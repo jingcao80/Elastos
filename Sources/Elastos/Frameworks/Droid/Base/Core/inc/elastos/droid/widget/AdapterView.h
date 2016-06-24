@@ -233,20 +233,8 @@ public:
         /* [in] */ Int32 position,
         /* [out] */ Int64* result);
 
-    virtual CARAPI GetAdapter(
-        /* [out] */ IAdapter** adapter);
-
-    virtual CARAPI SetAdapter(
-        /* [in] */ IAdapter* adapter);
-
     virtual CARAPI GetSelectedItemId(
         /* [out] */ Int64* itemId);
-
-    virtual CARAPI GetSelectedView(
-        /* [out] */ IView** view);
-
-    virtual CARAPI SetSelection(
-        /* [in] */ Int32 position);
 
     //@Override
     CARAPI SetOnClickListener(

@@ -1663,7 +1663,7 @@ AutoPtr<BatteryStatsImpl::StopwatchTimer> BatteryStatsImpl::Uid::Sensor::ReadTim
         pool = it->mSecond;
     }
     if (pool == NULL) {
-        pool = new List<AutoPtr<StopwatchTimer> >(32);
+        pool = new List<AutoPtr<StopwatchTimer> >();
         mHost->mHost->mSensorTimers[mHandle] = pool;
     }
     return new StopwatchTimer(mHost, 0, pool, timeBase, in);
@@ -1883,7 +1883,7 @@ Boolean BatteryStatsImpl::Uid::Proc::ReadExcessivePowerFromParcelLocked(
         return FALSE;
     }
 
-    mExcessivePower = new List<AutoPtr<ExcessivePower> >(N);
+    mExcessivePower = new List<AutoPtr<ExcessivePower> >();
     for (Int32 i = 0; i < N; i++) {
         AutoPtr<ExcessivePower> ew = new ExcessivePower();
         in->ReadInt32(&ew->mType);

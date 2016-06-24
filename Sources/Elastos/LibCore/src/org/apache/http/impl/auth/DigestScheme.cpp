@@ -425,7 +425,7 @@ ECode DigestScheme::CreateDigestHeader(
     String uname;
     principal->GetName(&uname);
 
-    AutoPtr< List<AutoPtr<IBasicNameValuePair> > > params = new List<AutoPtr<IBasicNameValuePair> >(20);
+    AutoPtr< List<AutoPtr<IBasicNameValuePair> > > params = new List<AutoPtr<IBasicNameValuePair> >();
     AutoPtr<IBasicNameValuePair> unameP;
     CBasicNameValuePair::New(String("username"), uname, (IBasicNameValuePair**)&unameP);
     params->PushBack(unameP);

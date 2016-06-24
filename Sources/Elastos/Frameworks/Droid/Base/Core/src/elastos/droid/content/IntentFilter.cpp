@@ -1602,7 +1602,7 @@ ECode IntentFilter::ReadFromParcel(
     source->ReadInt32(&count);
     if(count > 0){
         if (mCategories == NULL) {
-            mCategories = new List<String>(count);
+            mCategories = new List<String>();
         }
 
         for(Int32 i = 0; i < count; i++){
@@ -1614,7 +1614,7 @@ ECode IntentFilter::ReadFromParcel(
     source->ReadInt32(&count);
     if(count > 0){
         if (mDataSchemes == NULL) {
-            mDataSchemes = new List<String>(count);
+            mDataSchemes = new List<String>();
         }
 
         for(Int32 i = 0; i < count; i++){
@@ -1626,7 +1626,7 @@ ECode IntentFilter::ReadFromParcel(
     source->ReadInt32(&count);
     if(count > 0){
         if (mDataTypes == NULL) {
-            mDataTypes = new List<String>(count);
+            mDataTypes = new List<String>();
         }
 
         for(Int32 i = 0; i < count; i++){
@@ -1638,7 +1638,7 @@ ECode IntentFilter::ReadFromParcel(
     source->ReadInt32(&count);
     if(count > 0){
         if (mDataSchemeSpecificParts == NULL) {
-            mDataSchemeSpecificParts = new List<AutoPtr<IPatternMatcher> >(count);
+            mDataSchemeSpecificParts = new List<AutoPtr<IPatternMatcher> >();
         }
 
         for(Int32 i = 0; i < count; i++){
@@ -1651,7 +1651,7 @@ ECode IntentFilter::ReadFromParcel(
     source->ReadInt32(&count);
     if(count > 0){
         if (mDataAuthorities == NULL) {
-            mDataAuthorities = new List<AutoPtr<IIntentFilterAuthorityEntry> >(count);
+            mDataAuthorities = new List<AutoPtr<IIntentFilterAuthorityEntry> >();
         }
 
         for(Int32 i = 0; i < count; i++){
@@ -1664,7 +1664,7 @@ ECode IntentFilter::ReadFromParcel(
     source->ReadInt32(&count);
     if(count > 0){
         if (mDataPaths == NULL) {
-            mDataPaths = new List<AutoPtr<IPatternMatcher> >(count);
+            mDataPaths = new List<AutoPtr<IPatternMatcher> >();
         }
 
         for(Int32 i = 0; i < count; i++){

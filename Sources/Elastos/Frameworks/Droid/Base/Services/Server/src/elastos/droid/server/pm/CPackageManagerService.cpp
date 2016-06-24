@@ -10148,7 +10148,7 @@ String CPackageManagerService::GetPreferredInstructionSet()
 AutoPtr<List<String> > CPackageManagerService::GetAllInstructionSets()
 {
     AutoPtr< ArrayOf<String> > allAbis = Build::SUPPORTED_ABIS;
-    AutoPtr<List<String> > allInstructionSets = new List<String>(allAbis->GetLength());
+    AutoPtr<List<String> > allInstructionSets = new List<String>();
 
     AutoPtr<ISystem> system;
     CSystem::AcquireSingleton((ISystem**)&system);
@@ -14448,7 +14448,7 @@ AutoPtr<List<AutoPtr<IComponentName> > > CPackageManagerService::MatchVerifiers(
     }
 
     Int32 N = verifiers->GetLength();
-    AutoPtr<List<AutoPtr<IComponentName> > > sufficientVerifiers = new List<AutoPtr<IComponentName> >(N + 1);
+    AutoPtr<List<AutoPtr<IComponentName> > > sufficientVerifiers = new List<AutoPtr<IComponentName> >();
     for (Int32 i = 0; i < N; i++) {
         AutoPtr<IVerifierInfo> verifierInfo = (*verifiers)[i];
 

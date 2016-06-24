@@ -8202,8 +8202,7 @@ ECode AbsListView::OnRemoteAdapterConnected(
     VALIDATE_NOT_NULL(result);
     *result = FALSE;
 
-    AutoPtr<IRemoteViewsAdapter> temp = IRemoteViewsAdapter::Probe(mAdapter);
-    if (temp != NULL && mRemoteAdapter != temp) {
+    if (mRemoteAdapter.Get() != IRemoteViewsAdapter::Probe(mAdapter)) {
         SetAdapter(IAdapter::Probe(mRemoteAdapter));
         if (mDeferNotifyDataSetChanged) {
             IBaseAdapter::Probe(mRemoteAdapter)->NotifyDataSetChanged();

@@ -875,42 +875,11 @@ ECode AdapterView::GetItemIdAtPosition(
     return NOERROR;
 }
 
-ECode AdapterView::GetAdapter(
-    /* [out] */ IAdapter** adapter)
-{
-    VALIDATE_NOT_NULL(adapter)
-    // abstract function, nothing to do here
-    return NOERROR;
-}
-
-ECode AdapterView::SetAdapter(
-    /* [in] */ IAdapter* adapter)
-{
-    // abstract function, nothing to do here
-    return NOERROR;
-}
-
 ECode AdapterView::GetSelectedItemId(
     /* [out] */ Int64* itemId)
 {
     VALIDATE_NOT_NULL(itemId);
     *itemId = mNextSelectedRowId;
-    return NOERROR;
-}
-
-ECode AdapterView::GetSelectedView(
-    /* [out] */ IView** view)
-{
-    VALIDATE_NOT_NULL(view);
-    *view = NULL;
-    // abstract function, nothing to do here
-    return NOERROR;
-}
-
-ECode AdapterView::SetSelection(
-    /* [in] */ Int32 position)
-{
-    // abstract function, nothing to do here
     return NOERROR;
 }
 

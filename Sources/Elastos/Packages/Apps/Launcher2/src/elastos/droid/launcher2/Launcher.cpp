@@ -1668,7 +1668,7 @@ void Launcher::CompleteTwoStageWidgetDrop(
     mDragLayer->GetAnimatedView((IView**)&view2);
     if (view2 != NULL) {
         mWorkspace->AnimateWidgetDrop(IItemInfo::Probe(mPendingAddInfo), cellLayout,
-                IDragView::Probe(view), onCompleteRunnable,
+                IDragView::Probe(view2), onCompleteRunnable,
                 animationType, IView::Probe(boundWidget), TRUE);
     }
     else {
@@ -3142,6 +3142,7 @@ ECode Launcher::AddFolder(
     VALIDATE_NOT_NULL(icon);
 
     AutoPtr<FolderInfo> folderInfo = new FolderInfo();
+    folderInfo->constructor();
     GetText(Elastos::Droid::Launcher2::R::string::folder_name,
         (ICharSequence**)&(folderInfo->mTitle));
 

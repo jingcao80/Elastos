@@ -9,7 +9,6 @@
 #include "elastos/droid/widget/CActionMenuView.h"
 #include "elastos/droid/widget/CActionMenuViewLayoutParams.h"
 #include "elastos/droid/widget/CActivityChooserView.h"
-#include "elastos/droid/widget/CAdapterView.h"
 #include "elastos/droid/widget/CAdapterViewAnimator.h"
 #include "elastos/droid/widget/CAdapterViewAnimatorSavedState.h"
 #include "elastos/droid/widget/CAdapterViewFlipper.h"
@@ -152,7 +151,6 @@ CAR_OBJECT_IMPL(CActionMenuPresenterSavedState)
 CAR_OBJECT_IMPL(CActionMenuView)
 CAR_OBJECT_IMPL(CActionMenuViewLayoutParams)
 CAR_OBJECT_IMPL(CActivityChooserView)
-CAR_OBJECT_IMPL(CAdapterView)
 CAR_OBJECT_IMPL(CAdapterViewAnimator)
 CAR_OBJECT_IMPL(CAdapterViewAnimatorSavedState)
 CAR_OBJECT_IMPL(CAdapterViewFlipper)

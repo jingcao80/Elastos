@@ -14,7 +14,7 @@
 #include "Elastos.Droid.Os.h"
 #include "Elastos.Droid.View.h"
 #include "Elastos.Droid.Widget.h"
-    
+
 #include <elastos/utility/etl/List.h>
 #include <elastos/utility/etl/HashMap.h>
 #include <elastos/utility/etl/HashSet.h>
@@ -53,6 +53,7 @@ class RemoteViewsAdapter
 public:
     class RemoteViewsAdapterServiceConnection
         : public Object
+        , public IRemoteViewsAdapterServiceConnection
         , public IIRemoteViewsAdapterConnection
         , public IBinder
     {

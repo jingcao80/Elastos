@@ -855,7 +855,7 @@ String ThemeUtils::GetDefaultThemePackageName(
 
 AutoPtr<List<String> > ThemeUtils::GetAllComponents()
 {
-    AutoPtr<List<String> > components = new List<String>(9);
+    AutoPtr<List<String> > components = new List<String>();
     components->PushBack(IThemesContractThemesColumns::MODIFIES_FONTS);
     components->PushBack(IThemesContractThemesColumns::MODIFIES_LAUNCHER);
     components->PushBack(IThemesContractThemesColumns::MODIFIES_ALARMS);

@@ -1130,7 +1130,7 @@ void EnterTransitionCoordinator::SetSharedElementMatrices()
     Int32 numSharedElements;
     mSharedElements->GetSize(&numSharedElements);
     if (numSharedElements > 0) {
-        mSharedElementParentMatrices = new List<AutoPtr<IMatrix> >(numSharedElements);
+        mSharedElementParentMatrices = new List<AutoPtr<IMatrix> >();
     }
     for (Int32 i = 0; i < numSharedElements; i++) {
         AutoPtr<IInterface> obj;

@@ -21,6 +21,7 @@ CAR_INTERFACE_IMPL(PendingAddShortcutInfo, PendingAddItemInfo,
 ECode PendingAddShortcutInfo::constructor(
     /* [in] */ IActivityInfo* activityInfo)
 {
+    ItemInfo::constructor();
     mShortcutActivityInfo = activityInfo;
     return NOERROR;
 }

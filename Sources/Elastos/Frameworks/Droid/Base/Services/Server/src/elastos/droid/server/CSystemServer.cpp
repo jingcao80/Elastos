@@ -678,8 +678,8 @@ ECode SystemServer::StartOtherServices()
         }
     }
 
-    ec = mPackageManagerService->PerformBootDexOpt();
-    if (FAILED(ec)) ReportWtf("performing boot dexopt", ec);
+    // ec = mPackageManagerService->PerformBootDexOpt();
+    // if (FAILED(ec)) ReportWtf("performing boot dexopt", ec);
 
     AutoPtr<IResources> res;
     context->GetResources((IResources**)&res);

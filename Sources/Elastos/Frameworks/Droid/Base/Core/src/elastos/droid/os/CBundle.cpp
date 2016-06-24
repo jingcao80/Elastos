@@ -5,6 +5,7 @@
 #include <elastos/core/StringBuilder.h>
 #include <elastos/core/CoreUtils.h>
 #include "elastos/droid/utility/CArrayMap.h"
+#include <binder/Parcel.h>
 
 using Elastos::Core::StringBuilder;
 using Elastos::Core::CoreUtils;
@@ -609,15 +610,12 @@ ECode CBundle::ReadFromParcel(
 ECode CBundle::WriteToParcel(
     /* [in] */ IParcel* parcel)
 {
-    Boolean oldAllowFds;
-    // TODO:
-    //parcel->PushAllowFds(mAllowFds, &oldAllowFds);
-    // try {
-    BaseBundle::WriteToParcelInner(parcel);
-    // } finally {
-    // parcel->RestoreAllowFds(oldAllowFds);
-    // }
-    return NOERROR;
+    android::Parcel* p;
+    parcel->GetElementPayload((Handle32*)&p);
+    Boolean oldAllowFds = p->pushAllowFds(mAllowFds);
+    ECode ec = BaseBundle::WriteToParcelInner(parcel);
+    p->restoreAllowFds(oldAllowFds);
+    return ec;
 }
 
 ECode CBundle::ToString(

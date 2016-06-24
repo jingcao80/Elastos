@@ -452,9 +452,9 @@ ECode ImageView::SetImageBitmap(
     // to reduce the intermediate drawable object
     AutoPtr<IResources> res;
     mContext->GetResources((IResources**)&res);
-    AutoPtr<IBitmapDrawable> bd;
-    CBitmapDrawable::New(res.Get(), bm, (IBitmapDrawable**)&bd);
-    SetImageDrawable((IDrawable*)(bd.Get()));
+    AutoPtr<IDrawable> bd;
+    CBitmapDrawable::New(res.Get(), bm, (IDrawable**)&bd);
+    SetImageDrawable(bd);
     return NOERROR;
 }
 
