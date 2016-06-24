@@ -185,6 +185,8 @@ public:
     AutoPtr<StatusBarHelper> mStatusBarHelper;
 
 private:
+    friend class CNetworkSetting;
+
     static const String TAG;
     static const Boolean DBG;
     // Do not check in with VDBG = true, since that may write PII to the system log.

@@ -1,5 +1,47 @@
 
 #include "elastos/droid/phone/COutgoingCallBroadcaster.h"
+#include "elastos/droid/phone/COutgoingCallReceiver.h"
+#include "elastos/droid/phone/PhoneGlobals.h"
+#include "elastos/droid/phone/PhoneUtils.h"
+#include "elastos/droid/phone/OtaUtils.h"
+#include "elastos/droid/Manifest.h"
+#include "elastos/droid/R.h"
+#include "elastos/droid/app/ActivityManagerNative.h"
+#include "elastos/droid/text/TextUtils.h"
+#include "Elastos.Droid.Internal.h"
+#include "Elastos.Droid.Telephony.h"
+#include "Elastos.Droid.Telecomm.h"
+#include "Elastos.Droid.View.h"
+#include <elastos/utility/logging/Logger.h>
+#include "elastos/core/Thread.h"
+#include <elastos/core/StringBuilder.h>
+#include "R.h"
+
+using Elastos::Droid::App::ActivityManagerNative;
+using Elastos::Droid::App::IAppOpsManager;
+using Elastos::Droid::App::IAlertDialogBuilder;
+using Elastos::Droid::App::CAlertDialogBuilder;
+using Elastos::Droid::Content::CIntent;
+using Elastos::Droid::Content::EIID_IDialogInterfaceOnClickListener;
+using Elastos::Droid::Content::EIID_IDialogInterfaceOnCancelListener;
+using Elastos::Droid::Content::Res::IResources;
+using Elastos::Droid::Internal::Telephony::IPhone;
+using Elastos::Droid::Net::CUriHelper;
+using Elastos::Droid::Net::IUriHelper;
+using Elastos::Droid::Os::ISystemProperties;
+using Elastos::Droid::Os::CSystemProperties;
+using Elastos::Droid::Os::IUserHandle;
+using Elastos::Droid::Os::IUserHandleHelper;
+using Elastos::Droid::Os::CUserHandleHelper;
+using Elastos::Droid::Text::TextUtils;
+using Elastos::Droid::Telephony::IPhoneNumberUtils;
+using Elastos::Droid::Telephony::CPhoneNumberUtils;
+using Elastos::Droid::Telecomm::Telecom::IPhoneAccount;
+using Elastos::Droid::View::IView;
+using Elastos::Core::Thread;
+using Elastos::Core::StringBuilder;
+
+using Elastos::Utility::Logging::Logger;
 
 namespace Elastos {
 namespace Droid {
@@ -9,7 +51,7 @@ COutgoingCallBroadcaster::MyHandler::MyHandler(
     /* [in] */ COutgoingCallBroadcaster* host)
     : mHost(host)
 {
-    Handler::constructor()
+    Handler::constructor();
 }
 
 ECode COutgoingCallBroadcaster::MyHandler::HandleMessage(
@@ -19,13 +61,13 @@ ECode COutgoingCallBroadcaster::MyHandler::HandleMessage(
     msg->GetWhat(&what);
     if (what == EVENT_OUTGOING_CALL_TIMEOUT) {
         Logger::I(TAG, "Outgoing call takes too long. Showing the spinner.");
-        mWaitingSpinner->SetVisibility(IView::VISIBLE);
+        IView::Probe(mHost->mWaitingSpinner)->SetVisibility(IView::VISIBLE);
     }
     else if (what == EVENT_DELAYED_FINISH) {
-        Finish();
+        mHost->Finish();
     }
     else {
-        Logger::WTF(TAG, "Unknown message id: %d", what);
+        Logger::W(TAG, "Unknown message id: %d", what);
     }
     return NOERROR;
 }
@@ -35,7 +77,7 @@ const String COutgoingCallBroadcaster::OutgoingCallReceiver::TAG("OutgoingCallRe
 ECode COutgoingCallBroadcaster::OutgoingCallReceiver::constructor(
     /* [in] */ IOutgoingCallBroadcaster* host)
 {
-    mHost = (IOutgoingCallBroadcaster*)host;
+    mHost = (COutgoingCallBroadcaster*)host;
     return BroadcastReceiver::constructor();
 }
 
@@ -43,7 +85,7 @@ ECode COutgoingCallBroadcaster::OutgoingCallReceiver::OnReceive(
     /* [in] */ IContext* context,
     /* [in] */ IIntent* intent)
 {
-    mHandler->RemoveMessages(EVENT_OUTGOING_CALL_TIMEOUT);
+    mHost->mHandler->RemoveMessages(EVENT_OUTGOING_CALL_TIMEOUT);
     Boolean isAttemptingCall;
     DoReceive(context, intent, &isAttemptingCall);
     if (DBG) Logger::V(TAG, "OutgoingCallReceiver is going to finish the Activity itself.");
@@ -55,10 +97,10 @@ ECode COutgoingCallBroadcaster::OutgoingCallReceiver::OnReceive(
     // immediately so that subsequent CALL intents will retrigger a new
     // OutgoingCallReceiver. see b/10857203
     if (isAttemptingCall) {
-        StartDelayedFinish();
+        mHost->StartDelayedFinish();
     }
     else {
-        Finish();
+        mHost->Finish();
     }
     return NOERROR;
 }
@@ -91,19 +133,22 @@ ECode COutgoingCallBroadcaster::OutgoingCallReceiver::DoReceive(
     GetResultData(&number);
     if (VDBG) Logger::V(TAG, "- got number from resultData: '%s'", number.string());
 
-    AutoPtr<PhoneGlobals> app = PhoneGlobals::GetInstance();
+    AutoPtr<PhoneGlobals> app;
+    PhoneGlobals::GetInstance((PhoneGlobals**)&app);
 
     // OTASP-specific checks.
     // TODO: This should probably all happen in
     // OutgoingCallBroadcaster.onCreate(), since there's no reason to
     // even bother with the NEW_OUTGOING_CALL broadcast if we're going
     // to disallow the outgoing call anyway...
-    if (TelephonyCapabilities::SupportsOtasp(app->mPhone)) {
-        Boolean activateState = (app.cdmaOtaScreenState.otaScreenState
-                == OtaUtils.CdmaOtaScreenState.OtaScreenState.OTA_STATUS_ACTIVATION);
-        Boolean dialogState = (app.cdmaOtaScreenState.otaScreenState
-                == OtaUtils.CdmaOtaScreenState.OtaScreenState
-                .OTA_STATUS_SUCCESS_FAILURE_DLG);
+    Boolean res;
+    assert(0);
+    //TelephonyCapabilities::SupportsOtasp(app->mPhone, &res);
+    if (res) {
+        Boolean activateState = (app->mCdmaOtaScreenState->mOtaScreenState
+                == OtaUtils::CdmaOtaScreenState::OTA_STATUS_ACTIVATION);
+        Boolean dialogState = (app->mCdmaOtaScreenState->mOtaScreenState
+                == OtaUtils::CdmaOtaScreenState::OTA_STATUS_SUCCESS_FAILURE_DLG);
         Boolean isOtaCallActive = FALSE;
 
         // TODO: Need cleaner way to check if OTA is active.
@@ -111,10 +156,10 @@ ECode COutgoingCallBroadcaster::OutgoingCallReceiver::DoReceive(
         // you interrupt an OTASP call by pressing Back then Skip,
         // otaScreenState somehow gets left in either PROGRESS or
         // LISTENING.
-        if ((app.cdmaOtaScreenState.otaScreenState
-                == OtaUtils.CdmaOtaScreenState.OtaScreenState.OTA_STATUS_PROGRESS)
-                || (app.cdmaOtaScreenState.otaScreenState
-                == OtaUtils.CdmaOtaScreenState.OtaScreenState.OTA_STATUS_LISTENING)) {
+        if ((app->mCdmaOtaScreenState->mOtaScreenState
+                == OtaUtils::CdmaOtaScreenState::OTA_STATUS_PROGRESS)
+                || (app->mCdmaOtaScreenState->mOtaScreenState
+                == OtaUtils::CdmaOtaScreenState::OTA_STATUS_LISTENING)) {
             isOtaCallActive = TRUE;
         }
 
@@ -136,31 +181,32 @@ ECode COutgoingCallBroadcaster::OutgoingCallReceiver::DoReceive(
         }
     }
 
-    Int32 state;
-    Boolean res;
-    if (number.IsNull()) {
-        if (DBG) Logger::V(TAG, "CALL cancelled (null number), returning...");
-        *result = FALSE;
-        return NOERROR;
-    }
-    else if (TelephonyCapabilities::SupportsOtasp(app->mPhone)
-            && ((app->mPhone->GetState(&state), state) != PhoneConstantsState_IDLE)
-            && ((app->mPhone->IsOtaSpNumber(number, &res), res))) {
-        if (DBG) Logger::V(TAG, "Call is active, a 2nd OTA call cancelled -- returning.");
-        *result = FALSE;
-        return NOERROR;
-    } else if (PhoneNumberUtils::IsPotentialLocalEmergencyNumber(context, number)) {
-        // Just like 3rd-party apps aren't allowed to place emergency
-        // calls via the ACTION_CALL intent, we also don't allow 3rd
-        // party apps to use the NEW_OUTGOING_CALL broadcast to rewrite
-        // an outgoing call into an emergency number.
-        Logger::W(TAG, "Cannot modify outgoing call to emergency number %s.", number.string());
-        *result = FALSE;
-        return NOERROR;
-    }
+    assert(0);
+    // Int32 state;
+    // Boolean res;
+    // if (number.IsNull()) {
+    //     if (DBG) Logger::V(TAG, "CALL cancelled (null number), returning...");
+    //     *result = FALSE;
+    //     return NOERROR;
+    // }
+    // else if (TelephonyCapabilities::SupportsOtasp(app->mPhone)
+    //         && ((app->mPhone->GetState(&state), state) != PhoneConstantsState_IDLE)
+    //         && ((app->mPhone->IsOtaSpNumber(number, &res), res))) {
+    //     if (DBG) Logger::V(TAG, "Call is active, a 2nd OTA call cancelled -- returning.");
+    //     *result = FALSE;
+    //     return NOERROR;
+    // } else if (PhoneNumberUtils::IsPotentialLocalEmergencyNumber(context, number)) {
+    //     // Just like 3rd-party apps aren't allowed to place emergency
+    //     // calls via the ACTION_CALL intent, we also don't allow 3rd
+    //     // party apps to use the NEW_OUTGOING_CALL broadcast to rewrite
+    //     // an outgoing call into an emergency number.
+    //     Logger::W(TAG, "Cannot modify outgoing call to emergency number %s.", number.string());
+    //     *result = FALSE;
+    //     return NOERROR;
+    // }
 
     intent->GetStringExtra(
-            IOutgoingCallBroadcaster::EXTRA_ORIGINAL_URI, (IUri**)&originalUri);
+            IOutgoingCallBroadcaster::EXTRA_ORIGINAL_URI, &originalUri);
     if (originalUri == NULL) {
         Logger::E(TAG, "Intent is missing EXTRA_ORIGINAL_URI -- returning.");
         *result = FALSE;
@@ -177,14 +223,16 @@ ECode COutgoingCallBroadcaster::OutgoingCallReceiver::DoReceive(
     // NEW_OUTGOING_CALL broadcast.  But we need to do it again here
     // too, since the number might have been modified/rewritten during
     // the broadcast (and may now contain letters or separators again.)
-    number = PhoneNumberUtils::ConvertKeypadLettersToDigits(number);
-    number = PhoneNumberUtils::StripSeparators(number);
+    AutoPtr<IPhoneNumberUtils> helper2;
+    CPhoneNumberUtils::AcquireSingleton((IPhoneNumberUtils**)&helper2);
+    helper2->ConvertKeypadLettersToDigits(number, &number);
+    helper2->StripSeparators(number, &number);
 
     if (DBG) Logger::V(TAG, "doReceive: proceeding with call...");
     if (VDBG) Logger::V(TAG, "- uri: %p", TO_CSTR(uri));
     if (VDBG) Logger::V(TAG, "- actual number to dial: '%s'", number.string());
 
-    StartSipCallOptionHandler(context, intent, uri, number);
+    mHost->StartSipCallOptionHandler(context, intent, uri, number);
 
     *result = TRUE;
     return NOERROR;
@@ -206,7 +254,7 @@ const Boolean COutgoingCallBroadcaster::DBG = initDBG();
 
 const Boolean COutgoingCallBroadcaster::VDBG = FALSE;
 
-const String COutgoingCallBroadcaster::PERMISSION = android.Manifest.permission.PROCESS_OUTGOING_CALLS;
+const String COutgoingCallBroadcaster::PERMISSION = Elastos::Droid::Manifest::permission::PROCESS_OUTGOING_CALLS;
 
 const Int32 COutgoingCallBroadcaster::DIALOG_NOT_VOICE_CAPABLE = 1;
 
@@ -233,7 +281,8 @@ ECode COutgoingCallBroadcaster::constructor()
 
 void COutgoingCallBroadcaster::StartDelayedFinish()
 {
-    mHandler->SendEmptyMessageDelayed(EVENT_DELAYED_FINISH, DELAYED_FINISH_TIME);
+    Boolean res;
+    mHandler->SendEmptyMessageDelayed(EVENT_DELAYED_FINISH, DELAYED_FINISH_TIME, &res);
 }
 
 void COutgoingCallBroadcaster::StartSipCallOptionHandler(
@@ -250,10 +299,10 @@ ECode COutgoingCallBroadcaster::OnCreate(
     /* [in] */ IBundle* icicle)
 {
     Activity::OnCreate(icicle);
-    SetContentView(R.layout.outgoing_call_broadcaster);
+    SetContentView(Elastos::Droid::Server::Telephony::R::layout::outgoing_call_broadcaster);
 
     AutoPtr<IView> view;
-    FindViewById(R.id.spinner, (IView**)&view);
+    FindViewById(Elastos::Droid::Server::Telephony::R::id::spinner, (IView**)&view);
     mWaitingSpinner = IProgressBar::Probe(view);
 
     AutoPtr<IIntent> intent;
@@ -312,7 +361,13 @@ void COutgoingCallBroadcaster::ProcessIntent(
     /* [in] */ IIntent* intent)
 {
     if (DBG) {
-        Logger::V(TAG, "processIntent() = " + intent + ", thread: " + Thread.currentThread());
+        StringBuilder sb;
+        sb += "processIntent() = ";
+        sb += TO_CSTR(intent);
+        sb += ", thread: ";
+        AutoPtr<IThread> currentThread = Thread::GetCurrentThread();
+        sb += TO_CSTR(currentThread);
+        Logger::V(TAG, sb.ToString());
     }
     AutoPtr<IResources> resources;
     GetResources((IResources**)&resources);
@@ -328,13 +383,18 @@ void COutgoingCallBroadcaster::ProcessIntent(
 
     String action;
     intent->GetAction(&action);
-    String number = PhoneNumberUtils::GetNumberFromIntent(intent, this);
+    AutoPtr<IPhoneNumberUtils> helper;
+    CPhoneNumberUtils::AcquireSingleton((IPhoneNumberUtils**)&helper);
+    String number;
+    helper->GetNumberFromIntent(intent, this, &number);
     // Check the number, don't convert for sip uri
     // TODO put uriNumber under PhoneNumberUtils
     if (!number.IsNull()) {
-        if (!PhoneNumberUtils::IsUriNumber(number)) {
-            number = PhoneNumberUtils::ConvertKeypadLettersToDigits(number);
-            number = PhoneNumberUtils::StripSeparators(number);
+        Boolean res;
+        helper->IsUriNumber(number, &res);
+        if (!res) {
+            helper->ConvertKeypadLettersToDigits(number, &number);
+            helper->StripSeparators(number, &number);
         }
     }
     else {
@@ -347,6 +407,7 @@ void COutgoingCallBroadcaster::ProcessIntent(
     Int32 launchedFromUid;
     String launchedFromPackage;
     //try
+    ECode ec = NOERROR;
     {
         AutoPtr<IIActivityManager> manageer = ActivityManagerNative::GetDefault();
         AutoPtr<IBinder> binder;
@@ -357,16 +418,16 @@ void COutgoingCallBroadcaster::ProcessIntent(
     }
     // catch (RemoteException e) {
 ERROR:
-    if (ec == (ECode)RemoteException) {
+    if (ec == (ECode)E_REMOTE_EXCEPTION) {
         launchedFromUid = -1;
         launchedFromPackage = NULL;
     }
     //}
-    Boolean res;
-    if ((appOps->NoteOpNoThrow(IAppOpsManager::OP_CALL_PHONE, launchedFromUid, launchedFromPackage, &res), res)
+    Int32 tmp;
+    if ((appOps->NoteOpNoThrow(IAppOpsManager::OP_CALL_PHONE, launchedFromUid, launchedFromPackage, &tmp), tmp)
             != IAppOpsManager::MODE_ALLOWED) {
         Logger::W(TAG, "Rejecting call from uid %d package %s", launchedFromUid
-                , launchedFromPackage.tostring());
+                , launchedFromPackage.string());
         Finish();
         return;
     }
@@ -381,17 +442,18 @@ ERROR:
     intent->GetComponent((IComponentName**)&componentName);
     String cname;
     componentName->GetClassName(&cname);
-    if (getClass().getName().Equals(cname)) {
-        // If we were launched directly from the OutgoingCallBroadcaster,
-        // not one of its more privileged aliases, then make sure that
-        // only the non-privileged actions are allowed.
-        String action;
-        intent->GetAction(&action);
-        if (!IIntent::ACTION_CALL.Equals(action)) {
-            Logger::W(TAG, "Attempt to deliver non-CALL action; forcing to CALL");
-            intent->SetAction(IIntent::ACTION_CALL);
-        }
-    }
+    assert(0);
+    // if (getClass().getName().Equals(cname)) {
+    //     // If we were launched directly from the OutgoingCallBroadcaster,
+    //     // not one of its more privileged aliases, then make sure that
+    //     // only the non-privileged actions are allowed.
+    //     String action;
+    //     intent->GetAction(&action);
+    //     if (!IIntent::ACTION_CALL.Equals(action)) {
+    //         Logger::W(TAG, "Attempt to deliver non-CALL action; forcing to CALL");
+    //         intent->SetAction(IIntent::ACTION_CALL);
+    //     }
+    // }
 
     // Check whether or not this is an emergency number, in order to
     // enforce the restriction that only the CALL_PRIVILEGED and
@@ -404,10 +466,13 @@ ERROR:
     // "invalid" number like "9111234" that isn't technically an
     // emergency number but might still result in an emergency call
     // with some networks.)
+    AutoPtr<IPhoneNumberUtils> helper3;
+    CPhoneNumberUtils::AcquireSingleton((IPhoneNumberUtils**)&helper3);
+    Boolean result;
     Boolean isExactEmergencyNumber =
-            (!number.IsNull()) && PhoneNumberUtils::IsLocalEmergencyNumber(this, number);
+            (!number.IsNull()) && (helper3->IsLocalEmergencyNumber(this, number, &result), result);
     Boolean isPotentialEmergencyNumber =
-            (!number.IsNull()) && PhoneNumberUtils::IsPotentialLocalEmergencyNumber(this, number);
+            (!number.IsNull()) && (helper3->IsPotentialLocalEmergencyNumber(this, number, &result), result);
     if (VDBG) {
         Logger::V(TAG, " - Checking restrictions for number '%s':", number.string());
         Logger::V(TAG, "     isExactEmergencyNumber     = %d", isExactEmergencyNumber);
@@ -424,7 +489,7 @@ ERROR:
         // the dialer if you really want to.)
         if (isPotentialEmergencyNumber) {
             Logger::I(TAG, "ACTION_CALL_PRIVILEGED is used while the number is a potential"
-                    + " emergency number. Use ACTION_CALL_EMERGENCY as an action instead.");
+                    " emergency number. Use ACTION_CALL_EMERGENCY as an action instead.");
             action = IIntent::ACTION_CALL_EMERGENCY;
         }
         else {
@@ -451,9 +516,9 @@ ERROR:
             AutoPtr<IResources> resources;
             GetResources((IResources**)&resources);
             String package;
-            resources->GetString(R.string.ui_default_package, &package);
+            resources->GetString(Elastos::Droid::Server::Telephony::R::string::ui_default_package, &package);
             String classname;
-            resources->GetString(R.string.dialer_default_class, &classname);
+            resources->GetString(Elastos::Droid::Server::Telephony::R::string::dialer_default_class, &classname);
             invokeFrameworkDialer->SetClassName(package, classname);
             invokeFrameworkDialer->SetAction(IIntent::ACTION_DIAL);
             AutoPtr<IUri> data;
@@ -499,7 +564,8 @@ ERROR:
     // Also, this ensures the device stays awake while doing the following
     // broadcast; technically we should be holding a wake lock here
     // as well.
-    AutoPtr<PhoneGlobals> globals = PhoneGlobals::GetInstance();
+    AutoPtr<PhoneGlobals> globals;
+    PhoneGlobals::GetInstance((PhoneGlobals**)&globals);
     globals->WakeUpScreen();
 
     // If number is null, we're probably trying to call a non-existent voicemail number,
@@ -529,8 +595,10 @@ ERROR:
 
         // Initiate the outgoing call, and simultaneously launch the
         // InCallScreen to display the in-call UI:
-        AutoPtr<PhoneGlobals> globals = PhoneGlobals::GetInstance();
-        globals->mCallController->PlaceCall(intent);
+        AutoPtr<PhoneGlobals> globals;
+        PhoneGlobals::GetInstance((PhoneGlobals**)&globals);
+        assert(0);
+        //globals->mCallController->PlaceCall(intent);
 
         // Note we do *not* "return" here, but instead continue and
         // send the ACTION_NEW_OUTGOING_CALL broadcast like for any
@@ -554,7 +622,10 @@ ERROR:
     intent->GetData((IUri**)&uri);
     String scheme;
     uri->GetScheme(&scheme);
-    if (IPhoneAccount::SCHEME_SIP.Equals(scheme) || PhoneNumberUtils::IsUriNumber(number)) {
+    AutoPtr<IPhoneNumberUtils> helper4;
+    CPhoneNumberUtils::AcquireSingleton((IPhoneNumberUtils**)&helper4);
+    Boolean res;
+    if (IPhoneAccount::SCHEME_SIP.Equals(scheme) || (helper4->IsUriNumber(number, &res), res)) {
         Logger::I(TAG, "The requested number was detected as SIP call.");
         StartSipCallOptionHandler(this, intent, uri, number);
         Finish();
@@ -573,7 +644,7 @@ ERROR:
     CallGatewayManager::CheckAndCopyPhoneProviderExtras(intent, broadcastIntent);
     broadcastIntent->PutExtra(EXTRA_ALREADY_CALLED, callNow);
     String str;
-    uri->ToString(&str);
+    IObject::Probe(uri)->ToString(&str);
     broadcastIntent->PutExtra(EXTRA_ORIGINAL_URI, str);
     // Need to raise foreground in-call UI as soon as possible while allowing 3rd party app
     // to intercept the outgoing call.
@@ -585,11 +656,15 @@ ERROR:
     // This message will be removed when OutgoingCallReceiver#onReceive() is called before the
     // timeout.
     mHandler->SendEmptyMessageDelayed(EVENT_OUTGOING_CALL_TIMEOUT,
-            OUTGOING_CALL_TIMEOUT_THRESHOLD);
+            OUTGOING_CALL_TIMEOUT_THRESHOLD, &res);
 
     AutoPtr<IBroadcastReceiver> receiver;
     COutgoingCallReceiver::New(this, (IBroadcastReceiver**)&receiver);
-    SendOrderedBroadcastAsUser(broadcastIntent, IUserHandle::OWNER,
+    AutoPtr<IUserHandleHelper> helper5;
+    CUserHandleHelper::AcquireSingleton((IUserHandleHelper**)&helper5);
+    AutoPtr<IUserHandle> h;
+    helper5->GetOWNER((IUserHandle**)&h);
+    SendOrderedBroadcastAsUser(broadcastIntent, h,
             PERMISSION, receiver,
             NULL,  // scheduler
             IActivity::RESULT_OK,  // initialCode
@@ -631,17 +706,17 @@ ECode COutgoingCallBroadcaster::OnCreateDialog(
 {
     VALIDATE_NOT_NULL(outdialog)
 
-    AutoPtr<IDialog> dialog;
+    AutoPtr<IAlertDialog> dialog;
     switch(id) {
         case DIALOG_NOT_VOICE_CAPABLE:
         {
             AutoPtr<IAlertDialogBuilder> builder;
             CAlertDialogBuilder::New(this, (IAlertDialogBuilder**)&builder);
-            builder->SetTitle(R.string.not_voice_capable)
-            builder->SetIconAttribute(android.R.attr.alertDialogIcon)
-            builder->SetPositiveButton(android.R.string.ok, this)
-            builder->SetOnCancelListener(this)
-            builder->Create((IDialog**)&dialog);
+            builder->SetTitle(Elastos::Droid::Server::Telephony::R::string::not_voice_capable);
+            builder->SetIconAttribute(Elastos::Droid::R::attr::alertDialogIcon);
+            builder->SetPositiveButton(Elastos::Droid::R::string::ok, this);
+            builder->SetOnCancelListener(this);
+            builder->Create((IAlertDialog**)&dialog);
             break;
         }
         default:
@@ -649,7 +724,7 @@ ECode COutgoingCallBroadcaster::OnCreateDialog(
             dialog = NULL;
             break;
     }
-    *outdialog = dialog;
+    *outdialog = IDialog::Probe(dialog);
     REFCOUNT_ADD(*outdialog)
     return NOERROR;
 }

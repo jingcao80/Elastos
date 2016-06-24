@@ -1,8 +1,11 @@
 #ifndef  __ELASTOS_DROID_PHONE_COUTGOINGCALLRECEIVER_H__
 #define  __ELASTOS_DROID_PHONE_COUTGOINGCALLRECEIVER_H__
 
-#include "elastos/droid/telephony/phone/COutgoingCallBroadcaster.h"
+#include "_Elastos_Droid_Phone_COutgoingCallReceiver.h"
+#include "elastos/droid/phone/COutgoingCallBroadcaster.h"
 #include "elastos/droid/ext/frameworkext.h"
+
+using Elastos::Droid::Phone::COutgoingCallBroadcaster;
 
 namespace Elastos {
 namespace Droid {

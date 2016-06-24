@@ -1,5 +1,30 @@
 
 #include "elastos/droid/phone/COtaStartupReceiver.h"
+#include "elastos/droid/phone/OtaUtils.h"
+#include "elastos/droid/phone/PhoneGlobals.h"
+#include "elastos/droid/os/AsyncResult.h"
+#include "Elastos.Droid.Internal.h"
+#include "Elastos.Droid.Provider.h"
+#include "Elastos.Droid.Telephony.h"
+#include <elastos/core/StringBuilder.h>
+#include <elastos/utility/logging/Logger.h>
+
+using Elastos::Droid::Content::IContentResolver;
+using Elastos::Droid::Content::CIntent;
+using Elastos::Droid::Content::Pm::IResolveInfo;
+using Elastos::Droid::Internal::Telephony::IServiceStateTracker;
+using Elastos::Droid::Internal::Telephony::IPhone;
+using Elastos::Droid::Internal::Telephony::IServiceStateTracker;
+using Elastos::Droid::Internal::Telephony::ITelephonyCapabilities;
+using Elastos::Droid::Os::AsyncResult;
+using Elastos::Droid::Os::ISystemProperties;
+using Elastos::Droid::Os::CSystemProperties;
+using Elastos::Droid::Provider::ISettingsGlobal;
+using Elastos::Droid::Provider::CSettingsGlobal;
+using Elastos::Droid::Telephony::IServiceState;
+using Elastos::Droid::Telephony::ITelephonyManager;
+using Elastos::Core::StringBuilder;
+using Elastos::Utility::Logging::Logger;
 
 namespace Elastos {
 namespace Droid {
@@ -8,21 +33,21 @@ namespace Phone {
 ECode COtaStartupReceiver::MyPhoneStateListener::OnOtaspChanged(
     /* [in] */ Int32 otaspMode)
 {
-    if (mOtaspMode == otaspMode) {
+    if (mHost->mOtaspMode == otaspMode) {
         return NOERROR;
     }
-    mOtaspMode = otaspMode;
+    mHost->mOtaspMode = otaspMode;
     StringBuilder sb;
     sb += "onOtaspChanged: mOtaspMode=";
-    sb += mOtaspMode;
-    Logger::V(TAG, sb.ToString());
+    sb += mHost->mOtaspMode;
+    Logger::V(mHost->TAG, sb.ToString());
 
     if (otaspMode == IServiceStateTracker::OTASP_NEEDED) {
-        Logger::I(TAG, "OTASP is needed - performing CDMA provisioning");
+        Logger::I(mHost->TAG, "OTASP is needed - performing CDMA provisioning");
         AutoPtr<IIntent> intent;
         CIntent::New(OtaUtils::ACTION_PERFORM_CDMA_PROVISIONING, (IIntent**)&intent);
         intent->SetFlags(IIntent::FLAG_ACTIVITY_NEW_TASK);
-        mContext->StartActivity(intent);
+        mHost->mContext->StartActivity(intent);
     }
     return NOERROR;
 }
@@ -44,18 +69,22 @@ ECode COtaStartupReceiver::MyHandler::HandleMessage(
         {
             StringBuilder sb;
             sb += "Attempting OtaActivation from handler, mOtaspMode=";
-            sb += mOtaspMode;
-            Logger::V(TAG, sb.ToString());
-            OtaUtils::MaybeDoOtaCall(mContext, mHandler, MIN_READY);
+            sb += mHost->mOtaspMode;
+            Logger::V(mHost->TAG, sb.ToString());
+            assert(0);
+            //OtaUtils::MaybeDoOtaCall(mHost->mContext, mHandler, MIN_READY);
             break;
         }
         case SERVICE_STATE_CHANGED:
         {
-            ServiceState state = (ServiceState) ((AsyncResult) msg.obj).result;
+            AutoPtr<IInterface> obj;
+            msg->GetObj((IInterface**)&obj);
+            AutoPtr<AsyncResult> result = (AsyncResult*)IObject::Probe(obj);
+            AutoPtr<IServiceState> state = IServiceState::Probe(result->mResult);
             StringBuilder sb;
             sb += "onServiceStateChanged()...  new state = ";
-            sb += state;
-            if (DBG) Logger::D(TAG, sb.ToString());
+            sb += TO_CSTR(state);
+            if (DBG) Logger::D(mHost->TAG, sb.ToString());
 
             // Possible service states:
             // - STATE_IN_SERVICE        // Normal operation
@@ -66,13 +95,14 @@ ECode COtaStartupReceiver::MyHandler::HandleMessage(
 
             // Once we reach STATE_IN_SERVICE
             // it's finally OK to start OTA provisioning
-            Int32 state;
-            state->GetState(&state);
-            if (state == IServiceState::STATE_IN_SERVICE) {
+            Int32 _state;
+            state->GetState(&_state);
+            if (_state == IServiceState::STATE_IN_SERVICE) {
                 if (DBG) Logger::D(TAG, "call OtaUtils.maybeDoOtaCall after network is available");
                 AutoPtr<IPhone> phone = PhoneGlobals::GetPhone();
                 phone->UnregisterForServiceStateChanged(this);
-                OtaUtils::MaybeDoOtaCall(mContext, mHandler, MIN_READY);
+                assert(0);
+                //OtaUtils::MaybeDoOtaCall(mHost->mContext, mHandler, MIN_READY);
             }
             break;
         }
@@ -82,10 +112,6 @@ ECode COtaStartupReceiver::MyHandler::HandleMessage(
 
 const String COtaStartupReceiver::TAG("OtaStartupReceiver");
 const Boolean COtaStartupReceiver::DBG = FALSE;
-const Int32 COtaStartupReceiver::MIN_READY = 10;
-const Int32 COtaStartupReceiver::SERVICE_STATE_CHANGED = 11;
-
-CAR_INTERFACE_IMPL(COtaStartupReceiver, BroadcastReceiver, IOtaStartupReceiver)
 
 CAR_OBJECT_IMPL(COtaStartupReceiver)
 
@@ -137,9 +163,11 @@ ECode COtaStartupReceiver::OnReceive(
         if (DBG) Logger::D(TAG, "PhoneStateListener already registered");
     }
 
-    AutoPtr<IPhone> phone;
-    PhoneGlobals->GetPhone((IPhone**)&phone);
-    if (!TelephonyCapabilities::SupportsOtasp(phone)) {
+    AutoPtr<IPhone> phone = PhoneGlobals::GetPhone();
+    Boolean res;
+    assert(0);
+    //TelephonyCapabilities::SupportsOtasp(phone, &res);
+    if (!res) {
         if (DBG) Logger::D(TAG, "OTASP not supported, nothing to do.");
         return NOERROR;
     }
@@ -150,11 +178,14 @@ ECode COtaStartupReceiver::OnReceive(
     }
 
     // Delay OTA provisioning if network is not available yet
-    AutoPtr<IPhoneGlobals> app = PhoneGlobals::GetInstance();
-    AutoPtr<IPhone> phone = PhoneGlobals::GetPhone();
-    if (app.mCM.getServiceState() != IServiceState::STATE_IN_SERVICE) {
+    AutoPtr<PhoneGlobals> app;
+    PhoneGlobals::GetInstance((PhoneGlobals**)&app);
+    AutoPtr<IPhone> phone2 = PhoneGlobals::GetPhone();
+    Int32 state;
+    app->mCM->GetServiceState(&state);
+    if (state != IServiceState::STATE_IN_SERVICE) {
         if (DBG) Logger::W(TAG, "Network is not ready. Registering to receive notification.");
-        phone->RegisterForServiceStateChanged(mHandler, SERVICE_STATE_CHANGED, NULL);
+        phone2->RegisterForServiceStateChanged(mHandler, SERVICE_STATE_CHANGED, NULL);
         return NOERROR;
     }
 
@@ -162,7 +193,7 @@ ECode COtaStartupReceiver::OnReceive(
     // expect a BroadcastReceiver to persist after returning from this function but it does
     // because the phone activity is persistent.
     if (DBG) Logger::D(TAG, "call OtaUtils.maybeDoOtaCall");
-    return OtaUtils::MaybeDoOtaCall(mContext, mHandler, MIN_READY);
+    return OtaUtils::MaybeDoOtaCall(mContext, mHandler, MIN_READY, &res);
 }
 
 Boolean COtaStartupReceiver::ShouldPostpone(
@@ -184,8 +215,10 @@ Boolean COtaStartupReceiver::ShouldPostpone(
     helper->GetInt32(contentResolver, ISettingsGlobal::DEVICE_PROVISIONED, 0, &tmp);
     Boolean provisioned = tmp != 0;
 
+    AutoPtr<ISystemProperties> helper2;
+    CSystemProperties::AcquireSingleton((ISystemProperties**)&helper2);
     String mode;
-    SystemProperties::Get(Stirng("ro.setupwizard.mode"), String("REQUIRED"), &mode);
+    helper2->Get(String("ro.setupwizard.mode"), String("REQUIRED"), &mode);
     Boolean runningSetupWizard = String("REQUIRED").Equals(mode) || String("OPTIONAL").Equals(mode);
     if (DBG) {
         StringBuilder sb;

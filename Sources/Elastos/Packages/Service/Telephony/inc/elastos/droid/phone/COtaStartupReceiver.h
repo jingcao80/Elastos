@@ -3,6 +3,21 @@
 
 #include "_Elastos_Droid_Phone_COtaStartupReceiver.h"
 #include "elastos/droid/ext/frameworkext.h"
+#include "elastos/droid/content/BroadcastReceiver.h"
+#include "elastos/droid/telephony/PhoneStateListener.h"
+#include "elastos/droid/os/Handler.h"
+#include "Elastos.Droid.Content.h"
+#include "Elastos.Droid.Os.h"
+#include "Elastos.Droid.Telephony.h"
+
+using Elastos::Droid::Content::IIntent;
+using Elastos::Droid::Content::IContext;
+using Elastos::Droid::Content::BroadcastReceiver;
+using Elastos::Droid::Os::Handler;
+using Elastos::Droid::Os::IHandler;
+using Elastos::Droid::Os::IMessage;
+using Elastos::Droid::Telephony::PhoneStateListener;
+using Elastos::Droid::Telephony::IPhoneStateListener;
 
 namespace Elastos {
 namespace Droid {
@@ -15,7 +30,6 @@ namespace Phone {
  */
 CarClass(COtaStartupReceiver)
     , public BroadcastReceiver
-    , public IOtaStartupReceiver
 {
 private:
     class MyPhoneStateListener
@@ -54,8 +68,6 @@ private:
     };
 
 public:
-    CAR_INTERFACE_DECL()
-
     CAR_OBJECT_DECL();
 
     COtaStartupReceiver();
@@ -87,15 +99,15 @@ private:
 private:
     static const String TAG;
     static const Boolean DBG;
-    static const Int32 MIN_READY;
-    static const Int32 SERVICE_STATE_CHANGED;
+    static const Int32 MIN_READY = 10;
+    static const Int32 SERVICE_STATE_CHANGED = 11;
     AutoPtr<IContext> mContext;
 
     Int32 mOtaspMode;
     Boolean mPhoneStateListenerRegistered;
-    AutoPtr<IPhoneStateListener> mPhoneStateListene;
+    AutoPtr<IPhoneStateListener> mPhoneStateListener;
 
-    AutoPtr<IHandler> mHandle;
+    AutoPtr<IHandler> mHandler;
 };
 
 } // namespace Phone

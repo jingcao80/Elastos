@@ -320,6 +320,9 @@ private:
     friend class PhoneUtils;
     friend class CallController;
     friend class CPhoneInterfaceManager;
+    friend class COtaStartupReceiver;
+    friend class COutgoingCallBroadcaster;
+    friend class CNetworkSetting;
 
     static const Boolean DBG;
     static const Boolean VDBG;

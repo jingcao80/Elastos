@@ -1,5 +1,7 @@
 module
 {
+    using interface Elastos.Utility.IList;
+
     namespace Elastos {
     namespace Droid {
     namespace Phone {

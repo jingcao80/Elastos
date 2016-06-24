@@ -1,12 +1,56 @@
 
 #include "elastos/droid/phone/CMobileNetworkSettings.h"
+#include "elastos/droid/phone/PhoneGlobals.h"
+#include "elastos/droid/os/AsyncResult.h"
+#include "elastos/droid/text/TextUtils.h"
+#include "elastos/droid/R.h"
+#include "Elastos.Droid.App.h"
+#include "Elastos.Droid.Internal.h"
+#include "Elastos.Droid.Net.h"
+#include "Elastos.Droid.Provider.h"
+#include "Elastos.Droid.Telephony.h"
+#include <elastos/core/StringBuilder.h>
+#include <elastos/core/CoreUtils.h>
+#include <elastos/core/StringUtils.h>
+#include <elastos/utility/logging/Logger.h>
+#include "R.h"
+
+using Elastos::Droid::App::IActionBar;
+using Elastos::Droid::App::IActionBar;
+using Elastos::Droid::App::CAlertDialogBuilder;
+using Elastos::Droid::App::IAlertDialogBuilder;
+using Elastos::Droid::Content::ISharedPreferencesEditor;
+using Elastos::Droid::Content::IContentResolver;
+using Elastos::Droid::Content::EIID_IDialogInterfaceOnClickListener;
+using Elastos::Droid::Content::EIID_IDialogInterfaceOnDismissListener;
+using Elastos::Droid::Net::IUri;
+using Elastos::Droid::Net::CUriHelper;
+using Elastos::Droid::Net::IUriHelper;
+using Elastos::Droid::Os::AsyncResult;
+using Elastos::Droid::Os::ISystemProperties;
+using Elastos::Droid::Os::CSystemProperties;
+using Elastos::Droid::Os::IUserHandleHelper;
+using Elastos::Droid::Os::CUserHandleHelper;
+using Elastos::Droid::Provider::ISettingsGlobal;
+using Elastos::Droid::Provider::CSettingsGlobal;
+using Elastos::Droid::Preference::IPreferenceGroup;
+using Elastos::Droid::Preference::ITwoStatePreference;
+using Elastos::Droid::Preference::EIID_IPreferenceOnPreferenceChangeListener;
+using Elastos::Droid::Internal::Telephony::IPhoneConstants;
+using Elastos::Droid::Internal::Telephony::ITelephonyIntents;
+using Elastos::Droid::Internal::Telephony::ITelephonyProperties;
+using Elastos::Droid::Text::TextUtils;
+using Elastos::Droid::Telephony::ITelephonyManager;
+using Elastos::Droid::Telephony::ISubscriptionManager;
+using Elastos::Droid::Telephony::CSubscriptionManager;
+using Elastos::Core::StringUtils;
+using Elastos::Core::CoreUtils;
+using Elastos::Core::StringBuilder;
+using Elastos::Utility::Logging::Logger;
 
 namespace Elastos {
 namespace Droid {
 namespace Phone {
-
-const Int32 CMobileNetworkSettings::MyHandler::MESSAGE_GET_PREFERRED_NETWORK_TYPE = 0;
-const Int32 CMobileNetworkSettings::MyHandler::MESSAGE_SET_PREFERRED_NETWORK_TYPE = 1;
 
 CMobileNetworkSettings::MyHandler::MyHandler(
     CMobileNetworkSettings* host)
@@ -35,10 +79,17 @@ ECode CMobileNetworkSettings::MyHandler::HandleMessage(
 void CMobileNetworkSettings::MyHandler::HandleGetPreferredNetworkTypeResponse(
     /* [in] */ IMessage* msg)
 {
-    AsyncResult ar = (AsyncResult) msg.obj;
+    AutoPtr<IInterface> obj;
+    msg->GetObj((IInterface**)&obj);
+    AutoPtr<AsyncResult> ar = (AsyncResult*)IObject::Probe(obj);
 
-    if (ar.exception == NULL) {
-        Int32 modemNetworkMode = ((int[])ar.result)[0];
+    if (ar->mException == NULL) {
+        AutoPtr<IArrayOf> array = IArrayOf::Probe(ar->mResult);
+        AutoPtr<IInterface> obj;
+        array->Get(0, (IInterface**)&obj);
+        AutoPtr<IInteger32> num = IInteger32::Probe(obj);
+        Int32 modemNetworkMode;
+        num->GetValue(&modemNetworkMode);
 
         if (DBG) {
             Log(String("handleGetPreferredNetworkTypeResponse: modemNetworkMode = ") +
@@ -46,7 +97,7 @@ void CMobileNetworkSettings::MyHandler::HandleGetPreferredNetworkTypeResponse(
         }
 
         AutoPtr<IContext> context;
-        mPhone->GetContext((IContext**)&context);
+        mHost->mPhone->GetContext((IContext**)&context);
         AutoPtr<IContentResolver> contentResolver;
         context->GetContentResolver((IContentResolver**)&contentResolver);
 
@@ -54,7 +105,7 @@ void CMobileNetworkSettings::MyHandler::HandleGetPreferredNetworkTypeResponse(
         CSettingsGlobal::AcquireSingleton((ISettingsGlobal**)&helper);
         Int32 settingsNetworkMode;
         helper->GetInt32(contentResolver, ISettingsGlobal::PREFERRED_NETWORK_MODE,
-                preferredNetworkMode, &settingsNetworkMode);
+                sPreferredNetworkMode, &settingsNetworkMode);
 
         if (DBG) {
             Log(String("handleGetPreferredNetworkTypeReponse: settingsNetworkMode = ") +
@@ -98,10 +149,10 @@ void CMobileNetworkSettings::MyHandler::HandleGetPreferredNetworkTypeResponse(
                 }
             }
 
-            UpdatePreferredNetworkModeSummary(modemNetworkMode);
-            UpdateEnabledNetworksValueAndSummary(modemNetworkMode);
+            mHost->UpdatePreferredNetworkModeSummary(modemNetworkMode);
+            mHost->UpdateEnabledNetworksValueAndSummary(modemNetworkMode);
             // changes the mButtonPreferredNetworkMode accordingly to modemNetworkMode
-            mButtonPreferredNetworkMode->SetValue(StringUtils::ToString(modemNetworkMode));
+            mHost->mButtonPreferredNetworkMode->SetValue(StringUtils::ToString(modemNetworkMode));
         }
         else {
             if (DBG) Log(String("handleGetPreferredNetworkTypeResponse: else: reset to default"));
@@ -113,76 +164,80 @@ void CMobileNetworkSettings::MyHandler::HandleGetPreferredNetworkTypeResponse(
 void CMobileNetworkSettings::MyHandler::HandleSetPreferredNetworkTypeResponse(
     /* [in] */ IMessage* msg)
 {
-    AsyncResult ar = (AsyncResult) msg.obj;
+    AutoPtr<IInterface> obj;
+    msg->GetObj((IInterface**)&obj);
+    AutoPtr<AsyncResult> ar = (AsyncResult*)IObject::Probe(obj);
 
-    if (ar.exception == NULL) {
+    if (ar->mException == NULL) {
         String value;
-        mButtonPreferredNetworkMode->GetValue(&value);
+        mHost->mButtonPreferredNetworkMode->GetValue(&value);
         Int32 networkMode = StringUtils::ParseInt32(value);
 
         AutoPtr<IContext> context;
-        mPhone->GetContext((IContext**)&context);
+        mHost->mPhone->GetContext((IContext**)&context);
         AutoPtr<IContentResolver> contentResolver;
         context->GetContentResolver((IContentResolver**)&contentResolver);
 
         AutoPtr<ISettingsGlobal> helper;
         CSettingsGlobal::AcquireSingleton((ISettingsGlobal**)&helper);
+        Boolean res;
         helper->PutInt32(contentResolver, ISettingsGlobal::PREFERRED_NETWORK_MODE,
-                networkMode);
+                networkMode, &res);
 
         String value2;
-        mButtonEnabledNetworks->GetValue(&value2);
+        mHost->mButtonEnabledNetworks->GetValue(&value2);
         networkMode = StringUtils::ParseInt32(value2);
 
         helper->PutInt32(contentResolver, ISettingsGlobal::PREFERRED_NETWORK_MODE,
-                networkMode);
+                networkMode, &res);
     }
     else {
         AutoPtr<IMessage> m;
         ObtainMessage(MESSAGE_GET_PREFERRED_NETWORK_TYPE, (IMessage**)&m);
-        mPhone->GetPreferredNetworkType(m);
+        mHost->mPhone->GetPreferredNetworkType(m);
     }
 }
 
 void CMobileNetworkSettings::MyHandler::ResetNetworkModeToDefault()
 {
     //set the mButtonPreferredNetworkMode
-    mButtonPreferredNetworkMode->SetValue(StringUtils::ToString(preferredNetworkMode));
-    mButtonEnabledNetworks->SetValue(StringUtils::ToString(preferredNetworkMode));
+    mHost->mButtonPreferredNetworkMode->SetValue(StringUtils::ToString(sPreferredNetworkMode));
+    mHost->mButtonEnabledNetworks->SetValue(StringUtils::ToString(sPreferredNetworkMode));
 
     //set the Settings.System
     AutoPtr<IContext> context;
-    mPhone->GetContext((IContext**)&context);
+    mHost->mPhone->GetContext((IContext**)&context);
     AutoPtr<IContentResolver> contentResolver;
     context->GetContentResolver((IContentResolver**)&contentResolver);
 
     AutoPtr<ISettingsGlobal> helper;
     CSettingsGlobal::AcquireSingleton((ISettingsGlobal**)&helper);
+    Boolean res;
     helper->PutInt32(contentResolver, ISettingsGlobal::PREFERRED_NETWORK_MODE,
-            preferredNetworkMode);
+            sPreferredNetworkMode, &res);
 
     //Set the Modem
     AutoPtr<IMessage> m;
     ObtainMessage(MyHandler::MESSAGE_SET_PREFERRED_NETWORK_TYPE, (IMessage**)&m);
-    mPhone->SetPreferredNetworkType(preferredNetworkMode, m);
+    mHost->mPhone->SetPreferredNetworkType(sPreferredNetworkMode, m);
 }
 
-static const String CMobileNetworkSettings::TAG("NetworkSettings");
-static const Boolean CMobileNetworkSettings::DBG = TRUE;
+const String CMobileNetworkSettings::TAG("NetworkSettings");
+const Boolean CMobileNetworkSettings::DBG = TRUE;
 
-static const String CMobileNetworkSettings::BUTTON_PREFERED_NETWORK_MODE("preferred_network_mode_key");
-static const String CMobileNetworkSettings::BUTTON_ROAMING_KEY("button_roaming_key");
-static const String CMobileNetworkSettings::BUTTON_CDMA_LTE_DATA_SERVICE_KEY("cdma_lte_data_service_key");
-static const String CMobileNetworkSettings::BUTTON_ENABLED_NETWORKS_KEY("enabled_networks_key");
-static const String CMobileNetworkSettings::BUTTON_4G_LTE_KEY("enhanced_4g_lte");
-static const String CMobileNetworkSettings::BUTTON_CELL_BROADCAST_SETTINGS("cell_broadcast_settings");
+const String CMobileNetworkSettings::BUTTON_PREFERED_NETWORK_MODE("preferred_network_mode_key");
+const String CMobileNetworkSettings::BUTTON_ROAMING_KEY("button_roaming_key");
+const String CMobileNetworkSettings::BUTTON_CDMA_LTE_DATA_SERVICE_KEY("cdma_lte_data_service_key");
+const String CMobileNetworkSettings::BUTTON_ENABLED_NETWORKS_KEY("enabled_networks_key");
+const String CMobileNetworkSettings::BUTTON_4G_LTE_KEY("enhanced_4g_lte");
+const String CMobileNetworkSettings::BUTTON_CELL_BROADCAST_SETTINGS("cell_broadcast_settings");
 
-static const Int32 CMobileNetworkSettings::sPreferredNetworkMode = IPhone::PREFERRED_NT_MODE;
+const Int32 CMobileNetworkSettings::sPreferredNetworkMode = IPhone::PREFERRED_NT_MODE;
 
-static const String CMobileNetworkSettings::UP_ACTIVITY_PACKAGE("com.android.settings");
-static const String CMobileNetworkSettings::UP_ACTIVITY_CLASS("com.android.settings.Settings$WirelessSettingsActivity");
+const String CMobileNetworkSettings::UP_ACTIVITY_PACKAGE("com.android.settings");
+const String CMobileNetworkSettings::UP_ACTIVITY_CLASS("com.android.settings.Settings$WirelessSettingsActivity");
 
-static const String CMobileNetworkSettings::sIface("rmnet0"); //TODO: this will go away
+const String CMobileNetworkSettings::sIface("rmnet0"); //TODO: this will go away
 
 CAR_INTERFACE_IMPL_4(CMobileNetworkSettings, PreferenceActivity, IMobileNetworkSettings,
         IDialogInterfaceOnClickListener, IDialogInterfaceOnDismissListener,
@@ -213,7 +268,7 @@ ECode CMobileNetworkSettings::OnClick(
     }
     else {
         // Reset the toggle
-        mButtonDataRoam->SetChecked(FALSE);
+        ITwoStatePreference::Probe(mButtonDataRoam)->SetChecked(FALSE);
     }
     return NOERROR;
 }
@@ -222,7 +277,7 @@ ECode CMobileNetworkSettings::OnDismiss(
     /* [in] */ IDialogInterface* dialog)
 {
     // Assuming that onClick gets called first
-    return mButtonDataRoam->SetChecked(mOkClicked);
+    return ITwoStatePreference::Probe(mButtonDataRoam)->SetChecked(mOkClicked);
 }
 
 ECode CMobileNetworkSettings::OnPreferenceTreeClick(
@@ -250,12 +305,9 @@ ECode CMobileNetworkSettings::OnPreferenceTreeClick(
             (mCdmaOptions->PreferenceTreeClick(preference, &res), res)) {
         AutoPtr<ISystemProperties> helper;
         CSystemProperties::AcquireSingleton((ISystemProperties**)&helper);
-        AutoPtr<IInterface> obj;
-        helper->Get(ITelephonyProperties::PROPERTY_INECM_MODE, (IInterface**)&obj);
-        AutoPtr<IBoolean> value = IBoolean::Probe(obj);
-        Boolean res;
-        value->ToValue(&res);
-        if (res) {
+        String obj;
+        helper->Get(ITelephonyProperties::PROPERTY_INECM_MODE, &obj);
+        if (StringUtils::ParseBoolean(obj)) {
             mClickedPreference = preference;
 
             // In ECM mode launch ECM app dialog
@@ -277,8 +329,8 @@ ECode CMobileNetworkSettings::OnPreferenceTreeClick(
         AutoPtr<ISettingsGlobal> helper;
         CSettingsGlobal::AcquireSingleton((ISettingsGlobal**)&helper);
         Int32 settingsNetworkMode;
-        helper->GetInt32(context, contentResolver, ISettingsGlobal::PREFERRED_NETWORK_MODE,
-                preferredNetworkMode, &settingsNetworkMode);
+        helper->GetInt32(contentResolver, ISettingsGlobal::PREFERRED_NETWORK_MODE,
+                sPreferredNetworkMode, &settingsNetworkMode);
 
         mButtonPreferredNetworkMode->SetValue(StringUtils::ToString(settingsNetworkMode));
         *result = TRUE;
@@ -304,8 +356,11 @@ ECode CMobileNetworkSettings::OnPreferenceTreeClick(
             }
             String url;
             if (!TextUtils::IsEmpty(tmpl)) {
-                AutoPtr<ICharSequence> cchar;
-                TextUtils::ExpandTemplate(tmpl, imsi, (ICharSequence**)&cchar);
+                AutoPtr<ICharSequence> tmplChar = CoreUtils::Convert(tmpl);
+                AutoPtr<ArrayOf<ICharSequence*> > array = ArrayOf<ICharSequence*>::Alloc(1);
+                AutoPtr<ICharSequence> imsiChar = CoreUtils::Convert(imsi);
+                array->Set(0, imsiChar);
+                AutoPtr<ICharSequence> cchar = TextUtils::ExpandTemplate(tmplChar, array);
                 cchar->ToString(&url);
             }
 
@@ -313,8 +368,8 @@ ECode CMobileNetworkSettings::OnPreferenceTreeClick(
             CUriHelper::AcquireSingleton((IUriHelper**)&helper);
             AutoPtr<IUri> _data;
             helper->Parse(url, (IUri**)&_data);
-            AutoPtr<IIntent> intent；
-            CIntent::New(IIntent::ACTION_VIEW, _data);
+            AutoPtr<IIntent> intent;
+            CIntent::New(IIntent::ACTION_VIEW, _data, (IIntent**)&intent);
             StartActivity(intent);
         }
         else {
@@ -332,8 +387,8 @@ ECode CMobileNetworkSettings::OnPreferenceTreeClick(
         AutoPtr<ISettingsGlobal> helper;
         CSettingsGlobal::AcquireSingleton((ISettingsGlobal**)&helper);
         Int32 settingsNetworkMode;
-        helper->GetInt32(context, contentResolver, ISettingsGlobal::PREFERRED_NETWORK_MODE,
-                preferredNetworkMode, &settingsNetworkMode);
+        helper->GetInt32(contentResolver, ISettingsGlobal::PREFERRED_NETWORK_MODE,
+                sPreferredNetworkMode, &settingsNetworkMode);
 
         mButtonEnabledNetworks->SetValue(StringUtils::ToString(settingsNetworkMode));
         *result = TRUE;
@@ -348,7 +403,7 @@ ECode CMobileNetworkSettings::OnPreferenceTreeClick(
         // if the button is anything but the simple toggle preference,
         // we'll need to disable all preferences to reject all click
         // events until the sub-activity's UI comes up.
-        preferenceScreen->SetEnabled(FALSE);
+        IPreference::Probe(preferenceScreen)->SetEnabled(FALSE);
         // Let the intents be launched by the Preference manager
         *result = FALSE;
         return NOERROR;
@@ -360,12 +415,14 @@ void CMobileNetworkSettings::SetIMS(
     /* [in] */ Boolean turnOn)
 {
     AutoPtr<ISharedPreferences> imsPref;
-    GetSharedPreferences(IImsManager::IMS_SHARED_PREFERENCES, IContext::MODE_WORLD_READABLE,
-            (ISharedPreferences**)&imsPref);
+    assert(0);
+    // GetSharedPreferences(IImsManager::IMS_SHARED_PREFERENCES, IContext::MODE_WORLD_READABLE,
+    //         (ISharedPreferences**)&imsPref);
 
     AutoPtr<ISharedPreferencesEditor> edit;
     imsPref->Edit((ISharedPreferencesEditor**)&edit);
-    edit->PutBoolean(IImsManager::KEY_IMS_ON, turnOn);
+    assert(0);
+    //edit->PutBoolean(IImsManager::KEY_IMS_ON, turnOn);
     Boolean tmp;
     edit->Commit(&tmp);
 }
@@ -373,7 +430,7 @@ void CMobileNetworkSettings::SetIMS(
 ECode CMobileNetworkSettings::OnCreate(
     /* [in] */ IBundle* icicle)
 {
-    SetTheme(R.style.Theme_Material_Settings);
+    SetTheme(Elastos::Droid::Server::Telephony::R::style::Theme_Material_Settings);
     PreferenceActivity::OnCreate(icicle);
 
     mPhone = PhoneGlobals::GetPhone();
@@ -386,23 +443,24 @@ ECode CMobileNetworkSettings::OnCreate(
     Boolean res;
     if (mUm->HasUserRestriction(IUserManager::DISALLOW_CONFIG_MOBILE_NETWORKS, &res), res) {
         mUnavailable = TRUE;
-        SetContentView(R.layout.telephony_disallowed_preference_screen);
+        SetContentView(Elastos::Droid::Server::Telephony::R::layout::telephony_disallowed_preference_screen);
         return NOERROR;
     }
 
-    AddPreferencesFromResource(R.xml.network_setting);
+    AddPreferencesFromResource(Elastos::Droid::Server::Telephony::R::xml::network_setting);
 
     AutoPtr<IPreference> preference;
     FindPreference(BUTTON_4G_LTE_KEY, (IPreference**)&preference);
     mButton4glte = ISwitchPreference::Probe(preference);
 
-    mButton4glte->SetOnPreferenceChangeListener(this);
-    mButton4glte->SetChecked(ImsManager::IsEnhanced4gLteModeSettingEnabledByUser(this));
+    IPreference::Probe(mButton4glte)->SetOnPreferenceChangeListener(this);
+    assert(0);
+    //mButton4glte->SetChecked(ImsManager::IsEnhanced4gLteModeSettingEnabledByUser(this));
 
     //try
+    ECode ec = NOERROR;
     {
         AutoPtr<IContext> con;
-        ECode ec;
         FAIL_GOTO(ec = CreatePackageContext(String("com.android.systemui"), 0, (IContext**)&con), ERROR)
 
         AutoPtr<IResources> resources;
@@ -414,7 +472,7 @@ ECode CMobileNetworkSettings::OnCreate(
     }
     // catch (NameNotFoundException e) {
 ERROR:
-    if (ec == (ECode)NameNotFoundException) {
+    if (ec == (ECode)E_NAME_NOT_FOUND_EXCEPTION) {
         Loge(String("NameNotFoundException for show4GFotLTE"));
         mShow4GForLTE = FALSE;
     }
@@ -425,19 +483,23 @@ ERROR:
     GetPreferenceScreen((IPreferenceScreen**)&prefSet);
 
     AutoPtr<IPreference> preference2;
-    prefSet->FindPreference(BUTTON_ROAMING_KEY, (IPreference**)&preference2);
+    AutoPtr<ICharSequence> cchar2 = CoreUtils::Convert(BUTTON_ROAMING_KEY);
+    IPreferenceGroup::Probe(prefSet)->FindPreference(cchar2, (IPreference**)&preference2);
     mButtonDataRoam = ISwitchPreference::Probe(preference2);
 
     AutoPtr<IPreference> preference3;
-    prefSet->FindPreference(BUTTON_PREFERED_NETWORK_MODE, (IPreference**)&preference3);
+    AutoPtr<ICharSequence> cchar3 = CoreUtils::Convert(BUTTON_PREFERED_NETWORK_MODE);
+    IPreferenceGroup::Probe(prefSet)->FindPreference(cchar3, (IPreference**)&preference3);
     mButtonPreferredNetworkMode = IListPreference::Probe(preference3);
 
     AutoPtr<IPreference> preference4;
-    prefSet->FindPreference(BUTTON_ENABLED_NETWORKS_KEY, (IPreference**)&preference4);
+    AutoPtr<ICharSequence> cchar4 = CoreUtils::Convert(BUTTON_ENABLED_NETWORKS_KEY);
+    IPreferenceGroup::Probe(prefSet)->FindPreference(cchar4, (IPreference**)&preference4);
     mButtonEnabledNetworks = IListPreference::Probe(preference4);
 
-    mButtonDataRoam->SetOnPreferenceChangeListener(this);
-    prefSet->FindPreference(BUTTON_CDMA_LTE_DATA_SERVICE_KEY, (IPreference**)&mLteDataServicePref);
+    IPreference::Probe(mButtonDataRoam)->SetOnPreferenceChangeListener(this);
+    AutoPtr<ICharSequence> cchar5 = CoreUtils::Convert(BUTTON_CDMA_LTE_DATA_SERVICE_KEY);
+    IPreferenceGroup::Probe(prefSet)->FindPreference(cchar5, (IPreference**)&mLteDataServicePref);
 
     Int32 mode;
     mPhone->GetLteOnCdmaMode(&mode);
@@ -446,28 +508,34 @@ ERROR:
     if (isLteOnCdma) {
         AutoPtr<IResources> resources;
         GetResources((IResources**)&resources);
-        resources->GetBoolean(R.bool.config_show_cdma, &mIsGlobalCdma);
+        resources->GetBoolean(Elastos::Droid::Server::Telephony::R::bool_::config_show_cdma, &mIsGlobalCdma);
     }
     else {
         mIsGlobalCdma = FALSE;
     }
 
     AutoPtr<IInterface> obj2;
-    GetSystemService(IContext::TELEPHONY_SERVICE, obj2);
+    GetSystemService(IContext::TELEPHONY_SERVICE, (IInterface**)&obj2);
     AutoPtr<ITelephonyManager> tm = ITelephonyManager::Probe(obj2);
     AutoPtr<IResources> resources;
     GetResources((IResources**)&resources);
-    if (tm->GetSimplifiedNetworkSettingsEnabledForSubscriber(
-            SubscriptionManager::GetDefaultSubId(), &res), res) {
-        prefSet->RemovePreference(mButtonPreferredNetworkMode);
-        prefSet->RemovePreference(mButtonEnabledNetworks);
-        prefSet->RemovePreference(mLteDataServicePref);
+
+    AutoPtr<ISubscriptionManager> helper;
+    CSubscriptionManager::AcquireSingleton((ISubscriptionManager**)&helper);
+    Int64 id;
+    helper->GetDefaultSubId(&id);
+    if (tm->GetSimplifiedNetworkSettingsEnabledForSubscriber(id, &res), res) {
+        Boolean tmp;
+        IPreferenceGroup::Probe(prefSet)->RemovePreference(IPreference::Probe(mButtonPreferredNetworkMode), &tmp);
+        IPreferenceGroup::Probe(prefSet)->RemovePreference(IPreference::Probe(mButtonEnabledNetworks), &tmp);
+        IPreferenceGroup::Probe(prefSet)->RemovePreference(IPreference::Probe(mLteDataServicePref), &tmp);
     }
-    else if (resources->GetBoolean(R.bool.world_phone, &res), res) {
-        prefSet->RemovePreference(mButtonEnabledNetworks);
+    else if (resources->GetBoolean(Elastos::Droid::Server::Telephony::R::bool_::world_phone, &res), res) {
+        Boolean tmp;
+        IPreferenceGroup::Probe(prefSet)->RemovePreference(IPreference::Probe(mButtonEnabledNetworks), &tmp);
         // set the listener for the mButtonPreferredNetworkMode list preference so we can issue
         // change Preferred Network Mode.
-        mButtonPreferredNetworkMode->SetOnPreferenceChangeListener(this);
+        IPreference::Probe(mButtonPreferredNetworkMode)->SetOnPreferenceChangeListener(this);
 
         //Get the networkMode from Settings.System and displays it
         AutoPtr<IContext> context;
@@ -479,71 +547,73 @@ ERROR:
         CSettingsGlobal::AcquireSingleton((ISettingsGlobal**)&helper);
         Int32 settingsNetworkMode;
         helper->GetInt32(contentResolver, ISettingsGlobal::PREFERRED_NETWORK_MODE,
-                preferredNetworkMode, &settingsNetworkMode);
+                sPreferredNetworkMode, &settingsNetworkMode);
 
         mButtonPreferredNetworkMode->SetValue(StringUtils::ToString(settingsNetworkMode));
-        CCdmaOptions::New(this, prefSet, mPhone, (ICdmaOptions**)&mCdmaOptions);
-        CGsmUmtsOptions::New(this, prefSet, (IGsmUmtsOptions**)&mGsmUmtsOptions);
+        assert(0);
+        //CCdmaOptions::New(this, prefSet, mPhone, (ICdmaOptions**)&mCdmaOptions);
+        //CGsmUmtsOptions::New(this, prefSet, (IGsmUmtsOptions**)&mGsmUmtsOptions);
     }
     else {
-        prefSet->RemovePreference(mButtonPreferredNetworkMode);
+        Boolean tmp;
+        IPreferenceGroup::Probe(prefSet)->RemovePreference(IPreference::Probe(mButtonPreferredNetworkMode), &tmp);
         Int32 phoneType;
         mPhone->GetPhoneType(&phoneType);
         if (phoneType == IPhoneConstants::PHONE_TYPE_CDMA) {
             if (isLteOnCdma) {
                 mButtonEnabledNetworks->SetEntries(
-                        R.array.enabled_networks_cdma_choices);
+                        Elastos::Droid::Server::Telephony::R::array::enabled_networks_cdma_choices);
                 mButtonEnabledNetworks->SetEntryValues(
-                        R.array.enabled_networks_cdma_values);
+                        Elastos::Droid::Server::Telephony::R::array::enabled_networks_cdma_values);
             }
-            CCdmaOptions::New(this, prefSet, mPhone, (ICdmaOptions**)&mCdmaOptions);
+            assert(0);
+            //CCdmaOptions::New(this, prefSet, mPhone, (ICdmaOptions**)&mCdmaOptions);
         }
         else if (phoneType == IPhoneConstants::PHONE_TYPE_GSM) {
-            AutoPtr<IResources> resources;
-            GetResources((IResources**)&resources);
             Boolean res1, res2;
-            if ((resources->GetBoolean(R.bool.config_prefer_2g, &res1), !res1)
-                    && (resources->GetBoolean(R.bool.config_enabled_lte, &res2), !res2)) {
+            if ((resources->GetBoolean(Elastos::Droid::Server::Telephony::R::bool_::config_prefer_2g, &res1), !res1)
+                    && (resources->GetBoolean(Elastos::Droid::Server::Telephony::R::bool_::config_enabled_lte, &res2), !res2)) {
                 mButtonEnabledNetworks->SetEntries(
-                        R.array.enabled_networks_except_gsm_lte_choices);
+                        Elastos::Droid::Server::Telephony::R::array::enabled_networks_except_gsm_lte_choices);
                 mButtonEnabledNetworks->SetEntryValues(
-                        R.array.enabled_networks_except_gsm_lte_values);
+                        Elastos::Droid::Server::Telephony::R::array::enabled_networks_except_gsm_lte_values);
             }
-            else if ((resources->GetBoolean(R.bool.config_prefer_2g, &res1), !res1)) {
+            else if ((resources->GetBoolean(Elastos::Droid::Server::Telephony::R::bool_::config_prefer_2g, &res1), !res1)) {
                 Int32 select = (mShow4GForLTE == TRUE) ?
-                    R.array.enabled_networks_except_gsm_4g_choices
-                    : R.array.enabled_networks_except_gsm_choices;
+                    Elastos::Droid::Server::Telephony::R::array::enabled_networks_except_gsm_4g_choices
+                    : Elastos::Droid::Server::Telephony::R::array::enabled_networks_except_gsm_choices;
                 mButtonEnabledNetworks->SetEntries(select);
                 mButtonEnabledNetworks->SetEntryValues(
-                        R.array.enabled_networks_except_gsm_values);
+                        Elastos::Droid::Server::Telephony::R::array::enabled_networks_except_gsm_values);
             }
-            else if ((resources->GetBoolean(R.bool.config_enabled_lte, &res1), !res1)) {
+            else if ((resources->GetBoolean(Elastos::Droid::Server::Telephony::R::bool_::config_enabled_lte, &res1), !res1)) {
                 mButtonEnabledNetworks->SetEntries(
-                        R.array.enabled_networks_except_lte_choices);
+                        Elastos::Droid::Server::Telephony::R::array::enabled_networks_except_lte_choices);
                 mButtonEnabledNetworks->SetEntryValues(
-                        R.array.enabled_networks_except_lte_values);
+                        Elastos::Droid::Server::Telephony::R::array::enabled_networks_except_lte_values);
             }
             else if (mIsGlobalCdma) {
                 mButtonEnabledNetworks->SetEntries(
-                        R.array.enabled_networks_cdma_choices);
+                        Elastos::Droid::Server::Telephony::R::array::enabled_networks_cdma_choices);
                 mButtonEnabledNetworks->SetEntryValues(
-                        R.array.enabled_networks_cdma_values);
+                        Elastos::Droid::Server::Telephony::R::array::enabled_networks_cdma_values);
             }
             else {
-                Int32 select = (mShow4GForLTE == TRUE) ? R.array.enabled_networks_4g_choices
-                    : R.array.enabled_networks_choices;
+                Int32 select = (mShow4GForLTE == TRUE) ? Elastos::Droid::Server::Telephony::R::array::enabled_networks_4g_choices
+                    : Elastos::Droid::Server::Telephony::R::array::enabled_networks_choices;
                 mButtonEnabledNetworks->SetEntries(select);
                 mButtonEnabledNetworks->SetEntryValues(
-                        R.array.enabled_networks_values);
+                        Elastos::Droid::Server::Telephony::R::array::enabled_networks_values);
             }
-            CGsmUmtsOptions::New(this, prefSet, (IGsmUmtsOptions**)&mGsmUmtsOptions);
+            assert(0);
+            //CGsmUmtsOptions::New(this, prefSet, (IGsmUmtsOptions**)&mGsmUmtsOptions);
         }
         else {
             //throw new IllegalStateException("Unexpected phone type: " + phoneType);
             Logger::E(TAG, "Unexpected phone type: %d", phoneType);
-            return IllegalStateException;
+            return E_ILLEGAL_STATE_EXCEPTION;
         }
-        mButtonEnabledNetworks->SetOnPreferenceChangeListener(this);
+        IPreference::Probe(mButtonEnabledNetworks)->IPreference::Probe((this));
 
         AutoPtr<IContext> context;
         mPhone->GetContext((IContext**)&context);
@@ -554,7 +624,7 @@ ERROR:
         CSettingsGlobal::AcquireSingleton((ISettingsGlobal**)&helper);
         Int32 settingsNetworkMode;
         helper->GetInt32(contentResolver, ISettingsGlobal::PREFERRED_NETWORK_MODE,
-                preferredNetworkMode, &settingsNetworkMode);
+                sPreferredNetworkMode, &settingsNetworkMode);
 
         if (DBG) Log(String("settingsNetworkMode: ") + StringUtils::ToString(settingsNetworkMode));
         mButtonEnabledNetworks->SetValue(StringUtils::ToString(settingsNetworkMode));
@@ -563,27 +633,29 @@ ERROR:
     AutoPtr<IContentResolver> contentResolver;
     GetContentResolver((IContentResolver**)&contentResolver);
 
-    AutoPtr<ISettingsGlobal> helper;
-    CSettingsGlobal::AcquireSingleton((ISettingsGlobal**)&helper);
+    AutoPtr<ISettingsGlobal> helper2;
+    CSettingsGlobal::AcquireSingleton((ISettingsGlobal**)&helper2);
     String str;
-    helper->GetString(contentResolver, ISettingsGlobal::SETUP_PREPAID_DATA_SERVICE_URL,
-            preferredNetworkMode, &str);
+    helper2->GetString(contentResolver, ISettingsGlobal::SETUP_PREPAID_DATA_SERVICE_URL, &str);
     Boolean missingDataServiceUrl = TextUtils::IsEmpty(str);
     if (!isLteOnCdma || missingDataServiceUrl) {
-        prefSet->RemovePreference(mLteDataServicePref);
+        Boolean tmp;
+        IPreferenceGroup::Probe(prefSet)->RemovePreference(IPreference::Probe(mLteDataServicePref), &tmp);
     }
     else {
         Logger::D(TAG, "keep ltePref");
     }
 
     // Enable enhanced 4G LTE mode settings depending on whether exists on platform
-    if (!ImsManager::IsEnhanced4gLteModeSettingEnabledByPlatform(this)) {
-        AutoPtr<IPreference> pref;
-        prefSet->FindPreference(BUTTON_4G_LTE_KEY, (IPreference**)&pref);
-        if (pref != NULL) {
-            prefSet->RemovePreference(pref);
-        }
-    }
+    assert(0);
+    // if (!ImsManager::IsEnhanced4gLteModeSettingEnabledByPlatform(this)) {
+    //     AutoPtr<IPreference> pref;
+    //     IPreferenceGroup::Probe(prefSet)->FindPreference(BUTTON_4G_LTE_KEY, (IPreference**)&pref);
+    //     if (pref != NULL) {
+    //         Boolean tmp;
+    //         IPreferenceGroup::Probe(prefSet)->RemovePreference(IPreference::Probe(pref), &tmp);
+    //     }
+    // }
 
     AutoPtr<IActionBar> actionBar;
     GetActionBar((IActionBar**)&actionBar);
@@ -592,15 +664,15 @@ ERROR:
         actionBar->SetDisplayHomeAsUpEnabled(TRUE);
     }
 
-    Int32 id;
-    UserHandle::MyUserId(&id);
-    Boolean isSecondaryUser = id != IUserHandle::USER_OWNER;
+    AutoPtr<IUserHandleHelper> helper3;
+    CUserHandleHelper::AcquireSingleton((IUserHandleHelper**)&helper3);
+    Int32 uid;
+    helper3->GetMyUserId(&uid);
+    Boolean isSecondaryUser = uid != IUserHandle::USER_OWNER;
     // Enable link to CMAS app settings depending on the value in config.xml.
-    AutoPtr<IResources> resources;
-    GetResources((IResources**)&resources);
-    Boolean isCellBroadcastAppLinkEnabled
+    Boolean isCellBroadcastAppLinkEnabled;
     resources->GetBoolean(
-            com.android.internal.R.bool.config_cellBroadcastAppLinks, &isCellBroadcastAppLinkEnabled);
+            Elastos::Droid::R::bool_::config_cellBroadcastAppLinks, &isCellBroadcastAppLinkEnabled);
     Boolean tmp;
     if (isSecondaryUser || !isCellBroadcastAppLinkEnabled
             || (mUm->HasUserRestriction(IUserManager::DISALLOW_CONFIG_CELL_BROADCASTS, &tmp), tmp)) {
@@ -609,7 +681,8 @@ ERROR:
         AutoPtr<IPreference> ps;
         FindPreference(BUTTON_CELL_BROADCAST_SETTINGS, (IPreference**)&ps);
         if (ps != NULL) {
-            root->RemovePreference(ps);
+            Boolean tmp;
+            IPreferenceGroup::Probe(root)->RemovePreference(ps, &tmp);
         }
     }
     return NOERROR;
@@ -627,16 +700,17 @@ ECode CMobileNetworkSettings::OnResume()
     // preferences.
     AutoPtr<IPreferenceScreen> preferenceScreen;
     GetPreferenceScreen((IPreferenceScreen**)&preferenceScreen);
-    preferenceScreen->SetEnabled(TRUE);
+    IPreference::Probe(preferenceScreen)->SetEnabled(TRUE);
 
     // Set UI state in onResume because a user could go home, launch some
     // app to change this setting's backend, and re-launch this settings app
     // and the UI state would be inconsistent with actual state
     Boolean res;
-    mButtonDataRoam->SetChecked(mPhone->GetDataRoamingEnabled(&res), res);
+    ITwoStatePreference::Probe(mButtonDataRoam)->SetChecked((mPhone->GetDataRoamingEnabled(&res), res));
 
     AutoPtr<IPreference> preference;
-    preferenceScreen->FindPreference(BUTTON_PREFERED_NETWORK_MODE, (IPreference**)&preference);
+    AutoPtr<ICharSequence> cchar1 = CoreUtils::Convert(BUTTON_PREFERED_NETWORK_MODE);
+    IPreferenceGroup::Probe(preferenceScreen)->FindPreference(cchar1, (IPreference**)&preference);
     if (preference != NULL)  {
         AutoPtr<IMessage> m;
         mHandler->ObtainMessage(
@@ -645,7 +719,8 @@ ECode CMobileNetworkSettings::OnResume()
     }
 
     AutoPtr<IPreference> preference2;
-    preferenceScreen->FindPreference(BUTTON_ENABLED_NETWORKS_KEY, (IPreference**)&preference2);
+    AutoPtr<ICharSequence> cchar2 = CoreUtils::Convert(BUTTON_ENABLED_NETWORKS_KEY);
+    IPreferenceGroup::Probe(preferenceScreen)->FindPreference(cchar2, (IPreference**)&preference2);
     if (preference2 != NULL)  {
         AutoPtr<IMessage> m;
         mHandler->ObtainMessage(
@@ -685,7 +760,7 @@ ECode CMobileNetworkSettings::OnPreferenceChange(
         CSettingsGlobal::AcquireSingleton((ISettingsGlobal**)&helper);
         Int32 settingsNetworkMode;
         helper->GetInt32(contentResolver, ISettingsGlobal::PREFERRED_NETWORK_MODE,
-                preferredNetworkMode, &settingsNetworkMode);
+                sPreferredNetworkMode, &settingsNetworkMode);
 
         if (buttonNetworkMode != settingsNetworkMode) {
             Int32 modemNetworkMode;
@@ -721,9 +796,9 @@ ECode CMobileNetworkSettings::OnPreferenceChange(
 
             AutoPtr<ISettingsGlobal> helper;
             CSettingsGlobal::AcquireSingleton((ISettingsGlobal**)&helper);
-            Int32 settingsNetworkMode;
+            Boolean res;
             helper->PutInt32(contentResolver, ISettingsGlobal::PREFERRED_NETWORK_MODE,
-                    buttonNetworkMode);
+                    buttonNetworkMode, &res);
 
             //Set the modem network mode
             AutoPtr<IMessage> m;
@@ -737,7 +812,7 @@ ECode CMobileNetworkSettings::OnPreferenceChange(
         String str;
         cchar->ToString(&str);
 
-        mButtonEnabledNetworks.setValue(str);
+        mButtonEnabledNetworks->SetValue(str);
         Int32 buttonNetworkMode = StringUtils::ParseInt32(str);
 
         if (DBG) Log(String("buttonNetworkMode: ") + StringUtils::ToString(buttonNetworkMode));
@@ -751,7 +826,7 @@ ECode CMobileNetworkSettings::OnPreferenceChange(
         CSettingsGlobal::AcquireSingleton((ISettingsGlobal**)&helper);
         Int32 settingsNetworkMode;
         helper->GetInt32(contentResolver, ISettingsGlobal::PREFERRED_NETWORK_MODE,
-                preferredNetworkMode, &settingsNetworkMode);
+                sPreferredNetworkMode, &settingsNetworkMode);
 
         if (buttonNetworkMode != settingsNetworkMode) {
             Int32 modemNetworkMode;
@@ -781,9 +856,9 @@ ECode CMobileNetworkSettings::OnPreferenceChange(
 
             AutoPtr<ISettingsGlobal> helper;
             CSettingsGlobal::AcquireSingleton((ISettingsGlobal**)&helper);
-            Int32 settingsNetworkMode;
+            Boolean res;
             helper->PutInt32(contentResolver, ISettingsGlobal::PREFERRED_NETWORK_MODE,
-                    buttonNetworkMode);
+                    buttonNetworkMode, &res);
 
             //Set the modem network mode
             AutoPtr<IMessage> m;
@@ -795,25 +870,26 @@ ECode CMobileNetworkSettings::OnPreferenceChange(
     else if (TO_IINTERFACE(preference) == TO_IINTERFACE(mButton4glte)) {
         AutoPtr<ISwitchPreference> ltePref = ISwitchPreference::Probe(preference);
         Boolean res;
-        ltePref->SetChecked(ltePref->IsChecked(&res), !res);
-        SetIMS(ltePref->IsChecked(&res), res);
+        ITwoStatePreference::Probe(ltePref)->SetChecked((ITwoStatePreference::Probe(ltePref)->IsChecked(&res), !res));
+        SetIMS((ITwoStatePreference::Probe(ltePref)->IsChecked(&res), res));
 
-        AutoPtr<IImsManager> imsMan = ImsManager::GetInstance(getBaseContext(),
-                SubscriptionManager::GetDefaultVoiceSubId());
-        if (imsMan != NULL) {
-            //try {
-            imsMan->SetAdvanced4GMode(ltePref->IsChecked(&res), res);
-            //} catch (ImsException ie) {
-                // do nothing
-            //}
-        }
+        assert(0);
+        // AutoPtr<IImsManager> imsMan = ImsManager::GetInstance(getBaseContext(),
+        //         SubscriptionManager::GetDefaultVoiceSubId());
+        // if (imsMan != NULL) {
+        //     //try {
+        //     imsMan->SetAdvanced4GMode(ltePref->IsChecked(&res), res);
+        //     //} catch (ImsException ie) {
+        //         // do nothing
+        //     //}
+        // }
     }
     else if (TO_IINTERFACE(preference) == TO_IINTERFACE(mButtonDataRoam)) {
-        if (DBG) Log("onPreferenceTreeClick: preference == mButtonDataRoam.");
+        if (DBG) Log(String("onPreferenceTreeClick: preference == mButtonDataRoam."));
 
         //normally called on the toggle click
         Boolean res;
-        if (mButtonDataRoam->IsChecked(&res), !res) {
+        if ((ITwoStatePreference::Probe(mButtonDataRoam)->IsChecked(&res), !res)) {
             // First confirm with a warning dialog about charges
             mOkClicked = FALSE;
             AutoPtr<IAlertDialogBuilder> builder;
@@ -821,13 +897,15 @@ ECode CMobileNetworkSettings::OnPreferenceChange(
             AutoPtr<IResources> resources;
             GetResources((IResources**)&resources);
             String str;
-            resources->GetString(R.string.roaming_warning,　&str);
-            builder->SetMessage(str)
-            builder->SetTitle(android.R.string.dialog_alert_title)
-            builder->SetIconAttribute(android.R.attr.alertDialogIcon)
-            builder->SetPositiveButton(android.R.string.yes, this)
-            builder->SetNegativeButton(android.R.string.no, this)
-            builder->Show()
+            resources->GetString(Elastos::Droid::Server::Telephony::R::string::roaming_warning, &str);
+            AutoPtr<ICharSequence> cchar = CoreUtils::Convert(str);
+            builder->SetMessage(cchar);
+            builder->SetTitle(Elastos::Droid::R::string::dialog_alert_title);
+            builder->SetIconAttribute(Elastos::Droid::R::attr::alertDialogIcon);
+            builder->SetPositiveButton(Elastos::Droid::R::string::yes, this);
+            builder->SetNegativeButton(Elastos::Droid::R::string::no, this);
+            AutoPtr<IAlertDialog> dialog;
+            builder->Show((IAlertDialog**)&dialog);
             builder->SetOnDismissListener(this);
         }
         else {
@@ -847,71 +925,71 @@ void CMobileNetworkSettings::UpdatePreferredNetworkModeSummary(
 {
     switch(NetworkMode) {
         case IPhone::NT_MODE_WCDMA_PREF:
-            mButtonPreferredNetworkMode->SetSummary(
-                    R.string.preferred_network_mode_wcdma_perf_summary);
+            IPreference::Probe(mButtonPreferredNetworkMode)->SetSummary(
+                    Elastos::Droid::Server::Telephony::R::string::preferred_network_mode_wcdma_perf_summary);
             break;
         case IPhone::NT_MODE_GSM_ONLY:
-            mButtonPreferredNetworkMode->SetSummary(
-                    R.string.preferred_network_mode_gsm_only_summary);
+            IPreference::Probe(mButtonPreferredNetworkMode)->SetSummary(
+                    Elastos::Droid::Server::Telephony::R::string::preferred_network_mode_gsm_only_summary);
             break;
         case IPhone::NT_MODE_WCDMA_ONLY:
-            mButtonPreferredNetworkMode->SetSummary(
-                    R.string.preferred_network_mode_wcdma_only_summary);
+            IPreference::Probe(mButtonPreferredNetworkMode)->SetSummary(
+                    Elastos::Droid::Server::Telephony::R::string::preferred_network_mode_wcdma_only_summary);
             break;
         case IPhone::NT_MODE_GSM_UMTS:
-            mButtonPreferredNetworkMode->SetSummary(
-                    R.string.preferred_network_mode_gsm_wcdma_summary);
+            IPreference::Probe(mButtonPreferredNetworkMode)->SetSummary(
+                    Elastos::Droid::Server::Telephony::R::string::preferred_network_mode_gsm_wcdma_summary);
             break;
         case IPhone::NT_MODE_CDMA:
             Int32 mode;
             mPhone->GetLteOnCdmaMode(&mode);
             switch (mode) {
                 case IPhoneConstants::LTE_ON_CDMA_TRUE:
-                    mButtonPreferredNetworkMode->SetSummary(
-                        R.string.preferred_network_mode_cdma_summary);
+                    IPreference::Probe(mButtonPreferredNetworkMode)->SetSummary(
+                        Elastos::Droid::Server::Telephony::R::string::preferred_network_mode_cdma_summary);
                 break;
                 case IPhoneConstants::LTE_ON_CDMA_FALSE:
                 default:
-                    mButtonPreferredNetworkMode->SetSummary(
-                        R.string.preferred_network_mode_cdma_evdo_summary);
+                    IPreference::Probe(mButtonPreferredNetworkMode)->SetSummary(
+                        Elastos::Droid::Server::Telephony::R::string::preferred_network_mode_cdma_evdo_summary);
                     break;
             }
             break;
         case IPhone::NT_MODE_CDMA_NO_EVDO:
-            mButtonPreferredNetworkMode->SetSummary(
-                    R.string.preferred_network_mode_cdma_only_summary);
+            IPreference::Probe(mButtonPreferredNetworkMode)->SetSummary(
+                    Elastos::Droid::Server::Telephony::R::string::preferred_network_mode_cdma_only_summary);
             break;
         case IPhone::NT_MODE_EVDO_NO_CDMA:
-            mButtonPreferredNetworkMode->SetSummary(
-                    R.string.preferred_network_mode_evdo_only_summary);
+            IPreference::Probe(mButtonPreferredNetworkMode)->SetSummary(
+                    Elastos::Droid::Server::Telephony::R::string::preferred_network_mode_evdo_only_summary);
             break;
         case IPhone::NT_MODE_LTE_ONLY:
-            mButtonPreferredNetworkMode->SetSummary(
-                    R.string.preferred_network_mode_lte_summary);
+            IPreference::Probe(mButtonPreferredNetworkMode)->SetSummary(
+                    Elastos::Droid::Server::Telephony::R::string::preferred_network_mode_lte_summary);
             break;
         case IPhone::NT_MODE_LTE_GSM_WCDMA:
-            mButtonPreferredNetworkMode->SetSummary(
-                    R.string.preferred_network_mode_lte_gsm_wcdma_summary);
+            IPreference::Probe(mButtonPreferredNetworkMode)->SetSummary(
+                    Elastos::Droid::Server::Telephony::R::string::preferred_network_mode_lte_gsm_wcdma_summary);
             break;
         case IPhone::NT_MODE_LTE_CDMA_AND_EVDO:
-            mButtonPreferredNetworkMode->SetSummary(
-                    R.string.preferred_network_mode_lte_cdma_evdo_summary);
+            IPreference::Probe(mButtonPreferredNetworkMode)->SetSummary(
+                    Elastos::Droid::Server::Telephony::R::string::preferred_network_mode_lte_cdma_evdo_summary);
             break;
         case IPhone::NT_MODE_LTE_CDMA_EVDO_GSM_WCDMA:
-            mButtonPreferredNetworkMode->SetSummary(
-                    R.string.preferred_network_mode_global_summary);
+            IPreference::Probe(mButtonPreferredNetworkMode)->SetSummary(
+                    Elastos::Droid::Server::Telephony::R::string::preferred_network_mode_global_summary);
             break;
         case IPhone::NT_MODE_GLOBAL:
-            mButtonPreferredNetworkMode->SetSummary(
-                    R.string.preferred_network_mode_cdma_evdo_gsm_wcdma_summary);
+            IPreference::Probe(mButtonPreferredNetworkMode)->SetSummary(
+                    Elastos::Droid::Server::Telephony::R::string::preferred_network_mode_cdma_evdo_gsm_wcdma_summary);
             break;
         case IPhone::NT_MODE_LTE_WCDMA:
-            mButtonPreferredNetworkMode->SetSummary(
-                    R.string.preferred_network_mode_lte_wcdma_summary);
+            IPreference::Probe(mButtonPreferredNetworkMode)->SetSummary(
+                    Elastos::Droid::Server::Telephony::R::string::preferred_network_mode_lte_wcdma_summary);
             break;
         default:
-            mButtonPreferredNetworkMode->SetSummary(
-                    R.string.preferred_network_mode_global_summary);
+            IPreference::Probe(mButtonPreferredNetworkMode)->SetSummary(
+                    Elastos::Droid::Server::Telephony::R::string::preferred_network_mode_global_summary);
     }
 }
 
@@ -925,24 +1003,24 @@ void CMobileNetworkSettings::UpdateEnabledNetworksValueAndSummary(
             if (!mIsGlobalCdma) {
                 mButtonEnabledNetworks->SetValue(
                         StringUtils::ToString(IPhone::NT_MODE_WCDMA_PREF));
-                mButtonEnabledNetworks->SetSummary(R.string.network_3G);
+                IPreference::Probe(mButtonEnabledNetworks)->SetSummary(Elastos::Droid::Server::Telephony::R::string::network_3G);
             }
             else {
-                mButtonEnabledNetworks.setValue(
+                mButtonEnabledNetworks->SetValue(
                         StringUtils::ToString(IPhone::NT_MODE_LTE_CDMA_EVDO_GSM_WCDMA));
-                mButtonEnabledNetworks->SetSummary(R.string.network_global);
+                IPreference::Probe(mButtonEnabledNetworks)->SetSummary(Elastos::Droid::Server::Telephony::R::string::network_global);
             }
             break;
         case IPhone::NT_MODE_GSM_ONLY:
             if (!mIsGlobalCdma) {
                 mButtonEnabledNetworks->SetValue(
                         StringUtils::ToString(IPhone::NT_MODE_GSM_ONLY));
-                mButtonEnabledNetworks->SetSummary(R.string.network_2G);
+                IPreference::Probe(mButtonEnabledNetworks)->SetSummary(Elastos::Droid::Server::Telephony::R::string::network_2G);
             }
             else {
                 mButtonEnabledNetworks->SetValue(
                         StringUtils::ToString(IPhone::NT_MODE_LTE_CDMA_EVDO_GSM_WCDMA));
-                mButtonEnabledNetworks->SetSummary(R.string.network_global);
+                IPreference::Probe(mButtonEnabledNetworks)->SetSummary(Elastos::Droid::Server::Telephony::R::string::network_global);
             }
             break;
         case IPhone::NT_MODE_LTE_GSM_WCDMA:
@@ -951,44 +1029,48 @@ void CMobileNetworkSettings::UpdateEnabledNetworksValueAndSummary(
             if (!mIsGlobalCdma) {
                 mButtonEnabledNetworks->SetValue(
                         StringUtils::ToString(IPhone::NT_MODE_LTE_GSM_WCDMA));
-                mButtonEnabledNetworks->SetSummary((mShow4GForLTE == true)
-                        ? R.string.network_4G : R.string.network_lte);
+                IPreference::Probe(mButtonEnabledNetworks)->SetSummary((mShow4GForLTE == true)
+                        ? Elastos::Droid::Server::Telephony::R::string::network_4G :
+                        Elastos::Droid::Server::Telephony::R::string::network_lte);
             } else {
                 mButtonEnabledNetworks->SetValue(
                         StringUtils::ToString(IPhone::NT_MODE_LTE_CDMA_EVDO_GSM_WCDMA));
-                mButtonEnabledNetworks->SetSummary(R.string.network_global);
+                IPreference::Probe(mButtonEnabledNetworks)->SetSummary(Elastos::Droid::Server::Telephony::R::string::network_global);
             }
             break;
         case IPhone::NT_MODE_LTE_CDMA_AND_EVDO:
             mButtonEnabledNetworks->SetValue(
                     StringUtils::ToString(IPhone::NT_MODE_LTE_CDMA_AND_EVDO));
-            mButtonEnabledNetworks->SetSummary(R.string.network_lte);
+            IPreference::Probe(mButtonEnabledNetworks)->SetSummary(Elastos::Droid::Server::Telephony::R::string::network_lte);
             break;
         case IPhone::NT_MODE_CDMA:
         case IPhone::NT_MODE_EVDO_NO_CDMA:
         case IPhone::NT_MODE_GLOBAL:
             mButtonEnabledNetworks->SetValue(
                     StringUtils::ToString(IPhone::NT_MODE_CDMA));
-            mButtonEnabledNetworks->SetSummary(R.string.network_3G);
+            IPreference::Probe(mButtonEnabledNetworks)->SetSummary(Elastos::Droid::Server::Telephony::R::string::network_3G);
             break;
         case IPhone::NT_MODE_CDMA_NO_EVDO:
             mButtonEnabledNetworks->SetValue(
                     StringUtils::ToString(IPhone::NT_MODE_CDMA_NO_EVDO));
-            mButtonEnabledNetworks->SetSummary(R.string.network_1x);
+            IPreference::Probe(mButtonEnabledNetworks)->SetSummary(Elastos::Droid::Server::Telephony::R::string::network_1x);
             break;
         case IPhone::NT_MODE_LTE_CDMA_EVDO_GSM_WCDMA:
             mButtonEnabledNetworks->SetValue(
                     StringUtils::ToString(IPhone::NT_MODE_LTE_CDMA_EVDO_GSM_WCDMA));
-            mButtonEnabledNetworks->SetSummary(R.string.network_global);
+            IPreference::Probe(mButtonEnabledNetworks)->SetSummary(Elastos::Droid::Server::Telephony::R::string::network_global);
             break;
         default:
+        {
             StringBuilder sb;
             sb += "Invalid Network Mode (";
-            sb += NetworkMode；
+            sb += NetworkMode;
             sb += "). Ignore.";
             String errMsg = sb.ToString();
             Loge(errMsg);
-            mButtonEnabledNetworks->SetSummary(errMsg);
+            AutoPtr<ICharSequence> cchar = CoreUtils::Convert(errMsg);
+            IPreference::Probe(mButtonEnabledNetworks)->SetSummary(cchar);
+        }
     }
 }
 
@@ -1037,7 +1119,7 @@ ECode CMobileNetworkSettings::OnOptionsItemSelected(
 
     Int32 itemId;
     item->GetItemId(&itemId);
-    if (itemId == android.R.id.home) {  // See ActionBar#setDisplayHomeAsUpEnabled()
+    if (itemId == Elastos::Droid::R::id::home) {  // See ActionBar#setDisplayHomeAsUpEnabled()
         // Commenting out "logical up" capability. This is a workaround for issue 5278083.
         //
         // Settings app may not launch this activity via UP_ACTIVITY_CLASS but the other

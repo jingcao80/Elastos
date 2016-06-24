@@ -2,7 +2,36 @@
 #define  __ELASTOS_DROID_PHONE_CNETWORKSETTING_H__
 
 #include "_Elastos_Droid_Phone_CNetworkSetting.h"
+#include "elastos/droid/preference/PreferenceActivity.h"
 #include "elastos/droid/ext/frameworkext.h"
+#include "elastos/droid/os/Handler.h"
+#include "Elastos.Droid.App.h"
+#include "Elastos.Droid.Content.h"
+#include "Elastos.Droid.Internal.h"
+#include "Elastos.Droid.Os.h"
+#include "Elastos.Droid.Preference.h"
+#include "Elastos.CoreLibrary.Core.h"
+#include "Elastos.CoreLibrary.Utility.h"
+
+using Elastos::Droid::App::IDialog;
+using Elastos::Droid::Content::IServiceConnection;
+using Elastos::Droid::Content::IComponentName;
+using Elastos::Droid::Content::IDialogInterface;
+using Elastos::Droid::Content::IDialogInterfaceOnCancelListener;
+using Elastos::Droid::Os::Handler;
+using Elastos::Droid::Os::IHandler;
+using Elastos::Droid::Os::IBinder;
+using Elastos::Droid::Os::IMessage;
+using Elastos::Droid::Os::IUserManager;
+using Elastos::Droid::Preference::IPreference;
+using Elastos::Droid::Preference::IPreferenceGroup;
+using Elastos::Droid::Preference::IPreferenceScreen;
+using Elastos::Droid::Preference::PreferenceActivity;
+using Elastos::Droid::Internal::Telephony::IPhone;
+using Elastos::Droid::Internal::Telephony::IOperatorInfo;
+using Elastos::Core::IThrowable;
+using Elastos::Utility::IList;
+using Elastos::Utility::IHashMap;
 
 namespace Elastos {
 namespace Droid {
@@ -16,6 +45,29 @@ CarClass(CNetworkSetting)
     , public INetworkSetting
     , public IDialogInterfaceOnCancelListener
 {
+public:
+    class MyNetworkQueryServiceCallback
+        : public Object
+        , public IINetworkQueryServiceCallback
+        , public IBinder
+    {
+    public:
+        TO_STRING_IMPL("CNetworkSetting::MyNetworkQueryServiceCallback")
+
+        CAR_INTERFACE_DECL()
+
+        CARAPI constructor(
+            /* [in] */ INetworkSetting* host);
+
+        /** place the message on the looper queue upon query completion. */
+        CARAPI OnQueryComplete(
+            /* [in] */ IList* networkInfoArray,
+            /* [in] */ Int32 status);
+
+    private:
+        CNetworkSetting* mHost;
+    };
+
 private:
     class MyHandler
         : public Handler
@@ -32,7 +84,6 @@ private:
     private:
         CNetworkSetting* mHost;
     };
-
 
     class MyServiceConnection
         : public Object
@@ -59,28 +110,7 @@ private:
 
     private:
         CNetworkSetting* mHost;
-    }
-
-
-    class MyNetworkQueryServiceCallback
-        : public Object
-        , public IINetworkQueryServiceCallback
-        , public IBinder
-    {
-    public:
-        TO_STRING_IMPL("CNetworkSetting::MyNetworkQueryServiceCallback")
-
-        CARAPI constructor(
-            /* [in] */ INetworkSetting* host);
-
-        /** place the message on the looper queue upon query completion. */
-        CARAPI OnQueryComplete(
-            /* [in] */ IList* networkInfoArray,
-            /* [in] */ Int32 status);
-
-    private:
-        CNetworkSetting* mHost;
-    }
+    };
 
     class MyRunnable
         : public Runnable
@@ -146,7 +176,7 @@ protected:
         /* [out] */ IDialog** dialog);
 
     //@Override
-    CARAPI OnPrepareDialog(
+    CARAPI_(void) OnPrepareDialog(
         /* [in] */ Int32 id,
         /* [in] */ IDialog* dialog);
 
@@ -204,14 +234,14 @@ private:
     static const String TAG;
     static const Boolean DBG;
 
-    static const Int32 EVENT_NETWORK_SCAN_COMPLETED;
-    static const Int32 EVENT_NETWORK_SELECTION_DONE;
-    static const Int32 EVENT_AUTO_SELECT_DONE;
+    static const Int32 EVENT_NETWORK_SCAN_COMPLETED = 100;
+    static const Int32 EVENT_NETWORK_SELECTION_DONE = 200;
+    static const Int32 EVENT_AUTO_SELECT_DONE = 300;
 
     //dialog ids
-    static const Int32 DIALOG_NETWORK_SELECTION;
-    static const Int32 DIALOG_NETWORK_LIST_LOAD;
-    static const Int32 DIALOG_NETWORK_AUTO_SELECT;
+    static const Int32 DIALOG_NETWORK_SELECTION = 100;
+    static const Int32 DIALOG_NETWORK_LIST_LOAD = 200;
+    static const Int32 DIALOG_NETWORK_AUTO_SELECT = 300;
 
     //String keys for preference lookup
     static const String LIST_NETWORKS_KEY;
@@ -258,6 +288,5 @@ private:
 } // namespace Phone
 } // namespace Droid
 } // namespace Elastos
-
 
 #endif // __ELASTOS_DROID_PHONE_CNETWORKSETTING_H__

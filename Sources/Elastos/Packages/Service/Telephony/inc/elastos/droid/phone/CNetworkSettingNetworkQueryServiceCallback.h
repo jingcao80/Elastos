@@ -1,8 +1,11 @@
 #ifndef  __ELASTOS_DROID_PHONE_CNETWORKSETTINGNETWORKQUERYSERVICECALLBACK_H__
 #define  __ELASTOS_DROID_PHONE_CNETWORKSETTINGNETWORKQUERYSERVICECALLBACK_H__
 
-#include "elastos/droid/telephony/phone/CNetworkSetting.h"
+#include "_Elastos_Droid_Phone_CNetworkSettingNetworkQueryServiceCallback.h"
+#include "elastos/droid/phone/CNetworkSetting.h"
 #include "elastos/droid/ext/frameworkext.h"
+
+using Elastos::Droid::Phone::CNetworkSetting;
 
 namespace Elastos {
 namespace Droid {

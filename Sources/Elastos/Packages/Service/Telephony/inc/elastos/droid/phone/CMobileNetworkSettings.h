@@ -2,7 +2,33 @@
 #define  __ELASTOS_DROID_PHONE_CMOBILENETWORKSETTINGS_H__
 
 #include "_Elastos_Droid_Phone_CMobileNetworkSettings.h"
+#include "elastos/droid/preference/PreferenceActivity.h"
 #include "elastos/droid/ext/frameworkext.h"
+#include "elastos/droid/os/Handler.h"
+#include "Elastos.Droid.Content.h"
+#include "Elastos.Droid.Internal.h"
+#include "Elastos.Droid.Os.h"
+#include "Elastos.Droid.Preference.h"
+#include "Elastos.Droid.View.h"
+
+using Elastos::Droid::Content::IIntent;
+using Elastos::Droid::Content::CIntent;
+using Elastos::Droid::Content::IDialogInterface;
+using Elastos::Droid::Content::IDialogInterfaceOnClickListener;
+using Elastos::Droid::Content::IDialogInterfaceOnDismissListener;
+using Elastos::Droid::Internal::Telephony::IPhone;
+using Elastos::Droid::Os::Handler;
+using Elastos::Droid::Os::IHandler;
+using Elastos::Droid::Os::IMessage;
+using Elastos::Droid::Os::IBundle;
+using Elastos::Droid::Os::IUserManager;
+using Elastos::Droid::Preference::IPreference;
+using Elastos::Droid::Preference::IListPreference;
+using Elastos::Droid::Preference::ISwitchPreference;
+using Elastos::Droid::Preference::IPreferenceScreen;
+using Elastos::Droid::Preference::PreferenceActivity;
+using Elastos::Droid::Preference::IPreferenceOnPreferenceChangeListener;
+using Elastos::Droid::View::IMenuItem;
 
 namespace Elastos {
 namespace Droid {
@@ -50,6 +76,8 @@ private:
         CARAPI_(void) ResetNetworkModeToDefault();
 
     private:
+        friend class CMobileNetworkSettings;
+
         CMobileNetworkSettings* mHost;
 
         static const Int32 MESSAGE_GET_PREFERRED_NETWORK_TYPE = 0;

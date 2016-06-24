@@ -393,8 +393,7 @@ ECode PhoneGlobals::OnCreate()
     // overrideable on a per-product basis):
     AutoPtr<IResources> resources;
     GetResources((IResources**)&resources);
-    assert(0);
-    //resources->GetBoolean(com.android.internal.R.bool.config_voice_capable, &sVoiceCapable);
+    resources->GetBoolean(Elastos::Droid::R::bool_::config_voice_capable, &sVoiceCapable);
 
 
     // ...but this might eventually become a PackageManager "system
@@ -414,7 +413,7 @@ ECode PhoneGlobals::OnCreate()
         // Start TelephonyDebugService After the default phone is created.
         AutoPtr<IIntent> intent;
         assert(0);
-        //CIntent::New(this, TelephonyDebugService.class, (IIntent**)&intent);
+        //CIntent::New(this, EIID_ITelephonyDebugService, (IIntent**)&intent);
         AutoPtr<IComponentName> name;
         StartService(intent, (IComponentName**)&name);
 

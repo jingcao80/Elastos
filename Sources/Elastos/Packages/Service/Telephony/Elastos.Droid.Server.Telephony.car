@@ -23,6 +23,13 @@ module
     merge("car/elastos/droid/phone/OtaUtils.car");
     merge("car/elastos/droid/phone/HfaLogic.car");
     merge("car/elastos/droid/phone/PhoneUtils.car");
+    merge("car/elastos/droid/phone/NetworkSetting.car");
+    merge("car/elastos/droid/phone/NetworkQueryService.car");
+    merge("car/elastos/droid/phone/INetworkQueryService.car");
+    merge("car/elastos/droid/phone/INetworkQueryServiceCallback.car");
+    merge("car/elastos/droid/phone/GsmUmtsOptions.car");
+    merge("car/elastos/droid/phone/MobileNetworkSettings.car");
+    merge("car/elastos/droid/phone/EmergencyCallbackModeExitDialog.car");
 
     merge("car/elastos/droid/phone/settings/AccountSelectionPreference.car");
 
@@ -39,6 +46,8 @@ module
     using interface Elastos.Droid.App.IActivity;
     using interface Elastos.Droid.App.IApplication;
     using interface Elastos.Droid.App.IListActivity;
+    using interface Elastos.Droid.Content.IDialogInterfaceOnClickListener;
+    using interface Elastos.Droid.Content.IDialogInterfaceOnCancelListener;
     using interface Elastos.Droid.Content.IBroadcastReceiver;
     using interface Elastos.Droid.Content.IContext;
     using interface Elastos.Droid.Content.IContentProvider;
@@ -48,6 +57,7 @@ module
     using interface Elastos.Droid.Content.IDialogInterfaceOnClickListener;
     using interface Elastos.Droid.Content.IDialogInterfaceOnDismissListener;
     using interface Elastos.Droid.Internal.Telephony.ICallForwardInfo;
+    using interface Elastos.Droid.Os.IBinder;
     using interface Elastos.Droid.Provider.ISearchIndexablesProvider;
     using interface Elastos.Droid.Internal.Telephony.IITelephony;
     using interface Elastos.Droid.Internal.Telephony.IPhone;
@@ -303,6 +313,124 @@ module
 
         interface IITelephony;
         interface IBinder;
+    }
+
+    class COtaStartupReceiver {
+        constructor();
+
+        interface IBroadcastReceiver;
+    }
+
+    class COutgoingCallBroadcaster {
+        constructor();
+
+        interface IContext;
+        interface IContextWrapper;
+        interface IContextThemeWrapper;
+        interface ILayoutInflaterFactory;
+        interface ILayoutInflaterFactory2;
+        interface IWindowCallback;
+        interface IKeyEventCallback;
+        interface IViewOnCreateContextMenuListener;
+        interface IComponentCallbacks;
+        interface IComponentCallbacks2;
+        interface IOnWindowDismissedCallback;
+        interface IActivity;
+
+        interface IOutgoingCallBroadcaster;
+        interface IDialogInterfaceOnClickListener;
+        interface IDialogInterfaceOnCancelListener;
+    }
+
+    class COutgoingCallReceiver {
+        constructor(
+            [in] IOutgoingCallBroadcaster* host);
+
+        interface IBroadcastReceiver;
+    }
+
+    class CNetworkQueryService {
+        constructor();
+
+        interface IContext;
+        interface IContextWrapper;
+        interface IComponentCallbacks;
+        interface IComponentCallbacks2;
+        interface IService;
+        interface INetworkQueryService;
+    }
+
+    class CNetworkQueryServiceLocalBinder {
+        constructor(
+            [in] INetworkQueryService* host);
+
+        interface IBinder;
+    }
+
+    class CNetworkQueryServiceNetworkQueryService {
+        constructor(
+            [in] INetworkQueryService* host);
+
+        interface IINetworkQueryService;
+        interface IBinder;
+    }
+
+    class CNetworkSetting {
+        constructor();
+
+        interface IListActivity;
+        interface IActivity;
+        interface IPreferenceManagerOnPreferenceTreeClickListener;
+        interface IPreferenceFragmentOnPreferenceStartFragmentCallback;
+        interface IContextThemeWrapper;
+        interface ILayoutInflaterFactory;
+        interface ILayoutInflaterFactory2;
+        interface IWindowCallback;
+        interface IKeyEventCallback;
+        //interface IViewOnCreateContextMenuListener; //undefined
+        interface IComponentCallbacks2;
+        interface IComponentCallbacks;
+        //interface IOnWindowDismissedCallback;  //IOnWindowDismissedCallback
+        interface IContextWrapper;
+        interface IContext;
+        interface IPreferenceActivity;
+
+        interface INetworkSetting;
+        interface IDialogInterfaceOnCancelListener;
+    }
+
+    class CNetworkSettingNetworkQueryServiceCallback {
+        constructor(
+            [in] INetworkSetting* host);
+
+        interface IINetworkQueryServiceCallback;
+        interface IBinder;
+    }
+
+    class CMobileNetworkSettings {
+        constructor();
+
+        interface IListActivity;
+        interface IActivity;
+        interface IPreferenceManagerOnPreferenceTreeClickListener;
+        interface IPreferenceFragmentOnPreferenceStartFragmentCallback;
+        interface IContextThemeWrapper;
+        interface ILayoutInflaterFactory;
+        interface ILayoutInflaterFactory2;
+        interface IWindowCallback;
+        interface IKeyEventCallback;
+        //interface IViewOnCreateContextMenuListener; //undefined
+        interface IComponentCallbacks2;
+        interface IComponentCallbacks;
+        //interface IOnWindowDismissedCallback;  //IOnWindowDismissedCallback
+        interface IContextWrapper;
+        interface IContext;
+        interface IPreferenceActivity;
+
+        interface IMobileNetworkSettings;
+        interface IDialogInterfaceOnClickListener;
+        interface IDialogInterfaceOnDismissListener;
+        interface IPreferenceOnPreferenceChangeListener;
     }
 
     } // namespace Phone

@@ -1,8 +1,16 @@
 module
 {
+    interface IINetworkQueryService;
+
     namespace Elastos {
     namespace Droid {
     namespace Phone {
+
+    [local]
+    interface INetworkQueryServiceLocalBinder {
+        GetService(
+            [out] IINetworkQueryService** service);
+    }
 
     interface INetworkQueryService {
         // error statuses that will be retured in the callback.

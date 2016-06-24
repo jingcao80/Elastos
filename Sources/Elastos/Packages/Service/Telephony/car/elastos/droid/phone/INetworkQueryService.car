@@ -1,5 +1,7 @@
 module
 {
+    interface IINetworkQueryServiceCallback;
+
     namespace Elastos {
     namespace Droid {
     namespace Phone {

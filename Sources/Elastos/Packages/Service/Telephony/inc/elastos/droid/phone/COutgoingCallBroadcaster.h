@@ -3,6 +3,29 @@
 
 #include "_Elastos_Droid_Phone_COutgoingCallBroadcaster.h"
 #include "elastos/droid/ext/frameworkext.h"
+#include "elastos/droid/content/BroadcastReceiver.h"
+#include "elastos/droid/os/Handler.h"
+#include "elastos/droid/app/Activity.h"
+#include "Elastos.Droid.Content.h"
+#include "Elastos.Droid.Os.h"
+#include "Elastos.Droid.Net.h"
+#include "Elastos.Droid.Widget.h"
+
+using Elastos::Droid::App::IDialog;
+using Elastos::Droid::App::Activity;
+using Elastos::Droid::Content::IContext;
+using Elastos::Droid::Content::IIntent;
+using Elastos::Droid::Content::IDialogInterface;
+using Elastos::Droid::Content::IDialogInterfaceOnClickListener;
+using Elastos::Droid::Content::IDialogInterfaceOnCancelListener;
+using Elastos::Droid::Content::BroadcastReceiver;
+using Elastos::Droid::Content::Res::IConfiguration;
+using Elastos::Droid::Os::IMessage;
+using Elastos::Droid::Os::IHandler;
+using Elastos::Droid::Os::IBundle;
+using Elastos::Droid::Os::Handler;
+using Elastos::Droid::Net::IUri;
+using Elastos::Droid::Widget::IProgressBar;
 
 namespace Elastos {
 namespace Droid {
@@ -32,23 +55,6 @@ CarClass(COutgoingCallBroadcaster)
     , public IDialogInterfaceOnClickListener
     , public IDialogInterfaceOnCancelListener
 {
-private:
-    class MyHandler
-        : public Handler
-    {
-    public:
-        TO_STRING_IMPL("COutgoingCallBroadcaster::MyHandler")
-
-        MyHandler(
-            /* [in] */ COutgoingCallBroadcaster* host);
-
-        CARAPI HandleMessage(
-            /* [in] */ IMessage* msg);
-
-    private:
-        COutgoingCallBroadcaster* mHost;
-    };
-
 public:
     /**
      * OutgoingCallReceiver finishes NEW_OUTGOING_CALL broadcasts, starting
@@ -80,8 +86,25 @@ public:
             /* [out] */ Boolean* result);
 
     private:
-        static const String TAG("OutgoingCallReceiver");
+        static const String TAG;
 
+        COutgoingCallBroadcaster* mHost;
+    };
+
+private:
+    class MyHandler
+        : public Handler
+    {
+    public:
+        TO_STRING_IMPL("COutgoingCallBroadcaster::MyHandler")
+
+        MyHandler(
+            /* [in] */ COutgoingCallBroadcaster* host);
+
+        CARAPI HandleMessage(
+            /* [in] */ IMessage* msg);
+
+    private:
         COutgoingCallBroadcaster* mHost;
     };
 

@@ -6,6 +6,11 @@ INCLUDES += ../../../..
 INCLUDES += $(MAKEDIR)/../../../..
 INCLUDES += $(MAKEDIR)/../../../../inc/
 
+SOURCES += CMobileNetworkSettings.cpp
+SOURCES += CNetworkSetting.cpp
+SOURCES += CNetworkQueryService.cpp
+SOURCES += COutgoingCallBroadcaster.cpp
+SOURCES += COtaStartupReceiver.cpp
 SOURCES += CPhoneSearchIndexablesProvider.cpp
 SOURCES += CProcessOutgoingCallTest.cpp
 SOURCES += CSimContacts.cpp

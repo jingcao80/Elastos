@@ -1,5 +1,32 @@
 
 #include "elastos/droid/phone/CNetworkSetting.h"
+#include "elastos/droid/phone/CNetworkSettingNetworkQueryServiceCallback.h"
+#include "elastos/droid/phone/NotificationMgr.h"
+#include "elastos/droid/phone/PhoneGlobals.h"
+#include "elastos/droid/os/AsyncResult.h"
+#include "elastos/droid/text/TextUtils.h"
+#include "Elastos.Droid.Internal.h"
+#include <elastos/utility/logging/Logger.h>
+#include <elastos/core/StringBuilder.h>
+#include <elastos/core/CoreUtils.h>
+#include "R.h"
+
+using Elastos::Droid::App::IAlertDialog;
+using Elastos::Droid::App::CProgressDialog;
+using Elastos::Droid::App::IProgressDialog;
+using Elastos::Droid::Content::EIID_IServiceConnection;
+using Elastos::Droid::Content::EIID_IDialogInterfaceOnCancelListener;
+using Elastos::Droid::Os::AsyncResult;
+using Elastos::Droid::Os::EIID_IBinder;
+using Elastos::Droid::Preference::CPreference;
+using Elastos::Droid::Text::TextUtils;
+using Elastos::Droid::Internal::Telephony::ICommandException;
+using Elastos::Core::StringBuilder;
+using Elastos::Core::CoreUtils;
+using Elastos::Utility::ISet;
+using Elastos::Utility::IIterator;
+using Elastos::Utility::Logging::Logger;
+using Elastos::Utility::CHashMap;
 
 namespace Elastos {
 namespace Droid {
@@ -15,32 +42,39 @@ CNetworkSetting::MyHandler::MyHandler(
 ECode CNetworkSetting::MyHandler::HandleMessage(
     /* [in] */ IMessage* msg)
 {
-    AutoPtr<IAsyncResult> ar;
+    AutoPtr<AsyncResult> ar;
 
     Int32 what;
     msg->GetWhat(&what);
     switch (what) {
         case EVENT_NETWORK_SCAN_COMPLETED:
-            NetworksListLoaded ((List<OperatorInfo>) msg.obj, msg.arg1);
+        {
+            AutoPtr<IInterface> obj;
+            msg->GetObj((IInterface**)&obj);
+            Int32 arg1;
+            msg->GetArg1(&arg1);
+            mHost->NetworksListLoaded(IList::Probe(obj), arg1);
             break;
-
+        }
         case EVENT_NETWORK_SELECTION_DONE:
         {
             if (DBG) mHost->Log(String("hideProgressPanel"));
-            RemoveDialog(DIALOG_NETWORK_SELECTION);
+            mHost->RemoveDialog(DIALOG_NETWORK_SELECTION);
 
             AutoPtr<IPreferenceScreen> screen;
-            GetPreferenceScreen((IPreferenceScreen**)&screen);
-            screen->SetEnabled(TRUE);
+            mHost->GetPreferenceScreen((IPreferenceScreen**)&screen);
+            IPreference::Probe(screen)->SetEnabled(TRUE);
 
-            ar = (AsyncResult) msg.obj;
-            if (ar.exception != null) {
+            AutoPtr<IInterface> obj;
+            msg->GetObj((IInterface**)&obj);
+            ar = (AsyncResult*)IObject::Probe(obj);
+            if (ar->mException != NULL) {
                 if (DBG) mHost->Log(String("manual network selection: failed!"));
-                DisplayNetworkSelectionFailed(ar.exception);
+                mHost->DisplayNetworkSelectionFailed(ar->mException);
             }
             else {
                 if (DBG) mHost->Log(String("manual network selection: succeeded!"));
-                DisplayNetworkSelectionSucceeded();
+                mHost->DisplayNetworkSelectionSucceeded();
             }
             break;
         }
@@ -51,7 +85,7 @@ ECode CNetworkSetting::MyHandler::HandleMessage(
             // Always try to dismiss the dialog because activity may
             // be moved to background after dialog is shown.
             //try {
-            ECode ec = DismissDialog(DIALOG_NETWORK_AUTO_SELECT);
+            ECode ec = mHost->DismissDialog(DIALOG_NETWORK_AUTO_SELECT);
             //} catch (IllegalArgumentException e) {
             if (ec == (ECode)E_ILLEGAL_ARGUMENT_EXCEPTION) {
             //    // "auto select" is always trigged in foreground, so "auto select" dialog
@@ -61,17 +95,19 @@ ECode CNetworkSetting::MyHandler::HandleMessage(
             }
             //}
             AutoPtr<IPreferenceScreen> screen;
-            GetPreferenceScreen((IPreferenceScreen**)&screen);
-            screen->SetEnabled(TRUE);
+            mHost->GetPreferenceScreen((IPreferenceScreen**)&screen);
+            IPreference::Probe(screen)->SetEnabled(TRUE);
 
-            ar = (AsyncResult) msg.obj;
-            if (ar.exception != null) {
+            AutoPtr<IInterface> obj;
+            msg->GetObj((IInterface**)&obj);
+            ar = (AsyncResult*)IObject::Probe(obj);
+            if (ar->mException != NULL) {
                 if (DBG) mHost->Log(String("automatic network selection: failed!"));
-                DisplayNetworkSelectionFailed(ar.exception);
+                mHost->DisplayNetworkSelectionFailed(ar->mException);
             }
             else {
                 if (DBG) mHost->Log(String("automatic network selection: succeeded!"));
-                DisplayNetworkSelectionSucceeded();
+                mHost->DisplayNetworkSelectionSucceeded();
             }
             break;
         }
@@ -80,12 +116,14 @@ ECode CNetworkSetting::MyHandler::HandleMessage(
     return NOERROR;
 }
 
+CAR_INTERFACE_IMPL(CNetworkSetting::MyServiceConnection, Object, IServiceConnection)
+
 ECode CNetworkSetting::MyServiceConnection::OnServiceConnected(
     /* [in] */ IComponentName* className,
     /* [in] */ IBinder* service)
 {
     if (DBG) mHost->Log(String("connection created, binding local service."));
-    INetworkQueryServiceLocalBinder::Probe(service)->GetService(mHost->mNetworkQueryService);
+    INetworkQueryServiceLocalBinder::Probe(service)->GetService((IINetworkQueryService**)&(mHost->mNetworkQueryService));
     // as soon as it is bound, run a query.
     mHost->LoadNetworksList();
     return NOERROR;
@@ -127,14 +165,6 @@ ECode CNetworkSetting::MyRunnable::Run()
 
 const String CNetworkSetting::TAG("phone");
 const Boolean CNetworkSetting::DBG = FALSE;
-
-const Int32 CNetworkSetting::EVENT_NETWORK_SCAN_COMPLETED = 100;
-const Int32 CNetworkSetting::EVENT_NETWORK_SELECTION_DONE = 200;
-const Int32 CNetworkSetting::EVENT_AUTO_SELECT_DONE = 300;
-
-const Int32 CNetworkSetting::DIALOG_NETWORK_SELECTION = 100;
-const Int32 CNetworkSetting::DIALOG_NETWORK_LIST_LOAD = 200;
-const Int32 CNetworkSetting::DIALOG_NETWORK_AUTO_SELECT = 300;
 
 const String CNetworkSetting::LIST_NETWORKS_KEY("list_networks_key");
 const String CNetworkSetting::BUTTON_SRCH_NETWRKS_KEY("button_srch_netwrks_key");
@@ -257,25 +287,28 @@ ECode CNetworkSetting::OnCreate(
 
     Boolean res;
     if (mUm->HasUserRestriction(IUserManager::DISALLOW_CONFIG_MOBILE_NETWORKS, &res), res) {
-        SetContentView(R.layout.telephony_disallowed_preference_screen);
+        SetContentView(Elastos::Droid::Server::Telephony::R::layout::telephony_disallowed_preference_screen);
         mUnavailable = TRUE;
         return NOERROR;
     }
 
-    AddPreferencesFromResource(R.xml.carrier_select);
+    AddPreferencesFromResource(Elastos::Droid::Server::Telephony::R::xml::carrier_select);
 
-    mPhone = PhoneGlobals::GetPhone((IPhone**)&mPhone);
+    mPhone = PhoneGlobals::GetPhone();
 
     AutoPtr<IPreferenceScreen> screen;
     GetPreferenceScreen((IPreferenceScreen**)&screen);
+    AutoPtr<ICharSequence> cchar = CoreUtils::Convert(LIST_NETWORKS_KEY);
     AutoPtr<IPreference> preference;
-    screen->FindPreference(LIST_NETWORKS_KEY, (IPreference**)&preference);
+    IPreferenceGroup::Probe(screen)->FindPreference(cchar, (IPreference**)&preference);
 
     mNetworkList = IPreferenceGroup::Probe(preference);
-    CHashMap::New((HashMap**)&mNetworkMap);
+    CHashMap::New((IHashMap**)&mNetworkMap);
 
-    screen->FindPreference(BUTTON_SRCH_NETWRKS_KEY, (IPreference**)&mSearchButton);
-    screen->FindPreference(BUTTON_AUTO_SELECT_KEY, (IPreference**)&mAutoSelect);
+    AutoPtr<ICharSequence> cchar2 = CoreUtils::Convert(BUTTON_SRCH_NETWRKS_KEY);
+    IPreferenceGroup::Probe(screen)->FindPreference(cchar2, (IPreference**)&mSearchButton);
+    AutoPtr<ICharSequence> cchar3 = CoreUtils::Convert(BUTTON_AUTO_SELECT_KEY);
+    IPreferenceGroup::Probe(screen)->FindPreference(cchar3, (IPreference**)&mAutoSelect);
 
     // Start the Network Query service, and bind it.
     // The OS knows to start he service only once and keep the instance around (so
@@ -283,12 +316,15 @@ ECode CNetworkSetting::OnCreate(
     // we want this service to just stay in the background until it is killed, we
     // don't bother stopping it from our end.
     AutoPtr<IIntent> intent;
-    CIntent::New(this, NetworkQueryService.class, (IIntent**)&intent);
-    StartService (intent);
+    assert(0);
+    //CIntent::New(this, NetworkQueryService.class, (IIntent**)&intent);
+    AutoPtr<IComponentName> name;
+    StartService(intent, (IComponentName**)&name);
 
     AutoPtr<IIntent> intent2;
-    CIntent::New(this, NetworkQueryService.class, (IIntent**)&intent2):
-    return BindService (intent2, mNetworkQueryServiceConnection, IContext::BIND_AUTO_CREATE);
+    assert(0);
+    //CIntent::New(this, NetworkQueryService.class, (IIntent**)&intent2):
+    return BindService(intent2, mNetworkQueryServiceConnection, IContext::BIND_AUTO_CREATE, &res);
 }
 
 ECode CNetworkSetting::OnResume()
@@ -305,11 +341,21 @@ ECode CNetworkSetting::OnPause()
     return NOERROR;
 }
 
+ECode CNetworkSetting::OnDestroy()
+{
+    if (!mUnavailable) {
+        // unbind the service.
+        UnbindService(mNetworkQueryServiceConnection);
+    }
+    return PreferenceActivity::OnDestroy();
+}
+
 ECode CNetworkSetting::OnCreateDialog(
     /* [in] */ Int32 id,
     /* [out] */ IDialog** outdialog)
 {
     VALIDATE_NOT_NULL(outdialog)
+    *outdialog = NULL;
 
     if ((id == DIALOG_NETWORK_SELECTION) || (id == DIALOG_NETWORK_LIST_LOAD) ||
             (id == DIALOG_NETWORK_AUTO_SELECT)) {
@@ -317,23 +363,27 @@ ECode CNetworkSetting::OnCreateDialog(
         CProgressDialog::New(this, (IProgressDialog**)&dialog);
         switch (id) {
             case DIALOG_NETWORK_SELECTION:
+            {
                 // It would be more efficient to reuse this dialog by moving
                 // this setMessage() into onPreparedDialog() and NOT use
                 // removeDialog().  However, this is not possible since the
                 // message is rendered only 2 times in the ProgressDialog -
                 // after show() and before onCreate.
-                dialog->SetMessage(mNetworkSelectMsg);
-                dialog->SetCancelable(FALSE);
+                AutoPtr<ICharSequence> cchar = CoreUtils::Convert(mNetworkSelectMsg);
+                IAlertDialog::Probe(dialog)->SetMessage(cchar);
+                IDialog::Probe(dialog)->SetCancelable(FALSE);
                 dialog->SetIndeterminate(TRUE);
                 break;
+            }
             case DIALOG_NETWORK_AUTO_SELECT:
             {
                 AutoPtr<IResources> resources;
                 GetResources((IResources**)&resources);
                 String str;
-                resources->GetString(R.string.register_automatically, &str);
-                dialog->SetMessage(str);
-                dialog->SetCancelable(FALSE);
+                resources->GetString(Elastos::Droid::Server::Telephony::R::string::register_automatically, &str);
+                AutoPtr<ICharSequence> cchar = CoreUtils::Convert(str);
+                IAlertDialog::Probe(dialog)->SetMessage(cchar);
+                IDialog::Probe(dialog)->SetCancelable(FALSE);
                 dialog->SetIndeterminate(TRUE);
                 break;
             }
@@ -344,22 +394,22 @@ ECode CNetworkSetting::OnCreateDialog(
                 AutoPtr<IResources> resources;
                 GetResources((IResources**)&resources);
                 String str;
-                resources->GetString(R.string.load_networks_progress, &str);
-                dialog->SetMessage(str);
-                dialog->SetCanceledOnTouchOutside(FALSE);
-                dialog->SetOnCancelListener(this);
+                resources->GetString(Elastos::Droid::Server::Telephony::R::string::load_networks_progress, &str);
+                AutoPtr<ICharSequence> cchar = CoreUtils::Convert(str);
+                IAlertDialog::Probe(dialog)->SetMessage(cchar);
+                IDialog::Probe(dialog)->SetCanceledOnTouchOutside(FALSE);
+                IDialog::Probe(dialog)->SetOnCancelListener(this);
                 break;
             }
         }
-        *outdialog = dialog;
+        *outdialog = IDialog::Probe(dialog);
         REFCOUNT_ADD(*outdialog)
         return NOERROR;
     }
-    *outdialog = NULL;
     return NOERROR;
 }
 
-ECode CNetworkSetting::OnPrepareDialog(
+void CNetworkSetting::OnPrepareDialog(
     /* [in] */ Int32 id,
     /* [in] */ IDialog* dialog)
 {
@@ -369,15 +419,15 @@ ECode CNetworkSetting::OnPrepareDialog(
         // we're in a busy state to dissallow further input.
         AutoPtr<IPreferenceScreen> screen;
         GetPreferenceScreen((IPreferenceScreen**)&screen);
-        screen->SetEnabled(FALSE);
+        IPreference::Probe(screen)->SetEnabled(FALSE);
     }
-    return NOERROR;
 }
 
 void CNetworkSetting::DisplayEmptyNetworkList(
         /* [in] */ Boolean flag)
 {
-    mNetworkList->SetTitle(flag ? R.string.empty_networks_list : R.string.label_available);
+    IPreference::Probe(mNetworkList)->SetTitle(flag ? Elastos::Droid::Server::Telephony::R::string::empty_networks_list :
+            Elastos::Droid::Server::Telephony::R::string::label_available);
 }
 
 void CNetworkSetting::DisplayNetworkSeletionInProgress(
@@ -386,7 +436,12 @@ void CNetworkSetting::DisplayNetworkSeletionInProgress(
     // TODO: use notification manager?
     AutoPtr<IResources> resources;
     GetResources((IResources**)&resources);
-    resources->GetString(R.string.register_on_network, networkStr, &mNetworkSelectMsg);
+
+    AutoPtr<ArrayOf<IInterface*> > array = ArrayOf<IInterface*>::Alloc(1);
+    AutoPtr<ICharSequence> cchar = CoreUtils::Convert(networkStr);
+    array->Set(0, TO_IINTERFACE(cchar));
+    resources->GetString(Elastos::Droid::Server::Telephony::R::string::register_on_network,
+            array, &mNetworkSelectMsg);
 
     if (mIsForeground) {
         ShowDialog(DIALOG_NETWORK_SELECTION);
@@ -399,11 +454,13 @@ void CNetworkSetting::DisplayNetworkQueryFailed(
     AutoPtr<IResources> resources;
     GetResources((IResources**)&resources);
     String status;
-    resources->GetString(R.string.network_query_error, &status);
+    resources->GetString(Elastos::Droid::Server::Telephony::R::string::network_query_error, &status);
 
-    AutoPtr<IPhoneGlobals> app = PhoneGlobals::GetInstance();
+    AutoPtr<PhoneGlobals> app;
+    PhoneGlobals::GetInstance((PhoneGlobals**)&app);
+    AutoPtr<ICharSequence> cchar = CoreUtils::Convert(status);
     app->mNotificationMgr->PostTransientNotification(
-            INotificationMgr::NETWORK_SELECTION_NOTIFICATION, status);
+            NotificationMgr::NETWORK_SELECTION_NOTIFICATION, cchar);
 }
 
 void CNetworkSetting::DisplayNetworkSelectionFailed(
@@ -413,18 +470,21 @@ void CNetworkSetting::DisplayNetworkSelectionFailed(
 
     AutoPtr<IResources> resources;
     GetResources((IResources**)&resources);
-    if ((ex != NULL && ex instanceof CommandException) &&
-            ((CommandException)ex).getCommandError()
-              == CommandException.Error.ILLEGAL_SIM_OR_ME) {
-        resources->GetString(R.string.not_allowed, &status);
-    }
-    else {
-        resources->GetString(R.string.connect_later, &status);
-    }
+    assert(0);
+    // if ((ex != NULL && ICommandException::Probe(ec) != NULL) &&
+    //         ((CommandException)ex).getCommandError()
+    //           == CommandException.Error.ILLEGAL_SIM_OR_ME) {
+    //     resources->GetString(Elastos::Droid::Server::Telephony::R::string::not_allowed, &status);
+    // }
+    // else {
+    //     resources->GetString(Elastos::Droid::Server::Telephony::R::string::connect_later, &status);
+    // }
 
-    AutoPtr<IPhoneGlobals> app = PhoneGlobals::GetInstance();
+    AutoPtr<PhoneGlobals> app;
+    PhoneGlobals::GetInstance((PhoneGlobals**)&app);
+    AutoPtr<ICharSequence> cchar = CoreUtils::Convert(status);
     app->mNotificationMgr->PostTransientNotification(
-            INotificationMgr::NETWORK_SELECTION_NOTIFICATION, status);
+            NotificationMgr::NETWORK_SELECTION_NOTIFICATION, cchar);
 }
 
 void CNetworkSetting::DisplayNetworkSelectionSucceeded()
@@ -432,19 +492,22 @@ void CNetworkSetting::DisplayNetworkSelectionSucceeded()
     AutoPtr<IResources> resources;
     GetResources((IResources**)&resources);
     String status;
-    resources->GetString(R.string.registration_done, &status);
+    resources->GetString(Elastos::Droid::Server::Telephony::R::string::registration_done, &status);
 
-    AutoPtr<IPhoneGlobals> app = PhoneGlobals::GetInstance();
+    AutoPtr<PhoneGlobals> app;
+    PhoneGlobals::GetInstance((PhoneGlobals**)&app);
+    AutoPtr<ICharSequence> cchar = CoreUtils::Convert(status);
     app->mNotificationMgr->PostTransientNotification(
-            INotificationMgr::NETWORK_SELECTION_NOTIFICATION, status);
+            NotificationMgr::NETWORK_SELECTION_NOTIFICATION, cchar);
 
     AutoPtr<IRunnable> r = new MyRunnable(this);
-    mHandler->PostDelayed(r, 3000);
+    Boolean res;
+    mHandler->PostDelayed(r, 3000, &res);
 }
 
 void CNetworkSetting::LoadNetworksList()
 {
-    if (DBG) Log("load networks list...");
+    if (DBG) Log(String("load networks list..."));
 
     if (mIsForeground) {
         ShowDialog(DIALOG_NETWORK_LIST_LOAD);
@@ -484,7 +547,7 @@ void CNetworkSetting::NetworksListLoaded(
 
     AutoPtr<IPreferenceScreen> screen;
     GetPreferenceScreen((IPreferenceScreen**)&screen);
-    screen->SetEnabled(TRUE);
+    IPreference::Probe(screen)->SetEnabled(TRUE);
     ClearList();
 
     if (status != INetworkQueryService::QUERY_OK) {
@@ -508,10 +571,12 @@ void CNetworkSetting::NetworksListLoaded(
 
                 AutoPtr<IPreference> carrier;
                 CPreference::New(this, NULL, (IPreference**)&carrier);
-                carrier->SetTitle(GetNetworkTitle(ni));
+                AutoPtr<ICharSequence> cchar = CoreUtils::Convert(GetNetworkTitle(ni));
+                carrier->SetTitle(cchar);
                 carrier->SetPersistent(FALSE);
-                mNetworkList->AddPreference(carrier);
-                mNetworkMap->Put(carrier, ni);
+                Boolean res;
+                mNetworkList->AddPreference(carrier, &res);
+                mNetworkMap->Put(TO_IINTERFACE(carrier), TO_IINTERFACE(ni));
 
                 StringBuilder sb;
                 sb += "  ";
@@ -553,8 +618,9 @@ void CNetworkSetting::ClearList()
     while (fit->HasNext(&hasNext), hasNext) {
         AutoPtr<IInterface> ko;
         fit->GetNext((IInterface**)&ko);
-        AutoPtr<IPreference> p = IPreference::Probe(ko)
-        mNetworkList->RemovePreference(p);
+        AutoPtr<IPreference> p = IPreference::Probe(ko);
+        Boolean res;
+        mNetworkList->RemovePreference(p, &res);
     }
 
     mNetworkMap->Clear();

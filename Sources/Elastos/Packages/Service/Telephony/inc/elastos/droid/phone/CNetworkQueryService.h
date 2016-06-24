@@ -2,7 +2,26 @@
 #define  __ELASTOS_DROID_PHONE_CNETWORKQUERYSERVICE_H__
 
 #include "_Elastos_Droid_Phone_CNetworkQueryService.h"
+#include "elastos/droid/app/Service.h"
+#include "elastos/droid/os/Binder.h"
+#include "elastos/droid/os/Handler.h"
+#include "elastos/droid/os/AsyncResult.h"
+#include <elastos/core/Object.h>
+#include "Elastos.Droid.Os.h"
+#include "Elastos.Droid.Internal.h"
 #include "elastos/droid/ext/frameworkext.h"
+
+using Elastos::Droid::App::Service;
+using Elastos::Droid::Internal::Telephony::IPhone;
+using Elastos::Droid::Os::Binder;
+using Elastos::Droid::Os::IBinder;
+using Elastos::Droid::Os::Handler;
+using Elastos::Droid::Os::IHandler;
+using Elastos::Droid::Os::IMessage;
+using Elastos::Droid::Os::AsyncResult;
+using Elastos::Droid::Os::IRemoteCallbackList;
+using Elastos::Core::Object;
+
 
 namespace Elastos {
 namespace Droid {
@@ -13,7 +32,7 @@ namespace Phone {
  * availability.
  */
 CarClass(CNetworkQueryService)
-    , public Service
+    , public Elastos::Droid::App::Service
     , public INetworkQueryService
 {
 public:
@@ -24,9 +43,12 @@ public:
      */
     class LocalBinder
         : public Binder
+        , public INetworkQueryServiceLocalBinder
     {
     public:
         TO_STRING_IMPL("CNetworkQueryService::LocalBinder")
+
+        CAR_INTERFACE_DECL()
 
         CARAPI constructor(
             /* [in] */ INetworkQueryService* host);
@@ -56,7 +78,7 @@ public:
 
     class MyNetworkQueryService
         : public Object
-        , public INetworkQueryService
+        , public IINetworkQueryService
         , public IBinder
     {
     public:
@@ -83,6 +105,9 @@ public:
          */
         CARAPI StopNetworkQuery(
             /* [in] */ IINetworkQueryServiceCallback* cb);
+
+    private:
+        CNetworkQueryService* mHost;
     };
 
 
@@ -120,7 +145,7 @@ private:
      * objects.
      */
     CARAPI_(void) BroadcastQueryResults(
-        /* [in] */ IAsyncResult* ar);
+        /* [in] */ AsyncResult* ar);
 
     static CARAPI_(void) Log(
         /* [in] */ const String& msg);
@@ -131,11 +156,11 @@ public:
     static const Boolean DBG;
 
     // static events
-    static const Int32 EVENT_NETWORK_SCAN_COMPLETED;
+    static const Int32 EVENT_NETWORK_SCAN_COMPLETED  = 100;
 
     // static states indicating the query status of the service
-    static const Int32 QUERY_READY;
-    static const Int32 QUERY_IS_RUNNING;
+    static const Int32 QUERY_READY = -1;
+    static const Int32 QUERY_IS_RUNNING = -2;
 
     /** state of the query service */
     Int32 mState;

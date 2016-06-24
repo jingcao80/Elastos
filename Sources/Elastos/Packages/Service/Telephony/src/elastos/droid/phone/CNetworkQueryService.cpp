@@ -1,9 +1,26 @@
 
 #include "elastos/droid/phone/CNetworkQueryService.h"
+#include "elastos/droid/phone/CNetworkQueryServiceLocalBinder.h"
+#include "elastos/droid/phone/CNetworkQueryServiceNetworkQueryService.h"
+#include <elastos/utility/logging/Logger.h>
+#include <elastos/core/StringBuilder.h>
+#include <elastos/core/AutoLock.h>
+#include "Elastos.CoreLibrary.Utility.h"
+
+using Elastos::Droid::Os::IRemoteCallbackList;
+using Elastos::Droid::Os::CRemoteCallbackList;
+using Elastos::Droid::Os::EIID_IBinder;
+using Elastos::Droid::Internal::Telephony::IPhoneFactory;
+using Elastos::Droid::Internal::Telephony::CPhoneFactory;
+using Elastos::Core::StringBuilder;
+using Elastos::Utility::IList;
+using Elastos::Utility::Logging::Logger;
 
 namespace Elastos {
 namespace Droid {
 namespace Phone {
+
+CAR_INTERFACE_IMPL(CNetworkQueryService::LocalBinder, Binder, INetworkQueryServiceLocalBinder)
 
 ECode CNetworkQueryService::LocalBinder::constructor(
     /* [in] */ INetworkQueryService* host)
@@ -38,14 +55,19 @@ ECode CNetworkQueryService::MyHandler::HandleMessage(
         // if the scan is complete, broadcast the results.
         // to all registerd callbacks.
         case EVENT_NETWORK_SCAN_COMPLETED:
-            if (DBG) mHost->Log("scan completed, broadcasting results");
-            mHost->BroadcastQueryResults((AsyncResult) msg.obj);
+        {
+            if (DBG) mHost->Log(String("scan completed, broadcasting results"));
+            AutoPtr<IInterface> obj;
+            msg->GetObj((IInterface**)&obj);
+            AutoPtr<AsyncResult> result = (AsyncResult*)IObject::Probe(obj);
+            mHost->BroadcastQueryResults(result);
             break;
+        }
     }
     return NOERROR;
 }
 
-CAR_INTERFACE_IMPL(CNetworkQueryService::MyNetworkQueryService, Object, INetworkQueryService,
+CAR_INTERFACE_IMPL_2(CNetworkQueryService::MyNetworkQueryService, Object, IINetworkQueryService,
         IBinder)
 
 ECode CNetworkQueryService::MyNetworkQueryService::constructor(
@@ -61,28 +83,32 @@ ECode CNetworkQueryService::MyNetworkQueryService::StartNetworkQuery(
     if (cb != NULL) {
         // register the callback to the list of callbacks.
         {
-            AutoLock syncLock(mCallbacks);
-            mHost->mCallbacks->Register(cb);
+            AutoLock syncLock(mHost->mCallbacks);
+            Boolean res;
+            mHost->mCallbacks->Register(TO_IINTERFACE(cb), &res);
             if (DBG) {
-                log("registering callback " + cb.getClass().toString());
+                assert(0);
+                //Log("registering callback " + cb.getClass().toString());
             }
 
-            switch (mState) {
+            switch (mHost->mState) {
                 case QUERY_READY:
+                {
                     // TODO: we may want to install a timeout here in case we
                     // do not get a timely response from the RIL.
-                    AutoLock<IMessage> m;
+                    AutoPtr<IMessage> m;
                     mHost->mHandler->ObtainMessage(EVENT_NETWORK_SCAN_COMPLETED, (IMessage**)&m);
                     mHost->mPhone->GetAvailableNetworks(m);
                     mHost->mState = QUERY_IS_RUNNING;
                     if (DBG) mHost->Log(String("starting new query"));
                     break;
-
+                }
                 // do nothing if we're currently busy.
                 case QUERY_IS_RUNNING:
                     if (DBG) mHost->Log(String("query already in progress"));
                     break;
                 default:
+                    ;
             }
         }
     }
@@ -101,11 +127,13 @@ ECode CNetworkQueryService::MyNetworkQueryService::StopNetworkQuery(
     // repeated button presses in the NetworkSetting activity.
     if (cb != NULL) {
         {
-            AutoLock syncLock(mCallbacks);
+            AutoLock syncLock(mHost->mCallbacks);
             if (DBG) {
-                log("unregistering callback " + cb.getClass().toString());
+                assert(0);
+                //Log("unregistering callback " + cb.getClass().toString());
             }
-            mCallbacks->Unregister(cb);
+            Boolean res;
+            mHost->mCallbacks->Unregister(TO_IINTERFACE(cb), &res);
         }
     }
     return NOERROR;
@@ -113,11 +141,6 @@ ECode CNetworkQueryService::MyNetworkQueryService::StopNetworkQuery(
 
 const String CNetworkQueryService::TAG("NetworkQuery");
 const Boolean CNetworkQueryService::DBG = FALSE;
-
-const Int32 CNetworkQueryService::EVENT_NETWORK_SCAN_COMPLETED = 100;
-
-const Int32 CNetworkQueryService::QUERY_READY = -1;
-const Int32 CNetworkQueryService::QUERY_IS_RUNNING = -2;
 
 CAR_INTERFACE_IMPL(CNetworkQueryService, Service, INetworkQueryService)
 
@@ -130,7 +153,7 @@ CNetworkQueryService::CNetworkQueryService()
 
     mHandler = new MyHandler(this);
 
-    CRemoteCallbackList::New((RemoteCallbackList**)&mCallbacks);
+    CRemoteCallbackList::New((IRemoteCallbackList**)&mCallbacks);
 
     CNetworkQueryServiceNetworkQueryService::New(this, (IINetworkQueryService**)&mBinder);
 }
@@ -143,7 +166,9 @@ ECode CNetworkQueryService::constructor()
 ECode CNetworkQueryService::OnCreate()
 {
     mState = QUERY_READY;
-    mPhone = PhoneFactory::GetDefaultPhone();
+    AutoPtr<IPhoneFactory> helper;
+    CPhoneFactory::AcquireSingleton((IPhoneFactory**)&helper);
+    helper->GetDefaultPhone((IPhone**)&mPhone);
     return NOERROR;
 }
 
@@ -170,7 +195,7 @@ ECode CNetworkQueryService::OnBind(
 }
 
 void CNetworkQueryService::BroadcastQueryResults(
-    /* [in] */ IAsyncResult* ar)
+    /* [in] */ AsyncResult* ar)
 {
     // reset the state.
     {
@@ -185,7 +210,7 @@ void CNetworkQueryService::BroadcastQueryResults(
 
         // TODO: we may need greater accuracy here, but for now, just a
         // simple status integer will suffice.
-        Int32 exception = (ar.exception == null) ? QUERY_OK : QUERY_EXCEPTION;
+        Int32 exception = (ar->mException == NULL) ? QUERY_OK : QUERY_EXCEPTION;
         if (DBG) {
             StringBuilder sb;
             sb += "AsyncResult has exception ";
@@ -199,12 +224,13 @@ void CNetworkQueryService::BroadcastQueryResults(
         for (Int32 i = (num - 1); i >= 0; i--) {
             AutoPtr<IInterface> obj;
             mCallbacks->GetBroadcastItem(i, (IInterface**)&obj);
-            AutoPtr<IINetworkQueryServiceCallback> cb = IINetworkQueryServiceCallback::Probs(obj);
+            AutoPtr<IINetworkQueryServiceCallback> cb = IINetworkQueryServiceCallback::Probe(obj);
             if (DBG) {
-                log("broadcasting results to " + cb.getClass().toString());
+                assert(0);
+                //Log("broadcasting results to " + cb.getClass().toString());
             }
             //try {
-            cb->OnQueryComplete((ArrayList<OperatorInfo>) ar.result, exception);
+            cb->OnQueryComplete(IList::Probe(ar->mResult), exception);
             //} catch (RemoteException e) {
             //}
         }
