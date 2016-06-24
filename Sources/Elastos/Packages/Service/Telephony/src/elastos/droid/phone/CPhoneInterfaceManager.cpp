@@ -1,24 +1,129 @@
 
 #include "elastos/droid/phone/CPhoneInterfaceManager.h"
+#include "elastos/droid/phone/PhoneUtils.h"
 #include <elastos/droid/Manifest.h>
+#include "elastos/droid/os/AsyncResult.h"
+#include "elastos/droid/os/Binder.h"
+#include "elastos/droid/os/Looper.h"
+#include "elastos/droid/os/Process.h"
+#include "elastos/droid/os/ServiceManager.h"
+#include "Elastos.Droid.Net.h"
+#include "Elastos.Droid.Preference.h"
+#include "Elastos.Droid.Provider.h"
 #include "elastos/droid/text/TextUtils.h"
+#include "Elastos.Droid.Utility.h"
 #include <elastos/core/AutoLock.h>
+#include <elastos/core/CoreUtils.h>
 #include <elastos/core/StringBuilder.h>
 #include <elastos/core/StringUtils.h>
 #include <elastos/utility/logging/Logger.h>
 
+using Elastos::Droid::App::CActivityManagerHelper;
+using Elastos::Droid::App::IActivityManagerHelper;
+using Elastos::Droid::Content::IContentResolver;
+using Elastos::Droid::Content::ISharedPreferencesEditor;
+using Elastos::Droid::Internal::Telephony::EIID_IITelephony;
+using Elastos::Droid::Internal::Telephony::IPhoneConstants;
+using Elastos::Droid::Internal::Telephony::PhoneConstantsState;
+using Elastos::Droid::Internal::Telephony::PhoneConstantsState_IDLE;
+using Elastos::Droid::Internal::Telephony::PhoneConstantsState_OFFHOOK;
+using Elastos::Droid::Internal::Telephony::PhoneConstantsState_RINGING;
+using Elastos::Droid::Internal::Telephony::Uicc::CIccIoResult;
+using Elastos::Droid::Internal::Telephony::Uicc::CUiccControllerHelper;
+using Elastos::Droid::Internal::Telephony::Uicc::IIccIoResult;
+using Elastos::Droid::Internal::Telephony::Uicc::IUiccCard;
+using Elastos::Droid::Internal::Telephony::Uicc::IUiccController;
+using Elastos::Droid::Internal::Telephony::Uicc::IUiccControllerHelper;
 using Elastos::Droid::Manifest;
+using Elastos::Droid::Net::CUriHelper;
+using Elastos::Droid::Net::IUriHelper;
+using Elastos::Droid::Os::AsyncResult;
+using Elastos::Droid::Os::Binder;
+using Elastos::Droid::Os::CBundle;
+using Elastos::Droid::Os::CMessageHelper;
+using Elastos::Droid::Os::CUserHandleHelper;
+using Elastos::Droid::Os::EIID_IBinder;
+using Elastos::Droid::Os::IAsyncResult;
+using Elastos::Droid::Os::IMessageHelper;
+using Elastos::Droid::Os::IUserHandleHelper;
+using Elastos::Droid::Os::Looper;
+using Elastos::Droid::Os::Process;
+using Elastos::Droid::Os::ServiceManager;
+using Elastos::Droid::Preference::CPreferenceManagerHelper;
+using Elastos::Droid::Preference::IPreferenceManagerHelper;
+using Elastos::Droid::Provider::CSettingsGlobal;
+using Elastos::Droid::Provider::CSettingsSystem;
+using Elastos::Droid::Provider::ISettingsGlobal;
+using Elastos::Droid::Provider::ISettingsSystem;
+using Elastos::Droid::Telephony::CIccOpenLogicalChannelResponse;
+using Elastos::Droid::Telephony::CSubscriptionManager;
+using Elastos::Droid::Telephony::CTelephonyManagerHelper;
+using Elastos::Droid::Telephony::ICellLocation;
+using Elastos::Droid::Telephony::IIccOpenLogicalChannelResponse;
+using Elastos::Droid::Telephony::ITelephonyManagerWifiCallingChoices;
+using Elastos::Droid::Telephony::IServiceState;
+using Elastos::Droid::Telephony::ISubscriptionManager;
+using Elastos::Droid::Telephony::ITelephonyManager;
+using Elastos::Droid::Telephony::ITelephonyManagerHelper;
 using Elastos::Droid::Text::TextUtils;
+using Elastos::Droid::Utility::CPair;
+using Elastos::Droid::Utility::IPair;
 using Elastos::Core::AutoLock;
+using Elastos::Core::CBoolean;
+using Elastos::Core::CInteger32;
+using Elastos::Core::CInteger64;
+using Elastos::Core::CoreUtils;
+using Elastos::Core::CString;
+using Elastos::Core::IBoolean;
+using Elastos::Core::IByte;
+using Elastos::Core::IInteger32;
+using Elastos::Core::IInteger64;
 using Elastos::Core::StringBuilder;
 using Elastos::Core::StringUtils;
+using Elastos::Utility::CArrayList;
 using Elastos::Utility::Logging::Logger;
 
 namespace Elastos {
 namespace Droid {
 namespace Phone {
 
-CPhoneInterfaceManager::MainThreadHandler::MyHandler(
+const String CPhoneInterfaceManager::TAG("PhoneInterfaceManager");
+const Boolean CPhoneInterfaceManager::DBG = (IPhoneGlobals::DBG_LEVEL >= 2);
+const Boolean CPhoneInterfaceManager::DBG_LOC = FALSE;
+const Int32 CPhoneInterfaceManager::CMD_HANDLE_PIN_MMI = 1;
+const Int32 CPhoneInterfaceManager::CMD_HANDLE_NEIGHBORING_CELL = 2;
+const Int32 CPhoneInterfaceManager::EVENT_NEIGHBORING_CELL_DONE = 3;
+const Int32 CPhoneInterfaceManager::CMD_ANSWER_RINGING_CALL = 4;
+const Int32 CPhoneInterfaceManager::CMD_END_CALL = 5;  // not used yet
+const Int32 CPhoneInterfaceManager::CMD_TRANSMIT_APDU_LOGICAL_CHANNEL = 7;
+const Int32 CPhoneInterfaceManager::EVENT_TRANSMIT_APDU_LOGICAL_CHANNEL_DONE = 8;
+const Int32 CPhoneInterfaceManager::CMD_OPEN_CHANNEL = 9;
+const Int32 CPhoneInterfaceManager::EVENT_OPEN_CHANNEL_DONE = 10;
+const Int32 CPhoneInterfaceManager::CMD_CLOSE_CHANNEL = 11;
+const Int32 CPhoneInterfaceManager::EVENT_CLOSE_CHANNEL_DONE = 12;
+const Int32 CPhoneInterfaceManager::CMD_NV_READ_ITEM = 13;
+const Int32 CPhoneInterfaceManager::EVENT_NV_READ_ITEM_DONE = 14;
+const Int32 CPhoneInterfaceManager::CMD_NV_WRITE_ITEM = 15;
+const Int32 CPhoneInterfaceManager::EVENT_NV_WRITE_ITEM_DONE = 16;
+const Int32 CPhoneInterfaceManager::CMD_NV_WRITE_CDMA_PRL = 17;
+const Int32 CPhoneInterfaceManager::EVENT_NV_WRITE_CDMA_PRL_DONE = 18;
+const Int32 CPhoneInterfaceManager::CMD_NV_RESET_CONFIG = 19;
+const Int32 CPhoneInterfaceManager::EVENT_NV_RESET_CONFIG_DONE = 20;
+const Int32 CPhoneInterfaceManager::CMD_GET_PREFERRED_NETWORK_TYPE = 21;
+const Int32 CPhoneInterfaceManager::EVENT_GET_PREFERRED_NETWORK_TYPE_DONE = 22;
+const Int32 CPhoneInterfaceManager::CMD_SET_PREFERRED_NETWORK_TYPE = 23;
+const Int32 CPhoneInterfaceManager::EVENT_SET_PREFERRED_NETWORK_TYPE_DONE = 24;
+const Int32 CPhoneInterfaceManager::CMD_SEND_ENVELOPE = 25;
+const Int32 CPhoneInterfaceManager::EVENT_SEND_ENVELOPE_DONE = 26;
+const Int32 CPhoneInterfaceManager::CMD_INVOKE_OEM_RIL_REQUEST_RAW = 27;
+const Int32 CPhoneInterfaceManager::EVENT_INVOKE_OEM_RIL_REQUEST_RAW_DONE = 28;
+const Int32 CPhoneInterfaceManager::CMD_TRANSMIT_APDU_BASIC_CHANNEL = 29;
+const Int32 CPhoneInterfaceManager::EVENT_TRANSMIT_APDU_BASIC_CHANNEL_DONE = 30;
+const Int32 CPhoneInterfaceManager::CMD_EXCHANGE_SIM_IO = 31;
+const Int32 CPhoneInterfaceManager::EVENT_EXCHANGE_SIM_IO_DONE = 32;
+const Int32 CPhoneInterfaceManager::UnlockSim::SUPPLY_PIN_COMPLETE = 100;
+
+CPhoneInterfaceManager::MainThreadHandler::MainThreadHandler(
     /* [in] */ CPhoneInterfaceManager* host)
     : mHost(host)
 {
@@ -30,23 +135,31 @@ ECode CPhoneInterfaceManager::MainThreadHandler::HandleMessage(
 {
     AutoPtr<MainThreadRequest> request;
     AutoPtr<IMessage> onCompleted;
-    AutoPtr<IAsyncResult> ar;
+    AsyncResult* ar = NULL;
 
-    AutoPTR<IUiccController> controller;
-    UiccController::GetInstance((IUiccController**)&controller);
+    AutoPtr<IUiccControllerHelper> helper;
+    CUiccControllerHelper::AcquireSingleton((IUiccControllerHelper**)&helper);
+    AutoPtr<IUiccController> controller;
+    helper->GetInstance((IUiccController**)&controller);
     AutoPtr<IUiccCard> uiccCard;
     controller->GetUiccCard((IUiccCard**)&uiccCard);
-    AutoPtr<IIccAPDUArgument> iccArgument;
+    IccAPDUArgument* iccArgument = NULL;
 
     Int32 what;
     msg->GetWhat(&what);
     switch (what) {
-        case CMD_HANDLE_PIN_MMI:
-        {
+        case CMD_HANDLE_PIN_MMI: {
             AutoPtr<IInterface> obj;
             msg->GetObj((IInterface**)&obj);
             request = (MainThreadRequest*)IObject::Probe(obj);
-            request->mResult = mPhone->HandlePinMmi((String) request.argument);
+            AutoPtr<ICharSequence> cs = ICharSequence::Probe(request->mArgument);
+            String s;
+            cs->ToString(&s);
+            Boolean tmp = FALSE;
+            mHost->mPhone->HandlePinMmi(s, &tmp);
+            AutoPtr<IBoolean> r;
+            CBoolean::New(tmp, (IBoolean**)&r);
+            request->mResult = r;
             // Wake up the requesting thread
 
             {
@@ -55,24 +168,22 @@ ECode CPhoneInterfaceManager::MainThreadHandler::HandleMessage(
             }
             break;
         }
-        case CMD_HANDLE_NEIGHBORING_CELL:
-        {
+        case CMD_HANDLE_NEIGHBORING_CELL: {
             AutoPtr<IInterface> obj;
             msg->GetObj((IInterface**)&obj);
             request = (MainThreadRequest*)IObject::Probe(obj);
             ObtainMessage(EVENT_NEIGHBORING_CELL_DONE,
-                    request, (IMessage**)&onCompleted);
-            mPhone->GetNeighboringCids(onCompleted);
+                    request->Probe(EIID_IInterface), (IMessage**)&onCompleted);
+            mHost->mPhone->GetNeighboringCids(onCompleted);
             break;
         }
-        case EVENT_NEIGHBORING_CELL_DONE:
-        {
+        case EVENT_NEIGHBORING_CELL_DONE: {
             AutoPtr<IInterface> obj;
             msg->GetObj((IInterface**)&obj);
-            ar = IAsyncResult::Probe(obj);
-            request = (MainThreadRequest) ar.userObj;
-            if (ar.exception == null && ar.result != null) {
-                request.result = ar.result;
+            ar = (AsyncResult*)IAsyncResult::Probe(obj);
+            request = (MainThreadRequest*) IObject::Probe(ar->mUserObj);
+            if (ar->mException == NULL && ar->mResult != NULL) {
+                request->mResult = ar->mResult;
             }
             else {
                 // create an empty list to notify the waiting thread
@@ -83,35 +194,34 @@ ECode CPhoneInterfaceManager::MainThreadHandler::HandleMessage(
             // Wake up the requesting thread
             {
                 AutoLock syncLock(request);
-                request.notifyAll();
+                request->NotifyAll();
             }
             break;
         }
         case CMD_ANSWER_RINGING_CALL:
-            AnswerRingingCallInternal();
+            mHost->AnswerRingingCallInternal();
             break;
 
-        case CMD_END_CALL:
-        {
+        case CMD_END_CALL: {
             AutoPtr<IInterface> obj;
             msg->GetObj((IInterface**)&obj);
             request = (MainThreadRequest*)IObject::Probe(obj);
             Boolean hungUp;
             Int32 phoneType;
-            mPhone->GetPhoneType(&phoneType);
+            mHost->mPhone->GetPhoneType(&phoneType);
             if (phoneType == IPhoneConstants::PHONE_TYPE_CDMA) {
                 // CDMA: If the user presses the Power button we treat it as
                 // ending the complete call session
-                hungUp = PhoneUtils::HangupRingingAndActive(mPhone);
+                hungUp = PhoneUtils::HangupRingingAndActive(mHost->mPhone);
             }
             else if (phoneType == IPhoneConstants::PHONE_TYPE_GSM) {
                 // GSM: End the call as per the Phone state
-                hungUp = PhoneUtils::Hangup(mCM);
+                hungUp = PhoneUtils::Hangup(mHost->mCM);
             }
             else {
                 //throw new IllegalStateException("Unexpected phone type: " + phoneType);
                 Logger::E("CPhoneInterfaceManager", "Unexpected phone type: %d", phoneType);
-                return IllegalStateException;
+                return E_ILLEGAL_STATE_EXCEPTION;
             }
             if (DBG) {
                 StringBuilder sb;
@@ -119,203 +229,65 @@ ECode CPhoneInterfaceManager::MainThreadHandler::HandleMessage(
                 sb += (hungUp ? "hung up!" : "no call to hang up");
                 Log(sb.ToString());
             }
-            request->mResult = hungUp;
+            AutoPtr<IBoolean> r;
+            CBoolean::New(hungUp, (IBoolean**)&r);
+            request->mResult = r;
             // Wake up the requesting thread
             {
                 AutoLock syncLock(request);
-                request.notifyAll();
+                request->NotifyAll();
             }
             break;
         }
-        case CMD_TRANSMIT_APDU_LOGICAL_CHANNEL:
-        {
+        case CMD_TRANSMIT_APDU_LOGICAL_CHANNEL: {
             AutoPtr<IInterface> obj;
             msg->GetObj((IInterface**)&obj);
             request = (MainThreadRequest*)IObject::Probe(obj);
 
-            iccArgument = (IccAPDUArgument) request.argument;
+            iccArgument = (IccAPDUArgument*) IObject::Probe(request->mArgument);
             if (uiccCard == NULL) {
                 Loge(String("iccTransmitApduLogicalChannel: No UICC"));
-                request.result = new IccIoResult(0x6F, 0, (byte[])null);
+                AutoPtr<IIccIoResult> ir;
+                CIccIoResult::New(0x6F, 0, NULL, (IIccIoResult**)&ir);
+                request->mResult = ir;
                 {
                     AutoLock syncLock(request);
-                    request.notifyAll();
+                    request->NotifyAll();
                 }
             }
             else {
                 ObtainMessage(EVENT_TRANSMIT_APDU_LOGICAL_CHANNEL_DONE,
-                    request, (IMessage)&onCompleted);
+                    request->Probe(EIID_IInterface), (IMessage**)&onCompleted);
                 uiccCard->IccTransmitApduLogicalChannel(
-                    iccArgument.channel, iccArgument.cla, iccArgument.command,
-                    iccArgument.p1, iccArgument.p2, iccArgument.p3, iccArgument.data,
+                    iccArgument->mChannel, iccArgument->mCla, iccArgument->mCommand,
+                    iccArgument->mP1, iccArgument->mP2, iccArgument->mP3, iccArgument->mData,
                     onCompleted);
             }
             break;
         }
-        case EVENT_TRANSMIT_APDU_LOGICAL_CHANNEL_DONE:
-        {
+        case EVENT_TRANSMIT_APDU_LOGICAL_CHANNEL_DONE: {
             AutoPtr<IInterface> obj;
             msg->GetObj((IInterface**)&obj);
-            ar = IAsyncResult::Probe(obj);
+            ar = (AsyncResult*)IAsyncResult::Probe(obj);
 
-            request = (MainThreadRequest) ar.userObj;
-            if (ar.exception == null && ar.result != null) {
-                request.result = ar.result;
+            request = (MainThreadRequest*) IObject::Probe(ar->mUserObj);
+            if (ar->mException == NULL && ar->mResult != NULL) {
+                request->mResult = ar->mResult;
             }
             else {
-                request.result = new IccIoResult(0x6F, 0, (byte[])null);
-                if (ar.result == null) {
+                AutoPtr<IIccIoResult> ir;
+                CIccIoResult::New(0x6F, 0, NULL, (IIccIoResult**)&ir);
+                request->mResult = ir;
+                Logger::D(TAG, "TODO CommandException");
+                if (ar->mResult == NULL) {
                     Loge(String("iccTransmitApduLogicalChannel: Empty response"));
                 }
-                else if (ar.exception instanceof CommandException) {
-                    Loge("iccTransmitApduLogicalChannel: CommandException: " +
-                            ar.exception);
-                }
+                // else if (ar->mException instanceof CommandException) {
+                //     Loge("iccTransmitApduLogicalChannel: CommandException: " +
+                //             ar.exception);
+                // }
                 else {
                     Loge(String("iccTransmitApduLogicalChannel: Unknown exception"));
-                }
-            }
-            {
-                AutoLock syncLock(request);
-                request.notifyAll();
-            }
-            break;
-        }
-        case CMD_TRANSMIT_APDU_BASIC_CHANNEL:
-        {
-            AutoPtr<IInterface> obj;
-            msg->GetObj((IInterface**)&obj);
-            request = (MainThreadRequest*)IObject::Probe(obj);
-
-            iccArgument = (IccAPDUArgument) request.argument;
-            if (uiccCard == NULL) {
-                Loge(String("iccTransmitApduBasicChannel: No UICC"));
-                request.result = new IccIoResult(0x6F, 0, (byte[])null);
-                {
-                    AutoLock syncLock(request);
-                    request.notifyAll();
-                }
-            }
-            else {
-                ObtainMessage(EVENT_TRANSMIT_APDU_BASIC_CHANNEL_DONE,
-                    request, (IMessage**)&onCompleted);
-                uiccCard->IccTransmitApduBasicChannel(
-                    iccArgument->mCla, iccArgument->mCommand, iccArgument->mP1, iccArgument->mP2,
-                    iccArgument->mP3, iccArgument->mData, onCompleted);
-            }
-            break;
-        }
-        case EVENT_TRANSMIT_APDU_BASIC_CHANNEL_DONE:
-        {
-            AutoPtr<IInterface> obj;
-            msg->GetObj((IInterface**)&obj);
-            ar = IAsyncResult::Probe(obj);
-
-            request = (MainThreadRequest) ar.userObj;
-            if (ar.exception == null && ar.result != null) {
-                request.result = ar.result;
-            }
-            else {
-                request.result = new IccIoResult(0x6F, 0, (byte[])null);
-                if (ar.result == null) {
-                    Loge(String("iccTransmitApduBasicChannel: Empty response"));
-                }
-                else if (ar.exception instanceof CommandException) {
-                    Loge(String("iccTransmitApduBasicChannel: CommandException: ") +
-                            ar.exception);
-                }
-                else {
-                    Loge(String("iccTransmitApduBasicChannel: Unknown exception"));
-                }
-            }
-            {
-                AutoLock syncLock(request);
-                request.notifyAll();
-            }
-            break;
-        }
-        case CMD_EXCHANGE_SIM_IO:
-        {
-            AutoPtr<IInterface> obj;
-            msg->GetObj((IInterface**)&obj);
-            request = (MainThreadRequest*)IObject::Probe(obj);
-
-            iccArgument = (IccAPDUArgument) request.argument;
-            if (uiccCard == NULL) {
-                Loge(String("iccExchangeSimIO: No UICC"));
-                request.result = new IccIoResult(0x6F, 0, (byte[])null);
-                {
-                    AutoLock syncLock(request);
-                    request.notifyAll();
-                }
-            }
-            else {
-                ObtainMessage(EVENT_EXCHANGE_SIM_IO_DONE,
-                        request, (IMessage**)&onCompleted);
-                uiccCard->IccExchangeSimIO(iccArgument->mCla, /* fileID */
-                        iccArgument->mCommand, iccArgument->mP1, iccArgument->mP2, iccArgument->mP3,
-                        iccArgument->mData, onCompleted);
-            }
-            break;
-        }
-        case EVENT_EXCHANGE_SIM_IO_DONE:
-        {
-            AutoPtr<IInterface> obj;
-            msg->GetObj((IInterface**)&obj);
-            ar = IAsyncResult::Probe(obj);
-
-            request = (MainThreadRequest) ar.userObj;
-            if (ar.exception == null && ar.result != null) {
-                request.result = ar.result;
-            }
-            else {
-                request.result = new IccIoResult(0x6f, 0, (byte[])null);
-            }
-            {
-                AutoLock syncLock(request);
-                request.notifyAll();
-            }
-            break;
-        }
-        case CMD_SEND_ENVELOPE:
-        {
-            AutoPtr<IInterface> obj;
-            msg->GetObj((IInterface**)&obj);
-            request = (MainThreadRequest*)IObject::Probe(obj);
-
-            if (uiccCard == NULL) {
-                Loge(String("sendEnvelopeWithStatus: No UICC"));
-                request.result = new IccIoResult(0x6F, 0, (byte[])null);
-                {
-                    AutoLock syncLock(request);
-                    request.notifyAll();
-                }
-            }
-            else {
-                ObtainMessage(EVENT_SEND_ENVELOPE_DONE, request, (IMessage**)&onCompleted);
-                uiccCard->SendEnvelopeWithStatus((String)request.argument, onCompleted);
-            }
-            break;
-        }
-        case EVENT_SEND_ENVELOPE_DONE:
-        {
-            AutoPtr<IInterface> obj;
-            msg->GetObj((IInterface**)&obj);
-            ar = IAsyncResult::Probe(obj);
-
-            request = (MainThreadRequest) ar.userObj;
-            if (ar.exception == null && ar.result != null) {
-                request.result = ar.result;
-            }
-            else {
-                request.result = new IccIoResult(0x6F, 0, (byte[])null);
-                if (ar.result == null) {
-                    Loge(String("sendEnvelopeWithStatus: Empty response"));
-                } else if (ar.exception instanceof CommandException) {
-                    Loge(String("sendEnvelopeWithStatus: CommandException: ") +
-                            ar.exception);
-                } else {
-                    Loge(String("sendEnvelopeWithStatus: exception:") + ar.exception);
                 }
             }
             {
@@ -324,36 +296,196 @@ ECode CPhoneInterfaceManager::MainThreadHandler::HandleMessage(
             }
             break;
         }
-        case CMD_OPEN_CHANNEL:
-        {
+        case CMD_TRANSMIT_APDU_BASIC_CHANNEL: {
             AutoPtr<IInterface> obj;
             msg->GetObj((IInterface**)&obj);
             request = (MainThreadRequest*)IObject::Probe(obj);
 
+            iccArgument = (IccAPDUArgument*) IObject::Probe(request->mArgument);
             if (uiccCard == NULL) {
-                Loge(String("iccOpenLogicalChannel: No UICC"));
-                request.result = new IccIoResult(0x6F, 0, (byte[])null);
+                Loge(String("iccTransmitApduBasicChannel: No UICC"));
+                AutoPtr<IIccIoResult> ir;
+                CIccIoResult::New(0x6F, 0, NULL, (IIccIoResult**)&ir);
+                request->mResult = ir;
                 {
                     AutoLock syncLock(request);
                     request->NotifyAll();
                 }
             }
             else {
-                ObtainMessage(EVENT_OPEN_CHANNEL_DONE, request, (IMessage**)&onCompleted);
-                uiccCard->IccOpenLogicalChannel((String)request.argument, onCompleted);
+                ObtainMessage(EVENT_TRANSMIT_APDU_BASIC_CHANNEL_DONE,
+                    request->Probe(EIID_IInterface), (IMessage**)&onCompleted);
+                uiccCard->IccTransmitApduBasicChannel(
+                    iccArgument->mCla, iccArgument->mCommand, iccArgument->mP1, iccArgument->mP2,
+                    iccArgument->mP3, iccArgument->mData, onCompleted);
             }
             break;
         }
-        case EVENT_OPEN_CHANNEL_DONE:
-        {
+        case EVENT_TRANSMIT_APDU_BASIC_CHANNEL_DONE: {
             AutoPtr<IInterface> obj;
             msg->GetObj((IInterface**)&obj);
-            ar = IAsyncResult::Probe(obj);
+            ar = (AsyncResult*)IAsyncResult::Probe(obj);
 
-            request = (MainThreadRequest) ar.userObj;
+            request = (MainThreadRequest*) IObject::Probe(ar->mUserObj);
+            if (ar->mException == NULL && ar->mResult != NULL) {
+                request->mResult = ar->mResult;
+            }
+            else {
+                AutoPtr<IIccIoResult> ir;
+                CIccIoResult::New(0x6F, 0, NULL, (IIccIoResult**)&ir);
+                request->mResult = ir;
+                Logger::D(TAG, "TODO CommandException");
+                if (ar->mResult == NULL) {
+                    Loge(String("iccTransmitApduBasicChannel: Empty response"));
+                }
+                // else if (ar.exception instanceof CommandException) {
+                //     Loge(String("iccTransmitApduBasicChannel: CommandException: ") +
+                //             ar.exception);
+                // }
+                else {
+                    Loge(String("iccTransmitApduBasicChannel: Unknown exception"));
+                }
+            }
+            {
+                AutoLock syncLock(request);
+                request->NotifyAll();
+            }
+            break;
+        }
+        case CMD_EXCHANGE_SIM_IO: {
+            AutoPtr<IInterface> obj;
+            msg->GetObj((IInterface**)&obj);
+            request = (MainThreadRequest*)IObject::Probe(obj);
+
+            iccArgument = (IccAPDUArgument*) IObject::Probe(request->mArgument);
+            if (uiccCard == NULL) {
+                Loge(String("iccExchangeSimIO: No UICC"));
+                AutoPtr<IIccIoResult> ir;
+                CIccIoResult::New(0x6F, 0, NULL, (IIccIoResult**)&ir);
+                request->mResult = ir;
+                {
+                    AutoLock syncLock(request);
+                    request->NotifyAll();
+                }
+            }
+            else {
+                ObtainMessage(EVENT_EXCHANGE_SIM_IO_DONE,
+                        request->Probe(EIID_IInterface), (IMessage**)&onCompleted);
+                uiccCard->IccExchangeSimIO(iccArgument->mCla, /* fileID */
+                        iccArgument->mCommand, iccArgument->mP1, iccArgument->mP2, iccArgument->mP3,
+                        iccArgument->mData, onCompleted);
+            }
+            break;
+        }
+        case EVENT_EXCHANGE_SIM_IO_DONE: {
+            AutoPtr<IInterface> obj;
+            msg->GetObj((IInterface**)&obj);
+            ar = (AsyncResult*)IAsyncResult::Probe(obj);
+
+            request = (MainThreadRequest*) IObject::Probe(ar->mUserObj);
+            if (ar->mException == NULL && ar->mResult != NULL) {
+                request->mResult = ar->mResult;
+            }
+            else {
+                AutoPtr<IIccIoResult> ir;
+                CIccIoResult::New(0x6F, 0, NULL, (IIccIoResult**)&ir);
+                request->mResult = ir;
+            }
+            {
+                AutoLock syncLock(request);
+                request->NotifyAll();
+            }
+            break;
+        }
+        case CMD_SEND_ENVELOPE: {
+            AutoPtr<IInterface> obj;
+            msg->GetObj((IInterface**)&obj);
+            request = (MainThreadRequest*)IObject::Probe(obj);
+
+            if (uiccCard == NULL) {
+                Loge(String("sendEnvelopeWithStatus: No UICC"));
+                AutoPtr<IIccIoResult> ir;
+                CIccIoResult::New(0x6F, 0, NULL, (IIccIoResult**)&ir);
+                request->mResult = ir;
+                {
+                    AutoLock syncLock(request);
+                    request->NotifyAll();
+                }
+            }
+            else {
+                ObtainMessage(EVENT_SEND_ENVELOPE_DONE, request->Probe(EIID_IInterface), (IMessage**)&onCompleted);
+                AutoPtr<ICharSequence> cs = ICharSequence::Probe(request->mArgument);
+                String s;
+                cs->ToString(&s);
+                uiccCard->SendEnvelopeWithStatus(s, onCompleted);
+            }
+            break;
+        }
+        case EVENT_SEND_ENVELOPE_DONE: {
+            AutoPtr<IInterface> obj;
+            msg->GetObj((IInterface**)&obj);
+            ar = (AsyncResult*)IAsyncResult::Probe(obj);
+
+            request = (MainThreadRequest*) IObject::Probe(ar->mUserObj);
+            if (ar->mException == NULL && ar->mResult != NULL) {
+                request->mResult = ar->mResult;
+            }
+            else {
+                AutoPtr<IIccIoResult> ir;
+                CIccIoResult::New(0x6F, 0, NULL, (IIccIoResult**)&ir);
+                request->mResult = ir;
+                Logger::D(TAG, "TODO CommandException");
+                if (ar->mResult == NULL) {
+                    Loge(String("sendEnvelopeWithStatus: Empty response"));
+                }
+                // else if (ar.exception instanceof CommandException) {
+                //     Loge(String("sendEnvelopeWithStatus: CommandException: ") +
+                //             ar.exception);
+                // }
+                else {
+                    Loge(String("sendEnvelopeWithStatus: exception:") + TO_CSTR(ar->mException));
+                }
+            }
+            {
+                AutoLock syncLock(request);
+                request->NotifyAll();
+            }
+            break;
+        }
+        case CMD_OPEN_CHANNEL: {
+            AutoPtr<IInterface> obj;
+            msg->GetObj((IInterface**)&obj);
+            request = (MainThreadRequest*)IObject::Probe(obj);
+
+            if (uiccCard == NULL) {
+                Loge(String("iccOpenLogicalChannel: No UICC"));
+                AutoPtr<IIccIoResult> ir;
+                CIccIoResult::New(0x6F, 0, NULL, (IIccIoResult**)&ir);
+                request->mResult = ir;
+                {
+                    AutoLock syncLock(request);
+                    request->NotifyAll();
+                }
+            }
+            else {
+                ObtainMessage(EVENT_OPEN_CHANNEL_DONE, request->Probe(EIID_IInterface), (IMessage**)&onCompleted);
+                String s;
+                ICharSequence::Probe(request->mArgument)->ToString(&s);
+                uiccCard->IccOpenLogicalChannel(s, onCompleted);
+            }
+            break;
+        }
+        case EVENT_OPEN_CHANNEL_DONE: {
+            AutoPtr<IInterface> obj;
+            msg->GetObj((IInterface**)&obj);
+            ar = (AsyncResult*)IAsyncResult::Probe(obj);
+
+            request = (MainThreadRequest*) IObject::Probe(ar->mUserObj);
             AutoPtr<IIccOpenLogicalChannelResponse> openChannelResp;
-            if (ar.exception == null && ar.result != null) {
-                AutoPtr<ArrayOf<Int32> > result = (int[]) ar.result;
+            if (ar->mException == NULL && ar->mResult != NULL) {
+                AutoPtr<ArrayOf<Int32> > result;
+                assert(0 && "TODO");
+                // result = (int[]) ar.result;
                 Int32 channelId = (*result)[0];
                 AutoPtr<ArrayOf<Byte> > selectResponse;
                 if (result->GetLength() > 1) {
@@ -363,53 +495,57 @@ ECode CPhoneInterfaceManager::MainThreadHandler::HandleMessage(
                     }
                 }
                 CIccOpenLogicalChannelResponse::New(channelId,
-                    IccOpenLogicalChannelResponse.STATUS_NO_ERROR, selectResponse,
+                    IIccOpenLogicalChannelResponse::STATUS_NO_ERROR, selectResponse,
                     (IIccOpenLogicalChannelResponse**)&openChannelResp);
             }
             else {
-                if (ar.result == null) {
+                if (ar->mResult == NULL) {
                     Loge(String("iccOpenLogicalChannel: Empty response"));
                 }
-                if (ar.exception != null) {
-                    Loge(String("iccOpenLogicalChannel: Exception: ") + ar.exception);
+                if (ar->mException != NULL) {
+                    Loge(String("iccOpenLogicalChannel: Exception: ") + TO_CSTR(ar->mException));
                 }
 
                 Int32 errorCode = IIccOpenLogicalChannelResponse::STATUS_UNKNOWN_ERROR;
-                if ((ar.exception != null) && (ar.exception instanceof CommandException)) {
-                    if (ar.exception.getMessage().compareTo("MISSING_RESOURCE") == 0) {
-                        errorCode = IIccOpenLogicalChannelResponse::STATUS_MISSING_RESOURCE;
-                    } else if (ar.exception.getMessage().compareTo("NO_SUCH_ELEMENT") == 0) {
-                        errorCode = IIccOpenLogicalChannelResponse::STATUS_NO_SUCH_ELEMENT;
-                    }
-                }
+                assert(0 && "TODO CommandException");
+                // if ((ar.exception != NULL) && (ar.exception instanceof CommandException)) {
+                //     if (ar.exception.getMessage().compareTo("MISSING_RESOURCE") == 0) {
+                //         errorCode = IIccOpenLogicalChannelResponse::STATUS_MISSING_RESOURCE;
+                //     } else if (ar.exception.getMessage().compareTo("NO_SUCH_ELEMENT") == 0) {
+                //         errorCode = IIccOpenLogicalChannelResponse::STATUS_NO_SUCH_ELEMENT;
+                //     }
+                // }
                 CIccOpenLogicalChannelResponse::New(
-                    IccOpenLogicalChannelResponse.INVALID_CHANNEL, errorCode, NULL,
+                    IIccOpenLogicalChannelResponse::INVALID_CHANNEL, errorCode, NULL,
                     (IIccOpenLogicalChannelResponse**)&openChannelResp);
             }
-            request.result = openChannelResp;
+            request->mResult = openChannelResp;
             {
                 AutoLock syncLock(request);
                 request->NotifyAll();
             }
             break;
         }
-        case CMD_CLOSE_CHANNEL:
-        {
+        case CMD_CLOSE_CHANNEL: {
             AutoPtr<IInterface> obj;
             msg->GetObj((IInterface**)&obj);
             request = (MainThreadRequest*)IObject::Probe(obj);
 
             if (uiccCard == NULL) {
                 Loge(String("iccCloseLogicalChannel: No UICC"));
-                request.result = new IccIoResult(0x6F, 0, (byte[])null);
+                AutoPtr<IIccIoResult> ir;
+                CIccIoResult::New(0x6F, 0, NULL, (IIccIoResult**)&ir);
+                request->mResult = ir;
                 {
                     AutoLock syncLock(request);
-                    request.notifyAll();
+                    request->NotifyAll();
                 }
             }
             else {
-                ObtainMessage(EVENT_CLOSE_CHANNEL_DONE, request, (IMessage**)&onCompleted);
-                uiccCard->IccCloseLogicalChannel((Integer) request.argument, onCompleted);
+                ObtainMessage(EVENT_CLOSE_CHANNEL_DONE, request->Probe(EIID_IInterface), (IMessage**)&onCompleted);
+                Int32 v;
+                IInteger32::Probe(request->mArgument)->GetValue(&v);
+                uiccCard->IccCloseLogicalChannel(v, onCompleted);
             }
             break;
         }
@@ -417,35 +553,38 @@ ECode CPhoneInterfaceManager::MainThreadHandler::HandleMessage(
             HandleNullReturnEvent(msg, String("iccCloseLogicalChannel"));
             break;
 
-        case CMD_NV_READ_ITEM:
-        {
+        case CMD_NV_READ_ITEM: {
             AutoPtr<IInterface> obj;
             msg->GetObj((IInterface**)&obj);
             request = (MainThreadRequest*)IObject::Probe(obj);
 
-            ObtainMessage(EVENT_NV_READ_ITEM_DONE, request, (IMessage**)&onCompleted);
-            mPhone->NvReadItem((Integer) request.argument, onCompleted);
+            ObtainMessage(EVENT_NV_READ_ITEM_DONE, request->Probe(EIID_IInterface), (IMessage**)&onCompleted);\
+            Int32 v;
+            IInteger32::Probe(request->mArgument)->GetValue(&v);
+            mHost->mPhone->NvReadItem(v, onCompleted);
             break;
         }
-        case EVENT_NV_READ_ITEM_DONE:
-        {
+        case EVENT_NV_READ_ITEM_DONE: {
             AutoPtr<IInterface> obj;
             msg->GetObj((IInterface**)&obj);
-            ar = IAsyncResult::Probe(obj);
+            ar = (AsyncResult*)IAsyncResult::Probe(obj);
 
-            request = (MainThreadRequest) ar.userObj;
-            if (ar.exception == null && ar.result != null) {
-                request.result = ar.result;     // String
+            request = (MainThreadRequest*) IObject::Probe(ar->mUserObj);
+            if (ar->mException == NULL && ar->mResult != NULL) {
+                request->mResult = ar->mResult;     // String
             }
             else {
-                request.result = "";
-                if (ar.result == null) {
+                AutoPtr<ICharSequence> cs;
+                CString::New(String(""), (ICharSequence**)&cs);
+                request->mResult = cs;
+                Logger::D(TAG, "TODO CommandException");
+                if (ar->mResult == NULL) {
                     Loge(String("nvReadItem: Empty response"));
                 }
-                else if (ar.exception instanceof CommandException) {
-                    Loge(String("nvReadItem: CommandException: ") +
-                            ar.exception);
-                }
+                // else if (ar.exception instanceof CommandException) {
+                //     Loge(String("nvReadItem: CommandException: ") +
+                //             ar.exception);
+                // }
                 else {
                     Loge(String("nvReadItem: Unknown exception"));
                 }
@@ -456,121 +595,130 @@ ECode CPhoneInterfaceManager::MainThreadHandler::HandleMessage(
             }
             break;
         }
-        case CMD_NV_WRITE_ITEM:
-        {
+        case CMD_NV_WRITE_ITEM: {
             AutoPtr<IInterface> obj;
             msg->GetObj((IInterface**)&obj);
             request = (MainThreadRequest*)IObject::Probe(obj);
 
-            ObtainMessage(EVENT_NV_WRITE_ITEM_DONE, request, (IMessage**)&onCompleted);
-            Pair<Integer, String> idValue = (Pair<Integer, String>) request.argument;
-            mPhone->NvWriteItem(idValue.first, idValue.second, onCompleted);
+            ObtainMessage(EVENT_NV_WRITE_ITEM_DONE, request->Probe(EIID_IInterface), (IMessage**)&onCompleted);
+            AutoPtr<IPair> idValue = IPair::Probe(request->mArgument);
+            AutoPtr<IInterface> o;
+            idValue->GetFirst((IInterface**)&o);
+            Int32 first = 0;
+            IInteger32::Probe(o)->GetValue(&first);
+
+            o = NULL;
+            idValue->GetSecond((IInterface**)&o);
+            String second;
+            ICharSequence::Probe(o)->ToString(&second);
+            mHost->mPhone->NvWriteItem(first, second, onCompleted);
             break;
         }
         case EVENT_NV_WRITE_ITEM_DONE:
             HandleNullReturnEvent(msg, String("nvWriteItem"));
             break;
 
-        case CMD_NV_WRITE_CDMA_PRL:
-        {
+        case CMD_NV_WRITE_CDMA_PRL: {
             AutoPtr<IInterface> obj;
             msg->GetObj((IInterface**)&obj);
             request = (MainThreadRequest*)IObject::Probe(obj);
 
-            ObtainMessage(EVENT_NV_WRITE_CDMA_PRL_DONE, request, (IMessage**)&onCompleted);
-            mPhone->NvWriteCdmaPrl((byte[]) request.argument, onCompleted);
+            ObtainMessage(EVENT_NV_WRITE_CDMA_PRL_DONE, request->Probe(EIID_IInterface), (IMessage**)&onCompleted);
+            assert(0 && "TODO");
+            // mHost->mPhone->NvWriteCdmaPrl((byte[]) request.argument, onCompleted);
             break;
         }
         case EVENT_NV_WRITE_CDMA_PRL_DONE:
             HandleNullReturnEvent(msg, String("nvWriteCdmaPrl"));
             break;
 
-        case CMD_NV_RESET_CONFIG:
-        {
+        case CMD_NV_RESET_CONFIG: {
             AutoPtr<IInterface> obj;
             msg->GetObj((IInterface**)&obj);
             request = (MainThreadRequest*)IObject::Probe(obj);
 
-            ObtainMessage(EVENT_NV_RESET_CONFIG_DONE, request, (IMessage**)&onCompleted);
-            mPhone->NvResetConfig((Integer) request.argument, onCompleted);
+            ObtainMessage(EVENT_NV_RESET_CONFIG_DONE, request->Probe(EIID_IInterface), (IMessage**)&onCompleted);
+            Int32 v;
+            IInteger32::Probe(request->mArgument)->GetValue(&v);
+            mHost->mPhone->NvResetConfig(v, onCompleted);
             break;
         }
         case EVENT_NV_RESET_CONFIG_DONE:
             HandleNullReturnEvent(msg, String("nvResetConfig"));
             break;
 
-        case CMD_GET_PREFERRED_NETWORK_TYPE:
-        {
+        case CMD_GET_PREFERRED_NETWORK_TYPE: {
             AutoPtr<IInterface> obj;
             msg->GetObj((IInterface**)&obj);
             request = (MainThreadRequest*)IObject::Probe(obj);
 
-            ObtainMessage(EVENT_GET_PREFERRED_NETWORK_TYPE_DONE, request, (IMessage**)&onCompleted);
-            mPhone->GetPreferredNetworkType(onCompleted);
+            ObtainMessage(EVENT_GET_PREFERRED_NETWORK_TYPE_DONE, request->Probe(EIID_IInterface), (IMessage**)&onCompleted);
+            mHost->mPhone->GetPreferredNetworkType(onCompleted);
             break;
         }
-        case EVENT_GET_PREFERRED_NETWORK_TYPE_DONE:
-        {
+        case EVENT_GET_PREFERRED_NETWORK_TYPE_DONE: {
             AutoPtr<IInterface> obj;
             msg->GetObj((IInterface**)&obj);
-            ar = IAsyncResult::Probe(obj);
+            ar = (AsyncResult*)IAsyncResult::Probe(obj);
 
-            request = (MainThreadRequest) ar.userObj;
-            if (ar.exception == null && ar.result != null) {
-                request.result = ar.result;     // Integer
+            request = (MainThreadRequest*) IObject::Probe(ar->mUserObj);
+            if (ar->mException == NULL && ar->mResult != NULL) {
+                request->mResult = ar->mResult;     // Integer
             }
             else {
-                request.result = -1;
-                if (ar.result == null) {
+                AutoPtr<IInteger32> io;
+                CInteger32::New(-1, (IInteger32**)&io);
+                request->mResult = io;
+                Logger::D(TAG, "TODO CommandException");
+                if (ar->mResult == NULL) {
                     Loge(String("getPreferredNetworkType: Empty response"));
                 }
-                else if (ar.exception instanceof CommandException) {
-                    Loge(String("getPreferredNetworkType: CommandException: ") +
-                            ar.exception);
-                }
+                // else if (ar.exception instanceof CommandException) {
+                //     Loge(String("getPreferredNetworkType: CommandException: ") +
+                //             ar.exception);
+                // }
                 else {
                     Loge(String("getPreferredNetworkType: Unknown exception"));
                 }
             }
             {
                 AutoLock syncLock(request);
-                request.notifyAll();
+                request->NotifyAll();
             }
             break;
         }
-        case CMD_SET_PREFERRED_NETWORK_TYPE:
-        {
+        case CMD_SET_PREFERRED_NETWORK_TYPE: {
             AutoPtr<IInterface> obj;
             msg->GetObj((IInterface**)&obj);
             request = (MainThreadRequest*)IObject::Probe(obj);
 
-            ObtainMessage(EVENT_SET_PREFERRED_NETWORK_TYPE_DONE, request, (IMessage**)&onCompleted);
-            Int32 networkType = (Integer) request.argument;
-            mPhone->SetPreferredNetworkType(networkType, onCompleted);
+            ObtainMessage(EVENT_SET_PREFERRED_NETWORK_TYPE_DONE, request->Probe(EIID_IInterface), (IMessage**)&onCompleted);
+            Int32 networkType = 0;
+            IInteger32::Probe(request->mArgument)->GetValue(&networkType);
+            mHost->mPhone->SetPreferredNetworkType(networkType, onCompleted);
             break;
         }
         case EVENT_SET_PREFERRED_NETWORK_TYPE_DONE:
             HandleNullReturnEvent(msg, String("setPreferredNetworkType"));
             break;
 
-        case CMD_INVOKE_OEM_RIL_REQUEST_RAW:
-        {
+        case CMD_INVOKE_OEM_RIL_REQUEST_RAW: {
             AutoPtr<IInterface> obj;
             msg->GetObj((IInterface**)&obj);
             request = (MainThreadRequest*)IObject::Probe(obj);
 
-            ObtainMessage(EVENT_INVOKE_OEM_RIL_REQUEST_RAW_DONE, request, (IMessage**)&onCompleted);
-            mPhone->InvokeOemRilRequestRaw((byte[])request.argument, onCompleted);
+            ObtainMessage(EVENT_INVOKE_OEM_RIL_REQUEST_RAW_DONE, request->Probe(EIID_IInterface), (IMessage**)&onCompleted);
+            assert(0 && "TODO");
+            // mHost->mPhone->InvokeOemRilRequestRaw((byte[])request.argument, onCompleted);
             break;
         }
-        case EVENT_INVOKE_OEM_RIL_REQUEST_RAW_DONE:
-        {
+        case EVENT_INVOKE_OEM_RIL_REQUEST_RAW_DONE: {
             AutoPtr<IInterface> obj;
             msg->GetObj((IInterface**)&obj);
-            ar = IAsyncResult::Probe(obj);
+            ar = (AsyncResult*)IAsyncResult::Probe(obj);
 
-            request = (MainThreadRequest)ar.userObj;
-            request.result = ar;
+            request = (MainThreadRequest*)IObject::Probe(ar->mUserObj);
+            request->mResult = ar->Probe(EIID_IInterface);
             {
                 AutoLock syncLock(request);
                 request->NotifyAll();
@@ -590,27 +738,32 @@ void CPhoneInterfaceManager::MainThreadHandler::HandleNullReturnEvent(
 {
     AutoPtr<IInterface> obj;
     msg->GetObj((IInterface**)&obj);
-    AutoPtr<IAsyncResult> ar = IAsyncResult::Probe(obj);
+    AsyncResult* ar = (AsyncResult*)IAsyncResult::Probe(obj);
 
-    AutoPtr<MainThreadRequest> request = (MainThreadRequest) ar.userObj;
-    if (ar.exception == NULL) {
-        request.result = TRUE;
+    AutoPtr<MainThreadRequest> request = (MainThreadRequest*) IObject::Probe(ar->mUserObj);
+    if (ar->mException == NULL) {
+        AutoPtr<IBoolean> bo;
+        CBoolean::New(TRUE, (IBoolean**)&bo);
+        request->mResult = bo;
     }
     else {
-        request.result = FALSE;
-        if (ar.exception instanceof CommandException) {
-            StringBuilder sb;
-            sb += command;
-            sb += ": CommandException: ";
-            sb += ar.exception;
-            Loge(sb.ToString());
-        }
-        else {
-            StringBuilder sb;
-            sb += command;
-            sb += ": Unknown exception";
-            Loge(sb.ToString());
-        }
+        AutoPtr<IBoolean> bo;
+        CBoolean::New(FALSE, (IBoolean**)&bo);
+        request->mResult = bo;
+        Logger::D(TAG, "TODO CommandException");
+        // if (ar.exception instanceof CommandException) {
+        //     StringBuilder sb;
+        //     sb += command;
+        //     sb += ": CommandException: ";
+        //     sb += ar.exception;
+        //     Loge(sb.ToString());
+        // }
+        // else {
+        //     StringBuilder sb;
+        //     sb += command;
+        //     sb += ": Unknown exception";
+        //     Loge(sb.ToString());
+        // }
     }
 
     {
@@ -631,38 +784,37 @@ ECode CPhoneInterfaceManager::MyHandler::HandleMessage(
 {
     AutoPtr<IInterface> obj;
     msg->GetObj((IInterface**)&obj);
-    AutoPtr<IAsyncResult> ar = IAsyncResult::Probe(obj);
+    AsyncResult* ar = (AsyncResult*)IAsyncResult::Probe(obj);
 
     Int32 what;
     msg->GetWhat(&what);
     switch (what) {
-        case SUPPLY_PIN_COMPLETE:
+        case UnlockSim::SUPPLY_PIN_COMPLETE:
             Logger::D(TAG, "SUPPLY_PIN_COMPLETE");
             {
                 AutoLock syncLock(mHost);
-                mRetryCount = msg->GetArg1(&(mHost->mRetryCount));
-                if (ar.exception != null) {
-                    if (ar.exception instanceof CommandException &&
-                            ((CommandException)(ar.exception)).getCommandError()
-                            == CommandException.Error.PASSWORD_INCORRECT) {
-                        mResult = IPhoneConstants::PIN_PASSWORD_INCORRECT;
-                    }
-                    else {
-                        mResult = IPhoneConstants::PIN_GENERAL_FAILURE;
-                    }
+                msg->GetArg1(&(mHost->mRetryCount));
+                if (ar->mException != NULL) {
+                    Logger::D(TAG, "TODO CommandException");
+                    // if (ar.exception instanceof CommandException &&
+                    //         ((CommandException)(ar.exception)).getCommandError()
+                    //         == CommandException.Error.PASSWORD_INCORRECT) {
+                    //     mResult = IPhoneConstants::PIN_PASSWORD_INCORRECT;
+                    // }
+                    // else {
+                    //     mResult = IPhoneConstants::PIN_GENERAL_FAILURE;
+                    // }
                 }
                 else {
-                    mResult = IPhoneConstants::PIN_RESULT_SUCCESS;
+                    mHost->mResult = IPhoneConstants::PIN_RESULT_SUCCESS;
                 }
-                mDone = TRUE;
-                mHost->notifyAll();
+                mHost->mDone = TRUE;
+                mHost->NotifyAll();
             }
             break;
     }
     return NOERROR;
 }
-
-const Int32 CPhoneInterfaceManager::UnlockSim::::SUPPLY_PIN_COMPLETE = 100;
 
 CPhoneInterfaceManager::UnlockSim::UnlockSim(
     /* [in] */ CPhoneInterfaceManager* host,
@@ -681,7 +833,7 @@ ECode CPhoneInterfaceManager::UnlockSim::Run()
 
     {
         AutoLock syncLock(this);
-        mHandler = new MyHandler(this); {
+        mHandler = new MyHandler(this);
         NotifyAll();
     }
     return Looper::Loop();
@@ -702,15 +854,16 @@ ECode CPhoneInterfaceManager::UnlockSim::MyUnlockSim(
             //try {
             ECode ec = Wait();
             //} catch (InterruptedException e) {
-            if (ec == (ECode)InterruptedException) {
-                AutoPtr<IThread> t;
-                Thread::GetCurrentThread((IThread**)&t);
+            if (ec == (ECode)E_INTERRUPTED_EXCEPTION) {
+                AutoPtr<IThread> t = Thread::GetCurrentThread();
                 t->Interrupt();
             }
             //}
         }
+        AutoPtr<IMessageHelper> helper;
+        CMessageHelper::AcquireSingleton((IMessageHelper**)&helper);
         AutoPtr<IMessage> callback;
-        Message::Obtain(mHandler, SUPPLY_PIN_COMPLETE, (IMessage**)&callback);
+        helper->Obtain(mHandler, SUPPLY_PIN_COMPLETE, (IMessage**)&callback);
 
         if (puk == NULL) {
             mSimCard->SupplyPin(pin, callback);
@@ -725,9 +878,8 @@ ECode CPhoneInterfaceManager::UnlockSim::MyUnlockSim(
             ECode ec = Wait();
             //} catch (InterruptedException e) {
                 // Restore the interrupted status
-            if (ec == (ECode)InterruptedException) {
-                AutoPtr<IThread> t;
-                Thread::GetCurrentThread((IThread**)&t);
+            if (ec == (ECode)E_INTERRUPTED_EXCEPTION) {
+                AutoPtr<IThread> t = Thread::GetCurrentThread();
                 t->Interrupt();
             }
             //}
@@ -746,48 +898,13 @@ ECode CPhoneInterfaceManager::UnlockSim::MyUnlockSim(
 CAR_INTERFACE_IMPL_2(CPhoneInterfaceManager, Object, IITelephony, IBinder)
 CAR_OBJECT_IMPL(CPhoneInterfaceManager)
 
-static const String CPhoneInterfaceManager::TAG = "PhoneInterfaceManager";
-static const Boolean CPhoneInterfaceManager::DBG = (IPhoneGlobals::DBG_LEVEL >= 2);
-static const Boolean CPhoneInterfaceManager::DBG_LOC = FALSE;
+AutoPtr<CPhoneInterfaceManager> CPhoneInterfaceManager::sInstance;
 
-static const Int32 CPhoneInterfaceManager::CMD_HANDLE_PIN_MMI = 1;
-static const Int32 CPhoneInterfaceManager::CMD_HANDLE_NEIGHBORING_CELL = 2;
-static const Int32 CPhoneInterfaceManager::EVENT_NEIGHBORING_CELL_DONE = 3;
-static const Int32 CPhoneInterfaceManager::CMD_ANSWER_RINGING_CALL = 4;
-static const Int32 CPhoneInterfaceManager::CMD_END_CALL = 5;  // not used yet
-static const Int32 CPhoneInterfaceManager::CMD_TRANSMIT_APDU_LOGICAL_CHANNEL = 7;
-static const Int32 CPhoneInterfaceManager::EVENT_TRANSMIT_APDU_LOGICAL_CHANNEL_DONE = 8;
-static const Int32 CPhoneInterfaceManager::CMD_OPEN_CHANNEL = 9;
-static const Int32 CPhoneInterfaceManager::EVENT_OPEN_CHANNEL_DONE = 10;
-static const Int32 CPhoneInterfaceManager::CMD_CLOSE_CHANNEL = 11;
-static const Int32 CPhoneInterfaceManager::EVENT_CLOSE_CHANNEL_DONE = 12;
-static const Int32 CPhoneInterfaceManager::CMD_NV_READ_ITEM = 13;
-static const Int32 CPhoneInterfaceManager::EVENT_NV_READ_ITEM_DONE = 14;
-static const Int32 CPhoneInterfaceManager::CMD_NV_WRITE_ITEM = 15;
-static const Int32 CPhoneInterfaceManager::EVENT_NV_WRITE_ITEM_DONE = 16;
-static const Int32 CPhoneInterfaceManager::CMD_NV_WRITE_CDMA_PRL = 17;
-static const Int32 CPhoneInterfaceManager::EVENT_NV_WRITE_CDMA_PRL_DONE = 18;
-static const Int32 CPhoneInterfaceManager::CMD_NV_RESET_CONFIG = 19;
-static const Int32 CPhoneInterfaceManager::EVENT_NV_RESET_CONFIG_DONE = 20;
-static const Int32 CPhoneInterfaceManager::CMD_GET_PREFERRED_NETWORK_TYPE = 21;
-static const Int32 CPhoneInterfaceManager::EVENT_GET_PREFERRED_NETWORK_TYPE_DONE = 22;
-static const Int32 CPhoneInterfaceManager::CMD_SET_PREFERRED_NETWORK_TYPE = 23;
-static const Int32 CPhoneInterfaceManager::EVENT_SET_PREFERRED_NETWORK_TYPE_DONE = 24;
-static const Int32 CPhoneInterfaceManager::CMD_SEND_ENVELOPE = 25;
-static const Int32 CPhoneInterfaceManager::EVENT_SEND_ENVELOPE_DONE = 26;
-static const Int32 CPhoneInterfaceManager::CMD_INVOKE_OEM_RIL_REQUEST_RAW = 27;
-static const Int32 CPhoneInterfaceManager::EVENT_INVOKE_OEM_RIL_REQUEST_RAW_DONE = 28;
-static const Int32 CPhoneInterfaceManager::CMD_TRANSMIT_APDU_BASIC_CHANNEL = 29;
-static const Int32 CPhoneInterfaceManager::EVENT_TRANSMIT_APDU_BASIC_CHANNEL_DONE = 30;
-static const Int32 CPhoneInterfaceManager::CMD_EXCHANGE_SIM_IO = 31;
-static const Int32 CPhoneInterfaceManager::EVENT_EXCHANGE_SIM_IO_DONE = 32;
-
-static AutoPtr<CPhoneInterfaceManager> CPhoneInterfaceManager::sInstance;
-
-static const String CPhoneInterfaceManager::PREF_CARRIERS_ALPHATAG_PREFIX("carrier_alphtag_");
-static const String CPhoneInterfaceManager::PREF_CARRIERS_NUMBER_PREFIX("carrier_number_");
-static const String CPhoneInterfaceManager::
+const String CPhoneInterfaceManager::PREF_CARRIERS_ALPHATAG_PREFIX("carrier_alphtag_");
+const String CPhoneInterfaceManager::PREF_CARRIERS_NUMBER_PREFIX("carrier_number_");
+const String CPhoneInterfaceManager::
         PREF_CARRIERS_SIMPLIFIED_NETWORK_SETTINGS_PREFIX("carrier_simplified_network_settings_");
+Object CPhoneInterfaceManager::THIS;
 
 ECode CPhoneInterfaceManager::SendRequest(
     /* [in] */ Int32 command,
@@ -804,19 +921,18 @@ ECode CPhoneInterfaceManager::SendRequest(
     /* [in] */ IInterface* argument2,
     /* [out] */ IInterface** result)
 {
-    AutoPtr<ILooper> lopper;
-    Loope::GetMyLooper((ILooper**)&lopper);
+    AutoPtr<ILooper> lopper = Looper::GetMyLooper();
     AutoPtr<ILooper> lopper2;
-    mMainThreadHandler->GetLooper(&lopper2);
+    mMainThreadHandler->GetLooper((ILooper**)&lopper2);
     if (TO_IINTERFACE(lopper) == TO_IINTERFACE(lopper2)) {
         //throw new RuntimeException("This method will deadlock if called from the main thread.");
         Logger::E("CPhoneInterfaceManager", "This method will deadlock if called from the main thread.");
-        return RuntimeException;
+        return E_RUNTIME_EXCEPTION;
     }
 
     AutoPtr<MainThreadRequest> request = new MainThreadRequest(argument);
     AutoPtr<IMessage> msg;
-    mMainThreadHandler->ObtainMessage(command, request, (IMessage**)&msg);
+    mMainThreadHandler->ObtainMessage(command, request->Probe(EIID_IInterface), (IMessage**)&msg);
     msg->SendToTarget();
 
     // Wait for the request to complete
@@ -838,7 +954,8 @@ ECode CPhoneInterfaceManager::SendRequest(
 void CPhoneInterfaceManager::SendRequestAsync(
     /* [in] */ Int32 command)
 {
-    mMainThreadHandler->SendEmptyMessage(command);
+    Boolean tmp = FALSE;
+    mMainThreadHandler->SendEmptyMessage(command, &tmp);
 }
 
 void CPhoneInterfaceManager::SendRequestAsync(
@@ -847,7 +964,7 @@ void CPhoneInterfaceManager::SendRequestAsync(
 {
     AutoPtr<MainThreadRequest> request = new MainThreadRequest(argument);
     AutoPtr<IMessage> msg;
-    mMainThreadHandler->ObtainMessage(command, request, (IMessage**)&msg);
+    mMainThreadHandler->ObtainMessage(command, request->Probe(EIID_IInterface), (IMessage**)&msg);
     msg->SendToTarget();
 }
 
@@ -855,45 +972,47 @@ AutoPtr<CPhoneInterfaceManager> CPhoneInterfaceManager::Init(
     /* [in] */ PhoneGlobals* app,
     /* [in] */ IPhone* phone)
 {
-    synchronized (PhoneInterfaceManager.class)
     {
-        assert(0 & "synchronized (PhoneInterfaceManager.class)");
+        AutoLock lock(THIS);
         if (sInstance == NULL) {
             CPhoneInterfaceManager::NewByFriend(app, phone, (CPhoneInterfaceManager**)&sInstance);
         }
         else {
-            Logger::WTF(TAG, "init() called multiple times!  sInstance = %s", TO_CSTR(sInstance));
+            Logger::D(TAG, "init() called multiple times!  sInstance = %s", TO_CSTR(sInstance));
         }
     }
     return sInstance;
 }
 
-CPhoneInterfaceManager::CPhoneInterfaceManager(
-    /* [in] */ PhoneGlobals* app,
+ECode CPhoneInterfaceManager::constructor(
+    /* [in] */ IPhoneGlobals* app,
     /* [in] */ IPhone* phone)
-    : mApp(app)
-    , mPhone(phone)
 {
+    mApp = (PhoneGlobals*)app;
+    mPhone = phone;
     AutoPtr<PhoneGlobals> globals;
     PhoneGlobals::GetInstance((PhoneGlobals**)&globals);
     mCM = globals->mCM;
 
     AutoPtr<IInterface> obj;
-    app->GetSystemService(IContext::APP_OPS_SERVICE, (IInterface**)&obj);
-    mAppOps = IAppOpsManager::probe(obj);
-    mMainThreadHandler = new MainThreadHandler();
+    IContext::Probe(app)->GetSystemService(IContext::APP_OPS_SERVICE, (IInterface**)&obj);
+    mAppOps = IAppOpsManager::Probe(obj);
+    mMainThreadHandler = new MainThreadHandler(this);
 
     AutoPtr<IContext> context;
     mPhone->GetContext((IContext**)&context);
-    carrierPrivilegeConfigs = PreferenceManager::GetDefaultSharedPreferences(context);
+    AutoPtr<IPreferenceManagerHelper> helper;
+    CPreferenceManagerHelper::AcquireSingleton((IPreferenceManagerHelper**)&helper);
+    helper->GetDefaultSharedPreferences(context, (ISharedPreferences**)&mCarrierPrivilegeConfigs);
     Publish();
+    return NOERROR;
 }
 
 void CPhoneInterfaceManager::Publish()
 {
     if (DBG) Log(String("publish: ") + TO_CSTR(this));
 
-    ServiceManager::AddService(String("phone"), this);
+    ServiceManager::AddService(String("phone"), this->Probe(EIID_IInterface));
 }
 
 AutoPtr<IPhone> CPhoneInterfaceManager::GetPhone(
@@ -907,8 +1026,7 @@ AutoPtr<IPhone> CPhoneInterfaceManager::GetPhone(
 ECode CPhoneInterfaceManager::Dial(
     /* [in] */ const String& number)
 {
-    Int64 num;
-    GetPreferredVoiceSubscription(&num);
+    Int64 num = GetPreferredVoiceSubscription();
     return DialForSubscriber(num, number);
 }
 
@@ -927,9 +1045,9 @@ ECode CPhoneInterfaceManager::DialForSubscriber(
     }
 
     // PENDING: should we just silently fail if phone is offhook or ringing?
-    IPhoneConstantsState state;
+    PhoneConstantsState state;
     mCM->GetState(subId, &state);
-    if (state != IPhoneConstantsState_OFFHOOK && state != IPhoneConstantsState_RINGING) {
+    if (state != PhoneConstantsState_OFFHOOK && state != PhoneConstantsState_RINGING) {
         AutoPtr<IUriHelper> helper;
         CUriHelper::AcquireSingleton((IUriHelper**)&helper);
         AutoPtr<IUri> uri;
@@ -937,7 +1055,7 @@ ECode CPhoneInterfaceManager::DialForSubscriber(
         AutoPtr<IIntent> intent;
         CIntent::New(IIntent::ACTION_DIAL, uri, (IIntent**)&intent);
         intent->AddFlags(IIntent::FLAG_ACTIVITY_NEW_TASK);
-        intent->PutExtra(SUBSCRIPTION_KEY, subId);
+        intent->PutExtra(IPhoneConstants::SUBSCRIPTION_KEY, subId);
         mApp->StartActivity(intent);
     }
     return NOERROR;
@@ -947,8 +1065,7 @@ ECode CPhoneInterfaceManager::Call(
     /* [in] */ const String& callingPackage,
     /* [in] */ const String& number)
 {
-    Int64 num;
-    GetPreferredVoiceSubscription(&num);
+    Int64 num = GetPreferredVoiceSubscription();
     return CallForSubscriber(num, callingPackage, number);
 }
 
@@ -964,8 +1081,7 @@ ECode CPhoneInterfaceManager::CallForSubscriber(
     // from the context of the phone app.
     EnforceCallPermission();
 
-    Int32 id;
-    Binder::GetCallingUid(&id);
+    Int32 id = Binder::GetCallingUid();
     Int32 op;
     mAppOps->NoteOp(IAppOpsManager::OP_CALL_PHONE, id, callingPackage, &op);
     if (op!= IAppOpsManager::MODE_ALLOWED) {
@@ -983,7 +1099,7 @@ ECode CPhoneInterfaceManager::CallForSubscriber(
     helper->Parse(url, (IUri**)&uri);
     AutoPtr<IIntent> intent;
     CIntent::New(IIntent::ACTION_CALL, uri, (IIntent**)&intent);
-    intent->PutExtra(SUBSCRIPTION_KEY, subId);
+    intent->PutExtra(IPhoneConstants::SUBSCRIPTION_KEY, subId);
     intent->AddFlags(IIntent::FLAG_ACTIVITY_NEW_TASK);
     return mApp->StartActivity(intent);
 }
@@ -993,9 +1109,7 @@ ECode CPhoneInterfaceManager::EndCall(
 {
     VALIDATE_NOT_NULL(result)
 
-    Int64 subId;
-    GetDefaultSubscription(&subId);
-    return EndCallForSubscriber(subId, result);
+    return EndCallForSubscriber(GetDefaultSubscription(), result);
 }
 
 ECode CPhoneInterfaceManager::EndCallForSubscriber(
@@ -1006,16 +1120,17 @@ ECode CPhoneInterfaceManager::EndCallForSubscriber(
 
     EnforceCallPermission();
     AutoPtr<IInterface> obj;
-    SendRequest(CMD_END_CALL, subId, NULL, (IInterface**)&obj);
+    AutoPtr<IInteger64> iv;
+    CInteger64::New(subId, (IInteger64**)&iv);
+    SendRequest(CMD_END_CALL, iv, NULL, (IInterface**)&obj);
     AutoPtr<IBoolean> value = IBoolean::Probe(obj);
     return value->GetValue(result);
 }
 
 ECode CPhoneInterfaceManager::AnswerRingingCall()
 {
-    Int64 subId;
-    GetDefaultSubscription(&subId);
-    return AnswerRingingCallForSubscriber(subId);
+
+    return AnswerRingingCallForSubscriber(GetDefaultSubscription());
 }
 
 ECode CPhoneInterfaceManager::AnswerRingingCallForSubscriber(
@@ -1084,9 +1199,7 @@ ECode CPhoneInterfaceManager::IsOffhook(
 {
     VALIDATE_NOT_NULL(result)
 
-    Int64 subId;
-    GetDefaultSubscription(&subId);
-    return IsOffhookForSubscriber(subId, result);
+    return IsOffhookForSubscriber(GetDefaultSubscription(), result);
 }
 
 ECode CPhoneInterfaceManager::IsOffhookForSubscriber(
@@ -1095,11 +1208,10 @@ ECode CPhoneInterfaceManager::IsOffhookForSubscriber(
 {
     VALIDATE_NOT_NULL(result)
 
-    AutoPtr<IPhone> phone;
-    GetPhone(subId, (IPhone**)&phone);
+    AutoPtr<IPhone> phone = GetPhone(subId);
     Int32 state;
     phone->GetState(&state);
-    *result = (state == IPhoneConstantsState_OFFHOOK);
+    *result = (state == PhoneConstantsState_OFFHOOK);
     return NOERROR;
 }
 
@@ -1108,9 +1220,7 @@ ECode CPhoneInterfaceManager::IsRinging(
 {
     VALIDATE_NOT_NULL(result)
 
-    Int64 subId;
-    GetDefaultSubscription(&subId);
-    return IsRingingForSubscriber(subId, result);
+    return IsRingingForSubscriber(GetDefaultSubscription(), result);
 }
 
 ECode CPhoneInterfaceManager::IsRingingForSubscriber(
@@ -1119,11 +1229,10 @@ ECode CPhoneInterfaceManager::IsRingingForSubscriber(
 {
     VALIDATE_NOT_NULL(result)
 
-    AutoPtr<IPhone> phone;
-    GetPhone(subId, (IPhone**)&phone);
+    AutoPtr<IPhone> phone = GetPhone(subId);
     Int32 state;
     phone->GetState(&state);
-    *result = (state == IPhoneConstantsState_RINGING);
+    *result = (state == PhoneConstantsState_RINGING);
     return NOERROR;
 }
 
@@ -1141,8 +1250,7 @@ ECode CPhoneInterfaceManager::IsIdleForSubscriber(
 {
     VALIDATE_NOT_NULL(result)
 
-    AutoPtr<IPhone> phone;
-    GetPhone(subId, (IPhone**)&phone);
+    AutoPtr<IPhone> phone = GetPhone(subId);
     Int32 state;
     phone->GetState(&state);
     *result = (state == PhoneConstantsState_IDLE);
@@ -1223,13 +1331,12 @@ ECode CPhoneInterfaceManager::SupplyPinReportResultForSubscriber(
     VALIDATE_NOT_NULL(array)
 
     EnforceModifyPermission();
-    AutoPtr<IPhone> phone;
-    GetPhone(subId, (IPhone**)&phone);
+    AutoPtr<IPhone> phone = GetPhone(subId);
     AutoPtr<IIccCard> iccCard;
     phone->GetIccCard((IIccCard**)&iccCard);
-    AutoPtr<IThread> checkSimPin = new UnlockSim(iccCard);
-    checkSimPin->Start();
-    return checkSimPin->MyUnlockSim(NULL, pin, array);
+    AutoPtr<UnlockSim> checkSimPin = new UnlockSim(this, iccCard);
+    IThread::Probe(checkSimPin)->Start();
+    return checkSimPin->MyUnlockSim(String(NULL), pin, array);
 }
 
 ECode CPhoneInterfaceManager::SupplyPukReportResult(
@@ -1251,12 +1358,11 @@ ECode CPhoneInterfaceManager::SupplyPukReportResultForSubscriber(
     VALIDATE_NOT_NULL(array)
 
     EnforceModifyPermission();
-    AutoPtr<IPhone> phone;
-    GetPhone(subId, (IPhone**)&phone);
+    AutoPtr<IPhone> phone = GetPhone(subId);
     AutoPtr<IIccCard> iccCard;
     phone->GetIccCard((IIccCard**)&iccCard);
-    AutoPtr<IThread> checkSimPuk = new UnlockSim(iccCard);
-    checkSimPuk->Start();
+    AutoPtr<UnlockSim> checkSimPuk = new UnlockSim(this, iccCard);
+    IThread::Probe(checkSimPuk)->Start();
     return checkSimPuk->MyUnlockSim(puk, pin, array);
 }
 
@@ -1271,8 +1377,7 @@ ECode CPhoneInterfaceManager::UpdateServiceLocationForSubscriber(
     // No permission check needed here: this call is harmless, and it's
     // needed for the ServiceState.requestStateUpdate() call (which is
     // already intentionally exposed to 3rd parties.)
-    AutoPtr<IPhone> phone;
-    GetPhone(subId, (IPhone**)&phone);
+    AutoPtr<IPhone> phone = GetPhone(subId);
     return phone->UpdateServiceLocation();
 }
 
@@ -1290,8 +1395,7 @@ ECode CPhoneInterfaceManager::IsRadioOnForSubscriber(
 {
     VALIDATE_NOT_NULL(result)
 
-    AutoPtr<IPhone> phone;
-    GetPhone(subId, (IPhone**)&phone);
+    AutoPtr<IPhone> phone = GetPhone(subId);
     AutoPtr<IServiceState> serviceState;
     phone->GetServiceState((IServiceState**)&serviceState);
     Int32 state;
@@ -1309,9 +1413,10 @@ ECode CPhoneInterfaceManager::ToggleRadioOnOffForSubscriber(
     /* [in] */ Int64 subId)
 {
     EnforceModifyPermission();
-    AutoPtr<IPhone> phone;
-    GetPhone(subId, (IPhone**)&phone);
-    return phone->SetRadioPower(!IsRadioOnForSubscriber(subId));
+    AutoPtr<IPhone> phone = GetPhone(subId);
+    Boolean tmp = FALSE;
+    IsRadioOnForSubscriber(subId, &tmp);
+    return phone->SetRadioPower(!tmp);
 }
 
 ECode CPhoneInterfaceManager::SetRadio(
@@ -1331,8 +1436,7 @@ ECode CPhoneInterfaceManager::SetRadioForSubscriber(
     VALIDATE_NOT_NULL(result)
 
     EnforceModifyPermission();
-    AutoPtr<IPhone> phone;
-    GetPhone(subId, (IPhone**)&phone);
+    AutoPtr<IPhone> phone = GetPhone(subId);
     AutoPtr<IServiceState> serviceState;
     phone->GetServiceState((IServiceState**)&serviceState);
     Int32 state;
@@ -1360,7 +1464,9 @@ ECode CPhoneInterfaceManager::NeedMobileRadioShutdown(
     Int32 count;
     manager->GetPhoneCount(&count);
     for (Int32 i = 0; i < count; i++) {
-        AutoPtr<IPhone> phone = PhoneFactory->GetPhone(i);
+        AutoPtr<IPhone> phone;
+        assert(0 && "TODO: Need PhoneFactory");
+        // PhoneFactory::GetPhone(i);
         Boolean res;
         if (phone != NULL && (phone->IsRadioAvailable(&res), res)) {
             *result = TRUE;
@@ -1391,7 +1497,9 @@ void CPhoneInterfaceManager::ShutdownRadioUsingPhoneId(
     /* [in] */ Int32 phoneId)
 {
     EnforceModifyPermission();
-    AutoPtr<IPhone> phone = PhoneFactory::GetPhone(phoneId);
+    AutoPtr<IPhone> phone;
+    assert(0 && "TODO: Need PhoneFactory");
+    // PhoneFactory::GetPhone(phoneId);
     Boolean res;
     if (phone != NULL && (phone->IsRadioAvailable(&res), res)) {
         phone->ShutdownRadio();
@@ -1415,8 +1523,7 @@ ECode CPhoneInterfaceManager::SetRadioPowerForSubscriber(
     VALIDATE_NOT_NULL(result)
 
     EnforceModifyPermission();
-    AutoPtr<IPhone> phone;
-    GetPhone(subId, (IPhone**)&phone);
+    AutoPtr<IPhone> phone = GetPhone(subId);
     phone->SetRadioPower(turnOn);
     *result = TRUE;
     return NOERROR;
@@ -1428,9 +1535,11 @@ ECode CPhoneInterfaceManager::EnableDataConnectivity(
     VALIDATE_NOT_NULL(result)
 
     EnforceModifyPermission();
-    Int64 subId = SubscriptionManager::GetDefaultDataSubId();
-    AutoPtr<IPhone> phone;
-    GetPhone(subId, (IPhone**)&phone);
+    AutoPtr<ISubscriptionManager> helper;
+    CSubscriptionManager::AcquireSingleton((ISubscriptionManager**)&helper);
+    Int64 subId = 0;
+    helper->GetDefaultDataSubId(&subId);
+    AutoPtr<IPhone> phone = GetPhone(subId);
     phone->SetDataEnabled(TRUE);
     *result = TRUE;
     return NOERROR;
@@ -1442,9 +1551,11 @@ ECode CPhoneInterfaceManager::DisableDataConnectivity(
     VALIDATE_NOT_NULL(result)
 
     EnforceModifyPermission();
-    Int64 subId = SubscriptionManager::GetDefaultDataSubId();
-    AutoPtr<IPhone> phone;
-    GetPhone(subId, (IPhone**)&phone);
+    AutoPtr<ISubscriptionManager> helper;
+    CSubscriptionManager::AcquireSingleton((ISubscriptionManager**)&helper);
+    Int64 subId = 0;
+    helper->GetDefaultDataSubId(&subId);
+    AutoPtr<IPhone> phone = GetPhone(subId);
     phone->SetDataEnabled(FALSE);
     *result = TRUE;
     return NOERROR;
@@ -1455,9 +1566,11 @@ ECode CPhoneInterfaceManager::IsDataConnectivityPossible(
 {
     VALIDATE_NOT_NULL(result)
 
-    Int64 subId = SubscriptionManager::GetDefaultDataSubId();
-    AutoPtr<IPhone> phone;
-    GetPhone(subId, (IPhone**)&phone);
+    AutoPtr<ISubscriptionManager> helper;
+    CSubscriptionManager::AcquireSingleton((ISubscriptionManager**)&helper);
+    Int64 subId = 0;
+    helper->GetDefaultDataSubId(&subId);
+    AutoPtr<IPhone> phone = GetPhone(subId);
     return phone->IsDataConnectivityPossible(result);
 }
 
@@ -1478,14 +1591,18 @@ ECode CPhoneInterfaceManager::HandlePinMmiForSubscriber(
     VALIDATE_NOT_NULL(result)
 
     EnforceModifyPermission();
+    AutoPtr<ICharSequence> cs;
+    CString::New(dialString, (ICharSequence**)&cs);
+    AutoPtr<IInteger64> iv;
+    CInteger64::New(subId, (IInteger64**)&iv);
     AutoPtr<IInterface> obj;
-    sendRequest(CMD_HANDLE_PIN_MMI, dialString, subId, (IInterface**)&obj);
+    SendRequest(CMD_HANDLE_PIN_MMI, cs, iv, (IInterface**)&obj);
     AutoPtr<IBoolean> value = IBoolean::Probe(obj);
     return value->GetValue(result);
 }
 
 ECode CPhoneInterfaceManager::GetCallState(
-    /* [out] */ Int32 result)
+    /* [out] */ Int32* result)
 {
     VALIDATE_NOT_NULL(result)
 
@@ -1494,56 +1611,66 @@ ECode CPhoneInterfaceManager::GetCallState(
 
 ECode CPhoneInterfaceManager::GetCallStateForSubscriber(
     /* [in] */ Int64 subId,
-    /* [out] */ Int32 result)
+    /* [out] */ Int32* result)
 {
     VALIDATE_NOT_NULL(result)
 
-    AutoPtr<IPhone> phone;
-    GetPhone(subId, (IPhone**)&phone);
+    AutoPtr<IPhone> phone = GetPhone(subId);
     Int32 state;
     phone->GetState(&state);
-    return DefaultPhoneNotifier::ConvertCallState(state, result);
+    assert(0 && "TODO Need DefaultPhoneNotifier");
+    // return DefaultPhoneNotifier::ConvertCallState(state, result);
+    return NOERROR;
 }
 
 ECode CPhoneInterfaceManager::GetDataState(
-    /* [out] */ Int32 result)
+    /* [out] */ Int32* result)
 {
     VALIDATE_NOT_NULL(result)
-
-    AutoPtr<IPhone> phone;
-    GetPhone(SubscriptionManager::GetDefaultDataSubId(), (IPhone**)&phone);
+    AutoPtr<ISubscriptionManager> helper;
+    CSubscriptionManager::AcquireSingleton((ISubscriptionManager**)&helper);
+    Int64 subId = 0;
+    helper->GetDefaultDataSubId(&subId);
+    AutoPtr<IPhone> phone = GetPhone(subId);
     Int32 state;
     phone->GetDataConnectionState(&state);
-    return DefaultPhoneNotifier::ConvertDataState(state, result);
+    assert(0 && "TODO Need DefaultPhoneNotifier");
+    // return DefaultPhoneNotifier::ConvertDataState(state, result);
+    return NOERROR;
 }
 
 ECode CPhoneInterfaceManager::GetDataActivity(
-    /* [out] */ Int32 result)
+    /* [out] */ Int32* result)
 {
     VALIDATE_NOT_NULL(result)
 
-    AutoPtr<IPhone> phone;
-    GetPhone(SubscriptionManager::GetDefaultDataSubId(), (IPhone**)&phone);
+    AutoPtr<ISubscriptionManager> helper;
+    CSubscriptionManager::AcquireSingleton((ISubscriptionManager**)&helper);
+    Int64 subId = 0;
+    helper->GetDefaultDataSubId(&subId);
+    AutoPtr<IPhone> phone = GetPhone(subId);
     Int32 state;
     phone->GetDataActivityState(&state);
-    return DefaultPhoneNotifier::ConvertDataActivityState(state, result);
+    assert(0 && "TODO Need DefaultPhoneNotifier");
+    // return DefaultPhoneNotifier::ConvertDataActivityState(state, result);
+    return NOERROR;
 }
 
 ECode CPhoneInterfaceManager::GetCellLocation(
     /* [out] */ IBundle** bundle)
 {
-    VALIDATE_NOT_NULL(result)
+    VALIDATE_NOT_NULL(bundle)
 
     //try {
     ECode ec = mApp->EnforceCallingOrSelfPermission(
-            android.Manifest.permission.ACCESS_FINE_LOCATION, NULL);
+            Elastos::Droid::Manifest::permission::ACCESS_FINE_LOCATION, String(NULL));
     //} catch (SecurityException e) {
-    if (ec == (ECode)SecurityException) {
+    if (ec == (ECode)E_SECURITY_EXCEPTION) {
         // If we have ACCESS_FINE_LOCATION permission, skip the check for ACCESS_COARSE_LOCATION
         // A failure should throw the SecurityException from ACCESS_COARSE_LOCATION since this
         // is the weaker precondition
         mApp->EnforceCallingOrSelfPermission(
-            android.Manifest.permission.ACCESS_COARSE_LOCATION, NULL);
+            Elastos::Droid::Manifest::permission::ACCESS_COARSE_LOCATION, String(NULL));
     }
     //}
 
@@ -1551,7 +1678,9 @@ ECode CPhoneInterfaceManager::GetCellLocation(
         if (DBG_LOC) Log(String("getCellLocation: is active user"));
         AutoPtr<IBundle> data;
         CBundle::New((IBundle**)&data);
-        mPhone.getCellLocation().fillInNotifierBundle(data);
+        AutoPtr<ICellLocation> cl;
+        mPhone->GetCellLocation((ICellLocation**)&cl);
+        cl->FillInNotifierBundle(data);
         *bundle = data;
         REFCOUNT_ADD(*bundle);
         return NOERROR;
@@ -1573,11 +1702,10 @@ ECode CPhoneInterfaceManager::EnableLocationUpdatesForSubscriber(
     /* [in] */ Int64 subId)
 {
     mApp->EnforceCallingOrSelfPermission(
-            android.Manifest.permission.CONTROL_LOCATION_UPDATES, NULL);
+            Elastos::Droid::Manifest::permission::CONTROL_LOCATION_UPDATES, String(NULL));
 
-    AutoPtr<IPhone> phone;
-    GetPhone(subId, (IPhone**)&phone);
-    return phone->EenableLocationUpdates();
+    AutoPtr<IPhone> phone = GetPhone(subId);
+    return phone->EnableLocationUpdates();
 }
 
 ECode CPhoneInterfaceManager::DisableLocationUpdates()
@@ -1589,9 +1717,8 @@ ECode CPhoneInterfaceManager::DisableLocationUpdatesForSubscriber(
     /* [in] */ Int64 subId)
 {
     mApp->EnforceCallingOrSelfPermission(
-            android.Manifest.permission.CONTROL_LOCATION_UPDATES, NULL);
-    AutoPtr<IPhone> phone;
-    GetPhone(subId, (IPhone**)&phone);
+            Elastos::Droid::Manifest::permission::CONTROL_LOCATION_UPDATES, String(NULL));
+    AutoPtr<IPhone> phone = GetPhone(subId);
     return phone->DisableLocationUpdates();
 }
 
@@ -1599,44 +1726,44 @@ ECode CPhoneInterfaceManager::GetNeighboringCellInfo(
     /* [in] */ const String& callingPackage,
     /* [out] */ IList** list)
 {
-    VALIDATE_NOT_NULL(result)
+    VALIDATE_NOT_NULL(list)
 
     //try {
     ECode ec = mApp->EnforceCallingOrSelfPermission(
-                android.Manifest.permission.ACCESS_FINE_LOCATION, NULL);
+                Elastos::Droid::Manifest::permission::ACCESS_FINE_LOCATION, String(NULL));
     //} catch (SecurityException e) {
-    if (ec == (ECode)SecurityException) {
+    if (ec == (ECode)E_SECURITY_EXCEPTION) {
         // If we have ACCESS_FINE_LOCATION permission, skip the check
         // for ACCESS_COARSE_LOCATION
         // A failure should throw the SecurityException from
         // ACCESS_COARSE_LOCATION since this is the weaker precondition
         mApp->EnforceCallingOrSelfPermission(
-                android.Manifest.permission.ACCESS_COARSE_LOCATION, NULL);
+                Elastos::Droid::Manifest::permission::ACCESS_COARSE_LOCATION, String(NULL));
     }
     //}
 
     Int32 op;
-    mAppOps->NoteOp(IAppOpsManager::OP_NEIGHBORING_CELLS, Binder.getCallingUid(),
+    mAppOps->NoteOp(IAppOpsManager::OP_NEIGHBORING_CELLS, Binder::GetCallingUid(),
             callingPackage, &op);
     if (op != IAppOpsManager::MODE_ALLOWED) {
         *list = NULL;
         return NOERROR;
     }
     if (CheckIfCallerIsSelfOrForegroundUser()) {
-        if (DBG_LOC) Log(Srting("getNeighboringCellInfo: is active user"));
+        if (DBG_LOC) Log(String("getNeighboringCellInfo: is active user"));
 
         AutoPtr<IArrayList> cells;
 
         //try {
         AutoPtr<IInterface> obj;
-        ECode ec = sendRequest(CMD_HANDLE_NEIGHBORING_CELL, NULL, NULL, (IInterface**)&obj);
+        ECode ec = SendRequest(CMD_HANDLE_NEIGHBORING_CELL, NULL, NULL, (IInterface**)&obj);
         cells = IArrayList::Probe(obj);
         //} catch (RuntimeException e) {
-        if (ec == (ECode)RuntimeException) {
+        if (ec == (ECode)E_RUNTIME_EXCEPTION) {
             Logger::E(TAG, "getNeighboringCellInfo %d", ec);
         }
         //}
-        *list = cells;
+        *list = IList::Probe(cells);
         REFCOUNT_ADD(*list)
         return NOERROR;
     }
@@ -1651,18 +1778,18 @@ ECode CPhoneInterfaceManager::GetNeighboringCellInfo(
 ECode CPhoneInterfaceManager::GetAllCellInfo(
     /* [out] */ IList** list)
 {
-    VALIDATE_NOT_NULL(result)
+    VALIDATE_NOT_NULL(list)
 
     //try {
-    ECode ec = mApp.enforceCallingOrSelfPermission(
-            android.Manifest.permission.ACCESS_FINE_LOCATION, NULL);
+    ECode ec = mApp->EnforceCallingOrSelfPermission(
+            Elastos::Droid::Manifest::permission::ACCESS_FINE_LOCATION, String(NULL));
     //} catch (SecurityException e) {
-    if (ec == (ECode)SecurityException) {
+    if (ec == (ECode)E_SECURITY_EXCEPTION) {
         // If we have ACCESS_FINE_LOCATION permission, skip the check for ACCESS_COARSE_LOCATION
         // A failure should throw the SecurityException from ACCESS_COARSE_LOCATION since this
         // is the weaker precondition
         mApp->EnforceCallingOrSelfPermission(
-            android.Manifest.permission.ACCESS_COARSE_LOCATION, NULL);
+            Elastos::Droid::Manifest::permission::ACCESS_COARSE_LOCATION, String(NULL));
     }
     //}
 
@@ -1688,36 +1815,40 @@ Boolean CPhoneInterfaceManager::CheckIfCallerIsSelfOrForegroundUser()
 {
     Boolean ok;
 
-    Boolean self = Binder::GetCallingUid() == Process::GetMyUid();
+    Boolean self = Binder::GetCallingUid() == Process::MyUid();
     if (!self) {
         // Get the caller's user id then clear the calling identity
         // which will be restored in the finally clause.
-        Int32 callingUser = UserHandle::GetCallingUserId();
+        AutoPtr<IUserHandleHelper> helper;
+        CUserHandleHelper::AcquireSingleton((IUserHandleHelper**)&helper);
+        Int32 callingUser = 0;
+        helper->GetCallingUserId(&callingUser);
         Int64 ident = Binder::ClearCallingIdentity();
 
         //try {
-            // With calling identity cleared the current user is the foreground user.
-            Int32 foregroundUser;
-            ECode ec;
-            FAIL_GOTO(ec = ActivityManager::GetCurrentUser(&foregroundUser), ERROR)
-            ok = (foregroundUser == callingUser);
-            if (DBG_LOC) {
-                StringBuilder sb;
-                sb += "checkIfCallerIsSelfOrForegoundUser: foregroundUser=";
-                sb += foregroundUser;
-                sb += " callingUser=";
-                sb += callingUser;
-                sb += " ok=";
-                sb += ok;
-                Log(sb.ToString());
-            }
+        // With calling identity cleared the current user is the foreground user.
+        Int32 foregroundUser;
+        ECode ec;
+        AutoPtr<IActivityManagerHelper> amHelper;
+        CActivityManagerHelper::AcquireSingleton((IActivityManagerHelper**)&amHelper);
+        FAIL_GOTO(ec = amHelper->GetCurrentUser(&foregroundUser), ERROR)
+        ok = (foregroundUser == callingUser);
+        if (DBG_LOC) {
+            StringBuilder sb;
+            sb += "checkIfCallerIsSelfOrForegoundUser: foregroundUser=";
+            sb += foregroundUser;
+            sb += " callingUser=";
+            sb += callingUser;
+            sb += " ok=";
+            sb += ok;
+            Log(sb.ToString());
+        }
         //} catch (Exception ex) {
     ERROR:
-            if (DBG_LOC) Loge(String("checkIfCallerIsSelfOrForegoundUser: Exception ex=")
-                    + StringUtils::ToString(ex));
-            ok = FALSE;
+        if (DBG_LOC) Loge(String("checkIfCallerIsSelfOrForegoundUser: Exception ex="));
+        ok = FALSE;
         //} finally {
-            Binder::RestoreCallingIdentity(ident);
+        Binder::RestoreCallingIdentity(ident);
         //}
     }
     else {
@@ -1730,51 +1861,58 @@ Boolean CPhoneInterfaceManager::CheckIfCallerIsSelfOrForegroundUser()
 
 ECode CPhoneInterfaceManager::EnforceReadPermission()
 {
-    return mApp->EnforceCallingOrSelfPermission(android.Manifest.permission.READ_PHONE_STATE, NULL);
+    return mApp->EnforceCallingOrSelfPermission(
+        Elastos::Droid::Manifest::permission::READ_PHONE_STATE, String(NULL));
 }
 
 ECode CPhoneInterfaceManager::EnforceModifyPermission()
 {
-    return mApp->nforceCallingOrSelfPermission(android.Manifest.permission.MODIFY_PHONE_STATE, NULL);
+    return mApp->EnforceCallingOrSelfPermission(
+        Elastos::Droid::Manifest::permission::MODIFY_PHONE_STATE, String(NULL));
 }
 
 ECode CPhoneInterfaceManager::EnforceModifyPermissionOrCarrierPrivilege()
 {
     Int32 permission;
     mApp->CheckCallingOrSelfPermission(
-            android.Manifest.permission.MODIFY_PHONE_STATE, &permission);
+            Elastos::Droid::Manifest::permission::MODIFY_PHONE_STATE, &permission);
     if (permission == IPackageManager::PERMISSION_GRANTED) {
         return NOERROR;
     }
 
     Log(String("No modify permission, check carrier privilege next."));
-    if (HasCarrierPrivileges() != ITelephonyManager::CARRIER_PRIVILEGE_STATUS_HAS_ACCESS) {
+    Int32 v = 0;
+    HasCarrierPrivileges(&v);
+    if (v != ITelephonyManager::CARRIER_PRIVILEGE_STATUS_HAS_ACCESS) {
         Loge(String("No Carrier Privilege."));
         //throw new SecurityException("No modify permission or carrier privilege.");
-        return SecurityException;
+        return E_SECURITY_EXCEPTION;
     }
     return NOERROR;
 }
 
 ECode CPhoneInterfaceManager::EnforceCarrierPrivilege()
 {
-    if (HasCarrierPrivileges() != ITelephonyManager::CARRIER_PRIVILEGE_STATUS_HAS_ACCESS) {
+    Int32 v = 0;
+    HasCarrierPrivileges(&v);
+    if (v != ITelephonyManager::CARRIER_PRIVILEGE_STATUS_HAS_ACCESS) {
         Loge(String("No Carrier Privilege."));
         //throw new SecurityException("No Carrier Privilege.");
-        return SecurityException;
+        return E_SECURITY_EXCEPTION;
     }
     return NOERROR;
 }
 
-void CPhoneInterfaceManager::EnforceCallPermission()
+ECode CPhoneInterfaceManager::EnforceCallPermission()
 {
-    return mApp->EnforceCallingOrSelfPermission(android.Manifest.permission.CALL_PHONE, NULL);
+    return mApp->EnforceCallingOrSelfPermission(
+        Elastos::Droid::Manifest::permission::CALL_PHONE, String(NULL));
 }
 
-void CPhoneInterfaceManager::EnforcePrivilegedPhoneStatePermission()
+ECode CPhoneInterfaceManager::EnforcePrivilegedPhoneStatePermission()
 {
-    return mApp->EnforceCallingOrSelfPermission(android.Manifest.permission.READ_PRIVILEGED_PHONE_STATE,
-            NULL);
+    return mApp->EnforceCallingOrSelfPermission(
+        Elastos::Droid::Manifest::permission::READ_PRIVILEGED_PHONE_STATE, String(NULL));
 }
 
 String CPhoneInterfaceManager::CreateTelUrl(
@@ -1819,8 +1957,7 @@ ECode CPhoneInterfaceManager::GetActivePhoneTypeForSubscriber(
 {
     VALIDATE_NOT_NULL(result)
 
-    AutoPtr<IPhone> phone;
-    GetPhone(subId, (IPhone**)&phone);
+    AutoPtr<IPhone> phone = GetPhone(subId);
     return phone->GetPhoneType(result);
 }
 
@@ -1838,8 +1975,7 @@ ECode CPhoneInterfaceManager::GetCdmaEriIconIndexForSubscriber(
 {
     VALIDATE_NOT_NULL(result)
 
-    AutoPtr<IPhone> phone;
-    GetPhone(subId, (IPhone**)&phone);
+    AutoPtr<IPhone> phone = GetPhone(subId);
     return phone->GetCdmaEriIconIndex(result);
 }
 
@@ -1857,8 +1993,7 @@ ECode CPhoneInterfaceManager::GetCdmaEriIconModeForSubscriber(
 {
     VALIDATE_NOT_NULL(result)
 
-    AutoPtr<IPhone> phone;
-    GetPhone(subId, (IPhone**)&phone);
+    AutoPtr<IPhone> phone = GetPhone(subId);
     return phone->GetCdmaEriIconMode(result);
 }
 
@@ -1876,8 +2011,7 @@ ECode CPhoneInterfaceManager::GetCdmaEriTextForSubscriber(
 {
     VALIDATE_NOT_NULL(str)
 
-    AutoPtr<IPhone> phone;
-    GetPhone(subId, (IPhone**)&phone);
+    AutoPtr<IPhone> phone = GetPhone(subId);
     return phone->GetCdmaEriText(str);
 }
 
@@ -1891,8 +2025,7 @@ ECode CPhoneInterfaceManager::GetCdmaMdn(
     Int32 type;
     mPhone->GetPhoneType(&type);
     if (type == IPhoneConstants::PHONE_TYPE_CDMA) {
-        AutoPtr<IPhone> phone;
-        GetPhone(subId, (IPhone**)&phone);
+        AutoPtr<IPhone> phone = GetPhone(subId);
         return phone->GetLine1Number(str);
     }
     else {
@@ -1912,8 +2045,7 @@ ECode CPhoneInterfaceManager::GetCdmaMin(
     Int32 type;
     mPhone->GetPhoneType(&type);
     if (type == IPhoneConstants::PHONE_TYPE_CDMA) {
-        AutoPtr<IPhone> phone;
-        GetPhone(subId, (IPhone**)&phone);
+        AutoPtr<IPhone> phone = GetPhone(subId);
         return phone->GetCdmaMin(str);
     }
     else {
@@ -1945,8 +2077,7 @@ ECode CPhoneInterfaceManager::GetVoiceMessageCountForSubscriber(
 {
     VALIDATE_NOT_NULL(result)
 
-    AutoPtr<IPhone> phone;
-    GetPhone(subId, (IPhone**)&phone);
+    AutoPtr<IPhone> phone = GetPhone(subId);
     return phone->GetVoiceMessageCount(result);
 }
 
@@ -1964,8 +2095,7 @@ ECode CPhoneInterfaceManager::GetNetworkTypeForSubscriber(
 {
     VALIDATE_NOT_NULL(result)
 
-    AutoPtr<IPhone> phone;
-    GetPhone(subId, (IPhone**)&phone);
+    AutoPtr<IPhone> phone = GetPhone(subId);
     AutoPtr<IServiceState> serviceState;
     phone->GetServiceState((IServiceState**)&serviceState);
     return serviceState->GetDataNetworkType(result);
@@ -1985,8 +2115,7 @@ ECode CPhoneInterfaceManager::GetDataNetworkTypeForSubscriber(
 {
     VALIDATE_NOT_NULL(result)
 
-    AutoPtr<IPhone> phone;
-    GetPhone(subId, (IPhone**)&phone);
+    AutoPtr<IPhone> phone = GetPhone(subId);
     AutoPtr<IServiceState> serviceState;
     phone->GetServiceState((IServiceState**)&serviceState);
     return serviceState->GetDataNetworkType(result);
@@ -2006,8 +2135,7 @@ ECode CPhoneInterfaceManager::GetVoiceNetworkTypeForSubscriber(
 {
     VALIDATE_NOT_NULL(result)
 
-    AutoPtr<IPhone> phone;
-    GetPhone(subId, (IPhone**)&phone);
+    AutoPtr<IPhone> phone = GetPhone(subId);
     AutoPtr<IServiceState> serviceState;
     phone->GetServiceState((IServiceState**)&serviceState);
     return serviceState->GetVoiceNetworkType(result);
@@ -2028,8 +2156,7 @@ ECode CPhoneInterfaceManager::HasIccCardUsingSlotId(
 {
     VALIDATE_NOT_NULL(result)
 
-    AutoPtr<IPhone> phone;
-    GetPhone(subId, (IPhone**)&phone);
+    AutoPtr<IPhone> phone = GetPhone(slotId);
     AutoPtr<IIccCard> iccCard;
     phone->GetIccCard((IIccCard**)&iccCard);
     return iccCard->HasIccCard(result);
@@ -2049,8 +2176,7 @@ ECode CPhoneInterfaceManager::GetLteOnCdmaModeForSubscriber(
 {
     VALIDATE_NOT_NULL(result)
 
-    AutoPtr<IPhone> phone;
-    GetPhone(subId, (IPhone**)&phone);
+    AutoPtr<IPhone> phone = GetPhone(subId);
     return phone->GetLteOnCdmaMode(result);
 }
 
@@ -2063,12 +2189,20 @@ ECode CPhoneInterfaceManager::SetPhone(
 
 Int64 CPhoneInterfaceManager::GetDefaultSubscription()
 {
-    return SubscriptionManager::GetDefaultSubId();
+    AutoPtr<ISubscriptionManager> helper;
+    CSubscriptionManager::AcquireSingleton((ISubscriptionManager**)&helper);
+    Int64 subId = 0;
+    helper->GetDefaultSubId(&subId);
+    return subId;
 }
 
 Int64 CPhoneInterfaceManager::GetPreferredVoiceSubscription()
 {
-    return SubscriptionManager::GetDefaultVoiceSubId();
+    AutoPtr<ISubscriptionManager> helper;
+    CSubscriptionManager::AcquireSingleton((ISubscriptionManager**)&helper);
+    Int64 subId = 0;
+    helper->GetDefaultVoiceSubId(&subId);
+    return subId;
 }
 
 ECode CPhoneInterfaceManager::GetWhenToMakeWifiCalls(
@@ -2084,6 +2218,7 @@ ECode CPhoneInterfaceManager::GetWhenToMakeWifiCalls(
     CSettingsSystem::AcquireSingleton((ISettingsSystem**)&helper);
     helper->GetInt32(contentResolver, ISettingsSystem::WHEN_TO_MAKE_WIFI_CALLS,
             GetWhenToMakeWifiCallsDefaultPreference(), result);
+    return NOERROR;
 }
 
 ECode CPhoneInterfaceManager::SetWhenToMakeWifiCalls(
@@ -2098,8 +2233,9 @@ ECode CPhoneInterfaceManager::SetWhenToMakeWifiCalls(
     context->GetContentResolver((IContentResolver**)&contentResolver);
     AutoPtr<ISettingsSystem> helper;
     CSettingsSystem::AcquireSingleton((ISettingsSystem**)&helper);
+    Boolean tmp = FALSE;
     return helper->PutInt32(contentResolver, ISettingsSystem::WHEN_TO_MAKE_WIFI_CALLS,
-            preference);
+            preference, &tmp);
 }
 
 Int32 CPhoneInterfaceManager::GetWhenToMakeWifiCallsDefaultPreference()
@@ -2118,8 +2254,10 @@ ECode CPhoneInterfaceManager::IccOpenLogicalChannel(
 
     if (DBG) Log(String("iccOpenLogicalChannel: ") + AID);
 
+    AutoPtr<ICharSequence> cs;
+    CString::New(AID, (ICharSequence**)&cs);
     AutoPtr<IInterface> obj;
-    SendRequest(CMD_OPEN_CHANNEL, AID, (IInterface**)&obj);
+    SendRequest(CMD_OPEN_CHANNEL, cs, (IInterface**)&obj);
     AutoPtr<IIccOpenLogicalChannelResponse> response = IIccOpenLogicalChannelResponse::Probe(obj);
     if (DBG) Log(String("iccOpenLogicalChannel: ") + TO_CSTR(response));
     *respanse = response;
@@ -2141,8 +2279,10 @@ ECode CPhoneInterfaceManager::IccCloseLogicalChannel(
       return NOERROR;
     }
 
-    AutoPtr<IInterfaces> obj;
-    SendRequest(CMD_CLOSE_CHANNEL, channel, (IInterfaces**)&obj);
+    AutoPtr<IInteger32> io;
+    CInteger32::New(channel, (IInteger32**)&io);
+    AutoPtr<IInterface> obj;
+    SendRequest(CMD_CLOSE_CHANNEL, io, (IInterface**)&obj);
     AutoPtr<IBoolean> value = IBoolean::Probe(obj);
     Boolean success;
     value->GetValue(&success);
@@ -2190,18 +2330,19 @@ ECode CPhoneInterfaceManager::IccTransmitApduLogicalChannel(
     }
 
     AutoPtr<IccAPDUArgument> arg = new IccAPDUArgument(channel, cla, command, p1, p2, p3, data);
-    AutoPtr<IInterfaces> obj;
-    SendRequest(CMD_TRANSMIT_APDU_LOGICAL_CHANNEL, arg, (IInterfaces**)&obj);
+    AutoPtr<IInterface> obj;
+    SendRequest(CMD_TRANSMIT_APDU_LOGICAL_CHANNEL, arg->Probe(EIID_IInterface), (IInterface**)&obj);
 
     AutoPtr<IIccIoResult> response = IIccIoResult::Probe(obj);
     if (DBG) Log(String("iccTransmitApduLogicalChannel: ") + TO_CSTR(response));
 
     // Append the returned status code to the end of the response payload.
-    String s = Integer.toHexString(
-            (response.sw1 << 8) + response.sw2 + 0x10000).substring(1);
-    if (response.payload != NULL) {
-        s = IccUtils::BytesToHexString(response.payload) + s;
-    }
+    String s;
+    assert(0 && "TDOO Need IccIoResulthelper");
+    // s = StringUtils::ToHexString((response->mSw1 << 8) + response->mSw2 + 0x10000).Substring(1);
+    // if (response->mPayload != NULL) {
+    //     s = IccUtils::BytesToHexString(response->mPayload) + s;
+    // }
     *result = s;
     return NOERROR;
 }
@@ -2237,18 +2378,19 @@ ECode CPhoneInterfaceManager::IccTransmitApduBasicChannel(
     }
 
     AutoPtr<IccAPDUArgument> arg = new IccAPDUArgument(0, cla, command, p1, p2, p3, data);
-    AutoPtr<IInterfaces> obj;
-    SendRequest(CMD_TRANSMIT_APDU_BASIC_CHANNEL, arg, (IInterfaces**)&obj);
+    AutoPtr<IInterface> obj;
+    SendRequest(CMD_TRANSMIT_APDU_BASIC_CHANNEL, arg->Probe(EIID_IInterface), (IInterface**)&obj);
 
     AutoPtr<IIccIoResult> response = IIccIoResult::Probe(obj);
     if (DBG) Log(String("iccTransmitApduBasicChannel: ") + TO_CSTR(response));
 
     // Append the returned status code to the end of the response payload.
-    String s = Integer.toHexString(
-            (response.sw1 << 8) + response.sw2 + 0x10000).substring(1);
-    if (response.payload != null) {
-        s = IccUtils::BytesToHexString(response.payload) + s;
-    }
+    String s;
+    assert(0 && "TDOO Need IccIoResulthelper");
+    // s = StringUtils::ToHexString((response->mSw1 << 8) + response->mSw2 + 0x10000).Substring(1);
+    // if (response->mPayload != NULL) {
+    //     s = IccUtils::BytesToHexString(response->mPayload) + s;
+    // }
     *result = s;
     return NOERROR;
 }
@@ -2284,8 +2426,8 @@ ECode CPhoneInterfaceManager::IccExchangeSimIO(
     }
 
     AutoPtr<IccAPDUArgument> arg = new IccAPDUArgument(-1, fileID, command, p1, p2, p3, filePath);
-    AutoPtr<IInterfaces> obj;
-    SendRequest(CMD_EXCHANGE_SIM_IO, arg, (IInterfaces**)&obj);
+    AutoPtr<IInterface> obj;
+    SendRequest(CMD_EXCHANGE_SIM_IO, arg->Probe(EIID_IInterface), (IInterface**)&obj);
 
     AutoPtr<IIccIoResult> response = IIccIoResult::Probe(obj);
 
@@ -2294,18 +2436,19 @@ ECode CPhoneInterfaceManager::IccExchangeSimIO(
     }
 
     AutoPtr<ArrayOf<Byte> > result;
-    Int32 length = 2;
-    if (response.payload != null) {
-        length = 2 + response.payload.length;
-        result = ArrayOf<Byte>::Alloc(length);
-        System.arraycopy(response.payload, 0, result, 0, response.payload.length);
-    }
-    else {
-        result = ArrayOf<Byte>::Alloc(length);
-    }
+    assert(0 && "TDOO Need IccIoResulthelper");
+    // Int32 length = 2;
+    // // if (response.payload != NULL) {
+    // //     length = 2 + response.payload.length;
+    // //     result = ArrayOf<Byte>::Alloc(length);
+    // //     System.arraycopy(response.payload, 0, result, 0, response.payload.length);
+    // // }
+    // // else {
+    // //     result = ArrayOf<Byte>::Alloc(length);
+    // // }
 
-    (*result)[length - 1] = (Byte)response.sw2;
-    (*result)[length - 2] = (Byte)response.sw1;
+    // (*result)[length - 1] = (Byte)response.sw2;
+    // (*result)[length - 2] = (Byte)response.sw1;
     *array = result;
     REFCOUNT_ADD(*array);
     return NOERROR;
@@ -2319,18 +2462,22 @@ ECode CPhoneInterfaceManager::SendEnvelopeWithStatus(
 
     EnforceModifyPermissionOrCarrierPrivilege();
 
-    AutoPtr<IInterfaces> obj;
-    SendRequest(CMD_SEND_ENVELOPE, content, (IInterfaces**)&obj);
+    AutoPtr<ICharSequence> cs;
+    CString::New(content, (ICharSequence**)&cs);
+    AutoPtr<IInterface> obj;
+    SendRequest(CMD_SEND_ENVELOPE, cs, (IInterface**)&obj);
     AutoPtr<IIccIoResult> response = IIccIoResult::Probe(obj);
-    if (response.payload == NULL) {
-      *result = String("");
-      return NOERROR;
-    }
+    assert(0 && "TDOO Need IccIoResulthelper");
+    // if (response.payload == NULL) {
+    //   *result = String("");
+    //   return NOERROR;
+    // }
 
     // Append the returned status code to the end of the response payload.
-    String s = Integer.toHexString(
-            (response.sw1 << 8) + response.sw2 + 0x10000).substring(1);
-    s = IccUtils::BytesToHexString(response.payload) + s;
+    String s;
+    assert(0 && "TDOO Need IccIoResulthelper");
+    // s = StringUtils::ToHexString((response->mSw1 << 8) + response->mSw2 + 0x10000).Substring(1);
+    // s = IccUtils::BytesToHexString(response->mPayload) + s;
     *result = s;
     return NOERROR;
 }
@@ -2344,8 +2491,10 @@ ECode CPhoneInterfaceManager::NvReadItem(
     EnforceModifyPermissionOrCarrierPrivilege();
     if (DBG) Log(String("nvReadItem: item ") + StringUtils::ToString(itemID));
 
-    AutoPtr<IInterfaces> obj;
-    SendRequest(CMD_NV_READ_ITEM, itemID, (IInterfaces**)&obj);
+    AutoPtr<IInteger32> io;
+    CInteger32::New(itemID, (IInteger32**)&io);
+    AutoPtr<IInterface> obj;
+    SendRequest(CMD_NV_READ_ITEM, io, (IInterface**)&obj);
     AutoPtr<ICharSequence> cchar = ICharSequence::Probe(obj);
     String value;
     cchar->ToString(&value);
@@ -2380,8 +2529,15 @@ ECode CPhoneInterfaceManager::NvWriteItem(
         Log(sb.ToString());
     }
 
-    AutoPtr<IInterfaces> obj;
-    SendRequest(CMD_NV_WRITE_ITEM, new Pair<Integer, String>(itemID, itemValue), (IInterfaces**)&obj);
+    AutoPtr<IInteger32> first;
+    CInteger32::New(itemID, (IInteger32**)&first);
+    AutoPtr<ICharSequence> second;
+    CString::New(itemValue, (ICharSequence**)&second);
+
+    AutoPtr<IPair> p;
+    CPair::New(first, second, (IPair**)&p);
+    AutoPtr<IInterface> obj;
+    SendRequest(CMD_NV_WRITE_ITEM, p, (IInterface**)&obj);
     AutoPtr<IBoolean> value = IBoolean::Probe(obj);
     Boolean success;
     value->GetValue(&success);
@@ -2404,10 +2560,11 @@ ECode CPhoneInterfaceManager::NvWriteCdmaPrl(
     VALIDATE_NOT_NULL(result)
 
     EnforceModifyPermissionOrCarrierPrivilege();
-    if (DBG) Log(String("nvWriteCdmaPrl: value: ") + HexDump.toHexString(preferredRoamingList));
+    if (DBG) Log(String("nvWriteCdmaPrl: value: ") + StringUtils::ToHexString(*preferredRoamingList));
 
-    AutoPtr<IInterfaces> obj;
-    SendRequest(CMD_NV_WRITE_CDMA_PRL, preferredRoamingList, (IInterfaces**)&obj);
+    AutoPtr<IArrayOf> array = CoreUtils::ConvertByteArray(preferredRoamingList);
+    AutoPtr<IInterface> obj;
+    SendRequest(CMD_NV_WRITE_CDMA_PRL, array, (IInterface**)&obj);
     AutoPtr<IBoolean> value = IBoolean::Probe(obj);
     Boolean success;
     value->GetValue(&success);
@@ -2426,8 +2583,10 @@ ECode CPhoneInterfaceManager::NvResetConfig(
     EnforceModifyPermissionOrCarrierPrivilege();
     if (DBG) Log(String("nvResetConfig: type ") + StringUtils::ToString(resetType));
 
-    AutoPtr<IInterfaces> obj;
-    SendRequest(CMD_NV_RESET_CONFIG, resetType, (IInterfaces**)&obj);
+    AutoPtr<IInteger32> io;
+    CInteger32::New(resetType, (IInteger32**)&io);
+    AutoPtr<IInterface> obj;
+    SendRequest(CMD_NV_RESET_CONFIG, io, (IInterface**)&obj);
     AutoPtr<IBoolean> value = IBoolean::Probe(obj);
     Boolean success;
     value->GetValue(&success);
@@ -2478,7 +2637,9 @@ ECode CPhoneInterfaceManager::GetCalculatedPreferredNetworkType(
     EnforceReadPermission();
     AutoPtr<IContext> context;
     mPhone->GetContext((IContext**)&context);
-    return PhoneFactory::CalculatePreferredNetworkType(context, result);
+    assert(0 && "TODO: Need PhoneFactory");
+    // return PhoneFactory::CalculatePreferredNetworkType(context, result);
+    return NOERROR;
 }
 
 ECode CPhoneInterfaceManager::GetPreferredNetworkType(
@@ -2489,14 +2650,14 @@ ECode CPhoneInterfaceManager::GetPreferredNetworkType(
     EnforceModifyPermissionOrCarrierPrivilege();
     if (DBG) Log(String("getPreferredNetworkType"));
 
-    AutoPtr<IInterfaces> obj;
-    SendRequest(CMD_GET_PREFERRED_NETWORK_TYPE, NULL, (IInterfaces**)&obj);
+    AutoPtr<IInterface> obj;
+    SendRequest(CMD_GET_PREFERRED_NETWORK_TYPE, NULL, (IInterface**)&obj);
     AutoPtr<IArrayOf> array = IArrayOf::Probe(obj);
 
     Int32 networkType;
     if (array != NULL) {
-        AutoPtr<IInterfaces> tmp;
-        array->Get(0, (IInterfaces**)&tmp);
+        AutoPtr<IInterface> tmp;
+        array->Get(0, (IInterface**)&tmp);
         AutoPtr<IInteger32> value = IInteger32::Probe(tmp);
         value->GetValue(&networkType);
     }
@@ -2517,13 +2678,15 @@ ECode CPhoneInterfaceManager::SetPreferredNetworkType(
     EnforceModifyPermissionOrCarrierPrivilege();
     if (DBG) Log(String("setPreferredNetworkType: type ") + StringUtils::ToString(networkType));
 
-    AutoPtr<IInterfaces> obj;
-    SendRequest(CMD_SET_PREFERRED_NETWORK_TYPE, networkType, (IInterfaces**)&obj);
+    AutoPtr<IInteger32> io;
+    CInteger32::New(networkType, (IInteger32**)&io);
+    AutoPtr<IInterface> obj;
+    SendRequest(CMD_SET_PREFERRED_NETWORK_TYPE, io, (IInterface**)&obj);
     AutoPtr<IBoolean> value = IBoolean::Probe(obj);
     Boolean success;
     value->GetValue(&success);
 
-    if (DBG) Log(Srting("setPreferredNetworkType: ") + (success ? Srting("ok") : Srting("fail")));
+    if (DBG) Log(String("setPreferredNetworkType: ") + (success ? String("ok") : String("fail")));
     if (success) {
         AutoPtr<IContext> context;
         mPhone->GetContext((IContext**)&context);
@@ -2531,7 +2694,8 @@ ECode CPhoneInterfaceManager::SetPreferredNetworkType(
         context->GetContentResolver((IContentResolver**)&cr);
         AutoPtr<ISettingsGlobal> helper;
         CSettingsGlobal::AcquireSingleton((ISettingsGlobal**)&helper);
-        helper->PutInt32(cr, ISettingsGlobal::PREFERRED_NETWORK_MODE, networkType);
+        Boolean tmp = FALSE;
+        helper->PutInt32(cr, ISettingsGlobal::PREFERRED_NETWORK_MODE, networkType, &tmp);
     }
     *result = success;
     return NOERROR;
@@ -2551,11 +2715,11 @@ ECode CPhoneInterfaceManager::GetDataEnabled(
 
     //try {
     ECode ec = mApp->EnforceCallingOrSelfPermission(
-            android.Manifest.permission.ACCESS_NETWORK_STATE, NULL);
+        Elastos::Droid::Manifest::permission::ACCESS_NETWORK_STATE, String(NULL));
     //} catch (Exception e) {
     if (FAILED(ec)) {
-        mApp->EnforceCallingOrSelfPermission(android.Manifest.permission.MODIFY_PHONE_STATE,
-                NULL);
+        mApp->EnforceCallingOrSelfPermission(
+            Elastos::Droid::Manifest::permission::MODIFY_PHONE_STATE, String(NULL));
     }
     //}
     return mPhone->GetDataEnabled(result);
@@ -2568,8 +2732,8 @@ ECode CPhoneInterfaceManager::HasCarrierPrivileges(
 
     AutoPtr<IUiccControllerHelper> helper;
     CUiccControllerHelper::AcquireSingleton((IUiccControllerHelper**)&helper);
-    AutoPtr<UiccController> controller;
-    helper->GetInstance((UiccController**)&controller);
+    AutoPtr<IUiccController> controller;
+    helper->GetInstance((IUiccController**)&controller);
 
     AutoPtr<IUiccCard> card;
     controller->GetUiccCard((IUiccCard**)&card);
@@ -2594,8 +2758,8 @@ ECode CPhoneInterfaceManager::CheckCarrierPrivilegesForPackage(
 
     AutoPtr<IUiccControllerHelper> helper;
     CUiccControllerHelper::AcquireSingleton((IUiccControllerHelper**)&helper);
-    AutoPtr<UiccController> controller;
-    helper->GetInstance((UiccController**)&controller);
+    AutoPtr<IUiccController> controller;
+    helper->GetInstance((IUiccController**)&controller);
     AutoPtr<IUiccCard> card;
     controller->GetUiccCard((IUiccCard**)&card);
 
@@ -2620,8 +2784,8 @@ ECode CPhoneInterfaceManager::GetCarrierPackageNamesForIntent(
 
     AutoPtr<IUiccControllerHelper> helper;
     CUiccControllerHelper::AcquireSingleton((IUiccControllerHelper**)&helper);
-    AutoPtr<UiccController> controller;
-    helper->GetInstance((UiccController**)&controller);
+    AutoPtr<IUiccController> controller;
+    helper->GetInstance((IUiccController**)&controller);
     AutoPtr<IUiccCard> card;
     controller->GetUiccCard((IUiccCard**)&card);
 
@@ -2641,8 +2805,7 @@ ECode CPhoneInterfaceManager::GetCarrierPackageNamesForIntent(
 String CPhoneInterfaceManager::GetIccId(
     /* [in] */ Int64 subId)
 {
-    AutoPtr<IPhone> phone;
-    GetPhone(subId, (IPhone**)&phone);
+    AutoPtr<IPhone> phone = GetPhone(subId);
     AutoPtr<IUiccCard> card;
     phone->GetUiccCard((IUiccCard**)&card);
     if (card == NULL) {
@@ -2652,7 +2815,7 @@ String CPhoneInterfaceManager::GetIccId(
     String iccId;
     card->GetIccId(&iccId);
     if (TextUtils::IsEmpty(iccId)) {
-        Loge(String("getIccId: ICC ID is null or empty."));
+        Loge(String("getIccId: ICC ID is NULL or empty."));
         return String(NULL);
     }
     return iccId;
@@ -2664,19 +2827,19 @@ ECode CPhoneInterfaceManager::EnableSimplifiedNetworkSettingsForSubscriber(
 {
     EnforceModifyPermissionOrCarrierPrivilege();
 
-    String iccId;
-    GetIccId(subId, &iccId);
+    String iccId = GetIccId(subId);
     if (!iccId.IsNull()) {
         String snsPrefKey = PREF_CARRIERS_SIMPLIFIED_NETWORK_SETTINGS_PREFIX + iccId;
         AutoPtr<ISharedPreferencesEditor> editor;
-        carrierPrivilegeConfigs->Edit((ISharedPreferencesEditor**)&editor);
+        mCarrierPrivilegeConfigs->Edit((ISharedPreferencesEditor**)&editor);
         if (enable) {
             editor->PutBoolean(snsPrefKey, TRUE);
         }
         else {
             editor->Remove(snsPrefKey);
         }
-        editor->Commit();
+        Boolean tmp = FALSE;
+        editor->Commit(&tmp);
     }
     return NOERROR;
 }
@@ -2688,11 +2851,10 @@ ECode CPhoneInterfaceManager::GetSimplifiedNetworkSettingsEnabledForSubscriber(
     VALIDATE_NOT_NULL(result)
 
     EnforceReadPermission();
-    String iccId;
-    GetIccId(subId, &iccId);
+    String iccId = GetIccId(subId);
     if (!iccId.IsNull()) {
         String snsPrefKey = PREF_CARRIERS_SIMPLIFIED_NETWORK_SETTINGS_PREFIX + iccId;
-        return carrierPrivilegeConfigs->GetBoolean(snsPrefKey, FALSE, result);
+        return mCarrierPrivilegeConfigs->GetBoolean(snsPrefKey, FALSE, result);
     }
     *result = FALSE;
     return NOERROR;
@@ -2705,12 +2867,11 @@ ECode CPhoneInterfaceManager::SetLine1NumberForDisplayForSubscriber(
 {
     EnforceModifyPermissionOrCarrierPrivilege();
 
-    String iccId;
-    GetIccId(subId, &iccId);
+    String iccId = GetIccId(subId);
     if (!iccId.IsNull()) {
         String alphaTagPrefKey = PREF_CARRIERS_ALPHATAG_PREFIX + iccId;
         AutoPtr<ISharedPreferencesEditor> editor;
-        carrierPrivilegeConfigs->Edit((ISharedPreferencesEditor**)&editor);
+        mCarrierPrivilegeConfigs->Edit((ISharedPreferencesEditor**)&editor);
         if (alphaTag.IsNull()) {
             editor->Remove(alphaTagPrefKey);
         }
@@ -2725,7 +2886,8 @@ ECode CPhoneInterfaceManager::SetLine1NumberForDisplayForSubscriber(
         else {
             editor->PutString(numberPrefKey, number);
         }
-        editor->Commit();
+        Boolean tmp = FALSE;
+        editor->Commit(&tmp);
     }
     return NOERROR;
 }
@@ -2738,11 +2900,10 @@ ECode CPhoneInterfaceManager::GetLine1NumberForDisplay(
 
     EnforceReadPermission();
 
-    String iccId;
-    GetIccId(subId, &iccId);
+    String iccId = GetIccId(subId);
     if (!iccId.IsNull()) {
         String numberPrefKey = PREF_CARRIERS_NUMBER_PREFIX + iccId;
-        return carrierPrivilegeConfigs->GetString(numberPrefKey, NULL, result);
+        return mCarrierPrivilegeConfigs->GetString(numberPrefKey, String(NULL), result);
     }
     *result = String(NULL);
     return NOERROR;
@@ -2756,11 +2917,10 @@ ECode CPhoneInterfaceManager::GetLine1AlphaTagForDisplay(
 
     EnforceReadPermission();
 
-    String iccId;
-    GetIccId(subId, &iccId);
+    String iccId = GetIccId(subId);
     if (iccId != NULL) {
         String alphaTagPrefKey = PREF_CARRIERS_ALPHATAG_PREFIX + iccId;
-        return carrierPrivilegeConfigs->GetString(alphaTagPrefKey, NULL, result);
+        return mCarrierPrivilegeConfigs->GetString(alphaTagPrefKey, String(NULL), result);
     }
     *result = String(NULL);
     return NOERROR;
@@ -2778,7 +2938,7 @@ ECode CPhoneInterfaceManager::SetOperatorBrandOverride(
 
 ECode CPhoneInterfaceManager::InvokeOemRilRequestRaw(
     /* [in] */ ArrayOf<Byte>* oemReq,
-    /* [in] */ ArrayOf<Byte>* oemResp,
+    /* [out, callee] */ ArrayOf<Byte>** oemResp,
     /* [out] */ Int32* result)
 {
     VALIDATE_NOT_NULL(result)
@@ -2786,42 +2946,67 @@ ECode CPhoneInterfaceManager::InvokeOemRilRequestRaw(
     EnforceModifyPermission();
 
     Int32 returnValue = 0;
+    ECode ec = NOERROR;
     //try
-    {
-        ECode ec = NOERROR;
-        AutoPtr<IInterfaces> obj;
-        SendRequest(CMD_INVOKE_OEM_RIL_REQUEST_RAW, oemReq, (IInterfaces**)&obj);
-        AutoPtr<IAsyncResult> result = IAsyncResult::Probe(obj);
-        if(result.exception == NULL) {
-            if (result.result != NULL) {
-                AutoPtr<ArrayOf<Byte> > responseData = (byte[])(result.result);
-                if(responseData->GetLength() > oemResp->GetLength()) {
+    do {
+        AutoPtr<IArrayOf> array = CoreUtils::ConvertByteArray(oemReq);
+        AutoPtr<IInterface> obj;
+        if (FAILED(ec = SendRequest(CMD_INVOKE_OEM_RIL_REQUEST_RAW, array, (IInterface**)&obj))) {
+            break;
+        }
+        AsyncResult* result = (AsyncResult*)IAsyncResult::Probe(obj);
+        if(result->mException == NULL) {
+            if (result->mResult != NULL) {
+                AutoPtr<IArrayOf> data = IArrayOf::Probe(result->mResult);
+                assert(data != NULL);
+                Int32 len = 0;
+                data->GetLength(&len);
+                AutoPtr<ArrayOf<Byte> > responseData = ArrayOf<Byte>::Alloc(len);
+                for (Int32 i = 0; i < len; i++) {
+                    AutoPtr<IInterface> o;
+                    data->Get(i, (IInterface**)&o);
+                    Byte b;
+                    IByte::Probe(o)->GetValue(&b);
+                    (*responseData)[i] = b;
+                }
+                if(responseData->GetLength() > (*oemResp)->GetLength()) {
                     StringBuilder sb;
                     sb += "Buffer to copy response too small: Response length is ";
                     sb += responseData->GetLength();
                     sb += "bytes. Buffer Size is ";
-                    sb += oemResp->GetLength();
+                    sb += (*oemResp)->GetLength();
                     sb += "bytes.";
                     Logger::W(TAG, sb.ToString());
                 }
-                System.arraycopy(responseData, 0, oemResp, 0, responseData.length);
+                (*oemResp)->Copy(0, responseData, 0, len);
+                // System.arraycopy(responseData, 0, oemResp, 0, responseData.length);
                 returnValue = responseData->GetLength();
             }
         }
         else {
-            CommandException ex = (CommandException) result.exception;
-            returnValue = ex.getCommandError().ordinal();
+            assert(0 && "TODO need CommandException");
+            // CommandException ex = (CommandException) result.exception;
+            // returnValue = ex.getCommandError().ordinal();
             if(returnValue > 0) returnValue *= -1;
         }
-    }
+    } while (0);
     //catch (RuntimeException e) {
-    if (ec == (ECode)RuntimeException) {
+    if (ec == (ECode)E_RUNTIME_EXCEPTION) {
         Logger::W(TAG, "sendOemRilRequestRaw: Runtime Exception");
-        returnValue = (CommandException.Error.GENERIC_FAILURE.ordinal());
+        assert(0 && "TODO need CommandException");
+        // returnValue = (CommandException.Error.GENERIC_FAILURE.ordinal());
         if(returnValue > 0) returnValue *= -1;
     }
 
     *result = returnValue;
+    return NOERROR;
+}
+
+ECode CPhoneInterfaceManager::ToString(
+    /* [out] */ String* result)
+{
+    VALIDATE_NOT_NULL(result);
+    *result = String("Elastos.Droid.Phone.CPhoneInterfaceManager");
     return NOERROR;
 }
 

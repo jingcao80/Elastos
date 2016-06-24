@@ -129,7 +129,7 @@ private:
         TO_STRING_IMPL("CPhoneInterfaceManager::MainThreadHandler")
 
         MainThreadHandler(
-            /* [in] */ CPhoneInterfaceManager::UnlockSim* host);
+            /* [in] */ CPhoneInterfaceManager* host);
 
         CARAPI HandleMessage(
             /* [in] */ IMessage* msg);
@@ -140,8 +140,10 @@ private:
             /* [in] */ const String& command);
 
     private:
-        CPhoneInterfaceManager::UnlockSim* mHost;
+        CPhoneInterfaceManager* mHost;
     };
+
+    class UnlockSim;
 
     class MyHandler
         : public Handler
@@ -150,13 +152,13 @@ private:
         TO_STRING_IMPL("CPhoneInterfaceManager::MyHandler")
 
         MyHandler(
-            /* [in] */ CPhoneInterfaceManager* host);
+            /* [in] */ CPhoneInterfaceManager::UnlockSim* host);
 
         CARAPI HandleMessage(
             /* [in] */ IMessage* msg);
 
     private:
-        CPhoneInterfaceManager* mHost;
+        CPhoneInterfaceManager::UnlockSim* mHost;
     };
 
     /**
@@ -188,7 +190,7 @@ private:
             /* [in] */ const String& pin,
             /* [out, callee] */ ArrayOf<Int32>** array);
 
-    private:
+    public:
         CPhoneInterfaceManager* mHost;
 
         AutoPtr<IIccCard> mSimCard;
@@ -394,17 +396,17 @@ public:
         /* [out] */ Boolean* result);
 
     CARAPI GetCallState(
-        /* [out] */ Int32 result);
+        /* [out] */ Int32* result);
 
     CARAPI GetCallStateForSubscriber(
         /* [in] */ Int64 subId,
-        /* [out] */ Int32 result);
+        /* [out] */ Int32* result);
 
     CARAPI GetDataState(
-        /* [out] */ Int32 result);
+        /* [out] */ Int32* result);
 
     CARAPI GetDataActivity(
-        /* [out] */ Int32 result);
+        /* [out] */ Int32* result);
 
     //@Override
     CARAPI GetCellLocation(
@@ -450,8 +452,8 @@ public:
         /* [out] */ Int32* result);
 
     CARAPI GetCdmaEriIconIndexForSubscriber(
-        /* [in] */ Int64 subId),
-        /* [out] */ Int32* result;
+        /* [in] */ Int64 subId,
+        /* [out] */ Int32* result);
 
     /**
      * Returns the CDMA ERI icon mode,
@@ -811,8 +813,11 @@ public:
     //@Override
     CARAPI InvokeOemRilRequestRaw(
         /* [in] */ ArrayOf<Byte>* oemReq,
-        /* [in] */ ArrayOf<Byte>* oemResp,
+        /* [out, callee] */ ArrayOf<Byte>** oemResp,
         /* [out] */ Int32* result);
+
+    CARAPI ToString(
+        /* [out] */ String* result);
 
 private:
     /**
@@ -852,11 +857,6 @@ private:
     CARAPI_(void) SendRequestAsync(
         /* [in] */ Int32 command,
         /* [in] */ IInterface* argument);
-
-    /** Private constructor; @see init() */
-    CPhoneInterfaceManager(
-        /* [in] */ PhoneGlobals* app,
-        /* [in] */ IPhone* phone);
 
     CARAPI_(void) Publish();
 
@@ -1002,10 +1002,11 @@ private:
     AutoPtr<IAppOpsManager> mAppOps;
     AutoPtr<MainThreadHandler> mMainThreadHandler;
 
-    AutoPtr<ISharedPreferences> carrierPrivilegeConfigs;
+    AutoPtr<ISharedPreferences> mCarrierPrivilegeConfigs;
     static const String PREF_CARRIERS_ALPHATAG_PREFIX;
     static const String PREF_CARRIERS_NUMBER_PREFIX ;
     static const String PREF_CARRIERS_SIMPLIFIED_NETWORK_SETTINGS_PREFIX;
+    static Object THIS;
 };
 
 } // namespace Phone
