@@ -1753,7 +1753,7 @@ protected:
     virtual CARAPI GenerateDefaultLayoutParams(
         /* [out] */ IViewGroupLayoutParams** params);
 
-    virtual CARAPI_(void) Debug(
+    virtual CARAPI_(Boolean) Debug(
         /* [in] */ Int32 depth);
 
     /**

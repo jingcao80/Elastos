@@ -20,6 +20,7 @@ using Elastos::Droid::View::CViewConfigurationHelper;
 using Elastos::Droid::View::IViewConfiguration;
 using Elastos::Droid::View::IViewConfigurationHelper;
 using Elastos::Core::IInteger32;
+using Elastos::Core::IFloat;
 
 namespace Elastos {
 namespace Droid {
@@ -51,8 +52,8 @@ ECode DragDownHelper::AnimatorUpdateListener::OnAnimationUpdate(
 {
     AutoPtr<IInterface> obj;
     animation->GetAnimatedValue((IInterface**)&obj);
-    Int32 value = 0;
-    IInteger32::Probe(obj)->GetValue(&value);
+    Float value = 0;
+    IFloat::Probe(obj)->GetValue(&value);
     mHost->mDragDownCallback->SetEmptyDragAmount(value);
     return NOERROR;
 }

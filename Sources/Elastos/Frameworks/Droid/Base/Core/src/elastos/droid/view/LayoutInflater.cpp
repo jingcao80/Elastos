@@ -783,11 +783,11 @@ ECode LayoutInflater::CreateView(
         IViewStub::Probe(*view)->SetLayoutInflater(paraInflater);
     }
 
-#if defined(_DEBUG) || defined(_ELASTOS_DEBUG)
-    Int32 viewId;
-    (*view)->GetId(&viewId);
-    Slogger::D(TAG, " > CreateView: %s, id: 0x%08x, type: %s", TO_CSTR(*view), viewId, reflectionClassName.string());
-#endif
+// #if defined(_DEBUG) || defined(_ELASTOS_DEBUG)
+//     Int32 viewId;
+//     (*view)->GetId(&viewId);
+//     Slogger::D(TAG, " > CreateView: %s, id: 0x%08x, type: %s", TO_CSTR(*view), viewId, reflectionClassName.string());
+// #endif
 
     return NOERROR;
 

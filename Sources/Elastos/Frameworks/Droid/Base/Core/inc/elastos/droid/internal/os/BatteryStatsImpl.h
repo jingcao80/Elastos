@@ -337,18 +337,20 @@ public:
 
         TO_STRING_IMPL("BatteryStatsImpl::Timer")
 
+        Timer();
+
         /**
          * Constructs from a parcel.
          * @param type
          * @param timeBase
          * @param in
          */
-        Timer(
+        CARAPI constructor(
             /* [in] */ Int32 type,
             /* [in] */ TimeBase* timeBase,
             /* [in] */ IParcel* in);
 
-        Timer(
+        CARAPI constructor(
             /* [in] */ Int32 type,
             /* [in] */ TimeBase* timeBase);
 
@@ -418,7 +420,7 @@ public:
 
     protected:
         Int32 mType;
-        AutoPtr<TimeBase> mTimeBase;
+        TimeBase* mTimeBase;
 
         Int32 mCount;
         Int32 mLoadedCount;
@@ -462,11 +464,13 @@ public:
     public:
         TO_STRING_IMPL("BatteryStatsImpl::SamplingTimer")
 
-        SamplingTimer(
+        SamplingTimer();
+
+        CARAPI constructor(
             /* [in] */ TimeBase* timeBase,
             /* [in] */ IParcel* in);
 
-        SamplingTimer(
+        CARAPI constructor(
             /* [in] */ TimeBase* timeBase,
             /* [in] */ Boolean trackReportedValues);
 
@@ -577,13 +581,15 @@ public:
     public:
         TO_STRING_IMPL("BatteryStatsImpl::BatchTimer")
 
-        BatchTimer(
+        BatchTimer();
+
+        CARAPI constructor(
             /* [in] */ Uid* uid,
             /* [in] */ Int32 type,
             /* [in] */ TimeBase* timeBase,
             /* [in] */ IParcel* in);
 
-        BatchTimer(
+        CARAPI constructor(
             /* [in] */ Uid* uid,
             /* [in] */ Int32 type,
             /* [in] */ TimeBase* timeBase);
@@ -661,14 +667,16 @@ public:
     public:
         TO_STRING_IMPL("BatteryStatsImpl::StopwatchTimer")
 
-        StopwatchTimer(
+        StopwatchTimer();
+
+        CARAPI constructor(
             /* [in] */ Uid* uid,
             /* [in] */ Int32 type,
             /* [in] */ List<AutoPtr<StopwatchTimer> >* timerPool,
             /* [in] */ TimeBase* timeBase,
             /* [in] */ IParcel* in);
 
-        StopwatchTimer(
+        CARAPI constructor(
             /* [in] */ Uid* uid,
             /* [in] */ Int32 type,
             /* [in] */ List<AutoPtr<StopwatchTimer> >* timerPool,
@@ -2696,6 +2704,8 @@ public:
         /* [in] */ Int64 histStart);
 
 private:
+    CARAPI Init();
+
     CARAPI_(void) HandleUpdateWakelocks();
 
     CARAPI_(void) HandleReportPowerChange(

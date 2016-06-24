@@ -5085,7 +5085,7 @@ protected:
     virtual CARAPI_(AutoPtr<IView>) FindViewWithTagTraversal(
         /* [in] */ IInterface* tag);
 
-    virtual CARAPI_(void) Debug(
+    virtual CARAPI_(Boolean) Debug(
        /* [in] */ Int32 depth);
 
     static CARAPI_(String) DebugIndent(

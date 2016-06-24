@@ -13278,7 +13278,8 @@ ECode CWindowManagerService::StatusBarVisibilityChanged(
         //         + Manifest::permission::STATUS_BAR);
     }
 
-    {    AutoLock syncLock(mWindowMapLock);
+    {
+        AutoLock syncLock(mWindowMapLock);
         mLastStatusBarVisibility = visibility;
         mPolicy->AdjustSystemUiVisibilityLw(visibility, &visibility);
         UpdateStatusBarVisibilityLocked(visibility);

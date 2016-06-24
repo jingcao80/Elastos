@@ -8573,10 +8573,13 @@ Int32 TextView::ViewportToContentVerticalOffset()
     return offset;
 }
 
-void TextView::Debug(
+Boolean TextView::Debug(
     /* [in] */ Int32 depth)
 {
-    View::Debug(depth);
+    Boolean bval = View::Debug(depth);
+    if (!bval) {
+        return FALSE;
+    }
 
     StringBuilder output;
     output.Append(DebugIndent(depth));
@@ -8612,6 +8615,7 @@ void TextView::Debug(
         output.Append("mText=NULL");
     }
     Logger::D("TextView", "%s", output.ToString().string());
+    return TRUE;
 }
 
 ECode TextView::GetSelectionStart(

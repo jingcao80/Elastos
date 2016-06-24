@@ -98,7 +98,7 @@ ECode CStatusBarWindowView::OnAttachedToWindow()
     AutoPtr<IContext> ctx;
     GetContext((IContext**)&ctx);
     mDragDownHelper = new DragDownHelper(ctx, this,
-                IExpandHelperCallback::Probe(mStackScrollLayout), IDragDownCallback::Probe(mService));
+        IExpandHelperCallback::Probe(mStackScrollLayout), IDragDownCallback::Probe(mService));
     FindViewById(R::id::brightness_mirror, (IView**)&mBrightnessMirror);
 
     // We really need to be able to animate while window animations are going on
@@ -273,10 +273,7 @@ void CStatusBarWindowView::OnDraw(
         Int32 h = 0, w = 0, pb = 0, pr = 0, pt = 0, pl = 0;
         GetHeight(&h);
         GetWidth(&w);
-        GetPaddingBottom(&pb);
-        GetPaddingRight(&pr);
-        GetPaddingTop(&pt);
-        GetPaddingLeft(&pl);
+        GetPadding(&pl, &pt, &pr, &pb);
         Int32 paddedBottom = h - pb;
         Int32 paddedRight = w - pr;
         if (pt != 0) {

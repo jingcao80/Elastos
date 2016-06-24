@@ -6423,10 +6423,14 @@ ECode ViewGroup::GenerateDefaultLayoutParams(
 /**
  * {@inheritDoc}
  */
-void ViewGroup::Debug(
+Boolean ViewGroup::Debug(
     /* [in] */ Int32 depth)
 {
-    View::Debug(depth);
+    Boolean bval = View::Debug(depth);
+    if (!bval) {
+        return FALSE;
+    }
+
     String output;
 
     if (mFocused != NULL) {

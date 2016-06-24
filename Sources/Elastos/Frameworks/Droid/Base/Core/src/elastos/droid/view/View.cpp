@@ -15678,9 +15678,17 @@ void View::Debug()
  *
  * @hide
  */
-void View::Debug(
+Boolean View::Debug(
     /* [in] */ Int32 depth)
 {
+    if (mLeft == 0 && mTop == 0 && mRight == 0 && mBottom == 0) {
+        return FALSE;
+    }
+    if ((mViewFlags & VISIBILITY_MASK) == IView::INVISIBLE
+        || (mViewFlags & VISIBILITY_MASK) == IView::GONE) {
+        return FALSE;
+    }
+
     StringBuilder output;
 
     output.Append(DebugIndent(depth - 1));
@@ -15763,7 +15771,7 @@ void View::Debug(
     }
     else {
         String str;
-        mLayoutParams->Debug(output.ToString(), &str);
+        mLayoutParams->Debug(String(""), &str);
         output.Append(str);
     }
     Logger::D(TAG, "%s", output.ToString().string());
@@ -15781,6 +15789,7 @@ void View::Debug(
     output.Append(View::PrintPrivateFlags(mPrivateFlags));
     output.Append("}");
     Logger::D(TAG, "%s", output.ToString().string());
+    return TRUE;
 }
 
 /**
