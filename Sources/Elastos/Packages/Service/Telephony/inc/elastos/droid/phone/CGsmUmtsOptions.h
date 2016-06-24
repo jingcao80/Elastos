@@ -57,7 +57,7 @@ protected:
         /* [in] */ const String& s);
 
 private:
-    static const String LOG_TAG = "GsmUmtsOptions";
+    static const String TAG = "GsmUmtsOptions";
 
     AutoPtr<IPreferenceScreen> mButtonAPNExpand;
     AutoPtr<IPreferenceScreen> mButtonOperatorSelectionExpand;

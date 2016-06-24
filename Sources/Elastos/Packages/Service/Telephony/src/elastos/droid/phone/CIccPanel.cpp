@@ -5,7 +5,7 @@ namespace Elastos {
 namespace Droid {
 namespace Phone {
 
-const String CIccPanel::TAG("CIccPanel");// = PhoneGlobals.LOG_TAG;
+const String CIccPanel::TAG("CIccPanel");// = PhoneGlobals.TAG;
 
 CAR_INTERFACE_IMPL(CIccPanel, Dialog, IIccPanel)
 

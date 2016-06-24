@@ -5,7 +5,7 @@ namespace Elastos {
 namespace Droid {
 namespace Phone {
 
-const String CGsmUmtsCallOptions::LOG_TAG("GsmUmtsCallOptions");
+const String CGsmUmtsCallOptions::TAG("GsmUmtsCallOptions");
 
 CAR_INTERFACE_IMPL(CGsmUmtsCallOptions, PreferenceActivity, IGsmUmtsCallOptions)
 

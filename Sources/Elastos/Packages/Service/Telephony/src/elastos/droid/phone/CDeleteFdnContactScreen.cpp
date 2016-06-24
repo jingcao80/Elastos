@@ -52,7 +52,7 @@ ECode CDeleteFdnContactScreen::MyRunnable::Run()
     return mHost->Finish();
 }
 
-const String CDeleteFdnContactScreen::LOG_TAG = PhoneGlobals.LOG_TAG;
+const String CDeleteFdnContactScreen::TAG = PhoneGlobals.TAG;
 const Boolean CDeleteFdnContactScreen::DBG = FALSE;
 
 const String CDeleteFdnContactScreen::INTENT_EXTRA_NAME("name");
@@ -226,7 +226,7 @@ void CDeleteFdnContactScreen::HandleResult(
 void CDeleteFdnContactScreen::Log(
     /* [in] */ const String& msg)
 {
-    Logger::D(LOG_TAG, String("[DeleteFdnContact] ") + msg);
+    Logger::D(TAG, String("[DeleteFdnContact] ") + msg);
 }
 
 } // namespace Phone

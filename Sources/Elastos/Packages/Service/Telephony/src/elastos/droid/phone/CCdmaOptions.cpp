@@ -1,6 +1,33 @@
 
-#include "elastos/droid/phone/CPhoneApp.h"
+#include "elastos/droid/phone/CCdmaOptions.h"
+#include "elastos/droid/phone/CCdmaSystemSelectListPreference.h"
+#include "elastos/droid/phone/CCdmaSubscriptionListPreference.h"
+#include "R.h"
+#include "elastos/droid/text/TextUtils.h"
+#include <elastos/droid/R.h>
+#include "Elastos.Droid.Content.h"
+#include "Elastos.Droid.Internal.h"
+#include "Elastos.Droid.Os.h"
+#include "Elastos.Droid.Provider.h"
+#include <elastos/core/StringBuilder.h>
+#include <elastos/core/StringUtils.h>
+#include <elastos/utility/logging/Logger.h>
 
+using Elastos::Droid::Content::CIntent;
+using Elastos::Droid::Content::IContext;
+using Elastos::Droid::Content::IIntent;
+using Elastos::Droid::Content::Res::IResources;
+using Elastos::Droid::Internal::Telephony::IPhoneConstants;
+using Elastos::Droid::Os::CSystemProperties;
+using Elastos::Droid::Os::ISystemProperties;
+using Elastos::Droid::Preference::EIID_IPreferenceOnPreferenceClickListener;
+using Elastos::Droid::Preference::IPreferenceGroup;
+using Elastos::Droid::Provider::ISettings;
+using Elastos::Droid::Text::TextUtils;
+using Elastos::Core::CString;
+using Elastos::Core::StringBuilder;
+using Elastos::Core::StringUtils;
+using Elastos::Utility::Logging::Logger;
 
 namespace Elastos {
 namespace Droid {
@@ -22,13 +49,12 @@ CCdmaOptions::MyOnPreferenceClickListener::OnPreferenceClick(
     CIntent::New(ISettings::ACTION_APN_SETTINGS, (IIntent**)&intent);
     // This will setup the Home and Search affordance
     intent->PutExtra(String(":settings:show_fragment_as_subsetting"), TRUE);
-    mHost->mPrefActivity->StartActivity(intent);
+    IContext::Probe(mHost->mPrefActivity)->StartActivity(intent);
     *result = TRUE;
     return NOERROR;
 }
 
-const String CCdmaOptions::LOG_TAG("CdmaOptions");
-
+const String CCdmaOptions::TAG("CdmaOptions");
 const String CCdmaOptions::BUTTON_CDMA_SYSTEM_SELECT_KEY("cdma_system_select_key");
 const String CCdmaOptions::BUTTON_CDMA_SUBSCRIPTION_KEY("cdma_subscription_key");
 const String CCdmaOptions::BUTTON_CDMA_ACTIVATE_DEVICE_KEY("cdma_activate_device_key");
@@ -52,50 +78,60 @@ ECode CCdmaOptions::constructor(
 
 ECode CCdmaOptions::Create()
 {
-    mPrefActivity->AddPreferencesFromResource(R.xml.cdma_options);
+    mPrefActivity->AddPreferencesFromResource(Elastos::Droid::Server::Telephony::R::xml::cdma_options);
 
     AutoPtr<IPreference> preference;
-    mPrefScreen->FindPreference(BUTTON_APN_EXPAND_KEY, (IPreference**)&preference);
+    AutoPtr<ICharSequence> cs;
+    CString::New(BUTTON_APN_EXPAND_KEY, (ICharSequence**)&cs);
+    IPreferenceGroup::Probe(mPrefScreen)->FindPreference(cs, (IPreference**)&preference);
     mButtonAPNExpand = IPreferenceScreen::Probe(preference);
     Boolean removedAPNExpand = FALSE;
     AutoPtr<IResources> res;
-    mPrefActivity->GetResources((IResources**)&res);
+    IContext::Probe(mPrefActivity)->GetResources((IResources**)&res);
 
     // Some CDMA carriers want the APN settings
     Boolean result;
-    res->GetBoolean(R.bool.config_show_apn_setting_cdma, &result);
+    res->GetBoolean(Elastos::Droid::Server::Telephony::R::bool_::config_show_apn_setting_cdma, &result);
     if (!result && mButtonAPNExpand != NULL) {
-        mPrefScreen->RemovePreference(mButtonAPNExpand);
+        Boolean tmp = FALSE;
+        IPreferenceGroup::Probe(mPrefScreen)->RemovePreference(IPreference::Probe(mButtonAPNExpand), &tmp);
         removedAPNExpand = TRUE;
     }
     if (!removedAPNExpand) {
         AutoPtr<IPreferenceOnPreferenceClickListener> listener =
                 new MyOnPreferenceClickListener(this);
-        mButtonAPNExpand->SetOnPreferenceClickListener(listener);
+        IPreference::Probe(mButtonAPNExpand)->SetOnPreferenceClickListener(listener);
     }
 
     AutoPtr<IPreference> preference2;
-    mPrefScreen->FindPreference(BUTTON_CDMA_SYSTEM_SELECT_KEY, (IPreference**)&preference2);
+    cs = NULL;
+    CString::New(BUTTON_CDMA_SYSTEM_SELECT_KEY, (ICharSequence**)&cs);
+    IPreferenceGroup::Probe(mPrefScreen)->FindPreference(cs, (IPreference**)&preference2);
     mButtonCdmaSystemSelect = ICdmaSystemSelectListPreference::Probe(preference2);
 
     AutoPtr<IPreference> preference3;
-    mPrefScreen->FindPreference(BUTTON_CDMA_SUBSCRIPTION_KEY, (IPreference**)&preference3);
+    cs = NULL;
+    CString::New(BUTTON_CDMA_SUBSCRIPTION_KEY, (ICharSequence**)&cs);
+    IPreferenceGroup::Probe(mPrefScreen)->FindPreference(cs, (IPreference**)&preference3);
     mButtonCdmaSubscription = ICdmaSubscriptionListPreference::Probe(preference3);
 
-    mButtonCdmaSystemSelect->SetEnabled(TRUE);
+    IPreference::Probe(mButtonCdmaSystemSelect)->SetEnabled(TRUE);
     if(DeviceSupportsNvAndRuim()) {
         Log(String("Both NV and Ruim supported, ENABLE subscription type selection"));
-        mButtonCdmaSubscription->SetEnabled(TRUE);
+        IPreference::Probe(mButtonCdmaSubscription)->SetEnabled(TRUE);
     }
     else {
         Log(String("Both NV and Ruim NOT supported, REMOVE subscription type selection"));
         AutoPtr<IPreference> preference;
-        mPrefScreen->FindPreference(BUTTON_CDMA_SUBSCRIPTION_KEY, (IPreference**)&preference);
-        mPrefScreen->RemovePreference(preference);
+        cs = NULL;
+        CString::New(BUTTON_CDMA_SUBSCRIPTION_KEY, (ICharSequence**)&cs);
+        IPreferenceGroup::Probe(mPrefScreen)->FindPreference(cs, (IPreference**)&preference);
+        Boolean tmp = FALSE;
+        IPreferenceGroup::Probe(mPrefScreen)->RemovePreference(preference, &tmp);
     }
 
     Boolean voiceCapable;
-    res->GetBoolean(com.android.internal.R.bool.config_voice_capable, &voiceCapable);
+    res->GetBoolean(Elastos::Droid::R::bool_::config_voice_capable, &voiceCapable);
     Int32 mode;
     mPhone->GetLteOnCdmaMode(&mode);
     Boolean isLTE = mode == IPhoneConstants::LTE_ON_CDMA_TRUE;
@@ -103,18 +139,24 @@ ECode CCdmaOptions::Create()
         // This option should not be available on voice-capable devices (i.e. regular phones)
         // and is replaced by the LTE data service item on LTE devices
         AutoPtr<IPreference> preference;
-        mPrefScreen->FindPreference(BUTTON_CDMA_ACTIVATE_DEVICE_KEY, (IPreference**)&preference);
-        mPrefScreen->RemovePreference(preference);
+        cs = NULL;
+        CString::New(BUTTON_CDMA_ACTIVATE_DEVICE_KEY, (ICharSequence**)&cs);
+        IPreferenceGroup::Probe(mPrefScreen)->FindPreference(cs, (IPreference**)&preference);
+        Boolean tmp = FALSE;
+        IPreferenceGroup::Probe(mPrefScreen)->RemovePreference(preference, &tmp);
     }
 
     // Read platform settings for carrier settings
     Boolean isCarrierSettingsEnabled;
-    res->GetBoolean(R.bool.config_carrier_settings_enable, &isCarrierSettingsEnabled);
+    res->GetBoolean(Elastos::Droid::Server::Telephony::R::bool_::config_carrier_settings_enable, &isCarrierSettingsEnabled);
     if (!isCarrierSettingsEnabled) {
         AutoPtr<IPreference> pref;
-        mPrefScreen->FindPreference(BUTTON_CARRIER_SETTINGS_KEY, (IPreference**)&pref);
+        cs = NULL;
+        CString::New(BUTTON_CARRIER_SETTINGS_KEY, (ICharSequence**)&cs);
+        IPreferenceGroup::Probe(mPrefScreen)->FindPreference(cs, (IPreference**)&pref);
         if (pref != NULL) {
-            mPrefScreen->RemovePreference(pref);
+            Boolean tmp = FALSE;
+            IPreferenceGroup::Probe(mPrefScreen)->RemovePreference(pref, &tmp);
         }
     }
     return NOERROR;
@@ -123,7 +165,10 @@ ECode CCdmaOptions::Create()
 Boolean CCdmaOptions::DeviceSupportsNvAndRuim()
 {
     // retrieve the list of subscription types supported by device.
-    String subscriptionsSupported = SystemProperties::Get(String("ril.subscription.types"));
+    AutoPtr<ISystemProperties> sp;
+    CSystemProperties::AcquireSingleton((ISystemProperties**)&sp);
+    String subscriptionsSupported;
+    sp->Get(String("ril.subscription.types"), &subscriptionsSupported);
     Boolean nvSupported = FALSE;
     Boolean ruimSupported = FALSE;
 
@@ -134,7 +179,10 @@ Boolean CCdmaOptions::DeviceSupportsNvAndRuim()
     if (!TextUtils::IsEmpty(subscriptionsSupported)) {
         // Searches through the comma-separated list for a match for "NV"
         // and "RUIM" to update nvSupported and ruimSupported.
-        for (String subscriptionType : subscriptionsSupported.split(",")) {
+        AutoPtr<ArrayOf<String> > values;
+        StringUtils::Split(subscriptionsSupported, String(","), (ArrayOf<String>**)&values);
+        for (Int32 i = 0; i < values->GetLength(); i++) {
+            String subscriptionType = (*values)[i];
             subscriptionType = subscriptionType.Trim();
             if (subscriptionType.EqualsIgnoreCase(String("NV"))) {
                 nvSupported = TRUE;
@@ -182,10 +230,10 @@ ECode CCdmaOptions::ShowDialog(
     String key;
     preference->GetKey(&key);
     if (key.Equals(BUTTON_CDMA_SYSTEM_SELECT_KEY)) {
-        mButtonCdmaSystemSelect->ShowDialog(NULL);
+        ((CCdmaSystemSelectListPreference*)mButtonCdmaSystemSelect.Get())->ShowDialog(NULL);
     }
     else if (key.Equals(BUTTON_CDMA_SUBSCRIPTION_KEY)) {
-        mButtonCdmaSubscription->ShowDialog(NULL);
+        ((CCdmaSubscriptionListPreference*)mButtonCdmaSubscription.Get())->ShowDialog(NULL);
     }
     return NOERROR;
 }
@@ -193,7 +241,7 @@ ECode CCdmaOptions::ShowDialog(
 void CCdmaOptions::Log(
     /* [in] */ const String& s)
 {
-    Logger::D(LOG_TAG, s);
+    Logger::D(TAG, s);
     return;
 }
 

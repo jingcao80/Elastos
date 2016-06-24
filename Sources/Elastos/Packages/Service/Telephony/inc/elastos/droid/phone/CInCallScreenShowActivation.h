@@ -58,7 +58,7 @@ private:
     CARAPI_(void) StartHfa();
 
 private:
-    static const String LOG_TAG = "InCallScreenShowActivation";
+    static const String TAG = "InCallScreenShowActivation";
     static const Boolean DBG = (PhoneGlobals.DBG_LEVEL >= 1) && (SystemProperties.getInt("ro.debuggable", 0) == 1);
 };
 

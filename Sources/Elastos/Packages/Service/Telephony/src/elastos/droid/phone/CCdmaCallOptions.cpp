@@ -1,19 +1,25 @@
 
 #include "elastos/droid/phone/CCdmaCallOptions.h"
+#include "R.h"
+#include "Elastos.Droid.Internal.h"
+#include "Elastos.Droid.Preference.h"
+
+using Elastos::Droid::Internal::Telephony::IPhone;
+using Elastos::Droid::Internal::Telephony::IPhoneConstants;
+using Elastos::Droid::Preference::IPreference;
+using Elastos::Droid::Server::Telephony::R;
 
 namespace Elastos {
 namespace Droid {
 namespace Phone {
 
-const String LOG_TAG("CdmaCallOptions");
-const String BUTTON_VP_KEY("button_voice_privacy_key");
-
-CAR_INTERFACE_IMPL(CCdmaCallOptions, PreferenceActivity, ICdmaCallOptions)
+const String CCdmaCallOptions::TAG("CdmaCallOptions");
+const String CCdmaCallOptions::BUTTON_VP_KEY("button_voice_privacy_key");
 
 CAR_OBJECT_IMPL(CCdmaCallOptions)
 
 CCdmaCallOptions::CCdmaCallOptions()
-    : DBG(PhoneGlobals::DBG_LEVEL >= 2)
+    : DBG(IPhoneGlobals::DBG_LEVEL >= 2)
 {
 }
 
@@ -27,25 +33,27 @@ ECode CCdmaCallOptions::OnCreate(
 {
     PreferenceActivity::OnCreate(icicle);
 
-    AddPreferencesFromResource(R.xml.cdma_call_privacy);
+    AddPreferencesFromResource(R::xml::cdma_call_privacy);
 
     AutoPtr<IPreference> preference;
     FindPreference(BUTTON_VP_KEY, (IPreference**)&preference);
     mButtonVoicePrivacy = ICheckBoxPreference::Probe(preference);
 
-    AutoPtr<IPhone> phone = PhoneGlobals::GetPhone();
+    AutoPtr<IPhone> phone;
+    assert(0 && "TODO need PhoneGlobals");
+    // phone = PhoneGlobals::GetPhone();
     Int32 type;
     phone->GetPhoneType(&type);
 
     AutoPtr<IResources> resources;
     GetResources((IResources**)&resources);
     Boolean res;
-    resources->GetBoolean(R.bool.config_voice_privacy_disable, &res);
+    resources->GetBoolean(R::bool_::config_voice_privacy_disable, &res);
     if (type != IPhoneConstants::PHONE_TYPE_CDMA || res) {
         //disable the entire screen
         AutoPtr<IPreferenceScreen> screen;
         GetPreferenceScreen((IPreferenceScreen**)&screen);
-        screen->SetEnabled(FALSE);
+        IPreference::Probe(screen)->SetEnabled(FALSE);
     }
     return NOERROR;
 }

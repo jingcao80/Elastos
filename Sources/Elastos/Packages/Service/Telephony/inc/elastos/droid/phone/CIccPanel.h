@@ -40,7 +40,7 @@ protected:
     CARAPI OnStart();
 
 protected:
-    static const String TAG = PhoneGlobals.LOG_TAG;
+    static const String TAG = PhoneGlobals.TAG;
 
 private:
     AutoPtr<IStatusBarManager> mStatusBarManager;

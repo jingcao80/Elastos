@@ -41,7 +41,7 @@ protected:
         /* [in] */ IBundle* outState);
 
 private:
-    static const String LOG_TAG;
+    static const String TAG;
     const Boolean DBG;
 
     static const String BUTTON_CLIR_KEY;

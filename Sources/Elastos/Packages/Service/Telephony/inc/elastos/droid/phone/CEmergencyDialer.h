@@ -186,7 +186,7 @@ private:
 
     // Debug constants.
     static const Boolean DBG;
-    static const String LOG_TAG;
+    static const String TAG;
 
     AutoPtr<IStatusBarManager> mStatusBarManager;
     AutoPtr<IAccessibilityManager> mAccessibilityManager;

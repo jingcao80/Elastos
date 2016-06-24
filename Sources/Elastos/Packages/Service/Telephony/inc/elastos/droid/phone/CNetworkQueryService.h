@@ -127,7 +127,7 @@ private:
 
 public:
     // debug data
-    static const String LOG_TAG;
+    static const String TAG;
     static const Boolean DBG;
 
     // static events

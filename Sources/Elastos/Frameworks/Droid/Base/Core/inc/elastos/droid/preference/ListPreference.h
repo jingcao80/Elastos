@@ -7,6 +7,7 @@
 #include "elastos/droid/R.h"
 #include "elastos/droid/text/TextUtils.h"
 
+using Elastos::Droid::Preference::IListPreference;
 using Elastos::Droid::R;
 using Elastos::Droid::Text::TextUtils;
 
@@ -24,7 +25,7 @@ namespace Preference {
 * @attr ref android.R.styleable#ListPreference_entries
 * @attr ref android.R.styleable#ListPreference_entryValues
  */
-class ListPreference
+class ECO_PUBLIC ListPreference
     : public DialogPreference
     , public IListPreference
 {

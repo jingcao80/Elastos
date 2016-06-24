@@ -56,7 +56,7 @@ ECode CEnableIccPinScreen::MyRunnable::Run()
     return mHost->Finish();
 }
 
-const String CEnableIccPinScreen::LOG_TAG("CEnableIccPinScreen");// = PhoneGlobals.LOG_TAG;
+const String CEnableIccPinScreen::TAG("CEnableIccPinScreen");// = PhoneGlobals.TAG;
 
 const Int32 CEnableIccPinScreen::ENABLE_ICC_PIN_COMPLETE = 100;
 const Boolean CEnableIccPinScreen::DBG = FALSE;
@@ -190,7 +190,7 @@ void CEnableIccPinScreen::HandleResult(
 void CEnableIccPinScreen::Log(
     /* [in] */ const String& msg)
 {
-    Logger::D(LOG_TAG, String("[EnableIccPin] ") + msg);
+    Logger::D(TAG, String("[EnableIccPin] ") + msg);
 }
 
 

@@ -107,7 +107,7 @@ ECode CFdnSetting::MyHandler::HandleMessage(
     return NOERROR;
 }
 
-const String CFdnSetting::LOG_TAG("CFdnSetting");// = PhoneGlobals.LOG_TAG;
+const String CFdnSetting::TAG("CFdnSetting");// = PhoneGlobals.TAG;
 const Boolean CFdnSetting::DBG = FALSE;
 
 const Int32 CFdnSetting::EVENT_PIN2_ENTRY_COMPLETE = 100;
@@ -594,7 +594,7 @@ void CFdnSetting::Log(
     StringBuilder sb;
     sb += "FdnSetting: ";
     sb += msg;
-    Logger::D(LOG_TAG, sb.ToString());
+    Logger::D(TAG, sb.ToString());
 }
 
 } // namespace Phone

@@ -134,7 +134,7 @@ ECode CGsmUmtsOptions::PreferenceTreeClick(
 ECode CGsmUmtsOptions::Log(
     /* [in] */ const String& s)
 {
-    return Logger::D(LOG_TAG, s);
+    return Logger::D(TAG, s);
 }
 
 

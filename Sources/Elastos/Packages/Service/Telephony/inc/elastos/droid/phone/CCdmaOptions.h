@@ -2,7 +2,16 @@
 #define  __ELASTOS_DROID_PHONE_CCDMAOPTIONS_H__
 
 #include "_Elastos_Droid_Phone_CCdmaOptions.h"
-#include "elastos/droid/ext/frameworkext.h"
+#include "Elastos.Droid.Internal.h"
+#include "Elastos.Droid.Preference.h"
+#include <elastos/core/Object.h>
+
+using Elastos::Droid::Internal::Telephony::IPhone;
+using Elastos::Droid::Preference::IPreference;
+using Elastos::Droid::Preference::IPreferenceActivity;
+using Elastos::Droid::Preference::IPreferenceScreen;
+using Elastos::Droid::Preference::IPreferenceOnPreferenceClickListener;
+using Elastos::Core::Object;
 
 namespace Elastos {
 namespace Droid {
@@ -67,17 +76,17 @@ private:
     CARAPI_(Boolean) DeviceSupportsNvAndRuim();
 
 private:
-    static const String LOG_TAG = "CdmaOptions";
+    static const String TAG;
 
     AutoPtr<ICdmaSystemSelectListPreference> mButtonCdmaSystemSelect;
     AutoPtr<ICdmaSubscriptionListPreference> mButtonCdmaSubscription;
     AutoPtr<IPreferenceScreen> mButtonAPNExpand;
 
-    static const String BUTTON_CDMA_SYSTEM_SELECT_KEY = "cdma_system_select_key";
-    static const String BUTTON_CDMA_SUBSCRIPTION_KEY = "cdma_subscription_key";
-    static const String BUTTON_CDMA_ACTIVATE_DEVICE_KEY = "cdma_activate_device_key";
-    static const String BUTTON_CARRIER_SETTINGS_KEY = "carrier_settings_key";
-    static const String BUTTON_APN_EXPAND_KEY = "button_apn_key";
+    static const String BUTTON_CDMA_SYSTEM_SELECT_KEY;
+    static const String BUTTON_CDMA_SUBSCRIPTION_KEY;
+    static const String BUTTON_CDMA_ACTIVATE_DEVICE_KEY;
+    static const String BUTTON_CARRIER_SETTINGS_KEY;
+    static const String BUTTON_APN_EXPAND_KEY;
 
     AutoPtr<IPreferenceActivity> mPrefActivity;
     AutoPtr<IPreferenceScreen> mPrefScreen;

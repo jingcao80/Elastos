@@ -5,7 +5,7 @@ namespace Elastos {
 namespace Droid {
 namespace Phone {
 
-const String CInCallScreenShowActivation::LOG_TAG("InCallScreenShowActivation");
+const String CInCallScreenShowActivation::TAG("InCallScreenShowActivation");
 
 static Boolean initDBG()
 {
@@ -41,7 +41,7 @@ ECode CInCallScreenShowActivation::OnCreate(
     StringBuilder sb;
     sb += "onCreate: intent = ";
     sb += TO_CSTR(intent);
-    if (DBG) Logger::D(LOG_TAG, sb.ToString());
+    if (DBG) Logger::D(TAG, sb.ToString());
 
     AutoPtr<IBundle> extras;
     intent->GetExtras((IBundle**)&extras);
@@ -51,19 +51,19 @@ ECode CInCallScreenShowActivation::OnCreate(
         Int32 size;
         extras->GetSize(&size);
         sb += size;
-        Loger::D(LOG_TAG, sb.ToString()); // forces an unparcel()
+        Loger::D(TAG, sb.ToString()); // forces an unparcel()
 
         StringBuilder sb2;
         sb2 += "      - extras = ";
         sb2 += TO_CSTR(extras);
-        Loger::D(LOG_TAG, sb2.ToString());
+        Loger::D(TAG, sb2.ToString());
     }
 
     AutoPtr<IPhoneGlobals> app = PhoneGlobals::GetInstance();
     AutoPtr<IPhone> phone;
     app->GetPhone((IPhone**)&phone);
     if (!TelephonyCapabilities::SupportsOtasp(phone)) {
-        Logger::W(LOG_TAG, "CDMA Provisioning not supported on this device");
+        Logger::W(TAG, "CDMA Provisioning not supported on this device");
         SetResult(RESULT_CANCELED);
         return Finish();
     }
@@ -76,7 +76,7 @@ ECode CInCallScreenShowActivation::OnCreate(
         Boolean usesHfa;
         resources->GetBoolean(R.bool.config_use_hfa_for_provisioning, &usesHfa);
         if (usesHfa) {
-            Logger::I(LOG_TAG, "Starting Hfa from ACTION_PERFORM_CDMA_PROVISIONING");
+            Logger::I(TAG, "Starting Hfa from ACTION_PERFORM_CDMA_PROVISIONING");
             StartHfa();
             return Finish();
         }
@@ -93,7 +93,7 @@ ECode CInCallScreenShowActivation::OnCreate(
             sb += "ACTION_PERFORM_CDMA_PROVISIONING (interactiveMode = ";
             sb += interactiveMode;
             sb += ")...";
-            Logger::I(LOG_TAG, sb.ToString());
+            Logger::I(TAG, sb.ToString());
 
             // Testing: this intent extra allows test apps manually
             // enable/disable "interactive mode", regardless of whether
@@ -110,7 +110,7 @@ ECode CInCallScreenShowActivation::OnCreate(
                     StringBuilder sb;
                     sb += "==> MANUALLY OVERRIDING interactiveMode to ";
                     sb += interactiveMode;
-                    Logger::D(LOG_TAG, sb.ToString());
+                    Logger::D(TAG, sb.ToString());
                 }
             }
 
@@ -133,7 +133,7 @@ ECode CInCallScreenShowActivation::OnCreate(
                 // notice that an OTASP call is active, and display the
                 // special OTASP UI instead of the usual in-call controls.)
 
-                if (DBG) Logger::D(LOG_TAG, "==> Starting interactive CDMA provisioning...");
+                if (DBG) Logger::D(TAG, "==> Starting interactive CDMA provisioning...");
                 OtaUtils::StartInteractiveOtasp(this);
 
                 // The result we set here is actually irrelevant, since the
@@ -149,7 +149,7 @@ ECode CInCallScreenShowActivation::OnCreate(
                 // SetupWizardActivity, is responsible for displaying some
                 // sort of progress UI.)
 
-                if (DBG) Logger::D(LOG_TAG, "==> Starting non-interactive CDMA provisioning...");
+                if (DBG) Logger::D(TAG, "==> Starting non-interactive CDMA provisioning...");
                 Int32 callStatus;
                 OtaUtils::StartNonInteractiveOtasp(this, &callStatus);
 
@@ -158,7 +158,7 @@ ECode CInCallScreenShowActivation::OnCreate(
                         StringBuilder sb;
                         sb += "  ==> successful result from startNonInteractiveOtasp(): ";
                         sb += callStatus;
-                        Logger::D(LOG_TAG, sb.ToString());
+                        Logger::D(TAG, sb.ToString());
                     }
                     SetResult(IOtaUtils::RESULT_NONINTERACTIVE_OTASP_STARTED);
                 }
@@ -166,20 +166,20 @@ ECode CInCallScreenShowActivation::OnCreate(
                     StringBuilder sb;
                     sb += "Failure code from startNonInteractiveOtasp(): ";
                     sb += callStatus;
-                    Logger::W(LOG_TAG, sb.ToString());
+                    Logger::W(TAG, sb.ToString());
                     SetResult(IOtaUtils::RESULT_NONINTERACTIVE_OTASP_FAILED);
                 }
             }
         }
         else {
-            Logger::I(LOG_TAG, "Skipping activation.");
+            Logger::I(TAG, "Skipping activation.");
         }
     }
     else {
         StringBuilder sb;
         sb += "Unexpected intent action: ";
         sb += TO_CSTR(intent);
-        Logger:E(LOG_TAG, sb.ToString());
+        Logger:E(TAG, sb.ToString());
         SetResult(RESULT_CANCELED);
     }
 
@@ -221,7 +221,7 @@ Boolean CInCallScreenShowActivation::IsWizardRunning(
         sb += provisioned;
         sb += ", runningSetupWizard = ";
         sb += runningSetupWizard;
-        Logger::V(LOG_TAG, sb.ToString());
+        Logger::V(TAG, sb.ToString());
     }
     return resolveInfo != NULL && !provisioned && runningSetupWizard;
 }
@@ -258,7 +258,7 @@ void CInCallScreenShowActivation::StartHfa()
             intent->PutExtra(IOtaUtils::EXTRA_OTASP_RESULT_CODE_PENDING_INTENT, otaResponseIntent);
         }
 
-        Logger::V(LOG_TAG, "Starting hfa activation activity");
+        Logger::V(TAG, "Starting hfa activation activity");
         if (showUi) {
             intent->SetClassName(this, String("HfaActivity") /*HfaActivity.class.getName()*/);
             StartActivity(intent);

@@ -68,7 +68,7 @@ private:
         /* [in] */ const String& msg);
 
 private:
-    static const String LOG_TAG;
+    static const String TAG;
 
     AutoPtr<IEditText> mPin2Field;
     AutoPtr<IButton> mOkButton;

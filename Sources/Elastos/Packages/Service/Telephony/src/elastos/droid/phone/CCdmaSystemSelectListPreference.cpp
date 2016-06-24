@@ -1,12 +1,29 @@
 
 #include "elastos/droid/phone/CCdmaSystemSelectListPreference.h"
+#include "Elastos.Droid.Content.h"
+#include "Elastos.Droid.Internal.h"
+#include "Elastos.Droid.Os.h"
+#include "Elastos.Droid.Provider.h"
+#include "elastos/droid/os/AsyncResult.h"
+#include <elastos/core/StringUtils.h>
+#include <elastos/utility/logging/Logger.h>
+
+using Elastos::Droid::Content::IContentResolver;
+using Elastos::Droid::Internal::Telephony::ITelephonyProperties;
+using Elastos::Droid::Os::AsyncResult;
+using Elastos::Droid::Os::CSystemProperties;
+using Elastos::Droid::Os::ISystemProperties;
+using Elastos::Droid::Provider::CSettingsGlobal;
+using Elastos::Droid::Provider::ISettingsGlobal;
+using Elastos::Core::StringUtils;
+using Elastos::Utility::Logging::Logger;
 
 namespace Elastos {
 namespace Droid {
 namespace Phone {
 
-const Int32 CCdmaSystemSelectListPreference::MyHandler::::MESSAGE_GET_ROAMING_PREFERENCE = 0;
-const Int32 CCdmaSystemSelectListPreference::MyHandler::::MESSAGE_SET_ROAMING_PREFERENCE = 1;
+const Int32 CCdmaSystemSelectListPreference::MyHandler::MESSAGE_GET_ROAMING_PREFERENCE = 0;
+const Int32 CCdmaSystemSelectListPreference::MyHandler::MESSAGE_SET_ROAMING_PREFERENCE = 1;
 
 CCdmaSystemSelectListPreference::MyHandler::MyHandler(
     /* [in] */ CCdmaSystemSelectListPreference* host)
@@ -20,7 +37,7 @@ ECode CCdmaSystemSelectListPreference::MyHandler::HandleMessage(
 {
     Int32 what;
     msg->GetWhat(&what);
-    switch (mwhat) {
+    switch (what) {
         case MESSAGE_GET_ROAMING_PREFERENCE:
             HandleQueryCdmaRoamingPreference(msg);
             break;
@@ -35,13 +52,17 @@ ECode CCdmaSystemSelectListPreference::MyHandler::HandleMessage(
 void CCdmaSystemSelectListPreference::MyHandler::HandleQueryCdmaRoamingPreference(
     /* [in] */ IMessage* msg)
 {
-    AsyncResult ar = (AsyncResult) msg.obj;
+    AutoPtr<IInterface> obj;
+    msg->GetObj((IInterface**)&obj);
+    AsyncResult* ar = (AsyncResult*) IObject::Probe(obj);
 
-    if (ar.exception == null) {
-        Int32 statusCdmaRoamingMode = ((int[])ar.result)[0];
+    if (ar->mException == NULL) {
+        Int32 statusCdmaRoamingMode = 0;
+        assert(0 && "TODO");
+        // statusCdmaRoamingMode = ((int[])ar.result)[0];
 
         AutoPtr<IContext> context;
-        mPhone->GetContext((IContext**)&context);
+        mHost->mPhone->GetContext((IContext**)&context);
         AutoPtr<IContentResolver> cr;
         context->GetContentResolver((IContentResolver**)&cr);
 
@@ -58,13 +79,14 @@ void CCdmaSystemSelectListPreference::MyHandler::HandleQueryCdmaRoamingPreferenc
             if (statusCdmaRoamingMode != settingsRoamingMode) {
                 settingsRoamingMode = statusCdmaRoamingMode;
                 //changes the Settings.Secure accordingly to statusCdmaRoamingMode
-                helper->PutInt32(cr, ISettingsGlobal::CDMA_ROAMING_MODE, settingsRoamingMode);
+                Boolean tmp = FALSE;
+                helper->PutInt32(cr, ISettingsGlobal::CDMA_ROAMING_MODE, settingsRoamingMode, &tmp);
             }
             //changes the mButtonPreferredNetworkMode accordingly to modemNetworkMode
-            SetValue(StringUtils::ToString(statusCdmaRoamingMode));
+            mHost->SetValue(StringUtils::ToString(statusCdmaRoamingMode));
         }
         else {
-            if(DBG) Logger::I(LOG_TAG, "reset cdma roaming mode to default");
+            if(DBG) Logger::I(TAG, "reset cdma roaming mode to default");
             ResetCdmaRoamingModeToDefault();
         }
     }
@@ -73,49 +95,53 @@ void CCdmaSystemSelectListPreference::MyHandler::HandleQueryCdmaRoamingPreferenc
 void CCdmaSystemSelectListPreference::MyHandler::HandleSetCdmaRoamingPreference(
     /* [in] */ IMessage* msg)
 {
-    AsyncResult ar = (AsyncResult) msg.obj;
+    AutoPtr<IInterface> obj;
+    msg->GetObj((IInterface**)&obj);
+    AsyncResult* ar = (AsyncResult*) IObject::Probe(obj);
 
     String value;
     mHost->GetValue(&value);
-    if ((ar.exception == NULL) && !value.IsNull()) {
+    if ((ar->mException == NULL) && !value.IsNull()) {
         Int32 cdmaRoamingMode = StringUtils::ParseInt32(value);
 
         AutoPtr<IContext> context;
-        mPhone->GetContext((IContext**)&context);
+        mHost->mPhone->GetContext((IContext**)&context);
         AutoPtr<IContentResolver> cr;
         context->GetContentResolver((IContentResolver**)&cr);
 
         AutoPtr<ISettingsGlobal> helper;
         CSettingsGlobal::AcquireSingleton((ISettingsGlobal**)&helper);
-        helper->PutInt32(cr, ISettingsGlobal::CDMA_ROAMING_MODE, cdmaRoamingMode);
+        Boolean tmp = FALSE;
+        helper->PutInt32(cr, ISettingsGlobal::CDMA_ROAMING_MODE, cdmaRoamingMode, &tmp);
     }
     else {
         AutoPtr<IMessage> m;
         ObtainMessage(MESSAGE_GET_ROAMING_PREFERENCE, (IMessage**)&m);
-        mPhone->QueryCdmaRoamingPreference(m);
+        mHost->mPhone->QueryCdmaRoamingPreference(m);
     }
 }
 
 void CCdmaSystemSelectListPreference::MyHandler::ResetCdmaRoamingModeToDefault()
 {
     //set the mButtonCdmaRoam
-    SetValue(StringUtils::ToString(IPhone::CDMA_RM_ANY));
+    mHost->SetValue(StringUtils::ToString(IPhone::CDMA_RM_ANY));
     //set the Settings.System
     AutoPtr<IContext> context;
-    mPhone->GetContext((IContext**)&context);
+    mHost->mPhone->GetContext((IContext**)&context);
     AutoPtr<IContentResolver> cr;
     context->GetContentResolver((IContentResolver**)&cr);
 
     AutoPtr<ISettingsGlobal> helper;
     CSettingsGlobal::AcquireSingleton((ISettingsGlobal**)&helper);
-    helper->PutInt32(cr, ISettingsGlobal::CDMA_ROAMING_MODE, IPhone::CDMA_RM_ANY);
+    Boolean tmp = FALSE;
+    helper->PutInt32(cr, ISettingsGlobal::CDMA_ROAMING_MODE, IPhone::CDMA_RM_ANY, &tmp);
     //Set the Status
     AutoPtr<IMessage> m;
     ObtainMessage(MESSAGE_SET_ROAMING_PREFERENCE, (IMessage**)&m);
-    mPhone->SetCdmaRoamingPreference(IPhone::CDMA_RM_ANY, m);
+    mHost->mPhone->SetCdmaRoamingPreference(IPhone::CDMA_RM_ANY, m);
 }
 
-const String CCdmaSystemSelectListPreference::LOG_TAG("CdmaRoamingListPreference");
+const String CCdmaSystemSelectListPreference::TAG("CdmaRoamingListPreference");
 const Boolean CCdmaSystemSelectListPreference::DBG = FALSE;
 
 CAR_INTERFACE_IMPL(CCdmaSystemSelectListPreference, ListPreference, ICdmaSystemSelectListPreference)
@@ -124,7 +150,7 @@ CAR_OBJECT_IMPL(CCdmaSystemSelectListPreference)
 
 CCdmaSystemSelectListPreference::CCdmaSystemSelectListPreference()
 {
-    mHandler = new MyHandler();
+    mHandler = new MyHandler(this);
 }
 
 ECode CCdmaSystemSelectListPreference::constructor(
@@ -133,8 +159,8 @@ ECode CCdmaSystemSelectListPreference::constructor(
 {
     ListPreference::constructor(context, attrs);
 
-    mPhone = PhoneGlobals::GetPhone();
-    //mHandler = new MyHandler();
+    assert(0 && "TODO need PhoneGlobals");
+    // mPhone = PhoneGlobals::GetPhone();
     AutoPtr<IMessage> m;
     mHandler->ObtainMessage(MyHandler::MESSAGE_GET_ROAMING_PREFERENCE, (IMessage**)&m);
     return mPhone->QueryCdmaRoamingPreference(m);
@@ -192,7 +218,8 @@ ECode CCdmaSystemSelectListPreference::OnDialogClosed(
                     statusCdmaRoamingMode = IPhone::CDMA_RM_HOME;
             }
             //Set the Settings.Secure network mode
-            helper->PutInt32(cr, ISettingsGlobal::CDMA_ROAMING_MODE, buttonCdmaRoamingMode);
+            Boolean tmp = FALSE;
+            helper->PutInt32(cr, ISettingsGlobal::CDMA_ROAMING_MODE, buttonCdmaRoamingMode, &tmp);
             //Set the roaming preference mode
             AutoPtr<IMessage> m;
             mHandler->ObtainMessage(MyHandler::MESSAGE_SET_ROAMING_PREFERENCE, (IMessage**)&m);
@@ -200,8 +227,8 @@ ECode CCdmaSystemSelectListPreference::OnDialogClosed(
         }
     }
     else {
-        Logger::D(LOG_TAG, "onDialogClosed: positiveResult=%b value=%s -- do nothing",
-                positiveResult, value.tostring());
+        Logger::D(TAG, "onDialogClosed: positiveResult=%b value=%s -- do nothing",
+                positiveResult, value.string());
     }
     return NOERROR;
 }

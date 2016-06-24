@@ -142,7 +142,7 @@ private:
 private:
     // Default Emergency Callback Mode timeout value
     static const Int32 DEFAULT_ECM_EXIT_TIMER_VALUE;
-    static const String LOG_TAG;
+    static const String TAG;
 
     AutoPtr<INotificationManager> mNotificationManager;
     AutoPtr<ICountDownTimer> mTimer;

@@ -2,7 +2,24 @@
 #define  __ELASTOS_DROID_PHONE_CPHONEINTERFACEMANAGER_H__
 
 #include "_Elastos_Droid_Phone_CPhoneInterfaceManager.h"
-#include "elastos/droid/ext/frameworkext.h"
+#include "elastos/droid/phone/PhoneGlobals.h"
+#include "Elastos.CoreLibrary.Utility.h"
+#include "Elastos.Droid.Os.h"
+#include "Elastos.Droid.Telephony.h"
+#include "elastos/droid/os/Handler.h"
+
+using Elastos::Droid::App::IAppOpsManager;
+using Elastos::Droid::Content::IComponentName;
+using Elastos::Droid::Content::ISharedPreferences;
+using Elastos::Droid::Internal::Telephony::ICallManager;
+using Elastos::Droid::Internal::Telephony::IIccCard;
+using Elastos::Droid::Internal::Telephony::IITelephony;
+using Elastos::Droid::Internal::Telephony::IPhone;
+using Elastos::Droid::Os::Handler;
+using Elastos::Droid::Os::IBinder;
+using Elastos::Droid::Os::IBundle;
+using Elastos::Droid::Telephony::IIccOpenLogicalChannelResponse;
+using Elastos::Utility::IList;
 
 namespace Elastos {
 namespace Droid {
@@ -13,7 +30,6 @@ namespace Phone {
  */
 CarClass(CPhoneInterfaceManager)
     , public Object
-    , public IPhoneInterfaceManager
     , public IITelephony
     , public IBinder
 {
@@ -193,16 +209,17 @@ public:
 
     CAR_OBJECT_DECL();
 
-    CARAPI constructor();
+    CARAPI constructor(
+        /* [in] */ IPhoneGlobals* pg,
+        /* [in] */ IPhone* phone);
 
     /**
      * Initialize the singleton PhoneInterfaceManager instance.
      * This is only done once, at startup, from PhoneApp.onCreate().
      */
-    static CARAPI Init(
+    static CARAPI_(AutoPtr<CPhoneInterfaceManager>) Init(
         /* [in] */ PhoneGlobals* app,
-        /* [in] */ IPhone* phone,
-        /* [out] */ IPhoneInterfaceManager** manager);
+        /* [in] */ IPhone* phone);
 
     //
     // Implementation of the ITelephony interface.
@@ -939,7 +956,7 @@ private:
         /* [in] */ Int64 subId);
 
 private:
-    static const String LOG_TAG;
+    static const String TAG;
     static const Boolean DBG;
     static const Boolean DBG_LOC;
 
@@ -977,13 +994,13 @@ private:
     static const Int32 EVENT_EXCHANGE_SIM_IO_DONE;
 
     /** The singleton instance. */
-    static AutoPtr<IPhoneInterfaceManager> sInstance;
+    static AutoPtr<CPhoneInterfaceManager> sInstance;
 
     AutoPtr<PhoneGlobals> mApp;
     AutoPtr<IPhone> mPhone;
     AutoPtr<ICallManager> mCM;
     AutoPtr<IAppOpsManager> mAppOps;
-    AutoPtr<IMainThreadHandler> mMainThreadHandler;
+    AutoPtr<MainThreadHandler> mMainThreadHandler;
 
     AutoPtr<ISharedPreferences> carrierPrivilegeConfigs;
     static const String PREF_CARRIERS_ALPHATAG_PREFIX;
@@ -994,6 +1011,5 @@ private:
 } // namespace Phone
 } // namespace Droid
 } // namespace Elastos
-
 
 #endif // __ELASTOS_DROID_PHONE_CPHONEINTERFACEMANAGER_H__

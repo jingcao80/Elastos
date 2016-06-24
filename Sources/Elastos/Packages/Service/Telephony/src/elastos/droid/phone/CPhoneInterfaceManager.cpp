@@ -1,5 +1,18 @@
 
 #include "elastos/droid/phone/CPhoneInterfaceManager.h"
+#include <elastos/droid/Manifest.h>
+#include "elastos/droid/text/TextUtils.h"
+#include <elastos/core/AutoLock.h>
+#include <elastos/core/StringBuilder.h>
+#include <elastos/core/StringUtils.h>
+#include <elastos/utility/logging/Logger.h>
+
+using Elastos::Droid::Manifest;
+using Elastos::Droid::Text::TextUtils;
+using Elastos::Core::AutoLock;
+using Elastos::Core::StringBuilder;
+using Elastos::Core::StringUtils;
+using Elastos::Utility::Logging::Logger;
 
 namespace Elastos {
 namespace Droid {
@@ -565,7 +578,7 @@ ECode CPhoneInterfaceManager::MainThreadHandler::HandleMessage(
             break;
         }
         default:
-            Logger::W(LOG_TAG, "MainThreadHandler: unexpected message code: %d", what);
+            Logger::W(TAG, "MainThreadHandler: unexpected message code: %d", what);
             break;
     }
     return NOERROR;
@@ -624,7 +637,7 @@ ECode CPhoneInterfaceManager::MyHandler::HandleMessage(
     msg->GetWhat(&what);
     switch (what) {
         case SUPPLY_PIN_COMPLETE:
-            Logger::D(LOG_TAG, "SUPPLY_PIN_COMPLETE");
+            Logger::D(TAG, "SUPPLY_PIN_COMPLETE");
             {
                 AutoLock syncLock(mHost);
                 mRetryCount = msg->GetArg1(&(mHost->mRetryCount));
@@ -708,7 +721,7 @@ ECode CPhoneInterfaceManager::UnlockSim::MyUnlockSim(
 
         while (!mDone) {
             //try {
-            Logger::D(LOG_TAG, "wait for done");
+            Logger::D(TAG, "wait for done");
             ECode ec = Wait();
             //} catch (InterruptedException e) {
                 // Restore the interrupted status
@@ -719,7 +732,7 @@ ECode CPhoneInterfaceManager::UnlockSim::MyUnlockSim(
             }
             //}
         }
-        Logger::D(LOG_TAG, "done");
+        Logger::D(TAG, "done");
         AutoPtr<ArrayOf<Int32> > resultArray = ArrayOf<Int32>::Alloc(2);
         (*resultArray)[0] = mResult;
         (*resultArray)[1] = mRetryCount;
@@ -730,12 +743,10 @@ ECode CPhoneInterfaceManager::UnlockSim::MyUnlockSim(
     return NOERROR;
 }
 
-CAR_INTERFACE_IMPL(CPhoneInterfaceManager, Object, IPhoneInterfaceManager,
-        IITelephony, IBinder)
-
+CAR_INTERFACE_IMPL_2(CPhoneInterfaceManager, Object, IITelephony, IBinder)
 CAR_OBJECT_IMPL(CPhoneInterfaceManager)
 
-static const String CPhoneInterfaceManager::LOG_TAG = "PhoneInterfaceManager";
+static const String CPhoneInterfaceManager::TAG = "PhoneInterfaceManager";
 static const Boolean CPhoneInterfaceManager::DBG = (IPhoneGlobals::DBG_LEVEL >= 2);
 static const Boolean CPhoneInterfaceManager::DBG_LOC = FALSE;
 
@@ -771,7 +782,7 @@ static const Int32 CPhoneInterfaceManager::EVENT_TRANSMIT_APDU_BASIC_CHANNEL_DON
 static const Int32 CPhoneInterfaceManager::CMD_EXCHANGE_SIM_IO = 31;
 static const Int32 CPhoneInterfaceManager::EVENT_EXCHANGE_SIM_IO_DONE = 32;
 
-static AutoPtr<IPhoneInterfaceManager> CPhoneInterfaceManager::sInstance;
+static AutoPtr<CPhoneInterfaceManager> CPhoneInterfaceManager::sInstance;
 
 static const String CPhoneInterfaceManager::PREF_CARRIERS_ALPHATAG_PREFIX("carrier_alphtag_");
 static const String CPhoneInterfaceManager::PREF_CARRIERS_NUMBER_PREFIX("carrier_number_");
@@ -840,24 +851,21 @@ void CPhoneInterfaceManager::SendRequestAsync(
     msg->SendToTarget();
 }
 
-ECode CPhoneInterfaceManager::Init(
+AutoPtr<CPhoneInterfaceManager> CPhoneInterfaceManager::Init(
     /* [in] */ PhoneGlobals* app,
-    /* [in] */ IPhone* phone,
-    /* [out] */ IPhoneInterfaceManager** manager)
+    /* [in] */ IPhone* phone)
 {
     synchronized (PhoneInterfaceManager.class)
     {
         assert(0 & "synchronized (PhoneInterfaceManager.class)");
         if (sInstance == NULL) {
-            CPhoneInterfaceManager(app, phone, (IPhoneInterfaceManager**)&sInstance);
+            CPhoneInterfaceManager::NewByFriend(app, phone, (CPhoneInterfaceManager**)&sInstance);
         }
         else {
-            Logger::WTF(LOG_TAG, "init() called multiple times!  sInstance = %s", TO_CSTR(sInstance));
+            Logger::WTF(TAG, "init() called multiple times!  sInstance = %s", TO_CSTR(sInstance));
         }
-        *manager = sInstance;
-        REFCOUNT_ADD(*manager);
     }
-    return NOERROR;
+    return sInstance;
 }
 
 CPhoneInterfaceManager::CPhoneInterfaceManager(
@@ -1067,7 +1075,7 @@ void CPhoneInterfaceManager::AnswerRingingCallInternal()
 
 ECode CPhoneInterfaceManager::SilenceRinger()
 {
-    Logger::E(LOG_TAG, "silenseRinger not supported");
+    Logger::E(TAG, "silenseRinger not supported");
     return NOERROR;
 }
 
@@ -1625,7 +1633,7 @@ ECode CPhoneInterfaceManager::GetNeighboringCellInfo(
         cells = IArrayList::Probe(obj);
         //} catch (RuntimeException e) {
         if (ec == (ECode)RuntimeException) {
-            Logger::E(LOG_TAG, "getNeighboringCellInfo %d", ec);
+            Logger::E(TAG, "getNeighboringCellInfo %d", ec);
         }
         //}
         *list = cells;
@@ -1782,19 +1790,19 @@ String CPhoneInterfaceManager::CreateTelUrl(
 void CPhoneInterfaceManager::Log(
     /* [in] */ const String& msg)
 {
-    Logger::D(LOG_TAG, String("[PhoneIntfMgr] ") + msg);
+    Logger::D(TAG, String("[PhoneIntfMgr] ") + msg);
 }
 
 void CPhoneInterfaceManager::Logv(
     /* [in] */ const String& msg)
 {
-    Logger::V(LOG_TAG, String("[PhoneIntfMgr] ") + msg);
+    Logger::V(TAG, String("[PhoneIntfMgr] ") + msg);
 }
 
 void CPhoneInterfaceManager::Loge(
     /* [in] */ const String& msg)
 {
-    Logger::E(LOG_TAG, String("[PhoneIntfMgr] ") + msg);
+    Logger::E(TAG, String("[PhoneIntfMgr] ") + msg);
 }
 
 ECode CPhoneInterfaceManager::GetActivePhoneType(
@@ -2794,7 +2802,7 @@ ECode CPhoneInterfaceManager::InvokeOemRilRequestRaw(
                     sb += "bytes. Buffer Size is ";
                     sb += oemResp->GetLength();
                     sb += "bytes.";
-                    Logger::W(LOG_TAG, sb.ToString());
+                    Logger::W(TAG, sb.ToString());
                 }
                 System.arraycopy(responseData, 0, oemResp, 0, responseData.length);
                 returnValue = responseData->GetLength();
@@ -2808,7 +2816,7 @@ ECode CPhoneInterfaceManager::InvokeOemRilRequestRaw(
     }
     //catch (RuntimeException e) {
     if (ec == (ECode)RuntimeException) {
-        Logger::W(LOG_TAG, "sendOemRilRequestRaw: Runtime Exception");
+        Logger::W(TAG, "sendOemRilRequestRaw: Runtime Exception");
         returnValue = (CommandException.Error.GENERIC_FAILURE.ordinal());
         if(returnValue > 0) returnValue *= -1;
     }

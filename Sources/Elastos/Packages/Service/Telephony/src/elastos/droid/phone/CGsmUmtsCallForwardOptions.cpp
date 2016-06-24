@@ -5,7 +5,7 @@ namespace Elastos {
 namespace Droid {
 namespace Phone {
 
-const String CGsmUmtsCallForwardOptions::LOG_TAG("GsmUmtsCallForwardOptions");
+const String CGsmUmtsCallForwardOptions::TAG("GsmUmtsCallForwardOptions");
 
 static AutoPtr<ArrayOf<String> > initNUM_PROJECTION()
 {
@@ -100,7 +100,7 @@ ECode CGsmUmtsCallForwardOptions::OnResume()
 
     if (mFirstResume) {
         if (mIcicle == NULL) {
-            if (DBG) Logger::D(LOG_TAG, "start to init ");
+            if (DBG) Logger::D(TAG, "start to init ");
             AutoPtr<IInterface> obj;
             mPreferences->Get(mInitIndex, (IInterface**)&obj);
             AutoPtr<ICallForwardEditPreference> p = ICallForwardEditPreference::Probe(obj);
@@ -195,9 +195,9 @@ ECode CGsmUmtsCallForwardOptions::OnActivityResult(
     /* [in] */ Int32 resultCode,
     /* [in] */ IIntent* data)
 {
-    if (DBG) Logger::D(LOG_TAG, "onActivityResult: done");
+    if (DBG) Logger::D(TAG, "onActivityResult: done");
     if (resultCode != RESULT_OK) {
-        if (DBG) Logger::D(LOG_TAG, "onActivityResult: contact picker result not OK.");
+        if (DBG) Logger::D(TAG, "onActivityResult: contact picker result not OK.");
         return NOERROR;
     }
     AutoPtr<ICursor> cursor;
@@ -211,7 +211,7 @@ ECode CGsmUmtsCallForwardOptions::OnActivityResult(
 
         Boolean res;
         if ((cursor == NULL) || (cursor->MoveToFirst(&res), !res)) {
-            if (DBG) Logger::D(LOG_TAG, "onActivityResult: bad contact data, no results found.");
+            if (DBG) Logger::D(TAG, "onActivityResult: bad contact data, no results found.");
             return NOERROR;
         }
 

@@ -150,7 +150,7 @@ ECode CChangeIccPinScreen::MyRunnable2::Run()
     return mHost->mPUKAlert->Dismiss();
 }
 
-const String CChangeIccPinScreen::LOG_TAG = PhoneGlobals::LOG_TAG;
+const String CChangeIccPinScreen::TAG = PhoneGlobals::TAG;
 const Boolean CChangeIccPinScreen::DBG = FALSE;
 
 const Int32 CChangeIccPinScreen::EVENT_PIN_CHANGED = 100;
@@ -375,7 +375,7 @@ void CChangeIccPinScreen::Log(
     /* [in] */ const String& msg)
 {
     String prefix = mChangePin2 ? String("[ChgPin2]") : String("[ChgPin]");
-    Logger::D(LOG_TAG, prefix + msg);
+    Logger::D(TAG, prefix + msg);
 }
 
 } // namespace Phone

@@ -342,7 +342,7 @@ private:
     AutoPtr<CallerInfoCache> mCallerInfoCache;
     AutoPtr<NotificationMgr> mNotificationMgr;
     AutoPtr<IPhone> mPhone;
-    //AutoPtr<IPhoneInterfaceManager> mPhoneMgr;
+    //CPhoneInterfaceManager* mPhoneMgr;
 
     AutoPtr<IBluetoothManager> mBluetoothManager;
     AutoPtr<CallGatewayManager> mCallGatewayManager;

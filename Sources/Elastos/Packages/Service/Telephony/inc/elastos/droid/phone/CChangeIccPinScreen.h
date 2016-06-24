@@ -120,7 +120,7 @@ private:
         /* [in] */ const String& msg);
 
 private:
-    static const String LOG_TAG;
+    static const String TAG;
     static const Boolean DBG;
 
     static const Int32 EVENT_PIN_CHANGED;

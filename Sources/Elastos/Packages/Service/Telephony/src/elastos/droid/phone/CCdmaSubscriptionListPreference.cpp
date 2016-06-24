@@ -1,5 +1,20 @@
 
 #include "elastos/droid/phone/CCdmaSubscriptionListPreference.h"
+#include "Elastos.Droid.Content.h"
+#include "Elastos.Droid.Provider.h"
+#include "elastos/droid/os/AsyncResult.h"
+#include "elastos/droid/provider/Settings.h"
+#include <elastos/core/StringUtils.h>
+#include <elastos/utility/logging/Logger.h>
+
+using Elastos::Droid::Content::IContentResolver;
+using Elastos::Droid::Os::AsyncResult;
+using Elastos::Droid::Provider::CSettingsGlobal;
+using Elastos::Droid::Provider::ISettingsGlobal;
+using Elastos::Droid::Provider::Settings;
+using Elastos::Core::CString;
+using Elastos::Core::StringUtils;
+using Elastos::Utility::Logging::Logger;
 
 namespace Elastos {
 namespace Droid {
@@ -30,23 +45,33 @@ ECode CCdmaSubscriptionListPreference::CdmaSubscriptionButtonHandler::HandleMess
 void CCdmaSubscriptionListPreference::CdmaSubscriptionButtonHandler::HandleSetCdmaSubscriptionMode(
     /* [in] */ IMessage* msg)
 {
-    mHost->mPhone = PhoneFactory::GetDefaultPhone();
-    assert(0);
-    // AsyncResult ar = (AsyncResult) msg.obj;
+    assert(0 && "TODO Need PhoneFactory");
+    // mHost->mPhone = PhoneFactory::GetDefaultPhone();
 
-    // if (ar.exception == null) {
-    //     // Get the original string entered by the user
-    //     int cdmaSubscriptionMode = Integer.valueOf((String) ar.userObj).intValue();
-    //     Settings.Global.putInt(mPhone.getContext().getContentResolver(),
-    //             Settings.Global.CDMA_SUBSCRIPTION_MODE,
-    //             cdmaSubscriptionMode );
-    // }
-    // else {
-    //     Logger::E(LOG_TAG, "Setting Cdma subscription source failed");
-    // }
+    AutoPtr<IInterface> obj;
+    msg->GetObj((IInterface**)&obj);
+    AsyncResult* ar = (AsyncResult*) IObject::Probe(obj);
+
+    if (ar->mException == NULL) {
+        // Get the original string entered by the user
+        AutoPtr<ICharSequence> cs = ICharSequence::Probe(ar->mUserObj);
+        String s;
+        cs->ToString(&s);
+        Int32 cdmaSubscriptionMode = StringUtils::ParseInt32(s);
+        AutoPtr<IContext> ctx;
+        mHost->mPhone->GetContext((IContext**)&ctx);
+        AutoPtr<IContentResolver> cr;
+        ctx->GetContentResolver((IContentResolver**)&cr);
+        Boolean tmp = FALSE;
+        Elastos::Droid::Provider::Settings::Global::PutInt32(cr, ISettingsGlobal::CDMA_SUBSCRIPTION_MODE,
+                cdmaSubscriptionMode, &tmp);
+    }
+    else {
+        Logger::E(TAG, "Setting Cdma subscription source failed");
+    }
 }
 
-const String CCdmaSubscriptionListPreference::LOG_TAG("CdmaSubscriptionListPreference");
+const String CCdmaSubscriptionListPreference::TAG("CdmaSubscriptionListPreference");
 
 const Int32 CCdmaSubscriptionListPreference::CDMA_SUBSCRIPTION_RUIM_SIM = 0;
 const Int32 CCdmaSubscriptionListPreference::CDMA_SUBSCRIPTION_NV = 1;
@@ -63,8 +88,9 @@ ECode CCdmaSubscriptionListPreference::constructor(
 {
     ListPreference::constructor(context, attrs);
 
-    mPhone = PhoneFactory::GetDefaultPhone();
-    mHandler = new CdmaSubscriptionButtonHandler();
+    assert(0 && "TODO Need PhoneFactory");
+    // mPhone = PhoneFactory::GetDefaultPhone();
+    mHandler = new CdmaSubscriptionButtonHandler(this);
     SetCurrentCdmaSubscriptionModeValue();
     return NOERROR;
 }
@@ -97,6 +123,7 @@ ECode CCdmaSubscriptionListPreference::ShowDialog(
     SetCurrentCdmaSubscriptionModeValue();
 
     ListPreference::ShowDialog(state);
+    return NOERROR;
 }
 
 ECode CCdmaSubscriptionListPreference::OnDialogClosed(
@@ -111,8 +138,8 @@ ECode CCdmaSubscriptionListPreference::OnDialogClosed(
 
     String value;
     GetValue(&value);
-    Int32 buttonCdmaSubscriptionMod = StringUtils::ParseInt32(value);
-    Logger::D(LOG_TAG, "Setting new value %d", buttonCdmaSubscriptionMode);
+    Int32 buttonCdmaSubscriptionMode = StringUtils::ParseInt32(value);
+    Logger::D(TAG, "Setting new value %d", buttonCdmaSubscriptionMode);
     Int32 statusCdmaSubscriptionMode;
     switch(buttonCdmaSubscriptionMode) {
         case CDMA_SUBSCRIPTION_NV:
@@ -130,8 +157,10 @@ ECode CCdmaSubscriptionListPreference::OnDialogClosed(
     String value2;
     GetValue(&value2);
     AutoPtr<IMessage> message;
-    mHandler->ObtainMessage(ICdmaSubscriptionButtonHandler::MESSAGE_SET_CDMA_SUBSCRIPTION,
-            value2, (IMessage**)&message);
+    AutoPtr<ICharSequence> cs;
+    CString::New(value2, (ICharSequence**)&cs);
+    mHandler->ObtainMessage(CdmaSubscriptionButtonHandler::MESSAGE_SET_CDMA_SUBSCRIPTION,
+            cs, (IMessage**)&message);
     return mPhone->SetCdmaSubscription(statusCdmaSubscriptionMode, message);
 }
 

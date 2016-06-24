@@ -20,7 +20,7 @@ CGetPin2Screen::MyViewOnClickListener::OnClick(
     return NOERROR;
 }
 
-const String CGetPin2Screen::LOG_TAG("CGetPin2Screen");// = PhoneGlobals.LOG_TAG;
+const String CGetPin2Screen::TAG("CGetPin2Screen");// = PhoneGlobals.TAG;
 
 CAR_INTERFACE_IMPL_2(CGetPin2Screen, Activity, IGetPin2Screen, ITextViewOnEditorActionListener)
 
@@ -119,7 +119,7 @@ void CGetPin2Screen::Log(
     String sb;
     sb += "[GetPin2] ";
     sb += msg;
-    Logger::D(LOG_TAG, sb.ToString());
+    Logger::D(TAG, sb.ToString());
 }
 
 } // namespace Phone

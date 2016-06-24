@@ -1,0 +1,22 @@
+module
+{
+    using interface Elastos.Droid.Preference.IPreference;
+
+    namespace Elastos {
+    namespace Droid {
+    namespace Phone {
+
+    [local]
+    interface ICdmaOptions {
+        PreferenceTreeClick(
+            [in] IPreference* preference,
+            [out] Boolean* result);
+
+        ShowDialog(
+            [in] IPreference* preference);
+    }
+
+    } // namespace Phone
+    } // namespace Droid
+    } // namespace Elastos
+}

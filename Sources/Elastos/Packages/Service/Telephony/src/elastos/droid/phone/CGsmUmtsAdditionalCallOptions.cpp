@@ -5,7 +5,7 @@ namespace Elastos {
 namespace Droid {
 namespace Phone {
 
-const String CGsmUmtsAdditionalCallOptions::LOG_TAG("GsmUmtsAdditionalCallOptions");
+const String CGsmUmtsAdditionalCallOptions::TAG("GsmUmtsAdditionalCallOptions");
 
 const String CGsmUmtsAdditionalCallOptions::BUTTON_CLIR_KEY("button_clir_key");
 const String CGsmUmtsAdditionalCallOptions::BUTTON_CW_KEY("button_cw_key");
@@ -48,11 +48,11 @@ ECode CGsmUmtsAdditionalCallOptions::OnCreate(
     mPreferences->Add(mCWButton);
 
     if (icicle == NULL) {
-        if (DBG) LogGER::D(LOG_TAG, "start to init ");
+        if (DBG) LogGER::D(TAG, "start to init ");
         mCLIRButton->Init(this, FALSE);
     }
     else {
-        if (DBG) Logger::D(LOG_TAG, "restore stored states");
+        if (DBG) Logger::D(TAG, "restore stored states");
         mPreferences->GetSize(&mInitIndex);
         mCLIRButton->Init(this, TRUE);
         mCWButton->Init(this, TRUE);
@@ -68,7 +68,7 @@ ECode CGsmUmtsAdditionalCallOptions::OnCreate(
                 sb += (*clirArray)[0];
                 sb += ", clirArray[1]=";
                 sb += (*clirArray)[1];
-                Logger::D(LOG_TAG, sb.ToString());
+                Logger::D(TAG, sb.ToString());
             }
             mCLIRButton->HandleGetCLIRResult(clirArray);
         }

@@ -55,7 +55,7 @@ ECode CEnableFdnScreen::MyRunnable::Run()
     return mHost->Finish();
 }
 
-const String CEnableFdnScreen::LOG_TAG("CEnableFdnScreen");// = PhoneGlobals.LOG_TAG;
+const String CEnableFdnScreen::TAG("CEnableFdnScreen");// = PhoneGlobals.TAG;
 const Boolean CEnableFdnScreen::DBG = FALSE;
 
 const Int32 CEnableFdnScreen::ENABLE_FDN_COMPLETE = 100;
@@ -193,7 +193,7 @@ void CEnableFdnScreen::HandleResult(
 void CEnableFdnScreen::Log(
     /* [in] */ const String& msg)
 {
-    Logger::D(LOG_TAG, String("[EnableSimPin] ") + msg);
+    Logger::D(TAG, String("[EnableSimPin] ") + msg);
 }
 
 } // namespace Phone

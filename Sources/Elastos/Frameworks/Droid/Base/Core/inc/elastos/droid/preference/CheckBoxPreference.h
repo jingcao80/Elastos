@@ -6,6 +6,7 @@
 #include "elastos/droid/preference/TwoStatePreference.h"
 
 using Elastos::Droid::Preference::IPreference;
+using Elastos::Droid::Preference::TwoStatePreference;
 
 namespace Elastos {
 namespace Droid {
@@ -21,7 +22,7 @@ namespace Preference {
  * @attr ref android.R.styleable#CheckBoxPreference_summaryOn
  * @attr ref android.R.styleable#CheckBoxPreference_disableDependentsState
  */
-class CheckBoxPreference
+class ECO_PUBLIC CheckBoxPreference
     : public TwoStatePreference
     , public ICheckBoxPreference
 {

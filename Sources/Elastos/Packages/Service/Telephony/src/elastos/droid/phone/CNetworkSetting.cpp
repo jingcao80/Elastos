@@ -57,7 +57,7 @@ ECode CNetworkSetting::MyHandler::HandleMessage(
             //    // "auto select" is always trigged in foreground, so "auto select" dialog
                 //  should be shown when "auto select" is trigged. Should NOT get
                 // this exception, and Log it.
-                Logger::W(LOG_TAG, "[NetworksList] Fail to dismiss auto select dialog %d", ec);
+                Logger::W(TAG, "[NetworksList] Fail to dismiss auto select dialog %d", ec);
             }
             //}
             AutoPtr<IPreferenceScreen> screen;
@@ -125,7 +125,7 @@ ECode CNetworkSetting::MyRunnable::Run()
     return mHost->Finish();
 }
 
-const String CNetworkSetting::LOG_TAG("phone");
+const String CNetworkSetting::TAG("phone");
 const Boolean CNetworkSetting::DBG = FALSE;
 
 const Int32 CNetworkSetting::EVENT_NETWORK_SCAN_COMPLETED = 100;
@@ -216,7 +216,7 @@ ECode CNetworkSetting::OnCancel(
     //} catch (RemoteException e) {
     if (ec == (ECode)E_RUNTIME_EXCEPTION) {
         //throw new RuntimeException(e);
-        Logger::E(LOG_TAG, "RuntimeException");
+        Logger::E(TAG, "RuntimeException");
         return E_RUNTIME_EXCEPTION;
     }
     //}
@@ -578,7 +578,7 @@ void CNetworkSetting::Log(
     StringBuilder sb;
     sb += "[NetworksList] ";
     sb += msg;
-    Logger::D(LOG_TAG, sb.ToString());
+    Logger::D(TAG, sb.ToString());
 }
 
 } // namespace Phone

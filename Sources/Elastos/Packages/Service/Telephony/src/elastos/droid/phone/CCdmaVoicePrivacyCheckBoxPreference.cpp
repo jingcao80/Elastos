@@ -1,10 +1,22 @@
 
 #include "elastos/droid/phone/CCdmaVoicePrivacyCheckBoxPreference.h"
+#include "Elastos.Droid.Content.h"
+#include "Elastos.Droid.Provider.h"
+#include <elastos/droid/R.h>
+#include "elastos/droid/os/AsyncResult.h"
+#include <elastos/utility/logging/Logger.h>
+
+using Elastos::Droid::Content::IContentResolver;
+using Elastos::Droid::Os::AsyncResult;
+using Elastos::Droid::Provider::CSettingsSecure;
+using Elastos::Droid::Provider::ISettingsSecure;
+using Elastos::Utility::Logging::Logger;
 
 namespace Elastos {
 namespace Droid {
 namespace Phone {
 
+const String CCdmaVoicePrivacyCheckBoxPreference::TAG("CdmaVoicePrivacyCheckBoxPreference");
 const Int32 CCdmaVoicePrivacyCheckBoxPreference::MyHandler::MESSAGE_GET_VP = 0;
 const Int32 CCdmaVoicePrivacyCheckBoxPreference::MyHandler::MESSAGE_SET_VP = 1;
 
@@ -34,51 +46,53 @@ ECode CCdmaVoicePrivacyCheckBoxPreference::MyHandler::HandleMessage(
 void CCdmaVoicePrivacyCheckBoxPreference::MyHandler::HandleGetVPResponse(
     /* [in] */ IMessage* msg)
 {
-    AsyncResult ar = (AsyncResult) msg.obj;
+    AutoPtr<IInterface> obj;
+    msg->GetObj((IInterface**)&obj);
+    AsyncResult* ar = (AsyncResult*) IObject::Probe(obj);
 
-    if (ar.exception != null) {
-        if (DBG) Log.d(LOG_TAG, "handleGetVPResponse: ar.exception=" + ar.exception);
-        SetEnabled(FALSE);
+    if (ar->mException != NULL) {
+        if (mHost->DBG) Logger::D(TAG, "handleGetVPResponse: ar.exception=%s", TO_CSTR(ar->mException));
+        mHost->SetEnabled(FALSE);
     }
     else {
-        if (DBG) Log.d(LOG_TAG, "handleGetVPResponse: VP state successfully queried.");
-        Int32 enable = ((int[]) ar.result)[0];
-        SetChecked(enable != 0);
+        if (mHost->DBG) Logger::D(TAG, "handleGetVPResponse: VP state successfully queried.");
+        Int32 enable = 0;
+        assert(0 && "TODO");
+        //((int[]) ar.result)[0];
+        mHost->SetChecked(enable != 0);
 
         AutoPtr<IContext> context;
-        GetContext((IContext**)&context);
+        mHost->GetContext((IContext**)&context);
         AutoPtr<IContentResolver> cr;
         context->GetContentResolver((IContentResolver**)&cr);
 
-        AutoPtr<ISettingsSecur> helper;
-        CSettingsSecure::AcquireSingleton((ISettingsSecur**)&helper);
-        helper->PutInt32(cr, ISettingsSecure::ENHANCED_VOICE_PRIVACY_ENABLED, enable);
+        AutoPtr<ISettingsSecure> helper;
+        CSettingsSecure::AcquireSingleton((ISettingsSecure**)&helper);
+        Boolean tmp = FALSE;
+        helper->PutInt32(cr, ISettingsSecure::ENHANCED_VOICE_PRIVACY_ENABLED, enable, &tmp);
     }
 }
 
 void CCdmaVoicePrivacyCheckBoxPreference::MyHandler::HandleSetVPResponse(
     /* [in] */ IMessage* msg)
 {
-    AsyncResult ar = (AsyncResult) msg.obj;
+    AutoPtr<IInterface> obj;
+    msg->GetObj((IInterface**)&obj);
+    AsyncResult* ar = (AsyncResult*) IObject::Probe(obj);
 
-    if (ar.exception != null) {
-        if (DBG) Log.d(LOG_TAG, "handleSetVPResponse: ar.exception=" + ar.exception);
+    if (ar->mException != NULL) {
+        if (mHost->DBG) Logger::D(TAG, "handleSetVPResponse: ar.exception=%s", TO_CSTR(ar->mException));
     }
-    if (DBG) Logger::D(LOG_TAG, "handleSetVPResponse: re get");
+    if (mHost->DBG) Logger::D(TAG, "handleSetVPResponse: re get");
 
     AutoPtr<IMessage> m;
-    mHandler->ObtainMessage(MESSAGE_GET_VP, (IMessage**)&m);
-    mPhone->GetEnhancedVoicePrivacy(m);
+    mHost->mHandler->ObtainMessage(MESSAGE_GET_VP, (IMessage**)&m);
+    mHost->mPhone->GetEnhancedVoicePrivacy(m);
 }
 
-const String CCdmaVoicePrivacyCheckBoxPreference::LOG_TAG("CdmaVoicePrivacyCheckBoxPreference");
-
-CAR_INTERFACE_IMPL(CCdmaVoicePrivacyCheckBoxPreference, CheckBoxPreference, ICdmaVoicePrivacyCheckBoxPreference)
-
 CAR_OBJECT_IMPL(CCdmaVoicePrivacyCheckBoxPreference)
-
 CCdmaVoicePrivacyCheckBoxPreference::CCdmaVoicePrivacyCheckBoxPreference()
-    : DBG(PhoneGlobals::DBG_LEVEL >= 2)
+    : DBG(IPhoneGlobals::DBG_LEVEL >= 2)
 {
     mHandler = new MyHandler(this);
 }
@@ -86,11 +100,12 @@ CCdmaVoicePrivacyCheckBoxPreference::CCdmaVoicePrivacyCheckBoxPreference()
 ECode CCdmaVoicePrivacyCheckBoxPreference::constructor(
     /* [in] */ IContext* context,
     /* [in] */ IAttributeSet* attrs,
-    /* [in] */ Int232 defStyle)
+    /* [in] */ Int32 defStyle)
 {
     CheckBoxPreference::constructor(context, attrs, defStyle);
 
-    mPhone = PhoneGlobals::GetPhone();
+    assert(0 && "TODO need PhoneGlobals");
+    // mPhone = PhoneGlobals::GetPhone();
     AutoPtr<IMessage> m;
     mHandler->ObtainMessage(MyHandler::MESSAGE_GET_VP, (IMessage**)&m);
     return mPhone->GetEnhancedVoicePrivacy(m);
@@ -100,7 +115,7 @@ ECode CCdmaVoicePrivacyCheckBoxPreference::constructor(
     /* [in] */ IContext* context,
     /* [in] */ IAttributeSet* attrs)
 {
-    return constructor(context, attrs, com.android.internal.R.attr.checkBoxPreferenceStyle);
+    return constructor(context, attrs, Elastos::Droid::R::attr::checkBoxPreferenceStyle);
 }
 
 ECode CCdmaVoicePrivacyCheckBoxPreference::constructor(

@@ -112,7 +112,7 @@ protected:
     AutoPtr<IQueryHandler> mQueryHandler;
 
 private:
-    static const String LOG_TAG = PhoneGlobals.LOG_TAG;
+    static const String TAG = PhoneGlobals.TAG;
     static const Boolean DBG = FALSE;
 
     static const String INTENT_EXTRA_NAME = "name";

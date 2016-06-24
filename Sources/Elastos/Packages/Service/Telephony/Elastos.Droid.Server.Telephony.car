@@ -10,6 +10,9 @@ module
     merge("car/elastos/droid/phone/CallFeaturesSetting.car");
     merge("car/elastos/droid/phone/CallTime.car");
     merge("car/elastos/droid/phone/Constants.car");
+    merge("car/elastos/droid/phone/CdmaOptions.car");
+    merge("car/elastos/droid/phone/CdmaSystemSelectListPreference.car");
+    merge("car/elastos/droid/phone/CdmaSubscriptionListPreference.car");
     merge("car/elastos/droid/phone/ErrorDialogActivity.car");
     merge("car/elastos/droid/phone/EditPhoneNumberPreference.car");
     merge("car/elastos/droid/phone/InCallScreen.car");
@@ -43,8 +46,12 @@ module
     using interface Elastos.Droid.Content.IComponentCallbacks;
     using interface Elastos.Droid.Content.IComponentCallbacks2;
     using interface Elastos.Droid.Content.IDialogInterfaceOnClickListener;
+    using interface Elastos.Droid.Content.IDialogInterfaceOnDismissListener;
     using interface Elastos.Droid.Internal.Telephony.ICallForwardInfo;
     using interface Elastos.Droid.Provider.ISearchIndexablesProvider;
+    using interface Elastos.Droid.Internal.Telephony.IITelephony;
+    using interface Elastos.Droid.Internal.Telephony.IPhone;
+    using interface Elastos.Droid.Os.IBinder;
     using interface Elastos.Droid.Telecomm.Telecom.IConnectionService;
     using interface Elastos.Droid.View.IContextThemeWrapper;
     using interface Elastos.Droid.View.IKeyEventCallback;
@@ -53,10 +60,19 @@ module
     using interface Elastos.Droid.View.IOnWindowDismissedCallback;
     using interface Elastos.Droid.View.IViewOnCreateContextMenuListener;
     using interface Elastos.Droid.View.IWindowCallback;
+    using interface Elastos.Droid.Preference.ICheckBoxPreference;
+    using interface Elastos.Droid.Preference.IDialogPreference;
+    using interface Elastos.Droid.Preference.IListPreference;
+    using interface Elastos.Droid.Preference.IPreference;
     using interface Elastos.Droid.Preference.IPreferenceActivity;
-    using interface Elastos.Droid.Preference.IPreferenceOnPreferenceChangeListener;
     using interface Elastos.Droid.Preference.IPreferenceFragmentOnPreferenceStartFragmentCallback;
+    using interface Elastos.Droid.Preference.IPreferenceManagerOnActivityDestroyListener;
+    using interface Elastos.Droid.Preference.IPreferenceOnPreferenceChangeListener;
+    using interface Elastos.Droid.Preference.IPreferenceScreen;
     using interface Elastos.Droid.Preference.IPreferenceManagerOnPreferenceTreeClickListener;
+    using interface Elastos.Droid.Preference.ITwoStatePreference;
+    using interface Elastos.Core.IComparable;
+    using interface Elastos.Droid.Utility.IAttributeSet;
 
     namespace Elastos {
     namespace Droid {
@@ -160,6 +176,113 @@ module
         interface IOnWindowDismissedCallback;
     }
 
+    class CCdmaCallOptions {
+        constructor();
+
+        interface IPreferenceActivity;
+        interface IPreferenceFragmentOnPreferenceStartFragmentCallback;
+        interface IPreferenceManagerOnPreferenceTreeClickListener;
+        interface IListActivity;
+        interface IActivity;
+        interface IContext;
+        interface IContextThemeWrapper;
+        interface ILayoutInflaterFactory;
+        interface ILayoutInflaterFactory2;
+        interface IWindowCallback;
+        interface IKeyEventCallback;
+        interface IViewOnCreateContextMenuListener;
+        interface IComponentCallbacks;
+        interface IComponentCallbacks2;
+        interface IOnWindowDismissedCallback;
+    }
+
+    [local]
+    class CCdmaOptions {
+        constructor(
+            [in] IPreferenceActivity* prefActivity,
+            [in] IPreferenceScreen* prefScreen,
+            [in] IPhone* phone);
+
+        interface ICdmaOptions;
+    }
+
+    [local]
+    class CCdmaSubscriptionListPreference {
+        constructor(
+            [in] IContext* ctx,
+            [in] IAttributeSet* attrs);
+
+        constructor(
+            [in] IContext* ctx);
+
+        interface ICdmaSubscriptionListPreference;
+        interface IListPreference;
+        interface IDialogPreference;
+        interface IPreference;
+        interface IComparable;
+        interface IPreferenceManagerOnActivityDestroyListener;
+        interface IDialogInterfaceOnDismissListener;
+        interface IDialogInterfaceOnClickListener;
+    }
+
+    [local]
+    class CCdmaSystemSelectListPreference {
+        constructor(
+            [in] IContext* ctx,
+            [in] IAttributeSet* attrs);
+
+        constructor(
+            [in] IContext* ctx);
+
+        interface ICdmaSystemSelectListPreference;
+        interface IListPreference;
+        interface IDialogPreference;
+        interface IPreference;
+        interface IComparable;
+        interface IPreferenceManagerOnActivityDestroyListener;
+        interface IDialogInterfaceOnDismissListener;
+        interface IDialogInterfaceOnClickListener;
+    }
+
+    [local]
+    class CCdmaVoicePrivacyCheckBoxPreference {
+        constructor(
+            [in] IContext* ctx,
+            [in] IAttributeSet* attrs,
+            [in] Int32 defStyleAttr);
+
+        constructor(
+            [in] IContext* ctx,
+            [in] IAttributeSet* attrs);
+
+        constructor(
+            [in] IContext* ctx);
+
+        interface ICheckBoxPreference;
+        interface ITwoStatePreference;
+        interface IComparable;
+        interface IPreference;
+    }
+
+    class CCellBroadcastSms {
+        interface IPreferenceActivity;
+        interface IPreferenceOnPreferenceChangeListener;
+        interface IPreferenceFragmentOnPreferenceStartFragmentCallback;
+        interface IPreferenceManagerOnPreferenceTreeClickListener;
+        interface IListActivity;
+        interface IActivity;
+        interface IContext;
+        interface IContextThemeWrapper;
+        interface ILayoutInflaterFactory;
+        interface ILayoutInflaterFactory2;
+        interface IWindowCallback;
+        interface IKeyEventCallback;
+        interface IViewOnCreateContextMenuListener;
+        interface IComponentCallbacks;
+        interface IComponentCallbacks2;
+        interface IOnWindowDismissedCallback;
+    }
+
     class CProcessOutgoingCallTest {
         constructor();
 
@@ -171,6 +294,15 @@ module
         interface IComponentCallbacks;
         interface IComponentCallbacks2;
         interface ISearchIndexablesProvider;
+    }
+
+    class CPhoneInterfaceManager {
+        constructor(
+            [in] IPhoneGlobals* pg,
+            [in] IPhone* phone);
+
+        interface IITelephony;
+        interface IBinder;
     }
 
     } // namespace Phone

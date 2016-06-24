@@ -103,7 +103,7 @@ private:
         /* [in] */ const String& msg);
 
 private:
-    static const String LOG_TAG = PhoneGlobals.LOG_TAG;
+    static const String TAG = PhoneGlobals.TAG;
 
     static const Int32 ENABLE_ICC_PIN_COMPLETE = 100;
     static const Boolean DBG = FALSE;

@@ -167,7 +167,7 @@ void CMobileNetworkSettings::MyHandler::ResetNetworkModeToDefault()
     mPhone->SetPreferredNetworkType(preferredNetworkMode, m);
 }
 
-static const String CMobileNetworkSettings::LOG_TAG("NetworkSettings");
+static const String CMobileNetworkSettings::TAG("NetworkSettings");
 static const Boolean CMobileNetworkSettings::DBG = TRUE;
 
 static const String CMobileNetworkSettings::BUTTON_PREFERED_NETWORK_MODE("preferred_network_mode_key");
@@ -318,7 +318,7 @@ ECode CMobileNetworkSettings::OnPreferenceTreeClick(
             StartActivity(intent);
         }
         else {
-            Logger::E(LOG_TAG, "Missing SETUP_PREPAID_DATA_SERVICE_URL");
+            Logger::E(TAG, "Missing SETUP_PREPAID_DATA_SERVICE_URL");
         }
         *result = TRUE;
         return NOERROR;
@@ -540,7 +540,7 @@ ERROR:
         }
         else {
             //throw new IllegalStateException("Unexpected phone type: " + phoneType);
-            Logger::E(LOG_TAG, "Unexpected phone type: %d", phoneType);
+            Logger::E(TAG, "Unexpected phone type: %d", phoneType);
             return IllegalStateException;
         }
         mButtonEnabledNetworks->SetOnPreferenceChangeListener(this);
@@ -573,7 +573,7 @@ ERROR:
         prefSet->RemovePreference(mLteDataServicePref);
     }
     else {
-        Logger::D(LOG_TAG, "keep ltePref");
+        Logger::D(TAG, "keep ltePref");
     }
 
     // Enable enhanced 4G LTE mode settings depending on whether exists on platform
@@ -1020,13 +1020,13 @@ ECode CMobileNetworkSettings::OnActivityResult(
 void CMobileNetworkSettings::Log(
     /* [in] */ const String& msg)
 {
-    Logger::D(LOG_TAG, msg);
+    Logger::D(TAG, msg);
 }
 
 void CMobileNetworkSettings::Loge(
     /* [in] */ const String& msg)
 {
-    Logger::E(LOG_TAG, msg);
+    Logger::E(TAG, msg);
 }
 
 ECode CMobileNetworkSettings::OnOptionsItemSelected(

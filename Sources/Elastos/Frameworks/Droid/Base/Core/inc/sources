@@ -132,8 +132,10 @@ EXPORT_HEADERS += elastos/droid/provider/SearchIndexableData.h
 EXPORT_HEADERS += elastos/droid/provider/SearchIndexablesProvider.h
 EXPORT_HEADERS += elastos/droid/provider/DocumentsProvider.h
 
+EXPORT_HEADERS += elastos/droid/preference/CheckBoxPreference.h
 EXPORT_HEADERS += elastos/droid/preference/DialogPreference.h
 EXPORT_HEADERS += elastos/droid/preference/EditTextPreference.h
+EXPORT_HEADERS += elastos/droid/preference/ListPreference.h
 EXPORT_HEADERS += elastos/droid/preference/PreferenceActivity.h
 EXPORT_HEADERS += elastos/droid/preference/Preference.h
 EXPORT_HEADERS += elastos/droid/preference/PreferenceFragment.h

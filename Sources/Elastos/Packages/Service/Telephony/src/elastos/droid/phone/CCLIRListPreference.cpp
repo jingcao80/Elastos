@@ -53,7 +53,7 @@ void MyHandler::HandleGetCLIRResponse(
             StringBuilder sb;
             sb += "handleGetCLIRResponse: ar.exception=";
             sb += TO_CSTR(ar->mException);
-            Logger::D(LOG_TAG, sb.ToString());
+            Logger::D(TAG, sb.ToString());
         }
         mTcpListener->OnException(mHost, ICommandException::Probe(ar->mException)));
     }
@@ -83,7 +83,7 @@ void MyHandler::HandleGetCLIRResponse(
                 Int32 value2;
                 intObj2->GetValue(&value2);
                 sb += value2;
-                Logger::D(LOG_TAG, sb.ToString());
+                Logger::D(TAG, sb.ToString());
             }
             HandleGetCLIRResult(clirArray);
         }
@@ -102,11 +102,11 @@ void MyHandler::HandleSetCLIRResponse(
             StringBuilder sb;
             sb += "handleSetCallWaitingResponse: ar.exception=";
             sb += TO_CSTR(ar->mException);
-            Logger::D(LOG_TAG, sb.ToString());
+            Logger::D(TAG, sb.ToString());
         }
         //setEnabled(false);
     }
-    if (DBG) Logger::D(LOG_TAG, String("handleSetCallWaitingResponse: re get"));
+    if (DBG) Logger::D(TAG, String("handleSetCallWaitingResponse: re get"));
 
     AutoPtr<IMessage> msg;
     ObtainMessage(MESSAGE_GET_CLIR,
@@ -114,7 +114,7 @@ void MyHandler::HandleSetCLIRResponse(
     mPhone->GetOutgoingCallerIdDisplay(msg);
 }
 
-const String CCLIRListPreference::LOG_TAG("CLIRListPreference");
+const String CCLIRListPreference::TAG("CLIRListPreference");
 
 CAR_INTERFACE_IMPL(CCLIRListPreference, ListPreference, ICLIRListPreference)
 

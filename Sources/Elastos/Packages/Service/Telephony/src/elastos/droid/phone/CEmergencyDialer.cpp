@@ -49,7 +49,7 @@ static AutoPtr<ArrayOf<Int32> > initDIALER_KEYS()
 const AutoPtr<ArrayOf<Int32> > CEmergencyDialer::DIALER_KEYS = initDIALER_KEYS();
 
 const Boolean CEmergencyDialer::DBG = FALSE;
-const String CEmergencyDialer::LOG_TAG("EmergencyDialer");
+const String CEmergencyDialer::TAG("EmergencyDialer");
 
 const Int32 CEmergencyDialer::TONE_LENGTH_MS = 150;
 
@@ -229,7 +229,7 @@ ECode CEmergencyDialer::OnCreate(
             ECode ec = CToneGenerator::New(DIAL_TONE_STREAM_TYPE, TONE_RELATIVE_VOLUME, (IToneGenerator**)&mToneGenerator);
             //} catch (RuntimeException e) {
             if (ec == (ECode)E_RUNTIME_EXCEPTION) {
-                Logger::W(LOG_TAG, "Exception caught while creating local tone generator: %d", ec);
+                Logger::W(TAG, "Exception caught while creating local tone generator: %d", ec);
                 mToneGenerator = NULL;
             }
             //}
@@ -245,7 +245,7 @@ ECode CEmergencyDialer::OnCreate(
     ECode ec = mHaptic->Init(this, (res->GetBoolean(R.bool.config_enable_dialer_key_vibration, &result), result));
     //} catch (Resources.NotFoundException nfe) {
     if (ec == (ECode)E_RESOURCES_NOT_FOUND_EXCEPTION) {
-        Logger::E(LOG_TAG, "Vibrate control bool missing. %d", ec);
+        Logger::E(TAG, "Vibrate control bool missing. %d", ec);
     }
     //}
     return NOERROR;
@@ -544,7 +544,7 @@ ECode CEmergencyDialer::OnResume()
                     TONE_RELATIVE_VOLUME, (ToneGenerator**)&mToneGenerator);
             //} catch (RuntimeException e) {
             if (ec == (ECode)E_RUNTIME_EXCEPTION) {
-                Logger::W(LOG_TAG, "Exception caught while creating local tone generator: %d", ec);
+                Logger::W(TAG, "Exception caught while creating local tone generator: %d", ec);
                 mToneGenerator = NULL;
             }
             //}
@@ -553,7 +553,7 @@ ECode CEmergencyDialer::OnResume()
 
     // Disable the status bar and set the poke lock timeout to medium.
     // There is no need to do anything with the wake lock.
-    if (DBG) Logger::D(LOG_TAG, "disabling status bar, set to long timeout");
+    if (DBG) Logger::D(TAG, "disabling status bar, set to long timeout");
     mStatusBarManager->Disable(IStatusBarManager::DISABLE_EXPAND);
 
     return UpdateDialAndDeleteButtonStateEnabledAttr();
@@ -563,7 +563,7 @@ ECode CEmergencyDialer::OnPause()
 {
     // Reenable the status bar and set the poke lock timeout to default.
     // There is no need to do anything with the wake lock.
-    if (DBG) Logger::D(LOG_TAG, "reenabling status bar and closing the dialer");
+    if (DBG) Logger::D(TAG, "reenabling status bar and closing the dialer");
     mStatusBarManager->Disable(IStatusBarManager::DISABLE_NONE);
 
     Activity::OnPause();
@@ -588,7 +588,7 @@ void CEmergencyDialer::PlaceCall()
             StringBuilder sb;
             sb += "placing call to ";
             sb += mLastNumber;
-            Logger::D(LOG_TAG, sb.ToString());
+            Logger::D(TAG, sb.ToString());
         }
 
         // place the call if it is a valid number
@@ -613,7 +613,7 @@ void CEmergencyDialer::PlaceCall()
             StringBuilder sb;
             sb += "rejecting bad requested number ";
             sb += mLastNumber;
-            Logger::D(LOG_TAG, sb.ToString());
+            Logger::D(TAG, sb.ToString());
         }
 
         // erase the number and throw up an alert dialog.
@@ -651,7 +651,7 @@ ECode CEmergencyDialer::PlayTone(
     {
         AutoLock syncLock(mToneGeneratorLock);
         if (mToneGenerator == NULL) {
-            Logger::W(LOG_TAG, "playTone: mToneGenerator == null, tone: %d", tone);
+            Logger::W(TAG, "playTone: mToneGenerator == null, tone: %d", tone);
             return NOERROR;
         }
 

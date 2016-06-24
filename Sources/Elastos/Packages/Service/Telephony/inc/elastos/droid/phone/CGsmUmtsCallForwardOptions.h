@@ -50,7 +50,7 @@ protected:
         /* [in] */ IIntent* data);
 
 private:
-    static const String LOG_TAG;
+    static const String TAG;
     const Boolean DBG;
 
     static const AutoPtr<ArrayOf<String> > NUM_PROJECTION;

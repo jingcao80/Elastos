@@ -92,7 +92,7 @@ ECode CEmergencyCallbackModeService::MyCountDownTimer::OnFinish()
 }
 
 const Int32 CEmergencyCallbackModeService::DEFAULT_ECM_EXIT_TIMER_VALUE = 300000;
-const String CEmergencyCallbackModeService::LOG_TAG("EmergencyCallbackModeService");
+const String CEmergencyCallbackModeService::TAG("EmergencyCallbackModeService");
 
 const Int32 CEmergencyCallbackModeService::ECM_TIMER_RESET = 1;
 
@@ -131,7 +131,7 @@ ECode CEmergencyCallbackModeService::OnCreate()
         phone->GetPhoneName(&name);
         sb += name;
         sb += " phones";
-        Logger::E(LOG_TAG, sb.ToString());
+        Logger::E(TAG, sb.ToString());
         StopSelf();
     }
 
@@ -196,7 +196,7 @@ void CEmergencyCallbackModeService::ShowNotification(
     Boolean isInEcm = StringUtils::ParseBoolean(mode);
 
     if (!isInEcm) {
-        Logger::I(LOG_TAG, "Asked to show notification but not in ECM mode");
+        Logger::I(TAG, "Asked to show notification but not in ECM mode");
         if (mTimer != NULL) {
             mTimer->Cancel();
         }

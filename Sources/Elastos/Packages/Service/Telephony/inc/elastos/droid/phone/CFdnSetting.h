@@ -138,7 +138,7 @@ private:
         /* [in] */ const String& msg);
 
 private:
-    static const String LOG_TAG = PhoneGlobals.LOG_TAG;
+    static const String TAG = PhoneGlobals.TAG;
     static const Boolean DBG = FALSE;
 
     AutoPtr<IPhone> mPhone;

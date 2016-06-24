@@ -27,7 +27,7 @@ protected:
         /* [in] */ IBundle* icicle);
 
 private:
-    static const String LOG_TAG = "GsmUmtsCallOptions";
+    static const String TAG = "GsmUmtsCallOptions";
     const Boolean DBG;
 };
 

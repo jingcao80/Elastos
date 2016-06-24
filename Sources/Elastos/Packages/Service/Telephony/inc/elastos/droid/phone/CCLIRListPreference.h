@@ -71,7 +71,7 @@ protected:
         /* [in] */ Boolean positiveResult);
 
 public:
-    static const String LOG_TAG;
+    static const String TAG;
     Boolean DBG;
 
     AutoPtr<IHandler> mHandler;

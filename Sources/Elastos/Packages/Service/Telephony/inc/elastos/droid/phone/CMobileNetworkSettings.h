@@ -139,7 +139,7 @@ private:
 
 private:
     // debug data
-    static const String LOG_TAG;
+    static const String TAG;
     static const Boolean DBG;
 
     //String keys for preference lookup

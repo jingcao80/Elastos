@@ -111,7 +111,7 @@ ECode CNetworkQueryService::MyNetworkQueryService::StopNetworkQuery(
     return NOERROR;
 }
 
-const String CNetworkQueryService::LOG_TAG("NetworkQuery");
+const String CNetworkQueryService::TAG("NetworkQuery");
 const Boolean CNetworkQueryService::DBG = FALSE;
 
 const Int32 CNetworkQueryService::EVENT_NETWORK_SCAN_COMPLETED = 100;
@@ -217,7 +217,7 @@ void CNetworkQueryService::BroadcastQueryResults(
 void CNetworkQueryService::Log(
     /* [in] */ const String& msg)
 {
-    Logger::D(LOG_TAG, msg);
+    Logger::D(TAG, msg);
 }
 
 } // namespace Phone

@@ -100,7 +100,7 @@ ECode CEditFdnContactScreen::MyRunnable::Run()
     return mHost->Finish();
 }
 
-const String CEditFdnContactScreen::LOG_TAG(PhoneGlobals::LOG_TAG);
+const String CEditFdnContactScreen::TAG(PhoneGlobals::TAG);
 const Boolean CEditFdnContactScreen::DBG = FALSE;
 
 const Int32 CEditFdnContactScreen::MENU_IMPORT = 1;
@@ -230,7 +230,7 @@ ECode CEditFdnContactScreen::OnActivityResult(
 
                 Boolean result;
                 if ((cursor == NULL) || (cursor->MoveToFirst(&result), !result)) {
-                    Logger::W(LOG_TAG,"onActivityResult: bad contact data, no results found.");
+                    Logger::W(TAG,"onActivityResult: bad contact data, no results found.");
                     return NOERROR;
                 }
                 String text1;
@@ -570,7 +570,7 @@ void CEditFdnContactScreen::HandleResult(
 void CEditFdnContactScreen::Log(
     /* [in] */ const String& msg)
 {
-    Logger::D(LOG_TAG, String("[EditFdnContact] ") + msg);
+    Logger::D(TAG, String("[EditFdnContact] ") + msg);
 }
 
 } // namespace Phone

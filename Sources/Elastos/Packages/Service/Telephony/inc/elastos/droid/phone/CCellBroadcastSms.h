@@ -2,7 +2,17 @@
 #define  __ELASTOS_DROID_PHONE_CCELLBROADCASTSMS_H__
 
 #include "_Elastos_Droid_Phone_CCellBroadcastSms.h"
-#include "elastos/droid/ext/frameworkext.h"
+#include "elastos/droid/preference/PreferenceActivity.h"
+#include "Elastos.Droid.Internal.h"
+#include "Elastos.Droid.Preference.h"
+
+using Elastos::Droid::Internal::Telephony::IPhone;
+using Elastos::Droid::Preference::ICheckBoxPreference;
+using Elastos::Droid::Preference::IListPreference;
+using Elastos::Droid::Preference::IPreference;
+using Elastos::Droid::Preference::IPreferenceScreen;
+using Elastos::Droid::Preference::IPreferenceOnPreferenceChangeListener;
+using Elastos::Droid::Preference::PreferenceActivity;
 
 namespace Elastos {
 namespace Droid {
@@ -13,7 +23,6 @@ namespace Phone {
  */
 CarClass(CCellBroadcastSms)
     , public PreferenceActivity
-    , public ICellBroadcastSms
     , public IPreferenceOnPreferenceChangeListener
 {
 private:
@@ -45,7 +54,6 @@ private:
             : mHost(host)
         {}
 
-    private:
         static CARAPI_(void) SetCbSmsConfig(
             /* [in] */ ArrayOf<Int32>* configData);
 
@@ -79,6 +87,25 @@ private:
         //NO_OF_SERVICE_CATEGORIES +1 is used, because we will leave the first array entry 0
         static AutoPtr<ArrayOf<Int32> > mBSelected;
         static AutoPtr<ArrayOf<Int32> > mConfigDataComplete;
+    };
+
+    class PreferenceOnPreferenceChangeListener
+        : public Object
+        , public IPreferenceOnPreferenceChangeListener
+    {
+    public:
+        CAR_INTERFACE_DECL()
+
+        PreferenceOnPreferenceChangeListener(
+            /* [in] */ CCellBroadcastSms* host);
+
+        CARAPI OnPreferenceChange(
+            /* [in] */ IPreference* preference,
+            /* [in] */ IInterface* objValue,
+            /* [out] */ Boolean* result);
+
+    private:
+        CCellBroadcastSms* mHost;
     };
 
 public:
@@ -123,7 +150,7 @@ private:
 
 private:
     // debug data
-    static const String LOG_TAG;
+    static const String TAG;
     static const Boolean DBG;
 
     //String keys for preference lookup

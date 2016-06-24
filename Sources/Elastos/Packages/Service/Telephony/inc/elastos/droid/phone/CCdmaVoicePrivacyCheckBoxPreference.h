@@ -2,7 +2,13 @@
 #define  __ELASTOS_DROID_PHONE_CCDMAVOICEPRIVACYCHECKBOXPREFERENCE_H__
 
 #include "_Elastos_Droid_Phone_CCdmaVoicePrivacyCheckBoxPreference.h"
-#include "elastos/droid/ext/frameworkext.h"
+#include "Elastos.Droid.Internal.h"
+#include "elastos/droid/os/Handler.h"
+#include "elastos/droid/preference/CheckBoxPreference.h"
+
+using Elastos::Droid::Internal::Telephony::IPhone;
+using Elastos::Droid::Os::Handler;
+using Elastos::Droid::Preference::CheckBoxPreference;
 
 namespace Elastos {
 namespace Droid {
@@ -10,7 +16,6 @@ namespace Phone {
 
 CarClass(CCdmaVoicePrivacyCheckBoxPreference)
     , public CheckBoxPreference
-    , public ICdmaVoicePrivacyCheckBoxPreference
 {
 private:
     class MyHandler
@@ -33,7 +38,7 @@ private:
         CARAPI_(void) HandleSetVPResponse(
             /* [in] */ IMessage* msg);
 
-    private:
+    public:
         static const Int32 MESSAGE_GET_VP;
         static const Int32 MESSAGE_SET_VP;
 
@@ -41,8 +46,6 @@ private:
     };
 
 public:
-    CAR_INTERFACE_DECL()
-
     CAR_OBJECT_DECL();
 
     CCdmaVoicePrivacyCheckBoxPreference();
@@ -50,7 +53,7 @@ public:
     CARAPI constructor(
         /* [in] */ IContext* context,
         /* [in] */ IAttributeSet* attrs,
-        /* [in] */ Int232 defStyle);
+        /* [in] */ Int32 defStyle);
 
     CARAPI constructor(
         /* [in] */ IContext* context,
@@ -64,7 +67,7 @@ protected:
     CARAPI OnClick();
 
 private:
-    static const String LOG_TAG;
+    static const String TAG;
     const Boolean DBG;
 
     AutoPtr<IPhone> mPhone;
