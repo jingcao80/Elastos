@@ -3,6 +3,7 @@
 #define _ORG_JAVIA_ARITY_CFUNCTIONANDNAME_H__
 
 #include "_Org_Javia_Arity_CFunctionAndName.h"
+#include <elastos/core/Object.h>
 
 namespace Org {
 namespace Javia {
@@ -26,7 +27,7 @@ public:
         /* [in] */ IFunction* fun,
         /* [in] */ const String& name);
 
-private:
+public:
     AutoPtr<IFunction> mFunction;
     String mName;
 };

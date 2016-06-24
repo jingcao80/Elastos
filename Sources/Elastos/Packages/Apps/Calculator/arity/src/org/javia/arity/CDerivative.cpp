@@ -9,11 +9,11 @@ namespace Javia {
 namespace Arity {
 
 const Double CDerivative::H;
-const Double CDerivative::INVH;
+const Double CDerivative::INVH = 1 / H;
 
 CDerivative::CDerivative()
 {
-    CComplex::New(o, (IComplex**)&mC);
+    CComplex::New((IComplex**)&mC);
 }
 
 CAR_OBJECT_IMPL(CDerivative)
@@ -34,10 +34,8 @@ ECode CDerivative::Eval(
     VALIDATE_NOT_NULL(result)
     *result = 0;
     mC->Set(x, H);
-    Double d;
-    mF->Eval(mC, &d);
     AutoPtr<IComplex> c;
-    FAIL_RETURN(f->Eval(mC, (IComplex**)&c))
+    FAIL_RETURN(mF->Eval(mC, (IComplex**)&c))
     *result = ((CComplex*)c.Get())->mIm * INVH;
     return NOERROR;
 }

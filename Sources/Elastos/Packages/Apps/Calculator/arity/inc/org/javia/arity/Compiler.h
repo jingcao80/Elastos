@@ -5,7 +5,6 @@
 #include "org/javia/arity/Lexer.h"
 #include "org/javia/arity/RPN.h"
 #include "org/javia/arity/DeclarationParser.h"
-#include "org/javia/arity/OptCodeGen.h"
 #include "org/javia/arity/Declaration.h"
 
 using Elastos::Utility::IStack;
@@ -13,6 +12,10 @@ using Elastos::Utility::IStack;
 namespace Org {
 namespace Javia {
 namespace Arity {
+
+class SimpleCodeGen;
+class OptCodeGen;
+class CSymbols;
 
 /**
    Compiles a textual arithmetic expression to a {@link Function}.<p>
@@ -37,7 +40,7 @@ public:
         /* [in] */ const String& source,
         /* [out] */ IFunctionAndName** func);
 
-private::
+private:
     AutoPtr<Lexer> mLexer;
     AutoPtr<RPN> mRpn;
     AutoPtr<DeclarationParser> mDeclParser;

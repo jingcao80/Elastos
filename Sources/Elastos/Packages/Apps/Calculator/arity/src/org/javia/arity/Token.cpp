@@ -52,7 +52,7 @@ void Token::SetAlpha(
 Boolean Token::IsDerivative()
 {
     Int32 len;
-    return !mName.IsNull() && (len = name.GetLength()) > 0 && name.GetChar(len - 1) == '\'';
+    return !mName.IsNull() && (len = mName.GetLength()) > 0 && mName.GetChar(len - 1) == '\'';
 }
 
 ECode Token::ToString(
@@ -74,7 +74,7 @@ ECode Token::ToString(
             *str = sb.ToString();
             return NOERROR;
         }
-        case Lexer::CONST:
+        case Lexer::_CONST:
             *str = mName;
             return NOERROR;
     }

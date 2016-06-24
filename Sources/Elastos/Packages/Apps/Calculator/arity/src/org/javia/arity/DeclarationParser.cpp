@@ -1,6 +1,7 @@
 
 #include "org/javia/arity/DeclarationParser.h"
 #include "org/javia/arity/Lexer.h"
+#include <Elastos.CoreLibrary.Utility.h>
 #include <elastos/utility/logging/Slogger.h>
 
 using Elastos::Core::ICharSequence;
@@ -49,7 +50,7 @@ ECode DeclarationParser::Push(
             }
             break;
 
-        case Lexer::CONST:
+        case Lexer::_CONST:
             if (mName.IsNull()) {
                 mName = token->mName;
                 mArity = UNKNOWN_ARITY;
@@ -79,13 +80,14 @@ ECode DeclarationParser::Push(
             Slogger::E("DeclarationParser", "Invalid token in declaration %d", token->mPosition);
             return E_SYNTAX_EXCEPTION;
     }
+    return NOERROR;
 }
 
 AutoPtr<ArrayOf<String> > DeclarationParser::ArgNames()
 {
     if (mArity > 0) {
         AutoPtr<ArrayOf<String> > argNames = ArrayOf<String>::Alloc(mArity);
-        AutoPtr<ArrayOf<IInterface*> > temp = ArrayOf<String>::Alloc(mArity);
+        AutoPtr<ArrayOf<IInterface*> > temp = ArrayOf<IInterface*>::Alloc(mArity);
         mArgs->CopyInto(temp);
         for (Int32 i = 0; i < temp->GetLength(); ++i) {
             (ICharSequence::Probe((*temp)[i]))->ToString(&(*argNames)[i]);

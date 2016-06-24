@@ -2,10 +2,13 @@
 #include "org/javia/arity/CompiledFunction.h"
 #include "org/javia/arity/CComplex.h"
 #include "org/javia/arity/MoreMath.h"
-#include "org/javia/arity/VM::h"
+#include "org/javia/arity/VM.h"
+#include "org/javia/arity/CCompiledFunction.h"
+#include "org/javia/arity/CEvalContext.h"
 #include <elastos/core/StringBuilder.h>
 #include <elastos/core/Math.h>
 #include <elastos/utility/logging/Slogger.h>
+#include <math.h>
 
 using Elastos::Core::StringBuilder;
 using Elastos::Utility::CRandom;
@@ -42,7 +45,7 @@ CompiledFunction::DerivativeFunction::Eval(
 //                  CompiledFunction
 //==============================================================================
 
-static AutoPtr<IEvalContext> InitRandom()
+static AutoPtr<IRandom> InitRandom()
 {
     AutoPtr<IRandom> random;
     CRandom::New((IRandom**)&random);
@@ -62,7 +65,7 @@ static AutoPtr<ArrayOf<IFunction*> > InitEmptyFun()
     AutoPtr<ArrayOf<IFunction*> > args = ArrayOf<IFunction*>::Alloc(0);
     return args;
 }
-const AutoPtr<ArrayOf<IFunction*> > CompiledFunction::EMPTY_FUN;
+const AutoPtr<ArrayOf<IFunction*> > CompiledFunction::EMPTY_FUN = InitEmptyFun();
 
 static AutoPtr<IComplex> InitOneThird()
 {
@@ -125,21 +128,27 @@ ECode CompiledFunction::ToString(
     /* [out] */ String* str)
 {
     VALIDATE_NOT_NULL(str)
-    StringBuilder buf = new StringBuffer();
+    StringBuilder buf;
     Int32 cpos = 0, fpos = 0;
     if (mArity != 0) {
-        buf.Append("arity ").Append(mArity).Append("; ");
+        buf.Append("arity ");
+        buf.Append(mArity);
+        buf.Append("; ");
     }
     for (Int32 i = 0; i < mCode->GetLength(); ++i) {
         Byte op = (*mCode)[i];
         buf.Append((*VM::OPCODENAME)[op]);
-        if (op == VM::CONST) {
+        if (op == VM::_CONST) {
             buf.Append(' ');
             if (mConstsIm == NULL) {
                 buf.Append((*mConstsRe)[cpos]);
             }
             else {
-                buf.Append('(').Append((*mConstsRe)[cpos]).Append(", ").Append((*mConstsIm)[cpos]).Append(')');
+                buf.AppendChar('(');
+                buf.Append((*mConstsRe)[cpos]);
+                buf.Append(", ");
+                buf.Append((*mConstsIm)[cpos]);
+                buf.AppendChar(')');
             }
             ++cpos;
         }
@@ -150,32 +159,38 @@ ECode CompiledFunction::ToString(
         buf.Append("; ");
     }
     if (cpos != mConstsRe->GetLength()) {
-        buf.Append("\nuses only ").Append(cpos).Append(" consts out of ").Append(mConstsRe->GetLength());
+        buf.Append("\nuses only ");
+        buf.Append(cpos);
+        buf.Append(" consts out of ");
+        buf.Append(mConstsRe->GetLength());
     }
     if (fpos != mFuncs->GetLength()) {
-        buf.Append("\nuses only ").Append(fpos).Append(" funcs out of ").Append(mFuncs->GetLength());
+        buf.Append("\nuses only ");
+        buf.Append(fpos);
+        buf.Append(" funcs out of ");
+        buf.Append(mFuncs->GetLength());
     }
     *str = buf.ToString();
     return NOERROR;
 }
 
 ECode CompiledFunction::Eval(
-    /* [in] */ ArrayOf<Double>* x,
+    /* [in] */ ArrayOf<Double>* args,
     /* [in] */ IEvalContext* context,
     /* [out] */ Double* result)
 {
     VALIDATE_NOT_NULL(result)
     *result = 0;
     if (mConstsIm != NULL) {
-        return EvalComplexToReal(mArgs, context, result);
+        return EvalComplexToReal(args, context, result);
     }
-    FAIL_RETURN(CheckArity(mArgs->GetLength()))
+    FAIL_RETURN(CheckArity(args->GetLength()))
     AutoPtr<CEvalContext> obj = (CEvalContext*)context;
-    obj->mStackRe->Copy(obj->mStackBase, mArgs, 0, mArgs->GetLength());
+    obj->mStackRe->Copy(obj->mStackBase, args, 0, args->GetLength());
     // try {
     Int32 value;
-    if (FAILED(ExecReal(context, ojb->mStackBase + args->GetLength() - 1, &value))) {
-        return EvalComplexToReal(mArgs, context, result);
+    if (FAILED(ExecReal(context, obj->mStackBase + args->GetLength() - 1, &value))) {
+        return EvalComplexToReal(args, context, result);
     }
     *result = (*obj->mStackRe)[obj->mStackBase];
     return NOERROR;
@@ -246,6 +261,7 @@ ECode CompiledFunction::ExecComplex(
 {
     VALIDATE_NOT_NULL(result)
     *result = 0;
+    Int32 expected = p + 1;
     Int32 value;
     FAIL_RETURN(ExecWithoutCheckComplex(context, p, -2, &value))
     p = value;
@@ -282,7 +298,7 @@ ECode CompiledFunction::ExecWithoutCheck(
     for (Int32 pc = 0; pc < codeLen; ++pc) {
         Int32 opcode = (*mCode)[pc];
         switch (opcode) {
-            case VM::CONST:
+            case VM::_CONST:
                 (*s)[++p] = (*mConstsRe)[constp++];
                 break;
 
@@ -290,7 +306,7 @@ ECode CompiledFunction::ExecWithoutCheck(
                 AutoPtr<IFunction> f = (*mFuncs)[funp++];
                 AutoPtr<ICompiledFunction> compiledF = ICompiledFunction::Probe(f);
                 if (compiledF != NULL) {
-                    (CompiledFunction*)(compiledF)->ExecReal(context, p, &p);
+                    ((CompiledFunction*)compiledF.Get())->ExecReal(context, p, &p);
                 }
                 else {
                     Int32 arity;
@@ -308,7 +324,7 @@ ECode CompiledFunction::ExecWithoutCheck(
                             f->Eval((*s)[p+1], &result);
                             break;
                         case 2:
-                            f->Eval((*s)[p+1], (*s)[p+2]);
+                            f->Eval((*s)[p+1], (*s)[p+2], &result);
                             break;
                         default:
                             AutoPtr<ArrayOf<Double> > args = ArrayOf<Double>::Alloc(arity);
@@ -353,7 +369,11 @@ ECode CompiledFunction::ExecWithoutCheck(
 
             case VM::MUL: (*s)[--p] *= (*s)[p+1]; break;
             case VM::DIV: (*s)[--p] /= (*s)[p+1]; break;
-            case VM::MOD: (*s)[--p] %= (*s)[p+1]; break;
+            case VM::MOD: {
+                Double temp = fmod((*s)[--p], (*s)[p+1]);
+                (*s)[p] = temp;
+                break;
+            }
 
             case VM::POWER: {
                 (*s)[--p] = Elastos::Core::Math::Pow((*s)[p], (*s)[p+1]);
@@ -392,7 +412,7 @@ ECode CompiledFunction::ExecWithoutCheck(
             case VM::LN: (*s)[p] = Elastos::Core::Math::Log((*s)[p]); break;
 
             case VM::SQRT: {
-                Double v = s[p];
+                Double v = (*s)[p];
                 if (v < 0) {
                     return E_IS_COMPLEX_EXCEPTION;
                 }
@@ -460,9 +480,9 @@ ECode CompiledFunction::ExecWithoutCheckComplex(
     VALIDATE_NOT_NULL(_result)
     *_result = 0;
     AutoPtr<CEvalContext> obj = (CEvalContext*)context;
-    AutoPtr<ArrayOf<IComplex*> > s = obj->StackComplex;
+    AutoPtr<ArrayOf<IComplex*> > s = obj->mStackComplex;
 
-    Int32 stackBase = p - arity;
+    Int32 stackBase = p - mArity;
     Int32 constp = 0;
     Int32 funp = 0;
 
@@ -472,7 +492,7 @@ ECode CompiledFunction::ExecWithoutCheckComplex(
         Int32 opcode = (*mCode)[pc];
         // System.out.println("+ " + pc + ' ' + opcode + ' ' + p);
         switch (opcode) {
-        case VM::CONST:
+        case VM::_CONST:
             ++p;
             (*s)[p]->Set((*mConstsRe)[constp], mConstsIm == NULL ? 0 : (*mConstsIm)[constp]);
             ++constp;
@@ -482,7 +502,7 @@ ECode CompiledFunction::ExecWithoutCheckComplex(
             AutoPtr<IFunction> f = (*mFuncs)[funp++];
             AutoPtr<ICompiledFunction> compiledF = ICompiledFunction::Probe(f);
             if (compiledF != NULL) {
-                (CompiledFunction*)(compiledF)->ExecComplex(context, p, &p);
+                ((CompiledFunction*)compiledF.Get())->ExecComplex(context, p, &p);
             }
             else {
                 Int32 arity;
@@ -527,7 +547,7 @@ ECode CompiledFunction::ExecWithoutCheckComplex(
 
         case VM::ADD: {
             if (percentPC == pc-1) {
-                (*s)[p+1]->Mul((*s)[p], (IComplex**)&temp);
+                (*s)[p+1]->Mul((*s)[p]);
             }
             (*s)[--p]->Add((*s)[p+1]);
             break;
@@ -599,7 +619,7 @@ ECode CompiledFunction::ExecWithoutCheckComplex(
             Double b = c->mIm;
             Boolean isNaN;
             if (b == 0) {
-                (*s)[p]->Set(a > 0 ? 1 : a < 0 ? -1 : a == 0 ? 0 : Elastos::Core::DOUBLE_NAN, 0);
+                (*s)[p]->Set(a > 0 ? 1 : a < 0 ? -1 : a == 0 ? 0 : Elastos::Core::Math::DOUBLE_NAN, 0);
             }
             else if ((*s)[p]->IsNaN(&isNaN), !isNaN) {
                 Double abs;
@@ -607,7 +627,7 @@ ECode CompiledFunction::ExecWithoutCheckComplex(
                 (*s)[p]->Set(a / abs, b / abs);
             }
             else {
-                (*s)[p]->Set(Elastos::Core::DOUBLE_NAN, 0);
+                (*s)[p]->Set(Elastos::Core::Math::DOUBLE_NAN, 0);
             }
             break;
         }
@@ -659,7 +679,7 @@ ECode CompiledFunction::ExecWithoutCheckComplex(
             Boolean isNaN;
             Double d;
             if ((*s)[p]->IsNaN(&isNaN), isNaN) {
-                d = Elastos::Core::DOUBLE_NAN;
+                d = Elastos::Core::Math::DOUBLE_NAN;
             }
             else {
                 d = ((CComplex*)(*s)[p])->mRe;
@@ -672,7 +692,7 @@ ECode CompiledFunction::ExecWithoutCheckComplex(
             Boolean isNaN;
             Double d;
             if ((*s)[p]->IsNaN(&isNaN), isNaN) {
-                d = Elastos::Core::DOUBLE_NAN;
+                d = Elastos::Core::Math::DOUBLE_NAN;
             }
             else {
                 d = ((CComplex*)(*s)[p])->mIm;

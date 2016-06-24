@@ -1,6 +1,7 @@
 
 #include "org/javia/arity/RPN.h"
 #include "org/javia/arity/Lexer.h"
+#include <Elastos.CoreLibrary.Utility.h>
 #include <elastos/utility/logging/Slogger.h>
 
 using Elastos::Utility::CStack;
@@ -50,7 +51,8 @@ ECode RPN::PopHigher(
     while (t != NULL && t->mPriority >= priority) {
         mConsumer->Push(t);
         //code.push(t);
-        FAIL_RETURN(mStack->Pop())
+        AutoPtr<IInterface> value;
+        FAIL_RETURN(mStack->Pop((IInterface**)&value))
         t = Top();
     }
     return NOERROR;
@@ -63,7 +65,7 @@ Boolean RPN::IsOperand(
         id == Lexer::FACT ||
         id == Lexer::RPAREN ||
         id == Lexer::NUMBER ||
-        id == Lexer::CONST ||
+        id == Lexer::_CONST ||
         id == Lexer::PERCENT;
 }
 
@@ -74,7 +76,7 @@ ECode RPN::Push(
     Int32 id = token->mId;
     switch (id) {
         case Lexer::NUMBER:
-        case Lexer::CONST:
+        case Lexer::_CONST:
             if (IsOperand(mPrevTokenId)) {
                 Push(Lexer::TOK_MUL);
             }
@@ -100,7 +102,8 @@ ECode RPN::Push(
                     Slogger::E("RPN", "expected LPAREN or CALL %d", token->mPosition);
                     return E_SYNTAX_EXCEPTION;
                 }
-                mStack->Pop();
+                AutoPtr<IInterface> value;
+                mStack->Pop((IInterface**)&value);
             }
             break;
         }
@@ -147,7 +150,7 @@ ECode RPN::Push(
                 }
                 else if (id == Lexer::ADD) {
                     // ignore, keep prevTokenId unchanged
-                    return;
+                    return NOERROR;
                 }
                 Slogger::E("RPN", "operator without operand %d", token->mPosition);
                 return E_SYNTAX_EXCEPTION;

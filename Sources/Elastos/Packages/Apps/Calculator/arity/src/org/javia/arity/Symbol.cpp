@@ -1,5 +1,6 @@
 
 #include "org/javia/arity/Symbol.h"
+#include "org/javia/arity/VM.h"
 #include "elastos/core/StringBuilder.h"
 
 using Org::Javia::Arity::EIID_ISymbol;
@@ -9,7 +10,7 @@ namespace Org {
 namespace Javia {
 namespace Arity {
 
-static const Int32 Symbol::CONST_ARITY;
+const Int32 Symbol::CONST_ARITY;
 
 Symbol::Symbol(
     /* [in] */ const String& name,
@@ -29,15 +30,15 @@ Symbol::Symbol(
 Symbol::Symbol(
     /* [in] */ const String& name,
     /* [in] */ IFunction* fun)
-    : mOp(op)
+    : mOp(0)
     , mFun(fun)
     , mValueRe(0)
     , mValueIm(0)
-    , mIsConst(isConst)
+    , mIsConst(FALSE)
     , mArity(0)
 {
     Int32 arity;
-    fun->GetArity(&arity);
+    fun->Arity(&arity);
     SetKey(name, arity);
 }
 
@@ -45,7 +46,7 @@ Symbol::Symbol(
     /* [in] */ const String& name,
     /* [in] */ Double re,
     /* [in] */ Boolean isConst)
-    : mOp(op)
+    : mOp(0)
     , mValueRe(re)
     , mValueIm(0)
     , mIsConst(isConst)
@@ -59,7 +60,7 @@ Symbol::Symbol(
     /* [in] */ Double re,
     /* [in] */ Double im,
     /* [in] */ Boolean isConst)
-    : mOp(op)
+    : mOp(0)
     , mValueRe(re)
     , mValueIm(im)
     , mIsConst(isConst)
@@ -68,7 +69,7 @@ Symbol::Symbol(
     SetKey(name, CONST_ARITY);
 }
 
-CAR_INTERFACE_DECL(Symbol, Object, ISymbol)
+CAR_INTERFACE_IMPL(Symbol, Object, ISymbol)
 
 AutoPtr<ISymbol> Symbol::MakeArg(
     /* [in] */ const String& name,

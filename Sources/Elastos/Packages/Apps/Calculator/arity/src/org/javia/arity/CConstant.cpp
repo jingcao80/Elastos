@@ -39,7 +39,7 @@ ECode CConstant::ToString(
     /* [out] */ String* str)
 {
     VALIDATE_NOT_NULL(str)
-    return IObject::Probe(mValue)->ToString(str)
+    return IObject::Probe(mValue)->ToString(str);
 }
 
 ECode CConstant::Arity(

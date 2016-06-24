@@ -42,6 +42,7 @@ module
        The compile() methods are synchronized, so parallel compile() calls on the same Symbols
        instance are serialized.
      */
+    [deprecated]
     interface ISymbols
     {
 
@@ -163,7 +164,7 @@ module
 
     }
 
-    ISymbolsHelper {
+    interface ISymbolsHelper {
         /**
            @param source the expression
            @return true if the expression is a definition (i.e. contains a '=').<p>

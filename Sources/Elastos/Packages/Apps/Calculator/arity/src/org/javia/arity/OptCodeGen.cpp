@@ -1,7 +1,9 @@
 
 #include "org/javia/arity/OptCodeGen.h"
+#include "org/javia/arity/CEvalContext.h"
 #include "org/javia/arity/Lexer.h"
 #include "org/javia/arity/VM.h"
+#include "org/javia/arity/CComplex.h"
 #include <elastos/core/Math.h>
 #include <elastos/utility/logging/Slogger.h>
 
@@ -17,12 +19,12 @@ OptCodeGen::OptCodeGen()
     , mIntrinsicArity(0)
     , mIsPercent(FALSE)
 {
-    mContext = new EvalContext();
+    CEvalContext::NewByFriend((CEvalContext**)&mContext);
     AutoPtr<ArrayOf<IComplex*> > mStack = mContext->mStackComplex;
     AutoPtr<ArrayOf<Double> > mTraceConstsRe = ArrayOf<Double>::Alloc(1);
     AutoPtr<ArrayOf<Double> > mTraceConstsIm = ArrayOf<Double>::Alloc(1);
-    AutoPtr<ArrayOf<IFunction*> > mTraceFuncs = ArrayOf<IFunction*>(1);
-    AutoPtr<ArrayOf<Byte> > mTraceCode = ArrayOf<Byte>(1);
+    AutoPtr<ArrayOf<IFunction*> > mTraceFuncs = ArrayOf<IFunction*>::Alloc(1);
+    AutoPtr<ArrayOf<Byte> > mTraceCode = ArrayOf<Byte>::Alloc(1);
     CCompiledFunction::NewByFriend(0, mTraceCode, mTraceConstsRe, mTraceConstsIm, mTraceFuncs,
             (CCompiledFunction**)&mTracer);
 }
@@ -44,18 +46,18 @@ ECode OptCodeGen::Push(
     Byte op;
     switch (token->mId) {
     case Lexer::NUMBER:
-        op = VM::CONST;
+        op = VM::_CONST;
         (*mTraceConstsRe)[0] = token->mValue;
         (*mTraceConstsIm)[0] = 0;
         break;
 
-    case Lexer::CONST:
+    case Lexer::_CONST:
     case Lexer::CALL: {
         AutoPtr<Symbol> symbol;
         FAIL_RETURN(GetSymbol(token, (Symbol**)&symbol))
         if (token->IsDerivative()) {
             op = VM::CALL;
-            AutoPtr<IFunction> temp
+            AutoPtr<IFunction> temp;
             symbol->mFun->GetDerivative((IFunction**)&temp);
             mTraceFuncs->Set(0, temp);
         }
@@ -66,8 +68,8 @@ ECode OptCodeGen::Push(
                 if (arg + 1 > mIntrinsicArity) {
                     mIntrinsicArity = arg + 1;
                 }
-                ((CComplex*)(*mStack)[++mSp].Get())->mRe = Elastos::Core::Math::DOUBLE_NAN;
-                ((CComplex*)(*mStack)[mSp].Get())->mIm = 0;
+                ((CComplex*)(*mStack)[++mSp])->mRe = Elastos::Core::Math::DOUBLE_NAN;
+                ((CComplex*)(*mStack)[mSp])->mIm = 0;
                 mCode->Push(op);
                 //System.out.println("op " + VM.opcodeName[op] + "; sp " + sp + "; top " + stack[sp]);
                 return NOERROR;
@@ -78,7 +80,7 @@ ECode OptCodeGen::Push(
             mTraceFuncs->Set(0, symbol->mFun);
         }
         else { // variable reference
-            op = VM::CONST;
+            op = VM::_CONST;
             (*mTraceConstsRe)[0] = symbol->mValueRe;
             (*mTraceConstsIm)[0] = symbol->mValueIm;
         }
@@ -95,31 +97,30 @@ ECode OptCodeGen::Push(
             mIsPercent = TRUE;
         }
     }
-    Int32 oldSP = mSp;
     (*mTraceCode)[0] = op;
     if (op != VM::RND) {
-        mTracer->ExecWithoutCheckComplex(context, sp, prevWasPercent ? -1 : -2, &mSp);
+        mTracer->ExecWithoutCheckComplex(mContext, mSp, prevWasPercent ? -1 : -2, &mSp);
     }
     else {
-        ((CComplex*)(*mStack)[++mSp].Get())->mRe = Elastos::Core::Math::DOUBLE_NAN;
-        ((CComplex*)(*mStack)[mSp].Get())->mIm = 0;
+        ((CComplex*)(*mStack)[++mSp])->mRe = Elastos::Core::Math::DOUBLE_NAN;
+        ((CComplex*)(*mStack)[mSp])->mIm = 0;
     }
 
     //System.out.println("op " + VM.opcodeName[op] + "; old " + oldSP + "; sp " + sp + "; top " + stack[sp] + " " + stack[0]);
 
     //constant folding
     Boolean isNaN;
-    if (((*mStack)[mSp]->IsNaN(&isNaN), !isNaN) || op == VM::CONST) {
+    if (((*mStack)[mSp]->IsNaN(&isNaN), !isNaN) || op == VM::_CONST) {
         Int32 nPopCode;
         if (op == VM::CALL) {
-            (*mTraceFuncs)[0]->GetArity(&nPopCode);
+            (*mTraceFuncs)[0]->Arity(&nPopCode);
         }
         else {
             nPopCode = (*VM::ARITY)[op];
         }
         while (nPopCode > 0) {
             Byte pop = mCode->Pop();
-            if (pop == VM::CONST) {
+            if (pop == VM::_CONST) {
                 mConsts->Pop();
             }
             else if (pop == VM::CALL) {
@@ -133,8 +134,8 @@ ECode OptCodeGen::Push(
             }
             --nPopCode;
         }
-        mConsts->Push(((CComplex*)(*mStack)[mSp].Get())->mRe, ((CComplex*)(*mStack)[mSp].Get())->mIm);
-        op = VM::CONST;
+        mConsts->Push(((CComplex*)(*mStack)[mSp])->mRe, ((CComplex*)(*mStack)[mSp])->mIm);
+        op = VM::_CONST;
     }
     else if (op == VM::CALL) {
         mFuncs->Push((*mTraceFuncs)[0]);

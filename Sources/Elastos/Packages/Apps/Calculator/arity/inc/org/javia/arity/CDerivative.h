@@ -36,8 +36,8 @@ public:
 private:
     AutoPtr<IFunction> mF;
     AutoPtr<IComplex> mC;
-    static const Double H = 1e - 12;
-    static const Double INVH = 1 / H;
+    static const Double H = 1e-12;
+    static const Double INVH;
 };
 
 } // namespace Arity

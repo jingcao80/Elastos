@@ -3,6 +3,7 @@
 #include <elastos/core/Math.h>
 #include <elastos/core/StringUtils.h>
 #include <elastos/core/StringBuilder.h>
+#include <math.h>
 
 using Elastos::Core::StringBuilder;
 using Elastos::Core::StringUtils;
@@ -11,7 +12,7 @@ namespace Org {
 namespace Javia {
 namespace Arity {
 
-static const Double MoreMath::LOG2E;
+const Double MoreMath::LOG2E;
 
 static AutoPtr<ArrayOf<Double> > InitGamma()
 {
@@ -61,7 +62,7 @@ static AutoPtr<ArrayOf<Double> > InitFact()
     (*doubles)[21] = 2.5260757449731984E302;
     return doubles;
 }
-const AutoPtr<ArrayOf<Double> > MoreMath::FACT = InitFact()
+const AutoPtr<ArrayOf<Double> > MoreMath::FACT = InitFact();
 
 Double MoreMath::Asinh(
     /* [in] */ Double x)
@@ -95,13 +96,13 @@ Double MoreMath::Gcd(
 {
     if (Elastos::Core::Math::IsNaN(x) || Elastos::Core::Math::IsNaN(y) ||
             Elastos::Core::Math::IsInfinite(x) || Elastos::Core::Math::IsInfinite(y)) {
-        return Elastos::Core::Math::DOUBLE_NaN;
+        return Elastos::Core::Math::DOUBLE_NAN;
     }
     x = Elastos::Core::Math::Abs(x);
     y = Elastos::Core::Math::Abs(y);
     while (x < y * 1e15) {
         Double save = y;
-        y = x % y;
+        y = fmod(x, y);
         x = save;
     }
     return x;
@@ -125,7 +126,7 @@ Double MoreMath::Factorial(
     /* [in] */ Double x)
 {
     if (x < 0) { // x <= -1 ?
-        return Elastos::Core::Math::DOUBLE_NaN;
+        return Elastos::Core::Math::DOUBLE_NAN;
     }
     if (x <= 170) {
         if (Elastos::Core::Math::Floor(x) == x) {
@@ -151,7 +152,7 @@ Double MoreMath::Combinations(
     /* [in] */ Double k)
 {
     if (n < 0 || k < 0) {
-        return Elastos::Core::Math::DOUBLE_NaN;
+        return Elastos::Core::Math::DOUBLE_NAN;
     }
     if (n < k) {
         return 0;
@@ -179,7 +180,7 @@ Double MoreMath::Permutations(
     /* [in] */ Double k)
 {
     if (n < 0 || k < 0) {
-        return Elastos::Core::Math::DOUBLE_NaN;
+        return Elastos::Core::Math::DOUBLE_NAN;
     }
     if (n < k) {
         return 0;

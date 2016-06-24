@@ -7,12 +7,13 @@ module
     merge("car/org/javia/arity/ContextFunction.car");
     merge("car/org/javia/arity/CompiledFunction.car");
     merge("car/org/javia/arity/Complex.car");
-    merge("car/org/javia/arity/Symbols.car")
+    merge("car/org/javia/arity/Symbols.car");
     merge("car/org/javia/arity/Symbol.car");
     merge("car/org/javia/arity/FunctionAndName.car");
     merge("car/org/javia/arity/Constant.car");
     merge("car/org/javia/arity/EvalContext.car");
     merge("car/org/javia/arity/Derivative.car");
+    merge("car/org/javia/arity/Exceptions.car");
 
     interface Org.Javia.Arity.IFunction;
     interface Org.Javia.Arity.IContextFunction;
@@ -29,6 +30,7 @@ module
     namespace Javia {
     namespace Arity {
 
+    [deprecated]
     class CCompiledFunction {
         constructor(
             [in] Int32 arity,
@@ -39,7 +41,7 @@ module
 
         interface ICompiledFunction;
         interface IContextFunction;
-        interface IFunction
+        interface IFunction;
     }
 
     class CComplex {
@@ -80,7 +82,7 @@ module
             [in] IComplex* o);
 
         interface IConstant;
-        interface IFunction
+        interface IFunction;
     }
 
     class CEvalContext {
@@ -94,7 +96,7 @@ module
             [in] IFunction* f);
 
         interface IDerivative;
-        interface IFunction
+        interface IFunction;
     }
 
     } // namespace Arity

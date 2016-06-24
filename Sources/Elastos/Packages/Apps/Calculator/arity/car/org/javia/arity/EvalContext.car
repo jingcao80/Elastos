@@ -10,7 +10,7 @@ module
        you need to create one EvalContext instance per thread,
        and pass it to the eval() methods of CompiledFunction.
      */
-    interface IConstant
+    interface IEvalContext
     {
     }
 

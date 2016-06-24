@@ -6,7 +6,7 @@ namespace Javia {
 namespace Arity {
 
 const Byte VM::RESERVED;
-const Byte VM::CONST;
+const Byte VM::_CONST;
 const Byte VM::CALL;
 const Byte VM::ADD;
 const Byte VM::SUB;
@@ -99,6 +99,7 @@ static AutoPtr<ArrayOf<String> > InitOpcodeName()
     (*names)[42] = String("load4");
     (*names)[43] = String("real");
     (*names)[44] = String("imag");
+    return names;
 }
 const AutoPtr<ArrayOf<String> > VM::OPCODENAME = InitOpcodeName();
 

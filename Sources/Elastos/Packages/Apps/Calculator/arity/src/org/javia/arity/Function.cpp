@@ -19,7 +19,7 @@ ECode Function::GetDerivative(
 {
     VALIDATE_NOT_NULL(func)
     if (mCachedDerivate == NULL) {
-        CDerivative::New((IFunction**)&mCachedDerivate);
+        CDerivative::New((IFunction*)this, (IFunction**)&mCachedDerivate);
     }
     *func = mCachedDerivate;
     REFCOUNT_ADD(*func)

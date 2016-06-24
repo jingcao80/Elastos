@@ -3,9 +3,11 @@
 #include "org/javia/arity/MoreMath.h"
 #include "org/javia/arity/CComplex.h"
 #include "elastos/core/Math.h"
+#include "elastos/core/StringBuilder.h"
 #include "elastos/core/StringUtils.h"
 
 using Elastos::Core::StringUtils;
+using Elastos::Core::StringBuilder;
 
 namespace Org {
 namespace Javia {
@@ -46,9 +48,9 @@ String Util::SizeTruncate(
     }
     if (dotPos > keepLen) {
         Int32 exponent = (ePos != -1) ? StringUtils::ParseInt32(str.Substring(ePos + 1)) : 0;
-        Int32 start = str.GetCharAt() == '-' ? 1 : 0;
+        Int32 start = str.GetChar(0) == '-' ? 1 : 0;
         exponent += dotPos - start - 1;
-        String newStr = str.Substring(0, start+1) + '.' + str.Substring(start + 1, headLen) + 'E' + exponent;
+        String newStr = str.Substring(0, start+1) + "." + str.Substring(start + 1, headLen) + "E" + StringUtils::ToString(exponent);
         return SizeTruncate(newStr, maxLen);
 
     }
@@ -65,7 +67,7 @@ String Util::DoubleToString(
     Int32 roundingStart = (roundingDigits <= 0 || roundingDigits > 13) ? 17 : (16 - roundingDigits);
 
     Int32 ePos = str.LastIndexOf('E');
-    Int32 exp  =  (ePos != -1) ? StringUtils::ParseInt(str.Substring(ePos + 1)) : 0;
+    Int32 exp  =  (ePos != -1) ? StringUtils::ParseInt32(str.Substring(ePos + 1)) : 0;
     if (ePos != -1) {
         buf.SetLength(ePos);
     }
@@ -132,7 +134,7 @@ String Util::DoubleToString(
     }
 
     if (exp != 0) {
-        buf.Append('E')
+        buf.AppendChar('E');
         buf.Append(exp);
     }
     if (v < 0) {
@@ -203,7 +205,7 @@ String Util::ComplexToString(
         Int32 simLen = sim.GetLength();
         Int32 reduce = sreLen + simLen - maxLen;
         if (reduce > 0) {
-            Int32 diff   = Elastos::Core::Math::abs(sreLen - simLen);
+            Int32 diff   = Elastos::Core::Math::Abs(sreLen - simLen);
             Int32 rShort = reduce > diff ? (reduce - diff) / 2 : 0;
             Int32 rLong  = rShort + Elastos::Core::Math::Min(reduce, diff);
             Int32 sreTarget = sreLen;
@@ -223,7 +225,7 @@ String Util::ComplexToString(
             sim = SizeTruncate(sim, simTarget);
         }
     }
-    return sre + (addPlus ? "+" : "") + sim + finalMultiply + 'i';
+    return sre + (addPlus ? "+" : "") + sim + finalMultiply + "i";
 }
 
 } // namespace Arity

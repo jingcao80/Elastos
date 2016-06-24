@@ -3,7 +3,7 @@
 #define _ORG_JAVIA_ARITY_OPTCODEGEN_H__
 
 #include "org/javia/arity/SimpleCodeGen.h"
-#include "org/javia/arity/EvalContext.h"
+#include "org/javia/arity/CEvalContext.h"
 #include "org/javia/arity/CCompiledFunction.h"
 
 namespace Org {
@@ -29,7 +29,7 @@ public:
         /* [in] */ Int32 arity);
 
 public:
-    AutoPtr<EvalContext> mContext;
+    AutoPtr<CEvalContext> mContext;
     Int32 mSp;
     AutoPtr<ArrayOf<IComplex*> > mStack;
 

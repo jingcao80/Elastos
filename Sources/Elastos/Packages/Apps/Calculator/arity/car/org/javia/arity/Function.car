@@ -17,6 +17,7 @@ module
      If the user subclasses Function, he is responsible for the thread-safety of
      his user-defined Functions.
     */
+    [deprecated]
     interface IFunction
     {
 

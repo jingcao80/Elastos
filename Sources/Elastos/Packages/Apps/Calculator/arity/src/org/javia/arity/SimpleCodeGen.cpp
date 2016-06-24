@@ -39,7 +39,7 @@ ECode SimpleCodeGen::GetSymbol(
     Boolean isDerivative = token->IsDerivative();
     if (isDerivative) {
         if (token->mArity == 1) {
-            mName = mName.Substring(0, name.GetLength() - 1);
+            name = name.Substring(0, name.GetLength() - 1);
         }
         else {
             Slogger::E("SimpleCodeGen", "Derivative expects arity 1 but found %d %d", token->mArity, token->mPosition);
@@ -53,7 +53,7 @@ ECode SimpleCodeGen::GetSymbol(
     }
     if (isDerivative && symbol->mOp > 0 && symbol->mFun == NULL) {
         symbol->mFun = NULL;
-        CompiledFunction::MakeOpFunction(symbol->mOp, &(symbol->mFun));
+        CompiledFunction::MakeOpFunction(symbol->mOp, (IFunction**)&(symbol->mFun));
     }
     if (isDerivative && symbol->mFun == NULL) {
         Slogger::E("SimpleCodeGen", "Invalid derivative %s %d", name.string(), token->mPosition);
@@ -70,12 +70,12 @@ ECode SimpleCodeGen::Push(
     Byte op;
     switch (token->mId) {
         case Lexer::NUMBER:
-            op = VM::CONST;
+            op = VM::_CONST;
             mConsts->Push(token->mValue, 0);
             break;
 
-        case Lexer::CONST:
-        case Lexer::CALL:
+        case Lexer::_CONST:
+        case Lexer::CALL: {
             AutoPtr<Symbol> symbol;
             FAIL_RETURN(GetSymbol(token, (Symbol**)&symbol))
             if (token->IsDerivative()) {
@@ -96,10 +96,11 @@ ECode SimpleCodeGen::Push(
                 mFuncs->Push(symbol->mFun);
             }
             else { // variable reference
-                op = VM::CONST;
+                op = VM::_CONST;
                 mConsts->Push(symbol->mValueRe, symbol->mValueIm);
             }
             break;
+        }
 
         default:
             op = token->mVmop;

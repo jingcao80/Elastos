@@ -4,7 +4,7 @@
 #include "org/javia/arity/CComplex.h"
 #include <elastos/core/AutoLock.h>
 
-using Elastos::Core::Autolock;
+using Elastos::Core::AutoLock;
 using Org::Javia::Arity::EIID_IContextFunction;
 
 namespace Org {
@@ -17,21 +17,21 @@ static AutoPtr<IEvalContext> InitContext()
     CEvalContext::New((IEvalContext**)&ctx);
     return ctx;
 }
-AutoPtr<IEvalContext> ContextFunction::context = InitContext();
+AutoPtr<IEvalContext> ContextFunction::sContext = InitContext();
 
 static AutoPtr<ArrayOf<Double> > InitNoArgs()
 {
     AutoPtr<ArrayOf<Double> > args = ArrayOf<Double>::Alloc(0);
     return args;
 }
-static AutoPtr<ArrayOf<Double> > ContextFunction::NO_ARGS = InitNoArgs();
+const AutoPtr<ArrayOf<Double> > ContextFunction::NO_ARGS = InitNoArgs();
 
 static AutoPtr<ArrayOf<IComplex*> > InitNoArgsComplex()
 {
     AutoPtr<ArrayOf<IComplex*> > args = ArrayOf<IComplex*>::Alloc(0);
     return args;
 }
-static AutoPtr<ArrayOf<IComplex*> > ContextFunction::NO_ARGS_COMPLEX = InitNoArgsComplex();
+const  AutoPtr<ArrayOf<IComplex*> > ContextFunction::NO_ARGS_COMPLEX = InitNoArgsComplex();
 
 CAR_INTERFACE_IMPL(ContextFunction, Function, IContextFunction)
 
@@ -77,8 +77,8 @@ ECode ContextFunction::Eval(
     /* [out] */ Double* result)
 {
     VALIDATE_NOT_NULL(result)
-    Autolock Lock(CONTEXT);
-    return Eval(x, CONTEXT, result);
+    AutoLock lock(sContext);
+    return Eval(x, sContext, result);
 }
 
 ECode ContextFunction::Eval(
@@ -87,8 +87,8 @@ ECode ContextFunction::Eval(
     /* [out] */ Double* result)
 {
     VALIDATE_NOT_NULL(result)
-    Autolock Lock(CONTEXT);
-    return Eval(x, y, CONTEXT, result);
+    AutoLock lock(sContext);
+    return Eval(x, y, sContext, result);
 }
 
 ECode ContextFunction::Eval(
@@ -96,8 +96,8 @@ ECode ContextFunction::Eval(
     /* [out] */ Double* result)
 {
     VALIDATE_NOT_NULL(result)
-    Autolock Lock(CONTEXT);
-    return Eval(args, CONTEXT, result);
+    AutoLock lock(sContext);
+    return Eval(args, sContext, result);
 }
 
 ECode ContextFunction::Eval(
@@ -136,8 +136,8 @@ ECode ContextFunction::Eval(
     /* [out] */ IComplex** complex)
 {
     VALIDATE_NOT_NULL(complex)
-    Autolock Lock(CONTEXT);
-    return Eval(x, CONTEXT, complex);
+    AutoLock lock(sContext);
+    return Eval(x, sContext, complex);
 }
 
 ECode ContextFunction::Eval(
@@ -146,8 +146,8 @@ ECode ContextFunction::Eval(
     /* [out] */ IComplex** complex)
 {
     VALIDATE_NOT_NULL(complex)
-    Autolock Lock(CONTEXT);
-    return Eval(x, y, CONTEXT, complex);
+    AutoLock lock(sContext);
+    return Eval(x, y, sContext, complex);
 }
 
 ECode ContextFunction::Eval(
@@ -155,8 +155,8 @@ ECode ContextFunction::Eval(
     /* [out] */ IComplex** complex)
 {
     VALIDATE_NOT_NULL(complex)
-    Autolock Lock(CONTEXT);
-    return Eval(args, CONTEXT, complex);
+    AutoLock lock(sContext);
+    return Eval(args, sContext, complex);
 }
 
 ECode ContextFunction::Eval(

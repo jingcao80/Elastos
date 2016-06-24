@@ -3,7 +3,8 @@
 #define _ORG_JAVIA_ARITY_LEXER_H__
 
 #include "_Org.Javia.Arity.h"
-#include "org/javia/arity/Token.h"
+#include <elastos/droid/ext/frameworkext.h>
+#include "org/javia/arity/TokenConsumer.h"
 
 namespace Org {
 namespace Javia {
@@ -35,7 +36,7 @@ public:
     static const Int32 POWER  = 7;
     static const Int32 FACT   = 8;
     static const Int32 NUMBER = 9;
-    static const Int32 CONST  = 10;
+    static const Int32 _CONST  = 10;
     static const Int32 CALL   = 11;
     static const Int32 COMMA  = 12;
     static const Int32 LPAREN = 13;
@@ -44,12 +45,12 @@ public:
     static const Int32 SQRT   = 16;
     static const Int32 PERCENT = 17;
 
-    static const AutoPtr<Token> TOK_ADD;,
-    static const AutoPtr<Token> TOK_SUB;,
+    static const AutoPtr<Token> TOK_ADD;
+    static const AutoPtr<Token> TOK_SUB;
 
-    static const AutoPtr<Token> TOK_MUL;,
-    static const AutoPtr<Token> TOK_DIV;,
-    static const AutoPtr<Token> TOK_MOD;,
+    static const AutoPtr<Token> TOK_MUL;
+    static const AutoPtr<Token> TOK_DIV;
+    static const AutoPtr<Token> TOK_MOD;
 
     static const AutoPtr<Token> TOK_UMIN;
 
@@ -69,10 +70,10 @@ public:
     static const AutoPtr<Token> TOK_CONST;
 
 private:
-    static const Char32 UNICODE_MINUS = '\u2212',
-    static const Char32 UNICODE_MUL   = '\u00d7',
-    static const Char32 UNICODE_DIV   = '\u00f7',
-    static const Char32 UNICODE_SQRT  = '\u221a';
+    static const Char32 UNICODE_MINUS = 0x2212;
+    static const Char32 UNICODE_MUL   = 0x00d7;
+    static const Char32 UNICODE_DIV   = 0x00f7;
+    static const Char32 UNICODE_SQRT  = 0x221a;
 
     static const String WHITESPACE;
     static const Char32 END_MARKER = '$';

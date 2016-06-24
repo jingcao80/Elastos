@@ -17,6 +17,8 @@ public:
 
     CAR_INTERFACE_DECL()
 
+    using IContextFunction::Eval;
+
     //@Override
     CARAPI Eval(
         /* [out] */ Double* result);
@@ -85,9 +87,9 @@ protected:
         /* [in] */ IEvalContext* context);
 
 private:
-    static AutoPtr<IEvalContext> CONTEXT;
-    static AutoPtr<ArrayOf<Double> > NO_ARGS;
-    static AutoPtr<ArrayOf<IComplex*> > NO_ARGS_COMPLEX;
+    static AutoPtr<IEvalContext> sContext;
+    static const AutoPtr<ArrayOf<Double> > NO_ARGS;
+    static const AutoPtr<ArrayOf<IComplex*> > NO_ARGS_COMPLEX;
 };
 
 } // namespace Arity

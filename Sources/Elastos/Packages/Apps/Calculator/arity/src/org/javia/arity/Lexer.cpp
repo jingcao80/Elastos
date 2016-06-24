@@ -22,7 +22,7 @@ const Int32 Lexer::UMIN;
 const Int32 Lexer::POWER;
 const Int32 Lexer::FACT;
 const Int32 Lexer::NUMBER;
-const Int32 Lexer::CONST;
+const Int32 Lexer::_CONST;
 const Int32 Lexer::CALL;
 const Int32 Lexer::COMMA;
 const Int32 Lexer::LPAREN;
@@ -41,7 +41,7 @@ static AutoPtr<Token> InitToken(
 }
 const AutoPtr<Token> Lexer::TOK_ADD    = InitToken(Lexer::ADD, 4, Token::LEFT, VM::ADD);
 const AutoPtr<Token> Lexer::TOK_SUB    = InitToken(Lexer::SUB, 4, Token::LEFT, VM::SUB);
-const AutoPtr<Token> Lexer::TOK_MUL    = InitToken(Lexer::MUL, 5, Token::LEFT, VM::MUL),
+const AutoPtr<Token> Lexer::TOK_MUL    = InitToken(Lexer::MUL, 5, Token::LEFT, VM::MUL);
 const AutoPtr<Token> Lexer::TOK_DIV    = InitToken(Lexer::DIV, 5, Token::LEFT, VM::DIV);
 const AutoPtr<Token> Lexer::TOK_MOD    = InitToken(Lexer::MOD, 5, Token::LEFT, VM::MOD);
 const AutoPtr<Token> Lexer::TOK_UMIN   = InitToken(Lexer::UMIN, 6, Token::PREFIX, VM::UMIN);
@@ -54,7 +54,11 @@ const AutoPtr<Token> Lexer::TOK_RPAREN = InitToken(Lexer::RPAREN, 3, 0, 0);
 const AutoPtr<Token> Lexer::TOK_COMMA  = InitToken(Lexer::COMMA,  2, 0, 0);
 const AutoPtr<Token> Lexer::TOK_END    = InitToken(Lexer::END,    0, 0, 0);
 const AutoPtr<Token> Lexer::TOK_NUMBER = InitToken(Lexer::NUMBER, 20, 0, 0);
-const AutoPtr<Token> Lexer::TOK_CONST  = InitToken(Lexer::CONST,  20, 0, 0);
+const AutoPtr<Token> Lexer::TOK_CONST  = InitToken(Lexer::_CONST,  20, 0, 0);
+const Char32 Lexer::UNICODE_MINUS;
+const Char32 Lexer::UNICODE_MUL;
+const Char32 Lexer::UNICODE_DIV;
+const Char32 Lexer::UNICODE_SQRT;
 const String Lexer::WHITESPACE(" \n\r\t");
 const Char32 Lexer::END_MARKER;
 
@@ -76,7 +80,7 @@ ECode Lexer::Scan(
     consumer->Start();
     AutoPtr<Token> token;
     do {
-        Int32 savePos = pos;
+        Int32 savePos = mPos;
         FAIL_RETURN(NextToken((Token**)&token))
         token->mPosition = savePos;
         consumer->Push(token);
@@ -100,12 +104,12 @@ ECode Lexer::NextToken(
     /* [out] */ Token** token)
 {
     VALIDATE_NOT_NULL(token)
-    while (WHITESPACE.IndexOf((*mInput)[pos]) != -1) {
-        ++pos;
+    while (WHITESPACE.IndexOf((*mInput)[mPos]) != -1) {
+        ++mPos;
     }
 
-    Char32 c = (*mInput)[pos];
-    Int32 begin = pos++;
+    Char32 c = (*mInput)[mPos];
+    Int32 begin = mPos++;
 
     switch (c) {
         case '!': {
@@ -168,7 +172,7 @@ ECode Lexer::NextToken(
     Int32 p = mPos;
     if (('0' <= c && c <= '9') || c == '.') {
         if (c == '0') {
-            Char cc = Character::ToLowerCase((*mInput)[p]);
+            Char32 cc = Character::ToLowerCase((*mInput)[p]);
             Int32 base = (cc == 'x') ? 16 : (cc == 'b') ? 2 : (cc == 'o') ? 8 : 0;
             if (base > 0) {
                 p++;
@@ -178,7 +182,7 @@ ECode Lexer::NextToken(
                          ('A' <= c && c <= 'Z') ||
                          ('0' <= c && c <= '9'));
                 String coded(*mInput, begin + 2, p - 3 - begin);
-                pos = p - 1;
+                mPos = p - 1;
                 // try {
                 TOK_NUMBER->SetValue(StringUtils::ParseInt32(coded, base));
                 *token = TOK_NUMBER;
@@ -198,7 +202,7 @@ ECode Lexer::NextToken(
             }
             c = (*mInput)[p++];
         }
-        pos = p - 1;
+        mPos = p - 1;
         String nbStr(*mInput, begin, p - 1 - begin);
         // try {
         // parse single dot as 0
@@ -234,22 +238,22 @@ ECode Lexer::NextToken(
             c = (*mInput)[p++];
         }
         if (c == '(') {
-            pos = p;
+            mPos = p;
             *token = new Token(CALL, 0, Token::PREFIX, 0);
             (*token)->SetAlpha(nameValue);
             REFCOUNT_ADD(*token)
             return NOERROR;
         }
         else {
-            pos = p - 1;
+            mPos = p - 1;
             TOK_CONST->SetAlpha(nameValue);
             *token = TOK_CONST;
             REFCOUNT_ADD(*token)
             return NOERROR;
         }
     }
-    else if ((c >= '\u0391' && c <= '\u03a9') || (c >= '\u03b1' && c <= '\u03c9')
-               || c == '\u221e') {
+    else if ((c >= 0x0391 && c <= 0x03a9) || (c >= 0x03b1 && c <= 0x03c9)
+               || c == 0x221e) {
         TOK_CONST->SetAlpha(String("") + c);
         *token = TOK_CONST;
         REFCOUNT_ADD(*token)

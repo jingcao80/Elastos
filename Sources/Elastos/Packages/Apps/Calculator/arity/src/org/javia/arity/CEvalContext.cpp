@@ -15,7 +15,6 @@ CEvalContext::CEvalContext()
 {
     mStackRe = ArrayOf<Double>::Alloc(MAX_STACK_SIZE);
     AutoPtr<ArrayOf<IComplex*> > mStackComplex = ArrayOf<IComplex*>::Alloc(MAX_STACK_SIZE);
-    Int32 mStackBase;
 
     AutoPtr<ArrayOf<Double> > mArgs1 = ArrayOf<Double>::Alloc(1);
     AutoPtr<ArrayOf<Double> > mArgs2 = ArrayOf<Double>::Alloc(2);
@@ -37,7 +36,6 @@ ECode CEvalContext::constructor()
     CComplex::New((IComplex**)&c1);
     mArgs1c->Set(0, c1);
     mArgs2c = ArrayOf<IComplex*>::Alloc(2);
-    AutoPtr<IComplex> c1, c2, c3;
     CComplex::New((IComplex**)&c2);
     CComplex::New((IComplex**)&c3);
     mArgs2c->Set(0, c2);

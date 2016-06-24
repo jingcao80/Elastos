@@ -74,19 +74,7 @@ public:
         /* [in] */ IEvalContext* context,
         /* [out] */ IComplex** complex);
 
-    //@Override
-    CARAPI Eval(
-        /* [in] */ Double x,
-        /* [in] */ Double y,
-        /* [out] */ Double* result);
-
-    //@Override
-    CARAPI Eval(
-        /* [in] */ ArrayOf<Double>* args,
-        /* [out] */ Double* result);
-
-protected:
-    CARAPI MakeOpFunction(
+    static CARAPI MakeOpFunction(
         /* [in] */ Int32 op,
         /* [out] */ IFunction** func);
 
@@ -123,7 +111,7 @@ private:
     static const AutoPtr<ArrayOf<IFunction*> > EMPTY_FUN;
     static const AutoPtr<IComplex> ONE_THIRD;
 
-    AutoPtr<ArrayOf<Double> > mConstsRe,
+    AutoPtr<ArrayOf<Double> > mConstsRe;
     AutoPtr<ArrayOf<Double> > mConstsIm;
 
     AutoPtr<ArrayOf<IFunction*> > mFuncs;

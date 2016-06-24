@@ -2,6 +2,8 @@
 #include "org/javia/arity/Compiler.h"
 #include "org/javia/arity/Lexer.h"
 #include "org/javia/arity/CConstant.h"
+#include "org/javia/arity/OptCodeGen.h"
+#include "org/javia/arity/CFunctionAndName.h"
 #include <elastos/utility/logging/Slogger.h>
 
 using Elastos::Utility::Logging::Slogger;
@@ -27,7 +29,7 @@ ECode Compiler::CompileSimple(
 {
     VALIDATE_NOT_NULL(func)
     *func = NULL;
-    mSimpleCodeGen->SetSymbols(symbols)
+    mSimpleCodeGen->SetSymbols(symbols);
     mRpn->SetConsumer((TokenConsumer*)mSimpleCodeGen.Get());
     FAIL_RETURN(mLexer->Scan(expression, (TokenConsumer*)mRpn.Get()))
     *func = IFunction::Probe(mSimpleCodeGen->GetFun());
@@ -44,7 +46,7 @@ ECode Compiler::Compile(
     *func = NULL;
     AutoPtr<IFunction> fun;
     mDecl->Parse(source, mLexer, mDeclParser);
-    if (decl->mArity == DeclarationParser::UNKNOWN_ARITY) {
+    if (mDecl->mArity == DeclarationParser::UNKNOWN_ARITY) {
         // try {
         AutoPtr<IFunction> f;
         FAIL_RETURN(CompileSimple(symbols, mDecl->mExpression, (IFunction**)&f))
@@ -66,7 +68,7 @@ ECode Compiler::Compile(
         // try {
         mCodeGen->SetSymbols(symbols);
         mRpn->SetConsumer(mCodeGen);
-        mLexer->Scan(mDecl->Expression, mRpn);
+        mLexer->Scan(mDecl->mExpression, mRpn);
         // } finally {
         //     symbols.popFrame();
         // }

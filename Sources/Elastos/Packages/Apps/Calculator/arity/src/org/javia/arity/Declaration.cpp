@@ -30,7 +30,7 @@ ECode Declaration::Parse(
     else {
         decl = source.Substring(0, equalPos);
         mExpression = source.Substring(equalPos + 1);
-        FAIL_RETURN(lexer->Scan(decl, declParser);
+        FAIL_RETURN(lexer->Scan(decl, declParser))
         mName = declParser->mName;
         mArgs = declParser->ArgNames();
         mArity = declParser->mArity;

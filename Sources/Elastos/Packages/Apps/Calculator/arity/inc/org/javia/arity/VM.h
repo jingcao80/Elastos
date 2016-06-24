@@ -2,6 +2,8 @@
 #ifndef _ORG_JAVIA_ARITY_VM_H__
 #define _ORG_JAVIA_ARITY_VM_H__
 
+#include <elastos.h>
+
 namespace Org {
 namespace Javia {
 namespace Arity {
@@ -10,7 +12,7 @@ class VM
 {
 public:
     static const Byte RESERVED = 0;
-    static const Byte CONST = 1;
+    static const Byte _CONST = 1;
     static const Byte CALL = 2;
     static const Byte ADD = 3;
     static const Byte SUB = 4;

@@ -12,12 +12,10 @@ VPATH += $(MAKEDIR)/src/org/javia/arity
 
 SOURCES += Org.Javia.Arity.car
 SOURCES += Elastos.CoreLibrary.cpp
-SOURCES += Elastos.Droid.Core.cpp
 
 SOURCES += Function.cpp
 SOURCES += ContextFunction.cpp
 SOURCES += CompiledFunction.cpp
-SOURCES += CCompiledFunction.cpp
 SOURCES += arity.cpp
 SOURCES += CComplex.cpp
 SOURCES += MoreMath.cpp
@@ -39,6 +37,7 @@ SOURCES += CConstant.cpp
 SOURCES += DeclarationParser.cpp
 SOURCES += Declaration.cpp
 SOURCES += CDerivative.cpp
+SOURCES += CEvalContext.cpp
 
 LIBRARIES = $(XDK_USER_LIB)/Elastos.Runtime.lib
 LIBRARIES += $(XDK_TARGETS)/Elastos.Runtime.eco

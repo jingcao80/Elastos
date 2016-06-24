@@ -3,6 +3,7 @@
 #include "org/javia/arity/MoreMath.h"
 #include <elastos/core/StringBuilder.h>
 #include <elastos/core/Math.h>
+#include <math.h>
 
 using Elastos::Core::StringBuilder;
 using Org::Javia::Arity::EIID_IComplex;
@@ -11,9 +12,9 @@ namespace Org {
 namespace Javia {
 namespace Arity {
 
-CAR_OBJ_IMPL(CComplex)
+CAR_OBJECT_IMPL(CComplex)
 
-CAR_INTERFACE_DECL(CComplex, Object, IComplex)
+CAR_INTERFACE_IMPL(CComplex, Object, IComplex)
 
 ECode CComplex::constructor()
 {
@@ -75,7 +76,7 @@ ECode CComplex::AsReal(
     /* [out] */ Double* result)
 {
     VALIDATE_NOT_NULL(result)
-    *result = mIm == 0 ? mRe : Elastos::Core::Math::DOUBLE_NaN;
+    *result = mIm == 0 ? mRe : Elastos::Core::Math::DOUBLE_NAN;
     return NOERROR;
     //return Math.abs(im) < 1E-30 ? re : Double.NaN;
 }
@@ -87,7 +88,7 @@ ECode CComplex::Conjugate()
 
 ECode CComplex::Negate()
 {
-    return Set(-nRe, -mIm);
+    return Set(-mRe, -mIm);
 }
 
 ECode CComplex::IsInfinite(
@@ -95,8 +96,8 @@ ECode CComplex::IsInfinite(
 {
     VALIDATE_NOT_NULL(isInfinite)
     Boolean isNan;
-    *result = Elastos::Droid::Math::IsInfinite(mRe) ||
-            Elastos::Droid::Math::IsInfinite(mIm) && (IsNaN(&isNan), !isNan);
+    *isInfinite = Elastos::Core::Math::IsInfinite(mRe) ||
+            (Elastos::Core::Math::IsInfinite(mIm) && (IsNaN(&isNan), !isNan));
     return NOERROR;
 }
 
@@ -113,7 +114,7 @@ ECode CComplex::IsNaN(
     /* [out] */ Boolean* isNan)
 {
     VALIDATE_NOT_NULL(isNan)
-    *isNan = Elastos::Droid::Math::IsNaN(mRe) || Elastos::Droid::Math::IsNaN(mIm);
+    *isNan = Elastos::Core::Math::IsNaN(mRe) || Elastos::Core::Math::IsNaN(mIm);
     return NOERROR;
 }
 
@@ -124,7 +125,7 @@ ECode CComplex::Equals(
     VALIDATE_NOT_NULL(result)
     AutoPtr<CComplex> o = (CComplex*)IComplex::Probe(other);
     *result = ((mRe == o->mRe) || (mRe != mRe && o->mRe != o->mRe)) &&
-            ((im == o->mIm) || (im != im && o->mIm != o->mIm));
+            ((mIm == o->mIm) || (mIm != mIm && o->mIm != o->mIm));
     return NOERROR;
 }
 
@@ -185,7 +186,7 @@ ECode CComplex::Sub(
     if (Elastos::Core::Math::Abs(mRe) < ulp * 1024) {
         mRe = 0;
     }
-    return Normalizes;
+    return NOERROR;
 }
 
 ECode CComplex::Mul(
@@ -199,7 +200,7 @@ ECode CComplex::Mul(
 ECode CComplex::Mul(
     /* [in] */ IComplex* o)
 {
-    Double a = mRe, b = mIm,
+    Double a = mRe, b = mIm;
     AutoPtr<CComplex> obj = (CComplex*)o;
     Double c = obj->mRe, d = obj->mIm;
     if (b == 0 && d == 0) {
@@ -305,7 +306,7 @@ ECode CComplex::Sqrt()
     }
     else {
         Double abs;
-        Abs(&abs)
+        Abs(&abs);
         Double t = Elastos::Core::Math::Sqrt((Elastos::Core::Math::Abs(mRe) + abs) / 2);
         if (mRe >= 0) {
             Set(t, mIm / (t + t));
@@ -324,7 +325,7 @@ ECode CComplex::Mod(
     Double b = mIm;
     AutoPtr<CComplex> obj = (CComplex*)o;
     if (b == 0 && obj->mIm == 0) {
-        return Set(a % obj->mRe, 0);
+        return Set(fmod(a, obj->mRe), 0);
     }
     Div(o);
     Set(Elastos::Core::Math::Rint(mRe), Elastos::Core::Math::Rint(mIm));
@@ -402,7 +403,7 @@ ECode CComplex::Pow(
             return Set(1, 0);
         }
         if (mIm == 0) {
-            Double res = Elastos::Core::Math::Pow(re, y->mRe);
+            Double res = Elastos::Core::Math::Pow(mRe, y->mRe);
             if (res == res) { // !NaN
                 return Set(res, 0);
             }
@@ -421,7 +422,7 @@ ECode CComplex::Pow(
         Double a = arg * y->mRe;
         return Set(p * MoreMath::Cos(a), p * MoreMath::Sin(a));
     }
-    if (mim == 0 && mRe > 0) {
+    if (mIm == 0 && mRe > 0) {
         Double a = Elastos::Core::Math::Pow(mRe, y->mRe);
         Set(0, y->mIm*Elastos::Core::Math::Log(mRe));
         Exp();
@@ -445,7 +446,7 @@ ECode CComplex::Lgamma()
         down += xplusk + xplusk - 1;
         Double cc = (*GAMMA)[k];
         sumRe += cc * xplusk / down;
-        sumIm -= cc * im     / down;
+        sumIm -= cc * mIm     / down;
     }
 
     Double a = mRe + .5;
@@ -519,11 +520,11 @@ ECode CComplex::Cosh()
 
 ECode CComplex::Tan()
 {
-    if (im == 0) {
-        return Set(MoreMath::Tan(re), 0);
+    if (mIm == 0) {
+        return Set(MoreMath::Tan(mRe), 0);
     }
-    Double aa = re + re;
-    Double bb = im + im;
+    Double aa = mRe + mRe;
+    Double bb = mIm + mIm;
     Double down = MoreMath::Cos(aa) + Elastos::Core::Math::Cosh(bb);
     return Set(MoreMath::Sin(aa)/down, Elastos::Core::Math::Sinh(bb)/down);
 }

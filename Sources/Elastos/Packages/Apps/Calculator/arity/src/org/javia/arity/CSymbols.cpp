@@ -1,14 +1,15 @@
 
 #include "org/javia/arity/CSymbols.h"
-#include "org/javia/arity/CCompiler.h"
+#include "org/javia/arity/Compiler.h"
 #include "org/javia/arity/VM.h"
 #include "org/javia/arity/CFunctionAndName.h"
+#include "org/javia/arity/CComplex.h"
 #include <elastos/core/Math.h>
 #include <elastos/core/AutoLock.h>
 #include <elastos/utility/etl/Vector.h>
 
 using Org::Javia::Arity::EIID_ISymbols;
-using Elastos::Core::Autolock;
+using Elastos::Core::AutoLock;
 using Elastos::Utility::CHashTable;
 using Elastos::Utility::CHashSet;
 using Elastos::Utility::CStack;
@@ -26,8 +27,7 @@ namespace Arity {
 
 CSymbols::StaticInitializer::StaticInitializer()
 {
-    Vector<AutoPtr<ISymbol> > vect = new Vector();
-    Int32 arity;
+    Vector<AutoPtr<ISymbol> > vect;;
     for (Int32 i = 0; i < VM::BUILTINS->GetLength(); ++i) {
         Byte b = (*VM::BUILTINS)[i];
         vect.PushBack(Symbol::MakeVmOp((*VM::OPCODENAME)[b], b));
@@ -70,8 +70,8 @@ CSymbols::StaticInitializer::StaticInitializer()
     s12 = new Symbol(String("j"), 0, 1, FALSE);
     vect.PushBack(s12);
 
-    Int32 size = vect->GetSize();
-    CSymbols::sBuiltin = ArrayOf<ISymbol*>::Alloc[size];
+    Int32 size = vect.GetSize();
+    CSymbols::sBuiltin = ArrayOf<ISymbol*>::Alloc(size);
     Vector<AutoPtr<ISymbol> >::Iterator it = vect.Begin();
     for (Int32 i = 0; it != vect.End(); ++it, ++i) {
         CSymbols::sBuiltin->Set(i, *it);
@@ -87,7 +87,7 @@ AutoPtr<ArrayOf<ISymbol*> > CSymbols::sBuiltin;
 
 static AutoPtr<Symbol> InitShell()
 {
-    return new Symbol(NULL, 0, FALSE);
+    return new Symbol(String(NULL), 0, FALSE);
 }
 const AutoPtr<Symbol> CSymbols::SHELL = InitShell();
 
@@ -126,9 +126,9 @@ CSymbols::CSymbols()
     mCompiler = new Compiler();
 }
 
-CAR_OBJ_IMPL(CSymbols)
+CAR_OBJECT_IMPL(CSymbols)
 
-CAR_INTERFACE_DECL(CSymbols, Object, IComplex)
+CAR_INTERFACE_IMPL(CSymbols, Object, ISymbols)
 
 ECode CSymbols::constructor()
 {
@@ -163,7 +163,7 @@ ECode CSymbols::Eval(
 {
     VALIDATE_NOT_NULL(result)
     *result = 0;
-    Autolock Lock(this);
+    AutoLock lock(this);
     AutoPtr<IFunction> func;
     FAIL_RETURN(mCompiler->CompileSimple(this, expression, (IFunction**)&func))
     return func->Eval(result);
@@ -174,8 +174,9 @@ ECode CSymbols::EvalComplex(
     /* [out] */ IComplex** complex)
 {
     VALIDATE_NOT_NULL(complex)
-    Autolock Lock(this);
+    AutoLock lock(this);
     *complex = NULL;
+    AutoPtr<IFunction> func;
     FAIL_RETURN(mCompiler->CompileSimple(this, expression, (IFunction**)&func))
     return func->EvalComplex(complex);
 }
@@ -185,7 +186,7 @@ ECode CSymbols::CompileWithName(
     /* [out] */ IFunctionAndName** fan)
 {
     VALIDATE_NOT_NULL(fan)
-    Autolock Lock(this);
+    AutoLock lock(this);
     return mCompiler->CompileWithName(this, source, fan);
 }
 
@@ -194,7 +195,7 @@ ECode CSymbols::Compile(
     /* [out] */ IFunction** func)
 {
     VALIDATE_NOT_NULL(func)
-    Autolock Lock(this);
+    AutoLock lock(this);
     return mCompiler->Compile(this, source, func);
 }
 
@@ -202,15 +203,14 @@ ECode CSymbols::Define(
     /* [in] */ const String& name,
     /* [in] */ IFunction* function)
 {
-    Autolock Lock(this);
+    AutoLock lock(this);
     if (IConstant::Probe(function) != NULL) {
         Double value;
         function->Eval(&value);
         Define(name, value);
     }
     else {
-        AutoPtr<ISymbol> s;
-        s1 = new Symbol(name, function, (ISymbol**)&s);
+        AutoPtr<ISymbol> s = new Symbol(name, function);
         Add(s);
     }
     return NOERROR;
@@ -219,9 +219,9 @@ ECode CSymbols::Define(
 ECode CSymbols::Define(
     /* [in] */ IFunctionAndName* funAndName)
 {
-    Autolock Lock(this);
+    AutoLock lock(this);
     AutoPtr<CFunctionAndName> obj = (CFunctionAndName*)funAndName;
-    if (!obj-mName.IsNull()) {
+    if (!obj->mName.IsNull()) {
         Define(obj->mName, obj->mFunction);
     }
     return NOERROR;
@@ -231,9 +231,8 @@ ECode CSymbols::Define(
     /* [in] */ const String& name,
     /* [in] */ Double value)
 {
-    Autolock Lock(this);
-    AutoPtr<ISymbol> s;
-    s1 = new Symbol(name, value, 0, FALSE, (ISymbol**)&s);
+    AutoLock lock(this);
+    AutoPtr<ISymbol> s = new Symbol(name, value, 0, FALSE);
     Add(s);
     return NOERROR;
 }
@@ -242,17 +241,16 @@ ECode CSymbols::Define(
     /* [in] */ const String& name,
     /* [in] */ IComplex* value)
 {
-    Autolock Lock(this);
+    AutoLock lock(this);
     AutoPtr<CComplex> obj = (CComplex*)value;
-    AutoPtr<ISymbol> s;
-    s1 = new Symbol(name, obj->mRe, obj->mIm, FALSE, (ISymbol**)&s);
+    AutoPtr<ISymbol> s = new Symbol(name, obj->mRe, obj->mIm, FALSE);
     Add(s);
     return NOERROR;
 }
 
 ECode CSymbols::PushFrame()
 {
-    Autolock Lock(this);
+    AutoLock lock(this);
     mFrames->Push(mDelta);
     mDelta = NULL;
     return NOERROR;
@@ -260,7 +258,7 @@ ECode CSymbols::PushFrame()
 
 ECode CSymbols::PopFrame()
 {
-    Autolock Lock(this);
+    AutoLock lock(this);
     if (mDelta != NULL) {
         AutoPtr<IIterator> it;
         mDelta->GetIterator((IIterator**)&it);
@@ -269,7 +267,7 @@ ECode CSymbols::PopFrame()
             AutoPtr<IInterface> next;
             it->GetNext((IInterface**)&next);
             AutoPtr<ISymbol> previous = ISymbol::Probe(next);
-            if (((Symbol*)previous)->IsEmpty()) {
+            if (((Symbol*)previous.Get())->IsEmpty()) {
                 mSymbols->Remove(previous);
             }
             else {
@@ -353,7 +351,7 @@ void CSymbols::Add(
     AutoPtr<Symbol> obj = (Symbol*)previous.Get();
     if (previous != NULL && obj->mIsConst) {
         mSymbols->Put(previous, previous);
-        return NOERROR;
+        return;
     }
     if (mDelta == NULL) {
         CHashSet::New((IHashSet**)&mDelta);
@@ -368,7 +366,7 @@ AutoPtr<ISymbol> CSymbols::Lookup(
     /* [in] */ const String& name,
     /* [in] */ Int32 arity)
 {
-    Autolock Lock(this);
+    AutoLock lock(this);
     SHELL->SetKey(name, arity);
     AutoPtr<IInterface> value;
     mSymbols->Get((ISymbol*)SHELL.Get(), (IInterface**)&value);
