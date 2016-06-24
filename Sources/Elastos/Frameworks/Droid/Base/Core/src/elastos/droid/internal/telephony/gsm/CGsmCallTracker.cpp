@@ -3,6 +3,7 @@
 #include "elastos/droid/internal/telephony/gsm/CGsmConnection.h"
 #include "elastos/droid/internal/telephony/gsm/CGSMPhone.h"
 #include "elastos/droid/os/CRegistrant.h"
+#include "elastos/droid/os/CRegistrantList.h"
 #include "elastos/droid/os/RegistrantList.h"
 #include "elastos/droid/os/SystemProperties.h"
 #include <elastos/core/StringUtils.h>
@@ -16,6 +17,7 @@ using Elastos::Droid::Telephony::IDisconnectCause;
 using Elastos::Droid::Telephony::IPhoneNumberUtils;
 using Elastos::Droid::Telephony::IServiceState;
 using Elastos::Droid::Os::CRegistrant;
+using Elastos::Droid::Os::CRegistrantList;
 using Elastos::Droid::Os::IRegistrant;
 using Elastos::Droid::Os::RegistrantList;
 using Elastos::Droid::Os::SystemProperties;
@@ -52,9 +54,8 @@ CGsmCallTracker::CGsmCallTracker()
     , mSrvccState(ICallSrvccState_NONE)
 {
     mConnections = ArrayOf<IGsmConnection*>::Alloc(MAX_CONNECTIONS);
-// TODO: Need CRegistrantList
-    // CRegistrantList::New((IRegistrantList**)&mVoiceCallEndedRegistrants);
-    // CRegistrantList::New((IRegistrantList**)&mVoiceCallStartedRegistrants);
+    CRegistrantList::New((IRegistrantList**)&mVoiceCallEndedRegistrants);
+    CRegistrantList::New((IRegistrantList**)&mVoiceCallStartedRegistrants);
 
     // connections dropped during last poll
     CArrayList::New(MAX_CONNECTIONS, (IArrayList**)&mDroppedDuringPoll);
@@ -200,7 +201,7 @@ ECode CGsmCallTracker::Dial(
         // Always unmute when initiating a new call
         SetMute(FALSE);
 
-// TODO:
+// TODO: Need ICommandsInterface
         // mCi->Dial(addr, clirMode, uusInfo, ObtainCompleteMessage());
     }
 

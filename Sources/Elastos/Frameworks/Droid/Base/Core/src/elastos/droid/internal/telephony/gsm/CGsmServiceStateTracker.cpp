@@ -11,6 +11,7 @@
 #include "elastos/droid/internal/telephony/ProxyController.h"
 #include "elastos/droid/provider/CSettingsGlobal.h"
 #include "elastos/droid/os/Build.h"
+#include "elastos/droid/os/CHandler.h"
 #include "elastos/droid/os/CMessage.h"
 #include "elastos/droid/os/SystemClock.h"
 #include "elastos/droid/os/SystemProperties.h"
@@ -44,6 +45,7 @@ using Elastos::Droid::Internal::Telephony::MccTable;
 using Elastos::Droid::Internal::Telephony::ProxyController;
 using Elastos::Droid::Net::IUri;
 using Elastos::Droid::Os::Build;
+using Elastos::Droid::Os::CHandler;
 using Elastos::Droid::Os::CMessage;
 using Elastos::Droid::Os::IPowerManager;
 using Elastos::Droid::Os::SystemClock;
@@ -114,6 +116,46 @@ CAR_INTERFACE_IMPL(CGsmServiceStateTracker, ServiceStateTracker, IGsmServiceStat
 
 CAR_OBJECT_IMPL(CGsmServiceStateTracker)
 
+ECode CGsmServiceStateTracker::MyBroadcastReceiver::OnReceive(
+    /* [in] */ IContext* context,
+    /* [in] */ IIntent* intent)
+{
+    if (!((CGSMPhone*)mHost->mPhone.Get())->mIsTheCurrentActivePhone) {
+        // Logger::E(TAG, "Received Intent " + intent +
+        //         " while being destroyed. Ignoring.");
+        return NOERROR;
+    }
+
+    String action;
+    intent->GetAction(&action);
+    if (action.Equals(IIntent::ACTION_LOCALE_CHANGED)) {
+        // update emergency string whenever locale changed
+        mHost->UpdateSpnDisplay();
+    }
+    else if (action.Equals(ACTION_RADIO_OFF)) {
+        mHost->mAlarmSwitch = FALSE;
+        AutoPtr<IDcTrackerBase> dcTracker = ((CGSMPhone*)mHost->mPhone.Get())->mDcTracker;
+        mHost->PowerOffRadioSafely(dcTracker);
+    }
+    return NOERROR;
+}
+
+ECode CGsmServiceStateTracker::AutoTimeContentObserver::OnChange(
+    /* [in] */ Boolean selfChange)
+{
+    Logger::I("GsmServiceStateTracker", "Auto time state changed");
+    mHost->RevertToNitzTime();
+    return NOERROR;
+}
+
+ECode CGsmServiceStateTracker::AutoTimeZoneContentObserver::OnChange(
+    /* [in] */ Boolean selfChange)
+{
+    Logger::I("GsmServiceStateTracker", "Auto time zone state changed");
+    mHost->RevertToNitzTimeZone();
+    return NOERROR;
+}
+
 CGsmServiceStateTracker::CGsmServiceStateTracker()
     : mPreferredNetworkType(0)
     , mSavedTime(0)
@@ -136,6 +178,13 @@ CGsmServiceStateTracker::CGsmServiceStateTracker()
     , mCurShowPlmn(FALSE)
     , mCurShowSpn(FALSE)
 {
+    mIntentReceiver = new MyBroadcastReceiver(this);
+    AutoPtr<IHandler> handler1;
+    CHandler::New((IHandler**)&handler1);
+    mAutoTimeObserver = new AutoTimeContentObserver(handler1, this);
+    AutoPtr<IHandler> handler2;
+    CHandler::New((IHandler**)&handler2);
+    mAutoTimeZoneObserver = new AutoTimeZoneContentObserver(handler2, this);
 }
 
 CGsmServiceStateTracker::~CGsmServiceStateTracker()

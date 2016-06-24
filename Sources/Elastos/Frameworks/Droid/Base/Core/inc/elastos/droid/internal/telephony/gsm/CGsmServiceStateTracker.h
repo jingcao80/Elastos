@@ -11,13 +11,17 @@
 #include "Elastos.Droid.Telephony.h"
 #include "_Elastos_Droid_Internal_Telephony_Gsm_CGsmServiceStateTracker.h"
 #include "elastos/droid/ext/frameworkdef.h"
+#include "elastos/droid/content/BroadcastReceiver.h"
+#include "elastos/droid/database/ContentObserver.h"
 #include "elastos/droid/internal/telephony/ServiceStateTracker.h"
 #include "elastos/droid/os/AsyncResult.h"
 #include <elastos/core/Object.h>
 
 using Elastos::Droid::App::INotification;
+using Elastos::Droid::Content::BroadcastReceiver;
 using Elastos::Droid::Content::IBroadcastReceiver;
 using Elastos::Droid::Content::IContentResolver;
+using Elastos::Droid::Database::ContentObserver;
 using Elastos::Droid::Database::IContentObserver;
 using Elastos::Droid::Internal::Telephony::DataConnection::IDcTrackerBase;
 using Elastos::Droid::Internal::Telephony::IPhone;
@@ -46,6 +50,64 @@ CarClass(CGsmServiceStateTracker)
     , public ServiceStateTracker
     , public IGsmServiceStateTracker
 {
+private:
+    class MyBroadcastReceiver
+        : public BroadcastReceiver
+    {
+    public:
+        MyBroadcastReceiver(
+            /* [in] */ CGsmServiceStateTracker* host)
+            : mHost(host)
+        {}
+
+        CARAPI OnReceive(
+            /* [in] */ IContext* context,
+            /* [in] */ IIntent* intent);
+
+    private:
+        CGsmServiceStateTracker* mHost;
+    };
+
+    class AutoTimeContentObserver
+        : public ContentObserver
+    {
+    public:
+        AutoTimeContentObserver(
+            /* [in] */ IHandler* handler,
+            /* [in] */ CGsmServiceStateTracker* host)
+            : mHost(host)
+        {
+            ContentObserver::constructor(handler);
+        }
+
+        // @Override
+        CARAPI OnChange(
+            /* [in] */ Boolean selfChange);
+
+    private:
+        CGsmServiceStateTracker* mHost;
+    };
+
+    class AutoTimeZoneContentObserver
+        : public ContentObserver
+    {
+    public:
+        AutoTimeZoneContentObserver(
+            /* [in] */ IHandler* handler,
+            /* [in] */ CGsmServiceStateTracker* host)
+            : mHost(host)
+        {
+            ContentObserver::constructor(handler);
+        }
+
+        // @Override
+        CARAPI OnChange(
+            /* [in] */ Boolean selfChange);
+
+    private:
+        CGsmServiceStateTracker* mHost;
+    };
+
 public:
     CGsmServiceStateTracker();
 
@@ -363,12 +425,11 @@ private:
     Boolean mCurShowPlmn; // = FALSE;
     Boolean mCurShowSpn; // = FALSE;
 
-// TODO:
-    AutoPtr<IBroadcastReceiver> mIntentReceiver; // = new BroadcastReceiver();
+    AutoPtr<IBroadcastReceiver> mIntentReceiver;
 
-    AutoPtr<IContentObserver> mAutoTimeObserver; // = new ContentObserver(new Handler());
+    AutoPtr<IContentObserver> mAutoTimeObserver;
 
-    AutoPtr<IContentObserver> mAutoTimeZoneObserver; // = new ContentObserver(new Handler());
+    AutoPtr<IContentObserver> mAutoTimeZoneObserver;
 };
 
 } // namespace Gem

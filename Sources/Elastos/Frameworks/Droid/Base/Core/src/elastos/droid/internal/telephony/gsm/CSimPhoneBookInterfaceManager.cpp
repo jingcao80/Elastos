@@ -3,6 +3,7 @@
 #include <elastos/core/StringUtils.h>
 #include <elastos/utility/logging/Logger.h>
 
+using Elastos::Droid::Internal::Telephony::IPhoneBase;
 using Elastos::Droid::Internal::Telephony::Uicc::IIccFileHandler;
 using Elastos::Droid::Os::IMessage;
 using Elastos::Core::AutoLock;
@@ -41,9 +42,7 @@ ECode CSimPhoneBookInterfaceManager::constructor()
 ECode CSimPhoneBookInterfaceManager::constructor(
     /* [in] */ IGSMPhone* phone)
 {
-// TODO: Need IccPhoneBookInterfaceManager::constructor
-    // return IccPhoneBookInterfaceManager::constructor(phone);
-    return NOERROR;
+    return IccPhoneBookInterfaceManager::constructor(IPhoneBase::Probe(phone));
     //NOTE service "simphonebook" added by IccSmsInterfaceManagerProxy
 }
 

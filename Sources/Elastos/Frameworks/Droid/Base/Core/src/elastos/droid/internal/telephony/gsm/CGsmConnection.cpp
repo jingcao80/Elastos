@@ -313,11 +313,10 @@ ECode CGsmConnection::ProceedAfterWildChar(
     buf.Append(mPostDialString.Substring(mNextPostDialChar));
     buf.ToString(&mPostDialString);
     mNextPostDialChar = 0;
-// TODO: Need Phone
-    // if (Phone::DEBUG_PHONE) {
-    //     Log(String("proceedAfterWildChar: new postDialString is ") +
-    //             mPostDialString);
-    // }
+    if (IPhone::DEBUG_PHONE) {
+        Log(String("proceedAfterWildChar: new postDialString is ") +
+                mPostDialString);
+    }
 
     ProcessNextPostDialChar();
     return NOERROR;
@@ -513,16 +512,14 @@ ECode CGsmConnection::Update (
 
     //Ignore dc->mNumber and dc->mName in case of a handover connection
     if (mOrigConnection != NULL) {
-// TODO: Need Phone
-        // if (Phone::DEBUG_PHONE) Log(String("update: mOrigConnection is not null"));
+        if (IPhone::DEBUG_PHONE) Log(String("update: mOrigConnection is not null"));
     }
     else {
         Log(String(" mNumberConverted ") + mNumberConverted);
         Boolean b1, b2;
         if ((EqualsHandlesNulls(CoreUtils::Convert(mAddress), CoreUtils::Convert(((DriverCall*)dc)->mNumber), &b1), !b1) && (!mNumberConverted
                 || (EqualsHandlesNulls(CoreUtils::Convert(mConvertedNumber), CoreUtils::Convert(((DriverCall*)dc)->mNumber), &b2), b2))) {
-// TODO: Need Phone
-            // if (Phone::DEBUG_PHONE) Log(String("update: phone # changed!"));
+            if (IPhone::DEBUG_PHONE) Log(String("update: phone # changed!"));
             mAddress = ((DriverCall*)dc)->mNumber;
             changed = TRUE;
         }
@@ -540,8 +537,7 @@ ECode CGsmConnection::Update (
         mCnapName = ((DriverCall*)dc)->mName;
     }
 
-// TODO: Need Phone
-    // if (Phone::DEBUG_PHONE) Log(String("--dssds----") + mCnapName);
+    if (IPhone::DEBUG_PHONE) Log(String("--dssds----") + mCnapName);
     mCnapNamePresentation = ((DriverCall*)dc)->mNamePresentation;
     mNumberPresentation = ((DriverCall*)dc)->mNumberPresentation;
 
@@ -561,14 +557,13 @@ ECode CGsmConnection::Update (
 
     /** Some state-transition events */
 
-    // if (Phone::DEBUG_PHONE) Log(
+    // if (IPhone::DEBUG_PHONE) Log(
     //         "update: parent=" + mParent +
     //         ", hasNewParent=" + (newParent != mParent) +
     //         ", wasConnectingInOrOut=" + wasConnectingInOrOut +
     //         ", wasHolding=" + wasHolding +
     //         ", isConnectingInOrOut=" + isConnectingInOrOut() +
     //         ", changed=" + changed);
-
 
     if (wasConnectingInOrOut && !IsConnectingInOrOut()) {
         OnConnectedInOrOut();
@@ -622,10 +617,10 @@ ECode CGsmConnection::OnConnectedInOrOut()
 
     // bug #678474: incoming call interpreted as missed call, even though
     // it sounds like the user has picked up the call.
-// TODO: Need Phone
-    // if (Phone::DEBUG_PHONE) {
-    //     Log(String("onConnectedInOrOut: connectTime=") + mConnectTime);
-    // }
+
+    if (IPhone::DEBUG_PHONE) {
+        Log(String("onConnectedInOrOut: connectTime=") + mConnectTime);
+    }
 
     if (!mIsIncoming) {
         // outgoing calls only
