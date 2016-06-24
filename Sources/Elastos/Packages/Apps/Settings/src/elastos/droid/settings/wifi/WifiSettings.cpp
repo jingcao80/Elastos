@@ -2,7 +2,7 @@
 #include "Elastos.Droid.Location.h"
 #include "Elastos.Droid.Provider.h"
 #include "elastos/droid/settings/wifi/WifiSettings.h"
-#include "elastos/droid/settings/SettingsActivity.h"
+#include "elastos/droid/settings/CSettingsActivity.h"
 #include "elastos/droid/settings/search/SearchIndexableRaw.h"
 #include "elastos/droid/settings/wifi/WpsDialog.h"
 #include "elastos/droid/settings/wifi/CAccessPoint.h"
@@ -155,7 +155,7 @@ ECode WifiSettings::MyBaseSearchIndexProvider::GetRawDataToIndex(
         IAccessPoint* accessPoint = IAccessPoint::Probe(object);
 
         // We are indexing only the saved Wi-Fi networks.
-        if (((AccessPoint*)accessPoint)->GetConfig() == NULL) continue;
+        if (((CAccessPoint*)accessPoint)->GetConfig() == NULL) continue;
         data = NULL;
         data = new SearchIndexableRaw();
         data->constructor(context);
@@ -544,7 +544,7 @@ AutoPtr<WifiEnabler> WifiSettings::CreateWifiEnabler()
 {
     AutoPtr<IActivity> _activity;
     GetActivity((IActivity**)&_activity);
-    AutoPtr<SettingsActivity> activity = (SettingsActivity*)ISettingsActivity::Probe(_activity);
+    AutoPtr<CSettingsActivity> activity = (CSettingsActivity*)ISettingsActivity::Probe(_activity);
     AutoPtr<ISwitchBar> switchBar;
     activity->GetSwitchBar((ISwitchBar**)&switchBar);
     AutoPtr<WifiEnabler> abler = new WifiEnabler(IContext::Probe(activity), switchBar);
@@ -651,7 +651,7 @@ ECode WifiSettings::OnSaveInstanceState(
         if (mDlgAccessPoint != NULL) {
             mAccessPointSavedState = NULL;
             CBundle::New((IBundle**)&mAccessPointSavedState);
-            ((AccessPoint*)mDlgAccessPoint.Get())->SaveWifiState(mAccessPointSavedState);
+            ((CAccessPoint*)mDlgAccessPoint.Get())->SaveWifiState(mAccessPointSavedState);
             outState->PutBundle(SAVE_DIALOG_ACCESS_POINT_STATE, mAccessPointSavedState);
         }
     }
@@ -712,7 +712,7 @@ ECode WifiSettings::OnOptionsItemSelected(
                 AutoPtr<IActivity> activity;
                 GetActivity((IActivity**)&activity);
                 if (ISettingsActivity::Probe(activity) != NULL) {
-                    ((SettingsActivity*)ISettingsActivity::Probe(activity))->StartPreferencePanel(
+                    ((CSettingsActivity*)ISettingsActivity::Probe(activity))->StartPreferencePanel(
                             String("Elastos.Droid.Settings.Wifi.CSavedAccessPointsWifiSettings"), NULL,
                             R::string::wifi_saved_access_points_titlebar, NULL, this, 0);
                 }
@@ -728,7 +728,7 @@ ECode WifiSettings::OnOptionsItemSelected(
                 AutoPtr<IActivity> activity;
                 GetActivity((IActivity**)&activity);
                 if (ISettingsActivity::Probe(activity) != NULL) {
-                    ((SettingsActivity*)ISettingsActivity::Probe(activity))->StartPreferencePanel(
+                    ((CSettingsActivity*)ISettingsActivity::Probe(activity))->StartPreferencePanel(
                             String("Elastos.Droid.Settings.Wifi.CAdvancedWifiSettings"), NULL,
                             R::string::wifi_advanced_titlebar, NULL, this, 0);
                 }
@@ -760,7 +760,7 @@ ECode WifiSettings::OnCreateContextMenu(
 
         if (IAccessPoint::Probe(preference) != NULL) {
             mSelectedAccessPoint = IAccessPoint::Probe(preference);
-            AccessPoint* selectedAccessPoint = (AccessPoint*)mSelectedAccessPoint.Get();
+            CAccessPoint* selectedAccessPoint = (CAccessPoint*)mSelectedAccessPoint.Get();
             menu->SetHeaderTitle(CoreUtils::Convert(selectedAccessPoint->mSsid));
             if (selectedAccessPoint->GetLevel() != -1
                     && selectedAccessPoint->GetState() == NetworkInfoDetailedState_NONE) {
@@ -805,7 +805,7 @@ ECode WifiSettings::OnContextItemSelected(
         return RestrictedSettingsFragment::OnContextItemSelected(item, result);
     }
 
-    AccessPoint* selectedAccessPoint = (AccessPoint*)mSelectedAccessPoint.Get();
+    CAccessPoint* selectedAccessPoint = (CAccessPoint*)mSelectedAccessPoint.Get();
 
     Int32 id;
     item->GetItemId(&id);
@@ -853,7 +853,7 @@ ECode WifiSettings::OnPreferenceTreeClick(
 
     if (IAccessPoint::Probe(preference)) {
         mSelectedAccessPoint = IAccessPoint::Probe(preference);
-        AccessPoint* selectedAccessPoint = (AccessPoint*)mSelectedAccessPoint.Get();
+        CAccessPoint* selectedAccessPoint = (CAccessPoint*)mSelectedAccessPoint.Get();
         /** Bypass dialog for unsecured, unsaved networks */
         if (selectedAccessPoint->mSecurity == AccessPoint::SECURITY_NONE &&
                 selectedAccessPoint->mNetworkId == IWifiConfiguration::INVALID_NETWORK_ID) {
@@ -1008,7 +1008,7 @@ void WifiSettings::UpdateAccessPoints()
                 iter->GetNext((IInterface**)&obj);
                 IAccessPoint* accessPoint = IAccessPoint::Probe(obj);
                 // Ignore access points that are out of range.
-                if (((AccessPoint*)accessPoint)->GetLevel() != -1) {
+                if (((CAccessPoint*)accessPoint)->GetLevel() != -1) {
                     Boolean res;
                     IPreferenceGroup::Probe(screen)->AddPreference(IPreference::Probe(accessPoint), &res);
                 }
@@ -1247,10 +1247,10 @@ AutoPtr<IList> WifiSettings::ConstructAccessPoints(
             AutoPtr<IAccessPoint> accessPoint;
             CAccessPoint::New(context, config, (IAccessPoint**)&accessPoint);
             if (lastInfo != NULL && lastState != NetworkInfoDetailedState_NONE) {
-                ((AccessPoint*)accessPoint.Get())->Update(lastInfo, lastState);
+                ((CAccessPoint*)accessPoint.Get())->Update(lastInfo, lastState);
             }
             accessPoints->Add(accessPoint);
-            apMap->Put(((AccessPoint*)accessPoint.Get())->mSsid, accessPoint);
+            apMap->Put(((CAccessPoint*)accessPoint.Get())->mSsid, accessPoint);
         }
     }
 
@@ -1280,7 +1280,7 @@ AutoPtr<IList> WifiSettings::ConstructAccessPoints(
             for (Int32 j = 0; j < len; j++) {
                 AutoPtr<IInterface> object;
                 list->Get(j, (IInterface**)&object);
-                AutoPtr<AccessPoint> accessPoint = (AccessPoint*)IAccessPoint::Probe(object);
+                AutoPtr<CAccessPoint> accessPoint = (CAccessPoint*)IAccessPoint::Probe(object);
                 if (accessPoint->Update(result)) {
                     found = TRUE;
                 }
@@ -1290,7 +1290,7 @@ AutoPtr<IList> WifiSettings::ConstructAccessPoints(
                 AutoPtr<IAccessPoint> accessPoint;
                 CAccessPoint::New(context, result, (IAccessPoint**)&accessPoint);
                 accessPoints->Add(accessPoint);
-                apMap->Put(((AccessPoint*)accessPoint.Get())->mSsid, accessPoint);
+                apMap->Put(((CAccessPoint*)accessPoint.Get())->mSsid, accessPoint);
             }
         }
     }
@@ -1370,7 +1370,7 @@ void WifiSettings::UpdateConnectionState(
         IPreferenceGroup::Probe(screen)->GetPreference(i, (IPreference**)&preference);
         if (IAccessPoint::Probe(preference) != NULL) {
             AutoPtr<IAccessPoint> accessPoint = IAccessPoint::Probe(preference);
-            ((AccessPoint*)accessPoint.Get())->Update(mLastInfo, mLastState);
+            ((CAccessPoint*)accessPoint.Get())->Update(mLastInfo, mLastState);
         }
     }
 }
@@ -1439,8 +1439,8 @@ void WifiSettings::Submit(
 
     if (config == NULL) {
         if (mSelectedAccessPoint != NULL
-                && ((AccessPoint*)mSelectedAccessPoint.Get())->mNetworkId != IWifiConfiguration::INVALID_NETWORK_ID) {
-            Connect(((AccessPoint*)mSelectedAccessPoint.Get())->mNetworkId);
+                && ((CAccessPoint*)mSelectedAccessPoint.Get())->mNetworkId != IWifiConfiguration::INVALID_NETWORK_ID) {
+            Connect(((CAccessPoint*)mSelectedAccessPoint.Get())->mNetworkId);
         }
     }
     else if (networkId != IWifiConfiguration::INVALID_NETWORK_ID) {
@@ -1466,7 +1466,7 @@ void WifiSettings::Submit(
 
 void WifiSettings::Forget()
 {
-    AccessPoint* selectedAccessPoint = (AccessPoint*)mSelectedAccessPoint.Get();
+    CAccessPoint* selectedAccessPoint = (CAccessPoint*)mSelectedAccessPoint.Get();
     if (selectedAccessPoint->mNetworkId == IWifiConfiguration::INVALID_NETWORK_ID) {
         // Should not happen, but a monkey seems to trigger it
         Logger::E(TAG, "Failed to forget invalid network %s", TO_CSTR(selectedAccessPoint->GetConfig()));

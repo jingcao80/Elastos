@@ -1,6 +1,8 @@
 
+#ifndef __ELASTOS_DROID_SETTINGS_WIDGET_CANIMATEDIMAGEVIEW_H__
+#define __ELASTOS_DROID_SETTINGS_WIDGET_CANIMATEDIMAGEVIEW_H__
 
-package com.android.settings.widget;
+#include "_Elastos_Droid_Settings_Widget_CAnimatedImageView.h"
 
 using Elastos::Droid::Content::IContext;
 using Elastos::Droid::Graphics::Drawable::IAnimatedRotateDrawable;
@@ -9,10 +11,15 @@ using Elastos::Droid::Utility::IAttributeSet;
 using Elastos::Droid::View::IView;
 using Elastos::Droid::Widget::IImageView;
 
-public class AnimatedImageView extends ImageView {
-    private AnimatedRotateDrawable mDrawable;
-    private Boolean mAnimating;
+namespace Elastos {
+namespace Droid {
+namespace Settings {
+namespace Widget {
 
+CarClass(CAnimatedImageView)
+    , public ImageView
+{
+public:
     public AnimatedImageView(Context context) {
         Super(context);
     }
@@ -51,25 +58,25 @@ public class AnimatedImageView extends ImageView {
 
     //@Override
     CARAPI SetImageDrawable(Drawable drawable) {
-        super->SetImageDrawable(drawable);
+        ImageView::SetImageDrawable(drawable);
         UpdateDrawable();
     }
 
     //@Override
     CARAPI SetImageResource(Int32 resid) {
-        super->SetImageResource(resid);
+        ImageView::SetImageResource(resid);
         UpdateDrawable();
     }
 
     //@Override
     CARAPI OnAttachedToWindow() {
-        super->OnAttachedToWindow();
+        ImageView::OnAttachedToWindow();
         UpdateAnimating();
     }
 
     //@Override
     CARAPI OnDetachedFromWindow() {
-        super->OnDetachedFromWindow();
+        ImageView::OnDetachedFromWindow();
         UpdateAnimating();
     }
 
@@ -80,7 +87,17 @@ public class AnimatedImageView extends ImageView {
 
     //@Override
     protected void OnVisibilityChanged(View changedView, Int32 vis) {
-        super->OnVisibilityChanged(changedView, vis);
+        ImageView::OnVisibilityChanged(changedView, vis);
         UpdateAnimating();
     }
-}
+private:
+    private AnimatedRotateDrawable mDrawable;
+    private Boolean mAnimating;
+};
+
+}// namespace Widget
+}// namespace Settings
+}// namespace Droid
+}// namespace Elastos
+
+#endif //__ELASTOS_DROID_SETTINGS_WIDGET_CANIMATEDIMAGEVIEW_H__

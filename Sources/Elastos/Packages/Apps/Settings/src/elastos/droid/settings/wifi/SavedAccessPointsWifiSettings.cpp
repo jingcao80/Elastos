@@ -242,7 +242,7 @@ AutoPtr<IList> SavedAccessPointsWifiSettings::ConstructSavedAccessPoints(
 
             AutoPtr<IAccessPoint> accessPoint;
             CAccessPoint::New(context, config, (IAccessPoint**)&accessPoint);
-            AccessPoint* _accessPoint = (AccessPoint*)accessPoint.Get();
+            CAccessPoint* _accessPoint = (CAccessPoint*)accessPoint.Get();
             obj = NULL;
             resultsMap->Get(CoreUtils::Convert(_accessPoint->mSsid), (IInterface**)&obj);
             IList* results = IList::Probe(obj);
@@ -321,7 +321,7 @@ ECode SavedAccessPointsWifiSettings::OnSaveInstanceState(
         if (mDlgAccessPoint != NULL) {
             mAccessPointSavedState = NULL;
             CBundle::New((IBundle**)&mAccessPointSavedState);
-            ((AccessPoint*)mDlgAccessPoint.Get())->SaveWifiState(mAccessPointSavedState);
+            ((CAccessPoint*)mDlgAccessPoint.Get())->SaveWifiState(mAccessPointSavedState);
             outState->PutBundle(SAVE_DIALOG_ACCESS_POINT_STATE, mAccessPointSavedState);
         }
     }
@@ -333,7 +333,7 @@ ECode SavedAccessPointsWifiSettings::OnClick(
     /* [in] */ Int32 button)
 {
     if (button == WifiDialog::BUTTON_FORGET && mSelectedAccessPoint != NULL) {
-        mWifiManager->Forget(((AccessPoint*)mSelectedAccessPoint.Get())->mNetworkId, NULL);
+        mWifiManager->Forget(((CAccessPoint*)mSelectedAccessPoint.Get())->mNetworkId, NULL);
         AutoPtr<IPreferenceScreen> screen;
         GetPreferenceScreen((IPreferenceScreen**)&screen);
         Boolean res;

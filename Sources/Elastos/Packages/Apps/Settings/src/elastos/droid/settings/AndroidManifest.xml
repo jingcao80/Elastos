@@ -386,7 +386,7 @@
                 <category android:name="android.intent.category.VOICE_LAUNCH" />
             </intent-filter>
             <meta-data android:name="com.android.settings.FRAGMENT_CLASS"
-                android:value="com.android.settings.wifi.p2p.WifiP2pSettings" />
+                android:value="Elastos.Droid.Settings.Wifi.P2p.CWifiP2pSettings" />
             <meta-data android:name="com.android.settings.TOP_LEVEL_HEADER_ID"
                 android:resource="@id/wireless_settings" />
         </activity>

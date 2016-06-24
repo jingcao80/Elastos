@@ -8,7 +8,7 @@
 #include <Elastos.Droid.View.h>
 #include <Elastos.Droid.Widget.h>
 #include <elastos/core/Object.h>
-#include "elastos/droid/settings/UserSpinnerAdapter.h"
+#include "elastos/droid/settings/CUserSpinnerAdapter.h"
 #include "elastos/droid/settings/dashboard/CDashboardTile.h"
 
 using Elastos::Droid::App::IDialog;
@@ -281,7 +281,7 @@ public:
      *
      * @return a {@link UserSpinnerAdapter} or NULL if there is only one profile.
      */
-    static CARAPI_(AutoPtr<UserSpinnerAdapter>) CreateUserSpinnerAdapter(
+    static CARAPI_(AutoPtr<CUserSpinnerAdapter>) CreateUserSpinnerAdapter(
         /* [in] */ IUserManager* userManager,
         /* [in] */ IContext* context);
 

@@ -919,7 +919,7 @@ Boolean Utils::IsManagedProfile(
     return res;
 }
 
-AutoPtr<UserSpinnerAdapter> Utils::CreateUserSpinnerAdapter(
+AutoPtr<CUserSpinnerAdapter> Utils::CreateUserSpinnerAdapter(
     /* [in] */ IUserManager* userManager,
     /* [in] */ IContext* context)
 {
@@ -943,8 +943,8 @@ AutoPtr<UserSpinnerAdapter> Utils::CreateUserSpinnerAdapter(
     for (Int32 i = 0; i < count; i++) {
         AutoPtr<IInterface> obj;
         userProfiles->Get(i, (IInterface**)&obj);
-        AutoPtr<UserSpinnerAdapter::UserDetails> detail =
-                new UserSpinnerAdapter::UserDetails(IUserHandle::Probe(obj),
+        AutoPtr<CUserSpinnerAdapter::UserDetails> detail =
+                new CUserSpinnerAdapter::UserDetails(IUserHandle::Probe(obj),
                 userManager, context);
         userDetails->Add((IObject*)detail);
     }
@@ -952,7 +952,7 @@ AutoPtr<UserSpinnerAdapter> Utils::CreateUserSpinnerAdapter(
     AutoPtr<ISpinnerAdapter> adapter;
     CUserSpinnerAdapter::New(context, userDetails, (ISpinnerAdapter**)&adapter);
 
-    return (UserSpinnerAdapter*)adapter.Get();
+    return (CUserSpinnerAdapter*)adapter.Get();
 }
 
 AutoPtr<IUserHandle> Utils::GetSecureTargetUser(

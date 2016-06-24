@@ -2,6 +2,7 @@
 #include "Elastos.Droid.Os.h"
 #include "elastos/droid/settings/wifi/WifiSettingsForSetupWizardXL.h"
 #include "elastos/droid/settings/wifi/AccessPoint.h"
+#include "elastos/droid/settings/wifi/CAccessPoint.h"
 #include "elastos/droid/settings/wifi/Summary.h"
 #include "elastos/droid/settings/wifi/WifiConfigUiForSetupWizardXL.h"
 #include "../R.h"
@@ -511,8 +512,8 @@ void WifiSettingsForSetupWizardXL::ShowConfigUi(
     mScreenState = SCREEN_STATE_EDITING;
 
     if (selectedAccessPoint != NULL &&
-            (((AccessPoint*)selectedAccessPoint)->mSecurity == AccessPoint::SECURITY_WEP ||
-                    ((AccessPoint*)selectedAccessPoint)->mSecurity == AccessPoint::SECURITY_PSK)) {
+            (((CAccessPoint*)selectedAccessPoint)->mSecurity == AccessPoint::SECURITY_WEP ||
+                    ((CAccessPoint*)selectedAccessPoint)->mSecurity == AccessPoint::SECURITY_PSK)) {
         // We forcibly set edit as TRUE so that users can modify every field if they want,
         // while config UI doesn't allow them to edit some of them when edit is FALSE
         // (e.g. password field is hiden when edit==FALSE).
@@ -538,7 +539,7 @@ void WifiSettingsForSetupWizardXL::ShowConfigUi(
         ShowDisconnectedProgressBar();
         ShowEditingButtonState();
     }
-    else if (((AccessPoint*)selectedAccessPoint)->mSecurity == AccessPoint::SECURITY_NONE) {
+    else if (((CAccessPoint*)selectedAccessPoint)->mSecurity == AccessPoint::SECURITY_NONE) {
         AutoPtr<ICharSequence> seq;
         IPreference::Probe(selectedAccessPoint)->GetTitle((ICharSequence**)&seq);
         mNetworkName = seq;
@@ -554,7 +555,7 @@ void WifiSettingsForSetupWizardXL::ShowConfigUi(
         ShowEditingTitle();
         ShowDisconnectedProgressBar();
         ShowEditingButtonState();
-        if (((AccessPoint*)selectedAccessPoint)->mSecurity == AccessPoint::SECURITY_EAP) {
+        if (((CAccessPoint*)selectedAccessPoint)->mSecurity == AccessPoint::SECURITY_EAP) {
             OnEapNetworkSelected();
         }
         else {

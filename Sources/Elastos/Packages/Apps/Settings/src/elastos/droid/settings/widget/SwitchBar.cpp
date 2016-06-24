@@ -1,7 +1,7 @@
 
 #include "elastos/droid/settings/widget/SwitchBar.h"
 #include "elastos/droid/settings/widget/CSwitchBarSavedState.h"
-#include "elastos/droid/settings/widget/ToggleSwitch.h"
+#include "elastos/droid/settings/widget/CToggleSwitch.h"
 #include "elastos/droid/view/LayoutInflater.h"
 #include "../R.h"
 #include <elastos/core/StringBuilder.h>
@@ -221,7 +221,7 @@ ECode SwitchBar::SetCheckedInternal(
     /* [in] */ Boolean checked)
 {
     SetTextViewLabel(checked);
-    return ((ToggleSwitch*)mSwitch.Get())->SetCheckedInternal(checked);
+    return ((CToggleSwitch*)mSwitch.Get())->SetCheckedInternal(checked);
 }
 
 ECode SwitchBar::IsChecked(
@@ -342,7 +342,7 @@ void SwitchBar::OnRestoreInstanceState(
     ss->GetSuperState((IParcelable**)&p);
     LinearLayout::OnRestoreInstanceState(p);
 
-    ((ToggleSwitch*)mSwitch.Get())->SetCheckedInternal(ss->mChecked);
+    ((CToggleSwitch*)mSwitch.Get())->SetCheckedInternal(ss->mChecked);
     SetTextViewLabel(ss->mChecked);
     SetVisibility(ss->mVisible ? IView::VISIBLE : IView::GONE);
     ICompoundButton::Probe(mSwitch)->SetOnCheckedChangeListener(ss->mVisible ? this : NULL);

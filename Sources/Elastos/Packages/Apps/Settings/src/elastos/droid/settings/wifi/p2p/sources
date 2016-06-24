@@ -1,0 +1,9 @@
+TARGET_NAME = p2p
+TARGET_TYPE = lib
+
+INCLUDES += ../../
+INCLUDES += $(MAKEDIR)/../../../../../../inc/
+
+SOURCES = CWifiP2pPeer.cpp
+SOURCES += CWifiP2pPersistentGroup.cpp
+SOURCES += CWifiP2pSettings.cpp

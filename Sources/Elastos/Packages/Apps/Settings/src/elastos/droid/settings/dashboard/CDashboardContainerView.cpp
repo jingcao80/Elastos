@@ -1,6 +1,6 @@
 
 #include "elastos/droid/settings/dashboard/CDashboardContainerView.h"
-#include "elastos/droid/settings/dashboard/DashboardTileView.h"
+#include "elastos/droid/settings/dashboard/CDashboardTileView.h"
 #include "Elastos.Droid.View.h"
 #include "../R.h"
 #include <elastos/core/Math.h>
@@ -62,7 +62,7 @@ void CDashboardContainerView::OnMeasure(
     for (Int32 i = 0; i < N; ++i) {
         view = NULL;
         GetChildAt(i, (IView**)&view);
-        AutoPtr<DashboardTileView> v = (DashboardTileView*)view.Get();
+        AutoPtr<CDashboardTileView> v = (CDashboardTileView*)view.Get();
         Int32 visibility;
         v->GetVisibility(&visibility);
         if (visibility == IView::GONE) {
@@ -126,7 +126,7 @@ ECode CDashboardContainerView::OnLayout(
     for (Int32 i = 0; i < N; ++i) {
         view = NULL;
         GetChildAt(i, (IView**)&view);
-        AutoPtr<DashboardTileView> child = (DashboardTileView*)view.Get();
+        AutoPtr<CDashboardTileView> child = (CDashboardTileView*)view.Get();
 
         AutoPtr<IViewGroupLayoutParams> lp;
         child->GetLayoutParams((IViewGroupLayoutParams**)&lp);

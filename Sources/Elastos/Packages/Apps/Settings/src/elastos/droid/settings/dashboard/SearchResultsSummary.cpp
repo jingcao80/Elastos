@@ -2,7 +2,7 @@
 #include "Elastos.CoreLibrary.IO.h"
 #include "elastos/droid/settings/dashboard/SearchResultsSummary.h"
 #include "elastos/droid/settings/search/Index.h"
-#include "elastos/droid/settings/SettingsActivity.h"
+#include "elastos/droid/settings/CSettingsActivity.h"
 #include "elastos/droid/settings/Utils.h"
 #include "elastos/droid/text/TextUtils.h"
 #include "elastos/droid/view/LayoutInflater.h"
@@ -562,13 +562,13 @@ ECode SearchResultsSummary::AdapterViewOnItemClickListener::OnItemClick(
 
             AutoPtr<IActivity> activity;
             mHost->GetActivity((IActivity**)&activity);
-            AutoPtr<SettingsActivity> sa = (SettingsActivity*)activity.Get();
+            AutoPtr<CSettingsActivity> sa = (CSettingsActivity*)activity.Get();
             sa->NeedToRevertToInitialFragment();
 
             if (TextUtils::IsEmpty(action)) {
                 AutoPtr<IBundle> args;
                 CBundle::New((IBundle**)&args);
-                args->PutString(SettingsActivity::EXTRA_FRAGMENT_ARG_KEY, key);
+                args->PutString(CSettingsActivity::EXTRA_FRAGMENT_ARG_KEY, key);
 
                 Utils::StartWithFragment(sa, className, args, NULL, 0, -1,
                         CoreUtils::Convert(screenTitle));
@@ -588,7 +588,7 @@ ECode SearchResultsSummary::AdapterViewOnItemClickListener::OnItemClick(
                     CComponentName::New(targetPackage, targetClass, (IComponentName**)&component);
                     intent->SetComponent(component);
                 }
-                intent->PutExtra(SettingsActivity::EXTRA_FRAGMENT_ARG_KEY, key);
+                intent->PutExtra(CSettingsActivity::EXTRA_FRAGMENT_ARG_KEY, key);
 
                 sa->StartActivity(intent);
             }

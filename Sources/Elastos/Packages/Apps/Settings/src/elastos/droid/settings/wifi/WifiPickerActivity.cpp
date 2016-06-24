@@ -34,7 +34,7 @@ Boolean WifiPickerActivity::IsValidFragment(
     /* [in] */ const String& fragmentName)
 {
     if (String("Elastos.Droid.Settings.Wifi.CWifiSettings").Equals(fragmentName)
-            || String("Elastos.Droid.Settings.Wifi.P2p.WifiP2pSettings").Equals(fragmentName)
+            || String("Elastos.Droid.Settings.Wifi.P2p.CWifiP2pSettings").Equals(fragmentName)
             || String("Elastos.Droid.Settings.Wifi.CSavedAccessPointsWifiSettings").Equals(fragmentName)
             || String("Elastos.Droid.Settings.Wifi.CAdvancedWifiSettings").Equals(fragmentName)) return TRUE;
     return FALSE;

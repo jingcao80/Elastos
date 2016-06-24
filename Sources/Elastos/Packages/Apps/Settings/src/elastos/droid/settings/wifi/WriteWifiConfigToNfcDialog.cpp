@@ -1,6 +1,7 @@
 #include "Elastos.Droid.Nfc.h"
 #include "elastos/droid/settings/wifi/WriteWifiConfigToNfcDialog.h"
 #include "elastos/droid/settings/wifi/AccessPoint.h"
+#include "elastos/droid/settings/wifi/CAccessPoint.h"
 #include "../R.h"
 #include "elastos/droid/R.h"
 #include <elastos/core/Character.h>
@@ -205,7 +206,7 @@ ECode WriteWifiConfigToNfcDialog::OnClick(
     mPasswordView->GetText((ICharSequence**)&seq);
     String password = TO_STR(seq);
     String wpsNfcConfigurationToken;
-    mWifiManager->GetWpsNfcConfigurationToken(((AccessPoint*)mAccessPoint.Get())->mNetworkId, &wpsNfcConfigurationToken);
+    mWifiManager->GetWpsNfcConfigurationToken(((CAccessPoint*)mAccessPoint.Get())->mNetworkId, &wpsNfcConfigurationToken);
     String passwordHex = ByteArrayToHexString(password.GetBytes());
 
     StringBuilder builder;
@@ -340,12 +341,12 @@ ECode WriteWifiConfigToNfcDialog::OnTextChanged(
 void WriteWifiConfigToNfcDialog::EnableSubmitIfAppropriate()
 {
     if (mPasswordView != NULL) {
-        if (((AccessPoint*)mAccessPoint.Get())->mSecurity == AccessPoint::SECURITY_WEP) {
+        if (((CAccessPoint*)mAccessPoint.Get())->mSecurity == AccessPoint::SECURITY_WEP) {
             Int32 length;
             mPasswordView->GetLength(&length);
             IView::Probe(mSubmitButton)->SetEnabled(length > 0);
         }
-        else if (((AccessPoint*)mAccessPoint.Get())->mSecurity == AccessPoint::SECURITY_PSK) {
+        else if (((CAccessPoint*)mAccessPoint.Get())->mSecurity == AccessPoint::SECURITY_PSK) {
             Int32 length;
             mPasswordView->GetLength(&length);
             IView::Probe(mSubmitButton)->SetEnabled(length >= 8);

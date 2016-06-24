@@ -2,9 +2,8 @@
 #include "Elastos.Droid.App.h"
 #include "Elastos.Droid.Widget.h"
 #include "elastos/droid/settings/dashboard/DashboardSummary.h"
-#include "elastos/droid/settings/SettingsActivity.h"
+#include "elastos/droid/settings/CSettingsActivity.h"
 #include "elastos/droid/settings/dashboard/CDashboardCategory.h"
-#include "elastos/droid/settings/dashboard/DashboardTileView.h"
 #include "elastos/droid/settings/dashboard/CDashboardTileView.h"
 #include "elastos/droid/text/TextUtils.h"
 #include "../R.h"
@@ -165,7 +164,7 @@ void DashboardSummary::RebuildUI(
     mDashboard->RemoveAllViews();
 
     AutoPtr<IList> categories;
-    ((SettingsActivity*)IActivity::Probe(context))->GetDashboardCategories(TRUE, (IList**)&categories);
+    ((CSettingsActivity*)IActivity::Probe(context))->GetDashboardCategories(TRUE, (IList**)&categories);
 
     Int32 count;
     categories->GetSize(&count);
@@ -194,7 +193,7 @@ void DashboardSummary::RebuildUI(
 
             AutoPtr<IFrameLayout> layout;
             CDashboardTileView::New(context, (IFrameLayout**)&layout);
-            AutoPtr<DashboardTileView> tileView = (DashboardTileView*)layout.Get();
+            AutoPtr<CDashboardTileView> tileView = (CDashboardTileView*)layout.Get();
             UpdateTileView(context, res, tile, tileView->GetImageView(),
                     tileView->GetTitleTextView(), tileView->GetStatusTextView());
 

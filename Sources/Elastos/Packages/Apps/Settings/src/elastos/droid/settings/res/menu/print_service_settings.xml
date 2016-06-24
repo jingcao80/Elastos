@@ -18,7 +18,7 @@
     <item
         android:id="@+id/print_menu_item_search"
         android:title="@string/print_menu_item_search"
-        android:actionViewClass="Elastos.Widget.CSearchView"
+        android:actionViewClass="Elastos.Droid.Widget.CSearchView"
         android:showAsAction="never|collapseActionView"
         android:imeOptions="actionSearch">
     </item>

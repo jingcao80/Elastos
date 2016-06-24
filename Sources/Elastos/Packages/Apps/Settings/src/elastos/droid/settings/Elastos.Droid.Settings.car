@@ -17,6 +17,8 @@ module
     merge("../../../../car/elastos/droid/widget/SettingsAppWidgetProvider.car");
     merge("../../../../car/elastos/droid/widget/SwitchBar.car");
     merge("../../../../car/elastos/droid/widget/ToggleSwitch.car");
+    merge("../../../../car/elastos/droid/wifi/p2p/WifiP2pPeer.car");
+    merge("../../../../car/elastos/droid/wifi/p2p/WifiP2pPersistentGroup.car");
     merge("../../../../car/elastos/droid/wifi/AccessPoint.car");
     merge("../../../../car/elastos/droid/wifi/WifiConfigController.car");
     merge("../../../../car/elastos/droid/wifi/WifiConfigUiBase.car");
@@ -78,6 +80,10 @@ module
     using interface Elastos.Droid.Widget.ISearchViewOnCloseListener;
     using interface Elastos.Droid.Wifi.IScanResult;
     using interface Elastos.Droid.Wifi.IWifiConfiguration;
+    using interface Elastos.Droid.Wifi.P2p.IWifiP2pManagerPersistentGroupInfoListener;
+    using interface Elastos.Droid.Wifi.P2p.IWifiP2pManagerPeerListListener;
+    using interface Elastos.Droid.Wifi.P2p.IWifiP2pDevice;
+    using interface Elastos.Droid.Wifi.P2p.IWifiP2pGroup;
     using interface Elastos.Core.IComparable;
     using interface Elastos.Utility.IArrayList;
 
@@ -266,6 +272,56 @@ module
     }
 
     } // namespace Widget
+    } // namespace Settings
+    } // namespace Droid
+    } // namespace Elastos
+
+    namespace Elastos {
+    namespace Droid {
+    namespace Settings {
+    namespace Wifi {
+    namespace P2p {
+
+    [local]
+    class CWifiP2pPeer {
+        constructor(
+            [in] IContext* context,
+            [in] IWifiP2pDevice* dev);
+
+        interface IWifiP2pPeer;
+        interface IPreference;
+        interface IComparable;
+    }
+
+    [local]
+    class CWifiP2pPersistentGroup {
+        constructor(
+            [in] IContext* context,
+            [in] IWifiP2pGroup* group);
+
+        interface IWifiP2pPersistentGroup;
+        interface IPreference;
+        interface IComparable;
+    }
+
+    class CWifiP2pSettings {
+        constructor();
+
+        interface ISettingsPreferenceFragment;
+        interface IPreferenceFragment;
+        interface IFragment;
+        interface IPreferenceManagerOnPreferenceTreeClickListener;
+        interface IComponentCallbacks;
+        interface IComponentCallbacks2;
+        interface IViewOnCreateContextMenuListener;
+        interface IDialogCreatable;
+
+        interface IWifiP2pManagerPersistentGroupInfoListener;
+        interface IWifiP2pManagerPeerListListener;
+    }
+
+    } // namespace P2p
+    } // namespace Wifi
     } // namespace Settings
     } // namespace Droid
     } // namespace Elastos

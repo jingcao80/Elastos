@@ -19,3 +19,5 @@ SOURCES += WpsDialog.cpp
 SOURCES += CWpsDialogHelper.cpp
 SOURCES += WriteWifiConfigToNfcDialog.cpp
 SOURCES += wifi.cpp
+
+ELASTOS_LIBS += p2p/p2p.lib

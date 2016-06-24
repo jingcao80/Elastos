@@ -6,6 +6,7 @@
 #include "elastos/droid/app/AlertDialog.h"
 #include "elastos/droid/content/BroadcastReceiver.h"
 #include "_Elastos.Droid.Settings.h"
+#include <elastos/utility/TimerTask.h>
 
 using Elastos::Droid::App::AlertDialog;
 using Elastos::Droid::Content::BroadcastReceiver;
@@ -17,16 +18,14 @@ using Elastos::Droid::Net::NetworkInfoDetailedState;
 using Elastos::Droid::Os::IBundle;
 using Elastos::Droid::Os::IHandler;
 using Elastos::Droid::View::IView;
+using Elastos::Droid::View::IViewOnClickListener;
 using Elastos::Droid::Widget::IButton;
 using Elastos::Droid::Widget::IProgressBar;
 using Elastos::Droid::Widget::ITextView;
 using Elastos::Droid::Wifi::IWifiManagerWpsCallback;
-using Elastos::Droid::Wifi::IWifiInfo;
 using Elastos::Droid::Wifi::IWifiManager;
-using Elastos::Droid::Wifi::IWpsInfo;
-
-// using Elastos::Utility::ITimer;
-// using Elastos::Utility::ITimerTask;
+using Elastos::Utility::ITimer;
+using Elastos::Utility::TimerTask;
 
 namespace Elastos {
 namespace Droid {
@@ -102,6 +101,59 @@ private:
         String mMsg;
     };
 
+    class OnCreateViewOnClickListener
+        : public Object
+        , public IViewOnClickListener
+    {
+    public:
+        CAR_INTERFACE_DECL();
+
+        OnCreateViewOnClickListener(
+            /* [in] */ WpsDialog* host);
+
+        ~OnCreateViewOnClickListener();
+
+        //@Override
+        CARAPI OnClick(
+            /* [in] */ IView* v);
+
+    private:
+        WpsDialog* mHost;
+    };
+
+    class OnStartRunnable
+        : public Runnable
+    {
+        friend class OnStartTimerTask;
+    public:
+        OnStartRunnable(
+            /* [in] */ WpsDialog* host);
+
+        ~OnStartRunnable();
+
+        //@Override
+        CARAPI Run();
+
+    private:
+        WpsDialog* mHost;
+    };
+
+    class OnStartTimerTask
+        : public TimerTask
+    {
+    public:
+        OnStartTimerTask(
+            /* [in] */ WpsDialog* host);
+
+        ~OnStartTimerTask();
+
+        //@Override
+        CARAPI Run();
+
+    private:
+        WpsDialog* mHost;
+    };
+
 public:
     WpsDialog(
         /* [in] */ IContext* context,
@@ -142,12 +194,12 @@ private:
     static const String DIALOG_STATE;
     static const String DIALOG_MSG_STRING;
 
-    // View mView;
+    AutoPtr<IView> mView;
     AutoPtr<ITextView> mTextView;
     AutoPtr<IProgressBar> mTimeoutBar;
     AutoPtr<IProgressBar> mProgressBar;
     AutoPtr<IButton> mButton;
-    // Timer mTimer;
+    AutoPtr<ITimer> mTimer;
 
     static const Int32 WPS_TIMEOUT_S;
 

@@ -5,7 +5,7 @@
 #include "elastos/droid/settings/HomeSettings.h"
 #include "elastos/droid/settings/dashboard/CDashboardCategory.h"
 #include "elastos/droid/settings/dashboard/NoHomeDialogFragment.h"
-#include "elastos/droid/settings/dashboard/SearchResultsSummary.h"
+#include "elastos/droid/settings/dashboard/CSearchResultsSummary.h"
 #include "elastos/droid/settings/search/Index.h"
 #include "elastos/droid/settings/Utils.h"
 #include "elastos/droid/internal/utility/ArrayUtils.h"
@@ -56,7 +56,7 @@ using Elastos::Droid::Os::Build;
 using Elastos::Droid::Preference::EIID_IPreferenceFragmentOnPreferenceStartFragmentCallback;
 using Elastos::Droid::Preference::EIID_IPreferenceManagerOnPreferenceTreeClickListener;
 using Elastos::Droid::Settings::Dashboard::CDashboardCategory;
-using Elastos::Droid::Settings::Dashboard::SearchResultsSummary;
+using Elastos::Droid::Settings::Dashboard::CSearchResultsSummary;
 using Elastos::Droid::Settings::Dashboard::NoHomeDialogFragment;
 using Elastos::Droid::Settings::Search::Index;
 using Elastos::Droid::Settings::EIID_IButtonBarHandler;
@@ -130,7 +130,7 @@ static AutoPtr< ArrayOf<String> > InitENTRY_FRAGMENTS()
     (*args)[4] = "Elastos.Droid.Settings.Bluetooth.BluetoothSettings";
     (*args)[5] = "Elastos.Droid.Settings.Sim.SimSettings";
     (*args)[6] = "Elastos.Droid.Settings.TetherSettings";
-    (*args)[7] = "Elastos.Droid.Settings.P2p.WifiP2pSettings";
+    (*args)[7] = "Elastos.Droid.Settings.Wifi.P2p.CWifiP2pSettings";
     (*args)[8] = "Elastos.Droid.Settings.Vpn2.VpnSettings";
     (*args)[9] = "Elastos.Droid.Settings.DateTimeSettings";
     (*args)[10] = "Elastos.Droid.Settings.LocalePicker";
@@ -533,7 +533,7 @@ ECode SettingsActivity::OnCreateOptionsMenu(
     }
 
     if (mSearchResultsFragment != NULL) {
-        ((SearchResultsSummary*)mSearchResultsFragment.Get())->SetSearchView(mSearchView);
+        ((CSearchResultsSummary*)mSearchResultsFragment.Get())->SetSearchView(mSearchView);
     }
 
     mSearchMenuItem->SetOnActionExpandListener(this);
@@ -1630,7 +1630,7 @@ ECode SettingsActivity::OnQueryTextSubmit(
     VALIDATE_NOT_NULL(result);
     SwitchToSearchResultsFragmentIfNeeded();
     mSearchQuery = query;
-    *result = ((SearchResultsSummary*)mSearchResultsFragment.Get())->OnQueryTextSubmit(query);
+    *result = ((CSearchResultsSummary*)mSearchResultsFragment.Get())->OnQueryTextSubmit(query);
     return NOERROR;
 }
 
@@ -1644,7 +1644,7 @@ ECode SettingsActivity::OnQueryTextChange(
         *result = FALSE;
         return NOERROR;
     }
-    *result = ((SearchResultsSummary*)mSearchResultsFragment.Get())->OnQueryTextChange(newText);
+    *result = ((CSearchResultsSummary*)mSearchResultsFragment.Get())->OnQueryTextChange(newText);
     return NOERROR;
 }
 
@@ -1709,7 +1709,7 @@ void SettingsActivity::SwitchToSearchResultsFragmentIfNeeded()
                 TRUE, (IFragment**)&fragment);
         mSearchResultsFragment = ISearchResultsSummary::Probe(fragment);
     }
-    ((SearchResultsSummary*)mSearchResultsFragment.Get())->SetSearchView(mSearchView);
+    ((CSearchResultsSummary*)mSearchResultsFragment.Get())->SetSearchView(mSearchView);
     mSearchMenuItemExpanded = TRUE;
 }
 

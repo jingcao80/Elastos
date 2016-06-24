@@ -103,7 +103,7 @@
             android:layout_width="716dip"
             android:layout_height="370dip">
             <fragment
-                class="Elastos.Droid.Settings.wifi.CWifiSettings"
+                class="Elastos.Droid.Settings.Wifi.CWifiSettings"
                 android:id="@+id/wifi_setup_fragment"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content" />
