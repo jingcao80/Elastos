@@ -459,13 +459,14 @@
 
 # ==== build Packages/Apps/Settings ====
 > Elastos/Packages/Apps/Settings/src/elastos/droid/settings Elastos.Droid.Settings.car
+  Elastos/Packages/Apps/Settings/src/elastos/droid/settings/wifi/p2p
+> Elastos/Packages/Apps/Settings/src/elastos/droid/settings/wifi
   Elastos/Packages/Apps/Settings/src/elastos/droid/settings/dashboard
   Elastos/Packages/Apps/Settings/src/elastos/droid/settings/drawable
   Elastos/Packages/Apps/Settings/src/elastos/droid/settings/inputmethod
   Elastos/Packages/Apps/Settings/src/elastos/droid/settings/search
   Elastos/Packages/Apps/Settings/src/elastos/droid/settings/voice
   Elastos/Packages/Apps/Settings/src/elastos/droid/settings/widget
-  Elastos/Packages/Apps/Settings/src/elastos/droid/settings/wifi
 > Elastos/Packages/Apps/Settings/src/elastos/droid/settings
 
 # ==== build Packages/Apps/Launcher2 ====
