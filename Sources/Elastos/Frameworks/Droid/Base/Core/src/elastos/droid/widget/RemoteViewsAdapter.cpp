@@ -1,6 +1,7 @@
 #include "elastos/droid/widget/RemoteViewsAdapter.h"
 #include "elastos/droid/widget/RemoteViews.h"
-// #include "elastos/droid/widget/CRemoteViewsAdapterServiceConnection.h"
+#include "elastos/droid/widget/CRemoteViewsAdapterServiceConnection.h"
+#include "elastos/droid/appwidget/AppWidgetManager.h"
 #include "elastos/droid/view/View.h"
 #include "elastos/droid/view/ViewGroup.h"
 #include "elastos/droid/view/LayoutInflater.h"
@@ -22,6 +23,7 @@
 #include <elastos/core/AutoLock.h>
 using Elastos::Core::AutoLock;
 using Elastos::Droid::R;
+using Elastos::Droid::AppWidget::AppWidgetManager;
 using Elastos::Droid::AppWidget::IAppWidgetManager;
 using Elastos::Droid::Content::CIntentFilterComparison;
 using Elastos::Droid::Graphics::Drawable::EIID_IDrawableCallback;
@@ -149,7 +151,8 @@ ECode RemoteViewsAdapter::MyRunnableEx2::Run()
 
 
 /*----------------------------------RemoteViewsAdapterServiceConnection----------------------------------*/
-CAR_INTERFACE_IMPL_2(RemoteViewsAdapter::RemoteViewsAdapterServiceConnection, Object, IIRemoteViewsAdapterConnection, IBinder)
+CAR_INTERFACE_IMPL_3(RemoteViewsAdapter::RemoteViewsAdapterServiceConnection,
+    Object, IRemoteViewsAdapterServiceConnection, IIRemoteViewsAdapterConnection, IBinder)
 
 RemoteViewsAdapter::RemoteViewsAdapterServiceConnection::RemoteViewsAdapterServiceConnection()
     : mIsConnected(FALSE)
@@ -173,8 +176,7 @@ ECode RemoteViewsAdapter::RemoteViewsAdapterServiceConnection::Bind(
     if (!mIsConnecting)
     {
         AutoPtr<IRemoteViewsAdapter> adapter;
-        AutoPtr<IAppWidgetManager> mgr;
-        // CAppWidgetManager::GetInstance(ctx, (IAppWidgetManager**)&mgr);
+        AutoPtr<IAppWidgetManager> mgr = AppWidgetManager::GetInstance(ctx);
 
         if (mAdapter != NULL) {
             AutoPtr<IInterface> obj;
@@ -209,8 +211,7 @@ ECode RemoteViewsAdapter::RemoteViewsAdapterServiceConnection::Unbind(
     AutoLock lock(mLock);
     // try {
         AutoPtr<IRemoteViewsAdapter> adapter;
-        AutoPtr<IAppWidgetManager> mgr;
-        // CAppWidgetManager::GetInstance(ctx, (IAppWidgetManager**)&mgr);
+        AutoPtr<IAppWidgetManager> mgr = AppWidgetManager::GetInstance(ctx);
 
         if (mAdapter != NULL) {
             AutoPtr<IInterface> obj;
@@ -551,7 +552,7 @@ Boolean RemoteViewsAdapter::RemoteViewsMetaData::IsViewTypeInRange(
     /* [in] */ Int32 typeId)
 {
     Int32 mappedType = GetMappedViewType(typeId);
-    if (mappedType >= mFirstViewHeight) {
+    if (mappedType >= mViewTypeCount) {
         return FALSE;
     } else {
         return TRUE;
@@ -1100,7 +1101,7 @@ ECode RemoteViewsAdapter::constructor(
 
     AutoPtr<IWeakReference> thisWeak;
     GetWeakReference((IWeakReference**)&thisWeak);
-    // CRemoteViewsAdapterServiceConnection::New(thisWeak, (IRemoteViewsAdapterServiceConnection**)&mServiceConnection);
+    CRemoteViewsAdapterServiceConnection::New(thisWeak, (IRemoteViewsAdapterServiceConnection**)&mServiceConnection);
 
     AutoPtr<IIntentFilterComparison> comparison;
     CIntentFilterComparison::New(mIntent, (IIntentFilterComparison**)&comparison);

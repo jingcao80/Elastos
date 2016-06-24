@@ -156,7 +156,7 @@ ECode Process::ZygoteState::Connect(
 
     StringUtils::Split(abiListString, String(","), (ArrayOf<String>**)&splits);
     if (splits != NULL) {
-        lists = new List<String>(splits->GetLength());
+        lists = new List<String>();
         for (Int32 i = 0; i < splits->GetLength(); ++i) {
             lists->PushBack((*splits)[i]);
         }

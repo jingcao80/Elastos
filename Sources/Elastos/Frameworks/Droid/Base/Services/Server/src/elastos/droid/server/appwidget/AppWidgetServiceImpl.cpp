@@ -4929,7 +4929,7 @@ void AppWidgetServiceImpl::OnUserStarted(
     mProviders->GetSize(&N);
     for (Int32 i = 0; i < N; ++i) {
         AutoPtr<IInterface> interfaceTmp;
-        mProviders->Get(0, (IInterface**)&interfaceTmp);
+        mProviders->Get(i, (IInterface**)&interfaceTmp);
         IObject* objTmp = IObject::Probe(interfaceTmp);
         Provider* provider = (Provider*)objTmp;
 

@@ -35,7 +35,8 @@ public:
     virtual CARAPI SetRemoteViewsAdapter(
         /* [in] */ IIntent* intent);
 
-    virtual CARAPI_(AutoPtr<IAdapter>) GetAdapter();
+    virtual CARAPI GetAdapter(
+        /* [out] */ IAdapter** adapter);
 
     virtual CARAPI SetAdapter(
         /* [in] */ IAdapter* adapter);

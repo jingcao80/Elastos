@@ -189,7 +189,7 @@ ECode CJarEntry::GetCodeSigners(
     }
 
     AutoPtr<List<AutoPtr<ICodeSigner> > > asigners;
-    asigners = new List<AutoPtr<ICodeSigner> >(certChains->GetLength());
+    asigners = new List<AutoPtr<ICodeSigner> >();
 
     for (Int32 i = 0; i < certChains->GetLength(); ++i) {
         AddCodeSigner(asigners, (*certChains)[i]);

@@ -131,6 +131,7 @@ module
     merge("widget/DayPickerView.car");
     merge("widget/TimePickerClockDelegate.car");
     merge("widget/TimePickerSpinnerDelegate.car");
+    merge("internal/widget/IRemoteViewsAdapterConnection.car");
     merge("internal/widget/IRemoteViewsFactory.car");
 
     using interface Elastos.Core.ICharSequence;
@@ -155,6 +156,7 @@ module
     interface Elastos.Droid.Internal.View.Menu.IBaseMenuPresenter;
     interface Elastos.Droid.Internal.View.Menu.IMenuBuilderItemInvoker;
     interface Elastos.Droid.Internal.View.Menu.IMenuView;
+    interface Elastos.Droid.Internal.Widget.IIRemoteViewsAdapterConnection;
     interface Elastos.Droid.Internal.Widget.IIRemoteViewsFactory;
     interface Elastos.Droid.Media.ISubtitleControllerAnchor;
     interface Elastos.Droid.Os.IBinder;
@@ -2710,6 +2712,7 @@ module
             [in] IWeakReference* adapter);
 
         interface IRemoteViewsAdapterServiceConnection;
+        interface IIRemoteViewsAdapterConnection;
         interface IBinder;
     }
 
@@ -3030,29 +3033,6 @@ module
         interface IListAdapter;
         interface IAdapter;
         interface IFilterable;
-    }
-
-    [local]
-    class CAdapterView {
-        constructor(
-            [in] IContext* context);
-
-        constructor(
-            [in] IContext* ctx,
-            [in] IAttributeSet* attrs);
-
-        constructor(
-            [in] IContext* ctx,
-            [in] IAttributeSet* attrs,
-            [in] Int32 defStyle);
-
-        constructor(
-            [in] IContext* ctx,
-            [in] IAttributeSet* attrs,
-            [in] Int32 defStyle,
-            [in] Int32 defStyleRes);
-
-        interface IAdapterView;
     }
 
     [local]

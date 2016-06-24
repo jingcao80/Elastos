@@ -3642,6 +3642,7 @@ ECode LauncherModel::GetShortcutInfo(
 
     AutoPtr<IBitmap> icon;
     AutoPtr<ShortcutInfo> info = new ShortcutInfo();
+    info->constructor();
     info->mUser = user;
 
     AutoPtr<IComponentName> componentName;
@@ -3755,6 +3756,7 @@ AutoPtr<IShortcutInfo> LauncherModel::GetShortcutInfo(
 {
     AutoPtr<IBitmap> icon;
     AutoPtr<ShortcutInfo> info = new ShortcutInfo();
+    info->constructor();
     info->mItemType = LauncherSettings::Favorites::ITEM_TYPE_SHORTCUT;
 
     // TODO: If there's an explicit component and we can't install that, delete it.
@@ -3852,7 +3854,7 @@ ECode LauncherModel::GetIconFromCursor(
     AutoPtr<IBitmapFactory> factory;
     CBitmapFactory::AcquireSingleton((IBitmapFactory**)&factory);
     AutoPtr<IBitmap> bitmap;
-    if(FAILED(factory->DecodeByteArray(data, 0, data->GetLength(), (IBitmap**)&bitmap))) {
+    if(FAILED(factory->DecodeByteArray(data, 0, data->GetLength(), (IBitmap**)&bitmap)) || bitmap == NULL) {
         *map = NULL;
         return NOERROR;
     }
@@ -4188,6 +4190,7 @@ AutoPtr<FolderInfo> LauncherModel::FindOrMakeFolder(
     if (folderInfo == NULL) {
         // No placeholder -- create a new instance
         folderInfo = new FolderInfo();
+        folderInfo->constructor();
         AutoPtr<IInteger64> key = CoreUtils::Convert(id);
         folders->Put(TO_IINTERFACE(key), TO_IINTERFACE(folderInfo));
     }

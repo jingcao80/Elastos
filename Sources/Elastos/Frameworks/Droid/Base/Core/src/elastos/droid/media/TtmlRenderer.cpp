@@ -781,7 +781,7 @@ AutoPtr<List<AutoPtr<TtmlNode> > > TtmlTrack::GetActiveNodes(
     /* [in] */ Int64 endTimeUs)
 {
     Int32 size = mTtmlNodes.GetSize();
-    AutoPtr<List<AutoPtr<TtmlNode> > > activeNodes = new List<AutoPtr<TtmlNode> >(size);
+    AutoPtr<List<AutoPtr<TtmlNode> > > activeNodes = new List<AutoPtr<TtmlNode> >();
     List<AutoPtr<TtmlNode> >::Iterator it = mTtmlNodes.Begin();
     Boolean flag = FALSE;
     for (; it != mTtmlNodes.End(); ++it){

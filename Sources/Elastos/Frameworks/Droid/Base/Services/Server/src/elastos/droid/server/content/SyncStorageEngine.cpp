@@ -663,7 +663,7 @@ void SyncStorageEngine::ReportChange(
                 continue;
             }
             if (reports == NULL) {
-                reports = new List<AutoPtr<IISyncStatusObserver> >(i);
+                reports = new List<AutoPtr<IISyncStatusObserver> >();
             }
 
             obj = NULL;
@@ -1716,7 +1716,7 @@ AutoPtr<List<AutoPtr<ISyncStatusInfo> > > SyncStorageEngine::GetSyncStatus()
     AutoPtr<List<AutoPtr<ISyncStatusInfo> > > ops;
     {    AutoLock syncLock(mAuthoritiesLock);
         Int32 N = mSyncStatus.GetSize();
-        ops = new List<AutoPtr<ISyncStatusInfo> >(N);
+        ops = new List<AutoPtr<ISyncStatusInfo> >();
 
         HashMap<Int32, AutoPtr<ISyncStatusInfo> >::Iterator it;
         for (it = mSyncStatus.Begin(); it != mSyncStatus.End(); ++it) {
@@ -1743,7 +1743,7 @@ AutoPtr<List<AutoPtr<AuthoritySyncStatusPair> > > SyncStorageEngine::GetCopyOfAl
 {
     AutoPtr<List<AutoPtr<AuthoritySyncStatusPair> > > infos;
     {    AutoLock syncLock(mAuthoritiesLock);
-        infos = new List<AutoPtr<AuthoritySyncStatusPair> >(mAuthorities.GetSize());
+        infos = new List<AutoPtr<AuthoritySyncStatusPair> >();
         HashMap<Int32, AutoPtr<AuthorityInfo> >::Iterator it;
         for (it = mAuthorities.Begin(); it != mAuthorities.End(); ++it) {
             AutoPtr<AuthoritySyncStatusPair> pair = CreateCopyPairOfAuthorityWithSyncStatusLocked(it->mSecond);

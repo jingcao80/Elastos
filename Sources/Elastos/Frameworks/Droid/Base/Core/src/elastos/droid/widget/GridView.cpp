@@ -114,9 +114,13 @@ ECode GridView::SetRemoteViewsAdapter(
     return AbsListView::SetRemoteViewsAdapter(intent);
 }
 
-AutoPtr<IAdapter> GridView::GetAdapter()
+ECode GridView::GetAdapter(
+    /* [out] */ IAdapter** adapter)
 {
-    return IAdapter::Probe(mAdapter);
+    VALIDATE_NOT_NULL(adapter)
+    *adapter = IAdapter::Probe(mAdapter);
+    REFCOUNT_ADD(*adapter)
+    return NOERROR;
 }
 
 ECode GridView::SetAdapter(

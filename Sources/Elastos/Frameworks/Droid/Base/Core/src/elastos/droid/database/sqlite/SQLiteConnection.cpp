@@ -806,7 +806,7 @@ ECode SQLiteConnection::NativeBindBlob(
 
     Int32 valueLength = value->GetLength();
     //jbyte* value = static_cast<jbyte*>(env->GetPrimitiveArrayCritical(valueArray, NULL));
-    int err = sqlite3_bind_blob(statement, index, value, valueLength, SQLITE_TRANSIENT);
+    int err = sqlite3_bind_blob(statement, index, value->GetPayload(), valueLength, SQLITE_TRANSIENT);
     if (err != SQLITE_OK) {
         return throw_sqlite3_exception(connection->db, sqlite3_errstr(err));
     }

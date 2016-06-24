@@ -447,7 +447,7 @@ void CKeyButtonRipple::EnterHardware()
         bounds->GetHeight(&value);
         mBottomProp = CanvasProperty::CreateFloat(value);
         mRxProp = CanvasProperty::CreateFloat(value / 2);
-        mRyProp = mRyProp;
+        mRyProp = CanvasProperty::CreateFloat(value / 2);;
     }
     else {
         AutoPtr<IRect> bounds;
@@ -457,7 +457,7 @@ void CKeyButtonRipple::EnterHardware()
         mLeftProp = CanvasProperty::CreateFloat(0.f);
         mRightProp = CanvasProperty::CreateFloat(value);
         mRxProp = CanvasProperty::CreateFloat(value / 2);
-        mRyProp = mRxProp;
+        mRyProp = CanvasProperty::CreateFloat(value / 2);;
     }
 
     mGlowScale = GLOW_MAX_SCALE_FACTOR;

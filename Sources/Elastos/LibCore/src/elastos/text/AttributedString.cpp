@@ -716,7 +716,7 @@ ECode AttributedString::constructor(
         AutoPtr<IInterface> key;
         entry->GetKey((IInterface**)&key);
 
-        ranges = new List<AutoPtr<Range> >(1);
+        ranges = new List<AutoPtr<Range> >();
         AutoPtr<Range> range = new Range(0, value.GetLength(), val);
         ranges->PushBack(range);
         attr = IAttributedCharacterIteratorAttribute::Probe(key);
@@ -742,7 +742,7 @@ ECode AttributedString::AddAttribute(
     AutoPtr<List<AutoPtr<Range> > > ranges;
     AttributeRangeMapIterator it = mAttributeMap.Find(attribute);
     if (it == mAttributeMap.End()) {
-        ranges = new List<AutoPtr<Range> >(0);
+        ranges = new List<AutoPtr<Range> >();
         mAttributeMap[attribute] = ranges;
     }
     else {

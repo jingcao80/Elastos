@@ -3397,14 +3397,14 @@ Boolean Util::GetElIntent(
     Util::CheckErrorAndLog(env, "GetElIntent", "GetObjectField jflags %d", __LINE__);
     (*elIntent)->SetFlags((Int32)jflags);
 
-    f = env->GetFieldID(intentKlass, "mCategories", "Ljava/util/ArraySet;");
-    Util::CheckErrorAndLog(env, "GetElIntent", "GetFieldID: mFlags %d", __LINE__);
+    f = env->GetFieldID(intentKlass, "mCategories", "Landroid/util/ArraySet;");
+    Util::CheckErrorAndLog(env, "GetElIntent", "GetFieldID: mCategories %d", __LINE__);
 
     jobject jcategories = env->GetObjectField(jintent, f);
     Util::CheckErrorAndLog(env, "GetElIntent", "GetObjectField jcategories %d", __LINE__);
 
     if (jcategories != NULL) {
-        jclass setKlass = env->FindClass("java/util/ArraySet");
+        jclass setKlass = env->FindClass("android/util/ArraySet");
         Util::CheckErrorAndLog(env, "GetElIntent", "GetElIntent FindClass: ArraySet fail %d", __LINE__);
 
         jmethodID m = env->GetMethodID(setKlass, "size", "()I");
@@ -6958,7 +6958,7 @@ Boolean Util::GetElRemoteViews(
     jobject jmPortrait = env->GetObjectField(jremoteview, mPortraitField);
     CheckErrorAndLog(env, "%s: Fail get RemoteViews field: %s : %d!\n", "GetElRemoteViews", "mPortrait ", __LINE__);
 
-    jfieldID mApplicationField = env->GetFieldID(remoteviewClass, "mApplication", "Landroid/widget/RemoteViews;");
+    jfieldID mApplicationField = env->GetFieldID(remoteviewClass, "mApplication", "Landroid/content/pm/ApplicationInfo;");
     CheckErrorAndLog(env, "%s: Fail get RemoteViews fieldid: %s : %d!\n", "GetElRemoteViews", "mApplication ", __LINE__);
     jobject jmApplication = env->GetObjectField(jremoteview, mApplicationField);
     CheckErrorAndLog(env, "%s: Fail get RemoteViews field: %s : %d!\n", "GetElRemoteViews", "mApplication ", __LINE__);
@@ -7072,7 +7072,7 @@ Boolean Util::GetElRemoteViews(
                         // LOGGERD(TAG, "GetElRemoteViews: found a ReflectionAction action.");
                         String methodName = GetJavaStringField(env, klass, jaction, "methodName", "GetElRemoteViews");
                         if (!methodName.IsNullOrEmpty()) {
-                            methodName = methodName.ToLowerCase(0, 1);
+                            methodName = methodName.ToUpperCase(0, 1);
                         }
                         Int32 type = GetJavaIntField(env, klass, jaction, "type", "GetElRemoteViews");
                         jfieldID f = env->GetFieldID(klass, "value", "Ljava/lang/Object;");
@@ -7208,7 +7208,7 @@ Boolean Util::GetElRemoteViews(
                         // LOGGERD(TAG, "GetElRemoteViews: found a ReflectionActionWithoutParams action.");
                         String methodName = GetJavaStringField(env, klass, jaction, "methodName", "GetElRemoteViews");
                         if (!methodName.IsNullOrEmpty()) {
-                            methodName = methodName.ToLowerCase(0, 1);
+                            methodName = methodName.ToUpperCase(0, 1);
                         }
 
                         if (methodName.Equals(String("ShowNext"))){
@@ -7304,7 +7304,7 @@ Boolean Util::GetElRemoteViews(
                         // LOGGERD(TAG, "GetElRemoteViews: found a BitmapReflectionAction action.");
                         String methodName = GetJavaStringField(env, klass, jaction, "methodName", "GetElRemoteViews");
                         if (!methodName.IsNullOrEmpty()) {
-                            methodName = methodName.ToLowerCase(0, 1);
+                            methodName = methodName.ToUpperCase(0, 1);
                         }
 
                         jfieldID f = env->GetFieldID(klass, "bitmap", "Landroid/graphics/Bitmap;");
@@ -11052,8 +11052,7 @@ Boolean Util::GetElClipData(
         }
     }
 
-    AutoPtr<IParcelable> parcelable = (IParcelable*)clipDescription->Probe(EIID_IParcelable);
-    parcelable->WriteToParcel(source);
+    source->WriteInterfacePtr(clipDescription);
 
     f = env->GetFieldID(clipKlass, "mIcon", "Landroid/graphics/Bitmap;");
     CheckErrorAndLog(env, "GetElClipData", "GetFieldID mIcon : %d!\n", __LINE__);
@@ -11065,8 +11064,7 @@ Boolean Util::GetElClipData(
         AutoPtr<IBitmap> icon;
         if (Util::GetElBitmap(env, jicon, (IBitmap**)&icon)) {
             source->WriteInt32(1);
-            parcelable = (IParcelable*)icon->Probe(EIID_IParcelable);
-            parcelable->WriteToParcel(source);
+            source->WriteInterfacePtr(icon);
             env->DeleteLocalRef(jicon);
         }
         else {
@@ -11112,8 +11110,7 @@ Boolean Util::GetElClipData(
 
                 AutoPtr<ICharSequence> text;
                 item->GetText((ICharSequence**)&text);
-                LOGGERE("GetElClipData", "TextUtils::WriteToParcel not ready!");
-                // TextUtils::WriteToParcel(text, source);
+                TextUtils::WriteToParcel(text, source);
 
                 String htmlText;
                 item->GetHtmlText(&htmlText);
@@ -11123,8 +11120,7 @@ Boolean Util::GetElClipData(
                 item->GetIntent((IIntent**)&intent);
                 if (intent != NULL) {
                     source->WriteInt32(1);
-                    AutoPtr<IParcelable> parcelable = (IParcelable*)intent->Probe(EIID_IParcelable);
-                    parcelable->WriteToParcel(source);
+                    source->WriteInterfacePtr(intent);
                 }
                 else {
                     source->WriteInt32(0);
@@ -11134,8 +11130,7 @@ Boolean Util::GetElClipData(
                 item->GetUri((IUri**)&uri);
                 if (uri != NULL) {
                     source->WriteInt32(1);
-                    AutoPtr<IParcelable> parcelable = (IParcelable*)uri->Probe(EIID_IParcelable);
-                    parcelable->WriteToParcel(source);
+                    source->WriteInterfacePtr(uri);
                 }
                 else {
                     source->WriteInt32(0);
@@ -11151,6 +11146,7 @@ Boolean Util::GetElClipData(
         source->WriteInt32(0);
     }
 
+    source->SetDataPosition(0);
     AutoPtr<IParcelable> clipParcel = IParcelable::Probe(*clip);
     if (clipParcel != NULL) {
         clipParcel->ReadFromParcel(source);

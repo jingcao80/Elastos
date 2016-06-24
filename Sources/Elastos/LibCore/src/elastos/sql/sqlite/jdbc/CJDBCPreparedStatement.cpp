@@ -137,7 +137,7 @@ String CJDBCPreparedStatement::Fixup2(
 ECode CJDBCPreparedStatement::AddBatch()
 {
     if (mBatch == NULL) {
-        mBatch = new List<AutoPtr<BatchArg> >(mArgs->GetLength());
+        mBatch = new List<AutoPtr<BatchArg> >();
     }
     for (Int32 i = 0; i < mArgs->GetLength(); i++) {
         AutoPtr<BatchArg> arg = new BatchArg((*mArgs)[i], (*mBlobs)[i]);

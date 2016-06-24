@@ -2358,7 +2358,7 @@ ECode RemoteViews::IntentTemplateOnItemClickListener::OnItemClick(
         CIntent::New((IIntent**)&intent);
         intent->SetSourceBounds(rect);
         Boolean succeed = FALSE;
-        mHandler->OnClickHandler(view, mIntent, intent, &succeed);
+        mHandler->OnClickHandler(view, mIntent, fillInIntent, &succeed);
     }
     return NOERROR;
 }
