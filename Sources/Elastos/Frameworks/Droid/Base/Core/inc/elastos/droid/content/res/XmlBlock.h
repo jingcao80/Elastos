@@ -37,6 +37,8 @@ public:
         , public ICloseable
     {
     public:
+        TO_STRING_IMPL("XmlBlock::Parser")
+
         CAR_INTERFACE_DECL()
 
         Parser(
@@ -280,6 +282,8 @@ public:
     };
 
 public:
+    TO_STRING_IMPL("XmlBlock")
+
     XmlBlock(
         /* [in] */ const ArrayOf<Byte>& data);
 

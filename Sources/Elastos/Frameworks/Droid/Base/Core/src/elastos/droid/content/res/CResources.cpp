@@ -1156,7 +1156,6 @@ ECode CResources::GetColor(
 {
     VALIDATE_NOT_NULL(color);
 
-
     AutoPtr<ITypedValue> value;
 
     {
@@ -1166,20 +1165,20 @@ ECode CResources::GetColor(
             CTypedValue::New((ITypedValue**)&value);
         }
 
-        AutoPtr<ITypedValue> value = (ITypedValue*)mTmpValue.Get();
         FAIL_RETURN(GetValue(id, value, TRUE))
-        if (mTmpValue->mType >= ITypedValue::TYPE_FIRST_INT
-                && mTmpValue->mType <= ITypedValue::TYPE_LAST_INT) {
-            *color = mTmpValue->mData;
-            mTmpValue = (CTypedValue*)value.Get();
+        CTypedValue* tv = (CTypedValue*)value.Get();
+        if (tv->mType >= ITypedValue::TYPE_FIRST_INT
+                && tv->mType <= ITypedValue::TYPE_LAST_INT) {
+            *color = tv->mData;
+            mTmpValue = tv;
             return NOERROR;
         }
-        else if (mTmpValue->mType != ITypedValue::TYPE_STRING) {
-            Logger::E(TAG, "Resource ID #0x%08x type #0x%08x is not valid", id, mTmpValue->mType);
+        else if (tv->mType != ITypedValue::TYPE_STRING) {
+            Logger::E(TAG, "Resource ID #0x%08x type #0x%08x is not valid", id, tv->mType);
             *color = 0;
-            mTmpValue = NULL;
             return E_NOT_FOUND_EXCEPTION;
         }
+        mTmpValue = NULL;
     }
 
     AutoPtr<IColorStateList> csl;
@@ -1335,7 +1334,8 @@ ECode CResources::OpenRawResource(
     VALIDATE_NOT_NULL(res);
 
     AutoPtr<ITypedValue> value;
-    {    AutoLock syncLock(mAccessLock);
+    {
+        AutoLock syncLock(mAccessLock);
         value = (ITypedValue*)mTmpValue.Get();
         if (value == NULL) {
             CTypedValue::New((ITypedValue**)&value);
@@ -1347,7 +1347,8 @@ ECode CResources::OpenRawResource(
 
     AutoPtr<IInputStream> is;
     OpenRawResource(id, value, (IInputStream**)&is);
-    {    AutoLock syncLock(mAccessLock);
+    {
+        AutoLock syncLock(mAccessLock);
         if (mTmpValue == NULL) {
             mTmpValue = (CTypedValue*)value.Get();
         }
@@ -1387,7 +1388,8 @@ ECode CResources::OpenRawResourceFd(
     VALIDATE_NOT_NULL(des);
 
     AutoPtr<ITypedValue> value;
-    {    AutoLock syncLock(mAccessLock);
+    {
+        AutoLock syncLock(mAccessLock);
         value = mTmpValue;
         if (value == NULL) {
             CTypedValue::New((ITypedValue**)&value);
@@ -1412,7 +1414,8 @@ ECode CResources::OpenRawResourceFd(
 //        rnf.initCause(e);
 //        throw rnf;
 //    }
-    {    AutoLock syncLock(mAccessLock);
+    {
+        AutoLock syncLock(mAccessLock);
         if (mTmpValue == NULL) {
             mTmpValue = (CTypedValue*)value.Get();
         }
@@ -1434,6 +1437,7 @@ ECode CResources::GetValue(
     /* [in] */ Boolean resolveRefs,
     /* [in] */ Boolean supportComposedIcons)
 {
+    assert(outValue);
     VALIDATE_NOT_NULL(outValue)
 
     //Check if an icon was themed
@@ -1532,6 +1536,7 @@ ECode CResources::GetValue(
     /* [in, out] */ ITypedValue* outValue,
     /* [in] */ Boolean resolveRefs)
 {
+    assert(outValue);
     VALIDATE_NOT_NULL(outValue);
 
     Int32 id;
@@ -2355,9 +2360,9 @@ ECode CResources::LoadDrawableForCookie(
         }
     }
 
-    // if (DEBUG_LOAD) {
-    //     Logger::V(TAG, "Loading drawable for cookie %d : %s", value->mAssetCookie, file.string());
-    // }
+    if (DEBUG_LOAD) {
+        Logger::V(TAG, "Loading drawable for cookie %d : %s", value->mAssetCookie, file.string());
+    }
 
     AutoPtr<IDrawable> dr;
     ECode ec = NOERROR;
