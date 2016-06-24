@@ -186,7 +186,9 @@ ECode CGsmSMSDispatcher::SendText(
         if (messageUri == NULL) {
             Boolean b;
 // TODO: Need SmsApplication
-            // if (SmsApplication::ShouldWriteMessageForPackage(callingPkg, mContext, &b), b) {
+            // AutoPtr<ISmsApplication> helper;
+            // SmsApplication::AcquireSingleton((ISmsApplication**)&helper);
+            // if (helper->ShouldWriteMessageForPackage(callingPkg, mContext, &b), b) {
             //     messageUri = WriteOutboxMessage(
             //             GetSubId(),
             //             destAddr,
