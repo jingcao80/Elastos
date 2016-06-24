@@ -319,6 +319,7 @@ private:
     friend class OtaUtils;
     friend class PhoneUtils;
     friend class CallController;
+    friend class CPhoneInterfaceManager;
 
     static const Boolean DBG;
     static const Boolean VDBG;
