@@ -595,7 +595,7 @@ ECode Toolbar::CanShowOverflowMenu(
     Int32 visibility;
     GetVisibility(&visibility);
     Boolean isOverflowReserved;
-    *menu = visibility && mMenuView != NULL
+    *menu = (visibility == VISIBLE) && mMenuView != NULL
         && (mMenuView->IsOverflowReserved(&isOverflowReserved), isOverflowReserved);
     return NOERROR;
 }

@@ -30,8 +30,8 @@
 #include "elastos/droid/view/CMotionEvent.h"
 #include "elastos/droid/view/CViewGroupLayoutParams.h"
 #include "elastos/droid/view/CWindowManagerLayoutParams.h"
-#include "elastos/droid/view/CViewConfigurationHelper.h"
 #include "elastos/droid/view/LayoutInflater.h"
+#include "elastos/droid/view/ViewConfiguration.h"
 #include "elastos/droid/view/accessibility/CAccessibilityManager.h"
 #include "elastos/droid/view/animation/CAnimationUtils.h"
 #include "elastos/droid/internal/view/StandaloneActionMode.h"
@@ -134,8 +134,6 @@ using Elastos::Droid::View::CKeyEvent;
 using Elastos::Droid::View::CGestureDetector;
 using Elastos::Droid::View::CView;
 using Elastos::Droid::View::IViewConfiguration;
-using Elastos::Droid::View::CViewConfigurationHelper;
-using Elastos::Droid::View::IViewConfigurationHelper;
 using Elastos::Droid::View::CContextThemeWrapper;
 using Elastos::Droid::View::IContextThemeWrapper;
 using Elastos::Droid::View::CViewGroupLayoutParams;
@@ -159,6 +157,7 @@ using Elastos::Droid::View::IViewManager;
 using Elastos::Droid::View::IViewParent;
 using Elastos::Droid::View::IViewStub;
 using Elastos::Droid::View::LayoutInflater;
+using Elastos::Droid::View::ViewConfiguration;
 using Elastos::Droid::Widget::CFrameLayoutLayoutParams;
 using Elastos::Droid::Widget::IAdapter;
 using Elastos::Droid::Widget::IFrameLayout;
@@ -825,8 +824,7 @@ ECode PhoneWindow::_DecorView::DispatchKeyShortcutEvent(
     if (mHost->mPreparedPanel == NULL) {
         AutoPtr<PanelFeatureState> st;
         ECode ec = mHost->GetPanelState(FEATURE_OPTIONS_PANEL, TRUE, (PanelFeatureState**)&st);
-        if (FAILED(ec))
-        {
+        if (FAILED(ec)) {
             *result = FALSE;
             return NOERROR;
         }
@@ -2652,30 +2650,6 @@ ECode PhoneWindow::DialogMenuCallback::OnOpenSubMenu(
     return NOERROR;
 }
 
-PhoneWindow::DecorRunnable::DecorRunnable(
-    /* [in] */ PhoneWindow* host)
-{
-    host->GetWeakReference((IWeakReference**)&mWeakHost);
-}
-
-ECode PhoneWindow::DecorRunnable::Run()
-{
-    AutoPtr<IPhoneWindow> w;
-    mWeakHost->Resolve(EIID_IPhoneWindow, (IInterface**)&w);
-    if (w == NULL)
-        return NOERROR;
-
-    AutoPtr<PhoneWindow> mHost = (PhoneWindow*)w.Get();
-    // Invalidate if the panel menu hasn't been created before this.
-    AutoPtr<PanelFeatureState> st;
-    FAIL_RETURN(mHost->GetPanelState(FEATURE_OPTIONS_PANEL, FALSE, (PanelFeatureState**)&st));
-    Boolean destoryed = FALSE;
-    if (!(mHost->IsDestroyed(&destoryed), destoryed) && (st == NULL || st->mMenu == NULL)) {
-        mHost->InvalidatePanelMenu(FEATURE_ACTION_BAR);
-    }
-    return NOERROR;
-}
-
 PhoneWindow::DrawableFeatureState::DrawableFeatureState(
     /* [in] */ Int32 _featureId)
     : mFeatureId(_featureId)
@@ -3374,7 +3348,6 @@ ECode PhoneWindow::OnKeyDownPanel(
     if ((event->GetRepeatCount(&repeat), repeat) == 0) {
         // The panel key was pushed, so set the chording key
         mPanelChordingKey = keyCode;
-
         AutoPtr<PanelFeatureState> st;
         FAIL_RETURN(GetPanelState(featureId, TRUE, (PanelFeatureState**)&st));
         if (!st->mIsOpen) {
@@ -3410,23 +3383,18 @@ ECode PhoneWindow::OnKeyUpPanel(
 
         AutoPtr<IContext> context;
         GetContext((IContext**)&context);
-        AutoPtr<IViewConfigurationHelper> vcHelper;
-        CViewConfigurationHelper::AcquireSingleton((IViewConfigurationHelper**)&vcHelper);
-        AutoPtr<IViewConfiguration> viewConfig;
-        vcHelper->Get(context, (IViewConfiguration**)&viewConfig);
         Boolean hasPerMk;
-        viewConfig->HasPermanentMenuKey(&hasPerMk);
         if (featureId == FEATURE_OPTIONS_PANEL && mDecorContentParent != NULL
             && (mDecorContentParent->CanShowOverflowMenu(&reserved), reserved)
-            && !hasPerMk)
-        {
+            && (ViewConfiguration::Get(context)->HasPermanentMenuKey(&hasPerMk), !hasPerMk)) {
             Boolean showing = FALSE;
             if (!(mDecorContentParent->IsOverflowMenuShowing(&showing), showing)) {
                 Boolean prepared = FALSE, destoryed = FALSE;
                 if (!(IsDestroyed(&destoryed), destoryed) && (PreparePanel(st, event, &prepared), prepared)) {
                     mDecorContentParent->ShowOverflowMenu(&playSoundEffect);
                 }
-            } else {
+            }
+            else {
                 mDecorContentParent->HideOverflowMenu(&playSoundEffect);
             }
         }
@@ -3500,16 +3468,10 @@ ECode PhoneWindow::OpenPanel(
     Boolean reserved = FALSE;
     AutoPtr<IContext> context;
     GetContext((IContext**)&context);
-    AutoPtr<IViewConfigurationHelper> vcHelper;
-    CViewConfigurationHelper::AcquireSingleton((IViewConfigurationHelper**)&vcHelper);
-    AutoPtr<IViewConfiguration> viewConfig;
-    vcHelper->Get(context, (IViewConfiguration**)&viewConfig);
     Boolean hasPerMk;
-    viewConfig->HasPermanentMenuKey(&hasPerMk);
     if (featureId == FEATURE_OPTIONS_PANEL && mDecorContentParent != NULL
         && (mDecorContentParent->CanShowOverflowMenu(&reserved), reserved)
-        && !hasPerMk)
-    {
+        && (ViewConfiguration::Get(context)->HasPermanentMenuKey(&hasPerMk), !hasPerMk)) {
         Boolean tmp = FALSE;
         mDecorContentParent->ShowOverflowMenu(&tmp);
     }
@@ -3818,16 +3780,10 @@ ECode PhoneWindow::ClosePanel(
     Boolean reserved = FALSE;
     AutoPtr<IContext> context;
     GetContext((IContext**)&context);
-    AutoPtr<IViewConfigurationHelper> vcHelper;
-    CViewConfigurationHelper::AcquireSingleton((IViewConfigurationHelper**)&vcHelper);
-    AutoPtr<IViewConfiguration> viewConfig;
-    vcHelper->Get(context, (IViewConfiguration**)&viewConfig);
     Boolean hasPerMk;
-    viewConfig->HasPermanentMenuKey(&hasPerMk);
     if (featureId == FEATURE_OPTIONS_PANEL && mDecorContentParent != NULL
         && (mDecorContentParent->CanShowOverflowMenu(&reserved), reserved)
-        && !hasPerMk)
-    {
+        && (ViewConfiguration::Get(context)->HasPermanentMenuKey(&hasPerMk), !hasPerMk)) {
         Boolean tmp = FALSE;
         mDecorContentParent->HideOverflowMenu(&tmp);
     }
@@ -4155,30 +4111,27 @@ void PhoneWindow::DoInvalidatePanelMenu(
     /* [in] */ Int32 featureId)
 {
     AutoPtr<PanelFeatureState> st;
-    /*ECode ec = */GetPanelState(featureId, TRUE, (PanelFeatureState**)&st);
+    GetPanelState(featureId, TRUE, (PanelFeatureState**)&st);
+    AutoPtr<IBundle> savedActionViewStates;
+    if (st->mMenu != NULL) {
+        CBundle::New((IBundle**)&savedActionViewStates);
+        st->mMenu->SaveActionViewStates(savedActionViewStates);
 
-    if (st) {
-        AutoPtr<IBundle> savedActionViewStates;
-        if (st->mMenu != NULL) {
-            CBundle::New((IBundle**)&savedActionViewStates);
-            st->mMenu->SaveActionViewStates(savedActionViewStates);
-
-            Int32 size = 0;
-            if ((savedActionViewStates->GetSize(&size), size) > 0) {
-                st->mFrozenActionViewState = savedActionViewStates;
-            }
-            // This will be started again when the panel is prepared.
-            st->mMenu->StopDispatchingItemsChanged();
-            IMenu::Probe(st->mMenu)->Clear();
+        Int32 size = 0;
+        if ((savedActionViewStates->GetSize(&size), size) > 0) {
+            st->mFrozenActionViewState = savedActionViewStates;
         }
-
-        st->mRefreshMenuContent = TRUE;
-        st->mRefreshDecorView = TRUE;
+        // This will be started again when the panel is prepared.
+        st->mMenu->StopDispatchingItemsChanged();
+        IMenu::Probe(st->mMenu)->Clear();
     }
 
+    st->mRefreshMenuContent = TRUE;
+    st->mRefreshDecorView = TRUE;
+
     // Prepare the options panel if we have an action bar
-    if ((featureId == FEATURE_ACTION_BAR || featureId == FEATURE_OPTIONS_PANEL) && mDecorContentParent != NULL)
-    {
+    if ((featureId == FEATURE_ACTION_BAR || featureId == FEATURE_OPTIONS_PANEL)
+            && mDecorContentParent != NULL) {
         st = NULL;
         GetPanelState(IWindow::FEATURE_OPTIONS_PANEL, FALSE, (PanelFeatureState**)&st);
         if (st != NULL) {
@@ -5440,8 +5393,7 @@ ECode PhoneWindow::AlwaysReadCloseOnTouchAttr()
 
 ECode PhoneWindow::DoPendingInvalidatePanelMenu()
 {
-    if (mInvalidatePanelMenuPosted)
-    {
+    if (mInvalidatePanelMenuPosted) {
         Boolean res;
         mDecor->RemoveCallbacks(mInvalidatePanelMenuRunnable, &res);
         mInvalidatePanelMenuRunnable->Run();
@@ -6419,7 +6371,6 @@ ECode PhoneWindow::PreparePanel(
 {
     VALIDATE_NOT_NULL(prepared)
     *prepared = FALSE;
-    VALIDATE_NOT_NULL(st)
 
     Boolean destoryed = FALSE;
     if (IsDestroyed(&destoryed), destoryed) {
@@ -6445,7 +6396,9 @@ ECode PhoneWindow::PreparePanel(
         st->mCreatedPanelView = view;
     }
 
-    Boolean isActionBarMenu = st->mFeatureId == FEATURE_OPTIONS_PANEL || st->mFeatureId == FEATURE_ACTION_BAR;
+    Boolean isActionBarMenu =
+            st->mFeatureId == FEATURE_OPTIONS_PANEL || st->mFeatureId == FEATURE_ACTION_BAR;
+
     if (isActionBarMenu && mDecorContentParent != NULL) {
         // Enforce ordering guarantees around events so that the action bar never
         // dispatches menu-related events before the panel is prepared.
@@ -6773,64 +6726,53 @@ void PhoneWindow::ReopenMenu(
     /* [in] */ Boolean toggleMenuMode)
 {
     Boolean tmp = FALSE;
-    AutoPtr<IContext> context;
-    GetContext((IContext**)&context);
-    AutoPtr<IViewConfigurationHelper> vcHelper;
-    CViewConfigurationHelper::AcquireSingleton((IViewConfigurationHelper**)&vcHelper);
-    AutoPtr<IViewConfiguration> viewConfig;
-    vcHelper->Get(context, (IViewConfiguration**)&viewConfig);
-    Boolean hasPerMk;
-    viewConfig->HasPermanentMenuKey(&hasPerMk);
-    if (mDecorContentParent != NULL
-        && (mDecorContentParent->CanShowOverflowMenu(&tmp), tmp)
-        && (!hasPerMk|| (mDecorContentParent->IsOverflowMenuShowing(&tmp), tmp)))
-    {
-        AutoPtr<IWindowCallback> cb;
-        GetCallback((IWindowCallback**)&cb);
+    if (mDecorContentParent != NULL && (mDecorContentParent->CanShowOverflowMenu(&tmp), tmp)) {
+        AutoPtr<IContext> context;
+        GetContext((IContext**)&context);
+        Boolean hasPerMk;
+        if ((ViewConfiguration::Get(context)->HasPermanentMenuKey(&hasPerMk), !hasPerMk) ||
+            (mDecorContentParent->IsOverflowMenuShowing(&tmp), tmp)) {
+            AutoPtr<IWindowCallback> cb;
+            GetCallback((IWindowCallback**)&cb);
+            Boolean destoryed = FALSE;
+            if (!(mDecorContentParent->IsOverflowMenuShowing(&tmp), tmp) || !toggleMenuMode) {
+                if (cb != NULL && (IsDestroyed(&destoryed), !destoryed)) {
+                    // If we have a menu invalidation pending, do it now.
+                    if (mInvalidatePanelMenuPosted &&
+                        (mInvalidatePanelMenuFeatures & (1 << FEATURE_OPTIONS_PANEL)) != 0) {
+                        Boolean res;
+                        mDecor->RemoveCallbacks(mInvalidatePanelMenuRunnable, &res);
+                        mInvalidatePanelMenuRunnable->Run();
+                    }
 
-        Boolean destoryed = FALSE;
-        IsDestroyed(&destoryed);
-        if (!(mDecorContentParent->IsOverflowMenuShowing(&tmp), tmp) || !toggleMenuMode) {
-            if (cb != NULL && !destoryed ) {
-                // If we have a menu invalidation pending, do it now.
-                if (mInvalidatePanelMenuPosted &&
-                    (mInvalidatePanelMenuFeatures & (1 << FEATURE_OPTIONS_PANEL)) != 0)
-                {
-                    Boolean res;
-                    mDecor->RemoveCallbacks(mInvalidatePanelMenuRunnable, &res);
-                    mInvalidatePanelMenuRunnable->Run();
-                }
+                    AutoPtr<PanelFeatureState> st;
+                    GetPanelState(FEATURE_OPTIONS_PANEL, TRUE, (PanelFeatureState**)&st);
 
-                AutoPtr<PanelFeatureState> st;
-                GetPanelState(FEATURE_OPTIONS_PANEL, TRUE, (PanelFeatureState**)&st);
-
-                // If we don't have a menu or we're waiting for a full content refresh,
-                // forget it. This is a lingering event that no longer matters.
-                if (st != NULL && st->mMenu != NULL && !st->mRefreshMenuContent &&
-                        (cb->OnPreparePanel(FEATURE_OPTIONS_PANEL, st->mCreatedPanelView, IMenu::Probe(st->mMenu), &tmp), tmp)) {
-                    Boolean tmp = FALSE;
-                    cb->OnMenuOpened(FEATURE_ACTION_BAR, IMenu::Probe(st->mMenu), &tmp);
-                    mDecorContentParent->ShowOverflowMenu(&tmp);
+                    // If we don't have a menu or we're waiting for a full content refresh,
+                    // forget it. This is a lingering event that no longer matters.
+                    if (st->mMenu != NULL && !st->mRefreshMenuContent &&
+                            (cb->OnPreparePanel(FEATURE_OPTIONS_PANEL, st->mCreatedPanelView, IMenu::Probe(st->mMenu), &tmp), tmp)) {
+                        Boolean tmp = FALSE;
+                        cb->OnMenuOpened(FEATURE_ACTION_BAR, IMenu::Probe(st->mMenu), &tmp);
+                        mDecorContentParent->ShowOverflowMenu(&tmp);
+                    }
                 }
             }
-        }
-        else {
-            Boolean tmp = FALSE;
-            mDecorContentParent->HideOverflowMenu(&tmp);
-            if (cb != NULL && !destoryed) {
-                AutoPtr<PanelFeatureState> st;
-                GetPanelState(FEATURE_OPTIONS_PANEL, TRUE, (PanelFeatureState**)&st);
-                if (st != NULL) {
+            else {
+                Boolean tmp = FALSE;
+                mDecorContentParent->HideOverflowMenu(&tmp);
+                if (cb != NULL && (IsDestroyed(&destoryed), !destoryed)) {
+                    AutoPtr<PanelFeatureState> st;
+                    GetPanelState(FEATURE_OPTIONS_PANEL, TRUE, (PanelFeatureState**)&st);
                     cb->OnPanelClosed(FEATURE_ACTION_BAR, IMenu::Probe(st->mMenu));
                 }
             }
+            return;
         }
-        return;
     }
 
     AutoPtr<PanelFeatureState> st;
-    ECode ec = GetPanelState(FEATURE_OPTIONS_PANEL, TRUE, (PanelFeatureState**)&st);
-    if (FAILED(ec)) return;
+    GetPanelState(FEATURE_OPTIONS_PANEL, TRUE, (PanelFeatureState**)&st);
 
     // Save the future expanded mode state since closePanel will reset it
     Boolean newExpandedMode = toggleMenuMode ? !st->mIsInExpandedMode : st->mIsInExpandedMode;

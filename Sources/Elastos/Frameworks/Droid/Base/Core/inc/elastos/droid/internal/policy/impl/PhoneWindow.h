@@ -796,19 +796,6 @@ private:
         AutoPtr<IWeakReference> mWeakHost;
     };
 
-    class DecorRunnable
-        : public Runnable
-    {
-    public:
-        DecorRunnable(
-            /* [in] */ PhoneWindow* host);
-
-        CARAPI Run();
-
-    private:
-        AutoPtr<IWeakReference> mWeakHost;
-    };
-
     class DrawableFeatureState
         : public Object
     {

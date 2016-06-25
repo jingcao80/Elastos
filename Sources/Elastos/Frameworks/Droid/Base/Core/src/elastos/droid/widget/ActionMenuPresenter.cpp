@@ -308,16 +308,13 @@ ActionMenuPresenter::OpenOverflowRunnable::OpenOverflowRunnable(
 ECode ActionMenuPresenter::OpenOverflowRunnable::Run()
 {
     mHost->mMenu->ChangeMenuMode();
-    AutoPtr<IView> menuView = IView::Probe(mHost->mMenuView);
-
+    IView* menuView = IView::Probe(mHost->mMenuView);
     AutoPtr<IBinder> token;
     Boolean tryShow = FALSE;
     if (menuView != NULL && (menuView->GetWindowToken((IBinder**)&token), token) != NULL && (mPopup->TryShow(&tryShow), tryShow)) {
         mHost->mOverflowPopup = mPopup;
     }
-
     mHost->mPostedOpenRunnable = NULL;
-
     return NOERROR;
 }
 
@@ -762,30 +759,26 @@ AutoPtr<IView> ActionMenuPresenter::FindViewForItem(
 ECode ActionMenuPresenter::ShowOverflowMenu(
     /* [out] */ Boolean* result)
 {
-    if (mMenu == NULL || mMenuView == NULL || mPostedOpenRunnable != NULL) {
-        *result = FALSE;
-        return NOERROR;
-    }
-    AutoPtr<IArrayList> nonActionItems;
-    mMenu->GetNonActionItems((IArrayList**)&nonActionItems);
-    Boolean empty = TRUE;
-    if (nonActionItems != NULL) {
-        nonActionItems->IsEmpty(&empty);
-    }
     Boolean overflowMenuShowing;
-    if (mReserveOverflow && (IsOverflowMenuShowing(&overflowMenuShowing), !overflowMenuShowing) && !empty) {
-        AutoPtr<OverflowPopup> popup = new OverflowPopup(mContext, mMenu, mOverflowButton, TRUE, this);
-        mPostedOpenRunnable = new OpenOverflowRunnable(popup, this);
-        // Post this for later; we might still need a layout for the anchor to be right.
-        Boolean tmp = FALSE;
-        IView::Probe(mMenuView)->Post(mPostedOpenRunnable, &tmp);
+    if (mReserveOverflow && (IsOverflowMenuShowing(&overflowMenuShowing), !overflowMenuShowing) &&
+            mMenu != NULL && mMenuView != NULL && mPostedOpenRunnable == NULL) {
+        AutoPtr<IArrayList> nonActionItems;
+        mMenu->GetNonActionItems((IArrayList**)&nonActionItems);
+        Boolean empty;
+        if (nonActionItems->IsEmpty(&empty), !empty) {
+            AutoPtr<OverflowPopup> popup = new OverflowPopup(mContext, mMenu, mOverflowButton, TRUE, this);
+            mPostedOpenRunnable = new OpenOverflowRunnable(popup, this);
+            // Post this for later; we might still need a layout for the anchor to be right.
+            Boolean tmp = FALSE;
+            IView::Probe(mMenuView)->Post(mPostedOpenRunnable, &tmp);
 
-        // ActionMenuPresenter uses null as a callback argument here
-        // to indicate overflow is opening.
-        BaseMenuPresenter::OnSubMenuSelected(NULL, &tmp);
+            // ActionMenuPresenter uses null as a callback argument here
+            // to indicate overflow is opening.
+            BaseMenuPresenter::OnSubMenuSelected(NULL, &tmp);
 
-        *result = TRUE;
-        return NOERROR;
+            *result = TRUE;
+            return NOERROR;
+        }
     }
 
     *result = FALSE;

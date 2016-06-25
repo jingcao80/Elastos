@@ -395,10 +395,9 @@ ECode AbsActionBarView::CanShowOverflowMenu(
 {
     VALIDATE_NOT_NULL(result);
     Boolean resTmp = FALSE;
-    IsOverflowReserved(&resTmp);
     Int32 visibility = 0;
-    GetVisibility(&visibility);
-    *result = resTmp && visibility == VISIBLE;
+    *result = (IsOverflowReserved(&resTmp), resTmp) &&
+            (GetVisibility(&visibility), visibility == VISIBLE);
     return NOERROR;
 }
 
