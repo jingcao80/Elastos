@@ -6,6 +6,18 @@ INCLUDES += ../../../..
 INCLUDES += $(MAKEDIR)/../../../..
 INCLUDES += $(MAKEDIR)/../../../../inc/
 
+SOURCES += CEditPinPreference.cpp
+
+SOURCES += CGetPin2Screen.cpp
+SOURCES += CGsmUmtsAdditionalCallOptions.cpp
+SOURCES += CGsmUmtsCallForwardOptions.cpp
+SOURCES += CGsmUmtsCallOptions.cpp
+SOURCES += CGsmUmtsOptions.cpp
+SOURCES += CHfaActivity.cpp
+SOURCES += CHfaService.cpp
+SOURCES += CIccPanel.cpp
+SOURCES += CInCallScreenShowActivation.cpp
+SOURCES += CMMIDialogActivity.cpp
 SOURCES += CMobileNetworkSettings.cpp
 SOURCES += CNetworkSetting.cpp
 SOURCES += CNetworkQueryService.cpp

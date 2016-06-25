@@ -2,7 +2,17 @@
 #define  __ELASTOS_DROID_PHONE_CGSMUMTSADDITIONALCALLOPTIONS_H__
 
 #include "_Elastos_Droid_Phone_CGsmUmtsAdditionalCallOptions.h"
+#include "elastos/droid/phone/TimeConsumingPreferenceActivity.h"
 #include "elastos/droid/ext/frameworkext.h"
+#include "Elastos.Droid.Os.h"
+#include "Elastos.Droid.Preference.h"
+#include "Elastos.Droid.View.h"
+#include "Elastos.CoreLibrary.Utility.h"
+
+using Elastos::Droid::Os::IBundle;
+using Elastos::Droid::Preference::IPreference;
+using Elastos::Droid::View::IMenuItem;
+using Elastos::Utility::IArrayList;
 
 namespace Elastos {
 namespace Droid {
@@ -10,11 +20,8 @@ namespace Phone {
 
 CarClass(CGsmUmtsAdditionalCallOptions)
     , public TimeConsumingPreferenceActivity
-    , public IGsmUmtsAdditionalCallOptions
 {
 public:
-    CAR_INTERFACE_DECL()
-
     CAR_OBJECT_DECL();
 
     CGsmUmtsAdditionalCallOptions();
@@ -48,7 +55,7 @@ private:
     static const String BUTTON_CW_KEY;
 
     AutoPtr<ICLIRListPreference> mCLIRButton;
-    AutoPtr<ICallWaitingCheckBoxPreference> mCWButton;
+    //AutoPtr<ICallWaitingCheckBoxPreference> mCWButton;
 
     AutoPtr<IArrayList> mPreferences;
     Int32 mInitIndex;
@@ -57,6 +64,5 @@ private:
 } // namespace Phone
 } // namespace Droid
 } // namespace Elastos
-
 
 #endif // __ELASTOS_DROID_PHONE_CGSMUMTSADDITIONALCALLOPTIONS_H__

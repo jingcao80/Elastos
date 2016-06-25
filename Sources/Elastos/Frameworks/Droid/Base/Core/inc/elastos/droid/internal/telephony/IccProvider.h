@@ -24,7 +24,7 @@ namespace Telephony {
 /**
  * {@hide}
  */
-class IccProvider: public ContentProvider
+class ECO_PUBLIC IccProvider: public ContentProvider
 {
 public:
     // @Override

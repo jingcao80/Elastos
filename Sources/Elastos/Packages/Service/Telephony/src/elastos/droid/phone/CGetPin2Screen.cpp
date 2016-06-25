@@ -1,17 +1,42 @@
 
 #include "elastos/droid/phone/CGetPin2Screen.h"
+#include "elastos/droid/text/TextUtils.h"
+#include "Elastos.Droid.Content.h"
+#include "Elastos.Droid.Net.h"
+#include <elastos/core/StringBuilder.h>
+#include <elastos/utility/logging/Logger.h>
+#include "R.h"
+
+using Elastos::Droid::Content::IIntent;
+using Elastos::Droid::Content::CIntent;
+using Elastos::Droid::Os::CBundle;
+using Elastos::Droid::Net::IUri;
+using Elastos::Droid::Text::TextUtils;
+using Elastos::Droid::Text::IInputType;
+using Elastos::Droid::Text::Method::IKeyListener;
+using Elastos::Droid::Text::Method::IDigitsKeyListener;
+using Elastos::Droid::Text::Method::IDigitsKeyListenerHelper;
+using Elastos::Droid::Text::Method::CDigitsKeyListenerHelper;
+using Elastos::Droid::View::EIID_IViewOnClickListener;
+using Elastos::Droid::View::InputMethod::IEditorInfo;
+using Elastos::Droid::Widget::ITextView;
+using Elastos::Droid::Widget::EIID_IOnEditorActionListener;
+using Elastos::Core::StringBuilder;
+using Elastos::Utility::Logging::Logger;
 
 namespace Elastos {
 namespace Droid {
 namespace Phone {
 
-CAR_INTERFACE_IMPL_2(CGetPin2Screen:MyViewOnClickListener, Object, IViewOnClickListener)
+CAR_INTERFACE_IMPL(CGetPin2Screen::MyViewOnClickListener, Object, IViewOnClickListener)
 
 CGetPin2Screen::MyViewOnClickListener::OnClick(
     /* [in] */ IView* v)
 {
+    AutoPtr<ICharSequence> cchar;
+    ITextView::Probe(mHost->mPin2Field)->GetText((ICharSequence**)&cchar);
     String str;
-    mPin2Field->GetText(&str);
+    cchar->ToString(&str);
     if (TextUtils::IsEmpty(str)) {
         return NOERROR;
     }
@@ -22,7 +47,7 @@ CGetPin2Screen::MyViewOnClickListener::OnClick(
 
 const String CGetPin2Screen::TAG("CGetPin2Screen");// = PhoneGlobals.TAG;
 
-CAR_INTERFACE_IMPL_2(CGetPin2Screen, Activity, IGetPin2Screen, ITextViewOnEditorActionListener)
+CAR_INTERFACE_IMPL(CGetPin2Screen, Activity, IOnEditorActionListener)
 
 CAR_OBJECT_IMPL(CGetPin2Screen)
 
@@ -41,31 +66,32 @@ ECode CGetPin2Screen::OnCreate(
 {
     Activity::OnCreate(icicle);
 
-    SetContentView(R.layout.get_pin2_screen);
+    SetContentView(Elastos::Droid::Server::Telephony::R::layout::get_pin2_screen);
 
     AutoPtr<IView> view;
-    FindViewById(R.id.pin, (IView**)&view);
+    FindViewById(Elastos::Droid::Server::Telephony::R::id::pin, (IView**)&view);
     mPin2Field = IEditText::Probe(view);
 
     AutoPtr<IDigitsKeyListenerHelper> helper;
     CDigitsKeyListenerHelper::AcquireSingleton((IDigitsKeyListenerHelper**)&helper);
     AutoPtr<IDigitsKeyListener> listener;
     helper->GetInstance((IDigitsKeyListener**)&listener);
-    mPin2Field->SetKeyListener(listener);
-    mPin2Field->SetMovementMethod(NULL);
-    mPin2Field->SetOnEditorActionListener(this);
-    mPin2Field->SetInputType(IInputType:TYPE_CLASS_NUMBER | IInputType::TYPE_NUMBER_VARIATION_PASSWORD);
+    ITextView::Probe(mPin2Field)->SetKeyListener(IKeyListener::Probe(listener));
+    ITextView::Probe(mPin2Field)->SetMovementMethod(NULL);
+    ITextView::Probe(mPin2Field)->SetOnEditorActionListener((IOnEditorActionListener*)this);
+    ITextView::Probe(mPin2Field)->SetInputType(IInputType::TYPE_CLASS_NUMBER | 
+            IInputType::TYPE_NUMBER_VARIATION_PASSWORD);
 
     AutoPtr<IView> view2;
-    FindViewById(R.id.ok, (IView**)&view2);
+    FindViewById(Elastos::Droid::Server::Telephony::R::id::ok, (IView**)&view2);
     mOkButton = IButton::Probe(view2);
-    return mOkButton->SetOnClickListener(mClicked);
+    return IView::Probe(mOkButton)->SetOnClickListener(mClicked);
 }
 
 String CGetPin2Screen::GetPin2()
 {
     AutoPtr<ICharSequence> cchar;
-    mPin2Field->GetText((ICharSequence**)&cchar);
+    ITextView::Probe(mPin2Field)->GetText((ICharSequence**)&cchar);
     String str;
     cchar->ToString(&str);
     return str;
@@ -87,7 +113,7 @@ void CGetPin2Screen::ReturnResult()
 
     if (uri != NULL) {
         String str;
-        uri->ToString(&str);
+        IObject::Probe(uri)->ToString(&str);
         action->SetAction(str);
     }
 
@@ -104,8 +130,9 @@ ECode CGetPin2Screen::OnEditorAction(
 {
     VALIDATE_NOT_NULL(result)
 
-    if (actionId == iEditorInfo::IME_ACTION_DONE) {
-        mOkButton->PerformClick();
+    if (actionId == IEditorInfo::IME_ACTION_DONE) {
+        Boolean tmp;
+        IView::Probe(mOkButton)->PerformClick(&tmp);
         *result = TRUE;
         return NOERROR;
     }
@@ -116,7 +143,7 @@ ECode CGetPin2Screen::OnEditorAction(
 void CGetPin2Screen::Log(
     /* [in] */ const String& msg)
 {
-    String sb;
+    StringBuilder sb;
     sb += "[GetPin2] ";
     sb += msg;
     Logger::D(TAG, sb.ToString());

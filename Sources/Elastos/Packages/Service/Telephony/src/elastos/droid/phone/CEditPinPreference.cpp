@@ -1,11 +1,19 @@
 
 #include "elastos/droid/phone/CEditPinPreference.h"
+#include "elastos/droid/R.h"
+#include "Elastos.Droid.Text.h"
+#include "Elastos.Droid.Widget.h"
+#include "R.h"
+
+using Elastos::Droid::Text::IInputType;
+using Elastos::Droid::Widget::ITextView;
+using Elastos::Droid::Widget::IEditText;
 
 namespace Elastos {
 namespace Droid {
 namespace Phone {
 
-CAR_INTERFACE_IMPL(CEditPinPreference, EditTextPreference, IEditPinPreference)
+CAR_INTERFACE_IMPL(CEditPinPreference, EditTextPreference, IPhoneEditPinPreference)
 
 CAR_OBJECT_IMPL(CEditPinPreference)
 
@@ -27,14 +35,14 @@ ECode CEditPinPreference::OnCreateDialogView(
     VALIDATE_NOT_NULL(view)
 
     // set the dialog layout
-    SetDialogLayoutResource(R.layout.pref_dialog_editpin);
+    SetDialogLayoutResource(Elastos::Droid::Server::Telephony::R::layout::pref_dialog_editpin);
 
     AutoPtr<IView> dialog;
     EditTextPreference::OnCreateDialogView((IView**)&dialog);
 
     AutoPtr<IEditText> editText;
     GetEditText((IEditText**)&editText);
-    editText->SetInputType(IInputType::TYPE_CLASS_NUMBER |
+    ITextView::Probe(editText)->SetInputType(IInputType::TYPE_CLASS_NUMBER |
         IInputType::TYPE_NUMBER_VARIATION_PASSWORD);
 
     *view = dialog;
@@ -49,7 +57,7 @@ ECode CEditPinPreference::OnBindDialogView(
 
     // If the layout does not contain an edittext, hide the buttons.
     AutoPtr<IView> _view;
-    view->FindViewById(android.R.id.edit, (IView**)&_view);
+    view->FindViewById(Elastos::Droid::R::id::edit, (IView**)&_view);
     mShouldHideButtons = (_view == NULL);
     return NOERROR;
 }
@@ -61,9 +69,10 @@ ECode CEditPinPreference::OnPrepareDialogBuilder(
 
     // hide the buttons if we need to.
     if (mShouldHideButtons) {
-        builder->SetPositiveButton(NULL, this);
-        builder->SetNegativeButton(NULL, this);
+        builder->SetPositiveButton((ICharSequence*)NULL, this);
+        builder->SetNegativeButton((ICharSequence*)NULL, this);
     }
+    return NOERROR;
 }
 
 ECode CEditPinPreference::OnDialogClosed(
@@ -73,6 +82,7 @@ ECode CEditPinPreference::OnDialogClosed(
     if (mPinListener != NULL) {
         mPinListener->OnPinEntered(this, positiveResult);
     }
+    return NOERROR;
 }
 
 ECode CEditPinPreference::ShowPinDialog()

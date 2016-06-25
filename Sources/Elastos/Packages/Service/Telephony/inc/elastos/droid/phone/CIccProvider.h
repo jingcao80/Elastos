@@ -3,6 +3,9 @@
 
 #include "_Elastos_Droid_Phone_CIccProvider.h"
 #include "elastos/droid/ext/frameworkext.h"
+#include "elastos/droid/internal/telephony/IccProvider.h"
+
+using Elastos::Droid::Internal::Telephony::IccProvider;
 
 namespace Elastos {
 namespace Droid {
@@ -13,19 +16,13 @@ namespace Phone {
  */
 CarClass(CIccProvider)
     , public IccProvider
-    , public IIccProvider
 {
 public:
-    CAR_INTERFACE_DECL()
-
     CAR_OBJECT_DECL();
-
-    CARAPI constructor();
 };
 
 } // namespace Phone
 } // namespace Droid
 } // namespace Elastos
-
 
 #endif // __ELASTOS_DROID_PHONE_CICCPROVIDER_H__

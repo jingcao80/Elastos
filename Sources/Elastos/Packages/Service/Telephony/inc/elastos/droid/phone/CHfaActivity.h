@@ -3,6 +3,17 @@
 
 #include "_Elastos_Droid_Phone_CHfaActivity.h"
 #include "elastos/droid/ext/frameworkext.h"
+#include "elastos/droid/app/Activity.h"
+#include "Elastos.Droid.Content.h"
+#include "Elastos.Droid.Os.h"
+#include <elastos/core/Object.h>
+
+using Elastos::Droid::App::Activity;
+using Elastos::Droid::App::IAlertDialog;
+using Elastos::Droid::Content::IDialogInterface;
+using Elastos::Droid::Content::IDialogInterfaceOnClickListener;
+using Elastos::Droid::Os::IBundle;
+using Elastos::Core::Object;
 
 namespace Elastos {
 namespace Droid {
@@ -21,7 +32,6 @@ namespace Phone {
  */
 CarClass(CHfaActivity)
     , public Activity
-    , public IHfaActivity
 {
 private:
     class MyDialogInterfaceOnClickListener
@@ -30,6 +40,8 @@ private:
     {
     public:
         TO_STRING_IMPL("CHfaActivity::MyDialogInterfaceOnClickListener")
+
+        CAR_INTERFACE_DECL()
 
         MyDialogInterfaceOnClickListener(
             /* [in] */ CHfaActivity* host)
@@ -52,6 +64,8 @@ private:
     public:
         TO_STRING_IMPL("CHfaActivity::MyDialogInterfaceOnClickListener2")
 
+        CAR_INTERFACE_DECL()
+
         MyDialogInterfaceOnClickListener2(
             /* [in] */ CHfaActivity* host)
             : mHost(host)
@@ -72,6 +86,8 @@ private:
     {
     public:
         TO_STRING_IMPL("CHfaActivity::MyDialogInterfaceOnClickListener3")
+
+        CAR_INTERFACE_DECL()
 
         MyDialogInterfaceOnClickListener3(
             /* [in] */ CHfaActivity* host)
@@ -94,6 +110,8 @@ private:
     public:
         TO_STRING_IMPL("CHfaActivity::MyHfaLogicHfaLogicCallback")
 
+        CAR_INTERFACE_DECL()
+
         MyHfaLogicHfaLogicCallback(
             /* [in] */ CHfaActivity* host)
             : mHost(host)
@@ -111,8 +129,6 @@ private:
     };
 
 public:
-    CAR_INTERFACE_DECL()
-
     CAR_OBJECT_DECL();
 
     CARAPI constructor();
@@ -138,7 +154,7 @@ private:
     CARAPI_(void) OnUserSkip();
 
 private:
-    static const String TAG = HfaActivity.class.getSimpleName();
+    static const String TAG;
 
     AutoPtr<IAlertDialog> mDialog;
     AutoPtr<IHfaLogic> mHfaLogic;

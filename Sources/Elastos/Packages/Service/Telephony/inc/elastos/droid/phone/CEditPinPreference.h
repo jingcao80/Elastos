@@ -3,6 +3,13 @@
 
 #include "_Elastos_Droid_Phone_CEditPinPreference.h"
 #include "elastos/droid/ext/frameworkext.h"
+#include "elastos/droid/preference/EditTextPreference.h"
+#include "Elastos.Droid.App.h"
+#include "Elastos.Droid.View.h"
+
+using Elastos::Droid::App::IAlertDialogBuilder;
+using Elastos::Droid::Preference::EditTextPreference;
+using Elastos::Droid::View::IView;
 
 namespace Elastos {
 namespace Droid {
@@ -15,7 +22,7 @@ namespace Phone {
  */
 CarClass(CEditPinPreference)
     , public EditTextPreference
-    , public IEditPinPreference
+    , public IPhoneEditPinPreference
 {
 public:
     CAR_INTERFACE_DECL()
@@ -23,17 +30,6 @@ public:
     CAR_OBJECT_DECL();
 
     CEditPinPreference();
-
-    // CARAPI constructor();
-
-    // CARAPI constructor(
-    //     /* [in] */ IContext* context,
-    //     /* [in] */ IAttributeSet* attrs);
-
-    // CARAPI constructor(
-    //     /* [in] */ IContext* context,
-    //     /* [in] */ IAttributeSet* attrs,
-    //     /* [in] */ Int32 defStyle);
 
     CARAPI SetOnPinEnteredListener(
         /* [in] */ IEditPinPreferenceOnPinEnteredListener* listener);
@@ -43,7 +39,7 @@ public:
      * for multi-step / multi-dialog requests (like changing
      * the SIM pin).
      */
-    CARAPI ShowPinDialog()
+    CARAPI ShowPinDialog();
 
 protected:
     /**
@@ -75,6 +71,5 @@ private:
 } // namespace Phone
 } // namespace Droid
 } // namespace Elastos
-
 
 #endif // __ELASTOS_DROID_PHONE_CEDITPINPREFRENCE_H__

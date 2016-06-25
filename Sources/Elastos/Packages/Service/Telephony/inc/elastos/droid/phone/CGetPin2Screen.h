@@ -3,6 +3,21 @@
 
 #include "_Elastos_Droid_Phone_CGetPin2Screen.h"
 #include "elastos/droid/ext/frameworkext.h"
+#include "elastos/droid/app/Activity.h"
+#include "Elastos.Droid.Os.h"
+#include "Elastos.Droid.View.h"
+#include <elastos/core/Object.h>
+
+using Elastos::Droid::App::Activity;
+using Elastos::Droid::Os::IBundle;
+using Elastos::Droid::View::IView;
+using Elastos::Droid::View::IKeyEvent;
+using Elastos::Droid::View::IViewOnClickListener;
+using Elastos::Droid::Widget::IButton;
+using Elastos::Droid::Widget::ITextView;
+using Elastos::Droid::Widget::IEditText;
+using Elastos::Droid::Widget::IOnEditorActionListener;
+using Elastos::Core::Object;
 
 namespace Elastos {
 namespace Droid {
@@ -13,8 +28,7 @@ namespace Phone {
  */
 CarClass(CGetPin2Screen)
     , public Activity
-    , public IGetPin2Screen
-    , public ITextViewOnEditorActionListener
+    , public IOnEditorActionListener
 {
 private:
     class MyViewOnClickListener

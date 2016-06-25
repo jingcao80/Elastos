@@ -3,6 +3,16 @@
 
 #include "_Elastos_Droid_Phone_CIccPanel.h"
 #include "elastos/droid/ext/frameworkext.h"
+#include "elastos/droid/app/Dialog.h"
+#include "Elastos.Droid.Content.h"
+#include "Elastos.Droid.Os.h"
+#include "Elastos.Droid.View.h"
+
+using Elastos::Droid::App::Dialog;
+using Elastos::Droid::App::IStatusBarManager;
+using Elastos::Droid::Content::IContext;
+using Elastos::Droid::Os::IBundle;
+using Elastos::Droid::View::IKeyEvent;
 
 namespace Elastos {
 namespace Droid {
@@ -13,11 +23,8 @@ namespace Phone {
  */
 CarClass(CIccPanel)
     , public Dialog
-    , public IIccPanel
 {
 public:
-    CAR_INTERFACE_DECL()
-
     CAR_OBJECT_DECL();
 
     CARAPI constructor(
@@ -40,7 +47,7 @@ protected:
     CARAPI OnStart();
 
 protected:
-    static const String TAG = PhoneGlobals.TAG;
+    static const String TAG;
 
 private:
     AutoPtr<IStatusBarManager> mStatusBarManager;
@@ -49,6 +56,5 @@ private:
 } // namespace Phone
 } // namespace Droid
 } // namespace Elastos
-
 
 #endif // __ELASTOS_DROID_PHONE_CICCPANEL_H__

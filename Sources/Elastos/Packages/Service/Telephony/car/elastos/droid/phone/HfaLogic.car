@@ -20,6 +20,8 @@ module
         const Int32 OTASP_USER_SKIPPED = 1;
         const Int32 OTASP_SUCCESS = 2;
         const Int32 OTASP_FAILURE = 3;
+
+        Start();
     }
 
     } // namespace Phone

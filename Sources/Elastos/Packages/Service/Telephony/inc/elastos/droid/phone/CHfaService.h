@@ -3,6 +3,15 @@
 
 #include "_Elastos_Droid_Phone_CHfaService.h"
 #include "elastos/droid/ext/frameworkext.h"
+#include "elastos/droid/app/Service.h"
+#include "Elastos.Droid.Content.h"
+#include "Elastos.Droid.Os.h"
+#include <elastos/core/Object.h>
+
+using Elastos::Droid::App::Service;
+using Elastos::Droid::Content::IIntent;
+using Elastos::Droid::Os::IBinder;
+using Elastos::Core::Object;
 
 namespace Elastos {
 namespace Droid {
@@ -12,8 +21,7 @@ namespace Phone {
  * Service for performing HfaActivation without any UI.
  */
 CarClass(CHfaService)
-    , public Service
-    , public IHfaService
+    , public Elastos::Droid::App::Service
 {
 private:
     class MyHfaLogicHfaLogicCallback
@@ -22,6 +30,8 @@ private:
     {
     public:
         TO_STRING_IMPL("CHfaService::MyHfaLogicHfaLogicCallback")
+
+        CAR_INTERFACE_DECL()
 
         MyHfaLogicHfaLogicCallback(
             /* [in] */ CHfaService* host)
@@ -40,8 +50,6 @@ private:
     };
 
 public:
-    CAR_INTERFACE_DECL()
-
     CAR_OBJECT_DECL();
 
     CARAPI constructor();
@@ -65,7 +73,7 @@ private:
     CARAPI_(void) OnComplete();
 
 private:
-    static const String TAG = HfaService.class.getSimpleName();
+    static const String TAG;
 
     AutoPtr<IHfaLogic> mHfaLogic;
 };
@@ -73,6 +81,5 @@ private:
 } // namespace Phone
 } // namespace Droid
 } // namespace Elastos
-
 
 #endif // __ELASTOS_DROID_PHONE_CHFASERVICE_H__

@@ -4,9 +4,11 @@ module
     namespace Droid {
     namespace Phone {
 
+    interface IPhoneEditPinPreference;
+
     interface IEditPinPreferenceOnPinEnteredListener {
         OnPinEntered(
-            [in] IEditPinPreference* preference,
+            [in] IPhoneEditPinPreference* preference,
             [in] Boolean positiveResult);
     }
 
@@ -15,8 +17,16 @@ module
      * class, with a couple of modifications, including a different layout
      * for the dialog.
      */
-    interface IEditPinPreference{
+    interface IPhoneEditPinPreference {
+        SetOnPinEnteredListener(
+            [in] IEditPinPreferenceOnPinEnteredListener* listener);
 
+        /**
+         * Externally visible method to bring up the dialog to
+         * for multi-step / multi-dialog requests (like changing
+         * the SIM pin).
+         */
+        ShowPinDialog();
     }
 
     } // namespace Phone

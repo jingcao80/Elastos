@@ -1,5 +1,27 @@
 
 #include "elastos/droid/phone/CInCallScreenShowActivation.h"
+#include "elastos/droid/phone/PhoneGlobals.h"
+#include "elastos/droid/phone/PhoneUtils.h"
+#include "Elastos.Droid.Os.h"
+#include "Elastos.Droid.Provider.h"
+#include <elastos/core/StringBuilder.h>
+#include <elastos/utility/logging/Logger.h>
+#include "R.h"
+
+using Elastos::Droid::Content::IIntent;
+using Elastos::Droid::Content::CIntent;
+using Elastos::Droid::Content::IComponentName;
+using Elastos::Droid::Content::IContentResolver;
+using Elastos::Droid::Content::Pm::IPackageManager;
+using Elastos::Droid::Content::Pm::IResolveInfo;
+using Elastos::Droid::Content::Res::IResources;
+using Elastos::Droid::Os::ISystemProperties;
+using Elastos::Droid::Os::CSystemProperties;
+using Elastos::Droid::Provider::ISettingsGlobal;
+using Elastos::Droid::Provider::CSettingsGlobal;
+using Elastos::Core::StringBuilder;
+
+using Elastos::Utility::Logging::Logger;
 
 namespace Elastos {
 namespace Droid {
@@ -9,8 +31,6 @@ const String CInCallScreenShowActivation::TAG("InCallScreenShowActivation");
 
 static Boolean initDBG()
 {
-    SystemProperties.getInt("ro.debuggable", 0)
-
     AutoPtr<ISystemProperties> helper;
     CSystemProperties::AcquireSingleton((ISystemProperties**)&helper);
     Int32 tmp;
@@ -20,8 +40,6 @@ static Boolean initDBG()
 }
 
 const Boolean CInCallScreenShowActivation::DBG = initDBG();
-
-CAR_INTERFACE_IMPL(CInCallScreenShowActivation, Activity, IInCallScreenShowActivation)
 
 CAR_OBJECT_IMPL(CInCallScreenShowActivation)
 
@@ -51,18 +69,22 @@ ECode CInCallScreenShowActivation::OnCreate(
         Int32 size;
         extras->GetSize(&size);
         sb += size;
-        Loger::D(TAG, sb.ToString()); // forces an unparcel()
+        Logger::D(TAG, sb.ToString()); // forces an unparcel()
 
         StringBuilder sb2;
         sb2 += "      - extras = ";
         sb2 += TO_CSTR(extras);
-        Loger::D(TAG, sb2.ToString());
+        Logger::D(TAG, sb2.ToString());
     }
 
-    AutoPtr<IPhoneGlobals> app = PhoneGlobals::GetInstance();
-    AutoPtr<IPhone> phone;
-    app->GetPhone((IPhone**)&phone);
-    if (!TelephonyCapabilities::SupportsOtasp(phone)) {
+    AutoPtr<PhoneGlobals> app;
+    PhoneGlobals::GetInstance((PhoneGlobals**)&app);
+    AutoPtr<IPhone> phone = app->GetPhone();
+
+    Boolean res;
+    assert(0);
+    //TelephonyCapabilities::SupportsOtasp(phone, &res);
+    if (!res) {
         Logger::W(TAG, "CDMA Provisioning not supported on this device");
         SetResult(RESULT_CANCELED);
         return Finish();
@@ -74,7 +96,8 @@ ECode CInCallScreenShowActivation::OnCreate(
         AutoPtr<IResources> resources;
         GetResources((IResources**)&resources);
         Boolean usesHfa;
-        resources->GetBoolean(R.bool.config_use_hfa_for_provisioning, &usesHfa);
+        resources->GetBoolean(Elastos::Droid::Server::Telephony::R::bool_::config_use_hfa_for_provisioning, 
+                &usesHfa);
         if (usesHfa) {
             Logger::I(TAG, "Starting Hfa from ACTION_PERFORM_CDMA_PROVISIONING");
             StartHfa();
@@ -82,7 +105,8 @@ ECode CInCallScreenShowActivation::OnCreate(
         }
 
         Boolean usesOtasp;
-        resources->GetBoolean(R.bool.config_use_otasp_for_provisioning, &usesOtasp);
+        resources->GetBoolean(Elastos::Droid::Server::Telephony::R::bool_::config_use_otasp_for_provisioning, 
+                &usesOtasp);
         if (usesOtasp) {
             // On voice-capable devices, we perform CDMA provisioning in
             // "interactive" mode by directly launching the InCallScreen.
@@ -153,7 +177,7 @@ ECode CInCallScreenShowActivation::OnCreate(
                 Int32 callStatus;
                 OtaUtils::StartNonInteractiveOtasp(this, &callStatus);
 
-                if (callStatus == IPhoneUtils::CALL_STATUS_DIALED) {
+                if (callStatus == PhoneUtils::CALL_STATUS_DIALED) {
                     if (DBG) {
                         StringBuilder sb;
                         sb += "  ==> successful result from startNonInteractiveOtasp(): ";
@@ -179,7 +203,7 @@ ECode CInCallScreenShowActivation::OnCreate(
         StringBuilder sb;
         sb += "Unexpected intent action: ";
         sb += TO_CSTR(intent);
-        Logger:E(TAG, sb.ToString());
+        Logger::E(TAG, sb.ToString());
         SetResult(RESULT_CANCELED);
     }
 
@@ -205,13 +229,13 @@ Boolean CInCallScreenShowActivation::IsWizardRunning(
     CSettingsGlobal::AcquireSingleton((ISettingsGlobal**)&helper);
     Int32 tmp;
     helper->GetInt32(contentResolver, ISettingsGlobal::DEVICE_PROVISIONED,
-            0, &cdmaSubscriptionMode, &tmp);
+            0, &tmp);
     Boolean provisioned = (tmp != 0);
 
-    AutoPtr<ISystemProperties> helper;
-    CSystemProperties::AcquireSingleton((ISystemProperties**)&helper);
+    AutoPtr<ISystemProperties> helper2;
+    CSystemProperties::AcquireSingleton((ISystemProperties**)&helper2);
     String mode;
-    helper->Get(String("ro.setupwizard.mode"), String("REQUIRED"), &mode);
+    helper2->Get(String("ro.setupwizard.mode"), String("REQUIRED"), &mode);
     Boolean runningSetupWizard = String("REQUIRED").Equals(mode) || String("OPTIONAL").Equals(mode);
     if (DBG) {
         StringBuilder sb;
@@ -237,7 +261,8 @@ void CInCallScreenShowActivation::StartHfa()
     AutoPtr<IResources> resources;
     GetResources((IResources**)&resources);
     Boolean res;
-    resources->GetBoolean(R.bool.config_allow_hfa_outside_of_setup_wizard, &res);
+    resources->GetBoolean(Elastos::Droid::Server::Telephony::R::bool_::config_allow_hfa_outside_of_setup_wizard, 
+            &res);
     if (isWizardRunning || res) {
 
         AutoPtr<IIntent> intent;
@@ -255,17 +280,18 @@ void CInCallScreenShowActivation::StartHfa()
         intent->SetFlags(IIntent::FLAG_ACTIVITY_NEW_TASK);
 
         if (otaResponseIntent != NULL) {
-            intent->PutExtra(IOtaUtils::EXTRA_OTASP_RESULT_CODE_PENDING_INTENT, otaResponseIntent);
+            intent->PutExtra(IOtaUtils::EXTRA_OTASP_RESULT_CODE_PENDING_INTENT, IParcelable::Probe(otaResponseIntent));
         }
 
         Logger::V(TAG, "Starting hfa activation activity");
         if (showUi) {
-            intent->SetClassName(this, String("HfaActivity") /*HfaActivity.class.getName()*/);
+            intent->SetClassName(this, String("CHfaActivity") /*HfaActivity.class.getName()*/);
             StartActivity(intent);
         }
         else {
-            intent->SetClassName(this, String("HfaService") /*HfaService.class.getName()*/);
-            StartService(intent);
+            intent->SetClassName(this, String("CHfaService") /*HfaService.class.getName()*/);
+            AutoPtr<IComponentName> name;
+            StartService(intent, (IComponentName**)&name);
         }
 
     }

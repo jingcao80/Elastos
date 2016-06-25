@@ -802,6 +802,7 @@ private:
 
 private:
     friend class CallController;
+    friend class CInCallScreenShowActivation;
 
     static const String TAG;
     static const Boolean DBG;

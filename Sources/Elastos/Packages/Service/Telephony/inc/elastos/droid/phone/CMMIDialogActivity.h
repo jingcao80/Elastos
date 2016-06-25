@@ -3,6 +3,21 @@
 
 #include "_Elastos_Droid_Phone_CMMIDialogActivity.h"
 #include "elastos/droid/ext/frameworkext.h"
+#include "elastos/droid/app/Activity.h"
+#include "elastos/droid/os/Handler.h"
+#include "Elastos.Droid.App.h"
+#include "Elastos.Droid.Internal.h"
+#include "Elastos.Droid.Os.h"
+
+using Elastos::Droid::App::IDialog;
+using Elastos::Droid::App::Activity;
+using Elastos::Droid::Os::IBundle;
+using Elastos::Droid::Os::IMessage;
+using Elastos::Droid::Os::Handler;
+using Elastos::Droid::Os::IHandler;
+using Elastos::Droid::Internal::Telephony::IPhone;
+using Elastos::Droid::Internal::Telephony::ICallManager;
+using Elastos::Droid::Internal::Telephony::IMmiCode;
 
 namespace Elastos {
 namespace Droid {
@@ -13,7 +28,6 @@ namespace Phone {
  */
 CarClass(CMMIDialogActivity)
     , public Activity
-    , public IMMIDialogActivity
 {
 private:
     class MyHandler
@@ -33,8 +47,6 @@ private:
     };
 
 public:
-    CAR_INTERFACE_DECL()
-
     CAR_OBJECT_DECL();
 
     CMMIDialogActivity();

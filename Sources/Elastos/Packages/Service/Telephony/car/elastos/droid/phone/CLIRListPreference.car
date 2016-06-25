@@ -1,0 +1,22 @@
+module
+{
+    interface ITimeConsumingPreferenceListener;
+    
+    namespace Elastos {
+    namespace Droid {
+    namespace Phone {
+
+    [deprecated]
+    interface ICLIRListPreference {
+        Init(
+            [in] ITimeConsumingPreferenceListener* listener,
+            [in] Boolean skipReading);
+
+        HandleGetCLIRResult(
+            [in] ArrayOf<Int32>* tmpClirArray);
+    }
+
+    } // namespace Phone
+    } // namespace Droid
+    } // namespace Elastos
+}

@@ -3,6 +3,16 @@
 
 #include "_Elastos_Droid_Phone_CGsmUmtsCallForwardOptions.h"
 #include "elastos/droid/ext/frameworkext.h"
+#include "elastos/droid/phone/TimeConsumingPreferenceActivity.h"
+#include "Elastos.Droid.Content.h"
+#include "Elastos.Droid.Os.h"
+#include "Elastos.Droid.Preference.h"
+#include "Elastos.Droid.View.h"
+
+using Elastos::Droid::Content::IIntent;
+using Elastos::Droid::Os::IBundle;
+using Elastos::Droid::Preference::IPreference;
+using Elastos::Droid::View::IMenuItem;
 
 namespace Elastos {
 namespace Droid {
@@ -10,14 +20,11 @@ namespace Phone {
 
 CarClass(CGsmUmtsCallForwardOptions)
     , public TimeConsumingPreferenceActivity
-    , public IGsmUmtsCallForwardOptions
 {
 public:
-    CAR_INTERFACE_DECL()
-
     CAR_OBJECT_DECL();
 
-    CGsmUmtsCallForwardOptions() {}
+    CGsmUmtsCallForwardOptions();
 
     CARAPI constructor();
 
@@ -64,10 +71,10 @@ private:
     static const String KEY_STATUS;
     static const String KEY_NUMBER;
 
-    AutoPtr<ICallForwardEditPreference> mButtonCFU;
-    AutoPtr<ICallForwardEditPreference> mButtonCFB;
-    AutoPtr<ICallForwardEditPreference> mButtonCFNRy;
-    AutoPtr<ICallForwardEditPreference> mButtonCFNRc;
+    // AutoPtr<ICallForwardEditPreference> mButtonCFU;
+    // AutoPtr<ICallForwardEditPreference> mButtonCFB;
+    // AutoPtr<ICallForwardEditPreference> mButtonCFNRy;
+    // AutoPtr<ICallForwardEditPreference> mButtonCFNRc;
 
     AutoPtr<IArrayList> mPreferences;
     Int32 mInitIndex;
@@ -79,6 +86,5 @@ private:
 } // namespace Phone
 } // namespace Droid
 } // namespace Elastos
-
 
 #endif // __ELASTOS_DROID_PHONE_CGSMUMTSCALLFORWARDOPTIONS_H__

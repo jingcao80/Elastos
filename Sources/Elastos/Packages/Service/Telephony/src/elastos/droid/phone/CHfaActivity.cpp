@@ -1,5 +1,21 @@
 
 #include "elastos/droid/phone/CHfaActivity.h"
+#include "elastos/droid/phone/HfaLogic.h"
+#include <elastos/core/StringBuilder.h>
+#include <elastos/core/CoreUtils.h>
+#include <elastos/utility/logging/Logger.h>
+#include "R.h"
+
+using Elastos::Droid::App::IDialog;
+using Elastos::Droid::App::IPendingIntent;
+using Elastos::Droid::App::IAlertDialogBuilder;
+using Elastos::Droid::App::CAlertDialogBuilder;
+using Elastos::Droid::Content::IDialogInterface;
+using Elastos::Droid::Content::IIntent;
+using Elastos::Droid::Content::EIID_IDialogInterfaceOnClickListener;
+using Elastos::Core::StringBuilder;
+using Elastos::Core::CoreUtils;
+using Elastos::Utility::Logging::Logger;
 
 namespace Elastos {
 namespace Droid {
@@ -12,7 +28,8 @@ ECode CHfaActivity::MyDialogInterfaceOnClickListener::OnClick(
     /* [in] */ IDialogInterface* di,
     /* [in] */ Int32 which)
 {
-    return mHost->OnUserSkip();
+    mHost->OnUserSkip();
+    return NOERROR;
 }
 
 CAR_INTERFACE_IMPL(CHfaActivity::MyDialogInterfaceOnClickListener2, Object,
@@ -23,7 +40,8 @@ ECode CHfaActivity::MyDialogInterfaceOnClickListener2::OnClick(
     /* [in] */ Int32 which)
 {
     di->Dismiss();
-    return mHost->OnUserSkip();
+    mHost->OnUserSkip();
+    return NOERROR;
 }
 
 CAR_INTERFACE_IMPL(CHfaActivity::MyDialogInterfaceOnClickListener3, Object,
@@ -34,7 +52,8 @@ ECode CHfaActivity::MyDialogInterfaceOnClickListener3::OnClick(
     /* [in] */ Int32 which)
 {
     di->Dismiss();
-    return mHost->StartProvisioning();
+    mHost->StartProvisioning();
+    return NOERROR;
 }
 
 CAR_INTERFACE_IMPL(CHfaActivity::MyHfaLogicHfaLogicCallback, Object,
@@ -42,18 +61,18 @@ CAR_INTERFACE_IMPL(CHfaActivity::MyHfaLogicHfaLogicCallback, Object,
 
 ECode CHfaActivity::MyHfaLogicHfaLogicCallback::OnSuccess()
 {
-    return mHost->OnHfaSuccess();
+    mHost->OnHfaSuccess();
+    return NOERROR;
 }
 
 ECode CHfaActivity::MyHfaLogicHfaLogicCallback::OnError(
     /* [in] */ const String& error)
 {
-    return mHost->OnHfaError(error);
+    mHost->OnHfaError(error);
+    return NOERROR;
 }
 
 const String CHfaActivity::TAG("CHfaActivity");// = HfaActivity.class.getSimpleName();
-
-CAR_INTERFACE_IMPL(CHfaActivity, Activity, IHfaActivity)
 
 CAR_OBJECT_IMPL(CHfaActivity)
 
@@ -79,9 +98,10 @@ ECode CHfaActivity::OnCreate(
     GetApplicationContext((IContext**)&ctx);
     AutoPtr<IHfaLogicHfaLogicCallback> cb = new MyHfaLogicHfaLogicCallback(this);
 
-    CHfaLogic::New(ctx, cb, otaResponseIntent, (HfaLogic**)&mHfaLogic);
+    mHfaLogic = new HfaLogic(ctx, cb, otaResponseIntent);
 
-    return StartProvisioning();
+    StartProvisioning();
+    return NOERROR;
 }
 
 ECode CHfaActivity::OnDestroy()
@@ -91,8 +111,8 @@ ECode CHfaActivity::OnDestroy()
     Logger::I(TAG, "onDestroy");
 
     Boolean res;
-    if (mDialog != NULL && (mDialog->IsShowing(&res), res)) {
-        mDialog->Dismiss();
+    if (mDialog != NULL && (IDialog::Probe(mDialog)->IsShowing(&res), res)) {
+        IDialogInterface::Probe(mDialog)->Dismiss();
         mDialog = NULL;
     }
     return NOERROR;
@@ -108,40 +128,44 @@ void CHfaActivity::BuildAndShowDialog()
 {
     AutoPtr<IAlertDialogBuilder> builder;
     CAlertDialogBuilder::New(this, IAlertDialog::THEME_DEVICE_DEFAULT_LIGHT, (IAlertDialogBuilder**)&builder);
-    builder->SetTitle(R.string.ota_hfa_activation_title);
-    builder->SetMessage(R.string.ota_hfa_activation_dialog_message);
+    builder->SetTitle(Elastos::Droid::Server::Telephony::R::string::ota_hfa_activation_title);
+    builder->SetMessage(Elastos::Droid::Server::Telephony::R::string::ota_hfa_activation_dialog_message);
 
     AutoPtr<IDialogInterfaceOnClickListener> listener = new MyDialogInterfaceOnClickListener(this);
-    builder->setPositiveButton(R.string.ota_skip_activation_dialog_skip_label, listener);
+    builder->SetPositiveButton(Elastos::Droid::Server::Telephony::R::string::ota_skip_activation_dialog_skip_label, 
+            listener);
 
     builder->Create((IAlertDialog**)&mDialog);
 
     // Do not allow user to dismiss dialog unless they are clicking "skip"
-    mDialog->SetCanceledOnTouchOutside(FALSE);
-    mDialog->SetCancelable(FALSE);
+    IDialog::Probe(mDialog)->SetCanceledOnTouchOutside(FALSE);
+    IDialog::Probe(mDialog)->SetCancelable(FALSE);
 
     Logger::I(TAG, "showing dialog");
-    mDialog->Show();
+    IDialog::Probe(mDialog)->Show();
 }
 
 void CHfaActivity::OnHfaError(
     /* [in] */ const String& errorMsg)
 {
-    mDialog->Dismiss();
+    IDialogInterface::Probe(mDialog)->Dismiss();
 
     AutoPtr<IAlertDialogBuilder> builder;
     CAlertDialogBuilder::New(this, IAlertDialog::THEME_DEVICE_DEFAULT_LIGHT, (IAlertDialogBuilder**)&builder);
-    builder->SetMessage(errorMsg);
+    AutoPtr<ICharSequence> cchar = CoreUtils::Convert(errorMsg);
+    builder->SetMessage(cchar);
 
     AutoPtr<IDialogInterfaceOnClickListener> listener = new MyDialogInterfaceOnClickListener2(this);
-    builder->SetPositiveButton(R.string.ota_skip_activation_dialog_skip_label, listener);
+    builder->SetPositiveButton(Elastos::Droid::Server::Telephony::R::string::ota_skip_activation_dialog_skip_label, 
+            listener);
 
     AutoPtr<IDialogInterfaceOnClickListener> listener2 = new MyDialogInterfaceOnClickListener3(this);
-    builder->SetNegativeButton(R.string.ota_try_again, listener2);
+    builder->SetNegativeButton(Elastos::Droid::Server::Telephony::R::string::ota_try_again, 
+            listener2);
 
     AutoPtr<IAlertDialog> errorDialog;
     builder->Create((IAlertDialog**)&errorDialog);
-    errorDialog->Show();
+    IDialog::Probe(errorDialog)->Show();
 }
 
 void CHfaActivity::OnHfaSuccess()

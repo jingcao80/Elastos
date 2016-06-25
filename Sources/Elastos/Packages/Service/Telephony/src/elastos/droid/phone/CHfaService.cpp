@@ -1,5 +1,12 @@
 
 #include "elastos/droid/phone/CHfaService.h"
+#include "elastos/droid/phone/HfaLogic.h"
+#include <elastos/utility/logging/Logger.h>
+#include <elastos/core/StringBuilder.h>
+
+using Elastos::Droid::App::IPendingIntent;
+using Elastos::Core::StringBuilder;
+using Elastos::Utility::Logging::Logger;
 
 namespace Elastos {
 namespace Droid {
@@ -10,7 +17,8 @@ CAR_INTERFACE_IMPL(CHfaService::MyHfaLogicHfaLogicCallback, Object, IHfaLogicHfa
 ECode CHfaService::MyHfaLogicHfaLogicCallback::OnSuccess()
 {
     Logger::I(TAG, "onSuccess");
-    return mHost->OnComplete();
+    mHost->OnComplete();
+    return NOERROR;
 }
 
 ECode CHfaService::MyHfaLogicHfaLogicCallback::OnError(
@@ -18,16 +26,15 @@ ECode CHfaService::MyHfaLogicHfaLogicCallback::OnError(
 {
     StringBuilder sb;
     sb += "onError: ";
-    sb += msg;
+    sb += error;
     Logger::I(TAG, sb.ToString());
     // We do not respond from this service. On success or failure
     // we do the same thing...finish.
-    return mHost->OnComplete();
+    mHost->OnComplete();
+    return NOERROR;
 }
 
 const String CHfaService::TAG("CHfaService");// = HfaService.class.getSimpleName();
-
-CAR_INTERFACE_IMPL(CHfaService, Service, IHfaService)
 
 CAR_OBJECT_IMPL(CHfaService)
 
@@ -38,7 +45,7 @@ ECode CHfaService::constructor()
 
 ECode CHfaService::OnCreate()
 {
-    return Loger::I(TAG, "service started");
+    return Logger::I(TAG, "service started");
 }
 
 ECode CHfaService::OnStartCommand(
@@ -55,7 +62,7 @@ ECode CHfaService::OnStartCommand(
 
     AutoPtr<IHfaLogicHfaLogicCallback> c = new MyHfaLogicHfaLogicCallback(this);
 
-    CHfaLogic::New(this, c, otaResponseIntent, (IHfaLogic**)&mHfaLogic);
+    mHfaLogic = new HfaLogic(this, c, otaResponseIntent);
     mHfaLogic->Start();
 
     *result = START_REDELIVER_INTENT;

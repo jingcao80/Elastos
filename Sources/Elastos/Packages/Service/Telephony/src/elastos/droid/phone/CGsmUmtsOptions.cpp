@@ -1,5 +1,26 @@
 
-#include "elastos/droid/phone/CPhoneApp.h"
+#include "elastos/droid/phone/CGsmUmtsOptions.h"
+#include "Elastos.Droid.Content.h"
+#include "Elastos.Droid.Internal.h"
+#include "Elastos.Droid.Provider.h"
+#include <elastos/core/CoreUtils.h>
+#include <elastos/utility/logging/Logger.h>
+#include "R.h"
+
+using Elastos::Droid::Content::IContext;
+using Elastos::Droid::Content::IIntent;
+using Elastos::Droid::Content::CIntent;
+using Elastos::Droid::Content::Res::IResources;
+using Elastos::Droid::Provider::ISettings;
+using Elastos::Droid::Preference::IPreference;
+using Elastos::Droid::Preference::IPreferenceGroup;
+using Elastos::Droid::Preference::EIID_IPreferenceOnPreferenceClickListener;
+using Elastos::Droid::Internal::Telephony::IPhone;
+using Elastos::Droid::Internal::Telephony::CPhoneFactory;
+using Elastos::Droid::Internal::Telephony::IPhoneFactory;
+using Elastos::Droid::Internal::Telephony::IPhoneConstants;
+using Elastos::Core::CoreUtils;
+using Elastos::Utility::Logging::Logger;
 
 namespace Elastos {
 namespace Droid {
@@ -17,14 +38,20 @@ CGsmUmtsOptions::MyPreferenceOnPreferenceClickListener::OnPreferenceClick(
     // We need to build the Intent by hand as the Preference Framework
     // does not allow to add an Intent with some extras into a Preference
     // XML file
-    AUtoPtr<IIntent> intent;
+    AutoPtr<IIntent> intent;
     CIntent::New(ISettings::ACTION_APN_SETTINGS, (IIntent**)&intent);
     // This will setup the Home and Search affordance
     intent->PutExtra(String(":settings:show_fragment_as_subsetting"), TRUE);
-    mHost->mPrefActivity->StartActivity(intent);
+    IContext::Probe(mHost->mPrefActivity)->StartActivity(intent);
     *result = TRUE;
     return NOERROR;
 }
+
+const String CGsmUmtsOptions::TAG("GsmUmtsOptions");
+
+const String CGsmUmtsOptions::BUTTON_APN_EXPAND_KEY("button_apn_key");
+const String CGsmUmtsOptions::BUTTON_OPERATOR_SELECTION_EXPAND_KEY("button_carrier_sel_key");
+const String CGsmUmtsOptions::BUTTON_CARRIER_SETTINGS_KEY("carrier_settings_key");
 
 CAR_INTERFACE_IMPL(CGsmUmtsOptions, Object, IGsmUmtsOptions)
 
@@ -41,79 +68,96 @@ ECode CGsmUmtsOptions::constructor(
 
 ECode CGsmUmtsOptions::Create()
 {
-    mPrefActivity->AddPreferencesFromResource(R.xml.gsm_umts_options);
+    mPrefActivity->AddPreferencesFromResource(
+            Elastos::Droid::Server::Telephony::R::xml::gsm_umts_options);
 
     AutoPtr<IPreference> preference;
-    mPrefScreen->FindPreference(BUTTON_APN_EXPAND_KEY, (IPreference**)&preference);
+    AutoPtr<ICharSequence> cchar = CoreUtils::Convert(BUTTON_APN_EXPAND_KEY);
+    IPreferenceGroup::Probe(mPrefScreen)->FindPreference(cchar, (IPreference**)&preference);
     mButtonAPNExpand = IPreferenceScreen::Probe(preference);
     Boolean removedAPNExpand = FALSE;
 
     AutoPtr<IPreference> preference2;
-    mPrefScreen->FindPreference(BUTTON_OPERATOR_SELECTION_EXPAND_KEY, (IPreference**)&preference2);
+    AutoPtr<ICharSequence> cchar2 = CoreUtils::Convert(BUTTON_OPERATOR_SELECTION_EXPAND_KEY);
+    IPreferenceGroup::Probe(mPrefScreen)->FindPreference(cchar2, (IPreference**)&preference2);
     mButtonOperatorSelectionExpand = IPreferenceScreen::Probe(preference2);
 
+    AutoPtr<IPhoneFactory> helper;
+    CPhoneFactory::AcquireSingleton((IPhoneFactory**)&helper);
     AutoPtr<IPhone> phone;
-    PhoneFactory::GetDefaultPhone((IPhone**)&phone);
+    helper->GetDefaultPhone((IPhone**)&phone);
     Int32 type;
     phone->GetPhoneType(&type);
     if (type != IPhoneConstants::PHONE_TYPE_GSM) {
         Log(String("Not a GSM phone"));
-        mButtonAPNExpand->SetEnabled(FALSE);
-        mButtonOperatorSelectionExpand->SetEnabled(FALSE);
+        IPreference::Probe(mButtonAPNExpand)->SetEnabled(FALSE);
+        IPreference::Probe(mButtonOperatorSelectionExpand)->SetEnabled(FALSE);
     }
     else {
         Log(String("Not a CDMA phone"));
         AutoPtr<IResources> res;
-        mPrefActivity->GetResources((IResources**)&res);
+        IContext::Probe(mPrefActivity)->GetResources((IResources**)&res);
 
         // Determine which options to display, for GSM these are defaulted
         // are defaulted to true in Phone/res/values/config.xml. But for
         // some operators like verizon they maybe overriden in operator
         // specific resources or device specific overlays.
         Boolean result;
-        if ((res->GetBoolean(R.bool.config_apn_expand, &result), !result) && mButtonAPNExpand != NULL) {
-            mPrefScreen->RemovePreference(mButtonAPNExpand);
+        if ((res->GetBoolean(
+                Elastos::Droid::Server::Telephony::R::bool_::config_apn_expand, &result), !result) 
+                && mButtonAPNExpand != NULL) {
+            Boolean tmp;
+            IPreferenceGroup::Probe(mPrefScreen)->RemovePreference(IPreference::Probe(mButtonAPNExpand), &tmp);
             removedAPNExpand = TRUE;
         }
-        if (res->GetBoolean(R.bool.config_operator_selection_expand, &result), !result) {
+        if (res->GetBoolean(
+                Elastos::Droid::Server::Telephony::R::bool_::config_operator_selection_expand, &result), 
+                !result) {
             AutoPtr<IPreference> preference;
-            mPrefScreen->FindPreference(BUTTON_OPERATOR_SELECTION_EXPAND_KEY, (IPreference**)&preference);
-            mPrefScreen->RemovePreference(preference);
+            AutoPtr<ICharSequence> cchar = CoreUtils::Convert(BUTTON_OPERATOR_SELECTION_EXPAND_KEY);
+            IPreferenceGroup::Probe(mPrefScreen)->FindPreference(cchar, (IPreference**)&preference);
+            Boolean tmp;
+            IPreferenceGroup::Probe(mPrefScreen)->RemovePreference(preference, &tmp);
         }
 
-        if (res->GetBoolean(R.bool.csp_enabled, &result), result) {
-            AutoPtr<IPhone> _phone;
-            PhoneFactory::GetDefaultPhone((IPhone**)&_phone);
-            Boolean result2;
-            if (_phone->IsCspPlmnEnabled(&result2), result2) {
+        if (res->GetBoolean(
+                Elastos::Droid::Server::Telephony::R::bool_::csp_enabled, &result), 
+                result) {
+            Boolean tmp;
+            if (phone->IsCspPlmnEnabled(&tmp), tmp) {
                 Log(String("[CSP] Enabling Operator Selection menu."));
-                mButtonOperatorSelectionExpand->SetEnabled(TRUE);
+                IPreference::Probe(mButtonOperatorSelectionExpand)->SetEnabled(TRUE);
             }
             else {
                 Log(String("[CSP] Disabling Operator Selection menu."));
                 AutoPtr<IPreference> preference;
-                mPrefScreen->FindPreference(BUTTON_OPERATOR_SELECTION_EXPAND_KEY, (IPreference**)&preference);
-                mPrefScreen->RemovePreference(preference);
+                AutoPtr<ICharSequence> cchar = CoreUtils::Convert(BUTTON_OPERATOR_SELECTION_EXPAND_KEY);
+                IPreferenceGroup::Probe(mPrefScreen)->FindPreference(cchar, (IPreference**)&preference);
+                IPreferenceGroup::Probe(mPrefScreen)->RemovePreference(preference, &tmp);
             }
         }
 
         // Read platform settings for carrier settings
         AutoPtr<IResources> resources;
-        mPrefActivity->GetResources((IResources**)&resources);
+        IContext::Probe(mPrefActivity)->GetResources((IResources**)&resources);
         Boolean isCarrierSettingsEnabled;
-        resources->GetBoolean(R.bool.config_carrier_settings_enable, &isCarrierSettingsEnabled);
+        resources->GetBoolean(
+                Elastos::Droid::Server::Telephony::R::bool_::config_carrier_settings_enable, 
+                &isCarrierSettingsEnabled);
         if (!isCarrierSettingsEnabled) {
             AutoPtr<IPreference> pref;
-            mPrefScreen->FindPreference(BUTTON_CARRIER_SETTINGS_KEY, (IPreference**)&pref);
+            AutoPtr<ICharSequence> cchar = CoreUtils::Convert(BUTTON_CARRIER_SETTINGS_KEY);
+            IPreferenceGroup::Probe(mPrefScreen)->FindPreference(cchar, (IPreference**)&pref);
             if (pref != NULL) {
-                mPrefScreen->RemovePreference(pref);
+                Boolean tmp;
+                IPreferenceGroup::Probe(mPrefScreen)->RemovePreference(pref, &tmp);
             }
         }
     }
     if (!removedAPNExpand) {
         AutoPtr<IPreferenceOnPreferenceClickListener> listener =
                 new MyPreferenceOnPreferenceClickListener(this);
-        mButtonAPNExpand->SetOnPreferenceClickListener(listener);
+        IPreference::Probe(mButtonAPNExpand)->SetOnPreferenceClickListener(listener);
     }
     return NOERROR;
 }
@@ -130,13 +174,11 @@ ECode CGsmUmtsOptions::PreferenceTreeClick(
     return NOERROR;
 }
 
-
 ECode CGsmUmtsOptions::Log(
     /* [in] */ const String& s)
 {
     return Logger::D(TAG, s);
 }
-
 
 } // namespace Phone
 } // namespace Droid

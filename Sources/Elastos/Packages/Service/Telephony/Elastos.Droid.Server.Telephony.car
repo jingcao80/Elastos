@@ -11,9 +11,11 @@ module
     merge("car/elastos/droid/phone/CallTime.car");
     merge("car/elastos/droid/phone/Constants.car");
     merge("car/elastos/droid/phone/CdmaOptions.car");
+    merge("car/elastos/droid/phone/CLIRListPreference.car");
     merge("car/elastos/droid/phone/CdmaSystemSelectListPreference.car");
     merge("car/elastos/droid/phone/CdmaSubscriptionListPreference.car");
     merge("car/elastos/droid/phone/ErrorDialogActivity.car");
+    merge("car/elastos/droid/phone/EditPinPreference.car");
     merge("car/elastos/droid/phone/EditPhoneNumberPreference.car");
     merge("car/elastos/droid/phone/InCallScreen.car");
     merge("car/elastos/droid/phone/EmergencyCallHelper.car");
@@ -46,6 +48,8 @@ module
     using interface Elastos.Droid.App.IActivity;
     using interface Elastos.Droid.App.IApplication;
     using interface Elastos.Droid.App.IListActivity;
+    using interface Elastos.Droid.App.IDialog;
+    using interface Elastos.Droid.Content.IDialogInterface;
     using interface Elastos.Droid.Content.IDialogInterfaceOnClickListener;
     using interface Elastos.Droid.Content.IDialogInterfaceOnCancelListener;
     using interface Elastos.Droid.Content.IBroadcastReceiver;
@@ -61,6 +65,7 @@ module
     using interface Elastos.Droid.Provider.ISearchIndexablesProvider;
     using interface Elastos.Droid.Internal.Telephony.IITelephony;
     using interface Elastos.Droid.Internal.Telephony.IPhone;
+    using interface Elastos.Droid.Internal.Telephony.IIccProvider;
     using interface Elastos.Droid.Os.IBinder;
     using interface Elastos.Droid.Telecomm.Telecom.IConnectionService;
     using interface Elastos.Droid.View.IContextThemeWrapper;
@@ -70,6 +75,7 @@ module
     using interface Elastos.Droid.View.IOnWindowDismissedCallback;
     using interface Elastos.Droid.View.IViewOnCreateContextMenuListener;
     using interface Elastos.Droid.View.IWindowCallback;
+    using interface Elastos.Droid.Preference.IEditTextPreference;
     using interface Elastos.Droid.Preference.ICheckBoxPreference;
     using interface Elastos.Droid.Preference.IDialogPreference;
     using interface Elastos.Droid.Preference.IListPreference;
@@ -81,6 +87,7 @@ module
     using interface Elastos.Droid.Preference.IPreferenceScreen;
     using interface Elastos.Droid.Preference.IPreferenceManagerOnPreferenceTreeClickListener;
     using interface Elastos.Droid.Preference.ITwoStatePreference;
+    using interface Elastos.Droid.Widget.IOnEditorActionListener;
     using interface Elastos.Core.IComparable;
     using interface Elastos.Droid.Utility.IAttributeSet;
 
@@ -387,10 +394,10 @@ module
         interface ILayoutInflaterFactory2;
         interface IWindowCallback;
         interface IKeyEventCallback;
-        //interface IViewOnCreateContextMenuListener; //undefined
+        interface IViewOnCreateContextMenuListener; 
         interface IComponentCallbacks2;
         interface IComponentCallbacks;
-        //interface IOnWindowDismissedCallback;  //IOnWindowDismissedCallback
+        interface IOnWindowDismissedCallback;  
         interface IContextWrapper;
         interface IContext;
         interface IPreferenceActivity;
@@ -419,10 +426,10 @@ module
         interface ILayoutInflaterFactory2;
         interface IWindowCallback;
         interface IKeyEventCallback;
-        //interface IViewOnCreateContextMenuListener; //undefined
+        interface IViewOnCreateContextMenuListener;
         interface IComponentCallbacks2;
         interface IComponentCallbacks;
-        //interface IOnWindowDismissedCallback;  //IOnWindowDismissedCallback
+        interface IOnWindowDismissedCallback; 
         interface IContextWrapper;
         interface IContext;
         interface IPreferenceActivity;
@@ -431,6 +438,207 @@ module
         interface IDialogInterfaceOnClickListener;
         interface IDialogInterfaceOnDismissListener;
         interface IPreferenceOnPreferenceChangeListener;
+    }
+
+    class CMMIDialogActivity {
+        constructor();
+
+        interface IContext;
+        interface IContextWrapper;
+        interface IContextThemeWrapper;
+        interface ILayoutInflaterFactory;
+        interface ILayoutInflaterFactory2;
+        interface IWindowCallback;
+        interface IKeyEventCallback;
+        interface IViewOnCreateContextMenuListener;
+        interface IComponentCallbacks;
+        interface IComponentCallbacks2;
+        interface IOnWindowDismissedCallback;
+        interface IActivity;
+    }
+
+    class CInCallScreenShowActivation {
+        constructor();
+
+        interface IContext;
+        interface IContextWrapper;
+        interface IContextThemeWrapper;
+        interface ILayoutInflaterFactory;
+        interface ILayoutInflaterFactory2;
+        interface IWindowCallback;
+        interface IKeyEventCallback;
+        interface IViewOnCreateContextMenuListener;
+        interface IComponentCallbacks;
+        interface IComponentCallbacks2;
+        interface IOnWindowDismissedCallback;
+        interface IActivity;
+    }
+
+    class CIccProvider {
+        constructor();
+
+        interface IContentProvider;
+        interface IIccProvider;
+    }
+
+    [local]
+    class CIccPanel {
+        constructor(
+            [in] IContext* context);
+
+        interface IDialog;
+        interface IDialogInterface;
+        interface IWindowCallback;
+        interface IKeyEventCallback;
+        interface IViewOnCreateContextMenuListener;
+        interface IOnWindowDismissedCallback;
+    }
+
+    class CHfaService {
+        constructor();
+
+        interface IContext;
+        interface IContextWrapper;
+        interface IComponentCallbacks;
+        interface IComponentCallbacks2;
+        interface IService; 
+    }
+
+    class CHfaActivity {
+        constructor();
+
+        interface IContext;
+        interface IContextWrapper;
+        interface IContextThemeWrapper;
+        interface ILayoutInflaterFactory;
+        interface ILayoutInflaterFactory2;
+        interface IWindowCallback;
+        interface IKeyEventCallback;
+        interface IViewOnCreateContextMenuListener;
+        interface IComponentCallbacks;
+        interface IComponentCallbacks2;
+        interface IOnWindowDismissedCallback;
+        interface IActivity;
+    }
+
+    [local]
+    class CGsmUmtsOptions {
+        constructor(
+            [in] IPreferenceActivity* prefActivity,
+            [in] IPreferenceScreen* prefScreen);
+
+        interface IGsmUmtsOptions;
+    }
+
+    class CGsmUmtsCallOptions {
+        constructor();
+
+        interface IListActivity;
+        interface IActivity;
+        interface IPreferenceManagerOnPreferenceTreeClickListener;
+        interface IPreferenceFragmentOnPreferenceStartFragmentCallback;
+        interface IContextThemeWrapper;
+        interface ILayoutInflaterFactory;
+        interface ILayoutInflaterFactory2;
+        interface IWindowCallback;
+        interface IKeyEventCallback;
+        interface IViewOnCreateContextMenuListener;
+        interface IComponentCallbacks2;
+        interface IComponentCallbacks;
+        interface IOnWindowDismissedCallback; 
+        interface IContextWrapper;
+        interface IContext;
+        interface IPreferenceActivity;
+    }
+
+    class CGsmUmtsCallForwardOptions {
+        constructor();
+
+        interface IListActivity;
+        interface IActivity;
+        interface IPreferenceManagerOnPreferenceTreeClickListener;
+        interface IPreferenceFragmentOnPreferenceStartFragmentCallback;
+        interface IContextThemeWrapper;
+        interface ILayoutInflaterFactory;
+        interface ILayoutInflaterFactory2;
+        interface IWindowCallback;
+        interface IKeyEventCallback;
+        interface IViewOnCreateContextMenuListener;
+        interface IComponentCallbacks2;
+        interface IComponentCallbacks;
+        interface IOnWindowDismissedCallback; 
+        interface IContextWrapper;
+        interface IContext;
+        interface IPreferenceActivity;
+
+        interface ITimeConsumingPreferenceListener;
+        interface IDialogInterfaceOnCancelListener;
+    }
+
+    class CGsmUmtsAdditionalCallOptions {
+        constructor();
+
+        interface IListActivity;
+        interface IActivity;
+        interface IPreferenceManagerOnPreferenceTreeClickListener;
+        interface IPreferenceFragmentOnPreferenceStartFragmentCallback;
+        interface IContextThemeWrapper;
+        interface ILayoutInflaterFactory;
+        interface ILayoutInflaterFactory2;
+        interface IWindowCallback;
+        interface IKeyEventCallback;
+        interface IViewOnCreateContextMenuListener;
+        interface IComponentCallbacks2;
+        interface IComponentCallbacks;
+        interface IOnWindowDismissedCallback; 
+        interface IContextWrapper;
+        interface IContext;
+        interface IPreferenceActivity;
+
+        interface ITimeConsumingPreferenceListener;
+        interface IDialogInterfaceOnCancelListener;
+    }
+
+    class CGetPin2Screen {
+        constructor();
+
+        interface IContext;
+        interface IContextWrapper;
+        interface IContextThemeWrapper;
+        interface ILayoutInflaterFactory;
+        interface ILayoutInflaterFactory2;
+        interface IWindowCallback;
+        interface IKeyEventCallback;
+        interface IViewOnCreateContextMenuListener;
+        interface IComponentCallbacks;
+        interface IComponentCallbacks2;
+        interface IOnWindowDismissedCallback;
+        interface IActivity;
+
+        interface IOnEditorActionListener;
+    }
+
+    [local]
+    class CEditPinPreference {
+        constructor(
+            [in] IContext* ctx,
+            [in] IAttributeSet* attrs);
+
+        constructor(
+            [in] IContext* ctx,
+            [in] IAttributeSet* attrs,
+            [in] Int32 defStyle);
+
+        interface IPreference;
+        interface IComparable;
+        interface IDialogPreference;
+        interface IDialogInterfaceOnClickListener;
+        interface IDialogInterfaceOnDismissListener;
+        interface IPreferenceManagerOnActivityDestroyListener;
+        interface IEditTextPreference;
+
+        interface IPhoneEditPinPreference;
+
     }
 
     } // namespace Phone
@@ -454,10 +662,10 @@ module
         interface ILayoutInflaterFactory2;
         interface IWindowCallback;
         interface IKeyEventCallback;
-        //interface IViewOnCreateContextMenuListener; //undefined
+        interface IViewOnCreateContextMenuListener;
         interface IComponentCallbacks2;
         interface IComponentCallbacks;
-        //interface IOnWindowDismissedCallback;  //IOnWindowDismissedCallback
+        interface IOnWindowDismissedCallback;
         interface IContextWrapper;
         interface IContext;
         interface IPreferenceActivity;

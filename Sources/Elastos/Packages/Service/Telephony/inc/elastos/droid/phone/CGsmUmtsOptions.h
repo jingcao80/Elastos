@@ -3,6 +3,14 @@
 
 #include "_Elastos_Droid_Phone_CGsmUmtsOptions.h"
 #include "elastos/droid/ext/frameworkext.h"
+#include "Elastos.Droid.Preference.h"
+#include <elastos/core/Object.h>
+
+using Elastos::Droid::Preference::IPreferenceActivity;
+using Elastos::Droid::Preference::IPreferenceScreen;
+using Elastos::Droid::Preference::IPreference;
+using Elastos::Droid::Preference::IPreferenceOnPreferenceClickListener;
+using Elastos::Core::Object;
 
 namespace Elastos {
 namespace Droid {
@@ -22,6 +30,8 @@ private:
     {
     public:
         TO_STRING_IMPL("CGsmUmtsOptions::MyPreferenceOnPreferenceClickListener")
+
+        CAR_INTERFACE_DECL()
 
         MyPreferenceOnPreferenceClickListener(
             /* [in] */ CGsmUmtsOptions* host)
@@ -57,14 +67,14 @@ protected:
         /* [in] */ const String& s);
 
 private:
-    static const String TAG = "GsmUmtsOptions";
+    static const String TAG;
 
     AutoPtr<IPreferenceScreen> mButtonAPNExpand;
     AutoPtr<IPreferenceScreen> mButtonOperatorSelectionExpand;
 
-    static const String BUTTON_APN_EXPAND_KEY = "button_apn_key";
-    static const String BUTTON_OPERATOR_SELECTION_EXPAND_KEY = "button_carrier_sel_key";
-    static const String BUTTON_CARRIER_SETTINGS_KEY = "carrier_settings_key";
+    static const String BUTTON_APN_EXPAND_KEY;
+    static const String BUTTON_OPERATOR_SELECTION_EXPAND_KEY;
+    static const String BUTTON_CARRIER_SETTINGS_KEY;
     AutoPtr<IPreferenceActivity> mPrefActivity;
     AutoPtr<IPreferenceScreen> mPrefScreen;
 };
@@ -72,6 +82,5 @@ private:
 } // namespace Phone
 } // namespace Droid
 } // namespace Elastos
-
 
 #endif // __ELASTOS_DROID_PHONE_CGSMUMTSOPTIONS_H__

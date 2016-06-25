@@ -3,6 +3,12 @@
 
 #include "_Elastos_Droid_Phone_CInCallScreenShowActivation.h"
 #include "elastos/droid/ext/frameworkext.h"
+#include "elastos/droid/app/Activity.h"
+#include "Elastos.Droid.Content.h"
+
+using Elastos::Droid::App::Activity;
+using Elastos::Droid::Content::IContext;
+using Elastos::Droid::Os::IBundle;
 
 namespace Elastos {
 namespace Droid {
@@ -23,11 +29,8 @@ namespace Phone {
  */
 CarClass(CInCallScreenShowActivation)
     , public Activity
-    , public IInCallScreenShowActivation
 {
 public:
-    CAR_INTERFACE_DECL()
-
     CAR_OBJECT_DECL();
 
     CARAPI constructor();
@@ -58,13 +61,12 @@ private:
     CARAPI_(void) StartHfa();
 
 private:
-    static const String TAG = "InCallScreenShowActivation";
-    static const Boolean DBG = (PhoneGlobals.DBG_LEVEL >= 1) && (SystemProperties.getInt("ro.debuggable", 0) == 1);
+    static const String TAG;
+    static const Boolean DBG;
 };
 
 } // namespace Phone
 } // namespace Droid
 } // namespace Elastos
-
 
 #endif // __ELASTOS_DROID_PHONE_CINCALLSCREENSHOWACTIVATION_H__
