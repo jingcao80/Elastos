@@ -346,7 +346,7 @@ ECode InCallController::OnPostDialWait(
 ECode InCallController::OnIsConferencedChanged(
     /* [in] */ ICall* call)
 {
-    Log::D("InCallController", "onIsConferencedChanged %s", call);
+    Log::D("InCallController", "onIsConferencedChanged %s", TO_CSTR(call));
     UpdateCall(call);
     return NOERROR;
 }
@@ -386,9 +386,9 @@ ECode InCallController::Unbind()
     entrySet->GetIterator((IIterator**)&iterator);
     Boolean hasNext;
     while (iterator->HasNext(&hasNext), hasNext) {
-        Log::I("InCallController", "Unbinding from InCallService %s");
         AutoPtr<IInterface> obj;
         iterator->GetNext((IInterface**)&obj);
+        Log::I("InCallController", "Unbinding from InCallService %s", TO_CSTR(obj));
         AutoPtr<IMapEntry> entry = IMapEntry::Probe(obj);
         obj = NULL;
         entry->GetValue((IInterface**)&obj);
@@ -480,7 +480,7 @@ ECode InCallController::OnConnected(
     /* [in] */ IBinder* service)
 {
     ThreadUtil::CheckOnMainThread();
-    Log::I("InCallController", "onConnected to %s", componentName);
+    Log::I("InCallController", "onConnected to %s", TO_CSTR(componentName));
     AutoPtr<IIInCallService> inCallService = IIInCallService::Probe(service);
     // try {
     ECode ec;
@@ -554,7 +554,7 @@ ECode InCallController::OnConnected(
 ECode InCallController::OnDisconnected(
     /* [in] */ IComponentName* disconnectedComponent)
 {
-    Log::I("InCallController", "onDisconnected from %s", disconnectedComponent);
+    Log::I("InCallController", "onDisconnected from %s", TO_CSTR(disconnectedComponent));
     ThreadUtil::CheckOnMainThread();
     Boolean isContainsKey;
     mInCallServices->ContainsKey(disconnectedComponent, &isContainsKey);

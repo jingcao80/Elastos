@@ -78,7 +78,7 @@ ECode RingbackPlayer::StartRingbackForCall(
     preconditionsHelper->CheckState(callState == ICallState::DIALING);
     ThreadUtil::CheckOnMainThread();
     if (mCall.Get() == call) {
-        Log::W("RingbackPlayer", "Ignoring duplicate requests to ring for %s.", call);
+        Log::W("RingbackPlayer", "Ignoring duplicate requests to ring for %s.", TO_CSTR(call));
         return NOERROR;
     }
     if (mCall != NULL) {
@@ -106,7 +106,7 @@ ECode RingbackPlayer::StopRingbackForCall(
         if (mTonePlayer == NULL) {
             Log::W("RingbackPlayer", "No player found to stop.");
         } else {
-            Log::I("RingbackPlayer", "Stopping the ringback tone for %s.", call);
+            Log::I("RingbackPlayer", "Stopping the ringback tone for %s.", TO_CSTR(call));
             mTonePlayer->StopTone();
             mTonePlayer = NULL;
         }

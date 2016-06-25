@@ -239,7 +239,7 @@ ECode CallsManager::OnFailedOutgoingCall(
     /* [in] */ ICall* call,
     /* [in] */ IDisconnectCause* disconnectCause)
 {
-    Log::V(TAG, "onFailedOutgoingCall, call: %s", call);
+    Log::V(TAG, "onFailedOutgoingCall, call: %s", TO_CSTR(call));
     MarkCallAsRemoved(call);
     return NOERROR;
 }
@@ -803,7 +803,7 @@ ECode CallsManager::AnswerCall(
     Boolean isContains;
     mCalls->Contains(call, &isContains);
     if (!isContains) {
-        Log::I(TAG, "Request to answer a non-existent call %s", call);
+        Log::I(TAG, "Request to answer a non-existent call %s", TO_CSTR(call));
     } else {
         AutoPtr<IPhoneAccountHandle> phoneAccountHandle;
         ((Call*) call)->GetTargetPhoneAccount((IPhoneAccountHandle**)&phoneAccountHandle);
@@ -892,7 +892,7 @@ ECode CallsManager::DeflectCall(
     Boolean isContains;
     mCalls->Contains(call, &isContains);
     if (!isContains) {
-        Log::I(TAG, "Request to deflect a non-existent call %s", call);
+        Log::I(TAG, "Request to deflect a non-existent call %s", TO_CSTR(call));
     } else {
         ((Call*) call)->Deflect(number);
     }
@@ -907,7 +907,7 @@ ECode CallsManager::RejectCall(
     Boolean isContains;
     mCalls->Contains(call, &isContains);
     if (!isContains) {
-        Log::I(TAG, "Request to reject a non-existent call %s", call);
+        Log::I(TAG, "Request to reject a non-existent call %s", TO_CSTR(call));
     } else {
         AutoPtr<IIterator> it;
         mListeners->GetIterator((IIterator**)&it);
@@ -933,7 +933,7 @@ ECode CallsManager::PlayDtmfTone(
     Boolean isContains;
     mCalls->Contains(call, &isContains);
     if (!isContains) {
-        Log::I(TAG, "Request to play DTMF in a non-existent call %s", call);
+        Log::I(TAG, "Request to play DTMF in a non-existent call %s", TO_CSTR(call));
     } else {
         ((Call*) call)->PlayDtmfTone(digit);
         mDtmfLocalTonePlayer->PlayTone(call, digit);
@@ -947,7 +947,7 @@ ECode CallsManager::StopDtmfTone(
     Boolean isContains;
     mCalls->Contains(call, &isContains);
     if (!isContains) {
-        Log::I(TAG, "Request to stop DTMF in a non-existent call %s", call);
+        Log::I(TAG, "Request to stop DTMF in a non-existent call %s", TO_CSTR(call));
     } else {
         ((Call*) call)->StopDtmfTone();
         mDtmfLocalTonePlayer->StopTone(call);
@@ -962,7 +962,7 @@ ECode CallsManager::PostDialContinue(
     Boolean isContains;
     mCalls->Contains(call, &isContains);
     if (!isContains) {
-        Log::I(TAG, "Request to continue post-dial string in a non-existent call %s", call);
+        Log::I(TAG, "Request to continue post-dial string in a non-existent call %s", TO_CSTR(call));
     } else {
         ((Call*) call)->PostDialContinue(proceed);
     }
@@ -976,7 +976,7 @@ ECode CallsManager::DisconnectCall(
     Boolean isContains;
     mCalls->Contains(call, &isContains);
     if (!isContains) {
-        Log::W(TAG, "Unknown call (%s) asked to disconnect", call);
+        Log::W(TAG, "Unknown call (%s) asked to disconnect", TO_CSTR(call));
     } else {
         mLocallyDisconnectingCalls->Add(call);
         ((Call*) call)->Disconnect();
@@ -1005,9 +1005,9 @@ ECode CallsManager::HoldCall(
     Boolean isContains;
     mCalls->Contains(call, &isContains);
     if (!isContains) {
-        Log::W(TAG, "Unknown call (%s) asked to be put on hold", call);
+        Log::W(TAG, "Unknown call (%s) asked to be put on hold", TO_CSTR(call));
     } else {
-        Log::D(TAG, "Putting call on hold: (%s)", call);
+        Log::D(TAG, "Putting call on hold: (%s)", TO_CSTR(call));
         ((Call*) call)->Hold();
     }
     return NOERROR;
@@ -1019,9 +1019,9 @@ ECode CallsManager::UnholdCall(
     Boolean isContains;
     mCalls->Contains(call, &isContains);
     if (!isContains) {
-        Log::W(TAG, "Unknown call (%s) asked to be removed from hold", call);
+        Log::W(TAG, "Unknown call (%s) asked to be removed from hold", TO_CSTR(call));
     } else {
-        Log::D(TAG, "unholding call: (%s)", call);
+        Log::D(TAG, "unholding call: (%s)", TO_CSTR(call));
         AutoPtr<IPhoneAccountHandle> ph;
         ((Call*) call)->GetTargetPhoneAccount((IPhoneAccountHandle**)&ph);
         AutoPtr<IList> childCalls;
@@ -1120,7 +1120,7 @@ ECode CallsManager::PhoneAccountSelected(
     Boolean isContains;
     mCalls->Contains(call, &isContains);
     if (!isContains) {
-        Log::I(TAG, "Attempted to add account to unknown call %s", call);
+        Log::I(TAG, "Attempted to add account to unknown call %s", TO_CSTR(call));
     } else {
         // TODO: There is an odd race condition here. Since NewOutgoingCallIntentBroadcaster and
         // the PRE_DIAL_WAIT sequence run in parallel, if the user selects an account before the
@@ -1786,7 +1786,7 @@ ECode CallsManager::GetBlacklistCallNotifier(
 ECode CallsManager::AddCall(
     /* [in] */ ICall* call)
 {
-    Log::V(TAG, "addCall(%s)", call);
+    Log::V(TAG, "addCall(%s)", TO_CSTR(call));
     ((Call*) call)->AddListener(this);
     mCalls->Add(call);
     // TODO: Update mForegroundCall prior to invoking
@@ -1807,7 +1807,7 @@ ECode CallsManager::AddCall(
 ECode CallsManager::RemoveCall(
     /* [in] */ ICall* call)
 {
-    Log::V(TAG, "removeCall(%s)", call);
+    Log::V(TAG, "removeCall(%s)", TO_CSTR(call));
     ((Call*) call)->SetParentCall(NULL);  // need to clean up parent relationship before destroying.
     ((Call*) call)->RemoveListener(this);
     ((Call*) call)->ClearConnectionService();

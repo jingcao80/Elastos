@@ -454,7 +454,7 @@ ECode CallAudioManager::TurnOnSpeaker(
     Boolean isSpeakerphoneOn;
     mAudioManager->IsSpeakerphoneOn(&isSpeakerphoneOn);
     if (isSpeakerphoneOn != on) {
-        Log::I("CallAudioManager", "turning speaker phone %s", on);
+        Log::I("CallAudioManager", "turning speaker phone %d", on);
         mAudioManager->SetSpeakerphoneOn(on);
     }
     return NOERROR;

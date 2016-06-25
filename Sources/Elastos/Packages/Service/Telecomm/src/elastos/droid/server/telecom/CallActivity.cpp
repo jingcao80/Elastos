@@ -143,7 +143,7 @@ ECode CallActivity::ProcessOutgoingCallIntent(
     intent->GetInt32Extra(
             ITelecomManager::EXTRA_START_CALL_WITH_VIDEO_STATE,
             IVideoProfileVideoState::AUDIO_ONLY, &videoState);
-    Log::D("CallActivity", "processOutgoingCallIntent videoState = " + videoState);
+    Log::D("CallActivity", "processOutgoingCallIntent videoState = %d", videoState);
     Boolean isTtyModeEnabled;
     IsTtyModeEnabled(&isTtyModeEnabled);
     assert(0 && "TODO: IVideoProfileHelper");

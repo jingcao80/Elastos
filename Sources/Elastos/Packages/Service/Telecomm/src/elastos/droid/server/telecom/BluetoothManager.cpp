@@ -213,11 +213,11 @@ ECode BluetoothManager::IsBluetoothAudioConnectedOrPending(
         Int64 timeSinceRequest =
                 SystemClock::GetElapsedRealtime() - mBluetoothConnectionRequestTime;
         if (timeSinceRequest < 5000 /* 5 seconds */) {
-            Log::V("BluetoothManager", "isBluetoothAudioConnectedOrPending: ==> TRUE (requested %ld msec ago)", timeSinceRequest);
+            Log::V("BluetoothManager", "isBluetoothAudioConnectedOrPending: ==> TRUE (requested %lld msec ago)", timeSinceRequest);
             *result = TRUE;
             return NOERROR;
         } else {
-            Log::V("BluetoothManager", "isBluetoothAudioConnectedOrPending: ==> FALSE (request too old: %ld msec ago)", timeSinceRequest);
+            Log::V("BluetoothManager", "isBluetoothAudioConnectedOrPending: ==> FALSE (request too old: %lld msec ago)", timeSinceRequest);
             mBluetoothConnectionPending = FALSE;
             *result = FALSE;
             return NOERROR;

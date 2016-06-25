@@ -103,7 +103,7 @@ ECode CreateConnectionProcessor::Response::HandleCreateConnectionFailure(
     /* [in] */ IDisconnectCause* errorDisconnectCause)
 {
     // Failure of some sort; record the reasons for failure and try again if possible
-    Log::D("CreateConnectionProcessor", "Connection failed: (%s)", errorDisconnectCause);
+    Log::D("CreateConnectionProcessor", "Connection failed: (%s)", TO_CSTR(errorDisconnectCause));
     mHost->mLastErrorDisconnectCause = errorDisconnectCause;
     mHost->AttemptNextPhoneAccount();
     return NOERROR;

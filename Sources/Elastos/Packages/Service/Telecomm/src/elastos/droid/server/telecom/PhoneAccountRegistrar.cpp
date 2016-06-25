@@ -788,7 +788,7 @@ ECode PhoneAccountRegistrar::SetDefaultVoicePhoneAccount(
     Boolean voicePrompt;
     assert(0 && "TODO ISubscriptionManager");
     // subscriptionManagerHelper->IsVoicePromptEnabled(&voicePrompt);
-    Log::D("PhoneAccountRegistrar", "set voice default, prompt =  %d", voicePrompt);
+    Log::D("PhoneAccountRegistrar", "set voice default, prompt = %d", voicePrompt);
     if (mState->mDefaultOutgoing == NULL) {
         AutoPtr<IList> outgoing;
         GetCallCapablePhoneAccounts((IList**)&outgoing);
@@ -807,7 +807,7 @@ ECode PhoneAccountRegistrar::SetDefaultVoicePhoneAccount(
             return NOERROR;
         }
         Int64 subId = StringUtils::ParseInt64(id);
-        Log::I("PhoneAccountRegistrar", "set voice default subId as  %ld prmotp = %d", subId, voicePrompt);
+        Log::I("PhoneAccountRegistrar", "set voice default subId as %lld prmotp = %d", subId, voicePrompt);
         Int64 defaultVoiceSubId;
         subscriptionManagerHelper->GetDefaultVoiceSubId(&defaultVoiceSubId);
         if (defaultVoiceSubId != subId) {

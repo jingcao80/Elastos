@@ -471,7 +471,7 @@ ECode Call::SetState(
     /* [in] */ Int32 newState)
 {
     if (mState != newState) {
-        Log::V("Call", "setState %s -> %s", mState, newState);
+        Log::V("Call", "setState %d -> %d", mState, newState);
         mState = newState;
         MaybeLoadCannedSmsResponses();
         if (mState == ICallState::DISCONNECTED) {
@@ -766,7 +766,7 @@ ECode Call::SetTargetPhoneAccount(
     /* [in] */ IPhoneAccountHandle* accountHandle)
 {
     if (!Objects::Equals(mTargetPhoneAccountHandle.Get(), accountHandle)) {
-        Log::I("Call", "setTargetPhoneAccount  %s ", accountHandle);
+        Log::I("Call", "setTargetPhoneAccount  %s ", TO_CSTR(accountHandle));
         mTargetPhoneAccountHandle = accountHandle;
         AutoPtr<IIterator> it;
         mListeners->GetIterator((IIterator**)&it);
@@ -1217,7 +1217,7 @@ ECode Call::Disconnect()
     SetLocallyDisconnecting(TRUE);
     if (mState == ICallState::NEW || mState == ICallState::PRE_DIAL_WAIT ||
             mState == ICallState::CONNECTING) {
-        Log::V("Call", "Aborting call %s", this);
+        Log::V("Call", "Aborting call %s", TO_CSTR(this));
         Abort();
     } else if (mState != ICallState::ABORTED && mState != ICallState::DISCONNECTED) {
         if (mConnectionService == NULL) {

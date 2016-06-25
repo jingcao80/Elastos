@@ -93,10 +93,6 @@ private:
     static CARAPI_(String) GetPrefixFromObject(
         /* [in] */ IInterface* obj);
 
-    static CARAPI_(String) BuildMessage(
-        /* [in] */ const char * tag,
-        /* [in] */ const char * fmt, ...);
-
 public:
     static const Boolean FORCE_LOGGING; /* STOP SHIP if true */
     static const Boolean DEBUG;
