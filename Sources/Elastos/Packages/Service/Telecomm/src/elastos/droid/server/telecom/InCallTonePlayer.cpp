@@ -187,7 +187,7 @@ ECode InCallTonePlayer::Run()
                 Log::E("InCallTonePlayer", "Voice privacy tone NYI.");
                 return E_ILLEGAL_STATE_EXCEPTION;
             default:
-                Log::E("InCallTonePlayer", "Bad toneId: " + mToneId);
+                Log::E("InCallTonePlayer", "Bad toneId: %d", mToneId);
                 return E_ILLEGAL_STATE_EXCEPTION;
         }
         Int32 stream = IAudioManager::STREAM_VOICE_CALL;

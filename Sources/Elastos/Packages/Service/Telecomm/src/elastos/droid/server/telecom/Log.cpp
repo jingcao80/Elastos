@@ -56,11 +56,11 @@ ECode Log::D(
 {
     if (DEBUG) {
         char msgBuf[MSG_BUF_SIZE];
+        snprintf(msgBuf, MSG_BUF_SIZE, "%s: %s", prefix, fmt);
         va_list args;
         va_start(args, fmt);
-        vsnprintf(msgBuf, MSG_BUF_SIZE, fmt, args);
+        Slogger::D(TAG, msgBuf, args);
         va_end(args);
-        Slogger::D(TAG, BuildMessage(prefix, msgBuf));
     }
     return NOERROR;
 }
@@ -71,11 +71,11 @@ ECode Log::D(
 {
     if (DEBUG) {
         char msgBuf[MSG_BUF_SIZE];
+        snprintf(msgBuf, MSG_BUF_SIZE, "%s: %s", TO_CSTR(objectPrefix), fmt);
         va_list args;
         va_start(args, fmt);
-        vsnprintf(msgBuf, MSG_BUF_SIZE, fmt, args);
+        Slogger::D(TAG, msgBuf, args);
         va_end(args);
-        Slogger::D(TAG, BuildMessage(GetPrefixFromObject(objectPrefix), msgBuf));
     }
     return NOERROR;
 }
@@ -86,11 +86,11 @@ ECode Log::I(
 {
     if (INFO) {
         char msgBuf[MSG_BUF_SIZE];
+        snprintf(msgBuf, MSG_BUF_SIZE, "%s: %s", prefix, fmt);
         va_list args;
         va_start(args, fmt);
-        vsnprintf(msgBuf, MSG_BUF_SIZE, fmt, args);
+        Slogger::I(TAG, msgBuf, args);
         va_end(args);
-        Slogger::I(TAG, BuildMessage(prefix, msgBuf));
     }
     return NOERROR;
 }
@@ -101,11 +101,11 @@ ECode Log::I(
 {
     if (INFO) {
         char msgBuf[MSG_BUF_SIZE];
+        snprintf(msgBuf, MSG_BUF_SIZE, "%s: %s", TO_CSTR(objectPrefix), fmt);
         va_list args;
         va_start(args, fmt);
-        vsnprintf(msgBuf, MSG_BUF_SIZE, fmt, args);
+        Slogger::I(TAG, msgBuf, args);
         va_end(args);
-        Slogger::I(TAG, BuildMessage(GetPrefixFromObject(objectPrefix), msgBuf));
     }
     return NOERROR;
 }
@@ -116,11 +116,11 @@ ECode Log::V(
 {
     if (VERBOSE) {
         char msgBuf[MSG_BUF_SIZE];
+        snprintf(msgBuf, MSG_BUF_SIZE, "%s: %s", prefix, fmt);
         va_list args;
         va_start(args, fmt);
-        vsnprintf(msgBuf, MSG_BUF_SIZE, fmt, args);
+        Slogger::V(TAG, msgBuf, args);
         va_end(args);
-        Slogger::V(TAG, BuildMessage(prefix, msgBuf));
     }
     return NOERROR;
 }
@@ -131,11 +131,11 @@ ECode Log::V(
 {
     if (VERBOSE) {
         char msgBuf[MSG_BUF_SIZE];
+        snprintf(msgBuf, MSG_BUF_SIZE, "%s: %s", TO_CSTR(objectPrefix), fmt);
         va_list args;
         va_start(args, fmt);
-        vsnprintf(msgBuf, MSG_BUF_SIZE, fmt, args);
+        Slogger::V(TAG, msgBuf, args);
         va_end(args);
-        Slogger::V(TAG, BuildMessage(GetPrefixFromObject(objectPrefix), msgBuf));
     }
     return NOERROR;
 }
@@ -146,11 +146,11 @@ ECode Log::W(
 {
     if (WARN) {
         char msgBuf[MSG_BUF_SIZE];
+        snprintf(msgBuf, MSG_BUF_SIZE, "%s: %s", prefix, fmt);
         va_list args;
         va_start(args, fmt);
-        vsnprintf(msgBuf, MSG_BUF_SIZE, fmt, args);
+        Slogger::W(TAG, msgBuf, args);
         va_end(args);
-        Slogger::W(TAG, BuildMessage(prefix, msgBuf));
     }
     return NOERROR;
 }
@@ -161,11 +161,11 @@ ECode Log::W(
 {
     if (WARN) {
         char msgBuf[MSG_BUF_SIZE];
+        snprintf(msgBuf, MSG_BUF_SIZE, "%s: %s", TO_CSTR(objectPrefix), fmt);
         va_list args;
         va_start(args, fmt);
-        vsnprintf(msgBuf, MSG_BUF_SIZE, fmt, args);
+        Slogger::W(TAG, msgBuf, args);
         va_end(args);
-        Slogger::W(TAG, BuildMessage(GetPrefixFromObject(objectPrefix), msgBuf));
     }
     return NOERROR;
 }
@@ -176,11 +176,11 @@ ECode Log::E(
 {
     if (ERROR) {
         char msgBuf[MSG_BUF_SIZE];
+        snprintf(msgBuf, MSG_BUF_SIZE, "%s: %s", prefix, fmt);
         va_list args;
         va_start(args, fmt);
-        vsnprintf(msgBuf, MSG_BUF_SIZE, fmt, args);
+        Slogger::E(TAG, msgBuf, args);
         va_end(args);
-        Slogger::E(TAG, BuildMessage(prefix, msgBuf));
     }
     return NOERROR;
 }
@@ -191,11 +191,11 @@ ECode Log::E(
 {
     if (ERROR) {
         char msgBuf[MSG_BUF_SIZE];
+        snprintf(msgBuf, MSG_BUF_SIZE, "%s: %s", TO_CSTR(objectPrefix), fmt);
         va_list args;
         va_start(args, fmt);
-        vsnprintf(msgBuf, MSG_BUF_SIZE, fmt, args);
+        Slogger::E(TAG, msgBuf, args);
         va_end(args);
-        Slogger::E(TAG, BuildMessage(GetPrefixFromObject(objectPrefix), msgBuf));
     }
     return NOERROR;
 }
@@ -205,12 +205,11 @@ ECode Log::Wtf(
     /* [in] */ const char * fmt, ...)
 {
     char msgBuf[MSG_BUF_SIZE];
+    snprintf(msgBuf, MSG_BUF_SIZE, "%s: %s", prefix, fmt);
     va_list args;
     va_start(args, fmt);
-    vsnprintf(msgBuf, MSG_BUF_SIZE, fmt, args);
+    Slogger::E(TAG, msgBuf, args);
     va_end(args);
-    String msg = BuildMessage(prefix, msgBuf);
-    Slogger::E(TAG, msg);
     return E_ILLEGAL_STATE_EXCEPTION;
 }
 
@@ -219,12 +218,11 @@ ECode Log::Wtf(
     /* [in] */ const char * fmt, ...)
 {
     char msgBuf[MSG_BUF_SIZE];
+    snprintf(msgBuf, MSG_BUF_SIZE, "%s: %s", TO_CSTR(objectPrefix), fmt);
     va_list args;
     va_start(args, fmt);
-    vsnprintf(msgBuf, MSG_BUF_SIZE, fmt, args);
+    Slogger::E(TAG, msgBuf, args);
     va_end(args);
-    String msg = BuildMessage(GetPrefixFromObject(objectPrefix), msgBuf);
-    Slogger::E(TAG, msg);
     return E_ILLEGAL_STATE_EXCEPTION;
 }
 
@@ -241,7 +239,8 @@ String Log::PiiHandle(
         uri->GetScheme(&scheme);
         if (!IPhoneAccount::SCHEME_TEL.Equals(scheme)) {
             return Pii(pii);
-        } else {
+        }
+        else {
             String schemeSpecificPart;
             uri->GetSchemeSpecificPart(&schemeSpecificPart);
             pii = StringUtils::ParseCharSequence(schemeSpecificPart);
@@ -259,7 +258,8 @@ String Log::PiiHandle(
         phoneNumberUtilsHelper->IsDialable(c, &isDialable);
         if (isDialable) {
             stringBuilder.Append('*');
-        } else {
+        }
+        else {
             stringBuilder.AppendChar(c);
         }
     }
@@ -322,31 +322,13 @@ String Log::EncodeHex(
 String Log::GetPrefixFromObject(
     /* [in] */ IInterface* obj)
 {
+    if (obj == NULL) return String("<null>");
+
     AutoPtr<IClassInfo> classInfo;
     CObject::ReflectClassInfo(obj, (IClassInfo**)&classInfo);
     String name;
     classInfo->GetName(&name);
-    return obj == NULL ? String("<null>") : name;
-}
-
-String Log::BuildMessage(
-    /* [in] */ const char * prefix,
-    /* [in] */ const char * format, ...)
-{
-    // try {
-    char msgBuf[MSG_BUF_SIZE];
-    va_list args;
-    va_start(args, format);
-    vsnprintf(msgBuf, MSG_BUF_SIZE, format, args);
-    va_end(args);
-    // } catch (IllegalFormatException ife) {
-    //     e("Log", ife, "IllegalFormatException: formatString='%s' numArgs=%d", format,
-    //             args.length);
-    //     msg = format + " (An error occurred while formatting the message.)";
-    // }
-    String rev;
-    rev.AppendFormat("%s: %s", prefix, msgBuf);
-    return rev;
+    return name;
 }
 
 } // namespace Telecom

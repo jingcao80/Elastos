@@ -229,7 +229,7 @@ ECode CallLogManager::LogCall(
     const Boolean isOkToLogThisCall = !isEmergencyNumber || okToLogEmergencyNumber;
     SendAddCallBroadcast(callType, duration);
     if (isOkToLogThisCall) {
-        Log::D(TAG, "Logging Calllog entry: %s, %s, %d, %d, %ld, %ld", TO_CSTR(callerInfo),
+        Log::D(TAG, "Logging Calllog entry: %s, %s, %d, %d, %lld, %lld", TO_CSTR(callerInfo),
                 Log::Pii(StringUtils::ParseCharSequence(number)).string(), presentation, callType, start, duration);
         AutoPtr<AddCallArgs> args = new AddCallArgs(mContext, callerInfo, number, presentation,
                 callType, features, accountHandle, start, duration, dataUsage);

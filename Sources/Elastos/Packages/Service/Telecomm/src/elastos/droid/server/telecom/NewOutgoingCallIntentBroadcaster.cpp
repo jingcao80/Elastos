@@ -47,7 +47,7 @@ ECode NewOutgoingCallIntentBroadcaster::NewOutgoingCallBroadcastIntentReceiver::
     /* [in] */ IContext* context,
     /* [in] */ IIntent* intent)
 {
-    Log::V("NewOutgoingCallIntentBroadcaster", "onReceive: %s", intent);
+    Log::V("NewOutgoingCallIntentBroadcaster", "onReceive: %s", TO_CSTR(intent));
     // Once the NEW_OUTGOING_CALL broadcast is finished, the resultData is used as the
     // actual number to call. (If null, no call will be placed.)
     String resultNumber;
@@ -192,7 +192,7 @@ ECode NewOutgoingCallIntentBroadcaster::ProcessIntent(
     }
     Boolean isPotentialEmergencyNumber;
     IsPotentialEmergencyNumber(number, &isPotentialEmergencyNumber);
-    Log::V("NewOutgoingCallIntentBroadcaster", "isPotentialEmergencyNumber = %s", isPotentialEmergencyNumber);
+    Log::V("NewOutgoingCallIntentBroadcaster", "isPotentialEmergencyNumber = %d", isPotentialEmergencyNumber);
     RewriteCallIntentAction(intent, isPotentialEmergencyNumber);
     intent->GetAction(&action);
     // True for certain types of numbers that are not intended to be intercepted or modified

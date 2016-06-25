@@ -338,7 +338,7 @@ ECode MissedCallNotifier::ShowMissedCallNotification(
     AutoPtr<INotification> notification;
     builder->Build((INotification**)&notification);
     ConfigureLedOnNotification(mContext, notification);
-    Log::I("MissedCallNotifier", "Adding missed call notification for %s.", call);
+    Log::I("MissedCallNotifier", "Adding missed call notification for %s.", TO_CSTR(call));
     AutoPtr<IUserHandleHelper> userHandleHelper;
     CUserHandleHelper::AcquireSingleton((IUserHandleHelper**)&userHandleHelper);
     AutoPtr<IUserHandle> current;

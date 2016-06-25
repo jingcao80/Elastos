@@ -249,13 +249,12 @@ ECode BluetoothPhoneService::SubHandler::HandleMessage(
     AutoPtr<IBluetoothPhoneServiceMainThreadRequest> request = IBluetoothPhoneServiceMainThreadRequest::Probe(msgObj);
     AutoPtr<CallsManager> callsManager = mHost->GetCallsManager();
     AutoPtr<ICall> call;
-    if (request == NULL)
-    {
+    if (request == NULL) {
         Log::I(BluetoothPhoneService::TAG, "handleMessage: request is null");
         return NOERROR;
     }
     Log::D(BluetoothPhoneService::TAG, "handleMessage(%d) w/ param %s",
-            msgWhat, request == NULL ? NULL : ((MainThreadRequest*) request.Get())->mParam);
+            msgWhat, request == NULL ? "NULL" : StringUtils::ToString(((MainThreadRequest*) request.Get())->mParam).string());
     if (msgWhat == MSG_ANSWER_CALL) {
         // try {
         ECode ec;

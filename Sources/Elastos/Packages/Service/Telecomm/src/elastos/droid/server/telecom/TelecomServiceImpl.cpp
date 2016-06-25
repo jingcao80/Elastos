@@ -415,7 +415,7 @@ ECode TelecomServiceImpl::RegisterPhoneAccount(
     } while(FALSE);
     // } catch (Exception e) {
     if (FAILED(ec)) {
-        Log::E("TelecomServiceImpl", "registerPhoneAccount %d %s", ec, account);
+        Log::E("TelecomServiceImpl", "registerPhoneAccount %d %s", ec, TO_CSTR(account));
         return ec;
     }
     // }
@@ -438,7 +438,7 @@ ECode TelecomServiceImpl::UnregisterPhoneAccount(
     } while(FALSE);
     // } catch (Exception e) {
     if (FAILED(ec)) {
-        Log::E("TelecomServiceImpl", "unregisterPhoneAccount %d %s", ec, accountHandle);
+        Log::E("TelecomServiceImpl", "unregisterPhoneAccount %d %s", ec, TO_CSTR(accountHandle));
         return ec;
     }
     // }

@@ -45,7 +45,7 @@ ECode CallReceiver::OnReceive(
     intent->GetBooleanExtra(KEY_IS_UNKNOWN_CALL, FALSE, &isUnknownCall);
     Boolean isIncomingCall;
     intent->GetBooleanExtra(KEY_IS_INCOMING_CALL, FALSE, &isIncomingCall);
-    Log::I(TAG, "onReceive - isIncomingCall: %s isUnknownCall: %s", isIncomingCall,
+    Log::I(TAG, "onReceive - isIncomingCall: %d isUnknownCall: %d", isIncomingCall,
             isUnknownCall);
     if (isUnknownCall) {
         ProcessUnknownCallIntent(intent);
