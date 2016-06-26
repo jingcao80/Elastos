@@ -64,8 +64,11 @@ public:
     CARAPI constructor(
         /* [in] */ IInterfaceInfo * pInterfaceInfo);
 
+    CARAPI GetInternalObject(
+        /* [out] */ PInterface* ppObject);
+
 private:
-    IInterfaceInfo* mInterfaceInfo;
+    AutoPtr<IInterfaceInfo> mInterfaceInfo;
 };
 
 }

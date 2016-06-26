@@ -53,9 +53,11 @@ public:
     CARAPI constructor(
         /* [in] */ IParamInfo * pParamInfo);
 
+    CARAPI GetInternalObject(
+        /* [out] */ PInterface* ppObject);
+
 private:
-    // TODO: Add your private member variables here.
-    IParamInfo* mParamInfo;
+    AutoPtr<IParamInfo> mParamInfo;
 };
 
 }

@@ -743,6 +743,12 @@ ECode CTestClassInfo::constructor(
     return NOERROR;
 }
 
+ECode CTestClassInfo::GetInternalObject(
+    /* [out] */ PInterface* ppObject){
+    *ppObject = mClassInfo;
+    return NOERROR;
+}
+
 }
 }
 }

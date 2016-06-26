@@ -190,6 +190,12 @@ ECode CTestStructInfo::constructor(
     return NOERROR;
 }
 
+ECode CTestStructInfo::GetInternalObject(
+    /* [out] */ PInterface* ppObject){
+    *ppObject = mStructInfo;
+    return NOERROR;
+}
+
 }
 }
 }

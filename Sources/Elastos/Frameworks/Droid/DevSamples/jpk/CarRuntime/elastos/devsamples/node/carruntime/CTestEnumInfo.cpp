@@ -143,6 +143,12 @@ ECode CTestEnumInfo::constructor(
     return NOERROR;
 }
 
+ECode CTestEnumInfo::GetInternalObject(
+    /* [out] */ PInterface* ppObject){
+    *ppObject = mEnumInfo;
+    return NOERROR;
+}
+
 }
 }
 }

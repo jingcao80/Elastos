@@ -46,6 +46,9 @@ public:
     CARAPI constructor(
         /* [in] */ ICarArrayInfo * pCarArrayInfo);
 
+    CARAPI GetInternalObject(
+        /* [out] */ PInterface* ppObject);
+
 private:
     AutoPtr<ICarArrayInfo> mCarArrayInfo;
 };

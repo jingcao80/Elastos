@@ -347,6 +347,8 @@ module.exports = function(aoElastos, aoActivity){
                     else if (typeof(aoView.SetOnTouchListener) == 'function') {  //ILinearLayout
                         elog('==================SetViewValue.LinearLayout.begin=============');
 
+return;
+
                         _SetFolerLayoutListener(aoView);
                         // aoView.SetOnTouchListener({
                         //     //(IViewOnTouchListener*)(mHost->mMyListener->Probe(EIID_IViewOnTouchListener))
@@ -750,7 +752,7 @@ if (aiTimes == 14) {
 
                 //AutoPtr<IBitmapDrawable> drawable = AsyncImageLoader::LoadDrawable(textRepresentation, FALSE, imageView, myLoadImage);
                 var oAsyncImageLoader = Droid_New("AsyncImageLoader");
-                var drawable = oAsyncImageLoader.LoadDrawable(_textRepresentation, FALSE, _imageView, _myLoadImage);
+                var drawable = oAsyncImageLoader.LoadDrawable(_textRepresentation, false, _imageView, _myLoadImage);
 
                 var drawable = aoInObject;
                 //if ( typeof(drawable)=="object" ) {

@@ -69,8 +69,11 @@ public:
     CARAPI constructor(
         /* [in] */ IConstructorInfo * pConstructorInfo);
 
+    CARAPI GetInternalObject(
+        /* [out] */ PInterface* ppObject);
+
 private:
-    IConstructorInfo* mConstructorInfo;
+    AutoPtr<IConstructorInfo> mConstructorInfo;
 };
 
 }

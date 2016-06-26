@@ -173,6 +173,12 @@ ECode CTestCallbackArgumentList::constructor(
     return E_NOT_IMPLEMENTED;
 }
 
+ECode CTestCallbackArgumentList::GetInternalObject(
+    /* [out] */ PInterface* ppObject){
+    *ppObject = mCallbackArgumentList;
+    return NOERROR;
+}
+
 }
 }
 }

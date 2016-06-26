@@ -9,7 +9,8 @@ function extend (a,b) {
     for (var p in b) a[p] = b[p];
 }
 
-var ImageCacheService = require("/data/temp/node/JSGallery/data/ImageCacheService.js");
+var sFileName = '/data/temp/node/JSGallery/data/ImageCacheService.js';
+var ImageCacheService = require(sFileName)(aoElastos);
 
 //main class
 function AsyncImageLoader () {};
@@ -17,10 +18,9 @@ function AsyncImageLoader () {};
 //private static property:
 var TAG = "AsyncImageLoader";
 var sImgWidth = 320;
-var sImgWidth = 320;
-var sImgHeight = null;
+var sImgHeight = 320;
 
-var sCacheService = null;
+var sCacheService=null;
 
 var sImageCache = {};
 var sImageSampleStatus = {};
@@ -48,8 +48,8 @@ function ImageLoaderParam (aoImageView, aoCallback) {
 
 //private internal class
 var ImageLoaderThread = (function(){
-    function _ImageLoaderThread (abIsHight, asImageUrl) {
-        this.mIsHight = abIsHight;
+    function _ImageLoaderThread (abIsHigh, asImageUrl) {
+        this.mIsHigh = abIsHigh;
         this.mImageUrl = asImageUrl;
     }
 
@@ -66,9 +66,9 @@ var ImageLoaderThread = (function(){
         var last = file.GetLastModified();
         elog("====LoadImageFromUrl====begin====1.2====");
 
-var aa=[];
-for (var p in file)aa.push(p);
-elog("====CFile methods:["+aa.join("][")+"]");
+//var aa=[];
+//for (var p in file)aa.push(p);
+//elog("====CFile methods:["+aa.join("][")+"]");
 
         //var hashkey = path.GetHashCode();
         var hashkey = file.GetHashCode();
@@ -95,10 +95,12 @@ elog("====CFile methods:["+aa.join("][")+"]");
         var bitmap = factory.DecodeFile(path, opt);
         elog("====LoadImageFromUrl====begin====5====");
 
-        if (mIsHigh) {
+        if (this.mIsHigh) {
+            elog("====LoadImageFromUrl====begin====5.1====");
             inSampleSize = ComputeSampleSize(opt, -1, 1280 * 672 * 4);
         }
         else {
+            elog("====LoadImageFromUrl====begin====5.2====");
             inSampleSize = ComputeSampleSize(opt, -1, sImgWidth * sImgHeight);
         }
         elog("====LoadImageFromUrl====begin====6====");
@@ -107,14 +109,23 @@ elog("====CFile methods:["+aa.join("][")+"]");
         opt.SetInJustDecodeBounds(false);
 
         //Mutex::Autolock lock(sStatusLock);
-        sImageSampleStatus[path] = (inSampleSize > 1 || mIsHigh);
+        sImageSampleStatus[path] = (inSampleSize > 1 || this.mIsHigh);
         elog("====LoadImageFromUrl====begin====7====");
 
-        bitmap = null;
+        //bitmap = null;
         bitmap = factory.DecodeFile(path, opt);
-        bitmapDrawable = Droid_New(bitmap);
+        elog("====LoadImageFromUrl====begin====8===="+bitmap);
+
+//var aa=[];
+//for(var pp in bitmap)aa.push(pp);
+//elog("====bitmap methods:["+aa.join("][")+"]");
+
+
+        var bitmapDrawable = Droid_New("Elastos.Droid.Graphics.Drawable.CBitmapDrawable",bitmap);
+        elog("====LoadImageFromUrl====begin====9====");
         if (inSampleSize > 1 && bitmap != null) {
-            cacheService.PutImageData(hashkey, mIsHigh, len, last, bitmap);
+            elog("====LoadImageFromUrl====begin====10====");
+            cacheService.PutImageData(hashkey, this.mIsHigh, len, last, bitmap);
         }
 
         elog("====LoadImageFromUrl====end====");
@@ -123,51 +134,59 @@ elog("====CFile methods:["+aa.join("][")+"]");
     }
 
     function ComputeSampleSize (options, minSideLength, maxNumOfPixels) {
-    //     var initialSize = ComputeInitialSampleSize(options, minSideLength, maxNumOfPixels);
-    //     var roundedSize = 0;
+        elog("====ComputeSampleSize====begin====");
 
-    //     if (initialSize <= 8 ) {
-    //         roundedSize = 1;
-    //         while (roundedSize < initialSize) {
-    //             roundedSize <<= 1;
-    //         }
-    //     }
-    //     else {
-    //         roundedSize = (initialSize + 7) / 8 * 8;
-    //     }
+        var initialSize = ComputeInitialSampleSize(options, minSideLength, maxNumOfPixels);
+        var roundedSize = 0;
 
-    //     return roundedSize;
+        if (initialSize <= 8 ) {
+            roundedSize = 1;
+            while (roundedSize < initialSize) {
+                roundedSize <<= 1;
+            }
+        }
+        else {
+            roundedSize = (initialSize + 7) / 8 * 8;
+        }
+
+        elog("====ComputeSampleSize====end====");
+
+        return roundedSize;
     }
 
     function ComputeInitialSampleSize (options, minSideLength, maxNumOfPixels) {
-        // var w = options.GetOutWidth();
-        // var h = options.GetOutHeight();
+        elog("====ComputeInitialSampleSize====begin====");
 
-        // if (mIsHigh) {
-        //     //Mutex::Autolock lock(sImageWHLock);
-        //     sHighImageWH[mImageUrl] = [w, h];
-        // }
+        var w = options.GetOutWidth();
+        var h = options.GetOutHeight();
 
-        // var lowerBound = (maxNumOfPixels == -1/*UNCONSTRAINED*/) ? 1 :
-        //     Math.Ceil(Math.Sqrt((Double)w * h / maxNumOfPixels));
-        // var upperBound = (minSideLength == -1/*UNCONSTRAINED*/) ? 128 :
-        //     Math.Min(Math.Floor((Double)w / minSideLength),
-        //         Math.Floor(h / minSideLength));
+        if (this.mIsHigh) {
+            //Mutex::Autolock lock(sImageWHLock);
+            sHighImageWH[mImageUrl] = [w, h];
+        }
 
-        // if (upperBound < lowerBound) {
-        //     // return the larger one when there is no overlapping zone.
-        //     return lowerBound;
-        // }
+        var lowerBound = (maxNumOfPixels == -1/*UNCONSTRAINED*/) ? 1 :
+            Math.ceil(Math.sqrt(w * h / maxNumOfPixels));
+        var upperBound = (minSideLength == -1/*UNCONSTRAINED*/) ? 128 :
+            Math.min(Math.Floor(w / minSideLength),
+                Math.floor(h / minSideLength));
 
-        // if ((maxNumOfPixels == -1/*UNCONSTRAINED*/) && (minSideLength == -1/*UNCONSTRAINED*/)) {
-        //     return 1;
-        // }
-        // else if (minSideLength == -1/*UNCONSTRAINED*/) {
-        //     return lowerBound;
-        // }
-        // else {
-        //     return upperBound;
-        // }
+        elog("====ComputeInitialSampleSize====end====");
+
+        if (upperBound < lowerBound) {
+            // return the larger one when there is no overlapping zone.
+            return lowerBound;
+        }
+
+        if ((maxNumOfPixels == -1/*UNCONSTRAINED*/) && (minSideLength == -1/*UNCONSTRAINED*/)) {
+            return 1;
+        }
+        else if (minSideLength == -1/*UNCONSTRAINED*/) {
+            return lowerBound;
+        }
+        else {
+            return upperBound;
+        }
 
     }
 
@@ -208,7 +227,7 @@ function LoadDrawable (imageUrl, isHigh, imageView, imageCallback) {
     elog('====AsyncImageLoader.LoadDrawable.begin========2========');
 
     var key = this.MakeImageParamKey(imageUrl, isHigh);
-    elog('====AsyncImageLoader.LoadDrawable.begin========3========');
+    elog('====AsyncImageLoader.LoadDrawable.begin========3========'+key);
     var list = sImageLoaderParamCache[key];
     elog('====AsyncImageLoader.LoadDrawable.begin========4========');
     if (list) {
@@ -220,7 +239,9 @@ function LoadDrawable (imageUrl, isHigh, imageView, imageCallback) {
                 break;
             }
         }
+        elog('====AsyncImageLoader.LoadDrawable.begin========5.1========');
         if (needAdd) {
+            elog('====AsyncImageLoader.LoadDrawable.begin========5.2========');
             list.push({
                 mImageView : imageView,
                 mCallback : imageCallback,
@@ -249,23 +270,31 @@ function LoadDrawable (imageUrl, isHigh, imageView, imageCallback) {
 }
 
 function DrawableLoaded (imageUrl, isHigh, drawable){
+    elog('====AsyncImageLoader.DrawableLoaded.begin=========');
+
     //Mutex::Autolock lock(sLock);
 
-    // if (isHigh) {
-    //     sHighImageCache[imageUrl] = drawable;
-    // }
-    // else {
-    //     sImageCache[imageUrl] = drawable;
-    // }
+    if (isHigh) {
+        sHighImageCache[imageUrl] = drawable;
+    }
+    else {
+        sImageCache[imageUrl] = drawable;
+    }
 
-    // var key = this.MakeImageParamKey(imageUrl, isHigh);
-    // var list = sImageLoaderParamCache[key];
-    // if (list) {
-    //     for (var i=0, im=list.length; i<im; i++) {
-    //         var param = list[i];    //ImageLoaderParam
-    //         param.mCallback.ImageLoaded(drawable, param.mImageView);
-    //     }
-    // }
+    var key = this.MakeImageParamKey(imageUrl, isHigh);
+    elog('====AsyncImageLoader.DrawableLoaded.begin====1=====key:' + key + ' Cache:' + JSON.stringify(sImageLoaderParamCache));
+    var list = sImageLoaderParamCache[key];
+    elog('====AsyncImageLoader.DrawableLoaded.begin====2=====');
+    if (list) {
+        for (var i=0, im=list.length; i<im; i++) {
+            var param = list[i];    //ImageLoaderParam
+            elog('====AsyncImageLoader.DrawableLoaded.begin====3=====');
+            param.mCallback.ImageLoaded(drawable, param.mImageView);
+            elog('====AsyncImageLoader.DrawableLoaded.begin====4=====');
+        }
+    }
+
+    elog('====AsyncImageLoader.DrawableLoaded.end=========');
 }
 
 function NeedLoadHighDrawable (imageUrl) {
@@ -333,9 +362,24 @@ function UpdateImageCache (albumArray) {
 }
 
 function GetCacheService () {
-    if (!sCacheService) {
+    var a = {
+        "typeof" : typeof sCacheService,
+        "string" : ''+sCacheService,
+        "isNull2" : sCacheService===null,
+        "isNull3" : sCacheService===null,
+        "isUndefined2" : sCacheService==undefined,
+        "isUndefined3" : sCacheService===undefined,
+        "JSON" : JSON.stringify(sCacheService),
+        "Object" : sCacheService instanceof Object,
+        "ImageCacheService" : sCacheService instanceof ImageCacheService,
+
+    };
+    elog("========GetCacheService========begin========"+JSON.stringify(a));
+    if (sCacheService===null) {
+    elog("========GetCacheService========1========");
         sCacheService = new ImageCacheService(sImgWidth, sImgHeight);
     }
+    elog("========GetCacheService========end========"+typeof sCacheService.GetImageData);
     return sCacheService;
 }
 

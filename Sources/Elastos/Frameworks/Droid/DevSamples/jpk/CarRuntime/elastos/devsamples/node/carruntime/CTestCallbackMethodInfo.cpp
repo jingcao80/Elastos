@@ -85,6 +85,12 @@ ECode CTestCallbackMethodInfo::constructor(
     return NOERROR;
 }
 
+ECode CTestCallbackMethodInfo::GetInternalObject(
+    /* [out] */ PInterface* ppObject){
+    *ppObject = mCallbackMethodInfo;
+    return NOERROR;
+}
+
 }
 }
 }

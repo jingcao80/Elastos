@@ -107,6 +107,12 @@ ECode CTestLocalPtrInfo::constructor(
     return NOERROR;
 }
 
+ECode CTestLocalPtrInfo::GetInternalObject(
+    /* [out] */ PInterface* ppObject){
+    *ppObject = mLocalPtrInfo;
+    return NOERROR;
+}
+
 }
 }
 }

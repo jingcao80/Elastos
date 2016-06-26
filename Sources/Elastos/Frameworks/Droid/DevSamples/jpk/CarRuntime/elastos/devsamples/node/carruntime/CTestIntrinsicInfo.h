@@ -37,8 +37,11 @@ public:
     CARAPI constructor(
         /* [in] */ IIntrinsicInfo * pIntrinsicInfo);
 
+    CARAPI GetInternalObject(
+        /* [out] */ PInterface* ppObject);
+
 private:
-    IIntrinsicInfo* mIntrinsicInfo;
+    AutoPtr<IIntrinsicInfo> mIntrinsicInfo;
 };
 
 }

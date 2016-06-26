@@ -20,6 +20,7 @@ module
 
     interface IVariable;
     interface IVariableOfCarArray;
+    //interface IVariableOfCppVector;
     interface IVariableOfStruct;
     interface ICarArraySetter;
     interface ICarArrayGetter;
@@ -47,13 +48,6 @@ module
     interface ITestCarDataType;
     interface IMethodTest;
     interface IProperty;
-
-    //interface ITestModuleInfo;
-    //interface ITestClassInfo;
-    //interface ITestMethodInfo;
-    //interface ITestParamInfo;
-    //interface ITestTypeAliasInfo;
-    //interface ITestArgumentList;
 
     interface ITestDataTypeInfo;
     interface ITestLocalPtrInfo;
@@ -94,13 +88,12 @@ module
     interface ITestIntrinsicInfo;  //whm add
     interface ITestLocalTypeInfo;  //whm add
 
-
     namespace Elastos {
     namespace DevSamples {
     namespace Node {
     namespace CarRuntime {
 
-    //-------------------------user interface---------------------
+    //-----------------user interface---------------
 
     enum TestObjectState {
         TestObjectState_State1,
@@ -137,6 +130,49 @@ module
 
         Test_AddEventListener(
             [in] ITestEventListener* listener);
+
+        //------------reflection------------
+        Test_CReflector_AcquireModuleInfo(
+            [in] String name,
+            [out] ITestModuleInfo** moduleInfo);
+
+        Test_CReflector_AcquireIntrinsicTypeInfo(
+            [in] CarDataType intrinsicType,
+            [out] ITestDataTypeInfo** intrinsicTypeInfo);
+
+        Test_CReflector_AcquireEnumInfo(
+            [in] String name,
+            [in] ArrayOf<String>* itemNames,
+            [in] ArrayOf<Int32>* itemValues,
+            [out] ITestEnumInfo** enumInfo);
+
+        Test_CReflector_AcquireCppVectorInfo(
+            [in] ITestDataTypeInfo* elementTypeInfo,
+            [in] Int32 length,
+            [out] ITestCppVectorInfo** cppVectorInfo);
+
+        Test_CReflector_AcquireStructInfo(
+            [in] String name,
+            [in] ArrayOf<String>* fieldNames,
+            [in] ArrayOf<ITestDataTypeInfo *>* fieldTypeInfos,
+            [out] ITestStructInfo** structInfo);
+
+        Test_CReflector_AcquireCarArrayInfo(
+            [in] CarDataType quintetType,
+            [in] ITestDataTypeInfo* elementTypeInfo,
+            [out] ITestCarArrayInfo** carArrayInfo);
+
+        Test_CObject_ReflectModuleInfo(
+            [in] PInterface object,
+            [out] ITestModuleInfo** moduleInfo);
+
+        Test_CObject_ReflectClassInfo(
+            [in] PInterface object,
+            [out] ITestClassInfo** classInfo);
+
+        Test_CObject_ReflectInterfaceInfo(
+            [in] PInterface object,
+            [out] ITestInterfaceInfo** interfaceInfo);
     }
 
     //[local,deprecated]

@@ -41,8 +41,11 @@ public:
     CARAPI constructor(
         /* [in] */ IDelegateProxy * pDelegateProxy);
 
+    CARAPI GetInternalObject(
+        /* [out] */ PInterface* ppObject);
+
 private:
-    // TODO: Add your private member variables here.
+    AutoPtr<IDelegateProxy> mDelegateProxy;
 };
 
 }

@@ -335,6 +335,12 @@ ECode CTestVariableOfCarArray::constructor(
     return E_NOT_IMPLEMENTED;
 }
 
+ECode CTestVariableOfCarArray::GetInternalObject(
+    /* [out] */ PInterface* ppObject){
+    *ppObject = mVariableOfCarArray;
+    return NOERROR;
+}
+
 }
 }
 }

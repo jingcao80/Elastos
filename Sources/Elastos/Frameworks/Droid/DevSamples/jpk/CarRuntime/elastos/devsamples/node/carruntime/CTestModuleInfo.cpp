@@ -487,6 +487,12 @@ ECode CTestModuleInfo::constructor(
     return NOERROR;
 }
 
+ECode CTestModuleInfo::GetInternalObject(
+    /* [out] */ PInterface* ppObject){
+    *ppObject = mModuleInfo;
+    return NOERROR;
+}
+
 }
 }
 }

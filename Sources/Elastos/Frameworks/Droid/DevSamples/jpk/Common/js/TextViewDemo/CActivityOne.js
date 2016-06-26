@@ -234,18 +234,31 @@ module.exports = function(aoElastos, aoActivity){
             //----------------PowerManagerButton end----------------
 
             //----------------myListView begin----------------
+            elog("====myListView====0====");
+
             var oListView = oActivity.FindViewById(R.id.myListView);
+            elog("====myListView====1====");
             var oDataList = Core_New("Elastos.Utility.CArrayList");
+            elog("====myListView====2====");
 
             for (var i=0; i< 15; i++) {
-                oDataList.Add(CString("Item " + i));
+                elog("====myListView====2.1===="+i);
+                var s = CString("Item " + i);
+                elog("====myListView====2.2===="+i);
+                oDataList.Add(s);
+                elog("====myListView====2.3===="+i);
             }
 
+            elog("====myListView====3====");
             var oAdapter = Droid_New("Elastos.Droid.Widget.CArrayAdapter", oActivity, R.layout.list_item, oDataList);
+            elog("====myListView====4====");
             oListView.SetAdapter(oAdapter);
 
+            elog("====myListView====5====");
             var oDrawable = Droid_New("Elastos.Droid.Graphics.Drawable.CColorDrawable", 0xFF0000FF);
+            elog("====myListView====6====");
             oListView.SetDivider(oDrawable);
+            elog("====myListView====7====");
 
             oListView.SetDividerHeight(1);
 

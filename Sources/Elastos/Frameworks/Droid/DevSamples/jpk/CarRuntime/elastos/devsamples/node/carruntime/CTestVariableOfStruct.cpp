@@ -335,6 +335,12 @@ ECode CTestVariableOfStruct::constructor(
     return E_NOT_IMPLEMENTED;
 }
 
+ECode CTestVariableOfStruct::GetInternalObject(
+    /* [out] */ PInterface* ppObject){
+    *ppObject = mVariableOfStruct;
+    return NOERROR;
+}
+
 }
 }
 }

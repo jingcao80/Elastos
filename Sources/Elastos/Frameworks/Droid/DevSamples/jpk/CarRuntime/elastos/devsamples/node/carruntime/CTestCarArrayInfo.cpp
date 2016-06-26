@@ -162,6 +162,12 @@ ECode CTestCarArrayInfo::constructor(
     return NOERROR;
 }
 
+ECode CTestCarArrayInfo::GetInternalObject(
+    /* [out] */ PInterface* ppObject){
+    *ppObject = mCarArrayInfo;
+    return NOERROR;
+}
+
 }
 }
 }

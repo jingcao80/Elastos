@@ -100,8 +100,11 @@ public:
     CARAPI constructor(
         /* [in] */ ICallbackArgumentList * pCallbackArgumentList);
 
+    CARAPI GetInternalObject(
+        /* [out] */ PInterface* ppObject);
+
 private:
-    // TODO: Add your private member variables here.
+    AutoPtr<ICallbackArgumentList> mCallbackArgumentList;
 };
 
 }

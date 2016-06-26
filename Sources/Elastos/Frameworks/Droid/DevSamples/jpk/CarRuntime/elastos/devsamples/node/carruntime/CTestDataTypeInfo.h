@@ -35,8 +35,11 @@ public:
     CARAPI constructor(
         /* [in] */ IDataTypeInfo * pDataTypeInfo);
 
+    CARAPI GetInternalObject(
+        /* [out] */ PInterface* ppObject);
+
 private:
-    IDataTypeInfo* mDataTypeInfo;
+    AutoPtr<IDataTypeInfo> mDataTypeInfo;
 };
 
 }

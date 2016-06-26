@@ -177,6 +177,12 @@ ECode CTestParamInfo::constructor(
     return NOERROR;
 }
 
+ECode CTestParamInfo::GetInternalObject(
+    /* [out] */ PInterface* ppObject){
+    *ppObject = mParamInfo;
+    return NOERROR;
+}
+
 }
 }
 }

@@ -41,6 +41,9 @@ public:
     CARAPI constructor(
         /* [in] */ ICppVectorInfo * pCppVectorInfo);
 
+    CARAPI GetInternalObject(
+        /* [out] */ PInterface* ppObject);
+
 private:
     AutoPtr<ICppVectorInfo> mCppVectorInfo;
 };

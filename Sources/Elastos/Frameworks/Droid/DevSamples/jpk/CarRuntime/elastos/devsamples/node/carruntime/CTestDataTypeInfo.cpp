@@ -42,6 +42,12 @@ ECode CTestDataTypeInfo::constructor(
     return NOERROR;
 }
 
+ECode CTestDataTypeInfo::GetInternalObject(
+    /* [out] */ PInterface* ppObject){
+    *ppObject = mDataTypeInfo;
+    return NOERROR;
+}
+
 }
 }
 }

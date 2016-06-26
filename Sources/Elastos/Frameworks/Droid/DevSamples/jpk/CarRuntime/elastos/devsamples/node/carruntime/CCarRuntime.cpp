@@ -1,8 +1,6 @@
 
 #include "CCarRuntime.h"
 
-#include "CTestModuleInfo.h"
-
 #include <cutils/log.h>
 
 namespace Elastos {
@@ -75,6 +73,106 @@ ECode CCarRuntime::Test_Require_Activity(
 
 ECode CCarRuntime::Test_AddEventListener(
     /* [in] */ Elastos::DevSamples::Node::CarRuntime::ITestEventListener * pListener)
+{
+    // TODO: Add your code here
+    return E_NOT_IMPLEMENTED;
+}
+
+//------------reflection------------
+
+ECode CCarRuntime::Test_CReflector_AcquireModuleInfo(
+        /* [in] */ const String& name,
+        /* [out] */ ITestModuleInfo** ppModuleInfo)
+{
+    // TODO: Add your code here
+    return E_NOT_IMPLEMENTED;
+}
+
+ECode CCarRuntime::Test_CReflector_AcquireIntrinsicTypeInfo(
+        /* [in] */ CarDataType intrinsicType,
+        /* [out] */ ITestDataTypeInfo** ppIntrinsicTypeInfo)
+{
+    // TODO: Add your code here
+    return E_NOT_IMPLEMENTED;
+}
+
+ECode CCarRuntime::Test_CReflector_AcquireEnumInfo(
+        /* [in] */ const String& name,
+        /* [in] */ ArrayOf<String>* itemNames,
+        /* [in] */ ArrayOf<Int32>* itemValues,
+        /* [out] */ ITestEnumInfo** ppEnumInfo)
+{
+    // TODO: Add your code here
+    return E_NOT_IMPLEMENTED;
+}
+
+ECode CCarRuntime::Test_CReflector_AcquireCppVectorInfo(
+        /* [in] */ ITestDataTypeInfo* elementTypeInfo,
+        /* [in] */ Int32 length,
+        /* [out] */ ITestCppVectorInfo** ppCppVectorInfo)
+{
+    // TODO: Add your code here
+    return E_NOT_IMPLEMENTED;
+}
+
+ECode CCarRuntime::Test_CReflector_AcquireStructInfo(
+        /* [in] */ const String& name,
+        /* [in] */ ArrayOf<String>* fieldNames,
+        /* [in] */ ArrayOf<ITestDataTypeInfo *>* fieldTypeInfos,
+        /* [out] */ ITestStructInfo** ppStructInfo)
+{
+    // TODO: Add your code here
+    return E_NOT_IMPLEMENTED;
+}
+
+ECode CCarRuntime::Test_CReflector_AcquireCarArrayInfo(
+        /* [in] */ CarDataType quintetType,
+        /* [in] */ ITestDataTypeInfo* elementTypeInfo,
+        /* [out] */ ITestCarArrayInfo** ppCarArrayInfo)
+{
+    // TODO: Add your code here
+    return E_NOT_IMPLEMENTED;
+}
+
+ECode CCarRuntime::Test_CObject_ReflectModuleInfo(
+        /* [in] */ PInterface object,
+        /* [out] */ ITestModuleInfo** ppModuleInfo)
+{
+    // TODO: Add your code here
+    return E_NOT_IMPLEMENTED;
+}
+
+ECode CCarRuntime::Test_CObject_ReflectClassInfo(
+        /* [in] */ PInterface object,
+        /* [out] */ ITestClassInfo** ppClassInfo)
+{
+    ECode ec = NOERROR;
+
+    AutoPtr<IClassInfo> info;
+    //ec = mClassInfo->GetModuleInfo((IModuleInfo**)&moduleInfo);
+    ec = _CObject_ReflectClassInfo(object, (IClassInfo**)&info);
+    if (FAILED(ec)) {
+        ALOGD("CCarRuntime::Test_CObject_ReflectClassInfo error: _CObject_ReflectClassInfo fail!");
+        return ec;
+    }
+
+    AutoPtr<ITestClassInfo> testInfo;
+    ec = CTestClassInfo::New(info,(ITestClassInfo**)&testInfo);
+    if (FAILED(ec)) {
+        ALOGD("CCarRuntime::Test_CObject_ReflectClassInfo error: CTestClassInfo::New fail!");
+        return ec;
+    }
+    *ppClassInfo = testInfo;
+
+    info->AddRef();
+    testInfo->AddRef();
+
+    return ec;
+}
+
+ECode CCarRuntime::Test_CObject_ReflectInterfaceInfo(
+        /* [in] */ PInterface object,
+        /* [out] */ ITestInterfaceInfo** ppInterfaceInfo)
 {
     // TODO: Add your code here
     return E_NOT_IMPLEMENTED;
