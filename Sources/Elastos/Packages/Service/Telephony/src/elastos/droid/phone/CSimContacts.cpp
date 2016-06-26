@@ -275,13 +275,11 @@ void CSimContacts::ActuallyImportOneSimContact(
             (ArrayOf<IContentProviderResult*>**)&tmp);
     //} catch (RemoteException e) {
     if (ec == (ECode)E_REMOTE_EXCEPTION) {
-        assert(0);
-        //Logger::E(TAG, String.format("%s: %s", e.toString(), e.getMessage()));
+        Logger::E(TAG, "E_REMOTE_EXCEPTION %d", ec);
     }
     //} catch (OperationApplicationException e) {
     if (ec == (ECode)E_OPERATION_APPLICATION_EXCEPTION) {
-        assert(0);
-        //Logger::E(TAG, String.format("%s: %s", e.toString(), e.getMessage()));
+        Logger::E(TAG, "E_REMOTE_EXCEPTION %d", ec);
     }
     //}
 }

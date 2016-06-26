@@ -127,6 +127,7 @@ EXPORT_HEADERS += elastos/droid/os/RemoteCallbackList.h
 EXPORT_HEADERS += elastos/droid/os/UEventObserver.h
 EXPORT_HEADERS += elastos/droid/os/SELinux.h
 EXPORT_HEADERS += elastos/droid/os/ResultReceiver.h
+EXPORT_HEADERS += elastos/droid/os/CountDownTimer.h
 
 EXPORT_HEADERS += elastos/droid/provider/Settings.h
 EXPORT_HEADERS += elastos/droid/provider/SearchIndexableData.h

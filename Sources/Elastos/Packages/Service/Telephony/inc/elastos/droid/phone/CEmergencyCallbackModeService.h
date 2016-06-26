@@ -3,6 +3,31 @@
 
 #include "_Elastos_Droid_Phone_CEmergencyCallbackModeService.h"
 #include "elastos/droid/ext/frameworkext.h"
+#include "elastos/droid/app/Service.h"
+#include "elastos/droid/content/BroadcastReceiver.h"
+#include "elastos/droid/os/Handler.h"
+#include "elastos/droid/os/CountDownTimer.h"
+#include "elastos/droid/os/AsyncResult.h"
+#include "elastos/droid/os/Binder.h"
+#include "Elastos.Droid.App.h"
+#include "Elastos.Droid.Internal.h"
+#include "Elastos.Droid.Content.h"
+#include "Elastos.Droid.Os.h"
+
+using Elastos::Droid::App::Service;
+using Elastos::Droid::App::INotificationManager;
+using Elastos::Droid::Content::IContext;
+using Elastos::Droid::Content::IIntent;
+using Elastos::Droid::Content::BroadcastReceiver;
+using Elastos::Droid::Content::IBroadcastReceiver;
+using Elastos::Droid::Internal::Telephony::IPhone;
+using Elastos::Droid::Os::Binder;
+using Elastos::Droid::Os::Handler;
+using Elastos::Droid::Os::IHandler;
+using Elastos::Droid::Os::IMessage;
+using Elastos::Droid::Os::AsyncResult;
+using Elastos::Droid::Os::CountDownTimer;
+using Elastos::Droid::Os::ICountDownTimer;
 
 namespace Elastos {
 namespace Droid {
@@ -15,7 +40,7 @@ namespace Phone {
  * @see EmergencyCallbackModeExitDialog
  */
 CarClass(CEmergencyCallbackModeService)
-    , public Service
+    , public Elastos::Droid::App::Service
     , public IEmergencyCallbackModeService
 {
 public:
@@ -42,9 +67,12 @@ public:
      */
     class LocalBinder
         : public Binder
+        , public IEmergencyCallbackModeServiceLocalBinder
     {
     public:
         TO_STRING_IMPL("CEmergencyCallbackModeService::LocalBinder")
+
+        CAR_INTERFACE_DECL()
 
         CARAPI GetService(
             /* [out] */ IEmergencyCallbackModeService** service);
@@ -87,7 +115,7 @@ private:
 
     private:
         CEmergencyCallbackModeService* mHost;
-    }
+    };
 
 public:
     CAR_INTERFACE_DECL()
@@ -137,7 +165,7 @@ private:
      * Handle ECM_TIMER_RESET notification
      */
     CARAPI_(void) ResetEcmTimer(
-        /* [in] */ IAsyncResult* r);
+        /* [in] */ AsyncResult* r);
 
 private:
     // Default Emergency Callback Mode timeout value
@@ -150,7 +178,7 @@ private:
     AutoPtr<IPhone> mPhone;
     Boolean mInEmergencyCall;
 
-    static const Int32 ECM_TIMER_RESET;
+    static const Int32 ECM_TIMER_RESET = 1;
 
     AutoPtr<IHandler> mHandler;
 
@@ -166,6 +194,5 @@ private:
 } // namespace Phone
 } // namespace Droid
 } // namespace Elastos
-
 
 #endif // __ELASTOS_DROID_PHONE_CEMERGENCYCALLBACKMODESERVICE_H__

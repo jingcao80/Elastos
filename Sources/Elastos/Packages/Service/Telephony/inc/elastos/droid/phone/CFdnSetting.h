@@ -3,6 +3,21 @@
 
 #include "_Elastos_Droid_Phone_CFdnSetting.h"
 #include "elastos/droid/ext/frameworkext.h"
+#include "elastos/droid/preference/PreferenceActivity.h"
+#include "elastos/droid/os/Handler.h"
+#include "Elastos.Droid.Content.h"
+#include "Elastos.Droid.Internal.h"
+#include "Elastos.Droid.View.h"
+
+using Elastos::Droid::Content::IDialogInterface;
+using Elastos::Droid::Content::IDialogInterfaceOnCancelListener;
+using Elastos::Droid::Os::Handler;
+using Elastos::Droid::Os::IHandler;
+using Elastos::Droid::Os::IMessage;
+using Elastos::Droid::Os::IBundle;
+using Elastos::Droid::View::IMenuItem;
+using Elastos::Droid::Preference::PreferenceActivity;
+using Elastos::Droid::Internal::Telephony::IPhone;
 
 namespace Elastos {
 namespace Droid {
@@ -14,7 +29,6 @@ namespace Phone {
  */
 CarClass(CFdnSetting)
     , public PreferenceActivity
-    , public IFdnSetting
     , public IEditPinPreferenceOnPinEnteredListener
     , public IDialogInterfaceOnCancelListener
 {
@@ -46,7 +60,7 @@ public:
 
     //@Override
     CARAPI OnPinEntered(
-        /* [in] */ IEditPinPreference* preference,
+        /* [in] */ IPhoneEditPinPreference* preference,
         /* [in] */ Boolean positiveResult);
 
     /**
@@ -93,11 +107,11 @@ private:
      * Display a toast for message, like the rest of the settings.
      */
     CARAPI_(void) DisplayMessage(
-        /* [in] */ Int 32strId,
-        /* [in] */ Int 32attemptsRemaining);
+        /* [in] */ Int32 strId,
+        /* [in] */ Int32 attemptsRemaining);
 
     CARAPI_(void) DisplayMessage(
-        /* [in] */ Int 32strId);
+        /* [in] */ Int32 strId);
 
     /**
      * The next two functions are for updating the message field on the dialog.
@@ -138,8 +152,8 @@ private:
         /* [in] */ const String& msg);
 
 private:
-    static const String TAG = PhoneGlobals.TAG;
-    static const Boolean DBG = FALSE;
+    static const String TAG;
+    static const Boolean DBG;
 
     AutoPtr<IPhone> mPhone;
 
@@ -153,11 +167,11 @@ private:
     // String keys for preference lookup
     // We only care about the pin preferences here, the manage FDN contacts
     // Preference is handled solely in xml.
-    static const String BUTTON_FDN_ENABLE_KEY = "button_fdn_enable_key";
-    static const String BUTTON_CHANGE_PIN2_KEY = "button_change_pin2_key";
+    static const String BUTTON_FDN_ENABLE_KEY;
+    static const String BUTTON_CHANGE_PIN2_KEY;
 
-    AutoPtr<IEditPinPreference> mButtonEnableFDN;
-    AutoPtr<IEditPinPreference> mButtonChangePin2;
+    AutoPtr<IPhoneEditPinPreference> mButtonEnableFDN;
+    AutoPtr<IPhoneEditPinPreference> mButtonChangePin2;
 
     // State variables
     String mOldPin;
@@ -172,16 +186,16 @@ private:
     Int32 mPinChangeState;
     Boolean mIsPuk2Locked;    // Indicates we know that we are PUK2 blocked.
 
-    static const String SKIP_OLD_PIN_KEY = "skip_old_pin_key";
-    static const String PIN_CHANGE_STATE_KEY = "pin_change_state_key";
-    static const String OLD_PIN_KEY = "old_pin_key";
-    static const String NEW_PIN_KEY = "new_pin_key";
-    static const String DIALOG_MESSAGE_KEY = "dialog_message_key";
-    static const String DIALOG_PIN_ENTRY_KEY = "dialog_pin_entry_key";
+    static const String SKIP_OLD_PIN_KEY;
+    static const String PIN_CHANGE_STATE_KEY;
+    static const String OLD_PIN_KEY;
+    static const String NEW_PIN_KEY;
+    static const String DIALOG_MESSAGE_KEY;
+    static const String DIALOG_PIN_ENTRY_KEY;
 
     // size limits for the pin.
-    static const Int32 MIN_PIN_LENGTH = 4;
-    static const Int32 MAX_PIN_LENGTH = 8;
+    static const Int32 MIN_PIN_LENGTH;
+    static const Int32 MAX_PIN_LENGTH;
 
     /**
      * Handler for asynchronous replies from the sim.
@@ -192,6 +206,5 @@ private:
 } // namespace Phone
 } // namespace Droid
 } // namespace Elastos
-
 
 #endif // __ELASTOS_DROID_PHONE_CFDNSETTING_H__

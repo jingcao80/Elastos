@@ -3,6 +3,17 @@
 
 #include "_Elastos_Droid_Phone_CErrorDialogActivity.h"
 #include "elastos/droid/ext/frameworkext.h"
+#include "elastos/droid/app/Activity.h"
+#include "Elastos.Droid.Content.h"
+#include "Elastos.Droid.Os.h"
+#include <elastos/core/Object.h>
+
+using Elastos::Droid::App::Activity;
+using Elastos::Droid::Content::IDialogInterface;
+using Elastos::Droid::Content::IDialogInterfaceOnClickListener;
+using Elastos::Droid::Content::IDialogInterfaceOnCancelListener;
+using Elastos::Droid::Os::IBundle;
+using Elastos::Core::Object;
 
 namespace Elastos {
 namespace Droid {
@@ -22,6 +33,8 @@ private:
     {
     public:
         TO_STRING_IMPL("CErrorDialogActivity::MyDialogInterfaceOnClickListener")
+
+        CAR_INTERFACE_DECL()
 
         MyDialogInterfaceOnClickListener(
             /* [in] */ CErrorDialogActivity* host)
@@ -45,6 +58,8 @@ private:
     public:
         TO_STRING_IMPL("CErrorDialogActivity::MyDialogInterfaceOnClickListener2")
 
+        CAR_INTERFACE_DECL()
+
         MyDialogInterfaceOnClickListener2(
             /* [in] */ CErrorDialogActivity* host)
             : mHost(host)
@@ -66,6 +81,8 @@ private:
     {
     public:
         TO_STRING_IMPL("CErrorDialogActivity::MyDialogInterfaceOnClickListener3")
+
+        CAR_INTERFACE_DECL()
 
         MyDialogInterfaceOnClickListener3(
             /* [in] */ CErrorDialogActivity* host)
@@ -89,6 +106,8 @@ private:
     public:
         TO_STRING_IMPL("CErrorDialogActivity::MyDialogInterfaceOnCancelListener")
 
+        CAR_INTERFACE_DECL()
+
         MyDialogInterfaceOnCancelListener(
             /* [in] */ CErrorDialogActivity* host)
             : mHost(host)
@@ -108,6 +127,8 @@ private:
     {
     public:
         TO_STRING_IMPL("CErrorDialogActivity::MyDialogInterfaceOnCancelListener2")
+
+        CAR_INTERFACE_DECL()
 
         MyDialogInterfaceOnCancelListener2(
             /* [in] */ CErrorDialogActivity* host)
@@ -154,6 +175,5 @@ private:
 } // namespace Phone
 } // namespace Droid
 } // namespace Elastos
-
 
 #endif // __ELASTOS_DROID_PHONE_CERRORDIALOGACTIVITY_H__

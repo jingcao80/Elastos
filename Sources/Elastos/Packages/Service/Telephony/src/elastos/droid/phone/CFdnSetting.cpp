@@ -1,5 +1,36 @@
 
 #include "elastos/droid/phone/CFdnSetting.h"
+#include "elastos/droid/os/AsyncResult.h"
+#include "elastos/droid/phone/PhoneGlobals.h"
+#include "elastos/droid/phone/CCallFeaturesSetting.h"
+#include "elastos/droid/R.h"
+#include "Elastos.Droid.App.h"
+#include "Elastos.Droid.Preference.h"
+#include "Elastos.Droid.Widget.h"
+#include <elastos/core/StringBuilder.h>
+#include <elastos/core/CoreUtils.h>
+#include <Elastos.CoreLibrary.Core.h>
+#include <elastos/utility/logging/Logger.h>
+#include "R.h"
+
+using Elastos::Droid::App::IActionBar;
+using Elastos::Droid::Content::EIID_IDialogInterfaceOnCancelListener;
+using Elastos::Droid::Internal::Telephony::IIccCard;
+using Elastos::Droid::Internal::Telephony::ICommandException;
+using Elastos::Droid::Os::AsyncResult;
+using Elastos::Droid::Os::IMessage;
+using Elastos::Droid::Preference::IPreference;
+using Elastos::Droid::Preference::IPreferenceGroup;
+using Elastos::Droid::Preference::IPreferenceScreen;
+using Elastos::Droid::Preference::IDialogPreference;
+using Elastos::Droid::Preference::IEditTextPreference;
+using Elastos::Droid::Widget::IToast;
+using Elastos::Droid::Widget::IToastHelper;
+using Elastos::Droid::Widget::CToastHelper;
+using Elastos::Core::StringBuilder;
+using Elastos::Core::IInteger32;
+using Elastos::Core::CoreUtils;
+using Elastos::Utility::Logging::Logger;
 
 namespace Elastos {
 namespace Droid {
@@ -22,29 +53,35 @@ ECode CFdnSetting::MyHandler::HandleMessage(
         // a toast, or just update the UI.
         case EVENT_PIN2_ENTRY_COMPLETE:
         {
-            AsyncResult ar = (AsyncResult) msg.obj;
-            if (ar.exception != null && ar.exception instanceof CommandException) {
-                Int32 attemptsRemaining = msg.arg1;
+            AutoPtr<IInterface> obj;
+            msg->GetObj((IInterface**)&obj);
+            AutoPtr<AsyncResult> ar = (AsyncResult*)IObject::Probe(obj);
+            if (ar->mException != NULL && ICommandException::Probe(ar->mException) != NULL) {
+                Int32 attemptsRemaining;
+                msg->GetArg1(&attemptsRemaining);
                 // see if PUK2 is requested and alert the user accordingly.
-                CommandException.Error e =
-                        ((CommandException) ar.exception).getCommandError();
-                switch (e) {
-                    case SIM_PUK2:
-                        // make sure we set the PUK2 state so that we can skip
-                        // some redundant behaviour.
-                        DisplayMessage(R.string.fdn_enable_puk2_requested,
-                                attemptsRemaining);
-                        ResetPinChangeStateForPUK2();
-                        break;
-                    case PASSWORD_INCORRECT:
-                        DisplayMessage(R.string.pin2_invalid, attemptsRemaining);
-                        break;
-                    default:
-                        DisplayMessage(R.string.fdn_failed, attemptsRemaining);
-                        break;
-                }
+                assert(0);
+                // CommandException.Error e =
+                //         ((CommandException) ar.exception).getCommandError();
+                // switch (e) {
+                //     case SIM_PUK2:
+                //         // make sure we set the PUK2 state so that we can skip
+                //         // some redundant behaviour.
+                //         mHost->DisplayMessage(Elastos::Droid::Server::Telephony::R::string::fdn_enable_puk2_requested,
+                //                 attemptsRemaining);
+                //         ResetPinChangeStateForPUK2();
+                //         break;
+                //     case PASSWORD_INCORRECT:
+                //         mHost->DisplayMessage(Elastos::Droid::Server::Telephony::R::string::pin2_invalid, 
+                //                 attemptsRemaining);
+                //         break;
+                //     default:
+                //         mHost->DisplayMessage(Elastos::Droid::Server::Telephony::R::string::fdn_failed, 
+                //                 attemptsRemaining);
+                //         break;
+                // }
             }
-            updateEnableFDN();
+            mHost->UpdateEnableFDN();
             break;
         }
         // when changing the pin we need to pay attention to whether or not
@@ -52,54 +89,58 @@ ECode CFdnSetting::MyHandler::HandleMessage(
         // Set the state accordingly.
         case EVENT_PIN2_CHANGE_COMPLETE:
         {
-            if (DBG) Log(String("Handle EVENT_PIN2_CHANGE_COMPLETE"));
-            AsyncResult ar = (AsyncResult) msg.obj;
-            if (ar.exception != null) {
-                Int32 attemptsRemaining = msg.arg1;
+            if (DBG) mHost->Log(String("Handle EVENT_PIN2_CHANGE_COMPLETE"));
+            AutoPtr<IInterface> obj;
+            msg->GetObj((IInterface**)&obj);
+            AutoPtr<AsyncResult> ar = (AsyncResult*)IObject::Probe(obj);
+            if (ar->mException != NULL) {
+                Int32 attemptsRemaining;
+                msg->GetArg1(&attemptsRemaining);
                 StringBuilder sb;
                 sb += "Handle EVENT_PIN2_CHANGE_COMPLETE attemptsRemaining=";
                 sb += attemptsRemaining;
-                Log(sb.ToString());
-                CommandException ce = (CommandException) ar.exception;
-                if (ce.getCommandError() == CommandException.Error.SIM_PUK2) {
-                    // throw an alert dialog on the screen, displaying the
-                    // request for a PUK2.  set the cancel listener to
-                    // FdnSetting.onCancel().
-                    AutoPtr<IAlertDialogBuilder> builder;
-                    CAlertDialogBuilder::New(this, (IAlertDialogBuilder**)&builder);
-                    builder->SetMessage(R.string.puk2_requested);
-                    builder->SetCancelable(TRUE);
-                    builder->SetOnCancelListener(this);
-                    AutoPtr<IAlertDialog> a;
-                    builder->Create((IAlertDialog**)&a);
-                    AutoPtr<IWindow> window;
-                    a->GetWindow((IWindow**)&window);
-                    window->AddFlags(IWindowManagerLayoutParams::FLAG_DIM_BEHIND);
-                    a->Show();
-                }
-                else {
-                    // set the correct error message depending upon the state.
-                    // Reset the state depending upon or knowledge of the PUK state.
-                    if (!mIsPuk2Locked) {
-                        DisplayMessage(R.string.badPin2, attemptsRemaining);
-                        ResetPinChangeState();
-                    }
-                    else {
-                        DisplayMessage(R.string.badPuk2, attemptsRemaining);
-                        ResetPinChangeStateForPUK2();
-                    }
-                }
+                mHost->Log(sb.ToString());
+                assert(0);
+                // CommandException ce = (CommandException) ar.exception;
+                // if (ce.getCommandError() == CommandException.Error.SIM_PUK2) {
+                //     // throw an alert dialog on the screen, displaying the
+                //     // request for a PUK2.  set the cancel listener to
+                //     // FdnSetting.onCancel().
+                //     AutoPtr<IAlertDialogBuilder> builder;
+                //     CAlertDialogBuilder::New(this, (IAlertDialogBuilder**)&builder);
+                //     builder->SetMessage(R.string.puk2_requested);
+                //     builder->SetCancelable(TRUE);
+                //     builder->SetOnCancelListener(this);
+                //     AutoPtr<IAlertDialog> a;
+                //     builder->Create((IAlertDialog**)&a);
+                //     AutoPtr<IWindow> window;
+                //     a->GetWindow((IWindow**)&window);
+                //     window->AddFlags(IWindowManagerLayoutParams::FLAG_DIM_BEHIND);
+                //     a->Show();
+                // }
+                // else {
+                //     // set the correct error message depending upon the state.
+                //     // Reset the state depending upon or knowledge of the PUK state.
+                //     if (!mIsPuk2Locked) {
+                //         mHost->DisplayMessage(Elastos::Droid::Server::Telephony::R::string::badPin2, attemptsRemaining);
+                //         mHost->ResetPinChangeState();
+                //     }
+                //     else {
+                //         mHost->DisplayMessage(Elastos::Droid::Server::Telephony::R::string::badPuk2, attemptsRemaining);
+                //         mHost->ResetPinChangeStateForPUK2();
+                //     }
+                // }
             }
             else {
-                if (mPinChangeState == PIN_CHANGE_PUK) {
-                    DisplayMessage(R.string.pin2_unblocked);
+                if (mHost->mPinChangeState == PIN_CHANGE_PUK) {
+                    mHost->DisplayMessage(Elastos::Droid::Server::Telephony::R::string::pin2_unblocked);
                 }
                 else {
-                    DisplayMessage(R.string.pin2_changed);
+                    mHost->DisplayMessage(Elastos::Droid::Server::Telephony::R::string::pin2_changed);
                 }
 
                 // reset to normal behaviour on successful change.
-                ResetPinChangeState();
+                mHost->ResetPinChangeState();
             }
             break;
         }
@@ -110,18 +151,8 @@ ECode CFdnSetting::MyHandler::HandleMessage(
 const String CFdnSetting::TAG("CFdnSetting");// = PhoneGlobals.TAG;
 const Boolean CFdnSetting::DBG = FALSE;
 
-const Int32 CFdnSetting::EVENT_PIN2_ENTRY_COMPLETE = 100;
-const Int32 CFdnSetting::EVENT_PIN2_CHANGE_COMPLETE = 200;
-
 const String CFdnSetting::BUTTON_FDN_ENABLE_KEY("button_fdn_enable_key");
 const String CFdnSetting::BUTTON_CHANGE_PIN2_KEY("button_change_pin2_key");
-
-const Int32 CFdnSetting::PIN_CHANGE_OLD = 0;
-const Int32 CFdnSetting::PIN_CHANGE_NEW = 1;
-const Int32 CFdnSetting::PIN_CHANGE_REENTER = 2;
-const Int32 CFdnSetting::PIN_CHANGE_PUK = 3;
-const Int32 CFdnSetting::PIN_CHANGE_NEW_PIN_FOR_PUK = 4;
-const Int32 CFdnSetting::PIN_CHANGE_REENTER_PIN_FOR_PUK = 5;
 
 const String CFdnSetting::SKIP_OLD_PIN_KEY("skip_old_pin_key");
 const String CFdnSetting::PIN_CHANGE_STATE_KEY("pin_change_state_key");
@@ -133,7 +164,7 @@ const String CFdnSetting::DIALOG_PIN_ENTRY_KEY("dialog_pin_entry_key");
 const Int32 CFdnSetting::MIN_PIN_LENGTH = 4;
 const Int32 CFdnSetting::MAX_PIN_LENGTH = 8;
 
-CAR_INTERFACE_IMPL_3(CFdnSetting, PreferenceActivity, IFdnSetting, IEditPinPreferenceOnPinEnteredListener,
+CAR_INTERFACE_IMPL_2(CFdnSetting, PreferenceActivity, IEditPinPreferenceOnPinEnteredListener,
         IDialogInterfaceOnCancelListener)
 
 CAR_OBJECT_IMPL(CFdnSetting)
@@ -154,7 +185,7 @@ ECode CFdnSetting::constructor()
 }
 
 ECode CFdnSetting::OnPinEntered(
-    /* [in] */ IEditPinPreference* preference,
+    /* [in] */ IPhoneEditPinPreference* preference,
     /* [in] */ Boolean positiveResult)
 {
     if (TO_IINTERFACE(preference) == TO_IINTERFACE(mButtonEnableFDN)) {
@@ -175,7 +206,7 @@ void CFdnSetting::ToggleFDNEnable(
 
     // validate the pin first, before submitting it to the RIL for FDN enable.
     String password;
-    mButtonEnableFDN->GetText(&password);
+    IEditTextPreference::Probe(mButtonEnableFDN)->GetText(&password);
     if (ValidatePin(password, FALSE)) {
         // get the relevant data for the icc call
         AutoPtr<IIccCard> card;
@@ -191,10 +222,10 @@ void CFdnSetting::ToggleFDNEnable(
     }
     else {
         // throw up error if the pin is invalid.
-        DisplayMessage(R.string.invalidPin2);
+        DisplayMessage(Elastos::Droid::Server::Telephony::R::string::invalidPin2);
     }
 
-    mButtonEnableFDN->SetText(String(""));
+    IEditTextPreference::Probe(mButtonEnableFDN)->SetText(String(""));
 }
 
 void CFdnSetting::UpdatePINChangeState(
@@ -208,7 +239,7 @@ void CFdnSetting::UpdatePINChangeState(
         sb += mPinChangeState;
         sb += " mSkipOldPin=";
         sb += mIsPuk2Locked;
-        log(sb.ToString());
+        Log(sb.ToString());
     }
 
     if (!positiveResult) {
@@ -234,44 +265,44 @@ void CFdnSetting::UpdatePINChangeState(
     switch (mPinChangeState) {
         case PIN_CHANGE_OLD:
         {
-            mButtonChangePin2->GetText(&mOldPin);
-            mButtonChangePin2->SetText(String(""));
+            IEditTextPreference::Probe(mButtonChangePin2)->GetText(&mOldPin);
+            IEditTextPreference::Probe(mButtonChangePin2)->SetText(String(""));
             // if the pin is not valid, display a message and reset the state.
             if (ValidatePin(mOldPin, FALSE)) {
                 mPinChangeState = PIN_CHANGE_NEW;
                 DisplayPinChangeDialog();
             }
             else {
-                DisplayPinChangeDialog(R.string.invalidPin2, TRUE);
+                DisplayPinChangeDialog(Elastos::Droid::Server::Telephony::R::string::invalidPin2, TRUE);
             }
             break;
         }
         case PIN_CHANGE_NEW:
         {
-            mButtonChangePin2->GetText(&mNewPin);
-            mButtonChangePin2->SetText(String(""));
+            IEditTextPreference::Probe(mButtonChangePin2)->GetText(&mNewPin);
+            IEditTextPreference::Probe(mButtonChangePin2)->SetText(String(""));
             // if the new pin is not valid, display a message and reset the state.
             if (ValidatePin(mNewPin, FALSE)) {
                 mPinChangeState = PIN_CHANGE_REENTER;
                 DisplayPinChangeDialog();
             } else {
-                DisplayPinChangeDialog(R.string.invalidPin2, TRUE);
+                DisplayPinChangeDialog(Elastos::Droid::Server::Telephony::R::string::invalidPin2, TRUE);
             }
             break;
         }
         case PIN_CHANGE_REENTER:
         {
             String text;
-            mButtonChangePin2->GetText(&text);
+            IEditTextPreference::Probe(mButtonChangePin2)->GetText(&text);
             // if the re-entered pin is not valid, display a message and reset the state.
             if (!mNewPin.Equals(text)) {
                 mPinChangeState = PIN_CHANGE_NEW;
-                mButtonChangePin2->SetText(String(""));
-                DisplayPinChangeDialog(R.string.mismatchPin2, TRUE);
+                IEditTextPreference::Probe(mButtonChangePin2)->SetText(String(""));
+                DisplayPinChangeDialog(Elastos::Droid::Server::Telephony::R::string::mismatchPin2, TRUE);
             }
             else {
                 // If the PIN is valid, then we submit the change PIN request.
-                mButtonChangePin2->SetText(String(""));
+                IEditTextPreference::Probe(mButtonChangePin2)->SetText(String(""));
                 AutoPtr<IMessage> onComplete;
                 mFDNHandler->ObtainMessage(
                         EVENT_PIN2_CHANGE_COMPLETE, (IMessage**)&onComplete);
@@ -284,8 +315,8 @@ void CFdnSetting::UpdatePINChangeState(
         case PIN_CHANGE_PUK:
         {
                 // Doh! too many incorrect requests, PUK requested.
-                mButtonChangePin2->GetText(&mPuk2);
-                mButtonChangePin2->SetText(String(""));
+                IEditTextPreference::Probe(mButtonChangePin2)->GetText(&mPuk2);
+                IEditTextPreference::Probe(mButtonChangePin2)->SetText(String(""));
                 // if the puk is not valid, display
                 // a message and reset the state.
                 if (ValidatePin(mPuk2, TRUE)) {
@@ -293,14 +324,14 @@ void CFdnSetting::UpdatePINChangeState(
                     DisplayPinChangeDialog();
                 }
                 else {
-                    DisplayPinChangeDialog(R.string.invalidPuk2, TRUE);
+                    DisplayPinChangeDialog(Elastos::Droid::Server::Telephony::R::string::invalidPuk2, TRUE);
                 }
             break;
         }
         case PIN_CHANGE_NEW_PIN_FOR_PUK:
         {
-            mButtonChangePin2->GetText(&mNewPin);
-            mButtonChangePin2->SetText(String(""));
+            IEditTextPreference::Probe(mButtonChangePin2)->GetText(&mNewPin);
+            IEditTextPreference::Probe(mButtonChangePin2)->SetText(String(""));
             // if the new pin is not valid, display
             // a message and reset the state.
             if (ValidatePin(mNewPin, FALSE)) {
@@ -308,24 +339,24 @@ void CFdnSetting::UpdatePINChangeState(
                 DisplayPinChangeDialog();
             }
             else {
-                DisplayPinChangeDialog(R.string.invalidPin2, TRUE);
+                DisplayPinChangeDialog(Elastos::Droid::Server::Telephony::R::string::invalidPin2, TRUE);
             }
             break;
         }
         case PIN_CHANGE_REENTER_PIN_FOR_PUK:
         {
             String text;
-            mButtonChangePin2->GetText(&text);
+            IEditTextPreference::Probe(mButtonChangePin2)->GetText(&text);
             // if the re-entered pin is not valid, display
             // a message and reset the state.
             if (!mNewPin.Equals(text)) {
                 mPinChangeState = PIN_CHANGE_NEW_PIN_FOR_PUK;
-                mButtonChangePin2->SetText(String(""));
-                DisplayPinChangeDialog(R.string.mismatchPin2, TRUE);
+                IEditTextPreference::Probe(mButtonChangePin2)->SetText(String(""));
+                DisplayPinChangeDialog(Elastos::Droid::Server::Telephony::R::string::mismatchPin2, TRUE);
             }
             else {
                 // Both puk2 and new pin2 are ready to submit
-                mButtonChangePin2->SetText(String(""));
+                IEditTextPreference::Probe(mButtonChangePin2)->SetText(String(""));
                 AutoPtr<IMessage> onComplete;
                 mFDNHandler->ObtainMessage(
                         EVENT_PIN2_CHANGE_COMPLETE, (IMessage**)&onComplete);
@@ -343,23 +374,28 @@ ECode CFdnSetting::OnCancel(
 {
     // set the state of the preference and then display the dialog.
     ResetPinChangeStateForPUK2();
-    return DisplayPinChangeDialog(0, TRUE);
+    DisplayPinChangeDialog(0, TRUE);
+    return NOERROR;
 }
 
 void CFdnSetting::DisplayMessage(
-    /* [in] */ Int 32strId,
-    /* [in] */ Int 32attemptsRemaining)
+    /* [in] */ Int32 strId,
+    /* [in] */ Int32 attemptsRemaining)
 {
     String s;
     GetString(strId, &s);
-    if ((strId == R.string.badPin2) || (strId == R.string.badPuk2) ||
-            (strId == R.string.pin2_invalid)) {
+    if ((strId == Elastos::Droid::Server::Telephony::R::string::badPin2) || 
+            (strId == Elastos::Droid::Server::Telephony::R::string::badPuk2) ||
+            (strId == Elastos::Droid::Server::Telephony::R::string::pin2_invalid)) {
         if (attemptsRemaining >= 0) {
             StringBuilder sb;
             String str;
             GetString(strId, &str);
             sb += str;
-            GetString(R.string.pin2_attempts, attemptsRemaining, &str);
+            AutoPtr<ArrayOf<IInterface*> > array = ArrayOf<IInterface*>::Alloc(1);
+            AutoPtr<IInteger32> value = CoreUtils::Convert(attemptsRemaining);
+            array->Set(0, value);
+            GetString(Elastos::Droid::Server::Telephony::R::string::pin2_attempts, array, &str);
             sb += str;
             s = sb.ToString();
         }
@@ -377,12 +413,13 @@ void CFdnSetting::DisplayMessage(
     AutoPtr<IToastHelper> helper;
     CToastHelper::AcquireSingleton((IToastHelper**)&helper);
     AutoPtr<IToast> toast;
-    helper->MakeText(this, s, IToast::LENGTH_SHORT, (IToast**)&toast);
+    AutoPtr<ICharSequence> cchar = CoreUtils::Convert(s);
+    helper->MakeText(this, cchar, IToast::LENGTH_SHORT, (IToast**)&toast);
     toast->Show();
 }
 
 void CFdnSetting::DisplayMessage(
-    /* [in] */ Int 32strId)
+    /* [in] */ Int32 strId)
 {
     DisplayMessage(strId, -1);
 }
@@ -399,35 +436,40 @@ void CFdnSetting::DisplayPinChangeDialog(
     Int32 msgId;
     switch (mPinChangeState) {
         case PIN_CHANGE_OLD:
-            msgId = R.string.oldPin2Label;
+            msgId = Elastos::Droid::Server::Telephony::R::string::oldPin2Label;
             break;
         case PIN_CHANGE_NEW:
         case PIN_CHANGE_NEW_PIN_FOR_PUK:
-            msgId = R.string.newPin2Label;
+            msgId = Elastos::Droid::Server::Telephony::R::string::newPin2Label;
             break;
         case PIN_CHANGE_REENTER:
         case PIN_CHANGE_REENTER_PIN_FOR_PUK:
-            msgId = R.string.confirmPin2Label;
+            msgId = Elastos::Droid::Server::Telephony::R::string::confirmPin2Label;
             break;
         case PIN_CHANGE_PUK:
         default:
-            msgId = R.string.label_puk2_code;
+            msgId = Elastos::Droid::Server::Telephony::R::string::label_puk2_code;
             break;
     }
 
     // append the note / additional message, if needed.
     if (strId != 0) {
         StringBuilder sb;
+        AutoPtr<ICharSequence> cchar;
+        GetText(msgId, (ICharSequence**)&cchar);
         String str;
-        GetText(msgId, &str);
+        cchar->ToString(&str);
         sb += str;
         sb += "\n";
-        GetText(strId, &str);
+        AutoPtr<ICharSequence> cchar2;
+        GetText(strId, (ICharSequence**)&cchar2);
+        cchar->ToString(&str);
         sb += str;
-        mButtonChangePin2->SetDialogMessage(sb.ToString());
+        AutoPtr<ICharSequence> cchar3 = CoreUtils::Convert(sb.ToString());
+        IDialogPreference::Probe(mButtonChangePin2)->SetDialogMessage(cchar3);
     }
     else {
-        mButtonChangePin2->SetDialogMessage(msgId);
+        IDialogPreference::Probe(mButtonChangePin2)->SetDialogMessage(msgId);
     }
 
     // only display if requested.
@@ -478,37 +520,39 @@ void CFdnSetting::UpdateEnableFDN()
     mPhone->GetIccCard((IIccCard**)&card);
     Boolean enable;
     if (card->GetIccFdnEnabled(&enable), enable) {
-        mButtonEnableFDN->SetTitle(R.string.enable_fdn_ok);
-        mButtonEnableFDN->SetSummary(R.string.fdn_enabled);
-        mButtonEnableFDN->SetDialogTitle(R.string.disable_fdn);
+        IPreference::Probe(mButtonEnableFDN)->SetTitle(Elastos::Droid::Server::Telephony::R::string::enable_fdn_ok);
+        IPreference::Probe(mButtonEnableFDN)->SetSummary(Elastos::Droid::Server::Telephony::R::string::fdn_enabled);
+        IDialogPreference::Probe(mButtonEnableFDN)->SetDialogTitle(Elastos::Droid::Server::Telephony::R::string::disable_fdn);
     }
     else {
-        mButtonEnableFDN->SetTitle(R.string.disable_fdn_ok);
-        mButtonEnableFDN->SetSummary(R.string.fdn_disabled);
-        mButtonEnableFDN->SetDialogTitle(R.string.enable_fdn);
+        IPreference::Probe(mButtonEnableFDN)->SetTitle(Elastos::Droid::Server::Telephony::R::string::disable_fdn_ok);
+        IPreference::Probe(mButtonEnableFDN)->SetSummary(Elastos::Droid::Server::Telephony::R::string::fdn_disabled);
+        IDialogPreference::Probe(mButtonEnableFDN)->SetDialogTitle(Elastos::Droid::Server::Telephony::R::string::enable_fdn);
     }
 }
 
-Ecode CFdnSetting::OnCreate(
+ECode CFdnSetting::OnCreate(
     /* [in] */ IBundle* icicle)
 {
     PreferenceActivity::OnCreate(icicle);
 
-    AddPreferencesFromResource(R.xml.fdn_setting);
+    AddPreferencesFromResource(Elastos::Droid::Server::Telephony::R::xml::fdn_setting);
 
-    PhoneGlobals::GetPhone((IPhone**)&mPhone);
+    mPhone = PhoneGlobals::GetPhone();
 
     //get UI object references
     AutoPtr<IPreferenceScreen> prefSet;
     GetPreferenceScreen((IPreferenceScreen**)&prefSet);
 
     AutoPtr<IPreference> preference;
-    prefSet->FindPreference(BUTTON_FDN_ENABLE_KEY, (IPreference**)&preference);
-    mButtonEnableFDN = IEditPinPreference::Probe(preference);
+    AutoPtr<ICharSequence> cchar = CoreUtils::Convert(BUTTON_FDN_ENABLE_KEY);
+    IPreferenceGroup::Probe(prefSet)->FindPreference(cchar, (IPreference**)&preference);
+    mButtonEnableFDN = IPhoneEditPinPreference::Probe(preference);
 
     AutoPtr<IPreference> preference2;
-    prefSet->FindPreference(BUTTON_CHANGE_PIN2_KEY, (IPreference**)&preference2);
-    mButtonChangePin2 = IEditPinPreference::Probe(preference2);
+    AutoPtr<ICharSequence> cchar2 = CoreUtils::Convert(BUTTON_CHANGE_PIN2_KEY);
+    IPreferenceGroup::Probe(prefSet)->FindPreference(cchar2, (IPreference**)&preference2);
+    mButtonChangePin2 = IPhoneEditPinPreference::Probe(preference2);
 
     //assign click listener and update state
     mButtonEnableFDN->SetOnPinEnteredListener(this);
@@ -528,11 +572,12 @@ Ecode CFdnSetting::OnCreate(
 
         String str;
         icicle->GetString(DIALOG_MESSAGE_KEY, &str);
-        mButtonChangePin2->SetDialogMessage(str);
+        AutoPtr<ICharSequence> cchar = CoreUtils::Convert(str);
+        IDialogPreference::Probe(mButtonChangePin2)->SetDialogMessage(cchar);
 
         String str2;
         icicle->GetString(DIALOG_PIN_ENTRY_KEY, &str2);
-        mButtonChangePin2->SetText(str2);
+        IEditTextPreference::Probe(mButtonChangePin2)->SetText(str2);
     }
 
     AutoPtr<IActionBar> actionBar;
@@ -544,15 +589,15 @@ Ecode CFdnSetting::OnCreate(
     return NOERROR;
 }
 
-Ecode CFdnSetting::OnResume()
+ECode CFdnSetting::OnResume()
 {
     PreferenceActivity::OnResume();
-    PhoneGlobals::GetPhone((IPhone**)&mPhone);
+    mPhone = PhoneGlobals::GetPhone();
     UpdateEnableFDN();
     return NOERROR;
 }
 
-Ecode CFdnSetting::OnSaveInstanceState(
+ECode CFdnSetting::OnSaveInstanceState(
     /* [in] */ IBundle* _out)
 {
     PreferenceActivity::OnSaveInstanceState(_out);
@@ -561,18 +606,18 @@ Ecode CFdnSetting::OnSaveInstanceState(
     _out->PutString(OLD_PIN_KEY, mOldPin);
     _out->PutString(NEW_PIN_KEY, mNewPin);
 
-    AutoPtr<IDialogMessage> dialogMessage;
-    mButtonChangePin2->GetDialogMessage((IDialogMessage**)&dialogMessage);
+    AutoPtr<ICharSequence> dialogMessage;
+    IDialogPreference::Probe(mButtonChangePin2)->GetDialogMessage((ICharSequence**)&dialogMessage);
     String str;
     dialogMessage->ToString(&str);
     _out->PutString(DIALOG_MESSAGE_KEY, str);
 
     String str2;
-    mButtonChangePin2->GetText(&str2);
+    IEditTextPreference::Probe(mButtonChangePin2)->GetText(&str2);
     return _out->PutString(DIALOG_PIN_ENTRY_KEY, str2);
 }
 
-Ecode CFdnSetting::OnOptionsItemSelected(
+ECode CFdnSetting::OnOptionsItemSelected(
     /* [in] */ IMenuItem* item,
     /* [out] */ Boolean* result)
 {
@@ -580,8 +625,8 @@ Ecode CFdnSetting::OnOptionsItemSelected(
 
     Int32 itemId;
     item->GetItemId(&itemId);
-    if (itemId == android.R.id.home) {  // See ActionBar#setDisplayHomeAsUpEnabled()
-        CallFeaturesSetting::GoUpToTopLevelSetting(this);
+    if (itemId == Elastos::Droid::R::id::home) {  // See ActionBar#setDisplayHomeAsUpEnabled()
+        CCallFeaturesSetting::GoUpToTopLevelSetting(this);
         *result = TRUE;
         return NOERROR;
     }

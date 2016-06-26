@@ -3,6 +3,32 @@
 
 #include "_Elastos_Droid_Phone_CEmergencyDialer.h"
 #include "elastos/droid/ext/frameworkext.h"
+#include "elastos/droid/app/Activity.h"
+#include "elastos/droid/content/BroadcastReceiver.h"
+#include "Elastos.Droid.Media.h"
+#include "Elastos.Droid.Text.h"
+#include "Elastos.Droid.View.h"
+#include "Elastos.Droid.Widget.h"
+
+using Elastos::Droid::App::IDialog;
+using Elastos::Droid::App::Activity;
+using Elastos::Droid::App::IStatusBarManager;
+using Elastos::Droid::Content::IContext;
+using Elastos::Droid::Content::IIntent;
+using Elastos::Droid::Content::BroadcastReceiver;
+using Elastos::Droid::Content::IBroadcastReceiver;
+using Elastos::Droid::Media::IToneGenerator;
+using Elastos::Droid::Os::IBundle;
+using Elastos::Droid::Text::IEditable;
+using Elastos::Droid::Text::ITextWatcher;
+using Elastos::Droid::View::IView;
+using Elastos::Droid::View::IKeyEvent;
+using Elastos::Droid::View::IMenuItem;
+using Elastos::Droid::View::IViewOnClickListener;
+using Elastos::Droid::View::IViewOnKeyListener;
+using Elastos::Droid::View::IViewOnLongClickListener;
+using Elastos::Droid::View::Accessibility::IAccessibilityManager;
+using Elastos::Droid::Widget::IEditText;
 
 namespace Elastos {
 namespace Droid {
@@ -18,9 +44,9 @@ CarClass(CEmergencyDialer)
     , public IViewOnLongClickListener
     , public IViewOnKeyListener
     , public ITextWatcher
-    , public IDialpadKeyButtonOnPressedListener
+    //, public IDialpadKeyButtonOnPressedListener
 {
-private:
+public:
     class MyBroadcastReceiver
         : public BroadcastReceiver
     {
@@ -154,7 +180,7 @@ protected:
         /* [out] */ IDialog** dialog);
 
     //@Override
-    CARAPI OnPrepareDialog(
+    CARAPI_(void) OnPrepareDialog(
         /* [in] */ Int32 id,
         /* [in] */ IDialog* dialog);
 
@@ -215,7 +241,7 @@ private:
     Boolean mDTMFToneEnabled;
 
     // Haptic feedback (vibration) for dialer key presses.
-    AutoPtr<IHapticFeedback> mHaptic;
+    //AutoPtr<IHapticFeedback> mHaptic;
 
     // close activity when screen turns off
     AutoPtr<IBroadcastReceiver> mBroadcastReceiver;
@@ -226,6 +252,5 @@ private:
 } // namespace Phone
 } // namespace Droid
 } // namespace Elastos
-
 
 #endif // __ELASTOS_DROID_PHONE_CEMERGENCYDIALER_H__

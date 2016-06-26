@@ -3,6 +3,16 @@
 
 #include "_Elastos_Droid_Phone_CFdnList.h"
 #include "elastos/droid/ext/frameworkext.h"
+#include "elastos/droid/phone/ADNList.h"
+#include "Elastos.Droid.Net.h"
+#include "Elastos.Droid.Os.h"
+#include "Elastos.Droid.View.h"
+
+using Elastos::Droid::Net::IUri;
+using Elastos::Droid::Os::IBundle;
+using Elastos::Droid::View::IMenu;
+using Elastos::Droid::View::IMenuItem;
+using Elastos::Droid::Widget::IListView;
 
 namespace Elastos {
 namespace Droid {
@@ -14,7 +24,6 @@ namespace Phone {
  */
 CarClass(CFdnList)
     , public ADNList
-    , public IFdnList
 {
 public:
     CAR_INTERFACE_DECL()
@@ -78,13 +87,12 @@ private:
     static const Int32 MENU_EDIT = 2;
     static const Int32 MENU_DELETE = 3;
 
-    static const String INTENT_EXTRA_NAME = "name";
-    static const String INTENT_EXTRA_NUMBER = "number";
+    static const String INTENT_EXTRA_NAME;
+    static const String INTENT_EXTRA_NUMBER;
 };
 
 } // namespace Phone
 } // namespace Droid
 } // namespace Elastos
-
 
 #endif // __ELASTOS_DROID_PHONE_CFDNLIST_H__

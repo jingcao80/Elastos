@@ -1,5 +1,14 @@
 
 #include "elastos/droid/phone/CFakePhoneActivity.h"
+#include "elastos/droid/phone/PhoneGlobals.h"
+#include "R.h"
+
+using Elastos::Droid::App::INotificationManager;
+using Elastos::Droid::View::EIID_IViewOnClickListener;
+using Elastos::Droid::Widget::ITextView;
+using Elastos::Droid::Widget::IToast;
+using Elastos::Droid::Widget::IToastHelper;
+using Elastos::Droid::Widget::CToastHelper;
 
 namespace Elastos {
 namespace Droid {
@@ -10,23 +19,26 @@ CAR_INTERFACE_IMPL(CFakePhoneActivity::ButtonListener, Object, IViewOnClickListe
 ECode CFakePhoneActivity::ButtonListener::OnClick(
     /* [in] */ IView* v)
 {
-    if (mHost->mRadioControl == NULL) {
-        Logger::E("Phone", "SimulatedRadioControl not available, abort!");
-        AutoPtr<IInterface> obj;
-        GetSystemService(NOTIFICATION_SERVICE, (IInterface**)&obj);
-        AutoPtr<INotificationManager> nm = INotificationManager::Probe(obj);
+    assert(0);
+    // if (mHost->mRadioControl == NULL) {
+    //     Logger::E("Phone", "SimulatedRadioControl not available, abort!");
+    //     AutoPtr<IInterface> obj;
+    //     GetSystemService(NOTIFICATION_SERVICE, (IInterface**)&obj);
+    //     AutoPtr<INotificationManager> nm = INotificationManager::Probe(obj);
 
-        CToastHelper::AcquireSingleton((IToastHelper**)&helper);
-        AutoPtr<IToast> toast;
-        helper->MakeText(this, String("null mRadioControl!"), IToast::LENGTH_SHORT, (IToast**)&toast);
-        return toast->Show();
-    }
+    //     CToastHelper::AcquireSingleton((IToastHelper**)&helper);
+    //     AutoPtr<IToast> toast;
+    //     helper->MakeText(this, String("null mRadioControl!"), IToast::LENGTH_SHORT, (IToast**)&toast);
+    //     return toast->Show();
+    // }
 
     AutoPtr<ICharSequence> cchar;
-    mHost->mPhoneNumber->GetText((ICharSequence**)&cchar);
+    ITextView::Probe(mHost->mPhoneNumber)->GetText((ICharSequence**)&cchar);
     String str;
     cchar->ToString(&str);
-    return mHost->mRadioControl->TriggerRing(str);
+    assert(0);
+    //return mHost->mRadioControl->TriggerRing(str);
+    return NOERROR;
 }
 
 CAR_INTERFACE_IMPL(CFakePhoneActivity::MyViewOnClickListener, Object, IViewOnClickListener)
@@ -34,12 +46,11 @@ CAR_INTERFACE_IMPL(CFakePhoneActivity::MyViewOnClickListener, Object, IViewOnCli
 ECode CFakePhoneActivity::MyViewOnClickListener::OnClick(
     /* [in] */ IView* v)
 {
-    return mHost->mPlaceCall->RequestFocus();
+    Boolean res;
+    return IView::Probe(mHost->mPlaceCall)->RequestFocus(&res);
 }
 
 const String CFakePhoneActivity::TAG("FakePhoneActivity");
-
-CAR_INTERFACE_IMPL(CFakePhoneActivity, Activity, IFakePhoneActivity)
 
 CAR_OBJECT_IMPL(CFakePhoneActivity)
 
@@ -53,24 +64,23 @@ ECode CFakePhoneActivity::OnCreate(
 {
     Activity::OnCreate(icicle);
 
-    SetContentView(R.layout.fake_phone_activity);
+    SetContentView(Elastos::Droid::Server::Telephony::R::layout::fake_phone_activity);
 
     AutoPtr<IView> view;
-    FindViewById(R.id.placeCallm, (IView**)&view);
+    FindViewById(Elastos::Droid::Server::Telephony::R::id::placeCall, (IView**)&view);
     mPlaceCall = IButton::Probe(view);
     AutoPtr<IViewOnClickListener> listener = new ButtonListener(this);
-    mPlaceCall->SetOnClickListener(listener);
+    IView::Probe(mPlaceCall)->SetOnClickListener(listener);
 
     AutoPtr<IView> view2;
-    FindViewById(R.id.phoneNumber, (IView**)&view2);
+    FindViewById(Elastos::Droid::Server::Telephony::R::id::phoneNumber, (IView**)&view2);
     mPhoneNumber = IEditText::Probe(view2);
     AutoPtr<IViewOnClickListener> listener2 = new MyViewOnClickListener(this);
-    mPhoneNumber->SetOnClickListener(listener2);
+    IView::Probe(mPhoneNumber)->SetOnClickListener(listener2);
 
-    AutoPtr<IPhone> phone;
-    PhoneGlobals::GetPhone((IPhone**)&phone);
-    phone->GetSimulatedRadioControl((ISimulatedRadioControl**)&mRadioControl);
-
+    AutoPtr<IPhone> phone = PhoneGlobals::GetPhone();
+    assert(0);
+    //phone->GetSimulatedRadioControl((ISimulatedRadioControl**)&mRadioControl);
 
 //     Logger::I(TAG, "- PhoneApp.getInstance(): " + PhoneGlobals.getInstance());
 //     Logger::I(TAG, "- PhoneApp.getPhone(): " + PhoneGlobals.getPhone());

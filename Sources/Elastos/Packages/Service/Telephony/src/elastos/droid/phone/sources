@@ -7,7 +7,15 @@ INCLUDES += $(MAKEDIR)/../../../..
 INCLUDES += $(MAKEDIR)/../../../../inc/
 
 SOURCES += CEditPinPreference.cpp
-
+SOURCES += CEmergencyCallbackModeExitDialog.cpp
+SOURCES += CEmergencyCallbackModeService.cpp
+SOURCES += CEmergencyDialer.cpp
+SOURCES += CEnableFdnScreen.cpp
+SOURCES += CEnableIccPinScreen.cpp
+SOURCES += CErrorDialogActivity.cpp
+SOURCES += CFakePhoneActivity.cpp
+SOURCES += CFdnList.cpp
+SOURCES += CFdnSetting.cpp
 SOURCES += CGetPin2Screen.cpp
 SOURCES += CGsmUmtsAdditionalCallOptions.cpp
 SOURCES += CGsmUmtsCallForwardOptions.cpp

@@ -1,8 +1,11 @@
 #ifndef  __ELASTOS_DROID_PHONE_CEMERGENCYCALLBACKMODESERVICEBROADCASTRECEIVER_H__
 #define  __ELASTOS_DROID_PHONE_CEMERGENCYCALLBACKMODESERVICEBROADCASTRECEIVER_H__
 
-#include "elastos/droid/telephony/phone/CEmergencyCallbackModeService.h"
+#include "_Elastos_Droid_Phone_CEmergencyCallbackModeServiceBroadcastReceiver.h"
+#include "elastos/droid/phone/CEmergencyCallbackModeService.h"
 #include "elastos/droid/ext/frameworkext.h"
+
+using Elastos::Droid::Phone::CEmergencyCallbackModeService;
 
 namespace Elastos {
 namespace Droid {

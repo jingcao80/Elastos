@@ -1,5 +1,42 @@
 
 #include "elastos/droid/phone/CEmergencyCallbackModeExitDialog.h"
+#include "elastos/droid/phone/CEmergencyCallbackModeExitDialogBroadcastReceiver.h"
+#include "elastos/droid/phone/PhoneGlobals.h"
+#include "elastos/droid/os/Looper.h"
+#include <elastos/core/AutoLock.h>
+#include <elastos/core/StringUtils.h>
+#include <elastos/core/StringBuilder.h>
+#include <elastos/core/CoreUtils.h>
+#include <Elastos.CoreLibrary.Core.h>
+#include <elastos/utility/logging/Logger.h>
+#include "R.h"
+
+using Elastos::Droid::App::IDialog;
+using Elastos::Droid::App::IAlertDialog;
+using Elastos::Droid::App::IAlertDialogBuilder;
+using Elastos::Droid::App::CAlertDialogBuilder;
+using Elastos::Droid::App::CProgressDialog;
+using Elastos::Droid::Content::CIntent;
+using Elastos::Droid::Content::IIntentFilter;
+using Elastos::Droid::Content::CIntentFilter;
+using Elastos::Droid::Content::IDialogInterface;
+using Elastos::Droid::Content::EIID_IServiceConnection;
+using Elastos::Droid::Content::EIID_IDialogInterfaceOnClickListener;
+using Elastos::Droid::Content::EIID_IDialogInterfaceOnDismissListener;
+using Elastos::Droid::Content::Res::IResources;
+using Elastos::Droid::Os::Looper;
+using Elastos::Droid::Os::ISystemProperties;
+using Elastos::Droid::Os::CSystemProperties;
+using Elastos::Droid::Os::CHandler;
+using Elastos::Droid::Internal::Telephony::ITelephonyIntents;
+using Elastos::Droid::Internal::Telephony::ITelephonyProperties;
+using Elastos::Core::IBoolean;
+using Elastos::Core::StringUtils;
+using Elastos::Core::IThread;
+using Elastos::Core::CThread;
+using Elastos::Core::CoreUtils;
+using Elastos::Core::StringBuilder;
+using Elastos::Utility::Logging::Logger;
 
 namespace Elastos {
 namespace Droid {
@@ -7,7 +44,7 @@ namespace Phone {
 
 CEmergencyCallbackModeExitDialog::MyCountDownTimer::MyCountDownTimer(
     /* [in] */ Int64 millisInFuture,
-    /* [in] */ Int64 countDownInterval
+    /* [in] */ Int64 countDownInterval,
     /* [in] */ CEmergencyCallbackModeExitDialog* host)
     : mHost(host)
 {
@@ -39,7 +76,7 @@ ECode CEmergencyCallbackModeExitDialog::MyDialogInterfaceOnClickListener::OnClic
 
     // Show progress dialog
     mHost->ShowDialog(EXIT_ECM_PROGRESS_DIALOG);
-    return mTimer->Cancel();
+    return mHost->mTimer->Cancel();
 }
 
 CAR_INTERFACE_IMPL(CEmergencyCallbackModeExitDialog::MyDialogInterfaceOnClickListener2, Object,
@@ -52,7 +89,7 @@ ECode CEmergencyCallbackModeExitDialog::MyDialogInterfaceOnClickListener2::OnCli
     // User clicked No
     AutoPtr<IIntent> intent;
     CIntent::New((IIntent**)&intent);
-    intent->putExtra(EXTRA_EXIT_ECM_RESULT, FALSE);
+    intent->PutExtra(EXTRA_EXIT_ECM_RESULT, FALSE);
     mHost->SetResult(RESULT_OK, intent);
     return mHost->Finish();
 }
@@ -67,7 +104,7 @@ ECode CEmergencyCallbackModeExitDialog::MyDialogInterfaceOnClickListener3::OnCli
     // User clicked Dismiss
     AutoPtr<IIntent> intent;
     CIntent::New((IIntent**)&intent);
-    intent->putExtra(EXTRA_EXIT_ECM_RESULT, FALSE);
+    intent->PutExtra(EXTRA_EXIT_ECM_RESULT, FALSE);
     mHost->SetResult(RESULT_OK, intent);
     return mHost->Finish();
 }
@@ -78,16 +115,18 @@ ECode CEmergencyCallbackModeExitDialog::MyRunnable::Run()
 
     // Bind to the remote service
     AutoPtr<IIntent> intent;
-    CIntent::New(this, EmergencyCallbackModeService.class, (IIntent**)&intent);
-    BindService(intent, mConnection, IContext::BIND_AUTO_CREATE);
+    assert(0);
+    //CIntent::New(this, EmergencyCallbackModeService.class, (IIntent**)&intent);
+    Boolean res;
+    mHost->BindService(intent, mHost->mConnection, IContext::BIND_AUTO_CREATE, &res);
 
     // Wait for bind to finish
     {
         AutoLock syncLock(mHost);
         //try {
-        if (mService == NULL) {
+        if (mHost->mService == NULL) {
             mHost->Wait();
-        //    }
+        }
         // } catch (InterruptedException e) {
         //     Logger::D("ECM", "EmergencyCallbackModeExitDialog InterruptedException: "
         //             + e.getMessage());
@@ -96,12 +135,12 @@ ECode CEmergencyCallbackModeExitDialog::MyRunnable::Run()
     }
 
     // Get timeout value and call state from the service
-    if (mService != NULL) {
-        mService->GetEmergencyCallbackModeTimeout(&mEcmTimeout);
-        mService->GetEmergencyCallbackModeCallState(&mInEmergencyCall);
+    if (mHost->mService != NULL) {
+        mHost->mService->GetEmergencyCallbackModeTimeout(&(mHost->mEcmTimeout));
+        mHost->mService->GetEmergencyCallbackModeCallState(&(mHost->mInEmergencyCall));
         //try {
             // Unbind from remote service
-        UnbindService(mConnection);
+        mHost->UnbindService(mHost->mConnection);
         //} catch (IllegalArgumentException e) {
             // Failed to unbind from service. Don't crash as this brings down the entire
             // radio.
@@ -110,8 +149,8 @@ ECode CEmergencyCallbackModeExitDialog::MyRunnable::Run()
     }
 
     // Show dialog
-    AutoPtr<IRunnable> r = new MyRunnable2(this);
-    return mHost->mHandler->Post(r);
+    AutoPtr<IRunnable> r = new MyRunnable2(mHost);
+    return mHost->mHandler->Post(r, &res);
 }
 
 ECode CEmergencyCallbackModeExitDialog::MyRunnable2::Run()
@@ -120,11 +159,14 @@ ECode CEmergencyCallbackModeExitDialog::MyRunnable2::Run()
     return NOERROR;
 }
 
-ECode MyServiceConnection::OnServiceConnected(
+CAR_INTERFACE_IMPL(CEmergencyCallbackModeExitDialog::MyServiceConnection, Object, IServiceConnection)
+
+ECode CEmergencyCallbackModeExitDialog::MyServiceConnection::OnServiceConnected(
     /* [in] */ IComponentName* name,
     /* [in] */ IBinder* service)
 {
-    ((EmergencyCallbackModeService::LocalBinder*)service)->GetService((IEmergencyCallbackModeService**)&mService);
+    IEmergencyCallbackModeServiceLocalBinder::Probe(service)->
+            GetService((IEmergencyCallbackModeService**)&(mHost->mService));
     // Notify thread that connection is ready
     {
         AutoLock syncLock(mHost);
@@ -133,10 +175,10 @@ ECode MyServiceConnection::OnServiceConnected(
     return NOERROR;
 }
 
-ECode MyServiceConnection::OnServiceDisconnected(
+ECode CEmergencyCallbackModeExitDialog::MyServiceConnection::OnServiceDisconnected(
     /* [in] */ IComponentName* name)
 {
-    mService = NULL;
+    mHost->mService = NULL;
     return NOERROR;
 }
 
@@ -155,7 +197,15 @@ ECode CEmergencyCallbackModeExitDialog::MyHandler::HandleMessage(
     msg->GetWhat(&what);
     switch (what) {
         case ECM_TIMER_RESET:
-            if(!((Boolean)((AsyncResult) msg.obj).result).booleanValue()) {
+        {
+            AutoPtr<IInterface> obj;
+            msg->GetObj((IInterface**)&obj);
+            AutoPtr<AsyncResult> result = (AsyncResult*)IObject::Probe(obj);
+            AutoPtr<IBoolean> value = IBoolean::Probe(result->mResult);
+            Boolean res;
+            value->GetValue(&res);
+
+            if(!res) {
                 AutoPtr<IIntent> intent;
                 CIntent::New((IIntent**)&intent);
                 intent->PutExtra(EXTRA_EXIT_ECM_RESULT, FALSE);
@@ -163,6 +213,7 @@ ECode CEmergencyCallbackModeExitDialog::MyHandler::HandleMessage(
                 mHost->Finish();
             }
             break;
+        }
     }
     return NOERROR;
 }
@@ -170,7 +221,7 @@ ECode CEmergencyCallbackModeExitDialog::MyHandler::HandleMessage(
 ECode CEmergencyCallbackModeExitDialog::MyBroadcastReceiver::constructor(
     /* [in] */ IEmergencyCallbackModeExitDialog* host)
 {
-    mHost = (CEmergencyCallbackModeService*)host;
+    mHost = (CEmergencyCallbackModeExitDialog*)host;
     return BroadcastReceiver::constructor();
 }
 
@@ -185,14 +236,14 @@ ECode CEmergencyCallbackModeExitDialog::MyBroadcastReceiver::OnReceive(
         Boolean res;
         intent->GetBooleanExtra(String("phoneinECMState"), FALSE, &res);
         if (res == FALSE) {
-            if (mAlertDialog != NULL)
-                mHost->mAlertDialog->Dismiss();
-            if (mProgressDialog != NULL)
-                mHost->mProgressDialog->Dismiss();
+            if (mHost->mAlertDialog != NULL)
+                IDialogInterface::Probe(mHost->mAlertDialog)->Dismiss();
+            if (mHost->mProgressDialog != NULL)
+                IDialogInterface::Probe(mHost->mProgressDialog)->Dismiss();
 
             AutoPtr<IIntent> _intent;
             CIntent::New((IIntent**)&_intent);
-            _intent->PutExtra(EXTRA_EXIT_ECM_RESULT, TRUE)
+            _intent->PutExtra(EXTRA_EXIT_ECM_RESULT, TRUE);
             mHost->SetResult(RESULT_OK, _intent);
             mHost->Finish();
         }
@@ -200,9 +251,7 @@ ECode CEmergencyCallbackModeExitDialog::MyBroadcastReceiver::OnReceive(
     return NOERROR;
 }
 
-static const String CEmergencyCallbackModeExitDialog::TAG("EmergencyCallbackMode");
-
-static const Int32 CEmergencyCallbackModeExitDialog::ECM_TIMER_RESET = 1;
+const String CEmergencyCallbackModeExitDialog::TAG("EmergencyCallbackMode");
 
 CAR_INTERFACE_IMPL_2(CEmergencyCallbackModeExitDialog, Activity, IEmergencyCallbackModeExitDialog,
         IDialogInterfaceOnDismissListener)
@@ -216,7 +265,7 @@ CEmergencyCallbackModeExitDialog::CEmergencyCallbackModeExitDialog()
 {
     mTask = new MyRunnable(this);
 
-    CCEmergencyCallbackModeExitDialogBroadcastReceiver::New(this, (IBroadcastReceiver**)&mEcmExitReceiver);
+    CEmergencyCallbackModeExitDialogBroadcastReceiver::New(this, (IBroadcastReceiver**)&mEcmExitReceiver);
 
     mConnection = new MyServiceConnection(this);
 
@@ -257,14 +306,15 @@ ECode CEmergencyCallbackModeExitDialog::OnCreate(
     waitForConnectionCompleteThread->Start();
 
     // Register ECM timer reset notfication
-    PhoneGlobals::GetPhone((IPhone**)&mPhone);
+    mPhone = PhoneGlobals::GetPhone();
     mPhone->RegisterForEcmTimerReset(mTimerResetHandler, ECM_TIMER_RESET, NULL);
 
     // Register receiver for intent closing the dialog
     AutoPtr<IIntentFilter> filter;
     CIntentFilter::New((IIntentFilter**)&filter);
     filter->AddAction(ITelephonyIntents::ACTION_EMERGENCY_CALLBACK_MODE_CHANGED);
-    return RegisterReceiver(mEcmExitReceiver, filter);
+    AutoPtr<IIntent> intent;
+    return RegisterReceiver(mEcmExitReceiver, filter, (IIntent**)&intent);
 }
 
 ECode CEmergencyCallbackModeExitDialog::OnDestroy()
@@ -298,7 +348,9 @@ ECode CEmergencyCallbackModeExitDialog::OnSaveInstanceState(
 
 void CEmergencyCallbackModeExitDialog::ShowEmergencyCallbackModeExitDialog()
 {
-    if (!IsResumed()) {
+    Boolean res;
+    IsResumed(&res);
+    if (!res) {
         Logger::W(TAG, "Tried to show dialog, but activity was already finished");
         return;
     }
@@ -320,7 +372,7 @@ void CEmergencyCallbackModeExitDialog::ShowEmergencyCallbackModeExitDialog()
             ShowDialog(EXIT_ECM_DIALOG);
         }
 
-        mTimer = new MyCountDownTimer(mEcmTimeout, 1000);
+        mTimer = new MyCountDownTimer(mEcmTimeout, 1000, this);
         mTimer->Start();
     }
 }
@@ -340,18 +392,18 @@ ECode CEmergencyCallbackModeExitDialog::OnCreateDialog(
 
         AutoPtr<IAlertDialogBuilder> builder;
         CAlertDialogBuilder::New(this, (IAlertDialogBuilder**)&builder);
-        builder->SetIcon(R.drawable.ic_emergency_callback_mode);
-        builder->SetTitle(R.string.phone_in_ecm_notification_title);
+        builder->SetIcon(Elastos::Droid::Server::Telephony::R::drawable::ic_emergency_callback_mode);
+        builder->SetTitle(Elastos::Droid::Server::Telephony::R::string::phone_in_ecm_notification_title);
         builder->SetMessage(text);
 
         AutoPtr<IDialogInterfaceOnClickListener> listener = new MyDialogInterfaceOnClickListener(this);
-        builder->SetPositiveButton(R.string.alert_dialog_yes, listener);
+        builder->SetPositiveButton(Elastos::Droid::Server::Telephony::R::string::alert_dialog_yes, listener);
 
         AutoPtr<IDialogInterfaceOnClickListener> listener2 =new MyDialogInterfaceOnClickListener2(this);
-        builder->SetNegativeButton(R.string.alert_dialog_no, listener2);
+        builder->SetNegativeButton(Elastos::Droid::Server::Telephony::R::string::alert_dialog_no, listener2);
         builder->Create((IAlertDialog**)&mAlertDialog);
-        mAlertDialog->SetOnDismissListener(this);
-        *dialog = mAlertDialog;
+        IDialog::Probe(mAlertDialog)->SetOnDismissListener(this);
+        *dialog = IDialog::Probe(mAlertDialog);
         REFCOUNT_ADD(*dialog);
         return NOERROR;
     }
@@ -360,15 +412,15 @@ ECode CEmergencyCallbackModeExitDialog::OnCreateDialog(
 
         AutoPtr<IAlertDialogBuilder> builder;
         CAlertDialogBuilder::New(this, (IAlertDialogBuilder**)&builder);
-        builder->SetIcon(R.drawable.ic_emergency_callback_mode);
-        builder->SetTitle(R.string.phone_in_ecm_notification_title);
-        builder->SetMessage(R.string.alert_dialog_in_ecm_call);
+        builder->SetIcon(Elastos::Droid::Server::Telephony::R::drawable::ic_emergency_callback_mode);
+        builder->SetTitle(Elastos::Droid::Server::Telephony::R::string::phone_in_ecm_notification_title);
+        builder->SetMessage(Elastos::Droid::Server::Telephony::R::string::alert_dialog_in_ecm_call);
 
         AutoPtr<IDialogInterfaceOnClickListener> listener = new MyDialogInterfaceOnClickListener3(this);
-        builder->SetNeutralButton(R.string.alert_dialog_dismiss, listener);
+        builder->SetNeutralButton(Elastos::Droid::Server::Telephony::R::string::alert_dialog_dismiss, listener);
         builder->Create((IAlertDialog**)&mAlertDialog);
-        mAlertDialog->SetOnDismissListener(this);
-        *dialog = mAlertDialog;
+        IDialog::Probe(mAlertDialog)->SetOnDismissListener(this);
+        *dialog = IDialog::Probe(mAlertDialog);
         REFCOUNT_ADD(*dialog);
         return NOERROR;
     }
@@ -377,11 +429,12 @@ ECode CEmergencyCallbackModeExitDialog::OnCreateDialog(
         CProgressDialog::New(this, (IProgressDialog**)&mProgressDialog);
 
         AutoPtr<ICharSequence> cchar;
-        GetText(R.string.progress_dialog_exiting_ecm, (ICharSequence**)&cchar);
-        mProgressDialog->SetMessage(cchar);
+        GetText(Elastos::Droid::Server::Telephony::R::string::progress_dialog_exiting_ecm, 
+                (ICharSequence**)&cchar);
+        IAlertDialog::Probe(mProgressDialog)->SetMessage(cchar);
         mProgressDialog->SetIndeterminate(TRUE);
-        mProgressDialog->SetCancelable(FALSE);
-        *dialog = mProgressDialog;
+        IDialog::Probe(mProgressDialog)->SetCancelable(FALSE);
+        *dialog = IDialog::Probe(mProgressDialog);
         REFCOUNT_ADD(*dialog);
         return NOERROR;
     }
@@ -397,8 +450,9 @@ AutoPtr<ICharSequence> CEmergencyCallbackModeExitDialog::GetDialogText(
 {
     // Format time
     Int32 minutes = (Int32)(millisUntilFinished / 60000);
-    String time = String.format("%d:%02d", minutes,
-            (millisUntilFinished % 60000) / 1000);
+    assert(0);
+    String time;
+    time.AppendFormat("%d:%02d", minutes, (millisUntilFinished % 60000) / 1000);
 
     AutoPtr<IResources> resources;
     GetResources((IResources**)&resources);
@@ -406,20 +460,26 @@ AutoPtr<ICharSequence> CEmergencyCallbackModeExitDialog::GetDialogText(
         case EXIT_ECM_BLOCK_OTHERS:
         {
             AutoPtr<ICharSequence> cchar;
-            resources->GetQuantityText(R.plurals.alert_dialog_not_avaialble_in_ecm,
+            resources->GetQuantityText(Elastos::Droid::Server::Telephony::R::plurals::alert_dialog_not_avaialble_in_ecm,
                     minutes, (ICharSequence**)&cchar);
             String str;
             cchar->ToString(&str);
-            return String.format(str, time);
+            String outStr;
+            outStr.AppendFormat(str, time.string());
+            AutoPtr<ICharSequence> cchar2 = CoreUtils::Convert(outStr);
+            return cchar2;
         }
         case EXIT_ECM_DIALOG:
         {
             AutoPtr<ICharSequence> cchar;
-            resources->GetQuantityText(R.plurals.alert_dialog_exit_ecm,
+            resources->GetQuantityText(Elastos::Droid::Server::Telephony::R::plurals::alert_dialog_exit_ecm,
                     minutes, (ICharSequence**)&cchar);
             String str;
             cchar->ToString(&str);
-            return String.format(str, time);
+            String outStr;
+            outStr.AppendFormat(str, time.string());
+            AutoPtr<ICharSequence> cchar2 = CoreUtils::Convert(outStr);
+            return cchar2;
         }
     }
     return NULL;

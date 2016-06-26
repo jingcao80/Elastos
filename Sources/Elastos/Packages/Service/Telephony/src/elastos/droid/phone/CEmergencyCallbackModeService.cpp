@@ -1,5 +1,37 @@
 
 #include "elastos/droid/phone/CPhoneApp.h"
+#include "elastos/droid/phone/CEmergencyCallbackModeServiceBroadcastReceiver.h"
+#include "elastos/droid/phone/CEmergencyCallbackModeServiceLocalBinder.h"
+#include <elastos/core/StringBuilder.h>
+#include <elastos/core/StringUtils.h>
+#include <elastos/core/CoreUtils.h>
+#include <Elastos.CoreLibrary.Core.h>
+#include <elastos/utility/logging/Logger.h>
+#include "R.h"
+
+using Elastos::Droid::App::IPendingIntent;
+using Elastos::Droid::App::INotification;
+using Elastos::Droid::App::INotificationBuilder;
+using Elastos::Droid::App::CNotificationBuilder;
+using Elastos::Droid::App::IPendingIntentHelper;
+using Elastos::Droid::App::CPendingIntentHelper;
+using Elastos::Droid::Content::IContext;
+using Elastos::Droid::Content::CIntent;
+using Elastos::Droid::Content::IIntentFilter;
+using Elastos::Droid::Content::CIntentFilter;
+using Elastos::Droid::Content::Res::IResources;
+using Elastos::Droid::Os::ISystemProperties;
+using Elastos::Droid::Os::CSystemProperties;
+using Elastos::Droid::Internal::Telephony::ITelephonyProperties;
+using Elastos::Droid::Internal::Telephony::IPhoneConstants;
+using Elastos::Droid::Internal::Telephony::ITelephonyIntents;
+using Elastos::Droid::Internal::Telephony::IPhoneFactory;
+using Elastos::Droid::Internal::Telephony::CPhoneFactory;
+using Elastos::Core::StringBuilder;
+using Elastos::Core::StringUtils;
+using Elastos::Core::CoreUtils;
+using Elastos::Core::IBoolean;
+using Elastos::Utility::Logging::Logger;
 
 namespace Elastos {
 namespace Droid {
@@ -22,7 +54,7 @@ ECode CEmergencyCallbackModeService::MyBroadcastReceiver::OnReceive(
     if (action.Equals(ITelephonyIntents::ACTION_EMERGENCY_CALLBACK_MODE_CHANGED)) {
         Boolean res;
         if ((intent->GetBooleanExtra(String("phoneinECMState"), FALSE, &res), res) == FALSE) {
-            StopSelf();
+            mHost->StopSelf();
         }
     }
     // Show dialog box
@@ -35,12 +67,15 @@ ECode CEmergencyCallbackModeService::MyBroadcastReceiver::OnReceive(
     return NOERROR;
 }
 
+CAR_INTERFACE_IMPL(CEmergencyCallbackModeService::LocalBinder, Binder, 
+        IEmergencyCallbackModeServiceLocalBinder)
+
 ECode CEmergencyCallbackModeService::LocalBinder::GetService(
     /* [out] */ IEmergencyCallbackModeService** service)
 {
     VALIDATE_NOT_NULL(service)
 
-    *service = EmergencyCallbackModeService.this;
+    *service = (IEmergencyCallbackModeService*)this;
     REFCOUNT_ADD(*service);
     return NOERROR;
 }
@@ -62,7 +97,8 @@ ECode CEmergencyCallbackModeService::MyHandler::HandleMessage(
         case ECM_TIMER_RESET:
             AutoPtr<IInterface> obj;
             msg->GetObj((IInterface**)&obj);
-            mHost->ResetEcmTimer(IAsyncResult::Probe(obj));
+            AutoPtr<AsyncResult> result = (AsyncResult*)IObject::Probe(obj);
+            mHost->ResetEcmTimer(result);
             break;
     }
     return NOERROR;
@@ -81,7 +117,7 @@ ECode CEmergencyCallbackModeService::MyCountDownTimer::OnTick(
     /* [in] */ Int64 millisUntilFinished)
 {
     mHost->mTimeLeft = millisUntilFinished;
-    EmergencyCallbackModeService.this::ShowNotification(millisUntilFinished);
+    mHost->ShowNotification(millisUntilFinished);
     return NOERROR;
 }
 
@@ -94,8 +130,6 @@ ECode CEmergencyCallbackModeService::MyCountDownTimer::OnFinish()
 const Int32 CEmergencyCallbackModeService::DEFAULT_ECM_EXIT_TIMER_VALUE = 300000;
 const String CEmergencyCallbackModeService::TAG("EmergencyCallbackModeService");
 
-const Int32 CEmergencyCallbackModeService::ECM_TIMER_RESET = 1;
-
 CAR_INTERFACE_IMPL(CEmergencyCallbackModeService, Service, IEmergencyCallbackModeService)
 
 CAR_OBJECT_IMPL(CEmergencyCallbackModeService)
@@ -106,9 +140,9 @@ CEmergencyCallbackModeService::CEmergencyCallbackModeService()
 {
     mHandler = new MyHandler(this);
 
-    CEmergencyCallbackModeServiceBroadcastReceiver::New(this, (BroadcastReceiver**)&mEcmReceiver);
+    CEmergencyCallbackModeServiceBroadcastReceiver::New(this, (IBroadcastReceiver**)&mEcmReceiver);
 
-    mBinder = new LocalBinder();
+    CEmergencyCallbackModeServiceLocalBinder::New((IBinder**)&mBinder);
 }
 
 ECode CEmergencyCallbackModeService::constructor()
@@ -120,7 +154,9 @@ ECode CEmergencyCallbackModeService::OnCreate()
 {
     // Check if it is CDMA phone
     AutoPtr<IPhone> phone;
-    PhoneFactory::GetDefaultPhone((IPhone**)&phone);
+    AutoPtr<IPhoneFactory> helper;
+    CPhoneFactory::AcquireSingleton((IPhoneFactory**)&helper);
+    helper->GetDefaultPhone((IPhone**)&phone);
     Int32 type;
     AutoPtr<IPhone> phone2;
     if (((phone->GetPhoneType(&type), type)  != IPhoneConstants::PHONE_TYPE_CDMA)
@@ -140,17 +176,19 @@ ECode CEmergencyCallbackModeService::OnCreate()
     CIntentFilter::New((IIntentFilter**)&filter);
     filter->AddAction(ITelephonyIntents::ACTION_EMERGENCY_CALLBACK_MODE_CHANGED);
     filter->AddAction(ITelephonyIntents::ACTION_SHOW_NOTICE_ECM_BLOCK_OTHERS);
-    RegisterReceiver(mEcmReceiver, filter);
+    AutoPtr<IIntent> intent;
+    RegisterReceiver(mEcmReceiver, filter, (IIntent**)&intent);
 
     AutoPtr<IInterface> obj;
     GetSystemService(NOTIFICATION_SERVICE, (IInterface**)&obj);
     mNotificationManager = INotificationManager::Probe(obj);
 
     // Register ECM timer reset notfication
-    PhoneFactory::GetDefaultPhone((IPhone**)&mPhone);
+    helper->GetDefaultPhone((IPhone**)&mPhone);
     mPhone->RegisterForEcmTimerReset(mHandler, ECM_TIMER_RESET, NULL);
 
     StartTimerNotification();
+    return NOERROR;
 }
 
 ECode CEmergencyCallbackModeService::OnDestroy()
@@ -161,7 +199,7 @@ ECode CEmergencyCallbackModeService::OnDestroy()
     mPhone->UnregisterForEcmTimerReset(mHandler);
 
     // Cancel the notification and timer
-    mNotificationManager->Cancel(R.string.phone_in_ecm_notification_title);
+    mNotificationManager->Cancel(Elastos::Droid::Server::Telephony::R::string::phone_in_ecm_notification_title);
     return mTimer->Cancel();
 }
 
@@ -181,7 +219,7 @@ void CEmergencyCallbackModeService::StartTimerNotification()
         mTimer->Cancel();
     }
     else {
-        mTimer = new MyCountDownTimer(ecmTimeout, 1000);
+        mTimer = new MyCountDownTimer(ecmTimeout, 1000, this);
     }
     mTimer->Start();
 }
@@ -210,26 +248,28 @@ void CEmergencyCallbackModeService::ShowNotification(
     CNotificationBuilder::New(context, (INotificationBuilder**)&builder);
     builder->SetOngoing(TRUE);
     builder->SetPriority(INotification::PRIORITY_HIGH);
-    builder->SetSmallIcon(R.drawable.ic_emergency_callback_mode);
+    builder->SetSmallIcon(Elastos::Droid::Server::Telephony::R::drawable::ic_emergency_callback_mode);
 
     AutoPtr<ICharSequence> text1;
-    GetText(R.string.phone_entered_ecm_text, (ICharSequence**)&text1);
+    GetText(Elastos::Droid::Server::Telephony::R::string::phone_entered_ecm_text, (ICharSequence**)&text1);
     builder->SetTicker(text1);
 
     AutoPtr<ICharSequence> text2;
-    GetText(R.string.phone_in_ecm_notification_title, (ICharSequence**)&text2);
+    GetText(Elastos::Droid::Server::Telephony::R::string::phone_in_ecm_notification_title, 
+            (ICharSequence**)&text2);
     builder->SetContentTitle(text2);
 
     AutoPtr<IResources> resources;
     GetResources((IResources**)&resources);
-    AutoPtr<IColor> color;
-    resources->GetColor(R.color.dialer_theme_color, (IColor**)&color);
+    Int32 color;
+    resources->GetColor(Elastos::Droid::Server::Telephony::R::color::dialer_theme_color, 
+            &color);
     builder->SetColor(color);
 
     // PendingIntent to launch Emergency Callback Mode Exit activity if the user selects
     // this notification
     AutoPtr<IPendingIntentHelper> helper2;
-    CPendingIntentHelper::New((IPendingIntentHelper**)&helper2);
+    CPendingIntentHelper::AcquireSingleton((IPendingIntentHelper**)&helper2);
     AutoPtr<IIntent> intent;
     CIntent::New(IEmergencyCallbackModeExitDialog::ACTION_SHOW_ECM_EXIT_DIALOG, (IIntent**)&intent);
     AutoPtr<IPendingIntent> contentIntent;
@@ -240,33 +280,40 @@ void CEmergencyCallbackModeService::ShowNotification(
     String text;
     if(mInEmergencyCall) {
         AutoPtr<ICharSequence> text3;
-        GetText(R.string.phone_in_ecm_call_notification_text, (ICharSequence**)&text3);
+        GetText(Elastos::Droid::Server::Telephony::R::string::phone_in_ecm_call_notification_text,
+                (ICharSequence**)&text3);
         text3->ToString(&text);
     }
     else {
         Int32 minutes = (Int32)(millisUntilFinished / 60000);
-        String time = String.format("%d:%02d", minutes, (millisUntilFinished % 60000) / 1000);
+        String time;
+        time.AppendFormat("%d:%02d", minutes, (millisUntilFinished % 60000) / 1000);
 
         AutoPtr<IResources> resources;
         GetResources((IResources**)&resources);
         AutoPtr<ICharSequence> text4;
-        resources->getQuantityText(R.plurals.phone_in_ecm_notification_time, minutes, (ICharSequence**)&text4);
+        resources->GetQuantityText(Elastos::Droid::Server::Telephony::R::plurals::phone_in_ecm_notification_time, 
+                minutes, (ICharSequence**)&text4);
         String str;
         text4->ToString(&str);
-        text = String.format(str, time);
+        text.AppendFormat(str.string(), time.string());
     }
-    builder->SetContentText(text);
+    AutoPtr<ICharSequence> cchar = CoreUtils::Convert(text);
+    builder->SetContentText(cchar);
 
     // Show notification
     AutoPtr<INotification> notification;
     builder->Build((INotification**)&notification);
-    mNotificationManager->Notify(R.string.phone_in_ecm_notification_title, notification);
+    mNotificationManager->Notify(Elastos::Droid::Server::Telephony::R::string::phone_in_ecm_notification_title, 
+            notification);
 }
 
 void CEmergencyCallbackModeService::ResetEcmTimer(
-    /* [in] */ IAsyncResult* r)
+    /* [in] */ AsyncResult* r)
 {
-    Boolean isTimerCanceled = ((Boolean)r.result).booleanValue();
+    AutoPtr<IBoolean> value = IBoolean::Probe(r->mResult);
+    Boolean isTimerCanceled;
+    value->GetValue(&isTimerCanceled);
 
     if (isTimerCanceled) {
         mInEmergencyCall = TRUE;

@@ -1,5 +1,24 @@
 
 #include "elastos/droid/phone/CEnableIccPinScreen.h"
+#include "elastos/droid/phone/PhoneGlobals.h"
+#include "elastos/droid/text/TextUtils.h"
+#include "Elastos.Droid.Content.h"
+#include "Elastos.Droid.Text.h"
+#include <elastos/utility/logging/Logger.h>
+#include "R.h"
+
+using Elastos::Droid::Content::Res::IResources;
+using Elastos::Droid::Internal::Telephony::IIccCard;
+using Elastos::Droid::Internal::Telephony::ICommandException;
+using Elastos::Droid::Os::CMessageHelper;
+using Elastos::Droid::Os::IMessageHelper;
+using Elastos::Droid::Text::TextUtils;
+using Elastos::Droid::Text::Method::IKeyListener;
+using Elastos::Droid::Text::Method::IDigitsKeyListener;
+using Elastos::Droid::Text::Method::IDigitsKeyListenerHelper;
+using Elastos::Droid::Text::Method::CDigitsKeyListenerHelper;
+using Elastos::Droid::View::EIID_IViewOnClickListener;
+using Elastos::Utility::Logging::Logger;
 
 namespace Elastos {
 namespace Droid {
@@ -21,7 +40,7 @@ ECode CEnableIccPinScreen::MyHandler::HandleMessage(
         case ENABLE_ICC_PIN_COMPLETE:
             AutoPtr<IInterface> obj;
             msg->GetObj((IInterface**)&obj);
-            AutoPtr<IAsyncResult> ar = IAsyncResult::Probe(obj);
+            AutoPtr<AsyncResult> ar = (AsyncResult*)IObject::Probe(obj);
             mHost->HandleResult(ar);
             break;
     }
@@ -36,7 +55,7 @@ ECode CEnableIccPinScreen::MyViewOnClickListener::OnClick(
     /* [in] */ IView* v)
 {
     AutoPtr<ICharSequence> text;
-    mHost->mPinField->GetText((ICharSequence**)&text);
+    ITextView::Probe(mHost->mPinField)->GetText((ICharSequence**)&text);
     if (TextUtils::IsEmpty(text)) {
         return NOERROR;
     }
@@ -44,7 +63,8 @@ ECode CEnableIccPinScreen::MyViewOnClickListener::OnClick(
     AutoPtr<IResources> resources;
     mHost->GetResources((IResources**)&resources);
     AutoPtr<ICharSequence> text2;
-    resources->GetText(R.string.enable_in_progress, (ICharSequence**)&text2);
+    resources->GetText(Elastos::Droid::Server::Telephony::R::string::enable_in_progress, 
+            (ICharSequence**)&text2);
     mHost->ShowStatus(text2);
 
     mHost->EnableIccPin();
@@ -58,10 +78,7 @@ ECode CEnableIccPinScreen::MyRunnable::Run()
 
 const String CEnableIccPinScreen::TAG("CEnableIccPinScreen");// = PhoneGlobals.TAG;
 
-const Int32 CEnableIccPinScreen::ENABLE_ICC_PIN_COMPLETE = 100;
 const Boolean CEnableIccPinScreen::DBG = FALSE;
-
-CAR_INTERFACE_IMPL(CEnableIccPinScreen, Activity, IEnableIccPinScreen)
 
 CAR_OBJECT_IMPL(CEnableIccPinScreen)
 
@@ -75,7 +92,7 @@ CEnableIccPinScreen::CEnableIccPinScreen()
 
 ECode CEnableIccPinScreen::constructor()
 {
-    Activity::constructor();
+    return Activity::constructor();
 }
 
 ECode CEnableIccPinScreen::OnCreate(
@@ -83,16 +100,17 @@ ECode CEnableIccPinScreen::OnCreate(
 {
     Activity::OnCreate(icicle);
 
-    SetContentView(R.layout.enable_sim_pin_screen);
+    SetContentView(Elastos::Droid::Server::Telephony::R::layout::enable_sim_pin_screen);
     SetupView();
 
-    PhoneGlobals::GetPhone((IPhone**)&mPhone);
+    mPhone = PhoneGlobals::GetPhone();
     AutoPtr<IIccCard> card;
     mPhone->GetIccCard((IIccCard**)&card);
     card->GetIccLockEnabled(&mEnable);
     mEnable = !mEnable;
 
-    Int32 id = mEnable ? R.string.enable_sim_pin : R.string.disable_sim_pin;
+    Int32 id = mEnable ? Elastos::Droid::Server::Telephony::R::string::enable_sim_pin : 
+            Elastos::Droid::Server::Telephony::R::string::disable_sim_pin;
     AutoPtr<IResources> resources;
     GetResources((IResources**)&resources);
     AutoPtr<ICharSequence> cchar;
@@ -103,23 +121,23 @@ ECode CEnableIccPinScreen::OnCreate(
 void CEnableIccPinScreen::SetupView()
 {
     AutoPtr<IView> view;
-    FindViewById(R.id.pin, (IView**)&view);
+    FindViewById(Elastos::Droid::Server::Telephony::R::id::pin, (IView**)&view);
     mPinField = IEditText::Probe(view);
 
     AutoPtr<IDigitsKeyListenerHelper> helper;
-    CDigitsKeyListenerHelper::New((IDigitsKeyListenerHelper**)&helper);
+    CDigitsKeyListenerHelper::AcquireSingleton((IDigitsKeyListenerHelper**)&helper);
     AutoPtr<IDigitsKeyListener> ret;
     helper->GetInstance((IDigitsKeyListener**)&ret);
-    mPinField->SetKeyListener(ret);
-    mPinField->SetMovementMethod(NULL);
-    mPinField->SetOnClickListener(mClicked);
+    ITextView::Probe(mPinField)->SetKeyListener(IKeyListener::Probe(ret));
+    ITextView::Probe(mPinField)->SetMovementMethod(NULL);
+    IView::Probe(mPinField)->SetOnClickListener(mClicked);
 
     AutoPtr<IView> view2;
-    FindViewById(R.id.pinc, (IView**)&view2);
+    FindViewById(Elastos::Droid::Server::Telephony::R::id::pinc, (IView**)&view2);
     mPinFieldContainer = ILinearLayout::Probe(view2);
 
     AutoPtr<IView> view3;
-    FindViewById(R.id.status, (IView**)&view3);
+    FindViewById(Elastos::Droid::Server::Telephony::R::id::status, (IView**)&view3);
     mStatusField = ITextView::Probe(view3);
 }
 
@@ -128,28 +146,30 @@ void CEnableIccPinScreen::ShowStatus(
 {
     if (statusMsg != NULL) {
         mStatusField->SetText(statusMsg);
-        mStatusField->SetVisibility(IView::VISIBLE);
-        mPinFieldContainer->SetVisibility(IView::GONE);
+        IView::Probe(mStatusField)->SetVisibility(IView::VISIBLE);
+        IView::Probe(mPinFieldContainer)->SetVisibility(IView::GONE);
     }
     else {
-        mPinFieldContainer->SetVisibility(IView::VISIBLE);
-        mStatusField->SetVisibility(IView::GONE);
+        IView::Probe(mPinFieldContainer)->SetVisibility(IView::VISIBLE);
+        IView::Probe(mStatusField)->SetVisibility(IView::GONE);
     }
 }
 
 String CEnableIccPinScreen::GetPin()
 {
     AutoPtr<ICharSequence> cchar;
-    mPinField->GetText((ICharSequence**)&cchar);
+    ITextView::Probe(mPinField)->GetText((ICharSequence**)&cchar);
     String str;
-    cchar->ToString(&str)
+    cchar->ToString(&str);
     return str;
 }
 
 void CEnableIccPinScreen::EnableIccPin()
 {
+    AutoPtr<IMessageHelper> helper;
+    CMessageHelper::AcquireSingleton((IMessageHelper**)&helper);
     AutoPtr<IMessage> callback;
-    Message::Obtain(mHandler, ENABLE_ICC_PIN_COMPLETE, (IMessage**)&callback);
+    helper->Obtain(mHandler, ENABLE_ICC_PIN_COMPLETE, (IMessage**)&callback);
 
     if (DBG) Log(String("enableIccPin:"));
 
@@ -161,30 +181,31 @@ void CEnableIccPinScreen::EnableIccPin()
 }
 
 void CEnableIccPinScreen::HandleResult(
-    /* [in] */ IAsyncResult* ar)
+    /* [in] */ AsyncResult* ar)
 {
-    if (ar.exception == null) {
-        if (DBG) log("handleResult: success!");
+    if (ar->mException == NULL) {
+        if (DBG) Log(String("handleResult: success!"));
         AutoPtr<IResources> resources;
         GetResources((IResources**)&resources);
         AutoPtr<ICharSequence> cchar;
-        resources->GetText(mEnable ? R.string.enable_pin_ok : R.string.disable_pin_ok, (ICharSequence**)&cchar);
+        resources->GetText(mEnable ? Elastos::Droid::Server::Telephony::R::string::enable_pin_ok : 
+                Elastos::Droid::Server::Telephony::R::string::disable_pin_ok, (ICharSequence**)&cchar);
         ShowStatus(cchar);
     }
-    else if (ar.exception instanceof CommandException
+    else if (ICommandException::Probe(ar->mException) != NULL
             /* && ((CommandException)ar.exception).getCommandError() ==
                 CommandException.Error.GENERIC_FAILURE */ ) {
-        if (DBG) log("handleResult: failed!");
+        if (DBG) Log(String("handleResult: failed!"));
         AutoPtr<IResources> resources;
         GetResources((IResources**)&resources);
         AutoPtr<ICharSequence> cchar;
-        resources->GetText(R.string.pin_failed, (ICharSequence**)&cchar);
+        resources->GetText(Elastos::Droid::Server::Telephony::R::string::pin_failed, (ICharSequence**)&cchar);
         ShowStatus(cchar);
     }
 
     AutoPtr<IRunnable> r = new MyRunnable(this);
-    mHandler->PostDelayed(r, 3000);
-    return NOERROR;
+    Boolean res;
+    mHandler->PostDelayed(r, 3000, &res);
 }
 
 void CEnableIccPinScreen::Log(
@@ -192,7 +213,6 @@ void CEnableIccPinScreen::Log(
 {
     Logger::D(TAG, String("[EnableIccPin] ") + msg);
 }
-
 
 } // namespace Phone
 } // namespace Droid

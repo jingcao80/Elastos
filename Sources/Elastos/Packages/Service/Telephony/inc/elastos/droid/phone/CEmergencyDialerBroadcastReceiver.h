@@ -1,8 +1,11 @@
 #ifndef  __ELASTOS_DROID_PHONE_CEMERGENCYDIALERBROADCASTRECEIVER_H__
 #define  __ELASTOS_DROID_PHONE_CEMERGENCYDIALERBROADCASTRECEIVER_H__
 
-#include "elastos/droid/telephony/phone/CEmergencyDialer.h"
+#include "_Elastos_Droid_Phone_CEmergencyDialerBroadcastReceiver.h"
+#include "elastos/droid/phone/CEmergencyDialer.h"
 #include "elastos/droid/ext/frameworkext.h"
+
+using Elastos::Droid::Phone::CEmergencyDialer;
 
 namespace Elastos {
 namespace Droid {

@@ -1,5 +1,19 @@
 
 #include "elastos/droid/phone/CErrorDialogActivity.h"
+#include "Elastos.Droid.App.h"
+#include <elastos/utility/logging/Logger.h>
+#include "R.h"
+
+using Elastos::Droid::App::IDialog;
+using Elastos::Droid::App::IAlertDialog;
+using Elastos::Droid::App::IAlertDialogBuilder;
+using Elastos::Droid::App::CAlertDialogBuilder;
+using Elastos::Droid::Content::IIntent;
+using Elastos::Droid::Content::CIntent;
+using Elastos::Droid::Content::Res::IResources;
+using Elastos::Droid::Content::EIID_IDialogInterfaceOnClickListener;
+using Elastos::Droid::Content::EIID_IDialogInterfaceOnCancelListener;
+using Elastos::Utility::Logging::Logger;
 
 namespace Elastos {
 namespace Droid {
@@ -22,7 +36,8 @@ ECode CErrorDialogActivity::MyDialogInterfaceOnClickListener2::OnClick(
     /* [in] */ IDialogInterface* dialog,
     /* [in] */ Int32 which)
 {
-    return mHost->DontAddVoiceMailNumber();
+    mHost->DontAddVoiceMailNumber();
+    return NOERROR;
 }
 
 CAR_INTERFACE_IMPL(CErrorDialogActivity::MyDialogInterfaceOnClickListener3,
@@ -32,7 +47,8 @@ ECode CErrorDialogActivity::MyDialogInterfaceOnClickListener3::OnClick(
     /* [in] */ IDialogInterface* dialog,
     /* [in] */ Int32 which)
 {
-    return mHost->AddVoiceMailNumberPanel(dialog);
+    mHost->AddVoiceMailNumberPanel(dialog);
+    return NOERROR;
 }
 
 CAR_INTERFACE_IMPL(CErrorDialogActivity::MyDialogInterfaceOnCancelListener,
@@ -50,7 +66,8 @@ CAR_INTERFACE_IMPL(CErrorDialogActivity::MyDialogInterfaceOnCancelListener2,
 ECode CErrorDialogActivity::MyDialogInterfaceOnCancelListener2::OnCancel(
     /* [in] */ IDialogInterface* dialog)
 {
-    return mHost->DontAddVoiceMailNumber();
+    mHost->DontAddVoiceMailNumber();
+    return NOERROR;
 }
 
 const String CErrorDialogActivity::TAG("CErrorDialogActivity");// = ErrorDialogActivity.class.getSimpleName();
@@ -64,7 +81,7 @@ ECode CErrorDialogActivity::constructor()
     return Activity::constructor();
 }
 
-ECOde CErrorDialogActivity::OnCreate(
+ECode CErrorDialogActivity::OnCreate(
     /* [in] */ IBundle* savedInstanceState)
 {
     Activity::OnCreate(savedInstanceState);
@@ -81,20 +98,21 @@ ECOde CErrorDialogActivity::OnCreate(
         AutoPtr<IIntent> intent;
         GetIntent((IIntent**)&intent);
         Int32 error;
-        intent->GetIntExtra(ERROR_MESSAGE_ID_EXTRA, -1, &error);
+        intent->GetInt32Extra(ERROR_MESSAGE_ID_EXTRA, -1, &error);
         if (error == -1) {
             Logger::E(TAG, "ErrorDialogActivity called with no error type extra.");
             Finish();
         }
         ShowGenericErrorDialog(error);
     }
+    return NOERROR;
 }
 
 void CErrorDialogActivity::ShowGenericErrorDialog(
     /* [in] */ Int32 resid)
 {
     AutoPtr<IResources> resources;
-    getResources((IResources**)&resources);
+    GetResources((IResources**)&resources);
     AutoPtr<ICharSequence> msg;
     resources->GetText(resid, (ICharSequence**)&msg);
 
@@ -105,12 +123,12 @@ void CErrorDialogActivity::ShowGenericErrorDialog(
     AutoPtr<IAlertDialogBuilder> builder;
     CAlertDialogBuilder::New(this, (IAlertDialogBuilder**)&builder);
     builder->SetMessage(msg);
-    builder->SetPositiveButton(R.string.ok, clickListener);
+    builder->SetPositiveButton(Elastos::Droid::Server::Telephony::R::string::ok, clickListener);
     builder->SetOnCancelListener(cancelListener);
 
     AutoPtr<IAlertDialog> errorDialog;
     builder->Create((IAlertDialog**)&errorDialog);
-    errorDialog->Show();
+    IDialog::Probe(errorDialog)->Show();
 }
 
 void CErrorDialogActivity::ShowMissingVoicemailErrorDialog()
@@ -118,19 +136,20 @@ void CErrorDialogActivity::ShowMissingVoicemailErrorDialog()
     AutoPtr<IAlertDialogBuilder> builder;
     CAlertDialogBuilder::New(this, (IAlertDialogBuilder**)&builder);
 
-    builder->SetTitle(R.string.no_vm_number);
-    builder->SetMessage(R.string.no_vm_number_msg);
+    builder->SetTitle(Elastos::Droid::Server::Telephony::R::string::no_vm_number);
+    builder->SetMessage(Elastos::Droid::Server::Telephony::R::string::no_vm_number_msg);
 
     AutoPtr<IDialogInterfaceOnClickListener> listener = new MyDialogInterfaceOnClickListener2(this);
-    builder->SetPositiveButton(R.string.ok, listener);
+    builder->SetPositiveButton(Elastos::Droid::Server::Telephony::R::string::ok, listener);
 
     AutoPtr<IDialogInterfaceOnClickListener> listener2 = new MyDialogInterfaceOnClickListener3(this);
-    builder->SetNegativeButton(R.string.add_vm_number_str, listener2);
+    builder->SetNegativeButton(Elastos::Droid::Server::Telephony::R::string::add_vm_number_str, listener2);
 
-    AutoPtr<MyDialogInterfaceOnCancelListener> listener3 = new MyDialogInterfaceOnCancelListener2(this);
+    AutoPtr<IDialogInterfaceOnCancelListener> listener3 = new MyDialogInterfaceOnCancelListener2(this);
     builder->SetOnCancelListener(listener3);
 
-    builder->Show();
+    AutoPtr<IAlertDialog> missingVoicemailDialog;
+    builder->Show((IAlertDialog**)&missingVoicemailDialog);
 }
 
 void CErrorDialogActivity::AddVoiceMailNumberPanel(
@@ -143,7 +162,8 @@ void CErrorDialogActivity::AddVoiceMailNumberPanel(
     // navigate to the Voicemail setting in the Call Settings activity.
     AutoPtr<IIntent> intent;
     CIntent::New(ICallFeaturesSetting::ACTION_ADD_VOICEMAIL, (IIntent**)&intent);
-    intent->SetClass(this, CallFeaturesSetting.class);
+    assert(0);
+    //intent->SetClass(this, CallFeaturesSetting.class);
     StartActivity(intent);
     Finish();
 }

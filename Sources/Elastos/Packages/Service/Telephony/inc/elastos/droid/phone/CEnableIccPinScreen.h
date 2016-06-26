@@ -3,6 +3,26 @@
 
 #include "_Elastos_Droid_Phone_CEnableIccPinScreen.h"
 #include "elastos/droid/ext/frameworkext.h"
+#include "elastos/droid/app/Activity.h"
+#include "elastos/droid/os/Handler.h"
+#include "elastos/droid/os/Runnable.h"
+#include "elastos/droid/os/AsyncResult.h"
+#include "Elastos.Droid.Internal.h"
+#include "Elastos.Droid.View.h"
+#include "Elastos.Droid.Widget.h"
+
+using Elastos::Droid::App::Activity;
+using Elastos::Droid::Os::IMessage;
+using Elastos::Droid::Os::Handler;
+using Elastos::Droid::Os::IHandler;
+using Elastos::Droid::Os::Runnable;
+using Elastos::Droid::Os::AsyncResult;
+using Elastos::Droid::Internal::Telephony::IPhone;
+using Elastos::Droid::View::IView;
+using Elastos::Droid::View::IViewOnClickListener;
+using Elastos::Droid::Widget::ILinearLayout;
+using Elastos::Droid::Widget::IEditText;
+using Elastos::Droid::Widget::ITextView;
 
 namespace Elastos {
 namespace Droid {
@@ -13,7 +33,6 @@ namespace Phone {
  */
 CarClass(CEnableIccPinScreen)
     , public Activity
-    , public IEnableIccPinScreen
 {
 private:
     class MyHandler
@@ -64,6 +83,7 @@ private:
         MyRunnable(
             /* [in] */ CEnableIccPinScreen* host)
             : mHost(host)
+        {}
 
         //@Override
         CARAPI Run();
@@ -73,8 +93,6 @@ private:
     };
 
 public:
-    CAR_INTERFACE_DECL()
-
     CAR_OBJECT_DECL();
 
     CEnableIccPinScreen();
@@ -97,16 +115,16 @@ private:
     CARAPI_(void) EnableIccPin();
 
     CARAPI_(void) HandleResult(
-        /* [in] */ IAsyncResult* ar);
+        /* [in] */ AsyncResult* ar);
 
     CARAPI_(void) Log(
         /* [in] */ const String& msg);
 
 private:
-    static const String TAG = PhoneGlobals.TAG;
+    static const String TAG;
 
     static const Int32 ENABLE_ICC_PIN_COMPLETE = 100;
-    static const Boolean DBG = FALSE;
+    static const Boolean DBG;
 
     AutoPtr<ILinearLayout> mPinFieldContainer;
     AutoPtr<IEditText> mPinField;
@@ -122,6 +140,5 @@ private:
 } // namespace Phone
 } // namespace Droid
 } // namespace Elastos
-
 
 #endif // __ELASTOS_DROID_PHONE_CENABLEICCPINSCREEN_H__

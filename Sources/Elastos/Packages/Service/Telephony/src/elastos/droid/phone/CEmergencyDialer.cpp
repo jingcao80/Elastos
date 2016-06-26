@@ -1,5 +1,59 @@
 
 #include "elastos/droid/phone/CEmergencyDialer.h"
+#include "elastos/droid/phone/CEmergencyDialerBroadcastReceiver.h"
+#include "elastos/droid/phone/SpecialCharSequenceMgr.h"
+#include "elastos/droid/text/TextUtils.h"
+#include "Elastos.Droid.Os.h"
+#include "Elastos.Droid.Net.h"
+#include "Elastos.Droid.Provider.h"
+#include "Elastos.Droid.Telecomm.h"
+#include "Elastos.Droid.Telephony.h"
+#include "Elastos.Droid.Widget.h"
+#include <elastos/core/AutoLock.h>
+#include <elastos/core/StringBuilder.h>
+#include <elastos/core/CoreUtils.h>
+#include <elastos/utility/logging/Logger.h>
+#include "elastos/droid/R.h"
+#include "R.h"
+
+using Elastos::Droid::App::IDialog;
+using Elastos::Droid::App::IAlertDialog;
+using Elastos::Droid::App::IAlertDialogBuilder;
+using Elastos::Droid::App::CAlertDialogBuilder;
+using Elastos::Droid::Content::CIntent;
+using Elastos::Droid::Content::IIntentFilter;
+using Elastos::Droid::Content::CIntentFilter;
+using Elastos::Droid::Content::IContentResolver;
+using Elastos::Droid::Content::IDialogInterface;
+using Elastos::Droid::Content::Res::IResources;
+using Elastos::Droid::Media::CToneGenerator;
+using Elastos::Droid::Media::IAudioManager;
+using Elastos::Droid::Net::IUriHelper;
+using Elastos::Droid::Net::CUriHelper;
+using Elastos::Droid::Provider::ISettingsSystem;
+using Elastos::Droid::Provider::CSettingsSystem;
+using Elastos::Droid::Text::TextUtils;
+using Elastos::Droid::Text::EIID_ITextWatcher;
+using Elastos::Droid::Text::Method::IKeyListener;
+using Elastos::Droid::Text::Method::IDialerKeyListener;
+using Elastos::Droid::Text::Method::IDialerKeyListenerHelper;
+using Elastos::Droid::Text::Method::CDialerKeyListenerHelper;
+using Elastos::Droid::Telecomm::Telecom::IPhoneAccount;
+using Elastos::Droid::Telephony::IPhoneNumberUtils;
+using Elastos::Droid::Telephony::CPhoneNumberUtils;
+using Elastos::Droid::View::IWindow;
+using Elastos::Droid::View::CKeyEvent;
+using Elastos::Droid::View::IWindowManagerLayoutParams;
+using Elastos::Droid::View::EIID_IViewOnKeyListener;
+using Elastos::Droid::View::EIID_IViewOnClickListener;
+using Elastos::Droid::View::EIID_IViewOnLongClickListener;
+using Elastos::Droid::Widget::ITextView;
+using Elastos::Core::StringBuilder;
+using Elastos::Core::CoreUtils;
+using Elastos::Utility::Logging::Logger;
+
+// using Elastos::Apps::Contacts::Common::Util::IViewUtil;
+// using Elastos::Apps::Contacts::Common::Util::CViewUtil;
 
 namespace Elastos {
 namespace Droid {
@@ -31,18 +85,18 @@ static AutoPtr<ArrayOf<Int32> > initDIALER_KEYS()
 {
     AutoPtr<ArrayOf<Int32> > array = ArrayOf<Int32>::Alloc(12);
 
-    (*array)[0] = R.id.one;
-    (*array)[1] = R.id.two;
-    (*array)[2] = R.id.three;
-    (*array)[3] = R.id.four;
-    (*array)[4] = R.id.five;
-    (*array)[5] = R.id.six;
-    (*array)[6] = R.id.seven;
-    (*array)[7] = R.id.eight;
-    (*array)[8] = R.id.nine;
-    (*array)[9] = R.id.star;
-    (*array)[10] = R.id.zero;
-    (*array)[11] = R.id.pound;
+    (*array)[0] = Elastos::Droid::Server::Telephony::R::id::one;
+    (*array)[1] = Elastos::Droid::Server::Telephony::R::id::two;
+    (*array)[2] = Elastos::Droid::Server::Telephony::R::id::three;
+    (*array)[3] = Elastos::Droid::Server::Telephony::R::id::four;
+    (*array)[4] = Elastos::Droid::Server::Telephony::R::id::five;
+    (*array)[5] = Elastos::Droid::Server::Telephony::R::id::six;
+    (*array)[6] = Elastos::Droid::Server::Telephony::R::id::seven;
+    (*array)[7] = Elastos::Droid::Server::Telephony::R::id::eight;
+    (*array)[8] = Elastos::Droid::Server::Telephony::R::id::nine;
+    (*array)[9] = Elastos::Droid::Server::Telephony::R::id::star;
+    (*array)[10] = Elastos::Droid::Server::Telephony::R::id::zero;
+    (*array)[11] = Elastos::Droid::Server::Telephony::R::id::pound;
     return array;
 }
 
@@ -60,7 +114,7 @@ const Int32 CEmergencyDialer::DIAL_TONE_STREAM_TYPE = IAudioManager::STREAM_DTMF
 const Int32 CEmergencyDialer::BAD_EMERGENCY_NUMBER_DIALOG = 0;
 
 CAR_INTERFACE_IMPL_5(CEmergencyDialer, Activity, IEmergencyDialer , IViewOnClickListener,
-        IViewOnLongClickListener, IViewOnKeyListener, ITextWatcher)
+        IViewOnLongClickListener, IViewOnKeyListener, ITextWatcher/*IDialpadKeyButtonOnPressedListener*/)
 
 CAR_OBJECT_IMPL(CEmergencyDialer)
 
@@ -68,7 +122,8 @@ CEmergencyDialer::CEmergencyDialer()
     : mDTMFToneEnabled(FALSE)
     , mLastNumber(NULL)
 {
-    mHaptic = new HapticFeedback();
+    assert(0);
+    //mHaptic = new HapticFeedback();
 
     CEmergencyDialerBroadcastReceiver::New(this, (IBroadcastReceiver**)&mBroadcastReceiver);
 }
@@ -111,13 +166,13 @@ ECode CEmergencyDialer::AfterTextChanged(
     // So we call SpecialCharSequenceMgr.handleCharsForLockedDevice()
     // here, not the regular handleChars() method.
     String str;
-    input->ToString(&str);
-    Boolean res;
-    if (SpecialCharSequenceMgr::HandleCharsForLockedDevice(this, str, this, &res), res) {
+    IObject::Probe(input)->ToString(&str);
+    if (SpecialCharSequenceMgr::HandleCharsForLockedDevice(this, str, this)) {
         // A special sequence was entered, clear the digits
         AutoPtr<ICharSequence> str;
-        mDigits->GetText((ICharSequence**)&str);
-        str->Clear();
+        ITextView::Probe(mDigits)->GetText((ICharSequence**)&str);
+        assert(0);
+        //str->Clear();
     }
 
     return UpdateDialAndDeleteButtonStateEnabledAttr();
@@ -140,7 +195,9 @@ ECode CEmergencyDialer::OnCreate(
     GetWindow((IWindow**)&window);
     AutoPtr<IWindowManagerLayoutParams> lp;
     window->GetAttributes((IWindowManagerLayoutParams**)&lp);
-    lp->mFlags |= IWindowManagerLayoutParams::FLAG_SHOW_WHEN_LOCKED;
+    Int32 flags;
+    lp->GetFlags(&flags);
+    lp->SetFlags(flags |= IWindowManagerLayoutParams::FLAG_SHOW_WHEN_LOCKED);
 
     // When no proximity sensor is available, use a shorter timeout.
     // TODO: Do we enable this for non proximity devices any more?
@@ -148,44 +205,45 @@ ECode CEmergencyDialer::OnCreate(
 
     window->SetAttributes(lp);
 
-    SetContentView(R.layout.emergency_dialer);
+    SetContentView(Elastos::Droid::Server::Telephony::R::layout::emergency_dialer);
 
     AutoPtr<IView> _view;
-    FindViewById(R.id.digits, (IView**)&_view);
+    FindViewById(Elastos::Droid::Server::Telephony::R::id::digits, (IView**)&_view);
     mDigits = IEditText::Probe(_view);
 
     AutoPtr<IDialerKeyListenerHelper> helper;
     CDialerKeyListenerHelper::AcquireSingleton((IDialerKeyListenerHelper**)&helper);
     AutoPtr<IDialerKeyListener> listener;
     helper->GetInstance((IDialerKeyListener**)&listener);
-    mDigits->SetKeyListener(listener);
-    mDigits->SetOnClickListener(this);
-    mDigits->SetOnKeyListener(this);
-    mDigits->SetLongClickable(FALSE);
+    ITextView::Probe(mDigits)->SetKeyListener(IKeyListener::Probe(listener));
+    IView::Probe(mDigits)->SetOnClickListener(this);
+    IView::Probe(mDigits)->SetOnKeyListener(this);
+    IView::Probe(mDigits)->SetLongClickable(FALSE);
     Boolean result;
     if (mAccessibilityManager->IsEnabled(&result), result) {
         // The text view must be selected to send accessibility events.
-        mDigits->SetSelected(TRUE);
+        IView::Probe(mDigits)->SetSelected(TRUE);
     }
     MaybeAddNumberFormatting();
 
     // Check for the presence of the keypad
     AutoPtr<IView> view;
-    FindViewById(R.id.one, (IView**)&view);
+    FindViewById(Elastos::Droid::Server::Telephony::R::id::one, (IView**)&view);
     if (view != NULL) {
         SetupKeypad();
     }
 
-    FindViewById(R.id.deleteButton, (IView**)&mDelete);
+    FindViewById(Elastos::Droid::Server::Telephony::R::id::deleteButton, (IView**)&mDelete);
     mDelete->SetOnClickListener(this);
     mDelete->SetOnLongClickListener(this);
 
-    FindViewById(R.id.floating_action_button, (IView**)&mDialButton);
+    FindViewById(Elastos::Droid::Server::Telephony::R::id::floating_action_button, (IView**)&mDialButton);
 
     // Check whether we should show the onscreen "Dial" button and co.
     AutoPtr<IResources> res;
     GetResources((IResources**)&res);
-    if (res->GetBoolean(R.bool.config_show_onscreen_dial_button, &result), result) {
+    if (res->GetBoolean(Elastos::Droid::Server::Telephony::R::bool_::config_show_onscreen_dial_button, &result), 
+            result) {
         mDialButton->SetOnClickListener(this);
     }
     else {
@@ -193,10 +251,12 @@ ECode CEmergencyDialer::OnCreate(
     }
 
     AutoPtr<IView> floatingActionButtonContainer;
-    FindViewById(R.id.floating_action_button_container, (IView**)&floatingActionButtonContainer);
+    FindViewById(Elastos::Droid::Server::Telephony::R::id::floating_action_button_container, 
+            (IView**)&floatingActionButtonContainer);
     AutoPtr<IResources> tmp;
     GetResources((IResources**)&tmp);
-    ViewUtil::SetupFloatingActionButton(floatingActionButtonContainer, tmp);
+    assert(0);
+    //ViewUtil::SetupFloatingActionButton(floatingActionButtonContainer, tmp);
 
     if (icicle != NULL) {
         Activity::OnRestoreInstanceState(icicle);
@@ -207,15 +267,19 @@ ECode CEmergencyDialer::OnCreate(
     GetIntent((IIntent**)&intent);
     AutoPtr<IUri> data;
     intent->GetData((IUri**)&data);
-    if (data != NULL && ) {
+    if (data != NULL) {
         String str;
         data->GetScheme(&str);
         if (IPhoneAccount::SCHEME_TEL.Equals(str)) {
             AutoPtr<IIntent> _intent;
-            GetIntent((IIntent**)_intent);
-            String number = PhoneNumberUtils::GetNumberFromIntent(_intent, this);
+            GetIntent((IIntent**)&_intent);
+            AutoPtr<IPhoneNumberUtils> helper;
+            CPhoneNumberUtils::AcquireSingleton((IPhoneNumberUtils**)&helper);
+            String number;
+            helper->GetNumberFromIntent(_intent, this, &number);
             if (!number.IsNull()) {
-                mDigits->SetText(number);
+                AutoPtr<ICharSequence> cchar = CoreUtils::Convert(number);
+                ITextView::Probe(mDigits)->SetText(cchar);
             }
         }
     }
@@ -239,14 +303,16 @@ ECode CEmergencyDialer::OnCreate(
     AutoPtr<IIntentFilter> intentFilter;
     CIntentFilter::New((IIntentFilter**)&intentFilter);
     intentFilter->AddAction(IIntent::ACTION_SCREEN_OFF);
-    RegisterReceiver(mBroadcastReceiver, intentFilter);
+    AutoPtr<IIntent> tmpintent;
+    RegisterReceiver(mBroadcastReceiver, intentFilter, (IIntent**)&tmpintent);
 
     //try {
-    ECode ec = mHaptic->Init(this, (res->GetBoolean(R.bool.config_enable_dialer_key_vibration, &result), result));
-    //} catch (Resources.NotFoundException nfe) {
-    if (ec == (ECode)E_RESOURCES_NOT_FOUND_EXCEPTION) {
-        Logger::E(TAG, "Vibrate control bool missing. %d", ec);
-    }
+    assert(0);
+    // ECode ec = mHaptic->Init(this, (res->GetBoolean(R.bool.config_enable_dialer_key_vibration, &result), result));
+    // //} catch (Resources.NotFoundException nfe) {
+    // if (ec == (ECode)E_RESOURCES_NOT_FOUND_EXCEPTION) {
+    //     Logger::E(TAG, "Vibrate control bool missing. %d", ec);
+    // }
     //}
     return NOERROR;
 }
@@ -293,7 +359,7 @@ ECode CEmergencyDialer::OnPostCreate(
     // will play DTMF tones for all the old digits if it is when onRestoreSavedInstanceState()
     // is called. This method will be called every time the activity is created, and
     // will always happen after onRestoreSavedInstanceState().
-    return mDigits->AddTextChangedListener(this);
+    return ITextView::Probe(mDigits)->AddTextChangedListener(this);
 }
 
 void CEmergencyDialer::SetupKeypad()
@@ -304,12 +370,13 @@ void CEmergencyDialer::SetupKeypad()
 
         AutoPtr<IView> _view;
         FindViewById(id, (IView**)&_view);
-        AutorPtr<IDialpadKeyButton> key = IDialpadKeyButton::(_view);
-        key->SetOnPressedListener(this);
+        assert(0);
+        // AutoPtr<IDialpadKeyButton> key = IDialpadKeyButton::(_view);
+        // key->SetOnPressedListener(this);
     }
 
     AutoPtr<IView> view;
-    FindViewById(R.id.zero, (IView**)&view);
+    FindViewById(Elastos::Droid::Server::Telephony::R::id::zero, (IView**)&view);
     view->SetOnLongClickListener(this);
 }
 
@@ -325,7 +392,7 @@ ECode CEmergencyDialer::OnKeyDown(
         case IKeyEvent::KEYCODE_CALL:
         {
             AutoPtr<ICharSequence> text;
-            mDigits->GetText(&text);
+            ITextView::Probe(mDigits)->GetText((ICharSequence**)&text);
             String str;
             text->ToString(&str);
             if (TextUtils::IsEmpty(str)) {
@@ -348,10 +415,12 @@ ECode CEmergencyDialer::OnKeyDown(
 void CEmergencyDialer::KeyPressed(
         /* [in] */ Int32 keyCode)
 {
-    mHaptic->Vibrate();
+    assert(0);
+    //mHaptic->Vibrate();
     AutoPtr<IKeyEvent> event;
     CKeyEvent::New(IKeyEvent::ACTION_DOWN, keyCode, (IKeyEvent**)&event);
-    mDigits->OnKeyDown(keyCode, event);
+    Boolean res;
+    IView::Probe(mDigits)->OnKeyDown(keyCode, event, &res);
 }
 
 ECode CEmergencyDialer::OnKey(
@@ -365,7 +434,7 @@ ECode CEmergencyDialer::OnKey(
     Int32 id;
     view->GetId(&id);
     switch (id) {
-        case R.id.digits:
+        case Elastos::Droid::Server::Telephony::R::id::digits:
             // Happen when "Done" button of the IME is pressed. This can happen when this
             // Activity is forced into landscape mode due to a desk dock.
             if (keyCode == IKeyEvent::KEYCODE_ENTER) {
@@ -389,22 +458,26 @@ ECode CEmergencyDialer::OnClick(
     Int32 id;
     view->GetId(&id);
     switch (id) {
-        case R.id.deleteButton: {
+        case Elastos::Droid::Server::Telephony::R::id::deleteButton: 
+        {
             KeyPressed(IKeyEvent::KEYCODE_DEL);
             return NOERROR;
         }
-        case R.id.floating_action_button: {
-            mHaptic->Vibrate();  // Vibrate here too, just like we do for the regular keys
+        case Elastos::Droid::Server::Telephony::R::id::floating_action_button: 
+        {
+            assert(0);
+            //mHaptic->Vibrate();  // Vibrate here too, just like we do for the regular keys
             PlaceCall();
             return NOERROR;
         }
-        case R.id.digits: {
+        case Elastos::Droid::Server::Telephony::R::id::digits: 
+        {
             Int32 length;
-            mDigits->GetLength(&length);
+            ITextView::Probe(mDigits)->GetLength(&length);
             if (length != 0) {
-                mDigits->SetCursorVisible(TRUE);
+                ITextView::Probe(mDigits)->SetCursorVisible(TRUE);
             }
-            return;
+            return NOERROR;
         }
     }
     return NOERROR;
@@ -421,62 +494,62 @@ ECode CEmergencyDialer::OnPressed(
     Int32 id;
     view->GetId(&id);
     switch (id) {
-        case R.id.one: {
+        case Elastos::Droid::Server::Telephony::R::id::one: {
             PlayTone(IToneGenerator::TONE_DTMF_1);
             KeyPressed(IKeyEvent::KEYCODE_1);
             return NOERROR;
         }
-        case R.id.two: {
+        case Elastos::Droid::Server::Telephony::R::id::two: {
             PlayTone(IToneGenerator::TONE_DTMF_2);
             KeyPressed(IKeyEvent::KEYCODE_2);
             return NOERROR;
         }
-        case R.id.three: {
+        case Elastos::Droid::Server::Telephony::R::id::three: {
             PlayTone(IToneGenerator::TONE_DTMF_3);
             KeyPressed(IKeyEvent::KEYCODE_3);
             return NOERROR;
         }
-        case R.id.four: {
+        case Elastos::Droid::Server::Telephony::R::id::four: {
             PlayTone(IToneGenerator::TONE_DTMF_4);
             KeyPressed(IKeyEvent::KEYCODE_4);
             return NOERROR;
         }
-        case R.id.five: {
+        case Elastos::Droid::Server::Telephony::R::id::five: {
             PlayTone(IToneGenerator::TONE_DTMF_5);
             KeyPressed(IKeyEvent::KEYCODE_5);
             return NOERROR;
         }
-        case R.id.six: {
+        case Elastos::Droid::Server::Telephony::R::id::six: {
             PlayTone(IToneGenerator::TONE_DTMF_6);
             KeyPressed(IKeyEvent::KEYCODE_6);
             return NOERROR;
         }
-        case R.id.seven: {
+        case Elastos::Droid::Server::Telephony::R::id::seven: {
             PlayTone(IToneGenerator::TONE_DTMF_7);
             KeyPressed(IKeyEvent::KEYCODE_7);
             return NOERROR;
         }
-        case R.id.eight: {
+        case Elastos::Droid::Server::Telephony::R::id::eight: {
             PlayTone(IToneGenerator::TONE_DTMF_8);
             KeyPressed(IKeyEvent::KEYCODE_8);
             return NOERROR;
         }
-        case R.id.nine: {
+        case Elastos::Droid::Server::Telephony::R::id::nine: {
             PlayTone(IToneGenerator::TONE_DTMF_9);
             KeyPressed(IKeyEvent::KEYCODE_9);
             return NOERROR;
         }
-        case R.id.zero: {
+        case Elastos::Droid::Server::Telephony::R::id::zero: {
             PlayTone(IToneGenerator::TONE_DTMF_0);
             KeyPressed(IKeyEvent::KEYCODE_0);
             return NOERROR;
         }
-        case R.id.pound: {
+        case Elastos::Droid::Server::Telephony::R::id::pound: {
             PlayTone(IToneGenerator::TONE_DTMF_P);
             KeyPressed(IKeyEvent::KEYCODE_POUND);
             return NOERROR;
         }
-        case R.id.star: {
+        case Elastos::Droid::Server::Telephony::R::id::star: {
             PlayTone(IToneGenerator::TONE_DTMF_S);
             KeyPressed(IKeyEvent::KEYCODE_STAR);
             return NOERROR;
@@ -494,11 +567,12 @@ ECode CEmergencyDialer::OnLongClick(
     Int32 id;
     view->GetId(&id);
     switch (id) {
-        case R.id.deleteButton:
+        case Elastos::Droid::Server::Telephony::R::id::deleteButton:
         {
             AutoPtr<ICharSequence> text;
-            mDigits->GetText((ICharSequence**)&text);
-            text->Clear();
+            ITextView::Probe(mDigits)->GetText((ICharSequence**)&text);
+            assert(0);
+            //text->Clear();
             // TODO: The framework forgets to clear the pressed
             // status of disabled button. Until this is fixed,
             // clear manually the pressed status. b/2133127
@@ -506,7 +580,7 @@ ECode CEmergencyDialer::OnLongClick(
             *result = TRUE;
             return NOERROR;
         }
-        case R.id.zero: {
+        case Elastos::Droid::Server::Telephony::R::id::zero: {
             KeyPressed(IKeyEvent::KEYCODE_PLUS);
             *result = TRUE;
             return NOERROR;
@@ -532,7 +606,8 @@ ECode CEmergencyDialer::OnResume()
     mDTMFToneEnabled = (tmp == 1);
 
     // Retrieve the haptic feedback setting.
-    mHaptic->CheckSystemSetting();
+    assert(0);
+    //mHaptic->CheckSystemSetting();
 
     // if the mToneGenerator creation fails, just continue without it.  It is
     // a local audio signal, and is not as important as the dtmf tone itself.
@@ -541,7 +616,7 @@ ECode CEmergencyDialer::OnResume()
         if (mToneGenerator == NULL) {
             //try {
             ECode ec = CToneGenerator::New(IAudioManager::STREAM_DTMF,
-                    TONE_RELATIVE_VOLUME, (ToneGenerator**)&mToneGenerator);
+                    TONE_RELATIVE_VOLUME, (IToneGenerator**)&mToneGenerator);
             //} catch (RuntimeException e) {
             if (ec == (ECode)E_RUNTIME_EXCEPTION) {
                 Logger::W(TAG, "Exception caught while creating local tone generator: %d", ec);
@@ -581,9 +656,14 @@ ECode CEmergencyDialer::OnPause()
 void CEmergencyDialer::PlaceCall()
 {
     AutoPtr<ICharSequence> text;
-    mDigits->GetText((ICharSequence**)&text);
+    ITextView::Probe(mDigits)->GetText((ICharSequence**)&text);
     text->ToString(&mLastNumber);
-    if (PhoneNumberUtils::IsLocalEmergencyNumber(this, mLastNumber)) {
+
+    AutoPtr<IPhoneNumberUtils> helper;
+    CPhoneNumberUtils::AcquireSingleton((IPhoneNumberUtils**)&helper);
+    Boolean res;
+    helper->IsLocalEmergencyNumber(this, mLastNumber, &res);
+    if (res) {
         if (DBG) {
             StringBuilder sb;
             sb += "placing call to ";
@@ -592,9 +672,10 @@ void CEmergencyDialer::PlaceCall()
         }
 
         // place the call if it is a valid number
-        if (mLastNumber == NULL || !TextUtils::IsGraphic(mLastNumber)) {
+        AutoPtr<ICharSequence> cchar = CoreUtils::Convert(mLastNumber);
+        if (mLastNumber.IsNull() || !TextUtils::IsGraphic(cchar)) {
             // There is no number entered.
-            PlayTone(ToneGenerator.TONE_PROP_NACK);
+            PlayTone(IToneGenerator::TONE_PROP_NACK);
             return;
         }
         AutoPtr<IIntent> intent;
@@ -602,7 +683,7 @@ void CEmergencyDialer::PlaceCall()
         AutoPtr<IUriHelper> helper;
         CUriHelper::AcquireSingleton((IUriHelper**)&helper);
         AutoPtr<IUri> uri;
-        helper->FromParts(IPhoneAccount::SCHEME_TEL, mLastNumber, NULL, (IUri**)&uri)
+        helper->FromParts(IPhoneAccount::SCHEME_TEL, mLastNumber, String(NULL), (IUri**)&uri);
         intent->SetData(uri);
         intent->SetFlags(IIntent::FLAG_ACTIVITY_NEW_TASK);
         StartActivity(intent);
@@ -618,9 +699,10 @@ void CEmergencyDialer::PlaceCall()
 
         // erase the number and throw up an alert dialog.
         AutoPtr<ICharSequence> text;
-        mDigits->GetText((ICharSequence**)&text);
-        Int32 length;
-        text->Delete(0, (text->GetLength(&length), length));
+        ITextView::Probe(mDigits)->GetText((ICharSequence**)&text);
+        //Int32 length;
+        assert(0);
+        //text->Delete(0, (text->GetLength(&length), length));
         ShowDialog(BAD_EMERGENCY_NUMBER_DIALOG);
     }
 }
@@ -656,7 +738,8 @@ ECode CEmergencyDialer::PlayTone(
         }
 
         // Start the new tone (will stop any playing tone)
-        mToneGenerator->StartTone(tone, TONE_LENGTH_MS);
+        Boolean res;
+        mToneGenerator->StartTone(tone, TONE_LENGTH_MS, &res);
     }
     return NOERROR;
 }
@@ -666,13 +749,16 @@ AutoPtr<ICharSequence> CEmergencyDialer::CreateErrorMessage(
 {
     AutoPtr<ICharSequence> obj;
     if (!TextUtils::IsEmpty(number)) {
+        AutoPtr<ArrayOf<IInterface*> > array = ArrayOf<IInterface*>::Alloc(1);
+        AutoPtr<ICharSequence> cchar = CoreUtils::Convert(mLastNumber);
+        array->Set(0, TO_IINTERFACE(cchar));
         String str;
-        GetString(R.string.dial_emergency_error, mLastNumber, &str);
-        AutoPtr<ICharSequence> obj = CoreUtil::Convert(str);
+        GetString(Elastos::Droid::Server::Telephony::R::string::dial_emergency_error, array, &str);
+        AutoPtr<ICharSequence> obj = CoreUtils::Convert(str);
     }
     else {
         AutoPtr<ICharSequence> obj;
-        GetText(R.string.dial_emergency_empty_error, (ICharSequence**)&obj);
+        GetText(Elastos::Droid::Server::Telephony::R::string::dial_emergency_empty_error, (ICharSequence**)&obj);
     }
     return obj;
 }
@@ -689,35 +775,35 @@ ECode CEmergencyDialer::OnCreateDialog(
         AutoPtr<IAlertDialogBuilder> builder;
         CAlertDialogBuilder::New(this, (IAlertDialogBuilder**)&builder);
         AutoPtr<ICharSequence> text;
-        GetText(R.string.emergency_enable_radio_dialog_title, (ICharSequence**)&text);
+        GetText(Elastos::Droid::Server::Telephony::R::string::emergency_enable_radio_dialog_title, 
+                (ICharSequence**)&text);
         builder->SetTitle(text);
         AutoPtr<ICharSequence> m = CreateErrorMessage(mLastNumber);
         builder->SetMessage(m);
-        builder->SetPositiveButton(R.string.ok, NULL)
+        builder->SetPositiveButton(Elastos::Droid::Server::Telephony::R::string::ok, NULL);
         builder->SetCancelable(TRUE);
         builder->Create((IAlertDialog**)&dialog);
 
         // blur stuff behind the dialog
         AutoPtr<IWindow> window;
-        dialog->GetWindow((IWindow**)&window);
+        IDialog::Probe(dialog)->GetWindow((IWindow**)&window);
         window->AddFlags(IWindowManagerLayoutParams::FLAG_BLUR_BEHIND);
         window->AddFlags(IWindowManagerLayoutParams::FLAG_SHOW_WHEN_LOCKED);
     }
-    *outdialog = dialog;
+    *outdialog = IDialog::Probe(dialog);
     REFCOUNT_ADD(*outdialog)
     return NOERROR;
 }
 
-ECode CEmergencyDialer::OnPrepareDialog(
+void CEmergencyDialer::OnPrepareDialog(
     /* [in] */ Int32 id,
     /* [in] */ IDialog* dialog)
 {
     Activity::OnPrepareDialog(id, dialog);
     if (id == BAD_EMERGENCY_NUMBER_DIALOG) {
         AutoPtr<IAlertDialog> alert = IAlertDialog::Probe(dialog);
-        return alert->SetMessage(CreateErrorMessage(mLastNumber));
+        alert->SetMessage(CreateErrorMessage(mLastNumber));
     }
-    return NOERROR;
 }
 
 ECode CEmergencyDialer::OnOptionsItemSelected(
@@ -728,7 +814,7 @@ ECode CEmergencyDialer::OnOptionsItemSelected(
 
     Int32 itemId;
     item->GetItemId(&itemId);
-    if (itemId == android.R.id.home) {
+    if (itemId == Elastos::Droid::R::id::home) {
         OnBackPressed();
         *result = TRUE;
     }
@@ -738,7 +824,7 @@ ECode CEmergencyDialer::OnOptionsItemSelected(
 ECode CEmergencyDialer::UpdateDialAndDeleteButtonStateEnabledAttr()
 {
     Int32 length;
-    mDigits->GetLength(&length);
+    ITextView::Probe(mDigits)->GetLength(&length);
     Boolean notEmpty = length != 0;
 
     return mDelete->SetEnabled(notEmpty);

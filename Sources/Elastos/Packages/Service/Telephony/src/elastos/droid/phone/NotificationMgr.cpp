@@ -57,6 +57,8 @@ using Elastos::Droid::Widget::IToastHelper;
 using Elastos::Droid::Widget::CToastHelper;
 using Elastos::Droid::Text::TextUtils;
 using Elastos::Droid::Telephony::IServiceState;
+using Elastos::Droid::Telephony::IPhoneNumberUtils;
+using Elastos::Droid::Telephony::CPhoneNumberUtils;
 using Elastos::Droid::Telecomm::Telecom::IPhoneAccount;
 using Elastos::Core::StringBuilder;
 using Elastos::Core::StringUtils;
@@ -319,7 +321,7 @@ ECode NotificationMgr::UpdateMwi(
         //     mPhone->GetVoiceMessageCount(&vmCount);
         //     String titleFormat;
         //     mContext->GetString(Elastos::Droid::Server::Telephony::R::string::notification_voicemail_title_count, &titleFormat);
-        //     notificationTitle = String.format(titleFormat, vmCount);
+        //     notificationTitle.AppendFormat(titleFormat.string(), vmCount);
         // }
 
         String notificationText;
@@ -331,8 +333,11 @@ ECode NotificationMgr::UpdateMwi(
             String tmp;
             mContext->GetString(Elastos::Droid::Server::Telephony::R::string::notification_voicemail_text_format,
                     &tmp);
-            assert(0);
-            //notificationText = String.format(tmp, PhoneNumberUtils.formatNumber(vmNumber));
+            AutoPtr<IPhoneNumberUtils> helper;
+            CPhoneNumberUtils::AcquireSingleton((IPhoneNumberUtils**)&helper);
+            String res;
+            helper->FormatNumber(vmNumber, &res);
+            notificationText.AppendFormat(tmp.string(), res.string());
         }
 
         AutoPtr<IUriHelper> helper;

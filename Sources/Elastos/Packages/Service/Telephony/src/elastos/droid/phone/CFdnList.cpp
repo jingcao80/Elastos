@@ -1,18 +1,27 @@
 
 #include "elastos/droid/phone/CFdnList.h"
+#include "Elastos.Droid.App.h"
+#include "Elastos.Droid.Content.h"
+#include <elastos/utility/logging/Logger.h>
+#include "elastos/droid/R.h"
+#include <elastos/core/CoreUtils.h>
+#include "R.h"
+
+using Elastos::Droid::App::IActionBar;
+using Elastos::Droid::Content::IIntent;
+using Elastos::Droid::Content::CIntent;
+using Elastos::Droid::Net::CUriHelper;
+using Elastos::Droid::Net::IUriHelper;
+using Elastos::Core::CoreUtils;
+
+using Elastos::Utility::Logging::Logger;
 
 namespace Elastos {
 namespace Droid {
 namespace Phone {
 
-const Int32 CFdnList::MENU_ADD = 1;
-const Int32 CFdnList::MENU_EDIT = 2;
-const Int32 CFdnList::MENU_DELETE = 3;
-
 const String CFdnList::INTENT_EXTRA_NAME("name");
 const String CFdnList::INTENT_EXTRA_NUMBER("number");
-
-CAR_INTERFACE_IMPL(CFdnList, ADNList, IFdnList)
 
 CAR_OBJECT_IMPL(CFdnList)
 
@@ -42,6 +51,7 @@ ECode CFdnList::ResolveIntent(
 
     AutoPtr<IIntent> intent;
     GetIntent((IIntent**)&intent);
+    AutoPtr<IUriHelper> helper;
     CUriHelper::AcquireSingleton((IUriHelper**)&helper);
     AutoPtr<IUri> _uri;
     helper->Parse(String("content://icc/fdn"), (IUri**)&_uri);
@@ -55,21 +65,31 @@ ECode CFdnList::OnCreateOptionsMenu(
 {
     VALIDATE_NOT_NULL(result)
 
-    ADNList::OnCreateOptionsMenu(menu);
+    Boolean res;
+    ADNList::OnCreateOptionsMenu(menu, &res);
 
     AutoPtr<IResources> r;
     GetResources((IResources**)&r);
 
     // Added the icons to the context menu
     String str;
-    menu->Add(0, MENU_ADD, 0, (r->GetString(R.string.menu_add, &str), str))
-    menu->SetIcon(android.R.drawable.ic_menu_add);
+    r->GetString(Elastos::Droid::Server::Telephony::R::string::menu_add, &str);
+    AutoPtr<ICharSequence> cchar = CoreUtils::Convert(str);
+    AutoPtr<IMenuItem> item1;
+    menu->Add(0, MENU_ADD, 0, cchar, (IMenuItem**)&item1);
+    item1->SetIcon(Elastos::Droid::R::drawable::ic_menu_add);
 
-    menu->Add(0, MENU_EDIT, 0, (r->GetString(R.string.menu_edit, &str), str));
-    menu->SetIcon(android.R.drawable.ic_menu_edit);
+    r->GetString(Elastos::Droid::Server::Telephony::R::string::menu_edit, &str);
+    AutoPtr<IMenuItem> item2;
+    AutoPtr<ICharSequence> cchar2 = CoreUtils::Convert(str);
+    menu->Add(0, MENU_EDIT, 0, cchar2, (IMenuItem**)&item2);
+    item2->SetIcon(Elastos::Droid::R::drawable::ic_menu_edit);
 
-    menu->Add(0, MENU_DELETE, 0, (r->GetString(R.string.menu_delete, &str), str));
-    menu->SetIcon(android.R.drawable.ic_menu_delete);
+    r->GetString(Elastos::Droid::Server::Telephony::R::string::menu_delete, &str);
+    AutoPtr<IMenuItem> item3;
+    AutoPtr<ICharSequence> cchar3 = CoreUtils::Convert(str);
+    menu->Add(0, MENU_DELETE, 0, cchar3, (IMenuItem**)&item3);
+    item3->SetIcon(Elastos::Droid::R::drawable::ic_menu_delete);
     *result = TRUE;
     return NOERROR;
 }
@@ -80,19 +100,23 @@ ECode CFdnList::OnPrepareOptionsMenu(
 {
     VALIDATE_NOT_NULL(result)
 
-    ADNList::OnPrepareOptionsMenu(menu);
+    Boolean res;
+    ADNList::OnPrepareOptionsMenu(menu, &res);
     Int32 position;
     GetSelectedItemPosition(&position);
     Boolean hasSelection = (position >= 0);
 
-    menu->FindItem(MENU_ADD);
-    menu->SetVisible(TRUE);
+    AutoPtr<IMenuItem> item;
+    menu->FindItem(MENU_ADD, (IMenuItem**)&item);
+    item->SetVisible(TRUE);
 
-    menu->FindItem(MENU_EDIT);
-    menu->SetVisible(hasSelection);
+    AutoPtr<IMenuItem> item2;
+    menu->FindItem(MENU_EDIT, (IMenuItem**)&item2);
+    item2->SetVisible(hasSelection);
 
-    menu->FindItem(MENU_DELETE);
-    menu->SetVisible(hasSelection);
+    AutoPtr<IMenuItem> item3;
+    menu->FindItem(MENU_DELETE, (IMenuItem**)&item3);
+    item3->SetVisible(hasSelection);
 
     *result = TRUE;
     return NOERROR;
@@ -107,10 +131,11 @@ ECode CFdnList::OnOptionsItemSelected(
     Int32 id;
     item->GetItemId(&id);
     switch (id) {
-        case android.R.id.home:  // See ActionBar#setDisplayHomeAsUpEnabled()
+        case Elastos::Droid::R::id::home:  // See ActionBar#setDisplayHomeAsUpEnabled()
         {
             AutoPtr<IIntent> intent;
-            CIntent::New(this, FdnSetting.class, (IIntent**)&intent);
+            assert(0);
+            //CIntent::New(this, FdnSetting.class, (IIntent**)&intent);
             intent->SetAction(IIntent::ACTION_MAIN);
             intent->AddFlags(IIntent::FLAG_ACTIVITY_CLEAR_TOP);
             StartActivity(intent);
@@ -144,7 +169,8 @@ ECode CFdnList::OnListItemClick(
     /* [in] */ Int64 id)
 {
     // TODO: is this what we really want?
-    return EditSelected(position);
+    EditSelected(position);
+    return NOERROR;
 }
 
 void CFdnList::AddContact()
@@ -153,7 +179,8 @@ void CFdnList::AddContact()
     // EditFdnContactScreen treats it like add contact.
     AutoPtr<IIntent> intent;
     CIntent::New((IIntent**)&intent);
-    intent->SetClass(this, EditFdnContactScreen.class);
+    assert(0);
+    //intent->SetClass(this, EditFdnContactScreen.class);
     StartActivity(intent);
 }
 
@@ -176,7 +203,8 @@ void CFdnList::EditSelected(
 
         AutoPtr<IIntent> intent;
         CIntent::New((IIntent**)&intent);
-        intent->SetClass(this, EditFdnContactScreen.class);
+        assert(0);
+        //intent->SetClass(this, EditFdnContactScreen.class);
         intent->PutExtra(INTENT_EXTRA_NAME, name);
         intent->PutExtra(INTENT_EXTRA_NUMBER, number);
         StartActivity(intent);
@@ -196,7 +224,8 @@ void CFdnList::DeleteSelected()
 
         AutoPtr<IIntent> intent;
         CIntent::New((IIntent**)&intent);
-        intent->SetClass(this, DeleteFdnContactScreen.class);
+        assert(0);
+        //intent->SetClass(this, DeleteFdnContactScreen.class);
         intent->PutExtra(INTENT_EXTRA_NAME, name);
         intent->PutExtra(INTENT_EXTRA_NUMBER, number);
         StartActivity(intent);

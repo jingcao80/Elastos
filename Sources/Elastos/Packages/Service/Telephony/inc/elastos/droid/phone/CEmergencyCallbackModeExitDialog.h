@@ -1,8 +1,41 @@
-#ifndef  __ELASTOS_DROID_PHONE_CPHONEAPP_H__
-#define  __ELASTOS_DROID_PHONE_CPHONEAPP_H__
+#ifndef  __ELASTOS_DROID_PHONE_CEMERGENCYCALLBACKMODEEXITDIALOG_H__
+#define  __ELASTOS_DROID_PHONE_CEMERGENCYCALLBACKMODEEXITDIALOG_H__
 
-#include "_Elastos_Droid_Phone_CPhoneApp.h"
+#include "_Elastos_Droid_Phone_CEmergencyCallbackModeExitDialog.h"
 #include "elastos/droid/ext/frameworkext.h"
+#include "elastos/droid/app/Activity.h"
+#include "elastos/droid/content/BroadcastReceiver.h"
+#include "elastos/droid/os/CountDownTimer.h"
+#include "elastos/droid/os/Runnable.h"
+#include "elastos/droid/os/Handler.h"
+#include <elastos/core/Object.h>
+#include "Elastos.Droid.Content.h"
+#include "Elastos.Droid.Internal.h"
+#include "Elastos.Droid.Os.h"
+
+using Elastos::Droid::App::Activity;
+using Elastos::Droid::App::IDialog;
+using Elastos::Droid::App::IAlertDialog;
+using Elastos::Droid::App::IProgressDialog;
+using Elastos::Droid::Content::IContext;
+using Elastos::Droid::Content::IIntent;
+using Elastos::Droid::Content::IComponentName;
+using Elastos::Droid::Content::IServiceConnection;
+using Elastos::Droid::Content::IDialogInterface;
+using Elastos::Droid::Content::IDialogInterfaceOnDismissListener;
+using Elastos::Droid::Content::IDialogInterfaceOnClickListener;
+using Elastos::Droid::Content::BroadcastReceiver;
+using Elastos::Droid::Content::IBroadcastReceiver;
+using Elastos::Droid::Internal::Telephony::IPhone;
+using Elastos::Droid::Os::CountDownTimer;
+using Elastos::Droid::Os::ICountDownTimer;
+using Elastos::Droid::Os::Runnable;
+using Elastos::Droid::Os::IBinder;
+using Elastos::Droid::Os::IMessage;
+using Elastos::Droid::Os::Handler;
+using Elastos::Core::IRunnable;
+using Elastos::Core::Object;
+
 
 namespace Elastos {
 namespace Droid {
@@ -18,6 +51,25 @@ CarClass(CEmergencyCallbackModeExitDialog)
     , public IEmergencyCallbackModeExitDialog
     , public IDialogInterfaceOnDismissListener
 {
+public:
+    class MyBroadcastReceiver
+        : public BroadcastReceiver
+    {
+    public:
+        TO_STRING_IMPL("CEmergencyCallbackModeExitDialog::MyBroadcastReceiver")
+
+        CARAPI constructor(
+            /* [in] */ IEmergencyCallbackModeExitDialog* host);
+
+        //@Override
+        CARAPI OnReceive(
+            /* [in] */ IContext* context,
+            /* [in] */ IIntent* intent);
+
+    private:
+        CEmergencyCallbackModeExitDialog* mHost;
+    };
+    
 private:
     class MyCountDownTimer
         : public CountDownTimer
@@ -142,10 +194,13 @@ private:
     };
 
     class MyServiceConnection
-        : public ServiceConnection
+        : public Object 
+        , public IServiceConnection
     {
     public:
         TO_STRING_IMPL("CEmergencyCallbackModeExitDialog::MyServiceConnection")
+
+        CAR_INTERFACE_DECL()
 
         MyServiceConnection(
             /* [in] */ CEmergencyCallbackModeExitDialog* host)
@@ -174,24 +229,6 @@ private:
 
         CARAPI HandleMessage(
             /* [in] */ IMessage* msg);
-
-    private:
-        CEmergencyCallbackModeExitDialog* mHost;
-    };
-
-    class MyBroadcastReceiver
-        : public BroadcastReceiver
-    {
-    public:
-        TO_STRING_IMPL("CEmergencyCallbackModeExitDialog::MyBroadcastReceiver")
-
-        CARAPI constructor(
-            /* [in] */ IEmergencyCallbackModeExitDialog* host);
-
-        //@Override
-        CARAPI OnReceive(
-            /* [in] */ IContext* context,
-            /* [in] */ IIntent* intent);
 
     private:
         CEmergencyCallbackModeExitDialog* mHost;
@@ -260,7 +297,7 @@ private:
     Int32 mDialogType;
     Int64 mEcmTimeout;
     Boolean mInEmergencyCall;
-    static const Int32 ECM_TIMER_RESET;
+    static const Int32 ECM_TIMER_RESET = 1;
     AutoPtr<IPhone> mPhone;
 
     /**
@@ -288,4 +325,4 @@ private:
 } // namespace Droid
 } // namespace Elastos
 
-#endif // __ELASTOS_DROID_PHONE_CPHONEAPP_H__
+#endif // __ELASTOS_DROID_PHONE_CEMERGENCYCALLBACKMODEEXITDIALOG_H__

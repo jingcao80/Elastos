@@ -1,5 +1,24 @@
 
 #include "elastos/droid/phone/CEnableFdnScreen.h"
+#include "elastos/droid/phone/PhoneGlobals.h"
+#include "elastos/droid/text/TextUtils.h"
+#include "Elastos.Droid.Content.h"
+#include "Elastos.Droid.Text.h"
+#include <elastos/utility/logging/Logger.h>
+#include "R.h"
+
+using Elastos::Droid::Content::Res::IResources;
+using Elastos::Droid::Internal::Telephony::IIccCard;
+using Elastos::Droid::Internal::Telephony::ICommandException;
+using Elastos::Droid::Os::CMessageHelper;
+using Elastos::Droid::Os::IMessageHelper;
+using Elastos::Droid::Text::TextUtils;
+using Elastos::Droid::Text::Method::IKeyListener;
+using Elastos::Droid::Text::Method::IDigitsKeyListener;
+using Elastos::Droid::Text::Method::IDigitsKeyListenerHelper;
+using Elastos::Droid::Text::Method::CDigitsKeyListenerHelper;
+using Elastos::Droid::View::EIID_IViewOnClickListener;
+using Elastos::Utility::Logging::Logger;
 
 namespace Elastos {
 namespace Droid {
@@ -21,7 +40,7 @@ ECode CEnableFdnScreen::MyHandler::HandleMessage(
         case ENABLE_FDN_COMPLETE:
             AutoPtr<IInterface> obj;
             msg->GetObj((IInterface**)&obj);
-            AutoPtr<IAsyncResult> ar = IAsyncResult::Probe(obj);
+            AutoPtr<AsyncResult> ar = (AsyncResult*)IObject::Probe(obj);
             mHost->HandleResult(ar);
             break;
     }
@@ -35,7 +54,7 @@ ECode CEnableFdnScreen::MyViewOnClickListener::OnClick(
     /* [in] */ IView* v)
 {
     AutoPtr<ICharSequence> text;
-    mHost->mPin2Field->GetText((ICharSequence**)&text);
+    ITextView::Probe(mHost->mPin2Field)->GetText((ICharSequence**)&text);
     if (TextUtils::IsEmpty(text)) {
         return NOERROR;
     }
@@ -43,7 +62,8 @@ ECode CEnableFdnScreen::MyViewOnClickListener::OnClick(
     AutoPtr<IResources> resources;
     mHost->GetResources((IResources**)&resources);
     AutoPtr<ICharSequence> text2;
-    resources->GetText(R.string.enable_in_progress, (ICharSequence**)&text2);
+    resources->GetText(Elastos::Droid::Server::Telephony::R::string::enable_in_progress, 
+            (ICharSequence**)&text2);
     mHost->ShowStatus(text2);
 
     mHost->EnableFdn();
@@ -57,10 +77,6 @@ ECode CEnableFdnScreen::MyRunnable::Run()
 
 const String CEnableFdnScreen::TAG("CEnableFdnScreen");// = PhoneGlobals.TAG;
 const Boolean CEnableFdnScreen::DBG = FALSE;
-
-const Int32 CEnableFdnScreen::ENABLE_FDN_COMPLETE = 100;
-
-CAR_INTERFACE_IMPL(CEnableFdnScreen, Activity, IEnableFdnScreen)
 
 CAR_OBJECT_IMPL(CEnableFdnScreen)
 
@@ -82,16 +98,17 @@ ECode CEnableFdnScreen::OnCreate(
 {
     Activity::OnCreate(icicle);
 
-    SetContentView(R.layout.enable_fdn_screen);
+    SetContentView(Elastos::Droid::Server::Telephony::R::layout::enable_fdn_screen);
     SetupView();
 
-    PhoneGlobals::GetPhone((IPhone**)&mPhone);
+    mPhone = PhoneGlobals::GetPhone();
     AutoPtr<IIccCard> card;
     mPhone->GetIccCard((IIccCard**)&card);
     card->GetIccFdnEnabled(&mEnable);
     mEnable = !mEnable;
 
-    Int32 id = mEnable ? R.string.enable_fdn : R.string.disable_fdn;
+    Int32 id = mEnable ? Elastos::Droid::Server::Telephony::R::string::enable_fdn : 
+            Elastos::Droid::Server::Telephony::R::string::disable_fdn;
     AutoPtr<IResources> resources;
     GetResources((IResources**)&resources);
     AutoPtr<ICharSequence> cchar;
@@ -102,29 +119,30 @@ ECode CEnableFdnScreen::OnCreate(
 ECode CEnableFdnScreen::OnResume()
 {
     Activity::OnResume();
-    return PhoneGlobals::GetPhone((IPhone**)&mPhone);
+    mPhone = PhoneGlobals::GetPhone();
+    return NOERROR;
 }
 
 void CEnableFdnScreen::SetupView()
 {
     AutoPtr<IView> view;
-    FindViewById(R.id.pin, (IView**)&view);
+    FindViewById(Elastos::Droid::Server::Telephony::R::id::pin, (IView**)&view);
     mPin2Field = IEditText::Probe(view);
 
     AutoPtr<IDigitsKeyListenerHelper> helper;
-    CDigitsKeyListenerHelper::New((IDigitsKeyListenerHelper**)&helper);
+    CDigitsKeyListenerHelper::AcquireSingleton((IDigitsKeyListenerHelper**)&helper);
     AutoPtr<IDigitsKeyListener> ret;
     helper->GetInstance((IDigitsKeyListener**)&ret);
-    mPin2Field->SetKeyListener(ret);
-    mPin2Field->SetMovementMethod(NULL);
-    mPin2Field->SetOnClickListener(mClicked);
+    ITextView::Probe(mPin2Field)->SetKeyListener(IKeyListener::Probe(ret));
+    ITextView::Probe(mPin2Field)->SetMovementMethod(NULL);
+    IView::Probe(mPin2Field)->SetOnClickListener(mClicked);
 
     AutoPtr<IView> view2;
-    FindViewById(R.id.pinc, (IView**)&view2);
+    FindViewById(Elastos::Droid::Server::Telephony::R::id::pinc, (IView**)&view2);
     mPinFieldContainer = ILinearLayout::Probe(view2);
 
     AutoPtr<IView> view3;
-    FindViewById(R.id.status, (IView**)&view3);
+    FindViewById(Elastos::Droid::Server::Telephony::R::id::status, (IView**)&view3);
     mStatusField = ITextView::Probe(view3);
 }
 
@@ -133,28 +151,30 @@ void CEnableFdnScreen::ShowStatus(
 {
     if (statusMsg != NULL) {
         mStatusField->SetText(statusMsg);
-        mStatusField->SetVisibility(IView::VISIBLE);
-        mPinFieldContainer->SetVisibility(IView::GONE);
+        IView::Probe(mStatusField)->SetVisibility(IView::VISIBLE);
+        IView::Probe(mPinFieldContainer)->SetVisibility(IView::GONE);
     }
     else {
-        mPinFieldContainer->SetVisibility(IView::VISIBLE);
-        mStatusField->SetVisibility(IView::GONE);
+        IView::Probe(mPinFieldContainer)->SetVisibility(IView::VISIBLE);
+        IView::Probe(mStatusField)->SetVisibility(IView::GONE);
     }
 }
 
 String CEnableFdnScreen::GetPin2()
 {
     AutoPtr<ICharSequence> cchar;
-    mPin2Field->GetText((ICharSequence**)&cchar);
+    ITextView::Probe(mPin2Field)->GetText((ICharSequence**)&cchar);
     String str;
-    cchar->ToString(&str)
+    cchar->ToString(&str);
     return str;
 }
 
 void CEnableFdnScreen::EnableFdn()
 {
+    AutoPtr<IMessageHelper> helper;
+    CMessageHelper::AcquireSingleton((IMessageHelper**)&helper);
     AutoPtr<IMessage> callback;
-    Message::Obtain(mHandler, ENABLE_FDN_COMPLETE, (IMessage**)&callback);
+    helper->Obtain(mHandler, ENABLE_FDN_COMPLETE, (IMessage**)&callback);
 
     AutoPtr<IIccCard> card;
     mPhone->GetIccCard((IIccCard**)&card);
@@ -164,30 +184,32 @@ void CEnableFdnScreen::EnableFdn()
 }
 
 void CEnableFdnScreen::HandleResult(
-    /* [in] */ IAsyncResult* ar)
+    /* [in] */ AsyncResult* ar)
 {
-    if (ar.exception == null) {
+    if (ar->mException == NULL) {
         if (DBG) Log(String("handleResult: success!"));
         AutoPtr<IResources> resources;
         GetResources((IResources**)&resources);
         AutoPtr<ICharSequence> cchar;
-        resources->GetText(mEnable ? R.string.enable_fdn_ok : R.string.disable_fdn_ok, (ICharSequence**)&cchar);
+        resources->GetText(mEnable ? Elastos::Droid::Server::Telephony::R::string::enable_fdn_ok : 
+                Elastos::Droid::Server::Telephony::R::string::disable_fdn_ok, (ICharSequence**)&cchar);
         ShowStatus(cchar);
     }
-    else if (ar.exception instanceof CommandException
+    else if (ICommandException::Probe(ar->mException) != NULL
             /* && ((CommandException)ar.exception).getCommandError() ==
                 CommandException.Error.GENERIC_FAILURE */ ) {
         if (DBG) Log(String("handleResult: failed!"));
         AutoPtr<IResources> resources;
         GetResources((IResources**)&resources);
         AutoPtr<ICharSequence> cchar;
-        resources->GetText(R.string.pin_failed, (ICharSequence**)&cchar);
+        resources->GetText(Elastos::Droid::Server::Telephony::R::string::pin_failed, 
+                (ICharSequence**)&cchar);
         ShowStatus(cchar);
     }
 
     AutoPtr<IRunnable> r;
-    mHandler->PostDelayed(r, 3000);
-    return NOERROR;
+    Boolean res;
+    mHandler->PostDelayed(r, 3000, &res);
 }
 
 void CEnableFdnScreen::Log(

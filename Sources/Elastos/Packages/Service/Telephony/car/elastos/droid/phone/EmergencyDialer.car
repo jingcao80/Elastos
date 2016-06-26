@@ -7,6 +7,24 @@ module
     interface IEmergencyDialer {
         // Intent action for this activity.
         const String ACTION_DIAL = "com.android.phone.EmergencyDialer.DIAL";
+
+        /**
+         * Plays the specified tone for TONE_LENGTH_MS milliseconds.
+         *
+         * The tone is played locally, using the audio stream for phone calls.
+         * Tones are played only if the "Audible touch tones" user preference
+         * is checked, and are NOT played if the device is in silent mode.
+         *
+         * @param tone a tone code from {@link ToneGenerator}
+         */
+        PlayTone(
+            [in] Int32 tone);
+
+        /**
+         * Explicitly turn off number formatting, since it gets in the way of the emergency
+         * number detector
+         */
+        MaybeAddNumberFormatting();
     }
 
     } // namespace Phone

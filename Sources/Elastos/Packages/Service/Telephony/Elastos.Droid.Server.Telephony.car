@@ -15,6 +15,8 @@ module
     merge("car/elastos/droid/phone/CdmaSystemSelectListPreference.car");
     merge("car/elastos/droid/phone/CdmaSubscriptionListPreference.car");
     merge("car/elastos/droid/phone/ErrorDialogActivity.car");
+    merge("car/elastos/droid/phone/EmergencyDialer.car");
+    merge("car/elastos/droid/phone/EmergencyCallbackModeService.car");
     merge("car/elastos/droid/phone/EditPinPreference.car");
     merge("car/elastos/droid/phone/EditPhoneNumberPreference.car");
     merge("car/elastos/droid/phone/InCallScreen.car");
@@ -67,8 +69,12 @@ module
     using interface Elastos.Droid.Internal.Telephony.IPhone;
     using interface Elastos.Droid.Internal.Telephony.IIccProvider;
     using interface Elastos.Droid.Os.IBinder;
+    using interface Elastos.Droid.Text.ITextWatcher;
     using interface Elastos.Droid.Telecomm.Telecom.IConnectionService;
     using interface Elastos.Droid.View.IContextThemeWrapper;
+    using interface Elastos.Droid.View.IViewOnClickListener;
+    using interface Elastos.Droid.View.IViewOnKeyListener;
+    using interface Elastos.Droid.View.IViewOnLongClickListener;
     using interface Elastos.Droid.View.IKeyEventCallback;
     using interface Elastos.Droid.View.ILayoutInflaterFactory;
     using interface Elastos.Droid.View.ILayoutInflaterFactory2;
@@ -639,6 +645,199 @@ module
 
         interface IPhoneEditPinPreference;
 
+    }
+
+    class CFdnSetting {
+        constructor();
+
+        interface IListActivity;
+        interface IActivity;
+        interface IPreferenceManagerOnPreferenceTreeClickListener;
+        interface IPreferenceFragmentOnPreferenceStartFragmentCallback;
+        interface IContextThemeWrapper;
+        interface ILayoutInflaterFactory;
+        interface ILayoutInflaterFactory2;
+        interface IWindowCallback;
+        interface IKeyEventCallback;
+        interface IViewOnCreateContextMenuListener;
+        interface IComponentCallbacks2;
+        interface IComponentCallbacks;
+        interface IOnWindowDismissedCallback; 
+        interface IContextWrapper;
+        interface IContext;
+        interface IPreferenceActivity;
+
+        interface IEditPinPreferenceOnPinEnteredListener;
+        interface IDialogInterfaceOnCancelListener;
+    }
+
+    class CFdnList {
+        constructor();
+
+        interface IListActivity;
+        interface IActivity;
+        interface IContext;
+        interface IContextThemeWrapper;
+        interface ILayoutInflaterFactory;
+        interface ILayoutInflaterFactory2;
+        interface IWindowCallback;
+        interface IKeyEventCallback;
+        interface IViewOnCreateContextMenuListener;
+        interface IComponentCallbacks;
+        interface IComponentCallbacks2;
+        interface IOnWindowDismissedCallback; 
+    }
+
+    class CFakePhoneActivity {
+        constructor();
+
+        interface IContext;
+        interface IContextWrapper;
+        interface IContextThemeWrapper;
+        interface ILayoutInflaterFactory;
+        interface ILayoutInflaterFactory2;
+        interface IWindowCallback;
+        interface IKeyEventCallback;
+        interface IViewOnCreateContextMenuListener;
+        interface IComponentCallbacks;
+        interface IComponentCallbacks2;
+        interface IOnWindowDismissedCallback;
+        interface IActivity;
+    }
+
+    class CErrorDialogActivity {
+        constructor();
+
+        interface IContext;
+        interface IContextWrapper;
+        interface IContextThemeWrapper;
+        interface ILayoutInflaterFactory;
+        interface ILayoutInflaterFactory2;
+        interface IWindowCallback;
+        interface IKeyEventCallback;
+        interface IViewOnCreateContextMenuListener;
+        interface IComponentCallbacks;
+        interface IComponentCallbacks2;
+        interface IOnWindowDismissedCallback;
+        interface IActivity;
+
+        interface IErrorDialogActivity;
+    }
+
+    class CEnableIccPinScreen {
+        constructor();
+
+        interface IContext;
+        interface IContextWrapper;
+        interface IContextThemeWrapper;
+        interface ILayoutInflaterFactory;
+        interface ILayoutInflaterFactory2;
+        interface IWindowCallback;
+        interface IKeyEventCallback;
+        interface IViewOnCreateContextMenuListener;
+        interface IComponentCallbacks;
+        interface IComponentCallbacks2;
+        interface IOnWindowDismissedCallback;
+        interface IActivity;
+    }
+
+    class CEnableFdnScreen {
+        constructor();
+
+        interface IContext;
+        interface IContextWrapper;
+        interface IContextThemeWrapper;
+        interface ILayoutInflaterFactory;
+        interface ILayoutInflaterFactory2;
+        interface IWindowCallback;
+        interface IKeyEventCallback;
+        interface IViewOnCreateContextMenuListener;
+        interface IComponentCallbacks;
+        interface IComponentCallbacks2;
+        interface IOnWindowDismissedCallback;
+        interface IActivity;
+    }
+
+    class CEmergencyDialerBroadcastReceiver {
+        constructor(
+            [in] IEmergencyDialer* host);
+
+        interface IBroadcastReceiver;
+    }
+
+    class CEmergencyDialer {
+        constructor();
+
+        interface IContext;
+        interface IContextWrapper;
+        interface IContextThemeWrapper;
+        interface ILayoutInflaterFactory;
+        interface ILayoutInflaterFactory2;
+        interface IWindowCallback;
+        interface IKeyEventCallback;
+        interface IViewOnCreateContextMenuListener;
+        interface IComponentCallbacks;
+        interface IComponentCallbacks2;
+        interface IOnWindowDismissedCallback;
+        interface IActivity;
+
+        interface IEmergencyDialer;
+        interface IViewOnClickListener;
+        interface IViewOnLongClickListener;
+        interface IViewOnKeyListener;
+        interface ITextWatcher;
+        //interface IDialpadKeyButtonOnPressedListener;
+    }
+
+    class CEmergencyCallbackModeServiceBroadcastReceiver {
+        constructor(
+            [in] IEmergencyCallbackModeService* host);
+
+        interface IBroadcastReceiver;
+    }
+
+    class CEmergencyCallbackModeServiceLocalBinder {
+        interface IEmergencyCallbackModeServiceLocalBinder;
+        interface IBinder;
+    }
+
+    class CEmergencyCallbackModeService {
+        constructor();
+
+        interface IContext;
+        interface IContextWrapper;
+        interface IComponentCallbacks;
+        interface IComponentCallbacks2;
+        interface IService;
+
+        interface IEmergencyCallbackModeService;
+    }
+
+    class CEmergencyCallbackModeExitDialogBroadcastReceiver {
+        constructor(
+            [in] IEmergencyCallbackModeExitDialog* host);
+
+        interface IBroadcastReceiver;
+    }
+
+    class CEmergencyCallbackModeExitDialog {
+        constructor();
+
+        interface IContext;
+        interface IContextWrapper;
+        interface IContextThemeWrapper;
+        interface ILayoutInflaterFactory;
+        interface ILayoutInflaterFactory2;
+        interface IWindowCallback;
+        interface IKeyEventCallback;
+        interface IViewOnCreateContextMenuListener;
+        interface IComponentCallbacks;
+        interface IComponentCallbacks2;
+        interface IOnWindowDismissedCallback;
+        interface IActivity;
+
+        interface IEmergencyCallbackModeExitDialog;
+        interface IDialogInterfaceOnDismissListener;
     }
 
     } // namespace Phone

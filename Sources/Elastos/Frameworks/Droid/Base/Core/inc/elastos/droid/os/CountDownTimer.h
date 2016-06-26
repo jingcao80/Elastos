@@ -34,7 +34,7 @@ namespace Os {
  * {@link #onTick(long)} takes an amount of time to execute that is significant
  * compared to the countdown interval.
  */
-class CountDownTimer
+class ECO_PUBLIC CountDownTimer
     : public Object
     , public ICountDownTimer
 {

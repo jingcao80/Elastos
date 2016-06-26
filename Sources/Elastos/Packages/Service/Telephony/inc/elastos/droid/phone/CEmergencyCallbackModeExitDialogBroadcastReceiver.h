@@ -1,14 +1,17 @@
 #ifndef  __ELASTOS_DROID_PHONE_CEMERGENCYCALLBACKMODEEXITDIALOGBROADCASTRECEIVER_H__
 #define  __ELASTOS_DROID_PHONE_CEMERGENCYCALLBACKMODEEXITDIALOGBROADCASTRECEIVER_H__
 
-#include "elastos/droid/telephony/phone/CEmergencyCallbackModeExitDialog.h"
+#include "_Elastos_Droid_Phone_CEmergencyCallbackModeExitDialogBroadcastReceiver.h"
+#include "elastos/droid/phone/CEmergencyCallbackModeExitDialog.h"
 #include "elastos/droid/ext/frameworkext.h"
+
+using Elastos::Droid::Phone::CEmergencyCallbackModeExitDialog;
 
 namespace Elastos {
 namespace Droid {
 namespace Phone {
 
-CarClass(CCEmergencyCallbackModeExitDialogBroadcastReceiver)
+CarClass(CEmergencyCallbackModeExitDialogBroadcastReceiver)
     , public CEmergencyCallbackModeExitDialog::MyBroadcastReceiver
 {
 public:
