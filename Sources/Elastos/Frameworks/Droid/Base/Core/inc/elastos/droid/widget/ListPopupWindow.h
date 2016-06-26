@@ -232,12 +232,14 @@ private:
         };
 
     public:
+        DropDownListView();
+
         /**
           * <p>Creates a new list view wrapper.</p>
           *
           * @param context this view's context
           */
-        DropDownListView(
+        CARAPI constructor(
             /* [in] */ IContext* context,
             /* [in] */ Boolean hijackFocus);
 
@@ -268,7 +270,8 @@ private:
             /* [in] */ ArrayOf<Boolean>* isScrap);
 
         // @Override
-        CARAPI_(Boolean) IsInTouchMode();
+        CARAPI IsInTouchMode(
+            /* [out] */ Boolean* result);
 
         /**
           * <p>Returns the focus state in the drop down.</p>
@@ -276,7 +279,8 @@ private:
           * @return true always if hijacking focus
           */
         // @Override
-        CARAPI_(Boolean) HasWindowFocus();
+        CARAPI HasWindowFocus(
+            /* [out] */ Boolean* result);
 
         /**
           * <p>Returns the focus state in the drop down.</p>
@@ -284,7 +288,8 @@ private:
           * @return true always if hijacking focus
           */
         // @Override
-        CARAPI_(Boolean) IsFocused();
+        CARAPI IsFocused(
+            /* [out] */ Boolean* result);
 
         /**
           * <p>Returns the focus state in the drop down.</p>
@@ -292,7 +297,8 @@ private:
           * @return true always if hijacking focus
           */
         // @Override
-        CARAPI_(Boolean) HasFocus();
+        CARAPI HasFocus(
+            /* [out] */ Boolean* result);
 
     private:
         /**
@@ -310,9 +316,6 @@ private:
             /* [in] */ Int32 position,
             /* [in] */ Float x,
             /* [in] */ Float y);
-
-        // inner function for initializing static object
-        static AutoPtr<Int32Property> InitDrawableAlpha();
 
     public:
         Boolean mListSelectionHidden;
