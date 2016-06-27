@@ -856,6 +856,63 @@ module
         interface IDialogInterfaceOnDismissListener;
     }
 
+    [local]
+    class CEditPhoneNumberPreference {
+        /*
+         * Constructors
+         */
+        constructor(
+            [in] IContext* ctx,
+            [in] IAttributeSet* attrs);
+
+        constructor(
+            [in] IContext* ctx);
+
+        interface IPreference;
+        interface IComparable;
+        interface IDialogPreference;
+        interface IDialogInterfaceOnClickListener;
+        interface IDialogInterfaceOnDismissListener;
+        interface IPreferenceManagerOnActivityDestroyListener;
+        interface IEditTextPreference;
+
+        interface IEditPhoneNumberPreference;
+    }
+
+    class CEditFdnContactScreen {
+        constructor();
+
+        interface IContext;
+        interface IContextWrapper;
+        interface IContextThemeWrapper;
+        interface ILayoutInflaterFactory;
+        interface ILayoutInflaterFactory2;
+        interface IWindowCallback;
+        interface IKeyEventCallback;
+        interface IViewOnCreateContextMenuListener;
+        interface IComponentCallbacks;
+        interface IComponentCallbacks2;
+        interface IOnWindowDismissedCallback;
+        interface IActivity;
+    }
+
+    class CDeleteFdnContactScreen {
+        constructor();
+
+        interface IContext;
+        interface IContextWrapper;
+        interface IContextThemeWrapper;
+        interface ILayoutInflaterFactory;
+        interface ILayoutInflaterFactory2;
+        interface IWindowCallback;
+        interface IKeyEventCallback;
+        interface IViewOnCreateContextMenuListener;
+        interface IComponentCallbacks;
+        interface IComponentCallbacks2;
+        interface IOnWindowDismissedCallback;
+        interface IActivity;
+    }
+
     } // namespace Phone
     } // namespace Droid
     } // namespace Elastos

@@ -287,6 +287,18 @@ ECode TimeConsumingPreferenceActivity::OnCancel(
     return Finish();
 }
 
+void TimeConsumingPreferenceActivity::DismissDialogSafely(
+        /* [in] */ Int32 id)
+{
+    //try {
+    DismissDialog(id);
+    //} catch (IllegalArgumentException e) {
+        // This is expected in the case where we were in the background
+        // at the time we would normally have shown the dialog, so we didn't
+        // show it.
+    //}
+}
+
 ECode TimeConsumingPreferenceActivity::DumpState()
 {
     Logger::D(TAG, "dumpState begin");

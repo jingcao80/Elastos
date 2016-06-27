@@ -26,8 +26,6 @@ CarClass(CFdnList)
     , public ADNList
 {
 public:
-    CAR_INTERFACE_DECL()
-
     CAR_OBJECT_DECL();
 
     CARAPI constructor();

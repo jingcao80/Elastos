@@ -1,6 +1,53 @@
 
-#include "elastos/droid/phone/CPhoneApp.h"
+#include "elastos/droid/phone/CEditFdnContactScreen.h"
+#include "elastos/droid/text/TextUtils.h"
+#include "elastos/droid/R.h"
+#include "Elastos.Droid.Internal.h"
+#include "Elastos.Droid.Text.h"
+#include "Elastos.Droid.Provider.h"
+#include "Elastos.Droid.Telephony.h"
+#include <elastos/core/StringBuilder.h>
+#include <elastos/core/CoreUtils.h>
+#include <Elastos.CoreLibrary.IO.h>
+#include <elastos/utility/logging/Logger.h>
+#include "R.h"
 
+using Elastos::Droid::Content::CIntent;
+using Elastos::Droid::Content::IContentResolver;
+using Elastos::Droid::Content::IContentValues;
+using Elastos::Droid::Content::CContentValues;
+using Elastos::Droid::Content::Res::IResources;
+using Elastos::Droid::Internal::Telephony::IPhone;
+using Elastos::Droid::Internal::Telephony::IPhoneFactory;
+using Elastos::Droid::Internal::Telephony::CPhoneFactory;
+using Elastos::Droid::Internal::Telephony::IIccCard;
+using Elastos::Droid::Net::IUriHelper;
+using Elastos::Droid::Net::CUriHelper;
+using Elastos::Droid::Provider::IContactsPhones;
+using Elastos::Droid::Provider::IContactsPeopleColumns;
+using Elastos::Droid::Provider::IContactsPhonesColumns;
+using Elastos::Droid::Text::ISpannable;
+using Elastos::Droid::Text::TextUtils;
+using Elastos::Droid::Text::ISelection;
+using Elastos::Droid::Text::CSelection;
+using Elastos::Droid::Text::Method::IKeyListener;
+using Elastos::Droid::Text::Method::CDialerKeyListener;
+using Elastos::Droid::Text::Method::IDialerKeyListener;
+using Elastos::Droid::Text::Method::IDialerKeyListenerHelper;
+using Elastos::Droid::Text::Method::CDialerKeyListenerHelper;
+using Elastos::Droid::Telephony::IPhoneNumberUtils;
+using Elastos::Droid::Telephony::CPhoneNumberUtils;
+using Elastos::Droid::View::IWindow;
+using Elastos::Droid::View::EIID_IViewOnClickListener;
+using Elastos::Droid::View::EIID_IViewOnFocusChangeListener;
+using Elastos::Droid::Widget::IToast;
+using Elastos::Droid::Widget::ITextView;
+using Elastos::Droid::Widget::IToastHelper;
+using Elastos::Droid::Widget::CToastHelper;
+using Elastos::Core::StringBuilder;
+using Elastos::Core::CoreUtils;
+using Elastos::IO::ICloseable;
+using Elastos::Utility::Logging::Logger;
 
 namespace Elastos {
 namespace Droid {
@@ -12,28 +59,30 @@ ECode CEditFdnContactScreen::MyViewOnClickListener::OnClick(
     /* [in] */ IView* v)
 {
     Int32 visibale;
-    mPinFieldContainer->GetVisibility(&visibale);
+    IView::Probe(mHost->mPinFieldContainer)->GetVisibility(&visibale);
     if (visibale != IView::VISIBLE) {
         return NOERROR;
     }
 
-    if (TO_IINTERFACE(v) == TO_IINTERFACE(mNameField)) {
-        mNumberField->RequestFocus();
+    if (TO_IINTERFACE(v) == TO_IINTERFACE(mHost->mNameField)) {
+        Boolean res;
+        IView::Probe(mHost->mNumberField)->RequestFocus(&res);
     }
-    else if (TO_IINTERFACE(v) == TO_IINTERFACE(mNumberField)) {
-        mButton->RequestFocus();
+    else if (TO_IINTERFACE(v) == TO_IINTERFACE(mHost->mNumberField)) {
+        Boolean res;
+        IView::Probe(mHost->mButton)->RequestFocus(&res);
     }
-    else if (TO_IINTERFACE(v) == TO_IINTERFACE(mButton)) {
+    else if (TO_IINTERFACE(v) == TO_IINTERFACE(mHost->mButton)) {
         // Authenticate the pin AFTER the contact information
         // is entered, and if we're not busy.
-        if (!mDataBusy) {
-            AuthenticatePin2();
+        if (!mHost->mDataBusy) {
+            mHost->AuthenticatePin2();
         }
     }
     return NOERROR;
 }
 
-CAR_INTERFACE_IMPL(CEditFdnContactScreen::MyViewOnClickListener, Object, IViewOnFocusChangeListener)
+CAR_INTERFACE_IMPL(CEditFdnContactScreen::MyViewOnFocusChangeListener, Object, IViewOnFocusChangeListener)
 
 ECode CEditFdnContactScreen::MyViewOnFocusChangeListener::OnFocusChange(
     /* [in] */ IView* v,
@@ -43,8 +92,10 @@ ECode CEditFdnContactScreen::MyViewOnFocusChangeListener::OnFocusChange(
         AutoPtr<ITextView> textView = ITextView::Probe(v);
 
         AutoPtr<ICharSequence> text;
-        textView->GetText((ICharSequence**)&text)
-        Selection::SelectAll(ISpannable::Probe(text));
+        textView->GetText((ICharSequence**)&text);
+        AutoPtr<ISelection> helper;
+        CSelection::AcquireSingleton((ISelection**)&helper);
+        helper->SelectAll(ISpannable::Probe(text));
     }
     return NOERROR;
 }
@@ -73,7 +124,8 @@ ECode CEditFdnContactScreen::QueryHandler::OnInsertComplete(
 {
     if (DBG) mHost->Log(String("onInsertComplete"));
     mHost->DisplayProgress(FALSE);
-    return mHost->HandleResult(uri != NULL, FALSE);
+    mHost->HandleResult(uri != NULL, FALSE);
+    return NOERROR;
 }
 
 ECode CEditFdnContactScreen::QueryHandler::OnUpdateComplete(
@@ -83,7 +135,8 @@ ECode CEditFdnContactScreen::QueryHandler::OnUpdateComplete(
 {
     if (DBG) mHost->Log(String("onUpdateComplete"));
     mHost->DisplayProgress(FALSE);
-    return mHost->HandleResult(result > 0, FALSE);
+    mHost->HandleResult(result > 0, FALSE);
+    return NOERROR;
 }
 
 ECode CEditFdnContactScreen::QueryHandler::OnDeleteComplete(
@@ -100,7 +153,7 @@ ECode CEditFdnContactScreen::MyRunnable::Run()
     return mHost->Finish();
 }
 
-const String CEditFdnContactScreen::TAG(PhoneGlobals::TAG);
+const String CEditFdnContactScreen::TAG("CEditFdnContactScreen"); //PhoneGlobals::TAG
 const Boolean CEditFdnContactScreen::DBG = FALSE;
 
 const Int32 CEditFdnContactScreen::MENU_IMPORT = 1;
@@ -117,25 +170,23 @@ static AutoPtr<ArrayOf<String> > initNUM_PROJECTION()
 {
     AutoPtr<ArrayOf<String> > array = ArrayOf<String>::Alloc(2);
 
-    array->Set(0, IPeopleColumns::DISPLAY_NAME);
-    array->Set(1, IPhonesColumns::NUMBER);
+    array->Set(0, IContactsPeopleColumns::DISPLAY_NAME);
+    array->Set(1, IContactsPhonesColumns::NUMBER);
     return array;
 }
 
-const AutoPtr<ArrayOf<String> > NUM_PROJECTION = initNUM_PROJECTION();
+const AutoPtr<ArrayOf<String> > CEditFdnContactScreen::NUM_PROJECTION = initNUM_PROJECTION();
 
 static AutoPtr<IIntent> initCONTACT_IMPORT_INTENT()
 {
     AutoPtr<IIntent> intent;
     CIntent::New(IIntent::ACTION_GET_CONTENT, (IIntent**)&intent);
 
-    intent->SetType(android.provider.Contacts.Phones.CONTENT_ITEM_TYPE);
+    intent->SetType(IContactsPhones::CONTENT_ITEM_TYPE);
     return intent;
 }
 
-const AutoPtr<IIntent> CONTACT_IMPORT_INTENT = initCONTACT_IMPORT_INTENT();
-
-CAR_INTERFACE_IMPL(CEditFdnContactScreen, Activity, IEditFdnContactScreen)
+const AutoPtr<IIntent> CEditFdnContactScreen::CONTACT_IMPORT_INTENT = initCONTACT_IMPORT_INTENT();
 
 CAR_OBJECT_IMPL(CEditFdnContactScreen)
 
@@ -166,13 +217,16 @@ ECode CEditFdnContactScreen::OnCreate(
     ResolveIntent();
 
     AutoPtr<IWindow> window = GetWindow();
-    window->RequestFeature(IWindow::FEATURE_INDETERMINATE_PROGRESS);
-    SetContentView(R.layout.edit_fdn_contact_screen);
+    Boolean res;
+    window->RequestFeature(IWindow::FEATURE_INDETERMINATE_PROGRESS, &res);
+    SetContentView(Elastos::Droid::Server::Telephony::R::layout::edit_fdn_contact_screen);
     SetupView();
     SetTitle(mAddContact ?
-            R.string.add_fdn_contact : R.string.edit_fdn_contact);
+            Elastos::Droid::Server::Telephony::R::string::add_fdn_contact :
+            Elastos::Droid::Server::Telephony::R::string::edit_fdn_contact);
 
-    return DisplayProgress(FALSE);
+    DisplayProgress(FALSE);
+    return NOERROR;
 }
 
 ECode CEditFdnContactScreen::OnActivityResult(
@@ -191,6 +245,7 @@ ECode CEditFdnContactScreen::OnActivityResult(
 
     switch (requestCode) {
         case PIN2_REQUEST_CODE:
+        {
             AutoPtr<IBundle> extras;
             if (intent != NULL) {
                 intent->GetExtras((IBundle**)&extras);
@@ -210,10 +265,11 @@ ECode CEditFdnContactScreen::OnActivityResult(
                 Finish();
             }
             break;
-
+        }
         // look for the data associated with this number, and update
         // the display with it.
         case CONTACTS_PICKER_CODE:
+        {
             if (resultCode != RESULT_OK) {
                 if (DBG) Log(String("onActivityResult: cancelled."));
                 return NOERROR;
@@ -226,7 +282,8 @@ ECode CEditFdnContactScreen::OnActivityResult(
 
                 AutoPtr<IUri> data;
                 FAIL_GOTO(intent->GetData((IUri**)&data), FINALLY)
-                FAIL_GOTO(contentResolver->Query(data, NUM_PROJECTION, NULL, NULL, NULL, (ICursor**)&cursor), FINALLY)
+                FAIL_GOTO(contentResolver->Query(data, NUM_PROJECTION, String(NULL), NULL, String(NULL),
+                        (ICursor**)&cursor), FINALLY)
 
                 Boolean result;
                 if ((cursor == NULL) || (cursor->MoveToFirst(&result), !result)) {
@@ -235,17 +292,20 @@ ECode CEditFdnContactScreen::OnActivityResult(
                 }
                 String text1;
                 FAIL_GOTO(cursor->GetString(0, &text1), FINALLY)
-                mNameField->SetText(text1);
+                AutoPtr<ICharSequence> cchar = CoreUtils::Convert(text1);
+                ITextView::Probe(mNameField)->SetText(cchar);
                 String text2;
                 FAIL_GOTO(cursor->GetString(1, &text2), FINALLY)
-                mNumberField->SetText(text2);
+                AutoPtr<ICharSequence> cchar2 = CoreUtils::Convert(text2);
+                ITextView::Probe(mNumberField)->SetText(cchar2);
             } //finally {
         FINALLY:
             if (cursor != NULL) {
-                cursor->Close();
+                ICloseable::Probe(cursor)->Close();
             }
             //}
             break;
+        }
     }
     return NOERROR;
 }
@@ -256,22 +316,27 @@ ECode CEditFdnContactScreen::OnCreateOptionsMenu(
 {
     VALIDATE_NOT_NULL(result)
 
-    Activity::OnCreateOptionsMenu(menu);
+    Boolean res;
+    Activity::OnCreateOptionsMenu(menu, &res);
 
     AutoPtr<IResources> r;
     GetResources((IResources**)&r);
 
-assert(0 && "Add--SetIcon");
+    assert(0 && "Add--SetIcon");
     // Added the icons to the context menu
     String str1;
-    r->GetString(R.string.importToFDNfromContacts, &str1);
-    menu->Add(0, MENU_IMPORT, 0, str1);
-    menu->SetIcon(R.drawable.ic_menu_contact);
+    r->GetString(Elastos::Droid::Server::Telephony::R::string::importToFDNfromContacts, &str1);
+    AutoPtr<ICharSequence> cchar1 = CoreUtils::Convert(str1);
+    AutoPtr<IMenuItem> item1;
+    menu->Add(0, MENU_IMPORT, 0, cchar1, (IMenuItem**)&item1);
+    item1->SetIcon(Elastos::Droid::Server::Telephony::R::drawable::ic_menu_contact);
 
     String str2;
-    r->GetString(R.string.menu_delete, &str2);
-    menu->Add(0, MENU_DELETE, 0, str2)
-    menu->SetIcon(android.R.drawable.ic_menu_delete);
+    r->GetString(Elastos::Droid::Server::Telephony::R::string::menu_delete, &str2);
+    AutoPtr<ICharSequence> cchar2 = CoreUtils::Convert(str2);
+    AutoPtr<IMenuItem> item2;
+    menu->Add(0, MENU_DELETE, 0, cchar2, (IMenuItem**)&item2);
+    item2->SetIcon(Elastos::Droid::R::drawable::ic_menu_delete);
 
     *result = TRUE;
     return NOERROR;
@@ -326,47 +391,53 @@ void CEditFdnContactScreen::ResolveIntent()
 void CEditFdnContactScreen::SetupView()
 {
     AutoPtr<IView> view;
-    FindViewById(R.id.fdn_name, (IView**)&view);
+    FindViewById(Elastos::Droid::Server::Telephony::R::id::fdn_name, (IView**)&view);
     mNameField = IEditText::Probe(view);
     if (mNameField != NULL) {
-        mNameField->SetOnFocusChangeListener(mOnFocusChangeHandler);
-        mNameField->SetOnClickListener(mClicked);
+        IView::Probe(mNameField)->SetOnFocusChangeListener(mOnFocusChangeHandler);
+        IView::Probe(mNameField)->SetOnClickListener(mClicked);
     }
 
     AutoPtr<IView> view2;
-    FindViewById(R.id.fdn_number, (IView**)&view2);
+    FindViewById(Elastos::Droid::Server::Telephony::R::id::fdn_number, (IView**)&view2);
     mNumberField = IEditText::Probe(view2);
     if (mNumberField != NULL) {
-        mNumberField->SetKeyListener(DialerKeyListener.getInstance());
-        mNumberField->SetOnFocusChangeListener(mOnFocusChangeHandler);
-        mNumberField->SetOnClickListener(mClicked);
+        AutoPtr<IDialerKeyListenerHelper> helper;
+        CDialerKeyListenerHelper::AcquireSingleton((IDialerKeyListenerHelper**)&helper);
+        AutoPtr<IDialerKeyListener> listener;
+        helper->GetInstance((IDialerKeyListener**)&listener);
+        ITextView::Probe(mNumberField)->SetKeyListener(IKeyListener::Probe(listener));
+        IView::Probe(mNumberField)->SetOnFocusChangeListener(mOnFocusChangeHandler);
+        IView::Probe(mNumberField)->SetOnClickListener(mClicked);
     }
 
     if (!mAddContact) {
         if (mNameField != NULL) {
-            mNameField->SetText(mName);
+            AutoPtr<ICharSequence> cchar = CoreUtils::Convert(mName);
+            ITextView::Probe(mNameField)->SetText(cchar);
         }
         if (mNumberField != NULL) {
-            mNumberField->SetText(mNumber);
+            AutoPtr<ICharSequence> cchar = CoreUtils::Convert(mNumber);
+            ITextView::Probe(mNumberField)->SetText(cchar);
         }
     }
 
     AutoPtr<IView> view3;
-    FindViewById(R.id.button, (IView**)&view3);
-    mButton = IButton::Probs(view3);
+    FindViewById(Elastos::Droid::Server::Telephony::R::id::button, (IView**)&view3);
+    mButton = IButton::Probe(view3);
     if (mButton != NULL) {
-        mButton->SetOnClickListener(mClicked);
+        IView::Probe(mButton)->SetOnClickListener(mClicked);
     }
 
     AutoPtr<IView> view4;
-    FindViewById(R.id.pinc, (IView**)&view4);
+    FindViewById(Elastos::Droid::Server::Telephony::R::id::pinc, (IView**)&view4);
     mPinFieldContainer = ILinearLayout::Probe(view4);
 }
 
 String CEditFdnContactScreen::GetNameFromTextField()
 {
     AutoPtr<ICharSequence> text;
-    mNameField->GetText((ICharSequence**)&text);
+    ITextView::Probe(mNameField)->GetText((ICharSequence**)&text);
 
     String field;
     text->ToString(&field);
@@ -376,7 +447,7 @@ String CEditFdnContactScreen::GetNameFromTextField()
 String CEditFdnContactScreen::GetNumberFromTextField()
 {
     AutoPtr<ICharSequence> text;
-    mNumberField->GetText((ICharSequence**)&text);
+    ITextView::Probe(mNumberField)->GetText((ICharSequence**)&text);
 
     String field;
     text->ToString(&field);
@@ -400,9 +471,12 @@ Boolean CEditFdnContactScreen::IsValidNumber(
 
 void CEditFdnContactScreen::AddContact()
 {
-    if (DBG) Log(String("addContact");
+    if (DBG) Log(String("addContact"));
 
-    const String number = PhoneNumberUtils::ConvertAndStrip(GetNumberFromTextField());
+    AutoPtr<IPhoneNumberUtils> helper;
+    CPhoneNumberUtils::AcquireSingleton((IPhoneNumberUtils**)&helper);
+    String number;
+    helper->ConvertAndStrip(GetNumberFromTextField(), &number);
 
     if (!IsValidNumber(number)) {
         HandleResult(FALSE, TRUE);
@@ -417,14 +491,16 @@ void CEditFdnContactScreen::AddContact()
     bundle->Put(String("number"), number);
     bundle->Put(String("pin2"), mPin2);
 
-    mQueryHandler = new QueryHandler(GetContentResolver(), this);
-    mQueryHandler->startInsert(0, null, uri, bundle);
+    AutoPtr<IContentResolver> resolver;
+    GetContentResolver((IContentResolver**)&resolver);
+    mQueryHandler = new QueryHandler(resolver, this);
+    mQueryHandler->StartInsert(0, NULL, uri, bundle);
     DisplayProgress(TRUE);
 
     AutoPtr<IResources> resources;
     GetResources((IResources**)&resources);
     AutoPtr<ICharSequence> cchar;
-    resources->GetText(R.string.adding_fdn_contact, (ICharSequence**)&cchar);
+    resources->GetText(Elastos::Droid::Server::Telephony::R::string::adding_fdn_contact, (ICharSequence**)&cchar);
     ShowStatus(cchar);
 }
 
@@ -433,7 +509,10 @@ void CEditFdnContactScreen::UpdateContact()
     if (DBG) Log(String("updateContact"));
 
     const String name = GetNameFromTextField();
-    const String number = PhoneNumberUtils::ConvertAndStrip(GetNumberFromTextField());
+    AutoPtr<IPhoneNumberUtils> helper;
+    CPhoneNumberUtils::AcquireSingleton((IPhoneNumberUtils**)&helper);
+    String number;
+    helper->ConvertAndStrip(GetNumberFromTextField(), &number);
 
     if (!IsValidNumber(number)) {
         HandleResult(FALSE, TRUE);
@@ -449,14 +528,16 @@ void CEditFdnContactScreen::UpdateContact()
     bundle->Put(String("newNumber"), number);
     bundle->Put(String("pin2"), mPin2);
 
-    mQueryHandler = new QueryHandler(GetContentResolver(), this);
-    mQueryHandler->StartUpdate(0, NULL, uri, bundle, NULL, NULL);
+    AutoPtr<IContentResolver> resolver;
+    GetContentResolver((IContentResolver**)&resolver);
+    mQueryHandler = new QueryHandler(resolver, this);
+    mQueryHandler->StartUpdate(0, NULL, uri, bundle, String(NULL), NULL);
     DisplayProgress(TRUE);
 
     AutoPtr<IResources> resources;
     GetResources((IResources**)&resources);
     AutoPtr<ICharSequence> cchar;
-    resources->GetText(R.string.updating_fdn_contact, (ICharSequence**)&cchar);
+    resources->GetText(Elastos::Droid::Server::Telephony::R::string::updating_fdn_contact, (ICharSequence**)&cchar);
     ShowStatus(cchar);
 }
 
@@ -464,9 +545,10 @@ void CEditFdnContactScreen::DeleteSelected()
 {
     // delete ONLY if this is NOT a new contact.
     if (!mAddContact) {
-        AutoPrt<IIntent> intent;
+        AutoPtr<IIntent> intent;
         CIntent::New((IIntent**)&intent);
-        intent->SetClass(this, DeleteFdnContactScreen.class);
+        assert(0);
+        //intent->SetClass(this, DeleteFdnContactScreen.class);
         intent->PutExtra(INTENT_EXTRA_NAME, mName);
         intent->PutExtra(INTENT_EXTRA_NUMBER, mNumber);
         StartActivity(intent);
@@ -476,9 +558,10 @@ void CEditFdnContactScreen::DeleteSelected()
 
 void CEditFdnContactScreen::AuthenticatePin2()
 {
-    AutoPrt<IIntent> intent;
+    AutoPtr<IIntent> intent;
     CIntent::New((IIntent**)&intent);
-    intent->SetClass(this, GetPin2Screen.class);
+    assert(0);
+    //intent->SetClass(this, GetPin2Screen.class);
     StartActivityForResult(intent, PIN2_REQUEST_CODE);
 }
 
@@ -490,10 +573,10 @@ void CEditFdnContactScreen::DisplayProgress(
     AutoPtr<IWindow> window = GetWindow();
     window->SetFeatureInt(
             IWindow::FEATURE_INDETERMINATE_PROGRESS,
-            mDataBusy ? PROGRESS_VISIBILITY_ON : PROGRESS_VISIBILITY_OFF);
+            mDataBusy ? IWindow::PROGRESS_VISIBILITY_ON : IWindow::PROGRESS_VISIBILITY_OFF);
     // make sure we don't allow calls to save when we're
     // not ready for them.
-    mButton->SetClickable(!mDataBusy);
+    IView::Probe(mButton)->SetClickable(!mDataBusy);
 }
 
 void CEditFdnContactScreen::ShowStatus(
@@ -519,7 +602,8 @@ void CEditFdnContactScreen::HandleResult(
         GetResources((IResources**)&resources);
         AutoPtr<ICharSequence> cchar;
         resources->GetText(mAddContact ?
-                R.string.fdn_contact_added : R.string.fdn_contact_updated, (ICharSequence**)&cchar);
+                Elastos::Droid::Server::Telephony::R::string::fdn_contact_added :
+                Elastos::Droid::Server::Telephony::R::string::fdn_contact_updated, (ICharSequence**)&cchar);
         ShowStatus(cchar);
     }
     else {
@@ -528,14 +612,16 @@ void CEditFdnContactScreen::HandleResult(
             AutoPtr<IResources> resources;
             GetResources((IResources**)&resources);
             AutoPtr<ICharSequence> cchar;
-            resources->GetText(R.string.fdn_invalid_number, (ICharSequence**)&cchar);
+            resources->GetText(Elastos::Droid::Server::Telephony::R::string::fdn_invalid_number, (ICharSequence**)&cchar);
             ShowStatus(cchar);
         }
         else {
+            AutoPtr<IPhoneFactory> helper;
+            CPhoneFactory::AcquireSingleton((IPhoneFactory**)&helper);
             AutoPtr<IPhone> phone;
-            PhoneFactory::GetDefaultPhone((IPhone**)&phone);
+            helper->GetDefaultPhone((IPhone**)&phone);
             AutoPtr<IIccCard> card;
-            phone->GetIccCard((IIccCard*)&card);
+            phone->GetIccCard((IIccCard**)&card);
 
             AutoPtr<IResources> resources;
             GetResources((IResources**)&resources);
@@ -543,19 +629,22 @@ void CEditFdnContactScreen::HandleResult(
             card->GetIccPin2Blocked(&res);
             if (res) {
                 AutoPtr<ICharSequence> cchar;
-                resources->GetText(R.string.fdn_enable_puk2_requested, (ICharSequence**)&cchar);
+                resources->GetText(Elastos::Droid::Server::Telephony::R::string::fdn_enable_puk2_requested,
+                        (ICharSequence**)&cchar);
                 ShowStatus(cchar);
             }
             else if (card->GetIccPuk2Blocked(&res), res) {
                 AutoPtr<ICharSequence> cchar;
-                resources->GetText(R.string.puk2_blocked, (ICharSequence**)&cchar);
+                resources->GetText(Elastos::Droid::Server::Telephony::R::string::puk2_blocked,
+                        (ICharSequence**)&cchar);
                 ShowStatus(cchar);
             }
             else {
                 // There's no way to know whether the failure is due to incorrect PIN2 or
                 // an inappropriate phone number.
                 AutoPtr<ICharSequence> cchar;
-                resources->GetText(R.string.pin2_or_fdn_invalid, (ICharSequence**)&cchar);
+                resources->GetText(Elastos::Droid::Server::Telephony::R::string::pin2_or_fdn_invalid,
+                        (ICharSequence**)&cchar);
                 ShowStatus(cchar);
             }
         }
@@ -563,8 +652,8 @@ void CEditFdnContactScreen::HandleResult(
 
     AutoPtr<IRunnable> r = new MyRunnable(this);
 
-    mHandler->PostDelayed(r, 2000);
-    return NOERROR;
+    Boolean res;
+    mHandler->PostDelayed(r, 2000, &res);
 }
 
 void CEditFdnContactScreen::Log(

@@ -1,5 +1,26 @@
 
 #include "elastos/droid/phone/CDeleteFdnContactScreen.h"
+#include "elastos/droid/text/TextUtils.h"
+#include <elastos/utility/logging/Logger.h>
+#include "Elastos.Droid.Net.h"
+#include "Elastos.Droid.View.h"
+#include "Elastos.Droid.Widget.h"
+#include <elastos/core/StringBuilder.h>
+#include "R.h"
+
+using Elastos::Droid::Content::IContentResolver;
+using Elastos::Droid::Content::Res::IResources;
+using Elastos::Droid::Net::IUri;
+using Elastos::Droid::Net::IUriHelper;
+using Elastos::Droid::Net::CUriHelper;
+using Elastos::Droid::View::IWindow;
+using Elastos::Droid::Text::TextUtils;
+using Elastos::Droid::Widget::IToast;
+using Elastos::Droid::Widget::ITextView;
+using Elastos::Droid::Widget::IToastHelper;
+using Elastos::Droid::Widget::CToastHelper;
+using Elastos::Core::StringBuilder;
+using Elastos::Utility::Logging::Logger;
 
 namespace Elastos {
 namespace Droid {
@@ -45,6 +66,7 @@ ECode CDeleteFdnContactScreen::QueryHandler::OnDeleteComplete(
     if (DBG) mHost->Log(String("onDeleteComplete"));
     mHost->DisplayProgress(FALSE);
     mHost->HandleResult(result > 0);
+    return NOERROR;
 }
 
 ECode CDeleteFdnContactScreen::MyRunnable::Run()
@@ -52,15 +74,13 @@ ECode CDeleteFdnContactScreen::MyRunnable::Run()
     return mHost->Finish();
 }
 
-const String CDeleteFdnContactScreen::TAG = PhoneGlobals.TAG;
+const String CDeleteFdnContactScreen::TAG("CDeleteFdnContactScreen");// = PhoneGlobals.TAG;
 const Boolean CDeleteFdnContactScreen::DBG = FALSE;
 
 const String CDeleteFdnContactScreen::INTENT_EXTRA_NAME("name");
 const String CDeleteFdnContactScreen::INTENT_EXTRA_NUMBER("number");
 
 const Int32 CDeleteFdnContactScreen::PIN2_REQUEST_CODE = 100;
-
-CAR_INTERFACE_IMPL(CDeleteFdnContactScreen, Activity, IDeleteFdnContactScreen)
 
 CAR_OBJECT_IMPL(CDeleteFdnContactScreen)
 
@@ -77,7 +97,8 @@ ECode CDeleteFdnContactScreen::constructor()
     return Activity::constructor();
 }
 
-ECode CDeleteFdnContactScreen::OnCreate()
+ECode CDeleteFdnContactScreen::OnCreate(
+    /* [in] */ IBundle* icicle)
 {
     Activity::OnCreate(icicle);
 
@@ -88,7 +109,7 @@ ECode CDeleteFdnContactScreen::OnCreate()
     AutoPtr<IWindow> window = GetWindow();
     Boolean result;
     window->RequestFeature(IWindow::FEATURE_INDETERMINATE_PROGRESS, &result);
-    return SetContentView(R.layout.delete_fdn_contact_screen);
+    return SetContentView(Elastos::Droid::Server::Telephony::R::layout::delete_fdn_contact_screen);
 }
 
 ECode CDeleteFdnContactScreen::OnActivityResult(
@@ -106,10 +127,11 @@ ECode CDeleteFdnContactScreen::OnActivityResult(
             }
             if (extras != NULL) {
                 extras->GetString(String("pin2"), &mPin2);
-                AutoPtr<IResource> resource;
-                GetResources((IResource**)&resource);
+                AutoPtr<IResources> resource;
+                GetResources((IResources**)&resource);
                 AutoPtr<ICharSequence> csq;
-                resource->GetText(R.string.deleting_fdn_contact, (ICharSequence**)&csq);
+                resource->GetText(Elastos::Droid::Server::Telephony::R::string::deleting_fdn_contact,
+                        (ICharSequence**)&csq);
                 ShowStatus(csq);
                 DeleteContact();
             }
@@ -159,7 +181,7 @@ ECode CDeleteFdnContactScreen::DeleteContact()
     helper->Parse(String("content://icc/fdn"), (IUri**)&uri);
 
     AutoPtr<IContentResolver> resolver;
-    getContentResolver((IContentResolver**)&resolver);
+    GetContentResolver((IContentResolver**)&resolver);
     mQueryHandler = new QueryHandler(resolver, this);
     mQueryHandler->StartDelete(0, NULL, uri, buf.ToString(), NULL);
     return DisplayProgress(TRUE);
@@ -170,7 +192,8 @@ ECode CDeleteFdnContactScreen::AuthenticatePin2()
     AutoPtr<IIntent> intent;
     GetIntent((IIntent**)&intent);
 
-    intent->SetClass(this, GetPin2Screen.class);
+    assert(0);
+    //intent->SetClass(this, GetPin2Screen.class);
     return StartActivityForResult(intent, PIN2_REQUEST_CODE);
 }
 
@@ -182,7 +205,7 @@ ECode CDeleteFdnContactScreen::DisplayProgress(
 
     return window->SetFeatureInt(
             IWindow::FEATURE_INDETERMINATE_PROGRESS,
-            flag ? PROGRESS_VISIBILITY_ON : PROGRESS_VISIBILITY_OFF);
+            flag ? IWindow::PROGRESS_VISIBILITY_ON : IWindow::PROGRESS_VISIBILITY_OFF);
 }
 
 void CDeleteFdnContactScreen::ShowStatus(
@@ -197,30 +220,31 @@ void CDeleteFdnContactScreen::ShowStatus(
     }
 }
 
-void CDeleteFdnContactScreen::HandleResult(
+ECode CDeleteFdnContactScreen::HandleResult(
     /* [in] */ Boolean success)
 {
     if (success) {
         if (DBG) Log(String("handleResult: success!"));
 
-        AutoPtr<IResource> resource;
-        GetResources((IResource**)&resource);
+        AutoPtr<IResources> resource;
+        GetResources((IResources**)&resource);
         AutoPtr<ICharSequence> csq;
-        resource->GetText(R.string.pin2_invalid, (ICharSequence**)&csq);
+        resource->GetText(Elastos::Droid::Server::Telephony::R::string::pin2_invalid, (ICharSequence**)&csq);
         ShowStatus(csq);
     }
     else {
         if (DBG) Log(String("handleResult: failed!"));
 
-        AutoPtr<IResource> resource;
-        GetResources((IResource**)&resource);
+        AutoPtr<IResources> resource;
+        GetResources((IResources**)&resource);
         AutoPtr<ICharSequence> csq;
-        resource->GetText(R.string.pin2_invalid, (ICharSequence**)&csq);
+        resource->GetText(Elastos::Droid::Server::Telephony::R::string::pin2_invalid, (ICharSequence**)&csq);
         ShowStatus(csq);
     }
 
     AutoPtr<IRunnable> r = new MyRunnable(this);
-    return mHandler->PostDelayed(r, 2000);
+    Boolean res;
+    return mHandler->PostDelayed(r, 2000, &res);
 }
 
 void CDeleteFdnContactScreen::Log(

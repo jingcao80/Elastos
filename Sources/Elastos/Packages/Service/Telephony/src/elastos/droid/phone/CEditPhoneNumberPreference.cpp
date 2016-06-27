@@ -1,13 +1,41 @@
 
-#include "elastos/droid/phone/CPhoneApp.h"
+#include "elastos/droid/phone/CEditPhoneNumberPreference.h"
+#include "elastos/droid/R.h"
+#include "Elastos.Droid.Provider.h"
+#include "Elastos.Droid.Telephony.h"
+#include "Elastos.Droid.Text.h"
+#include <elastos/core/CoreUtils.h>
+#include <elastos/core/StringBuilder.h>
+#include <elastos/core/StringUtils.h>
+#include <elastos/utility/logging/Logger.h>
+#include "R.h"
+
+using Elastos::Droid::Content::CIntent;
+using Elastos::Droid::Content::Res::ITypedArray;
+using Elastos::Droid::Provider::IContactsContractCommonDataKindsPhone;
+using Elastos::Droid::Telephony::IPhoneNumberUtils;
+using Elastos::Droid::Telephony::CPhoneNumberUtils;
+using Elastos::Droid::Text::Method::IKeyListener;
+using Elastos::Droid::Text::Method::IMovementMethod;
+using Elastos::Droid::Text::Method::IDialerKeyListener;
+using Elastos::Droid::Text::Method::IDialerKeyListenerHelper;
+using Elastos::Droid::Text::Method::CDialerKeyListenerHelper;
+using Elastos::Droid::Text::Method::IArrowKeyMovementMethodHelper;
+using Elastos::Droid::Text::Method::CArrowKeyMovementMethodHelper;
+using Elastos::Droid::View::IViewGroup;
+using Elastos::Droid::View::IViewGroupLayoutParams;
+using Elastos::Droid::View::EIID_IViewOnClickListener;
+using Elastos::Droid::Widget::ITextView;
+using Elastos::Core::StringBuilder;
+using Elastos::Core::CoreUtils;
+using Elastos::Core::StringUtils;
+using Elastos::Utility::Logging::Logger;
 
 namespace Elastos {
 namespace Droid {
 namespace Phone {
 
-
-
-
+CAR_INTERFACE_IMPL(CEditPhoneNumberPreference::MyViewOnClickListener, Object, IViewOnClickListener)
 
 ECode CEditPhoneNumberPreference::MyViewOnClickListener::OnClick(
     /* [in] */ IView* v)
@@ -18,19 +46,13 @@ ECode CEditPhoneNumberPreference::MyViewOnClickListener::OnClick(
     return NOERROR;
 }
 
-
-
-
-
-
-
 const Int32 CEditPhoneNumberPreference::CM_CONFIRM = 0;
 
 const Int32 CEditPhoneNumberPreference::CM_ACTIVATION = 1;
 
-const String CEditPhoneNumberPreference::VALUE_SEPARATOR = ":";
-const String CEditPhoneNumberPreference::VALUE_OFF = "0";
-const String CEditPhoneNumberPreference::VALUE_ON = "1";
+const String CEditPhoneNumberPreference::VALUE_SEPARATOR = String(":");
+const String CEditPhoneNumberPreference::VALUE_OFF = String("0");
+const String CEditPhoneNumberPreference::VALUE_ON = String("1");
 
 CAR_INTERFACE_IMPL(CEditPhoneNumberPreference, EditTextPreference, IEditPhoneNumberPreference)
 
@@ -52,27 +74,35 @@ ECode CEditPhoneNumberPreference::constructor(
 {
     EditTextPreference::constructor(context, attrs);
 
-    SetDialogLayoutResource(R.layout.pref_dialog_editphonenumber);
+    SetDialogLayoutResource(Elastos::Droid::Server::Telephony::R::layout::pref_dialog_editphonenumber);
 
     //create intent to bring up contact list
     CIntent::New(IIntent::ACTION_GET_CONTENT, (IIntent**)&mContactListIntent);
-    mContactListIntent->SetType(IPhone::CONTENT_ITEM_TYPE);
+    mContactListIntent->SetType(IContactsContractCommonDataKindsPhone::CONTENT_ITEM_TYPE);
 
     //get the edit phone number default settings
     AutoPtr<ITypedArray> a;
-    context->ObtainStyledAttributes(attrs, R.styleable.EditPhoneNumberPreference, 0,
-            R.style.EditPhoneNumberPreference, (ITypedArray**)&a);
-    a->GetString(R.styleable.EditPhoneNumberPreference_enableButtonText, &mEnableText);
-    a->GetString(R.styleable.EditPhoneNumberPreference_disableButtonText, &mDisableText);
-    a->GetString(R.styleable.EditPhoneNumberPreference_changeNumButtonText, &mChangeNumberText);
-    a->GetInt32(R.styleable.EditPhoneNumberPreference_confirmMode, 0, &mConfirmationMode);
+    assert(0);
+    // context->ObtainStyledAttributes(attrs, Elastos::Droid::Server::Telephony::R::styleable::EditPhoneNumberPreference, 0,
+    //         Elastos::Droid::Server::Telephony::R::style::EditPhoneNumberPreference, (ITypedArray**)&a);
+    String str;
+    a->GetString(Elastos::Droid::Server::Telephony::R::styleable::EditPhoneNumberPreference_enableButtonText, &str);
+    mEnableText = CoreUtils::Convert(str);
+    a->GetString(Elastos::Droid::Server::Telephony::R::styleable::EditPhoneNumberPreference_disableButtonText, &str);
+    mDisableText = CoreUtils::Convert(str);
+    a->GetString(Elastos::Droid::Server::Telephony::R::styleable::EditPhoneNumberPreference_changeNumButtonText, &str);
+    mChangeNumberText = CoreUtils::Convert(str);
+    a->GetInt32(Elastos::Droid::Server::Telephony::R::styleable::EditPhoneNumberPreference_confirmMode, 0, &mConfirmationMode);
     a->Recycle();
 
     a = NULL;
     //get the summary settings, use CheckBoxPreference as the standard.
-    context->ObtainStyledAttributes(attrs, android.R.styleable.CheckBoxPreference, 0, 0, (ITypedArray**)&a);
-    a->GetString(android.R.styleable.CheckBoxPreference_summaryOn, &mSummaryOn);
-    a->GetString(android.R.styleable.CheckBoxPreference_summaryOff, &mSummaryOff);
+    assert(0);
+    //context->ObtainStyledAttributes(attrs, Elastos::Droid::R::styleable::CheckBoxPreference, 0, 0, (ITypedArray**)&a);
+    a->GetString(Elastos::Droid::R::styleable::CheckBoxPreference_summaryOn, &str);
+    mSummaryOn = CoreUtils::Convert(str);
+    a->GetString(Elastos::Droid::R::styleable::CheckBoxPreference_summaryOff, &str);
+    mSummaryOff = CoreUtils::Convert(str);
     return a->Recycle();
 }
 
@@ -89,7 +119,7 @@ ECode CEditPhoneNumberPreference::OnBindView(
 
     // Sync the summary view
     AutoPtr<IView> _view;
-    view->FindViewById(android.R.id.summary, (IView**)&_view);
+    view->FindViewById(Elastos::Droid::R::id::summary, (IView**)&_view);
     AutoPtr<ITextView> summaryView = ITextView::Probe(_view);
     if (summaryView != NULL) {
         AutoPtr<ICharSequence> sum;
@@ -128,9 +158,9 @@ ECode CEditPhoneNumberPreference::OnBindView(
         }
 
         Int32 visibility;
-        summaryView->GetVisibility(&visibility);
+        IView::Probe(summaryView)->GetVisibility(&visibility);
         if (vis != visibility) {
-            summaryView->SetVisibility(vis);
+            IView::Probe(summaryView)->SetVisibility(vis);
         }
     }
     return NOERROR;
@@ -149,7 +179,7 @@ ECode CEditPhoneNumberPreference::OnBindDialogView(
     GetEditText((IEditText**)&editText);
     //get the contact pick button within the number field
     AutoPtr<IView> _view;
-    view->FindViewById(R.id.select_contact, (IView**)&_view);
+    view->FindViewById(Elastos::Droid::Server::Telephony::R::id::select_contact, (IView**)&_view);
     mContactPickButton = IImageButton::Probe(_view);
 
     //setup number entry
@@ -163,40 +193,41 @@ ECode CEditPhoneNumberPreference::OnBindDialogView(
                 mPhoneNumber = defaultNumber;
             }
         }
-        editText->SetText(mPhoneNumber);
+        AutoPtr<ICharSequence> cchar = CoreUtils::Convert(mPhoneNumber);
+        ITextView::Probe(editText)->SetText(cchar);
         AutoPtr<IArrowKeyMovementMethodHelper> helper;
         CArrowKeyMovementMethodHelper::AcquireSingleton((IArrowKeyMovementMethodHelper**)&helper);
-        AutoPtr<IMovementMethod> ret;
-        helper->GetInstance((IMovementMethod**)&ret);
-        editText->SetMovementMethod(ret);
+        AutoPtr<IMovementMethod> method;
+        helper->GetInstance((IMovementMethod**)&method);
+        ITextView::Probe(editText)->SetMovementMethod(method);
         AutoPtr<IDialerKeyListenerHelper> helper2;
         CDialerKeyListenerHelper::AcquireSingleton((IDialerKeyListenerHelper**)&helper2);
-        AutoPtr<IDialerKeyListener> ret2;
-        helper2->GetInstance((IDialerKeyListener**)&ret2);
-        editText->SetKeyListener(ret2);
-        editText->SetOnFocusChangeListener(mDialogFocusChangeListener);
+        AutoPtr<IDialerKeyListener> listener;
+        helper2->GetInstance((IDialerKeyListener**)&listener);
+        ITextView::Probe(editText)->SetKeyListener(IKeyListener::Probe(listener));
+        IView::Probe(editText)->SetOnFocusChangeListener(mDialogFocusChangeListener);
     }
 
     //set contact picker
     if (mContactPickButton != NULL) {
         AutoPtr<IViewOnClickListener> listener = new MyViewOnClickListener(this);
-        mContactPickButton->SetOnClickListener(listener);
+        IView::Probe(mContactPickButton)->SetOnClickListener(listener);
     }
     return NOERROR;
 }
 
 ECode CEditPhoneNumberPreference::OnAddEditTextToDialogView(
-    /* [in] */View* dialogView,
-    /* [in] */EditText* editText)
+    /* [in] */IView* dialogView,
+    /* [in] */IEditText* editText)
 {
     // look for the container object
     AutoPtr<IView> view;
-    dialogView->FindViewById(R.id.edit_container, (IView**)&view);
+    dialogView->FindViewById(Elastos::Droid::Server::Telephony::R::id::edit_container, (IView**)&view);
     AutoPtr<IViewGroup> container = IViewGroup::Probe(view);
 
     // add the edittext to the container.
     if (container != NULL) {
-        container->AddView(editText, IViewGroupLayoutParams::MATCH_PARENT,
+        container->AddView(IView::Probe(editText), IViewGroupLayoutParams::MATCH_PARENT,
                 IViewGroupLayoutParams::WRAP_CONTENT);
     }
     return NOERROR;
@@ -214,12 +245,12 @@ ECode CEditPhoneNumberPreference::OnPrepareDialogBuilder(
             builder->SetNeutralButton(mDisableText, this);
         }
         else {
-            builder->SetPositiveButton(null, null);
+            builder->SetPositiveButton((ICharSequence*)NULL, NULL);
             builder->SetNeutralButton(mEnableText, this);
         }
     }
     // set the call icon on the title.
-    return builder->SetIcon(R.mipmap.ic_launcher_phone);
+    return builder->SetIcon(Elastos::Droid::Server::Telephony::R::mipmap::ic_launcher_phone);
 }
 
 ECode CEditPhoneNumberPreference::SetDialogOnFocusChangeListener(
@@ -263,7 +294,8 @@ ECode CEditPhoneNumberPreference::OnPickActivityResult(
     AutoPtr<IEditText> editText;
     GetEditText((IEditText**)&editText);
     if (editText != NULL) {
-        editText->SetText(pickedValue);
+        AutoPtr<ICharSequence> cchar = CoreUtils::Convert(pickedValue);
+        ITextView::Probe(editText)->SetText(cchar);
     }
     return NOERROR;
 }
@@ -275,7 +307,9 @@ ECode CEditPhoneNumberPreference::OnClick(
     // The neutral button (button3) is always the toggle.
     if ((mConfirmationMode == CM_ACTIVATION) && (which == IDialogInterface::BUTTON_NEUTRAL)) {
         //flip the toggle if we are in the correct mode.
-        SetToggled(!IsToggled());
+        Boolean res;
+        IsToggled(&res);
+        SetToggled(!res);
     }
     // record the button that was clicked.
     mButtonClicked = which;
@@ -291,7 +325,7 @@ ECode CEditPhoneNumberPreference::OnDialogClosed(
         AutoPtr<IEditText> editText;
         GetEditText((IEditText**)&editText);
         AutoPtr<ICharSequence> cchar;
-        editText->GetText((ICharSequence**)&cchar);
+        ITextView::Probe(editText)->GetText((ICharSequence**)&cchar);
         String str;
         cchar->ToString(&str);
         SetPhoneNumber(str);
@@ -339,7 +373,9 @@ ECode CEditPhoneNumberPreference::GetPhoneNumber(
 
     // return the phone number, after it has been stripped of all
     // irrelevant text.
-    return PhoneNumberUtils::StripSeparators(mPhoneNumber, number);
+    AutoPtr<IPhoneNumberUtils> helper;
+    CPhoneNumberUtils::AcquireSingleton((IPhoneNumberUtils**)&helper);
+    return helper->StripSeparators(mPhoneNumber, number);
 }
 
 ECode CEditPhoneNumberPreference::GetRawPhoneNumber(
@@ -393,7 +429,8 @@ ECode CEditPhoneNumberPreference::ShouldDisableDependents(
     // manner (refer to setValueFromString and getStringValue below).
     Boolean shouldDisable = FALSE;
     if ((mConfirmationMode == CM_ACTIVATION) && (mEncodedText != NULL)) {
-        AutoPtr<ArrayOf<String> > inValues = mEncodedText.split(":", 2);
+        AutoPtr<ArrayOf<String> > inValues;
+        StringUtils::Split(mEncodedText, String(":"), 2, (ArrayOf<String>**)&inValues);
         shouldDisable = (*inValues)[0].Equals(VALUE_ON);
     }
     else {
@@ -417,7 +454,9 @@ ECode CEditPhoneNumberPreference::SetSummaryOn(
     /* [in] */ ICharSequence* summary)
 {
     mSummaryOn = summary;
-    if (IsToggled()) {
+    Boolean res;
+    IsToggled(&res);
+    if (res) {
         NotifyChanged();
     }
     return NOERROR;
@@ -430,7 +469,7 @@ ECode CEditPhoneNumberPreference::SetSummaryOn(
     GetContext((IContext**)&context);
     String str;
     context->GetString(summaryResId, &str);
-    AutoPtr<ICharSequence> cchar = CoreUtil::Convert(str);
+    AutoPtr<ICharSequence> cchar = CoreUtils::Convert(str);
     return SetSummaryOn(cchar);
 }
 
@@ -440,7 +479,7 @@ ECode CEditPhoneNumberPreference::GetSummaryOn(
     VALIDATE_NOT_NULL(result)
 
     *result = mSummaryOn;
-    REFOCUNT_ADD(*result);
+    REFCOUNT_ADD(*result);
     return NOERROR;
 }
 
@@ -448,7 +487,9 @@ ECode CEditPhoneNumberPreference::SetSummaryOff(
     /* [in] */ ICharSequence* summary)
 {
     mSummaryOff = summary;
-    if (!IsToggled()) {
+    Boolean res;
+    IsToggled(&res);
+    if (!res) {
         NotifyChanged();
     }
     return NOERROR;
@@ -461,7 +502,7 @@ ECode CEditPhoneNumberPreference::SetSummaryOff(
     GetContext((IContext**)&context);
     String str;
     context->GetString(summaryResId, &str);
-    AutoPtr<ICharSequence> cchar = CoreUtil::Convert(str);
+    AutoPtr<ICharSequence> cchar = CoreUtils::Convert(str);
     return SetSummaryOff(cchar);
 }
 
@@ -471,14 +512,15 @@ ECode CEditPhoneNumberPreference::GetSummaryOff(
     VALIDATE_NOT_NULL(result)
 
     *result = mSummaryOff;
-    REFOCUNT_ADD(*result);
+    REFCOUNT_ADD(*result);
     return NOERROR;
 }
 
 ECode CEditPhoneNumberPreference::SetValueFromString(
     /* [in] */ const String& value)
 {
-    AutoPtr<ArrayOf<String> > inValues = value.split(":", 2);
+    AutoPtr<ArrayOf<String> > inValues;
+    StringUtils::Split(value, String(":"), 2, (ArrayOf<String>**)&inValues);
     SetToggled((*inValues)[0].Equals(VALUE_ON));
     return SetPhoneNumber((*inValues)[1]);
 }
@@ -489,7 +531,9 @@ ECode CEditPhoneNumberPreference::GetStringValue(
     VALIDATE_NOT_NULL(value)
 
     StringBuilder sb;
-    sb += IsToggled() ? VALUE_ON : VALUE_OFF;
+    Boolean res;
+    IsToggled(&res);
+    sb += res ? VALUE_ON : VALUE_OFF;
     sb += VALUE_SEPARATOR;
     String str;
     GetPhoneNumber(&str);

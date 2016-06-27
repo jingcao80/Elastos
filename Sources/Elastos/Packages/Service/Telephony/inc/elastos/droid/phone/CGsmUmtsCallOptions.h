@@ -17,8 +17,6 @@ CarClass(CGsmUmtsCallOptions)
     , public PreferenceActivity
 {
 public:
-    CAR_INTERFACE_DECL()
-
     CAR_OBJECT_DECL();
 
     CGsmUmtsCallOptions();

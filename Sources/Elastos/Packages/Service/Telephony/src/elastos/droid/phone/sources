@@ -6,6 +6,9 @@ INCLUDES += ../../../..
 INCLUDES += $(MAKEDIR)/../../../..
 INCLUDES += $(MAKEDIR)/../../../../inc/
 
+SOURCES += CDeleteFdnContactScreen.cpp
+SOURCES += CEditFdnContactScreen.cpp
+SOURCES += CEditPhoneNumberPreference.cpp
 SOURCES += CEditPinPreference.cpp
 SOURCES += CEmergencyCallbackModeExitDialog.cpp
 SOURCES += CEmergencyCallbackModeService.cpp

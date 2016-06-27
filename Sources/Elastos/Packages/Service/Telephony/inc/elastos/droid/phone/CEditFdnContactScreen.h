@@ -3,6 +3,35 @@
 
 #include "_Elastos_Droid_Phone_CEditFdnContactScreen.h"
 #include "elastos/droid/ext/frameworkext.h"
+#include "elastos/droid/app/Activity.h"
+#include "elastos/droid/content/AsyncQueryHandler.h"
+#include "elastos/droid/os/Runnable.h"
+#include "Elastos.Droid.Content.h"
+#include "Elastos.Droid.Database.h"
+#include "Elastos.Droid.Os.h"
+#include "Elastos.Droid.Net.h"
+#include "Elastos.Droid.View.h"
+#include "Elastos.Droid.Widget.h"
+#include <elastos/core/Object.h>
+
+using Elastos::Droid::App::Activity;
+using Elastos::Droid::Content::IIntent;
+using Elastos::Droid::Content::AsyncQueryHandler;
+using Elastos::Droid::Content::IContentResolver;
+using Elastos::Droid::Database::ICursor;
+using Elastos::Droid::Net::IUri;
+using Elastos::Droid::Os::Runnable;
+using Elastos::Droid::Os::IBundle;
+using Elastos::Droid::Os::IHandler;
+using Elastos::Droid::View::IView;
+using Elastos::Droid::View::IMenu;
+using Elastos::Droid::View::IMenuItem;
+using Elastos::Droid::View::IViewOnClickListener;
+using Elastos::Droid::View::IViewOnFocusChangeListener;
+using Elastos::Droid::Widget::IButton;
+using Elastos::Droid::Widget::IEditText;
+using Elastos::Droid::Widget::ILinearLayout;
+using Elastos::Core::Object;
 
 namespace Elastos {
 namespace Droid {
@@ -13,7 +42,6 @@ namespace Phone {
  */
 CarClass(CEditFdnContactScreen)
     , public Activity
-    , public IEditFdnContactScreen
 {
 private:
     class MyViewOnClickListener
@@ -62,7 +90,7 @@ private:
         CEditFdnContactScreen* mHost;
     };
 
-    class QueryHandler :
+    class QueryHandler
         : public AsyncQueryHandler
     {
     public:
@@ -110,6 +138,7 @@ private:
         MyRunnable(
             /* [in] */ CEditFdnContactScreen* host)
             : mHost(host)
+        {}
 
         //@Override
         CARAPI Run();
@@ -119,8 +148,6 @@ private:
     };
 
 public:
-    CAR_INTERFACE_DECL()
-
     CAR_OBJECT_DECL();
 
     CEditFdnContactScreen();
@@ -192,7 +219,7 @@ private:
       *
       * TODO: Fix this logic.
       */
-    CARAPI(Boolean) IsValidNumber(
+    CARAPI_(Boolean) IsValidNumber(
         /* [in] */ const String& number);
 
     CARAPI_(void) AddContact();
@@ -240,7 +267,7 @@ private:
     String mNumber;
     String mPin2;
     Boolean mAddContact;
-    AutoPtr<IQueryHandler> mQueryHandler;
+    AutoPtr<QueryHandler> mQueryHandler;
 
     AutoPtr<IEditText> mNameField;
     AutoPtr<IEditText> mNumberField;

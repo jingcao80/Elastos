@@ -3,6 +3,27 @@
 
 #include "_Elastos_Droid_Phone_CEditPhoneNumberPreference.h"
 #include "elastos/droid/ext/frameworkext.h"
+#include "elastos/droid/preference/EditTextPreference.h"
+#include "Elastos.Droid.App.h"
+#include "Elastos.Droid.Content.h"
+#include "Elastos.Droid.View.h"
+#include "Elastos.Droid.Utility.h"
+#include "Elastos.Droid.Widget.h"
+#include <elastos/core/Object.h>
+
+using Elastos::Droid::App::IActivity;
+using Elastos::Droid::App::IAlertDialogBuilder;
+using Elastos::Droid::Content::IContext;
+using Elastos::Droid::Content::IIntent;
+using Elastos::Droid::Content::IDialogInterface;
+using Elastos::Droid::Preference::EditTextPreference;
+using Elastos::Droid::View::IView;
+using Elastos::Droid::View::IViewOnClickListener;
+using Elastos::Droid::View::IViewOnFocusChangeListener;
+using Elastos::Droid::Utility::IAttributeSet;
+using Elastos::Droid::Widget::IEditText;
+using Elastos::Droid::Widget::IImageButton;
+using Elastos::Core::Object;
 
 namespace Elastos {
 namespace Droid {
@@ -173,8 +194,8 @@ protected:
      */
     //@Override
     CARAPI OnAddEditTextToDialogView(
-        /* [in] */View* dialogView,
-        /* [in] */EditText* editText);
+        /* [in] */ IView* dialogView,
+        /* [in] */ IEditText* editText);
 
     //control the appearance of the dialog depending upon the mode.
     //@Override
@@ -241,12 +262,12 @@ private:
     /** Called when focus is changed between fields */
     AutoPtr<IViewOnFocusChangeListener> mDialogFocusChangeListener;
     /** Called when the Dialog is closed. */
-    AutoPtr<IIEditPhoneNumberPreferenceOnDialogClosedListener> mDialogOnClosedListener;
+    AutoPtr<IEditPhoneNumberPreferenceOnDialogClosedListener> mDialogOnClosedListener;
     /**
      * Used to indicate that we are going to request for a
      * default number. for the dialog.
      */
-    AutoPtr<IIEditPhoneNumberPreferenceGetDefaultNumberListener> mGetDefaultNumberListener;
+    AutoPtr<IEditPhoneNumberPreferenceGetDefaultNumberListener> mGetDefaultNumberListener;
 
     //Activity values
     AutoPtr<IActivity> mParentActivity;
@@ -278,6 +299,5 @@ private:
 } // namespace Phone
 } // namespace Droid
 } // namespace Elastos
-
 
 #endif // __ELASTOS_DROID_PHONE_CEDITPHONENUMBERPREFERENCE_H__

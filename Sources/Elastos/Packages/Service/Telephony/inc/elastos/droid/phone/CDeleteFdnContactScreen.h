@@ -3,6 +3,23 @@
 
 #include "_Elastos_Droid_Phone_CDeleteFdnContactScreen.h"
 #include "elastos/droid/ext/frameworkext.h"
+#include "elastos/droid/app/Activity.h"
+#include "elastos/droid/content/AsyncQueryHandler.h"
+#include "elastos/droid/os/Runnable.h"
+#include "Elastos.Droid.Content.h"
+#include "Elastos.Droid.Database.h"
+#include "Elastos.Droid.Os.h"
+#include "Elastos.Droid.Net.h"
+
+using Elastos::Droid::App::Activity;
+using Elastos::Droid::Content::IIntent;
+using Elastos::Droid::Content::AsyncQueryHandler;
+using Elastos::Droid::Content::IContentResolver;
+using Elastos::Droid::Database::ICursor;
+using Elastos::Droid::Net::IUri;
+using Elastos::Droid::Os::Runnable;
+using Elastos::Droid::Os::IHandler;
+using Elastos::Droid::Os::IBundle;
 
 namespace Elastos {
 namespace Droid {
@@ -13,10 +30,9 @@ namespace Phone {
  */
 CarClass(CDeleteFdnContactScreen)
     , public Activity
-    , public IDeleteFdnContactScreen
 {
 private:
-    class QueryHandler :
+    class QueryHandler
         : public AsyncQueryHandler
     {
     public:
@@ -60,6 +76,7 @@ private:
         MyRunnable(
             /* [in] */ CDeleteFdnContactScreen* host)
             : mHost(host)
+        {}
 
         //@Override
         CARAPI Run();
@@ -69,17 +86,16 @@ private:
     };
 
 public:
-    CAR_INTERFACE_DECL()
-
     CAR_OBJECT_DECL();
 
-    CDeleteFdnContactScreen() {}
+    CDeleteFdnContactScreen();
 
     CARAPI constructor();
 
 protected:
     //@Override
-    CARAPI OnCreate();
+    CARAPI OnCreate(
+        /* [in] */ IBundle* icicle);
 
     //@Override
     CARAPI OnActivityResult(
@@ -109,16 +125,16 @@ private:
         /* [in] */ const String& msg);
 
 protected:
-    AutoPtr<IQueryHandler> mQueryHandler;
+    AutoPtr<QueryHandler> mQueryHandler;
 
 private:
-    static const String TAG = PhoneGlobals.TAG;
-    static const Boolean DBG = FALSE;
+    static const String TAG;
+    static const Boolean DBG;
 
-    static const String INTENT_EXTRA_NAME = "name";
-    static const String INTENT_EXTRA_NUMBER = "number";
+    static const String INTENT_EXTRA_NAME;
+    static const String INTENT_EXTRA_NUMBER;
 
-    static const Int32 PIN2_REQUEST_CODE = 100;
+    static const Int32 PIN2_REQUEST_CODE;
 
     String mName;
     String mNumber;
@@ -130,6 +146,5 @@ private:
 } // namespace Phone
 } // namespace Droid
 } // namespace Elastos
-
 
 #endif // __ELASTOS_DROID_PHONE_CDELETEFDNCONTACTSCREEN_H__
