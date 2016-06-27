@@ -302,31 +302,15 @@ module.exports = function(aoElastos, aoActivity){
                     if (typeof(aoView.SetImageResource) == 'function') viewType += " ImageView";
                     elog('==================SetViewValue.viewtype=============' + viewType);
 
-                    //if(typeof(aoView.SetImageResource) == 'function') {
-                    //if (false) {
                     if (viewType.indexOf("ImageView")>-1) {
                         elog('==================SetViewValue.ImageView.begin=============');
-
-                        //var myLoadImage = new MyLoadImageCallback(oActivity);
 
                         var aoImageView = aoView;
 
                         var myLoadImage = {
                             ImageLoaded : function(aoImageDrawable, aoImageView){
                                 elog('==================ImageLoaded.begin=============');
-
-                                //MyImageLoaded(aoImageDrawable, aoImageView);
                                 aoImageView.SetImageDrawable(aoImageDrawable);
-
-    // AutoPtr<SomeArgs> args = SomeArgs::Obtain();
-    // args->mArg1 = imageDrawable;
-    // args->mArg2 = imageView;
-
-    // AutoPtr<IMessage> msg;
-    // mHost->mMyHandler->ObtainMessageEx(CAlbumActivity::MSG_IMAGE_LOADED, args, (IMessage**)&msg);
-    // Boolean result;
-    // return mHost->mMyHandler->SendMessage(msg, &result);
-
                                 elog('==================ImageLoaded.end=============');
                             },
                         };
@@ -336,10 +320,14 @@ module.exports = function(aoElastos, aoActivity){
                         var drawable = AsyncImageLoader.LoadDrawable(asTextRepresentation, false, aoImageView, myLoadImage);
                         elog('==================SetViewValue.ImageView.begin======2=======');
                         if (drawable) {
+                            elog('==================SetViewValue.ImageView.begin======3.0=======');
                             aoImageView.SetImageDrawable(drawable);
+                            elog('==================SetViewValue.ImageView.begin======3.1=======');
                         }
                         else {
+                            elog('==================SetViewValue.ImageView.begin======4.0=======');
                             aoImageView.SetImageResource(R.color.divide_line_bg);
+                            elog('==================SetViewValue.ImageView.begin======4.1=======');
                         }
 
                         out_abResult.data = true;
@@ -347,7 +335,7 @@ module.exports = function(aoElastos, aoActivity){
                     else if (typeof(aoView.SetOnTouchListener) == 'function') {  //ILinearLayout
                         elog('==================SetViewValue.LinearLayout.begin=============');
 
-return;
+                        return; //TODO
 
                         _SetFolerLayoutListener(aoView);
                         // aoView.SetOnTouchListener({

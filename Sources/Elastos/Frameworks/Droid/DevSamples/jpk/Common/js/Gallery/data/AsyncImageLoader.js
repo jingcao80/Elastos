@@ -72,6 +72,7 @@ var ImageLoaderThread = (function(){
 
         //var hashkey = path.GetHashCode();
         var hashkey = file.GetHashCode();
+        if (hashkey < 0) hashkey = 0 - hashkey;
         elog("====LoadImageFromUrl====begin====1.3====");
         var len = file.GetLength();
         elog("====LoadImageFromUrl====begin====2====");
@@ -80,27 +81,32 @@ var ImageLoaderThread = (function(){
         if (bitmap) {
             //Mutex::Autolock lock(sStatusLock);
             sImageSampleStatus[path] = true;
-            var bitmapDrawable = Droid_New(bitmap);
+            elog("====LoadImageFromUrl====begin====3.1====");
+            var bitmapDrawable = Droid_New("Elastos.Droid.Graphics.Drawable.CBitmapDrawable",bitmap);
+
+            elog("====LoadImageFromUrl====begin====3.2====");
             return bitmapDrawable;
         }
         elog("====LoadImageFromUrl====begin====4====");
 
         var opt;
         var inSampleSize = 0;
-        var opt = Droid_New("Elastos.Droid.Graphics.CBitmapFactoryOptions");
 
+        var opt = Droid_New("Elastos.Droid.Graphics.CBitmapFactoryOptions");
         opt.SetInJustDecodeBounds(true);
+
         var factory = Droid_New("Elastos.Droid.Graphics.CBitmapFactory");
 
+        elog("====LoadImageFromUrl====begin====5.1====path:"+path);
         var bitmap = factory.DecodeFile(path, opt);
-        elog("====LoadImageFromUrl====begin====5====");
+        elog("====LoadImageFromUrl====begin====5.2====");
 
         if (this.mIsHigh) {
-            elog("====LoadImageFromUrl====begin====5.1====");
+            elog("====LoadImageFromUrl====begin====5.3====");
             inSampleSize = ComputeSampleSize(opt, -1, 1280 * 672 * 4);
         }
         else {
-            elog("====LoadImageFromUrl====begin====5.2====");
+            elog("====LoadImageFromUrl====begin====5.4====");
             inSampleSize = ComputeSampleSize(opt, -1, sImgWidth * sImgHeight);
         }
         elog("====LoadImageFromUrl====begin====6====");
@@ -130,7 +136,7 @@ var ImageLoaderThread = (function(){
 
         elog("====LoadImageFromUrl====end====");
 
-        // return bitmapDrawable;
+        return bitmapDrawable;
     }
 
     function ComputeSampleSize (options, minSideLength, maxNumOfPixels) {
@@ -199,8 +205,12 @@ var ImageLoaderThread = (function(){
         },
 
         Run : function () {
+            elog('====ImageLoaderThread::Run.begin======url:'+this.mImageUrl);
             var drawable = this._LoadImageFromUrl(this.mImageUrl);
+            elog('====ImageLoaderThread::Run===1===drawable:'+typeof drawable);
+
             AsyncImageLoader.DrawableLoaded(this.mImageUrl, this.mIsHigh, drawable);
+            elog('====ImageLoaderThread::Run.end======');
         },
     }); //extend
 

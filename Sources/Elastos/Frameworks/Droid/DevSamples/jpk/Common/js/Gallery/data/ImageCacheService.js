@@ -146,7 +146,10 @@ function GetImageData(key, isHigh, len, modify) {
 //                     CBitmapFactory::AcquireSingleton((IBitmapFactory**)&factory);
                     var factory = Droid_New("Elastos.Droid.Graphics.CBitmapFactory");
 //                     return factory->DecodeFile(path, NULL, bitmap);
-                    bitmap = factory.DecodeFile(path, null);
+                    elog("====ImageCacheService::GetImageData====begin========DecodeFile.1.1 path:"+path);
+                    //bitmap = factory.DecodeFile(path, null);
+                    bitmap = factory.DecodeFile(path);
+                    elog("====ImageCacheService::GetImageData====begin========DecodeFile.1.2");
 //                 }
                 } else {
 //                 else {
@@ -168,7 +171,10 @@ function GetImageData(key, isHigh, len, modify) {
 //                     CBitmapFactory::AcquireSingleton((IBitmapFactory**)&factory);
                     var factory = Droid_New("Elastos.Droid.Graphics.CBitmapFactory");
 //                     return factory->DecodeFile(path, NULL, bitmap);
-                    bitmap = factory.DecodeFile(path, null);
+                    elog("====ImageCacheService::GetImageData====begin========DecodeFile.2.1 path:"+path);
+                    //bitmap = factory.DecodeFile(path, null);
+                    bitmap = factory.DecodeFile(path);
+                    elog("====ImageCacheService::GetImageData====begin========DecodeFile.2.2");
 //                 }
                 }
                 else {
@@ -227,7 +233,7 @@ function PutImageData(key, isHigh, len, modify, bitmap){
 //     AutoPtr<IFile> file;
 //     CFile::New(CACHE_PATH, imgStr, (IFile**)&file);
 //     assert(file != NULL);
-    var file = Core_New("Elastos.IO.CFile", imgStr);
+    var file = Core_New("Elastos.IO.CFile", ImageCacheService.CACHE_PATH, imgStr);
 
 //     Boolean ret = FALSE;
 //     file->Exists(&ret);
@@ -519,7 +525,7 @@ function _initProp(o){
 //static properties
 _extend(ImageCacheService, {
     TAG : "ImageCacheService",
-    CACHE_PATH : "/data/temp/diskcache",
+    CACHE_PATH : "/data/temp/diskcache/",
     //CACHE_PATH : "/mnt/sdcard/Android/data/JSGallery/cache/",
 });
 
