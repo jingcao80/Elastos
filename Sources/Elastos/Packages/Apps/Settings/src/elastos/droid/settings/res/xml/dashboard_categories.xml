@@ -205,7 +205,7 @@
         <dashboard-tile
                 android:id="@+id/date_time_settings"
                 android:title="@string/date_and_time_settings_title"
-                android:fragment="Elastos.Droid.Settings.DateTimeSettings"
+                android:fragment="Elastos.Droid.Settings.CDateTimeSettings"
                 android:icon="@drawable/ic_settings_date_time"
                 />
 

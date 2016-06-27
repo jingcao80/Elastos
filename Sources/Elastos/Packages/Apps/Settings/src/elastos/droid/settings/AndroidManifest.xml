@@ -421,14 +421,14 @@
                 <category android:name="android.intent.category.DEFAULT" />
             </intent-filter>
             <meta-data android:name="com.android.settings.FRAGMENT_CLASS"
-                android:value="com.android.settings.DateTimeSettings" />
+                android:value="Elastos.Droid.Settings.CDateTimeSettings" />
             <meta-data android:name="com.android.settings.TOP_LEVEL_HEADER_ID"
                 android:resource="@id/date_time_settings" />
             <meta-data android:name="com.android.settings.PRIMARY_PROFILE_CONTROLLED"
                 android:value="true" />
         </activity>
 
-        <activity android:name="DateTimeSettingsSetupWizard"
+        <activity android:name="CDateTimeSettingsSetupWizard"
                   android:label="@string/date_and_time"
                   android:theme="@android:style/Theme.Material.Light.NoActionBar"
                   android:screenOrientation="behind">

@@ -21,7 +21,7 @@ namespace Elastos {
 namespace Droid {
 namespace App {
 
-class ListFragment
+class ECO_PUBLIC ListFragment
     : public Fragment
     , public IListFragment
 {
@@ -118,11 +118,11 @@ public:
         /* [out] */ IListAdapter** listadapter);
 
 private:
-    CARAPI SetListShown(
+    ECO_LOCAL CARAPI SetListShown(
         /* [in] */ Boolean shown,
         /* [in] */ Boolean animate);
 
-    CARAPI EnsureList();
+    ECO_LOCAL CARAPI EnsureList();
 
 public:
     AutoPtr<IListAdapter> mAdapter;

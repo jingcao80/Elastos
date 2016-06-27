@@ -36,7 +36,7 @@
                   android:orientation="vertical">
 
         <fragment android:id="@+id/date_time_settings_fragment"
-                  class="Elastos.Droid.Settings.DateTimeSettings"
+                  class="Elastos.Droid.Settings.CDateTimeSettings"
                   android:layout_width="match_parent"
                   android:layout_height="match_parent" />
 

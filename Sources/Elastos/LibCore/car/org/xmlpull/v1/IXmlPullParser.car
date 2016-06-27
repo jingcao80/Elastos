@@ -390,9 +390,9 @@ module
          * @exception XmlPullParserException If the feature is not supported or can not be set
          * @exception IllegalArgumentException If string with the feature name is null
          */
-         SetFeature(
-             [in] String name,
-             [in] Boolean state);
+        SetFeature(
+            [in] String name,
+            [in] Boolean state);
 
         /**
          * Returns the current value of the given feature.
@@ -403,9 +403,9 @@ module
          * @return The value of the feature.
          * @exception IllegalArgumentException if string the feature name is null
          */
-         GetFeature(
-             [in] String name,
-             [out] Boolean* value);
+        GetFeature(
+            [in] String name,
+            [out] Boolean* value);
 
         /**
          * Set the value of a property.
@@ -479,8 +479,8 @@ module
          * After first call to next if XML declaration was present this method
          * will return encoding declared.
          */
-         GetInputEncoding(
-             [out] String* inputEncoding);
+        GetInputEncoding(
+            [out] String* inputEncoding);
 
         /**
          * Set new value for entity replacement text as defined in
@@ -555,9 +555,9 @@ module
          * in the corresponding START_TAG are still accessible
          * although they are no longer in scope.
          */
-         GetNamespacePrefix(
-             [in] Int32 pos,
-             [out] String* nspPrefix);
+        GetNamespacePrefix(
+            [in] Int32 pos,
+            [out] String* nspPrefix);
 
         /**
          * Returns the namespace URI for the given position in the
@@ -677,8 +677,8 @@ module
          * via nextToken only.
          *
          */
-         IsWhitespace(
-             [out] Boolean* isWhitespace);
+        IsWhitespace(
+            [out] Boolean* isWhitespace);
 
         /**
          * Returns the text content of the current event as String.
@@ -698,8 +698,8 @@ module
          * @see #next
          * @see #nextToken
          */
-         GetText (
-             [out] String* text);
+        GetText (
+            [out] String* text);
 
         /**
          * Returns the buffer that contains the text of the current event,

@@ -147,7 +147,7 @@ static AutoPtr<IHashMap> InitsRankMap()
             Ranking::RANK_PRIVACY);
 
     // Date / Time
-    InitPut(map, String("Elastos.Droid.Settings.DateTimeSettings"),
+    InitPut(map, String("Elastos.Droid.Settings.CDateTimeSettings"),
             Ranking::RANK_DATE_TIME);
 
     // Accessibility

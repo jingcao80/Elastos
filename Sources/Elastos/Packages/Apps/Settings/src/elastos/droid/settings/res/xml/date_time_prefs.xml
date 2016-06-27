@@ -14,47 +14,47 @@
      limitations under the License.
 -->
 
-<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android"
+<Elastos.Droid.Preference.CPreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android"
                   xmlns:settings="http://schemas.android.com/apk/res/Elastos.Droid.Settings"
         android:title="@string/date_and_time"
         settings:keywords="@string/keywords_date_and_time">
 
-    <CheckBoxPreference android:key="auto_time"
+    <Elastos.Droid.Preference.CCheckBoxPreference android:key="auto_time"
         android:title="@string/date_time_auto"
         android:summaryOn="@string/date_time_auto_summaryOn"
         android:summaryOff="@string/date_time_auto_summaryOff"
         />
 
-    <CheckBoxPreference android:key="auto_zone"
+    <Elastos.Droid.Preference.CCheckBoxPreference android:key="auto_zone"
         android:title="@string/zone_auto"
         android:summaryOn="@string/zone_auto_summaryOn"
         android:summaryOff="@string/zone_auto_summaryOff"
         />
 
-    <Preference android:key="date"
+    <Elastos.Droid.Preference.CPreference android:key="date"
         android:title="@string/date_time_set_date"
         android:summary="03/10/2008"
         />
 
-    <Preference android:key="time"
+    <Elastos.Droid.Preference.CPreference android:key="time"
         android:title="@string/date_time_set_time"
         android:summary="12:00am"
         />
 
-    <PreferenceScreen
-        android:fragment="Elastos.Droid.Settings.ZonePicker"
+    <Elastos.Droid.Preference.CPreferenceScreen
+        android:fragment="Elastos.Droid.Settings.CZonePicker"
         android:key="timezone"
         android:title="@string/date_time_set_timezone"
         android:summary="GMT-8:00"
         />
 
-    <CheckBoxPreference android:key="24 hour"
+    <Elastos.Droid.Preference.CCheckBoxPreference android:key="24 hour"
         android:title="@string/date_time_24hour"
         />
 
-    <ListPreference
+    <Elastos.Droid.Preference.CListPreference
         android:key="date_format"
         android:title="@string/date_time_date_format"
         android:summary="mm/dd/yyyy"/>
 
-</PreferenceScreen>
+</Elastos.Droid.Preference.CPreferenceScreen>

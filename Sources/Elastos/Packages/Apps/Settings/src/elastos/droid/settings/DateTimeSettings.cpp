@@ -105,6 +105,11 @@ DateTimeSettings::DateTimeSettings()
 DateTimeSettings::~DateTimeSettings()
 {}
 
+ECode DateTimeSettings::constructor()
+{
+    return NOERROR;
+}
+
 ECode DateTimeSettings::OnCreate(
     /* [in] */ IBundle* icicle)
 {

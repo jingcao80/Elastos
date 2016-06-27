@@ -32,7 +32,7 @@
                   android:layout_width="fill_parent"
                   android:orientation="vertical">
         <fragment android:id="@+id/date_time_settings_fragment"
-                  class="Elastos.Droid.Settings.DateTimeSettings"
+                  class="Elastos.Droid.Settings.CDateTimeSettings"
                   android:layout_width="fill_parent"
                   android:layout_height="fill_parent" />
     </LinearLayout>

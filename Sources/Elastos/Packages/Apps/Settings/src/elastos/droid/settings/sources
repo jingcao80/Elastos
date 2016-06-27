@@ -15,6 +15,7 @@ SOURCES += Elastos.Droid.Core.cpp
 SOURCES += Elastos.CoreLibrary.cpp
 SOURCES += AirplaneModeEnabler.cpp
 SOURCES += DateTimeSettings.cpp
+SOURCES += DateTimeSettingsSetupWizard.cpp
 SOURCES += HelpUtils.cpp
 SOURCES += RestrictedSettingsFragment.cpp
 SOURCES += SettingsPreferenceFragment.cpp
@@ -29,6 +30,7 @@ SOURCES += CUserSpinnerAdapter.cpp
 SOURCES += CSettings.cpp
 SOURCES += CSubSettings.cpp
 SOURCES += VoiceInputOutputSettings.cpp
+SOURCES += ZonePicker.cpp
 SOURCES += settings.cpp
 
 ELASTOS_LIBS += dashboard/dashboard.lib

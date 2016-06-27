@@ -59,6 +59,8 @@ public:
 
     ~DateTimeSettings();
 
+    CARAPI constructor();
+
     //@Override
     CARAPI OnCreate(
         /* [in] */ IBundle* icicle);

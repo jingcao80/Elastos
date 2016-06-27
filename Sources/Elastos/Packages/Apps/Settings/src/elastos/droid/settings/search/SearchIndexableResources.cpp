@@ -127,7 +127,7 @@ static AutoPtr<IHashMap> InitsResMap()
             SearchIndexableResources::NO_DATA_RES_ID,
             R::drawable::ic_settings_backup);
 
-    InitPut(map, String("Elastos.Droid.Settings.DateTimeSettings"),
+    InitPut(map, String("Elastos.Droid.Settings.CDateTimeSettings"),
             R::xml::date_time_prefs, R::drawable::ic_settings_date_time);
 
     InitPut(map, String("Elastos.Droid.Settings.Accessibility.AccessibilitySettings"),
