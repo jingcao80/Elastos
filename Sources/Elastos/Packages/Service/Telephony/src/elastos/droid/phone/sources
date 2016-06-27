@@ -53,6 +53,7 @@ SOURCES += CCdmaSubscriptionListPreference.cpp
 SOURCES += CCdmaSystemSelectListPreference.cpp
 SOURCES += CCdmaVoicePrivacyCheckBoxPreference.cpp
 SOURCES += CCellBroadcastSms.cpp
+SOURCES += CChangeIccPinScreen.cpp
 SOURCES += CPhoneApp.cpp
 SOURCES += CPhoneInterfaceManager.cpp
 SOURCES += TimeConsumingPreferenceActivity.cpp

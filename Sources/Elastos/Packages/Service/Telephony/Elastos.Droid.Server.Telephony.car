@@ -400,10 +400,10 @@ module
         interface ILayoutInflaterFactory2;
         interface IWindowCallback;
         interface IKeyEventCallback;
-        interface IViewOnCreateContextMenuListener; 
+        interface IViewOnCreateContextMenuListener;
         interface IComponentCallbacks2;
         interface IComponentCallbacks;
-        interface IOnWindowDismissedCallback;  
+        interface IOnWindowDismissedCallback;
         interface IContextWrapper;
         interface IContext;
         interface IPreferenceActivity;
@@ -435,7 +435,7 @@ module
         interface IViewOnCreateContextMenuListener;
         interface IComponentCallbacks2;
         interface IComponentCallbacks;
-        interface IOnWindowDismissedCallback; 
+        interface IOnWindowDismissedCallback;
         interface IContextWrapper;
         interface IContext;
         interface IPreferenceActivity;
@@ -507,7 +507,7 @@ module
         interface IContextWrapper;
         interface IComponentCallbacks;
         interface IComponentCallbacks2;
-        interface IService; 
+        interface IService;
     }
 
     class CHfaActivity {
@@ -551,7 +551,7 @@ module
         interface IViewOnCreateContextMenuListener;
         interface IComponentCallbacks2;
         interface IComponentCallbacks;
-        interface IOnWindowDismissedCallback; 
+        interface IOnWindowDismissedCallback;
         interface IContextWrapper;
         interface IContext;
         interface IPreferenceActivity;
@@ -572,7 +572,7 @@ module
         interface IViewOnCreateContextMenuListener;
         interface IComponentCallbacks2;
         interface IComponentCallbacks;
-        interface IOnWindowDismissedCallback; 
+        interface IOnWindowDismissedCallback;
         interface IContextWrapper;
         interface IContext;
         interface IPreferenceActivity;
@@ -596,7 +596,7 @@ module
         interface IViewOnCreateContextMenuListener;
         interface IComponentCallbacks2;
         interface IComponentCallbacks;
-        interface IOnWindowDismissedCallback; 
+        interface IOnWindowDismissedCallback;
         interface IContextWrapper;
         interface IContext;
         interface IPreferenceActivity;
@@ -662,7 +662,7 @@ module
         interface IViewOnCreateContextMenuListener;
         interface IComponentCallbacks2;
         interface IComponentCallbacks;
-        interface IOnWindowDismissedCallback; 
+        interface IOnWindowDismissedCallback;
         interface IContextWrapper;
         interface IContext;
         interface IPreferenceActivity;
@@ -685,7 +685,23 @@ module
         interface IViewOnCreateContextMenuListener;
         interface IComponentCallbacks;
         interface IComponentCallbacks2;
-        interface IOnWindowDismissedCallback; 
+        interface IOnWindowDismissedCallback;
+    }
+
+    class CChangeIccPinScreen {
+        constructor();
+
+        interface IActivity;
+        interface IContext;
+        interface IContextThemeWrapper;
+        interface ILayoutInflaterFactory;
+        interface ILayoutInflaterFactory2;
+        interface IWindowCallback;
+        interface IKeyEventCallback;
+        interface IViewOnCreateContextMenuListener;
+        interface IComponentCallbacks;
+        interface IComponentCallbacks2;
+        interface IOnWindowDismissedCallback;
     }
 
     class CFakePhoneActivity {

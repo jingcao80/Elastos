@@ -1,9 +1,42 @@
 
 #include "elastos/droid/phone/CChangeIccPinScreen.h"
+#include "elastos/droid/phone/PhoneGlobals.h"
+#include "R.h"
+#include "Elastos.Droid.Text.h"
+#include <elastos/core/CoreUtils.h>
+#include <elastos/core/StringBuilder.h>
+#include <elastos/utility/logging/Logger.h>
+
+using Elastos::Droid::App::CAlertDialogBuilder;
+using Elastos::Droid::App::IAlertDialogBuilder;
+using Elastos::Droid::App::IDialog;
+using Elastos::Droid::Internal::Telephony::IIccCard;
+using Elastos::Droid::Os::CMessageHelper;
+using Elastos::Droid::Os::IAsyncResult;
+using Elastos::Droid::Os::IMessageHelper;
+using Elastos::Droid::Text::Method::CDigitsKeyListenerHelper;
+using Elastos::Droid::Text::Method::IDigitsKeyListener;
+using Elastos::Droid::Text::Method::IDigitsKeyListenerHelper;
+using Elastos::Droid::Text::Method::IKeyListener;
+using Elastos::Droid::View::EIID_IViewOnClickListener;
+using Elastos::Droid::Widget::CToastHelper;
+using Elastos::Droid::Widget::IToastHelper;
+using Elastos::Core::CoreUtils;
+using Elastos::Core::StringBuilder;
+using Elastos::Utility::Logging::Logger;
 
 namespace Elastos {
 namespace Droid {
 namespace Phone {
+
+const String CChangeIccPinScreen::TAG = PhoneGlobals::TAG;
+const Boolean CChangeIccPinScreen::DBG = FALSE;
+const Int32 CChangeIccPinScreen::EVENT_PIN_CHANGED = 100;
+const Int32 CChangeIccPinScreen::NO_ERROR = 0;
+const Int32 CChangeIccPinScreen::PIN_MISMATCH = 1;
+const Int32 CChangeIccPinScreen::PIN_INVALID_LENGTH = 2;
+const Int32 CChangeIccPinScreen::MIN_PIN_LENGTH = 4;
+const Int32 CChangeIccPinScreen::MAX_PIN_LENGTH = 8;
 
 CChangeIccPinScreen::MyHandler::MyHandler(
     /* [in] */ CChangeIccPinScreen* host)
@@ -18,81 +51,87 @@ ECode CChangeIccPinScreen::MyHandler::HandleMessage(
     Int32 what;
     msg->GetWhat(&what);
     switch (what) {
-        case EVENT_PIN_CHANGED:
-            AsyncResult ar = (AsyncResult) msg.obj;
+        case EVENT_PIN_CHANGED: {
+            AutoPtr<IInterface> obj;
+            msg->GetObj((IInterface**)&obj);
+            AsyncResult* ar = (AsyncResult*)IAsyncResult::Probe(obj);
             mHost->HandleResult(ar);
             break;
+        }
     }
 
-    return;
+    return NOERROR;
 }
 
 CAR_INTERFACE_IMPL(CChangeIccPinScreen::MyViewOnClickListener, Object, IViewOnClickListener)
-
-ECode CChangeIccPinScreen::MyViewOnClickListenerOnClick(
+ECode CChangeIccPinScreen::MyViewOnClickListener::OnClick(
     /* [in] */ IView* v)
 {
-    if (TO_IINTERFACE(v) == TO_IINTERFACE(mOldPin)) {
-        mNewPin1->RequestFocus();
+    if (TO_IINTERFACE(v) == TO_IINTERFACE(mHost->mOldPin)) {
+        Boolean tmp = FALSE;
+        IView::Probe(mHost->mNewPin1)->RequestFocus(&tmp);
     }
-    else if (TO_IINTERFACE(v) == TO_IINTERFACE(mNewPin1)) {
-        mNewPin2->RequestFocus();
+    else if (TO_IINTERFACE(v) == TO_IINTERFACE(mHost->mNewPin1)) {
+        Boolean tmp = FALSE;
+        IView::Probe(mHost->mNewPin2)->RequestFocus(&tmp);
     }
-    else if (TO_IINTERFACE(v) == TO_IINTERFACE(mNewPin2)) {
-        mButton->RequestFocus();
+    else if (TO_IINTERFACE(v) == TO_IINTERFACE(mHost->mNewPin2)) {
+        Boolean tmp = FALSE;
+        IView::Probe(mHost->mButton)->RequestFocus(&tmp);
     }
-    else if (TO_IINTERFACE(v) == TO_IINTERFACE(mButton)) {
+    else if (TO_IINTERFACE(v) == TO_IINTERFACE(mHost->mButton)) {
         AutoPtr<IIccCard> iccCardInterface;
-        mPhone->GetIccCard((IIccCard**)&iccCardInterface);
+        mHost->mPhone->GetIccCard((IIccCard**)&iccCardInterface);
         if (iccCardInterface != NULL) {
             AutoPtr<ICharSequence> cchar;
-            mOldPin->GetText((ICharSequence**)&cchar);
+            ITextView::Probe(mHost->mOldPin)->GetText((ICharSequence**)&cchar);
             String oldPin;
             cchar->ToString(&oldPin);
 
             AutoPtr<ICharSequence> cchar2;
-            mNewPin1->GetText((ICharSequence**)&cchar2);
+            ITextView::Probe(mHost->mNewPin1)->GetText((ICharSequence**)&cchar2);
             String newPin1;
             cchar2->ToString(&newPin1);
 
             AutoPtr<ICharSequence> cchar3;
-            mNewPin2->GetText((ICharSequence**)&cchar3);
+            ITextView::Probe(mHost->mNewPin2)->GetText((ICharSequence**)&cchar3);
             String newPin2;
             cchar3->ToString(&newPin2);
 
-            Int32 error = ValidateNewPin(newPin1, newPin2);
+            Int32 error = mHost->ValidateNewPin(newPin1, newPin2);
 
             switch (error) {
                 case PIN_INVALID_LENGTH:
                 case PIN_MISMATCH:
                 {
                     AutoPtr<ICharSequence> cchar;
-                    mNewPin1->GetText((ICharSequence**)&cchar);
-                    cchar->Clear();
+                    ITextView::Probe(mHost->mNewPin1)->GetText((ICharSequence**)&cchar);
 
                     AutoPtr<ICharSequence> cchar2;
-                    mNewPin2->GetText((ICharSequence**)&cchar2);
-                    cchar2->Clear();
+                    ITextView::Probe(mHost->mNewPin2)->GetText((ICharSequence**)&cchar2);
 
-                    mMismatchError->SetVisibility(IView::VISIBLE);
+                    IView::Probe(mHost->mMismatchError)->SetVisibility(IView::VISIBLE);
 
                     AutoPtr<IResources> r;
-                    GetResources((IResources**)&r);
+                    mHost->GetResources((IResources**)&r);
                     String text;
 
                     if (error == PIN_MISMATCH) {
-                        r->GetString(R.string.mismatchPin, &text);
+                        r->GetString(Elastos::Droid::Server::Telephony::R::string::mismatchPin, &text);
                     }
                     else {
-                        r->GetString(R.string.invalidPin, &text);
+                        r->GetString(Elastos::Droid::Server::Telephony::R::string::invalidPin, &text);
                     }
 
-                    AutoPtr<ICharSequence> textObj = CoreUtil::Convert(text);
-                    mMismatchError->SetText(textObj);
+                    AutoPtr<ICharSequence> textObj = CoreUtils::Convert(text);
+                    mHost->mMismatchError->SetText(textObj);
                     break;
                 }
-                default:
-                    AutoPtr<IMessage> callBack = Message::Obtain(mHandler, EVENT_PIN_CHANGED);
+                default: {
+                    AutoPtr<IMessageHelper> helper;
+                    CMessageHelper::AcquireSingleton((IMessageHelper**)&helper);
+                    AutoPtr<IMessage> callBack;
+                    helper->Obtain(mHost->mHandler, EVENT_PIN_CHANGED, (IMessage**)&callBack);
 
                     if (DBG) {
                         StringBuilder sb;
@@ -100,12 +139,12 @@ ECode CChangeIccPinScreen::MyViewOnClickListenerOnClick(
                         sb += oldPin;
                         sb += ", newPin=";
                         sb += newPin1;
-                        Log(sb.ToString());
+                        mHost->Log(sb.ToString());
                     }
 
-                    Reset();
+                    mHost->Reset();
 
-                    if (mChangePin2) {
+                    if (mHost->mChangePin2) {
                         iccCardInterface->ChangeIccFdnPassword(oldPin,
                                 newPin1, callBack);
                     }
@@ -115,26 +154,32 @@ ECode CChangeIccPinScreen::MyViewOnClickListenerOnClick(
                     }
 
                     // TODO: show progress panel
+                }
             }
         }
     }
-    else if (TO_IINTERFACE(v) == TO_IINTERFACE(mPUKCode)) {
-        mPUKSubmit->RequestFocus();
+    else if (TO_IINTERFACE(v) == TO_IINTERFACE(mHost->mPUKCode)) {
+        Boolean tmp = FALSE;
+        IView::Probe(mHost->mPUKSubmit)->RequestFocus(&tmp);
     }
-    else if (TO_IINTERFACE(v) == TO_IINTERFACE(mPUKSubmit)) {
+    else if (TO_IINTERFACE(v) == TO_IINTERFACE(mHost->mPUKSubmit)) {
         AutoPtr<ICharSequence> text;
-        mPUKCode->GetText((ICharSequence**)&text);
+        ITextView::Probe(mHost->mPUKCode)->GetText((ICharSequence**)&text);
         String str;
         text->ToString(&str);
 
         AutoPtr<ICharSequence> text2;
-        mPUKCode->GetText((ICharSequence**)&text2);
+        ITextView::Probe(mHost->mPUKCode)->GetText((ICharSequence**)&text2);
         String str2;
         text2->ToString(&str2);
 
         AutoPtr<IIccCard> card;
-        mPhone->GetIccCard((IIccCard**)&card);
-        AutoPtr<IMessage> m = Message::Obtain(mHandler, EVENT_PIN_CHANGED);
+        mHost->mPhone->GetIccCard((IIccCard**)&card);
+
+        AutoPtr<IMessageHelper> helper;
+        CMessageHelper::AcquireSingleton((IMessageHelper**)&helper);
+        AutoPtr<IMessage> m;
+        helper->Obtain(mHost->mHandler, EVENT_PIN_CHANGED, (IMessage**)&m);
         card->SupplyPuk2(str, str2, m);
     }
     return NOERROR;
@@ -147,22 +192,8 @@ ECode CChangeIccPinScreen::MyRunnable::Run()
 
 ECode CChangeIccPinScreen::MyRunnable2::Run()
 {
-    return mHost->mPUKAlert->Dismiss();
+    return IDialogInterface::Probe(mHost->mPUKAlert)->Dismiss();
 }
-
-const String CChangeIccPinScreen::TAG = PhoneGlobals::TAG;
-const Boolean CChangeIccPinScreen::DBG = FALSE;
-
-const Int32 CChangeIccPinScreen::EVENT_PIN_CHANGED = 100;
-
-const Int32 CChangeIccPinScreen::NO_ERROR = 0;
-const Int32 CChangeIccPinScreen::PIN_MISMATCH = 1;
-const Int32 CChangeIccPinScreen::PIN_INVALID_LENGTH = 2;
-
-const Int32 CChangeIccPinScreen::MIN_PIN_LENGTH = 4;
-const Int32 CChangeIccPinScreen::MAX_PIN_LENGTH = 8;
-
-CAR_INTERFACE_IMPL(CChangeIccPinScreen, Activity, IChangeIccPinScreen)
 
 CAR_OBJECT_IMPL(CChangeIccPinScreen)
 
@@ -180,7 +211,8 @@ ECode CChangeIccPinScreen::constructor()
     return Activity::constructor();
 }
 
-ECode CChangeIccPinScreen::OnCreate()
+ECode CChangeIccPinScreen::OnCreate(
+    /* [in] */ IBundle* icicle)
 {
     Activity::OnCreate(icicle);
 
@@ -188,66 +220,67 @@ ECode CChangeIccPinScreen::OnCreate()
 
     ResolveIntent();
 
-    SetContentView(R.layout.change_sim_pin_screen);
+    SetContentView(Elastos::Droid::Server::Telephony::R::layout::change_sim_pin_screen);
 
     AutoPtr<IView> view1;
-    FindViewById(R.id.old_pin, (IView**)&view1);
+    FindViewById(Elastos::Droid::Server::Telephony::R::id::old_pin, (IView**)&view1);
     mOldPin = IEditText::Probe(view1);
     AutoPtr<IDigitsKeyListenerHelper> helper;
     CDigitsKeyListenerHelper::AcquireSingleton((IDigitsKeyListenerHelper**)&helper);
     AutoPtr<IDigitsKeyListener> listener;
     helper->GetInstance((IDigitsKeyListener**)&listener);
-    mOldPin->SetKeyListener(listener);
-    mOldPin->SetMovementMethod(NULL);
-    mOldPin->SetOnClickListener(mClicked);
+    ITextView::Probe(mOldPin)->SetKeyListener(IKeyListener::Probe(listener));
+    ITextView::Probe(mOldPin)->SetMovementMethod(NULL);
+    IView::Probe(mOldPin)->SetOnClickListener(mClicked);
 
     AutoPtr<IView> view2;
-    FindViewById(R.id.new_pin1, (IView**)&view2);
+    FindViewById(Elastos::Droid::Server::Telephony::R::id::new_pin1, (IView**)&view2);
     mNewPin1 = IEditText::Probe(view2);
-    mNewPin1->SetKeyListener(listener);
-    mNewPin1->SetMovementMethod(NULL);
-    mNewPin1->SetOnClickListener(mClicked);
+    ITextView::Probe(mNewPin1)->SetKeyListener(IKeyListener::Probe(listener));
+    ITextView::Probe(mNewPin1)->SetMovementMethod(NULL);
+    IView::Probe(mNewPin1)->SetOnClickListener(mClicked);
 
     AutoPtr<IView> view3;
-    FindViewById(R.id.new_pin2, (IView**)&view3);
+    FindViewById(Elastos::Droid::Server::Telephony::R::id::new_pin2, (IView**)&view3);
     mNewPin2 = IEditText::Probe(view3);
-    mNewPin2->SetKeyListener(listener);
-    mNewPin2->SetMovementMethod(NULL);
-    mNewPin2->SetOnClickListener(mClicked);
+    ITextView::Probe(mNewPin2)->SetKeyListener(IKeyListener::Probe(listener));
+    ITextView::Probe(mNewPin2)->SetMovementMethod(NULL);
+    IView::Probe(mNewPin2)->SetOnClickListener(mClicked);
 
     AutoPtr<IView> view4;
-    FindViewById(R.id.bad_pin, (IView**)&view4);
+    FindViewById(Elastos::Droid::Server::Telephony::R::id::bad_pin, (IView**)&view4);
     mBadPinError = ITextView::Probe(view4);
     AutoPtr<IView> view5;
-    FindViewById(R.id.mismatch, (IView**)&view5);
+    FindViewById(Elastos::Droid::Server::Telephony::R::id::mismatch, (IView**)&view5);
     mMismatchError = ITextView::Probe(view5);
 
     AutoPtr<IView> view6;
-    FindViewById(R.id.button, (IView**)&view6);
+    FindViewById(Elastos::Droid::Server::Telephony::R::id::button, (IView**)&view6);
     mButton = IButton::Probe(view6);
-    mButton->SetOnClickListener(mClicked);
+    IView::Probe(mButton)->SetOnClickListener(mClicked);
 
     AutoPtr<IView> view7;
-    FindViewById(R.id.scroll, (IView**)&view7);
+    FindViewById(Elastos::Droid::Server::Telephony::R::id::scroll, (IView**)&view7);
     mScrollView = IScrollView::Probe(view7);
 
     AutoPtr<IView> view8;
-    FindViewById(R.id.puk_code, (IView**)&view8);
+    FindViewById(Elastos::Droid::Server::Telephony::R::id::puk_code, (IView**)&view8);
     mPUKCode = IEditText::Probe(view8);
-    mPUKCode->SetKeyListener(listener);
-    mPUKCode->SetMovementMethod(NULL);
-    mPUKCode->SetOnClickListener(mClicked);
+    ITextView::Probe(mPUKCode)->SetKeyListener(IKeyListener::Probe(listener));
+    ITextView::Probe(mPUKCode)->SetMovementMethod(NULL);
+    IView::Probe(mPUKCode)->SetOnClickListener(mClicked);
 
     AutoPtr<IView> view9;
-    FindViewById(R.id.puk_submit, (IView**)&view9);
+    FindViewById(Elastos::Droid::Server::Telephony::R::id::puk_submit, (IView**)&view9);
     mPUKSubmit = IButton::Probe(view9);
-    mPUKSubmit->SetOnClickListener(mClicked);
+    IView::Probe(mPUKSubmit)->SetOnClickListener(mClicked);
 
     AutoPtr<IView> view10;
-    FindViewById(R.id.puk_panel, (IView**)&view10);
+    FindViewById(Elastos::Droid::Server::Telephony::R::id::puk_panel, (IView**)&view10);
     mIccPUKPanel = ILinearLayout::Probe(view10);
 
-    Int32 id = mChangePin2 ? R.string.change_pin2 : R.string.change_pin;
+    Int32 id = mChangePin2 ? Elastos::Droid::Server::Telephony::R::string::change_pin2
+            : Elastos::Droid::Server::Telephony::R::string::change_pin;
     AutoPtr<IResources> resources;
     GetResources((IResources**)&resources);
     AutoPtr<ICharSequence> csq;
@@ -261,15 +294,15 @@ ECode CChangeIccPinScreen::OnCreate()
 void CChangeIccPinScreen::ResolveIntent()
 {
     AutoPtr<IIntent> intent;
-    GetIntent(IIntent**()&intent);
+    GetIntent((IIntent**)&intent);
     intent->GetBooleanExtra(String("pin2"), mChangePin2, &mChangePin2);
 }
 
 void CChangeIccPinScreen::Reset()
 {
-    mScrollView->ScrollTo(0, 0);
-    mBadPinError->SetVisibility(IView::GONE);
-    mMismatchError->SetVisibility(IView::GONE);
+    IView::Probe(mScrollView)->ScrollTo(0, 0);
+    IView::Probe(mBadPinError)->SetVisibility(IView::GONE);
+    IView::Probe(mMismatchError)->SetVisibility(IView::GONE);
 }
 
 Int32 CChangeIccPinScreen::ValidateNewPin(
@@ -294,50 +327,52 @@ Int32 CChangeIccPinScreen::ValidateNewPin(
 }
 
 void CChangeIccPinScreen::HandleResult(
-    /* [in] */ AsyncResult ar)
+    /* [in] */ AsyncResult* ar)
 {
-    if (ar.exception == NULL) {
+    if (ar->mException == NULL) {
         if (DBG) Log(String("handleResult: success!"));
 
         if (mState == ES_PUK) {
-            mScrollView->SetVisibility(IView::VISIBLE);
-            mIccPUKPanel->SetVisibility(IView::GONE);
+            IView::Probe(mScrollView)->SetVisibility(IView::VISIBLE);
+            IView::Probe(mIccPUKPanel)->SetVisibility(IView::GONE);
         }
         // TODO: show success feedback
         ShowConfirmation();
 
-        AutoPtr<IRunnable> r new MyRunnable(this);
-        mHandler->PostDelayed(r, 3000);
+        AutoPtr<IRunnable> r = new MyRunnable(this);
+        Boolean tmp = FALSE;
+        mHandler->PostDelayed(r, 3000, &tmp);
     }
-    else if (ar.exception instanceof CommandException
-       /*  && ((CommandException)ar.exception).getCommandError() ==
-       CommandException.Error.PASSWORD_INCORRECT */ ) {
-        if (mState == ES_PIN) {
-            if (DBG) Log(String("handleResult: pin failed!"));
-            AutoPtr<ICharSequence> csq;
-            mOldPin->GetText((ICharSequence**)&csq);
-            csq->Clear();
-            mBadPinError->SetVisibility(IView:VISIBLE);
-            CommandException ce = (CommandException) ar.exception;
-            if (ce.getCommandError() == CommandException.Error.SIM_PUK2) {
-                if (DBG) Log(String("handleResult: puk requested!"));
-                mState = ES_PUK;
-                DisplayPUKAlert();
-                mScrollView->SetVisibility(IView::GONE);
-                mIccPUKPanel->SetVisibility(IView::VISIBLE);
-                mPUKCode->RequestFocus();
-            }
-        }
-        else if (mState == ES_PUK) {
-            //should really check to see if the error is CommandException.PASSWORD_INCORRECT...
-            if (DBG) Log(String("handleResult: puk2 failed!"));
-            DisplayPUKAlert();
-            AutoPtr<ICharSequence> csq;
-            mPUKCode->GetText((ICharSequence**)&csq);
-            csq->Clear();
-            mPUKCode->RequestFocus();
-        }
-    }
+    assert(0 && "TODO CommandException");
+    // else if (ar.exception instanceof CommandException
+    //    /*  && ((CommandException)ar.exception).getCommandError() ==
+    //    CommandException.Error.PASSWORD_INCORRECT */ ) {
+    //     if (mState == ES_PIN) {
+    //         if (DBG) Log(String("handleResult: pin failed!"));
+    //         AutoPtr<ICharSequence> csq;
+    //         mOldPin->GetText((ICharSequence**)&csq);
+    //         csq->Clear();
+    //         IView::Probe(mBadPinError)->SetVisibility(IView:VISIBLE);
+    //         CommandException ce = (CommandException) ar.exception;
+    //         if (ce.getCommandError() == CommandException.Error.SIM_PUK2) {
+    //             if (DBG) Log(String("handleResult: puk requested!"));
+    //             mState = ES_PUK;
+    //             DisplayPUKAlert();
+    //             IView::Probe(mScrollView)->SetVisibility(IView::GONE);
+    //             IView::Probe(mIccPUKPanel)->SetVisibility(IView::VISIBLE);
+    //             IView::Probe(mPUKCode)->RequestFocus();
+    //         }
+    //     }
+    //     else if (mState == ES_PUK) {
+    //         //should really check to see if the error is CommandException.PASSWORD_INCORRECT...
+    //         if (DBG) Log(String("handleResult: puk2 failed!"));
+    //         DisplayPUKAlert();
+    //         AutoPtr<ICharSequence> csq;
+    //         mPUKCode->GetText((ICharSequence**)&csq);
+    //         csq->Clear();
+    //         IView::Probe(mPUKCode)->RequestFocus();
+    //     }
+    // }
     return;
 }
 
@@ -346,23 +381,24 @@ void CChangeIccPinScreen::DisplayPUKAlert()
     if (mPUKAlert == NULL) {
         AutoPtr<IAlertDialogBuilder> builder;
         CAlertDialogBuilder::New(this, (IAlertDialogBuilder**)&builder);
-        builder->SetMessage(R.string.puk_requested);
+        builder->SetMessage(Elastos::Droid::Server::Telephony::R::string::puk_requested);
         builder->SetCancelable(FALSE);
         builder->Show((IAlertDialog**)&mPUKAlert);
     }
     else {
-        mPUKAlert->Show();
+        IDialog::Probe(mPUKAlert)->Show();
     }
     //TODO: The 3 second delay here is somewhat arbitrary, reflecting the values
     //used elsewhere for similar code.  This should get revisited with the framework
     //crew to see if there is some standard we should adhere to.
     AutoPtr<IRunnable> r = new MyRunnable2(this);
-    mHandler->PostDelayed(r, 3000);
+    Boolean tmp = FALSE;
+    mHandler->PostDelayed(r, 3000, &tmp);
 }
 
 void CChangeIccPinScreen::ShowConfirmation()
 {
-    Int32 id = mChangePin2 ? R.string.pin2_changed : R.string.pin_changed;
+    Int32 id = mChangePin2 ? Elastos::Droid::Server::Telephony::R::string::pin2_changed : Elastos::Droid::Server::Telephony::R::string::pin_changed;
 
     AutoPtr<IToastHelper> helper;
     CToastHelper::AcquireSingleton((IToastHelper**)&helper);

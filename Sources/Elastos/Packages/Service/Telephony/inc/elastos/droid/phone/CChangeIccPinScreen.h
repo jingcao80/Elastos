@@ -2,7 +2,26 @@
 #define  __ELASTOS_DROID_PHONE_CCHANGEICCPINSCREEN_H__
 
 #include "_Elastos_Droid_Phone_CChangeIccPinScreen.h"
-#include "elastos/droid/ext/frameworkext.h"
+#include "elastos/droid/app/Activity.h"
+#include "elastos/droid/os/AsyncResult.h"
+#include "elastos/droid/os/Handler.h"
+#include "elastos/droid/os/Runnable.h"
+#include "Elastos.Droid.Internal.h"
+#include "Elastos.Droid.View.h"
+#include "Elastos.Droid.Widget.h"
+
+using Elastos::Droid::App::Activity;
+using Elastos::Droid::App::IAlertDialog;
+using Elastos::Droid::Internal::Telephony::IPhone;
+using Elastos::Droid::Os::AsyncResult;
+using Elastos::Droid::Os::Handler;
+using Elastos::Droid::Os::Runnable;
+using Elastos::Droid::View::IViewOnClickListener;
+using Elastos::Droid::Widget::IButton;
+using Elastos::Droid::Widget::IEditText;
+using Elastos::Droid::Widget::ILinearLayout;
+using Elastos::Droid::Widget::IScrollView;
+using Elastos::Droid::Widget::ITextView;
 
 namespace Elastos {
 namespace Droid {
@@ -13,7 +32,6 @@ namespace Phone {
  */
 CarClass(CChangeIccPinScreen)
     , public Activity
-    , public IChangeIccPinScreen
 {
 private:
     class MyHandler
@@ -89,8 +107,6 @@ private:
     };
 
 public:
-    CAR_INTERFACE_DECL()
-
     CAR_OBJECT_DECL();
 
     CChangeIccPinScreen();
@@ -98,7 +114,8 @@ public:
     CARAPI constructor();
 
     //@Override
-    CARAPI OnCreate();
+    CARAPI OnCreate(
+        /* [in] */ IBundle* icicle);
 
 private:
     CARAPI_(void) ResolveIntent();
@@ -110,7 +127,7 @@ private:
         /* [in] */ const String& p2);
 
     CARAPI_(void) HandleResult(
-        /* [in] */ AsyncResult ar);
+        /* [in] */ AsyncResult* ar);
 
     CARAPI_(void) DisplayPUKAlert();
 
