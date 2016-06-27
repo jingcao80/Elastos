@@ -57,6 +57,9 @@ public:
     CARAPI constructor(
         /* [in] */ ICallbackMethodInfo * pCallbackMethodInfo);
 
+    CARAPI GetInternalObject(
+        /* [out] */ PInterface* ppObject);
+
 private:
     AutoPtr<ICallbackMethodInfo> mCallbackMethodInfo;
 };

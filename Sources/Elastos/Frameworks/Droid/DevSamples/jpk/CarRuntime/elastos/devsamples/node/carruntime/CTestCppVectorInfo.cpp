@@ -108,6 +108,12 @@ ECode CTestCppVectorInfo::constructor(
     return NOERROR;
 }
 
+ECode CTestCppVectorInfo::GetInternalObject(
+    /* [out] */ PInterface* ppObject){
+    *ppObject = mCppVectorInfo;
+    return NOERROR;
+}
+
 }
 }
 }

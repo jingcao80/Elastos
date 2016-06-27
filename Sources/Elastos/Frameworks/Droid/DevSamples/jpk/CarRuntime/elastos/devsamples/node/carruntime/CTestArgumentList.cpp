@@ -314,8 +314,7 @@ ECode CTestArgumentList::constructor(
 
 ECode CTestArgumentList::GetInternalObject(
     /* [out] */ PInterface* ppObject){
-    *ppObject = mArgumentList;
-
+    *ppObject = mArgumentList.Get();
     return NOERROR;
 }
 

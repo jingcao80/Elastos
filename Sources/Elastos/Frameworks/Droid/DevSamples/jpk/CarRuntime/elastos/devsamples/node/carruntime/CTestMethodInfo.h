@@ -53,8 +53,11 @@ public:
     CARAPI constructor(
         /* [in] */ IMethodInfo * pMethodInfo);
 
+    CARAPI GetInternalObject(
+        /* [out] */ PInterface* ppObject);
+
 private:
-    IMethodInfo* mMethodInfo;
+    AutoPtr<IMethodInfo> mMethodInfo;
 };
 
 }

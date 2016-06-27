@@ -178,8 +178,11 @@ public:
     CARAPI constructor(
         /* [in] */ IVariableOfStruct * pVariableOfStruct);
 
+    CARAPI GetInternalObject(
+        /* [out] */ PInterface* ppObject);
+
 private:
-    // TODO: Add your private member variables here.
+    AutoPtr<IVariableOfStruct> mVariableOfStruct;
 };
 
 }

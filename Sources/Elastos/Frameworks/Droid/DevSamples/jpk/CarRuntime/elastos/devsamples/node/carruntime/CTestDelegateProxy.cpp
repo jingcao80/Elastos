@@ -58,6 +58,12 @@ ECode CTestDelegateProxy::constructor(
     return E_NOT_IMPLEMENTED;
 }
 
+ECode CTestDelegateProxy::GetInternalObject(
+    /* [out] */ PInterface* ppObject){
+    *ppObject = mDelegateProxy;
+    return NOERROR;
+}
+
 }
 }
 }

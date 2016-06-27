@@ -199,6 +199,12 @@ ECode CTestInterfaceInfo::constructor(
     return NOERROR;
 }
 
+ECode CTestInterfaceInfo::GetInternalObject(
+    /* [out] */ PInterface* ppObject){
+    *ppObject = mInterfaceInfo;
+    return NOERROR;
+}
+
 }
 }
 }

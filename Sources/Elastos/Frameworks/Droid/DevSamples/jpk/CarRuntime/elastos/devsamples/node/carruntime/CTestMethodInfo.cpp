@@ -167,6 +167,12 @@ ECode CTestMethodInfo::constructor(
     return NOERROR;
 }
 
+ECode CTestMethodInfo::GetInternalObject(
+    /* [out] */ PInterface* ppObject){
+    *ppObject = mMethodInfo;
+    return NOERROR;
+}
+
 }
 }
 }

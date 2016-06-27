@@ -35,12 +35,12 @@ ECode CTestConstructorInfo::GetAnnotation(
 ECode CTestConstructorInfo::GetParamCount(
     /* [out] */ Int32 * pCount)
 {
-    //mConstructorInfo->GetParamCount(pCount);
+    return mConstructorInfo->GetParamCount(pCount);
 
-    CConstructorInfo* oConstructorInfo = (CConstructorInfo*)mConstructorInfo;
-    *pCount = oConstructorInfo->mMethodInfo->mMethodDescriptor->mParamCount;
+    //CConstructorInfo* oConstructorInfo = (CConstructorInfo*)mConstructorInfo;
+    //*pCount = oConstructorInfo->mMethodInfo->mMethodDescriptor->mParamCount;
 
-    return NOERROR;
+    //return NOERROR;
 }
 
 ECode CTestConstructorInfo::GetAllParamInfos(
@@ -162,7 +162,7 @@ ECode CTestConstructorInfo::CreateObject(
 {
     ECode ec = NOERROR;
 
-    IArgumentList* argumentList;
+    AutoPtr<IArgumentList> argumentList;
     ec = pArgumentList->GetInternalObject((PInterface*)&argumentList);
     if (FAILED(ec)) {
         ALOGD("CTestConstructorInfo::CreateObject: pArgumentList->GetInternalObject fail!");
@@ -192,7 +192,7 @@ ECode CTestConstructorInfo::LocalCreateObject(
 {
     ECode ec = NOERROR;
 
-    IArgumentList* argumentList;
+    AutoPtr<IArgumentList> argumentList;
     ec = pArgumentList->GetInternalObject((PInterface*)&argumentList);
     if (FAILED(ec)) {
         ALOGD("CTestConstructorInfo::CreateObject: pArgumentList->GetInternalObject fail!");
@@ -202,7 +202,7 @@ ECode CTestConstructorInfo::LocalCreateObject(
         ALOGD("CTestConstructorInfo::CreateObject: pArgumentList->GetInternalObject success!");
     }
 
-    ec = mConstructorInfo->CreateObject(argumentList,ppObject);
+    ec = mConstructorInfo->CreateObject(argumentList.Get(),ppObject);
     if (FAILED(ec)) {
         ALOGD("CTestConstructorInfo::CreateObject: mConstructorInfo->CreateObject fail!");
         return ec;
@@ -222,7 +222,7 @@ ECode CTestConstructorInfo::RemoteCreateObject(
 {
     ECode ec = NOERROR;
 
-    IArgumentList* argumentList;
+    AutoPtr<IArgumentList> argumentList;
     ec = pArgumentList->GetInternalObject((PInterface*)&argumentList);
     if (FAILED(ec)) {
         ALOGD("CTestConstructorInfo::CreateObject: pArgumentList->GetInternalObject fail!");
@@ -308,6 +308,13 @@ ECode CTestConstructorInfo::constructor(
     /* [in] */ IConstructorInfo * pConstructorInfo)
 {
     mConstructorInfo = pConstructorInfo;
+    return NOERROR;
+}
+
+ECode CTestConstructorInfo::GetInternalObject(
+    /* [out] */ PInterface* ppObject){
+    *ppObject = mConstructorInfo.Get();
+    (*ppObject)->AddRef();
     return NOERROR;
 }
 

@@ -91,6 +91,12 @@ ECode CTestFieldInfo::constructor(
     return NOERROR;
 }
 
+ECode CTestFieldInfo::GetInternalObject(
+    /* [out] */ PInterface* ppObject){
+    *ppObject = mFieldInfo;
+    return NOERROR;
+}
+
 }
 }
 }

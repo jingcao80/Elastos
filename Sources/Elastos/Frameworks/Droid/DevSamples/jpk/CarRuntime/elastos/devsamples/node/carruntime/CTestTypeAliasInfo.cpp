@@ -57,6 +57,12 @@ ECode CTestTypeAliasInfo::constructor(
     return NOERROR;
 }
 
+ECode CTestTypeAliasInfo::GetInternalObject(
+    /* [out] */ PInterface* ppObject){
+    *ppObject = mTypeAliasInfo;
+    return NOERROR;
+}
+
 }
 }
 }

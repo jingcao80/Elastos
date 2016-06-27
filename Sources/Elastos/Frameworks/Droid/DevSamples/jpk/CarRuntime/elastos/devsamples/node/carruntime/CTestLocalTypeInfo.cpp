@@ -46,6 +46,12 @@ ECode CTestLocalTypeInfo::constructor(
     return NOERROR;
 }
 
+ECode CTestLocalTypeInfo::GetInternalObject(
+    /* [out] */ PInterface* ppObject){
+    *ppObject = mLocalTypeInfo;
+    return NOERROR;
+}
+
 }
 }
 }

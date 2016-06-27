@@ -165,6 +165,9 @@ public:
     CARAPI constructor(
         /* [in] */ IClassInfo * pClassInfo);
 
+    CARAPI GetInternalObject(
+        /* [out] */ PInterface* ppObject);
+
 private:
     AutoPtr<IClassInfo> mClassInfo;
 };

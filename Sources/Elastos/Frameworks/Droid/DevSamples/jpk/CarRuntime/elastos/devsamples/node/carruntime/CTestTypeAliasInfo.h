@@ -41,8 +41,11 @@ public:
     CARAPI constructor(
         /* [in] */ ITypeAliasInfo * pTypeAliasInfo);
 
+    CARAPI GetInternalObject(
+        /* [out] */ PInterface* ppObject);
+
 private:
-    ITypeAliasInfo* mTypeAliasInfo;
+    AutoPtr<ITypeAliasInfo> mTypeAliasInfo;
 };
 
 }

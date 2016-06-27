@@ -101,9 +101,11 @@ public:
     CARAPI constructor(
         /* [in] */ IModuleInfo * pModuleInfo);
 
+    CARAPI GetInternalObject(
+        /* [out] */ PInterface* ppObject);
+
 private:
-    // TODO: Add your private member variables here.
-    IModuleInfo* mModuleInfo;
+    AutoPtr<IModuleInfo> mModuleInfo;
 };
 
 }

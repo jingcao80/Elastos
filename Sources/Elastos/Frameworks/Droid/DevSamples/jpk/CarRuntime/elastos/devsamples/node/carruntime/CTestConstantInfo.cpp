@@ -62,6 +62,12 @@ ECode CTestConstantInfo::constructor(
     return NOERROR;
 }
 
+ECode CTestConstantInfo::GetInternalObject(
+    /* [out] */ PInterface* ppObject){
+    *ppObject = mConstantInfo;
+    return NOERROR;
+}
+
 }
 }
 }

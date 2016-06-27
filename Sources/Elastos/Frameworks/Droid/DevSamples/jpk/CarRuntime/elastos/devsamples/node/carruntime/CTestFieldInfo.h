@@ -32,8 +32,11 @@ public:
     CARAPI constructor(
         /* [in] */ IFieldInfo * pFieldInfo);
 
+    CARAPI GetInternalObject(
+        /* [out] */ PInterface* ppObject);
+
 private:
-    IFieldInfo* mFieldInfo;
+    AutoPtr<IFieldInfo> mFieldInfo;
 };
 
 }

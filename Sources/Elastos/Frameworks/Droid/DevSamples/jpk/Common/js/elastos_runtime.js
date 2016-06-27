@@ -4,6 +4,10 @@ var sEcoName = "/data/temp/node/bin/Elastos.DevSamples.Node.CarRuntime.eco";
 var sClassName = "Elastos.DevSamples.Node.CarRuntime.CCarRuntime";
 var _Runtime_Native = api.require(sEcoName, sClassName);
 
+function _getObjClassInfo(ao_car) {
+    return _Runtime_Native.Test_CObject_ReflectClassInfo(ao_car);
+}
+
 var _getModuleInfo = function (asEcoName) {
     return _Runtime_Native.Test_Require_ModuleInfo(asEcoName);
 };
@@ -133,20 +137,23 @@ function getRunOnUIThread(as_MethodName) {
 
 //--------proto info begin--------
 function getSubDataTypeCarString(ao_TypeInfo){
+    //elog("====getSubDataTypeCarString====begin");
     var a = [],s;
 
     var iDataType = ao_TypeInfo.GetDataType();
     switch (iDataType) {
-        //case CarDataType.IInterface:
-        //    //
-        //    break;
+        case CarDataType.IInterface:
+            s = "<"+ao_TypeInfo.GetName()+">";
+            a.push(s);
+
+            break;
         case CarDataType.LocalPtr:
             var oElementTypeInfo = ao_TypeInfo.GetTargetTypeInfo();
             var iElementDataType = oElementTypeInfo.GetDataType();
             s = getDataTypeCarString(iElementDataType);
             a.push(s);
-            s = "<"+oElementTypeInfo.GetName()+">";
-            a.push(s);
+            //s = "<"+oElementTypeInfo.GetName()+">";
+            //a.push(s);
             s = getSubDataTypeCarString(oElementTypeInfo);
             a.push(s);
 
@@ -156,8 +163,8 @@ function getSubDataTypeCarString(ao_TypeInfo){
             var iElementDataType = oElementTypeInfo.GetDataType();
             s = getDataTypeCarString(iElementDataType);
             a.push(s);
-            s = "<"+oElementTypeInfo.GetName()+">";
-            a.push(s);
+            //s = "<"+oElementTypeInfo.GetName()+">";
+            //a.push(s);
             s = getSubDataTypeCarString(oElementTypeInfo);
             a.push(s);
 
@@ -169,25 +176,29 @@ function getSubDataTypeCarString(ao_TypeInfo){
     s = a.join("");
     if(s.length)s = "<" + s + ">";
 
+    //elog("====getSubDataTypeCarString====end");
     return s;
 }
 function __getCarDataTypeString(ao_TypeInfo){
+    //elog("====__getCarDataTypeString====begin");
     var a = [];
 
     var iDataType = ao_TypeInfo.GetDataType();
     var s;
     s = getDataTypeCarString(iDataType);
     a.push(s);
-    s = "<"+ao_TypeInfo.GetName()+">";
-    a.push(s);
+    //s = "<"+ao_TypeInfo.GetName()+">";
+    //a.push(s);
     s = getSubDataTypeCarString(ao_TypeInfo);
     a.push(s);
 
+    //elog("====__getCarDataTypeString====end");
     return a.join("");
 }
 
 //return: ParamProto=ParamName[]
 function getParamProto(ao_ParamInfo){
+    //elog("====getParamProto====begin");
     var aProto = [];
 
     aProto.push(ao_ParamInfo.GetName());
@@ -199,45 +210,64 @@ function getParamProto(ao_ParamInfo){
 
     aProto.push("]");
 
+    //elog("====getParamProto====end");
     return aProto.join("");
 }
 
 //return: ConstructorProto=Constructor(ParamProtos);
 function getConstructorProto(ao_ConstructorInfo){
+    //elog("====getConstructorProto====begin");
     var aProto = [];
 
     aProto.push(ao_ConstructorInfo.GetName());
     aProto.push("(");
 
+    var len = ao_ConstructorInfo.GetParamCount();
+    elog("====getConstructorProto====GetParamCount:"+len);
+
+if (len > 0) {
+
     var bProto = [];
     var aParamInfos = ao_ConstructorInfo.GetAllParamInfos();
+    elog("====getConstructorProto====GetAllParamInfos:"+aParamInfos.length);
     for (var i=0,im=aParamInfos.length;i<im;i++) {
         var sParamProto = getParamProto(aParamInfos[i]);
         bProto.push(sParamProto);
     }
     aProto.push(bProto.join(","));
+}
 
     aProto.push(")");
 
+    //elog("====getConstructorProto====end");
     return aProto.join("");
 }
 
 //return: ClassName{ConstructorProtos};
 function getConstructorProtos(ao_ClassInfo){
+    elog("====getConstructorProtos====begin");
+
     var aProto = [];
 
     aProto.push(ao_ClassInfo.GetName());
     aProto.push("{");
 
+    var len = ao_ClassInfo.GetConstructorCount();
+    elog("====getConstructorProtos====GetConstructorCount:"+len);
+
     var aConstructorInfos = ao_ClassInfo.GetAllConstructorInfos();
+    elog("====getConstructorProtos====GetAllConstructorInfos:"+aConstructorInfos.length);
     for (var i=0,im=aConstructorInfos.length;i<im;i++) {
         aProto.push("=="+i+"==");
+        elog("====getConstructorProto=="+i+"==begin");
         var sConstructorProto = getConstructorProto(aConstructorInfos[i]);
+        elog("====getConstructorProto=="+i+"==end");
         aProto.push(sConstructorProto);
     }
 
     aProto.push("}");
 
+    elog("====getConstructorProtos====end");
     return aProto.join("");
 }
 
@@ -271,8 +301,10 @@ function classinfo__createObject(oModuleInfo,oClassInfo){
         elog('====classinfo__createObject====begin==0.3==ClassName:'+sClassName);
     }
 
-    //var sConstructorProtos = getConstructorProtos(oClassInfo);
-    //elog("====sConstructorProtos====" + sConstructorProtos);
+    elog("====sConstructorProtos====begin====");
+    var sConstructorProtos = getConstructorProtos(oClassInfo);
+    elog("====sConstructorProtos====:" + sConstructorProtos);
+    elog("====sConstructorProtos====end====");
 
     var bCreateOnUIThread = getCreateOnUIThread(sClassName);
 
@@ -289,9 +321,12 @@ function classinfo__createObject(oModuleInfo,oClassInfo){
     }
     else {
         var aConstructorInfos = oClassInfo.GetAllConstructorInfos();
+
+        elog('====classinfo__createObject====ConstructorInfos total num:' + aConstructorInfos.length);
+
         var oConstructorInfo;
-        //var paramCount = length - 2;  //RDK4.2.2
-        var paramCount = length - 1;
+        var paramCount = length - 2;  //RDK4.2.2
+        //var paramCount = length - 1;
         var bSameArgs = false;
         for(var i=0, im=aConstructorInfos.length; i<im; i++){
             oConstructorInfo = aConstructorInfos[i];
@@ -304,8 +339,8 @@ function classinfo__createObject(oModuleInfo,oClassInfo){
             if (_paramCount == paramCount) {
                 bSameArgs = true;
                 var aParamInfos = oConstructorInfo.GetAllParamInfos();
-                //for(var j = 0, jm = paramCount; j<jm; j++) {  //RDK4.2.2
-                for(var j = 0, jm = paramCount -1; j<jm; j++) {
+                for(var j = 0, jm = paramCount; j<jm; j++) {  //RDK4.2.2
+                //for(var j = 0, jm = paramCount -1; j<jm; j++) {
                     var paramInfo = aParamInfos[j];
                     var oTypeInfo = paramInfo.GetTypeInfo();
 
@@ -321,6 +356,28 @@ function classinfo__createObject(oModuleInfo,oClassInfo){
                         if (iDataType == CarDataType.IInterface) {
                             //TODO:compare the interface name
                             //continue;
+                            var sFromClassName = arg_in.ToString();
+                            var sToClassName = oTypeInfo.GetName();
+                            elog('==============classinfo__createObject ======find method====Interface====paraClass:'+sFromClassName+"=="+sToClassName);
+
+                            var oArgClassInfo = _getObjClassInfo(arg_in);
+                            var oArgClassName = oArgClassInfo.GetName();
+                            elog('==============classinfo__createObject ======find method====Interface====paraClassName:'+oArgClassName);
+                            oArgInterfaces = oArgClassInfo.GetAllInterfaceInfos();
+                            //var aa = [];
+                            //elog('==============classinfo__createObject ======find method====Interface====paraInterfacesNum:'+oArgInterfaces.length);
+                            var hasInterface = false;
+                            for (var k=0,km=oArgInterfaces.length;k<km;k++){
+                                var sArgInterfaceName = oArgInterfaces[k].GetName();
+                                if (sArgInterfaceName == sToClassName) {
+                                    hasInterface = true;
+                                    break;
+                                }
+                                //elog('==============classinfo__createObject ======find method====Interface====paraInterfaceName:'+k+":"+s);
+                                //aa.push(s);
+                            }
+                            bSameArgs = hasInterface;
+                            //elog('==============classinfo__createObject ======find method====Interface====paraInterfaces:['+aa.join("][")+"]");
                         }
                         else if (iDataType == CarDataType.LocalPtr) {
                             //TODO:compare the localptr element type
@@ -369,8 +426,8 @@ function classinfo__createObject(oModuleInfo,oClassInfo){
         var aParamInfos = oConstructorInfo.GetAllParamInfos();
         var oArgumentList = oConstructorInfo.CreateArgumentList();
 
-        //for(var i = 0, im = paramCount; i<im; i++) {  //RDK4.2.2
-        for(var i = 0, im = paramCount - 1; i<im; i++) {
+        for(var i = 0, im = paramCount; i<im; i++) {  //RDK4.2.2
+        //for(var i = 0, im = paramCount - 1; i<im; i++) {
             var paramInfo = aParamInfos[i];
             var oTypeInfo = paramInfo.GetTypeInfo();
 

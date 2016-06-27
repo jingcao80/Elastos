@@ -35,8 +35,11 @@ public:
     CARAPI constructor(
         /* [in] */ IEnumItemInfo * pEnumItemInfo);
 
+    CARAPI GetInternalObject(
+        /* [out] */ PInterface* ppObject);
+
 private:
-    IEnumItemInfo* mEnumItemInfo;
+    AutoPtr<IEnumItemInfo> mEnumItemInfo;
 };
 
 }

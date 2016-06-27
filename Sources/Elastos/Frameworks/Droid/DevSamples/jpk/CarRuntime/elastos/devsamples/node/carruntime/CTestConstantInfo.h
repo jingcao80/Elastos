@@ -35,6 +35,9 @@ public:
     CARAPI constructor(
         /* [in] */ IConstantInfo * pConstantInfo);
 
+    CARAPI GetInternalObject(
+        /* [out] */ PInterface* ppObject);
+
 private:
     AutoPtr<IConstantInfo> mConstantInfo;
 };

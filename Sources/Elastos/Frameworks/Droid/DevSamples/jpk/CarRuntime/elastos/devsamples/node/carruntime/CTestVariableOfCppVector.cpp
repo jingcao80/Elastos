@@ -342,6 +342,12 @@ ECode CTestVariableOfCppVector::constructor(
     return E_NOT_IMPLEMENTED;
 }
 
+ECode CTestVariableOfCppVector::GetInternalObject(
+    /* [out] */ PInterface* ppObject){
+    *ppObject = mVariableOfCppVector;
+    return NOERROR;
+}
+
 }
 }
 }

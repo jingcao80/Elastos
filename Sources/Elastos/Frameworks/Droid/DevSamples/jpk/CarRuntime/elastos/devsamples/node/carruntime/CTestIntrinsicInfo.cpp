@@ -46,6 +46,12 @@ ECode CTestIntrinsicInfo::constructor(
     return NOERROR;
 }
 
+ECode CTestIntrinsicInfo::GetInternalObject(
+    /* [out] */ PInterface* ppObject){
+    *ppObject = mIntrinsicInfo;
+    return NOERROR;
+}
+
 }
 }
 }
