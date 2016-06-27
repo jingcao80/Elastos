@@ -491,8 +491,12 @@ module.exports = function(aoElastos, aoActivity){
                 elog('================mAboutButton.OnClick.begin=======1==========');
 
                 var intent = Droid_New('Elastos.Droid.Content.CIntent');
-                intent.SetClassNameEx("JSGallery", "JSGallery.CAboutActivity");
+                elog('================mAboutButton.OnClick.begin=======2==========');
+                //intent.SetClassNameEx("JSGallery", "JSGallery.CAboutActivity");
+                intent.SetClassName("Elastos.DevSamples.Node.JSGallery", "Elastos.DevSamples.Node.JSGallery.CAboutActivity");
+                elog('================mAboutButton.OnClick.begin=======3==========');
                 var status = oActivity.StartActivity(intent);
+                elog('================mAboutButton.OnClick.begin=======4==========');
             }
         });
     };

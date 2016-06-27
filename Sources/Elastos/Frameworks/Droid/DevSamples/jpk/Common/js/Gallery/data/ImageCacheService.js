@@ -135,7 +135,7 @@ function GetImageData(key, isHigh, len, modify) {
         if (fileName.indexOf(keyStr)==0) {
 //             if (isHigh && fileName.Contains("#")) {
             var _modify = '' + modify;
-            if (isHigh && fileName.indexOf("#")>0) {
+            if (isHigh && fileName.indexOf("#")>-1) {
 //                 if (fileName.EndWith(StringUtils::Int64ToString(modify))) {
                 if (fileName.lastIndexOf(_modify)+_modify.length==fileName.length) {
 //                     AutoPtr<IBitmapFactory> factory;
@@ -160,7 +160,7 @@ function GetImageData(key, isHigh, len, modify) {
 //             }
             }
 //             else if (!isHigh && fileName.Contains("$")) {
-            else if (!isHigh && fileName.indexOf("$")>0) {
+            else if (!isHigh && fileName.indexOf("$")>-1) {
 //                 if (fileName.EndWith(StringUtils::Int64ToString(modify))) {
                 if (fileName.lastIndexOf(_modify)+_modify.length==fileName.length) {
 //                     AutoPtr<IBitmapFactory> factory;
