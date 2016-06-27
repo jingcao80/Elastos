@@ -1,7 +1,7 @@
 #include "elastos/droid/systemui/recent/RecentsVerticalScrollView.h"
 #include "elastos/droid/systemui/recent/RecentsPanelView.h"
 #include "elastos/droid/systemui/CSwipeHelper.h"
-#include "../R.h"
+#include "R.h"
 #include <elastos/core/Math.h>
 #include <elastos/core/CoreUtils.h>
 #include "elastos/droid/utility/FloatMath.h"

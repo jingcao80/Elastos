@@ -1,6 +1,6 @@
 
 #include "elastos/droid/systemui/statusbar/stack/StackScrollState.h"
-#include "../../R.h"
+#include "../R.h"
 #include "Elastos.Droid.Content.h"
 #include <elastos/utility/logging/Logger.h>
 

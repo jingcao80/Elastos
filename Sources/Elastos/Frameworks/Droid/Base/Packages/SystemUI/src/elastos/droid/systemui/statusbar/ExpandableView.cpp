@@ -1,6 +1,6 @@
 
 #include "elastos/droid/systemui/statusbar/ExpandableView.h"
-#include "../R.h"
+#include "R.h"
 #include <elastos/core/Math.h>
 
 using Elastos::Utility::CArrayList;

@@ -3,7 +3,7 @@
 #include "elastos/droid/systemui/BitmapHelper.h"
 #include "elastos/droid/systemui/CGuestResumeSessionReceiver.h"
 #include "elastos/droid/systemui/qs/tiles/CUserDetailView.h"
-#include "../../R.h"
+#include "../R.h"
 #include "Elastos.Droid.Graphics.h"
 #include "Elastos.Droid.Internal.h"
 #include "Elastos.Droid.Provider.h"

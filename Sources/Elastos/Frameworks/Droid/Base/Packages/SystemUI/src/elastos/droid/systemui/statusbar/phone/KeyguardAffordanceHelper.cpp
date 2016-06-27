@@ -2,7 +2,7 @@
 #include "elastos/droid/systemui/statusbar/phone/KeyguardAffordanceHelper.h"
 #include "elastos/droid/systemui/statusbar/CKeyguardAffordanceView.h"
 #include "elastos/droid/systemui/statusbar/FlingAnimationUtils.h"
-#include "../../R.h"
+#include "../R.h"
 #include <elastos/droid/R.h>
 #include <elastos/droid/view/animation/AnimationUtils.h>
 #include <elastos/core/Math.h>

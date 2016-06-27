@@ -7,7 +7,7 @@
 #include "elastos/droid/systemui/statusbar/stack/StackStateAnimator.h"
 #include "elastos/droid/systemui/CExpandHelper.h"
 #include "elastos/droid/systemui/CSwipeHelper.h"
-#include "../../R.h"
+#include "../R.h"
 #include <elastos/droid/view/animation/AnimationUtils.h>
 #include <elastos/droid/view/View.h>
 #include <elastos/core/Math.h>

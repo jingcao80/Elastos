@@ -1,6 +1,6 @@
 
 #include "elastos/droid/systemui/statusbar/policy/TelephonyIcons.h"
-#include "../../R.h"
+#include "../R.h"
 
 using Elastos::Droid::SystemUI::R;
 

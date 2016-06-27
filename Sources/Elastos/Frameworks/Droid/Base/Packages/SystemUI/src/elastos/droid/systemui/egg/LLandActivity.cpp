@@ -1,6 +1,6 @@
 #include "elastos/droid/systemui/egg/LLandActivity.h"
 #include "elastos/droid/systemui/egg/LLand.h"
-#include "../R.h"
+#include "R.h"
 #include <elastos/utility/logging/Logger.h>
 
 using Elastos::Droid::View::IView;

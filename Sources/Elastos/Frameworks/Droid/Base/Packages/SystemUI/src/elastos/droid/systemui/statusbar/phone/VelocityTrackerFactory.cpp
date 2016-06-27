@@ -2,7 +2,7 @@
 #include "elastos/droid/systemui/statusbar/phone/VelocityTrackerFactory.h"
 #include "elastos/droid/systemui/statusbar/phone/NoisyVelocityTracker.h"
 #include "elastos/droid/systemui/statusbar/phone/PlatformVelocityTracker.h"
-#include "../../R.h"
+#include "../R.h"
 #include "Elastos.Droid.Content.h"
 
 using Elastos::Droid::Content::Res::IResources;

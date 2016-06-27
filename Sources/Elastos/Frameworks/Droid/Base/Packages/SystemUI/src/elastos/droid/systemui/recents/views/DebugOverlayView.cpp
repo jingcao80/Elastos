@@ -1,6 +1,6 @@
 
 #include "elastos/droid/systemui/recents/views/DebugOverlayView.h"
-#include "../../R.h"
+#include "../R.h"
 
 using Elastos::Droid::Graphics::CPaint;
 using Elastos::Droid::Graphics::CRect;

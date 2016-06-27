@@ -1,7 +1,7 @@
 
 #include "elastos/droid/systemui/statusbar/stack/StackStateAnimator.h"
 #include "elastos/droid/systemui/statusbar/stack/CNotificationStackScrollLayout.h"
-#include "../../R.h"
+#include "../R.h"
 #include "Elastos.Droid.Animation.h"
 #include "Elastos.Droid.Content.h"
 #include <elastos/droid/R.h>

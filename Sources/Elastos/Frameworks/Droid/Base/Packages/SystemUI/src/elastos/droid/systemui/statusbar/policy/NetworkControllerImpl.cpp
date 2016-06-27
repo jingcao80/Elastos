@@ -7,7 +7,7 @@
 #include "elastos/droid/systemui/statusbar/policy/WifiAccessPointController.h"
 #include "elastos/droid/systemui/statusbar/policy/WifiIcons.h"
 #include "elastos/droid/systemui/statusbar/policy/WimaxIcons.h"
-#include "../../R.h"
+#include "../R.h"
 #include "Elastos.Droid.Internal.h"
 #include "Elastos.Droid.Net.h"
 #include "Elastos.Droid.Provider.h"

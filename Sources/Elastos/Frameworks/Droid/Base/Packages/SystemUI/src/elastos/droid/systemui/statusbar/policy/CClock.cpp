@@ -1,7 +1,7 @@
 
 #include "elastos/droid/systemui/statusbar/policy/CClock.h"
 #include "elastos/droid/systemui/statusbar/policy/CClockIntentReceiver.h"
-#include "../../R.h"
+#include "../R.h"
 #include <Elastos.CoreLibrary.Libcore.h>
 #include "Elastos.Droid.Content.h"
 #include "Elastos.Droid.Os.h"

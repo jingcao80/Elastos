@@ -1,6 +1,6 @@
 
 #include "elastos/droid/systemui/statusbar/CDismissView.h"
-#include "../R.h"
+#include "R.h"
 
 namespace Elastos {
 namespace Droid {

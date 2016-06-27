@@ -2,7 +2,7 @@
 #include "elastos/droid/systemui/statusbar/policy/CHeadsUpNotificationView.h"
 #include "elastos/droid/systemui/CExpandHelper.h"
 #include "elastos/droid/systemui/CSwipeHelper.h"
-#include "../../R.h"
+#include "../R.h"
 #include "Elastos.Droid.Service.h"
 #include <elastos/core/Math.h>
 #include <elastos/utility/logging/Logger.h>

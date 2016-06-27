@@ -7,7 +7,7 @@
 #include "elastos/droid/systemui/volume/Interaction.h"
 #include "elastos/droid/utility/MathUtils.h"
 #include "elastos/droid/view/LayoutInflater.h"
-#include "../R.h"
+#include "R.h"
 #include <elastos/core/Math.h>
 #include <elastos/core/StringUtils.h>
 #include <elastos/utility/Arrays.h>

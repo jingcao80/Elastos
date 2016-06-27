@@ -4,7 +4,7 @@
 #include "Elastos.Droid.Graphics.h"
 #include "Elastos.Droid.Utility.h"
 #include "elastos/droid/systemui/recent/RecentTasksLoader.h"
-#include "../R.h"
+#include "R.h"
 #include <elastos/utility/logging/Logger.h>
 
 using Elastos::Droid::App::CActivityOptionsHelper;

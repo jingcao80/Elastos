@@ -2,7 +2,7 @@
 #include "elastos/droid/systemui/recents/views/SystemBarScrimViews.h"
 #include "Elastos.Droid.Animation.h"
 #include "Elastos.Droid.App.h"
-#include "../../R.h"
+#include "../R.h"
 
 using Elastos::Droid::Animation::ITimeInterpolator;
 using Elastos::Droid::View::IViewPropertyAnimator;

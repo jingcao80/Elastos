@@ -1,7 +1,7 @@
 
 #include "elastos/droid/systemui/statusbar/CNotificationOverflowIconsView.h"
 #include "elastos/droid/systemui/statusbar/CStatusBarIconView.h"
-#include "../R.h"
+#include "R.h"
 #include "Elastos.Droid.Service.h"
 #include <elastos/droid/R.h>
 

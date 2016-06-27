@@ -1,6 +1,6 @@
 
 #include "elastos/droid/systemui/qs/tiles/HotspotTile.h"
-#include "../../R.h"
+#include "../R.h"
 
 using Elastos::Droid::SystemUI::StatusBar::Policy::EIID_IHotspotControllerCallback;
 

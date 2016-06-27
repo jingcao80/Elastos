@@ -2,7 +2,7 @@
 #include "elastos/droid/systemui/qs/QSFooter.h"
 #include "elastos/droid/systemui/FontSizeUtils.h"
 #include "elastos/droid/systemui/statusbar/phone/CSystemUIDialog.h"
-#include "../R.h"
+#include "R.h"
 #include <elastos/droid/view/LayoutInflater.h>
 
 using Elastos::Droid::App::IDialog;

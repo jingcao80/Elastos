@@ -2,7 +2,7 @@
 #include "elastos/droid/systemui/net/NetworkOverLimitActivity.h"
 #include "elastos/droid/os/ServiceManager.h"
 #include "Elastos.Droid.View.h"
-#include "../R.h"
+#include "R.h"
 #include <elastos/utility/logging/Logger.h>
 
 using Elastos::Droid::App::CAlertDialogBuilder;

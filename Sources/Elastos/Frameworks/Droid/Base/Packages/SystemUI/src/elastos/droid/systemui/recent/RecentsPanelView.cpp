@@ -12,7 +12,7 @@
 #include "elastos/droid/view/LayoutInflater.h"
 #include "elastos/droid/view/animation/AnimationUtils.h"
 #include "elastos/droid/R.h"
-#include "../R.h"
+#include "R.h"
 #include <elastos/core/Math.h>
 #include <elastos/core/AutoLock.h>
 #include <elastos/core/CoreUtils.h>

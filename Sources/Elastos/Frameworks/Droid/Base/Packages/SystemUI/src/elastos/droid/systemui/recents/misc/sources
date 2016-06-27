@@ -2,8 +2,8 @@
 TARGET_NAME= misc
 TARGET_TYPE= lib
 
-include $(MAKEDIR)/../../../../../../../../../sources.inc
-INCLUDES += ../../
+INCLUDES += ../../../../../../
+INCLUDES += $(MAKEDIR)/../../../../../../
 INCLUDES += $(MAKEDIR)/../../../../../../inc/
 
 SOURCES = DebugTrigger.cpp

@@ -1,6 +1,6 @@
 
 #include "elastos/droid/systemui/statusbar/CKeyguardAffordanceView.h"
-#include "../R.h"
+#include "R.h"
 #include "Elastos.Droid.View.h"
 #include <elastos/droid/R.h>
 #include <elastos/core/Math.h>

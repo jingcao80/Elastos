@@ -1,7 +1,7 @@
 
 #include "elastos/droid/systemui/statusbar/CSystemBars.h"
 #include "elastos/droid/systemui/statusbar/BaseStatusBar.h"
-#include "../R.h"
+#include "R.h"
 #include "Elastos.Droid.Provider.h"
 #include <elastos/utility/logging/Logger.h>
 

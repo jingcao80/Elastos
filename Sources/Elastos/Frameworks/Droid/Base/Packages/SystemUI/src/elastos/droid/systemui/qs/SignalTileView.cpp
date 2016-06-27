@@ -1,7 +1,7 @@
 
 #include "elastos/droid/systemui/qs/SignalTileView.h"
 #include "elastos/droid/systemui/qs/QSTile.h"
-#include "../R.h"
+#include "R.h"
 #include "Elastos.Droid.Animation.h"
 #include "Elastos.Droid.View.h"
 

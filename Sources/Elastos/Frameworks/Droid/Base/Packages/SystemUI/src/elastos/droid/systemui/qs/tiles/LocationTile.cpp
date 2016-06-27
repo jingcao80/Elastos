@@ -1,6 +1,6 @@
 
 #include "elastos/droid/systemui/qs/tiles/LocationTile.h"
-#include "../../R.h"
+#include "../R.h"
 
 using Elastos::Droid::SystemUI::StatusBar::Policy::EIID_IKeyguardMonitorCallback;
 using Elastos::Droid::SystemUI::StatusBar::Policy::EIID_ILocationSettingsChangeCallback;

@@ -1,6 +1,6 @@
 
 #include "elastos/droid/systemui/qs/tiles/FlashlightTile.h"
-#include "../../R.h"
+#include "../R.h"
 #include "Elastos.Droid.App.h"
 #include <elastos/droid/os/SystemClock.h>
 

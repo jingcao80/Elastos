@@ -9,7 +9,7 @@
 #include "elastos/droid/os/SystemClock.h"
 #include "elastos/droid/systemui/power/CPowerUI.h"
 #include "elastos/droid/R.h"
-#include "../R.h"
+#include "R.h"
 #include <elastos/core/StringUtils.h>
 #include <elastos/utility/logging/Slogger.h>
 

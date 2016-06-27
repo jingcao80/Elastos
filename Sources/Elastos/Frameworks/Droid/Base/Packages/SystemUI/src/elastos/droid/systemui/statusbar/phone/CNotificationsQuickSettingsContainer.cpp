@@ -1,6 +1,6 @@
 
 #include "elastos/droid/systemui/statusbar/phone/CNotificationsQuickSettingsContainer.h"
-#include "../../R.h"
+#include "../R.h"
 
 using Elastos::Droid::View::EIID_IViewStubOnInflateListener;
 

@@ -3,7 +3,7 @@
 #include "elastos/droid/systemui/qs/QSDualTileLabel.h"
 #include "elastos/droid/systemui/qs/QSTile.h"
 #include "elastos/droid/systemui/FontSizeUtils.h"
-#include "../R.h"
+#include "R.h"
 #include "Elastos.Droid.Utility.h"
 #include "Elastos.Droid.View.h"
 #include <elastos/droid/R.h>

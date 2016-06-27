@@ -5,7 +5,7 @@
 #include "Elastos.Droid.Content.h"
 #include "Elastos.Droid.Internal.h"
 #include "Elastos.Droid.Os.h"
-#include "../../R.h"
+#include "../R.h"
 #include <elastos/droid/R.h>
 
 using Elastos::Droid::Content::IContext;

@@ -1,6 +1,6 @@
 
 #include "elastos/droid/systemui/statusbar/policy/CDeadZone.h"
-#include "../../R.h"
+#include "../R.h"
 #include "Elastos.Droid.Animation.h"
 #include "Elastos.Droid.Content.h"
 #include <elastos/droid/os/SystemClock.h>

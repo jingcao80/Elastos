@@ -2,7 +2,7 @@
 #include "elastos/droid/systemui/statusbar/policy/LocationControllerImpl.h"
 #include "elastos/droid/systemui/statusbar/policy/CLocationControllerBroadcastReceiver.h"
 #include "elastos/droid/systemui/statusbar/policy/CLocationControllerLocalBroadcastReceiver.h"
-#include "../../R.h"
+#include "../R.h"
 #include "Elastos.Droid.Location.h"
 #include "Elastos.Droid.Os.h"
 #include "Elastos.Droid.Provider.h"

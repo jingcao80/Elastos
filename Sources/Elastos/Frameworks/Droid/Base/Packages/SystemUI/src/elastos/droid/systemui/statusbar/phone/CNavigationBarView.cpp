@@ -2,7 +2,7 @@
 #include "elastos/droid/systemui/statusbar/phone/CNavigationBarView.h"
 #include "elastos/droid/systemui/statusbar/phone/CPhoneStatusBar.h"
 #include "elastos/droid/systemui/statusbar/phone/NavigationBarViewTaskSwitchHelper.h"
-#include "../../R.h"
+#include "../R.h"
 #include "Elastos.CoreLibrary.IO.h"
 #include "Elastos.Droid.App.h"
 #include "Elastos.Droid.Graphics.h"

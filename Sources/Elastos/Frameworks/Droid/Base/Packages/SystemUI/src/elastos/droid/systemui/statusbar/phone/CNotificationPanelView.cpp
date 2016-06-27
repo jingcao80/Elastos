@@ -7,7 +7,7 @@
 #include "elastos/droid/systemui/statusbar/BaseStatusBar.h"
 #include "elastos/droid/systemui/keyguard/CKeyguardStatusView.h"
 #include "elastos/droid/view/animation/AnimationUtils.h"
-#include "../../R.h"
+#include "../R.h"
 #include "Elastos.Droid.Graphics.h"
 #include <elastos/droid/utility/MathUtils.h>
 #include <elastos/droid/R.h>

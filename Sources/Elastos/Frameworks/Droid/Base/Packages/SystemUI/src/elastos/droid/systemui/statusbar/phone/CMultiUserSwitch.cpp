@@ -1,7 +1,7 @@
 
 #include "elastos/droid/systemui/statusbar/phone/CMultiUserSwitch.h"
 #include "elastos/droid/systemui/statusbar/policy/UserSwitcherController.h"
-#include "../../R.h"
+#include "../R.h"
 #include "Elastos.Droid.Os.h"
 #include "Elastos.Droid.Provider.h"
 #include <elastos/droid/text/TextUtils.h>

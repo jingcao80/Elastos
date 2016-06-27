@@ -3,7 +3,7 @@
 #include "elastos/droid/systemui/volume/CVolumePanel.h"
 #include "elastos/droid/systemui/volume/ZenModePanel.h"
 #include "Elastos.Droid.Provider.h"
-#include "../R.h"
+#include "R.h"
 #include <elastos/utility/logging/Logger.h>
 
 using Elastos::Droid::Content::IContentResolver;

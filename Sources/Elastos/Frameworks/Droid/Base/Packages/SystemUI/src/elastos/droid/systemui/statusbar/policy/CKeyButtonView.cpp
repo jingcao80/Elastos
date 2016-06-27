@@ -1,7 +1,7 @@
 
 #include "elastos/droid/systemui/statusbar/policy/CKeyButtonView.h"
 #include "elastos/droid/systemui/statusbar/policy/CKeyButtonRipple.h"
-#include "../../R.h"
+#include "../R.h"
 #include "Elastos.Droid.App.h"
 #include "Elastos.Droid.Hardware.h"
 #include <elastos/core/Math.h>

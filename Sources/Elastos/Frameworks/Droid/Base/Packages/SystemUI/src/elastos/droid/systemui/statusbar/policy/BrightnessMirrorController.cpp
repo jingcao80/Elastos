@@ -1,7 +1,7 @@
 
 #include "elastos/droid/systemui/statusbar/policy/BrightnessMirrorController.h"
 #include "elastos/droid/systemui/statusbar/phone/CPhoneStatusBar.h"
-#include "../../R.h"
+#include "../R.h"
 #include "Elastos.Droid.Content.h"
 #include "Elastos.Droid.Widget.h"
 #include <elastos/utility/logging/Logger.h>

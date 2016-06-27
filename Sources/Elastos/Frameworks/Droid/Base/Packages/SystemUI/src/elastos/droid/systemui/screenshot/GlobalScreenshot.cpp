@@ -2,7 +2,7 @@
 #include "elastos/droid/systemui/screenshot/SaveImageInBackgroundData.h"
 #include "elastos/droid/systemui/screenshot/SaveImageInBackgroundTask.h"
 #include "elastos/droid/R.h"
-#include "../R.h"
+#include "R.h"
 #include <elastos/core/Math.h>
 
 using Elastos::Droid::Animation::CAnimatorSet;

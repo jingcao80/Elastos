@@ -1,8 +1,8 @@
 TARGET_NAME = power
 TARGET_TYPE = lib
 
-include $(MAKEDIR)/../../../../../../../../sources.inc
-INCLUDES += ../
+INCLUDES += ../../../../../
+INCLUDES += $(MAKEDIR)/../../../../../
 INCLUDES += $(MAKEDIR)/../../../../../inc/
 
 SOURCES = PowerNotificationWarnings.cpp

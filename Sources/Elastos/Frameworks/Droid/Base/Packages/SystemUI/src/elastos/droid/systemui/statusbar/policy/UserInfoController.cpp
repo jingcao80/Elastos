@@ -3,7 +3,7 @@
 #include "elastos/droid/systemui/statusbar/policy/CProfileReceiverBroadcastReceiver.h"
 #include "elastos/droid/systemui/statusbar/policy/CUserInfoControllerReceiver.h"
 #include "elastos/droid/systemui/BitmapHelper.h"
-#include "../../R.h"
+#include "../R.h"
 #include "Elastos.CoreLibrary.IO.h"
 #include "Elastos.Droid.App.h"
 #include "Elastos.Droid.Database.h"

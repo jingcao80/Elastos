@@ -2,7 +2,7 @@
 #include "elastos/droid/systemui/statusbar/phone/PanelView.h"
 #include "elastos/droid/systemui/statusbar/phone/VelocityTrackerFactory.h"
 #include "elastos/droid/systemui/doze/DozeLog.h"
-#include "../../R.h"
+#include "../R.h"
 #include <elastos/droid/R.h>
 #include <elastos/droid/view/animation/AnimationUtils.h>
 #include <elastos/core/Math.h>

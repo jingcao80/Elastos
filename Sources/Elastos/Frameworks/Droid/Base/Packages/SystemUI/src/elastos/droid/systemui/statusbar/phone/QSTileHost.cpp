@@ -12,7 +12,7 @@
 #include "elastos/droid/systemui/qs/tiles/LocationTile.h"
 #include "elastos/droid/systemui/qs/tiles/RotationLockTile.h"
 #include "elastos/droid/systemui/qs/tiles/WifiTile.h"
-#include "../../R.h"
+#include "../R.h"
 #include <elastos/droid/os/Looper.h>
 #include <elastos/droid/provider/Settings.h>
 #include <elastos/core/StringUtils.h>

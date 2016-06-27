@@ -2,7 +2,7 @@
 #include "Elastos.CoreLibrary.Core.h"
 #include "elastos/droid/systemui/volume/Interaction.h"
 #include "elastos/droid/view/LayoutInflater.h"
-#include "../R.h"
+#include "R.h"
 #include <elastos/core/StringUtils.h>
 #include <elastos/utility/Objects.h>
 

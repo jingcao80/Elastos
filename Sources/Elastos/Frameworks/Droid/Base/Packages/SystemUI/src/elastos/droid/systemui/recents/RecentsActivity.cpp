@@ -7,7 +7,7 @@
 #include "elastos/droid/systemui/recents/model/RecentsTaskLoader.h"
 #include "elastos/droid/systemui/recents/model/Task.h"
 #include "elastos/droid/systemui/recents/model/TaskStack.h"
-#include "../R.h"
+#include "R.h"
 #include <elastos/core/StringBuilder.h>
 #include <elastos/core/StringUtils.h>
 #include <elastos/utility/logging/Logger.h>

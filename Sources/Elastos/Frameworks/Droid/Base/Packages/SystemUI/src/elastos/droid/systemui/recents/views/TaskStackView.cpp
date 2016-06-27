@@ -9,7 +9,7 @@
 #include <elastos/core/Math.h>
 #include <elastos/core/StringBuilder.h>
 #include <elastos/utility/logging/Logger.h>
-#include "../../R.h"
+#include "../R.h"
 
 using Elastos::Droid::Animation::EIID_IAnimatorUpdateListener;
 using Elastos::Droid::Graphics::CMatrix;

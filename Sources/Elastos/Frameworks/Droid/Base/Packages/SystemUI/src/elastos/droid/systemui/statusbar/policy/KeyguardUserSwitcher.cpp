@@ -3,7 +3,7 @@
 #include "elastos/droid/systemui/statusbar/policy/CKeyguardUserSwitcherScrim.h"
 #include "elastos/droid/systemui/statusbar/policy/UserSwitcherController.h"
 #include "elastos/droid/systemui/statusbar/phone/CPhoneStatusBar.h"
-#include "../../R.h"
+#include "../R.h"
 #include <elastos/droid/view/LayoutInflater.h>
 #include <elastos/core/Math.h>
 #include <elastos/utility/logging/Logger.h>

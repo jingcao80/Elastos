@@ -4,7 +4,7 @@
 #include "Elastos.Droid.Content.h"
 #include <elastos/core/Math.h>
 #include <elastos/utility/logging/Logger.h>
-#include "../../R.h"
+#include "../R.h"
 
 using Elastos::Droid::Graphics::CLinearGradient;
 using Elastos::Droid::Graphics::CPaint;

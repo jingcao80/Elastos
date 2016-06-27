@@ -1,7 +1,7 @@
 
 #include "elastos/droid/systemui/statusbar/phone/BarTransitions.h"
 #include "elastos/droid/systemui/statusbar/phone/CBarBackgroundDrawable.h"
-#include "../../R.h"
+#include "../R.h"
 #include "Elastos.Droid.App.h"
 #include "Elastos.Droid.Content.h"
 #include <elastos/droid/R.h>

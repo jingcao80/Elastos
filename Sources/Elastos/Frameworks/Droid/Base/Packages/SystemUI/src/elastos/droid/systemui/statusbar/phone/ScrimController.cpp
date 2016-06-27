@@ -2,7 +2,7 @@
 #include "elastos/droid/systemui/statusbar/phone/ScrimController.h"
 #include "elastos/droid/systemui/statusbar/phone/UnlockMethodCache.h"
 #include "elastos/droid/systemui/doze/DozeLog.h"
-#include "../../R.h"
+#include "../R.h"
 #include "Elastos.Droid.Graphics.h"
 #include <elastos/droid/R.h>
 #include <elastos/droid/view/animation/AnimationUtils.h>

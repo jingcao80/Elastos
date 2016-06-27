@@ -1,5 +1,5 @@
 #include "elastos/droid/systemui/statusbar/policy/WifiIcons.h"
-#include "../../R.h"
+#include "../R.h"
 
 namespace Elastos {
 namespace Droid {

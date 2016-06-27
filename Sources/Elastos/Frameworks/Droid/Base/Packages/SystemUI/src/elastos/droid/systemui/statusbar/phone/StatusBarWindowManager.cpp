@@ -1,6 +1,6 @@
 
 #include "elastos/droid/systemui/statusbar/phone/StatusBarWindowManager.h"
-#include "../../R.h"
+#include "../R.h"
 #include "Elastos.Droid.Graphics.h"
 #include "Elastos.Droid.Os.h"
 

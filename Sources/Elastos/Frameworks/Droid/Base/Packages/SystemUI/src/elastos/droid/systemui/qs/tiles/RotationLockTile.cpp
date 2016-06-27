@@ -1,6 +1,6 @@
 
 #include "elastos/droid/systemui/qs/tiles/RotationLockTile.h"
-#include "../../R.h"
+#include "../R.h"
 
 using Elastos::Droid::Content::Res::IConfiguration;
 using Elastos::Droid::Content::Res::IResources;

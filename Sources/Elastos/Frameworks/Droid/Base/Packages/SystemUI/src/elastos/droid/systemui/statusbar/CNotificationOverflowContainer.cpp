@@ -1,6 +1,6 @@
 
 #include "elastos/droid/systemui/statusbar/CNotificationOverflowContainer.h"
-#include "../R.h"
+#include "R.h"
 
 using Elastos::Droid::SystemUI::StatusBar::Phone::IIconMerger;
 using Elastos::Droid::Widget::ITextView;

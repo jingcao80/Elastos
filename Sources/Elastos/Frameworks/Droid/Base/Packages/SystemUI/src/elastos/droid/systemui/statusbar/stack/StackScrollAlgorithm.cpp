@@ -2,7 +2,7 @@
 #include "elastos/droid/systemui/statusbar/stack/StackScrollAlgorithm.h"
 #include "elastos/droid/systemui/statusbar/stack/StackStateAnimator.h"
 #include "elastos/droid/systemui/statusbar/stack/PiecewiseLinearIndentationFunctor.h"
-#include "../../R.h"
+#include "../R.h"
 #include "Elastos.Droid.Content.h"
 #include "Elastos.Droid.Utility.h"
 #include <elastos/core/Math.h>

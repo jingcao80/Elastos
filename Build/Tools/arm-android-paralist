@@ -368,30 +368,31 @@
 # >  Elastos/Frameworks/Droid/Base/Core/src/elastos/droid/webkit/webview/chromium
 
 # ==== buid SystemUI ====
-- Elastos/Frameworks/Droid/Base/Packages/SystemUI/src/elastos/droid/systemui Elastos.Droid.SystemUI.car
-> Elastos/Frameworks/Droid/Base/Packages/SystemUI/src/elastos/droid/systemui/doze
+  Elastos/Frameworks/Droid/Base/Packages/SystemUI Elastos.Droid.SystemUI.car
+  Elastos/Frameworks/Droid/Base/Packages/SystemUI R.cpp
+< Elastos/Frameworks/Droid/Base/Packages/SystemUI/src/elastos/droid/systemui/doze
   Elastos/Frameworks/Droid/Base/Packages/SystemUI/src/elastos/droid/systemui/egg
   Elastos/Frameworks/Droid/Base/Packages/SystemUI/src/elastos/droid/systemui/keyguard
   Elastos/Frameworks/Droid/Base/Packages/SystemUI/src/elastos/droid/systemui/media
   Elastos/Frameworks/Droid/Base/Packages/SystemUI/src/elastos/droid/systemui/net
   Elastos/Frameworks/Droid/Base/Packages/SystemUI/src/elastos/droid/systemui/power
-> Elastos/Frameworks/Droid/Base/Packages/SystemUI/src/elastos/droid/systemui/qs/tiles
-  Elastos/Frameworks/Droid/Base/Packages/SystemUI/src/elastos/droid/systemui/qs
+  Elastos/Frameworks/Droid/Base/Packages/SystemUI/src/elastos/droid/systemui/qs/tiles
+< Elastos/Frameworks/Droid/Base/Packages/SystemUI/src/elastos/droid/systemui/qs
   Elastos/Frameworks/Droid/Base/Packages/SystemUI/src/elastos/droid/systemui/recent
-> Elastos/Frameworks/Droid/Base/Packages/SystemUI/src/elastos/droid/systemui/recents/misc
+< Elastos/Frameworks/Droid/Base/Packages/SystemUI/src/elastos/droid/systemui/recents/misc
   Elastos/Frameworks/Droid/Base/Packages/SystemUI/src/elastos/droid/systemui/recents/views
   Elastos/Frameworks/Droid/Base/Packages/SystemUI/src/elastos/droid/systemui/recents/model
-> Elastos/Frameworks/Droid/Base/Packages/SystemUI/src/elastos/droid/systemui/recents
-> Elastos/Frameworks/Droid/Base/Packages/SystemUI/src/elastos/droid/systemui/screenshot
+< Elastos/Frameworks/Droid/Base/Packages/SystemUI/src/elastos/droid/systemui/recents
+  Elastos/Frameworks/Droid/Base/Packages/SystemUI/src/elastos/droid/systemui/screenshot
   Elastos/Frameworks/Droid/Base/Packages/SystemUI/src/elastos/droid/systemui/settings
-> Elastos/Frameworks/Droid/Base/Packages/SystemUI/src/elastos/droid/systemui/statusbar/phone
-> Elastos/Frameworks/Droid/Base/Packages/SystemUI/src/elastos/droid/systemui/statusbar/policy
-> Elastos/Frameworks/Droid/Base/Packages/SystemUI/src/elastos/droid/systemui/statusbar/stack
+< Elastos/Frameworks/Droid/Base/Packages/SystemUI/src/elastos/droid/systemui/statusbar/phone
+  Elastos/Frameworks/Droid/Base/Packages/SystemUI/src/elastos/droid/systemui/statusbar/policy
+  Elastos/Frameworks/Droid/Base/Packages/SystemUI/src/elastos/droid/systemui/statusbar/stack
   Elastos/Frameworks/Droid/Base/Packages/SystemUI/src/elastos/droid/systemui/statusbar/tv
-> Elastos/Frameworks/Droid/Base/Packages/SystemUI/src/elastos/droid/systemui/statusbar
-> Elastos/Frameworks/Droid/Base/Packages/SystemUI/src/elastos/droid/systemui/usb
+< Elastos/Frameworks/Droid/Base/Packages/SystemUI/src/elastos/droid/systemui/statusbar
+  Elastos/Frameworks/Droid/Base/Packages/SystemUI/src/elastos/droid/systemui/usb
   Elastos/Frameworks/Droid/Base/Packages/SystemUI/src/elastos/droid/systemui/volume
-> Elastos/Frameworks/Droid/Base/Packages/SystemUI/src/elastos/droid/systemui
+< Elastos/Frameworks/Droid/Base/Packages/SystemUI
 
 # ==== build SettingsProvider ====
   Elastos/Frameworks/Droid/Base/Packages/SettingsProvider Elastos.Droid.SettingsProvider.car

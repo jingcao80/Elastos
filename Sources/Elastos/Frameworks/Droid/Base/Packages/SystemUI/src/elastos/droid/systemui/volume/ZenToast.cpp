@@ -3,7 +3,7 @@
 #include "Elastos.CoreLibrary.Core.h"
 #include "elastos/droid/view/LayoutInflater.h"
 #include "elastos/droid/R.h"
-#include "../R.h"
+#include "R.h"
 
 using Elastos::Droid::Content::CIntentFilter;
 using Elastos::Droid::Content::IIntentFilter;

@@ -1,7 +1,7 @@
 
 #include "elastos/droid/systemui/qs/tiles/CellularTile.h"
 #include "elastos/droid/systemui/qs/SignalTileView.h"
-#include "../../R.h"
+#include "../R.h"
 #include "Elastos.Droid.View.h"
 #include <elastos/droid/view/LayoutInflater.h>
 

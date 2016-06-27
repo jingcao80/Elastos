@@ -1,6 +1,6 @@
 
 #include "elastos/droid/systemui/qs/QSDualTileLabel.h"
-#include "../R.h"
+#include "R.h"
 #include "Elastos.Droid.Graphics.h"
 #include "Elastos.Droid.Text.h"
 #include <elastos/droid/text/TextUtils.h>

@@ -3,7 +3,7 @@
 #include "elastos/droid/systemui/statusbar/phone/CTrustDrawable.h"
 #include "elastos/droid/systemui/statusbar/phone/KeyguardTouchDelegate.h"
 #include "elastos/droid/systemui/statusbar/policy/PreviewInflater.h"
-#include "../../R.h"
+#include "../R.h"
 #include "Elastos.Droid.App.h"
 #include "Elastos.Droid.Content.h"
 #include "Elastos.Droid.Provider.h"

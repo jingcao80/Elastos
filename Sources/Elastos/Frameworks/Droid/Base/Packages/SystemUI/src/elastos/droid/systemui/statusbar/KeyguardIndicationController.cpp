@@ -1,6 +1,6 @@
 
 #include "elastos/droid/systemui/statusbar/KeyguardIndicationController.h"
-#include "../R.h"
+#include "R.h"
 #include "Elastos.Droid.Content.h"
 #include "Elastos.Droid.Internal.h"
 #include "Elastos.Droid.View.h"

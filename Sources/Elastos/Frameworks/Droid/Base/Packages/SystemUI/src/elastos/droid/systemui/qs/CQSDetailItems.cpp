@@ -1,7 +1,7 @@
 
 #include "elastos/droid/systemui/qs/CQSDetailItems.h"
 #include "elastos/droid/systemui/FontSizeUtils.h"
-#include "../R.h"
+#include "R.h"
 #include <elastos/droid/R.h>
 #include <elastos/droid/os/Looper.h>
 #include <elastos/droid/text/TextUtils.h>

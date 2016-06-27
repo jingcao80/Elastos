@@ -1,6 +1,6 @@
 #include "elastos/droid/systemui/statusbar/DelegateViewHelper.h"
 #include "elastos/droid/systemui/statusbar/BaseStatusBar.h"
-#include "../R.h"
+#include "R.h"
 #include "Elastos.Droid.Content.h"
 #include <elastos/droid/R.h>
 #include <elastos/utility/logging/Logger.h>

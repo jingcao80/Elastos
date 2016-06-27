@@ -7,7 +7,7 @@
 #include "elastos/droid/os/UserHandle.h"
 #include "elastos/droid/os/Process.h"
 #include "elastos/droid/R.h"
-#include "../R.h"
+#include "R.h"
 #include <elastos/core/AutoLock.h>
 #include <elastos/core/Math.h>
 #include <elastos/utility/logging/Logger.h>

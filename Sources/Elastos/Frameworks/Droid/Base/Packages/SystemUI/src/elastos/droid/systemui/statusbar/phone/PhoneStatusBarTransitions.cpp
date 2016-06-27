@@ -1,6 +1,6 @@
 
 #include "elastos/droid/systemui/statusbar/phone/PhoneStatusBarTransitions.h"
-#include "../../R.h"
+#include "../R.h"
 #include "Elastos.Droid.Content.h"
 
 using Elastos::Droid::Animation::CAnimatorSet;

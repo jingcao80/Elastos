@@ -3,7 +3,7 @@
 #include "Elastos.Droid.Content.h"
 #include "Elastos.Droid.Provider.h"
 #include "Elastos.CoreLibrary.Core.h"
-#include "../R.h"
+#include "R.h"
 #include <elastos/core/AutoLock.h>
 #include <elastos/utility/logging/Logger.h>
 

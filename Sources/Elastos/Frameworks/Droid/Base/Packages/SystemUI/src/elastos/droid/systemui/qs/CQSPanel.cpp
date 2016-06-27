@@ -2,7 +2,7 @@
 #include "elastos/droid/systemui/qs/CQSPanel.h"
 #include "elastos/droid/systemui/settings/CToggleSlider.h"
 #include "elastos/droid/systemui/FontSizeUtils.h"
-#include "../R.h"
+#include "R.h"
 #include <elastos/droid/R.h>
 #include <elastos/droid/view/LayoutInflater.h>
 #include <elastos/core/Math.h>

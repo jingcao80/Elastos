@@ -1,6 +1,6 @@
 
 #include "elastos/droid/systemui/statusbar/CNotificationContentView.h"
-#include "../R.h"
+#include "R.h"
 #include <elastos/droid/R.h>
 
 using Elastos::Droid::Animation::ITimeInterpolator;

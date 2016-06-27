@@ -1,7 +1,7 @@
 
 #include "elastos/droid/systemui/qs/tiles/CUserDetailItemView.h"
 #include "elastos/droid/systemui/FontSizeUtils.h"
-#include "../../R.h"
+#include "../R.h"
 #include <elastos/droid/R.h>
 #include <elastos/droid/internal/utility/ArrayUtils.h>
 #include <elastos/droid/view/LayoutInflater.h>

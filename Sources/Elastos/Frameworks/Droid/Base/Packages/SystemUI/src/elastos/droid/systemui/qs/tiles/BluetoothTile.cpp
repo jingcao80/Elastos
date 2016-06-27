@@ -2,7 +2,7 @@
 #include "elastos/droid/systemui/qs/tiles/BluetoothTile.h"
 #include "elastos/droid/systemui/qs//CQSDetailItems.h"
 #include "elastos/droid/systemui/statusbar/policy/PairedDevice.h"
-#include "../../R.h"
+#include "../R.h"
 #include "Elastos.Droid.Provider.h"
 #include <elastos/droid/text/TextUtils.h>
 

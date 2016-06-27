@@ -1,7 +1,7 @@
 
 #include "elastos/droid/systemui/statusbar/phone/PhoneStatusBarPolicy.h"
 #include "elastos/droid/systemui/statusbar/phone/CPhoneStatusBarPolicyIntentReceiver.h"
-#include "../../R.h"
+#include "../R.h"
 #include "Elastos.CoreLibrary.Utility.h"
 #include "Elastos.Droid.Bluetooth.h"
 #include "Elastos.Droid.Internal.h"

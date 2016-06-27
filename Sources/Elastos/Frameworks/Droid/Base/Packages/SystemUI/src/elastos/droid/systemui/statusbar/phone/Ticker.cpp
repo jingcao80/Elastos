@@ -1,7 +1,7 @@
 
 #include "elastos/droid/systemui/statusbar/phone/Ticker.h"
 #include "elastos/droid/systemui/statusbar/StatusBarIconView.h"
-#include "../../R.h"
+#include "../R.h"
 #include "Elastos.Droid.Internal.h"
 #include "Elastos.Droid.Os.h"
 #include "Elastos.Droid.Service.h"

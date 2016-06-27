@@ -6,7 +6,7 @@
 #include "elastos/droid/systemui/statusbar/CNotificationListenerService.h"
 #include "elastos/droid/systemui/statusbar/CStatusBarIconView.h"
 #include "elastos/droid/systemui/statusbar/CSettingsObserver.h"
-#include "../R.h"
+#include "R.h"
 #include "Elastos.Droid.App.h"
 #include "Elastos.Droid.Internal.h"
 #include "Elastos.Droid.Provider.h"

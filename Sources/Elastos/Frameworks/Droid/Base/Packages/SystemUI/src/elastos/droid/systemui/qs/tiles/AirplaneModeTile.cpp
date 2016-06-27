@@ -1,6 +1,6 @@
 
 #include "elastos/droid/systemui/qs/tiles/AirplaneModeTile.h"
-#include "../../R.h"
+#include "../R.h"
 #include "Elastos.Droid.Provider.h"
 
 using Elastos::Droid::Content::CIntentFilter;

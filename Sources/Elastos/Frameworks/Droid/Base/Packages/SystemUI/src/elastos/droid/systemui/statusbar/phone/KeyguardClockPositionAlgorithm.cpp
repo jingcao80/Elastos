@@ -1,6 +1,6 @@
 
 #include "elastos/droid/systemui/statusbar/phone/KeyguardClockPositionAlgorithm.h"
-#include "../../R.h"
+#include "../R.h"
 #include "Elastos.Droid.Animation.h"
 #include "Elastos.Droid.Content.h"
 #include "Elastos.Droid.Graphics.h"

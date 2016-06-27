@@ -1,7 +1,7 @@
 
 #include "elastos/droid/systemui/statusbar/phone/CStatusBarHeaderView.h"
 #include "elastos/droid/systemui/FontSizeUtils.h"
-#include "../../R.h"
+#include "../R.h"
 #include "Elastos.Droid.Content.h"
 #include "Elastos.Droid.Graphics.h"
 #include "Elastos.Droid.Provider.h"

@@ -1,7 +1,7 @@
 
 #include "elastos/droid/systemui/statusbar/policy/WifiAccessPointController.h"
 #include "elastos/droid/systemui/statusbar/policy/NetworkController.h"
-#include "../../R.h"
+#include "../R.h"
 #include <elastos/droid/text/TextUtils.h>
 #include <elastos/core/Math.h>
 #include <elastos/utility/logging/Logger.h>

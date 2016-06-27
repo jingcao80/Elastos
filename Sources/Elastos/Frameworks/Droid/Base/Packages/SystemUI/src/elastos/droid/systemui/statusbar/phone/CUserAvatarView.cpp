@@ -1,6 +1,6 @@
 
 #include "elastos/droid/systemui/statusbar/phone/CUserAvatarView.h"
-#include "../../R.h"
+#include "../R.h"
 #include "Elastos.Droid.Content.h"
 #include <elastos/core/Math.h>
 

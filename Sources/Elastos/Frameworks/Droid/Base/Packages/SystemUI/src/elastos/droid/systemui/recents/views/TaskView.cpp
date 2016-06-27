@@ -5,7 +5,7 @@
 #include "elastos/droid/systemui/recents/Constants.h"
 #include "elastos/droid/systemui/recents/AlternateRecentsComponent.h"
 #include "elastos/droid/systemui/recents/model/RecentsTaskLoader.h"
-#include "../../R.h"
+#include "../R.h"
 #include <elastos/core/Math.h>
 #include <elastos/utility/logging/Logger.h>
 

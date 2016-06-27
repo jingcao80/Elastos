@@ -2,7 +2,7 @@
 #include "elastos/droid/systemui/egg/LLand.h"
 #include "Elastos.Droid.Widget.h"
 #include "Elastos.CoreLibrary.Core.h"
-#include "../R.h"
+#include "R.h"
 #include <elastos/core/Math.h>
 #include <elastos/core/StringBuilder.h>
 #include <elastos/utility/logging/Logger.h>

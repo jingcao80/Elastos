@@ -1,6 +1,6 @@
 
 #include "elastos/droid/systemui/keyguard/CKeyguardStatusView.h"
-#include "../R.h"
+#include "R.h"
 #include "Elastos.Droid.App.h"
 #include "Elastos.Droid.Content.h"
 #include <elastos/droid/text/format/DateFormat.h>

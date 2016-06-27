@@ -1,5 +1,5 @@
 #include "elastos/droid/systemui/statusbar/policy/WimaxIcons.h"
-#include "../../R.h"
+#include "../R.h"
 
 namespace Elastos {
 namespace Droid {

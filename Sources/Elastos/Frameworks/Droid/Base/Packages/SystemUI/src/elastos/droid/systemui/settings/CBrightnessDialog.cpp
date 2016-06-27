@@ -1,7 +1,7 @@
 
 #include "elastos/droid/systemui/settings/CBrightnessDialog.h"
 #include "Elastos.Droid.Widget.h"
-#include "../R.h"
+#include "R.h"
 #include <elastos/utility/logging/Logger.h>
 
 using Elastos::Droid::View::IGravity;

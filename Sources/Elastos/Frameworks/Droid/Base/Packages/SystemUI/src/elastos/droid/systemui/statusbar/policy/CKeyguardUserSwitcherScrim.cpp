@@ -1,6 +1,6 @@
 
 #include "elastos/droid/systemui/statusbar/policy/CKeyguardUserSwitcherScrim.h"
-#include "../../R.h"
+#include "../R.h"
 #include "Elastos.Droid.Content.h"
 #include "Elastos.Droid.Utility.h"
 #include <elastos/core/Math.h>

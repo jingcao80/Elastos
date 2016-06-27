@@ -4,7 +4,7 @@
 #include "elastos/droid/systemui/recents/misc/Utilities.h"
 #include "elastos/droid/systemui/recents/Constants.h"
 #include <elastos/droid/R.h>
-#include "../../R.h"
+#include "../R.h"
 #include <elastos/core/CoreUtils.h>
 #include <elastos/core/Math.h>
 #include <elastos/utility/logging/Logger.h>

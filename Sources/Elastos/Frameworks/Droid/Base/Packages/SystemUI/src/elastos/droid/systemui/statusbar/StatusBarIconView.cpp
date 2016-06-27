@@ -1,7 +1,7 @@
 
 #include "elastos/droid/systemui/statusbar/StatusBarIconView.h"
 #include "elastos/droid/R.h"
-#include "../R.h"
+#include "R.h"
 #include "Elastos.CoreLibrary.Text.h"
 #include "Elastos.Droid.Os.h"
 #include <elastos/droid/text/TextUtils.h>

@@ -1,6 +1,6 @@
 
 #include "elastos/droid/systemui/statusbar/phone/DozeParameters.h"
-#include "../../R.h"
+#include "../R.h"
 #include <Elastos.CoreLibrary.IO.h>
 #include "Elastos.Droid.Os.h"
 #include <elastos/droid/text/TextUtils.h>

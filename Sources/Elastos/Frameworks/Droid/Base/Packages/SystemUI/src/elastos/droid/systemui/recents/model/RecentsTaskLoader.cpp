@@ -3,7 +3,7 @@
 #include "elastos/droid/systemui/recents/model/SpaceNode.h"
 #include "Elastos.CoreLibrary.Core.h"
 #include "elastos/droid/systemui/recents/Constants.h"
-#include "../../R.h"
+#include "../R.h"
 #include <elastos/core/AutoLock.h>
 #include <elastos/core/Math.h>
 #include <elastos/utility/logging/Logger.h>

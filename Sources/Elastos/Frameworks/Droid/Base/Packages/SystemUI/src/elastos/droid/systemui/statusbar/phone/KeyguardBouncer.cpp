@@ -1,6 +1,6 @@
 
 #include "elastos/droid/systemui/statusbar/phone/KeyguardBouncer.h"
-#include "../../R.h"
+#include "../R.h"
 #include <elastos/droid/view/LayoutInflater.h>
 #include <elastos/utility/logging/Logger.h>
 

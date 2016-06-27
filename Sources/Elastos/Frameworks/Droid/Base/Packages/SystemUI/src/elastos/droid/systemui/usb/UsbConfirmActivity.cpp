@@ -8,7 +8,7 @@
 #include "elastos/droid/os/ServiceManager.h"
 #include "elastos/droid/R.h"
 #include <elastos/core/StringUtils.h>
-#include "../R.h"
+#include "R.h"
 
 using Elastos::Droid::App::AlertDialog;
 using Elastos::Droid::Content::CComponentName;

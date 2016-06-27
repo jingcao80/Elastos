@@ -2,7 +2,7 @@
 #include "elastos/droid/systemui/recents/misc/SystemServicesProxy.h"
 #include "elastos/droid/systemui/recents/misc/Console.h"
 #include "elastos/droid/systemui/recents/Constants.h"
-#include "../../R.h"
+#include "../R.h"
 #include "Elastos.Droid.Os.h"
 #include "Elastos.Droid.Provider.h"
 #include "Elastos.CoreLibrary.Core.h"

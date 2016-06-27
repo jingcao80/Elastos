@@ -1,7 +1,7 @@
 
 #include "elastos/droid/systemui/qs/UsageTracker.h"
 #include "elastos/droid/systemui/qs/CUsageTrackerReceiver.h"
-#include "../R.h"
+#include "R.h"
 
 using Elastos::Droid::Content::CIntentFilter;
 using Elastos::Droid::Content::IIntentFilter;

@@ -6,7 +6,7 @@
 #include "Elastos.CoreLibrary.Core.h"
 #include "elastos/droid/os/ServiceManager.h"
 #include "elastos/droid/R.h"
-#include "../R.h"
+#include "R.h"
 #include <elastos/utility/logging/Logger.h>
 
 using Elastos::Droid::App::IAlertDialog;

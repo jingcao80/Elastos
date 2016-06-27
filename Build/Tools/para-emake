@@ -340,6 +340,46 @@ build_eco() {
     sleep 1&&touch "$eco_ts_path"
 }
 
+build_cpp() {
+    set +o errtrace
+    local rcpp_ts_path="$mirror_path/$1.timestamp"
+    if [[ "$XDK_TARGETS/$1" -ot "$rcpp_ts_path" ]]; then
+        return
+    fi
+    local extra_res_dir_list="`grep 'EXTRA_RES_DIR' $src_path/sources | sed -n 's/\(.\)* \?\= \(.*\)/\2/p' | sed 's/MAKEDIR//g'`"
+    extra_res_dir_list="${extra_res_dir_list//\$\(/}"
+    extra_res_dir_list="${extra_res_dir_list//\)\//}"
+    local res_namespace="`grep 'RES_NAMESPACE' $src_path/sources | sed -n 's/\(.\)* \?\= \(.*\)/\2/p'`"
+    local aapt_flags="`grep 'AAPT_FLAGS' $src_path/sources | sed -n 's/\(.\)* \?\= \(.*\)/\2/p'`"
+    local extra_res_dir
+    for i in $extra_res_dir_list; do
+        if [[ -z "$res_namespace" ]]; then
+            extra_res_dir="-S $i"
+        else
+            extra_res_dir="-S $i $extra_res_dir"
+        fi
+    done
+    set -o errtrace
+
+    cd $src_path
+    if [[ -d gen ]]; then rm -rf gen; fi
+    mkdir gen
+    aapt \
+        package $aapt_flags \
+        -f \
+        -m \
+        -J $src_path/gen \
+        $extra_res_dir \
+        -S res \
+        --cpp $res_namespace \
+        -I $EMULATOR_PATH/platforms/android-23/package-export.apk \
+        -M AndroidManifest.xml
+    cp -f gen/${res_namespace//\.//}/R.h .
+    cp -f gen/${res_namespace//\.//}/R.cpp .
+    rm -rf gen
+    sleep 1&&touch "$rcpp_ts_path"
+}
+
 build_car() {
     local car_file_name="${1%.car}"
     local cls_file="$car_file_name.cls"
@@ -394,7 +434,7 @@ build() {
     for file in "$@"; do
         local -l ext="${file##*.}"
         case $ext in
-            'car' | 'eco')
+            'car' | 'eco' | 'cpp')
                 build_$ext "$file"
                 ;;
             *)

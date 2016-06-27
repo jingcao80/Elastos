@@ -3,7 +3,7 @@
 #include "elastos/droid/systemui/qs/CQSDetailItems.h"
 #include "elastos/droid/systemui/qs/SignalTileView.h"
 #include "elastos/droid/systemui/statusbar/policy/NetworkController.h"
-#include "../../R.h"
+#include "../R.h"
 #include "Elastos.Droid.Provider.h"
 #include <elastos/core/StringBuilder.h>
 

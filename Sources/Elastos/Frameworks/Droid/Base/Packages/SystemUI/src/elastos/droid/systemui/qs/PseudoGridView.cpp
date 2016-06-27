@@ -1,7 +1,7 @@
 
 #include "elastos/droid/systemui/qs/PseudoGridView.h"
 #include "elastos/droid/systemui/qs/CViewGroupAdapterBridge.h"
-#include "../R.h"
+#include "R.h"
 #include <elastos/core/Math.h>
 #include <elastos/utility/logging/Logger.h>
 

@@ -1,7 +1,7 @@
 
 #include "elastos/droid/systemui/qs/tiles/CUserDetailView.h"
 #include "elastos/droid/systemui/qs/tiles/CUserDetailItemView.h"
-#include "../../R.h"
+#include "../R.h"
 #include <elastos/droid/view/LayoutInflater.h>
 
 using Elastos::Droid::SystemUI::StatusBar::Policy::IUserSwitcherControllerUserRecord;

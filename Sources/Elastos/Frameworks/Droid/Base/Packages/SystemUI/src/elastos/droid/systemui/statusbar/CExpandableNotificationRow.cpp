@@ -1,6 +1,6 @@
 
 #include "elastos/droid/systemui/statusbar/CExpandableNotificationRow.h"
-#include "../R.h"
+#include "R.h"
 #include <elastos/droid/R.h>
 
 using Elastos::Droid::Graphics::Drawable::IAnimatable;

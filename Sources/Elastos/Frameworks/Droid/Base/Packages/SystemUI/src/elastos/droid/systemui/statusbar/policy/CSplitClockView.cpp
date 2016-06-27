@@ -1,6 +1,6 @@
 
 #include "elastos/droid/systemui/statusbar/policy/CSplitClockView.h"
-#include "../../R.h"
+#include "../R.h"
 #include "Elastos.Droid.Content.h"
 #include "Elastos.Droid.Text.h"
 #include "Elastos.Droid.View.h"

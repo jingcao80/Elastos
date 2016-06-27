@@ -5,7 +5,7 @@
 #include "Elastos.Droid.Graphics.h"
 #include "Elastos.CoreLibrary.Core.h"
 #include "elastos/droid/app/AlertDialog.h"
-#include "../R.h"
+#include "R.h"
 #include "elastos/droid/R.h"
 #include <elastos/core/AutoLock.h>
 #include <elastos/core/StringUtils.h>

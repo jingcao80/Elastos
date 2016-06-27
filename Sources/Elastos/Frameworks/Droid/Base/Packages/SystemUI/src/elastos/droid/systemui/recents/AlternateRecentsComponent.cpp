@@ -19,7 +19,7 @@
 #include "elastos/droid/view/LayoutInflater.h"
 #include "elastos/droid/view/View.h"
 #include "elastos/droid/R.h"
-#include "../R.h"
+#include "R.h"
 #include <elastos/utility/logging/Logger.h>
 
 using Elastos::Droid::App::CActivityOptionsHelper;

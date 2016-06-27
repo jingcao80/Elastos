@@ -6,7 +6,7 @@
 #include "Elastos.Droid.Utility.h"
 #include <elastos/droid/view/animation/AnimationUtils.h>
 #include <elastos/droid/R.h>
-#include "../R.h"
+#include "R.h"
 
 using Elastos::Droid::App::CActivityManagerHelper;
 using Elastos::Droid::App::IActivityManagerHelper;

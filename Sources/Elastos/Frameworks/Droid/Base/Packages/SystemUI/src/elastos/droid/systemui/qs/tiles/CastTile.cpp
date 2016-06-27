@@ -2,7 +2,7 @@
 #include "elastos/droid/systemui/qs/tiles/CastTile.h"
 #include "elastos/droid/systemui/qs/CQSDetailItems.h"
 #include "elastos/droid/systemui/statusbar/policy/CastDevice.h"
-#include "../../R.h"
+#include "../R.h"
 #include "Elastos.Droid.Provider.h"
 #include <elastos/utility/logging/Logger.h>
 

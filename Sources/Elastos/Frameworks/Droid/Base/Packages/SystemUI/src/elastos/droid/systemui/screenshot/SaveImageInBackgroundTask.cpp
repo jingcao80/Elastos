@@ -11,7 +11,7 @@
 #include "elastos/droid/os/Environment.h"
 #include "elastos/droid/os/Process.h"
 #include "elastos/droid/R.h"
-#include "../R.h"
+#include "R.h"
 #include <elastos/core/StringUtils.h>
 
 using Elastos::Droid::App::CNotificationBigPictureStyle;

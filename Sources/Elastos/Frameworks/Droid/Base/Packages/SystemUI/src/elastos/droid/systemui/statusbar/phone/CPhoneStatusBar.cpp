@@ -15,7 +15,7 @@
 #include "elastos/droid/systemui/statusbar/CStatusBarIconView.h"
 #include "elastos/droid/systemui/doze/DozeLog.h"
 #include "elastos/droid/systemui/FontSizeUtils.h"
-#include "../../R.h"
+#include "../R.h"
 #include "Elastos.CoreLibrary.Utility.h"
 #include "Elastos.Droid.InputMethodService.h"
 #include "Elastos.Droid.Provider.h"

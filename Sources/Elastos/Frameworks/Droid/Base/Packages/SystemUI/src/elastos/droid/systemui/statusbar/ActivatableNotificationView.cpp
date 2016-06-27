@@ -1,7 +1,7 @@
 
 #include "elastos/droid/systemui/statusbar/ActivatableNotificationView.h"
 #include "elastos/droid/systemui/statusbar/CNotificationBackgroundView.h"
-#include "../R.h"
+#include "R.h"
 #include <elastos/droid/R.h>
 #include <elastos/core/Math.h>
 

@@ -1,6 +1,6 @@
 
 #include "elastos/droid/systemui/statusbar/policy/CDateView.h"
-#include "../../R.h"
+#include "../R.h"
 #include <elastos/droid/text/format/DateFormat.h>
 
 using Elastos::Droid::Content::CIntentFilter;

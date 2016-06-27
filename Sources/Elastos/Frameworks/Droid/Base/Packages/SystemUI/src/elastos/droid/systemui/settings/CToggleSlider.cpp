@@ -3,7 +3,7 @@
 #include "Elastos.Droid.View.h"
 #include "Elastos.CoreLibrary.Core.h"
 #include "elastos/droid/view/View.h"
-#include "../R.h"
+#include "R.h"
 
 using Elastos::Droid::Content::Res::IResources;
 using Elastos::Droid::Content::Res::ITypedArray;

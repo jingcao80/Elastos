@@ -1,6 +1,6 @@
 
 #include "elastos/droid/systemui/statusbar/phone/CTrustDrawable.h"
-#include "../../R.h"
+#include "../R.h"
 #include "Elastos.Droid.Content.h"
 #include <elastos/droid/view/animation/AnimationUtils.h>
 #include <elastos/droid/R.h>
