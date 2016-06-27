@@ -12,6 +12,7 @@
 #include <elastos/core/Object.h>
 
 using Elastos::Droid::App::Application;
+using Elastos::Droid::Telecomm::Internal::IITelecomService;
 
 namespace Elastos {
 namespace Droid {
@@ -39,7 +40,7 @@ private:
     /**
      * The Telecom service implementation.
      */
-    AutoPtr<TelecomServiceImpl> mTelecomService;
+    AutoPtr<IITelecomService> mTelecomService;
 
     /**
      * Missed call notifier. Exists here so that the instance can be shared with

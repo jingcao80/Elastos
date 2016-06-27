@@ -1133,6 +1133,14 @@ module
         interface IBinder;
     }
 
+    [local]
+    class CMediaSessionService {
+        constructor(
+            [in] IContext* ctx);
+
+        interface ISystemService;
+    }
+
     class CMediaSession {
         constructor(
             [in] Handle64 host);

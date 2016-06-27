@@ -370,16 +370,18 @@ ECode CallAudioManager::OnCallUpdated(
     Boolean wasNotVoiceCall = mAudioFocusStreamType != IAudioManager::STREAM_VOICE_CALL;
     UpdateAudioStreamAndMode();
     AutoPtr<IPhoneAccountHandle> phoneAccountHandle;
-    ((Call*) call)->GetTargetPhoneAccount((IPhoneAccountHandle**)&phoneAccountHandle);
     Int32 state;
-    ((Call*) call)->GetState(&state);
     String id;
-    phoneAccountHandle->GetId(&id);
-    if ((call != NULL) && (state == ICallState::ACTIVE) &&
-            (phoneAccountHandle != NULL) &&
-            id.Equals(mSubId) && mSpeedUpAudioForMtCall) {
-        Log::D("CallAudioManager","Reset mSpeedUpAudioForMtCall");
-        mSpeedUpAudioForMtCall = FALSE;
+    if ((call != NULL)) {
+        ((Call*) call)->GetState(&state);
+        ((Call*) call)->GetTargetPhoneAccount((IPhoneAccountHandle**)&phoneAccountHandle);
+        if ((state == ICallState::ACTIVE) && (phoneAccountHandle != NULL)) {
+            phoneAccountHandle->GetId(&id);
+            if(id.Equals(mSubId) && mSpeedUpAudioForMtCall) {
+                Log::D("CallAudioManager","Reset mSpeedUpAudioForMtCall");
+                mSpeedUpAudioForMtCall = FALSE;
+            }
+        }
     }
     // If we transition from not voice call to voice call, we need to set an initial state.
     if (wasNotVoiceCall && mAudioFocusStreamType == IAudioManager::STREAM_VOICE_CALL) {
@@ -699,9 +701,11 @@ ECode CallAudioManager::GetForegroundCall(
     // We ignore any foreground call that is in the ringing state because we deal with ringing
     // calls exclusively through the mIsRinging variable set by {@link Ringer}.
     Int32 state;
-    ((Call*) call.Get())->GetState(&state);
-    if (call != NULL && state == ICallState::RINGING && !mSpeedUpAudioForMtCall ) {
-        call = NULL;
+    if (call != NULL) {
+        ((Call*) call.Get())->GetState(&state);
+        if (state == ICallState::RINGING && !mSpeedUpAudioForMtCall ) {
+            call = NULL;
+        }
     }
     *result = call;
     REFCOUNT_ADD(*result)

@@ -1603,7 +1603,7 @@ ECode CConcurrentHashMap::MapEntry::SetValue(
 //===============================================================================
 // CConcurrentHashMap::CollectionView::
 //===============================================================================
-CAR_INTERFACE_IMPL_2(CConcurrentHashMap::CollectionView, Object, ICollection, ISerializable)
+CAR_INTERFACE_IMPL_3(CConcurrentHashMap::CollectionView, Object, ICollection, IIterable, ISerializable)
 
 String CConcurrentHashMap::CollectionView::mOomeMsg = String("Required array size too large");
 

@@ -1,5 +1,5 @@
-
 #include "elastos/droid/server/telecom/TelecomApp.h"
+#include "elastos/droid/server/telecom/CTelecomServiceImpl.h"
 #include "elastos/droid/server/telecom/BlacklistCallNotifier.h"
 #include "elastos/droid/server/telecom/BluetoothPhoneService.h"
 #include <elastos/droid/os/ServiceManager.h>
@@ -33,9 +33,9 @@ ECode TelecomApp::OnCreate()
         mCallsManager->constructor(this, mMissedCallNotifier,
                 mBlacklistCallNotifier, mPhoneAccountRegistrar);
         CallsManager::Initialize(mCallsManager);
-        mTelecomService = new TelecomServiceImpl();
-        mTelecomService->constructor(mMissedCallNotifier, mPhoneAccountRegistrar,
-                mCallsManager, this);
+
+        CTelecomServiceImpl::New(TO_IINTERFACE(mMissedCallNotifier), TO_IINTERFACE(mPhoneAccountRegistrar),
+                TO_IINTERFACE(mCallsManager), this, (IITelecomService**)&mTelecomService);
         ServiceManager::AddService(IContext::TELECOM_SERVICE, TO_IINTERFACE(mTelecomService));
         // Start the BluetoothPhoneService
         BluetoothPhoneService::Start(this);

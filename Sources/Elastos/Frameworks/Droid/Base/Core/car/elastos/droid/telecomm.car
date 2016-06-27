@@ -448,6 +448,10 @@ module
         interface ITelecomManagerHelper;
     }
 
+    singleton class CVideoProfileVideoStateHelper {
+        interface IVideoProfileVideoStateHelper;
+    }
+
     } // namespace Telecom
     } // namespace Telecomm
     } // namespace Droid

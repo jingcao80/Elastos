@@ -512,6 +512,7 @@ public:
     class CollectionView
         : public Object
         , public ICollection
+        , public IIterable
         , public ISerializable
     {
     public:

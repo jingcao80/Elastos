@@ -87,7 +87,7 @@
              contain contact information in the intent's data. CallActivity handles any data
              URL with the schemes "tel", "sip", and "voicemail". It also handles URLs linked to
              contacts provider entries. Any data not fitting the schema described is ignored. -->
-        <activity android:name="CallActivity"
+        <activity android:name="CCallActivity"
                 android:theme="@style/Theme.Telecomm.Transparent"
                 android:permission="android.permission.CALL_PHONE"
                 android:excludeFromRecents="true">
@@ -125,7 +125,7 @@
              processed. High priority of 1000 is used in all intent filters to prevent anything but
              the system from processing this intent (b/8871505). -->
         <activity-alias android:name="PrivilegedCallActivity"
-                android:targetActivity="CallActivity"
+                android:targetActivity="CCallActivity"
                 android:permission="android.permission.CALL_PRIVILEGED">
             <intent-filter android:priority="1000">
                 <action android:name="android.intent.action.CALL_PRIVILEGED" />
@@ -159,7 +159,7 @@
         <!-- TODO: Is there really a notion of an emergency SIP number? If not, can
              that scheme be removed from this activity? -->
         <activity-alias android:name="EmergencyCallActivity"
-                android:targetActivity="CallActivity"
+                android:targetActivity="CCallActivity"
                 android:permission="android.permission.CALL_PRIVILEGED">
             <intent-filter android:priority="1000">
                 <action android:name="android.intent.action.CALL_EMERGENCY" />
@@ -186,7 +186,7 @@
         </activity-alias>
 
         <activity-alias android:name="IncomingCallActivity"
-                android:targetActivity="CallActivity"
+                android:targetActivity="CCallActivity"
                 android:exported="true">
             <intent-filter>
                 <action android:name="android.telecom.action.INCOMING_CALL" />

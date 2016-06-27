@@ -39,14 +39,16 @@ const AutoPtr<ArrayOf<Int32> > MediaSessionStack::TRANSITION_PRIORITY_STATES = I
 void MediaSessionStack::AddSession(
     /* [in] */ MediaSessionRecord* record)
 {
-    mSessions.PushBack(record);
+    AutoPtr<MediaSessionRecord> msr(record);
+    mSessions.PushBack(msr);
     ClearCache();
 }
 
 void MediaSessionStack::RemoveSession(
     /* [in] */ MediaSessionRecord* record)
 {
-    mSessions.Remove(record);
+    AutoPtr<MediaSessionRecord> msr(record);
+    mSessions.Remove(msr);
     if (record == mGlobalPrioritySession.Get()) {
         mGlobalPrioritySession = NULL;
     }
@@ -59,8 +61,9 @@ Boolean MediaSessionStack::OnPlaystateChange(
     /* [in] */ Int32 newState)
 {
     if (ShouldUpdatePriority(oldState, newState)) {
-        mSessions.Remove(record);
-        mSessions.Insert(mSessions.Begin(), record);
+        AutoPtr<MediaSessionRecord> msr(record);
+        mSessions.Remove(msr);
+        mSessions.Insert(mSessions.Begin(), msr);
         ClearCache();
         return TRUE;
     }
@@ -181,7 +184,7 @@ AutoPtr<List<AutoPtr<MediaSessionRecord> > > MediaSessionStack::GetPriorityListL
     /* [in] */ Int32 withFlags,
     /* [in] */ Int32 userId)
 {
-    List<AutoPtr<MediaSessionRecord> > result;
+    AutoPtr<List<AutoPtr<MediaSessionRecord> > > result = new List<AutoPtr<MediaSessionRecord> >();
     Int32 lastLocalIndex = 0;
     Int32 lastActiveIndex = 0;
     Int32 lastPublishedIndex = 0;
@@ -202,7 +205,7 @@ AutoPtr<List<AutoPtr<MediaSessionRecord> > > MediaSessionStack::GetPriorityListL
             if (!activeOnly) {
                 // If we're getting unpublished as well always put them at
                 // the end
-                result.PushBack(session);
+                result->PushBack(session);
             }
             continue;
         }
@@ -210,7 +213,7 @@ AutoPtr<List<AutoPtr<MediaSessionRecord> > > MediaSessionStack::GetPriorityListL
         if (session->IsSystemPriority()) {
             // System priority sessions are special and always go at the
             // front. We expect there to only be one of these at a time.
-            result.Insert(result.Begin(), session);
+            result->Insert(result->Begin(), session);
             lastLocalIndex++;
             lastActiveIndex++;
             lastPublishedIndex++;
@@ -219,14 +222,14 @@ AutoPtr<List<AutoPtr<MediaSessionRecord> > > MediaSessionStack::GetPriorityListL
             // TODO this with real local route check
             if (TRUE) {
                 // Active local sessions get top priority
-                result.Insert(lastLocalIndex, session);
+                result->Insert(lastLocalIndex, session);
                 lastLocalIndex++;
                 lastActiveIndex++;
                 lastPublishedIndex++;
             }
             else {
                 // Then active remote sessions
-                result.Insert(lastActiveIndex, session);
+                result->Insert(lastActiveIndex, session);
                 lastActiveIndex++;
                 lastPublishedIndex++;
             }
@@ -234,12 +237,12 @@ AutoPtr<List<AutoPtr<MediaSessionRecord> > > MediaSessionStack::GetPriorityListL
         else {
             // inactive sessions go at the end in order of whoever last did
             // something.
-            result.Insert(lastPublishedIndex, session);
+            result->Insert(lastPublishedIndex, session);
             lastPublishedIndex++;
         }
     }
 
-    return &result;
+    return result;
 }
 
 Boolean MediaSessionStack::ShouldUpdatePriority(

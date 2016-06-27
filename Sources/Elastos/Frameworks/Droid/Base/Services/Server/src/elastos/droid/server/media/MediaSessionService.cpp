@@ -161,9 +161,13 @@ const String MediaSessionService::TAG("MediaSessionService");
 const Boolean MediaSessionService::DEBUG;
 const Int32 MediaSessionService::WAKELOCK_TIMEOUT;
 
-MediaSessionService::MediaSessionService(
+MediaSessionService::MediaSessionService()
+{
+    mCurrentUserId = -1;
+}
+
+ECode MediaSessionService::constructor(
     /* [in] */ IContext* context)
-    : mCurrentUserId(-1)
 {
     SystemService::constructor(context);
     mHandler = new MessageHandler(this);
@@ -173,6 +177,7 @@ MediaSessionService::MediaSessionService(
     context->GetSystemService(IContext::POWER_SERVICE, (IInterface**)&service);
     AutoPtr<IPowerManager> pm = IPowerManager::Probe(service);
     pm->NewWakeLock(IPowerManager::PARTIAL_WAKE_LOCK, String("handleMediaEvent"), (IPowerManagerWakeLock**)&mMediaEventWakeLock);
+    return NOERROR;
 }
 
 CAR_INTERFACE_IMPL(MediaSessionService, SystemService, IWatchdogMonitor)

@@ -3,6 +3,7 @@
 #define __ELASTOS_DROID_SERVER_TELECOM_TELECOMSERVICEIMPL_H__
 
 #include "_Elastos.Droid.Server.Telecom.h"
+#include <Elastos.Droid.App.h>
 #include "elastos/droid/server/telecom/CallsManager.h"
 #include "elastos/droid/server/telecom/MissedCallNotifier.h"
 #include "elastos/droid/server/telecom/PhoneAccountRegistrar.h"
@@ -85,9 +86,9 @@ public:
         /* [out] */ IBinder** result);
 
     CARAPI constructor(
-        /* [in] */ MissedCallNotifier* missedCallNotifier,
-        /* [in] */ PhoneAccountRegistrar* phoneAccountRegistrar,
-        /* [in] */ CallsManager* callsManager,
+        /* [in] */ IInterface* missedCallNotifier,// MissedCallNotifier
+        /* [in] */ IInterface* phoneAccountRegistrar,// PhoneAccountRegistrar
+        /* [in] */ IInterface* callsManager,// CallsManager
         /* [in] */ IContext* context);
 
     //

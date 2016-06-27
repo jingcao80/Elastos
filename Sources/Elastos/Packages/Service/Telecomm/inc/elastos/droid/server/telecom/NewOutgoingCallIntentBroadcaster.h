@@ -60,7 +60,7 @@ public:
             /* [in] */ IIntent* intent);
 
     private:
-        NewOutgoingCallIntentBroadcaster* mHost;
+        AutoPtr<NewOutgoingCallIntentBroadcaster> mHost;
     };
 
 public:

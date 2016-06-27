@@ -54,4 +54,5 @@ SOURCES += CConnectionHelper.cpp
 SOURCES += CPhoneAccountHelper.cpp
 SOURCES += CRemoteConnectionHelper.cpp
 SOURCES += CTelecomManagerHelper.cpp
+SOURCES += CVideoProfileVideoStateHelper.cpp
 SOURCES += telecom.cpp

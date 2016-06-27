@@ -13,6 +13,8 @@
 #include <elastos/droid/os/UserHandle.h>
 #include <elastos/droid/text/TextUtils.h>
 #include <elastos/droid/provider/Settings.h>
+#include <elastos/utility/logging/Logger.h>
+using Elastos::Utility::Logging::Logger;
 
 using Elastos::Droid::App::ActivityManagerNative;
 using Elastos::Droid::App::IAppOpsManager;
@@ -146,7 +148,8 @@ ECode CallActivity::ProcessOutgoingCallIntent(
     Log::D("CallActivity", "processOutgoingCallIntent videoState = %d", videoState);
     Boolean isTtyModeEnabled;
     IsTtyModeEnabled(&isTtyModeEnabled);
-    assert(0 && "TODO: IVideoProfileHelper");
+    //TODO leliang
+    //assert(0 && "TODO: IVideoProfileHelper");
     // if (VideoProfile::VideoState::IsVideo(videoState) && isTtyModeEnabled) {
     //     AutoPtr<IResources> res;
     //     GetResources((IResources**)&res);
@@ -187,14 +190,14 @@ ECode CallActivity::ProcessOutgoingCallIntent(
     Int32 noteOpNoThrow;
     appOps->NoteOpNoThrow(IAppOpsManager::OP_CALL_PHONE, launchedFromUid,
             launchedFromPackage, &noteOpNoThrow);
-    if (noteOpNoThrow != IAppOpsManager::MODE_ALLOWED) {
+    if (FALSE/*TODO leliang noteOpNoThrow != IAppOpsManager::MODE_ALLOWED*/) {
         Log::W("CallActivity", "Rejecting call from uid %d package %s", launchedFromUid,
                 launchedFromPackage.string());
         return NOERROR;
     }
     Boolean isDefaultDialer;
     IsDefaultDialer(&isDefaultDialer);
-    intent->PutExtra(CallReceiver::KEY_IS_DEFAULT_DIALER, isDefaultDialer);
+    intent->PutBooleanExtra(CallReceiver::KEY_IS_DEFAULT_DIALER, isDefaultDialer);
     if (UserHandle::GetMyUserId() == IUserHandle::USER_OWNER) {
         AutoPtr<IContext> context;
         GetApplicationContext((IContext**)&context);

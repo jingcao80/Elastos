@@ -8,7 +8,6 @@
 #include "elastos/droid/server/telecom/Ringer.h"
 #include "elastos/droid/server/telecom/TelephonyUtil.h"
 #include <Elastos.CoreLibrary.IO.h>
-#include <Elastos.Droid.App.h>
 #include <Elastos.Droid.Telephony.h>
 #include <elastos/core/AutoLock.h>
 #include <elastos/core/StringUtils.h>
@@ -156,14 +155,14 @@ ECode TelecomServiceImpl::AsBinder(
 }
 
 ECode TelecomServiceImpl::constructor(
-    /* [in] */ MissedCallNotifier* missedCallNotifier,
-    /* [in] */ PhoneAccountRegistrar* phoneAccountRegistrar,
-    /* [in] */ CallsManager* callsManager,
+    /* [in] */ IInterface* missedCallNotifier,
+    /* [in] */ IInterface* phoneAccountRegistrar,
+    /* [in] */ IInterface* callsManager,
     /* [in] */ IContext* context)
 {
-        mMissedCallNotifier = missedCallNotifier;
-        mPhoneAccountRegistrar = phoneAccountRegistrar;
-        mCallsManager = callsManager;
+        mMissedCallNotifier = (MissedCallNotifier*)(IObject::Probe(missedCallNotifier));
+        mPhoneAccountRegistrar = (PhoneAccountRegistrar*)(IObject::Probe(phoneAccountRegistrar));
+        mCallsManager = (CallsManager*)(IObject::Probe(callsManager));
         mContext = context;
         AutoPtr<IInterface> obj;
         mContext->GetSystemService(IContext::APP_OPS_SERVICE, (IInterface**)&obj);

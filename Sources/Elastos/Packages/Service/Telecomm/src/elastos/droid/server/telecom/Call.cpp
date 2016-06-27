@@ -19,6 +19,8 @@
 #include <elastos/droid/text/TextUtils.h>
 #include <elastos/core/StringUtils.h>
 #include <elastos/utility/Objects.h>
+#include <elastos/utility/logging/Logger.h>
+using Elastos::Utility::Logging::Logger;
 
 using Elastos::Droid::Internal::Telephony::CCallerInfoAsyncQueryHelper;
 using Elastos::Droid::Internal::Telephony::EIID_ICallerInfoAsyncQueryOnQueryCompleteListener;
@@ -317,7 +319,7 @@ ECode Call::SubResponse::OnError(
 //=============================================================================
 // Call
 //=============================================================================
-CAR_INTERFACE_IMPL(Call, Object, ICreateConnectionResponse)
+CAR_INTERFACE_IMPL_2(Call, Object, ICreateConnectionResponse, ICall)
 
 const String Call::KEY_OEM_EXTRAS("OEMExtras");
 AutoPtr<ICallerInfoAsyncQueryOnQueryCompleteListener> Call::sCallerInfoQueryListener = new SubCallerInfoAsyncQueryOnQueryCompleteListener();
@@ -413,10 +415,12 @@ ECode Call::ToString(
 
 
     String component(NULL);
-    AutoPtr<IComponentName> componentName;
-    ((ConnectionServiceWrapper*) mConnectionService.Get())->GetComponentName((IComponentName**)&componentName);
-    if (mConnectionService != NULL && componentName != NULL) {
-        componentName->FlattenToShortString(&component);
+    if (mConnectionService != NULL) {
+        AutoPtr<IComponentName> componentName;
+        ((ConnectionServiceWrapper*) mConnectionService.Get())->GetComponentName((IComponentName**)&componentName);
+        if (componentName != NULL) {
+            componentName->FlattenToShortString(&component);
+        }
     }
     String rev;
     Int32 callCapabilities;
@@ -551,7 +555,7 @@ ECode Call::SetHandle(
         mHandle->GetSchemeSpecificPart(&schemeSpecificPart);
         phoneNumberUtilsHelper->IsLocalEmergencyNumber(mContext, schemeSpecificPart, &isLocalEmergencyNumber);
         mIsEmergencyCall = mHandle != NULL && isLocalEmergencyNumber;
-        StartCallerInfoLookup();
+        //TODO leliang StartCallerInfoLookup();
         AutoPtr<IIterator> it;
         mListeners->GetIterator((IIterator**)&it);
         Boolean hasNext;

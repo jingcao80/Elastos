@@ -20,5 +20,6 @@ SOURCES += MediaSessionStack.cpp
 SOURCES += RemoteDisplayProviderProxy.cpp
 SOURCES += CProviderCallback.cpp
 SOURCES += RemoteDisplayProviderWatcher.cpp
+SOURCES += CMediaSessionService.cpp
 
 ELASTOS_LIBS += projection/projection.lib

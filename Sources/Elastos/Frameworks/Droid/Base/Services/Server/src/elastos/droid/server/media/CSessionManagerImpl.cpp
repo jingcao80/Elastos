@@ -68,8 +68,6 @@ CSessionManagerImpl::CSessionManagerImpl()
     : mVoiceButtonDown(FALSE)
     , mVoiceButtonHandled(FALSE)
 {
-    CKeyEventWakeLockReceiver::NewByFriend(mHost->mHandler, (Handle64)mHost, (CKeyEventWakeLockReceiver**)&mKeyEventReceiver);
-    mKeyEventDone = new KeyEventDone(mHost);
 }
 
 CAR_INTERFACE_IMPL_2(CSessionManagerImpl, Object, IISessionManager, IBinder)
@@ -80,6 +78,8 @@ ECode CSessionManagerImpl::constructor(
     /* [in] */ Handle64 host)
 {
     mHost = (MediaSessionService*)host;
+    CKeyEventWakeLockReceiver::NewByFriend(mHost->mHandler, (Handle64)mHost, (CKeyEventWakeLockReceiver**)&mKeyEventReceiver);
+    mKeyEventDone = new KeyEventDone(mHost);
     return NOERROR;
 }
 
@@ -111,6 +111,7 @@ ECode CSessionManagerImpl::CreateSession(
     AutoPtr<MediaSessionRecord> record;
     ECode ec = mHost->CreateSessionInternal(pid, uid, resolvedUserId, packageName, cb, tag, (MediaSessionRecord**)&record);
     if (FAILED(ec)) {
+        Slogger::E(MediaSessionService::TAG, "CreateSessionInternal failed");
         Binder::RestoreCallingIdentity(token);
         return ec;
     }

@@ -652,10 +652,9 @@ ECode CallsManager::StartOutgoingCall(
         telephonyManagerHelper->GetDefault((ITelephonyManager**)&telephonyManager);
         telephonyManager->GetMultiSimConfiguration(&msimConfig);
         Boolean isAlive;
-        ((Call*) mForegroundCall.Get())->IsAlive(&isAlive);
         if (((msimConfig == Elastos::Droid::Telephony::MultiSimVariants_DSDS) ||
                 (msimConfig == Elastos::Droid::Telephony::MultiSimVariants_TSTS)) &&
-                (mForegroundCall != NULL) && (isAlive)) {
+                (mForegroundCall != NULL) && (((Call*) mForegroundCall.Get())->IsAlive(&isAlive), isAlive)) {
             AutoPtr<IPhoneAccountHandle> phoneAccountHandle;
             ((Call*) mForegroundCall.Get())->GetTargetPhoneAccount((IPhoneAccountHandle**)&phoneAccountHandle);
             defaultAccountHandle = phoneAccountHandle;

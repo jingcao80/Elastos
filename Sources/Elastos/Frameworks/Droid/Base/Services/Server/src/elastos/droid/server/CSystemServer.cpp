@@ -1084,7 +1084,10 @@ ECode SystemServer::StartOtherServices()
 
     //     mSystemServiceManager->StartService(RestrictionsManagerService.class);
 
-    //     mSystemServiceManager->StartService(MediaSessionService.class);
+    Slogger::I(TAG, "MediaSessionService");
+    AutoPtr<ISystemService> mediaSessionService;
+    ec = mSystemServiceManager->StartService(String("Elastos.Droid.Server.Media.CMediaSessionService"), (ISystemService**)&mediaSessionService);
+    if (FAILED(ec)) Slogger::I(TAG, "MediaSessionService start fail");
 
     //     if (mPackageManager.hasSystemFeature(PackageManager.FEATURE_HDMI_CEC)) {
     //         mSystemServiceManager->StartService(HdmiControlService.class);

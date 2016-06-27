@@ -62,6 +62,7 @@ SOURCES += StatusBarNotifier.cpp
 SOURCES += TelecomApp.cpp
 SOURCES += TelecomBroadcastReceiver.cpp
 SOURCES += TelecomServiceImpl.cpp
+SOURCES += CTelecomServiceImpl.cpp
 SOURCES += TelephonyUtil.cpp
 SOURCES += ThreadUtil.cpp
 SOURCES += Timeouts.cpp

@@ -153,7 +153,9 @@ public:
         MessageHandler(
             /* [in] */ MediaSessionService* host)
             : mHost(host)
-        {}
+        {
+            Handler::constructor();
+        }
 
         // @Override
         CARAPI HandleMessage(
@@ -172,7 +174,9 @@ public:
     };
 
 public:
-    MediaSessionService(
+    MediaSessionService();
+
+    CARAPI constructor(
         /* [in] */ IContext* context);
 
     CAR_INTERFACE_DECL()

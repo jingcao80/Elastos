@@ -2,6 +2,7 @@
 #include "elastos/droid/media/session/CMediaSession.h"
 #include <elastos/utility/logging/Logger.h>
 
+using Elastos::Droid::Os::EIID_IBinder;
 using Elastos::Utility::Logging::Logger;
 
 namespace Elastos {
@@ -11,7 +12,7 @@ namespace Session {
 
 const String CMediaSessionCallbackStub::TAG("CMediaSessionCallbackStub");
 
-CAR_INTERFACE_IMPL(CMediaSessionCallbackStub, Object, IISessionCallback)
+CAR_INTERFACE_IMPL_2(CMediaSessionCallbackStub, Object, IISessionCallback, IBinder)
 
 CAR_OBJECT_IMPL(CMediaSessionCallbackStub)
 
