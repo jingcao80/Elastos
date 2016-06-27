@@ -403,9 +403,9 @@ ECode WifiConfigStore::InnerDelayedDiskWriteWriter::OnWriteCalled(
 const String WifiConfigStore::OLD_PRIVATE_KEY_NAME("private_key");
 const String WifiConfigStore::EMPTY_VALUE("NULL");
 const String WifiConfigStore::TAG("WifiConfigStore");
-const Boolean WifiConfigStore::DBG = true;
-Boolean WifiConfigStore::VDBG = false;
-Boolean WifiConfigStore::VVDBG = false;
+const Boolean WifiConfigStore::DBG = TRUE;
+Boolean WifiConfigStore::VDBG = FALSE;
+Boolean WifiConfigStore::VVDBG = FALSE;
 const String WifiConfigStore::SUPPLICANT_CONFIG_FILE("/data/misc/wifi/wpa_supplicant.conf");
 static String GetDataDirectory()
 {
@@ -1302,8 +1302,7 @@ ECode WifiConfigStore::DisableAllNetworks()
         IWifiConfiguration* config = IWifiConfiguration::Probe(obj);
 
         Int32 status;
-        config->GetStatus(&status);
-        if(config != NULL && status != IWifiConfigurationStatus::DISABLED) {
+        if(config != NULL && (config->GetStatus(&status), status) != IWifiConfigurationStatus::DISABLED) {
             Int32 networkId;
             config->GetNetworkId(&networkId);
             if(mWifiNative->DisableNetwork(networkId)) {
@@ -1353,12 +1352,9 @@ ECode WifiConfigStore::DisableNetwork(
     /* Only change the reason if the network was not previously disabled
      * and the reason is not DISABLED_BY_WIFI_MANAGER, that is, if a 3rd party
      * set its configuration as disabled, then leave it disabled */
-    Int32 status;
-    config->GetStatus(&status);
-    Int32 disableReason;
-    config->GetDisableReason(&disableReason);
-    if (config != NULL && status != IWifiConfigurationStatus::DISABLED
-            && disableReason != IWifiConfiguration::DISABLED_BY_WIFI_MANAGER) {
+    Int32 status, disableReason;
+    if (config != NULL && (config->GetStatus(&status), status) != IWifiConfigurationStatus::DISABLED
+            && (config->GetDisableReason(&disableReason), disableReason) != IWifiConfiguration::DISABLED_BY_WIFI_MANAGER) {
         config->SetStatus(IWifiConfigurationStatus::DISABLED);
         config->SetDisableReason(reason);
         network = config;
@@ -3548,11 +3544,18 @@ String WifiConfigStore::ReadNetworkVariableFromSupplicantFile(
     /* [in] */ const String& key)
 {
     AutoPtr<IMap> data = ReadNetworkVariablesFromSupplicantFile(key);
-    if (VDBG) Loge(String("readNetworkVariableFromSupplicantFile ssid=[") + ssid + String("] key=") + key);
+    StringBuilder builder;
+    builder += "readNetworkVariableFromSupplicantFile ssid=[";
+    builder += ssid;
+    builder += "] key=";
+    builder += key;
+    if (VDBG) Loge(builder.ToString());
     AutoPtr<IInterface> obj;
     data->Get(CoreUtils::Convert(ssid), (IInterface**)&obj);
     String result;
-    ICharSequence::Probe(obj)->ToString(&result);
+    if (obj != NULL) {
+        ICharSequence::Probe(obj)->ToString(&result);
+    }
     return result;
 }
 
@@ -3564,15 +3567,13 @@ void WifiConfigStore::MarkAllNetworksDisabledExcept(
     AutoPtr<IIterator> iter;
     values->GetIterator((IIterator**)&iter);
     Boolean bNext;
-    iter->HasNext(&bNext);
-    for (; bNext; iter->HasNext(&bNext)) {
+    while (iter->HasNext(&bNext), bNext) {
         AutoPtr<IInterface> obj;
         iter->GetNext((IInterface**)&obj);
         IWifiConfiguration* config = IWifiConfiguration::Probe(obj);
 
         Int32 networkId;
-        config->GetNetworkId(&networkId);
-        if(config != NULL && networkId != netId) {
+        if(config != NULL && (config->GetNetworkId(&networkId), networkId) != netId) {
             Int32 status;
             config->GetStatus(&status);
             if (status != IWifiConfigurationStatus::DISABLED) {
@@ -4542,8 +4543,7 @@ void WifiConfigStore::ReadIpAndProxyConfigurations()
 
         Int32 autoJoinStatus = 0;
         Boolean duplicateNetwork;
-        config->GetAutoJoinStatus(&autoJoinStatus);
-        if (config == NULL || autoJoinStatus == IWifiConfiguration::AUTO_JOIN_DELETED) {
+        if (config == NULL || (config->GetAutoJoinStatus(&autoJoinStatus), autoJoinStatus) == IWifiConfiguration::AUTO_JOIN_DELETED) {
             String str("configuration found for missing network, nid=");
             str += id; str += ", ignored, networks.size=";
             str += size;
