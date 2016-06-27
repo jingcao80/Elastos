@@ -1,0 +1,8 @@
+TARGET_NAME= settings
+TARGET_TYPE= lib
+
+INCLUDES += ../../../../../..
+INCLUDES += $(MAKEDIR)/../../../../../..
+INCLUDES += $(MAKEDIR)/../../../../../../inc/
+
+SOURCES = CPhoneAccountSettingsActivity.cpp

@@ -1,9 +1,0 @@
-TARGET_NAME= common
-TARGET_TYPE= lib
-
-INCLUDES += ../
-INCLUDES += ../../../../../../
-INCLUDES += $(MAKEDIR)/../../../../../../inc/
-
-SOURCES = AudioMode.cpp
-SOURCES += MoreStrings.cpp

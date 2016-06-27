@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android"
-     xmlns:phone="http://schemas.android.com/apk/res/Elastos.Droid.Server.Telephony"
+     xmlns:phone="http://schemas.android.com/apk/res/Elastos.Droid.TeleService"
      android:title="@string/call_forwarding_settings">
 
 

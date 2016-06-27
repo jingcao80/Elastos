@@ -1,0 +1,27 @@
+#ifndef  __ELASTOS_DROID_PHONE_CEMERGENCYCALLBACKMODESERVICELOCALBINDER_H__
+#define  __ELASTOS_DROID_PHONE_CEMERGENCYCALLBACKMODESERVICELOCALBINDER_H__
+
+#include "_Elastos_Droid_TeleService_Phone_CEmergencyCallbackModeServiceLocalBinder.h"
+#include "elastos/droid/teleservice/phone/CEmergencyCallbackModeService.h"
+#include "elastos/droid/ext/frameworkext.h"
+
+using Elastos::Droid::TeleService::Phone::CEmergencyCallbackModeService;
+
+namespace Elastos {
+namespace Droid {
+namespace TeleService {
+namespace Phone {
+
+CarClass(CEmergencyCallbackModeServiceLocalBinder)
+    , public CEmergencyCallbackModeService::LocalBinder
+{
+public:
+    CAR_OBJECT_DECL();
+};
+
+} // namespace Phone
+} // namespace TeleService
+} // namespace Droid
+} // namespace Elastos
+
+#endif // __ELASTOS_DROID_PHONE_CEMERGENCYCALLBACKMODESERVICELOCALBINDER_H__

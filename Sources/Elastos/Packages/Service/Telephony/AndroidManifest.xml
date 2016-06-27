@@ -16,13 +16,13 @@
 
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
         xmlns:androidprv="http://schemas.android.com/apk/prv/res/android"
-        package="Elastos.Droid.Server.Telephony"
+        package="Elastos.Droid.TeleService"
         coreApp="true"
         android:sharedUserId="android.uid.phone"
         android:sharedUserLabel="@string/phoneAppLabel"
 >
 
-    <original-package android:name="Elastos.Droid.Phone" />
+    <original-package android:name="Elastos.Droid.TeleService" />
 
     <protected-broadcast android:name="android.intent.action.SERVICE_STATE" />
     <protected-broadcast android:name="android.intent.action.RADIO_TECHNOLOGY" />
@@ -102,13 +102,13 @@
          presses home. -->
     <uses-permission android:name="android.permission.STOP_APP_SWITCHES" />
 
-    <application android:name="CPhoneApp"
+    <application android:name=".Phone.CPhoneApp"
                  android:persistent="true"
                  android:label="@string/phoneAppLabel"
                  android:icon="@mipmap/ic_launcher_phone"
                  android:allowBackup="false"
                  android:supportsRtl="true">
-            <provider android:name="IccProvider"
+            <provider android:name="CIccProvider"
                       android:authorities="icc"
                       android:multiprocess="true"
                       android:exported="true"
@@ -116,7 +116,7 @@
                       android:writePermission="android.permission.WRITE_CONTACTS" />
 
         <!-- Dialer UI that only allows emergency calls -->
-        <activity android:name="CEmergencyDialer"
+        <activity android:name=".Phone.CEmergencyDialer"
             android:label="@string/emergencyDialerIconLabel"
             android:theme="@style/EmergencyDialerTheme"
             android:screenOrientation="portrait">
@@ -131,9 +131,9 @@
             </intent-filter>
         </activity>
 
-        <activity android:name="CADNList" />
+        <activity android:name=".Phone.CADNList" />
 
-        <activity android:name="CSimContacts"
+        <activity android:name=".Phone.CSimContacts"
             android:label="@string/simContacts_title"
             android:theme="@style/SimImportTheme"
             android:screenOrientation="portrait"
@@ -146,7 +146,7 @@
             </intent-filter>
         </activity>
 
-        <activity android:name="CFdnList"
+        <activity android:name=".Phone.CFdnList"
                 android:label="@string/fdnListLabel"
                 android:theme="@style/DialerSettingsLight">
             <intent-filter>
@@ -156,7 +156,7 @@
             </intent-filter>
         </activity>
 
-        <activity android:name="OutgoingCallBroadcaster"
+        <activity android:name=".Phone.COutgoingCallBroadcaster"
                 android:enabled="false"
                 android:theme="@style/OutgoingCallBroadcasterTheme"
                 android:permission="android.permission.CALL_PHONE"
@@ -191,7 +191,7 @@
 
         <activity-alias android:name="EmergencyOutgoingCallBroadcaster"
                 android:enabled="false"
-                android:targetActivity="OutgoingCallBroadcaster"
+                android:targetActivity=".Phone.COutgoingCallBroadcaster"
                 android:permission="android.permission.CALL_PRIVILEGED">
             <intent-filter android:priority="1000">
                 <action android:name="android.intent.action.CALL_EMERGENCY" />
@@ -219,7 +219,7 @@
 
         <activity-alias android:name="PrivilegedOutgoingCallBroadcaster"
                 android:enabled="false"
-                android:targetActivity="OutgoingCallBroadcaster"
+                android:targetActivity=".Phone.COutgoingCallBroadcaster"
                 android:screenOrientation="nosensor"
                 android:permission="android.permission.CALL_PRIVILEGED">
             <intent-filter android:priority="1000">
@@ -247,7 +247,7 @@
             </intent-filter>
         </activity-alias>
 
-        <receiver android:name="ProcessOutgoingCallTest" android:exported="false"
+        <receiver android:name=".Phone.CProcessOutgoingCallTest" android:exported="false"
             android:enabled="false">
             <intent-filter android:priority="1">
                 <action android:name="android.intent.action.NEW_OUTGOING_CALL" />
@@ -256,7 +256,7 @@
         </receiver>
 
         <!-- Trampoline activity that handles the PERFORM_CDMA_PROVISIONING intent. -->
-        <activity android:name="lastos.Droid.Phone.CInCallScreenShowActivation"
+        <activity android:name=".Phone.CInCallScreenShowActivation"
             android:permission="android.permission.PERFORM_CDMA_PROVISIONING"
             android:label="@string/phoneIconLabel"
             android:theme="@android:style/Theme.NoDisplay"
@@ -269,7 +269,7 @@
 
         <!-- "Mobile network settings" screen, used on both
              non-voice-capable tablets and regular phone devices. -->
-        <activity android:name="CMobileNetworkSettings"
+        <activity android:name=".Phone.CMobileNetworkSettings"
             android:label="@string/settings_label"
             android:theme="@style/SettingsLight">
             <intent-filter>
@@ -281,13 +281,13 @@
         </activity>
 
         <activity-alias android:name="Settings"
-            android:targetActivity="MobileNetworkSettings" />
+            android:targetActivity=".Phone.CMobileNetworkSettings" />
 
         <!-- networks setting -->
         <!-- service to handle network query requests sent to RIL -->
-        <service android:name="CNetworkQueryService" />
+        <service android:name=".Phone.CNetworkQueryService" />
 
-        <activity android:name="CNetworkSetting"
+        <activity android:name=".Phone.CNetworkSetting"
                 android:label="@string/networks"
                 android:configChanges="orientation|screenSize|keyboardHidden"
                 android:theme="@style/NetworkOperatorsSettingsTheme">
@@ -298,7 +298,7 @@
             </intent-filter>
         </activity>
 
-        <activity android:name="CGsmUmtsOptions"
+        <activity android:name=".Phone.CGsmUmtsOptions"
                 android:label="@string/gsm_umts_options"
                 android:theme="@style/DialerSettingsLight">
             <intent-filter>
@@ -306,7 +306,7 @@
             </intent-filter>
         </activity>
 
-        <activity android:name="CCdmaOptions"
+        <activity android:name=".Phone.CCdmaOptions"
                 android:label="@string/cdma_options"
                 android:theme="@style/DialerSettingsLight">
             <intent-filter>
@@ -314,7 +314,7 @@
             </intent-filter>
         </activity>
 
-        <activity android:name="CGsmUmtsCallOptions"
+        <activity android:name=".Phone.CGsmUmtsCallOptions"
                 android:label="@string/gsm_umts_options"
                 android:theme="@style/DialerSettingsLight">
             <intent-filter>
@@ -322,7 +322,7 @@
             </intent-filter>
         </activity>
 
-        <activity android:name="CCdmaCallOptions"
+        <activity android:name=".Phone.CCdmaCallOptions"
                 android:label="@string/cdma_options"
                 android:theme="@style/DialerSettingsLight">
             <intent-filter>
@@ -330,7 +330,7 @@
             </intent-filter>
         </activity>
 
-        <activity android:name="CGsmUmtsCallForwardOptions"
+        <activity android:name=".Phone.CGsmUmtsCallForwardOptions"
                 android:label="@string/labelCF"
                 android:configChanges="orientation|screenSize|keyboardHidden"
                 android:theme="@style/SettingsLight">
@@ -339,7 +339,7 @@
             </intent-filter>
         </activity>
 
-        <activity android:name="CGsmUmtsAdditionalCallOptions"
+        <activity android:name=".Phone.CGsmUmtsAdditionalCallOptions"
                 android:label="@string/labelGSMMore"
                 android:configChanges="orientation|screenSize|keyboardHidden"
                 android:theme="@style/SettingsLight">
@@ -348,7 +348,7 @@
             </intent-filter>
         </activity>
 
-        <activity android:name="CCellBroadcastSms"
+        <activity android:name=".Phone.CCellBroadcastSms"
             android:label="@string/cell_broadcast_sms"
             android:theme="@android:style/Theme.Holo.DialogWhenLarge">
             <intent-filter>
@@ -357,7 +357,7 @@
         </activity>
 
         <!-- fdn setting -->
-        <activity android:name="CFdnSetting"
+        <activity android:name=".Phone.CFdnSetting"
                 android:label="@string/fdn"
                 android:theme="@style/DialerSettingsLight">
             <intent-filter>
@@ -365,13 +365,13 @@
             </intent-filter>
         </activity>
 
-        <activity android:name="CEnableFdnScreen"
+        <activity android:name=".Phone.CEnableFdnScreen"
                 android:label=""
                 android:theme="@style/DialerSettingsLight">
         </activity>
 
         <!-- SIM PIN setting -->
-        <activity android:name="CEnableIccPinScreen"
+        <activity android:name=".Phone.CEnableIccPinScreen"
                 android:label="@string/enable_pin"
                 android:theme="@style/SettingsLight">
             <intent-filter>
@@ -380,7 +380,7 @@
             </intent-filter>
         </activity>
 
-        <activity android:name="CChangeIccPinScreen"
+        <activity android:name=".Phone.CChangeIccPinScreen"
                 android:label="@string/change_pin"
                 android:theme="@style/SettingsLight">
             <intent-filter>
@@ -389,23 +389,23 @@
             </intent-filter>
         </activity>
 
-        <activity android:name="CGetPin2Screen"
+        <activity android:name=".Phone.CGetPin2Screen"
                 android:label="@string/get_pin2"
                 android:theme="@style/SettingsLight"
                 android:windowSoftInputMode="stateVisible">
         </activity>
 
-        <activity android:name="CEditFdnContactScreen"
+        <activity android:name=".Phone.CEditFdnContactScreen"
                 android:theme="@style/DialerSettingsLight"
                 android:windowSoftInputMode="stateVisible">
         </activity>
 
-        <activity android:name="CDeleteFdnContactScreen"
+        <activity android:name=".Phone.CDeleteFdnContactScreen"
                 android:theme="@style/DialerSettingsLight"
                 android:label="@string/delete_fdn_contact">
         </activity>
 
-        <activity android:name="CDataRoamingReenable"
+        <activity android:name=".Phone.CDataRoamingReenable"
             android:label="@string/android:dialog_alert_title"
             android:theme="@android:style/Theme.Holo.Dialog">
             <intent-filter>
@@ -414,7 +414,7 @@
         </activity>
 
         <!-- data roaming setting -->
-        <activity android:name="CRoamingSetting"
+        <activity android:name=".Phone.CRoamingSetting"
                 android:label="@string/roaming"
                 android:theme="@android:style/Theme.Holo.DialogWhenLarge">
             <intent-filter>
@@ -423,7 +423,7 @@
         </activity>
 
         <!-- "Call settings" UI, used only on voice-capable phone devices. -->
-        <activity android:name="CCallFeaturesSetting"
+        <activity android:name=".Phone.CCallFeaturesSetting"
                 android:label="@string/call_settings"
                 android:configChanges="orientation|screenSize|keyboardHidden"
                 android:theme="@style/DialerSettingsLight">
@@ -438,7 +438,7 @@
         </activity>
 
         <!-- Broadcast Receiver that will process BOOT Complete and launch OTA -->
-        <receiver android:name="COtaStartupReceiver" android:exported="false"
+        <receiver android:name=".Phone.COtaStartupReceiver" android:exported="false"
                 androidprv:primaryUserOnly="true">
             <intent-filter android:priority="100">
                  <action android:name="android.intent.action.BOOT_COMPLETED"/>
@@ -446,13 +446,13 @@
         </receiver>
 
         <!-- CDMA Emergency Callback Mode -->
-        <service android:name="CEmergencyCallbackModeService">
+        <service android:name=".Phone.CEmergencyCallbackModeService">
         </service>
 
         <!-- service to dump telephony information -->
-        <service android:name="CTelephonyDebugService" />
+        <service android:name=".Phone.CTelephonyDebugService" />
 
-        <activity android:name="CEmergencyCallbackModeExitDialog"
+        <activity android:name=".Phone.CEmergencyCallbackModeExitDialog"
             android:excludeFromRecents="true"
             android:label="@string/ecm_exit_dialog"
             android:launchMode="singleTop"
@@ -465,13 +465,13 @@
         </activity>
 
         <!-- Start SIP -->
-        <service android:name="Elastos.Droid.Services.Telephony.Sip.CSipCallServiceProvider"
+        <service android:name=".Sip.CSipCallServiceProvider"
                  android:singleUser="true" >
             <intent-filter>
                 <action android:name="android.telecom.CallServiceProvider" />
             </intent-filter>
         </service>
-        <service android:name="Elastos.Droid.Services.Telephony.Sip.CSipConnectionService"
+        <service android:name=".Sip.CSipConnectionService"
                  android:label="@string/sip_connection_service_label"
                  android:singleUser="true"
                  android:permission="android.permission.BIND_CONNECTION_SERVICE" >
@@ -479,7 +479,7 @@
                 <action android:name="android.telecom.ConnectionService" />
             </intent-filter>
         </service>
-        <receiver android:name="Elastos.Droid.Services.Telephony.Sip.CSipBroadcastReceiver">
+        <receiver android:name=".Sip.CSipBroadcastReceiver">
             <intent-filter>
                 <action android:name="android.net.sip.SIP_SERVICE_UP" />
                 <action android:name="com.android.phone.SIP_INCOMING_CALL" />
@@ -489,7 +489,7 @@
         </receiver>
 
         <activity android:label="Sip Settings"
-                  android:name="Elastos.Droid.Services.Telephony.Sip.CSipSettings"
+                  android:name=".Sip.CSipSettings"
                   android:theme="@style/DialerSettingsLight"
                   android:launchMode="singleTop"
                   android:configChanges="orientation|screenSize|keyboardHidden"
@@ -500,7 +500,7 @@
                 <action android:name="android.net.sip.NOTIFY" />
             </intent-filter>
         </activity>
-        <activity android:name="Elastos.Droid.Services.Telephony.Sip.CSipEditor"
+        <activity android:name=".Sip.CSipEditor"
                 android:theme="@style/DialerSettingsLight"
                 android:configChanges="orientation|screenSize|keyboardHidden"
                 android:uiOptions="splitActionBarWhenNarrow">
@@ -508,40 +508,40 @@
 
         <!-- End SIP -->
 
-        <activity android:name="CErrorDialogActivity"
+        <activity android:name=".Phone.CErrorDialogActivity"
                 android:configChanges="orientation|screenSize|keyboardHidden"
                 android:excludeFromRecents="true"
                 android:launchMode="singleInstance"
                 android:theme="@style/Empty">
         </activity>
 
-        <activity android:name="CMMIDialogActivity"
+        <activity android:name=".Phone.CMMIDialogActivity"
                 android:configChanges="orientation|screenSize|keyboardHidden"
                 android:excludeFromRecents="true"
                 android:launchMode="singleInstance"
                 android:theme="@style/Empty">
         </activity>
 
-        <activity android:name=".TextMessagePackageChooser"
+        <activity android:name=".Phone.CTextMessagePackageChooser"
                 android:label="@string/respond_via_sms_setting_title"
                 android:configChanges="orientation|screenSize|keyboardHidden"
                 android:theme="@style/Theme.Transparent">
         </activity>
 
-        <activity android:name="CHfaActivity"
+        <activity android:name=".Phone.CHfaActivity"
                 android:configChanges="orientation|screenSize|keyboardHidden"
                 android:launchMode="singleInstance"
                 android:theme="@style/Empty"
                 android:exported="false">
         </activity>
 
-        <activity android:name="Elastos.Droid.Phone.Settings.CPhoneAccountSettingsActivity"
+        <activity android:name=".Phone.Settings.CPhoneAccountSettingsActivity"
             android:label="@string/phone_accounts"
             android:theme="@style/DialerSettingsLight">
         </activity>
 
         <!-- BroadcastReceiver for receiving Intents from Notification mechanism. -->
-        <receiver android:name="CPhoneGlobalsNotificationBroadcastReceiver"
+        <receiver android:name=".Phone.CPhoneGlobalsNotificationBroadcastReceiver"
             android:exported="false">
             <intent-filter>
                 <action android:name="com.android.phone.ACTION_HANG_UP_ONGOING_CALL" />
@@ -551,10 +551,10 @@
         </receiver>
 
         <!-- service to dump telephony information -->
-        <service android:name="CHfaService" android:exported="false"/>
+        <service android:name=".Phone.CHfaService" android:exported="false"/>
 
         <!-- Telecom integration -->
-        <service android:name="Elastos.Droid.Services.Telephony.CTelephonyCallServiceProvider"
+        <service android:name=".CTelephonyCallServiceProvider"
                 android:singleUser="true">
             <intent-filter>
                 <action android:name="android.telecom.CallServiceProvider" />
@@ -562,7 +562,7 @@
         </service>
         <service
                 android:singleUser="true"
-                android:name="Elastos.Droid.Services.Telephony.CTelephonyConnectionService"
+                android:name=".Services.Telephony.CTelephonyConnectionService"
                 android:label="@string/pstn_connection_service_label"
                 android:permission="android.permission.BIND_CONNECTION_SERVICE" >
             <intent-filter>
@@ -570,7 +570,7 @@
             </intent-filter>
         </service>
         <provider
-                android:name="CPhoneSearchIndexablesProvider"
+                android:name=".Phone.CPhoneSearchIndexablesProvider"
                 android:authorities="com.android.phone"
                 android:multiprocess="false"
                 android:grantUriPermissions="true"

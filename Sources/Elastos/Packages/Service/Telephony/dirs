@@ -1,2 +1,2 @@
 
-DIRS += src/elastos/droid
+DIRS += src/elastos/droid/teleservice

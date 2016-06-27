@@ -1680,7 +1680,7 @@ ECode PackageParser::ParseBaseApk(
         //         apkPath + " (at " + parser.getPositionDescription() + "): " + outError[0]);
         String pos;
         IXmlPullParser::Probe(parser)->GetPositionDescription(&pos);
-        Logger::E(TAG, "ParseBaseApk error %d, file %s (at %d): %s",
+        Logger::E(TAG, "ParseBaseApk error %d, file %s (at %s): %s",
             sParseError, apkPath.string(), pos.string(),(*outError)[0].string());
         ec = E_PACKAGE_PARSER_EXCEPTION;
         goto _EXIT_;
@@ -4851,6 +4851,7 @@ AutoPtr<PackageParser::Activity> PackageParser::ParseActivity(
 
     mParseActivityArgs->mTag = receiver ? "<receiver>" : "<activity>";
     mParseActivityArgs->mSa = sa;
+    assert(sa != NULL);
     mParseActivityArgs->mFlags = flags;
 
     AutoPtr<IActivityInfo> info;

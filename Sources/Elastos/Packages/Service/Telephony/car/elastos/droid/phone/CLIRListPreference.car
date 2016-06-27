@@ -1,9 +1,10 @@
 module
 {
     interface ITimeConsumingPreferenceListener;
-    
+
     namespace Elastos {
     namespace Droid {
+    namespace TeleService {
     namespace Phone {
 
     [deprecated]
@@ -17,6 +18,7 @@ module
     }
 
     } // namespace Phone
+    } // namespace TeleService
     } // namespace Droid
     } // namespace Elastos
 }
