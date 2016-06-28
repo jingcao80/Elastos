@@ -7,6 +7,9 @@
 #include <elastos/core/Math.h>
 #include <elastos/core/AutoLock.h>
 #include <elastos/utility/etl/Vector.h>
+#include <elastos/utility/logging/Slogger.h>
+
+using Elastos::Utility::Logging::Slogger;
 
 using Org::Javia::Arity::EIID_ISymbols;
 using Elastos::Core::AutoLock;
@@ -27,7 +30,7 @@ namespace Arity {
 
 CSymbols::StaticInitializer::StaticInitializer()
 {
-    Vector<AutoPtr<ISymbol> > vect;;
+    Vector<AutoPtr<ISymbol> > vect;
     for (Int32 i = 0; i < VM::BUILTINS->GetLength(); ++i) {
         Byte b = (*VM::BUILTINS)[i];
         vect.PushBack(Symbol::MakeVmOp((*VM::OPCODENAME)[b], b));

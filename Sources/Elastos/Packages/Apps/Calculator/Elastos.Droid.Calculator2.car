@@ -1,7 +1,7 @@
 module
 {
+    importlib("Org.Javia.Arity.eco");
     importlib("Elastos.Droid.Core.eco");
-    importlib("Elastos.CoreLibrary.eco");
 
     merge("car/elastos/droid/calculator2/calculatorEditText.car");
     merge("car/elastos/droid/calculator2/calculatorExpressionEvaluator.car");
@@ -20,12 +20,38 @@ module
     interface Elastos.Droid.Calculator2.ICalculatorExpressionEvaluator;
     interface Elastos.Droid.Calculator2.ICalculatorPadLayout;
 
+    using interface Elastos.Droid.App.IActivity;
     using interface Elastos.Droid.Content.IContext;
+    using interface Elastos.Droid.Content.IContextWrapper;
+    using interface Elastos.Droid.Content.IComponentCallbacks;
+    using interface Elastos.Droid.Content.IComponentCallbacks2;
+    using interface Elastos.Droid.Graphics.Drawable.IDrawableCallback;
+    using interface Elastos.Droid.Text.ISpannableStringBuilder;
+    using interface Elastos.Droid.Text.IGetChars;
+    using interface Elastos.Droid.Text.ISpannable;
+    using interface Elastos.Droid.Text.IEditable;
+    using interface Elastos.Droid.Text.IGraphicsOperations;
+    using interface Elastos.Droid.Text.ISpanned;
     using interface Elastos.Droid.Utility.IAttributeSet;
+    using interface Elastos.Droid.View.Accessibility.IAccessibilityEventSource;
+    using interface Elastos.Droid.View.IView;
+    using interface Elastos.Droid.View.IContextThemeWrapper;
+    using interface Elastos.Droid.View.ILayoutInflaterFactory;
+    using interface Elastos.Droid.View.ILayoutInflaterFactory2;
+    using interface Elastos.Droid.View.IWindowCallback;
+    using interface Elastos.Droid.View.IKeyEventCallback;
+    using interface Elastos.Droid.View.IViewOnCreateContextMenuListener;
+    using interface Elastos.Droid.View.IOnWindowDismissedCallback;
+    using interface Elastos.Droid.View.IOnPreDrawListener;
     using interface Elastos.Droid.View.IViewOnLongClickListener;
+    using interface Elastos.Droid.View.IViewGroup;
+    using interface Elastos.Droid.View.IViewManager;
+    using interface Elastos.Droid.View.IViewParent;
+    using interface Elastos.Droid.Widget.IEditText;
     using interface Elastos.Droid.Widget.ITextView;
-
+    using interface Elastos.Core.IAppendable;
     using interface Elastos.Core.ICharSequence;
+
 
     namespace Elastos{
     namespace Droid {
@@ -33,6 +59,20 @@ module
 
     class CCalculator
     {
+        constructor();
+
+        interface IActivity;
+        interface IContext;
+        interface IContextThemeWrapper;
+        interface ILayoutInflaterFactory;
+        interface ILayoutInflaterFactory2;
+        interface IWindowCallback;
+        interface IKeyEventCallback;
+        interface IViewOnCreateContextMenuListener;
+        interface IComponentCallbacks;
+        interface IComponentCallbacks2;
+        interface IOnWindowDismissedCallback;
+
         interface IOnTextSizeChangeListener;
         interface IEvaluateCallback;
         interface IViewOnLongClickListener;
@@ -54,6 +94,13 @@ module
             [in] IAttributeSet* attrs,
             [in] Int32 defStyle);
 
+        interface IEditText;
+        interface ITextView;
+        interface IOnPreDrawListener;
+        interface IView;
+        interface IDrawableCallback;
+        interface IKeyEventCallback;
+        interface IAccessibilityEventSource;
         interface ICalculatorEditText;
     }
 
@@ -65,6 +112,14 @@ module
             [in] Boolean isEdited);
 
         interface ICalculatorExpressionBuilder;
+        interface ISpannableStringBuilder;
+        interface ICharSequence;
+        interface IGetChars;
+        interface ISpannable;
+        interface ISpanned;
+        interface IEditable;
+        interface IAppendable;
+        interface IGraphicsOperations;
     }
 
     class CCalculatorExpressionEvaluator
@@ -100,6 +155,13 @@ module
             [in] Int32 defStyle);
 
         interface ICalculatorPadLayout;
+        interface IViewGroup;
+        interface IViewParent;
+        interface IViewManager;
+        interface IView;
+        interface IDrawableCallback;
+        interface IKeyEventCallback;
+        interface IAccessibilityEventSource;
     }
 
 //    class CCalculatorPadViewPager

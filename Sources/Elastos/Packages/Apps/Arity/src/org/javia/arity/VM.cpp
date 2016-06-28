@@ -1,55 +1,12 @@
 
 #include "org/javia/arity/VM.h"
+#include <elastos/utility/logging/Slogger.h>
+
+using Elastos::Utility::Logging::Slogger;
 
 namespace Org {
 namespace Javia {
 namespace Arity {
-
-const Byte VM::RESERVED;
-const Byte VM::_CONST;
-const Byte VM::CALL;
-const Byte VM::ADD;
-const Byte VM::SUB;
-const Byte VM::MUL;
-const Byte VM::DIV;
-const Byte VM::MOD;
-const Byte VM::RND;
-const Byte VM::UMIN;
-const Byte VM::POWER;
-const Byte VM::FACT;
-const Byte VM::PERCENT;
-const Byte VM::SQRT;
-const Byte VM::CBRT;
-const Byte VM::EXP;
-const Byte VM::LN;
-const Byte VM::SIN;
-const Byte VM::COS;
-const Byte VM::TAN;
-const Byte VM::ASIN;
-const Byte VM::ACOS;
-const Byte VM::ATAN;
-const Byte VM::SINH;
-const Byte VM::COSH;
-const Byte VM::TANH;
-const Byte VM::ASINH;
-const Byte VM::ACOSH;
-const Byte VM::ATANH;
-const Byte VM::ABS;
-const Byte VM::FLOOR;
-const Byte VM::CEIL;
-const Byte VM::SIGN;
-const Byte VM::MIN;
-const Byte VM::MAX;
-const Byte VM::GCD;
-const Byte VM::COMB;
-const Byte VM::PERM;
-const Byte VM::LOAD0;
-const Byte VM::LOAD1;
-const Byte VM::LOAD2;
-const Byte VM::LOAD3;
-const Byte VM::LOAD4;
-const Byte VM::REAL;
-const Byte VM::IMAG;
 
 static AutoPtr<ArrayOf<String> > InitOpcodeName()
 {
@@ -101,7 +58,6 @@ static AutoPtr<ArrayOf<String> > InitOpcodeName()
     (*names)[44] = String("imag");
     return names;
 }
-const AutoPtr<ArrayOf<String> > VM::OPCODENAME = InitOpcodeName();
 
 static AutoPtr<ArrayOf<Byte> > InitArity()
 {
@@ -153,7 +109,6 @@ static AutoPtr<ArrayOf<Byte> > InitArity()
     (*aritys)[44] = 1;
     return aritys;
 }
-const AutoPtr<ArrayOf<Byte> > VM::ARITY = InitArity();
 
 static AutoPtr<ArrayOf<Byte> > InitBuiltins()
 {
@@ -189,7 +144,55 @@ static AutoPtr<ArrayOf<Byte> > InitBuiltins()
     (*builtins)[28] = VM::IMAG;
     return builtins;
 }
-const AutoPtr<ArrayOf<Byte> > VM::BUILTINS = InitBuiltins();
+
+const Byte VM::RESERVED;
+const Byte VM::_CONST;
+const Byte VM::CALL;
+const Byte VM::ADD;
+const Byte VM::SUB;
+const Byte VM::MUL;
+const Byte VM::DIV;
+const Byte VM::MOD;
+const Byte VM::RND;
+const Byte VM::UMIN;
+const Byte VM::POWER;
+const Byte VM::FACT;
+const Byte VM::PERCENT;
+const Byte VM::SQRT;
+const Byte VM::CBRT;
+const Byte VM::EXP;
+const Byte VM::LN;
+const Byte VM::SIN;
+const Byte VM::COS;
+const Byte VM::TAN;
+const Byte VM::ASIN;
+const Byte VM::ACOS;
+const Byte VM::ATAN;
+const Byte VM::SINH;
+const Byte VM::COSH;
+const Byte VM::TANH;
+const Byte VM::ASINH;
+const Byte VM::ACOSH;
+const Byte VM::ATANH;
+const Byte VM::ABS;
+const Byte VM::FLOOR;
+const Byte VM::CEIL;
+const Byte VM::SIGN;
+const Byte VM::MIN;
+const Byte VM::MAX;
+const Byte VM::GCD;
+const Byte VM::COMB;
+const Byte VM::PERM;
+const Byte VM::LOAD0;
+const Byte VM::LOAD1;
+const Byte VM::LOAD2;
+const Byte VM::LOAD3;
+const Byte VM::LOAD4;
+const Byte VM::REAL;
+const Byte VM::IMAG;
+INIT_PROI_4 const AutoPtr<ArrayOf<String> > VM::OPCODENAME = InitOpcodeName();
+INIT_PROI_4 const AutoPtr<ArrayOf<Byte> > VM::ARITY = InitArity();
+INIT_PROI_4 const AutoPtr<ArrayOf<Byte> > VM::BUILTINS = InitBuiltins();
 
 } // namespace Arity
 } // namespace Javia

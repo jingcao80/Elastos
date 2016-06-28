@@ -13,6 +13,7 @@ VPATH += $(MAKEDIR)/src/elastos/droid/calculator2
 SOURCES += Elastos.Droid.Calculator2.car
 SOURCES += Elastos.CoreLibrary.cpp
 SOURCES += Elastos.Droid.Core.cpp
+SOURCES += Org.Javia.Arity.cpp
 
 SOURCES += R.cpp
 SOURCES += Calculator.cpp
@@ -28,6 +29,7 @@ LIBRARIES = $(XDK_USER_LIB)/Elastos.Runtime.lib
 LIBRARIES += $(XDK_TARGETS)/Elastos.Runtime.eco
 LIBRARIES += $(XDK_TARGETS)/Elastos.CoreLibrary.eco
 LIBRARIES += $(XDK_TARGETS)/Elastos.Droid.Core.eco
+LIBRARIES += $(XDK_TARGETS)/Org.Javia.Arity.eco
 LIBRARIES += -lm -lcutils -licuuc -llog -lutils -landroidfw
 
 APPPACK = 1

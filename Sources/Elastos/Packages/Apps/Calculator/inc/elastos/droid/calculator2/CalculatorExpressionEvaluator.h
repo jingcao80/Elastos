@@ -2,10 +2,12 @@
 #define _ELASTOS_DROID_CALCULATOR2_CALCULATOREXPRESSIONEVALUATOR_H__
 
 #include "_Elastos.Droid.Calculator2.h"
+#include <_Org.Javia.Arity.h>
 #include <elastos/core/Object.h>
 #include <elastos/droid/ext/frameworkext.h>
 
 using Elastos::Core::ICharSequence;
+using Org::Javia::Arity::ISymbols;
 
 namespace Elastos {
 namespace Droid {
@@ -37,8 +39,7 @@ private:
     static const Int32 MAX_DIGITS;
     static const Int32 ROUNDING_DIGITS;
 
-    // assert(0 && "TODO");
-    // Symbols mSymbols;
+    AutoPtr<ISymbols> mSymbols;
     AutoPtr<ICalculatorExpressionTokenizer> mTokenizer;
 };
 

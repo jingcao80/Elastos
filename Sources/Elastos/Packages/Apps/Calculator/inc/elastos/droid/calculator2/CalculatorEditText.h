@@ -31,10 +31,7 @@ private:
         , public IActionModeCallback
     {
     public:
-        MyActionModeCallback(
-            /* [in] */ CalculatorEditText* host);
-
-        ~MyActionModeCallback();
+        MyActionModeCallback();
 
         CAR_INTERFACE_DECL()
 
@@ -55,15 +52,12 @@ private:
             /* [in] */ IActionMode* mode,
             /* [in] */ IMenu* menu,
             /* [out] */ Boolean* result);
-
-    private:
-        CalculatorEditText* mHost;
     };
 
 public:
     CalculatorEditText();
 
-    ~CalculatorEditText();
+    virtual ~CalculatorEditText();
 
     CAR_INTERFACE_DECL()
 
@@ -115,7 +109,10 @@ protected:
         /* [in] */ Int32 lengthAfter);
 
 private:
-    AutoPtr<MyActionModeCallback> NO_SELECTION_ACTION_MODE_CALLBACK;
+    static CARAPI_(AutoPtr<MyActionModeCallback>) InitCallback();
+
+private:
+    static const AutoPtr<MyActionModeCallback> NO_SELECTION_ACTION_MODE_CALLBACK;
     Float mMaximumTextSize;
     Float mMinimumTextSize;
     Float mStepTextSize;
