@@ -3,7 +3,6 @@
 #define __ELASTOS_DROID_SYSTEMUI_STATUSBAR_STACK_CNOTICICATIONSTACKSCROLLLAYOUT_H__
 
 #include "_Elastos_Droid_SystemUI_StatusBar_Stack_CNotificationStackScrollLayout.h"
-#include "_Elastos.Droid.SystemUI.h"
 #include "Elastos.CoreLibrary.Utility.h"
 #include "Elastos.Droid.Content.h"
 #include "Elastos.Droid.Graphics.h"
@@ -13,7 +12,6 @@
 #include <elastos/droid/ext/frameworkext.h>
 #include <elastos/droid/os/Runnable.h>
 #include <elastos/droid/view/ViewGroup.h>
-#include <elastos/core/Object.h>
 
 using Elastos::Droid::Content::IContext;
 using Elastos::Droid::Graphics::ICanvas;
@@ -28,7 +26,6 @@ using Elastos::Droid::View::IVelocityTracker;
 using Elastos::Droid::View::IView;
 using Elastos::Droid::View::ViewGroup;
 using Elastos::Droid::Widget::IOverScroller;
-using Elastos::Core::Object;
 using Elastos::Utility::IArrayList;
 using Elastos::Utility::IHashSet;
 
@@ -77,9 +74,6 @@ public:
         static CARAPI_(Int64) CombineLength(
             /* [in] */ IArrayList/*<AnimationEvent>*/* events);
 
-    private:
-        static CARAPI_(AutoPtr<ArrayOf<IAnimationFilter*> >) InitStatic();
-
     public:
         static AutoPtr<ArrayOf<IAnimationFilter*> > FILTERS;
 
@@ -127,10 +121,10 @@ private:
         CNotificationStackScrollLayout* mHost;
     };
 
-    class Runnable1: public Runnable
+    class EmptyShadeViewGoneRunnable: public Runnable
     {
     public:
-        Runnable1(
+        EmptyShadeViewGoneRunnable(
             /* [in] */ CNotificationStackScrollLayout* host);
 
         // @Override
@@ -140,10 +134,10 @@ private:
         CNotificationStackScrollLayout* mHost;
     };
 
-    class Runnable2: public Runnable
+    class DismissViewGoneRunnable: public Runnable
     {
     public:
-        Runnable2(
+        DismissViewGoneRunnable(
             /* [in] */ CNotificationStackScrollLayout* host);
 
         // @Override

@@ -32,10 +32,6 @@ public:
 
     CNotificationsQuickSettingsContainer();
 
-    CARAPI constructor(
-        /* [in] */ IContext* context,
-        /* [in] */ IAttributeSet* attrs);
-
     // @Override
     CARAPI OnApplyWindowInsets(
         /* [in] */ IWindowInsets* insets,

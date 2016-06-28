@@ -146,7 +146,7 @@ static AutoPtr<IAudioAttributes> InitAudioAttributes()
     return attrs;
 }
 
-const String CPhoneStatusBar::TAG("CPhoneStatusBar");
+static const String TAG("CPhoneStatusBar");
 const Boolean CPhoneStatusBar::DEBUG = FALSE;
 const Boolean CPhoneStatusBar::SPEW = FALSE;
 const Boolean CPhoneStatusBar::DUMPTRUCK = TRUE; // extra dumpsys info
@@ -201,9 +201,11 @@ ECode CPhoneStatusBarUserSetupObserver::OnChange(
             ISettingsSecure::USER_SETUP_COMPLETE,
             0 /*default */,
             mHost->mCurrentUserId, &v);
-    const Boolean userSetup = 0 != v;
+    Boolean userSetup = 0 != v;
+    Logger::I(TAG, " TODO >> CPhoneStatusBarUserSetupObserver::OnChange: %d", userSetup);
+    userSetup = TRUE;
     if (CPhoneStatusBar::MULTIUSER_DEBUG) {
-        Logger::D(CPhoneStatusBar::TAG, "User setup changed: selfChange=%d userSetup=%d mUserSetup=%d",
+        Logger::D(TAG, "User setup changed: selfChange=%d userSetup=%d mUserSetup=%d",
             selfChange, userSetup, mHost->mUserSetup);
     }
 
@@ -245,10 +247,10 @@ ECode CPhoneStatusBarHeadsUpObserver::OnChange(
     Elastos::Droid::Provider::Settings::Global::GetInt32(
             cr, CPhoneStatusBar::SETTING_HEADS_UP_TICKER, 0, &v);
     mHost->mHeadsUpTicker = mHost->mUseHeadsUp && 0 != v;
-    Logger::D(CPhoneStatusBar::TAG, "heads up is %s", (mHost->mUseHeadsUp ? "enabled" : "disabled"));
+    Logger::D(TAG, "heads up is %s", (mHost->mUseHeadsUp ? "enabled" : "disabled"));
     if (wasUsing != mHost->mUseHeadsUp) {
         if (!mHost->mUseHeadsUp) {
-            Logger::D(CPhoneStatusBar::TAG, "dismissing any existing heads up notification on disable event");
+            Logger::D(TAG, "dismissing any existing heads up notification on disable event");
             mHost->SetHeadsUpVisibility(FALSE);
             mHost->mHeadsUpNotificationView->ReleaseResources();
             mHost->RemoveHeadsUpView();
@@ -323,6 +325,7 @@ ECode CPhoneStatusBar::OnChildLocationsChangedListener::OnChildLocationsChanged(
 // CPhoneStatusBar::NotificationLocationsChangedListener
 //=================================================================================
 CAR_INTERFACE_IMPL(CPhoneStatusBar::NotificationLocationsChangedListener, Object, IOnChildLocationsChangedListener)
+
 CPhoneStatusBar::NotificationLocationsChangedListener::NotificationLocationsChangedListener(
     /* [in] */ CPhoneStatusBar* host)
     : mHost(host)
@@ -402,8 +405,8 @@ ECode CPhoneStatusBar::VisibilityReporter::Run()
     AutoPtr<IArraySet> noLongerVisibleNotifications = mHost->mCurrentlyVisibleNotifications;  /*<String*/
     noLongerVisibleNotifications->RemoveAll(ICollection::Probe(mTmpCurrentlyVisibleNotifications));
 
-    mHost->LogNotificationVisibilityChanges(ICollection::Probe(mTmpNewlyVisibleNotifications)
-            , ICollection::Probe(noLongerVisibleNotifications));
+    mHost->LogNotificationVisibilityChanges(ICollection::Probe(mTmpNewlyVisibleNotifications),
+        ICollection::Probe(noLongerVisibleNotifications));
 
     mHost->mCurrentlyVisibleNotifications->Clear();
     mHost->mCurrentlyVisibleNotifications->AddAll(ICollection::Probe(mTmpCurrentlyVisibleNotifications));
@@ -417,6 +420,7 @@ ECode CPhoneStatusBar::VisibilityReporter::Run()
 // CPhoneStatusBar::OverflowClickListener
 //=================================================================================
 CAR_INTERFACE_IMPL(CPhoneStatusBar::OverflowClickListener, Object, IViewOnClickListener)
+
 CPhoneStatusBar::OverflowClickListener::OverflowClickListener(
     /* [in] */ CPhoneStatusBar* host)
     : mHost(host)
@@ -486,6 +490,7 @@ ECode CPhoneStatusBar::ShowSearchPanelRunnable::Run()
 // CPhoneStatusBar::HomeActionListener
 //=================================================================================
 CAR_INTERFACE_IMPL(CPhoneStatusBar::HomeActionListener, Object, IViewOnTouchListener)
+
 CPhoneStatusBar::HomeActionListener::HomeActionListener(
     /* [in] */ CPhoneStatusBar* host)
     : mHost(host)
@@ -583,7 +588,11 @@ ECode CPhoneStatusBar::H::HandleMessage(
     return NOERROR;
 }
 
+//==========================================================================================
+// CPhoneStatusBar::FocusChangeListener
+//==========================================================================================
 CAR_INTERFACE_IMPL(CPhoneStatusBar::FocusChangeListener, Object, IViewOnFocusChangeListener)
+
 ECode CPhoneStatusBar::FocusChangeListener::OnFocusChange(
     /* [in] */ IView* v,
     /* [in] */ Boolean hasFocus)
@@ -594,6 +603,9 @@ ECode CPhoneStatusBar::FocusChangeListener::OnFocusChange(
     return NOERROR;
 }
 
+//==========================================================================================
+// CPhoneStatusBar::AnimateCollapsePanelsRunnable
+//==========================================================================================
 CPhoneStatusBar::AnimateCollapsePanelsRunnable::AnimateCollapsePanelsRunnable(
     /* [in] */ CPhoneStatusBar* host)
     : mHost(host)
@@ -605,6 +617,9 @@ ECode CPhoneStatusBar::AnimateCollapsePanelsRunnable::Run()
     return NOERROR;
 }
 
+//==========================================================================================
+// CPhoneStatusBar::CheckBarModesRunnable
+//==========================================================================================
 CPhoneStatusBar::CheckBarModesRunnable::CheckBarModesRunnable(
     /* [in] */ CPhoneStatusBar* host)
     : mHost(host)
@@ -616,6 +631,9 @@ ECode CPhoneStatusBar::CheckBarModesRunnable::Run()
     return NOERROR;
 }
 
+//==========================================================================================
+// CPhoneStatusBar::MyTicker
+//==========================================================================================
 CPhoneStatusBar::MyTicker::MyTicker(
     /* [in] */ CPhoneStatusBar* host,
     /* [in] */ IContext* context,
@@ -666,7 +684,11 @@ ECode CPhoneStatusBar::MyTicker::TickerHalting()
     return NOERROR;
 }
 
+//==========================================================================================
+// CPhoneStatusBar::TickingDoneListener
+//==========================================================================================
 CAR_INTERFACE_IMPL(CPhoneStatusBar::TickingDoneListener, Object, IAnimationAnimationListener)
+
 CPhoneStatusBar::TickingDoneListener::TickingDoneListener(
     /* [in] */ CPhoneStatusBar* host)
     : mHost(host)
@@ -691,6 +713,9 @@ ECode CPhoneStatusBar::TickingDoneListener::OnAnimationStart(
     return NOERROR;
 }
 
+//==========================================================================================
+// CPhoneStatusBar::StartTracing
+//==========================================================================================
 CPhoneStatusBar::StartTracing::StartTracing(
     /* [in] */ CPhoneStatusBar* host)
     : mHost(host)
@@ -708,6 +733,9 @@ ECode CPhoneStatusBar::StartTracing::Run()
     return NOERROR;
 }
 
+//==========================================================================================
+// CPhoneStatusBar::StopTracing
+//==========================================================================================
 CPhoneStatusBar::StopTracing::StopTracing(
     /* [in] */ CPhoneStatusBar* host)
     : mHost(host)
@@ -715,13 +743,13 @@ CPhoneStatusBar::StopTracing::StopTracing(
 
 ECode CPhoneStatusBar::StopTracing::Run()
 {
-    assert(0 && "TODO");
-    // android.os.Debug.stopMethodTracing();
-    Logger::D(TAG, "stopTracing");
     mHost->Vibrate();
     return NOERROR;
 }
 
+//==========================================================================================
+// CPhoneStatusBar::ShadeUpdates
+//==========================================================================================
 CPhoneStatusBar::ShadeUpdates::ShadeUpdates(
     /* [in] */ CPhoneStatusBar* host)
     : mHost(host)
@@ -771,7 +799,9 @@ ECode CPhoneStatusBar::ShadeUpdates::Check()
     return NOERROR;
 }
 
-
+//==========================================================================================
+// CPhoneStatusBar::DozeServiceHost::DozeServiceHostHandler
+//==========================================================================================
 const Int32 CPhoneStatusBar::DozeServiceHost::DozeServiceHostHandler::MSG_START_DOZING = 1;
 const Int32 CPhoneStatusBar::DozeServiceHost::DozeServiceHostHandler::MSG_PULSE_WHILE_DOZING = 2;
 const Int32 CPhoneStatusBar::DozeServiceHost::DozeServiceHostHandler::MSG_STOP_DOZING = 3;
@@ -808,9 +838,13 @@ ECode CPhoneStatusBar::DozeServiceHost::DozeServiceHostHandler::HandleMessage(
     return NOERROR;
 }
 
-
+//==========================================================================================
+// CPhoneStatusBar::DozeServiceHost
+//==========================================================================================
 const Int64 CPhoneStatusBar::DozeServiceHost::PROCESSING_TIME = 500;
+
 CAR_INTERFACE_IMPL(CPhoneStatusBar::DozeServiceHost, Object, IDozeHost)
+
 CPhoneStatusBar::DozeServiceHost::DozeServiceHost(
     /* [in] */ CPhoneStatusBar* host)
     : mHost(host)
@@ -961,17 +995,22 @@ void CPhoneStatusBar::DozeServiceHost::HandleStopDozing()
     }
 }
 
-CAR_INTERFACE_IMPL(CPhoneStatusBar::OnTouchListener1, Object, IViewOnTouchListener)
-CPhoneStatusBar::OnTouchListener1::OnTouchListener1(
+//==========================================================================================
+// CPhoneStatusBar::StatusBarWindowOnTouchListener
+//==========================================================================================
+CAR_INTERFACE_IMPL(CPhoneStatusBar::StatusBarWindowOnTouchListener, Object, IViewOnTouchListener)
+
+CPhoneStatusBar::StatusBarWindowOnTouchListener::StatusBarWindowOnTouchListener(
     /* [in] */ CPhoneStatusBar* host)
     : mHost(host)
 {}
 
-ECode CPhoneStatusBar::OnTouchListener1::OnTouch(
+ECode CPhoneStatusBar::StatusBarWindowOnTouchListener::OnTouch(
     /* [in] */ IView* v,
     /* [in] */ IMotionEvent* event,
     /* [out] */ Boolean* result)
 {
+    VALIDATE_NOT_NULL(result)
     mHost->CheckUserAutohide(v, event);
     Int32 action;
     if ((event->GetAction(&action), action) == IMotionEvent::ACTION_DOWN) {
@@ -982,7 +1021,11 @@ ECode CPhoneStatusBar::OnTouchListener1::OnTouch(
     return IView::Probe(mHost->mStatusBarWindow)->OnTouchEvent(event, result);
 }
 
+//==========================================================================================
+// CPhoneStatusBar::VerticalChangedListener
+//==========================================================================================
 CAR_INTERFACE_IMPL(CPhoneStatusBar::VerticalChangedListener, Object, IOnVerticalChangedListener)
+
 CPhoneStatusBar::VerticalChangedListener::VerticalChangedListener(
     /* [in] */ CPhoneStatusBar* host)
     : mHost(host)
@@ -998,13 +1041,17 @@ ECode CPhoneStatusBar::VerticalChangedListener::OnVerticalChanged(
     return NOERROR;
 }
 
-CAR_INTERFACE_IMPL(CPhoneStatusBar::OnTouchListener2, Object, IViewOnTouchListener)
-CPhoneStatusBar::OnTouchListener2::OnTouchListener2(
+//==========================================================================================
+// CPhoneStatusBar::NavigationBarViewOnTouchListener
+//==========================================================================================
+CAR_INTERFACE_IMPL(CPhoneStatusBar::NavigationBarViewOnTouchListener, Object, IViewOnTouchListener)
+
+CPhoneStatusBar::NavigationBarViewOnTouchListener::NavigationBarViewOnTouchListener(
     /* [in] */ CPhoneStatusBar* host)
     : mHost(host)
 {}
 
-ECode CPhoneStatusBar::OnTouchListener2::OnTouch(
+ECode CPhoneStatusBar::NavigationBarViewOnTouchListener::OnTouch(
     /* [in] */ IView* v,
     /* [in] */ IMotionEvent* event,
     /* [out] */ Boolean* result)
@@ -1015,20 +1062,28 @@ ECode CPhoneStatusBar::OnTouchListener2::OnTouch(
     return NOERROR;
 }
 
-CAR_INTERFACE_IMPL(CPhoneStatusBar::OnClickListener1, Object, IViewOnClickListener)
-CPhoneStatusBar::OnClickListener1::OnClickListener1(
+//==========================================================================================
+// CPhoneStatusBar::DismissViewOnClickListener
+//==========================================================================================
+CAR_INTERFACE_IMPL(CPhoneStatusBar::DismissViewOnClickListener, Object, IViewOnClickListener)
+
+CPhoneStatusBar::DismissViewOnClickListener::DismissViewOnClickListener(
     /* [in] */ CPhoneStatusBar* host)
     : mHost(host)
 {}
 
-ECode CPhoneStatusBar::OnClickListener1::OnClick(
+ECode CPhoneStatusBar::DismissViewOnClickListener::OnClick(
     /* [in] */ IView* v)
 {
     mHost->ClearAllNotifications();
     return NOERROR;
 }
 
+//==========================================================================================
+// CPhoneStatusBar::BatteryStateChangeCallback
+//==========================================================================================
 CAR_INTERFACE_IMPL(CPhoneStatusBar::BatteryStateChangeCallback, Object, IBatteryStateChangeCallback)
+
 CPhoneStatusBar::BatteryStateChangeCallback::BatteryStateChangeCallback(
     /* [in] */ CPhoneStatusBar* host)
     : mHost(host)
@@ -1054,7 +1109,11 @@ ECode CPhoneStatusBar::BatteryStateChangeCallback::OnBatteryLevelChanged(
     return NOERROR;
 }
 
+//==========================================================================================
+// CPhoneStatusBar::HostCallback
+//==========================================================================================
 CAR_INTERFACE_IMPL(CPhoneStatusBar::HostCallback, Object, IQSTileHostCallback)
+
 CPhoneStatusBar::HostCallback::HostCallback(
     /* [in] */ CPhoneStatusBar* host,
     /* [in] */ IQSTileHost* qsh)
@@ -1610,7 +1669,7 @@ AutoPtr<IPhoneStatusBarView> CPhoneStatusBar::MakeStatusBarView()
     mStatusBarWindow = IStatusBarWindowView::Probe(statusBarWindow);
     ((CStatusBarWindowView*)mStatusBarWindow.Get())->mService = this;
 
-    AutoPtr<OnTouchListener1> listener = new OnTouchListener1(this);
+    AutoPtr<StatusBarWindowOnTouchListener> listener = new StatusBarWindowOnTouchListener(this);
     statusBarWindow->SetOnTouchListener(listener);
 
     AutoPtr<IView> statusBarView;
@@ -1671,7 +1730,7 @@ AutoPtr<IPhoneStatusBarView> CPhoneStatusBar::MakeStatusBarView()
             AutoPtr<VerticalChangedListener> cl = new VerticalChangedListener(this);
             mNavigationBarView->SetOnVerticalChangedListener(cl);
 
-            AutoPtr<OnTouchListener2> tl = new OnTouchListener2(this);
+            AutoPtr<NavigationBarViewOnTouchListener> tl = new NavigationBarViewOnTouchListener(this);
             IView::Probe(mNavigationBarView)->SetOnTouchListener(tl);
         }
     } /*catch (RemoteException ex) {
@@ -1712,12 +1771,12 @@ AutoPtr<IPhoneStatusBarView> CPhoneStatusBar::MakeStatusBarView()
     LayoutInflater::From(mContext, (ILayoutInflater**)&inflater);
 
     view = NULL;
-    inflater->Inflate(R::layout::status_bar_notification_keyguard_overflow
-            , IViewGroup::Probe(mStackScroller), FALSE, (IView**)&view);
+    inflater->Inflate(R::layout::status_bar_notification_keyguard_overflow,
+        IViewGroup::Probe(mStackScroller), FALSE, (IView**)&view);
     mKeyguardIconOverflowContainer = INotificationOverflowContainer::Probe(view);
     IActivatableNotificationView::Probe(mKeyguardIconOverflowContainer)->SetOnActivatedListener(this);
-    IView::Probe(mKeyguardIconOverflowContainer)->SetOnClickListener(mOverflowClickListener);
-    IViewGroup::Probe(mStackScroller)->AddView(IView::Probe(mKeyguardIconOverflowContainer));
+    view->SetOnClickListener(mOverflowClickListener);
+    IViewGroup::Probe(mStackScroller)->AddView(view);
 
     view = NULL;
     inflater->Inflate(R::layout::status_bar_notification_speed_bump,
@@ -1736,7 +1795,7 @@ AutoPtr<IPhoneStatusBarView> CPhoneStatusBar::MakeStatusBarView()
             IViewGroup::Probe(mStackScroller), FALSE, (IView**)&view);
     mDismissView = IDismissView::Probe(view);
 
-    AutoPtr<OnClickListener1> cl1 = new OnClickListener1(this);
+    AutoPtr<DismissViewOnClickListener> cl1 = new DismissViewOnClickListener(this);
     mDismissView->SetOnButtonClickListener(cl1);
     mStackScroller->SetDismissView(mDismissView);
     mExpandedContents = IView::Probe(mStackScroller);
@@ -1891,7 +1950,8 @@ AutoPtr<IPhoneStatusBarView> CPhoneStatusBar::MakeStatusBarView()
     mKeyguardBottomArea->SetAccessibilityController(mAccessibilityController);
     mNextAlarmController = new NextAlarmController(mContext);
     mKeyguardMonitor = new KeyguardMonitor();
-    mUserSwitcherController = new UserSwitcherController(mContext, mKeyguardMonitor);
+    mUserSwitcherController = new UserSwitcherController();
+    mUserSwitcherController->constructor(mContext, mKeyguardMonitor);
 
     view = NULL;
     statusBarWindow->FindViewById(R::id::keyguard_user_switcher, (IView**)&view);
@@ -2721,7 +2781,6 @@ void CPhoneStatusBar::UpdateClearAll()
 void CPhoneStatusBar::UpdateEmptyShadeView()
 {
     Boolean showEmptyShade = FALSE;
-
     if (mState != IStatusBarState::KEYGUARD) {
         AutoPtr<IArrayList> list;
         mNotificationData->GetActiveNotifications((IArrayList**)&list);
@@ -2878,8 +2937,7 @@ void CPhoneStatusBar::UpdateCarrierLabelVisibility(
     Int32 height = 0;
     IView::Probe(mStackScroller)->GetHeight(&height);
     if (SPEW) {
-        Logger::D(TAG, "stackScrollerh=%d scrollh=%d carrierh=%d",
-                height, height, mCarrierLabelHeight);
+        Logger::D(TAG, "stackScrollerh=%d scrollh=%d carrierh=%d", height, height, mCarrierLabelHeight);
     }
 
     // Emergency calls only is shown in the expanded header now.
@@ -2965,7 +3023,8 @@ ECode CPhoneStatusBar::FindAndUpdateMediaNotifications()
 {
     Boolean metaDataChanged = FALSE;
 
-    {    AutoLock syncLock(mNotificationData);
+    {
+        AutoLock syncLock(mNotificationData);
         AutoPtr<IArrayList> activeNotifications;  /*<INotificationDataEntry*/
         mNotificationData->GetActiveNotifications((IArrayList**)&activeNotifications);
         Int32 N = 0;
@@ -3803,10 +3862,8 @@ ECode CPhoneStatusBar::InterceptTouchEvent(
             Float x = 0, y = 0;
             event->GetX(&x);
             event->GetY(&y);
-            Logger::D("CPhoneStatusBar", "InterceptTouchEvent masked=[%d], x=[%d], y=[%d], mDisabled=[%d]"
-                    , masked, (Int32)x, (Int32)y, mDisabled);
-            // EventLog.writeEvent(EventLogTags.SYSUI_STATUSBAR_TOUCH,
-            //         event.getActionMasked(), (Int32) event.getX(), (Int32) event.getY(), mDisabled);
+            Logger::D("CPhoneStatusBar", "InterceptTouchEvent masked=[%d], x=[%d], y=[%d], mDisabled=[%d]",
+                masked, (Int32)x, (Int32)y, mDisabled);
         }
     }
 
@@ -3828,7 +3885,7 @@ ECode CPhoneStatusBar::InterceptTouchEvent(
             event->GetRawX(&x);
             event->GetRawY(&y);
             Logger::D(TAG, "panel: %s at (%f, %f) mDisabled=%d",
-                        str.string(), x, y, mDisabled);
+                str.string(), x, y, mDisabled);
         }
     }
 
@@ -4526,7 +4583,7 @@ void CPhoneStatusBar::UpdateExpandedViewPos(
     IView::Probe(mNotificationPanel)->GetLayoutParams((IViewGroupLayoutParams**)&vp);
     AutoPtr<IFrameLayoutLayoutParams> lp = IFrameLayoutLayoutParams::Probe(vp);
     lp->SetGravity(mNotificationPanelGravity);
-    IView::Probe(mNotificationPanel)->SetLayoutParams(IViewGroupLayoutParams::Probe(lp));
+    IView::Probe(mNotificationPanel)->SetLayoutParams(vp);
 
     UpdateCarrierLabelVisibility(FALSE);
 }
@@ -4870,8 +4927,6 @@ ECode CPhoneStatusBar::PostStartTracing()
 
 ECode CPhoneStatusBar::Vibrate()
 {
-    Logger::D("CPhoneStatusBar", "Vibrate");
-
     AutoPtr<IInterface> obj;
     mContext->GetSystemService(IContext::VIBRATOR_SERVICE, (IInterface**)&obj);
     AutoPtr<IVibrator> vib = IVibrator::Probe(obj);

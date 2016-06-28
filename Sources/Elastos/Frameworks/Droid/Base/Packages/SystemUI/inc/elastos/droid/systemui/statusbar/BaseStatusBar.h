@@ -670,7 +670,6 @@ private:
         /* [in] */ INotification* newNotification);
 
 public:
-    static const String TAG;
     static const Boolean DEBUG;
     static const Boolean MULTIUSER_DEBUG;
     // Should match the value in PhoneWindowManager

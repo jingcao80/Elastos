@@ -128,6 +128,19 @@ public:
         Boolean mIsRestricted;
     };
 
+    class SettingsObserver: public ContentObserver
+    {
+    public:
+        constructor(
+            /* [in] */ IUserSwitcherController* host);
+
+        CARAPI OnChange(
+            /* [in] */ Boolean selfChange);
+
+    private:
+        UserSwitcherController* mHost;
+    };
+
 private:
     class ExitGuestDialog
         : public SystemUIDialog
@@ -183,21 +196,6 @@ private:
         CARAPI OnReceive(
             /* [in] */ IContext* context,
             /* [in] */ IIntent* intent);
-
-    private:
-        UserSwitcherController* mHost;
-    };
-
-    class SettingsObserver: public ContentObserver
-    {
-    public:
-        TO_STRING_IMPL("UserSwitcherController::SettingsObserver")
-
-        SettingsObserver(
-            /* [in] */ UserSwitcherController* host);
-
-        CARAPI OnChange(
-            /* [in] */ Boolean selfChange);
 
     private:
         UserSwitcherController* mHost;
@@ -284,7 +282,9 @@ private:
 public:
     CAR_INTERFACE_DECL()
 
-    UserSwitcherController(
+    UserSwitcherController();
+
+    CARAPI constructor(
         /* [in] */ IContext* context,
         /* [in] */ IKeyguardMonitor* keyguardMonitor);
 

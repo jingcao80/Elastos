@@ -126,8 +126,7 @@ ECode PanelBar::OnTouchEvent(
             Float x = 0, y = 0;
             event->GetX(&x);
             event->GetY(&y);
-            Logger::V(TAG, "onTouch: no panel for touch at (%d,%d)",
-                    (Int32) x, (Int32) y);
+            Logger::V(TAG, "onTouch: no panel for touch at (%d,%d)", (Int32) x, (Int32) y);
             mTouchingPanel = NULL;
             *result = TRUE;
             return NOERROR;
@@ -142,7 +141,7 @@ ECode PanelBar::OnTouchEvent(
             event->GetX(&x);
             event->GetY(&y);
             Logger::V(TAG, "onTouch: panel (%s) is disabled, ignoring touch at (%d,%d)",
-                    TO_CSTR(panel), (Int32) x, (Int32) y);
+                TO_CSTR(panel), (Int32) x, (Int32) y);
             mTouchingPanel = NULL;
             *result = TRUE;
             return NOERROR;

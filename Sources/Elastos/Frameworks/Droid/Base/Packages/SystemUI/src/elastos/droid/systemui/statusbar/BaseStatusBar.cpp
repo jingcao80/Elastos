@@ -17,12 +17,11 @@
 #include <elastos/droid/R.h>
 #include <elastos/droid/text/TextUtils.h>
 #include <elastos/droid/view/LayoutInflater.h>
+#include <elastos/core/AutoLock.h>
 #include <elastos/core/Math.h>
 #include <elastos/core/StringUtils.h>
 #include <elastos/utility/logging/Logger.h>
-#include <elastos/core/AutoLock.h>
 
-using Elastos::Core::AutoLock;
 using Elastos::Droid::App::ActivityManagerNative;
 using Elastos::Droid::App::CActivityManager;
 using Elastos::Droid::App::CActivityManagerHelper;
@@ -110,6 +109,7 @@ using Elastos::Droid::Internal::StatusBar::CStatusBarIconList;
 using Elastos::Droid::Internal::StatusBar::EIID_IIStatusBar;
 using Elastos::Droid::Internal::StatusBar::IIStatusBar;
 using Elastos::Droid::Internal::StatusBar::IStatusBarIconList;
+using Elastos::Core::AutoLock;
 using Elastos::Core::CBoolean;
 using Elastos::Core::CString;
 using Elastos::Core::IBoolean;
@@ -123,7 +123,8 @@ namespace Droid {
 namespace SystemUI {
 namespace StatusBar {
 
-const String BaseStatusBar::TAG("BaseStatusBar");
+const String TAG("BaseStatusBar");
+
 const Boolean BaseStatusBar::DEBUG = FALSE;//Logger::IsLoggable(TAG, Logger::___DEBUG);
 const Boolean BaseStatusBar::MULTIUSER_DEBUG = FALSE;
 const Int32 BaseStatusBar::MSG_SHOW_RECENT_APPS;
@@ -152,6 +153,7 @@ const String BaseStatusBar::BANNER_ACTION_SETUP("com.android.systemui.statusbar.
 //                  CSettingsObserver
 //==============================================================================
 CAR_OBJECT_IMPL(CSettingsObserver)
+
 ECode CSettingsObserver::constructor(
     /* [in] */ IHandler* handler,
     /* [in] */ IBaseStatusBar* host)
@@ -170,6 +172,8 @@ ECode CSettingsObserver::OnChange(
     Elastos::Droid::Provider::Settings::Global::GetInt32(
             cr, ISettingsGlobal::DEVICE_PROVISIONED, 0, &value);
     Boolean provisioned = 0 != value;
+    Logger::I(TAG, " TODO >> CSettingsObserver::OnChange: ISettingsGlobal::DEVICE_PROVISIONED: %d", provisioned);
+    provisioned = TRUE; // TODO
     if (provisioned != mHost->mDeviceProvisioned) {
         mHost->mDeviceProvisioned = provisioned;
         mHost->UpdateNotifications();
@@ -177,6 +181,7 @@ ECode CSettingsObserver::OnChange(
     Int32 mode = 0;
     Elastos::Droid::Provider::Settings::Global::GetInt32(cr,
             ISettingsGlobal::ZEN_MODE, ISettingsGlobal::ZEN_MODE_OFF, &mode);
+    Logger::I(TAG, " >> CSettingsObserver::OnChange: ISettingsGlobal::ZEN_MODE_OFF:%d", mode);
     mHost->SetZenMode(mode);
 
     mHost->UpdateLockscreenNotificationSetting();
@@ -187,6 +192,7 @@ ECode CSettingsObserver::OnChange(
 //                  CLockscreenSettingsObserver
 //==============================================================================
 CAR_OBJECT_IMPL(CLockscreenSettingsObserver)
+
 ECode CLockscreenSettingsObserver::constructor(
     /* [in] */ IHandler* handler,
     /* [in] */ IBaseStatusBar* host)
@@ -281,6 +287,7 @@ Boolean BaseStatusBar::_RemoteViewsOnClickHandler::SuperOnClickHandler(
 //                  CBaseBroadcastReceiver
 //==============================================================================
 CAR_OBJECT_IMPL(CBaseBroadcastReceiver)
+
 ECode CBaseBroadcastReceiver::constructor(
     /* [in] */ IBaseStatusBar* host)
 {
@@ -294,13 +301,13 @@ ECode CBaseBroadcastReceiver::OnReceive(
 {
     String action;
     intent->GetAction(&action);
+    Logger::I("CBaseBroadcastReceiver", " >> OnReceive: %s", action.string());
     if (IIntent::ACTION_USER_SWITCHED.Equals(action)) {
         intent->GetInt32Extra(IIntent::EXTRA_USER_HANDLE, -1, &mHost->mCurrentUserId);
         mHost->UpdateCurrentProfilesCache();
-        if (TRUE) Logger::V(BaseStatusBar::TAG, "userId %d is in the house", mHost->mCurrentUserId);
+        if (TRUE) Logger::V(TAG, "userId %d is in the house", mHost->mCurrentUserId);
 
         mHost->UpdateLockscreenNotificationSetting();
-
         mHost->UserSwitched(mHost->mCurrentUserId);
     }
     else if (IIntent::ACTION_USER_ADDED.Equals(action)) {
@@ -337,9 +344,9 @@ ECode CBaseBroadcastReceiver::OnReceive(
 }
 
 //==============================================================================
-//                  CNotificationListenerService::Runnable1
+//                  CNotificationListenerService::AddNotificationRunnable
 //==============================================================================
-CNotificationListenerService::Runnable1::Runnable1(
+CNotificationListenerService::AddNotificationRunnable::AddNotificationRunnable(
     /* [in] */ CNotificationListenerService* service,
     /* [in] */ ArrayOf<IStatusBarNotification*>* notifications,
     /* [in] */ INotificationListenerServiceRankingMap* currentRanking)
@@ -348,8 +355,9 @@ CNotificationListenerService::Runnable1::Runnable1(
     , mCurrentRanking(currentRanking)
 {}
 
-ECode CNotificationListenerService::Runnable1::Run()
+ECode CNotificationListenerService::AddNotificationRunnable::Run()
 {
+    Logger::I("CNotificationListenerService", "AddNotificationRunnable:%d", mNotifications->GetLength());
     for (Int32 i = 0; i < mNotifications->GetLength(); i++) {
         AutoPtr<IStatusBarNotification> sbn = (*mNotifications)[i];
         mService->mHost->AddNotification(sbn, mCurrentRanking);
@@ -358,9 +366,9 @@ ECode CNotificationListenerService::Runnable1::Run()
 }
 
 //==============================================================================
-//                  CNotificationListenerService::Runnable2
+//                  CNotificationListenerService::UpdateNotificationRunnable
 //==============================================================================
-CNotificationListenerService::Runnable2::Runnable2(
+CNotificationListenerService::UpdateNotificationRunnable::UpdateNotificationRunnable(
     /* [in] */ CNotificationListenerService* service,
     /* [in] */ IStatusBarNotification* sbn,
     /* [in] */ INotificationListenerServiceRankingMap* rankingMap)
@@ -369,8 +377,9 @@ CNotificationListenerService::Runnable2::Runnable2(
     , mRankingMap(rankingMap)
 {}
 
-ECode CNotificationListenerService::Runnable2::Run()
+ECode CNotificationListenerService::UpdateNotificationRunnable::Run()
 {
+    Logger::I(TAG, "UpdateNotificationRunnable");
     AutoPtr<INotification> n;
     mSbn->GetNotification((INotification**)&n);
     String key;
@@ -389,7 +398,7 @@ ECode CNotificationListenerService::Runnable2::Run()
     if ((n->IsGroupChild(&tmp), tmp) &&
             (mService->mHost->mNotificationData->IsGroupWithSummary(gkey, &tmp2), tmp2)) {
         if (mService->mHost->DEBUG) {
-            Logger::D(mService->mHost->TAG, "Ignoring group child due to existing summary: %p", mSbn.Get());
+            Logger::D(TAG, "Ignoring group child due to existing summary: %p", mSbn.Get());
         }
 
         // Remove existing notification to avoid stale data.
@@ -411,9 +420,9 @@ ECode CNotificationListenerService::Runnable2::Run()
 }
 
 //==============================================================================
-//                  CNotificationListenerService::Runnable3
+//                  CNotificationListenerService::RemoveNotificationRunnable
 //==============================================================================
-CNotificationListenerService::Runnable3::Runnable3(
+CNotificationListenerService::RemoveNotificationRunnable::RemoveNotificationRunnable(
     /* [in] */ CNotificationListenerService* service,
     /* [in] */ IStatusBarNotification* sbn,
     /* [in] */ INotificationListenerServiceRankingMap* rankingMap)
@@ -422,8 +431,9 @@ CNotificationListenerService::Runnable3::Runnable3(
     , mRankingMap(rankingMap)
 {}
 
-ECode CNotificationListenerService::Runnable3::Run()
+ECode CNotificationListenerService::RemoveNotificationRunnable::Run()
 {
+    Logger::I(TAG, "RemoveNotificationRunnable");
     String key;
     mSbn->GetKey(&key);
     mService->mHost->RemoveNotification(key, mRankingMap);
@@ -431,16 +441,16 @@ ECode CNotificationListenerService::Runnable3::Run()
 }
 
 //==============================================================================
-//                  CNotificationListenerService::Runnable4
+//                  CNotificationListenerService::UpdateNotificationRankingRunnable
 //==============================================================================
-CNotificationListenerService::Runnable4::Runnable4(
+CNotificationListenerService::UpdateNotificationRankingRunnable::UpdateNotificationRankingRunnable(
     /* [in] */ CNotificationListenerService* service,
     /* [in] */ INotificationListenerServiceRankingMap* rankingMap)
     : mService(service)
     , mRankingMap(rankingMap)
 {}
 
-ECode CNotificationListenerService::Runnable4::Run()
+ECode CNotificationListenerService::UpdateNotificationRankingRunnable::Run()
 {
     return mService->mHost->UpdateNotificationRanking(mRankingMap);
 }
@@ -464,12 +474,11 @@ ECode CNotificationListenerService::constructor(
 
 ECode CNotificationListenerService::OnListenerConnected()
 {
-    if (mHost->DEBUG) Logger::D(mHost->TAG, "onListenerConnected");
     AutoPtr<ArrayOf<IStatusBarNotification*> > notifications;
     GetActiveNotifications((ArrayOf<IStatusBarNotification*>**)&notifications);
     AutoPtr<INotificationListenerServiceRankingMap> currentRanking;
     GetCurrentRanking((INotificationListenerServiceRankingMap**)&currentRanking);
-    AutoPtr<Runnable1> run = new Runnable1(this, notifications, currentRanking);
+    AutoPtr<AddNotificationRunnable> run = new AddNotificationRunnable(this, notifications, currentRanking);
     Boolean tmp = FALSE;
     mHost->mHandler->Post(run, &tmp);
     return NOERROR;
@@ -479,8 +488,8 @@ ECode CNotificationListenerService::OnNotificationPosted(
     /* [in] */ IStatusBarNotification* sbn,
     /* [in] */ INotificationListenerServiceRankingMap* rankingMap)
 {
-    if (mHost->DEBUG) Logger::D(mHost->TAG, "onNotificationPosted: %p", sbn);
-    AutoPtr<Runnable2> run = new Runnable2(this, sbn, rankingMap);
+    if (mHost->DEBUG) Logger::D(TAG, "OnNotificationPosted: %p", sbn);
+    AutoPtr<UpdateNotificationRunnable> run = new UpdateNotificationRunnable(this, sbn, rankingMap);
     Boolean tmp = FALSE;
     mHost->mHandler->Post(run, &tmp);
     return NOERROR;
@@ -490,8 +499,8 @@ ECode CNotificationListenerService::OnNotificationRemoved(
     /* [in] */ IStatusBarNotification* sbn,
     /* [in] */ INotificationListenerServiceRankingMap* rankingMap)
 {
-    if (mHost->DEBUG) Logger::D(mHost->TAG, "onNotificationRemoved: %p", sbn);
-    AutoPtr<Runnable3> run = new Runnable3(this, sbn, rankingMap);
+    if (mHost->DEBUG) Logger::D(TAG, "OnNotificationRemoved: %p", sbn);
+    AutoPtr<RemoveNotificationRunnable> run = new RemoveNotificationRunnable(this, sbn, rankingMap);
     Boolean tmp = FALSE;
     mHost->mHandler->Post(run, &tmp);
     return NOERROR;
@@ -500,8 +509,8 @@ ECode CNotificationListenerService::OnNotificationRemoved(
 ECode CNotificationListenerService::OnNotificationRankingUpdate(
     /* [in] */ INotificationListenerServiceRankingMap* rankingMap)
 {
-    if (mHost->DEBUG) Logger::D(mHost->TAG, "onRankingUpdate");
-    AutoPtr<Runnable4> run = new Runnable4(this, rankingMap);
+    if (mHost->DEBUG) Logger::D(TAG, "OnNotificationRankingUpdate");
+    AutoPtr<UpdateNotificationRankingRunnable> run = new UpdateNotificationRankingRunnable(this, rankingMap);
     Boolean tmp = FALSE;
     mHost->mHandler->Post(run, &tmp);
     return NOERROR;
@@ -588,7 +597,7 @@ ECode BaseStatusBar::H::HandleMessage(
             mHost->ShowRecentsPreviousAffiliatedTask();
             break;
         case MSG_CLOSE_SEARCH_PANEL: {
-            if (DEBUG) Logger::D(mHost->TAG, "closing search panel");
+            if (DEBUG) Logger::D(TAG, "closing search panel");
             Boolean tmp = FALSE;
             if (mHost->mSearchPanelView != NULL && (mHost->mSearchPanelView->IsShowing(&tmp), tmp)) {
                 mHost->mSearchPanelView->Show(FALSE, TRUE);
@@ -927,7 +936,7 @@ BaseStatusBar::BaseStatusBar()
     , mRowMinHeight(0)
     , mRowMaxHeight(0)
     , mZenMode(0)
-    , mState(0)
+    , mState(IStatusBarState::SHADE)
     , mBouncerShowing(FALSE)
     , mShowLockscreenNotifications(FALSE)
     , mLockscreenPublicMode(FALSE)
@@ -944,10 +953,8 @@ ECode BaseStatusBar::constructor()
     mRecentsPreloadOnTouchListener = new RecentsPreloadOnTouchListener(this);
     mHandler = CreateHandler();
 
-    CSettingsObserver::New((IHandler*)mHandler.Get(), this,
-        (IContentObserver**)&mSettingsObserver);
-    CLockscreenSettingsObserver::New((IHandler*)mHandler.Get(), this,
-        (IContentObserver**)&mLockscreenSettingsObserver);
+    CSettingsObserver::New(mHandler.Get(), this, (IContentObserver**)&mSettingsObserver);
+    CLockscreenSettingsObserver::New(mHandler.Get(), this, (IContentObserver**)&mLockscreenSettingsObserver);
 
     CSparseArray::New((ISparseArray**)&mCurrentProfiles);
     CSparseBooleanArray::New((ISparseBooleanArray**)&mUsersAllowingPrivateNotifications);
@@ -964,7 +971,8 @@ ECode BaseStatusBar::IsDeviceProvisioned(
 
 void BaseStatusBar::UpdateCurrentProfilesCache()
 {
-    {    AutoLock syncLock(mCurrentProfiles);
+    {
+        AutoLock syncLock(mCurrentProfiles);
         mCurrentProfiles->Clear();
         if (mUserManager != NULL) {
             AutoPtr<IList> lists;
@@ -997,7 +1005,6 @@ ECode BaseStatusBar::Start()
     mWindowManager->GetDefaultDisplay((IDisplay**)&mDisplay);
 
     obj = NULL;
-    Logger::D(TAG, "TODO: Not Implement===[DEVICE_POLICY_SERVICE].");
     // mContext->GetSystemService(IContext::DEVICE_POLICY_SERVICE, (IInterface**)&obj);
     mDevicePolicyManager = IDevicePolicyManager::Probe(obj);
 
@@ -1123,11 +1130,11 @@ ECode BaseStatusBar::Start()
     }
 
     // Set up the initial notification state.
-    AutoPtr<IComponentName> cn;
     String pn;
     mContext->GetPackageName(&pn);
     String name;
-    name = GetClass()/*.getCanonicalName()*/;
+    name = Object::GetFullClassName((IBaseStatusBar*)this);
+    AutoPtr<IComponentName> cn;
     CComponentName::New(pn, name, (IComponentName**)&cn);
     if (FAILED(mNotificationListener->RegisterAsSystemService(mContext, cn, IUserHandle::USER_ALL))) {
         Logger::E(TAG, "Unable to register notification listener");
@@ -1151,8 +1158,11 @@ ECode BaseStatusBar::Start()
     filter->AddAction(IDevicePolicyManager::ACTION_DEVICE_POLICY_MANAGER_STATE_CHANGED);
     AutoPtr<IIntent> intent;
     mContext->RegisterReceiver(mBroadcastReceiver, filter, (IIntent**)&intent);
-
     UpdateCurrentProfilesCache();
+
+    // TODO delete. luo.zhaohui
+    UpdateLockscreenNotificationSetting();
+    UserSwitched(0);
     return NOERROR;
 }
 
@@ -1161,7 +1171,8 @@ void BaseStatusBar::NotifyUserAboutHiddenNotifications()
     AutoPtr<IContentResolver> cr;
     mContext->GetContentResolver((IContentResolver**)&cr);
     Int32 value = 0;
-    Elastos::Droid::Provider::Settings::Secure::GetInt32(cr, ISettingsSecure::SHOW_NOTE_ABOUT_NOTIFICATION_HIDING, 1, &value);
+    Elastos::Droid::Provider::Settings::Secure::GetInt32(cr,
+        ISettingsSecure::SHOW_NOTE_ABOUT_NOTIFICATION_HIDING, 1, &value);
     if (0 != value) {
         Logger::D(TAG, "user hasn't seen notification about hidden notifications");
         AutoPtr<ILockPatternUtils> lockPatternUtils;
@@ -2381,7 +2392,7 @@ AutoPtr<INotificationDataEntry> BaseStatusBar::CreateNotificationViews(
     /* [in] */ IStatusBarNotification* sbn)
 {
     if (DEBUG) {
-        Logger::D(TAG, "createNotificationViews(notification=%p", sbn);
+        Logger::D(TAG, "CreateNotificationViews(notification=%p", sbn);
     }
     // Construct the icon.
     AutoPtr<INotification> n;
@@ -2434,6 +2445,7 @@ void BaseStatusBar::AddNotificationViews(
     /* [in] */ INotificationDataEntry* entry,
     /* [in] */ INotificationListenerServiceRankingMap* ranking)
 {
+    Logger::I(TAG, " >> AddNotificationViews: %s, %s", TO_CSTR(entry), TO_CSTR(ranking));
     if (entry == NULL) {
         return;
     }
@@ -2453,10 +2465,8 @@ void BaseStatusBar::UpdateRowStates()
     mNotificationData->GetActiveNotifications((IArrayList**)&activeNotifications);
     Int32 N = 0;
     activeNotifications->GetSize(&N);
-
     Int32 visibleNotifications = 0;
-    Logger::D(TAG, "TODO [UpdateRowStates onKeyguard = TRUE]");
-    Boolean onKeyguard = TRUE/*mState == IStatusBarState::KEYGUARD*/;
+    Boolean onKeyguard = mState == IStatusBarState::KEYGUARD;
     for (Int32 i = 0; i < N; i++) {
         AutoPtr<IInterface> obj;
         activeNotifications->Get(i, (IInterface**)&obj);
@@ -2559,7 +2569,7 @@ ECode BaseStatusBar::UpdateNotification(
     /* [in] */ IStatusBarNotification* notification,
     /* [in] */ INotificationListenerServiceRankingMap* ranking)
 {
-    if (DEBUG) Logger::D(TAG, "updateNotification(%p)", notification);
+    if (DEBUG) Logger::D(TAG, "UpdateNotification(%s)", TO_CSTR(notification));
 
     String key;
     notification->GetKey(&key);

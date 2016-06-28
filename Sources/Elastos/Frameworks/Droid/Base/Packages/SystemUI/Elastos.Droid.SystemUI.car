@@ -2259,6 +2259,14 @@ module
             interface IDrawable;
         }
 
+        [local]
+        class CUserSwitcherControllerSettingsObserver {
+            constructor(
+                [in] IUserSwitcherController* host);
+
+            interface IContentObserver;
+        }
+
         } // namespace Policy
 
     //===========================================================================

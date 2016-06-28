@@ -3149,8 +3149,7 @@ void ViewRootImpl::PerformTraversals()
             }
         }
 
-        if (DBG)
-        {
+        if (DBG) {
             Logger::D(TAG, "======================================");
             Logger::D(TAG, "performTraversals -- after setFrame");
             host->Debug();

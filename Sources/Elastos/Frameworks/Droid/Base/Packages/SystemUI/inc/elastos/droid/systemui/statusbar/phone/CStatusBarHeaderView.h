@@ -126,10 +126,10 @@ private:
         CStatusBarHeaderView* mHost;
     };
 
-    class Runnable1: public Runnable
+    class ToggleStateChangedRunnable: public Runnable
     {
     public:
-        Runnable1(
+        ToggleStateChangedRunnable(
             /* [in] */ QsPanelCallback* host,
             /* [in] */ Boolean state);
 
@@ -141,10 +141,10 @@ private:
         Boolean mState;
     };
 
-    class Runnable2: public Runnable
+    class ShowingDetailRunnable: public Runnable
     {
     public:
-        Runnable2(
+        ShowingDetailRunnable(
             /* [in] */ QsPanelCallback* host,
             /* [in] */ IQSTileDetailAdapter* detail);
 
@@ -156,10 +156,10 @@ private:
         AutoPtr<IQSTileDetailAdapter> mDetail;
     };
 
-    class Runnable3: public Runnable
+    class ScanStateChangedRunnable: public Runnable
     {
     public:
-        Runnable3(
+        ScanStateChangedRunnable(
             /* [in] */ QsPanelCallback* host,
             /* [in] */ Boolean state);
 
@@ -171,14 +171,14 @@ private:
         Boolean mState;
     };
 
-    class ClickListener
+    class DetailHeaderSwitchClickListener
         : public Object
         , public IViewOnClickListener
     {
     public:
         CAR_INTERFACE_DECL()
 
-        ClickListener(
+        DetailHeaderSwitchClickListener(
             /* [in] */ CStatusBarHeaderView* host,
             /* [in] */ IQSTileDetailAdapter* detail);
 
@@ -191,10 +191,10 @@ private:
         AutoPtr<IQSTileDetailAdapter> mDetail;
     };
 
-    class Runnable4: public Runnable
+    class SetVisibilityRunnable: public Runnable
     {
     public:
-        Runnable4(
+        SetVisibilityRunnable(
             /* [in] */ IView* v,
             /* [in] */ Boolean state);
 
@@ -206,14 +206,14 @@ private:
         Boolean mIn;
     };
 
-    class ClickListener2
+    class MainOnClickListener
         : public Object
         , public IViewOnClickListener
     {
     public:
         CAR_INTERFACE_DECL()
 
-        ClickListener2(
+        MainOnClickListener(
             /* [in] */ CStatusBarHeaderView* host);
 
         // @Override

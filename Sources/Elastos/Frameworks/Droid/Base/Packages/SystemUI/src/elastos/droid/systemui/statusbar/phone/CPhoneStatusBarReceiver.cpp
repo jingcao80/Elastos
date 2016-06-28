@@ -11,7 +11,10 @@ namespace SystemUI {
 namespace StatusBar {
 namespace Phone {
 
+static const String TAG("CPhoneStatusBarReceiver");
+
 CAR_OBJECT_IMPL(CPhoneStatusBarReceiver)
+
 ECode CPhoneStatusBarReceiver::constructor(
     /* [in] */ IPhoneStatusBar* controller)
 {
@@ -23,7 +26,7 @@ ECode CPhoneStatusBarReceiver::OnReceive(
     /* [in] */ IContext* context,
     /* [in] */ IIntent* intent)
 {
-    if (mHost->DEBUG) Logger::V(mHost->TAG, "onReceive: %s", TO_CSTR(intent));
+    if (mHost->DEBUG) Logger::V(TAG, "onReceive: %s", TO_CSTR(intent));
     String action;
     intent->GetAction(&action);
     if (IIntent::ACTION_CLOSE_SYSTEM_DIALOGS.Equals(action)) {
@@ -59,7 +62,7 @@ ECode CPhoneStatusBarReceiver::OnReceive(
             String command = str.Trim().ToLowerCase();
             if (command.GetLength() > 0) {
                 if (FAILED(mHost->DispatchDemoCommand(command, bundle))) {
-                    Logger::W(mHost->TAG, "Error running demo command, intent=%s", TO_CSTR(intent));
+                    Logger::W(TAG, "Error running demo command, intent=%s", TO_CSTR(intent));
                 }
             }
         }

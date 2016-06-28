@@ -49,112 +49,7 @@ namespace SystemUI {
 namespace StatusBar {
 namespace Stack {
 
-AutoPtr<ArrayOf<IAnimationFilter*> > CNotificationStackScrollLayout::AnimationEvent::FILTERS
-    = CNotificationStackScrollLayout::AnimationEvent::InitStatic();
-Int32 CNotificationStackScrollLayout::AnimationEvent::LENGTHS[] = {
-    // ANIMATION_TYPE_ADD
-    IStackStateAnimator::ANIMATION_DURATION_APPEAR_DISAPPEAR,
-
-    // ANIMATION_TYPE_REMOVE
-    IStackStateAnimator::ANIMATION_DURATION_APPEAR_DISAPPEAR,
-
-    // ANIMATION_TYPE_REMOVE_SWIPED_OUT
-    IStackStateAnimator::ANIMATION_DURATION_STANDARD,
-
-    // ANIMATION_TYPE_TOP_PADDING_CHANGED
-    IStackStateAnimator::ANIMATION_DURATION_STANDARD,
-
-    // ANIMATION_TYPE_START_DRAG
-    IStackStateAnimator::ANIMATION_DURATION_STANDARD,
-
-    // ANIMATION_TYPE_SNAP_BACK
-    IStackStateAnimator::ANIMATION_DURATION_STANDARD,
-
-    // ANIMATION_TYPE_ACTIVATED_CHILD
-    IStackStateAnimator::ANIMATION_DURATION_DIMMED_ACTIVATED,
-
-    // ANIMATION_TYPE_DIMMED
-    IStackStateAnimator::ANIMATION_DURATION_DIMMED_ACTIVATED,
-
-    // ANIMATION_TYPE_CHANGE_POSITION
-    IStackStateAnimator::ANIMATION_DURATION_STANDARD,
-
-    // ANIMATION_TYPE_DARK
-    IStackStateAnimator::ANIMATION_DURATION_STANDARD,
-
-    // ANIMATION_TYPE_GO_TO_FULL_SHADE
-    IStackStateAnimator::ANIMATION_DURATION_GO_TO_FULL_SHADE,
-
-    // ANIMATION_TYPE_HIDE_SENSITIVE
-    IStackStateAnimator::ANIMATION_DURATION_STANDARD,
-
-    // ANIMATION_TYPE_VIEW_RESIZE
-    IStackStateAnimator::ANIMATION_DURATION_STANDARD,
-
-    // ANIMATION_TYPE_EVERYTHING
-    IStackStateAnimator::ANIMATION_DURATION_STANDARD,
-};
-
-const Int32 CNotificationStackScrollLayout::AnimationEvent::ANIMATION_TYPE_ADD;
-const Int32 CNotificationStackScrollLayout::AnimationEvent::ANIMATION_TYPE_REMOVE;
-const Int32 CNotificationStackScrollLayout::AnimationEvent::ANIMATION_TYPE_REMOVE_SWIPED_OUT;
-const Int32 CNotificationStackScrollLayout::AnimationEvent::ANIMATION_TYPE_TOP_PADDING_CHANGED;
-const Int32 CNotificationStackScrollLayout::AnimationEvent::ANIMATION_TYPE_START_DRAG;
-const Int32 CNotificationStackScrollLayout::AnimationEvent::ANIMATION_TYPE_SNAP_BACK;
-const Int32 CNotificationStackScrollLayout::AnimationEvent::ANIMATION_TYPE_ACTIVATED_CHILD;
-const Int32 CNotificationStackScrollLayout::AnimationEvent::ANIMATION_TYPE_DIMMED;
-const Int32 CNotificationStackScrollLayout::AnimationEvent::ANIMATION_TYPE_CHANGE_POSITION;
-const Int32 CNotificationStackScrollLayout::AnimationEvent::ANIMATION_TYPE_DARK;
-const Int32 CNotificationStackScrollLayout::AnimationEvent::ANIMATION_TYPE_GO_TO_FULL_SHADE;
-const Int32 CNotificationStackScrollLayout::AnimationEvent::ANIMATION_TYPE_HIDE_SENSITIVE;
-const Int32 CNotificationStackScrollLayout::AnimationEvent::ANIMATION_TYPE_VIEW_RESIZE;
-const Int32 CNotificationStackScrollLayout::AnimationEvent::ANIMATION_TYPE_EVERYTHING;
-CNotificationStackScrollLayout::AnimationEvent::AnimationEvent(
-    /* [in] */ IView* view,
-    /* [in] */ Int32 type)
-{
-    Init(view, type, LENGTHS[type]);
-}
-
-CNotificationStackScrollLayout::AnimationEvent::AnimationEvent(
-    /* [in] */ IView* view,
-    /* [in] */ Int32 type,
-    /* [in] */ Int64 length)
-{
-    Init(view, type, length);
-}
-
-void CNotificationStackScrollLayout::AnimationEvent::Init(
-    /* [in] */ IView* view,
-    /* [in] */ Int32 type,
-    /* [in] */ Int64 length)
-{
-    AnimationUtils::CurrentAnimationTimeMillis(&mEventStartTime);
-    mChangingView = view;
-    mAnimationType = type;
-    mFilter = (*FILTERS)[type];
-    mLength = length;
-}
-
-Int64 CNotificationStackScrollLayout::AnimationEvent::CombineLength(
-    /* [in] */ IArrayList/*<AnimationEvent>*/* events)
-{
-    Int64 length = 0;
-    Int32 size = 0;
-    events->GetSize(&size);
-    for (Int32 i = 0; i < size; i++) {
-        AutoPtr<IInterface> obj;
-        events->Get(i, (IInterface**)&obj);
-        AutoPtr<AnimationEvent> event = (AnimationEvent*)IObject::Probe(obj);
-        length = Elastos::Core::Math::Max(length, event->mLength);
-        if (event->mAnimationType == ANIMATION_TYPE_GO_TO_FULL_SHADE) {
-            return event->mLength;
-        }
-    }
-    return length;
-}
-
-AutoPtr<ArrayOf<IAnimationFilter*> > CNotificationStackScrollLayout::AnimationEvent::InitStatic()
+static AutoPtr<ArrayOf<IAnimationFilter*> > InitFILTERS()
 {
     AutoPtr<ArrayOf<IAnimationFilter*> > filters = ArrayOf<IAnimationFilter*>::Alloc(14);
 
@@ -279,12 +174,130 @@ AutoPtr<ArrayOf<IAnimationFilter*> > CNotificationStackScrollLayout::AnimationEv
     return filters;
 }
 
-CNotificationStackScrollLayout::Runnable1::Runnable1(
+AutoPtr<ArrayOf<IAnimationFilter*> > CNotificationStackScrollLayout::AnimationEvent::FILTERS = InitFILTERS();
+
+Int32 CNotificationStackScrollLayout::AnimationEvent::LENGTHS[] = {
+    // ANIMATION_TYPE_ADD
+    IStackStateAnimator::ANIMATION_DURATION_APPEAR_DISAPPEAR,
+
+    // ANIMATION_TYPE_REMOVE
+    IStackStateAnimator::ANIMATION_DURATION_APPEAR_DISAPPEAR,
+
+    // ANIMATION_TYPE_REMOVE_SWIPED_OUT
+    IStackStateAnimator::ANIMATION_DURATION_STANDARD,
+
+    // ANIMATION_TYPE_TOP_PADDING_CHANGED
+    IStackStateAnimator::ANIMATION_DURATION_STANDARD,
+
+    // ANIMATION_TYPE_START_DRAG
+    IStackStateAnimator::ANIMATION_DURATION_STANDARD,
+
+    // ANIMATION_TYPE_SNAP_BACK
+    IStackStateAnimator::ANIMATION_DURATION_STANDARD,
+
+    // ANIMATION_TYPE_ACTIVATED_CHILD
+    IStackStateAnimator::ANIMATION_DURATION_DIMMED_ACTIVATED,
+
+    // ANIMATION_TYPE_DIMMED
+    IStackStateAnimator::ANIMATION_DURATION_DIMMED_ACTIVATED,
+
+    // ANIMATION_TYPE_CHANGE_POSITION
+    IStackStateAnimator::ANIMATION_DURATION_STANDARD,
+
+    // ANIMATION_TYPE_DARK
+    IStackStateAnimator::ANIMATION_DURATION_STANDARD,
+
+    // ANIMATION_TYPE_GO_TO_FULL_SHADE
+    IStackStateAnimator::ANIMATION_DURATION_GO_TO_FULL_SHADE,
+
+    // ANIMATION_TYPE_HIDE_SENSITIVE
+    IStackStateAnimator::ANIMATION_DURATION_STANDARD,
+
+    // ANIMATION_TYPE_VIEW_RESIZE
+    IStackStateAnimator::ANIMATION_DURATION_STANDARD,
+
+    // ANIMATION_TYPE_EVERYTHING
+    IStackStateAnimator::ANIMATION_DURATION_STANDARD,
+};
+
+const Int32 CNotificationStackScrollLayout::AnimationEvent::ANIMATION_TYPE_ADD;
+const Int32 CNotificationStackScrollLayout::AnimationEvent::ANIMATION_TYPE_REMOVE;
+const Int32 CNotificationStackScrollLayout::AnimationEvent::ANIMATION_TYPE_REMOVE_SWIPED_OUT;
+const Int32 CNotificationStackScrollLayout::AnimationEvent::ANIMATION_TYPE_TOP_PADDING_CHANGED;
+const Int32 CNotificationStackScrollLayout::AnimationEvent::ANIMATION_TYPE_START_DRAG;
+const Int32 CNotificationStackScrollLayout::AnimationEvent::ANIMATION_TYPE_SNAP_BACK;
+const Int32 CNotificationStackScrollLayout::AnimationEvent::ANIMATION_TYPE_ACTIVATED_CHILD;
+const Int32 CNotificationStackScrollLayout::AnimationEvent::ANIMATION_TYPE_DIMMED;
+const Int32 CNotificationStackScrollLayout::AnimationEvent::ANIMATION_TYPE_CHANGE_POSITION;
+const Int32 CNotificationStackScrollLayout::AnimationEvent::ANIMATION_TYPE_DARK;
+const Int32 CNotificationStackScrollLayout::AnimationEvent::ANIMATION_TYPE_GO_TO_FULL_SHADE;
+const Int32 CNotificationStackScrollLayout::AnimationEvent::ANIMATION_TYPE_HIDE_SENSITIVE;
+const Int32 CNotificationStackScrollLayout::AnimationEvent::ANIMATION_TYPE_VIEW_RESIZE;
+const Int32 CNotificationStackScrollLayout::AnimationEvent::ANIMATION_TYPE_EVERYTHING;
+
+//============================================================================
+// CNotificationStackScrollLayout::AnimationEvent
+//============================================================================
+CNotificationStackScrollLayout::AnimationEvent::AnimationEvent(
+    /* [in] */ IView* view,
+    /* [in] */ Int32 type)
+    : mEventStartTime(0)
+    , mAnimationType(type)
+    , mLength(0)
+{
+    Init(view, type, LENGTHS[type]);
+}
+
+CNotificationStackScrollLayout::AnimationEvent::AnimationEvent(
+    /* [in] */ IView* view,
+    /* [in] */ Int32 type,
+    /* [in] */ Int64 length)
+    : mEventStartTime(0)
+    , mAnimationType(type)
+    , mLength(length)
+{
+    Init(view, type, length);
+}
+
+void CNotificationStackScrollLayout::AnimationEvent::Init(
+    /* [in] */ IView* view,
+    /* [in] */ Int32 type,
+    /* [in] */ Int64 length)
+{
+    AnimationUtils::CurrentAnimationTimeMillis(&mEventStartTime);
+    mChangingView = view;
+    mAnimationType = type;
+    mFilter = (*FILTERS)[type];
+    mLength = length;
+}
+
+Int64 CNotificationStackScrollLayout::AnimationEvent::CombineLength(
+    /* [in] */ IArrayList/*<AnimationEvent>*/* events)
+{
+    Int64 length = 0;
+    Int32 size = 0;
+    events->GetSize(&size);
+    for (Int32 i = 0; i < size; i++) {
+        AutoPtr<IInterface> obj;
+        events->Get(i, (IInterface**)&obj);
+        AutoPtr<AnimationEvent> event = (AnimationEvent*)IObject::Probe(obj);
+        length = Elastos::Core::Math::Max(length, event->mLength);
+        if (event->mAnimationType == ANIMATION_TYPE_GO_TO_FULL_SHADE) {
+            return event->mLength;
+        }
+    }
+    return length;
+}
+
+//============================================================================
+// CNotificationStackScrollLayout::EmptyShadeViewGoneRunnable
+//============================================================================
+CNotificationStackScrollLayout::EmptyShadeViewGoneRunnable::EmptyShadeViewGoneRunnable(
     /* [in] */ CNotificationStackScrollLayout* host)
     : mHost(host)
 {}
 
-ECode CNotificationStackScrollLayout::Runnable1::Run()
+ECode CNotificationStackScrollLayout::EmptyShadeViewGoneRunnable::Run()
 {
     IView::Probe(mHost->mEmptyShadeView)->SetVisibility(IView::GONE);
     IStackScrollerDecorView::Probe(mHost->mEmptyShadeView)->SetWillBeGone(FALSE);
@@ -293,12 +306,15 @@ ECode CNotificationStackScrollLayout::Runnable1::Run()
     return NOERROR;
 }
 
-CNotificationStackScrollLayout::Runnable2::Runnable2(
+//============================================================================
+// CNotificationStackScrollLayout::DismissViewGoneRunnable
+//============================================================================
+CNotificationStackScrollLayout::DismissViewGoneRunnable::DismissViewGoneRunnable(
     /* [in] */ CNotificationStackScrollLayout* host)
     : mHost(host)
 {}
 
-ECode CNotificationStackScrollLayout::Runnable2::Run()
+ECode CNotificationStackScrollLayout::DismissViewGoneRunnable::Run()
 {
     IView::Probe(mHost->mDismissView)->SetVisibility(IView::GONE);
     IStackScrollerDecorView::Probe(mHost->mDismissView)->SetWillBeGone(FALSE);
@@ -307,7 +323,11 @@ ECode CNotificationStackScrollLayout::Runnable2::Run()
     return NOERROR;
 }
 
+//============================================================================
+// CNotificationStackScrollLayout::ChildrenUpdater
+//============================================================================
 CAR_INTERFACE_IMPL(CNotificationStackScrollLayout::ChildrenUpdater, Object, IOnPreDrawListener)
+
 CNotificationStackScrollLayout::ChildrenUpdater::ChildrenUpdater(
     /* [in] */ CNotificationStackScrollLayout* host)
     : mHost(host)
@@ -326,7 +346,9 @@ ECode CNotificationStackScrollLayout::ChildrenUpdater::OnPreDraw(
     return NOERROR;
 }
 
-
+//============================================================================
+// CNotificationStackScrollLayout
+//============================================================================
 const String CNotificationStackScrollLayout::TAG("NotificationStackScrollLayout");
 const Boolean CNotificationStackScrollLayout::DEBUG = FALSE;
 const Float CNotificationStackScrollLayout::RUBBER_BAND_FACTOR_NORMAL = 0.35f;
@@ -473,13 +495,16 @@ void CNotificationStackScrollLayout::OnDraw(
         Int32 w = 0;
         GetWidth(&w);
         canvas->DrawLine(0, y, w, y, mDebugPaint);
-        y = (Int32) (GetLayoutHeight() - mBottomStackPeekSize
-                - mBottomStackSlowDownHeight);
+
+        y = (Int32) (GetLayoutHeight() - mBottomStackPeekSize - mBottomStackSlowDownHeight);
         canvas->DrawLine(0, y, w, y, mDebugPaint);
+
         y = (Int32) (GetLayoutHeight() - mBottomStackPeekSize);
         canvas->DrawLine(0, y, w, y, mDebugPaint);
+
         y = (Int32) GetLayoutHeight();
         canvas->DrawLine(0, y, w, y, mDebugPaint);
+
         Int32 h = 0, bm = 0;
         y = (GetHeight(&h), h) - (GetEmptyBottomMargin(&bm), bm);
         canvas->DrawLine(0, y, w, y, mDebugPaint);
@@ -571,12 +596,11 @@ ECode CNotificationStackScrollLayout::OnLayout(
     GetWidth(&value);
     Float centerX = value / 2.0f;
     GetChildCount(&value);
+    Int32 width, height;
     for (Int32 i = 0; i < value; i++) {
         AutoPtr<IView> child;
         GetChildAt(i, (IView**)&child);
-        Int32 width = 0;
         child->GetMeasuredWidth(&width);
-        Int32 height = 0;
         child->GetMeasuredHeight(&height);
         child->Layout((Int32) (centerX - width / 2.0f),
                 0,
@@ -746,13 +770,14 @@ ECode CNotificationStackScrollLayout::SetStackHeight(
         Int32 translationY = (newStackHeight - minStackHeight);
         // A slight parallax effect is introduced in order for the stack to catch up with
         // the top card.
-        Float partiallyThere = (Float) (newStackHeight - mTopPadding) / minStackHeight;
+        Float partiallyThere = (newStackHeight - mTopPadding) * 1.0f / minStackHeight;
         partiallyThere = Elastos::Core::Math::Max((Float)0, partiallyThere);
         translationY += (1 - partiallyThere) * (mBottomStackPeekSize +
                 mCollapseSecondCardPadding);
         SetTranslationY(translationY - mTopPadding);
         stackHeight = (Int32) (height - (translationY - mTopPadding));
     }
+
     if (stackHeight != mCurrentStackHeight) {
         mCurrentStackHeight = stackHeight;
         UpdateAlgorithmHeightAndPadding();
@@ -1691,21 +1716,20 @@ void CNotificationStackScrollLayout::SpringBack()
 Int32 CNotificationStackScrollLayout::GetScrollRange()
 {
     Int32 scrollRange = 0;
-    AutoPtr<IExpandableView> firstChild = IExpandableView::Probe(GetFirstChildNotGone());
+    AutoPtr<IView> firstChild = GetFirstChildNotGone();
     if (firstChild != NULL) {
         Int32 contentHeight = 0;
         GetContentHeight(&contentHeight);
-        Int32 firstChildMaxExpandHeight = GetMaxExpandHeight(IView::Probe(firstChild));
+        Int32 firstChildMaxExpandHeight = GetMaxExpandHeight(firstChild);
         scrollRange = Elastos::Core::Math::Max(0, contentHeight - mMaxLayoutHeight + mBottomStackPeekSize
                 + mBottomStackSlowDownHeight);
         if (scrollRange > 0) {
-            AutoPtr<IView> lastChild;
-            GetLastChildNotGone((IView**)&lastChild);
             // We want to at least be able collapse the first item and not ending in a weird
             // end state.
             scrollRange = Elastos::Core::Math::Max(scrollRange, firstChildMaxExpandHeight - mCollapsedSize);
         }
     }
+
     return scrollRange;
 }
 
@@ -2645,7 +2669,8 @@ ECode CNotificationStackScrollLayout::GetEmptyBottomMargin(
     else {
         emptyMargin -= mCollapseSecondCardPadding;
     }
-    return Elastos::Core::Math::Max(emptyMargin, 0);
+    *result = Elastos::Core::Math::Max(emptyMargin, 0);
+    return NOERROR;
 }
 
 ECode CNotificationStackScrollLayout::OnExpansionStarted()
@@ -2932,7 +2957,7 @@ ECode CNotificationStackScrollLayout::UpdateEmptyShadeView(
         }
         else {
             IStackScrollerDecorView::Probe(mEmptyShadeView)->SetWillBeGone(TRUE);
-            AutoPtr<Runnable1> run = new Runnable1(this);
+            AutoPtr<EmptyShadeViewGoneRunnable> run = new EmptyShadeViewGoneRunnable(this);
             IStackScrollerDecorView::Probe(mEmptyShadeView)->PerformVisibilityAnimation(FALSE, run);
         }
     }
@@ -2962,7 +2987,7 @@ ECode CNotificationStackScrollLayout::UpdateDismissView(
         }
         else {
             IStackScrollerDecorView::Probe(mDismissView)->SetWillBeGone(TRUE);
-            AutoPtr<Runnable2> run = new Runnable2(this);
+            AutoPtr<DismissViewGoneRunnable> run = new DismissViewGoneRunnable(this);
             IStackScrollerDecorView::Probe(mDismissView)->PerformVisibilityAnimation(FALSE, run);
         }
     }

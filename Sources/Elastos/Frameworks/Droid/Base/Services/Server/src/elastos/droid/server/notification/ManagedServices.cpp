@@ -15,8 +15,6 @@
 #include <elastos/utility/logging/Logger.h>
 #include <elastos/utility/logging/Slogger.h>
 
-#include <elastos/core/AutoLock.h>
-using Elastos::Core::AutoLock;
 using Elastos::Droid::App::IActivityManagerHelper;
 using Elastos::Droid::App::CActivityManagerHelper;
 using Elastos::Droid::App::IPendingIntent;
@@ -45,6 +43,7 @@ using Elastos::Droid::Text::TextUtils;
 using Elastos::Droid::Utility::CArraySet;
 using Elastos::Droid::Utility::CSparseArray;
 using Elastos::Droid::Utility::ILogHelper;
+using Elastos::Core::AutoLock;
 using Elastos::Core::CoreUtils;
 using Elastos::Core::StringBuilder;
 using Elastos::Core::StringUtils;
@@ -386,7 +385,6 @@ ECode ManagedServices::MyServiceConnection::OnServiceConnected(
         // }
     }
     if (added) {
-Slogger::D(mHost->TAG, "[wanli] OnServiceConnected =============== 1");
         mHost->OnServiceAdded(info);
     }
     return NOERROR;
@@ -614,11 +612,8 @@ ECode ManagedServices::RegisterService(
 {
     FAIL_RETURN(CheckNotNull(service))
     AutoPtr<ManagedServiceInfo> info;
-Slogger::D(TAG, "[wanli] RegisterService =============== 1");
     RegisterServiceImpl(service, component, userid, (ManagedServiceInfo**)&info);
-Slogger::D(TAG, "[wanli] RegisterService =============== 2, info=[%p]", info.Get());
     if (info != NULL) {
-Slogger::D(TAG, "[wanli] RegisterService =============== 3");
         OnServiceAdded(info);
     }
     return NOERROR;
@@ -839,7 +834,7 @@ ECode ManagedServices::RegisterService(
     /* [in] */ Int32 userid)
 {
     if (DEBUG) {
-        Slogger::V(TAG, "registerService: %p u=%d", name, userid);
+        Slogger::V(TAG, "registerService: %s u=%d", TO_CSTR(name), userid);
     }
 
     {    AutoLock syncLock(mMutex);
@@ -972,7 +967,8 @@ AutoPtr<ManagedServices::ManagedServiceInfo> ManagedServices::RemoveServiceImpl(
         Slogger::D(TAG, "removeServiceImpl service=%p u=%d", service, userid);
     }
     AutoPtr<ManagedServiceInfo> serviceInfo;
-    {    AutoLock syncLock(mMutex);
+    {
+        AutoLock syncLock(mMutex);
         Int32 N;
         mServices->GetSize(&N);
         for (Int32 i = N-1; i >= 0; i--) {
@@ -1007,7 +1003,6 @@ ECode ManagedServices::CheckNotNull(
     if (service == NULL) {
         Slogger::E(TAG, "%s must not be null", GetCaption().string());
         return E_ILLEGAL_ARGUMENT_EXCEPTION;
-        // throw new IllegalArgumentException(getCaption() + " must not be null");
     }
     return NOERROR;
 }
@@ -1021,7 +1016,8 @@ ECode ManagedServices::RegisterServiceImpl(
     VALIDATE_NOT_NULL(_info);
     *_info = NULL;
 
-    {    AutoLock syncLock(mMutex);
+    {
+        AutoLock syncLock(mMutex);
         // try {
         AutoPtr<ManagedServiceInfo> info = NewServiceInfo(service, component, userid,
                 TRUE /*isSystem*/, NULL, Build::VERSION_CODES::LOLLIPOP);

@@ -22,10 +22,6 @@ public:
 
     CAR_INTERFACE_DECL()
 
-    CARAPI constructor(
-        /* [in] */ IContext* context,
-        /* [in] */ IAttributeSet* attrs);
-
     CARAPI GetIconsView(
         /* [out] */ INotificationOverflowIconsView** view);
 

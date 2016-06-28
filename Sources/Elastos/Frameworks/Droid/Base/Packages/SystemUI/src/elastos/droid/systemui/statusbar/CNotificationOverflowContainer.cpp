@@ -11,13 +11,8 @@ namespace SystemUI {
 namespace StatusBar {
 
 CAR_OBJECT_IMPL(CNotificationOverflowContainer)
+
 CAR_INTERFACE_IMPL(CNotificationOverflowContainer, ActivatableNotificationView, INotificationOverflowContainer)
-ECode CNotificationOverflowContainer::constructor(
-    /* [in] */ IContext* context,
-    /* [in] */ IAttributeSet* attrs)
-{
-    return ActivatableNotificationView::constructor(context, attrs);
-}
 
 ECode CNotificationOverflowContainer::OnFinishInflate()
 {

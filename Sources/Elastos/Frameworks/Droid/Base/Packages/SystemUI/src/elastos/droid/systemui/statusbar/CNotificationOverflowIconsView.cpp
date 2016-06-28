@@ -21,18 +21,13 @@ namespace SystemUI {
 namespace StatusBar {
 
 CAR_OBJECT_IMPL(CNotificationOverflowIconsView)
+
 CAR_INTERFACE_IMPL(CNotificationOverflowIconsView, IconMerger, INotificationOverflowIconsView)
+
 CNotificationOverflowIconsView::CNotificationOverflowIconsView()
     : mTintColor(0)
     , mIconSize(0)
 {}
-
-ECode CNotificationOverflowIconsView::constructor(
-    /* [in] */ IContext* context,
-    /* [in] */ IAttributeSet* attrs)
-{
-    return IconMerger::constructor(context, attrs);
-}
 
 ECode CNotificationOverflowIconsView::OnFinishInflate()
 {

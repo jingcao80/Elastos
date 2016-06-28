@@ -6,6 +6,7 @@
 #include "elastos/droid/server/SystemService.h"
 #include "elastos/droid/server/lights/Light.h"
 #include "elastos/droid/server/notification/ConditionProviders.h"
+#include "elastos/droid/server/notification/ManagedServices.h"
 #include "elastos/droid/server/notification/NotificationRecord.h"
 #include "elastos/droid/server/notification/RankingHelper.h"
 #include "elastos/droid/content/BroadcastReceiver.h"
@@ -375,7 +376,7 @@ public:
             /* [in] */ Int32 id,
             /* [in] */ Int32 userId);
 
-        CARAPI_(void) EnforceSystemOrSystemUI(
+        CARAPI EnforceSystemOrSystemUI(
             /* [in] */ const String& message);
 
     private:

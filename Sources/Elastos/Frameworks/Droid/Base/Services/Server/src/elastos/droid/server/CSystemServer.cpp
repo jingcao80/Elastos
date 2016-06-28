@@ -7,7 +7,7 @@
 #include "elastos/droid/server/Watchdog.h"
 #include "elastos/droid/server/SystemConfig.h"
 #include "elastos/droid/server/CConsumerIrService.h"
-// #include "elastos/droid/server/CDevicePolicyManagerServiceLifecycle.h"
+#include "elastos/droid/server/devicepolicy/CDevicePolicyManagerService.h"
 #include "elastos/droid/server/CEntropyMixer.h"
 #include "elastos/droid/server/CInputMethodManagerService.h"
 #include "elastos/droid/server/CLockSettingsService.h"
@@ -113,6 +113,7 @@ using Elastos::Droid::Server::Power::ShutdownThread;
 using Elastos::Droid::Server::Twilight::CTwilightService;
 using Elastos::Droid::Server::Webkit::WebViewUpdateService;
 using Elastos::Droid::Server::Wm::InputMonitor;
+using Elastos::Droid::Server::DevicePolicy::CDevicePolicyManagerService;
 
 using Elastos::Core::ISystem;
 using Elastos::Core::CSystem;
@@ -705,11 +706,11 @@ ECode SystemServer::StartOtherServices()
 
             // Always start the Device Policy Manager, so that the API is compatible with
             // API8.
-            Slogger::I(TAG,  "Device Policy Manager Service todo");
-            // AutoPtr<ISystemService> dpm;
-            // ec = CDevicePolicyManagerServiceLifecycle::New(context, (ISystemService**)&dpm);
-            // if (FAILED(ec)) ReportWtf("starting CDevicePolicyManagerServiceLifecycle", ec);
-            // mSystemServiceManager->StartService(dpm.Get());
+            Slogger::I(TAG,  "Device Policy Manager Service");
+            AutoPtr<CDevicePolicyManagerService::Lifecycle> dpms = new CDevicePolicyManagerService::Lifecycle();
+            dpms->constructor(context);
+            if (FAILED(ec)) ReportWtf("starting Policy Manager Service", ec);
+            mSystemServiceManager->StartService(dpms.Get());
         }
 
         if (!disableSystemUI) {
@@ -865,7 +866,8 @@ ECode SystemServer::StartOtherServices()
         mSystemServiceManager->StartService(systemService.Get());
         service = ServiceManager::GetService(IContext::NOTIFICATION_SERVICE);
         notification = IINotificationManager::Probe(service);
-        // networkPolicy->BindNotificationManager(notification);
+        assert(notification != NULL);
+        networkPolicy->BindNotificationManager(notification);
 
     //     mSystemServiceManager->StartService(DeviceStorageMonitorService.class);
 
@@ -1368,7 +1370,7 @@ ECode SystemServer::SystemReadyRunnable::Run()
     CWebViewFactory::AcquireSingleton((IWebViewFactory**)&webViewFactory);
     webViewFactory->PrepareWebViewInSystemServer();
 
-    Slogger::I(SystemServer::TAG, "start system ui　todo");
+    Slogger::I(SystemServer::TAG, "start System UI.");
     ec = StartSystemUi(mHost->mSystemContext);
     if (FAILED(ec)) {
         mHost->ReportWtf("starting System UI", ec);

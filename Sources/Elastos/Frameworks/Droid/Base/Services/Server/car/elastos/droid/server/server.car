@@ -2204,6 +2204,14 @@ module
          interface IBinder;
     }
 
+    class CDevicePolicyManagerServiceSetupContentObserver {
+         constructor(
+            [in] IHandler* handler,
+            [in] IIDevicePolicyManager* host);
+
+         interface IContentObserver;
+    }
+
     } // namespace DevicePolicy
     } // namespace Server
     } // namepsace Droid

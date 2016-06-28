@@ -7030,7 +7030,8 @@ Boolean CWindowManagerService::IsCurrentProfileLocked(
 
 void CWindowManagerService::EnableScreenAfterBoot()
 {
-    {    AutoLock syncLock(mWindowMapLock);
+    {
+        AutoLock syncLock(mWindowMapLock);
         if (DEBUG_BOOT) {
             Slogger::I(TAG, "enableScreenAfterBoot: mDisplayEnabled=%d  mForceDisplayEnabled=%d"
                 " mShowingBootMessages=%d mSystemBooted=%d",

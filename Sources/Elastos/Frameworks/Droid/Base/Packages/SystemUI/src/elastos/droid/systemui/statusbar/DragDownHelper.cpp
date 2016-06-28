@@ -4,6 +4,7 @@
 #include "Elastos.Droid.Content.h"
 #include <elastos/droid/R.h>
 #include <elastos/core/Math.h>
+#include <elastos/utility/logging/Logger.h>
 
 using Elastos::Droid::Animation::CValueAnimatorHelper;
 using Elastos::Droid::Animation::CObjectAnimatorHelper;
@@ -21,11 +22,14 @@ using Elastos::Droid::View::IViewConfiguration;
 using Elastos::Droid::View::IViewConfigurationHelper;
 using Elastos::Core::IInteger32;
 using Elastos::Core::IFloat;
+using Elastos::Utility::Logging::Logger;
 
 namespace Elastos {
 namespace Droid {
 namespace SystemUI {
 namespace StatusBar {
+
+static const String TAG("DragDownHelper");
 
 DragDownHelper::AnimatorListenerAdapter1::AnimatorListenerAdapter1(
     /* [in] */ DragDownHelper* host,
@@ -42,6 +46,7 @@ ECode DragDownHelper::AnimatorListenerAdapter1::OnAnimationEnd(
 }
 
 CAR_INTERFACE_IMPL(DragDownHelper::AnimatorUpdateListener, Object, IAnimatorUpdateListener)
+
 DragDownHelper::AnimatorUpdateListener::AnimatorUpdateListener(
     /* [in] */ DragDownHelper* host)
     : mHost(host)
@@ -63,6 +68,7 @@ const Float DragDownHelper::RUBBERBAND_FACTOR_STATIC = 0.15f;
 const Int32 DragDownHelper::SPRING_BACK_ANIMATION_LENGTH_MS = 375;
 
 CAR_INTERFACE_IMPL_2(DragDownHelper, Object, IDragDownHelper, IGefingerpoken);
+
 DragDownHelper::DragDownHelper(
     /* [in] */ IContext* context,
     /* [in] */ IView* host,

@@ -841,7 +841,8 @@ ECode Dialog::DispatchPopulateAccessibilityEvent(
     mContext->GetPackageName(&packageName);
     AutoPtr<ICharSequence> pnCsq;
     CString::New(packageName, (ICharSequence**)&pnCsq);
-//TODO    event.setClassName(getClass().getName());
+    String className = Object::GetFullClassName((IDialog*)this);
+    // TODO event->SetClassName(className);
     event->SetPackageName(pnCsq);
 
     AutoPtr<IWindowManagerLayoutParams> params;

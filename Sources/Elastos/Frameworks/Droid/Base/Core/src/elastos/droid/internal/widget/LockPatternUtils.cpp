@@ -961,7 +961,6 @@ ECode LockPatternUtils::ClearEncryptionPassword()
 ECode LockPatternUtils::GetKeyguardStoredPasswordQuality(
     /* [out] */ Int32* result)
 {
-    VALIDATE_NOT_NULL(result);
     return GetKeyguardStoredPasswordQuality(GetCurrentOrCallingUserId(), result);
 }
 
