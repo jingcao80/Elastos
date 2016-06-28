@@ -2,7 +2,7 @@
 #include "elastos/droid/settings/inputmethod/KeyboardLayoutDialogFragment.h"
 #include "elastos/droid/view/LayoutInflater.h"
 #include "_Elastos.Droid.Settings.h"
-#include "../R.h"
+#include "R.h"
 #include "elastos/droid/R.h"
 #include <elastos/core/CoreUtils.h>
 

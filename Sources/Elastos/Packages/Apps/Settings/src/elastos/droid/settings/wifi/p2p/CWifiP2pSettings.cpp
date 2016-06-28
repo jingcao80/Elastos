@@ -2,7 +2,7 @@
 #include "Elastos.Droid.Net.h"
 #include "Elastos.CoreLibrary.Utility.h"
 #include "elastos/droid/settings/wifi/p2p/CWifiP2pSettings.h"
-#include "../../R.h"
+#include "R.h"
 #include <elastos/core/CoreUtils.h>
 #include <elastos/utility/logging/Logger.h>
 

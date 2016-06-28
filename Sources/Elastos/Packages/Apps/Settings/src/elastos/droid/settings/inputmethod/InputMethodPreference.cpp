@@ -2,7 +2,7 @@
 #include "Elastos.Droid.Internal.h"
 #include "Elastos.CoreLibrary.Text.h"
 #include "elastos/droid/settings/inputmethod/InputMethodPreference.h"
-#include "../R.h"
+#include "R.h"
 #include "elastos/droid/R.h"
 #include <elastos/core/CoreUtils.h>
 #include <elastos/utility/logging/Logger.h>

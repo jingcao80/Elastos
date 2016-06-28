@@ -1,8 +1,9 @@
 TARGET_NAME = search
 TARGET_TYPE = lib
 
-INCLUDES += ../
+INCLUDES += ../../../../../
 INCLUDES += $(MAKEDIR)/../../../../../inc/
+INCLUDES += $(MAKEDIR)/../../../../../
 
 SOURCES = DynamicIndexableContentMonitor.cpp
 SOURCES += BaseSearchIndexProvider.cpp

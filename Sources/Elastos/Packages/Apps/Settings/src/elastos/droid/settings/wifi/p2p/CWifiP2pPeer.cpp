@@ -1,7 +1,7 @@
 
 #include "Elastos.Droid.View.h"
 #include "elastos/droid/settings/wifi/p2p/CWifiP2pPeer.h"
-#include "../../R.h"
+#include "R.h"
 #include <elastos/core/Math.h>
 #include <elastos/core/CoreUtils.h>
 

@@ -6,7 +6,7 @@
 #include "elastos/droid/settings/inputmethod/UserDictionaryList.h"
 #include "elastos/droid/settings/Utils.h"
 #include "elastos/droid/text/TextUtils.h"
-#include "../R.h"
+#include "R.h"
 #include <elastos/core/CoreUtils.h>
 
 using Elastos::Droid::App::IActionBar;

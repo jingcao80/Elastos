@@ -13,7 +13,7 @@
 #include "elastos/droid/settings/Utils.h"
 #include "elastos/droid/text/TextUtils.h"
 #include "_Elastos.Droid.Settings.h"
-#include "../R.h"
+#include "R.h"
 #include <elastos/core/AutoLock.h>
 #include <elastos/core/CoreUtils.h>
 #include <elastos/core/StringUtils.h>

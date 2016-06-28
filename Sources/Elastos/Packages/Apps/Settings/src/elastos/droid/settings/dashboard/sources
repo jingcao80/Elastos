@@ -1,8 +1,9 @@
 TARGET_NAME = dashboard
 TARGET_TYPE = lib
 
-INCLUDES += ../
+INCLUDES += ../../../../../
 INCLUDES += $(MAKEDIR)/../../../../../inc/
+INCLUDES += $(MAKEDIR)/../../../../../
 
 SOURCES += CDashboardContainerView.cpp
 SOURCES += CDashboardCategory.cpp
