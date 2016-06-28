@@ -1586,6 +1586,36 @@ ECode IntentFilter::Dump(
     return NOERROR;
 }
 
+ECode IntentFilter::ToString(
+    /* [out] */ String* str)
+{
+    VALIDATE_NOT_NULL(str)
+    StringBuilder sb("CIntentFilter{");
+    sb += StringUtils::ToHexString((Int32)this);
+    if (mActions.IsEmpty() == FALSE) {
+        sb += ", actions{";
+        List<String>::Iterator it = mActions.Begin();
+        for (; it != mActions.End(); ++it) {
+            if (it != mActions.Begin()) sb += ", ";
+            sb += *it;
+        }
+        sb += "}";
+    }
+
+    if (NULL != mCategories) {
+        sb += ", categories{";
+        List<String>::Iterator it = mCategories->Begin();
+        for (; it != mCategories->End(); ++it) {
+            if (it != mCategories->Begin()) sb += ", ";
+            sb += *it;
+        }
+        sb += "}";
+    }
+    sb += "}";
+    *str = sb.ToString();
+    return NOERROR;
+}
+
 ECode IntentFilter::ReadFromParcel(
     /* [in] */ IParcel *source)
 {

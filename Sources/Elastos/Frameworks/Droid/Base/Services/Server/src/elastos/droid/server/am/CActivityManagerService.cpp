@@ -83,8 +83,6 @@
 #include <dlfcn.h>
 #include <unistd.h>
 
-#include <elastos/core/AutoLock.h>
-using Elastos::Core::AutoLock;
 using Elastos::Droid::App::AppGlobals;
 using Elastos::Droid::App::IAppOpsManager;
 using Elastos::Droid::App::CActivityOptionsHelper;
@@ -174,6 +172,7 @@ using Elastos::Droid::Internal::Utility::CFastXmlSerializer;
 using Elastos::Droid::Internal::Utility::CPreconditions;
 using Elastos::Droid::Internal::Utility::IPreconditions;
 using Elastos::Droid::Internal::Utility::XmlUtils;
+using Elastos::Droid::Internal::Telephony::Cat::IAppInterface;
 using Elastos::Droid::Net::CUriHelper;
 using Elastos::Droid::Net::IUriHelper;
 using Elastos::Droid::Os::Binder;
@@ -241,6 +240,7 @@ using Elastos::Droid::Server::Wm::AppTransition;
 using Elastos::Droid::R;
 using Elastos::Droid::Manifest;
 
+using Elastos::Core::AutoLock;
 using Elastos::Core::CoreUtils;
 using Elastos::Core::EIID_IComparator;
 using Elastos::Core::StringUtils;
@@ -767,12 +767,10 @@ ECode CActivityManagerService::ScreenStatusReceiver::OnReceive(
     if (intent == NULL || (intent->GetAction(&action), action == NULL)) {
         return NOERROR;
     }
-    if (action.Equals(/*IAppInterface::CHECK_SCREEN_IDLE_ACTION*/
-        "org.codeaurora.intent.action.stk.check_screen_idle")) {
+    if (action.Equals(IAppInterface::CHECK_SCREEN_IDLE_ACTION)) {
         Slogger::I(TAG, "ICC has requested idle screen status");
         AutoPtr<IIntent> idleScreenIntent;
-        CIntent::New(/*IAppInterface::CAT_IDLE_SCREEN_ACTION*/
-            String("org.codeaurora.intent.action.stk.check_screen_idle"), (IIntent**)&idleScreenIntent);
+        CIntent::New(IAppInterface::CAT_IDLE_SCREEN_ACTION, (IIntent**)&idleScreenIntent);
         idleScreenIntent->AddFlags(IIntent::FLAG_RECEIVER_FOREGROUND);
         Boolean isIdle = mHost->GetFocusedStack()->IsHomeStack();
         idleScreenIntent->PutExtra(String("SCREEN_IDLE"), isIdle);
@@ -1559,7 +1557,8 @@ CActivityManagerService::OnFinishCallback::OnFinishCallback(
 
 ECode CActivityManagerService::OnFinishCallback::Run()
 {
-    {    AutoLock syncLock(mHost);
+    {
+        AutoLock syncLock(mHost);
         mHost->mDidUpdate = TRUE;
     }
     mHost->WriteLastDonePreBootReceivers(mDoneReceivers);
@@ -14572,6 +14571,7 @@ Boolean CActivityManagerService::DeliverPreBootCompleted(
 ECode CActivityManagerService::SystemReady(
     /* [in] */ IRunnable* goingCallback)
 {
+    Logger::I(TAG, " >>>>>>>>>> CActivityManagerService::SystemReady:%s", TO_CSTR(goingCallback));
     {
         AutoLock lock(this);
 
@@ -14660,8 +14660,7 @@ ECode CActivityManagerService::SystemReady(
 //    EventLog.writeEvent(EventLogTags.BOOT_PROGRESS_AMS_READY,
 //        SystemClock.uptimeMillis());
     AutoPtr<IIntentFilter> bootFilter;
-    CIntentFilter::New(/*IAppInterface::CHECK_SCREEN_IDLE_ACTION*/
-        String("org.codeaurora.intent.action.stk.check_screen_idle"), (IIntentFilter**)&bootFilter);
+    CIntentFilter::New(IAppInterface::CHECK_SCREEN_IDLE_ACTION, (IIntentFilter**)&bootFilter);
     AutoPtr<ScreenStatusReceiver> receiver = new ScreenStatusReceiver(this);
     AutoPtr<IIntent> outIntent;
     mContext->RegisterReceiver(receiver, bootFilter, (IIntent**)&outIntent);
@@ -19607,7 +19606,7 @@ ECode CActivityManagerService::RegisterReceiver(
     // The first sticky in the list is returned directly back to the client.
     AutoPtr<IIntent> sticky = allSticky != NULL ? *allSticky->Begin() : NULL;
     if (DEBUG_BROADCAST) {
-        Slogger::V(TAG, "Register receiver %s, filter %s: %s",
+        Slogger::V(TAG, "Register receiver: %s, filter: %s, sticky: %s",
             TO_CSTR(receiver), TO_CSTR(filter), TO_CSTR(sticky));
     }
     if (receiver == NULL) {
@@ -23527,6 +23526,7 @@ ECode CActivityManagerService::StartUser(
     /* [in] */ Boolean foreground,
     /* [out] */ Boolean* result)
 {
+    Logger::I(TAG, " >> StartUser: %d", userId);
     VALIDATE_NOT_NULL(result);
     *result = FALSE;
     if (CheckCallingPermission(Manifest::permission::INTERACT_ACROSS_USERS_FULL)
@@ -23732,6 +23732,8 @@ ECode CActivityManagerService::SendUserSwitchBroadcastsLocked(
     /* [in] */ Int32 oldUserId,
     /* [in] */ Int32 newUserId)
 {
+    Logger::I(TAG, " >> SendUserSwitchBroadcastsLocked: oldUserId: %d, newUserId: %d",
+        oldUserId, newUserId);
     Int64 ident = Binder::ClearCallingIdentity();
     String nullStr;
     // try {
@@ -23784,6 +23786,7 @@ ECode CActivityManagerService::SendUserSwitchBroadcastsLocked(
             | IIntent::FLAG_RECEIVER_FOREGROUND);
         intent->PutExtra(IIntent::EXTRA_USER_HANDLE, newUserId);
 
+        Logger::I(TAG, " >> SendUserSwitchBroadcastsLocked: %s", TO_CSTR(intent));
         Int32 result;
         BroadcastIntentLocked(NULL, nullStr, intent,
                 nullStr, NULL, 0, nullStr, NULL,
@@ -23863,7 +23866,9 @@ ECode CActivityManagerService::OnUserInitialized(
     /* [in] */ Int32 oldUserId,
     /* [in] */ Int32 newUserId)
 {
-    {    AutoLock syncLock(this);
+    Logger::I(TAG, " >> OnUserInitialized: oldUserId:%d, newUserId:%d", oldUserId, newUserId);
+    {
+        AutoLock syncLock(this);
         if (foreground) {
             MoveUserToForeground(uss, oldUserId, newUserId);
         }
@@ -24013,7 +24018,6 @@ ECode CActivityManagerService::FinishUserBoot(
         intent->AddFlags(IIntent::FLAG_RECEIVER_NO_ABORT);
         Int32 result;
         String nullStr;
-        //TODO:
         BroadcastIntentLocked(NULL, nullStr, intent,
             nullStr, NULL, 0, nullStr, NULL,
             Manifest::permission::RECEIVE_BOOT_COMPLETED, IAppOpsManager::OP_BOOT_COMPLETED,

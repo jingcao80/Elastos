@@ -6114,7 +6114,8 @@ ECode CPackageManagerService::CheckUidPermission(
     VALIDATE_NOT_NULL(result);
     *result = IPackageManager::PERMISSION_DENIED;
 
-    {    AutoLock syncLock(mPackagesLock);
+    {
+        AutoLock syncLock(mPackagesLock);
         AutoPtr<IInterface> obj = mSettings->GetUserIdLPr(UserHandle::GetAppId(uid));
         if (obj != NULL) {
             GrantedPermissions* gp = NULL;

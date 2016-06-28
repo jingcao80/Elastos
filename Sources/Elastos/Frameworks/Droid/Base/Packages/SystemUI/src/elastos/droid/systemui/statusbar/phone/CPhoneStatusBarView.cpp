@@ -29,7 +29,7 @@ ECode CPhoneStatusBarView::Runnable1::Run()
 
 const String CPhoneStatusBarView::TAG("PhoneStatusBarView");
 const Boolean CPhoneStatusBarView::DEBUG = CPhoneStatusBar::DEBUG;
-const Boolean CPhoneStatusBarView::DEBUG_GESTURES = TRUE;
+const Boolean CPhoneStatusBarView::DEBUG_GESTURES = FALSE;
 
 CAR_OBJECT_IMPL(CPhoneStatusBarView)
 
@@ -181,11 +181,8 @@ ECode CPhoneStatusBarView::OnTouchEvent(
             Float x = 0, y = 0;
             event->GetX(&x);
             event->GetY(&y);
-            Logger::D("CPhoneStatusBarView", "OnTouchEvent masked=[%d], x=[%d], y=[%d], barConsumedEvent=[%d]"
-                    , masked, (Int32)x, (Int32)y, (barConsumedEvent ? 1 : 0));
-            // EventLog.writeEvent(EventLogTags.SYSUI_PANELBAR_TOUCH,
-            //         event.getActionMasked(), (Int32) event.getX(), (Int32) event.getY(),
-            //         barConsumedEvent ? 1 : 0);
+            Logger::D("CPhoneStatusBarView", "OnTouchEvent masked=[%d], x=[%d], y=[%d], barConsumedEvent=[%d]",
+                masked, (Int32)x, (Int32)y, (barConsumedEvent ? 1 : 0));
         }
     }
 

@@ -732,6 +732,9 @@ public:
      */
     virtual CARAPI_(Boolean) DebugCheck();
 
+    CARAPI ToString(
+        /* [out] */ String* str);
+
 protected:
     /**
      * New empty IntentFilter.

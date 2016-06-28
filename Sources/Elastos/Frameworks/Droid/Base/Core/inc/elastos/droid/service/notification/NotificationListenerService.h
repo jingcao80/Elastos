@@ -630,7 +630,6 @@ private:
         /* [out] */ IContext** ctx);
 
 private:
-    const String TAG;//= NotificationListenerService.class.getSimpleName() + "[" + getClass().getSimpleName() + "]";
     AutoPtr<IINotificationListener> mWrapper;
     AutoPtr<RankingMap> mRankingMap;
 

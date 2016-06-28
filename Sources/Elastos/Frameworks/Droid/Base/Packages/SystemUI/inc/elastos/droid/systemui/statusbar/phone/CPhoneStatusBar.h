@@ -547,16 +547,16 @@ private:
         AutoPtr<DozeServiceHostHandler> mHandler;
     };
 
-    class OnTouchListener1
+    class StatusBarWindowOnTouchListener
         : public Object
         , public IViewOnTouchListener
     {
     public:
-        TO_STRING_IMPL("CPhoneStatusBar::OnTouchListener1")
+        TO_STRING_IMPL("CPhoneStatusBar::StatusBarWindowOnTouchListener")
 
         CAR_INTERFACE_DECL()
 
-        OnTouchListener1(
+        StatusBarWindowOnTouchListener(
             /* [in] */ CPhoneStatusBar* host);
 
         CARAPI OnTouch(
@@ -588,16 +588,16 @@ private:
         CPhoneStatusBar* mHost;
     };
 
-    class OnTouchListener2
+    class NavigationBarViewOnTouchListener
         : public Object
         , public IViewOnTouchListener
     {
     public:
-        TO_STRING_IMPL("CPhoneStatusBar::OnTouchListener2")
+        TO_STRING_IMPL("CPhoneStatusBar::NavigationBarViewOnTouchListener")
 
         CAR_INTERFACE_DECL()
 
-        OnTouchListener2(
+        NavigationBarViewOnTouchListener(
             /* [in] */ CPhoneStatusBar* host);
 
         CARAPI OnTouch(
@@ -609,16 +609,16 @@ private:
         CPhoneStatusBar* mHost;
     };
 
-    class OnClickListener1
+    class DismissViewOnClickListener
         : public Object
         , public IViewOnClickListener
     {
     public:
-        TO_STRING_IMPL("CPhoneStatusBar::OnClickListener1")
+        TO_STRING_IMPL("CPhoneStatusBar::DismissViewOnClickListener")
 
         CAR_INTERFACE_DECL()
 
-        OnClickListener1(
+        DismissViewOnClickListener(
             /* [in] */ CPhoneStatusBar* host);
 
         // @Override
@@ -1723,7 +1723,6 @@ private:
         /* [in] */ IView* v);
 
 public:
-    static const String TAG;
     static const Boolean DEBUG;
     static const Boolean SPEW;
     static const Boolean DUMPTRUCK;

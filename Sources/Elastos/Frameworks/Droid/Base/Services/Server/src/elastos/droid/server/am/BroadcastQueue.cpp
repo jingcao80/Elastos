@@ -215,16 +215,17 @@ ECode BroadcastQueue::ProcessCurBroadcastLocked(
             r->mResultData, r->mResultExtras, r->mOrdered, r->mUserId, app->mRepProcState))) {
         goto failed;
     }
-    if (DEBUG_BROADCAST)
-        Slogger::V(TAG, "Process cur broadcast %s DELIVERED for app ",
-            TO_CSTR(r), TO_CSTR(app));
+    if (DEBUG_BROADCAST) {
+        Slogger::V(TAG, "Process cur broadcast %s DELIVERED for app ", TO_CSTR(r), TO_CSTR(app));
+    }
+
     started = TRUE;
     // } finally {
 failed:
     if (!started) {
-        if (DEBUG_BROADCAST)
-            Slogger::V(TAG, "Process cur broadcast %s: NOT STARTED!",
-                TO_CSTR(r));
+        if (DEBUG_BROADCAST) {
+            Slogger::V(TAG, "Process cur broadcast %s: NOT STARTED!", TO_CSTR(r));
+        }
         r->mReceiver = NULL;
         r->mCurApp = NULL;
         app->mCurReceiver = NULL;
@@ -242,7 +243,7 @@ ECode BroadcastQueue::SendPendingBroadcastsLocked(
         // try {
         mPendingBroadcast = NULL;
         ECode ec = ProcessCurBroadcastLocked(br, app);
-        if(FAILED(ec)) {
+        if (FAILED(ec)) {
             String str;
             br->mCurComponent->FlattenToShortString(&str);
             Slogger::W(TAG, "Exception in new application when starting receiver %s 0x%08x", str.string(), ec);
@@ -472,10 +473,13 @@ void BroadcastQueue::DeliverToRegisteredReceiverLocked(
     /* [in] */ BroadcastFilter* filter,
     /* [in] */ Boolean ordered)
 {
-    if (DEBUG_BROADCAST)
-    {
-        Slogger::W(TAG, "DeliverToRegisteredReceiverLocked: \n >>> record:[%s]\n >>> filter:[%s] >>> ordered:%d",
-            TO_CSTR(r), TO_CSTR(filter), ordered);
+    if (DEBUG_BROADCAST) {
+        String action;
+        r->mIntent->GetAction(&action);
+        if (action != IIntent::ACTION_TIME_TICK) {
+            Slogger::W(TAG, "DeliverToRegisteredReceiverLocked: \n >>> record:[%s]\n >>> filter:[%s] >>> ordered:%d",
+                TO_CSTR(r), TO_CSTR(filter), ordered);
+        }
     }
 
     Boolean skip = FALSE;
@@ -553,9 +557,13 @@ void BroadcastQueue::DeliverToRegisteredReceiverLocked(
 
         // try {
         if (DEBUG_BROADCAST_LIGHT) {
-            Int32 seq;
-            r->mIntent->GetInt32Extra(String("seq"), -1, &seq);
-            Slogger::I(TAG, "Delivering to %s (seq=%d): %s", TO_CSTR(r), seq, TO_CSTR(r));
+            String action;
+            r->mIntent->GetAction(&action);
+            if (action != IIntent::ACTION_TIME_TICK) {
+                Int32 seq;
+                r->mIntent->GetInt32Extra(String("seq"), -1, &seq);
+                Slogger::I(TAG, "Delivering to %s (seq=%d): %s", TO_CSTR(r), seq, TO_CSTR(r));
+            }
         }
 
         AutoPtr<IIntent> newIntent;
@@ -732,8 +740,10 @@ ECode BroadcastQueue::ProcessNextBroadcast(
                     r->mIntent->GetInt32Extra(String("seq"), -1, &seq);
                     String action;
                     r->mIntent->GetAction(&action);
-                    Slogger::I(TAG, "Finishing broadcast [%s] %s seq=%d app=%s",
-                        mQueueName.string(), action.string(), seq, TO_CSTR(r->mCallerApp));
+                    if (action != IIntent::ACTION_TIME_TICK) {
+                        Slogger::I(TAG, "Finishing broadcast [%s] %s seq=%d app=%s",
+                            mQueueName.string(), action.string(), seq, TO_CSTR(r->mCallerApp));
+                    }
                 }
                 AutoPtr<IIntent> newIntent;
                 CIntent::New(r->mIntent, (IIntent**)&newIntent);
@@ -751,8 +761,9 @@ ECode BroadcastQueue::ProcessNextBroadcast(
             if (DEBUG_BROADCAST) Slogger::V(TAG, "Cancelling BROADCAST_TIMEOUT_MSG");
             CancelBroadcastTimeoutLocked();
 
-            if (DEBUG_BROADCAST_LIGHT)
+            if (DEBUG_BROADCAST_LIGHT) {
                 Slogger::V(TAG, "Finished with ordered broadcast %s", TO_CSTR(r));
+            }
 
             // ... and on to the next...
             AddBroadcastToHistoryLocked(r);
@@ -795,8 +806,12 @@ ECode BroadcastQueue::ProcessNextBroadcast(
         // a direct call.
         AutoPtr<BroadcastFilter> filter = (BroadcastFilter*)bf;
         if (DEBUG_BROADCAST)  {
-            Slogger::V(TAG, "Delivering ordered [%s] to registered %s: %s, filter:%s",
-                mQueueName.string(), TO_CSTR(filter), TO_CSTR(r), TO_CSTR(nextReceiver));
+            String action;
+            r->mIntent->GetAction(&action);
+            if (action != IIntent::ACTION_TIME_TICK) {
+                Slogger::V(TAG, "Delivering ordered [%s] to registered %s: %s, filter:%s",
+                    mQueueName.string(), TO_CSTR(filter), TO_CSTR(r), TO_CSTR(nextReceiver));
+            }
         }
         DeliverToRegisteredReceiverLocked(r, filter, r->mOrdered);
         if (r->mReceiver == NULL || !r->mOrdered) {

@@ -4,6 +4,7 @@
 #include "R.h"
 #include <elastos/droid/R.h>
 #include <elastos/core/Math.h>
+#include <elastos/utility/logging/Logger.h>
 
 using Elastos::Droid::Animation::CObjectAnimatorHelper;
 using Elastos::Droid::Animation::CValueAnimatorHelper;
@@ -40,12 +41,18 @@ using Elastos::Droid::View::IViewPropertyAnimator;
 using Elastos::Droid::View::IViewConfiguration;
 using Elastos::Droid::View::IViewConfigurationHelper;
 using Elastos::Core::IFloat;
+using Elastos::Utility::Logging::Logger;
 
 namespace Elastos {
 namespace Droid {
 namespace SystemUI {
 namespace StatusBar {
 
+static const String TAG("ActivatableNotificationView");
+
+//==========================================================================================
+// ActivatableNotificationView::HostRunnable
+//==========================================================================================
 ActivatableNotificationView::HostRunnable::HostRunnable(
     /* [in] */ ActivatableNotificationView* host)
     : mHost(host)
@@ -57,12 +64,15 @@ ECode ActivatableNotificationView::HostRunnable::Run()
     return NOERROR;
 }
 
-ActivatableNotificationView::AnimatorListenerAdapter1::AnimatorListenerAdapter1(
+//==========================================================================================
+// ActivatableNotificationView::InvisibleAnimatorListenerAdapter
+//==========================================================================================
+ActivatableNotificationView::InvisibleAnimatorListenerAdapter::InvisibleAnimatorListenerAdapter(
     /* [in] */ ActivatableNotificationView* host)
     : mHost(host)
 {}
 
-ECode ActivatableNotificationView::AnimatorListenerAdapter1::OnAnimationEnd(
+ECode ActivatableNotificationView::InvisibleAnimatorListenerAdapter::OnAnimationEnd(
     /* [in] */ IAnimator* animation)
 {
     if (mHost->mDimmed) {
@@ -71,12 +81,15 @@ ECode ActivatableNotificationView::AnimatorListenerAdapter1::OnAnimationEnd(
     return NOERROR;
 }
 
-ActivatableNotificationView::AnimatorListenerAdapter2::AnimatorListenerAdapter2(
+//==========================================================================================
+// ActivatableNotificationView::VisibleAnimatorListenerAdapter
+//==========================================================================================
+ActivatableNotificationView::VisibleAnimatorListenerAdapter::VisibleAnimatorListenerAdapter(
     /* [in] */ ActivatableNotificationView* host)
     : mHost(host)
 {}
 
-ECode ActivatableNotificationView::AnimatorListenerAdapter2::OnAnimationEnd(
+ECode ActivatableNotificationView::VisibleAnimatorListenerAdapter::OnAnimationEnd(
     /* [in] */ IAnimator* animation)
 {
     if (mHost->mDimmed) {
@@ -88,7 +101,11 @@ ECode ActivatableNotificationView::AnimatorListenerAdapter2::OnAnimationEnd(
     return NOERROR;
 }
 
+//==========================================================================================
+// ActivatableNotificationView::AnimatorUpdateListener
+//==========================================================================================
 CAR_INTERFACE_IMPL(ActivatableNotificationView::AnimatorUpdateListener, Object, IAnimatorUpdateListener)
+
 ActivatableNotificationView::AnimatorUpdateListener::AnimatorUpdateListener(
     /* [in] */ ActivatableNotificationView* host)
     : mHost(host)
@@ -106,6 +123,9 @@ ECode ActivatableNotificationView::AnimatorUpdateListener::OnAnimationUpdate(
     return NOERROR;
 }
 
+//==========================================================================================
+// ActivatableNotificationView::AnimatorListenerAdapter3
+//==========================================================================================
 ActivatableNotificationView::AnimatorListenerAdapter3::AnimatorListenerAdapter3(
     /* [in] */ ActivatableNotificationView* host,
     /* [in] */ IRunnable* runnable)
@@ -142,6 +162,9 @@ ECode ActivatableNotificationView::AnimatorListenerAdapter3::OnAnimationCancel(
     return NOERROR;
 }
 
+//==========================================================================================
+// ActivatableNotificationView
+//==========================================================================================
 const Int64 ActivatableNotificationView::DOUBLETAP_TIMEOUT_MS = 1200;
 const Int32 ActivatableNotificationView::BACKGROUND_ANIMATION_LENGTH_MS = 220;
 const Int32 ActivatableNotificationView::ACTIVATE_ANIMATION_LENGTH = 220;
@@ -150,11 +173,22 @@ const Float ActivatableNotificationView::HORIZONTAL_ANIMATION_END = 0.2f;
 const Float ActivatableNotificationView::ALPHA_ANIMATION_END = 0.0f;
 const Float ActivatableNotificationView::HORIZONTAL_ANIMATION_START = 1.0f;
 const Float ActivatableNotificationView::VERTICAL_ANIMATION_START = 1.0f;
-AutoPtr<IInterpolator> ActivatableNotificationView::ACTIVATE_INVERSE_INTERPOLATOR;
-AutoPtr<IInterpolator> ActivatableNotificationView::ACTIVATE_INVERSE_ALPHA_INTERPOLATOR;
-Boolean ActivatableNotificationView::sInit = InitStatic();
+
+static AutoPtr<IInterpolator> InitPathInterpolator(
+    /* [in] */ Float f1,
+    /* [in] */ Float f2,
+    /* [in] */ Float f3,
+    /* [in] */ Float f4)
+{
+    AutoPtr<IInterpolator> obj;
+    CPathInterpolator::New(f1, f2, f3, f4, (IInterpolator**)&obj);
+    return obj;
+}
+AutoPtr<IInterpolator> ActivatableNotificationView::ACTIVATE_INVERSE_INTERPOLATOR = InitPathInterpolator(0.6f, 0, 0.5f, 1);
+AutoPtr<IInterpolator> ActivatableNotificationView::ACTIVATE_INVERSE_ALPHA_INTERPOLATOR = InitPathInterpolator(0, 0, 0.5f, 1);
 
 CAR_INTERFACE_IMPL(ActivatableNotificationView, ExpandableOutlineView, IActivatableNotificationView)
+
 ActivatableNotificationView::ActivatableNotificationView()
     : mTintedRippleColor(0)
     , mLowPriorityRippleColor(0)
@@ -177,17 +211,6 @@ ActivatableNotificationView::ActivatableNotificationView()
     , mLowPriorityColor(0)
     , mIsBelowSpeedBump(FALSE)
 {
-    mTapTimeoutRunnable = new HostRunnable(this);
-    mDarkPaint = CreateDarkPaint();
-    CRectF::New((IRectF**)&mAppearAnimationRect);
-    CPaint::New((IPaint**)&mAppearPaint);
-}
-
-Boolean ActivatableNotificationView::InitStatic()
-{
-    CPathInterpolator::New(0.6f, 0, 0.5f, 1, (IInterpolator**)&ACTIVATE_INVERSE_INTERPOLATOR);
-    CPathInterpolator::New(0, 0, 0.5f, 1, (IInterpolator**)&ACTIVATE_INVERSE_ALPHA_INTERPOLATOR);
-    return TRUE;
 }
 
 ECode ActivatableNotificationView::constructor(
@@ -195,6 +218,12 @@ ECode ActivatableNotificationView::constructor(
     /* [in] */ IAttributeSet* attrs)
 {
     ExpandableOutlineView::constructor(context, attrs);
+
+    mTapTimeoutRunnable = new HostRunnable(this);
+    mDarkPaint = CreateDarkPaint();
+    CRectF::New((IRectF**)&mAppearAnimationRect);
+    CPaint::New((IPaint**)&mAppearPaint);
+
     AutoPtr<IViewConfigurationHelper> helper;
     CViewConfigurationHelper::AcquireSingleton((IViewConfigurationHelper**)&helper);
     AutoPtr<IViewConfiguration> vc;
@@ -380,7 +409,7 @@ void ActivatableNotificationView::StartActivateAnimation(
     animator->SetDuration(ACTIVATE_ANIMATION_LENGTH);
     if (reverse) {
         IView::Probe(mBackgroundNormal)->SetAlpha(1.f);
-        AutoPtr<AnimatorListenerAdapter1> adapter = new AnimatorListenerAdapter1(this);
+        AutoPtr<InvisibleAnimatorListenerAdapter> adapter = new InvisibleAnimatorListenerAdapter(this);
         animator->AddListener(adapter);
         animator->Start();
     }
@@ -565,7 +594,7 @@ void ActivatableNotificationView::FadeBackground()
     helper->OfFloat(mBackgroundNormal, View::ALPHA, floats, (IObjectAnimator**)&mBackgroundAnimator);
     IAnimator::Probe(mBackgroundAnimator)->SetInterpolator(ITimeInterpolator::Probe(mFastOutSlowInInterpolator));
     IAnimator::Probe(mBackgroundAnimator)->SetDuration(duration);
-    AutoPtr<AnimatorListenerAdapter2> adapter = new AnimatorListenerAdapter2(this);
+    AutoPtr<VisibleAnimatorListenerAdapter> adapter = new VisibleAnimatorListenerAdapter(this);
     IAnimator::Probe(mBackgroundAnimator)->AddListener(adapter);
     IAnimator::Probe(mBackgroundAnimator)->Start();
 }

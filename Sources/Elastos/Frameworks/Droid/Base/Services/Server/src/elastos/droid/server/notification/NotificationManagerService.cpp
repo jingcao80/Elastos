@@ -33,8 +33,6 @@
 #include <elastos/utility/logging/Logger.h>
 #include <elastos/utility/logging/Slogger.h>
 
-#include <elastos/core/AutoLock.h>
-using Elastos::Core::AutoLock;
 using Elastos::Droid::App::ActivityManagerNative;
 using Elastos::Droid::App::AppGlobals;
 using Elastos::Droid::App::IActivityManagerHelper;
@@ -123,6 +121,7 @@ using Elastos::Droid::View::Accessibility::IAccessibilityEventHelper;
 using Elastos::Droid::View::Accessibility::CAccessibilityEventHelper;
 using Elastos::Droid::Widget::IToast;
 using Elastos::Droid::R;
+using Elastos::Core::AutoLock;
 using Elastos::Core::CInteger32;
 using Elastos::Core::CSystem;
 using Elastos::Core::ISystem;
@@ -572,7 +571,7 @@ ECode NotificationManagerService::BinderService::GetShowNotificationForPackageOn
     /* [out] */ Int32* result)
 {
     VALIDATE_NOT_NULL(result)
-    EnforceSystemOrSystemUI(String("INotificationManager.getShowNotificationForPackageOnKeyguard"));
+    FAIL_RETURN(EnforceSystemOrSystemUI(String("INotificationManager.getShowNotificationForPackageOnKeyguard")))
     return mHost->mRankingHelper->GetShowNotificationForPackageOnKeyguard(pkg, uid, result);
 }
 
@@ -649,7 +648,7 @@ ECode NotificationManagerService::BinderService::RegisterListener(
     /* [in] */ IComponentName* component,
     /* [in] */ Int32 userid)
 {
-    EnforceSystemOrSystemUI(String("INotificationManager.registerListener"));
+    FAIL_RETURN(EnforceSystemOrSystemUI(String("INotificationManager.registerListener")))
     mHost->mListeners->RegisterService(listener, component, userid);
     return NOERROR;
 }
@@ -670,9 +669,10 @@ ECode NotificationManagerService::BinderService::CancelNotificationsFromListener
     const Int32 callingPid = Binder::GetCallingPid();
     Int64 identity = Binder::ClearCallingIdentity();
     // try {
-    {    AutoLock syncLock(mHost->mNotificationList);
+    {
+        AutoLock syncLock(mHost->mNotificationList);
         AutoPtr<ManagedServices::ManagedServiceInfo> info;
-        mHost->mListeners->CheckServiceTokenLocked(token, (ManagedServices::ManagedServiceInfo**)&info);
+        FAIL_RETURN(mHost->mListeners->CheckServiceTokenLocked(token, (ManagedServices::ManagedServiceInfo**)&info))
         if (keys != NULL) {
             const Int32 N = keys->GetLength();
             for (Int32 i = 0; i < N; i++) {
@@ -734,9 +734,10 @@ ECode NotificationManagerService::BinderService::CancelNotificationFromListener(
     const Int32 callingPid = Binder::GetCallingPid();
     Int64 identity = Binder::ClearCallingIdentity();
     // try {
-    {    AutoLock syncLock(mHost->mNotificationList);
+    {
+        AutoLock syncLock(mHost->mNotificationList);
         AutoPtr<ManagedServices::ManagedServiceInfo> info;
-        mHost->mListeners->CheckServiceTokenLocked(token, (ManagedServices::ManagedServiceInfo**)&info);
+        FAIL_RETURN(mHost->mListeners->CheckServiceTokenLocked(token, (ManagedServices::ManagedServiceInfo**)&info))
         if (info->SupportsProfiles()) {
             Logger::E(TAG, "Ignoring deprecated cancelNotification(pkg, tag, id) from %p use cancelNotification(key) instead."
                     , info->mComponent.Get());
@@ -759,45 +760,45 @@ ECode NotificationManagerService::BinderService::GetActiveNotificationsFromListe
     /* [out] */ IParceledListSlice** slice)
 {
     VALIDATE_NOT_NULL(slice);
+    *slice = NULL;
 
-    {    AutoLock syncLock(mHost->mNotificationList);
-        AutoPtr<ManagedServices::ManagedServiceInfo> info;
-        mHost->mListeners->CheckServiceTokenLocked(token, (ManagedServices::ManagedServiceInfo**)&info);
-        const Boolean getKeys = keys != NULL;
-        Int32 size;
-        mHost->mNotificationList->GetSize(&size);
-        const Int32 N = getKeys ? keys->GetLength() : size;
-        AutoPtr<IArrayList> list;
-        CArrayList::New(N, (IArrayList**)&list);
-        for (Int32 i = 0; i < N; i++) {
-            AutoPtr<NotificationRecord> r;
-            if (getKeys) {
-                AutoPtr<IInterface> obj;
-                mHost->mNotificationsByKey->Get(CoreUtils::Convert((*keys)[i]), (IInterface**)&obj);
-                r = (NotificationRecord*)INotificationRecord::Probe(obj);
-            }
-            else {
-                AutoPtr<IInterface> obj;
-                mHost->mNotificationList->Get(i, (IInterface**)&obj);
-                r = (NotificationRecord*)INotificationRecord::Probe(obj);
-            }
-            if (r == NULL) continue;
-            AutoPtr<IStatusBarNotification> sbn = r->mSbn;
-            if (!mHost->IsVisibleToListener(sbn, info)) continue;
-            AutoPtr<IStatusBarNotification> sbnToSend;
-            if (trim != INotificationListenerService::TRIM_FULL) {
-                AutoPtr<IStatusBarNotification> action;
-                sbn->CloneLight((IStatusBarNotification**)&action);
-                sbnToSend = action;
-            }
-            else {
-                sbnToSend = sbn;
-            }
-            list->Add(sbnToSend);
+    AutoLock syncLock(mHost->mNotificationList);
+    AutoPtr<ManagedServices::ManagedServiceInfo> info;
+    FAIL_RETURN(mHost->mListeners->CheckServiceTokenLocked(token, (ManagedServices::ManagedServiceInfo**)&info))
+    const Boolean getKeys = keys != NULL;
+    Int32 size;
+    mHost->mNotificationList->GetSize(&size);
+    const Int32 N = getKeys ? keys->GetLength() : size;
+    AutoPtr<IArrayList> list;
+    CArrayList::New(N, (IArrayList**)&list);
+    for (Int32 i = 0; i < N; i++) {
+        AutoPtr<NotificationRecord> r;
+        if (getKeys) {
+            AutoPtr<IInterface> obj;
+            mHost->mNotificationsByKey->Get(CoreUtils::Convert((*keys)[i]), (IInterface**)&obj);
+            r = (NotificationRecord*)INotificationRecord::Probe(obj);
         }
-        return CParceledListSlice::New(IList::Probe(list), slice);
+        else {
+            AutoPtr<IInterface> obj;
+            mHost->mNotificationList->Get(i, (IInterface**)&obj);
+            r = (NotificationRecord*)INotificationRecord::Probe(obj);
+        }
+        if (r == NULL) continue;
+        AutoPtr<IStatusBarNotification> sbn = r->mSbn;
+        if (!mHost->IsVisibleToListener(sbn, info)) continue;
+        AutoPtr<IStatusBarNotification> sbnToSend;
+        if (trim != INotificationListenerService::TRIM_FULL) {
+            AutoPtr<IStatusBarNotification> action;
+            sbn->CloneLight((IStatusBarNotification**)&action);
+            sbnToSend = action;
+        }
+        else {
+            sbnToSend = sbn;
+        }
+        list->Add(sbnToSend);
     }
-    return NOERROR;
+    Logger::I(TAG, " >> GetActiveNotificationsFromListener: %d notifications.", (list->GetSize(&size), size));
+    return CParceledListSlice::New(IList::Probe(list), slice);
 }
 
 ECode NotificationManagerService::BinderService::RequestHintsFromListener(
@@ -806,9 +807,10 @@ ECode NotificationManagerService::BinderService::RequestHintsFromListener(
 {
     const Int64 identity = Binder::ClearCallingIdentity();
     // try {
-    {    AutoLock syncLock(mHost->mNotificationList);
+    {
+        AutoLock syncLock(mHost->mNotificationList);
         AutoPtr<ManagedServices::ManagedServiceInfo> info;
-        mHost->mListeners->CheckServiceTokenLocked(token, (ManagedServices::ManagedServiceInfo**)&info);
+        FAIL_RETURN(mHost->mListeners->CheckServiceTokenLocked(token, (ManagedServices::ManagedServiceInfo**)&info))
         const Boolean disableEffects = (hints & INotificationListenerService::HINT_HOST_DISABLE_EFFECTS) != 0;
         if (disableEffects) {
             ISet::Probe(mHost->mListenersDisablingEffects)->Add((IProxyDeathRecipient*)info);
@@ -843,9 +845,10 @@ ECode NotificationManagerService::BinderService::RequestInterruptionFilterFromLi
 {
     const Int64 identity = Binder::ClearCallingIdentity();
     // try {
-    {    AutoLock syncLock(mHost->mNotificationList);
+    {
+        AutoLock syncLock(mHost->mNotificationList);
         AutoPtr<ManagedServices::ManagedServiceInfo> info;
-        mHost->mListeners->CheckServiceTokenLocked(token, (ManagedServices::ManagedServiceInfo**)&info);
+        FAIL_RETURN(mHost->mListeners->CheckServiceTokenLocked(token, (ManagedServices::ManagedServiceInfo**)&info))
         mHost->mZenModeHelper->RequestFromListener(interruptionFilter);
         mHost->UpdateInterruptionFilterLocked();
     }
@@ -871,9 +874,10 @@ ECode NotificationManagerService::BinderService::SetOnNotificationPostedTrimFrom
     /* [in] */ IINotificationListener* token,
     /* [in] */ Int32 trim)
 {
-    {    AutoLock syncLock(mHost->mNotificationList);
+    {
+        AutoLock syncLock(mHost->mNotificationList);
         AutoPtr<ManagedServices::ManagedServiceInfo> info;
-        mHost->mListeners->CheckServiceTokenLocked(token, (ManagedServices::ManagedServiceInfo**)&info);
+        FAIL_RETURN(mHost->mListeners->CheckServiceTokenLocked(token, (ManagedServices::ManagedServiceInfo**)&info))
         if (info == NULL) return NOERROR;
         mHost->mListeners->SetOnNotificationPostedTrimLocked(info, trim);
         return NOERROR;
@@ -885,7 +889,7 @@ ECode NotificationManagerService::BinderService::GetZenModeConfig(
     /* [out] */ IZenModeConfig** config)
 {
     VALIDATE_NOT_NULL(config);
-    EnforceSystemOrSystemUI(String("INotificationManager.getZenModeConfig"));
+    FAIL_RETURN(EnforceSystemOrSystemUI(String("INotificationManager.getZenModeConfig")))
     AutoPtr<IZenModeConfig> _config = mHost->mZenModeHelper->GetConfig();
     *config = _config;
     REFCOUNT_ADD(*config);
@@ -922,7 +926,7 @@ ECode NotificationManagerService::BinderService::RequestZenModeConditions(
     /* [in] */ IIConditionListener* callback,
     /* [in] */ Int32 relevance)
 {
-    EnforceSystemOrSystemUI(String("INotificationManager.requestZenModeConditions"));
+    FAIL_RETURN(EnforceSystemOrSystemUI(String("INotificationManager.requestZenModeConditions")))
     mHost->mConditionProviders->RequestZenModeConditions(callback, relevance);
     return NOERROR;
 }
@@ -930,7 +934,7 @@ ECode NotificationManagerService::BinderService::RequestZenModeConditions(
 ECode NotificationManagerService::BinderService::SetZenModeCondition(
     /* [in] */ ICondition* condition)
 {
-    EnforceSystemOrSystemUI(String("INotificationManager.setZenModeCondition"));
+    FAIL_RETURN(EnforceSystemOrSystemUI(String("INotificationManager.setZenModeCondition")))
     const Int64 identity = Binder::ClearCallingIdentity();
     // try {
     mHost->mConditionProviders->SetZenModeCondition(condition, String("binderCall"));
@@ -943,7 +947,7 @@ ECode NotificationManagerService::BinderService::SetZenModeCondition(
 ECode NotificationManagerService::BinderService::SetAutomaticZenModeConditions(
     /* [in] */ ArrayOf<IUri*>* conditionIds)
 {
-    EnforceSystemOrSystemUI(String("INotificationManager.setAutomaticZenModeConditions"));
+    FAIL_RETURN(EnforceSystemOrSystemUI(String("INotificationManager.setAutomaticZenModeConditions")))
     mHost->mConditionProviders->SetAutomaticZenModeConditions(conditionIds);
     return NOERROR;
 }
@@ -952,20 +956,20 @@ ECode NotificationManagerService::BinderService::GetAutomaticZenModeConditions(
     /* [out, callee] */ ArrayOf<ICondition*>** condition)
 {
     VALIDATE_NOT_NULL(condition);
-    EnforceSystemOrSystemUI(String("INotificationManager.getAutomaticZenModeConditions"));
+    FAIL_RETURN(EnforceSystemOrSystemUI(String("INotificationManager.getAutomaticZenModeConditions")))
     AutoPtr< ArrayOf<ICondition*> > con = mHost->mConditionProviders->GetAutomaticZenModeConditions();
     *condition = con;
     REFCOUNT_ADD(*condition);
     return NOERROR;;
 }
 
-void NotificationManagerService::BinderService::EnforceSystemOrSystemUI(
+ECode NotificationManagerService::BinderService::EnforceSystemOrSystemUI(
     /* [in] */ const String& message)
 {
-    if (IsCallerSystem()) return;
+    if (IsCallerSystem()) return NOERROR;
     AutoPtr<IContext> context;
     mHost->GetContext((IContext**)&context);
-    context->EnforceCallingPermission(
+    return context->EnforceCallingPermission(
             Elastos::Droid::Manifest::permission::STATUS_BAR_SERVICE, message);
 }
 
@@ -998,7 +1002,7 @@ ECode NotificationManagerService::BinderService::GetEffectsSuppressor(
 {
     VALIDATE_NOT_NULL(name);
 
-    EnforceSystemOrSystemUI(String("INotificationManager.getEffectsSuppressor"));
+    FAIL_RETURN(EnforceSystemOrSystemUI(String("INotificationManager.getEffectsSuppressor")))
     *name = mHost->mEffectsSuppressor;
     REFCOUNT_ADD(*name);
     return NOERROR;
@@ -1009,8 +1013,9 @@ ECode NotificationManagerService::BinderService::MatchesCallFilter(
     /* [out] */ Boolean* result)
 {
     VALIDATE_NOT_NULL(result);
+    *result = FALSE;
 
-    EnforceSystemOrSystemUI(String("INotificationManager.matchesCallFilter"));
+    FAIL_RETURN(EnforceSystemOrSystemUI(String("INotificationManager.matchesCallFilter")))
 
     AutoPtr<INotificationSignalExtractor> actor =
             mHost->mRankingHelper->FindExtractor(EIID_IValidateNotificationPeople);
@@ -1040,7 +1045,8 @@ NotificationManagerService::NotificationListeners::NotificationListeners()
 {}
 
 NotificationManagerService::NotificationListeners::~NotificationListeners()
-{}
+{
+}
 
 ECode NotificationManagerService::NotificationListeners::constructor(
     /* [in] */ IInterface* host)
@@ -1368,7 +1374,8 @@ Boolean NotificationManagerService::NotificationListeners::IsListenerPackage(
         return FALSE;
     }
     // TODO: clean up locking object later
-    {    AutoLock syncLock(mHost->mNotificationList);
+    {
+        AutoLock syncLock(mHost->mNotificationList);
         Int32 size;
         mServices->GetSize(&size);
         for (Int32 i = 0; i < size; i++) {
@@ -1929,7 +1936,8 @@ ECode NotificationManagerService::MyNotificationDelegate::OnNotificationClick(
     /* [in] */ Int32 callingPid,
     /* [in] */ const String& key)
 {
-    {    AutoLock syncLock(mHost->mNotificationList);
+    {
+        AutoLock syncLock(mHost->mNotificationList);
         // TODO
         // EventLogTags.writeNotificationClicked(key);
         AutoPtr<IInterface> obj;
@@ -1972,7 +1980,8 @@ ECode NotificationManagerService::MyNotificationDelegate::OnPanelRevealed()
 {
     // TODO
     // EventLogTags.writeNotificationPanelRevealed();
-    {    AutoLock syncLock(mHost->mNotificationList);
+    {
+        AutoLock syncLock(mHost->mNotificationList);
         // sound
         mHost->mSoundNotification = NULL;
 
@@ -2245,8 +2254,7 @@ ECode NotificationManagerService::MyBroadcastReceiver::OnReceive(
     else if (action.Equals(IIntent::ACTION_USER_PRESENT)) {
         // turn off LED when user passes through lock screen
         mHost->mNotificationLight->TurnOff();
-        Slogger::I(TAG, "TODO: StatusBar");
-        // mHost->mStatusBar->NotificationLightOff();
+        mHost->mStatusBar->NotificationLightOff();
     }
     else if (action.Equals(IIntent::ACTION_USER_SWITCHED)) {
         // reload per-user settings
@@ -2277,9 +2285,7 @@ NotificationManagerService::MyRunnable::~MyRunnable()
 
 ECode NotificationManagerService::MyRunnable::Run()
 {
-    Slogger::I(TAG, "TODO: StatusBar");
-    // return mHost->mStatusBar->BuzzBeepBlinked();
-    return NOERROR;
+    return mHost->mStatusBar->BuzzBeepBlinked();
 }
 
 //===============================================================================
@@ -3071,16 +3077,17 @@ ECode NotificationManagerService::OnStart()
 
     ImportOldBlockDb();
 
+    AutoPtr<CNotificationListeners> notificationListeners;
+    CNotificationListeners::NewByFriend(TO_IINTERFACE(this), (CNotificationListeners**)&notificationListeners);
+    mListeners = (NotificationListeners*) notificationListeners.Get();
     AutoPtr<IManagedServices> managedServices;
-    CNotificationListeners::New(TO_IINTERFACE(this), (IManagedServices**)&managedServices);
-    mListeners = (NotificationListeners*) managedServices.Get();
-    managedServices = NULL;
-    CConditionProviders::New(context, mHandler, TO_IINTERFACE(mUserProfiles), TO_IINTERFACE(mZenModeHelper), (IManagedServices**)&managedServices);
+    CConditionProviders::New(context, mHandler,
+        TO_IINTERFACE(mUserProfiles), TO_IINTERFACE(mZenModeHelper),
+        (IManagedServices**)&managedServices);
     mConditionProviders = (ConditionProviders*) managedServices.Get();
     obj = GetLocalService(EIID_IStatusBarManagerInternal);
     mStatusBar = IStatusBarManagerInternal::Probe(obj);
-    Slogger::I(TAG, "TODO: StatusBar");
-    // mStatusBar->SetNotificationDelegate(mNotificationDelegate);
+    mStatusBar->SetNotificationDelegate(mNotificationDelegate);
 
     obj = GetLocalService(EIID_ILightsManager);
     AutoPtr<LightsManager> lights = (LightsManager*)ILightsManager::Probe(obj);
@@ -3308,7 +3315,12 @@ AutoPtr< ArrayOf<String> > NotificationManagerService::GetActiveNotificationKeys
     /* [in] */ IINotificationListener* token)
 {
     AutoPtr<ManagedServices::ManagedServiceInfo> info;
-    mListeners->CheckServiceTokenLocked(token, (ManagedServices::ManagedServiceInfo**)&info);
+    ECode ec = mListeners->CheckServiceTokenLocked(token, (ManagedServices::ManagedServiceInfo**)&info);
+    if (FAILED(ec)) {
+        AutoPtr< ArrayOf<String> > resultArray = ArrayOf<String>::Alloc(0);
+            return resultArray;
+    }
+
     AutoPtr<IArrayList> keys;
     CArrayList::New((IArrayList**)&keys);
     if (info->IsEnabledForCurrentProfiles()) {
@@ -4691,8 +4703,7 @@ void NotificationManagerService::UpdateLightsLocked()
 
     if (!enableLed) {
         mNotificationLight->TurnOff();
-        Slogger::I(TAG, "TODO: StatusBar");
-        // mStatusBar->NotificationLightOff();
+        mStatusBar->NotificationLightOff();
     }
     else {
         AutoPtr<INotification> ledno;
@@ -4726,8 +4737,7 @@ void NotificationManagerService::UpdateLightsLocked()
         }
 
         // let SystemUI make an independent decision
-        Slogger::I(TAG, "TODO: StatusBar");
-        // mStatusBar->NotificationLightPulse(ledARGB, ledOnMS, ledOffMS);
+        mStatusBar->NotificationLightPulse(ledARGB, ledOnMS, ledOffMS);
     }
 }
 

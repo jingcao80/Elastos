@@ -31,7 +31,7 @@ namespace SystemUI {
 namespace StatusBar {
 namespace Phone {
 
-const String CStatusBarWindowView::TAG("StatusBarWindowView");
+const String CStatusBarWindowView::TAG("CStatusBarWindowView");
 const Boolean CStatusBarWindowView::DEBUG = BaseStatusBar::DEBUG;
 
 CAR_INTERFACE_IMPL(CStatusBarWindowView, FrameLayout, IStatusBarWindowView)
@@ -291,17 +291,17 @@ void CStatusBarWindowView::OnDraw(
                     mTransparentSrcPaint);
         }
     }
-    // if (DEBUG) {
-    //     AutoPtr<IPaint> pt;
-    //     CPaint::New((IPaint**)&pt);
-    //     pt->SetColor(0x80FFFF00);
-    //     pt->SetStrokeWidth(12.0f);
-    //     pt->SetStyle(PaintStyle_STROKE);
-    //     Int32 w = 0, h = 0;
-    //     canvas->GetWidth(&w);
-    //     canvas->GetHeight(&h);
-    //     canvas->DrawRect(0, 0, w, h, pt);
-    // }
+    if (DEBUG) {
+        AutoPtr<IPaint> pt;
+        CPaint::New((IPaint**)&pt);
+        pt->SetColor(0x80FFFF00);
+        pt->SetStrokeWidth(12.0f);
+        pt->SetStyle(PaintStyle_STROKE);
+        Int32 w = 0, h = 0;
+        canvas->GetWidth(&w);
+        canvas->GetHeight(&h);
+        canvas->DrawRect(0, 0, w, h, pt);
+    }
 }
 
 ECode CStatusBarWindowView::CancelExpandHelper()

@@ -41,6 +41,11 @@ namespace SystemUI {
 namespace StatusBar {
 namespace Phone {
 
+static const String TAG("CStatusBarHeaderView");
+
+//====================================================================================
+// CStatusBarHeaderView::LayoutValues
+//====================================================================================
 CStatusBarHeaderView::LayoutValues::LayoutValues()
     : mDateExpandedAlpha(0)
     , mDateCollapsedAlpha(0)
@@ -92,54 +97,67 @@ void CStatusBarHeaderView::LayoutValues::Interpoloate(
     mAlarmStatusAlpha = v1->mAlarmStatusAlpha * (1 - t3) + v2->mAlarmStatusAlpha * t3;
 }
 
-CStatusBarHeaderView::Runnable1::Runnable1(
+//====================================================================================
+// CStatusBarHeaderView::ToggleStateChangedRunnable
+//====================================================================================
+CStatusBarHeaderView::ToggleStateChangedRunnable::ToggleStateChangedRunnable(
     /* [in] */ QsPanelCallback* host,
     /* [in] */ Boolean state)
     : mHost(host)
     , mState(state)
 {}
 
-ECode CStatusBarHeaderView::Runnable1::Run()
+ECode CStatusBarHeaderView::ToggleStateChangedRunnable::Run()
 {
     mHost->HandleToggleStateChanged(mState);
     return NOERROR;
 }
 
-CStatusBarHeaderView::Runnable2::Runnable2(
+//====================================================================================
+// CStatusBarHeaderView::ShowingDetailRunnable
+//====================================================================================
+CStatusBarHeaderView::ShowingDetailRunnable::ShowingDetailRunnable(
     /* [in] */ QsPanelCallback* host,
     /* [in] */ IQSTileDetailAdapter* detail)
     : mHost(host)
     , mDetail(detail)
 {}
 
-ECode CStatusBarHeaderView::Runnable2::Run()
+ECode CStatusBarHeaderView::ShowingDetailRunnable::Run()
 {
     mHost->HandleShowingDetail(mDetail);
     return NOERROR;
 }
 
-CStatusBarHeaderView::Runnable3::Runnable3(
+//====================================================================================
+// CStatusBarHeaderView::ScanStateChangedRunnable
+//====================================================================================
+CStatusBarHeaderView::ScanStateChangedRunnable::ScanStateChangedRunnable(
     /* [in] */ QsPanelCallback* host,
     /* [in] */ Boolean state)
     : mHost(host)
     , mState(state)
 {}
 
-ECode CStatusBarHeaderView::Runnable3::Run()
+ECode CStatusBarHeaderView::ScanStateChangedRunnable::Run()
 {
     mHost->HandleScanStateChanged(mState);
     return NOERROR;
 }
 
-CAR_INTERFACE_IMPL(CStatusBarHeaderView::ClickListener, Object, IViewOnClickListener)
-CStatusBarHeaderView::ClickListener::ClickListener(
+//====================================================================================
+// CStatusBarHeaderView::DetailHeaderSwitchClickListener
+//====================================================================================
+CAR_INTERFACE_IMPL(CStatusBarHeaderView::DetailHeaderSwitchClickListener, Object, IViewOnClickListener)
+
+CStatusBarHeaderView::DetailHeaderSwitchClickListener::DetailHeaderSwitchClickListener(
     /* [in] */ CStatusBarHeaderView* host,
     /* [in] */ IQSTileDetailAdapter* detail)
     : mHost(host)
     , mDetail(detail)
 {}
 
-ECode CStatusBarHeaderView::ClickListener::OnClick(
+ECode CStatusBarHeaderView::DetailHeaderSwitchClickListener::OnClick(
     /* [in] */ IView* v)
 {
     Boolean tmp = FALSE;
@@ -150,14 +168,17 @@ ECode CStatusBarHeaderView::ClickListener::OnClick(
     return NOERROR;
 }
 
-CStatusBarHeaderView::Runnable4::Runnable4(
+//====================================================================================
+// CStatusBarHeaderView::SetVisibilityRunnable
+//====================================================================================
+CStatusBarHeaderView::SetVisibilityRunnable::SetVisibilityRunnable(
     /* [in] */ IView* v,
     /* [in] */ Boolean in)
     : mView(v)
     , mIn(in)
 {}
 
-ECode CStatusBarHeaderView::Runnable4::Run()
+ECode CStatusBarHeaderView::SetVisibilityRunnable::Run()
 {
     if (!mIn) {
         mView->SetVisibility(IView::INVISIBLE);
@@ -165,7 +186,11 @@ ECode CStatusBarHeaderView::Runnable4::Run()
     return NOERROR;
 }
 
+//====================================================================================
+// CStatusBarHeaderView::QsPanelCallback
+//====================================================================================
 CAR_INTERFACE_IMPL(CStatusBarHeaderView::QsPanelCallback, Object, IQSPanelCallback)
+
 CStatusBarHeaderView::QsPanelCallback::QsPanelCallback(
     /* [in] */ CStatusBarHeaderView* host)
     : mScanState(FALSE)
@@ -175,7 +200,7 @@ CStatusBarHeaderView::QsPanelCallback::QsPanelCallback(
 ECode CStatusBarHeaderView::QsPanelCallback::OnToggleStateChanged(
     /* [in] */ Boolean state)
 {
-    AutoPtr<Runnable1> run = new Runnable1(this, state);
+    AutoPtr<ToggleStateChangedRunnable> run = new ToggleStateChangedRunnable(this, state);
     Boolean tmp = FALSE;
     mHost->Post(run, &tmp);
     return NOERROR;
@@ -184,7 +209,7 @@ ECode CStatusBarHeaderView::QsPanelCallback::OnToggleStateChanged(
 ECode CStatusBarHeaderView::QsPanelCallback::OnShowingDetail(
     /* [in] */ IQSTileDetailAdapter* detail)
 {
-    AutoPtr<Runnable2> run = new Runnable2(this, detail);
+    AutoPtr<ShowingDetailRunnable> run = new ShowingDetailRunnable(this, detail);
     Boolean tmp = FALSE;
     mHost->Post(run, &tmp);
     return NOERROR;
@@ -193,7 +218,7 @@ ECode CStatusBarHeaderView::QsPanelCallback::OnShowingDetail(
 ECode CStatusBarHeaderView::QsPanelCallback::OnScanStateChanged(
     /* [in] */ Boolean state)
 {
-    AutoPtr<Runnable3> run = new Runnable3(this, state);
+    AutoPtr<ScanStateChangedRunnable> run = new ScanStateChangedRunnable(this, state);
     Boolean tmp = FALSE;
     mHost->Post(run, &tmp);
     return NOERROR;
@@ -242,7 +267,11 @@ void CStatusBarHeaderView::QsPanelCallback::HandleShowingDetail(
         mHost->mQsDetailHeaderTitle->SetText(v);
         AutoPtr<IBoolean> toggleState;
         detail->GetToggleState((IBoolean**)&toggleState);
-        if (toggleState == NULL) {
+        Boolean bval = FALSE;
+        if (toggleState) {
+            toggleState->GetValue(&bval);
+        }
+        if (toggleState == NULL || !bval) {
             IView::Probe(mHost->mQsDetailHeaderSwitch)->SetVisibility(IView::INVISIBLE);
             mHost->mQsDetailHeader->SetClickable(FALSE);
         }
@@ -252,7 +281,7 @@ void CStatusBarHeaderView::QsPanelCallback::HandleShowingDetail(
             toggleState->GetValue(&tmp);
             ICheckable::Probe(mHost->mQsDetailHeaderSwitch)->SetChecked(tmp);
             mHost->mQsDetailHeader->SetClickable(TRUE);
-            AutoPtr<ClickListener> listener = new ClickListener(mHost, detail);
+            AutoPtr<DetailHeaderSwitchClickListener> listener = new DetailHeaderSwitchClickListener(mHost, detail);
             mHost->mQsDetailHeader->SetOnClickListener(listener);
         }
     }
@@ -273,24 +302,32 @@ void CStatusBarHeaderView::QsPanelCallback::Transition(
     v->Animate((IViewPropertyAnimator**)&vpa);
     vpa->Alpha(in ? 1 : 0);
     vpa->WithLayer();
-    AutoPtr<Runnable4> run = new Runnable4(v, in);
+    AutoPtr<SetVisibilityRunnable> run = new SetVisibilityRunnable(v, in);
     vpa->WithEndAction(run);
     vpa->Start();
 }
 
-CAR_INTERFACE_IMPL(CStatusBarHeaderView::ClickListener2, Object, IViewOnClickListener)
-CStatusBarHeaderView::ClickListener2::ClickListener2(
+//====================================================================================
+// CStatusBarHeaderView::MainOnClickListener
+//====================================================================================
+CAR_INTERFACE_IMPL(CStatusBarHeaderView::MainOnClickListener, Object, IViewOnClickListener)
+
+CStatusBarHeaderView::MainOnClickListener::MainOnClickListener(
     /* [in] */ CStatusBarHeaderView* host)
     : mHost(host)
 {}
 
-ECode CStatusBarHeaderView::ClickListener2::OnClick(
+ECode CStatusBarHeaderView::MainOnClickListener::OnClick(
     /* [in] */ IView* v)
 {
     return mHost->OnClick(v);
 }
 
+//====================================================================================
+// CStatusBarHeaderView::OnLayoutChangeListener
+//====================================================================================
 CAR_INTERFACE_IMPL(CStatusBarHeaderView::OnLayoutChangeListener, Object, IViewOnLayoutChangeListener)
+
 CStatusBarHeaderView::OnLayoutChangeListener::OnLayoutChangeListener(
     /* [in] */ CStatusBarHeaderView* host)
     : mHost(host)
@@ -321,6 +358,9 @@ ECode CStatusBarHeaderView::OnLayoutChangeListener::OnLayoutChange(
     return NOERROR;
 }
 
+//====================================================================================
+// CStatusBarHeaderView::OutlineProvider
+//====================================================================================
 CStatusBarHeaderView::OutlineProvider::OutlineProvider(
     /* [in] */ CStatusBarHeaderView* host)
     : mHost(host)
@@ -334,7 +374,12 @@ ECode CStatusBarHeaderView::OutlineProvider::GetOutline(
     return NOERROR;
 }
 
-CAR_INTERFACE_IMPL(CStatusBarHeaderView::OnUserInfoChangedListener, Object, IUserInfoControllerOnUserInfoChangedListener)
+//====================================================================================
+// CStatusBarHeaderView::OnUserInfoChangedListener
+//====================================================================================
+CAR_INTERFACE_IMPL(CStatusBarHeaderView::OnUserInfoChangedListener, Object, \
+    IUserInfoControllerOnUserInfoChangedListener)
+
 CStatusBarHeaderView::OnUserInfoChangedListener::OnUserInfoChangedListener(
     /* [in] */ CStatusBarHeaderView* host)
     : mHost(host)
@@ -348,9 +393,14 @@ ECode CStatusBarHeaderView::OnUserInfoChangedListener::OnUserInfoChanged(
     return NOERROR;
 }
 
+//====================================================================================
+// CStatusBarHeaderView
+//====================================================================================
 CAR_OBJECT_IMPL(CStatusBarHeaderView)
-CAR_INTERFACE_IMPL_4(CStatusBarHeaderView, RelativeLayout, IStatusBarHeaderView, IViewOnClickListener \
-        , IBatteryStateChangeCallback, INextAlarmChangeCallback);
+
+CAR_INTERFACE_IMPL_4(CStatusBarHeaderView, RelativeLayout, IStatusBarHeaderView, \
+    IViewOnClickListener, IBatteryStateChangeCallback, INextAlarmChangeCallback)
+
 CStatusBarHeaderView::CStatusBarHeaderView()
     : mExpanded(FALSE)
     , mListening(FALSE)
@@ -373,17 +423,18 @@ CStatusBarHeaderView::CStatusBarHeaderView()
     , mCurrentT(0)
     , mShowingDetail(FALSE)
 {
-    CRect::New((IRect**)&mClipBounds);
-    mCollapsedValues = new LayoutValues();
-    mExpandedValues = new LayoutValues();
-    mCurrentValues = new LayoutValues();
-    mQsPanelCallback = new QsPanelCallback(this);
 }
 
 ECode CStatusBarHeaderView::constructor(
     /* [in] */ IContext* context,
     /* [in] */ IAttributeSet* attrs)
 {
+    CRect::New((IRect**)&mClipBounds);
+    mCollapsedValues = new LayoutValues();
+    mExpandedValues = new LayoutValues();
+    mCurrentValues = new LayoutValues();
+    mQsPanelCallback = new QsPanelCallback(this);
+
     return RelativeLayout::constructor(context, attrs);
 }
 
@@ -396,7 +447,7 @@ ECode CStatusBarHeaderView::OnFinishInflate()
     FindViewById(R::id::system_icons_container, (IView**)&view);
     mSystemIconsContainer = IViewGroup::Probe(view);
 
-    AutoPtr<ClickListener2> cl = new ClickListener2(this);
+    AutoPtr<MainOnClickListener> cl = new MainOnClickListener(this);
     mSystemIconsSuperContainer->SetOnClickListener(cl);
     FindViewById(R::id::date_group, (IView**)&mDateGroup);
     FindViewById(R::id::clock, (IView**)&mClock);

@@ -2100,38 +2100,41 @@ ECode CContextImpl::StartServiceCommon(
     *name = NULL;
     VALIDATE_NOT_NULL(user);
 
-//     try {
-        service->SetAllowFds(FALSE);
-        AutoPtr<IApplicationThread> appThread;
-        mMainThread->GetApplicationThread((IApplicationThread**)&appThread);
-        AutoPtr<IContentResolver> contentResolver;
-        GetContentResolver((IContentResolver**)&contentResolver);
-        String type;
-        service->ResolveTypeIfNeeded(contentResolver, &type);
-        Int32 identifier = 0;
-        user->GetIdentifier(&identifier);
-        AutoPtr<IComponentName> cn;
-        ActivityManagerNative::GetDefault()->StartService(
-            appThread, service, type, identifier, (IComponentName**)&cn);
-        if (cn != NULL) {
-            String pkgName, className;
-            cn->GetPackageName(&pkgName);
+    FAIL_RETURN(ValidateServiceIntent(service))
+    service->PrepareToLeaveProcess();
+
+    AutoPtr<IApplicationThread> appThread;
+    mMainThread->GetApplicationThread((IApplicationThread**)&appThread);
+    AutoPtr<IContentResolver> contentResolver;
+    GetContentResolver((IContentResolver**)&contentResolver);
+    String type;
+    service->ResolveTypeIfNeeded(contentResolver, &type);
+    Int32 identifier = 0;
+    user->GetIdentifier(&identifier);
+
+    AutoPtr<IComponentName> cn;
+    ActivityManagerNative::GetDefault()->StartService(
+        appThread, service, type, identifier, (IComponentName**)&cn);
+    if (cn != NULL) {
+        String pkgName;
+        cn->GetPackageName(&pkgName);
+        if (pkgName.Equals("!")) {
+            String className;
             cn->GetClassName(&className);
-            if (pkgName.Equals("!")) {
-                Slogger::E(TAG, "Not allowed to start service without permission: %s", className.string());
-                return E_SECURITY_EXCEPTION;
-            }
-            else if (pkgName.Equals("!!")) {
-                Slogger::E(TAG, "Unable to start service: %s", className.string());
-                return E_SECURITY_EXCEPTION;
-            }
+            Slogger::E(TAG, "Not allowed to start service without permission: %s", className.string());
+            return E_SECURITY_EXCEPTION;
         }
-        *name = cn;
-        REFCOUNT_ADD(*name);
-        return NOERROR;
-//     } catch (RemoteException e) {
-//         return NULL;
-//     }
+        else if (pkgName.Equals("!!")) {
+            String className;
+            cn->GetClassName(&className);
+            Slogger::E(TAG, "Unable to start service: %s", className.string());
+            return E_SECURITY_EXCEPTION;
+        }
+    }
+
+    *name = cn;
+    REFCOUNT_ADD(*name);
+    return NOERROR;
 }
 
 ECode CContextImpl::StopServiceAsUser(

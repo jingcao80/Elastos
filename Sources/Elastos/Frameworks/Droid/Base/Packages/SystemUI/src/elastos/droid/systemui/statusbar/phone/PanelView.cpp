@@ -31,6 +31,8 @@ namespace SystemUI {
 namespace StatusBar {
 namespace Phone {
 
+static const String TAG("PanelView");
+
 PanelView::PeekRunnable::PeekRunnable(
     /* [in] */ PanelView* host)
     : mHost(host)
@@ -246,9 +248,10 @@ ECode PanelView::AnimatorUpdateListener::OnAnimationUpdate(
 }
 
 
-const Boolean PanelView::DEBUG = IPanelBar::DEBUG;
-const String PanelView::TAG("PanelView.class.getSimpleName()");
+const Boolean PanelView::DEBUG = FALSE;
+
 CAR_INTERFACE_IMPL(PanelView, FrameLayout, IPanelView)
+
 void PanelView::OnExpandingFinished()
 {
     mClosing = FALSE;
@@ -538,8 +541,7 @@ ECode PanelView::OnTouchEvent(
                     mVelocityTracker->ComputeCurrentVelocity(1000);
                     mVelocityTracker->GetYVelocity(&vel);
                     mVelocityTracker->GetXVelocity(&fv1);
-                    mVelocityTracker->GetYVelocity(&fv2);
-                    vectorVel = (Float) Elastos::Core::Math::Hypot(fv1, fv2);
+                    vectorVel = (Float) Elastos::Core::Math::Hypot(fv1, vel);
                 }
                 Boolean expand = FlingExpands(vel, vectorVel);
                 OnTrackingStopped(expand);
@@ -618,9 +620,8 @@ ECode PanelView::OnInterceptTouchEvent(
         pointerIndex = 0;
         event->GetPointerId(pointerIndex, &mTrackingPointer);
     }
-    Float x = 0;
+    Float x, y;
     event->GetX(pointerIndex, &x);
-    Float y = 0;
     event->GetY(pointerIndex, &y);
     Boolean scrolledToBottom = IsScrolledToBottom();
 
@@ -825,7 +826,7 @@ ECode PanelView::GetName(
 ECode PanelView::SetExpandedHeight(
     /* [in] */ Float height)
 {
-    if (DEBUG) Logger::V(TAG, "%ssetExpandedHeight(%.1f)", (mViewName != NULL ? (mViewName + String(": ")).string() : "")
+    if (DEBUG) Logger::V(TAG, "%s setExpandedHeight(%.1f)", (mViewName != NULL ? (mViewName + String(": ")).string() : "")
         , height);
     SetExpandedHeightInternal(height + GetOverExpansionPixels());
     return NOERROR;
@@ -886,8 +887,7 @@ ECode PanelView::SetExpandedHeightInternal(
     mExpandedHeight = Elastos::Core::Math::Max((Float)0, mExpandedHeight);
     OnHeightUpdated(mExpandedHeight);
     mExpandedFraction = Elastos::Core::Math::Min(1.f, fhWithoutOverExpansion == 0
-            ? 0
-            : mExpandedHeight / fhWithoutOverExpansion);
+            ? 0 : mExpandedHeight / fhWithoutOverExpansion);
     NotifyBarPanelExpansionChanged();
     return NOERROR;
 }
@@ -957,7 +957,7 @@ ECode PanelView::SetBar(
 ECode PanelView::Collapse(
     /* [in] */ Boolean delayed)
 {
-    if (DEBUG) Logger::V(TAG, "%scollapse: %s", (mViewName != NULL ? (mViewName + String(": ")).string() : "")
+    if (DEBUG) Logger::V(TAG, "%s collapse: %s", (mViewName != NULL ? (mViewName + String(": ")).string() : "")
             , TO_CSTR(this));
 
     Boolean tmp = FALSE;
@@ -990,7 +990,7 @@ ECode PanelView::Collapse(
 
 ECode PanelView::Expand()
 {
-    if (DEBUG) Logger::V(TAG, "%sexpand: %s", (mViewName != NULL ? (mViewName + String(": ")).string() : ""), TO_CSTR(this));
+    if (DEBUG) Logger::V(TAG, "%s expand: %s", (mViewName != NULL ? (mViewName + String(": ")).string() : ""), TO_CSTR(this));
     Boolean tmp = FALSE;
     if (IsFullyCollapsed(&tmp), tmp) {
         mBar->StartOpeningPanel(this);
@@ -1085,11 +1085,12 @@ void PanelView::StartUnlockHintAnimationPhase1(
 {
     Float target = Elastos::Core::Math::Max((Float)0, GetMaxPanelHeight() - mHintDistance);
     AutoPtr<IValueAnimator> animator = CreateHeightAnimator(target);
-    IAnimator::Probe(animator)->SetDuration(250);
-    IAnimator::Probe(animator)->SetInterpolator(ITimeInterpolator::Probe(mFastOutSlowInInterpolator));
+    IAnimator* ani = IAnimator::Probe(animator);
+    ani->SetDuration(250);
+    ani->SetInterpolator(ITimeInterpolator::Probe(mFastOutSlowInInterpolator));
     AutoPtr<AnimatorListenerAdapter3> listener = new AnimatorListenerAdapter3(this, onAnimationFinished);
-    IAnimator::Probe(animator)->AddListener(listener);
-    IAnimator::Probe(animator)->Start();
+    ani->AddListener(listener);
+    ani->Start();
     mHeightAnimator = animator;
     AutoPtr<IView> view;
     mKeyguardBottomArea->GetIndicationView((IView**)&view);
@@ -1109,11 +1110,12 @@ void PanelView::StartUnlockHintAnimationPhase2(
     /* [in] */ IRunnable* onAnimationFinished)
 {
     AutoPtr<IValueAnimator> animator = CreateHeightAnimator(GetMaxPanelHeight());
-    IAnimator::Probe(animator)->SetDuration(450);
-    IAnimator::Probe(animator)->SetInterpolator(ITimeInterpolator::Probe(mBounceInterpolator));
+    IAnimator* ani = IAnimator::Probe(animator);
+    ani->SetDuration(450);
+    ani->SetInterpolator(ITimeInterpolator::Probe(mBounceInterpolator));
     AutoPtr<AnimatorListenerAdapter4> listener = new AnimatorListenerAdapter4(this, onAnimationFinished);
-    IAnimator::Probe(animator)->AddListener(listener);
-    IAnimator::Probe(animator)->Start();
+    ani->AddListener(listener);
+    ani->Start();
     mHeightAnimator = animator;
 }
 

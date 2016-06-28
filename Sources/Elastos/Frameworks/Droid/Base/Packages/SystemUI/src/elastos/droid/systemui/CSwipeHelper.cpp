@@ -104,6 +104,7 @@ ECode CSwipeHelper::AnimatorListenerAdapter2::OnAnimationEnd(
 }
 
 CAR_INTERFACE_IMPL(CSwipeHelper::AnimatorUpdateListenerOne, Object, IAnimatorUpdateListener)
+
 CSwipeHelper::AnimatorUpdateListenerOne::AnimatorUpdateListenerOne(
     /* [in] */ CSwipeHelper* host,
     /* [in] */ IView* animView,
@@ -132,18 +133,20 @@ AutoPtr<ILinearInterpolator> InitLinearInterpolator()
 }
 
 const String CSwipeHelper::TAG("Elastos.Droid.SystemUI.SwipeHelper");
-const Boolean CSwipeHelper::DEBUG = FALSE;
+const Boolean CSwipeHelper::DEBUG = TRUE;
 const Boolean CSwipeHelper::DEBUG_INVALIDATE = FALSE;
-const Boolean CSwipeHelper::SLOW_ANIMATIONS = FALSE; // DEBUG;
+const Boolean CSwipeHelper::SLOW_ANIMATIONS = CSwipeHelper::DEBUG;
 const Boolean CSwipeHelper::CONSTRAIN_SWIPE = TRUE;
 const Boolean CSwipeHelper::FADE_OUT_DURING_SWIPE = TRUE;
 const Boolean CSwipeHelper::DISMISS_IF_SWIPED_FAR_ENOUGH = TRUE;
 
 AutoPtr<ILinearInterpolator> CSwipeHelper::sLinearInterpolator = InitLinearInterpolator();
-const Int32 CSwipeHelper::SNAP_ANIM_LEN = 150;//SLOW_ANIMATIONS ? 1000 : 150; // ms
+const Int32 CSwipeHelper::SNAP_ANIM_LEN = CSwipeHelper::SLOW_ANIMATIONS ? 1000 : 150; // ms
 
 CAR_OBJECT_IMPL(CSwipeHelper)
+
 CAR_INTERFACE_IMPL_2(CSwipeHelper, Object, ISwipeHelper, IGefingerpoken);
+
 CSwipeHelper::CSwipeHelper()
     : SWIPE_ESCAPE_VELOCITY(100.f)
     , DEFAULT_ESCAPE_ANIMATION_DURATION(200)
@@ -369,9 +372,8 @@ ECode CSwipeHelper::InvalidateGlobalRegion(
     /* [in] */ IView* view,
     /* [in] */ IRectF* childBounds)
 {
-    //childBounds.offset(view.getTranslationX(), view.getTranslationY());
     // if (DEBUG_INVALIDATE)
-    //     Log.v(TAG, "-------------");
+    //     Logger::V(TAG, "-------------");
 
     using Elastos::Core::Math;
     AutoPtr<IViewParent> parent;
@@ -591,7 +593,7 @@ ECode CSwipeHelper::OnTouchEvent(
     if (!mDragging) {
         AutoPtr<IView> v;
         mCallback->GetChildAtPosition(ev, (IView**)&v);
-        if (v.Get() != NULL) {
+        if (v != NULL) {
             // We are dragging directly over a card, make sure that we also catch the gesture
             // even if nobody else wants the touch event.
             return OnInterceptTouchEvent(ev, result);

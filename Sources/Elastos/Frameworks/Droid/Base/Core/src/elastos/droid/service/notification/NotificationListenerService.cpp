@@ -44,6 +44,8 @@ namespace Droid {
 namespace Service {
 namespace Notification {
 
+static const String TAG("NotificationListenerService");
+
 //====================================
 // NotificationListenerService
 //====================================
@@ -51,7 +53,6 @@ namespace Notification {
 CAR_INTERFACE_IMPL(NotificationListenerService, Service, INotificationListenerService)
 
 NotificationListenerService::NotificationListenerService()
-    : TAG("NotificationListenerService")
 {
 }
 
@@ -443,7 +444,7 @@ ECode NotificationListenerService::INotificationListenerWrapper::OnNotificationP
     AutoPtr<IStatusBarNotification> sbn;
     ECode ec = sbnHolder->Get((IStatusBarNotification**)&sbn);
     if (FAILED(ec)) {
-        Logger::W(mHost->TAG, "onNotificationPosted: Error receiving StatusBarNotification");
+        Logger::W(TAG, "onNotificationPosted: Error receiving StatusBarNotification");
         return E_REMOTE_EXCEPTION;
     }
     AutoPtr<IContext> context;
@@ -453,7 +454,8 @@ ECode NotificationListenerService::INotificationListenerWrapper::OnNotificationP
     CNotificationBuilder::Rebuild(context, notification);
 
     // protect subclass from concurrent modifications of (@link mNotificationKeys}.
-    {    AutoLock syncLock(this);
+    {
+        AutoLock syncLock(this);
         mHost->ApplyUpdate(update);
         // try {
         mHost->OnNotificationPosted(sbn, mHost->mRankingMap);
@@ -471,11 +473,12 @@ ECode NotificationListenerService::INotificationListenerWrapper::OnNotificationR
     AutoPtr<IStatusBarNotification> sbn;
     ECode ec = sbnHolder->Get((IStatusBarNotification**)&sbn);
     if (FAILED(ec)) {
-        Logger::W(mHost->TAG, "onNotificationRemoved: Error receiving StatusBarNotification");
+        Logger::W(TAG, "onNotificationRemoved: Error receiving StatusBarNotification");
         return E_REMOTE_EXCEPTION;
     }
     // protect subclass from concurrent modifications of (@link mNotificationKeys}.
-    {    AutoLock syncLock(this);
+    {
+        AutoLock syncLock(this);
         mHost->ApplyUpdate(update);
         // try {
         mHost->OnNotificationRemoved(sbn, mHost->mRankingMap);
@@ -490,7 +493,8 @@ ECode NotificationListenerService::INotificationListenerWrapper::OnListenerConne
     /* [in] */ INotificationRankingUpdate* update)
 {
     // protect subclass from concurrent modifications of (@link mNotificationKeys}.
-    {    AutoLock syncLock(this);
+    {
+        AutoLock syncLock(this);
         mHost->ApplyUpdate(update);
         // try {
         mHost->OnListenerConnected();
@@ -505,7 +509,8 @@ ECode NotificationListenerService::INotificationListenerWrapper::OnNotificationR
     /* [in] */ INotificationRankingUpdate* update)
 {
     // protect subclass from concurrent modifications of (@link mNotificationKeys}.
-    {    AutoLock syncLock(this);
+    {
+        AutoLock syncLock(this);
         mHost->ApplyUpdate(update);
         // try {
         mHost->OnNotificationRankingUpdate(mHost->mRankingMap);

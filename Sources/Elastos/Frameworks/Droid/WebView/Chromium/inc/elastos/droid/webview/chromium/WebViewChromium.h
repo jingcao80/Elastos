@@ -2590,7 +2590,7 @@ public:
         /* [out] */ Boolean* result);
 
     // @Override
-    CARAPI OnMeasure(
+    CARAPI_(void) OnMeasure(
         /* [in] */ Int32 widthMeasureSpec,
         /* [in] */ Int32 heightMeasureSpec);
 

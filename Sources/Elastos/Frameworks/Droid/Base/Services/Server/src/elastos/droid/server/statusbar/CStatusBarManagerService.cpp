@@ -252,6 +252,7 @@ ECode CStatusBarManagerService::constructor(
     assert(array != NULL);
     mIcons->DefineSlots(*array);
 
+    mInternalService = new MyStatusBarManagerInternal(this);
     LocalServices::AddService(EIID_IStatusBarManagerInternal, mInternalService);
     return NOERROR;
 }

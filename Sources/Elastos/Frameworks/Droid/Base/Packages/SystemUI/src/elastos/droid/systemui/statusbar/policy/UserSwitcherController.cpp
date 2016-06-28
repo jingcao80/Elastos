@@ -1,5 +1,6 @@
 
 #include "elastos/droid/systemui/statusbar/policy/UserSwitcherController.h"
+#include "elastos/droid/systemui/statusbar/policy/CUserSwitcherControllerSettingsObserver.h"
 #include "elastos/droid/systemui/BitmapHelper.h"
 #include "elastos/droid/systemui/CGuestResumeSessionReceiver.h"
 #include "elastos/droid/systemui/qs/tiles/CUserDetailView.h"
@@ -59,7 +60,11 @@ const String UserSwitcherController::TAG("UserSwitcherController");
 const Boolean UserSwitcherController::DEBUG = FALSE;
 const String UserSwitcherController::SIMPLE_USER_SWITCHER_GLOBAL_SETTING("lockscreenSimpleUserSwitcher");
 
+//========================================================================
+// UserSwitcherController::BaseUserAdapter
+//========================================================================
 CAR_INTERFACE_IMPL(UserSwitcherController::BaseUserAdapter, BaseAdapter, IUserSwitcherControllerBaseUserAdapter)
+
 UserSwitcherController::BaseUserAdapter::BaseUserAdapter(
     /* [in] */ UserSwitcherController* controller)
 {
@@ -184,7 +189,11 @@ ECode UserSwitcherController::BaseUserAdapter::GetDrawable(
             /* light= */ TRUE, drawable);
 }
 
+//========================================================================
+// UserSwitcherController::UserRecord
+//========================================================================
 CAR_INTERFACE_IMPL(UserSwitcherController::UserRecord, Object, IUserSwitcherControllerUserRecord)
+
 UserSwitcherController::UserRecord::UserRecord(
     /* [in] */ IUserInfo* info,
     /* [in] */ IBitmap* picture,
@@ -241,7 +250,11 @@ ECode UserSwitcherController::UserRecord::ToString(
     return sb.ToString(str);
 }
 
+//========================================================================
+// UserSwitcherController::ExitGuestDialog
+//========================================================================
 CAR_INTERFACE_IMPL(UserSwitcherController::ExitGuestDialog, SystemUIDialog, IDialogInterfaceOnClickListener)
+
 UserSwitcherController::ExitGuestDialog::ExitGuestDialog(
     /* [in] */ IContext* context,
     /* [in] */ Int32 guestId,
@@ -284,7 +297,11 @@ ECode UserSwitcherController::ExitGuestDialog::OnClick(
     return NOERROR;
 }
 
+//========================================================================
+// UserSwitcherController::AddUserDialog
+//========================================================================
 CAR_INTERFACE_IMPL(UserSwitcherController::AddUserDialog, SystemUIDialog, IDialogInterfaceOnClickListener)
+
 UserSwitcherController::AddUserDialog::AddUserDialog(
     /* [in] */ IContext* context,
     /* [in] */ UserSwitcherController* host)
@@ -349,6 +366,9 @@ ECode UserSwitcherController::AddUserDialog::OnClick(
     return NOERROR;
 }
 
+//========================================================================
+// UserSwitcherController::Receiver
+//========================================================================
 UserSwitcherController::Receiver::Receiver(
     /* [in] */ UserSwitcherController* host)
     : mHost(host)
@@ -409,13 +429,18 @@ ECode UserSwitcherController::Receiver::OnReceive(
     return NOERROR;
 }
 
-UserSwitcherController::SettingsObserver::SettingsObserver(
-    /* [in] */ UserSwitcherController* host)
-    : mHost(host)
+//========================================================================
+// UserSwitcherController::SettingsObserver
+//========================================================================
+CAR_OBJECT_IMPL(CUserSwitcherControllerSettingsObserver)
+
+ECode UserSwitcherController::SettingsObserver::constructor(
+    /* [in] */ IUserSwitcherController* host)
 {
+    mHost = (UserSwitcherController*)host;
     AutoPtr<IHandler> handler;
     CHandler::New((IHandler**)&handler);
-    ContentObserver::constructor(handler);
+    return ContentObserver::constructor(handler);
 }
 
 ECode UserSwitcherController::SettingsObserver::OnChange(
@@ -423,15 +448,27 @@ ECode UserSwitcherController::SettingsObserver::OnChange(
 {
     AutoPtr<IContentResolver> cr;
     mHost->mContext->GetContentResolver((IContentResolver**)&cr);
-    mHost->mSimpleUserSwitcher = Elastos::Droid::Provider::Settings::Global::GetInt32(cr,
+    mHost->mSimpleUserSwitcher =
+        Elastos::Droid::Provider::Settings::Global::GetInt32(cr,
             SIMPLE_USER_SWITCHER_GLOBAL_SETTING, 0) != 0;
-    mHost->mAddUsersWhenLocked = Elastos::Droid::Provider::Settings::Global::GetInt32(cr,
+    mHost->mAddUsersWhenLocked =
+        Elastos::Droid::Provider::Settings::Global::GetInt32(cr,
             ISettingsGlobal::ADD_USERS_WHEN_LOCKED, 0) != 0;
+    Logger::I(TAG, " TODO >> UserSwitcherController::SettingsObserver::OnChange:"
+        " mSimpleUserSwitcher: %d, mAddUsersWhenLocked: %d",
+        mHost->mSimpleUserSwitcher,  mHost->mAddUsersWhenLocked);
+    mHost->mSimpleUserSwitcher = TRUE;
+
     mHost->RefreshUsers(IUserHandle::USER_NULL);
+
     return NOERROR;
 }
 
+//========================================================================
+// UserSwitcherController::UserDetailAdapter
+//========================================================================
 CAR_INTERFACE_IMPL(UserSwitcherController::UserDetailAdapter, Object, IQSTileDetailAdapter)
+
 UserSwitcherController::UserDetailAdapter::UserDetailAdapter(
     /* [in] */ UserSwitcherController* host)
     : mHost(host)
@@ -490,7 +527,11 @@ ECode UserSwitcherController::UserDetailAdapter::SetToggleState(
     return NOERROR;
 }
 
+//========================================================================
+// UserSwitcherController::KeyguardMonitorCallback
+//========================================================================
 CAR_INTERFACE_IMPL(UserSwitcherController::KeyguardMonitorCallback, Object, IKeyguardMonitorCallback)
+
 UserSwitcherController::KeyguardMonitorCallback::KeyguardMonitorCallback(
     /* [in] */ UserSwitcherController* host)
     : mHost(host)
@@ -502,6 +543,9 @@ ECode UserSwitcherController::KeyguardMonitorCallback::OnKeyguardChanged()
     return NOERROR;
 }
 
+//========================================================================
+// UserSwitcherController::UserAsyncTask
+//========================================================================
 UserSwitcherController::UserAsyncTask::UserAsyncTask(
     /* [in] */ UserSwitcherController* host,
     /* [in] */ Boolean addUsersWhenLocked)
@@ -629,20 +673,27 @@ ECode UserSwitcherController::UserAsyncTask::OnPostExecute(
     return NOERROR;
 }
 
-
+//========================================================================
+// UserSwitcherController
+//========================================================================
 CAR_INTERFACE_IMPL(UserSwitcherController, Object, IUserSwitcherController)
-UserSwitcherController::UserSwitcherController(
-    /* [in] */ IContext* context,
-    /* [in] */ IKeyguardMonitor* keyguardMonitor)
+
+UserSwitcherController::UserSwitcherController()
     : mLastNonGuestUser(IUserHandle::USER_OWNER)
     , mSimpleUserSwitcher(FALSE)
     , mAddUsersWhenLocked(FALSE)
+{
+}
+
+ECode UserSwitcherController::constructor(
+    /* [in] */ IContext* context,
+    /* [in] */ IKeyguardMonitor* keyguardMonitor)
 {
     CArrayList::New((IArrayList**)&mAdapters);
     CGuestResumeSessionReceiver::New((IGuestResumeSessionReceiver**)&mGuestResumeSessionReceiver);
     CArrayList::New((IArrayList**)&mUsers);
     mReceiver = new Receiver(this);
-    mSettingsObserver = new SettingsObserver(this);
+    CUserSwitcherControllerSettingsObserver::New(this, (IContentObserver**)&mSettingsObserver);
     mUserDetailAdapter = new UserDetailAdapter(this);
     mCallback = new KeyguardMonitorCallback(this);
     mContext = context;
@@ -671,11 +722,13 @@ UserSwitcherController::UserSwitcherController(
     AutoPtr<IContentResolver> cr;
     mContext->GetContentResolver((IContentResolver**)&cr);
     AutoPtr<IUri> uri;
-    Elastos::Droid::Provider::Settings::Global::GetUriFor(SIMPLE_USER_SWITCHER_GLOBAL_SETTING, (IUri**)&uri);
+    Elastos::Droid::Provider::Settings::Global::GetUriFor(
+        SIMPLE_USER_SWITCHER_GLOBAL_SETTING, (IUri**)&uri);
     cr->RegisterContentObserver(uri, TRUE, mSettingsObserver);
 
     uri = NULL;
-    Elastos::Droid::Provider::Settings::Global::GetUriFor(ISettingsGlobal::ADD_USERS_WHEN_LOCKED, (IUri**)&uri);
+    Elastos::Droid::Provider::Settings::Global::GetUriFor(
+        ISettingsGlobal::ADD_USERS_WHEN_LOCKED, (IUri**)&uri);
     cr->RegisterContentObserver(uri, TRUE, mSettingsObserver);
     // Fetch initial values.
     mSettingsObserver->OnChange(FALSE);
@@ -683,6 +736,7 @@ UserSwitcherController::UserSwitcherController(
     keyguardMonitor->AddCallback(mCallback);
 
     RefreshUsers(IUserHandle::USER_NULL);
+    return NOERROR;
 }
 
 void UserSwitcherController::RefreshUsers(

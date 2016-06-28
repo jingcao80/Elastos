@@ -10,10 +10,12 @@ namespace SystemUI {
 namespace StatusBar {
 namespace Phone {
 
-const Boolean CPanelHolder::DEBUG_GESTURES = TRUE;
+const Boolean CPanelHolder::DEBUG_GESTURES = FALSE;
 
 CAR_OBJECT_IMPL(CPanelHolder)
+
 CAR_INTERFACE_IMPL(CPanelHolder, FrameLayout, IPanelHolder)
+
 CPanelHolder::CPanelHolder()
     : mSelectedPanelIndex(-1)
 {}
@@ -94,8 +96,6 @@ ECode CPanelHolder::OnTouchEvent(
             event->GetY(&y);
             Logger::D("CPanelHolder", "OnTouchEvent masked=[%d], x=[%d], y=[%d]"
                     , masked, (Int32)x, (Int32)y);
-            // EventLog.writeEvent(EventLogTags.SYSUI_PANELHOLDER_TOUCH,
-            //         masked, (Int32) event.getX(), (Int32) event.getY());
         }
     }
     *result = FALSE;

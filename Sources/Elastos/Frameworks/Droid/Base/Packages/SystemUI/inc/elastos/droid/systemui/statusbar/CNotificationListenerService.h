@@ -25,10 +25,10 @@ CarClass(CNotificationListenerService)
     , public NotificationListenerService
 {
 private:
-    class Runnable1 : public Runnable
+    class AddNotificationRunnable : public Runnable
     {
     public:
-        Runnable1(
+        AddNotificationRunnable(
             /* [in] */ CNotificationListenerService* service,
             /* [in] */ ArrayOf<IStatusBarNotification*>* notifications,
             /* [in] */ INotificationListenerServiceRankingMap* currentRanking);
@@ -42,10 +42,10 @@ private:
         AutoPtr<INotificationListenerServiceRankingMap> mCurrentRanking;
     };
 
-    class Runnable2 : public Runnable
+    class UpdateNotificationRunnable : public Runnable
     {
     public:
-        Runnable2(
+        UpdateNotificationRunnable(
             /* [in] */ CNotificationListenerService* service,
             /* [in] */ IStatusBarNotification* sbn,
             /* [in] */ INotificationListenerServiceRankingMap* rankingMap);
@@ -59,10 +59,10 @@ private:
         AutoPtr<INotificationListenerServiceRankingMap> mRankingMap;
     };
 
-    class Runnable3 : public Runnable
+    class RemoveNotificationRunnable : public Runnable
     {
     public:
-        Runnable3(
+        RemoveNotificationRunnable(
             /* [in] */ CNotificationListenerService* service,
             /* [in] */ IStatusBarNotification* sbn,
             /* [in] */ INotificationListenerServiceRankingMap* rankingMap);
@@ -76,10 +76,10 @@ private:
         AutoPtr<INotificationListenerServiceRankingMap> mRankingMap;
     };
 
-    class Runnable4 : public Runnable
+    class UpdateNotificationRankingRunnable : public Runnable
     {
     public:
-        Runnable4(
+        UpdateNotificationRankingRunnable(
             /* [in] */ CNotificationListenerService* service,
             /* [in] */ INotificationListenerServiceRankingMap* rankingMap);
 

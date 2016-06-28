@@ -42,11 +42,11 @@ private:
         ActivatableNotificationView* mHost;
     };
 
-    class AnimatorListenerAdapter1
+    class InvisibleAnimatorListenerAdapter
         : public AnimatorListenerAdapter
     {
     public:
-        AnimatorListenerAdapter1(
+        InvisibleAnimatorListenerAdapter(
             /* [in] */ ActivatableNotificationView* host);
 
         // @Override
@@ -57,11 +57,11 @@ private:
         ActivatableNotificationView* mHost;
     };
 
-    class AnimatorListenerAdapter2
+    class VisibleAnimatorListenerAdapter
         : public AnimatorListenerAdapter
     {
     public:
-        AnimatorListenerAdapter2(
+        VisibleAnimatorListenerAdapter(
             /* [in] */ ActivatableNotificationView* host);
 
         // @Override
@@ -256,8 +256,6 @@ private:
     CARAPI_(void) DrawAppearRect(
         /* [in] */ ICanvas* canvas);
 
-    static CARAPI_(Boolean) InitStatic();
-
 private:
     static const Int64 DOUBLETAP_TIMEOUT_MS;
     static const Int32 BACKGROUND_ANIMATION_LENGTH_MS;
@@ -295,8 +293,6 @@ private:
 
     static AutoPtr<IInterpolator> ACTIVATE_INVERSE_INTERPOLATOR;
     static AutoPtr<IInterpolator> ACTIVATE_INVERSE_ALPHA_INTERPOLATOR;
-
-    static Boolean sInit;
 
     AutoPtr<IRunnable> mTapTimeoutRunnable;
     Int32 mTintedRippleColor;

@@ -451,7 +451,6 @@ private:
 
 public:
     static const Boolean DEBUG;
-    static const String TAG;
 
 protected:
     AutoPtr<IPhoneStatusBar> mStatusBar;

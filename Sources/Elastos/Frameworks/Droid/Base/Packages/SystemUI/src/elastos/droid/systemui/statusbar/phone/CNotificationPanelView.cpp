@@ -52,6 +52,8 @@ namespace SystemUI {
 namespace StatusBar {
 namespace Phone {
 
+static const String TAG("CNotificationPanelView");
+
 CNotificationPanelView::Runnable1::Runnable1(
     /* [in] */ CNotificationPanelView* host)
     : mHost(host)
@@ -90,6 +92,7 @@ ECode CNotificationPanelView::AnimatorListenerAdapter1::OnAnimationEnd(
 }
 
 CAR_INTERFACE_IMPL(CNotificationPanelView::OnLayoutChangeListener, Object, IViewOnLayoutChangeListener)
+
 CNotificationPanelView::OnLayoutChangeListener::OnLayoutChangeListener(
     /* [in] */ CNotificationPanelView* host)
     : mHost(host)
@@ -127,6 +130,7 @@ ECode CNotificationPanelView::OnLayoutChangeListener::OnLayoutChange(
 }
 
 CAR_INTERFACE_IMPL(CNotificationPanelView::OnPreDrawListener, Object, IOnPreDrawListener)
+
 CNotificationPanelView::OnPreDrawListener::OnPreDrawListener(
     /* [in] */ CNotificationPanelView* host)
     : mHost(host)
@@ -167,14 +171,16 @@ ECode CNotificationPanelView::OnPreDrawListener::OnPreDraw(
     AutoPtr<ArrayOf<Float> > fvs = ArrayOf<Float>::Alloc(2);
     (*fvs)[0] = y;
     (*fvs)[1] = ch + mHost->mQsPeekHeight - tmp - top;
+    mHost->mQsContainerAnimator = NULL;
     helper->OfFloat(mQsContainer, View::TRANSLATION_Y, fvs, (IObjectAnimator**)&mHost->mQsContainerAnimator);
 
     mHost->mStatusBar->CalculateGoingToFullShadeDelay(&t);
-    IAnimator::Probe(mHost->mQsContainerAnimator)->SetStartDelay(t);
-    IAnimator::Probe(mHost->mQsContainerAnimator)->SetDuration(IStackStateAnimator::ANIMATION_DURATION_GO_TO_FULL_SHADE);
-    IAnimator::Probe(mHost->mQsContainerAnimator)->SetInterpolator(ITimeInterpolator::Probe(mHost->mFastOutSlowInInterpolator));
-    IAnimator::Probe(mHost->mQsContainerAnimator)->AddListener(mHost->mAnimateHeaderSlidingInListener);
-    IAnimator::Probe(mHost->mQsContainerAnimator)->Start();
+    IAnimator* animator = IAnimator::Probe(mHost->mQsContainerAnimator);
+    animator->SetStartDelay(t);
+    animator->SetDuration(IStackStateAnimator::ANIMATION_DURATION_GO_TO_FULL_SHADE);
+    animator->SetInterpolator(ITimeInterpolator::Probe(mHost->mFastOutSlowInInterpolator));
+    animator->AddListener(mHost->mAnimateHeaderSlidingInListener);
+    animator->Start();
     mQsContainer->AddOnLayoutChangeListener(mHost->mQsContainerAnimatorUpdater);
     *result = TRUE;
     return NOERROR;
@@ -214,6 +220,7 @@ ECode CNotificationPanelView::Runnable5::Run()
 }
 
 CAR_INTERFACE_IMPL(CNotificationPanelView::ViewOnClickListener, Object, IViewOnClickListener)
+
 CNotificationPanelView::ViewOnClickListener::ViewOnClickListener(
     /* [in] */ CNotificationPanelView* host)
     : mHost(host)
@@ -226,6 +233,7 @@ ECode CNotificationPanelView::ViewOnClickListener::OnClick(
 }
 
 CAR_INTERFACE_IMPL(CNotificationPanelView::Listener, Object, IListener)
+
 CNotificationPanelView::Listener::Listener(
     /* [in] */ CNotificationPanelView* host)
     : mHost(host)
@@ -245,6 +253,7 @@ ECode CNotificationPanelView::Listener::OnOverscrolled(
 }
 
 CAR_INTERFACE_IMPL(CNotificationPanelView::HeightChangedListener, Object, IExpandableViewOnHeightChangedListener)
+
 CNotificationPanelView::HeightChangedListener::HeightChangedListener(
     /* [in] */ CNotificationPanelView* host)
     : mHost(host)
@@ -263,6 +272,7 @@ ECode CNotificationPanelView::HeightChangedListener::OnReset(
 }
 
 CAR_INTERFACE_IMPL(CNotificationPanelView::TopChangedListener, Object, IOnOverscrollTopChangedListener)
+
 CNotificationPanelView::TopChangedListener::TopChangedListener(
     /* [in] */ CNotificationPanelView* host)
     : mHost(host)
@@ -283,6 +293,7 @@ ECode CNotificationPanelView::TopChangedListener::FlingTopOverscroll(
 }
 
 CAR_INTERFACE_IMPL(CNotificationPanelView::OnLayoutChangeListener2, Object, IViewOnLayoutChangeListener)
+
 CNotificationPanelView::OnLayoutChangeListener2::OnLayoutChangeListener2(
     /* [in] */ CNotificationPanelView* host)
     : mHost(host)
@@ -321,6 +332,7 @@ ECode CNotificationPanelView::OnPreDrawListener2::AnimatorListenerAdapter2::OnAn
 }
 
 CAR_INTERFACE_IMPL(CNotificationPanelView::OnPreDrawListener2, Object, IOnPreDrawListener)
+
 CNotificationPanelView::OnPreDrawListener2::OnPreDrawListener2(
     /* [in] */ CNotificationPanelView* host)
     : mHost(host)
@@ -366,6 +378,7 @@ ECode CNotificationPanelView::Runnable6::Run()
 }
 
 CAR_INTERFACE_IMPL(CNotificationPanelView::AnimatorUpdateListener, Object, IAnimatorUpdateListener)
+
 CNotificationPanelView::AnimatorUpdateListener::AnimatorUpdateListener(
     /* [in] */ CNotificationPanelView* host)
     : mHost(host)
@@ -429,6 +442,7 @@ ECode CNotificationPanelView::Runnable8::Run()
 }
 
 CAR_INTERFACE_IMPL(CNotificationPanelView::AnimatorUpdateListener2, Object, IAnimatorUpdateListener)
+
 CNotificationPanelView::AnimatorUpdateListener2::AnimatorUpdateListener2(
     /* [in] */ IView* target,
     /* [in] */ Int32 r,
@@ -476,9 +490,12 @@ const Float CNotificationPanelView::LOCK_ICON_ACTIVE_SCALE = 1.2f;
 const Int32 CNotificationPanelView::DOZE_BACKGROUND_COLOR = 0xff000000;
 const Int32 CNotificationPanelView::TAG_KEY_ANIM = R::id::scrim;
 const Int64 CNotificationPanelView::DOZE_BACKGROUND_ANIM_DURATION = ScrimController::ANIMATION_DURATION;
+
 CAR_OBJECT_IMPL(CNotificationPanelView)
+
 CAR_INTERFACE_IMPL_6(CNotificationPanelView, PanelView, INotificationPanelView, IExpandableViewOnHeightChangedListener \
     , IListener, IViewOnClickListener, IOnOverscrollTopChangedListener, IKeyguardAffordanceHelperCallback);
+
 CNotificationPanelView::CNotificationPanelView()
     : mNotificationTopPadding(0)
     , mAnimateNextTopPaddingChange(FALSE)
@@ -717,6 +734,7 @@ ECode CNotificationPanelView::OnLayout(
         SetQsExpansion(mQsMinExpansionHeight + mLastOverscroll);
         Float eh = 0;
         GetExpandedHeight(&eh);
+        Logger::I(TAG, " >> OnLayout: SetStackHeight: %.2f", eh);
         mNotificationStackScroller->SetStackHeight(eh);
         UpdateHeader();
     }
@@ -775,6 +793,7 @@ void CNotificationPanelView::PositionClockAndNotifications()
         stackScrollerPadding = mClockPositionResult->mStackScrollerPadding;
         mTopPaddingAdjustment = mClockPositionResult->mStackScrollerPaddingAdjustment;
     }
+
     mNotificationStackScroller->SetIntrinsicPadding(stackScrollerPadding);
     RequestScrollerTopPaddingUpdate(animate);
 }
@@ -815,6 +834,7 @@ ECode CNotificationPanelView::AnimateToFullShade(
 ECode CNotificationPanelView::SetQsExpansionEnabled(
     /* [in] */ Boolean qsExpansionEnabled)
 {
+    Logger::I(TAG, " >> SetQsExpansionEnabled: %d", qsExpansionEnabled);
     mQsExpansionEnabled = qsExpansionEnabled;
     IView::Probe(mHeader)->SetClickable(qsExpansionEnabled);
     return NOERROR;
@@ -914,10 +934,10 @@ ECode CNotificationPanelView::OnInterceptTouchEvent(
         pointerIndex = 0;
         event->GetPointerId(pointerIndex, &mTrackingPointer);
     }
-    Float x = 0;
+    Float x, y;
     event->GetX(pointerIndex, &x);
-    Float y = 0;
     event->GetY(pointerIndex, &y);
+    Logger::I(TAG, " >> OnInterceptTouchEvent: (%.2f, %.2f), %s", x, y, TO_CSTR(event));
 
     Int32 masked = 0;
     event->GetActionMasked(&masked);
@@ -942,9 +962,8 @@ ECode CNotificationPanelView::OnInterceptTouchEvent(
             }
             break;
         case IMotionEvent::ACTION_POINTER_UP: {
-            Int32 v = 0;
+            Int32 v = 0, upPointer;
             event->GetActionIndex(&v);
-            Int32 upPointer = 0;
             event->GetPointerId(v, &upPointer);
             if (mTrackingPointer == upPointer) {
                 // gesture is ongoing, find a new pointer to track
@@ -969,9 +988,9 @@ ECode CNotificationPanelView::OnInterceptTouchEvent(
                 *result = TRUE;
                 return NOERROR;
             }
-            if (Elastos::Core::Math::Abs(h) > mTouchSlop
-                    && Elastos::Core::Math::Abs(h) > Elastos::Core::Math::Abs(x - mInitialTouchX)
-                    && ShouldQuickSettingsIntercept(mInitialTouchX, mInitialTouchY, h)) {
+            using Elastos::Core::Math;
+            if (Math::Abs(h) > mTouchSlop && Math::Abs(h) > Math::Abs(x - mInitialTouchX)
+                && ShouldQuickSettingsIntercept(mInitialTouchX, mInitialTouchY, h)) {
                 OnQsExpansionStarted();
                 mInitialHeightOnTouch = mQsExpansionHeight;
                 mInitialTouchY = y;
@@ -998,11 +1017,15 @@ ECode CNotificationPanelView::OnInterceptTouchEvent(
 
     // Allow closing the whole panel when in SHADE state.
     if (mStatusBarState == IStatusBarState::SHADE) {
-        return PanelView::OnInterceptTouchEvent(event, result);
+        Boolean tmp;
+        PanelView::OnInterceptTouchEvent(event, &tmp);
+        *result = tmp;
+    }
+    else {
+        Boolean tmp;
+        *result = !mQsExpanded && (PanelView::OnInterceptTouchEvent(event, &tmp), tmp);
     }
 
-    Boolean tmp = FALSE;
-    *result = !mQsExpanded && (PanelView::OnInterceptTouchEvent(event, &tmp), tmp);
     return NOERROR;
 }
 
@@ -1734,7 +1757,6 @@ Boolean CNotificationPanelView::ShouldQuickSettingsIntercept(
         Boolean tmp = FALSE;
         return onHeader || (((mScrollView->IsScrolledToBottom(&tmp), tmp) && yDiff < 0) && IsInQsArea(x, y));
     }
-
     return onHeader;
 }
 
@@ -1767,6 +1789,7 @@ Int32 CNotificationPanelView::GetMaxPanelHeight()
                 * HEADER_RUBBERBAND_FACTOR);
         min = Elastos::Core::Math::Max(min, minHeight);
     }
+
     Int32 maxHeight;
     if (mTwoFingerQsExpand || mQsExpanded || (mIsExpanding && mQsExpandedWhenExpandingStarted)) {
         maxHeight = Elastos::Core::Math::Max(CalculatePanelHeightQsExpanded(), CalculatePanelHeightShade());
@@ -1821,8 +1844,8 @@ Int32 CNotificationPanelView::CalculatePanelHeightShade()
 {
     Int32 emptyBottomMargin = 0, v = 0;
     mNotificationStackScroller->GetEmptyBottomMargin(&emptyBottomMargin);
-    Int32 maxHeight = (IView::Probe(mNotificationStackScroller)->GetHeight(&v), v) - emptyBottomMargin
-            - mTopPaddingAdjustment;
+    IView::Probe(mNotificationStackScroller)->GetHeight(&v);
+    Int32 maxHeight = v - emptyBottomMargin - mTopPaddingAdjustment;
 
     Float f = 0;
     maxHeight += (mNotificationStackScroller->GetTopPaddingOverflow(&f), f);
@@ -1866,15 +1889,15 @@ void CNotificationPanelView::UpdateNotificationTranslucency()
     alpha = Elastos::Core::Math::Max((Float)0, Elastos::Core::Math::Min(alpha, (Float)1));
     alpha = (Float) Elastos::Core::Math::Pow(alpha, 0.75);
 
+    IView* view = IView::Probe(mNotificationStackScroller);
     Int32 type = 0;
-    if (alpha != 1.f && (IView::Probe(mNotificationStackScroller)->GetLayerType(&type), type) != LAYER_TYPE_HARDWARE) {
-        IView::Probe(mNotificationStackScroller)->SetLayerType(LAYER_TYPE_HARDWARE, NULL);
+    if (alpha != 1.0f && (view->GetLayerType(&type), type) != LAYER_TYPE_HARDWARE) {
+        view->SetLayerType(LAYER_TYPE_HARDWARE, NULL);
     }
-    else if (alpha == 1.f
-            && (IView::Probe(mNotificationStackScroller)->GetLayerType(&type), type) == LAYER_TYPE_HARDWARE) {
-        IView::Probe(mNotificationStackScroller)->SetLayerType(LAYER_TYPE_NONE, NULL);
+    else if (alpha == 1.0f && (view->GetLayerType(&type), type) == LAYER_TYPE_HARDWARE) {
+        view->SetLayerType(LAYER_TYPE_NONE, NULL);
     }
-    IView::Probe(mNotificationStackScroller)->SetAlpha(alpha);
+    view->SetAlpha(alpha);
 }
 
 Float CNotificationPanelView::GetOverExpansionAmount()

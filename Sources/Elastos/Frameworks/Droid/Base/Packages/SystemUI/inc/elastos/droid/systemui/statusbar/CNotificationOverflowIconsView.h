@@ -32,10 +32,6 @@ public:
 
     CNotificationOverflowIconsView();
 
-    CARAPI constructor(
-        /* [in] */ IContext* context,
-        /* [in] */ IAttributeSet* attrs);
-
     CARAPI SetMoreText(
         /* [in] */ ITextView* moreText);
 

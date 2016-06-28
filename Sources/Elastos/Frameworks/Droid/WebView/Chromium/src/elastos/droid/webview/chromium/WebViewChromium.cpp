@@ -6410,7 +6410,7 @@ ECode WebViewChromium::RequestFocus(
     return mWebViewPrivate->Super_requestFocus(direction, previouslyFocusedRect, result);
 }
 
-ECode WebViewChromium::OnMeasure(
+void WebViewChromium::OnMeasure(
     /* [in] */ Int32 widthMeasureSpec,
     /* [in] */ Int32 heightMeasureSpec)
 {
@@ -6435,7 +6435,6 @@ ECode WebViewChromium::OnMeasure(
     }
 
     mAwContents->OnMeasure(widthMeasureSpec, heightMeasureSpec);
-    return NOERROR;
 }
 
 ECode WebViewChromium::RequestChildRectangleOnScreen(

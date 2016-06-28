@@ -107,7 +107,7 @@ ECode FragmentState::constructor(
     /* [in] */ IFragment* frag)
 {
 //     mClassName = frag.getClass().getName();
-    mClassName = String("Fragment");
+    mClassName = Object::GetFullClassName(frag);
     frag->GetIndex(&mIndex);
     frag->GetFromLayout(&mFromLayout);
     frag->GetFragmentId(&mFragmentId);

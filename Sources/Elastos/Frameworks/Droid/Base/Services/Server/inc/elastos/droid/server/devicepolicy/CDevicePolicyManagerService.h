@@ -385,6 +385,27 @@ public:
         AutoPtr<CDevicePolicyManagerService> mService;
     };
 
+    class SetupContentObserver
+        : public ContentObserver
+    {
+    public:
+        CARAPI constructor(
+            /* [in] */ IHandler* handler,
+            /* [in] */ IIDevicePolicyManager* host);
+
+        CARAPI Register(
+            /* [in] */ IContentResolver* resolver);
+
+        // @Override
+        CARAPI OnChange(
+            /* [in] */ Boolean selfChange,
+            /* [in] */ IUri* uri);
+
+    private:
+        AutoPtr<IUri> mUserSetupComplete;
+        CDevicePolicyManagerService* mHost;
+    };
+
 private:
     class MonitoringCertNotificationTask
         : public AsyncTask
@@ -403,31 +424,6 @@ private:
             /* [in] */ IUserHandle* userHandle);
 
     private:
-        CDevicePolicyManagerService* mHost;
-    };
-
-    class SetupContentObserver
-        : public ContentObserver
-    {
-    public:
-        TO_STRING_IMPL("CDevicePolicyManagerService::SetupContentObserver")
-
-        SetupContentObserver(
-            /* [in] */ CDevicePolicyManagerService* host);
-
-        CARAPI constructor(
-            /* [in] */ IHandler* handler);
-
-        CARAPI Register(
-            /* [in] */ IContentResolver* resolver);
-
-        // @Override
-        CARAPI OnChange(
-            /* [in] */ Boolean selfChange,
-            /* [in] */ IUri* uri);
-
-    private:
-        AutoPtr<IUri> mUserSetupComplete;
         CDevicePolicyManagerService* mHost;
     };
 
@@ -1417,8 +1413,6 @@ public:
     static const String SYSTEM_PROP_DISABLE_CAMERA;
 
 private:
-    static const String LOG__TAG;
-
     static const String DEVICE_POLICIES_XML;
 
     static const String LOCK_TASK_COMPONENTS_XML;

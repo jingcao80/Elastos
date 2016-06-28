@@ -32,6 +32,8 @@ namespace Droid {
 namespace SystemUI {
 namespace StatusBar {
 
+static const String TAG("NotificationData");
+
 //=============================================================================
 //              Entry
 //=============================================================================
@@ -472,8 +474,7 @@ ECode NotificationData::FilterAndSort()
         entry->GetNotification((IStatusBarNotification**)&sbn);
 
         if (ShouldFilterOut(sbn)) {
-            Logger::D("NotificationData", "[TODO] UpdateRankingAndSort has an error????");
-            // continue;
+            continue;
         }
 
         AutoPtr<INotification> n;
