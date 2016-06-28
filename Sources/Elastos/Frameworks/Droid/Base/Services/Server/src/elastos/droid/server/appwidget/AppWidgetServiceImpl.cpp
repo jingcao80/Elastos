@@ -2575,6 +2575,8 @@ ECode AppWidgetServiceImpl::GetAppWidgetIds(
     componentName->GetPackageName(&packageName);
     mSecurityPolicy->EnforceCallFromPackage(packageName);
 
+
+    AutoPtr<ArrayOf<Int32> > widgetIds;
     {
         AutoLock syncLock(mLock);
         EnsureGroupStateLoadedLocked(userId);
@@ -2585,13 +2587,13 @@ ECode AppWidgetServiceImpl::GetAppWidgetIds(
         AutoPtr<Provider> provider = LookupProviderLocked(providerId);
 
         if (provider != NULL) {
-            *result = GetWidgetIds(provider->mWidgets);
-            REFCOUNT_ADD(*result);
-            return NOERROR;
+            widgetIds = GetWidgetIds(provider->mWidgets);
         }
-
-        *result = ArrayOf<Int32>::Alloc(0);
+        else
+            widgetIds = ArrayOf<Int32>::Alloc(0);
     }
+    *result = widgetIds;
+    REFCOUNT_ADD(*result);
     return NOERROR;
 }
 
@@ -3871,7 +3873,8 @@ void AppWidgetServiceImpl::DecrementAppWidgetServiceRefCount(
             if (isEmpty) {
                 AutoPtr<IInterface> secondTmp;
                 key->GetSecond((IInterface**)&secondTmp);
-                IIntent* intent = IIntent::Probe(secondTmp);
+                AutoPtr<IIntent> intent;
+                IIntentFilterComparison::Probe(secondTmp)->GetIntent((IIntent**)&intent);
                 DestroyRemoteViewsService(intent, widget);
                 it->Remove();
             }

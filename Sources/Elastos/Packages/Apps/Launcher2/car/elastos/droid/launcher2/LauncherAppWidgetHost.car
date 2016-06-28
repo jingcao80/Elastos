@@ -12,7 +12,6 @@ module
      * @invoke interface IAppWidgetHost
      */
     interface ILauncherAppWidgetHost {
-        OnProvidersChanged();
     }
 
     } // namespace Launcher2

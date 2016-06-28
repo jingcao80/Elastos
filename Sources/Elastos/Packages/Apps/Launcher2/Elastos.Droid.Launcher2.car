@@ -93,6 +93,8 @@ module
     using interface Elastos.Droid.View.IOnWindowDismissedCallback;
     using interface Elastos.Droid.View.IViewOnCreateContextMenuListener;
     using interface Elastos.Droid.View.Accessibility.IAccessibilityEventSource;
+    using interface Elastos.Droid.View.IViewGroupLayoutParams;
+    using interface Elastos.Droid.View.IViewGroupMarginLayoutParams;
     using interface Elastos.Droid.View.IViewGroupOnHierarchyChangeListener;
     using interface Elastos.Droid.View.IViewOnFocusChangeListener;
     using interface Elastos.Droid.View.IViewOnTouchListener;
@@ -102,6 +104,7 @@ module
     using interface Elastos.Droid.Widget.IImageView;
     using interface Elastos.Droid.Widget.ILinearLayout;
     using interface Elastos.Droid.Widget.IFrameLayout;
+    using interface Elastos.Droid.Widget.IFrameLayoutLayoutParams;
     using interface Elastos.Droid.Widget.ITabWidget;
     using interface Elastos.Droid.Widget.IEditText;
     using interface Elastos.Droid.Widget.IOnEditorActionListener;
@@ -289,6 +292,17 @@ module
         interface IFrameLayout;
         interface IViewGroupOnHierarchyChangeListener;
         interface IDragLayer;
+    }
+
+    class CDragLayerLayoutParams {
+        constructor(
+            [in] Int32 width,
+            [in] Int32 height);
+
+        interface IDragLayerLayoutParams;
+        interface IFrameLayoutLayoutParams;
+        interface IViewGroupMarginLayoutParams;
+        interface IViewGroupLayoutParams;
     }
 
     [local]

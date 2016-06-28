@@ -10,6 +10,7 @@
 #include "elastos/droid/launcher2/FocusHelper.h"
 #include "elastos/droid/launcher2/CellLayout.h"
 #include "elastos/droid/launcher2/DragLayer.h"
+#include "elastos/droid/launcher2/CDragLayerLayoutParams.h"
 #include "elastos/droid/view/LayoutInflater.h"
 #include "elastos/droid/view/View.h"
 #include "Elastos.Droid.Service.h"
@@ -1435,11 +1436,10 @@ void Folder::SetupContentForNumItems(
 
     AutoPtr<IViewGroupLayoutParams> res;
     GetLayoutParams((IViewGroupLayoutParams**)&res);
-    AutoPtr<IDragLayerLayoutParams> lp = IDragLayerLayoutParams::Probe(res);
 
-    if (lp == NULL) {
-        AutoPtr<DragLayer::DragLayerLayoutParams> lp = new DragLayer::DragLayerLayoutParams();
-        lp->constructor(0, 0);
+    if (IDragLayerLayoutParams::Probe(res) == NULL) {
+        AutoPtr<CDragLayerLayoutParams> lp;
+        CDragLayerLayoutParams::NewByFriend(0, 0, (CDragLayerLayoutParams**)&lp);
         lp->mCustomPosition = TRUE;
         SetLayoutParams((IViewGroupLayoutParams*)lp.Get());
     }

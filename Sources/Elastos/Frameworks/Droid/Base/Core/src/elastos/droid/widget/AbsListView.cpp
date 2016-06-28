@@ -708,7 +708,7 @@ void AbsListView::RecycleBin::MarkChildrenDirty()
             scrap->GetSize(&scrapCount);
             for (Int32 j = 0; j < scrapCount; j++) {
                 AutoPtr<IInterface> obj;
-                scrap->Get(i, (IInterface**)&obj);
+                scrap->Get(j, (IInterface**)&obj);
                 IView::Probe(obj)->ForceLayout();
             }
         }

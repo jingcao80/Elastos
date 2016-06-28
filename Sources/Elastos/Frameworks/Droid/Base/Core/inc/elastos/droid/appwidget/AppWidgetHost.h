@@ -207,7 +207,7 @@ protected:
      * Called to create the AppWidgetHostView.  Override to return a custom subclass if you
      * need it.  {@more}
      */
-    CARAPI_(AutoPtr<IAppWidgetHostView>) OnCreateView(
+    virtual CARAPI_(AutoPtr<IAppWidgetHostView>) OnCreateView(
         /* [in] */ IContext* context,
         /* [in] */ Int32 appWidgetId,
         /* [in] */ IAppWidgetProviderInfo* appWidget);
@@ -215,7 +215,7 @@ protected:
     /**
      * Called when the AppWidget provider for a AppWidget has been upgraded to a new apk.
      */
-    CARAPI_(void) OnProviderChanged(
+    virtual CARAPI OnProviderChanged(
         /* [in] */ Int32 appWidgetId,
         /* [in] */ IAppWidgetProviderInfo* appWidget);
 
@@ -223,12 +223,12 @@ protected:
      * Called when the set of available widgets changes (ie. widget containing packages
      * are added, updated or removed, or widget components are enabled or disabled.)
      */
-    CARAPI_(void) OnProvidersChanged();
+    virtual CARAPI_(void) OnProvidersChanged();
 
     /**
      * Clear the list of Views that have been created by this AppWidgetHost.
      */
-    CARAPI_(void) ClearViews();
+    virtual CARAPI_(void) ClearViews();
 
 private:
     static CARAPI_(void) BindService();

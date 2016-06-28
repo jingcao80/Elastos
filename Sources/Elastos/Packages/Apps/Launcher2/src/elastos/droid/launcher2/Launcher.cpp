@@ -22,6 +22,7 @@
 #include "elastos/droid/launcher2/CLauncherBroadcastReceiver.h"
 #include "elastos/droid/launcher2/CLauncherCloseSystemDialogsIntentReceiver.h"
 #include "elastos/droid/launcher2/CLauncherAppWidgetResetObserver.h"
+#include "elastos/droid/launcher2/CDragLayerLayoutParams.h"
 #include "elastos/droid/appwidget/AppWidgetHostView.h"
 #include "elastos/droid/os/SystemClock.h"
 #include "elastos/droid/os/Build.h"
@@ -3785,15 +3786,14 @@ void Launcher::CopyFolderIconToImage(
         CCanvas::New(mFolderIconBitmap, (ICanvas**)&mFolderIconCanvas);
     }
 
-    AutoPtr<DragLayer::DragLayerLayoutParams> lp;
+    AutoPtr<CDragLayerLayoutParams> lp;
     AutoPtr<IViewGroupLayoutParams> para;
     IView::Probe(mFolderIconImageView)->GetLayoutParams((IViewGroupLayoutParams**)&para);
     if (IDragLayerLayoutParams::Probe(para) != NULL) {
-        lp = (DragLayer::DragLayerLayoutParams*)IDragLayerLayoutParams::Probe(para);
+        lp = (CDragLayerLayoutParams*)IDragLayerLayoutParams::Probe(para);
     }
     else {
-        lp = new DragLayer::DragLayerLayoutParams();
-        lp->constructor(width, height);
+        CDragLayerLayoutParams::NewByFriend(width, height, (CDragLayerLayoutParams**)&lp);
     }
 
     // The layout from which the folder is being opened may be scaled, adjust the starting

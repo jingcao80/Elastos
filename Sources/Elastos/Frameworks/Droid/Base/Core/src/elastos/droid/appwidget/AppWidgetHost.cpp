@@ -449,7 +449,7 @@ AutoPtr<IAppWidgetHostView> AppWidgetHost::OnCreateView(
     return view;
 }
 
-void AppWidgetHost::OnProviderChanged(
+ECode AppWidgetHost::OnProviderChanged(
     /* [in] */ Int32 appWidgetId,
     /* [in] */ IAppWidgetProviderInfo* app)
 {
@@ -482,6 +482,7 @@ void AppWidgetHost::OnProviderChanged(
     if (v != NULL) {
         v->ResetAppWidget(app);
     }
+    return NOERROR;
 }
 
 void AppWidgetHost::OnProvidersChanged()

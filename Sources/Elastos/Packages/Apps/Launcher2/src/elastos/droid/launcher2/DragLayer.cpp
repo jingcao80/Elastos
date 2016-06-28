@@ -2,6 +2,7 @@
 #include "elastos/droid/launcher2/DragLayer.h"
 #include "elastos/droid/launcher2/CellLayout.h"
 #include "elastos/droid/launcher2/LauncherApplication.h"
+#include "elastos/droid/launcher2/CDragLayerLayoutParams.h"
 #include "Elastos.Droid.Service.h"
 #include <elastos/core/Math.h>
 #include <elastos/core/CoreUtils.h>
@@ -890,8 +891,8 @@ ECode DragLayer::AddResizeFrame(
     AutoPtr<AppWidgetResizeFrame> resizeFrame = new AppWidgetResizeFrame();
     resizeFrame->constructor(context, widget, cellLayout, this);
 
-    AutoPtr<DragLayerLayoutParams> lp = new DragLayerLayoutParams();
-    lp->constructor(-1, -1);
+    AutoPtr<CDragLayerLayoutParams> lp;
+    CDragLayerLayoutParams::NewByFriend(-1, -1, (CDragLayerLayoutParams**)&lp);
     lp->mCustomPosition = TRUE;
 
     AddView(resizeFrame, lp);

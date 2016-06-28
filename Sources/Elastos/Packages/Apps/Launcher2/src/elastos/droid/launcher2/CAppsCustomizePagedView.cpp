@@ -11,6 +11,7 @@
 #include "elastos/droid/launcher2/FastBitmapDrawable.h"
 #include "elastos/droid/launcher2/PagedViewGridLayout.h"
 #include "elastos/droid/launcher2/PendingAddItemInfo.h"
+#include "elastos/droid/launcher2/CDragLayerLayoutParams.h"
 #include "elastos/droid/view/View.h"
 #include "elastos/droid/view/ViewGroup.h"
 #include "elastos/droid/view/LayoutInflater.h"
@@ -257,8 +258,8 @@ ECode CAppsCustomizePagedView::MyRunnable3::Run()
 
     // We want the first widget layout to be the correct size. This will be important
     // for width size reporting to the AppWidgetManager.
-    AutoPtr<DragLayer::DragLayerLayoutParams> lp = new DragLayer::DragLayerLayoutParams();
-    lp->constructor((*unScaledSize)[0], (*unScaledSize)[1]);
+    AutoPtr<CDragLayerLayoutParams> lp;
+    CDragLayerLayoutParams::NewByFriend((*unScaledSize)[0], (*unScaledSize)[1], (CDragLayerLayoutParams**)&lp);
     lp->SetX(0);
     lp->SetY(0);
     lp->mCustomPosition = TRUE;

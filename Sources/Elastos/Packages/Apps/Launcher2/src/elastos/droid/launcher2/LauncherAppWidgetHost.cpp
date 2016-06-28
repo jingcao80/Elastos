@@ -38,13 +38,13 @@ ECode LauncherAppWidgetHost::StopListening()
     return NOERROR;
 }
 
-ECode LauncherAppWidgetHost::OnProvidersChanged()
+void LauncherAppWidgetHost::OnProvidersChanged()
 {
     // Once we get the message that widget packages are updated, we need to rebind items
     // in AppsCustomize accordingly.
     AutoPtr<IArrayList> list;
     LauncherModel::GetSortedWidgetsAndShortcuts(IContext::Probe(mLauncher), (IArrayList**)&list);
-    return mLauncher->BindPackagesUpdated(list);
+    mLauncher->BindPackagesUpdated(list);
 }
 
 } // namespace Launcher2

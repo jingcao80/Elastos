@@ -2,6 +2,7 @@
 #include "elastos/droid/launcher2/DragView.h"
 #include "elastos/droid/launcher2/LauncherAnimUtils.h"
 #include "elastos/droid/launcher2/DragLayer.h"
+#include "elastos/droid/launcher2/CDragLayerLayoutParams.h"
 #include "Elastos.Droid.Content.h"
 #include "Elastos.Droid.View.h"
 #include "Elastos.Droid.Service.h"
@@ -392,8 +393,8 @@ ECode DragView::Show(
     IViewGroup::Probe(mDragLayer)->AddView(this);
 
     // Start the pick-up animation
-    AutoPtr<DragLayer::DragLayerLayoutParams> lp = new DragLayer::DragLayerLayoutParams();
-    lp->constructor(0, 0);
+    AutoPtr<CDragLayerLayoutParams> lp;
+    CDragLayerLayoutParams::NewByFriend(0, 0, (CDragLayerLayoutParams**)&lp);
     mBitmap->GetWidth(&(lp->mWidth));
     mBitmap->GetHeight(&(lp->mHeight));
     lp->mCustomPosition = TRUE;

@@ -669,10 +669,10 @@ ECode AppWidgetResizeFrame::SnapToWidget(
 
         AutoPtr<ArrayOf<IPropertyValuesHolder*> > arrays =
                 ArrayOf<IPropertyValuesHolder*>::Alloc(4);
-        (*arrays)[0] = width;
-        (*arrays)[1] = height;
-        (*arrays)[2] = x;
-        (*arrays)[3] = y;
+        arrays->Set(0, width);
+        arrays->Set(1, height);
+        arrays->Set(2, x);
+        arrays->Set(3, y);
         AutoPtr<IObjectAnimator> oa =
                 LauncherAnimUtils::OfPropertyValuesHolder(lp,
                 IView::Probe(this), arrays);

@@ -42,7 +42,7 @@ protected:
         /* [in] */ Int32 appWidgetId,
         /* [in] */ IAppWidgetProviderInfo* appWidget);
 
-    CARAPI OnProvidersChanged();
+    CARAPI_(void) OnProvidersChanged();
 
 public:
     AutoPtr<ILauncher> mLauncher;
