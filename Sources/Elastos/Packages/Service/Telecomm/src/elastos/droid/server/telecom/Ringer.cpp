@@ -53,8 +53,12 @@ ECode Ringer::constructor(
     /* [in] */ InCallTonePlayer::Factory* playerFactory,
     /* [in] */ IContext* context)
 {
-    mCallAudioManager = IWeakReference::Probe(TO_IINTERFACE(callAudioManager));
-    mCallsManager = IWeakReference::Probe(TO_IINTERFACE(callsManager));
+    IWeakReferenceSource* camsource = IWeakReferenceSource::Probe(TO_IINTERFACE(callAudioManager));
+    camsource->GetWeakReference((IWeakReference**)&mCallAudioManager);
+
+    IWeakReferenceSource* cmsource = IWeakReferenceSource::Probe(TO_IINTERFACE(callsManager));
+    cmsource->GetWeakReference((IWeakReference**)&mCallsManager);
+
     mPlayerFactory = playerFactory;
     mContext = context;
     // We don't rely on getSystemService(IContext::VIBRATOR_SERVICE) to make sure this
@@ -192,10 +196,17 @@ ECode Ringer::UpdateRinging()
 ECode Ringer::StartRingingOrCallWaiting()
 {
     AutoPtr<ICall> foregroundCall;
-    ((CallsManager*) IObject::Probe(mCallsManager))->GetForegroundCall((ICall**)&foregroundCall);
-    Log::V("Ringer", "startRingingOrCallWaiting, foregroundCall: %s.", TO_CSTR(foregroundCall));
     Boolean hasActiveOrHoldingCall;
-    ((CallsManager*) IObject::Probe(mCallsManager))->HasActiveOrHoldingCall(&hasActiveOrHoldingCall);
+    AutoPtr<IInterface> wsobj;
+    mCallsManager->Resolve(EIID_IInterface, (IInterface**)&wsobj);
+    if (wsobj != NULL) {
+        ((CallsManager*) IObject::Probe(wsobj))->GetForegroundCall((ICall**)&foregroundCall);
+        ((CallsManager*) IObject::Probe(wsobj))->HasActiveOrHoldingCall(&hasActiveOrHoldingCall);
+    } else {
+        Log::E("Ringer", "mCallsManager is NULL");
+        assert(0);
+    }
+    Log::V("Ringer", "startRingingOrCallWaiting, foregroundCall: %s.", TO_CSTR(foregroundCall));
     Boolean isContains;
     mRingingCalls->Contains(foregroundCall, &isContains);
     if (isContains && (!hasActiveOrHoldingCall)) {
@@ -227,7 +238,15 @@ ECode Ringer::StartRingingOrCallWaiting()
                 Settings::System::GetInt32(cr,
                         ISettingsSystem::INCREASING_RING_RAMP_UP_TIME, 20, &rampUpTime);
             }
-            ((CallAudioManager*) IObject::Probe(mCallAudioManager))->SetIsRinging(TRUE);
+            AutoPtr<IInterface> wsobj;
+            mCallAudioManager->Resolve(EIID_IInterface, (IInterface**)&wsobj);
+            if (wsobj != NULL) {
+                ((CallAudioManager*) IObject::Probe(wsobj))->SetIsRinging(TRUE);
+            } else {
+                Log::E("Ringer","CallAudioManager is NULL");
+                assert(0);
+            }
+
             // Because we wait until a contact info query to complete before processing a
             // call (for the purposes of direct-to-voicemail), the information about custom
             // ringtones should be available by the time this code executes. We can safely
@@ -322,7 +341,14 @@ ECode Ringer::StopRinging()
     }
     // Even though stop is asynchronous it's ok to update the audio manager. Things like audio
     // focus are voluntary so releasing focus too early is not detrimental.
-    ((CallAudioManager*) IObject::Probe(mCallAudioManager))->SetIsRinging(FALSE);
+    AutoPtr<IInterface> wsobj;
+    mCallAudioManager->Resolve(EIID_IInterface, (IInterface**)&wsobj);
+    if (wsobj != NULL) {
+        ((CallAudioManager*) IObject::Probe(wsobj))->SetIsRinging(FALSE);
+    } else {
+        Log::E("Ringer","CallAudioManager is NULL");
+        assert(0);
+    }
     return NOERROR;
 }
 

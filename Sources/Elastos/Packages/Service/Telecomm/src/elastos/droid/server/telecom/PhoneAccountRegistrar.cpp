@@ -723,8 +723,7 @@ ECode PhoneAccountRegistrar::GetUserSelectedVoicePhoneAccount(
                return NOERROR;
             }
             Int64 subId = StringUtils::ParseInt64(id);
-            Log::I("PhoneAccountRegistrar", "getUserSelectedVoicePhoneAccount, voice subId = %ld subId = %ld mId = %s",
-                    voiceSubId, subId, id.string());
+            Log::I("PhoneAccountRegistrar", "getUserSelectedVoicePhoneAccount, voice subId = %lld subId = %lld mId = %s", voiceSubId, subId, id.string());
             if (subId == voiceSubId) {
                 prefPhoneAccount = phoneAccountHandle;
                 break;

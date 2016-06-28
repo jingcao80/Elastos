@@ -1021,6 +1021,7 @@ ConnectionServiceWrapper::ConnectionServiceWrapper()
     AutoPtr<IMap> map;
     CConcurrentHashMap::New(8, 0.9f, 1, (IMap**)&map);
     AutoPtr<ICollections> helper;
+    CCollections::AcquireSingleton((ICollections**)&helper);
     helper->SetFromMap(map, (ISet**)&mPendingConferenceCalls);
     mCallIdMapper = new CallIdMapper();
     ((CallIdMapper*) mCallIdMapper.Get())->constructor(String("ConnectionService"));
@@ -1615,7 +1616,7 @@ ECode ConnectionServiceWrapper::LogIncoming(
 
     String s;
     s.AppendFormat("ConnectionService -> Telecom: %s", msgBuf);
-    Log::D("ConnectionServiceWrapper", s.string(), args);
+    Log::D("ConnectionServiceWrapper", "%s", s.string());
     return NOERROR;
 }
 
@@ -1630,7 +1631,7 @@ ECode ConnectionServiceWrapper::LogOutgoing(
 
     String s;
     s.AppendFormat("ConnectionService -> Telecom: %s", msgBuf);
-    Log::D("ConnectionServiceWrapper", s.string(), args);
+    Log::D("ConnectionServiceWrapper", "%s", s.string());
     return NOERROR;
 }
 

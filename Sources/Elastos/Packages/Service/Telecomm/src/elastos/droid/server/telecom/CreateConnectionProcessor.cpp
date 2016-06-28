@@ -202,7 +202,9 @@ ECode CreateConnectionProcessor::AttemptNextPhoneAccount()
         }
     }
     if (mResponse != NULL && attempt != NULL) {
-        Log::I("CreateConnectionProcessor", "Trying attempt %s", TO_CSTR(attempt));
+        String attemptStr;
+        (attempt)->ToString(&attemptStr);
+        Log::I("CreateConnectionProcessor", "Trying attempt %s", attemptStr.string());
         AutoPtr<IComponentName> componentName;
         attempt->mConnectionManagerPhoneAccount->GetComponentName((IComponentName**)&componentName);
         AutoPtr<IConnectionServiceWrapper> service;
@@ -247,8 +249,7 @@ ECode CreateConnectionProcessor::ShouldSetConnectionManager(
         return NOERROR;
     }
     if (mAttemptRecordsSize > 1) {
-        Log::D("CreateConnectionProcessor", "shouldSetConnectionManager, error, mAttemptRecords should not have more "
-                "than 1 record");
+        Log::D("CreateConnectionProcessor", "shouldSetConnectionManager, error, mAttemptRecords should not have more than 1 record");
         *result = FALSE;
         return NOERROR;
     }

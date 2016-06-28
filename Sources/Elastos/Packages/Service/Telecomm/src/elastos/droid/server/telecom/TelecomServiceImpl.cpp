@@ -688,8 +688,7 @@ ECode TelecomServiceImpl::AddNewUnknownCall(
         userHandleHelper->GetOWNER((IUserHandle**)&owner);
         mContext->SendBroadcastAsUser(intent, owner);
     } else {
-        Log::I("TelecomServiceImpl", "Null phoneAccountHandle or not initiated by Telephony. Ignoring request"
-                " to add new unknown call.");
+        Log::I("TelecomServiceImpl", "Null phoneAccountHandle or not initiated by Telephony. Ignoring request to add new unknown call.");
     }
     return NOERROR;
 }

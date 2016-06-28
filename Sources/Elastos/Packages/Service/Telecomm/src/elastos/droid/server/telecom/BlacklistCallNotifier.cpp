@@ -113,8 +113,8 @@ ECode BlacklistCallNotifier::NotifyBlacklistedItem(
     // if (!BlacklistUtils::IsBlacklistNotifyEnabled(mContext)) {
     //     return NOERROR;
     // }
-    if (DEBUG) Log::D("BlacklistCallNotifier", "notifyBlacklistedItem(). number: %s, match type: %d, date: %lld, type: %d",
-            number.string(), matchType, date, notificationId);
+    if (DEBUG) Log::D("BlacklistCallNotifier", "notifyBlacklistedItem(). number: %s, match type: %d, date: %lld, type: %d", number.string(), matchType, date, notificationId);
+
     AutoPtr<IArrayList> items = notificationId == BLACKLISTED_CALL_NOTIFICATION
             ? mBlacklistedCalls : mBlacklistedMessages;
     AutoPtr<IPendingIntent> clearIntent;

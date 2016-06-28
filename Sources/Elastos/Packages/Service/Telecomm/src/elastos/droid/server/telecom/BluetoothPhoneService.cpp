@@ -892,8 +892,7 @@ ECode BluetoothPhoneService::SendClccForCall(
     }
     if (shouldLog) {
         Log::I(TAG, "sending clcc for call %d, %d, %d, %d, %s, %d",
-                index, direction, state, isPartOfConference, Log::PiiHandle(StringUtils::ParseCharSequence(address)).string(),
-                addressType);
+                index, direction, state, isPartOfConference, Log::PiiHandle(StringUtils::ParseCharSequence(address)).string(), addressType);
     }
     if (mBluetoothHeadset != NULL) {
         mBluetoothHeadset->ClccResponse(

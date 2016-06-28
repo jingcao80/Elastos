@@ -2252,6 +2252,7 @@ ECode PhoneNumberUtils::IsLocalEmergencyNumberInternal(
     VALIDATE_NOT_NULL(res);
     String countryIso;
     AutoPtr<IInterface> obj;
+    Logger::W(TAG, "TODO COUNTRY_DETECTOR service is not implemented!!");
     //TODO leliang COUNTRY_DETECTOR service is not implemented
     //TODO context->GetSystemService(IContext::COUNTRY_DETECTOR, (IInterface**)&obj);
     AutoPtr<ICountryDetector> detector = ICountryDetector::Probe(obj);

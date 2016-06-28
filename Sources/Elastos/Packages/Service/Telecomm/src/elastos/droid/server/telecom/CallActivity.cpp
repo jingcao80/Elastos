@@ -148,6 +148,7 @@ ECode CallActivity::ProcessOutgoingCallIntent(
     Log::D("CallActivity", "processOutgoingCallIntent videoState = %d", videoState);
     Boolean isTtyModeEnabled;
     IsTtyModeEnabled(&isTtyModeEnabled);
+    Logger::W("CallActivity", "TODO CallActivity::ProcessOutgoingCallIntent IVideoProfileHelper is not ready!!");
     //TODO leliang
     //assert(0 && "TODO: IVideoProfileHelper");
     // if (VideoProfile::VideoState::IsVideo(videoState) && isTtyModeEnabled) {
@@ -190,6 +191,7 @@ ECode CallActivity::ProcessOutgoingCallIntent(
     Int32 noteOpNoThrow;
     appOps->NoteOpNoThrow(IAppOpsManager::OP_CALL_PHONE, launchedFromUid,
             launchedFromPackage, &noteOpNoThrow);
+    Logger::W("CallActivity", "TODO CallActivity::ProcessOutgoingCallIntent permission not given!!");
     if (FALSE/*TODO leliang noteOpNoThrow != IAppOpsManager::MODE_ALLOWED*/) {
         Log::W("CallActivity", "Rejecting call from uid %d package %s", launchedFromUid,
                 launchedFromPackage.string());

@@ -655,9 +655,9 @@ ECode CallsManager::StartOutgoingCall(
         if (((msimConfig == Elastos::Droid::Telephony::MultiSimVariants_DSDS) ||
                 (msimConfig == Elastos::Droid::Telephony::MultiSimVariants_TSTS)) &&
                 (mForegroundCall != NULL) && (((Call*) mForegroundCall.Get())->IsAlive(&isAlive), isAlive)) {
-            AutoPtr<IPhoneAccountHandle> phoneAccountHandle;
-            ((Call*) mForegroundCall.Get())->GetTargetPhoneAccount((IPhoneAccountHandle**)&phoneAccountHandle);
-            defaultAccountHandle = phoneAccountHandle;
+            AutoPtr<IPhoneAccountHandle> phoneAccountHandletmp;
+            ((Call*) mForegroundCall.Get())->GetTargetPhoneAccount((IPhoneAccountHandle**)&phoneAccountHandletmp);
+            defaultAccountHandle = phoneAccountHandletmp;
         }
         if (defaultAccountHandle != NULL) {
             phoneAccountHandle = defaultAccountHandle;
@@ -971,7 +971,7 @@ ECode CallsManager::PostDialContinue(
 ECode CallsManager::DisconnectCall(
     /* [in] */ ICall* call)
 {
-    Log::V(TAG, "disconnectCall %s", call);
+    Log::V(TAG, "disconnectCall %s", TO_CSTR(call));
     Boolean isContains;
     mCalls->Contains(call, &isContains);
     if (!isContains) {
@@ -1243,7 +1243,8 @@ ECode CallsManager::MarkCallAsDisconnected(
     String activeSubscription;
     GetActiveSubscription(&activeSubscription);
     Boolean isSetLCH;
-    phAcc->IsSet(IPhoneAccount::LCH, &isSetLCH);
+    if (phAcc != NULL)
+        phAcc->IsSet(IPhoneAccount::LCH, &isSetLCH);
     if ((phoneAccountHandle != NULL &&
                 id.Equals(activeSubscription)) &&
                 (phAcc != NULL) && isSetLCH &&
@@ -1590,7 +1591,9 @@ ECode CallsManager::GetFirstCallWithState(
         Int32 currentState = (*states)[i];
         // check the foreground first
         Int32 foregroundCallState;
-        ((Call*) mForegroundCall.Get())->GetState(&foregroundCallState);
+        if (mForegroundCall != NULL) {
+            ((Call*) mForegroundCall.Get())->GetState(&foregroundCallState);
+        }
         if (mForegroundCall != NULL && foregroundCallState == currentState) {
             *result = mForegroundCall;
             REFCOUNT_ADD(*result)

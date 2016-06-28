@@ -58,7 +58,10 @@ ECode HeadsetMediaButton::constructor(
     /* [in] */ CallsManager* callsManager)
 {
     mSessionCallback = new SubMediaSessionCallback(this);
-    mCallsManager = IWeakReference::Probe(TO_IINTERFACE(callsManager));
+
+    IWeakReferenceSource* source = IWeakReferenceSource::Probe(TO_IINTERFACE(callsManager));
+    source->GetWeakReference((IWeakReference**)&mCallsManager);
+
     // Create a MediaSession but don't enable it yet. This is a
     // replacement for MediaButtonReceiver
     CMediaSession::New(context, String("HeadsetMediaButton"), (IMediaSession**)&mSession);
@@ -82,10 +85,24 @@ ECode HeadsetMediaButton::HandleHeadsetHook(
     Log::D("HeadsetMediaButton", "handleHeadsetHook()...%d %d", action, repeatCount);
     Boolean isLongPress;
     event->IsLongPress(&isLongPress);
+    AutoPtr<IInterface> wsObj;
+    mCallsManager->Resolve(EIID_IInterface, (IInterface**)&wsObj);
     if (isLongPress) {
-        return ((CallsManager*) IObject::Probe(mCallsManager.Get()))->OnMediaButton(LONG_PRESS, result);
+        if (wsObj != NULL) {
+            return ((CallsManager*) IObject::Probe(wsObj.Get()))->OnMediaButton(LONG_PRESS, result);
+        } else {
+            Log::D("HeadsetMediaButton", "mCallsManager is NULL");
+            assert(0);
+            return E_ILLEGAL_STATE_EXCEPTION;
+        }
     } else if (action == IKeyEvent::ACTION_UP && repeatCount == 0) {
-        return ((CallsManager*) IObject::Probe(mCallsManager.Get()))->OnMediaButton(SHORT_PRESS, result);
+        if (wsObj != NULL) {
+            return ((CallsManager*) IObject::Probe(wsObj.Get()))->OnMediaButton(SHORT_PRESS, result);
+        } else {
+            Log::D("HeadsetMediaButton", "mCallsManager is NULL");
+            assert(0);
+            return E_ILLEGAL_STATE_EXCEPTION;
+        }
     }
     *result = TRUE;
     return NOERROR;
@@ -106,7 +123,14 @@ ECode HeadsetMediaButton::OnCallRemoved(
     /* [in] */ ICall* call)
 {
     Boolean hasAnyCalls;
-    ((CallsManager*) IObject::Probe(mCallsManager.Get()))->HasAnyCalls(&hasAnyCalls);
+    AutoPtr<IInterface> wsObj;
+        mCallsManager->Resolve(EIID_IInterface, (IInterface**)&wsObj);
+    if (wsObj != NULL) {
+        ((CallsManager*) IObject::Probe(wsObj.Get()))->HasAnyCalls(&hasAnyCalls);
+    } else {
+        Log::D("HeadsetMediaButton", "mCallsManager is NULL");
+        assert(0);
+    }
     if (!hasAnyCalls) {
         Boolean isActive;
         mSession->IsActive(&isActive);

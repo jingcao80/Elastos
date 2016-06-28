@@ -83,17 +83,17 @@ ECode AudioState::ToString(
     AutoPtr<ArrayOf<IInterface*> > arr = ArrayOf<IInterface*>::Alloc(3);
     AutoPtr<IBoolean> pMut;
     CBoolean::New(mIsMuted, (IBoolean**)&pMut);
-    (*arr)[0] = pMut;
+    arr->Set(0, pMut);
 
     String strRoute = AudioRouteToString(mRoute);
     AutoPtr<ICharSequence> pRoute;
     CString::New(strRoute, (ICharSequence**)&pRoute);
-    (*arr)[1] = pRoute;
+    arr->Set(1, pRoute);
 
     String strMask = AudioRouteToString(mSupportedRouteMask);
     AutoPtr<ICharSequence> pMask;
     CString::New(strMask, (ICharSequence**)&pMask);
-    (*arr)[2] = pMask;
+    arr->Set(2, pMask);
     String res = StringUtils::Format(us,
                 String("[AudioState isMuted: %b, route; %s, supportedRouteMask: %s]"),
                 arr);

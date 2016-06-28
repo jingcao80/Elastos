@@ -555,6 +555,7 @@ ECode Call::SetHandle(
         mHandle->GetSchemeSpecificPart(&schemeSpecificPart);
         phoneNumberUtilsHelper->IsLocalEmergencyNumber(mContext, schemeSpecificPart, &isLocalEmergencyNumber);
         mIsEmergencyCall = mHandle != NULL && isLocalEmergencyNumber;
+        Logger::W("Call", "TODO Call::SetHandle ignore the function StartCallerInfoLookup!!");
         //TODO leliang StartCallerInfoLookup();
         AutoPtr<IIterator> it;
         mListeners->GetIterator((IIterator**)&it);
@@ -707,7 +708,8 @@ ECode Call::GetOriginalHandle(
     VALIDATE_NOT_NULL(result)
 
     Boolean isEmpty;
-    mGatewayInfo->IsEmpty(&isEmpty);
+    if (mGatewayInfo != NULL)
+        mGatewayInfo->IsEmpty(&isEmpty);
     if (mGatewayInfo != NULL && !isEmpty) {
         return mGatewayInfo->GetOriginalAddress(result);
     }
@@ -1039,7 +1041,11 @@ ECode Call::StartCreateConnection(
     AutoPtr<IPreconditions> preconditionsHelper;
     CPreconditions::AcquireSingleton((IPreconditions**)&preconditionsHelper);
     preconditionsHelper->CheckState(mCreateConnectionProcessor == NULL);
-    mCreateConnectionProcessor = new CreateConnectionProcessor();
+    //note keep the variable here, because in the CreateConnectionProcessor::Process(),
+    //mCreateConnectionProcessor will be set NULL,
+    //also see  HandleCreateConnectionFailure() and HandleCreateConnectionSuccess();
+    AutoPtr<CreateConnectionProcessor> tmp = new CreateConnectionProcessor();
+    mCreateConnectionProcessor = tmp;
     mCreateConnectionProcessor->constructor(this, mRepository, this,
             phoneAccountRegistrar, mContext);
     mCreateConnectionProcessor->Process();

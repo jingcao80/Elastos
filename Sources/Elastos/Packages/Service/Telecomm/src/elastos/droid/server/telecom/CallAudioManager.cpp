@@ -667,7 +667,7 @@ ECode CallAudioManager::SetInitialAudioState(
 {
     AutoPtr<IAudioState> audioState;
     GetInitialAudioState(call, (IAudioState**)&audioState);
-    Log::V("CallAudioManager", "setInitialAudioState %s, %s", TO_CSTR(audioState), TO_CSTR(call));
+    Log::V("CallAudioManager", "setInitialAudioState %s, %s", TO_CSTR(audioState), (call!=NULL)?TO_CSTR(call):"call is null");
     Boolean isMuted;
     audioState->GetIsMuted(&isMuted);
     Int32 route;
@@ -720,7 +720,9 @@ ECode CallAudioManager::HasRingingForegroundCall(
     AutoPtr<ICall> call;
     CallsManager::GetInstance()->GetForegroundCall((ICall**)&call);
     Int32 state;
-    ((Call*) call.Get())->GetState(&state);
+    if (call != NULL) {
+        ((Call*) call.Get())->GetState(&state);
+    }
     *result = call != NULL && state == ICallState::RINGING;
     return NOERROR;
 }

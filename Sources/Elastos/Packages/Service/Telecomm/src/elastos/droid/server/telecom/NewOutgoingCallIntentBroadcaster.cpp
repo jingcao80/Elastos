@@ -83,8 +83,7 @@ ECode NewOutgoingCallIntentBroadcaster::NewOutgoingCallBroadcastIntentReceiver::
     if (schemeSpecificPart.Equals(resultNumber)) {
         Log::V("NewOutgoingCallIntentBroadcaster", "Call number unmodified after new outgoing call intent broadcast.");
     } else {
-        Log::V("NewOutgoingCallIntentBroadcaster", "Retrieved modified handle after outgoing call intent broadcast: "
-                "Original: %s, Modified: %s",
+        Log::V("NewOutgoingCallIntentBroadcaster", "Retrieved modified handle after outgoing call intent broadcast: Original: %s, Modified: %s",
                 Log::Pii(originalUri).string(),
                 Log::Pii(resultHandleUri).string());
     }
@@ -151,8 +150,7 @@ ECode NewOutgoingCallIntentBroadcaster::ProcessIntent(
         if (IIntent::ACTION_CALL.Equals(action)
                 || IIntent::ACTION_CALL_PRIVILEGED.Equals(action)) {
             // Voicemail calls will be handled directly by the telephony connection manager
-            Log::I("NewOutgoingCallIntentBroadcaster", "Placing call immediately instead of waiting for "
-                    " OutgoingCallBroadcastReceiver: %s", TO_CSTR(intent));
+            Log::I("NewOutgoingCallIntentBroadcaster", "Placing call immediately instead of waiting for OutgoingCallBroadcastReceiver: %s", TO_CSTR(intent));
             Boolean speakerphoneOn;
             mIntent->GetBooleanExtra(ITelecomManager::EXTRA_START_CALL_WITH_SPEAKERPHONE, FALSE, &speakerphoneOn);
             mCallsManager->PlaceOutgoingCall(mCall, handle, NULL, speakerphoneOn,
@@ -201,8 +199,7 @@ ECode NewOutgoingCallIntentBroadcaster::ProcessIntent(
     if (IIntent::ACTION_CALL.Equals(action)) {
         if (isPotentialEmergencyNumber) {
             if (!mIsDefaultOrSystemPhoneApp) {
-                Log::W("NewOutgoingCallIntentBroadcaster", "Cannot call potential emergency number %s with CALL Intent %s "
-                        "unless caller is system or default dialer.", number.string(), TO_CSTR(intent));
+                Log::W("NewOutgoingCallIntentBroadcaster", "Cannot call potential emergency number %s with CALL Intent %s unless caller is system or default dialer.", number.string(), TO_CSTR(intent));
                 AutoPtr<IUri> data;
                 intent->GetData((IUri**)&data);
                 LaunchSystemDialer(data);
@@ -214,8 +211,7 @@ ECode NewOutgoingCallIntentBroadcaster::ProcessIntent(
         }
     } else if (IIntent::ACTION_CALL_EMERGENCY.Equals(action)) {
         if (!isPotentialEmergencyNumber) {
-            Log::W("NewOutgoingCallIntentBroadcaster", "Cannot call non-potential-emergency number %s with EMERGENCY_CALL "
-                    "Intent %s.", number.string(), TO_CSTR(intent));
+            Log::W("NewOutgoingCallIntentBroadcaster", "Cannot call non-potential-emergency number %s with EMERGENCY_CALL Intent %s.", number.string(), TO_CSTR(intent));
             *result = Elastos::Droid::Telephony::IDisconnectCause::OUTGOING_CANCELED;
             return NOERROR;
         }
@@ -228,8 +224,7 @@ ECode NewOutgoingCallIntentBroadcaster::ProcessIntent(
     Boolean isProcessAddParticipantOk;
     ProcessAddParticipant(intent, number, &isProcessAddParticipantOk);
     if (!isProcessAddParticipantOk && callImmediately) {
-        Log::I("NewOutgoingCallIntentBroadcaster", "Placing call immediately instead of waiting for "
-                " OutgoingCallBroadcastReceiver: %s", TO_CSTR(intent));
+        Log::I("NewOutgoingCallIntentBroadcaster", "Placing call immediately instead of waiting for OutgoingCallBroadcastReceiver: %s", TO_CSTR(intent));
         String scheme = isUriNumber ? IPhoneAccount::SCHEME_SIP : IPhoneAccount::SCHEME_TEL;
         Boolean speakerphoneOn;
         mIntent->GetBooleanExtra(ITelecomManager::EXTRA_START_CALL_WITH_SPEAKERPHONE, FALSE, &speakerphoneOn);
@@ -444,8 +439,7 @@ ECode NewOutgoingCallIntentBroadcaster::RewriteCallIntentAction(
     /* Change CALL_PRIVILEGED into CALL or CALL_EMERGENCY as needed. */
     if (IIntent::ACTION_CALL_PRIVILEGED.Equals(action)) {
         if (isPotentialEmergencyNumber) {
-            Log::I("NewOutgoingCallIntentBroadcaster", "ACTION_CALL_PRIVILEGED is used while the number is a potential"
-                    " emergency number. Using ACTION_CALL_EMERGENCY as an action instead.");
+            Log::I("NewOutgoingCallIntentBroadcaster", "ACTION_CALL_PRIVILEGED is used while the number is a potential emergency number. Using ACTION_CALL_EMERGENCY as an action instead.");
             action = IIntent::ACTION_CALL_EMERGENCY;
         } else {
             action = IIntent::ACTION_CALL;

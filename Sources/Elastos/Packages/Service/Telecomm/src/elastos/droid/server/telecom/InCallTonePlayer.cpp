@@ -28,7 +28,8 @@ namespace Telecom {
 ECode InCallTonePlayer::Factory::constructor(
     /* [in] */ CallAudioManager* callAudioManager)
 {
-    mCallAudioManager = IWeakReference::Probe(TO_IINTERFACE(callAudioManager));
+    IWeakReferenceSource* source = IWeakReferenceSource::Probe(TO_IINTERFACE(callAudioManager));
+    source->GetWeakReference((IWeakReference**)&mCallAudioManager);
     return NOERROR;
 }
 
@@ -36,8 +37,16 @@ ECode InCallTonePlayer::Factory::CreatePlayer(
     /* [in] */ Int32 tone,
     /* [out] */ InCallTonePlayer** result)
 {
-    *result = new InCallTonePlayer(tone, (CallAudioManager*) IObject::Probe(mCallAudioManager));
-    REFCOUNT_ADD(*result)
+    AutoPtr<IInterface> ws;
+    mCallAudioManager->Resolve(EIID_IInterface, (IInterface**)&ws);
+    if (ws != NULL) {
+        *result = new InCallTonePlayer(tone, (CallAudioManager*) IObject::Probe(mCallAudioManager));
+        REFCOUNT_ADD(*result)
+    } else {
+        Log::E("InCallTonePlayer", "mCallAudioManager is NULL");
+        *result = NULL;
+        assert(0);
+    }
     return NOERROR;
 }
 
@@ -56,7 +65,14 @@ ECode InCallTonePlayer::SubRunnable::Run()
     if (sTonesPlaying == 0) {
         Log::Wtf("InCallTonePlayer", "Over-releasing focus for tone player.");
     } else if (--sTonesPlaying == 0) {
-        ((CallAudioManager*) IObject::Probe(mHost->mCallAudioManager))->SetIsTonePlaying(FALSE);
+        AutoPtr<IInterface> ws;
+        mHost->mCallAudioManager->Resolve(EIID_IInterface, (IInterface**)&ws);
+        if (ws != NULL) {
+            ((CallAudioManager*) IObject::Probe(ws))->SetIsTonePlaying(FALSE);
+        } else {
+            Log::E("InCallTonePlayer", "mCallAudioManager is NULL");
+            assert(0);
+        }
     }
     return NOERROR;
 }
@@ -95,7 +111,10 @@ InCallTonePlayer::InCallTonePlayer(
     : mToneId(toneId)
 {
     mState = STATE_OFF;
-    mCallAudioManager = IWeakReference::Probe(TO_IINTERFACE(callAudioManager));
+
+    IWeakReferenceSource* source = IWeakReferenceSource::Probe(TO_IINTERFACE(callAudioManager));
+    source->GetWeakReference((IWeakReference**)&mCallAudioManager);
+
     CHandler::New(Looper::GetMainLooper(), (IHandler**)&mMainThreadHandler);
 }
 
@@ -192,7 +211,15 @@ ECode InCallTonePlayer::Run()
         }
         Int32 stream = IAudioManager::STREAM_VOICE_CALL;
         Boolean isBluetoothAudioOn;
-        ((CallAudioManager*) IObject::Probe(mCallAudioManager))->IsBluetoothAudioOn(&isBluetoothAudioOn);
+        AutoPtr<IInterface> ws;
+        mCallAudioManager->Resolve(EIID_IInterface, (IInterface**)&ws);
+        if (ws != NULL) {
+            ((CallAudioManager*) IObject::Probe(ws))->IsBluetoothAudioOn(&isBluetoothAudioOn);
+        } else {
+            Log::E("InCallTonePlayer", "mCallAudioManager is NULL");
+            assert(0);
+        }
+
         if (isBluetoothAudioOn) {
             stream = IAudioManager::STREAM_BLUETOOTH_SCO;
         }
@@ -257,7 +284,14 @@ ECode InCallTonePlayer::StartTone()
     ThreadUtil::CheckOnMainThread();
     sTonesPlaying++;
     if (sTonesPlaying == 1) {
-        ((CallAudioManager*) IObject::Probe(mCallAudioManager))->SetIsTonePlaying(TRUE);
+        AutoPtr<IInterface> ws;
+        mCallAudioManager->Resolve(EIID_IInterface, (IInterface**)&ws);
+        if (ws != NULL) {
+            ((CallAudioManager*) IObject::Probe(ws))->SetIsTonePlaying(TRUE);
+        } else {
+            Log::E("InCallTonePlayer", "mCallAudioManager is NULL");
+            assert(0);
+        }
     }
     Start();
     return NOERROR;

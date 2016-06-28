@@ -56,10 +56,12 @@ ECode Log::D(
 {
     if (DEBUG) {
         char msgBuf[MSG_BUF_SIZE];
-        snprintf(msgBuf, MSG_BUF_SIZE, "%s: %s", prefix, fmt);
+        char msgBuf2[MSG_BUF_SIZE];
         va_list args;
         va_start(args, fmt);
-        Slogger::D(TAG, msgBuf, args);
+        vsnprintf(msgBuf, MSG_BUF_SIZE, fmt, args);
+        snprintf(msgBuf2, MSG_BUF_SIZE, "%s: %s", prefix, msgBuf);
+        Slogger::D(TAG, msgBuf2);
         va_end(args);
     }
     return NOERROR;
@@ -71,10 +73,12 @@ ECode Log::D(
 {
     if (DEBUG) {
         char msgBuf[MSG_BUF_SIZE];
-        snprintf(msgBuf, MSG_BUF_SIZE, "%s: %s", TO_CSTR(objectPrefix), fmt);
+        char msgBuf2[MSG_BUF_SIZE];
         va_list args;
         va_start(args, fmt);
-        Slogger::D(TAG, msgBuf, args);
+        vsnprintf(msgBuf, MSG_BUF_SIZE, fmt, args);
+        snprintf(msgBuf2, MSG_BUF_SIZE, "%s: %s", TO_CSTR(objectPrefix), msgBuf);
+        Slogger::D(TAG, msgBuf2);
         va_end(args);
     }
     return NOERROR;
@@ -86,11 +90,13 @@ ECode Log::I(
 {
     if (INFO) {
         char msgBuf[MSG_BUF_SIZE];
-        snprintf(msgBuf, MSG_BUF_SIZE, "%s: %s", prefix, fmt);
+        char msgBuf2[MSG_BUF_SIZE];
         va_list args;
         va_start(args, fmt);
-        Slogger::I(TAG, msgBuf, args);
+        vsnprintf(msgBuf, MSG_BUF_SIZE, fmt, args);
         va_end(args);
+        snprintf(msgBuf2, MSG_BUF_SIZE, "%s: %s", prefix, msgBuf);
+        Slogger::I(TAG, msgBuf2);
     }
     return NOERROR;
 }
@@ -101,10 +107,12 @@ ECode Log::I(
 {
     if (INFO) {
         char msgBuf[MSG_BUF_SIZE];
-        snprintf(msgBuf, MSG_BUF_SIZE, "%s: %s", TO_CSTR(objectPrefix), fmt);
+        char msgBuf2[MSG_BUF_SIZE];
         va_list args;
         va_start(args, fmt);
-        Slogger::I(TAG, msgBuf, args);
+        vsnprintf(msgBuf, MSG_BUF_SIZE, fmt, args);
+        snprintf(msgBuf2, MSG_BUF_SIZE, "%s: %s", TO_CSTR(objectPrefix), msgBuf);
+        Slogger::I(TAG, msgBuf2);
         va_end(args);
     }
     return NOERROR;
@@ -116,11 +124,13 @@ ECode Log::V(
 {
     if (VERBOSE) {
         char msgBuf[MSG_BUF_SIZE];
-        snprintf(msgBuf, MSG_BUF_SIZE, "%s: %s", prefix, fmt);
+        char msgBuf2[MSG_BUF_SIZE];
         va_list args;
         va_start(args, fmt);
-        Slogger::V(TAG, msgBuf, args);
+        vsnprintf(msgBuf, MSG_BUF_SIZE, fmt, args);
         va_end(args);
+        snprintf(msgBuf2, MSG_BUF_SIZE, "%s: %s", prefix, msgBuf);
+        Slogger::V(TAG, msgBuf2);
     }
     return NOERROR;
 }
@@ -131,10 +141,12 @@ ECode Log::V(
 {
     if (VERBOSE) {
         char msgBuf[MSG_BUF_SIZE];
-        snprintf(msgBuf, MSG_BUF_SIZE, "%s: %s", TO_CSTR(objectPrefix), fmt);
+        char msgBuf2[MSG_BUF_SIZE];
         va_list args;
         va_start(args, fmt);
-        Slogger::V(TAG, msgBuf, args);
+        vsnprintf(msgBuf, MSG_BUF_SIZE, fmt, args);
+        snprintf(msgBuf2, MSG_BUF_SIZE, "%s: %s", TO_CSTR(objectPrefix), msgBuf);
+        Slogger::V(TAG, msgBuf2);
         va_end(args);
     }
     return NOERROR;
@@ -146,10 +158,12 @@ ECode Log::W(
 {
     if (WARN) {
         char msgBuf[MSG_BUF_SIZE];
-        snprintf(msgBuf, MSG_BUF_SIZE, "%s: %s", prefix, fmt);
+        char msgBuf2[MSG_BUF_SIZE];
         va_list args;
         va_start(args, fmt);
-        Slogger::W(TAG, msgBuf, args);
+        vsnprintf(msgBuf, MSG_BUF_SIZE, fmt, args);
+        snprintf(msgBuf2, MSG_BUF_SIZE, "%s: %s", prefix, msgBuf);
+        Slogger::W(TAG, msgBuf2);
         va_end(args);
     }
     return NOERROR;
@@ -161,10 +175,12 @@ ECode Log::W(
 {
     if (WARN) {
         char msgBuf[MSG_BUF_SIZE];
-        snprintf(msgBuf, MSG_BUF_SIZE, "%s: %s", TO_CSTR(objectPrefix), fmt);
+        char msgBuf2[MSG_BUF_SIZE];
         va_list args;
         va_start(args, fmt);
-        Slogger::W(TAG, msgBuf, args);
+        vsnprintf(msgBuf, MSG_BUF_SIZE, fmt, args);
+        snprintf(msgBuf2, MSG_BUF_SIZE, "%s: %s", TO_CSTR(objectPrefix), msgBuf);
+        Slogger::W(TAG, msgBuf2);
         va_end(args);
     }
     return NOERROR;
@@ -176,10 +192,12 @@ ECode Log::E(
 {
     if (ERROR) {
         char msgBuf[MSG_BUF_SIZE];
-        snprintf(msgBuf, MSG_BUF_SIZE, "%s: %s", prefix, fmt);
+        char msgBuf2[MSG_BUF_SIZE];
         va_list args;
         va_start(args, fmt);
-        Slogger::E(TAG, msgBuf, args);
+        vsnprintf(msgBuf, MSG_BUF_SIZE, fmt, args);
+        snprintf(msgBuf2, MSG_BUF_SIZE, "%s: %s", prefix, msgBuf);
+        Slogger::E(TAG, msgBuf2);
         va_end(args);
     }
     return NOERROR;
@@ -191,10 +209,12 @@ ECode Log::E(
 {
     if (ERROR) {
         char msgBuf[MSG_BUF_SIZE];
-        snprintf(msgBuf, MSG_BUF_SIZE, "%s: %s", TO_CSTR(objectPrefix), fmt);
+        char msgBuf2[MSG_BUF_SIZE];
         va_list args;
         va_start(args, fmt);
-        Slogger::E(TAG, msgBuf, args);
+        vsnprintf(msgBuf, MSG_BUF_SIZE, fmt, args);
+        snprintf(msgBuf2, MSG_BUF_SIZE, "%s: %s", TO_CSTR(objectPrefix), msgBuf);
+        Slogger::E(TAG, msgBuf2);
         va_end(args);
     }
     return NOERROR;
@@ -205,10 +225,12 @@ ECode Log::Wtf(
     /* [in] */ const char * fmt, ...)
 {
     char msgBuf[MSG_BUF_SIZE];
-    snprintf(msgBuf, MSG_BUF_SIZE, "%s: %s", prefix, fmt);
+    char msgBuf2[MSG_BUF_SIZE];
     va_list args;
     va_start(args, fmt);
-    Slogger::E(TAG, msgBuf, args);
+    vsnprintf(msgBuf, MSG_BUF_SIZE, fmt, args);
+    snprintf(msgBuf2, MSG_BUF_SIZE, "%s: %s", prefix, msgBuf);
+    Slogger::E(TAG, msgBuf2);
     va_end(args);
     return E_ILLEGAL_STATE_EXCEPTION;
 }
@@ -218,10 +240,12 @@ ECode Log::Wtf(
     /* [in] */ const char * fmt, ...)
 {
     char msgBuf[MSG_BUF_SIZE];
-    snprintf(msgBuf, MSG_BUF_SIZE, "%s: %s", TO_CSTR(objectPrefix), fmt);
+    char msgBuf2[MSG_BUF_SIZE];
     va_list args;
     va_start(args, fmt);
-    Slogger::E(TAG, msgBuf, args);
+    vsnprintf(msgBuf, MSG_BUF_SIZE, fmt, args);
+    snprintf(msgBuf2, MSG_BUF_SIZE, "%s: %s", TO_CSTR(objectPrefix), msgBuf);
+    Slogger::E(TAG, msgBuf2);
     va_end(args);
     return E_ILLEGAL_STATE_EXCEPTION;
 }

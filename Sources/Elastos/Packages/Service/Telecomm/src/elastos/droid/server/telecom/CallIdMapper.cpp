@@ -8,6 +8,8 @@
 using Elastos::Droid::Utility::IPair;
 using Elastos::Core::ICharSequence;
 using Elastos::Core::StringUtils;
+using Elastos::Utility::ISet;
+using Elastos::Utility::IMapEntry;
 using Elastos::Utility::CHashMap;
 using Elastos::Utility::ICollection;
 using Elastos::Utility::IIterator;
@@ -98,19 +100,22 @@ ECode CallIdMapper::GetCallId(
     }
     ThreadUtil::CheckOnMainThread();
     // return mCalls->Inverse()->Get(call);
+    AutoPtr<ISet> st;
+    mCalls->GetEntrySet((ISet**)&st);
     AutoPtr<IIterator> it;
-    ICollection::Probe(mCalls)->GetIterator((IIterator**)&it);
+    st->GetIterator((IIterator**)&it);
     Boolean hasNext;
     while(it->HasNext(&hasNext), hasNext) {
         AutoPtr<IInterface> obj;
         it->GetNext((IInterface**)&obj);
-        AutoPtr<IPair> pair = IPair::Probe(obj);
-        obj = NULL;
-        pair->GetSecond((IInterface**)&obj);
-        if (ICall::Probe(obj) == call) {
-            obj = NULL;
-            pair ->GetFirst((IInterface**)&obj);
-            IObject::Probe(obj)->ToString(result);
+        AutoPtr<IMapEntry> entry = IMapEntry::Probe(obj);
+        AutoPtr<IInterface> v;
+        entry->GetValue((IInterface**)&v);
+
+        if (ICall::Probe(v) == call) {
+            AutoPtr<IInterface> k;
+            entry->GetKey((IInterface**)&k);
+            IObject::Probe(k)->ToString(result);
             break;
         }
     }

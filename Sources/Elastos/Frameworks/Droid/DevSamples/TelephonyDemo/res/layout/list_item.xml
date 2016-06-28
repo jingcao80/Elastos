@@ -1,0 +1,10 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TextView xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:layout_gravity="center_horizontal"
+    android:gravity="center_vertical"
+    android:textColor="#000000"
+    android:text="====人之初 性本善 性相近 习相远 苟不教 性乃迁 教之道 贵以专 昔孟母 择邻处 子不学 断机杼===="
+    android:background="#FFFFFF">
+</TextView>

@@ -100,7 +100,10 @@ ECode BluetoothManager::constructor(
     AutoPtr<IBluetoothAdapterHelper> bluetoothAdapterHelper;
     CBluetoothAdapterHelper::AcquireSingleton((IBluetoothAdapterHelper**)&bluetoothAdapterHelper);
     bluetoothAdapterHelper->GetDefaultAdapter((IBluetoothAdapter**)&mBluetoothAdapter);
-    mCallAudioManager = IWeakReference::Probe(TO_IINTERFACE(callAudioManager));
+
+    IWeakReferenceSource* source = IWeakReferenceSource::Probe(TO_IINTERFACE(callAudioManager));
+    source->GetWeakReference((IWeakReference**)&mCallAudioManager);
+
     if (mBluetoothAdapter != NULL) {
         Boolean bNoUse;
         mBluetoothAdapter->GetProfileProxy(context, mBluetoothProfileServiceListener,
@@ -230,7 +233,14 @@ ECode BluetoothManager::IsBluetoothAudioConnectedOrPending(
 
 ECode BluetoothManager::UpdateBluetoothState()
 {
-    ((CallAudioManager*) IObject::Probe(mCallAudioManager))->OnBluetoothStateChange(this);
+    AutoPtr<IInterface> ws;
+    mCallAudioManager->Resolve(EIID_IInterface, (IInterface**)&ws);
+    if (ws != NULL) {
+        ((CallAudioManager*) IObject::Probe(ws))->OnBluetoothStateChange(this);
+    } else {
+        Log::E("BluetoothManager", "mCallAudioManager is NULL");
+        assert(0);
+    }
     return NOERROR;
 }
 
@@ -288,7 +298,7 @@ ECode BluetoothManager::DumpBluetoothState()
                 Log::D("BluetoothManager", "= BluetoothHeadset.getCurrentDevice: %s", TO_CSTR(device));
                 Int32 state;
                 mBluetoothHeadset->GetConnectionState(device, &state);
-                Log::D("BluetoothManager", "= BluetoothHeadset.State: ", state);
+                Log::D("BluetoothManager", "= BluetoothHeadset.State: %d", state);
                 Boolean isAudioConnected;
                 mBluetoothHeadset->IsAudioConnected(device, &isAudioConnected);
                 Log::D("BluetoothManager", "= BluetoothHeadset audio connected: %d", isAudioConnected);
