@@ -119,90 +119,47 @@ EXTERN IHandler* myHandler;
 EXTERN NodeBridge* g_pNodeBridge;
 EXTERN NodeBridge** g_ppNodeBridge;
 
-    // interface ICallbackRunnable {
-    //     GetInstance(
-    //         [out] IInterface** instance);
-    // }
-
-
 class CallbackRunnable
     : public Object
     , public IRunnable
     , public ICallbackRunnable
 {
 public:
-
     CallbackRunnable(
         /* [in] */ IInterface* object,
         /* [in] */ IMethodInfo* method,
         /* [in] */ IArgumentList* argumentList,
         /* [in] */ pthread_mutex_t* mutex,
-        /* [in] */ Int32 tag);
+        /* [in] */ Int32 tag /*for debug only*/);
 
     ~CallbackRunnable();
 
     CAR_INTERFACE_DECL()
 
-    //CAR_OBJECT_DECL()
-
-    // CARAPI constructor(
-    //     /* [in] */ IInterface* object,
-    //     /* [in] */ IMethodInfo* method,
-    //     /* [in] */ IArgumentList* argumentList,
-    //     /* [in] */ pthread_mutex_t* mutex);
-
     CARAPI Run();
 
     CARAPI GetInstance(IInterface** ppInstance);
 
-    static void NodeMessage_FireCallback(void* payload) {
-        ALOGD("NodeMessage_FireCallback================begin================");
-
+    static void NodeMessage_FireCallback(void* payload)
+    {
         ECode ec = NOERROR;
 
         AutoPtr<IMessage> msg = (IMessage*)payload;
         AutoPtr<IRunnable> runnable;
         msg->GetCallback((IRunnable**)&runnable);
 
-        ALOGD("NodeMessage_FireCallback================1================");
-
-        IInterface* _interface = runnable->Probe(EIID_IInterface);
-        //IInterface* _object = runnable->Probe(EIID_IObject);
-        //CallbackRunnable* callback = (CallbackRunnable*)_interface;
-        CallbackRunnable* callback = *(CallbackRunnable**)&_interface;
-        //CallbackRunnable* callback = *(CallbackRunnable**)&runnable;
-
-
         ICallbackRunnable* _callbackRunnable = (ICallbackRunnable*)runnable->Probe(EIID_ICallbackRunnable);
+        CallbackRunnable* callbackInstance;
+        _callbackRunnable->GetInstance((IInterface**)&callbackInstance);
 
-        CallbackRunnable* callback_1;
-        _callbackRunnable->GetInstance((IInterface**)&callback_1);
-
-        ALOGD("NodeMessage_FireCallback================2================");
-        ALOGD("NodeMessage_FireCallback================2.0================mTag:%d",callback_1->mTag);
-        ALOGD("NodeMessage_FireCallback================2.1================mTag:%d",callback->mTag);
-
-        ALOGD("NodeMessage_FireCallback================2.2================check args");
-        IMethodInfo* _methodInfo = callback_1->mMethod.Get();
-        ALOGD("NodeMessage_FireCallback================2.3================mMethod:%p",_methodInfo);
-        IInterface* _object = callback_1->mObject.Get();
-        ALOGD("NodeMessage_FireCallback================2.4================mObject:%p",_object);
-        IArgumentList* _argumentList = callback_1->mArgumentList.Get();
-        ALOGD("NodeMessage_FireCallback================2.5================mArgumentList:%p",_argumentList);
-
-        //ec = callback->mMethod->Invoke(callback->mObject, callback->mArgumentList);
-        ec = callback_1->mMethod->Invoke(callback_1->mObject, callback_1->mArgumentList);
-
-        ALOGD("NodeMessage_FireCallback================3================");
-
+        ec = callbackInstance->mMethod->Invoke(callbackInstance->mObject, callbackInstance->mArgumentList);
         if (FAILED(ec)) {
             ALOGD("NodeMessage_FireCallback================Invoke failed================");
         }
-
-        ALOGD("NodeMessage_FireCallback================end================");
     }
 
-    static void NodeMessage_Send(void* payload) {
+    static void NodeMessage_Send(void* payload)
+    {
         AutoPtr<IHandler> target = myHandler;
         AutoPtr<IMessage> msg = (IMessage*)payload;
 
@@ -212,8 +169,6 @@ public:
 
     static void EnqueueUIMessage(void* obj, void* method, void* params)
     {
-        pthread_t mThread = pthread_self();
-
         AutoPtr<IMessage> msg;
         CMessage::New((IMessage**)&msg);
 
@@ -224,13 +179,10 @@ public:
         msg->SetWhat(MSG_RUNONUITHREAD);
 
         pthread_mutex_t* mutex;
-
         CallbackRunnable* callback = new CallbackRunnable(
             (IInterface*)obj, (IMethodInfo*)method, (IArgumentList*)params, (pthread_mutex_t*)mutex, 258);
         IRunnable* runnable = IRunnable::Probe(callback);
         msg->SetCallback(runnable);
-
-        ALOGD("EnqueueUIMessage======================mTag:%d",callback->mTag);
 
         g_pNodeBridge->vt->Enqueue(g_pNodeBridge, obj, NodeMessage_Send, NodeMessage_FireCallback, (void*)msg);
 
@@ -245,7 +197,6 @@ private:
     static CallbackRunnable* mInstances[];
 
     Int32 mMyLock;
-
     Int32 mTag;
 };
 
@@ -259,7 +210,7 @@ public:
     {
     public:
         _Thread(
-            /* [in] */ const String& packageName)
+            const String& packageName)
             : mPackageName(packageName)
         {
             Thread::constructor(String("CTestEventListener::_Thread"));
@@ -271,7 +222,9 @@ public:
         String mPackageName;
     };
 
-    static void InitBridge(const String& packageName) {
+    static void InitBridge(
+        /* [in] */ const String& packageName)
+    {
         AutoPtr<_Thread> t = new _Thread(packageName);
 
         pthread_mutex_t* pMutex = &mMutex;
@@ -281,16 +234,20 @@ public:
 
         t->Start();
 
-        //todo: use wait()
+        //TODO: use condition()
         pthread_mutex_lock(pMutex);
         pthread_mutex_unlock(pMutex);
 
         return;
     };
 
-    static void RegisterActivity(const String& packageName, const String& activityName, IInterface* activityInstance, IActivityListener** activityListener, IHandler* activityHandler) {
-        ALOGD("CTestEventListener::RegisterActivity================begin================");
-
+    static void RegisterActivity(
+        /* [in] */ const String& packageName,
+        /* [in] */ const String& activityName,
+        /* [in] */ IInterface* activityInstance,
+        /* [out] */ IActivityListener** activityListener,
+        /* [in] */ IHandler* activityHandler)
+    {
         if (!CTestEventListener::mNodeInit) {
             CTestEventListener::InitBridge(packageName);
             CTestEventListener::mNodeInit = true;
@@ -298,20 +255,50 @@ public:
 
         Boolean result = false;
         if(CTestEventListener::mNodeBridgeListener) {
-            ALOGD("CTestEventListener::RegisterActivity================mNodeBridgeListener OnRegistActivity.begin================");
-
-            CTestEventListener::mNodeBridgeListener->OnRegistActivity(
+            ECode ec = CTestEventListener::mNodeBridgeListener->OnRegistActivity(
                 packageName, activityName, activityInstance, (Int32)activityListener, activityHandler, &result);
-
-            ALOGD("CTestEventListener::RegisterActivity================mNodeBridgeListener OnRegistActivity.end================");
-        }
-        else {
-            ALOGD("CTestEventListener::RegisterActivity================mNodeBridgeListener is null================");
+            if (FAILED(ec)) {
+                ALOGD("NodeMessage_FireCallback================OnRegistActivity failed================");
+            }
         }
 
-        ALOGD("CTestEventListener::RegisterActivity================end================");
+        //TODO: deal with result
+    }
 
-        //g_pNodeBridge->vt->RegisterActivity(packageName.string(), activityName.string());
+    static ECode Require(
+        /* [in] */ const String& moduleName,
+        /* [in] */ const String& className,
+        /* [out] */ IInterface** object)
+    {
+        assert(object != NULL);
+
+        ECode ec = NOERROR;
+
+        AutoPtr<IModuleInfo> moduleInfo;
+        ec = _CReflector_AcquireModuleInfo(moduleName, (IModuleInfo**)&moduleInfo);
+        if (FAILED(ec)) {
+            ALOGD("Acquire \"%s\" module info failed!\n", moduleName.string());
+            return ec;
+        }
+
+        AutoPtr<IClassInfo> classInfo;
+        ec = moduleInfo->GetClassInfo(className, (IClassInfo**)&classInfo);
+        if (FAILED(ec)) {
+            ALOGD("Acquire \"%s\" class info failed!\n", className.string());
+            return ec;
+        }
+
+        AutoPtr<IInterface> testObject;
+        ec = classInfo->CreateObject((IInterface**)&testObject);
+        if (FAILED(ec)) {
+            ALOGD("Create object failed!\n");
+            return ec;
+        }
+
+        *object = testObject;
+        REFCOUNT_ADD(*object);
+
+        return ec;
     }
 
 public:
@@ -335,28 +322,24 @@ public:
     CARAPI Unlock();
 
     CARAPI SetActivityListener(
-        ///* [in] */ IActivityListener** ppActivityListener,
-        /* [in] */ Int32 ppActivityListener,
+        /* [in] */ Int32 ppActivityListener,    //IActivityListener**
         /* [in] */ IActivityListener* pJsActivityListener);
 
     CARAPI SetNodeBridgeListener(
         /* [in] */ INodeBridgeListener* pNodeBridgeListener);
-
-    CARAPI SetNodeBridge(
-        /* [in] */ Int32 from,
-        /* [in] */ Int32 threadIndex);
 
 private:
     void (*cbFunction)(void*);
 public:
     static pthread_mutex_t mMutex;
 
-    //String mPackageName;
-    //String mActivityName;
-
     static AutoPtr<INodeBridgeListener> mNodeBridgeListener;
 
     static bool mNodeInit;
+
+    CARAPI SetNodeBridge(
+        /* [in] */ Int32 from,
+        /* [in] */ Int32 threadIndex);
 };
 
 }   //namespace JSPkgName

@@ -42,10 +42,7 @@ CallbackRunnable::CallbackRunnable(
     CallbackRunnable::mInstances[0] = this;
 }
 
-//CAR_INTERFACE_IMPL(CallbackRunnable, Object, IRunnable);
 CAR_INTERFACE_IMPL_2(CallbackRunnable, Object, IRunnable, ICallbackRunnable);
-
-//CAR_OBJECT_IMPL(CallbackRunnable)
 
 ECode CallbackRunnable::Run()
 {
@@ -81,7 +78,6 @@ ECode CTestEventListener::_Thread::Run()
     Int32 length_0 = sizeof(processName);
     snprintf(argv[0], length_0 + 1, "%s", processName);
 
-    //char jsFileName[] = "/data/temp/node/elastos_node.js";
     char jsFileName[] = "/data/temp/node/Common/js/elastos_node.js";
     Int32 length_1 = sizeof(jsFileName);
     argv[1] = argv[0] + length_0;
@@ -109,7 +105,6 @@ ECode CTestEventListener::constructor()
 {
     Logger::I(DBG_TAG, " >> constructor()");
     return Object::constructor();
-    //return NOERROR;
 }
 
 ECode CTestEventListener::OnNodeEvent(
@@ -144,7 +139,7 @@ ECode CTestEventListener::Unlock()
 {
     pthread_mutex_t* pMutex = &CTestEventListener::mMutex;
     pthread_mutex_unlock(pMutex);
-   return NOERROR;
+    return NOERROR;
 }
 
 ECode CTestEventListener::SetActivityListener(

@@ -1,4 +1,3 @@
-
 #ifndef __CAlbumActivity_H__
 #define __CAlbumActivity_H__
 
@@ -67,14 +66,7 @@ public:
             constructor(true);
         };
 
-        //~MyHandler()
-        //{
-        //    //TODO
-        //};
-
         CAR_INTERFACE_DECL()
-
-        //CAR_OBJECT_DECL()
 
         virtual CARAPI HandleMessage(
             /* [in] */ IMessage* msg);
@@ -95,8 +87,8 @@ public:
         /* [in] */ IView* v,
         /* [in] */ IContextMenuInfo* menuInfo);
 
-    CARAPI OnClickPopupWindow(
-        /* [in] */ IView* v);
+   CARAPI OnClickPopupWindow(
+       /* [in] */ IView* v);
 
 protected:
     CARAPI OnCreate(
@@ -120,11 +112,6 @@ private:
         /* [in] */ Int32 requestCode,
         /* [in] */ Int32 resultCode,
         /* [in] */ IIntent *data);
-
-    CARAPI Require(
-        /* [in] */ const String& moduleName,
-        /* [in] */ const String& className,
-        /* [out] */ IInterface** object);
 
 private:
     static const String TAG;

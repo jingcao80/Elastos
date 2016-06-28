@@ -1,4 +1,3 @@
-
 #include "CAlbumActivity.h"
 
 #include "CTestEventListener.h"
@@ -13,8 +12,6 @@ namespace Elastos {
 namespace DevSamples {
 namespace Node {
 namespace JSPkgName {
-
-EXTERN const _ELASTOS ClassID ECLSID_CAlbumActivity;
 
 EXTERN NodeBridge* g_pNodeBridge;
 EXTERN NodeBridge** g_ppNodeBridge;
@@ -66,16 +63,15 @@ ECode JSActName::OnCreate(
     AutoPtr<IInterface> helper;
     String _helperEcoName = _pkgPath + _nspName + _pkgName + String(".Helper.eco");
     String _helperClsName = _nspName + _pkgName + String(".") + mActivityName + String("Helper");
-    ECode ec = Require(_helperEcoName, _helperClsName, (IInterface**)&helper);
+    ECode ec = CTestEventListener::Require(_helperEcoName, _helperClsName, (IInterface**)&helper);
+
     if (FAILED(ec)) {
         ALOGD("OnCreate========create Helper failed!======nodejs module will be used");
-
         AutoPtr<IInterface> _this = this->Probe(EIID_IInterface);
         CTestEventListener::RegisterActivity(mPackageName, mActivityName, _this, (IActivityListener**)&mListener, mHandler.Get());
     }
     else {
         ALOGD("OnCreate========create Helper success!======C++ epk will be used");
-
         mListener = IActivityListener::Probe(helper);
     }
 
@@ -151,54 +147,9 @@ ECode JSActName::OnCreateContextMenu(
 }
 
 ECode JSActName::OnClickPopupWindow(
-    /* [in] */ IView* view)
+   /* [in] */ IView* view)
 {
-    return NOERROR;
-}
-
-ECode JSActName::Require(
-    /* [in] */ const String& moduleName,
-    /* [in] */ const String& className,
-    /* [out] */ IInterface** object)
-{
-    ALOGD("==== File: %s, Function: %s ====", __FILE__, __FUNCTION__);
-    assert(object != NULL);
-
-    AutoPtr<IModuleInfo> moduleInfo;
-    ECode ec = _CReflector_AcquireModuleInfo(
-            moduleName, (IModuleInfo**)&moduleInfo);
-    if (FAILED(ec)) {
-        ALOGD("Acquire \"%s\" module info failed!\n", moduleName.string());
-        return ec;
-    }
-    else {
-        ALOGD("Acquire \"%s\" module info success!\n", moduleName.string());
-    }
-
-    AutoPtr<IClassInfo> classInfo;
-    ec = moduleInfo->GetClassInfo(
-            className, (IClassInfo**)&classInfo);
-    if (FAILED(ec)) {
-        ALOGD("Acquire \"%s\" class info failed!\n", className.string());
-        return ec;
-    }
-    else {
-        ALOGD("Acquire \"%s\" class info success!\n", className.string());
-    }
-
-    AutoPtr<IInterface> testObject;
-    ec = classInfo->CreateObject((IInterface**)&testObject);
-    if (FAILED(ec)) {
-        ALOGD("Create object failed!\n");
-        return ec;
-    }
-    else {
-        ALOGD("Create object success!\n");
-    }
-
-    *object = testObject;
-    REFCOUNT_ADD(*object);
-    return NOERROR;
+   return NOERROR;
 }
 
 } // namespace JSPkgName
