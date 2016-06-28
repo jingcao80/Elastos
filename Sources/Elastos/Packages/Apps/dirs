@@ -1,5 +1,5 @@
 
-DIRS += arity
+DIRS += Arity
 DIRS += Calculator
 DIRS += Launcher2
 #DIRS += PackageInstaller

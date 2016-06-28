@@ -454,6 +454,10 @@
 > Elastos/Packages/Service/Telecomm Elastos.Droid.Server.Telecom.car
 > Elastos/Packages/Service/Telecomm
 
+# ==== buid Packages/Apps/Arity ====
+> Elastos/Packages/Apps/Arity Org.Javia.Arity.car
+> Elastos/Packages/Apps/Arity
+
 # ==== buid Packages/Apps/Calculator ====
 > Elastos/Packages/Apps/Calculator Elastos.Droid.Calculator2.car
 > Elastos/Packages/Apps/Calculator
