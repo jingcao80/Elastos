@@ -59,10 +59,12 @@ module.exports = function(aoElastos, aoActivity){
                 }
                 else {
                     var res = oActivity.GetResources();
-                    var bitmapDrawable = Droid_New("Elastos.Droid.Graphics.Drawable.CBitmapDrawable", res, null);
+                    //var bitmapDrawable = Droid_New("Elastos.Droid.Graphics.Drawable.CBitmapDrawable", res, null);
+                    var bitmapDrawable = Droid_New("Elastos.Droid.Graphics.Drawable.CBitmapDrawable", res);
                     itemLayout.SetBackgroundDrawable(bitmapDrawable);
 
-                    var viewParent2 = viewParent.GetParentEx();
+                    //var viewParent2 = viewParent.GetParentEx();
+                    var viewParent2 = viewParent.GetParent();
                     var adapterView = viewParent2;
                     var index = adapterView.GetPositionForView(aoView);
 
@@ -73,9 +75,9 @@ module.exports = function(aoElastos, aoActivity){
                         var folderPath = sourcePath.substring(0,lastIndex);
 
                         var intent = Droid_New("Elastos.Droid.Content.CIntent");
-                        intent.SetClassNameEx("JSGallery", "JSGallery.CBrowserActivity");
-                        intent.PutStringExtra(DataSourceHelper.SOURCE_PATH, folderPath);
-                        intent.PutStringExtra(DataSourceHelper.SOURCE_DESC, entry.desc);
+                        intent.SetClassName("Elastos.DevSamples.Node.JSGallery", "Elastos.DevSamples.Node.JSGallery.CBrowserActivity");
+                        intent.PutExtra(DataSourceHelper.SOURCE_PATH, folderPath);
+                        intent.PutExtra(DataSourceHelper.SOURCE_DESC, entry.desc);
 
                         var ec = oActivity.StartActivity(intent)
                         if (ec) {
@@ -335,7 +337,7 @@ module.exports = function(aoElastos, aoActivity){
                     else if (typeof(aoView.SetOnTouchListener) == 'function') {  //ILinearLayout
                         elog('==================SetViewValue.LinearLayout.begin=============');
 
-                        return; //TODO
+                        //return; //TODO
 
                         _SetFolerLayoutListener(aoView);
                         // aoView.SetOnTouchListener({
