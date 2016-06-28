@@ -132,6 +132,12 @@ module
             [in] IView* v);
     }
 
+    class CTestEventListener {
+        constructor();
+
+        interface ITestEventListener;
+    }
+
     class CAlbumActivity {
         constructor();
 
@@ -149,10 +155,38 @@ module
         interface IActivityOne;
     }
 
-    class CTestEventListener {
+    class CAboutActivity {
         constructor();
 
-        interface ITestEventListener;
+        interface IActivity;
+        interface IContext;
+        interface IContextThemeWrapper;
+        interface ILayoutInflaterFactory;
+        interface ILayoutInflaterFactory2;
+        interface IWindowCallback;
+        interface IKeyEventCallback;
+        interface IViewOnCreateContextMenuListener;
+        interface IComponentCallbacks;
+        interface IComponentCallbacks2;
+        interface IOnWindowDismissedCallback;
+        interface IActivityOne;
+    }
+
+    class CBrowserActivity {
+        constructor();
+
+        interface IActivity;
+        interface IContext;
+        interface IContextThemeWrapper;
+        interface ILayoutInflaterFactory;
+        interface ILayoutInflaterFactory2;
+        interface IWindowCallback;
+        interface IKeyEventCallback;
+        interface IViewOnCreateContextMenuListener;
+        interface IComponentCallbacks;
+        interface IComponentCallbacks2;
+        interface IOnWindowDismissedCallback;
+        interface IActivityOne;
     }
 
     } // namespace JSGallery
