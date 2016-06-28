@@ -240,6 +240,8 @@ private:
 public:
     Calculator();
 
+    CARAPI constructor();
+
     virtual ~Calculator();
 
     CAR_INTERFACE_DECL()

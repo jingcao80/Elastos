@@ -23,12 +23,7 @@ namespace Calculator2 {
 //----------------------------------------------------------------
 //           CalculatorEditText::MyActionModeCallback
 //----------------------------------------------------------------
-CalculatorEditText::MyActionModeCallback::MyActionModeCallback(
-    /* [in] */ CalculatorEditText* host)
-    : mHost(host)
-{}
-
-CalculatorEditText::MyActionModeCallback::~MyActionModeCallback()
+CalculatorEditText::MyActionModeCallback::MyActionModeCallback()
 {}
 
 CAR_INTERFACE_IMPL(CalculatorEditText::MyActionModeCallback, Object, IActionModeCallback)
@@ -72,9 +67,20 @@ ECode CalculatorEditText::MyActionModeCallback::OnPrepareActionMode(
 //----------------------------------------------------------------
 //           CalculatorEditText
 //----------------------------------------------------------------
+
+AutoPtr<CalculatorEditText::MyActionModeCallback> CalculatorEditText::InitCallback()
+{
+    return new MyActionModeCallback();
+}
+const AutoPtr<CalculatorEditText::MyActionModeCallback> CalculatorEditText::NO_SELECTION_ACTION_MODE_CALLBACK = InitCallback();
+
 CalculatorEditText::CalculatorEditText()
     : mWidthConstraint(-1)
-{}
+{
+    AutoPtr<IPaint> mTempPaint;
+    CTextPaint::New((IPaint**)&mTempPaint);
+    CRect::New((IRect**)&mTempRect);
+}
 
 CalculatorEditText::~CalculatorEditText()
 {}
@@ -84,11 +90,6 @@ CAR_INTERFACE_IMPL(CalculatorEditText, EditText, ICalculatorEditText)
 ECode CalculatorEditText::constructor(
     /* [in] */ IContext* context)
 {
-    NO_SELECTION_ACTION_MODE_CALLBACK = new MyActionModeCallback(this);
-    AutoPtr<IPaint> mTempPaint;
-    CTextPaint::New((IPaint**)&mTempPaint);
-    AutoPtr<IRect> mTempRect;
-    CRect::New((IRect**)&mTempRect);
     return constructor(context, NULL);
 }
 
@@ -160,14 +161,14 @@ ECode CalculatorEditText::OnTouchEvent(
         CancelLongPress();
     }
 
-    return OnTouchEvent(event, result);
+    return EditText::OnTouchEvent(event, result);
 }
 
 void CalculatorEditText::OnMeasure(
     /* [in] */ Int32 widthMeasureSpec,
     /* [in] */ Int32 heightMeasureSpec)
 {
-    OnMeasure(widthMeasureSpec, heightMeasureSpec);
+    EditText::OnMeasure(widthMeasureSpec, heightMeasureSpec);
 
     Int32 paddingLeft;
     GetPaddingLeft(&paddingLeft);
@@ -188,7 +189,7 @@ ECode CalculatorEditText::OnSaveInstanceState(
     /* [out] */ IParcelable* result)
 {
     VALIDATE_NOT_NULL(result);
-    AutoPtr<IParcelable> pl = TextView::OnSaveInstanceState();
+    AutoPtr<IParcelable> pl = EditText::OnSaveInstanceState();
 
     // EditText will freeze any text with a selection regardless of getFreezesText() ->
     // return null to prevent any state from being preserved at the instance level.
@@ -202,7 +203,7 @@ void CalculatorEditText::OnTextChanged(
     /* [in] */ Int32 lengthBefore,
     /* [in] */ Int32 lengthAfter)
 {
-    OnTextChanged(text, start, lengthBefore, lengthAfter);
+    EditText::OnTextChanged(text, start, lengthBefore, lengthAfter);
 
     Int32 textLength;
     text->GetLength(&textLength);
@@ -227,7 +228,7 @@ ECode CalculatorEditText::SetTextSize(
 {
     Float oldTextSize;
     GetTextSize(&oldTextSize);
-    SetTextSize(unit, size);
+    EditText::SetTextSize(unit, size);
 
     Float fvol;
     if (mOnTextSizeChangeListener != NULL && (GetTextSize(&fvol), fvol != oldTextSize)) {
@@ -291,8 +292,7 @@ ECode CalculatorEditText::GetCompoundPaddingTop(
     // but don't remove more than the available top padding otherwise clipping may occur.
     AutoPtr<ITextPaint> tp;
     GetPaint((ITextPaint**)&tp);
-    IPaint::Probe(tp)->GetTextBounds(String("H"), 0, 1, mTempRect.Get());
-
+    IPaint::Probe(tp)->GetTextBounds(String("H"), 0, 1, mTempRect);
     AutoPtr<IPaintFontMetricsInt> fontMetrics;
     IPaint::Probe(tp)->GetFontMetricsInt((IPaintFontMetricsInt**)&fontMetrics);
     Int32 height;
@@ -301,7 +301,7 @@ ECode CalculatorEditText::GetCompoundPaddingTop(
     fontMetrics->GetAscent(&ascent);
     Int32 paddingOffset = -(ascent + height);
     Int32 top;
-    GetCompoundPaddingTop(&top);
+    EditText::GetCompoundPaddingTop(&top);
     Int32 paddingTop;
     GetPaddingTop(&paddingTop);
     *result = top - Elastos::Core::Math::Min(paddingTop, paddingOffset);
@@ -324,7 +324,7 @@ ECode CalculatorEditText::GetCompoundPaddingBottom(
     Int32 descent;
     fontMetrics->GetDescent(&descent);
     Int32 vbottom;
-    GetCompoundPaddingBottom(&vbottom);
+    EditText::GetCompoundPaddingBottom(&vbottom);
     *result = vbottom - Elastos::Core::Math::Min(bottom, descent);
     return NOERROR;
 }

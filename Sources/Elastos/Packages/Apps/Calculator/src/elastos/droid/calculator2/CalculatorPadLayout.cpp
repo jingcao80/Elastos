@@ -44,7 +44,7 @@ ECode CalculatorPadLayout::constructor(
     /* [in] */ IAttributeSet* attrs,
     /* [in] */ Int32 defStyle)
 {
-    constructor(context, attrs, defStyle);
+    ViewGroup::constructor(context, attrs, defStyle);
 
     AutoPtr<ArrayOf<Int32> > arr = ArrayOf<Int32>::Alloc(2);
     (*arr)[0] = Elastos::Droid::R::attr::rowCount;
@@ -75,16 +75,16 @@ ECode CalculatorPadLayout::OnLayout(
     /* [in] */ Int32 bottom)
 {
     Int32 paddingLeft;
-    IView::Probe(this)->GetPaddingLeft(&paddingLeft);
+    GetPaddingLeft(&paddingLeft);
     Int32 paddingRight;
-    IView::Probe(this)->GetPaddingRight(&paddingRight);
+    GetPaddingRight(&paddingRight);
     Int32 paddingTop;
-    IView::Probe(this)->GetPaddingTop(&paddingTop);
+    GetPaddingTop(&paddingTop);
     Int32 paddingBottom;
-    IView::Probe(this)->GetPaddingBottom(&paddingBottom);
+    GetPaddingBottom(&paddingBottom);
 
     Int32 ld;
-    IView::Probe(this)->GetLayoutDirection(&ld);
+    GetLayoutDirection(&ld);
     Boolean isRTL = ld == IView::LAYOUT_DIRECTION_RTL;
     Int32 columnWidth =
             Elastos::Core::Math::Round((Float) (right - left - paddingLeft - paddingRight)) / mColumnCount;
@@ -93,12 +93,11 @@ ECode CalculatorPadLayout::OnLayout(
 
     Int32 rowIndex = 0, columnIndex = 0;
     Int32 count;
-    IViewGroup::Probe(this)->GetChildCount(&count);
-    AutoPtr<IView> childView;
+    GetChildCount(&count);
     AutoPtr<IViewGroupLayoutParams> lp;
     for (Int32 childIndex = 0; childIndex < count; ++childIndex) {
-        childView = NULL;
-        IViewGroup::Probe(this)->GetChildAt(childIndex, (IView**)&childView);
+        AutoPtr<IView> childView;
+        GetChildAt(childIndex, (IView**)&childView);
         Int32 visibility;
         if (childView->GetVisibility(&visibility), visibility == IView::GONE) {
             continue;
@@ -139,7 +138,7 @@ ECode CalculatorPadLayout::GenerateLayoutParams(
 {
     VALIDATE_NOT_NULL(result);
     AutoPtr<IContext> context;
-    IView::Probe(this)->GetContext((IContext**)&context);
+    GetContext((IContext**)&context);
     AutoPtr<ViewGroup::MarginLayoutParams> mlp;
     mlp = new ViewGroup::MarginLayoutParams();
     mlp->constructor(context.Get(), attrs);

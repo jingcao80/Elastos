@@ -15,7 +15,7 @@
   limitations under the License.
   -->
 
-<com.android.calculator2.CalculatorPadLayout
+<Elastos.Droid.Calculator2.CCalculatorPadLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
     android:id="@+id/pad_operator"
     style="@style/PadLayoutStyle.Operator"
@@ -66,4 +66,4 @@
         android:onClick="onButtonClick"
         android:text="@string/op_add" />
 
-</com.android.calculator2.CalculatorPadLayout>
+</Elastos.Droid.Calculator2.CCalculatorPadLayout>

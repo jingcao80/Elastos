@@ -320,12 +320,18 @@ Calculator::Calculator()
 Calculator::~Calculator()
 {}
 
+ECode Calculator::constructor()
+{
+    Logger::I("Calculator", " >> constructor()");
+    return Activity::constructor();
+}
+
 CAR_INTERFACE_IMPL_4(Calculator, Activity, IOnTextSizeChangeListener, IEvaluateCallback, IViewOnLongClickListener, ICalculator)
 
 ECode Calculator::OnCreate(
     /* [in] */ IBundle* savedInstanceState)
 {
-    OnCreate(savedInstanceState);
+    Activity::OnCreate(savedInstanceState);
     SetContentView(R::layout::activity_calculator);
 
     mDisplayView = FindViewById(R::id::display);
@@ -335,8 +341,7 @@ ECode Calculator::OnCreate(
     mDeleteButton = FindViewById(R::id::del);
     mClearButton = FindViewById(R::id::clr);
 
-    AutoPtr<IView> tmpView;
-    tmpView = FindViewById(R::id::pad_numeric);
+    AutoPtr<IView> tmpView = FindViewById(R::id::pad_numeric);
     tmpView->FindViewById(R::id::eq, (IView**)&mEqualButton);
     Int32 visibility;
     mEqualButton->GetVisibility(&visibility);
@@ -388,7 +393,7 @@ ECode Calculator::OnSaveInstanceState(
         mCurrentAnimator->Cancel();
     }
 
-    OnSaveInstanceState(outState);
+    Activity::OnSaveInstanceState(outState);
 
     outState->PutInt32(KEY_CURRENT_STATE, mCurrentState);
     AutoPtr<ICharSequence> cs;
@@ -452,7 +457,7 @@ ECode Calculator::OnBackPressed()
 
 ECode Calculator::OnUserInteraction()
 {
-    OnUserInteraction();
+    Activity::OnUserInteraction();
 
     // If there's an animation in progress, cancel it so the user interaction can be handled
     // immediately.

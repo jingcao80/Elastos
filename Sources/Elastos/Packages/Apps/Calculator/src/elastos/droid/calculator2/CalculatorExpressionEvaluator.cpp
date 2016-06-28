@@ -7,6 +7,7 @@
 using Elastos::Core::StringUtils;
 using Elastos::Core::CoreUtils;
 using Elastos::Core::IDouble;
+using Org::Javia::Arity::CSymbols;
 
 namespace Elastos {
 namespace Droid {
@@ -26,8 +27,7 @@ CAR_INTERFACE_IMPL(CalculatorExpressionEvaluator, Object, ICalculatorExpressionE
 ECode CalculatorExpressionEvaluator::constructor(
     /* [in] */ ICalculatorExpressionTokenizer* tokenizer)
 {
-    assert(0 && "TODO");
-    // mSymbols = new Symbols();
+    CSymbols::New((ISymbols**)&mSymbols);
     mTokenizer = tokenizer;
     return NOERROR;
 }
@@ -64,8 +64,7 @@ ECode CalculatorExpressionEvaluator::Evaluate(
 
     // try {
         Double result;
-        assert(0 && "TODO"); // Symbols
-        // result =  mSymbols.eval(strexpr);
+        mSymbols->Eval(strexpr, &result);
         Boolean flag = FALSE;
         if ((CoreUtils::Convert(result)->IsNaN(&flag), flag)) {
             callback->OnEvaluate(strexpr, String(NULL), R::string::error_nan);
