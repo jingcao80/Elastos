@@ -496,7 +496,7 @@ void BroadcastQueue::DeliverToRegisteredReceiverLocked(
             skip = TRUE;
         }
     }
-    if (!skip && !r->mRequiredPermission.IsNull()) {
+    if (!skip && !r->mRequiredPermission.IsNull() && filter->mReceiverList != NULL) {
         Int32 perm = mService->CheckComponentPermission(r->mRequiredPermission,
                 filter->mReceiverList->mPid, filter->mReceiverList->mUid, -1, TRUE);
         if (perm != IPackageManager::PERMISSION_GRANTED) {
@@ -511,7 +511,7 @@ void BroadcastQueue::DeliverToRegisteredReceiverLocked(
         }
     }
 
-    if (r->mAppOp != IAppOpsManager::OP_NONE) {
+    if (r->mAppOp != IAppOpsManager::OP_NONE && filter->mReceiverList != NULL) {
         Int32 mode;
         mService->mAppOpsService->NoteOperation(r->mAppOp,
                 filter->mReceiverList->mUid, filter->mPackageName, &mode);
@@ -528,7 +528,7 @@ void BroadcastQueue::DeliverToRegisteredReceiverLocked(
         //         r->mCallingPid, r->mResolvedType, filter->mReceiverList->mUid);
     }
 
-    if (filter->mReceiverList->mApp == NULL || filter->mReceiverList->mApp->mCrashing) {
+    if (filter->mReceiverList == NULL || filter->mReceiverList->mApp == NULL || filter->mReceiverList->mApp->mCrashing) {
         Slogger::W(TAG, "Skipping deliver [%s] %s to %s: process crashing",
             mQueueName.string(), TO_CSTR(r), TO_CSTR(filter->mReceiverList));
         skip = TRUE;
