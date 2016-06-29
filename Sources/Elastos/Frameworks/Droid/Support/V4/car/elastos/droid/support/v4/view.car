@@ -1,0 +1,20 @@
+
+module
+{
+    merge("view/PagerAdapter.car");
+    merge("view/ViewPager.car");
+
+    namespace Elastos {
+    namespace Droid {
+    namespace Support {
+    namespace V4 {
+    namespace View {
+
+
+
+    } // View
+    } // namespace V4
+    } // namespace Support
+    } // namepsace Droid
+    } // namespace Elastos
+}

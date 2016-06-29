@@ -1,0 +1,11 @@
+
+module
+{
+    importlib("Elastos.CoreLibrary.eco");
+    importlib("Elastos.Droid.Core.eco");
+
+    submodule Elastos.Droid.Support.V4.View {
+    merge("../../../../../car/elastos/droid/support/v4/view.car");
+    }
+
+}
