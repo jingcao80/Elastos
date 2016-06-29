@@ -64,8 +64,6 @@ namespace Volume {
 // ZenModePanel::ZenCallback
 //------------------------------------------------------------------------------------------------------------
 
-CAR_INTERFACE_IMPL(ZenModePanel::ZenCallback, Object, IZenModeControllerCallback)
-
 ZenModePanel::ZenCallback::ZenCallback(
     /* [in] */ ZenModePanel* host)
     : mHost(host)
@@ -101,22 +99,6 @@ ECode ZenModePanel::ZenCallback::OnExitConditionChanged(
     AutoPtr<IMessage> msg;
     mHost->mHandler->ObtainMessage(H::EXIT_CONDITION_CHANGED, exitCondition, (IMessage**)&msg);
     msg->SendToTarget();
-    return NOERROR;
-}
-
-ECode ZenModePanel::ZenCallback::OnNextAlarmChanged()
-{
-    return NOERROR;
-}
-
-ECode ZenModePanel::ZenCallback::OnZenAvailableChanged(
-    /* [in] */ Boolean available)
-{
-    return NOERROR;
-}
-
-ECode ZenModePanel::ZenCallback::OnEffectsSupressorChanged()
-{
     return NOERROR;
 }
 
@@ -487,7 +469,7 @@ ECode ZenModePanel::MyOCL3::OnClick(
 //------------------------------------------------------------------------------------------------------------
 
 const String ZenModePanel::TAG("ZenModePanel");
-const Boolean ZenModePanel::DEBUG = Logger::IsLoggable(TAG.string(), Logger::___DEBUG);
+const Boolean ZenModePanel::DEBUG = TRUE;//Logger::IsLoggable(TAG.string(), Logger::___DEBUG);
 
 const Int32 ZenModePanel::SECONDS_MS;
 const Int32 ZenModePanel::MINUTES_MS;
@@ -782,9 +764,7 @@ Boolean ZenModePanel::SameConditionId(
         AutoPtr<IUri> id1, id2;
         lhs->GetId((IUri**)&id1);
         rhs->GetId((IUri**)&id2);
-        Boolean e;
-        IObject::Probe(id1)->Equals(id2, &e);
-        return e;
+        return Object::Equals(id1, id2);
     }
     return FALSE;
 }
@@ -793,8 +773,10 @@ AutoPtr<ICondition> ZenModePanel::Copy(
     /* [in] */ ICondition* condition)
 {
     AutoPtr<ICondition> c;
-    condition->Copy((ICondition**)&c);
-    return condition == NULL ? NULL : c;
+    if (condition != NULL) {
+        condition->Copy((ICondition**)&c);
+    }
+    return c;
 }
 
 void ZenModePanel::RefreshExitConditionText()
@@ -1212,7 +1194,7 @@ void ZenModePanel::OnClickTimeButton(
         AutoPtr<ISystem> sys;
         CSystem::AcquireSingleton((ISystem**)&sys);
         Int64 now;
-        sys->GetCurrentTimeMillis(&time);
+        sys->GetCurrentTimeMillis(&now);
         for (Int32 i = 0; i < N; i++) {
             Int32 j = up ? i : N - 1 - i;
             const Int32 bucketMinutes = (*MINUTE_BUCKETS)[j];

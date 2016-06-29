@@ -192,7 +192,7 @@ ECode CSettingsObserver::OnChange(
     }
     Int32 mode = 0;
     Elastos::Droid::Provider::Settings::Global::GetInt32(cr,
-            ISettingsGlobal::ZEN_MODE, ISettingsGlobal::ZEN_MODE_OFF, &mode);
+        ISettingsGlobal::ZEN_MODE, ISettingsGlobal::ZEN_MODE_OFF, &mode);
     Logger::I(TAG, " >> CSettingsObserver::OnChange: ISettingsGlobal::ZEN_MODE_OFF:%d", mode);
     mHost->SetZenMode(mode);
 
@@ -1456,7 +1456,6 @@ void BaseStatusBar::DismissKeyguardThenExecute(
     /* [in] */ IKeyguardHostViewOnDismissAction* action,
     /* [in] */ Boolean afterKeyguardGone)
 {
-    Logger::D(TAG, " >> %s OnDismiss: %d", TO_CSTR(action), afterKeyguardGone);
     Boolean bval;
     action->OnDismiss(&bval);
 }
@@ -1917,7 +1916,6 @@ void BaseStatusBar::SendCloseSystemWindows(
 void BaseStatusBar::ShowRecents(
     /* [in] */ Boolean triggeredFromAltTab)
 {
-    Logger::I(TAG, " >>> ShowRecents");
     if (mRecents != NULL) {
         SendCloseSystemWindows(mContext, SYSTEM_DIALOG_REASON_RECENT_APPS);
         AutoPtr<IView> view = GetStatusBarView();
@@ -2077,7 +2075,6 @@ Boolean BaseStatusBar::InflateViews(
 {
     AutoPtr<IStatusBarNotification> sbn;
     entry->GetNotification((IStatusBarNotification**)&sbn);
-    Logger::D(TAG, " >> InflateViews for notification: %s", TO_CSTR(sbn));
 
     AutoPtr<IUserHandle> uh;
     sbn->GetUser((IUserHandle**)&uh);
@@ -2171,14 +2168,11 @@ Boolean BaseStatusBar::InflateViews(
 
     AutoPtr<IPendingIntent> contentIntent;
     n->GetContentIntent((IPendingIntent**)&contentIntent);
-    Logger::I(TAG, " >> GetContentIntent: %s", TO_CSTR(contentIntent));
     if (contentIntent != NULL) {
         String key;
         sbn->GetKey(&key);
         AutoPtr<INotificationClicker> l;
         MakeClicker(contentIntent, key, isHeadsUp, (INotificationClicker**)&l);
-        Logger::I(TAG, " >> Create listener: %s for with key:%s on %s",
-            TO_CSTR(l), key.string(), TO_CSTR(rowView));
         AutoPtr<IViewOnClickListener> listener = IViewOnClickListener::Probe(l);
         rowView->SetOnClickListener(listener);
     }
@@ -2572,7 +2566,6 @@ void BaseStatusBar::AddNotificationViews(
     /* [in] */ INotificationDataEntry* entry,
     /* [in] */ INotificationListenerServiceRankingMap* ranking)
 {
-    Logger::I(TAG, " >> AddNotificationViews: %s, %s", TO_CSTR(entry), TO_CSTR(ranking));
     if (entry == NULL) {
         return;
     }

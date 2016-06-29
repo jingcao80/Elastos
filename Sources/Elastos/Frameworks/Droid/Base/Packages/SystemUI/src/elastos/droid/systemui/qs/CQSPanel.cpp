@@ -347,7 +347,6 @@ void CQSPanel::UpdateDetailText()
 ECode CQSPanel::SetBrightnessMirror(
     /* [in] */ IBrightnessMirrorController* c)
 {
-    Logger::D(TAG, " >>> SetBrightnessMirror SetMirrorController %s", TO_CSTR(c));
     ViewGroup::OnFinishInflate();
     AutoPtr<IView> view;
     FindViewById(R::id::brightness_slider, (IView**)&view);

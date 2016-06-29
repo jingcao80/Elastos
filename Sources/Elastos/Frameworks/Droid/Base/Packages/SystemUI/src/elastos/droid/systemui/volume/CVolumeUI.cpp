@@ -1,7 +1,9 @@
 #include "elastos/droid/systemui/volume/CVolumeUI.h"
-#include "elastos/droid/systemui/statusbar/policy/ZenModeControllerImpl.h"
+#include "elastos/droid/systemui/volume/CVolumeController.h"
+#include "elastos/droid/systemui/volume/CRemoteVolumeController.h"
 #include "elastos/droid/systemui/volume/CVolumePanel.h"
 #include "elastos/droid/systemui/volume/ZenModePanel.h"
+#include "elastos/droid/systemui/statusbar/policy/ZenModeControllerImpl.h"
 #include "Elastos.Droid.Provider.h"
 #include "R.h"
 #include <elastos/utility/logging/Logger.h>
@@ -29,9 +31,9 @@ namespace Droid {
 namespace SystemUI {
 namespace Volume {
 
-//-----------------------------------------------------------------------------------------
+//==============================================================================
 // CVolumeUI::MyObserver
-//-----------------------------------------------------------------------------------------
+//==============================================================================
 
 CVolumeUI::MyObserver::MyObserver(
     /* [in] */ CVolumeUI* host)
@@ -52,9 +54,9 @@ ECode CVolumeUI::MyObserver::OnChange(
     return NOERROR;
 }
 
-//-----------------------------------------------------------------------------------------
+//==============================================================================
 // CVolumeUI::MyRunnable
-//-----------------------------------------------------------------------------------------
+//==============================================================================
 
 CVolumeUI::MyRunnable::MyRunnable(
     /* [in] */ CVolumeUI* host)
@@ -73,9 +75,9 @@ ECode CVolumeUI::MyRunnable::Run()
     return NOERROR;
 }
 
-//-----------------------------------------------------------------------------------------
+//==============================================================================
 // CVolumeUI::VolumeController
-//-----------------------------------------------------------------------------------------
+//==============================================================================
 
 CAR_INTERFACE_IMPL_3(CVolumeUI::VolumeController, Object, IIVolumeController, IBinder, IVolumeComponent)
 
@@ -83,16 +85,11 @@ CVolumeUI::VolumeController::VolumeController()
 {}
 
 ECode CVolumeUI::VolumeController::constructor(
-    /* [in] */ Handle32 host)
+    /* [in] */ IVolumeUI* host)
 {
-    mHost = (CVolumeUI*)(&host);
+    mHost = (CVolumeUI*)host;
     return NOERROR;
 }
-
-CVolumeUI::VolumeController::VolumeController(
-    /* [in] */ CVolumeUI* host)
-    : mHost(host)
-{}
 
 ECode CVolumeUI::VolumeController::DisplaySafeVolumeWarning(
     /* [in] */ Int32 flags)
@@ -166,9 +163,9 @@ ECode CVolumeUI::VolumeController::ToString(
     return NOERROR;
 }
 
-//-----------------------------------------------------------------------------------------
+//==============================================================================
 // CVolumeUI::RemoteVolumeController
-//-----------------------------------------------------------------------------------------
+//==============================================================================
 
 CAR_INTERFACE_IMPL_2(CVolumeUI::RemoteVolumeController, Object, IIRemoteVolumeController, IBinder)
 
@@ -176,16 +173,11 @@ CVolumeUI::RemoteVolumeController::RemoteVolumeController()
 {}
 
 ECode CVolumeUI::RemoteVolumeController::constructor(
-    /* [in] */ Handle32 host)
+    /* [in] */ IVolumeUI* host)
 {
-    mHost = (CVolumeUI*)(&host);
+    mHost = (CVolumeUI*)host;
     return NOERROR;
 }
-
-CVolumeUI::RemoteVolumeController::RemoteVolumeController(
-    /* [in] */ CVolumeUI* host)
-    : mHost(host)
-{}
 
 ECode CVolumeUI::RemoteVolumeController::RemoteVolumeChanged(
     /* [in] */ IISessionController* binder,
@@ -215,12 +207,12 @@ ECode CVolumeUI::RemoteVolumeController::UpdateRemoteController(
 ECode CVolumeUI::RemoteVolumeController::ToString(
     /* [out] */ String* str)
 {
-    return NOERROR;
+    return Object::ToString(str);
 }
 
-//-----------------------------------------------------------------------------------------
+//==============================================================================
 // CVolumeUI::MyVolumePanelCallback
-//-----------------------------------------------------------------------------------------
+//==============================================================================
 
 CAR_INTERFACE_IMPL(CVolumeUI::MyVolumePanelCallback, Object, IVolumePanelCallback)
 
@@ -250,21 +242,20 @@ ECode CVolumeUI::MyVolumePanelCallback::OnInteraction()
 ECode CVolumeUI::MyVolumePanelCallback::OnVisible(
     /* [in] */ Boolean visible)
 {
-    Logger::W(TAG, "TODO: OnVisible Need debug AUDIO_SERVICE.");
-    // if (mHost->mAudioManager != NULL && mHost->mVolumeController != NULL) {
-    //     mHost->mAudioManager->NotifyVolumeControllerVisible(mHost->mVolumeController, visible);
-    // }
+    if (mHost->mAudioManager != NULL && mHost->mVolumeController != NULL) {
+        mHost->mAudioManager->NotifyVolumeControllerVisible(mHost->mVolumeController, visible);
+    }
     return NOERROR;
 }
 
-//-----------------------------------------------------------------------------------------
+//==============================================================================
 // CVolumeUI
-//-----------------------------------------------------------------------------------------
+//==============================================================================
 
 const String CVolumeUI::TAG("CVolumeUI");
 const String CVolumeUI::SETTING("systemui_volume_controller");
 
-static AutoPtr<IUri> init()
+static AutoPtr<IUri> InitSETTING_URI()
 {
     AutoPtr<ISettingsGlobal> ss;
     CSettingsGlobal::AcquireSingleton((ISettingsGlobal**)&ss);
@@ -273,17 +264,24 @@ static AutoPtr<IUri> init()
     return uri;
 }
 
-const AutoPtr<IUri> CVolumeUI::SETTING_URI = init();
+const AutoPtr<IUri> CVolumeUI::SETTING_URI = InitSETTING_URI();
 const Int32 CVolumeUI::DEFAULT;
 
 CAR_OBJECT_IMPL(CVolumeUI)
 
+CAR_INTERFACE_IMPL(CVolumeUI, SystemUI, IVolumeUI)
+
 CVolumeUI::CVolumeUI()
     : mDismissDelay(0)
+{
+}
+
+ECode CVolumeUI::constructor()
 {
     CHandler::New((IHandler**)&mHandler);
     mObserver = new MyObserver(this);
     mStartZenSettings = new MyRunnable(this);
+    return NOERROR;
 }
 
 ECode CVolumeUI::Start()
@@ -297,9 +295,10 @@ ECode CVolumeUI::Start()
     mMediaSessionManager = IMediaSessionManager::Probe(msmObj);
 
     InitPanel();
-    mVolumeController = new VolumeController(this);
-    mRemoteVolumeController = new RemoteVolumeController(this);
-    PutComponent(String("EIID_IVolumeComponent"), (IIVolumeController*)mVolumeController);
+
+    CVolumeController::New(this, (IIVolumeController**)&mVolumeController);
+    CRemoteVolumeController::New(this, (IIRemoteVolumeController**)&mRemoteVolumeController);
+    PutComponent(String("EIID_IVolumeComponent"), mVolumeController);
     UpdateController();
     AutoPtr<IContentResolver> resolver;
     mContext->GetContentResolver((IContentResolver**)&resolver);
@@ -325,17 +324,16 @@ void CVolumeUI::UpdateController()
     mContext->GetContentResolver((IContentResolver**)&resolver);
     Int32 i;
     ss->GetInt32(resolver, SETTING, DEFAULT, &i);
-    Logger::W(TAG, "TODO: UpdateController Need debug AUDIO_SERVICE.");
-    // if (i != 0) {
-    //     Logger::D(TAG, "Registering volume controller");
-    //     mAudioManager->SetVolumeController(mVolumeController);
-    //     mMediaSessionManager->SetRemoteVolumeController(mRemoteVolumeController);
-    // }
-    // else {
-    //     Logger::D(TAG, "Unregistering volume controller");
-    //     mAudioManager->SetVolumeController(NULL);
-    //     mMediaSessionManager->SetRemoteVolumeController(NULL);
-    // }
+    if (i != 0) {
+        Logger::D(TAG, "Registering volume controller, %s", TO_CSTR(mVolumeController));
+        mAudioManager->SetVolumeController(mVolumeController);
+        mMediaSessionManager->SetRemoteVolumeController(mRemoteVolumeController);
+    }
+    else {
+        Logger::D(TAG, "Unregistering volume controller");
+        mAudioManager->SetVolumeController(NULL);
+        mMediaSessionManager->SetRemoteVolumeController(NULL);
+    }
 }
 
 void CVolumeUI::InitPanel()

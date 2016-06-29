@@ -85,7 +85,7 @@ ECode StringUri::constructor(
     /* [in] */ const String& uriString)
 {
     if (uriString.IsNull()) {
-        Logger::E("Uri", "uriString");
+        Logger::E("Uri", "uriString is null.");
         return E_NULL_POINTER_EXCEPTION;
     }
 

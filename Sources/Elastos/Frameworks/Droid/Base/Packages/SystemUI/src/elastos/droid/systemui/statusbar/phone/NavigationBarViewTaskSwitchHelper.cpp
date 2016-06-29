@@ -117,7 +117,6 @@ ECode NavigationBarViewTaskSwitchHelper::OnFling(
     /* [in] */ Float velocityY,
     /* [out] */ Boolean* result)
 {
-    Logger::I(TAG, " >>> Enter OnFling");
     VALIDATE_NOT_NULL(result);
     Float absVelX = Elastos::Core::Math::Abs(velocityX);
     Float absVelY = Elastos::Core::Math::Abs(velocityY);
@@ -133,15 +132,12 @@ ECode NavigationBarViewTaskSwitchHelper::OnFling(
             showNext = mIsVertical ? (velocityY < 0) : (velocityX > 0);
         }
         if (showNext) {
-            Logger::I(TAG, "  ShowNextAffiliatedTask");
             mBar->ShowNextAffiliatedTask();
         }
         else {
-            Logger::I(TAG, "  ShowPreviousAffiliatedTask");
             mBar->ShowPreviousAffiliatedTask();
         }
     }
-    Logger::I(TAG, " >>> Leave OnFling");
     *result = TRUE;
     return NOERROR;
 }

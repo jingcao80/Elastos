@@ -50,6 +50,7 @@ namespace Volume {
  */
 CarClass(CVolumeUI)
     , public SystemUI
+    , public IVolumeUI
 {
 private:
     class MyObserver
@@ -119,7 +120,7 @@ public:
         VolumeController();
 
         CARAPI constructor(
-            /* [in] */ Handle32 host);
+            /* [in] */ IVolumeUI* host);
 
         // @Override
         CARAPI DisplaySafeVolumeWarning(
@@ -149,9 +150,6 @@ public:
         CARAPI GetZenController(
             /* [out] */ IZenModeController** zmc);
 
-        VolumeController(
-            /* [in] */ CVolumeUI* host);
-
         CARAPI ToString(
             /* [out] */ String* str);
 
@@ -170,7 +168,7 @@ public:
         RemoteVolumeController();
 
         CARAPI constructor(
-            /* [in] */ Handle32 host);
+            /* [in] */ IVolumeUI* host);
 
         // @Override
         CARAPI RemoteVolumeChanged(
@@ -180,9 +178,6 @@ public:
         // @Override
         CARAPI UpdateRemoteController(
             /* [in] */ IISessionController* session);
-
-        RemoteVolumeController(
-            /* [in] */ CVolumeUI* host);
 
         CARAPI ToString(
             /* [out] */ String* str);
@@ -194,7 +189,11 @@ public:
 public:
     CAR_OBJECT_DECL()
 
+    CAR_INTERFACE_DECL()
+
     CVolumeUI();
+
+    CARAPI constructor();
 
     // @Override
     CARAPI Start();
@@ -219,8 +218,8 @@ private:
 
     AutoPtr<IAudioManager> mAudioManager;
     AutoPtr<IMediaSessionManager> mMediaSessionManager;
-    AutoPtr<VolumeController> mVolumeController;
-    AutoPtr<RemoteVolumeController> mRemoteVolumeController;
+    AutoPtr<IIVolumeController> mVolumeController;
+    AutoPtr<IIRemoteVolumeController> mRemoteVolumeController;
 
     AutoPtr<IVolumePanel> mPanel;
     Int32 mDismissDelay;

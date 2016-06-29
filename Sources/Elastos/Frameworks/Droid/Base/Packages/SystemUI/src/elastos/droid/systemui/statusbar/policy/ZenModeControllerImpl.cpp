@@ -90,6 +90,8 @@ ECode ZenModeControllerImpl::SetupObserver::IsUserSetup(
     Elastos::Droid::Provider::Settings::Secure::GetInt32ForUser(mResolver,
         ISettingsSecure::USER_SETUP_COMPLETE, 0, mHost->mUserId, &value);
     *result = value != 0;
+    Logger::I(TAG, " >> TODO USER_SETUP_COMPLETE:%d", *result);
+    *result = TRUE;
     return NOERROR;
 }
 
@@ -99,8 +101,10 @@ ECode ZenModeControllerImpl::SetupObserver::IsDeviceProvisioned(
     VALIDATE_NOT_NULL(result);
     Int32 value = 0;
     Elastos::Droid::Provider::Settings::Global::GetInt32(mResolver,
-            ISettingsGlobal::DEVICE_PROVISIONED, 0, &value);
+        ISettingsGlobal::DEVICE_PROVISIONED, 0, &value);
     *result = value != 0;
+    Logger::I(TAG, " >> TODO DEVICE_PROVISIONED:%d", *result);
+    *result = TRUE;
     return NOERROR;
 }
 
@@ -133,9 +137,9 @@ ECode ZenModeControllerImpl::SetupObserver::OnChange(
     AutoPtr<IUri> u;
     Elastos::Droid::Provider::Settings::Global::GetUriFor(
         ISettingsGlobal::DEVICE_PROVISIONED, (IUri**)&u);
+    Logger::I(TAG, " >> TODO: uri for :DEVICE_PROVISIONED: %s", TO_CSTR(u));
 
-    Boolean e = FALSE;
-    if (IObject::Probe(u)->Equals(uri, &e), e) {
+    if (Object::Equals(uri, u)) {
         Boolean tmp = FALSE;
         mHost->IsZenAvailable(&tmp);
         mHost->FireZenAvailableChanged(tmp);
@@ -144,7 +148,8 @@ ECode ZenModeControllerImpl::SetupObserver::OnChange(
         u = NULL;
         Elastos::Droid::Provider::Settings::Secure::GetUriFor(
             ISettingsSecure::USER_SETUP_COMPLETE, (IUri**)&u);
-        if (IObject::Probe(u)->Equals(uri, &e), e) {
+        Logger::I(TAG, " >> TODO: uri for :USER_SETUP_COMPLETE: %s", TO_CSTR(u));
+        if (Object::Equals(uri, u)) {
             Boolean tmp = FALSE;
             mHost->IsZenAvailable(&tmp);
             mHost->FireZenAvailableChanged(tmp);
@@ -247,6 +252,7 @@ ECode ZenModeControllerImpl::IsZenAvailable(
     Boolean b1 = FALSE, b2 = FALSE;
     mSetupObserver->IsDeviceProvisioned(&b1);
     *result = b1 && (mSetupObserver->IsUserSetup(&b2), b2);
+    *result = TRUE;
     return NOERROR;
 }
 

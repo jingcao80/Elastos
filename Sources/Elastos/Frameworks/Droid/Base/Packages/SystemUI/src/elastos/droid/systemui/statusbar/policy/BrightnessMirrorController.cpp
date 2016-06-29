@@ -57,7 +57,6 @@ BrightnessMirrorController::BrightnessMirrorController(
 
 ECode BrightnessMirrorController::ShowMirror()
 {
-    Logger::I(TAG, " >> ShowMirror");
     mBrightnessMirror->SetVisibility(IView::VISIBLE);
     mScrimBehind->AnimateViewAlpha(0.0f, TRANSITION_DURATION_OUT, CPhoneStatusBar::ALPHA_OUT);
     AutoPtr<IViewPropertyAnimator> a;
@@ -69,7 +68,6 @@ ECode BrightnessMirrorController::ShowMirror()
 
 ECode BrightnessMirrorController::HideMirror()
 {
-    Logger::I(TAG, " >> HideMirror");
     mScrimBehind->AnimateViewAlpha(1.0f, TRANSITION_DURATION_IN, CPhoneStatusBar::ALPHA_IN);
     AutoPtr<IViewPropertyAnimator> a;
     mPanelHolder->Animate((IViewPropertyAnimator**)&a);
@@ -83,7 +81,6 @@ ECode BrightnessMirrorController::HideMirror()
 AutoPtr<IViewPropertyAnimator> BrightnessMirrorController::OutAnimation(
     /* [in] */ IViewPropertyAnimator* a)
 {
-    Logger::I(TAG, " >> OutAnimation");
     a->Alpha(0.0f);
     a->SetDuration(TRANSITION_DURATION_OUT);
     a->SetInterpolator(ITimeInterpolator::Probe(CPhoneStatusBar::ALPHA_OUT));
@@ -93,7 +90,6 @@ AutoPtr<IViewPropertyAnimator> BrightnessMirrorController::OutAnimation(
 AutoPtr<IViewPropertyAnimator> BrightnessMirrorController::InAnimation(
     /* [in] */ IViewPropertyAnimator* a)
 {
-    Logger::I(TAG, " >> InAnimation");
     a->Alpha(1.0f);
     a->SetDuration(TRANSITION_DURATION_IN);
     a->SetInterpolator(ITimeInterpolator::Probe(CPhoneStatusBar::ALPHA_IN));
@@ -111,7 +107,6 @@ ECode BrightnessMirrorController::SetLocation(
     Float y = 0;
     mBrightnessMirror->GetTranslationY(&y);
     mBrightnessMirror->SetTranslationY(y + originalY - mirrorY);
-    Logger::I(TAG, " >> SetLocation: %.2f", y + originalY - mirrorY);
     return NOERROR;
 }
 
@@ -126,7 +121,6 @@ ECode BrightnessMirrorController::GetMirror(
 
 ECode BrightnessMirrorController::UpdateResources()
 {
-    Logger::I(TAG, " >> UpdateResources");
     AutoPtr<IViewGroupLayoutParams> lp;
     mBrightnessMirror->GetLayoutParams((IViewGroupLayoutParams**)&lp);
 

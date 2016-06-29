@@ -28,7 +28,6 @@ PseudoGridView::ViewGroupAdapterBridge::ViewGroupAdapterBridge()
 
 PseudoGridView::ViewGroupAdapterBridge::~ViewGroupAdapterBridge()
 {
-    Logger::I(TAG, " >>> destory ViewGroupAdapterBridge %p", this);
 }
 
 ECode PseudoGridView::ViewGroupAdapterBridge::constructor(
@@ -49,7 +48,6 @@ void PseudoGridView::ViewGroupAdapterBridge::Link(
 {
     AutoPtr<IDataSetObserver> dso;
     CViewGroupAdapterBridge::New(viewGroup, adapter, (IDataSetObserver**)&dso);
-    Logger::I(TAG, " >>> Link CViewGroupAdapterBridge: %s", TO_CSTR(dso));
 }
 
 void PseudoGridView::ViewGroupAdapterBridge::Refresh()

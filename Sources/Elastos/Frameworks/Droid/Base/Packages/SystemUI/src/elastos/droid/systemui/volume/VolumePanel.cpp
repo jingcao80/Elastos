@@ -11,8 +11,6 @@
 #include <elastos/core/StringUtils.h>
 #include <elastos/utility/logging/Logger.h>
 
-#include <elastos/core/AutoLock.h>
-using Elastos::Core::AutoLock;
 using Elastos::Droid::App::AlertDialog;
 using Elastos::Droid::Content::EIID_IDialogInterfaceOnClickListener;
 using Elastos::Droid::Content::EIID_IDialogInterfaceOnDismissListener;
@@ -62,9 +60,9 @@ namespace Droid {
 namespace SystemUI {
 namespace Volume {
 
-//------------------------------------------------------------------------------------
+//==============================================================================
 // VolumePanel::StreamResources
-//------------------------------------------------------------------------------------
+//==============================================================================
 
 VolumePanel::StreamResources::StreamResources(
     /* [in] */ Int32 streamType,
@@ -79,9 +77,9 @@ VolumePanel::StreamResources::StreamResources(
     , mShow(show)
 {}
 
-//------------------------------------------------------------------------------------
+//==============================================================================
 // VolumePanel::ENUM_StreamResources
-//------------------------------------------------------------------------------------
+//==============================================================================
 
 static AutoPtr<VolumePanel::StreamResources> initBluetoothSCOStream()
 {
@@ -181,15 +179,15 @@ const AutoPtr<VolumePanel::StreamResources> VolumePanel::ENUM_StreamResources::N
 const AutoPtr<VolumePanel::StreamResources> VolumePanel::ENUM_StreamResources::MasterStream = initMasterStream();
 const AutoPtr<VolumePanel::StreamResources> VolumePanel::ENUM_StreamResources::RemoteStream = initRemoteStream();
 
-//------------------------------------------------------------------------------------
+//==============================================================================
 // VolumePanel::StreamControl
-//------------------------------------------------------------------------------------
+//==============================================================================
 
 CAR_INTERFACE_IMPL(VolumePanel::StreamControl, Object, IVolumePanelStreamControl)
 
-//------------------------------------------------------------------------------------
+//==============================================================================
 // CVolumePanelBroadcastReceiver2
-//------------------------------------------------------------------------------------
+//==============================================================================
 CAR_OBJECT_IMPL(CVolumePanelBroadcastReceiver2)
 ECode CVolumePanelBroadcastReceiver2::constructor(
     /* [in] */ ISystemUIDialog* host)
@@ -214,11 +212,12 @@ ECode CVolumePanelBroadcastReceiver2::OnReceive(
     return NOERROR;
 }
 
-//------------------------------------------------------------------------------------
+//==============================================================================
 // VolumePanel::SafetyWarning
-//------------------------------------------------------------------------------------
+//==============================================================================
 
-CAR_INTERFACE_IMPL_2(VolumePanel::SafetyWarning, SystemUIDialog, IDialogInterfaceOnDismissListener, IDialogInterfaceOnClickListener)
+CAR_INTERFACE_IMPL_2(VolumePanel::SafetyWarning, SystemUIDialog, \
+    IDialogInterfaceOnDismissListener, IDialogInterfaceOnClickListener)
 
 VolumePanel::SafetyWarning::SafetyWarning(
     /* [in] */ IContext* context,
@@ -305,9 +304,9 @@ ECode VolumePanel::SafetyWarning::CleanUp()
     return NOERROR;
 }
 
-//------------------------------------------------------------------------------------
+//==============================================================================
 // VolumePanel::MySeekListener
-//------------------------------------------------------------------------------------
+//==============================================================================
 
 CAR_INTERFACE_IMPL(VolumePanel::MySeekListener, Object, ISeekBarOnSeekBarChangeListener)
 
@@ -345,9 +344,9 @@ ECode VolumePanel::MySeekListener::OnStopTrackingTouch(
     return NOERROR;
 }
 
-//------------------------------------------------------------------------------------
+//==============================================================================
 // VolumePanel::MyZenCallback
-//------------------------------------------------------------------------------------
+//==============================================================================
 
 CAR_INTERFACE_IMPL(VolumePanel::MyZenCallback, Object, IZenModeControllerCallback)
 
@@ -403,9 +402,9 @@ ECode VolumePanel::MyZenCallback::OnNextAlarmChanged()
     return NOERROR;
 }
 
-//------------------------------------------------------------------------------------
+//==============================================================================
 // VolumePanel::MyMediaControllerCb
-//------------------------------------------------------------------------------------
+//==============================================================================
 VolumePanel::MyMediaControllerCb::MyMediaControllerCb(
     /* [in] */ VolumePanel* host)
     : mHost(host)
@@ -417,9 +416,9 @@ ECode VolumePanel::MyMediaControllerCb::OnAudioInfoChanged(
     return mHost->OnRemoteVolumeUpdateIfShown();
 }
 
-//------------------------------------------------------------------------------------
+//==============================================================================
 // VolumePanel::MyDialog
-//------------------------------------------------------------------------------------
+//==============================================================================
 
 VolumePanel::MyDialog::MyDialog(
     /* [in] */ IContext* ctx,
@@ -447,9 +446,9 @@ ECode VolumePanel::MyDialog::OnTouchEvent(
     return NOERROR;
 }
 
-//------------------------------------------------------------------------------------
+//==============================================================================
 // VolumePanel::MyDismissListener
-//------------------------------------------------------------------------------------
+//==============================================================================
 
 CAR_INTERFACE_IMPL(VolumePanel::MyDismissListener, Object, IDialogInterfaceOnDismissListener)
 
@@ -467,9 +466,9 @@ ECode VolumePanel::MyDismissListener::OnDismiss(
     return NOERROR;
 }
 
-//------------------------------------------------------------------------------------
+//==============================================================================
 // VolumePanel::InteractionCallback
-//------------------------------------------------------------------------------------
+//==============================================================================
 
 CAR_INTERFACE_IMPL(VolumePanel::InteractionCallback, Object, IInteractionCallback)
 
@@ -484,9 +483,9 @@ ECode VolumePanel::InteractionCallback::OnInteraction()
     return NOERROR;
 }
 
-//------------------------------------------------------------------------------------
+//==============================================================================
 // VolumePanel::ZMPCallback
-//------------------------------------------------------------------------------------
+//==============================================================================
 
 CAR_INTERFACE_IMPL(VolumePanel::ZMPCallback, Object, IZenModePanelCallback)
 
@@ -521,10 +520,11 @@ ECode VolumePanel::ZMPCallback::OnExpanded(
     return NOERROR;
 }
 
-//------------------------------------------------------------------------------------
+//==============================================================================
 // CVolumePanelBroadcastReceiver1
-//------------------------------------------------------------------------------------
+//==============================================================================
 CAR_OBJECT_IMPL(CVolumePanelBroadcastReceiver1)
+
 ECode CVolumePanelBroadcastReceiver1::constructor(
     /* [in] */ IVolumePanel* host)
 {
@@ -553,9 +553,9 @@ ECode CVolumePanelBroadcastReceiver1::OnReceive(
     return NOERROR;
 }
 
-//------------------------------------------------------------------------------------
+//==============================================================================
 // VolumePanel::MyOnClickListener
-//------------------------------------------------------------------------------------
+//==============================================================================
 
 CAR_INTERFACE_IMPL(VolumePanel::MyOnClickListener, Object, IViewOnClickListener)
 
@@ -574,9 +574,9 @@ ECode VolumePanel::MyOnClickListener::OnClick(
     return NOERROR;
 }
 
-//------------------------------------------------------------------------------------
+//==============================================================================
 // VolumePanel::MyOnTouchListener
-//------------------------------------------------------------------------------------
+//==============================================================================
 
 CAR_INTERFACE_IMPL(VolumePanel::MyOnTouchListener, Object, IViewOnTouchListener)
 
@@ -597,11 +597,11 @@ ECode VolumePanel::MyOnTouchListener::OnTouch(
     return NOERROR;
 }
 
-//------------------------------------------------------------------------------------
+//==============================================================================
 // VolumePanel
-//------------------------------------------------------------------------------------
+//==============================================================================
 
-static AutoPtr<IAudioAttributes> initVIBRATION_ATTRIBUTES()
+static AutoPtr<IAudioAttributes> InitVIBRATION_ATTRIBUTES()
 {
     AutoPtr<IAudioAttributesBuilder> aab;
     CAudioAttributesBuilder::New((IAudioAttributesBuilder**)&aab);
@@ -627,7 +627,8 @@ static AutoPtr<ArrayOf<VolumePanel::StreamResources*> > initSTREAMS()
 }
 
 const String VolumePanel::TAG("VolumePanel");
-Boolean VolumePanel::LOGD = Logger::IsLoggable(TAG.string(), Logger::___DEBUG);
+Boolean VolumePanel::LOGD = TRUE;//Logger::IsLoggable(TAG.string(), Logger::___DEBUG);
+
 const Int32 VolumePanel::PLAY_SOUND_DELAY;
 const Int32 VolumePanel::VIBRATE_DELAY;
 const Int32 VolumePanel::VIBRATE_DURATION;
@@ -657,7 +658,7 @@ const Int32 VolumePanel::MSG_USER_ACTIVITY;
 const Int32 VolumePanel::MSG_NOTIFICATION_EFFECTS_SUPPRESSOR_CHANGED;
 const Int32 VolumePanel::STREAM_MASTER;
 const Int32 VolumePanel::STREAM_REMOTE_MUSIC;
-const AutoPtr<IAudioAttributes> VolumePanel::VIBRATION_ATTRIBUTES = initVIBRATION_ATTRIBUTES();
+const AutoPtr<IAudioAttributes> VolumePanel::VIBRATION_ATTRIBUTES = InitVIBRATION_ATTRIBUTES();
 const Int32 VolumePanel::IC_AUDIO_VOL;
 const Int32 VolumePanel::IC_AUDIO_VOL_MUTE;
 const AutoPtr<ArrayOf<VolumePanel::StreamResources*> > VolumePanel::STREAMS = initSTREAMS();
@@ -665,6 +666,7 @@ AutoPtr<IAlertDialog> VolumePanel::sSafetyWarning;
 Object VolumePanel::sSafetyWarningLock;
 
 CAR_INTERFACE_IMPL(VolumePanel, Handler, IVolumePanel)
+
 VolumePanel::VolumePanel()
     : mRingIsSilent(FALSE)
     , mVoiceCapable(FALSE)
@@ -690,7 +692,7 @@ ECode VolumePanel::constructor(
     mZenController = zenController;
     Int32 hashCode;
     GetHashCode(&hashCode);
-    mTag.AppendFormat("%s.%08x", TAG.string(),hashCode);
+    mTag.AppendFormat("%s{0x%08x}", TAG.string(), hashCode);
     AutoPtr<IInterface> obj;
     context->GetSystemService(IContext::AUDIO_SERVICE, (IInterface**)&obj);
     mAudioManager = IAudioManager::Probe(obj);
@@ -709,7 +711,7 @@ ECode VolumePanel::constructor(
             streamRes->mShow = (streamRes->mStreamType == STREAM_MASTER);
         }
     }
-    if (LOGD) Logger::D(mTag, "new VolumePanel");
+    if (LOGD) Logger::D(mTag, "new VolumePanel: useMasterVolume: %d", useMasterVolume);
 
     mDisabledAlpha = 0.5f;
     AutoPtr<IResourcesTheme> theme;
@@ -792,11 +794,9 @@ ECode VolumePanel::constructor(
         mZenController->AddCallback(mZenCallback);
     }
 
-    Boolean masterVolumeOnly;
-    res->GetBoolean(Elastos::Droid::R::bool_::config_useMasterVolume, &masterVolumeOnly);
     Boolean masterVolumeKeySounds;
     res->GetBoolean(Elastos::Droid::R::bool_::config_useVolumeKeySounds, &masterVolumeKeySounds);
-    mPlayMasterStreamTones = masterVolumeOnly && masterVolumeKeySounds;
+    mPlayMasterStreamTones = useMasterVolume && masterVolumeKeySounds;
 
     RegisterReceiver();
 
@@ -1421,18 +1421,20 @@ ECode VolumePanel::OnVolumeChanged(
     /* [in] */ Int32 streamType,
     /* [in] */ Int32 flags)
 {
-    if (LOGD) Logger::D(mTag, "onVolumeChanged(streamType: %d, flags: %d)", streamType, flags);
-
-    if ((flags & IAudioManager::FLAG_SHOW_UI) != 0) {
-        {    AutoLock syncLock(this);
-            if (mActiveStreamType != streamType) {
-                ReorderSliders(streamType);
-            }
-            OnShowVolumeChanged(streamType, flags, NULL);
-        }
+    if (LOGD) {
+        Logger::D(mTag, "OnVolumeChanged(streamType: %08x, mActiveStreamType:%08x, flags: %08x)",
+            streamType, mActiveStreamType, flags);
     }
 
-    if ((flags & IAudioManager::FLAG_PLAY_SOUND) != 0 && ! mRingIsSilent) {
+    if ((flags & IAudioManager::FLAG_SHOW_UI) != 0) {
+        AutoLock syncLock(this);
+        if (mActiveStreamType != streamType) {
+            ReorderSliders(streamType);
+        }
+        OnShowVolumeChanged(streamType, flags, NULL);
+    }
+
+    if ((flags & IAudioManager::FLAG_PLAY_SOUND) != 0 && !mRingIsSilent) {
         RemoveMessages(MSG_PLAY_SOUND);
         AutoPtr<IMessage> msg;
         ObtainMessage(MSG_PLAY_SOUND, streamType, flags, (IMessage**)&msg);
@@ -1459,7 +1461,7 @@ ECode VolumePanel::OnMuteChanged(
     /* [in] */ Int32 streamType,
     /* [in] */ Int32 flags)
 {
-    if (LOGD) Logger::D(mTag, "onMuteChanged(streamType: %d, flags: %d)",streamType, flags);
+    if (LOGD) Logger::D(mTag, "onMuteChanged(streamType: %08x, flags: %08x)",streamType, flags);
 
     AutoPtr<IInterface> vpsc;
     mStreamControls->Get(streamType, (IInterface**)&vpsc);
@@ -1486,7 +1488,7 @@ ECode VolumePanel::OnShowVolumeChanged(
     mRingIsSilent = FALSE;
 
     if (LOGD) {
-        Logger::D(mTag, "onShowVolumeChanged(streamType: %d, flags: %d), index: %d",
+        Logger::D(mTag, "OnShowVolumeChanged(streamType: %08x, flags: %08x), index: %d",
             streamType, flags ,index);
     }
 
@@ -1721,7 +1723,7 @@ ECode VolumePanel::OnRemoteVolumeChanged(
     /* [in] */ IMediaController* controller,
     /* [in] */ Int32 flags)
 {
-    if (LOGD) Logger::D(mTag, "onRemoteVolumeChanged(controller:%s, flags: %d)", TO_CSTR(controller),flags);
+    if (LOGD) Logger::D(mTag, "onRemoteVolumeChanged(controller:%s, flags: %08x)", TO_CSTR(controller),flags);
 
     if (((flags & IAudioManager::FLAG_SHOW_UI) != 0) || IsShowing()) {
         {    AutoLock syncLock(this);

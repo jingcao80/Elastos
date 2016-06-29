@@ -13,9 +13,10 @@
 #include "Elastos.Droid.Widget.h"
 #include "elastos/droid/animation/AnimatorListenerAdapter.h"
 #include "elastos/droid/os/Handler.h"
+#include "elastos/droid/widget/LinearLayout.h"
 #include "elastos/droid/systemui/volume/SegmentedButtons.h"
 #include "elastos/droid/systemui/volume/ZenToast.h"
-#include "elastos/droid/widget/LinearLayout.h"
+#include "elastos/droid/systemui/statusbar/policy/ZenModeControllerCallback.h"
 #include "elastos/droid/R.h"
 
 using Elastos::Droid::Animation::AnimatorListenerAdapter;
@@ -28,7 +29,7 @@ using Elastos::Droid::Os::Handler;
 using Elastos::Droid::Os::IMessage;
 using Elastos::Droid::Service::Notification::ICondition;
 using Elastos::Droid::SystemUI::StatusBar::Policy::IZenModeController;
-using Elastos::Droid::SystemUI::StatusBar::Policy::IZenModeControllerCallback;
+using Elastos::Droid::SystemUI::StatusBar::Policy::ZenModeControllerCallback;
 using Elastos::Droid::SystemUI::Volume::IInteractionCallback;
 using Elastos::Droid::SystemUI::Volume::IZenModePanelCallback;
 using Elastos::Droid::Utility::IAttributeSet;
@@ -55,12 +56,9 @@ class ZenModePanel
 {
 private:
     class ZenCallback
-        : public Object
-        , public IZenModeControllerCallback
+        : public ZenModeControllerCallback
     {
     public:
-        CAR_INTERFACE_DECL()
-
         ZenCallback(
             /* [in] */ ZenModePanel* host);
 
@@ -75,16 +73,6 @@ private:
         // @Override
         CARAPI OnExitConditionChanged(
             /* [in] */ ICondition* exitCondition);
-
-        // @Override
-        CARAPI OnNextAlarmChanged();
-
-        // @Override
-        CARAPI OnZenAvailableChanged(
-            /* [in] */ Boolean available);
-
-        // @Override
-        CARAPI OnEffectsSupressorChanged();
 
     private:
         ZenModePanel* mHost;

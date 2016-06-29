@@ -116,9 +116,9 @@ const String CAudioService::ATTR_ASSET_FILE("file");
 const String CAudioService::ASSET_FILE_VERSION("1.0");
 const String CAudioService::GROUP_TOUCH_SOUNDS("touch_sounds");
 
-const Boolean CAudioService::DEBUG_MODE = FALSE; //Log.isLoggable(TAG + ".MOD", Log.DEBUG);
-const Boolean CAudioService::DEBUG_VOL = FALSE; //Log.isLoggable(TAG + ".VOL", Log.DEBUG);
-const Boolean CAudioService::DEBUG_SESSIONS = FALSE; //Log.isLoggable(TAG + ".SESSIONS", Log.DEBUG);
+const Boolean CAudioService::DEBUG_MODE = TRUE; //Log.isLoggable(TAG + ".MOD", Log.DEBUG);
+const Boolean CAudioService::DEBUG_VOL = TRUE; //Log.isLoggable(TAG + ".VOL", Log.DEBUG);
+const Boolean CAudioService::DEBUG_SESSIONS = TRUE; //Log.isLoggable(TAG + ".SESSIONS", Log.DEBUG);
 const Boolean CAudioService::VOLUME_SETS_RINGER_MODE_SILENT = FALSE;
 const Boolean CAudioService::PREVENT_VOLUME_ADJUSTMENT_IF_SILENT = TRUE;
 
@@ -273,7 +273,8 @@ ECode CAudioService::SoundPoolListenerThread::Run()
     Looper::Prepare();
     mHost->mSoundPoolLooper = Looper::GetMyLooper();
 
-    {    AutoLock syncLock(mHost->mSoundEffectsLock);
+    {
+        AutoLock syncLock(mHost->mSoundEffectsLock);
         if (mHost->mSoundPool != NULL) {
             mHost->mSoundPoolCallBack = new SoundPoolCallback(mHost);
             mHost->mSoundPool->SetOnLoadCompleteListener(mHost->mSoundPoolCallBack);
@@ -407,7 +408,8 @@ ECode CAudioService::VolumeStreamState::GetSettingNameForDevice(
 
 ECode CAudioService::VolumeStreamState::ReadSettings()
 {
-    {    AutoLock syncLock(this);
+    {
+        AutoLock syncLock(this);
         // force maximum volume on all streams if fixed volume property is set
         if (mHost->mUseFixedVolume) {
             AutoPtr<IInteger32> iKey;
@@ -499,7 +501,8 @@ ECode CAudioService::VolumeStreamState::ApplyDeviceVolume(
 
 ECode CAudioService::VolumeStreamState::ApplyAllVolumes()
 {
-    {    AutoLock syncLock(this);
+    {
+        AutoLock syncLock(this);
         // apply default volume first: by convention this will reset all
         // devices volumes in audio policy manager to the supplied value
         Int32 index;
@@ -575,12 +578,14 @@ ECode CAudioService::VolumeStreamState::SetIndex(
     VALIDATE_NOT_NULL(result)
     *result = FALSE;
 
-    {    AutoLock syncLock(this);
+    {
+        AutoLock syncLock(this);
         Int32 oldIndex;
         GetIndex(device, &oldIndex);
         index = GetValidIndex(index);
         AutoPtr<IBoolean> lock = mHost->mCameraSoundForced;
-        {    AutoLock syncLock(lock);
+        {
+            AutoLock syncLock(lock);
             Boolean b;
             mHost->mCameraSoundForced->GetValue(&b);
             if ((mStreamType == IAudioSystem::STREAM_SYSTEM_ENFORCED) && b) {
@@ -629,7 +634,8 @@ ECode CAudioService::VolumeStreamState::GetIndex(
     VALIDATE_NOT_NULL(result)
     *result = -1;
 
-    {    AutoLock syncLock(this);
+    {
+        AutoLock syncLock(this);
         AutoPtr<IInterface> obj;
         AutoPtr<IInteger32> iKey;
         CInteger32::New(device, (IInteger32**)&iKey);
@@ -661,7 +667,8 @@ ECode CAudioService::VolumeStreamState::GetMaxIndex(
 ECode CAudioService::VolumeStreamState::SetAllIndexes(
     /* [in] */ IAudioServiceVolumeStreamState* srcStream)
 {
-    {    AutoLock syncLock(this);
+    {
+        AutoLock syncLock(this);
         Int32 srcStreamType;
         srcStream->GetStreamType(&srcStreamType);
         // apply default device volume from source stream to all devices first in case
@@ -716,7 +723,8 @@ ECode CAudioService::VolumeStreamState::SetAllIndexes(
 
 ECode CAudioService::VolumeStreamState::SetAllIndexesToMax()
 {
-    {    AutoLock syncLock(this);
+    {
+        AutoLock syncLock(this);
         //TODO: delete this lock when mIndex is IConcurrentHashMap
         AutoLock lock(mIndex);
         AutoPtr<ISet> set;
@@ -741,7 +749,8 @@ ECode CAudioService::VolumeStreamState::Mute(
     /* [in] */ IBinder* cb,
     /* [in] */ Boolean state)
 {
-    {    AutoLock syncLock(this);
+    {
+        AutoLock syncLock(this);
         AutoPtr<VolumeDeathHandler> handler = GetDeathHandler(cb, state);
         if (handler == NULL) {
             Logger::E(TAG, "Could not get client death handler for stream: %d", mStreamType);
@@ -762,7 +771,8 @@ ECode CAudioService::VolumeStreamState::GetStreamType(
 
 ECode CAudioService::VolumeStreamState::CheckFixedVolumeDevices()
 {
-    {    AutoLock syncLock(this);
+    {
+        AutoLock syncLock(this);
         // ignore settings for fixed volume devices: volume should always be at max or 0
         if ((*mHost->mStreamVolumeAlias)[mStreamType] == IAudioSystem::STREAM_MUSIC) {
             //TODO: delete this lock when mIndex is IConcurrentHashMap
@@ -976,17 +986,15 @@ ECode CAudioService::VolumeController::IsSameBinder(
     /* [out] */ Boolean* result)
 {
     VALIDATE_NOT_NULL(result)
-    AutoPtr<IBinder> binder;
-    AsBinder((IBinder**)&binder);
-    return IObject::Probe(binder)->Equals(Binder(controller), result);
+    *result = Object::Equals(IBinder::Probe(controller), IBinder::Probe(mController));
+    return NOERROR;
 }
 
 ECode CAudioService::VolumeController::AsBinder(
     /* [out] */ IBinder** result)
 {
     VALIDATE_NOT_NULL(result)
-    AutoPtr<IBinder> temp = Binder(mController);
-    *result = temp;
+    *result = IBinder::Probe(mController);
     REFCOUNT_ADD(*result)
     return NOERROR;
 }
@@ -994,73 +1002,79 @@ ECode CAudioService::VolumeController::AsBinder(
 ECode CAudioService::VolumeController::PostDisplaySafeVolumeWarning(
     /* [in] */ Int32 flags)
 {
-    if (mController == NULL)
-        return NOERROR;
-    // try {
-    return mController->DisplaySafeVolumeWarning(flags);
-    // } catch (RemoteException e) {
-    //     Log.w(TAG, "Error calling displaySafeVolumeWarning", e);
-    // }
+    ECode ec = NOERROR;
+    if (mController != NULL) {
+        ec = mController->DisplaySafeVolumeWarning(flags);
+        if (FAILED(ec)) {
+            Logger::W(TAG, "Error calling displaySafeVolumeWarning, ec=%08x", ec);
+        }
+    }
+    return ec;
 }
 
 ECode CAudioService::VolumeController::PostVolumeChanged(
     /* [in] */ Int32 streamType,
     /* [in] */ Int32 flags)
 {
-    if (mController == NULL)
-        return NOERROR;
-    // try {
-    return mController->VolumeChanged(streamType, flags);
-    // } catch (RemoteException e) {
-    //     Log.w(TAG, "Error calling volumeChanged", e);
-    // }
+    ECode ec = NOERROR;
+    if (mController != NULL) {
+        ec = mController->VolumeChanged(streamType, flags);
+        if (FAILED(ec)) {
+            Logger::W(TAG, "Error calling volumeChanged, ec=%08x", ec);
+        }
+    }
+    return ec;
 }
 
 ECode CAudioService::VolumeController::PostMasterVolumeChanged(
     /* [in] */ Int32 flags)
 {
-    if (mController == NULL)
-        return NOERROR;
-    // try {
-    return mController->MasterVolumeChanged(flags);
-    // } catch (RemoteException e) {
-    //     Log.w(TAG, "Error calling masterVolumeChanged", e);
-    // }
+    ECode ec = NOERROR;
+    if (mController != NULL) {
+        ec = mController->MasterVolumeChanged(flags);
+        if (FAILED(ec)) {
+            Logger::W(TAG, "Error calling masterVolumeChanged, ec=%08x", ec);
+        }
+    }
+    return ec;
 }
 
 ECode CAudioService::VolumeController::PostMasterMuteChanged(
     /* [in] */ Int32 flags)
 {
-    if (mController == NULL)
-        return NOERROR;
-    // try {
-    return mController->MasterMuteChanged(flags);
-    // } catch (RemoteException e) {
-    //     Log.w(TAG, "Error calling masterMuteChanged", e);
-    // }
+    ECode ec = NOERROR;
+    if (mController != NULL) {
+        ec = mController->MasterMuteChanged(flags);
+        if (FAILED(ec)) {
+            Logger::W(TAG, "Error calling masterMuteChanged, ec=%08x", ec);
+        }
+    }
+    return ec;
 }
 
 ECode CAudioService::VolumeController::SetLayoutDirection(
     /* [in] */ Int32 layoutDirection)
 {
-    if (mController == NULL)
-        return NOERROR;
-    // try {
-    return mController->SetLayoutDirection(layoutDirection);
-    // } catch (RemoteException e) {
-    //     Log.w(TAG, "Error calling setLayoutDirection", e);
-    // }
+    ECode ec = NOERROR;
+    if (mController != NULL) {
+        ec = mController->SetLayoutDirection(layoutDirection);
+        if (FAILED(ec)) {
+            Logger::W(TAG, "Error calling setLayoutDirection, ec=%08x", ec);
+        }
+    }
+    return ec;
 }
 
 ECode CAudioService::VolumeController::PostDismiss()
 {
-    if (mController == NULL)
-        return NOERROR;
-    // try {
-    return mController->Dismiss();
-    // } catch (RemoteException e) {
-    //     Log.w(TAG, "Error calling dismiss", e);
-    // }
+    ECode ec = NOERROR;
+    if (mController != NULL) {
+        ec = mController->Dismiss();
+        if (FAILED(ec)) {
+            Logger::W(TAG, "Error calling dismiss, ec=%08x", ec);
+        }
+    }
+    return ec;
 }
 
 ECode CAudioService::VolumeController::ToString(
@@ -1069,22 +1083,19 @@ ECode CAudioService::VolumeController::ToString(
     VALIDATE_NOT_NULL(result)
     AutoPtr<IBinder> binder;
     AsBinder((IBinder**)&binder);
-    String str;
-    binder->ToString(&str);
-    *result = String("VolumeController(") + str + ",mVisible="
-            + StringUtils::BooleanToString(mVisible) + ")";
+    StringBuilder sb("VolumeController{");
+    sb += TO_CSTR(binder);
+    sb += ", visible=";
+    sb += mVisible;
+    sb += "}";
+    *result = sb.ToString();
     return NOERROR;
 }
 
 AutoPtr<IBinder> CAudioService::VolumeController::Binder(
     /* [in] */ IIVolumeController* controller)
 {
-    if (controller == NULL) {
-        return  NULL;
-    }
-    else {
-        return IBinder::Probe(controller);
-    }
+    return IBinder::Probe(controller);
 }
 
 //==============================================================================
@@ -1218,8 +1229,10 @@ ECode CAudioService::ForceControlStreamClient::ReleaseResources()
 {
     if (mCb != NULL) {
         AutoPtr<IProxy> proxy = (IProxy*)mCb->Probe(EIID_IProxy);
-        Boolean b;
-        if (proxy != NULL) proxy->UnlinkToDeath(this, 0, &b);
+        if (proxy) {
+            Boolean b;
+            proxy->UnlinkToDeath(this, 0, &b);
+        }
         mCb = NULL;
     }
     return NOERROR;
@@ -4702,16 +4715,19 @@ ECode CAudioService::SetVolumeController(
     if (controller != NULL) {
         // we are about to register a new controller, listen for its death
         // try {
-        AutoPtr<IProxy> proxy = (IProxy*)(IBinder::Probe(controller))->Probe(EIID_IProxy);
-        AutoPtr<SetVolumeControllerDeathRecipient> dr =
+        AutoPtr<IProxy> proxy = (IProxy*)controller->Probe(EIID_IProxy);
+        if (proxy != NULL) {
+            AutoPtr<SetVolumeControllerDeathRecipient> dr =
                 new SetVolumeControllerDeathRecipient(this, controller);
-        if (proxy != NULL) proxy->LinkToDeath(dr, 0);
+            proxy->LinkToDeath(dr, 0);
+        }
         // } catch (RemoteException e) {
         //     // noop
         // }
     }
     mVolumeController->SetController(controller);
-    // if (DEBUG_VOL) Logger::D(TAG, "Volume controller: " + mVolumeController);
+    if (DEBUG_VOL) Logger::D(TAG, "Volume controller: %s, %s",
+        TO_CSTR(mVolumeController), TO_CSTR(controller));
     return NOERROR;
 }
 
@@ -4799,7 +4815,8 @@ void CAudioService::CreateAudioSystemThread()
 
 void CAudioService::WaitForAudioHandlerCreation()
 {
-    {    AutoLock syncLock(this);
+    {
+        AutoLock syncLock(this);
         while (mAudioHandler == NULL) {
             // try {
                 // Wait for mAudioHandler to be set by the other thread
@@ -5220,14 +5237,16 @@ void CAudioService::AdjustStreamVolume(
         Int32 newIndex;
         (*mStreamStates)[streamType]->GetIndex(device, &newIndex);
         if (mHdmiManager != NULL) {
-            {    AutoLock syncLock(mHdmiManager);
+            {
+                AutoLock syncLock(mHdmiManager);
                 if (mHdmiTvClient != NULL &&
                     streamTypeAlias == IAudioSystem::STREAM_MUSIC &&
                     (flags & IAudioManager::FLAG_HDMI_SYSTEM_AUDIO_VOLUME) == 0 &&
                     oldIndex != newIndex) {
                     Int32 maxIndex;
                     GetStreamMaxVolume(streamType, &maxIndex);
-                    {    AutoLock syncLock(mHdmiTvClient);
+                    {
+                        AutoLock syncLock(mHdmiTvClient);
                         if (mHdmiSystemAudioSupported) {
                             mHdmiTvClient->SetSystemAudioVolume(
                                     (oldIndex + 5) / 10, (newIndex + 5) / 10, maxIndex);
@@ -5238,7 +5257,8 @@ void CAudioService::AdjustStreamVolume(
                 if (mHdmiCecSink &&
                         streamTypeAlias == IAudioSystem::STREAM_MUSIC &&
                         oldIndex != newIndex) {
-                    {    AutoLock syncLock(mHdmiPlaybackClient);
+                    {
+                        AutoLock syncLock(mHdmiPlaybackClient);
                         Int32 keyCode = (direction == -1) ? IKeyEvent::KEYCODE_VOLUME_DOWN :
                                 IKeyEvent::KEYCODE_VOLUME_UP;
                         IHdmiClient::Probe(mHdmiPlaybackClient)->SendKeyEvent(keyCode, TRUE);

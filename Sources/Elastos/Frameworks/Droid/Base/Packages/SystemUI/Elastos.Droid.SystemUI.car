@@ -43,6 +43,8 @@ module
     merge("car/elastos/droid/volume/VolumeComponent.car");
     merge("car/elastos/droid/volume/VolumePanel.car");
     merge("car/elastos/droid/volume/ZenModePanel.car");
+    merge("car/elastos/droid/volume/VolumeUI.car");
+
 
     //net
     merge("car/elastos/droid/net/NetworkOverLimitActivity.car");
@@ -960,7 +962,7 @@ module
 
         class CVolumeController {
             constructor(
-                [in] Handle32 host);
+                [in] IVolumeUI* host);
 
             interface IIVolumeController;
             interface IBinder;
@@ -969,7 +971,7 @@ module
 
         class CRemoteVolumeController {
             constructor(
-                [in] Handle32 host);
+                [in] IVolumeUI* host);
 
             interface IIRemoteVolumeController;
             interface IBinder;

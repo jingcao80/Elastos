@@ -1080,11 +1080,6 @@ ECode RecentsPanelView::OnTasksLoaded(
     /* [in] */ IArrayList* tasks,
     /* [in] */ Boolean firstScreenful)
 {
-    if (DEBUG) {
-        Logger::I(TAG, " >> OnTasksLoaded: %s, firstScreenful: %d",
-            TO_CSTR(tasks), firstScreenful);
-    }
-
     if (mRecentTaskDescriptions == NULL) {
         CArrayList::New(ICollection::Probe(tasks), (IList**)&mRecentTaskDescriptions);
     }

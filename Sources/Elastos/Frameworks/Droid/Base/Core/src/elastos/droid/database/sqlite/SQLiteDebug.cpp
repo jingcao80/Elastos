@@ -47,9 +47,9 @@ SQLiteDebug::PagerStats::~PagerStats()
 }
 
 
-const Boolean SQLiteDebug::DEBUG_SQL_LOG = Logger::IsLoggable(String("SQLiteLog"), Logger::VERBOSE);
-const Boolean SQLiteDebug::DEBUG_SQL_STATEMENTS  = Logger::IsLoggable(String("SQLiteStatements"), Logger::VERBOSE);
-const Boolean SQLiteDebug::DEBUG_SQL_TIME = Logger::IsLoggable(String("SQLiteTime"), Logger::VERBOSE);
+const Boolean SQLiteDebug::DEBUG_SQL_LOG = FALSE;//Logger::IsLoggable(String("SQLiteLog"), Logger::VERBOSE);
+const Boolean SQLiteDebug::DEBUG_SQL_STATEMENTS = FALSE;//Logger::IsLoggable(String("SQLiteStatements"), Logger::VERBOSE);
+const Boolean SQLiteDebug::DEBUG_SQL_TIME = FALSE;//Logger::IsLoggable(String("SQLiteTime"), Logger::VERBOSE);
 const Boolean SQLiteDebug::DEBUG_LOG_SLOW_QUERIES  = Build::IS_DEBUGGABLE;
 
 void SQLiteDebug::NativeGetPagerStats(

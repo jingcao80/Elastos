@@ -28,7 +28,6 @@ ECode CBrightnessDialog::constructor()
 ECode CBrightnessDialog::OnCreate(
     /* [in] */ IBundle* savedInstanceState)
 {
-    Logger::I(TAG, " >> OnCreate");
     Activity::OnCreate(savedInstanceState);
 
     AutoPtr<IWindow> window;

@@ -144,14 +144,11 @@ Boolean PreviewInflater::WouldLaunchResolverActivity(
     /* [in] */ IIntent* intent,
     /* [in] */ Int32 currentUserId)
 {
-    Logger::D(TAG, " >> WouldLaunchResolverActivity: %s, %s, %d",
-        TO_CSTR(ctx), TO_CSTR(intent), currentUserId);
     AutoPtr<IPackageManager> packageManager;
     ctx->GetPackageManager((IPackageManager**)&packageManager);
     AutoPtr<IList> appList;  /*<ResolveInfo*/
     packageManager->QueryIntentActivitiesAsUser(
         intent, IPackageManager::MATCH_DEFAULT_ONLY, currentUserId, (IList**)&appList);
-    Logger::D(TAG, " >> appList:%s", TO_CSTR(appList));
     Int32 size = 0;
     if ((appList->GetSize(&size), size) == 0) {
         return FALSE;
@@ -168,7 +165,6 @@ Boolean PreviewInflater::WouldLaunchResolverActivity(
     /* [in] */ IResolveInfo* resolved,
     /* [in] */ IList/*<ResolveInfo>*/* appList)
 {
-    Logger::D(TAG, " >> WouldLaunchResolverActivity:%s, %s", TO_CSTR(resolved), TO_CSTR(resolved));
     // If the list contains the above resolved activity, then it can't be
     // ResolverActivity itself.
     Int32 size = 0;

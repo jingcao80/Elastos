@@ -8,6 +8,7 @@ namespace StatusBar {
 namespace Policy {
 
 CAR_INTERFACE_IMPL(ZenModeControllerCallback, Object, IZenModeControllerCallback)
+
 ECode ZenModeControllerCallback::OnZenChanged(
     /* [in] */ Int32 zen)
 {
