@@ -321,6 +321,7 @@ ECode CreateConnectionProcessor::AdjustAttemptsForEmergency()
             // that emergency calls can still go through. We create a new ArrayLists here just
             // in case the implementation of PhoneAccountRegistrar ever returns an unmodifiable
             // list.
+            Log::V("CreateConnectionProcessor", "telephony hasn't registered any phone accounts yet");
             CArrayList::New((IList**)&allAccounts);
             AutoPtr<IPhoneAccount> phoneAccount;
             TelephonyUtil::GetDefaultEmergencyPhoneAccount((IPhoneAccount**)&phoneAccount);

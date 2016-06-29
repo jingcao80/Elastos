@@ -20,8 +20,8 @@ namespace Server {
 namespace Telecom {
 
 const String TAG("TelephonyUtil");
-const String TelephonyUtil::TELEPHONY_PACKAGE_NAME("com.android.phone");
-const String TelephonyUtil::PSTN_CALL_SERVICE_CLASS_NAME("com.android.services.telephony.TelephonyConnectionService");
+const String TelephonyUtil::TELEPHONY_PACKAGE_NAME("Elastos.Droid.TeleService");
+const String TelephonyUtil::PSTN_CALL_SERVICE_CLASS_NAME("Elastos.Droid.TeleService.Services.Telephony.CTelephonyConnectionService");
 AutoPtr<IPhoneAccountHandle> TelephonyUtil::DEFAULT_EMERGENCY_PHONE_ACCOUNT_HANDLE = InitDEFAULT_EMERGENCY_PHONE_ACCOUNT_HANDLE();
 
 TelephonyUtil::TelephonyUtil()
