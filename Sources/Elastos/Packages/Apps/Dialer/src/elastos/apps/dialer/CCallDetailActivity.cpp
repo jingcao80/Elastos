@@ -1,9 +1,10 @@
 
-#include "CCallDetailActivity.h"
+#include "elastos/apps/dialer/CCallDetailActivity.h"
 #include "elastos/droid/widget/Toast.h"
-#include <Elastos.Droid.Content.h>
-
+#include "Elastos.Droid.Content.h"
 #include <elastos/core/AutoLock.h>
+#include <elastos/utility/logging/Logger.h>
+
 using Elastos::Core::AutoLock;
 using Elastos::Droid::App::IFragmentManager;
 using Elastos::Droid::App::IFragmentTransaction;
@@ -18,7 +19,7 @@ using Elastos::Droid::Widget::IToast;
 using Elastos::Droid::Widget::Toast;
 using Elastos::Core::IStringBuilder;
 using Elastos::Core::CStringBuilder;
-using Elastos::Utility::Logger;
+using Elastos::Utility::Logging::Logger;
 
 namespace Elastos {
 namespace Apps {

@@ -1,21 +1,29 @@
 #ifndef __ELASTOS_APPS_DIALER_CALLDETAILACTIVITYQUERYHANDLER_H__
 #define __ELASTOS_APPS_DIALER_CALLDETAILACTIVITYQUERYHANDLER_H__
 
-#include "NoNullCursorAsyncQueryHandler.h"
+#include "_Elastos.App.Dialer.h"
+#include "Elastos.Droid.Database.h"
+#include "Elastos.Droid.Net.h"
+// #include "NoNullCursorAsyncQueryHandler.h"
 
-namespace Elastos{
-namespace Apps{
-namespace Dialer{
+using Elastos::Droid::Database::ICursor;
+using Elastos::Droid::Net::IUri;
+
+namespace Elastos {
+namespace Apps {
+namespace Dialer {
 
 /**
  * Class used by {@link CallDetailActivity} to fire async content resolver queries.
  */
 class CallDetailActivityQueryHandler
-    : public NoNullCursorAsyncQueryHandler
+    // TODO:
+    // : public NoNullCursorAsyncQueryHandler
+    : public Object
     , public ICallDetailActivityQueryHandler
 {
 public:
-    CAR_INTERFACE_DECL()
+    CAR_INTERFACE_DECL();
 
     CallDetailActivityQueryHandler();
 

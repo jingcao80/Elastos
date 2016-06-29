@@ -1,5 +1,16 @@
 
-#include "list/TileInteractionTeaserView.h"
+#include "elastos/apps/dialer/list/TileInteractionTeaserView.h"
+#include "R.h"
+#include <elastos/droid/view/View.h>
+#include <elastos/utility/logging/Logger.h>
+
+using Elastos::Droid::Content::ISharedPreferences;
+using Elastos::Droid::Content::Res::IResources;
+using Elastos::Droid::View::View;
+using Elastos::Droid::View::IViewGroupLayoutParams;
+using Elastos::Droid::View::IViewGroupMarginLayoutParams;
+using Elastos::Core::IRunnable;
+using Elastos::Utility::Logging::Logger;
 
 namespace Elastos {
 namespace Apps {

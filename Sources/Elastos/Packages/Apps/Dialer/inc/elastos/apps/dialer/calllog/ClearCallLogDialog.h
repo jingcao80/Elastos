@@ -55,6 +55,7 @@ private:
     {
     public:
         MyAsyncTask(
+            /* [in] */ IContext* context,
             /* [in] */ IContentResolver* resolver,
             /* [in] */ IProgressDialog* progressDialog,
             /* [in] */ ClearCallLogDialog* host);
@@ -69,6 +70,7 @@ private:
         CARAPI OnPostExecute(
             /* [in] */ IInterface* info);
     private:
+        AutoPtr<IContext> mContext;
         AutoPtr<IContentResolver> mResolver;
         AutoPtr<IProgressDialog> mProgressDialog;
         ClearCallLogDialog* mHost;

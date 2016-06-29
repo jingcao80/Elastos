@@ -1,7 +1,10 @@
 #ifndef __ELASTOS_APPS_DIALER_CONTACT_CONTACTUPDATESERVICE_H__
 #define __ELASTOS_APPS_DIALER_CONTACT_CONTACTUPDATESERVICE_H__
 
+#include "_Elastos.Apps.Dialer.h"
 #include "elastos/droid/app/IntentService.h"
+
+using Elastos::Droid::App::IntentService;
 
 namespace Elastos {
 namespace Apps {
@@ -12,7 +15,7 @@ namespace Contact {
  * Service for updating primary number on a contact.
  */
 class ContactUpdateService
-    , public IntentService
+    : public IntentService
     , public IContactUpdateService
 {
 public:

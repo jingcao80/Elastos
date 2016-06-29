@@ -2,18 +2,18 @@
 #define __ELASTOS_APPS_DIALER_WIDGET_COVERLAPPINGPAELAYOUT_H__
 
 #include "_Elastos_Apps_Dialer_Widget_COverlappingPaneLayout.h"
-#include "OverlappingPaneLayout.h"
+#include "elastos/apps/dialer/widget/OverlappingPaneLayout.h"
 
-namespace Elastos{
-namespace Apps{
-namespace Dialer{
-namespace Widget{
+namespace Elastos {
+namespace Apps {
+namespace Dialer {
+namespace Widget {
 
 CarClass(COverlappingPaneLayout)
     , public OverlappingPaneLayout
 {
 public:
-    CAR_OBJECT_DECL()
+    CAR_OBJECT_DECL();
 };
 
 } // Widget

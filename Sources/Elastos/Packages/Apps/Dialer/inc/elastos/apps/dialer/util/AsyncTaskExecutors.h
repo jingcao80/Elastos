@@ -1,8 +1,14 @@
 #ifndef __ELASTOS_APPS_DIALER_UTIL_ASYNCTASKEXECUTORS_H__
 #define __ELASTOS_APPS_DIALER_UTIL_ASYNCTASKEXECUTORS_H__
 
-namespace Elastos{
-namespace Apps{
+#include "_Elastos.Apps.Dialer.h"
+#include <elastos/core/Object.h>
+#include "Elastos.CoreLibrary.Utility.h"
+
+using Elastos::Utility::Concurrent::IExecutor;
+
+namespace Elastos {
+namespace Apps {
 namespace Dialer {
 namespace Util {
 
@@ -16,6 +22,7 @@ namespace Util {
  * controlled such as {@link android.app.Activity}.
  */
 class AsyncTaskExecutors
+    : public Object
 {
 private:
     class SimpleAsyncTaskExecutor
@@ -23,7 +30,7 @@ private:
         , public IAsyncTaskExecutor
     {
     public:
-        CAR_INTERFACE_DECL()
+        CAR_INTERFACE_DECL();
 
         SimpleAsyncTaskExecutor(
             /* [in] */ IExecutor* executor);

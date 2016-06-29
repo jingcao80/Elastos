@@ -1,5 +1,14 @@
 
-#include "list/PhoneFavoriteListView.h"
+#include "elastos/apps/dialer/list/PhoneFavoriteListView.h"
+#include <elastos/core/Math.h>
+#include <elastos/utility/logging/Logger.h>
+
+using Elastos::Droid::Content::Res::IResources;
+using Elastos::Droid::View::IViewConfiguration;
+using Elastos::Droid::View::IViewConfigurationHelper;
+using Elastos::Droid::View::CViewConfigurationHelper;
+using Elastos::Droid::View::IViewPropertyAnimator;
+using Elastos::Utility::Logging::Logger;
 
 namespace Elastos {
 namespace Apps {
@@ -51,7 +60,8 @@ ECode PhoneFavoriteListView::DragShadowOverAnimatorListener::OnAnimationEnd(
 //=================================================================
 // PhoneFavoriteListView
 //=================================================================
-CAR_INTERFACE_IMPL_3(PhoneFavoriteListView, GridView, IPhoneFavoriteListView,
+// TODO:
+CAR_INTERFACE_IMPL_3(PhoneFavoriteListView, /*GridView*/AbsListView, IPhoneFavoriteListView,
         IOnDragDropListener, IDragItemContainer);
 
 const String PhoneFavoriteListView::LOG_TAG("PhoneFavoriteListView");
@@ -86,7 +96,8 @@ ECode PhoneFavoriteListView::constructor(
     /* [in] */ IAttributeSet* attrs,
     /* [in] */ Int32 defStyle)
 {
-    GridView::constructor(context, attrs, defStyle);
+    assert(0 && "TODO");
+    // GridView::constructor(context, attrs, defStyle);
     AutoPtr<IResources> resources;
     context->GetResources((IResources**)&resources);
     resources->GetInteger(R::integer::fade_duration, mAnimationDuration);
@@ -103,7 +114,8 @@ ECode PhoneFavoriteListView::constructor(
 ECode PhoneFavoriteListView::OnConfigurationChanged(
     /* [in] */ IConfiguration* newConfig)
 {
-    GridView::OnConfigurationChanged(newConfig);
+    assert(0 && "TODO");
+    // GridView::OnConfigurationChanged(newConfig);
     AutoPtr<IContext> context;
     GetContext((IContext**)&context);
     AutoPtr<IViewConfigurationHelper> helper;
@@ -128,7 +140,9 @@ ECode PhoneFavoriteListView::OnInterceptTouchEvent(
         ev->GetY(&mTouchDownForDragStartY);
     }
 
-    return GridView::OnInterceptTouchEvent(ev);
+    assert(0 && "TODO");
+    // return GridView::OnInterceptTouchEvent(ev);
+    return NOERROR;
 }
 
 ECode PhoneFavoriteListView::OnDragEvent(
@@ -137,7 +151,7 @@ ECode PhoneFavoriteListView::OnDragEvent(
 {
     VALIDATE_NOT_NULL(result);
 
-    Int32 action = event.getAction();
+    Int32 action;
     event->GetAction(&action);
 
     Int32 eX;
@@ -167,7 +181,7 @@ ECode PhoneFavoriteListView::OnDragEvent(
             // Kick off {@link #mScrollHandler} if it's not started yet.
             if (!mIsDragScrollerRunning &&
                     // And if the distance traveled while dragging exceeds the touch slop
-                    (Math::Abs(mLastDragY - mTouchDownForDragStartY) >= 4 * mTouchSlop)) {
+                    (Elastos::Core::Math::Abs(mLastDragY - mTouchDownForDragStartY) >= 4 * mTouchSlop)) {
                 mIsDragScrollerRunning = TRUE;
                 EnsureScrollHandler();
                 mScrollHandler->PostDelayed(mDragScroller, SCROLL_HANDLER_DELAY_MILLIS);
@@ -315,9 +329,9 @@ ECode PhoneFavoriteListView::OnDragFinished(
         mDragShadowOverlay->ClearAnimation();
         AutoPtr<IViewPropertyAnimator> animator;
         mRemoveView->Animate((IViewPropertyAnimator**)&animator);
-        animator->Alpha(0.0f);
-        animator->SetDuration(mAnimationDuration)
-        animator->SetListener(mDragShadowOverAnimatorListener)
+        animator->Alpha(0);
+        animator->SetDuration(mAnimationDuration);
+        animator->SetListener(mDragShadowOverAnimatorListener);
         animator->Start();
     }
     return NOERROR;
@@ -338,7 +352,7 @@ AutoPtr<IBitmap> PhoneFavoriteListView::CreateDraggedChildBitmap(
     AutoPtr<IBitmap> bitmap;
     if (cache != NULL) {
         // try {
-             ECode ec = cache->Copy(IBitmap::Config.ARGB_8888,
+             ECode ec = cache->Copy(BitmapConfig_ARGB_8888,
                     FALSE, (IBitmap**)&bitmap);
              if (ec == (ECode)E_OUT_OF_MEMORY) {
                 Logger::W(LOG_TAG, "Failed to copy bitmap from Drawing cache %x", ec);

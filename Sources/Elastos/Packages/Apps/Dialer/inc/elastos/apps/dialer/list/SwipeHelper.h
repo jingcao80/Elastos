@@ -1,8 +1,29 @@
 #ifndef __ELASTOS_APPS_DIALER_LIST_SWIPEHELPER_H__
 #define __ELASTOS_APPS_DIALER_LIST_SWIPEHELPER_H__
 
-namespace Elastos{
-namespace Apps{
+#include "_Elastos.Apps.Dialer.h"
+#include <elastos/core/Object.h>
+#include <elastos/droid/animation/AnimatorListenerAdapter.h>
+#include "Elastos.Droid.Animation.h"
+#include "Elastos.Droid.Content.h"
+#include "Elastos.Droid.Graphics.h"
+#include "Elastos.Droid.View.h"
+
+using Elastos::Droid::Animation::IAnimator;
+using Elastos::Droid::Animation::IAnimatorUpdateListener;
+using Elastos::Droid::Animation::IObjectAnimator;
+using Elastos::Droid::Animation::IValueAnimator;
+using Elastos::Droid::Animation::AnimatorListenerAdapter;
+using Elastos::Droid::Content::IContext;
+using Elastos::Droid::Graphics::IRectF;
+using Elastos::Droid::View::IMotionEvent;
+using Elastos::Droid::View::IVelocityTracker;
+using Elastos::Droid::View::IView;
+using Elastos::Droid::View::Animation::ILinearInterpolator;
+
+
+namespace Elastos {
+namespace Apps {
 namespace Dialer {
 namespace List {
 
@@ -34,7 +55,7 @@ private:
         , public IAnimatorUpdateListener
     {
     public:
-        CAR_INTERFACE_DECL()
+        CAR_INTERFACE_DECL();
 
         DismissAnimatorUpdateListener(
             /* [in] */ SwipeHelper* host);
@@ -66,7 +87,7 @@ private:
         , public IAnimatorUpdateListener
     {
     public:
-        CAR_INTERFACE_DECL()
+        CAR_INTERFACE_DECL();
 
         SnapAnimatorUpdateListener(
             /* [in] */ SwipeHelper* host);

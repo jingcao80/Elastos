@@ -1,5 +1,8 @@
 
-#include "util/OrientationUtil.h"
+#include "elastos/apps/dialer/util/OrientationUtil.h"
+
+using Elastos::Droid::Content::IConfiguration;
+using Elastos::Droid::Content::Res::IResources;
 
 namespace Elastos {
 namespace Apps {

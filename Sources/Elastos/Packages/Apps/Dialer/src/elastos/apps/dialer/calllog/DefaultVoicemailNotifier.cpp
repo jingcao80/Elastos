@@ -1,18 +1,48 @@
 
 #include "elastos/apps/dialer/calllog/DefaultVoicemailNotifier.h"
+#include "elastos/apps/dialer/calllog/CPhoneNumberDisplayHelper.h"
+#include "elastos/apps/dialer/CCallDetailActivity.h"
+#include <elastos/droid/text/TextUtils.h>
 #include <elastos/core/AutoLock.h>
+#include <elastos/core/CoreUtils.h>
+#include <elastos/core/StringUtils.h>
+#include <elastos/utility/logging/Logger.h>
+#include <elastos/droid/R.h>
+#include "Elastos.Droid.Net.h"
+#include "Elastos.Droid.Provider.h"
+#include "Elastos.CoreLibrary.IO.h"
+#include "Elastos.CoreLibrary.Utility.h"
+#include "R.h"
 
-using Elastos::Core::AutoLock;
+using Elastos::Droid::App::INotification;
+using Elastos::Droid::App::INotificationBuilder;
+using Elastos::Droid::App::CNotificationBuilder;
 using Elastos::Droid::App::IPendingIntent;
 using Elastos::Droid::App::IPendingIntentHelper;
 using Elastos::Droid::App::CPendingIntentHelper;
 using Elastos::Droid::Content::IContentUris;
 using Elastos::Droid::Content::CContentUris;
+using Elastos::Droid::Content::IIntent;
+using Elastos::Droid::Content::CIntent;
+using Elastos::Droid::Content::Res::IResources;
 using Elastos::Droid::Database::ICursor;
+using Elastos::Droid::Text::TextUtils;
+using Elastos::Droid::Net::IUriHelper;
+using Elastos::Droid::Net::CUriHelper;
+using Elastos::Droid::Provider::IBaseColumns;
 using Elastos::Droid::Provider::ICalls;
 using Elastos::Droid::Provider::CCalls;
+using Elastos::Droid::Provider::IContactsContractContactsColumns;
 using Elastos::Droid::Provider::IContactsContractPhoneLookup;
 using Elastos::Droid::Provider::CContactsContractPhoneLookup;
+using Elastos::Core::AutoLock;
+using Elastos::Core::CoreUtils;
+using Elastos::Core::StringUtils;
+using Elastos::IO::ICloseable;
+using Elastos::Utility::IHashMap;
+using Elastos::Utility::CHashMap;
+using Elastos::Utility::Logging::Logger;
+using Elastos::Apps::Dialer::CCallDetailActivity;
 
 namespace Elastos {
 namespace Apps {
@@ -20,10 +50,10 @@ namespace Dialer {
 namespace CallLog {
 
 const String DefaultVoicemailNotifier::DefaultNewCallsQuery::PROJECTION[]= {
-    ICalls::_ID,
-    ICalls::NUMBER,
-    ICalls::VOICEMAIL_URI,
-    ICalls::NUMBER_PRESENTATION
+    Elastos::Droid::Provider::IBaseColumns::ID,
+    Elastos::Droid::Provider::ICalls::NUMBER,
+    Elastos::Droid::Provider::ICalls::VOICEMAIL_URI,
+    Elastos::Droid::Provider::ICalls::NUMBER_PRESENTATION
 };
 const Int32 DefaultVoicemailNotifier::DefaultNewCallsQuery::ID_COLUMN_INDEX = 0;
 const Int32 DefaultVoicemailNotifier::DefaultNewCallsQuery::NUMBER_COLUMN_INDEX = 1;
@@ -31,12 +61,12 @@ const Int32 DefaultVoicemailNotifier::DefaultNewCallsQuery::VOICEMAIL_URI_COLUMN
 const Int32 DefaultVoicemailNotifier::DefaultNewCallsQuery::NUMBER_PRESENTATION_COLUMN_INDEX = 3;
 
 const String DefaultVoicemailNotifier::DefaultNameLookupQuery::PROJECTION[] = {
-    IContactsContractPhoneLookup::DISPLAY_NAME
+    IContactsContractContactsColumns::DISPLAY_NAME
 };
 
 const Int32 DefaultVoicemailNotifier::DefaultNameLookupQuery::DISPLAY_NAME_COLUMN_INDEX = 0;
 
-const String DefaultVoicemailNotifier::TAG("DefaultVoicemailNotifier)";
+const String DefaultVoicemailNotifier::TAG("DefaultVoicemailNotifier");
 
 const String DefaultVoicemailNotifier::NOTIFICATION_TAG("DefaultVoicemailNotifier");
 
@@ -50,7 +80,7 @@ CAR_INTERFACE_IMPL(DefaultVoicemailNotifier::NewCall, Object, IDefaultVoicemailN
 DefaultVoicemailNotifier::NewCall::NewCall(
     /* [in] */ IUri* callsUri,
     /* [in] */ IUri* voicemailUri,
-    /* [in] */ String number,
+    /* [in] */ const String& number,
     /* [in] */ Int32 numberPresentation)
     : mCallsUri(callsUri)
     , mVoicemailUri(voicemailUri)
@@ -75,9 +105,8 @@ ECode DefaultVoicemailNotifier::DefaultNewCallsQuery::Query(
 {
     VALIDATE_NOT_NULL(newCalls);
     String selection = ICalls::NEW + " = 1 AND " + ICalls::TYPE + " = ?";
-    String selectionArgs[] = {
-        StringUtils::ParseInt32(ICalls::VOICEMAIL_TYPE)
-    }
+    AutoPtr<ArrayOf<String> > selectionArgs = ArrayOf<String>::Alloc(1);
+    selectionArgs->Set(0, StringUtils::ToString(ICalls::VOICEMAIL_TYPE));
 
     AutoPtr<ICursor> cursor;
     // try {
@@ -85,7 +114,9 @@ ECode DefaultVoicemailNotifier::DefaultNewCallsQuery::Query(
     CCalls::AcquireSingleton((ICalls**)&calls);
     AutoPtr<IUri> uri;
     calls->GetCONTENT_URI_WITH_VOICEMAIL((IUri**)&uri);
-    mContentResolver->Query(uri, PROJECTION,
+    AutoPtr<ArrayOf<String> > projection = ArrayOf<String>::Alloc(
+        (String*)PROJECTION, 4);
+    mContentResolver->Query(uri, projection,
             selection, selectionArgs, ICalls::DEFAULT_SORT_ORDER, (ICursor**)&cursor);
     if (cursor == NULL) {
         *newCalls = NULL;
@@ -98,7 +129,7 @@ ECode DefaultVoicemailNotifier::DefaultNewCallsQuery::Query(
             ArrayOf<IDefaultVoicemailNotifierNewCall*>::Alloc(count);
 
     Boolean succeeded;
-    FAILE_GOTO(cursor->MoveToNext(&succeeded), exit);
+    FAIL_GOTO(cursor->MoveToNext(&succeeded), exit);
     Int32 position;
     while (succeeded) {
         cursor->GetPosition(&position);
@@ -110,7 +141,7 @@ ECode DefaultVoicemailNotifier::DefaultNewCallsQuery::Query(
     //     MoreCloseables.closeQuietly(cursor);
     // }
 exit:
-    assert(0 && "TODO")
+    assert(0 && "TODO");
     // MoreCloseables::CloseQuietly(cursor);
     return NOERROR;
 }
@@ -128,11 +159,16 @@ AutoPtr<IDefaultVoicemailNotifierNewCall> DefaultVoicemailNotifier::DefaultNewCa
     AutoPtr<IUri> uri;
     calls->GetCONTENT_URI_WITH_VOICEMAIL((IUri**)&uri);
     Int64 index;
-    cursor->GetLong(ID_COLUMN_INDEX, &index);
+    cursor->GetInt64(ID_COLUMN_INDEX, &index);
     AutoPtr<IUri> callsUri;
     contentUris->WithAppendedId(uri, index, (IUri**)&callsUri);
 
-    AutoPtr<IUri> voicemailUri = voicemailUriString.IsNull() ? NULL : Uri::Parse(voicemailUriString);
+    AutoPtr<IUri> voicemailUri;
+    if (!voicemailUriString.IsNull()) {
+        AutoPtr<IUriHelper> helper;
+        CUriHelper::AcquireSingleton((IUriHelper**)&helper);
+        helper->Parse(voicemailUriString, (IUri**)&voicemailUri);
+    }
 
     String number;
     cursor->GetString(NUMBER_COLUMN_INDEX, &number);
@@ -154,7 +190,8 @@ DefaultVoicemailNotifier::DefaultNameLookupQuery::DefaultNameLookupQuery(
 {}
 
 ECode DefaultVoicemailNotifier::DefaultNameLookupQuery::Query(
-    /* [out, callee] */ String* result)
+    /* [in] */ const String& number,
+    /* [out] */ String* result)
 {
     VALIDATE_NOT_NULL(result);
     AutoPtr<ICursor> cursor;
@@ -165,14 +202,18 @@ ECode DefaultVoicemailNotifier::DefaultNameLookupQuery::Query(
     AutoPtr<IUri> uri;
     phoneLookup->GetCONTENT_FILTER_URI((IUri**)&uri);
 
+    AutoPtr<IUriHelper> helper;
+    CUriHelper::AcquireSingleton((IUriHelper**)&helper);
     String encode;
-    Uri::Encode(number, &encode);
+    helper->Encode(number, &encode);
     AutoPtr<IUri> newUri;
-    Uri::WithAppendedPath(uri, encode, (IUri**)&newUri);
-    FAILE_GOTO(mContentResolver->Query(newUri,
-            PROJECTION, NULL, NULL, NULL, (ICursor**)&cursor), exit);
+    helper->WithAppendedPath(uri, encode, (IUri**)&newUri);
+    AutoPtr<ArrayOf<String> > projection = ArrayOf<String>::Alloc(
+        (String*)PROJECTION, 1);
+    FAIL_GOTO(mContentResolver->Query(newUri, projection,
+            String(NULL), NULL, String(NULL), (ICursor**)&cursor), exit);
 
-    Boolean succeeded = FALSE;
+    Boolean succeeded;
     if (cursor == NULL || cursor->MoveToFirst(&succeeded), !succeeded) {
         *result = String(NULL);
         goto exit;
@@ -181,9 +222,9 @@ ECode DefaultVoicemailNotifier::DefaultNameLookupQuery::Query(
 
 exit:
     if (cursor != NULL) {
-        cursor->Close();
+        ICloseable::Probe(cursor)->Close();
     }
-    return ec;
+    return NOERROR;
     // } finally {
     //     if (cursor != null) {
     //         cursor.close();
@@ -212,13 +253,14 @@ DefaultVoicemailNotifier::DefaultVoicemailNotifier(
 AutoPtr<IDefaultVoicemailNotifier> DefaultVoicemailNotifier::GetInstance(
     /* [in] */ IContext* context)
 {
-    {    AutoLock syncLock(sLock);
+    {
+        AutoLock syncLock(sLock);
         if (sInstance == NULL) {
             AutoPtr<IInterface> service;
             context->GetSystemService(IContext::NOTIFICATION_SERVICE, (IInterface**)&service);
             INotificationManager* notificationManager = INotificationManager::Probe(service);
             AutoPtr<IContentResolver> contentResolver;
-            context->getContentResolver((IContentResolver**)&contentResolver);
+            context->GetContentResolver((IContentResolver**)&contentResolver);
             AutoPtr<DefaultVoicemailNotifier> notifier =
                     new DefaultVoicemailNotifier(context, notificationManager,
                     CreateNewCallsQuery(contentResolver),
@@ -270,10 +312,10 @@ ECode DefaultVoicemailNotifier::UpdateNotification(
         // Check if we already know the name associated with this number.
         AutoPtr<IInterface> value;
         names->Get(CoreUtils::Convert(newCall->mNumber), (IInterface**)&value);
-        String name = CoreUtils::Unbox(value);
+        String name = CoreUtils::Unbox(ICharSequence::Probe(value));
         if (name.IsNull()) {
-            AutoPtr<ICharSequence> displayName = mPhoneNumberHelper->GetDisplayName(
-                    newCall->mNumber, newCall->mNumberPresentation);
+            AutoPtr<ICharSequence> displayName = ((CPhoneNumberDisplayHelper*)mPhoneNumberHelper.Get())
+                    ->GetDisplayName(CoreUtils::Convert(newCall->mNumber), newCall->mNumberPresentation);
             displayName->ToString(&name);
             // If we cannot lookup the contact, use the number instead.
             if (TextUtils::IsEmpty(name)) {
@@ -289,55 +331,64 @@ ECode DefaultVoicemailNotifier::UpdateNotification(
                 callers = name;
             }
             else {
+                AutoPtr<ArrayOf<IInterface*> > args = ArrayOf<IInterface*>::Alloc(2);
+                args->Set(0, CoreUtils::Convert(callers));
+                args->Set(1, CoreUtils::Convert(name));
                 resources->GetString(R::string::notification_voicemail_callers_list,
-                         callers, name, &callers);
+                         args, &callers);
             }
         }
         // Check if this is the new call we need to notify about.
-        if (newCallUri != NULL && IObject::Probe(newCallUri)->Equals(newCall->mVoicemailUri)) {
+        Boolean equals;
+        if (newCallUri != NULL &&
+                IObject::Probe(newCallUri)->Equals(newCall->mVoicemailUri, &equals), equals) {
             callToNotify = (IDefaultVoicemailNotifierNewCall*)newCall;
         }
     }
 
     if (newCallUri != NULL && callToNotify == NULL) {
         String str;
-        newCallUri->ToString(&str);
+        IObject::Probe(newCallUri)->ToString(&str);
         Logger::E(TAG, "The new call could not be found in the call log: %s", str.string());
     }
 
     // Determine the title of the notification and the icon for it.
     String title;
+    AutoPtr<ArrayOf<IInterface*> > args = ArrayOf<IInterface*>::Alloc(1);
+    args->Set(0, CoreUtils::Convert(newCalls->GetLength()));
     resources->GetQuantityString(R::plurals::notification_voicemail_title,
-             newCalls->GetLength(), newCalls->GetLength(), &the);
+             newCalls->GetLength(), args, &title);
     // TODO: Use the photo of contact if all calls are from the same person.
-    Int32 icon = Elastos::R::drawable::stat_notify_voicemail;
+    Int32 icon = Elastos::Droid::R::drawable::stat_notify_voicemail;
 
     AutoPtr<INotificationBuilder> notificationBuilder;
     CNotificationBuilder::New(mContext, (INotificationBuilder**)&notificationBuilder);
     notificationBuilder->SetSmallIcon(icon);
-    notificationBuilder->SetContentTitle(title);
-    notificationBuilder->SetContentText(callers);
+    notificationBuilder->SetContentTitle(CoreUtils::Convert(title));
+    notificationBuilder->SetContentText(CoreUtils::Convert(callers));
     Int32 color;
-    resources->GetColor(R::color::dialer_theme_color, &color);
+    assert(0 && "TODO");
+    // resources->GetColor(R::color::dialer_theme_color, &color);
     notificationBuilder->SetColor(color);
     notificationBuilder->SetDefaults(callToNotify != NULL ? INotification::DEFAULT_ALL : 0);
-    notificationBuilder->SsetDeleteIntent(CreateMarkNewVoicemailsAsOldIntent());
+    notificationBuilder->SetDeleteIntent(CreateMarkNewVoicemailsAsOldIntent());
     notificationBuilder->SetAutoCancel(TRUE);
 
     // Determine the intent to fire when the notification is clicked on.
     AutoPtr<IIntent> contentIntent;
     if (newCalls->GetLength() == 1) {
         // Open the voicemail directly.
+        DefaultVoicemailNotifier::NewCall* newCall = (DefaultVoicemailNotifier::NewCall*)(*newCalls)[0];
         CIntent::New(mContext, ECLSID_CCallDetailActivity, (IIntent**)&contentIntent);
-        contentIntent->SetData((*newCalls)[0]->mCallsUri);
+        contentIntent->SetData(newCall->mCallsUri);
         contentIntent->PutExtra(ICallDetailActivity::EXTRA_VOICEMAIL_URI,
-                (*newCalls)[0]->mVoicemailUri);
+                IParcelable::Probe(newCall->mVoicemailUri));
 
         AutoPtr<IIntent> playIntent;
         CIntent::New(mContext, ECLSID_CCallDetailActivity, (IIntent**)&playIntent);
-        playIntent.setData((*newCalls)[0]->callsUri);
-        playIntent.putExtra(CallDetailActivity.EXTRA_VOICEMAIL_URI,
-                (*newCalls)[0]->mVoicemailUri);
+        playIntent->SetData(newCall->mCallsUri);
+        playIntent->PutExtra(CCallDetailActivity::EXTRA_VOICEMAIL_URI,
+                IParcelable::Probe(newCall->mVoicemailUri));
         playIntent->PutBooleanExtra(ICallDetailActivity::EXTRA_VOICEMAIL_START_PLAYBACK, TRUE);
         playIntent->PutBooleanExtra(ICallDetailActivity::EXTRA_FROM_NOTIFICATION, TRUE);
 
@@ -348,7 +399,7 @@ ECode DefaultVoicemailNotifier::UpdateNotification(
         AutoPtr<IPendingIntent> pendingIntent;
         helper->GetActivity(mContext, 0, playIntent, 0, (IPendingIntent**)&pendingIntent);
         notificationBuilder->AddAction(R::drawable::ic_play_holo_dark,
-                action, pendingIntent);
+                CoreUtils::Convert(action), pendingIntent);
     }
     else {
         // Open the call log.
@@ -357,7 +408,7 @@ ECode DefaultVoicemailNotifier::UpdateNotification(
         AutoPtr<IUri> uri;
         calls->GetCONTENT_URI((IUri**)&uri);
         CIntent::New(IIntent::ACTION_VIEW, uri, (IIntent**)&contentIntent);
-        contentIntent->PutExtra(ICalls::EXTRA_CALL_TYPE_FILTER, IIntent::ACTION_VIEWVOICEMAIL_TYPE);
+        contentIntent->PutExtra(ICalls::EXTRA_CALL_TYPE_FILTER, ICalls::VOICEMAIL_TYPE);
     }
     AutoPtr<IPendingIntentHelper> helper;
     CPendingIntentHelper::AcquireSingleton((IPendingIntentHelper**)&helper);
@@ -368,15 +419,17 @@ ECode DefaultVoicemailNotifier::UpdateNotification(
     // The text to show in the ticker, describing the new event.
     if (callToNotify != NULL) {
         AutoPtr<IInterface> value;
-        names->Get(callToNotify->mNumber, (IInterface**)&value);
+        names->Get(CoreUtils::Convert(((NewCall*)callToNotify.Get())->mNumber), (IInterface**)&value);
         String str;
-        resources->GetString(R::string::notification_new_voicemail_ticker,
-                CoreUtils::Unbox(value), &str);
-        notificationBuilder->SetTicker(str);
+        AutoPtr<ArrayOf<IInterface*> > args = ArrayOf<IInterface*>::Alloc(1);
+        args->Set(0, value);
+        resources->GetString(
+                R::string::notification_new_voicemail_ticker, args, &str);
+        notificationBuilder->SetTicker(CoreUtils::Convert(str));
     }
 
     AutoPtr<INotification> notification;
-    notificationBuilder::Build((INotification**)&notification);
+    notificationBuilder->Build((INotification**)&notification);
     mNotificationManager->Notify(NOTIFICATION_TAG, NOTIFICATION_ID, notification);
 
     return NOERROR;
@@ -419,8 +472,9 @@ AutoPtr<IPhoneNumberDisplayHelper> DefaultVoicemailNotifier::CreatePhoneNumberHe
 {
     AutoPtr<IResources> resources;
     context->GetResources((IResources**)&resources);
-    AutoPtr<PhoneNumberDisplayHelper> helper = new PhoneNumberDisplayHelper(resources);
-    return (IPhoneNumberDisplayHelper*)helper;
+    AutoPtr<IPhoneNumberDisplayHelper> helper;
+    CPhoneNumberDisplayHelper::New(resources, (IPhoneNumberDisplayHelper**)&helper);
+    return helper;
 }
 
 } // CallLog

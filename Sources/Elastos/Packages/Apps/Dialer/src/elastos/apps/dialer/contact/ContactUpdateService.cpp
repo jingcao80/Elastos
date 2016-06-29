@@ -1,4 +1,9 @@
-#include "contact/ContactUpdateService.h"
+#include "elastos/apps/dialer/contact/ContactUpdateService.h"
+#include "Elastos.Droid.Content.h"
+
+using Elastos::Droid::Content::IContext;
+using Elastos::Droid::Content::IIntent;
+using Elastos::Droid::Content::CIntent;
 
 namespace Elastos {
 namespace Apps {
@@ -29,9 +34,10 @@ ECode ContactUpdateService::OnHandleIntent(
 {
     // Currently this service only handles one type of update.
     Int64 dataId;
-    intent->GetLongExtra(IContactUpdateService::EXTRA_PHONE_NUMBER_DATA_ID, -1, &dataId);
+    intent->GetInt64Extra(IContactUpdateService::EXTRA_PHONE_NUMBER_DATA_ID, -1, &dataId);
 
-    ContactUpdateUtils::SetSuperPrimary((IContext*)this, dataId);
+    assert(0 && "TODO") ;
+    // ContactUpdateUtils::SetSuperPrimary((IContext*)this, dataId);
     return NOERROR;
 }
 

@@ -1,8 +1,23 @@
 #ifndef __ELASTOS_APPS_DIALER_LIST_PHONEFAVORITETITLEVIEW_H__
 #define __ELASTOS_APPS_DIALER_LIST_PHONEFAVORITETITLEVIEW_H__
 
-namespace Elastos{
-namespace Apps{
+#include "_Elastos.Apps.Dialer.h"
+#include <elastos/core/Object.h>
+#include <elastos/droid/widget/FrameLayout.h>
+#include "Elastos.Droid.Content.h"
+#include "Elastos.Droid.View.h"
+#include "Elastos.Droid.Utility.h"
+
+using Elastos::Droid::Content::IClipData;
+using Elastos::Droid::Content::IContext;
+using Elastos::Droid::View::IView;
+using Elastos::Droid::View::IViewOnClickListener;
+using Elastos::Droid::View::IViewOnLongClickListener;
+using Elastos::Droid::Utility::IAttributeSet;
+using Elastos::Droid::Widget::FrameLayout;
+
+namespace Elastos {
+namespace Apps {
 namespace Dialer {
 namespace List {
 
@@ -14,7 +29,9 @@ namespace List {
  * view.
  */
 class PhoneFavoriteTileView
-    : public ContactTileView
+    // TODO:
+    /*: public ContactTileView*/
+    : public FrameLayout
     , public IPhoneFavoriteTileView
 {
 private:
@@ -23,7 +40,7 @@ private:
         , public IViewOnLongClickListener
     {
     public:
-        CAR_INTERFACE_DECL()
+        CAR_INTERFACE_DECL();
 
         MyLongClickListener(
             /* [in] */ PhoneFavoriteTileView* host);
@@ -42,7 +59,7 @@ private:
         , public IViewOnClickListener
     {
     public:
-        CAR_INTERFACE_DECL()
+        CAR_INTERFACE_DECL();
 
         MyClickListener(
             /* [in] */ PhoneFavoriteTileView* host);
@@ -56,7 +73,7 @@ private:
     };
 
 public:
-    CAR_INTERFACE_DECL()
+    CAR_INTERFACE_DECL();
 
     PhoneFavoriteTileView();
 
@@ -64,9 +81,10 @@ public:
         /* [in] */ IContext* context,
         /* [in] */ IAttributeSet* attrs);
 
+    // TODO:
     // @Override
-    CARAPI LoadFromContact(
-        /* [in] */ IContactEntry* entry);
+    // CARAPI LoadFromContact(
+    //     /* [in] */ IContactEntry* entry);
 protected:
     // @Override
     CARAPI OnFinishInflate();
@@ -79,11 +97,12 @@ protected:
     CARAPI CreateClickListener(
         /* [out] */ IViewOnClickListener** listener);
 
+    // TODO:
     // @Override
-    CARAPI  GetDefaultImageRequest(
-        /* [in] */ const String& displayName,
-        /* [in] */ const String& lookupKey,
-        /* [out] */ IDefaultImageRequest** request);
+    // CARAPI  GetDefaultImageRequest(
+    //     /* [in] */ const String& displayName,
+    //     /* [in] */ const String& lookupKey,
+    //     /* [out] */ IDefaultImageRequest** request);
 
     // @Override
     CARAPI ConfigureViewForImage(

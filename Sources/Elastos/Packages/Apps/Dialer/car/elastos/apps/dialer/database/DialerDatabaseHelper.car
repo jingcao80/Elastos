@@ -57,7 +57,7 @@ module
         GetPropertyAsInt(
             [in] ISQLiteDatabase* db,
             [in] String key,
-            [in] String defaultValue,
+            [in] Int32 defaultValue,
             [out] Int32* value);
 
         /**

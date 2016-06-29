@@ -1,5 +1,7 @@
 
-#include "list/DragDropController.h"
+#include "elastos/apps/dialer/list/DragDropController.h"
+
+using Elastos::Utility::CArrayList;
 
 namespace Elastos {
 namespace Apps {
@@ -10,12 +12,12 @@ CAR_INTERFACE_IMPL(DragDropController, Object, IDragDropController);
 
 DragDropController::DragDropController()
 {
-    CAarrayList::New((IList**)&mOnDragDropListeners);
+    CArrayList::New((IList**)&mOnDragDropListeners);
     mLocationOnScreen = ArrayOf<Int32>::Alloc(2);
 }
 
 ECode DragDropController::constructor(
-    /* [in] */ iDragItemContainer* dragItemContainer)
+    /* [in] */ IDragItemContainer* dragItemContainer)
 {
     mDragItemContainer = dragItemContainer;
     return NOERROR;
@@ -48,8 +50,8 @@ ECode DragDropController::HandleDragHovered(
     /* [in] */ Int32 y)
 {
     v->GetLocationOnScreen(mLocationOnScreen);
-    Int32 screenX = x + mLocationOnScreen[0];
-    Int32 screenY = y + mLocationOnScreen[1];
+    Int32 screenX = x + (*mLocationOnScreen)[0];
+    Int32 screenY = y + (*mLocationOnScreen)[1];
     AutoPtr<IPhoneFavoriteSquareTileView> view;
     mDragItemContainer->GetViewForLocation(
             screenX, screenY, (IPhoneFavoriteSquareTileView**)&view);

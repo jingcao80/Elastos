@@ -1,13 +1,14 @@
 #ifndef __ELASTOS_APPS_DIALER_DIALERBACKUPAGENT_H__
 #define __ELASTOS_APPS_DIALER_DIALERBACKUPAGENT_H__
 
+#include "_Elastos.Apps.Dialer.h"
 #include "elastos/droid/app/backup/BackupAgentHelper.h"
 
 using Elastos::Droid::App::Backup::BackupAgentHelper;
 
-namespace Elastos{
-namespace Apps{
-namespace Dialer{
+namespace Elastos {
+namespace Apps {
+namespace Dialer {
 
 /**
  * The Dialer backup agent backs up the shared preferences settings of the
@@ -19,7 +20,7 @@ class DialerBackupAgent
     , public IDialerBackupAgent
 {
 public:
-    CAR_INTERFACE_DECL()
+    CAR_INTERFACE_DECL();
 
     //@Override
     CARAPI OnCreate();

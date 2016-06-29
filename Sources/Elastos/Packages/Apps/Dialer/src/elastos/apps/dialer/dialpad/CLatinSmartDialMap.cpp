@@ -1,5 +1,5 @@
 
-#include "dialpad/CLatinSmartDialMap.h"
+#include "elastos/apps/dialer/dialpad/CLatinSmartDialMap.h"
 
 namespace Elastos {
 namespace Apps {

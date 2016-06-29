@@ -2,10 +2,10 @@
 #define __ELASTOS_APPS_DIALER_SETTINGS_CDEFAULTRINGTONEPREFERENCE_H__
 
 #include "_Elastos_Apps_Dialer_Settings_CDefaultRingtonePreference.h"
-#include "DefaultRingtonePreference.h"
+#include "elastos/apps/dialer/settings/DefaultRingtonePreference.h"
 
-namespace Elastos{
-namespace Apps{
+namespace Elastos {
+namespace Apps {
 namespace Dialer {
 namespace Settings {
 
@@ -13,7 +13,7 @@ CarClass(CDefaultRingtonePreference)
     , public DefaultRingtonePreference
 {
 public:
-    CAR_OBJECT_DECL()
+    CAR_OBJECT_DECL();
 };
 
 } // Settings

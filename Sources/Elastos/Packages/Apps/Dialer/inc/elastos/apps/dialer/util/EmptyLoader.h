@@ -2,11 +2,13 @@
 #define __ELASTOS_APPS_DIALER_UTIL_EMPTYLOADER_H__
 
 #include "_Elastos.Apps.Dialer.h"
+#include <elastos/core/Object.h>
 #include "elastos/droid/content/Loader.h"
 #include "Elastos.Droid.App.h"
 #include "Elastos.Droid.Content.h"
 
 using Elastos::Droid::App::ILoaderManagerLoaderCallbacks;
+using Elastos::Droid::Content::IContext;
 using Elastos::Droid::Content::ILoader;
 using Elastos::Droid::Content::Loader;
 
@@ -37,7 +39,7 @@ public:
         , public ILoaderManagerLoaderCallbacks
     {
     public:
-        CAR_INTERFACE_DECL()
+        CAR_INTERFACE_DECL();
 
         CARAPI constructor(
             /* [in] */ IContext* context);
@@ -62,7 +64,7 @@ public:
     };
 
 public:
-    CAR_INTERFACE_DECL()
+    CAR_INTERFACE_DECL();
 
     CARAPI constructor(
         /* [in] */ IContext* context);

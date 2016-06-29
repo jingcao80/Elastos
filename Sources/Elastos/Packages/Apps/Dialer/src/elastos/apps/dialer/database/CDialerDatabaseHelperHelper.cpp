@@ -1,6 +1,6 @@
 
-#include "database/CDialerDatabaseHelperHelper.h"
-#include "database/DialerDatabaseHelper.h"
+#include "elastos/apps/dialer/database/CDialerDatabaseHelperHelper.h"
+#include "elastos/apps/dialer/database/DialerDatabaseHelper.h"
 
 namespace Elastos {
 namespace Apps {

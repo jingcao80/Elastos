@@ -1,5 +1,13 @@
 
-#include "list/PhoneFavoriteSquareTileView.h"
+#include "elastos/apps/dialer/list/PhoneFavoriteSquareTileView.h"
+#include "Elastos.Droid.Provider.h"
+#include <elastos/droid/view/View.h>
+
+using Elastos::Droid::Net::IUri;
+using Elastos::Droid::Provider::IContactsContractQuickContact;
+using Elastos::Droid::Provider::CContactsContractQuickContact;
+using Elastos::Droid::View::View;
+using Elastos::Droid::Widget::ITextView;
 
 namespace Elastos {
 namespace Apps {
@@ -53,7 +61,7 @@ ECode PhoneFavoriteSquareTileView::OnFinishInflate()
     ITextView::Probe(nameView)->SetElegantTextHeight(FALSE);
     AutoPtr<IView> phoneTypeView;
     FindViewById(R::id::contact_tile_phone_type, (IView**)&phoneTypeView);
-    ITextView::Probe(phoneTypeView)->SetElegantTextHeight(false);
+    ITextView::Probe(phoneTypeView)->SetElegantTextHeight(FALSE);
 
     AutoPtr<IView> button;
     FindViewById(R::id::contact_tile_secondary_button, (IView**)&button);

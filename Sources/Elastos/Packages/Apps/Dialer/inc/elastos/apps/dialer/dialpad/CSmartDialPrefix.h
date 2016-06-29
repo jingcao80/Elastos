@@ -3,9 +3,14 @@
 
 #include "_Elastos_Apps_Dialer_Dialpad_CSmartDialPrefix.h"
 #include <elastos/core/Singleton.h>
+#include "Elastos.Droid.Content.h"
+#include "Elastos.CoreLibrary.Utility.h"
 
-namespace Elastos{
-namespace Apps{
+using Elastos::Droid::Content::IContext;
+using Elastos::Utility::IArrayList;
+
+namespace Elastos {
+namespace Apps {
 namespace Dialer {
 namespace Dialpad {
 
@@ -14,9 +19,9 @@ CarClass(CSmartDialPrefix)
     , public ISmartDialPrefix
 {
 public:
-    CAR_INTERFACE_DECL()
+    CAR_INTERFACE_DECL();
 
-    CAR_SINGLETON_DECL()
+    CAR_SINGLETON_DECL();
 
     /** Initializes the Nanp settings, and finds out whether user is in a NANP region.*/
     CARAPI InitializeNanpSettings(

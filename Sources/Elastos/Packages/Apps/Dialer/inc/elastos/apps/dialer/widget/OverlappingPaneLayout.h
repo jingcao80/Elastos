@@ -1,10 +1,28 @@
 #ifndef __ELASTOS_APPS_DIALER_WIDGET_OVERLAPPINGPAELAYOUT_H__
 #define __ELASTOS_APPS_DIALER_WIDGET_OVERLAPPINGPAELAYOUT_H__
 
-namespace Elastos{
-namespace Apps{
-namespace Dialer{
-namespace Widget{
+#include "_Elastos.Apps.Dialer.h"
+#include <elastos/droid/view/ViewGroup.h>
+#include "Elastos.Droid.Content.h"
+#include "Elastos.Droid.Graphics.h"
+#include "Elastos.Droid.Utility.h"
+#include "Elastos.Droid.View.h"
+
+using Elastos::Droid::Content::IContext;
+using Elastos::Droid::Graphics::ICanvas;
+using Elastos::Droid::Graphics::IRect;
+using Elastos::Droid::Utility::IAttributeSet;
+using Elastos::Droid::View::ViewGroup;
+using Elastos::Droid::View::IMotionEvent;
+using Elastos::Droid::View::IView;
+using Elastos::Droid::View::IViewGroupLayoutParams;
+using Elastos::Droid::View::IViewGroupMarginLayoutParams;
+
+
+namespace Elastos {
+namespace Apps {
+namespace Dialer {
+namespace Widget {
 
 /**
  * A custom layout that aligns its child views vertically as two panes, and allows for the bottom
@@ -18,10 +36,10 @@ class OverlappingPaneLayout
 public:
     class LayoutParams
         : public ViewGroup::MarginLayoutParams
-        : public IOverlappingPaneLayoutLayoutParams
+        , public IOverlappingPaneLayoutLayoutParams
     {
     public:
-        CAR_INTERFACE_DECL()
+        CAR_INTERFACE_DECL();
 
         LayoutParams(
             /* [in] */ OverlappingPaneLayout* host);
@@ -125,7 +143,7 @@ private:
         , public IViewDragHelperCallback
     {
     public:
-        CAR_INTERFACE_DECL()
+        CAR_INTERFACE_DECL();
 
         DragHelperCallback(
             /* [in] */ OverlappingPaneLayout* host);

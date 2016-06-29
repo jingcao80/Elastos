@@ -1,5 +1,19 @@
 
-#include "list/RegularSearchListAdapter.h"
+#include "elastos/apps/dialer/list/RegularSearchListAdapter.h"
+#include "elastos/apps/dialer/list/DialerPhoneNumberListAdapter.h"
+#include "elastos/apps/dialer/calllog/CContactInfo.h"
+#include "Elastos.Droid.Database.h"
+#include "Elastos.Droid.Net.h"
+#include <elastos/droid/text/TextUtils.h>
+
+using Elastos::Droid::Database::ICursor;
+using Elastos::Droid::Net::IUri;
+using Elastos::Droid::Net::IUriHelper;
+using Elastos::Droid::Net::CUriHelper;
+using Elastos::Droid::Text::TextUtils;
+using Elastos::Apps::Dialer::CallLog::IContactInfo;
+using Elastos::Apps::Dialer::CallLog::CContactInfo;
+using Elastos::Apps::Dialer::CallLog::IPhoneQuery;
 
 namespace Elastos {
 namespace Apps {
@@ -21,8 +35,8 @@ ECode RegularSearchListAdapter::GetContactInfo(
 {
     VALIDATE_NOT_NULL(info);
 
-    AutoPtr<CContactInfo> contatctInfo;
-    CContactInfo::NewByFriend((CContactInfo**)&contatctInfo);
+    AutoPtr<IContactInfo> contatctInfo;
+    CContactInfo::NewByFriend((IContactInfo**)&contatctInfo);
     AutoPtr<ICachedContactInfo> cacheInfo;
     lookupService->BuildCachedContactInfo(info, (ICachedContactInfo**)&cacheInfo);
 
@@ -36,7 +50,14 @@ ECode RegularSearchListAdapter::GetContactInfo(
         item->GetString(IPhoneQuery::PHONE_NUMBER, &contatctInfo->mNumber);
         String photoUriStr;
         item->GetString(IPhoneQuery::PHOTO_URI, &photoUriStr);
-        contatctInfo->mPhotoUri = photoUriStr.IsNull() ? NULL : Uri::Parse(photoUriStr);
+        AutoPtr<IUriHelper> helper;
+        CUriHelper::AcquireSingleton((IUriHelper**)&helper);
+        if (photoUriStr.IsNull()) {
+            contatctInfo->mPhotoUri = NULL;
+        }
+        else {
+            helper->Parse(photoUriStr, (IUri**)&contatctInfo->mPhotoUri);
+        }
 
         String lookupKey;
         item->GetString(IPhoneQuery::LOOKUP_KEY, &lookupKey);
@@ -44,12 +65,13 @@ ECode RegularSearchListAdapter::GetContactInfo(
 
         Int32 partitionIndex;
         GetPartitionForPosition(position, &partitionIndex);
-        AutoPtr<IDirectoryPartition> partition;
-        GetPartition(partitionIndex, &partition);
-        Int64 directoryId;
-        partition->GetDirectoryId(&directoryId);
-        String sourceName;
-        partition->GetLabel(&sourceName);
+        assert(0 && "TODO");
+        // AutoPtr<IDirectoryPartition> partition;
+        // GetPartition(partitionIndex, &partition);
+        // Int64 directoryId;
+        // partition->GetDirectoryId(&directoryId);
+        // String sourceName;
+        // partition->GetLabel(&sourceName);
         if (IsExtendedDirectory(directoryId)) {
             cacheInfo->SetExtendedSource(sourceName, directoryId);
         }
@@ -79,8 +101,9 @@ ECode RegularSearchListAdapter::SetQueryString(
     changed |= result;
     AutoPtr<IContext> context;
     GetContext((IContext**)&context);
-    SetShortcutEnabled(SHORTCUT_MAKE_VIDEO_CALL,
-            showNumberShortcuts && CallUtil::IsVideoEnabled(context), &result);
+    assert(0 && "TODO");
+    // SetShortcutEnabled(SHORTCUT_MAKE_VIDEO_CALL,
+    //         showNumberShortcuts && CallUtil::IsVideoEnabled(context), &result);
     changed |= result;
     if (changed) {
         NotifyDataSetChanged();

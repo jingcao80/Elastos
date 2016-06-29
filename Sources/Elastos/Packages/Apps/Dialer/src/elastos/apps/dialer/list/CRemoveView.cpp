@@ -1,5 +1,5 @@
 
-#include "list/CRemoveView.h"
+#include "elastos/apps/dialer/list/CRemoveView.h"
 
 namespace Elastos {
 namespace Apps {

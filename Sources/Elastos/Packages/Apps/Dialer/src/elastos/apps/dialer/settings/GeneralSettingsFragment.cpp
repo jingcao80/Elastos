@@ -1,5 +1,17 @@
 
-#include "settings/GeneralSettingsFragment.h"
+#include "elastos/apps/dialer/settings/GeneralSettingsFragment.h"
+#include "R.h"
+#include "Elastos.Droid.Provider.h"
+
+using Elastos::Droid::App::IActivity;
+using Elastos::Droid::Content::IContentResolver;
+using Elastos::Droid::Os::IVibrator;
+using Elastos::Droid::Preference::IPreferenceCategory;
+using Elastos::Droid::Provider::ISettingsSystem;
+using Elastos::Droid::Provider::CSettingsSystem;
+using Elastos::Core::ICharSequence;
+using Elastos::Core::IThread;
+using Elastos::Core::CThread;
 
 namespace Elastos {
 namespace Apps {

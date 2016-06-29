@@ -1,5 +1,5 @@
 
-#include "PhoneCallDetailsViews.h"
+#include "elastos/apps/dialer/PhoneCallDetailsViews.h"
 
 namespace Elastos {
 namespace Apps {

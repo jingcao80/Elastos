@@ -2,9 +2,12 @@
 #ifndef __ELASTOS_APPS_DIALER_CALLLOG_PHONEACCOUNTUTILS_H__
 #define __ELASTOS_APPS_DIALER_CALLLOG_PHONEACCOUNTUTILS_H__
 
+#include <elastos/core/Object.h>
+#include "Elastos.Droid.Content.h"
 #include "Elastos.Droid.Graphics.h"
 #include "Elastos.Droid.Telecomm.h"
 
+using Elastos::Droid::Content::IContext;
 using Elastos::Droid::Graphics::Drawable::IDrawable;
 using Elastos::Droid::Telecomm::Telecom::IPhoneAccount;
 using Elastos::Droid::Telecomm::Telecom::IPhoneAccountHandle;

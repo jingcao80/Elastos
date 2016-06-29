@@ -3,8 +3,13 @@
 #define __ELASTOS_APPS_DIALER_CALLLOG_INTENTPROVIDER_H__
 
 #include "_Elastos.Apps.Dialer.h"
+#include "Elastos.Droid.Content.h"
+#include "Elastos.Droid.Telecomm.h"
+#include <elastos/core/Object.h>
 
+using Elastos::Droid::Content::IContext;
 using Elastos::Droid::Content::IIntent;
+using Elastos::Droid::Telecomm::Telecom::IPhoneAccountHandle;
 
 namespace Elastos {
 namespace Apps {
@@ -26,6 +31,8 @@ private:
         , public IIntentProvider
     {
     public:
+        CAR_INTERFACE_DECL();
+
         ReturnCallIntentProvider(
             /* [in] */ const String& number,
             /* [in] */ IPhoneAccountHandle* accountHandle);
@@ -44,6 +51,8 @@ private:
         , public IIntentProvider
     {
     public:
+        CAR_INTERFACE_DECL();
+
         ReturnVideoCallIntentProvider(
             /* [in] */ const String& number,
             /* [in] */ IPhoneAccountHandle* accountHandle);
@@ -62,6 +71,8 @@ private:
         , public IIntentProvider
     {
     public:
+        CAR_INTERFACE_DECL();
+
         PlayVoicemailIntentProvider(
             /* [in] */ Int64 rowId,
             /* [in] */ const String& voicemailUri);
@@ -79,6 +90,8 @@ private:
         , public IIntentProvider
     {
     public:
+        CAR_INTERFACE_DECL();
+
         CallDetailIntentProvider(
             /* [in] */ Int64 id,
             /* [in] */ ArrayOf<Int64>* extraIds,
@@ -94,6 +107,7 @@ private:
     };
 
 public:
+    CAR_INTERFACE_DECL();
 
     static CARAPI_(AutoPtr<IIntentProvider>) GetReturnCallIntentProvider(
         /* [in] */ const String& number);

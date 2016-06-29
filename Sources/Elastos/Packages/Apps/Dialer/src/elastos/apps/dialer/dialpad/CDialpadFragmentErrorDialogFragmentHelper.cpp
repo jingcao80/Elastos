@@ -1,5 +1,5 @@
-#include "dialpad/DialpadFragment.h"
-#include "dialpad/CDialpadFragmentErrorDialogFragmentHelper.h"
+#include "elastos/apps/dialer/dialpad/DialpadFragment.h"
+#include "elastos/apps/dialer/dialpad/CDialpadFragmentErrorDialogFragmentHelper.h"
 
 namespace Elastos {
 namespace Apps {
@@ -16,7 +16,7 @@ ECode CDialpadFragmentErrorDialogFragmentHelper::NewInstance(
 {
     VALIDATE_NOT_NULL(fragment);
     AutoPtr<IDialpadFragmentErrorDialogFragment> result =
-            DialogFragment::ErrorDialogFragment::NewInstance(messageResId);
+            DialpadFragment::ErrorDialogFragment::NewInstance(messageResId);
     *fragment = result;
     REFCOUNT_ADD(*fragment);
 
@@ -30,7 +30,7 @@ ECode CDialpadFragmentErrorDialogFragmentHelper::NewInstance(
 {
     VALIDATE_NOT_NULL(fragment);
     AutoPtr<IDialpadFragmentErrorDialogFragment> result =
-            DialogFragment::ErrorDialogFragment::NewInstance(titleResId, messageResId);
+            DialpadFragment::ErrorDialogFragment::NewInstance(titleResId, messageResId);
     *fragment = result;
     REFCOUNT_ADD(*fragment);
 

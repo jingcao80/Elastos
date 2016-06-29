@@ -1,4 +1,47 @@
-#include "DialtactsActivity.h"
+#include "elastos/apps/dialer/DialtactsActivity.h"
+#include "elastos/apps/dialer/activity/TransactionSafeActivity.h"
+#include "elastos/apps/dialer/dialpad/CDialpadFragment.h"
+#include "elastos/apps/dialer/dialpad/SmartDialPrefix.h"
+#include "elastos/apps/dialer/list/CListsFragment.h"
+#include "elastos/apps/dialer/util/DialerUtils.h"
+#include "elastos/apps/dialer/widget/CActionBarController.h"
+#include "elastos/apps/dialerbind/CDatabaseHelperManager.h"
+#include "Elastos.Droid.Content.h"
+#include "Elastos.Droid.Os.h"
+#include "Elastos.Droid.Telecomm.h"
+#include "Elastos.Droid.Telephony.h"
+#include "Elastos.Droid.View.h"
+#include "Elastos.Droid.Widget.h"
+#include <elastos/droid/text/TextUtils.h>
+#include <elastos/utility/logging/Logger.h>
+#include "R.h"
+
+using Elastos::Droid::App::IActionBar;
+using Elastos::Droid::App::IFragment;
+using Elastos::Droid::App::IFragmentManager;
+using Elastos::Droid::App::IFragmentTransaction;
+using Elastos::Droid::Content::IIntent;
+using Elastos::Droid::Content::CIntent;
+using Elastos::Droid::Content::Res::IResources;
+using Elastos::Droid::Os::IBundle;
+using Elastos::Droid::Text::TextUtils;
+using Elastos::Droid::Telecomm::Telecom::ITelecomManager;
+using Elastos::Droid::Telephony::ITelephonyManager;
+using Elastos::Droid::View::IKeyEvent;
+using Elastos::Droid::View::IMenu;
+using Elastos::Droid::View::IWindow;
+using Elastos::Droid::View::Animation::IAnimationUtils;
+using Elastos::Droid::View::Animation::CAnimationUtils;
+using Elastos::Droid::Widget::IImageButton;
+using Elastos::Utility::Logging::Logger;
+using Elastos::Apps::Dialer::activity::TransactionSafeActivity;
+using Elastos::Apps::Dialer::Dialpad::CDialpadFragment;
+using Elastos::Apps::Dialer::Dialpad::SmartDialPrefix;
+using Elastos::Apps::Dialer::List::IListsFragment;
+using Elastos::Apps::Dialer::List::CListsFragment;
+using Elastos::Apps::Dialer::Util::DialerUtils;
+using Elastos::Apps::DialerBind::IDatabaseHelperManager;
+using Elastos::Apps::DialerBind::CDatabaseHelperManager;
 
 namespace Elastos {
 namespace Apps {

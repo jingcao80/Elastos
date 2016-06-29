@@ -3,9 +3,17 @@
 #define __ELASTOS_APPS_DIALER_INTERACTIONS_CUNDEMOTEOUTGOINGCALLRECEIVER_H__
 
 #include "_Elastos_Apps_Dialer_Interactions_CUndemoteOutgoingCallReceiver.h"
+#include <elastos/droid/content/BroadcastReceiver.h>
+#include <elastos/core/Thread.h>
+#include "Elastos.Droid.Content.h"
 
-namespace Elastos{
-namespace Apps{
+using Elastos::Droid::Content::BroadcastReceiver;
+using Elastos::Droid::Content::IContext;
+using Elastos::Droid::Content::IIntent;
+using Elastos::Core::Thread;
+
+namespace Elastos {
+namespace Apps {
 namespace Dialer {
 namespace Interactions {
 
@@ -15,7 +23,7 @@ namespace Interactions {
  */
 CarClass(CUndemoteOutgoingCallReceiver)
     , public BroadcastReceiver
-    , public ICUndemoteOutgoingCallReceiver
+    , public IUndemoteOutgoingCallReceiver
 {
 private:
     class MyThread
@@ -23,19 +31,23 @@ private:
     {
     public:
         MyThread(
-            /* [in] */ CUndemoteOutgoingCallReceiver* host);
+            /* [in] */ CUndemoteOutgoingCallReceiver* host,
+            /* [in] */ IContext* context,
+            /* [in] */ const String& number);
 
         // @Override
         CARAPI Run();
 
     private:
         CUndemoteOutgoingCallReceiver* mHost;
+        AutoPtr<IContext> mContext;
+        String mNumber;
     };
 
 public:
-    CAR_INTERFACE_DECL()
+    CAR_INTERFACE_DECL();
 
-    CAR_OBJECT_DECL()
+    CAR_OBJECT_DECL();
 
     // @Override
     CARAPI OnReceive(

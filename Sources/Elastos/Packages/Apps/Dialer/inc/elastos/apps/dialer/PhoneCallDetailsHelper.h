@@ -1,8 +1,19 @@
 #ifndef __ELASTOS_APPS_DIALER_PHONECALLDETAILSHELPER_H__
 #define __ELASTOS_APPS_DIALER_PHONECALLDETAILSHELPER_H__
 
+#include "_Elastos.Apps.Dialer.h"
 #include "Elastos.Droid.App.h"
+#include "Elastos.Droid.Content.h"
+#include "Elastos.Droid.Widget.h"
+#include "Elastos.CoreLibrary.Core.h"
+#include "Elastos.CoreLibrary.Utility.h"
 
+using Elastos::Droid::Content::Res::IResources;
+using Elastos::Droid::Widget::ITextView;
+using Elastos::Core::ICharSequence;
+using Elastos::Core::IInteger32;
+using Elastos::Core::IInteger64;
+using Elastos::Utility::IArrayList;
 using Elastos::Apps::Dialer::CallLog::ICallTypeHelper;
 using Elastos::Apps::Dialer::CallLog::IPhoneNumberUtilsWrapper;
 using Elastos::Apps::Dialer::CallLog::IPhoneNumberDisplayHelper;
@@ -19,7 +30,7 @@ class PhoneCallDetailsHelper
     , public IPhoneCallDetailsHelper
 {
 public:
-    CAR_INTERFACE_DECL()
+    CAR_INTERFACE_DECL();
 
     PhoneCallDetailsHelper();
 

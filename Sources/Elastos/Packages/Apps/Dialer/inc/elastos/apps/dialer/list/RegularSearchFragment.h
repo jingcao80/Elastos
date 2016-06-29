@@ -1,10 +1,16 @@
 #ifndef __ELASTOS_APPS_DIALER_LIST_REGULARSEARCHFRAGMENT_H__
 #define __ELASTOS_APPS_DIALER_LIST_REGULARSEARCHFRAGMENT_H__
 
-#include "SearchFragment.h"
+#include "_Elastos.Apps.Dialer.h"
+#include "elastos/apps/dialer/list/SearchFragment.h"
+#include "Elastos.Droid.View.h"
 
-namespace Elastos{
-namespace Apps{
+using Elastos::Droid::View::ILayoutInflater;
+using Elastos::Droid::View::IViewGroup;
+using Elastos::Apps::Dialer::Service::ICachedNumberLookupService;
+
+namespace Elastos {
+namespace Apps {
 namespace Dialer {
 namespace List {
 
@@ -13,7 +19,7 @@ class RegularSearchFragment
     , public IRegularSearchFragment
 {
 public:
-    CAR_INTERFACE_DECL()
+    CAR_INTERFACE_DECL();
 
     CARAPI constructor();
 
@@ -25,7 +31,8 @@ protected:
         /* [in] */ ILayoutInflater* inflater,
         /* [in] */ IViewGroup* container);
 
-    CARAPI_(AutoPtr<IContactEntryListAdapter>) CreateListAdapter();
+    // TODO:
+    // CARAPI_(AutoPtr<IContactEntryListAdapter>) CreateListAdapter();
 
     // @Override
     CARAPI CacheContactInfo(

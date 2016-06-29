@@ -2,8 +2,17 @@
 #ifndef __ELASTOS_APPS_DIALER_DIALPAD_SMARTDIALPREFIX_H__
 #define __ELASTOS_APPS_DIALER_DIALPAD_SMARTDIALPREFIX_H__
 
-namespace Elastos{
-namespace Apps{
+#include "_Elastos.Apps.Dialer.h"
+#include <elastos/core/Object.h>
+#include "Elastos.Droid.Content.h"
+#include "Elastos.CoreLibrary.Utility.h"
+
+using Elastos::Droid::Content::IContext;
+using Elastos::Utility::IArrayList;
+using Elastos::Utility::ISet;
+
+namespace Elastos {
+namespace Apps {
 namespace Dialer {
 namespace Dialpad {
 
@@ -26,7 +35,7 @@ public:
         , public ISmartDialPrefixPhoneNumberTokens
     {
     public:
-        CAR_INTERFACE_DECL()
+        CAR_INTERFACE_DECL();
 
         PhoneNumberTokens(
             /* [in] */ const String& countryCode,

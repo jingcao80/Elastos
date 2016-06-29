@@ -3,6 +3,9 @@
 
 #include "_Elastos_Apps_Dialer_Contact_CContactUpdateServiceHelper.h"
 #include <elastos/core/Singleton.h>
+#include "Elastos.Droid.Content.h"
+
+using Elastos::Droid::Content::IContext;
 
 namespace Elastos {
 namespace Apps {
@@ -14,9 +17,9 @@ CarClass(CContactUpdateServiceHelper)
     , public IContactUpdateServiceHelper
 {
 public:
-    CAR_INTERFACE_DECL()
+    CAR_INTERFACE_DECL();
 
-    CAR_SINGLETON_DECL()
+    CAR_SINGLETON_DECL();
 
     /** Creates an intent that sets the selected data item as super primary (default) */
     CARAPI CreateSetSuperPrimaryIntent(

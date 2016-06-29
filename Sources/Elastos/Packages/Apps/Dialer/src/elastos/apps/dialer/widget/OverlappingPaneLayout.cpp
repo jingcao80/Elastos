@@ -1,5 +1,14 @@
 
-#include "widget/OverlappingPaneLayout.h"
+#include "elastos/apps/dialer/widget/OverlappingPaneLayout.h"
+#include "elastos/apps/dialer/widget/ViewDragHelper.h"
+#include <elastos/droid/view/View.h>
+#include <elastos/core/Math.h>
+#include <elastos/utility/logging/Logger.h>
+
+using Elastos::Droid::Content::Res::ITypedArray;
+using Elastos::Droid::Graphics::CRect;
+using Elastos::Droid::View::View;
+using Elastos::Utility::Logging::Logger;
 
 namespace Elastos {
 namespace Apps {
@@ -516,10 +525,10 @@ void OverlappingPaneLayouts::UpdateObscuredViewsVisibility(
         child->GetRight(&cRight);
         child->GetTop(&cTop);
         child->GetBottom(&cBottom);
-        Int32 clampedChildLeft = Math::Max(leftBound, cLeft);
-        Int32 clampedChildRight = Math::Min(rightBound, cRight);
-        Int32 clampedChildTop = Math::Max(startBound, cTop);
-        Int32 clampedChildBottom = Math::Min(endBound, cBottom);
+        Int32 clampedChildLeft = Elastos::Core::Math::Max(leftBound, cLeft);
+        Int32 clampedChildRight = Elastos::Core::Math::Min(rightBound, cRight);
+        Int32 clampedChildTop = Elastos::Core::Math::Max(startBound, cTop);
+        Int32 clampedChildBottom = Elastos::Core::Math::Min(endBound, cBottom);
 
         Int32 vis;
         if (clampedChildLeft >= left && clampedChildTop >= top &&
@@ -904,7 +913,7 @@ ECode OverlappingPaneLayouts::OnLayout(
             ((IViewGroupMarginLayoutParams*)lp)->GetTopMargin(&topMargin);
             ((IViewGroupMarginLayoutParams*)lp)->GetBottomMargin(&bottomMargin);
             Int32 margin = topMargin + bottomMargin;
-            Int32 range = Math::Min(nextYStart,
+            Int32 range = Elastos::Core::Math::Min(nextYStart,
                     height - paddingBottom - mOverhangSize) - yStart - margin;
             mSlideRange = range;
             Int32 lpMargin = topMargin;

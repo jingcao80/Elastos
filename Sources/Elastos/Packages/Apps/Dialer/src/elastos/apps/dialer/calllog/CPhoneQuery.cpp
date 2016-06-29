@@ -1,5 +1,11 @@
 
 #include "elastos/apps/dialer/calllog/CPhoneQuery.h"
+#include "Elastos.Droid.Provider.h"
+
+using Elastos::Droid::Provider::IBaseColumns;
+using Elastos::Droid::Provider::IContactsContractContactsColumns;
+using Elastos::Droid::Provider::IContactsContractPhoneLookup;
+using Elastos::Droid::Provider::IContactsContractPhoneLookupColumns;
 
 namespace Elastos {
 namespace Apps {
@@ -7,16 +13,16 @@ namespace Dialer {
 namespace CallLog {
 
 const String CPhoneQuery::_PROJECTION[] = {
-    IContactsContractPhoneLookup::_ID,
-    IContactsContractPhoneLookup::DISPLAY_NAME,
-    IContactsContractPhoneLookup::TYPE,
-    IContactsContractPhoneLookup::LABEL,
-    IContactsContractPhoneLookup::NUMBER,
-    IContactsContractPhoneLookup::NORMALIZED_NUMBER,
-    IContactsContractPhoneLookup::PHOTO_ID,
-    IContactsContractPhoneLookup::LOOKUP_KEY,
-    IContactsContractPhoneLookup::PHOTO_URI
-}
+    IBaseColumns::ID,
+    IContactsContractContactsColumns::DISPLAY_NAME,
+    IContactsContractPhoneLookupColumns::TYPE,
+    IContactsContractPhoneLookupColumns::LABEL,
+    IContactsContractPhoneLookupColumns::NUMBER,
+    IContactsContractPhoneLookupColumns::NORMALIZED_NUMBER,
+    IContactsContractContactsColumns::PHOTO_ID,
+    IContactsContractContactsColumns::LOOKUP_KEY,
+    IContactsContractContactsColumns::PHOTO_URI
+};
 
 CAR_INTERFACE_IMPL(CPhoneQuery, Singleton, IPhoneQuery);
 
@@ -29,7 +35,7 @@ ECode CPhoneQuery::Get_PROJECTION(
 
     // TODO:
     AutoPtr<ArrayOf<String> > projection = ArrayOf<String>::Alloc(
-        _PROJECTION, 9);
+        (String*)_PROJECTION, 9);
     *result = projection;
     REFCOUNT_ADD(*result);
     return NOERROR;

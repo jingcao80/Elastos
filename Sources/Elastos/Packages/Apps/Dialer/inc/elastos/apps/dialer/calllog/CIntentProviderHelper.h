@@ -4,6 +4,9 @@
 
 #include "_Elastos_Apps_Dialer_CallLog_CIntentProviderHelper.h"
 #include <elastos/core/Singleton.h>
+#include "Elastos.Droid.Telecomm.h"
+
+using Elastos::Droid::Telecomm::Telecom::IPhoneAccountHandle;
 
 namespace Elastos {
 namespace Apps {
@@ -19,25 +22,25 @@ public:
 
     CAR_SINGLETON_DECL()
 
-    CARRAPI GetReturnCallIntentProvider(
+    CARAPI GetReturnCallIntentProvider(
         /* [in] */ const String& number,
         /* [out] */ IIntentProvider** provider);
 
-    CARRAPI GetReturnCallIntentProvider(
-        /* [in] */ const String& number,
-        /* [in] */ IPhoneAccountHandle* accountHandle,
-        /* [out] */ IIntentProvider** provider);
-
-    CARRAPI GetReturnVideoCallIntentProvider(
-        /* [in] */ const String& number,
-        /* [out] */ IIntentProvider** provider);
-
-    CARRAPI GetReturnVideoCallIntentProvider(
+    CARAPI GetReturnCallIntentProvider(
         /* [in] */ const String& number,
         /* [in] */ IPhoneAccountHandle* accountHandle,
         /* [out] */ IIntentProvider** provider);
 
-    CARRAPI GetPlayVoicemailIntentProvider(
+    CARAPI GetReturnVideoCallIntentProvider(
+        /* [in] */ const String& number,
+        /* [out] */ IIntentProvider** provider);
+
+    CARAPI GetReturnVideoCallIntentProvider(
+        /* [in] */ const String& number,
+        /* [in] */ IPhoneAccountHandle* accountHandle,
+        /* [out] */ IIntentProvider** provider);
+
+    CARAPI GetPlayVoicemailIntentProvider(
         /* [in] */ Int64 rowId,
         /* [in] */ const String& voicemailUri,
         /* [out] */ IIntentProvider** provider);
@@ -50,7 +53,7 @@ public:
      * @param voicemailUri If call log entry is for a voicemail, the voicemail URI.
      * @return The call details intent provider.
      */
-   CARRAPI GetCallDetailIntentProvider(
+   CARAPI GetCallDetailIntentProvider(
         /* [in] */ Int64 id,
         /* [in] */ ArrayOf<Int64>* extraIds,
         /* [in] */ const String& voicemailUri,

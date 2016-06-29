@@ -2,6 +2,14 @@
 #ifndef __ELASTOS_APPS_DIALER_CALLLOG_CALLLOGLISTITEMHELPER_H__
 #define __ELASTOS_APPS_DIALER_CALLLOG_CALLLOGLISTITEMHELPER_H__
 
+#include "_Elastos.Apps.Dialer.h"
+#include <elastos/core/Object.h>
+#include "Elastos.Droid.Content.h"
+
+using Elastos::Droid::Content::IContext;
+using Elastos::Droid::Content::Res::IResources;
+
+
 namespace Elastos {
 namespace Apps {
 namespace Dialer {
@@ -102,7 +110,7 @@ private:
      * @return Call type.
      */
     CARAPI_(Int32) GetLastCallType(
-        /* [in] */ const ArrayOf<Int32>& callTypes);
+        /* [in] */ ArrayOf<Int32>* callTypes);
 
     /**
      * Return the name or number of the caller specified by the details.

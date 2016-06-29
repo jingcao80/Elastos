@@ -1,5 +1,14 @@
 
-#include "dialpad/SmartDialNameMatcher.h"
+#include "elastos/apps/dialer/dialpad/SmartDialNameMatcher.h"
+#include "elastos/apps/dialer/dialpad/CLatinSmartDialMap.h"
+#include "elastos/apps/dialer/dialpad/SmartDialMatchPosition.h"
+#include "elastos/apps/dialer/dialpad/CSmartDialMatchPosition.h"
+#include "elastos/apps/dialer/dialpad/SmartDialPrefix.h"
+#include <elastos/droid/text/TextUtils.h>
+
+using Elastos::Droid::Text::TextUtils;
+using Elastos::Utility::CArrayList;
+using Elastos::Utility::ICollection;
 
 namespace Elastos {
 namespace Apps {
@@ -38,7 +47,7 @@ ECode SmartDialNameMatcher::constructor(
 }
 
 void SmartDialNameMatcher::ConstructEmptyMask(
-    /* [in] */ IStringBuilder* builder,
+    /* [in] */ StringBuilder* builder,
     /* [in] */ Int32 length)
 {
     for (Int32 i = 0; i < length; ++i) {
@@ -47,12 +56,12 @@ void SmartDialNameMatcher::ConstructEmptyMask(
 }
 
 void SmartDialNameMatcher::ReplaceBitInMask(
-    /* [in] */ IStringBuilder* builder,
+    /* [in] */ StringBuilder* builder,
     /* [in] */ ISmartDialMatchPosition* matchPos)
 {
-    SmartDialMatchPosition* position = (SmartDialMatchPosition*)matchPos
+    SmartDialMatchPosition* position = (SmartDialMatchPosition*)matchPos;
     for (Int32 i = position->mStart; i < position->mEnd; ++i) {
-        builder->Replace(i, i + 1, "1");
+        builder->Replace(i, i + 1, String("1"));
     }
 }
 
@@ -73,7 +82,7 @@ String SmartDialNameMatcher::NormalizeNumber(
         Char32 ch = number.GetChar(i);
         Boolean result;
         if (map->IsValidDialpadNumericChar(ch, &result), result) {
-            s->Append(ch);
+            s->AppendChar(ch);
         }
     }
     return s->ToString();
@@ -102,15 +111,15 @@ ECode SmartDialNameMatcher::MatchesNumber(
             REFCOUNT_ADD(*position);
             return NOERROR;
         }
-        if (((SmartDialPrefix::PhoneNumberTokens*)phoneNumberTokens)->mCountryCodeOffset != 0) {
-            matchPos = matchesNumberWithOffset(phoneNumber, query,
-                    ((SmartDialPrefix::PhoneNumberTokens*)phoneNumberTokens)->mCountryCodeOffset);
+        if (((SmartDialPrefix::PhoneNumberTokens*)phoneNumberTokens.Get())->mCountryCodeOffset != 0) {
+            matchPos = MatchesNumberWithOffset(phoneNumber, query,
+                    ((SmartDialPrefix::PhoneNumberTokens*)phoneNumberTokens.Get())->mCountryCodeOffset);
         }
         if (matchPos == NULL
-            && ((SmartDialPrefix::PhoneNumberTokens*)phoneNumberTokens)->mNanpCodeOffset != 0
+            && ((SmartDialPrefix::PhoneNumberTokens*)phoneNumberTokens.Get())->mNanpCodeOffset != 0
             && useNanp) {
             matchPos = MatchesNumberWithOffset(phoneNumber, query,
-                    ((SmartDialPrefix::PhoneNumberTokens*)phoneNumberTokens)->mNanpCodeOffset);
+                    ((SmartDialPrefix::PhoneNumberTokens*)phoneNumberTokens.Get())->mNanpCodeOffset);
         }
     }
     if (matchPos != NULL) {
@@ -352,7 +361,7 @@ Boolean SmartDialNameMatcher::MatchesCombination(
     // then partial will always be empty.
     Boolean empty;
     if (partial->IsEmpty(&empty), !empty) {
-        matchList->AddAll(partial);
+        matchList->AddAll(0, ICollection::Probe(partial));
 
         Int32 size;
         matchList->GetSize(&size);
@@ -361,7 +370,7 @@ Boolean SmartDialNameMatcher::MatchesCombination(
             matchList->Get(i, (IInterface**)&match);
             ReplaceBitInMask(builder, ISmartDialMatchPosition::Probe(match));
         }
-        mNameMatchMask = builder.ToString();
+        mNameMatchMask = builder->ToString();
         return TRUE;
     }
     return FALSE;
@@ -384,7 +393,7 @@ ECode SmartDialNameMatcher::GetMatchPositions(
 {
     VALIDATE_NOT_NULL(positions);
 
-    return CArrayList::New(mMatchPositions, positions);
+    return CArrayList::New(ICollection::Probe(mMatchPositions), positions);
 }
 
 ECode SmartDialNameMatcher::SetQuery(
@@ -398,7 +407,7 @@ ECode SmartDialNameMatcher::GetNameMatchPositionsInString(
     /* [out] */ String* result)
 {
     VALIDATE_NOT_NULL(result);
-    *result = mNameMatchMask
+    *result = mNameMatchMask;
     return NOERROR;
 }
 
@@ -406,7 +415,7 @@ ECode SmartDialNameMatcher::GetNumberMatchPositionsInString(
     /* [out] */ String* result)
 {
     VALIDATE_NOT_NULL(result);
-    *result = mPhoneNumberMatchMask
+    *result = mPhoneNumberMatchMask;
     return NOERROR;
 }
 
@@ -414,7 +423,7 @@ ECode SmartDialNameMatcher::GetQuery(
     /* [out] */ String* result)
 {
     VALIDATE_NOT_NULL(result);
-    *result = mQuery
+    *result = mQuery;
     return NOERROR;
 }
 

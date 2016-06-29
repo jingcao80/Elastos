@@ -1,8 +1,26 @@
 #ifndef __ELASTOS_APPS_DIALER_LIST_TILEINTERACTIONTEASERVIEW_H__
 #define __ELASTOS_APPS_DIALER_LIST_TILEINTERACTIONTEASERVIEW_H__
 
-namespace Elastos{
-namespace Apps{
+#include "_Elastos.Apps.Dialer.h"
+#include <elastos/droid/widget/FrameLayout.h>
+#include <elastos/droid/os/Runnable.h>
+#include "Elastos.Droid.View.h"
+#include "Elastos.Droid.Widget.h"
+
+using Elastos::Droid::Animation::IAnimator;
+using Elastos::Droid::Animation::IAnimatorListener;
+using Elastos::Droid::Animation::IAnimatorUpdateListener;
+using Elastos::Droid::Animation::IValueAnimator;
+using Elastos::Droid::Content::IContext;
+using Elastos::Droid::Os::Runnable;
+using Elastos::Droid::Utility::IAttributeSet;
+using Elastos::Droid::View::IViewOnClickListener;
+using Elastos::Droid::Widget::FrameLayout;
+using Elastos::Droid::Widget::IImageView;
+using Elastos::Droid::Widget::ITextView;
+
+namespace Elastos {
+namespace Apps {
 namespace Dialer {
 namespace List {
 
@@ -19,7 +37,7 @@ private:
         , public IViewOnClickListener
     {
     public:
-        CAR_INTERFACE_DECL()
+        CAR_INTERFACE_DECL();
 
         DismissClickListener(
             /* [in] */ TileInteractionTeaserView* host);
@@ -72,7 +90,7 @@ private:
         , public IAnimatorListener
     {
     public:
-        CAR_INTERFACE_DECL()
+        CAR_INTERFACE_DECL();
 
         HeightAnimatorListener(
             /* [in] */ TileInteractionTeaserView* host);

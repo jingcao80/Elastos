@@ -1,6 +1,6 @@
 
-#include "CSpecialCharSequenceMgr.h"
-#include "SpecialCharSequenceMgr.h"
+#include "elastos/apps/dialer/CSpecialCharSequenceMgr.h"
+#include "elastos/apps/dialer/SpecialCharSequenceMgr.h"
 
 namespace Elastos {
 namespace Apps {

@@ -4,9 +4,14 @@
 
 #include "_Elastos_Apps_Dialer_Interactions_CPhoneDisambiguationDialogFragmentHelper.h"
 #include <elastos/core/Singleton.h>
+#include "Elastos.Droid.App.h"
+#include "Elastos.CoreLibrary.Utility.h"
 
-namespace Elastos{
-namespace Apps{
+using Elastos::Droid::App::IFragmentManager;
+using Elastos::Utility::IArrayList;
+
+namespace Elastos {
+namespace Apps {
 namespace Dialer {
 namespace Interactions {
 
@@ -15,9 +20,9 @@ CarClass(CPhoneDisambiguationDialogFragmentHelper)
     , public IPhoneDisambiguationDialogFragmentHelper
 {
 public:
-    CAR_INTERFACE_DECL()
+    CAR_INTERFACE_DECL();
 
-    CAR_SINGLETON_DECL()
+    CAR_SINGLETON_DECL();
 
     CARAPI Show(
         /* [in] */ IFragmentManager* fragmentManager,

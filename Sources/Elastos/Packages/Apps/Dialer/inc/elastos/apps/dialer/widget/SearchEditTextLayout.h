@@ -1,10 +1,31 @@
 #ifndef __ELASTOS_APPS_DIALER_WIDGET_SEARCHEDITTEXTLAYOUT_H__
 #define __ELASTOS_APPS_DIALER_WIDGET_SEARCHEDITTEXTLAYOUT_H__
 
-namespace Elastos{
-namespace Apps{
-namespace Dialer{
-namespace Widget{
+#include "_Elastos.Apps.Dialer.h"
+#include <elastos/core/Object.h>
+#include <elastos/droid/widget/FrameLayout.h>
+#include "Elastos.Droid.Animation.h"
+#include "Elastos.Droid.Content.h"
+#include "Elastos.Droid.Utility.h"
+#include "Elastos.Droid.View.h"
+#include "Elastos.Droid.Widget.h"
+
+using Elastos::Droid::Animation::IAnimatorUpdateListener;
+using Elastos::Droid::Animation::IValueAnimator;
+using Elastos::Droid::Content::IContext;
+using Elastos::Droid::Utility::IAttributeSet;
+using Elastos::Droid::View::IKeyEvent;
+using Elastos::Droid::View::IView;
+using Elastos::Droid::View::IViewOnClickListener;
+using Elastos::Droid::View::IViewOnFocusChangeListener;
+using Elastos::Droid::View::IViewOnKeyListener;
+using Elastos::Droid::Widget::FrameLayout;
+using Elastos::Droid::Widget::IEditText;
+
+namespace Elastos {
+namespace Apps {
+namespace Dialer {
+namespace Widget {
 
 class SearchEditTextLayout
     : public FrameLayout
@@ -16,7 +37,7 @@ private:
         , public IViewOnFocusChangeListener
     {
     public:
-        CAR_INTERFACE_DECL()
+        CAR_INTERFACE_DECL();
 
         SearchViewFocusChangeListener(
             /* [in] */ SearchEditTextLayout* host);
@@ -35,7 +56,7 @@ private:
         , public IViewOnClickListener
     {
     public:
-        CAR_INTERFACE_DECL()
+        CAR_INTERFACE_DECL();
 
         SearchCloseButtonClickListener(
             /* [in] */ SearchEditTextLayout* host);
@@ -53,7 +74,7 @@ private:
         , public IViewOnClickListener
     {
     public:
-        CAR_INTERFACE_DECL()
+        CAR_INTERFACE_DECL();
 
         SearchBackButtonClickListener(
             /* [in] */ SearchEditTextLayout* host);
@@ -68,10 +89,10 @@ private:
 
     class AnimatorUpdateListener
         : public Object
-        , pulbic IAnimatorUpdateListener
+        , public IAnimatorUpdateListener
     {
     public:
-        CAR_INTERFACE_DECL()
+        CAR_INTERFACE_DECL();
 
         AnimatorUpdateListener(
             /* [in] */ SearchEditTextLayout* host);
@@ -85,7 +106,7 @@ private:
     };
 
 public:
-    CAR_INTERFACE_DECL()
+    CAR_INTERFACE_DECL();
 
     SearchEditTextLayout();
 

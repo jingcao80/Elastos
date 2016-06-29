@@ -4,8 +4,8 @@
 #include "_Elastos_Apps_Dialer_Dialpad_CSmartDialNameMatcherHelper.h"
 #include <elastos/core/Singleton.h>
 
-namespace Elastos{
-namespace Apps{
+namespace Elastos {
+namespace Apps {
 namespace Dialer {
 namespace Dialpad {
 
@@ -14,9 +14,9 @@ CarClass(CSmartDialNameMatcherHelper)
     , public ISmartDialNameMatcherHelper
 {
 public:
-    CAR_INTERFACE_DECL()
+    CAR_INTERFACE_DECL();
 
-    CAR_SINGLETON_DECL()
+    CAR_SINGLETON_DECL();
 
     /**
      * Strips a phone number of unnecessary characters (spaces, dashes, etc.)

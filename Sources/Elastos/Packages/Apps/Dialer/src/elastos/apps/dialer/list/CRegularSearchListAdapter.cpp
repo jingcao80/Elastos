@@ -1,5 +1,5 @@
 
-#include "list/CRegularSearchListAdapter.h"
+#include "elastos/apps/dialer/list/CRegularSearchListAdapter.h"
 
 namespace Elastos {
 namespace Apps {

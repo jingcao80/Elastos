@@ -1,5 +1,8 @@
 
-#include "list/RemoveView.h"
+#include "elastos/apps/dialer/list/RemoveView.h"
+#include "R.h"
+
+using Elastos::Droid::Content::Res::IResources;
 
 namespace Elastos {
 namespace Apps {

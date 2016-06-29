@@ -1,6 +1,6 @@
 
-#include "dialpad/CSmartDialNameMatcherHelper.h"
-#include "dialpad/SmartDialNameMatcher.h"
+#include "elastos/apps/dialer/dialpad/CSmartDialNameMatcherHelper.h"
+#include "elastos/apps/dialer/dialpad/SmartDialNameMatcher.h"
 
 namespace Elastos {
 namespace Apps {

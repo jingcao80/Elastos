@@ -1,5 +1,5 @@
 
-#include "list/CRegularSearchFragment.h"
+#include "elastos/apps/dialer/list/CRegularSearchFragment.h"
 
 namespace Elastos {
 namespace Apps {

@@ -1,5 +1,8 @@
 
-#include "DialerApplication.h"
+#include "elastos/apps/dialer/DialerApplication.h"
+#include "Elastos.Droid.Content.h"
+
+using Elastos::Droid::Content::IContext;
 
 namespace Elastos {
 namespace Apps {
@@ -22,17 +25,18 @@ ECode DialerApplication::GetSystemService(
     /* [out] */ IInterface** object)
 {
     VALIDATE_NOT_NULL(object);
-    if (IContactPhotoManager::CONTACT_PHOTO_SERVICE.Equals(name)) {
-        if (mContactPhotoManager == NULL) {
-            assert(0 && "TODO");
-            // mContactPhotoManager = ContactPhotoManager::CreateContactPhotoManager(this);
-            RegisterComponentCallbacks(mContactPhotoManager);
-            mContactPhotoManager->PreloadPhotosInBackground();
-        }
-        *object = mContactPhotoManager;
-        REFCOUNT_ADD(*object);
-        return NOERROR;
-    }
+    assert(0 && "TODO");
+    // if (IContactPhotoManager::CONTACT_PHOTO_SERVICE.Equals(name)) {
+    //     if (mContactPhotoManager == NULL) {
+    //         assert(0 && "TODO");
+    //         // mContactPhotoManager = ContactPhotoManager::CreateContactPhotoManager(this);
+    //         RegisterComponentCallbacks(mContactPhotoManager);
+    //         mContactPhotoManager->PreloadPhotosInBackground();
+    //     }
+    //     *object = mContactPhotoManager;
+    //     REFCOUNT_ADD(*object);
+    //     return NOERROR;
+    // }
 
     return Application::GetSystemService(name, object);
 }

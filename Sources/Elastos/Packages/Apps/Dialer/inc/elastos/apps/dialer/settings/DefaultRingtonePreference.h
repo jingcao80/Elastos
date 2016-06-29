@@ -1,8 +1,20 @@
 #ifndef __ELASTOS_APPS_DIALER_SETTINGS_DEFAULTRINGTONEPREFERENCE_H__
 #define __ELASTOS_APPS_DIALER_SETTINGS_DEFAULTRINGTONEPREFERENCE_H__
 
-namespace Elastos{
-namespace Apps{
+#include "_Elastos.Apps.Dialer.h"
+#include "elastos/droid/prefernece.RingtonePreference.h"
+#include "Elastos.Droid.Content.h"
+#include "Elastos.Droid.Net.h"
+#include "Elastos.Droid.Utility.h"
+
+using Elastos::Droid::Content::IContext;
+using Elastos::Droid::Content::IIntent;
+using Elastos::Droid::Net::IUri;
+using Elastos::Droid::Preference::RingtonePreference;
+using Elastos::Droid::Utility::IAttributeSet;
+
+namespace Elastos {
+namespace Apps {
 namespace Dialer {
 namespace Settings {
 
@@ -14,11 +26,11 @@ class DefaultRingtonePreference
     , public IDefaultRingtonePreference
 {
 public:
-    CAR_INTERFACE_DECL()
+    CAR_INTERFACE_DECL();
 
     CARAPI constructor(
         /* [in] */ IContext* context,
-        /* [in] */ AttributeSet attrs);
+        /* [in] */ IAttributeSet* attrs);
 
 protected:
     // @Override

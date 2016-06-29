@@ -1,6 +1,6 @@
 
-#include "interactions/CPhoneDisambiguationDialogFragmentHelper.h"
-#include "interactions/PhoneNumberInteraction.h"
+#include "elastos/apps/dialer/interactions/CPhoneDisambiguationDialogFragmentHelper.h"
+#include "elastos/apps/dialer/interactions/PhoneNumberInteraction.h"
 
 namespace Elastos {
 namespace Apps {

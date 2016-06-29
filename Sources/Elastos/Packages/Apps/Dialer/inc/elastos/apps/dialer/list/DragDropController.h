@@ -1,8 +1,16 @@
 #ifndef __ELASTOS_APPS_DIALER_LIST_DRAGDROPCONTROLLER_H__
 #define __ELASTOS_APPS_DIALER_LIST_DRAGDROPCONTROLLER_H__
 
-namespace Elastos{
-namespace Apps{
+#include "_Elastos.Apps.Dialer.h"
+#include <elastos/core/Object.h>
+#include "Elastos.Droid.View.h"
+#include "Elastos.CoreLibrary.Utility.h"
+
+using Elastos::Droid::View::IView;
+using Elastos::Utility::IList;
+
+namespace Elastos {
+namespace Apps {
 namespace Dialer {
 namespace List {
 
@@ -15,12 +23,12 @@ class DragDropController
     , public IDragDropController
 {
 public:
-    CAR_INTERFACE_DECL()
+    CAR_INTERFACE_DECL();
 
     DragDropController();
 
     CARAPI constructor(
-        /* [in] */ iDragItemContainer* dragItemContainer);
+        /* [in] */ IDragItemContainer* dragItemContainer);
 
     /**
      * @return True if the drag is started, false if the drag is cancelled for some reason.

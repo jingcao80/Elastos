@@ -2,12 +2,13 @@ TARGET_NAME= interactions
 TARGET_TYPE= lib
 
 INCLUDES += $(MAKEDIR)/../../../../../inc
+INCLUDES += $(MAKEDIR)/../../../../../
 INCLUDES += ../../../../../
 
 CAR_FLAGS += -n -u
 LUBE_FLAGS += -n -u
 
-SOURCES += CPhoneDisambiguationDialogFragmentHelper.cpp
-SOURCES += CPhoneNumberInteraction.cpp
-SOURCES += CUndemoteOutgoingCallReceiver.cpp
 SOURCES += PhoneNumberInteraction.cpp
+SOURCES += CPhoneNumberInteraction.cpp
+SOURCES += CPhoneDisambiguationDialogFragmentHelper.cpp
+SOURCES += CUndemoteOutgoingCallReceiver.cpp

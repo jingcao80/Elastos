@@ -1,7 +1,9 @@
-#ifndef __ELASTOS_APPS_DIALER_UTIL_EMPTYLOADER_H__
-#define __ELASTOS_APPS_DIALER_UTIL_EMPTYLOADER_H__
+#ifndef __ELASTOS_APPS_DIALER_UTIL_EXPIRABLECACHE_H__
+#define __ELASTOS_APPS_DIALER_UTIL_EXPIRABLECACHE_H__
 
 #include "_Elastos.Apps.Dialer.h"
+#include <elastos/core/Object.h>
+#include "Elastos.CoreLibrary.Utility.h"
 
 using Elastos::Utility::Concurrent::Atomic::IAtomicInteger32;
 
@@ -236,4 +238,4 @@ private:
 } // Apps
 } // Elastos
 
-#endif //__ELASTOS_APPS_DIALER_UTIL_EMPTYLOADER_H__
+#endif //__ELASTOS_APPS_DIALER_UTIL_EXPIRABLECACHE_H__

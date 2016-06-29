@@ -1,4 +1,7 @@
-#include "SpecialCharSequenceMgr.h"
+#include "elastos/apps/dialer/SpecialCharSequenceMgr.h"
+#include "Elastos.Droid.Telephony.h"
+
+using Elastos::Droid::Telephony::ITelephonyManager;
 
 namespace Elastos {
 namespace Apps {
@@ -12,10 +15,12 @@ CAR_INTERFACE_IMPL(SpecialCharSequenceMgr::SimContactQueryCookie, Object, IDialo
 
 SpecialCharSequenceMgr::SimContactQueryCookie::SimContactQueryCookie(
     /* [in] */ Int32 number,
-    /* [in] */ IQueryHandler* handler,
+    // TODO:
+    // /* [in] */ QueryHandler* handler,
     /* [in] */ Int32 token)
     : mContactNum(number)
-    , mHandler(handler)
+    // TODO:
+    // , mHandler(handler)
     , mToken(token)
 {}
 
@@ -48,7 +53,8 @@ CARAPI SpecialCharSequenceMgr::SimContactQueryCookie::OnCancel(
         mTextField = NULL;
 
         // Cancel the operation if possible.
-        mHandler->CancelOperation(mToken);
+        // TODO:
+        // mHandler->CancelOperation(mToken);
         return NOERROR;
     }
 }
@@ -56,79 +62,80 @@ CARAPI SpecialCharSequenceMgr::SimContactQueryCookie::OnCancel(
 //================================================================
 // SpecialCharSequenceMgr::QueryHandler
 //================================================================
-ECode SpecialCharSequenceMgr::QueryHandler::constructor(
-    /* [in] */ IContentResolver* cr)
-{
-    return NoNullCursorAsyncQueryHandler::constructor(cr);
-}
+// TODO:
+// ECode SpecialCharSequenceMgr::QueryHandler::constructor(
+//     /* [in] */ IContentResolver* cr)
+// {
+//     return NoNullCursorAsyncQueryHandler::constructor(cr);
+// }
 
-ECode SpecialCharSequenceMgr::QueryHandler::OnNotNullableQueryComplete(
-    /* [in] */ Int32 token,
-    /* [in] */ IInterface* cookie,
-    /* [in] */ ICursor* cursor)
-{
-    // try {
-    sPreviousAdnQueryHandler = NULL;
-    if (mCanceled) {
-        return;
-    }
+// ECode SpecialCharSequenceMgr::QueryHandler::OnNotNullableQueryComplete(
+//     /* [in] */ Int32 token,
+//     /* [in] */ IInterface* cookie,
+//     /* [in] */ ICursor* cursor)
+// {
+//     // try {
+//     sPreviousAdnQueryHandler = NULL;
+//     if (mCanceled) {
+//         return;
+//     }
 
-    SimContactQueryCookie* sc = (SimContactQueryCookie*) cookie;
+//     SimContactQueryCookie* sc = (SimContactQueryCookie*) cookie;
 
-    // close the progress dialog.
-    sc->mProgressDialog->Dismiss();
+//     // close the progress dialog.
+//     sc->mProgressDialog->Dismiss();
 
-    // get the EditText to update or see if the request was cancelled.
-    AutoPtr<IEditText> text = sc->GetTextField();
+//     // get the EditText to update or see if the request was cancelled.
+//     AutoPtr<IEditText> text = sc->GetTextField();
 
-    // if the textview is valid, and the cursor is valid and postionable
-    // on the Nth number, then we update the text field and display a
-    // toast indicating the caller name.
-    Boolean succeeded;
-    if ((c != NULL) && (text != NULL) &&
-            (c->MoveToPosition(sc->mContactNum, &succeeded), succeeded)) {
-        Int32 columnIndex;
-        FAIL_GOTO(c->GetColumnIndexOrThrow(ADN_NAME_COLUMN_NAME, &columnIndex), exit);
-        String name;
-        c->GetString(columnIndex, &name);
-        FAIL_GOTO(c->GetColumnIndexOrThrow(ADN_PHONE_NUMBER_COLUMN_NAME, &columnIndex));
-        String number;
-        c->GetString(columnIndex, &number);
+//     // if the textview is valid, and the cursor is valid and postionable
+//     // on the Nth number, then we update the text field and display a
+//     // toast indicating the caller name.
+//     Boolean succeeded;
+//     if ((c != NULL) && (text != NULL) &&
+//             (c->MoveToPosition(sc->mContactNum, &succeeded), succeeded)) {
+//         Int32 columnIndex;
+//         FAIL_GOTO(c->GetColumnIndexOrThrow(ADN_NAME_COLUMN_NAME, &columnIndex), exit);
+//         String name;
+//         c->GetString(columnIndex, &name);
+//         FAIL_GOTO(c->GetColumnIndexOrThrow(ADN_PHONE_NUMBER_COLUMN_NAME, &columnIndex));
+//         String number;
+//         c->GetString(columnIndex, &number);
 
-        // fill the text in.
-        AutoPtr<ICharSequence> cs;
-        ITextView::Probe(text)->GetText((ICharSequence**)&cs);
-        CoreUtils::Unbox(cs).Replace(0, 0, number);
+//         // fill the text in.
+//         AutoPtr<ICharSequence> cs;
+//         ITextView::Probe(text)->GetText((ICharSequence**)&cs);
+//         CoreUtils::Unbox(cs).Replace(0, 0, number);
 
-        // display the name as a toast
-        AutoPtr<IContext> context;
-        sc->mProgressDialog->GetContext((IContext**)&context);
-        context->GetString(R::string::menu_callNumber, name, &name);
+//         // display the name as a toast
+//         AutoPtr<IContext> context;
+//         sc->mProgressDialog->GetContext((IContext**)&context);
+//         context->GetString(R::string::menu_callNumber, name, &name);
 
-        AutoPtr<IToastHelper> toastHelper;
-        CToastHelper::AcquireSingleton((IToastHelper**)&toastHelper);
-        AutoPtr<IToast> toast;
-        toastHelper->MakeText(context,
-                name,
-                IToast::LENGTH_SHORT, (IToast**)&toast);
-        toast->Show();
-    }
+//         AutoPtr<IToastHelper> toastHelper;
+//         CToastHelper::AcquireSingleton((IToastHelper**)&toastHelper);
+//         AutoPtr<IToast> toast;
+//         toastHelper->MakeText(context,
+//                 name,
+//                 IToast::LENGTH_SHORT, (IToast**)&toast);
+//         toast->Show();
+//     }
 
-exit:
-    assert(0 && "TODO");
-    // } finally {
-    //     MoreCloseables.closeQuietly(c);
-    // }
-    return NOERROR;
-}
+// exit:
+//     assert(0 && "TODO");
+//     // } finally {
+//     //     MoreCloseables.closeQuietly(c);
+//     // }
+//     return NOERROR;
+// }
 
-void SpecialCharSequenceMgr::QueryHandler::Cancel()
-{
-    mCanceled = TRUE;
-    // Ask AsyncQueryHandler to cancel the whole request. This will fails when the
-    // query already started.
-    CancelOperation(ADN_QUERY_TOKEN);
-}
+// void SpecialCharSequenceMgr::QueryHandler::Cancel()
+// {
+//     mCanceled = TRUE;
+//     // Ask AsyncQueryHandler to cancel the whole request. This will fails when the
+//     // query already started.
+//     CancelOperation(ADN_QUERY_TOKEN);
+// }
 
 //================================================================
 // SpecialCharSequenceMgr
@@ -139,7 +146,8 @@ const String SpecialCharSequenceMgr::SECRET_CODE_ACTION("android.provider.Teleph
 const String SpecialCharSequenceMgr::MMI_IMEI_DISPLAY("*#06#");
 const String SpecialCharSequenceMgr::MMI_REGULATORY_INFO_DISPLAY("*#07#");
 
-AutoPtr<IQueryHandler> SpecialCharSequenceMgr::sPreviousAdnQueryHandler;
+// TODO:
+// AutoPtr<QueryHandler> SpecialCharSequenceMgr::sPreviousAdnQueryHandler;
 
 const String SpecialCharSequenceMgr::ADN_PHONE_NUMBER_COLUMN_NAME("number");
 const String SpecialCharSequenceMgr::ADN_NAME_COLUMN_NAME("name");
@@ -196,10 +204,11 @@ void SpecialCharSequenceMgr::Cleanup()
         return;
     }
 
-    if (sPreviousAdnQueryHandler != NULL) {
-        sPreviousAdnQueryHandler->Cancel();
-        sPreviousAdnQueryHandler = NULL;
-    }
+    assert(0 && "TODO");
+    // if (sPreviousAdnQueryHandler != NULL) {
+    //     sPreviousAdnQueryHandler->Cancel();
+    //     sPreviousAdnQueryHandler = NULL;
+    // }
 }
 
 Boolean SpecialCharSequenceMgr::HandleSecretCode(
@@ -208,7 +217,7 @@ Boolean SpecialCharSequenceMgr::HandleSecretCode(
 {
     // Secret codes are in the form *#*#<code>#*#*
     Int32 len = input.GetLength();
-    if (len > 8 && input.StartsWith("*#*#") && input.EndsWith("#*#*")) {
+    if (len > 8 && input.StartWith("*#*#") && input.EndWith("#*#*")) {
         AutoPtr<IIntent> intent;
         CIntent::New(SECRET_CODE_ACTION,
                 Uri::Parse("android_secret_code://" + input.Substring(4, len - 4)),
@@ -263,42 +272,42 @@ Boolean SpecialCharSequenceMgr::HandleAdnEntry(
         // create the async query handler
         AutoPtr<IContentResolver> resolver;
         context->GetContentResolver((IContentResolver**)&resolver);
-        AutoPtr<IQueryHandler> handler;
-        CQueryHandler::New(resolver, (IQueryHandler**)&handler);
+        assert(0 && "TODO");
+        // AutoPtr<QueryHandler> handler = new QueryHandler(resolver);
 
         // create the cookie object
-        AutoPtr<SimContactQueryCookie> sc = new SimContactQueryCookie(
-                index - 1, handler, ADN_QUERY_TOKEN);
+        // AutoPtr<SimContactQueryCookie> sc = new SimContactQueryCookie(
+        //         index - 1, handler, ADN_QUERY_TOKEN);
 
-        // setup the cookie fields
-        sc->mContactNum = index - 1;
-        sc->SetTextField(textField);
+        // // setup the cookie fields
+        // sc->mContactNum = index - 1;
+        // sc->SetTextField(textField);
 
-        // create the progress dialog
-        CProgressDialog::New(context, (IProgressDialog**)&sc->mProgressDialog);
-        sc->mProgressDialog->SetTitle(R::string::simContacts_title);
-        String text;
-        context->GetText(R:;string::simContacts_emptyLoading, &text);
-        sc->mProgressDialog->SetMessage(text);
-        sc->mProgressDialog->SetIndeterminate(TRUE);
-        sc->mProgressDialog->SetCancelable(TRUE);
-        sc->mProgressDialog->SetOnCancelListener(sc);
-        AutoPtr<IWindow> window;
-        sc->mProgressDialog->GetWindow((IWindow**)&window);
-        window->AddFlags(IWindowManagerLayoutParams::FLAG_BLUR_BEHIND);
+        // // create the progress dialog
+        // CProgressDialog::New(context, (IProgressDialog**)&sc->mProgressDialog);
+        // sc->mProgressDialog->SetTitle(R::string::simContacts_title);
+        // String text;
+        // context->GetText(R:;string::simContacts_emptyLoading, &text);
+        // sc->mProgressDialog->SetMessage(text);
+        // sc->mProgressDialog->SetIndeterminate(TRUE);
+        // sc->mProgressDialog->SetCancelable(TRUE);
+        // sc->mProgressDialog->SetOnCancelListener(sc);
+        // AutoPtr<IWindow> window;
+        // sc->mProgressDialog->GetWindow((IWindow**)&window);
+        // window->AddFlags(IWindowManagerLayoutParams::FLAG_BLUR_BEHIND);
 
-        // display the progress dialog
-        sc->mProgressDialog->Show();
+        // // display the progress dialog
+        // sc->mProgressDialog->Show();
 
         // run the query.
-        handler->StartQuery(ADN_QUERY_TOKEN, sc, Uri::Parse("content://icc/adn"),
-                new String[]{ADN_PHONE_NUMBER_COLUMN_NAME}, NULL, NULL, NULL);
+        // handler->StartQuery(ADN_QUERY_TOKEN, sc, Uri::Parse("content://icc/adn"),
+        //         new String[]{ADN_PHONE_NUMBER_COLUMN_NAME}, NULL, NULL, NULL);
 
-        if (sPreviousAdnQueryHandler != NULL) {
-            // It is harmless to call cancel() even after the handler's gone.
-            sPreviousAdnQueryHandler->Cancel();
-        }
-        sPreviousAdnQueryHandler = handler;
+        // if (sPreviousAdnQueryHandler != NULL) {
+        //     // It is harmless to call cancel() even after the handler's gone.
+        //     sPreviousAdnQueryHandler->Cancel();
+        // }
+        // sPreviousAdnQueryHandler = handler;
         return TRUE;
         // } catch (NumberFormatException ex) {
         //     // Ignore

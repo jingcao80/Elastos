@@ -1,5 +1,12 @@
 
-#include "voicemail/VoicemailStatusHelperImpl.h"
+#include "elastos/apps/dialer/voicemail/VoicemailStatusHelperImpl.h"
+#include "Elastos.Droid.Net.h"
+
+using Elastos::Droid::Net::IUri;
+using Elastos::Utility::CArrayList;
+using Elastos::Utility::ICollections;
+using Elastos::Utility::CCollections;
+using Elastos::Utility::IIterator;
 
 namespace Elastos {
 namespace Apps {
@@ -253,7 +260,8 @@ AutoPtr<MessageStatusWithPriority> VoicemailStatusHelperImpl::GetMessageForStatu
     else if (action == &Action::CONFIGURE_VOICEMAIL) {
         String str;
         cursor->GetString(SETTINGS_URI_INDEX, &str);
-        actionUri = UriUtils::parseUriOrNull(str);
+        assert(0 && "TODO");
+        // actionUri = UriUtils::ParseUriOrNull(str);
         // If there is no settings URI, there is no point in showing the notification.
         if (actionUri == NULL) {
             return NULL;

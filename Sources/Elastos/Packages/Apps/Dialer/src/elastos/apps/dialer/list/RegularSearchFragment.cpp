@@ -1,5 +1,9 @@
 
-#include "list/RegularSearchFragment.h"
+#include "elastos/apps/dialer/list/RegularSearchFragment.h"
+#include "elastos/apps/dialer/CObjectFactory.h"
+
+using Elastos::Apps::Dialer::IObjectFactory;
+using Elastos::Apps::Dialer::CObjectFactory;
 
 namespace Elastos {
 namespace Apps {
@@ -40,22 +44,24 @@ ECode RegularSearchFragment::OnCreateView(
     SearchFragment::OnCreateView(inflater, container);
     AutoPtr<IListView> listView;
     GetListView((IListView**)&listView);
-    IPinnedHeaderListView::Probe(listView)->SetScrollToSectionOnHeaderTouch(TRUE);
+    assert(0 && "TODO");
+    // IPinnedHeaderListView::Probe(listView)->SetScrollToSectionOnHeaderTouch(TRUE);
     return NOERROR;
 }
 
-AutoPtr<IContactEntryListAdapter> RegularSearchFragment::CreateListAdapter()
-{
-    AutoPtr<IActivity> activity;
-    GetActivity(&activity);
-    AutoPtr<IRegularSearchListAdapter> adapter;
-    CRegularSearchListAdapter::New(activity, (IRegularSearchListAdapter**)&adapter);
-    adapter->SetDisplayPhotos(TRUE);
-    Boolean result;
-    UsesCallableUri(&result);
-    adapter->SetUseCallableUri(result);
-    return adapter;
-}
+// TODO:
+// AutoPtr<IContactEntryListAdapter> RegularSearchFragment::CreateListAdapter()
+// {
+//     AutoPtr<IActivity> activity;
+//     GetActivity(&activity);
+//     AutoPtr<IRegularSearchListAdapter> adapter;
+//     CRegularSearchListAdapter::New(activity, (IRegularSearchListAdapter**)&adapter);
+//     adapter->SetDisplayPhotos(TRUE);
+//     Boolean result;
+//     UsesCallableUri(&result);
+//     adapter->SetUseCallableUri(result);
+//     return adapter;
+// }
 
 ECode RegularSearchFragment::CacheContactInfo(
     /* [in] */ Int32 position)

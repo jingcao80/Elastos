@@ -1,8 +1,11 @@
-#ifndef __ELASTOS_APPS_DIALER_DATABASE_DIALERDATABASEHELPERHELPER_H__
-#define __ELASTOS_APPS_DIALER_DATABASE_DIALERDATABASEHELPERHELPER_H__
+#ifndef __ELASTOS_APPS_DIALER_DATABASE_CDIALERDATABASEHELPERHELPER_H__
+#define __ELASTOS_APPS_DIALER_DATABASE_CDIALERDATABASEHELPERHELPER_H__
 
 #include "_Elastos_Apps_Dialer_Database_CDialerDatabaseHelperHelper.h"
 #include <elastos/core/Singleton.h>
+#include "Elastos.Droid.Content.h"
+
+using Elastos::Droid::Content::IContext;
 
 namespace Elastos {
 namespace Apps {
@@ -32,4 +35,4 @@ public:
 } // Apps
 } // Elastos
 
-#endif //__ELASTOS_APPS_DIALER_DATABASE_DIALERDATABASEHELPERHELPER_H__
+#endif //__ELASTOS_APPS_DIALER_DATABASE_CDIALERDATABASEHELPERHELPER_H__

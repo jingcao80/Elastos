@@ -1,10 +1,30 @@
 #ifndef __ELASTOS_APPS_DIALER_LIST_SHORTCUTCARDSADAPTER_H__
 #define __ELASTOS_APPS_DIALER_LIST_SHORTCUTCARDSADAPTER_H__
 
-#include "BaseAdapter.h"
+#include "_Elastos.Apps.Dialer.h"
+#include "elastos/droid/database/DataSetObserver.h"
+#include "elastos/droid/widget/BaseAdapter.h"
+#include <elastos/droid/widget/FrameLayout.h>
+#include "Elastos.Droid.Content.h"
+#include "Elastos.Droid.Graphics.h"
+#include "Elastos.Droid.View.h"
 
-namespace Elastos{
-namespace Apps{
+using Elastos::Droid::Content::IContext;
+using Elastos::Droid::Database::ICursor;
+using Elastos::Droid::Database::DataSetObserver;
+using Elastos::Droid::Database::IDataSetObserver;
+using Elastos::Droid::Graphics::IRect;
+using Elastos::Droid::View::IMotionEvent;
+using Elastos::Droid::View::IView;
+using Elastos::Droid::View::IViewGroup;
+using Elastos::Droid::Widget::BaseAdapter;
+using Elastos::Droid::Widget::FrameLayout;
+using Elastos::Apps::Dialer::CallLog::ICallLogAdapter;
+using Elastos::Apps::Dialer::CallLog::ICallLogQueryHandler;
+using Elastos::Apps::Dialer::CallLog::ICallLogQueryHandlerListener;
+
+namespace Elastos {
+namespace Apps {
 namespace Dialer {
 namespace List {
 
@@ -25,7 +45,7 @@ public:
         , public ISwipeHelperCallback
     {
     public:
-        CAR_INTERFACE_DECL()
+        CAR_INTERFACE_DECL();
 
         SwipeableShortcutCard(
             /* [in] */ ShortcutCardsAdapter* host);
@@ -65,15 +85,15 @@ public:
 
         // @Override
         CARAPI OnInterceptTouchEvent(
-            /* [in] */ IMotionEvent ev,
+            /* [in] */ IMotionEvent* ev,
             /* [out] */ Boolean* result);
 
         // @Override
         CARAPI OnTouchEvent(
-            /* [in] */ IMotionEvent ev,
+            /* [in] */ IMotionEvent* ev,
             /* [out] */ Boolean* result);
 
-        CARPAI_(void) SetOnItemSwipeListener(
+        CARAPI_(void) SetOnItemSwipeListener(
             /* [in] */ ISwipeHelperOnItemGestureListener* listener);
 
         /**
@@ -83,14 +103,14 @@ public:
          *         clipped. If 0, the entire card is displayed. If 0.5f, each edge is hidden
          *         entirely, thus obscuring the entire card.
          */
-        CARPAI_(void) ClipCard(
+        CARAPI_(void) ClipCard(
             /* [in] */ Float ratioHidden);
 
     private:
-        CARPAI_(void) PrepareChildView(
+        CARAPI_(void) PrepareChildView(
             /* [in] */ IView* view);
 
-        CARPAI_(void) SetChildrenOpacity(
+        CARAPI_(void) SetChildrenOpacity(
             /* [in] */ IViewGroup* viewGroup,
             /* [in] */ Float alpha);
 
@@ -123,7 +143,7 @@ private:
         , public ISwipeHelperOnItemGestureListener
     {
     public:
-        CAR_INTERFACE_DECL()
+        CAR_INTERFACE_DECL();
 
         CallLogOnItemSwipeListener(
             /* [in] */ ShortcutCardsAdapter* host);
@@ -145,7 +165,7 @@ private:
 
     class CallLogQueryHandlerListener
         : public Object
-        : public ICallLogQueryHandlerListener
+        , public ICallLogQueryHandlerListener
     {
     public:
         CAR_INTERFACE_DECL()
@@ -167,7 +187,7 @@ private:
     };
 
 public:
-    CAR_INTERFACE_DECL()
+    CAR_INTERFACE_DECL();
 
     ShortcutCardsAdapter();
 

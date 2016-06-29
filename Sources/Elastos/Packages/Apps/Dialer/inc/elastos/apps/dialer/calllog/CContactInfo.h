@@ -3,6 +3,10 @@
 #define __ELASTOS_APPS_DIALER_CALLLOG_CCONTACTINFO_H__
 
 #include "_Elastos_Apps_Dialer_CallLog_CContactInfo.h"
+#include <elastos/core/Object.h>
+#include "Elastos.Droid.Net.h"
+
+using Elastos::Droid::Net::IUri;
 
 namespace Elastos {
 namespace Apps {
@@ -17,9 +21,9 @@ CarClass(CContactInfo)
     , public IContactInfo
 {
 public:
-    CAR_INTERFACE_DECL()
+    CAR_INTERFACE_DECL();
 
-    CAR_OBJECT_DECL()
+    CAR_OBJECT_DECL();
 
     CContactInfo();
 

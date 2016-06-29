@@ -1,6 +1,40 @@
 #ifndef __ELASTOS_APPS_DIALER_INTERACTIONS_PHONENUMBERINTERACTION_H__
 #define __ELASTOS_APPS_DIALER_INTERACTIONS_PHONENUMBERINTERACTION_H__
 
+#include "_Elastos.Apps.Dialer.h"
+#include <elastos/droid/app/DialogFragment.h>
+#include <elastos/droid/widget/ArrayAdapter.h>
+#include <elastos/core/Object.h>
+#include "Elastos.Droid.App.h"
+#include "Elastos.Droid.Content.h"
+#include "Elastos.Droid.Database.h"
+#include "Elastos.Droid.Net.h"
+#include "Elastos.Droid.Os.h"
+#include "Elastos.Droid.View.h"
+#include "Elastos.Droid.Widget.h"
+#include "Elastos.CoreLibrary.Utility.h"
+
+using Elastos::Droid::App::DialogFragment;
+using Elastos::Droid::App::IDialog;
+using Elastos::Droid::App::IFragmentManager;
+using Elastos::Droid::Content::IContext;
+using Elastos::Droid::Content::ICursorLoader;
+using Elastos::Droid::Content::IDialogInterface;
+using Elastos::Droid::Content::IDialogInterfaceOnDismissListener;
+using Elastos::Droid::Content::IDialogInterfaceOnClickListener;
+using Elastos::Droid::Content::ILoader;
+using Elastos::Droid::Content::ILoaderOnLoadCompleteListener;
+using Elastos::Droid::Database::ICursor;
+using Elastos::Droid::Net::IUri;
+using Elastos::Droid::Os::IBundle;
+using Elastos::Droid::View::IView;
+using Elastos::Droid::View::IViewGroup;
+using Elastos::Droid::Widget::ArrayAdapter;
+using Elastos::Droid::Widget::IListAdapter;
+using Elastos::Utility::IList;
+using Elastos::Utility::IArrayList;
+using Elastos::Apps::Dialer::Activity::ITransactionSafeActivity;
+
 namespace Elastos{
 namespace Apps{
 namespace Dialer {
@@ -18,17 +52,17 @@ public:
     class PhoneItem
         : public Object
         , public IParcelable
-        , public ICollapserCollapsible
+        // TODO:
+        // , public ICollapserCollapsible
     {
     public:
-        CAR_INTERFACE_DECL()
+        CAR_INTERFACE_DECL();
 
         PhoneItem();
 
         // @Override
         CARAPI WriteToParcel(
-            /* [in] */ IParcel* dest,
-            /* [in] */ Int32 flags);
+            /* [in] */ IParcel* dest);
 
         CARAPI ReadFromParcel(
             /* [in] */ IParcel* source);
@@ -73,10 +107,9 @@ public:
         : public DialogFragment
         , public IPhoneDisambiguationDialogFragment
         , public IDialogInterfaceOnClickListener
-        , public IDialogInterfaceOnDismissListener
     {
     public:
-        CAR_INTERFACE_DECL()
+        CAR_INTERFACE_DECL();
 
         static CARAPI_(void) Show(
             /* [in] */ IFragmentManager* fragmentManager,
@@ -126,6 +159,8 @@ private:
     };
 
 public:
+    CAR_INTERFACE_DECL();
+
     /**
      * Constructs a new {@link PhoneNumberInteraction}. The constructor takes in a {@link Context}
      * instead of a {@link TransactionSafeActivity} for testing purposes to verify the functionality
@@ -164,7 +199,7 @@ public:
     // @Override
     CARAPI OnLoadComplete(
         /* [in] */ ILoader* loader,
-        /* [in] */ ICursor* cursor);
+        /* [in] */ IInterface* cursor);
 
     /**
      * Start call action using given contact Uri. If there are multiple candidates for the phone
@@ -177,7 +212,7 @@ public:
      * (built from {@link Data#CONTENT_URI}). Contact Uri may show the disambiguation dialog while
      * data Uri won't.
      */
-    CARAPI_(void) StartInteractionForPhoneCall(
+    static CARAPI_(void) StartInteractionForPhoneCall(
         /* [in] */ ITransactionSafeActivity* activity,
         /* [in] */ IUri* uri);
 
@@ -196,7 +231,7 @@ public:
      * disambiguation dialog will be shown regardless of whether or not a primary phone number
      * is available.
      */
-    CARAPI_(void) StartInteractionForPhoneCall(
+    static CARAPI_(void) StartInteractionForPhoneCall(
         /* [in] */ ITransactionSafeActivity* activity,
         /* [in] */ IUri* uri,
         /* [in] */ Boolean useDefault);
@@ -209,7 +244,7 @@ public:
      * appended to the Intent initiating phone call. See comments in Phone package (PhoneApp)
      * for more detail.
      */
-    CARAPI_(void) StartInteractionForPhoneCall(
+    static CARAPI_(void) StartInteractionForPhoneCall(
         /* [in] */ ITransactionSafeActivity* activity,
         /* [in] */ IUri* uri,
         /* [in] */ const String& callOrigin);
@@ -226,7 +261,7 @@ public:
      * (built from {@link Data#CONTENT_URI}). Contact Uri may show the disambiguation dialog while
      * data Uri won't.
      */
-    CARAPI_(void) StartInteractionForTextMessage(
+    static CARAPI_(void) StartInteractionForTextMessage(
         /* [in] */ ITransactionSafeActivity* activity,
         /* [in] */ IUri* uri);
 
@@ -257,6 +292,8 @@ private:
 
     CARAPI_(void) OnDismiss();
 private:
+    static const String TAG;
+
     static const String PHONE_NUMBER_PROJECTION[];
 
     static const Int32 _ID; // = 0;
@@ -279,7 +316,7 @@ private:
     Boolean mUseDefault;
 
     static const Int32 UNKNOWN_CONTACT_ID; // = -1;
-    Int64 mContactId = UNKNOWN_CONTACT_ID;
+    Int64 mContactId; //  = UNKNOWN_CONTACT_ID;
 
     AutoPtr<ICursorLoader> mLoader;
 };

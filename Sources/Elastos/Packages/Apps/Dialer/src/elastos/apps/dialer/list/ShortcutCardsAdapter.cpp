@@ -1,5 +1,25 @@
 
-#include "list/ShortcutCardsAdapter.h"
+#include "elastos/apps/dialer/list/ShortcutCardsAdapter.h"
+#include "elastos/apps/dialer/list/CSwipeHelper.h"
+#include "elastos/apps/dialer/calllog/CallLogListItemView.h"
+#include "elastos/apps/dialer/calllog/CallLogNotificationsHelper.h"
+#include "elastos/apps/dialer/calllog/CCallLogQueryHandler.h"
+#include "Elastos.Droid.Utility.h"
+#include <elastos/core/CoreUtils.h>
+#include "R.h"
+
+using Elastos::Droid::Content::Res::IResources;
+using Elastos::Droid::View::IViewConfigurationHelper;
+using Elastos::Droid::View::CViewConfigurationHelper;
+using Elastos::Droid::Utility::IDisplayMetrics;
+using Elastos::Droid::Widget::IFrameLayoutLayoutParams;
+using Elastos::Droid::Widget::ILinearLayout;
+using Elastos::Core::ICharSequence;
+using Elastos::Core::CoreUtils;
+using Elastos::Apps::Dialer::CallLog::CallLogListItemView;
+using Elastos::Apps::Dialer::CallLog::CallLogNotificationsHelper;
+using Elastos::Apps::Dialer::CallLog::CCallLogQueryHandler;
+
 
 namespace Elastos {
 namespace Apps {

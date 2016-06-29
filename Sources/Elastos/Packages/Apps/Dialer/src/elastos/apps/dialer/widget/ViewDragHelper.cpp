@@ -1,5 +1,19 @@
 
-#include "widget/ViewDragHelper.h"
+#include "elastos/apps/dialer/widget/ViewDragHelper.h"
+#include "Elastos.Droid.Utility.h"
+#include <elastos/utility/Arrays.h>
+#include <elastos/utility/logging/Logger.h>
+#include <elastos/core/Math.h>
+
+using Elastos::Droid::Content::Res::IResources;
+using Elastos::Droid::Utility::IDisplayMetrics;
+using Elastos::Droid::View::IViewConfiguration;
+using Elastos::Droid::View::IViewConfigurationHelper;
+using Elastos::Droid::View::CViewConfigurationHelper;
+using Elastos::Droid::View::IVelocityTrackerHelper;
+using Elastos::Droid::View::CVelocityTrackerHelper;
+using Elastos::Utility::Logging::Logger;
+using Elastos::Utility::Arrays;
 
 namespace Elastos {
 namespace Apps {
@@ -395,10 +409,10 @@ Int32 ViewDragHelper::ComputeSettleDuration(
 {
     xvel = ClampMag(xvel, (int) mMinVelocity, (int) mMaxVelocity);
     yvel = ClampMag(yvel, (int) mMinVelocity, (int) mMaxVelocity);
-    Int32 absDx = Math::Abs(dx);
-    Int32 absDy = Math::Abs(dy);
-    Int32 absXVel = Math::Abs(xvel);
-    Int32 absYVel = Math::Abs(yvel);
+    Int32 absDx = Elastos::Core::Math::Abs(dx);
+    Int32 absDy = Elastos::Core::Math::Abs(dy);
+    Int32 absXVel = Elastos::Core::Math::Abs(xvel);
+    Int32 absYVel = Elastos::Core::Math::Abs(yvel);
     Int32 addedVel = absXVel + absYVel;
     Int32 addedDistance = absDx + absDy;
 
@@ -428,20 +442,20 @@ Int32 ViewDragHelper::ComputeAxisDuration(
     Int32 width;
     mParentView->GetWidth(&width);
     Int32 halfWidth = width / 2;
-    Float distanceRatio = Math::Min(1f, (Float) Math::Abs(delta) / width);
+    Float distanceRatio = Elastos::Core::Math::Min(1f, (Float) Elastos::Core::Math::Abs(delta) / width);
     Float distance = halfWidth + halfWidth *
             DistanceInfluenceForSnapDuration(distanceRatio);
 
     Int32 duration;
-    velocity = Math::Abs(velocity);
+    velocity = Elastos::Core::Math::Abs(velocity);
     if (velocity > 0) {
-        duration = 4 * Math::Round(1000 * Math::Abs(distance / velocity));
+        duration = 4 * Elastos::Core::Math::Round(1000 * Elastos::Core::Math::Abs(distance / velocity));
     }
     else {
-        Float range = (Float) Math::Abs(delta) / motionRange;
+        Float range = (Float) Elastos::Core::Math::Abs(delta) / motionRange;
         duration = (Int32) ((range + 1) * BASE_SETTLE_DURATION);
     }
-    return Math::Min(duration, MAX_SETTLE_DURATION);
+    return Elastos::Core::Math::Min(duration, MAX_SETTLE_DURATION);
 }
 
 Int32 ViewDragHelper::ClampMag(
@@ -449,7 +463,7 @@ Int32 ViewDragHelper::ClampMag(
     /* [in] */ Int32 absMin,
     /* [in] */ Int32 absMax)
 {
-    Int32 absValue = Math::Abs(value);
+    Int32 absValue = Elastos::Core::Math::Abs(value);
     if (absValue < absMin) return 0;
     if (absValue > absMax) return value > 0 ? absMax : -absMax;
     return value;
@@ -460,7 +474,7 @@ Float ViewDragHelper::ClampMag(
     /* [in] */ Float absMin,
     /* [in] */ Float absMax)
 {
-    Float absValue = Math::Abs(value);
+    Float absValue = Elastos::Core::Math::Abs(value);
     if (absValue < absMin) return 0;
     if (absValue > absMax) return value > 0 ? absMax : -absMax;
     return value;
@@ -469,9 +483,9 @@ Float ViewDragHelper::ClampMag(
 Float ViewDragHelper::DistanceInfluenceForSnapDuration(
     /* [in] */ Float f)
 {
-    f -= 0.5f; // center the values about 0.
-    f *= 0.3f * Math::PI / 2.0f;
-    return (Float) Math::Sin(f);
+    f -= 0.5; // center the values about 0.
+    f *= 0.3 * Elastos::Core::Math::PI / 2.0;
+    return (Float) Elastos::Core::Math::Sin(f);
 }
 
 ECode ViewDragHelper::FlingCapturedView(
@@ -562,10 +576,10 @@ ECode ViewDragHelper::ContinueSettling(
         Int32 top;
         mCapturedView->GetTop(&top);
         if (y - top > 0) {
-            y = Math::Min(y, mFinalScrollY);
+            y = Elastos::Core::Math::Min(y, mFinalScrollY);
         }
         else {
-            y = Math::Max(y, mFinalScrollY);
+            y = Elastos::Core::Math::Max(y, mFinalScrollY);
         }
         Int32 dy = y - top;
 
@@ -612,7 +626,7 @@ ECode ViewDragHelper::GetVelocityMagnitude(
     // ScrollerCompat implementation changes.
     Float velocity;
     mScroller->GetCurrVelocity(&velocity);
-    *magnitude =  (Int32) Math::Abs(velocity);
+    *magnitude =  (Int32) Elastos::Core::Math::Abs(velocity);
     return NOERROR;
 }
 
@@ -832,7 +846,7 @@ ECode ViewDragHelper::ShouldInterceptTouchEvent(
     }
 
     if (mVelocityTracker == NULL) {
-        AutoPtr<IVelocityTrackerHelper> helper;
+    AutoPtr<IVelocityTrackerHelper> helper;
         CVelocityTrackerHelper::AcquireSingleton((IVelocityTrackerHelper**)&helper);
         helper->Obtain((IVelocityTracker**)&mVelocityTracker);
     }
@@ -1155,8 +1169,8 @@ Boolean ViewDragHelper::CheckNewEdgeDrag(
     /* [in] */ Int32 pointerId,
     /* [in] */ Int32 edge)
 {
-    Float absDelta = Math::Abs(delta);
-    Float absODelta = Math::Abs(odelta);
+    Float absDelta = Elastos::Core::Math::Abs(delta);
+    Float absODelta = Elastos::Core::Math::Abs(odelta);
 
     if ((mInitialEdgesTouched[pointerId] & edge) != edge  || (mTrackingEdges & edge) == 0 ||
             (mEdgeDragsLocked[pointerId] & edge) == edge ||
@@ -1191,10 +1205,10 @@ Boolean ViewDragHelper::CheckTouchSlop(
         return dx * dx + dy * dy > mTouchSlop * mTouchSlop;
     }
     else if (checkHorizontal) {
-        return Math::Abs(dx) > mTouchSlop;
+        return Elastos::Core::Math::Abs(dx) > mTouchSlop;
     }
     else if (checkVertical) {
-        return Math::Abs(dy) > mTouchSlop;
+        return Elastos::Core::Math::Abs(dy) > mTouchSlop;
     }
     return FALSE;
 }
@@ -1242,11 +1256,11 @@ ECode ViewDragHelper::CheckTouchSlop(
         return NOERROR;
     }
     else if (checkHorizontal) {
-        *result = Math::Abs(dx) > mTouchSlop;
+        *result = Elastos::Core::Math::Abs(dx) > mTouchSlop;
         return NOERROR;
     }
     else if (checkVertical) {
-        *result = Math::Abs(dy) > mTouchSlop;
+        *result = Elastos::Core::Math::Abs(dy) > mTouchSlop;
         return NOERROR;
     }
     *result = FALSE;
@@ -1301,8 +1315,8 @@ void ViewDragHelper::DragTo(
     /* [in] */ Int32 dx,
     /* [in] */ Int32 dy)
 {
-    int clampedX = left;
-    int clampedY = top;
+    Int32 clampedX = left;
+    Int32 clampedY = top;
     Int32 oldLeft;
     mCapturedView0>GetLeft(&oldLeft);
     Int32 oldTop;

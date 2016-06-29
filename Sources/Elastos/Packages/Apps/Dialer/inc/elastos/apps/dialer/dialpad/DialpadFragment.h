@@ -2,18 +2,66 @@
 #ifndef __ELASTOS_APPS_DIALER_DIALPAD_DIALPADFRAGMENT_H__
 #define __ELASTOS_APPS_DIALER_DIALPAD_DIALPADFRAGMENT_H__
 
-#include <RelativeLayout.h>
+#include "_Elastos.Apps.Dialer.h"
+#include <elastos/droid/app/DialogFragment.h>
+#include <elastos/droid/app/Fragment.h>
+#include <elastos/droid/telephony/PhoneStateListener.h>
+#include <elastos/droid/widget/BaseAdapter.h>
+// #include <elastos/droid/widget/PopupMenu.h>
+#include <elastos/droid/widget/RelativeLayout.h>
+#include "Elastos.Droid.App.h"
+#include "Elastos.Droid.Content.h"
+#include "Elastos.Droid.Media.h"
+#include "Elastos.Droid.Os.h"
+#include "Elastos.Droid.Telecomm.h"
+#include "Elastos.Droid.Telephony.h"
+#include "Elastos.Droid.Text.h"
+#include "Elastos.Droid.View.h"
+#include "Elastos.Droid.Widget.h"
+#include "Elastos.CoreLibrary.Core.h"
+#include "Elastos.CoreLibrary.Utility.h"
 
+using Elastos::Droid::App::IActivity;
+using Elastos::Droid::App::IDialog;
+using Elastos::Droid::App::DialogFragment;
+using Elastos::Droid::App::Fragment;
+using Elastos::Droid::Content::IComponentName;
+using Elastos::Droid::Content::IContext;
+using Elastos::Droid::Content::IDialogInterface;
+using Elastos::Droid::Content::IDialogInterfaceOnClickListener;
+using Elastos::Droid::Content::IIntent;
+using Elastos::Droid::Media::IToneGenerator;
+using Elastos::Droid::Os::IBundle;
+using Elastos::Droid::Telecomm::Telecom::ITelecomManager;
+using Elastos::Droid::Telephony::PhoneStateListener;
+using Elastos::Droid::Telephony::ITelephonyManager;
+using Elastos::Droid::Text::IEditable;
 using Elastos::Droid::Text::ITextWatcher;
+using Elastos::Droid::Utility::IAttributeSet;
+using Elastos::Droid::View::ILayoutInflater;
+using Elastos::Droid::View::IKeyEvent;
+using Elastos::Droid::View::IMenuItem;
+using Elastos::Droid::View::IMotionEvent;
+using Elastos::Droid::View::IView;
+using Elastos::Droid::View::IViewGroup;
 using Elastos::Droid::View::IViewOnClickListener;
 using Elastos::Droid::View::IViewOnLongClickListener;
 using Elastos::Droid::View::IViewOnKeyListener;
+using Elastos::Droid::View::IViewOnTouchListener;
+using Elastos::Droid::Widget::BaseAdapter;
+using Elastos::Droid::Widget::IAdapterView;
 using Elastos::Droid::Widget::IAdapterViewOnItemClickListener;
+using Elastos::Droid::Widget::IEditText;
+using Elastos::Droid::Widget::IListView;
+using Elastos::Droid::Widget::IPopupMenu;
 using Elastos::Droid::Widget::RelativeLayout;
 using Elastos::Droid::Widget::IPopupMenuOnMenuItemClickListener;
+using Elastos::Core::ICharSequence;
+using Elastos::Utility::IHashSet;
+// using Elastos::Apps::DialerBind::AnalyticsFragment;
 
-namespace Elastos{
-namespace Apps{
+namespace Elastos {
+namespace Apps {
 namespace Dialer {
 namespace Dialpad {
 
@@ -21,7 +69,9 @@ namespace Dialpad {
  * Fragment that displays a twelve-key phone dialpad.
  */
 class DialpadFragment
-    : public AnalyticsFragment
+    // TODO:
+    /* : public AnalyticsFragment */
+    : public Fragment
     , public IDialpadFragment
     , public IViewOnClickListener
     , public IViewOnLongClickListener
@@ -29,6 +79,7 @@ class DialpadFragment
     , public IAdapterViewOnItemClickListener
     , public ITextWatcher
     , public IPopupMenuOnMenuItemClickListener
+    // TODO:
     /* , public IDialpadKeyButtonOnPressedListener */
 {
 public:
@@ -167,6 +218,7 @@ private:
     private:
         static const Int32 NUM_ITEMS; // = 3;
         AutoPtr<ArrayOf<ChoiceItem*> > mChoiceItems;
+        AutoPtr<ILayoutInflater> mInflater;
     };
 
     class AlertDialogClickListener
@@ -202,20 +254,24 @@ private:
         DialpadFragment* mHost;
     };
 
-    class DialpadPopupMenu
-        : public PopupMenu
-    {
-    public:
-        DialpadPopupMenu(
-            /* [in] */ DialpadFragment* host);
+    // class DialpadPopupMenu
+    //     : public PopupMen
+    // {
+    // public:
+    //     DialpadPopupMenu(
+    //          /* [in] */ DialpadFragment* host);
 
-        CARAPI Show();
+    //     CARAPI Show();
 
-    private:
-        DialpadFragment* mHost;
-    };
+    // private:
+    //     DialpadFragment* mHost;
+    // };
 
 public:
+    CAR_INTERFACE_DECL();
+
+    DialpadFragment();
+
     // @Override
     CARAPI BeforeTextChanged(
         /* [in] */ ICharSequence* s,
@@ -565,6 +621,7 @@ private:
 
     AutoPtr<IOnDialpadQueryChangedListener> mDialpadQueryListener;
 
+    // TODO:
     // AutoPtr<IDialpadView> mDialpadView;
     AutoPtr<IEditText> mDigits;
     Int32 mDialpadSlideInDuration;
@@ -579,7 +636,8 @@ private:
     Object mToneGeneratorLock;
     AutoPtr<IView> mSpacer;
 
-    AutoPtr<IFloatingActionButtonController> mFloatingActionButtonController;
+    // TODO:
+    // AutoPtr<IFloatingActionButtonController> mFloatingActionButtonController;
 
     /**
      * Set of dialpad keys that are currently being pressed

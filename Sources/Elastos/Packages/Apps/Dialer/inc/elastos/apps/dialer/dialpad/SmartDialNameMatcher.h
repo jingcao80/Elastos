@@ -1,10 +1,16 @@
 #ifndef __ELASTOS_APPS_DIALER_DIALPAD_SMARTDIALNAMEMATCHER_H__
 #define __ELASTOS_APPS_DIALER_DIALPAD_SMARTDIALNAMEMATCHER_H__
 
-using Elasots::Utility::IArrayList;
+#include "_Elastos.Apps.Dialer.h"
+#include <elastos/core/Object.h>
+#include <elastos/core/StringBuilder.h>
+#include "Elastos.CoreLibrary.Utility.h"
 
-namespace Elastos{
-namespace Apps{
+using Elastos::Core::StringBuilder;
+using Elastos::Utility::IArrayList;
+
+namespace Elastos {
+namespace Apps {
 namespace Dialer {
 namespace Dialpad {
 
@@ -20,7 +26,7 @@ class SmartDialNameMatcher
     , public ISmartDialNameMatcher
 {
 public:
-    CAR_INTERFACE_DECL()
+    CAR_INTERFACE_DECL();
 
     // @VisibleForTesting
     CARAPI constructor(
@@ -153,7 +159,7 @@ private:
      * @param length Length of the desired mask.
      */
     CARAPI_(void) ConstructEmptyMask(
-        /* [in] */ IStringBuilder* builder,
+        /* [in] */ StringBuilder* builder,
         /* [in] */ Int32 length);
 
     /**
@@ -162,7 +168,7 @@ private:
      * @param matchPos Match Positions to mask as 1.
      */
     CARAPI_(void) ReplaceBitInMask(
-        /* [in] */ IStringBuilder* builder,
+        /* [in] */ StringBuilder* builder,
         /* [in] */ ISmartDialMatchPosition* matchPos);
 
     /**

@@ -1,5 +1,43 @@
 
-#include "util/DialerUtils.h"
+#include "elastos/apps/dialer/util/DialerUtils.h"
+#include "R.h"
+#include "Elastos.Droid.App.h"
+#include "Elastos.Droid.Graphics.h"
+#include "Elastos.Droid.Internal.h"
+#include "Elastos.Droid.Net.h"
+#include "Elastos.Droid.Os.h"
+#include "Elastos.Droid.Widget.h"
+#include <elastos/core/CoreUtils>
+#include <elastos/droid/text/TextUtils>
+
+using Elastos::Droid::App::IActivity;
+using Elastos::Droid::Content::IComponentName;
+using Elastos::Droid::Content::CComponentName;
+using Elastos::Droid::Content::Pm::IActivityInfo;
+using Elastos::Droid::Content::Pm::IPackageManager;
+using Elastos::Droid::Content::Pm::IPackageItemInfo;
+using Elastos::Droid::Content::Pm::IResolveInfo;
+using Elastos::Droid::Content::CIntent;
+using Elastos::Droid::Graphics::IPoint;
+using Elastos::Droid::Graphics::IDrawable;
+using Elastos::Droid::Internal::View::IInputMethodManager;
+using Elastos::Droid::Net::IUri;
+using Elastos::Droid::Net::IUriHelper;
+using Elastos::Droid::Net::CUriHelper;
+using Elastos::Droid::Os::IBinder;
+using Elastos::Droid::Os::CBundle;
+using Elastos::Droid::Text::TextUtils;
+using Elastos::Droid::Widget::IImageView;
+using Elastos::Droid::Widget::IToast;
+using Elastos::Droid::Widget::IToastHelper;
+using Elastos::Droid::Widget::CToastHelper;
+using Elastos::Core::CoreUtils;
+using Elastos::Utility::ILocale;
+using Elastos::Utility::ILocaleHelper;
+using Elastos::Utility::CLocaleHelper;
+using Elastos::Utility::IList;
+using Elastos::Utility::IIterator;
+using Elastos::Utility::IIterable;
 
 namespace Elastos {
 namespace Apps {
@@ -67,10 +105,12 @@ AutoPtr<IComponentName> DialerUtils::GetSmsComponent(
     if (!smsPackage.IsNull()) {
         AutoPtr<IPackageManager> packageManager;
         context->GetPackageManager((IPackageManager**)&packageManager);
+        AutoPtr<IUriHelper> helper;
+        CUriHelper::AcquireSingleton((IUriHelper**)&helper);
+        AutoPtr<IUri> uri;
+        helper->FromParts(IContactsUtils::SCHEME_SMSTO, String(""), NULL, (IUri**)&uri);
         AutoPtr<IIntent> intent;
-        CIntent::New(IIntent::ACTION_SENDTO,
-                Uri::FromParts(IContactsUtils::SCHEME_SMSTO, String(""), NULL),
-                (IIntent**)&intent);
+        CIntent::New(IIntent::ACTION_SENDTO, uri, (IIntent**)&intent);
         AutoPtr<IList> resolveInfos;
         packageManager->QueryIntentActivities(intent, 0, (IList**)&resolveInfos);
 

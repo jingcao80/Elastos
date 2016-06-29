@@ -1,6 +1,8 @@
 
-#include "contact/ContactUpdateService.h"
-#include "contact/CContactUpdateServiceHelper.h"
+#include "elastos/apps/dialer/contact/ContactUpdateService.h"
+#include "elastos/apps/dialer/contact/CContactUpdateServiceHelper.h"
+
+using Elastos::Droid::Content::IIntent;
 
 namespace Elastos {
 namespace Apps {

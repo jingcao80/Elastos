@@ -2,8 +2,10 @@
 #define __ELASTOS_APPS_DIALER_CCALLDETAILACTIVITY_H__
 
 #include "_Elastos_Apps_Dialer_CCallDetailActivity.h"
-#include <AnalyticsActivity.h>
+#include "elastos/droid/app/Activity.h"
+// #include <AnalyticsActivity.h>
 #include "elastos/droid/os/AsyncTask.h"
+#include "elastos/core/StringBuilder.h"
 
 using Elastos::Droid::Content::IIntent;
 using Elastos::Droid::Database::ICursor;
@@ -11,26 +13,37 @@ using Elastos::Droid::Net::IUri;
 using Elastos::Droid::Os::AsyncTask;
 using Elastos::Droid::Os::IBundle;
 using Elastos::Droid::Text::IBidiFormatter;
+using Elastos::Droid::View::IViewOnClickListener;
 using Elastos::Droid::View::IKeyEvent;
 using Elastos::Droid::View::ILayoutInflater;
 using Elastos::Droid::View::IMenu;
 using Elastos::Droid::View::IMenuItem;
 using Elastos::Droid::Widget::ILinearLayout;
 using Elastos::Droid::Widget::ITextView;
+using Elastos::Droid::Widget::IQuickContactBadge;
 using Elastos::Core::ICharSequence;
 using Elastos::Core::IRunnable;
+using Elastos::Core::StringBuilder;
 using Elastos::Apps::Dialer::ICallDetailActivity;
 using Elastos::Apps::Dialer::IProximitySensorAware;
 using Elastos::Apps::Dialer::IProximitySensorManager;
 using Elastos::Apps::Dialer::IProximitySensorManagerListener;
-using Elastos::Apps::DialerBinder::AnalyticsActivity;
+using Elastos::Apps::Dialer::CallLog::ICallTypeHelper;
+using Elastos::Apps::Dialer::CallLog::IContactInfoHelper;
+using Elastos::Apps::Dialer::CallLog::IPhoneNumberDisplayHelper;
+using Elastos::Apps::Dialer::Util::IAsyncTaskExecutor;
+using Elastos::Apps::Dialer::Voicemail::IVoicemailStatusHelper;
+using Elastos::Apps::Dialer::Voicemail::IVoicemailStatusHelperStatusMessage;
+// using Elastos::Apps::DialerBinder::AnalyticsActivity;
 
-namespace Elastos{
-namespace Apps{
+namespace Elastos {
+namespace Apps {
 namespace Dialer {
 
 CarClass(CCallDetailActivity)
-    , public AnalyticsActivity
+    // TODO:
+    // , public AnalyticsActivity
+    , public Elastos::Droid::App::Activity
     , public IProximitySensorAware
     , public ICallDetailActivity
 {
@@ -140,7 +153,7 @@ private:
          * @return The phone number type or location.
          */
         CARAPI_(AutoPtr<ICharSequence>) GetNumberTypeOrLocation(
-            /* [in] */ IPhoneCallDetails details);
+            /* [in] */ IPhoneCallDetails* details);
 
     private:
         CCallDetailActivity* mHost;
@@ -183,17 +196,17 @@ private:
         , public IViewOnClickListener
     {
     public:
-        CAR_INTERFACE_DECL()
+        CAR_INTERFACE_DECL();
 
         StatusMessageViewOnClickListener(
-            /* [in] */ StatusMessage* messge;
+            /* [in] */ IVoicemailStatusHelperStatusMessage* messge,
             /* [in] */ CCallDetailActivity* host);
 
         CARAPI OnClick(
             /* [in] */ IView* v);
 
     private:
-        AutoPtr<StatusMessage> mMessage;
+        AutoPtr<IVoicemailStatusHelperStatusMessage> mMessage;
         CCallDetailActivity* mHost;
     };
 
@@ -202,7 +215,7 @@ private:
     {
     public:
         RemoveMenuFromCallLogTask(
-            /* [in] */ IStringBuilder* callIds,
+            /* [in] */ StringBuilder* callIds,
             /* [in] */ CCallDetailActivity* host);
 
         // @Override
@@ -215,7 +228,7 @@ private:
             /* [in] */ IInterface* result);
 
     private:
-        AutoPtr<IStringBuilder> mCallIds;
+        AutoPtr<StringBuilder> mCallIds;
         CCallDetailActivity* mHost;
     };
 
@@ -333,7 +346,7 @@ private:
         /* [in] */ const String& lookupKey,
         /* [in] */ Int32 contactType);
 
-    CARAPI_(AutoPtr<IStatusMessage>) GetStatusMessage(
+    CARAPI_(AutoPtr<IVoicemailStatusHelperStatusMessage>) GetStatusMessage(
         /* [in] */ ICursor* statusCursor);
 
     CARAPI_(void) CloseSystemDialogs();
@@ -398,7 +411,8 @@ private:
     AutoPtr<ILayoutInflater> mInflater;
     AutoPtr<IResources> mResources;
     /** Helper to load contact photos. */
-    AutoPtr<IContactPhotoManager> mContactPhotoManager;
+    // TODO:
+    // AutoPtr<IContactPhotoManager> mContactPhotoManager;
     /** Helper to make async queries to content resolver. */
     AutoPtr<ICallDetailActivityQueryHandler> mAsyncQueryHandler;
     /** Helper to get voicemail status messages. */

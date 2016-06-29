@@ -2,9 +2,12 @@
 #define __ELASTOS_APPS_DIALER_VOICEMAIL_VOICEMAILSTATUSHELPERIMPL_H__
 
 #include "_Elastos.Apps.Dialer.h"
+#include <elastos/core/Object.h>
+#include "Elastos.Droid.Database.h"
 #include "Elastos.CoreLibrary.Core.h"
 #include "Elastos.CoreLibrary.Utility.h"
 
+using Elastos::Droid::Database::ICursor;
 using Elastos::Core::IComparator;
 using Elastos::Utility::IList;
 
@@ -140,7 +143,7 @@ private:
     };
 
 public:
-    CAR_INTERFACE_DECL()
+    CAR_INTERFACE_DECL();
 
     // @Override
     CARAPI GetStatusMessages(

@@ -1,5 +1,16 @@
 
-#include "list/SearchFragment.h"
+#include "elastos/apps/dialer/list/SearchFragment.h"
+#include "elastos/apps/dialer/util/DialerUtils.h"
+#include "elastos/apps/dialer/DialtactsActivity.h"
+#include <elastos/droid/text/TextUtils.h>
+#include "R.h"
+
+using Elastos::Droid::Content::Res::IResources;
+using Elastos::Droid::Text::TextUtils;
+using Elastos::Droid::View::IView;
+using Elastos::Droid::Widget::IListView;
+using Elastos::Apps::Dialer::DialtactsActivity;
+using Elastos::Apps::Dialer::Util::DialerUtils;
 
 namespace Elastos {
 namespace Apps {
@@ -71,7 +82,8 @@ ECode SearchFragment::OnStart()
     if (IsSearchMode(&result), result) {
         AutoPtr<IInterface> adpater;
         GetAdapter((IInterface**)&adpater);
-        IContactEntryListAdapter::Probe(adpater)->SetHasHeader(0, FALSE);
+        assert(0 && "TODO");
+        // IContactEntryListAdapter::Probe(adpater)->SetHasHeader(0, FALSE);
     }
 
     AutoPtr<IActivity> activity;
@@ -85,8 +97,8 @@ ECode SearchFragment::OnStart()
     res->GetDrawable(R::drawable::search_shadow, (IDrawable**)&drawable);
     drawable->GetIntrinsicHeight(&mShadowHeight);
     res->GetDimensionPixelSize(R::dimen::search_list_padding_top, &mPaddingTop);
-    res->GetInteger(R.integer.dialpad_slide_in_duration, &mShowDialpadDuration);
-    res->GetInteger(R.integer.dialpad_slide_out_duration, &mHideDialpadDuration);
+    res->GetInteger(R::integer::dialpad_slide_in_duration, &mShowDialpadDuration);
+    res->GetInteger(R::integer::dialpad_slide_out_duration, &mHideDialpadDuration);
 
     AutoPtr<IView> parentView;
     GetView((IView**)&parentView);
@@ -110,7 +122,8 @@ ECode SearchFragment::OnViewCreated(
     /* [in] */ IView* view,
     /* [in] */ IBundle* savedInstanceState)
 {
-    PhoneNumberPickerFragment::OnViewCreated(view, savedInstanceState);
+    assert(0 && "TODO");
+    // PhoneNumberPickerFragment::OnViewCreated(view, savedInstanceState);
     AutoPtr<IListView> listView;
     GetListView((IListView**)&listView);
     AutoPtr<IResources> res;
@@ -122,13 +135,14 @@ ECode SearchFragment::OnViewCreated(
 ECode SearchFragment::SetSearchMode(
     /* [in] */ Boolean flag)
 {
-    PhoneNumberPickerFragment::SetSearchMode(flag);
+    assert(0 && "TODO");
+    // PhoneNumberPickerFragment::SetSearchMode(flag);
     // This hides the "All contacts with phone numbers" header in the search fragment
-    AutoPtr<IInterface> adpater;
-    GetAdapter((IInterface**)&adpater);
-    if (IContactEntryListAdapter::Probe(adpater) != NULL) {
-        IContactEntryListAdapter::Probe(adpater)->SetHasHeader(0, FALSE);
-    }
+    // AutoPtr<IInterface> adpater;
+    // GetAdapter((IInterface**)&adpater);
+    // if (IContactEntryListAdapter::Probe(adpater) != NULL) {
+    //     IContactEntryListAdapter::Probe(adpater)->SetHasHeader(0, FALSE);
+    // }
     return NOERROR;
 }
 
@@ -139,23 +153,24 @@ ECode SearchFragment::SetAddToContactNumber(
     return NOERROR;
 }
 
-ECode SearchFragment::CreateListAdapter(
-    /* [out] */ IContactEntryListAdapter** listAdapter)
-{
-    VALIDATE_NOT_NULL(listAdapter);
+// TODO:
+// ECode SearchFragment::CreateListAdapter(
+//     /* [out] */ IContactEntryListAdapter** listAdapter)
+// {
+//     VALIDATE_NOT_NULL(listAdapter);
 
-    AutoPtr<IActivity> activity;
-    GetActivity((IActivity**)&activity);
-    AutoPtr<IDialerPhoneNumberListAdapter> adapter;
-    CDialerPhoneNumberListAdapter::New(activity, (IDialerPhoneNumberListAdapter**)&adapter);
-    adapter->SetDisplayPhotos(TRUE);
-    Boolean result;
-    PhoneNumberPickerFragment::UsesCallableUri(&result);
-    adapter->SetUseCallableUri(result);
-    *listAdapter = adapter;
-    REFCOUNT_ADD(*listAdapter);
-    return NOERROR;
-}
+//     AutoPtr<IActivity> activity;
+//     GetActivity((IActivity**)&activity);
+//     AutoPtr<IDialerPhoneNumberListAdapter> adapter;
+//     CDialerPhoneNumberListAdapter::New(activity, (IDialerPhoneNumberListAdapter**)&adapter);
+//     adapter->SetDisplayPhotos(TRUE);
+//     Boolean result;
+//     PhoneNumberPickerFragment::UsesCallableUri(&result);
+//     adapter->SetUseCallableUri(result);
+//     *listAdapter = adapter;
+//     REFCOUNT_ADD(*listAdapter);
+//     return NOERROR;
+// }
 
 ECode SearchFragment::OnItemClick(
     /* [in] */ Int32 position,
@@ -170,7 +185,8 @@ ECode SearchFragment::OnItemClick(
 
     switch (shortcutType) {
         case IDialerPhoneNumberListAdapter::SHORTCUT_INVALID:
-            PhoneNumberPickerFragment::OnItemClick(position, id);
+            assert(0 && "TODO");
+            // PhoneNumberPickerFragment::OnItemClick(position, id);
             break;
         case IDialerPhoneNumberListAdapter::SHORTCUT_DIRECT_CALL:
              GetOnPhoneNumberPickerListener((IOnPhoneNumberPickerActionListener**)&listener);
@@ -222,18 +238,19 @@ ECode SearchFragment::UpdatePosition(
                 mActivity->IsDialpadShown(&result), result ? 0 : mActionBarHeight -mShadowHeight;
     }
     if (animate) {
-        AutoPtr<IInterpolator> interpolator =
-                mActivity->IsDialpadShown(&result), result ? IAnimUtils::EASE_IN : IAnimUtils::EASE_OUT ;
-        Int32 duration =
-                mActivity.isDialpadShown(&result), result ? mShowDialpadDuration : mHideDialpadDuration;
+        assert(0 && "TODO");
+        // AutoPtr<IInterpolator> interpolator =
+        //         mActivity->IsDialpadShown(&result), result ? IAnimUtils::EASE_IN : IAnimUtils::EASE_OUT ;
+        // Int32 duration =
+        //         mActivity->IsDialpadShown(&result), result ? mShowDialpadDuration : mHideDialpadDuration;
 
-        AutoPtr<IView> view;
-        GetView((IView**)&view);
-        view->SetTranslationY(startTranslationValue);
-        view->Animate()
-        view->TranslationY(endTranslationValue)
-        view->SetInterpolator(interpolator)
-        view->SetDuration(duration);
+        // AutoPtr<IView> view;
+        // GetView((IView**)&view);
+        // view->SetTranslationY(startTranslationValue);
+        // view->Animate()
+        // view->TranslationY(endTranslationValue)
+        // view->SetInterpolator(interpolator)
+        // view->SetDuration(duration);
     }
     else {
         AutoPtr<IView> view;

@@ -23,6 +23,7 @@ using Elastos::Droid::View::IMotionEvent;
 using Elastos::Droid::View::IViewOnDragListener;
 using Elastos::Droid::View::IViewOnKeyListener;
 using Elastos::Droid::View::IViewOnTouchListener;
+using Elastos::Droid::View::IViewTreeObserver;
 using Elastos::Droid::View::IOnGlobalLayoutListener;
 using Elastos::Droid::Widget::IEditText;
 using Elastos::Droid::Widget::IFrameLayout;

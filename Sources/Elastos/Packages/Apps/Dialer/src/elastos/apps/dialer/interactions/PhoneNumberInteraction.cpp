@@ -1,5 +1,39 @@
 
-#include "interactions/PhoneNumberInteraction.h"
+#include "elastos/apps/dialer/interactions/PhoneNumberInteraction.h"
+#include "elastos/apps/dialer/contact/ContactUpdateService.h"
+#include "elastos/apps/dialer/util/DialerUtils.h"
+#include <elastos/droid/R.h>
+#include "Elastos.Droid.Provider.h"
+#include "Elastos.CoreLibrary.IO.h"
+#include "R.h"
+
+using Elastos::Droid::App::IAlertDialog;
+using Elastos::Droid::App::IAlertDialogBuilder;
+using Elastos::Droid::App::CAlertDialogBuilder;
+using Elastos::Droid::Content::CCursorLoader;
+using Elastos::Droid::Content::IComponentName;
+using Elastos::Droid::Content::EIID_IDialogInterfaceOnClickListener;
+using Elastos::Droid::Content::EIID_ILoaderOnLoadCompleteListener;
+using Elastos::Droid::Net::IUriHelper;
+using Elastos::Droid::Net::CUriHelper;
+using Elastos::Droid::Os::CBundle;
+using Elastos::Droid::Provider::IBaseColumns;
+using Elastos::Droid::Provider::IContactsContractContactsData;
+using Elastos::Droid::Provider::IContactsContractDataColumns;
+using Elastos::Droid::Provider::IContactsContractCommonDataKindsPhone;
+using Elastos::Droid::Provider::IContactsContractCommonDataKindsSipAddress;
+using Elastos::Droid::Provider::IContactsContractRawContactsColumns;
+using Elastos::Droid::Provider::IContactsContractSyncColumns;
+using Elastos::Droid::Provider::IContactsContractCommonDataKindsCommonColumns;
+using Elastos::Droid::Provider::IContactsContractContacts;
+using Elastos::Droid::Provider::CContactsContractContacts;
+using Elastos::Droid::Provider::IContactsContractData;
+using Elastos::Droid::Provider::CContactsContractData;
+using Elastos::Droid::Widget::ICheckable;
+using Elastos::IO::ICloseable;
+using Elastos::Utility::CArrayList;
+using Elastos::Apps::Dialer::Contact::ContactUpdateService;
+using Elastos::Apps::Dialer::Util::DialerUtils;
 
 namespace Elastos {
 namespace Apps {
@@ -9,14 +43,14 @@ namespace Interactions {
 //=================================================================
 // PhoneNumberInteraction::PhoneItem
 //=================================================================
-CAR_INTERFACE_IMPL_2(PhoneNumberInteraction::PhoneItem, Object, IParcelable, ICollapserCollapsible);
+// TODO:
+CAR_INTERFACE_IMPL(PhoneNumberInteraction::PhoneItem, Object, IParcelable/*, ICollapserCollapsible*/);
 
 PhoneNumberInteraction::PhoneItem::PhoneItem()
 {}
 
 ECode PhoneNumberInteraction::PhoneItem::WriteToParcel(
-    /* [in] */ IParcel* dest,
-    /* [in] */ Int32 flags)
+    /* [in] */ IParcel* dest)
 {
     dest->WriteInt64(mId);
     dest->WriteString(mPhoneNumber);
@@ -39,6 +73,7 @@ ECode PhoneNumberInteraction::PhoneItem::ReadFromParcel(
     source->ReadInt64(&mType);
     source->ReadString(&mLabel);
     source->ReadString(&mMimeType);
+    return NOERROR;
 }
 
 ECode PhoneNumberInteraction::PhoneItem::CollapseWith(
@@ -54,10 +89,11 @@ ECode PhoneNumberInteraction::PhoneItem::ShouldCollapseWith(
     /* [out] */ Boolean* result)
 {
     VALIDATE_NOT_NULL(result);
-    *result = MoreContactUtils::ShouldCollapse(
-            IContactsContractCommonDataKindsPhone::CONTENT_ITEM_TYPE, mPhoneNumber,
-            IContactsContractCommonDataKindsPhone::CONTENT_ITEM_TYPE,
-            ((PhoneItem*)phoneItem)->mPhoneNumber);
+    assert(0 && "TODO");
+    // *result = MoreContactUtils::ShouldCollapse(
+    //         IContactsContractCommonDataKindsPhone::CONTENT_ITEM_TYPE, mPhoneNumber,
+    //         IContactsContractCommonDataKindsPhone::CONTENT_ITEM_TYPE,
+    //         ((PhoneItem*)phoneItem)->mPhoneNumber);
     return NOERROR;
 }
 
@@ -78,7 +114,7 @@ ECode PhoneNumberInteraction::PhoneItemAdapter::constructor(
     /* [in] */ Int32 interactionType)
 {
     ArrayAdapter::constructor(context,
-            R::layout::phone_disambig_item, Elastos::R::id::text2, list);
+            R::layout::phone_disambig_item, Elastos::Droid::R::id::text2, list);
     mInteractionType = interactionType;
     return NOERROR;
 }
@@ -95,17 +131,18 @@ ECode PhoneNumberInteraction::PhoneItemAdapter::GetView(
 
     AutoPtr<IInterface> temp;
     GetItem(position, (IInterface**)&temp);
-    PhoneItem* item = (PhoneItem*)temp;
+    PhoneItem* item = (PhoneItem*)IObject::Probe(temp);
 
     AutoPtr<IView> typeView;
-    view->FindViewById(Elastos::R::id::text1, (IView**)&typeView);
+    view->FindViewById(Elastos::Droid::R::id::text1, (IView**)&typeView);
 
     AutoPtr<IContext> context;
     GetContext((IContext**)&context);
-    AutoPtr<ICharSequence> value = ContactDisplayUtils::GetLabelForCallOrSms(
-            (Int32)item->mType, item->mLabel, mInteractionType, context);
+    assert(0 && "TODO");
+    // AutoPtr<ICharSequence> value = ContactDisplayUtils::GetLabelForCallOrSms(
+    //         (Int32)item->mType, item->mLabel, mInteractionType, context);
 
-    ITextView::Probe(typeView)->SetText(value);
+    // ITextView::Probe(typeView)->SetText(value);
     *result = view;
     REFCOUNT_ADD(*result);
 
@@ -115,8 +152,8 @@ ECode PhoneNumberInteraction::PhoneItemAdapter::GetView(
 //=================================================================
 // PhoneNumberInteraction::PhoneDisambiguationDialogFragment
 //=================================================================
-CAR_INTERFACE_IMPL_3(PhoneNumberInteraction::PhoneDisambiguationDialogFragment, DialogFragment,
-        IPhoneDisambiguationDialogFragment, IDialogInterfaceOnClickListener, IDialogInterfaceOnDismissListener);
+CAR_INTERFACE_IMPL_2(PhoneNumberInteraction::PhoneDisambiguationDialogFragment, DialogFragment,
+        IPhoneDisambiguationDialogFragment, IDialogInterfaceOnClickListener);
 
 const String PhoneNumberInteraction::PhoneDisambiguationDialogFragment::ARG_PHONE_LIST("phoneList");
 const String PhoneNumberInteraction::PhoneDisambiguationDialogFragment::ARG_INTERACTION_TYPE("interactionType");
@@ -132,10 +169,11 @@ void PhoneNumberInteraction::PhoneDisambiguationDialogFragment::Show(
     AutoPtr<IBundle> bundle;
     CBundle::New((IBundle**)&bundle);
     bundle->PutParcelableArrayList(ARG_PHONE_LIST, phoneList);
-    bundle->PutSerializable(ARG_INTERACTION_TYPE, interactionType);
+    assert(0 && "TODO");
+    // bundle->PutSerializable(ARG_INTERACTION_TYPE, interactionType);
     bundle->PutString(ARG_CALL_ORIGIN, callOrigin);
     fragment->SetArguments(bundle);
-    fragment->Show(fragmentManager, TAG);
+    IDialogFragment::Probe(fragment)->Show(fragmentManager, PhoneNumberInteraction::TAG);
 }
 
 ECode PhoneNumberInteraction::PhoneDisambiguationDialogFragment::OnCreateDialog(
@@ -146,25 +184,34 @@ ECode PhoneNumberInteraction::PhoneDisambiguationDialogFragment::OnCreateDialog(
     GetActivity((IActivity**)&activity);
     AutoPtr<IBundle> arguments;
     GetArguments((IBundle**)&arguments);
-    arguments->GetParcelableArrayList(ARG_PHONE_LIST, &mPhoneList);
+    AutoPtr<IArrayList> list;
+    arguments->GetParcelableArrayList(ARG_PHONE_LIST, (IArrayList**)&list);
+    mPhoneList = IList::Probe(list);
     arguments->GetInt32(ARG_INTERACTION_TYPE, &mInteractionType);
     arguments->GetString(ARG_CALL_ORIGIN, &mCallOrigin);
 
-    mPhonesAdapter = new PhoneItemAdapter();
-    mPhonesAdapter->constructor(activity, mPhoneList, mInteractionType);
+    AutoPtr<PhoneItemAdapter> adapter = new PhoneItemAdapter();
+    adapter->constructor(IContext::Probe(activity), mPhoneList, mInteractionType);
+    mPhonesAdapter = adapter;
     AutoPtr<ILayoutInflater> inflater;
     activity->GetLayoutInflater((ILayoutInflater**)&inflater);
     AutoPtr<IView> setPrimaryView;
     inflater->Inflate(R::layout::set_primary_checkbox,
-            String(NULL), (IView**)&setPrimaryView);
+            NULL, (IView**)&setPrimaryView);
 
     AutoPtr<IAlertDialogBuilder> builder;
-    CAlertDialogBuilder::New(activity, (IAlertDialogBuilder**)&builder);
+    CAlertDialogBuilder::New(IContext::Probe(activity), (IAlertDialogBuilder**)&builder);
     builder->SetAdapter(mPhonesAdapter, this);
-    builder->SetTitle(mInteractionType == IContactDisplayUtils::INTERACTION_SMS
-                    ? R::string::sms_disambig_title : R::string::call_disambig_title);
+    assert(0 && "TODO");
+    // builder->SetTitle(mInteractionType == IContactDisplayUtils::INTERACTION_SMS
+    //                 ? R::string::sms_disambig_title : R::string::call_disambig_title);
     builder->SetView(setPrimaryView);
-    return builder->Create(dialog);
+
+    AutoPtr<IAlertDialog> alertDialog;
+    builder->Create((IAlertDialog**)&alertDialog);
+    *dialog = IDialog::Probe(alertDialog);
+    REFCOUNT_ADD(*dialog);
+    return NOERROR;
 }
 
 ECode PhoneNumberInteraction::PhoneDisambiguationDialogFragment::OnClick(
@@ -183,18 +230,19 @@ ECode PhoneNumberInteraction::PhoneDisambiguationDialogFragment::OnClick(
     if (size > which && which >= 0) {
         AutoPtr<IInterface> item;
         mPhoneList->Get(which, (IInterface**)&item);
-        PhoneItem* phoneItem = (PhoneItem*)item;
+        PhoneItem* phoneItem = (PhoneItem*)IObject::Probe(item);
         AutoPtr<IView> checkBox;
-        alertDialog->FindViewById(R.id.setPrimary, &checkBox);
+        IView::Probe(alertDialog)->FindViewById(R::id::setPrimary, (IView**)&checkBox);
         Boolean isChecked;
-        if (ICheckBox::Probe(checkBox)->IsChecked(&isChecked), isChecked) {
+        if (ICheckable::Probe(checkBox)->IsChecked(&isChecked), isChecked) {
             // Request to mark the data as primary in the background.
             AutoPtr<IIntent> serviceIntent = ContactUpdateService::CreateSetSuperPrimaryIntent(
-                    activity, phoneItem->mId);
-            activity->StartService(serviceIntent);
+                    IContext::Probe(activity), phoneItem->mId);
+            AutoPtr<IComponentName> name;
+            IContext::Probe(activity)->StartService(serviceIntent, (IComponentName**)&name);
         }
 
-        PhoneNumberInteraction::PerformAction(activity, phoneItem->mPhoneNumber,
+        PhoneNumberInteraction::PerformAction(IContext::Probe(activity), phoneItem->mPhoneNumber,
                 mInteractionType, mCallOrigin);
     }
     else {
@@ -207,17 +255,18 @@ ECode PhoneNumberInteraction::PhoneDisambiguationDialogFragment::OnClick(
 //=================================================================
 // PhoneNumberInteraction
 //=================================================================
+const String PhoneNumberInteraction::TAG("PhoneNumberInteraction");
 
 const String PhoneNumberInteraction::PHONE_NUMBER_PROJECTION[] = {
-    Phone._ID,                      // 0
+    IBaseColumns::ID,                      // 0
     IContactsContractCommonDataKindsPhone::NUMBER,                   // 1
-    Phone.IS_SUPER_PRIMARY,         // 2
-    RawContacts.ACCOUNT_TYPE,       // 3
-    RawContacts.DATA_SET,           // 4
-    Phone.TYPE,                     // 5
-    Phone.LABEL,                    // 6
-    Phone.MIMETYPE,                 // 7
-    Phone.CONTACT_ID                // 8
+    IContactsContractDataColumns::IS_SUPER_PRIMARY,         // 2
+    IContactsContractSyncColumns::ACCOUNT_TYPE,       // 3
+    IContactsContractRawContactsColumns::DATA_SET,           // 4
+    IContactsContractCommonDataKindsCommonColumns::TYPE,                     // 5
+    IContactsContractCommonDataKindsCommonColumns::LABEL,                    // 6
+    IContactsContractDataColumns::MIMETYPE,                 // 7
+    IContactsContractRawContactsColumns::CONTACT_ID                // 8
 };
 
 const Int32 PhoneNumberInteraction::_ID = 0;
@@ -231,19 +280,21 @@ const Int32 PhoneNumberInteraction::MIMETYPE = 7;
 const Int32 PhoneNumberInteraction::CONTACT_ID = 8;
 
 const String PhoneNumberInteraction::PHONE_NUMBER_SELECTION =
-        Data.MIMETYPE + " IN ('"
-        + Phone.CONTENT_ITEM_TYPE + "', "
-        + "'" + SipAddress.CONTENT_ITEM_TYPE + "') AND "
-        + Data.DATA1 + " NOT NULL";
+        IContactsContractDataColumns::MIMETYPE + " IN ('"
+        + IContactsContractCommonDataKindsPhone::CONTENT_ITEM_TYPE + "', "
+        + "'" + IContactsContractCommonDataKindsSipAddress::CONTENT_ITEM_TYPE
+        + "') AND " + IContactsContractDataColumns::DATA1 + " NOT NULL";
 
 const Int32 PhoneNumberInteraction::UNKNOWN_CONTACT_ID = -1;
+
+CAR_INTERFACE_IMPL(PhoneNumberInteraction, Object, ILoaderOnLoadCompleteListener);
 
 PhoneNumberInteraction::PhoneNumberInteraction(
     /* [in] */ IContext* context,
     /* [in] */ Int32 interactionType,
     /* [in] */ IDialogInterfaceOnDismissListener* dismissListener)
 {
-    PhoneNumberInteraction(context, interactionType, dismissListener, null);
+    PhoneNumberInteraction(context, interactionType, dismissListener, String(NULL));
 }
 
 PhoneNumberInteraction::PhoneNumberInteraction(
@@ -252,8 +303,9 @@ PhoneNumberInteraction::PhoneNumberInteraction(
     /* [in] */ IDialogInterfaceOnDismissListener* dismissListener,
     /* [in] */ const String& callOrigin)
     : mContext(context)
-    , mInteractionType(interactionType)
     , mDismissListener(dismissListener)
+    , mInteractionType(interactionType)
+    , mContactId(UNKNOWN_CONTACT_ID)
 {
     mCallOrigin = callOrigin;
 }
@@ -272,17 +324,18 @@ void PhoneNumberInteraction::PerformAction(
     /* [in] */ const String& callOrigin)
 {
     AutoPtr<IIntent> intent;
-    switch (interactionType) {
-        case IContactDisplayUtils::INTERACTION_SMS:
-            AutoPtr<IUri> uri;
-            Uri::FromParts(String("sms"), phoneNumber, String(NULL), (IUri**)&uri);
-            CIntent::New(
-                    IIntent::ACTION_SENDTO, uri, (IIntent**)&intent);
-            break;
-        default:
-            intent = CallUtil::GetCallIntent(phoneNumber, callOrigin);
-            break;
-    }
+    assert(0 && "TODO");
+    // switch (interactionType) {
+    //     case IContactDisplayUtils::INTERACTION_SMS:
+    //         AutoPtr<IUri> uri;
+    //         Uri::FromParts(String("sms"), phoneNumber, String(NULL), (IUri**)&uri);
+    //         CIntent::New(
+    //                 IIntent::ACTION_SENDTO, uri, (IIntent**)&intent);
+    //         break;
+    //     default:
+    //         intent = CallUtil::GetCallIntent(phoneNumber, callOrigin);
+    //         break;
+    // }
     DialerUtils::StartActivityWithErrorToast(context, intent);
 }
 
@@ -297,37 +350,39 @@ ECode PhoneNumberInteraction::StartInteraction(
     /* [in] */ Boolean useDefault)
 {
     if (mLoader != NULL) {
-        mLoader->Reset();
+        ILoader::Probe(mLoader)->Reset();
     }
     mUseDefault = useDefault;
     AutoPtr<IUri> queryUri;
     String inputUriAsString;
-    uri->ToString(&inputUriAsString);
+    IObject::Probe(uri)->ToString(&inputUriAsString);
 
     AutoPtr<IContactsContractContacts> contacts;
     CContactsContractContacts::AcquireSingleton((IContactsContractContacts**)&contacts);
     AutoPtr<IUri> contentUri;
     contacts->GetCONTENT_URI((IUri**)&contentUri);
     String str;
-    contentUri->ToString(&str);
+    IObject::Probe(contentUri)->ToString(&str);
 
     AutoPtr<IContactsContractData> data;
     CContactsContractData::AcquireSingleton((IContactsContractData**)&data);
     AutoPtr<IUri> dataContentUri;
     data->GetCONTENT_URI((IUri**)&dataContentUri);
     String str1;
-    dataContentUri->ToString(&str1);
+    IObject::Probe(dataContentUri)->ToString(&str1);
 
-    if (inputUriAsString.StartsWith(str)) {
-        if (!inputUriAsString.EndsWith(IContactsContractContactsData::CONTENT_DIRECTORY)) {
-            queryUri = Uri::WithAppendedPath(uri,
-                    IContactsContractContactsData::CONTENT_DIRECTORY);
+    if (inputUriAsString.StartWith(str)) {
+        if (!inputUriAsString.EndWith(IContactsContractContactsData::CONTENT_DIRECTORY)) {
+            AutoPtr<IUriHelper> helper;
+            CUriHelper::AcquireSingleton((IUriHelper**)&helper);
+            helper->WithAppendedPath(uri,
+                    IContactsContractContactsData::CONTENT_DIRECTORY, (IUri**)&queryUri);
         }
         else {
             queryUri = uri;
         }
     }
-    else if (inputUriAsString.StartsWith(str1)) {
+    else if (inputUriAsString.StartWith(str1)) {
         queryUri = uri;
     }
     else {
@@ -336,26 +391,31 @@ ECode PhoneNumberInteraction::StartInteraction(
         //         "Input Uri must be contact Uri or data Uri (input: \"" + uri + "\")");
     }
 
+    AutoPtr<ArrayOf<String> > projection = ArrayOf<String>::Alloc(
+        (String*)PHONE_NUMBER_PROJECTION, 9);
     CCursorLoader::New(mContext,
             queryUri,
-            PHONE_NUMBER_PROJECTION,
+            projection,
             PHONE_NUMBER_SELECTION,
             NULL,
-            NULL, (CursorLoader**)&mLoader);
-    mLoader->RegisterListener(0, this);
-    mLoader->StartLoading();
+            String(NULL), (ICursorLoader**)&mLoader);
+    ILoader::Probe(mLoader)->RegisterListener(0, this);
+    ILoader::Probe(mLoader)->StartLoading();
 
     return NOERROR;
 }
 
 ECode PhoneNumberInteraction::OnLoadComplete(
     /* [in] */ ILoader* loader,
-    /* [in] */ ICursor* cursor)
+    /* [in] */ IInterface* data)
 {
-    if (cursor == NULL) {
+    if (data == NULL) {
         OnDismiss();
         return NOERROR;
     }
+
+    ICursor* cursor = ICursor::Probe(data);
+
     // try {
     AutoPtr<IArrayList> phoneList;
     CArrayList::New((IArrayList**)&phoneList);
@@ -367,6 +427,7 @@ ECode PhoneNumberInteraction::OnLoadComplete(
 
     Boolean succeeded;
     while (cursor->MoveToNext(&succeeded), succeeded) {
+        AutoPtr<PhoneItem> item;
         if (mContactId == UNKNOWN_CONTACT_ID) {
             FAIL_GOTO(cursor->GetInt64(CONTACT_ID, &mContactId), exit);
         }
@@ -378,16 +439,16 @@ ECode PhoneNumberInteraction::OnLoadComplete(
             FAIL_GOTO(cursor->GetString(NUMBER, &primaryPhone), exit);
         }
 
-        AutoPtr<PhoneItem> item = new PhoneItem();
+        item = new PhoneItem();
         cursor->GetInt64(_ID, &item->mId);
         cursor->GetString(NUMBER, &item->mPhoneNumber);
         cursor->GetString(ACCOUNT_TYPE, &item->mAccountType);
         cursor->GetString(DATA_SET, &item->mDataSet);
-        cursor->GetInt32(TYPE, &item->mType);
+        cursor->GetInt32(TYPE, (Int32*)&item->mType);
         cursor->GetString(LABEL, &item->mLabel);
         cursor->GetString(MIMETYPE, &item->mMimeType);
 
-        phoneList->Add((IInterface*)item);
+        phoneList->Add((IObject*)item);
     }
 
     if (mUseDefault && !primaryPhone.IsNull()) {
@@ -396,7 +457,8 @@ ECode PhoneNumberInteraction::OnLoadComplete(
         return NOERROR;
     }
 
-    Collapser::CollapseList(phoneList, mContext);
+    assert(0 && "TODO");
+    // Collapser::CollapseList(phoneList, mContext);
     Int32 size;
     phoneList->GetSize(&size);
     if (size == 0) {
@@ -406,7 +468,7 @@ ECode PhoneNumberInteraction::OnLoadComplete(
         AutoPtr<IInterface> item;
         phoneList->Get(0, (IInterface**)&item);
         OnDismiss();
-        PerformAction(((phoneList*)item)->mPhoneNumber);
+        PerformAction(((PhoneItem*)IObject::Probe(item))->mPhoneNumber);
     }
     else {
         // There are multiple candidates. Let the user choose one.
@@ -414,7 +476,7 @@ ECode PhoneNumberInteraction::OnLoadComplete(
     }
 
 exit:
-    cursor->Close();
+    ICloseable::Probe(cursor)->Close();
     return NOERROR;
     // } finally {
     //     cursor.close();
@@ -444,8 +506,9 @@ void PhoneNumberInteraction::StartInteractionForPhoneCall(
     /* [in] */ ITransactionSafeActivity* activity,
     /* [in] */ IUri* uri)
 {
-    (new PhoneNumberInteraction(activity, IContactDisplayUtils::INTERACTION_CALL, NULL))
-                .StartInteraction(uri, TRUE);
+    assert(0 && "TODO");
+    // (new PhoneNumberInteraction(activity, IContactDisplayUtils::INTERACTION_CALL, NULL))
+    //             .StartInteraction(uri, TRUE);
 }
 
 void PhoneNumberInteraction::StartInteractionForPhoneCall(
@@ -453,8 +516,9 @@ void PhoneNumberInteraction::StartInteractionForPhoneCall(
     /* [in] */ IUri* uri,
     /* [in] */ Boolean useDefault)
 {
-    (new PhoneNumberInteraction(activity, IContactDisplayUtils::INTERACTION_CALL, NULL))
-                .StartInteraction(uri, useDefault);
+    assert(0 && "TODO");
+    // (new PhoneNumberInteraction(activity, IContactDisplayUtils::INTERACTION_CALL, NULL))
+    //             .StartInteraction(uri, useDefault);
 }
 
 void PhoneNumberInteraction::StartInteractionForPhoneCall(
@@ -462,16 +526,18 @@ void PhoneNumberInteraction::StartInteractionForPhoneCall(
     /* [in] */ IUri* uri,
     /* [in] */ const String& callOrigin)
 {
-    (new PhoneNumberInteraction(activity, IContactDisplayUtils::INTERACTION_CALL, NULL, callOrigin))
-                .StartInteraction(uri, TRUE);
+    assert(0 && "TODO");
+    // (new PhoneNumberInteraction(activity, IContactDisplayUtils::INTERACTION_CALL, NULL, callOrigin))
+    //             .StartInteraction(uri, TRUE);
 }
 
 void PhoneNumberInteraction::StartInteractionForTextMessage(
     /* [in] */ ITransactionSafeActivity* activity,
     /* [in] */ IUri* uri)
 {
-    (new PhoneNumberInteraction(activity, IContactDisplayUtils::INTERACTION_SMS, NULL))
-                .StartInteraction(uri, TRUE);
+    assert(0 && "TODO");
+    // (new PhoneNumberInteraction(activity, IContactDisplayUtils::INTERACTION_SMS, NULL))
+    //             .StartInteraction(uri, TRUE);
 }
 
 AutoPtr<ICursorLoader> PhoneNumberInteraction::GetLoader()

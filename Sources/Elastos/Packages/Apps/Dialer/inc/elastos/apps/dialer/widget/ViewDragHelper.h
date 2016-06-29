@@ -1,10 +1,25 @@
 #ifndef __ELASTOS_APPS_DIALER_WIDGET_VIEWDRAGHELPER_H__
 #define __ELASTOS_APPS_DIALER_WIDGET_VIEWDRAGHELPER_H__
 
-namespace Elastos{
-namespace Apps{
-namespace Dialer{
-namespace Widget{
+#include "_Elastos.Apps.Dialer.h"
+#include <elastos/core/Object.h>
+#include <elastos/droid/os/Runnable.h>
+#include "Elastos.Droid.Content.h"
+#include "Elastos.Droid.Os.h"
+#include "Elastos.Droid.View.h"
+
+using Elastos::Droid::Content::IContext;
+using Elastos::Droid::Os::Runnable;
+using Elastos::Droid::Os::IRunnable;
+using Elastos::Droid::View::IMotionEvent;
+using Elastos::Droid::View::IView;
+using Elastos::Droid::View::IViewGroup;
+using Elastos::Droid::View::IVelocityTracker;
+
+namespace Elastos {
+namespace Apps {
+namespace Dialer {
+namespace Widget {
 
 /**
  * ViewDragHelper is a utility class for writing custom ViewGroups. It offers a number
@@ -28,7 +43,7 @@ public:
         , public IViewDragHelperCallback
     {
     public:
-        CAR_INTERFACE_DECL()
+        CAR_INTERFACE_DECL();
 
         /**
          * Called when the drag state changes. See the <code>STATE_*</code> constants

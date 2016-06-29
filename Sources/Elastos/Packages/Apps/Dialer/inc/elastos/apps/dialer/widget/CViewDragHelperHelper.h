@@ -3,20 +3,23 @@
 
 #include "_Elastos_Apps_Dialer_Widget_CViewDragHelperHelper.h"
 #include <elastos/core/Singleton.h>
+#include "Elastos.Droid.View.h"
 
-namespace Elastos{
-namespace Apps{
-namespace Dialer{
-namespace Widget{
+using Elastos::Droid::View::IViewGroup;
+
+namespace Elastos {
+namespace Apps {
+namespace Dialer {
+namespace Widget {
 
 CarClass(CViewDragHelperHelper)
     , public Singleton
     , public IViewDragHelperHelper
 {
 public:
-    CAR_INTERFACE_DECL()
+    CAR_INTERFACE_DECL();
 
-    CAR_SINGLETON_DECL()
+    CAR_SINGLETON_DECL();
 
     /**
      * Factory method to create a new ViewDragHelper.

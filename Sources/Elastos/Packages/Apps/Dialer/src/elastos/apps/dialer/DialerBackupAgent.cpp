@@ -1,4 +1,8 @@
-#include "DialerBackupAgent.h"
+#include "elastos/apps/dialer/DialerBackupAgent.h"
+#include "Elastos.Droid.App.h"
+
+using Elastos::Droid::App::Backup::ISharedPreferencesBackupHelper;
+using Elastos::Droid::App::Backup::CSharedPreferencesBackupHelper;
 
 namespace Elastos {
 namespace Apps {

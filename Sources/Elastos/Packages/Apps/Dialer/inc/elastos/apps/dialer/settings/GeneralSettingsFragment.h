@@ -1,8 +1,28 @@
 #ifndef __ELASTOS_APPS_DIALER_SETTINGS_GENERALSETTINGSFRAGMENT_H__
 #define __ELASTOS_APPS_DIALER_SETTINGS_GENERALSETTINGSFRAGMENT_H__
 
-namespace Elastos{
-namespace Apps{
+#include "_Elastos.Apps.Dialer.h"
+#include "elastos/droid/os/Handler.h"
+#include "elastos/droid/preference/PreferenceFragment.h"
+#include "Elastos.Droid.Content.h"
+#include "Elastos.Droid.Os.h"
+#include "Elastos.Droid.Preference.h"
+#include "Elastos.CoreLibrary.Core.h"
+
+using Elastos::Droid::Content::IContext;
+using Elastos::Droid::Os::Handler;
+using Elastos::Droid::Os::IBundle;
+using Elastos::Droid::Os::IHandler;
+using Elastos::Droid::Os::IMessage;
+using Elastos::Droid::Preference::PreferenceFragment;
+using Elastos::Droid::Preference::ICheckBoxPreference;
+using Elastos::Droid::Preference::IPreference;
+using Elastos::Droid::Preference::IPreferenceScreen;
+using Elastos::Droid::Preference::IPreferenceOnPreferenceChangeListener;
+using Elastos::Core::IRunnable;
+
+namespace Elastos {
+namespace Apps {
 namespace Dialer {
 namespace Settings {
 
@@ -42,7 +62,7 @@ private:
     };
 
 public:
-    CAR_INTERFACE_DECL()
+    CAR_INTERFACE_DECL();
 
     GeneralSettingsFragment();
 

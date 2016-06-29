@@ -3,9 +3,21 @@
 
 #include "_Elastos_Apps_Dialer_Util_CDialerUtils.h"
 #include <elastos/core/Singleton.h>
+#include "Elastos.Droid.Content.h"
+#include "Elastos.Droid.View.h"
+#include "Elastos.CoreLibrary.Core.h"
+#include "Elastos.CoreLibrary.Utility.h"
 
-namespace Elastos{
-namespace Apps{
+using Elastos::Droid::Content::IContext;
+using Elastos::Droid::Content::IComponentName;
+using Elastos::Droid::Content::IIntent;
+using Elastos::Droid::Content::Res::IResources;
+using Elastos::Droid::View::IView;
+using Elastos::Core::ICharSequence;
+using Elastos::Utility::IIterable;
+
+namespace Elastos {
+namespace Apps {
 namespace Dialer {
 namespace Util {
 
@@ -14,9 +26,9 @@ CarClass(CDialerUtils)
     , public IDialerUtils
 {
 public:
-    CAR_INTERFACE_DECL()
+    CAR_INTERFACE_DECL();
 
-    CAR_SINGLETON_DECL()
+    CAR_SINGLETON_DECL();
 
     /**
      * Attempts to start an activity and displays a toast with the default error message if the
@@ -27,7 +39,7 @@ public:
      */
     CARAPI StartActivityWithErrorToast(
         /* [in] */ IContext* context,
-        /* [in] */ Intent* intent);
+        /* [in] */ IIntent* intent);
 
     /**
      * Attempts to start an activity and displays a toast with a provided error message if the

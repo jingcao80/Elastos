@@ -1,6 +1,9 @@
 
-#include "widget/CViewDragHelperHelper.h"
-#include "widget/ViewDragHelper.h"
+#include "elastos/apps/dialer/widget/CViewDragHelperHelper.h"
+#include "elastos/apps/dialer/widget/ViewDragHelper.h"
+#include <elastos/utility/logging/Logger.h>
+
+using Elastos::Utility::Logging::Logger;
 
 namespace Elastos {
 namespace Apps {

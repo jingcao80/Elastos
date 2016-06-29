@@ -1,9 +1,20 @@
 #ifndef __ELASTOS_APPS_DIALER_SPECIALCHARSEQUENCEMGR_H__
 #define __ELASTOS_APPS_DIALER_SPECIALCHARSEQUENCEMGR_H__
 
-namespace Elastos{
-namespace Apps{
-namespace Dialer{
+#include <elastos/core/Object.h>
+#include "Elastos.Droid.App.h"
+#include "Elastos.Droid.Content.h"
+
+using Elastos::Droid::App::IProgressDialog;
+using Elastos::Droid::Content::IContext;
+using Elastos::Droid::Content::IContentResolver;
+using Elastos::Droid::Content::IDialogInterfaceOnCancelListener;
+using Elastos::Droid::Telephony::ITelephonyManager;
+using Elastos::Droid::Widget::IEditText;
+
+namespace Elastos {
+namespace Apps {
+namespace Dialer {
 
 /**
  * Helper class to listen for some magic character sequences
@@ -31,14 +42,15 @@ private:
      */
     class SimContactQueryCookie
         : public Object
-        : public IDialogInterfaceOnCancelListener
+        , public IDialogInterfaceOnCancelListener
     {
     public:
-        CAR_INTERFACE_DECL()
+        CAR_INTERFACE_DECL();
 
         SimContactQueryCookie(
             /* [in] */ Int32 number,
-            /* [in] */ IQueryHandler* handler,
+            // TODO:
+            // /* [in] */ QueryHandler* handler,
             /* [in] */ Int32 token);
 
         /**
@@ -66,7 +78,8 @@ private:
     private:
         // Used to identify the query request.
         Int32 mToken;
-        AutoPtr<IQueryHandler> mHandler;
+        // TODO:
+        // AutoPtr<QueryHandler> mHandler;
 
         // The text field we're going to update
         AutoPtr<IEditText> mTextField;
@@ -77,29 +90,29 @@ private:
      *
      * Queries originate from {@link #handleAdnEntry}.
      */
-    class QueryHandler
-        : public NoNullCursorAsyncQueryHandler
-    {
-    public:
-        CARAPI constructor(
-        /* [in] */ IContentResolver* cr);
+    // class QueryHandler
+    //     : public NoNullCursorAsyncQueryHandler
+    // {
+    // public:
+    //     CARAPI constructor(
+    //     /* [in] */ IContentResolver* cr);
 
-        CARAPI_(void) Cancel();
+    //     CARAPI_(void) Cancel();
 
-    protected:
-        /**
-         * Override basic onQueryComplete to fill in the textfield when
-         * we're handed the ADN cursor.
-         */
-        // @Override
-        CARAPI OnNotNullableQueryComplete(
-            /* [in] */ Int32 token,
-            /* [in] */ IInterface* cookie,
-            /* [in] */ ICursor* cursor);
+    // protected:
+    //     /*
+    //      * Override basic onQueryComplete to fill in the textfield when
+    //      * we're handed the ADN cursor.
 
-    private:
-        Boolean mCanceled;
-    };
+    //     // @Override*/
+    //     CARAPI OnNotNullableQueryComplete(
+    //         /* [in] */ Int32 token,
+    //         /* [in] */ IInterface* cookie,
+    //         /* [in] */ ICursor* cursor);
+
+    // private:
+    //     Boolean mCanceled;
+    // };
 
 public:
     static CARAPI_(Boolean) HandleChars(
@@ -205,7 +218,8 @@ private:
      * Fundamental fix would be to have one shared implementation and resolve this corner case more
      * gracefully.
      */
-    static AutoPtr<IQueryHandler> sPreviousAdnQueryHandler;
+    // TODO:
+    // static AutoPtr<QueryHandler> sPreviousAdnQueryHandler;
 
     /*******
      * This code is used to handle SIM Contact queries

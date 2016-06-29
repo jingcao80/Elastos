@@ -1,5 +1,32 @@
 
-#include "voicemail/VoicemailPlaybackFragment.h"
+#include "elastos/apps/dialer/voicemail/VoicemailPlaybackFragment.h"
+#include "elastos/apps/dialer/voicemail/CVoicemailPlaybackPresenter.h"
+#include "Elastos.Droid.Provider.h"
+#include "Elastos.Droid.Internal.h"
+#include <elastos/core/CoreUtils.h>
+#include <elastos/core/StringUtils.h>
+#include <elastos/core/Math.h>
+#include <elastos/utility/logging/Logger.h>
+#include "R.h"
+
+using Elastos::Droid::Content::IContentResolver;
+using Elastos::Droid::Content::IIntent;
+using Elastos::Droid::Content::CIntent;
+using Elastos::Droid::Database::ICursor;
+using Elastos::Droid::Os::IPowerManager;
+using Elastos::Droid::Os::IPowerManagerWakeLock;
+using Elastos::Droid::Provider::IVoicemails;
+using Elastos::Droid::Provider::IVoicemailContract;
+using Elastos::Droid::Internal::Utility::IPreconditions;
+using Elastos::Droid::Internal::Utility::CPreconditions;
+using Elastos::Droid::View::IViewPropertyAnimator;
+using Elastos::Droid::Widget::IProgressBar;
+using Elastos::Apps::Dialer::IProximitySensorAware;
+using Elastos::Core::CoreUtils;
+using Elastos::Core::StringUtils;
+using Elastos::Utility::Concurrent::IExecutors;
+using Elastos::Utility::Concurrent::CExecutors;
+using Elastos::Utility::Logging::Logger;
 
 namespace Elastos {
 namespace Apps {
@@ -61,8 +88,8 @@ VoicemailPlaybackFragment::PlaybackViewImpl::PlaybackViewImpl(
     playbackLayout->FindViewById(R::id::playback_position_text, (IView**)&positionText);
     AutoPtr<IView> speedText;
     playbackLayout->FindViewById(R::id::playback_speed_text, (IView**)&speedText);
-    CTextViewWithMessagesController::New(ITextView::Probe(positionText),
-            ITextView::Probe(speedText), (ITextViewWithMessagesController**)&mTextController);
+    mTextController = new TextViewWithMessagesController::New(this,
+            ITextView::Probe(positionText), ITextView::Probe(speedText));
 }
 
 ECode VoicemailPlaybackFragment::PlaybackViewImpl::Finish()
@@ -190,8 +217,8 @@ ECode VoicemailPlaybackFragment::PlaybackViewImpl::SetClipPosition(
     /* [in] */ Int32 clipPositionInMillis,
     /* [in] */ Int32 clipLengthInMillis)
 {
-    Int32 seekBarPosition = Math::Max(0, clipPositionInMillis);
-    Int32 seekBarMax = Math::Max(seekBarPosition, clipLengthInMillis);
+    Int32 seekBarPosition = Elastos::Core::Math::Max(0, clipPositionInMillis);
+    Int32 seekBarMax = Elastos::Core::Math::Max(seekBarPosition, clipLengthInMillis);
     Int32 max;
     IProgressBar::Probe(mPlaybackSeek)->GetMax(&max);
     if (max != seekBarMax) {
@@ -296,7 +323,7 @@ ECode VoicemailPlaybackFragment::PlaybackViewImpl::QueryHasContent(
     if (cursor != NULL && cursor->MoveToNext(&succeeded), succeeded) {
         Int32 columnIndex;
         ECode ec = cursor->GetColumnIndexOrThrow(
-                IVoicemailContractVoicemails::HAS_CONTENT, &columnIndex);
+                IVoicemails::HAS_CONTENT, &columnIndex);
         if (FAILED(ec)) {
             *result = FALSE;
             goto exit;
@@ -452,11 +479,12 @@ const String VoicemailPlaybackFragment::HAS_CONTENT_PROJECTION[] = {
     IVoicemailContractVoicemails::HAS_CONTENT,
 };
 
-Int32 VoicemailPlaybackFragment::mMediaPlayerRefCount; // = 0;
-AutoPtr<IMediaPlayerProxy> VoicemailPlaybackFragment::mMediaPlayerInstance;
+Int32 VoicemailPlaybackFragment::mMediaPlayerRefCount = 0;
+// TODO:
+// AutoPtr<IMediaPlayerProxy> VoicemailPlaybackFragment::mMediaPlayerInstance;
 AutoPtr<IScheduledExecutorService> VoicemailPlaybackFragment::mScheduledExecutorService;
 
-CAR_INTERFACE_IMPL(VoicemailPlaybackFragment, AnalyticsFragment, IVoicemailPlaybackFragment)
+CAR_INTERFACE_IMPL(VoicemailPlaybackFragment, /*AnalyticsFragment*/Fragment, IVoicemailPlaybackFragment)
 
 ECode VoicemailPlaybackFragment::OnCreateView(
     /* [in] */ ILayoutInflater* inflater,
@@ -474,7 +502,8 @@ ECode VoicemailPlaybackFragment::OnCreateView(
 ECode VoicemailPlaybackFragment::OnActivityCreated(
     /* [in] */ IBundle* savedInstanceState)
 {
-    AnalyticsFragment::OnActivityCreated(savedInstanceState);
+    assert(0 && "TODO");
+    // AnalyticsFragment::OnActivityCreated(savedInstanceState);
     AutoPtr<IBundle> arguments;
     GetArguments((IBundle**)&arguments);
 
@@ -497,11 +526,12 @@ ECode VoicemailPlaybackFragment::OnActivityCreated(
     AutoPtr<IPowerManagerWakeLock> wakeLock;
     powerManager->NewWakeLock(IPowerManager::SCREEN_DIM_WAKE_LOCK,
             String("VoicemailPlaybackFragment"), (IPowerManagerWakeLock**)&wakeLock);
-    CVoicemailPlaybackPresenter::New(CreatePlaybackViewImpl(),
-            GetMediaPlayerInstance(), voicemailUri,
-            GetScheduledExecutorServiceInstance(), startPlayback,
-            AsyncTaskExecutors::CreateAsyncTaskExecutor(), wakeLock,
-            (IVoicemailPlaybackPresenter**)&mPresenter);
+    assert(0 && "TODO");
+    // CVoicemailPlaybackPresenter::New(CreatePlaybackViewImpl(),
+    //         GetMediaPlayerInstance(), voicemailUri,
+    //         GetScheduledExecutorServiceInstance(), startPlayback,
+    //         AsyncTaskExecutors::CreateAsyncTaskExecutor(), wakeLock,
+    //         (IVoicemailPlaybackPresenter**)&mPresenter);
     mPresenter->OnCreate(savedInstanceState);
     return NOERROR;
 }
@@ -510,7 +540,8 @@ ECode VoicemailPlaybackFragment::OnSaveInstanceState(
     /* [in] */ IBundle* outState)
 {
     mPresenter->OnSaveInstanceState(outState);
-    AnalyticsFragment::OnSaveInstanceState(outState);
+    assert(0 && "TODO");
+    // AnalyticsFragment::OnSaveInstanceState(outState);
     return NOERROR;
 }
 
@@ -518,14 +549,16 @@ ECode VoicemailPlaybackFragment::OnDestroy()
 {
     ShutdownMediaPlayer();
     mPresenter->OnDestroy();
-    AnalyticsFragment::OnDestroy();
+    assert(0 && "TODO");
+    // AnalyticsFragment::OnDestroy();
     return NOERROR;
 }
 
 ECode VoicemailPlaybackFragment::OnPause()
 {
     mPresenter->OnPause();
-    AnalyticsFragment::OnPause();
+    assert(0 && "TODO");
+    // AnalyticsFragment::OnPause();
     return NOERROR;
 }
 
@@ -540,18 +573,19 @@ AutoPtr<IVoicemailPlaybackPresenterPlaybackView> VoicemailPlaybackFragment::Crea
     return (IVoicemailPlaybackPresenterPlaybackView*)pv;
 }
 
-AutoPtr<IMediaPlayerProxy> VoicemailPlaybackFragment::GetMediaPlayerInstance()
-{
-    synchronized(mLock) {
-        ++mMediaPlayerRefCount;
-        if (mMediaPlayerInstance == NULL) {
-            assert(0 && "TODO");
-            // mMediaPlayerInstance = VariableSpeed.createVariableSpeed(
-            //         GetScheduledExecutorServiceInstance());
-        }
-        return mMediaPlayerInstance;
-    }
-}
+// TODO:
+// AutoPtr<IMediaPlayerProxy> VoicemailPlaybackFragment::GetMediaPlayerInstance()
+// {
+//     synchronized(mLock) {
+//         ++mMediaPlayerRefCount;
+//         if (mMediaPlayerInstance == NULL) {
+//             assert(0 && "TODO");
+//             // mMediaPlayerInstance = VariableSpeed.createVariableSpeed(
+//             //         GetScheduledExecutorServiceInstance());
+//         }
+//         return mMediaPlayerInstance;
+//     }
+// }
 
 AutoPtr<IScheduledExecutorService> VoicemailPlaybackFragment::GetScheduledExecutorServiceInstance()
 {
@@ -577,10 +611,11 @@ void VoicemailPlaybackFragment::ShutdownMediaPlayer()
             mScheduledExecutorService->Shutdown();
             mScheduledExecutorService = NULL;
         }
-        if (mMediaPlayerInstance != NULL) {
-            mMediaPlayerInstance->Release();
-            mMediaPlayerInstance = NULL;
-        }
+        assert(0 && "TODO");
+        // if (mMediaPlayerInstance != NULL) {
+        //     mMediaPlayerInstance->Release();
+        //     mMediaPlayerInstance = NULL;
+        // }
     }
 }
 

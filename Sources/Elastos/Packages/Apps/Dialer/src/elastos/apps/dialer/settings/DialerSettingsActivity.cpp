@@ -1,5 +1,16 @@
 
-#include "settings/DialerSettingsActivity.h"
+#include "elastos/apps/dialer/settings/DialerSettingsActivity.h"
+#include "Elastos.Droid.Preference.h"
+#include "Elastos.CoreLibrary.Core.h"
+#include "R.h"
+
+using Elastos::Droid::Os::IUserHanlde;
+using Elastos::Droid::Preference::IPreferenceActivityHeader;
+using Elastos::Droid::Preference::CPreferenceActivityHeader;
+using Elastos::Droid::Preference::IPreferenceManagerHelper;
+using Elastos::Droid::Preference::CPreferenceManagerHelper;
+using Elastos::Core::ICharSequence;
+using Elastos::Core::CArrayList;
 
 namespace Elastos {
 namespace Apps {
@@ -78,12 +89,14 @@ ECode DialerSettingsActivity::HeaderAdapter::GetView(
 //=================================================================
 // DialerSettingsActivity
 //=================================================================
-CAR_INTERFACE_IMPL(DialerSettingsActivity, AnalyticsPreferenceActivity, IDialerSettingsActivity);
+// TODO:
+CAR_INTERFACE_IMPL(DialerSettingsActivity, /*AnalyticsPreferenceActivity*/Activity, IDialerSettingsActivity);
 
 ECode DialerSettingsActivity::OnCreate(
     /* [in] */ IBundle* savedInstanceState)
 {
-    AnalyticsPreferenceActivity::OnCreate(savedInstanceState);
+    assert(0 && "TODO");
+    // AnalyticsPreferenceActivity::OnCreate(savedInstanceState);
     AutoPtr<IPreferenceManagerHelper> helper;
     CPreferenceManagerHelper::AcquireSingleton((IPreferenceManagerHelper**)&helper);
     helper->GetDefaultSharedPreferences(this, (ISharedPreferences**)&mPreferences);
@@ -142,7 +155,8 @@ ECode DialerSettingsActivity::SetListAdapter(
     /* [in] */ IListAdapter* adapter)
 {
     if (adapter == NULL) {
-        AnalyticsPreferenceActivity::SetListAdapter(NULL);
+        assert(0 && "TODO");
+        // AnalyticsPreferenceActivity::SetListAdapter(NULL);
     }
     else {
         // We don't have access to the hidden getHeaders() method, so grab the headers from
@@ -158,7 +172,9 @@ ECode DialerSettingsActivity::SetListAdapter(
         }
         mHeaderAdapter = new HeaderAdapter();
         mHeaderAdapter->constructor((IContext*)this, headers);
-        AnalyticsPreferenceActivity::SetListAdapter(mHeaderAdapter);
+
+        assert(0 && "TODO");
+        // AnalyticsPreferenceActivity::SetListAdapter(mHeaderAdapter);
     }
     return NOERROR;
 }

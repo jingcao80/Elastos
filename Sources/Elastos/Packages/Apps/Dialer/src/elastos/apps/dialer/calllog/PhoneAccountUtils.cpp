@@ -1,9 +1,13 @@
 
 #include "elastos/apps/dialer/calllog/PhoneAccountUtils.h"
+#include "elastos/droid/text/TextUtils.h"
 
 using Elastos::Droid::Content::IComponentName;
 using Elastos::Droid::Content::IComponentNameHelper;
 using Elastos::Droid::Content::CComponentNameHelper;
+using Elastos::Droid::Text::TextUtils;
+using Elastos::Droid::Telecomm::Telecom::CPhoneAccountHandle;
+using Elastos::Droid::Telecomm::Telecom::ITelecomManager;
 
 namespace Elastos {
 namespace Apps {

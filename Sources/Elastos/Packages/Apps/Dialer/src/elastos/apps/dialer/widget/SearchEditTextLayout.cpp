@@ -1,5 +1,15 @@
 
-#include "widget/SearchEditTextLayout.h"
+#include "elastos/apps/dialer/widget/SearchEditTextLayout.h"
+#include "elastos/apps/dialer/util/DialerUtils.h"
+#include <elastos/core/CoreUtils.h>
+#include "R.h"
+
+using Elastos::Droid::Animation::IValueAnimatorHelper;
+using Elastos::Droid::Animation::CValueAnimatorHelper;
+using Elastos::Droid::View::IViewGroupLayoutParams;
+using Elastos::Droid::View::IViewGroupMarginLayoutParams;
+using Elastos::Core::CoreUtils;
+using Elastos::Apps::Dialer::Util::DialerUtils;
 
 namespace Elastos {
 namespace Apps {
@@ -259,20 +269,20 @@ ECode SearchEditTextLayout::Expand(
 ECode SearchEditTextLayout::Collapse(
     /* [in] */ Boolean animate)
 {
-    UpdateVisibility(false /* isExpand */);
+    UpdateVisibility(FALSE /* isExpand */);
 
     if (animate) {
         assert(0 && "TODO");
         // AnimUtils.crossFadeViews(mCollapsed, mExpanded, ANIMATION_DURATION);
         AutoPtr<IValueAnimatorHelper> helper;
         CValueAnimatorHelper::AcquireSingleton((IValueAnimatorHelper**)&helper);
-        helper->OfFloat(0f, 1f, &mAnimator);
-        PrepareAnimator(false);
+        helper->OfFloat(0, 1, &mAnimator);
+        PrepareAnimator(FALSE);
     }
     else {
         mCollapsed->SetVisibility(IView::VISIBLE);
         mCollapsed->SetAlpha(1);
-        SetMargins(1f);
+        SetMargins(1);
         mExpanded->SetVisibility(IView::GONE);
     }
 

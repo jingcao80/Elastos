@@ -1,5 +1,5 @@
 
-#include "list/CTileInteractionTeaserView.h"
+#include "elastos/apps/dialer/list/CTileInteractionTeaserView.h"
 
 namespace Elastos {
 namespace Apps {

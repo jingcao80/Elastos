@@ -1,8 +1,14 @@
 
 #include "elastos/apps/dialer/calllog/PhoneNumberUtilsWrapper.h"
+#include "elastos/apps/dialer/calllog/CPhoneNumberUtilsWrapper.h"
+#include <elastos/droid/text/TextUtils.h>
+#include "Elastos.Droid.Provider.h"
+#include "Elastos.Droid.Telephony.h"
 
-using Elastos ::Droid:Telephony::IPhoneNumberUtils;
-using Elastos ::Droid:Telephony::CPhoneNumberUtils;
+using Elastos::Droid::Provider::ICalls;
+using Elastos::Droid::Text::TextUtils;
+using Elastos::Droid::Telephony::IPhoneNumberUtils;
+using Elastos::Droid::Telephony::CPhoneNumberUtils;
 
 namespace Elastos {
 namespace Apps {
@@ -45,8 +51,8 @@ ECode PhoneNumberUtilsWrapper::CanSendSmsTo(
     Boolean isVoicemailNumber;
     Boolean isSipNumber;
     *result = CanPlaceCallsTo(number, presentation)
-            && IsVoicemailNumber(number, &isVoicemailNumber), !isVoicemailNumber
-            && IsSipNumber(number, &isSipNumber), !isSipNumber;
+            && (IsVoicemailNumber(number, &isVoicemailNumber), !isVoicemailNumber)
+            && (IsSipNumber(number, &isSipNumber), !isSipNumber);
     return NOERROR;
 }
 
@@ -64,7 +70,7 @@ ECode PhoneNumberUtilsWrapper::IsVoicemailNumber(
         CPhoneNumberUtils::AcquireSingleton((IPhoneNumberUtils**)&utils);
         String str;
         number->ToString(&str);
-        utils->IsVoiceMailNumber(result);
+        utils->IsVoiceMailNumber(str, result);
     }
     return NOERROR;
 }
@@ -81,7 +87,8 @@ ECode PhoneNumberUtilsWrapper::IsSipNumber(
     else {
         String str;
         number->ToString(&str);
-        *result = PhoneNumberHelper::IsUriNumber(str);
+        assert(0 && "TODO");
+        // *result = PhoneNumberHelper::IsUriNumber(str);
     }
     return NOERROR;
 }
@@ -116,7 +123,7 @@ Boolean PhoneNumberUtilsWrapper::IsLegacyUnknownNumbers(
     /* [in] */ ICharSequence* number)
 {
     Boolean contains;
-    return number != NULL && LEGACY_UNKNOWN_NUMBERS->Contains(number, &contains), contains;
+    return number != NULL && (LEGACY_UNKNOWN_NUMBERS->Contains(number, &contains), contains);
 }
 
 } // CallLog

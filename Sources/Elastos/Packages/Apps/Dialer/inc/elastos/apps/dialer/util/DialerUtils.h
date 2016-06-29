@@ -1,10 +1,16 @@
 #ifndef __ELASTOS_APPS_DIALER_UTIL_DIALERUTILS_H__
 #define __ELASTOS_APPS_DIALER_UTIL_DIALERUTILS_H__
 
+#include "_Elastos.Apps.Dialer.h"
 #include "Elastos.Droid.Content.h"
+#include "Elastos.Droid.View.h"
+#include "Elastos.CoreLibrary.Utility.h"
 
 using Elastos::Droid::Content::IComponentName;
+using Elastos::Droid::Content::IContext;
 using Elastos::Droid::Content::IIntent;
+using Elastos::Droid::Content::Res::IResources;
+using Elastos::Droid::View::IView;
 using Elastos::Utility::IIterable;
 
 namespace Elastos {

@@ -4,8 +4,8 @@
 #include "_Elastos_Apps_Dialer_Dialpad_CUnicodeDialerKeyListenerHelper.h"
 #include <elastos/core/Singleton.h>
 
-namespace Elastos{
-namespace Apps{
+namespace Elastos {
+namespace Apps {
 namespace Dialer {
 namespace Dialpad {
 
@@ -14,9 +14,9 @@ CarClass(CUnicodeDialerKeyListenerHelper)
     , public IUnicodeDialerKeyListenerHelper
 {
 public:
-    CAR_INTERFACE_DECL()
+    CAR_INTERFACE_DECL();
 
-    CAR_SINGLETON_DECL()
+    CAR_SINGLETON_DECL();
 
     CARAPI GetINSTANCE(
         /* [out] */ IUnicodeDialerKeyListener** instance);

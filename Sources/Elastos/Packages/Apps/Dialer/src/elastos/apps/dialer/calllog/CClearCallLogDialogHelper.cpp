@@ -1,6 +1,6 @@
 
 #include "elastos/apps/dialer/calllog/CClearCallLogDialogHelper.h"
-#include "elastos/apps/dialer/calllog/ClearCallLogDialogHelper.h"
+#include "elastos/apps/dialer/calllog/ClearCallLogDialog.h"
 
 namespace Elastos {
 namespace Apps {
@@ -14,7 +14,7 @@ CAR_SINGLETON_IMPL(CClearCallLogDialogHelper);
 ECode CClearCallLogDialogHelper::Show(
     /* [in] */ IFragmentManager* fragmentManager)
 {
-    ClearCallLogDialogHelper::Show(fragmentManager);
+    ClearCallLogDialog::Show(fragmentManager);
     return NOERROR;
 }
 

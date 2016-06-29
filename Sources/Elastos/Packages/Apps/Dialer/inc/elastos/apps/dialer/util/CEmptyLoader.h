@@ -2,10 +2,10 @@
 #define __ELASTOS_APPS_DIALER_UTIL_CEMPTYLOADER_H__
 
 #include "_Elastos_Apps_Dialer_Util_CEmptyLoader.h"
-#include "EmptyLoader.h"
+#include "elastos/apps/dialer/util/EmptyLoader.h"
 
-namespace Elastos{
-namespace Apps{
+namespace Elastos {
+namespace Apps {
 namespace Dialer {
 namespace Util {
 
@@ -13,7 +13,7 @@ CarClass(CEmptyLoader)
     , public EmptyLoader
 {
 public:
-    CAR_OBJECT_DECL()
+    CAR_OBJECT_DECL();
 };
 
 } // Util

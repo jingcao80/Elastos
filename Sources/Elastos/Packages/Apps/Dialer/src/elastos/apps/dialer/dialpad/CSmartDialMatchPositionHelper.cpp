@@ -1,5 +1,5 @@
-#include "dialpad/SmartDialMatchPosition.h"
-#include "dialpad/CSmartDialMatchPositionHelper.h"
+#include "elastos/apps/dialer/dialpad/SmartDialMatchPosition.h"
+#include "elastos/apps/dialer/dialpad/CSmartDialMatchPositionHelper.h"
 
 namespace Elastos {
 namespace Apps {

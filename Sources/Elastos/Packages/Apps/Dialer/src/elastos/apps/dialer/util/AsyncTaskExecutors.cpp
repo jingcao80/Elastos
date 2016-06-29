@@ -1,5 +1,16 @@
 
-#include "util/AsyncTaskExecutors.h"
+#include "elastos/apps/dialer/util/AsyncTaskExecutors.h"
+#include "Elastos.Droid.Internal.h"
+#include "Elastos.Droid.Os.h"
+#include <elastos/core/Thread.h>
+
+using Elastos::Droid::Internal::Utility::IPreconditions;
+using Elastos::Droid::Internal::Utility::CPreconditions;
+using Elastos::Droid::Os::ILooper;
+using Elastos::Droid::Os::ILooperHelper;
+using Elastos::Droid::Os::CLooperHelper;
+using Elastos::Core::IThread;
+using Elastos::Core::Thread;
 
 namespace Elastos {
 namespace Apps {
@@ -80,9 +91,9 @@ void AsyncTaskExecutors::CheckCalledFromUiThread()
     helper->GetMainLooper((ILooper**)&looper);
     AutoPtr<IThread> thread;
     looper->GetThread(&thread);
-    AutoPtr<IThread> currentThread = Thread.GetCurrentThread();
+    AutoPtr<IThread> currentThread = Thread::GetCurrentThread();
     String str;
-    currentThread->ToString(&str);
+    IObject::Probe(currentThread)->ToString(&str);
 
     AutoPtr<IPreconditions> preconditions;
     CPreconditions::AcquireSingleton((IPreconditions**)&preconditions);

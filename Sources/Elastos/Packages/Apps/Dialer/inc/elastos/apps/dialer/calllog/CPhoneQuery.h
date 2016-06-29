@@ -18,9 +18,9 @@ CarClass(CPhoneQuery)
     , public IPhoneQuery
 {
 public:
-    CAR_INTERFACE_DECL()
+    CAR_INTERFACE_DECL();
 
-    CAR_SINGLETON_DECL()
+    CAR_SINGLETON_DECL();
 
     CARAPI Get_PROJECTION(
         /* [out, callee] */ ArrayOf<String>** result);

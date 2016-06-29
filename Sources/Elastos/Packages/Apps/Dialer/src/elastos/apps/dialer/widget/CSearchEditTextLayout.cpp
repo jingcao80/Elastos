@@ -1,5 +1,5 @@
 
-#include "widget/CSearchEditTextLayout.h"
+#include "elastos/apps/dialer/widget/CSearchEditTextLayout.h"
 
 namespace Elastos {
 namespace Apps {

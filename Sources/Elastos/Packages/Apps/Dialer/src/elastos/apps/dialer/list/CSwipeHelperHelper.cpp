@@ -1,6 +1,6 @@
 
-#include "list/CSwipeHelperHelper.h"
-#include "list/SwipeHelper.h"
+#include "elastos/apps/dialer/list/CSwipeHelperHelper.h"
+#include "elastos/apps/dialer/list/SwipeHelper.h"
 
 namespace Elastos {
 namespace Apps {

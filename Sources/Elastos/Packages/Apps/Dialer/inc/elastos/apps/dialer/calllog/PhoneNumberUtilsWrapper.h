@@ -4,6 +4,7 @@
 
 #include "_Elastos.Apps.Dialer.h"
 #include "elastos/core/Object.h"
+#include "Elastos.CoreLibrary.Utility.h"
 
 using Elastos::Utility::ISet;
 

@@ -1,10 +1,41 @@
 #ifndef __ELASTOS_APPS_DIALER_VOICEMAIL_VOICEMAILPLAYBACKFRAGMENT_H__
 #define __ELASTOS_APPS_DIALER_VOICEMAIL_VOICEMAILPLAYBACKFRAGMENT_H__
 
-#include "AnalyticsFragment.h"
+#include "_Elastos.Apps.Dialer.h"
+#include <elastos/droid/app/Fragment.h>
+#include <elastos/core/Object.h>
+#include "Elastos.Droid.App.h"
+#include "Elastos.Droid.Content.h"
+#include "Elastos.Droid.Database.h"
+#include "Elastos.Droid.Media.h"
+#include "Elastos.Droid.Net.h"
+#include "Elastos.Droid.Os.h"
+#include "Elastos.Droid.View.h"
+#include "Elastos.Droid.Widget.h"
+#include "Elastos.CoreLibrary.Core.h"
+#include "Elastos.CoreLibrary.Utility.h"
 
-namespace Elastos{
-namespace Apps{
+using Elastos::Droid::App::Fragment;
+using Elastos::Droid::App::IActivity;
+using Elastos::Droid::Content::IContext;
+using Elastos::Droid::Database::IContentObserver;
+using Elastos::Droid::Media::IAudioManager;
+using Elastos::Droid::Net::IUri;
+using Elastos::Droid::Os::IBundle;
+using Elastos::Droid::View::ILayoutInflater;
+using Elastos::Droid::View::IView;
+using Elastos::Droid::View::IViewOnClickListener;
+using Elastos::Droid::View::IViewGroup;
+using Elastos::Droid::Widget::ISeekBar;
+using Elastos::Droid::Widget::ISeekBarOnSeekBarChangeListener;
+using Elastos::Droid::Widget::IImageButton;
+using Elastos::Droid::Widget::ITextView;
+using Elastos::Core::IRunnable;
+using Elastos::Utility::Concurrent::ITimeUnit;
+using Elastos::Utility::Concurrent::IScheduledExecutorService;
+
+namespace Elastos {
+namespace Apps {
 namespace Dialer {
 namespace Voicemail {
 
@@ -20,7 +51,9 @@ namespace Voicemail {
  */
 // @NotThreadSafe
 class VoicemailPlaybackFragment
-    : public AnalyticsFragment
+    // TODO:
+    /*: public AnalyticsFragment*/
+    : public Fragment
     , public IVoicemailPlaybackFragment
 {
 private:
@@ -188,7 +221,7 @@ private:
         AutoPtr<IImageButton> mPlaybackSpeakerphone;
         AutoPtr<IImageButton> mRateDecreaseButton;
         AutoPtr<IImageButton> mRateIncreaseButton;
-        AutoPtr<ITextViewWithMessagesController> mTextController;
+        AutoPtr<TextViewWithMessagesController> mTextController;
     };
 
     /**
@@ -252,7 +285,7 @@ private:
     class
 
 public:
-    CAR_INTERFACE_DECL()
+    CAR_INTERFACE_DECL();
 
     // @Override
     CARAPI OnCreateView(
@@ -279,7 +312,8 @@ private:
     CARAPI_(AutoPtr<IVoicemailPlaybackPresenterPlaybackView>) CreatePlaybackViewImpl();
 
     /* synchronized */
-    static CARAPI_(AutoPtr<IMediaPlayerProxy>) GetMediaPlayerInstance();
+    // TODO:
+    // static CARAPI_(AutoPtr<IMediaPlayerProxy>) GetMediaPlayerInstance();
 
     /* synchronized */
     static CARAPI_(AutoPtr<IScheduledExecutorService>) GetScheduledExecutorServiceInstance();
@@ -304,7 +338,8 @@ private:
 
     AutoPtr<IVoicemailPlaybackPresenter> mPresenter;
     static Int32 mMediaPlayerRefCount; // = 0;
-    static AutoPtr<IMediaPlayerProxy> mMediaPlayerInstance;
+    // TODO:
+    // static AutoPtr<IMediaPlayerProxy> mMediaPlayerInstance;
     static AutoPtr<IScheduledExecutorService> mScheduledExecutorService;
     AutoPtr<IView> mPlaybackLayout;
 };

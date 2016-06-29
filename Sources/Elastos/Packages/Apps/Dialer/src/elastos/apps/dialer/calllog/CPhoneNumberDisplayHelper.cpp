@@ -1,5 +1,14 @@
 
 #include "elastos/apps/dialer/calllog/CPhoneNumberDisplayHelper.h"
+#include "elastos/apps/dialer/calllog/CPhoneNumberUtilsWrapper.h"
+#include "R.h"
+#include <elastos/core/CoreUtils.h>
+#include <elastos/droid/text/TextUtils.h>
+#include "Elastos.Droid.Provider.h"
+
+using Elastos::Droid::Provider::ICalls;
+using Elastos::Droid::Text::TextUtils;
+using Elastos::Core::CoreUtils;
 
 namespace Elastos {
 namespace Apps {
@@ -12,15 +21,14 @@ CAR_OBJECT_IMPL(CPhoneNumberDisplayHelper);
 
 ECode CPhoneNumberDisplayHelper::constructor(
     /* [in] */ IResources* resources)
-    : mResources(resources)
 {
     mResources = resources;
-    return CPhoneNumberUtilsWrapper::AcquireSingleton(
+    return CPhoneNumberUtilsWrapper::New(
             (IPhoneNumberUtilsWrapper**)&mPhoneNumberUtils);
 }
 
 ECode CPhoneNumberDisplayHelper::constructor(
-    /* [in] */ IPhoneNumberUtilsWrapper phoneNumberUtils,
+    /* [in] */ IPhoneNumberUtilsWrapper* phoneNumberUtils,
     /* [in] */ IResources* resources)
 {
     mPhoneNumberUtils = phoneNumberUtils;
@@ -70,7 +78,7 @@ ECode CPhoneNumberDisplayHelper::GetDisplayNumber(
     /* [out] */ ICharSequence** result)
 {
     VALIDATE_NOT_NULL(result);
-    AutoPtr<ICharSequence> displayName = getDisplayName(number, presentation);
+    AutoPtr<ICharSequence> displayName = GetDisplayName(number, presentation);
     if (!TextUtils::IsEmpty(displayName)) {
         *result = displayName;
         REFCOUNT_ADD(*result);

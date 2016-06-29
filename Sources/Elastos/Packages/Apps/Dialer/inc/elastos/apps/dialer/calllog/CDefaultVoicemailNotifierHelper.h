@@ -4,6 +4,10 @@
 
 #include "_Elastos_Apps_Dialer_CallLog_CDefaultVoicemailNotifierHelper.h"
 #include <elastos/core/Singleton.h>
+#include "Elastos.Droid.Content.h"
+
+using Elastos::Droid::Content::IContext;
+using Elastos::Droid::Content::IContentResolver;
 
 namespace Elastos {
 namespace Apps {
@@ -15,19 +19,19 @@ CarClass(CDefaultVoicemailNotifierHelper)
     , public IDefaultVoicemailNotifierHelper
 {
 public:
-    CAR_INTERFACE_DECL()
+    CAR_INTERFACE_DECL();
 
-    CAR_SINGLETON_DECL()
+    CAR_SINGLETON_DECL();
 
     /** Returns the singleton instance of the {@link DefaultVoicemailNotifier}. */
     CARAPI GetInstance(
         /* [in] */ IContext* context,
-        /* [out] */ IDefaultVoicemailNotifier* notifier);
+        /* [out] */ IDefaultVoicemailNotifier** notifier);
 
     /** Create a new instance of {@link NewCallsQuery}. */
     CARAPI CreateNewCallsQuery(
         /* [in] */ IContentResolver* contentResolver,
-        /* [out] */ IDefaultVoicemailNotifierNewCallsQuery* query);
+        /* [out] */ IDefaultVoicemailNotifierNewCallsQuery** query);
 
     /**
      * Create a new PhoneNumberHelper.
@@ -37,7 +41,7 @@ public:
      */
     CARAPI CreatePhoneNumberHelper(
         /* [in] */ IContext* context,
-        /* [out] */ IPhoneNumberDisplayHelper* helper);
+        /* [out] */ IPhoneNumberDisplayHelper** helper);
 };
 
 } // CallLog

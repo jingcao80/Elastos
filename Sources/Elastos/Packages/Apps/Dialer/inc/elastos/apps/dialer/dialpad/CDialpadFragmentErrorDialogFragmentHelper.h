@@ -4,8 +4,8 @@
 #include "_Elastos_Apps_Dialer_Dialpad_CDialpadFragmentErrorDialogFragmentHelper.h"
 #include <elastos/core/Singleton.h>
 
-namespace Elastos{
-namespace Apps{
+namespace Elastos {
+namespace Apps {
 namespace Dialer {
 namespace Dialpad {
 
@@ -14,9 +14,9 @@ CarClass(CDialpadFragmentErrorDialogFragmentHelper)
     , public IDialpadFragmentErrorDialogFragmentHelper
 {
 public:
-    CAR_INTERFACE_DECL()
+    CAR_INTERFACE_DECL();
 
-    CAR_SINGLETON_DECL()
+    CAR_SINGLETON_DECL();
 
     CARAPI NewInstance(
         /* [in] */ Int32 messageResId,

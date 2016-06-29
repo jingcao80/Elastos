@@ -1,10 +1,25 @@
 
-#include "dialpad/SmartDialPrefix.h"
+#include "elastos/apps/dialer/dialpad/SmartDialPrefix.h"
+#include "elastos/apps/dialer/dialpad/CLatinSmartDialMap.h"
+#include "elastos/apps/dialer/dialpad/SmartDialNameMatcher.h"
+#include "Elastos.Droid.Preference.h"
+#include "Elastos.Droid.Telephony.h"
+#include <elastos/droid/text/TextUtils.h>
+#include <elastos/core/CoreUtils.h>
+#include <elastos/core/StringBuilder.h>
 
 using Elastos::Droid::Content::ISharedPreferences;
 using Elastos::Droid::Content::ISharedPreferencesEditor;
 using Elastos::Droid::Preference::IPreferenceManagerHelper;
 using Elastos::Droid::Preference::CPreferenceManagerHelper;
+using Elastos::Droid::Text::TextUtils;
+using Elastos::Droid::Telephony::ITelephonyManager;
+using Elastos::Core::CoreUtils;
+using Elastos::Core::StringBuilder;
+using Elastos::Core::ICharSequence;
+using Elastos::Utility::CArrayList;
+using Elastos::Utility::IHashSet;
+using Elastos::Utility::CHashSet;
 
 namespace Elastos {
 namespace Apps {
@@ -72,7 +87,7 @@ void SmartDialPrefix::InitializeNanpSettings(
         /** Updates shared preferences with the latest country obtained from getSimCountryIso.*/
         AutoPtr<ISharedPreferencesEditor> editor;
         prefs->Edit((ISharedPreferencesEditor**)&editor);
-        editor->PutString(PREF_USER_SIM_COUNTRY_CODE, sUserSimCountryCode)
+        editor->PutString(PREF_USER_SIM_COUNTRY_CODE, sUserSimCountryCode);
         editor->Apply();
     }
     else {
@@ -152,7 +167,7 @@ AutoPtr<IArrayList> SmartDialPrefix::GenerateNamePrefixes(
         for (Int32 i = size - 1; i >= 0; i--) {
             AutoPtr<IInterface> item;
             indexTokens->Get(i, (IInterface**)&item);
-            fullNameToken->Insert(0, CoreUtils::Unbox(item));
+            fullNameToken->Insert(0, CoreUtils::Unbox(ICharSequence::Probe(item)));
             result->Add(CoreUtils::Convert(fullNameToken->ToString()));
         }
 
@@ -177,7 +192,7 @@ AutoPtr<IArrayList> SmartDialPrefix::GenerateNamePrefixes(
                     (i < FIRST_TOKENS_FOR_INITIALS)) {
                 AutoPtr<IInterface> item;
                 indexTokens->Get(i, (IInterface**)&item);
-                initial = CoreUtils::Unbox(item).Substring(0, 1);
+                initial = CoreUtils::Unbox(ICharSequence::Probe(item)).Substring(0, 1);
 
                 /** Recursively adds initial combinations to the list.*/
                 Int32 fullNamesSize;
@@ -185,23 +200,23 @@ AutoPtr<IArrayList> SmartDialPrefix::GenerateNamePrefixes(
                 for (Int32 j = 0; j < fullNamesSize; ++j) {
                     AutoPtr<IInterface> nameItem;
                     fullNames->Get(j, (IInterface**)&nameItem);
-                    String str = initial + CoreUtils::Unbox(nameItem);
+                    String str = initial + CoreUtils::Unbox(ICharSequence::Probe(nameItem));
                     result->Add(CoreUtils::Convert(str));
                 }
                 for (Int32 j = recursiveNameStart; j < recursiveNameEnd; ++j) {
                     AutoPtr<IInterface> resItem;
                     result->Get(j, (IInterface**)&resItem);
-                    String str = initial + CoreUtils::Unbox(resItem);
+                    String str = initial + CoreUtils::Unbox(ICharSequence::Probe(resItem));
                     result->Add(CoreUtils::Convert(str));
                 }
                 result->GetSize(&recursiveNameEnd);
                 AutoPtr<IInterface> nameItem;
                 fullNames->Get(fullNamesSize - 1, (IInterface**)&nameItem);
-                const String currentFullName = CoreUtils::Unbox(nameItem);
+                const String currentFullName = CoreUtils::Unbox(ICharSequence::Probe(nameItem));
 
                 item = NULL;
                 indexTokens->Get(i, (IInterface**)&item);
-                String str = currentFullName + CoreUtils::Unbox(item);
+                String str = currentFullName + CoreUtils::Unbox(ICharSequence::Probe(item));
                 fullNames->Add(CoreUtils::Convert(str));
             }
         }
@@ -224,14 +239,14 @@ AutoPtr<IArrayList> SmartDialPrefix::ParseToNumberTokens(
             return result;
         }
 
-        if (((PhoneNumberTokens*)phoneNumberTokens)->mCountryCodeOffset != 0) {
+        if (((PhoneNumberTokens*)phoneNumberTokens.Get())->mCountryCodeOffset != 0) {
             result->Add(CoreUtils::Convert(SmartDialNameMatcher::NormalizeNumber(number,
-                    ((PhoneNumberTokens*)phoneNumberTokens)->mCountryCodeOffset, mMap)));
+                    ((PhoneNumberTokens*)phoneNumberTokens.Get())->mCountryCodeOffset, mMap)));
         }
 
-        if (((PhoneNumberTokens*)phoneNumberTokens)->mNanpCodeOffset != 0) {
+        if (((PhoneNumberTokens*)phoneNumberTokens.Get())->mNanpCodeOffset != 0) {
             result->Add(CoreUtils::Convert(SmartDialNameMatcher::NormalizeNumber(number,
-                    ((PhoneNumberTokens*)phoneNumberTokens)->mNanpCodeOffset, mMap)));
+                    ((PhoneNumberTokens*)phoneNumberTokens.Get())->mNanpCodeOffset, mMap)));
         }
     }
     return result;
@@ -275,7 +290,7 @@ AutoPtr<ISmartDialPrefixPhoneNumberTokens> SmartDialPrefix::ParsePhoneNumber(
 
         /** If user is in NANP region, finds out whether a number is in NANP format.*/
         if (sUserInNanpRegion)  {
-            String areaCode = "";
+            String areaCode("");
             if (countryCode.Equals("") && normalizedNumber.GetLength() == 10) {
                 /** if the number has no country code but fits the NANP format, extracts the
                  * NANP area code, and finds out offset of the local number.

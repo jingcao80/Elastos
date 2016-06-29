@@ -3,10 +3,10 @@
 #define __ELASTOS_APPS_DIALER_DIALPAD_CSMARTDIALNAMEMATCHER_H__
 
 #include "_Elastos_Apps_Dialer_Dialpad_CSmartDialNameMatcher.h"
-#include "SmartDialNameMatcher.h"
+#include "elastos/apps/dialer/dialpad/SmartDialNameMatcher.h"
 
-namespace Elastos{
-namespace Apps{
+namespace Elastos {
+namespace Apps {
 namespace Dialer {
 namespace Dialpad {
 
@@ -14,7 +14,7 @@ CarClass(CSmartDialNameMatcher)
     , public SmartDialNameMatcher
 {
 public:
-    CAR_OBJECT_DECL()
+    CAR_OBJECT_DECL();
 };
 
 } // Dialpad

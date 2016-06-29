@@ -1,10 +1,24 @@
 #ifndef __ELASTOS_APPS_DIALER_LIST_ALLCONTACTSFRAGMENT_H__
 #define __ELASTOS_APPS_DIALER_LIST_ALLCONTACTSFRAGMENT_H__
 
-#include "ContactEntryListFragment.h"
+#include "_Elastos.Apps.Dialer.h"
+#include <elastos/droid/app/Fragment.h>
+#include "Elastos.Droid.App.h"
+#include "Elastos.Droid.Database.h"
+#include "Elastos.Droid.Os.h"
+#include "Elastos.Droid.View.h"
+#include "Elastos.Droid.Widget.h"
 
-namespace Elastos{
-namespace Apps{
+using Elastos::Droid::App::Fragment;
+using Elastos::Droid::Database::ICursor;
+using Elastos::Droid::Os::IBundle;
+using Elastos::Droid::View::ILayoutInflater;
+using Elastos::Droid::View::IView;
+using Elastos::Droid::View::IViewGroup;
+using Elastos::Droid::Widget::IAdapterView;
+
+namespace Elastos {
+namespace Apps {
 namespace Dialer {
 namespace List {
 
@@ -12,31 +26,33 @@ namespace List {
  * Fragments to show all contacts with phone numbers.
  */
 class AllContactsFragment
-    : public ContactEntryListFragment
+    // TODO:
+    /*: public ContactEntryListFragment*/
+    : public Fragment
     , public IAllContactsFragment
 {
 private:
-    class MyDefaultContactListAdapter()
-        : public DefaultContactListAdapter
-    {
-    public:
-        MyDefaultContactListAdapter(
-            /* [in] */ AllContactsFragment* host);
+    // class MyDefaultContactListAdapter
+    //     : public DefaultContactListAdapter
+    // {
+    // public:
+    //     MyDefaultContactListAdapter(
+    //         /* [in] */ AllContactsFragment* host);
 
-    protected:
-        // @Override
-        CARAPI BindView(
-            /* [in] */ IView* itemView,
-            /* [in] */ Int32 partition,
-            /* [in] */ ICursor* cursor,
-            /* [in] */ Int32 position);
+    // protected:
+    //     // @Override
+    //     CARAPI BindView(
+    //         /* [in] */ IView* itemView,
+    //         /* [in] */ Int32 partition,
+    //         /* [in] */ ICursor* cursor,
+    //         /* [in] */ Int32 position);
 
-    private:
-        AllContactsFragment* mHost;
-    };
+    // private:
+    //     AllContactsFragment* mHost;
+    // };
 
 public:
-    CAR_INTERFACE_DECL()
+    CAR_INTERFACE_DECL();
 
     AllContactsFragment();
 
@@ -54,8 +70,9 @@ public:
 
 protected:
     // @Override
-    CARAPI CreateListAdapter(
-        /* [out] */ IContactEntryListAdapter** adapter);
+    // TODO:
+    // CARAPI CreateListAdapter(
+    //     /* [out] */ IContactEntryListAdapter** adapter);
 
     // @Override
     CARAPI InflateView(

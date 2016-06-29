@@ -1,10 +1,40 @@
 #ifndef __ELASTOS_APPS_DIALER_LIST_LISTSFRAGMENT_H__
 #define __ELASTOS_APPS_DIALER_LIST_LISTSFRAGMENT_H__
 
-using Elastos::Droid::App::IFragmentManager;
+#include "_Elastos.Apps.Dialer.h"
+#include "Elastos.Droid.App.h"
+#include "Elastos.Droid.Database.h"
+#include "Elastos.Droid.Os.h"
+#include "Elastos.Droid.View.h"
+#include "Elastos.Droid.Widget.h"
+#include "Elastos.CoreLibrary.Core.h"
+#include "Elastos.CoreLibrary.Utility.h"
+#include <elastos/droid/app/Fragment.h>
+#include <elastos/core/Object.h>
 
-namespace Elastos{
-namespace Apps{
+using Elastos::Droid::App::IActionBar;
+using Elastos::Droid::App::Fragment;
+using Elastos::Droid::App::IFragment;
+using Elastos::Droid::App::IFragmentManager;
+using Elastos::Droid::Database::ICursor;
+using Elastos::Droid::Os::IBundle;
+using Elastos::Droid::View::ILayoutInflater;
+using Elastos::Droid::View::IView;
+using Elastos::Droid::View::IViewGroup;
+using Elastos::Droid::Widget::IAbsListView;
+using Elastos::Droid::Widget::IListView;
+using Elastos::Core::ICharSequence;
+using Elastos::Utility::IArrayList;
+using Elastos::Apps::Dialer::CallLog::ICallLogAdapter;
+using Elastos::Apps::Dialer::CallLog::ICallLogAdapterCallFetcher;
+using Elastos::Apps::Dialer::CallLog::ICallLogFragment;
+using Elastos::Apps::Dialer::CallLog::ICallLogQueryHandler;
+using Elastos::Apps::Dialer::CallLog::ICallLogQueryHandlerListener;
+using Elastos::Apps::Dialer::Widget::IOverlappingPaneLayout;
+using Elastos::Apps::Dialer::Widget::IOverlappingPaneLayoutPanelSlideCallbacks;
+
+namespace Elastos {
+namespace Apps {
 namespace Dialer {
 namespace List {
 
@@ -17,7 +47,9 @@ namespace List {
  * screen.
  */
 class ListsFragment
-    : public AnalyticsFragment
+    // TODO:
+    /*: public AnalyticsFragment*/
+    : public Fragment
     , public IListsFragment
     , public ICallLogQueryHandlerListener
     , public ICallLogAdapterCallFetcher
@@ -28,6 +60,7 @@ public:
     class ViewPagerAdapter
         // TODO:android.support.v13.app.FragmentPagerAdapter
         // : public FragmentPagerAdapter
+        : public Object
     {
     public:
         ViewPagerAdapter(
@@ -102,7 +135,7 @@ private:
     };
 
 public:
-    CAR_INTERFACE_DECL()
+    CAR_INTERFACE_DECL();
 
     ListsFragment();
 
@@ -199,23 +232,24 @@ private:
     static const String KEY_LAST_DISMISSED_CALL_SHORTCUT_DATE; // =
             // "key_last_dismissed_call_shortcut_date";
 
-    AutPtr<IActionBar> mActionBar;
-    AutPtr<IViewPager> mViewPager;
-    AutPtr<IViewPagerTabs> mViewPagerTabs;
-    AutPtr<ViewPagerAdapter> mViewPagerAdapter;
-    AutPtr<IListView> mShortcutCardsListView;
-    AutPtr<IRemoveView> mRemoveView;
-    AutPtr<IView> mRemoveViewContent;
-    AutPtr<ISpeedDialFragment> mSpeedDialFragment;
-    AutPtr<ICallLogFragment> mRecentsFragment;
-    AutPtr<IAllContactsFragment> mAllContactsFragment;
-    AutPtr<IArrayList> mOnPageChangeListeners;
+    AutoPtr<IActionBar> mActionBar;
+    // TODO:
+    // AutoPtr<IViewPager> mViewPager;
+    // AutoPtr<IViewPagerTabs> mViewPagerTabs;
+    AutoPtr<ViewPagerAdapter> mViewPagerAdapter;
+    AutoPtr<IListView> mShortcutCardsListView;
+    AutoPtr<IRemoveView> mRemoveView;
+    AutoPtr<IView> mRemoveViewContent;
+    AutoPtr<ISpeedDialFragment> mSpeedDialFragment;
+    AutoPtr<ICallLogFragment> mRecentsFragment;
+    AutoPtr<IAllContactsFragment> mAllContactsFragment;
+    AutoPtr<IArrayList> mOnPageChangeListeners;
 
-    AutPtr<ArrayOf<String> > mTabTitles;
+    AutoPtr<ArrayOf<String> > mTabTitles;
 
-    AutPtr<IShortcutCardsAdapter> mMergedAdapter;
-    AutPtr<ICallLogAdapter> mCallLogAdapter;
-    AutPtr<ICallLogQueryHandler> mCallLogQueryHandler;
+    AutoPtr<IShortcutCardsAdapter> mMergedAdapter;
+    AutoPtr<ICallLogAdapter> mCallLogAdapter;
+    AutoPtr<ICallLogQueryHandler> mCallLogQueryHandler;
 
     Boolean mIsPanelOpen; // = true;
 
@@ -230,7 +264,7 @@ private:
      */
     Int64 mCurrentCallShortcutDate; // = 0;
 
-    AutPtr<PanelSlideCallbacks> mPanelSlideCallbacks;
+    AutoPtr<IOverlappingPaneLayoutPanelSlideCallbacks> mPanelSlideCallbacks;
 };
 
 } // List

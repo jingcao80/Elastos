@@ -1,9 +1,16 @@
 #ifndef __ELASTOS_APPS_DIALER_PHONECALLDETAILSVIEWS_H__
 #define __ELASTOS_APPS_DIALER_PHONECALLDETAILSVIEWS_H__
 
+#include "_Elastos.Apps.Dialer.h"
+#include <elastos/core/Object.h>
 #include "Elastos.Droid.App.h"
+#include "Elastos.Droid.Content.h"
+#include "Elastos.Droid.View.h"
 #include "Elastos.Droid.Widget.h"
 
+using Elastos::Droid::Content::IContext;
+using Elastos::Droid::View::IView;
+using Elastos::Droid::Widget::ITextView;
 using Elastos::Droid::Widget::IImageView;
 using Elastos::Apps::Dialer::CallLog::ICallTypeIconsView;
 
@@ -19,7 +26,7 @@ class PhoneCallDetailsViews
     , public IPhoneCallDetailsViews
 {
 public:
-    CAR_INTERFACE_DECL()
+    CAR_INTERFACE_DECL();
 
     /**
      * Create a new instance by extracting the elements from the given view.

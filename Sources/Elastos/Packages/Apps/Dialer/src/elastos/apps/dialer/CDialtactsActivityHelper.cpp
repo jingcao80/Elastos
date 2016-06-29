@@ -1,5 +1,5 @@
-#include "CDialtactsActivityHelper.h"
-#include "DialtactsActivity.h"
+#include "elastos/apps/dialer/CDialtactsActivityHelper.h"
+#include "elastos/apps/dialer/DialtactsActivity.h"
 
 namespace Elastos {
 namespace Apps {

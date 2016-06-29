@@ -1,5 +1,14 @@
 
-#include "voicemail/VoicemailPlaybackPresenter.h"
+#include "elastos/apps/dialer/voicemail/VoicemailPlaybackPresenter.h"
+#include <elastos/core/CoreUtils.h>
+#include "Elastos.Droid.Internal.h"
+
+using Elastos::Droid::Concurrent::Atomic::CAtomicBoolean;
+using Elastos::Droid::Concurrent::Atomic::CAtomicInteger32;
+using Elastos::Droid::Os::CHandler;
+using Elastos::Droid::Internal::Utility::IPreconditions;
+using Elastos::Droid::Internal::Utility::CPreconditions;
+using Elastos::Core::CoreUtils;
 
 namespace Elastos {
 namespace Apps {
@@ -88,7 +97,7 @@ void VoicemailPlaybackPresenter::FetchResultHandler::Destroy()
 ECode VoicemailPlaybackPresenter::FetchResultHandler::OnChange(
     /* [in]  */ Boolean selfChange)
 {
-    mHost->mAsyncTaskExecutor->Submit(ITasks::CHECK_CONTENT_AFTER_CHANGE,
+    mHost->mAsyncTaskExecutor->Submit(VoicemailPlaybackPresenterTasks_CHECK_CONTENT_AFTER_CHANGE,
                     new FetchResultHandlerAsyncTask(this));
     return NOERROR;
 }
@@ -208,20 +217,21 @@ ECode VoicemailPlaybackPresenter::AsyncPrepareTask::DoInBackground(
     // try {
     ECode ec = NOERROR;
     Boolean isReadyToPlay;
-    if (mHost->mPlayer->IsReadyToPlay(&isReadyToPlay), !isReadyToPlay) {
-        ec = mPlayer->Reset();
-        if (FAILED(ec)) goto exit;
+    assert(0 && "TODO");
+    // if (mHost->mPlayer->IsReadyToPlay(&isReadyToPlay), !isReadyToPlay) {
+    //     ec = mPlayer->Reset();
+    //     if (FAILED(ec)) goto exit;
 
-        AutoPtr<IContext> context;
-        ec = mHost->mView->GetDataSourceContext((IContext**)&context);
-        if (FAILED(ec)) goto exit;
-        ec = mHost->mPlayer->SetDataSource(context, mVoicemailUri);
-        if (FAILED(ec)) goto exit;
-        ec = mHost->mPlayer->SetAudioStreamType(PLAYBACK_STREAM);
-        if (FAILED(ec)) goto exit;
-        ec = mHost->mPlayer->Prepare();
-        if (FAILED(ec)) goto exit;
-    }
+    //     AutoPtr<IContext> context;
+    //     ec = mHost->mView->GetDataSourceContext((IContext**)&context);
+    //     if (FAILED(ec)) goto exit;
+    //     ec = mHost->mPlayer->SetDataSource(context, mVoicemailUri);
+    //     if (FAILED(ec)) goto exit;
+    //     ec = mHost->mPlayer->SetAudioStreamType(PLAYBACK_STREAM);
+    //     if (FAILED(ec)) goto exit;
+    //     ec = mHost->mPlayer->Prepare();
+    //     if (FAILED(ec)) goto exit;
+    // }
 exit:
     if (SUCCEEDED(ec)) {
         *result = NULL;
@@ -241,18 +251,21 @@ ECode VoicemailPlaybackPresenter::AsyncPrepareTask::OnPostExecute(
     mHost->mPrepareTask = NULL;
     if (result == NULL) {
         Int32 duration;
-        mPlayer->GetDuration(&duration);
+        assert(0 && "TODO");
+        // mHost->mPlayer->GetDuration(&duration);
         mDuration->Set(duration);
         Int32 startPosition =
             Constrain(mClipPositionInMillis, 0, duration);
-        mHost->mPlayer->SeekTo(startPosition);
+        assert(0 && "TODO");
+        // mHost->mPlayer->SeekTo(startPosition);
         mHost->mView->SetClipPosition(startPosition, duration);
         // try {
             // Can throw RejectedExecutionException
-            ECode ec = mHost->mPlayer->Start();
-            if (ec == (ECode)E_REJECTED_EXECUTION_EXCEPTION) {
-                mHost->HandleError(ec);
-            }
+            assert(0 && "TODO");
+            // ECode ec = mHost->mPlayer->Start();
+            // if (ec == (ECode)E_REJECTED_EXECUTION_EXCEPTION) {
+            //     mHost->HandleError(ec);
+            // }
             mHost->mView->PlaybackStarted();
             Boolean isHeld;
             if (mHost->mWakeLock->IsHeld(&isHeld), !isHeld) {
@@ -292,17 +305,18 @@ ECode VoicemailPlaybackPresenter::PlaybackPositionListener::OnStartTrackingTouch
     /* [in] */ ISeekBar* arg0)
 {
     Boolean result;
-    if (mHost->mPlayer->IsPlaying(&result), result) {
-        mShouldResumePlaybackAfterSeeking = TRUE;
-        Int32 position;
-        mHost->mPlayer->GetCurrentPosition(&position);
-        Int32 value;
-        mHost->mDuration->Get(&value);
-        StopPlaybackAtPosition(position, value);
-    }
-    else {
-        mShouldResumePlaybackAfterSeeking = FALSE;
-    }
+    assert(0 && "TODO");
+    // if (mHost->mPlayer->IsPlaying(&result), result) {
+    //     mShouldResumePlaybackAfterSeeking = TRUE;
+    //     Int32 position;
+    //     mHost->mPlayer->GetCurrentPosition(&position);
+    //     Int32 value;
+    //     mHost->mDuration->Get(&value);
+    //     StopPlaybackAtPosition(position, value);
+    // }
+    // else {
+    //     mShouldResumePlaybackAfterSeeking = FALSE;
+    // }
     return NOERROR;
 }
 
@@ -310,13 +324,14 @@ ECode VoicemailPlaybackPresenter::PlaybackPositionListener::OnStopTrackingTouch(
     /* [in] */ ISeekBar* arg0)
 {
     Boolean result;
-    if (mHost->mPlayer->IsPlaying(&result), result) {
-        Int32 position;
-        mHost->mPlayer->GetCurrentPosition(&position);
-        Int32 value;
-        mHost->mDuration->Get(&value);
-        StopPlaybackAtPosition(position, value);
-    }
+    assert(0 && "TODO");
+    // if (mHost->mPlayer->IsPlaying(&result), result) {
+    //     Int32 position;
+    //     mHost->mPlayer->GetCurrentPosition(&position);
+    //     Int32 value;
+    //     mHost->mDuration->Get(&value);
+    //     StopPlaybackAtPosition(position, value);
+    // }
     if (mShouldResumePlaybackAfterSeeking) {
         Int32 position;
         mHost->mView->GetDesiredClipPosition(&position);
@@ -355,15 +370,16 @@ ECode VoicemailPlaybackPresenter::SpeakerphoneListener::OnClick(
     mHost->mView->IsSpeakerPhoneOn(&previousState);
     mHost->mView->SetSpeakerPhoneOn(!previousState);
     Boolean result;
-    if (mHost->mPlayer->IsPlaying(&result), result && previousState) {
-        // If we are currently playing and we are disabling the speaker phone, enable the
-        // sensor.
-        mHost->mView->EnableProximitySensor();
-    }
-    else {
-        // If we are not currently playing, disable the sensor.
-        mHost->mView->DisableProximitySensor();
-    }
+    assert(0 && "TODO");
+    // if (mHost->mPlayer->IsPlaying(&result), result && previousState) {
+    //     // If we are currently playing and we are disabling the speaker phone, enable the
+    //     // sensor.
+    //     mHost->mView->EnableProximitySensor();
+    // }
+    // else {
+    //     // If we are not currently playing, disable the sensor.
+    //     mHost->mView->DisableProximitySensor();
+    // }
     return NOERROR;
 }
 
@@ -381,18 +397,19 @@ ECode VoicemailPlaybackPresenter::StartStopButtonListener::OnClick(
     /* [in] */ IView* v)
 {
     Boolean result;
-    if (mHost->mPlayer->IsPlaying(&result), result) {
-        Int32 position;
-        mHost->mPlayer->GetCurrentPosition(&position);
-        Int32 value;
-        mHost->mDuration->Get(&value);
-        StopPlaybackAtPosition(position, value);
-    }
-    else {
-        Int32 position;
-        mHost->mView->GetDesiredClipPosition(&position);
-        ResetPrepareStartPlaying(position);
-    }
+    assert(0 && "TODO");
+    // if (mHost->mPlayer->IsPlaying(&result), result) {
+    //     Int32 position;
+    //     mHost->mPlayer->GetCurrentPosition(&position);
+    //     Int32 value;
+    //     mHost->mDuration->Get(&value);
+    //     StopPlaybackAtPosition(position, value);
+    // }
+    // else {
+    //     Int32 position;
+    //     mHost->mView->GetDesiredClipPosition(&position);
+    //     ResetPrepareStartPlaying(position);
+    // }
     return NOERROR;
 }
 
@@ -412,7 +429,8 @@ ECode VoicemailPlaybackPresenter::PositionUpdater::PositionUpdaterRunnable::Run(
             // This task has been canceled. Just stop now.
             return NOERROR;
         }
-        mHost->mHost->mPlayer->GetCurrentPosition(&currentPosition);
+        assert(0 && "TODO");
+        // mHost->mHost->mPlayer->GetCurrentPosition(&currentPosition);
     }
     Int32 value;
     mHost->mHost->mDuration->Get(&value);
@@ -511,22 +529,23 @@ ECode VoicemailPlaybackPresenter::SuccessfullyFetchedContentAsyncTask::DoInBackg
     VALIDATE_NOT_NULL(result);
     // try {
     ECode ec = NOERROR;
-    ec = mHost->mPlayer->Reset();
-    if (FAILED(ec)) goto exit;
-    AutoPtr<IContext> context;
-    ec = mHost->mView->GetDataSourceContext((IContext**)&context);
-    if (FAILED(ec)) goto exit;
-    ec = mHost->mPlayer->SetDataSource(context, mVoicemailUri);
-    if (FAILED(ec)) goto exit;
-    ec = mHost->mPlayer->SetAudioStreamType(PLAYBACK_STREAM);
-    if (FAILED(ec)) goto exit;
-    ec = mHost->mPlayer->Prepare();
-    if (FAILED(ec)) goto exit;
+    assert(0 && "TODO");
+    // ec = mHost->mPlayer->Reset();
+    // if (FAILED(ec)) goto exit;
+    // AutoPtr<IContext> context;
+    // ec = mHost->mView->GetDataSourceContext((IContext**)&context);
+    // if (FAILED(ec)) goto exit;
+    // ec = mHost->mPlayer->SetDataSource(context, mVoicemailUri);
+    // if (FAILED(ec)) goto exit;
+    // ec = mHost->mPlayer->SetAudioStreamType(PLAYBACK_STREAM);
+    // if (FAILED(ec)) goto exit;
+    // ec = mHost->mPlayer->Prepare();
+    // if (FAILED(ec)) goto exit;
 
-    Int32 duration;
-    mHost->mPlayer->GetDuration(&duration);
-    ec = mHost->mDuration->Set(duration);
-    if (FAILED(ec)) goto exit;
+    // Int32 duration;
+    // mHost->mPlayer->GetDuration(&duration);
+    // ec = mHost->mDuration->Set(duration);
+    // if (FAILED(ec)) goto exit;
     // } catch (Exception e) {
     //     return e;
     // }
@@ -584,25 +603,26 @@ VoicemailPlaybackPresenter::VoicemailPlaybackPresenter()
     CAtomicInteger32::New((IAtomicInteger**)&mDuration);
 }
 
-ECode VoicemailPlaybackPresenter::constructor(
-    /* [in] */ IVoicemailPlaybackPresenterPlaybackView* view,
-    /* [in] */ IMediaPlayerProxy* player,
-    /* [in] */ IUri* voicemailUri,
-    /* [in] */ IScheduledExecutorService* executorService,
-    /* [in] */ Boolean startPlayingImmediately,
-    /* [in] */ IAsyncTaskExecutor* asyncTaskExecutor,
-    /* [in] */ IPowerManagerWakeLock* wakeLock)
-{
-    mView = view;
-    mPlayer = player;
-    mVoicemailUri = voicemailUri;
-    mStartPlayingImmediately = startPlayingImmediately;
-    mAsyncTaskExecutor = asyncTaskExecutor;
-    CPositionUpdater::New(executorService, SLIDER_UPDATE_PERIOD_MILLIS,
-            (IPositionUpdater**)&mPositionUpdater);
-    mWakeLock = wakeLock;
-    return NOERROR;
-}
+// TODO:
+// ECode VoicemailPlaybackPresenter::constructor(
+//     /* [in] */ IVoicemailPlaybackPresenterPlaybackView* view,
+//     /* [in] */ IMediaPlayerProxy* player,
+//     /* [in] */ IUri* voicemailUri,
+//     /* [in] */ IScheduledExecutorService* executorService,
+//     /* [in] */ Boolean startPlayingImmediately,
+//     /* [in] */ IAsyncTaskExecutor* asyncTaskExecutor,
+//     /* [in] */ IPowerManagerWakeLock* wakeLock)
+// {
+//     mView = view;
+//     mPlayer = player;
+//     mVoicemailUri = voicemailUri;
+//     mStartPlayingImmediately = startPlayingImmediately;
+//     mAsyncTaskExecutor = asyncTaskExecutor;
+//     CPositionUpdater::New(executorService, SLIDER_UPDATE_PERIOD_MILLIS,
+//             (IPositionUpdater**)&mPositionUpdater);
+//     mWakeLock = wakeLock;
+//     return NOERROR;
+// }
 
 ECode VoicemailPlaybackPresenter::OnCreate(
     /* [in] */ IBundle* bundle)
@@ -636,7 +656,7 @@ void VoicemailPlaybackPresenter::MakeRequestForContent()
 void VoicemailPlaybackPresenter::PostSuccessfullyFetchedContent()
 {
     mView->SetIsBuffering();
-    mAsyncTaskExecutor->Submit(ITasks::PREPARE_MEDIA_PLAYER,
+    mAsyncTaskExecutor->Submit(VoicemailPlaybackPresenterTasks_PREPARE_MEDIA_PLAYER,
             new SuccessfullyFetchedContentAsyncTask(this));
 }
 
@@ -646,8 +666,9 @@ void VoicemailPlaybackPresenter::PostSuccessfulPrepareActions()
     mView->SetPositionSeekListener(new PlaybackPositionListener(this));
     mView->SetStartStopListener(new StartStopButtonListener(this));
     mView->SetSpeakerphoneListener(new SpeakerphoneListener(this));
-    mPlayer->SetOnErrorListener(new MediaPlayerErrorListener(this));
-    mPlayer->SetOnCompletionListener(new MediaPlayerCompletionListener(this));
+    assert(0 && "TODO");
+    // mPlayer->SetOnErrorListener(new MediaPlayerErrorListener(this));
+    // mPlayer->SetOnCompletionListener(new MediaPlayerCompletionListener(this));
 
     Boolean result;
     mView->IsSpeakerPhoneOn(&result)
@@ -680,9 +701,10 @@ ECode VoicemailPlaybackPresenter::OnSaveInstanceState(
     mView->GetDesiredClipPosition(&position);
     outState->PutInt32(CLIP_POSITION_KEY, position);
     Boolean isPlaying;
-    if (mPlayer->IsPlaying(&isPlaying), !isPlaying) {
-        outState->PutBoolean(PAUSED_STATE_KEY, TRUE);
-    }
+    assert(0 && "TODO");
+    // if (mPlayer->IsPlaying(&isPlaying), !isPlaying) {
+    //     outState->PutBoolean(PAUSED_STATE_KEY, TRUE);
+    // }
 
     return NOERROR;
 }
@@ -693,7 +715,8 @@ ECode VoicemailPlaybackPresenter::OnDestroy()
         mPrepareTask->Cancel(FALSE);
         mPrepareTask = NULL;
     }
-    mPlayer->Release();
+    assert(0 && "TODO");
+    // mPlayer->Release();
     if (mFetchResultHandler != NULL) {
         mFetchResultHandler->Destroy();
         mFetchResultHandler = NULL;
@@ -744,7 +767,8 @@ void VoicemailPlaybackPresenter::HandleError(
 {
     mView->PlaybackError(ec);
     mPositionUpdater->StopUpdating();
-    mPlayer->Release();
+    assert(0 && "TODO");
+    // mPlayer->Release();
 }
 
 ECode VoicemailPlaybackPresenter::HandleCompletion(
@@ -770,30 +794,33 @@ void VoicemailPlaybackPresenter::StopPlaybackAtPosition(
     mView->DisableProximitySensor();
     mView->SetClipPosition(clipPosition, duration);
 
-    Boolean isPlaying;
-    if (mPlayer->IsPlaying(&isPlaying), isPlaying) {
-        mPlayer->Pause();
-    }
+    assert(0 && "TODO");
+    // Boolean isPlaying;
+    // if (mPlayer->IsPlaying(&isPlaying), isPlaying) {
+    //     mPlayer->Pause();
+    // }
 }
 
 void VoicemailPlaybackPresenter::ChangeRate(
     /* [in] */ Float rate,
     /* [in] */ Int32 stringResourceId)
 {
-    ISingleThreadedMediaPlayerProxy::Probe(mPlayer)->SetVariableSpeed(rate);
+    assert(0 && "TODO");
+    // ISingleThreadedMediaPlayerProxy::Probe(mPlayer)->SetVariableSpeed(rate);
     mView->SetRateDisplay(rate, stringResourceId);
 }
 
 ECode VoicemailPlaybackPresenter::OnPause()
 {
     Boolean isPlaying;
-    if (mPlayer->IsPlaying(&isPlaying), isPlaying) {
-        Int32 position;
-        mPlayer->GetCurrentPosition(&position);
-        Int32 value;
-        mDuration->Get(&value);
-        StopPlaybackAtPosition(position, value);
-    }
+    assert(0 && "TODO");
+    // if (mPlayer->IsPlaying(&isPlaying), isPlaying) {
+    //     Int32 position;
+    //     mPlayer->GetCurrentPosition(&position);
+    //     Int32 value;
+    //     mDuration->Get(&value);
+    //     StopPlaybackAtPosition(position, value);
+    // }
     if (mPrepareTask != NULL) {
         mPrepareTask->Cancel(FALSE);
         mPrepareTask = NULL;

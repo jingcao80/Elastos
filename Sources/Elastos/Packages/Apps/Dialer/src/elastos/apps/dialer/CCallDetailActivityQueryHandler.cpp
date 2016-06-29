@@ -1,5 +1,5 @@
 
-#include "CCallDetailActivityQueryHandler.h"
+#include "elastos/apps/dialer/CCallDetailActivityQueryHandler.h"
 
 namespace Elastos {
 namespace Apps {

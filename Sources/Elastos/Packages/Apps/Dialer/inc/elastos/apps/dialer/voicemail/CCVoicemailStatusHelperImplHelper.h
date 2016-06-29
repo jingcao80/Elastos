@@ -4,8 +4,8 @@
 #include "_Elastos_Apps_Dialer_Voicemail_CVoicemailStatusHelperImplHelper.h"
 #include <elastos/core/Singleton.h>
 
-namespace Elastos{
-namespace Apps{
+namespace Elastos {
+namespace Apps {
 namespace Dialer {
 namespace Voicemail {
 
@@ -14,9 +14,9 @@ CarClass(CVoicemailStatusHelperImplHelper)
     , public IVoicemailStatusHelperImplHelper
 {
 public:
-    CAR_INTERFACE_DECL()
+    CAR_INTERFACE_DECL();
 
-    CAR_SINGLETON_DECL()
+    CAR_SINGLETON_DECL();
 
     CARAPI GetPROJECTION(
         /* [out, callee] */ ArrayOf<String>** protection);

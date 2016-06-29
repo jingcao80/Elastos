@@ -1,6 +1,6 @@
 
-#include "dialpad/CSmartDialPrefix.h"
-#include "dialpad/SmartDialPrefix.h"
+#include "elastos/apps/dialer/dialpad/CSmartDialPrefix.h"
+#include "elastos/apps/dialer/dialpad/SmartDialPrefix.h"
 
 namespace Elastos {
 namespace Apps {

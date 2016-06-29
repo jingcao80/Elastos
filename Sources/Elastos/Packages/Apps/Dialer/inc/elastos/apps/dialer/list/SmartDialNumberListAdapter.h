@@ -1,10 +1,20 @@
 #ifndef __ELASTOS_APPS_DIALER_LIST_SMARTDIALNUMBERLISTADAPTER_H__
 #define __ELASTOS_APPS_DIALER_LIST_SMARTDIALNUMBERLISTADAPTER_H__
 
-#include "DialerPhoneNumberListAdapter.h"
+#include "_Elastos.Apps.Dialer.h"
+#include "elastos/apps/dialer/list/DialerPhoneNumberListAdapter.h"
+#include "Elastos.Droid.Content.h"
+#include "Elastos.Droid.Database.h"
+#include "Elastos.Droid.Net.h"
 
-namespace Elastos{
-namespace Apps{
+using Elastos::Droid::Content::IContext;
+using Elastos::Droid::Database::ICursor;
+using Elastos::Droid::Net::IUri;
+using Elastos::Apps::Dialer::Dialpad::ISmartDialCursorLoader;
+using Elastos::Apps::Dialer::Dialpad::ISmartDialNameMatcher;
+
+namespace Elastos {
+namespace Apps {
 namespace Dialer {
 namespace List {
 
@@ -16,7 +26,7 @@ class SmartDialNumberListAdapter
     , public ISmartDialNumberListAdapter
 {
 public:
-    CAR_INTERFACE_DECL()
+    CAR_INTERFACE_DECL();
 
     CARAPI constructor(
         /* [in] */ IContext* context);
@@ -47,9 +57,10 @@ protected:
      * @param cursor Object containing information of the associated List item.
      */
     // @Override
-    CARAPI SetHighlight(
-        /* [in] */ IContactListItemView* view,
-        /* [in] */ ICursor* cursor);
+    // TODO:
+    // CARAPI SetHighlight(
+    //     /* [in] */ IContactListItemView* view,
+    //     /* [in] */ ICursor* cursor);
 
 private:
     static const String TAG; // = SmartDialNumberListAdapter.class.getSimpleName();

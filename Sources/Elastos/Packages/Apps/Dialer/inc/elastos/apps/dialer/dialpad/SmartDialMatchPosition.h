@@ -1,10 +1,14 @@
 #ifndef __ELASTOS_APPS_DIALER_DIALPAD_SMARTDIALMATCHPOSITION_H__
 #define __ELASTOS_APPS_DIALER_DIALPAD_SMARTDIALMATCHPOSITION_H__
 
-using Elasots::Utility::IArrayList;
+#include "_Elastos.Apps.Dialer.h"
+#include <elastos/core/Object.h>
+#include "Elastos.CoreLibrary.Utility.h"
 
-namespace Elastos{
-namespace Apps{
+using Elastos::Utility::IArrayList;
+
+namespace Elastos {
+namespace Apps {
 namespace Dialer {
 namespace Dialpad {
 
@@ -19,7 +23,7 @@ class SmartDialMatchPosition
     , public ISmartDialMatchPosition
 {
 public:
-    CAR_INTERFACE_DECL()
+    CAR_INTERFACE_DECL();
 
     CARAPI constructor(
         /* [in] */ Int32 start,

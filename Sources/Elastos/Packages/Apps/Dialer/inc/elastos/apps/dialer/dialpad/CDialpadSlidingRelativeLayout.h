@@ -2,11 +2,11 @@
 #ifndef __ELASTOS_APPS_DIALER_DIALPAD_CDIALPADSLIDINGRELATIVELAYOUT_H__
 #define __ELASTOS_APPS_DIALER_DIALPAD_CDIALPADSLIDINGRELATIVELAYOUT_H__
 
-#include "DialpadFragment.h"
+#include "elastos/apps/dialer/dialpad/DialpadFragment.h"
 #include "_Elastos_Apps_Dialer_Dialpad_CDialpadSlidingRelativeLayout.h"
 
-namespace Elastos{
-namespace Apps{
+namespace Elastos {
+namespace Apps {
 namespace Dialer {
 namespace Dialpad {
 
@@ -14,7 +14,7 @@ CarClass(CDialpadSlidingRelativeLayout)
     , public DialpadFragment::DialpadSlidingRelativeLayout
 {
 public:
-    CAR_OBJECT_DECL()
+    CAR_OBJECT_DECL();
 };
 
 } // Dialpad

@@ -3,6 +3,7 @@
 #define __ELASTOS_APPS_DIALER_DIALPAD_CLATINSMARTDIALMAP_H__
 
 #include "_Elastos_Apps_Dialer_Dialpad_CLatinSmartDialMap.h"
+#include <elastos/core/Object.h>
 
 namespace Elastos{
 namespace Apps{

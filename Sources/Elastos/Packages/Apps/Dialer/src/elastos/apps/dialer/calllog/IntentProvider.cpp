@@ -1,5 +1,17 @@
 
 #include "elastos/apps/dialer/calllog/IntentProvider.h"
+#include "Elastos.Droid.Net.h"
+#include "Elastos.Droid.Provider.h"
+
+using Elastos::Droid::Content::IContentUris;
+using Elastos::Droid::Content::CContentUris;
+using Elastos::Droid::Content::IIntent;
+using Elastos::Droid::Content::CIntent;
+using Elastos::Droid::Net::IUri;
+using Elastos::Droid::Net::IUriHelper;
+using Elastos::Droid::Net::CUriHelper;
+using Elastos::Droid::Provider::ICalls;
+using Elastos::Droid::Provider::CCalls;
 
 namespace Elastos {
 namespace Apps {
@@ -26,8 +38,9 @@ ECode IntentProvider::ReturnCallIntentProvider::GetIntent(
     /* [out] */ IIntent** intent)
 {
     VALIDATE_NOT_NULL(intent);
-    AutoPtr<IIntent> result = CallUtil::GetCallIntent(mNumber, mAccountHandle);
-    *intent = result;
+    assert(0 && "TODO") ;
+    // AutoPtr<IIntent> result = CallUtil::GetCallIntent(mNumber, mAccountHandle);
+    // *intent = result;
     REFCOUNT_ADD(*intent);
     return NOERROR;
 }
@@ -50,8 +63,9 @@ ECode IntentProvider::ReturnVideoCallIntentProvider::GetIntent(
     /* [out] */ IIntent** intent)
 {
     VALIDATE_NOT_NULL(intent);
-    AutoPtr<IIntent> result = CallUtil::GetVideoCallIntent(mNumber, mAccountHandle);
-    *intent = result;
+    assert(0 && "TODO") ;
+    // AutoPtr<IIntent> result = CallUtil::GetVideoCallIntent(mNumber, mAccountHandle);
+    // *intent = result;
     REFCOUNT_ADD(*intent);
     return NOERROR;
 }
@@ -89,8 +103,12 @@ ECode IntentProvider::PlayVoicemailIntentProvider::GetIntent(
     result->SetData(callsUri);
 
     if (!mVoicemailUri.IsNull()) {
+        AutoPtr<IUriHelper> helper;
+        CUriHelper::AcquireSingleton((IUriHelper**)&helper);
+        AutoPtr<IUri> uri;
+        helper->Parse(mVoicemailUri, (IUri**)&uri);
         result->PutExtra(ICallDetailActivity::EXTRA_VOICEMAIL_URI,
-                Uri::Parse(voicemailUri));
+                IParcelable::Probe(uri));
     }
     result->PutBooleanExtra(ICallDetailActivity::EXTRA_VOICEMAIL_START_PLAYBACK, TRUE);
     *intent = result;
@@ -123,8 +141,12 @@ ECode IntentProvider::CallDetailIntentProvider::GetIntent(
     CIntent::New(context, ECLSID_CCallDetailActivity, (IIntent**)&result);
     // Check if the first item is a voicemail.
     if (!mVoicemailUri.IsNull()) {
+        AutoPtr<IUriHelper> helper;
+        CUriHelper::AcquireSingleton((IUriHelper**)&helper);
+        AutoPtr<IUri> uri;
+        helper->Parse(mVoicemailUri, (IUri**)&uri);
         result->PutExtra(ICallDetailActivity::EXTRA_VOICEMAIL_URI,
-                Uri::Parse(mVoicemailUri));
+                IParcelable::Probe(uri));
     }
     result->PutBooleanExtra(ICallDetailActivity::EXTRA_VOICEMAIL_START_PLAYBACK, FALSE);
 

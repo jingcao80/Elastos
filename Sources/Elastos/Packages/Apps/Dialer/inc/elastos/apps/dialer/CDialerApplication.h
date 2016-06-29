@@ -2,17 +2,17 @@
 #define __ELASTOS_APPS_DIALER_CDIALERAPPLICATION_H__
 
 #include "_Elastos_Apps_Dialer_CDialerApplication.h"
-#include "DialerApplication.h"
+#include "elastos/apps/dialer/DialerApplication.h"
 
-namespace Elastos{
-namespace Apps{
-namespace Dialer{
+namespace Elastos {
+namespace Apps {
+namespace Dialer {
 
 CarClass(CDialerApplication)
     , public DialerApplication
 {
 public:
-    CAR_OBJECT_DECL()
+    CAR_OBJECT_DECL();
 };
 
 

@@ -1,5 +1,5 @@
 
-#include "list/CAllContactsFragment.h"
+#include "elastos/apps/dialer/list/CAllContactsFragment.h"
 
 namespace Elastos {
 namespace Apps {

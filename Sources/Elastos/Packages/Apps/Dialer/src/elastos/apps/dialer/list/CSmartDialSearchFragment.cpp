@@ -1,5 +1,5 @@
 
-#include "list/CSmartDialSearchFragment.h"
+#include "elastos/apps/dialer/list/CSmartDialSearchFragment.h"
 
 namespace Elastos {
 namespace Apps {

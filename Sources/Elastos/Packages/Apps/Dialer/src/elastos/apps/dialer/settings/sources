@@ -2,14 +2,15 @@ TARGET_NAME= settings
 TARGET_TYPE= lib
 
 INCLUDES += $(MAKEDIR)/../../../../../inc
+INCLUDES += $(MAKEDIR)/../../../../../
 INCLUDES += ../../../../../
 
 CAR_FLAGS += -n -u
 LUBE_FLAGS += -n -u
 
-SOURCES += CDefaultRingtonePreference.cpp
-SOURCES += CDialerSettingsActivity.cpp
-SOURCES += CGeneralSettingsFragment.cpp
 SOURCES += DefaultRingtonePreference.cpp
+SOURCES += CDefaultRingtonePreference.cpp
 SOURCES += DialerSettingsActivity.cpp
+SOURCES += CDialerSettingsActivity.cpp
 SOURCES += GeneralSettingsFragment.cpp
+SOURCES += CGeneralSettingsFragment.cpp

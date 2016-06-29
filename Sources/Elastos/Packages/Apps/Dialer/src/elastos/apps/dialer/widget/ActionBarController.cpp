@@ -1,4 +1,15 @@
-#include "widget/ActionBarController.cpp"
+#include "elastos/apps/dialer/widget/ActionBarController.cpp"
+#include <elastos/core/CoreUtils.h>
+#include <elastos/utility/logging/Logger.h>
+#include "Elastos.Droid.App.h"
+#include "Elastos.Droid.View.h"
+
+using Elastos::Droid::App::IActionBar;
+using Elastos::Droid::Animation::IValueAnimatorHelper;
+using Elastos::Droid::Animation::CValueAnimatorHelper;
+using Elastos::Droid::View::IViewPropertyAnimator;
+using Elastos::Core::CoreUtils;
+using Elastos::Utility::Logging::Logger;
 
 namespace Elastos {
 namespace Apps {
@@ -112,7 +123,7 @@ ECode ActionBarController::OnDialpadDown()
     mSearchBox->IsFadedOut(&isFadedOut);
 
     if (DEBUG) {
-        Log.d(TAG, "OnDialpadDown: isInSearchUi %d hasSearchQuery: %d isFadedOut: %d isExpanded: %d",
+        Logger::D(TAG, "OnDialpadDown: isInSearchUi %d hasSearchQuery: %d isFadedOut: %d isExpanded: %d",
                 isInSearchUi, hasSearchQuery, isFadedOut, isExpanded);
     }
     if (isInSearchUi) {

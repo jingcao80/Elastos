@@ -1,4 +1,4 @@
-#include "CDialtactsActivity.h"
+#include "elastos/apps/dialer/CDialtactsActivity.h"
 
 namespace Elastos {
 namespace Apps {

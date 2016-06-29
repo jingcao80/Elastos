@@ -1,10 +1,38 @@
 #ifndef __ELASTOS_APPS_DIALER_LIST_SPEEDDIALFRAGMENT_H__
 #define __ELASTOS_APPS_DIALER_LIST_SPEEDDIALFRAGMENT_H__
 
-#include "SearchFragment.h"
+#include "_Elastos.Apps.Dialer.h"
+#include <elastos/core/Object.h>
+#include "elastos/droid/app/Fragment.h"
+#include "Elastos.Droid.App.h"
+#include "Elastos.Droid.Content.h"
+#include "Elastos.Droid.Database.h"
+#include "Elastos.Droid.Os.h"
+#include "Elastos.Droid.View.h"
+#include "Elastos.Droid.Widget.h"
+#include "Elastos.CoreLibrary.Utility.h"
 
-namespace Elastos{
-namespace Apps{
+using Elastos::Droid::App::IActivity;
+using Elastos::Droid::App::ILoaderManagerLoaderCallbacks;
+using Elastos::Droid::App::Fragment;
+using Elastos::Droid::Content::ICursorLoader;
+using Elastos::Droid::Content::ILoader;
+using Elastos::Droid::Database::ICursor;
+using Elastos::Droid::Net::IUri;
+using Elastos::Droid::Os::IBundle;
+using Elastos::Droid::View::ILayoutInflater;
+using Elastos::Droid::View::IView;
+using Elastos::Droid::View::IViewGroup;
+using Elastos::Droid::View::IViewTreeObserver;
+using Elastos::Droid::View::IOnPreDrawListener;
+using Elastos::Droid::Widget::IAbsListView;
+using Elastos::Droid::Widget::IAdapterView;
+using Elastos::Droid::Widget::IAdapterViewOnItemClickListener;
+using Elastos::Droid::Widget::IAbsListViewOnScrollListener;
+using Elastos::Utility::IHashMap;
+
+namespace Elastos {
+namespace Apps {
 namespace Dialer {
 namespace List {
 
@@ -12,7 +40,8 @@ namespace List {
  * This fragment displays the user's favorite/frequent contacts in a grid.
  */
 class SpeedDialFragment
-    : public AnalyticsFragment
+    /*: public AnalyticsFragment*/
+    : public Fragment
     , public ISpeedDialFragment
     , public IAdapterViewOnItemClickListener
     , public IOnDataSetChangedForAnimationListener
@@ -23,7 +52,7 @@ private:
         , public ILoaderManagerLoaderCallbacks
     {
     public:
-        CAR_INTERFACE_DECL()
+        CAR_INTERFACE_DECL();
 
         ContactTileLoaderListener(
             /* [in] */ SpeedDialFragment* host);
@@ -47,39 +76,40 @@ private:
         SpeedDialFragment* mHost;
     };
 
-    class ContactTileAdapterListener
-        : public Object
-        : public IContactTileViewListener
-    {
-    public:
-        CAR_INTERFACE_DECL()
+    // TODO:
+    // class ContactTileAdapterListener
+    //     : public Object
+    //     : public IContactTileViewListener
+    // {
+    // public:
+    //     CAR_INTERFACE_DECL();
 
-        ContactTileAdapterListener(
-            /* [in] */ SpeedDialFragment* host);
+    //     ContactTileAdapterListener(
+    //         /* [in] */ SpeedDialFragment* host);
 
-        // @Override
-        CARAPI OnContactSelected(
-            /* [in] */ IUri* contactUri,
-            /* [in] */ IRect* targetRect);
+    //     // @Override
+    //     CARAPI OnContactSelected(
+    //         /* [in] */ IUri* contactUri,
+    //         /* [in] */ IRect* targetRect);
 
-        // @Override
-        CARAPI OnCallNumberDirectly(
-            /* [in] */ const String& phoneNumber);
+    //     // @Override
+    //     CARAPI OnCallNumberDirectly(
+    //         /* [in] */ const String& phoneNumber);
 
-        // @Override
-        CARAPI GetApproximateTileWidth(
-            /* [out] */ Int32* width);
+    //     // @Override
+    //     CARAPI GetApproximateTileWidth(
+    //         /* [out] */ Int32* width);
 
-    private:
-        SpeedDialFragment* mHost;
-    };
+    // private:
+    //     SpeedDialFragment* mHost;
+    // };
 
     class ScrollListener
         : public Object
-        : public IListViewOnScrollListener
+        , public IAbsListViewOnScrollListener
     {
     public:
-        CAR_INTERFACE_DECL()
+        CAR_INTERFACE_DECL();
 
         ScrollListener(
             /* [in] */ SpeedDialFragment* host);
@@ -105,7 +135,7 @@ private:
         , public IOnPreDrawListener
     {
     public:
-        CAR_INTERFACE_DECL()
+        CAR_INTERFACE_DECL();
 
         MyViewTreeObserverOnPreDrawListener(
             /* [in] */ SpeedDialFragment* host,
@@ -218,7 +248,8 @@ private:
      */
     static Int32 LOADER_ID_CONTACT_TILE; // = 1;
 
-    AutoPtr<IOnPhoneNumberPickerActionListener> mPhoneNumberPickerActionListener;
+    // TODO:
+    // AutoPtr<IOnPhoneNumberPickerActionListener> mPhoneNumberPickerActionListener;
 
     AutoPtr<IOnListFragmentScrolledListener> mActivityScrollListener;
     AutoPtr<IPhoneFavoritesTileAdapter> mContactTileAdapter;
@@ -239,7 +270,8 @@ private:
      */
     AutoPtr<IView> mEmptyView;
 
-    AutoPtr<IContactTileViewListener> mContactTileAdapterListener;
+    // TODO:
+    // AutoPtr<IContactTileViewListener> mContactTileAdapterListener;
     AutoPtr<ILoaderManagerLoaderCallbacks> mContactTileLoaderListener;
     AutoPtr<ScrollListener> mScrollListener;
 };

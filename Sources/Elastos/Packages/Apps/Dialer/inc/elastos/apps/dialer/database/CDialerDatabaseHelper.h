@@ -2,7 +2,7 @@
 #ifndef __ELASTOS_APPS_DIALER_DATABASE_CDIALERDATABASEHELPER_H__
 #define __ELASTOS_APPS_DIALER_DATABASE_CDIALERDATABASEHELPER_H__
 
-#include "database/DialerDatabaseHelper.h"
+#include "elastos/apps/dialer/database/DialerDatabaseHelper.h"
 #include "_Elastos_Apps_Dialer_Database_CDialerDatabaseHelper.h"
 
 namespace Elastos {

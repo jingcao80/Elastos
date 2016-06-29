@@ -1,5 +1,8 @@
 
-#include "elastos/apps/dialer/calllog/ContactInfo.h"
+#include "elastos/apps/dialer/calllog/CContactInfo.h"
+#include <elastos/droid/text/TextUtils.h>
+
+using Elastos::Droid::Text::TextUtils;
 
 namespace Elastos {
 namespace Apps {
@@ -36,8 +39,10 @@ ECode CContactInfo::GetHashCode(
     Int32 prime = 31;
     Int32 result = 1;
     Int32 hash;
-    result = prime * result + ((mLookupUri == NULL) ? 0 : mLookupUri->GetHashCode(&uriHash), hash);
-    result = prime * result + ((mName == NULL) ? 0 : mName->GetHashCode(&hash), hash);
+    result = prime * result +
+            ((mLookupUri == NULL) ? 0 : IObject::Probe(mLookupUri)->GetHashCode(&hash), hash);
+    assert(0 && "TODO");
+    // result = prime * result + ((mName == NULL) ? 0 : mName->GetHashCode(&hash), hash);
     *hashCode = result;
 
     return NOERROR;
@@ -49,7 +54,8 @@ ECode CContactInfo::Equals(
 {
     VALIDATE_NOT_NULL(result);
 
-    if (this == obj){
+    CContactInfo* other = (CContactInfo*)IContactInfo::Probe(obj);
+    if (this == other){
         *result = TRUE;
         return NOERROR;
     }
@@ -57,15 +63,16 @@ ECode CContactInfo::Equals(
         *result = FALSE;
         return NOERROR;
     }
-    if (getClass() != obj.getClass()) {
-        *result = FALSE;
-        return NOERROR;
-    }
-    CContactInfo* other = (CContactInfo*)obj;
-    if (!UriUtils::AreEqual(mLookupUri, other->mLookupUri)) {
-        *result = FALSE;
-        return NOERROR;
-    }
+    assert(0 && "TODO");
+    // if (getClass() != obj.getClass()) {
+    //     *result = FALSE;
+    //     return NOERROR;
+    // }
+    assert(0 && "TODO");
+    // if (!UriUtils::AreEqual(mLookupUri, other->mLookupUri)) {
+    //     *result = FALSE;
+    //     return NOERROR;
+    // }
     if (!TextUtils::Equals(mName, other->mName)) {
         *result = FALSE;
         return NOERROR;
@@ -94,11 +101,12 @@ ECode CContactInfo::Equals(
         *result = FALSE;
         return NOERROR;
     }
-    if (!UriUtils::AreEqual(mPhotoUri, other->mPhotoUri)) {
-        *result = FALSE;
-        return NOERROR;
-    }
-    if (!TextUtils.equals(mObjectId, other->mObjectId)) {
+    assert(0 && "TODO");
+    // if (!UriUtils::AreEqual(mPhotoUri, other->mPhotoUri)) {
+    //     *result = FALSE;
+    //     return NOERROR;
+    // }
+    if (!TextUtils::Equals(mObjectId, other->mObjectId)) {
         *result = FALSE;
         return NOERROR;
     }

@@ -1,10 +1,16 @@
 #ifndef __ELASTOS_APPS_DIALER_WIDGET_ACTIONBARCONTROLLER_H__
 #define __ELASTOS_APPS_DIALER_WIDGET_ACTIONBARCONTROLLER_H__
 
-namespace Elastos{
-namespace Apps{
-namespace Dialer{
-namespace Widget{
+#include "_Elastos.Apps.Dialer.h"
+#include <elastos/core/Object.h>
+#include "Elastos.Droid.Animation.h"
+
+using Elastos::Droid::Animation::IValueAnimator;
+
+namespace Elastos {
+namespace Apps {
+namespace Dialer {
+namespace Widget {
 
 /**
  * Controls the various animated properties of the actionBar: showing/hiding, fading/revealing,
@@ -21,7 +27,7 @@ private:
         , public IAnimatorUpdateListener
     {
     public:
-        CAR_INTERFACE_DECL()
+        CAR_INTERFACE_DECL();
 
         MyAnimatorUpdateListener(
             /* [in] */ ActionBarController* host);

@@ -1,13 +1,38 @@
 #ifndef __ELASTOS_APPS_DIALER_SETTINGS_DEFAULTSETTINGSACTIVITY_H__
 #define __ELASTOS_APPS_DIALER_SETTINGS_DEFAULTSETTINGSACTIVITY_H__
 
+#include "_Elastos.Apps.Dialer.h"
+#include "elastos/droid/app/Activity.h"
+#include "elastos/droid/widget/ArrayAdapter.h"
+#include "Elastos.Droid.App.h"
+#include "Elastos.Droid.Content.h"
+#include "Elastos.Droid.Os.h"
+#include "Elastos.Droid.View.h"
+#include "Elastos.Droid.Widget.h"
+#include "Elastos.CoreLibrary.Utility.h"
+
+using Elastos::Droid::App::Activity;
+using Elastos::Droid::App::ISharedPreferences;
+using Elastos::Droid::Content::IContext;
+using Elastos::Droid::Os::IBundle;
+using Elastos::Droid::View::ILayoutInflater;
+using Elastos::Droid::View::IMenuItem;
+using Elastos::Droid::View::IView;
+using Elastos::Droid::View::IViewGroup;
+using Elastos::Droid::Widget::ArrayAdapter;
+using Elastos::Droid::Widget::IListAdapter;
+using Elastos::Droid::Widget::ITextView;
+using Elastos::Utility::IList;
+
 namespace Elastos{
 namespace Apps{
 namespace Dialer {
 namespace Settings {
 
 class DialerSettingsActivity
-    : public AnalyticsPreferenceActivity
+    // TODO:
+    /*: public AnalyticsPreferenceActivity*/
+    : public Activity
     , public IDialerSettingsActivity
 {
 private:
@@ -80,7 +105,7 @@ protected:
     AutoPtr<ISharedPreferences> mPreferences;
 
 private:
-    AutoPtr<IHeaderAdapter> mHeaderAdapter;
+    AutoPtr<HeaderAdapter> mHeaderAdapter;
 
     static const Int32 OWNER_HANDLE_ID; // = 0;
 };

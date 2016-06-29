@@ -1,10 +1,16 @@
 #ifndef __ELASTOS_APPS_DIALER_LIST_REGULARSEARCHLISTADAPTER_H__
 #define __ELASTOS_APPS_DIALER_LIST_REGULARSEARCHLISTADAPTER_H__
 
-#include "DialerPhoneNumberListAdapter.h"
+#include "_Elastos.Apps.Dialer.h"
+#include "elastos/apps/dialer/list/DialerPhoneNumberListAdapter.h"
+#include "Elastos.Droid.Content.h"
 
-namespace Elastos{
-namespace Apps{
+using Elastos::Droid::Content::IContext;
+using Elastos::Apps::Dialer::Service::ICachedNumberLookupService;
+using Elastos::Apps::Dialer::Service::ICachedContactInfo;
+
+namespace Elastos {
+namespace Apps {
 namespace Dialer {
 namespace List {
 

@@ -1,12 +1,26 @@
 #ifndef __ELASTOS_APPS_DIALER_DATABASE_DIALERDATABASEHELPER_H__
 #define __ELASTOS_APPS_DIALER_DATABASE_DIALERDATABASEHELPER_H__
 
-#include "SQLiteOpenHelper.h"
+#include "_Elastos.Apps.Dialer.h"
+#include "elastos/droid/database/sqlite/SQLiteOpenHelper.h"
+#include "elastos/droid/os/AsyncTask.h"
+#include "Elastos.Droid.Content.h"
+#include "Elastos.Droid.Net.h"
+#include "Elastos.CoreLibrary.Core.h"
+#include "Elastos.CoreLibrary.Utility.h"
 
+using Elastos::Droid::Database::ICursor;
 using Elastos::Droid::Database::Sqlite::SQLiteOpenHelper;
+using Elastos::Droid::Database::Sqlite::ISQLiteDatabase;
+using Elastos::Droid::Net::IUri;
+using Elastos::Droid::Os::AsyncTask;
+using Elastos::Core::IInteger64;
+using Elastos::Utility::IArrayList;
+using Elastos::Utility::Concurrent::Atomic::IAtomicBoolean;
+using Elastos::Apps::Dialer::Dialpad::ISmartDialNameMatcher;
 
-namespace Elastos{
-namespace Apps{
+namespace Elastos {
+namespace Apps {
 namespace Dialer {
 namespace Database {
 
@@ -53,6 +67,13 @@ public:
     };
 
     class PropertiesColumns
+    {
+    public:
+        static const String PROPERTY_KEY; // = "property_key";
+        static const String PROPERTY_VALUE; // = "property_value";
+    };
+
+    class PhoneQuery
     {
     public:
         static const AutoPtr<IUri> URI;
@@ -141,6 +162,7 @@ private:
      */
     class SmartDialSortingOrder
     {
+    public:
         /** Current contacts - those contacted within the last 3 days (in milliseconds) */
         static const Int64 LAST_TIME_USED_CURRENT_MS; // = 3L * 24 * 60 * 60 * 1000;
         /** Recent contacts - those contacted within the last 30 days (in milliseconds) */
@@ -234,7 +256,7 @@ public:
     CARAPI OnCreate(
         /* [in] */ ISQLiteDatabase* db);
 
-    CARAPI_(void) DropTables(
+    CARAPI DropTables(
         /* [in] */ ISQLiteDatabase* db);
 
     // @Override

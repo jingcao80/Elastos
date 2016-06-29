@@ -1,8 +1,65 @@
 
-#include "database/DialerDatabaseHelper.h"
+#include "elastos/apps/dialer/database/DialerDatabaseHelper.h"
+#include "elastos/apps/dialer/dialpad/SmartDialPrefix.h"
 #include <elastos/core/AutoLock.h>
+#include <elastos/core/CoreUtils.h>
+#include <elastos/core/StringUtils.h>
+#include <elastos/droid/text/TextUtils.h>
+#include <elastos/utility/logging/Logger.h>
+#include "Elastos.Droid.Content.h"
+#include "Elastos.Droid.Database.h"
+#include "Elastos.Droid.Provider.h"
+#include "Elastos.CoreLibrary.Core.h"
+#include "Elastos.CoreLibrary.IO.h"
+#include "Elastos.CoreLibrary.Utility.h"
+#include "R.h"
 
+using Elastos::Droid::Content::IContentValues;
+using Elastos::Droid::Content::CContentValues;
+using Elastos::Droid::Content::IContentResolver;
+using Elastos::Droid::Content::ISharedPreferences;
+using Elastos::Droid::Content::ISharedPreferencesEditor;
+using Elastos::Droid::Content::Res::IResources;
+using Elastos::Droid::Database::IDatabaseUtils;
+using Elastos::Droid::Database::CDatabaseUtils;
+using Elastos::Droid::Database::Sqlite::ISQLiteProgram;
+using Elastos::Droid::Database::Sqlite::ISQLiteStatement;
+using Elastos::Droid::Text::TextUtils;
+using Elastos::Droid::Net::IUriBuilder;
+using Elastos::Droid::Net::CUriBuilder;
+using Elastos::Droid::Provider::IBaseColumns;
+using Elastos::Droid::Provider::IContactsContract;
+using Elastos::Droid::Provider::IContactsContractDirectory;
+using Elastos::Droid::Provider::IContactsContractCommonDataKindsPhone;
+using Elastos::Droid::Provider::CContactsContractCommonDataKindsPhone;
+using Elastos::Droid::Provider::IContactsContractCommonDataKindsCommonColumns;
+using Elastos::Droid::Provider::IContactsContractRawContactsColumns;
+using Elastos::Droid::Provider::IContactsContractContactsColumns;
+using Elastos::Droid::Provider::IContactsContractContactNameColumns;
+// TODO:
+// using Elastos::Droid::Provider::IContactsContractDataUsageStatColumns;
+using Elastos::Droid::Provider::IContactsContractDataColumns;
+using Elastos::Droid::Provider::IContactsContractContactOptionsColumns;
+using Elastos::Droid::Provider::IContactsContractDeletedContacts;
+using Elastos::Droid::Provider::CContactsContractDeletedContacts;
+using Elastos::Droid::Provider::IContactsContractDeletedContactsColumns;
 using Elastos::Core::AutoLock;
+using Elastos::Core::CoreUtils;
+using Elastos::Core::StringUtils;
+using Elastos::Core::ICharSequence;
+using Elastos::Core::ISystem;
+using Elastos::Core::CSystem;
+using Elastos::IO::ICloseable;
+using Elastos::Utility::IArrayList;
+using Elastos::Utility::CArrayList;
+using Elastos::Utility::IHashSet;
+using Elastos::Utility::CHashSet;
+using Elastos::Utility::IIterator;
+using Elastos::Utility::Logging::Logger;
+using Elastos::Utility::Concurrent::Atomic::IAtomicBoolean;
+using Elastos::Utility::Concurrent::Atomic::CAtomicBoolean;
+using Elastos::Apps::Dialer::Dialpad::ISmartDialMatchPosition;
+using Elastos::Apps::Dialer::Dialpad::SmartDialPrefix;
 
 namespace Elastos {
 namespace Apps {
@@ -39,10 +96,17 @@ const String DialerDatabaseHelper::SmartDialDbColumns::LAST_SMARTDIAL_UPDATE_TIM
 const String DialerDatabaseHelper::PrefixColumns::PREFIX("prefix");
 const String DialerDatabaseHelper::PrefixColumns::CONTACT_ID("contact_id");
 
+
 //=================================================================
 // DialerDatabaseHelper::PropertiesColumns
 //=================================================================
-AutoPtr<IUri> CreatePropertiesColumnsUri()
+const String DialerDatabaseHelper::PropertiesColumns::PROPERTY_KEY("property_key");
+const String DialerDatabaseHelper::PropertiesColumns::PROPERTY_VALUE("property_value");
+
+//=================================================================
+// DialerDatabaseHelper::PhoneQuery
+//=================================================================
+AutoPtr<IUri> CreatePhoneQueryUri()
 {
     AutoPtr<IContactsContractCommonDataKindsPhone> phone;
     CContactsContractCommonDataKindsPhone::AcquireSingleton(
@@ -61,46 +125,47 @@ AutoPtr<IUri> CreatePropertiesColumnsUri()
     return uri;
 }
 
-const AutoPtr<IUri> DialerDatabaseHelper::PropertiesColumns::URI = CreatePropertiesColumnsUri();
-const String DialerDatabaseHelper::PropertiesColumns::PROJECTION[] = {
-    Phone._ID,                          // 0
-    Phone.TYPE,                         // 1
-    Phone.LABEL,                        // 2
-    Phone.NUMBER,                       // 3
-    Phone.CONTACT_ID,                   // 4
-    Phone.LOOKUP_KEY,                   // 5
+const AutoPtr<IUri> DialerDatabaseHelper::PhoneQuery::URI = CreatePhoneQueryUri();
+const String DialerDatabaseHelper::PhoneQuery::PROJECTION[] = {
+    IBaseColumns::ID,                          // 0
+    IContactsContractCommonDataKindsCommonColumns::TYPE,                         // 1
+    IContactsContractCommonDataKindsCommonColumns::LABEL,                        // 2
+    IContactsContractCommonDataKindsPhone::NUMBER,                       // 3
+    IContactsContractRawContactsColumns::CONTACT_ID,                   // 4
+    IContactsContractContactsColumns::LOOKUP_KEY,                   // 5
     IContactsContractContactNameColumns::DISPLAY_NAME_PRIMARY,         // 6
-    Phone.PHOTO_ID,                     // 7
-    Data.LAST_TIME_USED,                // 8
-    Data.TIMES_USED,                    // 9
-    Contacts.STARRED,                   // 10
+    IContactsContractContactsColumns::PHOTO_ID,                     // 7
+    // TODO:
+    // IContactsContractDataUsageStatColumns::LAST_TIME_USED,                // 8
+    // IContactsContractDataUsageStatColumns::TIMES_USED,                    // 9
+    IContactsContractContactOptionsColumns::STARRED,                   // 10
     IContactsContractDataColumns::IS_SUPER_PRIMARY,              // 11
     IContactsContractContactsColumns::IN_VISIBLE_GROUP,          // 12
-    Data.IS_PRIMARY,                    // 13
-}
+    IContactsContractDataColumns::IS_PRIMARY,                    // 13
+};
 
-const Int32 DialerDatabaseHelper::PropertiesColumns::PHONE_ID = 0;
-const Int32 DialerDatabaseHelper::PropertiesColumns::PHONE_TYPE = 1;
-const Int32 DialerDatabaseHelper::PropertiesColumns::PHONE_LABEL = 2;
-const Int32 DialerDatabaseHelper::PropertiesColumns::PHONE_NUMBER = 3;
-const Int32 DialerDatabaseHelper::PropertiesColumns::PHONE_CONTACT_ID = 4;
-const Int32 DialerDatabaseHelper::PropertiesColumns::PHONE_LOOKUP_KEY = 5;
-const Int32 DialerDatabaseHelper::PropertiesColumns::PHONE_DISPLAY_NAME = 6;
-const Int32 DialerDatabaseHelper::PropertiesColumns::PHONE_PHOTO_ID = 7;
-const Int32 DialerDatabaseHelper::PropertiesColumns::PHONE_LAST_TIME_USED = 8;
-const Int32 DialerDatabaseHelper::PropertiesColumns::PHONE_TIMES_USED = 9;
-const Int32 DialerDatabaseHelper::PropertiesColumns::PHONE_STARRED = 10;
-const Int32 DialerDatabaseHelper::PropertiesColumns::PHONE_IS_SUPER_PRIMARY = 11;
-const Int32 DialerDatabaseHelper::PropertiesColumns::PHONE_IN_VISIBLE_GROUP = 12;
-const Int32 DialerDatabaseHelper::PropertiesColumns::PHONE_IS_PRIMARY = 13;
+const Int32 DialerDatabaseHelper::PhoneQuery::PHONE_ID = 0;
+const Int32 DialerDatabaseHelper::PhoneQuery::PHONE_TYPE = 1;
+const Int32 DialerDatabaseHelper::PhoneQuery::PHONE_LABEL = 2;
+const Int32 DialerDatabaseHelper::PhoneQuery::PHONE_NUMBER = 3;
+const Int32 DialerDatabaseHelper::PhoneQuery::PHONE_CONTACT_ID = 4;
+const Int32 DialerDatabaseHelper::PhoneQuery::PHONE_LOOKUP_KEY = 5;
+const Int32 DialerDatabaseHelper::PhoneQuery::PHONE_DISPLAY_NAME = 6;
+const Int32 DialerDatabaseHelper::PhoneQuery::PHONE_PHOTO_ID = 7;
+const Int32 DialerDatabaseHelper::PhoneQuery::PHONE_LAST_TIME_USED = 8;
+const Int32 DialerDatabaseHelper::PhoneQuery::PHONE_TIMES_USED = 9;
+const Int32 DialerDatabaseHelper::PhoneQuery::PHONE_STARRED = 10;
+const Int32 DialerDatabaseHelper::PhoneQuery::PHONE_IS_SUPER_PRIMARY = 11;
+const Int32 DialerDatabaseHelper::PhoneQuery::PHONE_IN_VISIBLE_GROUP = 12;
+const Int32 DialerDatabaseHelper::PhoneQuery::PHONE_IS_PRIMARY = 13;
 
-const String DialerDatabaseHelper::PropertiesColumns::SELECT_UPDATED_CLAUSE =
+const String DialerDatabaseHelper::PhoneQuery::SELECT_UPDATED_CLAUSE =
         IContactsContractContactsColumns::CONTACT_LAST_UPDATED_TIMESTAMP + " > ?";
 
-const String DialerDatabaseHelper::PropertiesColumns::SELECT_IGNORE_LOOKUP_KEY_TOO_LONG_CLAUSE =
+const String DialerDatabaseHelper::PhoneQuery::SELECT_IGNORE_LOOKUP_KEY_TOO_LONG_CLAUSE =
         String("length(") + IContactsContractContactsColumns::LOOKUP_KEY + ") < 1000";
 
-const String DialerDatabaseHelper::PropertiesColumns::SELECTION = SELECT_UPDATED_CLAUSE + " AND " +
+const String DialerDatabaseHelper::PhoneQuery::SELECTION = SELECT_UPDATED_CLAUSE + " AND " +
                 SELECT_IGNORE_LOOKUP_KEY_TOO_LONG_CLAUSE;
 
 //=================================================================
@@ -112,7 +177,7 @@ AutoPtr<IUri> CreateDeleteContactQueryUri()
     CContactsContractDeletedContacts::AcquireSingleton(
             (IContactsContractDeletedContacts**)&contacts);
     AutoPtr<IUri> uri;
-    contacts->GetCONTENT_URI((IUri**)&contentUri);
+    contacts->GetCONTENT_URI((IUri**)&uri);
     return uri;
 }
 
@@ -121,7 +186,7 @@ const AutoPtr<IUri> DialerDatabaseHelper::DeleteContactQuery::URI = CreateDelete
 const String DialerDatabaseHelper::DeleteContactQuery::PROJECTION[] = {
     IContactsContractDeletedContactsColumns::CONTACT_ID,                          // 0
     IContactsContractDeletedContactsColumns::CONTACT_DELETED_TIMESTAMP,           // 1
-}
+};
 
 const Int32 DialerDatabaseHelper::DeleteContactQuery::DELETED_CONTACT_ID = 0;
 const Int32 DialerDatabaseHelper::DeleteContactQuery::DELECTED_TIMESTAMP = 1;
@@ -188,12 +253,12 @@ ECode DialerDatabaseHelper::ContactNumber::Equals(
 {
     VALIDATE_NOT_NULL(result);
 
-    if (this == other) {
+    if ((IObject*)this == other) {
         *result = TRUE;
         return NOERROR;
     }
     if (IDialerDatabaseHelperContactNumber::Probe(other)) {
-        ContactNumber* that = (ContactNumber*)other;
+        ContactNumber* that = (ContactNumber*)IObject::Probe(other);
         *result = mId == that->mId
                 && mDataId == that->mDataId
                 && mDisplayName.Equals(that->mDisplayName)
@@ -233,12 +298,12 @@ ECode DialerDatabaseHelper::ContactMatch::Equals(
 {
     VALIDATE_NOT_NULL(result);
 
-    if (this == other) {
+    if ((IObject*)this == other) {
         *result = TRUE;
         return NOERROR;
     }
     if (IDialerDatabaseHelperContactMatch::Probe(other)) {
-        ContactMatch* that = (ContactMatch*)other;
+        ContactMatch* that = (ContactMatch*)IObject::Probe(other);
         *result = mId == that->mId
                 && mLookupKey.Equals(that->mLookupKey);
         return NOERROR;
@@ -261,7 +326,7 @@ ECode DialerDatabaseHelper::SmartDialUpdateAsyncTask::DoInBackground(
 {
     VALIDATE_NOT_NULL(result);
     if (DialerDatabaseHelper::DEBUG) {
-        Logger::V(TAG, "Updating database");
+        Logger::V(DialerDatabaseHelper::TAG, "Updating database");
     }
     mHost->UpdateSmartDialDatabase();
     *result = NULL;
@@ -271,7 +336,7 @@ ECode DialerDatabaseHelper::SmartDialUpdateAsyncTask::DoInBackground(
 ECode DialerDatabaseHelper::SmartDialUpdateAsyncTask::OnCancelled()
 {
     if (DialerDatabaseHelper::DEBUG) {
-        Logger::V(TAG, "Updating Cancelled");
+        Logger::V(DialerDatabaseHelper::TAG, "Updating Cancelled");
     }
     return AsyncTask::OnCancelled();
 }
@@ -280,7 +345,7 @@ ECode DialerDatabaseHelper::SmartDialUpdateAsyncTask::OnPostExecute(
     /* [in] */ IInterface* result)
 {
     if (DialerDatabaseHelper::DEBUG) {
-        Logger::V(TAG, "Updating Finished");
+        Logger::V(DialerDatabaseHelper::TAG, "Updating Finished");
     }
     return AsyncTask::OnPostExecute(result);
 }
@@ -321,8 +386,8 @@ AutoPtr<IDialerDatabaseHelper> DialerDatabaseHelper::GetInstance(
         // and we don't want to leak the activity if the activity is not running but the
         // dialer database helper is still doing work.
         AutoPtr<IContext> appContext;
-        context->GetApplicationContext((IContext**)&appContext),
-        sSingleton = (IDialerDatabaseHelper**)new DialerDatabaseHelper(
+        context->GetApplicationContext((IContext**)&appContext);
+        sSingleton = (IDialerDatabaseHelper*)new DialerDatabaseHelper(
                 appContext, DATABASE_NAME);
     }
     return sSingleton;
@@ -348,8 +413,8 @@ DialerDatabaseHelper::DialerDatabaseHelper(
     /* [in] */ const String& databaseName,
     /* [in] */ Int32 dbVersion)
 {
-    SQLiteOpenHelper(context, databaseName, NULL, dbVersion);
-    assert(0 && "TODO")
+    SQLiteOpenHelper::constructor(context, databaseName, NULL, dbVersion);
+    assert(0 && "TODO");
     // mContext = Preconditions.checkNotNull(context, "Context must not be null");
 }
 
@@ -382,7 +447,7 @@ void DialerDatabaseHelper::SetupTables(
             ");");
 
     db->ExecSQL(String("CREATE TABLE ") + Tables::PREFIX_TABLE + " (" +
-            PrefixColumns::_ID + " INTEGER PRIMARY KEY AUTOINCREMENT," +
+            IBaseColumns::ID + " INTEGER PRIMARY KEY AUTOINCREMENT," +
             PrefixColumns::PREFIX + " TEXT COLLATE NOCASE, " +
             PrefixColumns::CONTACT_ID + " INTEGER" +
             ");");
@@ -392,21 +457,22 @@ void DialerDatabaseHelper::SetupTables(
             PropertiesColumns::PROPERTY_VALUE + " TEXT " +
             ");");
 
-    SetProperty(db, DATABASE_VERSION_PROPERTY, StringUtils.ToString(DATABASE_VERSION));
+    SetProperty(db, DATABASE_VERSION_PROPERTY, StringUtils::ToString(DATABASE_VERSION));
     ResetSmartDialLastUpdatedTime();
 }
 
-void DialerDatabaseHelper::DropTables(
+ECode DialerDatabaseHelper::DropTables(
     /* [in] */ ISQLiteDatabase* db)
 {
     db->ExecSQL(String("DROP TABLE IF EXISTS ") + Tables::PREFIX_TABLE);
     db->ExecSQL(String("DROP TABLE IF EXISTS ") + Tables::SMARTDIAL_TABLE);
     db->ExecSQL(String("DROP TABLE IF EXISTS ") + Tables::PROPERTIES);
+    return NOERROR;
 }
 
 ECode DialerDatabaseHelper::OnUpgrade(
     /* [in] */ ISQLiteDatabase* db,
-    /* [in] */ Int32 oldVersion,
+    /* [in] */ Int32 oldNumber,
     /* [in] */ Int32 newVersion)
 {
     // Disregard the old version and new versions provided by SQLiteOpenHelper, we will read
@@ -432,7 +498,7 @@ ECode DialerDatabaseHelper::OnUpgrade(
         return E_ILLEGAL_STATE_EXCEPTION;
     }
 
-    SetProperty(db, DATABASE_VERSION_PROPERTY, StringUtils.ToString(DATABASE_VERSION));
+    SetProperty(db, DATABASE_VERSION_PROPERTY, StringUtils::ToString(DATABASE_VERSION));
     return NOERROR;
 }
 
@@ -498,7 +564,7 @@ ECode DialerDatabaseHelper::GetProperty(
         if (cursor->MoveToFirst(&succeeded), succeeded) {
             cursor->GetString(0, &value);
         }
-        cursor->Close();
+        ICloseable::Probe(cursor)->Close();
         // } finally {
         //     cursor.close();
         // }
@@ -539,13 +605,14 @@ void DialerDatabaseHelper::ResetSmartDialLastUpdatedTime()
     AutoPtr<ISharedPreferencesEditor> editor;
     databaseLastUpdateSharedPref->Edit((ISharedPreferencesEditor**)&editor);
     editor->PutInt64(LAST_UPDATED_MILLIS, 0);
-    editor->Commit();
+    Boolean succeeded;
+    editor->Commit(&succeeded);
 }
 
 ECode DialerDatabaseHelper::StartSmartDialUpdateThread()
 {
-    AutoPtr<SmartDialUpdateAsyncTask> task = new SmartDialUpdateAsyncTask();
-    task->Execute();
+    AutoPtr<SmartDialUpdateAsyncTask> task = new SmartDialUpdateAsyncTask(this);
+    task->Execute((ArrayOf<IInterface*>*)NULL);
     return NOERROR;
 }
 
@@ -559,11 +626,12 @@ void DialerDatabaseHelper::RemoveDeletedContacts(
     AutoPtr<ArrayOf<String> > selectionArgs = ArrayOf<String>::Alloc(1);
     selectionArgs->Set(0, last_update_time);
     AutoPtr<ICursor> deletedContactCursor;
-    resolver->Query(
-            DeleteContactQuery::URI,
-            DeleteContactQuery::PROJECTION,
-            DeleteContactQuery::SELECT_UPDATED_CLAUSE,
-            selectionArgs, String(NULL), (ICursor**)&deletedContactCursor);
+    assert(0 && "TODO");
+    // resolver->Query(
+    //         DeleteContactQuery::URI,
+    //         DeleteContactQuery::PROJECTION,
+    //         IDialerDatabaseHelperDeleteContactQuery::SELECT_UPDATED_CLAUSE,
+    //         selectionArgs, String(NULL), (ICursor**)&deletedContactCursor);
     if (deletedContactCursor == NULL) {
         return;
     }
@@ -576,10 +644,11 @@ void DialerDatabaseHelper::RemoveDeletedContacts(
         FAIL_GOTO(deletedContactCursor->GetInt64(
             DeleteContactQuery::DELETED_CONTACT_ID, &deleteContactId), exit);
 
+        Int32 value;
         FAIL_GOTO(db->Delete(Tables::SMARTDIAL_TABLE,
-                SmartDialDbColumns::CONTACT_ID + "=" + deleteContactId, NULL), exit);
+                SmartDialDbColumns::CONTACT_ID + "=" + deleteContactId, NULL, &value), exit);
         FAIL_GOTO(db->Delete(Tables::PREFIX_TABLE,
-                PrefixColumns::CONTACT_ID + "=" + deleteContactId, NULL), exit);
+                PrefixColumns::CONTACT_ID + "=" + deleteContactId, NULL, &value), exit);
     }
 
     FAIL_GOTO(db->SetTransactionSuccessful(), exit);
@@ -588,7 +657,7 @@ void DialerDatabaseHelper::RemoveDeletedContacts(
     //     db.endTransaction();
     // }
 exit:
-    deletedContactCursor->Close();
+    ICloseable::Probe(deletedContactCursor)->Close();
     db->EndTransaction();
 }
 
@@ -596,21 +665,24 @@ void DialerDatabaseHelper::RemovePotentiallyCorruptedContacts(
     /* [in] */ ISQLiteDatabase* db,
     /* [in] */ const String& last_update_time)
 {
+    Int32 value;
     db->Delete(Tables::PREFIX_TABLE,
             PrefixColumns::CONTACT_ID + " IN " +
             "(SELECT " + SmartDialDbColumns::CONTACT_ID + " FROM " + Tables::SMARTDIAL_TABLE +
             " WHERE " + SmartDialDbColumns::LAST_SMARTDIAL_UPDATE_TIME + " > " +
             last_update_time + ")",
-            NULL);
+            NULL, &value);
     db->Delete(Tables::SMARTDIAL_TABLE,
-            SmartDialDbColumns::LAST_SMARTDIAL_UPDATE_TIME + " > " + last_update_time, NULL);
+            SmartDialDbColumns::LAST_SMARTDIAL_UPDATE_TIME + " > " + last_update_time,
+            NULL, &value);
 }
 
 void DialerDatabaseHelper::RemoveAllContacts(
     /* [in] */ ISQLiteDatabase* db)
 {
-    db->Delete(Tables::SMARTDIAL_TABLE, NULL, NULL);
-    db->Delete(Tables::PREFIX_TABLE, NULL, NULL);
+    Int32 value;
+    db->Delete(Tables::SMARTDIAL_TABLE, String(NULL), NULL, &value);
+    db->Delete(Tables::PREFIX_TABLE, String(NULL), NULL, &value);
 }
 
 Int32 DialerDatabaseHelper::CountPrefixTableRows(
@@ -619,7 +691,7 @@ Int32 DialerDatabaseHelper::CountPrefixTableRows(
     Int64 result;
     AutoPtr<IDatabaseUtils> utils;
     CDatabaseUtils::AcquireSingleton((IDatabaseUtils**)&utils);
-    utils->Int64ForQuery(db, String("SELECT COUNT(1) FROM ") + Tables::PREFIX_TABLE,,
+    utils->Int64ForQuery(db, String("SELECT COUNT(1) FROM ") + Tables::PREFIX_TABLE,
         NULL, &result);
     return (Int32)result;
 }
@@ -634,12 +706,13 @@ void DialerDatabaseHelper::RemoveUpdatedContacts(
     while (updatedContactCursor->MoveToNext(&succeeded), succeeded) {
         Int64 contactId;
         FAIL_GOTO(updatedContactCursor->GetInt64(
-            PhoneQuery.PHONE_CONTACT_ID, &contactId), exit);
+            PhoneQuery::PHONE_CONTACT_ID, &contactId), exit);
 
+        Int32 value;
         FAIL_GOTO(db->Delete(Tables::SMARTDIAL_TABLE, SmartDialDbColumns::CONTACT_ID + "=" +
-                contactId, NULL), exit);
+                contactId, NULL, &value), exit);
         FAIL_GOTO(db->Delete(Tables::PREFIX_TABLE, PrefixColumns::CONTACT_ID + "=" +
-                contactId, NULL), exit);
+                contactId, NULL, &value), exit);
     }
 
     db->SetTransactionSuccessful();
@@ -673,20 +746,21 @@ void DialerDatabaseHelper::InsertUpdatedContactsAndNumberPrefix(
             SmartDialDbColumns::LAST_SMARTDIAL_UPDATE_TIME + ") " +
             " VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
     AutoPtr<ISQLiteStatement> insert;
+    AutoPtr<ISQLiteStatement> numberInsert;
+    String numberSqlInsert;
     FAIL_GOTO(db->CompileStatement(sqlInsert, (ISQLiteStatement**)&insert), exit);
 
-    String numberSqlInsert = String("INSERT INTO ") + Tables::PREFIX_TABLE + " (" +
+    numberSqlInsert = String("INSERT INTO ") + Tables::PREFIX_TABLE + " (" +
             PrefixColumns::CONTACT_ID + ", " +
             PrefixColumns::PREFIX  + ") " +
             " VALUES (?, ?)";
-    AutoPtr<ISQLiteStatement> numberInsert;
     FAIL_GOTO(db->CompileStatement(numberSqlInsert,
             (ISQLiteStatement**)&numberInsert), exit);
 
     Boolean succeeded;
     updatedContactCursor->MoveToPosition(-1, &succeeded);
     while (updatedContactCursor->MoveToNext(&succeeded), succeeded) {
-        insert->ClearBindings();
+        ISQLiteProgram::Probe(insert)->ClearBindings();
 
         // Handle string columns which can possibly be null first. In the case of certain
         // null columns (due to malformed rows possibly inserted by third-party apps
@@ -697,7 +771,7 @@ void DialerDatabaseHelper::InsertUpdatedContactsAndNumberPrefix(
             continue;
         }
         else {
-            insert->BindString(2, number);
+            ISQLiteProgram::Probe(insert)->BindString(2, number);
         }
 
         String lookupKey;
@@ -707,7 +781,7 @@ void DialerDatabaseHelper::InsertUpdatedContactsAndNumberPrefix(
             continue;
         }
         else {
-            insert->BindString(4, lookupKey);
+            ISQLiteProgram::Probe(insert)->BindString(4, lookupKey);
         }
 
         String displayName;
@@ -718,35 +792,36 @@ void DialerDatabaseHelper::InsertUpdatedContactsAndNumberPrefix(
             mContext->GetResources((IResources**)&resources);
             String name;
             resources->GetString(R::string::missing_name, &name);
-            insert->BindString(5, name);
+            ISQLiteProgram::Probe(insert)->BindString(5, name);
         }
         else {
-            insert->BindString(5, displayName);
+            ISQLiteProgram::Probe(insert)->BindString(5, displayName);
         }
 
         Int64 value;
         updatedContactCursor->GetInt64(PhoneQuery::PHONE_ID, &value);
-        insert->BindInt64(1, value);
+        ISQLiteProgram::Probe(insert)->BindInt64(1, value);
         updatedContactCursor->GetInt64(PhoneQuery::PHONE_CONTACT_ID, &value);
-        insert->BindInt64(3, value);
+        ISQLiteProgram::Probe(insert)->BindInt64(3, value);
         updatedContactCursor->GetInt64(PhoneQuery::PHONE_PHOTO_ID, &value);
-        insert->BindInt64(6, value);
+        ISQLiteProgram::Probe(insert)->BindInt64(6, value);
         updatedContactCursor->GetInt64(PhoneQuery::PHONE_LAST_TIME_USED, &value);
-        insert->BindInt64(7, value);
+        ISQLiteProgram::Probe(insert)->BindInt64(7, value);
 
         Int32 intValue;
         updatedContactCursor->GetInt32(PhoneQuery::PHONE_TIMES_USED, &intValue);
-        insert->BindInt64(8, intValue);
+        ISQLiteProgram::Probe(insert)->BindInt64(8, intValue);
         updatedContactCursor->GetInt32(PhoneQuery::PHONE_STARRED, &intValue);
-        insert->BindInt64(9, intValue);
+        ISQLiteProgram::Probe(insert)->BindInt64(9, intValue);
         updatedContactCursor->GetInt32(PhoneQuery::PHONE_IS_SUPER_PRIMARY, &intValue);
-        insert->BindInt64(10, intValue);
+        ISQLiteProgram::Probe(insert)->BindInt64(10, intValue);
         updatedContactCursor->GetInt32(PhoneQuery::PHONE_IN_VISIBLE_GROUP, &intValue);
-        insert->BindInt64(11, intValue);
+        ISQLiteProgram::Probe(insert)->BindInt64(11, intValue);
         updatedContactCursor->GetInt32(PhoneQuery::PHONE_IS_PRIMARY, &intValue);
-        insert->BindInt64(12, intValue);
-        insert->BindInt64(13, currentMillis);
-        insert->ExecuteInsert();
+        ISQLiteProgram::Probe(insert)->BindInt64(12, intValue);
+        currentMillis->GetValue(&value);
+        ISQLiteProgram::Probe(insert)->BindInt64(13, value);
+        insert->ExecuteInsert(&value);
         String contactPhoneNumber;
         updatedContactCursor->GetString(PhoneQuery::PHONE_NUMBER, &contactPhoneNumber);
 
@@ -759,12 +834,12 @@ void DialerDatabaseHelper::InsertUpdatedContactsAndNumberPrefix(
         while(it->HasNext(&hasNext), hasNext) {
             AutoPtr<IInterface> item;
             it->GetNext((IInterface**)&item);
-            String numberPrefix = CoreUtils::Unbox(item);
+            String numberPrefix = CoreUtils::Unbox(ICharSequence::Probe(item));
             updatedContactCursor->GetInt64(PhoneQuery::PHONE_CONTACT_ID, &value);
-            numberInsert->BindInt64(1, value);
-            numberInsert->BindString(2, numberPrefix);
-            numberInsert->ExecuteInsert();
-            numberInsert->ClearBindings();
+            ISQLiteProgram::Probe(numberInsert)->BindInt64(1, value);
+            ISQLiteProgram::Probe(numberInsert)->BindString(2, numberPrefix);
+            numberInsert->ExecuteInsert(&value);
+            ISQLiteProgram::Probe(numberInsert)->ClearBindings();
         }
     }
 
@@ -781,16 +856,16 @@ void DialerDatabaseHelper::InsertNamePrefixes(
     /* [in] */ ICursor* nameCursor)
 {
     Int32 columnIndexName;
-    nameCursor->BetColumnIndex(
+    nameCursor->GetColumnIndex(
             SmartDialDbColumns::DISPLAY_NAME_PRIMARY, &columnIndexName);
     Int32 columnIndexContactId;
     nameCursor->GetColumnIndex(SmartDialDbColumns::CONTACT_ID, &columnIndexContactId);
 
     db->BeginTransaction();
     // try {
-    String sqlInsert = String("INSERT INTO ") + Tables.PREFIX_TABLE + " (" +
-            PrefixColumns.CONTACT_ID + ", " +
-            PrefixColumns.PREFIX  + ") " +
+    String sqlInsert = String("INSERT INTO ") + Tables::PREFIX_TABLE + " (" +
+            PrefixColumns::CONTACT_ID + ", " +
+            PrefixColumns::PREFIX  + ") " +
             " VALUES (?, ?)";
     AutoPtr<ISQLiteStatement> insert;
     FAIL_GOTO(db->CompileStatement(sqlInsert,
@@ -805,18 +880,18 @@ void DialerDatabaseHelper::InsertNamePrefixes(
                 SmartDialPrefix::GenerateNamePrefixes(name);
 
         AutoPtr<IIterator> it;
-        numberPrefixes->GetIterator((IIterator**)&it);
+        namePrefixes->GetIterator((IIterator**)&it);
         Boolean hasNext;
         while(it->HasNext(&hasNext), hasNext) {
             AutoPtr<IInterface> item;
             it->GetNext((IInterface**)&item);
-            String numberPrefix = CoreUtils::Unbox(item);
+            String namePrefix = CoreUtils::Unbox(ICharSequence::Probe(item));
             Int64 value;
             nameCursor->GetInt64(columnIndexContactId, &value);
-            insert->BindInt64(1, value);
-            insert->BindString(2, namePrefix);
-            insert->ExecuteInsert();
-            insert->ClearBindings();
+            ISQLiteProgram::Probe(insert)->BindInt64(1, value);
+            ISQLiteProgram::Probe(insert)->BindString(2, namePrefix);
+            insert->ExecuteInsert(&value);
+            ISQLiteProgram::Probe(insert)->ClearBindings();
         }
     }
 
@@ -837,7 +912,8 @@ ECode DialerDatabaseHelper::UpdateSmartDialDatabase()
         if (DEBUG) {
             Logger::V(TAG, "Starting to update database");
         }
-        AutoPtr<IStopWatch> stopWatch = DEBUG ? StopWatch::Start(String("Updating databases")) : NULL;
+        assert(0 && "TODO");
+        // AutoPtr<IStopWatch> stopWatch = DEBUG ? StopWatch::Start(String("Updating databases")) : NULL;
 
         /** Gets the last update time on the database. */
         AutoPtr<ISharedPreferences> databaseLastUpdateSharedPref;
@@ -848,7 +924,7 @@ ECode DialerDatabaseHelper::UpdateSmartDialDatabase()
         String lastUpdateMillis = StringUtils::ToString(value);
 
         if (DEBUG) {
-            Logger::V(TAG, "Last updated at " + lastUpdateMillis);
+            Logger::V(TAG, "Last updated at %s", lastUpdateMillis.string());
         }
         /** Queries the contact database to get contacts that have been updated since the last
          * update time.
@@ -858,14 +934,15 @@ ECode DialerDatabaseHelper::UpdateSmartDialDatabase()
         AutoPtr<ArrayOf<String> > args = ArrayOf<String>::Alloc(1);
         args->Set(0, lastUpdateMillis);
         AutoPtr<ICursor> updatedContactCursor;
-        resolver->Query(PhoneQuery::URI,
-                PhoneQuery::PROJECTION, PhoneQuery::SELECTION,
-                args, NULL, (ICursor**)&updatedContactCursor);
+        assert(0 && "TODO");
+        // resolver->Query(PhoneQuery::URI,
+        //         PhoneQuery::PROJECTION, PhoneQuery::SELECTION,
+        //         args, NULL, (ICursor**)&updatedContactCursor);
         if (updatedContactCursor == NULL) {
             if (DEBUG) {
                 Logger::E(TAG, "SmartDial query received null for cursor");
             }
-            return;
+            return NOERROR;
         }
 
         /** Sets the time after querying the database as the current update time. */
@@ -876,18 +953,21 @@ ECode DialerDatabaseHelper::UpdateSmartDialDatabase()
 
         // try {
         if (DEBUG) {
-            stopWatch->Lap("Queried the Contacts database");
+        assert(0 && "TODO");
+            // stopWatch->Lap("Queried the Contacts database");
         }
 
         /** Prevents the app from reading the dialer database when updating. */
-        sInUpdate->GetAndSet(TRUE);
+        Boolean res;
+        sInUpdate->GetAndSet(TRUE, &res);
 
         /** Removes contacts that have been deleted. */
         RemoveDeletedContacts(db, lastUpdateMillis);
         RemovePotentiallyCorruptedContacts(db, lastUpdateMillis);
 
         if (DEBUG) {
-            stopWatch->Lap("Finished deleting deleted entries");
+            assert(0 && "TODO");
+            // stopWatch->Lap("Finished deleting deleted entries");
         }
 
         /** If the database did not exist before, jump through deletion as there is nothing
@@ -899,16 +979,18 @@ ECode DialerDatabaseHelper::UpdateSmartDialDatabase()
              */
             RemoveUpdatedContacts(db, updatedContactCursor);
             if (DEBUG) {
-                stopWatch->Lap("Finished deleting updated entries");
+                assert(0 && "TODO");
+                // stopWatch->Lap("Finished deleting updated entries");
             }
         }
 
         /** Inserts recently updated contacts to the smartdial database.*/
-        InsertUpdatedContactsAndNumberPrefix(db, updatedContactCursor, currentMillis);
+        InsertUpdatedContactsAndNumberPrefix(db, updatedContactCursor, CoreUtils::Convert(currentMillis));
         if (DEBUG) {
-            stopWatch->Lap("Finished building the smart dial table");
+            assert(0 && "TODO");
+            // stopWatch->Lap("Finished building the smart dial table");
         }
-        updatedContactCursor->Close();
+        ICloseable::Probe(updatedContactCursor)->Close();
         // } finally {
             /** Inserts prefixes of phone numbers into the prefix table.*/
         //     updatedContactCursor.close();
@@ -917,7 +999,7 @@ ECode DialerDatabaseHelper::UpdateSmartDialDatabase()
         /** Gets a list of distinct contacts which have been updated, and adds the name prefixes
          * of these contacts to the prefix table.
          */
-        AutoPtr<ArrayOf<String> > args = ArrayOf<String>::Alloc(0);
+        AutoPtr<ArrayOf<String> > rowArgs = ArrayOf<String>::Alloc(0);
         AutoPtr<ICursor> nameCursor;
         db->RawQuery(
                 String("SELECT DISTINCT ") +
@@ -925,19 +1007,21 @@ ECode DialerDatabaseHelper::UpdateSmartDialDatabase()
                 " FROM " + Tables::SMARTDIAL_TABLE +
                 " WHERE " + SmartDialDbColumns::LAST_SMARTDIAL_UPDATE_TIME +
                 " = " + StringUtils::ToString(currentMillis),
-                args, (ICursor**)&nameCursor);
+                rowArgs, (ICursor**)&nameCursor);
         if (nameCursor != NULL) {
             // try {
             if (DEBUG) {
-                stopWatch->Lap("Queried the smart dial table for contact names");
+                assert(0 && "TODO");
+                // stopWatch->Lap("Queried the smart dial table for contact names");
             }
 
             /** Inserts prefixes of names into the prefix table.*/
             InsertNamePrefixes(db, nameCursor);
             if (DEBUG) {
-                stopWatch->Lap("Finished building the name prefix table");
+                assert(0 && "TODO");
+                // stopWatch->Lap("Finished building the name prefix table");
             }
-            nameCursor->Close();
+            ICloseable::Probe(nameCursor)->Close();
             // } finally {
             //     nameCursor.close();
             // }
@@ -948,8 +1032,8 @@ ECode DialerDatabaseHelper::UpdateSmartDialDatabase()
                 Tables::SMARTDIAL_TABLE + " (" + SmartDialDbColumns::CONTACT_ID  + ");");
         /** Creates index on last_smartdial_update_time for fast SELECT operation. */
         db->ExecSQL(String("CREATE INDEX IF NOT EXISTS smartdial_last_update_index ON ") +
-                Tables.SMARTDIAL_TABLE + " (" +
-                SmartDialDbColumns.LAST_SMARTDIAL_UPDATE_TIME + ");");
+                Tables::SMARTDIAL_TABLE + " (" +
+                SmartDialDbColumns::LAST_SMARTDIAL_UPDATE_TIME + ");");
         /** Creates index on sorting fields for fast sort operation. */
         db->ExecSQL(String("CREATE INDEX IF NOT EXISTS smartdial_sort_index ON ") +
                 Tables::SMARTDIAL_TABLE + " (" +
@@ -970,7 +1054,8 @@ ECode DialerDatabaseHelper::UpdateSmartDialDatabase()
                 Tables::PREFIX_TABLE + " (" + PrefixColumns::CONTACT_ID + ");");
 
         if (DEBUG) {
-            stopWatch->Lap(TAG + "Finished recreating index");
+            assert(0 && "TODO");
+            // stopWatch->Lap(TAG + "Finished recreating index");
         }
 
         /** Updates the database index statistics.*/
@@ -981,16 +1066,20 @@ ECode DialerDatabaseHelper::UpdateSmartDialDatabase()
         db->ExecSQL(String("ANALYZE nameprefix_index"));
         db->ExecSQL(String("ANALYZE nameprefix_contact_id_index"));
         if (DEBUG) {
-            stopWatch->TopAndLog(TAG + "Finished updating index stats", 0);
+            assert(0 && "TODO");
+            // stopWatch->TopAndLog(TAG + "Finished updating index stats", 0);
         }
 
-        sInUpdate->GetAndSet(FALSE);
+        sInUpdate->GetAndSet(FALSE, &res);
 
         AutoPtr<ISharedPreferencesEditor> editor;
         databaseLastUpdateSharedPref->Edit((ISharedPreferencesEditor**)&editor);
         editor->PutInt64(LAST_UPDATED_MILLIS, currentMillis);
-        editor->Commit();
+        Boolean succeeded;
+        editor->Commit(&succeeded);
     }
+
+    return NOERROR;
 }
 
 ECode DialerDatabaseHelper::GetLooseMatches(
@@ -1016,13 +1105,14 @@ ECode DialerDatabaseHelper::GetLooseMatches(
     AutoPtr<IArrayList> result;
     CArrayList::New((IArrayList**)&result);
 
-    AutoPtr<IStopWatch> stopWatch = DEBUG ? StopWatch::Start(":Name Prefix query") : NULL;
+    assert(0 && "TODO");
+    // AutoPtr<IStopWatch> stopWatch = DEBUG ? StopWatch::Start(":Name Prefix query") : NULL;
 
     AutoPtr<ISystem> sysObj;
     CSystem::AcquireSingleton((ISystem**)&sysObj);
     Int64 currentMillis;
     sysObj->GetCurrentTimeMillis(&currentMillis);
-    String currentTimeStamp = StringUtils.ToString(currentMillis);
+    String currentTimeStamp = StringUtils::ToString(currentMillis);
 
     /** Queries the database to find contacts that have an index matching the query prefix. */
     AutoPtr<ArrayOf<String> > args = ArrayOf<String>::Alloc(1);
@@ -1050,7 +1140,8 @@ ECode DialerDatabaseHelper::GetLooseMatches(
     }
     // try {
     if (DEBUG) {
-        stopWatch->Lap("Prefix query completed");
+        assert(0 && "TODO");
+        // stopWatch->Lap("Prefix query completed");
     }
 
     /** Gets the column ID from the cursor.*/
@@ -1061,14 +1152,16 @@ ECode DialerDatabaseHelper::GetLooseMatches(
     Int32 columnId = 4;
     Int32 columnLookupKey = 5;
     if (DEBUG) {
-        stopWatch->Lap("Found column IDs");
+        assert(0 && "TODO");
+        // stopWatch->Lap("Found column IDs");
     }
 
     AutoPtr<IHashSet> duplicates;
     CHashSet::New((IHashSet**)&duplicates);
     Int32 counter = 0;
     if (DEBUG) {
-        stopWatch->Lap("Moved cursor to start");
+        assert(0 && "TODO");
+        // stopWatch->Lap("Moved cursor to start");
     }
     /** Iterates the cursor to find top contact suggestions without duplication.*/
     Boolean succeeded;
@@ -1090,7 +1183,9 @@ ECode DialerDatabaseHelper::GetLooseMatches(
          * processed, skip the second instance.
          */
         AutoPtr<ContactMatch> contactMatch = new ContactMatch(lookupKey, id);
-        if (duplicates->Contains((IDialerDatabaseHelperContactMatch*)contactMatch)) {
+        Boolean contains;
+        if (duplicates->Contains(
+                (IObject*)contactMatch.Get(), &contains), contains) {
             continue;
         }
 
@@ -1105,25 +1200,27 @@ ECode DialerDatabaseHelper::GetLooseMatches(
         Boolean numberMatches = (position != NULL);
         if (nameMatches || numberMatches) {
             /** If a contact has not been added, add it to the result and the hash set.*/
-            duplicates->Add((IDialerDatabaseHelperContactMatch*)contactMatch);
+            duplicates->Add((IObject*)contactMatch.Get());
             AutoPtr<ContactNumber> contactNumber = new ContactNumber(id,
-                    dataID, displayName, phoneNumber, lookupKey,, photoId)
-            result->Add((IDialerDatabaseHelperContactNumber*)contactNumber);
+                    dataID, displayName, phoneNumber, lookupKey, photoId);
+            result->Add((IObject*)contactNumber.Get());
             counter++;
             if (DEBUG) {
-                stopWatch->Lap(String("Added one result: Name: ") + displayName);
+                assert(0 && "TODO");
+                // stopWatch->Lap(String("Added one result: Name: ") + displayName);
             }
         }
     }
 
     if (DEBUG) {
-        stopWatch->StopAndLog(TAG + "Finished loading cursor", 0);
+        assert(0 && "TODO");
+        // stopWatch->StopAndLog(TAG + "Finished loading cursor", 0);
     }
     // } finally {
     //     cursor.close();
     // }
-exit:
-    cursor->Close();
+
+    ICloseable::Probe(cursor)->Close();
     *matches = result;
     REFCOUNT_ADD(*matches);
     return NOERROR;

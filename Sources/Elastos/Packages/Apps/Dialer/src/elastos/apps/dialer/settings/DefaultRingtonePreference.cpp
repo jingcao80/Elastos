@@ -1,5 +1,10 @@
 
-#include "settings/DefaultRingtonePreference.h"
+#include "elastos/apps/dialer/settings/DefaultRingtonePreference.h"
+#include "Elastos.Droid.Media.h"
+
+using Elastos::Droid::Media::IRingtoneManager;
+using Elastos::Droid::Media::IRingtoneManagerHelper;
+using Elastos::Droid::Media::CRingtoneManagerHelper;
 
 namespace Elastos {
 namespace Apps {

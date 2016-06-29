@@ -4,12 +4,15 @@
 #include "_Elastos_Apps_Dialer_CPhoneCallDetails.h"
 #include "Elastos.Droid.Graphics.h"
 #include "Elastos.Droid.Net.h"
+#include "Elastos.CoreLibrary.Core.h"
 
 using Elastos::Droid::Graphics::Drawable::IDrawable;
 using Elastos::Droid::Net::IUri;
+using Elastos::Core::ICharSequence;
+using Elastos::Core::IInteger64;
 
-namespace Elastos{
-namespace Apps{
+namespace Elastos {
+namespace Apps {
 namespace Dialer {
 
 CarClass(CPhoneCallDetails)
@@ -17,9 +20,9 @@ CarClass(CPhoneCallDetails)
     , public IPhoneCallDetails
 {
 public:
-    CAR_INTERFACE_DECL()
+    CAR_INTERFACE_DECL();
 
-    CAR_OBJECT_DECL()
+    CAR_OBJECT_DECL();
 
     CARAPI constructor(
         /* [in] */ ICharSequence* number,

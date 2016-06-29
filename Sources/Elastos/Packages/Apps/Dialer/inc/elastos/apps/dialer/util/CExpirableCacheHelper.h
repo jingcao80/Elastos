@@ -1,11 +1,11 @@
-#ifndef __ELASTOS_APPS_DIALER_UTIL_CEMPTYLOADERHELPER_H__
-#define __ELASTOS_APPS_DIALER_UTIL_CEMPTYLOADERHELPER_H__
+#ifndef __ELASTOS_APPS_DIALER_UTIL_CEXPIRABLECACHEHELPER_H__
+#define __ELASTOS_APPS_DIALER_UTIL_CEXPIRABLECACHEHELPER_H__
 
 #include "_Elastos_Apps_Dialer_Util_CExpirableCacheHelper.h"
 #include <elastos/core/Singleton.h>
 
-namespace Elastos{
-namespace Apps{
+namespace Elastos {
+namespace Apps {
 namespace Dialer {
 namespace Util {
 
@@ -14,9 +14,9 @@ CarClass(CExpirableCacheHelper)
     , public IExpirableCacheHelper
 {
 public:
-    CAR_INTERFACE_DECL()
+    CAR_INTERFACE_DECL();
 
-    CAR_SINGLETON_DECL()
+    CAR_SINGLETON_DECL();
 
     /**
      * Creates a new {@link ExpirableCache} that wraps the given {@link LruCache}.
@@ -50,4 +50,4 @@ public:
 } // Apps
 } // Elastos
 
-#endif //__ELASTOS_APPS_DIALER_UTIL_CEMPTYLOADERHELPER_H__
+#endif //__ELASTOS_APPS_DIALER_UTIL_CEXPIRABLECACHEHELPER_H__

@@ -1,8 +1,78 @@
 
-#include "dialpad/DialpadFragment.h"
-
+#include "elastos/apps/dialer/dialpad/DialpadFragment.h"
+#include "elastos/apps/dialer/dialpad/UnicodeDialerKeyListener.h"
+#include "elastos/apps/dialer/util/DialerUtils.h"
+#include "elastos/apps/dialer/DialtactsActivity.h"
+#include "elastos/apps/dialer/SpecialCharSequenceMgr.h"
+#include <elastos/droid/provider/Settings.h>
+#include <elastos/droid/text/TextUtils.h>
+#include <elastos/droid/view/LayoutInflater.h>
+#include <elastos/droid/R.h>
 #include <elastos/core/AutoLock.h>
+#include <elastos/core/CoreUtils.h>
+#include <elastos/core/Math.h>
+#include <elastos/core/StringUtils.h>
+#include <elastos/utility/logging/Logger.h>
+#include "Elastos.Droid.Graphics.h"
+#include "Elastos.Droid.Net.h"
+#include "Elastos.Droid.Provider.h"
+#include "Elastos.CoreLibrary.IO.h"
+#include "R.h"
+
+using Elastos::Droid::App::IAlertDialog;
+using Elastos::Droid::App::IAlertDialogBuilder;
+using Elastos::Droid::App::CAlertDialogBuilder;
+using Elastos::Droid::Content::IContentResolver;
+using Elastos::Droid::Content::CIntent;
+using Elastos::Droid::Content::EIID_IDialogInterfaceOnClickListener;
+using Elastos::Droid::Database::ICursor;
+using Elastos::Droid::Graphics::IBitmap;
+using Elastos::Droid::Graphics::IBitmapFactory;
+using Elastos::Droid::Graphics::CBitmapFactory;
+using Elastos::Droid::Media::IAudioManager;
+using Elastos::Droid::Media::CToneGenerator;
+using Elastos::Droid::Net::IUri;
+using Elastos::Droid::Net::IUriHelper;
+using Elastos::Droid::Net::CUriHelper;
+using Elastos::Droid::Os::CBundle;
+using Elastos::Droid::Provider::IContactsPeople;
+using Elastos::Droid::Provider::IContactsPhones;
+using Elastos::Droid::Provider::IContactsPhonesColumns;
+using Elastos::Droid::Provider::Settings;
+using Elastos::Droid::Provider::ISettingsSystem;
+using Elastos::Droid::Telecomm::Telecom::IPhoneAccount;
+using Elastos::Droid::Telephony::IPhoneNumberUtils;
+using Elastos::Droid::Telephony::CPhoneNumberUtils;
+using Elastos::Droid::Telephony::IPhoneStateListener;
+using Elastos::Droid::Text::TextUtils;
+using Elastos::Droid::Text::ISpannable;
+using Elastos::Droid::Text::ISpannableString;
+using Elastos::Droid::Text::CSpannableString;
+using Elastos::Droid::Text::EIID_ITextWatcher;
+using Elastos::Droid::Text::Method::IKeyListener;
+using Elastos::Droid::Text::Style::IRelativeSizeSpan;
+using Elastos::Droid::Text::Style::CRelativeSizeSpan;
+using Elastos::Droid::View::EIID_IViewOnClickListener;
+using Elastos::Droid::View::EIID_IViewOnKeyListener;
+using Elastos::Droid::View::EIID_IViewOnTouchListener;
+using Elastos::Droid::View::EIID_IViewOnLongClickListener;
+using Elastos::Droid::View::CKeyEvent;
+using Elastos::Droid::View::LayoutInflater;
+using Elastos::Droid::Widget::EIID_IAdapterViewOnItemClickListener;
+using Elastos::Droid::Widget::EIID_IPopupMenuOnMenuItemClickListener;
+using Elastos::Droid::Widget::IImageView;
+using Elastos::Droid::Widget::ITextView;
 using Elastos::Core::AutoLock;
+using Elastos::Core::CoreUtils;
+using Elastos::Core::StringUtils;
+using Elastos::IO::ICloseable;
+using Elastos::Utility::CHashSet;
+using Elastos::Utility::Logging::Logger;
+using Elastos::Apps::Dialer::Util::DialerUtils;
+using Elastos::Apps::Dialer::DialtactsActivity;
+using Elastos::Apps::Dialer::SpecialCharSequenceMgr;
+
+DEFINE_CONVERSION_FOR(Elastos::Apps::Dialer::Dialpad::DialpadFragment::DialpadChooserAdapter::ChoiceItem, IInterface);
 
 namespace Elastos {
 namespace Apps {
@@ -137,7 +207,7 @@ ECode DialpadFragment::ErrorDialogFragment::OnCreateDialog(
     AutoPtr<IActivity> activity;
     GetActivity((IActivity**)&activity);
     AutoPtr<IAlertDialogBuilder> builder;
-    CAlertDialogBuilder::New(activity, (IAlertDialogBuilder**)&builder);
+    CAlertDialogBuilder::New(IContext::Probe(activity), (IAlertDialogBuilder**)&builder);
 
     if (mTitleResId != 0) {
         builder->SetTitle(mTitleResId);
@@ -147,8 +217,12 @@ ECode DialpadFragment::ErrorDialogFragment::OnCreateDialog(
     }
 
     AutoPtr<AlertDialogClickListener> listener = new AlertDialogClickListener();
-    builder->SetPositiveButton(Elastos::R::string::ok, listener);
-    return builder->Create(dialog);
+    builder->SetPositiveButton(Elastos::Droid::R::string::ok, listener);
+    AutoPtr<IAlertDialog> alertDialog;
+    builder->Create((IAlertDialog**)&alertDialog);
+    *dialog = IDialog::Probe(alertDialog);
+    REFCOUNT_ADD(*dialog);
+    return NOERROR;
 }
 
 //=================================================================
@@ -186,7 +260,7 @@ ECode DialpadFragment::AlertDialogClickListener::OnClick(
     /* [in] */ IDialogInterface* dialog,
     /* [in] */ Int32 which)
 {
-    Dismiss();
+    dialog->Dismiss();
     return NOERROR;
 }
 
@@ -194,30 +268,30 @@ ECode DialpadFragment::AlertDialogClickListener::OnClick(
 //=================================================================
 // DialpadFragment::DialpadPopupMenu
 //=================================================================
-DialpadFragment::DialpadPopupMenu::DialpadPopupMenu(
-    /* [in] */ DialpadFragment* host)
-    : mHost(host)
-{}
+// DialpadFragment::DialpadPopupMenu::DialpadPopupMenu(
+//     /* [in] */ DialpadFragment* host)
+//     : mHost(host)
+// {}
 
-ECode DialpadFragment::DialpadPopupMenu::Show()
-{
-    AutoPtr<IMenu> menu;
-    GetMenu((IMenu**)&menu);
-    AutoPtr<IMenuItem> sendMessage;
-    menu->FindItem(R::id::menu_send_message, (IMenuItem**)&sendMessage);
-    sendMessage->SetVisible(mHost->mSmsPackageComponentName != NULL);
+// ECode DialpadFragment::DialpadPopupMenu::Show()
+// {
+//     AutoPtr<IMenu> menu;
+//     GetMenu((IMenu**)&menu);
+//     AutoPtr<IMenuItem> sendMessage;
+//     menu->FindItem(R::id::menu_send_message, (IMenuItem**)&sendMessage);
+//     sendMessage->SetVisible(mHost->mSmsPackageComponentName != NULL);
 
-    Boolean enable = !mHost->IsDigitsEmpty();
-    Int32 size;
-    menu->GetSize(&size);
-    for (Int32 i = 0; i < size; i++) {
-        AutoPtr<IMenuItem> item;
-        menu->GetItem(i, (IMenuItem**)&item);
-        item->SetEnabled(enable);
-    }
+//     Boolean enable = !mHost->IsDigitsEmpty();
+//     Int32 size;
+//     menu->GetSize(&size);
+//     for (Int32 i = 0; i < size; i++) {
+//         AutoPtr<IMenuItem> item;
+//         menu->GetItem(i, (IMenuItem**)&item);
+//         item->SetEnabled(enable);
+//     }
 
-    return PopupMenu::Show();
-}
+//     return PopupMenu::Show();
+// }
 
 //=================================================================
 // DialpadFragment::DialpadChooserAdapter::ChoiceItem
@@ -261,24 +335,24 @@ DialpadFragment::DialpadChooserAdapter::DialpadChooserAdapter(
     AutoPtr<IBitmap> bitmap;
     factory->DecodeResource(resources,
             R::drawable::ic_dialer_fork_tt_keypad, (IBitmap**)&bitmap);
-    mChoiceItems[0] = new ChoiceItem(str,
-            bitmap, DIALPAD_CHOICE_USE_DTMF_DIALPAD));
+    (*mChoiceItems)[0] = new ChoiceItem(str,
+            bitmap, DIALPAD_CHOICE_USE_DTMF_DIALPAD);
 
     // - "Return to call in progress"
     context->GetString(R::string::dialer_returnToInCallScreen, &str);
     bitmap = NULL;
     factory->DecodeResource(resources,
             R::drawable::ic_dialer_fork_current_call, (IBitmap**)&bitmap);
-    mChoiceItems[1] = new ChoiceItem(str,
-            bitmap, DIALPAD_CHOICE_RETURN_TO_CALL));
+    (*mChoiceItems)[1] = new ChoiceItem(str,
+            bitmap, DIALPAD_CHOICE_RETURN_TO_CALL);
 
     // - "Add call"
     context->GetString(R::string::dialer_addAnotherCall, &str);
     bitmap = NULL;
     factory->DecodeResource(resources,
             R::drawable::ic_dialer_fork_add_call, (IBitmap**)&bitmap);
-    mChoiceItems[2] = new ChoiceItem(str,
-            bitmap, DIALPAD_CHOICE_ADD_NEW_CALL));
+    (*mChoiceItems)[2] = new ChoiceItem(str,
+            bitmap, DIALPAD_CHOICE_ADD_NEW_CALL);
 }
 
 ECode DialpadFragment::DialpadChooserAdapter::GetCount(
@@ -295,7 +369,7 @@ ECode DialpadFragment::DialpadChooserAdapter::GetItem(
 {
     VALIDATE_NOT_NULL(item);
 
-    *item = (IInterface*)mChoiceItems[position];
+    *item = (IObject*)(*mChoiceItems)[position];
     REFCOUNT_ADD(*item);
     return NOERROR;
 }
@@ -325,13 +399,13 @@ ECode DialpadFragment::DialpadChooserAdapter::GetView(
         convertView = temp.Get();
     }
 
-    AutoPtr<IInterface> text;
-    convertView->FindViewById(R::id::text, (IInterface**)&text);
-    ITextView::Probe(text)->SetText(mChoiceItems[position]->mText);
+    AutoPtr<IView> text;
+    convertView->FindViewById(R::id::text, (IView**)&text);
+    ITextView::Probe(text)->SetText(CoreUtils::Convert((*mChoiceItems)[position]->mText));
 
-    AutoPtr<IInterface> icon;
-    convertView->FindViewById(R::id::icon, (IInterface**)&icon);
-    IImageView::Probe(icon)->setImageBitmap(mChoiceItems[position]->mIcon);
+    AutoPtr<IView> icon;
+    convertView->FindViewById(R::id::icon, (IView**)&icon);
+    IImageView::Probe(icon)->SetImageBitmap((*mChoiceItems)[position]->mIcon);
 
     *view = convertView;
     REFCOUNT_ADD(*view);
@@ -364,16 +438,16 @@ const String DialpadFragment::EXTRA_SEND_EMPTY_FLASH("com.android.phone.extra.SE
 
 const String DialpadFragment::PREF_DIGITS_FILLED_BY_INTENT("pref_digits_filled_by_intent");
 
-CAR_INTERFACE_IMPL_8(DialpadFragment, AnalyticsFragment, IDialpadFragment, IViewOnClickListener,
+CAR_INTERFACE_IMPL_7(DialpadFragment, /*AnalyticsFragment*/Fragment, IDialpadFragment, IViewOnClickListener,
         IViewOnLongClickListener, IViewOnKeyListener, IAdapterViewOnItemClickListener, ITextWatcher,
-        IPopupMenuOnMenuItemClickListener, IDialpadKeyButtonOnPressedListener)
+        IPopupMenuOnMenuItemClickListener/*, IDialpadKeyButtonOnPressedListener*/);
 
 DialpadFragment::DialpadFragment()
     : mStartedFromNewIntent(FALSE)
     , mFirstLaunch(FALSE)
     , mAnimate(FALSE)
 {
-    CHashSet::New(12, (HashSet**)&mPressedDialpadKeys);
+    CHashSet::New(12, (IHashSet**)&mPressedDialpadKeys);
 
     assert(0 && "TODO");
     // CCallLogAsync::New((ICallLogAsync**)&mCallLog);
@@ -385,27 +459,33 @@ DialpadFragment::DialpadFragment()
 
 AutoPtr<IIntent> DialpadFragment::GetVoicemailIntent()
 {
+    AutoPtr<IUriHelper> helper;
+    CUriHelper::AcquireSingleton((IUriHelper**)&helper);
     AutoPtr<IUri> uri;
-    Uri::FromParts(IPhoneAccount::SCHEME_VOICEMAIL,
+    helper->FromParts(IPhoneAccount::SCHEME_VOICEMAIL,
             String(""), String(NULL), (IUri**)&uri);
-    return CallUtil::GetCallIntent(uri);
+    assert(0 && "TODO");
+    return NULL;
+    // return CallUtil::GetCallIntent(uri);
 }
 
 AutoPtr<ITelephonyManager> DialpadFragment::GetTelephonyManager()
 {
     AutoPtr<IActivity> activity;
-    GetActivity(&activity);
+    GetActivity((IActivity**)&activity);
     AutoPtr<IInterface> service;
-    activity->GetSystemService(IContext::TELEPHONY_SERVICE, (IInterface**)&service);
+    IContext::Probe(activity)->GetSystemService(
+            IContext::TELEPHONY_SERVICE, (IInterface**)&service);
     return ITelephonyManager::Probe(service);
 }
 
 AutoPtr<ITelecomManager> DialpadFragment::GetTelecomManager()
 {
     AutoPtr<IActivity> activity;
-    GetActivity(&activity);
+    GetActivity((IActivity**)&activity);
     AutoPtr<IInterface> service;
-    activity->GetSystemService(IContext::TELECOM_SERVICE, (IInterface**)&service);
+    IContext::Probe(activity)->GetSystemService(
+            IContext::TELECOM_SERVICE, (IInterface**)&service);
     return ITelecomManager::Probe(service);
 }
 
@@ -436,6 +516,7 @@ ECode DialpadFragment::OnTextChanged(
 
     // DTMF Tones do not need to be played here any longer -
     // the DTMF dialer handles that functionality now.
+    return NOERROR;
 }
 
 ECode DialpadFragment::AfterTextChanged(
@@ -447,9 +528,9 @@ ECode DialpadFragment::AfterTextChanged(
     AutoPtr<IActivity> activity;
     GetActivity((IActivity**)&activity);
     String str;
-    input->ToString(&str);
+    IObject::Probe(input)->ToString(&str);
     if (!mDigitsFilledByIntent &&
-            SpecialCharSequenceMgr::HandleChars(activity, str, mDigits)) {
+            SpecialCharSequenceMgr::HandleChars(IContext::Probe(activity), str, mDigits)) {
         // A special sequence was entered, clear the digits
         AutoPtr<IEditable> text;
         ITextView::Probe(mDigits)->GetEditableText((IEditable**)&text);
@@ -458,13 +539,13 @@ ECode DialpadFragment::AfterTextChanged(
 
     if (IsDigitsEmpty()) {
         mDigitsFilledByIntent = FALSE;
-        mDigits->SetCursorVisible(FALSE);
+        ITextView::Probe(mDigits)->SetCursorVisible(FALSE);
     }
 
     if (mDialpadQueryListener != NULL) {
         AutoPtr<IEditable> text;
         ITextView::Probe(mDigits)->GetEditableText((IEditable**)&text);
-        text->ToString(&str);
+        IObject::Probe(text)->ToString(&str);
         mDialpadQueryListener->OnDialpadQueryChanged(str);
     }
     UpdateDeleteButtonEnabledState();
@@ -475,24 +556,27 @@ ECode DialpadFragment::AfterTextChanged(
 ECode DialpadFragment::OnCreate(
     /* [in] */ IBundle* state)
 {
-    AnalyticsFragment::OnCreate(state);
+    assert(0 && "TODO");
+    // AnalyticsFragment::OnCreate(state);
     mFirstLaunch = TRUE;
     AutoPtr<IActivity> activity;
     GetActivity((IActivity**)&activity);
-    mCurrentCountryIso = GeoUtil::GetCurrentCountryIso(activity);
+    assert(0 && "TODO");
+    // mCurrentCountryIso = GeoUtil::GetCurrentCountryIso(activity);
 
     // try {
     AutoPtr<IResources> resources;
     GetResources((IResources**)&resources);
     Boolean enable;
-    ECode ec = resources->GetBoolean(
-            R::bool::config_enable_dialer_key_vibration, &enable);
-    if (ec == (ECode)E_RESOURCES_NOT_FOUND_EXCEPTION) {
-        Logger::E(TAG, "Vibrate control bool missing.");
-    } else {
-        assert(0 && "TODO");
-        // mHaptic->Init(activity, enable);
-    }
+    assert(0 && "TODO");
+    // ECode ec = resources->GetBoolean(
+    //         R::bool::config_enable_dialer_key_vibration, &enable);
+    // if (ec == (ECode)E_RESOURCES_NOT_FOUND_EXCEPTION) {
+    //     Logger::E(TAG, "Vibrate control bool missing.");
+    // } else {
+    //     assert(0 && "TODO");
+    //     // mHaptic->Init(activity, enable);
+    // }
     // } catch (Resources.NotFoundException nfe) {
     //      Log.e(TAG, "Vibrate control bool missing.", nfe);
     // }
@@ -504,8 +588,9 @@ ECode DialpadFragment::OnCreate(
         state->GetBoolean(PREF_DIGITS_FILLED_BY_INTENT, &mDigitsFilledByIntent);
     }
 
-    resources->GetInteger(
-            R::integer::dialpad_slide_in_duration, &mDialpadSlideInDuration);
+    assert(0 && "TODO");
+    // resources->GetInteger(
+    //         R::integer::dialpad_slide_in_duration, &mDialpadSlideInDuration);
 
     return NOERROR;
 }
@@ -527,24 +612,27 @@ ECode DialpadFragment::OnCreateView(
     GetResources((IResources**)&r);
 
     AutoPtr<IView> dialpadView;
-    fragmentView->FindViewById(R::id::dialpad_view, (IView**)&dialpadView);
     assert(0 && "TODO");
+    // fragmentView->FindViewById(R::id::dialpad_view, (IView**)&dialpadView);
     // mDialpadView = IDialpadView::Probe(dialpadView);
     // mDialpadView->SetCanDigitsBeEdited(TRUE);
-    mDigits = mDialpadView.getDigits();
-    mDigits->SetKeyListener(UnicodeDialerKeyListener::INSTANCE);
-    mDigits->SetOnClickListener(this);
-    mDigits->SetOnKeyListener(this);
-    mDigits->SetOnLongClickListener(this);
-    mDigits->AddTextChangedListener(this);
-    mDigits->SetElegantTextHeight(FALSE);
+    // mDigits = mDialpadView->GetDigits();
+    ITextView::Probe(mDigits)->SetKeyListener(
+            IKeyListener::Probe(UnicodeDialerKeyListener::INSTANCE.Get()));
+    IView::Probe(mDigits)->SetOnClickListener(this);
+    IView::Probe(mDigits)->SetOnKeyListener(this);
+    IView::Probe(mDigits)->SetOnLongClickListener(this);
+    ITextView::Probe(mDigits)->AddTextChangedListener(this);
+    ITextView::Probe(mDigits)->SetElegantTextHeight(FALSE);
 
     AutoPtr<IActivity> activity;
     GetActivity((IActivity**)&activity);
-    PhoneNumberFormatter::SetPhoneNumberFormattingTextWatcher(activity, mDigits);
+    assert(0 && "TODO");
+    // PhoneNumberFormatter::SetPhoneNumberFormattingTextWatcher(activity, mDigits);
     // Check for the presence of the keypad
     AutoPtr<IView> oneButton;
-    fragmentView->FindViewById(R::id::one, (IView**)&oneButton);
+    assert(0 && "TODO");
+    // fragmentView->FindViewById(R::id::one, (IView**)&oneButton);
     if (oneButton != NULL) {
         ConfigureKeypadListeners(fragmentView);
     }
@@ -561,13 +649,13 @@ ECode DialpadFragment::OnCreateView(
     AutoPtr<SpacerOnTouchListener> listener = new SpacerOnTouchListener(this);
     mSpacer->SetOnTouchListener(listener);
 
-    mDigits->SetCursorVisible(FALSE);
+    ITextView::Probe(mDigits)->SetCursorVisible(FALSE);
 
     // Set up the "dialpad chooser" UI; see showDialpadChooser().
     AutoPtr<IView> chooser;
     fragmentView->FindViewById(R::id::dialpadChooser, (IView**)&chooser);
     mDialpadChooser = IListView::Probe(chooser);
-    mDialpadChooser->SetOnItemClickListener(this);
+    IAdapterView::Probe(mDialpadChooser)->SetOnItemClickListener(this);
 
     AutoPtr<IView> floatingActionButtonContainer;
     fragmentView->FindViewById(R::id::dialpad_floating_action_button_container,
@@ -576,8 +664,9 @@ ECode DialpadFragment::OnCreateView(
     fragmentView->FindViewById(R::id::dialpad_floating_action_button,
             (IView**)&floatingActionButton);
     floatingActionButton->SetOnClickListener(this);
-    CFloatingActionButtonController::New(activity, floatingActionButtonContainer,
-            floatingActionButton, mFloatingActionButtonController);
+    assert(0 && "TODO");
+    // CFloatingActionButtonController::New(activity, floatingActionButtonContainer,
+    //         floatingActionButton, &mFloatingActionButtonController);
 
     *view = fragmentView;
     REFCOUNT_ADD(*view);
@@ -623,9 +712,12 @@ Boolean DialpadFragment::FillDigitsIfNecessary(
                 // Remember it is filled via Intent.
                 mDigitsFilledByIntent = TRUE;
                 String converted;
-                PhoneNumberUtils::ConvertKeypadLettersToDigits(
-                        PhoneNumberUtils::ReplaceUnicodeDigits(data), &converted);
-                SetFormattedDigits(converted, NULL);
+                AutoPtr<IPhoneNumberUtils> utils;
+                CPhoneNumberUtils::AcquireSingleton((IPhoneNumberUtils**)&utils);
+                String res;
+                utils->ReplaceUnicodeDigits(data, &res);
+                utils->ConvertKeypadLettersToDigits(res, &converted);
+                SetFormattedDigits(converted, String(NULL));
                 return TRUE;
             }
             else {
@@ -637,13 +729,13 @@ Boolean DialpadFragment::FillDigitsIfNecessary(
                     AutoPtr<IActivity> activity;
                     GetActivity((IActivity**)&activity);
                     AutoPtr<IContentResolver> resolver;
-                    activity->GetContentResolver((IContentResolver**)&resolver);
+                    IContext::Probe(activity)->GetContentResolver((IContentResolver**)&resolver);
                     AutoPtr<ArrayOf<String> > args = ArrayOf<String>::Alloc(2);
                     args->Set(0, IContactsPhonesColumns::NUMBER);
-                    args->Set(0, IContactsPhonesColumns::NUMBER_KEY);
+                    args->Set(1, IContactsPhonesColumns::NUMBER_KEY);
 
                     AutoPtr<ICursor> c;
-                    resolver->Query(uri, args, NULL, NULL, NULL, (ICursor**)&c);
+                    resolver->Query(uri, args, String(NULL), NULL, String(NULL), (ICursor**)&c);
                     if (c != NULL) {
                         // try {
                         Boolean succeeded = FALSE;
@@ -655,7 +747,7 @@ Boolean DialpadFragment::FillDigitsIfNecessary(
                             c->GetString(0, &str0);
                             c->GetString(1, &str1);
                             SetFormattedDigits(str0, str1);
-                            c->Close();
+                            ICloseable::Probe(c)->Close();
                             return TRUE;
                         }
                         // } finally {
@@ -727,7 +819,8 @@ void DialpadFragment::ConfigureScreenFromIntent(
                     || IIntent::ACTION_MAIN.Equals(action)) {
                 // If there's already an active call, bring up an intermediate UI to
                 // make the user confirm what they really want to do.
-                if (IsPhoneInUse()) {
+                Boolean res;
+                if (IsPhoneInUse(&res), res) {
                     needToShowDialpadChooser = TRUE;
                 }
             }
@@ -750,15 +843,17 @@ void DialpadFragment::SetFormattedDigits(
     /* [in] */ const String& normalizedNumber)
 {
     // strip the non-dialable numbers out of the data string.
-    String dialString = PhoneNumberUtils::ExtractNetworkPortion(data);
-    dialString =
-            PhoneNumberUtils::FormatNumber(dialString, normalizedNumber, mCurrentCountryIso);
+    AutoPtr<IPhoneNumberUtils> utils;
+    CPhoneNumberUtils::AcquireSingleton((IPhoneNumberUtils**)&utils);
+    String dialString;
+    utils->ExtractNetworkPortion(data, &dialString);
+    utils->FormatNumber(dialString, normalizedNumber, mCurrentCountryIso, &dialString);
     if (!TextUtils::IsEmpty(dialString)) {
         AutoPtr<IEditable> digits;
-        mDigits->GetEditableText((IEditable**)&digits);
+        ITextView::Probe(mDigits)->GetEditableText((IEditable**)&digits);
         Int32 length;
         ICharSequence::Probe(digits)->GetLength(&length);
-        digits->Replace(0, length, dialString);
+        digits->Replace(0, length, CoreUtils::Convert(dialString));
         // for some reason this isn't getting called in the digits.replace call above..
         // but in any case, this will make sure the background drawable looks right
         AfterTextChanged(digits);
@@ -768,64 +863,67 @@ void DialpadFragment::SetFormattedDigits(
 void DialpadFragment::ConfigureKeypadListeners(
     /* [in] */ IView* fragmentView)
 {
-    const Int32 buttonIds[] = {
-            R::id::one, R::id::two, R::id::three, R::id::four, R::id::five,
-            R::id::six, R::id::seven, R::id::eight, R::id::nine, R::id::star,
-            R::id::zero, R::id::pound};
+    assert(0 && "TODO");
+    // const Int32 buttonIds[] = {
+    //         R::id::one, R::id::two, R::id::three, R::id::four, R::id::five,
+    //         R::id::six, R::id::seven, R::id::eight, R::id::nine, R::id::star,
+    //         R::id::zero, R::id::pound};
 
-    AutoPtr<IDialpadKeyButton> dialpadKey;
+    // AutoPtr<IDialpadKeyButton> dialpadKey;
 
-    Int32 length = sizeof(buttonIds) / sizeof(Int32);
-    for (int i = 0; i < length; i++) {
-        AutoPtr<IView> view;
-        fragmentView->FindViewById(buttonIds[i], (IView**)&view);
-        dialpadKey = IDialpadKeyButton::Probe(view);
-        dialpadKey->SetOnPressedListener(this);
-    }
+    // Int32 length = sizeof(buttonIds) / sizeof(Int32);
+    // for (int i = 0; i < length; i++) {
+    //     AutoPtr<IView> view;
+    //     fragmentView->FindViewById(buttonIds[i], (IView**)&view);
+    //     dialpadKey = IDialpadKeyButton::Probe(view);
+    //     dialpadKey->SetOnPressedListener(this);
+    // }
 
-    // Long-pressing one button will initiate Voicemail.
-    AutoPtr<IView> one;
-    fragmentView->FindViewById(R::id::one, (IView**)&one);
-    IDialpadKeyButton::Probe(one)->SetOnLongClickListener(this);
+    // // Long-pressing one button will initiate Voicemail.
+    // AutoPtr<IView> one;
+    // fragmentView->FindViewById(R::id::one, (IView**)&one);
+    // IDialpadKeyButton::Probe(one)->SetOnLongClickListener(this);
 
-    // Long-pressing zero button will enter '+' instead.
-    AutoPtr<IView> zero;
-    fragmentView->FindViewById(R::id::zero, (IView**)&zero);
-    IDialpadKeyButton::Probe(zero)->SetOnLongClickListener(this);
+    // // Long-pressing zero button will enter '+' instead.
+    // AutoPtr<IView> zero;
+    // fragmentView->FindViewById(R::id::zero, (IView**)&zero);
+    // IDialpadKeyButton::Probe(zero)->SetOnLongClickListener(this);
 }
 
 ECode DialpadFragment::OnResume()
 {
-    AnalyticsFragment::OnResume();
+    assert(0 && "TODO");
+    // AnalyticsFragment::OnResume();
 
     AutoPtr<IActivity> activity;
-    GetActivity(&activity);
-    mDialpadQueryListener = IDialtactsActivity::Probe(activity);
+    GetActivity((IActivity**)&activity);
+    mDialpadQueryListener = IOnDialpadQueryChangedListener::Probe(activity);
 
-    AutoPtr<IStopWatch> stopWatch = StopWatch::Start(String("Dialpad.onResume"));
+    assert(0 && "TODO");
+    // AutoPtr<IStopWatch> stopWatch = StopWatch::Start(String("Dialpad.onResume"));
 
     // Query the last dialed number. Do it first because hitting
     // the DB is 'slow'. This call is asynchronous.
     QueryLastOutgoingCall();
 
-    stopWatch->Lap(String("qloc"));
+    assert(0 && "TODO");
+    // stopWatch->Lap(String("qloc"));
 
     AutoPtr<IContentResolver> contentResolver;
-    activity->GetContentResolver((IContentResolver**)&contentResolver);
+    IContext::Probe(activity)->GetContentResolver((IContentResolver**)&contentResolver);
 
     // retrieve the DTMF tone play back setting.
     Int32 value;
-    Settings::System::GetInt32(contentResolver,
+    Elastos::Droid::Provider::Settings::System::GetInt32(contentResolver,
             ISettingsSystem::DTMF_TONE_WHEN_DIALING, 1, &value);
     mDTMFToneEnabled = value == 1;
 
-    stopWatch->Lap(String("dtwd"));
+    assert(0 && "TODO");
+    // stopWatch->Lap(String("dtwd"));
 
     // Retrieve the haptic feedback setting.
-    assert(0 && "TODO");
     // mHaptic->CheckSystemSetting();
-
-    stopWatch->Lap(String("hptc"));
+    // stopWatch->Lap(String("hptc"));
 
     // if the mToneGenerator creation fails, just continue without it.  It is
     // a local audio signal, and is not as important as the dtmf tone itself.
@@ -844,20 +942,23 @@ ECode DialpadFragment::OnResume()
             // }
         }
     }
-    stopWatch->Lap(String("tg"));
+    assert(0 && "TODO");
+    // stopWatch->Lap(String("tg"));
 
     mPressedDialpadKeys->Clear();
 
     ConfigureScreenFromIntent(activity);
 
-    stopWatch->Lap(String("fdin"));
+    assert(0 && "TODO");
+    // stopWatch->Lap(String("fdin"));
 
     // While we're in the foreground, listen for phone state changes,
     // purely so that we can take down the "dialpad chooser" if the
     // phone becomes idle while the chooser UI is visible.
     GetTelephonyManager()->Listen(mPhoneStateListener, IPhoneStateListener::LISTEN_CALL_STATE);
 
-    stopWatch->Lap(String("tm"));
+    assert(0 && "TODO");
+    // stopWatch->Lap(String("tm"));
 
     // Potentially show hint text in the mDigits field when the user
     // hasn't typed any digits yet.  (If there's already an active call,
@@ -868,21 +969,22 @@ ECode DialpadFragment::OnResume()
     // are currently in use.  (Right now we let the user try to add
     // another call, but that call is guaranteed to fail.  Perhaps the
     // entire dialer UI should be disabled instead.)
-    if (IsPhoneInUse()) {
+    Boolean res;
+    if (IsPhoneInUse(&res), res) {
         String str;
-        activity->GetString(R::string::dialerDialpadHintText, &str);
+        IContext::Probe(activity)->GetString(R::string::dialerDialpadHintText, &str);
         AutoPtr<ISpannableString> hint;
-        CSpannableString::New(str, (ISpannableString**)&hint);
+        CSpannableString::New(CoreUtils::Convert(str), (ISpannableString**)&hint);
         AutoPtr<IRelativeSizeSpan> span;
-        CRelativeSizeSpan::New(0.8f), (IRelativeSizeSpan**)&span);
+        CRelativeSizeSpan::New(0.8, (IRelativeSizeSpan**)&span);
         Int32 length;
-        hint->GetLength(&length);
-        hint->SetSpan(span, 0, length, 0);
-        mDigits->SetHint(hint);
+        ICharSequence::Probe(hint)->GetLength(&length);
+        ISpannable::Probe(hint)->SetSpan(span, 0, length, 0);
+        ITextView::Probe(mDigits)->SetHint(ICharSequence::Probe(hint));
     }
     else {
         // Common case; no hint necessary.
-        mDigits->SetHint(NULL);
+        ITextView::Probe(mDigits)->SetHint((ICharSequence*)NULL);
 
         // Also, a sanity-check: the "dialpad chooser" UI should NEVER
         // be visible if the phone is idle!
@@ -891,15 +993,16 @@ ECode DialpadFragment::OnResume()
 
     mFirstLaunch = FALSE;
 
-    stopWatch->Lap(String("hnt"));
+    assert(0 && "TODO");
+    // stopWatch->Lap(String("hnt"));
 
     UpdateDeleteButtonEnabledState();
 
-    stopWatch->Lap(String("bes"));
+    assert(0 && "TODO");
+    // stopWatch->Lap(String("bes"));
+    // stopWatch->StopAndLog(TAG, 50);
 
-    stopWatch->StopAndLog(TAG, 50);
-
-    mSmsPackageComponentName = DialerUtils::GetSmsComponent(activity);
+    mSmsPackageComponentName = DialerUtils::GetSmsComponent(IContext::Probe(activity));
 
     // Populate the overflow menu in onResume instead of onCreate, so that if the SMS activity
     // is disabled while Dialer is paused, the "Send a text message" option can be correctly
@@ -907,8 +1010,8 @@ ECode DialpadFragment::OnResume()
     assert(0 && "TODO");
     // mDialpadView->GetOverflowMenuButton(&mOverflowMenuButton);
     mOverflowPopupMenu = BuildOptionsMenu(mOverflowMenuButton);
-    AutoPtr<IIViewOnTouchListener> listener;
-    mOverflowPopupMenu->GetDragToOpenListener((IIViewOnTouchListener**)&listener);
+    AutoPtr<IViewOnTouchListener> listener;
+    mOverflowPopupMenu->GetDragToOpenListener((IViewOnTouchListener**)&listener);
     mOverflowMenuButton->SetOnTouchListener(listener);
     mOverflowMenuButton->SetOnClickListener(this);
     mOverflowMenuButton->SetVisibility(IsDigitsEmpty() ? IView::INVISIBLE : IView::VISIBLE);
@@ -918,7 +1021,8 @@ ECode DialpadFragment::OnResume()
 
 ECode DialpadFragment::OnPause()
 {
-    AnalyticsFragment::OnPause();
+    assert(0 && "TODO");
+    // AnalyticsFragment::OnPause();
 
     // Stop listening for phone state changes.
     GetTelephonyManager()->Listen(mPhoneStateListener, IPhoneStateListener::LISTEN_NONE);
@@ -944,7 +1048,8 @@ ECode DialpadFragment::OnPause()
 
 ECode DialpadFragment::OnStop()
 {
-    AnalyticsFragment::OnStop();
+    assert(0 && "TODO");
+    // AnalyticsFragment::OnStop();
 
     if (mClearDigitsOnStop) {
         mClearDigitsOnStop = FALSE;
@@ -956,7 +1061,8 @@ ECode DialpadFragment::OnStop()
 ECode DialpadFragment::OnSaveInstanceState(
     /* [in] */ IBundle* outState)
 {
-    AnalyticsFragment::OnSaveInstanceState(outState);
+    assert(0 && "TODO");
+    // AnalyticsFragment::OnSaveInstanceState(outState);
     outState->PutBoolean(PREF_DIGITS_FILLED_BY_INTENT, mDigitsFilledByIntent);
     return NOERROR;
 }
@@ -966,7 +1072,7 @@ void DialpadFragment::KeyPressed(
 {
     AutoPtr<IView> view;
     GetView((IView**)&view);
-    Int32 y;
+    Float y;
     view->GetTranslationY(&y);
     if (y != 0) {
         return;
@@ -1016,11 +1122,12 @@ void DialpadFragment::KeyPressed(
     // mHaptic->Vibrate();
     AutoPtr<IKeyEvent> event;
     CKeyEvent::New(IKeyEvent::ACTION_DOWN, keyCode, (IKeyEvent**)&event);
-    mDigits->OnKeyDown(keyCode, event);
+    Boolean res;
+    IView::Probe(mDigits)->OnKeyDown(keyCode, event, &res);
 
     // If the cursor is at the end of the text we hide it.
     Int32 length;
-    mDigits->GetLength(&length);
+    ITextView::Probe(mDigits)->GetLength(&length);
     Int32 start, end;
     ITextView::Probe(mDigits)->GetSelectionStart(&start);
     ITextView::Probe(mDigits)->GetSelectionEnd(&end);
@@ -1039,15 +1146,16 @@ ECode DialpadFragment::OnKey(
 
     Int32 id;
     view->GetId(&id);
-    switch (id) {
-        case R::id::digits:
-            if (keyCode == IKeyEvent::KEYCODE_ENTER) {
-                HandleDialButtonPressed();
-                *result = TRUE;
-                return NOERROR;
-            }
-            break;
-    }
+    assert(0 && "TODO");
+    // switch (id) {
+    //     case R::id::digits:
+    //         if (keyCode == IKeyEvent::KEYCODE_ENTER) {
+    //             HandleDialButtonPressed();
+    //             *result = TRUE;
+    //             return NOERROR;
+    //         }
+    //         break;
+    // }
     *result = FALSE;
     return NOERROR;
 }
@@ -1058,69 +1166,70 @@ ECode DialpadFragment::OnPressed(
 {
     if (DEBUG) {
         String str;
-        view->ToString(&str);
+        IObject::Probe(view)->ToString(&str);
         Logger::D(TAG, "onPressed(). view: %s, pressed: %d", str.string(), pressed);
     }
 
     if (pressed) {
         Int32 id;
         view->GetId(&id);
-        switch (id) {
-            case R::id::one: {
-                KeyPressed(IKeyEvent::KEYCODE_1);
-                break;
-            }
-            case R::id::two: {
-                KeyPressed(IKeyEvent::KEYCODE_2);
-                break;
-            }
-            case R::id::three: {
-                KeyPressed(IKeyEvent::KEYCODE_3);
-                break;
-            }
-            case R::id::four: {
-                KeyPressed(IKeyEvent::KEYCODE_4);
-                break;
-            }
-            case R::id::five: {
-                KeyPressed(IKeyEvent::KEYCODE_5);
-                break;
-            }
-            case R::id::six: {
-                KeyPressed(IKeyEvent::KEYCODE_6);
-                break;
-            }
-            case R::id::seven: {
-                KeyPressed(IKeyEvent::KEYCODE_7);
-                break;
-            }
-            case R::id::eight: {
-                KeyPressed(IKeyEvent::KEYCODE_8);
-                break;
-            }
-            case R::id::nine: {
-                KeyPressed(IKeyEvent::KEYCODE_9);
-                break;
-            }
-            case R::id::zero: {
-                KeyPressed(IKeyEvent::KEYCODE_0);
-                break;
-            }
-            case R::id::pound: {
-                KeyPressed(IKeyEvent::KEYCODE_POUND);
-                break;
-            }
-            case R::id::star: {
-                KeyPressed(IKeyEvent::KEYCODE_STAR);
-                break;
-            }
-            default: {
-                String str;
-                view->ToString(&str);
-                Logger::Wtf(TAG, "Unexpected onTouch(ACTION_DOWN) event from: %s", str.string());
-                break;
-            }
-        }
+        assert(0 && "TODO");
+        // switch (id) {
+        //     case R::id::one: {
+        //         KeyPressed(IKeyEvent::KEYCODE_1);
+        //         break;
+        //     }
+        //     case R::id::two: {
+        //         KeyPressed(IKeyEvent::KEYCODE_2);
+        //         break;
+        //     }
+        //     case R::id::three: {
+        //         KeyPressed(IKeyEvent::KEYCODE_3);
+        //         break;
+        //     }
+        //     case R::id::four: {
+        //         KeyPressed(IKeyEvent::KEYCODE_4);
+        //         break;
+        //     }
+        //     case R::id::five: {
+        //         KeyPressed(IKeyEvent::KEYCODE_5);
+        //         break;
+        //     }
+        //     case R::id::six: {
+        //         KeyPressed(IKeyEvent::KEYCODE_6);
+        //         break;
+        //     }
+        //     case R::id::seven: {
+        //         KeyPressed(IKeyEvent::KEYCODE_7);
+        //         break;
+        //     }
+        //     case R::id::eight: {
+        //         KeyPressed(IKeyEvent::KEYCODE_8);
+        //         break;
+        //     }
+        //     case R::id::nine: {
+        //         KeyPressed(IKeyEvent::KEYCODE_9);
+        //         break;
+        //     }
+        //     case R::id::zero: {
+        //         KeyPressed(IKeyEvent::KEYCODE_0);
+        //         break;
+        //     }
+        //     case R::id::pound: {
+        //         KeyPressed(IKeyEvent::KEYCODE_POUND);
+        //         break;
+        //     }
+        //     case R::id::star: {
+        //         KeyPressed(IKeyEvent::KEYCODE_STAR);
+        //         break;
+        //     }
+        //     default: {
+        //         String str;
+        //         IObject::Probe(view)->ToString(&str);
+        //         Logger::Wtf(TAG, "Unexpected onTouch(ACTION_DOWN) event from: %s", str.string());
+        //         break;
+        //     }
+        // }
         mPressedDialpadKeys->Add(view);
     }
     else {
@@ -1137,14 +1246,16 @@ ECode DialpadFragment::OnPressed(
 AutoPtr<IPopupMenu> DialpadFragment::BuildOptionsMenu(
     /* [in] */ IView* invoker)
 {
-    AutoPtr<DialpadPopupMenu> popupMenu = new DialpadPopupMenu(this);
-    AutoPtr<IActivity> activity;
-    GetActivity(&activity);
-    popupMenu->constructor(activity, invoker);
-    popupMenu->Inflate(R::menu::dialpad_options);
-    popupMenu->SetOnMenuItemClickListener(this);
+    assert(0 && "TODO") ;
+    return NULL;
+    // AutoPtr<DialpadPopupMenu> popupMenu = new DialpadPopupMenu(this);
+    // AutoPtr<IActivity> activity;
+    // GetActivity((IActivity**)&activity);
+    // popupMenu->constructor(activity, invoker);
+    // popupMenu->Inflate(R::menu::dialpad_options);
+    // popupMenu->SetOnMenuItemClickListener(this);
 
-    return (IPopupMenu*)popupMenu;
+    // return (IPopupMenu*)popupMenu;
 }
 
 ECode DialpadFragment::OnClick(
@@ -1152,33 +1263,34 @@ ECode DialpadFragment::OnClick(
 {
     Int32 id;
     view->GetId(&id);
-    switch (id) {
-        case R::id::dialpad_floating_action_button:
-            assert(0 && "TODO");
-            // mHaptic->Vibrate();
-            HandleDialButtonPressed();
-            break;
-        case R::id::deleteButton: {
-            KeyPressed(IKeyEvent::KEYCODE_DEL);
-            break;
-        }
-        case R::id::digits: {
-            if (!IsDigitsEmpty()) {
-                mDigits->SetCursorVisible(TRUE);
-            }
-            break;
-        }
-        case R::id::dialpad_overflow: {
-            mOverflowPopupMenu->Show();
-            break;
-        }
-        default: {
-            String str;
-            view->ToString(&str);
-            Logger::Wtf(TAG, "Unexpected onClick() event from: ", str);
-            return NOERROR;
-        }
-    }
+    assert(0 && "TODO") ;
+    // switch (id) {
+    //     case R::id::dialpad_floating_action_button:
+    //         assert(0 && "TODO");
+    //         // mHaptic->Vibrate();
+    //         HandleDialButtonPressed();
+    //         break;
+    //     case R::id::deleteButton: {
+    //         KeyPressed(IKeyEvent::KEYCODE_DEL);
+    //         break;
+    //     }
+    //     case R::id::digits: {
+    //         if (!IsDigitsEmpty()) {
+    //             mDigits->SetCursorVisible(TRUE);
+    //         }
+    //         break;
+    //     }
+    //     case R::id::dialpad_overflow: {
+    //         mOverflowPopupMenu->Show();
+    //         break;
+    //     }
+    //     default: {
+    //         String str;
+    //         IObject::Probe(view)->ToString(&str);
+    //         // Logger::Wtf(TAG, "Unexpected onClick() event from: ", str);
+    //         return NOERROR;
+    //     }
+    // }
     return NOERROR;
 }
 
@@ -1189,80 +1301,81 @@ ECode DialpadFragment::OnLongClick(
     VALIDATE_NOT_NULL(result);
 
     AutoPtr<IEditable> digits;
-    mDigits->GetText((IEditable**)&digits);
+    ITextView::Probe(mDigits)->GetEditableText((IEditable**)&digits);
     Int32 id;
     view->GetId(&id);
-    switch (id) {
-        case R::id::deleteButton: {
-            digits->Clear();
-            *result = TRUE;
-            return NOERROR;
-        }
-        case R::id::one: {
-            // '1' may be already entered since we rely on onTouch() event for numeric buttons.
-            // Just for safety we also check if the digits field is empty or not.
-            String text;
-            mDigits->GetText(&text);
-            if (IsDigitsEmpty() || TextUtils::Equals(text, "1")) {
-                // We'll try to initiate voicemail and thus we want to remove irrelevant string.
-                RemovePreviousDigitIfPossible();
+    assert(0 && "TODO");
+    // switch (id) {
+    //     case R::id::deleteButton: {
+    //         digits->Clear();
+    //         *result = TRUE;
+    //         return NOERROR;
+    //     }
+    //     case R::id::one: {
+    //         // '1' may be already entered since we rely on onTouch() event for numeric buttons.
+    //         // Just for safety we also check if the digits field is empty or not.
+    //         String text;
+    //         mDigits->GetText(&text);
+    //         if (IsDigitsEmpty() || TextUtils::Equals(text, "1")) {
+    //             // We'll try to initiate voicemail and thus we want to remove irrelevant string.
+    //             RemovePreviousDigitIfPossible();
 
-                AutoPtr<IActivity> activity;
-                if (IsVoicemailAvailable()) {
-                    CallVoicemail();
-                }
-                else if (GetActivity((IActivity**)&activity), activity != null) {
-                    // Voicemail is unavailable maybe because Airplane mode is turned on.
-                    // Check the current status and show the most appropriate error message.
-                    AutoPtr<IContentResolver> resolver;
-                    activity->GetContentResolver(&resolver);
-                    Int32 value;
-                    Settings::System::GetInt32(resolver,
-                            ISettingsSystem::AIRPLANE_MODE_ON, 0, &value);
-                    Boolean isAirplaneModeOn = value != 0;
-                    if (isAirplaneModeOn) {
-                        AutoPtr<DialogFragment> dialogFragment = ErrorDialogFragment::NewInstance(
-                                R::string::dialog_voicemail_airplane_mode_message);
-                        AutoPtr<IFragmentManager> manager;
-                        GetFragmentManager((IFragmentManager**)&manager);
-                        dialogFragment->Show(manager,
-                                String("voicemail_request_during_airplane_mode"));
-                    }
-                    else {
-                        AutoPtr<DialogFragment> dialogFragment = ErrorDialogFragment::NewInstance(
-                                R::string::dialog_voicemail_not_ready_message);
-                        AutoPtr<IFragmentManager> manager;
-                        GetFragmentManager((IFragmentManager**)&manager);
-                        dialogFragment->Show(manager, String("voicemail_not_ready"));
-                    }
-                }
-                *result = TRUE;
-                return NOERROR;
-            }
-            *result = FALSE;
-            return NOERROR;
-        }
-        case R::id::zero: {
-            // Remove tentative input ('0') done by onTouch().
-            RemovePreviousDigitIfPossible();
-            KeyPressed(IKeyEvent::KEYCODE_PLUS);
+    //             AutoPtr<IActivity> activity;
+    //             if (IsVoicemailAvailable()) {
+    //                 CallVoicemail();
+    //             }
+    //             else if (GetActivity((IActivity**)&activity), activity != null) {
+    //                 // Voicemail is unavailable maybe because Airplane mode is turned on.
+    //                 // Check the current status and show the most appropriate error message.
+    //                 AutoPtr<IContentResolver> resolver;
+    //                 activity->GetContentResolver(&resolver);
+    //                 Int32 value;
+    //                 Settings::System::GetInt32(resolver,
+    //                         ISettingsSystem::AIRPLANE_MODE_ON, 0, &value);
+    //                 Boolean isAirplaneModeOn = value != 0;
+    //                 if (isAirplaneModeOn) {
+    //                     AutoPtr<DialogFragment> dialogFragment = ErrorDialogFragment::NewInstance(
+    //                             R::string::dialog_voicemail_airplane_mode_message);
+    //                     AutoPtr<IFragmentManager> manager;
+    //                     GetFragmentManager((IFragmentManager**)&manager);
+    //                     dialogFragment->Show(manager,
+    //                             String("voicemail_request_during_airplane_mode"));
+    //                 }
+    //                 else {
+    //                     AutoPtr<DialogFragment> dialogFragment = ErrorDialogFragment::NewInstance(
+    //                             R::string::dialog_voicemail_not_ready_message);
+    //                     AutoPtr<IFragmentManager> manager;
+    //                     GetFragmentManager((IFragmentManager**)&manager);
+    //                     dialogFragment->Show(manager, String("voicemail_not_ready"));
+    //                 }
+    //             }
+    //             *result = TRUE;
+    //             return NOERROR;
+    //         }
+    //         *result = FALSE;
+    //         return NOERROR;
+    //     }
+    //     case R::id::zero: {
+    //         // Remove tentative input ('0') done by onTouch().
+    //         RemovePreviousDigitIfPossible();
+    //         KeyPressed(IKeyEvent::KEYCODE_PLUS);
 
-            // Stop tone immediately
-            StopTone();
-            mPressedDialpadKeys->Remove(view);
+    //         // Stop tone immediately
+    //         StopTone();
+    //         mPressedDialpadKeys->Remove(view);
 
-            *result = TRUE;
-            return NOERROR;
-        }
-        case R::id::digits: {
-            // Right now EditText does not show the "paste" option when cursor is not visible.
-            // To show that, make the cursor visible, and return false, letting the EditText
-            // show the option by itself.
-            mDigits->SetCursorVisible(TRUE);
-            *result = FALSE;
-            return NOERROR;
-        }
-    }
+    //         *result = TRUE;
+    //         return NOERROR;
+    //     }
+    //     case R::id::digits: {
+    //         // Right now EditText does not show the "paste" option when cursor is not visible.
+    //         // To show that, make the cursor visible, and return false, letting the EditText
+    //         // show the option by itself.
+    //         mDigits->SetCursorVisible(TRUE);
+    //         *result = FALSE;
+    //         return NOERROR;
+    //     }
+    // }
     *result = FALSE;
     return NOERROR;
 }
@@ -1273,8 +1386,8 @@ void DialpadFragment::RemovePreviousDigitIfPossible()
     ITextView::Probe(mDigits)->GetSelectionStart(&currentPosition);
     if (currentPosition > 0) {
         mDigits->SetSelection(currentPosition);
-        AutoPtr<IEditableText> text;
-        mDigits->GetEditableText((IEditableText**)&text);
+        AutoPtr<IEditable> text;
+        ITextView::Probe(mDigits)->GetEditableText((IEditable**)&text);
         text->Delete(currentPosition - 1, currentPosition);
     }
 }
@@ -1283,7 +1396,7 @@ ECode DialpadFragment::CallVoicemail()
 {
     AutoPtr<IActivity> activity;
     GetActivity((IActivity**)&activity);
-    DialerUtils::StartActivityWithErrorToast(activity, GetVoicemailIntent());
+    DialerUtils::StartActivityWithErrorToast(IContext::Probe(activity), GetVoicemailIntent());
     HideAndClearDialpad(FALSE);
 
     return NOERROR;
@@ -1303,27 +1416,28 @@ void DialpadFragment::HandleDialButtonPressed()
         HandleDialButtonClickWithEmptyDigits();
     }
     else {
-        ICharSequence text;
-        mDigits->GetText(&text);
+        AutoPtr<ICharSequence> text;
+        ITextView::Probe(mDigits)->GetText((ICharSequence**)&text);
         String number;
-        text->ToString(&number);
+        IObject::Probe(text)->ToString(&number);
 
         // "persist.radio.otaspdial" is a temporary hack needed for one carrier's automated
         // test equipment.
         // TODO: clean it up.
         Boolean result;
         if (!number.IsNull()
-                && !TextUtils::isEmpty(mProhibitedPhoneNumberRegexp)
+                && !TextUtils::IsEmpty(mProhibitedPhoneNumberRegexp)
                 && StringUtils::Matches(number, mProhibitedPhoneNumberRegexp, &result), result) {
             Logger::I(TAG, "The phone number is prohibited explicitly by a rule.");
             AutoPtr<IActivity> activity;
             GetActivity((IActivity**)&activity);
             if (activity != NULL) {
-                AutoPtr<DialogFragment> dialogFragment = ErrorDialogFragment::NewInstance(
+                AutoPtr<IDialpadFragmentErrorDialogFragment> dialogFragment = ErrorDialogFragment::NewInstance(
                         R::string::dialog_phone_call_prohibited_message);
                 AutoPtr<IFragmentManager> manager;
                 GetFragmentManager((IFragmentManager**)&manager);
-                dialogFragment->Show(manager, String("phone_prohibited_dialog"));
+                assert(0 && "TODO");
+                // dialogFragment->Show(manager, String("phone_prohibited_dialog"));
             }
 
             // Clear the digits just in case.
@@ -1333,10 +1447,11 @@ void DialpadFragment::HandleDialButtonPressed()
             AutoPtr<IActivity> activity;
             GetActivity((IActivity**)&activity);
             String str;
-            AutoPtr<IIntent> intent = CallUtil::GetCallIntent(number,
-                    IDialtactsActivity::Probe(activity) ?
-                    IDialtactsActivity::Probe(activity)->GetCallOrigin(&str), str : String(NULL)));
-            DialerUtils::StartActivityWithErrorToast(activity, intent);
+            assert(0 && "TODO");
+            // AutoPtr<IIntent> intent = CallUtil::GetCallIntent(number,
+            //         IDialtactsActivity::Probe(activity) ?
+            //         IDialtactsActivity::Probe(activity)->GetCallOrigin(&str), str : String(NULL)));
+            // DialerUtils::StartActivityWithErrorToast(activity, intent);
             HideAndClearDialpad(FALSE);
         }
     }
@@ -1345,13 +1460,14 @@ void DialpadFragment::HandleDialButtonPressed()
 ECode DialpadFragment::ClearDialpad()
 {
     AutoPtr<IEditable> text;
-    ITextView::Probe(mDigits)->GetEditableText(&text)
+    ITextView::Probe(mDigits)->GetEditableText((IEditable**)&text);
     return text->Clear();
 }
 
 void DialpadFragment::HandleDialButtonClickWithEmptyDigits()
 {
-    if (PhoneIsCdma() && IsPhoneInUse()) {
+    Boolean res;
+    if (PhoneIsCdma() && IsPhoneInUse(&res), res) {
         // TODO: Move this logic into services/Telephony
         //
         // This is really CDMA specific. On GSM is it possible
@@ -1362,7 +1478,7 @@ void DialpadFragment::HandleDialButtonClickWithEmptyDigits()
     else {
         if (!TextUtils::IsEmpty(mLastNumberDialed)) {
             // Recall the last number dialed.
-            mDigits->SetText(mLastNumberDialed);
+            ITextView::Probe(mDigits)->SetText(CoreUtils::Convert(mLastNumberDialed));
 
             // ...and move the cursor to the end of the digits string,
             // so you'll be able to delete digits using the Delete
@@ -1373,7 +1489,7 @@ void DialpadFragment::HandleDialButtonClickWithEmptyDigits()
             // contains a *formatted* version of mLastNumberDialed (due to
             // mTextWatcher) and its length may have changed.
             AutoPtr<ICharSequence> text;
-            mDigits->GetText((ICharSequence**)&text);
+            ITextView::Probe(mDigits)->GetText((ICharSequence**)&text);
             Int32 length;
             text->GetLength(&length);
             mDigits->SetSelection(length);
@@ -1422,14 +1538,16 @@ void DialpadFragment::PlayTone(
         return;
     }
 
-    {    AutoLock syncLock(mToneGeneratorLock);
+    {
+        AutoLock syncLock(mToneGeneratorLock);
         if (mToneGenerator == NULL) {
             Logger::W(TAG, "playTone: mToneGenerator == null, tone: %d", tone);
             return;
         }
 
         // Start the new tone (will stop any playing tone)
-        mToneGenerator->StartTone(tone, durationMs);
+        Boolean res;
+        mToneGenerator->StartTone(tone, durationMs, &res);
     }
 }
 
@@ -1439,7 +1557,8 @@ void DialpadFragment::StopTone()
     if (!mDTMFToneEnabled) {
         return;
     }
-    {    AutoLock syncLock(mToneGeneratorLock);
+    {
+        AutoLock syncLock(mToneGeneratorLock);
         if (mToneGenerator == NULL) {
             Logger::W(TAG, "stopTone: mToneGenerator == null");
             return;
@@ -1463,38 +1582,39 @@ void DialpadFragment::ShowDialpadChooser(
 
     if (enabled) {
         Logger::I(TAG, "Showing dialpad chooser!");
-        if (mDialpadView != NULL) {
-            mDialpadView->SetVisibility(IView::GONE);
-        }
+        assert(0 && "TODO");
+        // if (mDialpadView != NULL) {
+        //     mDialpadView->SetVisibility(IView::GONE);
+        // }
 
-        mFloatingActionButtonController->SetVisible(FALSE);
-        mDialpadChooser->SetVisibility(IView::VISIBLE);
+        // mFloatingActionButtonController->SetVisible(FALSE);
+        IView::Probe(mDialpadChooser)->SetVisibility(IView::VISIBLE);
 
         // Instantiate the DialpadChooserAdapter and hook it up to the
         // ListView.  We do this only once.
         if (mDialpadChooserAdapter == NULL) {
-            mDialpadChooserAdapter = (IDialpadChooserAdapter*)new DialpadChooserAdapter(activity);
+            mDialpadChooserAdapter = new DialpadChooserAdapter(IContext::Probe(activity));
         }
-        mDialpadChooser->SetAdapter(mDialpadChooserAdapter);
+        IAdapterView::Probe(mDialpadChooser)->SetAdapter(mDialpadChooserAdapter);
     }
     else {
         Logger::I(TAG, "Displaying normal Dialer UI.");
-        if (mDialpadView != NULL) {
-            mDialpadView->SetVisibility(IView::VISIBLE);
-        }
-        else {
-            mDigits->SetVisibility(IView::VISIBLE);
-        }
-
-        mFloatingActionButtonController->SetVisible(TRUE);
-        mDialpadChooser->SetVisibility(IView::GONE);
+        assert(0 && "TODO");
+        // if (mDialpadView != NULL) {
+        //     mDialpadView->SetVisibility(IView::VISIBLE);
+        // }
+        // else {
+        //     IView::Probe(mDigits)->SetVisibility(IView::VISIBLE);
+        // }
+        // mFloatingActionButtonController->SetVisible(TRUE);
+        IView::Probe(mDialpadChooser)->SetVisibility(IView::GONE);
     }
 }
 
 Boolean DialpadFragment::IsDialpadChooserVisible()
 {
-    Boolean visible;
-    mDialpadChooser->GetVisibility(&visible);
+    Int32 visible;
+    IView::Probe(mDialpadChooser)->GetVisibility(&visible);
     return visible == IView::VISIBLE;
 }
 
@@ -1504,9 +1624,9 @@ ECode DialpadFragment::OnItemClick(
     /* [in] */ Int32 position,
     /* [in] */ Int64 id)
 {
-    AutoPtr<IInterface> view;
-    parent->GetItemAtPosition(position, (IInterface**)&view);
-    Int32 itemId = ((DialpadChooserAdapter::ChoiceItem*)item)->mId;
+    AutoPtr<IInterface> item;
+    parent->GetItemAtPosition(position, (IInterface**)&item);
+    Int32 itemId = ((DialpadChooserAdapter::ChoiceItem*)IObject::Probe(item))->mId;
     switch (itemId) {
         case DialpadChooserAdapter::DIALPAD_CHOICE_USE_DTMF_DIALPAD:
             // Log.i(TAG, "DIALPAD_CHOICE_USE_DTMF_DIALPAD");
@@ -1560,7 +1680,7 @@ ECode DialpadFragment::IsPhoneInUse(
 {
     VALIDATE_NOT_NULL(result);
 
-    GetTelecomManager()->IsInCall(&result);
+    GetTelecomManager()->IsInCall(result);
 
     return NOERROR;
 }
@@ -1568,7 +1688,7 @@ ECode DialpadFragment::IsPhoneInUse(
 Boolean DialpadFragment::PhoneIsCdma()
 {
     Int32 type;
-    GetTelephonyManager()::GetPhoneType(&type);
+    GetTelephonyManager()->GetPhoneType(&type);
     return type == ITelephonyManager::PHONE_TYPE_CDMA;
 }
 
@@ -1586,7 +1706,7 @@ ECode DialpadFragment::OnMenuItemClick(
             ITextView::Probe(mDigits)->GetText((ICharSequence**)&digits);
             AutoPtr<IActivity> activity;
             GetActivity((IActivity**)&activity);
-            DialerUtils::StartActivityWithErrorToast(activity,
+            DialerUtils::StartActivityWithErrorToast(IContext::Probe(activity),
                     DialtactsActivity::GetAddNumberToContactIntent(digits));
             *result = TRUE;
             return NOERROR;
@@ -1603,16 +1723,19 @@ ECode DialpadFragment::OnMenuItemClick(
             AutoPtr<ICharSequence> digits;
             ITextView::Probe(mDigits)->GetText((ICharSequence**)&digits);
             String str;
-            digits->ToString(&str);
+            IObject::Probe(digits)->ToString(&str);
+            AutoPtr<IUriHelper> helper;
+            CUriHelper::AcquireSingleton((IUriHelper**)&helper);
             AutoPtr<IUri> uri;
-            Uri::FromParts(IContactsUtils::SCHEME_SMSTO, str, String(NULL), (IUri**)&uri);
+            assert(0 && "TODO") ;
+            // helper->FromParts(IContactsUtils::SCHEME_SMSTO, str, String(NULL), (IUri**)&uri);
             AutoPtr<IIntent> smsIntent;
             CIntent::New(IIntent::ACTION_SENDTO, uri, (IIntent**)&smsIntent);
             smsIntent->SetComponent(mSmsPackageComponentName);
 
             AutoPtr<IActivity> activity;
             GetActivity((IActivity**)&activity);
-            DialerUtils::StartActivityWithErrorToast(activity, smsIntent);
+            DialerUtils::StartActivityWithErrorToast(IContext::Probe(activity), smsIntent);
             *result = TRUE;
             return NOERROR;
         }
@@ -1637,24 +1760,29 @@ ECode DialpadFragment::UpdateDialString(
 
     // SpannableStringBuilder editable_text = new SpannableStringBuilder(mDigits.getText());
     Int32 anchor;
-    mDigits->GetSelectionStart(&anchor);
+    ITextView::Probe(mDigits)->GetSelectionStart(&anchor);
     Int32 point;
-    mDigits->GetSelectionEnd(&point);
+    ITextView::Probe(mDigits)->GetSelectionEnd(&point);
 
-    selectionStart = Math::Min(anchor, point);
-    selectionEnd = Math::Max(anchor, point);
+    selectionStart = Elastos::Core::Math::Min(anchor, point);
+    selectionEnd = Elastos::Core::Math::Max(anchor, point);
 
     if (selectionStart == -1) {
         Int32 length;
-        mDigits->GetLength(&length);
+        ITextView::Probe(mDigits)->GetLength(&length);
         selectionStart = selectionEnd = length;
     }
 
     AutoPtr<IEditable> digits;
     ITextView::Probe(mDigits)->GetEditableText((IEditable**)&digits);
 
-    if (CanAddDigit(digits, selectionStart, selectionEnd, newDigit)) {
-        digits->Replace(selectionStart, selectionEnd, String(&newDigit));
+    Boolean res;
+    if (CanAddDigit(ICharSequence::Probe(digits),
+            selectionStart, selectionEnd, newDigit, &res), res) {
+        AutoPtr<ArrayOf<Char32> > array = ArrayOf<Char32>::Alloc(1);
+        (*array)[0] = newDigit;
+        digits->Replace(selectionStart,
+                selectionEnd, CoreUtils::Convert(String(*array)));
 
         if (selectionStart != selectionEnd) {
           // Unselect: back to a regular cursor, just pass the character inserted.
@@ -1679,15 +1807,14 @@ void DialpadFragment::UpdateDeleteButtonEnabledState()
 void DialpadFragment::UpdateMenuOverflowButton(
     /* [in] */ Boolean transitionIn)
 {
-    mDialpadView->GetOverflowMenuButton((IView**)&mOverflowMenuButton);
-    if (transitionIn) {
-        assert(0 && "TODO");
-        // AnimUtils::FadeIn(mOverflowMenuButton, IAnimUtils::DEFAULT_DURATION);
-    }
-    else {
-        assert(0 && "TODO");
-        // AnimUtils::FadeOut(mOverflowMenuButton, IAnimUtils::DEFAULT_DURATION);
-    }
+    assert(0 && "TODO");
+    // mDialpadView->GetOverflowMenuButton((IView**)&mOverflowMenuButton);
+    // if (transitionIn) {
+    //     AnimUtils::FadeIn(mOverflowMenuButton, IAnimUtils::DEFAULT_DURATION);
+    // }
+    // else {
+    //     AnimUtils::FadeOut(mOverflowMenuButton, IAnimUtils::DEFAULT_DURATION);
+    // }
 }
 
 Boolean DialpadFragment::IsVoicemailAvailable()
@@ -1795,34 +1922,41 @@ void DialpadFragment::QueryLastOutgoingCall()
 
 AutoPtr<IIntent> DialpadFragment::NewFlashIntent()
 {
-    AutoPtr<IIntent> intent = CallUtil::GetCallIntent(EMPTY_NUMBER);
-    intent->PutBooleanExtra(EXTRA_SEND_EMPTY_FLASH, TRUE);
-    return intent;
+    assert(0 && "TODO");
+    return NOERROR;
+    // AutoPtr<IIntent> intent = CallUtil::GetCallIntent(EMPTY_NUMBER);
+    // intent->PutBooleanExtra(EXTRA_SEND_EMPTY_FLASH, TRUE);
+    // return intent;
 }
 
 ECode DialpadFragment::OnHiddenChanged(
     /* [in] */ Boolean hidden)
 {
-    AnalyticsFragment::OnHiddenChanged(hidden);
+    assert(0 && "TODO");
+    // AnalyticsFragment::OnHiddenChanged(hidden);
     AutoPtr<IActivity> activity;
     GetActivity((IActivity**)&activity);
     AutoPtr<IView> view;
     GetView((IView**)&view);
     AutoPtr<IView> dialpadView;
-    view->FindViewById(R::id::dialpad_view, (IView**)&dialpadView);
+    assert(0 && "TODO");
+    // view->FindViewById(R::id::dialpad_view, (IView**)&dialpadView);
 
     if (activity == NULL) return NOERROR;
 
     if (!hidden && !IsDialpadChooserVisible()) {
-        if (mAnimate) {
-            IDialpadView::Probe(dialpadView)->AnimateShow();
-        }
-        mFloatingActionButtonController->ScaleIn(mAnimate ? mDialpadSlideInDuration : 0);
+        assert(0 && "TODO");
+        // if (mAnimate) {
+        //     IDialpadView::Probe(dialpadView)->AnimateShow();
+        // }
+        // mFloatingActionButtonController->ScaleIn(mAnimate ? mDialpadSlideInDuration : 0);
         IDialtactsActivity::Probe(activity)->OnDialpadShown();
-        mDigits->RequestFocus();
+        Boolean res;
+        IView::Probe(mDigits)->RequestFocus(&res);
     }
     if (hidden && mAnimate) {
-        mFloatingActionButtonController->ScaleOut();
+        assert(0 && "TODO");
+        // mFloatingActionButtonController->ScaleOut();
     }
 
     return NOERROR;

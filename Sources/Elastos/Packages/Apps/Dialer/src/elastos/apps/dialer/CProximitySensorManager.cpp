@@ -1,14 +1,19 @@
 
-#include "CProximitySensorManager.h"
-
+#include "elastos/apps/dialer/CProximitySensorManager.h"
+#include "Elastos.Droid.Hardware.h"
 #include <elastos/core/AutoLock.h>
+
+using Elastos::Droid::Hardware::ISensor;
+using Elastos::Droid::Hardware::ISensorEvent;
+using Elastos::Droid::Hardware::ISensorListener;
+using Elastos::Droid::Hardware::ISensorManager;
 using Elastos::Core::AutoLock;
 
 namespace Elastos {
 namespace Apps {
 namespace Dialer {
 
-const Float CProximitySensorManager::ProximitySensorEventListener::FAR_THRESHOLD = 5.0f;
+const Float CProximitySensorManager::ProximitySensorEventListener::FAR_THRESHOLD = 5.0;
 
 //=================================================================
 // CProximitySensorManager::ProximitySensorEventListener
@@ -91,7 +96,8 @@ IProximitySensorManager::State CProximitySensorManager::ProximitySensorEventList
 
 void CProximitySensorManager::ProximitySensorEventListener::UnregisterWhenFar()
 {
-    {    AutoLock syncLock(this);
+    {
+        AutoLock syncLock(this);
         if (mLastState == State.FAR) {
             // We are already in the far state, just unregister now.
             UnregisterWithoutNotification();
@@ -104,7 +110,8 @@ void CProximitySensorManager::ProximitySensorEventListener::UnregisterWhenFar()
 
 void CProximitySensorManager::ProximitySensorEventListener::Register()
 {
-    {    AutoLock syncLock(this);
+    {
+        AutoLock syncLock(this);
         // It is okay to register multiple times.
         Boolean supported;
         mSensorManager->RegisterListener(ISensorListener::Probe(this),
@@ -117,7 +124,8 @@ void CProximitySensorManager::ProximitySensorEventListener::Register()
 void CProximitySensorManager::ProximitySensorEventListener::Unregister()
 {
     IProximitySensorManager::State lastState;
-    {    AutoLock syncLock(this);
+    {
+        AutoLock syncLock(this);
         UnregisterWithoutNotification();
         lastState = mLastState;
         // Always go back to the FAR state. That way, when we register again we will get a

@@ -1,10 +1,18 @@
 #ifndef __ELASTOS_APPS_DIALER_LIST_SMARTDIALSEARCHFRAGMENT_H__
 #define __ELASTOS_APPS_DIALER_LIST_SMARTDIALSEARCHFRAGMENT_H__
 
-#include "SearchFragment.h"
+#include "_Elastos.Apps.Dialer.h"
+#include "elastos/apps/dialer/list/SearchFragment.h"
+#include "Elastos.Droid.Content.h"
+#include "Elastos.Droid.Net.h"
+#include "Elastos.Droid.Os.h"
 
-namespace Elastos{
-namespace Apps{
+using Elastos::Droid::Content::ILoader;
+using Elastos::Droid::Net::IUri;
+using Elastos::Droid::Os::IBundle;
+
+namespace Elastos {
+namespace Apps {
 namespace Dialer {
 namespace List {
 
@@ -16,7 +24,7 @@ class SmartDialSearchFragment
     , public ISmartDialSearchFragment
 {
 public:
-    CAR_INTERFACE_DECL()
+    CAR_INTERFACE_DECL();
 
     /**
      * Creates a SmartDialCursorLoader object to load query results.
@@ -32,8 +40,9 @@ protected:
      * Creates a SmartDialListAdapter to display and operate on search results.
      */
     // @Override
-    CARAPI CreateListAdapter(
-        /* [out] */ IContactEntryListAdapter** adapter);
+    // TODO:
+    // CARAPI CreateListAdapter(
+    //     /* [out] */ IContactEntryListAdapter** adapter);
 
     /**
      * Gets the Phone Uri of an entry for calling.

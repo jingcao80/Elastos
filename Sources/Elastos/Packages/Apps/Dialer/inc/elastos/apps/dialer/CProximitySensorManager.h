@@ -2,6 +2,7 @@
 #define __ELASTOS_APPS_DIALER_CPROXIMITYSENSERMANAGER_H__
 
 #include "_Elastos_Apps_Dialer_CProximitySensorManager.h"
+#include <elastos/core/Object.h>
 
 using Elastos::Droid::Hardware::ISensor;
 using Elastos::Droid::Hardware::ISensorEventListener;
@@ -9,8 +10,8 @@ using Elastos::Droid::Hardware::ISensorManager;
 using Elastos::Apps::Dialer::IProximitySensorManager;
 using Elastos::Apps::Dialer::IProximitySensorManagerListener;
 
-namespace Elastos{
-namespace Apps{
+namespace Elastos {
+namespace Apps {
 namespace Dialer {
 
 CarClass(CProximitySensorManager)

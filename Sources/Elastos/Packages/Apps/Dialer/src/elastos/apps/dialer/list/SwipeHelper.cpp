@@ -1,5 +1,16 @@
 
-#include "list/SwipeHelper.h"
+#include "elastos/apps/dialer/list/SwipeHelper.h"
+#include "R.h"
+#include <elastos/core/Math.h>
+#include <elastos/utility/logging/Logger.h>
+
+using Elastos::Droid::Animation::IObjectAnimatorHelper;
+using Elastos::Droid::Content::Res::IResources;
+using Elastos::Droid::Graphics::CRectF;
+using Elastos::Droid::View::IVelocityTrackerHelper;
+using Elastos::Droid::View::CVelocityTrackerHelper;
+using Elastos::Droid::View::Animation::CLinearInterpolator;
+using Elastos::Utility::Logging::Logger;
 
 namespace Elastos {
 namespace Apps {
@@ -121,17 +132,17 @@ Int32 SWIPE_SCROLL_SLOP;
 Float MIN_SWIPE;
 Float MIN_VERT;
 Float MIN_LOCK;
-const Float FACTOR = 1.2f;
+const Float FACTOR = 1.2;
 
 const Int32 PROTECTION_PADDING = 50;
 
 CAR_INTERFACE_DECL(SwipeHelper, Object, ISwipeHelper)
 
 SwipeHelper::SwipeHelper()
-    : mMinAlpha(0.3f)
+    : mMinAlpha(0.3)
     , mProtected(FALSE)
-    , mChildSwipedFarEnoughFactor(0.4f)
-    , mChildSwipedFastEnoughFactor(0.05f)
+    , mChildSwipedFarEnoughFactor(0.4)
+    , mChildSwipedFastEnoughFactor(0.05)
 {}
 
 ECode SwipeHelper::constructor(
@@ -157,9 +168,9 @@ ECode SwipeHelper::constructor(
         res->GetInteger(R::integer::max_dismiss_velocity, &MAX_DISMISS_VELOCITY);
         res->GetInteger(R::integer::snap_animation_duration, &SNAP_ANIM_LEN);
         res->GetInteger(R.integer.swipe_scroll_slop, &SWIPE_SCROLL_SLOP);
-        res->GetDimension(R.dimen.min_swipe, &MIN_SWIPE);
-        res->GetDimension(R.dimen.min_vert, &MIN_VERT);
-        res->GetDimension(R.dimen.min_lock, &MIN_LOCK);
+        res->GetDimension(R::dimen::min_swipe, &MIN_SWIPE);
+        res->GetDimension(R::dimen::min_vert, &MIN_VERT);
+        res->GetDimension(R::dimen::min_lock, &MIN_LOCK);
     }
 
     return NOERROR;
@@ -314,12 +325,12 @@ void SwipeHelper::InvalidateGlobalRegion(
         childBounds->GetTop(&top);
         childBounds->GetRight(&right);
         childBounds->GetBottom(&bottom);
-        view->Invalidate((Int32) Math::Floor(left), (Int32) Math::Floor(top),
-                (Int32) Math::Ceil(right), (Int32) Math::Ceil(bottom));
+        view->Invalidate((Int32) Elastos::Core::Math::Floor(left), (Int32) Elastos::Core::Math::Floor(top),
+                (Int32) Elastos::Core::Math::Ceil(right), (Int32) Elastos::Core::Math::Ceil(bottom));
         if (DEBUG_INVALIDATE) {
-            Logger::V(TAG, "INVALIDATE(%d,%d,%d,%d", (Int32) Math::Floor(left),
-                    (Int32) Math::Floor(top), (Int32) Math::Ceil(right),
-                    (Int32) Math::Ceil(bottom));
+            Logger::V(TAG, "INVALIDATE(%d,%d,%d,%d", (Int32) Elastos::Core::Math::Floor(left),
+                    (Int32) Elastos::Core::Math::Floor(top), (Int32) Elastos::Core::Math::Ceil(right),
+                    (Int32) Elastos::Core::Math::Ceil(bottom));
         }
     }
 }
@@ -355,8 +366,8 @@ ECode SwipeHelper::OnInterceptTouchEvent(
                     ev->GetY(&currY);
                     Float currX;
                     ev->GetX(&currX);
-                    Float deltaY = Math::Abs(currY - mInitialTouchPosY);
-                    Float deltaX = Math::Abs(currX - mInitialTouchPosX);
+                    Float deltaY = Elastos::Core::Math::Abs(currY - mInitialTouchPosY);
+                    Float deltaX = Elastos::Core::Math::Abs(currX - mInitialTouchPosX);
                     if (deltaY > SWIPE_SCROLL_SLOP && deltaY > (FACTOR * deltaX)) {
                         ev->GetY(&mLastY);
                         mCallback->OnScroll();
@@ -368,7 +379,7 @@ ECode SwipeHelper::OnInterceptTouchEvent(
                 Float pos;
                 ev->GetX(&pos);
                 Float delta = pos - mInitialTouchPosX;
-                if (Math::Abs(delta) > mPagingTouchSlop) {
+                if (Elastos::Core::Math::Abs(delta) > mPagingTouchSlop) {
                     AutoPtr<IView> view;
                     mCallback->GetChildContentView(mCurrView, (IView**)&view);
                     mCallback->OnBeginDrag(view);
@@ -407,7 +418,7 @@ void SwipeHelper::DismissChild(
     Int32 duration = DetermineDuration(animView, newPos, velocity);
 
     animView->SetLayerType(View.LAYER_TYPE_HARDWARE, NULL);
-    AutoPtr<IObjectAnimator> anim = createDismissAnimation(animView, newPos, duration);
+    AutoPtr<IObjectAnimator> anim = CreateDismissAnimation(animView, newPos, duration);
     anim->AddListener((IAnimatorListener*)new DismissAnimatorListenerAdapter(this));
     anim->AddUpdateListener((IAnimatorUpdateListener*)new DismissAnimatorUpdateListener(this));
     anim->Start();
@@ -422,8 +433,9 @@ Int32 SwipeHelper::DetermineDuration(
     if (velocity != 0) {
         Float x;
         animView->GetTranslationX(&x);
-        duration = Math::Min(duration,
-                    (Int32) (Math::Abs(newPos - x) * 1000f / Math::abs(velocity)));
+        duration = Elastos::Core::Math::Min(duration,
+                    (Int32) (Elastos::Core::Math::Abs(newPos - x) * 1000f
+                    / Elastos::Core::Math::abs(velocity)));
     }
     else {
         duration = DEFAULT_ESCAPE_ANIMATION_DURATION;
@@ -490,18 +502,18 @@ ECode SwipeHelper::OnTouchEvent(
                 ev->GetX(&x);
                 ev->GetY(&y);
                 Float deltaX = x - mInitialTouchPosX;
-                Float deltaY = Math::Abs(y - mInitialTouchPosY);
+                Float deltaY = Elastos::Core::Math::Abs(y - mInitialTouchPosY);
                 // If the user has gone vertical and not gone horizontalish AT
                 // LEAST minBeforeLock, switch to scroll. Otherwise, cancel
                 // the swipe.
-                if (!mDragging && deltaY > MIN_VERT && (Math::Abs(deltaX)) < MIN_LOCK
-                        && deltaY > (FACTOR * Math::Abs(deltaX))) {
+                if (!mDragging && deltaY > MIN_VERT && (Elastos::Core::Math::Abs(deltaX)) < MIN_LOCK
+                        && deltaY > (FACTOR * Elastos::Core::Math::Abs(deltaX))) {
                     mCallback->OnScroll();
                     *result = FALSE;
                     return NOERROR;
                 }
                 Float minDistance = MIN_SWIPE;
-                if (Math::Abs(deltaX) < minDistance) {
+                if (Elastos::Core::Math::Abs(deltaX) < minDistance) {
                     // Don't start the drag until at least X distance has
                     // occurred.
                     *result = TRUE;
@@ -513,14 +525,14 @@ ECode SwipeHelper::OnTouchEvent(
                 if (CONSTRAIN_SWIPE &&
                         mCallback.canChildBeDismissed(mCurrView, &canChildBeDismissed),
                         !canChildBeDismissed) {
-                    Float size = getSize(mCurrAnimView);
+                    Float size = GetSize(mCurrAnimView);
                     Float maxScrollDistance = 0.15f * size;
-                    if (Math::Abs(deltaX) >= size) {
+                    if (Elastos::Core::Math::Abs(deltaX) >= size) {
                         deltaX = deltaX > 0 ? maxScrollDistance : -maxScrollDistance;
                     }
                     else {
                         deltaX = maxScrollDistance
-                                * (Float) Math::Sin((deltaX / size) * (Math.PI / 2));
+                                * (Float) Elastos::Core::Math::Sin((deltaX / size) * (Math.PI / 2));
                     }
                 }
                 SetTranslation(mCurrAnimView, deltaX);
@@ -546,15 +558,15 @@ ECode SwipeHelper::OnTouchEvent(
                 // swipe/dismiss
                 Float x;
                 mCurrAnimView->GetTranslationX(&x);
-                Float translation = Math::Abs(x);
+                Float translation = Elastos::Core::Math::Abs(x);
                 Float currAnimViewSize = GetSize(mCurrAnimView);
                 // Long swipe = translation of {@link #mChildSwipedFarEnoughFactor} * width
                 Boolean childSwipedFarEnough = DISMISS_IF_SWIPED_FAR_ENOUGH
                         && translation > mChildSwipedFarEnoughFactor * currAnimViewSize;
                 // Fast swipe = > escapeVelocity and translation of
                 // {@link #mChildSwipedFastEnoughFactor} * width
-                Boolean childSwipedFastEnough = (Math::Abs(velocity) > escapeVelocity)
-                        && (Math.abs(velocity) > Math::Abs(perpendicularVelocity))
+                Boolean childSwipedFastEnough = (Elastos::Core::Math::Abs(velocity) > escapeVelocity)
+                        && (Math.abs(velocity) > Elastos::Core::Math::Abs(perpendicularVelocity))
                         && (velocity > 0) == (x > 0)
                         && translation > mChildSwipedFastEnoughFactor * currAnimViewSize;
                 if (LOG_SWIPE_DISMISS_VELOCITY) {

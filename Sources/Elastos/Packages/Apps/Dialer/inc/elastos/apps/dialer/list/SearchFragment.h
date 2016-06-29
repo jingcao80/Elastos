@@ -1,24 +1,35 @@
 #ifndef __ELASTOS_APPS_DIALER_LIST_SEARCHFRAGMENT_H__
 #define __ELASTOS_APPS_DIALER_LIST_SEARCHFRAGMENT_H__
 
-#include "PhoneNumberPickerFragment.h"
+#include "_Elastos.Apps.Dialer.h"
+#include <elastos/core/Object.h>
+#include "Elastos.Droid.App.h"
+#include "Elastos.Droid.Os.h"
+#include "Elastos.Droid.Widget.h"
 
-namespace Elastos{
-namespace Apps{
+using Elastos::Droid::App::IActivity;
+using Elastos::Droid::Os::IBundle;
+using Elastos::Droid::Widget::IAbsListView;
+using Elastos::Droid::Widget::IAbsListViewOnScrollListener;
+
+namespace Elastos {
+namespace Apps {
 namespace Dialer {
 namespace List {
 
 class SearchFragment
-    : public PhoneNumberPickerFragment
+    // TODO:
+    /*: public PhoneNumberPickerFragment*/
+    : public Object
     , public ISearchFragment
 {
 private:
     class MyOnScrollListener
         : public Object
-        , public IListViewOnScrollListener
+        , public IAbsListViewOnScrollListener
     {
     public:
-        CAR_INTERFACE_DECL()
+        CAR_INTERFACE_DECL();
 
         MyOnScrollListener(
             /* [in] */ SearchFragment* host);
@@ -40,7 +51,7 @@ private:
     };
 
 public:
-    CAR_INTERFACE_DECL()
+    CAR_INTERFACE_DECL();
 
     // @Override
     CARAPI OnAttach(
@@ -70,9 +81,10 @@ protected:
     CARAPI SetSearchMode(
         /* [in] */ Boolean flag);
 
+    // TODO:
     // @Override
-    CARAPI CreateListAdapter(
-        /* [out] */ IContactEntryListAdapter** adapter);
+    // CARAPI CreateListAdapter(
+    //     /* [out] */ IContactEntryListAdapter** adapter);
 
     // @Override
     CARAPI OnItemClick(

@@ -614,6 +614,10 @@ module
         interface IDialpadFragment;
     }
 
+    singleton class CDialpadFragmentErrorDialogFragmentHelper {
+        interface IDialpadFragmentErrorDialogFragmentHelper;
+    }
+
     [local]
     class CDialpadSlidingRelativeLayout {
         constructor(
@@ -662,6 +666,10 @@ module
         interface ISmartDialMatchPosition;
     }
 
+    singleton class CSmartDialMatchPositionHelper {
+        interface ISmartDialMatchPositionHelper;
+    }
+
     class CSmartDialNameMatcher {
         constructor(
             [in] String query);
@@ -671,6 +679,10 @@ module
             [in] ISmartDialMap* map);
 
         interface ISmartDialNameMatcher;
+    }
+
+    singleton class CSmartDialNameMatcherHelper {
+        interface ISmartDialNameMatcherHelper;
     }
 
     singleton class CSmartDialPrefix {
@@ -702,7 +714,7 @@ module
     namespace Dialer {
     namespace Interactions {
 
-    class CPhoneDisambiguationDialogFragmentHelper {
+    singleton class CPhoneDisambiguationDialogFragmentHelper {
         interface IPhoneDisambiguationDialogFragmentHelper;
     }
 

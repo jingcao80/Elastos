@@ -1,5 +1,12 @@
 
-#include "CallDetailActivityQueryHandler.h"
+#include "elastos/apps/dialer/CallDetailActivityQueryHandler.h"
+#include "Elastos.Droid.Provider.h"
+#include <elastos/utility/logging/Logger.h>
+
+using Elastos::Droid::Content::IContentResolver;
+using Elastos::Droid::Provider::IVoicemailContractStatus;
+using Elastos::Droid::Provider::CVoicemailContractStatus;
+using Elastos::Utility::Logging::Logger;
 
 namespace Elastos {
 namespace Apps {
@@ -12,7 +19,7 @@ const Int32 CallDetailActivityQueryHandler::SOURCE_PACKAGE_COLUMN_INDEX = 0;
 const Int32 CallDetailActivityQueryHandler::HAS_CONTENT_COLUMN_INDEX = 1;
 
 CAR_INTERFACE_IMPL(CallDetailActivityQueryHandler,
-        NoNullCursorAsyncQueryHandler, ICallDetailActivityQueryHandler);
+        /*NoNullCursorAsyncQueryHandler*/Object, ICallDetailActivityQueryHandler);
 
 CallDetailActivityQueryHandler::CallDetailActivityQueryHandler()
 {
@@ -26,7 +33,8 @@ ECode CallDetailActivityQueryHandler::constructor(
 {
     AutoPtr<IContentResolver> resolver;
     callDetailActivity->GetContentResolver((IContentResolver**)&resolver);
-    NoNullCursorAsyncQueryHandler::constructor(resolver);
+    asser(0 && "TODO");
+    // NoNullCursorAsyncQueryHandler::constructor(resolver);
     mCallDetailActivity = callDetailActivity;
     return NOERROR;
 }

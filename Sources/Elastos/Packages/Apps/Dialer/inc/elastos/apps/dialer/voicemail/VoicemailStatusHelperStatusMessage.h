@@ -1,8 +1,14 @@
 #ifndef __ELASTOS_APPS_DIALER_VOICEMAIL_VOICEMAILSTATUSHELPERSTATUSMESSAGE_H__
 #define __ELASTOS_APPS_DIALER_VOICEMAIL_VOICEMAILSTATUSHELPERSTATUSMESSAGE_H__
 
-namespace Elastos{
-namespace Apps{
+#include "_Elastos.Apps.Dialer.h"
+#include <elastos/core/Object.h>
+#include "Elastos.Droid.Net.h"
+
+using Elastos::Droid::Net::IUri;
+
+namespace Elastos {
+namespace Apps {
 namespace Dialer {
 namespace Voicemail {
 

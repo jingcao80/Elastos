@@ -13,12 +13,12 @@ CAR_SINGLETON_IMPL(CDefaultVoicemailNotifierHelper);
 
 ECode CDefaultVoicemailNotifierHelper::GetInstance(
     /* [in] */ IContext* context,
-    /* [out] */ IDefaultVoicemailNotifier* notifier)
+    /* [out] */ IDefaultVoicemailNotifier** notifier)
 {
     VALIDATE_NOT_NULL(notifier);
     AutoPtr<IDefaultVoicemailNotifier> result =
             DefaultVoicemailNotifier::GetInstance(context);
-    *notifier = result;
+    *notifier = result.Get();
     REFCOUNT_ADD(*notifier);
 
     return NOERROR;
@@ -26,12 +26,12 @@ ECode CDefaultVoicemailNotifierHelper::GetInstance(
 
 ECode CDefaultVoicemailNotifierHelper::CreateNewCallsQuery(
     /* [in] */ IContentResolver* contentResolver,
-    /* [out] */ IDefaultVoicemailNotifierNewCallsQuery* query)
+    /* [out] */ IDefaultVoicemailNotifierNewCallsQuery** query)
 {
     VALIDATE_NOT_NULL(query);
     AutoPtr<IDefaultVoicemailNotifierNewCallsQuery> result =
             DefaultVoicemailNotifier::CreateNewCallsQuery(contentResolver);
-    *query = result;
+    *query = result.Get();
     REFCOUNT_ADD(*query);
 
     return NOERROR;
@@ -39,12 +39,12 @@ ECode CDefaultVoicemailNotifierHelper::CreateNewCallsQuery(
 
 ECode CDefaultVoicemailNotifierHelper::CreatePhoneNumberHelper(
     /* [in] */ IContext* context,
-    /* [out] */ IPhoneNumberDisplayHelper* helper)
+    /* [out] */ IPhoneNumberDisplayHelper** helper)
 {
     VALIDATE_NOT_NULL(helper);
     AutoPtr<IPhoneNumberDisplayHelper> result =
             DefaultVoicemailNotifier::CreatePhoneNumberHelper(context);
-    *helper = result;
+    *helper = result.Get();
     REFCOUNT_ADD(*helper);
 
     return NOERROR;

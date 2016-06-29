@@ -1,8 +1,31 @@
 #ifndef __ELASTOS_APPS_DIALER_LIST_PHONEFAVORITELISTVIEW_H__
 #define __ELASTOS_APPS_DIALER_LIST_PHONEFAVORITELISTVIEW_H__
 
-namespace Elastos{
-namespace Apps{
+#include "_Elastos.Apps.Dialer.h"
+#include <elastos/droid/os/Runnable>
+#include <elastos/droid/widget/AbsListView>
+#include "Elastos.Droid.Animation.h"
+#include "Elastos.Droid.Content.h"
+#include "Elastos.Droid.Os.h"
+#include "Elastos.Droid.Utility.h"
+#include "Elastos.Droid.View.h"
+#include "Elastos.Droid.Widget.h"
+
+using Elastos::Droid::Animation::IAnimator;
+using Elastos::Droid::Animation::AnimatorListenerAdapter;
+using Elastos::Droid::Animation::IAnimatorListenerAdapter;
+using Elastos::Droid::Content::IContext;
+using Elastos::Droid::Content::Res::IConfiguration;
+using Elastos::Droid::Graphics::IBitmap;
+using Elastos::Droid::Os::Runnable;
+using Elastos::Droid::Os::IRunnable;
+using Elastos::Droid::Utility::IAttributeSet;
+using Elastos::Droid::View::IDragEvent;
+using Elastos::Droid::View::IMotionEvent;
+using Elastos::Droid::Widget::IImageView;
+
+namespace Elastos {
+namespace Apps {
 namespace Dialer {
 namespace List {
 
@@ -10,7 +33,9 @@ namespace List {
  * Viewgroup that presents the user's speed dial contacts in a grid.
  */
 class PhoneFavoriteListView
-    : public GridView
+    // TODO:
+    /*: public GridView*/
+    : public AbsListView
     , public IPhoneFavoriteListView
     , public IOnDragDropListener
     , public IDragItemContainer
@@ -46,7 +71,7 @@ private:
     };
 
 public:
-    CAR_INTERFACE_DECL()
+    CAR_INTERFACE_DECL();
 
     PhoneFavoriteListView();
 

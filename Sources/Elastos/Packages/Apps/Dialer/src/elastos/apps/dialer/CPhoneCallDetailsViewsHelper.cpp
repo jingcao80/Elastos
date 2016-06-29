@@ -1,6 +1,6 @@
 
-#include "CPhoneCallDetailsViewsHelper.h"
-#include "PhoneCallDetailsViews.h"
+#include "elastos/apps/dialer/CPhoneCallDetailsViewsHelper.h"
+#include "elastos/apps/dialer/PhoneCallDetailsViews.h"
 
 namespace Elastos {
 namespace Apps {

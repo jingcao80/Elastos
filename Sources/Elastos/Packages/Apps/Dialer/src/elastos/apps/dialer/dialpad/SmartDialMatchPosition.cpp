@@ -1,5 +1,8 @@
 
-#include "dialpad/SmartDialMatchPosition.h"
+#include "elastos/apps/dialer/dialpad/SmartDialMatchPosition.h"
+#include <elastos/utility/logging/Logger.h>
+
+using Elastos::Utility::Logging::Logger;
 
 namespace Elastos {
 namespace Apps {
@@ -16,6 +19,7 @@ ECode SmartDialMatchPosition::constructor(
 {
     mStart = start;
     mEnd = end;
+    return NOERROR;
 }
 
 void SmartDialMatchPosition::Advance(
@@ -34,7 +38,7 @@ void SmartDialMatchPosition::AdvanceMatchPositions(
     for (Int32 i = 0; i < size; i++) {
         AutoPtr<IInterface> item;
         inList->Get(i, (IInterface**)&item);
-        ((SmartDialMatchPosition*)item)->Advance(toAdvance);
+        ((SmartDialMatchPosition*)IObject::Probe(item))->Advance(toAdvance);
     }
 }
 
@@ -42,11 +46,11 @@ void SmartDialMatchPosition::Print(
     /* [in] */ IArrayList* list)
 {
     Int32 size;
-    inList->GetSize(&size);
+    list->GetSize(&size);
     for (Int32 i = 0; i < size; i++) {
         AutoPtr<IInterface> item;
         list->Get(i, (IInterface**)&item);
-        SmartDialMatchPosition* m = (SmartDialMatchPosition*)item;
+        SmartDialMatchPosition* m = (SmartDialMatchPosition*)IObject::Probe(item);
         Logger::D(TAG, "[%d,%d]", m->mStart , m->mEnd);
     }
 }

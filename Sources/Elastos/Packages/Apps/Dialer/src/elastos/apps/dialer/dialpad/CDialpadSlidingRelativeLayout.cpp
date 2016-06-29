@@ -1,4 +1,4 @@
-#include "dialpad/CDialpadSlidingRelativeLayout.h"
+#include "elastos/apps/dialer/dialpad/CDialpadSlidingRelativeLayout.h"
 
 namespace Elastos {
 namespace Apps {

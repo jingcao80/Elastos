@@ -1,6 +1,6 @@
 
-#include "voicemail/CVoicemailStatusHelperImplHelper.h"
-#include "voicemail/VoicemailStatusHelperImpl.h"
+#include "elastos/apps/dialer/voicemail/CVoicemailStatusHelperImplHelper.h"
+#include "elastos/apps/dialer/voicemail/VoicemailStatusHelperImpl.h"
 
 namespace Elastos {
 namespace Apps {

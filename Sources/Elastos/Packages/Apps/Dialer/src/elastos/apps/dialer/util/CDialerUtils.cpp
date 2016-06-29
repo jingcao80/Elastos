@@ -1,6 +1,6 @@
 
-#include "util/CDialerUtils.h"
-#include "util/DialerUtils.h"
+#include "elastos/apps/dialer/util/CDialerUtils.h"
+#include "elastos/apps/dialer/util/DialerUtils.h"
 
 namespace Elastos {
 namespace Apps {

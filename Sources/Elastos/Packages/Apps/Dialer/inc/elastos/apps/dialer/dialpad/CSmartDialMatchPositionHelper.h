@@ -3,9 +3,12 @@
 
 #include "_Elastos_Apps_Dialer_Dialpad_CSmartDialMatchPositionHelper.h"
 #include <elastos/core/Singleton.h>
+#include "Elastos.CoreLibrary.Utility.h"
 
-namespace Elastos{
-namespace Apps{
+using Elastos::Utility::IArrayList;
+
+namespace Elastos {
+namespace Apps {
 namespace Dialer {
 namespace Dialpad {
 

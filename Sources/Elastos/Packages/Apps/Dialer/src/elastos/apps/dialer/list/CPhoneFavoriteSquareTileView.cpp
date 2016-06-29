@@ -1,5 +1,5 @@
 
-#include "list/CPhoneFavoriteSquareTileView.h"
+#include "elastos/apps/dialer/list/CPhoneFavoriteSquareTileView.h"
 
 namespace Elastos {
 namespace Apps {

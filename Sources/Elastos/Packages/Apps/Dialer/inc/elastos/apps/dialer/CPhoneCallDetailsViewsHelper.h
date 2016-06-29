@@ -3,19 +3,24 @@
 
 #include "_Elastos_Apps_Dialer_CPhoneCallDetailsViewsHelper.h"
 #include <elastos/core/Singleton.h>
+#include "Elastos.Droid.Content.h"
+#include "Elastos.Droid.View.h"
 
-namespace Elastos{
-namespace Apps{
-namespace Dialer{
+using Elastos::Droid::Content::IContext;
+using Elastos::Droid::View::IView;
+
+namespace Elastos {
+namespace Apps {
+namespace Dialer {
 
 CarClass(CPhoneCallDetailsViewsHelper)
     , public Singleton
     , public IPhoneCallDetailsViewsHelper
 {
 public:
-    CAR_INTERFACE_DECL()
+    CAR_INTERFACE_DECL();
 
-    CAR_SINGLETON_DECL()
+    CAR_SINGLETON_DECL();
 
     /**
      * Create a new instance by extracting the elements from the given view.

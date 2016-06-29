@@ -1,5 +1,7 @@
 
-#include "util/ExpirableCache.h"
+#include "elastos/apps/dialer/util/ExpirableCache.h"
+
+using Elastos::Utility::Concurrent::Atomic::CAtomicInteger32;
 
 namespace Elastos {
 namespace Apps {
@@ -132,9 +134,11 @@ AutoPtr<IExpirableCache> ExpirableCache::Create(
 AutoPtr<IExpirableCache> ExpirableCache::Create(
     /* [in] */ Int32 maxSize)
 {
-    AutoPtr<LruCache<IInterface*, IInterface*> > lruCache =
-            new LruCache<IInterface*, IInterface*>(maxSize);
-    return Create((IInterface*)lruCache);
+    assert(0 && "TODO");
+    return NULL;
+    // AutoPtr<LruCache<IInterface*, IInterface*> > lruCache =
+    //         new LruCache<IInterface*, IInterface*>(maxSize);
+    // return Create((IInterface*)lruCache);
 }
 
 } // Util

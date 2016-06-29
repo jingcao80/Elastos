@@ -1,7 +1,14 @@
 #ifndef __ELASTOS_APPS_DIALER_LIST_DIALERPHONENUMBERLISTADAPTER_H__
 #define __ELASTOS_APPS_DIALER_LIST_DIALERPHONENUMBERLISTADAPTER_H__
 
-#include "PhoneNumberListAdapter.h"
+#include "_Elastos.Apps.Dialer.h"
+#include "Elastos.Droid.Content.h"
+#include "Elastos.Droid.View.h"
+#include <elastos/core/Object.h>
+
+using Elastos::Droid::Content::IContext;
+using Elastos::Droid::View::IView;
+using Elastos::Droid::View::IViewGroup;
 
 namespace Elastos{
 namespace Apps{
@@ -18,11 +25,13 @@ namespace List {
  * list.
  */
 class DialerPhoneNumberListAdapter
-    : public PhoneNumberListAdapter
+    // TODO:
+    /*: public PhoneNumberListAdapter*/
+    : public Object
     , public IDialerPhoneNumberListAdapter
 {
 public:
-    CAR_INTERFACE_DECL()
+    CAR_INTERFACE_DECL();
 
     DialerPhoneNumberListAdapter();
 
@@ -89,9 +98,10 @@ public:
         /* [in] */ const String& queryString);
 
 private:
-    CARAPI AssignShortcutToView(
-        /* [in] */ IContactListItemView* v,
-        /* [in] */ Int32 shortcutType);
+    // TODO:
+    // CARAPI AssignShortcutToView(
+    //     /* [in] */ IContactListItemView* v,
+    //     /* [in] */ Int32 shortcutType);
 
 private:
     String mFormattedQueryString;

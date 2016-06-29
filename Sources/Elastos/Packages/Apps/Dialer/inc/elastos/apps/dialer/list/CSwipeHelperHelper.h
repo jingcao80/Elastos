@@ -3,9 +3,14 @@
 
 #include "_Elastos_Apps_Dialer_List_CSwipeHelperHelper.h"
 #include <elastos/core/Singleton.h>
+#include "Elastos.Droid.Graphics.h"
+#include "Elastos.Droid.View.h"
 
-namespace Elastos{
-namespace Apps{
+using Elastos::Droid::Graphics::IRectF;
+using Elastos::Droid::View::IView;
+
+namespace Elastos {
+namespace Apps {
 namespace Dialer {
 namespace List {
 
@@ -14,9 +19,9 @@ CarClass(CSwipeHelperHelper)
     , public ISwipeHelperHelper
 {
 public:
-    CAR_INTERFACE_DECL()
+    CAR_INTERFACE_DECL();
 
-    CAR_SINGLETON_DECL()
+    CAR_SINGLETON_DECL();
 
     // invalidate the view's own bounds all the way up the view hierarchy
     CARAPI InvalidateGlobalRegion(

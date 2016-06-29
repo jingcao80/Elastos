@@ -1,8 +1,25 @@
 #ifndef __ELASTOS_APPS_DIALER_LIST_PHONEFAVORITESTILEADAPTER_H__
 #define __ELASTOS_APPS_DIALER_LIST_PHONEFAVORITESTILEADAPTER_H__
 
-namespace Elastos{
-namespace Apps{
+#include "_Elastos.Apps.Dialer.h"
+#include <elastos/droid/widget/BaseAdapter.h>
+#include <elastos/core/Object.h>
+#include "Elastos.Droid.Content.h"
+#include "Elastos.Droid.View.h"
+#include "Elastos.CoreLibrary.Core.h"
+#include "Elastos.CoreLibrary.Utility.h"
+
+using Elastos::Droid::Content::IContext;
+using Elastos::Droid::Content::Res::IResources;
+using Elastos::Droid::Database::ICursor;
+using Elastos::Droid::View::IView;
+using Elastos::Droid::View::IViewGroup;
+using Elastos::Droid::Widget::BaseAdapter;
+using Elastos::Core::IComparator;
+using Elastos::Utility::IArrayList;
+
+namespace Elastos {
+namespace Apps {
 namespace Dialer {
 namespace List {
 
@@ -20,16 +37,17 @@ private:
         , public IComparator
     {
     public:
-        CAR_INTERFACE_DECL()
+        CAR_INTERFACE_DECL();
 
         ContactEntryComparator(
             /* [in] */ PhoneFavoritesTileAdapter* host);
 
+        // TODO:
         // @Override
-        CARAPI Compare(
-            /* [in] */ IContactEntry* lhs,
-            /* [in] */ IContactEntry* rhs,
-            /* [out] */ Int32* result);
+        // CARAPI Compare(
+        //     /* [in] */ IContactEntry* lhs,
+        //     /* [in] */ IContactEntry* rhs,
+        //     /* [out] */ Int32* result);
 
     private:
         PhoneFavoritesTileAdapter* mHost;
@@ -45,14 +63,15 @@ protected:
     };
 
 public:
-    CAR_INTERFACE_DECL()
+    CAR_INTERFACE_DECL();
 
     PhoneFavoritesTileAdapter();
 
-    CARAPI constructor(
-        /* [in] */ IContext* context,
-        /* [in] */ IContactTileViewListener* listener,
-        /* [in] */ IOnDataSetChangedForAnimationListener* dataSetChangedListener);
+    // TODO:
+    // CARAPI constructor(
+    //     /* [in] */ IContext* context,
+    //     /* [in] */ IContactTileViewListener* listener,
+    //     /* [in] */ IOnDataSetChangedForAnimationListener* dataSetChangedListener);
 
     // TODO:
     // CARAPI SetPhotoLoader(
@@ -92,10 +111,11 @@ public:
      * Returns an ArrayList of the {@link ContactEntry}s that are to appear
      * on the row for the given position.
      */
-    // @Override
-    CARAPI GetItem(
-        /* [in] */ Int32 position,
-        /* [out] */ IContactEntry** item);
+    // TODO:
+    // // @Override
+    // CARAPI GetItem(
+    //     /* [in] */ Int32 position,
+    //     /* [out] */ IContactEntry** item);
 
     /**
      * For the top row of tiled contacts, the item id is the position of the row of
@@ -292,7 +312,8 @@ private:
     static const String TAG; // = PhoneFavoritesTileAdapter.class.getSimpleName();
     static const Boolean DEBUG; // = false;
 
-    AutoPtr<IContactTileViewListener> mListener;
+    // TODO:
+    // AutoPtr<IContactTileViewListener> mListener;
     AutoPtr<IOnDataSetChangedForAnimationListener> mDataSetChangedListener;
 
     AutoPtr<IContext> mContext;
@@ -300,7 +321,8 @@ private:
 
 
     /** Back up of the temporarily removed Contact during dragging. */
-    AutoPtr<IContactEntry> mDraggedEntry;
+    // TODO:
+    // AutoPtr<IContactEntry> mDraggedEntry;
     /** Position of the temporarily removed contact in the cache. */
     Int32 mDraggedEntryIndex; // = -1;
     /** New position of the temporarily removed contact in the cache. */
@@ -311,7 +333,8 @@ private:
     Boolean mAwaitingRemove; // = false;
     Boolean mDelayCursorUpdates; // = false;
 
-    AutoPtr<IContactPhotoManager> mPhotoManager;
+    // TODO:
+    // AutoPtr<IContactPhotoManager> mPhotoManager;
 
     Int32 mPhoneNumberIndex;
     Int32 mPhoneNumberTypeIndex;

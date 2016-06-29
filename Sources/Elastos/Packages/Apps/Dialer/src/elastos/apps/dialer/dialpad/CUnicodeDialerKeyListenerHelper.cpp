@@ -1,6 +1,6 @@
 
-#include "dialpad/CUnicodeDialerKeyListenerHelper.h"
-#include "dialpad/UnicodeDialerKeyListener.h"
+#include "elastos/apps/dialer/dialpad/CUnicodeDialerKeyListenerHelper.h"
+#include "elastos/apps/dialer/dialpad/UnicodeDialerKeyListener.h"
 
 namespace Elastos {
 namespace Apps {

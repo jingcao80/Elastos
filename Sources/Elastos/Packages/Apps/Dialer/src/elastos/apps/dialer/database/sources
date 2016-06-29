@@ -2,6 +2,7 @@ TARGET_NAME= database
 TARGET_TYPE= lib
 
 INCLUDES += $(MAKEDIR)/../../../../../inc
+INCLUDES += $(MAKEDIR)/../../../../../
 INCLUDES += ../../../../../
 
 CAR_FLAGS += -n -u

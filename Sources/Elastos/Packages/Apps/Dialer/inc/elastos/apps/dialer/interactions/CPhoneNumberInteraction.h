@@ -4,9 +4,13 @@
 
 #include "_Elastos_Apps_Dialer_Interactions_CPhoneNumberInteraction.h"
 #include <elastos/core/Singleton.h>
+#include "Elastos.Droid.Net.h"
 
-namespace Elastos{
-namespace Apps{
+using Elastos::Droid::Net::IUri;
+using Elastos::Apps::Dialer::Activity::ITransactionSafeActivity;
+
+namespace Elastos {
+namespace Apps {
 namespace Dialer {
 namespace Interactions {
 
@@ -15,9 +19,9 @@ CarClass(CPhoneNumberInteraction)
     , public IPhoneNumberInteraction
 {
 public:
-    CAR_INTERFACE_DECL()
+    CAR_INTERFACE_DECL();
 
-    CAR_SINGLETON_DECL()
+    CAR_SINGLETON_DECL();
 
     /**
      * Start call action using given contact Uri. If there are multiple candidates for the phone

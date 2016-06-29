@@ -1,5 +1,5 @@
 
-#include "settings/CDialerSettingsActivity.h"
+#include "elastos/apps/dialer/settings/CDialerSettingsActivity.h"
 
 namespace Elastos {
 namespace Apps {

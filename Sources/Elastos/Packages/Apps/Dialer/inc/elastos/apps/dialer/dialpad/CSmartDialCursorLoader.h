@@ -3,9 +3,16 @@
 #define __ELASTOS_APPS_DIALER_DIALPAD_CSMARTDIALCURSORLOADER_H__
 
 #include "_Elastos_Apps_Dialer_Dialpad_CSmartDialCursorLoader.h"
+#include <elastos/droid/content/AsyncTaskLoader.h>
+#include "Elastos.Droid.Content.h"
+#include "Elastos.Droid.Database.h"
 
-namespace Elastos{
-namespace Apps{
+using Elastos::Droid::Content::AsyncTaskLoader;
+using Elastos::Droid::Content::IContext;
+using Elastos::Droid::Database::ICursor;
+
+namespace Elastos {
+namespace Apps {
 namespace Dialer {
 namespace Dialpad {
 
@@ -17,9 +24,9 @@ CarClass(CSmartDialCursorLoader)
     , public ISmartDialCursorLoader
 {
 public:
-    CAR_INTERFACE_DECL()
+    CAR_INTERFACE_DECL();
 
-    CAR_OBJECT_DECL()
+    CAR_OBJECT_DECL();
 
     CSmartDialCursorLoader();
 

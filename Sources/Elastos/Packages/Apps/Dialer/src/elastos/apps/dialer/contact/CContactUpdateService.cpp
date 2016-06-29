@@ -1,5 +1,5 @@
 
-#include "contact/CContactUpdateService.h"
+#include "elastos/apps/dialer/contact/CContactUpdateService.h"
 
 namespace Elastos {
 namespace Apps {

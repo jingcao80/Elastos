@@ -2,6 +2,7 @@ TARGET_NAME= widget
 TARGET_TYPE= lib
 
 INCLUDES += $(MAKEDIR)/../../../../../inc
+INCLUDES += $(MAKEDIR)/../../../../../
 INCLUDES += ../../../../../
 
 CAR_FLAGS += -n -u
@@ -9,9 +10,9 @@ LUBE_FLAGS += -n -u
 
 SOURCES += ActionBarController.cpp
 SOURCES += CActionBarController.cpp
-SOURCES += COverlappingPaneLayout.cpp
-SOURCES += CSearchEditTextLayout.cpp
-SOURCES += CViewDragHelperHelper.cpp
 SOURCES += OverlappingPaneLayout.cpp
+SOURCES += COverlappingPaneLayout.cpp
 SOURCES += SearchEditTextLayout.cpp
+SOURCES += CSearchEditTextLayout.cpp
 SOURCES += ViewDragHelper.cpp
+SOURCES += CViewDragHelperHelper.cpp

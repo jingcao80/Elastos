@@ -12,12 +12,13 @@ namespace Dialer {
 namespace CallLog {
 
 CarClass(CPhoneNumberUtilsWrapperHelper)
+    , public Singleton
     , public IPhoneNumberUtilsWrapperHelper
 {
 public:
-    CAR_INTERFACE_DECL()
+    CAR_INTERFACE_DECL();
 
-    CAR_SINGLETON_DECL()
+    CAR_SINGLETON_DECL();
 
     CARAPI GetINSTANCE(
         /* [out] */ IPhoneNumberUtilsWrapper** wrapper);

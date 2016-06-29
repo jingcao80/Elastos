@@ -1,6 +1,6 @@
 
-#include "util/COrientationUtil.h"
-#include "util/OrientationUtil.h"
+#include "elastos/apps/dialer/util/COrientationUtil.h"
+#include "elastos/apps/dialer/util/OrientationUtil.h"
 
 namespace Elastos {
 namespace Apps {

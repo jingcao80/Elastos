@@ -1,5 +1,5 @@
 
-#include "list/CShortcutCardsAdapter .h"
+#include "elastos/apps/dialer/list/CShortcutCardsAdapter .h"
 
 namespace Elastos {
 namespace Apps {

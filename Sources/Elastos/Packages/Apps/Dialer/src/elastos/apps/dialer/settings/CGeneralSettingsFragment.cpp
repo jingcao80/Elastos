@@ -1,5 +1,5 @@
 
-#include "settings/CGeneralSettingsFragment.h"
+#include "elastos/apps/dialer/settings/CGeneralSettingsFragment.h"
 
 namespace Elastos {
 namespace Apps {

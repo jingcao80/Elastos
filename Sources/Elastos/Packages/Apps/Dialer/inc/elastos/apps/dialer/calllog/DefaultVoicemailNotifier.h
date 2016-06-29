@@ -2,12 +2,20 @@
 #ifndef __ELASTOS_APPS_DIALER_CALLLOG_DEFAULTVOICEMAILNOTIFIER_H__
 #define __ELASTOS_APPS_DIALER_CALLLOG_DEFAULTVOICEMAILNOTIFIER_H__
 
+#include "_Elastos.Apps.Dialer.h"
+#include <elastos/core/Object.h>
 #include "Elastos.Droid.App.h"
 #include "Elastos.Droid.Content.h"
+#include "Elastos.Droid.Database.h"
+#include "Elastos.Droid.Net.h"
 
 using Elastos::Droid::App::INotificationManager;
 using Elastos::Droid::App::IPendingIntent;
 using Elastos::Droid::Content::IContext;
+using Elastos::Droid::Content::IContentResolver;
+
+using Elastos::Droid::Database::ICursor;
+using Elastos::Droid::Net::IUri;
 
 namespace Elastos {
 namespace Apps {
@@ -30,7 +38,7 @@ private:
         , public IDefaultVoicemailNotifierNewCall
     {
     public:
-        CAR_INTERFACE_DECL()
+        CAR_INTERFACE_DECL();
 
         NewCall(
             /* [in] */ IUri* callsUri,
@@ -54,13 +62,15 @@ private:
         , public IDefaultVoicemailNotifierNewCallsQuery
     {
     public:
+        CAR_INTERFACE_DECL();
+
+        DefaultNewCallsQuery(
+            /* [in] */ IContentResolver* contentResolver);
+
         CARAPI Query(
             /* [out, callee] */ ArrayOf<IDefaultVoicemailNotifierNewCall*>** newCalls);
 
     private:
-        DefaultNewCallsQuery(
-            /* [in] */ IContentResolver* contentResolver);
-
          /** Returns an instance of {@link NewCall} created by using the values of the cursor. */
         AutoPtr<IDefaultVoicemailNotifierNewCall> CreateNewCallsFromCursor(
             /* [in] */ ICursor* cursor);
@@ -84,12 +94,15 @@ private:
         , public IDefaultVoicemailNotifierNameLookupQuery
     {
     public:
-        CARAPI Query(
-            /* [out] */ String* NewCalls);
+        CAR_INTERFACE_DECL();
 
-    private:
         DefaultNameLookupQuery(
             /* [in] */ IContentResolver* contentResolver);
+
+        CARAPI Query(
+            /* [in] */ const String& number,
+            /* [out] */ String* NewCalls);
+
     private:
         static const String PROJECTION[]; // = { PhoneLookup.DISPLAY_NAME };
         static const Int32 DISPLAY_NAME_COLUMN_INDEX; // = 0;
@@ -98,6 +111,8 @@ private:
     };
 
 public:
+    CAR_INTERFACE_DECL();
+
     /** Returns the singleton instance of the {@link DefaultVoicemailNotifier}. */
     static CARAPI_(AutoPtr<IDefaultVoicemailNotifier>) GetInstance(
         /* [in] */ IContext* context);

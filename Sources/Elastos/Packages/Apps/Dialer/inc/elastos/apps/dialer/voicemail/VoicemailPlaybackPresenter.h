@@ -1,8 +1,42 @@
 #ifndef __ELASTOS_APPS_DIALER_VOICEMAIL_VOICEMAILPLAYBACKPRESENTER_H__
 #define __ELASTOS_APPS_DIALER_VOICEMAIL_VOICEMAILPLAYBACKPRESENTER_H__
 
-namespace Elastos{
-namespace Apps{
+#include "_Elastos.Apps.Dialer.h"
+#include <elastos/core/Object.h>
+#include <elastos/core/Runnable.h>
+#include <elastos/droid/database/ContentObserver.h>
+#include <elastos/droid/os/AsyncTask.h>
+#include "Elastos.Droid.Concurrent.h"
+#include "Elastos.Droid.Media.h"
+#include "Elastos.Droid.Net.h"
+#include "Elastos.Droid.Os.h"
+#include "Elastos.Droid.View.h"
+#include "Elastos.Droid.Widget.h"
+#include "Elastos.CoreLibrary.Core.h"
+#include "Elastos.CoreLibrary.Utility.h"
+
+using Elastos::Droid::Concurrent::Atomic::IAtomicBoolean;
+using Elastos::Droid::Concurrent::Atomic::IAtomicInteger32;
+using Elastos::Droid::Database::ContentObserver;
+using Elastos::Droid::Media::IMediaPlayer;
+using Elastos::Droid::Media::IMediaPlayerOnErrorListener;
+using Elastos::Droid::Media::IMediaPlayerOnCompletionListener;
+using Elastos::Droid::Net::IUri;
+using Elastos::Droid::Os::AsyncTask;
+using Elastos::Droid::Os::IBundle;
+using Elastos::Droid::Os::IHandler;
+using Elastos::Droid::Os::IPowerManagerWakeLock;
+using Elastos::Droid::View::IView;
+using Elastos::Droid::View::IViewOnClickListener;
+using Elastos::Droid::Widget::ISeekBar;
+using Elastos::Droid::Widget::ISeekBarOnSeekBarChangeListener;
+using Elastos::Core::Runnable;
+using Elastos::Core::IRunnable;
+using Elastos::Utility::Concurrent::IScheduledExecutorService;
+using Elastos::Apps::Dialer::Util::IAsyncTaskExecutor;
+
+namespace Elastos {
+namespace Apps {
 namespace Dialer {
 namespace Voicemail {
 
@@ -48,7 +82,7 @@ private:
         };
 
     public:
-        CAR_INTERFACE_DECL()
+        CAR_INTERFACE_DECL();
 
         FetchResultHandler(
             /* [in]  */ VoicemailPlaybackPresenter* host);
@@ -93,7 +127,7 @@ private:
         };
 
     public:
-        CAR_INTERFACE_DECL()
+        CAR_INTERFACE_DECL();
 
         MediaPlayerErrorListener(
             /* [in]  */ VoicemailPlaybackPresenter* host);
@@ -130,7 +164,7 @@ private:
         };
 
     public:
-        CAR_INTERFACE_DECL()
+        CAR_INTERFACE_DECL();
 
         MediaPlayerCompletionListener(
             /* [in]  */ VoicemailPlaybackPresenter* host);
@@ -153,7 +187,7 @@ private:
         , public IViewOnClickListener
     {
     public:
-        CAR_INTERFACE_DECL()
+        CAR_INTERFACE_DECL();
 
         RateChangeListener(
             /* [in]  */ VoicemailPlaybackPresenter* host,
@@ -192,7 +226,7 @@ private:
         , public ISeekBarOnSeekBarChangeListener
     {
     public:
-        CAR_INTERFACE_DECL()
+        CAR_INTERFACE_DECL();
 
         PlaybackPositionListener(
             /* [in]  */ VoicemailPlaybackPresenter* host);
@@ -220,7 +254,7 @@ private:
         , public IViewOnClickListener
     {
     public:
-        CAR_INTERFACE_DECL()
+        CAR_INTERFACE_DECL();
 
         SpeakerphoneListener(
             /* [in]  */ VoicemailPlaybackPresenter* host);
@@ -238,7 +272,7 @@ private:
         , public IViewOnClickListener
     {
     public:
-        CAR_INTERFACE_DECL()
+        CAR_INTERFACE_DECL();
 
         StartStopButtonListener(
             /* [in]  */ VoicemailPlaybackPresenter* host);
@@ -293,7 +327,8 @@ private:
         Int32 mPeriodMillis;
         Object mLock;
         // @GuardedBy("mLock")
-        AutoPtr<IScheduledFuture> mScheduledFuture;
+        // TODO:
+        // AutoPtr<IScheduledFuture> mScheduledFuture;
         AutoPtr<IRunnable> mSetClipPostitionRunnable;
     };
 
@@ -334,18 +369,19 @@ private:
     };
 
 public:
-    CAR_INTERFACE_DECL()
+    CAR_INTERFACE_DECL();
 
     VoicemailPlaybackPresenter();
 
-    CARAPI constructor(
-        /* [in] */ IVoicemailPlaybackPresenterPlaybackView* view,
-        /* [in] */ IMediaPlayerProxy* player,
-        /* [in] */ IUri* voicemailUri,
-        /* [in] */ IScheduledExecutorService* executorService,
-        /* [in] */ Boolean startPlayingImmediately,
-        /* [in] */ IAsyncTaskExecutor* asyncTaskExecutor,
-        /* [in] */ IPowerManagerWakeLock* wakeLock);
+    // TODO:
+    // CARAPI constructor(
+    //     /* [in] */ IVoicemailPlaybackPresenterPlaybackView* view,
+    //     /* [in] */ IMediaPlayerProxy* player,
+    //     /* [in] */ IUri* voicemailUri,
+    //     /* [in] */ IScheduledExecutorService* executorService,
+    //     /* [in] */ Boolean startPlayingImmediately,
+    //     /* [in] */ IAsyncTaskExecutor* asyncTaskExecutor,
+    //     /* [in] */ IPowerManagerWakeLock* wakeLock);
 
     CARAPI OnCreate(
         /* [in] */ IBundle* bundle);
@@ -477,8 +513,9 @@ private:
     AutoPtr<IAtomicInteger32> mDuration; // = new AtomicInteger(0);
 
     AutoPtr<IVoicemailPlaybackPresenterPlaybackView> mView;
-    AutoPtr<IMediaPlayerProxy> mPlayer;
-    AutoPtr<IPositionUpdater> mPositionUpdater;
+    // TODO:
+    // AutoPtr<IMediaPlayerProxy> mPlayer;
+    AutoPtr<PositionUpdater> mPositionUpdater;
 
     /** Voicemail uri to play. */
     AutoPtr<IUri> mVoicemailUri;
@@ -494,7 +531,7 @@ private:
      */
     AutoPtr<FetchResultHandler> mFetchResultHandler;
     AutoPtr<IPowerManagerWakeLock> mWakeLock;
-    AutoPtr<IAsyncTask> mPrepareTask;
+    AutoPtr<AsyncTask> mPrepareTask;
 };
 
 } // Voicemail

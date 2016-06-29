@@ -14,7 +14,7 @@ CAR_SINGLETON_IMPL(CPhoneAccountUtils);
 ECode CPhoneAccountUtils::GetAccount(
     /* [in] */ String componentString,
     /* [in] */ String accountId,
-    /* [out] */ IPhoneAccountHandle* handle)
+    /* [out] */ IPhoneAccountHandle** handle)
 {
     VALIDATE_NOT_NULL(handle);
     AutoPtr<IPhoneAccountHandle> result = PhoneAccountUtils::GetAccount(
@@ -31,7 +31,7 @@ ECode CPhoneAccountUtils::GetAccountIcon(
     /* [out] */ IDrawable** drawable)
 {
     VALIDATE_NOT_NULL(drawable);
-    AutoPtr<IPhoneAccountHandle> result = PhoneAccountUtils::GetAccountIcon(
+    AutoPtr<IDrawable> result = PhoneAccountUtils::GetAccountIcon(
             context, phoneAccount);
     *drawable = result;
     REFCOUNT_ADD(*drawable);
@@ -45,9 +45,8 @@ ECode CPhoneAccountUtils::GetAccountLabel(
     /* [out] */ String* lable)
 {
     VALIDATE_NOT_NULL(lable);
-    AutoPtr<IPhoneAccountHandle> result = PhoneAccountUtils::GetAccountLabel(
+    *lable = PhoneAccountUtils::GetAccountLabel(
             context, phoneAccount);
-    *lable = result;
 
     return NOERROR;
 }

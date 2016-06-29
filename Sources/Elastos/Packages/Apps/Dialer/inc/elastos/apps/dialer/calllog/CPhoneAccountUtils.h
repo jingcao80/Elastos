@@ -4,6 +4,11 @@
 
 #include "_Elastos_Apps_Dialer_CallLog_CPhoneAccountUtils.h"
 #include <elastos/core/Singleton.h>
+#include "Elastos.Droid.Graphics.h"
+
+using Elastos::Droid::Content::IContext;
+using Elastos::Droid::Graphics::Drawable::IDrawable;
+using Elastos::Droid::Telecomm::Telecom::IPhoneAccountHandle;
 
 namespace Elastos {
 namespace Apps {
@@ -25,7 +30,7 @@ public:
     CARAPI GetAccount(
         /* [in] */ String componentString,
         /* [in] */ String accountId,
-        /* [out] */ IPhoneAccountHandle* handle);
+        /* [out] */ IPhoneAccountHandle** handle);
 
     /**
      * Generate account icon from data in Telecomm database

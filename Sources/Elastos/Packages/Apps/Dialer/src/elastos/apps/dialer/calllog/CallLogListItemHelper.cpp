@@ -1,5 +1,18 @@
 
 #include "elastos/apps/dialer/calllog/CallLogListItemHelper.h"
+#include "elastos/apps/dialer/calllog/CallLogListItemViews.h"
+#include "elastos/apps/dialer/CPhoneCallDetails.h"
+#include "R.h"
+#include "Elastos.Droid.Provider.h"
+#include <elastos/droid/text/TextUtils.h>
+#include <elastos/core/CoreUtils.h>
+#include <elastos/core/StringBuilder.h>
+
+using Elastos::Droid::Provider::ICalls;
+using Elastos::Droid::Text::TextUtils;
+using Elastos::Core::CoreUtils;
+using Elastos::Core::StringBuilder;
+using Elastos::Apps::Dialer::CPhoneCallDetails;
 
 namespace Elastos {
 namespace Apps {
@@ -20,7 +33,7 @@ void CallLogListItemHelper::SetPhoneCallDetails(
     /* [in] */ ICallLogListItemViews* views,
     /* [in] */ IPhoneCallDetails* details)
 {
-    CCallLogListItemViews* cviews = (CCallLogListItemViews*)views;
+    CallLogListItemViews* cviews = (CallLogListItemViews*)views;
     mPhoneCallDetailsHelper->SetPhoneCallDetails(
             cviews->mPhoneCallDetailsViews, details);
 
@@ -45,31 +58,36 @@ void CallLogListItemHelper::SetPhoneCallDetails(
 void CallLogListItemHelper::SetActionContentDescriptions(
     /* [in] */ ICallLogListItemViews* views)
 {
-    CCallLogListItemViews* cviews = (CCallLogListItemViews*)views;
+    CallLogListItemViews* cviews = (CallLogListItemViews*)views;
     String str;
+    AutoPtr<ArrayOf<IInterface*> > formatArgs = ArrayOf<IInterface*>::Alloc(1);
+    formatArgs->Set(0, cviews->mNameOrNumber);
     mResources->GetString(
-            R::string::description_call_back_action, cviews->mNameOrNumber, &str);
-    IView::Probe(cviews->mCallBackButtonView)->SetContentDescription(str);
+            R::string::description_call_back_action, formatArgs, &str);
+    IView::Probe(cviews->mCallBackButtonView)->SetContentDescription(CoreUtils::Convert(str));
 
     mResources->GetString(
-            R::string::description_video_call_action, cviews->mNameOrNumber, &str);
-    IView::Probe(cviews->mVideoCallButtonView)->SetContentDescription(str);
+            R::string::description_video_call_action, formatArgs, &str);
+    IView::Probe(cviews->mVideoCallButtonView)->SetContentDescription(CoreUtils::Convert(str));
 
     mResources->GetString(
-            R::string::description_voicemail_action, cviews->mNameOrNumber, &str);
-    IView::Probe(cviews->mVoicemailButtonView)->SetContentDescription(str);
+            R::string::description_voicemail_action, formatArgs, &str);
+    IView::Probe(cviews->mVoicemailButtonView)->SetContentDescription(CoreUtils::Convert(str));
 
     mResources->GetString(
-            R::string::description_details_action, cviews->mNameOrNumber, &str);
-    IView::Probe(cviews->mDetailsButtonView)->SetContentDescription(str);
+            R::string::description_details_action, formatArgs, &str);
+    IView::Probe(cviews->mDetailsButtonView)->SetContentDescription(CoreUtils::Convert(str));
 }
 
 AutoPtr<ICharSequence> CallLogListItemHelper::GetContactBadgeDescription(
     /* [in] */ IPhoneCallDetails* details)
 {
     String str;
-    mResources->GetString(R::string::description_contact_details,
-            GetNameOrNumber(details), &str);
+    AutoPtr<ICharSequence> nameOrNumber = GetNameOrNumber(details);
+    AutoPtr<ArrayOf<IInterface*> > formatArgs = ArrayOf<IInterface*>::Alloc(1);
+    formatArgs->Set(0, nameOrNumber);
+    mResources->GetString(
+            R::string::description_contact_details, formatArgs, &str);
     return CoreUtils::Convert(str);
 }
 
@@ -93,8 +111,7 @@ AutoPtr<ICharSequence> CallLogListItemHelper::GetCallDescription(
     AutoPtr<ICharSequence> timeOfCall;
     mPhoneCallDetailsHelper->GetCallDate(details, (ICharSequence**)&timeOfCall);
 
-    AutoPtr<IStringBuilder> callDescription;
-    CStringBuilder::New((IStringBuilder**)&callDescription);
+    AutoPtr<StringBuilder> callDescription = new StringBuilder();
 
     // Prepend the voicemail indication.
     if (isVoiceMail) {
@@ -106,27 +123,37 @@ AutoPtr<ICharSequence> CallLogListItemHelper::GetCallDescription(
     // Add number of calls if more than one.
     if (cdetails->mCallTypes->GetLength() > 1) {
         String str;
-        mResources.getString(R::string.description_num_calls,
-                cdetails->mCallTypes->GetLength(), &str);
+        AutoPtr<ArrayOf<IInterface*> > formatArgs = ArrayOf<IInterface*>::Alloc(1);
+        formatArgs->Set(0, CoreUtils::Convert(cdetails->mCallTypes->GetLength()));
+        mResources->GetString(
+                R::string::description_num_calls, formatArgs, &str);
         callDescription->Append(str);
     }
 
     // If call had video capabilities, add the "Video Call" string.
-    if ((cdetails->mFeatures & ICalls::FEATURES_VIDEO) == ICalls::FEATURES_VIDEO &&
-            CallUtil::IsVideoEnabled(context)) {
-        String str;
-        mResources->GetString(R::string::description_video_call, &str);
-        callDescription->Append(str);
-    }
+    assert(0 && "TODO");
+    // if ((cdetails->mFeatures & ICalls::FEATURES_VIDEO) == ICalls::FEATURES_VIDEO &&
+    //         CallUtil::IsVideoEnabled(context)) {
+    //     String str;
+    //     mResources->GetString(R::string::description_video_call, &str);
+    //     callDescription->Append(str);
+    // }
 
     Int32 stringID = GetCallDescriptionStringID(details);
 
     // Use chosen string resource to build up the message.
     String str;
-    mResources->GetString(stringID, nameOrNumber,
-            // If no type or location can be determined, sub in empty string.
-            typeOrLocation == NULL ? "" : typeOrLocation,
-            timeOfCall, &str);
+    AutoPtr<ArrayOf<IInterface*> > formatArgs = ArrayOf<IInterface*>::Alloc(3);
+    formatArgs->Set(0, nameOrNumber);
+    // If no type or location can be determined, sub in empty string.
+    if (typeOrLocation == NULL) {
+        formatArgs->Set(1, CoreUtils::Convert(String("")));
+    }
+    else {
+        formatArgs->Set(1, typeOrLocation);
+    }
+    formatArgs->Set(2, timeOfCall);
+    mResources->GetString(stringID, formatArgs, &str);
     callDescription->Append(str);
 
     return ICharSequence::Probe(callDescription);
@@ -135,7 +162,7 @@ AutoPtr<ICharSequence> CallLogListItemHelper::GetCallDescription(
 Int32 CallLogListItemHelper::GetCallDescriptionStringID(
     /* [in] */ IPhoneCallDetails* details)
 {
-    Int32 lastCallType = getLastCallType(details.callTypes);
+    Int32 lastCallType = GetLastCallType(((CPhoneCallDetails*)details)->mCallTypes);
     Int32 stringID;
 
     if (lastCallType == ICalls::VOICEMAIL_TYPE || lastCallType == ICalls::MISSED_TYPE) {
@@ -154,10 +181,10 @@ Int32 CallLogListItemHelper::GetCallDescriptionStringID(
 }
 
 Int32 CallLogListItemHelper::GetLastCallType(
-    /* [in] */ const ArrayOf<Int32>& callTypes)
+    /* [in] */ ArrayOf<Int32>* callTypes)
 {
-    if (callTypes.GetLength() > 0) {
-        return callTypes[0];
+    if (callTypes->GetLength() > 0) {
+        return (*callTypes)[0];
     }
     else {
         return ICalls::MISSED_TYPE;
@@ -174,7 +201,7 @@ AutoPtr<ICharSequence> CallLogListItemHelper::GetNameOrNumber(
     }
     else {
          mPhoneNumberHelper->GetDisplayNumber(
-                cdetails->mUumber, cdetails->mNumberPresentation,
+                cdetails->mNumber, cdetails->mNumberPresentation,
                 cdetails->mFormattedNumber, (ICharSequence**)&recipient);
     }
     return recipient;

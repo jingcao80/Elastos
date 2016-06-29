@@ -1,8 +1,21 @@
 #ifndef __ELASTOS_APPS_DIALER_LIST_PHONEFAVORITESQUARETITLEVIEW_H__
 #define __ELASTOS_APPS_DIALER_LIST_PHONEFAVORITESQUARETITLEVIEW_H__
 
-namespace Elastos{
-namespace Apps{
+#include "_Elastos.Apps.Dialer.h"
+#include "elastos/apps/dialer/list/PhoneFavoriteTileView.h"
+#include <elastos/core/Object.h>
+#include "Elastos.Droid.Content.h"
+#include "Elastos.Droid.View.h"
+#include "Elastos.Droid.Utility.h"
+#include "Elastos.Droid.Widget.h"
+
+using Elastos::Droid::Content::IContext;
+using Elastos::Droid::View::IView;
+using Elastos::Droid::Utility::IAttributeSet;
+using Elastos::Droid::Widget::IImageButton;
+
+namespace Elastos {
+namespace Apps {
 namespace Dialer {
 namespace List {
 
@@ -19,7 +32,7 @@ private:
         , public IViewOnClickListener
     {
     public:
-        CAR_INTERFACE_DECL()
+        CAR_INTERFACE_DECL();
 
         SecondaryButtonOnClickListener(
             /* [in] */ PhoneFavoriteSquareTileView* host);
@@ -33,7 +46,7 @@ private:
     };
 
 public:
-    CAR_INTERFACE_DECL()
+    CAR_INTERFACE_DECL();
 
     CARAPI constructor(
         /* [in] */ IContext* context,

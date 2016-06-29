@@ -3,9 +3,12 @@
 
 #include "_Elastos_Apps_Dialer_Util_COrientationUtil.h"
 #include <elastos/core/Singleton.h>
+#include "Elastos.Droid.Content.h"
 
-namespace Elastos{
-namespace Apps{
+using Elastos::Droid::Content::IContext;
+
+namespace Elastos {
+namespace Apps {
 namespace Dialer {
 namespace Util {
 
@@ -14,9 +17,9 @@ CarClass(COrientationUtil)
     , public IOrientationUtil
 {
 public:
-    CAR_INTERFACE_DECL()
+    CAR_INTERFACE_DECL();
 
-    CAR_SINGLETON_DECL()
+    CAR_SINGLETON_DECL();
 
     /**
      * @return if the context is in landscape orientation.

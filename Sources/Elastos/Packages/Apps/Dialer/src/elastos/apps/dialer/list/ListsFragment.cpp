@@ -1,5 +1,33 @@
 
-#include "list/ListsFragment.h"
+#include "elastos/apps/dialer/list/ListsFragment.h"
+#include "elastos/apps/dialer/list/CAllContactsFragment.h"
+#include "elastos/apps/dialer/list/CSpeedDialFragment.h"
+#include "elastos/apps/dialer/list/ShortcutCardsAdapter.h"
+#include "elastos/apps/dialer/list/CShortcutCardsAdapter.h"
+#include "elastos/apps/dialer/calllog/CCallLogFragment.h"
+#include "elastos/apps/dialer/calllog/CContactInfoHelper.h"
+#include "elastos/apps/dialer/calllog/CCallLogQueryHandler.h"
+#include "elastos/apps/dialer/util/DialerUtils.h"
+#include "elastos/apps/dialerbind/CObjectFactory.h"
+#include <elastos/core/CoreUtils.h>
+#include <elastos/utility/logging/Logger.h>
+#include "R.h"
+
+using Elastos::Droid::App::IActivity;
+using Elastos::Droid::Content::Res::IResources;
+using Elastos::Droid::Content::ISharedPreferences;
+using Elastos::Droid::View::IViewPropertyAnimator;
+using Elastos::Core::CoreUtils;
+using Elastos::Core::ISystem;
+using Elastos::Core::CSystem;
+using Elastos::Utility::CArrayList;
+using Elastos::Apps::Dialer::CallLog::ICallLogQuery;
+using Elastos::Apps::Dialer::CallLog::CCallLogFragment;
+using Elastos::Apps::Dialer::CallLog::CCallLogQueryHandler;
+using Elastos::Apps::Dialer::Util::DialerUtils;
+using Elastos::Apps::Dialer::IDialtactsActivity;
+using Elastos::Apps::DialerBind::IObjectFactory;
+using Elastos::Apps::DialerBind::CObjectFactory;
 
 namespace Elastos {
 namespace Apps {
@@ -27,7 +55,7 @@ ECode ListsFragment::ViewPagerAdapter::GetItemId(
     /* [out] */ Int64* id)
 {
     VALIDATE_NOT_NULL(id);
-    return mHost->GetRtlPosition(position, id);
+    return mHost->GetRtlPosition(position, (Int32*)id);
 }
 
 ECode ListsFragment::ViewPagerAdapter::GetItem(
@@ -45,16 +73,18 @@ ECode ListsFragment::ViewPagerAdapter::GetItem(
             REFCOUNT_ADD(*item);
             return NOERROR;
         case TAB_INDEX_RECENTS:
+        {
             AutoPtr<ISystem> sys;
             CSystem::AcquireSingleton((ISystem**)&sys);
             Int64 value;
             sys->GetCurrentTimeMillis(&value);
             CCallLogFragment::New(ICallLogQueryHandler::CALL_TYPE_ALL, MAX_RECENTS_ENTRIES,
                     value - OLDEST_RECENTS_DATE, (ICallLogFragment**)&(mHost->mRecentsFragment));
-            mRecentsFragment->SetHasFooterView(TRUE);
+            mHost->mRecentsFragment->SetHasFooterView(TRUE);
             *item = IFragment::Probe(mHost->mRecentsFragment);
             REFCOUNT_ADD(*item);
             return NOERROR;
+        }
         case TAB_INDEX_ALL_CONTACTS:
             CAllContactsFragment::New((IAllContactsFragment**)&(mHost->mAllContactsFragment));
             *item = IFragment::Probe(mHost->mAllContactsFragment);
@@ -77,7 +107,8 @@ ECode ListsFragment::ViewPagerAdapter::InstantiateItem(
     // Copy the fragments that the FragmentManager finds so that we can store them in
     // instance variables for later.
     AutoPtr<IInterface> fragment;
-    FragmentPagerAdapter::InstantiateItem(container, position, (IInterface**)&fragment);
+    assert(0 && "TODO");
+    // FragmentPagerAdapter::InstantiateItem(container, position, (IInterface**)&fragment);
     if (ISpeedDialFragment::Probe(fragment) != NULL) {
         mHost->mSpeedDialFragment = ISpeedDialFragment::Probe(fragment);
     }
@@ -107,7 +138,7 @@ ECode ListsFragment::ViewPagerAdapter::GetPageTitle(
 {
     VALIDATE_NOT_NULL(title);
 
-    *title = CoreUtils::Convert(mHost->mTabTitles[position]);
+    *title = CoreUtils::Convert((*mHost->mTabTitles)[position]);
     REFCOUNT_ADD(*title);
 
     return NOERROR;
@@ -136,7 +167,7 @@ ECode ListsFragment::PanelSlideCallbacks::OnPanelSlide(
     if (mHost->mShortcutCardsListView->GetChildCount(&count), count > 0) {
         AutoPtr<IInterface> v;
         mShortcutCardsListView->GetChildAt(0, (IInterface**)&v);
-        ISwipeableShortcutCard::Probe(v)->ClipCard(ratioCardHidden);
+        (ShortcutCardsAdapter::SwipeableShortcutCard*)IObject::Probe(v)->ClipCard(ratioCardHidden);
     }
 
     if (mHost->mActionBar != NULL) {
@@ -150,7 +181,7 @@ ECode ListsFragment::PanelSlideCallbacks::OnPanelSlide(
 
         AutoPtr<IActivity> activity;
         GetActivity((IActivity**)&activity);
-        IHostInterface::Probe(activity)->SetActionBarHideOffset(
+        IListFragmentHostInterface::Probe(activity)->SetActionBarHideOffset(
                 height - availableActionBarHeight);
 
         Boolean isShowing;
@@ -221,7 +252,8 @@ ECode ListsFragment::PanelSlideCallbacks::IsScrollableChildUnscrolled(
 //=================================================================
 // ListsFragment
 //=================================================================
-CAR_INTERFACE_IMPL_3(ListsFragment, AnalyticsFragment, IListsFragment,
+// TODO:
+CAR_INTERFACE_IMPL_3(ListsFragment, /*AnalyticsFragment*/Fragment, IListsFragment,
         ICallLogQueryHandlerListener, ICallLogAdapterCallFetcher)
 
 const Boolean ListsFragment::DEBUG = IDialtactsActivity::DEBUG;
@@ -270,7 +302,8 @@ ECode ListsFragment::GetCurrentListView(
 ECode ListsFragment::OnCreate(
     /* [in] */ IBundle* savedInstanceState)
 {
-    AnalyticsFragment::OnCreate(savedInstanceState);
+    assert(0 && "TODO");
+    // AnalyticsFragment::OnCreate(savedInstanceState);
 
     AutoPtr<IActivity> activity;
     GetActivity((IActivity**)&activity);
@@ -278,7 +311,9 @@ ECode ListsFragment::OnCreate(
     IContext::Probe(activity)->GetContentResolver((IContentResolver**)&resolver);
     CCallLogQueryHandler::New(resolver,
             this, 1, (ICallLogQueryHandler**)&mCallLogQueryHandler);
-    String currentCountryIso = GeoUtil::GetCurrentCountryIso(activity);
+    String currentCountryIso;
+    assert(0 && "TODO");
+    // currentCountryIso = GeoUtil::GetCurrentCountryIso(activity);
 
     AutoPtr<IObjectFactory> factory;
     CObjectFactory::AcquireSingleton((IObjectFactory**)&factory);
@@ -295,12 +330,15 @@ ECode ListsFragment::OnCreate(
 
 ECode ListsFragment::OnStart()
 {
-    return AnalyticsFragment::OnStart();
+    assert(0 && "TODO");
+    return NOERROR;
+    // return AnalyticsFragment::OnStart();
 }
 
 ECode ListsFragment::OnResume()
 {
-    AnalyticsFragment::OnResume();
+    assert(0 && "TODO");
+    // AnalyticsFragment::OnResume();
     AutoPtr<IActivity> activity;
     GetActivity((IActivity**)&activity);
     AutoPtr<ISharedPreferences> prefs;
@@ -319,13 +357,17 @@ ECode ListsFragment::OnPause()
     // Wipe the cache to refresh the call shortcut item. This is not that expensive because
     // it only contains one item.
     mCallLogAdapter->InvalidateCache();
-    return AnalyticsFragment::OnPause();
+    assert(0 && "TODO");
+    return NOERROR;
+    // return AnalyticsFragment::OnPause();
 }
 
 ECode ListsFragment::OnDestroy()
 {
     mCallLogAdapter->StopRequestProcessing();
-    return AnalyticsFragment::OnDestroy();
+    assert(0 && "TODO");
+    return NOERROR;
+    // return AnalyticsFragment::OnDestroy();
 }
 
 ECode ListsFragment::OnCreateView(
@@ -341,17 +383,18 @@ ECode ListsFragment::OnCreateView(
             container, FALSE, (IView**)&parentView);
     AutoPtr<IView> temp;
 
-    mViewPager = IViewPager::Probe(temp);
+    assert(0 && "TODO");
+    // mViewPager = IViewPager::Probe(temp);
 
-    AutoPtr<IFragmentManager> manager;
-    GetChildFragmentManager((IFragmentManager**)&manager);
-    CViewPagerAdapter::New(manager, (IViewPagerAdapter**)&mViewPagerAdapter);
-    mViewPager->SetAdapter(mViewPagerAdapter);
-    mViewPager->SetOffscreenPageLimit(2);
-    mViewPager->SetOnPageChangeListener(this);
-    Int32 rtl;
-    GetRtlPosition(TAB_INDEX_SPEED_DIAL, &rtl);
-    mViewPager->SetCurrentItem(rtl);
+    // AutoPtr<IFragmentManager> manager;
+    // GetChildFragmentManager((IFragmentManager**)&manager);
+    // CViewPagerAdapter::New(manager, (IViewPagerAdapter**)&mViewPagerAdapter);
+    // mViewPager->SetAdapter(mViewPagerAdapter);
+    // mViewPager->SetOffscreenPageLimit(2);
+    // mViewPager->SetOnPageChangeListener(this);
+    // Int32 rtl;
+    // GetRtlPosition(TAB_INDEX_SPEED_DIAL, &rtl);
+    // mViewPager->SetCurrentItem(rtl);
 
     mTabTitles = ArrayOf<String>::Alloc(TAB_INDEX_COUNT);
     AutoPtr<IResources> resources;
@@ -366,9 +409,10 @@ ECode ListsFragment::OnCreateView(
 
     temp = NULL;
     parentView->FindViewById(R::id::lists_pager_header, (IView**)&temp);
-    mViewPagerTabs = IViewPagerTabs::Probe(temp);
-    mViewPagerTabs->SetViewPager(mViewPager);
-    AddOnPageChangeListener(mViewPagerTabs);
+    assert(0 && "TODO");
+    // mViewPagerTabs = IViewPagerTabs::Probe(temp);
+    // mViewPagerTabs->SetViewPager(mViewPager);
+    // AddOnPageChangeListener(mViewPagerTabs);
 
     temp = NULL;
     parentView->FindViewById(R::id::shortcut_card_list, (IView**)&temp);
@@ -380,7 +424,7 @@ ECode ListsFragment::OnCreateView(
     mRemoveView = IRemoveView::Probe(temp);
     parentView->FindViewById(R::id::remove_view_content, (IView**)&mRemoveViewContent);
 
-    SetupPaneLayout((OverlappingPaneLayout) parentView);
+    SetupPaneLayout(IOverlappingPaneLayout::Probe(parentView));
 
     *view = parentView;
     REFCOUNT_ADD(*view);
@@ -547,14 +591,15 @@ void ListsFragment::SetupPaneLayout(
 {
     // TODO: Remove the notion of a capturable view. The entire view be slideable, once
     // the framework better supports nested scrolling.
-    paneLayou->SetCapturableView(mViewPagerTabs);
+    assert(0 && "TODO");
+    // paneLayou->SetCapturableView(mViewPagerTabs);
     paneLayout->OpenPane();
     paneLayout->SetPanelSlideCallbacks(mPanelSlideCallbacks);
 
     AutoPtr<IActivity> activity;
     GetActivity((IActivity**)&activity);
     Int32 height;
-    IHostInterface::Probe(activity)->GetActionBarHeight(&height);
+    IListsFragmentHostInterface::Probe(activity)->GetActionBarHeight(&height);
     paneLayout->SetIntermediatePinnedOffset(height);
 
     AutoPtr<ILayoutTransition> transition;

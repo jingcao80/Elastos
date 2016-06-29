@@ -1,5 +1,5 @@
 
-#include "list/CDialerPhoneNumberListAdapter.h"
+#include "elastos/apps/dialer/list/CDialerPhoneNumberListAdapter.h"
 
 namespace Elastos {
 namespace Apps {

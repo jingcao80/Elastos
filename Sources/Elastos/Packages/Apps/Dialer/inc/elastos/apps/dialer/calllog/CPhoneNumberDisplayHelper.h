@@ -3,8 +3,13 @@
 #define __ELASTOS_APPS_DIALER_CALLLOG_CPHONENUMBERDISPLAYHELPER_H__
 
 #include "_Elastos_Apps_Dialer_CallLog_CPhoneNumberDisplayHelper.h"
+#include <elastos/core/Object.h>
+#include "Elastos.Droid.Content.h"
+#include "Elastos.Droid.Telephony.h"
 
+using Elastos::Droid::Content::Res::IResources;
 using Elastos::Droid::Telephony::IPhoneNumberUtils;
+using Elastos::Core::ICharSequence;
 
 namespace Elastos {
 namespace Apps {
@@ -16,9 +21,9 @@ CarClass(CPhoneNumberDisplayHelper)
     , public IPhoneNumberDisplayHelper
 {
 public:
-    CAR_INTERFACE_DECL()
+    CAR_INTERFACE_DECL();
 
-    CAR_OBJECT_DECL()
+    CAR_OBJECT_DECL();
 
     CARAPI constructor(
         /* [in] */ IResources* resources);

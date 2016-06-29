@@ -1,5 +1,6 @@
 
-#include "util/EmptyLoader.h"
+#include "elastos/apps/dialer/util/EmptyLoader.h"
+#include "elastos/apps/dialer/util/CEmptyLoader.h"
 
 namespace Elastos {
 namespace Apps {

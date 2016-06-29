@@ -1,5 +1,13 @@
 
-#include "list/PhoneFavoriteTileView.h"
+#include "elastos/apps/dialer/list/PhoneFavoriteTileView.h"
+#include <elastos/droid/text/TextUtils.h>
+#include "R.h"
+
+using Elastos::Droid::Content::IClipDataHelper;
+using Elastos::Droid::Content::CClipDataHelper;
+using Elastos::Droid::Text::TextUtils;
+using Elastos::Droid::View::IDragShadowBuilder;
+using Elastos::Droid::View::CDragShadowBuilder;
 
 namespace Elastos {
 namespace Apps {
@@ -52,8 +60,9 @@ ECode PhoneFavoriteTileView::MyClickListener::OnClick(
         // Copy "superclass" implementation
         AutoPtr<IUri> uri;
         GetLookupUri((IUri**)&uri);
-        mHost->mListener->OnContactSelected(uri,
-                MoreContactUtils::GetTargetRectFromView(this));
+        assert(0 && "TODO");
+        // mHost->mListener->OnContactSelected(uri,
+        //         MoreContactUtils::GetTargetRectFromView(this));
     }
     else {
         // When you tap a frequently-called contact, you want to
@@ -83,56 +92,59 @@ const String PhoneFavoriteTileView::DRAG_PHONE_FAVORITE_TILE("PHONE_FAVORITE_TIL
 const String PhoneFavoriteTileView::TAG("PhoneFavoriteTileView");
 const Boolean PhoneFavoriteTileView::DEBUG = FALSE;
 
-const Float PhoneFavoriteTileView::DEFAULT_IMAGE_LETTER_OFFSET = -0.12f;
-const Float PhoneFavoriteTileView::DEFAULT_IMAGE_LETTER_SCALE = 0.70f;
+const Float PhoneFavoriteTileView::DEFAULT_IMAGE_LETTER_OFFSET = -0.12;
+const Float PhoneFavoriteTileView::DEFAULT_IMAGE_LETTER_SCALE = 0.70;
 
 const AutoPtr<IClipData> PhoneFavoriteTileView::EMPTY_CLIP_DATA = CreateClipData();
 
-CAR_INTERFACE_IMPL(PhoneFavoriteTileView, ContactTileView, IPhoneFavoriteTileView)
+CAR_INTERFACE_IMPL(PhoneFavoriteTileView, /*ContactTileView*/FrameLayout, IPhoneFavoriteTileView)
 
 ECode PhoneFavoriteTileView::constructor(
     /* [in] */ IContext* context,
     /* [in] */ IAttributeSet* attrs)
 {
-    return ContactTileView::constructor(context, attrs);
+    assert(0 && "TODO");
+    return NOERROR;
+    // return ContactTileView::constructor(context, attrs);
 }
 
 ECode PhoneFavoriteTileView::OnFinishInflate()
 {
-    ContactTileView::OnFinishInflate();
-    FindViewById(R.id.shadow_overlay, (IView**)&mShadowOverlay);
+    assert(0 && "TODO");
+    // ContactTileView::OnFinishInflate();
+    FindViewById(R::id::shadow_overlay, (IView**)&mShadowOverlay);
 
     SetOnLongClickListener(
             (IViewOnLongClickListener*)new MyLongClickListener(this));
     return NOERROR;
 }
 
-ECode PhoneFavoriteTileView::LoadFromContact(
-    /* [in] */ IContactEntry* entry)
-{
-    ContactTileView::LoadFromContact(entry);
-    // Set phone number to null in case we're reusing the view.
-    mPhoneNumberString = NULL;
-    if (entry != NULL) {
-        // Grab the phone-number to call directly. See {@link onClick()}.
-        mPhoneNumberString = ((CContactEntry*)entry)->mPhoneNumber;
+// ECode PhoneFavoriteTileView::LoadFromContact(
+//     /* [in] */ IContactEntry* entry)
+// {
+//     ContactTileView::LoadFromContact(entry);
+//     // Set phone number to null in case we're reusing the view.
+//     mPhoneNumberString = NULL;
+//     if (entry != NULL) {
+//         // Grab the phone-number to call directly. See {@link onClick()}.
+//         mPhoneNumberString = ((CContactEntry*)entry)->mPhoneNumber;
 
-        // If this is a blank entry, don't show anything.
-        // TODO krelease: Just hide the view for now. For this to truly look like an empty row
-        // the entire ContactTileRow needs to be hidden.
-        if (entry == ContactEntry::BLANK_ENTRY) {
-            SetVisibility(IView::INVISIBLE);
-        }
-        else {
-            AutoPtr<IView> starIcon;
-            FindViewById(R::id::contact_star_icon, (IView**)&starIcon);
-            starIcon->SetVisibility(
-                    ((CContactEntry*)entry)->mIsFavorite ? IView::VISIBLE : IView::GONE);
-            SetVisibility(IView::VISIBLE);
-        }
-    }
-    return NOERROR;
-}
+//         // If this is a blank entry, don't show anything.
+//         // TODO krelease: Just hide the view for now. For this to truly look like an empty row
+//         // the entire ContactTileRow needs to be hidden.
+//         if (entry == ContactEntry::BLANK_ENTRY) {
+//             SetVisibility(IView::INVISIBLE);
+//         }
+//         else {
+//             AutoPtr<IView> starIcon;
+//             FindViewById(R::id::contact_star_icon, (IView**)&starIcon);
+//             starIcon->SetVisibility(
+//                     ((CContactEntry*)entry)->mIsFavorite ? IView::VISIBLE : IView::GONE);
+//             SetVisibility(IView::VISIBLE);
+//         }
+//     }
+//     return NOERROR;
+// }
 
 ECode PhoneFavoriteTileView::IsDarkTheme(
     /* [out] */ Boolean* result)
@@ -153,16 +165,16 @@ ECode PhoneFavoriteTileView::CreateClickListener(
     return NOERROR;
 }
 
-ECode PhoneFavoriteTileView:: GetDefaultImageRequest(
-    /* [in] */ const String& displayName,
-    /* [in] */ const String& lookupKey,
-    /* [out] */ IDefaultImageRequest** request)
-{
-    VALIDATE_NOT_NULL(request);
-    return CDefaultImageRequest::New(displayName, lookupKey,
-                IContactPhotoManager::TYPE_DEFAULT, DEFAULT_IMAGE_LETTER_SCALE,
-                DEFAULT_IMAGE_LETTER_OFFSET, FALSE, request);
-}
+// ECode PhoneFavoriteTileView:: GetDefaultImageRequest(
+//     /* [in] */ const String& displayName,
+//     /* [in] */ const String& lookupKey,
+//     /* [out] */ IDefaultImageRequest** request)
+// {
+//     VALIDATE_NOT_NULL(request);
+//     return CDefaultImageRequest::New(displayName, lookupKey,
+//                 IContactPhotoManager::TYPE_DEFAULT, DEFAULT_IMAGE_LETTER_SCALE,
+//                 DEFAULT_IMAGE_LETTER_OFFSET, FALSE, request);
+// }
 
 ECode PhoneFavoriteTileView::ConfigureViewForImage(
     /* [in] */ Boolean isDefaultImage)

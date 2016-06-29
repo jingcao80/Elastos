@@ -1,8 +1,16 @@
 #ifndef __ELASTOS_APPS_DIALER_DIALPAD_UNICODEDIALERKEYLISTENER_H__
 #define __ELASTOS_APPS_DIALER_DIALPAD_UNICODEDIALERKEYLISTENER_H__
 
-namespace Elastos{
-namespace Apps{
+#include "_Elastos.Apps.Dialer.h"
+#include <elastos/core/Object.h>
+#include "Elastos.Droid.Text.h"
+#include "Elastos.CoreLibrary.Core.h"
+
+using Elastos::Droid::Text::ISpanned;
+using Elastos::Core::ICharSequence;
+
+namespace Elastos {
+namespace Apps {
 namespace Dialer {
 namespace Dialpad {
 
@@ -12,11 +20,13 @@ namespace Dialpad {
  * pasted digits from Unicode languages.
  */
 class UnicodeDialerKeyListener
-    : public DialerKeyListener
+    // TODO:
+    /*: public DialerKeyListener*/
+    : public Object
     , public IUnicodeDialerKeyListener
 {
 public:
-    CAR_INTERFACE_DECL()
+    CAR_INTERFACE_DECL();
 
     // @Override
     CARAPI Filter(

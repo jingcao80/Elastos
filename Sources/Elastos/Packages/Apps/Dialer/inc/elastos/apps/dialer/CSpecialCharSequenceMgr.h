@@ -3,19 +3,24 @@
 
 #include "_Elastos_Apps_Dialer_CSpecialCharSequenceMgr.h"
 #include <elastos/core/Singleton.h>
+#include "Elastos.Droid.Content.h"
+#include "Elastos.Droid.Widget.h"
 
-namespace Elastos{
-namespace Apps{
-namespace Dialer{
+using Elastos::Droid::Content::IContext;
+using Elastos::Droid::Widget::IEditText;
+
+namespace Elastos {
+namespace Apps {
+namespace Dialer {
 
 CarClass(CSpecialCharSequenceMgr)
     , public Singleton
     , public ISpecialCharSequenceMgr
 {
 public:
-    CAR_INTERFACE_DECL()
+    CAR_INTERFACE_DECL();
 
-    CAR_SINGLETON_DECL()
+    CAR_SINGLETON_DECL();
 
     CARAPI HandleChars(
         /* [in] */ IContext* context,

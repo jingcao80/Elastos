@@ -5,6 +5,8 @@
 #include "_Elastos_Apps_Dialer_CallLog_CClearCallLogDialogHelper.h"
 #include <elastos/core/Singleton.h>
 
+using Elastos::Droid::App::IFragmentManager;
+
 namespace Elastos {
 namespace Apps {
 namespace Dialer {
