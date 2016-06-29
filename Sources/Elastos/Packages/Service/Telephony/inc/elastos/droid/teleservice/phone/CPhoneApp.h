@@ -2,10 +2,13 @@
 #define  __ELASTOS_DROID_PHONE_CPHONEAPP_H__
 
 #include "_Elastos_Droid_TeleService_Phone_CPhoneApp.h"
+#include "elastos/droid/teleservice/phone/PhoneGlobals.h"
+#include "elastos/droid/teleservice/services/telephony/TelephonyGlobals.h"
 #include "elastos/droid/app/Application.h"
 #include "elastos/droid/ext/frameworkext.h"
 
 using Elastos::Droid::App::Application;
+using Elastos::Droid::TeleService::Services::Telephony::TelephonyGlobals;
 
 namespace Elastos {
 namespace Droid {
@@ -27,8 +30,8 @@ public:
     CARAPI OnCreate();
 
 public:
-    // AutoPtr<PhoneGlobals> mPhoneGlobals;
-    // AutoPtr<TelephonyGlobals> mTelephonyGlobals;
+    AutoPtr<PhoneGlobals> mPhoneGlobals;
+    AutoPtr<TelephonyGlobals> mTelephonyGlobals;
 };
 
 } // namespace Phone

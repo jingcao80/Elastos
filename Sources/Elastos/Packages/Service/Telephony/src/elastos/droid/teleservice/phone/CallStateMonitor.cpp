@@ -44,8 +44,7 @@ static Boolean initDBG()
     return result;
 }
 
-const Boolean DBG = initDBG();
-
+const Boolean CallStateMonitor::DBG = initDBG();
 CallStateMonitor::CallStateMonitor(
     /* [in] */ ICallManager* callManager)
     : mCallManager(callManager)

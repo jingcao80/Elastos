@@ -1,5 +1,8 @@
 
 #include "elastos/droid/teleservice/phone/PhoneGlobals.h"
+#include "elastos/droid/teleservice/phone/PhoneUtils.h"
+#include "elastos/droid/teleservice/phone/BluetoothManager.h"
+#include "elastos/droid/teleservice/phone/CallLogger.h"
 #include "elastos/droid/teleservice/phone/CPhoneGlobalsPhoneAppBroadcastReceiver.h"
 #include "elastos/droid/os/AsyncResult.h"
 #include "elastos/droid/os/ServiceManager.h"
@@ -402,6 +405,8 @@ ECode PhoneGlobals::OnCreate()
     // sVoiceCapable =
     //   getPackageManager().hasSystemFeature(PackageManager.FEATURE_TELEPHONY_VOICE_CALLS);
 
+    Logger::D(TAG, "TODO mPhone");
+#if 0
     if (mPhone == NULL) {
         // Initialize the telephony framework
         AutoPtr<IPhoneFactory> helper;
@@ -413,20 +418,19 @@ ECode PhoneGlobals::OnCreate()
 
         // Start TelephonyDebugService After the default phone is created.
         AutoPtr<IIntent> intent;
-        assert(0);
-        //CIntent::New(this, EIID_ITelephonyDebugService, (IIntent**)&intent);
+        CIntent::New(this, ECLSID_CTelephonyDebugService, (IIntent**)&intent);
         AutoPtr<IComponentName> name;
         StartService(intent, (IComponentName**)&name);
 
-        assert(0);
-        //mCM = CallManager::GetInstance();
-        Boolean res;
-        mCM->RegisterPhone(mPhone, &res);
+        Boolean res = FALSE;
+        Logger::D(TAG, "TODO Need CallManager::GetInstance");
+        // mCM = CallManager::GetInstance();
+        // mCM->RegisterPhone(mPhone, &res);
 
         // Create the NotificationMgr singleton, which is used to display
         // status bar icons and control other status bar behavior.
-        assert(0);
-        //notificationMgr = NotificationMgr::Init(this);
+        Logger::D(TAG, "TODO Need NotificationMgr::Init");
+        // mNotificationMgr = NotificationMgr::Init(this);
 
         mHandler->SendEmptyMessage(EVENT_START_SIP_SERVICE, &res);
 
@@ -464,7 +468,7 @@ ECode PhoneGlobals::OnCreate()
 
         if (DBG) Logger::D(IPhoneGlobals::TAG, "onCreate: mUpdateLock: %s", TO_CSTR(mUpdateLock));
 
-        assert(0);
+        Logger::D(TAG, "TODO Need CallLogAsync");
         // AutoPtr<ICallLogAsync> callLogAsync;
         // CCallLogAsync::New((ICallLogAsync**)&callLogAsync);
         // AutoPtr<CallLogger> callLogger = new CallLogger(this, callLogAsync);
@@ -474,8 +478,8 @@ ECode PhoneGlobals::OnCreate()
         // Create the CallController singleton, which is the interface
         // to the telephony layer for user-initiated telephony functionality
         // (like making outgoing calls.)
-        assert(0);
-        //mCallController = CallController::Init(this, callLogger, callGatewayManager);
+        Logger::D(TAG, "TODO Need CallLogAsync");
+        // mCallController = CallController::Init(this, callLogger, callGatewayManager);
 
         // Create the CallerInfoCache singleton, which remembers custom ring tone and
         // send-to-voicemail settings.
@@ -487,18 +491,16 @@ ECode PhoneGlobals::OnCreate()
         mCallStateMonitor = new CallStateMonitor(mCM);
 
         // Bluetooth manager
-        assert(0);
-        //mBluetoothManager = new BluetoothManager();
+        mBluetoothManager = new BluetoothManager();
 
-        assert(0);
-        //phoneMgr = PhoneInterfaceManager::Init(this, phone);
+        mPhoneMgr = CPhoneInterfaceManager::Init(this, mPhone);
 
         // Create the CallNotifer singleton, which handles
         // asynchronous events from the telephony layer (like
         // launching the incoming-call UI when an incoming call comes
         // in.)
-        assert(0);
-        // notifier = CallNotifier::Init(this, phone, callLogger, callStateMonitor,
+        Logger::D(TAG, "TODO Need callLogger");
+        // mNotifier = CallNotifier::Init(this, mPhone, callLogger, callStateMonitor,
         //         bluetoothManager);
 
         // register for ICC status
@@ -514,8 +516,7 @@ ECode PhoneGlobals::OnCreate()
         mCM->RegisterForMmiComplete(mHandler, MMI_COMPLETE, NULL);
 
         // register connection tracking to PhoneUtils
-        assert(0);
-        //PhoneUtils::InitializeConnectionHandler(mCM);
+        PhoneUtils::InitializeConnectionHandler(mCM);
 
         // Register for misc other intent broadcasts.
         AutoPtr<IIntentFilter> intentFilter;
@@ -541,9 +542,10 @@ ECode PhoneGlobals::OnCreate()
         // Make sure the audio mode (along with some
         // audio-mode-related state of our own) is initialized
         // correctly, given the current state of the phone.
-        assert(0);
-        //PhoneUtils::SetAudioMode(mCM);
+        PhoneUtils::SetAudioMode(mCM);
     }
+
+#endif
 
     mCdmaOtaProvisionData = new OtaUtils::CdmaOtaProvisionData();
     mCdmaOtaConfigData = new OtaUtils::CdmaOtaConfigData();

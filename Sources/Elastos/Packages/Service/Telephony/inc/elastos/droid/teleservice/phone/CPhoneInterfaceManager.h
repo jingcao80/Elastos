@@ -26,6 +26,8 @@ namespace Droid {
 namespace TeleService {
 namespace Phone {
 
+class PhoneGlobals;
+
 /**
  * Implementation of the ITelephony interface.
  */
@@ -997,7 +999,7 @@ private:
     /** The singleton instance. */
     static AutoPtr<CPhoneInterfaceManager> sInstance;
 
-    AutoPtr<PhoneGlobals> mApp;
+    PhoneGlobals* mApp;
     AutoPtr<IPhone> mPhone;
     AutoPtr<ICallManager> mCM;
     AutoPtr<IAppOpsManager> mAppOps;

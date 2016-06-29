@@ -30,10 +30,9 @@ static AutoPtr<ArrayOf<ISearchIndexableResource*> > initINDEXABLE_RES()
     AutoPtr<ArrayOf<ISearchIndexableResource*> > array = ArrayOf<ISearchIndexableResource*>::Alloc(1);
 
     AutoPtr<ISearchIndexableResource> resource;
-    assert(0);
-    // CSearchIndexableResource::New(1, Elastos::Droid::R::xml::network_setting,
-    //         MobileNetworkSettings.class.getName(),
-    //         Elastos::Droid::TeleService::R::mipmap::ic_launcher_phone, (ISearchIndexableResource**)&resource);
+    CSearchIndexableResource::New(1, R::xml::network_setting,
+        /*MobileNetworkSettings.class.getName()*/String("Elastos.Droid.TeleService.Phone.CMobileNetworkSettings"),
+        Elastos::Droid::TeleService::R::mipmap::ic_launcher_phone, (ISearchIndexableResource**)&resource);
     array->Set(0, resource);
     return array;
 }

@@ -108,7 +108,7 @@
                  android:icon="@mipmap/ic_launcher_phone"
                  android:allowBackup="false"
                  android:supportsRtl="true">
-            <provider android:name="CIccProvider"
+            <provider android:name=".Phone.CIccProvider"
                       android:authorities="icc"
                       android:multiprocess="true"
                       android:exported="true"
