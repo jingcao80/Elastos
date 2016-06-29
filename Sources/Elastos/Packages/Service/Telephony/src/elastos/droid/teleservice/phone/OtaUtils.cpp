@@ -158,7 +158,7 @@ ECode OtaUtils::MaybeDoOtaCall(
         return NOERROR;
     }
 
-    assert(0);
+    Logger::D(TAG, "TODO Need TelephonyCapabilities::SupportsOtasp");
     //TelephonyCapabilities::SupportsOtasp(phone, &res);
     if (!res) {
         // Presumably not a CDMA phone.

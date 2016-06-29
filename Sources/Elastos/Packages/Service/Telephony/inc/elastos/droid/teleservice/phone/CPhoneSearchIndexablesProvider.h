@@ -22,6 +22,8 @@ CarClass(CPhoneSearchIndexablesProvider)
 public:
     CAR_OBJECT_DECL();
 
+    CARAPI constructor();
+
     //@Override
     CARAPI OnCreate(
         /* [out] */ Boolean* result);

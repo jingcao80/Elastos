@@ -1,6 +1,7 @@
 #include "elastos/droid/provider/SearchIndexablesContract.h"
 #include "elastos/droid/provider/SearchIndexablesProvider.h"
 #include "elastos/droid/content/CUriMatcher.h"
+#include "elastos/droid/Manifest.h"
 #include <elastos/utility/logging/Slogger.h>
 
 using Elastos::Droid::Content::CUriMatcher;
@@ -14,6 +15,7 @@ using Elastos::Droid::Content::IContentValues;
 using Elastos::Droid::Content::IContext;
 using Elastos::Droid::Content::Pm::IComponentInfo;
 using Elastos::Droid::Content::Pm::IProviderInfo;
+using Elastos::Droid::Manifest;
 using Elastos::Utility::Logging::Slogger;
 
 namespace Elastos {
@@ -32,6 +34,11 @@ SearchIndexablesProvider::~SearchIndexablesProvider()
 {}
 
 CAR_INTERFACE_IMPL(SearchIndexablesProvider, ContentProvider, ISearchIndexablesProvider)
+
+ECode SearchIndexablesProvider::constructor()
+{
+    return ContentProvider::constructor();
+}
 
 //@Override
 ECode SearchIndexablesProvider::AttachInfo(
@@ -69,7 +76,7 @@ ECode SearchIndexablesProvider::AttachInfo(
     }
     String readPermission;
     info->GetReadPermission(&readPermission);
-    if (!readPermission.Equals("android.Manifest.permission.READ_SEARCH_INDEXABLES")) {
+    if (!readPermission.Equals(Manifest::permission::READ_SEARCH_INDEXABLES)) {
         // throw new SecurityException("Provider must be protected by READ_SEARCH_INDEXABLES");
         Slogger::E(TAG, "Provider must be protected by READ_SEARCH_INDEXABLES");
         return E_SECURITY_EXCEPTION;

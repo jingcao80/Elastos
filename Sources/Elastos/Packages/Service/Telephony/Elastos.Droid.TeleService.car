@@ -314,6 +314,8 @@ module
     }
 
     class CPhoneSearchIndexablesProvider {
+        constructor();
+
         interface IContentProvider;
         interface IComponentCallbacks;
         interface IComponentCallbacks2;

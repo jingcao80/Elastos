@@ -17,7 +17,6 @@ using Elastos::Core::StringBuilder;
 using Elastos::Core::CoreUtils;
 using Elastos::Utility::Logging::Logger;
 
-
 namespace Elastos {
 namespace Droid {
 namespace TeleService {
@@ -41,12 +40,18 @@ AutoPtr<ArrayOf<ISearchIndexableResource*> > CPhoneSearchIndexablesProvider::IND
 
 CAR_OBJECT_IMPL(CPhoneSearchIndexablesProvider)
 
+ECode CPhoneSearchIndexablesProvider::constructor()
+{
+    return SearchIndexablesProvider::constructor();
+}
+
 ECode CPhoneSearchIndexablesProvider::OnCreate(
     /* [out] */ Boolean* result)
 {
     VALIDATE_NOT_NULL(result);
 
-    return true;
+    *result = TRUE;
+    return NOERROR;
 }
 
 ECode CPhoneSearchIndexablesProvider::QueryXmlResources(

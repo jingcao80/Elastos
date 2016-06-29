@@ -706,11 +706,11 @@ ECode SystemServer::StartOtherServices()
 
             // Always start the Device Policy Manager, so that the API is compatible with
             // API8.
-            Slogger::I(TAG,  "Device Policy Manager Service");
-            AutoPtr<CDevicePolicyManagerService::Lifecycle> dpms = new CDevicePolicyManagerService::Lifecycle();
-            dpms->constructor(context);
+            Slogger::I(TAG,  "[TODO] Device Policy Manager Service");
+            // AutoPtr<CDevicePolicyManagerService::Lifecycle> dpms = new CDevicePolicyManagerService::Lifecycle();
+            // dpms->constructor(context);
             if (FAILED(ec)) ReportWtf("starting Policy Manager Service", ec);
-            mSystemServiceManager->StartService(dpms.Get());
+            // mSystemServiceManager->StartService(dpms.Get());
         }
 
         if (!disableSystemUI) {

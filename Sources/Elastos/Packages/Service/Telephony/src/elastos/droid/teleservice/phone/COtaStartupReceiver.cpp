@@ -157,7 +157,9 @@ ECode COtaStartupReceiver::OnReceive(
         AutoPtr<IInterface> obj;
         context->GetSystemService(IContext::TELEPHONY_SERVICE, (IInterface**)&obj);
         AutoPtr<ITelephonyManager> telephonyManager = ITelephonyManager::Probe(obj);
-        telephonyManager->Listen(mPhoneStateListener, IPhoneStateListener::LISTEN_OTASP_CHANGED);
+        if (telephonyManager != NULL) {
+            telephonyManager->Listen(mPhoneStateListener, IPhoneStateListener::LISTEN_OTASP_CHANGED);
+        }
         mPhoneStateListenerRegistered = TRUE;
     }
     else {
@@ -166,7 +168,7 @@ ECode COtaStartupReceiver::OnReceive(
 
     AutoPtr<IPhone> phone = PhoneGlobals::GetPhone();
     Boolean res;
-    assert(0);
+    Logger::D(TAG, "TODO Need TelephonyCapabilities::SupportsOtasp");
     //TelephonyCapabilities::SupportsOtasp(phone, &res);
     if (!res) {
         if (DBG) Logger::D(TAG, "OTASP not supported, nothing to do.");
@@ -182,8 +184,10 @@ ECode COtaStartupReceiver::OnReceive(
     AutoPtr<PhoneGlobals> app;
     PhoneGlobals::GetInstance((PhoneGlobals**)&app);
     AutoPtr<IPhone> phone2 = PhoneGlobals::GetPhone();
-    Int32 state;
-    app->mCM->GetServiceState(&state);
+    Int32 state = 0;
+    if (app->mCM != NULL) {
+        app->mCM->GetServiceState(&state);
+    }
     if (state != IServiceState::STATE_IN_SERVICE) {
         if (DBG) Logger::W(TAG, "Network is not ready. Registering to receive notification.");
         phone2->RegisterForServiceStateChanged(mHandler, SERVICE_STATE_CHANGED, NULL);

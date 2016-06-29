@@ -29,6 +29,8 @@ public:
 
     CAR_INTERFACE_DECL()
 
+    CARAPI constructor();
+
     /**
      * Implementation is provided by the parent class.
      */
