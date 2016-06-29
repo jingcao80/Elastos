@@ -2,11 +2,13 @@
 #define  __ELASTOS_DROID_PHONE_PHONEGLOBALS_H__
 
 #include "_Elastos.Droid.TeleService.h"
-#include "elastos/droid/ext/frameworkext.h"
+#include "elastos/droid/teleservice/phone/CallController.h"
 #include "elastos/droid/teleservice/phone/CallerInfoCache.h"
-#include "elastos/droid/teleservice/phone/NotificationMgr.h"
+#include "elastos/droid/teleservice/phone/CallNotifier.h"
 #include "elastos/droid/teleservice/phone/CallGatewayManager.h"
 #include "elastos/droid/teleservice/phone/CdmaPhoneCallState.h"
+#include "elastos/droid/teleservice/phone/CPhoneInterfaceManager.h"
+#include "elastos/droid/teleservice/phone/NotificationMgr.h"
 #include "elastos/droid/teleservice/phone/OtaUtils.h"
 #include "elastos/droid/teleservice/phone/CallStateMonitor.h"
 #include "elastos/droid/content/ContextWrapper.h"
@@ -341,13 +343,13 @@ private:
 
     // A few important fields we expose to the rest of the package
     // directly (rather than thru set/get methods) for efficiency.
-    //AutoPtr<CallController> mCallController;
+    AutoPtr<CallController> mCallController;
     AutoPtr<ICallManager> mCM;
-    //AutoPtr<CallNotifier> mNotifier;
+    AutoPtr<CallNotifier> mNotifier;
     AutoPtr<CallerInfoCache> mCallerInfoCache;
     AutoPtr<NotificationMgr> mNotificationMgr;
     AutoPtr<IPhone> mPhone;
-    //CPhoneInterfaceManager* mPhoneMgr;
+    AutoPtr<CPhoneInterfaceManager> mPhoneMgr;
 
     AutoPtr<IBluetoothManager> mBluetoothManager;
     AutoPtr<CallGatewayManager> mCallGatewayManager;

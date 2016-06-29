@@ -1,5 +1,5 @@
-#ifndef  __ELASTOS_DROID_PHONE_CARRIERLOGO_H__
-#define  __ELASTOS_DROID_PHONE_CARRIERLOGO_H__
+#ifndef  __ELASTOS_DROID_PHONE_CDMAPHONECALLSTATE_H__
+#define  __ELASTOS_DROID_PHONE_CDMAPHONECALLSTATE_H__
 
 #include "_Elastos.Droid.TeleService.h"
 #include "elastos/droid/ext/frameworkext.h"
@@ -136,4 +136,4 @@ private:
 } // namespace Droid
 } // namespace Elastos
 
-#endif // __ELASTOS_DROID_PHONE_CARRIERLOGO_H__
+#endif // __ELASTOS_DROID_PHONE_CDMAPHONECALLSTATE_H__

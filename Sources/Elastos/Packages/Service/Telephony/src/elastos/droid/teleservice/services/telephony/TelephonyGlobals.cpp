@@ -1,6 +1,9 @@
 
 #include "elastos/droid/teleservice/services/telephony/TelephonyGlobals.h"
 #include <elastos/core/AutoLock.h>
+#include <elastos/utility/logging/Logger.h>
+
+using Elastos::Utility::Logging::Logger;
 
 namespace Elastos {
 namespace Droid {
@@ -33,7 +36,7 @@ AutoPtr<TelephonyGlobals> TelephonyGlobals::GetInstance(
 
 ECode TelephonyGlobals::OnCreate()
 {
-    assert(0 && "need class PhoneFactory");
+    Logger::D("TelephonyGlobals", "[TODO] need class PhoneFactory");
     // // TODO: Make this work with Multi-SIM devices
     // AutoPtr<IPhone> phone;
     // PhoneFactory::GetDefaultPhone((IPhone**)&phone);

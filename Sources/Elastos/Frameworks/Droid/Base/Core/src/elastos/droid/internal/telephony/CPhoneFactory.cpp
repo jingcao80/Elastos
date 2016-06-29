@@ -11,10 +11,10 @@
 #include "elastos/droid/os/CSystemProperties.h"
 #include "elastos/droid/os/CUserHandleHelper.h"
 #include "elastos/droid/R.h"
-
 #include <elastos/core/AutoLock.h>
 #include <elastos/core/Thread.h>
 #include <elastos/core/StringUtils.h>
+#include <elastos/utility/logging/Logger.h>
 
 using Elastos::Droid::R;
 using Elastos::Droid::Content::IComponentName;
@@ -43,11 +43,11 @@ using Elastos::Droid::Internal::Telephony::Cdma::ICdmaSubscriptionSourceManager;
 using Elastos::Droid::Internal::Telephony::Cdma::ICdmaSubscriptionSourceManagerHelper;
 using Elastos::Droid::Internal::Telephony::Uicc::IUiccControllerHelper;
 using Elastos::Droid::Internal::Telephony::Gsm::IGSMPhone;
-
 using Elastos::Core::AutoLock;
 using Elastos::Core::Thread;
 using Elastos::Core::CInteger32;
 using Elastos::Core::StringUtils;
+using Elastos::Utility::Logging::Logger;
 
 namespace Elastos {
 namespace Droid {
@@ -93,236 +93,237 @@ ECode CPhoneFactory::MakeDefaultPhones(
 ECode CPhoneFactory::MakeDefaultPhone(
     /* [in] */ IContext* context)
 {
-    {
-        AutoLock syncLock(sLockProxyPhones);
-        if (!sMadeDefaults) {
-            sContext = context;
+    Logger::D("CPhoneFactory", "TODO: MakeDefaultPhone");
+//     {
+//         AutoLock syncLock(sLockProxyPhones);
+//         if (!sMadeDefaults) {
+//             sContext = context;
 
-            // create the telephony device controller.
-            AutoPtr<ITelephonyDevControllerHelper> hlpTDC;
-            assert(0 && "TODO");
-            // CTelephonyDevControllerHelper::AcquireSingleton((ITelephonyDevControllerHelper**)&hlpTDC);
-            AutoPtr<ITelephonyDevController> dc;
-            hlpTDC->Create((ITelephonyDevController**)&dc);
+//             // create the telephony device controller.
+//             AutoPtr<ITelephonyDevControllerHelper> hlpTDC;
+//             assert(0 && "TODO");
+//             // CTelephonyDevControllerHelper::AcquireSingleton((ITelephonyDevControllerHelper**)&hlpTDC);
+//             AutoPtr<ITelephonyDevController> dc;
+//             hlpTDC->Create((ITelephonyDevController**)&dc);
 
-            Int32 retryCount = 0;
-            for(;;) {
-                Boolean hasException = FALSE;
-                retryCount++;
+//             Int32 retryCount = 0;
+//             for(;;) {
+//                 Boolean hasException = FALSE;
+//                 retryCount++;
 
-                // try {
-                    // use UNIX domain socket to
-                    // prevent subsequent initialization
-                    AutoPtr<ILocalServerSocket> p;
-                    ECode ec = CLocalServerSocket::New(String("com.android.internal.telephony"), (ILocalServerSocket**)&p);
-                    if (FAILED(ec)) {
-                        hasException = TRUE;
-                    }
-                // } Catch (java.io.IOException ex) {
-                //     hasException = TRUE;
-                // }
+//                 // try {
+//                     // use UNIX domain socket to
+//                     // prevent subsequent initialization
+//                     AutoPtr<ILocalServerSocket> p;
+//                     ECode ec = CLocalServerSocket::New(String("com.android.internal.telephony"), (ILocalServerSocket**)&p);
+//                     if (FAILED(ec)) {
+//                         hasException = TRUE;
+//                     }
+//                 // } Catch (java.io.IOException ex) {
+//                 //     hasException = TRUE;
+//                 // }
 
-                if (!hasException) {
-                    break;
-                }
-                else if (retryCount > SOCKET_OPEN_MAX_RETRY) {
-                    // throw new RuntimeException("PhoneFactory probably already running");
-                    return E_RUNTIME_EXCEPTION;
-                }
-                else {
-                    // try {
-                        Thread::Sleep(SOCKET_OPEN_RETRY_MILLIS);
-                    // } Catch (InterruptedException er) {
-                    // }
-                }
-            }
+//                 if (!hasException) {
+//                     break;
+//                 }
+//                 else if (retryCount > SOCKET_OPEN_MAX_RETRY) {
+//                     // throw new RuntimeException("PhoneFactory probably already running");
+//                     return E_RUNTIME_EXCEPTION;
+//                 }
+//                 else {
+//                     // try {
+//                         Thread::Sleep(SOCKET_OPEN_RETRY_MILLIS);
+//                     // } Catch (InterruptedException er) {
+//                     // }
+//                 }
+//             }
 
-            assert(0 && "TODO");
-            // CDefaultPhoneNotifier::New((IDefaultPhoneNotifier**)&sPhoneNotifier);
+//             assert(0 && "TODO");
+//             // CDefaultPhoneNotifier::New((IDefaultPhoneNotifier**)&sPhoneNotifier);
 
-            // Get preferred network mode
-            Int32 preferredNetworkMode = IRILConstants::PREFERRED_NETWORK_MODE;
-            AutoPtr<ITelephonyManagerHelper> tmhlp;
-            CTelephonyManagerHelper::AcquireSingleton((ITelephonyManagerHelper**)&tmhlp);
-            Int32 lteoncdmamode = 0;
-            tmhlp->GetLteOnCdmaModeStatic(&lteoncdmamode);
-            if (lteoncdmamode == IPhoneConstants::LTE_ON_CDMA_TRUE) {
-                preferredNetworkMode = IPhone::NT_MODE_GLOBAL;
-            }
-            Int32 lteongsmmode = 0;
-            assert(0 && "TODO");
-            // tmhlp->GetLteOnGsmModeStatic(&lteongsmmode);
-            if (lteongsmmode != 0) {
-                preferredNetworkMode = IPhone::NT_MODE_LTE_GSM_WCDMA;
-            }
+//             // Get preferred network mode
+//             Int32 preferredNetworkMode = IRILConstants::PREFERRED_NETWORK_MODE;
+//             AutoPtr<ITelephonyManagerHelper> tmhlp;
+//             CTelephonyManagerHelper::AcquireSingleton((ITelephonyManagerHelper**)&tmhlp);
+//             Int32 lteoncdmamode = 0;
+//             tmhlp->GetLteOnCdmaModeStatic(&lteoncdmamode);
+//             if (lteoncdmamode == IPhoneConstants::LTE_ON_CDMA_TRUE) {
+//                 preferredNetworkMode = IPhone::NT_MODE_GLOBAL;
+//             }
+//             Int32 lteongsmmode = 0;
+//             assert(0 && "TODO");
+//             // tmhlp->GetLteOnGsmModeStatic(&lteongsmmode);
+//             if (lteongsmmode != 0) {
+//                 preferredNetworkMode = IPhone::NT_MODE_LTE_GSM_WCDMA;
+//             }
 
-            AutoPtr<ICdmaSubscriptionSourceManagerHelper> scmhlp;
-            assert(0 && "TODO");
-            // CCdmaSubscriptionSourceManagerHelper::AcquireSingleton((ICdmaSubscriptionSourceManagerHelper**)&scmhlp);
-            Int32 cdmaSubscription = 0;
-            scmhlp->GetDefault(context, &cdmaSubscription);
-            // Rlog::I(LOGTAG, "Cdma Subscription set to %d", cdmaSubscription);
+//             AutoPtr<ICdmaSubscriptionSourceManagerHelper> scmhlp;
+//             assert(0 && "TODO");
+//             // CCdmaSubscriptionSourceManagerHelper::AcquireSingleton((ICdmaSubscriptionSourceManagerHelper**)&scmhlp);
+//             Int32 cdmaSubscription = 0;
+//             scmhlp->GetDefault(context, &cdmaSubscription);
+//             // Rlog::I(LOGTAG, "Cdma Subscription set to %d", cdmaSubscription);
 
-            /* In case of multi SIM mode two instances of PhoneProxy, RIL are created,
-               where as in single SIM mode only instance. IsMultiSimEnabled() function checks
-               whether it is single SIM or multi SIM mode */
-            AutoPtr<ITelephonyManagerHelper> hlp;
-            CTelephonyManagerHelper::AcquireSingleton((ITelephonyManagerHelper**)&hlp);
-            AutoPtr<ITelephonyManager> tm;
-            hlp->GetDefault((ITelephonyManager**)&tm);
-            Int32 numPhones = 0;
-            tm->GetPhoneCount(&numPhones);
-            AutoPtr<ArrayOf<Int32> > networkModes = ArrayOf<Int32>::Alloc(numPhones);
-            sProxyPhones = ArrayOf<IPhoneProxy*>::Alloc(numPhones);
-            sCommandsInterfaces = ArrayOf<ICommandsInterface*>::Alloc(numPhones);
-            AutoPtr<ISystemProperties> sysprop;
-            CSystemProperties::AcquireSingleton((ISystemProperties**)&sysprop);
-            String sRILClassname;
-            sysprop->Get(String("ro.telephony.ril_class"), String("RIL"), &sRILClassname);
-            sRILClassname.Trim();
-            // Rlog::I(LOGTAG, "RILClassname is %s", sRILClassname);
+//             /* In case of multi SIM mode two instances of PhoneProxy, RIL are created,
+//                where as in single SIM mode only instance. IsMultiSimEnabled() function checks
+//                whether it is single SIM or multi SIM mode */
+//             AutoPtr<ITelephonyManagerHelper> hlp;
+//             CTelephonyManagerHelper::AcquireSingleton((ITelephonyManagerHelper**)&hlp);
+//             AutoPtr<ITelephonyManager> tm;
+//             hlp->GetDefault((ITelephonyManager**)&tm);
+//             Int32 numPhones = 0;
+//             tm->GetPhoneCount(&numPhones);
+//             AutoPtr<ArrayOf<Int32> > networkModes = ArrayOf<Int32>::Alloc(numPhones);
+//             sProxyPhones = ArrayOf<IPhoneProxy*>::Alloc(numPhones);
+//             sCommandsInterfaces = ArrayOf<ICommandsInterface*>::Alloc(numPhones);
+//             AutoPtr<ISystemProperties> sysprop;
+//             CSystemProperties::AcquireSingleton((ISystemProperties**)&sysprop);
+//             String sRILClassname;
+//             sysprop->Get(String("ro.telephony.ril_class"), String("RIL"), &sRILClassname);
+//             sRILClassname.Trim();
+//             // Rlog::I(LOGTAG, "RILClassname is %s", sRILClassname);
 
-            for (Int32 i = 0; i < numPhones; i++) {
-                //reads the system properties and makes commandsinterface
-                // try {
-//                        // Get preferred network type.
-//                        TODO: Sishir added this code to but we need a new technique for MSim
-//                        Int32 networkType = CalculatePreferredNetworkType(context);
-//                        Rlog->I(LOGTAG, "Network Type set to " + Integer->ToString(networkType));
+//             for (Int32 i = 0; i < numPhones; i++) {
+//                 //reads the system properties and makes commandsinterface
+//                 // try {
+// //                        // Get preferred network type.
+// //                        TODO: Sishir added this code to but we need a new technique for MSim
+// //                        Int32 networkType = CalculatePreferredNetworkType(context);
+// //                        Rlog->I(LOGTAG, "Network Type set to " + Integer->ToString(networkType));
 
-                    AutoPtr<IContentResolver> cr;
-                    context->GetContentResolver((IContentResolver**)&cr);
-                    hlp->GetInt32AtIndex(
-                            cr,
-                            ISettingsGlobal::PREFERRED_NETWORK_MODE,
-                            i,
-                            &((*networkModes)[i]));
-                // } Catch (SettingNotFoundException snfe) {
-                //     Rlog->E(LOGTAG, "Settings Exception Reading Value At Index for"+
-                //             " ISettingsGlobal::PREFERRED_NETWORK_MODE");
-                //     networkModes[i] = preferredNetworkMode;
-                // }
+//                     AutoPtr<IContentResolver> cr;
+//                     context->GetContentResolver((IContentResolver**)&cr);
+//                     hlp->GetInt32AtIndex(
+//                             cr,
+//                             ISettingsGlobal::PREFERRED_NETWORK_MODE,
+//                             i,
+//                             &((*networkModes)[i]));
+//                 // } Catch (SettingNotFoundException snfe) {
+//                 //     Rlog->E(LOGTAG, "Settings Exception Reading Value At Index for"+
+//                 //             " ISettingsGlobal::PREFERRED_NETWORK_MODE");
+//                 //     networkModes[i] = preferredNetworkMode;
+//                 // }
 
-                AutoPtr<IResources> res;
-                sContext->GetResources((IResources**)&res);
-                Boolean bPhoneEnabled = FALSE;
-                res->GetBoolean(
-                        R::bool_::config_global_phone_enabled, &bPhoneEnabled);
-                if (bPhoneEnabled &&
-                        i == IPhoneConstants::PHONE_ID1) {
-                    (*networkModes)[i] = IPhone::NT_MODE_LTE_CDMA_EVDO_GSM_WCDMA;
-                    Boolean res = FALSE;
-                    hlp->PutInt32AtIndex(cr,
-                            ISettingsGlobal::PREFERRED_NETWORK_MODE, i, (*networkModes)[i], &res);
-                }
+//                 AutoPtr<IResources> res;
+//                 sContext->GetResources((IResources**)&res);
+//                 Boolean bPhoneEnabled = FALSE;
+//                 res->GetBoolean(
+//                         R::bool_::config_global_phone_enabled, &bPhoneEnabled);
+//                 if (bPhoneEnabled &&
+//                         i == IPhoneConstants::PHONE_ID1) {
+//                     (*networkModes)[i] = IPhone::NT_MODE_LTE_CDMA_EVDO_GSM_WCDMA;
+//                     Boolean res = FALSE;
+//                     hlp->PutInt32AtIndex(cr,
+//                             ISettingsGlobal::PREFERRED_NETWORK_MODE, i, (*networkModes)[i], &res);
+//                 }
 
-                // Rlog::I(LOGTAG, "Network Mode set to %s", StringUtils::ToString((*networkModes)[i]));
-                // Use reflection to construct the RIL Class (defaults to RIL)
-                // try {
-                    AutoPtr<IInteger32> pI;
-                    CInteger32::New(i, (IInteger32**)&pI);
-                    AutoPtr<IInterface> pRIL = InstantiateCustomRIL(
-                                                sRILClassname, context, (*networkModes)[i], cdmaSubscription, pI);
-                    (*sCommandsInterfaces)[i] = ICommandsInterface::Probe(pRIL);
-                // } Catch (Exception e) {
-                //     // 6 different types of exceptions are thrown here that it's
-                //     // easier to just catch Exception as our "error handling" is the same.
-                //     // Yes, we're blocking the whole thing and making the radio unusable. That's by design.
-                //     // The log message should make it clear why the radio is broken
-                //     While (TRUE) {
-                //         Rlog->E(LOGTAG, "Unable to construct custom RIL class", e);
-                //         try {Thread->Sleep(10000);} Catch (InterruptedException ie) {}
-                //     }
-                // }
-            }
-            // Rlog::I(LOGTAG, "Creating SubscriptionController");
-            AutoPtr<ISubscriptionControllerHelper> schlp;
-            assert(0 && "TODO");
-            // CSubscriptionControllerHelper::AcquireSingleton(&schlp);
-            AutoPtr<ISubscriptionController> sc;
-            schlp->Init(context, sCommandsInterfaces, (ISubscriptionController**)&sc);
+//                 // Rlog::I(LOGTAG, "Network Mode set to %s", StringUtils::ToString((*networkModes)[i]));
+//                 // Use reflection to construct the RIL Class (defaults to RIL)
+//                 // try {
+//                     AutoPtr<IInteger32> pI;
+//                     CInteger32::New(i, (IInteger32**)&pI);
+//                     AutoPtr<IInterface> pRIL = InstantiateCustomRIL(
+//                                                 sRILClassname, context, (*networkModes)[i], cdmaSubscription, pI);
+//                     (*sCommandsInterfaces)[i] = ICommandsInterface::Probe(pRIL);
+//                 // } Catch (Exception e) {
+//                 //     // 6 different types of exceptions are thrown here that it's
+//                 //     // easier to just catch Exception as our "error handling" is the same.
+//                 //     // Yes, we're blocking the whole thing and making the radio unusable. That's by design.
+//                 //     // The log message should make it clear why the radio is broken
+//                 //     While (TRUE) {
+//                 //         Rlog->E(LOGTAG, "Unable to construct custom RIL class", e);
+//                 //         try {Thread->Sleep(10000);} Catch (InterruptedException ie) {}
+//                 //     }
+//                 // }
+//             }
+//             // Rlog::I(LOGTAG, "Creating SubscriptionController");
+//             AutoPtr<ISubscriptionControllerHelper> schlp;
+//             assert(0 && "TODO");
+//             // CSubscriptionControllerHelper::AcquireSingleton(&schlp);
+//             AutoPtr<ISubscriptionController> sc;
+//             schlp->Init(context, sCommandsInterfaces, (ISubscriptionController**)&sc);
 
-            // Instantiate UiccController so that all other classes can just
-            // call GetInstance()
-            AutoPtr<IUiccControllerHelper> uchlp;
-            assert(0 && "TODO");
-            // CUiccControllerHelper::AcquireSingleton((IUiccControllerHelper**)&uchlp);
-            uchlp->Make(context, sCommandsInterfaces, (IUiccController**)&mUiccController);
-            AutoPtr<IModemStackControllerHelper> mchlp;
-            assert(0 && "TODO");
-            // CModemStackControllerHelper::AcquireSingleton((IModemStackControllerHelper**)&mchlp);
-            // mchlp->Make(context,
-            //         mUiccController,
-            //         sCommandsInterfaces,
-            //         (IModemStackController**)&sModemStackController);
-            AutoPtr<IModemBindingPolicyHandlerHelper> mphlp;
-            assert(0 && "TODO");
-            // CModemBindingPolicyHandlerHelper::AcquireSingleton((IModemBindingPolicyHandlerHelper**)&mphlp);
-            // mphlp->Make(context,
-            //         mUiccController,
-            //         sCommandsInterfaces,
-            //         (IModemBindingPolicyHandler**)&sModemBindingPolicyHandler);
+//             // Instantiate UiccController so that all other classes can just
+//             // call GetInstance()
+//             AutoPtr<IUiccControllerHelper> uchlp;
+//             assert(0 && "TODO");
+//             // CUiccControllerHelper::AcquireSingleton((IUiccControllerHelper**)&uchlp);
+//             uchlp->Make(context, sCommandsInterfaces, (IUiccController**)&mUiccController);
+//             AutoPtr<IModemStackControllerHelper> mchlp;
+//             assert(0 && "TODO");
+//             // CModemStackControllerHelper::AcquireSingleton((IModemStackControllerHelper**)&mchlp);
+//             // mchlp->Make(context,
+//             //         mUiccController,
+//             //         sCommandsInterfaces,
+//             //         (IModemStackController**)&sModemStackController);
+//             AutoPtr<IModemBindingPolicyHandlerHelper> mphlp;
+//             assert(0 && "TODO");
+//             // CModemBindingPolicyHandlerHelper::AcquireSingleton((IModemBindingPolicyHandlerHelper**)&mphlp);
+//             // mphlp->Make(context,
+//             //         mUiccController,
+//             //         sCommandsInterfaces,
+//             //         (IModemBindingPolicyHandler**)&sModemBindingPolicyHandler);
 
-            for (Int32 i = 0; i < numPhones; i++) {
-                AutoPtr<IPhoneBase> phone;
-                Int32 phoneType = 0;
-                hlp->GetPhoneType((*networkModes)[i], &phoneType);
-                if (phoneType == IPhoneConstants::PHONE_TYPE_GSM) {
-                    assert(0 && "TODO");
-                    // CGSMPhone::New(context,
-                    //         (*sCommandsInterfaces)[i], sPhoneNotifier, i, (IGSMPhone**)&Phone);
-                }
-                else if (phoneType == IPhoneConstants::PHONE_TYPE_CDMA) {
-                    assert(0 && "TODO");
-                    // CCDMALTEPhone::New(context,
-                    //         (*sCommandsInterfaces)[i], sPhoneNotifier, i, (ICDMALTEPhone**)&Phone);
-                }
-                // Rlog::I(LOGTAG, "Creating Phone with type = %d sub = %d", phoneType, i);
+//             for (Int32 i = 0; i < numPhones; i++) {
+//                 AutoPtr<IPhoneBase> phone;
+//                 Int32 phoneType = 0;
+//                 hlp->GetPhoneType((*networkModes)[i], &phoneType);
+//                 if (phoneType == IPhoneConstants::PHONE_TYPE_GSM) {
+//                     assert(0 && "TODO");
+//                     // CGSMPhone::New(context,
+//                     //         (*sCommandsInterfaces)[i], sPhoneNotifier, i, (IGSMPhone**)&Phone);
+//                 }
+//                 else if (phoneType == IPhoneConstants::PHONE_TYPE_CDMA) {
+//                     assert(0 && "TODO");
+//                     // CCDMALTEPhone::New(context,
+//                     //         (*sCommandsInterfaces)[i], sPhoneNotifier, i, (ICDMALTEPhone**)&Phone);
+//                 }
+//                 // Rlog::I(LOGTAG, "Creating Phone with type = %d sub = %d", phoneType, i);
 
-                CPhoneProxy::New(phone, (IPhoneProxy**)&((*sProxyPhones)[i]));
-            }
-            AutoPtr<IProxyControllerHelper> pchlp;
-            assert(0 && "TODO");
-            // CProxyControllerHelper::AcquireSingleton((IProxyControllerHelper**)&pchlp);
-            // pchlp->GetInstance(context, sProxyPhones,
-            //         mUiccController, sCommandsInterfaces, (IProxyController**)&mProxyController);
+//                 CPhoneProxy::New(phone, (IPhoneProxy**)&((*sProxyPhones)[i]));
+//             }
+//             AutoPtr<IProxyControllerHelper> pchlp;
+//             assert(0 && "TODO");
+//             // CProxyControllerHelper::AcquireSingleton((IProxyControllerHelper**)&pchlp);
+//             // pchlp->GetInstance(context, sProxyPhones,
+//             //         mUiccController, sCommandsInterfaces, (IProxyController**)&mProxyController);
 
-            // Set the default phone in base class.
-            // FIXME: This is a first best guess at what the defaults will be. It
-            // FIXME: needs to be done in a more controlled manner in the future.
-            sProxyPhone = (*sProxyPhones)[0];
-            sCommandsInterface = (*sCommandsInterfaces)[0];
+//             // Set the default phone in base class.
+//             // FIXME: This is a first best guess at what the defaults will be. It
+//             // FIXME: needs to be done in a more controlled manner in the future.
+//             sProxyPhone = (*sProxyPhones)[0];
+//             sCommandsInterface = (*sCommandsInterfaces)[0];
 
-            // Ensure that we have a default SMS app. Requesting the app with
-            // updateIfNeeded set to TRUE is enough to configure a default SMS app.
-            AutoPtr<ISmsApplication> application;
-            assert(0 && "TODO");
-            // CSmsApplication::AcquireSingleton((ISmsApplication**)&application);
-            AutoPtr<IComponentName> componentName;
-            application->GetDefaultSmsApplication(context, TRUE /* updateIfNeeded */, (IComponentName**)&componentName);
-            String packageName("NONE");
-            if (componentName != NULL) {
-                componentName->GetPackageName(&packageName);
-            }
-            // Rlog::I(LOGTAG, "defaultSmsApplication: %s", packageName);
+//             // Ensure that we have a default SMS app. Requesting the app with
+//             // updateIfNeeded set to TRUE is enough to configure a default SMS app.
+//             AutoPtr<ISmsApplication> application;
+//             assert(0 && "TODO");
+//             // CSmsApplication::AcquireSingleton((ISmsApplication**)&application);
+//             AutoPtr<IComponentName> componentName;
+//             application->GetDefaultSmsApplication(context, TRUE /* updateIfNeeded */, (IComponentName**)&componentName);
+//             String packageName("NONE");
+//             if (componentName != NULL) {
+//                 componentName->GetPackageName(&packageName);
+//             }
+//             // Rlog::I(LOGTAG, "defaultSmsApplication: %s", packageName);
 
-            // Set up monitor to watch for changes to SMS packages
-            application->InitSmsPackageMonitor(context);
+//             // Set up monitor to watch for changes to SMS packages
+//             application->InitSmsPackageMonitor(context);
 
-            sMadeDefaults = TRUE;
+//             sMadeDefaults = TRUE;
 
-            // Rlog::I(LOGTAG, "Creating SubInfoRecordUpdater ");
-            assert(0 && "TODO");
-            // sSubInfoRecordUpdater = new SubInfoRecordUpdater(context,
-            //         sProxyPhones, sCommandsInterfaces);
-            AutoPtr<ISubscriptionControllerHelper> hlpSC;
-            assert(0 && "TODO");
-            // CSubscriptionControllerHelper::AcquireSingleton((ISubscriptionControllerHelper**)&hlpSC);
-            AutoPtr<ISubscriptionController> instance;
-            hlpSC->GetInstance((ISubscriptionController**)&instance);
-            instance->UpdatePhonesAvailability(sProxyPhones);
-        }
-    }
+//             // Rlog::I(LOGTAG, "Creating SubInfoRecordUpdater ");
+//             assert(0 && "TODO");
+//             // sSubInfoRecordUpdater = new SubInfoRecordUpdater(context,
+//             //         sProxyPhones, sCommandsInterfaces);
+//             AutoPtr<ISubscriptionControllerHelper> hlpSC;
+//             assert(0 && "TODO");
+//             // CSubscriptionControllerHelper::AcquireSingleton((ISubscriptionControllerHelper**)&hlpSC);
+//             AutoPtr<ISubscriptionController> instance;
+//             hlpSC->GetInstance((ISubscriptionController**)&instance);
+//             instance->UpdatePhonesAvailability(sProxyPhones);
+//         }
+//     }
     return NOERROR;
 }
 
