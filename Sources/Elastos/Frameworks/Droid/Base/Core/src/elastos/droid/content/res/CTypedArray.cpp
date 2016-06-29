@@ -4,10 +4,14 @@
 #include "elastos/droid/internal/utility/XmlUtils.h"
 #include <elastos/core/Math.h>
 #include <elastos/core/AutoLock.h>
+#include <elastos/core/StringUtils.h>
+#include <elastos/core/StringBuilder.h>
 #include <elastos/utility/logging/Logger.h>
 #include <stdlib.h>
 
 using Elastos::Droid::Internal::Utility::XmlUtils;
+using Elastos::Core::StringBuilder;
+using Elastos::Core::StringUtils;
 using Elastos::Utility::Logging::Logger;
 
 namespace Elastos {
@@ -610,7 +614,6 @@ ECode CTypedArray::GetLayoutDimension(
     index *= CAssetManager::STYLE_NUM_ENTRIES;
     AutoPtr< ArrayOf<Int32> > data = mData;
     Int32 type = (*data)[index + CAssetManager::STYLE_TYPE];
-    // Logger::I("CTypedArray", "GetLayoutDimension: index:%d, name:%s type:%08x", index, name.string(), type);
     if (type >= ITypedValue::TYPE_FIRST_INT && type <= ITypedValue::TYPE_LAST_INT) {
         *dimension = (*data)[index + CAssetManager::STYLE_DATA];
         return NOERROR;
@@ -1008,6 +1011,20 @@ AutoPtr<ICharSequence> CTypedArray::LoadStringValueAt(
     return cam->GetPooledStringForCookie(cookie, (*data)[index + CAssetManager::STYLE_DATA]);
 }
 
+ECode CTypedArray::ToString(
+    /* [out] */ String* str)
+{
+    VALIDATE_NOT_NULL(str)
+    StringBuilder sb("CTypedArray{");
+    sb += StringUtils::ToHexString((Int32)this);
+    sb += ", length=";
+    sb += mLength;
+    sb += ", value=";
+    sb += TO_CSTR(mValue);
+    sb += "}";
+    *str = sb.ToString();
+    return NOERROR;
+}
 
 } // namespace Res
 } // namespace Content

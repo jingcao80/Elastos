@@ -124,8 +124,6 @@ private:
 
     CARAPI_(void) UpdateState();
 
-    static CARAPI_(AutoPtr<INetworkRequest>) InitStatic();
-
 private:
     static const String TAG;
     static const Boolean DEBUG;

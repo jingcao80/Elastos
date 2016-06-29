@@ -2453,7 +2453,7 @@ ECode CContextImpl::GetSystemService(
         AutoPtr<IContentResolver> resolver;
         GetContentResolver((IContentResolver**)&resolver);
         String pkgName;
-        GetOuterContext()->GetPackageName(&pkgName);
+        GetPackageName(&pkgName);
         AutoPtr<IDownloadManager> downloadManager;
         CDownloadManager::New(resolver, pkgName, (IDownloadManager**)&downloadManager);
         *object = downloadManager.Get();
@@ -2525,7 +2525,7 @@ ECode CContextImpl::GetSystemService(
         AutoPtr<IPolicyManager> pm;
         FAIL_RETURN(CPolicyManager::AcquireSingleton((IPolicyManager**)&pm));
         AutoPtr<ILayoutInflater> inflater;
-        FAIL_RETURN(pm->MakeNewLayoutInflater(GetOuterContext(), (ILayoutInflater**)&inflater));
+        FAIL_RETURN(pm->MakeNewLayoutInflater((IContext*)this, (ILayoutInflater**)&inflater));
         *object = inflater.Get();
         REFCOUNT_ADD(*object);
         return NOERROR;

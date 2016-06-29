@@ -26,7 +26,10 @@ namespace SystemUI {
 namespace Qs {
 namespace Tiles {
 
+static const String TAG("CastTile");
+
 CAR_INTERFACE_IMPL_2(CastTile::Callback, Object, ICastControllerCallback, IKeyguardMonitorCallback);
+
 CastTile::Callback::Callback(
     /* [in] */ CastTile* host)
     : mHost(host)
@@ -45,6 +48,7 @@ ECode CastTile::Callback::OnKeyguardChanged()
 }
 
 CAR_INTERFACE_IMPL(CastTile::CastDetailAdapter::MyListener, Object, IViewOnAttachStateChangeListener)
+
 CastTile::CastDetailAdapter::MyListener::MyListener(
     /* [in] */ CastDetailAdapter* host)
     : mAdapter(host)
@@ -53,19 +57,20 @@ CastTile::CastDetailAdapter::MyListener::MyListener(
 ECode CastTile::CastDetailAdapter::MyListener::OnViewAttachedToWindow(
     /* [in] */ IView* v)
 {
-    if (DEBUG) Logger::D(mAdapter->mHost->TAG, "onViewAttachedToWindow");
+    if (DEBUG) Logger::D(TAG, "onViewAttachedToWindow");
     return NOERROR;
 }
 
 ECode CastTile::CastDetailAdapter::MyListener::OnViewDetachedFromWindow(
     /* [in] */ IView* v)
 {
-    if (DEBUG) Logger::D(mAdapter->mHost->TAG, "onViewDetachedFromWindow");
+    if (DEBUG) Logger::D(TAG, "onViewDetachedFromWindow");
     mAdapter->mVisibleOrder->Clear();
     return NOERROR;
 }
 
 CAR_INTERFACE_IMPL_2(CastTile::CastDetailAdapter, Object, IQSTileDetailAdapter, IQSDetailItemsCallback);
+
 CastTile::CastDetailAdapter::CastDetailAdapter(
     /* [in] */ CastTile* host)
     : mHost(host)
@@ -115,7 +120,7 @@ ECode CastTile::CastDetailAdapter::CreateDetailView(
     mItems = CQSDetailItems::ConvertOrInflate(context, convertView, parent);
     mItems->SetTagSuffix(String("Cast"));
     if (convertView == NULL) {
-        if (DEBUG) Logger::D(mHost->TAG, "addOnAttachStateChangeListener");
+        if (DEBUG) Logger::D(TAG, "addOnAttachStateChangeListener");
         AutoPtr<MyListener> listener = new MyListener(this);
         IView::Probe(mItems)->AddOnAttachStateChangeListener(listener);
     }

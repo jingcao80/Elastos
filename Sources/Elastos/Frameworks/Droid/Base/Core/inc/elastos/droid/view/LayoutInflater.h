@@ -308,8 +308,6 @@ public:
     static String mConstructorSignature;
 
 private:
-    Boolean DEBUG;
-
     IContext* mContext;
 
     // these are optional, set by the caller

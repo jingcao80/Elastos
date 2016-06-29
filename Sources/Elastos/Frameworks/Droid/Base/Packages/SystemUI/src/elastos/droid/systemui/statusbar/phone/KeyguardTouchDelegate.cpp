@@ -68,6 +68,7 @@ ECode KeyguardTouchDelegate::KeyguardConnection::OnServiceDisconnected(
 }
 
 CAR_INTERFACE_IMPL(KeyguardTouchDelegate, Object, IKeyguardTouchDelegate)
+
 KeyguardTouchDelegate::KeyguardTouchDelegate(
     /* [in] */ IContext* context)
 {
@@ -102,11 +103,10 @@ AutoPtr<IList> KeyguardTouchDelegate::InitList()
 AutoPtr<KeyguardTouchDelegate> KeyguardTouchDelegate::GetInstance(
     /* [in] */ IContext* context)
 {
-    AutoPtr<KeyguardTouchDelegate> instance = sInstance;
-    if (instance == NULL) {
-        instance = sInstance = new KeyguardTouchDelegate(context);
+    if (sInstance == NULL) {
+        sInstance = new KeyguardTouchDelegate(context);
     }
-    return instance;
+    return sInstance;
 }
 
 ECode KeyguardTouchDelegate::IsSecure(

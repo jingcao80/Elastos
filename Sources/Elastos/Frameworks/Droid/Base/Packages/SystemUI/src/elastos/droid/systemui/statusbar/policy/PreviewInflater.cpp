@@ -43,16 +43,18 @@ ECode PreviewInflater::InflatePreview(
     /* [out] */ IView** view)
 {
     VALIDATE_NOT_NULL(view);
+    *view = NULL;
+
     AutoPtr<WidgetInfo> info = GetWidgetInfo(intent);
     if (info == NULL) {
-        *view = NULL;
         return NOERROR;
     }
+
     AutoPtr<IView> v = InflateWidgetView(info);
     if (v == NULL) {
-        *view = NULL;
         return NOERROR;
     }
+
     AutoPtr<KeyguardPreviewContainer> container = new KeyguardPreviewContainer();
     container->constructor(mContext, NULL);
     container->AddView(v);
@@ -109,8 +111,8 @@ AutoPtr<PreviewInflater::WidgetInfo> PreviewInflater::GetWidgetInfo(
     }
     AutoPtr<IResolveInfo> resolved;
     packageManager->ResolveActivityAsUser(intent,
-            IPackageManager::MATCH_DEFAULT_ONLY | IPackageManager::GET_META_DATA,
-            user, (IResolveInfo**)&resolved);
+        IPackageManager::MATCH_DEFAULT_ONLY | IPackageManager::GET_META_DATA,
+        user, (IResolveInfo**)&resolved);
     if (WouldLaunchResolverActivity(resolved, appList)) {
         return NULL;
     }
@@ -142,19 +144,23 @@ Boolean PreviewInflater::WouldLaunchResolverActivity(
     /* [in] */ IIntent* intent,
     /* [in] */ Int32 currentUserId)
 {
+    Logger::D(TAG, " >> WouldLaunchResolverActivity: %s, %s, %d",
+        TO_CSTR(ctx), TO_CSTR(intent), currentUserId);
     AutoPtr<IPackageManager> packageManager;
     ctx->GetPackageManager((IPackageManager**)&packageManager);
     AutoPtr<IList> appList;  /*<ResolveInfo*/
     packageManager->QueryIntentActivitiesAsUser(
-            intent, IPackageManager::MATCH_DEFAULT_ONLY, currentUserId, (IList**)&appList);
-
+        intent, IPackageManager::MATCH_DEFAULT_ONLY, currentUserId, (IList**)&appList);
+    Logger::D(TAG, " >> appList:%s", TO_CSTR(appList));
     Int32 size = 0;
     if ((appList->GetSize(&size), size) == 0) {
         return FALSE;
     }
     AutoPtr<IResolveInfo> resolved;
-    packageManager->ResolveActivityAsUser(intent, IPackageManager::MATCH_DEFAULT_ONLY | IPackageManager::GET_META_DATA,
-            currentUserId, (IResolveInfo**)&resolved);
+    packageManager->ResolveActivityAsUser(intent,
+        IPackageManager::MATCH_DEFAULT_ONLY | IPackageManager::GET_META_DATA,
+        currentUserId, (IResolveInfo**)&resolved);
+    Logger::D(TAG, " >> resolved:%s", TO_CSTR(resolved));
     return WouldLaunchResolverActivity(resolved, appList);
 }
 
@@ -162,25 +168,26 @@ Boolean PreviewInflater::WouldLaunchResolverActivity(
     /* [in] */ IResolveInfo* resolved,
     /* [in] */ IList/*<ResolveInfo>*/* appList)
 {
+    Logger::D(TAG, " >> WouldLaunchResolverActivity:%s, %s", TO_CSTR(resolved), TO_CSTR(resolved));
     // If the list contains the above resolved activity, then it can't be
     // ResolverActivity itself.
     Int32 size = 0;
     appList->GetSize(&size);
+    String name, pname, name2, pname2;
+    AutoPtr<IActivityInfo> ai;
+    resolved->GetActivityInfo((IActivityInfo**)&ai);
+    IPackageItemInfo::Probe(ai)->GetName(&name2);
+    IPackageItemInfo::Probe(ai)->GetPackageName(&pname2);
+
     for (Int32 i = 0; i < size; i++) {
         AutoPtr<IInterface> obj;
         appList->Get(i, (IInterface**)&obj);
         AutoPtr<IResolveInfo> tmp = IResolveInfo::Probe(obj);
         AutoPtr<IActivityInfo> activityInfo;
         tmp->GetActivityInfo((IActivityInfo**)&activityInfo);
-        String name, pname;
         IPackageItemInfo::Probe(activityInfo)->GetName(&name);
         IPackageItemInfo::Probe(activityInfo)->GetPackageName(&pname);
 
-        AutoPtr<IActivityInfo> activityInfo2;
-        resolved->GetActivityInfo((IActivityInfo**)&activityInfo2);
-        String name2, pname2;
-        IPackageItemInfo::Probe(activityInfo2)->GetName(&name2);
-        IPackageItemInfo::Probe(activityInfo2)->GetPackageName(&pname2);
         if (name.Equals(name2) && pname.Equals(pname2)) {
             return FALSE;
         }

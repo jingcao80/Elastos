@@ -25,6 +25,8 @@ namespace SystemUI {
 namespace Qs {
 namespace Tiles {
 
+static const String TAG("IntentTile");
+
 IntentTile::Receiver::Receiver(
     /* [in] */ IntentTile* host)
     : mHost(host)
@@ -39,6 +41,7 @@ ECode IntentTile::Receiver::OnReceive(
 }
 
 const String IntentTile::PREFIX("intent(");
+
 IntentTile::IntentTile(
     /* [in] */ IQSTileHost* host,
     /* [in] */ const String& action)

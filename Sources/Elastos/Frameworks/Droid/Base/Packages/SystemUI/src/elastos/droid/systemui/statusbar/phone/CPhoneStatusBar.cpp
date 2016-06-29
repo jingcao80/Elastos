@@ -153,7 +153,7 @@ const Boolean CPhoneStatusBar::DUMPTRUCK = TRUE; // extra dumpsys info
 const Boolean CPhoneStatusBar::DEBUG_GESTURES = FALSE;
 const Boolean CPhoneStatusBar::DEBUG_MEDIA = FALSE;
 const Boolean CPhoneStatusBar::DEBUG_MEDIA_FAKE_ARTWORK = FALSE;
-const Boolean CPhoneStatusBar::DEBUG_WINDOW_STATE = TRUE;
+const Boolean CPhoneStatusBar::DEBUG_WINDOW_STATE = FALSE;
 const Boolean CPhoneStatusBar::CHATTY = DEBUG;
 const String CPhoneStatusBar::ACTION_STATUSBAR_START("com.android.internal.policy.statusbar.START");
 const Boolean CPhoneStatusBar::SHOW_LOCKSCREEN_MEDIA_ARTWORK = TRUE;
@@ -2111,8 +2111,8 @@ void CPhoneStatusBar::StartKeyguard()
     AutoPtr<IKeyguardViewMediator> keyguardViewMediator =
         IKeyguardViewMediator::Probe(GetComponent(String("EIID_IKeyguardViewMediator")));
     keyguardViewMediator->RegisterStatusBar(this,
-            IViewGroup::Probe(mStatusBarWindow), mStatusBarWindowManager, mScrimController,
-            (IStatusBarKeyguardViewManager**)&mStatusBarKeyguardViewManager);
+        IViewGroup::Probe(mStatusBarWindow), mStatusBarWindowManager, mScrimController,
+        (IStatusBarKeyguardViewManager**)&mStatusBarKeyguardViewManager);
     keyguardViewMediator->GetViewMediatorCallback((IViewMediatorCallback**)&mKeyguardViewMediatorCallback);
 }
 

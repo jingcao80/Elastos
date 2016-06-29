@@ -4358,7 +4358,8 @@ ECode CActivityManagerService::UpdateUsageStats(
             mUsageStatsService->ReportEvent(component->mRealActivity, component->mUserId,
                     IUsageEvent::MOVE_TO_FOREGROUND);
         }
-        {    AutoLock syncLock(stats);
+        {
+            AutoLock syncLock(stats);
             stats->NoteActivityResumedLocked(component->mApp->mUid);
         }
     }
@@ -4367,7 +4368,8 @@ ECode CActivityManagerService::UpdateUsageStats(
             mUsageStatsService->ReportEvent(component->mRealActivity, component->mUserId,
                     IUsageEvent::MOVE_TO_BACKGROUND);
         }
-        {    AutoLock syncLock(stats);
+        {
+            AutoLock syncLock(stats);
             stats->NoteActivityPausedLocked(component->mApp->mUid);
         }
     }

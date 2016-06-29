@@ -49,6 +49,8 @@ namespace Elastos {
 namespace Droid {
 namespace View {
 
+static const Boolean DEBUG = FALSE;
+
 #define LAYOUT_INFLATOR_CATCH_EXCEPTION1(expr, whereInfo) \
     do { \
         ECode ec = expr; \
@@ -345,8 +347,7 @@ ECode LayoutInflater::FactoryMerger::OnCreateView(
 // LayoutInflater
 //=======================================================================================
 LayoutInflater::LayoutInflater()
-    : DEBUG(FALSE)
-    , mContext(NULL)
+    : mContext(NULL)
     , mFactorySet(FALSE)
     , mPrivateFactory(NULL)
 {
@@ -526,6 +527,7 @@ ECode LayoutInflater::Inflate(
     /* [out] */ IView** view)
 {
     VALIDATE_NOT_NULL(view)
+    *view = NULL;
 
     if (DEBUG) {
         Slogger::D(TAG, "Inflate from resource: %08x", resource);
@@ -549,6 +551,7 @@ ECode LayoutInflater::Inflate(
     /* [out] */ IView** view)
 {
     VALIDATE_NOT_NULL(view)
+    *view = NULL;
 
     AutoLock lock(mConstructorArgsLock);
     AutoPtr<IAttributeSet> attrs = Xml::AsAttributeSet(parser);
@@ -558,12 +561,13 @@ ECode LayoutInflater::Inflate(
 
 //    try {
     // Look for the root node.
+    String name;
     Int32 type;
-    FAIL_RETURN_WITH_CLOSE(parser->Next(&type), parser)
+    FAIL_GOTO(parser->Next(&type), _EXIT_)
     while ((type != IXmlPullParser::START_TAG) &&
             type != IXmlPullParser::END_DOCUMENT) {
         // Empty
-        FAIL_RETURN_WITH_CLOSE(parser->Next(&type), parser)
+        FAIL_GOTO(parser->Next(&type), _EXIT_)
     }
 
     if (type != IXmlPullParser::START_TAG) {
@@ -573,7 +577,6 @@ ECode LayoutInflater::Inflate(
         return E_INFLATE_EXCEPTION;
     }
 
-    String name;
     parser->GetName(&name);
 
     if (DEBUG) {
@@ -651,6 +654,7 @@ ECode LayoutInflater::Inflate(
 //        mConstructorArgs[1] = null;
 //    }
 
+_EXIT_:
     *view = result.Get();
     REFCOUNT_ADD(*view);
 
@@ -957,39 +961,39 @@ ECode LayoutInflater::RInflate(
     Int32 type;
     String name;
     FAIL_RETURN(parser->GetDepth(&orgDepth));
-    FAIL_RETURN_WITH_CLOSE(parser->Next(&type), parser)
+    FAIL_RETURN(parser->Next(&type))
     FAIL_RETURN(parser->GetDepth(&depth));
     while ((type != IXmlPullParser::END_TAG ||
             depth > orgDepth) && type != IXmlPullParser::END_DOCUMENT) {
 
         if (type != IXmlPullParser::START_TAG) {
-            FAIL_RETURN_WITH_CLOSE(parser->Next(&type), parser)
+            FAIL_RETURN(parser->Next(&type))
             FAIL_RETURN(parser->GetDepth(&depth));
             continue;
         }
 
         FAIL_RETURN(parser->GetName(&name));
-        if (DEBUG)
-        {
-           // System.out.println("LayoutInflater : rInflate : name  === " + name );
+        if (DEBUG) {
+            Slogger::I(TAG, " parent: %s rInflate : %s  === ", TO_CSTR(parent), name.string());
         }
 
         if (name.Equals(TAG_REQUEST_FOCUS)) {
             FAIL_RETURN(ParseRequestFocus(parser, parent));
-        } else if (TAG_TAG.Equals(name)) {
+        }
+        else if (TAG_TAG.Equals(name)) {
             FAIL_RETURN(ParseViewTag(parser, parent, attrs));
         }
         else if (String(TAG_INCLUDE).Equals(name)) {
             Int32 d;
             FAIL_RETURN(parser->GetDepth(&d));
             if (d == 0) {
-//                throw new InflateException("<include /> cannot be the root element");
+                Slogger::E(TAG, "<include /> cannot be the root element");
                 return E_INFLATE_EXCEPTION;
             }
             FAIL_RETURN(ParseInclude(parser, parent, attrs, inheritContext));
         }
         else if (name.Equals(TAG_MERGE)) {
-//            throw new InflateException("<merge /> must be the root element");
+            Slogger::E(TAG, "<merge /> must be the root element");
             return E_INFLATE_EXCEPTION;
         }
         else {
@@ -1002,7 +1006,7 @@ ECode LayoutInflater::RInflate(
             viewGroup->AddView(view, params);
         }
 
-        FAIL_RETURN_WITH_CLOSE(parser->Next(&type), parser)
+        FAIL_RETURN(parser->Next(&type))
         FAIL_RETURN(parser->GetDepth(&depth));
     }
 
@@ -1022,11 +1026,11 @@ ECode LayoutInflater::ParseRequestFocus(
     view->RequestFocus(&resultTmp);
     Int32 currentDepth;
     parser->GetDepth(&currentDepth);
-    FAIL_RETURN_WITH_CLOSE(parser->Next(&type), parser)
+    FAIL_RETURN(parser->Next(&type))
     while ((type != IXmlPullParser::END_TAG ||
             (parser->GetDepth(&depth), depth) > currentDepth) && type != IXmlPullParser::END_DOCUMENT) {
         // Empty
-        FAIL_RETURN_WITH_CLOSE(parser->Next(&type), parser)
+        FAIL_RETURN(parser->Next(&type))
     }
     return NOERROR;
 }
@@ -1055,11 +1059,11 @@ ECode LayoutInflater::ParseViewTag(
 
     Int32 currentDepth;
     parser->GetDepth(&currentDepth);
-    FAIL_RETURN_WITH_CLOSE(parser->Next(&type), parser)
+    FAIL_RETURN(parser->Next(&type))
     while ((type != IXmlPullParser::END_TAG ||
             (parser->GetDepth(&depth), depth) > currentDepth) && type != IXmlPullParser::END_DOCUMENT) {
         // Empty
-        FAIL_RETURN_WITH_CLOSE(parser->Next(&type), parser)
+        FAIL_RETURN(parser->Next(&type))
     }
     return NOERROR;
 }
@@ -1080,15 +1084,17 @@ ECode LayoutInflater::ParseInclude(
             String value;
             attrs->GetAttributeValue(String(NULL), String("layout"), &value);
             if (value.IsNull()) {
-//                throw new InflateException("You must specifiy a layout in the"
-//                        + " include tag: <include layout=\"@layout/layoutID\" />");
-                return E_INFLATE_EXCEPTION;
-            } else {
-//                throw new InflateException("You must specifiy a valid layout "
-//                        + "reference. The layout ID " + value + " is not valid.");
+                Slogger::E(TAG, "You must specifiy a layout in the"
+                    " include tag: <include layout=\"@layout/layoutID\" />");
                 return E_INFLATE_EXCEPTION;
             }
-        } else {
+            else {
+                Slogger::E(TAG, "YYou must specifiy a valid layout "
+                    "reference. The layout ID %s is not valid.", value.string());
+                return E_INFLATE_EXCEPTION;
+            }
+        }
+        else {
             AutoPtr<IResources> res;
             ASSERT_SUCCEEDED(mContext->GetResources((IResources**)&res));
 
@@ -1105,19 +1111,23 @@ ECode LayoutInflater::ParseInclude(
             }
 
             if (type != IXmlPullParser::START_TAG) {
-//                throw new InflateException(childParser.getPositionDescription() +
-//                        ": No start tag found!");
+                String des;
+                IXmlPullParser::Probe(childParser)->GetPositionDescription(&des);
+                Slogger::E(TAG, "%s: No start tag found!", des.string());
                 childParser->Close();
                 return E_INFLATE_EXCEPTION;
             }
 
             String childName;
             FAIL_RETURN_WITH_CLOSE(IXmlPullParser::Probe(childParser)->GetName(&childName), childParser)
-
+            if (DEBUG) {
+                Slogger::I(TAG, " layout:%08x > childName: %s", layout, childName.string());
+            }
             if (childName.Equals(TAG_MERGE)) {
                 // Inflate all children.
                 FAIL_RETURN_WITH_CLOSE(RInflate(IXmlPullParser::Probe(childParser), parent, childAttrs, FALSE, inheritContext), childParser)
-            } else {
+            }
+            else {
                 AutoPtr<IView> view;
                 FAIL_RETURN_WITH_CLOSE(CreateViewFromTag(parent, childName, childAttrs, inheritContext, (IView**)&view), childParser)
 
@@ -1181,19 +1191,19 @@ ECode LayoutInflater::ParseInclude(
             childParser->Close();
         }
     } else {
-//        throw new InflateException("<include /> can only be used inside of a ViewGroup");
+        Slogger::E(TAG, "<include /> can only be used inside of a ViewGroup");
         return E_INFLATE_EXCEPTION;
     }
 
     Int32 currentDepth, depth;
     FAIL_RETURN(parser->GetDepth(&currentDepth));
-    FAIL_RETURN_WITH_CLOSE(parser->Next(&type), parser)
+    FAIL_RETURN(parser->Next(&type))
     FAIL_RETURN(parser->GetDepth(&depth));
     while ((type != IXmlPullParser::END_TAG ||
             depth > currentDepth) &&
             type != IXmlPullParser::END_DOCUMENT) {
         // Empty
-        FAIL_RETURN_WITH_CLOSE(parser->Next(&type), parser)
+        FAIL_RETURN(parser->Next(&type))
         FAIL_RETURN(parser->GetDepth(&depth));
     }
     return NOERROR;

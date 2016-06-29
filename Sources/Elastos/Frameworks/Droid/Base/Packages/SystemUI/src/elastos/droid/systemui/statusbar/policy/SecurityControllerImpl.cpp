@@ -24,8 +24,8 @@ namespace SystemUI {
 namespace StatusBar {
 namespace Policy {
 
-const String SecurityControllerImpl::TAG("SecurityController");
-const Boolean SecurityControllerImpl::DEBUG = Logger::IsLoggable(TAG, Logger::___DEBUG);
+const String SecurityControllerImpl::TAG("SecurityControllerImpl");
+const Boolean SecurityControllerImpl::DEBUG = FALSE;
 const Int32 SecurityControllerImpl::NO_NETWORK = -1;
 
 SecurityControllerImpl::NetworkCallback::NetworkCallback(
@@ -63,43 +63,8 @@ ECode SecurityControllerImpl::NetworkCallback::OnLost(
     return NOERROR;
 }
 
-AutoPtr<INetworkRequest> SecurityControllerImpl::REQUEST = InitStatic();
-CAR_INTERFACE_IMPL(SecurityControllerImpl, Object, ISecurityController)
-SecurityControllerImpl::SecurityControllerImpl(
-    /* [in] */ IContext* context)
-    : mCurrentVpnNetworkId(NO_NETWORK)
-{
-    mNetworkCallback = new NetworkCallback(this);
 
-    AutoPtr<IInterface> obj;
-    Logger::D(TAG, "TODO: CONNECTIVITY_SERVICE.");
-    // obj = ServiceManager::GetService(IContext::CONNECTIVITY_SERVICE);
-    mConnectivityService = IIConnectivityManager::Probe(obj);
-
-    CArrayList::New((IArrayList**)&mCallbacks);
-
-    mContext = context;
-    obj = NULL;
-    Logger::D(TAG, "TODO: Not Implement===[DEVICE_POLICY_SERVICE].");
-    // context->GetSystemService(IContext::DEVICE_POLICY_SERVICE, (IInterface**)&obj);
-    mDevicePolicyManager = IDevicePolicyManager::Probe(obj);
-
-    obj = NULL;
-    Logger::D(TAG, "TODO: CONNECTIVITY_SERVICE.");
-    // context->GetSystemService(IContext::CONNECTIVITY_SERVICE, (IInterface**)&obj);
-    mConnectivityManager = IConnectivityManager::Probe(obj);
-
-    // TODO: re-register network callback on user change.
-    if (mConnectivityManager != NULL) {
-        mConnectivityManager->RegisterNetworkCallback(REQUEST, mNetworkCallback);
-    }
-
-    AutoPtr<IActivityManagerHelper> amHelper;
-    CActivityManagerHelper::AcquireSingleton((IActivityManagerHelper**)&amHelper);
-    amHelper->GetCurrentUser(&mCurrentUserId);
-}
-
-AutoPtr<INetworkRequest> SecurityControllerImpl::InitStatic()
+static AutoPtr<INetworkRequest> InitREQUEST()
 {
     AutoPtr<INetworkRequestBuilder> builder;
     CNetworkRequestBuilder::New((INetworkRequestBuilder**)&builder);
@@ -110,6 +75,42 @@ AutoPtr<INetworkRequest> SecurityControllerImpl::InitStatic()
     AutoPtr<INetworkRequest> nr;
     builder->Build((INetworkRequest**)&nr);
     return nr;
+}
+
+AutoPtr<INetworkRequest> SecurityControllerImpl::REQUEST = InitREQUEST();
+
+CAR_INTERFACE_IMPL(SecurityControllerImpl, Object, ISecurityController)
+
+SecurityControllerImpl::SecurityControllerImpl(
+    /* [in] */ IContext* context)
+    : mCurrentVpnNetworkId(NO_NETWORK)
+{
+    mNetworkCallback = new NetworkCallback(this);
+
+    AutoPtr<IInterface> obj;
+    obj = ServiceManager::GetService(IContext::CONNECTIVITY_SERVICE);
+    mConnectivityService = IIConnectivityManager::Probe(obj);
+
+    CArrayList::New((IArrayList**)&mCallbacks);
+
+    Logger::I(TAG, " >> TODO: CONNECTIVITY_SERVICE");
+    mContext = context;
+    obj = NULL;
+    // context->GetSystemService(IContext::DEVICE_POLICY_SERVICE, (IInterface**)&obj);
+    mDevicePolicyManager = IDevicePolicyManager::Probe(obj);
+
+    obj = NULL;
+    context->GetSystemService(IContext::CONNECTIVITY_SERVICE, (IInterface**)&obj);
+    // mConnectivityManager = IConnectivityManager::Probe(obj);
+
+    // // TODO: re-register network callback on user change.
+    // if (mConnectivityManager != NULL) {
+    //     mConnectivityManager->RegisterNetworkCallback(REQUEST, mNetworkCallback);
+    // }
+
+    AutoPtr<IActivityManagerHelper> amHelper;
+    CActivityManagerHelper::AcquireSingleton((IActivityManagerHelper**)&amHelper);
+    amHelper->GetCurrentUser(&mCurrentUserId);
 }
 
 ECode SecurityControllerImpl::Dump(
@@ -217,7 +218,8 @@ ECode SecurityControllerImpl::DisconnectFromVpn()
         Boolean tmp = FALSE;
         if (IsLegacyVpn(&tmp), tmp) {
             if (mConnectivityService != NULL) {
-                ec = mConnectivityService->PrepareVpn(IVpnConfig::LEGACY_VPN, IVpnConfig::LEGACY_VPN, &tmp);
+                ec = mConnectivityService->PrepareVpn(IVpnConfig::LEGACY_VPN,
+                    IVpnConfig::LEGACY_VPN, &tmp);
             }
             if (FAILED(ec)) break;
         }
@@ -297,6 +299,7 @@ void SecurityControllerImpl::UpdateState()
     ECode ec = NOERROR;
     do {
         if (mConnectivityService != NULL) {
+            mVpnConfig = NULL;
             ec = mConnectivityService->GetVpnConfig((IVpnConfig**)&mVpnConfig);
         }
         if (FAILED(ec)) break;

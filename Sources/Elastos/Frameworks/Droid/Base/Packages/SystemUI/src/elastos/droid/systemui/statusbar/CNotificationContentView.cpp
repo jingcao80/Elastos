@@ -45,13 +45,21 @@ ECode CNotificationContentView::ViewRunnable::Run()
     return NOERROR;
 }
 
+AutoPtr<IColorFilter> InitNO_COLOR_FILTER()
+{
+    AutoPtr<IColorFilter> filter;
+    CColorFilter::New((IColorFilter**)&filter);
+    return filter;
+}
+
 const Int64 CNotificationContentView::ANIMATION_DURATION_LENGTH = 170;
 AutoPtr<IPaint> CNotificationContentView::INVERT_PAINT = CreateInvertPaint();
-AutoPtr<IColorFilter> CNotificationContentView::NO_COLOR_FILTER;
-Boolean CNotificationContentView::sInit = InitStatic();
+AutoPtr<IColorFilter> CNotificationContentView::NO_COLOR_FILTER = InitNO_COLOR_FILTER();
 
 CAR_OBJECT_IMPL(CNotificationContentView)
+
 CAR_INTERFACE_IMPL(CNotificationContentView, FrameLayout, INotificationContentView)
+
 CNotificationContentView::CNotificationContentView()
     : mSmallHeight(0)
     , mClipTopAmount(0)
@@ -74,12 +82,6 @@ ECode CNotificationContentView::constructor(
     mFadePaint->SetXfermode(mode);
     Reset();
     return NOERROR;
-}
-
-Boolean CNotificationContentView::InitStatic()
-{
-    CColorFilter::New((IColorFilter**)&NO_COLOR_FILTER);
-    return TRUE;
 }
 
 ECode CNotificationContentView::OnLayout(

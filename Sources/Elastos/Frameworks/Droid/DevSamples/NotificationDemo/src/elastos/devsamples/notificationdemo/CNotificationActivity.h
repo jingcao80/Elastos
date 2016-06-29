@@ -15,6 +15,8 @@ class CNotificationActivity : public Activity
 public:
     CAR_OBJECT_DECL()
 
+    CARAPI constructor();
+
 protected:
     CARAPI OnCreate(
         /* [in] */ IBundle* savedInstanceState);

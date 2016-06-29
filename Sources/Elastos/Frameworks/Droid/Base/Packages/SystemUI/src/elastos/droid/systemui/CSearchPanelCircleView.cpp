@@ -492,9 +492,12 @@ ECode CSearchPanelCircleView::SetCircleSize(
     /* [in] */ Int32 startDelay,
     /* [in] */ IInterpolator* interpolator)
 {
+    IAnimator* animator = IAnimator::Probe(mCircleAnimator);
     Boolean isAnimating = mCircleAnimator != NULL;
-    Boolean isRunning;
-    IAnimator::Probe(mCircleAnimator)->IsRunning(&isRunning);
+    Boolean isRunning = FALSE;
+    if (animator) {
+        animator->IsRunning(&isRunning);
+    }
     Boolean animationPending = isAnimating && !isRunning;
     Boolean animatingOut = isAnimating && mCircleAnimationEndValue == 0;
     if (animated || animationPending || animatingOut) {
@@ -502,25 +505,27 @@ ECode CSearchPanelCircleView::SetCircleSize(
             if (circleSize == mCircleAnimationEndValue) {
                 return E_NULL_POINTER_EXCEPTION;
             }
-            IAnimator::Probe(mCircleAnimator)->Cancel();
+            animator->Cancel();
         }
         AutoPtr<IValueAnimatorHelper> vah;
         CValueAnimatorHelper::AcquireSingleton((IValueAnimatorHelper**)&vah);
         AutoPtr<ArrayOf<Float> > fs = ArrayOf<Float>::Alloc(2);
         (*fs)[0] = mCircleSize;
         (*fs)[1] = circleSize;
+        mCircleAnimator = NULL;
         vah->OfFloat(fs, (IValueAnimator**)&mCircleAnimator);
+        animator = IAnimator::Probe(mCircleAnimator);
 
         mCircleAnimator->AddUpdateListener(mCircleUpdateListener);
-        IAnimator::Probe(mCircleAnimator)->AddListener(mClearAnimatorListener);
+        animator->AddListener(mClearAnimatorListener);
         AutoPtr<MyAnimatorListenerAdapter2> ala = new MyAnimatorListenerAdapter2(this, endRunnable);
-        IAnimator::Probe(mCircleAnimator)->AddListener(ala);
+        animator->AddListener(ala);
         AutoPtr<IInterpolator> desiredInterpolator = interpolator != NULL ? interpolator
                 : circleSize == 0 ? mDisappearInterpolator.Get() : mAppearInterpolator.Get();
-        IAnimator::Probe(mCircleAnimator)->SetInterpolator(ITimeInterpolator::Probe(desiredInterpolator));
+        animator->SetInterpolator(ITimeInterpolator::Probe(desiredInterpolator));
         mCircleAnimator->SetDuration(300);
-        IAnimator::Probe(mCircleAnimator)->SetStartDelay(startDelay);
-        IAnimator::Probe(mCircleAnimator)->Start();
+        animator->SetStartDelay(startDelay);
+        animator->Start();
         mCircleAnimationEndValue = circleSize;
     }
     else {

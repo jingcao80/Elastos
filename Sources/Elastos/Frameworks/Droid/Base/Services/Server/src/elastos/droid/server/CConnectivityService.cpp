@@ -2273,7 +2273,7 @@ void CConnectivityService::HandleRegisterNetworkRequest(
         NetworkAgentInfo* network = (NetworkAgentInfo*)INetworkAgentInfo::Probe(tmp);
 
         if (DBG) Slogger::D(TAG, "handleRegisterNetworkRequest checking %s", network->Name().string());
-        if (newCap->SatisfiedByNetworkCapabilities(network->mNetworkCapabilities, &bval), bval) {
+        if (newCap != NULL && newCap->SatisfiedByNetworkCapabilities(network->mNetworkCapabilities, &bval), bval) {
             network->GetCurrentScore(&score);
             if (DBG) {
                 Slogger::D(TAG, "apparently satisfied.  currentScore=%d", score);

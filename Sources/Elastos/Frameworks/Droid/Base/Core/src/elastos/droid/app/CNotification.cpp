@@ -1009,7 +1009,7 @@ ECode CNotification::ToString(
 {
     VALIDATE_NOT_NULL(info);
 
-    StringBuilder sb("Notification={pri=");
+    StringBuilder sb("Notification{pri=");
     sb += mPriority;
     sb += ", contentView=";
     if (mContentView != NULL) {

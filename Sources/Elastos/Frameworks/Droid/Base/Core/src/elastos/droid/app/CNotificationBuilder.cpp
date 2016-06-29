@@ -593,9 +593,9 @@ ECode CNotificationBuilder::ResetStandardTemplate(
     RemoveLargeIconBackground(contentView);
     contentView->SetViewPadding(R::id::icon, 0, 0, 0, 0);
     contentView->SetImageViewResource(R::id::icon, 0);
-    contentView->SetInt32(R::id::icon, String("setBackgroundResource"), 0);
+    contentView->SetInt32(R::id::icon, String("SetBackgroundResource"), 0);
     contentView->SetViewVisibility(R::id::right_icon, IView::GONE);
-    contentView->SetInt32(R::id::right_icon, String("setBackgroundResource"), 0);
+    contentView->SetInt32(R::id::right_icon, String("SetBackgroundResource"), 0);
     contentView->SetImageViewResource(R::id::right_icon, 0);
     contentView->SetImageViewResource(R::id::icon, 0);
     contentView->SetTextViewText(R::id::title, NULL);
@@ -1092,7 +1092,7 @@ ECode CNotificationBuilder::ProcessLargeLegacyIcon(
 ECode CNotificationBuilder::ApplyLargeIconBackground(
     /* [in] */ IRemoteViews* contentView)
 {
-    contentView->SetInt32(R::id::icon, String("setBackgroundResource"),
+    contentView->SetInt32(R::id::icon, String("SetBackgroundResource"),
         R::drawable::notification_icon_legacy_bg);
 
     contentView->SetDrawableParameters(
@@ -1112,7 +1112,7 @@ ECode CNotificationBuilder::ApplyLargeIconBackground(
 ECode CNotificationBuilder::RemoveLargeIconBackground(
     /* [in] */ IRemoteViews* contentView)
 {
-    return contentView->SetInt32(R::id::icon, String("setBackgroundResource"), 0);
+    return contentView->SetInt32(R::id::icon, String("SetBackgroundResource"), 0);
 }
 
 ECode CNotificationBuilder::ProcessSmallRightIcon(
@@ -1125,7 +1125,7 @@ ECode CNotificationBuilder::ProcessSmallRightIcon(
             0xFFFFFFFF, PorterDuffMode_SRC_ATOP, -1);
 
         contentView->SetInt32(R::id::right_icon,
-            String("setBackgroundResource"),
+            String("SetBackgroundResource"),
             R::drawable::notification_icon_legacy_bg);
 
         contentView->SetDrawableParameters(

@@ -734,7 +734,6 @@ ECode CNotificationPanelView::OnLayout(
         SetQsExpansion(mQsMinExpansionHeight + mLastOverscroll);
         Float eh = 0;
         GetExpandedHeight(&eh);
-        Logger::I(TAG, " >> OnLayout: SetStackHeight: %.2f", eh);
         mNotificationStackScroller->SetStackHeight(eh);
         UpdateHeader();
     }
@@ -834,7 +833,6 @@ ECode CNotificationPanelView::AnimateToFullShade(
 ECode CNotificationPanelView::SetQsExpansionEnabled(
     /* [in] */ Boolean qsExpansionEnabled)
 {
-    Logger::I(TAG, " >> SetQsExpansionEnabled: %d", qsExpansionEnabled);
     mQsExpansionEnabled = qsExpansionEnabled;
     IView::Probe(mHeader)->SetClickable(qsExpansionEnabled);
     return NOERROR;
@@ -937,7 +935,6 @@ ECode CNotificationPanelView::OnInterceptTouchEvent(
     Float x, y;
     event->GetX(pointerIndex, &x);
     event->GetY(pointerIndex, &y);
-    Logger::I(TAG, " >> OnInterceptTouchEvent: (%.2f, %.2f), %s", x, y, TO_CSTR(event));
 
     Int32 masked = 0;
     event->GetActionMasked(&masked);

@@ -232,7 +232,6 @@ private:
         /* [in] */ Boolean state);
 
 protected:
-    String TAG;
     static const Boolean DEBUG;
 
     AutoPtr<IQSTileHost> mHost;

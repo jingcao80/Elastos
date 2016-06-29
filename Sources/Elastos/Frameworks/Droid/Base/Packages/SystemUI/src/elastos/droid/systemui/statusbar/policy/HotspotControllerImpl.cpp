@@ -26,26 +26,26 @@ namespace SystemUI {
 namespace StatusBar {
 namespace Policy {
 
-const String HotspotControllerImpl::TAG("HotspotController");
-const Boolean HotspotControllerImpl::DEBUG = Logger::IsLoggable(TAG, Logger::___DEBUG);
+const String HotspotControllerImpl::TAG("HotspotControllerImpl");
+const Boolean HotspotControllerImpl::DEBUG = FALSE;
 
 CAR_INTERFACE_IMPL(HotspotControllerImpl, Object, IHotspotController)
+
 HotspotControllerImpl::HotspotControllerImpl(
     /* [in] */ IContext* context)
 {
-    CArrayList/*<IHotspotControllerCallback>*/::New((IArrayList**)&mCallbacks);
+    CArrayList::New((IArrayList**)&mCallbacks);
     CHotspotControllerReceiver::New(this, (IBroadcastReceiver**)&mReceiver);
     mContext = context;
 
     AutoPtr<IInterface> obj;
-    Logger::D(TAG, "TODO: WIFI_SERVICE not ready.");
-    // mContext->GetSystemService(IContext::WIFI_SERVICE, (IInterface**)&obj);
+    mContext->GetSystemService(IContext::WIFI_SERVICE, (IInterface**)&obj);
     mWifiManager = IWifiManager::Probe(obj);
 
+    Logger::I(TAG, " >> TODO: CONNECTIVITY_SERVICE");
     obj = NULL;
-    Logger::D(TAG, "TODO: CONNECTIVITY_SERVICE.");
     // mContext->GetSystemService(IContext::CONNECTIVITY_SERVICE, (IInterface**)&obj);
-    mConnectivityManager = IConnectivityManager::Probe(obj);
+    // mConnectivityManager = IConnectivityManager::Probe(obj);
 }
 
 ECode HotspotControllerImpl::AddCallback(
@@ -99,10 +99,11 @@ ECode HotspotControllerImpl::IsHotspotSupported(
     Int32 value = 0;
     helper->GetCurrentUser(&value);
     const Boolean isSecondaryUser = value != IUserHandle::USER_OWNER;
-    Boolean tmp = FALSE;
-    Logger::D(TAG, "TODO: need ConnectivityManager.");
-    // *result = !isSecondaryUser && (mConnectivityManager->IsTetheringSupported(&tmp), tmp);
-    *result = FALSE;
+    Boolean tmp = !isSecondaryUser;
+    if (tmp && mConnectivityManager != NULL) {
+        mConnectivityManager->IsTetheringSupported(&tmp);
+    }
+    *result = tmp;
     return NOERROR;
 }
 

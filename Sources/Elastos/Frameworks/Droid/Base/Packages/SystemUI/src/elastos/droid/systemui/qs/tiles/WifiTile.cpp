@@ -25,6 +25,8 @@ namespace SystemUI {
 namespace Qs {
 namespace Tiles {
 
+static const String TAG("WifiTile");
+
 WifiTile::CallbackInfo::CallbackInfo()
     : mEnabled(FALSE)
     , mConnected(FALSE)
@@ -58,6 +60,7 @@ ECode WifiTile::CallbackInfo::ToString(
 
 CAR_INTERFACE_IMPL_3(WifiTile::WifiDetailAdapter, Object, IQSTileDetailAdapter \
     , INetworkControllerAccessPointCallback, IQSDetailItemsCallback);
+
 WifiTile::WifiDetailAdapter::WifiDetailAdapter(
     /* [in] */ WifiTile* host)
     : mHost(host)
@@ -90,7 +93,7 @@ ECode WifiTile::WifiDetailAdapter::GetToggleState(
 ECode WifiTile::WifiDetailAdapter::SetToggleState(
     /* [in] */ IBoolean* state)
 {
-    if (DEBUG) Logger::D(mHost->TAG, "setToggleState %s", TO_CSTR(state));
+    if (DEBUG) Logger::D(TAG, "setToggleState %s", TO_CSTR(state));
     Boolean tmp = FALSE;
     state->GetValue(&tmp);
     mHost->mController->SetWifiEnabled(tmp);
@@ -105,7 +108,7 @@ ECode WifiTile::WifiDetailAdapter::CreateDetailView(
     /* [out] */ IView** view)
 {
     VALIDATE_NOT_NULL(view);
-    if (DEBUG) Logger::D(mHost->TAG, "createDetailView convertView=%d", (convertView != NULL));
+    if (DEBUG) Logger::D(TAG, "createDetailView convertView=%d", (convertView != NULL));
     mAccessPoints = NULL;
     mHost->mController->ScanForAccessPoints();
     mHost->FireScanStateChanged(TRUE);
@@ -198,7 +201,7 @@ ECode WifiTile::Callback::OnWifiSignalChanged(
     /* [in] */ const String& wifiSignalContentDescriptionId,
     /* [in] */ const String& description)
 {
-    if (DEBUG) Logger::D(mHost->TAG, "onWifiSignalChanged enabled=%d", enabled);
+    if (DEBUG) Logger::D(TAG, "onWifiSignalChanged enabled=%d", enabled);
     AutoPtr<CallbackInfo> info = new CallbackInfo();
     info->mEnabled = enabled;
     info->mConnected = connected;

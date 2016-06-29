@@ -735,7 +735,7 @@ public:
             /* [in] */ StopwatchTimer* self);
 
     private:
-        AutoPtr<Uid> mUid;
+        Uid* mUid;
         AutoPtr< List<AutoPtr<StopwatchTimer> > > mTimerPool;
 
         Int32 mNesting;

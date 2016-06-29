@@ -11,8 +11,7 @@
     <application android:icon="@drawable/icon" android:label="@string/app_name">
 
         <activity android:name=".CActivityOne"
-                  android:label="@string/app_name"
-                  android:theme="@android:style/Theme.Holo.Light">
+                  android:label="@string/app_name">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN"/>
                 <category android:name="android.intent.category.DEFAULT"/>
@@ -22,8 +21,7 @@
 
         <activity android:name=".CNotificationActivity"
                 android:label="Details of notification"
-                android:parentActivityName="CActivityOne"
-                android:theme="@android:style/Theme.Holo.Light">
+                android:parentActivityName="CActivityOne">
             <intent-filter>
                 <action android:name="android.intent.action.NOTIFICATION"/>
                 <category android:name="android.intent.category.DEFAULT"/>

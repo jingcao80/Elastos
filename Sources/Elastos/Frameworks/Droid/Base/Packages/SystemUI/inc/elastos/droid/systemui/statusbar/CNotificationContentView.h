@@ -120,13 +120,10 @@ private:
 
     static CARAPI_(AutoPtr<IPaint>) CreateInvertPaint();
 
-    static CARAPI_(Boolean) InitStatic();
-
 private:
     static const Int64 ANIMATION_DURATION_LENGTH;
     static AutoPtr<IPaint> INVERT_PAINT;
     static AutoPtr<IColorFilter> NO_COLOR_FILTER;
-    static Boolean sInit;
 
     AutoPtr<IRect> mClipBounds;
 

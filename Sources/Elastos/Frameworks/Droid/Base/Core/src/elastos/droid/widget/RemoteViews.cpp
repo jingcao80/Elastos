@@ -344,14 +344,18 @@ ECode RemoteViews::Action::GetUniqueKey(
     String subName;
     GetActionName(&subName);
     StringBuilder sb(subName);
-    sb += "[viewId:0x";
-    sb += StringUtils::ToString(mViewId, 16);
-    sb += "]";
+    sb += "{viewId:0x";
+    sb += StringUtils::ToHexString(mViewId);
+    sb += "}";
     *key = sb.ToString();
     return NOERROR;
 }
 
-
+ECode RemoteViews::Action::ToString(
+    /* [out] */ String* str)
+{
+    return GetUniqueKey(str);
+}
 //==============================================================================
 //                  RemoteViews::_SetEmptyView
 //==============================================================================
@@ -524,8 +528,8 @@ ECode RemoteViews::_SetPendingIntentTemplate::Apply(
         IView::Probe(av)->SetTag(mPendingIntentTemplate);
     }
     else {
-        SLOGGERE("RemoteViews", String("Cannot setPendingIntentTemplate on a view which is not") +
-                String("an AdapterView (id: ") + StringUtils::ToString(mViewId) + ")")
+        Slogger::E("RemoteViews", "Cannot setPendingIntentTemplate on a view which is not"
+            "an AdapterView (id: %08x)", mViewId);
     }
     return NOERROR;
 }
@@ -591,14 +595,14 @@ ECode RemoteViews::SetRemoteViewsAdapterList::Apply(
 
     // Ensure that we are applying to an AppWidget root
     if (IAppWidgetHostView::Probe(rootParent) == NULL) {
-        SLOGGERE("RemoteViews", String("SetRemoteViewsAdapterIntent action can only be used for ") +
-                "AppWidgets (root id: " + StringUtils::ToString(mViewId) + ")")
+        Slogger::E("RemoteViews", "SetRemoteViewsAdapterIntent action can only be used for "
+            "AppWidgets (root id: 08x)", mViewId);
         return NOERROR;
     }
     // Ensure that we are calling setRemoteAdapter on an AdapterView that supports it
     if (IAbsListView::Probe(target) == NULL && IAdapterViewAnimator::Probe(target) == NULL) {
-        SLOGGERE("RemoteViews", String("Cannot setRemoteViewsAdapter on a view which is not ") +
-                "an AbsListView or AdapterViewAnimator (id: " + StringUtils::ToString(mViewId) + ")");
+        Slogger::E("RemoteViews", "Cannot setRemoteViewsAdapter on a view which is not "
+            "an AbsListView or AdapterViewAnimator (id: %08x)", mViewId);
         return NOERROR;
     }
 
@@ -717,12 +721,12 @@ ECode RemoteViews::SetRemoteViewsAdapterIntent::Apply(
     }
 
     if (IAppWidgetHostView::Probe(rootParent) == NULL) {
-        SLOGGERE("RemoteViews", String("SetRemoteViewsAdapterIntent action can only be used for ") +
+        Slogger::E("RemoteViews", String("SetRemoteViewsAdapterIntent action can only be used for ") +
                 "AppWidgets (root id: " + StringUtils::ToString(mViewId)  + ")");
         return NOERROR;
     }
     if (IAbsListView::Probe(target) == NULL && IAdapterViewAnimator::Probe(target) == NULL) {
-        SLOGGERE("RemoteViews", String("Cannot setRemoteViewsAdapter on a view which is not ") +
+        Slogger::E("RemoteViews", String("Cannot setRemoteViewsAdapter on a view which is not ") +
                 "an AbsListView or AdapterViewAnimator (id: " + StringUtils::ToString(mViewId)  + ")");
         return NOERROR;
     }
@@ -803,8 +807,7 @@ ECode RemoteViews::_SetOnClickPendingIntent::Apply(
     }
 
     if (mHost->mIsWidgetCollectionChild) {
-        SLOGGERW("RemoteViews", String("Cannot setOnClickPendingIntent for collection item ") +
-            "(id: " + StringUtils::ToString(mViewId) + ")");
+        Slogger::W("RemoteViews", "Cannot setOnClickPendingIntent for collection item (id: %08x)", mViewId);
         AutoPtr<IContext> context;
         root->GetContext((IContext**)&context);
         AutoPtr<IApplicationInfo> appInfo;
@@ -999,7 +1002,8 @@ RemoteViews::ReflectionActionWithoutParams::ReflectionActionWithoutParams(
     : Action(id)
     , mMethodName(methodName)
     , mHost(host)
-{}
+{
+}
 
 ECode RemoteViews::ReflectionActionWithoutParams::Apply(
     /* [in] */ IView* root,
@@ -1382,7 +1386,7 @@ ECode RemoteViews::ReflectionAction::Apply(
     AutoPtr<IClassInfo> klass;
     CObject::ReflectClassInfo(view, (IClassInfo**)&klass);
     if (klass == NULL) {
-        SLOGGERE("RemoteViews", "can not find view's class infomations")
+        Slogger::E("RemoteViews", "can not find view's class infomations");
         return E_ILLEGAL_ARGUMENT_EXCEPTION;
     }
 
@@ -1391,8 +1395,8 @@ ECode RemoteViews::ReflectionAction::Apply(
     AutoPtr<IMethodInfo> methodInfo;
     if (FAILED(klass->GetMethodInfo(mMethodName, param, (IMethodInfo**)&methodInfo)) || methodInfo == NULL)
     {
-        SLOGGERE("RemoteViews ", "can not find method named: %s(%s) in view: %s",
-            mMethodName.string(), param.string(), className.string())
+        Slogger::E("RemoteViews ", "can not find method named: %s(%s) in view: %s",
+            mMethodName.string(), param.string(), className.string());
         return E_ILLEGAL_ARGUMENT_EXCEPTION;
     }
 
@@ -1501,7 +1505,8 @@ ECode RemoteViews::ReflectionAction::Apply(
 
     ECode ec = methodInfo->Invoke(view, argumentList);
     if (FAILED(ec)) {
-        SLOGGERE("RemoteViews", String("method: ") + mMethodName + "in class: " + className + "invoke error")
+        Slogger::E("RemoteViews", "method: %s in class: %s invoke error.",
+            mMethodName.string(), className.string());
     }
     return ec;
 }
@@ -1511,10 +1516,11 @@ ECode RemoteViews::ReflectionAction::GetActionName(
 {
     VALIDATE_NOT_NULL(name)
 
-    String str("ReflectionAction");
-    str += mMethodName;
-    str += StringUtils::ToString(mType);
-    *name = str;
+    StringBuilder sb("ReflectionAction:");
+    sb += mMethodName;
+    sb += "$";
+    sb += mType;
+    *name = sb.ToString();
     return NOERROR;
 }
 
@@ -1779,7 +1785,7 @@ ECode RemoteViews::ReflectionAction::WriteToParcel(
             break;
         }
         default:
-            SLOGGERW("RemoteViews", "RemoteViews::ReflectionAction::WriteToParcel(), write type unknown");
+            Slogger::W("RemoteViews", "RemoteViews::ReflectionAction::WriteToParcel(), write type unknown");
             break;
     }
 
@@ -1869,14 +1875,14 @@ ECode RemoteViews::ViewGroupAction::GetActionName(
 {
     VALIDATE_NOT_NULL(name)
 
-    String str("ViewGroupAction");
+    StringBuilder sb("ViewGroupAction:");
     if (mNestedViews) {
-        str += "Add";
+        sb += "Add";
     }
     else {
-        str += "Remove";
+        sb += "Remove";
     }
-    *name = str;
+    *name = sb.ToString();
     return NOERROR;
 }
 
@@ -2185,7 +2191,7 @@ ECode RemoteViews::TextViewDrawableColorFilterAction::Apply(
             target->GetCompoundDrawables((ArrayOf<IDrawable*>**)&drawables);
     }
     if (mIndex < 0 || mIndex >= 4) {
-        SLOGGERE("RemoteViews", "index must be in range [0, 3].")
+        Slogger::E("RemoteViews", "index must be in range [0, 3].");
         return NOERROR;
     }
     AutoPtr<IDrawable> d = (*drawables)[mIndex];
@@ -2259,7 +2265,7 @@ ECode RemoteViews::FillInIntentClickListener::FillInIntentClickListener::OnClick
     if (IAppWidgetHostView::Probe(parent) != NULL || parent == NULL) {
         // Somehow they've managed to get this far without having
         // and AdapterView as a parent.
-        SLOGGERE("RemoteViews", "Collection item doesn't have AdapterView parent");
+        Slogger::E("RemoteViews", "Collection item doesn't have AdapterView parent");
         return E_ILLEGAL_ARGUMENT_EXCEPTION;
     }
 
@@ -2268,7 +2274,8 @@ ECode RemoteViews::FillInIntentClickListener::FillInIntentClickListener::OnClick
     AutoPtr<IInterface> tag;
     parent->GetTag((IInterface**)&tag);
     if (IPendingIntent::Probe(tag) == NULL) {
-        SLOGGERE("RemoteViews", "Attempting setOnClickFillInIntent without calling setPendingIntentTemplate on parent.")
+        Slogger::E("RemoteViews", "Attempting setOnClickFillInIntent without"
+            " calling setPendingIntentTemplate on parent.");
         return E_ILLEGAL_ARGUMENT_EXCEPTION;
     }
 
@@ -2412,6 +2419,7 @@ static AutoPtr<IRemoteViewsOnClickHandler> InitHandler()
 
 const String RemoteViews::EXTRA_REMOTEADAPTER_APPWIDGET_ID("remoteAdapterAppWidgetId");
 const String RemoteViews::TAG("RemoteViews");
+
 const Int32 RemoteViews::MODE_NORMAL;
 const Int32 RemoteViews::MODE_HAS_LANDSCAPE_AND_PORTRAIT;
 Object RemoteViews::sMethodsLock;
@@ -2467,7 +2475,6 @@ ECode RemoteViews::constructor(
     mLayoutId = layoutId;
     mBitmapCache = new BitmapCache();
     // setup the memory usage statistics
-
     mMemoryUsageCounter = new MemoryUsageCounter();
     RecalculateMemoryUsage();
     return NOERROR;
@@ -2485,7 +2492,7 @@ ECode RemoteViews::constructor(
     /* [in] */ IRemoteViews* portrait)
 {
     if (landscape == NULL || portrait == NULL) {
-        SLOGGERE("RemoteViews", "Both RemoteViews must be non-null")
+        Slogger::E("RemoteViews", "Both RemoteViews must be non-null");
         return E_RUNTIME_EXCEPTION;
     }
     AutoPtr<IApplicationInfo> landApp = ((RemoteViews*)landscape)->mApplication;
@@ -2498,12 +2505,11 @@ ECode RemoteViews::constructor(
     IPackageItemInfo::Probe(portraitApp)->GetPackageName(&portraitAppName);
 
     if (landUid != portraitUid|| !landAppName.Equals(portraitAppName)) {
-        SLOGGERE("RemoteViews", "Both RemoteViews must share the same package and user")
+        Slogger::E("RemoteViews", "Both RemoteViews must share the same package and user");
         return E_RUNTIME_EXCEPTION;
     }
     mApplication = portraitApp;
     portrait->GetLayoutId(&mLayoutId);
-
     mLandscape = landscape;
     mPortrait = portrait;
 
@@ -2602,7 +2608,7 @@ ECode RemoteViews::constructor(
                         mActions.PushBack(actionImpl);
                         break;
                     case TextViewSizeAction::TAG:
-                        actionImpl = new TextViewDrawableAction();
+                        actionImpl = new TextViewSizeAction();
                         IParcelable::Probe(actionImpl)->ReadFromParcel(parcel);
                         mActions.PushBack(actionImpl);
                         break;
@@ -2627,7 +2633,7 @@ ECode RemoteViews::constructor(
                         mActions.PushBack(actionImpl);
                         break;
                     default:
-                        SLOGGERE(TAG, String("tag not found: ") + StringUtils::ToString(tag))
+                        Slogger::E(TAG, "tag not found: %d", tag);
                         return E_RUNTIME_EXCEPTION;
                 }
             }
@@ -2670,9 +2676,9 @@ ECode RemoteViews::WriteToParcel(
         dest->WriteInt32(mIsWidgetCollectionChild ? 1 : 0);
         Int32 count = mActions.GetSize();
         dest->WriteInt32(count);
-        for (Int32 i=0; i<count; i++) {
-            AutoPtr<IRemoteViewsAction> a = mActions[i];
-            IParcelable::Probe(a)->WriteToParcel(dest);
+        List<AutoPtr<IRemoteViewsAction> >::Iterator it;
+        for (it = mActions.Begin(); it != mActions.End(); ++it) {
+            IParcelable::Probe((*it))->WriteToParcel(dest);
         }
     }
     else {
@@ -2751,23 +2757,21 @@ AutoPtr<IContext> RemoteViews::GetContextForResources(
     /* [in] */ const String& themePackageName)
 {
     if (mApplication != NULL) {
-        Int32 appUid;
+        Int32 appUid, ctxUid;
         mApplication->GetUid(&appUid);
-        Int32 userHandleId = CUserHandle::GetUserId(appUid);
-        Int32 ctxUid;
         context->GetUserId(&ctxUid);
-        String pkgName;
+        String pkgName, appPkgName;
         context->GetPackageName(&pkgName);
-        String appPkgName;
         IPackageItemInfo::Probe(mApplication)->GetPackageName(&appPkgName);
-        if (ctxUid == userHandleId && pkgName.Equals(appPkgName)) {
+        if (ctxUid == UserHandle::GetUserId(appUid) && pkgName.Equals(appPkgName)) {
             return context;
         }
 
         AutoPtr<IContext> result;
-        if (FAILED(context->CreateApplicationContext(mApplication, themePackageName,
-            IContext::CONTEXT_RESTRICTED, (IContext**)&result))) {
-            SLOGGERE(TAG, String("Package name ") + appPkgName + " not found");
+        ECode ec = context->CreateApplicationContext(mApplication, themePackageName,
+            IContext::CONTEXT_RESTRICTED, (IContext**)&result);
+        if (FAILED(ec)) {
+            Slogger::E(TAG, "Package name %s not found", appPkgName.string());
         }
         else {
             return result;
@@ -2872,7 +2876,6 @@ ECode RemoteViews::GetLayoutId(
     /* [out] */ Int32* id)
 {
     VALIDATE_NOT_NULL(id)
-
     *id = mLayoutId;
     return NOERROR;
 }
@@ -2947,7 +2950,7 @@ ECode RemoteViews::AddAction(
     /* [in] */ IRemoteViewsAction* a)
 {
     if (HasLandscapeAndPortraitLayouts()) {
-        SLOGGERE("RemoteViews", String("RemoteViews specifying separate landscape and portrait") +
+        Slogger::E("RemoteViews", String("RemoteViews specifying separate landscape and portrait") +
             " layouts cannot be modified. Instead, fully configure the landscape and" +
             " portrait layouts individually before constructing the combined layout.");
         return E_RUNTIME_EXCEPTION;
@@ -3020,13 +3023,15 @@ ECode RemoteViews::GetMethod(
         String className;
         klass->GetName(&className);
         if (method == NULL) {
-            SLOGGERE("RemoteViews", String("view: ") + className + " doesn't have method: " + methodName + paramType)
+            Slogger::E("RemoteViews", "view: %s doesn't have method: %s, param:%s",
+                className.string(), methodName.string(), paramType.string());
         }
         else {
             String annotation;
             method->GetAnnotation(&annotation);
             if (!annotation.Equals(String("RemotableViewMethod"))) {
-                SLOGGERE("RemoteViews", String("view: ") + className + " can't use method with RemoteViews: " + methodName + paramType)
+                Slogger::E("RemoteViews", "view: %s can't use method with RemoteViews: %s, param:%s",
+                    className.string(), methodName.string(), paramType.string());
             }
 
             AutoPtr<IMutablePair> pair = new MutablePair(methodName, paramType);
@@ -3067,7 +3072,7 @@ ECode RemoteViews::GetApplicationInfo(
     // Get the application for the passed in package and user.
     AutoPtr<IApplication> application = CActivityThread::GetCurrentApplication();
     if (application == NULL) {
-        SLOGGERE(TAG, "Cannot create remote views out of an aplication.");
+        Slogger::E(TAG, "Cannot create remote views out of an aplication.");
         return E_ILLEGAL_STATE_EXCEPTION;
     }
 
@@ -3078,26 +3083,22 @@ ECode RemoteViews::GetApplicationInfo(
     String pkgName;
     IPackageItemInfo::Probe(applicationInfo)->GetPackageName(&pkgName);
 
-    if (UserHandle::GetUserId(uid) != userId
-            || !pkgName.Equals(packageName)) {
-        // try {
-            AutoPtr<IContext> baseContext;
-            IContextWrapper::Probe(application)->GetBaseContext((IContext**)&baseContext);
-            AutoPtr<IUserHandle> uhandle;
-            CUserHandle::New(userId, (IUserHandle**)&uhandle);
-            AutoPtr<IContext> context;
-            ECode ec = baseContext->CreatePackageContextAsUser(
-                    packageName, 0, uhandle, (IContext**)&context);
-            if (FAILED(ec) || context == NULL) {
-                // throw new IllegalArgumentException("No such package " + packageName);
-                SLOGGERE(TAG, String("No such package ") + packageName)
-                return E_ILLEGAL_ARGUMENT_EXCEPTION;
-            }
+    if (UserHandle::GetUserId(uid) != userId || !pkgName.Equals(packageName)) {
+        AutoPtr<IContext> baseContext;
+        IContextWrapper::Probe(application)->GetBaseContext((IContext**)&baseContext);
+        AutoPtr<IUserHandle> uhandle;
+        CUserHandle::New(userId, (IUserHandle**)&uhandle);
+        AutoPtr<IContext> context;
+        ECode ec = baseContext->CreatePackageContextAsUser(
+                packageName, 0, uhandle, (IContext**)&context);
+        if (FAILED(ec) || context == NULL) {
+            Slogger::E(TAG, "No such package %s", packageName.string());
+            return E_ILLEGAL_ARGUMENT_EXCEPTION;
+        }
 
-            return context->GetApplicationInfo(info);
-        // } catch (NameNotFoundException nnfe) {
-        // }
+        return context->GetApplicationInfo(info);
     }
+
     *info = applicationInfo;
     REFCOUNT_ADD(*info)
     return NOERROR;
@@ -3191,7 +3192,7 @@ ECode RemoteViews::SetTextViewCompoundDrawablesRelativeColorFilter(
     /* [in] */ PorterDuffMode mode)
 {
     if (index < 0 || index >= 4) {
-        SLOGGERE(TAG, "index must be in range [0, 3].")
+        Slogger::E(TAG, "index must be in range [0, 3].");
         return E_ILLEGAL_ARGUMENT_EXCEPTION;
     }
     AutoPtr<IRemoteViewsAction> action = new TextViewDrawableColorFilterAction(viewId, TRUE, index, color, mode);
@@ -3521,7 +3522,6 @@ ECode RemoteViews::Apply(
     /* [in] */ IViewGroup* parent,
     /* [out] */ IView** view)
 {
-    VALIDATE_NOT_NULL(view)
     return Apply(ctx, parent, NULL, view);
 }
 
@@ -3532,7 +3532,6 @@ ECode RemoteViews::Apply(
     /* [in] */ IRemoteViewsOnClickHandler* handler,
     /* [out] */ IView** view)
 {
-    VALIDATE_NOT_NULL(view)
     return Apply(ctx, parent, handler, String(NULL), view);
 }
 
@@ -3601,8 +3600,8 @@ ECode RemoteViews::Reapply(
         v->GetId(&vId);
         rvToApply->GetLayoutId(&rvId);
         if (vId != rvId) {
-            SLOGGERE(TAG, String("Attempting to re-apply RemoteViews to a view that") +
-                   " that does not share the same root layout id.")
+            Slogger::E(TAG, "Attempting to re-apply RemoteViews to a view that"
+                " that does not share the same root layout id.");
             return E_RUNTIME_EXCEPTION;
         }
     }
@@ -3622,6 +3621,28 @@ ECode RemoteViews::OnLoadClass(
     VALIDATE_NOT_NULL(res);
 //    return clazz.isAnnotationPresent(RemoteView.class);
     *res = TRUE;
+    return NOERROR;
+}
+
+
+ECode RemoteViews::ToString(
+    /* [out] */ String* str)
+{
+    VALIDATE_NOT_NULL(str)
+    StringBuilder sb("CRemoteViews{");
+    sb += StringUtils::ToHexString((Int32)this);
+    sb += ", layoutId=";
+    sb += StringUtils::ToHexString(mLayoutId);
+    sb += ", actions={";
+    List<AutoPtr<IRemoteViewsAction> >::Iterator it;
+    for (it = mActions.Begin(); it != mActions.End(); ++it) {
+        if (it != mActions.Begin()) {
+            sb += ", ";
+        }
+        sb += TO_CSTR(*it);
+    }
+    sb += "}}";
+    *str = sb.ToString();
     return NOERROR;
 }
 

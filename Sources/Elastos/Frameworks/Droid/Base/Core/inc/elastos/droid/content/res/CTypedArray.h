@@ -492,6 +492,9 @@ public:
         /* [in] */ IResources* res,
         /* [in] */ Int32 len);
 
+    CARAPI ToString(
+        /* [out] */ String* str);
+
 private:
     CARAPI_(Boolean) GetValueAt(
         /* [in] */ Int32 index,

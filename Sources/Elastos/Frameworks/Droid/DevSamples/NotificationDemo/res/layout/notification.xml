@@ -10,7 +10,7 @@
         android:layout_height="125px"
         android:layout_gravity="center_horizontal"
         android:gravity="center_vertical"
-        android:textColor="#000000"
+        android:textColor="#FF808080"
         android:text="开始, Your Detailed notification view goes here...."
         android:background="#FFFFFF"
     />

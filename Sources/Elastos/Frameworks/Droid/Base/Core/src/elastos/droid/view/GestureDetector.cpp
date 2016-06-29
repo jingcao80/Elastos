@@ -135,7 +135,6 @@ ECode GestureDetector::GestureHandler::HandleMessage(
 
     switch (what) {
         case GestureDetector::SHOW_PRESS:
-            Logger::I(TAG, "%s: OnShowPress", TO_CSTR(mHost->mListener));
             mHost->mListener->OnShowPress(
                 mHost->mCurrentDownEvent);
             break;

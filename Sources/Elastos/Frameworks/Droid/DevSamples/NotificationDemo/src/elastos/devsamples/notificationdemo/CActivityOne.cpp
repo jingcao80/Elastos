@@ -107,12 +107,14 @@ ECode CActivityOne::StartStatusBarNotification()
     notificationManager = INotificationManager::Probe(svTemp.Get());
     assert(notificationManager != NULL);
 
-    String packageName("NotificationDemo"); //Elastos.Droid.DevSamples.SpinnerDemo
+    String packageName("Elastos.DevSamples.NotificationDemo");
     String actionName("android.intent.action.NOTIFICATION");
+    String className("Elastos.DevSamples.NotificationDemo.CNotificationActivity");
     AutoPtr<IIntent> intent;
     CIntent::New((IIntent**)&intent);
-    intent->SetPackage(packageName);
-    intent->SetAction(actionName);
+    // intent->SetPackage(packageName);
+    // intent->SetAction(actionName);
+    intent->SetClassName(packageName, className);
 
     // The PendingIntent to launch our activity if the user selects this notification
     AutoPtr<IPendingIntentHelper> helper;
@@ -134,9 +136,8 @@ ECode CActivityOne::StartStatusBarNotification()
     Int64 now;
     system->GetCurrentTimeMillis(&now);
     AutoPtr<INotification> notification;
-    ASSERT_SUCCEEDED(CNotification::New(R::drawable::icon, tickerText,
-        now, (INotification**)&notification));
-    assert(notification != NULL);
+    ASSERT_SUCCEEDED(CNotification::New(
+        R::drawable::icon, tickerText, now, (INotification**)&notification));
 
     Int32 flags = 0;
     notification->GetFlags(&flags);
@@ -147,9 +148,7 @@ ECode CActivityOne::StartStatusBarNotification()
     ASSERT_SUCCEEDED(notification->SetLatestEventInfo(
         this, titleSeq, msgSeq, pendingIntent));
 
-    String notificationStr;
-    IObject::Probe(notification)->ToString(&notificationStr);
-    Slogger::D(TAG, " >> notify (%s)", notificationStr.string());
+    Slogger::D(TAG, " >> notify (%s)", TO_CSTR(notification));
 
     // Notify notification
     //
@@ -204,14 +203,15 @@ ECode CActivityOne::NotifyNotification(
     /* Creates an explicit intent for an Activity in your app */
     String packageName("Elastos.DevSamples.NotificationDemo");
     String actionName("android.intent.action.NOTIFICATION");
-    String className("CNotificationActivity");
-    String parentClassName("CActivityOne");
+    String className("Elastos.DevSamples.NotificationDemo.CNotificationActivity");
+    String parentClassName("Elastos.DevSamples.NotificationDemo.CActivityOne");
 
     /* Creates an explicit intent for an Activity in your app */
     AutoPtr<IIntent> intent;
     CIntent::New((IIntent**)&intent);
-    intent->SetPackage(packageName);
-    intent->SetAction(actionName);
+    // intent->SetPackage(packageName);
+    // intent->SetAction(actionName);
+    intent->SetClassName(packageName, className);
 
     AutoPtr<ITaskStackBuilderHelper> helper;
     CTaskStackBuilderHelper::AcquireSingleton((ITaskStackBuilderHelper**)&helper);
@@ -235,9 +235,7 @@ ECode CActivityOne::NotifyNotification(
     // Set the info for the views that show in the notification panel.
     ASSERT_SUCCEEDED(notification->SetLatestEventInfo(this, titleSeq, contentSeq, resultPendingIntent));
 
-    String notificationStr;
-    IObject::Probe(notification)->ToString(&notificationStr);
-    Slogger::D(TAG, " >> notify (%s)", notificationStr.string());
+    Slogger::D(TAG, " >> notify (%s)", TO_CSTR(notification));
 
     ASSERT_SUCCEEDED(notificationManager->Notify(mNotificationID, notification));
 
@@ -302,7 +300,7 @@ ECode CActivityOne::SendNotification(
     // Intent intent = new Intent(this, MainActivity.class);
     // PendingIntent pendingIntent = PendingIntent.getActivity(this, 0, intent, 0);
 
-    String packageName("NotificationDemo");
+    String packageName("Elastos.DevSamples.NotificationDemo");
     String actionName("android.intent.action.Main");
     AutoPtr<IIntent> intent;
     CIntent::New((IIntent**)&intent);
@@ -335,6 +333,8 @@ ECode CActivityOne::SendNotification(
         (INotification**)&notification));
     assert(notification != NULL);
     ASSERT_SUCCEEDED(notification->SetLatestEventInfo(this, titleSeq, msgSeq, pendingIntent));
+
+    Slogger::D(TAG, " >> notify (%s)", TO_CSTR(notification));
 
     // Notify notification
     //

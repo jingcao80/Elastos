@@ -12,6 +12,7 @@
 #include <elastos/droid/os/Handler.h>
 #include <elastos/droid/service/notification/NotificationListenerService.h>
 #include <elastos/droid/widget/RemoteViews.h>
+#include <elastos/core/Thread.h>
 
 using Elastos::Droid::Animation::ITimeInterpolator;
 using Elastos::Droid::App::INotification;
@@ -53,6 +54,7 @@ using Elastos::Droid::SystemUI::StatusBar::Phone::INavigationBarView;
 using Elastos::Droid::SystemUI::StatusBar::Phone::IStatusBarKeyguardViewManager;
 using Elastos::Droid::SystemUI::StatusBar::Policy::IHeadsUpNotificationView;
 using Elastos::Droid::SystemUI::StatusBar::Stack::INotificationStackScrollLayout;
+using Elastos::Core::Thread;
 
 namespace Elastos {
 namespace Droid {
@@ -134,11 +136,59 @@ protected:
         BaseStatusBar* mHost;
     };
 
+    class NotificationClicker;
+    class KeyguardHostViewOnDismissAction;
+    class KeyguardHostViewOnDismissActionThread
+        : public Thread
+    {
+    public:
+        KeyguardHostViewOnDismissActionThread(
+            /* [in] */ BaseStatusBar* host,
+            /* [in] */ KeyguardHostViewOnDismissAction* action);
+
+        CARAPI Run();
+
+    private:
+        BaseStatusBar* mHost;
+        KeyguardHostViewOnDismissAction* mAction;
+    };
+
+    class KeyguardHostViewOnDismissAction
+        : public Object
+        , public IKeyguardHostViewOnDismissAction
+    {
+    public:
+        TO_STRING_IMPL("BaseStatusBar::KeyguardHostViewOnDismissAction")
+
+        CAR_INTERFACE_DECL()
+
+        KeyguardHostViewOnDismissAction(
+            /* [in] */ BaseStatusBar* host,
+            /* [in] */ NotificationClicker* clicker,
+            /* [in] */ Boolean keyguardShowing,
+            /* [in] */ Boolean afterKeyguardGone);
+        /**
+         * @return true if the dismiss should be deferred
+         */
+        CARAPI OnDismiss(
+            /* [out] */ Boolean* result);
+
+    private:
+        friend class KeyguardHostViewOnDismissActionThread;
+        BaseStatusBar* mHost;
+        NotificationClicker* mClicker;
+        Boolean mKeyguardShowing;
+        Boolean mAfterKeyguardGone;
+    };
+
     class NotificationClicker
         : public Object
         , public IViewOnClickListener
+        , public INotificationClicker
     {
     public:
+        TO_STRING_IMPL("BaseStatusBar::NotificationClicker")
+
         CAR_INTERFACE_DECL()
 
         NotificationClicker(
@@ -151,6 +201,8 @@ protected:
             /* [in] */ IView* v);
 
     private:
+        friend class KeyguardHostViewOnDismissAction;
+        friend class KeyguardHostViewOnDismissActionThread;
         AutoPtr<IPendingIntent> mIntent;
         String mNotificationKey;
         Boolean mIsHeadsUp;
@@ -158,11 +210,92 @@ protected:
     };
 
 private:
-    class _RemoteViewsOnClickHandler
+
+    class NotificationGutsOnDismissAction;
+    class NotificationGutsRunnable
+        : public Runnable
+    {
+    public:
+        NotificationGutsRunnable(
+            /* [in] */ BaseStatusBar* host,
+            /* [in] */ NotificationGutsOnDismissAction* mAction);
+
+        CARAPI Run();
+
+    private:
+        BaseStatusBar* mHost;
+        NotificationGutsOnDismissAction* mAction;
+    };
+
+    class NotificationGutsOnDismissAction
+        : public Object
+        , public IKeyguardHostViewOnDismissAction
+    {
+    public:
+        TO_STRING_IMPL("BaseStatusBar::NotificationGutsOnDismissAction")
+
+        CAR_INTERFACE_DECL()
+
+        NotificationGutsOnDismissAction(
+            /* [in] */ BaseStatusBar* host,
+            /* [in] */ Boolean keyguardShowing,
+            /* [in] */ IIntent* intent,
+            /* [in] */ Int32 appUid);
+
+        /**
+         * @return true if the dismiss should be deferred
+         */
+        CARAPI OnDismiss(
+            /* [out] */ Boolean* result);
+
+    private:
+        friend class NotificationGutsRunnable;
+        BaseStatusBar* mHost;
+        Boolean mKeyguardShowing;
+        AutoPtr<IIntent> mIntent;
+        Int32 mAppUid;
+    };
+
+    class NotificationRemoteViewsOnClickHandler;
+    class NotificationRemoteViewsOnDismissAction
+        : public Object
+        , public IKeyguardHostViewOnDismissAction
+    {
+    public:
+        TO_STRING_IMPL("BaseStatusBar::NotificationRemoteViewsOnDismissAction")
+
+        CAR_INTERFACE_DECL()
+
+        NotificationRemoteViewsOnDismissAction(
+            /* [in] */ BaseStatusBar* host,
+            /* [in] */ NotificationRemoteViewsOnClickHandler* clickHandler,
+            /* [in] */ Boolean keyguardShowing,
+            /* [in] */ Boolean afterKeyguardGone,
+            /* [in] */ IView* view,
+            /* [in] */ IPendingIntent* pendingIntent,
+            /* [in] */ IIntent* fillInIntent);
+
+        /**
+         * @return true if the dismiss should be deferred
+         */
+        CARAPI OnDismiss(
+            /* [out] */ Boolean* result);
+
+    private:
+        BaseStatusBar* mHost;
+        NotificationRemoteViewsOnClickHandler* mClickHandler;
+        Boolean mKeyguardShowing;
+        Boolean mAfterKeyguardGone;
+        AutoPtr<IView> mView;
+        AutoPtr<IPendingIntent> mPendingIntent;
+        AutoPtr<IIntent> mFillInIntent;
+    };
+
+    class NotificationRemoteViewsOnClickHandler
         : public RemoteViews::RemoteViewsOnClickHandler
     {
     public:
-        _RemoteViewsOnClickHandler(
+        NotificationRemoteViewsOnClickHandler(
             /* [in] */ BaseStatusBar* host);
 
         // @Override
@@ -179,6 +312,7 @@ private:
             /* [in] */ IIntent* fillInIntent);
 
     private:
+        friend class NotificationRemoteViewsOnDismissAction;
         BaseStatusBar* mHost;
     };
 

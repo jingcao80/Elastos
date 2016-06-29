@@ -758,13 +758,9 @@ ECode FrameLayout::GenerateLayoutParams(
     /* [out] */ IViewGroupLayoutParams** params)
 {
     VALIDATE_NOT_NULL(params);
-    AutoPtr<IFrameLayoutLayoutParams> lp;
     AutoPtr<IContext> ctx;
     GetContext((IContext**)&ctx);
-    FAIL_RETURN(CFrameLayoutLayoutParams::New(ctx, attrs, (IFrameLayoutLayoutParams**)&lp));
-    *params = IViewGroupLayoutParams::Probe(lp);
-    REFCOUNT_ADD(*params);
-    return NOERROR;
+    return CFrameLayoutLayoutParams::New(ctx, attrs, params);
 }
 
 ECode FrameLayout::ShouldDelayChildPressedState(

@@ -2815,7 +2815,7 @@ AutoPtr<BatteryStatsImpl::StopwatchTimer> BatteryStatsImpl::Uid::CreateForegroun
     if (mForegroundActivityTimer == NULL) {
         mForegroundActivityTimer = new StopwatchTimer();
         mForegroundActivityTimer->constructor(
-                this, IBatteryStats::FOREGROUND_ACTIVITY, NULL, mHost->mOnBatteryTimeBase);
+            this, IBatteryStats::FOREGROUND_ACTIVITY, NULL, mHost->mOnBatteryTimeBase);
     }
     return mForegroundActivityTimer;
 }

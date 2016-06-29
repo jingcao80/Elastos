@@ -15,10 +15,14 @@ const String CNotificationActivity::TAG("NotificationDemo::CNotificationActivity
 
 CAR_OBJECT_IMPL(CNotificationActivity)
 
+ECode CNotificationActivity::constructor()
+{
+    return Activity::constructor();
+}
+
 ECode CNotificationActivity::OnCreate(
     /* [in] */ IBundle* savedInstanceState)
 {
-    Activity::OnCreate(savedInstanceState);
     Slogger::D(TAG, " >>> OnCreate");
     Activity::OnCreate(savedInstanceState);
     SetContentView(R::layout::notification);

@@ -165,6 +165,9 @@ private:
         CARAPI GetViewId(
             /* [out] */ Int32* viewId);
 
+        CARAPI ToString(
+            /* [out] */ String* str);
+
     protected:
         Action(
             /* [in] */ Int32 viewId);
@@ -1622,6 +1625,8 @@ public:
     CARAPI GetSequenceNumber(
         /* [out] */ Int32* seqNumber);
 
+    CARAPI ToString(
+        /* [out] */ String* str);
 protected:
     CARAPI CloneImpl(
         /* [in] */ IRemoteViews* views);

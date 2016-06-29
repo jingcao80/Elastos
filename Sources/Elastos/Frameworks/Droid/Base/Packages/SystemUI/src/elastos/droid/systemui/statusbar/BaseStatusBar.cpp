@@ -6,12 +6,16 @@
 #include "elastos/droid/systemui/statusbar/CNotificationListenerService.h"
 #include "elastos/droid/systemui/statusbar/CStatusBarIconView.h"
 #include "elastos/droid/systemui/statusbar/CSettingsObserver.h"
+#include "elastos/droid/systemui/statusbar/phone/KeyguardTouchDelegate.h"
+#include "elastos/droid/systemui/statusbar/policy/PreviewInflater.h"
 #include "R.h"
 #include "Elastos.Droid.App.h"
 #include "Elastos.Droid.Internal.h"
 #include "Elastos.Droid.Provider.h"
 #include <elastos/droid/app/ActivityManagerNative.h>
 #include <elastos/droid/os/Build.h>
+#include <elastos/droid/os/AsyncTask.h>
+#include <elastos/droid/os/UserHandle.h>
 #include <elastos/droid/os/ServiceManager.h>
 #include <elastos/droid/provider/Settings.h>
 #include <elastos/droid/R.h>
@@ -20,6 +24,7 @@
 #include <elastos/core/AutoLock.h>
 #include <elastos/core/Math.h>
 #include <elastos/core/StringUtils.h>
+#include <elastos/core/CoreUtils.h>
 #include <elastos/utility/logging/Logger.h>
 
 using Elastos::Droid::App::ActivityManagerNative;
@@ -36,6 +41,7 @@ using Elastos::Droid::App::IPendingIntentHelper;
 using Elastos::Droid::App::IKeyguardManager;
 using Elastos::Droid::App::ITaskStackBuilder;
 using Elastos::Droid::App::ITaskStackBuilderHelper;
+using Elastos::Droid::App::CTaskStackBuilderHelper;
 using Elastos::Droid::App::IActivityOptions;
 using Elastos::Droid::App::IActivityOptionsHelper;
 using Elastos::Droid::App::CActivityOptionsHelper;
@@ -64,6 +70,8 @@ using Elastos::Droid::Internal::Widget::ISizeAdaptiveLayoutLayoutParams;
 using Elastos::Droid::Internal::Utility::CNotificationColorUtilHelper;
 using Elastos::Droid::Internal::Utility::INotificationColorUtilHelper;
 using Elastos::Droid::Os::Build;
+using Elastos::Droid::Os::AsyncTask;
+using Elastos::Droid::Os::UserHandle;
 using Elastos::Droid::Os::CUserHandle;
 using Elastos::Droid::Os::CHandler;
 using Elastos::Droid::Os::EIID_IHandler;
@@ -73,6 +81,7 @@ using Elastos::Droid::Provider::ISettingsGlobal;
 using Elastos::Droid::Provider::ISettingsSecure;
 using Elastos::Droid::R;
 using Elastos::Droid::Service::Dreams::IDreamService;
+using Elastos::Droid::Keyguard::EIID_IKeyguardHostViewOnDismissAction;
 using Elastos::Droid::Text::TextUtils;
 using Elastos::Droid::Utility::CDisplayMetrics;
 using Elastos::Droid::Utility::CParcelableList;
@@ -109,11 +118,14 @@ using Elastos::Droid::Internal::StatusBar::CStatusBarIconList;
 using Elastos::Droid::Internal::StatusBar::EIID_IIStatusBar;
 using Elastos::Droid::Internal::StatusBar::IIStatusBar;
 using Elastos::Droid::Internal::StatusBar::IStatusBarIconList;
+using Elastos::Droid::SystemUI::StatusBar::Phone::KeyguardTouchDelegate;
+using Elastos::Droid::SystemUI::StatusBar::Policy::PreviewInflater;
 using Elastos::Core::AutoLock;
 using Elastos::Core::CBoolean;
 using Elastos::Core::CString;
 using Elastos::Core::IBoolean;
 using Elastos::Core::StringUtils;
+using Elastos::Core::CoreUtils;
 using Elastos::Utility::CArrayList;
 using Elastos::Utility::IIterator;
 using Elastos::Utility::Logging::Logger;
@@ -213,15 +225,62 @@ ECode CLockscreenSettingsObserver::OnChange(
     return NOERROR;
 }
 
+
 //==============================================================================
-//                  BaseStatusBar::_RemoteViewsOnClickHandler
+// BaseStatusBar::NotificationRemoteViewsOnDismissAction
 //==============================================================================
-BaseStatusBar::_RemoteViewsOnClickHandler::_RemoteViewsOnClickHandler(
+
+CAR_INTERFACE_IMPL(BaseStatusBar::NotificationRemoteViewsOnDismissAction, Object, \
+    IKeyguardHostViewOnDismissAction)
+
+BaseStatusBar::NotificationRemoteViewsOnDismissAction::NotificationRemoteViewsOnDismissAction(
+    /* [in] */ BaseStatusBar* host,
+    /* [in] */ NotificationRemoteViewsOnClickHandler* clickHandler,
+    /* [in] */ Boolean keyguardShowing,
+    /* [in] */ Boolean afterKeyguardGone,
+    /* [in] */ IView* view,
+    /* [in] */ IPendingIntent* pendingIntent,
+    /* [in] */ IIntent* fillInIntent)
+    : mHost(host)
+    , mClickHandler(clickHandler)
+    , mKeyguardShowing(keyguardShowing)
+    , mAfterKeyguardGone(afterKeyguardGone)
+    , mView(view)
+    , mPendingIntent(pendingIntent)
+    , mFillInIntent(fillInIntent)
+{
+}
+
+ECode BaseStatusBar::NotificationRemoteViewsOnDismissAction::OnDismiss(
+    /* [out] */ Boolean* result)
+{
+    VALIDATE_NOT_NULL(result)
+    if (mKeyguardShowing && !mAfterKeyguardGone) {
+        ActivityManagerNative::GetDefault()->KeyguardWaitingForActivityDrawn();
+    }
+
+    Boolean handled = mClickHandler->SuperOnClickHandler(mView, mPendingIntent, mFillInIntent);
+    mHost->OverrideActivityPendingAppTransition(mKeyguardShowing && !mAfterKeyguardGone);
+
+    // close the shade if it was open
+    if (handled) {
+        mHost->AnimateCollapsePanels(ICommandQueue::FLAG_EXCLUDE_NONE, TRUE /* force */);
+        mHost->VisibilityChanged(FALSE);
+    }
+    // Wait for activity start.
+    *result = handled;
+    return NOERROR;
+}
+
+//==============================================================================
+// BaseStatusBar::NotificationRemoteViewsOnClickHandler
+//==============================================================================
+BaseStatusBar::NotificationRemoteViewsOnClickHandler::NotificationRemoteViewsOnClickHandler(
     /* [in] */ BaseStatusBar* host)
     : mHost(host)
 {}
 
-ECode BaseStatusBar::_RemoteViewsOnClickHandler::OnClickHandler(
+ECode BaseStatusBar::NotificationRemoteViewsOnClickHandler::OnClickHandler(
     /* [in] */ IView* view,
     /* [in] */ IPendingIntent* pendingIntent,
     /* [in] */ IIntent* fillInIntent,
@@ -229,8 +288,10 @@ ECode BaseStatusBar::_RemoteViewsOnClickHandler::OnClickHandler(
 {
     VALIDATE_NOT_NULL(result);
     if (DEBUG) {
-        Logger::V(TAG, "Notification click handler invoked for intent: %p", pendingIntent);
+        Logger::V(TAG, "Notification click handler invoked for intent: %s, fillInIntent:%s",
+            TO_CSTR(pendingIntent), TO_CSTR(fillInIntent));
     }
+
     // The intent we are sending is for the application, which
     // won't have permission to immediately start an activity after
     // the user switches to home.  We know it is safe to do at this
@@ -241,39 +302,22 @@ ECode BaseStatusBar::_RemoteViewsOnClickHandler::OnClickHandler(
     if (isActivity) {
         Boolean keyguardShowing = FALSE;
         mHost->mStatusBarKeyguardViewManager->IsShowing(&keyguardShowing);
-        assert(0 && "TODO");
-        // Boolean afterKeyguardGone = PreviewInflater::WouldLaunchResolverActivity(
-        //         mContext, pendingIntent.getIntent(), mCurrentUserId);
-        // DismissKeyguardThenExecute(new OnDismissAction() {
-        //     @Override
-        //     public Boolean onDismiss() {
-        //         if (keyguardShowing && !afterKeyguardGone) {
-        //             try {
-        //                 ActivityManagerNative.getDefault()
-        //                         .keyguardWaitingForActivityDrawn();
-        //             } catch (RemoteException e) {
-        //             }
-        //         }
-
-        //         Boolean handled = superOnClickHandler(view, pendingIntent, fillInIntent);
-        //         overrideActivityPendingAppTransition(keyguardShowing && !afterKeyguardGone);
-
-        //         // close the shade if it was open
-        //         if (handled) {
-        //             animateCollapsePanels(CommandQueue.FLAG_EXCLUDE_NONE, TRUE /* force */);
-        //             visibilityChanged(FALSE);
-        //         }
-        //         // Wait for activity start.
-        //         return handled;
-        //     }
-        // }, afterKeyguardGone);
+        AutoPtr<IIntent> intent;
+        pendingIntent->GetIntent((IIntent**)&intent);
+        Boolean afterKeyguardGone = PreviewInflater::WouldLaunchResolverActivity(
+            mHost->mContext, intent, mHost->mCurrentUserId);
+        AutoPtr<NotificationRemoteViewsOnDismissAction> action;
+        action = new NotificationRemoteViewsOnDismissAction(mHost, this,
+            keyguardShowing, afterKeyguardGone, view, pendingIntent, fillInIntent);
+        mHost->DismissKeyguardThenExecute(action, afterKeyguardGone);
         *result = TRUE;
         return NOERROR;
     }
+
     return RemoteViewsOnClickHandler::OnClickHandler(view, pendingIntent, fillInIntent, result);
 }
 
-Boolean BaseStatusBar::_RemoteViewsOnClickHandler::SuperOnClickHandler(
+Boolean BaseStatusBar::NotificationRemoteViewsOnClickHandler::SuperOnClickHandler(
     /* [in] */ IView* view,
     /* [in] */ IPendingIntent* pendingIntent,
     /* [in] */ IIntent* fillInIntent)
@@ -517,7 +561,7 @@ ECode CNotificationListenerService::OnNotificationRankingUpdate(
 }
 
 //==============================================================================
-//                  BaseStatusBar::RecentsPreloadOnTouchListener
+// BaseStatusBar::RecentsPreloadOnTouchListener
 //==============================================================================
 CAR_INTERFACE_IMPL(BaseStatusBar::RecentsPreloadOnTouchListener, Object, IViewOnTouchListener)
 
@@ -553,7 +597,7 @@ ECode BaseStatusBar::RecentsPreloadOnTouchListener::OnTouch(
 }
 
 //==============================================================================
-//                  BaseStatusBar::H
+// BaseStatusBar::H
 //==============================================================================
 BaseStatusBar::H::H(
     /* [in] */ BaseStatusBar* host)
@@ -609,7 +653,7 @@ ECode BaseStatusBar::H::HandleMessage(
 }
 
 //==============================================================================
-//                  BaseStatusBar::TouchOutsideListener
+// BaseStatusBar::TouchOutsideListener
 //==============================================================================
 CAR_INTERFACE_IMPL(BaseStatusBar::TouchOutsideListener, Object, IViewOnTouchListener)
 
@@ -647,9 +691,159 @@ ECode BaseStatusBar::TouchOutsideListener::OnTouch(
 }
 
 //==============================================================================
-//                  BaseStatusBar::NotificationClicker
+// BaseStatusBar::NotificationGutsRunnable
 //==============================================================================
-CAR_INTERFACE_IMPL(BaseStatusBar::NotificationClicker, Object, IViewOnClickListener)
+BaseStatusBar::NotificationGutsRunnable::NotificationGutsRunnable(
+    /* [in] */ BaseStatusBar* host,
+    /* [in] */ NotificationGutsOnDismissAction* action)
+    : mHost(host)
+    , mAction(action)
+{}
+
+ECode BaseStatusBar::NotificationGutsRunnable::Run()
+{
+    if (mAction->mKeyguardShowing) {
+        ActivityManagerNative::GetDefault()->KeyguardWaitingForActivityDrawn();
+    }
+
+    AutoPtr<ITaskStackBuilderHelper> helper;
+    CTaskStackBuilderHelper::AcquireSingleton((ITaskStackBuilderHelper**)&helper);
+    AutoPtr<ITaskStackBuilder> builder;
+    helper->Create(mHost->mContext, (ITaskStackBuilder**)&builder);
+    builder->AddNextIntentWithParentStack(mAction->mIntent);
+    AutoPtr<IUserHandle> user;
+    CUserHandle::New(UserHandle::GetUserId(mAction->mAppUid), (IUserHandle**)&user);
+    builder->StartActivities(NULL, user);
+    return mHost->OverrideActivityPendingAppTransition(mAction->mKeyguardShowing);
+}
+
+//==============================================================================
+// BaseStatusBar::NotificationGutsOnDismissAction
+//==============================================================================
+
+CAR_INTERFACE_IMPL(BaseStatusBar::NotificationGutsOnDismissAction, Object, \
+    IKeyguardHostViewOnDismissAction)
+
+BaseStatusBar::NotificationGutsOnDismissAction::NotificationGutsOnDismissAction(
+    /* [in] */ BaseStatusBar* host,
+    /* [in] */ Boolean keyguardShowing,
+    /* [in] */ IIntent* intent,
+    /* [in] */ Int32 appUid)
+    : mHost(host)
+    , mKeyguardShowing(keyguardShowing)
+    , mIntent(intent)
+    , mAppUid(appUid)
+{
+}
+
+ECode BaseStatusBar::NotificationGutsOnDismissAction::OnDismiss(
+    /* [out] */ Boolean* result)
+{
+    VALIDATE_NOT_NULL(result)
+    AutoPtr<Runnable> runnable = new NotificationGutsRunnable(mHost, this);
+    AsyncTask::Execute(runnable);
+    mHost->AnimateCollapsePanels(ICommandQueue::FLAG_EXCLUDE_NONE, TRUE /* force */);
+    *result = TRUE;
+    return NOERROR;
+}
+
+//==============================================================================
+// BaseStatusBar::KeyguardHostViewOnDismissActionThread
+//==============================================================================
+
+BaseStatusBar::KeyguardHostViewOnDismissActionThread::KeyguardHostViewOnDismissActionThread(
+    /* [in] */ BaseStatusBar* host,
+    /* [in] */ KeyguardHostViewOnDismissAction* action)
+    : mHost(host)
+    , mAction(action)
+{
+    mAction->AddRef();              // holder ref-count
+    mAction->mClicker->AddRef();    // holder ref-count
+}
+
+ECode BaseStatusBar::KeyguardHostViewOnDismissActionThread::Run()
+{
+    AutoPtr<IIActivityManager> am = ActivityManagerNative::GetDefault();
+    if (mAction->mKeyguardShowing && !mAction->mAfterKeyguardGone) {
+        am->KeyguardWaitingForActivityDrawn();
+    }
+
+    // The intent we are sending is for the application, which
+    // won't have permission to immediately start an activity after
+    // the user switches to home.  We know it is safe to do at this
+    // point, so make sure new activity switches are now allowed.
+    am->ResumeAppSwitches();
+
+    if (mAction->mClicker->mIntent != NULL) {
+        ECode ec = mAction->mClicker->mIntent->Send();
+        if (FAILED(ec)) {
+            // the stack trace isn't very helpful here.
+            // Just log the exception message.
+            Logger::W(TAG, "Sending contentIntent failed: ec=%08x", ec);
+            // TODO: Dismiss Keyguard.
+        }
+
+        Boolean isActivity;
+        mAction->mClicker->mIntent->IsActivity(&isActivity);
+        if (isActivity) {
+            mHost->OverrideActivityPendingAppTransition(
+                mAction->mKeyguardShowing && !mAction->mAfterKeyguardGone);
+        }
+    }
+
+    mHost->mBarService->OnNotificationClick(mAction->mClicker->mNotificationKey);
+
+    REFCOUNT_RELEASE(mAction);              // release ref-count
+    REFCOUNT_RELEASE(mAction->mClicker);    // release ref-count
+    return NOERROR;
+}
+
+//==============================================================================
+// BaseStatusBar::KeyguardHostViewOnDismissAction
+//==============================================================================
+CAR_INTERFACE_IMPL(BaseStatusBar::KeyguardHostViewOnDismissAction, Object, IKeyguardHostViewOnDismissAction)
+
+BaseStatusBar::KeyguardHostViewOnDismissAction::KeyguardHostViewOnDismissAction(
+    /* [in] */ BaseStatusBar* host,
+    /* [in] */ NotificationClicker* clicker,
+    /* [in] */ Boolean keyguardShowing,
+    /* [in] */ Boolean afterKeyguardGone)
+    : mHost(host)
+    , mClicker(clicker)
+    , mKeyguardShowing(keyguardShowing)
+    , mAfterKeyguardGone(afterKeyguardGone)
+{
+}
+
+/**
+ * @return true if the dismiss should be deferred
+ */
+ECode BaseStatusBar::KeyguardHostViewOnDismissAction::OnDismiss(
+    /* [out] */ Boolean* result)
+{
+    VALIDATE_NOT_NULL(result)
+    if (mClicker->mIsHeadsUp) {
+        mHost->mHeadsUpNotificationView->Clear();
+    }
+
+    AutoPtr<Thread> thread = new KeyguardHostViewOnDismissActionThread(mHost, this);
+    thread->constructor();
+    thread->Start();
+
+    // close the shade if it was open
+    mHost->AnimateCollapsePanels(ICommandQueue::FLAG_EXCLUDE_NONE, TRUE /* force */);
+    mHost->VisibilityChanged(FALSE);
+
+    if (mClicker->mIntent != NULL) {
+        mClicker->mIntent->IsActivity(result);
+    }
+    return NOERROR;
+}
+
+//==============================================================================
+// BaseStatusBar::NotificationClicker
+//==============================================================================
+CAR_INTERFACE_IMPL_2(BaseStatusBar::NotificationClicker, Object, IViewOnClickListener, INotificationClicker)
 
 BaseStatusBar::NotificationClicker::NotificationClicker(
     /* [in] */ IPendingIntent* intent,
@@ -668,68 +862,23 @@ ECode BaseStatusBar::NotificationClicker::OnClick(
 {
     Boolean keyguardShowing = FALSE;
     mHost->mStatusBarKeyguardViewManager->IsShowing(&keyguardShowing);
-    assert(0 && "TODO");
-    // Boolean afterKeyguardGone = mIntent->IsActivity()
-    //         && PreviewInflater.wouldLaunchResolverActivity(mContext, mIntent.getIntent(),
-    //                 mCurrentUserId);
-    // DismissKeyguardThenExecute(new OnDismissAction() {
-    //     public Boolean onDismiss() {
-    //         if (mIsHeadsUp) {
-    //             mHeadsUpNotificationView.clear();
-    //         }
-    //         new Thread() {
-    //             @Override
-    //             public void run() {
-    //                 try {
-    //                     if (keyguardShowing && !afterKeyguardGone) {
-    //                         ActivityManagerNative.getDefault()
-    //                                 .keyguardWaitingForActivityDrawn();
-    //                     }
+    Boolean afterKeyguardGone;
+    mIntent->IsActivity(&afterKeyguardGone);
+    if (afterKeyguardGone) {
+        AutoPtr<IIntent> intent;
+        mIntent->GetIntent((IIntent**)&intent);
+        afterKeyguardGone = PreviewInflater::WouldLaunchResolverActivity(
+            mHost->mContext, intent, mHost->mCurrentUserId);
+    }
 
-    //                     // The intent we are sending is for the application, which
-    //                     // won't have permission to immediately start an activity after
-    //                     // the user switches to home.  We know it is safe to do at this
-    //                     // point, so make sure new activity switches are now allowed.
-    //                     ActivityManagerNative.getDefault().resumeAppSwitches();
-    //                 } catch (RemoteException e) {
-    //                 }
-
-    //                 if (mIntent != NULL) {
-    //                     try {
-    //                         mIntent.send();
-    //                     } catch (PendingIntent.CanceledException e) {
-    //                         // the stack trace isn't very helpful here.
-    //                         // Just log the exception message.
-    //                         Log.w(TAG, "Sending contentIntent failed: " + e);
-
-    //                         // TODO: Dismiss Keyguard.
-    //                     }
-    //                     if (mIntent.isActivity()) {
-    //                         OverrideActivityPendingAppTransition(keyguardShowing
-    //                                 && !afterKeyguardGone);
-    //                     }
-    //                 }
-
-    //                 try {
-    //                     mBarService.onNotificationClick(mNotificationKey);
-    //                 } catch (RemoteException ex) {
-    //                     // system process is dead if we're here.
-    //                 }
-    //             }
-    //         }.start();
-
-    //         // close the shade if it was open
-    //         AnimateCollapsePanels(CommandQueue.FLAG_EXCLUDE_NONE, TRUE /* force */);
-    //         visibilityChanged(FALSE);
-
-    //         return mIntent != NULL && mIntent.isActivity();
-    //     }
-    // }, afterKeyguardGone);
+    AutoPtr<KeyguardHostViewOnDismissAction> action;
+    action = new KeyguardHostViewOnDismissAction(mHost, this, keyguardShowing, afterKeyguardGone);
+    mHost->DismissKeyguardThenExecute(action, afterKeyguardGone);
     return NOERROR;
 }
 
 //==============================================================================
-//                  BaseStatusBar::RecentsComponentCallbacks
+// BaseStatusBar::RecentsComponentCallbacks
 //==============================================================================
 CAR_INTERFACE_IMPL(BaseStatusBar::RecentsComponentCallbacks, Object, IRecentsComponentCallbacks)
 
@@ -745,7 +894,7 @@ ECode BaseStatusBar::RecentsComponentCallbacks::OnVisibilityChanged(
 }
 
 //==============================================================================
-//                  BaseStatusBar::ViewOnClickListener1
+// BaseStatusBar::ViewOnClickListener1
 //==============================================================================
 CAR_INTERFACE_IMPL(BaseStatusBar::ViewOnClickListener1, Object, IViewOnClickListener)
 
@@ -780,7 +929,7 @@ ECode BaseStatusBar::ViewOnClickListener1::OnClick(
 }
 
 //==============================================================================
-//                  BaseStatusBar::ViewOnClickListener2
+// BaseStatusBar::ViewOnClickListener2
 //==============================================================================
 CAR_INTERFACE_IMPL(BaseStatusBar::ViewOnClickListener2, Object, IViewOnClickListener)
 
@@ -801,7 +950,7 @@ ECode BaseStatusBar::ViewOnClickListener2::OnClick(
 }
 
 //==============================================================================
-//                  BaseStatusBar::ViewOnClickListener3
+// BaseStatusBar::ViewOnClickListener3
 //==============================================================================
 CAR_INTERFACE_IMPL(BaseStatusBar::ViewOnClickListener3, Object, IViewOnClickListener)
 
@@ -828,7 +977,7 @@ ECode BaseStatusBar::ViewOnClickListener3::OnClick(
 }
 
 //==============================================================================
-//                  BaseStatusBar::BaseLongPressListener
+// BaseStatusBar::BaseLongPressListener
 //==============================================================================
 CAR_INTERFACE_IMPL(BaseStatusBar::BaseLongPressListener, Object, ISwipeHelperLongPressListener)
 
@@ -903,7 +1052,7 @@ ECode BaseStatusBar::BaseLongPressListener::OnLongPress(
 
 
 //==============================================================================
-//                  BaseStatusBar::BaseAnimatorListenerAdapter
+// BaseStatusBar::BaseAnimatorListenerAdapter
 //==============================================================================
 BaseStatusBar::BaseAnimatorListenerAdapter::BaseAnimatorListenerAdapter(
     /* [in] */ IView* v)
@@ -947,7 +1096,7 @@ BaseStatusBar::BaseStatusBar()
 
 ECode BaseStatusBar::constructor()
 {
-    mOnClickHandler = new _RemoteViewsOnClickHandler(this);
+    mOnClickHandler = new NotificationRemoteViewsOnClickHandler(this);
     CBaseBroadcastReceiver::New(this, (IBroadcastReceiver**)&mBroadcastReceiver);
     CNotificationListenerService::New(this, (INotificationListenerService**)&mNotificationListener);
     mRecentsPreloadOnTouchListener = new RecentsPreloadOnTouchListener(this);
@@ -1307,6 +1456,7 @@ void BaseStatusBar::DismissKeyguardThenExecute(
     /* [in] */ IKeyguardHostViewOnDismissAction* action,
     /* [in] */ Boolean afterKeyguardGone)
 {
+    Logger::D(TAG, " >> %s OnDismiss: %d", TO_CSTR(action), afterKeyguardGone);
     Boolean bval;
     action->OnDismiss(&bval);
 }
@@ -1465,30 +1615,9 @@ void BaseStatusBar::StartNotificationGutsIntent(
 {
     Boolean keyguardShowing = FALSE;
     mStatusBarKeyguardViewManager->IsShowing(&keyguardShowing);
-    assert(0 && "TODO");
-    // DismissKeyguardThenExecute(new OnDismissAction() {
-    //     @Override
-    //     public Boolean onDismiss() {
-    //         AsyncTask.execute(new Runnable() {
-    //             public void run() {
-    //                 try {
-    //                     if (keyguardShowing) {
-    //                         ActivityManagerNative.getDefault()
-    //                                 .keyguardWaitingForActivityDrawn();
-    //                     }
-    //                     TaskStackBuilder.create(mContext)
-    //                             .addNextIntentWithParentStack(intent)
-    //                             .startActivities(NULL,
-    //                                     new UserHandle(UserHandle.getUserId(appUid)));
-    //                     OverrideActivityPendingAppTransition(keyguardShowing);
-    //                 } catch (RemoteException e) {
-    //                 }
-    //             }
-    //         });
-    //         AnimateCollapsePanels(CommandQueue.FLAG_EXCLUDE_NONE, TRUE /* force */);
-    //         return TRUE;
-    //     }
-    // }, FALSE /* afterKeyguardGone */);
+    AutoPtr<NotificationGutsOnDismissAction> action = new NotificationGutsOnDismissAction(
+        this, keyguardShowing, intent, appUid);
+    DismissKeyguardThenExecute(action, FALSE /* afterKeyguardGone */);
 }
 
 void BaseStatusBar::InflateGuts(
@@ -1948,6 +2077,7 @@ Boolean BaseStatusBar::InflateViews(
 {
     AutoPtr<IStatusBarNotification> sbn;
     entry->GetNotification((IStatusBarNotification**)&sbn);
+    Logger::D(TAG, " >> InflateViews for notification: %s", TO_CSTR(sbn));
 
     AutoPtr<IUserHandle> uh;
     sbn->GetUser((IUserHandle**)&uh);
@@ -1976,14 +2106,11 @@ Boolean BaseStatusBar::InflateViews(
         return FALSE;
     }
 
-    if (DEBUG) {
-        AutoPtr<INotification> tmp;
-        n->GetPublicVersion((INotification**)&tmp);
-        Logger::V(TAG, "publicNotification: %p", tmp.Get());
-    }
-
     AutoPtr<INotification> publicNotification;
     n->GetPublicVersion((INotification**)&publicNotification);
+    if (DEBUG) {
+        Logger::V(TAG, "publicNotification: %s", TO_CSTR(publicNotification));
+    }
 
     AutoPtr<IExpandableNotificationRow> row;
 
@@ -2020,40 +2147,43 @@ Boolean BaseStatusBar::InflateViews(
         row->SetExpansionLogger(this, key);
     }
 
-    WorkAroundBadLayerDrawableOpacity(IView::Probe(row));
-    AutoPtr<IView> vetoButton = UpdateNotificationVetoButton(IView::Probe(row), sbn);
+    IView* rowView = IView::Probe(row);
+    WorkAroundBadLayerDrawableOpacity(rowView);
+    AutoPtr<IView> vetoButton = UpdateNotificationVetoButton(rowView, sbn);
 
     String str;
     mContext->GetString(R::string::accessibility_remove_notification, &str);
-    AutoPtr<ICharSequence> des;
-    CString::New(str, (ICharSequence**)&des);
+    AutoPtr<ICharSequence> des = CoreUtils::Convert(str);
     vetoButton->SetContentDescription(des);
 
     // NB: the large icon is now handled entirely by the template
 
     // bind the click event to the content area
     AutoPtr<IView> view;
-    IView::Probe(row)->FindViewById(R::id::expanded, (IView**)&view);
+    rowView->FindViewById(R::id::expanded, (IView**)&view);
     AutoPtr<INotificationContentView> expanded = INotificationContentView::Probe(view);
 
     view = NULL;
-    IView::Probe(row)->FindViewById(R::id::expandedPublic, (IView**)&view);
+    rowView->FindViewById(R::id::expandedPublic, (IView**)&view);
     AutoPtr<INotificationContentView> expandedPublic = INotificationContentView::Probe(view);
 
     IViewGroup::Probe(row)->SetDescendantFocusability(IViewGroup::FOCUS_BLOCK_DESCENDANTS);
 
     AutoPtr<IPendingIntent> contentIntent;
     n->GetContentIntent((IPendingIntent**)&contentIntent);
+    Logger::I(TAG, " >> GetContentIntent: %s", TO_CSTR(contentIntent));
     if (contentIntent != NULL) {
         String key;
         sbn->GetKey(&key);
         AutoPtr<INotificationClicker> l;
         MakeClicker(contentIntent, key, isHeadsUp, (INotificationClicker**)&l);
+        Logger::I(TAG, " >> Create listener: %s for with key:%s on %s",
+            TO_CSTR(l), key.string(), TO_CSTR(rowView));
         AutoPtr<IViewOnClickListener> listener = IViewOnClickListener::Probe(l);
-        IView::Probe(row)->SetOnClickListener(listener);
+        rowView->SetOnClickListener(listener);
     }
     else {
-        IView::Probe(row)->SetOnClickListener(NULL);
+        rowView->SetOnClickListener(NULL);
     }
 
     // set up the adaptive layout
@@ -2067,8 +2197,7 @@ Boolean BaseStatusBar::InflateViews(
         sbn->GetPackageName(&p);
         Int32 id = 0;
         sbn->GetId(&id);
-        String ident = p + "/0x" + StringUtils::ToHexString(id);
-        Logger::E(TAG, "couldn't inflate view for notification %s", ident.string());
+        Logger::E(TAG, "couldn't inflate view for notification %s/0x%08x",  p.string(), id);
         return FALSE;
     }
     if (bigContentView != NULL) {
@@ -2079,8 +2208,7 @@ Boolean BaseStatusBar::InflateViews(
             sbn->GetPackageName(&p);
             Int32 id = 0;
             sbn->GetId(&id);
-            String ident = p + "/0x" + StringUtils::ToHexString(id);
-            Logger::E(TAG, "couldn't inflate view for notification %s", ident.string());
+            Logger::E(TAG, "couldn't inflate view for notification %s/0x%08x",  p.string(), id);
             return FALSE;
         }
     }
@@ -2102,13 +2230,12 @@ Boolean BaseStatusBar::InflateViews(
         ec = rv->Apply(mContext, IViewGroup::Probe(expandedPublic),
                 mOnClickHandler, (IView**)&publicViewLocal);
 
-        if (ec == (Int32)E_RUNTIME_EXCEPTION) {
+        if (ec == (ECode)E_RUNTIME_EXCEPTION) {
             String p;
             sbn->GetPackageName(&p);
             Int32 id = 0;
             sbn->GetId(&id);
-            String ident = p + "/0x" + StringUtils::ToHexString(id);
-            Logger::E(TAG, "couldn't inflate public view for notification %s", ident.string());
+            Logger::E(TAG, "couldn't inflate view for notification %s/0x%08x",  p.string(), id);
             publicViewLocal = NULL;
         }
         else {
@@ -2123,7 +2250,8 @@ Boolean BaseStatusBar::InflateViews(
     AutoPtr<IApplicationInfo> info;
     String pkgname;
     sbn->GetPackageName(&pkgname);
-    if (pmUser->GetApplicationInfo(pkgname, 0, (IApplicationInfo**)&info) == (ECode)E_NAME_NOT_FOUND_EXCEPTION) {
+    ec = pmUser->GetApplicationInfo(pkgname, 0, (IApplicationInfo**)&info);
+    if (ec == (ECode)E_NAME_NOT_FOUND_EXCEPTION) {
         Logger::E(TAG, "Failed looking up ApplicationInfo for %s", pkgname.string());
     }
     else {
@@ -2165,9 +2293,8 @@ Boolean BaseStatusBar::InflateViews(
         publicViewLocal->FindViewById(R::id::profile_badge_line3, (IView**)&view);
         AutoPtr<IImageView> profileBadge = IImageView::Probe(view);
 
-        Int32 icon1;
+        Int32 icon1, iconLevel = 0, number = 0;
         n->GetIcon(&icon1);
-        Int32 iconLevel = 0, number = 0;
         n->GetIconLevel(&iconLevel);
         n->GetNumber(&number);
 
@@ -2185,7 +2312,7 @@ Boolean BaseStatusBar::InflateViews(
         if (targetSdk >= Build::VERSION_CODES::LOLLIPOP
                 || (mNotificationColorUtil->IsGrayscaleIcon(iconDrawable, &tmp), tmp)) {
             IView::Probe(icon)->SetBackgroundResource(
-                    Elastos::Droid::R::drawable::notification_icon_legacy_bg);
+                Elastos::Droid::R::drawable::notification_icon_legacy_bg);
 
             AutoPtr<IResources> res;
             mContext->GetResources((IResources**)&res);
@@ -2236,7 +2363,7 @@ Boolean BaseStatusBar::InflateViews(
         if (text != NULL) {
             text->SetText(R::string::notification_hidden_text);
             text->SetTextAppearance(mContext,
-                    R::style::TextAppearance_Material_Notification_Parenthetical);
+                R::style::TextAppearance_Material_Notification_Parenthetical);
         }
 
         AutoPtr<IResources> res;
@@ -2262,7 +2389,7 @@ Boolean BaseStatusBar::InflateViews(
 
     if (MULTIUSER_DEBUG) {
         view = NULL;
-        IView::Probe(row)->FindViewById(R::id::debug_info, (IView**)&view);
+        rowView->FindViewById(R::id::debug_info, (IView**)&view);
         AutoPtr<ITextView> debug = ITextView::Probe(view);
         if (debug != NULL) {
             IView::Probe(debug)->SetVisibility(IView::VISIBLE);
@@ -2305,7 +2432,7 @@ ECode BaseStatusBar::MakeClicker(
 {
     VALIDATE_NOT_NULL(clicker);
     AutoPtr<NotificationClicker> c = new NotificationClicker(intent, notificationKey, forHun, this);
-    *clicker = (INotificationClicker*)c->Probe(EIID_INotificationClicker);
+    *clicker = (INotificationClicker*)c.Get();
     REFCOUNT_ADD(*clicker);
     return NOERROR;
 }
@@ -2982,31 +3109,29 @@ Boolean BaseStatusBar::ShouldInterrupt(
     mAccessibilityManager->IsTouchExplorationEnabled(&tmp);
     Boolean accessibilityForcesLaunch = isFullscreen && tmp;
 
-    assert(0 && "TODO");
-    // final KeyguardTouchDelegate keyguard = KeyguardTouchDelegate.getInstance(mContext);
-    // Boolean interrupt = (isFullscreen || (isHighPriority && (isNoisy || hasTicker)))
-    //         && isAllowed
-    //         && !accessibilityForcesLaunch
-    //         && mPowerManager.isScreenOn()
-    //         && !keyguard.isShowingAndNotOccluded()
-    //         && !keyguard.isInputRestricted();
-    // try {
-    //     interrupt = interrupt && !mDreamManager.isDreaming();
-    // } catch (RemoteException e) {
-    //     Logger::D(TAG, "failed to query dream manager", e);
-    // }
-    // if (DEBUG) Logger::D(TAG, "interrupt: " + interrupt);
-    // return interrupt;
-    return FALSE;
+    AutoPtr<KeyguardTouchDelegate> keyguard = KeyguardTouchDelegate::GetInstance(mContext);
+    Boolean interrupt = (isFullscreen || (isHighPriority && (isNoisy || hasTicker)))
+            && isAllowed
+            && !accessibilityForcesLaunch
+            && (mPowerManager->IsScreenOn(&tmp), tmp)
+            && (keyguard->IsShowingAndNotOccluded(&tmp), !tmp)
+            && (keyguard->IsInputRestricted(&tmp), !tmp);
+
+    if (mDreamManager != NULL) {
+        mDreamManager->IsDreaming(&tmp);
+        interrupt = interrupt && !tmp;
+    }
+
+    if (DEBUG) Logger::D(TAG, "interrupt: %d", interrupt);
+    return interrupt;
 }
 
 ECode BaseStatusBar::InKeyguardRestrictedInputMode(
     /* [out] */ Boolean* result)
 {
     VALIDATE_NOT_NULL(result);
-    assert(0 && "TODO");
-    // return KeyguardTouchDelegate.getInstance(mContext).isInputRestricted();
-    return NOERROR;
+    AutoPtr<KeyguardTouchDelegate> keyguard = KeyguardTouchDelegate::GetInstance(mContext);
+    return keyguard->IsInputRestricted(result);
 }
 
 ECode BaseStatusBar::SetInteracting(

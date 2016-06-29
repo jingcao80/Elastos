@@ -19,7 +19,11 @@ namespace Droid {
 namespace SystemUI {
 namespace Qs {
 
+const Boolean QSTile::DEBUG = FALSE;//Logger::IsLoggable("QSTile", Logger::___DEBUG);
+static const String TAG("QSTile");
+
 CAR_INTERFACE_IMPL(QSTile::State, Object, IQSTileState)
+
 QSTile::State::State()
     : mVisible(FALSE)
     , mIconId(0)
@@ -185,6 +189,7 @@ const Int32 QSTile::H::USER_SWITCH;
 const Int32 QSTile::H::TOGGLE_STATE_CHANGED;
 const Int32 QSTile::H::SCAN_STATE_CHANGED;
 const Int32 QSTile::H::DESTROY;
+
 QSTile::H::H(
     /* [in] */ QSTile* host,
     /* [in] */ ILooper* looper)
@@ -249,22 +254,22 @@ ECode QSTile::H::HandleMessage(
 
     if (FAILED(ec)) {
         String error = String("Error in ") + name;
-        Logger::W(mQsTile->TAG, error);
+        Logger::W(TAG, error);
         mQsTile->mHost->Warn(error);
     }
     return NOERROR;
 }
 
-const Boolean QSTile::DEBUG = Logger::IsLoggable("QSTile", Logger::___DEBUG);
 CAR_INTERFACE_IMPL_2(QSTile, Object, IQSTile, IListenable);
+
 QSTile::QSTile()
+    : mAnnounceNextStateChange(FALSE)
 {
 }
 
 ECode QSTile::constructor(
     /* [in] */ IQSTileHost* host)
 {
-    TAG = "QSTile";
     CHandler::New(Looper::GetMainLooper(), (IHandler**)&mUiHandler);
     mState = NewTileState();
     mTmpState = NewTileState();
