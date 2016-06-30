@@ -1,17 +1,18 @@
 #include "elastos/droid/systemui/volume/ZenToast.h"
 #include "Elastos.Droid.Provider.h"
 #include "Elastos.CoreLibrary.Core.h"
+#include "elastos/droid/os/UserHandle.h"
 #include "elastos/droid/view/LayoutInflater.h"
 #include "elastos/droid/R.h"
 #include "R.h"
+#include <elastos/core/CoreUtils.h>
 
 using Elastos::Droid::Content::CIntentFilter;
 using Elastos::Droid::Content::IIntentFilter;
 using Elastos::Droid::Content::Res::IResources;
 using Elastos::Droid::Graphics::IPixelFormat;
-using Elastos::Droid::Os::CUserHandleHelper;
+using Elastos::Droid::Os::UserHandle;
 using Elastos::Droid::Os::IUserHandle;
-using Elastos::Droid::Os::IUserHandleHelper;
 using Elastos::Droid::Provider::ISettingsGlobal;
 using Elastos::Droid::View::CWindowManagerLayoutParams;
 using Elastos::Droid::View::EIID_IViewOnAttachStateChangeListener;
@@ -23,7 +24,7 @@ using Elastos::Droid::View::IWindowManagerLayoutParams;
 using Elastos::Droid::View::LayoutInflater;
 using Elastos::Droid::Widget::IImageView;
 using Elastos::Droid::R;
-using Elastos::Core::CString;
+using Elastos::Core::CoreUtils;
 using Elastos::Core::ICharSequence;
 
 namespace Elastos {
@@ -77,13 +78,11 @@ ECode ZenToast::MyReceiver::OnReceive(
     String action;
     intent->GetAction(&action);
     if (ZenToast::ACTION_SHOW.Equals(action)) {
-        Int32 v;
-        intent->GetInt32Extra(ZenToast::EXTRA_ZEN, ISettingsGlobal::ZEN_MODE_IMPORTANT_INTERRUPTIONS, &v);
-        const Int32 zen = v;
+        Int32 zen;
+        intent->GetInt32Extra(ZenToast::EXTRA_ZEN, ISettingsGlobal::ZEN_MODE_IMPORTANT_INTERRUPTIONS, &zen);
         String str;
         intent->GetStringExtra(ZenToast::EXTRA_TEXT, &str);
-        const String text = str;
-        mHost->HandleShow(zen, text);
+        mHost->HandleShow(zen, str);
     }
     else if (ZenToast::ACTION_HIDE.Equals(action)) {
         mHost->HandleHide();
@@ -92,19 +91,19 @@ ECode ZenToast::MyReceiver::OnReceive(
 }
 
 //===================================
-// ZenToast::MyListener
+// ZenToast::OnAttachStateChangeListener
 //===================================
 
-CAR_INTERFACE_IMPL(ZenToast::MyListener, Object, IViewOnAttachStateChangeListener)
+CAR_INTERFACE_IMPL(ZenToast::OnAttachStateChangeListener, Object, IViewOnAttachStateChangeListener)
 
-ZenToast::MyListener::MyListener(
+ZenToast::OnAttachStateChangeListener::OnAttachStateChangeListener(
     /* [in] */ ITextView* message,
     /* [in] */ ZenToast* host)
     : mMessage(message)
     , mHost(host)
 {}
 
-ECode ZenToast::MyListener::OnViewAttachedToWindow(
+ECode ZenToast::OnAttachStateChangeListener::OnViewAttachedToWindow(
     /* [in] */ IView* v)
 {
     AutoPtr<ICharSequence> text;
@@ -113,7 +112,7 @@ ECode ZenToast::MyListener::OnViewAttachedToWindow(
     return NOERROR;
 }
 
-ECode ZenToast::MyListener::OnViewDetachedFromWindow(
+ECode ZenToast::OnAttachStateChangeListener::OnViewDetachedFromWindow(
     /* [in] */ IView* v)
 {
     return NOERROR;
@@ -131,10 +130,13 @@ const String ZenToast::EXTRA_TEXT("text");
 const Int32 ZenToast::MSG_SHOW;
 const Int32 ZenToast::MSG_HIDE;
 
-ZenToast::ZenToast(
+ECode ZenToast::constructor(
     /* [in] */ IContext* context)
-    : mContext(context)
 {
+    mContext = context;
+    mHandler = new MyHandler(this);
+    mReceiver = new MyReceiver(this);
+
     AutoPtr<IInterface> obj;
     mContext->GetSystemService(IContext::WINDOW_SERVICE, (IInterface**)&obj);
     mWindowManager = IWindowManager::Probe(obj);
@@ -142,14 +144,9 @@ ZenToast::ZenToast(
     CIntentFilter::New((IIntentFilter**)&filter);
     filter->AddAction(ACTION_SHOW);
     filter->AddAction(ACTION_HIDE);
-    AutoPtr<IUserHandleHelper> uhh;
-    CUserHandleHelper::AcquireSingleton((IUserHandleHelper**)&uhh);
-    AutoPtr<IUserHandle> uh;
-    uhh->GetALL((IUserHandle**)&uh);
     AutoPtr<IIntent> intent;
-    mContext->RegisterReceiverAsUser(mReceiver, uh, filter, String(NULL), mHandler, (IIntent**)&intent);
-    mHandler = new MyHandler(this);
-    mReceiver = new MyReceiver(this);
+    return mContext->RegisterReceiverAsUser(mReceiver, UserHandle::ALL, filter,
+        String(NULL), mHandler, (IIntent**)&intent);
 }
 
 ECode ZenToast::Show(
@@ -180,20 +177,20 @@ void ZenToast::HandleShow(
     HandleHide();
 
     String text;
-    Int32 _iconRes;
+    Int32 iconRes;
     switch (zen) {
         case ISettingsGlobal::ZEN_MODE_NO_INTERRUPTIONS:
             mContext->GetString(R::string::zen_no_interruptions, &text);
-            _iconRes = R::drawable::ic_zen_none;
+            iconRes = R::drawable::ic_zen_none;
             break;
         case ISettingsGlobal::ZEN_MODE_IMPORTANT_INTERRUPTIONS:
             mContext->GetString(R::string::zen_important_interruptions, &text);
-            _iconRes = R::drawable::ic_zen_important;
+            iconRes = R::drawable::ic_zen_important;
             break;
         default:
             return;
     }
-    const Int32 iconRes = _iconRes;
+
     if (!overrideText.IsNull()) {
         text = overrideText;
     }
@@ -201,20 +198,17 @@ void ZenToast::HandleShow(
     mContext->GetResources((IResources**)&res);
     AutoPtr<IWindowManagerLayoutParams> params;
     CWindowManagerLayoutParams::New((IWindowManagerLayoutParams**)&params);
-
-    //TODO
-    // params.height = IWindowManagerLayoutParams::WRAP_CONTENT;
+    IViewGroupLayoutParams* vglp = IViewGroupLayoutParams::Probe(params);
 
     Int32 width;
     res->GetDimensionPixelSize(R::dimen::zen_toast_width, &width);
-
-    // params.width = width;
+    vglp->SetHeight(IViewGroupLayoutParams::WRAP_CONTENT);
+    vglp->SetWidth(width);
 
     params->SetFormat(IPixelFormat::TRANSLUCENT);
     params->SetWindowAnimations(R::style::ZenToastAnimations);
     params->SetType(IWindowManagerLayoutParams::TYPE_STATUS_BAR_PANEL);
-    AutoPtr<ICharSequence> title;
-    CString::New(String("ZenToast"), (ICharSequence**)&title);
+    AutoPtr<ICharSequence> title = CoreUtils::Convert("ZenToast");
     params->SetTitle(title);
     params->SetFlags(IWindowManagerLayoutParams::FLAG_KEEP_SCREEN_ON
         | IWindowManagerLayoutParams::FLAG_NOT_FOCUSABLE
@@ -224,27 +218,27 @@ void ZenToast::HandleShow(
     mContext->GetPackageName(&packageName);
     params->SetPackageName(packageName);
 
+    mZenToast = NULL;
     AutoPtr<ILayoutInflater> inflater;
     LayoutInflater::From(mContext, (ILayoutInflater**)&inflater);
     inflater->Inflate(R::layout::zen_toast, NULL, (IView**)&mZenToast);
 
     AutoPtr<IView> v1;
     mZenToast->FindViewById(Elastos::Droid::R::id::message, (IView**)&v1);
-    const AutoPtr<ITextView> message = ITextView::Probe(v1);
-    AutoPtr<ICharSequence> cs;
-    CString::New(text, (ICharSequence**)&cs);
+    AutoPtr<ITextView> message = ITextView::Probe(v1);
+    AutoPtr<ICharSequence> cs = CoreUtils::Convert(text);
     message->SetText(cs);
 
     AutoPtr<IView> v2;
-    mZenToast->FindViewById(R::id::icon, (IView**)&v2);
-    const AutoPtr<IImageView> icon = IImageView::Probe(v2);
+    mZenToast->FindViewById(Elastos::Droid::R::id::icon, (IView**)&v2);
+    AutoPtr<IImageView> icon = IImageView::Probe(v2);
     icon->SetImageResource(iconRes);
-    AutoPtr<MyListener> listener = new MyListener(message, this);
+
+    AutoPtr<OnAttachStateChangeListener> listener = new OnAttachStateChangeListener(message, this);
     mZenToast->AddOnAttachStateChangeListener(listener);
-    IViewManager::Probe(mWindowManager)->AddView(mZenToast, IViewGroupLayoutParams::Probe(params));
-    Int32 animDuration;
+    IViewManager::Probe(mWindowManager)->AddView(mZenToast, vglp);
+    Int32 animDuration, visibleDuration;
     res->GetInteger(R::integer::zen_toast_animation_duration, &animDuration);
-    Int32 visibleDuration;
     res->GetInteger(R::integer::zen_toast_visible_duration, &visibleDuration);
     Boolean result;
     mHandler->SendEmptyMessageDelayed(MSG_HIDE, animDuration + visibleDuration, &result);

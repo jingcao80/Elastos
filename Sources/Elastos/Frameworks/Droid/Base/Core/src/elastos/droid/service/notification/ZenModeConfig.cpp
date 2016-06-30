@@ -10,6 +10,7 @@
 #include <elastos/core/Math.h>
 #include <elastos/core/StringBuilder.h>
 #include <elastos/core/StringUtils.h>
+#include <elastos/utility/Arrays.h>
 #include <elastos/utility/logging/Logger.h>
 #include <elastos/utility/logging/Slogger.h>
 #include <elastos/utility/Objects.h>
@@ -37,6 +38,7 @@ using Elastos::Core::IString;
 using Elastos::Core::ISystem;
 using Elastos::Core::StringBuilder;
 using Elastos::Core::StringUtils;
+using Elastos::Utility::Arrays;
 using Elastos::Utility::CArrayList;
 using Elastos::Utility::IArrayList;
 using Elastos::Utility::ICalendar;
@@ -92,9 +94,9 @@ static AutoPtr<ArrayOf<Int32> > Init3()
     return alldays;
 }
 
-const AutoPtr<ArrayOf<Int32> > ZenModeConfig::ALL_DAYS = Init1();
-const AutoPtr<ArrayOf<Int32> > ZenModeConfig::WEEKNIGHT_DAYS = Init2();
-const AutoPtr<ArrayOf<Int32> > ZenModeConfig::MINUTE_BUCKETS = Init3();
+INIT_PROI_2 const AutoPtr<ArrayOf<Int32> > ZenModeConfig::ALL_DAYS = Init1();
+INIT_PROI_2 const AutoPtr<ArrayOf<Int32> > ZenModeConfig::WEEKNIGHT_DAYS = Init2();
+INIT_PROI_2 const AutoPtr<ArrayOf<Int32> > ZenModeConfig::MINUTE_BUCKETS = Init3();
 
 const String ZenModeConfig::TAG("ZenModeConfig");
 
@@ -306,22 +308,27 @@ ECode ZenModeConfig::ToString(
     sb += mSleepEndMinute;
     sb += ",conditionComponents=";
 
-    Int32 length = mConditionComponents->GetLength();
-    AutoPtr<ArrayOf<IInterface*> > objs = ArrayOf<IInterface*>::Alloc(length);
-    for (Int32 i = 0; i < length; i++) {
-        objs->Set(i, IInterface::Probe((*mConditionComponents)[i]));
+    AutoPtr<ArrayOf<IInterface*> > objs;
+    if (mConditionComponents != NULL) {
+        Int32 length = mConditionComponents->GetLength();
+        objs = ArrayOf<IInterface*>::Alloc(length);
+        for (Int32 i = 0; i < length; i++) {
+            objs->Set(i, IInterface::Probe((*mConditionComponents)[i]));
+        }
     }
 
     sb += mConditionComponents == NULL ? "NULL" : TextUtils::Join(cs.Get(), objs.Get());
     sb += ",conditionIds=";
 
-    length = mConditionIds->GetLength();
-    AutoPtr<ArrayOf<IInterface*> > objs2 = ArrayOf<IInterface*>::Alloc(length);
-    for (Int32 i = 0; i < length; i++) {
-        objs2->Set(i, IInterface::Probe((*mConditionIds)[i]));
+    if (mConditionIds != NULL) {
+        Int32 length = mConditionIds->GetLength();
+        objs = ArrayOf<IInterface*>::Alloc(length);
+        for (Int32 i = 0; i < length; i++) {
+            objs->Set(i, IInterface::Probe((*mConditionIds)[i]));
+        }
     }
 
-    sb += mConditionIds == NULL ? "NULL" : TextUtils::Join(cs.Get(), objs2.Get());
+    sb += mConditionIds == NULL ? "NULL" : TextUtils::Join(cs.Get(), objs.Get());
     sb += ",exitCondition=";
     sb += TO_CSTR(mExitCondition);
     sb += ",exitConditionComponent=";
@@ -356,7 +363,7 @@ ECode ZenModeConfig::Equals(
         *result = FALSE;
         return NOERROR;
     }
-    if (_other == (IZenModeConfig*)this) {
+    if (_other.Get() == (IZenModeConfig*)this) {
         *result = TRUE;
         return NOERROR;
     }
@@ -367,23 +374,33 @@ ECode ZenModeConfig::Equals(
     CString::New(mSleepMode, (IString**)&mSleepMode2);
 
     AutoPtr<IArrayOf> mConditionComponents1, mConditionComponents2;
-    CArrayOf::New(EIID_IComponentName, other->mConditionComponents->GetLength(), (IArrayOf**)&mConditionComponents1);
-    CArrayOf::New(EIID_IComponentName, mConditionComponents->GetLength(), (IArrayOf**)&mConditionComponents2);
-    for(Int32 i = 0; i < other->mConditionComponents->GetLength(); i++) {
-        mConditionComponents1->Set(i, IInterface::Probe((*(other->mConditionComponents))[i]));
+    if (other->mConditionComponents) {
+        CArrayOf::New(EIID_IComponentName, other->mConditionComponents->GetLength(), (IArrayOf**)&mConditionComponents1);
+        for(Int32 i = 0; i < other->mConditionComponents->GetLength(); i++) {
+            mConditionComponents1->Set(i, IInterface::Probe((*(other->mConditionComponents))[i]));
+        }
     }
-    for(Int32 i = 0; i < mConditionComponents->GetLength(); i++) {
-        mConditionComponents2->Set(i, IInterface::Probe((*mConditionComponents)[i]));
+
+    if (mConditionComponents) {
+        CArrayOf::New(EIID_IComponentName, mConditionComponents->GetLength(), (IArrayOf**)&mConditionComponents2);
+        for(Int32 i = 0; i < mConditionComponents->GetLength(); i++) {
+            mConditionComponents2->Set(i, IInterface::Probe((*mConditionComponents)[i]));
+        }
     }
 
     AutoPtr<IArrayOf> mConditionIds1, mConditionIds2;
-    CArrayOf::New(EIID_IUri, other->mConditionIds->GetLength(), (IArrayOf**)&mConditionIds1);
-    CArrayOf::New(EIID_IUri, mConditionIds->GetLength(), (IArrayOf**)&mConditionIds2);
-    for(Int32 i = 0; i < other->mConditionIds->GetLength(); i++) {
-        mConditionIds1->Set(i, IInterface::Probe((*(other->mConditionComponents))[i]));
+    if (other->mConditionIds) {
+        CArrayOf::New(EIID_IUri, other->mConditionIds->GetLength(), (IArrayOf**)&mConditionIds1);
+        for(Int32 i = 0; i < other->mConditionIds->GetLength(); i++) {
+            mConditionIds1->Set(i, IInterface::Probe((*(other->mConditionComponents))[i]));
+        }
     }
-    for(Int32 i = 0; i < mConditionIds->GetLength(); i++) {
-        mConditionIds2->Set(i, IInterface::Probe((*mConditionIds)[i]));
+
+    if (mConditionIds) {
+        CArrayOf::New(EIID_IUri, mConditionIds->GetLength(), (IArrayOf**)&mConditionIds2);
+        for(Int32 i = 0; i < mConditionIds->GetLength(); i++) {
+            mConditionIds2->Set(i, IInterface::Probe((*mConditionIds)[i]));
+        }
     }
 
     *result = other->mAllowCalls == mAllowCalls
@@ -405,12 +422,23 @@ ECode ZenModeConfig::Equals(
 ECode ZenModeConfig::GetHashCode(
     /* [out] */ Int32* hashCode)
 {
-    assert(0);
-    //TODO
-    // return Objects.hash(allowCalls, allowMessages, allowFrom, allowEvents, sleepMode,
-    //         sleepStartHour, sleepStartMinute, sleepEndHour, sleepEndMinute,
-    //         Arrays.hashCode(conditionComponents), Arrays.hashCode(conditionIds),
-    //         exitCondition, exitConditionComponent);
+    VALIDATE_NOT_NULL(hashCode)
+    AutoPtr<ArrayOf<Int32> > hash = ArrayOf<Int32>::Alloc(13);
+    hash->Set(0, mAllowCalls);
+    hash->Set(1, mAllowMessages);
+    hash->Set(2, mAllowFrom);
+    hash->Set(3, mAllowEvents);
+    hash->Set(4, mSleepMode.GetHashCode());
+    hash->Set(5, mSleepStartHour);
+    hash->Set(6, mSleepStartMinute);
+    hash->Set(7, mSleepEndHour);
+    hash->Set(8, mSleepEndMinute);
+    hash->Set(9, Arrays::GetHashCode(mConditionComponents));
+    hash->Set(10, Arrays::GetHashCode(mConditionIds));
+    hash->Set(11, Object::GetHashCode(mExitCondition));
+    hash->Set(12, Object::GetHashCode(mExitConditionComponent));
+
+    *hashCode = Arrays::GetHashCode(hash);
     return NOERROR;
 }
 
@@ -765,17 +793,15 @@ AutoPtr<IUri> ZenModeConfig::SafeUri(
 ECode ZenModeConfig::Copy(
     /* [out] */ IZenModeConfig** copy)
 {
-    assert(0);
-    //TODO
-    // final Parcel parcel = Parcel.obtain();
-    // try {
-    //     writeToParcel(parcel, 0);
-    //     parcel.setDataPosition(0);
-    //     return new ZenModeConfig(parcel);
-    // } finally {
-    //     parcel.recycle();
-    // }
-    return NOERROR;
+    VALIDATE_NOT_NULL(copy)
+    AutoPtr<IParcel> parcel;
+    CParcel::New((IParcel**)&parcel);
+    WriteToParcel(parcel);
+    parcel->SetDataPosition(0);
+
+    AutoPtr<IZenModeConfig> config;
+    CZenModeConfig::New(copy);
+    return IParcelable::Probe(*copy)->ReadFromParcel(parcel);
 }
 
 ECode ZenModeConfig::ToDowntimeInfo(
@@ -799,9 +825,8 @@ ECode ZenModeConfig::ToTimeCondition(
     VALIDATE_NOT_NULL(result)
     AutoPtr<ISystem> sys;
     CSystem::AcquireSingleton((ISystem**)&sys);
-    Int64 _now;
-    sys->GetCurrentTimeMillis(&_now);
-    const Int64 now = _now;
+    Int64 now;
+    sys->GetCurrentTimeMillis(&now);
     const Int64 millis = minutesFromNow == 0 ? ZERO_VALUE_MS : minutesFromNow * MINUTES_MS;
     return ToTimeCondition(now + millis, minutesFromNow, result);
 }
@@ -817,20 +842,16 @@ ECode ZenModeConfig::ToTimeCondition(
         ? R::plurals::zen_mode_duration_minutes
         : R::plurals::zen_mode_duration_hours;
 
-    AutoPtr<ArrayOf<Int32> > fa = ArrayOf<Int32>::Alloc(1);
-    (*fa)[0] = num;
-
     AutoPtr<IInteger32> iv;
-    CInteger32::New((*fa)[0], (IInteger32**)&iv);
+    CInteger32::New(num, (IInteger32**)&iv);
     AutoPtr<ArrayOf<IInterface*> > inArray = ArrayOf<IInterface*>::Alloc(1);
     inArray->Set(0, IInterface::Probe(iv));
-    String _caption;
-    CResources::GetSystem()->GetQuantityString(resId, num, inArray.Get(), &_caption);
-    const String caption = _caption;
-    const AutoPtr<IUri> id;
-     ToCountdownConditionId(time, (IUri**)&id);
-     CCondition::New(id, caption, String(""), String(""), 0, ICondition::STATE_TRUE,
-            ICondition::FLAG_RELEVANT_NOW, result);
+    String caption;
+    CResources::GetSystem()->GetQuantityString(resId, num, inArray, &caption);
+    AutoPtr<IUri> id;
+    ToCountdownConditionId(time, (IUri**)&id);
+    CCondition::New(id, caption, String(""), String(""), 0, ICondition::STATE_TRUE,
+        ICondition::FLAG_RELEVANT_NOW, result);
     return NOERROR;
 }
 
@@ -854,34 +875,27 @@ ECode ZenModeConfig::TryParseCountdownConditionId(
     /* [out] */ Int64* result)
 {
     VALIDATE_NOT_NULL(result)
+    *result = 0;
+
     Boolean isValidId;
     Condition::IsValidId(conditionId, SYSTEM_AUTHORITY, &isValidId);
-    if (!isValidId) {
-        *result = 0;
-        return NOERROR;
-    }
+    if (!isValidId) return NOERROR;
+
     AutoPtr<IList> list;
     conditionId->GetPathSegments((IList**)&list);
     Int32 size;
     list->GetSize(&size);
+    if (size != 2) return NOERROR;
+
     AutoPtr<IInterface> obj;
     list->Get(0, (IInterface**)&obj);
-    String strv;
-    IObject::Probe(obj)->ToString(&strv);
-    if (size != 2 || !COUNTDOWN_PATH.Equals(strv)) {
-        *result = 0;
-        return NOERROR;
-    }
+    if (!COUNTDOWN_PATH.Equals(Object::ToString(obj))) return NOERROR;
 
     obj = NULL;
     list->Get(1, (IInterface**)&obj);
-    String strv2;
-    IObject::Probe(obj)->ToString(&strv2);
-    ECode ec = StringUtils::Parse(strv2, result);
+    ECode ec = StringUtils::Parse(Object::ToString(obj), result);
     if (FAILED(ec)) {
-        String str;
-        IObject::Probe(conditionId)->ToString(&str);
-        Slogger::W(TAG, "Error parsing countdown condition: %s", str.string());
+        Slogger::W(TAG, "Error parsing countdown condition: %s", TO_CSTR(conditionId));
         return E_RUNTIME_EXCEPTION;
     }
     return NOERROR;
@@ -925,20 +939,23 @@ ECode ZenModeConfig::TryParseDowntimeConditionId(
     /* [in] */ IUri* conditionId,
     /* [out] */ IZenModeConfigDowntimeInfo** result)
 {
+    VALIDATE_NOT_NULL(result)
+    *result = NULL;
+
     Boolean isValidId;
     Condition::IsValidId(conditionId, SYSTEM_AUTHORITY, &isValidId);
+    if (!isValidId) return NOERROR;
+
+    Int32 size = 0;
     AutoPtr<IList> list;
     conditionId->GetPathSegments((IList**)&list);
-    Int32 size;
     list->GetSize(&size);
+    if (size != 1) return NOERROR;
+
     AutoPtr<IInterface> obj;
     list->Get(0, (IInterface**)&obj);
-    String strv;
-    IObject::Probe(obj)->ToString(&strv);
-    if (!isValidId || size != 1 || !DOWNTIME_PATH.Equals(strv)) {
-        *result = NULL;
-        return NOERROR;
-    }
+    if (!DOWNTIME_PATH.Equals(Object::ToString(obj))) return NOERROR;
+
     const AutoPtr<ArrayOf<Int32> > start;
     String qp;
     conditionId->GetQueryParameter(String("start"), &qp);
@@ -965,13 +982,14 @@ ECode ZenModeConfig::TryParseHourAndMinute(
     /* [in] */ const String& value,
     /* [out, callee] */ ArrayOf<Int32>** results)
 {
+    VALIDATE_NOT_NULL(results)
+    *results = NULL;
+
     if (TextUtils::IsEmpty(value)) {
-        *results = NULL;
         return NOERROR;
     }
     const Int32 i = value.IndexOf('.');
     if (i < 1 || i >= value.GetLength() - 1) {
-        *results = NULL;
         return NOERROR;
     }
     const Int32 hour = TryParseInt32(value.Substring(0, i), -1);
@@ -982,9 +1000,7 @@ ECode ZenModeConfig::TryParseHourAndMinute(
         (**results)[1] = minute;
         REFCOUNT_ADD(*results)
     }
-    else {
-        *results = NULL;
-    }
+
     return NOERROR;
 }
 

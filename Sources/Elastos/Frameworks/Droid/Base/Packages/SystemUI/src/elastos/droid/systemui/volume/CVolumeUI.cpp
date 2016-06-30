@@ -160,7 +160,7 @@ ECode CVolumeUI::VolumeController::GetZenController(
 ECode CVolumeUI::VolumeController::ToString(
     /* [out] */ String* str)
 {
-    return NOERROR;
+    return Object::ToString(str);
 }
 
 //==============================================================================
@@ -325,12 +325,12 @@ void CVolumeUI::UpdateController()
     Int32 i;
     ss->GetInt32(resolver, SETTING, DEFAULT, &i);
     if (i != 0) {
-        Logger::D(TAG, "Registering volume controller, %s", TO_CSTR(mVolumeController));
+        Logger::D(TAG, " >> Registering volume controller, %s", TO_CSTR(mVolumeController));
         mAudioManager->SetVolumeController(mVolumeController);
         mMediaSessionManager->SetRemoteVolumeController(mRemoteVolumeController);
     }
     else {
-        Logger::D(TAG, "Unregistering volume controller");
+        Logger::D(TAG, " >> Unregistering volume controller");
         mAudioManager->SetVolumeController(NULL);
         mMediaSessionManager->SetRemoteVolumeController(NULL);
     }
@@ -342,7 +342,8 @@ void CVolumeUI::InitPanel()
     mContext->GetResources((IResources**)&res);
     res->GetInteger(R::integer::volume_panel_dismiss_delay, &mDismissDelay);
 
-    AutoPtr<ZenModeControllerImpl> zmc = new ZenModeControllerImpl(mContext, mHandler);
+    AutoPtr<ZenModeControllerImpl> zmc = new ZenModeControllerImpl();
+    zmc->constructor(mContext, mHandler);
     CVolumePanel::New(mContext, zmc, (IVolumePanel**)&mPanel);
 
     AutoPtr<MyVolumePanelCallback> vpc = new MyVolumePanelCallback(this);

@@ -3,6 +3,7 @@
 #include "elastos/droid/systemui/volume/Interaction.h"
 #include "elastos/droid/view/LayoutInflater.h"
 #include "R.h"
+#include <elastos/core/CoreUtils.h>
 #include <elastos/core/StringUtils.h>
 #include <elastos/utility/Objects.h>
 
@@ -18,6 +19,7 @@ using Elastos::Core::CInteger32;
 using Elastos::Core::CString;
 using Elastos::Core::ICharSequence;
 using Elastos::Core::IInteger32;
+using Elastos::Core::CoreUtils;
 using Elastos::Core::StringUtils;
 using Elastos::Utility::Objects;
 
@@ -67,7 +69,7 @@ ECode SegmentedButtons::MyInteractionCallback::OnInteraction()
 // SegmentedButtons
 //==========================================
 
-static AutoPtr<ITypeface> initMEDIUM()
+static AutoPtr<ITypeface> InitMEDIUM()
 {
     AutoPtr<ITypefaceHelper> th;
     CTypefaceHelper::AcquireSingleton((ITypefaceHelper**)&th);
@@ -76,7 +78,7 @@ static AutoPtr<ITypeface> initMEDIUM()
     return tf;
 }
 
-static AutoPtr<ITypeface> initBOLD()
+static AutoPtr<ITypeface> InitBOLD()
 {
     AutoPtr<ITypefaceHelper> th;
     CTypefaceHelper::AcquireSingleton((ITypefaceHelper**)&th);
@@ -85,15 +87,14 @@ static AutoPtr<ITypeface> initBOLD()
     return tf;
 }
 
-const AutoPtr<ITypeface> SegmentedButtons::MEDIUM = initMEDIUM();
-const AutoPtr<ITypeface> SegmentedButtons::BOLD = initBOLD();
+const AutoPtr<ITypeface> SegmentedButtons::MEDIUM = InitMEDIUM();
+const AutoPtr<ITypeface> SegmentedButtons::BOLD = InitBOLD();
 const Int32 SegmentedButtons::LABEL_RES_KEY = R::id::label;
 
 CAR_INTERFACE_IMPL(SegmentedButtons, LinearLayout, ISegmentedButtons)
 
 SegmentedButtons::SegmentedButtons()
 {
-    mClick = new MyClick(this);
 }
 
 ECode SegmentedButtons::constructor(
@@ -102,6 +103,8 @@ ECode SegmentedButtons::constructor(
 {
     LinearLayout::constructor(context, attrs);
     mContext = context;
+
+    mClick = new MyClick(this);
     LayoutInflater::From(mContext, (ILayoutInflater**)&mInflater);
     SetOrientation(ILinearLayout::HORIZONTAL);
     return NOERROR;
@@ -126,19 +129,18 @@ ECode SegmentedButtons::GetSelectedValue(
 ECode SegmentedButtons::SetSelectedValue(
     /* [in] */ IInterface* value)
 {
-    if (Objects::Equals(value, (IInterface*)mSelectedValue)) return E_NULL_POINTER_EXCEPTION;
+    if (Object::Equals(value, mSelectedValue.Get())) return E_NULL_POINTER_EXCEPTION;
     mSelectedValue = value;
     Int32 count;
     GetChildCount(&count);
     for (Int32 i = 0; i < count; i++) {
         AutoPtr<IView> v;
         GetChildAt(i, (IView**)&v);
-        const AutoPtr<ITextView> c = ITextView::Probe(v);
         AutoPtr<IInterface> tag;
-        IView::Probe(c)->GetTag((IInterface**)&tag);
-        const Boolean selected = Objects::Equals(mSelectedValue, tag);
-        IView::Probe(c)->SetSelected(selected);
-        c->SetTypeface(selected ? BOLD : MEDIUM);
+        v->GetTag((IInterface**)&tag);
+        Boolean selected = Object::Equals(mSelectedValue, tag);
+        v->SetSelected(selected);
+        ITextView::Probe(v)->SetTypeface(selected ? BOLD : MEDIUM);
     }
     FireOnSelected();
     return NOERROR;
@@ -150,30 +152,25 @@ ECode SegmentedButtons::AddButton(
 {
     AutoPtr<IView> view;
     mInflater->Inflate(R::layout::segmented_button, this, FALSE, (IView**)&view);
-    const AutoPtr<IButton> b = IButton::Probe(view);
 
-    AutoPtr<IInteger32> i;
-    CInteger32::New(labelResId, (IInteger32**)&i);
-    IView::Probe(b)->SetTag(R::id::label/*LABEL_RES_KEY*/, i);
-
-    AutoPtr<ICharSequence> cs;
-    CString::New(StringUtils::ToString(labelResId), (ICharSequence**)&cs);
-    ITextView::Probe(b)->SetText(cs);
+    AutoPtr<IInteger32> i = CoreUtils::Convert(labelResId);
+    view->SetTag(LABEL_RES_KEY, i);
+    ITextView::Probe(view)->SetText(labelResId);
 
     AutoPtr<IViewGroupLayoutParams> lp;
-    IView::Probe(b)->GetLayoutParams((IViewGroupLayoutParams**)&lp);
+    view->GetLayoutParams((IViewGroupLayoutParams**)&lp);
     Int32 count;
     GetChildCount(&count);
     if (count == 0) {
         IViewGroupMarginLayoutParams::Probe(lp)->SetRightMargin(0);
         IViewGroupMarginLayoutParams::Probe(lp)->SetLeftMargin(0); // first button has no margin
     }
-    IView::Probe(b)->SetLayoutParams(lp);
-    AddView(IView::Probe(b));
-    IView::Probe(b)->SetTag(value);
-    IView::Probe(b)->SetOnClickListener(mClick);
+    view->SetLayoutParams(lp);
+    AddView(view);
+    view->SetTag(value);
+    view->SetOnClickListener(mClick);
     AutoPtr<MyInteractionCallback> icb = new MyInteractionCallback(this);
-    Interaction::Register(IView::Probe(b), icb);
+    Interaction::Register(view, icb);
     return NOERROR;
 }
 
@@ -184,16 +181,12 @@ ECode SegmentedButtons::UpdateLocale()
     for (Int32 i = 0; i < count; i++) {
         AutoPtr<IView> c;
         GetChildAt(i, (IView**)&c);
-        const AutoPtr<IButton> b = IButton::Probe(c);
         AutoPtr<IInterface> tag;
-        IView::Probe(b)->GetTag(R::id::label/*LABEL_RES_KEY*/, (IInterface**)&tag);
+        c->GetTag(LABEL_RES_KEY, (IInterface**)&tag);
         AutoPtr<IInteger32> i32 = IInteger32::Probe(tag);
-        Int32 value;
-        i32->GetValue(&value);
-        const Int32 labelResId = value;
-        AutoPtr<ICharSequence> cs;
-        CString::New(StringUtils::ToString(labelResId), (ICharSequence**)&cs);
-        ITextView::Probe(b)->SetText(cs);
+        Int32 labelResId;
+        i32->GetValue(&labelResId);
+        ITextView::Probe(c)->SetText(labelResId);
     }
     return NOERROR;
 }

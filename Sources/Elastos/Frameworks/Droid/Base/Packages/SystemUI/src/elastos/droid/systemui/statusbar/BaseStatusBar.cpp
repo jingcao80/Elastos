@@ -193,7 +193,7 @@ ECode CSettingsObserver::OnChange(
     Int32 mode = 0;
     Elastos::Droid::Provider::Settings::Global::GetInt32(cr,
         ISettingsGlobal::ZEN_MODE, ISettingsGlobal::ZEN_MODE_OFF, &mode);
-    Logger::I(TAG, " >> CSettingsObserver::OnChange: ISettingsGlobal::ZEN_MODE_OFF:%d", mode);
+    Logger::I(TAG, " >> Update ZEN_MODE: %d", mode);
     mHost->SetZenMode(mode);
 
     mHost->UpdateLockscreenNotificationSetting();
@@ -1120,24 +1120,22 @@ ECode BaseStatusBar::IsDeviceProvisioned(
 
 void BaseStatusBar::UpdateCurrentProfilesCache()
 {
-    {
-        AutoLock syncLock(mCurrentProfiles);
-        mCurrentProfiles->Clear();
-        if (mUserManager != NULL) {
-            AutoPtr<IList> lists;
-            mUserManager->GetProfiles(mCurrentUserId, (IList**)&lists);
+    AutoLock syncLock(mCurrentProfiles);
+    mCurrentProfiles->Clear();
+    if (mUserManager != NULL) {
+        AutoPtr<IList> lists;
+        mUserManager->GetProfiles(mCurrentUserId, (IList**)&lists);
 
-            AutoPtr<IIterator> ator;
-            lists->GetIterator((IIterator**)&ator);
-            Boolean has = FALSE;
-            while (ator->HasNext(&has), has) {
-                AutoPtr<IInterface> obj;
-                ator->GetNext((IInterface**)&obj);
-                AutoPtr<IUserInfo> user = IUserInfo::Probe(obj);
-                Int32 id = 0;
-                user->GetId(&id);
-                mCurrentProfiles->Put(id, user);
-            }
+        AutoPtr<IIterator> ator;
+        lists->GetIterator((IIterator**)&ator);
+        Boolean has = FALSE;
+        while (ator->HasNext(&has), has) {
+            AutoPtr<IInterface> obj;
+            ator->GetNext((IInterface**)&obj);
+            AutoPtr<IUserInfo> user = IUserInfo::Probe(obj);
+            Int32 id = 0;
+            user->GetId(&id);
+            mCurrentProfiles->Put(id, user);
         }
     }
 }
@@ -1154,6 +1152,7 @@ ECode BaseStatusBar::Start()
     mWindowManager->GetDefaultDisplay((IDisplay**)&mDisplay);
 
     obj = NULL;
+    Logger::I(TAG, " TODO >> DEVICE_POLICY_SERVICE");
     // mContext->GetSystemService(IContext::DEVICE_POLICY_SERVICE, (IInterface**)&obj);
     mDevicePolicyManager = IDevicePolicyManager::Probe(obj);
 

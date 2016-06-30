@@ -830,7 +830,7 @@ Int32 CAudioService::VolumeStreamState::MuteCount()
     for (Int32 i = 0; i < size; i++) {
         AutoPtr<IInterface> obj;
         mDeathHandlers->Get(i, (IInterface**)&obj);
-        count += ((VolumeDeathHandler*)(IObject*)obj.Get())->mMuteCount;
+        count += ((VolumeDeathHandler*)IObject::Probe(obj))->mMuteCount;
     }
     return count;
 }
@@ -850,7 +850,7 @@ AutoPtr<CAudioService::VolumeStreamState::VolumeDeathHandler> CAudioService::Vol
     for (Int32 i = 0; i < size; i++) {
         AutoPtr<IInterface> obj;
         mDeathHandlers->Get(i, (IInterface**)&obj);
-        handler = ((VolumeDeathHandler*)(IObject*)obj.Get());
+        handler = ((VolumeDeathHandler*)IObject::Probe(obj));
 
         if (cb == handler->mCallback) {
             return handler;
@@ -1543,7 +1543,7 @@ ECode CAudioService::ScoClient::TotalCount(
             AutoPtr<IInterface> obj;
             mHost->mScoClients->Get(i, (IInterface**)&obj);
             Int32 tmp;
-            ((ScoClient*)(IObject*)obj.Get())->GetCount(&tmp);
+            ((ScoClient*)IObject::Probe(obj))->GetCount(&tmp);
             count += tmp;
         }
         *result = count;
@@ -1570,7 +1570,7 @@ void CAudioService::ScoClient::RequestScoState(
                 AutoPtr<IInterface> obj;
                 mHost->mSetModeDeathHandlers->Get(0, (IInterface**)&obj);
                 Int32 pid;
-                ((SetModeDeathHandler*)(IObject*)obj.Get())->GetPid(&pid);
+                ((SetModeDeathHandler*)IObject::Probe(obj))->GetPid(&pid);
                 Boolean b;
                 if (((mHost->mSetModeDeathHandlers->IsEmpty(&b), b) ||
                         pid == mCreatorPid) &&
@@ -1696,15 +1696,15 @@ ECode CAudioService::AudioHandler::HandleMessage(
     switch (what) {
 
         case MSG_SET_DEVICE_VOLUME:
-            SetDeviceVolume((VolumeStreamState*)(IObject*)obj.Get(), arg1);
+            SetDeviceVolume((VolumeStreamState*)IObject::Probe(obj), arg1);
             break;
 
         case MSG_SET_ALL_VOLUMES:
-            SetAllVolumes((VolumeStreamState*)(IObject*)obj.Get());
+            SetAllVolumes((VolumeStreamState*)IObject::Probe(obj));
             break;
 
         case MSG_PERSIST_VOLUME:
-            PersistVolume((VolumeStreamState*)(IObject*)obj.Get(), arg1);
+            PersistVolume((VolumeStreamState*)IObject::Probe(obj), arg1);
             break;
 
         case MSG_PERSIST_MASTER_VOLUME: {
@@ -1855,7 +1855,7 @@ ECode CAudioService::AudioHandler::HandleMessage(
             // can take several dozens of milliseconds to complete
             Boolean loaded = OnLoadSoundEffects();
             if (obj != NULL) {
-                AutoPtr<LoadSoundEffectReply> reply = (LoadSoundEffectReply*)(IObject*)obj.Get();
+                AutoPtr<LoadSoundEffectReply> reply = (LoadSoundEffectReply*)IObject::Probe(obj);
                 {    AutoLock syncLock(reply);
                     reply->mStatus = loaded ? 0 : -1;
                     reply->Notify();
@@ -4199,7 +4199,7 @@ ECode CAudioService::ClearAllScoClients(
         for (Int32 i = 0; i < size; i++) {
             AutoPtr<IInterface> obj;
             mScoClients->Get(i, (IInterface**)&obj);
-            AutoPtr<ScoClient> cl = (ScoClient*)(IObject*)obj.Get();
+            AutoPtr<ScoClient> cl = (ScoClient*)IObject::Probe(obj);
             Int32 pid;
             cl->GetPid(&pid);
             if (pid != exceptPid) {
@@ -4471,7 +4471,7 @@ ECode CAudioService::UnregisterAudioPolicyAsync(
     {    AutoLock syncLock(mAudioPolicies);
         AutoPtr<IInterface> obj;
         mAudioPolicies->Remove(cb, (IInterface**)&obj);
-        AutoPtr<AudioPolicyProxy> app = (AudioPolicyProxy*)(IObject*)obj.Get();
+        AutoPtr<AudioPolicyProxy> app = (AudioPolicyProxy*)IObject::Probe(obj);
         if (app == NULL) {
             Logger::W(TAG, "Trying to unregister unknown audio policy for pid %d / uid %d",
                     Binder::GetCallingPid(), Binder::GetCallingUid());
@@ -5076,8 +5076,10 @@ void CAudioService::AdjustSuggestedStreamVolume(
     /* [in] */ const String& callingPackage,
     /* [in] */ Int32 uid)
 {
-    if (DEBUG_VOL) Logger::D(TAG, "adjustSuggestedStreamVolume() stream=%d, flags=%d",
+    if (DEBUG_VOL) {
+        Logger::D(TAG, "adjustSuggestedStreamVolume() stream=%d, flags=%08x",
             suggestedStreamType, flags);
+    }
     Int32 streamType;
     if (mVolumeControlStream != -1) {
         streamType = mVolumeControlStream;
@@ -5115,7 +5117,7 @@ void CAudioService::AdjustStreamVolume(
     if (mUseFixedVolume) {
         return;
     }
-    if (DEBUG_VOL) Logger::D(TAG, "adjustStreamVolume() stream=%d, dir=%d, flags=%d",
+    if (DEBUG_VOL) Logger::D(TAG, "adjustStreamVolume() stream=%d, dir=%d, flags=%08x",
             streamType, direction, flags);
 
     EnsureValidDirection(direction);
@@ -5558,7 +5560,7 @@ Boolean CAudioService::DiscardRmtSbmxFullVolDeathHandlerFor(
         AutoPtr<IInterface> obj;
         it->GetNext((IInterface**)&obj);
         AutoPtr<RmtSbmxFullVolDeathHandler> handler =
-                (RmtSbmxFullVolDeathHandler*)(IObject*)obj.Get();
+                (RmtSbmxFullVolDeathHandler*)IObject::Probe(obj);
 
         if (handler->IsHandlerFor(cb, &b), b) {
             handler->Forget();
@@ -5579,7 +5581,7 @@ Boolean CAudioService::HasRmtSbmxFullVolDeathHandlerFor(
         AutoPtr<IInterface> obj;
         it->GetNext((IInterface**)&obj);
         AutoPtr<RmtSbmxFullVolDeathHandler> handler =
-                (RmtSbmxFullVolDeathHandler*)(IObject*)obj.Get();
+                (RmtSbmxFullVolDeathHandler*)IObject::Probe(obj);
 
         if (handler->IsHandlerFor(cb, &b), b) {
             return TRUE;
@@ -5748,7 +5750,7 @@ Int32 CAudioService::SetModeInt(
     while (iter->HasNext(&b), b) {
         AutoPtr<IInterface> obj;
         iter->GetNext((IInterface**)&obj);
-        AutoPtr<SetModeDeathHandler> h = (SetModeDeathHandler*)(IObject*)obj.Get();
+        AutoPtr<SetModeDeathHandler> h = (SetModeDeathHandler*)IObject::Probe(obj);
         Int32 p;
         h->GetPid(&p);
         if (p == pid) {
@@ -5769,7 +5771,7 @@ Int32 CAudioService::SetModeInt(
             if (mSetModeDeathHandlers->IsEmpty(&b), !b) {
                 AutoPtr<IInterface> obj;
                 mSetModeDeathHandlers->Get(0, (IInterface**)&obj);
-                hdlr = (SetModeDeathHandler*)(IObject*)obj.Get();
+                hdlr = (SetModeDeathHandler*)IObject::Probe(obj);
                 hdlr->GetBinder((IBinder**)&cb);
                 hdlr->GetMode(&mode);
                 if (DEBUG_MODE) {
@@ -5827,7 +5829,7 @@ Int32 CAudioService::SetModeInt(
             else {
                 AutoPtr<IInterface> obj;
                 mSetModeDeathHandlers->Get(0, (IInterface**)&obj);
-                AutoPtr<SetModeDeathHandler> h = (SetModeDeathHandler*)(IObject*)obj.Get();
+                AutoPtr<SetModeDeathHandler> h = (SetModeDeathHandler*)IObject::Probe(obj);
                 h->GetPid(&newModeOwnerPid);
             }
         }
@@ -5971,7 +5973,7 @@ void CAudioService::ReadAudioSettings(
                     AutoPtr<IInterface> obj;
                     streamState->mDeathHandlers->Get(i, (IInterface**)&obj);
                     AutoPtr<VolumeStreamState::VolumeDeathHandler> h =
-                            (VolumeStreamState::VolumeDeathHandler*)(IObject*)obj.Get();
+                            (VolumeStreamState::VolumeDeathHandler*)IObject::Probe(obj);
                     h->mMuteCount = 1;
                     h->Mute(FALSE);
                 }
@@ -6024,7 +6026,7 @@ AutoPtr<CAudioService::ScoClient> CAudioService::GetScoClient(
         for (Int32 i = 0; i < size; i++) {
             AutoPtr<IInterface> obj;
             mScoClients->Get(i, (IInterface**)&obj);
-            client = (ScoClient*)(IObject*)obj.Get();
+            client = (ScoClient*)IObject::Probe(obj);
             AutoPtr<IBinder> binder;
             client->GetBinder((IBinder**)&binder);
             if (binder.Get() == cb) {

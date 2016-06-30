@@ -30,17 +30,14 @@ ECode CAsyncPlayer::Command::ToString(
     /* [out] */ String* result)
 {
     VALIDATE_NOT_NULL(result)
-    // String tempText;
-    // mUri->ToString(&tempText);
-
     StringBuilder sb("{ code=");
     sb += StringUtils::ToString(mCode);
     sb += " looping=";
     sb += StringUtils::BooleanToString(mLooping);
     sb += " stream=";
     sb += StringUtils::ToString(mStream);
-    // sb += " uri=";
-    // sb += tempText;
+    sb += " uri=";
+    sb += TO_CSTR(mUri);
     sb += " }";
     return sb.ToString(result);
 }
@@ -64,7 +61,7 @@ ECode CAsyncPlayer::MyThread::Run()
             if (mOwner->mDebug) Logger::D(mOwner->mTag, "RemoveFirst");
             AutoPtr<IInterface> obj;
             mOwner->mCmdQueue->RemoveFirst((IInterface**)&obj);
-            cmd = (Command*)(IObject*)obj.Get();
+            cmd = (Command*)IObject::Probe(obj);
         }
 
         switch (cmd->mCode) {

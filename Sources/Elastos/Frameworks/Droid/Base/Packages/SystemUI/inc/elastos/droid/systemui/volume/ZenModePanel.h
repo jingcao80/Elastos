@@ -136,7 +136,7 @@ private:
         Prefs(
             /* [in] */ ZenModePanel* host);
 
-        CARAPI_(AutoPtr<ISharedPreferences>) prefs();
+        CARAPI_(AutoPtr<ISharedPreferences>) GetPrefs();
 
         CARAPI_(void) UpdateMinuteIndex();
 
@@ -199,14 +199,14 @@ private:
         ZenModePanel* mHost;
     };
 
-    class MyViewOnClickListener
+    class ZenSubheadCollapsedOnClickListener
         : public Object
         , public IViewOnClickListener
     {
     public:
         CAR_INTERFACE_DECL()
 
-        MyViewOnClickListener(
+        ZenSubheadCollapsedOnClickListener(
             /* [in] */ ZenModePanel* host);
 
         CARAPI OnClick(
@@ -216,14 +216,14 @@ private:
         ZenModePanel* mHost;
     };
 
-    class MyViewOnClickListener2
+    class MoreSettingsOnClickListener
         : public Object
         , public IViewOnClickListener
     {
     public:
         CAR_INTERFACE_DECL()
 
-        MyViewOnClickListener2(
+        MoreSettingsOnClickListener(
             /* [in] */ ZenModePanel* host);
 
         CARAPI OnClick(
@@ -248,14 +248,14 @@ private:
         AutoPtr<IView> mNoneButton;
     };
 
-    class MyOCCL
+    class OnCheckedChangeListener
         : public Object
         , public ICompoundButtonOnCheckedChangeListener
     {
     public:
         CAR_INTERFACE_DECL()
 
-        MyOCCL(
+        OnCheckedChangeListener(
             /* [in] */ ConditionTag* tag,
             /* [in] */ ZenModePanel* host);
 
@@ -269,14 +269,14 @@ private:
         AutoPtr<ConditionTag> mTag;
     };
 
-    class MyOCL1
+    class Button1OnClickListener
         : public Object
         , public IViewOnClickListener
     {
     public:
         CAR_INTERFACE_DECL()
 
-        MyOCL1(
+        Button1OnClickListener(
             /* [in] */ IView* row,
             /* [in] */ ConditionTag* tag,
             /* [in] */ ZenModePanel* host);
@@ -291,14 +291,14 @@ private:
         ZenModePanel* mHost;
     };
 
-   class MyOCL2
+   class Button2OnClickListener
         : public Object
         , public IViewOnClickListener
     {
     public:
         CAR_INTERFACE_DECL()
 
-        MyOCL2(
+        Button2OnClickListener(
             /* [in] */ IView* row,
             /* [in] */ ConditionTag* tag,
             /* [in] */ ZenModePanel* host);
@@ -313,14 +313,14 @@ private:
         ZenModePanel* mHost;
     };
 
-    class MyOCL3
+    class TitleOnClickListener
         : public Object
         , public IViewOnClickListener
     {
     public:
         CAR_INTERFACE_DECL()
 
-        MyOCL3(
+        TitleOnClickListener(
             /* [in] */ ConditionTag* tag,
             /* [in] */ ZenModePanel* host);
 
@@ -442,6 +442,7 @@ public:
     const static AutoPtr<IIntent> ZEN_SETTINGS;
 
     const static AutoPtr<ArrayOf<Int32> > MINUTE_BUCKETS;
+
 private:
     const static String TAG;
     const static Boolean DEBUG;
@@ -452,9 +453,9 @@ private:
     const static Int32 MIN_BUCKET_MINUTES;
     const static Int32 MAX_BUCKET_MINUTES;
     const static Int32 DEFAULT_BUCKET_INDEX;
-    const static Int32 FOREVER_CONDITION_INDEX = 0;
-    const static Int32 TIME_CONDITION_INDEX = 1;
-    const static Int32 FIRST_CONDITION_INDEX = 2;
+    const static Int32 FOREVER_CONDITION_INDEX;
+    const static Int32 TIME_CONDITION_INDEX;
+    const static Int32 FIRST_CONDITION_INDEX;
     const static Float SILENT_HINT_PULSE_SCALE;
 
     AutoPtr<IContext> mContext;

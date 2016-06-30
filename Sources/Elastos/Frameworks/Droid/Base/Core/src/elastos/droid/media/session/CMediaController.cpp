@@ -689,7 +689,7 @@ Boolean CMediaController::RemoveCallbackLocked(
     for (Int32 i = size - 1; i >= 0; i--) {
         AutoPtr<IInterface> obj;
         mCallbacks->Get(i, (IInterface**)&obj);
-        AutoPtr<MessageHandler> handler = (MessageHandler*)(IObject*)obj.Get();
+        AutoPtr<MessageHandler> handler = (MessageHandler*)IObject::Probe(obj);
         if (cb == handler->mCallback) {
             mCallbacks->Remove(i);
             success = TRUE;
@@ -722,7 +722,7 @@ ECode CMediaController::GetHandlerForCallbackLocked(
     for (Int32 i = size - 1; i >= 0; i--) {
         AutoPtr<IInterface> obj;
         mCallbacks->Get(i, (IInterface**)&obj);
-        AutoPtr<MessageHandler> handler = (MessageHandler*)(IObject*)obj.Get();
+        AutoPtr<MessageHandler> handler = (MessageHandler*)IObject::Probe(obj);
         if (cb == handler->mCallback) {
             *result = handler;
             REFCOUNT_ADD(*result)
@@ -743,7 +743,7 @@ void CMediaController::PostMessage(
         for (Int32 i = size - 1; i >= 0; i--) {
             AutoPtr<IInterface> obj;
             mCallbacks->Get(i, (IInterface**)&obj);
-            AutoPtr<MessageHandler> mh = (MessageHandler*)(IObject*)obj.Get();
+            AutoPtr<MessageHandler> mh = (MessageHandler*)IObject::Probe(obj);
             mh->Post(what, obj, data);
         }
     }

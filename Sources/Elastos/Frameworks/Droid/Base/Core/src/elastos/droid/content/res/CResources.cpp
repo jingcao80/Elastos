@@ -52,6 +52,12 @@ namespace Droid {
 namespace Content {
 namespace Res {
 
+const String CResources::TAG("CResources");
+const Boolean CResources::DEBUG_LOAD = FALSE;
+const Boolean CResources::DEBUG_CONFIG = FALSE;
+const Boolean CResources::TRACE_FOR_PRELOAD = FALSE;
+const Boolean CResources::TRACE_FOR_MISS_PRELOAD = FALSE;
+
 CAR_INTERFACE_IMPL(CResources::Theme, Object, IResourcesTheme)
 
 CResources::Theme::Theme(
@@ -398,12 +404,6 @@ CResources::StaticInitializer::StaticInitializer()
     CInt64SparseArray::New((IInt64SparseArray**)&sPreloadedColorStateLists);
 }
 
-
-const String CResources::TAG("CResources");
-const Boolean CResources::DEBUG_LOAD = FALSE;
-const Boolean CResources::DEBUG_CONFIG = FALSE;
-const Boolean CResources::TRACE_FOR_PRELOAD = FALSE;
-const Boolean CResources::TRACE_FOR_MISS_PRELOAD = FALSE;
 const Int32 CResources::ID_OTHER = 0x01000004;
 Int32 CResources::LAYOUT_DIR_CONFIG = 0;
 const String CResources::WIDGET_SUFFIX("widget_preview");
@@ -702,16 +702,24 @@ ECode CResources::GetQuantityString(
 
     AutoPtr<ICharSequence> res;
     GetQuantityText(id, quantity, (ICharSequence**)&res);
-    if (res != NULL) {
+    if (res == NULL) {
+        Logger::E(TAG, "failed to GetQuantityString: %08x, quantity:%d", id, quantity);
         return E_NOT_FOUND_EXCEPTION;
     }
 
     String raw;
     res->ToString(&raw);
     if (raw.IsNull()) {
+        Logger::E(TAG, "failed to GetQuantityString: %08x, quantity:%d, raw is null.", id, quantity);
         return E_NOT_FOUND_EXCEPTION;
     }
-    Int32 bufferSize = raw.GetLength() + (formatArgs == NULL ? 0 : formatArgs->GetLength() * 10);
+
+    if (formatArgs == NULL) {
+        *str = raw;
+        return NOERROR;
+    }
+
+    Int32 bufferSize = raw.GetLength() + (formatArgs->GetLength() * 10);
     AutoPtr<IAppendable> a = new StringBuilder(bufferSize);
     AutoPtr<Elastos::Utility::IFormatter> f;
     Elastos::Utility::CFormatter::New(a, mConfiguration->mLocale, (IFormatter**)&f);

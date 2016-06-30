@@ -22,7 +22,7 @@ ColorInversionTile::ColorSettings::ColorSettings(
     , mHost(host)
 {}
 
-void ColorInversionTile::ColorSettings::HandleValueChanged(
+ECode ColorInversionTile::ColorSettings::HandleValueChanged(
     /* [in] */ Int32 value)
 {
     mHost->mUsageTracker->TrackUsage();
@@ -31,6 +31,7 @@ void ColorInversionTile::ColorSettings::HandleValueChanged(
         CInteger32::New(value, (IInteger32**)&obj);
         mHost->HandleRefreshState(obj);
     }
+    return NOERROR;
 }
 
 CAR_INTERFACE_IMPL(ColorInversionTile, QSTile, IColorInversionTile)

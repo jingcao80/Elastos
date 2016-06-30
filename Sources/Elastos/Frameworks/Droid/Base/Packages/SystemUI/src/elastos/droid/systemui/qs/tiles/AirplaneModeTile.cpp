@@ -26,12 +26,13 @@ AirplaneModeTile::Setting::Setting(
 {
 }
 
-void AirplaneModeTile::Setting::HandleValueChanged(
+ECode AirplaneModeTile::Setting::HandleValueChanged(
     /* [in] */ Int32 value)
 {
     AutoPtr<IInteger32> obj;
     CInteger32::New(value, (IInteger32**)&obj);
     mHost->HandleRefreshState(obj);
+    return NOERROR;
 }
 
 AirplaneModeTile::Receiver::Receiver(

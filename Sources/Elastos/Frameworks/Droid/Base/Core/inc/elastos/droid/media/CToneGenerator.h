@@ -18,7 +18,7 @@ namespace Media {
  */
 CarClass(CToneGenerator)
     , public Object
-    , IToneGenerator
+    , public IToneGenerator
 {
 public:
     CToneGenerator();

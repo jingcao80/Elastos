@@ -508,7 +508,7 @@ ECode CMediaBrowser::Subscribe(
     mSubscriptions->GetIndexOfKey(csq, &index);
     AutoPtr<IInterface> obj;
     mSubscriptions->GetValueAt(index, (IInterface**)&obj);
-    sub = (Subscription*)(IObject*)obj.Get();
+    sub = (Subscription*)IObject::Probe(obj);
     Boolean newSubscription = sub == NULL;
     if (newSubscription) {
         sub = new Subscription(parentId);
@@ -547,7 +547,7 @@ ECode CMediaBrowser::Unsubscribe(
     mSubscriptions->GetIndexOfKey(csq, &index);
     AutoPtr<IInterface> obj;
     mSubscriptions->RemoveAt(index, (IInterface**)&obj);
-    sub = (Subscription*)(IObject*)obj.Get();
+    sub = (Subscription*)IObject::Probe(obj);
 
     // Tell the service if necessary.
     if (mState == CMediaBrowser::CONNECT_STATE_CONNECTED && sub != NULL) {

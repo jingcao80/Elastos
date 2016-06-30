@@ -160,7 +160,7 @@ ECode CMediaProjectionManager::RemoveCallback(
     }
     AutoPtr<IInterface> obj;
     IMap::Probe(mCallbacks)->Remove(callback, (IInterface**)&obj);
-    AutoPtr<CallbackDelegate> delegate = (CallbackDelegate*)(IObject*)obj.Get();
+    AutoPtr<CallbackDelegate> delegate = (CallbackDelegate*)IObject::Probe(obj);
     // try {
     if (delegate != NULL) {
         mService->RemoveCallback(IIMediaProjectionWatcherCallback::Probe(delegate));

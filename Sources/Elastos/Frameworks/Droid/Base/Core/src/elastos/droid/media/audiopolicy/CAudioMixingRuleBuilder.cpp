@@ -57,7 +57,7 @@ ECode CAudioMixingRuleBuilder::AddRule(
             AutoPtr<IInterface> obj;
             crIterator->GetNext((IInterface**)&obj);
             AutoPtr<CAudioMixingRule::AttributeMatchCriterion> criterion =
-                    (CAudioMixingRule::AttributeMatchCriterion*)(IObject*)obj.Get();
+                    (CAudioMixingRule::AttributeMatchCriterion*)IObject::Probe(obj);
             if ((rule == IAudioMixingRule::RULE_MATCH_ATTRIBUTE_USAGE)
                     || (rule == IAudioMixingRule::RULE_EXCLUDE_ATTRIBUTE_USAGE)) {
                 // "usage"-based rule

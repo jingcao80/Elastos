@@ -10,6 +10,7 @@
 #include "R.h"
 #include <elastos/core/Math.h>
 #include <elastos/core/StringUtils.h>
+#include <elastos/core/CoreUtils.h>
 #include <elastos/utility/Arrays.h>
 #include <elastos/utility/Objects.h>
 #include <elastos/utility/logging/Logger.h>
@@ -50,6 +51,7 @@ using Elastos::Core::ICharSequence;
 using Elastos::Core::IArrayOf;
 using Elastos::Core::IInteger32;
 using Elastos::Core::ISystem;
+using Elastos::Core::CoreUtils;
 using Elastos::Core::StringUtils;
 using Elastos::Utility::Arrays;
 using Elastos::Utility::Objects;
@@ -60,9 +62,12 @@ namespace Droid {
 namespace SystemUI {
 namespace Volume {
 
-//------------------------------------------------------------------------------------------------------------
+const String ZenModePanel::TAG("ZenModePanel");
+const Boolean ZenModePanel::DEBUG = TRUE;//Logger::IsLoggable(TAG.string(), Logger::___DEBUG);
+
+//====================================================================
 // ZenModePanel::ZenCallback
-//------------------------------------------------------------------------------------------------------------
+//====================================================================
 
 ZenModePanel::ZenCallback::ZenCallback(
     /* [in] */ ZenModePanel* host)
@@ -102,9 +107,9 @@ ECode ZenModePanel::ZenCallback::OnExitConditionChanged(
     return NOERROR;
 }
 
-//------------------------------------------------------------------------------------------------------------
+//====================================================================
 // ZenModePanel::H
-//------------------------------------------------------------------------------------------------------------
+//====================================================================
 
 const Int32 ZenModePanel::H::UPDATE_CONDITIONS;
 const Int32 ZenModePanel::H::EXIT_CONDITION_CHANGED;
@@ -150,9 +155,9 @@ ECode ZenModePanel::H::HandleMessage(
     return NOERROR;
 }
 
-//------------------------------------------------------------------------------------------------------------
+//====================================================================
 // ZenModePanel::Prefs
-//------------------------------------------------------------------------------------------------------------
+//====================================================================
 
 const String ZenModePanel::Prefs::KEY_MINUTE_INDEX("minuteIndex");
 const String ZenModePanel::Prefs::KEY_NONE_SELECTED("noneSelected");
@@ -166,7 +171,7 @@ ZenModePanel::Prefs::Prefs(
     AutoPtr<IResources> resources;
     mHost->mContext->GetResources((IResources**)&resources);
     resources->GetInteger(R::integer::zen_mode_alarm_warning_threshold, &mNoneDangerousThreshold);
-    AutoPtr<ISharedPreferences> sp = prefs();
+    AutoPtr<ISharedPreferences> sp = GetPrefs();
     sp->RegisterOnSharedPreferenceChangeListener(this);
     UpdateMinuteIndex();
     UpdateNoneSelected();
@@ -186,7 +191,7 @@ ECode ZenModePanel::Prefs::TrackNoneSelected()
 {
     mNoneSelected = ClampNoneSelected(mNoneSelected + 1);
     if (DEBUG) Logger::D(mHost->mTag, "Setting none selected: %d threshold=%d", mNoneSelected, mNoneDangerousThreshold);
-    AutoPtr<ISharedPreferences> sp = prefs();
+    AutoPtr<ISharedPreferences> sp = GetPrefs();
     AutoPtr<ISharedPreferencesEditor> spe;
     sp->Edit((ISharedPreferencesEditor**)&spe);
     spe->PutInt32(KEY_NONE_SELECTED, mNoneSelected);
@@ -206,10 +211,10 @@ ECode ZenModePanel::Prefs::SetMinuteIndex(
     /* [in] */ Int32 minuteIndex)
 {
     minuteIndex = ClampIndex(minuteIndex);
-    if (minuteIndex == mMinuteIndex) return E_NULL_POINTER_EXCEPTION;
+    if (minuteIndex == mMinuteIndex) return NOERROR;
     mMinuteIndex = ClampIndex(minuteIndex);
     if (DEBUG) Logger::D(mHost->mTag, "Setting favorite minute index: %d", mMinuteIndex);
-    AutoPtr<ISharedPreferences> sp = prefs();
+    AutoPtr<ISharedPreferences> sp = GetPrefs();
     AutoPtr<ISharedPreferencesEditor> spe;
     sp->Edit((ISharedPreferencesEditor**)&spe);
     spe->PutInt32(KEY_MINUTE_INDEX, mNoneSelected);
@@ -226,7 +231,7 @@ ECode ZenModePanel::Prefs::OnSharedPreferenceChanged(
     return NOERROR;
 }
 
-AutoPtr<ISharedPreferences> ZenModePanel::Prefs::prefs()
+AutoPtr<ISharedPreferences> ZenModePanel::Prefs::GetPrefs()
 {
     AutoPtr<ISharedPreferences> sp;
     mHost->mContext->GetSharedPreferences(
@@ -236,7 +241,7 @@ AutoPtr<ISharedPreferences> ZenModePanel::Prefs::prefs()
 
 void ZenModePanel::Prefs::UpdateMinuteIndex()
 {
-    AutoPtr<ISharedPreferences> sp = prefs();
+    AutoPtr<ISharedPreferences> sp = GetPrefs();
     Int32 i;
     sp->GetInt32(KEY_MINUTE_INDEX, DEFAULT_BUCKET_INDEX, &i);
     mMinuteIndex = ClampIndex(i);
@@ -251,7 +256,7 @@ Int32 ZenModePanel::Prefs::ClampIndex(
 
 void ZenModePanel::Prefs::UpdateNoneSelected()
 {
-    AutoPtr<ISharedPreferences> sp = prefs();
+    AutoPtr<ISharedPreferences> sp = GetPrefs();
     Int32 i;
     sp->GetInt32(KEY_NONE_SELECTED, 0, &i);
     mNoneSelected = ClampNoneSelected(i);
@@ -264,11 +269,12 @@ Int32 ZenModePanel::Prefs::ClampNoneSelected(
     return MathUtils::Constrain(noneSelected, 0, Elastos::Core::Math::INT32_MAX_VALUE);
 }
 
-//------------------------------------------------------------------------------------------------------------
+//====================================================================
 // ZenModePanel::ZenButtonsCallback
-//------------------------------------------------------------------------------------------------------------
+//====================================================================
 
-CAR_INTERFACE_IMPL_2(ZenModePanel::ZenButtonsCallback, Object, ISegmentedButtonsCallback, IInteractionCallback)
+CAR_INTERFACE_IMPL_2(ZenModePanel::ZenButtonsCallback, Object, \
+    ISegmentedButtonsCallback, IInteractionCallback)
 
 ZenModePanel::ZenButtonsCallback::ZenButtonsCallback(
     /* [in] */ ZenModePanel* host)
@@ -296,9 +302,9 @@ ECode ZenModePanel::ZenButtonsCallback::OnInteraction()
     return NOERROR;
 }
 
-//------------------------------------------------------------------------------------------------------------
+//====================================================================
 // ZenModePanel::InteractionCallback
-//------------------------------------------------------------------------------------------------------------
+//====================================================================
 
 CAR_INTERFACE_IMPL(ZenModePanel::InteractionCallback, Object, IInteractionCallback)
 
@@ -313,45 +319,45 @@ ECode ZenModePanel::InteractionCallback::OnInteraction()
     return NOERROR;
 }
 
-//------------------------------------------------------------------------------------------------------------
-// ZenModePanel::MyViewOnClickListener
-//------------------------------------------------------------------------------------------------------------
+//====================================================================
+// ZenModePanel::ZenSubheadCollapsedOnClickListener
+//====================================================================
 
-CAR_INTERFACE_IMPL(ZenModePanel::MyViewOnClickListener, Object, IViewOnClickListener)
+CAR_INTERFACE_IMPL(ZenModePanel::ZenSubheadCollapsedOnClickListener, Object, IViewOnClickListener)
 
-ZenModePanel::MyViewOnClickListener::MyViewOnClickListener(
+ZenModePanel::ZenSubheadCollapsedOnClickListener::ZenSubheadCollapsedOnClickListener(
     /* [in] */ ZenModePanel* host)
     : mHost(host)
 {}
 
-ECode ZenModePanel::MyViewOnClickListener::OnClick(
+ECode ZenModePanel::ZenSubheadCollapsedOnClickListener::OnClick(
     /* [in] */ IView* v)
 {
     mHost->SetExpanded(TRUE);
     return NOERROR;
 }
 
-//------------------------------------------------------------------------------------------------------------
-// ZenModePanel::MyViewOnClickListener2
-//------------------------------------------------------------------------------------------------------------
+//====================================================================
+// ZenModePanel::MoreSettingsOnClickListener
+//====================================================================
 
-CAR_INTERFACE_IMPL(ZenModePanel::MyViewOnClickListener2, Object, IViewOnClickListener)
+CAR_INTERFACE_IMPL(ZenModePanel::MoreSettingsOnClickListener, Object, IViewOnClickListener)
 
-ZenModePanel::MyViewOnClickListener2::MyViewOnClickListener2(
+ZenModePanel::MoreSettingsOnClickListener::MoreSettingsOnClickListener(
     /* [in] */ ZenModePanel* host)
     : mHost(host)
 {}
 
-ECode ZenModePanel::MyViewOnClickListener2::OnClick(
+ECode ZenModePanel::MoreSettingsOnClickListener::OnClick(
     /* [in] */ IView* v)
 {
     mHost->FireMoreSettings();
     return NOERROR;
 }
 
-//------------------------------------------------------------------------------------------------------------
+//====================================================================
 // ZenModePanel::MyAnimatorListener
-//------------------------------------------------------------------------------------------------------------
+//====================================================================
 
 ZenModePanel::MyAnimatorListener::MyAnimatorListener(
     /* [in] */ IView* noneButton)
@@ -369,20 +375,20 @@ ECode ZenModePanel::MyAnimatorListener::OnAnimationEnd(
     return NOERROR;
 }
 
-//------------------------------------------------------------------------------------------------------------
-// ZenModePanel::MyOCCL
-//------------------------------------------------------------------------------------------------------------
+//====================================================================
+// ZenModePanel::OnCheckedChangeListener
+//====================================================================
 
-CAR_INTERFACE_IMPL(ZenModePanel::MyOCCL, Object, ICompoundButtonOnCheckedChangeListener)
+CAR_INTERFACE_IMPL(ZenModePanel::OnCheckedChangeListener, Object, ICompoundButtonOnCheckedChangeListener)
 
-ZenModePanel::MyOCCL::MyOCCL(
+ZenModePanel::OnCheckedChangeListener::OnCheckedChangeListener(
     /* [in] */ ConditionTag* tag,
     /* [in] */ ZenModePanel* host)
     : mHost(host)
     , mTag(tag)
 {}
 
-ECode ZenModePanel::MyOCCL::OnCheckedChanged(
+ECode ZenModePanel::OnCheckedChangeListener::OnCheckedChanged(
     /* [in] */ ICompoundButton* buttonView,
     /* [in] */ Boolean isChecked)
 {
@@ -401,13 +407,13 @@ ECode ZenModePanel::MyOCCL::OnCheckedChanged(
     return NOERROR;
 }
 
-//------------------------------------------------------------------------------------------------------------
-// ZenModePanel::MyOCL1
-//------------------------------------------------------------------------------------------------------------
+//====================================================================
+// ZenModePanel::Button1OnClickListener
+//====================================================================
 
-CAR_INTERFACE_IMPL(ZenModePanel::MyOCL1, Object, IViewOnClickListener)
+CAR_INTERFACE_IMPL(ZenModePanel::Button1OnClickListener, Object, IViewOnClickListener)
 
-ZenModePanel::MyOCL1::MyOCL1(
+ZenModePanel::Button1OnClickListener::Button1OnClickListener(
     /* [in] */ IView* row,
     /* [in] */ ConditionTag* tag,
     /* [in] */ ZenModePanel* host)
@@ -416,20 +422,20 @@ ZenModePanel::MyOCL1::MyOCL1(
     , mHost(host)
 {}
 
-ECode ZenModePanel::MyOCL1::OnClick(
+ECode ZenModePanel::Button1OnClickListener::OnClick(
     /* [in] */ IView* v)
 {
     mHost->OnClickTimeButton(mRow, mTag, FALSE /*down*/);
     return NOERROR;
 }
 
-//------------------------------------------------------------------------------------------------------------
-// ZenModePanel::MyOCL2
-//------------------------------------------------------------------------------------------------------------
+//====================================================================
+// ZenModePanel::Button2OnClickListener
+//====================================================================
 
-CAR_INTERFACE_IMPL(ZenModePanel::MyOCL2, Object, IViewOnClickListener)
+CAR_INTERFACE_IMPL(ZenModePanel::Button2OnClickListener, Object, IViewOnClickListener)
 
-ZenModePanel::MyOCL2::MyOCL2(
+ZenModePanel::Button2OnClickListener::Button2OnClickListener(
     /* [in] */ IView* row,
     /* [in] */ ConditionTag* tag,
     /* [in] */ ZenModePanel* host)
@@ -438,94 +444,92 @@ ZenModePanel::MyOCL2::MyOCL2(
     , mHost(host)
 {}
 
-ECode ZenModePanel::MyOCL2::OnClick(
+ECode ZenModePanel::Button2OnClickListener::OnClick(
     /* [in] */ IView* v)
 {
     mHost->OnClickTimeButton(mRow, mTag, TRUE /*down*/);
     return NOERROR;
 }
 
-//------------------------------------------------------------------------------------------------------------
-// ZenModePanel::MyOCL3
-//------------------------------------------------------------------------------------------------------------
+//====================================================================
+// ZenModePanel::TitleOnClickListener
+//====================================================================
 
-CAR_INTERFACE_IMPL(ZenModePanel::MyOCL3, Object, IViewOnClickListener)
+CAR_INTERFACE_IMPL(ZenModePanel::TitleOnClickListener, Object, IViewOnClickListener)
 
-ZenModePanel::MyOCL3::MyOCL3(
+ZenModePanel::TitleOnClickListener::TitleOnClickListener(
     /* [in] */ ConditionTag* tag,
     /* [in] */ ZenModePanel* host)
     : mHost(host)
     , mTag(tag)
 {}
 
-ECode ZenModePanel::MyOCL3::OnClick(
+ECode ZenModePanel::TitleOnClickListener::OnClick(
     /* [in] */ IView* v)
 {
     return ICheckable::Probe(mTag->mRb)->SetChecked(TRUE);
 }
 
-//------------------------------------------------------------------------------------------------------------
+//====================================================================
 // ZenModePanel
-//------------------------------------------------------------------------------------------------------------
-
-const String ZenModePanel::TAG("ZenModePanel");
-const Boolean ZenModePanel::DEBUG = TRUE;//Logger::IsLoggable(TAG.string(), Logger::___DEBUG);
-
+//====================================================================
 const Int32 ZenModePanel::SECONDS_MS;
 const Int32 ZenModePanel::MINUTES_MS;
 
-static AutoPtr<ArrayOf<Int32> > init1()
-{
-    AutoPtr<ArrayOf<Int32> > a = ArrayOf<Int32>::Alloc(12);
-    (*a)[0] = 0;
-    (*a)[1] = 1;
-    (*a)[2] = 2;
-    (*a)[3] = 5;
-    (*a)[4] = 15;
-    (*a)[5] = 30;
-    (*a)[6] = 45;
-    (*a)[7] = 60;
-    (*a)[8] = 120;
-    (*a)[9] = 180;
-    (*a)[10] = 240;
-    (*a)[11] = 480;
-    return a;
-}
+// static AutoPtr<ArrayOf<Int32> > InitMINUTE_BUCKETS_dbg()
+// {
+//     AutoPtr<ArrayOf<Int32> > a = ArrayOf<Int32>::Alloc(12);
+//     (*a)[0] = 0;
+//     (*a)[1] = 1;
+//     (*a)[2] = 2;
+//     (*a)[3] = 5;
+//     (*a)[4] = 15;
+//     (*a)[5] = 30;
+//     (*a)[6] = 45;
+//     (*a)[7] = 60;
+//     (*a)[8] = 120;
+//     (*a)[9] = 180;
+//     (*a)[10] = 240;
+//     (*a)[11] = 480;
+//     return a;
+// }
 
-static AutoPtr<ArrayOf<Int32> > init12()
+static AutoPtr<ArrayOf<Int32> > InitMINUTE_BUCKETS()
 {
     AutoPtr<IZenModeConfigHelper> h;
     CZenModeConfigHelper::AcquireSingleton((IZenModeConfigHelper**)&h);
     AutoPtr<ArrayOf<Int32> > a;
     h->GetMINUTE_BUCKETS((ArrayOf<Int32>**)&a);
+    assert(a != NULL);
     return a;
 }
 
-const AutoPtr<ArrayOf<Int32> > ZenModePanel::MINUTE_BUCKETS = DEBUG ? init1() : init12();
-const Int32 ZenModePanel::MIN_BUCKET_MINUTES = (*MINUTE_BUCKETS)[0];
-const Int32 ZenModePanel::MAX_BUCKET_MINUTES = (*MINUTE_BUCKETS)[MINUTE_BUCKETS->GetLength() - 1];
-
-static Int32 init2()
+static Int32 InitDEFAULT_BUCKET_INDEX()
 {
+    assert(ZenModePanel::MINUTE_BUCKETS != NULL);
     Int32 index;
     Arrays::BinarySearch(ZenModePanel::MINUTE_BUCKETS, 60, &index);
     return index;
 }
 
-const Int32 ZenModePanel::DEFAULT_BUCKET_INDEX = init2();
-const Int32 ZenModePanel::FOREVER_CONDITION_INDEX;
-const Int32 ZenModePanel::TIME_CONDITION_INDEX;
-const Int32 ZenModePanel::FIRST_CONDITION_INDEX;
-const Float ZenModePanel::SILENT_HINT_PULSE_SCALE = 1.1f;
-
-static AutoPtr<IIntent> init3()
+static AutoPtr<IIntent> InitZEN_SETTINGS()
 {
     AutoPtr<IIntent> i;
     CIntent::New(ISettings::ACTION_ZEN_MODE_SETTINGS, (IIntent**)&i);
     return i;
 }
 
-const AutoPtr<IIntent> ZenModePanel::ZEN_SETTINGS = init3();
+const AutoPtr<ArrayOf<Int32> > ZenModePanel::MINUTE_BUCKETS = InitMINUTE_BUCKETS();
+const Int32 ZenModePanel::MIN_BUCKET_MINUTES = (*MINUTE_BUCKETS)[0];
+const Int32 ZenModePanel::MAX_BUCKET_MINUTES = (*MINUTE_BUCKETS)[MINUTE_BUCKETS->GetLength() - 1];
+const Int32 ZenModePanel::DEFAULT_BUCKET_INDEX = InitDEFAULT_BUCKET_INDEX();
+
+const AutoPtr<IIntent> ZenModePanel::ZEN_SETTINGS = InitZEN_SETTINGS();
+
+const Int32 ZenModePanel::FOREVER_CONDITION_INDEX = 0;
+const Int32 ZenModePanel::TIME_CONDITION_INDEX = 1;
+const Int32 ZenModePanel::FIRST_CONDITION_INDEX = 2;
+const Float ZenModePanel::SILENT_HINT_PULSE_SCALE = 1.1f;
 
 CAR_INTERFACE_IMPL(ZenModePanel, LinearLayout, IZenModePanel)
 
@@ -551,14 +555,16 @@ ECode ZenModePanel::constructor(
 
     AutoPtr<IAnimationUtils> au;
     CAnimationUtils::AcquireSingleton((IAnimationUtils**)&au);
-    au->LoadInterpolator(mContext, Elastos::Droid::R::interpolator::fast_out_slow_in, (IInterpolator**)&mFastOutSlowInInterpolator);
+    au->LoadInterpolator(mContext, Elastos::Droid::R::interpolator::fast_out_slow_in,
+        (IInterpolator**)&mFastOutSlowInInterpolator);
 
     AutoPtr<IResources> res;
     mContext->GetResources((IResources**)&res);
     res->GetColor(R::color::system_warning_color, &mSubheadWarningColor);
     res->GetColor(R::color::qs_subhead, &mSubheadColor);
 
-    mZenToast = new ZenToast(mContext);
+    mZenToast = new ZenToast();
+    mZenToast->constructor(mContext);
     if (DEBUG) Logger::D(mTag, "new ZenModePanel");
 
     AutoPtr<ISystem> sys;
@@ -585,11 +591,11 @@ ECode ZenModePanel::OnFinishInflate()
     mZenButtons->AddButton(R::string::interruption_level_none, i);
 
     AutoPtr<IInteger32> i2;
-    CInteger32::New(ISettingsGlobal::ZEN_MODE_OFF, (IInteger32**)&i2);
+    CInteger32::New(ISettingsGlobal::ZEN_MODE_IMPORTANT_INTERRUPTIONS, (IInteger32**)&i2);
     mZenButtons->AddButton(R::string::interruption_level_priority, i2);
 
     AutoPtr<IInteger32> i3;
-    CInteger32::New(ISettingsGlobal::ZEN_MODE_IMPORTANT_INTERRUPTIONS, (IInteger32**)&i3);
+    CInteger32::New(ISettingsGlobal::ZEN_MODE_OFF, (IInteger32**)&i3);
     mZenButtons->AddButton(R::string::interruption_level_all, i3);
     mZenButtons->SetCallback(mZenButtonsCallback);
 
@@ -598,22 +604,17 @@ ECode ZenModePanel::OnFinishInflate()
     AutoPtr<IView> view2;
     FindViewById(R::id::zen_subhead_collapsed, (IView**)&view2);
     mZenSubheadCollapsed = ITextView::Probe(view2);
-
-    AutoPtr<MyViewOnClickListener> vo = new MyViewOnClickListener(this);
-
-    IView::Probe(mZenSubheadCollapsed)->SetOnClickListener(vo);
-
-    Interaction::Register(IView::Probe(mZenSubheadCollapsed), mInteractionCallback);
+    AutoPtr<ZenSubheadCollapsedOnClickListener> vo = new ZenSubheadCollapsedOnClickListener(this);
+    view2->SetOnClickListener(vo);
+    Interaction::Register(view2, mInteractionCallback);
 
     AutoPtr<IView> view3;
     FindViewById(R::id::zen_subhead_expanded, (IView**)&view3);
     mZenSubheadExpanded = ITextView::Probe(view3);
-
-    Interaction::Register(IView::Probe(mZenSubheadCollapsed), mInteractionCallback);
+    Interaction::Register(view3, mInteractionCallback);
 
     FindViewById(R::id::zen_more_settings, (IView**)&mMoreSettings);
-
-    AutoPtr<MyViewOnClickListener2> vo2 = new MyViewOnClickListener2(this);
+    AutoPtr<MoreSettingsOnClickListener> vo2 = new MoreSettingsOnClickListener(this);
     mMoreSettings->SetOnClickListener(vo2);
     Interaction::Register(mMoreSettings, mInteractionCallback);
 
@@ -639,7 +640,7 @@ ECode ZenModePanel::OnAttachedToWindow()
 ECode ZenModePanel::OnDetachedFromWindow()
 {
     LinearLayout::OnDetachedFromWindow();
-    if (DEBUG) Logger::D(mTag, "onDetachedFromWindow");
+    if (DEBUG) Logger::D(mTag, "OnDetachedFromWindow");
     CheckForAttachedZenChange();
     mAttachedZen = -1;
     mSessionZen = -1;
@@ -651,7 +652,7 @@ ECode ZenModePanel::OnDetachedFromWindow()
 ECode ZenModePanel::SetHidden(
     /* [in] */ Boolean hidden)
 {
-    if (mHidden == hidden) return E_NULL_POINTER_EXCEPTION;
+    if (mHidden == hidden) return NOERROR;
     mHidden = hidden;
     UpdateWidgets();
     return NOERROR;
@@ -660,9 +661,9 @@ ECode ZenModePanel::SetHidden(
 void ZenModePanel::CheckForAttachedZenChange()
 {
     const Int32 selectedZen = GetSelectedZen(-1);
-    if (DEBUG) Logger::D(mTag, "selectedZen=%d", selectedZen);
+    if (DEBUG) Logger::D(mTag, "SelectedZen=%d", selectedZen);
     if (selectedZen != mAttachedZen) {
-        if (DEBUG) Logger::D(mTag, "attachedZen: %d -> %d", mAttachedZen, selectedZen);
+        if (DEBUG) Logger::D(mTag, "AttachedZen: %d -> %d", mAttachedZen, selectedZen);
         if (selectedZen == ISettingsGlobal::ZEN_MODE_NO_INTERRUPTIONS) {
             mPrefs->TrackNoneSelected();
         }
@@ -687,7 +688,7 @@ void ZenModePanel::SetRequestingConditions(
     /* [in] */ Boolean requesting)
 {
     if (mRequestingConditions == requesting) return;
-    if (DEBUG) Logger::D(mTag, "setRequestingConditions %s", requesting ? "TRUE" : "FALSE");
+    if (DEBUG) Logger::D(mTag, "SetRequestingConditions %s", requesting ? "TRUE" : "FALSE");
     mRequestingConditions = requesting;
     if (mController != NULL) {
         mController->RequestConditions(mRequestingConditions);
@@ -703,7 +704,7 @@ void ZenModePanel::SetRequestingConditions(
             CZenModeConfigHelper::AcquireSingleton((IZenModeConfigHelper**)&zmc);
             zmc->ToTimeCondition((*MINUTE_BUCKETS)[mBucketIndex], (ICondition**)&mTimeCondition);
         }
-        if (DEBUG) Logger::D(mTag, "Initial bucket index: %d", mBucketIndex);
+        if (DEBUG) Logger::D(mTag, "Initial bucket index: %d, mTimeCondition:%s", mBucketIndex, TO_CSTR(mTimeCondition));
         mConditions = NULL; // reset conditions
         HandleUpdateConditions();
     }
@@ -748,8 +749,10 @@ AutoPtr<IUri> ZenModePanel::GetConditionId(
     /* [in] */ ICondition* condition)
 {
     AutoPtr<IUri> id;
-    condition->GetId((IUri**)&id);
-    return condition != NULL ? id : NULL;
+    if (condition != NULL) {
+        condition->GetId((IUri**)&id);
+    }
+    return id;
 }
 
 Boolean ZenModePanel::SameConditionId(
@@ -818,15 +821,15 @@ ECode ZenModePanel::SetCallback(
 ECode ZenModePanel::ShowSilentHint()
 {
     if (DEBUG) Logger::D(mTag, "showSilentHint");
-    if (mZenButtons == NULL) return E_NULL_POINTER_EXCEPTION;
+    if (mZenButtons == NULL) return NOERROR;
     Int32 count;
     mZenButtons->GetChildCount(&count);
-    if (count == 0) return E_NULL_POINTER_EXCEPTION;
+    if (count == 0) return NOERROR;
     AutoPtr<IView> noneButton;
     mZenButtons->GetChildAt(0, (IView**)&noneButton);
     Float sx;
     noneButton->GetScaleX(&sx);
-    if (sx != 1) return E_NULL_POINTER_EXCEPTION;  // already running
+    if (sx != 1) return NOERROR;  // already running
     AutoPtr<IViewPropertyAnimator> animator;
     noneButton->Animate((IViewPropertyAnimator**)&animator);
     animator->Cancel();
@@ -872,6 +875,7 @@ void ZenModePanel::UpdateWidgets()
     const Boolean zenImportant = zen == ISettingsGlobal::ZEN_MODE_IMPORTANT_INTERRUPTIONS;
     const Boolean zenNone = zen == ISettingsGlobal::ZEN_MODE_NO_INTERRUPTIONS;
     const Boolean expanded = !mHidden && mExpanded;
+    Logger::I(TAG, " >> ZenModePanel expanded: %d", expanded);
 
     mZenButtons->SetVisibility(mHidden ? GONE : VISIBLE);
     mZenSubhead->SetVisibility(!mHidden && !zenOff ? VISIBLE : GONE);
@@ -929,25 +933,28 @@ void ZenModePanel::HandleUpdateConditions(
 void ZenModePanel::HandleUpdateConditions()
 {
     const Int32 conditionCount = mConditions == NULL ? 0 : mConditions->GetLength();
-    if (DEBUG) Logger::D(mTag, "handleUpdateConditions conditionCount=%d", conditionCount);
+    if (DEBUG) Logger::D(mTag, "HandleUpdateConditions conditionCount=%d", conditionCount);
+
+    IViewGroup* zenConditions = IViewGroup::Probe(mZenConditions);
     Int32 count;
-    IViewGroup::Probe(mZenConditions)->GetChildCount(&count);
+    zenConditions->GetChildCount(&count);
     for (Int32 i = count - 1; i >= FIRST_CONDITION_INDEX; i--) {
-        IViewGroup::Probe(mZenConditions)->RemoveViewAt(i);
+        zenConditions->RemoveViewAt(i);
     }
     // forever
     AutoPtr<IView> v;
-    IViewGroup::Probe(mZenConditions)->GetChildAt(FOREVER_CONDITION_INDEX, (IView**)&v);
+    zenConditions->GetChildAt(FOREVER_CONDITION_INDEX, (IView**)&v);
     Bind(NULL, v);
     // countdown
     AutoPtr<IView> v2;
-    IViewGroup::Probe(mZenConditions)->GetChildAt(TIME_CONDITION_INDEX, (IView**)&v2);
+    zenConditions->GetChildAt(TIME_CONDITION_INDEX, (IView**)&v2);
+    Logger::D(TAG, " >> Bind: %s, contentView:%s", TO_CSTR(mTimeCondition), TO_CSTR(v2));
     Bind(mTimeCondition, v2);
     // provider conditions
     Boolean foundDowntime = FALSE;
     for (Int32 i = 0; i < conditionCount; i++) {
         AutoPtr<IView> v3;
-        IViewGroup::Probe(mZenConditions)->GetChildAt(FIRST_CONDITION_INDEX + i, (IView**)&v3);
+        zenConditions->GetChildAt(FIRST_CONDITION_INDEX + i, (IView**)&v3);
         Bind((*mConditions)[i], v3);
         foundDowntime |= IsDowntime((*mConditions)[i]);
     }
@@ -1019,7 +1026,7 @@ void ZenModePanel::HandleExitConditionChanged(
     /* [in] */ ICondition* exitCondition)
 {
     SetExitCondition(exitCondition);
-    if (DEBUG) Logger::D(mTag, "handleExitConditionChanged %s", TO_CSTR(mExitCondition));
+    if (DEBUG) Logger::D(mTag, "HandleExitConditionChanged %s", TO_CSTR(mExitCondition));
     Int32 N;
     IViewGroup::Probe(mZenConditions)->GetChildCount(&N);
     for (Int32 i = 0; i < N; i++) {
@@ -1034,21 +1041,26 @@ void ZenModePanel::Bind(
     /* [in] */ IView* convertView)
 {
     Int32 state;
-    condition->GetState(&state);
-    const Boolean enabled = condition == NULL || state == ICondition::STATE_TRUE;
+    Boolean enabled = condition == NULL || ((condition->GetState(&state), state) == ICondition::STATE_TRUE);
     AutoPtr<IView> row;
     if (convertView == NULL) {
         mInflater->Inflate(R::layout::zen_mode_condition, this, FALSE, (IView**)&row);
-        if (DEBUG) Logger::D(mTag, "Adding new condition view for: %s", TO_CSTR(condition));
+        if (DEBUG) Logger::D(mTag, "Adding new condition view for: %s, row: %s", TO_CSTR(condition), TO_CSTR(row));
         IViewGroup::Probe(mZenConditions)->AddView(row);
     }
     else {
         row = convertView;
     }
+
     AutoPtr<IInterface> obj;
     row->GetTag((IInterface**)&obj);
-    const AutoPtr<ConditionTag> tag =
-            obj != NULL ? (ConditionTag*)(IObject::Probe(obj)) : new ConditionTag();
+    AutoPtr<ConditionTag> tag;
+    if (obj != NULL) {
+        tag = (ConditionTag*)IObject::Probe(obj);
+    }
+    else {
+        tag = new ConditionTag();
+    }
     row->SetTag((IObject*)tag);
     if (tag->mRb == NULL) {
         AutoPtr<IView> v;
@@ -1060,47 +1072,45 @@ void ZenModePanel::Bind(
     if (SameConditionId(mSessionExitCondition, tag->mCondition)) {
         ICheckable::Probe(tag->mRb)->SetChecked(TRUE);
     }
-    AutoPtr<MyOCCL> occl = new MyOCCL(tag, this);
+    AutoPtr<OnCheckedChangeListener> occl = new OnCheckedChangeListener(tag, this);
     ICompoundButton::Probe(tag->mRb)->SetOnCheckedChangeListener(occl);
 
-    if (tag->mTitle == NULL) {
-        AutoPtr<IView> v;
-        row->FindViewById(R::id::title, (IView**)&v);
-        tag->mTitle = ITextView::Probe(v);
+    AutoPtr<IView> title = IView::Probe(tag->mTitle);
+    if (title == NULL) {
+        row->FindViewById(Elastos::Droid::R::id::title, (IView**)&title);
+        tag->mTitle = ITextView::Probe(title);
+        assert(tag->mTitle != NULL);
     }
+
     if (condition == NULL) {
         String s;
         mContext->GetString(Elastos::Droid::R::string::zen_mode_forever, &s);
-        AutoPtr<ICharSequence> cs;
-        CString::New(s, (ICharSequence**)&cs);
+        AutoPtr<ICharSequence> cs = CoreUtils::Convert(s);
         tag->mTitle->SetText(cs);
     }
     else {
         String s;
         condition->GetSummary(&s);
-        AutoPtr<ICharSequence> cs;
-        CString::New(s, (ICharSequence**)&cs);
+        AutoPtr<ICharSequence> cs = CoreUtils::Convert(s);
         tag->mTitle->SetText(cs);
     }
-    IView::Probe(tag->mTitle)->SetEnabled(enabled);
-    IView::Probe(tag->mTitle)->SetAlpha(enabled ? 1 : .4f);
+    title->SetEnabled(enabled);
+    title->SetAlpha(enabled ? 1 : .4f);
 
-    AutoPtr<IView> v;
-    row->FindViewById(Elastos::Droid::R::id::button1, (IView**)&v);
-    const AutoPtr<IImageView> button1 = IImageView::Probe(v);
-
-    AutoPtr<MyOCL1> ocl1 = new MyOCL1(row, tag, this);
-    IView::Probe(button1)->SetOnClickListener(ocl1);
+    AutoPtr<IView> v1;
+    row->FindViewById(Elastos::Droid::R::id::button1, (IView**)&v1);
+    const AutoPtr<IImageView> button1 = IImageView::Probe(v1);
+    AutoPtr<Button1OnClickListener> ocl1 = new Button1OnClickListener(row, tag, this);
+    v1->SetOnClickListener(ocl1);
 
     AutoPtr<IView> v2;
     row->FindViewById(Elastos::Droid::R::id::button2, (IView**)&v2);
     const AutoPtr<IImageView> button2 = IImageView::Probe(v2);
+    AutoPtr<Button2OnClickListener> ocl2 = new Button2OnClickListener(row, tag, this);
+    v2->SetOnClickListener(ocl2);
 
-    AutoPtr<MyOCL2> ocl2 = new MyOCL2(row, tag, this);
-    IView::Probe(button2)->SetOnClickListener(ocl2);
-
-    AutoPtr<MyOCL3> ocl3 = new MyOCL3(tag, this);
-    IView::Probe(tag->mTitle)->SetOnClickListener(ocl3);
+    AutoPtr<TitleOnClickListener> ocl3 = new TitleOnClickListener(tag, this);
+    title->SetOnClickListener(ocl3);
 
     AutoPtr<IZenModeConfigHelper> zmc;
     CZenModeConfigHelper::AcquireSingleton((IZenModeConfigHelper**)&zmc);
@@ -1109,8 +1119,8 @@ void ZenModePanel::Bind(
 
     if (time > 0) {
         if (mBucketIndex > -1) {
-            IView::Probe(button1)->SetEnabled(mBucketIndex > 0);
-            IView::Probe(button2)->SetEnabled(mBucketIndex < MINUTE_BUCKETS->GetLength() - 1);
+            v1->SetEnabled(mBucketIndex > 0);
+            v2->SetEnabled(mBucketIndex < MINUTE_BUCKETS->GetLength() - 1);
         }
         else {
             AutoPtr<ISystem> sys;
@@ -1118,34 +1128,31 @@ void ZenModePanel::Bind(
             Int64 span;
             sys->GetCurrentTimeMillis(&span);
             span = time - span;
-            IView::Probe(button1)->SetEnabled(span > MIN_BUCKET_MINUTES * MINUTES_MS);
+            v1->SetEnabled(span > MIN_BUCKET_MINUTES * MINUTES_MS);
             AutoPtr<ICondition> maxCondition;
             zmc->ToTimeCondition(MAX_BUCKET_MINUTES, (ICondition**)&maxCondition);
             String s1, s2;
             condition->GetSummary(&s1);
             maxCondition->GetSummary(&s2);
-            AutoPtr<ICharSequence> ss1,ss2;
-            CString::New(s1, (ICharSequence**)&ss1);
-            CString::New(s1, (ICharSequence**)&ss2);
-            IView::Probe(button2)->SetEnabled(!Objects::Equals(ss1, ss2));
+            v2->SetEnabled(!s1.Equals(s2));
         }
 
         Boolean b1, b2;
-        IView::Probe(button1)->IsEnabled(&b1);
-        IView::Probe(button2)->IsEnabled(&b2);
-        IView::Probe(button1)->SetAlpha(b1 ? 1.0f : .5f);
-        IView::Probe(button2)->SetAlpha(b2 ? 1.0f : .5f);
+        v1->IsEnabled(&b1);
+        v2->IsEnabled(&b2);
+        v1->SetAlpha(b1 ? 1.0f : .5f);
+        v2->SetAlpha(b2 ? 1.0f : .5f);
     }
     else {
-        IView::Probe(button1)->SetVisibility(IView::GONE);
-        IView::Probe(button2)->SetVisibility(IView::GONE);
+        v1->SetVisibility(IView::GONE);
+        v2->SetVisibility(IView::GONE);
     }
     // wire up interaction callbacks for newly-added condition rows
     if (convertView == NULL) {
         Interaction::Register(IView::Probe(tag->mRb), mInteractionCallback);
-        Interaction::Register(IView::Probe(tag->mTitle), mInteractionCallback);
-        Interaction::Register(IView::Probe(button1), mInteractionCallback);
-        Interaction::Register(IView::Probe(button2), mInteractionCallback);
+        Interaction::Register(title, mInteractionCallback);
+        Interaction::Register(v1, mInteractionCallback);
+        Interaction::Register(v2, mInteractionCallback);
     }
 }
 
@@ -1199,7 +1206,7 @@ void ZenModePanel::OnClickTimeButton(
             Int32 j = up ? i : N - 1 - i;
             const Int32 bucketMinutes = (*MINUTE_BUCKETS)[j];
             const Int64 bucketTime = now + bucketMinutes * MINUTES_MS;
-            if (up && bucketTime > time || !up && bucketTime < time) {
+            if ((up && bucketTime > time) || (!up && bucketTime < time)) {
                 mBucketIndex = j;
                 zmc->ToTimeCondition(bucketTime, bucketMinutes, (ICondition**)&newCondition);
                 break;
@@ -1225,24 +1232,27 @@ void ZenModePanel::OnClickTimeButton(
 void ZenModePanel::Select(
     /* [in] */ ICondition* condition)
 {
-    if (DEBUG) Logger::D(mTag, "select %s", TO_CSTR(condition));
+    if (DEBUG) Logger::D(mTag, "select %s, mPrefs:%s", TO_CSTR(condition), TO_CSTR(mPrefs));
     if (mController != NULL) {
         mController->SetExitCondition(condition);
     }
     SetExitCondition(condition);
-    AutoPtr<IUri> id;
-    condition->GetId((IUri**)&id);
-    AutoPtr<IZenModeConfigHelper> zmc;
-    CZenModeConfigHelper::AcquireSingleton((IZenModeConfigHelper**)&zmc);
-    Boolean b;
-    zmc->IsValidCountdownConditionId(id, &b);
 
     if (condition == NULL) {
         mPrefs->SetMinuteIndex(-1);
     }
-    else if (b && mBucketIndex != -1) {
-        mPrefs->SetMinuteIndex(mBucketIndex);
+    else {
+        AutoPtr<IUri> id;
+        condition->GetId((IUri**)&id);
+        AutoPtr<IZenModeConfigHelper> zmc;
+        CZenModeConfigHelper::AcquireSingleton((IZenModeConfigHelper**)&zmc);
+        Boolean b;
+        zmc->IsValidCountdownConditionId(id, &b);
+        if (b && mBucketIndex != -1) {
+            mPrefs->SetMinuteIndex(mBucketIndex);
+        }
     }
+
     mSessionExitCondition = Copy(condition);
 }
 

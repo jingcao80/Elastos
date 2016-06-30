@@ -40,7 +40,7 @@ class ZenModeControllerImpl
     : public Object
     , public IZenModeController
 {
-private:
+public:
     class ConditionListener
         : public Object
         , public IIConditionListener
@@ -48,8 +48,8 @@ private:
     public:
         CAR_INTERFACE_DECL()
 
-        ConditionListener(
-            /* [in] */ ZenModeControllerImpl* host);
+        CARAPI constructor(
+            /* [in] */ IZenModeController* host);
 
         // @Override
         CARAPI OnConditionsReceived(
@@ -59,7 +59,9 @@ private:
         ZenModeControllerImpl* mHost;
     };
 
-    class Receiver: public BroadcastReceiver
+private:
+    class Receiver
+        : public BroadcastReceiver
     {
     public:
 
@@ -77,7 +79,8 @@ private:
         ZenModeControllerImpl* mHost;
     };
 
-    class SetupObserver: public ContentObserver
+    class SetupObserver
+        : public ContentObserver
     {
     public:
         TO_STRING_IMPL("ZenModeControllerImpl::SetupObserver")
@@ -105,7 +108,8 @@ private:
         ZenModeControllerImpl* mHost;
     };
 
-    class ModeSetting: public GlobalSetting
+    class ModeSetting
+        : public GlobalSetting
     {
     public:
         ModeSetting(
@@ -116,14 +120,15 @@ private:
 
     protected:
         // @Override
-        CARAPI_(void) HandleValueChanged(
+        CARAPI HandleValueChanged(
             /* [in] */ Int32 value);
 
     private:
         ZenModeControllerImpl* mHost;
     };
 
-    class ConfigSetting: public GlobalSetting
+    class ConfigSetting
+        : public GlobalSetting
     {
     public:
         ConfigSetting(
@@ -134,7 +139,7 @@ private:
 
     protected:
         // @Override
-        CARAPI_(void) HandleValueChanged(
+        CARAPI HandleValueChanged(
             /* [in] */ Int32 value);
 
     private:
@@ -144,7 +149,9 @@ private:
 public:
     CAR_INTERFACE_DECL()
 
-    ZenModeControllerImpl(
+    ZenModeControllerImpl();
+
+    CARAPI constructor(
         /* [in] */ IContext* context,
         /* [in] */ IHandler* handler);
 
@@ -219,7 +226,7 @@ private:
     AutoPtr<IContext> mContext;
     AutoPtr<IGlobalSetting> mModeSetting;
     AutoPtr<IGlobalSetting> mConfigSetting;
-    AutoPtr<IINotificationManager> mNoMan;
+    AutoPtr<IINotificationManager> mNotificationManager;
     AutoPtr<ILinkedHashMap> mConditions;  /*<Uri, Condition*/
     AutoPtr<IAlarmManager> mAlarmManager;
     AutoPtr<SetupObserver> mSetupObserver;

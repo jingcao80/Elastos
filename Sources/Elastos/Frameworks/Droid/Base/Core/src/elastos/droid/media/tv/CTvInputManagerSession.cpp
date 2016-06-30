@@ -54,7 +54,7 @@ ECode CTvInputManagerSession::InputEventHandler::HandleMessage(
         case MSG_SEND_INPUT_EVENT: {
             AutoPtr<IInterface> obj;
             msg->GetObj((IInterface**)&obj);
-            mHost->SendInputEventAndReportResultOnMainLooper((PendingEvent*)(IObject*)obj.Get());
+            mHost->SendInputEventAndReportResultOnMainLooper((PendingEvent*)IObject::Probe(obj));
             return NOERROR;
         }
         case MSG_TIMEOUT_INPUT_EVENT: {
@@ -540,7 +540,7 @@ ECode CTvInputManagerSession::FinishedInputEvent(
 
         AutoPtr<IInterface> obj;
         mPendingEvents->ValueAt(index, (IInterface**)&obj);
-        p = (PendingEvent*)(IObject*)obj.Get();
+        p = (PendingEvent*)IObject::Probe(obj);
         mPendingEvents->RemoveAt(index);
 
         if (timeout) {
