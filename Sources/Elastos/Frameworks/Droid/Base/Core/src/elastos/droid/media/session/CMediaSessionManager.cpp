@@ -187,7 +187,7 @@ ECode CMediaSessionManager::AddOnActiveSessionsChangedListener(
     {    AutoLock syncLock(mLock);
         AutoPtr<IInterface> obj;
         IMap::Probe(mListeners)->Get(sessionListener, (IInterface**)&obj);
-        AutoPtr<SessionsChangedWrapper> wrapper = (SessionsChangedWrapper*)(IObject*)obj.Get();
+        AutoPtr<SessionsChangedWrapper> wrapper = (SessionsChangedWrapper*)IObject::Probe(obj);
         if (wrapper != NULL) {
             Logger::W(TAG, String("Attempted to add session listener twice, ignoring."));
             return NOERROR;
@@ -213,7 +213,7 @@ ECode CMediaSessionManager::RemoveOnActiveSessionsChangedListener(
     {    AutoLock syncLock(mLock);
         AutoPtr<IInterface> obj;
         IMap::Probe(mListeners)->Remove(listener, (IInterface**)&obj);
-        AutoPtr<SessionsChangedWrapper> wrapper = (SessionsChangedWrapper*)(IObject*)obj.Get();
+        AutoPtr<SessionsChangedWrapper> wrapper = (SessionsChangedWrapper*)IObject::Probe(obj);
         if (wrapper != NULL) {
             // try {
             mService->RemoveSessionsListener(wrapper->mStub);

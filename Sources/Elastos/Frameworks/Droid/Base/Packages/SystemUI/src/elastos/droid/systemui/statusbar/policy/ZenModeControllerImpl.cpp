@@ -1,5 +1,6 @@
 
 #include "elastos/droid/systemui/statusbar/policy/ZenModeControllerImpl.h"
+#include "elastos/droid/systemui/statusbar/policy/CZenModeControllerConditionListener.h"
 #include "Elastos.Droid.Os.h"
 #include "Elastos.Droid.Provider.h"
 #include <elastos/droid/os/ServiceManager.h>
@@ -34,24 +35,37 @@ namespace StatusBar {
 namespace Policy {
 
 const String ZenModeControllerImpl::TAG("ZenModeController");
-const Boolean ZenModeControllerImpl::DEBUG = Logger::IsLoggable(TAG, Logger::___DEBUG);
+const Boolean ZenModeControllerImpl::DEBUG = TRUE;//Logger::IsLoggable(TAG, Logger::___DEBUG);
+
+//==========================================================================
+// CZenModeControllerConditionListener
+//==========================================================================
+CAR_OBJECT_IMPL(CZenModeControllerConditionListener)
 
 CAR_INTERFACE_IMPL(ZenModeControllerImpl::ConditionListener, Object, IIConditionListener)
-ZenModeControllerImpl::ConditionListener::ConditionListener(
-    /* [in] */ ZenModeControllerImpl* host)
-    : mHost(host)
-{}
+
+ECode ZenModeControllerImpl::ConditionListener::constructor(
+    /* [in] */ IZenModeController* host)
+{
+    mHost = (ZenModeControllerImpl*)host;
+    return NOERROR;
+}
 
 ECode ZenModeControllerImpl::ConditionListener::OnConditionsReceived(
     /* [in] */ ArrayOf<ICondition*>* conditions)
 {
-    if (DEBUG) Slogger::D(TAG, "onConditionsReceived %d mRequesting=%d"
-            , (conditions == NULL ? 0 : conditions->GetLength()), mHost->mRequesting);
+    if (DEBUG) {
+        Slogger::D(TAG, "onConditionsReceived %d mRequesting=%d",
+            (conditions == NULL ? 0 : conditions->GetLength()), mHost->mRequesting);
+    }
     if (!mHost->mRequesting) return NOERROR;
     mHost->UpdateConditions(conditions);
     return NOERROR;
 }
 
+//==========================================================================
+// ZenModeControllerImpl::Receiver
+//==========================================================================
 ZenModeControllerImpl::Receiver::Receiver(
     /* [in] */ ZenModeControllerImpl* host)
     : mHost(host)
@@ -72,6 +86,9 @@ ECode ZenModeControllerImpl::Receiver::OnReceive(
     return NOERROR;
 }
 
+//==========================================================================
+// ZenModeControllerImpl::SetupObserver
+//==========================================================================
 ZenModeControllerImpl::SetupObserver::SetupObserver(
     /* [in] */ IHandler* handler,
     /* [in] */ ZenModeControllerImpl* host)
@@ -137,8 +154,6 @@ ECode ZenModeControllerImpl::SetupObserver::OnChange(
     AutoPtr<IUri> u;
     Elastos::Droid::Provider::Settings::Global::GetUriFor(
         ISettingsGlobal::DEVICE_PROVISIONED, (IUri**)&u);
-    Logger::I(TAG, " >> TODO: uri for :DEVICE_PROVISIONED: %s", TO_CSTR(u));
-
     if (Object::Equals(uri, u)) {
         Boolean tmp = FALSE;
         mHost->IsZenAvailable(&tmp);
@@ -148,7 +163,6 @@ ECode ZenModeControllerImpl::SetupObserver::OnChange(
         u = NULL;
         Elastos::Droid::Provider::Settings::Secure::GetUriFor(
             ISettingsSecure::USER_SETUP_COMPLETE, (IUri**)&u);
-        Logger::I(TAG, " >> TODO: uri for :USER_SETUP_COMPLETE: %s", TO_CSTR(u));
         if (Object::Equals(uri, u)) {
             Boolean tmp = FALSE;
             mHost->IsZenAvailable(&tmp);
@@ -158,6 +172,9 @@ ECode ZenModeControllerImpl::SetupObserver::OnChange(
     return NOERROR;
 }
 
+//==========================================================================
+// ZenModeControllerImpl::ModeSetting
+//==========================================================================
 ZenModeControllerImpl::ModeSetting::ModeSetting(
     /* [in] */ ZenModeControllerImpl* host,
     /* [in] */ IContext* context,
@@ -167,10 +184,11 @@ ZenModeControllerImpl::ModeSetting::ModeSetting(
     , mHost(host)
 {}
 
-void ZenModeControllerImpl::ModeSetting::HandleValueChanged(
+ECode ZenModeControllerImpl::ModeSetting::HandleValueChanged(
     /* [in] */ Int32 value)
 {
     mHost->FireZenChanged(value);
+    return NOERROR;
 }
 
 ZenModeControllerImpl::ConfigSetting::ConfigSetting(
@@ -182,39 +200,56 @@ ZenModeControllerImpl::ConfigSetting::ConfigSetting(
     , mHost(host)
 {}
 
-void ZenModeControllerImpl::ConfigSetting::HandleValueChanged(
+ECode ZenModeControllerImpl::ConfigSetting::HandleValueChanged(
     /* [in] */ Int32 value)
 {
     mHost->FireExitConditionChanged();
+    return NOERROR;
 }
 
-
+//==========================================================================
+// ZenModeControllerImpl
+//==========================================================================
 CAR_INTERFACE_IMPL(ZenModeControllerImpl, Object, IZenModeController)
-ZenModeControllerImpl::ZenModeControllerImpl(
-    /* [in] */ IContext* context,
-    /* [in] */ IHandler* handler)
+
+ZenModeControllerImpl::ZenModeControllerImpl()
     : mUserId(0)
     , mRequesting(FALSE)
     , mRegistered(FALSE)
 {
-    mListener = new ConditionListener(this);
+}
+
+ECode ZenModeControllerImpl::constructor(
+    /* [in] */ IContext* context,
+    /* [in] */ IHandler* handler)
+{
+    mContext = context;
+
+    CZenModeControllerConditionListener::New(this, (IIConditionListener**)&mListener);
     mReceiver = new Receiver(this);
     CArrayList::New((IArrayList**)&mCallbacks);
     CLinkedHashMap::New((ILinkedHashMap**)&mConditions);
 
-    mContext = context;
-    mModeSetting = new ModeSetting(this, mContext, handler, ISettingsGlobal::ZEN_MODE);
-    mConfigSetting = new ConfigSetting(this, mContext, handler, ISettingsGlobal::ZEN_MODE_CONFIG_ETAG);
-    IListenable::Probe(mModeSetting)->SetListening(TRUE);
-    IListenable::Probe(mConfigSetting)->SetListening(TRUE);
+    AutoPtr<ModeSetting> ms = new ModeSetting(
+        this, mContext, handler, ISettingsGlobal::ZEN_MODE);
+    ms->SetListening(TRUE);
+    mModeSetting = ms.Get();
+
+    AutoPtr<ConfigSetting> cs = new ConfigSetting(
+        this, mContext, handler, ISettingsGlobal::ZEN_MODE_CONFIG_ETAG);
+    cs->SetListening(TRUE);
+    mConfigSetting = cs.Get();
+
     AutoPtr<IInterface> obj = ServiceManager::GetService(IContext::NOTIFICATION_SERVICE);
-    mNoMan = IINotificationManager::Probe(obj);
+    mNotificationManager = IINotificationManager::Probe(obj);
 
     obj = NULL;
     context->GetSystemService(IContext::ALARM_SERVICE, (IInterface**)&obj);
     mAlarmManager = IAlarmManager::Probe(obj);
+
     mSetupObserver = new SetupObserver(handler, this);
     mSetupObserver->Register();
+    return NOERROR;
 }
 
 ECode ZenModeControllerImpl::AddCallback(
@@ -234,8 +269,11 @@ ECode ZenModeControllerImpl::RemoveCallback(
 ECode ZenModeControllerImpl::GetZen(
     /* [out] */ Int32* zen)
 {
-    VALIDATE_NOT_NULL(zen);
-    return mModeSetting->GetValue(zen);
+    Int32 zenMode;
+    mModeSetting->GetValue(&zenMode);
+    *zen = zenMode;
+    Logger::I(TAG, " TODO >> GetZenMode ZEN_MODE: %d", zenMode);
+    return NOERROR;
 }
 
 ECode ZenModeControllerImpl::SetZen(
@@ -252,7 +290,6 @@ ECode ZenModeControllerImpl::IsZenAvailable(
     Boolean b1 = FALSE, b2 = FALSE;
     mSetupObserver->IsDeviceProvisioned(&b1);
     *result = b1 && (mSetupObserver->IsUserSetup(&b2), b2);
-    *result = TRUE;
     return NOERROR;
 }
 
@@ -261,8 +298,9 @@ ECode ZenModeControllerImpl::RequestConditions(
 {
     mRequesting = request;
     // try {
-    if (mNoMan != NULL) {
-        mNoMan->RequestZenModeConditions(mListener, request ? ICondition::FLAG_RELEVANT_NOW : 0);
+    if (mNotificationManager != NULL) {
+        mNotificationManager->RequestZenModeConditions(
+            mListener, request ? ICondition::FLAG_RELEVANT_NOW : 0);
     }
     // } catch (RemoteException e) {
     //     // noop
@@ -276,13 +314,9 @@ ECode ZenModeControllerImpl::RequestConditions(
 ECode ZenModeControllerImpl::SetExitCondition(
     /* [in] */ ICondition* exitCondition)
 {
-    // try {
-    if (mNoMan != NULL) {
-        mNoMan->SetZenModeCondition(exitCondition);
+    if (mNotificationManager != NULL) {
+        mNotificationManager->SetZenModeCondition(exitCondition);
     }
-    // } catch (RemoteException e) {
-    //     // noop
-    // }
     return NOERROR;
 }
 
@@ -291,17 +325,14 @@ ECode ZenModeControllerImpl::GetExitCondition(
 {
     VALIDATE_NOT_NULL(c);
     *c = NULL;
-    // try {
+
     AutoPtr<IZenModeConfig> config;
-    if (mNoMan != NULL) {
-        FAIL_RETURN(mNoMan->GetZenModeConfig((IZenModeConfig**)&config));
+    if (mNotificationManager != NULL) {
+        FAIL_RETURN(mNotificationManager->GetZenModeConfig((IZenModeConfig**)&config));
+        if (config != NULL) {
+            return config->GetExitCondition(c);
+        }
     }
-    if (config != NULL) {
-        return config->GetExitCondition(c);
-    }
-    // } catch (RemoteException e) {
-    //     // noop
-    // }
 
     return NOERROR;
 }

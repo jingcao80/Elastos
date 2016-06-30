@@ -37,7 +37,7 @@ private:
             /* [out] */ Boolean* result);
 
     private:
-        IInteractionCallback* mCallback;
+        AutoPtr<IInteractionCallback> mCallback;
     };
 
     class MyOnGenericMotionListener
@@ -56,11 +56,11 @@ private:
             /* [out] */ Boolean* result);
 
     private:
-        IInteractionCallback* mCallback;
+        AutoPtr<IInteractionCallback> mCallback;
     };
 
 public:
-    static CARAPI_(void) Register(
+    static CARAPI Register(
         /* [in] */ IView* v,
         /* [in] */ IInteractionCallback* callback);
 };

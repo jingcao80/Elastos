@@ -199,7 +199,8 @@ void ConditionProviders::Dump(
     /* [in] */ DumpFilter* filter)
 {
     ManagedServices::Dump(pw, filter);
-    {    AutoLock syncLock(mMutex);
+    {
+        AutoLock syncLock(mMutex);
         Int32 size;
         if (filter == NULL) {
             pw->Print(String("    mListeners("));
@@ -262,7 +263,8 @@ ECode ConditionProviders::OnServiceAdded(
     // } catch (RemoteException e) {
     //     // we tried
     // }
-    {    AutoLock syncLock(mMutex);
+    {
+        AutoLock syncLock(mMutex);
         Boolean res;
         if (IObject::Probe(info->mComponent)->Equals(mExitConditionComponent, &res), res) {
             // ensure record exists, we'll wire it up and subscribe below
@@ -319,7 +321,8 @@ AutoPtr<ManagedServices::ManagedServiceInfo> ConditionProviders::CheckServiceTok
     /* [in] */ IIConditionProvider* provider)
 {
     AutoPtr<ManagedServiceInfo> info;
-    {    AutoLock syncLock(mMutex);
+    {
+        AutoLock syncLock(mMutex);
         CheckServiceTokenLocked(provider, (ManagedServiceInfo**)&info);
         return info;
     }
@@ -330,7 +333,8 @@ void ConditionProviders::RequestZenModeConditions(
     /* [in] */ IIConditionListener* callback,
     /* [in] */ Int32 relevance)
 {
-    {    AutoLock syncLock(mMutex);
+    {
+        AutoLock syncLock(mMutex);
         AutoPtr<IConditionHelper> helper;
         CConditionHelper::AcquireSingleton((IConditionHelper**)&helper);
         String str;
@@ -426,7 +430,8 @@ ECode ConditionProviders::NotifyConditions(
     /* [in] */ ManagedServiceInfo* info,
     /* [in] */ ArrayOf<ICondition*>* conditions)
 {
-    {    AutoLock syncLock(mMutex);
+    {
+        AutoLock syncLock(mMutex);
         if (DEBUG) {
             if (conditions == NULL) {
                 Slogger::D(TAG, "notifyConditions pkg=%s info=%p conditions=%p",
@@ -517,63 +522,61 @@ void ConditionProviders::SetZenModeCondition(
     /* [in] */ ICondition* condition,
     /* [in] */ const String& reason)
 {
-    if (DEBUG) Slogger::D(TAG, "setZenModeCondition %p", condition);
-    {    AutoLock syncLock(mMutex);
-        AutoPtr<IUri> id;
+    if (DEBUG) Slogger::D(TAG, "setZenModeCondition %s", TO_CSTR(condition));
+
+    AutoLock syncLock(mMutex);
+    AutoPtr<IUri> id;
+    AutoPtr<IComponentName> conditionComponent;
+    if (condition != NULL) {
         condition->GetId((IUri**)&id);
-        AutoPtr<IComponentName> conditionComponent;
-        if (condition != NULL) {
-            AutoPtr<IZenModeConfigHelper> helper;
-            CZenModeConfigHelper::AcquireSingleton((IZenModeConfigHelper**)&helper);
-            Boolean res;
-            if (helper->IsValidCountdownConditionId(id, &res), res) {
-                // constructed by the client, make sure the record exists...
-                AutoPtr<ConditionRecord> r = GetRecordLocked(id,
-                        CountdownConditionProvider::COMPONENT);
-                if (r->mInfo == NULL) {
-                    // ... and is associated with the in-process service
-                    CheckServiceTokenLocked(TO_IINTERFACE(mCountdown), (ManagedServiceInfo**)&r->mInfo);
-                }
-            }
-            if (helper->IsValidDowntimeConditionId(id, &res), res) {
-                // constructed by the client, make sure the record exists...
-                AutoPtr<ConditionRecord> r = GetRecordLocked(id,
-                        DowntimeConditionProvider::COMPONENT);
-                if (r->mInfo == NULL) {
-                    // ... and is associated with the in-process service
-                    CheckServiceTokenLocked(TO_IINTERFACE(mDowntime), (ManagedServiceInfo**)&r->mInfo);
-                }
+        AutoPtr<IZenModeConfigHelper> helper;
+        CZenModeConfigHelper::AcquireSingleton((IZenModeConfigHelper**)&helper);
+        Boolean res;
+        if (helper->IsValidCountdownConditionId(id, &res), res) {
+            // constructed by the client, make sure the record exists...
+            AutoPtr<ConditionRecord> r = GetRecordLocked(id,
+                    CountdownConditionProvider::COMPONENT);
+            if (r->mInfo == NULL) {
+                // ... and is associated with the in-process service
+                CheckServiceTokenLocked(TO_IINTERFACE(mCountdown), (ManagedServiceInfo**)&r->mInfo);
             }
         }
-        Int32 N;
-        mRecords->GetSize(&N);
-        for (Int32 i = 0; i < N; i++) {
-            AutoPtr<IInterface> obj;
-            mRecords->Get(i, (IInterface**)&obj);
-            AutoPtr<ConditionRecord> r = (ConditionRecord*)IObject::Probe(obj);
-            Boolean res;
-            IObject::Probe(r->mId)->Equals(id, &res);
-            const Boolean idEqual = condition != NULL && res;
-            if (r->mIsManual && !idEqual) {
-                // was previous manual condition, unsubscribe
-                UnsubscribeLocked(r);
-                r->mIsManual = FALSE;
-            }
-            else if (idEqual && !r->mIsManual) {
-                // is new manual condition, subscribe
-                SubscribeLocked(r);
-                r->mIsManual = TRUE;
-            }
-            if (idEqual) {
-                conditionComponent = r->mComponent;
+        if (helper->IsValidDowntimeConditionId(id, &res), res) {
+            // constructed by the client, make sure the record exists...
+            AutoPtr<ConditionRecord> r = GetRecordLocked(id,
+                    DowntimeConditionProvider::COMPONENT);
+            if (r->mInfo == NULL) {
+                // ... and is associated with the in-process service
+                CheckServiceTokenLocked(TO_IINTERFACE(mDowntime), (ManagedServiceInfo**)&r->mInfo);
             }
         }
-        if (!Objects::Equals(mExitCondition.Get(), condition)) {
-            mExitCondition = condition;
-            mExitConditionComponent = conditionComponent;
-            ZenLog::TraceExitCondition(mExitCondition, mExitConditionComponent, reason);
-            SaveZenConfigLocked();
+    }
+    Int32 N;
+    mRecords->GetSize(&N);
+    for (Int32 i = 0; i < N; i++) {
+        AutoPtr<IInterface> obj;
+        mRecords->Get(i, (IInterface**)&obj);
+        AutoPtr<ConditionRecord> r = (ConditionRecord*)IObject::Probe(obj);
+        Boolean idEqual = (condition != NULL && Object::Equals(r->mId, id));
+        if (r->mIsManual && !idEqual) {
+            // was previous manual condition, unsubscribe
+            UnsubscribeLocked(r);
+            r->mIsManual = FALSE;
         }
+        else if (idEqual && !r->mIsManual) {
+            // is new manual condition, subscribe
+            SubscribeLocked(r);
+            r->mIsManual = TRUE;
+        }
+        if (idEqual) {
+            conditionComponent = r->mComponent;
+        }
+    }
+    if (!Objects::Equals(mExitCondition.Get(), condition)) {
+        mExitCondition = condition;
+        mExitConditionComponent = conditionComponent;
+        ZenLog::TraceExitCondition(mExitCondition, mExitConditionComponent, reason);
+        SaveZenConfigLocked();
     }
 }
 
@@ -636,7 +639,8 @@ void ConditionProviders::SetAutomaticZenModeConditions(
         }
     }
 
-    {    AutoLock syncLock(mMutex);
+    {
+        AutoLock syncLock(mMutex);
         Int32 size = 0;
         if (conditionIds != NULL) {
             size = conditionIds->GetLength();
@@ -678,7 +682,8 @@ void ConditionProviders::SetAutomaticZenModeConditions(
 AutoPtr< ArrayOf<ICondition*> > ConditionProviders::GetAutomaticZenModeConditions()
 {
     AutoPtr< ArrayOf<ICondition*> > result;
-    {    AutoLock syncLock(mMutex);
+    {
+        AutoLock syncLock(mMutex);
         Int32 N;
         mRecords->GetSize(&N);
         AutoPtr<IArrayList> rt;
@@ -785,7 +790,8 @@ void ConditionProviders::LoadZenConfig()
         if (DEBUG) Slogger::D(TAG, "loadZenConfig: no config");
         return;
     }
-    {    AutoLock syncLock(mMutex);
+    {
+        AutoLock syncLock(mMutex);
         AutoPtr<ICondition> exitCondition;
         config->GetExitCondition((ICondition**)&exitCondition);
         const Boolean changingExit = !Objects::Equals(mExitCondition, exitCondition);

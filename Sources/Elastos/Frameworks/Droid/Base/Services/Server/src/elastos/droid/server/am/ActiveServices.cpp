@@ -18,8 +18,6 @@
 #include <elastos/utility/logging/Logger.h>
 #include <utils/CallStack.h>
 
-#include <elastos/core/AutoLock.h>
-using Elastos::Core::AutoLock;
 using Elastos::Droid::App::AppGlobals;
 using Elastos::Droid::App::CActivityManagerHelper;
 using Elastos::Droid::App::CActivityManagerRunningServiceInfo;
@@ -44,6 +42,7 @@ using Elastos::Droid::Os::ISystemProperties;
 using Elastos::Droid::Os::SystemClock;
 using Elastos::Droid::Utility::TimeUtils;
 using Elastos::Droid::Utility::CParcelableList;
+using Elastos::Core::AutoLock;
 using Elastos::Core::StringUtils;
 using Elastos::IO::IFlushable;
 using Elastos::Utility::CArrayList;
@@ -184,9 +183,9 @@ ECode ActiveServices::ServiceRestarter::Run()
 
 const String ActiveServices::TAG("ActiveServices");
 const String ActiveServices::TAG_MU("ActiveServicesMU");
-const Boolean ActiveServices::DEBUG_SERVICE = TRUE; //CActivityManagerService::DEBUG_SERVICE;
-const Boolean ActiveServices::DEBUG_SERVICE_EXECUTING = TRUE; //CActivityManagerService::DEBUG_SERVICE_EXECUTING;
-const Boolean ActiveServices::DEBUG_DELAYED_SERVICE = TRUE; //CActivityManagerService::DEBUG_SERVICE;
+const Boolean ActiveServices::DEBUG_SERVICE = FALSE; //CActivityManagerService::DEBUG_SERVICE;
+const Boolean ActiveServices::DEBUG_SERVICE_EXECUTING = FALSE; //CActivityManagerService::DEBUG_SERVICE_EXECUTING;
+const Boolean ActiveServices::DEBUG_DELAYED_SERVICE = FALSE; //CActivityManagerService::DEBUG_SERVICE;
 const Boolean ActiveServices::DEBUG_DELAYED_STARTS = DEBUG_DELAYED_SERVICE;
 const Boolean ActiveServices::DEBUG_MU = CActivityManagerService::DEBUG_MU;
 const Boolean ActiveServices::LOG_SERVICE_START_STOP = FALSE;

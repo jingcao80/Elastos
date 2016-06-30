@@ -44,25 +44,26 @@ ECode Condition::constructor(
     /* [in] */ Int32 flags)
 {
     if (id == NULL) {
-        Logger::E(TAG, "id is required");
+        Logger::E(TAG, "create condition: id is required");
         return E_ILLEGAL_ARGUMENT_EXCEPTION;
     }
     if (summary.IsNull()) {
-        Logger::E(TAG, "summary is required");
+        Logger::E(TAG, "create condition: summary is required");
         return E_ILLEGAL_ARGUMENT_EXCEPTION;
     }
     if (line1.IsNull()) {
-        Logger::E(TAG, "line1 is required");
+        Logger::E(TAG, "create condition: line1 is required");
         return E_ILLEGAL_ARGUMENT_EXCEPTION;
     }
     if (line2.IsNull()) {
-        Logger::E(TAG, "line2 is required");
+        Logger::E(TAG, "create condition: line2 is required");
         return E_ILLEGAL_ARGUMENT_EXCEPTION;
     }
     if (!IsValidState(state)) {
-        Logger::E(TAG, "state is invalid: %d", state);
+        Logger::E(TAG, "create condition: state is invalid: %d", state);
         return E_ILLEGAL_ARGUMENT_EXCEPTION;
     }
+
     mId = id;
     mSummary = summary;
     mLine1 = line1;
@@ -222,7 +223,7 @@ ECode Condition::ToString(
 {
     VALIDATE_NOT_NULL(str)
     StringBuilder sb("Condition[id=");
-    sb += mId;
+    sb += TO_CSTR(mId);
     sb += ",summary=";
     sb += mSummary;
     sb += ",line1=";
@@ -348,8 +349,10 @@ ECode Condition::IsValidId(
 {
     VALIDATE_NOT_NULL(isValidId)
     String scheme, authority;
-    id->GetScheme(&scheme);
-    id->GetAuthority(&authority);
+    if (id != NULL) {
+        id->GetScheme(&scheme);
+        id->GetAuthority(&authority);
+    }
     *isValidId = id != NULL && scheme.Equals(ICondition::SCHEME) && authority.Equals(pkg);
     return NOERROR;
 }

@@ -10,6 +10,7 @@ namespace SystemUI {
 namespace Qs {
 
 CAR_INTERFACE_IMPL_2(GlobalSetting, ContentObserver, IGlobalSetting, IListenable);
+
 GlobalSetting::GlobalSetting(
     /* [in] */ IContext* context,
     /* [in] */ IHandler* handler,

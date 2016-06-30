@@ -141,7 +141,7 @@ ECode TvInputService::ServiceHandler::HandleMessage(
         case DO_CREATE_SESSION: {
             AutoPtr<IInterface> obj;
             msg->GetObj((IInterface**)&obj);
-            AutoPtr<SomeArgs> args = (SomeArgs*)(IObject*)obj.Get();
+            AutoPtr<SomeArgs> args = (SomeArgs*)IObject::Probe(obj);
 
             AutoPtr<IInputChannel> channel = IInputChannel::Probe(args->mArg1);
             AutoPtr<IITvInputSessionCallback> cb = IITvInputSessionCallback::Probe(args->mArg2);
@@ -209,7 +209,7 @@ ECode TvInputService::ServiceHandler::HandleMessage(
         case DO_NOTIFY_SESSION_CREATED: {
             AutoPtr<IInterface> obj;
             msg->GetObj((IInterface**)&obj);
-            AutoPtr<SomeArgs> args = (SomeArgs*)(IObject*)obj.Get();
+            AutoPtr<SomeArgs> args = (SomeArgs*)IObject::Probe(obj);
 
             AutoPtr<IITvInputSession> stub = IITvInputSession::Probe(args->mArg1);
             AutoPtr<IITvInputSessionCallback> cb = IITvInputSessionCallback::Probe(args->mArg2);

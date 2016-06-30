@@ -1,7 +1,7 @@
-#ifndef __ELASTOS_DROID_SYSTEMUI_VOLUME_CVOLUMEPANELBROADCASTRECEIVER2_H__
-#define __ELASTOS_DROID_SYSTEMUI_VOLUME_CVOLUMEPANELBROADCASTRECEIVER2_H__
+#ifndef __ELASTOS_DROID_SYSTEMUI_VOLUME_CVOLUMEPANEL_CLOSESYSTEMDIALOG_RECEIVER_H__
+#define __ELASTOS_DROID_SYSTEMUI_VOLUME_CVOLUMEPANEL_CLOSESYSTEMDIALOG_RECEIVER_H__
 
-#include "_Elastos_Droid_SystemUI_Volume_CVolumePanelBroadcastReceiver2.h"
+#include "_Elastos_Droid_SystemUI_Volume_CVolumePanelCloseSystemDialogsReceiver.h"
 #include "elastos/droid/systemui/volume/VolumePanel.h"
 
 using Elastos::Droid::SystemUI::StatusBar::Phone::ISystemUIDialog;
@@ -11,7 +11,7 @@ namespace Droid {
 namespace SystemUI{
 namespace Volume{
 
-CarClass(CVolumePanelBroadcastReceiver2), public BroadcastReceiver
+CarClass(CVolumePanelCloseSystemDialogsReceiver), public BroadcastReceiver
 {
 public:
     CAR_OBJECT_DECL()
@@ -33,4 +33,4 @@ private:
 } // namespace Droid
 } // namespace Elastos
 
-#endif // __ELASTOS_DROID_SYSTEMUI_VOLUME_CVOLUMEPANELBROADCASTRECEIVER2_H__
+#endif // __ELASTOS_DROID_SYSTEMUI_VOLUME_CVOLUMEPANEL_CLOSESYSTEMDIALOG_RECEIVER_H__

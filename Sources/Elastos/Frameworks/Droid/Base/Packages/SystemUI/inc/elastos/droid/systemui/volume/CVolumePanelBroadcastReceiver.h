@@ -1,7 +1,7 @@
-#ifndef __ELASTOS_DROID_SYSTEMUI_VOLUME_CVOLUMEPANELBROADCASTRECEIVER1_H__
-#define __ELASTOS_DROID_SYSTEMUI_VOLUME_CVOLUMEPANELBROADCASTRECEIVER1_H__
+#ifndef __ELASTOS_DROID_SYSTEMUI_VOLUME_CVOLUMEPANELBROADCASTRECEIVER_H__
+#define __ELASTOS_DROID_SYSTEMUI_VOLUME_CVOLUMEPANELBROADCASTRECEIVER_H__
 
-#include "_Elastos_Droid_SystemUI_Volume_CVolumePanelBroadcastReceiver1.h"
+#include "_Elastos_Droid_SystemUI_Volume_CVolumePanelBroadcastReceiver.h"
 #include "elastos/droid/content/BroadcastReceiver.h"
 
 using Elastos::Droid::Content::BroadcastReceiver;
@@ -13,7 +13,7 @@ namespace Volume{
 
 class VolumePanel;
 
-CarClass(CVolumePanelBroadcastReceiver1), public BroadcastReceiver
+CarClass(CVolumePanelBroadcastReceiver), public BroadcastReceiver
 {
 public:
     CAR_OBJECT_DECL()
@@ -35,4 +35,4 @@ private:
 } // namespace Droid
 } // namespace Elastos
 
-#endif // __ELASTOS_DROID_SYSTEMUI_VOLUME_CVOLUMEPANELBROADCASTRECEIVER1_H__
+#endif // __ELASTOS_DROID_SYSTEMUI_VOLUME_CVOLUMEPANELBROADCASTRECEIVER_H__

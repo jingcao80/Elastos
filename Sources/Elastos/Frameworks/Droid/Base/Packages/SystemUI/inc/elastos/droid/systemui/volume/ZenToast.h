@@ -33,6 +33,8 @@ private:
         : public Handler
     {
     public:
+        TO_STRING_IMPL("ZenToast::MyHandler")
+
         MyHandler(
             /* [in] */ ZenToast* host);
 
@@ -60,14 +62,16 @@ private:
         ZenToast* mHost;
     };
 
-    class MyListener
+    class OnAttachStateChangeListener
         : public Object
         , public IViewOnAttachStateChangeListener
     {
     public:
+        TO_STRING_IMPL("ZenToast::OnAttachStateChangeListener")
+
         CAR_INTERFACE_DECL()
 
-        MyListener(
+        OnAttachStateChangeListener(
             /* [in] */ ITextView* message,
             /* [in] */ ZenToast* host);
 
@@ -83,7 +87,7 @@ private:
     };
 
 public:
-    ZenToast(
+    CARAPI constructor(
         /* [in] */ IContext* context);
 
     CARAPI Show(

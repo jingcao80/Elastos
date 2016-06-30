@@ -1,6 +1,8 @@
 #include "elastos/droid/systemui/volume/VolumePanel.h"
-#include "elastos/droid/systemui/volume/CVolumePanelBroadcastReceiver1.h"
-#include "elastos/droid/systemui/volume/CVolumePanelBroadcastReceiver2.h"
+#include "elastos/droid/systemui/volume/CVolumeDialog.h"
+#include "elastos/droid/systemui/volume/CVolumePanelSafetyWarning.h"
+#include "elastos/droid/systemui/volume/CVolumePanelBroadcastReceiver.h"
+#include "elastos/droid/systemui/volume/CVolumePanelCloseSystemDialogsReceiver.h"
 #include "elastos/droid/systemui/volume/Interaction.h"
 #include "Elastos.Droid.Graphics.h"
 #include "Elastos.CoreLibrary.Core.h"
@@ -8,6 +10,7 @@
 #include "R.h"
 #include "elastos/droid/R.h"
 #include <elastos/core/AutoLock.h>
+#include <elastos/core/CoreUtils.h>
 #include <elastos/core/StringUtils.h>
 #include <elastos/utility/logging/Logger.h>
 
@@ -52,6 +55,7 @@ using Elastos::Core::CString;
 using Elastos::Core::CSystem;
 using Elastos::Core::ICharSequence;
 using Elastos::Core::ISystem;
+using Elastos::Core::CoreUtils;
 using Elastos::Core::StringUtils;
 using Elastos::Utility::Logging::Logger;
 
@@ -81,7 +85,7 @@ VolumePanel::StreamResources::StreamResources(
 // VolumePanel::ENUM_StreamResources
 //==============================================================================
 
-static AutoPtr<VolumePanel::StreamResources> initBluetoothSCOStream()
+static AutoPtr<VolumePanel::StreamResources> InitBluetoothSCOStream()
 {
     AutoPtr<VolumePanel::StreamResources> sr = new VolumePanel::StreamResources(
         IAudioManager::STREAM_BLUETOOTH_SCO,
@@ -92,7 +96,7 @@ static AutoPtr<VolumePanel::StreamResources> initBluetoothSCOStream()
     return sr;
 }
 
-static AutoPtr<VolumePanel::StreamResources> initRingerStream()
+static AutoPtr<VolumePanel::StreamResources> InitRingerStream()
 {
     AutoPtr<VolumePanel::StreamResources> sr = new VolumePanel::StreamResources(
         IAudioManager::STREAM_RING,
@@ -103,7 +107,7 @@ static AutoPtr<VolumePanel::StreamResources> initRingerStream()
     return sr;
 }
 
-static AutoPtr<VolumePanel::StreamResources> initVoiceStream()
+static AutoPtr<VolumePanel::StreamResources> InitVoiceStream()
 {
     AutoPtr<VolumePanel::StreamResources> sr = new VolumePanel::StreamResources(
         IAudioManager::STREAM_VOICE_CALL,
@@ -114,7 +118,7 @@ static AutoPtr<VolumePanel::StreamResources> initVoiceStream()
     return sr;
 }
 
-static AutoPtr<VolumePanel::StreamResources> initAlarmStream()
+static AutoPtr<VolumePanel::StreamResources> InitAlarmStream()
 {
     AutoPtr<VolumePanel::StreamResources> sr = new VolumePanel::StreamResources(
         IAudioManager::STREAM_ALARM,
@@ -125,7 +129,7 @@ static AutoPtr<VolumePanel::StreamResources> initAlarmStream()
     return sr;
 }
 
-static AutoPtr<VolumePanel::StreamResources> initMediaStream()
+static AutoPtr<VolumePanel::StreamResources> InitMediaStream()
 {
     AutoPtr<VolumePanel::StreamResources> sr = new VolumePanel::StreamResources(
         IAudioManager::STREAM_MUSIC,
@@ -136,7 +140,7 @@ static AutoPtr<VolumePanel::StreamResources> initMediaStream()
     return sr;
 }
 
-static AutoPtr<VolumePanel::StreamResources> initNotificationStream()
+static AutoPtr<VolumePanel::StreamResources> InitNotificationStream()
 {
     AutoPtr<VolumePanel::StreamResources> sr = new VolumePanel::StreamResources(
         IAudioManager::STREAM_NOTIFICATION,
@@ -148,7 +152,7 @@ static AutoPtr<VolumePanel::StreamResources> initNotificationStream()
 }
 
 // for now, use media resources for master volume
-static AutoPtr<VolumePanel::StreamResources> initMasterStream()
+static AutoPtr<VolumePanel::StreamResources> InitMasterStream()
 {
     AutoPtr<VolumePanel::StreamResources> sr = new VolumePanel::StreamResources(
         /*STREAM_MASTER*/-100,
@@ -159,7 +163,7 @@ static AutoPtr<VolumePanel::StreamResources> initMasterStream()
     return sr;
 }
 
-static AutoPtr<VolumePanel::StreamResources> initRemoteStream()
+static AutoPtr<VolumePanel::StreamResources> InitRemoteStream()
 {
     AutoPtr<VolumePanel::StreamResources> sr = new VolumePanel::StreamResources(
         /*STREAM_REMOTE_MUSIC*/-200,
@@ -170,14 +174,14 @@ static AutoPtr<VolumePanel::StreamResources> initRemoteStream()
     return sr;
 }
 
-const AutoPtr<VolumePanel::StreamResources> VolumePanel::ENUM_StreamResources::BluetoothSCOStream = initBluetoothSCOStream();
-const AutoPtr<VolumePanel::StreamResources> VolumePanel::ENUM_StreamResources::RingerStream = initRingerStream();
-const AutoPtr<VolumePanel::StreamResources> VolumePanel::ENUM_StreamResources::VoiceStream = initVoiceStream();
-const AutoPtr<VolumePanel::StreamResources> VolumePanel::ENUM_StreamResources::AlarmStream = initAlarmStream();
-const AutoPtr<VolumePanel::StreamResources> VolumePanel::ENUM_StreamResources::MediaStream = initMediaStream();
-const AutoPtr<VolumePanel::StreamResources> VolumePanel::ENUM_StreamResources::NotificationStream = initNotificationStream();
-const AutoPtr<VolumePanel::StreamResources> VolumePanel::ENUM_StreamResources::MasterStream = initMasterStream();
-const AutoPtr<VolumePanel::StreamResources> VolumePanel::ENUM_StreamResources::RemoteStream = initRemoteStream();
+INIT_PROI_2 const AutoPtr<VolumePanel::StreamResources> VolumePanel::ENUM_StreamResources::BluetoothSCOStream = InitBluetoothSCOStream();
+INIT_PROI_2 const AutoPtr<VolumePanel::StreamResources> VolumePanel::ENUM_StreamResources::RingerStream = InitRingerStream();
+INIT_PROI_2 const AutoPtr<VolumePanel::StreamResources> VolumePanel::ENUM_StreamResources::VoiceStream = InitVoiceStream();
+INIT_PROI_2 const AutoPtr<VolumePanel::StreamResources> VolumePanel::ENUM_StreamResources::AlarmStream = InitAlarmStream();
+INIT_PROI_2 const AutoPtr<VolumePanel::StreamResources> VolumePanel::ENUM_StreamResources::MediaStream = InitMediaStream();
+INIT_PROI_2 const AutoPtr<VolumePanel::StreamResources> VolumePanel::ENUM_StreamResources::NotificationStream = InitNotificationStream();
+INIT_PROI_2 const AutoPtr<VolumePanel::StreamResources> VolumePanel::ENUM_StreamResources::MasterStream = InitMasterStream();
+INIT_PROI_2 const AutoPtr<VolumePanel::StreamResources> VolumePanel::ENUM_StreamResources::RemoteStream = InitRemoteStream();
 
 //==============================================================================
 // VolumePanel::StreamControl
@@ -186,17 +190,18 @@ const AutoPtr<VolumePanel::StreamResources> VolumePanel::ENUM_StreamResources::R
 CAR_INTERFACE_IMPL(VolumePanel::StreamControl, Object, IVolumePanelStreamControl)
 
 //==============================================================================
-// CVolumePanelBroadcastReceiver2
+// CVolumePanelCloseSystemDialogsReceiver
 //==============================================================================
-CAR_OBJECT_IMPL(CVolumePanelBroadcastReceiver2)
-ECode CVolumePanelBroadcastReceiver2::constructor(
+CAR_OBJECT_IMPL(CVolumePanelCloseSystemDialogsReceiver)
+
+ECode CVolumePanelCloseSystemDialogsReceiver::constructor(
     /* [in] */ ISystemUIDialog* host)
 {
     mHost = (VolumePanel::SafetyWarning*)host;
     return BroadcastReceiver::constructor();
 }
 
-ECode CVolumePanelBroadcastReceiver2::OnReceive(
+ECode CVolumePanelCloseSystemDialogsReceiver::OnReceive(
     /* [in] */ IContext* context,
     /* [in] */ IIntent* intent)
 {
@@ -213,43 +218,69 @@ ECode CVolumePanelBroadcastReceiver2::OnReceive(
 }
 
 //==============================================================================
+// VolumePanel::DialogInterfaceListener
+//==============================================================================
+
+CAR_INTERFACE_IMPL_2(VolumePanel::DialogInterfaceListener, Object, \
+    IDialogInterfaceOnDismissListener, IDialogInterfaceOnClickListener)
+
+VolumePanel::DialogInterfaceListener::DialogInterfaceListener(
+    /* [in] */ SafetyWarning* host)
+    : mHost(host)
+{}
+
+ECode VolumePanel::DialogInterfaceListener::OnClick(
+    /* [in] */ IDialogInterface* dialog,
+    /* [in] */ Int32 which)
+{
+    return mHost->mAudioManager->DisableSafeMediaVolume();
+}
+
+ECode VolumePanel::DialogInterfaceListener::OnDismiss(
+    /* [in] */ IDialogInterface* unused)
+{
+    mHost->mContext->UnregisterReceiver(mHost->mReceiver);
+    mHost->CleanUp();
+    return NOERROR;
+}
+
+//==============================================================================
 // VolumePanel::SafetyWarning
 //==============================================================================
 
-CAR_INTERFACE_IMPL_2(VolumePanel::SafetyWarning, SystemUIDialog, \
-    IDialogInterfaceOnDismissListener, IDialogInterfaceOnClickListener)
+VolumePanel::SafetyWarning::SafetyWarning()
+    : mNewVolumeUp(FALSE)
+{}
 
-VolumePanel::SafetyWarning::SafetyWarning(
+ECode VolumePanel::SafetyWarning::constructor(
     /* [in] */ IContext* context,
-    /* [in] */ VolumePanel* volumePanel,
+    /* [in] */ IVolumePanel* volumePanel,
     /* [in] */ IAudioManager* audioManager)
-    : mContext(context)
-    , mVolumePanel(volumePanel)
-    , mAudioManager(audioManager)
 {
     SystemUIDialog::constructor(context);
 
-    String s1;
-    mContext->GetString(Elastos::Droid::R::string::safe_media_volume_warning, &s1);
-    SystemUIDialog::SetMessage(StringUtils::ParseInt32(s1));
+    mContext = context;
+    mVolumePanel = (VolumePanel*)volumePanel;
+    mAudioManager = audioManager;
 
-    String s2;
-    mContext->GetString(Elastos::Droid::R::string::yes, &s2);
-    AutoPtr<ICharSequence> cs;
-    CString::New(s2, (ICharSequence**)&cs);
-    AlertDialog::SetButton(IDialogInterface::BUTTON_POSITIVE, cs, this);
-    String s3;
-    mContext->GetString(Elastos::Droid::R::string::no, &s3);
-    AutoPtr<ICharSequence> cs2;
-    CString::New(s3, (ICharSequence**)&cs2);
-    AlertDialog::SetButton(IDialogInterface::BUTTON_NEGATIVE, cs2, (IMessage*)NULL);
-    Dialog::SetOnDismissListener(this);
+    String str;
+    mContext->GetString(Elastos::Droid::R::string::safe_media_volume_warning, &str);
+    SetMessage(StringUtils::ParseInt32(str));
 
-    CVolumePanelBroadcastReceiver2::New(this, (IBroadcastReceiver**)&mReceiver);
+    AutoPtr<DialogInterfaceListener> listener = new DialogInterfaceListener(this);
+    mContext->GetString(Elastos::Droid::R::string::yes, &str);
+    AutoPtr<ICharSequence> cs = CoreUtils::Convert(str);
+    SetButton(IDialogInterface::BUTTON_POSITIVE, cs, listener);
+    mContext->GetString(Elastos::Droid::R::string::no, &str);
+    cs = CoreUtils::Convert(str);
+    SetButton(IDialogInterface::BUTTON_NEGATIVE, cs, (IMessage*)NULL);
+    SetOnDismissListener(listener);
+
+    CVolumePanelCloseSystemDialogsReceiver::New(this, (IBroadcastReceiver**)&mReceiver);
     AutoPtr<IIntentFilter> filter;
     CIntentFilter::New(IIntent::ACTION_CLOSE_SYSTEM_DIALOGS, (IIntentFilter**)&filter);
     AutoPtr<IIntent> intent;
-    context->RegisterReceiver(mReceiver, filter, (IIntent**)&intent);
+    return context->RegisterReceiver(mReceiver, filter, (IIntent**)&intent);
 }
 
 ECode VolumePanel::SafetyWarning::OnKeyDown(
@@ -279,24 +310,10 @@ ECode VolumePanel::SafetyWarning::OnKeyUp(
     return Dialog::OnKeyUp(keyCode, event, result);
 }
 
-ECode VolumePanel::SafetyWarning::OnClick(
-    /* [in] */ IDialogInterface* dialog,
-    /* [in] */ Int32 which)
-{
-    return mAudioManager->DisableSafeMediaVolume();
-}
-
-ECode VolumePanel::SafetyWarning::OnDismiss(
-    /* [in] */ IDialogInterface* unused)
-{
-    mContext->UnregisterReceiver(mReceiver);
-    CleanUp();
-    return NOERROR;
-}
-
 ECode VolumePanel::SafetyWarning::CleanUp()
 {
-    {    AutoLock syncLock(VolumePanel::sSafetyWarningLock);
+    {
+        AutoLock syncLock(VolumePanel::sSafetyWarningLock);
         sSafetyWarning = NULL;
     }
     mVolumePanel->ForceTimeout(0);
@@ -323,7 +340,7 @@ ECode VolumePanel::MySeekListener::OnProgressChanged(
     AutoPtr<IInterface> tag;
     IView::Probe(seekBar)->GetTag((IInterface**)&tag);
 
-    if (fromUser && tag->Probe(EIID_IVolumePanelStreamControl)) {
+    if (fromUser && IVolumePanelStreamControl::Probe(tag)) {
         AutoPtr<StreamControl> sc = (StreamControl*)(IVolumePanelStreamControl::Probe(tag));
         mHost->SetStreamVolume(sc, progress,
             IAudioManager::FLAG_SHOW_UI | IAudioManager::FLAG_VIBRATE);
@@ -345,17 +362,15 @@ ECode VolumePanel::MySeekListener::OnStopTrackingTouch(
 }
 
 //==============================================================================
-// VolumePanel::MyZenCallback
+// VolumePanel::ZenModeCallback
 //==============================================================================
 
-CAR_INTERFACE_IMPL(VolumePanel::MyZenCallback, Object, IZenModeControllerCallback)
-
-VolumePanel::MyZenCallback::MyZenCallback(
+VolumePanel::ZenModeCallback::ZenModeCallback(
     /* [in] */ VolumePanel* host)
     : mHost(host)
 {}
 
-ECode VolumePanel::MyZenCallback::OnZenAvailableChanged(
+ECode VolumePanel::ZenModeCallback::OnZenAvailableChanged(
     /* [in] */ Boolean available)
 {
     AutoPtr<IMessage> msg;
@@ -366,7 +381,7 @@ ECode VolumePanel::MyZenCallback::OnZenAvailableChanged(
     return NOERROR;
 }
 
-ECode VolumePanel::MyZenCallback::OnEffectsSupressorChanged()
+ECode VolumePanel::ZenModeCallback::OnEffectsSupressorChanged()
 {
     AutoPtr<IComponentName> name;
     mHost->mZenController->GetEffectsSuppressor((IComponentName**)&name);
@@ -379,65 +394,42 @@ ECode VolumePanel::MyZenCallback::OnEffectsSupressorChanged()
     return NOERROR;
 }
 
-ECode VolumePanel::MyZenCallback::OnZenChanged(
-   /* [in] */ Int32 zen)
-{
-    return NOERROR;
-}
-
-ECode VolumePanel::MyZenCallback::OnExitConditionChanged(
-   /* [in] */ ICondition* exitCondition)
-{
-    return NOERROR;
-}
-
-ECode VolumePanel::MyZenCallback::OnConditionsChanged(
-   /* [in] */ ArrayOf<ICondition*>* conditions)
-{
-    return NOERROR;
-}
-
-ECode VolumePanel::MyZenCallback::OnNextAlarmChanged()
-{
-    return NOERROR;
-}
-
 //==============================================================================
-// VolumePanel::MyMediaControllerCb
+// VolumePanel::AudioInfoChangedCallback
 //==============================================================================
-VolumePanel::MyMediaControllerCb::MyMediaControllerCb(
+VolumePanel::AudioInfoChangedCallback::AudioInfoChangedCallback(
     /* [in] */ VolumePanel* host)
     : mHost(host)
 {}
 
-ECode VolumePanel::MyMediaControllerCb::OnAudioInfoChanged(
+ECode VolumePanel::AudioInfoChangedCallback::OnAudioInfoChanged(
     /* [in] */ IMediaControllerPlaybackInfo* info)
 {
     return mHost->OnRemoteVolumeUpdateIfShown();
 }
 
 //==============================================================================
-// VolumePanel::MyDialog
+// VolumePanel::VolumeDialog
 //==============================================================================
 
-VolumePanel::MyDialog::MyDialog(
+ECode VolumePanel::VolumeDialog::constructor(
     /* [in] */ IContext* ctx,
-    /* [in] */ VolumePanel* host)
-    : mCtx(ctx)
-    , mHost(host)
+    /* [in] */ IVolumePanel* host)
 {
-    Dialog::constructor(mCtx);
+    mContext = ctx;
+    mHost = (VolumePanel*)host;
+    return Dialog::constructor(mContext);
 }
 
-ECode VolumePanel::MyDialog::OnTouchEvent(
+ECode VolumePanel::VolumeDialog::OnTouchEvent(
     /* [in] */ IMotionEvent* event,
     /* [out] */ Boolean* result)
 {
     VALIDATE_NOT_NULL(result)
     Int32 action;
     event->GetAction(&action);
-    if (mHost->IsShowing() &&
-        action == IMotionEvent::ACTION_OUTSIDE && sSafetyWarning == NULL) {
+    if (mHost->IsShowing() && action == IMotionEvent::ACTION_OUTSIDE
+        && sSafetyWarning == NULL) {
         mHost->ForceTimeout(0);
         *result = TRUE;
         return NOERROR;
@@ -447,17 +439,17 @@ ECode VolumePanel::MyDialog::OnTouchEvent(
 }
 
 //==============================================================================
-// VolumePanel::MyDismissListener
+// VolumePanel::VolumeDialogDismissListener
 //==============================================================================
 
-CAR_INTERFACE_IMPL(VolumePanel::MyDismissListener, Object, IDialogInterfaceOnDismissListener)
+CAR_INTERFACE_IMPL(VolumePanel::VolumeDialogDismissListener, Object, IDialogInterfaceOnDismissListener)
 
-VolumePanel::MyDismissListener::MyDismissListener(
+VolumePanel::VolumeDialogDismissListener::VolumeDialogDismissListener(
     /* [in] */ VolumePanel* host)
     : mHost(host)
 {}
 
-ECode VolumePanel::MyDismissListener::OnDismiss(
+ECode VolumePanel::VolumeDialogDismissListener::OnDismiss(
     /* [in] */ IDialogInterface* dialog)
 {
     mHost->mActiveStreamType = -1;
@@ -484,17 +476,17 @@ ECode VolumePanel::InteractionCallback::OnInteraction()
 }
 
 //==============================================================================
-// VolumePanel::ZMPCallback
+// VolumePanel::ZenPanelCallback
 //==============================================================================
 
-CAR_INTERFACE_IMPL(VolumePanel::ZMPCallback, Object, IZenModePanelCallback)
+CAR_INTERFACE_IMPL(VolumePanel::ZenPanelCallback, Object, IZenModePanelCallback)
 
-VolumePanel::ZMPCallback::ZMPCallback(
+VolumePanel::ZenPanelCallback::ZenPanelCallback(
     /* [in] */ VolumePanel* host)
     : mHost(host)
 {}
 
-ECode VolumePanel::ZMPCallback::OnMoreSettings()
+ECode VolumePanel::ZenPanelCallback::OnMoreSettings()
 {
     if (mHost->mCallback != NULL) {
         mHost->mCallback->OnZenSettings();
@@ -502,13 +494,13 @@ ECode VolumePanel::ZMPCallback::OnMoreSettings()
     return NOERROR;
 }
 
-ECode VolumePanel::ZMPCallback::OnInteraction()
+ECode VolumePanel::ZenPanelCallback::OnInteraction()
 {
     mHost->ResetTimeout();
     return NOERROR;
 }
 
-ECode VolumePanel::ZMPCallback::OnExpanded(
+ECode VolumePanel::ZenPanelCallback::OnExpanded(
     /* [in] */ Boolean expanded)
 {
     if (mHost->mZenPanelExpanded == expanded) {
@@ -521,18 +513,18 @@ ECode VolumePanel::ZMPCallback::OnExpanded(
 }
 
 //==============================================================================
-// CVolumePanelBroadcastReceiver1
+// CVolumePanelBroadcastReceiver
 //==============================================================================
-CAR_OBJECT_IMPL(CVolumePanelBroadcastReceiver1)
+CAR_OBJECT_IMPL(CVolumePanelBroadcastReceiver)
 
-ECode CVolumePanelBroadcastReceiver1::constructor(
+ECode CVolumePanelBroadcastReceiver::constructor(
     /* [in] */ IVolumePanel* host)
 {
     mHost = (VolumePanel*)host;
     return BroadcastReceiver::constructor();
 }
 
-ECode CVolumePanelBroadcastReceiver1::OnReceive(
+ECode CVolumePanelBroadcastReceiver::OnReceive(
     /* [in] */ IContext* context,
     /* [in] */ IIntent* intent)
 {
@@ -554,19 +546,19 @@ ECode CVolumePanelBroadcastReceiver1::OnReceive(
 }
 
 //==============================================================================
-// VolumePanel::MyOnClickListener
+// VolumePanel::StreamIconOnClickListener
 //==============================================================================
 
-CAR_INTERFACE_IMPL(VolumePanel::MyOnClickListener, Object, IViewOnClickListener)
+CAR_INTERFACE_IMPL(VolumePanel::StreamIconOnClickListener, Object, IViewOnClickListener)
 
-VolumePanel::MyOnClickListener::MyOnClickListener(
+VolumePanel::StreamIconOnClickListener::StreamIconOnClickListener(
     /* [in] */ StreamControl* sc,
     /* [in] */ VolumePanel* host)
     : mSc(sc)
     , mHost(host)
 {}
 
-ECode VolumePanel::MyOnClickListener::OnClick(
+ECode VolumePanel::StreamIconOnClickListener::OnClick(
     /* [in] */ IView* v)
 {
     mHost->ResetTimeout();
@@ -575,17 +567,17 @@ ECode VolumePanel::MyOnClickListener::OnClick(
 }
 
 //==============================================================================
-// VolumePanel::MyOnTouchListener
+// VolumePanel::VolumePanelItemOnTouchListener
 //==============================================================================
 
-CAR_INTERFACE_IMPL(VolumePanel::MyOnTouchListener, Object, IViewOnTouchListener)
+CAR_INTERFACE_IMPL(VolumePanel::VolumePanelItemOnTouchListener, Object, IViewOnTouchListener)
 
-VolumePanel::MyOnTouchListener::MyOnTouchListener(
+VolumePanel::VolumePanelItemOnTouchListener::VolumePanelItemOnTouchListener(
     /* [in] */ VolumePanel* host)
     : mHost(host)
 {}
 
-ECode VolumePanel::MyOnTouchListener::OnTouch(
+ECode VolumePanel::VolumePanelItemOnTouchListener::OnTouch(
     /* [in] */ IView* v,
     /* [in] */ IMotionEvent* event,
     /* [out] */ Boolean* result)
@@ -612,7 +604,7 @@ static AutoPtr<IAudioAttributes> InitVIBRATION_ATTRIBUTES()
     return aa;
 }
 
-static AutoPtr<ArrayOf<VolumePanel::StreamResources*> > initSTREAMS()
+static AutoPtr<ArrayOf<VolumePanel::StreamResources*> > InitSTREAMS()
 {
     AutoPtr<ArrayOf<VolumePanel::StreamResources*> > streams = ArrayOf<VolumePanel::StreamResources*>::Alloc(8);
     streams->Set(0, VolumePanel::ENUM_StreamResources::BluetoothSCOStream);
@@ -625,6 +617,9 @@ static AutoPtr<ArrayOf<VolumePanel::StreamResources*> > initSTREAMS()
     streams->Set(7, VolumePanel::ENUM_StreamResources::RemoteStream);
     return streams;
 }
+
+INIT_PROI_3 const AutoPtr<IAudioAttributes> VolumePanel::VIBRATION_ATTRIBUTES = InitVIBRATION_ATTRIBUTES();
+INIT_PROI_3 const AutoPtr<ArrayOf<VolumePanel::StreamResources*> > VolumePanel::STREAMS = InitSTREAMS();
 
 const String VolumePanel::TAG("VolumePanel");
 Boolean VolumePanel::LOGD = TRUE;//Logger::IsLoggable(TAG.string(), Logger::___DEBUG);
@@ -658,10 +653,9 @@ const Int32 VolumePanel::MSG_USER_ACTIVITY;
 const Int32 VolumePanel::MSG_NOTIFICATION_EFFECTS_SUPPRESSOR_CHANGED;
 const Int32 VolumePanel::STREAM_MASTER;
 const Int32 VolumePanel::STREAM_REMOTE_MUSIC;
-const AutoPtr<IAudioAttributes> VolumePanel::VIBRATION_ATTRIBUTES = InitVIBRATION_ATTRIBUTES();
 const Int32 VolumePanel::IC_AUDIO_VOL;
 const Int32 VolumePanel::IC_AUDIO_VOL_MUTE;
-const AutoPtr<ArrayOf<VolumePanel::StreamResources*> > VolumePanel::STREAMS = initSTREAMS();
+
 AutoPtr<IAlertDialog> VolumePanel::sSafetyWarning;
 Object VolumePanel::sSafetyWarningLock;
 
@@ -685,8 +679,8 @@ ECode VolumePanel::constructor(
     /* [in] */ IZenModeController* zenController)
 {
     mSeekListener = new MySeekListener(this);
-    mZenCallback = new MyZenCallback(this);
-    mMediaControllerCb = new MyMediaControllerCb(this);
+    mZenCallback = new ZenModeCallback(this);
+    mMediaControllerCb = new AudioInfoChangedCallback(this);
 
     mContext = context;
     mZenController = zenController;
@@ -696,9 +690,9 @@ ECode VolumePanel::constructor(
     AutoPtr<IInterface> obj;
     context->GetSystemService(IContext::AUDIO_SERVICE, (IInterface**)&obj);
     mAudioManager = IAudioManager::Probe(obj);
-    AutoPtr<IInterface> obj2;
-    context->GetSystemService(IContext::ACCESSIBILITY_SERVICE, (IInterface**)&obj2);
-    mAccessibilityManager = IAccessibilityManager::Probe(obj2);
+    obj = NULL;
+    context->GetSystemService(IContext::ACCESSIBILITY_SERVICE, (IInterface**)&obj);
+    mAccessibilityManager = IAccessibilityManager::Probe(obj);
 
     // For now, only show master volume if master volume is supported
     AutoPtr<IResources> res;
@@ -725,7 +719,7 @@ ECode VolumePanel::constructor(
         attr->Recycle();
     }
 
-    mDialog = new MyDialog(context, this);
+    CVolumeDialog::New(context, this, (IDialog**)&mDialog);
 
     AutoPtr<IWindow> window;
     mDialog->GetWindow((IWindow**)&window);
@@ -734,10 +728,8 @@ ECode VolumePanel::constructor(
     mDialog->SetCanceledOnTouchOutside(TRUE);
     mDialog->SetContentView(R::layout::volume_dialog);
 
-    AutoPtr<MyDismissListener> dl = new MyDismissListener(this);
-
+    AutoPtr<VolumeDialogDismissListener> dl = new VolumeDialogDismissListener(this);
     mDialog->SetOnDismissListener(dl);
-
     mDialog->Create();
 
     AutoPtr<IWindowManagerLayoutParams> lp;
@@ -749,8 +741,7 @@ ECode VolumePanel::constructor(
     lp->SetType(IWindowManagerLayoutParams::TYPE_STATUS_BAR_PANEL);
     lp->SetFormat(IPixelFormat::TRANSLUCENT);
     lp->SetWindowAnimations(R::style::VolumePanelAnimation);
-    AutoPtr<ICharSequence> title;
-    CString::New(TAG, (ICharSequence**)&title);
+    AutoPtr<ICharSequence> title = CoreUtils::Convert(TAG);
     lp->SetTitle(title);
     window->SetAttributes(lp);
 
@@ -784,9 +775,9 @@ ECode VolumePanel::constructor(
     Int32 nst;
     as->GetNumStreamTypes(&nst);
     mToneGenerators = ArrayOf<IToneGenerator*>::Alloc(nst);
-    AutoPtr<IInterface> obj3;
-    context->GetSystemService(IContext::VIBRATOR_SERVICE, (IInterface**)&obj3);
-    mVibrator = IVibrator::Probe(obj3);
+    obj = NULL;
+    context->GetSystemService(IContext::VIBRATOR_SERVICE, (IInterface**)&obj);
+    mVibrator = IVibrator::Probe(obj);
     res->GetBoolean(Elastos::Droid::R::bool_::config_voice_capable, &mVoiceCapable);
 
     if (mZenController != NULL && !useMasterVolume) {
@@ -797,6 +788,9 @@ ECode VolumePanel::constructor(
     Boolean masterVolumeKeySounds;
     res->GetBoolean(Elastos::Droid::R::bool_::config_useVolumeKeySounds, &masterVolumeKeySounds);
     mPlayMasterStreamTones = useMasterVolume && masterVolumeKeySounds;
+
+    Logger::I(TAG, " >> config VoiceCapable: %d, zenModeAvailable: %d, playMasterStreamTones: %d",
+        mVoiceCapable, mZenModeAvailable, mPlayMasterStreamTones);
 
     RegisterReceiver();
 
@@ -833,7 +827,7 @@ void VolumePanel::UpdateWidth()
 void VolumePanel::InitZenModePanel()
 {
     mZenPanel->Init(mZenController);
-    AutoPtr<ZMPCallback> cb = new ZMPCallback(this);
+    AutoPtr<ZenPanelCallback> cb = new ZenPanelCallback(this);
     mZenPanel->SetCallback(cb);
 }
 
@@ -851,7 +845,7 @@ void VolumePanel::RegisterReceiver()
     filter->AddAction(IAudioManager::RINGER_MODE_CHANGED_ACTION);
     filter->AddAction(IIntent::ACTION_SCREEN_OFF);
     AutoPtr<IBroadcastReceiver> br;
-    CVolumePanelBroadcastReceiver1::New(this, (IBroadcastReceiver**)&br);
+    CVolumePanelBroadcastReceiver::New(this, (IBroadcastReceiver**)&br);
     AutoPtr<IIntent> intent;
     mContext->RegisterReceiver(br, filter, (IIntent**)&intent);
 }
@@ -861,6 +855,8 @@ ECode VolumePanel::IsMuted(
     /* [out] */ Boolean* isMuted)
 {
     VALIDATE_NOT_NULL(isMuted)
+    *isMuted = FALSE;
+
     if (streamType == STREAM_MASTER) {
         return mAudioManager->IsMasterMute(isMuted);
     }
@@ -879,6 +875,8 @@ ECode VolumePanel::GetStreamMaxVolume(
     /* [out] */ Int32* smv)
 {
     VALIDATE_NOT_NULL(smv)
+    *smv = 0;
+
     if (streamType == STREAM_MASTER) {
         return mAudioManager->GetMasterMaxVolume(smv);
     }
@@ -894,17 +892,18 @@ ECode VolumePanel::GetStreamMaxVolume(
             }
         }
         *smv = -1;
+        return NOERROR;
     }
-    else {
-        return mAudioManager->GetStreamMaxVolume(streamType, smv);
-    }
-    return NOERROR;
+
+    return mAudioManager->GetStreamMaxVolume(streamType, smv);
 }
 
 ECode VolumePanel::GetStreamVolume(
     /* [in] */ Int32 streamType,
     /* [out] */ Int32* sv)
 {
+    VALIDATE_NOT_NULL(sv)
+
     if (streamType == STREAM_MASTER) {
         return mAudioManager->GetMasterVolume(sv);
     }
@@ -922,9 +921,8 @@ ECode VolumePanel::GetStreamVolume(
         *sv = -1;
         return NOERROR;
     }
-    else {
-        return mAudioManager->GetStreamVolume(streamType, sv);
-    }
+
+    return mAudioManager->GetStreamVolume(streamType, sv);
 }
 
 void VolumePanel::SetStreamVolume(
@@ -969,44 +967,44 @@ void VolumePanel::CreateSliders()
 
         AutoPtr<StreamControl> sc = new StreamControl();
         sc->mStreamType = streamType;
-        AutoPtr<IView> v1;
-        inflater->Inflate(R::layout::volume_panel_item, NULL, (IView**)&v1);
-        sc->mGroup = IViewGroup::Probe(v1);
-        IView::Probe(sc->mGroup)->SetTag((IVolumePanelStreamControl*)sc);
+        AutoPtr<IView> view;
+        inflater->Inflate(R::layout::volume_panel_item, NULL, (IView**)&view);
+        sc->mGroup = IViewGroup::Probe(view);
+        view->SetTag((IVolumePanelStreamControl*)sc);
 
-        AutoPtr<IView> v2;
-        IView::Probe(sc->mGroup)->FindViewById(R::id::stream_icon, (IView**)&v2);
-        sc->mIcon = IImageView::Probe(v2);
-        IView::Probe(sc->mIcon)->SetTag((IVolumePanelStreamControl*)sc);
+        AutoPtr<IView> iconView;
+        IView::Probe(sc->mGroup)->FindViewById(R::id::stream_icon, (IView**)&iconView);
+        sc->mIcon = IImageView::Probe(iconView);
+        iconView->SetTag((IVolumePanelStreamControl*)sc);
 
         String str;
         res->GetString(streamRes->mDescRes, &str);
-        AutoPtr<ICharSequence> cdes;
-        CString::New(str, (ICharSequence**)&cdes);
-        IView::Probe(sc->mIcon)->SetContentDescription(cdes);
+        AutoPtr<ICharSequence> cdes = CoreUtils::Convert(str);
+        iconView->SetContentDescription(cdes);
         sc->mIconRes = streamRes->mIconRes;
         sc->mIconMuteRes = streamRes->mIconMuteRes;
         sc->mIcon->SetImageResource(sc->mIconRes);
-        IView::Probe(sc->mIcon)->SetClickable(IsNotificationOrRing(streamType));
+        iconView->SetClickable(IsNotificationOrRing(streamType));
         Boolean isClickable;
-        IView::Probe(sc->mIcon)->IsClickable(&isClickable);
+        iconView->IsClickable(&isClickable);
         if (isClickable) {
-            IView::Probe(sc->mIcon)->SetSoundEffectsEnabled(FALSE);
-            AutoPtr<MyOnClickListener> ocl = new MyOnClickListener(sc, this);
-            IView::Probe(sc->mIcon)->SetOnClickListener(ocl);
+            iconView->SetSoundEffectsEnabled(FALSE);
+            AutoPtr<StreamIconOnClickListener> ocl = new StreamIconOnClickListener(sc, this);
+            iconView->SetOnClickListener(ocl);
             sc->mIconSuppressedRes = R::drawable::ic_ringer_mute;
         }
-        AutoPtr<IView> v3;
-        IView::Probe(sc->mGroup)->FindViewById(R::id::seekbar, (IView**)&v3);
-        sc->mSeekbarView = ISeekBar::Probe(v3);
 
-        AutoPtr<IView> v4;
-        IView::Probe(sc->mGroup)->FindViewById(R::id::suppressor, (IView**)&v4);
-        sc->mSuppressorView = ITextView::Probe(v4);
+        view = NULL;
+        IView::Probe(sc->mGroup)->FindViewById(R::id::seekbar, (IView**)&view);
+        sc->mSeekbarView = ISeekBar::Probe(view);
+
+        view = NULL;
+        IView::Probe(sc->mGroup)->FindViewById(R::id::suppressor, (IView**)&view);
+        sc->mSuppressorView = ITextView::Probe(view);
 
         IView::Probe(sc->mSuppressorView)->SetVisibility(IView::GONE);
-        const Int32 plusOne = (streamType == IAudioSystem::STREAM_BLUETOOTH_SCO ||
-            streamType == IAudioSystem::STREAM_VOICE_CALL) ? 1 : 0;
+        const Int32 plusOne = (streamType == IAudioSystem::STREAM_BLUETOOTH_SCO
+            || streamType == IAudioSystem::STREAM_VOICE_CALL) ? 1 : 0;
 
         Int32 smvolume;
         GetStreamMaxVolume(streamType, &smvolume);
@@ -1116,9 +1114,8 @@ void VolumePanel::UpdateSliderSupressor(
         array->Set(0, cs);
         String str;
         mContext->GetString(R::string::muted_by, array, &str);
-        AutoPtr<ICharSequence> cs2;
-        CString::New(str, (ICharSequence**)&cs2);
-        sc->mSuppressorView->SetText(cs2);
+        cs = CoreUtils::Convert(str);
+        sc->mSuppressorView->SetText(cs);
         sc->mIcon->SetImageResource(sc->mIconSuppressedRes);
     }
 }
@@ -1174,40 +1171,41 @@ void VolumePanel::UpdateSliderEnabled(
     Int32 mst;
     mAudioManager->GetMasterStreamType(&mst);
 
+    IView* iconView = IView::Probe(sc->mIcon);
+    IView* seekbarView = IView::Probe(sc->mSeekbarView);
     Boolean wasEnabled;
-    IView::Probe(sc->mSeekbarView)->IsEnabled(&wasEnabled);
+    seekbarView->IsEnabled(&wasEnabled);
     const Boolean isRinger = IsNotificationOrRing(sc->mStreamType);
     if (sc->mStreamType == STREAM_REMOTE_MUSIC) {
         // never disable touch interactions for remote playback, the muting is not tied to
         // the state of the phone.
-        IView::Probe(sc->mSeekbarView)->SetEnabled(!fixedVolume);
+        seekbarView->SetEnabled(!fixedVolume);
     }
     else if (isRinger && rm == IAudioManager::RINGER_MODE_SILENT) {
-        IView::Probe(sc->mSeekbarView)->SetEnabled(FALSE);
-        IView::Probe(sc->mIcon)->SetEnabled(FALSE);
-        IView::Probe(sc->mIcon)->SetAlpha(mDisabledAlpha);
-        IView::Probe(sc->mIcon)->SetClickable(FALSE);
+        seekbarView->SetEnabled(FALSE);
+        iconView->SetEnabled(FALSE);
+        iconView->SetAlpha(mDisabledAlpha);
+        iconView->SetClickable(FALSE);
     }
-    else if (fixedVolume ||
-        (sc->mStreamType != mst && muted) ||
-        (sSafetyWarning != NULL)) {
-        IView::Probe(sc->mSeekbarView)->SetEnabled(FALSE);
+    else if (fixedVolume || (sc->mStreamType != mst && muted) || (sSafetyWarning != NULL)) {
+        seekbarView->SetEnabled(FALSE);
     }
     else {
-        IView::Probe(sc->mSeekbarView)->SetEnabled(TRUE);
-        IView::Probe(sc->mIcon)->SetEnabled(TRUE);
-        IView::Probe(sc->mIcon)->SetAlpha(1.0f);
+        seekbarView->SetEnabled(TRUE);
+        iconView->SetEnabled(TRUE);
+        iconView->SetAlpha(1.0f);
     }
     // show the silent hint when the disabled slider is touched in silent mode
     Boolean isEnabled;
-    IView::Probe(sc->mSeekbarView)->IsEnabled(&isEnabled);
+    seekbarView->IsEnabled(&isEnabled);
     if (isRinger && wasEnabled != isEnabled) {
         if (isEnabled) {
             IView::Probe(sc->mGroup)->SetOnTouchListener(NULL);
-            IView::Probe(sc->mIcon)->SetClickable(TRUE);
+            iconView->SetClickable(TRUE);
         }
         else {
-            AutoPtr<MyOnTouchListener> showHintOnTouch = new MyOnTouchListener(this);
+            AutoPtr<VolumePanelItemOnTouchListener> showHintOnTouch;
+            showHintOnTouch = new VolumePanelItemOnTouchListener(this);
             IView::Probe(sc->mGroup)->SetOnTouchListener(showHintOnTouch);
         }
     }
@@ -1258,8 +1256,10 @@ ECode VolumePanel::IsZenPanelVisible(
 void VolumePanel::SetZenPanelVisible(
     /* [in] */ Boolean visible)
 {
-    if (LOGD) Logger::D(mTag, "setZenPanelVisible %s mZenPanel=%s",
-        visible ? "TRUE" : "FALSE", TO_CSTR(mZenPanel));
+    if (LOGD) {
+        Logger::D(mTag, "SetZenPanelVisible %s mZenPanel=%s",
+            visible ? "TRUE" : "FALSE", TO_CSTR(mZenPanel));
+    }
     Boolean b;
     IsZenPanelVisible(&b);
     const Boolean changing = visible != b;
@@ -1302,8 +1302,10 @@ ECode VolumePanel::PostVolumeChanged(
 {
     Boolean result;
     HasMessages(MSG_VOLUME_CHANGED, &result);
-    if (result) return E_NULL_POINTER_EXCEPTION;
-    {    AutoLock syncLock(this);
+    if (result) return NOERROR;
+
+    {
+        AutoLock syncLock(this);
         if (mStreamControls == NULL) {
             CreateSliders();
         }
@@ -1321,8 +1323,10 @@ ECode VolumePanel::PostRemoteVolumeChanged(
 {
     Boolean result;
     HasMessages(MSG_REMOTE_VOLUME_CHANGED, &result);
-    if (result) return E_NULL_POINTER_EXCEPTION;
-    {    AutoLock syncLock(this);
+    if (result) return NOERROR;
+
+    {
+        AutoLock syncLock(this);
         if (mStreamControls == NULL) {
             CreateSliders();
         }
@@ -1348,7 +1352,8 @@ ECode VolumePanel::PostHasNewRemotePlaybackInfo()
 {
     Boolean result;
     HasMessages(MSG_REMOTE_VOLUME_UPDATE_IF_SHOWN, &result);
-    if (result) return E_NULL_POINTER_EXCEPTION;
+    if (result) return NOERROR;
+
     // don't create or prevent resources to be freed, if they disappear, this update came too
     //   late and shouldn't warrant the panel to be displayed longer
     AutoPtr<IMessage> msg;
@@ -1369,8 +1374,10 @@ ECode VolumePanel::PostMuteChanged(
 {
     Boolean result;
     HasMessages(MSG_VOLUME_CHANGED, &result);
-    if (result) return E_NULL_POINTER_EXCEPTION;
-    {    AutoLock syncLock(this);
+    if (result) return NOERROR;
+
+    {
+        AutoLock syncLock(this);
         if (mStreamControls == NULL) {
             CreateSliders();
         }
@@ -1393,7 +1400,8 @@ ECode VolumePanel::PostDisplaySafeVolumeWarning(
 {
     Boolean result;
     HasMessages(MSG_DISPLAY_SAFE_VOLUME_WARNING, &result);
-    if (result) return E_NULL_POINTER_EXCEPTION;
+    if (result) return NOERROR;
+
     AutoPtr<IMessage> msg;
     ObtainMessage(MSG_DISPLAY_SAFE_VOLUME_WARNING, flags, 0, (IMessage**)&msg);
     msg->SendToTarget();
@@ -1426,6 +1434,7 @@ ECode VolumePanel::OnVolumeChanged(
             streamType, mActiveStreamType, flags);
     }
 
+    Boolean bval;
     if ((flags & IAudioManager::FLAG_SHOW_UI) != 0) {
         AutoLock syncLock(this);
         if (mActiveStreamType != streamType) {
@@ -1438,8 +1447,7 @@ ECode VolumePanel::OnVolumeChanged(
         RemoveMessages(MSG_PLAY_SOUND);
         AutoPtr<IMessage> msg;
         ObtainMessage(MSG_PLAY_SOUND, streamType, flags, (IMessage**)&msg);
-        Boolean b;
-        SendMessageDelayed(msg, PLAY_SOUND_DELAY, &b);
+        SendMessageDelayed(msg, PLAY_SOUND_DELAY, &bval);
     }
 
     if ((flags & IAudioManager::FLAG_REMOVE_SOUND_AND_VIBRATE) != 0) {
@@ -1451,8 +1459,7 @@ ECode VolumePanel::OnVolumeChanged(
     RemoveMessages(MSG_FREE_RESOURCES);
     AutoPtr<IMessage> msg;
     ObtainMessage(MSG_FREE_RESOURCES, (IMessage**)&msg);
-    Boolean b2;
-    SendMessageDelayed(msg, FREE_DELAY, &b2);
+    SendMessageDelayed(msg, FREE_DELAY, &bval);
     ResetTimeout();
     return NOERROR;
 }
@@ -1799,11 +1806,14 @@ ECode VolumePanel::OnDisplaySafeVolumeWarning(
 {
     if ((flags & (IAudioManager::FLAG_SHOW_UI
         | IAudioManager::FLAG_SHOW_UI_WARNINGS)) != 0 || IsShowing()) {
-        {    AutoLock syncLock(sSafetyWarningLock);
+        {
+            AutoLock syncLock(sSafetyWarningLock);
             if (sSafetyWarning != NULL) {
                 return E_NULL_POINTER_EXCEPTION;
             }
-            sSafetyWarning = new SafetyWarning(mContext, this, mAudioManager);
+
+            CVolumePanelSafetyWarning::New(mContext, this, mAudioManager,
+                (IAlertDialog**)&sSafetyWarning);
             IDialog::Probe(sSafetyWarning)->Show();
         }
         UpdateStates();
@@ -1834,19 +1844,20 @@ AutoPtr<IToneGenerator> VolumePanel::GetOrCreateToneGenerator(
             return NULL;
         }
     }
-    {    AutoLock syncLock(this);
-        if ((*mToneGenerators)[streamType] == NULL) {
-            ECode ec = CToneGenerator::New(streamType, MAX_VOLUME, (IToneGenerator**)(&(*mToneGenerators)[streamType]));
-            if (FAILED(ec)) {
-                if (LOGD) {
-                    Logger::D(mTag, "ToneGenerator constructor failed with RuntimeException: %08x", ec);
-                }
-                // return E_RUNTIME_EXCEPTION;
+
+    AutoLock syncLock(this);
+    if ((*mToneGenerators)[streamType] == NULL) {
+        AutoPtr<IToneGenerator> tg;
+        ECode ec = CToneGenerator::New(streamType, MAX_VOLUME, (IToneGenerator**)&tg);
+        if (FAILED(ec)) {
+            if (LOGD) {
+                Logger::D(mTag, "ToneGenerator constructor failed with RuntimeException: %08x", ec);
             }
+            return NULL;
         }
-        return (*mToneGenerators)[streamType];
+        mToneGenerators->Set(streamType, tg);
     }
-    return NULL;
+    return (*mToneGenerators)[streamType];
 }
 
 void VolumePanel::SetMusicIcon(
@@ -1867,11 +1878,10 @@ void VolumePanel::SetMusicIcon(
 
 ECode VolumePanel::OnFreeResources()
 {
-    {    AutoLock syncLock(this);
-        for (Int32 i = mToneGenerators->GetLength() - 1; i >= 0; i--) {
-            if ((*mToneGenerators)[i] != NULL) {
-                // (*mToneGenerators)[i].release();
-            }
+    AutoLock syncLock(this);
+    for (Int32 i = mToneGenerators->GetLength() - 1; i >= 0; i--) {
+        if ((*mToneGenerators)[i] != NULL) {
+            (*mToneGenerators)[i]->ReleaseResources();
             (*mToneGenerators)[i] = NULL;
         }
     }
@@ -1929,7 +1939,8 @@ ECode VolumePanel::HandleMessage(
                     mCallback->OnVisible(FALSE);
                 }
             }
-            {    AutoLock syncLock(sSafetyWarningLock);
+            {
+                AutoLock syncLock(sSafetyWarningLock);
                 if (sSafetyWarning != NULL) {
                     if (LOGD) Logger::D(mTag, "SafetyWarning timeout");
                     IDialogInterface::Probe(sSafetyWarning)->Dismiss();

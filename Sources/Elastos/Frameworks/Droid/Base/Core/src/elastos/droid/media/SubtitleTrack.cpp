@@ -676,7 +676,7 @@ ECode SubtitleTrack::SetRunDiscardTimeMs(
     if (runID != 0 && runID != ~0) {
         AutoPtr<IInterface> obj;
         mRunsByID->Get(runID, (IInterface**)&obj);
-        AutoPtr<Run> run = (Run*)(IObject*)obj.Get();
+        AutoPtr<Run> run = (Run*)IObject::Probe(obj);
         if (run != NULL) {
             run->mEndTimeMs = timeMs;
             run->StoreByEndTimeMs(mRunsByEndTime);
@@ -830,7 +830,7 @@ ECode SubtitleTrack::AddCue(
     if (runID != 0) {
         AutoPtr<IInterface> obj;
         mRunsByID->Get(runID, (IInterface**)&obj);
-        AutoPtr<Run> run = (Run*)(IObject*)obj.Get();
+        AutoPtr<Run> run = (Run*)IObject::Probe(obj);
         if (run == NULL) {
             run = new Run();
             mRunsByID->Put(((Cue*)cue)->mRunID, (IInterface*)(IObject*)run);
@@ -897,7 +897,7 @@ ECode SubtitleTrack::FinishedRun(
     if (runID != 0 && runID != ~0) {
         AutoPtr<IInterface> obj;
         mRunsByID->Get(runID, (IInterface**)&obj);
-        AutoPtr<Run> run = (Run*)(IObject*)obj.Get();
+        AutoPtr<Run> run = (Run*)IObject::Probe(obj);
         if (run != NULL) {
             run->StoreByEndTimeMs(mRunsByEndTime);
         }
@@ -910,7 +910,7 @@ ECode SubtitleTrack::RemoveRunsByEndTimeIndex(
 {
     AutoPtr<IInterface> obj;
     mRunsByEndTime->ValueAt(ix, (IInterface**)&obj);
-    AutoPtr<Run> run = (Run*)(IObject*)obj.Get();
+    AutoPtr<Run> run = (Run*)IObject::Probe(obj);
     while (run != NULL) {
         Cue* cue = run->mFirstCue;
         while (cue != NULL) {

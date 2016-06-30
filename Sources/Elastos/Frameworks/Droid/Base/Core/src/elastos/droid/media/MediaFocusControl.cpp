@@ -363,7 +363,7 @@ ECode MediaFocusControl::DisplayInfoForServer::ProxyDied()
         while (displayIterator->HasNext(&b), b) {
             AutoPtr<IInterface> obj;
             displayIterator->GetNext((IInterface**)&obj);
-            AutoPtr<DisplayInfoForServer> di = (DisplayInfoForServer*)(IObject*)obj.Get();
+            AutoPtr<DisplayInfoForServer> di = (DisplayInfoForServer*)IObject::Probe(obj);
             if (di->mRcDisplay == mRcDisplay) {
                 if (DEBUG_RC) Logger::W(TAG, " RCD removed from list");
                 displayIterator->Remove();
@@ -956,7 +956,7 @@ void MediaFocusControl::UnregisterRemoteControlDisplay(
         while ((displayIterator->HasNext(&b), b) && !displayWasPluggedIn) {
             AutoPtr<IInterface> obj;
             displayIterator->GetNext((IInterface**)&obj);
-            AutoPtr<DisplayInfoForServer> di = (DisplayInfoForServer*)(IObject*)obj.Get();
+            AutoPtr<DisplayInfoForServer> di = (DisplayInfoForServer*)IObject::Probe(obj);
             if (IObject::Probe(IBinder::Probe(di->mRcDisplay))->Equals(IBinder::Probe(rcd), &b), b) {
                 displayWasPluggedIn = TRUE;
                 di->ReleaseResources();
@@ -1004,7 +1004,7 @@ void MediaFocusControl::RemoteControlDisplayUsesBitmapSize(
         while ((displayIterator->HasNext(&b), b) && !artworkSizeUpdate) {
             AutoPtr<IInterface> obj;
             displayIterator->GetNext((IInterface**)&obj);
-            AutoPtr<DisplayInfoForServer> di = (DisplayInfoForServer*)(IObject*)obj.Get();
+            AutoPtr<DisplayInfoForServer> di = (DisplayInfoForServer*)IObject::Probe(obj);
             if (IObject::Probe(IBinder::Probe(di->mRcDisplay))->Equals(IBinder::Probe(rcd), &b), b) {
                 if ((di->mArtworkExpectedWidth != w) || (di->mArtworkExpectedHeight != h)) {
                     di->mArtworkExpectedWidth = w;

@@ -96,10 +96,11 @@ ECode CSystemUIApplication::StartServicesIfNeeded()
     Int32 N = SERVICES->GetLength();
     for (Int32 i = 0; i < N; i++) {
         AutoPtr<IClassInfo> cl = (*SERVICES)[i];
-        if (DEBUG) Logger::D(TAG, "loading: %s", TO_CSTR(cl));
+        if (DEBUG) Logger::D(TAG, " > systemui loading: %s", TO_CSTR(cl));
 
         AutoPtr<IInterface> object;
         if (FAILED(cl->CreateObject((IInterface**)&object))) {
+            Logger::I(TAG, "Failed to create service: %s", TO_CSTR(cl));
             return E_RUNTIME_EXCEPTION;
         }
 
@@ -107,7 +108,7 @@ ECode CSystemUIApplication::StartServicesIfNeeded()
 
         (*mServices)[i]->SetContext(this);
         ((SystemUI*)(*mServices)[i])->SetComponents(mComponents);
-        if (DEBUG) Logger::D(TAG, "running: %p", object.Get());
+        if (DEBUG) Logger::D(TAG, " > systemui running: %s", TO_CSTR(object));
         (*mServices)[i]->Start();
 
         if (mBootCompleted) {

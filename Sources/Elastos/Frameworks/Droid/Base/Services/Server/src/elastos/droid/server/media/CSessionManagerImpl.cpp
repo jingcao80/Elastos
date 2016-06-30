@@ -275,14 +275,9 @@ ECode CSessionManagerImpl::DispatchAdjustVolume(
     /* [in] */ Int32 flags)
 {
     Int64 token = Binder::ClearCallingIdentity();
-    // try {
     AutoLock lock(mHost->mLock);
     AutoPtr<MediaSessionRecord> session = mHost->mPriorityStack->GetDefaultVolumeSession(mHost->mCurrentUserId);
     ECode ec = DispatchAdjustVolumeLocked(suggestedStream, delta, flags, session);
-    // }
-    // } finally {
-    //     Binder.restoreCallingIdentity(token);
-    // }
     Binder::RestoreCallingIdentity(token);
     return ec;
 }

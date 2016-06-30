@@ -1132,9 +1132,13 @@ ECode HierarchicalUri::constructor(
 {
     mScheme = scheme;
     mAuthority = (Part*)authority;
+    if (mAuthority == NULL) mAuthority = Part::sNULL;
     mPath = (PathPart*)path;
+    if (mPath == NULL) mPath = PathPart::sNULL;
     mQuery = (Part*)query;
+    if (mQuery == NULL) mQuery = Part::sNULL;
     mFragment = (Part*)fragment;
+    if (mFragment == NULL) mFragment = Part::sNULL;
     return NOERROR;
 }
 
@@ -1281,7 +1285,6 @@ ECode HierarchicalUri::GetAuthority(
     /* [out] */ String* authority)
 {
     VALIDATE_NOT_NULL(authority);
-
     *authority = mAuthority->GetDecoded();
     return NOERROR;
 }
@@ -1290,7 +1293,6 @@ ECode HierarchicalUri::GetEncodedAuthority(
     /* [out] */ String* authority)
 {
     VALIDATE_NOT_NULL(authority);
-
     *authority = mAuthority->GetEncoded();
     return NOERROR;
 }
@@ -1299,7 +1301,6 @@ ECode HierarchicalUri::GetEncodedPath(
     /* [out] */ String* path)
 {
     VALIDATE_NOT_NULL(path);
-
     *path = mPath->GetEncoded();
     return NOERROR;
 }
@@ -1308,7 +1309,6 @@ ECode HierarchicalUri::GetPath(
     /* [out] */ String* path)
 {
     VALIDATE_NOT_NULL(path);
-
     *path = mPath->GetDecoded();
     return NOERROR;
 }
@@ -1317,8 +1317,7 @@ ECode HierarchicalUri::GetQuery(
     /* [out] */ String* query)
 {
     VALIDATE_NOT_NULL(query);
-
-    *query = mPath->GetDecoded();
+    *query = mQuery->GetDecoded();
     return NOERROR;
 }
 
@@ -1326,8 +1325,7 @@ ECode HierarchicalUri::GetEncodedQuery(
     /* [out] */ String* query)
 {
     VALIDATE_NOT_NULL(query);
-
-    *query = mPath->GetEncoded();
+    *query = mQuery->GetEncoded();
     return NOERROR;
 }
 
@@ -1335,8 +1333,7 @@ ECode HierarchicalUri::GetFragment(
     /* [out] */ String* fragment)
 {
     VALIDATE_NOT_NULL(fragment);
-
-    *fragment = mPath->GetEncoded();
+    *fragment = mFragment->GetEncoded();
     return NOERROR;
 }
 
@@ -1344,8 +1341,7 @@ ECode HierarchicalUri::GetEncodedFragment(
     /* [out] */ String* fragment)
 {
     VALIDATE_NOT_NULL(fragment);
-
-    *fragment = mPath->GetEncoded();
+    *fragment = mFragment->GetEncoded();
     return NOERROR;
 }
 

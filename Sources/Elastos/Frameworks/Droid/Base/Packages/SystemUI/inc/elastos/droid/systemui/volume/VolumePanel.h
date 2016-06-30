@@ -117,6 +117,81 @@ public:
         const static AutoPtr<StreamResources> RemoteStream;
     };
 
+    class SafetyWarning;
+    class DialogInterfaceListener
+        : public Object
+        , public IDialogInterfaceOnDismissListener
+        , public IDialogInterfaceOnClickListener
+    {
+    public:
+        CAR_INTERFACE_DECL()
+
+        DialogInterfaceListener(
+            /* [in] */ SafetyWarning* host);
+
+        // @Override
+        CARAPI OnClick(
+            /* [in] */ IDialogInterface* dialog,
+            /* [in] */ Int32 which);
+
+        // @Override
+        CARAPI OnDismiss(
+            /* [in] */ IDialogInterface* unused);
+    private:
+        SafetyWarning* mHost;
+    };
+
+    class SafetyWarning
+        : public SystemUIDialog
+    {
+    public:
+        SafetyWarning();
+
+        CARAPI constructor(
+            /* [in] */ IContext* context,
+            /* [in] */ IVolumePanel* volumePanel,
+            /* [in] */ IAudioManager* audioManager);
+
+        // @Override
+        CARAPI OnKeyDown(
+            /* [in] */ Int32 keyCode,
+            /* [in] */ IKeyEvent* event,
+            /* [out] */ Boolean* result);
+
+        // @Override
+        CARAPI OnKeyUp(
+            /* [in] */ Int32 keyCode,
+            /* [in] */ IKeyEvent* event,
+            /* [out] */ Boolean* result);
+
+        CARAPI CleanUp();
+
+    private:
+        friend class DialogInterfaceListener;
+        AutoPtr<IContext> mContext;
+        VolumePanel* mVolumePanel;
+        AutoPtr<IAudioManager> mAudioManager;
+        Boolean mNewVolumeUp;
+        AutoPtr<IBroadcastReceiver> mReceiver;
+    };
+
+    class VolumeDialog
+        : public Dialog
+    {
+    public:
+        CARAPI constructor(
+            /* [in] */ IContext* ctx,
+            /* [in] */ IVolumePanel* host);
+
+        CARAPI OnTouchEvent(
+            /* [in] */ IMotionEvent* event,
+            /* [out] */ Boolean* result);
+
+    private:
+        AutoPtr<IContext> mContext;
+        VolumePanel* mHost;
+    };
+
 private:
     /** Object that contains data for each slider */
     class StreamControl
@@ -136,51 +211,6 @@ private:
         Int32 mIconMuteRes;
         Int32 mIconSuppressedRes;
     };
-
-    class SafetyWarning
-        : public SystemUIDialog
-        , public IDialogInterfaceOnDismissListener
-        , public IDialogInterfaceOnClickListener
-    {
-    public:
-        CAR_INTERFACE_DECL()
-
-        SafetyWarning(
-            /* [in] */ IContext* context,
-            /* [in] */ VolumePanel* volumePanel,
-            /* [in] */ IAudioManager* audioManager);
-
-        // @Override
-        CARAPI OnKeyDown(
-            /* [in] */ Int32 keyCode,
-            /* [in] */ IKeyEvent* event,
-            /* [out] */ Boolean* result);
-
-        // @Override
-        CARAPI OnKeyUp(
-            /* [in] */ Int32 keyCode,
-            /* [in] */ IKeyEvent* event,
-            /* [out] */ Boolean* result);
-
-        // @Override
-        CARAPI OnClick(
-            /* [in] */ IDialogInterface* dialog,
-            /* [in] */ Int32 which);
-
-        // @Override
-        CARAPI OnDismiss(
-            /* [in] */ IDialogInterface* unused);
-
-        CARAPI CleanUp();
-
-    private:
-        AutoPtr<IContext> mContext;
-        VolumePanel* mVolumePanel;
-        AutoPtr<IAudioManager> mAudioManager;
-        Boolean mNewVolumeUp;
-        AutoPtr<IBroadcastReceiver> mReceiver;
-    };
-
     class MySeekListener
         : public Object
         , public ISeekBarOnSeekBarChangeListener
@@ -209,14 +239,11 @@ private:
         VolumePanel* mHost;
     };
 
-    class MyZenCallback
-        : public Object
-        , public IZenModeControllerCallback
+    class ZenModeCallback
+        : public ZenModeControllerCallback
     {
     public:
-        CAR_INTERFACE_DECL()
-
-        MyZenCallback(
+        ZenModeCallback(
             /* [in] */ VolumePanel* host);
 
         // @Override
@@ -226,29 +253,15 @@ private:
         // @Override
         CARAPI OnEffectsSupressorChanged();
 
-        // @Override
-        CARAPI OnZenChanged(
-           /* [in] */ Int32 zen);
-
-        // @Override
-        CARAPI OnExitConditionChanged(
-           /* [in] */ ICondition* exitCondition);
-
-        // @Override
-        CARAPI OnConditionsChanged(
-           /* [in] */ ArrayOf<ICondition*>* conditions);
-
-        // @Override
-        CARAPI OnNextAlarmChanged();
-
     private:
         VolumePanel* mHost;
     };
 
-    class MyMediaControllerCb: public MediaControllerCallback
+    class AudioInfoChangedCallback
+        : public MediaControllerCallback
     {
     public:
-        MyMediaControllerCb(
+        AudioInfoChangedCallback(
             /* [in] */ VolumePanel* host);
 
         CARAPI OnAudioInfoChanged(
@@ -258,31 +271,14 @@ private:
         VolumePanel* mHost;
     };
 
-    class MyDialog
-        : public Dialog
-    {
-    public:
-        MyDialog(
-            /* [in] */ IContext* ctx,
-            /* [in] */ VolumePanel* host);
-
-        CARAPI OnTouchEvent(
-            /* [in] */ IMotionEvent* event,
-            /* [out] */ Boolean* result);
-
-    private:
-        AutoPtr<IContext> mCtx;
-        VolumePanel* mHost;
-    };
-
-    class MyDismissListener
+    class VolumeDialogDismissListener
         : public Object
         , public IDialogInterfaceOnDismissListener
     {
     public:
         CAR_INTERFACE_DECL()
 
-        MyDismissListener(
+        VolumeDialogDismissListener(
             /* [in] */ VolumePanel* host);
 
         // @Override
@@ -310,14 +306,14 @@ private:
         VolumePanel* mHost;
     };
 
-    class ZMPCallback
+    class ZenPanelCallback
         : public Object
         , public IZenModePanelCallback
     {
     public:
         CAR_INTERFACE_DECL()
 
-        ZMPCallback(
+        ZenPanelCallback(
             /* [in] */ VolumePanel* host);
 
         CARAPI OnMoreSettings();
@@ -331,14 +327,14 @@ private:
         VolumePanel* mHost;
     };
 
-    class MyOnClickListener
+    class StreamIconOnClickListener
         : public Object
         , public IViewOnClickListener
     {
     public:
         CAR_INTERFACE_DECL()
 
-        MyOnClickListener(
+        StreamIconOnClickListener(
             /* [in] */ StreamControl* sc,
             /* [in] */ VolumePanel* host);
 
@@ -351,14 +347,14 @@ private:
         VolumePanel* mHost;
     };
 
-    class MyOnTouchListener
+    class VolumePanelItemOnTouchListener
         : public Object
         , public IViewOnTouchListener
     {
     public:
         CAR_INTERFACE_DECL()
 
-        MyOnTouchListener(
+        VolumePanelItemOnTouchListener(
             /* [in] */ VolumePanel* host);
 
         // @Override
@@ -374,13 +370,13 @@ private:
     friend class SafetyWarning;
     friend class StreamControl;
     friend class MySeekListener;
-    friend class MyZenCallback;
-    friend class MyDialog;
+    friend class ZenModeCallback;
+    friend class VolumeDialog;
     friend class InteractionCallback;
-    friend class ZMPCallback;
+    friend class ZenPanelCallback;
     friend class CVolumePanelBroadcastReceiver1;
     friend class CVolumePanelBroadcastReceiver2;
-    friend class MyOnTouchListener;
+    friend class VolumePanelItemOnTouchListener;
 
 public:
     CAR_INTERFACE_DECL()
@@ -603,6 +599,9 @@ private:
         /* [in] */ Int64 delay);
 
 public:
+    const static String TAG;
+    static Boolean LOGD;
+
     /**
      * The delay before vibrating. This small period exists so if the user is
      * moving to silent mode, it will not emit a short vibrate (it normally
@@ -610,6 +609,29 @@ public:
      * keys).
      */
     const static Int32 VIBRATE_DELAY = 300;
+
+    const static Int32 TIMEOUT_DELAY = 3000;
+    const static Int32 TIMEOUT_DELAY_SHORT = 1500;
+    const static Int32 TIMEOUT_DELAY_COLLAPSED = 4500;
+    const static Int32 TIMEOUT_DELAY_SAFETY_WARNING = 5000;
+    const static Int32 TIMEOUT_DELAY_EXPANDED = 10000;
+
+    const static Int32 MSG_VOLUME_CHANGED = 0;
+    const static Int32 MSG_FREE_RESOURCES = 1;
+    const static Int32 MSG_PLAY_SOUND = 2;
+    const static Int32 MSG_STOP_SOUNDS = 3;
+    const static Int32 MSG_VIBRATE = 4;
+    const static Int32 MSG_TIMEOUT = 5;
+    const static Int32 MSG_RINGER_MODE_CHANGED = 6;
+    const static Int32 MSG_MUTE_CHANGED = 7;
+    const static Int32 MSG_REMOTE_VOLUME_CHANGED = 8;
+    const static Int32 MSG_REMOTE_VOLUME_UPDATE_IF_SHOWN = 9;
+    const static Int32 MSG_SLIDER_VISIBILITY_CHANGED = 10;
+    const static Int32 MSG_DISPLAY_SAFE_VOLUME_WARNING = 11;
+    const static Int32 MSG_LAYOUT_DIRECTION = 12;
+    const static Int32 MSG_ZEN_MODE_AVAILABLE_CHANGED = 13;
+    const static Int32 MSG_USER_ACTIVITY = 14;
+    const static Int32 MSG_NOTIFICATION_EFFECTS_SUPPRESSOR_CHANGED = 15;
 
 protected:
     AutoPtr<IContext> mContext;
@@ -658,36 +680,12 @@ protected:
     static AutoPtr<IAlertDialog> sSafetyWarning;
     static Object sSafetyWarningLock;
 
-private:
-    const static String TAG;
-    static Boolean LOGD;
     const static Int32 PLAY_SOUND_DELAY = IAudioService::PLAY_SOUND_DELAY;
     const static Int32 VIBRATE_DURATION = 300;
     const static Int32 BEEP_DURATION = 150;
     const static Int32 MAX_VOLUME = 100;
     const static Int32 FREE_DELAY = 10000;
-    const static Int32 TIMEOUT_DELAY = 3000;
-    const static Int32 TIMEOUT_DELAY_SHORT = 1500;
-    const static Int32 TIMEOUT_DELAY_COLLAPSED = 4500;
-    const static Int32 TIMEOUT_DELAY_SAFETY_WARNING = 5000;
-    const static Int32 TIMEOUT_DELAY_EXPANDED = 10000;
 
-    const static Int32 MSG_VOLUME_CHANGED = 0;
-    const static Int32 MSG_FREE_RESOURCES = 1;
-    const static Int32 MSG_PLAY_SOUND = 2;
-    const static Int32 MSG_STOP_SOUNDS = 3;
-    const static Int32 MSG_VIBRATE = 4;
-    const static Int32 MSG_TIMEOUT = 5;
-    const static Int32 MSG_RINGER_MODE_CHANGED = 6;
-    const static Int32 MSG_MUTE_CHANGED = 7;
-    const static Int32 MSG_REMOTE_VOLUME_CHANGED = 8;
-    const static Int32 MSG_REMOTE_VOLUME_UPDATE_IF_SHOWN = 9;
-    const static Int32 MSG_SLIDER_VISIBILITY_CHANGED = 10;
-    const static Int32 MSG_DISPLAY_SAFE_VOLUME_WARNING = 11;
-    const static Int32 MSG_LAYOUT_DIRECTION = 12;
-    const static Int32 MSG_ZEN_MODE_AVAILABLE_CHANGED = 13;
-    const static Int32 MSG_USER_ACTIVITY = 14;
-    const static Int32 MSG_NOTIFICATION_EFFECTS_SUPPRESSOR_CHANGED = 15;
 
     // Pseudo stream type for master volume
     const static Int32 STREAM_MASTER = -100;
@@ -702,8 +700,8 @@ private:
     String mTag;
 
     AutoPtr<MySeekListener> mSeekListener;
-    AutoPtr<MyZenCallback> mZenCallback;
-    AutoPtr<MyMediaControllerCb> mMediaControllerCb;
+    AutoPtr<ZenModeCallback> mZenCallback;
+    AutoPtr<AudioInfoChangedCallback> mMediaControllerCb;
 };
 
 } // namespace Volume

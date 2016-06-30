@@ -29,7 +29,7 @@ ECode CMediaProjection::MediaProjectionCallback::OnStop()
     for (Int32 i = 0; i < N; i++) {
         AutoPtr<IInterface> obj;
         mHost->mCallbacks->GetValueAt(i, (IInterface**)&obj);
-        AutoPtr<CallbackRecord> cr = (CallbackRecord*)(IObject*)obj.Get();
+        AutoPtr<CallbackRecord> cr = (CallbackRecord*)IObject::Probe(obj);
         cr->OnStop();
     }
     return NOERROR;

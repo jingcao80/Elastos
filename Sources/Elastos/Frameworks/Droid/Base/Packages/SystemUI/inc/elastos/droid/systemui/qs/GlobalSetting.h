@@ -50,7 +50,7 @@ public:
         /* [in] */ Boolean selfChange);
 
 protected:
-    virtual CARAPI_(void) HandleValueChanged(
+    virtual CARAPI HandleValueChanged(
         /* [in] */ Int32 value) = 0;
 
 private:

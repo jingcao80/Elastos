@@ -33,7 +33,7 @@ private:
 
     protected:
         // @Override
-        CARAPI_(void) HandleValueChanged(
+        CARAPI HandleValueChanged(
             /* [in] */ Int32 value);
 
     private:

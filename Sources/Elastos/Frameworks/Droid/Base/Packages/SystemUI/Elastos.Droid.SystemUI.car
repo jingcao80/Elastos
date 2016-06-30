@@ -265,6 +265,7 @@ module
     using interface Elastos.Droid.Media.IIRemoteVolumeController;
     using interface Elastos.Droid.Media.IIRingtonePlayer;
     using interface Elastos.Droid.Media.IIVolumeController;
+    using interface Elastos.Droid.Media.IAudioManager;
     using interface Elastos.Droid.Utility.IAttributeSet;
     using interface Elastos.Droid.Graphics.Drawable.IColorDrawable;
     using interface Elastos.Droid.Graphics.Drawable.IDrawable;
@@ -277,6 +278,7 @@ module
     using interface Elastos.Droid.Os.IBinder;
     using interface Elastos.Droid.Os.IHandler;
     using interface Elastos.Droid.Service.Dreams.IDreamService;
+    using interface Elastos.Droid.Service.Notification.IIConditionListener;
     using interface Elastos.Droid.Service.Notification.INotificationListenerService;
     using interface Elastos.Droid.Service.Wallpaper.IWallpaperService;
     using interface Elastos.Droid.View.IView;
@@ -1010,18 +1012,49 @@ module
             interface ISystemUI;
         }
 
-        class CVolumePanelBroadcastReceiver1 {
+        class CVolumePanelBroadcastReceiver {
             constructor(
                 [in] IVolumePanel* host);
 
             interface IBroadcastReceiver;
         }
 
-        class CVolumePanelBroadcastReceiver2 {
+        class CVolumePanelCloseSystemDialogsReceiver {
             constructor(
                 [in] ISystemUIDialog* host);
 
             interface IBroadcastReceiver;
+        }
+
+        [local]
+        class CVolumePanelSafetyWarning {
+            constructor(
+                [in] IContext* ctx,
+                [in] IVolumePanel* volumePanel,
+                [in] IAudioManager* audioManager);
+
+            interface ISystemUIDialog;
+            interface IAlertDialog;
+            interface IDialog;
+            interface IDialogInterface;
+            interface IWindowCallback;
+            interface IKeyEventCallback;
+            interface IViewOnCreateContextMenuListener;
+            interface IOnWindowDismissedCallback;
+        }
+
+        [local]
+        class CVolumeDialog {
+            constructor(
+                [in] IContext* ctx,
+                [in] IVolumePanel* volumePanel);
+
+            interface IDialog;
+            interface IDialogInterface;
+            interface IWindowCallback;
+            interface IKeyEventCallback;
+            interface IViewOnCreateContextMenuListener;
+            interface IOnWindowDismissedCallback;
         }
     }
 
@@ -2267,6 +2300,14 @@ module
                 [in] IUserSwitcherController* host);
 
             interface IContentObserver;
+        }
+
+
+        class CZenModeControllerConditionListener {
+            constructor(
+                [in] IZenModeController* host);
+
+            interface IIConditionListener;
         }
 
         } // namespace Policy

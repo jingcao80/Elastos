@@ -26,7 +26,7 @@ ECode Interaction::MyOnTouchListener::OnTouch(
     /* [out] */ Boolean* result)
 {
     VALIDATE_NOT_NULL(result)
-    mCallback->OnInteraction();
+    if (mCallback) mCallback->OnInteraction();
     *result = FALSE;
     return NOERROR;
 }
@@ -48,7 +48,7 @@ ECode Interaction::MyOnGenericMotionListener::OnGenericMotion(
     /* [out] */ Boolean* result)
 {
     VALIDATE_NOT_NULL(result)
-    mCallback->OnInteraction();
+    if (mCallback) mCallback->OnInteraction();
     *result = FALSE;
     return NOERROR;
 }
@@ -57,15 +57,15 @@ ECode Interaction::MyOnGenericMotionListener::OnGenericMotion(
 // Interaction
 //--------------------------------------------------------------------------
 
-void Interaction::Register(
+ECode Interaction::Register(
     /* [in] */ IView* v,
     /* [in] */ IInteractionCallback* callback)
 {
     AutoPtr<MyOnTouchListener> otl = new MyOnTouchListener(callback);
-    v->SetOnTouchListener(otl);
     AutoPtr<MyOnGenericMotionListener> ogml = new MyOnGenericMotionListener(callback);
     v->SetOnTouchListener(otl);
     v->SetOnGenericMotionListener(ogml);
+    return NOERROR;
 }
 
 } // namespace Volume

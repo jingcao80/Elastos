@@ -151,7 +151,7 @@ ECode CMediaSession::CallbackMessageHandler::HandleMessage(
             break;
         }
         case MSG_COMMAND: {
-            AutoPtr<Command> cmd = (Command*)(IObject*)obj.Get();
+            AutoPtr<Command> cmd = (Command*)IObject::Probe(obj);
             mCallback->OnCommand(cmd->mCommand, cmd->mExtras, cmd->mStub);
             break;
         }
