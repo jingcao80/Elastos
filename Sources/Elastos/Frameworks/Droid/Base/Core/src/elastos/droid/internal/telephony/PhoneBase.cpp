@@ -374,9 +374,7 @@ ECode PhoneBase::constructor(
     AutoPtr<ISharedPreferences> sp;
     PreferenceManager::GetDefaultSharedPreferences(context, (ISharedPreferences**)&sp);
     sp->GetBoolean(DNS_SERVER_CHECK_DISABLED_KEY, FALSE, &mDnsCheckDisabled);
-    AutoPtr<IInteger32> io;
-    CInteger32::New(EVENT_CALL_RING, (IInteger32**)&io);
-    mCi->SetOnCallRing(this, io, NULL);
+    mCi->SetOnCallRing(this, EVENT_CALL_RING, NULL);
 
     /* "Voice capable" means that this device supports circuit-switched
     * (i.e. voice) phone calls over the telephony network, and is allowed

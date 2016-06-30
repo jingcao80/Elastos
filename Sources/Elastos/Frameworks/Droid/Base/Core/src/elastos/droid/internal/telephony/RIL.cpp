@@ -1,10 +1,6 @@
 
 #include "Elastos.Droid.Content.h"
-#include "Elastos.Droid.Net.h"
 #include "Elastos.Droid.Telephony.h"
-#include "Elastos.Droid.Utility.h"
-#include "Elastos.Droid.View.h"
-#include <Elastos.CoreLibrary.Utility.Concurrent.h>
 #include <Elastos.CoreLibrary.IO.h>
 #include "elastos/droid/content/res/CResourcesHelper.h"
 #include "elastos/droid/internal/telephony/RIL.h"
@@ -697,27 +693,33 @@ Int32 RIL::ReadRilMessage(
     return messageLength;
 }
 
-RIL::RIL(
+CAR_INTERFACE_IMPL(RIL, BaseCommands, IRIL);
+
+RIL::RIL()
+    : OEMHOOK_UNSOL_SIM_REFRESH(OEMHOOK_BASE + 1016)
+    , OEMHOOK_UNSOL_WWAN_IWLAN_COEXIST(OEMHOOK_BASE + 1018)
+{
+}
+
+ECode RIL::constructor(
     /* [in] */ IContext* context,
     /* [in] */ Int32 preferredNetworkType,
     /* [in] */ Int32 cdmaSubscription)
-    : BaseCommands(context)
-    , OEMHOOK_UNSOL_SIM_REFRESH(OEMHOOK_BASE + 1016)
-    , OEMHOOK_UNSOL_WWAN_IWLAN_COEXIST(OEMHOOK_BASE + 1018)
 {
+    BaseCommands::constructor(context);
     Init(context, preferredNetworkType, cdmaSubscription, NULL);
+    return NOERROR;
 }
 
-RIL::RIL(
+ECode RIL::constructor(
     /* [in] */ IContext* context,
     /* [in] */ Int32 preferredNetworkType,
     /* [in] */ Int32 cdmaSubscription,
     /* [in] */ IInteger32* instanceId)
-    : BaseCommands(context)
-    , OEMHOOK_UNSOL_SIM_REFRESH(OEMHOOK_BASE + 1016)
-    , OEMHOOK_UNSOL_WWAN_IWLAN_COEXIST(OEMHOOK_BASE + 1018)
 {
+    BaseCommands::constructor(context);
     Init(context, preferredNetworkType, cdmaSubscription, instanceId);
+    return NOERROR;
 }
 
 ECode RIL::Init(
@@ -969,15 +971,15 @@ ECode RIL::GetDataCallProfile(
 }
 
 ECode RIL::SupplyIccPin(
-    /* [in] */ String pin,
+    /* [in] */ const String& pin,
     /* [in] */ IMessage* result)
 {
     return SupplyIccPinForApp(pin, String(NULL), result);
 }
 
 ECode RIL::SupplyIccPinForApp(
-    /* [in] */ String pin,
-    /* [in] */ String aid,
+    /* [in] */ const String& pin,
+    /* [in] */ const String& aid,
     /* [in] */ IMessage* result)
 {
     //Note: This RIL request has not been renamed to ICC,
@@ -1006,17 +1008,17 @@ ECode RIL::SupplyIccPinForApp(
 }
 
 ECode RIL::SupplyIccPuk(
-    /* [in] */ String puk,
-    /* [in] */ String newPin,
+    /* [in] */ const String& puk,
+    /* [in] */ const String& newPin,
     /* [in] */ IMessage* result)
 {
     return SupplyIccPukForApp(puk, newPin, String(NULL), result);
 }
 
 ECode RIL::SupplyIccPukForApp(
-    /* [in] */ String puk,
-    /* [in] */ String newPin,
-    /* [in] */ String aid,
+    /* [in] */ const String& puk,
+    /* [in] */ const String& newPin,
+    /* [in] */ const String& aid,
     /* [in] */ IMessage* result)
 {
     //Note: This RIL request has not been renamed to ICC,
@@ -1046,15 +1048,15 @@ ECode RIL::SupplyIccPukForApp(
 }
 
 ECode RIL::SupplyIccPin2(
-    /* [in] */ String pin,
+    /* [in] */ const String& pin,
     /* [in] */ IMessage* result)
 {
     return SupplyIccPin2ForApp(pin, String(NULL), result);
 }
 
 ECode RIL::SupplyIccPin2ForApp(
-    /* [in] */ String pin,
-    /* [in] */ String aid,
+    /* [in] */ const String& pin,
+    /* [in] */ const String& aid,
     /* [in] */ IMessage* result)
 {
     //Note: This RIL request has not been renamed to ICC,
@@ -1083,17 +1085,17 @@ ECode RIL::SupplyIccPin2ForApp(
 }
 
 ECode RIL::SupplyIccPuk2(
-    /* [in] */ String puk2,
-    /* [in] */ String newPin2,
+    /* [in] */ const String& puk2,
+    /* [in] */ const String& newPin2,
     /* [in] */ IMessage* result)
 {
     return SupplyIccPuk2ForApp(puk2, newPin2, String(NULL), result);
 }
 
 ECode RIL::SupplyIccPuk2ForApp(
-    /* [in] */ String puk,
-    /* [in] */ String newPin2,
-    /* [in] */ String aid,
+    /* [in] */ const String& puk,
+    /* [in] */ const String& newPin2,
+    /* [in] */ const String& aid,
     /* [in] */ IMessage* result)
 {
     //Note: This RIL request has not been renamed to ICC,
@@ -1123,17 +1125,17 @@ ECode RIL::SupplyIccPuk2ForApp(
 }
 
 ECode RIL::ChangeIccPin(
-    /* [in] */ String oldPin,
-    /* [in] */ String newPin,
+    /* [in] */ const String& oldPin,
+    /* [in] */ const String& newPin,
     /* [in] */ IMessage* result)
 {
     return ChangeIccPinForApp(oldPin, newPin, String(NULL), result);
 }
 
 ECode RIL::ChangeIccPinForApp(
-    /* [in] */ String oldPin,
-    /* [in] */ String newPin,
-    /* [in] */ String aid,
+    /* [in] */ const String& oldPin,
+    /* [in] */ const String& newPin,
+    /* [in] */ const String& aid,
     /* [in] */ IMessage* result)
 {
     //Note: This RIL request has not been renamed to ICC,
@@ -1163,17 +1165,17 @@ ECode RIL::ChangeIccPinForApp(
 }
 
 ECode RIL::ChangeIccPin2(
-    /* [in] */ String oldPin2,
-    /* [in] */ String newPin2,
+    /* [in] */ const String& oldPin2,
+    /* [in] */ const String& newPin2,
     /* [in] */ IMessage* result)
 {
     return ChangeIccPin2ForApp(oldPin2, newPin2, String(NULL), result);
 }
 
 ECode RIL::ChangeIccPin2ForApp(
-    /* [in] */ String oldPin2,
-    /* [in] */ String newPin2,
-    /* [in] */ String aid,
+    /* [in] */ const String& oldPin2,
+    /* [in] */ const String& newPin2,
+    /* [in] */ const String& aid,
     /* [in] */ IMessage* result)
 {
     //Note: This RIL request has not been renamed to ICC,
@@ -1203,9 +1205,9 @@ ECode RIL::ChangeIccPin2ForApp(
 }
 
 ECode RIL::ChangeBarringPassword(
-    /* [in] */ String facility,
-    /* [in] */ String oldPwd,
-    /* [in] */ String newPwd,
+    /* [in] */ const String& facility,
+    /* [in] */ const String& oldPwd,
+    /* [in] */ const String& newPwd,
     /* [in] */ IMessage* result)
 {
     AutoPtr<RILRequest> rr = RILRequest::Obtain(
@@ -1229,8 +1231,8 @@ ECode RIL::ChangeBarringPassword(
 }
 
 ECode RIL::SupplyDepersonalization(
-    /* [in] */ String netpin,
-    /* [in] */ String type,
+    /* [in] */ const String& netpin,
+    /* [in] */ const String& type,
     /* [in] */ IMessage* result)
 {
     AutoPtr<RILRequest> rr = RILRequest::Obtain(
@@ -1297,7 +1299,7 @@ ECode RIL::GetDataCallList(
 }
 
 ECode RIL::Dial(
-    /* [in] */ String address,
+    /* [in] */ const String& address,
     /* [in] */ Int32 clirMode,
     /* [in] */ IMessage* result)
 {
@@ -1305,7 +1307,7 @@ ECode RIL::Dial(
 }
 
 ECode RIL::Dial(
-    /* [in] */ String address,
+    /* [in] */ const String& address,
     /* [in] */ Int32 clirMode,
     /* [in] */ IUUSInfo* uusInfo,
     /* [in] */ IMessage* result)
@@ -1352,7 +1354,7 @@ ECode RIL::GetIMSI(
 }
 
 ECode RIL::GetIMSIForApp(
-    /* [in] */ String aid,
+    /* [in] */ const String& aid,
     /* [in] */ IMessage* result)
 {
     AutoPtr<RILRequest> rr = RILRequest::Obtain(
@@ -1847,7 +1849,7 @@ ECode RIL::StopDtmf(
 }
 
 ECode RIL::SendBurstDtmf(
-    /* [in] */ String dtmfString,
+    /* [in] */ const String& dtmfString,
     /* [in] */ Int32 on,
     /* [in] */ Int32 off,
     /* [in] */ IMessage* result)
@@ -1873,10 +1875,10 @@ ECode RIL::SendBurstDtmf(
     return NOERROR;
 }
 
-void ConstructGsmSendSmsRilRequest(
+void RIL::ConstructGsmSendSmsRilRequest(
     /* [in] */ RILRequest* rr,
-    /* [in] */ String smscPDU,
-    /* [in] */ String pdu)
+    /* [in] */ const String& smscPDU,
+    /* [in] */ const String& pdu)
 {
     rr->mParcel->WriteInt32(2);
     rr->mParcel->WriteString(smscPDU);
@@ -1884,8 +1886,8 @@ void ConstructGsmSendSmsRilRequest(
 }
 
 ECode RIL::SendSMS(
-    /* [in] */ String smscPDU,
-    /* [in] */ String pdu,
+    /* [in] */ const String& smscPDU,
+    /* [in] */ const String& pdu,
     /* [in] */ IMessage* result)
 {
     AutoPtr<RILRequest> rr
@@ -1905,8 +1907,8 @@ ECode RIL::SendSMS(
 }
 
 ECode RIL::SendSMSExpectMore(
-    /* [in] */ String smscPDU,
-    /* [in] */ String pdu,
+    /* [in] */ const String& smscPDU,
+    /* [in] */ const String& pdu,
     /* [in] */ IMessage* result)
 {
     AutoPtr<RILRequest> rr
@@ -2023,8 +2025,8 @@ ECode RIL::SendCdmaSms(
 }
 
 ECode RIL::SendImsGsmSms(
-    /* [in] */ String smscPDU,
-    /* [in] */ String pdu,
+    /* [in] */ const String& smscPDU,
+    /* [in] */ const String& pdu,
     /* [in] */ Int32 retry,
     /* [in] */ Int32 messageRef,
     /* [in] */ IMessage* result)
@@ -2120,8 +2122,8 @@ ECode RIL::DeleteSmsOnRuim(
 
 ECode RIL::WriteSmsToSim(
     /* [in] */ Int32 status,
-    /* [in] */ String smsc,
-    /* [in] */ String pdu,
+    /* [in] */ const String& smsc,
+    /* [in] */ const String& pdu,
     /* [in] */ IMessage* response)
 {
     status = TranslateStatus(status);
@@ -2148,7 +2150,7 @@ ECode RIL::WriteSmsToSim(
 
 ECode RIL::WriteSmsToRuim(
     /* [in] */ Int32 status,
-    /* [in] */ String pdu,
+    /* [in] */ const String& pdu,
     /* [in] */ IMessage* response)
 {
     status = TranslateStatus(status);
@@ -2303,13 +2305,13 @@ Int32 RIL::TranslateStatus(
 }
 
 ECode RIL::SetupDataCall(
-    /* [in] */ String radioTechnology,
-    /* [in] */ String profile,
-    /* [in] */ String apn,
-    /* [in] */ String user,
-    /* [in] */ String password,
-    /* [in] */ String authType,
-    /* [in] */ String protocol,
+    /* [in] */ const String& radioTechnology,
+    /* [in] */ const String& profile,
+    /* [in] */ const String& apn,
+    /* [in] */ const String& user,
+    /* [in] */ const String& password,
+    /* [in] */ const String& authType,
+    /* [in] */ const String& protocol,
     /* [in] */ IMessage* result)
 {
     AutoPtr<RILRequest> rr
@@ -2496,7 +2498,7 @@ ECode RIL::AcknowledgeLastIncomingCdmaSms(
 
 ECode RIL::AcknowledgeIncomingGsmSmsWithPdu(
     /* [in] */ Boolean success,
-    /* [in] */ String ackPdu,
+    /* [in] */ const String& ackPdu,
     /* [in] */ IMessage* result)
 {
     AutoPtr<RILRequest> rr
@@ -2527,12 +2529,12 @@ ECode RIL::AcknowledgeIncomingGsmSmsWithPdu(
 ECode RIL::IccIO(
     /* [in] */ Int32 command,
     /* [in] */ Int32 fileid,
-    /* [in] */ String path,
+    /* [in] */ const String& path,
     /* [in] */ Int32 p1,
     /* [in] */ Int32 p2,
     /* [in] */ Int32 p3,
-    /* [in] */ String data,
-    /* [in] */ String pin2,
+    /* [in] */ const String& data,
+    /* [in] */ const String& pin2,
     /* [in] */ IMessage* result)
 {
     return IccIOForApp(command, fileid, path, p1, p2, p3, data, pin2, String(NULL), result);
@@ -2541,13 +2543,13 @@ ECode RIL::IccIO(
 ECode RIL::IccIOForApp(
     /* [in] */ Int32 command,
     /* [in] */ Int32 fileid,
-    /* [in] */ String path,
+    /* [in] */ const String& path,
     /* [in] */ Int32 p1,
     /* [in] */ Int32 p2,
     /* [in] */ Int32 p3,
-    /* [in] */ String data,
-    /* [in] */ String pin2,
-    /* [in] */ String aid,
+    /* [in] */ const String& data,
+    /* [in] */ const String& pin2,
+    /* [in] */ const String& aid,
     /* [in] */ IMessage* result)
 {
     //Note: This RIL request has not been renamed to ICC,
@@ -2701,7 +2703,7 @@ ECode RIL::SetNetworkSelectionModeAutomatic(
 }
 
 ECode RIL::SetNetworkSelectionModeManual(
-    /* [in] */ String operatorNumeric,
+    /* [in] */ const String& operatorNumeric,
     /* [in] */ IMessage* response)
 {
     AutoPtr<RILRequest> rr
@@ -2766,7 +2768,7 @@ ECode RIL::SetCallForward(
     /* [in] */ Int32 action,
     /* [in] */ Int32 cfReason,
     /* [in] */ Int32 serviceClass,
-    /* [in] */ String number,
+    /* [in] */ const String& number,
     /* [in] */ Int32 timeSeconds,
     /* [in] */ IMessage* response)
 {
@@ -2803,7 +2805,7 @@ ECode RIL::SetCallForward(
 ECode RIL::QueryCallForwardStatus(
     /* [in] */ Int32 cfReason,
     /* [in] */ Int32 serviceClass,
-    /* [in] */ String number,
+    /* [in] */ const String& number,
     /* [in] */ IMessage* response)
 {
     AutoPtr<RILRequest> rr
@@ -2874,8 +2876,8 @@ ECode RIL::GetBasebandVersion(
 }
 
 ECode RIL::QueryFacilityLock(
-    /* [in] */ String facility,
-    /* [in] */ String password,
+    /* [in] */ const String& facility,
+    /* [in] */ const String& password,
     /* [in] */ Int32 serviceClass,
     /* [in] */ IMessage* response)
 {
@@ -2883,10 +2885,10 @@ ECode RIL::QueryFacilityLock(
 }
 
 ECode RIL::QueryFacilityLockForApp(
-    /* [in] */ String facility,
-    /* [in] */ String password,
+    /* [in] */ const String& facility,
+    /* [in] */ const String& password,
     /* [in] */ Int32 serviceClass,
-    /* [in] */ String appId,
+    /* [in] */ const String& appId,
     /* [in] */ IMessage* response)
 {
     AutoPtr<RILRequest> rr = RILRequest::Obtain(
@@ -2920,9 +2922,9 @@ ECode RIL::QueryFacilityLockForApp(
 }
 
 ECode RIL::SetFacilityLock(
-    /* [in] */ String facility,
+    /* [in] */ const String& facility,
     /* [in] */ Boolean lockState,
-    /* [in] */ String password,
+    /* [in] */ const String& password,
     /* [in] */ Int32 serviceClass,
     /* [in] */ IMessage* response)
 {
@@ -2930,11 +2932,11 @@ ECode RIL::SetFacilityLock(
 }
 
 ECode RIL::SetFacilityLockForApp(
-    /* [in] */ String facility,
+    /* [in] */ const String& facility,
     /* [in] */ Boolean lockState,
-    /* [in] */ String password,
+    /* [in] */ const String& password,
     /* [in] */ Int32 serviceClass,
-    /* [in] */ String appId,
+    /* [in] */ const String& appId,
     /* [in] */ IMessage* response)
 {
     String lockString;
@@ -2976,7 +2978,7 @@ ECode RIL::SetFacilityLockForApp(
 }
 
 ECode RIL::SendUSSD(
-    /* [in] */ String ussdString,
+    /* [in] */ const String& ussdString,
     /* [in] */ IMessage* response)
 {
     AutoPtr<RILRequest> rr
@@ -3198,7 +3200,7 @@ ECode RIL::QueryAvailableBandMode(
 }
 
 ECode RIL::SendTerminalResponse(
-    /* [in] */ String contents,
+    /* [in] */ const String& contents,
     /* [in] */ IMessage* response)
 {
     AutoPtr<RILRequest> rr = RILRequest::Obtain(
@@ -3217,7 +3219,7 @@ ECode RIL::SendTerminalResponse(
 }
 
 ECode RIL::SendEnvelope(
-    /* [in] */ String contents,
+    /* [in] */ const String& contents,
     /* [in] */ IMessage* response)
 {
     AutoPtr<RILRequest> rr = RILRequest::Obtain(
@@ -3236,7 +3238,7 @@ ECode RIL::SendEnvelope(
 }
 
 ECode RIL::SendEnvelopeWithStatus(
-    /* [in] */ String contents,
+    /* [in] */ const String& contents,
     /* [in] */ IMessage* response)
 {
     AutoPtr<RILRequest> rr = RILRequest::Obtain(
@@ -3377,7 +3379,7 @@ ECode RIL::GetSmscAddress(
 }
 
 ECode RIL::SetSmscAddress(
-    /* [in] */ String address,
+    /* [in] */ const String& address,
     /* [in] */ IMessage* result)
 {
     AutoPtr<RILRequest> rr = RILRequest::Obtain(IRILConstants::RIL_REQUEST_SET_SMSC_ADDRESS, result);
@@ -5002,7 +5004,7 @@ AutoPtr<IInterface> RIL::ResponseICC_IOBase64(
 }
 
 ECode RIL::NeedsOldRilFeature(
-    /* [in] */ String feature,
+    /* [in] */ const String& feature,
     /* [out] */ Boolean* result)
 {
     VALIDATE_NOT_NULL(result)
@@ -6060,14 +6062,14 @@ String RIL::ResponseToString(
 }
 
 void RIL::RiljLog(
-    /* [in] */ String msg)
+    /* [in] */ const String& msg)
 {
     // Rlog.d(RILJ_LOG_TAG, msg
     //         + (mInstanceId != NULL ? (" [SUB" + mInstanceId + "]") : ""));
 }
 
 void RIL::RiljLogv(
-    /* [in] */ String msg)
+    /* [in] */ const String& msg)
 {
     // Rlog.v(RILJ_LOG_TAG, msg
     //         + (mInstanceId != NULL ? (" [SUB" + mInstanceId + "]") : ""));
@@ -6083,7 +6085,7 @@ void RIL::UnsljLog(
 
 void RIL::UnsljLogMore(
     /* [in] */ Int32 response,
-    /* [in] */ String more)
+    /* [in] */ const String& more)
 {
     String str("[UNSL]< ");
     str += ResponseToString(response);
@@ -6355,7 +6357,7 @@ ECode RIL::SetTTYMode(
 }
 
 ECode RIL::SendCDMAFeatureCode(
-    /* [in] */ String FeatureCode,
+    /* [in] */ const String& FeatureCode,
     /* [in] */ IMessage* response)
 {
     AutoPtr<RILRequest> rr = RILRequest::Obtain(IRILConstants::RIL_REQUEST_CDMA_FLASH, response);
@@ -6486,7 +6488,7 @@ ECode RIL::ExitEmergencyCallbackMode(
 }
 
 ECode RIL::RequestIsimAuthentication(
-    /* [in] */ String nonce,
+    /* [in] */ const String& nonce,
     /* [in] */ IMessage* response)
 {
     AutoPtr<RILRequest> rr = RILRequest::Obtain(IRILConstants::RIL_REQUEST_ISIM_AUTHENTICATION, response);
@@ -6506,8 +6508,8 @@ ECode RIL::RequestIsimAuthentication(
 
 ECode RIL::RequestIccSimAuthentication(
     /* [in] */ Int32 authContext,
-    /* [in] */ String data,
-    /* [in] */ String aid,
+    /* [in] */ const String& data,
+    /* [in] */ const String& aid,
     /* [in] */ IMessage* response)
 {
     AutoPtr<RILRequest> rr = RILRequest::Obtain(IRILConstants::RIL_REQUEST_SIM_AUTHENTICATION, response);
@@ -6569,11 +6571,11 @@ ECode RIL::SetCellInfoListRate(
 }
 
 ECode RIL::SetInitialAttachApn(
-    /* [in] */ String apn,
-    /* [in] */ String protocol,
+    /* [in] */ const String& apn,
+    /* [in] */ const String& protocol,
     /* [in] */ Int32 authType,
-    /* [in] */ String username,
-    /* [in] */ String password,
+    /* [in] */ const String& username,
+    /* [in] */ const String& password,
     /* [in] */ IMessage* result)
 {
     AutoPtr<RILRequest> rr = RILRequest::Obtain(IRILConstants::RIL_REQUEST_SET_INITIAL_ATTACH_APN, result);
@@ -6686,7 +6688,7 @@ ECode RIL::Dump(
 }
 
 ECode RIL::IccOpenLogicalChannel(
-    /* [in] */ String AID,
+    /* [in] */ const String& AID,
     /* [in] */ IMessage* response)
 {
     if(mRilVersion < 10) {
@@ -6741,7 +6743,7 @@ ECode RIL::IccTransmitApduLogicalChannel(
     /* [in] */ Int32 p1,
     /* [in] */ Int32 p2,
     /* [in] */ Int32 p3,
-    /* [in] */ String data,
+    /* [in] */ const String& data,
     /* [in] */ IMessage* response)
 {
     if(mRilVersion < 10) {
@@ -6773,7 +6775,7 @@ ECode RIL::IccTransmitApduBasicChannel(
     /* [in] */ Int32 p1,
     /* [in] */ Int32 p2,
     /* [in] */ Int32 p3,
-    /* [in] */ String data,
+    /* [in] */ const String& data,
     /* [in] */ IMessage* response)
 {
     IccTransmitApduHelper(IRILConstants::RIL_REQUEST_SIM_TRANSMIT_APDU_BASIC, 0, cla, instruction,
@@ -6809,7 +6811,7 @@ void RIL::IccTransmitApduHelper(
     /* [in] */ Int32 p1,
     /* [in] */ Int32 p2,
     /* [in] */ Int32 p3,
-    /* [in] */ String data,
+    /* [in] */ const String& data,
     /* [in] */ IMessage* response)
 {
     if (mRilVersion < 10) {
@@ -6867,7 +6869,7 @@ ECode RIL::NvReadItem(
 
 ECode RIL::NvWriteItem(
     /* [in] */ Int32 itemID,
-    /* [in] */ String itemValue,
+    /* [in] */ const String& itemValue,
     /* [in] */ IMessage* response)
 {
     AutoPtr<RILRequest> rr = RILRequest::Obtain(IRILConstants::RIL_REQUEST_NV_WRITE_ITEM, response);

@@ -32,7 +32,9 @@ class BaseCommands
 public:
     CAR_INTERFACE_DECL()
 
-    BaseCommands(
+    BaseCommands();
+
+    CARAPI constructor(
         /* [in] */ IContext* context);
 
     virtual ~BaseCommands();

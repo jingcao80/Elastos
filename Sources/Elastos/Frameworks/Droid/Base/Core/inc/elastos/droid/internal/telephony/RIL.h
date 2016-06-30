@@ -4,6 +4,10 @@
 
 #include "_Elastos.Droid.Internal.h"
 #include "Elastos.Droid.Hardware.h"
+#include "Elastos.Droid.Utility.h"
+#include "Elastos.Droid.View.h"
+#include "Elastos.Droid.Net.h"
+#include <Elastos.CoreLibrary.Utility.Concurrent.h>
 #include "elastos/droid/internal/telephony/BaseCommands.h"
 #include "elastos/droid/os/Handler.h"
 #include <elastos/core/Object.h>
@@ -111,6 +115,7 @@ private:
  */
 class RIL
     : public BaseCommands
+    , public IRIL
 {
 public:
     class RILSender
@@ -199,13 +204,17 @@ private:
     };
 
 public:
+    CAR_INTERFACE_DECL();
+
+    RIL();
+
     //***** Constructors
-    RIL(
+    CARAPI constructor(
         /* [in] */ IContext* context,
         /* [in] */ Int32 preferredNetworkType,
         /* [in] */ Int32 cdmaSubscription);
 
-    RIL(
+    CARAPI constructor(
         /* [in] */ IContext* context,
         /* [in] */ Int32 preferredNetworkType,
         /* [in] */ Int32 cdmaSubscription,
@@ -250,76 +259,76 @@ public:
         /* [in] */ IMessage* result);
 
     CARAPI SupplyIccPin(
-        /* [in] */ String pin,
+        /* [in] */ const String& pin,
         /* [in] */ IMessage* result);
 
     CARAPI SupplyIccPinForApp(
-        /* [in] */ String pin,
-        /* [in] */ String aid,
+        /* [in] */ const String& pin,
+        /* [in] */ const String& aid,
         /* [in] */ IMessage* result);
 
     CARAPI SupplyIccPuk(
-        /* [in] */ String puk,
-        /* [in] */ String newPin,
+        /* [in] */ const String& puk,
+        /* [in] */ const String& newPin,
         /* [in] */ IMessage* result);
 
     CARAPI SupplyIccPukForApp(
-        /* [in] */ String puk,
-        /* [in] */ String newPin,
-        /* [in] */ String aid,
+        /* [in] */ const String& puk,
+        /* [in] */ const String& newPin,
+        /* [in] */ const String& aid,
         /* [in] */ IMessage* result);
 
     CARAPI SupplyIccPin2(
-        /* [in] */ String pin,
+        /* [in] */ const String& pin,
         /* [in] */ IMessage* result);
 
     CARAPI SupplyIccPin2ForApp(
-        /* [in] */ String pin,
-        /* [in] */ String aid,
+        /* [in] */ const String& pin,
+        /* [in] */ const String& aid,
         /* [in] */ IMessage* result);
 
     CARAPI SupplyIccPuk2(
-        /* [in] */ String puk2,
-        /* [in] */ String newPin2,
+        /* [in] */ const String& puk2,
+        /* [in] */ const String& newPin2,
         /* [in] */ IMessage* result);
 
     CARAPI SupplyIccPuk2ForApp(
-        /* [in] */ String puk,
-        /* [in] */ String newPin2,
-        /* [in] */ String aid,
+        /* [in] */ const String& puk,
+        /* [in] */ const String& newPin2,
+        /* [in] */ const String& aid,
         /* [in] */ IMessage* result);
 
     CARAPI ChangeIccPin(
-        /* [in] */ String oldPin,
-        /* [in] */ String newPin,
+        /* [in] */ const String& oldPin,
+        /* [in] */ const String& newPin,
         /* [in] */ IMessage* result);
 
     CARAPI ChangeIccPinForApp(
-        /* [in] */ String oldPin,
-        /* [in] */ String newPin,
-        /* [in] */ String aid,
+        /* [in] */ const String& oldPin,
+        /* [in] */ const String& newPin,
+        /* [in] */ const String& aid,
         /* [in] */ IMessage* result);
 
     CARAPI ChangeIccPin2(
-        /* [in] */ String oldPin2,
-        /* [in] */ String newPin2,
+        /* [in] */ const String& oldPin2,
+        /* [in] */ const String& newPin2,
         /* [in] */ IMessage* result);
 
     CARAPI ChangeIccPin2ForApp(
-        /* [in] */ String oldPin2,
-        /* [in] */ String newPin2,
-        /* [in] */ String aid,
+        /* [in] */ const String& oldPin2,
+        /* [in] */ const String& newPin2,
+        /* [in] */ const String& aid,
         /* [in] */ IMessage* result);
 
     CARAPI ChangeBarringPassword(
-        /* [in] */ String facility,
-        /* [in] */ String oldPwd,
-        /* [in] */ String newPwd,
+        /* [in] */ const String& facility,
+        /* [in] */ const String& oldPwd,
+        /* [in] */ const String& newPwd,
         /* [in] */ IMessage* result);
 
     CARAPI SupplyDepersonalization(
-        /* [in] */ String netpin,
-        /* [in] */ String type,
+        /* [in] */ const String& netpin,
+        /* [in] */ const String& type,
         /* [in] */ IMessage* result);
 
     CARAPI GetCurrentCalls(
@@ -332,12 +341,12 @@ public:
         /* [in] */ IMessage* result);
 
     CARAPI Dial(
-        /* [in] */ String address,
+        /* [in] */ const String& address,
         /* [in] */ Int32 clirMode,
         /* [in] */ IMessage* result);
 
     CARAPI Dial(
-        /* [in] */ String address,
+        /* [in] */ const String& address,
         /* [in] */ Int32 clirMode,
         /* [in] */ IUUSInfo* uusInfo,
         /* [in] */ IMessage* result);
@@ -346,7 +355,7 @@ public:
         /* [in] */ IMessage* result);
 
     CARAPI GetIMSIForApp(
-        /* [in] */ String aid,
+        /* [in] */ const String& aid,
         /* [in] */ IMessage* result);
 
     CARAPI GetIMEI(
@@ -440,19 +449,19 @@ public:
         /* [in] */ IMessage* result);
 
     CARAPI SendBurstDtmf(
-        /* [in] */ String dtmfString,
+        /* [in] */ const String& dtmfString,
         /* [in] */ Int32 on,
         /* [in] */ Int32 off,
         /* [in] */ IMessage* result);
 
     CARAPI SendSMS(
-        /* [in] */ String smscPDU,
-        /* [in] */ String pdu,
+        /* [in] */ const String& smscPDU,
+        /* [in] */ const String& pdu,
         /* [in] */ IMessage* result);
 
     CARAPI SendSMSExpectMore(
-        /* [in] */ String smscPDU,
-        /* [in] */ String pdu,
+        /* [in] */ const String& smscPDU,
+        /* [in] */ const String& pdu,
         /* [in] */ IMessage* result);
 
     CARAPI SendCdmaSms(
@@ -460,8 +469,8 @@ public:
         /* [in] */ IMessage* result);
 
     CARAPI SendImsGsmSms(
-        /* [in] */ String smscPDU,
-        /* [in] */ String pdu,
+        /* [in] */ const String& smscPDU,
+        /* [in] */ const String& pdu,
         /* [in] */ Int32 retry,
         /* [in] */ Int32 messageRef,
         /* [in] */ IMessage* result);
@@ -482,23 +491,23 @@ public:
 
     CARAPI WriteSmsToSim(
         /* [in] */ Int32 status,
-        /* [in] */ String smsc,
-        /* [in] */ String pdu,
+        /* [in] */ const String& smsc,
+        /* [in] */ const String& pdu,
         /* [in] */ IMessage* response);
 
     CARAPI WriteSmsToRuim(
         /* [in] */ Int32 status,
-        /* [in] */ String pdu,
+        /* [in] */ const String& pdu,
         /* [in] */ IMessage* response);
 
     CARAPI SetupDataCall(
-        /* [in] */ String radioTechnology,
-        /* [in] */ String profile,
-        /* [in] */ String apn,
-        /* [in] */ String user,
-        /* [in] */ String password,
-        /* [in] */ String authType,
-        /* [in] */ String protocol,
+        /* [in] */ const String& radioTechnology,
+        /* [in] */ const String& profile,
+        /* [in] */ const String& apn,
+        /* [in] */ const String& user,
+        /* [in] */ const String& password,
+        /* [in] */ const String& authType,
+        /* [in] */ const String& protocol,
         /* [in] */ IMessage* result);
 
     CARAPI DeactivateDataCall(
@@ -529,30 +538,30 @@ public:
 
     CARAPI AcknowledgeIncomingGsmSmsWithPdu(
         /* [in] */ Boolean success,
-        /* [in] */ String ackPdu,
+        /* [in] */ const String& ackPdu,
         /* [in] */ IMessage* result);
 
     CARAPI IccIO(
         /* [in] */ Int32 command,
         /* [in] */ Int32 fileid,
-        /* [in] */ String path,
+        /* [in] */ const String& path,
         /* [in] */ Int32 p1,
         /* [in] */ Int32 p2,
         /* [in] */ Int32 p3,
-        /* [in] */ String data,
-        /* [in] */ String pin2,
+        /* [in] */ const String& data,
+        /* [in] */ const String& pin2,
         /* [in] */ IMessage* result);
 
     CARAPI IccIOForApp(
         /* [in] */ Int32 command,
         /* [in] */ Int32 fileid,
-        /* [in] */ String path,
+        /* [in] */ const String& path,
         /* [in] */ Int32 p1,
         /* [in] */ Int32 p2,
         /* [in] */ Int32 p3,
-        /* [in] */ String data,
-        /* [in] */ String pin2,
-        /* [in] */ String aid,
+        /* [in] */ const String& data,
+        /* [in] */ const String& pin2,
+        /* [in] */ const String& aid,
         /* [in] */ IMessage* result);
 
     CARAPI GetCLIR(
@@ -575,7 +584,7 @@ public:
         /* [in] */ IMessage* response);
 
     CARAPI SetNetworkSelectionModeManual(
-        /* [in] */ String operatorNumeric,
+        /* [in] */ const String& operatorNumeric,
         /* [in] */ IMessage* response);
 
     CARAPI GetNetworkSelectionMode(
@@ -588,14 +597,14 @@ public:
         /* [in] */ Int32 action,
         /* [in] */ Int32 cfReason,
         /* [in] */ Int32 serviceClass,
-        /* [in] */ String number,
+        /* [in] */ const String& number,
         /* [in] */ Int32 timeSeconds,
         /* [in] */ IMessage* response);
 
     CARAPI QueryCallForwardStatus(
         /* [in] */ Int32 cfReason,
         /* [in] */ Int32 serviceClass,
-        /* [in] */ String number,
+        /* [in] */ const String& number,
         /* [in] */ IMessage* response);
 
     CARAPI QueryCLIP(
@@ -605,35 +614,35 @@ public:
         /* [in] */ IMessage* response);
 
     CARAPI QueryFacilityLock(
-        /* [in] */ String facility,
-        /* [in] */ String password,
+        /* [in] */ const String& facility,
+        /* [in] */ const String& password,
         /* [in] */ Int32 serviceClass,
         /* [in] */ IMessage* response);
 
     CARAPI QueryFacilityLockForApp(
-        /* [in] */ String facility,
-        /* [in] */ String password,
+        /* [in] */ const String& facility,
+        /* [in] */ const String& password,
         /* [in] */ Int32 serviceClass,
-        /* [in] */ String appId,
+        /* [in] */ const String& appId,
         /* [in] */ IMessage* response);
 
     CARAPI SetFacilityLock(
-        /* [in] */ String facility,
+        /* [in] */ const String& facility,
         /* [in] */ Boolean lockState,
-        /* [in] */ String password,
+        /* [in] */ const String& password,
         /* [in] */ Int32 serviceClass,
         /* [in] */ IMessage* response);
 
     CARAPI SetFacilityLockForApp(
-        /* [in] */ String facility,
+        /* [in] */ const String& facility,
         /* [in] */ Boolean lockState,
-        /* [in] */ String password,
+        /* [in] */ const String& password,
         /* [in] */ Int32 serviceClass,
-        /* [in] */ String appId,
+        /* [in] */ const String& appId,
         /* [in] */ IMessage* response);
 
     CARAPI SendUSSD(
-        /* [in] */ String ussdString,
+        /* [in] */ const String& ussdString,
         /* [in] */ IMessage* response);
 
     // inherited javadoc suffices
@@ -687,21 +696,21 @@ public:
      * {@inheritDoc}
      */
     CARAPI SendTerminalResponse(
-        /* [in] */ String contents,
+        /* [in] */ const String& contents,
         /* [in] */ IMessage* response);
 
     /**
      * {@inheritDoc}
      */
     CARAPI SendEnvelope(
-        /* [in] */ String contents,
+        /* [in] */ const String& contents,
         /* [in] */ IMessage* response);
 
     /**
      * {@inheritDoc}
      */
     CARAPI SendEnvelopeWithStatus(
-        /* [in] */ String contents,
+        /* [in] */ const String& contents,
         /* [in] */ IMessage* response);
 
     /**
@@ -747,7 +756,7 @@ public:
      * {@inheritDoc}
      */
     CARAPI SetSmscAddress(
-        /* [in] */ String address,
+        /* [in] */ const String& address,
         /* [in] */ IMessage* result);
 
     /**
@@ -784,7 +793,7 @@ public:
         /* [in] */ IMessage* response);
 
     CARAPI NeedsOldRilFeature(
-        /* [in] */ String feature,
+        /* [in] */ const String& feature,
         /* [out] */ Boolean* result);
 
     // ***** Methods for CDMA support
@@ -840,7 +849,7 @@ public:
      * {@inheritDoc}
      */
     CARAPI SendCDMAFeatureCode(
-        /* [in] */ String FeatureCode,
+        /* [in] */ const String& FeatureCode,
         /* [in] */ IMessage* response);
 
     CARAPI GetCdmaBroadcastConfig(
@@ -861,13 +870,13 @@ public:
         /* [in] */ IMessage* response);
 
     CARAPI RequestIsimAuthentication(
-        /* [in] */ String nonce,
+        /* [in] */ const String& nonce,
         /* [in] */ IMessage* response);
 
     CARAPI RequestIccSimAuthentication(
         /* [in] */ Int32 authContext,
-        /* [in] */ String data,
-        /* [in] */ String aid,
+        /* [in] */ const String& data,
+        /* [in] */ const String& aid,
         /* [in] */ IMessage* response);
 
     /**
@@ -884,11 +893,11 @@ public:
         /* [in] */ IMessage* response);
 
     CARAPI SetInitialAttachApn(
-        /* [in] */ String apn,
-        /* [in] */ String protocol,
+        /* [in] */ const String& apn,
+        /* [in] */ const String& protocol,
         /* [in] */ Int32 authType,
-        /* [in] */ String username,
-        /* [in] */ String password,
+        /* [in] */ const String& username,
+        /* [in] */ const String& password,
         /* [in] */ IMessage* result);
 
     CARAPI SetDataProfile(
@@ -909,7 +918,7 @@ public:
      * {@inheritDoc}
      */
     CARAPI IccOpenLogicalChannel(
-        /* [in] */ String AID,
+        /* [in] */ const String& AID,
         /* [in] */ IMessage* response);
 
     /**
@@ -929,7 +938,7 @@ public:
         /* [in] */ Int32 p1,
         /* [in] */ Int32 p2,
         /* [in] */ Int32 p3,
-        /* [in] */ String data,
+        /* [in] */ const String& data,
         /* [in] */ IMessage* response);
 
     /**
@@ -941,7 +950,7 @@ public:
         /* [in] */ Int32 p1,
         /* [in] */ Int32 p2,
         /* [in] */ Int32 p3,
-        /* [in] */ String data,
+        /* [in] */ const String& data,
         /* [in] */ IMessage* response);
 
     /**
@@ -956,7 +965,7 @@ public:
 
     CARAPI NvWriteItem(
         /* [in] */ Int32 itemID,
-        /* [in] */ String itemValue,
+        /* [in] */ const String& itemValue,
         /* [in] */ IMessage* response);
 
     CARAPI NvWriteCdmaPrl(
@@ -1117,17 +1126,17 @@ protected:
         /* [in] */ Int32 request);
 
     CARAPI_(void) RiljLog(
-        /* [in] */ String msg);
+        /* [in] */ const String& msg);
 
     CARAPI_(void) RiljLogv(
-        /* [in] */ String msg);
+        /* [in] */ const String& msg);
 
     CARAPI_(void) UnsljLog(
         /* [in] */ Int32 response);
 
     CARAPI_(void) UnsljLogMore(
         /* [in] */ Int32 response,
-        /* [in] */ String more);
+        /* [in] */ const String& more);
 
     CARAPI_(void) UnsljLogRet(
         /* [in] */ Int32 response,
@@ -1160,8 +1169,8 @@ private:
 
     CARAPI_(void) ConstructGsmSendSmsRilRequest(
         /* [in] */ RILRequest* rr,
-        /* [in] */ String smscPDU,
-        /* [in] */ String pdu);
+        /* [in] */ const String& smscPDU,
+        /* [in] */ const String& pdu);
 
     CARAPI_(void) ConstructCdmaSendSmsRilRequest(
         /* [in] */ RILRequest* rr,
@@ -1239,7 +1248,7 @@ private:
         /* [in] */ Int32 p1,
         /* [in] */ Int32 p2,
         /* [in] */ Int32 p3,
-        /* [in] */ String data,
+        /* [in] */ const String& data,
         /* [in] */ IMessage* response);
 
 public:
