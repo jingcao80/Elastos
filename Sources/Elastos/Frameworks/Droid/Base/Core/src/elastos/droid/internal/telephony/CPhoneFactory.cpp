@@ -2,6 +2,8 @@
 #include "Elastos.Droid.Provider.h"
 #include "elastos/droid/internal/telephony/CPhoneFactory.h"
 // #include "elastos/droid/internal/telephony/CDefaultPhoneNotifier.h"
+#include "elastos/droid/internal/telephony/gsm/CGSMPhone.h"
+#include "elastos/droid/internal/telephony/CRIL.h"
 #include "elastos/droid/content/CIntent.h"
 #include "elastos/droid/provider/CSettingsGlobal.h"
 #include "elastos/droid/internal/telephony/CPhoneProxy.h"
@@ -38,6 +40,7 @@ using Elastos::Droid::Telephony::ITelephonyManager;
 using Elastos::Droid::Telephony::CSubscriptionManager;
 // using Elastos::Droid::Internal::Telephony::CDefaultPhoneNotifier;
 using Elastos::Droid::Internal::Telephony::CPhoneProxy;
+using Elastos::Droid::Internal::Telephony::Gsm::CGSMPhone;
 using Elastos::Droid::Internal::Telephony::ITelephonyProperties;
 using Elastos::Droid::Internal::Telephony::Cdma::ICdmaSubscriptionSourceManager;
 using Elastos::Droid::Internal::Telephony::Cdma::ICdmaSubscriptionSourceManagerHelper;
@@ -351,11 +354,10 @@ ECode CPhoneFactory::GetGsmPhone(
     VALIDATE_NOT_NULL(result)
     {
         AutoLock syncLock(PhoneProxy::lockForRadioTechnologyChange);
-        assert(0 && "TODO");
-        AutoPtr<IPhone> phone;// = new GSMPhone(sContext, (*sCommandsInterfaces)[phoneId],
-                // sPhoneNotifier, phoneId);
+        AutoPtr<IPhone> phone;
+        CGSMPhone::New(sContext, (*sCommandsInterfaces)[phoneId], sPhoneNotifier, phoneId, (IPhone**)&phone);
         *result = phone;
-        REFCOUNT_ADD(*result)
+        REFCOUNT_ADD(*result);
         return NOERROR;
     }
 }
@@ -367,11 +369,13 @@ AutoPtr<IInterface> CPhoneFactory::InstantiateCustomRIL(
     /* [in] */ Int32 cdmaSubscription,
     /* [in] */ IInteger32* instanceId)
 {
-    assert(0 && "TODO");
+    //assert(0 && "TODO");
     // Class<?> clazz = Class->ForName("com.android.internal.telephony." + sRILClassname);
     // Constructor<?> constructor = clazz->GetConstructor(Context.class, Int32.class, Int32.class, Integer.class);
     // return (T) clazz->Cast(constructor->NewInstance(context, networkMode, cdmaSubscription, instanceId));
-    return NULL;
+    AutoPtr<ICommandsInterface> ci;
+    CRIL::New(context, networkMode, cdmaSubscription, instanceId, (ICommandsInterface**)&ci);
+    return ci;
 }
 
 ECode CPhoneFactory::GetDefaultPhone(

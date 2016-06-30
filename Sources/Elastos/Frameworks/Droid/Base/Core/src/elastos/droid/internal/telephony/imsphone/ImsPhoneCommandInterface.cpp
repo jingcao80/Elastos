@@ -15,8 +15,8 @@ namespace ImsPhone {
 
 ImsPhoneCommandInterface::ImsPhoneCommandInterface(
     /* [in] */ IContext* context)
-    : BaseCommands(context)
 {
+    BaseCommands::constructor(context);
     // ==================before translated======================
     // super(context);
 }

@@ -20,6 +20,7 @@ SOURCES += CSmsNumberUtils.cpp
 SOURCES += CSmsResponse.cpp
 SOURCES += GsmAlphabet.cpp
 SOURCES += CGsmAlphabet.cpp
+SOURCES += CRIL.cpp
 SOURCES += CSmsRawData.cpp
 SOURCES += ATResponseParser.cpp
 SOURCES += BaseCommands.cpp

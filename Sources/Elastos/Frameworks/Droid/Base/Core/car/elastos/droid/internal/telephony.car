@@ -312,6 +312,7 @@ module
     interface Elastos.Droid.Internal.Utility.IStateMachine;
 
     using interface Elastos.Core.IRunnable;
+    using interface Elastos.Core.IInteger32;
 
     namespace Elastos {
     namespace Droid {
@@ -427,7 +428,7 @@ module
 
         class CSmsUsageMonitor {
             constructor(
-                [in]  IContext* context);
+                [in]  IContext* ctx);
 
             //interface IHandler;
             interface ISmsUsageMonitor;
@@ -436,7 +437,7 @@ module
         [deprecated]
         class CSubInfoRecordUpdater {
             constructor(
-                [in]  IContext* context,
+                [in]  IContext* ctx,
                 [in]  ArrayOf<IPhone*>* phoneProxy,
                 [in]  ArrayOf<ICommandsInterface*>* ci);
 
@@ -505,7 +506,7 @@ module
             constructor();
 
             constructor(
-                [in] IContext* context,
+                [in] IContext* ctx,
                 [in] IHandler* target);
 
             interface IPhoneStateIntentReceiver;
@@ -540,6 +541,23 @@ module
             interface IProxyControllerHelper;
         }
 
+        class CRIL {
+            constructor(
+                [in] IContext* ctx,
+                [in] Int32 preferredNetworkType,
+                [in] Int32 cdmaSubscription);
+
+            constructor(
+                [in] IContext* ctx,
+                [in] Int32 preferredNetworkType,
+                [in] Int32 cdmaSubscription,
+                [in] IInteger32* instanceId);
+
+            interface IBaseCommands;
+            interface ICommandsInterface;
+            interface IRIL;
+        }
+
     } // Telephony
     } // Internal
     } // Droid
@@ -567,7 +585,7 @@ module
 
         class CApnContext {
             constructor(
-                [in] IContext* context,
+                [in] IContext* ctx,
                 [in] String apnType,
                 [in] String logTag,
                 [in] INetworkConfig* config,
@@ -807,7 +825,7 @@ module
         class CCatService {
             constructor(
                 [in] ICommandsInterface* ci,
-                [in] IContext* context,
+                [in] IContext* ctx,
                 [in] IIccFileHandler* fh,
                 [in] Int32 slotId);
 
@@ -995,11 +1013,11 @@ module
 
         class CIccCardProxy {
             constructor(
-                [in] IContext* context,
+                [in] IContext* ctx,
                 [in] ICommandsInterface* ci);
 
             constructor(
-                [in] IContext* context,
+                [in] IContext* ctx,
                 [in] ICommandsInterface* ci,
                 [in] Int32 cardIndex);
 
@@ -1035,7 +1053,7 @@ module
         //class CIccRecords {
         //    constructor(
         //        [in] IUiccCardApplication* app,
-        //        [in] IContext* c,
+        //        [in] IContext* ctx,
         //        [in] ICommandsInterface* ci);
 
         //    //interface IHandler;
@@ -1074,7 +1092,7 @@ module
         class CIsimUiccRecords {
             constructor(
                 [in] IUiccCardApplication* app,
-                [in] IContext* c,
+                [in] IContext* ctx,
                 [in] ICommandsInterface* ci);
 
             //interface IHandler;
@@ -1096,7 +1114,7 @@ module
         class CRuimRecords {
             constructor(
                 [in] IUiccCardApplication* app,
-                [in] IContext* c,
+                [in] IContext* ctx,
                 [in] ICommandsInterface* ci);
 
             interface IIccRecords;
@@ -1117,7 +1135,7 @@ module
         class CSIMRecords {
             constructor(
                 [in] IUiccCardApplication* app,
-                [in] IContext* c,
+                [in] IContext* ctx,
                 [in] ICommandsInterface* ci);
 
             interface IIccRecords;
@@ -1134,7 +1152,7 @@ module
 
         class CUiccCard {
             constructor(
-                [in] IContext* c,
+                [in] IContext* ctx,
                 [in] ICommandsInterface* ci,
                 [in] IIccCardStatus* ics,
                 [in] Int32 slotId);
@@ -1146,7 +1164,7 @@ module
             constructor(
                 [in] IUiccCard* uiccCard,
                 [in] IIccCardApplicationStatus* as,
-                [in] IContext* c,
+                [in] IContext* ctx,
                 [in] ICommandsInterface* ci);
 
             interface IUiccCardApplication;
@@ -1164,7 +1182,7 @@ module
         [deprecated]
         class CUiccController {
             constructor(
-                [in] IContext* c,
+                [in] IContext* ctx,
                 [in] ArrayOf<ICommandsInterface*>* ci);
 
             //interface IHandler;
@@ -1219,7 +1237,7 @@ module
 
         class CSipPhone {
             constructor(
-                [in] IContext* context,
+                [in] IContext* ctx,
                 [in] IPhoneNotifier* notifier,
                 [in] /*TODO ISipProfile*/IInterface* profile);
 
@@ -1248,7 +1266,7 @@ module
 
         class CImsPhone {
             constructor(
-                [in] IContext* context,
+                [in] IContext* ctx,
                 [in] IPhoneNotifier* notifier,
                 [in] IPhone* defaultPhone);
 
@@ -1280,13 +1298,13 @@ module
 
         class CImsPhoneConnection {
             constructor(
-                [in] IContext* context,
+                [in] IContext* ctx,
                 [in] /*TODO IImsCall*/IInterface* imsCall,
                 [in] IImsPhoneCallTracker* ct,
                 [in] IImsPhoneCall* parent);
 
             constructor(
-                [in] IContext* context,
+                [in] IContext* ctx,
                 [in] String dialString,
                 [in] IImsPhoneCallTracker* ct,
                 [in] IImsPhoneCall* parent,
@@ -1375,20 +1393,20 @@ module
         class CCDMALTEPhone {
 
             constructor(
-                [in] IContext* context,
+                [in] IContext* ctx,
                 [in] ICommandsInterface* ci,
                 [in] IPhoneNotifier* notifier,
                 [in] Int32 phoneId);
 
             constructor(
-                [in] IContext* context,
+                [in] IContext* ctx,
                 [in] ICommandsInterface* ci,
                 [in] IPhoneNotifier* notifier,
                 [in] Boolean unitTestMode,
                 [in] Int32 phoneId);
 
             constructor(
-                [in] IContext* context,
+                [in] IContext* ctx,
                 [in] ICommandsInterface* ci,
                 [in] IPhoneNotifier* notifier);
 
@@ -1403,18 +1421,18 @@ module
             constructor();
 
             constructor(
-                [in] IContext* context,
+                [in] IContext* ctx,
                 [in] ICommandsInterface* ci,
                 [in] IPhoneNotifier* notifier);
 
             constructor(
-                [in] IContext* context,
+                [in] IContext* ctx,
                 [in] ICommandsInterface* ci,
                 [in] IPhoneNotifier* notifier,
                 [in] Int32 phoneId);
 
             constructor(
-                [in] IContext* context,
+                [in] IContext* ctx,
                 [in] ICommandsInterface* ci,
                 [in] IPhoneNotifier* notifier,
                 [in] Boolean unitTestMode);
@@ -1452,19 +1470,19 @@ module
 
         class CCdmaConnection {
             constructor(
-                [in] IContext* context,
+                [in] IContext* ctx,
                 [in] IDriverCall* dc,
                 [in] ICdmaCallTracker* ct,
                 [in] Int32 index);
 
             constructor(
-                [in] IContext* context,
+                [in] IContext* ctx,
                 [in] String dialString,
                 [in] ICdmaCallTracker* ct,
                 [in] ICdmaCall* parent);
 
             constructor(
-                [in] IContext* context,
+                [in] IContext* ctx,
                 [in] ICdmaCallWaitingNotification* cw,
                 [in] ICdmaCallTracker* ct,
                 [in] ICdmaCall* parent);
@@ -1533,7 +1551,7 @@ module
 
         class CCdmaServiceCategoryProgramHandler {
             constructor(
-                [in] IContext* context,
+                [in] IContext* ctx,
                 [in] ICommandsInterface* commandsInterface);
 
             //interface IStateMachine;
@@ -1582,7 +1600,7 @@ module
         class CEriManager {
             constructor(
                 [in] IPhoneBase* phone,
-                [in] IContext* context,
+                [in] IContext* ctx,
                 [in] Int32 eriFileSource);
 
             interface IEriManager;
@@ -1630,24 +1648,24 @@ module
             constructor();
 
             constructor(
-                [in] IContext* context,
+                [in] IContext* ctx,
                 [in] ICommandsInterface* ci,
                 [in] IPhoneNotifier* notifier);
 
             constructor(
-                [in] IContext* context,
+                [in] IContext* ctx,
                 [in] ICommandsInterface* ci,
                 [in] IPhoneNotifier* notifier,
                 [in] Boolean unitTestMode);
 
             constructor(
-                [in] IContext* context,
+                [in] IContext* ctx,
                 [in] ICommandsInterface* ci,
                 [in] IPhoneNotifier* notifier,
                 [in] Int32 phoneId);
 
             constructor(
-                [in] IContext* context,
+                [in] IContext* ctx,
                 [in] ICommandsInterface* ci,
                 [in] IPhoneNotifier* notifier,
                 [in] Boolean unitTestMode,
@@ -1685,7 +1703,7 @@ module
             constructor();
 
             constructor(
-                [in] IContext* context,
+                [in] IContext* ctx,
                 [in] IPhoneBase* phone);
 
             interface IGsmCellBroadcastHandler;
@@ -1702,13 +1720,13 @@ module
             constructor();
 
             constructor(
-                [in] IContext* context,
+                [in] IContext* ctx,
                 [in] IDriverCall* dc,
                 [in] IGsmCallTracker* ct,
                 [in] Int32 index);
 
             constructor(
-                [in] IContext* context,
+                [in] IContext* ctx,
                 [in] String dialString,
                 [in] IGsmCallTracker* ct,
                 [in] IGsmCall* parent);
@@ -1722,7 +1740,7 @@ module
 //            constructor();
 //
 //            constructor(
-//                [in] IContext* context,
+//                [in] IContext* ctx,
 //                [in] ISmsStorageMonitor* storageMonitor,
 //                [in] IPhoneBase* phone);
 //

@@ -464,7 +464,7 @@ module
          */
         SetOnCallRing(
             [in] IHandler* h,
-            [in] IInterface* what,
+            [in] Int32 what,
             [in] IInterface* obj);
 
         UnSetOnCallRing(

@@ -13,8 +13,8 @@ namespace Sip {
 //=====================================================================
 SipCommandInterface::SipCommandInterface(
     /* [in] */ IContext* context)
-    : BaseCommands(context)
 {
+    BaseCommands::constructor(context);
     // ==================before translated======================
     // super(context);
 }

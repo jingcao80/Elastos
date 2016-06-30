@@ -19,13 +19,18 @@ namespace Internal {
 namespace Telephony {
 
 CAR_INTERFACE_IMPL_2(BaseCommands, Object, IBaseCommands, ICommandsInterface)
-BaseCommands::BaseCommands(
-    /* [in] */ IContext* context)
+
+BaseCommands::BaseCommands()
     : mState(RADIO_UNAVAILABLE)
     , mPreferredNetworkType(0)
     , mCdmaSubscription(0)
     , mPhoneType(0)
     , mRilVersion(-1)
+{
+}
+
+ECode BaseCommands::constructor(
+    /* [in] */ IContext* context)
 {
     mContext = context;  // May be NULL (if so we won't log statistics)
     mRadioStateChangedRegistrants = new RegistrantList();
@@ -64,6 +69,7 @@ BaseCommands::BaseCommands(
     mWwanIwlanCoexistenceRegistrants = new RegistrantList();
     mSimRefreshRegistrants = new RegistrantList();
     mModemCapRegistrants = new RegistrantList();
+    return NOERROR;
 }
 
 BaseCommands::~BaseCommands()
