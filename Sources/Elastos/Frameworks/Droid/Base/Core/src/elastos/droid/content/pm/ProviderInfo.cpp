@@ -80,9 +80,9 @@ ECode ProviderInfo::ToString(
     /* [out] */ String* str)
 {
     VALIDATE_NOT_NULL(str);
-    // return "ContentProviderInfo{name=" + authority + " className=" + name + "}";
-    assert(0);
-    return E_NOT_IMPLEMENTED;
+    *str = NULL;
+    str->AppendFormat("ContentProviderInfo{name=%s className=%s}", mAuthority.string(), mName.string());
+    return NOERROR;
 }
 
 ECode ProviderInfo::GetAuthority(

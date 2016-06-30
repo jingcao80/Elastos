@@ -1208,11 +1208,6 @@ protected:
     CARAPI_(void) SetTlsCallingPackage(
         /* [in] */ const String& pakcage);
 
-public:
-    // ThreadLocal<String> mCallingPackage = new ThreadLocal<String>();
-    static pthread_once_t sKeyOnce;
-    static pthread_key_t sTlsKey;
-
 private:
     friend class CContentProviderTransport;
 
@@ -1234,6 +1229,9 @@ private:
     Boolean mExported;
     Boolean mNoPerms;
     Boolean mSingleUser;
+
+    // ThreadLocal<String> mCallingPackage = new ThreadLocal<String>();
+    pthread_key_t mTlsKey;
 
     AutoPtr<IContentProviderTransport> mTransport;
 };

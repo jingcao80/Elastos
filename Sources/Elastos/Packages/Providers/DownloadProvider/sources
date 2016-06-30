@@ -1,0 +1,46 @@
+
+TARGET_NAME = Elastos.Droid.Providers.Downloads
+TARGET_TYPE = eco
+
+CAR_FLAGS += -n -u
+LUBE_FLAGS += -n -u
+
+INCLUDES += $(MAKEDIR)/inc
+INCLUDES += $(MAKEDIR)/src
+
+VPATH += $(MAKEDIR)/src/elastos/droid/providers/downloads
+
+SOURCES += Elastos.CoreLibrary.cpp
+SOURCES += Elastos.Droid.Core.cpp
+SOURCES += Elastos.Droid.Providers.Downloads.car
+
+SOURCES += R.cpp
+SOURCES += Constants.cpp
+SOURCES += CDownloadDrmHelper.cpp
+SOURCES += CDownloadIdleService.cpp
+SOURCES += CDownloadInfo.cpp
+SOURCES += CDownloadNotifier.cpp
+SOURCES += CDownloadProvider.cpp
+SOURCES += CDownloadReceiver.cpp
+SOURCES += CDownloadScanner.cpp
+SOURCES += CDownloadService.cpp
+SOURCES += CDownloadStorageProvider.cpp
+SOURCES += CDownloadThread.cpp
+SOURCES += CHelpers.cpp
+SOURCES += COpenHelper.cpp
+SOURCES += RealSystemFacade.cpp
+SOURCES += CSizeLimitActivity.cpp
+SOURCES += CStorageUtils.cpp
+#SOURCES += StopRequestException.cpp
+
+
+LIBRARIES = $(XDK_USER_LIB)/Elastos.Runtime.lib
+LIBRARIES += $(XDK_TARGETS)/Elastos.Runtime.eco
+LIBRARIES += $(XDK_TARGETS)/Elastos.CoreLibrary.eco
+LIBRARIES += $(XDK_TARGETS)/Elastos.Droid.Core.eco
+LIBRARIES += -llog -lutils -ldrmframework
+
+APPPACK = 1
+APP_PACKAGE_NAME = Elastos.Droid.Providers.Downloads
+RES_NAMESPACE = Elastos.Droid.Providers.Downloads
+DIRRESOURCES += $(MAKEDIR)/res;

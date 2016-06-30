@@ -450,6 +450,10 @@
 > Elastos/Packages/Providers/MediaProvider Elastos.Droid.Providers.Media.car
 > Elastos/Packages/Providers/MediaProvider
 
+# ==== build Packages/Providers/DownloadProvider ====
+> Elastos/Packages/Providers/DownloadProvider Elastos.Droid.Providers.Downloads.car
+> Elastos/Packages/Providers/DownloadProvider
+
 # ==== build Packages/Service/Telecomm ====
 > Elastos/Packages/Service/Telecomm Elastos.Droid.Server.Telecom.car
 > Elastos/Packages/Service/Telecomm

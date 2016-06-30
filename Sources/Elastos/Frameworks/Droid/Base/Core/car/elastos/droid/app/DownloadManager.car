@@ -512,6 +512,27 @@ module
             [in] Int64 length,
             [in] Boolean showNotification,
             [out] Int64* id);
+
+        /** {@hide} */
+        AddCompletedDownload(
+            [in] String title,
+            [in] String description,
+            [in] Boolean isMediaScannerScannable,
+            [in] String mimeType,
+            [in] String path,
+            [in] Int64 length,
+            [in] Boolean showNotification,
+            [in] Boolean allowWrite,
+            [out] Int64* id);
+
+        /**
+         * Get the DownloadProvider URI for the download with the given ID.
+         *
+         * @hide
+         */
+        GetDownloadUri(
+            [in] Int64 id,
+            [in] IUri** uri);
     }
 
     [local]

@@ -3,7 +3,7 @@
         android:sharedUserId="android.media"
         android:sharedUserLabel="@string/uid_label"
         android:versionCode="700">
-        
+
     <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" />
     <uses-permission android:name="android.permission.WRITE_SETTINGS" />
     <uses-permission android:name="android.permission.WAKE_LOCK" />
@@ -13,10 +13,10 @@
     <uses-permission android:name="android.permission.MANAGE_USERS" />
     <uses-permission android:name="android.permission.INTERACT_ACROSS_USERS" />
 
-    <application android:process="android.process.media"
+    <application android:process="Elastos.Process.Media"
                  android:label="@string/app_label"
                  android:supportsRtl="true">
-        <provider android:name="MediaProvider" android:authorities="media"
+        <provider android:name="Elastos.Droid.Providers.Media.CMediaProvider" android:authorities="media"
                 android:multiprocess="false" android:exported="true">
             <grant-uri-permission android:pathPrefix="/external/" />
             <path-permission
@@ -26,7 +26,7 @@
         </provider>
 
         <provider
-            android:name="MediaDocumentsProvider"
+            android:name="Elastos.Droid.Providers.Media.CMediaDocumentsProvider"
             android:authorities="com.android.providers.media.documents"
             android:grantUriPermissions="true"
             android:exported="true"
@@ -37,7 +37,7 @@
         </provider>
 
         <!-- Handles database upgrades after OTAs, then disables itself -->
-        <receiver android:name="MediaUpgradeReceiver">
+        <receiver android:name="Elastos.Droid.Providers.Media.CMediaUpgradeReceiver">
             <!-- This broadcast is sent after the core system has finished
                  booting, before the home app is launched or BOOT_COMPLETED
                  is sent. -->
@@ -46,7 +46,7 @@
             </intent-filter>
         </receiver>
 
-        <receiver android:name="MediaScannerReceiver">
+        <receiver android:name="Elastos.Droid.Providers.Media.CMediaScannerReceiver">
             <intent-filter>
                 <action android:name="android.intent.action.BOOT_COMPLETED" />
             </intent-filter>
@@ -64,13 +64,13 @@
             </intent-filter>
         </receiver>
 
-        <service android:name="MediaScannerService" android:exported="true">
+        <service android:name="Elastos.Droid.Providers.Media.CMediaScannerService" android:exported="true">
             <intent-filter>
                 <action android:name="android.media.IMediaScannerService" />
             </intent-filter>
         </service>
 
-        <receiver android:name=".MtpReceiver">
+        <receiver android:name="Elastos.Droid.Providers.Media.CMtpReceiver">
             <intent-filter>
                 <action android:name="android.intent.action.BOOT_COMPLETED" />
             </intent-filter>
@@ -79,9 +79,9 @@
             </intent-filter>
         </receiver>
 
-        <service android:name="MtpService" />
+        <service android:name="Elastos.Droid.Providers.Media.CMtpService" />
 
-        <activity android:name="RingtonePickerActivity"
+        <activity android:name="Elastos.Droid.Providers.Media.CRingtonePickerActivity"
                 android:theme="@style/PickerDialogTheme"
                 android:excludeFromRecents="true">
             <intent-filter>

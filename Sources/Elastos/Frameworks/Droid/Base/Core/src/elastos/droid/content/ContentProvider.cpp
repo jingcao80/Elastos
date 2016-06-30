@@ -88,9 +88,6 @@ ECode ContentProvider::OpenPipeAsyncTask::DoInBackground(
 //================================================================
 static const String TAG("ContentProvider");
 
-pthread_key_t ContentProvider::sTlsKey;
-pthread_once_t ContentProvider::sKeyOnce = PTHREAD_ONCE_INIT;
-
 CAR_INTERFACE_IMPL_3(ContentProvider, Object, IContentProvider, IComponentCallbacks, IComponentCallbacks2)
 
 static void ThreadDestructor(void* st)
@@ -101,20 +98,13 @@ static void ThreadDestructor(void* st)
     }
 }
 
-static void MakeKey()
-{
-    ASSERT_TRUE(pthread_key_create(&ContentProvider::sTlsKey, ThreadDestructor) == 0);
-}
-
 String ContentProvider::GetTlsCallingPackage()
 {
-    pthread_once(&sKeyOnce, MakeKey);
-
-    AutoPtr<ICharSequence> callingPackage = (ICharSequence*)pthread_getspecific(sTlsKey);
+    AutoPtr<ICharSequence> callingPackage = (ICharSequence*)pthread_getspecific(mTlsKey);
     if (callingPackage == NULL) {
         CString::New(String(""), (ICharSequence**)&callingPackage);
 
-        ASSERT_TRUE(pthread_setspecific(sTlsKey, callingPackage.Get()) == 0);
+        ASSERT_TRUE(pthread_setspecific(mTlsKey, callingPackage.Get()) == 0);
         callingPackage->AddRef();
     }
     assert(callingPackage.Get() != NULL && "check GetCallingPackage failed!");
@@ -126,16 +116,14 @@ String ContentProvider::GetTlsCallingPackage()
 void ContentProvider::SetTlsCallingPackage(
     /* [in] */ const String& pakcage)
 {
-    pthread_once(&sKeyOnce, MakeKey);
-
-    AutoPtr<ICharSequence> callingPackage = (ICharSequence*)pthread_getspecific(sTlsKey);
+    AutoPtr<ICharSequence> callingPackage = (ICharSequence*)pthread_getspecific(mTlsKey);
     if (callingPackage != NULL) {
         REFCOUNT_RELEASE(callingPackage)
     }
 
     callingPackage = NULL;
     CString::New(pakcage, (ICharSequence**)&callingPackage);
-    ASSERT_TRUE(pthread_setspecific(sTlsKey, callingPackage.Get()) == 0);
+    ASSERT_TRUE(pthread_setspecific(mTlsKey, callingPackage.Get()) == 0);
     callingPackage->AddRef();
 }
 
@@ -145,6 +133,7 @@ ContentProvider::ContentProvider()
     , mNoPerms(FALSE)
     , mSingleUser(FALSE)
 {
+    ASSERT_TRUE(pthread_key_create(&mTlsKey, ThreadDestructor) == 0);
 }
 
 ContentProvider::~ContentProvider()

@@ -1,0 +1,46 @@
+
+module
+{
+    using interface Elastos.Droid.Net.IUri;
+
+    namespace Elastos {
+    namespace Droid {
+    namespace Providers {
+    namespace Downloads {
+
+    /**
+     * Manages asynchronous scanning of completed downloads.
+     */
+    [local]
+    interface IDownloadScanner
+    {
+        /**
+         * Check if requested scans are still pending. Scans may timeout after an
+         * internal duration.
+         */
+        HasPendingScans(
+            [out] Boolean* result);
+
+        /**
+         * Request that given {@link DownloadInfo} be scanned at some point in
+         * future. Enqueues the request to be scanned asynchronously.
+         *
+         * @see #hasPendingScans()
+         */
+        RequestScan(
+            [in] IDownloadInfo* info);
+
+        Shutdown();
+
+        OnMediaScannerConnected();
+
+        OnScanCompleted(
+            [in] String path,
+            [in] IUri* uri);
+    }
+
+    } // namespace Downloads
+    } // namespace Providers
+    } // namespace Droid
+    } // namespace Elastos
+}

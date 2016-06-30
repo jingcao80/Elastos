@@ -1,0 +1,27 @@
+
+module
+{
+    using interface Elastos.Droid.Content.IContext;
+    using interface Elastos.Droid.Content.IIntent;
+
+    namespace Elastos {
+    namespace Droid {
+    namespace Providers {
+    namespace Downloads {
+
+    /**
+     * Receives system broadcasts (boot, network connectivity)
+     */
+    [local]
+    interface IDownloadReceiver
+    {
+        OnReceive(
+            [in] IContext* ctx,
+            [in] IIntent* intent);
+    }
+
+    } // namespace Downloads
+    } // namespace Providers
+    } // namespace Droid
+    } // namespace Elastos
+}

@@ -1,0 +1,42 @@
+
+module
+{
+    using interface Elastos.Utility.ICollection;
+
+    namespace Elastos {
+    namespace Droid {
+    namespace Providers {
+    namespace Downloads {
+
+    /**
+     * Update {@link NotificationManager} to reflect current {@link DownloadInfo}
+     * states. Collapses similar downloads into a single notification, and builds
+     * {@link PendingIntent} that launch towards {@link DownloadReceiver}.
+     */
+    interface IDownloadNotifier
+    {
+        CancelAll();
+
+        /**
+         * Notify the current speed of an active download, used for calculating
+         * estimated remaining time.
+         */
+        NotifyDownloadSpeed(
+            [in] Int64 id,
+            [in] Int64 bytesPerSecond);
+
+        /**
+         * Update {@link NotificationManager} to reflect the given set of
+         * {@link DownloadInfo}, adding, collapsing, and removing as needed.
+         */
+        UpdateWith(
+            [in] ICollection* downloads);
+
+        DumpSpeeds();
+    }
+
+    } // namespace Downloads
+    } // namespace Providers
+    } // namespace Droid
+    } // namespace Elastos
+}
