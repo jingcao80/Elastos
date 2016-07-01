@@ -1,8 +1,14 @@
 
 module
 {
+
     merge("view/PagerAdapter.car");
     merge("view/ViewPager.car");
+
+    using interface Elastos.Droid.View.IAbsSavedState;
+    using interface Elastos.Droid.View.IViewBaseSavedState;
+
+    interface Elastos.Droid.Support.V4.View.IViewPagerSavedState;
 
     namespace Elastos {
     namespace Droid {
@@ -10,11 +16,22 @@ module
     namespace V4 {
     namespace View {
 
+    class CViewPagerSavedState {
+        //constructor();
 
+        //constructor(
+        //    [in] IParcelable* state);
 
-    } // View
+        interface IViewPagerSavedState;
+        interface IViewBaseSavedState;
+        interface IAbsSavedState;
+        interface IParcelable;
+    }
+
+    } // namespace View
     } // namespace V4
     } // namespace Support
     } // namepsace Droid
     } // namespace Elastos
+
 }

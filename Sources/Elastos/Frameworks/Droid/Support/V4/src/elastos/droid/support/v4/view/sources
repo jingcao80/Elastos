@@ -1,0 +1,13 @@
+
+TARGET_NAME = view
+TARGET_TYPE = lib
+
+CAR_FLAGS += -n -u
+LUBE_FLAGS += -n -u
+
+INCLUDES += $(MAKEDIR)/../../../../../../inc/
+INCLUDES += ../../../../../../
+
+#SOURCES += ViewPager.cpp
+SOURCES += view.cpp
+
