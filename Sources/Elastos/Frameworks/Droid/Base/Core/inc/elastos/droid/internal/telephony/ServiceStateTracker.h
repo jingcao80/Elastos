@@ -218,7 +218,7 @@ protected:
     virtual CARAPI HangupAndPowerOff() = 0;
 
     virtual CARAPI GetPhone(
-        /* [in] */ IPhone* phone) = 0;
+        /* [out] */ IPhone** phone) = 0;
 
     virtual CARAPI HandlePollStateResult(
         /* [in] */ Int32 what,
@@ -230,11 +230,11 @@ protected:
 
     virtual CARAPI OnUpdateIccAvailability() = 0;
 
-    virtual CARAPI_(void) Log(
-        /* [in] */ String s) = 0;
+    virtual CARAPI Log(
+        /* [in] */ const String& s) = 0;
 
-    virtual CARAPI_(void) Loge(
-        /* [in] */ String s) = 0;
+    virtual CARAPI Loge(
+        /* [in] */ const String& s) = 0;
 
     /** Cancel a Pending (if any) PollState() operation */
     CARAPI_(void) CancelPollState();
