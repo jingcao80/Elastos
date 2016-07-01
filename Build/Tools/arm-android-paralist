@@ -174,7 +174,7 @@
 - Elastos/Frameworks/Droid/Base/Core/src/elastos/droid/text/utility
 > Elastos/Frameworks/Droid/Base/Core/src/elastos/droid/text
 > Elastos/Frameworks/Droid/Base/Core/src/elastos/droid/transition
-#> Elastos/Frameworks/Droid/Base/Core/src/elastos/droid/app/admin
+> Elastos/Frameworks/Droid/Base/Core/src/elastos/droid/app/admin
 #- Elastos/Frameworks/Droid/Base/Core/src/elastos/droid/app/backup
 - Elastos/Frameworks/Droid/Base/Core/src/elastos/droid/app/job
 - Elastos/Frameworks/Droid/Base/Core/src/elastos/droid/app/trust

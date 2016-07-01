@@ -99,10 +99,16 @@ Ripple::Ripple()
     , mCanUseHardware(FALSE)
     , mHasMaxRadius(FALSE)
     , mCanceled(FALSE)
+    , mAnimationListener(NULL)
+    , mAnimationListenerReleased(FALSE)
 {}
 
 Ripple::~Ripple()
 {
+    if (!mAnimationListenerReleased) {
+        mAnimationListener->Release();
+        mAnimationListener = NULL;
+    }
 }
 
 ECode Ripple::constructor(
@@ -122,6 +128,7 @@ ECode Ripple::constructor(
     CArrayList::New((IArrayList**)&mRunningAnimations);
     CArrayList::New((IArrayList**)&mPendingAnimations);
     mAnimationListener = new RippleAnimatorListenerAdapter(this);
+    mAnimationListener->AddRef();
     return NOERROR;
 }
 
@@ -135,7 +142,8 @@ ECode Ripple::Setup(
     if (maxRadius != IRippleDrawable::RADIUS_AUTO) {
         mHasMaxRadius = TRUE;
         mOuterRadius = maxRadius;
-    } else {
+    }
+    else {
         Int32 width = 0, height = 0;
         mBounds->GetWidth(&width);
         mBounds->GetHeight(&height);
@@ -174,7 +182,8 @@ void Ripple::ClampStartingPosition()
         Double angle = Elastos::Core::Math::Atan2(dY, dX);
         mClampedStartingX = cX + (Float) (Elastos::Core::Math::Cos(angle) * r);
         mClampedStartingY = cY + (Float) (Elastos::Core::Math::Sin(angle) * r);
-    } else {
+    }
+    else {
         mClampedStartingX = mStartingX;
         mClampedStartingY = mStartingY;
     }
@@ -278,7 +287,8 @@ ECode Ripple::Draw(
     Boolean hasContent = FALSE;
     if (canUseHardware && mHardwareAnimating) {
         hasContent = DrawHardware(IHardwareCanvas::Probe(c));
-    } else {
+    }
+    else {
         hasContent = DrawSoftware(c, p);
     }
 
@@ -373,21 +383,24 @@ ECode Ripple::Enter()
     (*fa)[0] = 1;
     AutoPtr<IObjectAnimator> radius = ObjectAnimator::OfFloat(TO_IINTERFACE(this), String("radiusGravity"), fa);
     radius->SetAutoCancel(TRUE);
-    IAnimator::Probe(radius)->SetDuration(radiusDuration);
-    IAnimator::Probe(radius)->SetInterpolator(LINEAR_INTERPOLATOR);
-    IAnimator::Probe(radius)->SetStartDelay(RIPPLE_ENTER_DELAY);
+    IAnimator* _radius = IAnimator::Probe(radius);
+    _radius->SetDuration(radiusDuration);
+    _radius->SetInterpolator(LINEAR_INTERPOLATOR);
+    _radius->SetStartDelay(RIPPLE_ENTER_DELAY);
 
     AutoPtr<IObjectAnimator> cX = ObjectAnimator::OfFloat(TO_IINTERFACE(this), String("xGravity"), fa);
     cX->SetAutoCancel(TRUE);
-    IAnimator::Probe(cX)->SetDuration(radiusDuration);
-    IAnimator::Probe(cX)->SetInterpolator(LINEAR_INTERPOLATOR);
-    IAnimator::Probe(cX)->SetStartDelay(RIPPLE_ENTER_DELAY);
+    IAnimator* _cX = IAnimator::Probe(cX);
+    _cX->SetDuration(radiusDuration);
+    _cX->SetInterpolator(LINEAR_INTERPOLATOR);
+    _cX->SetStartDelay(RIPPLE_ENTER_DELAY);
 
     AutoPtr<IObjectAnimator> cY = ObjectAnimator::OfFloat(TO_IINTERFACE(this), String("yGravity"), fa);
     cY->SetAutoCancel(TRUE);
-    IAnimator::Probe(cY)->SetDuration(radiusDuration);
-    IAnimator::Probe(cY)->SetInterpolator(LINEAR_INTERPOLATOR);
-    IAnimator::Probe(cY)->SetStartDelay(RIPPLE_ENTER_DELAY);
+    IAnimator* _cY = IAnimator::Probe(cY);
+    _cY->SetDuration(radiusDuration);
+    _cY->SetInterpolator(LINEAR_INTERPOLATOR);
+    _cY->SetStartDelay(RIPPLE_ENTER_DELAY);
 
     mAnimRadius = radius;
     mAnimX = cX;
@@ -396,9 +409,9 @@ ECode Ripple::Enter()
     // Enter animations always run on the UI thread, since it's unlikely
     // that anything interesting is happening until the user lifts their
     // finger.
-    IAnimator::Probe(radius)->Start();
-    IAnimator::Probe(cX)->Start();
-    IAnimator::Probe(cY)->Start();
+    _radius->Start();
+    _cX->Start();
+    _cY->Start();
     return NOERROR;
 }
 
@@ -411,7 +424,8 @@ ECode Ripple::Exit()
     Boolean running = FALSE;
     if (mAnimRadius != NULL && (IAnimator::Probe(mAnimRadius)->IsRunning(&running), running)) {
         remaining = mOuterRadius - radius;
-    } else {
+    }
+    else {
         remaining = mOuterRadius;
     }
 
@@ -421,7 +435,8 @@ ECode Ripple::Exit()
 
     if (mCanUseHardware) {
         ExitHardware(radiusDuration, opacityDuration);
-    } else {
+    }
+    else {
         ExitSoftware(radiusDuration, opacityDuration);
     }
     return NOERROR;
@@ -470,6 +485,11 @@ void Ripple::ExitHardware(
     opacityAnim->SetDuration(opacityDuration);
     opacityAnim->SetInterpolator(LINEAR_INTERPOLATOR);
     opacityAnim->AddListener(mAnimationListener);
+    // opacityAnim takes mAnimationListener ref
+    if (!mAnimationListenerReleased) {
+        mAnimationListener->Release();
+        mAnimationListenerReleased = TRUE;
+    }
 
     mPendingAnimations->Add(IRenderNodeAnimator::Probe(radiusAnim));
     mPendingAnimations->Add(IRenderNodeAnimator::Probe(opacityAnim));
@@ -535,35 +555,44 @@ void Ripple::ExitSoftware(
     (*fa)[0] = 1;
     AutoPtr<IObjectAnimator> radiusAnim = ObjectAnimator::OfFloat(TO_IINTERFACE(this), String("radiusGravity"), fa);
     radiusAnim->SetAutoCancel(TRUE);
-    IAnimator::Probe(radiusAnim)->SetDuration(radiusDuration);
-    IAnimator::Probe(radiusAnim)->SetInterpolator(DECEL_INTERPOLATOR);
+    IAnimator* _radiusAnim = IAnimator::Probe(radiusAnim);
+    _radiusAnim->SetDuration(radiusDuration);
+    _radiusAnim->SetInterpolator(DECEL_INTERPOLATOR);
 
     AutoPtr<IObjectAnimator> xAnim = ObjectAnimator::OfFloat(TO_IINTERFACE(this), String("xGravity"), fa);
     xAnim->SetAutoCancel(TRUE);
-    IAnimator::Probe(xAnim)->SetDuration(radiusDuration);
-    IAnimator::Probe(xAnim)->SetInterpolator(DECEL_INTERPOLATOR);
+    IAnimator* _xAnim = IAnimator::Probe(xAnim);
+    _xAnim->SetDuration(radiusDuration);
+    _xAnim->SetInterpolator(DECEL_INTERPOLATOR);
 
     AutoPtr<IObjectAnimator> yAnim = ObjectAnimator::OfFloat(TO_IINTERFACE(this), String("yGravity"), fa);
     yAnim->SetAutoCancel(TRUE);
-    IAnimator::Probe(yAnim)->SetDuration(radiusDuration);
-    IAnimator::Probe(yAnim)->SetInterpolator(DECEL_INTERPOLATOR);
+    IAnimator* _yAnim = IAnimator::Probe(yAnim);
+    _yAnim->SetDuration(radiusDuration);
+    _yAnim->SetInterpolator(DECEL_INTERPOLATOR);
 
     (*fa)[0] = 0;
     AutoPtr<IObjectAnimator> opacityAnim = ObjectAnimator::OfFloat(TO_IINTERFACE(this), String("opacity"), fa);
     opacityAnim->SetAutoCancel(TRUE);
-    IAnimator::Probe(opacityAnim)->SetDuration(opacityDuration);
-    IAnimator::Probe(opacityAnim)->SetInterpolator(LINEAR_INTERPOLATOR);
-    IAnimator::Probe(opacityAnim)->AddListener(mAnimationListener);
+    IAnimator* _opacityAnim = IAnimator::Probe(opacityAnim);
+    _opacityAnim->SetDuration(opacityDuration);
+    _opacityAnim->SetInterpolator(LINEAR_INTERPOLATOR);
+    _opacityAnim->AddListener(mAnimationListener);
+    // opacityAnim takes mAnimationListener ref
+    if (!mAnimationListenerReleased) {
+        mAnimationListener->Release();
+        mAnimationListenerReleased = TRUE;
+    }
 
     mAnimRadius = radiusAnim;
     mAnimOpacity = opacityAnim;
     mAnimX = xAnim;
     mAnimY = yAnim;
 
-    IAnimator::Probe(radiusAnim)->Start();
-    IAnimator::Probe(opacityAnim)->Start();
-    IAnimator::Probe(xAnim)->Start();
-    IAnimator::Probe(yAnim)->Start();
+    _radiusAnim->Start();
+    _opacityAnim->Start();
+    _xAnim->Start();
+    _yAnim->Start();
 }
 
 ECode Ripple::Cancel()

@@ -108,8 +108,6 @@ SharedPreferencesImpl::EditorImpl::PostWriteRunnable::PostWriteRunnable(
 ECode SharedPreferencesImpl::EditorImpl::PostWriteRunnable::Run()
 {
     mAwaitCommitRunnable->Run();
-    //TODO
-    Logger::W(TAG, "[TODO] PostWriteRunnable::Run == There need the class QueuedWork...");
     QueuedWork::Remove(mAwaitCommitRunnable);
     return NOERROR;
 }
@@ -237,7 +235,6 @@ ECode SharedPreferencesImpl::EditorImpl::Apply()
     AutoPtr<AwaitCommitRunnable> awaitCommitRunnable = new AwaitCommitRunnable(mcr);
 
     QueuedWork::Add(awaitCommitRunnable);
-    Logger::W(TAG, "[TODO] Apply == There need the class QueuedWork...");
     AutoPtr<PostWriteRunnable> postWriteRunnable = new PostWriteRunnable(awaitCommitRunnable);
     mHost->EnqueueDiskWrite(mcr, postWriteRunnable);
 

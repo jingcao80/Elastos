@@ -822,8 +822,8 @@ ECode WifiConfigStore::GetWifiConfiguration(
 {
     VALIDATE_NOT_NULL(result);
     if (mConfiguredNetworks == NULL) {
-         *result = NULL;
-         return NOERROR;
+        *result = NULL;
+        return NOERROR;
     }
     AutoPtr<IInterface> obj;
     mConfiguredNetworks->Get(CoreUtils::Convert(netId), (IInterface**)&obj);
@@ -3544,12 +3544,15 @@ String WifiConfigStore::ReadNetworkVariableFromSupplicantFile(
     /* [in] */ const String& key)
 {
     AutoPtr<IMap> data = ReadNetworkVariablesFromSupplicantFile(key);
-    StringBuilder builder;
-    builder += "readNetworkVariableFromSupplicantFile ssid=[";
-    builder += ssid;
-    builder += "] key=";
-    builder += key;
-    if (VDBG) Loge(builder.ToString());
+
+    if (VDBG) {
+        StringBuilder builder;
+        builder += "readNetworkVariableFromSupplicantFile ssid=[";
+        builder += ssid;
+        builder += "] key=";
+        builder += key;
+        Loge(builder.ToString());
+    }
     AutoPtr<IInterface> obj;
     data->Get(CoreUtils::Convert(ssid), (IInterface**)&obj);
     String result;

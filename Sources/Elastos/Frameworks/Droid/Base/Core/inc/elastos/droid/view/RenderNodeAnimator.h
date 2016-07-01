@@ -110,6 +110,8 @@ public:
 
     RenderNodeAnimator();
 
+    ~RenderNodeAnimator();
+
     CARAPI constructor(
         /* [in] */ Int32 property,
         /* [in] */ Float finalValue);

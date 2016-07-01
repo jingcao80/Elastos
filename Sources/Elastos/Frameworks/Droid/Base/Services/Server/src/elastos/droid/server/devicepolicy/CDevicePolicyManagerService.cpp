@@ -1,12 +1,4 @@
 
-#include "elastos/droid/server/devicepolicy/CDevicePolicyManagerService.h"
-#include "elastos/droid/server/devicepolicy/CDevicePolicyManagerServiceSetupContentObserver.h"
-#include "elastos/droid/Manifest.h"
-#include "elastos/droid/app/ActivityManagerNative.h"
-#include "elastos/droid/app/AppGlobals.h"
-#include "elastos/droid/os/Binder.h"
-#include "elastos/droid/os/Handler.h"
-#include "elastos/droid/os/UserHandle.h"
 #include <Elastos.CoreLibrary.Security.h>
 #include <Elastos.CoreLibrary.Text.h>
 #include <Elastos.Droid.AccessibilityService.h>
@@ -21,29 +13,32 @@
 #include <Elastos.Droid.Utility.h>
 #include <Elastos.Droid.View.h>
 #include <Elastos.Droid.Widget.h>
+#include "elastos/droid/server/devicepolicy/CDevicePolicyManagerService.h"
+#include "elastos/droid/server/devicepolicy/CDevicePolicyManagerServiceSetupContentObserver.h"
+#include "elastos/droid/app/ActivityManagerNative.h"
+#include "elastos/droid/app/AppGlobals.h"
+#include "elastos/droid/internal/utility/XmlUtils.h"
+#include "elastos/droid/net/ReturnOutValue.h"
+#include "elastos/droid/os/Binder.h"
+#include "elastos/droid/os/Handler.h"
+#include "elastos/droid/os/UserHandle.h"
+#include "elastos/droid/os/Build.h"
+#include "elastos/droid/os/Process.h"
+#include "elastos/droid/os/ServiceManager.h"
+#include "elastos/droid/os/SystemClock.h"
+#include "elastos/droid/os/UserHandle.h"
+#include "elastos/droid/provider/Settings.h"
+#include "elastos/droid/server/LocalServices.h"
+#include "elastos/droid/utility/Xml.h"
+#include "elastos/droid/Manifest.h"
+#include "elastos/droid/R.h"
 #include <elastos/core/AutoLock.h>
 #include <elastos/core/CoreUtils.h>
 #include <elastos/core/Math.h>
 #include <elastos/core/StringBuffer.h>
 #include <elastos/core/StringUtils.h>
 #include <elastos/core/Thread.h>
-#include <elastos/droid/Manifest.h>
-#include <elastos/droid/R.h>
-#include <elastos/droid/app/ActivityManagerNative.h>
-#include <elastos/droid/app/AppGlobals.h>
-#include <elastos/droid/internal/utility/XmlUtils.h>
-#include <elastos/droid/net/ReturnOutValue.h>
-#include <elastos/droid/os/Binder.h>
-#include <elastos/droid/os/Build.h>
-#include <elastos/droid/os/Handler.h>
-#include <elastos/droid/os/Process.h>
-#include <elastos/droid/os/ServiceManager.h>
-#include <elastos/droid/os/SystemClock.h>
-#include <elastos/droid/os/UserHandle.h>
-#include <elastos/droid/provider/Settings.h>
-#include <elastos/droid/server/LocalServices.h>
-#include <elastos/droid/utility/Xml.h>
-#include <elastos/core/AutoLock.h>
+
 #include <elastos/utility/logging/Logger.h>
 #include <elastos/utility/logging/Slogger.h>
 
@@ -242,7 +237,8 @@ ECode CDevicePolicyManagerService::ActiveAdminLockedReceiver::OnReceive(
     /* [in] */ IContext* context,
     /* [in] */ IIntent* intent)
 {
-    {    AutoLock syncLock(mHost);
+    {
+        AutoLock syncLock(mHost);
         AutoPtr<IUserHandle> uHandle = mAdmin->GetUserHandle();
         Int32 userHandle;
         uHandle->GetIdentifier(&userHandle);
@@ -316,13 +312,15 @@ ECode CDevicePolicyManagerService::DevicePolicyReceiver::OnReceive(
     }
     if (IIntent::ACTION_USER_REMOVED.Equals(action)) {
         mHost->RemoveUserData(userHandle);
-    } else if (action.Equals(IIntent::ACTION_USER_STARTED)
+    }
+    else if (action.Equals(IIntent::ACTION_USER_STARTED)
             || action.Equals(IIntent::ACTION_PACKAGE_CHANGED)
             || action.Equals(IIntent::ACTION_PACKAGE_REMOVED)
             || action.Equals(IIntent::ACTION_EXTERNAL_APPLICATIONS_UNAVAILABLE)) {
         if (action.Equals(IIntent::ACTION_USER_STARTED)) {
             // Reset the policy data
-            {    AutoLock syncLock(mHost);
+            {
+                AutoLock syncLock(mHost);
                 mHost->mUserData->Remove(userHandle);
             }
         }
@@ -696,8 +694,8 @@ void CDevicePolicyManagerService::ActiveAdmin::WriteToXml(
         }
         out->WriteEndTag(String(NULL), TAG_MANAGE_TRUST_AGENT_FEATURES);
     }
-    mCrossProfileWidgetProviders->IsEmpty(&isEmpty);
-    if (mCrossProfileWidgetProviders != NULL && !isEmpty) {
+
+    if (mCrossProfileWidgetProviders != NULL && (mCrossProfileWidgetProviders->IsEmpty(&isEmpty), !isEmpty)) {
         out->WriteStartTag(String(NULL), TAG_CROSS_PROFILE_WIDGET_PROVIDERS);
         Int32 providerCount;
         mCrossProfileWidgetProviders->GetSize(&providerCount);
@@ -1397,7 +1395,8 @@ ECode CDevicePolicyManagerService::LocalService::GetCrossProfileWidgetProviders(
 {
     VALIDATE_NOT_NULL(result)
 
-    {    AutoLock syncLock(mHost);
+    {
+        AutoLock syncLock(mHost);
         if (mHost->mDeviceOwner == NULL) {
             AutoPtr<ICollections> collectionsHelper;
             CCollections::AcquireSingleton((ICollections**)&collectionsHelper);
@@ -1430,7 +1429,8 @@ ECode CDevicePolicyManagerService::LocalService::GetCrossProfileWidgetProviders(
 ECode CDevicePolicyManagerService::LocalService::AddOnCrossProfileWidgetProvidersChangeListener(
     /* [in] */ IDevicePolicyManagerInternalOnCrossProfileWidgetProvidersChangeListener* listener)
 {
-    {    AutoLock syncLock(mHost);
+    {
+        AutoLock syncLock(mHost);
         if (mWidgetProviderListeners == NULL) {
             CArrayList::New((IList**)&mWidgetProviderListeners);
         }
@@ -1448,7 +1448,8 @@ ECode CDevicePolicyManagerService::LocalService::NotifyCrossProfileProvidersChan
     /* [in] */ IList* packages)
 {
     AutoPtr<IList> listeners;
-    {    AutoLock syncLock(mHost);
+    {
+        AutoLock syncLock(mHost);
         CArrayList::New(ICollection::Probe(mWidgetProviderListeners), (IList**)&listeners);
     }
     Int32 listenerCount;
@@ -2119,7 +2120,8 @@ ECode CDevicePolicyManagerService::GetPasswordMinimumSymbols(
     }
     FAIL_RETURN(EnforceCrossUserPermission(userHandle))
 
-    {    AutoLock syncLock(this);
+    {
+        AutoLock syncLock(this);
 
         Int32 length = 0;
         if (who != NULL) {
@@ -2211,7 +2213,8 @@ ECode CDevicePolicyManagerService::GetPasswordMinimumNonLetter(
             AutoPtr<ActiveAdmin> admin = GetActiveAdminUncheckedLocked(who, userHandle);
             if (admin != NULL) {
                 *password = admin->mMinimumPasswordNonLetter;
-            } else {
+            }
+            else {
                 *password = length;
             }
             return NOERROR;
@@ -2297,7 +2300,8 @@ ECode CDevicePolicyManagerService::GetPasswordHistoryLength(
             AutoPtr<ActiveAdmin> admin = GetActiveAdminUncheckedLocked(who, userHandle);
             if (admin != NULL) {
                 *password = admin->mPasswordHistoryLength;
-            } else {
+            }
+            else {
                 *password = length;
             }
             return NOERROR;
@@ -2405,7 +2409,8 @@ ECode CDevicePolicyManagerService::GetPasswordExpirationTimeout(
             AutoPtr<ActiveAdmin> admin = GetActiveAdminUncheckedLocked(who, userHandle);
             if (admin != NULL) {
                 *password = admin->mPasswordExpirationTimeout;
-            } else {
+            }
+            else {
                 *password = timeout;
             }
             return NOERROR;
@@ -2531,7 +2536,8 @@ ECode CDevicePolicyManagerService::GetCrossProfileWidgetProviders(
         }
         if (Binder::GetCallingUid() == Process::MyUid()) {
             return CArrayList::New(ICollection::Probe(activeAdmin->mCrossProfileWidgetProviders), result);
-        } else {
+        }
+        else {
             *result = activeAdmin->mCrossProfileWidgetProviders;
             REFCOUNT_ADD(*result)
             return NOERROR;
@@ -2761,7 +2767,8 @@ ECode CDevicePolicyManagerService::ResetPassword(
     EnforceNotManagedProfile(userHandle, String("reset the password"));
 
     Int32 quality;
-    {    AutoLock syncLock(this);
+    {
+        AutoLock syncLock(this);
 
         // This api can only be called by an active device admin,
         // so try to retrieve it to check that the caller is one.
@@ -3532,8 +3539,7 @@ ECode CDevicePolicyManagerService::SetDeviceOwner(
         }
 
         Boolean hasDeviceOwner;
-        mDeviceOwner->HasDeviceOwner(&hasDeviceOwner);
-        if (mDeviceOwner != NULL && hasDeviceOwner) {
+        if (mDeviceOwner != NULL && (mDeviceOwner->HasDeviceOwner(&hasDeviceOwner), hasDeviceOwner)) {
             Logger::E(TAG, "Trying to set device owner but device owner is already set.");
             return E_ILLEGAL_STATE_EXCEPTION;
         }
@@ -3544,7 +3550,8 @@ ECode CDevicePolicyManagerService::SetDeviceOwner(
             mDeviceOwner->WriteOwnerFile();
             *result = TRUE;
             return NOERROR;
-        } else {
+        }
+        else {
             // Device owner is not set but a profile owner exists, update Device owner state.
             mDeviceOwner->SetDeviceOwner(packageName, ownerName);
             mDeviceOwner->WriteOwnerFile();
@@ -3566,12 +3573,10 @@ ECode CDevicePolicyManagerService::IsDeviceOwner(
     {
         AutoLock syncLock(this);
         Boolean hasDeviceOwner;
-        mDeviceOwner->HasDeviceOwner(&hasDeviceOwner);
         String name;
-        mDeviceOwner->GetDeviceOwnerPackageName(&name);
         *result = mDeviceOwner != NULL
-                && hasDeviceOwner
-                && name.Equals(packageName);
+                && (mDeviceOwner->HasDeviceOwner(&hasDeviceOwner), hasDeviceOwner)
+                && (mDeviceOwner->GetDeviceOwnerPackageName(&name), name).Equals(packageName);
     }
     return NOERROR;
 }
@@ -3586,8 +3591,7 @@ ECode CDevicePolicyManagerService::GetDeviceOwner(
     {
         AutoLock syncLock(this);
         Boolean hasDeviceOwner;
-        mDeviceOwner->HasDeviceOwner(&hasDeviceOwner);
-        if (mDeviceOwner != NULL && hasDeviceOwner) {
+        if (mDeviceOwner != NULL && (mDeviceOwner->HasDeviceOwner(&hasDeviceOwner), hasDeviceOwner)) {
             return mDeviceOwner->GetDeviceOwnerPackageName(result);
         }
     }
@@ -3977,8 +3981,9 @@ AutoPtr<CDevicePolicyManagerService::ActiveAdmin> CDevicePolicyManagerService::G
     /* [in] */ Int32 userHandle)
 {
     AutoPtr<IComponentName> profileOwner;
-    if (mDeviceOwner != NULL)
+    if (mDeviceOwner != NULL) {
         mDeviceOwner->GetProfileOwnerComponent(userHandle, (IComponentName**)&profileOwner);
+    }
     if (profileOwner == NULL) {
         return NULL;
     }
@@ -3998,7 +4003,6 @@ AutoPtr<CDevicePolicyManagerService::ActiveAdmin> CDevicePolicyManagerService::G
     }
     return NULL;
 }
-
 
 ECode CDevicePolicyManagerService::GetProfileOwnerName(
     /* [in] */ Int32 userHandle,
@@ -4540,10 +4544,12 @@ void CDevicePolicyManagerService::CleanUpOldUsers()
     AutoPtr<ISet> usersWithData;
     {
         AutoLock syncLock(this);
-        if (mDeviceOwner != NULL)
+        if (mDeviceOwner != NULL) {
             mDeviceOwner->GetProfileOwnerKeys((ISet**)&usersWithProfileOwners);
-        else
+        }
+        else {
             CHashSet::New((ISet**)&usersWithProfileOwners);
+        }
         CHashSet::New((ISet**)&usersWithData);
         Int32 size;
         mUserData->GetSize(&size);
@@ -4752,9 +4758,8 @@ ECode CDevicePolicyManagerService::GetActiveAdminForCallerLocked(
         AutoPtr<IComponentName> componentName;
         GetProfileOwner(userHandle, (IComponentName**)&componentName);
         String packageName;
-        componentName->GetPackageName(&packageName);
         Boolean ownsProfile = (componentName != NULL &&
-                    packageName.Equals(infoPackageName));
+                    (componentName->GetPackageName(&packageName), packageName).Equals(infoPackageName));
 
         if (reqPolicy == IDeviceAdminInfo::USES_POLICY_DEVICE_OWNER) {
             if (ownsDevice) {
@@ -4822,7 +4827,8 @@ AutoPtr<CDevicePolicyManagerService::DevicePolicyData> CDevicePolicyManagerServi
 void CDevicePolicyManagerService::RemoveUserData(
     /* [in] */ Int32 userHandle)
 {
-    {    AutoLock syncLock(this);
+    {
+        AutoLock syncLock(this);
 
         if (userHandle == IUserHandle::USER_OWNER) {
             Slogger::W(TAG, "Tried to remove device policy file for user 0! Ignoring.");
@@ -4897,14 +4903,14 @@ ECode CDevicePolicyManagerService::LoadSettingsLocked(
     // Extract the permission provider component name if available
     String permissionProvider;
     parser->GetAttributeValue(String(NULL), ATTR_PERMISSION_PROVIDER, &permissionProvider);
-    if (permissionProvider != NULL) {
+    if (!permissionProvider.IsNull()) {
         AutoPtr<IComponentNameHelper> cnHelper;
         CComponentNameHelper::AcquireSingleton((IComponentNameHelper**)&cnHelper);
         cnHelper->UnflattenFromString(permissionProvider, (IComponentName**)&(policy->mRestrictionsProvider));
     }
     String userSetupComplete;
     parser->GetAttributeValue(String(NULL), ATTR_SETUP_COMPLETE, &userSetupComplete);
-    if (userSetupComplete != NULL && StringUtils::ToString(TRUE).Equals(userSetupComplete)) {
+    if (!userSetupComplete.IsNull() && StringUtils::ToString(TRUE).Equals(userSetupComplete)) {
         policy->mUserSetupComplete = TRUE;
     }
 
@@ -8310,8 +8316,8 @@ ECode CDevicePolicyManagerService::NotifyLockTaskModeChanged(
             AutoPtr<IComponentName> componentName;
             GetProfileOwner(userHandle, (IComponentName**)&componentName);
             Boolean isEquals;
-            IObject::Probe(componentName)->Equals(StringUtils::ParseCharSequence(packageName), &isEquals);
-            Boolean ownsProfile = (componentName != NULL && isEquals);
+            Boolean ownsProfile = (componentName != NULL &&
+                    (IObject::Probe(componentName)->Equals(StringUtils::ParseCharSequence(packageName), &isEquals), isEquals));
             if (ownsDevice || ownsProfile) {
                 if (isEnabled) {
                     SendAdminCommandLocked(admin, IDeviceAdminReceiver::ACTION_LOCK_TASK_ENTERING,

@@ -400,40 +400,44 @@ module
             interface IParcelable;
         }
 
-//     namespace Admin {
+    namespace Admin {
 
-//         [local, parcelable]
-//         class CDeviceAdminInfo {
-//             constructor();
+//        [local, parcelable]
+//        class CDeviceAdminInfo {
+//            constructor();
 
-//             constructor(
-//                 [in] IContext* ctx,
-//                 [in] IResolveInfo* receiver);
+//            constructor(
+//                [in] IContext* ctx,
+//                [in] IResolveInfo* receiver);
 
-//             interface IDeviceAdminInfo;
-//             interface IParcelable;
-//         }
+//            interface IDeviceAdminInfo;
+//            interface IParcelable;
+//        }
 
-//         class CDeviceAdminInfoPolicyInfo {
-//             constructor(
-//                 [in] Int32 identIn,
-//                 [in] String tagIn,
-//                 [in] Int32 labelIn,
-//                 [in] Int32 descriptionIn);
+//        class CDeviceAdminInfoPolicyInfo {
+//            constructor(
+//                [in] Int32 identIn,
+//                [in] String tagIn,
+//                [in] Int32 labelIn,
+//                [in] Int32 descriptionIn);
 
-//             interface IDeviceAdminInfoPolicyInfo;
-//         }
+//            interface IDeviceAdminInfoPolicyInfo;
+//        }
 
-//         [local]
-//         class CDevicePolicyManager {
-//             constructor(
-//                 [in] IContext* ctx,
-//                 [in] IHandler* handler);
+        [local]
+        class CDevicePolicyManager {
+            constructor(
+                [in] IContext* ctx,
+                [in] IHandler* handler);
 
-//             interface IDevicePolicyManager;
-//         }
+            interface IDevicePolicyManager;
+        }
 
-//     } // namespace Admin
+        singleton class CDevicePolicyManagerHelper {
+            interface IDevicePolicyManagerHelper;
+        }
+
+    } // namespace Admin
 
 //     namespace Backup {
 

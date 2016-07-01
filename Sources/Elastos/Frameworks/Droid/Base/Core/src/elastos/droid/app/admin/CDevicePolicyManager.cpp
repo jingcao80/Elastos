@@ -1,30 +1,52 @@
 
+#include "Elastos.CoreLibrary.IO.h"
+#include "Elastos.CoreLibrary.Security.h"
+#include "Elastos.CoreLibrary.Utility.h"
 #include "elastos/droid/app/admin/CDevicePolicyManager.h"
-#include "elastos/droid/app/admin/CDeviceAdminInfo.h"
+// #include "elastos/droid/app/admin/CDeviceAdminInfo.h"
+#include "elastos/droid/content/CComponentName.h"
 #include "elastos/droid/os/CServiceManager.h"
-#include "elastos/droid/os/CUserHandleHelper.h"
+#include "elastos/droid/os/UserHandle.h"
+#include "elastos/droid/os/Process.h"
 #include "elastos/droid/net/CProxy.h"
 #include "elastos/droid/content/pm/CResolveInfo.h"
 #include <elastos/utility/logging/Logger.h>
+#include <elastos/core/CoreUtils.h>
 #include <elastos/core/StringUtils.h>
 #include <elastos/core/StringBuilder.h>
 
+// using Elastos::Droid::App::Admin::CDeviceAdminInfo;
+using Elastos::Droid::Content::Pm::IResolveInfo;
+using Elastos::Droid::Content::Pm::CResolveInfo;
+using Elastos::Droid::Content::Pm::IActivityInfo;
+using Elastos::Droid::Content::Pm::IPackageManager;
+using Elastos::Droid::Content::CComponentName;
+using Elastos::Droid::Os::UserHandle;
+using Elastos::Droid::Os::Process;
+using Elastos::Droid::Os::IServiceManager;
+using Elastos::Droid::Os::CServiceManager;
+using Elastos::Core::CoreUtils;
+using Elastos::Core::IArrayOf;
+using Elastos::Core::CArrayOf;
+using Elastos::Core::EIID_IByte;
+using Elastos::Core::StringUtils;
+using Elastos::Core::StringBuilder;
+using Elastos::IO::IInputStream;
+using Elastos::IO::CByteArrayInputStream;
 using Elastos::Net::ProxyType;
 using Elastos::Net::IProxyHelper;
 using Elastos::Net::CProxyHelper;
 using Elastos::Net::ISocketAddress;
 using Elastos::Net::IInetSocketAddress;
-using Elastos::Core::StringUtils;
-using Elastos::Core::StringBuilder;
-using Elastos::Droid::Os::IServiceManager;
-using Elastos::Droid::Os::CServiceManager;
-using Elastos::Droid::Os::IUserHandleHelper;
-using Elastos::Droid::Os::CUserHandleHelper;
-using Elastos::Droid::App::Admin::CDeviceAdminInfo;
-using Elastos::Droid::Content::Pm::IResolveInfo;
-using Elastos::Droid::Content::Pm::CResolveInfo;
-using Elastos::Droid::Content::Pm::IActivityInfo;
-using Elastos::Droid::Content::Pm::IPackageManager;
+using Elastos::Security::Cert::CCertificateFactoryHelper;
+using Elastos::Security::Cert::ICertificateFactoryHelper;
+using Elastos::Security::Cert::ICertificateFactory;
+using Elastos::Security::Cert::IX509Certificate;
+using Elastos::Utility::CCollections;
+using Elastos::Utility::ICollections;
+using Elastos::Utility::CArrayList;
+using Elastos::Utility::ISet;
+using Elastos::Utility::IIterator;
 using Elastos::Utility::Logging::Logger;
 
 namespace Elastos {
@@ -52,14 +74,32 @@ ECode CDevicePolicyManager::constructor(
     return NOERROR;
 }
 
+ECode CDevicePolicyManager::Create(
+    /* [in] */ IContext* context,
+    /* [in] */ IHandler* handler,
+    /* [out] */ IDevicePolicyManager** policymanager)
+{
+    VALIDATE_NOT_NULL(policymanager)
+    *policymanager = NULL;
+
+    AutoPtr<IDevicePolicyManager> me;
+    CDevicePolicyManager::New(context, handler, (IDevicePolicyManager**)&me);
+    if (((CDevicePolicyManager*)me.Get())->mService != NULL) {
+        *policymanager = me;
+        REFCOUNT_ADD(*policymanager);
+        return NOERROR;
+    }
+    return NOERROR;
+}
+
 ECode CDevicePolicyManager::IsAdminActive(
     /* [in] */ IComponentName* who,
     /* [out] */ Boolean* isAdminActive)
 {
-    return IsAdminActiveAsUser(who, UserHandle::MyUserId(), isAdminActive);
+    return IsAdminActiveAsUser(who, UserHandle::GetMyUserId(), isAdminActive);
 }
 
-ECode CDevicePolicyManager::IsAdminActive(
+ECode CDevicePolicyManager::IsAdminActiveAsUser(
     /* [in] */ IComponentName* who,
     /* [in] */ Int32 userId,
     /* [out] */ Boolean* isAdminActive)
@@ -71,7 +111,7 @@ ECode CDevicePolicyManager::IsAdminActive(
         if (FAILED(ec)) {
             Logger::W(TAG, "E_REMOTE_EXCEPTION: Failed talking with device policy service");
         }
-        return ec;
+        return NOERROR;
     }
     return NOERROR;
 }
@@ -79,10 +119,10 @@ ECode CDevicePolicyManager::IsAdminActive(
 ECode CDevicePolicyManager::GetActiveAdmins(
     /* [out] */ IList** admins)
 {
-    return GetActiveAdmins(UserHandle::MyUserId(), admins);
+    return GetActiveAdminsAsUser(UserHandle::GetMyUserId(), admins);
 }
 
-ECode CDevicePolicyManager::GetActiveAdmins(
+ECode CDevicePolicyManager::GetActiveAdminsAsUser(
     /* [in] */ Int32 userId,
     /* [out] */ IList** admins)
 {
@@ -94,7 +134,7 @@ ECode CDevicePolicyManager::GetActiveAdmins(
         if (FAILED(ec)) {
             Logger::W(TAG, "E_REMOTE_EXCEPTION: Failed talking with device policy service");
         }
-        return ec;
+        return NOERROR;
     }
 
     return NOERROR;
@@ -108,15 +148,11 @@ ECode CDevicePolicyManager::PackageHasActiveAdmins(
     *hasAdmins = FALSE;
 
     if (mService != NULL) {
-        Int32 myUserId;
-        AutoPtr<IUserHandleHelper> helper;
-        CUserHandleHelper::AcquireSingleton((IUserHandleHelper**)&helper);
-        helper->GetMyUserId(&myUserId);
-        ECode ec = mService->PackageHasActiveAdmins(packageName, myUserId, hasAdmins);
+        ECode ec = mService->PackageHasActiveAdmins(packageName, UserHandle::GetMyUserId(), hasAdmins);
         if (FAILED(ec)) {
             Logger::W(TAG, "E_REMOTE_EXCEPTION: Failed talking with device policy service");
         }
-        return ec;
+        return NOERROR;
     }
 
     return NOERROR;
@@ -126,17 +162,11 @@ ECode CDevicePolicyManager::RemoveActiveAdmin(
     /* [in] */ IComponentName* who)
 {
     if (mService != NULL) {
-        Int32 myUserId;
-        AutoPtr<IUserHandleHelper> helper;
-        CUserHandleHelper::AcquireSingleton((IUserHandleHelper**)&helper);
-        helper->GetMyUserId(&myUserId);
-        ECode ec = mService->RemoveActiveAdmin(who, myUserId);
+        ECode ec = mService->RemoveActiveAdmin(who, UserHandle::GetMyUserId());
         if (FAILED(ec)) {
             Logger::W(TAG, "E_REMOTE_EXCEPTION: Failed talking with device policy service");
         }
-        return ec;
     }
-
     return NOERROR;
 }
 
@@ -149,17 +179,12 @@ ECode CDevicePolicyManager::HasGrantedPolicy(
     *hasGrant = FALSE;
 
     if (mService != NULL) {
-        Int32 myUserId;
-        AutoPtr<IUserHandleHelper> helper;
-        CUserHandleHelper::AcquireSingleton((IUserHandleHelper**)&helper);
-        helper->GetMyUserId(&myUserId);
-        ECode ec = mService->HasGrantedPolicy(admin, usesPolicy, myUserId, hasGrant);
+        ECode ec = mService->HasGrantedPolicy(admin, usesPolicy, UserHandle::GetMyUserId(), hasGrant);
         if (FAILED(ec)) {
             Logger::W(TAG, "E_REMOTE_EXCEPTION: Failed talking with device policy service");
         }
-        return ec;
+        return NOERROR;
     }
-
     return NOERROR;
 }
 
@@ -168,17 +193,11 @@ ECode CDevicePolicyManager::SetPasswordQuality(
     /* [in] */ Int32 quality)
 {
     if (mService != NULL) {
-        Int32 myUserId;
-        AutoPtr<IUserHandleHelper> helper;
-        CUserHandleHelper::AcquireSingleton((IUserHandleHelper**)&helper);
-        helper->GetMyUserId(&myUserId);
-        ECode ec = mService->SetPasswordQuality(admin, quality, myUserId);
+        ECode ec = mService->SetPasswordQuality(admin, quality, UserHandle::GetMyUserId());
         if (FAILED(ec)) {
             Logger::W(TAG, "E_REMOTE_EXCEPTION: Failed talking with device policy service");
         }
-        return ec;
     }
-
     return NOERROR;
 }
 
@@ -187,11 +206,7 @@ ECode CDevicePolicyManager::GetPasswordQuality(
     /* [out] */ Int32* password)
 {
     VALIDATE_NOT_NULL(password);
-    Int32 myUserId;
-    AutoPtr<IUserHandleHelper> helper;
-    CUserHandleHelper::AcquireSingleton((IUserHandleHelper**)&helper);
-    helper->GetMyUserId(&myUserId);
-    return GetPasswordQuality(admin, myUserId, password);
+    return GetPasswordQuality(admin, UserHandle::GetMyUserId(), password);
 }
 
 ECode CDevicePolicyManager::GetPasswordQuality(
@@ -207,7 +222,7 @@ ECode CDevicePolicyManager::GetPasswordQuality(
         if (FAILED(ec)) {
             Logger::W(TAG, "E_REMOTE_EXCEPTION: Failed talking with device policy service");
         }
-        return ec;
+        return NOERROR;
      }
      return NOERROR;
 }
@@ -217,15 +232,10 @@ ECode CDevicePolicyManager::SetPasswordMinimumLength(
     /* [in] */ Int32 length)
 {
     if (mService != NULL) {
-        Int32 myUserId;
-        AutoPtr<IUserHandleHelper> helper;
-        CUserHandleHelper::AcquireSingleton((IUserHandleHelper**)&helper);
-        helper->GetMyUserId(&myUserId);
-        ECode ec = mService->SetPasswordMinimumLength(admin, length, myUserId);
+        ECode ec = mService->SetPasswordMinimumLength(admin, length, UserHandle::GetMyUserId());
         if (FAILED(ec)) {
             Logger::W(TAG, "E_REMOTE_EXCEPTION: Failed talking with device policy service");
         }
-        return ec;
     }
     return NOERROR;
 }
@@ -235,11 +245,7 @@ ECode CDevicePolicyManager::GetPasswordMinimumLength(
     /* [out] */ Int32* password)
 {
     VALIDATE_NOT_NULL(password);
-    Int32 myUserId;
-    AutoPtr<IUserHandleHelper> helper;
-    CUserHandleHelper::AcquireSingleton((IUserHandleHelper**)&helper);
-    helper->GetMyUserId(&myUserId);
-    return GetPasswordMinimumLength(admin, myUserId, password);
+    return GetPasswordMinimumLength(admin, UserHandle::GetMyUserId(), password);
 }
 
 ECode CDevicePolicyManager::GetPasswordMinimumLength(
@@ -255,7 +261,7 @@ ECode CDevicePolicyManager::GetPasswordMinimumLength(
         if (FAILED(ec)) {
             Logger::W(TAG, "E_REMOTE_EXCEPTION: Failed talking with device policy service");
         }
-        return ec;
+        return NOERROR;
     }
     return NOERROR;
 }
@@ -265,15 +271,10 @@ ECode CDevicePolicyManager::SetPasswordMinimumUpperCase(
     /* [in] */ Int32 length)
 {
     if (mService != NULL) {
-        Int32 myUserId;
-        AutoPtr<IUserHandleHelper> helper;
-        CUserHandleHelper::AcquireSingleton((IUserHandleHelper**)&helper);
-        helper->GetMyUserId(&myUserId);
-        ECode ec = mService->SetPasswordMinimumUpperCase(admin, length, myUserId);
+        ECode ec = mService->SetPasswordMinimumUpperCase(admin, length, UserHandle::GetMyUserId());
         if (FAILED(ec)) {
             Logger::W(TAG, "E_REMOTE_EXCEPTION: Failed talking with device policy service");
         }
-        return ec;
     }
     return NOERROR;
 }
@@ -283,11 +284,7 @@ ECode CDevicePolicyManager::GetPasswordMinimumUpperCase(
     /* [out] */ Int32* password)
 {
     VALIDATE_NOT_NULL(password);
-    Int32 myUserId;
-    AutoPtr<IUserHandleHelper> helper;
-    CUserHandleHelper::AcquireSingleton((IUserHandleHelper**)&helper);
-    helper->GetMyUserId(&myUserId);
-    return GetPasswordMinimumUpperCase(admin, myUserId, password);
+    return GetPasswordMinimumUpperCase(admin, UserHandle::GetMyUserId(), password);
 }
 
 ECode CDevicePolicyManager::GetPasswordMinimumUpperCase(
@@ -303,7 +300,7 @@ ECode CDevicePolicyManager::GetPasswordMinimumUpperCase(
         if (FAILED(ec)) {
             Logger::W(TAG, "E_REMOTE_EXCEPTION: Failed talking with device policy service");
         }
-        return ec;
+        return NOERROR;
     }
     return NOERROR;
 }
@@ -313,15 +310,10 @@ ECode CDevicePolicyManager::SetPasswordMinimumLowerCase(
     /* [in] */ Int32 length)
 {
     if (mService != NULL) {
-        Int32 myUserId;
-        AutoPtr<IUserHandleHelper> helper;
-        CUserHandleHelper::AcquireSingleton((IUserHandleHelper**)&helper);
-        helper->GetMyUserId(&myUserId);
-        ECode ec = mService->SetPasswordMinimumLowerCase(admin, length, myUserId);
+        ECode ec = mService->SetPasswordMinimumLowerCase(admin, length, UserHandle::GetMyUserId());
         if (FAILED(ec)) {
             Logger::W(TAG, "E_REMOTE_EXCEPTION: Failed talking with device policy service");
         }
-        return ec;
     }
     return NOERROR;
 }
@@ -330,11 +322,7 @@ ECode CDevicePolicyManager::GetPasswordMinimumLowerCase(
     /* [in] */ IComponentName* admin,
     /* [out] */ Int32* password)
 {
-    Int32 myUserId;
-    AutoPtr<IUserHandleHelper> helper;
-    CUserHandleHelper::AcquireSingleton((IUserHandleHelper**)&helper);
-    helper->GetMyUserId(&myUserId);
-    return GetPasswordMinimumLowerCase(admin, myUserId, password);
+    return GetPasswordMinimumLowerCase(admin, UserHandle::GetMyUserId(), password);
 }
 
 ECode CDevicePolicyManager::GetPasswordMinimumLowerCase(
@@ -350,7 +338,7 @@ ECode CDevicePolicyManager::GetPasswordMinimumLowerCase(
         if (FAILED(ec)) {
             Logger::W(TAG, "E_REMOTE_EXCEPTION: Failed talking with device policy service");
         }
-        return ec;
+        return NOERROR;
     }
     return NOERROR;
 }
@@ -360,15 +348,10 @@ ECode CDevicePolicyManager::SetPasswordMinimumLetters(
     /* [in] */ Int32 length)
 {
     if (mService != NULL) {
-        Int32 myUserId;
-        AutoPtr<IUserHandleHelper> helper;
-        CUserHandleHelper::AcquireSingleton((IUserHandleHelper**)&helper);
-        helper->GetMyUserId(&myUserId);
-        ECode ec = mService->SetPasswordMinimumLetters(admin, length, myUserId);
+        ECode ec = mService->SetPasswordMinimumLetters(admin, length, UserHandle::GetMyUserId());
         if (FAILED(ec)) {
             Logger::W(TAG, "E_REMOTE_EXCEPTION: Failed talking with device policy service");
         }
-        return ec;
     }
     return NOERROR;
 }
@@ -378,11 +361,7 @@ ECode CDevicePolicyManager::GetPasswordMinimumLetters(
     /* [out] */ Int32* password)
 {
     VALIDATE_NOT_NULL(password);
-    Int32 myUserId;
-    AutoPtr<IUserHandleHelper> helper;
-    CUserHandleHelper::AcquireSingleton((IUserHandleHelper**)&helper);
-    helper->GetMyUserId(&myUserId);
-    return GetPasswordMinimumLetters(admin, myUserId, password);
+    return GetPasswordMinimumLetters(admin, UserHandle::GetMyUserId(), password);
 }
 
 ECode CDevicePolicyManager::GetPasswordMinimumLetters(
@@ -398,7 +377,7 @@ ECode CDevicePolicyManager::GetPasswordMinimumLetters(
         if (FAILED(ec)) {
             Logger::W(TAG, "E_REMOTE_EXCEPTION: Failed talking with device policy service");
         }
-        return ec;
+        return NOERROR;
     }
     return NOERROR;
 }
@@ -408,15 +387,10 @@ ECode CDevicePolicyManager::SetPasswordMinimumNumeric(
     /* [in] */ Int32 length)
 {
     if (mService != NULL) {
-        Int32 myUserId;
-        AutoPtr<IUserHandleHelper> helper;
-        CUserHandleHelper::AcquireSingleton((IUserHandleHelper**)&helper);
-        helper->GetMyUserId(&myUserId);
-        ECode ec = mService->SetPasswordMinimumNumeric(admin, length, myUserId);
+        ECode ec = mService->SetPasswordMinimumNumeric(admin, length, UserHandle::GetMyUserId());
         if (FAILED(ec)) {
             Logger::W(TAG, "E_REMOTE_EXCEPTION: Failed talking with device policy service");
         }
-        return ec;
     }
     return NOERROR;
 }
@@ -426,11 +400,7 @@ ECode CDevicePolicyManager::GetPasswordMinimumNumeric(
     /* [out] */ Int32* password)
 {
     VALIDATE_NOT_NULL(password);
-    Int32 myUserId;
-    AutoPtr<IUserHandleHelper> helper;
-    CUserHandleHelper::AcquireSingleton((IUserHandleHelper**)&helper);
-    helper->GetMyUserId(&myUserId);
-    return GetPasswordMinimumNumeric(admin, myUserId, password);
+    return GetPasswordMinimumNumeric(admin, UserHandle::GetMyUserId(), password);
 }
 
 ECode CDevicePolicyManager::GetPasswordMinimumNumeric(
@@ -446,7 +416,7 @@ ECode CDevicePolicyManager::GetPasswordMinimumNumeric(
         if (FAILED(ec)) {
             Logger::W(TAG, "E_REMOTE_EXCEPTION: Failed talking with device policy service");
         }
-        return ec;
+        return NOERROR;
     }
     return NOERROR;
 }
@@ -456,15 +426,10 @@ ECode CDevicePolicyManager::SetPasswordMinimumSymbols(
     /* [in] */ Int32 length)
 {
     if (mService != NULL) {
-        Int32 myUserId;
-        AutoPtr<IUserHandleHelper> helper;
-        CUserHandleHelper::AcquireSingleton((IUserHandleHelper**)&helper);
-        helper->GetMyUserId(&myUserId);
-        ECode ec = mService->SetPasswordMinimumSymbols(admin, length, myUserId);
+        ECode ec = mService->SetPasswordMinimumSymbols(admin, length, UserHandle::GetMyUserId());
         if (FAILED(ec)) {
             Logger::W(TAG, "E_REMOTE_EXCEPTION: Failed talking with device policy service");
         }
-        return ec;
     }
     return NOERROR;
 }
@@ -474,11 +439,7 @@ ECode CDevicePolicyManager::GetPasswordMinimumSymbols(
     /* [out] */ Int32* password)
 {
     VALIDATE_NOT_NULL(password);
-    Int32 myUserId;
-    AutoPtr<IUserHandleHelper> helper;
-    CUserHandleHelper::AcquireSingleton((IUserHandleHelper**)&helper);
-    helper->GetMyUserId(&myUserId);
-    return GetPasswordMinimumSymbols(admin, myUserId, password);
+    return GetPasswordMinimumSymbols(admin, UserHandle::GetMyUserId(), password);
 }
 
 ECode CDevicePolicyManager::GetPasswordMinimumSymbols(
@@ -494,7 +455,7 @@ ECode CDevicePolicyManager::GetPasswordMinimumSymbols(
         if (FAILED(ec)) {
             Logger::W(TAG, "E_REMOTE_EXCEPTION: Failed talking with device policy service");
         }
-        return ec;
+        return NOERROR;
     }
     return NOERROR;
 }
@@ -504,15 +465,10 @@ ECode CDevicePolicyManager::SetPasswordMinimumNonLetter(
     /* [in] */ Int32 length)
 {
     if (mService != NULL) {
-        Int32 myUserId;
-        AutoPtr<IUserHandleHelper> helper;
-        CUserHandleHelper::AcquireSingleton((IUserHandleHelper**)&helper);
-        helper->GetMyUserId(&myUserId);
-        ECode ec = mService->SetPasswordMinimumNonLetter(admin, length, myUserId);
+        ECode ec = mService->SetPasswordMinimumNonLetter(admin, length, UserHandle::GetMyUserId());
         if (FAILED(ec)) {
             Logger::W(TAG, "E_REMOTE_EXCEPTION: Failed talking with device policy service");
         }
-        return ec;
     }
     return NOERROR;
 }
@@ -522,11 +478,7 @@ ECode CDevicePolicyManager::GetPasswordMinimumNonLetter(
     /* [out] */ Int32* password)
 {
     VALIDATE_NOT_NULL(password);
-    Int32 myUserId;
-    AutoPtr<IUserHandleHelper> helper;
-    CUserHandleHelper::AcquireSingleton((IUserHandleHelper**)&helper);
-    helper->GetMyUserId(&myUserId);
-    return GetPasswordMinimumNonLetter(admin, myUserId, password);
+    return GetPasswordMinimumNonLetter(admin, UserHandle::GetMyUserId(), password);
 }
 
 ECode CDevicePolicyManager::GetPasswordMinimumNonLetter(
@@ -542,7 +494,7 @@ ECode CDevicePolicyManager::GetPasswordMinimumNonLetter(
         if (FAILED(ec)) {
             Logger::W(TAG, "E_REMOTE_EXCEPTION: Failed talking with device policy service");
         }
-        return ec;
+        return NOERROR;
     }
     return NOERROR;
 }
@@ -552,15 +504,10 @@ ECode CDevicePolicyManager::SetPasswordHistoryLength(
     /* [in] */ Int32 length)
 {
     if (mService != NULL) {
-        Int32 myUserId;
-        AutoPtr<IUserHandleHelper> helper;
-        CUserHandleHelper::AcquireSingleton((IUserHandleHelper**)&helper);
-        helper->GetMyUserId(&myUserId);
-        ECode ec = mService->SetPasswordHistoryLength(admin, length, myUserId);
+        ECode ec = mService->SetPasswordHistoryLength(admin, length, UserHandle::GetMyUserId());
         if (FAILED(ec)) {
             Logger::W(TAG, "E_REMOTE_EXCEPTION: Failed talking with device policy service");
         }
-        return ec;
     }
     return NOERROR;
 }
@@ -570,15 +517,10 @@ ECode CDevicePolicyManager::SetPasswordExpirationTimeout(
     /* [in] */ Int64 timeout)
 {
     if (mService != NULL) {
-        Int32 myUserId;
-        AutoPtr<IUserHandleHelper> helper;
-        CUserHandleHelper::AcquireSingleton((IUserHandleHelper**)&helper);
-        helper->GetMyUserId(&myUserId);
-        ECode ec = mService->SetPasswordExpirationTimeout(admin, timeout, myUserId);
+        ECode ec = mService->SetPasswordExpirationTimeout(admin, timeout, UserHandle::GetMyUserId());
         if (FAILED(ec)) {
             Logger::W(TAG, "E_REMOTE_EXCEPTION: Failed talking with device policy service");
         }
-        return ec;
     }
     return NOERROR;
 }
@@ -591,15 +533,11 @@ ECode CDevicePolicyManager::GetPasswordExpirationTimeout(
     *timeout = 0;
 
     if (mService != NULL) {
-        Int32 myUserId;
-        AutoPtr<IUserHandleHelper> helper;
-        CUserHandleHelper::AcquireSingleton((IUserHandleHelper**)&helper);
-        helper->GetMyUserId(&myUserId);
-        ECode ec = mService->GetPasswordExpirationTimeout(admin, myUserId, timeout);
+        ECode ec = mService->GetPasswordExpirationTimeout(admin, UserHandle::GetMyUserId(), timeout);
         if (FAILED(ec)) {
             Logger::W(TAG, "E_REMOTE_EXCEPTION: Failed talking with device policy service");
         }
-        return ec;
+        return NOERROR;
     }
     return NOERROR;
 }
@@ -612,15 +550,11 @@ ECode CDevicePolicyManager::GetPasswordExpiration(
     *expiration = 0;
 
     if (mService != NULL) {
-        Int32 myUserId;
-        AutoPtr<IUserHandleHelper> helper;
-        CUserHandleHelper::AcquireSingleton((IUserHandleHelper**)&helper);
-        helper->GetMyUserId(&myUserId);
-        ECode ec = mService->GetPasswordExpiration(admin, myUserId, expiration);
+        ECode ec = mService->GetPasswordExpiration(admin, UserHandle::GetMyUserId(), expiration);
         if (FAILED(ec)) {
             Logger::W(TAG, "E_REMOTE_EXCEPTION: Failed talking with device policy service");
         }
-        return ec;
+        return NOERROR;
     }
     return NOERROR;
 }
@@ -630,11 +564,7 @@ ECode CDevicePolicyManager::GetPasswordHistoryLength(
     /* [out] */ Int32* length)
 {
     VALIDATE_NOT_NULL(length);
-    Int32 myUserId;
-    AutoPtr<IUserHandleHelper> helper;
-    CUserHandleHelper::AcquireSingleton((IUserHandleHelper**)&helper);
-    helper->GetMyUserId(&myUserId);
-    return GetPasswordHistoryLength(admin, myUserId, length);
+    return GetPasswordHistoryLength(admin, UserHandle::GetMyUserId(), length);
 }
 
 ECode CDevicePolicyManager::GetPasswordHistoryLength(
@@ -650,7 +580,7 @@ ECode CDevicePolicyManager::GetPasswordHistoryLength(
         if (FAILED(ec)) {
             Logger::W(TAG, "E_REMOTE_EXCEPTION: Failed talking with device policy service");
         }
-        return ec;
+        return NOERROR;
     }
     return NOERROR;
 }
@@ -672,15 +602,11 @@ ECode CDevicePolicyManager::IsActivePasswordSufficient(
     *isSufficient = FALSE;
 
     if (mService != NULL) {
-        Int32 myUserId;
-        AutoPtr<IUserHandleHelper> helper;
-        CUserHandleHelper::AcquireSingleton((IUserHandleHelper**)&helper);
-        helper->GetMyUserId(&myUserId);
-        ECode ec = mService->IsActivePasswordSufficient(myUserId, isSufficient);
+        ECode ec = mService->IsActivePasswordSufficient(UserHandle::GetMyUserId(), isSufficient);
         if (FAILED(ec)) {
             Logger::W(TAG, "E_REMOTE_EXCEPTION: Failed talking with device policy service");
         }
-        return ec;
+        return NOERROR;
     }
     return NOERROR;
 }
@@ -692,15 +618,11 @@ ECode CDevicePolicyManager::GetCurrentFailedPasswordAttempts(
     *atempts = -1;
 
     if (mService != NULL) {
-        Int32 myUserId;
-        AutoPtr<IUserHandleHelper> helper;
-        CUserHandleHelper::AcquireSingleton((IUserHandleHelper**)&helper);
-        helper->GetMyUserId(&myUserId);
-        ECode ec = mService->GetCurrentFailedPasswordAttempts(myUserId, atempts);
+        ECode ec = mService->GetCurrentFailedPasswordAttempts(UserHandle::GetMyUserId(), atempts);
         if (FAILED(ec)) {
             Logger::W(TAG, "E_REMOTE_EXCEPTION: Failed talking with device policy service");
         }
-        return ec;
+        return NOERROR;
     }
     return NOERROR;
 }
@@ -710,15 +632,10 @@ ECode CDevicePolicyManager::SetMaximumFailedPasswordsForWipe(
     /* [in] */ Int32 num)
 {
     if (mService != NULL) {
-        Int32 myUserId;
-        AutoPtr<IUserHandleHelper> helper;
-        CUserHandleHelper::AcquireSingleton((IUserHandleHelper**)&helper);
-        helper->GetMyUserId(&myUserId);
-        ECode ec = mService->SetMaximumFailedPasswordsForWipe(admin, num, myUserId);
+        ECode ec = mService->SetMaximumFailedPasswordsForWipe(admin, num, UserHandle::GetMyUserId());
         if (FAILED(ec)) {
             Logger::W(TAG, "E_REMOTE_EXCEPTION: Failed talking with device policy service");
         }
-        return ec;
     }
     return NOERROR;
 }
@@ -728,11 +645,7 @@ ECode CDevicePolicyManager::GetMaximumFailedPasswordsForWipe(
     /* [out] */ Int32* maximum)
 {
     VALIDATE_NOT_NULL(maximum);
-    Int32 myUserId;
-    AutoPtr<IUserHandleHelper> helper;
-    CUserHandleHelper::AcquireSingleton((IUserHandleHelper**)&helper);
-    helper->GetMyUserId(&myUserId);
-    return GetMaximumFailedPasswordsForWipe(admin, myUserId, maximum);
+    return GetMaximumFailedPasswordsForWipe(admin, UserHandle::GetMyUserId(), maximum);
 }
 
 ECode CDevicePolicyManager::GetMaximumFailedPasswordsForWipe(
@@ -744,15 +657,11 @@ ECode CDevicePolicyManager::GetMaximumFailedPasswordsForWipe(
     *maximum = 0;
 
     if (mService != NULL) {
-        Int32 myUserId;
-        AutoPtr<IUserHandleHelper> helper;
-        CUserHandleHelper::AcquireSingleton((IUserHandleHelper**)&helper);
-        helper->GetMyUserId(&myUserId);
-        ECode ec = mService->GetMaximumFailedPasswordsForWipe(admin, myUserId, maximum);
+        ECode ec = mService->GetMaximumFailedPasswordsForWipe(admin, userHandle, maximum);
         if (FAILED(ec)) {
             Logger::W(TAG, "E_REMOTE_EXCEPTION: Failed talking with device policy service");
         }
-        return ec;
+        return NOERROR;
     }
     return NOERROR;
 }
@@ -766,15 +675,11 @@ ECode CDevicePolicyManager::ResetPassword(
     *reset = FALSE;
 
     if (mService != NULL) {
-        Int32 myUserId;
-        AutoPtr<IUserHandleHelper> helper;
-        CUserHandleHelper::AcquireSingleton((IUserHandleHelper**)&helper);
-        helper->GetMyUserId(&myUserId);
-        ECode ec = mService->ResetPassword(password, flags, myUserId, reset);
+        ECode ec = mService->ResetPassword(password, flags, UserHandle::GetMyUserId(), reset);
         if (FAILED(ec)) {
             Logger::W(TAG, "E_REMOTE_EXCEPTION: Failed talking with device policy service");
         }
-        return ec;
+        return NOERROR;
     }
     return NOERROR;
 }
@@ -784,15 +689,10 @@ ECode CDevicePolicyManager::SetMaximumTimeToLock(
     /* [in] */ Int64 timeMs)
 {
     if (mService != NULL) {
-        Int32 myUserId;
-        AutoPtr<IUserHandleHelper> helper;
-        CUserHandleHelper::AcquireSingleton((IUserHandleHelper**)&helper);
-        helper->GetMyUserId(&myUserId);
-        ECode ec = mService->SetMaximumTimeToLock(admin, timeMs, myUserId);
+        ECode ec = mService->SetMaximumTimeToLock(admin, timeMs, UserHandle::GetMyUserId());
         if (FAILED(ec)) {
             Logger::W(TAG, "E_REMOTE_EXCEPTION: Failed talking with device policy service");
         }
-        return ec;
     }
     return NOERROR;
 }
@@ -802,11 +702,7 @@ ECode CDevicePolicyManager::GetMaximumTimeToLock(
     /* [out] */ Int64* time)
 {
     VALIDATE_NOT_NULL(time);
-    Int32 myUserId;
-    AutoPtr<IUserHandleHelper> helper;
-    CUserHandleHelper::AcquireSingleton((IUserHandleHelper**)&helper);
-    helper->GetMyUserId(&myUserId);
-    return GetMaximumTimeToLock(admin, myUserId, time);
+    return GetMaximumTimeToLock(admin, UserHandle::GetMyUserId(), time);
 }
 
 ECode CDevicePolicyManager::GetMaximumTimeToLock(
@@ -822,7 +718,7 @@ ECode CDevicePolicyManager::GetMaximumTimeToLock(
         if (FAILED(ec)) {
             Logger::W(TAG, "E_REMOTE_EXCEPTION: Failed talking with device policy service");
         }
-        return ec;
+        return NOERROR;
     }
     return NOERROR;
 }
@@ -834,7 +730,6 @@ ECode CDevicePolicyManager::LockNow()
         if (FAILED(ec)) {
             Logger::W(TAG, "E_REMOTE_EXCEPTION: Failed talking with device policy service");
         }
-        return ec;
     }
     return NOERROR;
 }
@@ -843,15 +738,10 @@ ECode CDevicePolicyManager::WipeData(
     /* [in] */ Int32 flags)
 {
     if (mService != NULL) {
-        Int32 myUserId;
-        AutoPtr<IUserHandleHelper> helper;
-        CUserHandleHelper::AcquireSingleton((IUserHandleHelper**)&helper);
-        helper->GetMyUserId(&myUserId);
-        ECode ec = mService->WipeData(flags, myUserId);
+        ECode ec = mService->WipeData(flags, UserHandle::GetMyUserId());
         if (FAILED(ec)) {
             Logger::W(TAG, "E_REMOTE_EXCEPTION: Failed talking with device policy service");
         }
-        return ec;
     }
     return NOERROR;
 }
@@ -859,7 +749,7 @@ ECode CDevicePolicyManager::WipeData(
 ECode CDevicePolicyManager::SetGlobalProxy(
     /* [in] */ IComponentName* admin,
     /* [in] */ Elastos::Net::IProxy* proxySpec,
-    /* [in] */ ArrayOf<String>* exclusionList,
+    /* [in] */ IList* exclusionList,
     /* [out] */ IComponentName** component)
 {
     VALIDATE_NOT_NULL(component);
@@ -882,13 +772,13 @@ ECode CDevicePolicyManager::SetGlobalProxy(
         Boolean equals = FALSE;
         IObject::Probe(proxySpec)->Equals(noPorxy, &equals);
         if (equals) {
-            hostSpec = NULL;
-            exclSpec = NULL;
+            hostSpec = String(NULL);
+            exclSpec = String(NULL);
         }
         else {
             ProxyType specType;
             proxySpec->GetType(&specType);
-            if (specType == Elastos::Net::ProxyType_HTTP) {
+            if (specType != Elastos::Net::ProxyType_HTTP) {
                 return E_ILLEGAL_ARGUMENT_EXCEPTION;
             }
 
@@ -911,9 +801,13 @@ ECode CDevicePolicyManager::SetGlobalProxy(
                 sb.Reset();
                 Boolean firstDomain = TRUE;
 
-                Int32 size = exclusionList->GetLength();
+                Int32 size;
+                exclusionList->GetSize(&size);
                 for (Int32 i = 0; i < size; ++i) {
-                    String exclDomain = (*exclusionList)[i];
+                    AutoPtr<IInterface> obj;
+                    exclusionList->Get(i, (IInterface**)&obj);
+                    String exclDomain;
+                    ICharSequence::Probe(obj)->ToString(&exclDomain);
                     if (!firstDomain) {
                         sb += ",";
                     }
@@ -934,30 +828,24 @@ ECode CDevicePolicyManager::SetGlobalProxy(
             }
         }
 
-        Int32 myUserId;
-        AutoPtr<IUserHandleHelper> uhelper;
-        CUserHandleHelper::AcquireSingleton((IUserHandleHelper**)&uhelper);
-        uhelper->GetMyUserId(&myUserId);
-        AutoPtr<IComponentName> comp;
-        ECode ec = mService->SetGlobalProxy(admin, hostSpec, exclSpec, myUserId, (IComponentName**)&comp);
+        ECode ec = mService->SetGlobalProxy(admin, hostSpec, exclSpec, UserHandle::GetMyUserId(), component);
         if (FAILED(ec)) {
             Logger::W(TAG, "E_REMOTE_EXCEPTION: Failed talking with device policy service");
         }
-        return ec;
+        return NOERROR;
     }
     return NOERROR;
 }
 
 ECode CDevicePolicyManager::SetRecommendedGlobalProxy(
     /* [in] */ IComponentName* admin,
-    /* [in] */ IProxyInfo* proxyInfo);
+    /* [in] */ IProxyInfo* proxyInfo)
 {
     if (mService != NULL) {
-        // try {
-            return mService->SetRecommendedGlobalProxy(admin, proxyInfo);
-        // } catch (RemoteException e) {
-        //     Log.w(TAG, "Failed talking with device policy service", e);
-        // }
+        ECode ec = mService->SetRecommendedGlobalProxy(admin, proxyInfo);
+        if (FAILED(ec)) {
+            Logger::W(TAG, "E_REMOTE_EXCEPTION: Failed talking with device policy service");
+        }
     }
     return NOERROR;
 }
@@ -969,15 +857,11 @@ ECode CDevicePolicyManager::GetGlobalProxyAdmin(
     *global = NULL;
 
     if (mService != NULL) {
-        Int32 myUserId;
-        AutoPtr<IUserHandleHelper> helper;
-        CUserHandleHelper::AcquireSingleton((IUserHandleHelper**)&helper);
-        helper->GetMyUserId(&myUserId);
-        ECode ec = mService->GetGlobalProxyAdmin(myUserId, global);
+        ECode ec = mService->GetGlobalProxyAdmin(UserHandle::GetMyUserId(), global);
         if (FAILED(ec)) {
             Logger::W(TAG, "E_REMOTE_EXCEPTION: Failed talking with device policy service");
         }
-        return ec;
+        return NOERROR;
     }
     return NOERROR;
 }
@@ -991,15 +875,11 @@ ECode CDevicePolicyManager::SetStorageEncryption(
     *result = IDevicePolicyManager::ENCRYPTION_STATUS_UNSUPPORTED;
 
     if (mService != NULL) {
-        Int32 myUserId;
-        AutoPtr<IUserHandleHelper> helper;
-        CUserHandleHelper::AcquireSingleton((IUserHandleHelper**)&helper);
-        helper->GetMyUserId(&myUserId);
-        ECode ec = mService->SetStorageEncryption(admin, encrypt, myUserId, result);
+        ECode ec = mService->SetStorageEncryption(admin, encrypt, UserHandle::GetMyUserId(), result);
         if (FAILED(ec)) {
             Logger::W(TAG, "E_REMOTE_EXCEPTION: Failed talking with device policy service");
         }
-        return ec;
+        return NOERROR;
     }
     return NOERROR;
 }
@@ -1012,15 +892,11 @@ ECode CDevicePolicyManager::GetStorageEncryption(
     *result = FALSE;
 
     if (mService != NULL) {
-        Int32 myUserId;
-        AutoPtr<IUserHandleHelper> helper;
-        CUserHandleHelper::AcquireSingleton((IUserHandleHelper**)&helper);
-        helper->GetMyUserId(&myUserId);
-        ECode ec = mService->GetStorageEncryption(admin, myUserId, result);
+        ECode ec = mService->GetStorageEncryption(admin, UserHandle::GetMyUserId(), result);
         if (FAILED(ec)) {
             Logger::W(TAG, "E_REMOTE_EXCEPTION: Failed talking with device policy service");
         }
-        return ec;
+        return NOERROR;
     }
     return NOERROR;
 }
@@ -1029,11 +905,7 @@ ECode CDevicePolicyManager::GetStorageEncryptionStatus(
     /* [out] */ Int32* st)
 {
     VALIDATE_NOT_NULL(st);
-    Int32 myUserId;
-    AutoPtr<IUserHandleHelper> helper;
-    CUserHandleHelper::AcquireSingleton((IUserHandleHelper**)&helper);
-    helper->GetMyUserId(&myUserId);
-    return GetStorageEncryptionStatus(myUserId, st);
+    return GetStorageEncryptionStatus(UserHandle::GetMyUserId(), st);
 }
 
 ECode CDevicePolicyManager::GetStorageEncryptionStatus(
@@ -1048,7 +920,7 @@ ECode CDevicePolicyManager::GetStorageEncryptionStatus(
         if (FAILED(ec)) {
             Logger::W(TAG, "E_REMOTE_EXCEPTION: Failed talking with device policy service");
         }
-        return ec;
+        return NOERROR;
     }
     return NOERROR;
 }
@@ -1056,17 +928,17 @@ ECode CDevicePolicyManager::GetStorageEncryptionStatus(
 ECode CDevicePolicyManager::InstallCaCert(
     /* [in] */ IComponentName* admin,
     /* [in] */ ArrayOf<Byte>* certBuffer,
-    /* [out] */ Booelan* result)
+    /* [out] */ Boolean* result)
 {
     VALIDATE_NOT_NULL(result)
     *result = FALSE;
 
     if (mService != NULL) {
-        // try {
-            return mService->InstallCaCert(admin, certBuffer, result);
-        // } catch (RemoteException e) {
-        //     Log.w(TAG, "Failed talking with device policy service", e);
-        // }
+        ECode ec = mService->InstallCaCert(admin, certBuffer, result);
+        if (FAILED(ec)) {
+            Logger::W(TAG, "E_REMOTE_EXCEPTION: Failed talking with device policy service");
+            return NOERROR;
+        }
     }
     return NOERROR;
 }
@@ -1077,25 +949,17 @@ ECode CDevicePolicyManager::UninstallCaCert(
 {
     ECode ec = NOERROR;
     if (mService != NULL) {
-        // try {
         String alias;
         GetCaCertAlias(certBuffer, &alias);
         ec = mService->UninstallCaCert(admin, alias);
         if (ec == (ECode)E_CERTIFICATE_EXCEPTION) {
-            Logger::W(TAG, "Unable to parse certificate: CertificateException");
-            ec = NOERROR;
+            Logger::W(TAG, "E_CERTIFICATE_EXCEPTION: Unable to parse certificate");
         }
         else if (ec == (ECode)E_REMOTE_EXCEPTION) {
-            Logger::W(TAG, "Failed talking with device policy service RemoteException");
-            ec = NOERROR;
+            Logger::W(TAG, "E_REMOTE_EXCEPTION: Failed talking with device policy service");
         }
-        // } catch (CertificateException e) {
-        //     Log.w(TAG, "Unable to parse certificate", e);
-        // } catch (RemoteException e) {
-        //     Log.w(TAG, "Failed talking with device policy service", e);
-        // }
     }
-    return ec;
+    return NOERROR;
 }
 
 ECode CDevicePolicyManager::GetInstalledCaCerts(
@@ -1103,39 +967,85 @@ ECode CDevicePolicyManager::GetInstalledCaCerts(
     /* [out] */ IList** list)
 {
     VALIDATE_NOT_NULL(list)
-    assert(0 && "TODO");
-    List<byte[]> certs = new ArrayList<byte[]>();
-    if (mService != null) {
-        try {
-            mService.enforceCanManageCaCerts(admin);
-            final TrustedCertificateStore certStore = new TrustedCertificateStore();
-            for (String alias : certStore.userAliases()) {
-                try {
-                    certs.add(certStore.getCertificate(alias).getEncoded());
-                } catch (CertificateException ce) {
-                    Log.w(TAG, "Could not encode certificate: " + alias, ce);
-                }
+    *list = NULL;
+
+    ECode ec = NOERROR;
+    AutoPtr<IList> certs; // List<byte[]>
+    CArrayList::New((IList**)&certs);
+
+    if (mService != NULL) {
+        // try {
+            ec = mService->EnforceCanManageCaCerts(admin);
+            if (ec == (ECode)E_REMOTE_EXCEPTION) {
+                Logger::W(TAG, "E_REMOTE_EXCEPTION: Failed talking with device policy service");
+                *list = certs;
+                REFCOUNT_ADD(*list)
+                return NOERROR;
             }
-        } catch (RemoteException re) {
-            Log.w(TAG, "Failed talking with device policy service", re);
-        }
+            assert(0 && "TODO");
+            // AutoPtr<ITrustedCertificateStore> certStore;
+            // CTrustedCertificateStore::New((ITrustedCertificateStore**)&certStore);
+            // AutoPtr<ISet> set;
+            // certStore->UserAliases((ISet**)&set);
+            // AutoPtr<IIterator> iterator;
+            // set->GetIterator((IIterator**)&iterator);
+            // Boolean res;
+            // while (iterator->HasNext(&res), res) {
+            //     AutoPtr<IInterface> obj;
+            //     iterator->GetNext((IInterface**)&obj);
+            //     String alias;
+            //     ICharSequence::Probe(obj)->ToString(&alias);
+
+            //     // try {
+            //         AutoPtr<ICertificate> certificate;
+            //         certStore->GetCertificate(alias, (ICertificate**)&certificate);
+            //         AutoPtr< ArrayOf<Byte> > encoded;
+            //         certificate->GetEncoded((ArrayOf<Byte>**)&encoded);
+            //         Int32 length = encoded->GetLength();
+            //         AutoPtr<IArrayOf> array;
+            //         CArrayOf::New(EIID_IByte, length, (IArrayOf**)&array);
+            //         for (Int32 i = 0; i < length, ++i) {
+            //             array->Set(i, CoreUtils::ConvertByte((*encoded)[i]));
+            //         }
+            //         certs->Add(array);
+            //     // } catch (CertificateException ce) {
+            //     //     Log.w(TAG, "Could not encode certificate: " + alias, ce);
+            //     // }
+            // }
+        // } catch (RemoteException re) {
+        //     Log.w(TAG, "Failed talking with device policy service", re);
+        // }
     }
-    // return certs;
+    *list = certs;
+    REFCOUNT_ADD(*list);
     return NOERROR;
 }
 
 ECode CDevicePolicyManager::UninstallAllUserCaCerts(
     /* [in] */ IComponentName* admin)
 {
-    if (mService != null) {
-        for (String alias : new TrustedCertificateStore().userAliases()) {
-            try {
-                mService.uninstallCaCert(admin, alias);
-            } catch (RemoteException re) {
-                Log.w(TAG, "Failed talking with device policy service", re);
-            }
-        }
+    if (mService != NULL) {
+        assert(0 && "TODO");
+        // AutoPtr<ITrustedCertificateStore> certStore;
+        // CTrustedCertificateStore::New((ITrustedCertificateStore**)&certStore);
+        // AutoPtr<ISet> set;
+        // certStore->UserAliases((ISet**)&set);
+        // AutoPtr<IIterator> iterator;
+        // set->GetIterator((IIterator**)&iterator);
+        // Boolean res;
+        // while (iterator->HasNext(&res), res) {
+        //     AutoPtr<IInterface> obj;
+        //     iterator->GetNext((IInterface**)&obj);
+        //     String alias;
+        //     ICharSequence::Probe(obj)->ToString(&alias);
+
+        //     ECode ec = mService->UninstallCaCert(admin, alias);
+        //     if (FAILED(ec)) {
+        //         Logger::W(TAG, "E_REMOTE_EXCEPTION: Failed talking with device policy service");
+        //     }
+        // }
     }
+    return NOERROR;
 }
 
 ECode CDevicePolicyManager::HasCaCertInstalled(
@@ -1143,17 +1053,25 @@ ECode CDevicePolicyManager::HasCaCertInstalled(
     /* [in] */ ArrayOf<Byte>* certBuffer,
     /* [out] */ Boolean* result)
 {
+    VALIDATE_NOT_NULL(result)
+    *result = FALSE;
+
     if (mService != NULL) {
-        try {
-            mService->EnforceCanManageCaCerts(admin);
-            return GetCaCertAlias(certBuffer) != null;
-        } catch (RemoteException re) {
-            Log.w(TAG, "Failed talking with device policy service", re);
-        } catch (CertificateException ce) {
-            Log.w(TAG, "Could not parse certificate", ce);
+        ECode ec = mService->EnforceCanManageCaCerts(admin);
+        if (SUCCEEDED(ec)) {
+            String str;
+            GetCaCertAlias(certBuffer, &str);
+            *result = !str.IsNull();
+            return NOERROR;
+        }
+        else if (ec == (ECode)E_REMOTE_EXCEPTION) {
+            Logger::W(TAG, "E_REMOTE_EXCEPTION: Failed talking with device policy service");
+        }
+        else if (ec == (ECode)E_CERTIFICATE_EXCEPTION) {
+            Logger::W(TAG, "E_CERTIFICATE_EXCEPTION: Could not parse certificate");
         }
     }
-    // return false;
+    return NOERROR;
 }
 
 ECode CDevicePolicyManager::InstallKeyPair(
@@ -1163,27 +1081,46 @@ ECode CDevicePolicyManager::InstallKeyPair(
     /* [in] */ const String& alias,
     /* [out] */ Boolean* result)
 {
-    try {
-        final byte[] pemCert = Credentials.convertToPem(cert);
-        return mService.installKeyPair(who, privKey.getEncoded(), pemCert, alias);
-    } catch (CertificateException e) {
-        Log.w(TAG, "Error encoding certificate", e);
-    } catch (IOException e) {
-        Log.w(TAG, "Error writing certificate", e);
-    } catch (RemoteException e) {
-        Log.w(TAG, "Failed talking with device policy service", e);
-    }
-    return false;
+    VALIDATE_NOT_NULL(result)
+    *result = FALSE;
+
+    assert(0 && "TODO");
+
+    // try {
+    //     final byte[] pemCert = Credentials.ConvertToPem(cert);
+    //     return mService.installKeyPair(who, privKey.getEncoded(), pemCert, alias);
+    // } catch (CertificateException e) {
+    //     Log.w(TAG, "Error encoding certificate", e);
+    // } catch (IOException e) {
+    //     Log.w(TAG, "Error writing certificate", e);
+    // } catch (RemoteException e) {
+    //     Log.w(TAG, "Failed talking with device policy service", e);
+    // }
+    return NOERROR;
 }
 
 ECode CDevicePolicyManager::GetCaCertAlias(
-    /* [in] */ Arrayof<Byte>* certBuffer,
+    /* [in] */ ArrayOf<Byte>* certBuffer,
     /* [out] */ String* alias)
 {
-    final CertificateFactory certFactory = CertificateFactory.getInstance("X.509");
-    final X509Certificate cert = (X509Certificate) certFactory.generateCertificate(
-                          new ByteArrayInputStream(certBuffer));
-    return new TrustedCertificateStore().getCertificateAlias(cert);
+    VALIDATE_NOT_NULL(alias)
+    *alias = String(NULL);
+
+    AutoPtr<ICertificateFactoryHelper> helper;
+    CCertificateFactoryHelper::AcquireSingleton((ICertificateFactoryHelper**)&helper);
+    AutoPtr<ICertificateFactory> certFactory;
+    helper->GetInstance(String("X.509"), (ICertificateFactory**)&certFactory);
+    AutoPtr<IInputStream> bais;
+    CByteArrayInputStream::New(certBuffer, (IInputStream**)&bais);
+
+    AutoPtr<ICertificate> certificate;
+    certFactory->GenerateCertificate(bais, (ICertificate**)&certificate);
+    IX509Certificate* cert = IX509Certificate::Probe(certificate);
+    assert(0 && "TODO");
+    // AutoPtr<ITrustedCertificateStore> tcs;
+    // CTrustedCertificateStore::New((ITrustedCertificateStore**)&tcs);
+    // return tcs->GetCertificateAlias(cert, &alias);
+    return NOERROR;
 }
 
 ECode CDevicePolicyManager::SetCameraDisabled(
@@ -1191,15 +1128,10 @@ ECode CDevicePolicyManager::SetCameraDisabled(
     /* [in] */ Boolean disabled)
 {
     if (mService != NULL) {
-        Int32 myUserId;
-        AutoPtr<IUserHandleHelper> helper;
-        CUserHandleHelper::AcquireSingleton((IUserHandleHelper**)&helper);
-        helper->GetMyUserId(&myUserId);
-        ECode ec = mService->SetCameraDisabled(admin, disabled, myUserId);
+        ECode ec = mService->SetCameraDisabled(admin, disabled, UserHandle::GetMyUserId());
         if (FAILED(ec)) {
             Logger::W(TAG, "E_REMOTE_EXCEPTION: Failed talking with device policy service");
         }
-        return ec;
     }
     return NOERROR;
 }
@@ -1209,11 +1141,7 @@ ECode CDevicePolicyManager::GetCameraDisabled(
     /* [out] */ Boolean* disabled)
 {
     VALIDATE_NOT_NULL(disabled);
-    Int32 myUserId;
-    AutoPtr<IUserHandleHelper> helper;
-    CUserHandleHelper::AcquireSingleton((IUserHandleHelper**)&helper);
-    helper->GetMyUserId(&myUserId);
-    return GetCameraDisabled(admin, myUserId, disabled);
+    return GetCameraDisabled(admin, UserHandle::GetMyUserId(), disabled);
 }
 
 ECode CDevicePolicyManager::GetCameraDisabled(
@@ -1229,40 +1157,29 @@ ECode CDevicePolicyManager::GetCameraDisabled(
         if (FAILED(ec)) {
             Logger::W(TAG, "E_REMOTE_EXCEPTION: Failed talking with device policy service");
         }
-        return ec;
+        return NOERROR;
     }
     return NOERROR;
 }
-
-//=======================
 
 ECode CDevicePolicyManager::SetScreenCaptureDisabled(
     /* [in] */ IComponentName* admin,
     /* [in] */ Boolean disabled)
 {
-    if (mService != null) {
-        try {
-            mService.setScreenCaptureDisabled(admin, UserHandle.myUserId(), disabled);
-        } catch (RemoteException e) {
-            Log.w(TAG, "Failed talking with device policy service", e);
+    if (mService != NULL) {
+        ECode ec = mService->SetScreenCaptureDisabled(admin, UserHandle::GetMyUserId(), disabled);
+        if (FAILED(ec)) {
+            Logger::W(TAG, "E_REMOTE_EXCEPTION: Failed talking with device policy service");
         }
     }
-}
-
-ECode CDevicePolicyManager::SetScreenCaptureDisabled(
-    /* [in] */ IComponentName* admin,
-    /* [out] */ Boolean* disabled)
-{
-    assert(0);
-    // TODO
-    return E_NOT_IMPLEMENTED;
+    return NOERROR;
 }
 
 ECode CDevicePolicyManager::GetScreenCaptureDisabled(
     /* [in] */ IComponentName* admin,
     /* [out] */ Boolean* result)
 {
-    return getScreenCaptureDisabled(admin, UserHandle.myUserId());
+    return GetScreenCaptureDisabled(admin, UserHandle::GetMyUserId(), result);
 }
 
 ECode CDevicePolicyManager::GetScreenCaptureDisabled(
@@ -1270,58 +1187,57 @@ ECode CDevicePolicyManager::GetScreenCaptureDisabled(
     /* [in] */ Int32 userHandle,
     /* [out] */ Boolean* result)
 {
-    if (mService != null) {
-        try {
-            return mService.getScreenCaptureDisabled(admin, userHandle);
-        } catch (RemoteException e) {
-            Log.w(TAG, "Failed talking with device policy service", e);
+    VALIDATE_NOT_NULL(result)
+    *result = FALSE;
+
+    if (mService != NULL) {
+        ECode ec = mService->GetScreenCaptureDisabled(admin, userHandle, result);
+        if (FAILED(ec)) {
+            Logger::W(TAG, "E_REMOTE_EXCEPTION: Failed talking with device policy service");
         }
+        return NOERROR;
     }
-    return false;
+    return NOERROR;
 }
 
 ECode CDevicePolicyManager::SetAutoTimeRequired(
     /* [in] */ IComponentName* admin,
     /* [in] */ Boolean required)
 {
-    if (mService != null) {
-        try {
-            mService.setAutoTimeRequired(admin, UserHandle.myUserId(), required);
-        } catch (RemoteException e) {
-            Log.w(TAG, "Failed talking with device policy service", e);
+    if (mService != NULL) {
+        ECode ec = mService->SetAutoTimeRequired(admin, UserHandle::GetMyUserId(), required);
+        if (FAILED(ec)) {
+            Logger::W(TAG, "E_REMOTE_EXCEPTION: Failed talking with device policy service");
         }
     }
+    return NOERROR;
 }
 
 ECode CDevicePolicyManager::GetAutoTimeRequired(
     /* [out] */ Boolean* result)
 {
-    if (mService != null) {
-        try {
-            return mService.getAutoTimeRequired();
-        } catch (RemoteException e) {
-            Log.w(TAG, "Failed talking with device policy service", e);
-        }
-    }
-    return false;
-}
+    VALIDATE_NOT_NULL(result)
+    *result = FALSE;
 
-//=======================
+    if (mService != NULL) {
+        ECode ec = mService->GetAutoTimeRequired(result);
+        if (FAILED(ec)) {
+            Logger::W(TAG, "E_REMOTE_EXCEPTION: Failed talking with device policy service");
+        }
+        return NOERROR;
+    }
+    return NOERROR;
+}
 
 ECode CDevicePolicyManager::SetKeyguardDisabledFeatures(
     /* [in] */ IComponentName* admin,
     /* [in] */ Int32 which)
 {
     if (mService != NULL) {
-        Int32 myUserId;
-        AutoPtr<IUserHandleHelper> helper;
-        CUserHandleHelper::AcquireSingleton((IUserHandleHelper**)&helper);
-        helper->GetMyUserId(&myUserId);
-        ECode ec = mService->SetKeyguardDisabledFeatures(admin, which, myUserId);
+        ECode ec = mService->SetKeyguardDisabledFeatures(admin, which, UserHandle::GetMyUserId());
         if (FAILED(ec)) {
             Logger::W(TAG, "E_REMOTE_EXCEPTION: Failed talking with device policy service");
         }
-        return ec;
     }
     return NOERROR;
 }
@@ -1331,11 +1247,7 @@ ECode CDevicePolicyManager::GetKeyguardDisabledFeatures(
     /* [out] */ Int32* which)
 {
     VALIDATE_NOT_NULL(which);
-    Int32 myUserId;
-    AutoPtr<IUserHandleHelper> helper;
-    CUserHandleHelper::AcquireSingleton((IUserHandleHelper**)&helper);
-    helper->GetMyUserId(&myUserId);
-    return GetKeyguardDisabledFeatures(admin, myUserId, which);
+    return GetKeyguardDisabledFeatures(admin, UserHandle::GetMyUserId(), which);
 }
 
 ECode CDevicePolicyManager::GetKeyguardDisabledFeatures(
@@ -1351,7 +1263,7 @@ ECode CDevicePolicyManager::GetKeyguardDisabledFeatures(
         if (FAILED(ec)) {
             Logger::W(TAG, "E_REMOTE_EXCEPTION: Failed talking with device policy service");
         }
-        return ec;
+        return NOERROR;
     }
     return NOERROR;
 }
@@ -1360,7 +1272,7 @@ ECode CDevicePolicyManager::SetActiveAdmin(
     /* [in] */ IComponentName* policyReceiver,
     /* [in] */ Boolean refreshing)
 {
-    return SetActiveAdmin(policyReceiver,  refreshing, UserHandle::MyUserId());
+    return SetActiveAdmin(policyReceiver,  refreshing, UserHandle::GetMyUserId());
 }
 
 ECode CDevicePolicyManager::SetActiveAdmin(
@@ -1373,7 +1285,6 @@ ECode CDevicePolicyManager::SetActiveAdmin(
         if (FAILED(ec)) {
             Logger::W(TAG, "E_REMOTE_EXCEPTION: Failed talking with device policy service");
         }
-        return ec;
     }
     return NOERROR;
 }
@@ -1385,44 +1296,34 @@ ECode CDevicePolicyManager::GetAdminInfo(
     VALIDATE_NOT_NULL(info);
     *info = NULL;
 
-    String cnStr;
-    cn->ToString(&cnStr);
-
     AutoPtr<IPackageManager> pm;
     FAIL_RETURN(mContext->GetPackageManager((IPackageManager**)&pm));
     AutoPtr<IActivityInfo> ai;
     ECode ec = pm->GetReceiverInfo(cn, IPackageManager::GET_META_DATA, (IActivityInfo**)&ai);
     if (FAILED(ec)) {
         // catch (PackageManager.NameNotFoundException e)
-        String msg("PackageManager.NameNotFoundException: Unable to retrieve device policy ");
-        msg += cnStr;
-        Logger::W(TAG, msg);
-        return ec;
+        Logger::W(TAG, "PackageManager.NameNotFoundException: Unable to retrieve device policy %s", TO_CSTR(cn));
+        return NOERROR;
     }
 
     AutoPtr<IResolveInfo> ri;
     CResolveInfo::New((IResolveInfo**)&ri);
     ri->SetActivityInfo(ai.Get());
 
-    ec = CDeviceAdminInfo::New(mContext, ri, info);
+    assert(0 && "TODO");
+    // ec = CDeviceAdminInfo::New(mContext, ri, info);
     if (ec == (ECode)E_XML_PULL_PARSER_EXCEPTION) {
-        String warn("XmlPullParserException: Unable to parse device policy");
-        warn += cnStr;
-        Logger::W(TAG, warn);
-
+        Logger::W(TAG, "XmlPullParserException: Unable to parse device policy %s", TO_CSTR(cn));
         *info = NULL;
-        return ec;
+        return NOERROR;
     }
     else if (ec == (ECode)E_IO_EXCEPTION) {
-        String warn("IOException: Unable to parse device policy");
-        warn += cnStr;
-        Logger::W(TAG, warn);
-
+        Logger::W(TAG, "IOException: Unable to parse device policy %s", TO_CSTR(cn));
         *info = NULL;
-        return ec;
+        return NOERROR;
     }
 
-    return ec;
+    return NOERROR;
 }
 
 ECode CDevicePolicyManager::GetRemoveWarning(
@@ -1430,15 +1331,10 @@ ECode CDevicePolicyManager::GetRemoveWarning(
     /* [in] */ IRemoteCallback* result)
 {
     if (mService != NULL) {
-        Int32 myUserId;
-        AutoPtr<IUserHandleHelper> helper;
-        CUserHandleHelper::AcquireSingleton((IUserHandleHelper**)&helper);
-        helper->GetMyUserId(&myUserId);
-        ECode ec = mService->GetRemoveWarning(admin, result, myUserId);
+        ECode ec = mService->GetRemoveWarning(admin, result, UserHandle::GetMyUserId());
         if (FAILED(ec)) {
             Logger::W(TAG, "E_REMOTE_EXCEPTION: Failed talking with device policy service");
         }
-        return ec;
     }
     return NOERROR;
 }
@@ -1461,7 +1357,6 @@ ECode CDevicePolicyManager::SetActivePasswordState(
         if (FAILED(ec)) {
             Logger::W(TAG, "E_REMOTE_EXCEPTION: Failed talking with device policy service");
         }
-        return ec;
     }
     return NOERROR;
 }
@@ -1474,7 +1369,6 @@ ECode CDevicePolicyManager::ReportFailedPasswordAttempt(
         if (FAILED(ec)) {
             Logger::W(TAG, "E_REMOTE_EXCEPTION: Failed talking with device policy service");
         }
-        return ec;
     }
     return NOERROR;
 }
@@ -1487,7 +1381,6 @@ ECode CDevicePolicyManager::ReportSuccessfulPasswordAttempt(
         if (FAILED(ec)) {
             Logger::W(TAG, "E_REMOTE_EXCEPTION: Failed talking with device policy service");
         }
-        return ec;
     }
     return NOERROR;
 }
@@ -1496,9 +1389,7 @@ ECode CDevicePolicyManager::SetDeviceOwner(
     /* [in] */ const String& packageName,
     /* [out] */ Boolean* result)
 {
-    assert(0);
-    // TODO
-    return E_NOT_IMPLEMENTED;
+    return SetDeviceOwner(packageName, String(NULL), result);
 }
 
 ECode CDevicePolicyManager::SetDeviceOwner(
@@ -1506,35 +1397,140 @@ ECode CDevicePolicyManager::SetDeviceOwner(
     /* [in] */ const String& ownerName,
     /* [out] */ Boolean* result)
 {
-    assert(0);
-    // TODO
-    return E_NOT_IMPLEMENTED;
+    VALIDATE_NOT_NULL(result)
+    *result = FALSE;
+
+    if (mService != NULL) {
+        ECode ec = mService->SetDeviceOwner(packageName, ownerName, result);
+        if (FAILED(ec)) {
+            Logger::W(TAG, "E_REMOTE_EXCEPTION: Failed to set device owner");
+        }
+        return NOERROR;
+    }
+    return NOERROR;
 }
 
 ECode CDevicePolicyManager::IsDeviceOwnerApp(
     /* [in] */ const String& packageName,
     /* [out] */ Boolean* result)
 {
-    assert(0);
-    // TODO
-    return E_NOT_IMPLEMENTED;
+    VALIDATE_NOT_NULL(result)
+    *result = FALSE;
+
+    if (mService != NULL) {
+        ECode ec = mService->IsDeviceOwner(packageName, result);
+        if (FAILED(ec)) {
+            Logger::W(TAG, "E_REMOTE_EXCEPTION: Failed to check device owner");
+        }
+        return NOERROR;
+    }
+    return NOERROR;
 }
 
 ECode CDevicePolicyManager::IsDeviceOwner(
     /* [in] */ const String& packageName,
     /* [out] */ Boolean* result)
 {
-    assert(0);
-    // TODO
-    return E_NOT_IMPLEMENTED;
+    return IsDeviceOwnerApp(packageName, result);
 }
 
 ECode CDevicePolicyManager::ClearDeviceOwnerApp(
     /* [in] */ const String& packageName)
 {
-    assert(0);
-    // TODO
-    return E_NOT_IMPLEMENTED;
+    if (mService != NULL) {
+        ECode ec = mService->ClearDeviceOwner(packageName);
+        if (FAILED(ec)) {
+            Logger::W(TAG, "E_REMOTE_EXCEPTION: Failed to clear device owner");
+        }
+    }
+    return NOERROR;
+}
+
+ECode CDevicePolicyManager::GetDeviceOwner(
+    /* [out] */ String* result)
+{
+    VALIDATE_NOT_NULL(result)
+    *result = String(NULL);
+
+    if (mService != NULL) {
+        ECode ec = mService->GetDeviceOwner(result);
+        if (FAILED(ec)) {
+            Logger::W(TAG, "E_REMOTE_EXCEPTION: Failed to get device owner");
+        }
+        return NOERROR;
+    }
+    return NOERROR;
+}
+
+ECode CDevicePolicyManager::GetDeviceOwnerName(
+    /* [out] */ String* result)
+{
+    VALIDATE_NOT_NULL(result)
+    *result = String(NULL);
+
+    if (mService != NULL) {
+        ECode ec = mService->GetDeviceOwnerName(result);
+        if (FAILED(ec)) {
+            Logger::W(TAG, "E_REMOTE_EXCEPTION: Failed to get device owner name");
+        }
+        return NOERROR;
+    }
+    return NOERROR;
+}
+
+ECode CDevicePolicyManager::SetActiveProfileOwner(
+    /* [in] */ IComponentName* admin,
+    /* [in] */ const String& ownerName,
+    /* [out] */ Boolean* result)
+{
+    VALIDATE_NOT_NULL(result)
+    *result = FALSE;
+
+    if (mService != NULL) {
+        Int32 myUserId = UserHandle::GetMyUserId();
+        ECode ec = mService->SetActiveAdmin(admin, FALSE, myUserId);
+        if (ec == (ECode)E_REMOTE_EXCEPTION) {
+            Logger::W(TAG, "E_REMOTE_EXCEPTION: Failed to set profile owner");
+            Logger::E(TAG, "E_ILLEGAL_ARGUMENT_EXCEPTION: Couldn't set profile owner.");
+            return E_ILLEGAL_ARGUMENT_EXCEPTION;
+        }
+        ec = mService->SetProfileOwner(admin, ownerName, myUserId, result);
+        if (ec == (ECode)E_REMOTE_EXCEPTION) {
+            Logger::W(TAG, "E_REMOTE_EXCEPTION: Failed to set profile owner");
+            Logger::E(TAG, "E_ILLEGAL_ARGUMENT_EXCEPTION: Couldn't set profile owner.");
+            return E_ILLEGAL_ARGUMENT_EXCEPTION;
+        }
+        return NOERROR;
+    }
+    return NOERROR;
+}
+
+ECode CDevicePolicyManager::ClearProfileOwner(
+    /* [in] */ IComponentName* admin)
+{
+    if (mService != NULL) {
+        ECode ec = mService->ClearProfileOwner(admin);
+        if (FAILED(ec)) {
+            Logger::W(TAG, "E_REMOTE_EXCEPTION: Failed to clear profile owner %s", TO_CSTR(admin));
+        }
+    }
+    return NOERROR;
+}
+
+ECode CDevicePolicyManager::HasUserSetupCompleted(
+    /* [out] */ Boolean* result)
+{
+    VALIDATE_NOT_NULL(result)
+    *result = TRUE;
+
+    if (mService != NULL) {
+        ECode ec = mService->HasUserSetupCompleted(result);
+        if (FAILED(ec)) {
+            Logger::W(TAG, "E_REMOTE_EXCEPTION: Failed to check if user setup has completed");
+        }
+        return NOERROR;
+    }
+    return NOERROR;
 }
 
 ECode CDevicePolicyManager::SetProfileOwner(
@@ -1543,9 +1539,18 @@ ECode CDevicePolicyManager::SetProfileOwner(
     /* [in] */ Int32 userHandle,
     /* [out] */ Boolean* result)
 {
-    assert(0);
-    // TODO
-    return E_NOT_IMPLEMENTED;
+    VALIDATE_NOT_NULL(result)
+    *result = FALSE;
+
+    if (packageName.IsNull()) {
+        Logger::E(TAG, "E_NULL_POINTER_EXCEPTION: packageName cannot be null");
+        return E_NULL_POINTER_EXCEPTION;
+    }
+
+    AutoPtr<IComponentName> cn;
+    CComponentName::New(packageName, String(""), (IComponentName**)&cn);
+
+    return SetProfileOwner(cn, ownerName, userHandle, result);
 }
 
 ECode CDevicePolicyManager::SetProfileOwner(
@@ -1554,43 +1559,155 @@ ECode CDevicePolicyManager::SetProfileOwner(
     /* [in] */ Int32 userHandle,
     /* [out] */ Boolean* result)
 {
-    assert(0);
-    // TODO
-    return E_NOT_IMPLEMENTED;
+    VALIDATE_NOT_NULL(result)
+    *result = FALSE;
+
+    String str = ownerName;
+
+    if (admin == NULL) {
+        Logger::E(TAG, "E_NULL_POINTER_EXCEPTION: admin cannot be null");
+        return E_NULL_POINTER_EXCEPTION;
+    }
+    if (mService != NULL) {
+        if (str.IsNull()) {
+            str = "";
+        }
+        ECode ec = mService->SetProfileOwner(admin, str, userHandle, result);
+        if (FAILED(ec)) {
+            Logger::W(TAG, "E_REMOTE_EXCEPTION: Failed to set profile owner");
+            Logger::E(TAG, "E_ILLEGAL_ARGUMENT_EXCEPTION: Couldn't set profile owner.");
+            return E_ILLEGAL_ARGUMENT_EXCEPTION;
+        }
+        return NOERROR;
+    }
+
+    return NOERROR;
 }
 
 ECode CDevicePolicyManager::SetProfileEnabled(
     /* [in] */ IComponentName* admin)
 {
-    assert(0);
-    // TODO
-    return E_NOT_IMPLEMENTED;
+    if (mService != NULL) {
+        ECode ec = mService->SetProfileEnabled(admin);
+        if (FAILED(ec)) {
+            Logger::W(TAG, "E_REMOTE_EXCEPTION: Failed talking with device policy service");
+        }
+    }
+    return NOERROR;
 }
 
 ECode CDevicePolicyManager::SetProfileName(
     /* [in] */ IComponentName* who,
     /* [in] */ const String& profileName)
 {
-    assert(0);
-    // TODO
-    return E_NOT_IMPLEMENTED;
+    if (mService != NULL) {
+        ECode ec = mService->SetProfileName(who, profileName);
+        if (FAILED(ec)) {
+            Logger::W(TAG, "E_REMOTE_EXCEPTION: Failed talking with device policy service");
+        }
+    }
+    return NOERROR;
 }
 
 ECode CDevicePolicyManager::IsProfileOwnerApp(
     /* [in] */ const String& packageName,
     /* [out] */ Boolean* result)
 {
-    assert(0);
-    // TODO
-    return E_NOT_IMPLEMENTED;
+    VALIDATE_NOT_NULL(result)
+    *result = FALSE;
+
+    if (mService != NULL) {
+        AutoPtr<IUserHandle> handle;
+        Process::MyUserHandle((IUserHandle**)&handle);
+        Int32 id;
+        handle->GetIdentifier(&id);
+        AutoPtr<IComponentName> profileOwner;
+        ECode ec = mService->GetProfileOwner(id, (IComponentName**)&profileOwner);
+        if (SUCCEEDED(ec)) {
+            if (profileOwner != NULL) {
+                String name;
+                profileOwner->GetPackageName(&name);
+                *result = name.Equals(packageName);
+                return NOERROR;
+            }
+        }
+        else if (ec == (ECode) E_REMOTE_EXCEPTION) {
+            Logger::W(TAG, "E_REMOTE_EXCEPTION: Failed to check profile owner");
+        }
+    }
+    return NOERROR;
 }
 
 ECode CDevicePolicyManager::GetProfileOwner(
     /* [out]*/ IComponentName** name)
 {
-    assert(0);
-    // TODO
-    return E_NOT_IMPLEMENTED;
+    VALIDATE_NOT_NULL(name)
+
+    AutoPtr<IUserHandle> handle;
+    Process::MyUserHandle((IUserHandle**)&handle);
+    Int32 id;
+    handle->GetIdentifier(&id);
+    return GetProfileOwnerAsUser(id, name);
+}
+
+ECode CDevicePolicyManager::GetProfileOwnerAsUser(
+    /* [in] */ Int32 userId,
+    /* [out]*/ IComponentName** name)
+{
+    VALIDATE_NOT_NULL(name)
+    *name = NULL;
+
+    if (mService != NULL) {
+        ECode ec = mService->GetProfileOwner(userId, name);
+        if (FAILED(ec)) {
+            Logger::W(TAG, "E_REMOTE_EXCEPTION: Failed to get profile owner");
+            Logger::E(TAG, "E_ILLEGAL_ARGUMENT_EXCEPTION: Requested profile owner for invalid userId");
+            return E_ILLEGAL_ARGUMENT_EXCEPTION;
+        }
+        return NOERROR;
+    }
+    return NOERROR;
+}
+
+ECode CDevicePolicyManager::GetProfileOwnerName(
+    /* [out]*/ String* result)
+{
+    VALIDATE_NOT_NULL(result)
+    *result = String(NULL);
+
+    if (mService != NULL) {
+        AutoPtr<IUserHandle> handle;
+        Process::MyUserHandle((IUserHandle**)&handle);
+        Int32 id;
+        handle->GetIdentifier(&id);
+        ECode ec = mService->GetProfileOwnerName(id, result);
+        if (FAILED(ec)) {
+            Logger::W(TAG, "E_REMOTE_EXCEPTION: Failed to get profile owner");
+            Logger::E(TAG, "E_ILLEGAL_ARGUMENT_EXCEPTION: Requested profile owner for invalid userId");
+            return E_ILLEGAL_ARGUMENT_EXCEPTION;
+        }
+        return NOERROR;
+    }
+    return NOERROR;
+}
+
+ECode CDevicePolicyManager::GetProfileOwnerNameAsUser(
+    /* [in] */ Int32 userId,
+    /* [out] */ String* result)
+{
+    VALIDATE_NOT_NULL(result)
+    *result = String(NULL);
+
+    if (mService != NULL) {
+        ECode ec = mService->GetProfileOwnerName(userId, result);
+        if (FAILED(ec)) {
+            Logger::W(TAG, "E_REMOTE_EXCEPTION: Failed to get profile owner");
+            Logger::E(TAG, "E_ILLEGAL_ARGUMENT_EXCEPTION: Requested profile owner for invalid userId");
+            return E_ILLEGAL_ARGUMENT_EXCEPTION;
+        }
+        return NOERROR;
+    }
+    return NOERROR;
 }
 
 ECode CDevicePolicyManager::AddPersistentPreferredActivity(
@@ -1598,18 +1715,26 @@ ECode CDevicePolicyManager::AddPersistentPreferredActivity(
     /* [in] */ IIntentFilter* filter,
     /* [in] */ IComponentName* activity)
 {
-    assert(0);
-    // TODO
-    return E_NOT_IMPLEMENTED;
+    if (mService != NULL) {
+        ECode ec = mService->AddPersistentPreferredActivity(admin, filter, activity);
+        if (FAILED(ec)) {
+            Logger::W(TAG, "E_REMOTE_EXCEPTION: Failed talking with device policy service");
+        }
+    }
+    return NOERROR;
 }
 
 ECode CDevicePolicyManager::ClearPackagePersistentPreferredActivities(
     /* [in] */ IComponentName* admin,
     /* [in] */ const String& packageName)
 {
-    assert(0);
-    // TODO
-    return E_NOT_IMPLEMENTED;
+    if (mService != NULL) {
+        ECode ec = mService->ClearPackagePersistentPreferredActivities(admin, packageName);
+        if (FAILED(ec)) {
+            Logger::W(TAG, "E_REMOTE_EXCEPTION: Failed talking with device policy service");
+        }
+    }
+    return NOERROR;
 }
 
 ECode CDevicePolicyManager::SetApplicationRestrictions(
@@ -1617,9 +1742,13 @@ ECode CDevicePolicyManager::SetApplicationRestrictions(
     /* [in] */ const String& packageName,
     /* [in] */ IBundle* settings)
 {
-    assert(0);
-    // TODO
-    return E_NOT_IMPLEMENTED;
+    if (mService != NULL) {
+        ECode ec = mService->SetApplicationRestrictions(admin, packageName, settings);
+        if (FAILED(ec)) {
+            Logger::W(TAG, "E_REMOTE_EXCEPTION: Failed talking with device policy service");
+        }
+    }
+    return NOERROR;
 }
 
 ECode CDevicePolicyManager::SetTrustAgentFeaturesEnabled(
@@ -1627,9 +1756,13 @@ ECode CDevicePolicyManager::SetTrustAgentFeaturesEnabled(
     /* [in] */ IComponentName* agent,
     /* [in] */ IList* features)
 {
-    assert(0);
-    // TODO
-    return E_NOT_IMPLEMENTED;
+    if (mService != NULL) {
+        ECode ec = mService->SetTrustAgentFeaturesEnabled(admin, agent, features, UserHandle::GetMyUserId());
+        if (FAILED(ec)) {
+            Logger::W(TAG, "E_REMOTE_EXCEPTION: Failed talking with device policy service");
+        }
+    }
+    return NOERROR;
 }
 
 ECode CDevicePolicyManager::GetTrustAgentFeaturesEnabled(
@@ -1637,27 +1770,68 @@ ECode CDevicePolicyManager::GetTrustAgentFeaturesEnabled(
     /* [in] */ IComponentName* agent,
     /* [out] */ IList** result)
 {
-    assert(0);
-    // TODO
-    return E_NOT_IMPLEMENTED;
+    VALIDATE_NOT_NULL(result)
+
+    if (mService != NULL) {
+        ECode ec = mService->GetTrustAgentFeaturesEnabled(admin, agent, UserHandle::GetMyUserId(), result);
+        if (SUCCEEDED(ec)) {
+            return NOERROR;
+        }
+        else if (ec == (ECode)E_REMOTE_EXCEPTION) {
+            Logger::W(TAG, "E_REMOTE_EXCEPTION: Failed talking with device policy service");
+        }
+    }
+
+    return CArrayList::New(result); // empty list
 }
 
 ECode CDevicePolicyManager::SetCrossProfileCallerIdDisabled(
     /* [in] */ IComponentName* who,
     /* [in] */ Boolean disabled)
 {
-    assert(0);
-    // TODO
-    return E_NOT_IMPLEMENTED;
+    if (mService != NULL) {
+        ECode ec = mService->SetCrossProfileCallerIdDisabled(who, disabled);
+        if (FAILED(ec)) {
+            Logger::W(TAG, "E_REMOTE_EXCEPTION: Failed talking with device policy service");
+        }
+    }
+    return NOERROR;
 }
 
 ECode CDevicePolicyManager::GetCrossProfileCallerIdDisabled(
     /* [in] */ IComponentName* who,
     /* [out] */ Boolean* result)
 {
-    assert(0);
-    // TODO
-    return E_NOT_IMPLEMENTED;
+    VALIDATE_NOT_NULL(result)
+    *result = FALSE;
+
+    if (mService != NULL) {
+        ECode ec = mService->GetCrossProfileCallerIdDisabled(who, result);
+        if (FAILED(ec)) {
+            Logger::W(TAG, "E_REMOTE_EXCEPTION: Failed talking with device policy service");
+        }
+        return NOERROR;
+    }
+    return NOERROR;
+}
+
+ECode CDevicePolicyManager::GetCrossProfileCallerIdDisabled(
+    /* [in] */ IUserHandle* userHandle,
+    /* [out] */ Boolean* result)
+{
+    VALIDATE_NOT_NULL(result)
+    *result = FALSE;
+
+    if (mService != NULL) {
+        Int32 id;
+        userHandle->GetIdentifier(&id);
+        ECode ec = mService->GetCrossProfileCallerIdDisabledForUser(id, result);
+        if (FAILED(ec)) {
+            Logger::W(TAG, "E_REMOTE_EXCEPTION: Failed talking with device policy service");
+        }
+        return NOERROR;
+    }
+    return NOERROR;
 }
 
 ECode CDevicePolicyManager::AddCrossProfileIntentFilter(
@@ -1665,17 +1839,25 @@ ECode CDevicePolicyManager::AddCrossProfileIntentFilter(
     /* [in] */ IIntentFilter* filter,
     /* [in] */ Int32 flags)
 {
-    assert(0);
-    // TODO
-    return E_NOT_IMPLEMENTED;
+    if (mService != NULL) {
+        ECode ec = mService->AddCrossProfileIntentFilter(admin, filter, flags);
+        if (FAILED(ec)) {
+            Logger::W(TAG, "E_REMOTE_EXCEPTION: Failed talking with device policy service");
+        }
+    }
+    return NOERROR;
 }
 
 ECode CDevicePolicyManager::ClearCrossProfileIntentFilters(
     /* [in] */ IComponentName* admin)
 {
-    assert(0);
-    // TODO
-    return E_NOT_IMPLEMENTED;
+    if (mService != NULL) {
+        ECode ec = mService->ClearCrossProfileIntentFilters(admin);
+        if (FAILED(ec)) {
+            Logger::W(TAG, "E_REMOTE_EXCEPTION: Failed talking with device policy service");
+        }
+    }
+    return NOERROR;
 }
 
 ECode CDevicePolicyManager::SetPermittedAccessibilityServices(
@@ -1683,17 +1865,51 @@ ECode CDevicePolicyManager::SetPermittedAccessibilityServices(
     /* [in] */ IList* packageNames,
     /* [out] */ Boolean* result)
 {
-    assert(0);
-    // TODO
-    return E_NOT_IMPLEMENTED;
+    VALIDATE_NOT_NULL(result)
+    *result = FALSE;
+
+    if (mService != NULL) {
+        ECode ec = mService->SetPermittedAccessibilityServices(admin, packageNames, result);
+        if (FAILED(ec)) {
+            Logger::W(TAG, "E_REMOTE_EXCEPTION: Failed talking with device policy service");
+        }
+        return NOERROR;
+    }
+    return NOERROR;
 }
 
 ECode CDevicePolicyManager::GetPermittedAccessibilityServices(
-    /* [out] */ IComponentName** admin)
+    /* [in] */ IComponentName* admin,
+    /* [out] */ IList** result)
 {
-    assert(0);
-    // TODO
-    return E_NOT_IMPLEMENTED;
+    VALIDATE_NOT_NULL(result)
+    *result = NULL;
+
+    if (mService != NULL) {
+        ECode ec = mService->GetPermittedAccessibilityServices(admin, result);
+        if (FAILED(ec)) {
+            Logger::W(TAG, "E_REMOTE_EXCEPTION: Failed talking with device policy service");
+        }
+        return NOERROR;
+    }
+    return NOERROR;
+}
+
+ECode CDevicePolicyManager::GetPermittedAccessibilityServices(
+    /* [in] */ Int32 userId,
+    /* [out] */ IList** result)
+{
+    VALIDATE_NOT_NULL(result)
+    *result = NULL;
+
+    if (mService != NULL) {
+        ECode ec = mService->GetPermittedAccessibilityServicesForUser(userId, result);
+        if (FAILED(ec)) {
+            Logger::W(TAG, "E_REMOTE_EXCEPTION: Failed talking with device policy service");
+        }
+        return NOERROR;
+    }
+    return NOERROR;
 }
 
 ECode CDevicePolicyManager::SetPermittedInputMethods(
@@ -1701,18 +1917,50 @@ ECode CDevicePolicyManager::SetPermittedInputMethods(
     /* [in] */ IList* packageNames,
     /* [out] */ Boolean* result)
 {
-    assert(0);
-    // TODO
-    return E_NOT_IMPLEMENTED;
+    VALIDATE_NOT_NULL(result)
+    *result = FALSE;
+
+    if (mService != NULL) {
+        ECode ec = mService->SetPermittedInputMethods(admin, packageNames, result);
+        if (FAILED(ec)) {
+            Logger::W(TAG, "E_REMOTE_EXCEPTION: Failed talking with device policy service");
+        }
+        return NOERROR;
+    }
+    return NOERROR;
 }
 
 ECode CDevicePolicyManager::GetPermittedInputMethods(
     /* [in] */ IComponentName* admin,
     /* [out] */ IList** list)
 {
-    assert(0);
-    // TODO
-    return E_NOT_IMPLEMENTED;
+    VALIDATE_NOT_NULL(list)
+    *list = NULL;
+
+    if (mService != NULL) {
+        ECode ec = mService->GetPermittedInputMethods(admin, list);
+        if (FAILED(ec)) {
+            Logger::W(TAG, "E_REMOTE_EXCEPTION: Failed talking with device policy service");
+        }
+        return NOERROR;
+    }
+    return NOERROR;
+}
+
+ECode CDevicePolicyManager::GetPermittedInputMethodsForCurrentUser(
+    /* [out] */ IList** list)
+{
+    VALIDATE_NOT_NULL(list)
+    *list = NULL;
+
+    if (mService != NULL) {
+        ECode ec = mService->GetPermittedInputMethodsForCurrentUser(list);
+        if (FAILED(ec)) {
+            Logger::W(TAG, "E_REMOTE_EXCEPTION: Failed talking with device policy service");
+        }
+        return NOERROR;
+    }
+    return NOERROR;
 }
 
 ECode CDevicePolicyManager::CreateUser(
@@ -1720,9 +1968,14 @@ ECode CDevicePolicyManager::CreateUser(
     /* [in] */ const String& name,
     /* [out] */ IUserHandle** handle)
 {
-    assert(0);
-    // TODO
-    return E_NOT_IMPLEMENTED;
+    VALIDATE_NOT_NULL(handle)
+    *handle = NULL;
+
+    ECode ec = mService->CreateUser(admin, name, handle);
+    if (FAILED(ec)) {
+        Logger::W(TAG, "E_REMOTE_EXCEPTION: Could not create a user");
+    }
+    return NOERROR;
 }
 
 ECode CDevicePolicyManager::CreateAndInitializeUser(
@@ -1730,20 +1983,33 @@ ECode CDevicePolicyManager::CreateAndInitializeUser(
     /* [in] */ const String& name,
     /* [in] */ const String& ownerName,
     /* [in] */ IComponentName* profileOwnerComponent,
-    /* [in] */ IBundle* adminExtras)
+    /* [in] */ IBundle* adminExtras,
+    /* [out] */ IUserHandle** handle)
 {
-    assert(0);
-    // TODO
-    return E_NOT_IMPLEMENTED;
+    VALIDATE_NOT_NULL(handle)
+    *handle = NULL;
+
+    ECode ec = mService->CreateAndInitializeUser(admin, name, ownerName, profileOwnerComponent, adminExtras, handle);
+    if (FAILED(ec)) {
+        Logger::W(TAG, "E_REMOTE_EXCEPTION: Could not create a user");
+    }
+    return NOERROR;
 }
 
 ECode CDevicePolicyManager::RemoveUser(
     /* [in] */ IComponentName* admin,
-    /* [in] */ IUserHandle* userHandle)
+    /* [in] */ IUserHandle* userHandle,
+    /* [out] */ Boolean* result)
 {
-    assert(0);
-    // TODO
-    return E_NOT_IMPLEMENTED;
+    VALIDATE_NOT_NULL(result)
+
+    ECode ec = mService->RemoveUser(admin, userHandle, result);
+    if (FAILED(ec)) {
+        Logger::W(TAG, "E_REMOTE_EXCEPTION: Could not remove user");
+        *result = FALSE;
+        return NOERROR;
+    }
+    return NOERROR;
 }
 
 ECode CDevicePolicyManager::SwitchUser(
@@ -1751,9 +2017,15 @@ ECode CDevicePolicyManager::SwitchUser(
     /* [in] */ IUserHandle* userHandle,
     /* [out] */ Boolean* result)
 {
-    assert(0);
-    // TODO
-    return E_NOT_IMPLEMENTED;
+    VALIDATE_NOT_NULL(result)
+
+    ECode ec = mService->SwitchUser(admin, userHandle, result);
+    if (FAILED(ec)) {
+        Logger::W(TAG, "E_REMOTE_EXCEPTION: Could not remove user");
+        *result = FALSE;
+        return NOERROR;
+    }
+    return NOERROR;
 }
 
 ECode CDevicePolicyManager::GetApplicationRestrictions(
@@ -1761,27 +2033,43 @@ ECode CDevicePolicyManager::GetApplicationRestrictions(
     /* [in] */ const String& packageName,
     /* [out] */ IBundle** bundle)
 {
-    assert(0);
-    // TODO
-    return E_NOT_IMPLEMENTED;
+    VALIDATE_NOT_NULL(bundle)
+    *bundle = NULL;
+
+    if (mService != NULL) {
+        ECode ec = mService->GetApplicationRestrictions(admin, packageName, bundle);
+        if (FAILED(ec)) {
+            Logger::W(TAG, "E_REMOTE_EXCEPTION: Failed talking with device policy service");
+        }
+        return NOERROR;
+    }
+    return NOERROR;
 }
 
 ECode CDevicePolicyManager::AddUserRestriction(
     /* [in] */ IComponentName* admin,
     /* [in] */ const String& key)
 {
-    assert(0);
-    // TODO
-    return E_NOT_IMPLEMENTED;
+    if (mService != NULL) {
+        ECode ec = mService->SetUserRestriction(admin, key, TRUE);
+        if (FAILED(ec)) {
+            Logger::W(TAG, "E_REMOTE_EXCEPTION: Failed talking with device policy service");
+        }
+    }
+    return NOERROR;
 }
 
 ECode CDevicePolicyManager::ClearUserRestriction(
     /* [in] */ IComponentName* admin,
     /* [in] */ const String& key)
 {
-    assert(0);
-    // TODO
-    return E_NOT_IMPLEMENTED;
+    if (mService != NULL) {
+        ECode ec = mService->SetUserRestriction(admin, key, FALSE);
+        if (FAILED(ec)) {
+            Logger::W(TAG, "E_REMOTE_EXCEPTION: Failed talking with device policy service");
+        }
+    }
+    return NOERROR;
 }
 
 ECode CDevicePolicyManager::SetApplicationHidden(
@@ -1790,9 +2078,17 @@ ECode CDevicePolicyManager::SetApplicationHidden(
     /* [in] */ Boolean hide,
     /* [out] */ Boolean* result)
 {
-    assert(0);
-    // TODO
-    return E_NOT_IMPLEMENTED;
+    VALIDATE_NOT_NULL(result)
+    *result = FALSE;
+
+    if (mService != NULL) {
+        ECode ec = mService->SetApplicationHidden(admin, packageName, hide, result);
+        if (FAILED(ec)) {
+            Logger::W(TAG, "E_REMOTE_EXCEPTION: Failed talking with device policy service");
+        }
+        return NOERROR;
+    }
+    return NOERROR;
 }
 
 ECode CDevicePolicyManager::IsApplicationHidden(
@@ -1800,18 +2096,30 @@ ECode CDevicePolicyManager::IsApplicationHidden(
     /* [in] */ const String& packageName,
     /* [out] */ Boolean* result)
 {
-    assert(0);
-    // TODO
-    return E_NOT_IMPLEMENTED;
+    VALIDATE_NOT_NULL(result)
+    *result = FALSE;
+
+    if (mService != NULL) {
+        ECode ec = mService->IsApplicationHidden(admin, packageName, result);
+        if (FAILED(ec)) {
+            Logger::W(TAG, "E_REMOTE_EXCEPTION: Failed talking with device policy service");
+        }
+        return NOERROR;
+    }
+    return NOERROR;
 }
 
 ECode CDevicePolicyManager::EnableSystemApp(
     /* [in] */ IComponentName* admin,
     /* [in] */ const String& packageName)
 {
-    assert(0);
-    // TODO
-    return E_NOT_IMPLEMENTED;
+    if (mService != NULL) {
+        ECode ec = mService->EnableSystemApp(admin, packageName);
+        if (FAILED(ec)) {
+            Logger::W(TAG, "E_REMOTE_EXCEPTION: Failed to install package: %s", packageName.string());
+        }
+    }
+    return NOERROR;
 }
 
 ECode CDevicePolicyManager::EnableSystemApp(
@@ -1819,9 +2127,17 @@ ECode CDevicePolicyManager::EnableSystemApp(
     /* [in] */ IIntent* intent,
     /* [out] */ Int32* result)
 {
-    assert(0);
-    // TODO
-    return E_NOT_IMPLEMENTED;
+    VALIDATE_NOT_NULL(result)
+    *result = 0;
+
+    if (mService != NULL) {
+        ECode ec = mService->EnableSystemAppWithIntent(admin, intent, result);
+        if (FAILED(ec)) {
+            Logger::W(TAG, "E_REMOTE_EXCEPTION: Failed to install packages matching filter: %s", TO_CSTR(intent));
+        }
+        return NOERROR;
+    }
+    return NOERROR;
 }
 
 ECode CDevicePolicyManager::SetAccountManagementDisabled(
@@ -1829,35 +2145,83 @@ ECode CDevicePolicyManager::SetAccountManagementDisabled(
     /* [in] */ const String& accountType,
     /* [in] */ Boolean disabled)
 {
-    assert(0);
-    // TODO
-    return E_NOT_IMPLEMENTED;
+    if (mService != NULL) {
+        ECode ec = mService->SetAccountManagementDisabled(admin, accountType, disabled);
+        if (FAILED(ec)) {
+            Logger::W(TAG, "E_REMOTE_EXCEPTION: Failed talking with device policy service");
+        }
+    }
+    return NOERROR;
 }
 
 ECode CDevicePolicyManager::GetAccountTypesWithManagementDisabled(
     /* [out, callee] */ ArrayOf<String>** result)
 {
-    assert(0);
-    // TODO
-    return E_NOT_IMPLEMENTED;
+    VALIDATE_NOT_NULL(result)
+    return GetAccountTypesWithManagementDisabledAsUser(UserHandle::GetMyUserId(), result);
+}
+
+ECode CDevicePolicyManager::GetAccountTypesWithManagementDisabledAsUser(
+    /* [in] */ Int32 userId,
+    /* [out, callee] */ ArrayOf<String>** result)
+{
+    VALIDATE_NOT_NULL(result)
+
+    if (mService != NULL) {
+        ECode ec = mService->GetAccountTypesWithManagementDisabledAsUser(userId, result);
+        if (FAILED(ec)) {
+            Logger::W(TAG, "E_REMOTE_EXCEPTION: Failed talking with device policy service");
+        }
+        return NOERROR;
+    }
+    return NOERROR;
 }
 
 ECode CDevicePolicyManager::SetLockTaskPackages(
     /* [in] */ IComponentName* admin,
+    /* [in] */ ArrayOf<String>* packages)
+{
+    if (mService != NULL) {
+        ECode ec = mService->SetLockTaskPackages(admin, packages);
+        if (FAILED(ec)) {
+            Logger::W(TAG, "E_REMOTE_EXCEPTION: Failed talking with device policy service");
+        }
+    }
+    return NOERROR;
+}
+
+ECode CDevicePolicyManager::GetLockTaskPackages(
+    /* [in] */ IComponentName* admin,
     /* [out, callee] */ ArrayOf<String>** packages)
 {
-    assert(0);
-    // TODO
-    return E_NOT_IMPLEMENTED;
+    VALIDATE_NOT_NULL(packages)
+    *packages = NULL;
+
+    if (mService != NULL) {
+        ECode ec = mService->GetLockTaskPackages(admin, packages);
+        if (FAILED(ec)) {
+            Logger::W(TAG, "E_REMOTE_EXCEPTION: Failed talking with device policy service");
+        }
+        return NOERROR;
+    }
+    return NOERROR;
 }
 
 ECode CDevicePolicyManager::IsLockTaskPermitted(
     /* [in] */ const String& pkg,
     /* [out] */ Boolean* result)
 {
-    assert(0);
-    // TODO
-    return E_NOT_IMPLEMENTED;
+    VALIDATE_NOT_NULL(result)
+    *result = FALSE;
+
+    if (mService != NULL) {
+        ECode ec = mService->IsLockTaskPermitted(pkg, result);
+        if (FAILED(ec)) {
+            Logger::W(TAG, "E_REMOTE_EXCEPTION: Failed talking with device policy service");
+        }
+        return NOERROR;
+    }
+    return NOERROR;
 }
 
 ECode CDevicePolicyManager::SetGlobalSetting(
@@ -1865,9 +2229,13 @@ ECode CDevicePolicyManager::SetGlobalSetting(
     /* [in] */ const String& setting,
     /* [in] */ const String& value)
 {
-    assert(0);
-    // TODO
-    return E_NOT_IMPLEMENTED;
+    if (mService != NULL) {
+        ECode ec = mService->SetGlobalSetting(admin, setting, value);
+        if (FAILED(ec)) {
+            Logger::W(TAG, "E_REMOTE_EXCEPTION: Failed talking with device policy service");
+        }
+    }
+    return NOERROR;
 }
 
 ECode CDevicePolicyManager::SetSecureSetting(
@@ -1875,36 +2243,56 @@ ECode CDevicePolicyManager::SetSecureSetting(
     /* [in] */ const String& setting,
     /* [in] */ const String& value)
 {
-    assert(0);
-    // TODO
-    return E_NOT_IMPLEMENTED;
+    if (mService != NULL) {
+        ECode ec = mService->SetSecureSetting(admin, setting, value);
+        if (FAILED(ec)) {
+            Logger::W(TAG, "E_REMOTE_EXCEPTION: Failed talking with device policy service");
+        }
+    }
+    return NOERROR;
 }
 
 ECode CDevicePolicyManager::SetRestrictionsProvider(
     /* [in] */ IComponentName* admin,
     /* [in] */ IComponentName* provider)
 {
-    assert(0);
-    // TODO
-    return E_NOT_IMPLEMENTED;
+    if (mService != NULL) {
+        ECode ec = mService->SetRestrictionsProvider(admin, provider);
+        if (FAILED(ec)) {
+            Logger::W(TAG, "E_REMOTE_EXCEPTION: Failed to set permission provider on device policy service");
+        }
+    }
+    return NOERROR;
 }
 
 ECode CDevicePolicyManager::SetMasterVolumeMuted(
     /* [in] */ IComponentName* admin,
     /* [in] */ Boolean on)
 {
-    assert(0);
-    // TODO
-    return E_NOT_IMPLEMENTED;
+    if (mService != NULL) {
+        ECode ec = mService->SetMasterVolumeMuted(admin, on);
+        if (FAILED(ec)) {
+            Logger::W(TAG, "E_REMOTE_EXCEPTION: Failed to setMasterMute on device policy service");
+        }
+    }
+    return NOERROR;
 }
 
 ECode CDevicePolicyManager::IsMasterVolumeMuted(
     /* [in] */ IComponentName* admin,
     /* [out] */ Boolean* result)
 {
-    assert(0);
-    // TODO
-    return E_NOT_IMPLEMENTED;
+    VALIDATE_NOT_NULL(result)
+    *result = FALSE;
+
+    if (mService != NULL) {
+        ECode ec = mService->IsMasterVolumeMuted(admin, result);
+        if (FAILED(ec)) {
+            Logger::W(TAG, "E_REMOTE_EXCEPTION: Failed to get isMasterMute on device policy service");
+        }
+        return NOERROR;
+    }
+    return NOERROR;
 }
 
 ECode CDevicePolicyManager::SetUninstallBlocked(
@@ -1912,9 +2300,13 @@ ECode CDevicePolicyManager::SetUninstallBlocked(
     /* [in] */ const String& packageName,
     /* [in] */ Boolean uninstallBlocked)
 {
-    assert(0);
-    // TODO
-    return E_NOT_IMPLEMENTED;
+    if (mService != NULL) {
+        ECode ec = mService->SetUninstallBlocked(admin, packageName, uninstallBlocked);
+        if (FAILED(ec)) {
+            Logger::W(TAG, "E_REMOTE_EXCEPTION: Failed to call block uninstall on device policy service");
+        }
+    }
+    return NOERROR;
 }
 
 ECode CDevicePolicyManager::IsUninstallBlocked(
@@ -1922,9 +2314,17 @@ ECode CDevicePolicyManager::IsUninstallBlocked(
     /* [in] */ const String& packageName,
     /* [out] */ Boolean* result)
 {
-    assert(0);
-    // TODO
-    return E_NOT_IMPLEMENTED;
+    VALIDATE_NOT_NULL(result)
+    *result = FALSE;
+
+    if (mService != NULL) {
+        ECode ec = mService->IsUninstallBlocked(admin, packageName, result);
+        if (FAILED(ec)) {
+            Logger::W(TAG, "E_REMOTE_EXCEPTION: Failed to call block uninstall on device policy service");
+        }
+        return NOERROR;
+    }
+    return NOERROR;
 }
 
 ECode CDevicePolicyManager::AddCrossProfileWidgetProvider(
@@ -1932,9 +2332,17 @@ ECode CDevicePolicyManager::AddCrossProfileWidgetProvider(
     /* [in] */ const String& packageName,
     /* [out] */ Boolean* result)
 {
-    assert(0);
-    // TODO
-    return E_NOT_IMPLEMENTED;
+    VALIDATE_NOT_NULL(result)
+    *result = FALSE;
+
+    if (mService != NULL) {
+        ECode ec = mService->AddCrossProfileWidgetProvider(admin, packageName, result);
+        if (FAILED(ec)) {
+            Logger::W(TAG, "E_REMOTE_EXCEPTION: Error calling addCrossProfileWidgetProvider");
+        }
+        return NOERROR;
+    }
+    return NOERROR;
 }
 
 ECode CDevicePolicyManager::RemoveCrossProfileWidgetProvider(
@@ -1942,18 +2350,44 @@ ECode CDevicePolicyManager::RemoveCrossProfileWidgetProvider(
     /* [in] */ const String& packageName,
     /* [out] */ Boolean* result)
 {
-    assert(0);
-    // TODO
-    return E_NOT_IMPLEMENTED;
+    VALIDATE_NOT_NULL(result)
+    *result = FALSE;
+
+    if (mService != NULL) {
+        ECode ec = mService->RemoveCrossProfileWidgetProvider(admin, packageName, result);
+        if (FAILED(ec)) {
+            Logger::W(TAG, "E_REMOTE_EXCEPTION: Error calling removeCrossProfileWidgetProvider");
+        }
+        return NOERROR;
+    }
+    return NOERROR;
 }
 
 ECode CDevicePolicyManager::GetCrossProfileWidgetProviders(
     /* [in] */ IComponentName* admin,
     /* [out] */ IList** result)
 {
-    assert(0);
-    // TODO
-    return E_NOT_IMPLEMENTED;
+    VALIDATE_NOT_NULL(result)
+    *result = NULL;
+
+    if (mService != NULL) {
+        AutoPtr<IList> providers;
+        ECode ec = mService->GetCrossProfileWidgetProviders(admin, (IList**)&providers);
+        if (SUCCEEDED(ec)) {
+            if (providers != NULL) {
+                *result = providers;
+                REFCOUNT_ADD(*result)
+                return NOERROR;
+            }
+        }
+        else if (ec == (ECode)E_REMOTE_EXCEPTION) {
+            Logger::W(TAG, "E_REMOTE_EXCEPTION: Error calling getCrossProfileWidgetProviders");
+        }
+    }
+
+    AutoPtr<ICollections> coll;
+    CCollections::AcquireSingleton((ICollections**)&coll);
+    return coll->GetEmptyList(result);
 }
 
 ECode CDevicePolicyManager::RequireSecureKeyguard(
@@ -1975,13 +2409,13 @@ ECode CDevicePolicyManager::RequireSecureKeyguard(
         // try {
         ec = mService->RequireSecureKeyguard(userHandle, isRequired);
         if (FAILED(ec)) {
-            Logger::W(TAG, "Failed to get secure keyguard requirement");
+            Logger::W(TAG, "E_REMOTE_EXCEPTION: Failed to get secure keyguard requirement");
         }
         // } catch (RemoteException e) {
         //     Log.w(TAG, "Failed to get secure keyguard requirement");
         // }
     }
-    return ec;
+    return NOERROR;
 }
 
 } // namespace Admin

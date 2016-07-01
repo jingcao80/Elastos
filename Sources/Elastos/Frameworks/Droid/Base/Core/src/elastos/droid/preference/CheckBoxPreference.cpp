@@ -43,13 +43,13 @@ ECode CheckBoxPreference::constructor(
     a->GetString(R::styleable::CheckBoxPreference_summaryOn, &summaryOn);
     AutoPtr<ICharSequence> cs;
     CString::New(summaryOn, (ICharSequence**)&cs);
-    TwoStatePreference::SetSummaryOn(cs);
+    SetSummaryOn(cs);
 
     String summaryOff;
     a->GetString(R::styleable::CheckBoxPreference_summaryOff, &summaryOff);
     cs = NULL;
     CString::New(summaryOff, (ICharSequence**)&cs);
-    TwoStatePreference::SetSummaryOff(cs);
+    SetSummaryOff(cs);
 
     Boolean disableDependentsState;
     a->GetBoolean(R::styleable::CheckBoxPreference_disableDependentsState, FALSE, &disableDependentsState);
@@ -64,13 +64,13 @@ ECode CheckBoxPreference::constructor(
     /* [in] */ IContext* context,
     /* [in] */ IAttributeSet* attrs)
 {
-    return constructor(context, attrs, R::attr::checkBoxPreferenceStyle, 0);
+    return constructor(context, attrs, R::attr::checkBoxPreferenceStyle);
 }
 
 ECode CheckBoxPreference::constructor(
     /* [in] */ IContext* context)
 {
-    return constructor(context, NULL, R::attr::checkBoxPreferenceStyle, 0);
+    return constructor(context, NULL);
 }
 
 ECode CheckBoxPreference::OnBindView(
@@ -81,8 +81,7 @@ ECode CheckBoxPreference::OnBindView(
     AutoPtr<IView> checkboxView;
     view->FindViewById(R::id::checkbox, (IView**)&checkboxView);
     if (checkboxView != NULL && ICheckable::Probe(checkboxView) != NULL) {
-        AutoPtr<ICheckable> checkable = ICheckable::Probe(checkboxView);
-        checkable->SetChecked(mChecked);
+        ICheckable::Probe(checkboxView)->SetChecked(mChecked);
     }
 
     SyncSummaryView(view);
@@ -92,4 +91,3 @@ ECode CheckBoxPreference::OnBindView(
 }
 }
 }
-

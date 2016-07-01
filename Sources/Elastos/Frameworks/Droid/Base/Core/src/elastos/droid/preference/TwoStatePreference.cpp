@@ -113,8 +113,8 @@ ECode TwoStatePreference::ShouldDisableDependents(
 
     Boolean shouldDisable = mDisableDependentsState ? mChecked : !mChecked;
     Boolean superShouldDisableDependents;
-    Preference::ShouldDisableDependents(&superShouldDisableDependents);
-    *shouldDisableDependents = shouldDisable || superShouldDisableDependents;
+    *shouldDisableDependents = shouldDisable ||
+            (Preference::ShouldDisableDependents(&superShouldDisableDependents), superShouldDisableDependents);
 
     return NOERROR;
 }

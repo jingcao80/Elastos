@@ -10,6 +10,7 @@
 #include <elastos/core/CoreUtils.h>
 #include <elastos/core/Math.h>
 #include <elastos/core/StringBuilder.h>
+#include <elastos/utility/logging/Slogger.h>
 
 using Elastos::Droid::App::Admin::IDevicePolicyManager;
 using Elastos::Droid::App::IDatePickerDialog;
@@ -48,10 +49,13 @@ using Elastos::Utility::IDate;
 using Elastos::Utility::ILocale;
 using Elastos::Utility::ILocaleHelper;
 using Elastos::Utility::CLocaleHelper;
+using Elastos::Utility::Logging::Slogger;
 
 namespace Elastos {
 namespace Droid {
 namespace Settings {
+
+const String DateTimeSettings::TAG("DateTimeSettings");
 
 const String DateTimeSettings::EXTRA_IS_FIRST_RUN("firstRun");
 
@@ -113,16 +117,20 @@ ECode DateTimeSettings::constructor()
 ECode DateTimeSettings::OnCreate(
     /* [in] */ IBundle* icicle)
 {
+    Slogger::I(TAG, " >> enter DateTimeSettings::OnCreate");
     SettingsPreferenceFragment::OnCreate(icicle);
 
     AddPreferencesFromResource(R::xml::date_time_prefs);
 
     InitUI();
+    Slogger::I(TAG, " << leave DateTimeSettings::OnCreate");
     return NOERROR;
 }
 
 void DateTimeSettings::InitUI()
 {
+    Slogger::I(TAG, " >> enter DateTimeSettings::InitUI");
+
     Boolean autoTimeEnabled;
     GetAutoState(ISettingsGlobal::AUTO_TIME, &autoTimeEnabled);
     Boolean autoTimeZoneEnabled;
@@ -133,20 +141,20 @@ void DateTimeSettings::InitUI()
     mAutoTimePref = ICheckBoxPreference::Probe(pref);
 
     AutoPtr<IInterface> obj = GetSystemService(IContext::DEVICE_POLICY_SERVICE);
-    AutoPtr<IDevicePolicyManager> dpm = IDevicePolicyManager::Probe(obj);
+    IDevicePolicyManager* dpm = IDevicePolicyManager::Probe(obj);
     Boolean res;
     if (dpm->GetAutoTimeRequired(&res), res) {
-        IPreference::Probe(mAutoTimePref)->SetEnabled(FALSE);
+        pref->SetEnabled(FALSE);
 
         // If Settings::Global::AUTO_TIME is FALSE it will be set to TRUE
         // by the device policy manager very soon.
         // Note that this app listens to that change.
     }
 
-    AutoPtr<IActivity> activity;
-    GetActivity((IActivity**)&activity);
+    AutoPtr<IActivity> _activity;
+    GetActivity((IActivity**)&_activity);
     AutoPtr<IIntent> intent;
-    activity->GetIntent((IIntent**)&intent);
+    _activity->GetIntent((IIntent**)&intent);
     Boolean isFirstRun;
     intent->GetBooleanExtra(EXTRA_IS_FIRST_RUN, FALSE, &isFirstRun);
 
@@ -160,12 +168,11 @@ void DateTimeSettings::InitUI()
     mAutoTimeZonePref = ICheckBoxPreference::Probe(pref);
     // Override auto-timezone if it's a wifi-only device or if we're still in setup wizard.
     // TODO: Remove the wifiOnly test when auto-timezone is implemented based on wifi-location.
-    if (Utils::IsWifiOnly(IContext::Probe(activity)) || isFirstRun) {
+    IContext* activity = IContext::Probe(_activity);
+    if (Utils::IsWifiOnly(activity) || isFirstRun) {
         AutoPtr<IPreferenceScreen> screen;
         GetPreferenceScreen((IPreferenceScreen**)&screen);
-        Boolean res;
-        IPreferenceGroup::Probe(screen)->RemovePreference(
-                IPreference::Probe(mAutoTimeZonePref), &res);
+        IPreferenceGroup::Probe(screen)->RemovePreference(pref, &res);
         autoTimeZoneEnabled = FALSE;
     }
     ITwoStatePreference::Probe(mAutoTimeZonePref)->SetChecked(autoTimeZoneEnabled);
@@ -178,11 +185,11 @@ void DateTimeSettings::InitUI()
     FindPreference(CoreUtils::Convert(KEY_DATE_FORMAT), (IPreference**)&pref);
     mDateFormat = IListPreference::Probe(pref);
     if (isFirstRun) {
-        AutoPtr<IPreferenceScreen> screen;
-        GetPreferenceScreen((IPreferenceScreen**)&screen);
-        IPreferenceGroup::Probe(screen)->RemovePreference(mTime24Pref, &res);
-        IPreferenceGroup::Probe(screen)->RemovePreference(
-                IPreference::Probe(mDateFormat), &res);
+        AutoPtr<IPreferenceScreen> _screen;
+        GetPreferenceScreen((IPreferenceScreen**)&_screen);
+        IPreferenceGroup* screen = IPreferenceGroup::Probe(_screen);
+        screen->RemovePreference(mTime24Pref, &res);
+        screen->RemovePreference(pref, &res);
     }
 
     AutoPtr<IResources> resource;
@@ -206,7 +213,7 @@ void DateTimeSettings::InitUI()
         AutoPtr<IDate> date;
         mDummyDate->GetTime((IDate**)&date);
         AutoPtr<Elastos::Text::IDateFormat> dateFormat = DateFormat::GetDateFormatForSetting(
-                IContext::Probe(activity), (*dateFormats)[i]);
+                activity, (*dateFormats)[i]);
         String formatted;
         dateFormat->Format(date, &formatted);
 
@@ -229,10 +236,12 @@ void DateTimeSettings::InitUI()
     mTimePref->SetEnabled(!autoTimeEnabled);
     mDatePref->SetEnabled(!autoTimeEnabled);
     mTimeZone->SetEnabled(!autoTimeZoneEnabled);
+    Slogger::I(TAG, " << leave DateTimeSettings::InitUI");
 }
 
 ECode DateTimeSettings::OnResume()
 {
+    Slogger::I(TAG, " >> enter DateTimeSettings::OnResume");
     SettingsPreferenceFragment::OnResume();
 
     AutoPtr<IPreferenceScreen> screen;
@@ -250,18 +259,22 @@ ECode DateTimeSettings::OnResume()
     filter->AddAction(IIntent::ACTION_TIME_TICK);
     filter->AddAction(IIntent::ACTION_TIME_CHANGED);
     filter->AddAction(IIntent::ACTION_TIMEZONE_CHANGED);
-    AutoPtr<IActivity> activity;
-    GetActivity((IActivity**)&activity);
+    AutoPtr<IActivity> _activity;
+    GetActivity((IActivity**)&_activity);
+    IContext* activity = IContext::Probe(_activity);
     AutoPtr<IIntent> intent;
-    IContext::Probe(activity)->RegisterReceiver(
+    activity->RegisterReceiver(
             (IBroadcastReceiver*)mIntentReceiver, filter, String(NULL),
             NULL, (IIntent**)&intent);
 
-    return UpdateTimeAndDateDisplay(IContext::Probe(activity));
+    UpdateTimeAndDateDisplay(activity);
+    Slogger::I(TAG, " << leave DateTimeSettings::OnResume");
+    return NOERROR;
 }
 
 ECode DateTimeSettings::OnPause()
 {
+    Slogger::I(TAG, " >> enter DateTimeSettings::OnPause");
     SettingsPreferenceFragment::OnPause();
 
     AutoPtr<IActivity> activity;
@@ -272,8 +285,11 @@ ECode DateTimeSettings::OnPause()
     GetPreferenceScreen((IPreferenceScreen**)&screen);
     AutoPtr<ISharedPreferences> sp;
     IPreference::Probe(screen)->GetSharedPreferences((ISharedPreferences**)&sp);
-    return sp->UnregisterOnSharedPreferenceChangeListener(
+
+    sp->UnregisterOnSharedPreferenceChangeListener(
             (ISharedPreferencesOnSharedPreferenceChangeListener*)this);
+    Slogger::I(TAG, " << leave DateTimeSettings::OnPause");
+    return NOERROR;
 }
 
 ECode DateTimeSettings::UpdateTimeAndDateDisplay(
@@ -295,12 +311,13 @@ ECode DateTimeSettings::UpdateTimeAndDateDisplay(
     AutoPtr<IDate> dummyDate;
     mDummyDate->GetTime((IDate**)&dummyDate);
 
-    AutoPtr<IActivity> activity;
-    GetActivity((IActivity**)&activity);
+    AutoPtr<IActivity> _activity;
+    GetActivity((IActivity**)&_activity);
     AutoPtr<IDate> nowTime;
     now->GetTime((IDate**)&nowTime);
     String str;
-    DateFormat::GetTimeFormat(IContext::Probe(activity))->Format(nowTime, &str);
+    IContext* activity = IContext::Probe(_activity);
+    DateFormat::GetTimeFormat(activity)->Format(nowTime, &str);
     mTimePref->SetSummary(CoreUtils::Convert(str));
 
     mTimeZone->SetSummary(CoreUtils::Convert(GetTimeZoneText(zone, TRUE)));
@@ -308,7 +325,7 @@ ECode DateTimeSettings::UpdateTimeAndDateDisplay(
     mDatePref->SetSummary(CoreUtils::Convert(str));
     shortDateFormat->Format(dummyDate, &str);
     IPreference::Probe(mDateFormat)->SetSummary(CoreUtils::Convert(str));
-    DateFormat::GetTimeFormat(IContext::Probe(activity))->Format(dummyDate, &str);
+    DateFormat::GetTimeFormat(activity)->Format(dummyDate, &str);
     mTime24Pref->SetSummary(CoreUtils::Convert(str));
     return NOERROR;
 }
@@ -319,11 +336,12 @@ ECode DateTimeSettings::OnDateSet(
     /* [in] */ Int32 month,
     /* [in] */ Int32 day)
 {
-    AutoPtr<IActivity> activity;
-    GetActivity((IActivity**)&activity);
-    if (activity != NULL) {
-        SetDate(IContext::Probe(activity), year, month, day);
-        UpdateTimeAndDateDisplay(IContext::Probe(activity));
+    AutoPtr<IActivity> _activity;
+    GetActivity((IActivity**)&_activity);
+    if (_activity != NULL) {
+        IContext* activity = IContext::Probe(_activity);
+        SetDate(activity, year, month, day);
+        UpdateTimeAndDateDisplay(activity);
     }
     return NOERROR;
 }
@@ -333,11 +351,12 @@ ECode DateTimeSettings::OnTimeSet(
     /* [in] */ Int32 hourOfDay,
     /* [in] */ Int32 minute)
 {
-    AutoPtr<IActivity> activity;
-    GetActivity((IActivity**)&activity);
-    if (activity != NULL) {
-        SetTime(IContext::Probe(activity), hourOfDay, minute);
-        UpdateTimeAndDateDisplay(IContext::Probe(activity));
+    AutoPtr<IActivity> _activity;
+    GetActivity((IActivity**)&_activity);
+    if (_activity != NULL) {
+        IContext* activity = IContext::Probe(_activity);
+        SetTime(activity, hourOfDay, minute);
+        UpdateTimeAndDateDisplay(activity);
     }
 
     // We don't need to call TimeUpdated() here because the TIME_CHANGED
@@ -403,8 +422,9 @@ ECode DateTimeSettings::OnCreateDialog(
     AutoPtr<ICalendar> calendar;
     helper->GetInstance((ICalendar**)&calendar);
 
-    AutoPtr<IActivity> activity;
-    GetActivity((IActivity**)&activity);
+    AutoPtr<IActivity> _activity;
+    GetActivity((IActivity**)&_activity);
+    IContext* activity = IContext::Probe(_activity);
 
     switch (id) {
         case DIALOG_DATEPICKER: {
@@ -413,7 +433,7 @@ ECode DateTimeSettings::OnCreateDialog(
             calendar->Get(ICalendar::MONTH, &month);
             calendar->Get(ICalendar::DAY_OF_MONTH, &day);
             AutoPtr<IDatePickerDialog> d;
-            CDatePickerDialog::New(IContext::Probe(activity),
+            CDatePickerDialog::New(activity,
                     (IDatePickerDialogOnDateSetListener*)this, year, month,
                     day, (IDatePickerDialog**)&d);
             AutoPtr<IDatePicker> picker;
@@ -427,9 +447,9 @@ ECode DateTimeSettings::OnCreateDialog(
             Int32 hour, minute;
             calendar->Get(ICalendar::HOUR_OF_DAY, &hour);
             calendar->Get(ICalendar::MINUTE, &minute);
-            return CTimePickerDialog::New(IContext::Probe(activity),
+            return CTimePickerDialog::New(activity,
                     (ITimePickerDialogOnTimeSetListener*)this, hour, minute,
-                    DateFormat::Is24HourFormat(IContext::Probe(activity)), dialog);
+                    DateFormat::Is24HourFormat(activity), dialog);
         }
         default:
             return E_ILLEGAL_ARGUMENT_EXCEPTION;
@@ -541,22 +561,20 @@ Boolean DateTimeSettings::Is24Hour()
 void DateTimeSettings::Set24Hour(
     /* [in] */ Boolean is24Hour)
 {
-    AutoPtr<IContentResolver> resolver = GetContentResolver();
     AutoPtr<ISettingsSystem> sys;
     CSettingsSystem::AcquireSingleton((ISettingsSystem**)&sys);
 
     Boolean res;
-    sys->PutString(resolver, ISettingsSystem::TIME_12_24,
+    sys->PutString(GetContentResolver(), ISettingsSystem::TIME_12_24,
             is24Hour? HOURS_24 : HOURS_12, &res);
 }
 
 String DateTimeSettings::GetDateFormat()
 {
-    AutoPtr<IContentResolver> resolver = GetContentResolver();
     AutoPtr<ISettingsSystem> sys;
     CSettingsSystem::AcquireSingleton((ISettingsSystem**)&sys);
     String str;
-    sys->GetString(resolver, ISettingsSystem::DATE_FORMAT, &str);
+    sys->GetString(GetContentResolver(), ISettingsSystem::DATE_FORMAT, &str);
     return str;
 }
 
@@ -569,9 +587,8 @@ ECode DateTimeSettings::GetAutoState(
     AutoPtr<ISettingsGlobal> global;
     CSettingsGlobal::AcquireSingleton((ISettingsGlobal**)&global);
 
-    AutoPtr<IContentResolver> resolver = GetContentResolver();
     Int32 data;
-    ECode ec = global->GetInt32(resolver, name, &data);
+    ECode ec = global->GetInt32(GetContentResolver(), name, &data);
     if (SUCCEEDED(ec)) {
         *res = data > 0;
         return NOERROR;
@@ -640,9 +657,10 @@ String DateTimeSettings::GetTimeZoneText(
     // Use SimpleDateFormat to format the GMT+00:00 string.
     AutoPtr<ISimpleDateFormat> gmtFormatter;
     CSimpleDateFormat::New(String("ZZZZ"), (ISimpleDateFormat**)&gmtFormatter);
-    IDateFormat::Probe(gmtFormatter)->SetTimeZone(tz);
+    IDateFormat* _gmtFormatter = IDateFormat::Probe(gmtFormatter);
+    _gmtFormatter->SetTimeZone(tz);
     String gmtString;
-    IDateFormat::Probe(gmtFormatter)->Format(now, &gmtString);
+    _gmtFormatter->Format(now, &gmtString);
 
     // Ensure that the "GMT+" stays with the "00:00" even if the digits are RTL.
     AutoPtr<IBidiFormatterHelper> helper;
@@ -669,9 +687,10 @@ String DateTimeSettings::GetTimeZoneText(
     // Optionally append the time zone name.
     AutoPtr<ISimpleDateFormat> zoneNameFormatter;
     CSimpleDateFormat::New(String("zzzz"), (ISimpleDateFormat**)&zoneNameFormatter);
-    IDateFormat::Probe(zoneNameFormatter)->SetTimeZone(tz);
+    IDateFormat* _zoneNameFormatter = IDateFormat::Probe(zoneNameFormatter);
+    _zoneNameFormatter->SetTimeZone(tz);
     String zoneNameString;
-    IDateFormat::Probe(zoneNameFormatter)->Format(now, &zoneNameString);
+    _zoneNameFormatter->Format(now, &zoneNameString);
 
     // We don't use punctuation here to avoid having to worry about localizing that too!
     StringBuilder builder;

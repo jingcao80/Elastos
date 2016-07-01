@@ -182,6 +182,10 @@ RenderNodeAnimator::RenderNodeAnimator()
     , mStartTime(0)
 {}
 
+RenderNodeAnimator::~RenderNodeAnimator()
+{
+}
+
 ECode RenderNodeAnimator::constructor(
     /* [in] */ Int32 property,
     /* [in] */ Float finalValue)

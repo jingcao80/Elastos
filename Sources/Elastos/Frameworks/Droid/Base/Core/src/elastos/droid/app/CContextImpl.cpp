@@ -24,7 +24,7 @@
 #include "elastos/droid/app/CAppOpsManager.h"
 #include "elastos/droid/app/CJobSchedulerImpl.h"
 #include "elastos/droid/app/CProfileManager.h"
-// #include "elastos/droid/app/admin/CDevicePolicyManager.h"
+#include "elastos/droid/app/admin/CDevicePolicyManager.h"
 // #include "elastos/droid/app/backup/CBackupManager.h"
 #include "elastos/droid/app/usage/CUsageStatsManager.h"
 #include "elastos/droid/app/trust/CTrustManager.h"
@@ -105,7 +105,7 @@ using Elastos::Droid::App::IProfileManager;
 using Elastos::Droid::App::CProfileManager;
 using Elastos::Droid::App::CJobSchedulerImpl;
 using Elastos::Droid::App::Admin::IDevicePolicyManager;
-// using Elastos::Droid::App::Admin::CDevicePolicyManager;
+using Elastos::Droid::App::Admin::CDevicePolicyManager;
 using Elastos::Droid::App::Backup::IBackupManager;
 // using Elastos::Droid::App::Backup::CBackupManager;
 using Elastos::Droid::App::Job::IIJobScheduler;
@@ -2440,9 +2440,7 @@ ECode CContextImpl::GetSystemService(
     else if (IContext::DEVICE_POLICY_SERVICE.Equals(name)) {
         AutoPtr<IHandler> handler = mMainThread->GetHandler();
         AutoPtr<IDevicePolicyManager> devicePolicy;
-        Slogger::E(TAG, " >>> TODO: Service %s is not ready!", name.string());
-        assert(0 && "TODO");
-        // CDevicePolicyManager::New(this, handler, (IDevicePolicyManager**)&devicePolicy);
+        CDevicePolicyManager::New(this, handler, (IDevicePolicyManager**)&devicePolicy);
         *object = devicePolicy.Get();
         REFCOUNT_ADD(*object);
         return NOERROR;

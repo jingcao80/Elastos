@@ -374,10 +374,12 @@ void CRippleBackground::ExitHardware(
             outerFadeOutAnim->AddListener(mAnimationListener);
 
             mPendingAnimations->Add(outerFadeOutAnim);
-        } else {
+        }
+        else {
             outerOpacityAnim->AddListener(mAnimationListener);
         }
-    } else {
+    }
+    else {
         CRenderNodeAnimator::New(mPropOuterPaint, IRenderNodeAnimator::PAINT_ALPHA,
             0, (IAnimator**)&outerOpacityAnim);
         outerOpacityAnim->SetInterpolator(LINEAR_INTERPOLATOR);

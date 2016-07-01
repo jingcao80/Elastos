@@ -234,11 +234,9 @@ String DateFormat::GetDateFormatStringForSetting(
     CLocaleDataHelper::AcquireSingleton((ILocaleDataHelper**)&localeDataHelper);
     AutoPtr<ILocaleData> d;
     localeDataHelper->Get(locale, (ILocaleData**)&d);
-    assert(0 && "TODO");
-    // String ret;
-    // d->GetShortDateFormat4(&ret);
-    // return ret;
-    return String("");
+    String ret;
+    d->GetShortDateFormat4(&ret);
+    return ret;
 }
 
 AutoPtr<Elastos::Text::IDateFormat> DateFormat::GetLongDateFormat(

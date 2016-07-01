@@ -6,8 +6,8 @@ include $(MAKEDIR)/../../../../../../../sources.inc
 INCLUDES += ../../
 INCLUDES += $(MAKEDIR)/../../../../../inc/
 
-SOURCES = CDeviceAdminInfo.cpp
-SOURCES += CDeviceAdminInfoPolicyInfo.cpp
+#SOURCES = CDeviceAdminInfo.cpp
+#SOURCES += CDeviceAdminInfoPolicyInfo.cpp
 #SOURCES += CDeviceAdminReceiver.cpp
 SOURCES += CDevicePolicyManager.cpp
-#SOURCES += CDevicePolicyManagerHelper.cpp
+SOURCES += CDevicePolicyManagerHelper.cpp

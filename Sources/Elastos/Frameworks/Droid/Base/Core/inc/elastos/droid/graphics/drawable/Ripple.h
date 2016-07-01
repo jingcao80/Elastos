@@ -63,7 +63,7 @@ private:
             /* [in] */ IAnimator* animation);
 
     private:
-        Ripple* mHost;
+        AutoPtr<Ripple> mHost;
     };
 
 public:
@@ -271,7 +271,9 @@ private:
     /** Whether we were canceled externally and should avoid self-removal. */
     Boolean mCanceled;
 
-    AutoPtr<AnimatorListenerAdapter> mAnimationListener;
+    /*AutoPtr can crash, pointer early release*/
+    AnimatorListenerAdapter* mAnimationListener;
+    Boolean mAnimationListenerReleased;
 };
 
 } // namespace Drawable

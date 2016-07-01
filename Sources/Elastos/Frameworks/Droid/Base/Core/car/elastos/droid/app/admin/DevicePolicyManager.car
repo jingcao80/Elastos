@@ -3,7 +3,7 @@ module
     using interface Elastos.Net.IProxy;
     using interface Elastos.Utility.IList;
     using interface Elastos.Security.IPrivateKey;
-    using interface Elastos.Security.ICertificate;
+    using interface Elastos.Security.Cert.ICertificate;
 
     interface Elastos.Droid.Os.IRemoteCallback;
     interface Elastos.Droid.Os.IHandler;
@@ -569,11 +569,28 @@ module
             [out] Boolean* isAdminActive);
 
         /**
+         * @see #isAdminActive(ComponentName)
+         * @hide
+         */
+        IsAdminActiveAsUser(
+            [in] IComponentName* who,
+            [in] Int32 userId,
+            [out] Boolean* isAdminActive);
+
+        /**
          * Return a list of all currently active device administrator's component
          * names.  Note that if there are no administrators than null may be
          * returned.
          */
         GetActiveAdmins(
+            [out] IList** admins);
+
+        /**
+         * @see #getActiveAdmins()
+         * @hide
+         */
+        GetActiveAdminsAsUser(
+            [in] Int32 userId,
             [out] IList** admins);
 
         /**
@@ -1258,7 +1275,7 @@ module
         SetGlobalProxy(
             [in] IComponentName* admin,
             [in] IProxy* proxySpec,
-            [in] ArrayOf<String>* exclusionList,
+            [in] IList* exclusionList,
             [out] IComponentName** component);
 
         /**
@@ -1492,7 +1509,7 @@ module
          * @param admin The name of the admin component to check, or null to check if any admins
          * have disabled screen capture.
          */
-        SetScreenCaptureDisabled(
+        GetScreenCaptureDisabled(
             [in] IComponentName* admin,
             [out] Boolean* disabled);
 
@@ -1671,6 +1688,57 @@ module
         ClearDeviceOwnerApp(
             [in] String packageName);
 
+        /** @hide */
+        // @SystemApi
+        GetDeviceOwner(
+            [out] String* result);
+
+        /** @hide */
+        GetDeviceOwnerName(
+            [out] String* result);
+
+        /**
+         * @hide
+         * @deprecated Use #ACTION_SET_PROFILE_OWNER
+         * Sets the given component as an active admin and registers the package as the profile
+         * owner for this user. The package must already be installed and there shouldn't be
+         * an existing profile owner registered for this user. Also, this method must be called
+         * before the user setup has been completed.
+         * <p>
+         * This method can only be called by system apps that hold MANAGE_USERS permission and
+         * MANAGE_DEVICE_ADMINS permission.
+         * @param admin The component to register as an active admin and profile owner.
+         * @param ownerName The user-visible name of the entity that is managing this user.
+         * @return whether the admin was successfully registered as the profile owner.
+         * @throws IllegalArgumentException if packageName is null, the package isn't installed, or
+         *         the user has already been set up.
+         */
+        // @SystemApi
+        SetActiveProfileOwner(
+            [in] IComponentName* admin,
+            [in] String ownerName,
+            [out] Boolean* result);
+
+        /**
+         * @hide
+         * Clears the active profile owner and removes all user restrictions. The caller must
+         * be from the same package as the active profile owner for this user, otherwise a
+         * SecurityException will be thrown.
+         *
+         * @param admin The component to remove as the profile owner.
+         * @return
+         */
+        // @SystemApi
+        ClearProfileOwner(
+            [in] IComponentName* admin);
+
+        /**
+         * @hide
+         * Checks if the user was already setup.
+         */
+        HasUserSetupCompleted(
+            [out] Boolean* result);
+
         /**
          * @deprecated Use setProfileOwner(ComponentName ...)
          * @hide
@@ -1754,6 +1822,35 @@ module
         //@SystemApi
         GetProfileOwner(
             [out] IComponentName** name);
+
+        /**
+         * @see #getProfileOwner()
+         * @hide
+         */
+        GetProfileOwnerAsUser(
+            [in] Int32 userId,
+            [out] IComponentName** name);
+
+        /**
+         * @hide
+         * @return the human readable name of the organisation associated with this DPM or null if
+         *         one is not set.
+         * @throws IllegalArgumentException if the userId is invalid.
+         */
+        GetProfileOwnerName(
+            [out] String* result);
+
+        /**
+         * @hide
+         * @param user The user for whom to fetch the profile owner name, if any.
+         * @return the human readable name of the organisation associated with this profile owner or
+         *         null if one is not set.
+         * @throws IllegalArgumentException if the userId is invalid.
+         */
+        //@SystemApi
+        GetProfileOwnerNameAsUser(
+            [in] Int32 userId,
+            [out] String* result);
 
         /**
          * Called by a profile owner or device owner to add a default intent handler activity for
@@ -1877,6 +1974,16 @@ module
             [out] Boolean* result);
 
         /**
+         * Determine whether or not caller-Id information has been disabled.
+         *
+         * @param userHandle The user for whom to check the caller-id permission
+         * @hide
+         */
+        GetCrossProfileCallerIdDisabled(
+            [in] IUserHandle* userHandle,
+            [out] Boolean* result);
+
+        /**
          * Called by the profile owner of a managed profile so that some intents sent in the managed
          * profile can also be resolved in the parent, or vice versa.
          * @param admin Which {@link DeviceAdminReceiver} this request is associated with.
@@ -1935,7 +2042,25 @@ module
          * @return List of accessiblity service package names.
          */
         GetPermittedAccessibilityServices(
-            [out] IComponentName** admin);
+            [in] IComponentName* admin,
+            [out] IList** list);
+
+        /**
+         * Returns the list of accessibility services permitted by the device or profiles
+         * owners of this user.
+         *
+         * <p>Null means all accessibility services are allowed, if a non-null list is returned
+         * it will contain the intersection of the permitted lists for any device or profile
+         * owners that apply to this user. It will also include any system accessibility services.
+         *
+         * @param userId which user to check for.
+         * @return List of accessiblity service package names.
+         * @hide
+         */
+         // @SystemApi
+        GetPermittedAccessibilityServices(
+            [in] Int32 userId,
+            [out] IList** list);
 
         /**
          * Called by a profile or device owner to set the permitted input methods services. When
@@ -1976,6 +2101,21 @@ module
          */
         GetPermittedInputMethods(
             [in] IComponentName* admin,
+            [out] IList** list);
+
+        /**
+         * Returns the list of input methods permitted by the device or profiles
+         * owners of the current user.
+         *
+         * <p>Null means all input methods are allowed, if a non-null list is returned
+         * it will contain the intersection of the permitted lists for any device or profile
+         * owners that apply to this user. It will also include any system input methods.
+         *
+         * @return List of input method package names.
+         * @hide
+         */
+        //@SystemApi
+        GetPermittedInputMethodsForCurrentUser(
             [out] IList** list);
 
         /**
@@ -2023,7 +2163,8 @@ module
             [in] String name,
             [in] String ownerName,
             [in] IComponentName* profileOwnerComponent,
-            [in] IBundle* adminExtras);
+            [in] IBundle* adminExtras,
+            [out] IUserHandle** handle);
 
         /**
          * Called by a device owner to remove a user and all associated data. The primary user can
@@ -2035,7 +2176,8 @@ module
          */
         RemoveUser(
             [in] IComponentName* admin,
-            [in] IUserHandle* userHandle);
+            [in] IUserHandle* userHandle,
+            [out] Boolean* result);
 
         /**
          * Called by a device owner to switch the specified user to the foreground.
@@ -2210,6 +2352,16 @@ module
          * @see UserManager#DISALLOW_CREATE_WINDOWS
          */
         SetLockTaskPackages(
+            [in] IComponentName* admin,
+            [in] ArrayOf<String>* packages);
+
+        /**
+         * This function returns the list of packages allowed to start the lock task mode.
+         *
+         * @param admin Which {@link DeviceAdminReceiver} this request is associated with.
+         * @hide
+         */
+        GetLockTaskPackages(
             [in] IComponentName* admin,
             [out, callee] ArrayOf<String>* packages);
 

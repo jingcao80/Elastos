@@ -3,7 +3,11 @@
 #define __ELASTOS_DROID_APP_ADMIN_CDEVICEPOLICYMANAGERHELPER_H__
 
 #include "_Elastos_Droid_App_Admin_CDevicePolicyManagerHelper.h"
+#include <elastos/core/Singleton.h>
 
+using Elastos::Droid::Content::IContext;
+using Elastos::Droid::Os::IHandler;
+using Elastos::Core::Singleton;
 
 namespace Elastos {
 namespace Droid {
@@ -11,6 +15,8 @@ namespace App {
 namespace Admin {
 
 CarClass(CDevicePolicyManagerHelper)
+    , public Singleton
+    , public IDevicePolicyManagerHelper
 {
 public:
     CAR_INTERFACE_DECL()

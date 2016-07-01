@@ -19,6 +19,8 @@ public:
 
     CAR_OBJECT_DECL()
 
+    CVirtualRefBasePtr();
+
     ~CVirtualRefBasePtr();
 
     CARAPI constructor(

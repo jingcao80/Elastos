@@ -13,13 +13,17 @@ CAR_INTERFACE_IMPL(CVirtualRefBasePtr, Object, IVirtualRefBasePtr)
 
 CAR_OBJECT_IMPL(CVirtualRefBasePtr)
 
+CVirtualRefBasePtr::CVirtualRefBasePtr()
+{
+}
+
 CVirtualRefBasePtr::~CVirtualRefBasePtr()
 {
     ReleasePtr();
 }
 
 ECode CVirtualRefBasePtr::constructor(
-        /* [in] */ Int64 ptr)
+    /* [in] */ Int64 ptr)
 {
     mNativePtr = ptr;
     VirtualLightRefBase* obj = reinterpret_cast<VirtualLightRefBase*>(mNativePtr);

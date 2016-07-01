@@ -607,7 +607,7 @@ ECode Preference::HasKey(
     /* [out] */ Boolean* hasKey)
 {
     VALIDATE_NOT_NULL(hasKey)
-    *hasKey = !mKey.IsNullOrEmpty();
+    *hasKey = !TextUtils::IsEmpty(mKey);
     return NOERROR;
 }
 
@@ -1049,7 +1049,13 @@ void Preference::TryCommit(
 {
     Boolean shouldCommit;
     if (mPreferenceManager->ShouldCommit(&shouldCommit), shouldCommit) {
-        if(FAILED(editor->Apply())){
+        // try {
+        ECode ec = editor->Apply();
+        // } catch (AbstractMethodError unused) {
+        if (FAILED(ec)) {
+            // The app injected its own pre-Gingerbread
+            // SharedPreferences.Editor implementation without
+            // an apply method.
             Boolean commitResult;
             editor->Commit(&commitResult);
         }

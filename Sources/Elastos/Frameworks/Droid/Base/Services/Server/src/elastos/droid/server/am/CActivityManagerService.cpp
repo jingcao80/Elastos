@@ -5446,10 +5446,14 @@ void CActivityManagerService::CleanupRecentTasksLocked(
 
     Int32 N = mRecentTasks->GetSize();
 
-    AutoPtr<ArrayOf<Int32> > users = userId == IUserHandle::USER_ALL
-            ? GetUsersLocked() : AutoPtr<ArrayOf<Int32> >(ArrayOf<Int32>::Alloc(1));
-    if (userId != IUserHandle::USER_ALL)
+    AutoPtr<ArrayOf<Int32> > users;
+    if (userId == IUserHandle::USER_ALL) {
+        users = GetUsersLocked();
+    }
+    else {
+        users = ArrayOf<Int32>::Alloc(1);
         (*users)[0] = userId;
+    }
 
     for (Int32 ui = 0; ui < users->GetLength(); ui++) {
         Int32 user = (*users)[ui];
@@ -5554,6 +5558,7 @@ void CActivityManagerService::CleanupRecentTasksLocked(
                     }
                 }
             }
+            ++it;
         }
     }
 

@@ -2,6 +2,8 @@
 #ifndef __ELASTOS_DROID_APP_ADMIN_CDEVICEPOLICYMANAGER_H__
 #define __ELASTOS_DROID_APP_ADMIN_CDEVICEPOLICYMANAGER_H__
 
+#include "Elastos.CoreLibrary.Net.h"
+#include "Elastos.Droid.Content.h"
 #include "_Elastos_Droid_App_Admin_CDevicePolicyManager.h"
 #include <elastos/core/Object.h>
 
@@ -15,7 +17,7 @@ using Elastos::Droid::Os::IRemoteCallback;
 using Elastos::Droid::Os::IUserHandle;
 using Elastos::Droid::Net::IProxyInfo;
 using Elastos::Security::IPrivateKey;
-using Elastos::Security::ICertificate;
+using Elastos::Security::Cert::ICertificate;
 using Elastos::Utility::IList;
 
 namespace Elastos {
@@ -36,6 +38,11 @@ public:
         /* [in] */ IContext* context,
         /* [in] */ IHandler* handler);
 
+    static CARAPI Create(
+        /* [in] */ IContext* context,
+        /* [in] */ IHandler* handler,
+        /* [out] */ IDevicePolicyManager** policymanager);
+
     /**
      * Return true if the given administrator component is currently
      * active (enabled) in the system.
@@ -44,7 +51,7 @@ public:
         /* [in] */ IComponentName* who,
         /* [out] */ Boolean* isAdminActive);
 
-    CARAPI IsAdminActive(
+    CARAPI IsAdminActiveAsUser(
         /* [in] */ IComponentName* who,
         /* [in] */ Int32 userId,
         /* [out] */ Boolean* isAdminActive);
@@ -57,7 +64,7 @@ public:
     CARAPI GetActiveAdmins(
         /* [out] */ IList** admins);
 
-    CARAPI GetActiveAdmins(
+    CARAPI GetActiveAdminsAsUser(
         /* [in] */ Int32 userId,
         /* [out] */ IList** admins);
 
@@ -344,7 +351,6 @@ public:
     CARAPI SetPasswordMinimumNumeric(
         /* [in] */ IComponentName* admin,
         /* [in] */ Int32 length);
-
 
     /**
      * Retrieve the current number of numerical digits required in the password
@@ -739,7 +745,7 @@ public:
     CARAPI SetGlobalProxy(
         /* [in] */ IComponentName* admin,
         /* [in] */ Elastos::Net::IProxy* proxySpec,
-        /* [in] */ ArrayOf<String>* exclusionList,
+        /* [in] */ IList* exclusionList,
         /* [out] */ IComponentName** component);
 
     /**
@@ -966,10 +972,6 @@ public:
         /* [in] */ IComponentName* admin,
         /* [in] */ Boolean disabled);
 
-    CARAPI SetScreenCaptureDisabled(
-        /* [in] */ IComponentName* admin,
-        /* [out] */ Boolean* disabled);
-
     /**
      * Determine whether or not screen capture has been disabled by the current
      * admin, if specified, or all admins.
@@ -1117,6 +1119,57 @@ public:
     CARAPI ClearDeviceOwnerApp(
         /* [in] */ const String& packageName);
 
+    /** @hide */
+    // @SystemApi
+    CARAPI GetDeviceOwner(
+        /* [out] */ String* result);
+
+    /** @hide */
+    CARAPI GetDeviceOwnerName(
+        /* [out] */ String* result);
+
+    /**
+     * @hide
+     * @deprecated Use #ACTION_SET_PROFILE_OWNER
+     * Sets the given component as an active admin and registers the package as the profile
+     * owner for this user. The package must already be installed and there shouldn't be
+     * an existing profile owner registered for this user. Also, this method must be called
+     * before the user setup has been completed.
+     * <p>
+     * This method can only be called by system apps that hold MANAGE_USERS permission and
+     * MANAGE_DEVICE_ADMINS permission.
+     * @param admin The component to register as an active admin and profile owner.
+     * @param ownerName The user-visible name of the entity that is managing this user.
+     * @return whether the admin was successfully registered as the profile owner.
+     * @throws IllegalArgumentException if packageName is null, the package isn't installed, or
+     *         the user has already been set up.
+     */
+    // @SystemApi
+    CARAPI SetActiveProfileOwner(
+        /* [in] */ IComponentName* admin,
+        /* [in] */ const String& ownerName,
+        /* [out] */ Boolean* result);
+
+    /**
+     * @hide
+     * Clears the active profile owner and removes all user restrictions. The caller must
+     * be from the same package as the active profile owner for this user, otherwise a
+     * SecurityException will be thrown.
+     *
+     * @param admin The component to remove as the profile owner.
+     * @return
+     */
+    // @SystemApi
+    CARAPI ClearProfileOwner(
+        /* [in] */ IComponentName* admin);
+
+    /**
+     * @hide
+     * Checks if the user was already setup.
+     */
+    CARAPI HasUserSetupCompleted(
+        /* [out] */ Boolean* result);
+
     CARAPI SetProfileOwner(
         /* [in] */ const String& packageName,
         /* [in] */ const String& ownerName,
@@ -1142,6 +1195,35 @@ public:
 
     CARAPI GetProfileOwner(
         /* [out]*/ IComponentName** name);
+
+    /**
+     * @see #getProfileOwner()
+     * @hide
+     */
+    CARAPI GetProfileOwnerAsUser(
+        /* [in] */ Int32 userId,
+        /* [out]*/ IComponentName** name);
+
+    /**
+     * @hide
+     * @return the human readable name of the organisation associated with this DPM or null if
+     *         one is not set.
+     * @throws IllegalArgumentException if the userId is invalid.
+     */
+    CARAPI GetProfileOwnerName(
+        /* [out]*/ String* result);
+
+    /**
+     * @hide
+     * @param user The user for whom to fetch the profile owner name, if any.
+     * @return the human readable name of the organisation associated with this profile owner or
+     *         null if one is not set.
+     * @throws IllegalArgumentException if the userId is invalid.
+     */
+    //@SystemApi
+    CARAPI GetProfileOwnerNameAsUser(
+        /* [in] */ Int32 userId,
+        /* [out] */ String* result);
 
     CARAPI AddPersistentPreferredActivity(
         /* [in] */ IComponentName* admin,
@@ -1175,6 +1257,16 @@ public:
         /* [in] */ IComponentName* who,
         /* [out] */ Boolean* result);
 
+    /**
+     * Determine whether or not caller-Id information has been disabled.
+     *
+     * @param userHandle The user for whom to check the caller-id permission
+     * @hide
+     */
+    CARAPI GetCrossProfileCallerIdDisabled(
+        /* [in] */ IUserHandle* userHandle,
+        /* [out] */ Boolean* result);
+
     CARAPI AddCrossProfileIntentFilter(
         /* [in] */ IComponentName* admin,
         /* [in] */ IIntentFilter* filter,
@@ -1189,7 +1281,25 @@ public:
         /* [out] */ Boolean* result);
 
     CARAPI GetPermittedAccessibilityServices(
-        /* [out] */ IComponentName** admin);
+        /* [in] */ IComponentName* admin,
+        /* [out] */ IList** result);
+
+    /**
+     * Returns the list of accessibility services permitted by the device or profiles
+     * owners of this user.
+     *
+     * <p>Null means all accessibility services are allowed, if a non-null list is returned
+     * it will contain the intersection of the permitted lists for any device or profile
+     * owners that apply to this user. It will also include any system accessibility services.
+     *
+     * @param userId which user to check for.
+     * @return List of accessiblity service package names.
+     * @hide
+     */
+     // @SystemApi
+    CARAPI GetPermittedAccessibilityServices(
+        /* [in] */ Int32 userId,
+        /* [out] */ IList** result);
 
     CARAPI SetPermittedInputMethods(
         /* [in] */ IComponentName* admin,
@@ -1198,6 +1308,21 @@ public:
 
     CARAPI GetPermittedInputMethods(
         /* [in] */ IComponentName* admin,
+        /* [out] */ IList** list);
+
+    /**
+     * Returns the list of input methods permitted by the device or profiles
+     * owners of the current user.
+     *
+     * <p>Null means all input methods are allowed, if a non-null list is returned
+     * it will contain the intersection of the permitted lists for any device or profile
+     * owners that apply to this user. It will also include any system input methods.
+     *
+     * @return List of input method package names.
+     * @hide
+     */
+    // @SystemApi
+    CARAPI GetPermittedInputMethodsForCurrentUser(
         /* [out] */ IList** list);
 
     CARAPI CreateUser(
@@ -1210,11 +1335,13 @@ public:
         /* [in] */ const String& name,
         /* [in] */ const String& ownerName,
         /* [in] */ IComponentName* profileOwnerComponent,
-        /* [in] */ IBundle* adminExtras);
+        /* [in] */ IBundle* adminExtras,
+        /* [out] */ IUserHandle** handle);
 
     CARAPI RemoveUser(
         /* [in] */ IComponentName* admin,
-        /* [in] */ IUserHandle* userHandle);
+        /* [in] */ IUserHandle* userHandle,
+        /* [out] */ Boolean* result);
 
     CARAPI SwitchUser(
         /* [in] */ IComponentName* admin,
@@ -1262,7 +1389,25 @@ public:
     CARAPI GetAccountTypesWithManagementDisabled(
         /* [out, callee] */ ArrayOf<String>** result);
 
+    /**
+     * @see #getAccountTypesWithManagementDisabled()
+     * @hide
+     */
+    CARAPI GetAccountTypesWithManagementDisabledAsUser(
+        /* [in] */ Int32 userId,
+        /* [out, callee] */ ArrayOf<String>** result);
+
     CARAPI SetLockTaskPackages(
+        /* [in] */ IComponentName* admin,
+        /* [in] */ ArrayOf<String>* packages);
+
+    /**
+     * This function returns the list of packages allowed to start the lock task mode.
+     *
+     * @param admin Which {@link DeviceAdminReceiver} this request is associated with.
+     * @hide
+     */
+    CARAPI GetLockTaskPackages(
         /* [in] */ IComponentName* admin,
         /* [out, callee] */ ArrayOf<String>** packages);
 

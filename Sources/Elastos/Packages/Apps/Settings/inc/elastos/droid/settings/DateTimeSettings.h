@@ -155,6 +155,7 @@ private:
 
 protected:
     // have we been launched from the setup wizard?
+    static const String TAG;
     static const String EXTRA_IS_FIRST_RUN;
 
 private:

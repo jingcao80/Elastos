@@ -435,9 +435,6 @@ ECode TaskPersister::SaveToXml(
     VALIDATE_NOT_NULL(writer)
     *writer = NULL;
 
-    Slogger::I(TAG, "TODO: just disable task persister SaveToXml for debug!!");
-    return NOERROR;
-
     if (DEBUG) Slogger::D(TAG, "saveToXml: task=%s", task->ToString().string());
     AutoPtr<IXmlSerializer> xmlSerializer;
     CFastXmlSerializer::New((IXmlSerializer**)&xmlSerializer);
