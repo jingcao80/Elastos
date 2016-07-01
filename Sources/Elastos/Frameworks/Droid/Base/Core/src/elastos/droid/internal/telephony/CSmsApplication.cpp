@@ -1,96 +1,120 @@
 
 #include "elastos/droid/Manifest.h"
+#include "elastos/droid/content/CIntent.h"
+#include "elastos/droid/content/CComponentName.h"
+#include "elastos/droid/content/CIntentFilter.h"
 #include "elastos/droid/os/Process.h"
+#include "elastos/droid/os/Binder.h"
+#include "elastos/droid/os/CUserHandle.h"
+#include "elastos/droid/os/CUserHandleHelper.h"
+#include "elastos/droid/net/CUriHelper.h"
+#include "elastos/droid/internal/telephony/CSmsApplication.h"
+#include "elastos/droid/provider/CSettingsSecure.h"
+#include "elastos/droid/telephony/CSmsManagerHelper.h"
+#include "elastos/droid/R.h"
+
+#include <elastos/core/CoreUtils.h>
+#include <elastos/utility/Arrays.h>
 #include <elastos/utility/logging/Logger.h>
 
-
-using Elastos::Droid::Manifest;
-using Elastos::Droid::App::IAppGlobals;
 using Elastos::Droid::App::IAppOpsManager;
-using Elastos::Droid::Content::IComponentName;
 using Elastos::Droid::Content::IContext;
 using Elastos::Droid::Content::IIntent;
+using Elastos::Droid::Content::CIntent;
 using Elastos::Droid::Content::IIntentFilter;
+using Elastos::Droid::Content::CIntentFilter;
+using Elastos::Droid::Content::CComponentName;
 using Elastos::Droid::Content::Pm::IActivityInfo;
-using Elastos::Droid::Content::Pm::IIPackageManager;
 using Elastos::Droid::Content::Pm::IPackageInfo;
-using Elastos::Droid::Content::Pm::IPackageManager;
 using Elastos::Droid::Content::Pm::IResolveInfo;
 using Elastos::Droid::Content::Pm::IServiceInfo;
+using Elastos::Droid::Content::Pm::IPackageItemInfo;
+using Elastos::Droid::Content::Pm::IApplicationInfo;
+using Elastos::Droid::Content::Pm::IComponentInfo;
 using Elastos::Droid::Content::Res::IResources;
+using Elastos::Droid::R;
+using Elastos::Droid::Manifest;
 using Elastos::Droid::Net::IUri;
-using Elastos::Droid::Os::IBinder;
-using Elastos::Droid::Os::IDebug;
+using Elastos::Droid::Net::IUriHelper;
+using Elastos::Droid::Net::CUriHelper;
+using Elastos::Droid::Os::Binder;
 using Elastos::Droid::Os::IUserHandle;
+using Elastos::Droid::Os::CUserHandle;
+using Elastos::Droid::Os::IUserHandleHelper;
+using Elastos::Droid::Os::CUserHandleHelper;
 using Elastos::Droid::Os::Process;
-using Elastos::Droid::Provider::ISettings;
-using Elastos::Droid::Provider::Telephony::Sms::IIntents;
-using Elastos::Droid::Telephony::IRlog;
+using Elastos::Droid::Os::IProcess;
+using Elastos::Droid::Provider::ISettingsSecure;
+using Elastos::Droid::Provider::CSettingsSecure;
+using Elastos::Droid::Provider::ITelephonySmsIntents;
 using Elastos::Droid::Telephony::ISmsManager;
+using Elastos::Droid::Telephony::ISmsManagerHelper;
+using Elastos::Droid::Telephony::CSmsManagerHelper;
 using Elastos::Droid::Telephony::ITelephonyManager;
-using Elastos::Droid::Utility::ILog;
 
-using Elastos::Droid::Internal::IR;
-using Elastos::Droid::Internal::Content::IPackageMonitor;
-
-using Elastos::Utility::IArrays;
-using Elastos::Utility::ICollection;
+using Elastos::Core::CoreUtils;
+using Elastos::Utility::Arrays;
 using Elastos::Utility::IHashMap;
+using Elastos::Utility::CHashMap;
 using Elastos::Utility::IList;
+using Elastos::Utility::IIterator;
 using Elastos::Utility::Logging::Logger;
-
 
 namespace Elastos {
 namespace Droid {
 namespace Internal {
 namespace Telephony {
 
-SmsApplication::SmsPackageMonitor::SmsPackageMonitor(
-    /* [in] */ IContext* context)
+CSmsApplication::SmsPackageMonitor::SmsPackageMonitor(
+    /* [in] */ IContext* context,
+    /* [in] */ CSmsApplication* host)
     : mContext(context)
+    , mHost(host)
 {
 }
 
 //@Override
-ECode SmsApplication::SmsPackageMonitor::OnPackageDisappeared(
+ECode CSmsApplication::SmsPackageMonitor::OnPackageDisappeared(
     /* [in] */ const String& packageName,
     /* [in] */ Int32 reason)
 {
-    return OnPackageChanged(packageName);
+    OnPackageChanged(packageName);
+    return NOERROR;
 }
 
-//@Override
-ECode SmsApplication::SmsPackageMonitor::OnPackageAppeared(
+ECode CSmsApplication::SmsPackageMonitor::OnPackageAppeared(
     /* [in] */ const String& packageName,
     /* [in] */ Int32 reason)
 {
-    return OnPackageChanged(packageName);
+    OnPackageChanged(packageName);
+    return NOERROR;
 }
 
-//@Override
-ECode SmsApplication::SmsPackageMonitor::OnPackageModified(
+ECode CSmsApplication::SmsPackageMonitor::OnPackageModified(
     /* [in] */ const String& packageName)
 {
-    return OnPackageChanged(packageName);
+    OnPackageChanged(packageName);
+    return NOERROR;
 }
 
-void SmsApplication::SmsPackageMonitor::OnPackageChanged(
+void CSmsApplication::SmsPackageMonitor::OnPackageChanged(
     /* [in] */ const String& packageName)
 {
     AutoPtr<IPackageManager> packageManager;
     mContext->GetPackageManager((IPackageManager**)&packageManager);
     AutoPtr<IContext> userContext;
-    Int32 userId = GetSendingUserId();
-    if (userId != UserHandle::USER_OWNER) {
+    Int32 userId = 0;
+    GetSendingUserId(&userId);
+    if (userId != IUserHandle::USER_OWNER) {
         String pn;
         mContext->GetPackageName(&pn);
         AutoPtr<IUserHandle> uh;
-        CUserHandle::New(userId, ((IUserHandle**)&uh);
+        CUserHandle::New(userId, (IUserHandle**)&uh);
 
         ECode ec = mContext->CreatePackageContextAsUser(pn, 0, uh, (IContext**)&userContext);
         if (FAILED(ec)) {//Catch (NameNotFoundException nnfe) {
             if (DEBUG_MULTIUSER) {
-                Logger::W(LOG_TAG, "Unable to create package context for user %d", userId);
+                Logger::W(LOGTAG, "Unable to create package context for user %d", userId);
             }
         }
     }
@@ -98,32 +122,16 @@ void SmsApplication::SmsPackageMonitor::OnPackageChanged(
         userContext = mContext;
     }
     // Ensure this component is still configured as the preferred activity
-    AutoPtr<IComponentName> componentName = GetDefaultSendToApplication(userContext, TRUE);
+    AutoPtr<IComponentName> componentName;
+    mHost->GetDefaultSendToApplication(userContext, TRUE, (IComponentName**)&componentName);
     if (componentName != NULL) {
         ConfigurePreferredActivity(packageManager, componentName, userId);
     }
 }
 
-/**
- * Class for managing the primary application that we will deliver SMS/MMS messages to
- *
- * {@hide}
- */
-CAR_INTERFACE_IMPL(SmsApplication, Singleton, ISmsApplication)
+CAR_INTERFACE_IMPL(CSmsApplication::SmsApplicationData, Object, ISmsApplicationData)
 
-const String LOG_TAG = "SmsApplication";
-const String PHONE_PACKAGE_NAME = "com.android.phone";
-const String BLUETOOTH_PACKAGE_NAME = "com.android.bluetooth";
-const String MMS_SERVICE_PACKAGE_NAME = "com.android.mms.service";
-const String SCHEME_SMS = "sms";
-const String SCHEME_SMSTO = "smsto";
-const String SCHEME_MMS = "mms";
-const String SCHEME_MMSTO = "mmsto";
-const Boolean DEBUG_MULTIUSER = FALSE;
-
-CAR_INTERFACE_IMPL(SmsApplication::SmsApplicationData, Object, ISmsApplicationData)
-
-ECode SmsApplication::SmsApplicationData::IsComplete(
+ECode CSmsApplication::SmsApplicationData::IsComplete(
     /* [out] */ Boolean *result)
 {
     VALIDATE_NOT_NULL(result)
@@ -132,7 +140,7 @@ ECode SmsApplication::SmsApplicationData::IsComplete(
     return NOERROR;
 }
 
-ECode SmsApplication::SmsApplicationData::constructor(
+ECode CSmsApplication::SmsApplicationData::constructor(
     /* [in] */ const String& applicationName,
     /* [in] */ const String& packageName,
     /* [in] */ Int32 uid)
@@ -143,7 +151,23 @@ ECode SmsApplication::SmsApplicationData::constructor(
     return NOERROR;
 }
 
-Int32 SmsApplication::GetIncomingUserId(
+CAR_SINGLETON_IMPL(CSmsApplication)
+
+CAR_INTERFACE_IMPL(CSmsApplication, Singleton, ISmsApplication)
+
+const String CSmsApplication::LOGTAG("CSmsApplication");
+const String CSmsApplication::PHONE_PACKAGE_NAME("com.android.phone");
+const String CSmsApplication::BLUETOOTH_PACKAGE_NAME("com.android.bluetooth");
+const String CSmsApplication::MMS_SERVICE_PACKAGE_NAME("com.android.mms.service");
+const String CSmsApplication::SCHEME_SMS("sms");
+const String CSmsApplication::SCHEME_SMSTO("smsto");
+const String CSmsApplication::SCHEME_MMS("mms");
+const String CSmsApplication::SCHEME_MMSTO("mmsto");
+const Boolean CSmsApplication::DEBUG_MULTIUSER = FALSE;
+
+AutoPtr<CSmsApplication::SmsPackageMonitor> CSmsApplication::sSmsPackageMonitor;
+
+Int32 CSmsApplication::GetIncomingUserId(
     /* [in] */ IContext* context)
 {
     Int32 contextUserId;
@@ -151,17 +175,23 @@ Int32 SmsApplication::GetIncomingUserId(
     Int32 callingUid = Binder::GetCallingUid();
     //TODO
 //    if (DEBUG_MULTIUSER) {
-//        Logger::I(LOG_TAG, "getIncomingUserHandle caller=" + callingUid + ", myuid="
+//        Logger::I(LOGTAG, "getIncomingUserHandle caller=" + callingUid + ", myuid="
 //                + Process::MyUid() + "\n\t" + Debug->GetCallers(4));
 //    }
-    if (UserHandle::GetAppId(callingUid) < IProcess::FIRST_APPLICATION_UID) {
+    AutoPtr<IUserHandleHelper> hlp;
+    CUserHandleHelper::AcquireSingleton((IUserHandleHelper**)&hlp);
+    Int32 appId = 0, userId = 0;
+    hlp->GetAppId(callingUid, &appId);
+    if (appId < IProcess::FIRST_APPLICATION_UID) {
         return contextUserId;
-    } else {
-        return UserHandle::GetUserId(callingUid);
+    }
+    else {
+        hlp->GetUserId(callingUid, &userId);
+        return userId;
     }
 }
 
-ECode SmsApplication::GetApplicationCollection(
+ECode CSmsApplication::GetApplicationCollection(
     /* [in] */ IContext* context,
     /* [out] */ ICollection** result)
 {
@@ -178,25 +208,30 @@ ECode SmsApplication::GetApplicationCollection(
     return NOERROR;
 }
 
-AutoPtr<ICollection> SmsApplication::GetApplicationCollectionInternal(
-    /* [in] */ IIContext* context,
+AutoPtr<ICollection> CSmsApplication::GetApplicationCollectionInternal(
+    /* [in] */ IContext* context,
     /* [in] */ Int32 userId)
 {
     AutoPtr<IPackageManager> packageManager;
     context->GetPackageManager((IPackageManager**)&packageManager);
 
     // Get the list of apps registered for SMS
-    AutoPtr<IIntent> intent
-    CIntent::New(IIntents::SMS_DELIVER_ACTION, (IIntent**)&intent);
-    AutoPtr<IList> smsReceivers
+    AutoPtr<IIntent> intent;
+    CIntent::New(ITelephonySmsIntents::SMS_DELIVER_ACTION, (IIntent**)&intent);
+    AutoPtr<IList> smsReceivers;
     packageManager->QueryBroadcastReceivers(intent, 0, userId, (IList**)&smsReceivers);
 
     AutoPtr<IHashMap> receivers;
     CHashMap::New((IHashMap**)&receivers);
 
     // Add one entry to the map for every sms Receiver (ignoring duplicate sms receivers)
-    FOR_EACH(iter, smsReceivers) {
-        AutoPtr<IResolveInfo> resolveInfo = IResolveInfo::Probe(Ptr(iter)->Func(iter->GetNext));
+    AutoPtr<IIterator> it;
+    smsReceivers->GetIterator((IIterator**)&it);
+    Boolean bHasNext = FALSE;
+    while ((it->HasNext(&bHasNext), bHasNext)) {
+        AutoPtr<IInterface> p;
+        it->GetNext((IInterface**)&p);
+        AutoPtr<IResolveInfo> resolveInfo = IResolveInfo::Probe(p);
         AutoPtr<IActivityInfo> activityInfo;
         resolveInfo->GetActivityInfo((IActivityInfo**)&activityInfo);
         if (activityInfo == NULL) {
@@ -204,39 +239,46 @@ AutoPtr<ICollection> SmsApplication::GetApplicationCollectionInternal(
         }
         String permission;
         activityInfo->GetPermission(&permission);
-        if (!Manifest::permission::BROADCAST_SMS->Equals(permission)) {
+        if (!Manifest::permission::BROADCAST_SMS.Equals(permission)) {
             continue;
         }
         String packageName;
-        activityInfo->GetPackageName(&packageName);
-        if (!receivers->ContainsKey(packageName)) {
+        IPackageItemInfo::Probe(activityInfo)->GetPackageName(&packageName);
+        Boolean bCK = FALSE;
+        receivers->ContainsKey(CoreUtils::Convert(packageName), &bCK);
+        if (!bCK) {
             AutoPtr<ICharSequence> label;
             resolveInfo->LoadLabel(packageManager, (ICharSequence**)&label);
             String applicationName = Object::ToString(label);
 
             AutoPtr<IApplicationInfo> appInfo;
-            activityInfo->GetApplicationInfo((IApplicationInfo**)&appInfo);
+            IComponentInfo::Probe(activityInfo)->GetApplicationInfo((IApplicationInfo**)&appInfo);
             Int32 uid;
             appInfo->GetUid(&uid);
 
             String name;
-            activityInfo->GetName(&name);
+            IPackageItemInfo::Probe(activityInfo)->GetName(&name);
 
-            AutoPtr<ISmsApplicationData> smsApplicationData = new SmsApplicationData(
-                    applicationName, packageName, uid);
-            smsApplicationData.mSmsReceiverClass = name;
-            receivers->Put(packageName, smsApplicationData);
+            AutoPtr<SmsApplicationData> smsApplicationData = new SmsApplicationData();
+            smsApplicationData->constructor(applicationName, packageName, uid);
+            smsApplicationData->mSmsReceiverClass = name;
+            receivers->Put(CoreUtils::Convert(packageName), (IObject*)smsApplicationData.Get());
         }
     }
 
     // Update any existing entries with mms receiver class
     intent = NULL;
-    CIntent::New(IIntents::WAP_PUSH_DELIVER_ACTION, (IIntent**)&intent);
+    CIntent::New(ITelephonySmsIntents::WAP_PUSH_DELIVER_ACTION, (IIntent**)&intent);
     intent->SetDataAndType(NULL, String("application/vnd.wap.mms-message"));
     AutoPtr<IList> mmsReceivers;
     packageManager->QueryBroadcastReceivers(intent, 0, userId, (IList**)&mmsReceivers);
-    FOR_EACH(iter, mmsReceivers) {
-        AutoPtr<IResolveInfo> resolveInfo = IResolveInfo::Probe(Ptr(iter)->Func(iter->GetNext));
+    AutoPtr<IIterator> itMms;
+    mmsReceivers->GetIterator((IIterator**)&itMms);
+    bHasNext = FALSE;
+    while ((itMms->HasNext(&bHasNext), bHasNext)) {
+        AutoPtr<IInterface> p;
+        itMms->GetNext((IInterface**)&p);
+        AutoPtr<IResolveInfo> resolveInfo = IResolveInfo::Probe(p);
         AutoPtr<IActivityInfo> activityInfo;
         resolveInfo->GetActivityInfo((IActivityInfo**)&activityInfo);
         if (activityInfo == NULL) {
@@ -245,31 +287,38 @@ AutoPtr<ICollection> SmsApplication::GetApplicationCollectionInternal(
 
         String permission;
         activityInfo->GetPermission(&permission);
-        if (!Manifest::permission::BROADCAST_WAP_PUSH->Equals(permission)) {
+        if (!Manifest::permission::BROADCAST_WAP_PUSH.Equals(permission)) {
             continue;
         }
         String packageName;
-        activityInfo->GetPackageName(&packageName);
+        IPackageItemInfo::Probe(activityInfo)->GetPackageName(&packageName);
         AutoPtr<IInterface> obj;
-        receivers->Get(packageName, (IInterface**)&obj);
-        AutoPtr<ISmsApplicationData> smsApplicationData = ISmsApplicationData::Probe(obj);
+        receivers->Get(CoreUtils::Convert(packageName), (IInterface**)&obj);
+        AutoPtr<SmsApplicationData> smsApplicationData = (SmsApplicationData*)ISmsApplicationData::Probe(obj);
         if (smsApplicationData != NULL) {
             String name;
-            activityInfo->GetName(&name);
-            smsApplicationData.mMmsReceiverClass = name;
+            IPackageItemInfo::Probe(activityInfo)->GetName(&name);
+            smsApplicationData->mMmsReceiverClass = name;
         }
     }
 
     // Update any existing entries with respond via message intent class.
+    AutoPtr<IUriHelper> urihlp;
+    CUriHelper::AcquireSingleton((IUriHelper**)&urihlp);
     AutoPtr<IUri> uri;
-    Uri::FromParts(SCHEME_SMSTO, String(""), String(NULL), (IUri**)&uri);
+    urihlp->FromParts(SCHEME_SMSTO, String(""), String(NULL), (IUri**)&uri);
     intent = NULL;
     CIntent::New(ITelephonyManager::ACTION_RESPOND_VIA_MESSAGE, uri, (IIntent**)&intent);
 
     AutoPtr<IList> respondServices;
     packageManager->QueryIntentServicesAsUser(intent, 0, userId, (IList**)&respondServices);
-    FOR_EACH(iter, respondServices) {
-        AutoPtr<IResolveInfo> resolveInfo = IResolveInfo::Probe(Ptr(iter)->Func(iter->GetNext));
+    AutoPtr<IIterator> itRespond;
+    respondServices->GetIterator((IIterator**)&itRespond);
+    bHasNext = FALSE;
+    while ((itRespond->HasNext(&bHasNext), bHasNext)) {
+        AutoPtr<IInterface> p;
+        itRespond->GetNext((IInterface**)&p);
+        AutoPtr<IResolveInfo> resolveInfo = IResolveInfo::Probe(p);
         AutoPtr<IServiceInfo> serviceInfo;
         resolveInfo->GetServiceInfo((IServiceInfo**)&serviceInfo);
         if (serviceInfo == NULL) {
@@ -277,18 +326,18 @@ AutoPtr<ICollection> SmsApplication::GetApplicationCollectionInternal(
         }
         String permission;
         serviceInfo->GetPermission(&permission);
-        if (!Manifest::permission::SEND_RESPOND_VIA_MESSAGE->Equals(permission)) {
+        if (!Manifest::permission::SEND_RESPOND_VIA_MESSAGE.Equals(permission)) {
             continue;
         }
         String packageName;
-        serviceInfo->GetPackageName(&packageName);
+        IPackageItemInfo::Probe(serviceInfo)->GetPackageName(&packageName);
         AutoPtr<IInterface> obj;
-        receivers->Get(packageName, (IInterface**)&obj);
-        AutoPtr<ISmsApplicationData> smsApplicationData = ISmsApplicationData::Probe(obj);
+        receivers->Get(CoreUtils::Convert(packageName), (IInterface**)&obj);
+        AutoPtr<SmsApplicationData> smsApplicationData = (SmsApplicationData*)ISmsApplicationData::Probe(obj);
         if (smsApplicationData != NULL) {
             String name;
-            serviceInfo->GetName(&name);
-            smsApplicationData.mRespondViaMessageClass = name;
+            IPackageItemInfo::Probe(serviceInfo)->GetName(&name);
+            smsApplicationData->mRespondViaMessageClass = name;
         }
     }
 
@@ -297,43 +346,53 @@ AutoPtr<ICollection> SmsApplication::GetApplicationCollectionInternal(
     CIntent::New(IIntent::ACTION_SENDTO, uri, (IIntent**)&intent);
     AutoPtr<IList> sendToActivities;
     packageManager->QueryIntentActivitiesAsUser(intent, 0, userId, (IList**)&sendToActivities);
-    FOR_EACH(iter, sendToActivities) {
-        AutoPtr<IResolveInfo> resolveInfo = IResolveInfo::Probe(Ptr(iter)->Func(iter->GetNext));
+    AutoPtr<IIterator> itSend;
+    sendToActivities->GetIterator((IIterator**)&itSend);
+    bHasNext = FALSE;
+    while ((itSend->HasNext(&bHasNext), bHasNext)) {
+        AutoPtr<IInterface> p;
+        itSend->GetNext((IInterface**)&p);
+        AutoPtr<IResolveInfo> resolveInfo = IResolveInfo::Probe(p);
         AutoPtr<IActivityInfo> activityInfo;
         resolveInfo->GetActivityInfo((IActivityInfo**)&activityInfo);
         if (activityInfo == NULL) {
             continue;
         }
         String packageName;
-        activityInfo->GetPackageName(&packageName);
+        IPackageItemInfo::Probe(activityInfo)->GetPackageName(&packageName);
         AutoPtr<IInterface> obj;
-        receivers->Get(packageName, (IInterface**)&obj);
-        AutoPtr<ISmsApplicationData> smsApplicationData = ISmsApplicationData::Probe(obj);
+        receivers->Get(CoreUtils::Convert(packageName), (IInterface**)&obj);
+        AutoPtr<SmsApplicationData> smsApplicationData = (SmsApplicationData*)ISmsApplicationData::Probe(obj);
         if (smsApplicationData != NULL) {
             String name;
-            serviceInfo->GetName(&name);
-            smsApplicationData.mSendToClass = name;
+            IPackageItemInfo::Probe(activityInfo)->GetName(&name);
+            smsApplicationData->mSendToClass = name;
         }
     }
 
     // Remove any entries for which we did not find all required intents.
-    FOR_EACH(iter, smsReceivers) {
-        AutoPtr<IResolveInfo> resolveInfo = IResolveInfo::Probe(Ptr(iter)->Func(iter->GetNext));
+    AutoPtr<IIterator> itSms;
+    smsReceivers->GetIterator((IIterator**)&itSms);
+    bHasNext = FALSE;
+    while ((itSms->HasNext(&bHasNext), bHasNext)) {
+        AutoPtr<IInterface> p;
+        itSms->GetNext((IInterface**)&p);
+        AutoPtr<IResolveInfo> resolveInfo = IResolveInfo::Probe(p);
         AutoPtr<IActivityInfo> activityInfo;
         resolveInfo->GetActivityInfo((IActivityInfo**)&activityInfo);
         if (activityInfo == NULL) {
             continue;
         }
         String packageName;
-        activityInfo->GetPackageName(&packageName);
+        IPackageItemInfo::Probe(activityInfo)->GetPackageName(&packageName);
         AutoPtr<IInterface> obj;
-        receivers->Get(packageName, (IInterface**)&obj);
+        receivers->Get(CoreUtils::Convert(packageName), (IInterface**)&obj);
         AutoPtr<ISmsApplicationData> smsApplicationData = ISmsApplicationData::Probe(obj);
         if (smsApplicationData != NULL) {
-            Boolean bComplete
+            Boolean bComplete;
             smsApplicationData->IsComplete(&bComplete);
             if (!bComplete) {
-                receivers->Remove(packageName);
+                receivers->Remove(CoreUtils::Convert(packageName));
             }
         }
     }
@@ -343,7 +402,7 @@ AutoPtr<ICollection> SmsApplication::GetApplicationCollectionInternal(
     return collection;
 }
 
-AutoPtr<ISmsApplicationData> SmsApplication::GetApplicationForPackage(
+AutoPtr<CSmsApplication::SmsApplicationData> CSmsApplication::GetApplicationForPackage(
     /* [in] */ ICollection* applications,
     /* [in] */ const String& packageName)
 {
@@ -351,18 +410,21 @@ AutoPtr<ISmsApplicationData> SmsApplication::GetApplicationForPackage(
         return NULL;
     }
     // Is there an entry in the application list for the specified package?
-    FOR_EACH(iter, applications) {
-        AutoPtr<ISmsApplicationData> application = ISmsApplicationData::Probe(Ptr(iter)->Func(iter->GetNext());
-        String pName;
-        application->GetPackageName(pName);
-        if (pName->ContentEquals(packageName)) {
+    AutoPtr<IIterator> it;
+    applications->GetIterator((IIterator**)&it);
+    Boolean bHasNext = FALSE;
+    while ((it->HasNext(&bHasNext), bHasNext)) {
+        AutoPtr<IInterface> p;
+        it->GetNext((IInterface**)&p);
+        AutoPtr<SmsApplicationData> application = (SmsApplicationData*)ISmsApplicationData::Probe(p);
+        if (application->mPackageName.Equals(packageName)) {
             return application;
         }
     }
     return NULL;
 }
 
-AutoPtr<ISmsApplicationData> SmsApplication::GetApplication(
+AutoPtr<CSmsApplication::SmsApplicationData> CSmsApplication::GetApplication(
     /* [in] */ IContext* context,
     /* [in] */ Boolean updateIfNeeded,
     /* [in] */ Int32 userId)
@@ -371,32 +433,39 @@ AutoPtr<ISmsApplicationData> SmsApplication::GetApplication(
     AutoPtr<IInterface> obj;
     context->GetSystemService(IContext::TELEPHONY_SERVICE, (IInterface**)&obj);
     AutoPtr<ITelephonyManager> tm = ITelephonyManager::Probe(obj);
-    if (!tm->IsSmsCapable()) {
+    Boolean bCap = FALSE;
+    tm->IsSmsCapable(&bCap);
+    if (!bCap) {
         // No phone, no SMS
         return NULL;
     }
 
     AutoPtr<ICollection> applications = GetApplicationCollectionInternal(context, userId);
     if (DEBUG_MULTIUSER) {
-        Logger::I(LOG_TAG, "getApplication userId=%d", userId);
+        assert(0 && "TODO");
+        // Logger::I(LOGTAG, "getApplication userId=%d", userId);
     }
     // Determine which application receives the broadcast
     AutoPtr<IContentResolver> cr;
     context->GetContentResolver((IContentResolver**)&cr);
 
+    AutoPtr<ISettingsSecure> ss;
+    CSettingsSecure::AcquireSingleton((ISettingsSecure**)&ss);
     String defaultApplication;
-    Settings::Secure::GetStringForUser(cr,
+    ss->GetStringForUser(cr,
             ISettingsSecure::SMS_DEFAULT_APPLICATION, userId, &defaultApplication);
     if (DEBUG_MULTIUSER) {
-        Logger::I(LOG_TAG, "getApplication defaultApp=%d", defaultApplication);
+        assert(0 && "TODO");
+        // Logger::I(LOGTAG, "getApplication defaultApp=%d", defaultApplication);
     }
 
-    AutoPtr<ISmsApplicationData> applicationData;
+    AutoPtr<SmsApplicationData> applicationData;
     if (defaultApplication != NULL) {
         applicationData = GetApplicationForPackage(applications, defaultApplication);
     }
     if (DEBUG_MULTIUSER) {
-        Logger::I(LOG_TAG, "getApplication appData=%d", applicationData);
+        assert(0 && "TODO");
+        // Logger::I(LOGTAG, "getApplication appData=%d", applicationData);
     }
     // Picking a new SMS app requires AppOps and Settings.Secure permissions, so we only do
     // this if the caller asked us to.
@@ -415,13 +484,13 @@ AutoPtr<ISmsApplicationData> SmsApplication::GetApplication(
             if (size != 0) {
                 AutoPtr<ArrayOf<IInterface*> > array;
                 applications->ToArray((ArrayOf<IInterface*>**)&array);
-                applicationData = IISmsApplicationData::Probe((*array)[0]);
+                applicationData = (SmsApplicationData*)ISmsApplicationData::Probe((*array)[0]);
             }
         }
 
         // if we found a new default app, update the setting
         if (applicationData != NULL) {
-            SetDefaultApplicationInternal(applicationData.mPackageName, context, userId);
+            SetDefaultApplicationInternal(applicationData->mPackageName, context, userId);
         }
     }
 
@@ -435,17 +504,20 @@ AutoPtr<ISmsApplicationData> SmsApplication::GetApplication(
         // are checking is for our current uid. Doing this check from the unprivileged current
         // SMS app allows us to tell the current SMS app that it is not in a good state and
         // needs to ask to be the current SMS app again to work properly.
-        if (updateIfNeeded || applicationData.mUid == Process::MyUid()) {
+        if (updateIfNeeded || applicationData->mUid == Process::MyUid()) {
             // Verify that the SMS app has permissions
-            Int32 mode = appOps->CheckOp(IAppOpsManager::OP_WRITE_SMS, applicationData.mUid,
-                    applicationData.mPackageName);
+            Int32 mode = 0;
+            appOps->CheckOp(IAppOpsManager::OP_WRITE_SMS, applicationData->mUid,
+                    applicationData->mPackageName, &mode);
             if (mode != IAppOpsManager::MODE_ALLOWED) {
-                Rlog->E(LOG_TAG, applicationData.mPackageName + " lost OP_WRITE_SMS: " +
-                        (updateIfNeeded ? " (fixing)" : " (no permission to fix)"));
+                assert(0 && "TODO");
+                // Rlog->E(LOGTAG, applicationData.mPackageName + " lost OP_WRITE_SMS: " +
+                //         (updateIfNeeded ? " (fixing)" : " (no permission to fix)"));
                 if (updateIfNeeded) {
-                    appOps->SetMode(IAppOpsManager::OP_WRITE_SMS, applicationData.mUid,
-                            applicationData.mPackageName, IAppOpsManager::MODE_ALLOWED);
-                } else {
+                    appOps->SetMode(IAppOpsManager::OP_WRITE_SMS, applicationData->mUid,
+                            applicationData->mPackageName, IAppOpsManager::MODE_ALLOWED);
+                }
+                else {
                     // We can not return a package if permissions are not set up correctly
                     applicationData = NULL;
                 }
@@ -462,7 +534,7 @@ AutoPtr<ISmsApplicationData> SmsApplication::GetApplication(
             context->GetPackageManager((IPackageManager**)&packageManager);
 
             AutoPtr<IComponentName> cn;
-            CComponentName::New(applicationData.mPackageName, applicationData.mSendToClass, (IComponentName**)&cn);
+            CComponentName::New(applicationData->mPackageName, applicationData->mSendToClass, (IComponentName**)&cn);
             ConfigurePreferredActivity(packageManager, cn, userId);
             // Verify that the phone, BT app and MmsService have permissions
 
@@ -473,16 +545,19 @@ AutoPtr<ISmsApplicationData> SmsApplication::GetApplication(
                 info->GetApplicationInfo((IApplicationInfo**)&appInfo);
                 Int32 uid;
                 appInfo->GetUid(&uid);
-                Int32 mode = appOps->CheckOp(IAppOpsManager::OP_WRITE_SMS, uid, PHONE_PACKAGE_NAME);
+                Int32 mode = 0;
+                appOps->CheckOp(IAppOpsManager::OP_WRITE_SMS, uid, PHONE_PACKAGE_NAME, &mode);
                 if (mode != IAppOpsManager::MODE_ALLOWED) {
-                    Rlog->E(LOG_TAG, PHONE_PACKAGE_NAME + " lost OP_WRITE_SMS:  (fixing)");
+                    assert(0 && "TODO");
+                    // Rlog->E(LOGTAG, PHONE_PACKAGE_NAME + " lost OP_WRITE_SMS:  (fixing)");
                     appOps->SetMode(IAppOpsManager::OP_WRITE_SMS, uid,
                             PHONE_PACKAGE_NAME, IAppOpsManager::MODE_ALLOWED);
                 }
             }
             else {//} Catch (NameNotFoundException e) {
                 // No phone app on this Device (unexpected, even for non-phone devices)
-                Rlog->E(LOG_TAG, "Phone package not found: " + PHONE_PACKAGE_NAME);
+                assert(0 && "TODO");
+                // Rlog->E(LOGTAG, "Phone package not found: " + PHONE_PACKAGE_NAME);
                 applicationData = NULL;
             }
 
@@ -493,15 +568,19 @@ AutoPtr<ISmsApplicationData> SmsApplication::GetApplication(
                 info->GetApplicationInfo((IApplicationInfo**)&appInfo);
                 Int32 uid;
                 appInfo->GetUid(&uid);
-                Int32 mode = appOps->CheckOp(IAppOpsManager::OP_WRITE_SMS, uid, BLUETOOTH_PACKAGE_NAME);
+                Int32 mode = 0;
+                appOps->CheckOp(IAppOpsManager::OP_WRITE_SMS, uid, BLUETOOTH_PACKAGE_NAME, &mode);
                 if (mode != IAppOpsManager::MODE_ALLOWED) {
-                    Rlog->E(LOG_TAG, BLUETOOTH_PACKAGE_NAME + " lost OP_WRITE_SMS:  (fixing)");
+                    assert(0 && "TODO");
+                    // Rlog->E(LOGTAG, BLUETOOTH_PACKAGE_NAME + " lost OP_WRITE_SMS:  (fixing)");
                     appOps->SetMode(IAppOpsManager::OP_WRITE_SMS, uid,
                             BLUETOOTH_PACKAGE_NAME, IAppOpsManager::MODE_ALLOWED);
                 }
-            } else {// Catch (NameNotFoundException e) {
+            }
+            else {// Catch (NameNotFoundException e) {
                 // No BT app on this device
-                Rlog->E(LOG_TAG, "Bluetooth package not found: " + BLUETOOTH_PACKAGE_NAME);
+                assert(0 && "TODO");
+                // Rlog->E(LOGTAG, "Bluetooth package not found: " + BLUETOOTH_PACKAGE_NAME);
             }
 
             info = NULL;
@@ -511,36 +590,42 @@ AutoPtr<ISmsApplicationData> SmsApplication::GetApplication(
                 info->GetApplicationInfo((IApplicationInfo**)&appInfo);
                 Int32 uid;
                 appInfo->GetUid(&uid);
-                Int32 mode = appOps->CheckOp(IAppOpsManager::OP_WRITE_SMS, uid, MMS_SERVICE_PACKAGE_NAME);
+                Int32 mode = 0;
+                appOps->CheckOp(IAppOpsManager::OP_WRITE_SMS, uid, MMS_SERVICE_PACKAGE_NAME, &mode);
                 if (mode != IAppOpsManager::MODE_ALLOWED) {
-                    Rlog->E(LOG_TAG, MMS_SERVICE_PACKAGE_NAME + " lost OP_WRITE_SMS:  (fixing)");
+                    assert(0 && "TODO");
+                    // Rlog->E(LOGTAG, MMS_SERVICE_PACKAGE_NAME + " lost OP_WRITE_SMS:  (fixing)");
                     appOps->SetMode(IAppOpsManager::OP_WRITE_SMS, uid,
                             MMS_SERVICE_PACKAGE_NAME, IAppOpsManager::MODE_ALLOWED);
                 }
-            } else {//Catch (NameNotFoundException e) {
+            }
+            else {//Catch (NameNotFoundException e) {
                 // No phone app on this Device (unexpected, even for non-phone devices)
-                Rlog->E(LOG_TAG, "MmsService package not found: " + MMS_SERVICE_PACKAGE_NAME);
+                assert(0 && "TODO");
+                // Rlog->E(LOGTAG, "MmsService package not found: " + MMS_SERVICE_PACKAGE_NAME);
                 applicationData = NULL;
             }
 
         }
     }
     if (DEBUG_MULTIUSER) {
-        Logger::I(LOG_TAG, "getApplication returning appData=" + applicationData);
+        Logger::I(LOGTAG, "getApplication returning appData=%p", applicationData.Get());
     }
     return applicationData;
 }
 
-ECode SmsApplication::SetDefaultApplication(
+ECode CSmsApplication::SetDefaultApplication(
     /* [in] */ const String& packageName,
     /* [in] */ IContext* context)
 {
     AutoPtr<IInterface> obj;
     context->GetSystemService(IContext::TELEPHONY_SERVICE, (IInterface**)&obj);
     AutoPtr<ITelephonyManager> tm = ITelephonyManager::Probe(obj);
-    if (!tm->IsSmsCapable()) {
+    Boolean bCap = FALSE;
+    tm->IsSmsCapable(&bCap);
+    if (!bCap) {
         // No phone, no SMS
-        return;
+        return NOERROR;
     }
 
     Int32 userId = GetIncomingUserId(context);
@@ -553,7 +638,7 @@ ECode SmsApplication::SetDefaultApplication(
     return NOERROR;
 }
 
-void SmsApplication::SetDefaultApplicationInternal(
+void CSmsApplication::SetDefaultApplicationInternal(
     /* [in] */ const String& packageName,
     /* [in] */ IContext* context,
     /* [in] */ Int32 userId)
@@ -562,11 +647,13 @@ void SmsApplication::SetDefaultApplicationInternal(
     AutoPtr<IContentResolver> cr;
     context->GetContentResolver((IContentResolver**)&cr);
     // Get old package name
+    AutoPtr<ISettingsSecure> ss;
+    CSettingsSecure::AcquireSingleton((ISettingsSecure**)&ss);
     String oldPackageName;
-    Settings::Secure::GetStringForUser(cr,
+    ss->GetStringForUser(cr,
             ISettingsSecure::SMS_DEFAULT_APPLICATION, userId, &oldPackageName);
 
-    if (packageName != NULL && oldPackageName != NULL && packageName->Equals(oldPackageName)) {
+    if (packageName != NULL && oldPackageName != NULL && packageName.Equals(oldPackageName)) {
         // No change
         return;
     }
@@ -574,8 +661,10 @@ void SmsApplication::SetDefaultApplicationInternal(
     // We only make the change if the new package is valid
     AutoPtr<IPackageManager> packageManager;
     context->GetPackageManager((IPackageManager**)&packageManager);
-    AutoPtr<ICollection> applications = GetApplicationCollection(context);
-    AutoPtr<ISmsApplicationData> applicationData = GetApplicationForPackage(applications, packageName);
+    AutoPtr<ICollection> applications;
+    assert(0 && "TODO");
+    // GetApplicationCollection(context, (ICollection**)&applications);
+    AutoPtr<SmsApplicationData> applicationData = GetApplicationForPackage(applications, packageName);
     if (applicationData != NULL) {
         // Ignore OP_WRITE_SMS for the previously configured default SMS app.
         AutoPtr<IPackageInfo> info;
@@ -590,24 +679,31 @@ void SmsApplication::SetDefaultApplicationInternal(
                 Int32 uid;
                 appInfo->GetUid(&uid);
                 appOps->SetMode(IAppOpsManager::OP_WRITE_SMS, uid, oldPackageName, IAppOpsManager::MODE_IGNORED);
-            } else {// Catch (NameNotFoundException e) {
-                Rlog->W(LOG_TAG, "Old SMS package not found: " + oldPackageName);
+            }
+            else {// Catch (NameNotFoundException e) {
+                assert(0 && "TODO");
+                // Rlog->W(LOGTAG, "Old SMS package not found: " + oldPackageName);
             }
         }
 
         // Update the secure setting.
-        Settings::Secure::PutStringForUser(context->GetContentResolver(),
-                ISettingsSecure::SMS_DEFAULT_APPLICATION, applicationData.mPackageName,
-                userId);
+        AutoPtr<ISettingsSecure> ss;
+        CSettingsSecure::AcquireSingleton((ISettingsSecure**)&ss);
+        AutoPtr<IContentResolver> cr;
+        context->GetContentResolver((IContentResolver**)&cr);
+        Boolean bForUser = FALSE;
+        ss->PutStringForUser(cr,
+                ISettingsSecure::SMS_DEFAULT_APPLICATION, applicationData->mPackageName,
+                userId, &bForUser);
 
         // Configure this as the preferred activity for SENDTO sms/mms intents
         AutoPtr<IComponentName> cn;
-        CComponentName::New(applicationData.mPackageName, applicationData.mSendToClass, (IComponentName**)&cn);
+        CComponentName::New(applicationData->mPackageName, applicationData->mSendToClass, (IComponentName**)&cn);
         ConfigurePreferredActivity(packageManager, cn, userId);
 
         // Allow OP_WRITE_SMS for the newly configured default SMS app.
-        appOps->SetMode(IAppOpsManager::OP_WRITE_SMS, applicationData.mUid,
-                applicationData.mPackageName, IAppOpsManager::MODE_ALLOWED);
+        appOps->SetMode(IAppOpsManager::OP_WRITE_SMS, applicationData->mUid,
+                applicationData->mPackageName, IAppOpsManager::MODE_ALLOWED);
 
         // Phone needs to always have this permission to write to the sms database
         info = NULL;
@@ -618,9 +714,11 @@ void SmsApplication::SetDefaultApplicationInternal(
             Int32 uid;
             appInfo->GetUid(&uid);
             appOps->SetMode(IAppOpsManager::OP_WRITE_SMS, uid, PHONE_PACKAGE_NAME, IAppOpsManager::MODE_ALLOWED);
-        } else {//Catch (NameNotFoundException e) {
+        }
+        else {//Catch (NameNotFoundException e) {
             // No phone app on this Device (unexpected, even for non-phone devices)
-            Rlog->E(LOG_TAG, "Phone package not found: " + PHONE_PACKAGE_NAME);
+            assert(0 && "TODO");
+            // Rlog::E(LOGTAG, "Phone package not found: " + PHONE_PACKAGE_NAME);
         }
 
         // BT needs to always have this permission to write to the sms database
@@ -632,9 +730,11 @@ void SmsApplication::SetDefaultApplicationInternal(
             Int32 uid;
             appInfo->GetUid(&uid);
             appOps->SetMode(IAppOpsManager::OP_WRITE_SMS, uid, BLUETOOTH_PACKAGE_NAME, IAppOpsManager::MODE_ALLOWED);
-        } else {//Catch (NameNotFoundException e) {
+        }
+        else {//Catch (NameNotFoundException e) {
             // No BT app on this device
-            Rlog->E(LOG_TAG, "Bluetooth package not found: " + BLUETOOTH_PACKAGE_NAME);
+            assert(0 && "TODO");
+            // Rlog->E(LOGTAG, "Bluetooth package not found: " + BLUETOOTH_PACKAGE_NAME);
         }
 
         // MmsService needs to always have this permission to write to the sms database
@@ -646,23 +746,29 @@ void SmsApplication::SetDefaultApplicationInternal(
             Int32 uid;
             appInfo->GetUid(&uid);
             appOps->SetMode(IAppOpsManager::OP_WRITE_SMS, uid, MMS_SERVICE_PACKAGE_NAME, IAppOpsManager::MODE_ALLOWED);
-        } else {//Catch (NameNotFoundException e) {
+        }
+        else {//Catch (NameNotFoundException e) {
             // No phone app on this Device (unexpected, even for non-phone devices)
-            Rlog->E(LOG_TAG, "MmsService package not found: " + MMS_SERVICE_PACKAGE_NAME);
+            assert(0 && "TODO");
+            // Rlog->E(LOGTAG, "MmsService package not found: " + MMS_SERVICE_PACKAGE_NAME);
         }
     }
 }
 
-ECode SmsApplication::InitSmsPackageMonitor(
+ECode CSmsApplication::InitSmsPackageMonitor(
     /* [in] */ IContext* context)
 {
-    sSmsPackageMonitor = new SmsPackageMonitor(context);
+    sSmsPackageMonitor = new SmsPackageMonitor(context, this);
     AutoPtr<ILooper> looper;
     context->GetMainLooper((ILooper**)&looper);
-    return sSmsPackageMonitor->Register(context, looper, UserHandle::ALL, FALSE);
+    AutoPtr<IUserHandleHelper> hlp;
+    CUserHandleHelper::AcquireSingleton((IUserHandleHelper**)&hlp);
+    AutoPtr<IUserHandle> all;
+    hlp->GetALL((IUserHandle**)&all);
+    return sSmsPackageMonitor->Register(context, looper, all, FALSE);
 }
 
-ECode SmsApplication::ConfigurePreferredActivity(
+void CSmsApplication::ConfigurePreferredActivity(
     /* [in] */ IPackageManager* packageManager,
     /* [in] */ IComponentName* componentName,
     /* [in] */ Int32 userId)
@@ -672,64 +778,72 @@ ECode SmsApplication::ConfigurePreferredActivity(
     ReplacePreferredActivity(packageManager, componentName, userId, SCHEME_SMSTO);
     ReplacePreferredActivity(packageManager, componentName, userId, SCHEME_MMS);
     ReplacePreferredActivity(packageManager, componentName, userId, SCHEME_MMSTO);
-    return NOERROR;
 }
 
-ECode SmsApplication::ReplacePreferredActivity(
+void CSmsApplication::ReplacePreferredActivity(
     /* [in] */ IPackageManager* packageManager,
     /* [in] */ IComponentName* componentName,
     /* [in] */ Int32 userId,
     /* [in] */ const String& scheme)
 {
     // Build the set of existing activities that handle this scheme
+    AutoPtr<IUriHelper> urihlp;
+    CUriHelper::AcquireSingleton((IUriHelper**)&urihlp);
     AutoPtr<IUri> uri;
-    Uri::FromParts(scheme, String(""), String(NULL), (IUri**)&uri);
+    urihlp->FromParts(scheme, String(""), String(NULL), (IUri**)&uri);
 
     AutoPtr<IIntent> intent;
     CIntent::New(IIntent::ACTION_SENDTO, uri, (IIntent**)&intent);
 
     AutoPtr<IList> resolveInfoList;
-    FAIL_RETURN(packageManager->QueryIntentActivitiesAsUser(
+    packageManager->QueryIntentActivitiesAsUser(
             intent, IPackageManager::MATCH_DEFAULT_ONLY | IPackageManager::GET_RESOLVED_FILTER,
-            userId, (IList**)&resolveInfoList));
+            userId, (IList**)&resolveInfoList);
 
     // Build the set of ComponentNames for these activities
-    Int32 n = resolveInfoList->Size();
-    Autoptr<ArrayOf<IComponentName*> > set = ArrayOf<IComponentName*>::Alloc(n);
+    Int32 n = 0;
+    resolveInfoList->GetSize(&n);
+    AutoPtr<ArrayOf<IComponentName*> > set = ArrayOf<IComponentName*>::Alloc(n);
     for (Int32 i = 0; i < n; i++) {
-        Autoptr<IInterface> item;
+        AutoPtr<IInterface> item;
         resolveInfoList->Get(i, (IInterface**)&item);
-        Autoptr<IResolveInfo> info = IResolveInfo::Probe(item);
+        AutoPtr<IResolveInfo> info = IResolveInfo::Probe(item);
         AutoPtr<IActivityInfo> aInfo;
         info->GetActivityInfo((IActivityInfo**)&aInfo);
         String pkgName, name;
-        IPackageItemInfo * pii = IPackageItemInfo::Probe(aInfo);
+        AutoPtr<IPackageItemInfo> pii = IPackageItemInfo::Probe(aInfo);
         pii->GetPackageName(&pkgName);
         pii->GetName(&name);
         CComponentName::New(pkgName, name, (IComponentName**)&(*set)[i]);
     }
 
     // Update the preferred SENDTO activity for the specified scheme
-    AutoPtr<IIntentFilter> intentFilter
+    AutoPtr<IIntentFilter> intentFilter;
     CIntentFilter::New((IIntentFilter**)&intentFilter);
     intentFilter->AddAction(IIntent::ACTION_SENDTO);
-    intentFilter->AddCategory(Intent.CATEGORY_DEFAULT);
+    intentFilter->AddCategory(IIntent::CATEGORY_DEFAULT);
     intentFilter->AddDataScheme(scheme);
-    return packageManager->ReplacePreferredActivityAsUser(intentFilter,
-            IIntentFilter::MATCH_CATEGORY_SCHEME + IIntentFilter::MATCH_ADJUSTMENT_NORMAL,
-            set, componentName, userId);
+    assert(0 && "TODO add method to car");
+    // packageManager->ReplacePreferredActivityAsUser(intentFilter,
+    //         IIntentFilter::MATCH_CATEGORY_SCHEME + IIntentFilter::MATCH_ADJUSTMENT_NORMAL,
+    //         set, componentName, userId);
 }
 
-ECode SmsApplication::GetSmsApplicationData(
+ECode CSmsApplication::GetSmsApplicationData(
     /* [in] */ const String& packageName,
     /* [in] */ IContext* context,
     /* [out] */ ISmsApplicationData** result)
 {
-    AutoPtr<ICollection> applications = GetApplicationCollection(context);
-    return GetApplicationForPackage(applications, packageName);
+    VALIDATE_NOT_NULL(result)
+    AutoPtr<ICollection> applications;
+    GetApplicationCollection(context, (ICollection**)&applications);
+    AutoPtr<ISmsApplicationData> res = GetApplicationForPackage(applications, packageName);
+    *result = res;
+    REFCOUNT_ADD(*result)
+    return NOERROR;
 }
 
-ECode SmsApplication::GetDefaultSmsApplication(
+ECode CSmsApplication::GetDefaultSmsApplication(
     /* [in] */ IContext* context,
     /* [in] */ Boolean updateIfNeeded,
     /* [out] */ IComponentName** result)
@@ -739,16 +853,16 @@ ECode SmsApplication::GetDefaultSmsApplication(
     Int32 userId = GetIncomingUserId(context);
     Int64 token = Binder::ClearCallingIdentity();
 
-    AutoPtr<ISmsApplicationData> smsApplicationData = GetApplication(context, updateIfNeeded, userId);
+    AutoPtr<SmsApplicationData> smsApplicationData = GetApplication(context, updateIfNeeded, userId);
     if (smsApplicationData != NULL) {
-        CComponentName::New(smsApplicationData.mPackageName,
-                smsApplicationData.mSmsReceiverClass, result);
+        CComponentName::New(smsApplicationData->mPackageName,
+                smsApplicationData->mSmsReceiverClass, result);
     }
 
-    return Binder->RestoreCallingIdentity(token);
+    return Binder::RestoreCallingIdentity(token);
 }
 
-ECode SmsApplication::GetDefaultMmsApplication(
+ECode CSmsApplication::GetDefaultMmsApplication(
     /* [in] */ IContext* context,
     /* [in] */ Boolean updateIfNeeded,
     /* [out] */ IComponentName** result)
@@ -758,16 +872,16 @@ ECode SmsApplication::GetDefaultMmsApplication(
     Int32 userId = GetIncomingUserId(context);
     Int64 token = Binder::ClearCallingIdentity();
 
-    AutoPtr<ISmsApplicationData> smsApplicationData = GetApplication(context, updateIfNeeded, userId);
+    AutoPtr<SmsApplicationData> smsApplicationData = GetApplication(context, updateIfNeeded, userId);
     if (smsApplicationData != NULL) {
-        CComponentName::New(smsApplicationData.mPackageName,
-                smsApplicationData.mMmsReceiverClass, result);
+        CComponentName::New(smsApplicationData->mPackageName,
+                smsApplicationData->mMmsReceiverClass, result);
     }
 
-    return Binder->RestoreCallingIdentity(token);
+    return Binder::RestoreCallingIdentity(token);
 }
 
-ECode SmsApplication::GetDefaultRespondViaMessageApplication(
+ECode CSmsApplication::GetDefaultRespondViaMessageApplication(
     /* [in] */ IContext* context,
     /* [in] */ Boolean updateIfNeeded,
     /* [out] */ IComponentName** result)
@@ -777,15 +891,15 @@ ECode SmsApplication::GetDefaultRespondViaMessageApplication(
     Int32 userId = GetIncomingUserId(context);
     Int64 token = Binder::ClearCallingIdentity();
 
-    AutoPtr<ISmsApplicationData> smsApplicationData = GetApplication(context, updateIfNeeded, userId);
+    AutoPtr<SmsApplicationData> smsApplicationData = GetApplication(context, updateIfNeeded, userId);
     if (smsApplicationData != NULL) {
-        CComponentName::New(smsApplicationData.mPackageName,
-                smsApplicationData.mRespondViaMessageClass, result);
+        CComponentName::New(smsApplicationData->mPackageName,
+                smsApplicationData->mRespondViaMessageClass, result);
     }
-    return Binder->RestoreCallingIdentity(token);
+    return Binder::RestoreCallingIdentity(token);
 }
 
-ECode SmsApplication::GetDefaultSendToApplication(
+ECode CSmsApplication::GetDefaultSendToApplication(
     /* [in] */ IContext* context,
     /* [in] */ Boolean updateIfNeeded,
     /* [out] */ IComponentName** result)
@@ -795,16 +909,16 @@ ECode SmsApplication::GetDefaultSendToApplication(
     Int32 userId = GetIncomingUserId(context);
     Int64 token = Binder::ClearCallingIdentity();
 
-    AutoPtr<ISmsApplicationData> smsApplicationData = GetApplication(context, updateIfNeeded, userId);
+    AutoPtr<SmsApplicationData> smsApplicationData = GetApplication(context, updateIfNeeded, userId);
     if (smsApplicationData != NULL) {
-        CComponentName::New(smsApplicationData.mPackageName,
-                smsApplicationData.mSendToClass, result);
+        CComponentName::New(smsApplicationData->mPackageName,
+                smsApplicationData->mSendToClass, result);
     }
 
-    return Binder->RestoreCallingIdentity(token);
+    return Binder::RestoreCallingIdentity(token);
 }
 
-ECode SmsApplication::ShouldWriteMessageForPackage(
+ECode CSmsApplication::ShouldWriteMessageForPackage(
     /* [in] */ const String& packageName,
     /* [in] */ IContext* context,
     /* [out] */ Boolean* result)
@@ -815,18 +929,19 @@ ECode SmsApplication::ShouldWriteMessageForPackage(
     if (packageName == NULL) return NOERROR;
 
     AutoPtr<ISmsManagerHelper> smsMHelper;
+    CSmsManagerHelper::AcquireSingleton((ISmsManagerHelper**)&smsMHelper);
     AutoPtr<ISmsManager> smsM;
-    CSmsManager::AcquireSingleton((ISmsManager**)&smsMHelper);
     smsMHelper->GetDefault((ISmsManager**)&smsM);
 
-    Boolean bAutoPersisting;
+    Boolean bAutoPersisting = FALSE;
     smsM->GetAutoPersisting(&bAutoPersisting);
     if (bAutoPersisting) {
         return NOERROR;
     }
 
     String defaultSmsPackage;
-    AutoPtr<IComponentName> component = GetDefaultSmsApplication(context, FALSE);
+    AutoPtr<IComponentName> component;
+    GetDefaultSmsApplication(context, FALSE, (IComponentName**)&component);
     if (component != NULL) {
         component->GetPackageName(&defaultSmsPackage);
     }
@@ -838,15 +953,18 @@ ECode SmsApplication::ShouldWriteMessageForPackage(
     AutoPtr<IList> ignorePackages;
     Arrays::AsList(ignoredPack, (IList**)&ignorePackages);
 
-    if (ignorePackages->Contains(packageName)) {
+    Boolean bContain = FALSE;
+    ignorePackages->Contains(CoreUtils::Convert(packageName), &bContain);
+    if (bContain) {
         *result = FALSE;
         return NOERROR;
     }
 
-    if ((defaultSmsPackage == NULL || !defaultSmsPackage->Equals(packageName)) &&
-            !packageName->Equals(BLUETOOTH_PACKAGE_NAME)) {
+    if ((defaultSmsPackage.IsNull() || !defaultSmsPackage.Equals(packageName)) &&
+            !packageName.Equals(BLUETOOTH_PACKAGE_NAME)) {
         // To write the message for someone other than the default SMS and BT app
-        return TRUE;
+        *result = TRUE;
+        return NOERROR;
     }
 
     *result = FALSE;

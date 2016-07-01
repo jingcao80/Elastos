@@ -2,16 +2,17 @@
 #ifndef __ELASTOS_DROID_INTERNAL_TELEPHONY_CSMS7BITENCODINGTRANSLATOR_H__
 #define __ELASTOS_DROID_INTERNAL_TELEPHONY_CSMS7BITENCODINGTRANSLATOR_H__
 
+#include "Elastos.Droid.Telephony.h"
+#include "Elastos.Droid.Utility.h"
 #include "_Elastos_Droid_Internal_Telephony_CSms7BitEncodingTranslator.h"
-
-#include "_Elastos.Droid.Internal.h"
-#include "elastos/core/Singleton.h"
 #include "elastos/droid/utility/SparseInt32Array.h"
+
+#include "elastos/core/Singleton.h"
+
+using Elastos::Droid::Utility::ISparseInt32Array;
 
 using Elastos::Core::Singleton;
 using Elastos::Core::ICharSequence;
-
-using Elastos::Droid::Utility::ISparseInt32Array;
 
 namespace Elastos {
 namespace Droid {
@@ -38,7 +39,9 @@ public:
      *            is thrown; otherwise a NULL String is returned
      * @return translated message or NULL if some error occur
      */
-    CARAPI Translate(ICharSequence* message, String *result);
+    CARAPI Translate(
+        /* [in] */ ICharSequence* message,
+        /* [out] */ String* result);
 
 
 protected:

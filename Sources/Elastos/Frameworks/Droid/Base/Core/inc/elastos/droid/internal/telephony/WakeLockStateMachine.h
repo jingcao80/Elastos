@@ -11,6 +11,7 @@ using Elastos::Droid::Content::BroadcastReceiver;
 using Elastos::Droid::Internal::Utility::State;
 using Elastos::Droid::Internal::Utility::StateMachine;
 using Elastos::Droid::Os::IPowerManagerWakeLock;
+
 using Elastos::Core::IThrowable;
 
 namespace Elastos {
@@ -34,7 +35,8 @@ private:
      * This parent state throws an exception (for debug builds) or prints an error for unhandled
      * message types.
      */
-    class DefaultState: public State
+    class DefaultState
+        : public State
     {
     public:
         DefaultState(
@@ -55,7 +57,8 @@ private:
      * Idle state delivers Cell Broadcasts to receivers. It acquires the wakelock, which is
      * released when the broadcast completes.
      */
-    class IdleState: public State
+    class IdleState
+        : public State
     {
     public:
         IdleState(
@@ -82,7 +85,8 @@ private:
      * Waiting state waits for the result receiver to be called for the current cell broadcast.
      * In this state, any new cell broadcasts are deferred until we return to Idle state.
      */
-    class WaitingState: public State
+    class WaitingState
+        : public State
     {
     public:
         WaitingState(
@@ -102,7 +106,8 @@ private:
     /**
      * BroadcastReceiver to send message to return to idle state.
      */
-    class Receiver: public BroadcastReceiver
+    class Receiver
+        : public BroadcastReceiver
     {
     public:
         Receiver(

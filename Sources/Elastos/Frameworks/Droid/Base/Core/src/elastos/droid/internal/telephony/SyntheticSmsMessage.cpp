@@ -1,125 +1,178 @@
-/*
- * Copyright (C) 2014 The CyanogenMod Project
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
 
-package com.android.internal.telephony;
+#include "elastos/droid/internal/telephony/SyntheticSmsMessage.h"
 
-using org::Json::IJSONObject;
+using Elastos::Droid::Internal::Telephony::MessageClass_UNKNOWN;
 
-using Elastos::Droid::Internal::Telephony::SmsConstants::IMessageClass;
+using Org::Json::IJSONObject;
+// using Org::Json::CJSONObject;
 
-public class SyntheticSmsMessage extends SmsMessageBase {
-    public static class SyntheticAddress extends SmsAddress {
-    }
+namespace Elastos {
+namespace Droid {
+namespace Internal {
+namespace Telephony {
 
-    public static Boolean IsSyntheticPdu(Byte[] pdu) {
-        try {
-            JSONObject json = new JSONObject(new String(pdu));
-            return json->OptBoolean("synthetic", FALSE);
-        }
-        Catch (Exception e) {
-        }
-        return FALSE;
-    }
+//==============================================================
+//  SyntheticSmsMessage::
+//==============================================================
+CAR_INTERFACE_IMPL(SyntheticSmsMessage, SmsMessageBase, ISyntheticSmsMessage)
 
-    public static SyntheticSmsMessage CreateFromPdu(Byte[] pdu) {
-        try {
-            // TODO: use Parcelable or Bundle or something that serializes?
-            JSONObject json = new JSONObject(new String(pdu));
-            SyntheticSmsMessage message = new SyntheticSmsMessage(
-                    json->GetString("originatingAddress"),
-                    json->OptString("scAddress", NULL),
-                    json->GetString("messageBody"),
-                    json->GetLong("timestampMillis"));
-            return message;
-        }
-        Catch (Exception e) {
-            e->PrintStackTrace();
-        }
-        return NULL;
-    }
-
-    public SyntheticSmsMessage(String originatingAddress, String scAddress, String messageBody, Int64 timestampMillis) {
-        this.mOriginatingAddress = new SyntheticAddress();
-        this.mOriginatingAddress.address = originatingAddress;
-
-        this.mMessageBody = messageBody;
-        this.mScTimeMillis = timestampMillis;
-        this.mScAddress = scAddress;
-
-        try {
-            JSONObject json = new JSONObject();
-            json->Put("originatingAddress", originatingAddress);
-            json->Put("scAddress", scAddress);
-            json->Put("messageBody", messageBody);
-            json->Put("timestampMillis", timestampMillis);
-            json->Put("synthetic", TRUE);
-            this.mPdu = json->ToString()->GetBytes();
-        }
-        Catch (Exception e) {
-            e->PrintStackTrace();
-        }
-    }
-
-    //@Override
-    public MessageClass GetMessageClass() {
-        return SmsConstants.MessageClass.UNKNOWN;
-    }
-
-    //@Override
-    public Int32 GetProtocolIdentifier() {
-        return 0;
-    }
-
-    //@Override
-    public Boolean IsReplace() {
-        return FALSE;
-    }
-
-    //@Override
-    public Boolean IsCphsMwiMessage() {
-        return FALSE;
-    }
-
-    //@Override
-    public Boolean IsMWIClearMessage() {
-        return FALSE;
-    }
-
-    //@Override
-    public Boolean IsMWISetMessage() {
-        return FALSE;
-    }
-
-    //@Override
-    public Boolean IsMwiDontStore() {
-        return FALSE;
-    }
-
-    //@Override
-    public Int32 GetStatus() {
-        return 0;
-    }
-
-    //@Override
-    public Boolean IsStatusReportMessage() {
-        return FALSE;
-    }
-
-    //@Override
-    public Boolean IsReplyPathPresent() {
-        return FALSE;
-    }
+Boolean SyntheticSmsMessage::IsSyntheticPdu(
+    /* [in] */ ArrayOf<Byte>* pdu)
+{
+    // try {
+    // AutoPtr<IJSONObject> json;
+    assert(0 && "TODO");
+    // CJSONObject::New(String(pdu), (IJSONObject**)&json);
+    Boolean res = FALSE;
+    // json->OptBoolean(String("synthetic"), FALSE, &res);
+    return res;
+    // }
+    // Catch (Exception e) {
+    // }
 }
+
+AutoPtr<ISyntheticSmsMessage> SyntheticSmsMessage::CreateFromPdu(
+    /* [in] */ ArrayOf<Byte>* pdu)
+{
+    // try {
+    // TODO: use Parcelable or Bundle or something that serializes?
+    String strPdu(*pdu);
+    assert(0 && "TODO");
+    // AutoPtr<IJSONObject> json;
+    // CJSONObject::New(strPdu, (IJSONObject**)&json);
+    String address, body, scAddress;
+    // json->GetString(String("originatingAddress"), &address);
+    // json->GetString(String("messageBody"), &body);
+    // json->OptString(String("scAddress"), NULL, &scAddress);
+    Int64 millis = 0;
+    // json->GetInt64(String("timestampMillis"), &millis);
+    AutoPtr<ISyntheticSmsMessage> message;
+    // CSyntheticSmsMessage::New(
+    //         address,
+    //         scAddress,
+    //         body,
+    //         millis,
+    //         (ISyntheticSmsMessage**)&message);
+    return message;
+    // }
+    // Catch (Exception e) {
+    //     e->PrintStackTrace();
+    // }
+}
+
+ECode SyntheticSmsMessage::constructor(
+    /* [in] */ String originatingAddress,
+    /* [in] */ String scAddress,
+    /* [in] */ String messageBody,
+    /* [in] */ Int64 timestampMillis)
+{
+    mOriginatingAddress = new SyntheticAddress();
+    assert(0 && "TODO");
+    // mOriginatingAddress->mAddress = originatingAddress;
+
+    mMessageBody = messageBody;
+    mScTimeMillis = timestampMillis;
+    mScAddress = scAddress;
+
+    // try {
+    // AutoPtr<IJSONObject> json;
+    // CJSONObject::New((IJSONObject**)&json);
+    // json->Put(String("originatingAddress"), originatingAddress);
+    // json->Put(String("scAddress"), scAddress);
+    // json->Put(String("messageBody"), messageBody);
+    // json->Put(String("timestampMillis"), timestampMillis);
+    // json->Put(String("synthetic"), TRUE);
+    String str;
+    // json->ToString(&str);
+    mPdu = str.GetBytes();
+    // }
+    // Catch (Exception e) {
+    //     e->PrintStackTrace();
+    // }
+    return NOERROR;
+}
+
+ECode SyntheticSmsMessage::GetMessageClass(
+    /* [out] */ MessageClass* result)
+{
+    VALIDATE_NOT_NULL(result)
+    *result = MessageClass_UNKNOWN;
+    return NOERROR;
+}
+
+ECode SyntheticSmsMessage::GetProtocolIdentifier(
+    /* [out] */ Int32* result)
+{
+    VALIDATE_NOT_NULL(result)
+    *result = 0;
+    return NOERROR;
+}
+
+ECode SyntheticSmsMessage::IsReplace(
+    /* [out] */ Boolean* result)
+{
+    VALIDATE_NOT_NULL(result)
+    *result = FALSE;
+    return NOERROR;
+}
+
+ECode SyntheticSmsMessage::IsCphsMwiMessage(
+    /* [out] */ Boolean* result)
+{
+    VALIDATE_NOT_NULL(result)
+    *result = FALSE;
+    return NOERROR;
+}
+
+ECode SyntheticSmsMessage::IsMWIClearMessage(
+    /* [out] */ Boolean* result)
+{
+    VALIDATE_NOT_NULL(result)
+    *result = FALSE;
+    return NOERROR;
+}
+
+ECode SyntheticSmsMessage::IsMWISetMessage(
+    /* [out] */ Boolean* result)
+{
+    VALIDATE_NOT_NULL(result)
+    *result = FALSE;
+    return NOERROR;
+}
+
+ECode SyntheticSmsMessage::IsMwiDontStore(
+    /* [out] */ Boolean* result)
+{
+    VALIDATE_NOT_NULL(result)
+    *result = FALSE;
+    return NOERROR;
+}
+
+ECode SyntheticSmsMessage::GetStatus(
+    /* [out] */ Int32* result)
+{
+    VALIDATE_NOT_NULL(result)
+    *result = 0;
+    return NOERROR;
+}
+
+ECode SyntheticSmsMessage::IsStatusReportMessage(
+    /* [out] */ Boolean* result)
+{
+    VALIDATE_NOT_NULL(result)
+    *result = FALSE;
+    return NOERROR;
+}
+
+ECode SyntheticSmsMessage::IsReplyPathPresent(
+    /* [out] */ Boolean* result)
+{
+    VALIDATE_NOT_NULL(result)
+    *result = FALSE;
+    return NOERROR;
+}
+
+} // namespace Telephony
+} // namespace Internal
+} // namespace Droid
+} // namespace Elastos

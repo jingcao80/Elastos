@@ -1,0 +1,65 @@
+
+module
+{
+    interface Elastos.Droid.Content.IContext;
+
+    namespace Elastos {
+    namespace Droid {
+    namespace Internal {
+    namespace Telephony {
+
+    /**
+     * @Involve
+     * interface IHandler
+     */
+    [deprecated]
+    interface ISubscriptionHelper {
+
+        const Int32 SUB_SET_UICC_FAIL = -100;
+        const Int32 SUB_SIM_NOT_INSERTED = -99;
+        const Int32 SUB_INIT_STATE = -1;
+
+        UpdateSubActivation(
+            [in] ArrayOf<Int32>* simStatus,
+            [in] Boolean isStackReadyEvent);
+
+        UpdateNwMode();
+
+        SetUiccSubscription(
+            [in] Int32 slotId,
+            [in] Int32 subStatus);
+
+        IsRadioOn(
+            [in] Int32 phoneId,
+            [out] Boolean* result);
+
+        IsRadioAvailable(
+            [in] Int32 phoneId,
+            [out] Boolean* result);
+
+        IsApmSIMNotPwdn(
+            [out] Boolean* result);
+
+        ProceedToHandleIccEvent(
+            [in] Int32 slotId,
+            [out] Boolean* result);
+    }
+
+    [deprecated]
+    interface ISubscriptionHelperHelper {
+
+        Init(
+            [in] IContext* c,
+            [in] ArrayOf<ICommandsInterface*>* ci,
+            [out] ISubscriptionHelper** result);
+
+        GetInstance(
+            [out] ISubscriptionHelper** result);
+    }
+
+    }//Telephony
+    }//Internal
+    }//Droid
+    }//Elastos
+
+}

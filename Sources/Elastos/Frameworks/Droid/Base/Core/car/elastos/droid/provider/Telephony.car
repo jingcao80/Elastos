@@ -2140,16 +2140,16 @@ module
             [out] Boolean* result);
 
         GetCONTENT_URI(
-             [out] IUri** uri);
+            [out] IUri** uri);
 
         GetREPORT_REQUEST_URI(
-             [out] IUri** uri);
+            [out] IUri** uri);
 
         GetREPORT_STATUS_URI(
-             [out] IUri** uri);
+            [out] IUri** uri);
 
         GetNAME_ADDR_EMAIL_PATTERN(
-             [out] IPattern** pattern);
+            [out] IPattern** pattern);
     }
 
     /**

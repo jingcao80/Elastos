@@ -2,18 +2,16 @@
 #ifndef __ELASTOS_DROID_INTERNAL_TELEPHONY_SERVICESTATETRACKER_H__
 #define __ELASTOS_DROID_INTERNAL_TELEPHONY_SERVICESTATETRACKER_H__
 
+#include "Elastos.Droid.App.h"
+#include "Elastos.Droid.Content.h"
+#include "Elastos.CoreLibrary.IO.h"
 #include "_Elastos.Droid.Internal.h"
+#include "elastos/droid/os/AsyncResult.h"
 #include <elastos/core/Object.h>
 #include "elastos/droid/internal/telephony/dataconnection/DataConnection.h"
 #include "elastos/droid/os/Handler.h"
 #include "elastos/droid/os/AsyncResult.h"
 #include "elastos/droid/os/RegistrantList.h"
-
-using Elastos::IO::IFileDescriptor;
-using Elastos::IO::IPrintWriter;
-
-using Elastos::Core::Object;
-using Elastos::Droid::Os::Handler;
 
 using Elastos::Droid::App::IPendingIntent;
 using Elastos::Droid::Content::IContext;
@@ -24,11 +22,14 @@ using Elastos::Droid::Internal::Telephony::Uicc::IUiccCardApplication;
 using Elastos::Droid::Internal::Telephony::Uicc::IIccRecords;
 using Elastos::Droid::Os::AsyncResult;
 using Elastos::Droid::Os::RegistrantList;
+using Elastos::Droid::Os::Handler;
 using Elastos::Droid::Telephony::ICellInfo;
 using Elastos::Droid::Telephony::IServiceState;
 using Elastos::Droid::Telephony::ISignalStrength;
-using Elastos::Droid::Telephony::ITelephonyManager;
 
+using Elastos::Core::Object;
+using Elastos::IO::IFileDescriptor;
+using Elastos::IO::IPrintWriter;
 using Elastos::Utility::IList;
 
 namespace Elastos {
@@ -41,11 +42,12 @@ class ServiceStateTracker
     , public IServiceStateTracker
 {
 private:
-    class ECO_LOCAL CellInfoResult
+    class CellInfoResult
         : public Object
     {
     public:
-        CellInfoResult();
+        AutoPtr<IList> mList;
+        Object mLockObj;
     };
 
 public:
@@ -119,16 +121,8 @@ public:
 
     CARAPI DisableLocationUpdates();
 
-    virtual CARAPI GetCurrentDataConnectionState(
-        /* [out] */ Int32* result) = 0;
-
-    virtual CARAPI IsConcurrentVoiceAndDataAllowed(
-        /* [out] */ Boolean* result) = 0;
-
-    virtual CARAPI SetImsRegistrationState(
-        /* [in] */ Boolean registered) = 0;
-
-    virtual CARAPI PollState() = 0;
+    CARAPI HandleMessage(
+        /* [in] */ IMessage* msg);
 
     CARAPI RegisterForDataConnectionAttached(
         /* [in] */ IHandler* h,
@@ -179,7 +173,7 @@ public:
         /* [in] */ IHandler* h);
 
     CARAPI  PowerOffRadioSafely(
-         /* [in] */ IDcTrackerBase* dcTracker);
+        /* [in] */ IDcTrackerBase* dcTracker);
 
     CARAPI ProcessPendingRadioPowerOffAfterDataOff(
         /* [out] */ Boolean* result);
@@ -200,34 +194,53 @@ public:
         /* [in] */ IPrintWriter* pw,
         /* [in] */ ArrayOf<String>* args);
 
+    CARAPI RequestShutdown();
+
 protected:
-    ECO_LOCAL CARAPI RequestShutdown();
-    ECO_LOCAL CARAPI NotifySignalStrength(Boolean * result);
-    ECO_LOCAL void NotifyDataRegStateRilRadioTechnologyChanged();
+    CARAPI_(Boolean) NotifySignalStrength();
+
+    CARAPI_(void) NotifyDataRegStateRilRadioTechnologyChanged();
+
     /**
      * Some operators have been known to report registration failure
      * data only devices, to fix that use DataRegState.
      */
-    ECO_LOCAL void UseDataRegStateForDataOnlyDevices();
-    ECO_LOCAL void UpdatePhoneObject();
-    ECO_LOCAL void DisableSingleLocationUpdate();
-    ECO_LOCAL Boolean OnSignalStrengthResult(AsyncResult* ar, Boolean isGsm);
+    CARAPI_(void) UseDataRegStateForDataOnlyDevices();
+
+    CARAPI_(void) UpdatePhoneObject();
+
+    CARAPI_(void) DisableSingleLocationUpdate();
+
+    CARAPI_(Boolean) OnSignalStrengthResult(
+        /* [in] */ AsyncResult* ar,
+        /* [in] */ Boolean isGsm);
 
     /**
      * Hang up all voice call and turn off radio. Implemented by derived class.
      */
     virtual CARAPI HangupAndPowerOff() = 0;
 
-    virtual CARAPI GetPhone(IPhone** phone) = 0;
-    virtual CARAPI HandlePollStateResult(Int32 what, AsyncResult* ar) = 0;
-    virtual CARAPI UpdateSpnDisplay() = 0;
-    virtual CARAPI SetPowerStateToDesired() = 0;
-    virtual CARAPI OnUpdateIccAvailability() = 0;
-    virtual CARAPI Log(const String& s) = 0;
-    virtual CARAPI Loge(const String& s) = 0;
+    virtual CARAPI GetPhone(
+        /* [in] */ IPhone* phone) = 0;
+
+    virtual CARAPI_(void) HandlePollStateResult(
+        /* [in] */ Int32 what,
+        /* [in] */ AsyncResult* ar) = 0;
+
+    virtual CARAPI_(void) UpdateSpnDisplay() = 0;
+
+    virtual CARAPI_(void) SetPowerStateToDesired() = 0;
+
+    virtual CARAPI_(void) OnUpdateIccAvailability() = 0;
+
+    virtual CARAPI_(void) Log(
+        /* [in] */ String s) = 0;
+
+    virtual CARAPI_(void) Loge(
+        /* [in] */ String s) = 0;
 
     /** Cancel a Pending (if any) PollState() operation */
-    ECO_LOCAL void CancelPollState();
+    CARAPI_(void) CancelPollState();
 
     /**
      * Return TRUE if time zone needs fixing.
@@ -238,8 +251,11 @@ protected:
      * @param needToFixTimeZone
      * @return TRUE if time zone needs to be fixed
      */
-    ECO_LOCAL Boolean ShouldFixTimeZoneNow(IPhoneBase* phoneBase, const String& operatorNumeric,
-        const String& prevOperatorNumeric, Boolean needToFixTimeZone);
+    CARAPI_(Boolean) ShouldFixTimeZoneNow(
+        /* [in] */ IPhoneBase* phoneBase,
+        /* [in] */ String operatorNumeric,
+        /* [in] */ String prevOperatorNumeric,
+        /* [in] */ Boolean needToFixTimeZone);
 
     /**
      * Verifies the current thread is the same as the thread originally
@@ -249,11 +265,19 @@ protected:
      * @exception RuntimeException if the current thread is not
      * the thread that originally obtained this PhoneBase instance.
      */
-    ECO_LOCAL ECode CheckCorrectThread();
-    ECO_LOCAL Boolean IsCallerOnDifferentThread();
-    ECO_LOCAL void UpdateCarrierMccMncConfiguration(const String& newOp, const String& oldOp, IContext* context);
-    ECO_LOCAL Boolean IsIwlanFeatureAvailable();
-    ECO_LOCAL void ProcessIwlanToWwanTransition(IServiceState* ss);
+    CARAPI CheckCorrectThread();
+
+    CARAPI_(Boolean) IsCallerOnDifferentThread();
+
+    CARAPI_(void) UpdateCarrierMccMncConfiguration(
+        /* [in] */ String newOp,
+        /* [in] */ String oldOp,
+        /* [in] */ IContext* context);
+
+    CARAPI_(Boolean) IsIwlanFeatureAvailable();
+
+    CARAPI_(void) ProcessIwlanToWwanTransition(
+        /* [in] */ IServiceState* ss);
 
 private:
     static CARAPI_(AutoPtr<ArrayOf<String> >) InitCOUNTCODE();
@@ -386,7 +410,6 @@ protected:
     Boolean mPowerOffDelayNeed;
     Boolean mDeviceShuttingDown;
 
-
 private:
     static const Int64 LAST_CELL_INFO_LIST_MAX_AGE_MS;
     AutoPtr<ISignalStrength> mLastSignalStrength;
@@ -402,7 +425,6 @@ private:
      */
     Boolean mWantContinuousLocationUpdates;
     Boolean mWantSingleLocationUpdate;
-
 };
 
 } // namespace Telephony

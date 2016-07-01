@@ -5,6 +5,8 @@ module
     interface Elastos.Droid.Net.IUri;
     interface Elastos.Droid.Internal.Telephony.ISmsRawData;
 
+    using interface Elastos.Utility.IList;
+
     namespace Elastos {
     namespace Droid {
     namespace Internal {
@@ -25,6 +27,12 @@ module
      */
     [local, parcelable, deprecated]
     interface IISms {
+        SynthesizeMessages(
+            [in] String originatingAddress,
+            [in] String scAddress,
+            [in] IList* messages,
+            [in] Int64 timestampMillis);
+
         /**
          * Retrieves all messages currently stored on ICC.
          *
@@ -32,7 +40,7 @@ module
          */
         GetAllMessagesFromIccEf(
             [in] String callingPkg,
-            [out, callee] ArrayOf<ISmsRawData*>* array);
+            [out] IList** result);
 
         /**
          * Retrieves all messages currently stored on ICC.
@@ -42,7 +50,7 @@ module
         GetAllMessagesFromIccEfForSubscriber(
             [in] Int64 subId,
             [in] String callingPkg,
-            [out, callee] ArrayOf<ISmsRawData*>* array);
+            [out] IList** result);
 
         /**
          * Update the specified message on the ICC.
@@ -301,9 +309,9 @@ module
             [in] String callingPkg,
             [in] String destinationAddress,
             [in] String scAddress,
-            [in] ArrayOf<String>* parts,
-            [in] ArrayOf<IPendingIntent*> sentIntents,
-            [in] ArrayOf<IPendingIntent*> deliveryIntents);
+            [in] IList* parts,
+            [in] IList* sentIntents,
+            [in] IList* deliveryIntents);
 
         /**
          * Send a multi-part text based SMS.
@@ -333,9 +341,9 @@ module
             [in] String callingPkg,
             [in] String destinationAddress,
             [in] String scAddress,
-            [in] ArrayOf<String> parts,
-            [in] ArrayOf<IPendingIntent*> sentIntents,
-            [in] ArrayOf<IPendingIntent*> deliveryIntents);
+            [in] IList* parts,
+            [in] IList* sentIntents,
+            [in] IList* deliveryIntents);
 
         /**
          * Enable reception of cell broadcast (SMS-CB) messages with the given
@@ -546,13 +554,6 @@ module
             [in] Int64 subId,
             [out] Boolean* result);
 
-        /*
-         * get user prefered SMS subId
-         * @return subId id
-         */
-        GetPreferredSmsSubscription(
-            [out] Int64* subId);
-
         /**
          * Gets SMS format supported on IMS.  SMS over IMS format is
          * either 3GPP or 3GPP2.
@@ -579,13 +580,6 @@ module
         GetImsSmsFormatForSubscriber(
             [in] Int64 subId,
             [out] String* format);
-
-        /*
-         * Get SMS prompt property,  enabled or not
-         * @return true if enabled, false otherwise
-         */
-        IsSMSPromptEnabled(
-            [out] Boolean* result);
 
         /**
          * Send a system stored text message.
@@ -660,8 +654,8 @@ module
             [in] String callingPkg,
             [in] IUri* messageUri,
             [in] String scAddress,
-            [in] ArrayOf<IPendingIntent*> sentIntents,
-            [in] ArrayOf<IPendingIntent*> deliveryIntents);
+            [in] IList* sentIntents,
+            [in] IList* deliveryIntents);
     }
 
     } // namespace Telephony

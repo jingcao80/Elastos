@@ -1,50 +1,63 @@
 
-#include "Elastos.Droid.Content.h"
 #include "Elastos.Droid.Telephony.h"
-#include <elastos/core/AutoLock.h>
-#include <elastos/core/CoreUtils.h>
-#include <elastos/core/IntegralToString.h>
-#include <elastos/core/StringToIntegral.h>
 #include "elastos/droid/internal/telephony/ServiceStateTracker.h"
-#include "elastos/droid/internal/telephony/uicc/IccCardApplicationStatus.h"
-#include "elastos/droid/internal/telephony/uicc/UiccController.h"
+#include "elastos/droid/os/SystemClock.h"
+#include "elastos/droid/os/CMessageHelper.h"
+#include "elastos/droid/telephony/CServiceState.h"
+#include "elastos/droid/telephony/CSignalStrength.h"
+#include "elastos/droid/telephony/CServiceStateHelper.h"
+#include "elastos/droid/telephony/CTelephonyManagerHelper.h"
+#include "elastos/droid/utility/CPair.h"
 #include "elastos/droid/R.h"
 #include "elastos/droid/text/TextUtils.h"
 
-using Elastos::Core::AutoLock;
-using Elastos::Core::CoreUtils;
-using Elastos::Core::IntegralToString;
-using Elastos::Core::StringUtils;
+#include <elastos/core/AutoLock.h>
+#include <elastos/core/CoreUtils.h>
+#include <elastos/core/Thread.h>
+#include <elastos/core/IntegralToString.h>
+#include <elastos/core/StringToIntegral.h>
 
 using Elastos::Droid::Content::Res::IResources;
 using Elastos::Droid::Internal::Telephony::Uicc::AppState;
+using Elastos::Droid::Internal::Telephony::Uicc::APPSTATE_UNKNOWN;
 using Elastos::Droid::Internal::Telephony::Uicc::IIccRecords;
 using Elastos::Droid::Internal::Telephony::Uicc::IUiccCardApplication;
 using Elastos::Droid::Internal::Telephony::Uicc::IUiccController;
 using Elastos::Droid::Internal::Telephony::Uicc::UiccController;
 using Elastos::Droid::Net::IConnectivityManager;
 using Elastos::Droid::Net::INetworkInfo;
-//using Elastos::Droid::Os::IHandler;
 using Elastos::Droid::Os::IMessage;
-//using Elastos::Droid::Os::IRegistrant;
-//using Elastos::Droid::Os::IRegistrantList;
+using Elastos::Droid::Os::IMessageHelper;
+using Elastos::Droid::Os::CMessageHelper;
+// using Elastos::Droid::Os::Registrant;
+using Elastos::Droid::Os::IRegistrantList;
+// using Elastos::Droid::Os::CRegistrantList;
+using Elastos::Droid::Os::SystemClock;
 using Elastos::Droid::R;
-//using Elastos::Droid::Telephony::IServiceStateHelper;
-//using Elastos::Droid::Telephony::CServiceStateHelper;
+using Elastos::Droid::Telephony::IServiceStateHelper;
+using Elastos::Droid::Telephony::CServiceStateHelper;
+using Elastos::Droid::Telephony::CServiceState;
+using Elastos::Droid::Telephony::CSignalStrength;
+using Elastos::Droid::Telephony::ITelephonyManagerHelper;
+using Elastos::Droid::Telephony::CTelephonyManagerHelper;
 using Elastos::Droid::Text::ITextUtils;
 using Elastos::Droid::Text::TextUtils;
 //using Elastos::Droid::Utility::CPair;
 using Elastos::Droid::Utility::IPair;
 
+using Elastos::Core::AutoLock;
+using Elastos::Core::CoreUtils;
+using Elastos::Core::IntegralToString;
+using Elastos::Core::StringUtils;
+using Elastos::Core::ISystem;
+using Elastos::Core::IThread;
+using Elastos::Core::Thread;
 
 namespace Elastos {
 namespace Droid {
 namespace Internal {
 namespace Telephony {
 
-/**
- * {@hide}
- */
 CAR_INTERFACE_IMPL(ServiceStateTracker, Handler, IServiceStateTracker)
 
 const Boolean ServiceStateTracker::DBG = TRUE;
@@ -112,13 +125,6 @@ const String ServiceStateTracker::ACTION_RADIO_OFF("android.intent.action.ACTION
 
 const Int64 ServiceStateTracker::LAST_CELL_INFO_LIST_MAX_AGE_MS = 2000;
 
-ServiceStateTracker::CellInfoResult::CellInfoResult()
-{
-    assert(0);
-    AutoPtr<IList> list;
-    Object lockObj;
-}
-
 ServiceStateTracker::ServiceStateTracker()
     : mUiccController(NULL)
     , mUiccApplcation(NULL)
@@ -136,21 +142,21 @@ ServiceStateTracker::ServiceStateTracker()
     , mDeviceShuttingDown(FALSE)
     , mLastSignalStrength(NULL)
 {
-    assert(0);
-    //CServiceState::New((IServiceState**)&mSS);
-    //CServiceState::New((IServiceState**)&mNewSS);
+    CServiceState::New((IServiceState**)&mSS);
+    CServiceState::New((IServiceState**)&mNewSS);
 
-    //CSignalStrength::New((ISignalStrength**)&mSignalStrength);
-    //CRestrictedState::New((IRestrictedState**)&mRestrictedState);
+    CSignalStrength::New((ISignalStrength**)&mSignalStrength);
+    assert(0 && "TODO");
+    // CRestrictedState::New((IRestrictedState**)&mRestrictedState);
 
-    //CRegistrantList::New((IRegistrantList**)&mRoamingOnRegistrants);
-    //CRegistrantList::New((IRegistrantList**)&mRoamingOffRegistrants);
-    //CRegistrantList::New((IRegistrantList**)&mAttachedRegistrants);
-    //CRegistrantList::New((IRegistrantList**)&mDetachedRegistrants);
-    //CRegistrantList::New((IRegistrantList**)&mDataRegStateOrRatChangedRegistrants);
-    //CRegistrantList::New((IRegistrantList**)&mNetworkAttachedRegistrants);
-    //CRegistrantList::New((IRegistrantList**)&mPsRestrictEnabledRegistrants);
-    //CRegistrantList::New((IRegistrantList**)&mPsRestrictDisabledRegistrants);
+    // CRegistrantList::New((IRegistrantList**)&mRoamingOnRegistrants);
+    // CRegistrantList::New((IRegistrantList**)&mRoamingOffRegistrants);
+    // CRegistrantList::New((IRegistrantList**)&mAttachedRegistrants);
+    // CRegistrantList::New((IRegistrantList**)&mDetachedRegistrants);
+    // CRegistrantList::New((IRegistrantList**)&mDataRegStateOrRatChangedRegistrants);
+    // CRegistrantList::New((IRegistrantList**)&mNetworkAttachedRegistrants);
+    // CRegistrantList::New((IRegistrantList**)&mPsRestrictEnabledRegistrants);
+    // CRegistrantList::New((IRegistrantList**)&mPsRestrictDisabledRegistrants);
 }
 
 AutoPtr<ArrayOf<String> > ServiceStateTracker::InitCOUNTCODE()
@@ -180,39 +186,40 @@ AutoPtr<ArrayOf<String> > ServiceStateTracker::InitCOUNTCODE()
     return sArray;
 }
 
-ECode ServiceStateTracker::constructor(IPhoneBase* phoneBase, ICommandsInterface* ci, ICellInfo* cellInfo)
+ECode ServiceStateTracker::constructor(
+    /* [in] */ IPhoneBase* phoneBase,
+    /* [in] */ ICommandsInterface* ci,
+    /* [in] */ ICellInfo* cellInfo)
 {
-    assert(0);
-    //mPhoneBase = phoneBase;
-    //mCellInfo = cellInfo;
-    //mCi = ci;
+    mPhoneBase = phoneBase;
+    mCellInfo = cellInfo;
+    mCi = ci;
 
-    //AutoPtr<IContext> context;
-    //mPhoneBase->GetContext((IContext**)&context);
-    //AutoPtr<IResources> res;
-    //context->GetResources((IResources**)&res);
-    //res->GetBoolean(R::bool::config_voice_capable, &mVoiceCapable);
+    AutoPtr<IContext> context;
+    IPhone::Probe(mPhoneBase)->GetContext((IContext**)&context);
+    AutoPtr<IResources> res;
+    context->GetResources((IResources**)&res);
+    res->GetBoolean(R::bool_::config_voice_capable, &mVoiceCapable);
 
-    //mUiccController = UiccController::GetInstance();
-    //mUiccController->RegisterForIccChanged(this, EVENT_ICC_CHANGED, NULL);
-    //mCi->SetOnSignalStrengthUpdate(this, EVENT_SIGNAL_STRENGTH_UPDATE, NULL);
-    //mCi->RegisterForCellInfoList(this, EVENT_UNSOL_CELL_INFO_LIST, NULL);
+    assert(0 && "TODO");
+    // mUiccController = UiccController->GetInstance();
+    mUiccController->RegisterForIccChanged(this, EVENT_ICC_CHANGED, NULL);
+    mCi->SetOnSignalStrengthUpdate(this, EVENT_SIGNAL_STRENGTH_UPDATE, NULL);
+    mCi->RegisterForCellInfoList(this, EVENT_UNSOL_CELL_INFO_LIST, NULL);
 
-    //String str;
-    //AutoPtr<IServiceStateHelper> ssHelper;
-    //CServiceStateHelper::AcquireSingleton((IServiceStateHelper**)&ssHelper);
-    //ssHelper->RilRadioTechnologyToString(IServiceState::RIL_RADIO_TECHNOLOGY_UNKNOWN, &str);
-    //return mPhoneBase->SetSystemProperty(ITelephonyProperties::PROPERTY_DATA_NETWORK_TYPE, str);
-    return NOERROR;
+    String str;
+    AutoPtr<IServiceStateHelper> ssHelper;
+    CServiceStateHelper::AcquireSingleton((IServiceStateHelper**)&ssHelper);
+    ssHelper->RilRadioTechnologyToString(IServiceState::RIL_RADIO_TECHNOLOGY_UNKNOWN, &str);
+    return mPhoneBase->SetSystemProperty(ITelephonyProperties::PROPERTY_DATA_NETWORK_TYPE, str);
 }
 
 ECode ServiceStateTracker::RequestShutdown()
 {
-    assert(0);
-    //if (mDeviceShuttingDown == TRUE) return;
-    //mDeviceShuttingDown = TRUE;
-    //mDesiredPowerState = FALSE;
-    //SetPowerStateToDesired();
+    if (mDeviceShuttingDown == TRUE) return NOERROR;
+    mDeviceShuttingDown = TRUE;
+    mDesiredPowerState = FALSE;
+    SetPowerStateToDesired();
     return NOERROR;
 }
 
@@ -225,7 +232,8 @@ ECode ServiceStateTracker::Dispose()
     return NOERROR;
 }
 
-ECode ServiceStateTracker::GetDesiredPowerState(Boolean* result)
+ECode ServiceStateTracker::GetDesiredPowerState(
+    /* [out] */ Boolean* result)
 {
     assert(0);
     //VALIDATE_NOT_NULL(result)
@@ -233,155 +241,129 @@ ECode ServiceStateTracker::GetDesiredPowerState(Boolean* result)
     return NOERROR;
 }
 
-
-ECode ServiceStateTracker::NotifySignalStrength(Boolean * result)
+Boolean ServiceStateTracker::NotifySignalStrength()
 {
-    assert(0);
-    //VALIDATE_NOT_NULL(result)
-    //*result = FALSE;
+    {
+        AutoLock syncLock(mCellInfo);
 
-    //{
-    //    AutoLock syncLock(mCellInfo);
-
-    //    Boolean bEqual;
-    //    if (IObject::Probe(mSignalStrength)->Equals(mLastSignalStrength, &bEqual), !bEqual) {
-    //        FAIL_RETURN(mPhoneBase->NotifySignalStrength());
-    //        *result = TRUE;
-    //    }
-    //}
-    return NOERROR;
+        Boolean bEqual;
+        if (IObject::Probe(mSignalStrength)->Equals(mLastSignalStrength, &bEqual), !bEqual) {
+            FAIL_RETURN(mPhoneBase->NotifySignalStrength());
+            return TRUE;
+        }
+    }
+    return FALSE;
 }
 
-/**
- * Notify all mDataConnectionRatChangeRegistrants using an
- * AsyncResult in msg.obj where AsyncResult#result contains the
- * new RAT as an Integer Object.
- */
 void ServiceStateTracker::NotifyDataRegStateRilRadioTechnologyChanged()
 {
-    assert(0);
-    //Int32 rat, drs;
-    //mSS->GetRilDataRadioTechnology(&rat);
-    //mSS->GetDataRegState(&drs);
+    Int32 rat, drs;
+    mSS->GetRilDataRadioTechnology(&rat);
+    mSS->GetDataRegState(&drs);
 
-    //if (DBG) Log(String("notifyDataRegStateRilRadioTechnologyChanged: drs=") +
-    //        IntegralToString::ToString(drs) + String(" rat= ") + IntegralToString::ToString(rat));
+    if (DBG) {
+        Log(String("notifyDataRegStateRilRadioTechnologyChanged: drs=") + \
+            IntegralToString::ToString(drs) + String(" rat= ") + IntegralToString::ToString(rat));
+    }
 
-    //AutoPtr<IServiceStateHelper> ssHelper;
-    //String str;
-    //CServiceStateHelper::AcquireSingleton((IServiceStateHelper**)&ssHelper);
-    //ssHelper->RilRadioTechnologyToString(rat, &str);
-    //mPhoneBase->SetSystemProperty(ITelephonyProperties::PROPERTY_DATA_NETWORK_TYPE, str);
+    AutoPtr<IServiceStateHelper> ssHelper;
+    String str;
+    CServiceStateHelper::AcquireSingleton((IServiceStateHelper**)&ssHelper);
+    ssHelper->RilRadioTechnologyToString(rat, &str);
+    mPhoneBase->SetSystemProperty(ITelephonyProperties::PROPERTY_DATA_NETWORK_TYPE, str);
 
-    //AutoPtr<IPair> pair;
-    //CPair::New(CoreUtils::Convert(drs), CoreUtils::Convert(rat), (IPair**)&pair);
-    //mDataRegStateOrRatChangedRegistrants->NotifyResult(pair);
+    AutoPtr<IPair> pair;
+    CPair::New(CoreUtils::Convert(drs), CoreUtils::Convert(rat), (IPair**)&pair);
+    assert(0 && "TODO IRegistrantList ");
+    // mDataRegStateOrRatChangedRegistrants->NotifyResult(pair);
 }
 
-/**
- * Some operators have been known to report registration failure
- * data only devices, to fix that use DataRegState.
- */
 void ServiceStateTracker::UseDataRegStateForDataOnlyDevices()
 {
-    assert(0);
-    //if (mVoiceCapable == FALSE) {
-//        if (DBG) {
-//            Log("useDataRegStateForDataOnlyDevice: VoiceRegState=" + mNewSS->GetVoiceRegState()
-//                + " DataRegState=" + mNewSS->GetDataRegState());
-//        }
+    if (mVoiceCapable == FALSE) {
+        if (DBG) {
+            assert(0 && "TODO");
+            // Log("useDataRegStateForDataOnlyDevice: VoiceRegState=" + mNewSS->GetVoiceRegState()
+            //     + " DataRegState=" + mNewSS->GetDataRegState());
+        }
         // TODO: Consider not lying and instead have callers know the difference.
-    //    Int32 state;
-    //    mNewSS->GetDataRegState(&state);
-    //    mNewSS->SetVoiceRegState(state);
-    //}
+
+        Int32 state = 0;
+        mNewSS->GetDataRegState(&state);
+        mNewSS->SetVoiceRegState(state);
+    }
 }
 
 void ServiceStateTracker::UpdatePhoneObject()
 {
-    assert(0);
-    //AutoPtr<IContext> context;
-    //mPhoneBase->GetContext((IContext**)&context);
-    //AutoPtr<IResources> res;
-    //context->GetResources((IResources**)&res);
-    //Boolean bResult;
-    //res->GetBoolean(R::bool::config_switch_phone_on_voice_reg_state_change, &bResult);
-    //if (bResult) {
-    //    Int32 rt;
-    //    mSS->GetRilVoiceRadioTechnology(&rt)
-    //    mPhoneBase->UpdatePhoneObject(rt);
-    //}
+    AutoPtr<IContext> context;
+    IPhone::Probe(mPhoneBase)->GetContext((IContext**)&context);
+    AutoPtr<IResources> res;
+    context->GetResources((IResources**)&res);
+    Boolean bResult = FALSE;
+    res->GetBoolean(R::bool_::config_switch_phone_on_voice_reg_state_change, &bResult);
+    if (bResult) {
+        Int32 rt = 0;
+        mSS->GetRilVoiceRadioTechnology(&rt);
+        IPhone::Probe(mPhoneBase)->UpdatePhoneObject(rt);
+    }
 }
 
-/**
- * Registration point for combined roaming on
- * combined roaming is TRUE when roaming is TRUE and ONS differs SPN
- *
- * @param h handler to notify
- * @param what what code of message when delivered
- * @param obj placed in Message.obj
- */
-ECode ServiceStateTracker::RegisterForRoamingOn(IHandler* h, Int32 what, IInterface* obj)
+ECode ServiceStateTracker::RegisterForRoamingOn(
+    /* [in] */ IHandler* h,
+    /* [in] */ Int32 what,
+    /* [in] */ IInterface* obj)
 {
-    assert(0);
-    //AutoPtr<IRegistrant> r;
-    //CRegistrant::New(h, what, obj, (IRegistrant**)&r);
-    //mRoamingOnRegistrants->Add(r);
+    assert(0 && "TODO Registrant ECO_PUBLIC");
+    // AutoPtr<Registrant> r = new Registrant(h, what, obj);
+    // mRoamingOnRegistrants->Add(r);
 
-    //Boolean bRoaming;
-    //mSS->GetRoaming(&bRoaming);
-    //if (bRoaming) {
-    //    r->NotifyRegistrant();
-    //}
+    Boolean bRoaming;
+    mSS->GetRoaming(&bRoaming);
+    if (bRoaming) {
+        assert(0 && "TODO Registrant ECO_PUBLIC");
+        // r->NotifyRegistrant();
+    }
     return NOERROR;
 }
 
-ECode ServiceStateTracker::UnregisterForRoamingOn(IHandler* h)
+ECode ServiceStateTracker::UnregisterForRoamingOn(
+    /* [in] */ IHandler* h)
 {
-    assert(0);
-    //return mRoamingOnRegistrants->Remove(h);
-    return NOERROR;
-
-}
-
-/**
- * Registration point for combined roaming off
- * combined roaming is TRUE when roaming is TRUE and ONS differs SPN
- *
- * @param h handler to notify
- * @param what what code of message when delivered
- * @param obj placed in Message.obj
- */
-ECode ServiceStateTracker::RegisterForRoamingOff(IHandler* h, Int32 what, IInterface* obj)
-{
-    assert(0);
-    //AutoPtr<IRegistrant> r;
-    //CRegistrant::New(h, what, obj, (IRegistrant**)&r);
-    //mRoamingOffRegistrants->Add(r);
-
-    //if (!mSS->GetRoaming()) {
-    //    r->NotifyRegistrant();
-    //}
+    assert(0 && "TODO IRegistrantList ");
+    // return mRoamingOnRegistrants->Remove(h);
     return NOERROR;
 }
 
-ECode ServiceStateTracker::UnregisterForRoamingOff(IHandler* h)
+ECode ServiceStateTracker::RegisterForRoamingOff(
+    /* [in] */ IHandler* h,
+    /* [in] */ Int32 what,
+    /* [in] */ IInterface* obj)
 {
-    assert(0);
-    //return mRoamingOffRegistrants->Remove(h);
+    assert(0 && "TODO Registrant ECO_PUBLIC");
+    // AutoPtr<IRegistrant> r;
+    // CRegistrant::New(h, what, obj, (IRegistrant**)&r);
+    // mRoamingOffRegistrants->Add(r);
+
+    Boolean bRoaming = FALSE;
+    mSS->GetRoaming(&bRoaming);
+    if (!bRoaming) {
+        assert(0 && "TODO Registrant ECO_PUBLIC");
+        // r->NotifyRegistrant();
+    }
     return NOERROR;
 }
 
-/**
- * Re-register network by toggling preferred network type.
- * This is a work-around to deregister and register network since there is
- * no ril api to set COPS=2 (deregister) only.
- *
- * @param onComplete is dispatched when this is complete.  it will be
- * an AsyncResult, and onComplete.obj.exception will be non-NULL
- * on failure.
- */
-ECode ServiceStateTracker::ReRegisterNetwork(IMessage* onComplete)
+ECode ServiceStateTracker::UnregisterForRoamingOff(
+    /* [in] */ IHandler* h)
+{
+    assert(0 && "TODO IRegistrantList ");
+    // return mRoamingOffRegistrants->Remove(h);
+    return NOERROR;
+}
+
+ECode ServiceStateTracker::ReRegisterNetwork(
+    /* [in] */ IMessage* onComplete)
 {
     assert(0);
     //AutoPtr<IMessage> response;
@@ -390,12 +372,13 @@ ECode ServiceStateTracker::ReRegisterNetwork(IMessage* onComplete)
     return NOERROR;
 }
 
-ECode ServiceStateTracker::SetRadioPower(Boolean power)
+ECode ServiceStateTracker::SetRadioPower(
+    /* [in] */ Boolean power)
 {
     assert(0);
     //mDesiredPowerState = power;
 
-    //return SetPowerStateToDesired();
+    SetPowerStateToDesired();
     return NOERROR;
 }
 
@@ -442,368 +425,360 @@ ECode ServiceStateTracker::DisableLocationUpdates()
     return NOERROR;
 }
 
-//@Override
-ECode ServiceStateTracker::HandleMessage(IMessage* msg)
+ECode ServiceStateTracker::HandleMessage(
+    /* [in] */ IMessage* msg)
 {
-    assert(0);
-    //Int32 what, arg1, arg2;
-    //msg->GetWhat(&what);
-    //msg->GetArg1(&arg1);
-    //msg->GetArg2(&arg2);
-    //AutoPtr<IInterface> obj;
-    //msg->GetObj((IInterface**)&obj);
+    Int32 what = 0, arg1 = 0, arg2 = 0;
+    msg->GetWhat(&what);
+    msg->GetArg1(&arg1);
+    msg->GetArg2(&arg2);
+    AutoPtr<IInterface> obj;
+    msg->GetObj((IInterface**)&obj);
 
-    //switch (what) {
-    //    case EVENT_SET_RADIO_POWER_OFF:
-    //        {
-    //            AutoLock syncLock(this);
-    //            if (mPendingRadioPowerOffAfterDataOff &&
-    //                    (arg1 == mPendingRadioPowerOffAfterDataOffTag)) {
-    //                if (DBG) Log(String("EVENT_SET_RADIO_OFF, turn radio off now."));
-    //                HangupAndPowerOff();
-    //                mPendingRadioPowerOffAfterDataOffTag += 1;
-    //                mPendingRadioPowerOffAfterDataOff = FALSE;
-    //            } else {
-    //                Log(String("EVENT_SET_RADIO_OFF is stale arg1=") + IntegralToString(arg1) +
-    //                        String("!= tag=") + IntegralToString(mPendingRadioPowerOffAfterDataOffTag));
-    //            }
-    //        }
-    //        break;
+    switch (what) {
+        case EVENT_SET_RADIO_POWER_OFF:
+            {
+                AutoLock syncLock(this);
+                if (mPendingRadioPowerOffAfterDataOff &&
+                        (arg1 == mPendingRadioPowerOffAfterDataOffTag)) {
+                    if (DBG) {
+                        Log(String("EVENT_SET_RADIO_OFF, turn radio off now."));
+                    }
+                    HangupAndPowerOff();
+                    mPendingRadioPowerOffAfterDataOffTag += 1;
+                    mPendingRadioPowerOffAfterDataOff = FALSE;
+                }
+                else {
+                    Log(String("EVENT_SET_RADIO_OFF is stale arg1=") + StringUtils::ToString(arg1) +
+                            String("!= tag=") + StringUtils::ToString(mPendingRadioPowerOffAfterDataOffTag));
+                }
+            }
+            break;
 
-    //    case EVENT_ICC_CHANGED:
-    //        OnUpdateIccAvailability();
-    //        break;
+        case EVENT_ICC_CHANGED:
+            OnUpdateIccAvailability();
+            break;
 
-    //    case EVENT_GET_CELL_INFO_LIST: {
-    //        IAsyncResult* ar = IAsyncResult::Probe(obj);
-    //        CellInfoResult result = (CellInfoResult) ar.userObj;
-    //        {
-    //            AutoLock syncLock(result.lockObj);
-    //            if (ar.exception != NULL) {
-//  //                  Log("EVENT_GET_CELL_INFO_LIST: error ret NULL, e=" + ar.exception);
-    //                result.list = NULL;
-    //            } else {
-    //                result.list = (List<CellInfo>) ar.result;
+        case EVENT_GET_CELL_INFO_LIST: {
+            AutoPtr<AsyncResult> ar = (AsyncResult*)(IObject*)(obj.Get());
+            AutoPtr<CellInfoResult> result = (CellInfoResult*)(IObject*)(ar->mUserObj).Get();
+            {
+                AutoLock syncLock(result->mLockObj);
+                if (ar->mException != NULL) {
+//                    Log("EVENT_GET_CELL_INFO_LIST: error ret NULL, e=" + ar.exception);
+                    result->mList = NULL;
+                }
+                else {
+                    result->mList = IList::Probe(ar->mResult);
 
-//  //                  if (VDBG) {
-//  //                      Log("EVENT_GET_CELL_INFO_LIST: size=" + result.list->Size()
-//  //                              + " list=" + result.list);
-//  //                  }
-    //            }
-    //            mLastCellInfoListTime = SystemClock::GetElapsedRealtime();
-    //            mLastCellInfoList = result.list;
-    //            result.lockObj->Notify();
-    //        }
-    //        break;
-    //    }
+//                    if (VDBG) {
+//                        Log("EVENT_GET_CELL_INFO_LIST: size=" + result.list->Size()
+//                                + " list=" + result.list);
+//                    }
+                }
+                mLastCellInfoListTime = SystemClock::GetElapsedRealtime();
+                mLastCellInfoList = result->mList;
+                result->mLockObj.Notify();
+            }
+            break;
+        }
 
-    //    case EVENT_UNSOL_CELL_INFO_LIST: {
-    //        IAsyncResult* ar = IAsyncResult::Probe(obj);
-    //        if (ar.exception != NULL) {
-    //            Log("EVENT_UNSOL_CELL_INFO_LIST: error ignoring, e=" + ar.exception);
-    //        } else {
-    //            List<CellInfo> list = (List<CellInfo>) ar.result;
-    //            if (DBG) {
-    //                Log("EVENT_UNSOL_CELL_INFO_LIST: size=" + list->Size()
-    //                        + " list=" + list);
-    //            }
-    //            mLastCellInfoListTime = SystemClock::GetElapsedRealtime();
-    //            mLastCellInfoList = list;
-    //            mPhoneBase->NotifyCellInfo(list);
-    //        }
-    //        break;
-    //    }
+        case EVENT_UNSOL_CELL_INFO_LIST: {
+            AutoPtr<AsyncResult> ar = (AsyncResult*)(IObject*)(obj.Get());
+            if (ar->mException != NULL) {
+                assert(0 && "TODO");
+                // Log(String("EVENT_UNSOL_CELL_INFO_LIST: error ignoring, e=") + StringUtils::ToString(ar->mException));
+            }
+            else {
+                AutoPtr<IList> list = IList::Probe(ar->mResult);
+                if (DBG) {
+                    Int32 size = 0;
+                    list->GetSize(&size);
+                    assert(0 && "TODO");
+                    // Log("EVENT_UNSOL_CELL_INFO_LIST: size=" + size
+                    //         + " list=" + list);
+                }
+                mLastCellInfoListTime = SystemClock::GetElapsedRealtime();
+                mLastCellInfoList = list;
+                mPhoneBase->NotifyCellInfo(list);
+            }
+            break;
+        }
 
-    //    default:
-    //        Log(String("Unhandled message with number: ") + IntegralToString(what));
-    //        break;
-    //}
+        default:
+            Log(String("Unhandled message with number: ") + StringUtils::ToString(what));
+            break;
+    }
     return NOERROR;
 }
 
-/**
- * Registration point for transition into DataConnection attached.
- * @param h handler to notify
- * @param what what code of message when delivered
- * @param obj placed in Message.obj
- */
-ECode ServiceStateTracker::RegisterForDataConnectionAttached(IHandler* h, Int32 what, IInterface* obj)
+ECode ServiceStateTracker::RegisterForDataConnectionAttached(
+    /* [in] */ IHandler* h,
+    /* [in] */ Int32 what,
+    /* [in] */ IInterface* obj)
 {
-    assert(0);
-    //AutoPtr<IRegistrant> r;
-    //CRegistrant::New(h, what, obj, (IRegistrant**)&r);
-    //mAttachedRegistrants->Add(r);
+    assert(0 && "TODO Registrant ECO_PUBLIC");
+    // AutoPtr<IRegistrant> r;
+    // CRegistrant::New(h, what, obj, (IRegistrant**)&r);
+    // mAttachedRegistrants->Add(r);
 
-    //if (GetCurrentDataConnectionState() == IServiceState::STATE_IN_SERVICE) {
-    //    r->NotifyRegistrant();
-    //}
+    Int32 state = 0;
+    GetCurrentDataConnectionState(&state);
+    if (state == IServiceState::STATE_IN_SERVICE) {
+        assert(0 && "TODO");
+        // r->NotifyRegistrant();
+    }
     return NOERROR;
 }
 
-ECode ServiceStateTracker::UnregisterForDataConnectionAttached(IHandler* h)
+ECode ServiceStateTracker::UnregisterForDataConnectionAttached(
+    /* [in] */ IHandler* h)
 {
-    assert(0);
-    //mAttachedRegistrants->Remove(h);
+    assert(0 && "TODO");
+    // mAttachedRegistrants->Remove(h);
     return NOERROR;
 }
 
-/**
- * Registration point for transition into DataConnection detached.
- * @param h handler to notify
- * @param what what code of message when delivered
- * @param obj placed in Message.obj
- */
-ECode ServiceStateTracker::RegisterForDataConnectionDetached(IHandler* h, Int32 what, IInterface* obj)
+ECode ServiceStateTracker::RegisterForDataConnectionDetached(
+    /* [in] */ IHandler* h,
+    /* [in] */ Int32 what,
+    /* [in] */ IInterface* obj)
 {
-    assert(0);
-    //AutoPtr<IRegistrant> r;
-    //CRegistrant::New(h, what, obj, (IRegistrant**)&r);
-    //mDetachedRegistrants->Add(r);
+    assert(0 && "TODO Registrant ECO_PUBLIC");
+    // AutoPtr<IRegistrant> r;
+    // CRegistrant::New(h, what, obj, (IRegistrant**)&r);
+    // mDetachedRegistrants->Add(r);
 
-    //if (GetCurrentDataConnectionState() != IServiceState::STATE_IN_SERVICE) {
-    //    r->NotifyRegistrant();
-    //}
+    Int32 state = 0;
+    GetCurrentDataConnectionState(&state);
+    if (state != IServiceState::STATE_IN_SERVICE) {
+        assert(0 && "TODO");
+        // r->NotifyRegistrant();
+    }
     return NOERROR;
 }
 
-ECode ServiceStateTracker::UnregisterForDataConnectionDetached(IHandler* h)
+ECode ServiceStateTracker::UnregisterForDataConnectionDetached(
+    /* [in] */ IHandler* h)
 {
-    assert(0);
-    //mDetachedRegistrants->Remove(h);
+    assert(0 && "TODO");
+    // mDetachedRegistrants->Remove(h);
     return NOERROR;
 }
 
-/**
- * Registration for DataConnection RIL Data Radio Technology changing. The
- * new radio technology will be returned AsyncResult#result as an Integer Object.
- * The AsyncResult will be in the notification Message#obj.
- *
- * @param h handler to notify
- * @param what what code of message when delivered
- * @param obj placed in Message.obj
- */
-ECode ServiceStateTracker::RegisterForDataRegStateOrRatChanged(IHandler* h, Int32 what, IInterface* obj)
+ECode ServiceStateTracker::RegisterForDataRegStateOrRatChanged(
+    /* [in] */ IHandler* h,
+    /* [in] */ Int32 what,
+    /* [in] */ IInterface* obj)
 {
-    assert(0);
-    //AutoPtr<IRegistrant> r;
-    //CRegistrant::New(h, what, obj, (IRegistrant**)&r);
-    //mDataRegStateOrRatChangedRegistrants->Add(r);
-    //NotifyDataRegStateRilRadioTechnologyChanged();
+    assert(0 && "TODO Registrant ECO_PUBLIC");
+    // AutoPtr<IRegistrant> r;
+    // CRegistrant::New(h, what, obj, (IRegistrant**)&r);
+    // mDataRegStateOrRatChangedRegistrants->Add(r);
+    NotifyDataRegStateRilRadioTechnologyChanged();
     return NOERROR;
 }
 
-ECode ServiceStateTracker::UnregisterForDataRegStateOrRatChanged(IHandler* h)
+ECode ServiceStateTracker::UnregisterForDataRegStateOrRatChanged(
+    /* [in] */ IHandler* h)
 {
-    assert(0);
-    //mDataRegStateOrRatChangedRegistrants->Remove(h);
+    assert(0 && "TODO");
+    // mDataRegStateOrRatChangedRegistrants->Remove(h);
     return NOERROR;
 }
 
-/**
- * Registration point for transition into network attached.
- * @param h handler to notify
- * @param what what code of message when delivered
- * @param obj in Message.obj
- */
-ECode ServiceStateTracker::RegisterForNetworkAttached(IHandler* h, Int32 what, IInterface* obj)
+ECode ServiceStateTracker::RegisterForNetworkAttached(
+    /* [in] */ IHandler* h,
+    /* [in] */ Int32 what,
+    /* [in] */ IInterface* obj)
 {
-    assert(0);
-    //AutoPtr<IRegistrant> r;
-    //CRegistrant::New(h, what, obj, (IRegistrant**)&r);
-    //mNetworkAttachedRegistrants->Add(r);
+    assert(0 && "TODO Registrant ECO_PUBLIC");
+    // AutoPtr<IRegistrant> r;
+    // CRegistrant::New(h, what, obj, (IRegistrant**)&r);
+    // mNetworkAttachedRegistrants->Add(r);
 
-    //Int32 state;
-    //mSS->GetVoiceRegState(&state);
-    //if (state == IServiceState::STATE_IN_SERVICE) {
-    //    r->NotifyRegistrant();
-    //}
+    Int32 state;
+    mSS->GetVoiceRegState(&state);
+    if (state == IServiceState::STATE_IN_SERVICE) {
+        assert(0 && "TODO");
+        // r->NotifyRegistrant();
+    }
     return NOERROR;
 }
 
-ECode ServiceStateTracker::UnregisterForNetworkAttached(IHandler* h)
+ECode ServiceStateTracker::UnregisterForNetworkAttached(
+    /* [in] */ IHandler* h)
 {
-    assert(0);
-    //mNetworkAttachedRegistrants->Remove(h);
+    assert(0 && "TODO");
+    // mNetworkAttachedRegistrants->Remove(h);
     return NOERROR;
 }
 
-/**
- * Registration point for transition into packet service restricted zone.
- * @param h handler to notify
- * @param what what code of message when delivered
- * @param obj placed in Message.obj
- */
-ECode ServiceStateTracker::RegisterForPsRestrictedEnabled(IHandler* h, Int32 what, IInterface* obj)
+ECode ServiceStateTracker::RegisterForPsRestrictedEnabled(
+    /* [in] */ IHandler* h,
+    /* [in] */ Int32 what,
+    /* [in] */ IInterface* obj)
 {
-    assert(0);
-    //AutoPtr<IRegistrant> r;
-    //CRegistrant::New(h, what, obj, (IRegistrant**)&r);
-    //mPsRestrictEnabledRegistrants->Add(r);
+    assert(0 && "TODO Registrant ECO_PUBLIC");
+    // AutoPtr<IRegistrant> r;
+    // CRegistrant::New(h, what, obj, (IRegistrant**)&r);
+    // mPsRestrictEnabledRegistrants->Add(r);
 
-    //if (mRestrictedState->IsPsRestricted()) {
-    //    r->NotifyRegistrant();
-    //}
+    Boolean bRestricted = FALSE;
+    mRestrictedState->IsPsRestricted(&bRestricted);
+    if (bRestricted) {
+        assert(0 && "TODO");
+        // r->NotifyRegistrant();
+    }
     return NOERROR;
 }
 
-ECode ServiceStateTracker::UnregisterForPsRestrictedEnabled(IHandler* h)
+ECode ServiceStateTracker::UnregisterForPsRestrictedEnabled(
+    /* [in] */ IHandler* h)
 {
-    assert(0);
-    //mPsRestrictEnabledRegistrants->Remove(h);
+    assert(0 && "TODO");
+    // mPsRestrictEnabledRegistrants->Remove(h);
     return NOERROR;
 }
 
-/**
- * Registration point for transition out of packet service restricted zone.
- * @param h handler to notify
- * @param what what code of message when delivered
- * @param obj placed in Message.obj
- */
-ECode ServiceStateTracker::RegisterForPsRestrictedDisabled(IHandler* h, Int32 what, IInterface* obj)
+ECode ServiceStateTracker::RegisterForPsRestrictedDisabled(
+    /* [in] */ IHandler* h,
+    /* [in] */ Int32 what,
+    /* [in] */ IInterface* obj)
 {
-    assert(0);
-    //AutoPtr<IRegistrant> r;
-    //CRegistrant::New(h, what, obj, (IRegistrant**)&r);
-    //mPsRestrictDisabledRegistrants->Add(r);
+    assert(0 && "TODO Registrant ECO_PUBLIC");
+    // AutoPtr<IRegistrant> r;
+    // CRegistrant::New(h, what, obj, (IRegistrant**)&r);
+    // mPsRestrictDisabledRegistrants->Add(r);
 
-    //Boolean result;
-    //mRestrictedState->IsPsRestricted(&result);
-    //if (result) {
-    //    r->NotifyRegistrant();
-    //}
+    Boolean result = FALSE;
+    mRestrictedState->IsPsRestricted(&result);
+    if (result) {
+        assert(0 && "TODO");
+        // r->NotifyRegistrant();
+    }
     return NOERROR;
 }
 
-ECode ServiceStateTracker::UnregisterForPsRestrictedDisabled(IHandler* h)
+ECode ServiceStateTracker::UnregisterForPsRestrictedDisabled(
+    /* [in] */ IHandler* h)
 {
-    assert(0);
-    //mPsRestrictDisabledRegistrants->Remove(h);
+    assert(0 && "TODO");
+    // mPsRestrictDisabledRegistrants->Remove(h);
     return NOERROR;
 }
 
-/**
- * Clean up existing voice and data connection then turn off radio power.
- *
- * Hang up the existing voice calls to decrease call drop rate.
- */
-ECode ServiceStateTracker::PowerOffRadioSafely(IDcTrackerBase* dcTracker)
+ECode ServiceStateTracker::PowerOffRadioSafely(
+    /* [in] */ IDcTrackerBase* dcTracker)
 {
-    assert(0);
-    //{
-    //    AutoLock syncLock(this);
-    //    if (!mPendingRadioPowerOffAfterDataOff) {
-    //        // In some network, deactivate PDP connection cause releasing of RRC connection,
-    //        // which MM/IMSI detaching request needs. Without this detaching, network can
-    //        // not release the network resources previously attached.
-    //        // So we are avoiding data detaching on these networks.
-    //        AutoPtr<IContext> context;
-    //        mPhoneBase->GetContext((IContext**)&context);
-    //        AutoPtr<IResources> res;
-    //        context->GetResources((IResources**)&res);
-    //        AutoPtr< ArrayOf<String> > networkNotClearData;
-    //        res->GetStringArray(R::array::networks_not_clear_data, (ArrayOf<String>**)&networkNotClearData);
+    {
+        AutoLock syncLock(this);
+        if (!mPendingRadioPowerOffAfterDataOff) {
+            // In some network, deactivate PDP connection cause releasing of RRC connection,
+            // which MM/IMSI detaching request needs. Without this detaching, network can
+            // not release the network resources previously attached.
+            // So we are avoiding data detaching on these networks.
+            AutoPtr<IContext> context;
+            IPhone::Probe(mPhoneBase)->GetContext((IContext**)&context);
+            AutoPtr<IResources> res;
+            context->GetResources((IResources**)&res);
+            AutoPtr< ArrayOf<String> > networkNotClearData;
+            res->GetStringArray(R::array::networks_not_clear_data, (ArrayOf<String>**)&networkNotClearData);
 
-    //        String currentNetwork;
-    //        mSS->GetOperatorNumeric(&currentNetwork);
+            String currentNetwork;
+            mSS->GetOperatorNumeric(&currentNetwork);
 
-    //        if ((networkNotClearData != NULL) && (currentNetwork != NULL)) {
-    //            Int32 arrayLen = networkNotClearData->GetLength();
-    //            for (Int32 i = 0; i < arrayLen; i++) {
-    //                Boolean bEqual;
-    //                if (IObject::Probe(currentNetwork)->Equals(networkNotClearData[i], &bEqual), bEqual) {
-    //                    // Don't clear data connection for this carrier
-    //                    if (DBG)
-    //                        Log("Not disconnecting data for " + currentNetwork);
-    //                    HangupAndPowerOff();
-    //                    return NOERROR;
-    //                }
-    //            }
-    //        }
-    //        // To minimize race conditions we call cleanUpAllConnections on
-    //        // both if else paths instead of before this isDisconnected test.
-    //        Boolean result;
-    //        if (dcTracker->IsDisconnected(&result), result) {
-    //            // To minimize race conditions we do this after isDisconnected
-    //            dcTracker->CleanUpAllConnections(Phone::REASON_RADIO_TURNED_OFF);
-    //            if (DBG) Log("Data disconnected, turn off radio right away.");
-    //            HangupAndPowerOff();
-    //        } else {
-    //            dcTracker->CleanUpAllConnections(Phone::REASON_RADIO_TURNED_OFF);
+            if ((networkNotClearData != NULL) && (currentNetwork != NULL)) {
+                Int32 arrayLen = networkNotClearData->GetLength();
+                for (Int32 i = 0; i < arrayLen; i++) {
+                    if (currentNetwork.Equals((*networkNotClearData)[i])) {
+                        // Don't clear data connection for this carrier
+                        if (DBG) {
+                            Log(String("Not disconnecting data for ") + currentNetwork);
+                        }
+                        HangupAndPowerOff();
+                        return NOERROR;
+                    }
+                }
+            }
+            // To minimize race conditions we call cleanUpAllConnections on
+            // both if else paths instead of before this isDisconnected test.
+            Boolean result;
+            if (dcTracker->IsDisconnected(&result), result) {
+                // To minimize race conditions we do this after isDisconnected
+                dcTracker->CleanUpAllConnections(IPhone::REASON_RADIO_TURNED_OFF);
+                if (DBG) Log(String("Data disconnected, turn off radio right away."));
+                HangupAndPowerOff();
+            }
+            else {
+                dcTracker->CleanUpAllConnections(IPhone::REASON_RADIO_TURNED_OFF);
 
-    //            AutoPtr<IMessageHelper> mHelper;
-    //            AutoPtr<IMessage> msg;
-    //            CMessageHelper::AcquireSingleton((IMessageHelper**)&mHelper);
-    //            mHelper->Obtain(this, (IMessage**)&msg);
-    //            msg->SetWhat(EVENT_SET_RADIO_POWER_OFF);
-    //            msg->SetArg1(++mPendingRadioPowerOffAfterDataOffTag);
+                AutoPtr<IMessageHelper> mHelper;
+                AutoPtr<IMessage> msg;
+                CMessageHelper::AcquireSingleton((IMessageHelper**)&mHelper);
+                mHelper->Obtain(this, (IMessage**)&msg);
+                msg->SetWhat(EVENT_SET_RADIO_POWER_OFF);
+                msg->SetArg1(++mPendingRadioPowerOffAfterDataOffTag);
 
-    //            if (SendMessageDelayed(msg, 30000, &result), result) {
-    //                if (DBG) Log("Wait upto 30s for data to disconnect, then turn off radio.");
-    //                mPendingRadioPowerOffAfterDataOff = TRUE;
-    //            } else {
-    //                Log("Cannot send delayed Msg, turn off radio right away.");
-    //                HangupAndPowerOff();
-    //            }
-    //        }
-    //    }
-    //}
+                if (SendMessageDelayed(msg, 30000, &result), result) {
+                    if (DBG) Log(String("Wait upto 30s for data to disconnect, then turn off radio."));
+                    mPendingRadioPowerOffAfterDataOff = TRUE;
+                }
+                else {
+                    Log(String("Cannot send delayed Msg, turn off radio right away."));
+                    HangupAndPowerOff();
+                }
+            }
+        }
+    }
     return NOERROR;
 }
 
-/**
- * process the pending request to turn radio off after data is disconnected
- *
- * return TRUE if there is pending request to process; FALSE otherwise.
- */
-ECode ServiceStateTracker::ProcessPendingRadioPowerOffAfterDataOff(Boolean* result)
+ECode ServiceStateTracker::ProcessPendingRadioPowerOffAfterDataOff(
+    /* [out] */ Boolean* result)
 {
-    assert(0);
-    //VALIDATE_NOT_NULL(result)
+    VALIDATE_NOT_NULL(result)
 
-    //{
-    //    AutoLock syncLock(this);
-    //    if (mPendingRadioPowerOffAfterDataOff) {
-    //        if (DBG) Log("Process pending request to turn radio off.");
-    //        mPendingRadioPowerOffAfterDataOffTag += 1;
-    //        HangupAndPowerOff();
-    //        mPendingRadioPowerOffAfterDataOff = FALSE;
-    //        *result = TRUE;
-    //        return NOERROR;
-    //    }
-    //    *result = FALSE;
-    //    return NOERROR;
-    //}
-    return NOERROR;
+    {
+        AutoLock syncLock(this);
+        if (mPendingRadioPowerOffAfterDataOff) {
+            if (DBG) Log(String("Process pending request to turn radio off."));
+            mPendingRadioPowerOffAfterDataOffTag += 1;
+            HangupAndPowerOff();
+            mPendingRadioPowerOffAfterDataOff = FALSE;
+            *result = TRUE;
+            return NOERROR;
+        }
+        *result = FALSE;
+        return NOERROR;
+    }
 }
 
-/**
- * send signal-strength-changed notification if changed Called both for
- * solicited and unsolicited signal strength updates
- *
- * @return TRUE if the signal strength changed and a notification was sent.
- */
-Boolean ServiceStateTracker::OnSignalStrengthResult(AsyncResult* ar, Boolean isGsm)
+Boolean ServiceStateTracker::OnSignalStrengthResult(
+    /* [in] */ AsyncResult* ar,
+    /* [in] */ Boolean isGsm)
 {
-    assert(0);
-    //SignalStrength oldSignalStrength = mSignalStrength;
+    AutoPtr<ISignalStrength> oldSignalStrength = mSignalStrength;
 
-    //// This signal is used for both voice and data radio signal so parse
-    //// all fields
+    // This signal is used for both voice and data radio signal so parse
+    // all fields
 
-    //if ((ar.exception == NULL) && (ar.result != NULL)) {
-    //    mSignalStrength = (SignalStrength) ar.result;
-    //    mSignalStrength->ValidateInput();
-    //    mSignalStrength->SetGsm(isGsm);
-    //} else {
-    //    Log("OnSignalStrengthResult() Exception from RIL : " + ar.exception);
-    //    mSignalStrength = new SignalStrength(isGsm);
-    //}
+    if ((ar->mException == NULL) && (ar->mResult != NULL)) {
+        mSignalStrength = ISignalStrength::Probe(ar->mResult);
+        mSignalStrength->ValidateInput();
+        mSignalStrength->SetGsm(isGsm);
+    }
+    else {
+        String str("OnSignalStrengthResult() Exception from RIL : ");
+        assert(0 && "TODO");
+        // str += ar->mException;
+        Log(str);
+        // CSignalStrength::New(isGsm, (ISignalStrength**)&mSignalStrength);
+    }
 
-    //return NotifySignalStrength();
-    return NOERROR;
+    return NotifySignalStrength();
 }
 
-/** Cancel a Pending (if any) PollState() operation */
 void ServiceStateTracker::CancelPollState()
 {
     assert(0);
@@ -811,17 +786,11 @@ void ServiceStateTracker::CancelPollState()
     //mPollingContext = ArrayOf<Int32>::Alloc(1);
 }
 
-/**
- * Return TRUE if time zone needs fixing.
- *
- * @param phoneBase
- * @param operatorNumeric
- * @param prevOperatorNumeric
- * @param needToFixTimeZone
- * @return TRUE if time zone needs to be fixed
- */
-Boolean ServiceStateTracker::ShouldFixTimeZoneNow(IPhoneBase* phoneBase, const String& operatorNumeric,
-        const String& prevOperatorNumeric, Boolean needToFixTimeZone)
+Boolean ServiceStateTracker::ShouldFixTimeZoneNow(
+    /* [in] */ IPhoneBase* phoneBase,
+    /* [in] */ String operatorNumeric,
+    /* [in] */ String prevOperatorNumeric,
+    /* [in] */ Boolean needToFixTimeZone)
 {
     assert(0);
     // Return FALSE if the mcc isn't valid as we don't know where we are.
@@ -830,119 +799,118 @@ Boolean ServiceStateTracker::ShouldFixTimeZoneNow(IPhoneBase* phoneBase, const S
     // know the country code.
 
     // if mcc is invalid then we'll return FALSE
-    //Int32 mcc;
-    //String subStr = operatorNumeric->Substring(0, 3);
-    //if (FAILED(StringToIntegral::Parse(subStr, &mcc)) {
-    //    return FALSE;
-    //}
+    String subStr = operatorNumeric.Substring(0, 3);
+    Int32 mcc = StringUtils::ParseInt32(subStr);
 
-    //// if prevMcc is invalid will make it different from mcc
-    //// so we'll return TRUE if the card exists.
-    //Int32 prevMcc;
-    //subStr = prevOperatorNumeric->Substring(0, 3);
-    //if (FAILED(StringToIntegral::Parse(subStr, &prevMcc)) {
-    //    prevMcc = mcc + 1;
-    //}
+    // if prevMcc is invalid will make it different from mcc
+    // so we'll return TRUE if the card exists.
+    subStr = prevOperatorNumeric.Substring(0, 3);
+    Int32 prevMcc = StringUtils::ParseInt32(subStr);
 
-    //// Determine if the Icc card exists
-    //Boolean iccCardExist = FALSE;
-    //if (mUiccApplcation != NULL) {
-    //    AppState aState;
-    //    mUiccApplcation->GetState(&aState);
-    //    iccCardExist = aState != AppState::APPSTATE_UNKNOWN;
-    //}
+    // Determine if the Icc card exists
+    Boolean iccCardExist = FALSE;
+    if (mUiccApplcation != NULL) {
+        AppState aState;
+        mUiccApplcation->GetState(&aState);
+        iccCardExist = aState != APPSTATE_UNKNOWN;
+    }
 
-    //// Determine retVal
-    //Boolean retVal = ((iccCardExist && (mcc != prevMcc)) || needToFixTimeZone);
-    //if (DBG) {
-    //    AutoPtr<ISystem> sys;
-    //    Elastos::Core::CSystem::AcquireSingleton((ISystem**)&sys);
-    //    sys->GetCurrentTimeMillis(&ctm);
-    //    Log("shouldFixTimeZoneNow: retVal=" + retVal +
-    //            " iccCardExist=" + iccCardExist +
-    //            " operatorNumeric=" + operatorNumeric + " mcc=" + mcc +
-    //            " prevOperatorNumeric=" + prevOperatorNumeric + " prevMcc=" + prevMcc +
-    //            " needToFixTimeZone=" + needToFixTimeZone +
-    //            " ltod=" + TimeUtils->LogTimeOfDay(ctm));
-    //}
-    //return retVal;
-    return FALSE;
+    // Determine retVal
+    Boolean retVal = ((iccCardExist && (mcc != prevMcc)) || needToFixTimeZone);
+    if (DBG) {
+        AutoPtr<ISystem> sys;
+        Elastos::Core::CSystem::AcquireSingleton((ISystem**)&sys);
+        Int64 ctm = 0;
+        sys->GetCurrentTimeMillis(&ctm);
+        // Log("shouldFixTimeZoneNow: retVal=" + retVal +
+        //         " iccCardExist=" + iccCardExist +
+        //         " operatorNumeric=" + operatorNumeric + " mcc=" + mcc +
+        //         " prevOperatorNumeric=" + prevOperatorNumeric + " prevMcc=" + prevMcc +
+        //         " needToFixTimeZone=" + needToFixTimeZone +
+        //         " ltod=" + TimeUtils->LogTimeOfDay(ctm));
+    }
+    return retVal;
 }
 
-ECode ServiceStateTracker::GetSystemProperty(const String& property, const String& defValue, String* result)
+ECode ServiceStateTracker::GetSystemProperty(
+    /* [in] */ String property,
+    /* [in] */ String defValue,
+    /* [out] */ String* result)
 {
-    assert(0);
-    //AutoPtr<ITelephonyManager> tManager;
-    //CTelephonyManager::AcquireSingleton((ITelephonyManager**)&tManager);
-    //Int64 subId;
-    //mPhoneBase->GetSubId(&subId);
-    //return tManager->GetTelephonyProperty(property, subId, defValue, result);
-    return NOERROR;
+    AutoPtr<ITelephonyManagerHelper> hlp;
+    CTelephonyManagerHelper::AcquireSingleton((ITelephonyManagerHelper**)&hlp);
+    Int64 subId = 0;
+    mPhoneBase->GetSubId(&subId);
+    return hlp->GetTelephonyProperty(property, subId, defValue, result);
 }
 
-/**
- * @return all available cell information or NULL if none.
- */
-ECode ServiceStateTracker::GetAllCellInfo(IList** result)
+ECode ServiceStateTracker::GetAllCellInfo(
+    /* [out] */ IList** result)
 {
-    assert(0);
-    //VALIDATE_NOT_NULL(result)
+    VALIDATE_NOT_NULL(result)
 
-    //CellInfoResult result = new CellInfoResult();
-    //if (VDBG) Log(String("SST->GetAllCellInfo(): E"));
+    AutoPtr<CellInfoResult> res;
+    if (VDBG) Log(String("SST->GetAllCellInfo(): E"));
 
-    //Int32 ver;
-    //mCi->GetRilVersion(&ver);
-    //if (ver >= 8) {
-    //    if (IsCallerOnDifferentThread()) {
-    //        if ((SystemClock::GetElapsedRealtime() - mLastCellInfoListTime)
-    //                > LAST_CELL_INFO_LIST_MAX_AGE_MS) {
-    //            AutoPtr<IMessage> msg;
-    //            ObtainMessage(EVENT_GET_CELL_INFO_LIST, result, (IMessage**)&msg);
-    //            {
-    //                AutoLock syncLock(result.lockObj);
-    //                result.list = NULL;
-    //                mCi->GetCellInfoList(msg);
-//  //                  try {
-    //                    result.lockObj->Wait(5000);
-//  //                  } Catch (InterruptedException e) {
-//  //                      e->PrintStackTrace();
-//  //                  }
-    //            }
-    //        } else {
-    //            if (DBG) Log("SST->GetAllCellInfo(): return last, back to back calls");
-    //            result.list = mLastCellInfoList;
-    //        }
-    //    } else {
-    //        if (DBG) Log(String("SST->GetAllCellInfo(): return last, same thread can't block"));
-    //        result.list = mLastCellInfoList;
-    //    }
-    //} else {
-    //    if (DBG) Log(String("SST->GetAllCellInfo(): not implemented"));
-    //    result.list = NULL;
-    //}
+    Int32 ver = 0;
+    mCi->GetRilVersion(&ver);
+    if (ver >= 8) {
+        if (IsCallerOnDifferentThread()) {
+            if ((SystemClock::GetElapsedRealtime() - mLastCellInfoListTime)
+                    > LAST_CELL_INFO_LIST_MAX_AGE_MS) {
+                AutoPtr<IMessage> msg;
+                ObtainMessage(EVENT_GET_CELL_INFO_LIST, (IObject*)res.Get(), (IMessage**)&msg);
+                {
+                    AutoLock syncLock(res->mLockObj);
+                    res->mList = NULL;
+                    mCi->GetCellInfoList(msg);
+//                    try {
+                        res->mLockObj.Wait(5000);
+//                    } Catch (InterruptedException e) {
+//                        e->PrintStackTrace();
+//                    }
+                }
+            }
+            else {
+                if (DBG) Log(String("SST->GetAllCellInfo(): return last, back to back calls"));
+                res->mList = mLastCellInfoList;
+            }
+        }
+        else {
+            if (DBG) Log(String("SST->GetAllCellInfo(): return last, same thread can't block"));
+            res->mList = mLastCellInfoList;
+        }
+    }
+    else {
+        if (DBG) Log(String("SST->GetAllCellInfo(): not implemented"));
+        res->mList = NULL;
+    }
 
-    //{
-    //    AutoLock syncLock(result.lockObj);
-    //    if (result.list != NULL) {
-    //        if (DBG) Log("SST->GetAllCellInfo(): X size=" + result.list->Size()
-    //                + " list=" + result.list);
-    //        *result = result.list;
-    //        return NOERROR;
-    //    } else {
-    //        if (DBG) Log(String("SST->GetAllCellInfo(): X size=0 list=NULL"));
+    {
+        AutoLock syncLock(res->mLockObj);
+        if (res->mList != NULL) {
+            if (DBG) {
+                Int32 size = 0;
+                res->mList->GetSize(&size);
+                assert(0 && "TODO");
+                // Log("SST->GetAllCellInfo(): X size=" + size
+                //     + " list=" + res->mList);
+            }
+            *result = res->mList;
+            REFCOUNT_ADD(*result)
+            return NOERROR;
+        }
+        else {
+            if (DBG) Log(String("SST->GetAllCellInfo(): X size=0 list=NULL"));
 
-    //        *result = NULL;
-    //        return NOERROR;
-    //    }
-    //}
-    return NOERROR;
+            *result = NULL;
+            return NOERROR;
+        }
+    }
 }
 
-/**
- * @return signal strength
- */
-ECode ServiceStateTracker::GetSignalStrength(ISignalStrength** result)
+ECode ServiceStateTracker::GetSignalStrength(
+    /* [out] */ ISignalStrength** result)
 {
     assert(0);
     //VALIDATE_NOT_NULL(result)
@@ -956,110 +924,79 @@ ECode ServiceStateTracker::GetSignalStrength(ISignalStrength** result)
     return NOERROR;
 }
 
-ECode ServiceStateTracker::Dump(IFileDescriptor* fd, IPrintWriter* pw, ArrayOf<String>* args)
+ECode ServiceStateTracker::Dump(
+    /* [in] */ IFileDescriptor* fd,
+    /* [in] */ IPrintWriter* pw,
+    /* [in] */ ArrayOf<String>* args)
 {
-    assert(0);
-    //pw->Println(String("ServiceStateTracker:"));
-    //pw->Println(String(" mSS=") + Object::ToString(mSS));
-    //pw->Println(String(" mNewSS=") + Object::ToString(mNewSS));
-    //pw->Println(String(" mCellInfo=") + Object::ToString(mCellInfo));
-    //pw->Println(String(" mRestrictedState=") + Object::ToString(mRestrictedState));
-    //pw->Println(String(" mPollingContext=") + Object::ToString(mPollingContext));
-    //pw->Println(String(" mDesiredPowerState=") + StringUtils::BooleanToString(mDesiredPowerState));
-    //pw->Println(String(" mDontPollSignalStrength=") + StringUtils::BooleanToString(mDontPollSignalStrength));
-    //pw->Println(String(" mPendingRadioPowerOffAfterDataOff=") + StringUtils::BooleanToString(mPendingRadioPowerOffAfterDataOff));
-    //pw->Println(String(" mPendingRadioPowerOffAfterDataOffTag=") + IntegralToString::ToString(mPendingRadioPowerOffAfterDataOffTag));
+    pw->Println(String("ServiceStateTracker:"));
+    pw->Println(String(" mSS=") + Object::ToString(mSS));
+    pw->Println(String(" mNewSS=") + Object::ToString(mNewSS));
+    pw->Println(String(" mCellInfo=") + Object::ToString(mCellInfo));
+    pw->Println(String(" mRestrictedState=") + Object::ToString(mRestrictedState));
+    assert(0 && "TODO");
+    // pw->Println(String(" mPollingContext=") + Object::ToString(mPollingContext));
+    pw->Println(String(" mDesiredPowerState=") + StringUtils::BooleanToString(mDesiredPowerState));
+    pw->Println(String(" mDontPollSignalStrength=") + StringUtils::BooleanToString(mDontPollSignalStrength));
+    pw->Println(String(" mPendingRadioPowerOffAfterDataOff=") + StringUtils::BooleanToString(mPendingRadioPowerOffAfterDataOff));
+    pw->Println(String(" mPendingRadioPowerOffAfterDataOffTag=") + IntegralToString::ToString(mPendingRadioPowerOffAfterDataOffTag));
     return NOERROR;
 }
 
-/**
- * Verifies the current thread is the same as the thread originally
- * used in the initialization of this instance. Throws RuntimeException
- * if not.
- *
- * @exception RuntimeException if the current thread is not
- * the thread that originally obtained this PhoneBase instance.
- */
 ECode ServiceStateTracker::CheckCorrectThread()
 {
-    assert(0);
-    //AutoPtr<IThread> looperThread;
-    //AutoPtr<ILooper> handlerLooper;
-    //GetLooper((ILooper**)&handlerLooper);
-    //handlerLooper->GetThread((IThread**)&looperThread);
-    //if (!CObject::Compare(Thread::GetCurrentThread(), looperThread.Get()) {
-    //    return E_RUNTIME_EXCEPTION
-    //}
+    AutoPtr<IThread> looperThread;
+    AutoPtr<ILooper> handlerLooper;
+    GetLooper((ILooper**)&handlerLooper);
+    handlerLooper->GetThread((IThread**)&looperThread);
+    if (!Object::Equals(Thread::GetCurrentThread(), looperThread.Get())) {
+        return E_RUNTIME_EXCEPTION;
+    }
     return NOERROR;
 }
 
 Boolean ServiceStateTracker::IsCallerOnDifferentThread()
 {
-    assert(0);
-    //AutoPtr<IThread> looperThread;
-    //AutoPtr<ILooper> handlerLooper;
-    //GetLooper((ILooper**)&handlerLooper);
-    //handlerLooper->GetThread((IThread**)&looperThread);
-    //Boolean value = !CObject::Compare(Thread::GetCurrentThread(), looperThread.Get());
-    //if (VDBG) Log(String("isCallerOnDifferentThread: ") + StringUtils::BooleanToString(value));
-    //return value;
-    return FALSE;
+    AutoPtr<IThread> looperThread;
+    AutoPtr<ILooper> handlerLooper;
+    GetLooper((ILooper**)&handlerLooper);
+    handlerLooper->GetThread((IThread**)&looperThread);
+    Boolean value = !Object::Equals(Thread::GetCurrentThread(), looperThread.Get());
+    if (VDBG) Log(String("isCallerOnDifferentThread: ") + StringUtils::BooleanToString(value));
+    return value;
 }
 
-void ServiceStateTracker::UpdateCarrierMccMncConfiguration(const String& newOp, const String& oldOp, IContext* context)
+void ServiceStateTracker::UpdateCarrierMccMncConfiguration(
+    /* [in] */ String newOp,
+    /* [in] */ String oldOp,
+    /* [in] */ IContext* context)
 {
-    assert(0);
-    //// if we have a change in operator, notify Wifi (even to/from none)
-    //if (((newOp == NULL) && (TextUtils::IsEmpty(oldOp) == FALSE)) ||
-    //        ((newOp != NULL) && (newOp->Equals(oldOp) == FALSE))) {
-    //    Log(String("update mccmnc=") + newOp + String(" fromServiceState=TRUE"));
-    //    AutoPtr<IMccTableHelper> mccTableHelper;
-    //    CMccTableHelper::AcquireSingleton((IMccTableHelper**)&mccTableHelper);
-    //    mccTableHelper->UpdateMccMncConfiguration(context, newOp, TRUE);
-    //}
+    // if we have a change in operator, notify Wifi (even to/from none)
+    if (((newOp.IsNull()) && (TextUtils::IsEmpty(oldOp) == FALSE)) ||
+            ((!newOp.IsNull()) && (newOp.Equals(oldOp) == FALSE))) {
+        Log(String("update mccmnc=") + newOp + String(" fromServiceState=TRUE"));
+        assert(0 && "TODO");
+        // AutoPtr<IMccTableHelper> mccTableHelper;
+        // CMccTableHelper::AcquireSingleton((IMccTableHelper**)&mccTableHelper);
+        // mccTableHelper->UpdateMccMncConfiguration(context, newOp, TRUE);
+    }
 }
 
 Boolean ServiceStateTracker::IsIwlanFeatureAvailable()
 {
-    assert(0);
-    //AutoPtr<IContext> context;
-    //mPhoneBase->GetContext((IContext**)&context);
-    //AutoPtr<IResources> res;
-    //context->GetResources((IResources**)&res);
-    Boolean iwlanAvailable = FALSE;
-    //res->GetBoolean(R::bool::config_feature_iwlan_enabled, &iwlanAvailable);
+    AutoPtr<IContext> context;
+    IPhone::Probe(mPhoneBase)->GetContext((IContext**)&context);
+    AutoPtr<IResources> res;
+    context->GetResources((IResources**)&res);
+    Boolean iwlanAvailable;
+    res->GetBoolean(R::bool_::config_feature_iwlan_enabled, &iwlanAvailable);
 
-    //Log(String("Iwlan feature available = ") + StringUtils::BooleanToString(iwlanAvailable));
+    Log(String("Iwlan feature available = ") + StringUtils::BooleanToString(iwlanAvailable));
     return iwlanAvailable;
 }
 
-/* Consider the below usecase.
- * 1. WQE and IWLAN features are enabled and hence device can have wifi and mobile
- * connectivity simultaneously.
- * 2. Current available RATs are WWAN and IWLAN, both co-exists.
- * 3. RIL informs preferred RAT as WWAN. Telephony could have default and
- * non-default PDP activated. Since IWLAN is also available, non-default pdp
- * would be over IWLAN.
- * 4. WWAN goes to OOS.
- * 5. RIL informs that default PDP is Lost(unsol_data_call_list).
- * 6. Telephony attempts to retry the default APN context.
- * 7. RIL informs current preferred RAT is IWLAN.
- * 8. Telephony marks default/ia APN as "not available".
- * 9. Upon retry timer expiration, telephony does not bringup default APN
- * since is marked as unavailable. DC object moved to IDLE state.
- * 10 Later WWAN gets back in service.
- * 11. RIL informs preferred RAT as WWAN. So the RAT transition was as
- * follow.
- * IWLAN(Attached) -> WWAN(Attached)
- * 12. There is no trigger for telephony to initiate data call on
- * connnectable ApnContext after WWAN gets in service.
- * 13 Below method detects the transition from IWLAN to WWAN in attached
- * state and informs telephony that we are in WWAN attached state.
- * 14. Telephony would look into all the connectable APNs are would trigger
- * data call based on prevailing conditions.
- *
- */
-void ServiceStateTracker::ProcessIwlanToWwanTransition(IServiceState* ss)
+void ServiceStateTracker::ProcessIwlanToWwanTransition(
+    /* [in] */ IServiceState* ss)
 {
     assert(0);
     // Wifi Connected(iwlan feature on) AND a Valid(non-wlan) RAT present
@@ -1067,19 +1004,20 @@ void ServiceStateTracker::ProcessIwlanToWwanTransition(IServiceState* ss)
     //
     // Notify that we are attached so that we can setup connectable
     // APNs.
-    //Int32 rat, state;
-    //ss->GetRilDataRadioTechnology(&rat);
-    //ss->GetDataRegState(&state);
+    Int32 rat = 0, state = 0;
+    ss->GetRilDataRadioTechnology(&rat);
+    ss->GetDataRegState(&state);
 
-    //if (IsIwlanFeatureAvailable() &&
-    //        (rat != IServiceState::RIL_RADIO_TECHNOLOGY_IWLAN) &&
-    //        (rat != IServiceState::RIL_RADIO_TECHNOLOGY_UNKNOWN) &&
-    //        (state == IServiceState::STATE_IN_SERVICE) &&
-    //        (mIwlanRatAvailable == TRUE)) {
+    assert(0 && "TODO");
+    // if (IsIwlanFeatureAvailable() &&
+    //         (rat != IServiceState::RIL_RADIO_TECHNOLOGY_IWLAN) &&
+    //         (rat != IServiceState::RIL_RADIO_TECHNOLOGY_UNKNOWN) &&
+    //         (state == IServiceState::STATE_IN_SERVICE) &&
+    //         (mIwlanRatAvailable == TRUE)) {
 
-    //    Log(String("pollStateDone: Wifi connected and moved out of iwlan and wwan is attached."));
-    //    mAttachedRegistrants->NotifyRegistrants();
-    //}
+    //     Log(String("pollStateDone: Wifi connected and moved out of iwlan and wwan is attached."));
+    //     mAttachedRegistrants->NotifyRegistrants();
+    // }
 }
 
 } // namespace Telephony

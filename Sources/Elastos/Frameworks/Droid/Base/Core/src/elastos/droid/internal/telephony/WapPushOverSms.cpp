@@ -1,474 +1,658 @@
-/*
- * Copyright (C) 2008 The Android Open Source Project
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
 
-package com.android.internal.telephony;
+#include "elastos/droid/internal/telephony/WapPushOverSms.h"
+#include "elastos/droid/content/CIntent.h"
+#include "elastos/droid/content/CContentValues.h"
+#include "elastos/droid/database/CDatabaseUtils.h"
+#include "elastos/droid/provider/CTelephonySmsInbox.h"
+#include "elastos/droid/provider/CTelephonyMms.h"
+#include "elastos/droid/telephony/CSmsManagerHelper.h"
+#include "elastos/droid/telephony/CSubscriptionManager.h"
+#include "elastos/droid/text/TextUtils.h"
+#include "elastos/droid/os/CUserHandleHelper.h"
+#include "elastos/droid/R.h"
+#include "elastos/droid/Manifest.h"
 
-using com::Google::Android::Mms::Pdu::IDeliveryInd;
-using com::Google::Android::Mms::Pdu::IGenericPdu;
-using com::Google::Android::Mms::Pdu::INotificationInd;
-using com::Google::Android::Mms::Pdu::IPduHeaders;
-using com::Google::Android::Mms::Pdu::IPduParser;
-using com::Google::Android::Mms::Pdu::IPduPersister;
-using com::Google::Android::Mms::Pdu::IReadOrigInd;
+#include <elastos/core/StringUtils.h>
+#include <elastos/utility/logging/Logger.h>
 
 using Elastos::Droid::App::IActivity;
 using Elastos::Droid::App::IAppOpsManager;
-using Elastos::Droid::Content::IBroadcastReceiver;
-using Elastos::Droid::Content::IComponentName;
 using Elastos::Droid::Content::IContentValues;
-using Elastos::Droid::Content::IContext;
+using Elastos::Droid::Content::CContentValues;
 using Elastos::Droid::Content::IIntent;
-using Elastos::Droid::Content::IServiceConnection;
+using Elastos::Droid::Content::CIntent;
+using Elastos::Droid::Content::IContentResolver;
+using Elastos::Droid::Content::EIID_IServiceConnection;
+using Elastos::Droid::Content::Pm::IPackageManager;
 using Elastos::Droid::Database::ICursor;
 using Elastos::Droid::Database::IDatabaseUtils;
-using Elastos::Droid::Database::Sqlite::ISqliteWrapper;
+using Elastos::Droid::Database::CDatabaseUtils;
 using Elastos::Droid::Net::IUri;
 using Elastos::Droid::Os::IBundle;
-using Elastos::Droid::Os::IIBinder;
 using Elastos::Droid::Os::IUserHandle;
-using Elastos::Droid::Provider::ITelephony;
-using Elastos::Droid::Provider::Telephony::Sms::IIntents;
+using Elastos::Droid::Os::IUserHandleHelper;
+using Elastos::Droid::Os::CUserHandleHelper;
+using Elastos::Droid::Provider::ITelephonyBaseMmsColumns;
+using Elastos::Droid::Provider::ITelephonySmsIntents;
+using Elastos::Droid::Provider::ITelephonySmsInbox;
+using Elastos::Droid::Provider::CTelephonySmsInbox;
+using Elastos::Droid::Provider::ITelephonyMms;
+using Elastos::Droid::Provider::CTelephonyMms;
 using Elastos::Droid::Telephony::ISmsManager;
 using Elastos::Droid::Telephony::ISubscriptionManager;
-using Elastos::Droid::Telephony::IRlog;
-using Elastos::Droid::Text::ITextUtils;
-using Elastos::Droid::Utility::ILog;
+using Elastos::Droid::Telephony::ISmsManagerHelper;
+using Elastos::Droid::Telephony::CSmsManagerHelper;
+using Elastos::Droid::Telephony::CSubscriptionManager;
+using Elastos::Droid::Text::TextUtils;
+using Elastos::Droid::Google::Mms::Pdu::IDeliveryInd;
+using Elastos::Droid::Google::Mms::Pdu::IPduHeaders;
+using Elastos::Droid::Google::Mms::Pdu::IPduParser;
+using Elastos::Droid::Google::Mms::Pdu::IPduPersister;
+using Elastos::Droid::Google::Mms::Pdu::IPduPersisterHelper;
+using Elastos::Droid::Google::Mms::Pdu::IReadOrigInd;
+using Elastos::Droid::Google::Mms::Pdu::IPduHeaders;
+using Elastos::Droid::Google::Mms::Utility::ISqliteWrapper;
+using Elastos::Droid::R;
+using Elastos::Droid::Manifest;
 
-using Elastos::Droid::Internal::Telephony::Uicc::IIccUtils;
+using Elastos::Core::StringUtils;
+using Elastos::IO::ICloseable;
+using Elastos::Utility::IHashMap;
+using Elastos::Utility::Logging::Logger;
 
-using static com::Google::Android::Mms::Pdu::PduHeaders::IMESSAGE_TYPE_DELIVERY_IND;
-using static com::Google::Android::Mms::Pdu::PduHeaders::IMESSAGE_TYPE_NOTIFICATION_IND;
-using static com::Google::Android::Mms::Pdu::PduHeaders::IMESSAGE_TYPE_READ_ORIG_IND;
+namespace Elastos {
+namespace Droid {
+namespace Internal {
+namespace Telephony {
 
-/**
- * WAP push handler class.
- *
- * @hide
- */
-public class WapPushOverSms implements ServiceConnection {
-    private static const String TAG = "WAP PUSH";
-    private static const Boolean DBG = TRUE;
+//==============================================================
+//  WapPushOverSms::
+//==============================================================
+const String WapPushOverSms::TAG("WAP PUSH");
+const Boolean WapPushOverSms::DBG = TRUE;
 
-    private final Context mContext;
+const String WapPushOverSms::THREAD_ID_SELECTION =
+        ITelephonyBaseMmsColumns::MESSAGE_ID + "=? AND " + ITelephonyBaseMmsColumns::MESSAGE_TYPE + "=?";
 
-    /** Assigned from ServiceConnection callback on main threaad. */
-    private volatile IWapPushManager mWapPushManager;
+const String WapPushOverSms::LOCATION_SELECTION =
+        ITelephonyBaseMmsColumns::MESSAGE_TYPE + "=? AND " + ITelephonyBaseMmsColumns::CONTENT_LOCATION + " =?";
 
-    //@Override
-    CARAPI OnServiceConnected(ComponentName name, IBinder service) {
-        mWapPushManager = IWapPushManager.Stub->AsInterface(service);
-        If (DBG) Rlog->V(TAG, "wappush manager connected to " + HashCode());
+CAR_INTERFACE_IMPL_2(WapPushOverSms, Object, IServiceConnection, IWapPushOverSms)
+
+ECode WapPushOverSms::OnServiceConnected(
+    /* [in] */ IComponentName* name,
+    /* [in] */ IBinder* service)
+{
+    // mWapPushManager = IWapPushManager.Stub->AsInterface(service);
+    // if (DBG) Rlog->V(TAG, "wappush manager connected to " + HashCode());
+    return NOERROR;
+}
+
+ECode WapPushOverSms::OnServiceDisconnected(
+    /* [in] */ IComponentName* name)
+{
+    mWapPushManager = NULL;
+    // if (DBG) Rlog::V(TAG, "wappush manager disconnected.");
+    return NOERROR;
+}
+
+ECode WapPushOverSms::constructor(
+    /* [in] */ IContext* context)
+{
+    mContext = context;
+    AutoPtr<IIntent> intent;
+    // CIntent::New(IWapPushManager.class->GetName(), (IIntent**)&intent);
+    AutoPtr<IPackageManager> pm;
+    context->GetPackageManager((IPackageManager**)&pm);
+    AutoPtr<IComponentName> comp;
+    intent->ResolveSystemService(pm, 0, (IComponentName**)&comp);
+    intent->SetComponent(comp);
+    Boolean bBindService = FALSE;
+    context->BindService(intent, this, IContext::BIND_AUTO_CREATE, &bBindService);
+    if (comp == NULL || !bBindService) {
+        // Rlog::E(TAG, "BindService() for wappush manager failed");
     }
-
-    //@Override
-    CARAPI OnServiceDisconnected(ComponentName name) {
-        mWapPushManager = NULL;
-        If (DBG) Rlog->V(TAG, "wappush manager disconnected.");
+    else {
+        // if (DBG) Rlog::V(TAG, "BindService() for wappush manager succeeded");
     }
+    return NOERROR;
+}
 
-    public WapPushOverSms(Context context) {
-        mContext = context;
-        Intent intent = new Intent(IWapPushManager.class->GetName());
-        ComponentName comp = intent->ResolveSystemService(context->GetPackageManager(), 0);
-        intent->SetComponent(comp);
-        If (comp == NULL || !context->BindService(intent, this, Context.BIND_AUTO_CREATE)) {
-            Rlog->E(TAG, "BindService() for wappush manager failed");
-        } else {
-            If (DBG) Rlog->V(TAG, "BindService() for wappush manager succeeded");
+ECode WapPushOverSms::Dispose()
+{
+    if (mWapPushManager != NULL) {
+        // if (DBG) Rlog::V(TAG, "dispose: unbind wappush manager");
+        mContext->UnbindService(this);
+    }
+    else {
+        // Rlog->E(TAG, "dispose: not bound to a wappush manager");
+    }
+    return NOERROR;
+}
+
+ECode WapPushOverSms::DispatchWapPdu(
+    /* [in] */ ArrayOf<Byte>* pdu,
+    /* [in] */ IBroadcastReceiver* receiver,
+    /* [in] */ IInboundSmsHandler* handler,
+    /* [in] */ const String& address,
+    /* [out] */ Int32* result)
+{
+    // if (DBG) Rlog->D(TAG, "Rx: " + IccUtils->BytesToHexString(pdu));
+
+    // try {
+    Int32 index = 0;
+    Int32 transactionId = (*pdu)[index++] & 0xFF;
+    Int32 pduType = (*pdu)[index++] & 0xFF;
+
+    // Should we "abort" if no subId for now just no supplying extra param below
+    AutoPtr<IPhoneBase> phone;
+    handler->GetPhone((IPhoneBase**)&phone);
+    Int32 phoneId = 0;
+    phone->GetPhoneId(&phoneId);
+
+    if ((pduType != IWspTypeDecoder::PDU_TYPE_PUSH) &&
+            (pduType != IWspTypeDecoder::PDU_TYPE_CONFIRMED_PUSH)) {
+        AutoPtr<IResources> res;
+        mContext->GetResources((IResources**)&res);
+        res->GetInteger(
+                R::integer::config_valid_wappush_index,
+                &index);
+        if (index != -1) {
+            transactionId = (*pdu)[index++] & 0xff;
+            pduType = (*pdu)[index++] & 0xff;
+            if (DBG) {
+                // Rlog::D(TAG, "index = " + index + " PDU Type = " + pduType +
+                //         " transactionID = " + transactionId);
+            }
+
+            // recheck wap push pduType
+            if ((pduType != IWspTypeDecoder::PDU_TYPE_PUSH)
+                    && (pduType != IWspTypeDecoder::PDU_TYPE_CONFIRMED_PUSH)) {
+                if (DBG) {
+                    // Rlog::W(TAG, "Received non-PUSH WAP PDU. Type = " + pduType);
+                }
+                *result = ITelephonySmsIntents::RESULT_SMS_HANDLED;
+                return NOERROR;
+            }
+        }
+        else {
+            // if (DBG) Rlog->W(TAG, "Received non-PUSH WAP PDU. Type = " + pduType);
+            *result = ITelephonySmsIntents::RESULT_SMS_HANDLED;
+            return NOERROR;
         }
     }
 
-    void Dispose() {
-        If (mWapPushManager != NULL) {
-            If (DBG) Rlog->V(TAG, "dispose: unbind wappush manager");
-            mContext->UnbindService(this);
-        } else {
-            Rlog->E(TAG, "dispose: not bound to a wappush manager");
+    AutoPtr<IWspTypeDecoder> pduDecoder;
+    assert(0 && "TODO");
+    // CWspTypeDecoder::New(pdu, (IWspTypeDecoder**)&pduDecoder);
+
+    /**
+     * Parse HeaderLen(unsigned integer).
+     * From wap-230-wsp-20010705-a section 8.1.2
+     * The maximum size of a uintvar is 32 bits.
+     * So it will be encoded in no more than 5 octets.
+     */
+    Boolean bInteger = FALSE;
+    pduDecoder->DecodeUintvarInteger(index, &bInteger);
+    if (bInteger == FALSE) {
+        // if (DBG) Rlog->W(TAG, "Received PDU. Header Length error.");
+        *result = ITelephonySmsIntents::RESULT_SMS_GENERIC_ERROR;
+        return NOERROR;
+    }
+    Int64 val = 0;
+    pduDecoder->GetValue32(&val);
+    Int32 headerLength = (Int32) val;
+    Int32 length = 0;
+    pduDecoder->GetDecodedDataLength(&length);
+    index += length;
+
+    Int32 headerStartIndex = index;
+
+    /**
+     * Parse Content-Type.
+     * From wap-230-wsp-20010705-a section 8.4.2.24
+     *
+     * Content-type-value = Constrained-media | Content-general-form
+     * Content-general-form = Value-length Media-type
+     * Media-type = (Well-known-media | Extension-Media) *(Parameter)
+     * Value-length = Short-length | (Length-quote Length)
+     * Short-length = <Any octet 0-30>   (octet <= WAP_PDU_SHORT_LENGTH_MAX)
+     * Length-quote = <Octet 31>         (WAP_PDU_LENGTH_QUOTE)
+     * Length = Uintvar-integer
+     */
+    Boolean bType = FALSE;
+    pduDecoder->DecodeContentType(index, &bType);
+    if (bType == FALSE) {
+        // if (DBG) Rlog->W(TAG, "Received PDU. Header Content-Type error.");
+        *result = ITelephonySmsIntents::RESULT_SMS_GENERIC_ERROR;
+        return NOERROR;
+    }
+
+    String mimeType;
+    pduDecoder->GetValueString(&mimeType);
+    Int64 binaryContentType = 0;
+    pduDecoder->GetValue32(&binaryContentType);
+    Int32 dataLength = 0;
+    pduDecoder->GetDecodedDataLength(&dataLength);
+    index += dataLength;
+
+    AutoPtr<ArrayOf<Byte> > header = ArrayOf<Byte>::Alloc(headerLength);
+    header->Copy(0, pdu, headerStartIndex, header->GetLength());
+
+    AutoPtr<ArrayOf<Byte> > intentData;
+
+    if (!mimeType.IsNull() && mimeType.Equals(IWspTypeDecoder::CONTENT_TYPE_B_PUSH_CO)) {
+        intentData = pdu;
+    }
+    else {
+        Int32 dataIndex = headerStartIndex + headerLength;
+        intentData = ArrayOf<Byte>::Alloc(pdu->GetLength() - dataIndex);
+        intentData->Copy(0, pdu, dataIndex, intentData->GetLength());
+    }
+
+    AutoPtr<ISmsManagerHelper> smhlp;
+    CSmsManagerHelper::AcquireSingleton((ISmsManagerHelper**)&smhlp);
+    AutoPtr<ISmsManager> sm;
+    smhlp->GetDefault((ISmsManager**)&sm);
+    Boolean bPersis = FALSE;
+    sm->GetAutoPersisting(&bPersis);
+    AutoPtr<ISubscriptionManager> submg;
+    CSubscriptionManager::AcquireSingleton((ISubscriptionManager**)&submg);
+    if (bPersis) {
+        // Store the wap push data in telephony
+        AutoPtr<ArrayOf<Int64> > subIds;
+        submg->GetSubId(phoneId, (ArrayOf<Int64>**)&subIds);
+        // FIXME (tomtaylor) - when we've updated SubscriptionManager, change
+        // SubscriptionManager.DEFAULT_SUB_ID to SubscriptionManager->GetDefaultSmsSubId()
+        Int64 subId = 0;
+        if ((subIds != NULL) && (subIds->GetLength() > 0)) {
+            subId = (*subIds)[0];
         }
+        else {
+            smhlp->GetDefaultSmsSubId(&subId);
+        }
+        WriteInboxMessage(subId, intentData);
     }
 
     /**
-     * Dispatches inbound messages that are in the WAP PDU format. See
-     * wap-230-wsp-20010705-a section 8 for details on the WAP PDU format.
-     *
-     * @param pdu The WAP PDU, made up of one or more SMS PDUs
-     * @param address The originating address
-     * @return a result code from {@link android.provider.Telephony.Sms.Intents}, or
-     *         {@link Activity#RESULT_OK} if the message has been broadcast
-     *         to applications
+     * Seek for application ID field in WSP header.
+     * if application ID is found, WapPushManager substitute the message
+     * processing. Since WapPushManager is optional module, if WapPushManager
+     * is not found, legacy message processing will be continued.
      */
-    public Int32 DispatchWapPdu(Byte[] pdu, BroadcastReceiver receiver, InboundSmsHandler handler,
-            String address) {
-
-        If (DBG) Rlog->D(TAG, "Rx: " + IccUtils->BytesToHexString(pdu));
-
-        try {
-            Int32 index = 0;
-            Int32 transactionId = pdu[index++] & 0xFF;
-            Int32 pduType = pdu[index++] & 0xFF;
-
-            // Should we "abort" if no subId for now just no supplying extra param below
-            Int32 phoneId = handler->GetPhone()->GetPhoneId();
-
-            If ((pduType != WspTypeDecoder.PDU_TYPE_PUSH) &&
-                    (pduType != WspTypeDecoder.PDU_TYPE_CONFIRMED_PUSH)) {
-                index = mContext->GetResources()->GetInteger(
-                        R.integer.config_valid_wappush_index);
-                If (index != -1) {
-                    transactionId = pdu[index++] & 0xff;
-                    pduType = pdu[index++] & 0xff;
-                    If (DBG)
-                        Rlog->D(TAG, "index = " + index + " PDU Type = " + pduType +
-                                " transactionID = " + transactionId);
-
-                    // recheck wap push pduType
-                    If ((pduType != WspTypeDecoder.PDU_TYPE_PUSH)
-                            && (pduType != WspTypeDecoder.PDU_TYPE_CONFIRMED_PUSH)) {
-                        If (DBG) Rlog->W(TAG, "Received non-PUSH WAP PDU. Type = " + pduType);
-                        return Intents.RESULT_SMS_HANDLED;
-                    }
-                } else {
-                    If (DBG) Rlog->W(TAG, "Received non-PUSH WAP PDU. Type = " + pduType);
-                    return Intents.RESULT_SMS_HANDLED;
-                }
-            }
-
-            WspTypeDecoder pduDecoder = new WspTypeDecoder(pdu);
-
-            /**
-             * Parse HeaderLen(unsigned integer).
-             * From wap-230-wsp-20010705-a section 8.1.2
-             * The maximum size of a uintvar is 32 bits.
-             * So it will be encoded in no more than 5 octets.
-             */
-            If (pduDecoder->DecodeUintvarInteger(index) == FALSE) {
-                If (DBG) Rlog->W(TAG, "Received PDU. Header Length error.");
-                return Intents.RESULT_SMS_GENERIC_ERROR;
-            }
-            Int32 headerLength = (Int32) pduDecoder->GetValue32();
-            index += pduDecoder->GetDecodedDataLength();
-
-            Int32 headerStartIndex = index;
-
-            /**
-             * Parse Content-Type.
-             * From wap-230-wsp-20010705-a section 8.4.2.24
-             *
-             * Content-type-value = Constrained-media | Content-general-form
-             * Content-general-form = Value-length Media-type
-             * Media-type = (Well-known-media | Extension-Media) *(Parameter)
-             * Value-length = Short-length | (Length-quote Length)
-             * Short-length = <Any octet 0-30>   (octet <= WAP_PDU_SHORT_LENGTH_MAX)
-             * Length-quote = <Octet 31>         (WAP_PDU_LENGTH_QUOTE)
-             * Length = Uintvar-integer
-             */
-            If (pduDecoder->DecodeContentType(index) == FALSE) {
-                If (DBG) Rlog->W(TAG, "Received PDU. Header Content-Type error.");
-                return Intents.RESULT_SMS_GENERIC_ERROR;
-            }
-
-            String mimeType = pduDecoder->GetValueString();
-            Int64 binaryContentType = pduDecoder->GetValue32();
-            index += pduDecoder->GetDecodedDataLength();
-
-            Byte[] header = new Byte[headerLength];
-            System->Arraycopy(pdu, headerStartIndex, header, 0, header.length);
-
-            Byte[] intentData;
-
-            If (mimeType != NULL && mimeType->Equals(WspTypeDecoder.CONTENT_TYPE_B_PUSH_CO)) {
-                intentData = pdu;
-            } else {
-                Int32 dataIndex = headerStartIndex + headerLength;
-                intentData = new Byte[pdu.length - dataIndex];
-                System->Arraycopy(pdu, dataIndex, intentData, 0, intentData.length);
-            }
-
-            If (SmsManager->GetDefault()->GetAutoPersisting()) {
-                // Store the wap push data in telephony
-                Int64 [] subIds = SubscriptionManager->GetSubId(phoneId);
-                // FIXME (tomtaylor) - when we've updated SubscriptionManager, change
-                // SubscriptionManager.DEFAULT_SUB_ID to SubscriptionManager->GetDefaultSmsSubId()
-                Int64 subId = (subIds != NULL) && (subIds.length > 0) ? subIds[0] :
-                    SmsManager->GetDefaultSmsSubId();
-                WriteInboxMessage(subId, intentData);
-            }
-
-            /**
-             * Seek for application ID field in WSP header.
-             * If application ID is found, WapPushManager substitute the message
-             * processing. Since WapPushManager is optional module, if WapPushManager
-             * is not found, legacy message processing will be continued.
-             */
-            If (pduDecoder->SeekXWapApplicationId(index, index + headerLength - 1)) {
-                index = (Int32) pduDecoder->GetValue32();
-                pduDecoder->DecodeXWapApplicationId(index);
-                String wapAppId = pduDecoder->GetValueString();
-                If (wapAppId == NULL) {
-                    wapAppId = Integer->ToString((Int32) pduDecoder->GetValue32());
-                }
-
-                String contentType = ((mimeType == NULL) ?
-                        Long->ToString(binaryContentType) : mimeType);
-                If (DBG) Rlog->V(TAG, "appid found: " + wapAppId + ":" + contentType);
-
-                try {
-                    Boolean processFurther = TRUE;
-                    IWapPushManager wapPushMan = mWapPushManager;
-
-                    If (wapPushMan == NULL) {
-                        If (DBG) Rlog->W(TAG, "wap push manager not found!");
-                    } else {
-                        Intent intent = new Intent();
-                        intent->PutExtra("transactionId", transactionId);
-                        intent->PutExtra("pduType", pduType);
-                        intent->PutExtra("header", header);
-                        intent->PutExtra("data", intentData);
-                        intent->PutExtra("contentTypeParameters",
-                                pduDecoder->GetContentParameters());
-                        If (!TextUtils->IsEmpty(address)) {
-                            intent->PutExtra("address", address);
-                        }
-                        SubscriptionManager->PutPhoneIdAndSubIdExtra(intent, phoneId);
-
-                        Int32 procRet = wapPushMan->ProcessMessage(wapAppId, contentType, intent);
-                        If (DBG) Rlog->V(TAG, "procRet:" + procRet);
-                        If ((procRet & WapPushManagerParams.MESSAGE_HANDLED) > 0
-                                && (procRet & WapPushManagerParams.FURTHER_PROCESSING) == 0) {
-                            processFurther = FALSE;
-                        }
-                    }
-                    If (!processFurther) {
-                        return Intents.RESULT_SMS_HANDLED;
-                    }
-                } Catch (RemoteException e) {
-                    If (DBG) Rlog->W(TAG, "remote func failed...");
-                }
-            }
-            If (DBG) Rlog->V(TAG, "fall back to existing handler");
-
-            If (mimeType == NULL) {
-                If (DBG) Rlog->W(TAG, "Header Content-Type error.");
-                return Intents.RESULT_SMS_GENERIC_ERROR;
-            }
-
-            String permission;
-            Int32 appOp;
-
-            If (mimeType->Equals(WspTypeDecoder.CONTENT_TYPE_B_MMS)) {
-                permission = Manifest::permission::RECEIVE_MMS;
-                appOp = AppOpsManager.OP_RECEIVE_MMS;
-            } else {
-                permission = Manifest::permission::RECEIVE_WAP_PUSH;
-                appOp = AppOpsManager.OP_RECEIVE_WAP_PUSH;
-            }
-
-            Intent intent = new Intent(Intents.WAP_PUSH_DELIVER_ACTION);
-            intent->SetType(mimeType);
-            intent->PutExtra("transactionId", transactionId);
-            intent->PutExtra("pduType", pduType);
-            intent->PutExtra("header", header);
-            intent->PutExtra("data", intentData);
-            intent->PutExtra("contentTypeParameters", pduDecoder->GetContentParameters());
-            If (!TextUtils->IsEmpty(address)) {
-                intent->PutExtra("address", address);
-            }
-            SubscriptionManager->PutPhoneIdAndSubIdExtra(intent, phoneId);
-
-            // Direct the intent to only the default MMS app. If we can't find a default MMS app
-            // then sent it to all broadcast receivers.
-            ComponentName componentName = SmsApplication->GetDefaultMmsApplication(mContext, TRUE);
-            If (componentName != NULL) {
-                // Deliver MMS message only to this receiver
-                intent->SetComponent(componentName);
-                If (DBG) Rlog->V(TAG, "Delivering MMS to: " + componentName->GetPackageName() +
-                        " " + componentName->GetClassName());
-            }
-
-            handler->DispatchIntent(intent, permission, appOp, receiver, UserHandle.OWNER);
-            return Activity.RESULT_OK;
-        } Catch (ArrayIndexOutOfBoundsException aie) {
-            // 0-Byte WAP PDU or other unexpected WAP PDU contents can easily throw this;
-            // log exception string without stack trace and return FALSE.
-            Rlog->E(TAG, "ignoring DispatchWapPdu() array index exception: " + aie);
-            return Intents.RESULT_SMS_GENERIC_ERROR;
+    Boolean bAppId = FALSE;
+    pduDecoder->SeekXWapApplicationId(index, index + headerLength - 1, &bAppId);
+    if (bAppId) {
+        Int64 val = 0;
+        pduDecoder->GetValue32(&val);
+        index = (Int32) val;
+        Boolean bId = FALSE;
+        pduDecoder->DecodeXWapApplicationId(index, &bId);
+        String wapAppId;
+        pduDecoder->GetValueString(&wapAppId);
+        if (wapAppId.IsNull()) {
+            pduDecoder->GetValue32(&val);
+            wapAppId = StringUtils::ToString((Int32) val);
         }
+
+        String contentType = mimeType;
+        if (mimeType.IsNull()) {
+            contentType = StringUtils::ToString(binaryContentType);
+        }
+
+        // if (DBG) Rlog->V(TAG, "appid found: " + wapAppId + ":" + contentType);
+
+        // try {
+        Boolean processFurther = TRUE;
+        AutoPtr<IIWapPushManager> wapPushMan = mWapPushManager;
+
+        if (wapPushMan == NULL) {
+            // if (DBG) Rlog->W(TAG, "wap push manager not found!");
+        }
+        else {
+            AutoPtr<IIntent> intent;
+            CIntent::New((IIntent**)&intent);
+            intent->PutExtra(String("transactionId"), transactionId);
+            intent->PutExtra(String("pduType"), pduType);
+            assert(0 && "TODO");
+            // intent->PutExtra(String("header"), header);
+            // intent->PutExtra(String("data"), intentData);
+            AutoPtr<IHashMap> parameters;
+            pduDecoder->GetContentParameters((IHashMap**)&parameters);
+            intent->PutExtra(String("contentTypeParameters"),
+                    IParcelable::Probe(parameters));
+            if (!TextUtils::IsEmpty(address)) {
+                intent->PutExtra(String("address"), address);
+            }
+            submg->PutPhoneIdAndSubIdExtra(intent, phoneId);
+
+            Int32 procRet = 0;
+            wapPushMan->ProcessMessage(wapAppId, contentType, intent, &procRet);
+            // if (DBG) Rlog->V(TAG, "procRet:" + procRet);
+            if ((procRet & IWapPushManagerParams::MESSAGE_HANDLED) > 0
+                    && (procRet & IWapPushManagerParams::FURTHER_PROCESSING) == 0) {
+                processFurther = FALSE;
+            }
+        }
+        if (!processFurther) {
+            *result = ITelephonySmsIntents::RESULT_SMS_HANDLED;
+            return NOERROR;
+        }
+        // } Catch (RemoteException e) {
+        //     if (DBG) Rlog->W(TAG, "remote func failed...");
+        // }
+    }
+    // if (DBG) Rlog->V(TAG, "fall back to existing handler");
+
+    if (mimeType.IsNull()) {
+        // if (DBG) Rlog->W(TAG, "Header Content-Type error.");
+        *result = ITelephonySmsIntents::RESULT_SMS_GENERIC_ERROR;
+        return NOERROR;
     }
 
-    private void WriteInboxMessage(Int64 subId, Byte[] pushData) {
-        final GenericPdu pdu = new PduParser(pushData).Parse();
-        If (pdu == NULL) {
-            Rlog->E(TAG, "Invalid PUSH PDU");
-        }
-        final PduPersister persister = PduPersister->GetPduPersister(mContext);
-        final Int32 type = pdu->GetMessageType();
-        try {
-            Switch (type) {
-                case MESSAGE_TYPE_DELIVERY_IND:
-                case MESSAGE_TYPE_READ_ORIG_IND: {
-                    final Int64 threadId = GetDeliveryOrReadReportThreadId(mContext, pdu);
-                    If (threadId == -1) {
-                        // The associated SendReq isn't found, therefore skip
-                        // processing this PDU.
-                        Rlog->E(TAG, "Failed to find delivery or read report's thread id");
-                        break;
-                    }
-                    final Uri uri = persister->Persist(
-                            pdu,
-                            Telephony.Mms.Inbox.CONTENT_URI,
-                            TRUE/*createThreadId*/,
-                            TRUE/*groupMmsEnabled*/,
-                            NULL/*preOpenedFiles*/);
-                    If (uri == NULL) {
-                        Rlog->E(TAG, "Failed to persist delivery or read report");
-                        break;
-                    }
-                    // Update thread ID for ReadOrigInd & DeliveryInd.
-                    final ContentValues values = new ContentValues(1);
-                    values->Put(Telephony.Mms.THREAD_ID, threadId);
-                    If (SqliteWrapper->Update(
-                            mContext,
-                            mContext->GetContentResolver(),
-                            uri,
-                            values,
-                            NULL/*where*/,
-                            NULL/*selectionArgs*/) != 1) {
-                        Rlog->E(TAG, "Failed to update delivery or read report thread id");
-                    }
-                    break;
-                }
-                case MESSAGE_TYPE_NOTIFICATION_IND: {
-                    final NotificationInd nInd = (NotificationInd) pdu;
+    String permission;
+    Int32 appOp;
 
-                    Bundle configs = SmsManager->GetSmsManagerForSubscriber(subId)
-                            .GetCarrierConfigValues();
-                    If (configs != NULL && configs->GetBoolean(
-                        SmsManager.MMS_CONFIG_APPEND_TRANSACTION_ID, FALSE)) {
-                        final Byte [] contentLocation = nInd->GetContentLocation();
-                        If ('=' == contentLocation[contentLocation.length - 1]) {
-                            Byte [] transactionId = nInd->GetTransactionId();
-                            Byte [] contentLocationWithId = new Byte [contentLocation.length
-                                    + transactionId.length];
-                            System->Arraycopy(contentLocation, 0, contentLocationWithId,
-                                    0, contentLocation.length);
-                            System->Arraycopy(transactionId, 0, contentLocationWithId,
-                                    contentLocation.length, transactionId.length);
-                            nInd->SetContentLocation(contentLocationWithId);
-                        }
-                    }
-                    If (!IsDuplicateNotification(mContext, nInd)) {
-                        final Uri uri = persister->Persist(
-                                pdu,
-                                Telephony.Mms.Inbox.CONTENT_URI,
-                                TRUE/*createThreadId*/,
-                                TRUE/*groupMmsEnabled*/,
-                                NULL/*preOpenedFiles*/);
-                        If (uri == NULL) {
-                            Rlog->E(TAG, "Failed to save MMS WAP push notification ind");
-                        }
-                    } else {
-                        Rlog->D(TAG, "Skip storing duplicate MMS WAP push notification ind: "
-                                + new String(nInd->GetContentLocation()));
-                    }
-                    break;
-                }
-                default:
-                    Logger::E(TAG, "Received unrecognized WAP Push PDU.");
-            }
-        } Catch (MmsException e) {
-            Logger::E(TAG, "Failed to save MMS WAP push data: type=" + type, e);
-        } Catch (RuntimeException e) {
-            Logger::E(TAG, "Unexpected RuntimeException in persisting MMS WAP push data", e);
-        }
-
+    if (mimeType.Equals(IWspTypeDecoder::CONTENT_TYPE_B_MMS)) {
+        permission = Manifest::permission::RECEIVE_MMS;
+        appOp = IAppOpsManager::OP_RECEIVE_MMS;
+    }
+    else {
+        permission = Manifest::permission::RECEIVE_WAP_PUSH;
+        appOp = IAppOpsManager::OP_RECEIVE_WAP_PUSH;
     }
 
-    private static const String THREAD_ID_SELECTION =
-            Telephony.Mms.MESSAGE_ID + "=? AND " + Telephony.Mms.MESSAGE_TYPE + "=?";
+    AutoPtr<IIntent> intent;
+    CIntent::New(ITelephonySmsIntents::WAP_PUSH_DELIVER_ACTION, (IIntent**)&intent);
+    intent->SetType(mimeType);
+    intent->PutExtra(String("transactionId"), transactionId);
+    intent->PutExtra(String("pduType"), pduType);
+    assert(0 && "TODO");
+    // intent->PutExtra(String("header"), header);
+    // intent->PutExtra(String("data"), intentData);
+    AutoPtr<IHashMap> parameters;
+    pduDecoder->GetContentParameters((IHashMap**)&parameters);
+    // intent->PutExtra(String("contentTypeParameters"), parameters);
+    if (!TextUtils::IsEmpty(address)) {
+        intent->PutExtra(String("address"), address);
+    }
+    submg->PutPhoneIdAndSubIdExtra(intent, phoneId);
 
-    private static Int64 GetDeliveryOrReadReportThreadId(Context context, GenericPdu pdu) {
-        String messageId;
-        If (pdu instanceof DeliveryInd) {
-            messageId = new String(((DeliveryInd) pdu).GetMessageId());
-        } else If (pdu instanceof ReadOrigInd) {
-            messageId = new String(((ReadOrigInd) pdu).GetMessageId());
-        } else {
-            Rlog->E(TAG, "WAP Push data is neither delivery or read report type: "
-                    + pdu->GetClass()->GetCanonicalName());
-            return -1L;
-        }
-        Cursor cursor = NULL;
-        try {
-            cursor = SqliteWrapper->Query(
-                    context,
-                    context->GetContentResolver(),
-                    Telephony.Mms.CONTENT_URI,
-                    new String[]{ Telephony.Mms.THREAD_ID },
-                    THREAD_ID_SELECTION,
-                    new String[]{
-                            DatabaseUtils->SqlEscapeString(messageId),
-                            Integer->ToString(PduHeaders.MESSAGE_TYPE_SEND_REQ)
-                    },
-                    NULL/*sortOrder*/);
-            If (cursor != NULL && cursor->MoveToFirst()) {
-                return cursor->GetLong(0);
-            }
-        } Catch (SQLiteException e) {
-            Rlog->E(TAG, "Failed to query delivery or read report thread id", e);
-        } finally {
-            If (cursor != NULL) {
-                cursor->Close();
-            }
-        }
-        return -1L;
+    // Direct the intent to only the default MMS app. if we can't find a default MMS app
+    // then sent it to all broadcast receivers.
+    AutoPtr<ISmsApplication> smsApp;
+    assert(0 && "TODO");
+    // CSmsApplication::AcquireSingleton((ISmsApplication**)&smsApp);
+    AutoPtr<IComponentName> componentName;
+    smsApp->GetDefaultMmsApplication(mContext, TRUE, (IComponentName**)&componentName);
+    if (componentName != NULL) {
+        // Deliver MMS message only to this receiver
+        intent->SetComponent(componentName);
+        // if (DBG) Rlog->V(TAG, "Delivering MMS to: " + componentName->GetPackageName() +
+        //         " " + componentName->GetClassName());
     }
 
-    private static const String LOCATION_SELECTION =
-            Telephony.Mms.MESSAGE_TYPE + "=? AND " + Telephony.Mms.CONTENT_LOCATION + " =?";
-
-    private static Boolean IsDuplicateNotification(Context context, NotificationInd nInd) {
-        final Byte[] rawLocation = nInd->GetContentLocation();
-        If (rawLocation != NULL) {
-            String location = new String(rawLocation);
-            String[] selectionArgs = new String[] { location };
-            Cursor cursor = NULL;
-            try {
-                cursor = SqliteWrapper->Query(
-                        context,
-                        context->GetContentResolver(),
-                        Telephony.Mms.CONTENT_URI,
-                        new String[]{Telephony.Mms._ID},
-                        LOCATION_SELECTION,
-                        new String[]{
-                                Integer->ToString(PduHeaders.MESSAGE_TYPE_NOTIFICATION_IND),
-                                new String(rawLocation)
-                        },
-                        NULL/*sortOrder*/);
-                If (cursor != NULL && cursor->GetCount() > 0) {
-                    // We already received the same notification before.
-                    return TRUE;
-                }
-            } Catch (SQLiteException e) {
-                Rlog->E(TAG, "failed to query existing notification ind", e);
-            } finally {
-                If (cursor != NULL) {
-                    cursor->Close();
-                }
-            }
-        }
-        return FALSE;
-    }
+    AutoPtr<IUserHandleHelper> uhhlp;
+    CUserHandleHelper::AcquireSingleton((IUserHandleHelper**)&uhhlp);
+    AutoPtr<IUserHandle> owner;
+    uhhlp->GetOWNER((IUserHandle**)&owner);
+    assert(0 && "TODO protected method");
+    // handler->DispatchIntent(intent, permission, appOp, receiver, owner);
+    *result = IActivity::RESULT_OK;
+    return NOERROR;
+    // } Catch (ArrayIndexOutOfBoundsException aie) {
+    //     // 0-Byte WAP PDU or other unexpected WAP PDU contents can easily throw this;
+    //     // log exception string without stack trace and return FALSE.
+    //     Rlog->E(TAG, "ignoring DispatchWapPdu() array index exception: " + aie);
+    //     return Intents.RESULT_SMS_GENERIC_ERROR;
+    // }
 }
+
+void WapPushOverSms::WriteInboxMessage(
+    /* [in] */ Int64 subId,
+    /* [in] */ ArrayOf<Byte>* pushData)
+{
+    AutoPtr<IPduParser> parser;
+    assert(0 && "TODO");
+    // CPduParser::New((IPduParser**)&parser);
+    AutoPtr<IGenericPdu> pdu;
+    parser->Parse((IGenericPdu**)&pdu);
+    if (pdu == NULL) {
+        // Rlog::E(TAG, "Invalid PUSH PDU");
+    }
+    AutoPtr<IPduPersisterHelper> pphlp;
+    assert(0 && "TODO");
+    // CPduPersisterHelper::AcquireSingleton((IPduPersisterHelper**)&pphlp);
+    AutoPtr<IPduPersister> persister;
+    pphlp->GetPduPersister(mContext, (IPduPersister**)&persister);
+    Int32 type = 0;
+    pdu->GetMessageType(&type);
+    // try {
+    switch (type) {
+        case IPduHeaders::MESSAGE_TYPE_DELIVERY_IND:
+        case IPduHeaders::MESSAGE_TYPE_READ_ORIG_IND: {
+            Int64 threadId = GetDeliveryOrReadReportThreadId(mContext, pdu);
+            if (threadId == -1) {
+                // The associated SendReq isn't found, therefore skip
+                // processing this PDU.
+                // Rlog::E(TAG, "Failed to find delivery or read report's thread id");
+                break;
+            }
+            AutoPtr<ITelephonySmsInbox> inbox;
+            CTelephonySmsInbox::AcquireSingleton((ITelephonySmsInbox**)&inbox);
+            AutoPtr<IUri> content_uri;
+            inbox->GetCONTENT_URI((IUri**)&content_uri);
+            AutoPtr<IUri> uri;
+            persister->Persist(
+                    pdu,
+                    content_uri,
+                    TRUE/*createThreadId*/,
+                    TRUE/*groupMmsEnabled*/,
+                    NULL/*preOpenedFiles*/,
+                    (IUri**)&uri);
+            if (uri == NULL) {
+                // Rlog->E(TAG, "Failed to persist delivery or read report");
+                break;
+            }
+            // Update thread ID for ReadOrigInd & DeliveryInd.
+            AutoPtr<IContentValues> values;
+            CContentValues::New(1, (IContentValues**)&values);
+            values->Put(ITelephonyBaseMmsColumns::THREAD_ID, threadId);
+            AutoPtr<IContentResolver> cr;
+            mContext->GetContentResolver((IContentResolver**)&cr);
+            AutoPtr<ISqliteWrapper> sw;
+            assert(0 && "TODO");
+            // CSqliteWrapper::AcquireSingleton((ISqliteWrapper**)&sw);
+            Int32 updateRes = 0;
+            sw->Update(
+                    mContext,
+                    cr,
+                    uri,
+                    values,
+                    String(NULL)/*where*/,
+                    NULL/*selectionArgs*/,
+                    &updateRes);
+            if (updateRes != 1) {
+                // Rlog->E(TAG, "Failed to update delivery or read report thread id");
+            }
+            break;
+        }
+        case IPduHeaders::MESSAGE_TYPE_NOTIFICATION_IND: {
+            AutoPtr<INotificationInd> nInd = INotificationInd::Probe(pdu);
+
+            AutoPtr<ISmsManagerHelper> smhlp;
+            CSmsManagerHelper::AcquireSingleton((ISmsManagerHelper**)&smhlp);
+            AutoPtr<ISmsManager> sm;
+            smhlp->GetSmsManagerForSubscriber(subId, (ISmsManager**)&sm);
+            AutoPtr<IBundle> configs;
+            sm->GetCarrierConfigValues((IBundle**)&configs);
+            if (configs != NULL) {
+                Boolean b = FALSE;
+                configs->GetBoolean(
+                    ISmsManager::MMS_CONFIG_APPEND_TRANSACTION_ID, FALSE, &b);
+                if (b) {
+                    AutoPtr<ArrayOf<Byte> > contentLocation;
+                    nInd->GetContentLocation((ArrayOf<Byte>**)&contentLocation);
+                    if ('=' == (*contentLocation)[contentLocation->GetLength() - 1]) {
+                        AutoPtr<ArrayOf<Byte> > transactionId;
+                        nInd->GetTransactionId((ArrayOf<Byte>**)&transactionId);
+                        AutoPtr<ArrayOf<Byte> > contentLocationWithId = ArrayOf<Byte>::Alloc(contentLocation->GetLength()
+                                + transactionId->GetLength());
+                        contentLocationWithId->Copy(0, contentLocation, 0, contentLocation->GetLength());
+                        contentLocationWithId->Copy(contentLocation->GetLength(), transactionId, 0, transactionId->GetLength());
+                        nInd->SetContentLocation(contentLocationWithId);
+                    }
+                }
+            }
+            if (!IsDuplicateNotification(mContext, nInd)) {
+                AutoPtr<ITelephonySmsInbox> inbox;
+                CTelephonySmsInbox::AcquireSingleton((ITelephonySmsInbox**)&inbox);
+                AutoPtr<IUri> content_uri;
+                inbox->GetCONTENT_URI((IUri**)&content_uri);
+                AutoPtr<IUri> uri;
+                persister->Persist(
+                        pdu,
+                        content_uri,
+                        TRUE/*createThreadId*/,
+                        TRUE/*groupMmsEnabled*/,
+                        NULL/*preOpenedFiles*/,
+                        (IUri**)&uri);
+                if (uri == NULL) {
+                    // Rlog->E(TAG, "Failed to save MMS WAP push notification ind");
+                }
+            }
+            else {
+                // Rlog->D(TAG, "Skip storing duplicate MMS WAP push notification ind: "
+                //         + new String(nInd->GetContentLocation()));
+            }
+            break;
+        }
+        default:
+            Logger::E(TAG, "Received unrecognized WAP Push PDU.");
+    }
+    // } Catch (MmsException e) {
+    //     Logger::E(TAG, "Failed to save MMS WAP push data: type=" + type, e);
+    // } Catch (RuntimeException e) {
+    //     Logger::E(TAG, "Unexpected RuntimeException in persisting MMS WAP push data", e);
+    // }
+}
+
+Int64 WapPushOverSms::GetDeliveryOrReadReportThreadId(
+    /* [in] */ IContext* context,
+    /* [in] */ IGenericPdu* pdu)
+{
+    String messageId;
+    if (IDeliveryInd::Probe(pdu) != NULL) {
+        AutoPtr<ArrayOf<Byte> > ids;
+        IDeliveryInd::Probe(pdu)->GetMessageId((ArrayOf<Byte>**)&ids);
+        messageId = String(*ids);
+    }
+    else if (IReadOrigInd::Probe(pdu) != NULL) {
+        AutoPtr<ArrayOf<Byte> > ids;
+        IReadOrigInd::Probe(pdu)->GetMessageId((ArrayOf<Byte>**)&ids);
+        messageId = String(*ids);
+    }
+    else {
+        // Rlog->E(TAG, "WAP Push data is neither delivery or read report type: "
+        //         + pdu->GetClass()->GetCanonicalName());
+        return -1l;
+    }
+    AutoPtr<ICursor> cursor;
+    // try {
+    AutoPtr<ISqliteWrapper> sw;
+    assert(0 && "TODO");
+    // CSqliteWrapper::AcquireSingleton((ISqliteWrapper**)&sw);
+    AutoPtr<IContentResolver> cr;
+    context->GetContentResolver((IContentResolver**)&cr);
+    AutoPtr<ArrayOf<String> > arr1 = ArrayOf<String>::Alloc(1);
+    (*arr1)[0] = ITelephonyBaseMmsColumns::THREAD_ID;
+    AutoPtr<ArrayOf<String> > arr2 = ArrayOf<String>::Alloc(2);
+    AutoPtr<IDatabaseUtils> dbUtils;
+    CDatabaseUtils::AcquireSingleton((IDatabaseUtils**)&dbUtils);
+    dbUtils->SqlEscapeString(messageId, &((*arr2)[0]));
+    (*arr2)[1] = StringUtils::ToString(IPduHeaders::MESSAGE_TYPE_SEND_REQ);
+    AutoPtr<ITelephonyMms> mms;
+    CTelephonyMms::AcquireSingleton((ITelephonyMms**)&mms);
+    AutoPtr<IUri> content_uri;
+    mms->GetCONTENT_URI((IUri**)&content_uri);
+    sw->Query(
+            context,
+            cr,
+            content_uri,
+            arr1,
+            THREAD_ID_SELECTION,
+            arr2,
+            String(NULL)/*sortOrder*/,
+            (ICursor**)&cursor);
+    Boolean bMF = FALSE;
+    if (cursor != NULL && (cursor->MoveToFirst(&bMF), bMF)) {
+        Int64 res = 0;
+        cursor->GetInt64(0, &res);
+        return res;
+    }
+    // } Catch (SQLiteException e) {
+    //     Rlog->E(TAG, "Failed to query delivery or read report thread id", e);
+    // } finally {
+    if (cursor != NULL) {
+        ICloseable::Probe(cursor)->Close();
+    }
+    // }
+    return -1l;
+}
+
+Boolean WapPushOverSms::IsDuplicateNotification(
+    /* [in] */ IContext* context,
+    /* [in] */ INotificationInd* nInd)
+{
+    AutoPtr<ArrayOf<Byte> > rawLocation;
+    nInd->GetContentLocation((ArrayOf<Byte>**)&rawLocation);
+    if (rawLocation != NULL) {
+        String location(*rawLocation);
+        AutoPtr<ArrayOf<String> > selectionArgs = ArrayOf<String>::Alloc(1);
+        (*selectionArgs)[0] = location;
+        AutoPtr<ICursor> cursor;
+        // try {
+        AutoPtr<ISqliteWrapper> sw;
+        assert(0 && "TODO");
+        // CSqliteWrapper::AcquireSingleton((ISqliteWrapper**)&sw);
+        AutoPtr<IContentResolver> cr;
+        context->GetContentResolver((IContentResolver**)&cr);
+        AutoPtr<ArrayOf<String> > arr1 = ArrayOf<String>::Alloc(1);
+        assert(0 && "TODO");
+        // (*arr1)[0] = ITelephonyMms::_ID;
+        AutoPtr<ArrayOf<String> > arr2 = ArrayOf<String>::Alloc(2);
+        (*arr2)[0] = StringUtils::ToString(IPduHeaders::MESSAGE_TYPE_NOTIFICATION_IND);
+        (*arr2)[1] = String(*rawLocation);
+        AutoPtr<ITelephonyMms> mms;
+        CTelephonyMms::AcquireSingleton((ITelephonyMms**)&mms);
+        AutoPtr<IUri> content_uri;
+        mms->GetCONTENT_URI((IUri**)&content_uri);
+        sw->Query(
+                context,
+                cr,
+                content_uri,
+                arr1,
+                LOCATION_SELECTION,
+                arr2,
+                String(NULL)/*sortOrder*/,
+                (ICursor**)&cursor);
+        Int32 count = 0;
+        if (cursor != NULL && (cursor->GetCount(&count), count) > 0) {
+            // We already received the same notification before.
+            return TRUE;
+        }
+        // } Catch (SQLiteException e) {
+        //     Rlog->E(TAG, "failed to query existing notification ind", e);
+        // } finally {
+        if (cursor != NULL) {
+            ICloseable::Probe(cursor)->Close();
+        }
+        // }
+    }
+    return FALSE;
+}
+
+} // namespace Telephony
+} // namespace Internal
+} // namespace Droid
+} // namespace Elastos

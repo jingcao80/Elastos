@@ -1,34 +1,30 @@
-/*
- * Copyright (C) 2010 The Android Open Source Project
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
 
-package com.android.internal.telephony;
+#ifndef __ELASTOS_DROID_INTERNAL_TELEPHONY_TELEPHONYCAPABILITIES_H__
+#define __ELASTOS_DROID_INTERNAL_TELEPHONY_TELEPHONYCAPABILITIES_H__
 
-using Elastos::Droid::Telephony::IRlog;
+#include "_Elastos_Droid_Internal_Telephony_CTelephonyCapabilities.h"
+#include <elastos/core/Singleton.h>
 
 using Elastos::Droid::Internal::Telephony::IPhone;
+
+using Elastos::Core::Singleton;
+
+namespace Elastos {
+namespace Droid {
+namespace Internal {
+namespace Telephony {
 
 /**
  * Utilities that check if the phone supports specified capabilities.
  */
-public class TelephonyCapabilities {
-    private static const String LOG_TAG = "TelephonyCapabilities";
+CarClass(CTelephonyCapabilities)
+    , public Singleton
+    , public ITelephonyCapabilities
+{
+public:
+    CAR_SINGLETON_DECL()
 
-    /** This class is never instantiated. */
-    private TelephonyCapabilities() {
-    }
+    CAR_INTERFACE_DECL()
 
     /**
      * Return TRUE if the current phone supports ECM ("Emergency Callback
@@ -44,12 +40,9 @@ public class TelephonyCapabilities {
      * Currently this is assumed to be TRUE for CDMA phones, and FALSE
      * otherwise.
      */
-    public static Boolean SupportsEcm(Phone phone) {
-        Rlog->D(LOG_TAG, "supportsEcm: Phone type = " + phone->GetPhoneType() +
-                  " Ims Phone = " + phone->GetImsPhone());
-        Return (phone->GetPhoneType() == PhoneConstants.PHONE_TYPE_CDMA ||
-                phone->GetImsPhone() != NULL);
-    }
+    CARAPI SupportsEcm(
+        /* [in] */ IPhone* phone,
+        /* [out] */ Boolean* result);
 
     /**
      * Return TRUE if the current phone supports Over The Air Service
@@ -68,18 +61,18 @@ public class TelephonyCapabilities {
      * This method here is just a placeholder to reduce hardcoded
      * "If (CDMA)" checks sprinkled throughout the phone app.
      */
-    public static Boolean SupportsOtasp(Phone phone) {
-        Return (phone->GetPhoneType() == PhoneConstants.PHONE_TYPE_CDMA);
-    }
+    CARAPI SupportsOtasp(
+        /* [in] */ IPhone* phone,
+        /* [out] */ Boolean* result);
 
     /**
      * Return TRUE if the current phone supports voice message count.
      * and the count is available
      * Both CDMA and GSM phones support voice message count
      */
-    public static Boolean SupportsVoiceMessageCount(Phone phone) {
-        Return (phone->GetVoiceMessageCount() != -1);
-    }
+    CARAPI SupportsVoiceMessageCount(
+        /* [in] */ IPhone* phone,
+        /* [out] */ Boolean* result);
 
     /**
      * Return TRUE if this phone allows the user to select which
@@ -89,9 +82,9 @@ public class TelephonyCapabilities {
      *
      * TODO: Should CDMA phones allow this as well?
      */
-    public static Boolean SupportsNetworkSelection(Phone phone) {
-        Return (phone->GetPhoneType() == PhoneConstants.PHONE_TYPE_GSM);
-    }
+    CARAPI SupportsNetworkSelection(
+        /* [in] */ IPhone* phone,
+        /* [out] */ Boolean* result);
 
     /**
      * Returns a resource ID for a label to use when displaying the
@@ -101,17 +94,9 @@ public class TelephonyCapabilities {
      * This is specific to the device's telephony technology: the device
      * id is called "IMEI" on GSM phones and "MEID" on CDMA phones.
      */
-    public static Int32 GetDeviceIdLabel(Phone phone) {
-        If (phone->GetPhoneType() == PhoneConstants.PHONE_TYPE_GSM) {
-            return R::string::imei;
-        } else If (phone->GetPhoneType() == PhoneConstants.PHONE_TYPE_CDMA) {
-            return R::string::meid;
-        } else {
-            Rlog->W(LOG_TAG, "getDeviceIdLabel: no known label for phone "
-                  + phone->GetPhoneName());
-            return 0;
-        }
-    }
+    CARAPI GetDeviceIdLabel(
+        /* [in] */ IPhone* phone,
+        /* [out] */ Int32* result);
 
     /**
      * Return TRUE if the current phone supports the ability to explicitly
@@ -123,10 +108,9 @@ public class TelephonyCapabilities {
      *
      * Currently this is assumed to be TRUE on GSM phones and FALSE otherwise.
      */
-    public static Boolean SupportsConferenceCallManagement(Phone phone) {
-        Return ((phone->GetPhoneType() == PhoneConstants.PHONE_TYPE_GSM)
-                || (phone->GetPhoneType() == PhoneConstants.PHONE_TYPE_SIP));
-    }
+    CARAPI SupportsConferenceCallManagement(
+        /* [in] */ IPhone* phone,
+        /* [out] */ Boolean* result);
 
     /**
      * Return TRUE if the current phone supports explicit "Hold" and
@@ -137,11 +121,9 @@ public class TelephonyCapabilities {
      * otherwise.  (In particular, CDMA has no concept of "putting a call
      * on hold.")
      */
-    public static Boolean SupportsHoldAndUnhold(Phone phone) {
-        Return ((phone->GetPhoneType() == PhoneConstants.PHONE_TYPE_GSM)
-                || (phone->GetPhoneType() == PhoneConstants.PHONE_TYPE_SIP)
-                || (phone->GetPhoneType() == PhoneConstants.PHONE_TYPE_IMS));
-    }
+    CARAPI SupportsHoldAndUnhold(
+        /* [in] */ IPhone* phone,
+        /* [out] */ Boolean* result);
 
     /**
      * Return TRUE if the current phone supports distinct "Answer & Hold"
@@ -157,10 +139,9 @@ public class TelephonyCapabilities {
      * generic form, like maybe "SupportsExplicitMultipleLineManagement()"
      * rather than focusing specifically on call-waiting behavior.
      */
-    public static Boolean SupportsAnswerAndHold(Phone phone) {
-        Return ((phone->GetPhoneType() == PhoneConstants.PHONE_TYPE_GSM)
-                || (phone->GetPhoneType() == PhoneConstants.PHONE_TYPE_SIP));
-    }
+    CARAPI SupportsAnswerAndHold(
+        /* [in] */ IPhone* phone,
+        /* [out] */ Boolean* result);
 
     /**
      * Return TRUE if phones with the given phone type support ADN
@@ -175,13 +156,12 @@ public class TelephonyCapabilities {
      *
      * TODO: Theoretically phones other than GSM may have the ADN capability.
      * Consider having better check here, or have better capability as part
-     * of public API, with which the argument should be replaced with
+     * of API, with which the argument should be replaced with
      * something more appropriate.
      */
-    public static Boolean SupportsAdn(Int32 phoneType) {
-        Return ((phoneType == PhoneConstants.PHONE_TYPE_GSM)
-                || (phoneType == PhoneConstants.PHONE_TYPE_CDMA));
-    }
+    CARAPI SupportsAdn(
+        /* [in] */ Int32 phoneType,
+        /* [out] */ Boolean* result);
 
     /**
      * Returns TRUE if the device can distinguish the phone's dialing state
@@ -190,7 +170,20 @@ public class TelephonyCapabilities {
      * Currently this returns TRUE for GSM phones as we cannot know when a CDMA
      * phone has transitioned from dialing/active to connected.
      */
-    public static Boolean CanDistinguishDialingAndConnected(Int32 phoneType) {
-        return phoneType == PhoneConstants.PHONE_TYPE_GSM;
-    }
-}
+    CARAPI CanDistinguishDialingAndConnected(
+        /* [in] */ Int32 phoneType,
+        /* [out] */ Boolean* result);
+
+    /** This class is never instantiated. */
+    CTelephonyCapabilities();
+
+private:
+    static const String LOGTAG;
+};
+
+} // namespace Telephony
+} // namespace Internal
+} // namespace Droid
+} // namespace Elastos
+
+#endif // __ELASTOS_DROID_INTERNAL_TELEPHONY_TELEPHONYCAPABILITIES_H__
