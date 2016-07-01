@@ -57,6 +57,7 @@ using Elastos::Droid::Telephony::IPhoneNumberUtils;
 using Elastos::Droid::Text::TextUtils;
 using Elastos::Droid::Widget::IAdapter;
 using Elastos::Droid::Widget::IAdapterView;
+using Elastos::Droid::Widget::IListView;
 using Elastos::Droid::Widget::IAdapterViewOnItemClickListener;
 using Elastos::Core::CString;
 using Elastos::Core::CThread;

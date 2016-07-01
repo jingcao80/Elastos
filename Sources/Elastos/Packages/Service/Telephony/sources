@@ -16,9 +16,10 @@ SOURCES += Elastos.CoreLibrary.cpp
 SOURCES += Elastos.Droid.Core.cpp
 
 ELASTOS_LIBS += src/elastos/droid/teleservice/services/telephony/common/common.lib
+ELASTOS_LIBS += src/elastos/droid/teleservice/services/telephony/sip/sip.lib;
+ELASTOS_LIBS += src/elastos/droid/teleservice/services/telephony/telephony.lib
 ELASTOS_LIBS += src/elastos/droid/teleservice/phone/phone.lib
 ELASTOS_LIBS += src/elastos/droid/teleservice/phone/settings/settings.lib
-ELASTOS_LIBS += src/elastos/droid/teleservice/services/telephony/telephony.lib
 
 LIBRARIES  = $(XDK_USER_LIB)/Elastos.Runtime.lib
 LIBRARIES += $(XDK_TARGETS)/Elastos.Runtime.eco

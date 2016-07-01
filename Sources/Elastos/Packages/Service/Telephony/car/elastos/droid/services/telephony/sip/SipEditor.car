@@ -1,0 +1,26 @@
+module
+{
+    using interface Elastos.Droid.Preference.IPreference;
+
+    namespace Elastos {
+    namespace Droid {
+    namespace TeleService {
+    namespace Services {
+    namespace Telephony {
+    namespace Sip {
+
+    [local]
+    interface ISipEditor {
+        OnPreferenceChange(
+            [in] IPreference* pref,
+            [in] IInterface* newValue,
+            [out] Boolean* result);
+    }
+
+    } // namespace Sip
+    } // namespace Telephony
+    } // namespace Services
+    } // namespace TeleService
+    } // namespace Droid
+    } // namespace Elastos
+}

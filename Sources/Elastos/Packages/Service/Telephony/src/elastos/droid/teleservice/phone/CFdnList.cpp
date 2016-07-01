@@ -2,6 +2,7 @@
 #include "elastos/droid/teleservice/phone/CFdnList.h"
 #include "Elastos.Droid.App.h"
 #include "Elastos.Droid.Content.h"
+#include "Elastos.Droid.Widget.h"
 #include <elastos/utility/logging/Logger.h>
 #include "elastos/droid/R.h"
 #include <elastos/core/CoreUtils.h>
@@ -12,8 +13,8 @@ using Elastos::Droid::Content::IIntent;
 using Elastos::Droid::Content::CIntent;
 using Elastos::Droid::Net::CUriHelper;
 using Elastos::Droid::Net::IUriHelper;
+using Elastos::Droid::Widget::IListView;
 using Elastos::Core::CoreUtils;
-
 using Elastos::Utility::Logging::Logger;
 
 namespace Elastos {

@@ -8,6 +8,7 @@
 #include "Elastos.Droid.Accounts.h"
 #include "Elastos.Droid.Content.h"
 #include "Elastos.Droid.View.h"
+#include "Elastos.Droid.Widget.h"
 #include <elastos/core/Object.h>
 #include <elastos/core/Thread.h>
 
@@ -23,7 +24,7 @@ using Elastos::Droid::View::IMenu;
 using Elastos::Droid::View::IMenuItem;
 using Elastos::Droid::View::IView;
 using Elastos::Droid::View::IContextMenuInfo;
-
+using Elastos::Droid::Widget::IListView;
 using Elastos::Core::Thread;
 using Elastos::Core::Object;
 

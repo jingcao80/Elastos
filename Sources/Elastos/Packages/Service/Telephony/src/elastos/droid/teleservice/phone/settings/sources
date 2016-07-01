@@ -6,3 +6,5 @@ INCLUDES += $(MAKEDIR)/../../../../../..
 INCLUDES += $(MAKEDIR)/../../../../../../inc/
 
 SOURCES = CPhoneAccountSettingsActivity.cpp
+SOURCES += CAccountSelectionPreference.cpp
+SOURCES += PhoneAccountSettingsFragment.cpp

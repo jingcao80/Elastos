@@ -7,6 +7,7 @@
 #include "Elastos.Droid.Os.h"
 #include "Elastos.Droid.Provider.h"
 #include "Elastos.Droid.Service.h"
+#include "Elastos.Droid.Widget.h"
 #include "elastos/droid/R.h"
 #include <elastos/core/StringBuilder.h>
 #include <elastos/utility/logging/Logger.h>
@@ -19,6 +20,7 @@ using Elastos::Droid::Os::IUserHandleHelper;
 using Elastos::Droid::Provider::CSettingsSystem;
 using Elastos::Droid::Provider::ISettingsSystem;
 using Elastos::Droid::Widget::IAdapter;
+using Elastos::Droid::Widget::IListView;
 using Elastos::Droid::Widget::CSimpleCursorAdapter;
 using Elastos::Droid::Widget::ICursorFilterClient;
 using Elastos::Droid::Widget::ISimpleCursorAdapter;

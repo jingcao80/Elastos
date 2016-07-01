@@ -3,6 +3,7 @@
 
 #include "elastos/droid/ext/frameworkext.h"
 #include "Elastos.Droid.Preference.h"
+#include "Elastos.Droid.Widget.h"
 #include "elastos/droid/app/Fragment.h"
 #include "elastos/droid/os/Handler.h"
 #include "elastos/droid/os/Runnable.h"

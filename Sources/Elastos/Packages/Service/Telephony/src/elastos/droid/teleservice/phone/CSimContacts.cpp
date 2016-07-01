@@ -52,6 +52,7 @@ using Elastos::Droid::View::IView;
 using Elastos::Droid::View::IContextMenuInfo;
 using Elastos::Droid::Widget::ISimpleCursorAdapter;
 using Elastos::Droid::Widget::CSimpleCursorAdapter;
+using Elastos::Droid::Widget::IListView;
 using Elastos::Droid::Widget::IAdapterContextMenuInfo;
 using Elastos::Core::Character;
 using Elastos::Core::StringUtils;

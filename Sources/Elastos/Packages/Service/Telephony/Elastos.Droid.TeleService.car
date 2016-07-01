@@ -46,6 +46,9 @@ module
     merge("car/elastos/droid/services/telephony/TelephonyConnection.car");
     merge("car/elastos/droid/services/telephony/TelephonyConnectionService.car");
 
+    merge("car/elastos/droid/services/telephony/sip/SipEditor.car");
+    merge("car/elastos/droid/services/telephony/sip/SipConnectionService.car");
+
     using interface Elastos.Droid.App.IService;
     using interface Elastos.Droid.App.IActivity;
     using interface Elastos.Droid.App.IApplication;
@@ -937,6 +940,27 @@ module
             interface IContext;
             interface IPreferenceActivity;
         }
+
+        [local]
+        class CAccountSelectionPreference {
+            constructor(
+                [in] IContext* ctx);
+
+            constructor(
+                [in] IContext* ctx,
+                [in] IAttributeSet* attrs);
+
+            interface IListPreference;
+            interface IDialogPreference;
+            interface IPreference;
+            interface IComparable;
+            interface IPreferenceManagerOnActivityDestroyListener;
+            interface IDialogInterfaceOnDismissListener;
+            interface IDialogInterfaceOnClickListener;
+
+            interface IPreferenceOnPreferenceChangeListener;
+            interface IAccountSelectionPreference;
+        }
     } // namespace Settings
     } // namespace Phone
 
@@ -977,6 +1001,61 @@ module
             interface IConnectionService;
         }
 
+    namespace Sip {
+        class CSipBroadcastReceiver {
+            interface IBroadcastReceiver;
+        }
+
+        class CSipConnectionService {
+            interface IContext;
+            interface IContextWrapper;
+            interface IComponentCallbacks;
+            interface IComponentCallbacks2;
+            interface IService;
+            interface IConnectionService;
+        }
+
+        class CSipSettings {
+            interface IListActivity;
+            interface IActivity;
+            interface IPreferenceManagerOnPreferenceTreeClickListener;
+            interface IPreferenceFragmentOnPreferenceStartFragmentCallback;
+            interface IContextThemeWrapper;
+            interface ILayoutInflaterFactory;
+            interface ILayoutInflaterFactory2;
+            interface IWindowCallback;
+            interface IKeyEventCallback;
+            interface IViewOnCreateContextMenuListener;
+            interface IComponentCallbacks2;
+            interface IComponentCallbacks;
+            interface IOnWindowDismissedCallback;
+            interface IContextWrapper;
+            interface IContext;
+            interface IPreferenceActivity;
+        }
+
+        class CSipEditor {
+            interface IListActivity;
+            interface IActivity;
+            interface IPreferenceManagerOnPreferenceTreeClickListener;
+            interface IPreferenceFragmentOnPreferenceStartFragmentCallback;
+            interface IContextThemeWrapper;
+            interface ILayoutInflaterFactory;
+            interface ILayoutInflaterFactory2;
+            interface IWindowCallback;
+            interface IKeyEventCallback;
+            interface IViewOnCreateContextMenuListener;
+            interface IComponentCallbacks2;
+            interface IComponentCallbacks;
+            interface IOnWindowDismissedCallback;
+            interface IContextWrapper;
+            interface IContext;
+            interface IPreferenceActivity;
+
+            interface ISipEditor;
+            interface IPreferenceOnPreferenceChangeListener;
+        }
+    } // namespace Sip
     } // namespace Telephony
     } // namespace Services
 

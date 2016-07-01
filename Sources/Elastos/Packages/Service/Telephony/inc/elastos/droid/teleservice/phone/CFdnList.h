@@ -7,6 +7,7 @@
 #include "Elastos.Droid.Net.h"
 #include "Elastos.Droid.Os.h"
 #include "Elastos.Droid.View.h"
+#include "Elastos.Droid.Widget.h"
 
 using Elastos::Droid::Net::IUri;
 using Elastos::Droid::Os::IBundle;

@@ -1,0 +1,16 @@
+TARGET_NAME= sip
+TARGET_TYPE= lib
+
+INCLUDES += ../../../../../../../
+INCLUDES += $(MAKEDIR)/../../../../../../..
+INCLUDES += $(MAKEDIR)/../../../../../../../inc/
+
+SOURCES = SipProfileDb.cpp
+SOURCES += SipUtil.cpp
+SOURCES += SipSharedPreferences.cpp
+SOURCES += CSipBroadcastReceiver.cpp
+SOURCES += SipAccountRegistry.cpp
+SOURCES += SipConnection.cpp
+SOURCES += CSipConnectionService.cpp
+SOURCES += CSipSettings.cpp
+SOURCES += CSipEditor.cpp
