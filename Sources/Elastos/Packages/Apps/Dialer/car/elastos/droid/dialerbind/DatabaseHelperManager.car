@@ -1,0 +1,20 @@
+module
+{
+    using interface Elastos.Droid.Content.IContext;
+    interface Elastos.Droid.Dialer.Database.IDialerDatabaseHelper;
+
+    namespace Elastos {
+    namespace Droid {
+    namespace DialerBind {
+
+    [local]
+    interface IDatabaseHelperManager {
+        GetDatabaseHelper(
+            [in] IContext* ctx,
+            [out] IDialerDatabaseHelper** helper);
+    }
+
+    } //DialerBind
+    } //Droid
+    } //Elastos
+}

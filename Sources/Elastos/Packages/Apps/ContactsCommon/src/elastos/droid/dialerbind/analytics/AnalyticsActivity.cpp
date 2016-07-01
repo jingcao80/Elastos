@@ -3,8 +3,10 @@
 
 namespace Elastos {
 namespace Droid {
-namespace DailerBind {
+namespace DialerBind {
 namespace Analytics {
+
+CAR_INTERFACE_IMPL(AnalyticsActivity, Activity, IAnalyticsInterface)
 
 ECode AnalyticsActivity::SendHitEvent(
     /* [in] */ const String& categoryId,
@@ -20,6 +22,6 @@ ECode AnalyticsActivity::SendScreenView()
 }
 
 } // Analytics
-} // DailerBind
+} // DialerBind
 } // Droid
 } // Elastos

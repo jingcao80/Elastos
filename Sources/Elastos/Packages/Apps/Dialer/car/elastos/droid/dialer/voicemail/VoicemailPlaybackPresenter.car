@@ -1,0 +1,133 @@
+module
+{
+    using interface Elastos.Droid.Content.IContext;
+    using interface Elastos.Droid.Database.IContentObserver;
+    using interface Elastos.Droid.Media.IMediaPlayer;
+    using interface Elastos.Droid.Net.IUri;
+    using interface Elastos.Droid.Os.IBundle;
+    using interface Elastos.Droid.View.IViewOnClickListener;
+    using interface Elastos.Droid.Widget.ISeekBarOnSeekBarChangeListener;
+    using interface Elastos.Core.IRunnable;
+
+    namespace Elastos {
+    namespace Droid {
+    namespace Dialer {
+    namespace Voicemail {
+
+    /** Contract describing the behaviour we need from the ui we are controlling. */
+    [local]
+    interface IVoicemailPlaybackPresenterPlaybackView {
+        GetDataSourceContext(
+            [out] IContext** context);
+
+        RunOnUiThread(
+            [in] IRunnable* runnable);
+
+        SetStartStopListener(
+            [in] IViewOnClickListener* listener);
+
+        SetPositionSeekListener(
+            [in] ISeekBarOnSeekBarChangeListener* listener);
+
+        SetSpeakerphoneListener(
+            [in] IViewOnClickListener* listener);
+
+        SetIsBuffering();
+
+        SetClipPosition(
+            [in] Int32 clipPositionInMillis,
+            [in] Int32 clipLengthInMillis);
+
+        GetDesiredClipPosition(
+            [out] Int32* position);
+
+        PlaybackStarted();
+
+        PlaybackStopped();
+
+        PlaybackError(
+            [in] ECode ec);
+
+        IsSpeakerPhoneOn(
+            [out] Boolean* result);
+
+        SetSpeakerPhoneOn(
+            [in] Boolean on);
+
+        Finish();
+
+        SetRateDisplay(
+            [in] Float rate,
+            [in] Int32 stringResourceId);
+
+        SetRateIncreaseButtonListener(
+            [in] IViewOnClickListener* listener);
+
+        SetRateDecreaseButtonListener(
+            [in] IViewOnClickListener* listener);
+
+        SetIsFetchingContent();
+
+        DisableUiElements();
+
+        EnableUiElements();
+
+        SendFetchVoicemailRequest(
+            [in] IUri* voicemailUri);
+
+        QueryHasContent(
+            [in] IUri* voicemailUri,
+            [out] Boolean* result);
+
+        SetFetchContentTimeout();
+
+        RegisterContentObserver(
+            [in] IUri* uri,
+            [in] IContentObserver* observer);
+
+        UnregisterContentObserver(
+            [in] IContentObserver* observer);
+
+        EnableProximitySensor();
+
+        DisableProximitySensor();
+
+        SetVolumeControlStream(
+            [in] Int32 streamType);
+    }
+
+    /** The enumeration of {@link AsyncTask} objects we use in this class. */
+    enum VoicemailPlaybackPresenterTasks {
+        VoicemailPlaybackPresenterTasks_CHECK_FOR_CONTENT,
+        VoicemailPlaybackPresenterTasks_CHECK_CONTENT_AFTER_CHANGE,
+        VoicemailPlaybackPresenterTasks_PREPARE_MEDIA_PLAYER,
+        VoicemailPlaybackPresenterTasks_RESET_PREPARE_START_MEDIA_PLAYER,
+    }
+
+    [local]
+    interface IVoicemailPlaybackPresenter {
+        OnCreate(
+            [in] IBundle* bundle);
+
+        OnSaveInstanceState(
+            [in] IBundle* outState);
+
+        OnDestroy();
+
+        CreateRateDecreaseListener(
+            [out] IViewOnClickListener** listener);
+
+        CreateRateIncreaseListener(
+            [out] IViewOnClickListener** listener);
+
+        HandleCompletion(
+            [in] IMediaPlayer* mediaPlayer);
+
+        OnPause();
+    }
+
+    } // Voicemail
+    } // Dialer
+    } // Droid
+    } // Elastos
+}

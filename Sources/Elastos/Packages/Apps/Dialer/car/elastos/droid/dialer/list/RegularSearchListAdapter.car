@@ -1,0 +1,31 @@
+module
+{
+    interface Elastos.Droid.Dialer.Service.ICachedContactInfo;
+    interface Elastos.Droid.Dialer.Service.ICachedNumberLookupService;
+
+    namespace Elastos {
+    namespace Droid {
+    namespace Dialer {
+    namespace List {
+
+    /**
+     * @Involve
+     * interface Elastos.Apps.Contacts.Common.List.IPinnedHeaderListAdapter
+     * interface Elastos.Apps.Contacts.Common.List.IIndexerListAdapter
+     * interface Elastos.Apps.Contacts.Common.List.IContactEntryListAdapter
+     * interface Elastos.Apps.Contacts.Common.List.IPhoneNumberListAdapter
+     * interface Elastos.Droid.Dialer.List.IDialerPhoneNumberListAdapter
+     */
+    interface IRegularSearchListAdapter {
+        GetContactInfo(
+            [in] ICachedNumberLookupService* lookupService,
+            [in] Int32 position,
+            [out] ICachedContactInfo** info);
+    }
+
+
+    } //List
+    } //Dialer
+    } //Droid
+    } //Elastos
+}

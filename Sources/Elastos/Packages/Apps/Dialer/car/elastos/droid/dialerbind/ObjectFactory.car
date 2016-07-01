@@ -1,0 +1,47 @@
+module
+{
+    using interface Elastos.Droid.App.IDialogFragment;
+    using interface Elastos.Droid.Content.IContext;
+    interface Elastos.Droid.Dialer.CallLog.ICallLogAdapter;
+    interface Elastos.Droid.Dialer.CallLog.ICallLogAdapterCallFetcher;
+    interface Elastos.Droid.Dialer.CallLog.ICallLogAdapterCallItemExpandedListener;
+    interface Elastos.Droid.Dialer.CallLog.ICallLogAdapterOnReportButtonClickListener;
+    interface Elastos.Droid.Dialer.CallLog.IContactInfoHelper;
+    interface Elastos.Droid.Dialer.Service.ICachedNumberLookupService;
+
+
+    namespace Elastos {
+    namespace Droid {
+    namespace DialerBind {
+
+    [deprecated, local]
+    interface IObjectFactory {
+        NewCachedNumberLookupService(
+            [out] ICachedNumberLookupService** service);
+
+        /**
+         * Create a new instance of the call log adapter.
+         * @param context The context to use.
+         * @param callFetcher Instance of call fetcher to use.
+         * @param contactInfoHelper Instance of contact info helper class to use.
+         * @param isCallLog Is this call log adapter being used on the call log?
+         * @return Instance of CallLogAdapter.
+         */
+        NewCallLogAdapter(
+            [in] IContext* ctx,
+            [in] ICallLogAdapterCallFetcher* callFetcher,
+            [in] IContactInfoHelper* contactInfoHelper,
+            [in] ICallLogAdapterCallItemExpandedListener* callItemExpandedListener,
+            [in] ICallLogAdapterOnReportButtonClickListener* onReportButtonClickListener,
+            [in] Boolean isCallLog,
+            [out] ICallLogAdapter** adapter);
+
+        GetReportDialogFragment(
+            [in] String name,
+            [out] IDialogFragment** fragment);
+    }
+
+    } // DialerBind
+    } // Droid
+    } // Elastos
+}

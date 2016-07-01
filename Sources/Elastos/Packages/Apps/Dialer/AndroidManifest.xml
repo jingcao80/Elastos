@@ -15,7 +15,7 @@
 -->
 
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-    package="Elastos.Apps.Dialer"
+    package="Elastos.Droid.Dialer"
     coreApp="true">
 
     <uses-permission android:name="android.permission.CALL_PHONE" />

@@ -1,0 +1,39 @@
+module
+{
+    namespace Elastos {
+    namespace Droid {
+    namespace Dialer {
+    namespace CallLog {
+
+    /**
+      * @Invovle
+      * interface IService
+      * interface IIntentService
+      */
+    interface ICallLogNotificationsService {
+        /** Action to mark all the new voicemails as old. */
+        const String ACTION_MARK_NEW_VOICEMAILS_AS_OLD =
+                "com.android.dialer.calllog.ACTION_MARK_NEW_VOICEMAILS_AS_OLD";
+
+        /**
+         * Action to update the notifications.
+         * <p>
+         * May include an optional extra {@link #EXTRA_NEW_VOICEMAIL_URI}.
+         */
+        const String ACTION_UPDATE_NOTIFICATIONS =
+                "com.android.dialer.calllog.UPDATE_NOTIFICATIONS";
+
+        /**
+         * Extra to included with {@link #ACTION_UPDATE_NOTIFICATIONS} to identify the new voicemail
+         * that triggered an update.
+         * <p>
+         * It must be a {@link Uri}.
+         */
+        const String EXTRA_NEW_VOICEMAIL_URI = "NEW_VOICEMAIL_URI";
+    }
+
+    } //CallLog
+    } //Dialer
+    } //Droid
+    } //Elastos
+}

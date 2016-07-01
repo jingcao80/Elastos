@@ -1,0 +1,32 @@
+module
+{
+    using interface Elastos.Droid.App.IActionBar;
+
+    namespace Elastos {
+    namespace Droid {
+    namespace Dialer {
+    namespace Widget {
+
+    [local]
+    interface IActionBarControllerActivityUi {
+        IsInSearchUi(
+            [out] Boolean* result);
+
+        HasSearchQuery(
+            [out] Boolean* result);
+
+        ShouldShowActionBar(
+            [out] Boolean* result);
+
+        GetActionBarHeight(
+            [out] Int32* height);
+
+        GetActionBar(
+            [out] IActionBar** actionBar);
+    }
+
+    } // Widget
+    } // Dialer
+    } // Droid
+    } // Elastos
+}

@@ -1,0 +1,7 @@
+TARGET_NAME= activity
+TARGET_TYPE= lib
+
+INCLUDES += $(MAKEDIR)/../../../../../inc
+INCLUDES += ../../../../../
+
+SOURCES = TransactionSafeActivity.cpp

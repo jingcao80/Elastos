@@ -1,0 +1,64 @@
+module
+{
+//    using interface Elastos.Droid.View.IViewOnKeyListener;
+
+    namespace Elastos {
+    namespace Droid {
+    namespace Dialer {
+    namespace Widget {
+
+    /**
+     * Listener for the back button next to the search view being pressed
+     */
+    interface IOnBackButtonClickedListener {
+        OnBackButtonClicked();
+    }
+
+//    /**
+//     * @Involve
+//     * extends Elastos.Droid.View.IView
+//     * extends Elastos.Droid.View.IViewGroup
+//     * extends Elastos.Droid.Widget.IFrameLayout
+//     *
+//     * interface Elastos.Droid.View.IViewParent
+//     * interface Elastos.Droid.View.IViewManager
+//     * interface Elastos.Droid.View.IKeyEventCallback
+//     * interface Elastos.Droid.View.Accessibility.IAccessibilityEventSource
+//     * interface Elastos.Droid.Graphics.Drawable.IDrawableCallback
+//     */
+//    interface ISearchEditTextLayout {
+//        SetPreImeKeyListener(
+//            [in] IViewOnKeyListener* listener);
+//
+//        SetOnBackButtonClickedListener(
+//            [in] IOnBackButtonClickedListener* listener);
+//
+//        FadeOut();
+//
+//        // FadeOut(
+//        //    [in] AnimUtils.AnimationCallback callback);
+//
+//        FadeIn();
+//
+//        SetVisible(
+//            [in] Boolean visible);
+//
+//        Expand(
+//            [in] Boolean animate,
+//            [in] Boolean requestFocus);
+//
+//        Collapse(
+//            [in] Boolean animate);
+//
+//        IsExpanded(
+//            [out] Boolean* isExpanded);
+//
+//        IsFadedOut(
+//            [out] Boolean* isFadedOut);
+//    }
+
+    } // Widget
+    } // Dialer
+    } // Droid
+    } // Elastos
+}

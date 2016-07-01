@@ -31,7 +31,7 @@ using Elastos::Droid::Widget::IListAdapter;
  * @attr ref android.R.styleable#ListView_footerDividersEnabled
  */
 // @RemoteView
-class ListView
+class ECO_PUBLIC ListView
     : public AbsListView
     , public IListView
 {
@@ -77,7 +77,7 @@ public:
     };
 
 private:
-    class FocusSelector
+    class ECO_LOCAL FocusSelector
         : public Runnable
     {
     public:
@@ -99,7 +99,7 @@ private:
     /**
      * Holds results of focus aware arrow scrolling.
      */
-    class ArrowScrollFocusResult
+    class ECO_LOCAL ArrowScrollFocusResult
         : public Object
     {
         friend class ListView;
@@ -536,86 +536,86 @@ protected:
         /* [in] */ Int32 position);
 
 private:
-    CARAPI_(void) AdjustViewsUpOrDown();
+    ECO_LOCAL CARAPI_(void) AdjustViewsUpOrDown();
 
-    CARAPI_(void) RemoveFixedViewInfo(
+    ECO_LOCAL CARAPI_(void) RemoveFixedViewInfo(
         /* [in] */ IView* v,
         /* [in] */ IArrayList* where);
 
-    CARAPI_(void) ClearRecycledState(
+    ECO_LOCAL CARAPI_(void) ClearRecycledState(
         /* [in] */ IArrayList* infos);
 
-    CARAPI_(Boolean) ShowingTopFadingEdge();
+    ECO_LOCAL CARAPI_(Boolean) ShowingTopFadingEdge();
 
-    CARAPI_(Boolean) ShowingBottomFadingEdge();
+    ECO_LOCAL CARAPI_(Boolean) ShowingBottomFadingEdge();
 
-    CARAPI_(AutoPtr<IView>) FillDown(
+    ECO_LOCAL CARAPI_(AutoPtr<IView>) FillDown(
         /* [in] */ Int32 pos,
         /* [in] */ Int32 nextTop);
 
-    CARAPI_(AutoPtr<IView>) FillUp(
+    ECO_LOCAL CARAPI_(AutoPtr<IView>) FillUp(
         /* [in] */ Int32 pos,
         /* [in] */ Int32 nextBottom);
 
-    CARAPI_(AutoPtr<IView>) FillFromTop(
+    ECO_LOCAL CARAPI_(AutoPtr<IView>) FillFromTop(
         /* [in] */ Int32 nextTop);
 
-    CARAPI_(AutoPtr<IView>) FillFromMiddle(
+    ECO_LOCAL CARAPI_(AutoPtr<IView>) FillFromMiddle(
         /* [in] */ Int32 childrenTop,
         /* [in] */ Int32 childrenBottom);
 
-    CARAPI_(void) FillAboveAndBelow(
+    ECO_LOCAL CARAPI_(void) FillAboveAndBelow(
         /* [in] */ IView* sel,
         /* [in] */ Int32 position);
 
-    CARAPI_(AutoPtr<IView>) FillFromSelection(
+    ECO_LOCAL CARAPI_(AutoPtr<IView>) FillFromSelection(
         /* [in] */ Int32 selectedTop,
         /* [in] */ Int32 childrenTop,
         /* [in] */ Int32 childrenBottom);
 
-    CARAPI_(Int32) GetBottomSelectionPixel(
+    ECO_LOCAL CARAPI_(Int32) GetBottomSelectionPixel(
         /* [in] */ Int32 childrenBottom,
         /* [in] */ Int32 fadingEdgeLength,
         /* [in] */ Int32 selectedPosition);
 
-    CARAPI_(Int32) GetTopSelectionPixel(
+    ECO_LOCAL CARAPI_(Int32) GetTopSelectionPixel(
         /* [in] */ Int32 childrenTop,
         /* [in] */ Int32 fadingEdgeLength,
         /* [in] */ Int32 selectedPosition);
 
-    CARAPI_(AutoPtr<IView>) MoveSelection(
+    ECO_LOCAL CARAPI_(AutoPtr<IView>) MoveSelection(
         /* [in] */ IView* oldSel,
         /* [in] */ IView* newSel,
         /* [in] */ Int32 delta,
         /* [in] */ Int32 childrenTop,
         /* [in] */ Int32 childrenBottom);
 
-    CARAPI_(void) MeasureScrapChild(
+    ECO_LOCAL CARAPI_(void) MeasureScrapChild(
         /* [in] */ IView* child,
         /* [in] */ Int32 position,
         /* [in] */ Int32 widthMeasureSpec);
 
-    CARAPI_(AutoPtr<IView>) FillSpecific(
+    ECO_LOCAL CARAPI_(AutoPtr<IView>) FillSpecific(
         /* [in] */ Int32 position,
         /* [in] */ Int32 top);
 
-    CARAPI_(void) CorrectTooHigh(
+    ECO_LOCAL CARAPI_(void) CorrectTooHigh(
         /* [in] */ Int32 childCount);
 
-    CARAPI_(void) CorrectTooLow(
+    ECO_LOCAL CARAPI_(void) CorrectTooLow(
         /* [in] */ Int32 childCount);
 
-    CARAPI_(Boolean) IsDirectChildHeaderOrFooter(
+    ECO_LOCAL CARAPI_(Boolean) IsDirectChildHeaderOrFooter(
         /* [in] */ IView* child);
 
-    CARAPI_(AutoPtr<IView>) MakeAndAddView(
+    ECO_LOCAL CARAPI_(AutoPtr<IView>) MakeAndAddView(
         /* [in] */ Int32 position,
         /* [in] */ Int32 y,
         /* [in] */ Boolean flow,
         /* [in] */ Int32 childrenLeft,
         /* [in] */ Boolean selected);
 
-    CARAPI_(void) SetupChild(
+    ECO_LOCAL CARAPI_(void) SetupChild(
         /* [in] */ IView* child,
         /* [in] */ Int32 position,
         /* [in] */ Int32 y,
@@ -624,12 +624,12 @@ private:
         /* [in] */ Boolean selected,
         /* [in] */ Boolean recycled);
 
-    CARAPI_(Boolean) CommonKey(
+    ECO_LOCAL CARAPI_(Boolean) CommonKey(
         /* [in] */ Int32 keyCode,
         /* [in] */ Int32 count,
         /* [in] */ IKeyEvent* event);
 
-    CARAPI HandleHorizontalFocusWithinListItem(
+    ECO_LOCAL CARAPI HandleHorizontalFocusWithinListItem(
         /* [in] */ Int32 direction,
         /* [out] */ Boolean* rst);
 
@@ -643,73 +643,73 @@ private:
      * @param direction Direction to move in
      * @return Desired selected position after moving in the given direction
      */
-    CARAPI_(Int32) NextSelectedPositionForDirection(
+    ECO_LOCAL CARAPI_(Int32) NextSelectedPositionForDirection(
         /* [in] */ IView* selectedView,
         /* [in] */ Int32 selectedPos,
         /* [in] */ Int32 direction);
 
-    CARAPI_(Boolean) ArrowScrollImpl(
+    ECO_LOCAL CARAPI_(Boolean) ArrowScrollImpl(
         /* [in] */ Int32 direction);
 
-    CARAPI HandleNewSelectionChange(
+    ECO_LOCAL CARAPI HandleNewSelectionChange(
         /* [in] */ IView* selectedView,
         /* [in] */ Int32 direction,
         /* [in] */ Int32 newSelectedPosition,
         /* [in] */ Boolean newFocusAssigned);
 
-    CARAPI_(void) MeasureAndAdjustDown(
+    ECO_LOCAL CARAPI_(void) MeasureAndAdjustDown(
         /* [in] */ IView* child,
         /* [in] */ Int32 childIndex,
         /* [in] */ Int32 numChildren);
 
-    CARAPI_(void) MeasureItem(
+    ECO_LOCAL CARAPI_(void) MeasureItem(
         /* [in] */ IView* child);
 
-    CARAPI_(void) RelayoutMeasuredItem(
+    ECO_LOCAL CARAPI_(void) RelayoutMeasuredItem(
         /* [in] */ IView* child);
 
-    CARAPI_(Int32) GetArrowScrollPreviewLength();
+    ECO_LOCAL CARAPI_(Int32) GetArrowScrollPreviewLength();
 
-    CARAPI_(Int32) AmountToScroll(
+    ECO_LOCAL CARAPI_(Int32) AmountToScroll(
         /* [in] */ Int32 direction,
         /* [in] */ Int32 nextSelectedPosition);
 
-    CARAPI_(Int32) LookForSelectablePositionOnScreen(
+    ECO_LOCAL CARAPI_(Int32) LookForSelectablePositionOnScreen(
         /* [in] */ Int32 direction);
 
-    CARAPI_(AutoPtr<ArrowScrollFocusResult>) ArrowScrollFocused(
+    ECO_LOCAL CARAPI_(AutoPtr<ArrowScrollFocusResult>) ArrowScrollFocused(
         /* [in] */ Int32 direction);
 
-    CARAPI PositionOfNewFocus(
+    ECO_LOCAL CARAPI PositionOfNewFocus(
         /* [in] */ IView* newFocus,
         /* [out] */ Int32* focus);
 
-    CARAPI_(Boolean) IsViewAncestorOf(
+    ECO_LOCAL CARAPI_(Boolean) IsViewAncestorOf(
         /* [in] */ IView* child,
         /* [in] */ IView* parent);
 
-    CARAPI_(Int32) AmountToScrollToNewFocus(
+    ECO_LOCAL CARAPI_(Int32) AmountToScrollToNewFocus(
         /* [in] */ Int32 direction,
         /* [in] */ IView* newFocus,
         /* [in] */ Int32 positionOfNewFocus);
 
-    CARAPI_(Int32) DistanceToView(
+    ECO_LOCAL CARAPI_(Int32) DistanceToView(
         /* [in] */ IView* descendant);
 
-    CARAPI_(void) ScrollListItemsBy(
+    ECO_LOCAL CARAPI_(void) ScrollListItemsBy(
         /* [in] */ Int32 amount);
 
-    CARAPI_(AutoPtr<IView>) AddViewAbove(
+    ECO_LOCAL CARAPI_(AutoPtr<IView>) AddViewAbove(
         /* [in] */ IView* theView,
         /* [in] */ Int32 position);
 
-    CARAPI_(AutoPtr<IView>) AddViewBelow(
+    ECO_LOCAL CARAPI_(AutoPtr<IView>) AddViewBelow(
         /* [in] */ IView* theView,
         /* [in] */ Int32 position);
 
-    CARAPI_(Int32) GetMaxScrollAmount();
+    ECO_LOCAL CARAPI_(Int32) GetMaxScrollAmount();
 
-    CARAPI_(Boolean) ShouldAdjustHeightForDivider(
+    ECO_LOCAL CARAPI_(Boolean) ShouldAdjustHeightForDivider(
         /* [in] */ Int32 itemIndex);
 
 public:
@@ -730,16 +730,16 @@ private:
      * When arrow scrolling, ListView will never scroll more than this factor
      * times the height of the list.
      */
-    static const Float MAX_SCROLL_FACTOR;
+    ECO_LOCAL static const Float MAX_SCROLL_FACTOR;
 
     /**
      * When arrow scrolling, need a certain amount of pixels to preview next
      * items.  This is usually the fading edge, but if that is small enough,
      * we want to make sure we preview at least this many pixels.
      */
-    static const Int32 MIN_SCROLL_PREVIEW_PIXELS;
+    ECO_LOCAL static const Int32 MIN_SCROLL_PREVIEW_PIXELS;
 
-    static const String LISTVIEW_NAME;
+    ECO_LOCAL static const String LISTVIEW_NAME;
 
     AutoPtr<IArrayList> mHeaderViewInfos;
     AutoPtr<IArrayList> mFooterViewInfos;

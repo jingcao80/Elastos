@@ -1,0 +1,48 @@
+module
+{
+    using interface Elastos.Droid.Content.IIntent;
+
+    namespace Elastos {
+    namespace Droid {
+    namespace Dialer {
+    namespace CallLog {
+
+    /**
+     * @Involve
+     * interface IListFragment
+     * interface IAnalyticsListFragment
+     * interface ICallLogQueryHandlerListener
+     * interface ICallLogAdapterOnReportButtonClickListener
+     * interface ICallLogAdapterCallItemExpandedListener
+     */
+    interface ICallLogFragment {
+        /**
+         * Based on the new intent, decide whether the list should be configured
+         * to scroll up to display the first item.
+         */
+        ConfigureScreenFromIntent(
+            [in] IIntent* newIntent);
+
+        StartCallsQuery();
+
+        /**
+         * Enables/disables the showing of the view full call history footer
+         *
+         * @param hasFooterView Whether or not to show the footer
+         */
+        SetHasFooterView(
+            [in] Boolean hasFooterView);
+
+        OnBadDataReported(
+            [in] String number);
+
+        OnReportButtonClick(
+            [in] String number);
+
+    }
+
+    } //CallLog
+    } //Dialer
+    } //Droid
+    } //Elastos
+}

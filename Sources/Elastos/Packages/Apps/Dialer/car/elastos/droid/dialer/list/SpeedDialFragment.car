@@ -1,0 +1,40 @@
+module
+{
+    using interface Elastos.Droid.Widget.IAbsListView;
+    interface Elastos.Droid.Dialer.List.IDragDropController;
+
+    namespace Elastos {
+    namespace Droid {
+    namespace Dialer {
+    namespace List {
+
+//    /**
+//     * @Involve
+//     * interface Elastos.Droid.Content.IComponentCallbacks
+//     * interface Elastos.Droid.Content.IComponentCallbacks2
+//     * interface Elastos.Droid.View.IViewOnCreateContextMenuListener
+//     * interface Elastos.Droid.Apps.IFragment
+//     * interface Elastos.Apps.DailerBind.Analytics.IAnalyticsFragment
+//     * interface IAdapterViewOnItemClickListener
+//     * interface IOnDataSetChangedForAnimationListener
+//     */
+//    [local]
+//    interface ISpeedDialFragment {
+//        HasFrequents(
+//            [out] Boolean* result);
+//
+//        GetListView(
+//            [out] IAbsListView** listView);
+//    }
+
+    [local]
+    interface ISpeedDialFragmentHostInterface {
+        SetDragDropController(
+            [in] IDragDropController* controller);
+    }
+
+    } //List
+    } //Dialer
+    } //Droid
+    } //Elastos
+}

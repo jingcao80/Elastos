@@ -4,6 +4,7 @@ module
     importlib("Elastos.Droid.Core.eco");
 
     merge("car/elastos/droid/dialerbind/analytics/AnalyticsInterface.car");
+    merge("car/elastos/droid/contacts/common/list/OnPhoneNumberPickerActionListener.car");
 
     interface IDummy {}
 

@@ -1,0 +1,35 @@
+
+module
+{
+    using interface Elastos.Droid.Net.IUri;
+
+    namespace Elastos{
+    namespace Droid {
+    namespace Dialer {
+    namespace CallLog {
+
+    /**
+     * Handles notifications for voicemails.
+     */
+    interface IVoicemailNotifier {
+        /**
+         * Updates the notification and clears it if there are no new voicemails.
+         * <p>
+         * If the given URI corresponds to a new voicemail, also notifies about it.
+         * <p>
+         * It is not safe to call this method from the main thread.
+         *
+         * @param newCallUri URI of the new call, may be null
+         */
+        UpdateNotification(
+            [in] IUri* newCallUri);
+
+        /** Clears the new voicemail notification. */
+        ClearNotification();
+    }
+
+    } //CallLog
+    } //Dialer
+    } //Droid
+    } //Elastos
+}

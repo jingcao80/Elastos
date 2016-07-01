@@ -3,7 +3,7 @@
 
 namespace Elastos{
 namespace Apps{
-namespace DailerBind {
+namespace DialerBind {
 namespace Analytics {
 
 class ECO_PUBLIC AnalyticsListFragment
@@ -28,7 +28,7 @@ public:
 };
 
 } // Analytics
-} // DailerBind
+} // DialerBind
 } // Apps
 } // Elastos
 

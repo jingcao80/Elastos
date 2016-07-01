@@ -1,8 +1,10 @@
 module
 {
+    using interface Elastos.Droid.Content.IIntent;
+    using interface Elastos.Droid.Net.IUri;
 
-    namespace Elastos{
-    namespace Apps {
+    namespace Elastos {
+    namespace Droid {
     namespace Contacts {
     namespace Common {
     namespace List {
@@ -45,7 +47,7 @@ module
     } // List
     } // Common
     } // Contacts
-    } // Apps
+    } // Droid
     } // Elastos
 
 }

@@ -1,0 +1,105 @@
+module
+{
+    using interface Elastos.Droid.Content.IComponentName;
+    using interface Elastos.Droid.Content.IContext;
+    using interface Elastos.Droid.Content.IIntent;
+    using interface Elastos.Droid.Content.Res.IResources;
+    using interface Elastos.Droid.View.IView;
+    using interface Elastos.Core.ICharSequence;
+    using interface Elastos.Utility.IIterable;
+
+    namespace Elastos {
+    namespace Droid {
+    namespace Dialer {
+    namespace Util {
+
+    [local]
+    interface IDialerUtils {
+        /**
+         * Attempts to start an activity and displays a toast with the default error message if the
+         * activity is not found, instead of throwing an exception.
+         *
+         * @param context to start the activity with.
+         * @param intent to start the activity with.
+         */
+        StartActivityWithErrorToast(
+            [in] IContext* context,
+            [in] IIntent* intent);
+
+        /**
+         * Attempts to start an activity and displays a toast with a provided error message if the
+         * activity is not found, instead of throwing an exception.
+         *
+         * @param context to start the activity with.
+         * @param intent to start the activity with.
+         * @param msgId Resource ID of the string to display in an error message if the activity is
+         *              not found.
+         */
+        StartActivityWithErrorToast(
+            [in] IContext* context,
+            [in] IIntent* intent,
+            [in] Int32 msgId);
+
+        /**
+         * Returns the component name to use in order to send an SMS using the default SMS application,
+         * or null if none exists.
+         */
+        GetSmsComponent(
+            [in] IContext* context,
+            [out] IComponentName** component);
+
+        /**
+         * Sets the image asset and text for an empty list view (see empty_list_view.xml).
+         *
+         * @param emptyListView The empty list view.
+         * @param imageResId The resource id for the drawable to set as the image.
+         * @param strResId The resource id for the string to set as the message.
+         * @param res The resources to obtain the image and string from.
+         */
+        ConfigureEmptyListView(
+            [in] IView* emptyListView,
+            [in] Int32 imageResId,
+            [in] Int32 strResId,
+            [in] IResources* res);
+
+        /**
+         * Closes an {@link AutoCloseable}, silently ignoring any checked exceptions. Does nothing if
+         * null.
+         *
+         * @param closeable to close.
+         */
+        // TODO:
+        // CloseQuietly(
+        //    [in] IAutoCloseable* closeable);
+
+        /**
+         * Joins a list of {@link CharSequence} into a single {@link CharSequence} seperated by a
+         * localized delimiter such as ", ".
+         *
+         * @param resources Resources used to get list delimiter.
+         * @param list List of char sequences to join.
+         * @return Joined char sequences.
+         */
+        Join(
+            [in] IResources* resources,
+            [in] IIterable* list,
+            [out] ICharSequence** result);
+
+        /**
+         * @return True if the application is currently in RTL mode.
+         */
+        IsRtl(
+            [out] Boolean* result);
+
+        ShowInputMethod(
+            [in] IView* view);
+
+        HideInputMethod(
+            [in] IView* view);
+    }
+
+    } // Util
+    } // Dialer
+    } // Droid
+    } // Elastos
+}
