@@ -1,0 +1,13 @@
+
+module
+{
+    importlib("Elastos.Droid.Core.eco");
+
+    merge("car/elastos/droid/dialerbind/analytics/AnalyticsInterface.car");
+
+    interface IDummy {}
+
+    class CDummy {
+        interface IDummy;
+    }
+}

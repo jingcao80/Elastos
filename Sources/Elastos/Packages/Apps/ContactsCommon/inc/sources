@@ -1,0 +1,2 @@
+
+EXPORT_HEADERS += elastos/droid/dialerbind/analytics/AnalyticsActivity.h
