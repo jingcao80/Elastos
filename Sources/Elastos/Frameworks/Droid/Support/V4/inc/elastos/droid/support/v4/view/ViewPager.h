@@ -104,6 +104,42 @@ public:
             /* [in] */ Int32 state);
     };
 
+    /**
+     * This is the persistent state that is saved by ViewPager.  Only needed
+     * if you are creating a sublass of ViewPager that must save its own
+     * state, in which case it should implement a subclass of this which
+     * contains that state.
+     */
+    class SavedState : public BaseSavedState
+    {
+    public:
+        SavedState();
+
+        CARAPI constructor();
+
+        CARAPI constructor(
+            /* [in] */ IParcelable* superState);
+
+        // @Override
+        CARAPI WriteToParcel(
+            /* [in] */ IParcel* out);
+
+        CARAPI ReadFromParcel(
+            /* [in] */ IParcel* in);
+
+        // @Override
+        CARAPI ToString(
+            /* [out] */ String* str);
+
+    // protected:
+    //     SavedState(Parcel in, ClassLoader loader);
+
+    public:
+        Int32 mPosition;
+        AutoPtr<IParcelable> mAdapterState;
+        AutoPtr<IClassLoader> mLoader;
+    };
+
 private:
     class ItemInfoComparator
         , public Object
@@ -435,9 +471,49 @@ protected:
     // @Override
     CARAPI_(Boolean) VerifyDrawable(
         /* [in] */ IDrawable* who);
-// begin from this
+
     // @Override
     CARAPI DrawableStateChanged();
+
+    // We want the duration of the page snap animation to be influenced by the distance that
+    // the screen has to travel, however, we don't want this duration to be effected in a
+    // purely linear fashion. Instead, we use this method to moderate the effect that the distance
+    // of travel has on the overall snap duration.
+    CARAPI_(Float) DistanceInfluenceForSnapDuration(
+        /* [in] */ Float f);
+
+    /**
+     * Like {@link View#scrollBy}, but scroll smoothly instead of immediately.
+     *
+     * @param x the number of pixels to scroll by on the X axis
+     * @param y the number of pixels to scroll by on the Y axis
+     */
+    CARAPI_(void) SmoothScrollTo(
+        /* [in] */ Int32 x,
+        /* [in] */ Int32 y);
+
+    /**
+     * Like {@link View#scrollBy}, but scroll smoothly instead of immediately.
+     *
+     * @param x the number of pixels to scroll by on the X axis
+     * @param y the number of pixels to scroll by on the Y axis
+     * @param velocity the velocity associated with a fling, if applicable. (0 otherwise)
+     */
+    CARAPI_(void) SmoothScrollTo(
+        /* [in] */ Int32 x,
+        /* [in] */ Int32 y,
+        /* [in] */ Int32 velocity);
+
+    CARAPI_(AutoPtr<ItemInfo>) AddNewItem(
+        /* [in] */ Int32 position,
+        /* [in] */ Int32 index);
+
+    CARAPI_(void) DataSetChanged();
+
+    CARAPI Populate();
+
+    CARAPI Populate(
+        /* [in] */ Int32 newCurrentItem);
 
 private:
     static CARAPI_(AutoPtr<IComparator>) InitComparator();
@@ -458,6 +534,13 @@ private:
         /* [in] */ Boolean smoothScroll,
         /* [in] */ Int32 velocity,
         /* [in] */ Boolean dispatchSelected);
+
+    CARAPI_(void) SortChildDrawingOrder();
+
+    CARAPI_(void) CalculatePageOffsets(
+        /* [in] */ ItemInfo* curItem,
+        /* [in] */ Int32 curIndex,
+        /* [in] */ ItemInfo* oldCurInfo);
 
 private:
     static const String TAG;

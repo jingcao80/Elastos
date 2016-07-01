@@ -1,0 +1,24 @@
+
+TARGET_NAME= Elastos.Droid.Support.V4
+TARGET_TYPE= eco
+
+EXPORT_ALL_SYMBOLS=1
+
+CAR_FLAGS += -n -u
+LUBE_FLAGS += -n -u
+
+INCLUDES += $(MAKEDIR)
+INCLUDES += $(MAKEDIR)/inc
+
+SOURCES = Elastos.Droid.Support.V4.car
+SOURCES += Elastos.CoreLibrary.cpp
+SOURCES += Elastos.Droid.Core.cpp
+
+ELASTOS_LIBS += src/elastos/droid/support/v4/view/view.lib
+
+LIBRARIES  = $(XDK_USER_LIB)/Elastos.Runtime.lib
+LIBRARIES += $(XDK_TARGETS)/Elastos.Runtime.eco
+LIBRARIES += $(XDK_TARGETS)/Elastos.CoreLibrary.eco
+LIBRARIES += $(XDK_TARGETS)/Elastos.Droid.Core.eco
+LIBRARIES += -lm -lcutils -licuuc -llog -lutils
+

@@ -1,6 +1,7 @@
 module
 {
 
+    using interface Elastos.Droid.Graphics.Drawable.IDrawable;
     using interface Elastos.Droid.View.IView;
     using interface Elastos.Droid.View.IKeyEvent;
 
@@ -11,22 +12,6 @@ module
     namespace Support {
     namespace V4 {
     namespace View {
-
-    /**
-     * Indicates that the pager is in an idle, settled state. The current page
-     * is fully in view and no animation is in progress.
-     */
-    const Int32 SCROLL_STATE_IDLE = 0;
-
-    /**
-     * Indicates that the pager is currently being dragged by the user.
-     */
-    const Int32 SCROLL_STATE_DRAGGING = 1;
-
-    /**
-     * Indicates that the pager is in the process of settling to a final position.
-     */
-    const Int32 SCROLL_STATE_SETTLING = 2;
 
     /**
      * Callback interface for responding to changing state of the selected page.
@@ -79,6 +64,7 @@ module
      * setting a PageTransformer on a ViewPager on earlier platform versions will
      * be ignored.</p>
      */
+    [local]
     interface IViewPagerPageTransformer {
         /**
          * Apply a property transformation to the given page.
@@ -96,6 +82,7 @@ module
     /**
      * Used internally to monitor when adapters are switched.
      */
+    [local]
     interface IViewPagerOnAdapterChangeListener {
         OnAdapterChanged(
             [in] IPagerAdapter* oldAdapter,
@@ -107,6 +94,15 @@ module
      * pager decorations by default.
      */
     interface IViewPagerDecor {
+    }
+
+    /**
+     * @Involve
+     * interface Elastos.Droid.View.IViewBaseSavedState
+     * interface Elastos.Droid.View.IAbsSavedState
+     * interface IParcelable
+     */
+    interface IViewPagerSavedState {
     }
 
     /**
@@ -149,7 +145,25 @@ module
      * interface IViewManager;
      * interface IViewGroup;
      */
+    [local]
     interface IViewPager {
+
+        /**
+         * Indicates that the pager is in an idle, settled state. The current page
+         * is fully in view and no animation is in progress.
+         */
+        const Int32 SCROLL_STATE_IDLE = 0;
+
+        /**
+         * Indicates that the pager is currently being dragged by the user.
+         */
+        const Int32 SCROLL_STATE_DRAGGING = 1;
+
+        /**
+         * Indicates that the pager is in the process of settling to a final position.
+         */
+        const Int32 SCROLL_STATE_SETTLING = 2;
+
         /**
          * Set a PagerAdapter that will supply views for this pager as needed.
          *

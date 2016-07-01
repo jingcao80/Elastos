@@ -6,6 +6,7 @@
 #include "elastos/droid/os/Build.h"
 #include "elastos/droid/R.h"
 #include <elastos/core/Math.h>
+#include <elastos/core/StringUtils.h>
 #include <elastos/utility/logging/Slogger.h>
 
 using Elastos::Droid::Content::Res::IResources;
@@ -19,6 +20,9 @@ using Elastos::Droid::View::IViewConfiguration;
 using Elastos::Droid::View::IViewConfigurationHelper;
 using Elastos::Droid::View::CViewConfigurationHelper;
 using Elastos::Droid::Widget::CScroller;
+using Elastos::Core::StringUtils;
+using Elastos::Utility::ICollections;
+using Elastos::Utility::CCollections;
 using Elastos::Utility::CArrayList;
 using Elastos::Utility::Logging::Slogger;
 
@@ -289,7 +293,7 @@ ECode ViewPager::SetAdapter(
         for (Int32 i = 0; i < size; i++) {
             AutoPtr<IInterface> value;
             mItems->Get(i, (IInterface**)&value);
-            AutoPtr<ItemInfo> ii = (ItemInfo*)(IObject*)value->Get();
+            AutoPtr<ItemInfo> ii = (ItemInfo*)(IObject*)value.Get();
             mAdapter->DestroyItem(IViewGroup::(this), ii->mPosition, ii->mObject);
         }
         mAdapter->FinishUpdate(IViewGroup::(this));
@@ -342,8 +346,8 @@ void ViewPager::RemoveNonDecorViews()
         GetChildAt(i, (IView**)&child);
         AutoPtr<IViewGroupLayoutParams> lp;
         child->GetLayoutParams((IViewGroupLayoutParams**)&lp);
-        AutoPtr<LayoutParams> params = (LayoutParams*)lp->Get();
-        if (!lp->mIsDecor) {
+        AutoPtr<LayoutParams> params = (LayoutParams*)lp.Get();
+        if (!params->mIsDecor) {
             RemoveViewAt(i);
             i--;
         }
@@ -439,7 +443,7 @@ void ViewPager::SetCurrentItemInternal(
         for (Int32 i = 0; i < size; i++) {
             AutoPtr<IInterface> value;
             mItems->Get(i, (IInterface**)&value);
-            AutoPtr<ItemInfo> ii = (ItemInfo*)(IObject*)value->Get();
+            AutoPtr<ItemInfo> ii = (ItemInfo*)(IObject*)value.Get();
             ii->mScrolling = TRUE;
         }
     }
@@ -555,7 +559,7 @@ Int32 ViewPager::GetChildDrawingOrder(
     AutoPtr<IView> v = IView::Probe(value);
     AutoPtr<IViewGroupLayoutParams> lp;
     v->GetLayoutParams((IViewGroupLayoutParams**)&lp);
-    Int32 result = ((LayoutParams*)lp->Get())->mChildIndex;
+    Int32 result = ((LayoutParams*)lp.Get())->mChildIndex;
     return result;
 }
 
@@ -637,6 +641,598 @@ Boolean ViewPager::VerifyDrawable(
     /* [in] */ IDrawable* who)
 {
     return ViewGroup::VerifyDrawable(who) || who == mMarginDrawable.Get();
+}
+
+ECode ViewPager::DrawableStateChanged()
+{
+    ViewGroup::DrawableStateChanged();
+    AutoPtr<IDrawable> d = mMarginDrawable;
+    Boolean isStateful;
+    if (d != NULL && (d->IsStateful(&isStateful), isStateful)) {
+        AutoPtr<ArrayOf<Int32> > state;
+        GetDrawableState((ArrayOf<Int32>**)&state);
+        Boolean result;
+        d->SetState(state, &result);
+    }
+    return NOERROR;
+}
+
+Float ViewPager::DistanceInfluenceForSnapDuration(
+    /* [in] */ Float f)
+{
+    f -= 0.5f; // center the values about 0.
+    f *= 0.3f * Elastos::Core::Math::PI / 2.0f;
+    return (Float) Elastos::Core::Math::Sin(f);
+}
+
+void ViewPager::SmoothScrollTo(
+    /* [in] */ Int32 x,
+    /* [in] */ Int32 y)
+{
+    SmoothScrollTo(x, y, 0);
+}
+
+void ViewPager::SmoothScrollTo(
+    /* [in] */ Int32 x,
+    /* [in] */ Int32 y,
+    /* [in] */ Int32 velocity)
+{
+    Int32 count;
+    if (GetChildCount() == 0) {
+        // Nothing to do.
+        SetScrollingCacheEnabled(FALSE);
+        return;
+    }
+    Int32 sx, sy;
+    GetScrollX(&sx);
+    GetScrollY(&sy);
+    Int32 dx = x - sx;
+    Int32 dy = y - sy;
+    if (dx == 0 && dy == 0) {
+        CompleteScroll(FALSE);
+        Populate();
+        SetScrollState(SCROLL_STATE_IDLE);
+        return;
+    }
+
+    SetScrollingCacheEnabled(TRUE);
+    SetScrollState(SCROLL_STATE_SETTLING);
+
+    Int32 width;
+    GetClientWidth(&width);
+    Int32 halfWidth = width / 2;
+    Float distanceRatio = Elastos::Core::Math::Min(1f, 1.0f * Elastos::Core::Math::Abs(dx) / width);
+    Float distance = halfWidth + halfWidth *
+            DistanceInfluenceForSnapDuration(distanceRatio);
+
+    Int32 duration = 0;
+    velocity = Elastos::Core::Math::Abs(velocity);
+    if (velocity > 0) {
+        duration = 4 * Elastos::Core::Math::Round(1000 * Elastos::Core::Math::Abs(distance / velocity));
+    }
+    else {
+        Int32 pageW;
+        mAdapter->GetPageWidth(mCurItem, &pageW)
+        Float pageWidth = width * pageW;
+        Float pageDelta = (Float) Elastos::Core::Math::Abs(dx) / (pageWidth + mPageMargin);
+        duration = (Int32)((pageDelta + 1) * 100);
+    }
+    duration = Elastos::Core::Math::Min(duration, MAX_SETTLE_DURATION);
+
+    mScroller->StartScroll(sx, sy, dx, dy, duration);
+    ViewCompat:PostInvalidateOnAnimation(this);
+}
+
+AutoPtr<ItemInfo> ViewPager::AddNewItem(
+    /* [in] */ Int32 position,
+    /* [in] */ Int32 index)
+{
+    AutoPtr<ItemInfo> ii = new ItemInfo();
+    ii->mPosition = position;
+    ii->mObject = NULL;
+    mAdapter->InstantiateItem(IView::Probe(this), position, &ii->mObject);
+    mAdapter->GetPageWidth(position, &ii->mWidthFactor);
+    Int32 size;
+    if (index < 0 || (mItems->GetSize(&size), index >= size)) {
+        mItems->Add(ii);
+    }
+    else {
+        mItems->Add(index, ii);
+    }
+    return ii;
+}
+
+void ViewPager::DataSetChanged()
+{
+    // This method only gets called if our observer is attached, so mAdapter is non-null.
+
+    Int32 adapterCount;
+    mAdapter->GetCount(&adapterCount);
+    mExpectedAdapterCount = adapterCount;
+    Int32 size;
+    mItems->GetSize(&size);
+    Boolean needPopulate = size < mOffscreenPageLimit * 2 + 1 && size < adapterCount;
+    Int32 newCurrItem = mCurItem;
+
+    Boolean isUpdating = FALSE;
+    for (Int32 i = 0; i < size; i++) {
+        AutoPtr<IInterface> value;
+        mItems->Get(i, (IInterface**)&value);
+        AutoPtr<ItemInfo> ii = (ItemInfo*)(IObject*)value.Get();
+        Int32 newPos;
+        mAdapter->GetItemPosition(ii->mObject, &newPos);
+
+        if (newPos == IPagerAdapter::POSITION_UNCHANGED) {
+            continue;
+        }
+
+        if (newPos == IPagerAdapter::POSITION_NONE) {
+            mItems->Remove(i);
+            i--;
+
+            if (!isUpdating) {
+                mAdapter->StartUpdate(IView::Probe(this));
+                isUpdating = TRUE;
+            }
+
+            mAdapter->DestroyItem(IView::Probe(this), ii->mPosition, ii->mObject);
+            needPopulate = TRUE;
+
+            if (mCurItem == ii->mPosition) {
+                // Keep the current item in the valid range
+                newCurrItem = Elastos::Core::Math::Max(0, Elastos::Core::Math::Min(mCurItem, adapterCount - 1));
+                needPopulate = TRUE;
+            }
+            continue;
+        }
+
+        if (ii->mPosition != newPos) {
+            if (ii->mPosition == mCurItem) {
+                // Our current item changed position. Follow it.
+                newCurrItem = newPos;
+            }
+
+            ii->mPosition = newPos;
+            needPopulate = TRUE;
+        }
+    }
+
+    if (isUpdating) {
+        mAdapter->FinishUpdate(IView::Probe(this));
+    }
+
+    AutoPtr<ICollections> coll;
+    CCollections::AcquireSingleton((ICollections**)&coll);
+    coll->Sort(IList::Probe(mItems), COMPARATOR);
+
+    if (needPopulate) {
+        // Reset our known page widths; populate will recompute them.
+        Int32 childCount;
+        GetChildCount(&childCount);
+        for (Int32 i = 0; i < childCount; i++) {
+            AutoPtr<IView> child;
+            GetChildAt(i, (IView**)&child);
+            AutoPtr<IViewGroupLayoutParams> lp;
+            child->GetLayoutParams((IViewGroupLayoutParams**)&lp);
+            AutoPtr<LayoutParams> params = (LayoutParams*)lp.Get();
+            if (!params->mIsDecor) {
+                params->mWidthFactor = 0.f;
+            }
+        }
+
+        SetCurrentItemInternal(newCurrItem, FALSE, TRUE);
+        RequestLayout();
+    }
+}
+
+ECode ViewPager::Populate()
+{
+    return Populate(mCurItem);
+}
+
+ECode ViewPager::Populate(
+    /* [in] */ Int32 newCurrentItem)
+{
+    AutoPtr<ItemInfo> oldCurInfo;
+    Int32 focusDirection = IView::FOCUS_FORWARD;
+    if (mCurItem != newCurrentItem) {
+        focusDirection = mCurItem < newCurrentItem ? IView::FOCUS_RIGHT : IView::FOCUS_LEFT;
+        oldCurInfo = InfoForPosition(mCurItem);
+        mCurItem = newCurrentItem;
+    }
+
+    if (mAdapter == NULL) {
+        SortChildDrawingOrder();
+        return;
+    }
+
+    // Bail now if we are waiting to populate.  This is to hold off
+    // on creating views from the time the user releases their finger to
+    // fling to a new position until we have finished the scroll to
+    // that position, avoiding glitches from happening at that point.
+    if (mPopulatePending) {
+        if (DEBUG) Slogger::I(TAG, "populate is pending, skipping for now...");
+        SortChildDrawingOrder();
+        return;
+    }
+
+    // Also, don't populate until we are attached to a window.  This is to
+    // avoid trying to populate before we have restored our view hierarchy
+    // state and conflicting with what is restored.
+    AutoPtr<IBinder> token;
+    if (GetWindowToken((IBinder**)&token), token == NULL) {
+        return;
+    }
+
+    mAdapter->StartUpdate(IView::Probe(this));
+
+    Int32 pageLimit = mOffscreenPageLimit;
+    Int32 startPos = Elastos::Core::Math::Max(0, mCurItem - pageLimit);
+    Int32 N;
+    mAdapter->GetCount(&N);
+    Int32 endPos = Elastos::Core::Math::Min(N - 1, mCurItem + pageLimit);
+
+    if (N != mExpectedAdapterCount) {
+        String resName;
+        // try {
+        AutoPtr<IResources> res;
+        GetResources((IResources**)&res);
+        Int32 id;
+        GetId(&id);
+        if (FAILED(res->GetResourcesName(id, &resName))) {
+            resName = StringUtils::ToHexString(id);
+        }
+        // } catch (Resources.NotFoundException e) {
+        //     resName = Integer.toHexString(getId());
+        // }
+        Slogger::E(TAG, "The application's PagerAdapter changed the adapter's contents without calling PagerAdapter#notifyDataSetChanged! Expected adapter item count: %d, found: %d Pager id: %s Pager class:  Problematic adapter: "
+                , mExpectedAdapterCount, N, resName.string()/*, getClass(), mAdapter.getClass()*/);
+        return E_ILLEGAL_STATE_EXCEPTION;
+    }
+
+    // Locate the currently focused item or add it if needed.
+    Int32 curIndex = -1;
+    AutoPtr<ItemInfo> curItem;
+    Int32 size;
+    mItems->GetSize(&size);
+    for (curIndex = 0; curIndex < size; curIndex++) {
+        AutoPtr<IInterface> value;
+        mItems->Get(curIndex, (IInterface**)&value);
+        AutoPtr<ItemInfo> ii = (ItemInfo*)(IObject*)value.Get();
+        if (ii->mPosition >= mCurItem) {
+            if (ii->mPosition == mCurItem) curItem = ii;
+            break;
+        }
+    }
+
+    if (curItem == NULL && N > 0) {
+        curItem = AddNewItem(mCurItem, curIndex);
+    }
+
+    // Fill 3x the available width or up to the number of offscreen
+    // pages requested to either side, whichever is larger.
+    // If we have no current item we have no work to do.
+    if (curItem != NULL) {
+        Float extraWidthLeft = 0.f;
+        Int32 itemIndex = curIndex - 1;
+        AutoPtr<ItemInfo> ii;
+        if (itemIndex >= 0) {
+            AutoPtr<IInterface> value;
+            mItems->Get(itemIndex, (IInterface**)&value);
+            ii = (ItemInfo*)(IObject*)value.Get();
+        }
+        Int32 clientWidth;
+        GetClientWidth(&clientWidth);
+        Int32 paddingL;
+        GetPaddingLeft(&paddingL);
+        Float leftWidthNeeded = clientWidth <= 0 ? 0 :
+                2.f - curItem->mWidthFactor + (Float)paddingL / (Float) clientWidth;
+        for (Int32 pos = mCurItem - 1; pos >= 0; pos--) {
+            if (extraWidthLeft >= leftWidthNeeded && pos < startPos) {
+                if (ii == NULL) {
+                    break;
+                }
+                if (pos == ii->mPosition && !ii->mScrolling) {
+                    mItems->Remove(itemIndex);
+                    mAdapter->DestroyItem(IView::Probe(this), pos, ii->mObject);
+                    if (DEBUG) {
+                        Slogger::I(TAG, "populate() - destroyItem() with pos: %d view: %s", pos, TO_CSTR(ii->mObject));
+                    }
+                    itemIndex--;
+                    curIndex--;
+                    ii = NULL;
+                    if (itemIndex >= 0) {
+                        AutoPtr<IInterface> value;
+                        mItems->Get(itemIndex, (IInterface**)&value);
+                        ii = (ItemInfo*)(IObject*)value.Get();
+                    }
+                }
+            }
+            else if (ii != NULL && pos == ii->mPosition) {
+                extraWidthLeft += ii->mWidthFactor;
+                itemIndex--;
+                ii = NULL;
+                if (itemIndex >= 0) {
+                    AutoPtr<IInterface> value;
+                    mItems->Get(itemIndex, (IInterface**)&value);
+                    ii = (ItemInfo*)(IObject*)value.Get();
+                }
+            }
+            else {
+                ii = AddNewItem(pos, itemIndex + 1);
+                extraWidthLeft += ii->mWidthFactor;
+                curIndex++;
+                ii = NULL;
+                if (itemIndex >= 0) {
+                    AutoPtr<IInterface> value;
+                    mItems->Get(itemIndex, (IInterface**)&value);
+                    ii = (ItemInfo*)(IObject*)value.Get();
+                }
+            }
+        }
+
+        Float extraWidthRight = curItem->mWidthFactor;
+        itemIndex = curIndex + 1;
+        if (extraWidthRight < 2.f) {
+            mItems->GetSize(&size);
+            ii = NULL;
+            if (itemIndex < size) {
+                AutoPtr<IInterface> value;
+                mItems->Get(itemIndex, (IInterface**)&value);
+                ii = (ItemInfo*)(IObject*)value.Get();
+            }
+            Int32 paddingR;
+            GetPaddingRight(&paddingR);
+            Float rightWidthNeeded = clientWidth <= 0 ? 0 : (Float)paddingR / (Float)clientWidth + 2.f;
+            for (Int32 pos = mCurItem + 1; pos < N; pos++) {
+                if (extraWidthRight >= rightWidthNeeded && pos > endPos) {
+                    if (ii == NULL) {
+                        break;
+                    }
+                    if (pos == ii->mPosition && !ii->mScrolling) {
+                        mItems->Remove(itemIndex);
+                        mAdapter->DestroyItem(this, pos, ii->mObject);
+                        if (DEBUG) {
+                            Slogger::I(TAG, "populate() - destroyItem() with pos: %d view: %s", pos, TO_CSTR(ii->mObject));
+                        }
+                        mItems->GetSize(&size);
+                        ii = NULL;
+                        if (itemIndex < size) {
+                            AutoPtr<IInterface> value;
+                            mItems->Get(itemIndex, (IInterface**)&value);
+                            ii = (ItemInfo*)(IObject*)value.Get();
+                        }
+                    }
+                }
+                else if (ii != NULL && pos == ii->mPosition) {
+                    extraWidthRight += ii->mWidthFactor;
+                    itemIndex++;
+                    mItems->GetSize(&size);
+                    ii = NULL;
+                    if (itemIndex < size) {
+                        AutoPtr<IInterface> value;
+                        mItems->Get(itemIndex, (IInterface**)&value);
+                        ii = (ItemInfo*)(IObject*)value.Get();
+                    }
+                }
+                else {
+                    ii = AddNewItem(pos, itemIndex);
+                    itemIndex++;
+                    extraWidthRight += ii->mWidthFactor;
+                    mItems->GetSize(&size);
+                    ii = NULL;
+                    if (itemIndex < size) {
+                        AutoPtr<IInterface> value;
+                        mItems->Get(itemIndex, (IInterface**)&value);
+                        ii = (ItemInfo*)(IObject*)value.Get();
+                    }
+                }
+            }
+        }
+
+        CalculatePageOffsets(curItem, curIndex, oldCurInfo);
+    }
+
+    if (DEBUG) {
+        Slogger::I(TAG, "Current page list:");
+        mItems->GetSize(&size);
+        for (Int32 i = 0; i < size; i++) {
+            AutoPtr<IInterface> value;
+            mItems->Get(i, (IInterface**)&value);
+            AutoPtr<ItemInfo> itemInfo = (ItemInfo*)(IObject*)value.Get();
+            Slogger::I(TAG, "#%d: page %d", itemInfo->mPosition);
+        }
+    }
+
+    AutoPtr<IView> v = IView::Probe(this);
+    mAdapter->SetPrimaryItem(v, mCurItem, curItem != NULL ? curItem->mObject : NULL);
+
+    mAdapter->FinishUpdate(v);
+
+    // Check width measurement of current pages and drawing sort order.
+    // Update LayoutParams as needed.
+    Int32 childCount;
+    GetChildCount(&childCount);
+    for (Int32 i = 0; i < childCount; i++) {
+        AutoPtr<IView> child;
+        GetChildAt(i, (IView**)&child);
+        AutoPtr<IViewGroupLayoutParams> lp;
+        child->GetLayoutParams((IViewGroupLayoutParams**)&lp);
+        AutoPtr<LayoutParams> params = (LayoutParams*)lp.Get();
+        params->mChildIndex = i;
+        if (!params->mIsDecor && params->mWidthFactor == 0.f) {
+            // 0 means requery the adapter for this, it doesn't have a valid width.
+            AutoPtr<ItemInfo> ii = InfoForChild(child);
+            if (ii != NULL) {
+                params->mWidthFactor = ii->mWidthFactor;
+                params->mPosition = ii->mPosition;
+            }
+        }
+    }
+    SortChildDrawingOrder();
+
+    Boolean hasFocus;
+    if (HasFocus(&hasFocus), hasFocus) {
+        AutoPtr<IView> currentFocused;
+        FindFocus((IView**)&currentFocused);
+        AutoPtr<ItemInfo> ii = currentFocused != NULL ? InfoForAnyChild(currentFocused) : NULL;
+        if (ii == NULL || ii->mPosition != mCurItem) {
+            Int32 c;
+            GetChildCount(&c);
+            for (Int32 i = 0; i < c; i++) {
+                AutoPtr<IView> child;
+                GetChildAt(i, (IView**)&child);
+                ii = InfoForChild(child);
+                if (ii != NULL && ii->mPosition == mCurItem) {
+                    Boolean isFocus;
+                    if (child->RequestFocus(focusDirection, &isFocus), isFocus) {
+                        break;
+                    }
+                }
+            }
+        }
+    }
+    return NOERROR;
+}
+
+void ViewPager::SortChildDrawingOrder()
+{
+    if (mDrawingOrder != DRAW_ORDER_DEFAULT) {
+        if (mDrawingOrderedChildren == NULL) {
+            CArrayList::New((IArrayList**)&mDrawingOrderedChildren);
+        }
+        else {
+            mDrawingOrderedChildren->Clear();
+        }
+        Int32 childCount;
+        GetChildCount(&childCount);
+        for (Int32 i = 0; i < childCount; i++) {
+            AutoPtr<IView> child;
+            GetChildAt(i, (IView**)&child);
+            mDrawingOrderedChildren->Add(child);
+        }
+        AutoPtr<ICollections> coll;
+        CCollections::AcquireSingleton((ICollections**)&coll);
+        coll->Sort(IList::Probe(mDrawingOrderedChildren), sPositionComparator);
+    }
+}
+
+void ViewPager::CalculatePageOffsets(
+    /* [in] */ ItemInfo* curItem,
+    /* [in] */ Int32 curIndex,
+    /* [in] */ ItemInfo* oldCurInfo)
+{
+    Int32 N;
+    mAdapter->GetCount(&N);
+    Int32 width;
+    GetClientWidth(&width);
+    Float marginOffset = width > 0 ? (Float) mPageMargin / width : 0;
+    // Fix up offsets for later layout.
+    if (oldCurInfo != NULL) {
+        Int32 oldCurPosition = oldCurInfo->mPosition;
+        // Base offsets off of oldCurInfo.
+        if (oldCurPosition < curItem->mPosition) {
+            Int32 itemIndex = 0;
+            AutoPtr<ItemInfo> ii;
+            Float offset = oldCurInfo->mOffset + oldCurInfo->mWidthFactor + marginOffset;
+            Int32 size;
+            mItems->GetSize(&size);
+            for (Int32 pos = oldCurPosition + 1;
+                    pos <= curItem->mPosition && itemIndex < size; pos++) {
+                AutoPtr<IInterface> value;
+                mItems->Get(itemIndex, (IInterface**)&value);
+                ii = (ItemInfo*)(IObject*)value.Get();
+                while (pos > ii->mPosition && itemIndex < size - 1) {
+                    itemIndex++;
+                    AutoPtr<IInterface> v;
+                    mItems->Get(itemIndex, (IInterface**)&v);
+                    ii = (ItemInfo*)(IObject*)v.Get();
+                }
+                while (pos < ii->mPosition) {
+                    // We don't have an item populated for this,
+                    // ask the adapter for an offset.
+                    Int32 width;
+                    mAdapter->GetPageWidth(pos, &width);
+                    offset += width + marginOffset;
+                    pos++;
+                }
+                ii->mOffset = offset;
+                offset += ii->mWidthFactor + marginOffset;
+            }
+        }
+        else if (oldCurPosition > curItem->mPosition) {
+            Int32 size;
+            mItems->GetSize(&size);
+            Int32 itemIndex = size - 1;
+            AutoPtr<ItemInfo> ii;
+            Float offset = oldCurInfo->mOffset;
+            for (Int32 pos = oldCurPosition - 1;
+                    pos >= curItem->mPosition && itemIndex >= 0; pos--) {
+                AutoPtr<IInterface> value;
+                mItems->Get(itemIndex, (IInterface**)&value);
+                ii = (ItemInfo*)(IObject*)value.Get();
+                while (pos < ii->mPosition && itemIndex > 0) {
+                    itemIndex--;
+                    AutoPtr<IInterface> v;
+                    mItems->Get(itemIndex, (IInterface**)&v);
+                    ii = (ItemInfo*)(IObject*)v.Get();
+                }
+                while (pos > ii->mPosition) {
+                    // We don't have an item populated for this,
+                    // ask the adapter for an offset.
+                    Int32 width;
+                    mAdapter->GetPageWidth(pos, &width);
+                    offset -= width + marginOffset;
+                    pos--;
+                }
+                offset -= ii->mWidthFactor + marginOffset;
+                ii->mOffset = offset;
+            }
+        }
+    }
+
+    // Base all offsets off of curItem.
+    Int32 itemCount;
+    mItems->GetSize(&itemCount);
+    Float offset = curItem->mOffset;
+    Int32 pos = curItem->mPosition - 1;
+    mFirstOffset = curItem->mPosition == 0 ? curItem->mOffset : -Elastos::Core::Math::Float_MAX_VALUE;
+    mLastOffset = curItem->mPosition == N - 1 ?
+            curItem->mOffset + curItem->mWidthFactor - 1 : Elastos::Core::Math::Float_MAX_VALUE;
+    // Previous pages
+    for (Int32 i = curIndex - 1; i >= 0; i--, pos--) {
+        AutoPtr<IInterface> value;
+        mItems->Get(i, (IInterface**)&value);
+        AutoPtr<ItemInfo> ii = (ItemInfo*)(IObject*)value.Get();
+        while (pos > ii->Mposition) {
+            Int32 width;
+            mAdapter->GetPageWidth(pos--, &width);
+            offset -= width + marginOffset;
+        }
+        offset -= ii->mWidthFactor + marginOffset;
+        ii->mOffset = offset;
+        if (ii->mPosition == 0) mFirstOffset = offset;
+    }
+    offset = curItem->mOffset + curItem->mWidthFactor + marginOffset;
+    pos = curItem->mPosition + 1;
+    // Next pages
+    for (Int32 i = curIndex + 1; i < itemCount; i++, pos++) {
+        AutoPtr<IInterface> value;
+        mItems->Get(i, (IInterface**)&value);
+        AutoPtr<ItemInfo> ii = (ItemInfo*)(IObject*)value.Get();
+        while (pos < ii->mPosition) {
+            Int32 width;
+            mAdapter->GetPageWidth(pos++, &width);
+            offset += width + marginOffset;
+        }
+        if (ii->mPosition == N - 1) {
+            mLastOffset = offset + ii->mWidthFactor - 1;
+        }
+        ii->mOffset = offset;
+        offset += ii->mWidthFactor + marginOffset;
+    }
+
+    mNeedCalculatePageOffsets = FALSE;
 }
 
 ECode ViewPager::OnPageScrolled(
