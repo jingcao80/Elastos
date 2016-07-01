@@ -73,7 +73,7 @@ module
         constructor(
             [in] IHandler* handler);
 
-        interface IConnectionService;
+        interface IIConnectionService;
         interface IBinder;
     }
 

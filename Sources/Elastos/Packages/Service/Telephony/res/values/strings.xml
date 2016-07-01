@@ -115,7 +115,7 @@
     <!-- settings strings -->
 
     <!-- Error message for users that aren't allowed to modify Mobile Network settings [CHAR LIMIT=none] -->
-    <string name="mobile_network_settings_not_available">Cellular network settings are not available for this user</string>
+    <string name="mobile_network_settings_not_available">Mobile network settings are not available for this user</string>
     <!-- GSM Call settings screen, setting option name -->
     <string name="labelGSMMore">GSM call settings</string>
     <!-- CDM Call settings screen, setting option name -->
@@ -178,8 +178,6 @@
     <string name="networks">Network operators</string>
     <!-- Cell Broadcast settings title.  [CHAR LIMIT=50] -->
     <string name="cell_broadcast_settings">Emergency broadcasts</string>
-    <!-- Phone account settings screen title -->
-    <string name="phone_account_settings">Phone account settings</string>
     <!-- Call settings screen title -->
     <string name="call_settings">Call Settings</string>
     <!-- GSM Call settings screen, setting option name -->
@@ -324,7 +322,7 @@
 
     <!-- networks setting strings --><skip/>
     <!-- Mobile network settings screen title -->
-    <string name="mobile_networks">Cellular network settings</string>
+    <string name="mobile_networks">Mobile network settings</string>
     <!-- Available networks screen title/heading -->
     <string name="label_available">Available networks</string>
     <!-- Mobile network settings screen, toast when searching for available networks -->
@@ -401,6 +399,16 @@
         <item>GSM/WCDMA preferred</item>
     </string-array>
     <string-array name="preferred_network_mode_values"  translatable="false">
+        <item>"22"</item>
+        <item>"21"</item>
+        <item>"20"</item>
+        <item>"19"</item>
+        <item>"18"</item>
+        <item>"17"</item>
+        <item>"16"</item>
+        <item>"15"</item>
+        <item>"14"</item>
+        <item>"13"</item>
         <item>"12"</item>
         <item>"11"</item>
         <item>"10"</item>
@@ -1199,6 +1207,8 @@
          which sound to play when a voicemail notification is received.
          [CHAR LIMIT=30] -->
     <string name="voicemail_notification_ringtone_title">Sound</string>
+
+    <string name="ringtone_title">Phone ringtone</string>
 
     <!-- The default value value for voicemail notification. -->
     <string name="voicemail_notification_vibrate_when_default" translatable="false">never</string>

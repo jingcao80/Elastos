@@ -405,7 +405,7 @@ ECode PhoneGlobals::OnCreate()
     // sVoiceCapable =
     //   getPackageManager().hasSystemFeature(PackageManager.FEATURE_TELEPHONY_VOICE_CALLS);
 
-    Logger::D(TAG, "TODO mPhone");
+    Logger::D(TAG, "TODO PhoneGlobals::OnCreate mPhone");
 #if 0
     if (mPhone == NULL) {
         // Initialize the telephony framework
@@ -598,6 +598,7 @@ ECode PhoneGlobals::GetInstance(
     if (sMe == NULL) {
         //throw new IllegalStateException("No PhoneGlobals here!");
         Logger::E(IPhoneGlobals::TAG, "No PhoneGlobals here!");
+        assert(0);
         return E_ILLEGAL_STATE_EXCEPTION;
     }
     *global = sMe;

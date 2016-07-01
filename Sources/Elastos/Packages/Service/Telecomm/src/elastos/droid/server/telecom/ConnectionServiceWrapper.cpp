@@ -1,6 +1,7 @@
 
 #include "elastos/droid/server/telecom/Call.h"
 #include "elastos/droid/server/telecom/ConnectionServiceWrapper.h"
+#include "elastos/droid/server/telecom/CConnectionServiceWrapperAdapter.h"
 #include "elastos/droid/server/telecom/CallIdMapper.h"
 #include "elastos/droid/server/telecom/Log.h"
 #include <elastos/droid/internal/os/SomeArgs.h>
@@ -502,9 +503,11 @@ ECode ConnectionServiceWrapper::SubCreateBindCallback::OnSuccess()
     AutoPtr<IBundle> extras;
     ((Call*) mCall.Get())->GetExtras((IBundle**)&extras);
     String gatewayProviderPackageName;
-    gatewayInfo->GetGatewayProviderPackageName(&gatewayProviderPackageName);
+    if (gatewayInfo != NULL)
+        gatewayInfo->GetGatewayProviderPackageName(&gatewayProviderPackageName);
     AutoPtr<IUri> originalAddress;
-    gatewayInfo->GetOriginalAddress((IUri**)&originalAddress);
+    if (gatewayInfo != NULL)
+        gatewayInfo->GetOriginalAddress((IUri**)&originalAddress);
     if (gatewayInfo != NULL && !gatewayProviderPackageName.IsNull() &&
             originalAddress != NULL) {
         AutoPtr<IInterface> obj;
@@ -585,7 +588,9 @@ ECode ConnectionServiceWrapper::SubCreateBindCallback::OnFailure()
 ConnectionServiceWrapper::SubHandler::SubHandler(
     /* [in] */ ConnectionServiceWrapper* host)
     : mHost(host)
-{}
+{
+    Handler::constructor();
+}
 
 ECode ConnectionServiceWrapper::SubHandler::HandleMessage(
     /* [in] */ IMessage* msg)
@@ -1016,7 +1021,7 @@ const Int32 ConnectionServiceWrapper::MSG_SET_CALL_PROPERTIES = 30;
 ConnectionServiceWrapper::ConnectionServiceWrapper()
 {
     mHandler = new SubHandler(this);
-    mAdapter = new Adapter();
+    CConnectionServiceWrapperAdapter::New(TO_IINTERFACE(this), (IIConnectionServiceAdapter**)&mAdapter);
     mCallsManager = CallsManager::GetInstance();
     AutoPtr<IMap> map;
     CConcurrentHashMap::New(8, 0.9f, 1, (IMap**)&map);
@@ -1646,9 +1651,11 @@ ECode ConnectionServiceWrapper::QueryRemoteConnectionServices(
     AutoPtr<IComponentName> componentName;
     GetComponentName((IComponentName**)&componentName);
     AutoPtr<IComponentName> simCallManagerComponentName;
-    simCallManager->GetComponentName((IComponentName**)&simCallManagerComponentName);
     Boolean isEquals;
-    IObject::Probe(componentName)->Equals(simCallManagerComponentName, &isEquals);
+    if (simCallManager != NULL) {
+        simCallManager->GetComponentName((IComponentName**)&simCallManagerComponentName);
+        IObject::Probe(componentName)->Equals(simCallManagerComponentName, &isEquals);
+    }
     if (simCallManager == NULL || !isEquals) {
         NoRemoteServices(callback);
         return NOERROR;
@@ -1730,10 +1737,14 @@ ECode ConnectionServiceWrapper::NoRemoteServices(
     /* [in] */ IRemoteServiceCallback* callback)
 {
     // try {
-    AutoPtr<ICollections> collectionsHelper;
-    CCollections::AcquireSingleton((ICollections**)&collectionsHelper);
+    //AutoPtr<ICollections> collectionsHelper;
+    //CCollections::AcquireSingleton((ICollections**)&collectionsHelper);
+    //AutoPtr<IList> emptyList;
+    //collectionsHelper->GetEmptyList((IList**)&emptyList);
+    //note: because the emptylist got from Collections is not a car class,
+    //so here use the this replace.
     AutoPtr<IList> emptyList;
-    collectionsHelper->GetEmptyList((IList**)&emptyList);
+    CArrayList::New((IList**)&emptyList);
     ECode ec = callback->OnResult(emptyList, emptyList);
     // } catch (RemoteException e) {
     if (FAILED(ec)) {

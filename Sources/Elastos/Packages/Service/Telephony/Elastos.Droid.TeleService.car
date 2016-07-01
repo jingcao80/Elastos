@@ -968,6 +968,11 @@ module
         class CTelephonyConnectionService {
             constructor();
 
+            interface IContext;
+            interface IContextWrapper;
+            interface IService;
+            interface IComponentCallbacks;
+            interface IComponentCallbacks2;
             interface ITelephonyConnectionService;
             interface IConnectionService;
         }

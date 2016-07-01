@@ -849,7 +849,7 @@ ECode ActiveServices::BindServiceLocked(
     Boolean callerFg = callerApp->mSetSchedGroup != IProcess::THREAD_GROUP_BG_NONINTERACTIVE;
 
     Int32 pid = Binder::GetCallingPid();
-    Int32 cuid = Binder::GetCallingPid();
+    Int32 cuid = Binder::GetCallingUid();
     AutoPtr<ServiceLookupResult> res = RetrieveServiceLocked(
         service, resolvedType, pid, cuid, userId, TRUE, callerFg);
     if (res == NULL) {
@@ -1275,8 +1275,8 @@ AutoPtr<ActiveServices::ServiceLookupResult> ActiveServices::RetrieveServiceLock
                 result = new ServiceLookupResult(NULL, sb.ToString());
                 return result;
             }
-            Slogger::W(TAG, "Permission Denial: Accessing service %s from pid=%d, uid=%d requires %s",
-                TO_CSTR(r->mName), callingPid, callingUid, r->mPermission.string());
+            Slogger::W(TAG, "Permission Denial: Accessing service %s from callingpid=%d, callinguid=%d, uid=%d, requires %s",
+                TO_CSTR(r->mName), callingPid, callingUid, uid, r->mPermission.string());
             result = new ServiceLookupResult(NULL, r->mPermission);
             return result;
         }

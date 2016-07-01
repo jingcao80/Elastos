@@ -29,7 +29,7 @@ namespace Telecom {
  */
 // Service
 class ECO_PUBLIC ConnectionService
-    : public Object
+    : public Elastos::Droid::App::Service
     , public IConnectionService
 {
 public:

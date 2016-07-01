@@ -1,5 +1,6 @@
 
 #include "elastos/droid/teleservice/services/telephony/DisconnectCauseUtil.h"
+#include "elastos/droid/teleservice/phone/PhoneGlobals.h"
 #include "Elastos.Droid.Media.h"
 #include "Elastos.Droid.Telephony.h"
 #include <elastos/core/CoreUtils.h>
@@ -9,6 +10,7 @@
 using Elastos::Droid::Content::Res::IResources;
 using Elastos::Droid::Media::IToneGenerator;
 using Elastos::Droid::TeleService::R;
+using Elastos::Droid::TeleService::Phone::PhoneGlobals;
 using Elastos::Droid::Telecomm::Telecom::CDisconnectCause;
 using Elastos::Core::CoreUtils;
 using Elastos::Core::StringBuilder;
@@ -29,8 +31,9 @@ AutoPtr<IDisconnectCause> DisconnectCauseUtil::ToTelecomDisconnectCause(
     /* [in] */ Int32 telephonyDisconnectCause,
     /* [in] */ const String& reason)
 {
-    assert(0 && "need class PhoneGlobals");
-    AutoPtr<IContext> context;// = PhoneGlobals::GetInstance();
+    AutoPtr<PhoneGlobals> pg;
+    PhoneGlobals::GetInstance((PhoneGlobals**)&pg);
+    AutoPtr<IContext> context = IContext::Probe(pg);
 
     AutoPtr<IDisconnectCause> tmp;
     CDisconnectCause::New(

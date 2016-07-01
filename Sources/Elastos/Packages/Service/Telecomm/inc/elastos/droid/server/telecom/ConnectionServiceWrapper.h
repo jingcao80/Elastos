@@ -472,7 +472,7 @@ private:
 
     AutoPtr<IHandler> mHandler;
 
-    AutoPtr<Adapter> mAdapter;
+    AutoPtr<IIConnectionServiceAdapter> mAdapter;
     AutoPtr<CallsManager> mCallsManager;
     /**
      * ConcurrentHashMap constructor params: 8 is initial table size, 0.9f is

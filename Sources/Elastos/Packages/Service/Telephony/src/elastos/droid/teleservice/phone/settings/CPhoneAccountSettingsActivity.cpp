@@ -28,7 +28,7 @@ ECode CPhoneAccountSettingsActivity::OnCreate(
 
     AutoPtr<IActionBar> actionBar;
     GetActionBar((IActionBar**)&actionBar);
-    actionBar->SetTitle(Elastos::Droid::TeleService::R::string::phone_account_settings);
+    actionBar->SetTitle(Elastos::Droid::TeleService::R::string::phone_accounts);
 
     AutoPtr<IFragmentManager> manager;
     GetFragmentManager((IFragmentManager**)&manager);

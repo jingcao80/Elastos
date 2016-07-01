@@ -1482,8 +1482,8 @@ ECode ResolverActivity::OnIntentSelected(
         }
         AutoPtr<ArrayOf<String> > categories;
         intent->GetCategories((ArrayOf<String>**)&categories);
-        Int32 size = categories->GetLength();
         if (categories != NULL) {
+            Int32 size = categories->GetLength();
             for (Int32 i = 0; i < size; ++i) {
                 filter->AddCategory((*categories)[i]);
             }
@@ -1562,8 +1562,8 @@ ECode ResolverActivity::OnIntentSelected(
 
                 pIt = NULL;
                 rfilter->GetPaths((ArrayOf<IPatternMatcher*>**)&pIt);
-                size = pIt->GetLength();
                 if (pIt != NULL) {
+                    Int32 size = pIt->GetLength();
                     String path;
                     data->GetPath(&path);
                     if (path != NULL) {
