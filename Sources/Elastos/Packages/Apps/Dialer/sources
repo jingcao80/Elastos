@@ -4,7 +4,6 @@ TARGET_TYPE= eco
 EXPORT_ALL_SYMBOLS = 1
 
 INCLUDES += $(MAKEDIR)/inc
-INCLUDES += $(MAKEDIR)/src
 
 CAR_FLAGS += -n -u
 LUBE_FLAGS += -n -u
@@ -12,8 +11,8 @@ LUBE_FLAGS += -n -u
 SOURCES = Elastos.Droid.Dialer.car
 SOURCES += R.cpp
 
-ELASTOS_LIBS += elastos/droid/dialer/dialer.lib
-ELASTOS_LIBS += elastos/droid/dialerbind/dialerbind.lib
+ELASTOS_LIBS += src/elastos/droid/dialer/dialer.lib
+#ELASTOS_LIBS += src/elastos/droid/dialerbind/dialerbind.lib
 
 LIBRARIES  = $(XDK_USER_LIB)/Elastos.Runtime.lib
 LIBRARIES += $(XDK_TARGETS)/Elastos.Runtime.eco

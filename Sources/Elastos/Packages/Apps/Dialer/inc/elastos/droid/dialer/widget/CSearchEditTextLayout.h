@@ -2,7 +2,7 @@
 #define __ELASTOS_DROID_DIALER_WIDGET_CSEARCHEDITTEXTLAYOUT_H__
 
 #include "_Elastos_Droid_Dialer_Widget_CSearchEditTextLayout.h"
-#include "elastos/apps/dialer/widget/SearchEditTextLayout.h"
+#include "elastos/droid/dialer/widget/SearchEditTextLayout.h"
 
 namespace Elastos {
 namespace Droid {

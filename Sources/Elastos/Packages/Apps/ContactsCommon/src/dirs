@@ -1,2 +1,3 @@
 
+DIRS += elastos/droid/contacts/common
 DIRS += elastos/droid/dialerbind/analytics

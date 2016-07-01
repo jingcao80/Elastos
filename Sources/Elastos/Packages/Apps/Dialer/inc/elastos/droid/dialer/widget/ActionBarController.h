@@ -3,6 +3,7 @@
 
 #include "_Elastos.Droid.Dialer.h"
 #include "Elastos.Droid.Animation.h"
+#include "elastos/droid/dialer/widget/CSearchEditTextLayout.h"
 #include <elastos/core/Object.h>
 
 using Elastos::Droid::Animation::IValueAnimator;
@@ -44,7 +45,7 @@ private:
 public:
     CAR_INTERFACE_DECL()
 
-    CARAPI constructor(
+    ActionBarController(
         /* [in] */ IActionBarControllerActivityUi* activityUi,
         /* [in] */ CSearchEditTextLayout* searchBox);
 

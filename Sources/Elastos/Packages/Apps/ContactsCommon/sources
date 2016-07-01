@@ -10,8 +10,10 @@ INCLUDES += $(MAKEDIR)/inc
 VPATH += $(MAKEDIR)/src
 
 SOURCES += Elastos.Droid.ContactsCommon.car
-SOURCES += CDummy.cpp
+#SOURCES += R.cpp
+SOURCES += Elastos.Droid.Core.cpp
 
+ELASTOS_LIBS += src/elastos/droid/contacts/common/common.lib
 ELASTOS_LIBS += src/elastos/droid/dialerbind/analytics/analytics.lib
 
 LIBRARIES = $(XDK_USER_LIB)/Elastos.Runtime.lib
@@ -19,3 +21,6 @@ LIBRARIES += $(XDK_TARGETS)/Elastos.Runtime.eco
 LIBRARIES += $(XDK_TARGETS)/Elastos.CoreLibrary.eco
 LIBRARIES += $(XDK_TARGETS)/Elastos.Droid.Core.eco
 LIBRARIES += -llog
+
+RES_NAMESPACE = Elastos.Droid.ContactsCommon
+DIRRESOURCES += $(MAKEDIR)/res;

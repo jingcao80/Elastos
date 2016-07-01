@@ -1,10 +1,19 @@
-#ifndef __ELASTOS_APPS_CONTACTS_COMMON_WIDGET_CFLOATINGACTIONBUTTONCONTROLLER_H__
-#define __ELASTOS_APPS_CONTACTS_COMMON_WIDGET_CFLOATINGACTIONBUTTONCONTROLLER_H__
+#ifndef __ELASTOS_DROID_CONTACTS_COMMON_WIDGET_CFLOATINGACTIONBUTTONCONTROLLER_H__
+#define __ELASTOS_DROID_CONTACTS_COMMON_WIDGET_CFLOATINGACTIONBUTTONCONTROLLER_H__
 
-#include "_Elastos_Apps_Contacts_Common_Widget_CFloatingActionButtonController.h"
+#include "Elastos.Droid.App.h"
+#include "Elastos.Droid.Graphics.h"
+#include "Elastos.Droid.View.h"
+#include "_Elastos_Droid_Contacts_Common_Widget_CFloatingActionButtonController.h"
+#include <elastos/core/Object.h>
 
-namespace Elastos{
-namespace Apps{
+using Elastos::Droid::App::IActivity;
+using Elastos::Droid::Graphics::IInterpolator;
+using Elastos::Droid::View::IView;
+using Elastos::Core::Object;
+
+namespace Elastos {
+namespace Droid {
 namespace Contacts {
 namespace Common {
 namespace Widget {
@@ -98,12 +107,13 @@ public:
         /* [in] */ Int32 align,
         /* [out] */ Int32* result);
 
+private:
     CARAPI_(Boolean) IsLayoutRtl();
 
 private:
-    static const Int32 FAB_SCALE_IN_DURATION; // = 266;
-    static const Int32 FAB_SCALE_IN_FADE_IN_DELAY; // = 100;
-    static const Int32 FAB_ICON_FADE_OUT_DURATION; // = 66;
+    static const Int32 FAB_SCALE_IN_DURATION;
+    static const Int32 FAB_SCALE_IN_FADE_IN_DELAY;
+    static const Int32 FAB_ICON_FADE_OUT_DURATION;
 
     Int32 mAnimationDuration;
     Int32 mFloatingActionButtonWidth;
@@ -117,7 +127,7 @@ private:
 } // Widget
 } // Common
 } // Contacts
-} // Apps
+} // Droid
 } // Elastos
 
-#endif //__ELASTOS_APPS_CONTACTS_COMMON_WIDGET_CFLOATINGACTIONBUTTONCONTROLLER_H__
+#endif //__ELASTOS_DROID_CONTACTS_COMMON_WIDGET_CFLOATINGACTIONBUTTONCONTROLLER_H__
