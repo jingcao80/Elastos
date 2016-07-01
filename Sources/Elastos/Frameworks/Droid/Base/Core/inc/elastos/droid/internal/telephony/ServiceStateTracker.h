@@ -60,9 +60,6 @@ public:
         /* [in] */ ICommandsInterface* ci,
         /* [in] */ ICellInfo* cellInfo);
 
-    CARAPI HandleMessage(
-        /* [in] */ IMessage* msg);
-
     CARAPI Dispose();
 
     CARAPI GetDesiredPowerState(
@@ -223,15 +220,15 @@ protected:
     virtual CARAPI GetPhone(
         /* [in] */ IPhone* phone) = 0;
 
-    virtual CARAPI_(void) HandlePollStateResult(
+    virtual CARAPI HandlePollStateResult(
         /* [in] */ Int32 what,
         /* [in] */ AsyncResult* ar) = 0;
 
-    virtual CARAPI_(void) UpdateSpnDisplay() = 0;
+    virtual CARAPI UpdateSpnDisplay() = 0;
 
-    virtual CARAPI_(void) SetPowerStateToDesired() = 0;
+    virtual CARAPI SetPowerStateToDesired() = 0;
 
-    virtual CARAPI_(void) OnUpdateIccAvailability() = 0;
+    virtual CARAPI OnUpdateIccAvailability() = 0;
 
     virtual CARAPI_(void) Log(
         /* [in] */ String s) = 0;

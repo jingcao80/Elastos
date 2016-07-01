@@ -23,7 +23,7 @@ using Elastos::Droid::Internal::Telephony::Uicc::APPSTATE_UNKNOWN;
 using Elastos::Droid::Internal::Telephony::Uicc::IIccRecords;
 using Elastos::Droid::Internal::Telephony::Uicc::IUiccCardApplication;
 using Elastos::Droid::Internal::Telephony::Uicc::IUiccController;
-using Elastos::Droid::Internal::Telephony::Uicc::UiccController;
+// using Elastos::Droid::Internal::Telephony::Uicc::UiccController;
 using Elastos::Droid::Net::IConnectivityManager;
 using Elastos::Droid::Net::INetworkInfo;
 using Elastos::Droid::Os::IMessage;
@@ -42,7 +42,7 @@ using Elastos::Droid::Telephony::ITelephonyManagerHelper;
 using Elastos::Droid::Telephony::CTelephonyManagerHelper;
 using Elastos::Droid::Text::ITextUtils;
 using Elastos::Droid::Text::TextUtils;
-//using Elastos::Droid::Utility::CPair;
+using Elastos::Droid::Utility::CPair;
 using Elastos::Droid::Utility::IPair;
 
 using Elastos::Core::AutoLock;
@@ -833,8 +833,8 @@ Boolean ServiceStateTracker::ShouldFixTimeZoneNow(
 }
 
 ECode ServiceStateTracker::GetSystemProperty(
-    /* [in] */ String property,
-    /* [in] */ String defValue,
+    /* [in] */ const String& property,
+    /* [in] */ const String& defValue,
     /* [out] */ String* result)
 {
     AutoPtr<ITelephonyManagerHelper> hlp;
