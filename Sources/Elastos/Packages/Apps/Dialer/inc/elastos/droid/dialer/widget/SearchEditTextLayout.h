@@ -176,12 +176,12 @@ private:
 
 protected:
     /* Subclass-visible for testing */
-    Boolean mIsExpanded; // = false;
-    Boolean mIsFadedOut; // = false;
+    Boolean mIsExpanded;
+    Boolean mIsFadedOut;
 
 private:
-    static const Float EXPAND_MARGIN_FRACTION_START; // = 0.8f;
-    static const Int32 ANIMATION_DURATION; // = 200;
+    static const Float EXPAND_MARGIN_FRACTION_START;
+    static const Int32 ANIMATION_DURATION;
 
     AutoPtr<IViewOnKeyListener> mPreImeKeyListener;
     Int32 mTopMargin;

@@ -4,7 +4,7 @@
 // #include "elastos/droid/dialer/dialpad/SmartDialPrefix.h"
 // #include "elastos/droid/dialer/list/CListsFragment.h"
 // #include "elastos/droid/dialer/util/DialerUtils.h"
-// #include "elastos/droid/dialer/widget/CActionBarController.h"
+#include "elastos/droid/dialer/widget/CSearchEditTextLayout.h"
 // #include "elastos/droid/dialerbind/CDatabaseHelperManager.h"
 // #include "Elastos.Droid.Content.h"
 // #include "Elastos.Droid.Os.h"
@@ -12,14 +12,16 @@
 // #include "Elastos.Droid.Telephony.h"
 // #include "Elastos.Droid.View.h"
 // #include "Elastos.Droid.Widget.h"
+#include <elastos/droid/contacts/common/interactions/TouchPointManager.h>
 #include <elastos/droid/text/TextUtils.h>
+#include <elastos/core/CoreUtils.h>
 #include <elastos/utility/logging/Logger.h>
 #include "R.h"
 
 // using Elastos::Droid::App::IActionBar;
 // using Elastos::Droid::App::IFragment;
-// using Elastos::Droid::App::IFragmentManager;
-// using Elastos::Droid::App::IFragmentTransaction;
+using Elastos::Droid::App::IFragmentManager;
+using Elastos::Droid::App::IFragmentTransaction;
 // using Elastos::Droid::Content::IIntent;
 // using Elastos::Droid::Content::CIntent;
 // using Elastos::Droid::Content::Res::IResources;
@@ -29,15 +31,30 @@
 using Elastos::Droid::Text::TextUtils;
 using Elastos::Droid::Text::EIID_ITextWatcher;
 using Elastos::Droid::View::IGravity;
+using Elastos::Droid::View::EIID_IOnGlobalLayoutListener;
 using Elastos::Droid::View::EIID_IViewOnClickListener;
 using Elastos::Droid::View::EIID_IViewOnDragListener;
+using Elastos::Droid::View::EIID_IViewOnKeyListener;
+using Elastos::Droid::View::EIID_IViewOnTouchListener;
 // using Elastos::Droid::View::IKeyEvent;
 // using Elastos::Droid::View::IMenu;
 // using Elastos::Droid::View::IWindow;
 // using Elastos::Droid::View::Animation::IAnimationUtils;
 // using Elastos::Droid::View::Animation::CAnimationUtils;
-// using Elastos::Droid::Widget::IImageButton;
+using Elastos::Droid::Widget::IImageButton;
+using Elastos::Droid::Widget::ITextView;
+using Elastos::Droid::Widget::EIID_IPopupMenuOnMenuItemClickListener;
+using Elastos::Core::CoreUtils;
 using Elastos::Utility::Logging::Logger;
+using Elastos::Droid::Dialer::Dialpad::EIID_IOnDialpadQueryChangedListener;
+using Elastos::Droid::Dialer::List::EIID_IListsFragmentHostInterface;
+using Elastos::Droid::Dialer::List::EIID_IOnDragDropListener;
+using Elastos::Droid::Dialer::List::EIID_ISearchFragmentHostInterface;
+using Elastos::Droid::Dialer::List::EIID_ISpeedDialFragmentHostInterface;
+using Elastos::Droid::Dialer::Widget::ISearchEditTextLayout;
+using Elastos::Droid::Dialer::Widget::CSearchEditTextLayout;
+using Elastos::Droid::Dialer::Widget::EIID_IActionBarControllerActivityUi;
+using Elastos::Droid::Dialer::Widget::EIID_IOnBackButtonClickedListener;
 // using Elastos::Apps::Dialer::activity::TransactionSafeActivity;
 // using Elastos::Apps::Dialer::Dialpad::CDialpadFragment;
 // using Elastos::Apps::Dialer::Dialpad::SmartDialPrefix;
@@ -46,6 +63,9 @@ using Elastos::Utility::Logging::Logger;
 // using Elastos::Apps::Dialer::Util::DialerUtils;
 // using Elastos::Apps::DialerBind::IDatabaseHelperManager;
 // using Elastos::Apps::DialerBind::CDatabaseHelperManager;
+using Elastos::Droid::Contacts::Common::Interactions::TouchPointManager;
+using Elastos::Droid::Contacts::Common::List::EIID_IOnPhoneNumberPickerActionListener;
+using Elastos::Droid::Contacts::Common::Widget::CFloatingActionButtonController;
 
 namespace Elastos {
 namespace Droid {
@@ -196,258 +216,272 @@ ECode DialtactsActivity::SearchViewOnClickListener::OnClick(
     Boolean result;
     if (mHost->IsInSearchUi(&result), !result) {
         mHost->mActionBarController->OnSearchBoxTapped();
-        String text;
-        mHost->mSearchView->GetText(&text);
-        mHost->EnterSearchUi(FALSE /* smartDialSearch */, text);
+        AutoPtr<ICharSequence> text;
+        ITextView::Probe(mHost->mSearchView)->GetText((ICharSequence**)&text);
+        mHost->EnterSearchUi(FALSE /* smartDialSearch */, CoreUtils::Unbox(text));
     }
     return NOERROR;
 }
 
 
-// //================================================================
-// // DialtactsActivity::SearchEditTextLayoutListener
-// //================================================================
-// CAR_INTERFACE_IMPL(DialtactsActivity::SearchEditTextLayoutListener, Object, IViewOnKeyListener);
+//================================================================
+// DialtactsActivity::SearchEditTextLayoutListener
+//================================================================
+CAR_INTERFACE_IMPL(DialtactsActivity::SearchEditTextLayoutListener, Object, IViewOnKeyListener);
 
-// DialtactsActivity::SearchEditTextLayoutListener::SearchEditTextLayoutListener(
-//     /* [in] */ DialtactsActivity* host)
-//     : mHost(host)
-// {}
+DialtactsActivity::SearchEditTextLayoutListener::SearchEditTextLayoutListener(
+    /* [in] */ DialtactsActivity* host)
+    : mHost(host)
+{}
 
-// ECode DialtactsActivity::SearchEditTextLayoutListener::OnKey(
-//     /* [in] */ IView* v,
-//     /* [in] */ Int32 keyCode,
-//     /* [in] */ IKeyEvent* event,
-//     /* [out] */ Boolean* result)
-// {
-//     VALIDATE_NOT_NULL(result);
-//     Int32 action;
-//     String text;
-//     if (keyCode == IKeyEvent::KEYCODE_BACK &&
-//             event->GetAction(&action), action == IKeyEvent::ACTION_DOWN &&
-//             TextUtils::IsEmpty(mSearchView->GetText(&text), text)) {
-//         mHost->MaybeExitSearchUi();
-//     }
-//     *result = FALSE;
-//     return NOERROR;
-// }
+ECode DialtactsActivity::SearchEditTextLayoutListener::OnKey(
+    /* [in] */ IView* v,
+    /* [in] */ Int32 keyCode,
+    /* [in] */ IKeyEvent* event,
+    /* [out] */ Boolean* result)
+{
+    VALIDATE_NOT_NULL(result);
+    Int32 action;
+    AutoPtr<ICharSequence> text;
+    if (keyCode == IKeyEvent::KEYCODE_BACK &&
+            (event->GetAction(&action), action == IKeyEvent::ACTION_DOWN) &&
+            (ITextView::Probe(mHost->mSearchView)->GetText((ICharSequence**)&text),
+                TextUtils::IsEmpty(CoreUtils::Unbox(text)))) {
+        mHost->MaybeExitSearchUi();
+    }
+    *result = FALSE;
+    return NOERROR;
+}
 
-// //================================================================
-// // DialtactsActivity::MyOnBackButtonClickedListener
-// //================================================================
-// CAR_INTERFACE_IMPL(DialtactsActivity::MyOnBackButtonClickedListener, Object,
-//         IOnBackButtonClickedListener);
 
-// DialtactsActivity::MyOnBackButtonClickedListener::MyOnBackButtonClickedListener(
-//     /* [in] */ DialtactsActivity* host)
-//     : mHost(host)
-// {}
+//================================================================
+// DialtactsActivity::MyOnBackButtonClickedListener
+//================================================================
+CAR_INTERFACE_IMPL(DialtactsActivity::MyOnBackButtonClickedListener, Object,
+        IOnBackButtonClickedListener);
 
-// ECode DialtactsActivity::MyOnBackButtonClickedListener::OnBackButtonClicked()
-// {
-//     return mHost->OnBackPressed();
-// }
+DialtactsActivity::MyOnBackButtonClickedListener::MyOnBackButtonClickedListener(
+    /* [in] */ DialtactsActivity* host)
+    : mHost(host)
+{}
 
-// //================================================================
-// // DialtactsActivity::MyOnGlobalLayoutListener
-// //================================================================
-// CAR_INTERFACE_IMPL(DialtactsActivity::MyOnGlobalLayoutListener, Object,
-//         IOnGlobalLayoutListener);
+ECode DialtactsActivity::MyOnBackButtonClickedListener::OnBackButtonClicked()
+{
+    return mHost->OnBackPressed();
+}
 
-// DialtactsActivity::MyOnGlobalLayoutListener::MyOnGlobalLayoutListener(
-//     /* [in] */ DialtactsActivity* host,
-//     /* [in] */ IViewTreeObserver* observer)
-//     : mHost(host)
-//     , mObserver(observer)
-// {}
 
-// ECode DialtactsActivity::MyOnGlobalLayoutListener::OnGlobalLayout()
-// {
-//     Boolean isAlive;
-//     if (mObserver->IsAlive(&isAlive), !isAlive) {
-//         return NOERROR;
-//     }
-//     mObserver->RemoveOnGlobalLayoutListener(this);
-//     Int32 screenWidth;
-//     mHost->mParentLayout->GetWidth(&screenWidth);
-//     mHost->mFloatingActionButtonController->SetScreenWidth(screenWidth);
-//     mHost->UpdateFloatingActionButtonControllerAlignment(FALSE /* animate */);
-//     return NOERROR;
-// }
+//================================================================
+// DialtactsActivity::MyOnGlobalLayoutListener
+//================================================================
+CAR_INTERFACE_IMPL(DialtactsActivity::MyOnGlobalLayoutListener, Object,
+        IOnGlobalLayoutListener);
 
-// //================================================================
-// // DialtactsActivity::MyOnTouchListener
-// //================================================================
-// CAR_INTERFACE_IMPL(DialtactsActivity::MyOnTouchListener, Object, IViewOnTouchListener);
+DialtactsActivity::MyOnGlobalLayoutListener::MyOnGlobalLayoutListener(
+    /* [in] */ DialtactsActivity* host,
+    /* [in] */ IViewTreeObserver* observer)
+    : mHost(host)
+    , mObserver(observer)
+{}
 
-// DialtactsActivity::MyOnTouchListener::MyOnTouchListener(
-//     /* [in] */ DialtactsActivity* host)
-//     : mHost(host)
-// {}
+ECode DialtactsActivity::MyOnGlobalLayoutListener::OnGlobalLayout()
+{
+    Boolean isAlive;
+    if (mObserver->IsAlive(&isAlive), !isAlive) {
+        return NOERROR;
+    }
+    mObserver->RemoveOnGlobalLayoutListener(this);
+    Int32 screenWidth;
+    IView::Probe(mHost->mParentLayout)->GetWidth(&screenWidth);
+    mHost->mFloatingActionButtonController->SetScreenWidth(screenWidth);
+    mHost->UpdateFloatingActionButtonControllerAlignment(FALSE /* animate */);
+    return NOERROR;
+}
 
-// ECode DialtactsActivity::MyOnTouchListener::OnTouch(
-//     /* [in] */ IView* v,
-//     /* [in] */ IMotionEvent* event,
-//     /* [out] */ Boolean* result)
-// {
-//     VALIDATE_NOT_NULL(result);
-//     if (!mHost->mIsDialpadShown) {
-//         mHost->MaybeExitSearchUi();
-//     }
-//     *result = FALSE;
-//     return NOERROR;
-// }
 
-// //================================================================
-// // DialtactsActivity
-// //================================================================
-// const String DialtactsActivity::TAG("DialtactsActivity");
-// const boolean DialtactsActivity::DEBUG = Logger::IsLoggable(TAG, Logger::DEBUG);
+//================================================================
+// DialtactsActivity::MyOnTouchListener
+//================================================================
+CAR_INTERFACE_IMPL(DialtactsActivity::MyOnTouchListener, Object, IViewOnTouchListener);
 
-// const String DialtactsActivity::CALL_ORIGIN_DIALTACTS("com.android.dialer.DialtactsActivity");
+DialtactsActivity::MyOnTouchListener::MyOnTouchListener(
+    /* [in] */ DialtactsActivity* host)
+    : mHost(host)
+{}
 
-// const String DialtactsActivity::KEY_IN_REGULAR_SEARCH_UI("in_regular_search_ui");
-// const String DialtactsActivity::KEY_IN_DIALPAD_SEARCH_UI("in_dialpad_search_ui");
-// const String DialtactsActivity::KEY_SEARCH_QUERY("search_query");
-// const String DialtactsActivity::KEY_FIRST_LAUNCH("first_launch");
-// const String DialtactsActivity::KEY_IS_DIALPAD_SHOWN("is_dialpad_shown");
+ECode DialtactsActivity::MyOnTouchListener::OnTouch(
+    /* [in] */ IView* v,
+    /* [in] */ IMotionEvent* event,
+    /* [out] */ Boolean* result)
+{
+    VALIDATE_NOT_NULL(result);
+    if (!mHost->mIsDialpadShown) {
+        mHost->MaybeExitSearchUi();
+    }
+    *result = FALSE;
+    return NOERROR;
+}
 
-// const String DialtactsActivity::TAG_DIALPAD_FRAGMENT("dialpad");
-// const String DialtactsActivity::TAG_REGULAR_SEARCH_FRAGMENT("search");
-// const String DialtactsActivity::TAG_SMARTDIAL_SEARCH_FRAGMENT("smartdial");
-// const String DialtactsActivity::TAG_FAVORITES_FRAGMENT("favorites");
 
-// const String DialtactsActivity::ACTION_TOUCH_DIALER("com.android.phone.action.TOUCH_DIALER");
+//================================================================
+// DialtactsActivity
+//================================================================
+const String DialtactsActivity::TAG("DialtactsActivity");
+const Boolean DialtactsActivity::DEBUG = TRUE;
 
-// const Int32 DialtactsActivity::ACTIVITY_REQUEST_CODE_VOICE_SEARCH = 1;
+const String DialtactsActivity::CALL_ORIGIN_DIALTACTS("Elastos.Droid.Dialer.CDialtactsActivity");
 
-// //TODO:
-// CAR_INTERFACE_IMPL_10(DialtactsActivity, TransactionSafeActivity, IDialtactsActivity,
-//         IViewOnClickListener, IOnDialpadQueryChangedListener, IListsFragmentHostInterface,
-//         ISpeedDialFragmentHostInterface, ISearchFragmentHostInterface, IOnDragDropListener,
-//         IOnPhoneNumberPickerActionListener, IPopupMenuOnMenuItemClickListener,
-//         /*IViewPagerOnPageChangeListener, */ IActionBarControllerActivityUi);
+const String DialtactsActivity::KEY_IN_REGULAR_SEARCH_UI("in_regular_search_ui");
+const String DialtactsActivity::KEY_IN_DIALPAD_SEARCH_UI("in_dialpad_search_ui");
+const String DialtactsActivity::KEY_SEARCH_QUERY("search_query");
+const String DialtactsActivity::KEY_FIRST_LAUNCH("first_launch");
+const String DialtactsActivity::KEY_IS_DIALPAD_SHOWN("is_dialpad_shown");
 
-// DialtactsActivity::DialtactsActivity
-//     : mCurrentTabPosition(0)
-// {
-//     mPhoneSearchQueryTextListener = new PhoneSearchQueryTextListener(this);
-//     mSearchViewOnClickListener = new SearchViewOnClickListener(this);
-//     mSearchEditTextLayoutListener = new SearchEditTextLayoutListener(this);
-// }
+const String DialtactsActivity::TAG_DIALPAD_FRAGMENT("dialpad");
+const String DialtactsActivity::TAG_REGULAR_SEARCH_FRAGMENT("search");
+const String DialtactsActivity::TAG_SMARTDIAL_SEARCH_FRAGMENT("smartdial");
+const String DialtactsActivity::TAG_FAVORITES_FRAGMENT("favorites");
 
-// ECode DialtactsActivity::DispatchTouchEvent(
-//     /* [in] */ IMotionEvent* event,
-//     /* [out] */ Boolean* isConsumed)
-// {
-//     VALIDATE_NOT_NULL(isConsumed);
+const String DialtactsActivity::ACTION_TOUCH_DIALER("com.android.phone.action.TOUCH_DIALER");
 
-//     Int32 action;
-//     ev->GetAction(&action);
-//     if (action == IMotionEvent::ACTION_DOWN) {
-//         assert(0 && "TODO");
-//         // TouchPointManager.getInstance().setPoint((int) ev.getRawX(), (int) ev.getRawY());
-//     }
-//     return TransactionSafeActivity::DispatchTouchEvent(ev, isConsumed);
-// }
+const Int32 DialtactsActivity::ACTIVITY_REQUEST_CODE_VOICE_SEARCH = 1;
 
-// ECode DialtactsActivity::OnCreate(
-//     /* [in] */ IBundle* savedInstanceState)
-// {
-//     TransactionSafeActivity::OnCreate(savedInstanceState);
-//     mFirstLaunch = TRUE;
+CAR_INTERFACE_IMPL_10(DialtactsActivity, TransactionSafeActivity, IDialtactsActivity,
+        IViewOnClickListener, IOnDialpadQueryChangedListener, IListsFragmentHostInterface,
+        ISpeedDialFragmentHostInterface, ISearchFragmentHostInterface, IOnDragDropListener,
+        IOnPhoneNumberPickerActionListener, IPopupMenuOnMenuItemClickListener,
+        /*IViewPagerOnPageChangeListener, */ IActionBarControllerActivityUi);
 
-//     AutoPtr<IResources> resources;
-//     GetResources((IResources**)&resources);
-//     resources->GetDimensionPixelSize(
-//             R::dimen::action_bar_height_large, &mActionBarHeight);
+DialtactsActivity::DialtactsActivity()
+    : mInDialpadSearch(FALSE)
+    , mInRegularSearch(FALSE)
+    , mClearSearchOnPause(FALSE)
+    , mIsDialpadShown(FALSE)
+    , mShowDialpadOnResume(FALSE)
+    , mIsLandscape(FALSE)
+    , mCurrentTabPosition(0)
+    , mInCallDialpadUp(FALSE)
+    , mFirstLaunch(FALSE)
+    , mActionBarHeight(0)
+{
+    mPhoneSearchQueryTextListener = new PhoneSearchQueryTextListener(this);
+    mSearchViewOnClickListener = new SearchViewOnClickListener(this);
+    mSearchEditTextLayoutListener = new SearchEditTextLayoutListener(this);
+}
 
-//     SetContentView(R::layout::dialtacts_activity);
+ECode DialtactsActivity::DispatchTouchEvent(
+    /* [in] */ IMotionEvent* event,
+    /* [out] */ Boolean* isConsumed)
+{
+    VALIDATE_NOT_NULL(isConsumed);
 
-//     AutoPtr<IWindow> window;
-//     GetWindow((IWindow**)&window);
-//     window->SetBackgroundDrawable(NULL);
+    Int32 action;
+    event->GetAction(&action);
+    if (action == IMotionEvent::ACTION_DOWN) {
+        Float x, y;
+        event->GetRawX(&x);
+        event->GetRawY(&y);
+        TouchPointManager::GetInstance()->SetPoint((Int32)x, (Int32)y);
+    }
+    return TransactionSafeActivity::DispatchTouchEvent(event, isConsumed);
+}
 
-//     AutoPtr<IActionBar> actionBar;
-//     GetActionBar((IActionBar**)&actionBar);
-//     actionBar->SetCustomView(R::layout::search_edittext);
-//     actionBar->SetDisplayShowCustomEnabled(TRUE);
-//     actionBar->SetBackgroundDrawable(NULL);
+ECode DialtactsActivity::OnCreate(
+    /* [in] */ IBundle* savedInstanceState)
+{
+    FAIL_RETURN(TransactionSafeActivity::OnCreate(savedInstanceState));
+    mFirstLaunch = TRUE;
 
-//     AutoPtr<IView> customView;
-//     actionBar->GetCustomView((IView**)&customView);
-//     ISearchEditTextLayout* searchEditTextLayout = ISearchEditTextLayout::Probe(customView);
-//     CActionBarController::New(this, searchEditTextLayout,
-//              (IActionBarController**)&mActionBarController);
+    AutoPtr<IResources> resources;
+    GetResources((IResources**)&resources);
+    resources->GetDimensionPixelSize(
+            R::dimen::action_bar_height_large, &mActionBarHeight);
 
-//     searchEditTextLayout->SetPreImeKeyListener(mSearchEditTextLayoutListener);
+    SetContentView(R::layout::dialtacts_activity);
 
-//     AutoPtr<IView> view;
-//     searchEditTextLayout->FindViewById(R::id::search_view, (IView**)&view);
-//     mSearchView = IEditText::Probe(view);
-//     mSearchView->AddTextChangedListener(mPhoneSearchQueryTextListener);
-//     searchEditTextLayout->FindViewById(R::id::voice_search_button, (IView**)&mVoiceSearchButton);
+    AutoPtr<IWindow> window;
+    GetWindow((IWindow**)&window);
+    window->SetBackgroundDrawable(NULL);
 
-//     view = NULL;
-//     searchEditTextLayout->FindViewById(R::id::search_magnifying_glass, (IView**)&view);
-//     view->SetOnClickListener(mSearchViewOnClickListener);
-//     view = NULL;
-//     searchEditTextLayout->FindViewById(R::id::search_box_start_search, (IView**)&view);
-//     view->SetOnClickListener(mSearchViewOnClickListener);
-//     searchEditTextLayout->SetOnBackButtonClickedListener(new MyOnBackButtonClickedListener(this));
+    AutoPtr<IActionBar> actionBar;
+    GetActionBar((IActionBar**)&actionBar);
+    actionBar->SetCustomView(R::layout::search_edittext);
+    actionBar->SetDisplayShowCustomEnabled(TRUE);
+    actionBar->SetBackgroundDrawable(NULL);
 
-//     AutoPtr<IResources> res;
-//     GetResources((IResources**)&res);
-//     AutoPtr<IConfiguration> config;
-//     res->GetConfiguration((IConfiguration**)&config);
-//     Int32 orientation;
-//     config->GetOrientation(&orientation);
-//     mIsLandscape = orientation == IConfiguration::ORIENTATION_LANDSCAPE;
+    AutoPtr<IView> customView;
+    actionBar->GetCustomView((IView**)&customView);
+    ISearchEditTextLayout* searchEditTextLayout = ISearchEditTextLayout::Probe(customView);
+    mActionBarController = new ActionBarController(
+            this, (CSearchEditTextLayout*)searchEditTextLayout);
 
-//     AutoPtr<IView> floatingActionButtonContainer;
-//     FindViewById(R::id::floating_action_button_container,
-//             (IView**)&floatingActionButtonContainer);
+    searchEditTextLayout->SetPreImeKeyListener(mSearchEditTextLayoutListener);
 
-//     view = NULL;
-//     FindViewById(R::id::floating_action_button, (IView**)&view);
-//     IImageButton* floatingActionButton = IImageButton::Probe(view);
-//     floatingActionButton->SetOnClickListener(this);
-//     CFloatingActionButtonController::New(this,
-//             floatingActionButtonContainer, floatingActionButton,
-//             (IFloatingActionButtonController**)&mFloatingActionButtonController);
+    AutoPtr<IView> view;
+    customView->FindViewById(R::id::search_view, (IView**)&view);
+    mSearchView = IEditText::Probe(view);
+    ITextView::Probe(mSearchView)->AddTextChangedListener(mPhoneSearchQueryTextListener);
+    customView->FindViewById(R::id::voice_search_button, (IView**)&mVoiceSearchButton);
+    view = NULL;
+    customView->FindViewById(R::id::search_magnifying_glass, (IView**)&view);
+    view->SetOnClickListener(mSearchViewOnClickListener);
+    view = NULL;
+    customView->FindViewById(R::id::search_box_start_search, (IView**)&view);
+    view->SetOnClickListener(mSearchViewOnClickListener);
+    AutoPtr<IOnBackButtonClickedListener> listener = new MyOnBackButtonClickedListener(this);
+    searchEditTextLayout->SetOnBackButtonClickedListener(listener);
 
-//     view = NULL;
-//     searchEditTextLayout->FindViewById(R::id::dialtacts_options_menu_button, (IView**)&view);
-//     IImageButton* optionsMenuButton = IImageButton::Probe(view);
-//     optionsMenuButton->SetOnClickListener(this);
-//     mOverflowMenu = BuildOptionsMenu(searchEditTextLayout);
-//     AutoPtr<IViewOnTouchListener> listener;
-//     mOverflowMenu->GetDragToOpenListener((IViewOnTouchListener**)&listener);
-//     optionsMenuButton->SetOnTouchListener(listener);
+    AutoPtr<IResources> res;
+    GetResources((IResources**)&res);
+    AutoPtr<IConfiguration> config;
+    res->GetConfiguration((IConfiguration**)&config);
+    Int32 orientation;
+    config->GetOrientation(&orientation);
+    mIsLandscape = orientation == IConfiguration::ORIENTATION_LANDSCAPE;
 
-//     // Add the favorites fragment, and the dialpad fragment, but only if savedInstanceState
-//     // is null. Otherwise the fragment manager takes care of recreating these fragments.
-//     if (savedInstanceState == NULL) {
-//         AutoPtr<IFragmentManager> manager;
-//         GetFragmentManager((IFragmentManager**)&manager);
-//         AutoPtr<IFragmentTransaction> transaction;
-//         manager->BeginTransaction((IFragmentTransaction**)&transaction);
-//         AutoPtr<IFragment> listFragment;
-//         CListsFragment::New((IFragment**)&listFragment);
-//         transaction->Add(R::id::dialtacts_frame, listFragment, TAG_FAVORITES_FRAGMENT);
-//         AutoPtr<IFragment> dialpadFragment;
-//         CDialpadFragment::New((IFragment**)&dialpadFragment);
-//         transaction->Add(R::id::dialtacts_container, dialpadFragment, TAG_DIALPAD_FRAGMENT);
-//         transaction->Commit();
-//     }
-//     else {
-//         savedInstanceState->GetString(KEY_SEARCH_QUERY, &mSearchQuery);
-//         savedInstanceState->GetBoolean(KEY_IN_REGULAR_SEARCH_UI, &mInRegularSearch);
-//         savedInstanceState->GetBoolean(KEY_IN_DIALPAD_SEARCH_UI, &mInDialpadSearch);
-//         savedInstanceState->GetBoolean(KEY_FIRST_LAUNCH, &mFirstLaunch);
-//         savedInstanceState->GetBoolean(KEY_IS_DIALPAD_SHOWN, &mShowDialpadOnResume);
-//         mActionBarController->RestoreInstanceState(savedInstanceState);
-//     }
+    AutoPtr<IView> floatingActionButtonContainer;
+    FindViewById(R::id::floating_action_button_container,
+            (IView**)&floatingActionButtonContainer);
+    view = NULL;
+    FindViewById(R::id::floating_action_button, (IView**)&view);
+    AutoPtr<IImageButton> floatingActionButton = IImageButton::Probe(view);
+    view->SetOnClickListener(this);
+    CFloatingActionButtonController::New(this,
+            floatingActionButtonContainer, view,
+            (IFloatingActionButtonController**)&mFloatingActionButtonController);
+
+    view = NULL;
+    customView->FindViewById(R::id::dialtacts_options_menu_button, (IView**)&view);
+    view->SetOnClickListener(this);
+    mOverflowMenu = BuildOptionsMenu(customView);
+    AutoPtr<IViewOnTouchListener> touchListener;
+    mOverflowMenu->GetDragToOpenListener((IViewOnTouchListener**)&touchListener);
+    view->SetOnTouchListener(touchListener);
+
+    // Add the favorites fragment, and the dialpad fragment, but only if savedInstanceState
+    // is null. Otherwise the fragment manager takes care of recreating these fragments.
+    if (savedInstanceState == NULL) {
+        AutoPtr<IFragmentManager> manager;
+        GetFragmentManager((IFragmentManager**)&manager);
+        AutoPtr<IFragmentTransaction> transaction;
+        manager->BeginTransaction((IFragmentTransaction**)&transaction);
+        AutoPtr<IFragment> listFragment;
+        CListsFragment::New((IFragment**)&listFragment);
+        transaction->Add(R::id::dialtacts_frame, listFragment, TAG_FAVORITES_FRAGMENT);
+        AutoPtr<IFragment> dialpadFragment;
+        CDialpadFragment::New((IFragment**)&dialpadFragment);
+        transaction->Add(R::id::dialtacts_container, dialpadFragment, TAG_DIALPAD_FRAGMENT);
+        Int32 id;
+        transaction->Commit(&id);
+    }
+    else {
+        savedInstanceState->GetString(KEY_SEARCH_QUERY, &mSearchQuery);
+        savedInstanceState->GetBoolean(KEY_IN_REGULAR_SEARCH_UI, &mInRegularSearch);
+        savedInstanceState->GetBoolean(KEY_IN_DIALPAD_SEARCH_UI, &mInDialpadSearch);
+        savedInstanceState->GetBoolean(KEY_FIRST_LAUNCH, &mFirstLaunch);
+        savedInstanceState->GetBoolean(KEY_IS_DIALPAD_SHOWN, &mShowDialpadOnResume);
+        mActionBarController->RestoreInstanceState(savedInstanceState);
+    }
 
 //     Boolean isLayoutRtl = DialerUtils::isRtl();
 //     AutoPtr<IAnimationUtils> autils;
@@ -488,8 +522,8 @@ ECode DialtactsActivity::SearchViewOnClickListener::OnClick(
 //             (IDialerDatabaseHelper**)&mDialerDatabaseHelper);
 //     SmartDialPrefix::InitializeNanpSettings(this);
 
-//     return NOERROR;
-// }
+    return NOERROR;
+}
 
 // void DialtactsActivity::SetupActivityOverlay()
 // {

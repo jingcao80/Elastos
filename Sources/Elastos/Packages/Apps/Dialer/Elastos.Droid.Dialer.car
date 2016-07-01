@@ -134,11 +134,11 @@ module
 //    using interface Elastos.Droid.Preference.//IPreferenceFragmentOnPreferenceStartFragmentCallback;
 //    using interface Elastos.Droid.Preference.IPreferenceActivity;
 //    using interface Elastos.Droid.Os.IHandler;
-//    using interface Elastos.Droid.Utility.IAttributeSet;
-//    using interface Elastos.Droid.View.IView;
-//    using interface Elastos.Droid.View.IViewGroup;
-//    using interface Elastos.Droid.View.IViewParent;
-//    using interface Elastos.Droid.View.IViewManager;
+    using interface Elastos.Droid.Utility.IAttributeSet;
+    using interface Elastos.Droid.View.IView;
+    using interface Elastos.Droid.View.IViewGroup;
+    using interface Elastos.Droid.View.IViewParent;
+    using interface Elastos.Droid.View.IViewManager;
 //    using interface Elastos.Droid.View.IOnPreDrawListener;
 //    using interface Elastos.Droid.View.IViewOnKeyListener;
     using interface Elastos.Droid.View.IKeyEventCallback;
@@ -152,7 +152,7 @@ module
 //    using interface Elastos.Droid.View.IViewOnLongClickListener;
     using interface Elastos.Droid.View.IOnWindowDismissedCallback;
     using interface Elastos.Droid.View.IViewOnCreateContextMenuListener;
-//    using interface Elastos.Droid.View.Accessibility.IAccessibilityEventSource;
+    using interface Elastos.Droid.View.Accessibility.IAccessibilityEventSource;
 //    using interface Elastos.Droid.View.IViewGroupOnHierarchyChangeListener;
 //    using interface Elastos.Droid.View.IViewOnFocusChangeListener;
 //    using interface Elastos.Droid.View.IViewOnTouchListener;
@@ -166,14 +166,14 @@ module
 //    using interface Elastos.Droid.Widget.IBaseAdapter;
 //    using interface Elastos.Droid.Widget.IListAdapter;
 //    using interface Elastos.Droid.Widget.ISpinnerAdapter;
-//    using interface Elastos.Droid.Widget.IFrameLayout;
+    using interface Elastos.Droid.Widget.IFrameLayout;
 //    using interface Elastos.Droid.Widget.IAdapterViewOnItemClickListener;
     using interface Elastos.Droid.Widget.IPopupMenuOnMenuItemClickListener;
 //    using interface Elastos.Droid.Widget.IRelativeLayout;
 //    using interface Elastos.Droid.Widget.IFilterListener;
 //    using interface Elastos.Droid.Widget.IRemoteAdapterConnectionCallback;
 //    using interface Elastos.Droid.Graphics.Drawable.IDrawable;
-//    using interface Elastos.Droid.Graphics.Drawable.IDrawableCallback;
+    using interface Elastos.Droid.Graphics.Drawable.IDrawableCallback;
 //    using interface Elastos.Core.IComparable;
 //    using interface Elastos.Core.ICharSequence;
 //
@@ -261,7 +261,7 @@ module
 //    interface Elastos.Droid.Dialer.Voicemail.IVoicemailStatusHelper;
 //    interface Elastos.Droid.Dialer.Voicemail.IVoicemailStatusHelperImpl;
     interface Elastos.Droid.Dialer.Widget.IActionBarControllerActivityUi;
-//    interface Elastos.Droid.Dialer.Widget.ISearchEditTextLayout;
+    interface Elastos.Droid.Dialer.Widget.ISearchEditTextLayout;
 //    interface Elastos.Droid.Dialer.Widget.IOverlappingPaneLayout;
 //    interface Elastos.Droid.Dialer.Widget.IViewDragHelperHelper;
 //    interface Elastos.Droid.Dialer.IPhoneCallDetails;
@@ -1129,10 +1129,10 @@ module
 //    } // Elastos
 //
 //
-//    namespace Elastos {
-//    namespace Droid {
-//    namespace Dialer {
-//    namespace Widget {
+    namespace Elastos {
+    namespace Droid {
+    namespace Dialer {
+    namespace Widget {
 //
 //    [local]
 //    class COverlappingPaneLayout {
@@ -1157,34 +1157,33 @@ module
 //        interface IViewGroup;
 //        interface IOverlappingPaneLayout;
 //    }
-//
-//    [local]
-//    class CSearchEditTextLayout {
-//        constructor(
-//            [in] IContext* context,
-//            [in] IAttributeSet* attrs);
-//
-//        interface IView;
-//        interface IViewGroup;
-//        interface IFrameLayout;
-//        interface IViewParent;
-//        interface IViewManager;
-//        interface IKeyEventCallback;
-//        interface IAccessibilityEventSource;
-//        interface IDrawableCallback;
-//        interface ISearchEditTextLayout;
-//    }
-//
+
+    [local]
+    class CSearchEditTextLayout {
+        constructor(
+            [in] IContext* context,
+            [in] IAttributeSet* attrs);
+
+        interface IView;
+        interface IViewGroup;
+        interface IFrameLayout;
+        interface IViewParent;
+        interface IViewManager;
+        interface IKeyEventCallback;
+        interface IAccessibilityEventSource;
+        interface IDrawableCallback;
+        interface ISearchEditTextLayout;
+    }
+
 //    singleton class CViewDragHelperHelper {
 //        interface IViewDragHelperHelper;
 //    }
 //
-//    } // Widget
-//    } // Dialer
-//    } // Droid
-//    } // Elastos
-//
-//
+    } // Widget
+    } // Dialer
+    } // Droid
+    } // Elastos
+
     namespace Elastos {
     namespace Droid {
     namespace Dialer {

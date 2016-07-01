@@ -1,11 +1,24 @@
 
-#include "CFloatingActionButtonController.h"
+#include "Elastos.Droid.Animation.h"
+#include "Elastos.Droid.Content.h"
+#include "elastos/droid/contacts/common/widget/CFloatingActionButtonController.h"
+// #include "R.h"
 
-namespace Elastos{
-namespace Apps{
+using Elastos::Droid::Animation::ITimeInterpolator;
+using Elastos::Droid::Content::IContext;
+using Elastos::Droid::Content::Res::IResources;
+using Elastos::Droid::View::IViewGroupLayoutParams;
+using Elastos::Droid::View::IViewPropertyAnimator;
+
+namespace Elastos {
+namespace Droid {
 namespace Contacts {
 namespace Common {
 namespace Widget {
+
+const Int32 CFloatingActionButtonController::FAB_SCALE_IN_DURATION = 266;
+const Int32 CFloatingActionButtonController::FAB_SCALE_IN_FADE_IN_DELAY = 100;
+const Int32 CFloatingActionButtonController::FAB_ICON_FADE_OUT_DURATION = 66;
 
 CAR_INTERFACE_IMPL(CFloatingActionButtonController, Object, IFloatingActionButtonController)
 
@@ -17,19 +30,19 @@ ECode CFloatingActionButtonController::constructor(
     /* [in] */ IView* button)
 {
     AutoPtr<IResources> resources;
-    activity->GetResources((IResources**)&resources);
-    AnimationUtils::LoadInterpolator(activity,
-            Elastos::R::interpolator::fast_out_slow_in, (IInterpolator**)&mFabInterpolator);
-    resources->GetDimensionPixelSize(
-            R::dimen::floating_action_button_width, &mFloatingActionButtonWidth);
-    resources->GetDimensionPixelOffset(
-            R::dimen::floating_action_button_margin_right, &mFloatingActionButtonMarginRight);
-    resources->GetInteger(
-            R::integer::floating_action_button_animation_duration, &mAnimationDuration);
+    IContext::Probe(activity)->GetResources((IResources**)&resources);
+    assert(0 && "TODO");
+    // AnimationUtils::LoadInterpolator(activity,
+    //         R::interpolator::fast_out_slow_in, (IInterpolator**)&mFabInterpolator);
+    // resources->GetDimensionPixelSize(
+    //         R::dimen::floating_action_button_width, &mFloatingActionButtonWidth);
+    // resources->GetDimensionPixelOffset(
+    //         R::dimen::floating_action_button_margin_right, &mFloatingActionButtonMarginRight);
+    // resources->GetInteger(
+    //         R::integer::floating_action_button_animation_duration, &mAnimationDuration);
     mFloatingActionButtonContainer = container;
     mFloatingActionButton = button;
-    ViewUtil::SetupFloatingActionButton(mFloatingActionButtonContainer, resources);
-
+    // ViewUtil::SetupFloatingActionButton(mFloatingActionButtonContainer, resources);
     return NOERROR;
 }
 
@@ -57,7 +70,6 @@ ECode CFloatingActionButtonController::OnPageScrolled(
     mFloatingActionButtonContainer->SetTranslationX(
             (Int32) (positionOffset * result));
     mFloatingActionButtonContainer->SetTranslationY(0);
-
     return NOERROR;
 }
 
@@ -76,12 +88,12 @@ ECode CFloatingActionButtonController::Align(
 
     // Skip animation if container is not shown; animation causes container to show again.
     Boolean shown = FALSE;
-    if (animate && mFloatingActionButtonContainer->IsShown(&shown), shown) {
+    if (animate && (mFloatingActionButtonContainer->IsShown(&shown), shown)) {
         AutoPtr<IViewPropertyAnimator> animator;
-        mFloatingActionButtonContainer->Animate(&animator);
+        mFloatingActionButtonContainer->Animate((IViewPropertyAnimator**)&animator);
         animator->TranslationX(translationX + offsetX);
         animator->TranslationY(offsetY);
-        animator->SetInterpolator(mFabInterpolator);
+        animator->SetInterpolator(ITimeInterpolator::Probe(mFabInterpolator));
         animator->SetDuration(mAnimationDuration);
         animator->Start();
     }
@@ -89,7 +101,6 @@ ECode CFloatingActionButtonController::Align(
         mFloatingActionButtonContainer->SetTranslationX(translationX + offsetX);
         mFloatingActionButtonContainer->SetTranslationY(offsetY);
     }
-
     return NOERROR;
 }
 
@@ -100,7 +111,8 @@ ECode CFloatingActionButtonController::Resize(
     if (animate) {
         assert(0 && "TODO");
         // AnimUtils::ChangeDimensions(mFloatingActionButtonContainer, dimension, dimension);
-    } else {
+    }
+    else {
         AutoPtr<IViewGroupLayoutParams> params;
         mFloatingActionButtonContainer->GetLayoutParams(
                 (IViewGroupLayoutParams**)&params);
@@ -108,14 +120,13 @@ ECode CFloatingActionButtonController::Resize(
         params->SetHeight(dimension);
         mFloatingActionButtonContainer->RequestLayout();
     }
-
     return NOERROR;
 }
 
 ECode CFloatingActionButtonController::ScaleIn(
     /* [in] */ Int32 delayMs)
 {
-    SetVisible(true);
+    SetVisible(TRUE);
     assert(0 && "TODO");
     // AnimUtils::ScaleIn(mFloatingActionButtonContainer, FAB_SCALE_IN_DURATION, delayMs);
     // AnimUtils::FadeIn(mFloatingActionButton, FAB_SCALE_IN_DURATION,
@@ -137,7 +148,7 @@ ECode CFloatingActionButtonController::GetTranslationXForAlignment(
     /* [in] */ Int32 align,
     /* [out] */ Int32* result)
 {
-    VALUE_NOT_NULL(result);
+    VALIDATE_NOT_NULL(result);
 
     Int32 value = 0;
     switch (align) {
@@ -173,5 +184,5 @@ Boolean CFloatingActionButtonController::IsLayoutRtl()
 } // Widget
 } // Common
 } // Contacts
-} // Apps
+} // Droid
 } // Elastos

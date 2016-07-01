@@ -3,12 +3,34 @@ module
 {
     importlib("Elastos.Droid.Core.eco");
 
-    merge("car/elastos/droid/dialerbind/analytics/AnalyticsInterface.car");
+    merge("car/elastos/droid/contacts/common/interactions/TouchPointManager.car");
     merge("car/elastos/droid/contacts/common/list/OnPhoneNumberPickerActionListener.car");
+    merge("car/elastos/droid/contacts/common/widget/FloatingActionButtonController.car");
+    merge("car/elastos/droid/dialerbind/analytics/AnalyticsInterface.car");
 
-    interface IDummy {}
+    using interface Elastos.Droid.App.IActivity;
+    using interface Elastos.Droid.View.IView;
+    interface Elastos.Droid.Contacts.Common.Widget.IFloatingActionButtonController;
 
-    class CDummy {
-        interface IDummy;
+    namespace Elastos {
+    namespace Droid {
+    namespace Contacts {
+    namespace Common {
+    namespace Widget {
+
+    [local]
+    class CFloatingActionButtonController {
+        constructor(
+            [in] IActivity* activity,
+            [in] IView* container,
+            [in] IView* button);
+
+        interface IFloatingActionButtonController;
     }
+
+    } // Widget
+    } // Common
+    } // Contacts
+    } // Droid
+    } // Elastos
 }

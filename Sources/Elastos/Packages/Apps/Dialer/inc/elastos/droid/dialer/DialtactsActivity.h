@@ -57,6 +57,7 @@ using Elastos::Droid::Dialer::Widget::ActionBarController;
 using Elastos::Droid::Dialer::Widget::IActionBarControllerActivityUi;
 using Elastos::Droid::Dialer::Widget::IOnBackButtonClickedListener;
 using Elastos::Droid::Contacts::Common::List::IOnPhoneNumberPickerActionListener;
+using Elastos::Droid::Contacts::Common::Widget::IFloatingActionButtonController;
 
 namespace Elastos {
 namespace Droid {
@@ -662,8 +663,7 @@ private:
     AutoPtr<DragDropController> mDragDropController;
     AutoPtr<ActionBarController> mActionBarController;
 
-    // TODO:
-    // AutoPtr<IFloatingActionButtonController> mFloatingActionButtonController;
+    AutoPtr<IFloatingActionButtonController> mFloatingActionButtonController;
 
     Int32 mActionBarHeight;
 

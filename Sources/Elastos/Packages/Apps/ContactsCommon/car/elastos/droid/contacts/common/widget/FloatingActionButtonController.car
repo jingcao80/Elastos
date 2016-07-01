@@ -1,9 +1,8 @@
 
 module
 {
-
-    namespace Elastos{
-    namespace Apps {
+    namespace Elastos {
+    namespace Droid {
     namespace Contacts {
     namespace Common {
     namespace Widget {
@@ -89,7 +88,6 @@ module
     } // Widget
     } // Common
     } // Contacts
-    } // Apps
+    } // Droid
     } // Elastos
-
 }

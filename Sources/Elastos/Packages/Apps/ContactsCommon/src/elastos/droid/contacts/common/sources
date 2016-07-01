@@ -1,0 +1,11 @@
+
+TARGET_NAME= common
+TARGET_TYPE= lib
+
+#INCLUDES += $(MAKEDIR)/../../../../../inc
+INCLUDES += ../../../../../
+
+#SOURCES = AnalyticsActivity.cpp
+
+ELASTOS_LIBS += interactions/interactions.lib
+ELASTOS_LIBS += widget/widget.lib
