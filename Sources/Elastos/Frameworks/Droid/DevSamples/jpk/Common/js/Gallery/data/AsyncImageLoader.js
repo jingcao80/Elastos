@@ -222,7 +222,7 @@ function LoadDrawable (imageUrl, isHigh, imageView, imageCallback) {
 
     elog('====AsyncImageLoader.LoadDrawable.begin======1==='+imageUrl);
 
-    var drawble;
+    var drawable;
 
     //Mutex::Autolock lock(sLock);
 

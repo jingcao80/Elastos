@@ -363,7 +363,7 @@ function classinfo__createObject(oModuleInfo,oClassInfo){
                             var oArgClassInfo = _getObjClassInfo(arg_in);
                             var oArgClassName = oArgClassInfo.GetName();
                             elog('==============classinfo__createObject ======find method====Interface====paraClassName:'+oArgClassName);
-                            oArgInterfaces = oArgClassInfo.GetAllInterfaceInfos();
+                            var oArgInterfaces = oArgClassInfo.GetAllInterfaceInfos();
                             //var aa = [];
                             //elog('==============classinfo__createObject ======find method====Interface====paraInterfacesNum:'+oArgInterfaces.length);
                             var hasInterface = false;

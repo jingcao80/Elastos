@@ -124,7 +124,7 @@ Application.NodeBridgeListener = {
             ActivityHandler : aoActivityHandler,
         };
 
-        oActivityListener = require(sFileName)(Elastos, oActivity);
+        var oActivityListener = require(sFileName)(Elastos, oActivity);
         oActivity.ActivityListener = oActivityListener;
         _this.Activities.push(oActivity);
 

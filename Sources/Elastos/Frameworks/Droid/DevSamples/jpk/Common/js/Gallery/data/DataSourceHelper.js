@@ -44,8 +44,8 @@ TimeComparator : function (lhs, rhs) {
     elog('=============DataSourceHelper::TimeComparator.begin==============='+typeof(this.sCurrentPath));
 
     elog('=============DataSourceHelper::TimeComparator.begin======0.0=========path:'+this.sCurrentPath);
-    strL = this.sCurrentPath + lhs;
-    strR = this.sCurrentPath + rhs;
+    var strL = this.sCurrentPath + lhs;
+    var strR = this.sCurrentPath + rhs;
     elog('=============DataSourceHelper::TimeComparator.begin======0.1=========strL:'+strL);
     var file1 = Core_New('Elastos.IO.CFile', strL);
     elog('=============DataSourceHelper::TimeComparator.begin======0.2=========strR:'+strR);

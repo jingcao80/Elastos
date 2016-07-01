@@ -38,10 +38,10 @@ module.exports = function(aoElastos, aoActivity){
     var mMyHandler;
 
     //public class
-    var sFileName = '/data/temp/node/JSGallery/data/DataSourceHelper.js';
+    var sFileName = './data/DataSourceHelper.js';
     var DataSourceHelper = require(sFileName)(aoElastos);
 
-    sFileName = '/data/temp/node/JSGallery/data/AsyncImageLoader.js';
+    sFileName = './data/AsyncImageLoader.js';
     var AsyncImageLoader = require(sFileName)(aoElastos);
 
     var _SetFolerLayoutListener = function (folderLayout) {
@@ -821,7 +821,7 @@ if (aiTimes == 0) {
             elog('====jso_activity_cb====OnHandleMessage.begin===='+typeof(aoMessage));
 
             var aa = [];
-            for (prop in aoMessage) aa.push(prop);
+            for (var prop in aoMessage) aa.push(prop);
             elog('====jso_activity_cb====OnHandleMessage.aoMessage.methods:===='+aa.join('--'));
 
             var what = aoMessage.GetWhat();

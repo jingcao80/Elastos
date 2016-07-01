@@ -522,8 +522,7 @@ module.exports = function(aoElastos, aoActivity){
         elog('====jso_activity_cb====OnHandleMessage.begin====');
     }
 
-    return new CActivityListener(oActivity);
-
 //--------CActivityListener--------default end--------
 
+    return new CActivityListener(oActivity);
 };  //module.exports
