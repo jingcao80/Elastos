@@ -10,10 +10,7 @@ INCLUDES += $(MAKEDIR)/src
 
 VPATH += $(MAKEDIR)/src/elastos/droid/providers/downloads
 
-SOURCES += Elastos.CoreLibrary.cpp
-SOURCES += Elastos.Droid.Core.cpp
 SOURCES += Elastos.Droid.Providers.Downloads.car
-
 SOURCES += R.cpp
 SOURCES += Constants.cpp
 SOURCES += CDownloadDrmHelper.cpp
@@ -32,6 +29,8 @@ SOURCES += RealSystemFacade.cpp
 SOURCES += CSizeLimitActivity.cpp
 SOURCES += CStorageUtils.cpp
 #SOURCES += StopRequestException.cpp
+SOURCES += Elastos.CoreLibrary.cpp
+SOURCES += Elastos.Droid.Core.cpp
 
 
 LIBRARIES = $(XDK_USER_LIB)/Elastos.Runtime.lib
