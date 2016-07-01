@@ -1,0 +1,32 @@
+
+module
+{
+    using interface Elastos.Core.ICharSequence;
+
+    namespace Elastos {
+    namespace Droid {
+    namespace Dialer {
+    namespace CallLog {
+
+    /**
+     * Helper for formatting and managing the display of phone numbers.
+     */
+    interface IPhoneNumberDisplayHelper {
+            /**
+         * Returns the string to display for the given phone number.
+         *
+         * @param number the number to display
+         * @param formattedNumber the formatted number if available, may be null
+         */
+        GetDisplayNumber(
+            [in] ICharSequence* number,
+            [in] Int32 presentation,
+            [in] ICharSequence* formattedNumber,
+            [out] ICharSequence** result);
+    }
+
+    } //CallLog
+    } //Dialer
+    } //Droid
+    } //Elastos
+}

@@ -1,0 +1,30 @@
+module
+{
+    using interface Elastos.Droid.Content.IContext;
+    using interface Elastos.Droid.Widget.IEditText;
+
+    namespace Elastos {
+    namespace Droid {
+    namespace Dialer {
+
+    [local]
+    interface ISpecialCharSequenceMgr {
+        HandleChars(
+            [in] IContext* context,
+            [in] String input,
+            [in] IEditText* textField,
+            [out] Boolean* result);
+
+        /**
+         * Cleanup everything around this class. Must be run inside the main thread.
+         *
+         * This should be called when the screen becomes background.
+         */
+        Cleanup();
+    }
+
+    } //Dialer
+    } //Droid
+    } //Elastos
+    }
+}

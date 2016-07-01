@@ -185,7 +185,7 @@ public:
     };
 
 private:
-    class InnerForwardingListener
+    class ECO_LOCAL InnerForwardingListener
         : public ForwardingListener
     {
     public:
@@ -206,7 +206,7 @@ private:
       * displayed on screen within a drop down. The focus is never actually
       * passed to the drop down in this mode; the list only looks focused.</p>
       */
-    class DropDownListView
+    class ECO_LOCAL DropDownListView
         : public ListView
     {
     private:
@@ -330,7 +330,7 @@ private:
         AutoPtr<IAbsListViewAutoScroller> mScrollHelper;
     };
 
-    class InnerInt32Property
+    class ECO_LOCAL InnerInt32Property
         : public Int32Property
     {
     public:
@@ -348,7 +348,7 @@ private:
             /* [out] */ IInterface** result);
     };
 
-    class PopupDataSetObserver
+    class ECO_LOCAL PopupDataSetObserver
         : public Object
         , public IDataSetObserver
     {
@@ -368,7 +368,7 @@ private:
         ListPopupWindow* mOwner;
     };
 
-    class ListSelectorHider
+    class ECO_LOCAL ListSelectorHider
         : public Object
         , public IRunnable
     {
@@ -384,7 +384,7 @@ private:
         ListPopupWindow* mOwner;
     };
 
-    class ResizePopupRunnable
+    class ECO_LOCAL ResizePopupRunnable
         : public Object
         , public IRunnable
     {
@@ -400,7 +400,7 @@ private:
         ListPopupWindow* mOwner;
     };
 
-    class PopupTouchInterceptor
+    class ECO_LOCAL PopupTouchInterceptor
         : public Object
         , public IViewOnTouchListener
     {
@@ -419,7 +419,7 @@ private:
         ListPopupWindow* mOwner;
     };
 
-    class PopupScrollListener
+    class ECO_LOCAL PopupScrollListener
         : public Object
         , public IAbsListViewOnScrollListener
     {
@@ -443,7 +443,7 @@ private:
         ListPopupWindow* mOwner;
     };
 
-    class InnerShowRunnable
+    class ECO_LOCAL InnerShowRunnable
         : public Object
         , public IRunnable
     {
@@ -460,7 +460,7 @@ private:
         ListPopupWindow* mOwner;
     };
 
-    class InnerAdapterViewOnItemSelectedListener
+    class ECO_LOCAL InnerAdapterViewOnItemSelectedListener
         : public Object
         , public IAdapterViewOnItemSelectedListener
     {
@@ -1002,7 +1002,7 @@ public:
         /* [out] */ IViewOnTouchListener** result);
 
 private:
-    CARAPI RemovePromptView();
+    ECO_LOCAL CARAPI RemovePromptView();
 
     /**
       * <p>Builds the popup window's content and returns the height the popup
@@ -1010,7 +1010,7 @@ private:
       *
       * @return the content's height or -1 if content already exists
       */
-    CARAPI_(Int32) BuildDropDown();
+    ECO_LOCAL CARAPI_(Int32) BuildDropDown();
 
 public:
     Int32 mListItemExpandMaximum;
@@ -1023,9 +1023,9 @@ public:
     static const Int32 INPUT_METHOD_NOT_NEEDED = IPopupWindow::INPUT_METHOD_NOT_NEEDED;
 
 private:
-    static const String TAG;
-    static const Boolean DEBUG;
-    static const Int32 EXPAND_LIST_TIMEOUT = 250;
+    ECO_LOCAL static const String TAG;
+    ECO_LOCAL static const Boolean DEBUG;
+    ECO_LOCAL static const Int32 EXPAND_LIST_TIMEOUT = 250;
     AutoPtr<IContext> mContext;
     AutoPtr<IPopupWindow> mPopup;
     AutoPtr<IListAdapter> mAdapter;

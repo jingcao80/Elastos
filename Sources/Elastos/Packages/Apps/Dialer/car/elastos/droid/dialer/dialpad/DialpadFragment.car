@@ -1,0 +1,106 @@
+
+module
+{
+    using interface Elastos.Droid.Widget.IEditText;
+
+    namespace Elastos {
+    namespace Droid {
+    namespace Dialer {
+    namespace Dialpad {
+
+//    /**
+//     * @Involve
+//     * interface Elastos.Droid.Content.IComponentCallbacks
+//     * interface Elastos.Droid.Content.IComponentCallbacks2
+//     * interface Elastos.Droid.View.IViewOnCreateContextMenuListener
+//     * interface Elastos.Droid.App.IFragment
+//     * interface Elastos.Apps.DailerBind.Analytics.IAnalyticsFragment
+//     * interface IViewOnClickListener
+//     * interface IViewOnLongClickListener
+//     * interface IViewOnKeyListener
+//     * interface IAdapterViewOnItemClickListener
+//     * interface ITextWatcher
+//     * interface IPopupMenuOnMenuItemClickListener
+//     * interface IDialpadKeyButtonOnPressedListener
+//     */
+//    interface IDialpadFragment {
+//        GetDigitsWidget(
+//            [out] IEditText** text);
+//
+//        SetStartedFromNewIntent(
+//            [in] Boolean value);
+//
+//        CallVoicemail();
+//
+//        ClearDialpad();
+//
+//        /**
+//         * @return true if the phone is "in use", meaning that at least one line
+//         *              is active (ie. off hook or ringing or dialing, or on hold).
+//         */
+//        IsPhoneInUse(
+//            [out] Boolean* result);
+//
+//        SetAnimate(
+//            [in] Boolean value);
+//
+//        GetAnimate(
+//            [out] Boolean* result);
+//
+//        SetYFraction(
+//            [in] Float yFraction);
+//    }
+
+//    /**
+//     * @Involve
+//     * interface Elastos.Droid.View.IView
+//     * interface Elastos.Droid.View.IViewGroup
+//     *
+//     * interface Elastos.Droid.View.IViewParent
+//     * interface Elastos.Droid.View.IViewManager
+//     * interface Elastos.Droid.View.IKeyEventCallback
+//     * interface Elastos.Droid.View.Accessibility.IAccessibilityEventSource
+//     * interface Elastos.Droid.Graphics.Drawable.IDrawableCallback
+//     * interface Elastos.Droid.Widget.IRelativeLayout
+//     */
+//    interface IDialpadSlidingRelativeLayout {
+//        // @NeededForReflection
+//        GetYFraction(
+//            [out] Float* result);
+//
+//        // @NeededForReflection
+//        SetYFraction(
+//            [in] Float yFraction);
+//    }
+
+    interface IOnDialpadQueryChangedListener {
+        OnDialpadQueryChanged(
+            [in] String query);
+    }
+
+//    /**
+//     * @Involve
+//     * interface IFragment
+//     * interface IDialogInterfaceOnCancelListener
+//     * interface IDialogInterfaceOnDismissListener
+//     * interface IDialogFragment
+//     */
+//    interface IDialpadFragmentErrorDialogFragment {
+//    }
+//
+//    interface IDialpadFragmentErrorDialogFragmentHelper {
+//        NewInstance(
+//            [in] Int32 messageResId,
+//            [out] IDialpadFragmentErrorDialogFragment** fragment);
+//
+//        NewInstance(
+//            [in] Int32 titleResId,
+//            [in] Int32 messageResId,
+//            [out] IDialpadFragmentErrorDialogFragment** fragment);
+//    }
+
+    } //Dialpad
+    } //Dialer
+    } //Droid
+    } //Elastos
+}

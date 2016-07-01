@@ -14,7 +14,7 @@ module
      * interface Elastos.Droid.Content.IComponentCallbacks2
      * interface Elastos.Droid.View.IViewOnCreateContextMenuListener
      * interface Elastos.Droid.App.IFragment
-     * interface Elastos.Apps.DailerBind.Analytics.IAnalyticsFragment
+     * interface Elastos.Apps.DialerBind.Analytics.IAnalyticsFragment
      */
     interface IContactEntryListFragment {
         // TODO: Make this protected. This should not be used from the PeopleActivity but

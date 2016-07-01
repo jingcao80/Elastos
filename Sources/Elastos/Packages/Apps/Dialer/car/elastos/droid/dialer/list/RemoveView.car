@@ -1,0 +1,32 @@
+module
+{
+    interface Elastos.Droid.Dialer.List.IDragDropController;
+
+    namespace Elastos {
+    namespace Droid {
+    namespace Dialer {
+    namespace List {
+
+    /**
+     * @Involve
+     * extends Elastos.Droid.View.IView
+     * extends Elastos.Droid.View.IViewGroup
+     * extends Elastos.Droid.Widget.IFrameLayout
+     *
+     * interface Elastos.Droid.View.IViewParent
+     * interface Elastos.Droid.View.IViewManager
+     * interface Elastos.Droid.View.IKeyEventCallback
+     * interface Elastos.Droid.View.Accessibility.IAccessibilityEventSource
+     * interface Elastos.Droid.Graphics.Drawable.IDrawableCallback
+     */
+    [local]
+    interface IRemoveView {
+        SetDragDropController(
+            [in] IDragDropController* controller);
+    }
+
+    } //List
+    } //Dialer
+    } //Droid
+    } //Elastos
+}

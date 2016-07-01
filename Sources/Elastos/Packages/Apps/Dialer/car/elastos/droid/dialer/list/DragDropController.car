@@ -1,0 +1,47 @@
+module
+{
+    using interface Elastos.Droid.View.IView;
+    interface Elastos.Droid.Dialer.List.IOnDragDropListener;
+    interface Elastos.Droid.Dialer.List.IPhoneFavoriteSquareTileView;
+
+    namespace Elastos {
+    namespace Droid {
+    namespace Dialer {
+    namespace List {
+
+    /**
+     * Callback interface used to retrieve views based on the current touch coordinates of the
+     * drag event. The {@link DragItemContainer} houses the draggable views that this
+     * {@link DragDropController} controls.
+     */
+    interface IDragItemContainer {
+        GetViewForLocation(
+            [in] Int32 x,
+            [in] Int32 y,
+            [out] IPhoneFavoriteSquareTileView** view);
+    }
+
+    [deprecated, local]
+    interface IDragDropController {
+        HandleDragHovered(
+            [in] IView* v,
+            [in] Int32 x,
+            [in] Int32 y);
+
+        HandleDragFinished(
+            [in] Int32 x,
+            [in] Int32 y,
+            [in] Boolean isRemoveView);
+
+        AddOnDragDropListener(
+            [in] IOnDragDropListener* listener);
+
+        RemoveOnDragDropListener(
+            [in] IOnDragDropListener* listener);
+    }
+
+    } // List
+    } // Dialer
+    } // Droid
+    } // Elastos
+}

@@ -3,7 +3,7 @@ module
 
     namespace Elastos{
     namespace Apps {
-    namespace DailerBind {
+    namespace DialerBind {
     namespace Analytics {
 
     /**
@@ -17,7 +17,7 @@ module
     }
 
     } // Analytics
-    } // DailerBind
+    } // DialerBind
     } // Apps
     } // Elastos
 

@@ -1,0 +1,32 @@
+
+module
+{
+    using interface Elastos.Droid.App.IFragmentManager;
+
+    namespace Elastos {
+    namespace Droid {
+    namespace Dialer {
+    namespace CallLog {
+
+    /**
+     * @Involve
+     * interface IFragment
+     * interface IDialogInterfaceOnCancelListener
+     * interface IDialogInterfaceOnDismissListener
+     * interface IDialogFragment
+     */
+    interface IClearCallLogDialog {
+    }
+
+    [local]
+    interface IClearCallLogDialogHelper {
+        /** Preferred way to show this dialog */
+        Show(
+            [in] IFragmentManager* fragmentManager);
+    }
+
+    } //CallLog
+    } //Dialer
+    } //Droid
+    } //Elastos
+}

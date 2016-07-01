@@ -22,12 +22,12 @@ namespace Elastos {
 namespace Droid {
 namespace Widget {
 
-class PopupMenu
+class ECO_PUBLIC PopupMenu
     : public Object
     , public IPopupMenu
 {
 private:
-    class MyCallback
+    class ECO_LOCAL MyCallback
         : public Object
         , public IMenuBuilderCallback
         , public IMenuPresenterCallback
@@ -60,7 +60,7 @@ private:
         PopupMenu* mHost;
     };
 
-    class MyForwardingListener
+    class ECO_LOCAL MyForwardingListener
         : public ListPopupWindow::ForwardingListener
     {
     public:

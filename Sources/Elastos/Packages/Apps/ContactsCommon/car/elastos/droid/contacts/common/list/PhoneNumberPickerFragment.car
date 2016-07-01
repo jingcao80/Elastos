@@ -13,7 +13,7 @@ module
      * interface Elastos.Droid.Content.IComponentCallbacks2
      * interface Elastos.Droid.View.IViewOnCreateContextMenuListener
      * interface Elastos.Droid.App.IFragment
-     * interface Elastos.Apps.DailerBind.Analytics.IAnalyticsFragment
+     * interface Elastos.Apps.DialerBind.Analytics.IAnalyticsFragment
      * interface Elastos.Apps.Contacts.Common.List.IContactEntryListFragment
      */
     interface IPhoneNumberPickerFragment {

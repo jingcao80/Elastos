@@ -1,4 +1,4 @@
-TARGET_NAME= Elastos.Apps.Dialer
+TARGET_NAME= Elastos.Droid.Dialer
 TARGET_TYPE= eco
 
 EXPORT_ALL_SYMBOLS = 1
@@ -9,21 +9,22 @@ INCLUDES += $(MAKEDIR)/src
 CAR_FLAGS += -n -u
 LUBE_FLAGS += -n -u
 
-SOURCES = Elastos.Apps.Dialer.car
+SOURCES = Elastos.Droid.Dialer.car
 SOURCES += R.cpp
 
-ELASTOS_LIBS += elastos/apps/dialer/dialer.lib
-ELASTOS_LIBS += elastos/apps/dialerbind/dialerbind.lib
+ELASTOS_LIBS += elastos/droid/dialer/dialer.lib
+ELASTOS_LIBS += elastos/droid/dialerbind/dialerbind.lib
 
 LIBRARIES  = $(XDK_USER_LIB)/Elastos.Runtime.lib
 LIBRARIES += $(XDK_TARGETS)/Elastos.Runtime.eco
 LIBRARIES += $(XDK_TARGETS)/Elastos.Droid.Core.eco
 LIBRARIES += $(XDK_TARGETS)/Elastos.CoreLibrary.eco
+LIBRARIES += $(XDK_TARGETS)/Elastos.Droid.ContactsCommon.eco
 LIBRARIES += $(XDK_USER_LIB)/crt0.lib
 LIBRARIES += -lm -licuuc -llog -lutils -landroidfw
 
-APP_PACKAGE_NAME = Elastos.Apps.Dialer
-RES_NAMESPACE = Elastos.Apps.Dialer
+APP_PACKAGE_NAME = Elastos.Droid.Dialer
+RES_NAMESPACE = Elastos.Droid.Dialer
 APPPACK = 1
 EXTRA_RES_DIR = $(MAKEDIR)/../ContactsCommon/res
 AAPT_FLAGS = --auto-add-overlay --extra-packages com.android.contacts.common

@@ -5,11 +5,11 @@
  * should not be modified by hand.
  */
 
-#ifndef __Elastos_Apps_Dialer_R_H__
-#define __Elastos_Apps_Dialer_R_H__
+#ifndef __Elastos_Droid_Dialer_R_H__
+#define __Elastos_Droid_Dialer_R_H__
 #include <elatypes.h>
 namespace Elastos {
-namespace Apps {
+namespace Droid {
 namespace Dialer {
 class ECO_PUBLIC R {
     public: class array {
@@ -3009,11 +3009,11 @@ background and text color. See also android:style/Widget.Holo.TextView.ListSepar
            <colgroup align="left" />
            <colgroup align="left" />
            <tr><th>Attribute</th><th>Description</th></tr>
-           <tr><td><code>{@link #CallLog_call_log_header_color Elastos.Apps.Dialer:call_log_header_color}</code></td><td></td></tr>
-           <tr><td><code>{@link #CallLog_call_log_primary_background_color Elastos.Apps.Dialer:call_log_primary_background_color}</code></td><td></td></tr>
-           <tr><td><code>{@link #CallLog_call_log_primary_text_color Elastos.Apps.Dialer:call_log_primary_text_color}</code></td><td></td></tr>
-           <tr><td><code>{@link #CallLog_call_log_secondary_background_color Elastos.Apps.Dialer:call_log_secondary_background_color}</code></td><td></td></tr>
-           <tr><td><code>{@link #CallLog_call_log_secondary_text_color Elastos.Apps.Dialer:call_log_secondary_text_color}</code></td><td></td></tr>
+           <tr><td><code>{@link #CallLog_call_log_header_color Elastos.Droid.Dialer:call_log_header_color}</code></td><td></td></tr>
+           <tr><td><code>{@link #CallLog_call_log_primary_background_color Elastos.Droid.Dialer:call_log_primary_background_color}</code></td><td></td></tr>
+           <tr><td><code>{@link #CallLog_call_log_primary_text_color Elastos.Droid.Dialer:call_log_primary_text_color}</code></td><td></td></tr>
+           <tr><td><code>{@link #CallLog_call_log_secondary_background_color Elastos.Droid.Dialer:call_log_secondary_background_color}</code></td><td></td></tr>
+           <tr><td><code>{@link #CallLog_call_log_secondary_text_color Elastos.Droid.Dialer:call_log_secondary_text_color}</code></td><td></td></tr>
            </table>
            @see #CallLog_call_log_header_color
            @see #CallLog_call_log_primary_background_color
@@ -3023,7 +3023,7 @@ background and text color. See also android:style/Widget.Holo.TextView.ListSepar
          */
         public: static const int CallLog[5];
         /**
-          <p>This symbol is the offset where the {@link Elastos.Apps.Dialer.R.attr#call_log_header_color}
+          <p>This symbol is the offset where the {@link Elastos.Droid.Dialer.R.attr#call_log_header_color}
           attribute's value can be found in the {@link #CallLog} array.
 
 
@@ -3038,7 +3038,7 @@ containing a value of this type.
         */
         public: static const int CallLog_call_log_header_color = 4;
         /**
-          <p>This symbol is the offset where the {@link Elastos.Apps.Dialer.R.attr#call_log_primary_background_color}
+          <p>This symbol is the offset where the {@link Elastos.Droid.Dialer.R.attr#call_log_primary_background_color}
           attribute's value can be found in the {@link #CallLog} array.
 
 
@@ -3053,7 +3053,7 @@ containing a value of this type.
         */
         public: static const int CallLog_call_log_primary_background_color = 1;
         /**
-          <p>This symbol is the offset where the {@link Elastos.Apps.Dialer.R.attr#call_log_primary_text_color}
+          <p>This symbol is the offset where the {@link Elastos.Droid.Dialer.R.attr#call_log_primary_text_color}
           attribute's value can be found in the {@link #CallLog} array.
 
 
@@ -3068,7 +3068,7 @@ containing a value of this type.
         */
         public: static const int CallLog_call_log_primary_text_color = 0;
         /**
-          <p>This symbol is the offset where the {@link Elastos.Apps.Dialer.R.attr#call_log_secondary_background_color}
+          <p>This symbol is the offset where the {@link Elastos.Droid.Dialer.R.attr#call_log_secondary_background_color}
           attribute's value can be found in the {@link #CallLog} array.
 
 
@@ -3083,7 +3083,7 @@ containing a value of this type.
         */
         public: static const int CallLog_call_log_secondary_background_color = 3;
         /**
-          <p>This symbol is the offset where the {@link Elastos.Apps.Dialer.R.attr#call_log_secondary_text_color}
+          <p>This symbol is the offset where the {@link Elastos.Droid.Dialer.R.attr#call_log_secondary_text_color}
           attribute's value can be found in the {@link #CallLog} array.
 
 
@@ -3103,9 +3103,9 @@ containing a value of this type.
            <colgroup align="left" />
            <colgroup align="left" />
            <tr><th>Attribute</th><th>Description</th></tr>
-           <tr><td><code>{@link #ContactBrowser_contact_browser_background Elastos.Apps.Dialer:contact_browser_background}</code></td><td></td></tr>
-           <tr><td><code>{@link #ContactBrowser_contact_browser_list_padding_left Elastos.Apps.Dialer:contact_browser_list_padding_left}</code></td><td></td></tr>
-           <tr><td><code>{@link #ContactBrowser_contact_browser_list_padding_right Elastos.Apps.Dialer:contact_browser_list_padding_right}</code></td><td></td></tr>
+           <tr><td><code>{@link #ContactBrowser_contact_browser_background Elastos.Droid.Dialer:contact_browser_background}</code></td><td></td></tr>
+           <tr><td><code>{@link #ContactBrowser_contact_browser_list_padding_left Elastos.Droid.Dialer:contact_browser_list_padding_left}</code></td><td></td></tr>
+           <tr><td><code>{@link #ContactBrowser_contact_browser_list_padding_right Elastos.Droid.Dialer:contact_browser_list_padding_right}</code></td><td></td></tr>
            </table>
            @see #ContactBrowser_contact_browser_background
            @see #ContactBrowser_contact_browser_list_padding_left
@@ -3113,7 +3113,7 @@ containing a value of this type.
          */
         public: static const int ContactBrowser[3];
         /**
-          <p>This symbol is the offset where the {@link Elastos.Apps.Dialer.R.attr#contact_browser_background}
+          <p>This symbol is the offset where the {@link Elastos.Droid.Dialer.R.attr#contact_browser_background}
           attribute's value can be found in the {@link #ContactBrowser} array.
 
 
@@ -3123,7 +3123,7 @@ or to a theme attribute in the form "<code>?[<i>package</i>:][<i>type</i>:]<i>na
         */
         public: static const int ContactBrowser_contact_browser_background = 2;
         /**
-          <p>This symbol is the offset where the {@link Elastos.Apps.Dialer.R.attr#contact_browser_list_padding_left}
+          <p>This symbol is the offset where the {@link Elastos.Droid.Dialer.R.attr#contact_browser_list_padding_left}
           attribute's value can be found in the {@link #ContactBrowser} array.
 
 
@@ -3139,7 +3139,7 @@ containing a value of this type.
         */
         public: static const int ContactBrowser_contact_browser_list_padding_left = 0;
         /**
-          <p>This symbol is the offset where the {@link Elastos.Apps.Dialer.R.attr#contact_browser_list_padding_right}
+          <p>This symbol is the offset where the {@link Elastos.Droid.Dialer.R.attr#contact_browser_list_padding_right}
           attribute's value can be found in the {@link #ContactBrowser} array.
 
 
@@ -3160,32 +3160,32 @@ containing a value of this type.
            <colgroup align="left" />
            <colgroup align="left" />
            <tr><th>Attribute</th><th>Description</th></tr>
-           <tr><td><code>{@link #ContactListItemView_activated_background Elastos.Apps.Dialer:activated_background}</code></td><td></td></tr>
-           <tr><td><code>{@link #ContactListItemView_list_item_background_color Elastos.Apps.Dialer:list_item_background_color}</code></td><td></td></tr>
-           <tr><td><code>{@link #ContactListItemView_list_item_data_width_weight Elastos.Apps.Dialer:list_item_data_width_weight}</code></td><td></td></tr>
-           <tr><td><code>{@link #ContactListItemView_list_item_gap_between_image_and_text Elastos.Apps.Dialer:list_item_gap_between_image_and_text}</code></td><td></td></tr>
-           <tr><td><code>{@link #ContactListItemView_list_item_gap_between_label_and_data Elastos.Apps.Dialer:list_item_gap_between_label_and_data}</code></td><td></td></tr>
-           <tr><td><code>{@link #ContactListItemView_list_item_header_height Elastos.Apps.Dialer:list_item_header_height}</code></td><td></td></tr>
-           <tr><td><code>{@link #ContactListItemView_list_item_header_text_color Elastos.Apps.Dialer:list_item_header_text_color}</code></td><td></td></tr>
-           <tr><td><code>{@link #ContactListItemView_list_item_header_text_indent Elastos.Apps.Dialer:list_item_header_text_indent}</code></td><td></td></tr>
-           <tr><td><code>{@link #ContactListItemView_list_item_header_text_size Elastos.Apps.Dialer:list_item_header_text_size}</code></td><td></td></tr>
-           <tr><td><code>{@link #ContactListItemView_list_item_height Elastos.Apps.Dialer:list_item_height}</code></td><td></td></tr>
-           <tr><td><code>{@link #ContactListItemView_list_item_label_width_weight Elastos.Apps.Dialer:list_item_label_width_weight}</code></td><td></td></tr>
-           <tr><td><code>{@link #ContactListItemView_list_item_name_text_color Elastos.Apps.Dialer:list_item_name_text_color}</code></td><td></td></tr>
-           <tr><td><code>{@link #ContactListItemView_list_item_name_text_size Elastos.Apps.Dialer:list_item_name_text_size}</code></td><td></td></tr>
-           <tr><td><code>{@link #ContactListItemView_list_item_padding_bottom Elastos.Apps.Dialer:list_item_padding_bottom}</code></td><td></td></tr>
-           <tr><td><code>{@link #ContactListItemView_list_item_padding_left Elastos.Apps.Dialer:list_item_padding_left}</code></td><td></td></tr>
-           <tr><td><code>{@link #ContactListItemView_list_item_padding_right Elastos.Apps.Dialer:list_item_padding_right}</code></td><td></td></tr>
-           <tr><td><code>{@link #ContactListItemView_list_item_padding_top Elastos.Apps.Dialer:list_item_padding_top}</code></td><td></td></tr>
-           <tr><td><code>{@link #ContactListItemView_list_item_photo_size Elastos.Apps.Dialer:list_item_photo_size}</code></td><td></td></tr>
-           <tr><td><code>{@link #ContactListItemView_list_item_prefix_highlight_color Elastos.Apps.Dialer:list_item_prefix_highlight_color}</code></td><td></td></tr>
-           <tr><td><code>{@link #ContactListItemView_list_item_presence_icon_margin Elastos.Apps.Dialer:list_item_presence_icon_margin}</code></td><td></td></tr>
-           <tr><td><code>{@link #ContactListItemView_list_item_presence_icon_size Elastos.Apps.Dialer:list_item_presence_icon_size}</code></td><td></td></tr>
-           <tr><td><code>{@link #ContactListItemView_list_item_profile_photo_size Elastos.Apps.Dialer:list_item_profile_photo_size}</code></td><td></td></tr>
-           <tr><td><code>{@link #ContactListItemView_list_item_text_indent Elastos.Apps.Dialer:list_item_text_indent}</code></td><td></td></tr>
-           <tr><td><code>{@link #ContactListItemView_list_item_text_offset_top Elastos.Apps.Dialer:list_item_text_offset_top}</code></td><td></td></tr>
-           <tr><td><code>{@link #ContactListItemView_list_section_header_height Elastos.Apps.Dialer:list_section_header_height}</code></td><td></td></tr>
-           <tr><td><code>{@link #ContactListItemView_section_header_background Elastos.Apps.Dialer:section_header_background}</code></td><td></td></tr>
+           <tr><td><code>{@link #ContactListItemView_activated_background Elastos.Droid.Dialer:activated_background}</code></td><td></td></tr>
+           <tr><td><code>{@link #ContactListItemView_list_item_background_color Elastos.Droid.Dialer:list_item_background_color}</code></td><td></td></tr>
+           <tr><td><code>{@link #ContactListItemView_list_item_data_width_weight Elastos.Droid.Dialer:list_item_data_width_weight}</code></td><td></td></tr>
+           <tr><td><code>{@link #ContactListItemView_list_item_gap_between_image_and_text Elastos.Droid.Dialer:list_item_gap_between_image_and_text}</code></td><td></td></tr>
+           <tr><td><code>{@link #ContactListItemView_list_item_gap_between_label_and_data Elastos.Droid.Dialer:list_item_gap_between_label_and_data}</code></td><td></td></tr>
+           <tr><td><code>{@link #ContactListItemView_list_item_header_height Elastos.Droid.Dialer:list_item_header_height}</code></td><td></td></tr>
+           <tr><td><code>{@link #ContactListItemView_list_item_header_text_color Elastos.Droid.Dialer:list_item_header_text_color}</code></td><td></td></tr>
+           <tr><td><code>{@link #ContactListItemView_list_item_header_text_indent Elastos.Droid.Dialer:list_item_header_text_indent}</code></td><td></td></tr>
+           <tr><td><code>{@link #ContactListItemView_list_item_header_text_size Elastos.Droid.Dialer:list_item_header_text_size}</code></td><td></td></tr>
+           <tr><td><code>{@link #ContactListItemView_list_item_height Elastos.Droid.Dialer:list_item_height}</code></td><td></td></tr>
+           <tr><td><code>{@link #ContactListItemView_list_item_label_width_weight Elastos.Droid.Dialer:list_item_label_width_weight}</code></td><td></td></tr>
+           <tr><td><code>{@link #ContactListItemView_list_item_name_text_color Elastos.Droid.Dialer:list_item_name_text_color}</code></td><td></td></tr>
+           <tr><td><code>{@link #ContactListItemView_list_item_name_text_size Elastos.Droid.Dialer:list_item_name_text_size}</code></td><td></td></tr>
+           <tr><td><code>{@link #ContactListItemView_list_item_padding_bottom Elastos.Droid.Dialer:list_item_padding_bottom}</code></td><td></td></tr>
+           <tr><td><code>{@link #ContactListItemView_list_item_padding_left Elastos.Droid.Dialer:list_item_padding_left}</code></td><td></td></tr>
+           <tr><td><code>{@link #ContactListItemView_list_item_padding_right Elastos.Droid.Dialer:list_item_padding_right}</code></td><td></td></tr>
+           <tr><td><code>{@link #ContactListItemView_list_item_padding_top Elastos.Droid.Dialer:list_item_padding_top}</code></td><td></td></tr>
+           <tr><td><code>{@link #ContactListItemView_list_item_photo_size Elastos.Droid.Dialer:list_item_photo_size}</code></td><td></td></tr>
+           <tr><td><code>{@link #ContactListItemView_list_item_prefix_highlight_color Elastos.Droid.Dialer:list_item_prefix_highlight_color}</code></td><td></td></tr>
+           <tr><td><code>{@link #ContactListItemView_list_item_presence_icon_margin Elastos.Droid.Dialer:list_item_presence_icon_margin}</code></td><td></td></tr>
+           <tr><td><code>{@link #ContactListItemView_list_item_presence_icon_size Elastos.Droid.Dialer:list_item_presence_icon_size}</code></td><td></td></tr>
+           <tr><td><code>{@link #ContactListItemView_list_item_profile_photo_size Elastos.Droid.Dialer:list_item_profile_photo_size}</code></td><td></td></tr>
+           <tr><td><code>{@link #ContactListItemView_list_item_text_indent Elastos.Droid.Dialer:list_item_text_indent}</code></td><td></td></tr>
+           <tr><td><code>{@link #ContactListItemView_list_item_text_offset_top Elastos.Droid.Dialer:list_item_text_offset_top}</code></td><td></td></tr>
+           <tr><td><code>{@link #ContactListItemView_list_section_header_height Elastos.Droid.Dialer:list_section_header_height}</code></td><td></td></tr>
+           <tr><td><code>{@link #ContactListItemView_section_header_background Elastos.Droid.Dialer:section_header_background}</code></td><td></td></tr>
            </table>
            @see #ContactListItemView_activated_background
            @see #ContactListItemView_list_item_background_color
@@ -3216,7 +3216,7 @@ containing a value of this type.
          */
         public: static const int ContactListItemView[26];
         /**
-          <p>This symbol is the offset where the {@link Elastos.Apps.Dialer.R.attr#activated_background}
+          <p>This symbol is the offset where the {@link Elastos.Droid.Dialer.R.attr#activated_background}
           attribute's value can be found in the {@link #ContactListItemView} array.
 
 
@@ -3226,7 +3226,7 @@ or to a theme attribute in the form "<code>?[<i>package</i>:][<i>type</i>:]<i>na
         */
         public: static const int ContactListItemView_activated_background = 2;
         /**
-          <p>This symbol is the offset where the {@link Elastos.Apps.Dialer.R.attr#list_item_background_color}
+          <p>This symbol is the offset where the {@link Elastos.Droid.Dialer.R.attr#list_item_background_color}
           attribute's value can be found in the {@link #ContactListItemView} array.
 
 
@@ -3241,7 +3241,7 @@ containing a value of this type.
         */
         public: static const int ContactListItemView_list_item_background_color = 15;
         /**
-          <p>This symbol is the offset where the {@link Elastos.Apps.Dialer.R.attr#list_item_data_width_weight}
+          <p>This symbol is the offset where the {@link Elastos.Droid.Dialer.R.attr#list_item_data_width_weight}
           attribute's value can be found in the {@link #ContactListItemView} array.
 
 
@@ -3255,7 +3255,7 @@ containing a value of this type.
         */
         public: static const int ContactListItemView_list_item_data_width_weight = 24;
         /**
-          <p>This symbol is the offset where the {@link Elastos.Apps.Dialer.R.attr#list_item_gap_between_image_and_text}
+          <p>This symbol is the offset where the {@link Elastos.Droid.Dialer.R.attr#list_item_gap_between_image_and_text}
           attribute's value can be found in the {@link #ContactListItemView} array.
 
 
@@ -3271,7 +3271,7 @@ containing a value of this type.
         */
         public: static const int ContactListItemView_list_item_gap_between_image_and_text = 8;
         /**
-          <p>This symbol is the offset where the {@link Elastos.Apps.Dialer.R.attr#list_item_gap_between_label_and_data}
+          <p>This symbol is the offset where the {@link Elastos.Droid.Dialer.R.attr#list_item_gap_between_label_and_data}
           attribute's value can be found in the {@link #ContactListItemView} array.
 
 
@@ -3287,7 +3287,7 @@ containing a value of this type.
         */
         public: static const int ContactListItemView_list_item_gap_between_label_and_data = 9;
         /**
-          <p>This symbol is the offset where the {@link Elastos.Apps.Dialer.R.attr#list_item_header_height}
+          <p>This symbol is the offset where the {@link Elastos.Droid.Dialer.R.attr#list_item_header_height}
           attribute's value can be found in the {@link #ContactListItemView} array.
 
 
@@ -3303,7 +3303,7 @@ containing a value of this type.
         */
         public: static const int ContactListItemView_list_item_header_height = 19;
         /**
-          <p>This symbol is the offset where the {@link Elastos.Apps.Dialer.R.attr#list_item_header_text_color}
+          <p>This symbol is the offset where the {@link Elastos.Droid.Dialer.R.attr#list_item_header_text_color}
           attribute's value can be found in the {@link #ContactListItemView} array.
 
 
@@ -3318,7 +3318,7 @@ containing a value of this type.
         */
         public: static const int ContactListItemView_list_item_header_text_color = 17;
         /**
-          <p>This symbol is the offset where the {@link Elastos.Apps.Dialer.R.attr#list_item_header_text_indent}
+          <p>This symbol is the offset where the {@link Elastos.Droid.Dialer.R.attr#list_item_header_text_indent}
           attribute's value can be found in the {@link #ContactListItemView} array.
 
 
@@ -3334,7 +3334,7 @@ containing a value of this type.
         */
         public: static const int ContactListItemView_list_item_header_text_indent = 16;
         /**
-          <p>This symbol is the offset where the {@link Elastos.Apps.Dialer.R.attr#list_item_header_text_size}
+          <p>This symbol is the offset where the {@link Elastos.Droid.Dialer.R.attr#list_item_header_text_size}
           attribute's value can be found in the {@link #ContactListItemView} array.
 
 
@@ -3350,7 +3350,7 @@ containing a value of this type.
         */
         public: static const int ContactListItemView_list_item_header_text_size = 18;
         /**
-          <p>This symbol is the offset where the {@link Elastos.Apps.Dialer.R.attr#list_item_height}
+          <p>This symbol is the offset where the {@link Elastos.Droid.Dialer.R.attr#list_item_height}
           attribute's value can be found in the {@link #ContactListItemView} array.
 
 
@@ -3366,7 +3366,7 @@ containing a value of this type.
         */
         public: static const int ContactListItemView_list_item_height = 0;
         /**
-          <p>This symbol is the offset where the {@link Elastos.Apps.Dialer.R.attr#list_item_label_width_weight}
+          <p>This symbol is the offset where the {@link Elastos.Droid.Dialer.R.attr#list_item_label_width_weight}
           attribute's value can be found in the {@link #ContactListItemView} array.
 
 
@@ -3380,7 +3380,7 @@ containing a value of this type.
         */
         public: static const int ContactListItemView_list_item_label_width_weight = 25;
         /**
-          <p>This symbol is the offset where the {@link Elastos.Apps.Dialer.R.attr#list_item_name_text_color}
+          <p>This symbol is the offset where the {@link Elastos.Droid.Dialer.R.attr#list_item_name_text_color}
           attribute's value can be found in the {@link #ContactListItemView} array.
 
 
@@ -3395,7 +3395,7 @@ containing a value of this type.
         */
         public: static const int ContactListItemView_list_item_name_text_color = 20;
         /**
-          <p>This symbol is the offset where the {@link Elastos.Apps.Dialer.R.attr#list_item_name_text_size}
+          <p>This symbol is the offset where the {@link Elastos.Droid.Dialer.R.attr#list_item_name_text_size}
           attribute's value can be found in the {@link #ContactListItemView} array.
 
 
@@ -3411,7 +3411,7 @@ containing a value of this type.
         */
         public: static const int ContactListItemView_list_item_name_text_size = 21;
         /**
-          <p>This symbol is the offset where the {@link Elastos.Apps.Dialer.R.attr#list_item_padding_bottom}
+          <p>This symbol is the offset where the {@link Elastos.Droid.Dialer.R.attr#list_item_padding_bottom}
           attribute's value can be found in the {@link #ContactListItemView} array.
 
 
@@ -3427,7 +3427,7 @@ containing a value of this type.
         */
         public: static const int ContactListItemView_list_item_padding_bottom = 6;
         /**
-          <p>This symbol is the offset where the {@link Elastos.Apps.Dialer.R.attr#list_item_padding_left}
+          <p>This symbol is the offset where the {@link Elastos.Droid.Dialer.R.attr#list_item_padding_left}
           attribute's value can be found in the {@link #ContactListItemView} array.
 
 
@@ -3443,7 +3443,7 @@ containing a value of this type.
         */
         public: static const int ContactListItemView_list_item_padding_left = 7;
         /**
-          <p>This symbol is the offset where the {@link Elastos.Apps.Dialer.R.attr#list_item_padding_right}
+          <p>This symbol is the offset where the {@link Elastos.Droid.Dialer.R.attr#list_item_padding_right}
           attribute's value can be found in the {@link #ContactListItemView} array.
 
 
@@ -3459,7 +3459,7 @@ containing a value of this type.
         */
         public: static const int ContactListItemView_list_item_padding_right = 5;
         /**
-          <p>This symbol is the offset where the {@link Elastos.Apps.Dialer.R.attr#list_item_padding_top}
+          <p>This symbol is the offset where the {@link Elastos.Droid.Dialer.R.attr#list_item_padding_top}
           attribute's value can be found in the {@link #ContactListItemView} array.
 
 
@@ -3475,7 +3475,7 @@ containing a value of this type.
         */
         public: static const int ContactListItemView_list_item_padding_top = 4;
         /**
-          <p>This symbol is the offset where the {@link Elastos.Apps.Dialer.R.attr#list_item_photo_size}
+          <p>This symbol is the offset where the {@link Elastos.Droid.Dialer.R.attr#list_item_photo_size}
           attribute's value can be found in the {@link #ContactListItemView} array.
 
 
@@ -3491,7 +3491,7 @@ containing a value of this type.
         */
         public: static const int ContactListItemView_list_item_photo_size = 12;
         /**
-          <p>This symbol is the offset where the {@link Elastos.Apps.Dialer.R.attr#list_item_prefix_highlight_color}
+          <p>This symbol is the offset where the {@link Elastos.Droid.Dialer.R.attr#list_item_prefix_highlight_color}
           attribute's value can be found in the {@link #ContactListItemView} array.
 
 
@@ -3506,7 +3506,7 @@ containing a value of this type.
         */
         public: static const int ContactListItemView_list_item_prefix_highlight_color = 14;
         /**
-          <p>This symbol is the offset where the {@link Elastos.Apps.Dialer.R.attr#list_item_presence_icon_margin}
+          <p>This symbol is the offset where the {@link Elastos.Droid.Dialer.R.attr#list_item_presence_icon_margin}
           attribute's value can be found in the {@link #ContactListItemView} array.
 
 
@@ -3522,7 +3522,7 @@ containing a value of this type.
         */
         public: static const int ContactListItemView_list_item_presence_icon_margin = 10;
         /**
-          <p>This symbol is the offset where the {@link Elastos.Apps.Dialer.R.attr#list_item_presence_icon_size}
+          <p>This symbol is the offset where the {@link Elastos.Droid.Dialer.R.attr#list_item_presence_icon_size}
           attribute's value can be found in the {@link #ContactListItemView} array.
 
 
@@ -3538,7 +3538,7 @@ containing a value of this type.
         */
         public: static const int ContactListItemView_list_item_presence_icon_size = 11;
         /**
-          <p>This symbol is the offset where the {@link Elastos.Apps.Dialer.R.attr#list_item_profile_photo_size}
+          <p>This symbol is the offset where the {@link Elastos.Droid.Dialer.R.attr#list_item_profile_photo_size}
           attribute's value can be found in the {@link #ContactListItemView} array.
 
 
@@ -3554,7 +3554,7 @@ containing a value of this type.
         */
         public: static const int ContactListItemView_list_item_profile_photo_size = 13;
         /**
-          <p>This symbol is the offset where the {@link Elastos.Apps.Dialer.R.attr#list_item_text_indent}
+          <p>This symbol is the offset where the {@link Elastos.Droid.Dialer.R.attr#list_item_text_indent}
           attribute's value can be found in the {@link #ContactListItemView} array.
 
 
@@ -3570,7 +3570,7 @@ containing a value of this type.
         */
         public: static const int ContactListItemView_list_item_text_indent = 22;
         /**
-          <p>This symbol is the offset where the {@link Elastos.Apps.Dialer.R.attr#list_item_text_offset_top}
+          <p>This symbol is the offset where the {@link Elastos.Droid.Dialer.R.attr#list_item_text_offset_top}
           attribute's value can be found in the {@link #ContactListItemView} array.
 
 
@@ -3586,7 +3586,7 @@ containing a value of this type.
         */
         public: static const int ContactListItemView_list_item_text_offset_top = 23;
         /**
-          <p>This symbol is the offset where the {@link Elastos.Apps.Dialer.R.attr#list_section_header_height}
+          <p>This symbol is the offset where the {@link Elastos.Droid.Dialer.R.attr#list_section_header_height}
           attribute's value can be found in the {@link #ContactListItemView} array.
 
 
@@ -3602,7 +3602,7 @@ containing a value of this type.
         */
         public: static const int ContactListItemView_list_section_header_height = 1;
         /**
-          <p>This symbol is the offset where the {@link Elastos.Apps.Dialer.R.attr#section_header_background}
+          <p>This symbol is the offset where the {@link Elastos.Droid.Dialer.R.attr#section_header_background}
           attribute's value can be found in the {@link #ContactListItemView} array.
 
 
@@ -3617,12 +3617,12 @@ or to a theme attribute in the form "<code>?[<i>package</i>:][<i>type</i>:]<i>na
            <colgroup align="left" />
            <colgroup align="left" />
            <tr><th>Attribute</th><th>Description</th></tr>
-           <tr><td><code>{@link #ContactsDataKind_android_allContactsName Elastos.Apps.Dialer:android_allContactsName}</code></td><td> Resource representing the term "All Contacts" (e.</td></tr>
-           <tr><td><code>{@link #ContactsDataKind_android_detailColumn Elastos.Apps.Dialer:android_detailColumn}</code></td><td> Column in data table that contains details for this data.</td></tr>
-           <tr><td><code>{@link #ContactsDataKind_android_detailSocialSummary Elastos.Apps.Dialer:android_detailSocialSummary}</code></td><td> Flag indicating that detail should be built from SocialProvider.</td></tr>
-           <tr><td><code>{@link #ContactsDataKind_android_icon Elastos.Apps.Dialer:android_icon}</code></td><td> Icon used to represent data of this kind.</td></tr>
-           <tr><td><code>{@link #ContactsDataKind_android_mimeType Elastos.Apps.Dialer:android_mimeType}</code></td><td> Mime-type handled by this mapping.</td></tr>
-           <tr><td><code>{@link #ContactsDataKind_android_summaryColumn Elastos.Apps.Dialer:android_summaryColumn}</code></td><td> Column in data table that summarizes this data.</td></tr>
+           <tr><td><code>{@link #ContactsDataKind_android_allContactsName Elastos.Droid.Dialer:android_allContactsName}</code></td><td> Resource representing the term "All Contacts" (e.</td></tr>
+           <tr><td><code>{@link #ContactsDataKind_android_detailColumn Elastos.Droid.Dialer:android_detailColumn}</code></td><td> Column in data table that contains details for this data.</td></tr>
+           <tr><td><code>{@link #ContactsDataKind_android_detailSocialSummary Elastos.Droid.Dialer:android_detailSocialSummary}</code></td><td> Flag indicating that detail should be built from SocialProvider.</td></tr>
+           <tr><td><code>{@link #ContactsDataKind_android_icon Elastos.Droid.Dialer:android_icon}</code></td><td> Icon used to represent data of this kind.</td></tr>
+           <tr><td><code>{@link #ContactsDataKind_android_mimeType Elastos.Droid.Dialer:android_mimeType}</code></td><td> Mime-type handled by this mapping.</td></tr>
+           <tr><td><code>{@link #ContactsDataKind_android_summaryColumn Elastos.Droid.Dialer:android_summaryColumn}</code></td><td> Column in data table that summarizes this data.</td></tr>
            </table>
            @see #ContactsDataKind_android_allContactsName
            @see #ContactsDataKind_android_detailColumn
@@ -3637,7 +3637,7 @@ or to a theme attribute in the form "<code>?[<i>package</i>:][<i>type</i>:]<i>na
           @attr description
            Resource representing the term "All Contacts" (e.g. "All Friends" or
         "All connections"). Optional (Default is "All Contacts"). 
-          <p>This corresponds to the global attribute          resource symbol {@link Elastos.Apps.Dialer.R.attr#android_allContactsName}.
+          <p>This corresponds to the global attribute          resource symbol {@link Elastos.Droid.Dialer.R.attr#android_allContactsName}.
           @attr name android:android_allContactsName
         */
         public: static const int ContactsDataKind_android_allContactsName = 5;
@@ -3645,7 +3645,7 @@ or to a theme attribute in the form "<code>?[<i>package</i>:][<i>type</i>:]<i>na
           <p>
           @attr description
            Column in data table that contains details for this data. 
-          <p>This corresponds to the global attribute          resource symbol {@link Elastos.Apps.Dialer.R.attr#android_detailColumn}.
+          <p>This corresponds to the global attribute          resource symbol {@link Elastos.Droid.Dialer.R.attr#android_detailColumn}.
           @attr name android:android_detailColumn
         */
         public: static const int ContactsDataKind_android_detailColumn = 3;
@@ -3653,7 +3653,7 @@ or to a theme attribute in the form "<code>?[<i>package</i>:][<i>type</i>:]<i>na
           <p>
           @attr description
            Flag indicating that detail should be built from SocialProvider. 
-          <p>This corresponds to the global attribute          resource symbol {@link Elastos.Apps.Dialer.R.attr#android_detailSocialSummary}.
+          <p>This corresponds to the global attribute          resource symbol {@link Elastos.Droid.Dialer.R.attr#android_detailSocialSummary}.
           @attr name android:android_detailSocialSummary
         */
         public: static const int ContactsDataKind_android_detailSocialSummary = 4;
@@ -3661,7 +3661,7 @@ or to a theme attribute in the form "<code>?[<i>package</i>:][<i>type</i>:]<i>na
           <p>
           @attr description
            Icon used to represent data of this kind. 
-          <p>This corresponds to the global attribute          resource symbol {@link Elastos.Apps.Dialer.R.attr#android_icon}.
+          <p>This corresponds to the global attribute          resource symbol {@link Elastos.Droid.Dialer.R.attr#android_icon}.
           @attr name android:android_icon
         */
         public: static const int ContactsDataKind_android_icon = 0;
@@ -3669,7 +3669,7 @@ or to a theme attribute in the form "<code>?[<i>package</i>:][<i>type</i>:]<i>na
           <p>
           @attr description
            Mime-type handled by this mapping. 
-          <p>This corresponds to the global attribute          resource symbol {@link Elastos.Apps.Dialer.R.attr#android_mimeType}.
+          <p>This corresponds to the global attribute          resource symbol {@link Elastos.Droid.Dialer.R.attr#android_mimeType}.
           @attr name android:android_mimeType
         */
         public: static const int ContactsDataKind_android_mimeType = 1;
@@ -3677,7 +3677,7 @@ or to a theme attribute in the form "<code>?[<i>package</i>:][<i>type</i>:]<i>na
           <p>
           @attr description
            Column in data table that summarizes this data. 
-          <p>This corresponds to the global attribute          resource symbol {@link Elastos.Apps.Dialer.R.attr#android_summaryColumn}.
+          <p>This corresponds to the global attribute          resource symbol {@link Elastos.Droid.Dialer.R.attr#android_summaryColumn}.
           @attr name android:android_summaryColumn
         */
         public: static const int ContactsDataKind_android_summaryColumn = 2;
@@ -3687,13 +3687,13 @@ or to a theme attribute in the form "<code>?[<i>package</i>:][<i>type</i>:]<i>na
            <colgroup align="left" />
            <colgroup align="left" />
            <tr><th>Attribute</th><th>Description</th></tr>
-           <tr><td><code>{@link #Favorites_favorites_padding_bottom Elastos.Apps.Dialer:favorites_padding_bottom}</code></td><td></td></tr>
+           <tr><td><code>{@link #Favorites_favorites_padding_bottom Elastos.Droid.Dialer:favorites_padding_bottom}</code></td><td></td></tr>
            </table>
            @see #Favorites_favorites_padding_bottom
          */
         public: static const int Favorites[1];
         /**
-          <p>This symbol is the offset where the {@link Elastos.Apps.Dialer.R.attr#favorites_padding_bottom}
+          <p>This symbol is the offset where the {@link Elastos.Droid.Dialer.R.attr#favorites_padding_bottom}
           attribute's value can be found in the {@link #Favorites} array.
 
 
@@ -3714,15 +3714,15 @@ containing a value of this type.
            <colgroup align="left" />
            <colgroup align="left" />
            <tr><th>Attribute</th><th>Description</th></tr>
-           <tr><td><code>{@link #ProportionalLayout_direction Elastos.Apps.Dialer:direction}</code></td><td></td></tr>
-           <tr><td><code>{@link #ProportionalLayout_ratio Elastos.Apps.Dialer:ratio}</code></td><td></td></tr>
+           <tr><td><code>{@link #ProportionalLayout_direction Elastos.Droid.Dialer:direction}</code></td><td></td></tr>
+           <tr><td><code>{@link #ProportionalLayout_ratio Elastos.Droid.Dialer:ratio}</code></td><td></td></tr>
            </table>
            @see #ProportionalLayout_direction
            @see #ProportionalLayout_ratio
          */
         public: static const int ProportionalLayout[2];
         /**
-          <p>This symbol is the offset where the {@link Elastos.Apps.Dialer.R.attr#direction}
+          <p>This symbol is the offset where the {@link Elastos.Droid.Dialer.R.attr#direction}
           attribute's value can be found in the {@link #ProportionalLayout} array.
 
 
@@ -3736,7 +3736,7 @@ containing a value of this type.
         */
         public: static const int ProportionalLayout_direction = 0;
         /**
-          <p>This symbol is the offset where the {@link Elastos.Apps.Dialer.R.attr#ratio}
+          <p>This symbol is the offset where the {@link Elastos.Droid.Dialer.R.attr#ratio}
           attribute's value can be found in the {@link #ProportionalLayout} array.
 
 
@@ -3758,13 +3758,13 @@ containing a value of this type.
            <colgroup align="left" />
            <colgroup align="left" />
            <tr><th>Attribute</th><th>Description</th></tr>
-           <tr><td><code>{@link #Theme_android_textColorSecondary Elastos.Apps.Dialer:android_textColorSecondary}</code></td><td></td></tr>
+           <tr><td><code>{@link #Theme_android_textColorSecondary Elastos.Droid.Dialer:android_textColorSecondary}</code></td><td></td></tr>
            </table>
            @see #Theme_android_textColorSecondary
          */
         public: static const int Theme[1];
         /**
-          <p>This symbol is the offset where the {@link Elastos.Apps.Dialer.R.attr#android_textColorSecondary}
+          <p>This symbol is the offset where the {@link Elastos.Droid.Dialer.R.attr#android_textColorSecondary}
           attribute's value can be found in the {@link #Theme} array.
           @attr name android:android_textColorSecondary
         */
@@ -3775,10 +3775,10 @@ containing a value of this type.
            <colgroup align="left" />
            <colgroup align="left" />
            <tr><th>Attribute</th><th>Description</th></tr>
-           <tr><td><code>{@link #VoicemailStatus_call_log_voicemail_status_action_text_color Elastos.Apps.Dialer:call_log_voicemail_status_action_text_color}</code></td><td></td></tr>
-           <tr><td><code>{@link #VoicemailStatus_call_log_voicemail_status_background_color Elastos.Apps.Dialer:call_log_voicemail_status_background_color}</code></td><td></td></tr>
-           <tr><td><code>{@link #VoicemailStatus_call_log_voicemail_status_height Elastos.Apps.Dialer:call_log_voicemail_status_height}</code></td><td></td></tr>
-           <tr><td><code>{@link #VoicemailStatus_call_log_voicemail_status_text_color Elastos.Apps.Dialer:call_log_voicemail_status_text_color}</code></td><td></td></tr>
+           <tr><td><code>{@link #VoicemailStatus_call_log_voicemail_status_action_text_color Elastos.Droid.Dialer:call_log_voicemail_status_action_text_color}</code></td><td></td></tr>
+           <tr><td><code>{@link #VoicemailStatus_call_log_voicemail_status_background_color Elastos.Droid.Dialer:call_log_voicemail_status_background_color}</code></td><td></td></tr>
+           <tr><td><code>{@link #VoicemailStatus_call_log_voicemail_status_height Elastos.Droid.Dialer:call_log_voicemail_status_height}</code></td><td></td></tr>
+           <tr><td><code>{@link #VoicemailStatus_call_log_voicemail_status_text_color Elastos.Droid.Dialer:call_log_voicemail_status_text_color}</code></td><td></td></tr>
            </table>
            @see #VoicemailStatus_call_log_voicemail_status_action_text_color
            @see #VoicemailStatus_call_log_voicemail_status_background_color
@@ -3787,7 +3787,7 @@ containing a value of this type.
          */
         public: static const int VoicemailStatus[4];
         /**
-          <p>This symbol is the offset where the {@link Elastos.Apps.Dialer.R.attr#call_log_voicemail_status_action_text_color}
+          <p>This symbol is the offset where the {@link Elastos.Droid.Dialer.R.attr#call_log_voicemail_status_action_text_color}
           attribute's value can be found in the {@link #VoicemailStatus} array.
 
 
@@ -3802,7 +3802,7 @@ containing a value of this type.
         */
         public: static const int VoicemailStatus_call_log_voicemail_status_action_text_color = 3;
         /**
-          <p>This symbol is the offset where the {@link Elastos.Apps.Dialer.R.attr#call_log_voicemail_status_background_color}
+          <p>This symbol is the offset where the {@link Elastos.Droid.Dialer.R.attr#call_log_voicemail_status_background_color}
           attribute's value can be found in the {@link #VoicemailStatus} array.
 
 
@@ -3817,7 +3817,7 @@ containing a value of this type.
         */
         public: static const int VoicemailStatus_call_log_voicemail_status_background_color = 1;
         /**
-          <p>This symbol is the offset where the {@link Elastos.Apps.Dialer.R.attr#call_log_voicemail_status_height}
+          <p>This symbol is the offset where the {@link Elastos.Droid.Dialer.R.attr#call_log_voicemail_status_height}
           attribute's value can be found in the {@link #VoicemailStatus} array.
 
 
@@ -3833,7 +3833,7 @@ containing a value of this type.
         */
         public: static const int VoicemailStatus_call_log_voicemail_status_height = 0;
         /**
-          <p>This symbol is the offset where the {@link Elastos.Apps.Dialer.R.attr#call_log_voicemail_status_text_color}
+          <p>This symbol is the offset where the {@link Elastos.Droid.Dialer.R.attr#call_log_voicemail_status_text_color}
           attribute's value can be found in the {@link #VoicemailStatus} array.
 
 
@@ -3853,4 +3853,4 @@ containing a value of this type.
 };
 };
 
-#endif // __Elastos_Apps_Dialer_R_H__
+#endif // __Elastos_Droid_Dialer_R_H__

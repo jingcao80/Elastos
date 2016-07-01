@@ -1,7 +1,6 @@
 module
 {
     importlib("Elastos.Droid.Core.eco");
-    importlib("Elastos.CoreLibrary.eco");
 
     merge("car/org/javia/arity/Function.car");
     merge("car/org/javia/arity/ContextFunction.car");

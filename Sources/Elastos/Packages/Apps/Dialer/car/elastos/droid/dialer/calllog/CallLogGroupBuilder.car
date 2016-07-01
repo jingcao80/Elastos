@@ -1,0 +1,80 @@
+
+module
+{
+    using interface Elastos.Droid.Database.ICursor;
+
+    namespace Elastos {
+    namespace Droid {
+    namespace Dialer {
+    namespace CallLog {
+
+    interface ICallLogGroupBuilderGroupCreator {
+        /**
+         * Defines the interface for adding a group to the call log.
+         * The primary group for a call log groups the calls together based on the number which was
+         * dialed.
+         * @param cursorPosition The starting position of the group in the cursor.
+         * @param size The size of the group.
+         * @param expanded Whether the group is expanded; always false for the call log.
+         */
+        AddGroup(
+            [in] Int32 cursorPosition,
+            [in] Int32 size,
+            [in] Boolean expanded);
+
+        /**
+         * Defines the interface for tracking the day group each call belongs to.  Calls in a call
+         * group are assigned the same day group as the first call in the group.  The day group
+         * assigns calls to the buckets: Today, Yesterday, Last week, and Other
+         *
+         * @param rowId The row Id of the current call.
+         * @param dayGroup The day group the call belongs in.
+         */
+        SetDayGroup(
+            [in] Int64 rowId,
+            [in] Int32 dayGroup);
+
+        /**
+         * Defines the interface for clearing the day groupings information on rebind/regroup.
+         */
+        ClearDayGroups();
+
+    }
+
+    interface ICallLogGroupBuilder {
+        /**
+         * Day grouping for call log entries used to represent no associated day group.  Used primarily
+         * when retrieving the previous day group, but there is no previous day group (i.e. we are at
+         * the start of the list).
+         */
+        const Int32 DAY_GROUP_NONE = -1;
+
+        /** Day grouping for calls which occurred today. */
+        const Int32 DAY_GROUP_TODAY = 0;
+
+        /** Day grouping for calls which occurred yesterday. */
+        const Int32 DAY_GROUP_YESTERDAY = 1;
+
+        /** Day grouping for calls which occurred before last week. */
+        const Int32 DAY_GROUP_OTHER = 2;
+
+        /**
+         * Finds all groups of adjacent entries in the call log which should be grouped together and
+         * calls {@link GroupCreator#addGroup(int, int, boolean)} on {@link #mGroupCreator} for each of
+         * them.
+         * <p>
+         * For entries that are not grouped with others, we do not need to create a group of size one.
+         * <p>
+         * It assumes that the cursor will not change during its execution.
+         *
+         * @see GroupingListAdapter#addGroups(Cursor)
+         */
+        AddGroups(
+            [in] ICursor* cursor);
+    }
+
+    } //CallLog
+    } //Dialer
+    } //Droid
+    } //Elastos
+}

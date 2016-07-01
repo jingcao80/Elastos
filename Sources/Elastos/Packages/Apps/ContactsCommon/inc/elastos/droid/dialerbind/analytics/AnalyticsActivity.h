@@ -9,7 +9,7 @@ using Elastos::Droid::App::Activity;
 
 namespace Elastos {
 namespace Droid {
-namespace DailerBind {
+namespace DialerBind {
 namespace Analytics {
 
 class ECO_PUBLIC AnalyticsActivity
@@ -17,6 +17,8 @@ class ECO_PUBLIC AnalyticsActivity
     , public IAnalyticsInterface
 {
 public:
+    CAR_INTERFACE_DECL();
+
     CARAPI SendHitEvent(
         /* [in] */ const String& categoryId,
         /* [in] */ const String& actionId,
@@ -26,7 +28,7 @@ public:
 };
 
 } // Analytics
-} // DailerBind
+} // DialerBind
 } // Droid
 } // Elastos
 

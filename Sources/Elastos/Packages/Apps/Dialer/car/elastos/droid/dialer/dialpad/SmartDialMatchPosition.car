@@ -1,0 +1,39 @@
+
+module
+{
+    interface Elastos.Utility.IArrayList;
+
+    namespace Elastos {
+    namespace Droid {
+    namespace Dialer {
+    namespace Dialpad {
+
+    interface ISmartDialMatchPosition {
+    }
+
+    interface ISmartDialMatchPositionHelper {
+        /**
+         * Used by {@link SmartDialNameMatcher} to advance the positions of a match position found in
+         * a sub query.
+         *
+         * @param inList ArrayList of SmartDialMatchPositions to modify.
+         * @param toAdvance Offset to modify by.
+         */
+        AdvanceMatchPositions(
+            [in] IArrayList* inList,
+            [in] Int32 toAdvance);
+
+        /**
+         * Used mainly for debug purposes. Displays contents of an ArrayList of SmartDialMatchPositions.
+         *
+         * @param list ArrayList of SmartDialMatchPositions to print out in a human readable fashion.
+         */
+        Print(
+            [in] IArrayList* list);
+    }
+
+    } //Dialpad
+    } //Dialer
+    } //Droid
+    } //Elastos
+}

@@ -1,0 +1,24 @@
+module
+{
+    using interface Elastos.Droid.Content.IContext;
+
+    namespace Elastos {
+    namespace Droid {
+    namespace Dialer {
+    namespace Util {
+
+    [local]
+    interface IOrientationUtil {
+        /**
+         * @return if the context is in landscape orientation.
+         */
+        IsLandscape(
+            [in] IContext* context,
+            [out] Boolean* result);
+    }
+
+    } // Util
+    } // Dialer
+    } // Droid
+    } // Elastos
+}

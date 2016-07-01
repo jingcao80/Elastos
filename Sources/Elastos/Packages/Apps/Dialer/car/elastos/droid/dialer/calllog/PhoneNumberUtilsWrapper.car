@@ -1,0 +1,61 @@
+
+module
+{
+    using interface Elastos.Core.ICharSequence;
+
+    namespace Elastos {
+    namespace Droid {
+    namespace Dialer {
+    namespace CallLog {
+
+    interface IPhoneNumberUtilsWrapper {
+        /**
+         * Returns true if it is possible to send an SMS to the given number.
+         */
+        CanSendSmsTo(
+            [in] ICharSequence* number,
+            [in] Int32 presentation,
+            [out] Boolean* result);
+
+        /**
+         * Returns true if the given number is the number of the configured voicemail. To be able to
+         * mock-out this, it is not a static method.
+         */
+        IsVoicemailNumber(
+            [in] ICharSequence* number,
+            [out] Boolean* result);
+
+        /**
+         * Returns true if the given number is a SIP address. To be able to mock-out this, it is not a
+         * static method.
+         */
+        IsSipNumber(
+            [in] ICharSequence* number,
+            [out] Boolean* result);
+    }
+
+    interface IPhoneNumberUtilsWrapperHelper {
+        GetINSTANCE(
+            [out] IPhoneNumberUtilsWrapper** wrapper);
+
+        /** Returns true if it is possible to place a call to the given number. */
+        CanPlaceCallsTo(
+            [in] ICharSequence* number,
+            [in] Int32 presentation,
+            [out] Boolean* result);
+
+        IsUnknownNumberThatCanBeLookedUp(
+            [in] ICharSequence* number,
+            [in] Int32 presentation,
+            [out] Boolean* result);
+
+        IsLegacyUnknownNumbers(
+            [in] ICharSequence* number,
+            [out] Boolean* result);
+    }
+
+    } //CallLog
+    } //Dialer
+    } //Droid
+    } //Elastos
+}

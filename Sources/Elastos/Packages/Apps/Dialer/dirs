@@ -1,2 +1,2 @@
 
-DIRS += src/elastos/apps
+DIRS += src/elastos/droid

@@ -1,0 +1,42 @@
+module
+{
+    using interface Elastos.Droid.Net.IUri;
+    interface Elastos.Droid.Dialer.Dialpad.ISmartDialCursorLoader;
+
+    namespace Elastos {
+    namespace Droid {
+    namespace Dialer {
+    namespace List {
+
+    /**
+     * @Involve
+     * interface Elastos.Apps.Contacts.Common.List.IPinnedHeaderListAdapter
+     * interface Elastos.Apps.Contacts.Common.List.IIndexerListAdapter
+     * interface Elastos.Apps.Contacts.Common.List.IContactEntryListAdapter
+     * interface Elastos.Apps.Contacts.Common.List.IPhoneNumberListAdapter
+     * interface Elastos.Droid.Dialer.List.IDialerPhoneNumberListAdapter
+     */
+    [deprecated, local]
+    interface ISmartDialNumberListAdapter {
+        /**
+         * Sets query for the SmartDialCursorLoader.
+         */
+        ConfigureLoader(
+            [in] ISmartDialCursorLoader* loader);
+
+        /**
+         * Gets Uri for the list item at the given position.
+         * @param position Location of the data of interest.
+         * @return Data Uri of the entry.
+         */
+        GetDataUri(
+            [in] Int32 position,
+            [out] IUri** uri);
+    }
+
+
+    } //List
+    } //Dialer
+    } //Droid
+    } //Elastos
+}
