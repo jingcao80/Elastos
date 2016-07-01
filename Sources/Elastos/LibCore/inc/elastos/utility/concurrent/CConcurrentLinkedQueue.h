@@ -41,11 +41,6 @@ private:
     public:
         AutoPtr<IInterface> mItem;
         AutoPtr<Node> mNext;
-
-    private:
-//        static sun.misc.Unsafe UNSAFE;
-        static Int64 sItemOffset;
-        static Int64 sNextOffset;
     };
 
     class Itr
@@ -186,12 +181,8 @@ private:
         /* [in] */ Node* val);
 
 private:
-//    static long serialVersionUID = 196745693267521676L;
     AutoPtr<Node> mHead;
     AutoPtr<Node> mTail;
-//    static sun.misc.Unsafe UNSAFE;
-    static Int64 sHeadOffset;
-    static Int64 sTailOffset;
 };
 
 } // namespace Concurrent
