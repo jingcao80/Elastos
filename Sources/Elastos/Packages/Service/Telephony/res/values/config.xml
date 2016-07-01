@@ -18,9 +18,12 @@
      for different hardware or product builds. -->
 <resources>
     <!-- Flag indicating whether the Phone app should ignore
-         EVENT_SIM_NETWORK_LOCKED events from the Sim.  If true, this will
-         prevent the IccNetworkDepersonalizationPanel from being shown,
-         and effectively disable the "Sim network lock" feature. -->
+         EVENT_SIM_PERSO_LOCKED events from the Sim.  If true, this will
+         prevent the IccDepersonalizationPanel from being shown,
+         and effectively disable the "Sim perso unlock" feature. -->
+    <bool name="ignore_perso_locked_events">false</bool>
+    <!-- For compatibility with Google's configuration files, it
+         is used in exactly the same way as the above -->
     <bool name="ignore_sim_network_locked_events">false</bool>
 
     <!-- Flag indicating whether the Phone app should provide
@@ -31,7 +34,7 @@
          (One important consequence: there will be no way to make an
          Emergency Call if your SIM is network-locked and you don't know
          the PIN.) -->
-    <bool name="sim_network_unlock_allow_dismiss">true</bool>
+    <bool name="icc_perso_unlock_allow_dismiss">true</bool>
 
     <!-- OTA configuration values, used when provisioning CDMA devices.
          Following defaults values of zero means OTA UI is completely disabled.
@@ -119,7 +122,15 @@
     <!-- Show enabled lte option for lte device -->
     <bool name="config_enabled_lte" translatable="false">false</bool>
     <!-- Show cdma auto network mode in (glabal) roaming -->
-    <bool name="config_show_cdma" translatable="false">false</bool>
+    <integer-array name="config_show_cdma">
+        <item name="slot1">0</item>
+        <item name="slot2">0</item>
+    </integer-array>
+    <!-- Show roaming mode options for slot 1/2-->
+    <integer-array name="config_show_roaming_mode_option">
+        <item name="slot1">0</item>
+        <item name="slot2">0</item>
+    </integer-array>
 
     <!-- Package name for the default in-call UI and dialer [DO NOT TRANSLATE] -->
     <string name="ui_default_package" translatable="false">com.android.dialer</string>
@@ -141,6 +152,13 @@
     <string name="carrier_settings" translatable="false"></string>
     <string name="carrier_settings_menu" translatable="false"></string>
 
+    <!-- Sprint Message Wait Indicator Quirk
+         If true, message wait indicators are hidden by default on this device
+         unless the user enables it in Call Settings.  This quirk is necessary
+         for the "Phantom Voicemail" issue where notifications are impossible
+         to dismiss on the Sprint network. -->
+    <bool name="sprint_mwi_quirk">false</bool>
+
     <!-- Does not display additional call seting for IMS phone based on GSM Phone -->
     <bool name="config_additional_call_setting">true</bool>
 
@@ -149,4 +167,8 @@
 
     <!-- Allows the telephony HFA logic to run even if we're not in setup wizard. -->
     <bool name="config_allow_hfa_outside_of_setup_wizard">true</bool>
+    <!-- whether to show uplmn preference for usim -->
+    <bool name="config_uplmn_for_usim">false</bool>
+    <!-- Disable data before manual PLMN scan if true-->
+    <bool name="config_disable_data_manual_plmn">true</bool>
 </resources>

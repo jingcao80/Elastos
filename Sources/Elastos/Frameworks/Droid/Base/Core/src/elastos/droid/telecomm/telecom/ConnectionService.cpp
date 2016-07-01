@@ -633,7 +633,7 @@ ECode ConnectionService::ConnectionListener::OnConferenceChanged(
 //===============================================================
 // ConnectionService::
 //===============================================================
-CAR_INTERFACE_IMPL(ConnectionService, Object, IConnectionService)
+CAR_INTERFACE_IMPL(ConnectionService, Elastos::Droid::App::Service, IConnectionService);
 
 ConnectionService::ConnectionService()
     : mAreAccountsInitialized(FALSE)
@@ -647,14 +647,13 @@ ConnectionService::ConnectionService()
 
     CConnectionServiceAdapter::New((IConnectionServiceAdapter**)&mAdapter);
 
-    CConnectionServiceBinder::New(mHandler, (IBinder**)&mBinder);
-
     AutoPtr<ILooperHelper> hlp;
     CLooperHelper::AcquireSingleton((ILooperHelper**)&hlp);
     AutoPtr<ILooper> loop;
     hlp->GetMainLooper((ILooper**)&loop);
     mHandler = new MyHandler(loop, this);
 
+    CConnectionServiceBinder::New(mHandler, (IBinder**)&mBinder);
     mConferenceListener = new ConferenceListener(this);
 
     mConnectionListener = new ConnectionListener(this);
@@ -676,9 +675,7 @@ ECode ConnectionService::OnUnbind(
 {
     VALIDATE_NOT_NULL(result)
     EndAllConnections();
-    assert(0 && "TODO");
-    // return Service::OnUnbind(intent, result);
-    return NOERROR;
+    return Elastos::Droid::App::Service::OnUnbind(intent, result);
 }
 
 void ConnectionService::CreateConnection(
@@ -1009,6 +1006,7 @@ void ConnectionService::OnAdapterAttached()
 
     AutoPtr<IRemoteServiceCallback> cb;
     CRemoteServiceCallback::New((IRemoteServiceCallback**)&cb);
+    ((CRemoteServiceCallback*)cb.Get())->SetHost(this);
     mAdapter->QueryRemoteConnectionServices(cb);
 }
 

@@ -22,10 +22,11 @@ AutoPtr<PhoneGlobals> ImsUtil::GetApp()
     }
 }
 
-AutoPtr<PhoneGlobals> ImsUtil::mApp = GetApp();
+//AutoPtr<PhoneGlobals> ImsUtil::mApp = GetApp();
 
 Boolean ImsUtil::IsImsPhoneSupported()
 {
+    GetApp();
     return sImsPhoneSupported;
 }
 

@@ -85,7 +85,7 @@ ECode ServiceBinder::ServiceBinderConnection::OnServiceConnected(
     /* [in] */ IBinder* binder)
 {
     ThreadUtil::CheckOnMainThread();
-    Log::I("ServiceBinder", "Service bound %s", TO_CSTR(componentName));
+    Log::I("ServiceBinder", "ServiceBinderConnection::OnServiceConnected Service bound %s", TO_CSTR(componentName));
     // Unbind request was queued so unbind immediately.
     if (mHost->mIsBindingAborted) {
         mHost->ClearAbort();
@@ -241,6 +241,7 @@ ECode ServiceBinder::LogServiceDisconnected(
 
 ECode ServiceBinder::HandleSuccessfulConnection()
 {
+    Log::I("ServiceBinder", "HandleSuccessfulConnection");
     AutoPtr<IIterator> it;
     mCallbacks->GetIterator((IIterator**)&it);
     Boolean hasNext;

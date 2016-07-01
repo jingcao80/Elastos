@@ -82,7 +82,7 @@ ECode SearchIndexablesProvider::AttachInfo(
         return E_SECURITY_EXCEPTION;
     }
 
-    return IContentProvider::Probe(this)->AttachInfo(context, info);
+    return ContentProvider::AttachInfo(context, info);
 }
 
 ECode SearchIndexablesProvider::Query(

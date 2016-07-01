@@ -1,8 +1,11 @@
 
 #include "elastos/droid/ext/frameworkext.h"
 #include "elastos/droid/telecomm/telecom/PhoneAccountHandle.h"
+#include "elastos/droid/content/CComponentNameHelper.h"
 #include <elastos/core/StringBuilder.h>
 
+using Elastos::Droid::Content::CComponentNameHelper;
+using Elastos::Droid::Content::IComponentNameHelper;
 using Elastos::Core::StringBuilder;
 
 namespace Elastos {
@@ -104,7 +107,10 @@ ECode PhoneAccountHandle::WriteToParcel(
 ECode PhoneAccountHandle::ReadFromParcel(
     /* [in] */ IParcel* in)
 {
-    IParcelable::Probe(mComponentName)->ReadFromParcel(in);
+    mComponentName = NULL;
+    AutoPtr<IComponentNameHelper> helper;
+    CComponentNameHelper::AcquireSingleton((IComponentNameHelper**)&helper);
+    helper->ReadFromParcel(in, (IComponentName**)&mComponentName);
     in->ReadString(&mId);
     return NOERROR;
 }

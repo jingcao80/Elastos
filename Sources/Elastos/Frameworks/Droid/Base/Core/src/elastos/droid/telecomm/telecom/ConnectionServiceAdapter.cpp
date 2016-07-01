@@ -1,10 +1,14 @@
-
+#include <Elastos.CoreLibrary.Utility.Concurrent.h>
 #include "elastos/droid/ext/frameworkext.h"
 #include "elastos/droid/telecomm/telecom/ConnectionServiceAdapter.h"
 #include <elastos/utility/logging/Logger.h>
 
 using Elastos::Droid::Telecomm::Internal::IIVideoProvider;
 using Elastos::Utility::IIterator;
+using Elastos::Utility::IMap;
+using Elastos::Utility::ICollections;
+using Elastos::Utility::CCollections;
+using Elastos::Utility::Concurrent::CConcurrentHashMap;
 using Elastos::Utility::Logging::Logger;
 
 namespace Elastos {
@@ -19,9 +23,13 @@ CAR_INTERFACE_IMPL_2(ConnectionServiceAdapter, Object, IConnectionServiceAdapter
 
 ConnectionServiceAdapter::ConnectionServiceAdapter()
 {
-    assert(0 && "TODO");
     // mAdapters = Collections.newSetFromMap(
     //     new ConcurrentHashMap<IConnectionServiceAdapter, Boolean>(8, 0.9f, 1));
+    AutoPtr<IMap> map;
+    CConcurrentHashMap::New(8, 0.9f, 1, (IMap**)&map);
+    AutoPtr<ICollections> cls;
+    CCollections::AcquireSingleton((ICollections**)&cls);
+    cls->SetFromMap(map, (ISet**)&mAdapters);
 }
 
 ECode ConnectionServiceAdapter::AddAdapter(

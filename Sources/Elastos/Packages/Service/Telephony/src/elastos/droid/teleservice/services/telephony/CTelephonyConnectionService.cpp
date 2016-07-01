@@ -88,9 +88,11 @@ CTelephonyConnectionService::CTelephonyConnectionService()
 
 ECode CTelephonyConnectionService::OnCreate()
 {
-    assert(0);
-    //ConnectionService::OnCreate();
-    //CComponentName::New(this, this.getClass(), (IComponentName**)&mExpectedComponentName);
+    ConnectionService::OnCreate();
+    //CComponentName::New(IContext::Probe(this), this.getClass(), (IComponentName**)&mExpectedComponentName);
+    CComponentName::New(IContext::Probe(this),
+            String("Elastos.Droid.TeleService.Services.Telephony.CTelephonyConnectionService"),
+            (IComponentName**)&mExpectedComponentName);
     mEmergencyTonePlayer = new EmergencyTonePlayer((IContext*)this);
     return NOERROR;
 }
@@ -172,7 +174,7 @@ ECode CTelephonyConnectionService::OnCreateOutgoingConnection(
     request->GetAccountHandle((Elastos::Droid::Telecomm::Telecom::IPhoneAccountHandle**)&handle2);
     AutoPtr<IPhone> phone = GetPhoneForAccount(handle2, isEmergencyNumber);
     if (phone == NULL) {
-        Logger::D("CTelephonyConnectionService", "onCreateOutgoingConnection, phone is null");
+        Logger::D("CTelephonyConnectionService", "onCreateOutgoingConnection, phone is null, isEmergencyNumber:%d", isEmergencyNumber);
         AutoPtr<Elastos::Droid::Telecomm::Telecom::IDisconnectCause> cause = DisconnectCauseUtil::ToTelecomDisconnectCause(
                 Elastos::Droid::Telephony::IDisconnectCause::OUTGOING_FAILURE, String("Phone is null"));
         return Connection::CreateFailedConnection(cause, result);

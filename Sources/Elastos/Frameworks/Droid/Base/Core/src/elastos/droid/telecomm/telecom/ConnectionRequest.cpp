@@ -87,36 +87,32 @@ ECode ConnectionRequest::ToString(
 {
     VALIDATE_NOT_NULL(result)
 
-    AutoPtr<IInterface> content1;
+    String content1;
     if (mAddress == NULL) {
         AutoPtr<IUriHelper> hlp;
         CUriHelper::AcquireSingleton((IUriHelper**)&hlp);
         AutoPtr<IUri> emp;
         hlp->GetEMPTY((IUri**)&emp);
-        content1 = IInterface::Probe(emp);
+        IObject::Probe(emp)->ToString(&content1);
     }
     else {
         String str;
-        assert(0 && "TODO");
-        // mAddress->ToString(&str);
+        IObject::Probe(mAddress)->ToString(&str);
         String phoneNumber;
         Connection::ToLogSafePhoneNumber(str, &phoneNumber);
-        AutoPtr<ICharSequence> pStr;
-        CString::New(phoneNumber, (ICharSequence**)&pStr);
-        content1 = pStr;
+        content1 = phoneNumber;
     }
 
-    AutoPtr<IInterface> content2;
+    String content2;
     if (mExtras == NULL) {
-        AutoPtr<ICharSequence> pStr;
-        CString::New(String(""), (ICharSequence**)&pStr);
-        content2 = pStr;
+        content2 = String("");
+    }
+    else {
+        IObject::Probe(mExtras)->ToString(&content2);
     }
 
-    AutoPtr<ArrayOf<IInterface*> > arr = ArrayOf<IInterface*>::Alloc(2);
-    (*arr)[0] = content1;
-    (*arr)[1] = content2;
-    String res = StringUtils::Format(String("ConnectionRequest %p %p"), arr);
+    String res;
+    res.AppendFormat("ConnectionRequest %p %p", content1.string(), content2.string());
     *result = res;
     return NOERROR;
 }

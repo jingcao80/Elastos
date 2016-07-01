@@ -19,11 +19,11 @@
 
     <PreferenceScreen
         android:key="phone_account_settings_preference_screen"
-        android:title="@string/phone_account_settings">
+        android:title="@string/phone_accounts">
 
         <intent
-            android:targetPackage="Elastos.Droid.Phone"
-            android:targetClass="Elastos.Droid.Phone.Settings.CPhoneAccountSettingsActivity"/>
+            android:targetPackage="com.android.phone"
+            android:targetClass="com.android.phone.settings.PhoneAccountSettingsActivity"/>
 
     </PreferenceScreen>>
 
@@ -31,6 +31,13 @@
         android:key="button_voicemail_category_key"
         android:title="@string/voicemail"
         android:persistent="false">
+
+      <SwitchPreference
+            android:defaultValue="false"
+            android:key="button_mwi_notification_key"
+            android:title="@string/mwi_notification_title"
+            android:persistent="false"
+            android:summary="@string/mwi_notification_summary" />
 
         <ListPreference
             android:key="button_voicemail_provider_key"
@@ -53,7 +60,7 @@
                  2. android:autoText
                  3. android:background -->
 
-            <Elastos.Droid.Phone.CEditPhoneNumberPreference
+            <Elastos.Droid.TeleService.Phone.CEditPhoneNumberPreference
                 android:key="button_voicemail_key"
                 android:title="@string/voicemail_settings_number_label"
                 android:persistent="false"
@@ -71,12 +78,20 @@
             android:ringtoneType="notification"
             android:defaultValue="content://settings/system/notification_sound" />
 
-        <CheckBoxPreference
+        <SwitchPreference
             android:key="button_voicemail_notification_vibrate_key"
             android:title="@string/voicemail_notification_vibrate_when_title"
             android:persistent="true" />
 
     </PreferenceScreen>
+
+  <ListPreference
+      android:key="call_recording_format"
+      android:title="@string/call_recording_format"
+      android:summary="%s"
+      android:entries="@array/call_recording_encoder_entries"
+      android:entryValues="@array/call_recording_encoder_values"
+      android:persistent="false" />
 
     <PreferenceScreen
         android:key="button_fdn_key"
@@ -84,12 +99,12 @@
         android:persistent="false">
 
         <intent android:action="android.intent.action.MAIN"
-            android:targetPackage="Elastos.Droid.Phone"
-            android:targetClass="Elastos.Droid.Phone.CFdnSetting" />
+            android:targetPackage="com.android.phone"
+            android:targetClass="com.android.phone.FdnSetting" />
 
     </PreferenceScreen>
 
-    <CheckBoxPreference
+     <SwitchPreference
         android:key="button_auto_retry_key"
         android:title="@string/auto_retry_mode_title"
         android:persistent="false"
@@ -103,7 +118,7 @@
         android:entries="@array/tty_mode_entries"
         android:entryValues="@array/tty_mode_values"/>
 
-    <CheckBoxPreference
+    <SwitchPreference
         android:key="button_hac_key"
         android:title="@string/hac_mode_title"
         android:persistent="true"
@@ -123,8 +138,8 @@
         android:persistent="false">
 
         <intent android:action="android.intent.action.MAIN"
-            android:targetPackage="Elastos.Droid.Phone"
-            android:targetClass="Elastos.Droid.Phone.CGsmUmtsCallOptions"/>
+            android:targetPackage="com.android.phone"
+            android:targetClass="com.android.phone.GsmUmtsCallOptions"/>
 
     </PreferenceScreen>
 
@@ -135,9 +150,39 @@
         android:persistent="false">
 
         <intent android:action="android.intent.action.MAIN"
-            android:targetPackage="Elastos.Droid.Phone"
-            android:targetClass="Elastos.Droid.Phone.CCdmaCallOptions"/>
+            android:targetPackage="com.android.phone"
+            android:targetClass="com.android.phone.CdmaCallOptions"/>
 
     </PreferenceScreen>
 
+    <PreferenceScreen
+        android:key="ims_account_settings_key"
+        android:title="@string/ims_accounts_title"
+        android:persistent="false">
+
+        <intent android:action="android.intent.action.MAIN"
+            android:targetPackage="com.android.phone"
+            android:targetClass="com.android.phone.ims.ImsEditor" />
+    </PreferenceScreen>
+
+    <PreferenceScreen
+        android:key="button_ipprefix_key"
+        android:title="@string/ipcall_sub_title"
+        android:summary="@string/ipcall_sub_summery"
+        android:persistent="false">
+    </PreferenceScreen>
+
+    <PreferenceCategory
+        android:key="pref_advanced_settings"
+        android:title="@string/advanced_settings">
+
+         <PreferenceScreen
+             android:key="button_blacklist"
+             android:title="@string/blacklist_title"
+             android:persistent="false">
+             <intent android:action="android.intent.action.MAIN"
+                 android:targetPackage="com.android.settings"
+                 android:targetClass="com.android.settings.Settings$BlacklistSettingsActivity" />
+         </PreferenceScreen>
+    </PreferenceCategory>
 </PreferenceScreen>

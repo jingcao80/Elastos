@@ -506,10 +506,15 @@ ERROR:
     mPhone->GetLteOnCdmaMode(&mode);
     Boolean isLteOnCdma = mode == IPhoneConstants::LTE_ON_CDMA_TRUE;
 
+    Int32 phoneId;
+    mPhone->GetPhoneId(&phoneId);
     if (isLteOnCdma) {
         AutoPtr<IResources> resources;
         GetResources((IResources**)&resources);
-        resources->GetBoolean(Elastos::Droid::TeleService::R::bool_::config_show_cdma, &mIsGlobalCdma);
+        AutoPtr< ArrayOf<Int32> > ar;
+        resources->GetInt32Array(Elastos::Droid::TeleService::R::array::config_show_cdma, (ArrayOf<Int32>**)&ar);
+        mIsGlobalCdma = (*ar)[phoneId] != 0;
+
     }
     else {
         mIsGlobalCdma = FALSE;
