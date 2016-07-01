@@ -1,0 +1,8 @@
+
+TARGET_NAME= analytics
+TARGET_TYPE= lib
+
+#INCLUDES += $(MAKEDIR)/../../../../../inc
+INCLUDES += ../../../../../
+
+SOURCES = AnalyticsActivity.cpp

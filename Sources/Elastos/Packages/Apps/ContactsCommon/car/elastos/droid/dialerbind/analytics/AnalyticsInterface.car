@@ -1,9 +1,8 @@
 
 module
 {
-
     namespace Elastos{
-    namespace Apps {
+    namespace Droid {
     namespace DailerBind {
     namespace Analytics {
 
@@ -18,7 +17,6 @@ module
 
     } // Analytics
     } // DailerBind
-    } // Apps
+    } // Droid
     } // Elastos
-
 }
