@@ -1,23 +1,33 @@
 
 #include "elastos/droid/internal/telephony/CSms7BitEncodingTranslator.h"
-#include <elastos/core/IntegralToString.h>
 #include "elastos/droid/os/Build.h"
+#include "elastos/droid/content/res/CResourcesHelper.h"
 #include "elastos/droid/internal/utility/XmlUtils.h"
 #include "elastos/droid/internal/telephony/GsmAlphabet.h"
+#include "elastos/droid/telephony/CSmsManagerHelper.h"
+#include "elastos/droid/telephony/CTelephonyManagerHelper.h"
 #include "elastos/droid/utility/CSparseInt32Array.h"
+#include "elastos/droid/R.h"
+
+#include <elastos/core/IntegralToString.h>
 
 using Elastos::Droid::Content::Res::IResources;
 using Elastos::Droid::Content::Res::IResourcesHelper;
+using Elastos::Droid::Content::Res::CResourcesHelper;
 using Elastos::Droid::Content::Res::IXmlResourceParser;
-//using Elastos::Droid::Internal::Utility::IXmlUtils;
+using Elastos::Droid::Internal::Utility::XmlUtils;
 //using Elastos::Droid::Internal::Telephony::Cdma::Sms::IUserData;
 using Elastos::Droid::Os::Build;
 //using Elastos::Droid::Telephony::IRlog;
 using Elastos::Droid::Telephony::ISmsManager;
 using Elastos::Droid::Telephony::ISmsManagerHelper;
+using Elastos::Droid::Telephony::CSmsManagerHelper;
 using Elastos::Droid::Telephony::ITelephonyManager;
 using Elastos::Droid::Telephony::ITelephonyManagerHelper;
+using Elastos::Droid::Telephony::CTelephonyManagerHelper;
 using Elastos::Droid::Utility::CSparseInt32Array;
+using Elastos::Droid::Utility::IAttributeSet;
+using Elastos::Droid::R;
 
 using Org::Xmlpull::V1::IXmlPullParser;
 
@@ -31,8 +41,12 @@ CAR_SINGLETON_IMPL(CSms7BitEncodingTranslator)
 CAR_INTERFACE_IMPL(CSms7BitEncodingTranslator, Singleton, ISms7BitEncodingTranslator)
 
 const String CSms7BitEncodingTranslator::TAG("CSms7BitEncodingTranslator");
-const Boolean CSms7BitEncodingTranslator::DBG = IBuild::IS_DEBUGGABLE ;
+const Boolean CSms7BitEncodingTranslator::DBG = Build::IS_DEBUGGABLE;
 Boolean CSms7BitEncodingTranslator::mIs7BitTranslationTableLoaded = FALSE;
+AutoPtr<ISparseInt32Array> CSms7BitEncodingTranslator::mTranslationTable;
+AutoPtr<ISparseInt32Array> CSms7BitEncodingTranslator::mTranslationTableCommon;
+AutoPtr<ISparseInt32Array> CSms7BitEncodingTranslator::mTranslationTableGSM;
+AutoPtr<ISparseInt32Array> CSms7BitEncodingTranslator::mTranslationTableCDMA;
 
 // Parser variables
 const String CSms7BitEncodingTranslator::XML_START_TAG("SmsEnforce7BitTranslationTable");
@@ -41,18 +55,9 @@ const String CSms7BitEncodingTranslator::XML_CHARACTOR_TAG("Character");
 const String CSms7BitEncodingTranslator::XML_FROM_TAG("from");
 const String CSms7BitEncodingTranslator::XML_TO_TAG("to");
 
-/**
- * Translates each message character that is not supported by GSM 7bit
- * alphabet into a supported one
- *
- * @param message
- *            message to be translated
- * @param throwsException
- *            if TRUE and some error occurs during translation, an exception
- *            is thrown; otherwise a NULL String is returned
- * @return translated message or NULL if some error occur
- */
-ECode CSms7BitEncodingTranslator::Translate(ICharSequence* message, String* result)
+ECode CSms7BitEncodingTranslator::Translate(
+    /* [in] */ ICharSequence* message,
+    /* [out] */ String* result)
 {
     VALIDATE_NOT_NULL(result)
 
@@ -62,7 +67,7 @@ ECode CSms7BitEncodingTranslator::Translate(ICharSequence* message, String* resu
         return NOERROR;
     }
 
-    Int32 size;
+    Int32 size = 0;
     message->GetLength(&size);
     if (size <= 0) {
         *result = String("");
@@ -96,17 +101,6 @@ ECode CSms7BitEncodingTranslator::Translate(ICharSequence* message, String* resu
     return NOERROR;
 }
 
-/**
- * Translates a single character into its corresponding acceptable one, if
- * needed, based on GSM 7-bit alphabet
- *
- * @param c
- *            character to be translated
- * @return original character, if it's present on GSM 7-bit alphabet; a
- *         corresponding character, based on the translation table or white
- *         space, if no mapping is found in the translation table for such
- *         character
- */
 Char32 CSms7BitEncodingTranslator::TranslateIfNeeded(
     /* [in] */ Char32 c)
 {
@@ -135,7 +129,8 @@ Char32 CSms7BitEncodingTranslator::TranslateIfNeeded(
             if (mTranslationTableCDMA != NULL) {
                 mTranslationTableCDMA->Get(c, -1, &translation);
             }
-        } else {
+        }
+        else {
             if (mTranslationTableGSM != NULL) {
                 mTranslationTableGSM->Get(c, -1, &translation);
             }
@@ -148,7 +143,8 @@ Char32 CSms7BitEncodingTranslator::TranslateIfNeeded(
 //                    + Integer->ToHexString(translation) + " (" + (Char32) translation + ")");
 //        }
         return (Char32) translation;
-    } else {
+    }
+    else {
 //        if (DBG) {
 //            Rlog->W(TAG, "No translation found for " + Integer->ToHexString(c)
 //                    + "! Replacing for empty space");
@@ -160,7 +156,7 @@ Char32 CSms7BitEncodingTranslator::TranslateIfNeeded(
 Boolean CSms7BitEncodingTranslator::NoTranslationNeeded(
     /* [in] */ Char32 c)
 {
-    Boolean bResult;
+    Boolean bResult = FALSE;
     GsmAlphabet::IsGsmSeptets(c, &bResult);
     if (UseCdmaFormatForMoSms()) {
 //        Int32 value;
@@ -197,13 +193,9 @@ Boolean CSms7BitEncodingTranslator::UseCdmaFormatForMoSms()
     // IMS is registered with SMS support, check the SMS format supported
     String str;
     sM->GetImsSmsFormat(&str);
-    return ISmsConstants::FORMAT_3GPP2->Equals(str);
+    return ISmsConstants::FORMAT_3GPP2.Equals(str);
 }
 
-/**
- * Load the whole translation table file from the framework resource
- * encoded in XML.
- */
 void CSms7BitEncodingTranslator::Load7BitTranslationTableFromXml()
 {
     AutoPtr<IXmlResourceParser> parser;
@@ -218,44 +210,50 @@ void CSms7BitEncodingTranslator::Load7BitTranslationTableFromXml()
     }
 
 //    try {
-    XmlUtils::BeginDocument(parser, XML_START_TAG);
+    XmlUtils::BeginDocument(IXmlPullParser::Probe(parser), XML_START_TAG);
     while (TRUE)  {
-        XmlUtils::NextElement(parser);
+        XmlUtils::NextElement(IXmlPullParser::Probe(parser));
         String tag;
-        parser->GetName(&tag);
+        IXmlPullParser::Probe(parser)->GetName(&tag);
 //        if (DBG) {
 //            Rlog->D(TAG, "tag: " + tag);
 //        }
-        if (XML_TRANSLATION_TYPE_TAG->Equals(tag)) {
+        if (XML_TRANSLATION_TYPE_TAG.Equals(tag)) {
             String type;
-            parser->GetAttributeValue(String(NULL), String("Type"), &type);
+            IXmlPullParser::Probe(parser)->GetAttributeValue(String(NULL), String("Type"), &type);
 //            if (DBG) {
 //                Rlog->D(TAG, "type: " + type);
 //            }
-            if (type->Equals("common")) {
+            if (type.Equals("common")) {
                 mTranslationTable = mTranslationTableCommon;
-            } else if (type->Equals("gsm")) {
+            }
+            else if (type.Equals("gsm")) {
                 mTranslationTable = mTranslationTableGSM;
-            } else if (type->Equals("cdma")) {
+            }
+            else if (type.Equals("cdma")) {
                 mTranslationTable = mTranslationTableCDMA;
-            } else {
+            }
+            else {
 //                Rlog->E(TAG, "Error Parsing 7BitTranslationTable: found incorrect type" + type);
             }
-        } else if (XML_CHARACTOR_TAG->Equals(tag) && mTranslationTable != NULL) {
-            IAttributeSet *aset = IAttributeSet::Probe(parser);
+        }
+        else if (XML_CHARACTOR_TAG.Equals(tag) && mTranslationTable != NULL) {
+            AutoPtr<IAttributeSet> aset = IAttributeSet::Probe(parser);
             Int32 from, to;
-            aset->GetAttributeUnsignedIntValue(NULL, XML_FROM_TAG, -1, &from);
-            aset->GetAttributeUnsignedIntValue(NULL, XML_TO_TAG, -1, &to);
+            aset->GetAttributeUnsignedIntValue(String(NULL), XML_FROM_TAG, -1, &from);
+            aset->GetAttributeUnsignedIntValue(String(NULL), XML_TO_TAG, -1, &to);
             if ((from != -1) && (to != -1)) {
-//                if (DBG) {
-//                    Rlog->D(TAG, "Loading mapping " + IntegralToString::ToHexString(from)
-//                        + " -> " + IntegralToString::ToHexString(to));
-//                }
+                if (DBG) {
+                    // Rlog::D(TAG, "Loading mapping " + IntegralToString::ToHexString(from)
+                    //    + " -> " + IntegralToString::ToHexString(to));
+                }
                 mTranslationTable->Put(from, to);
-            } else {
+            }
+            else {
 //                Rlog->D(TAG, "Invalid translation table file format");
             }
-        } else {
+        }
+        else {
             break;
         }
     }
@@ -263,11 +261,9 @@ void CSms7BitEncodingTranslator::Load7BitTranslationTableFromXml()
 //    } Catch (Exception e) {
 //        Rlog->E(TAG, "Got exception while loading 7BitTranslationTable file.", e);
 
-
-    if (parser) {
-        IXmlResourceParser->Close();
+    if (IXmlResourceParser::Probe(parser) != NULL) {
+        IXmlResourceParser::Probe(parser)->Close();
     }
-
 }
 
 } // namespace Telephony

@@ -11,6 +11,15 @@
 #include "elastos/droid/internal/telephony/CPhoneSubInfo.h"
 #include "elastos/droid/internal/telephony/CPhoneSubInfoController.h"
 #include "elastos/droid/internal/telephony/CPhoneSubInfoProxy.h"
+#include "elastos/droid/internal/telephony/CSubscriptionController.h"
+#include "elastos/droid/internal/telephony/CSubscriptionHelper.h"
+#include "elastos/droid/internal/telephony/CSyntheticSmsMessage.h"
+#include "elastos/droid/internal/telephony/CTelephonyDevController.h"
+#include "elastos/droid/internal/telephony/CUiccPhoneBookController.h"
+#include "elastos/droid/internal/telephony/CUiccSmsController.h"
+#include "elastos/droid/internal/telephony/CUUSInfo.h"
+#include "elastos/droid/internal/telephony/CWapPushOverSms.h"
+#include "elastos/droid/internal/telephony/CWspTypeDecoder.h"
 
 namespace Elastos {
 namespace Droid {
@@ -40,6 +49,24 @@ CAR_OBJECT_IMPL(CPhoneSubInfo)
 CAR_OBJECT_IMPL(CPhoneSubInfoController)
 
 CAR_OBJECT_IMPL(CPhoneSubInfoProxy)
+
+CAR_OBJECT_IMPL(CSubscriptionController)
+
+CAR_OBJECT_IMPL(CSubscriptionHelper)
+
+CAR_OBJECT_IMPL(CSyntheticSmsMessage)
+
+CAR_OBJECT_IMPL(CTelephonyDevController)
+
+CAR_OBJECT_IMPL(CUiccPhoneBookController)
+
+CAR_OBJECT_IMPL(CUiccSmsController)
+
+CAR_OBJECT_IMPL(CUUSInfo)
+
+CAR_OBJECT_IMPL(CWapPushOverSms)
+
+CAR_OBJECT_IMPL(CWspTypeDecoder)
 
 } // namespace Telephony
 } // namespace Internal

@@ -86,6 +86,7 @@ module
     merge("telephony/Subscription.car");
     merge("telephony/SubscriptionController.car");
     merge("telephony/SubscriptionData.car");
+    merge("telephony/SubscriptionHelper.car");
     merge("telephony/SyntheticSmsMessage.car");
     merge("telephony/TelephonyIntents.car");
     merge("telephony/TelephonyProperties.car");
@@ -263,6 +264,7 @@ module
     interface Elastos.Droid.Internal.Telephony.IConnection;
     interface Elastos.Droid.Internal.Telephony.IMmiCode;
     interface Elastos.Droid.Content.IBroadcastReceiver;
+    interface Elastos.Droid.Content.IServiceConnection;
     interface Elastos.Droid.Internal.Telephony.IPhone;
     interface Elastos.Droid.Internal.Telephony.IPhoneBase;
     interface Elastos.Droid.Internal.Telephony.IPhoneProxy;
@@ -556,6 +558,118 @@ module
             interface IBaseCommands;
             interface ICommandsInterface;
             interface IRIL;
+        }
+
+        class CSubscriptionController {
+            constructor(
+                [in] IContext* c);
+
+            constructor(
+                [in] IPhone* phone);
+
+            interface ISubscriptionController;
+            interface IISub;
+        }
+
+        [deprecated]
+        class CSubscriptionHelper {
+            constructor(
+                [in] IContext* c,
+                [in] ArrayOf<ICommandsInterface*>* ci);
+
+            interface ISubscriptionHelper;
+            // interface IHandler;
+        }
+
+        class CSyntheticSmsMessage {
+            constructor(
+                [in] String originatingAddress,
+                [in] String scAddress,
+                [in] String messageBody,
+                [in] Int64 timestampMillis);
+
+            interface ISyntheticSmsMessage;
+            interface ISmsMessageBase;
+        }
+
+        class CTelephonyDevController {
+            constructor();
+
+            interface ITelephonyDevController;
+            // interface IHandler;
+        }
+
+        [deprecated]
+        class CUiccPhoneBookController {
+            constructor(
+                [in] ArrayOf<IPhone*>* phone);
+
+            interface IUiccPhoneBookController;
+            interface IIIccPhoneBook;
+        }
+
+        [deprecated]
+        class CUiccSmsController {
+            constructor(
+                [in] ArrayOf<IPhone*>* phone,
+                [in] IContext* context);
+
+            interface IUiccSmsController;
+            interface IISms;
+        }
+
+        [deprecated]
+        class CUUSInfo {
+            constructor(
+                [in] Int32 uusType,
+                [in] Int32 uusDcs,
+                [in] ArrayOf<Byte>* uusData);
+
+            interface IUUSInfo;
+        }
+
+        class CWapPushOverSms {
+            constructor(
+                [in] IContext* context);
+
+            // interface IServiceConnection;
+            interface IWapPushOverSms;
+        }
+
+        [deprecated]
+        class CWspTypeDecoder {
+            constructor(
+                [in] ArrayOf<Byte>* pdu);
+
+            interface IWspTypeDecoder;
+        }
+
+        singleton class CTelephonyCapabilities {
+            interface ITelephonyCapabilities;
+        }
+
+        singleton class CSms7BitEncodingTranslator {
+            interface ISms7BitEncodingTranslator;
+        }
+
+        singleton class CSmsApplication {
+            interface ISmsApplication;
+        }
+
+        singleton class CSubscriptionControllerHelper {
+            interface ISubscriptionControllerHelper;
+        }
+
+        singleton class CSubscriptionHelperHelper {
+            interface ISubscriptionHelperHelper;
+        }
+
+        singleton class CSyntheticSmsMessageHelper {
+            interface ISyntheticSmsMessageHelper;
+        }
+
+        singleton class CTelephonyDevControllerHelper {
+            interface ITelephonyDevControllerHelper;
         }
 
     } // Telephony

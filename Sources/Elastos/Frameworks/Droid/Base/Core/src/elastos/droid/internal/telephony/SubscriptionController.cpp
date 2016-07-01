@@ -1,1782 +1,2882 @@
-/*
-* Copyright (C) 2011-2014 MediaTek Inc.
-*
-* Licensed under the Apache License, Version 2.0 (the "License");
-* you may not use this file except in compliance with the License.
-* You may obtain a copy of the License at
-*
-*      http://www.apache.org/licenses/LICENSE-2.0
-*
-* Unless required by applicable law or agreed to in writing, software
-* distributed under the License is distributed on an "AS IS" BASIS,
-* WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-* See the License for the specific language governing permissions and
-* limitations under the License.
-*/
 
-package com.android.internal.telephony;
+#include "Elastos.Droid.Database.h"
+#include "Elastos.Droid.Provider.h"
+#include "Elastos.Droid.Telephony.h"
+#include "elastos/droid/internal/telephony/SubscriptionController.h"
+#include "elastos/droid/internal/telephony/dataconnection/CDdsSchedulerHelper.h"
+#include "elastos/droid/internal/telephony/dataconnection/CDdsSchedulerAc.h"
+#include "elastos/droid/internal/telephony/dataconnection/CDctControllerHelper.h"
+#include "elastos/droid/content/CIntent.h"
+#include "elastos/droid/content/CContentValues.h"
+#include "elastos/droid/provider/CSettingsGlobal.h"
+#include "elastos/droid/preference/CPreferenceManagerHelper.h"
+#include "elastos/droid/text/format/CTime.h"
+#include "elastos/droid/telephony/CSubscriptionManager.h"
+#include "elastos/droid/telephony/CSubInfoRecord.h"
+#include "elastos/droid/telephony/CTelephonyManagerHelper.h"
+#include "elastos/droid/os/CUserHandleHelper.h"
+#include "elastos/droid/os/CServiceManager.h"
+#include "elastos/droid/os/Process.h"
+#include "elastos/droid/Manifest.h"
+#include "elastos/droid/R.h"
 
 #include <elastos/core/AutoLock.h>
-using Elastos::Core::AutoLock;
-using Elastos::Droid::Content::IContext;
+#include <elastos/core/StringUtils.h>
+#include <elastos/core/CoreUtils.h>
+
 using Elastos::Droid::Content::ISharedPreferences;
-using Elastos::Droid::Os::IAsyncResult;
-using Elastos::Droid::Os::IHandler;
-using Elastos::Droid::Os::IMessage;
+using Elastos::Droid::Content::IIntent;
+using Elastos::Droid::Content::CIntent;
+using Elastos::Droid::Content::IContentResolver;
+using Elastos::Droid::Content::IContentValues;
+using Elastos::Droid::Content::CContentValues;
+using Elastos::Droid::Internal::Utility::IAsyncChannel;
+using Elastos::Droid::Internal::Utility::IStateMachine;
+using Elastos::Droid::Internal::Telephony::Uicc::ISpnOverride;
+using Elastos::Droid::Internal::Telephony::DataConnection::IDdsSchedulerHelper;
+using Elastos::Droid::Internal::Telephony::DataConnection::CDdsSchedulerHelper;
+using Elastos::Droid::Internal::Telephony::DataConnection::CDdsSchedulerAc;
+using Elastos::Droid::Internal::Telephony::DataConnection::IDctControllerHelper;
+using Elastos::Droid::Internal::Telephony::DataConnection::CDctControllerHelper;
+using Elastos::Droid::Net::IUri;
+using Elastos::Droid::Net::INetworkCapabilities;
 using Elastos::Droid::Os::IServiceManager;
+using Elastos::Droid::Os::CServiceManager;
 using Elastos::Droid::Os::IUserHandle;
 using Elastos::Droid::Os::IMessenger;
-using Elastos::Droid::Telephony::IRlog;
-using Elastos::Droid::Utility::ILog;
-using Elastos::Droid::Net::IUri;
-using Elastos::Droid::Net::INetworkRequest;
-using Elastos::Droid::Net::INetworkCapabilities;
-using Elastos::Droid::Database::ICursor;
-using Elastos::Droid::Content::IIntent;
+using Elastos::Droid::Os::IUserHandleHelper;
+using Elastos::Droid::Os::CUserHandleHelper;
+using Elastos::Droid::Os::Process;
 using Elastos::Droid::Preference::IPreferenceManager;
 using Elastos::Droid::Provider::IBaseColumns;
 using Elastos::Droid::Provider::ISettings;
-using Elastos::Droid::Content::IContentResolver;
-using Elastos::Droid::Content::IContentValues;
-
-using Elastos::Droid::Internal::Utility::IAsyncChannel;
-using Elastos::Droid::Internal::Telephony::IISub;
-using Elastos::Droid::Internal::Telephony::Uicc::ISpnOverride;
-
-using Elastos::Droid::Internal::Telephony::Dataconnection::IDctController;
-using Elastos::Droid::Internal::Telephony::Dataconnection::IDdsScheduler;
-using Elastos::Droid::Internal::Telephony::Dataconnection::IDdsSchedulerAc;
+using Elastos::Droid::Provider::ISettingsGlobal;
+using Elastos::Droid::Provider::CSettingsGlobal;
+using Elastos::Droid::Preference::IPreferenceManagerHelper;
+using Elastos::Droid::Preference::CPreferenceManagerHelper;
 using Elastos::Droid::Telephony::ISubscriptionManager;
-using Elastos::Droid::Telephony::ISubInfoRecord;
 using Elastos::Droid::Telephony::ITelephonyManager;
-using Elastos::Droid::Text::Format::ITime;
+using Elastos::Droid::Telephony::CSubscriptionManager;
+using Elastos::Droid::Telephony::CSubInfoRecord;
+using Elastos::Droid::Telephony::ITelephonyManagerHelper;
+using Elastos::Droid::Telephony::CTelephonyManagerHelper;
+using Elastos::Droid::Text::Format::CTime;
+using Elastos::Droid::Manifest;
+using Elastos::Droid::R;
 
-using Elastos::IO::IFileDescriptor;
-using Elastos::IO::IPrintWriter;
+using Elastos::Core::AutoLock;
+using Elastos::Core::StringUtils;
+using Elastos::Core::IInteger32;
+using Elastos::Core::CInteger32;
+using Elastos::Core::IInteger64;
+using Elastos::Core::CoreUtils;
+using Elastos::Core::IStackTraceElement;
+using Elastos::IO::IFlushable;
+using Elastos::IO::ICloseable;
 using Elastos::Utility::IArrayList;
+using Elastos::Utility::CArrayList;
+using Elastos::Utility::CHashMap;
 using Elastos::Utility::IIterator;
-using Elastos::Utility::ILinkedList;
-using Elastos::Utility::IList;
-using Elastos::Utility::IHashMap;
-using Elastos::Utility::Map::IEntry;
+using Elastos::Utility::IMapEntry;
 using Elastos::Utility::ISet;
-
-/**
- * SubscriptionController to provide an inter-process communication to
- * access Sms in Icc.
- *
- * Any setters which take subId, slotId or phoneId as a parameter will throw an exception if the
- * parameter equals the corresponding INVALID_XXX_ID or DEFAULT_XXX_ID.
- *
- * All getters will lookup the corresponding default if the parameter is DEFAULT_XXX_ID. Ie calling
- * GetPhoneId(DEFAULT_SUB_ID) will return the same as GetPhoneId(GetDefaultSubId()).
- *
- * Finally, any getters which perform the mapping between subscriptions, slots and phones will
- * return the corresponding INVALID_XXX_ID if the parameter is INVALID_XXX_ID. All other getters
- * will fail and return the appropriate error value. Ie calling GetSlotId(INVALID_SUB_ID) will
- * return INVALID_SLOT_ID and calling GetSubInfoForSubscriber(INVALID_SUB_ID) will return NULL.
- *
- */
-public class SubscriptionController extends ISub.Stub {
-    static const String LOG_TAG = "SubController";
-    static const Boolean DBG = TRUE;
-    static const Boolean VDBG = FALSE;
-    static const Int32 MAX_LOCAL_LOG_LINES = 500; // TODO: Reduce to 100 when 17678050 is fixed
-    private ScLocalLog mLocalLog = new ScLocalLog(MAX_LOCAL_LOG_LINES);
-
-    /**
-     * Copied from android.util.LocalLog with Flush() adding flush and line number
-     * TODO: Update LocalLog
-     */
-    static class ScLocalLog {
-
-        private LinkedList<String> mLog;
-        private Int32 mMaxLines;
-        private Time mNow;
-
-        public ScLocalLog(Int32 maxLines) {
-            mLog = new LinkedList<String>();
-            mMaxLines = maxLines;
-            mNow = new Time();
-        }
-
-        public synchronized void Log(String msg) {
-            If (mMaxLines > 0) {
-                Int32 pid = android.os.Process->MyPid();
-                Int32 tid = android.os.Process->MyTid();
-                mNow->SetToNow();
-                mLog->Add(mNow->Format("%m-%d %H:%M:%S") + " pid=" + pid + " tid=" + tid + " " + msg);
-                While (mLog->Size() > mMaxLines) mLog->Remove();
-            }
-        }
-
-        public synchronized void Dump(FileDescriptor fd, PrintWriter pw, String[] args) {
-            final Int32 LOOPS_PER_FLUSH = 10; // Flush every N loops.
-            Iterator<String> itr = mLog->ListIterator(0);
-            Int32 i = 0;
-            While (itr->HasNext()) {
-                pw->Println(Integer->ToString(i++) + ": " + itr->Next());
-                // Flush periodically so we don't drop lines
-                If ((i % LOOPS_PER_FLUSH) == 0) pw->Flush();
-            }
-        }
-    }
-
-    protected final Object mLock = new Object();
-    protected Boolean mSuccess;
-
-    /** The singleton instance. */
-    private static SubscriptionController sInstance = NULL;
-    protected static PhoneProxy[] sProxyPhones;
-    protected Context mContext;
-    protected CallManager mCM;
-
-    private static const Int32 RES_TYPE_BACKGROUND_DARK = 0;
-    private static const Int32 RES_TYPE_BACKGROUND_LIGHT = 1;
-
-    private static const Int32[] sSimBackgroundDarkRes = SetSimResource(RES_TYPE_BACKGROUND_DARK);
-    private static const Int32[] sSimBackgroundLightRes = SetSimResource(RES_TYPE_BACKGROUND_LIGHT);
-
-    //FIXME this does not allow for multiple subs in a slot
-    private static HashMap<Integer, Long> mSimInfo = new HashMap<Integer, Long>();
-    private static Int64 mDefaultVoiceSubId = SubscriptionManager.DEFAULT_SUB_ID;
-    private static Int32 mDefaultPhoneId = 0;
-
-    private static const Int32 EVENT_WRITE_MSISDN_DONE = 1;
-
-    protected Handler mHandler = new Handler() {
-        //@Override
-        CARAPI HandleMessage(Message msg) {
-            AsyncResult ar;
-
-            Switch (msg.what) {
-                case EVENT_WRITE_MSISDN_DONE:
-                    ar = (AsyncResult) msg.obj;
-                    {    AutoLock syncLock(mLock);
-                        mSuccess = (ar.exception == NULL);
-                        Logd("EVENT_WRITE_MSISDN_DONE, mSuccess = "+mSuccess);
-                        mLock->NotifyAll();
-                    }
-                    break;
-            }
-        }
-    };
-
-    private static const Int32 EVENT_SET_DEFAULT_DATA_DONE = 1;
-    private DataConnectionHandler mDataConnectionHandler;
-    private  DctController mDctController;
-
-    private HashMap<Long, OnDemandDdsLockNotifier> mOnDemandDdsLockNotificationRegistrants =
-        new HashMap<Long, OnDemandDdsLockNotifier>();
-
-    private DdsScheduler mScheduler;
-    private DdsSchedulerAc mSchedulerAc;
-
-    // Dummy subId is used when no SIMs present on device
-    // with MSIM configuration and this is corresponds
-    // to phoneId 0.
-    private static const Int32 DUMMY_SUB_ID = -1;
-
-    public static SubscriptionController Init(Phone phone) {
-        {    AutoLock syncLock(SubscriptionController.class);
-            If (sInstance == NULL) {
-                sInstance = new SubscriptionController(phone);
-            } else {
-                Log->Wtf(LOG_TAG, "Init() called multiple times!  sInstance = " + sInstance);
-            }
-            return sInstance;
-        }
-    }
-
-    public static SubscriptionController Init(Context c, CommandsInterface[] ci) {
-        {    AutoLock syncLock(SubscriptionController.class);
-            If (sInstance == NULL) {
-                sInstance = new SubscriptionController(c);
-            } else {
-                Log->Wtf(LOG_TAG, "Init() called multiple times!  sInstance = " + sInstance);
-            }
-            return sInstance;
-        }
-    }
-
-    public static SubscriptionController GetInstance() {
-        If (sInstance == NULL)
-        {
-           Log->Wtf(LOG_TAG, "getInstance NULL");
-        }
-
-        return sInstance;
-    }
-
-    private SubscriptionController(Context c) {
-        Logd("SubscriptionController init by Context");
-        mContext = c;
-        mCM = CallManager->GetInstance();
-
-        If(ServiceManager->GetService("isub") == NULL) {
-                ServiceManager->AddService("isub", this);
-        }
-
-        Logdl("[SubscriptionController] init by Context");
-        mDataConnectionHandler = new DataConnectionHandler();
-
-        mScheduler = DdsScheduler->GetInstance();
-
-        mSchedulerAc = new DdsSchedulerAc();
-        mSchedulerAc->Connect(mContext, mDataConnectionHandler, mScheduler->GetHandler());
-
-    }
-
-    public Int64 GetSubIdFromNetworkRequest(NetworkRequest n) {
-        Int64 subId;
-        If (n == NULL) {
-            return GetDefaultDataSubId();
-        }
-
-        String str = n.networkCapabilities->GetNetworkSpecifier();
-        try {
-            subId = Long->ParseLong(str);
-        } Catch(NumberFormatException e) {
-            Loge("Exception e = " + e);
-            subId = GetDefaultDataSubId();
-        }
-
-        return subId;
-    }
-
-    CARAPI StartOnDemandDataSubscriptionRequest(NetworkRequest n) {
-        Logd("startOnDemandDataSubscriptionRequest = " + n);
-        mSchedulerAc->AllocateDds(n);
-    }
-
-    CARAPI StopOnDemandDataSubscriptionRequest(NetworkRequest n) {
-        Logd("stopOnDemandDataSubscriptionRequest = " + n);
-        mSchedulerAc->FreeDds(n);
-    }
-
-    private Boolean IsSubInfoReady() {
-        return mSimInfo->Size() > 0;
-    }
-
-    private SubscriptionController(Phone phone) {
-        mContext = phone->GetContext();
-        mCM = CallManager->GetInstance();
-
-        If(ServiceManager->GetService("isub") == NULL) {
-                ServiceManager->AddService("isub", this);
-        }
-
-        Logdl("[SubscriptionController] init by Phone");
-    }
-
-    /**
-     * Make sure the caller has the READ_PHONE_STATE permission.
-     *
-     * @throws SecurityException if the caller does not have the required permission
-     */
-    private void EnforceSubscriptionPermission() {
-        mContext->EnforceCallingOrSelfPermission(Manifest::permission::READ_PHONE_STATE,
-                "Requires READ_PHONE_STATE");
-    }
-
-    /**
-     * Broadcast when subinfo settings has chanded
-     * @SubId The unique SubInfoRecord index in database
-     * @param columnName The column that is updated
-     * @param intContent The updated integer value
-     * @param stringContent The updated string value
-     */
-     private void BroadcastSimInfoContentChanged(Int64 subId,
-            String columnName, Int32 intContent, String stringContent) {
-
-        Intent intent = new Intent(TelephonyIntents.ACTION_SUBINFO_CONTENT_CHANGE);
-        intent->PutExtra(BaseColumns._ID, subId);
-        intent->PutExtra(TelephonyIntents.EXTRA_COLUMN_NAME, columnName);
-        intent->PutExtra(TelephonyIntents.EXTRA_INT_CONTENT, intContent);
-        intent->PutExtra(TelephonyIntents.EXTRA_STRING_CONTENT, stringContent);
-        If (intContent != SubscriptionManager.DEFAULT_INT_VALUE) {
-            Logd("[broadcastSimInfoContentChanged] subId" + subId
-                    + " changed, " + columnName + " -> " +  intContent);
-        } else {
-            Logd("[broadcastSimInfoContentChanged] subId" + subId
-                    + " changed, " + columnName + " -> " +  stringContent);
-        }
-        mContext->SendBroadcast(intent);
-    }
-
-
-    /**
-     * New SubInfoRecord instance and fill in detail info
-     * @param cursor
-     * @return the query result of desired SubInfoRecord
-     */
-    private SubInfoRecord GetSubInfoRecord(Cursor cursor) {
-            SubInfoRecord info = new SubInfoRecord();
-            info.subId = cursor->GetLong(cursor->GetColumnIndexOrThrow(BaseColumns._ID));
-            info.iccId = cursor->GetString(cursor->GetColumnIndexOrThrow(
-                    SubscriptionManager.ICC_ID));
-            info.slotId = cursor->GetInt(cursor->GetColumnIndexOrThrow(
-                    SubscriptionManager.SIM_ID));
-            info.displayName = cursor->GetString(cursor->GetColumnIndexOrThrow(
-                    SubscriptionManager.DISPLAY_NAME));
-            info.nameSource = cursor->GetInt(cursor->GetColumnIndexOrThrow(
-                    SubscriptionManager.NAME_SOURCE));
-            info.color = cursor->GetInt(cursor->GetColumnIndexOrThrow(
-                    SubscriptionManager.COLOR));
-            info.number = cursor->GetString(cursor->GetColumnIndexOrThrow(
-                    SubscriptionManager.NUMBER));
-            info.displayNumberFormat = cursor->GetInt(cursor->GetColumnIndexOrThrow(
-                    SubscriptionManager.DISPLAY_NUMBER_FORMAT));
-            info.dataRoaming = cursor->GetInt(cursor->GetColumnIndexOrThrow(
-                    SubscriptionManager.DATA_ROAMING));
-
-            Int32 size = sSimBackgroundDarkRes.length;
-            If (info.color >= 0 && info.color < size) {
-                info.simIconRes[RES_TYPE_BACKGROUND_DARK] = sSimBackgroundDarkRes[info.color];
-                info.simIconRes[RES_TYPE_BACKGROUND_LIGHT] = sSimBackgroundLightRes[info.color];
-            }
-            info.mcc = cursor->GetInt(cursor->GetColumnIndexOrThrow(
-                    SubscriptionManager.MCC));
-            info.mnc = cursor->GetInt(cursor->GetColumnIndexOrThrow(
-                    SubscriptionManager.MNC));
-            info.mStatus = cursor->GetInt(cursor->GetColumnIndexOrThrow(
-                    SubscriptionManager.SUB_STATE));
-            info.mNwMode = cursor->GetInt(cursor->GetColumnIndexOrThrow(
-                    SubscriptionManager.NETWORK_MODE));
-
-            Logd("[getSubInfoRecord] SubId:" + info.subId + " iccid:" + info.iccId + " slotId:" +
-                    info.slotId + " displayName:" + info.displayName + " color:" + info.color +
-                    " mcc/mnc:" + info.mcc + "/" + info.mnc + " subStatus: " + info.mStatus
-                    + " Nwmode: " + info.mNwMode);
-
-            return info;
-    }
-
-    /**
-     * Query SubInfoRecord(s) from subinfo database
-     * @param selection A filter declaring which rows to return
-     * @param queryKey query key content
-     * @return Array list of queried result from database
-     */
-     private List<SubInfoRecord> GetSubInfo(String selection, Object queryKey) {
-        Logd("selection:" + selection + " " + queryKey);
-        String[] selectionArgs = NULL;
-        If (queryKey != NULL) {
-            selectionArgs = new String[] {queryKey->ToString()};
-        }
-        ArrayList<SubInfoRecord> subList = NULL;
-        Cursor cursor = mContext->GetContentResolver()->Query(SubscriptionManager.CONTENT_URI,
-                NULL, selection, selectionArgs, SubscriptionManager.SIM_ID);
-        try {
-            If (cursor != NULL) {
-                While (cursor->MoveToNext()) {
-                    SubInfoRecord subInfo = GetSubInfoRecord(cursor);
-                    If (subInfo != NULL && SubscriptionManager->IsValidSlotId(subInfo.slotId))
-                    {
-                        If (subList == NULL)
-                        {
-                            subList = new ArrayList<SubInfoRecord>();
-                        }
-                        subList->Add(subInfo);
-                }
-                }
-            } else {
-                Logd("Query fail");
-            }
-        } finally {
-            If (cursor != NULL) {
-                cursor->Close();
-            }
-        }
-
-        return subList;
-    }
-
-
-
-    /**
-     * Get the SubInfoRecord according to an index
-     * @param subId The unique SubInfoRecord index in database
-     * @return SubInfoRecord, maybe NULL
-     */
-    //@Override
-    public SubInfoRecord GetSubInfoForSubscriber(Int64 subId) {
-        Logd("[getSubInfoForSubscriberx]+ subId:" + subId);
-        EnforceSubscriptionPermission();
-
-        If (subId == SubscriptionManager.DEFAULT_SUB_ID) {
-            subId = GetDefaultSubId();
-        }
-        If (!SubscriptionManager->IsValidSubId(subId) || !IsSubInfoReady()) {
-            Logd("[getSubInfoForSubscriberx]- invalid subId or not ready, subId = " + subId);
-            return NULL;
-        }
-        Cursor cursor = mContext->GetContentResolver()->Query(SubscriptionManager.CONTENT_URI,
-                NULL, BaseColumns._ID + "=?", new String[] {Long->ToString(subId)}, NULL);
-        try {
-            If (cursor != NULL) {
-                If (cursor->MoveToFirst()) {
-                    Logd("[getSubInfoForSubscriberx]- Info detail:");
-                    return GetSubInfoRecord(cursor);
-                }
-            }
-        } finally {
-            If (cursor != NULL) {
-                cursor->Close();
-            }
-        }
-        Logd("[getSubInfoForSubscriber]- NULL info return");
-
-        return NULL;
-    }
-
-    /**
-     * Get the SubInfoRecord according to an IccId
-     * @param iccId the IccId of SIM card
-     * @return SubInfoRecord, maybe NULL
-     */
-    //@Override
-    public List<SubInfoRecord> GetSubInfoUsingIccId(String iccId) {
-        Logd("[getSubInfoUsingIccId]+ iccId:" + iccId);
-        EnforceSubscriptionPermission();
-
-        If (iccId == NULL || !IsSubInfoReady()) {
-            Logd("[getSubInfoUsingIccId]- NULL iccid or not ready");
-            return NULL;
-        }
-        Cursor cursor = mContext->GetContentResolver()->Query(SubscriptionManager.CONTENT_URI,
-                NULL, SubscriptionManager.ICC_ID + "=?", new String[] {iccId}, NULL);
-        ArrayList<SubInfoRecord> subList = NULL;
-        try {
-            If (cursor != NULL) {
-                While (cursor->MoveToNext()) {
-                    SubInfoRecord subInfo = GetSubInfoRecord(cursor);
-                    If (subInfo != NULL)
-                    {
-                        If (subList == NULL)
-                        {
-                            subList = new ArrayList<SubInfoRecord>();
-                        }
-                        subList->Add(subInfo);
-                }
-                }
-            } else {
-                Logd("Query fail");
-            }
-        } finally {
-            If (cursor != NULL) {
-                cursor->Close();
-            }
-        }
-
-        return subList;
-    }
-
-    /**
-     * Get the SubInfoRecord according to slotId
-     * @param slotId the slot which the SIM is inserted
-     * @return SubInfoRecord, maybe NULL
-     */
-    //@Override
-    public List<SubInfoRecord> GetSubInfoUsingSlotId(Int32 slotId) {
-        return GetSubInfoUsingSlotIdWithCheck(slotId, TRUE);
-    }
-
-    /**
-     * Get all the SubInfoRecord(s) in subinfo database
-     * @return Array list of all SubInfoRecords in database, include thsoe that were inserted before
-     */
-    //@Override
-    public List<SubInfoRecord> GetAllSubInfoList() {
-        Logd("[getAllSubInfoList]+");
-        EnforceSubscriptionPermission();
-
-        List<SubInfoRecord> subList = NULL;
-        subList = GetSubInfo(NULL, NULL);
-        If (subList != NULL) {
-            Logd("[getAllSubInfoList]- " + subList->Size() + " infos return");
-        } else {
-            Logd("[getAllSubInfoList]- no info return");
-        }
-
-        return subList;
-    }
-
-    /**
-     * Get the SubInfoRecord(s) of the currently inserted SIM(s)
-     * @return Array list of currently inserted SubInfoRecord(s)
-     */
-    //@Override
-    public List<SubInfoRecord> GetActiveSubInfoList() {
-        EnforceSubscriptionPermission();
-        Logdl("[getActiveSubInfoList]+");
-
-        List<SubInfoRecord> subList = NULL;
-
-        If (!IsSubInfoReady()) {
-            Logdl("[getActiveSubInfoList] Sub Controller not ready");
-            return subList;
-        }
-
-        subList = GetSubInfo(SubscriptionManager.SIM_ID
-                + "!=" + SubscriptionManager.INVALID_SLOT_ID, NULL);
-        If (subList != NULL) {
-            Logdl("[getActiveSubInfoList]- " + subList->Size() + " infos return");
-        } else {
-            Logdl("[getActiveSubInfoList]- no info return");
-        }
-
-        return subList;
-    }
-
-    /**
-     * Get the SUB count of active SUB(s)
-     * @return active SIM count
-     */
-    //@Override
-    public Int32 GetActiveSubInfoCount() {
-        Logd("[getActiveSubInfoCount]+");
-        List<SubInfoRecord> records = GetActiveSubInfoList();
-        If (records == NULL) {
-            Logd("[getActiveSubInfoCount] records NULL");
-            return 0;
-        }
-        Logd("[getActiveSubInfoCount]- count: " + records->Size());
-        return records->Size();
-    }
-
-    /**
-     * Get the SUB count of all SUB(s) in subinfo database
-     * @return all SIM count in database, include what was inserted before
-     */
-    //@Override
-    public Int32 GetAllSubInfoCount() {
-        Logd("[getAllSubInfoCount]+");
-        EnforceSubscriptionPermission();
-
-        Cursor cursor = mContext->GetContentResolver()->Query(SubscriptionManager.CONTENT_URI,
-                NULL, NULL, NULL, NULL);
-        try {
-            If (cursor != NULL) {
-                Int32 count = cursor->GetCount();
-                Logd("[getAllSubInfoCount]- " + count + " SUB(s) in DB");
-                return count;
-            }
-        } finally {
-            If (cursor != NULL) {
-                cursor->Close();
-            }
-        }
-        Logd("[getAllSubInfoCount]- no SUB in DB");
-
-        return 0;
-    }
-
-    /**
-     * Add a new SubInfoRecord to subinfo database if needed
-     * @param iccId the IccId of the SIM card
-     * @param slotId the slot which the SIM is inserted
-     * @return the URL of the newly created row or the updated row
-     */
-    //@Override
-    public Int32 AddSubInfoRecord(String iccId, Int32 slotId) {
-        Logdl("[addSubInfoRecord]+ iccId:" + iccId + " slotId:" + slotId);
-        EnforceSubscriptionPermission();
-
-        If (iccId == NULL) {
-            Logdl("[addSubInfoRecord]- NULL iccId");
-        }
-
-        String nameToSet;
-        If (IsSubInfoReady()) { // we can only get a subId if SubInfo is ready
-            Int64[] subIds = GetSubId(slotId);
-            If (subIds == NULL || subIds.length == 0) {
-                Logdl("[addSubInfoRecord]- getSubId fail");
-                return 0;
-            }
-
-            Int32 subIdsIndex = 0;
-            If (subIds.length > 1) { // one SIM can have more than one subId
-                For (Int32 i = 0; i < subIds.length; i++) {
-                    Logdl("[addSubInfoRecord] inspecting subIds["+i+"]: " + subIds[i]);
-                    If (TelephonyManager->GetDefault()->GetSimOperatorName(subIds[i]) != "") {
-                        // We have a Carrier here, with a CarrierName and everything!
-                        subIdsIndex = i;
-                        Logdl("[addSubInfoRecord] using subIds["+i+"]: it has a Carrier");
-                    }
-                }
-            }
-
-            If (subIds[subIdsIndex] == -1) { // DUMMY value from getSubId
-                Long currentSubId = mSimInfo->Get(slotId);
-                If (currentSubId == NULL) {
-                    Logdl("[addSubInfoRecord] currentSubId is NULL, proceed with dummy value");
-                } else {
-                    Logdl("[addSubInfoRecord] currentSubId " + currentSubId + ", proceed with it");
-                    subIds[subIdsIndex] = currentSubId;
-                }
-            }
-
-            String Carrier = TelephonyManager->GetDefault()->GetSimOperator(subIds[subIdsIndex]);
-            Logdl("[addSubInfoRecord] Carrier = " + Carrier);
-            String CarrierName = TelephonyManager->GetDefault()->GetSimOperatorName(subIds[subIdsIndex]);
-            Logdl("[addSubInfoRecord] CarrierName = " + CarrierName);
-            SpnOverride mSpnOverride = new SpnOverride();
-
-            If (mSpnOverride->ContainsCarrier(Carrier)) {
-                nameToSet = mSpnOverride->GetSpn(Carrier);
-                Logdl("[addSubInfoRecord] Found, SpnOverride, name = " + nameToSet);
-            } else If (CarrierName != "") {
-                nameToSet = CarrierName;
-                Logdl("[addSubInfoRecord] Found, name = " + nameToSet);
-            } else {
-                nameToSet = "SIM " + Integer->ToString(slotId + 1);
-                Logdl("[addSubInfoRecord] Not found, name = " + nameToSet);
-            }
-        } else {
-            nameToSet = "SIM " + Integer->ToString(slotId + 1);
-            Logdl("[addSubInfoRecord] SubInfo not ready, name = " + nameToSet);
-        }
-
-        ContentResolver resolver = mContext->GetContentResolver();
-        Cursor cursor = resolver->Query(SubscriptionManager.CONTENT_URI,
-                new String[] {BaseColumns._ID, SubscriptionManager.SIM_ID,
-                SubscriptionManager.NAME_SOURCE}, SubscriptionManager.ICC_ID + "=?",
-                new String[] {iccId}, NULL);
-
-        try {
-            If (cursor == NULL || !cursor->MoveToFirst()) {
-                ContentValues value = new ContentValues();
-                value->Put(SubscriptionManager.ICC_ID, iccId);
-                // default SIM color differs between slots
-                value->Put(SubscriptionManager.COLOR, slotId);
-                value->Put(SubscriptionManager.SIM_ID, slotId);
-                value->Put(SubscriptionManager.DISPLAY_NAME, nameToSet);
-                Uri uri = resolver->Insert(SubscriptionManager.CONTENT_URI, value);
-                Logdl("[addSubInfoRecord]- New record created: " + uri);
-            } else {
-                Int64 subId = cursor->GetLong(0);
-                Int32 oldSimInfoId = cursor->GetInt(1);
-                Int32 nameSource = cursor->GetInt(2);
-                ContentValues value = new ContentValues();
-
-                If (slotId != oldSimInfoId) {
-                    value->Put(SubscriptionManager.SIM_ID, slotId);
-                }
-
-                If (nameSource == SubscriptionManager.NAME_SOURCE_UNDEFINDED) {
-                    value->Put(SubscriptionManager.DISPLAY_NAME, nameToSet);
-                    Logdl("[addSubInfoRecord]- going to update SIM name to " + nameToSet);
-                }
-
-                If (value->Size() > 0) {
-                    resolver->Update(SubscriptionManager.CONTENT_URI, value,
-                            BaseColumns._ID + "=" + Long->ToString(subId), NULL);
-                }
-
-                Logdl("[addSubInfoRecord]- Record already exist");
-            }
-        } finally {
-            If (cursor != NULL) {
-                cursor->Close();
-            }
-        }
-
-        cursor = resolver->Query(SubscriptionManager.CONTENT_URI, NULL,
-                SubscriptionManager.SIM_ID + "=?", new String[] {String->ValueOf(slotId)}, NULL);
-
-        try {
-            If (cursor != NULL && cursor->MoveToFirst()) {
-                do {
-                    Int64 subId = cursor->GetLong(cursor->GetColumnIndexOrThrow(BaseColumns._ID));
-                    // If mSimInfo already has a valid subId for a slotId/phoneId,
-                    // do not add another subId for same slotId/phoneId.
-                    Long currentSubId = mSimInfo->Get(slotId);
-                    If (currentSubId == NULL || !SubscriptionManager->IsValidSubId(currentSubId)) {
-                        // TODO While two subs active, if user deactivats first
-                        // one, need to update the default subId with second one.
-
-                        // FIXME: Currently we assume phoneId and slotId may not be TRUE
-                        // when we cross map modem or when multiple subs per slot.
-                        // But is TRUE at the moment.
-                        mSimInfo->Put(slotId, subId);
-                        Int32 simCount = TelephonyManager->GetDefault()->GetSimCount();
-                        Int64 defaultSubId = GetDefaultSubId();
-                        Logdl("[addSubInfoRecord] mSimInfo.size=" + mSimInfo->Size()
-                                + " slotId=" + slotId + " subId=" + subId
-                                + " defaultSubId=" + defaultSubId + " simCount=" + simCount);
-
-                        // Set the default sub if not set or if single sim device
-                        If (!SubscriptionManager->IsValidSubId(defaultSubId) || simCount == 1) {
-                            SetDefaultSubId(subId);
-                        }
-                        // If single sim device, set this subscription as the default for everything
-                        If (simCount == 1) {
-                            Logdl("[addSubInfoRecord] one sim set defaults to subId=" + subId);
-                            SetDefaultDataSubId(subId);
-                            SetDataSubId(subId);
-                            SetDefaultSmsSubId(subId);
-                            SetDefaultVoiceSubId(subId);
-                        }
-                    } else {
-                        Logdl("[addSubInfoRecord] currentSubId != NULL && currentSubId is valid, IGNORE");
-                    }
-                    Logdl("[addSubInfoRecord]- Hashmap("+slotId+","+subId+")");
-                } While (cursor->MoveToNext());
-            }
-        } finally {
-            If (cursor != NULL) {
-                cursor->Close();
-            }
-        }
-
-        Int32 size = mSimInfo->Size();
-        Logdl("[addSubInfoRecord]- info size="+size);
-
-        // Once the records are loaded, notify DcTracker
-        UpdateAllDataConnectionTrackers();
-
-        // FIXME this does not match the javadoc
-        return 1;
-    }
-
-    /**
-     * Set SIM color by simInfo index
-     * @param color the color of the SIM
-     * @param subId the unique SubInfoRecord index in database
-     * @return the number of records updated
-     */
-    //@Override
-    public Int32 SetColor(Int32 color, Int64 subId) {
-        Logd("[setColor]+ color:" + color + " subId:" + subId);
-        EnforceSubscriptionPermission();
-
-        ValidateSubId(subId);
-        Int32 size = sSimBackgroundDarkRes.length;
-        If (color < 0 || color >= size) {
-            Logd("[setColor]- fail");
-            return -1;
-        }
-        ContentValues value = new ContentValues(1);
-        value->Put(SubscriptionManager.COLOR, color);
-        Logd("[setColor]- color:" + color + " set");
-
-        Int32 result = mContext->GetContentResolver()->Update(SubscriptionManager.CONTENT_URI, value,
-                BaseColumns._ID + "=" + Long->ToString(subId), NULL);
-        BroadcastSimInfoContentChanged(subId, SubscriptionManager.COLOR,
-                color, SubscriptionManager.DEFAULT_STRING_VALUE);
-
-        return result;
-    }
-
-    /**
-     * Set display name by simInfo index
-     * @param displayName the display name of SIM card
-     * @param subId the unique SubInfoRecord index in database
-     * @return the number of records updated
-     */
-    //@Override
-    public Int32 SetDisplayName(String displayName, Int64 subId) {
-        return SetDisplayNameUsingSrc(displayName, subId, -1);
-    }
-
-    /**
-     * Set display name by simInfo index with name source
-     * @param displayName the display name of SIM card
-     * @param subId the unique SubInfoRecord index in database
-     * @param nameSource 0: NAME_SOURCE_DEFAULT_SOURCE, 1: NAME_SOURCE_SIM_SOURCE,
-     *                   2: NAME_SOURCE_USER_INPUT, -1 NAME_SOURCE_UNDEFINED
-     * @return the number of records updated
-     */
-    //@Override
-    public Int32 SetDisplayNameUsingSrc(String displayName, Int64 subId, Int64 nameSource) {
-        Logd("[setDisplayName]+  displayName:" + displayName + " subId:" + subId
-                + " nameSource:" + nameSource);
-        EnforceSubscriptionPermission();
-
-        ValidateSubId(subId);
-        String nameToSet;
-        If (displayName == NULL) {
-            nameToSet = mContext->GetString(SubscriptionManager.DEFAULT_NAME_RES);
-        } else {
-            nameToSet = displayName;
-        }
-        ContentValues value = new ContentValues(1);
-        value->Put(SubscriptionManager.DISPLAY_NAME, nameToSet);
-        If (nameSource >= SubscriptionManager.NAME_SOURCE_DEFAULT_SOURCE) {
-            Logd("Set nameSource=" + nameSource);
-            value->Put(SubscriptionManager.NAME_SOURCE, nameSource);
-        }
-        Logd("[setDisplayName]- mDisplayName:" + nameToSet + " set");
-
-        Int32 result = mContext->GetContentResolver()->Update(SubscriptionManager.CONTENT_URI, value,
-                BaseColumns._ID + "=" + Long->ToString(subId), NULL);
-        BroadcastSimInfoContentChanged(subId, SubscriptionManager.DISPLAY_NAME,
-                SubscriptionManager.DEFAULT_INT_VALUE, nameToSet);
-
-        return result;
-    }
-
-    /**
-     * Set phone number by subId
-     * @param number the phone number of the SIM
-     * @param subId the unique SubInfoRecord index in database
-     * @return the number of records updated
-     */
-    //@Override
-    public Int32 SetDisplayNumber(String number, Int64 subId) {
-        Logd("[setDisplayNumber]+ number:" + number + " subId:" + subId);
-        EnforceSubscriptionPermission();
-
-        ValidateSubId(subId);
-        Int32 result = 0;
-        Int32 phoneId = GetPhoneId(subId);
-
-        If (number == NULL || phoneId < 0 ||
-                phoneId >= TelephonyManager->GetDefault()->GetPhoneCount()) {
-            Logd("[setDispalyNumber]- fail");
-            return -1;
-        }
-        ContentValues value = new ContentValues(1);
-        value->Put(SubscriptionManager.NUMBER, number);
-        Logd("[setDisplayNumber]- number:" + number + " set");
-
-        Phone phone = sProxyPhones[phoneId];
-        String alphaTag = TelephonyManager->GetDefault()->GetLine1AlphaTagForSubscriber(subId);
-
-        {    AutoLock syncLock(mLock);
-            mSuccess = FALSE;
-            Message response = mHandler->ObtainMessage(EVENT_WRITE_MSISDN_DONE);
-
-            phone->SetLine1Number(alphaTag, number, response);
-
-            try {
-                mLock->Wait();
-            } Catch (InterruptedException e) {
-                Loge("interrupted while trying to write MSISDN");
-            }
-        }
-
-        If (mSuccess) {
-            result = mContext->GetContentResolver()->Update(SubscriptionManager.CONTENT_URI, value,
-                    BaseColumns._ID + "=" + Long->ToString(subId), NULL);
-            Logd("[setDisplayNumber]- update result :" + result);
-            BroadcastSimInfoContentChanged(subId, SubscriptionManager.NUMBER,
-                    SubscriptionManager.DEFAULT_INT_VALUE, number);
-        }
-
-        return result;
-    }
-
-    /**
-     * Set number display format. 0: none, 1: the first four digits, 2: the last four digits
-     * @param format the display format of phone number
-     * @param subId the unique SubInfoRecord index in database
-     * @return the number of records updated
-     */
-    //@Override
-    public Int32 SetDisplayNumberFormat(Int32 format, Int64 subId) {
-        Logd("[setDisplayNumberFormat]+ format:" + format + " subId:" + subId);
-        EnforceSubscriptionPermission();
-
-        ValidateSubId(subId);
-        If (format < 0) {
-            Logd("[setDisplayNumberFormat]- fail, return -1");
-            return -1;
-        }
-        ContentValues value = new ContentValues(1);
-        value->Put(SubscriptionManager.DISPLAY_NUMBER_FORMAT, format);
-        Logd("[setDisplayNumberFormat]- format:" + format + " set");
-
-        Int32 result = mContext->GetContentResolver()->Update(SubscriptionManager.CONTENT_URI, value,
-                BaseColumns._ID + "=" + Long->ToString(subId), NULL);
-        BroadcastSimInfoContentChanged(subId, SubscriptionManager.DISPLAY_NUMBER_FORMAT,
-                format, SubscriptionManager.DEFAULT_STRING_VALUE);
-
-        return result;
-    }
-
-    /**
-     * Set data roaming by simInfo index
-     * @param roaming 0:Don't allow data when roaming, 1:Allow data when roaming
-     * @param subId the unique SubInfoRecord index in database
-     * @return the number of records updated
-     */
-    //@Override
-    public Int32 SetDataRoaming(Int32 roaming, Int64 subId) {
-        Logd("[setDataRoaming]+ roaming:" + roaming + " subId:" + subId);
-        EnforceSubscriptionPermission();
-
-        ValidateSubId(subId);
-        If (roaming < 0) {
-            Logd("[setDataRoaming]- fail");
-            return -1;
-        }
-        ContentValues value = new ContentValues(1);
-        value->Put(SubscriptionManager.DATA_ROAMING, roaming);
-        Logd("[setDataRoaming]- roaming:" + roaming + " set");
-
-        Int32 result = mContext->GetContentResolver()->Update(SubscriptionManager.CONTENT_URI, value,
-                BaseColumns._ID + "=" + Long->ToString(subId), NULL);
-        BroadcastSimInfoContentChanged(subId, SubscriptionManager.DATA_ROAMING,
-                roaming, SubscriptionManager.DEFAULT_STRING_VALUE);
-
-        return result;
-    }
-
-    /**
-     * Set MCC/MNC by subscription ID
-     * @param mccMnc MCC/MNC associated with the subscription
-     * @param subId the unique SubInfoRecord index in database
-     * @return the number of records updated
-     */
-    public Int32 SetMccMnc(String mccMnc, Int64 subId) {
-        Int32 mcc = 0;
-        Int32 mnc = 0;
-        try {
-            mcc = Integer->ParseInt(mccMnc->Substring(0,3));
-            mnc = Integer->ParseInt(mccMnc->Substring(3));
-        } Catch (NumberFormatException e) {
-            Logd("[setMccMnc] - couldn't parse mcc/mnc: " + mccMnc);
-        }
-        Logd("[setMccMnc]+ mcc/mnc:" + mcc + "/" + mnc + " subId:" + subId);
-        ContentValues value = new ContentValues(2);
-        value->Put(SubscriptionManager.MCC, mcc);
-        value->Put(SubscriptionManager.MNC, mnc);
-
-        Int32 result = mContext->GetContentResolver()->Update(SubscriptionManager.CONTENT_URI, value,
-                BaseColumns._ID + "=" + Long->ToString(subId), NULL);
-        BroadcastSimInfoContentChanged(subId, SubscriptionManager.MCC, mcc, NULL);
-
-        return result;
-    }
-
-
-    //@Override
-    public Int32 GetSlotId(Int64 subId) {
-        If (VDBG) PrintStackTrace("[getSlotId] subId=" + subId);
-
-        If (subId == SubscriptionManager.DEFAULT_SUB_ID) {
-            subId = GetDefaultSubId();
-        }
-        If (!SubscriptionManager->IsValidSubId(subId)) {
-            Logd("[getSlotId]- subId invalid");
-            return SubscriptionManager.INVALID_SLOT_ID;
-        }
-
-        Int32 size = mSimInfo->Size();
-
-        If (size == 0)
-        {
-            Logd("[getSlotId]- size == 0, return SIM_NOT_INSERTED instead");
-            return SubscriptionManager.SIM_NOT_INSERTED;
-        }
-
-        For (Entry<Integer, Long> entry: mSimInfo->EntrySet()) {
-            Int32 sim = entry->GetKey();
-            Int64 sub = entry->GetValue();
-
-            If (subId == sub)
-            {
-                If (VDBG) Logv("[getSlotId]- return = " + sim);
-                return sim;
-            }
-        }
-
-        Logd("[getSlotId]- return fail");
-        return SubscriptionManager.INVALID_SLOT_ID;
-    }
-
-    /**
-     * Return the subId for specified slot Id.
-     * @deprecated
-     */
-    //@Override
-    //@Deprecated
-    public Int64[] GetSubId(Int32 slotId) {
-        If (VDBG) PrintStackTrace("[getSubId] slotId=" + slotId);
-
-        If (slotId == SubscriptionManager.DEFAULT_SLOT_ID) {
-            Logd("[getSubId]- default slotId");
-            slotId = GetSlotId(GetDefaultSubId());
-        }
-
-        //FIXME remove this
-        final Int64[] DUMMY_VALUES = {-1 - slotId, -1 - slotId};
-
-        If (!SubscriptionManager->IsValidSlotId(slotId)) {
-            Logd("[getSubId]- invalid slotId");
-            return NULL;
-        }
-
-        //FIXME remove this
-        If (slotId < 0) {
-            Logd("[getSubId]- slotId < 0, return dummy instead");
-            return DUMMY_VALUES;
-        }
-
-        Int32 size = mSimInfo->Size();
-
-        If (size == 0) {
-            Logd("[getSubId]- size == 0, return dummy instead");
-            //FIXME return NULL
-            return DUMMY_VALUES;
-        }
-
-        ArrayList<Long> subIds = new ArrayList<Long>();
-        For (Entry<Integer, Long> entry: mSimInfo->EntrySet()) {
-            Int32 slot = entry->GetKey();
-            Int64 sub = entry->GetValue();
-            If (slotId == slot) {
-                subIds->Add(sub);
-            }
-        }
-
-        If (VDBG) Logd("[getSubId]-, subIds = " + subIds);
-        Int32 numSubIds = subIds->Size();
-
-        If (numSubIds == 0) {
-            Logd("[getSubId]- numSubIds == 0, return dummy instead");
-            return DUMMY_VALUES;
-        }
-
-        Int64[] subIdArr = new Int64[numSubIds];
-        For (Int32 i = 0; i < numSubIds; i++) {
-            subIdArr[i] = subIds->Get(i);
-        }
-
-        return subIdArr;
-    }
-
-    //@Override
-    public Int32 GetPhoneId(Int64 subId) {
-        If (VDBG) PrintStackTrace("[getPhoneId] subId=" + subId);
-        Int32 phoneId;
-
-        If (subId == SubscriptionManager.DEFAULT_SUB_ID) {
-            subId = GetDefaultSubId();
-            Logdl("[getPhoneId] asked for default subId=" + subId);
-        }
-
-        If (!SubscriptionManager->IsValidSubId(subId)) {
-            Logdl("[getPhoneId]- invalid subId return=" + SubscriptionManager.INVALID_PHONE_ID);
-            return SubscriptionManager.INVALID_PHONE_ID;
-        }
-
-        //FIXME remove this
-        If (subId < 0) {
-            phoneId = (Int32) (-1 - subId);
-            If (VDBG) Logdl("[getPhoneId]- map subId=" + subId + " phoneId=" + phoneId);
-            return phoneId;
-        }
-
-        Int32 size = mSimInfo->Size();
-
-        If (size == 0) {
-            phoneId = mDefaultPhoneId;
-            Logdl("[getPhoneId]- no sims, returning default phoneId=" + phoneId);
-            return phoneId;
-        }
-
-        // FIXME: Assumes phoneId == slotId
-        For (Entry<Integer, Long> entry: mSimInfo->EntrySet()) {
-            Int32 sim = entry->GetKey();
-            Int64 sub = entry->GetValue();
-
-            If (subId == sub) {
-                If (VDBG) Logdl("[getPhoneId]- found subId=" + subId + " phoneId=" + sim);
-                return sim;
-            }
-        }
-
-        phoneId = mDefaultPhoneId;
-        Logdl("[getPhoneId]- subId=" + subId + " not found return default phoneId=" + phoneId);
-        return phoneId;
-
-    }
-
-    /**
-     * @return the number of records cleared
-     */
-    //@Override
-    public Int32 ClearSubInfo() {
-        EnforceSubscriptionPermission();
-        Logd("[clearSubInfo]+");
-
-        Int32 size = mSimInfo->Size();
-
-        If (size == 0) {
-            Logdl("[clearSubInfo]- no simInfo size=" + size);
-            return 0;
-        }
-
-        mSimInfo->Clear();
-        Logdl("[clearSubInfo]- clear size=" + size);
-        return size;
-    }
-
-    private static Int32[] SetSimResource(Int32 type) {
-        Int32[] simResource = NULL;
-
-        Switch (type) {
-            case RES_TYPE_BACKGROUND_DARK:
-                simResource = new Int32[] {
-                    R.drawable.sim_dark_blue,
-                    R.drawable.sim_dark_orange,
-                    R.drawable.sim_dark_green,
-                    R.drawable.sim_dark_purple
-                };
-                break;
-            case RES_TYPE_BACKGROUND_LIGHT:
-                simResource = new Int32[] {
-                    R.drawable.sim_light_blue,
-                    R.drawable.sim_light_orange,
-                    R.drawable.sim_light_green,
-                    R.drawable.sim_light_purple
-                };
-                break;
-        }
-
-        return simResource;
-    }
-
-    private void Logvl(String msg) {
-        Logv(msg);
-        mLocalLog->Log(msg);
-    }
-
-    private void Logv(String msg) {
-        Rlog->V(LOG_TAG, msg);
-    }
-
-    private void Logdl(String msg) {
-        Logd(msg);
-        mLocalLog->Log(msg);
-    }
-
-    private static void Slogd(String msg) {
-        Rlog->D(LOG_TAG, msg);
-    }
-
-    private void Logd(String msg) {
-        Rlog->D(LOG_TAG, msg);
-    }
-
-    private void Logel(String msg) {
-        Loge(msg);
-        mLocalLog->Log(msg);
-    }
-
-    private void Loge(String msg) {
-        Rlog->E(LOG_TAG, msg);
-    }
-
-    //@Override
-    //@Deprecated
-    public Int64 GetDefaultSubId() {
-        //FIXME: Make this smarter, need to handle data only and voice devices
-        Int64 subId = mDefaultVoiceSubId;
-        If (VDBG) Logv("[getDefaultSubId] value = " + subId);
-        return subId;
-    }
-
-    //@Override
-    CARAPI SetDefaultSmsSubId(Int64 subId) {
-        If (subId == SubscriptionManager.DEFAULT_SUB_ID) {
-            throw new RuntimeException("setDefaultSmsSubId called with DEFAULT_SUB_ID");
-        }
-        Logdl("[setDefaultSmsSubId] subId=" + subId);
-        Settings::Global::>PutLong(mContext->GetContentResolver(),
-                Settings::Global::MULTI_SIM_SMS_SUBSCRIPTION, subId);
-        BroadcastDefaultSmsSubIdChanged(subId);
-    }
-
-    private void BroadcastDefaultSmsSubIdChanged(Int64 subId) {
-        // Broadcast an Intent for default sms sub change
-        Logdl("[broadcastDefaultSmsSubIdChanged] subId=" + subId);
-        Intent intent = new Intent(TelephonyIntents.ACTION_DEFAULT_SMS_SUBSCRIPTION_CHANGED);
-        intent->AddFlags(IIntent::FLAG_RECEIVER_REPLACE_PENDING);
-        intent->PutExtra(PhoneConstants.SUBSCRIPTION_KEY, subId);
-        mContext->SendStickyBroadcastAsUser(intent, UserHandle.ALL);
-    }
-
-    //@Override
-    public Int64 GetDefaultSmsSubId() {
-        Int64 subId = Settings::Global::>GetLong(mContext->GetContentResolver(),
-                Settings::Global::MULTI_SIM_SMS_SUBSCRIPTION,
-                SubscriptionManager.INVALID_SUB_ID);
-        If (VDBG) Logd("[getDefaultSmsSubId] subId=" + subId);
-        return subId;
-    }
-
-    //@Override
-    CARAPI SetDefaultVoiceSubId(Int64 subId) {
-        If (subId == SubscriptionManager.DEFAULT_SUB_ID) {
-            throw new RuntimeException("setDefaultVoiceSubId called with DEFAULT_SUB_ID");
-        }
-        Logdl("[setDefaultVoiceSubId] subId=" + subId);
-        Settings::Global::>PutLong(mContext->GetContentResolver(),
-                Settings::Global::MULTI_SIM_VOICE_CALL_SUBSCRIPTION, subId);
-        BroadcastDefaultVoiceSubIdChanged(subId);
-    }
-
-    private void BroadcastDefaultVoiceSubIdChanged(Int64 subId) {
-        // Broadcast an Intent for default voice sub change
-        Logdl("[broadcastDefaultVoiceSubIdChanged] subId=" + subId);
-        Intent intent = new Intent(TelephonyIntents.ACTION_DEFAULT_VOICE_SUBSCRIPTION_CHANGED);
-        intent->AddFlags(IIntent::FLAG_RECEIVER_REPLACE_PENDING);
-        intent->PutExtra(PhoneConstants.SUBSCRIPTION_KEY, subId);
-        mContext->SendStickyBroadcastAsUser(intent, UserHandle.ALL);
-    }
-
-    //@Override
-    public Int64 GetDefaultVoiceSubId() {
-        Int64 subId = Settings::Global::>GetLong(mContext->GetContentResolver(),
-                Settings::Global::MULTI_SIM_VOICE_CALL_SUBSCRIPTION,
-                SubscriptionManager.INVALID_SUB_ID);
-        If (VDBG) Logd("[getDefaultVoiceSubId] subId=" + subId);
-        return subId;
-    }
-
-    /* Returns User SMS Prompt property,  enabled or not */
-    //@Override
-    public Boolean IsSMSPromptEnabled() {
-        Boolean prompt = FALSE;
-        Int32 value = 0;
-        try {
-            value = Settings::Global::>GetInt(mContext->GetContentResolver(),
-                    Settings::Global::MULTI_SIM_SMS_PROMPT);
-        } Catch (SettingNotFoundException snfe) {
-            Loge("Settings Exception Reading Dual Sim SMS Prompt Values");
-        }
-        prompt = (value == 0) ? FALSE : TRUE ;
-        If (VDBG) Logd("SMS Prompt option:" + prompt);
-
-       return prompt;
-    }
-
-    /*Sets User SMS Prompt property,  enable or not */
-    //@Override
-    CARAPI SetSMSPromptEnabled(Boolean enabled) {
-        Int32 value = (enabled == FALSE) ? 0 : 1;
-        Settings::Global::>PutInt(mContext->GetContentResolver(),
-                Settings::Global::MULTI_SIM_SMS_PROMPT, value);
-        Logd("setSMSPromptOption to " + enabled);
-    }
-
-
-    //@Override
-    public Int64 GetDefaultDataSubId() {
-        Int64 subId = Settings::Global::>GetLong(mContext->GetContentResolver(),
-                Settings::Global::MULTI_SIM_DATA_CALL_SUBSCRIPTION,
-                SubscriptionManager.INVALID_SUB_ID);
-        If (VDBG) Logd("[getDefaultDataSubId] subId= " + subId);
-        return subId;
-    }
-
-    //@Override
-    CARAPI SetDefaultDataSubId(Int64 subId) {
-        Logdl("[setDefaultDataSubId] subId=" + subId);
-
-        If (mDctController == NULL) {
-            mDctController = DctController->GetInstance();
-            mDctController->RegisterForDefaultDataSwitchInfo(mDataConnectionHandler,
-                    EVENT_SET_DEFAULT_DATA_DONE, NULL);
-        }
-        mDctController->SetDefaultDataSubId(subId);
-
-    }
-
-    public Int64 GetCurrentDds() {
-        return mScheduler->GetCurrentDds();
-    }
-
-
-    private void UpdateDataSubId(AsyncResult ar) {
-        Long subId = (Long)ar.result;
-        Int32 reqStatus = PhoneConstants.FAILURE;
-
-        Logd(" updateDataSubId,  subId=" + subId + " exception " + ar.exception);
-        // Update newDds in database if the DDS request succeeded.
-        If (ar.exception == NULL) {
-            SetDataSubId(subId);
-            reqStatus = PhoneConstants.SUCCESS;
-        }
-        mScheduler->UpdateCurrentDds(NULL);
-        BroadcastDefaultDataSubIdChanged(reqStatus);
-
-        // FIXME is this still needed?
-        UpdateAllDataConnectionTrackers();
-    }
-    CARAPI SetDataSubId(Int64 subId) {
-        Settings::Global::>PutLong(mContext->GetContentResolver(),
-                Settings::Global::MULTI_SIM_DATA_CALL_SUBSCRIPTION, subId);
-    }
-
-    private void UpdateAllDataConnectionTrackers() {
-        // Tell Phone Proxies to update data connection tracker
-        Int32 len = sProxyPhones.length;
-        Logdl("[updateAllDataConnectionTrackers] sProxyPhones.length=" + len);
-        For (Int32 phoneId = 0; phoneId < len; phoneId++) {
-            sProxyPhones[phoneId].UpdateDataConnectionTracker();
-        }
-    }
-
-    private void BroadcastDefaultDataSubIdChanged(Int32 status) {
-        // Broadcast an Intent for default data sub change
-        Logdl("[broadcastDefaultDataSubIdChanged] subId = " + GetDefaultDataSubId()
-                 + " status " + status);
-        Intent intent = new Intent(TelephonyIntents.ACTION_DEFAULT_DATA_SUBSCRIPTION_CHANGED);
-        intent->AddFlags(IIntent::FLAG_RECEIVER_REPLACE_PENDING);
-        intent->PutExtra(PhoneConstants.SUBSCRIPTION_KEY, GetDefaultDataSubId());
-        intent->PutExtra(TelephonyIntents.EXTRA_RESULT, status);
-        mContext->SendStickyBroadcastAsUser(intent, UserHandle.ALL);
-    }
-
-    /* Sets the default subscription. If only one sub is active that
-     * sub is set as default subId. If two or more  sub's are active
-     * the first sub is set as default subscription
-     */
-    // FIXME
-    CARAPI SetDefaultSubId(Int64 subId) {
-        If (subId == SubscriptionManager.DEFAULT_SUB_ID) {
-            throw new RuntimeException("setDefaultSubId called with DEFAULT_SUB_ID");
-        }
-        Logdl("[setDefaultSubId] subId=" + subId);
-        If (SubscriptionManager->IsValidSubId(subId)) {
-            Int32 phoneId = GetPhoneId(subId);
-            If (phoneId >= 0 && (phoneId < TelephonyManager->GetDefault()->GetPhoneCount()
-                    || TelephonyManager->GetDefault()->GetSimCount() == 1)) {
-                Logdl("[setDefaultSubId] set mDefaultVoiceSubId=" + subId);
-                mDefaultVoiceSubId = subId;
-                // Update MCC MNC device configuration information
-                String defaultMccMnc = TelephonyManager->GetDefault()->GetSimOperator(phoneId);
-                MccTable->UpdateMccMncConfiguration(mContext, defaultMccMnc, FALSE);
-
-                // Broadcast an Intent for default sub change
-                Intent intent = new Intent(TelephonyIntents.ACTION_DEFAULT_SUBSCRIPTION_CHANGED);
-                intent->AddFlags(IIntent::FLAG_RECEIVER_REPLACE_PENDING);
-                SubscriptionManager->PutPhoneIdAndSubIdExtra(intent, phoneId, subId);
-                If (VDBG) {
-                    Logdl("[setDefaultSubId] broadcast default subId changed phoneId=" + phoneId
-                            + " subId=" + subId);
-                }
-                mContext->SendStickyBroadcastAsUser(intent, UserHandle.ALL);
-            } else {
-                If (VDBG) {
-                    Logdl("[setDefaultSubId] not set invalid phoneId=" + phoneId + " subId=" + subId);
-                }
-            }
-        }
-    }
-
-    //@Override
-    CARAPI ClearDefaultsForInactiveSubIds() {
-        final List<SubInfoRecord> records = GetActiveSubInfoList();
-        Logdl("[clearDefaultsForInactiveSubIds] records: " + records);
-        If (ShouldDefaultBeCleared(records, GetDefaultDataSubId())) {
-            Logd("[clearDefaultsForInactiveSubIds] clearing default data sub id");
-            SetDefaultDataSubId(SubscriptionManager.INVALID_SUB_ID);
-        }
-        If (ShouldDefaultBeCleared(records, GetDefaultSmsSubId())) {
-            Logdl("[clearDefaultsForInactiveSubIds] clearing default sms sub id");
-            SetDefaultSmsSubId(SubscriptionManager.INVALID_SUB_ID);
-        }
-        If (ShouldDefaultBeCleared(records, GetDefaultVoiceSubId())) {
-            Logdl("[clearDefaultsForInactiveSubIds] clearing default voice sub id");
-            SetDefaultVoiceSubId(SubscriptionManager.INVALID_SUB_ID);
-        }
-    }
-
-    private Boolean ShouldDefaultBeCleared(List<SubInfoRecord> records, Int64 subId) {
-        Logdl("[shouldDefaultBeCleared: subId] " + subId);
-        If (records == NULL) {
-            Logdl("[shouldDefaultBeCleared] return TRUE no records subId=" + subId);
-            return TRUE;
-        }
-        If (subId == SubscriptionManager.ASK_USER_SUB_ID && records->Size() > 1) {
-            // Only allow ASK_USER_SUB_ID if there is more than 1 subscription.
-            Logdl("[shouldDefaultBeCleared] return FALSE only one subId, subId=" + subId);
-            return FALSE;
-        }
-        For (SubInfoRecord record : records) {
-            Logdl("[shouldDefaultBeCleared] Record.subId: " + record.subId);
-            If (record.subId == subId) {
-                Logdl("[shouldDefaultBeCleared] return FALSE subId is active, subId=" + subId);
-                return FALSE;
-            }
-        }
-        Logdl("[shouldDefaultBeCleared] return TRUE not active subId=" + subId);
-        return TRUE;
-    }
-
-    private class DataConnectionHandler extends Handler {
-        //@Override
-        CARAPI HandleMessage(Message msg) {
-            Switch (msg.what) {
-                case EVENT_SET_DEFAULT_DATA_DONE:{
-                    AsyncResult ar = (AsyncResult) msg.obj;
-                    Logd("EVENT_SET_DEFAULT_DATA_DONE subId:" + (Long)ar.result);
-                    UpdateDataSubId(ar);
-                    break;
-                }
-            }
-        }
-    }
-
-    /* This should return Int64 and not Int64 [] since each phone has
-     * exactly 1 sub id for now, it could return the 0th element
-     * returned from GetSubId()
-     */
-    // FIXME will design a mechanism to manage the relationship between PhoneId/SlotId/SubId
-    // since phoneId = SlotId is not always TRUE
-    public Int64 GetSubIdUsingPhoneId(Int32 phoneId) {
-        Int64[] subIds = GetSubId(phoneId);
-        If (subIds == NULL || subIds.length == 0) {
-            return SubscriptionManager.INVALID_SUB_ID;
-        }
-        return subIds[0];
-    }
-
-    public Int64[] GetSubIdUsingSlotId(Int32 slotId) {
-        return GetSubId(slotId);
-    }
-
-    public List<SubInfoRecord> GetSubInfoUsingSlotIdWithCheck(Int32 slotId, Boolean needCheck) {
-        Logd("[getSubInfoUsingSlotIdWithCheck]+ slotId:" + slotId);
-        EnforceSubscriptionPermission();
-
-        If (slotId == SubscriptionManager.DEFAULT_SLOT_ID) {
-            slotId = GetSlotId(GetDefaultSubId());
-        }
-        If (!SubscriptionManager->IsValidSlotId(slotId)) {
-            Logd("[getSubInfoUsingSlotIdWithCheck]- invalid slotId");
-            return NULL;
-        }
-
-        If (needCheck && !IsSubInfoReady()) {
-            Logd("[getSubInfoUsingSlotIdWithCheck]- not ready");
-            return NULL;
-        }
-
-        Cursor cursor = mContext->GetContentResolver()->Query(SubscriptionManager.CONTENT_URI,
-                NULL, SubscriptionManager.SIM_ID + "=?", new String[] {String->ValueOf(slotId)}, NULL);
-        ArrayList<SubInfoRecord> subList = NULL;
-        try {
-            If (cursor != NULL && cursor->MoveToFirst()) {
-                do {
-                    SubInfoRecord subInfo = GetSubInfoRecord(cursor);
-                    If (subInfo != NULL) {
-                        If (subList == NULL) {
-                            subList = new ArrayList<SubInfoRecord>();
-                        }
-                        subList->Add(subInfo);
-                    }
-                } While (cursor->MoveToNext());
-            }
-        } finally {
-            If (cursor != NULL) {
-                cursor->Close();
-            }
-        }
-        Logd("[getSubInfoUsingSlotId]- NULL info return");
-
-        return subList;
-    }
-
-    private void ValidateSubId(Int64 subId) {
-        Logd("validateSubId subId: " + subId);
-        If (!SubscriptionManager->IsValidSubId(subId)) {
-            throw new RuntimeException("Invalid sub id passed as parameter");
-        } else If (subId == SubscriptionManager.DEFAULT_SUB_ID) {
-            throw new RuntimeException("Default sub id passed as parameter");
-        }
-    }
-
-    CARAPI UpdatePhonesAvailability(PhoneProxy[] phones) {
-        sProxyPhones = phones;
-    }
-
-    /**
-     * @return the list of subId's that are active, is never NULL but the length maybe 0.
-     */
-    //@Override
-    public Int64[] GetActiveSubIdList() {
-        Set<Entry<Integer, Long>> simInfoSet = mSimInfo->EntrySet();
-        Logdl("[getActiveSubIdList] simInfoSet=" + simInfoSet);
-
-        Int64[] subIdArr = new Int64[simInfoSet->Size()];
-        Int32 i = 0;
-        For (Entry<Integer, Long> entry: simInfoSet) {
-            Int64 sub = entry->GetValue();
-            subIdArr[i] = sub;
-            i++;
-        }
-
-        Logdl("[getActiveSubIdList] X subIdArr.length=" + subIdArr.length);
-        return subIdArr;
-    }
-
-    private static void PrintStackTrace(String msg) {
-        RuntimeException re = new RuntimeException();
-        Slogd("StackTrace - " + msg);
-        StackTraceElement[] st = re->GetStackTrace();
-        Boolean first = TRUE;
-        For (StackTraceElement ste : st) {
-            If (first) {
-                first = FALSE;
-            } else {
-                Slogd(ste->ToString());
-            }
-        }
-    }
-
-    //@Override
-    CARAPI Dump(FileDescriptor fd, PrintWriter pw, String[] args) {
-        mContext->EnforceCallingOrSelfPermission(Manifest::permission::DUMP,
-                "Requires DUMP");
-        pw->Println("SubscriptionController:");
-        pw->Println(" defaultSubId=" + GetDefaultSubId());
-        pw->Println(" defaultDataSubId=" + GetDefaultDataSubId());
-        pw->Println(" defaultVoiceSubId=" + GetDefaultVoiceSubId());
-        pw->Println(" defaultSmsSubId=" + GetDefaultSmsSubId());
-
-        pw->Println(" defaultDataPhoneId=" + SubscriptionManager->GetDefaultDataPhoneId());
-        pw->Println(" defaultVoicePhoneId=" + SubscriptionManager->GetDefaultVoicePhoneId());
-        pw->Println(" defaultSmsPhoneId=" + SubscriptionManager->GetDefaultSmsPhoneId());
-        pw->Flush();
-
-        For (Entry<Integer, Long> entry : mSimInfo->EntrySet()) {
-            pw->Println(" mSimInfo[" + entry->GetKey() + "]: subId=" + entry->GetValue());
-        }
-        pw->Flush();
-        pw->Println("++++++++++++++++++++++++++++++++");
-
-        List<SubInfoRecord> sirl = GetActiveSubInfoList();
-        If (sirl != NULL) {
-            pw->Println(" ActiveSubInfoList:");
-            For (SubInfoRecord entry : sirl) {
-                pw->Println("  " + entry->ToString());
-            }
-        } else {
-            pw->Println(" ActiveSubInfoList: is NULL");
-        }
-        pw->Flush();
-        pw->Println("++++++++++++++++++++++++++++++++");
-
-        sirl = GetAllSubInfoList();
-        If (sirl != NULL) {
-            pw->Println(" AllSubInfoList:");
-            For (SubInfoRecord entry : sirl) {
-                pw->Println("  " + entry->ToString());
-            }
-        } else {
-            pw->Println(" AllSubInfoList: is NULL");
-        }
-        pw->Flush();
-        pw->Println("++++++++++++++++++++++++++++++++");
-
-        mLocalLog->Dump(fd, pw, args);
-        pw->Flush();
-        pw->Println("++++++++++++++++++++++++++++++++");
-        pw->Flush();
-    }
-
-    //@Override
-    CARAPI ActivateSubId(Int64 subId) {
-        If (GetSubState(subId) == SubscriptionManager.ACTIVE) {
-            Logd("activateSubId: subscription already active, subId = " + subId);
-            return;
-        }
-
-        Int32 slotId = GetSlotId(subId);
-        SubscriptionHelper->GetInstance()->SetUiccSubscription(slotId, SubscriptionManager.ACTIVE);
-    }
-
-    //@Override
-    CARAPI DeactivateSubId(Int64 subId) {
-        If (GetSubState(subId) == SubscriptionManager.INACTIVE) {
-            Logd("activateSubId: subscription already deactivated, subId = " + subId);
-            return;
-        }
-
-        Int32 slotId = GetSlotId(subId);
-        SubscriptionHelper->GetInstance()->SetUiccSubscription(slotId, SubscriptionManager.INACTIVE);
-    }
-
-    CARAPI SetNwMode(Int64 subId, Int32 nwMode) {
-        Logd("setNwMode, nwMode: " + nwMode + " subId: " + subId);
-        ContentValues value = new ContentValues(1);
-        value->Put(SubscriptionManager.NETWORK_MODE, nwMode);
-        mContext->GetContentResolver()->Update(SubscriptionManager.CONTENT_URI,
-                value, BaseColumns._ID + "=" + Long->ToString(subId), NULL);
-    }
-
-    public Int32 GetNwMode(Int64 subId) {
-        SubInfoRecord subInfo = GetSubInfoForSubscriber(subId);
-        If (subInfo != NULL)  {
-            return subInfo.mNwMode;
-        } else {
-            Loge("getSubState: invalid subId = " + subId);
-            return SubscriptionManager.DEFAULT_NW_MODE;
-        }
-    }
-
-    //@Override
-    public Int32 SetSubState(Int64 subId, Int32 subStatus) {
-        Int32 result = 0;
-        Logd("setSubState, subStatus: " + subStatus + " subId: " + subId);
-        If (ModemStackController->GetInstance()->IsStackReady()) {
-            ContentValues value = new ContentValues(1);
-            value->Put(SubscriptionManager.SUB_STATE, subStatus);
-            result = mContext->GetContentResolver()->Update(SubscriptionManager.CONTENT_URI,
-                    value, BaseColumns._ID + "=" + Long->ToString(subId), NULL);
-
-        }
-        BroadcastSimInfoContentChanged(subId,
-                SubscriptionManager.SUB_STATE, subStatus, SubscriptionManager.DEFAULT_STRING_VALUE);
-        return result;
-    }
-
-    //@Override
-    public Int32 GetSubState(Int64 subId) {
-        SubInfoRecord subInfo = GetSubInfoForSubscriber(subId);
-        Int32 subStatus = SubscriptionManager.INACTIVE;
-
-        // Consider the subStatus from subInfo record only if the
-        //  record is associated with a valid slot Id.
-        If ((subInfo != NULL) && (subInfo.slotId >= 0)) {
-            subStatus = subInfo.mStatus;
-        }
-        return subStatus;
-    }
-
-    /* setDds flag is used to trigger DDS switch request during
-      device powerUp and when flex map performed */
-    CARAPI UpdateUserPrefs(Boolean setDds) {
-        List<SubInfoRecord> subInfoList = GetActiveSubInfoList();
-        Int32 mActCount = 0;
-        SubInfoRecord mNextActivatedSub = NULL;
-
-        If (subInfoList == NULL) {
-            Logd("updateUserPrefs: subscription are not avaiable dds = " + GetDefaultDataSubId()
-                     + " voice = " + GetDefaultVoiceSubId() + " sms = " + GetDefaultSmsSubId() +
-                     " setDDs = " + setDds);
-            // If no SIM cards present on device, set dummy subId
-            // as data/sms/voice preferred subId.
-            SetDefaultSubId(DUMMY_SUB_ID);
-            SetDefaultVoiceSubId(DUMMY_SUB_ID);
-            SetDefaultSmsSubId(DUMMY_SUB_ID);
-            SetDataSubId(DUMMY_SUB_ID);
-            return;
-        }
-
-        //Get num of activated Subs and next available activated sub info.
-        For (SubInfoRecord subInfo : subInfoList) {
-            If (GetSubState(subInfo.subId) == SubscriptionManager.ACTIVE) {
-                mActCount++;
-                If (mNextActivatedSub == NULL) mNextActivatedSub = subInfo;
-            }
-        }
-
-        Logd("updateUserPrefs: active sub count = " + mActCount + " dds = " + GetDefaultDataSubId()
-                 + " voice = " + GetDefaultVoiceSubId() + " sms = "
-                 + GetDefaultSmsSubId() + " setDDs = " + setDds);
-        //if activated sub count is less than 2, disable prompt.
-        If (mActCount < 2) {
-            SetSMSPromptEnabled(FALSE);
-            SetVoicePromptEnabled(FALSE);
-        }
-
-        //if there are no activated subs available, no need to update. EXIT.
-        If (mNextActivatedSub == NULL) return;
-
-        If (GetSubState(GetDefaultSubId()) == SubscriptionManager.INACTIVE) {
-            SetDefaultSubId(mNextActivatedSub.subId);
-        }
-
-        Int64 ddsSubId = GetDefaultDataSubId();
-        Int32 ddsSubState = GetSubState(ddsSubId);
-        //if current data sub is not active, fallback to next active sub.
-        If (setDds || (ddsSubState == SubscriptionManager.INACTIVE)) {
-            If (ddsSubState == SubscriptionManager.INACTIVE) ddsSubId = mNextActivatedSub.subId;
-            SetDefaultDataSubId(ddsSubId);
-        }
-        //if current voice sub is not active and prompt not enabled, fallback to next active sub.
-        If (GetSubState(GetDefaultVoiceSubId()) == SubscriptionManager.INACTIVE &&
-            !IsVoicePromptEnabled()) {
-            SetDefaultVoiceSubId(mNextActivatedSub.subId);
-        }
-        //if current sms sub is not active and prompt not enabled, fallback to next active sub.
-        If (GetSubState(GetDefaultSmsSubId()) == SubscriptionManager.INACTIVE &&
-            !IsSMSPromptEnabled()) {
-            SetDefaultSmsSubId(mNextActivatedSub.subId);
-        }
-        Logd("updateUserPrefs: after currentDds = " + GetDefaultDataSubId() + " voice = " +
-                 GetDefaultVoiceSubId() + " sms = " + GetDefaultSmsSubId() +
-                 " newDds = " + ddsSubId);
-
-    }
-
-    /* Returns User Voice Prompt property,  enabled or not */
-    //@Override
-    public Boolean IsVoicePromptEnabled() {
-        Boolean prompt = FALSE;
-        Int32 value = 0;
-        try {
-            value = Settings::Global::>GetInt(mContext->GetContentResolver(),
-                    Settings::Global::MULTI_SIM_VOICE_PROMPT);
-        } Catch (SettingNotFoundException snfe) {
-            Loge("Settings Exception Reading Dual Sim Voice Prompt Values");
-        }
-        prompt = (value == 0) ? FALSE : TRUE ;
-        If (VDBG) Logd("Voice Prompt option:" + prompt);
-
-       return prompt;
-    }
-
-    /*Sets User SMS Prompt property,  enable or not */
-    //@Override
-    CARAPI SetVoicePromptEnabled(Boolean enabled) {
-        Int32 value = (enabled == FALSE) ? 0 : 1;
-        Settings::Global::>PutInt(mContext->GetContentResolver(),
-                Settings::Global::MULTI_SIM_VOICE_PROMPT, value);
-        Logd("setVoicePromptOption to " + enabled);
-    }
-
-    //@Override
-    public Int64 GetOnDemandDataSubId() {
-        return GetCurrentDds();
-    }
-
-    CARAPI RegisterForOnDemandDdsLockNotification(Int64 clientSubId,
-            OnDemandDdsLockNotifier callback) {
-        Logd("registerForOnDemandDdsLockNotification for client=" + clientSubId);
-        mOnDemandDdsLockNotificationRegistrants->Put(clientSubId, callback);
-
-    }
-
-    /* {@hide} */
-    CARAPI NotifyOnDemandDataSubIdChanged(NetworkRequest n) {
-        OnDemandDdsLockNotifier notifier = mOnDemandDdsLockNotificationRegistrants->Get(
-                GetSubIdFromNetworkRequest(n));
-        If (notifier != NULL) {
-            notifier->NotifyOnDemandDdsLockGranted(n);
-        } else {
-            Logd("No registrants for OnDemandDdsLockGranted event");
-        }
-    }
-
-    public interface OnDemandDdsLockNotifier {
-        CARAPI NotifyOnDemandDdsLockGranted(NetworkRequest n);
-    }
-    CARAPI RemoveStaleSubPreferences(String prefKey) {
-        List<SubInfoRecord> subInfoList = GetAllSubInfoList();
-        SharedPreferences sp = PreferenceManager->GetDefaultSharedPreferences(mContext);
-        For (SubInfoRecord subInfo : subInfoList) {
-            If (subInfo.slotId == -1) {
-                sp->Edit()->Remove(prefKey+subInfo.subId).Commit();
-            }
+using Elastos::Utility::CLinkedList;
+using Elastos::Utility::IListIterator;
+
+namespace Elastos {
+namespace Droid {
+namespace Internal {
+namespace Telephony {
+
+//==============================================================
+//  SubscriptionController::ScLocalLog::
+//==============================================================
+
+SubscriptionController::ScLocalLog::ScLocalLog(
+    /* [in] */ Int32 maxLines)
+{
+    CLinkedList::New((ILinkedList**)&mLog);
+    mMaxLines = maxLines;
+    CTime::New((ITime**)&mNow);
+}
+
+void SubscriptionController::ScLocalLog::Log(
+    /* [in] */ String msg)
+{
+    if (mMaxLines > 0) {
+        Int32 pid = Process::MyPid();
+        Int32 tid = Process::MyTid();
+        mNow->SetToNow();
+        assert(0 && "TODO");
+        // mLog->Add(mNow->Format("%m-%d %H:%M:%S") + " pid=" + pid + " tid=" + tid + " " + msg);
+        Int32 size = 0;
+        while ((mLog->GetSize(&size), size) > mMaxLines) {
+            AutoPtr<IInterface> p;
+            mLog->Remove((IInterface**)&p);
         }
     }
 }
+
+void SubscriptionController::ScLocalLog::Dump(
+    /* [in] */ IFileDescriptor* fd,
+    /* [in] */ IPrintWriter* pw,
+    /* [in] */ ArrayOf<String>* args)
+{
+    Int32 LOOPS_PER_FLUSH = 10; // Flush every N loops.
+    AutoPtr<IListIterator> itr;
+    mLog->GetListIterator(0, (IListIterator**)&itr);
+    Int32 i = 0;
+    Boolean bHasNext = FALSE;
+    while ((IIterator::Probe(itr)->HasNext(&bHasNext), bHasNext)) {
+        String str(StringUtils::ToString(i++));
+        str += ": ";
+        AutoPtr<IInterface> p;
+        IIterator::Probe(itr)->GetNext((IInterface**)&p);
+        assert(0 && "TODO");
+        // str += p;
+        pw->Println(str);
+        // Flush periodically so we don't drop lines
+        if ((i % LOOPS_PER_FLUSH) == 0) {
+            IFlushable::Probe(pw)->Flush();
+        }
+    }
+}
+
+//==============================================================
+//  SubscriptionController::DataConnectionHandler::
+//==============================================================
+SubscriptionController::DataConnectionHandler::DataConnectionHandler(
+    /* [in] */ SubscriptionController* host)
+    : mHost(host)
+{}
+
+ECode SubscriptionController::DataConnectionHandler::HandleMessage(
+    /* [in] */ IMessage* msg)
+{
+    Int32 what = 0;
+    msg->GetWhat(&what);
+    switch (what) {
+        case 1: {       // SubscriptionController::EVENT_SET_DEFAULT_DATA_DONE: {
+            AutoPtr<IInterface> obj;
+            msg->GetObj((IInterface**)&obj);
+            AutoPtr<AsyncResult> ar = (AsyncResult*)(IObject*)obj.Get();
+            String str("EVENT_SET_DEFAULT_DATA_DONE subId:");
+            assert(0 && "TODO");
+            // str += ar->mResult;
+            mHost->Logd(str);
+            mHost->UpdateDataSubId(ar);
+            break;
+        }
+    }
+    return NOERROR;
+}
+
+//==============================================================
+//  SubscriptionController::MyHandler::
+//==============================================================
+SubscriptionController::MyHandler::MyHandler(
+    /* [in] */ SubscriptionController* host)
+    : mHost(host)
+{}
+
+ECode SubscriptionController::MyHandler::HandleMessage(
+    /* [in] */ IMessage* msg)
+{
+    AutoPtr<AsyncResult> ar;
+
+    Int32 what = 0;
+    msg->GetWhat(&what);
+    switch (what) {
+        case 1: {           // SubscriptionController::EVENT_WRITE_MSISDN_DONE: {
+            AutoPtr<IInterface> obj;
+            msg->GetObj((IInterface**)&obj);
+            ar = (AsyncResult*)(IObject*)obj.Get();
+            {
+                AutoLock syncLock(mHost->mLock);
+                mHost->mSuccess = (ar->mException == NULL);
+                String str("EVENT_WRITE_MSISDN_DONE, mSuccess = ");
+                str += mHost->mSuccess;
+                mHost->Logd(str);
+                mHost->mLock.NotifyAll();
+            }
+            break;
+        }
+    }
+    return NOERROR;
+}
+
+//==============================================================
+//  SubscriptionController::
+//==============================================================
+const String SubscriptionController::LOGTAG("SubController");
+const Boolean SubscriptionController::DBG = TRUE;
+const Boolean SubscriptionController::VDBG = FALSE;
+const Int32 SubscriptionController::MAX_LOCAL_LOG_LINES = 500; // TODO: Reduce to 100 when 17678050 is fixed
+
+AutoPtr<ISubscriptionController> SubscriptionController::sInstance = NULL;
+AutoPtr<ArrayOf<IPhoneProxy*> > SubscriptionController::sProxyPhones;
+
+const Int32 SubscriptionController::RES_TYPE_BACKGROUND_DARK = 0;
+const Int32 SubscriptionController::RES_TYPE_BACKGROUND_LIGHT = 1;
+
+const AutoPtr<ArrayOf<Int32> > SubscriptionController::sSimBackgroundDarkRes = SetSimResource(RES_TYPE_BACKGROUND_DARK);
+const AutoPtr<ArrayOf<Int32> > SubscriptionController::sSimBackgroundLightRes = SetSimResource(RES_TYPE_BACKGROUND_LIGHT);
+
+static AutoPtr<IHashMap> InitInfo()
+{
+    AutoPtr<IHashMap> p;
+    CHashMap::New((IHashMap**)&p);
+    return p;
+}
+AutoPtr<IHashMap> SubscriptionController::mSimInfo = InitInfo();
+Int64 SubscriptionController::mDefaultVoiceSubId = ISubscriptionManager::DEFAULT_SUB_ID;
+Int32 SubscriptionController::mDefaultPhoneId = 0;
+
+const Int32 SubscriptionController::EVENT_WRITE_MSISDN_DONE = 1;
+
+const Int32 SubscriptionController::EVENT_SET_DEFAULT_DATA_DONE = 1;
+
+const Int32 SubscriptionController::DUMMY_SUB_ID = -1;
+
+CAR_INTERFACE_IMPL_2(SubscriptionController, Object, ISubscriptionController, IISub)
+
+SubscriptionController::SubscriptionController()
+{
+    mLocalLog = new ScLocalLog(MAX_LOCAL_LOG_LINES);
+
+    mSuccess = FALSE;
+
+    mHandler = new MyHandler(this);
+
+    CHashMap::New((IHashMap**)&mOnDemandDdsLockNotificationRegistrants);
+}
+
+AutoPtr<ISubscriptionController> SubscriptionController::Init(
+    /* [in] */ IPhone* phone)
+{
+    {
+        // AutoLock syncLock(SubscriptionController.class);
+        if (sInstance == NULL) {
+            assert(0 && "TODO");
+            // sInstance = new SubscriptionController(phone);
+        }
+        else {
+            // Logger::Wtf(LOGTAG, "Init() called multiple times!  sInstance = %p", sInstance);
+        }
+        return sInstance;
+    }
+}
+
+AutoPtr<ISubscriptionController> SubscriptionController::Init(
+    /* [in] */ IContext* c,
+    /* [in] */ ArrayOf<ICommandsInterface*>* ci)
+{
+    {
+        // AutoLock syncLock(SubscriptionController.class);
+        if (sInstance == NULL) {
+            assert(0 && "TODO");
+            // sInstance = new SubscriptionController(c);
+        }
+        else {
+            // Log::Wtf(LOGTAG, "Init() called multiple times!  sInstance = %p", sInstance);
+        }
+        return sInstance;
+    }
+}
+
+AutoPtr<ISubscriptionController> SubscriptionController::GetInstance()
+{
+    if (sInstance == NULL) {
+        assert(0 && "TODO");
+       // Log::Wtf(LOGTAG, "getInstance NULL");
+    }
+
+    return sInstance;
+}
+
+ECode SubscriptionController::constructor(
+    /* [in] */ IContext* c)
+{
+    Logd(String("SubscriptionController init by Context"));
+    mContext = c;
+    AutoPtr<ICallManagerHelper> cmhlp;
+    assert(0 && "TODO");
+    // CCallManagerHelper::AcquireSingleton((ICallManagerHelper**)&cmhlp);
+    cmhlp->GetInstance((ICallManager**)&mCM);
+
+    AutoPtr<IServiceManager> sm;
+    CServiceManager::AcquireSingleton((IServiceManager**)&sm);
+    AutoPtr<IInterface> pServ;
+    sm->GetService(String("isub"), (IInterface**)&pServ);
+    if (pServ == NULL) {
+        sm->AddService(String("isub"), ISubscriptionController::Probe(this));
+    }
+
+    Logdl(String("[SubscriptionController] init by Context"));
+    mDataConnectionHandler = new DataConnectionHandler(this);
+
+    AutoPtr<IDdsSchedulerHelper> dshlp;
+    CDdsSchedulerHelper::AcquireSingleton((IDdsSchedulerHelper**)&dshlp);
+    dshlp->GetInstance((IDdsScheduler**)&mScheduler);
+
+    CDdsSchedulerAc::New((IDdsSchedulerAc**)&mSchedulerAc);
+    AutoPtr<IHandler> h;
+    IStateMachine::Probe(mScheduler)->GetHandler((IHandler**)&h);
+    IAsyncChannel::Probe(mSchedulerAc)->Connect(mContext, mDataConnectionHandler, h);
+    return NOERROR;
+}
+
+ECode SubscriptionController::constructor(
+    /* [in] */ IPhone* phone)
+{
+    phone->GetContext((IContext**)&mContext);
+    AutoPtr<ICallManagerHelper> cmhlp;
+    assert(0 && "TODO");
+    // CCallManagerHelper::AcquireSingleton((ICallManagerHelper**)&cmhlp);
+    cmhlp->GetInstance((ICallManager**)&mCM);
+
+    AutoPtr<IServiceManager> sm;
+    CServiceManager::AcquireSingleton((IServiceManager**)&sm);
+    AutoPtr<IInterface> pServ;
+    sm->GetService(String("isub"), (IInterface**)&pServ);
+    if (pServ == NULL) {
+        sm->AddService(String("isub"), ISubscriptionController::Probe(this));
+    }
+
+    Logdl(String("[SubscriptionController] init by Phone"));
+    return NOERROR;
+}
+
+ECode SubscriptionController::GetSubIdFromNetworkRequest(
+    /* [in] */ INetworkRequest* n,
+    /* [out] */ Int64* result)
+{
+    VALIDATE_NOT_NULL(result)
+    Int64 subId = 0;
+    if (n == NULL) {
+        return GetDefaultDataSubId(result);
+    }
+
+    AutoPtr<INetworkCapabilities> netcap;
+    n->GetNetworkCapabilities((INetworkCapabilities**)&netcap);
+    String str;
+    netcap->GetNetworkSpecifier(&str);
+    // try {
+        subId = StringUtils::ParseInt64(str);
+    // } Catch(NumberFormatException e) {
+    //     Loge("Exception e = " + e);
+    //     subId = GetDefaultDataSubId();
+    // }
+
+    *result = subId;
+    return NOERROR;
+}
+
+ECode SubscriptionController::StartOnDemandDataSubscriptionRequest(
+    /* [in] */ INetworkRequest* n)
+{
+    String str("startOnDemandDataSubscriptionRequest = ");
+    assert(0 && "TODO");
+    // str += n;
+    Logd(str);
+    mSchedulerAc->AllocateDds(n);
+    return NOERROR;
+}
+
+ECode SubscriptionController::StopOnDemandDataSubscriptionRequest(
+    /* [in] */ INetworkRequest* n)
+{
+    String str("stopOnDemandDataSubscriptionRequest = ");
+    assert(0 && "TODO");
+    // str += n;
+    Logd(str);
+    mSchedulerAc->FreeDds(n);
+    return NOERROR;
+}
+
+Boolean SubscriptionController::IsSubInfoReady()
+{
+    Int32 size = 0;
+    mSimInfo->GetSize(&size);
+    return size > 0;
+}
+
+void SubscriptionController::EnforceSubscriptionPermission()
+{
+    mContext->EnforceCallingOrSelfPermission(Manifest::permission::READ_PHONE_STATE,
+            String("Requires READ_PHONE_STATE"));
+}
+
+void SubscriptionController::BroadcastSimInfoContentChanged(
+    /* [in] */ Int64 subId,
+    /* [in] */ String columnName,
+    /* [in] */ Int32 intContent,
+    /* [in] */ String stringContent)
+{
+    AutoPtr<IIntent> intent;
+    CIntent::New(ITelephonyIntents::ACTION_SUBINFO_CONTENT_CHANGE, (IIntent**)&intent);
+    intent->PutExtra(IBaseColumns::ID, subId);
+    intent->PutExtra(ITelephonyIntents::EXTRA_COLUMN_NAME, columnName);
+    intent->PutExtra(ITelephonyIntents::EXTRA_INT_CONTENT, intContent);
+    intent->PutExtra(ITelephonyIntents::EXTRA_STRING_CONTENT, stringContent);
+    if (intContent != ISubscriptionManager::DEFAULT_INT_VALUE) {
+        String str("[broadcastSimInfoContentChanged] subId");
+        str += subId;
+        str += " changed, ";
+        str += columnName;
+        str += " -> ";
+        str += intContent;
+        Logd(str);
+    }
+    else {
+        String str("[broadcastSimInfoContentChanged] subId");
+        str += subId;
+        str += " changed, ";
+        str += columnName;
+        str += " -> ";
+        str += stringContent;
+        Logd(str);
+    }
+    mContext->SendBroadcast(intent);
+}
+
+AutoPtr<ISubInfoRecord> SubscriptionController::GetSubInfoRecord(
+    /* [in] */ ICursor* cursor)
+{
+    AutoPtr<ISubInfoRecord> info;
+    CSubInfoRecord::New((ISubInfoRecord**)&info);
+    AutoPtr<CSubInfoRecord> _info = (CSubInfoRecord*)info.Get();
+    Int32 subId = 0;
+    cursor->GetColumnIndexOrThrow(IBaseColumns::ID, &subId);
+    cursor->GetInt64(subId, &(_info->mSubId));
+    Int32 iccId = 0;
+    cursor->GetColumnIndexOrThrow(
+            ISubscriptionManager::ICC_ID, &iccId);
+    cursor->GetString(iccId, &(_info->mIccId));
+    Int32 slotId = 0;
+    cursor->GetColumnIndexOrThrow(
+            ISubscriptionManager::SIM_ID, &slotId);
+    cursor->GetInt32(slotId, &(_info->mSlotId));
+    Int32 displayName = 0;
+    cursor->GetColumnIndexOrThrow(
+            ISubscriptionManager::DISPLAY_NAME, &displayName);
+    cursor->GetString(displayName, &(_info->mDisplayName));
+    Int32 nameSource = 0;
+    cursor->GetColumnIndexOrThrow(
+            ISubscriptionManager::NAME_SOURCE, &nameSource);
+    cursor->GetInt32(nameSource, &(_info->mNameSource));
+    Int32 color = 0;
+    cursor->GetColumnIndexOrThrow(
+            ISubscriptionManager::COLOR, &color);
+    cursor->GetInt32(color, &(_info->mColor));
+    Int32 number = 0;
+    cursor->GetColumnIndexOrThrow(
+            ISubscriptionManager::NUMBER, &number);
+    cursor->GetString(number, &(_info->mNumber));
+    Int32 displayNumberFormat = 0;
+    cursor->GetColumnIndexOrThrow(
+            ISubscriptionManager::DISPLAY_NUMBER_FORMAT, &displayNumberFormat);
+    cursor->GetInt32(displayNumberFormat, &(_info->mDisplayNumberFormat));
+    Int32 dataRoaming = 0;
+    cursor->GetColumnIndexOrThrow(
+            ISubscriptionManager::DATA_ROAMING, &dataRoaming);
+    cursor->GetInt32(dataRoaming, &(_info->mDataRoaming));
+
+    Int32 size = sSimBackgroundDarkRes->GetLength();
+    if (_info->mColor >= 0 && _info->mColor < size) {
+        AutoPtr<ArrayOf<Int32> > iconRes = _info->mSimIconRes;
+        (*iconRes)[RES_TYPE_BACKGROUND_DARK] = (*sSimBackgroundDarkRes)[_info->mColor];
+        (*iconRes)[RES_TYPE_BACKGROUND_LIGHT] = (*sSimBackgroundLightRes)[_info->mColor];
+    }
+    Int32 mcc = 0;
+    cursor->GetColumnIndexOrThrow(
+            ISubscriptionManager::MCC, &mcc);
+    cursor->GetInt32(mcc, &(_info->mMcc));
+    Int32 mnc = 0;
+    cursor->GetColumnIndexOrThrow(
+            ISubscriptionManager::MNC, &mnc);
+    cursor->GetInt32(mnc, &(_info->mMnc));
+    Int32 mStatus = 0;
+    cursor->GetColumnIndexOrThrow(
+            ISubscriptionManager::SUB_STATE, &mStatus);
+    assert(0 && "TODO");
+    // cursor->GetInt32(mStatus, &(_info->mStatus));
+    Int32 mNwMode = 0;
+    cursor->GetColumnIndexOrThrow(
+            ISubscriptionManager::NETWORK_MODE, &mNwMode);
+    assert(0 && "TODO");
+    // cursor->GetInt32(mNwMode, &(_info->mNwMode));
+
+    String str("[getSubInfoRecord] SubId:");
+    str += _info->mSubId;
+    str += " iccid:";
+    str += _info->mIccId;
+    str += " slotId:";
+    str += _info->mSlotId;
+    str += " displayName:";
+    str += _info->mDisplayName;
+    str += " color:";
+    str += _info->mColor;
+    str += " mcc/mnc:";
+    str += _info->mMcc;
+    str += "/";
+    str += _info->mMnc;
+    str += " subStatus: ";
+    assert(0 && "TODO");
+    // str += _info->mStatus;
+    str += " Nwmode: ";
+    // str += _info->mNwMode;
+    Logd(str);
+
+    return info;
+}
+
+AutoPtr<IList> SubscriptionController::GetSubInfo(
+    /* [in] */ String selection,
+    /* [in] */ IInterface* queryKey)
+{
+    String str("selection:");
+    str += selection;
+    str += " ";
+    assert(0 && "TODO");
+    // str += queryKey;
+    Logd(str);
+    AutoPtr<ArrayOf<String> > selectionArgs;
+    if (queryKey != NULL) {
+        selectionArgs = ArrayOf<String>::Alloc(1);
+        assert(0 && "TODO");
+        // (*selectionArgs)[0] = queryKey->ToString();
+    }
+    AutoPtr<IArrayList> subList;
+    AutoPtr<IContentResolver> cr;
+    mContext->GetContentResolver((IContentResolver**)&cr);
+    AutoPtr<ISubscriptionManager> sm;
+    CSubscriptionManager::AcquireSingleton((ISubscriptionManager**)&sm);
+    AutoPtr<IUri> content_uri;
+    sm->GetCONTENT_URI((IUri**)&content_uri);
+    AutoPtr<ICursor> cursor;
+    cr->Query(content_uri,
+            NULL, selection, selectionArgs, ISubscriptionManager::SIM_ID, (ICursor**)&cursor);
+
+    if (cursor != NULL) {
+        Boolean bMN = FALSE;
+        while ((cursor->MoveToNext(&bMN), bMN)) {
+            AutoPtr<ISubInfoRecord> subInfo = GetSubInfoRecord(cursor);
+            AutoPtr<ISubscriptionManager> sm;
+            CSubscriptionManager::AcquireSingleton((ISubscriptionManager**)&sm);
+            AutoPtr<CSubInfoRecord> _subInfo = (CSubInfoRecord*)subInfo.Get();
+            Boolean bValid = FALSE;
+            if (subInfo != NULL && (sm->IsValidSlotId(_subInfo->mSlotId, &bValid), bValid)) {
+                if (subList == NULL) {
+                    CArrayList::New((IArrayList**)&subList);
+                }
+                subList->Add(subInfo);
+            }
+        }
+    }
+    else {
+        Logd(String("Query fail"));
+    }
+
+    if (cursor != NULL) {
+        ICloseable::Probe(cursor)->Close();
+    }
+
+    return IList::Probe(subList);
+}
+
+ECode SubscriptionController::GetSubInfoForSubscriber(
+    /* [in] */ Int64 subId,
+    /* [out] */ ISubInfoRecord** result)
+{
+    VALIDATE_NOT_NULL(result)
+    String str("[getSubInfoForSubscriberx]+ subId:");
+    str += subId;
+    Logd(str);
+    EnforceSubscriptionPermission();
+
+    if (subId == ISubscriptionManager::DEFAULT_SUB_ID) {
+        GetDefaultSubId(&subId);
+    }
+    AutoPtr<ISubscriptionManager> sm;
+    CSubscriptionManager::AcquireSingleton((ISubscriptionManager**)&sm);
+    Boolean bValid = FALSE;
+    sm->IsValidSubId(subId, &bValid);
+    if (!bValid || !IsSubInfoReady()) {
+        str = "[getSubInfoForSubscriberx]- invalid subId or not ready, subId = ";
+        str += subId;
+        Logd(str);
+        *result = NULL;
+        return NOERROR;
+    }
+    AutoPtr<IContentResolver> cr;
+    mContext->GetContentResolver((IContentResolver**)&cr);
+    AutoPtr<ArrayOf<String> > arr = ArrayOf<String>::Alloc(1);
+    (*arr)[0] = StringUtils::ToString(subId);
+    str = IBaseColumns::ID;
+    str += "=?";
+    AutoPtr<IUri> content_uri;
+    sm->GetCONTENT_URI((IUri**)&content_uri);
+    AutoPtr<ICursor> cursor;
+    cr->Query(content_uri,
+            NULL, str, arr, String(NULL), (ICursor**)&cursor);
+
+    if (cursor != NULL) {
+        Boolean bMF = FALSE;
+        cursor->MoveToFirst(&bMF);
+        if (bMF) {
+            Logd(String("[getSubInfoForSubscriberx]- Info detail:"));
+            AutoPtr<ISubInfoRecord> res = GetSubInfoRecord(cursor);
+            *result = res;
+            REFCOUNT_ADD(*result)
+            return NOERROR;
+        }
+    }
+
+    if (cursor != NULL) {
+        ICloseable::Probe(cursor)->Close();
+    }
+    Logd(String("[getSubInfoForSubscriber]- NULL info return"));
+    *result = NULL;
+    return NOERROR;
+}
+
+ECode SubscriptionController::GetSubInfoUsingIccId(
+    /* [in] */ const String& iccId,
+    /* [out] */ IList** result)
+{
+    VALIDATE_NOT_NULL(result)
+    String str("[getSubInfoUsingIccId]+ iccId:");
+    str += iccId;
+    Logd(str);
+    EnforceSubscriptionPermission();
+
+    if (iccId == NULL || !IsSubInfoReady()) {
+        Logd(String("[getSubInfoUsingIccId]- NULL iccid or not ready"));
+        *result = NULL;
+        return NOERROR;
+    }
+    AutoPtr<IContentResolver> cr;
+    mContext->GetContentResolver((IContentResolver**)&cr);
+    AutoPtr<ArrayOf<String> > arr = ArrayOf<String>::Alloc(1);
+    (*arr)[0] = iccId;
+    str = ISubscriptionManager::ICC_ID;
+    str += "=?";
+    AutoPtr<ISubscriptionManager> sm;
+    CSubscriptionManager::AcquireSingleton((ISubscriptionManager**)&sm);
+    AutoPtr<IUri> content_uri;
+    sm->GetCONTENT_URI((IUri**)&content_uri);
+    AutoPtr<ICursor> cursor;
+    cr->Query(content_uri,
+            NULL, str, arr, String(NULL), (ICursor**)&cursor);
+    AutoPtr<IArrayList> subList;
+
+    if (cursor != NULL) {
+        Boolean bMN = FALSE;
+        while ((cursor->MoveToNext(&bMN), bMN)) {
+            AutoPtr<ISubInfoRecord> subInfo = GetSubInfoRecord(cursor);
+            if (subInfo != NULL) {
+                if (subList == NULL) {
+                    CArrayList::New((IArrayList**)&subList);
+                }
+                subList->Add(subInfo);
+            }
+        }
+    }
+    else {
+        Logd(String("Query fail"));
+    }
+
+    if (cursor != NULL) {
+        ICloseable::Probe(cursor)->Close();
+    }
+
+    *result = IList::Probe(subList);
+    REFCOUNT_ADD(*result)
+    return NOERROR;
+}
+
+ECode SubscriptionController::GetSubInfoUsingSlotId(
+    /* [in] */ Int32 slotId,
+    /* [out] */ IList** result)
+{
+    VALIDATE_NOT_NULL(result)
+    return GetSubInfoUsingSlotIdWithCheck(slotId, TRUE, result);
+}
+
+ECode SubscriptionController::GetAllSubInfoList(
+    /* [out] */ IList** result)
+{
+    VALIDATE_NOT_NULL(result)
+    Logd(String("[getAllSubInfoList]+"));
+    EnforceSubscriptionPermission();
+
+    AutoPtr<IList> subList;
+    subList = GetSubInfo(String(NULL), NULL);
+    if (subList != NULL) {
+        Int32 size = 0;
+        subList->GetSize(&size);
+        String str("[getAllSubInfoList]- ");
+        str += size;
+        str += " infos return";
+        Logd(str);
+    }
+    else {
+        Logd(String("[getAllSubInfoList]- no info return"));
+    }
+
+    *result = subList;
+    REFCOUNT_ADD(*result)
+    return NOERROR;
+}
+
+ECode SubscriptionController::GetActiveSubInfoList(
+    /* [out] */ IList** result)
+{
+    VALIDATE_NOT_NULL(result)
+    EnforceSubscriptionPermission();
+    Logdl(String("[getActiveSubInfoList]+"));
+
+    AutoPtr<IList> subList;
+
+    if (!IsSubInfoReady()) {
+        Logdl(String("[getActiveSubInfoList] Sub Controller not ready"));
+        *result = subList;
+        REFCOUNT_ADD(*result)
+        return NOERROR;
+    }
+
+    String str(ISubscriptionManager::SIM_ID);
+    str += "!=";
+    str += ISubscriptionManager::INVALID_SLOT_ID;
+    subList = GetSubInfo(str, NULL);
+    if (subList != NULL) {
+        Int32 size = 0;
+        subList->GetSize(&size);
+        str = "[getActiveSubInfoList]- ";
+        str += size;
+        str += " infos return";
+        Logdl(str);
+    }
+    else {
+        Logdl(String("[getActiveSubInfoList]- no info return"));
+    }
+
+    *result = subList;
+    REFCOUNT_ADD(*result)
+    return NOERROR;
+}
+
+ECode SubscriptionController::GetActiveSubInfoCount(
+    /* [out] */ Int32* result)
+{
+    VALIDATE_NOT_NULL(result)
+    Logd(String("[getActiveSubInfoCount]+"));
+    AutoPtr<IList> records;
+    GetActiveSubInfoList((IList**)&records);
+    if (records == NULL) {
+        Logd(String("[getActiveSubInfoCount] records NULL"));
+        *result = 0;
+        return NOERROR;
+    }
+    String str("[getActiveSubInfoCount]- count: ");
+    Int32 size = 0;
+    records->GetSize(&size);
+    str += size;
+    Logd(str);
+    *result = size;
+    return NOERROR;
+}
+
+ECode SubscriptionController::GetAllSubInfoCount(
+    /* [out] */ Int32* result)
+{
+    VALIDATE_NOT_NULL(result)
+    Logd(String("[getAllSubInfoCount]+"));
+    EnforceSubscriptionPermission();
+
+    AutoPtr<IContentResolver> cr;
+    mContext->GetContentResolver((IContentResolver**)&cr);
+    AutoPtr<ISubscriptionManager> sm;
+    CSubscriptionManager::AcquireSingleton((ISubscriptionManager**)&sm);
+    AutoPtr<IUri> content_uri;
+    sm->GetCONTENT_URI((IUri**)&content_uri);
+    AutoPtr<ICursor> cursor;
+    cr->Query(content_uri,
+            NULL, String(NULL), NULL, String(NULL), (ICursor**)&cursor);
+    if (cursor != NULL) {
+        Int32 count = 0;
+        cursor->GetCount(&count);
+        String str("[getAllSubInfoCount]- ");
+        str += count;
+        str += " SUB(s) in DB";
+        Logd(str);
+        *result = count;
+        return NOERROR;
+    }
+    if (cursor != NULL) {
+        ICloseable::Probe(cursor)->Close();
+    }
+    Logd(String("[getAllSubInfoCount]- no SUB in DB"));
+
+    *result = 0;
+    return NOERROR;
+}
+
+ECode SubscriptionController::AddSubInfoRecord(
+    /* [in] */ const String& iccId,
+    /* [in] */ Int32 slotId,
+    /* [out] */ Int32* result)
+{
+    VALIDATE_NOT_NULL(result)
+    String str("[addSubInfoRecord]+ iccId:");
+    str += iccId;
+    str += " slotId:";
+    str += slotId;
+    Logdl(str);
+    EnforceSubscriptionPermission();
+
+    if (iccId == NULL) {
+        Logdl(String("[addSubInfoRecord]- NULL iccId"));
+    }
+
+    String nameToSet;
+    if (IsSubInfoReady()) { // we can only get a subId if SubInfo is ready
+        AutoPtr<ArrayOf<Int64> > subIds;
+        GetSubId(slotId, (ArrayOf<Int64>**)&subIds);
+        if (subIds == NULL || subIds->GetLength() == 0) {
+            Logdl(String("[addSubInfoRecord]- getSubId fail"));
+            *result = 0;
+            return NOERROR;
+        }
+
+        Int32 subIdsIndex = 0;
+        if (subIds->GetLength() > 1) { // one SIM can have more than one subId
+            for (Int32 i = 0; i < subIds->GetLength(); i++) {
+                str = "[addSubInfoRecord] inspecting subIds[";
+                str += i;
+                str += "]: ";
+                str += (*subIds)[i];
+                Logdl(str);
+                AutoPtr<ITelephonyManagerHelper> tmhlp;
+                CTelephonyManagerHelper::AcquireSingleton((ITelephonyManagerHelper**)&tmhlp);
+                AutoPtr<ITelephonyManager> tm;
+                tmhlp->GetDefault((ITelephonyManager**)&tm);
+                String name;
+                tm->GetSimOperatorName((*subIds)[i], &name);
+                if (!name.Equals("")) {
+                    // We have a Carrier here, with a CarrierName and everything!
+                    subIdsIndex = i;
+                    str = "[addSubInfoRecord] using subIds[";
+                    str += i;
+                    str += "]: it has a Carrier";
+                    Logdl(str);
+                }
+            }
+        }
+
+        if ((*subIds)[subIdsIndex] == -1) { // DUMMY value from getSubId
+            AutoPtr<IInterface> p;
+            mSimInfo->Get(CoreUtils::Convert(slotId), (IInterface**)&p);
+            if (p == NULL) {
+                Logdl(String("[addSubInfoRecord] currentSubId is NULL, proceed with dummy value"));
+            }
+            else {
+                Int64 currentSubId = 0;
+                IInteger64::Probe(p)->GetValue(&currentSubId);
+                str = "[addSubInfoRecord] currentSubId ";
+                str += currentSubId;
+                str += ", proceed with it";
+                Logdl(str);
+                (*subIds)[subIdsIndex] = currentSubId;
+            }
+        }
+
+        AutoPtr<ITelephonyManagerHelper> tmhlp;
+        CTelephonyManagerHelper::AcquireSingleton((ITelephonyManagerHelper**)&tmhlp);
+        AutoPtr<ITelephonyManager> tm;
+        tmhlp->GetDefault((ITelephonyManager**)&tm);
+        String Carrier;
+        tm->GetSimOperator((*subIds)[subIdsIndex], &Carrier);
+        str = "[addSubInfoRecord] Carrier = ";
+        str += Carrier;
+        Logdl(str);
+        String CarrierName;
+        tm->GetSimOperatorName((*subIds)[subIdsIndex], &CarrierName);
+        str = "[addSubInfoRecord] CarrierName = ";
+        str += CarrierName;
+        Logdl(str);
+        AutoPtr<ISpnOverride> mSpnOverride;
+        assert(0 && "TODO");
+        // CSpnOverride::New((ISpnOverride**)&mSpnOverride);
+
+        Boolean bContain = FALSE;
+        mSpnOverride->ContainsCarrier(Carrier, &bContain);
+        if (bContain) {
+            mSpnOverride->GetSpn(Carrier, &nameToSet);
+            str = "[addSubInfoRecord] Found, SpnOverride, name = ";
+            str += nameToSet;
+            Logdl(str);
+        }
+        else if (!CarrierName.Equals("")) {
+            nameToSet = CarrierName;
+            str = "[addSubInfoRecord] Found, name = ";
+            str += nameToSet;
+            Logdl(str);
+        }
+        else {
+            nameToSet = "SIM ";
+            nameToSet += StringUtils::ToString(slotId + 1);
+            str = "[addSubInfoRecord] Not found, name = ";
+            str += nameToSet;
+            Logdl(str);
+        }
+    }
+    else {
+        nameToSet = "SIM ";
+        nameToSet += StringUtils::ToString(slotId + 1);
+        str = "[addSubInfoRecord] SubInfo not ready, name = ";
+        str += nameToSet;
+        Logdl(str);
+    }
+
+    AutoPtr<ArrayOf<String> > arr1 = ArrayOf<String>::Alloc(3);
+    (*arr1)[0] = IBaseColumns::ID;
+    (*arr1)[1] = ISubscriptionManager::SIM_ID;
+    (*arr1)[2] = ISubscriptionManager::NAME_SOURCE;
+    AutoPtr<ArrayOf<String> > arr2 = ArrayOf<String>::Alloc(1);
+    (*arr2)[0] = iccId;
+    str = ISubscriptionManager::ICC_ID;
+    str += "=?";
+    AutoPtr<IContentResolver> resolver;
+    mContext->GetContentResolver((IContentResolver**)&resolver);
+    AutoPtr<ISubscriptionManager> sm;
+    CSubscriptionManager::AcquireSingleton((ISubscriptionManager**)&sm);
+    AutoPtr<IUri> content_uri;
+    sm->GetCONTENT_URI((IUri**)&content_uri);
+    AutoPtr<ICursor> cursor;
+    resolver->Query(content_uri,
+            arr1, str,
+            arr2, String(NULL),
+            (ICursor**)&cursor);
+
+    Boolean bMF = FALSE;
+    if (cursor == NULL || !(cursor->MoveToFirst(&bMF), bMF)) {
+        AutoPtr<IContentValues> value;
+        CContentValues::New((IContentValues**)&value);
+        value->Put(ISubscriptionManager::ICC_ID, iccId);
+        // default SIM color differs between slots
+        value->Put(ISubscriptionManager::COLOR, slotId);
+        value->Put(ISubscriptionManager::SIM_ID, slotId);
+        value->Put(ISubscriptionManager::DISPLAY_NAME, nameToSet);
+        AutoPtr<IUri> uri;
+        resolver->Insert(content_uri, value, (IUri**)&uri);
+        str = "[addSubInfoRecord]- New record created: ";
+        assert(0 && "TODO");
+        // str += uri;
+        Logdl(str);
+    }
+    else {
+        Int64 subId = 0;
+        cursor->GetInt64(0, &subId);
+        Int32 oldSimInfoId = 0;
+        cursor->GetInt32(1, &oldSimInfoId);
+        Int32 nameSource = 0;
+        cursor->GetInt32(2, &nameSource);
+        AutoPtr<IContentValues> value;
+        CContentValues::New((IContentValues**)&value);
+
+        if (slotId != oldSimInfoId) {
+            value->Put(ISubscriptionManager::SIM_ID, slotId);
+        }
+
+        if (nameSource == ISubscriptionManager::NAME_SOURCE_UNDEFINDED) {
+            value->Put(ISubscriptionManager::DISPLAY_NAME, nameToSet);
+            str = "[addSubInfoRecord]- going to update SIM name to ";
+            str += nameToSet;
+            Logdl(str);
+        }
+
+        Int32 size = 0;
+        value->GetSize(&size);
+        if (size > 0) {
+            str = IBaseColumns::ID;
+            str += "=";
+            str += StringUtils::ToString(subId);
+            Int32 res = 0;
+            resolver->Update(content_uri, value,
+                    str, NULL, &res);
+        }
+
+        Logdl(String("[addSubInfoRecord]- Record already exist"));
+    }
+    if (cursor != NULL) {
+        ICloseable::Probe(cursor)->Close();
+    }
+
+    str = ISubscriptionManager::SIM_ID;
+    str += "=?";
+    AutoPtr<ArrayOf<String> > arrVal = ArrayOf<String>::Alloc(1);
+    (*arrVal)[0] = StringUtils::ToString(slotId);
+    resolver->Query(content_uri, NULL,
+            str, arrVal, String(NULL), (ICursor**)&cursor);
+
+    Boolean bMN = FALSE;
+    bMF = FALSE;
+    if (cursor != NULL && (cursor->MoveToFirst(&bMF), bMF)) {
+        do {
+            Int32 id = 0;
+            cursor->GetColumnIndexOrThrow(IBaseColumns::ID, &id);
+            Int64 subId = 0;
+            cursor->GetInt64(id, &subId);
+            // if mSimInfo already has a valid subId for a slotId/phoneId,
+            // do not add another subId for same slotId/phoneId.
+            AutoPtr<IInterface> p;
+            mSimInfo->Get(CoreUtils::Convert(slotId), (IInterface**)&p);
+            Int64 currentSubId = 0;
+            IInteger64::Probe(p)->GetValue(&currentSubId);
+            AutoPtr<ISubscriptionManager> sm;
+            CSubscriptionManager::AcquireSingleton((ISubscriptionManager**)&sm);
+            Boolean bValid = FALSE;
+            if (p == NULL || !(sm->IsValidSubId(currentSubId, &bValid), bValid)) {
+                // TODO while two subs active, if user deactivats first
+                // one, need to update the default subId with second one.
+
+                // FIXME: Currently we assume phoneId and slotId may not be TRUE
+                // when we cross map modem or when multiple subs per slot.
+                // But is TRUE at the moment.
+                mSimInfo->Put(CoreUtils::Convert(slotId), CoreUtils::Convert(subId));
+                AutoPtr<ITelephonyManagerHelper> tmhlp;
+                CTelephonyManagerHelper::AcquireSingleton((ITelephonyManagerHelper**)&tmhlp);
+                AutoPtr<ITelephonyManager> tm;
+                tmhlp->GetDefault((ITelephonyManager**)&tm);
+                Int32 simCount = 0;
+                tm->GetSimCount(&simCount);
+                Int64 defaultSubId = 0;
+                GetDefaultSubId(&defaultSubId);
+                str = "[addSubInfoRecord] mSimInfo.size=";
+                Int32 size = 0;
+                mSimInfo->GetSize(&size);
+                str += size;
+                str += " slotId=";
+                str += slotId;
+                str += " subId=";
+                str += subId;
+                str += " defaultSubId=";
+                str += defaultSubId;
+                str += " simCount=";
+                str += simCount;
+                Logdl(str);
+
+                // Set the default sub if not set or if single sim device
+                if (!(sm->IsValidSubId(defaultSubId, &bValid), bValid) || simCount == 1) {
+                    SetDefaultSubId(subId);
+                }
+                // if single sim device, set this subscription as the default for everything
+                if (simCount == 1) {
+                    str = "[addSubInfoRecord] one sim set defaults to subId=";
+                    str += subId;
+                    Logdl(str);
+                    SetDefaultDataSubId(subId);
+                    SetDataSubId(subId);
+                    SetDefaultSmsSubId(subId);
+                    SetDefaultVoiceSubId(subId);
+                }
+            }
+            else {
+                Logdl(String("[addSubInfoRecord] currentSubId != NULL && currentSubId is valid, IGNORE"));
+            }
+            str = "[addSubInfoRecord]- Hashmap(";
+            str += slotId;
+            str += ",";
+            str += subId;
+            str += ")";
+            Logdl(str);
+        } while ((cursor->MoveToNext(&bMN), bMN));
+    }
+    if (cursor != NULL) {
+        ICloseable::Probe(cursor)->Close();
+    }
+
+    Int32 size = 0;
+    mSimInfo->GetSize(&size);
+    str = "[addSubInfoRecord]- info size=";
+    str += size;
+    Logdl(str);
+
+    // Once the records are loaded, notify DcTracker
+    UpdateAllDataConnectionTrackers();
+
+    // FIXME this does not match the javadoc
+    *result = 1;
+    return NOERROR;
+}
+
+ECode SubscriptionController::SetColor(
+    /* [in] */ Int32 color,
+    /* [in] */ Int64 subId,
+    /* [out] */ Int32* result)
+{
+    VALIDATE_NOT_NULL(result)
+    String str("[setColor]+ color:");
+    str += color;
+    str += " subId:";
+    str += subId;
+    Logd(str);
+    EnforceSubscriptionPermission();
+
+    ValidateSubId(subId);
+    Int32 size = sSimBackgroundDarkRes->GetLength();
+    if (color < 0 || color >= size) {
+        Logd(String("[setColor]- fail"));
+        *result = -1;
+        return NOERROR;
+    }
+    AutoPtr<IContentValues> value;
+    CContentValues::New(1, (IContentValues**)&value);
+    value->Put(ISubscriptionManager::COLOR, color);
+    str = "[setColor]- color:";
+    str += color;
+    str += " set";
+    Logd(str);
+
+    AutoPtr<IContentResolver> cr;
+    mContext->GetContentResolver((IContentResolver**)&cr);
+    str = IBaseColumns::ID;
+    str += "=";
+    str += StringUtils::ToString(subId);
+    AutoPtr<ISubscriptionManager> sm;
+    CSubscriptionManager::AcquireSingleton((ISubscriptionManager**)&sm);
+    AutoPtr<IUri> content_uri;
+    sm->GetCONTENT_URI((IUri**)&content_uri);
+    Int32 res = 0;
+    cr->Update(content_uri, value,
+            str, NULL, &res);
+    BroadcastSimInfoContentChanged(subId, ISubscriptionManager::COLOR,
+            color, ISubscriptionManager::DEFAULT_STRING_VALUE);
+
+    *result = res;
+    return NOERROR;
+}
+
+ECode SubscriptionController::SetDisplayName(
+    /* [in] */ const String& displayName,
+    /* [in] */ Int64 subId,
+    /* [out] */ Int32* result)
+{
+    VALIDATE_NOT_NULL(result)
+    return SetDisplayNameUsingSrc(displayName, subId, -1, result);
+}
+
+ECode SubscriptionController::SetDisplayNameUsingSrc(
+    /* [in] */ const String& displayName,
+    /* [in] */ Int64 subId,
+    /* [in] */ Int64 nameSource,
+    /* [out] */ Int32* result)
+{
+    VALIDATE_NOT_NULL(result)
+    String str("[setDisplayName]+  displayName:");
+    str += displayName;
+    str += " subId:";
+    str += subId;
+    str += " nameSource:";
+    str += nameSource;
+    Logd(str);
+    EnforceSubscriptionPermission();
+
+    ValidateSubId(subId);
+    String nameToSet;
+    if (displayName == NULL) {
+        mContext->GetString(ISubscriptionManager::DEFAULT_NAME_RES, &nameToSet);
+    }
+    else {
+        nameToSet = displayName;
+    }
+    AutoPtr<IContentValues> value;
+    CContentValues::New(1, (IContentValues**)&value);
+    value->Put(ISubscriptionManager::DISPLAY_NAME, nameToSet);
+    if (nameSource >= ISubscriptionManager::NAME_SOURCE_DEFAULT_SOURCE) {
+        str = "Set nameSource=";
+        str += nameSource;
+        Logd(str);
+        value->Put(ISubscriptionManager::NAME_SOURCE, nameSource);
+    }
+    str = "[setDisplayName]- mDisplayName:";
+    str += nameToSet;
+    str += " set";
+    Logd(str);
+
+    AutoPtr<IContentResolver> cr;
+    mContext->GetContentResolver((IContentResolver**)&cr);
+    str = IBaseColumns::ID;
+    str += "=";
+    str += StringUtils::ToString(subId);
+    AutoPtr<ISubscriptionManager> sm;
+    CSubscriptionManager::AcquireSingleton((ISubscriptionManager**)&sm);
+    AutoPtr<IUri> content_uri;
+    sm->GetCONTENT_URI((IUri**)&content_uri);
+    Int32 res = 0;
+    cr->Update(content_uri, value,
+            str, NULL, &res);
+    BroadcastSimInfoContentChanged(subId, ISubscriptionManager::DISPLAY_NAME,
+            ISubscriptionManager::DEFAULT_INT_VALUE, nameToSet);
+
+    *result = res;
+    return NOERROR;
+}
+
+ECode SubscriptionController::SetDisplayNumber(
+    /* [in] */ const String& number,
+    /* [in] */ Int64 subId,
+    /* [out] */ Int32* result)
+{
+    VALIDATE_NOT_NULL(result)
+    String str("[setDisplayNumber]+ number:");
+    str += number;
+    str += " subId:";
+    str += subId;
+    Logd(str);
+    EnforceSubscriptionPermission();
+
+    ValidateSubId(subId);
+    Int32 res = 0;
+    Int32 phoneId = 0;
+    GetPhoneId(subId, &phoneId);
+
+    AutoPtr<ITelephonyManagerHelper> tmhlp;
+    CTelephonyManagerHelper::AcquireSingleton((ITelephonyManagerHelper**)&tmhlp);
+    AutoPtr<ITelephonyManager> tm;
+    tmhlp->GetDefault((ITelephonyManager**)&tm);
+    Int32 phonecount = 0;
+    tm->GetPhoneCount(&phonecount);
+    if (number == NULL || phoneId < 0 ||
+            phoneId >= phonecount) {
+        Logd(String("[setDispalyNumber]- fail"));
+        *result = -1;
+        return NOERROR;
+    }
+    AutoPtr<IContentValues> value;
+    CContentValues::New(1, (IContentValues**)&value);
+    value->Put(ISubscriptionManager::NUMBER, number);
+    str = "[setDisplayNumber]- number:";
+    str += number;
+    str += " set";
+    Logd(str);
+
+    AutoPtr<IPhone> phone = IPhone::Probe((*sProxyPhones)[phoneId]);
+    String alphaTag;
+    tm->GetLine1AlphaTagForSubscriber(subId, &alphaTag);
+
+    {
+        AutoLock syncLock(mLock);
+        mSuccess = FALSE;
+        AutoPtr<IMessage> response;
+        mHandler->ObtainMessage(EVENT_WRITE_MSISDN_DONE, (IMessage**)&response);
+
+        phone->SetLine1Number(alphaTag, number, response);
+
+        // try {
+            mLock.Wait();
+        // } Catch (InterruptedException e) {
+        //     Loge("interrupted while trying to write MSISDN");
+        // }
+    }
+
+    if (mSuccess) {
+        AutoPtr<IContentResolver> cr;
+        mContext->GetContentResolver((IContentResolver**)&cr);
+        String str(IBaseColumns::ID);
+        str += "=";
+        str += StringUtils::ToString(subId);
+        AutoPtr<ISubscriptionManager> sm;
+        CSubscriptionManager::AcquireSingleton((ISubscriptionManager**)&sm);
+        AutoPtr<IUri> content_uri;
+        sm->GetCONTENT_URI((IUri**)&content_uri);
+        cr->Update(content_uri, value,
+                str, NULL, &res);
+        str = "[setDisplayNumber]- update result :";
+        str += res;
+        Logd(str);
+        BroadcastSimInfoContentChanged(subId, ISubscriptionManager::NUMBER,
+                ISubscriptionManager::DEFAULT_INT_VALUE, number);
+    }
+
+    *result = res;
+    return NOERROR;
+}
+
+ECode SubscriptionController::SetDisplayNumberFormat(
+    /* [in] */ Int32 format,
+    /* [in] */ Int64 subId,
+    /* [out] */ Int32* result)
+{
+    VALIDATE_NOT_NULL(result)
+    String str("[setDisplayNumberFormat]+ format:");
+    str += format;
+    str += " subId:";
+    str += subId;
+    Logd(str);
+    EnforceSubscriptionPermission();
+
+    ValidateSubId(subId);
+    if (format < 0) {
+        Logd(String("[setDisplayNumberFormat]- fail, return -1"));
+        *result = -1;
+        return NOERROR;
+    }
+    AutoPtr<IContentValues> value;
+    CContentValues::New(1, (IContentValues**)&value);
+    value->Put(ISubscriptionManager::DISPLAY_NUMBER_FORMAT, format);
+    str = "[setDisplayNumberFormat]- format:";
+    str += format;
+    str += " set";
+    Logd(str);
+
+    AutoPtr<IContentResolver> cr;
+    mContext->GetContentResolver((IContentResolver**)&cr);
+    str = IBaseColumns::ID;
+    str += "=";
+    str += StringUtils::ToString(subId);
+    AutoPtr<ISubscriptionManager> sm;
+    CSubscriptionManager::AcquireSingleton((ISubscriptionManager**)&sm);
+    AutoPtr<IUri> content_uri;
+    sm->GetCONTENT_URI((IUri**)&content_uri);
+    Int32 res = 0;
+    cr->Update(content_uri, value,
+            str, NULL, &res);
+    BroadcastSimInfoContentChanged(subId, ISubscriptionManager::DISPLAY_NUMBER_FORMAT,
+            format, ISubscriptionManager::DEFAULT_STRING_VALUE);
+
+    *result = res;
+    return NOERROR;
+}
+
+ECode SubscriptionController::SetDataRoaming(
+    /* [in] */ Int32 roaming,
+    /* [in] */ Int64 subId,
+    /* [out] */ Int32* result)
+{
+    VALIDATE_NOT_NULL(result)
+    String str("[setDataRoaming]+ roaming:");
+    str += roaming;
+    str += " subId:";
+    str += subId;
+    Logd(str);
+    EnforceSubscriptionPermission();
+
+    ValidateSubId(subId);
+    if (roaming < 0) {
+        Logd(String("[setDataRoaming]- fail"));
+        *result = -1;
+        return NOERROR;
+    }
+    AutoPtr<IContentValues> value;
+    CContentValues::New(1, (IContentValues**)&value);
+    value->Put(ISubscriptionManager::DATA_ROAMING, roaming);
+    str = "[setDataRoaming]- roaming:";
+    str += roaming;
+    str += " set";
+    Logd(str);
+
+    AutoPtr<IContentResolver> cr;
+    mContext->GetContentResolver((IContentResolver**)&cr);
+    str = IBaseColumns::ID;
+    str += "=";
+    str += StringUtils::ToString(subId);
+    AutoPtr<ISubscriptionManager> sm;
+    CSubscriptionManager::AcquireSingleton((ISubscriptionManager**)&sm);
+    AutoPtr<IUri> content_uri;
+    sm->GetCONTENT_URI((IUri**)&content_uri);
+    Int32 res = 0;
+    cr->Update(content_uri, value,
+            str, NULL, &res);
+    BroadcastSimInfoContentChanged(subId, ISubscriptionManager::DATA_ROAMING,
+            roaming, ISubscriptionManager::DEFAULT_STRING_VALUE);
+
+    *result = res;
+    return NOERROR;
+}
+
+ECode SubscriptionController::SetMccMnc(
+    /* [in] */ const String& mccMnc,
+    /* [in] */ Int64 subId,
+    /* [out] */ Int32* result)
+{
+    VALIDATE_NOT_NULL(result)
+    Int32 mcc = 0;
+    Int32 mnc = 0;
+    // try {
+        mcc = StringUtils::ParseInt32(mccMnc.Substring(0, 3));
+        mnc = StringUtils::ParseInt32(mccMnc.Substring(3));
+    // } Catch (NumberFormatException e) {
+    //     Logd("[setMccMnc] - couldn't parse mcc/mnc: " + mccMnc);
+    // }
+    String str("[setMccMnc]+ mcc/mnc:");
+    str += mcc;
+    str += "/";
+    str += mnc;
+    str += " subId:";
+    str += subId;
+    Logd(str);
+    AutoPtr<IContentValues> value;
+    CContentValues::New(2, (IContentValues**)&value);
+    value->Put(ISubscriptionManager::MCC, mcc);
+    value->Put(ISubscriptionManager::MNC, mnc);
+
+    AutoPtr<IContentResolver> cr;
+    mContext->GetContentResolver((IContentResolver**)&cr);
+    str = IBaseColumns::ID;
+    str += "=";
+    str += StringUtils::ToString(subId);
+    AutoPtr<ISubscriptionManager> sm;
+    CSubscriptionManager::AcquireSingleton((ISubscriptionManager**)&sm);
+    AutoPtr<IUri> content_uri;
+    sm->GetCONTENT_URI((IUri**)&content_uri);
+    Int32 res = 0;
+    cr->Update(content_uri, value,
+            str, NULL, &res);
+    BroadcastSimInfoContentChanged(subId, ISubscriptionManager::MCC, mcc, String(NULL));
+
+    *result = res;
+    return NOERROR;
+}
+
+ECode SubscriptionController::GetSlotId(
+    /* [in] */ Int64 subId,
+    /* [out] */ Int32* result)
+{
+    VALIDATE_NOT_NULL(result)
+    if (VDBG) {
+        String str("[getSlotId] subId=");
+        str += subId;
+        PrintStackTrace(str);
+    }
+
+    if (subId == ISubscriptionManager::DEFAULT_SUB_ID) {
+        GetDefaultSubId(&subId);
+    }
+    AutoPtr<ISubscriptionManager> sm;
+    CSubscriptionManager::AcquireSingleton((ISubscriptionManager**)&sm);
+    Boolean bValid = FALSE;
+    sm->IsValidSubId(subId, &bValid);
+    if (!bValid) {
+        Logd(String("[getSlotId]- subId invalid"));
+        *result = ISubscriptionManager::INVALID_SLOT_ID;
+        return NOERROR;
+    }
+
+    Int32 size = 0;
+    mSimInfo->GetSize(&size);
+
+    if (size == 0) {
+        Logd(String("[getSlotId]- size == 0, return SIM_NOT_INSERTED instead"));
+        *result = ISubscriptionManager::SIM_NOT_INSERTED;
+        return NOERROR;
+    }
+
+    AutoPtr<ISet> st;
+    mSimInfo->GetEntrySet((ISet**)&st);
+    AutoPtr<IIterator> it;
+    st->GetIterator((IIterator**)&it);
+    Boolean bHasNext = FALSE;
+    while ((it->HasNext(&bHasNext), bHasNext)) {
+        AutoPtr<IInterface> p;
+        it->GetNext((IInterface**)&p);
+        AutoPtr<IMapEntry> entry = IMapEntry::Probe(p);
+        AutoPtr<IInterface> key;
+        entry->GetKey((IInterface**)&key);
+        Int32 sim = 0;
+        IInteger32::Probe(key)->GetValue(&sim);
+        AutoPtr<IInterface> value;
+        entry->GetValue((IInterface**)&value);
+        Int64 sub = 0;
+        IInteger64::Probe(value)->GetValue(&sub);
+
+        if (subId == sub) {
+            if (VDBG) {
+                String str("[getSlotId]- return = ");
+                str += sim;
+                Logv(str);
+            }
+            *result = sim;
+            return NOERROR;
+        }
+    }
+
+    Logd(String("[getSlotId]- return fail"));
+    *result = ISubscriptionManager::INVALID_SLOT_ID;
+    return NOERROR;
+}
+
+ECode SubscriptionController::GetSubId(
+    /* [in] */ Int32 slotId,
+    /* [out] */ ArrayOf<Int64>** result)
+{
+    VALIDATE_NOT_NULL(result)
+    if (VDBG) {
+        String str("[getSubId] slotId=");
+        str += slotId;
+        PrintStackTrace(str);
+    }
+
+    if (slotId == ISubscriptionManager::DEFAULT_SLOT_ID) {
+        Logd(String("[getSubId]- default slotId"));
+        Int64 subId = 0;
+        GetDefaultSubId(&subId);
+        GetSlotId(subId, &slotId);
+    }
+
+    //FIXME remove this
+    AutoPtr<ArrayOf<Int64> > DUMMY_VALUES = ArrayOf<Int64>::Alloc(2);
+    (*DUMMY_VALUES)[0] = -1 - slotId;
+    (*DUMMY_VALUES)[1] = -1 - slotId;
+
+    AutoPtr<ISubscriptionManager> sm;
+    CSubscriptionManager::AcquireSingleton((ISubscriptionManager**)&sm);
+    Boolean bValid = FALSE;
+    sm->IsValidSlotId(slotId, &bValid);
+    if (!bValid) {
+        Logd(String("[getSubId]- invalid slotId"));
+        *result = NULL;
+        return NOERROR;
+    }
+
+    //FIXME remove this
+    if (slotId < 0) {
+        Logd(String("[getSubId]- slotId < 0, return dummy instead"));
+        *result = DUMMY_VALUES;
+        return NOERROR;
+    }
+
+    Int32 size = 0;
+    mSimInfo->GetSize(&size);
+
+    if (size == 0) {
+        Logd(String("[getSubId]- size == 0, return dummy instead"));
+        //FIXME return NULL
+        *result = DUMMY_VALUES;
+        return NOERROR;
+    }
+
+    AutoPtr<IArrayList> subIds;
+    CArrayList::New((IArrayList**)&subIds);
+    AutoPtr<ISet> st;
+    mSimInfo->GetEntrySet((ISet**)&st);
+    AutoPtr<IIterator> it;
+    st->GetIterator((IIterator**)&it);
+    Boolean bHasNext = FALSE;
+    while ((it->HasNext(&bHasNext), bHasNext)) {
+        AutoPtr<IInterface> p;
+        it->GetNext((IInterface**)&p);
+        AutoPtr<IMapEntry> entry = IMapEntry::Probe(p);
+        AutoPtr<IInterface> key;
+        entry->GetKey((IInterface**)&key);
+        Int32 slot = 0;
+        IInteger32::Probe(key)->GetValue(&slot);
+        AutoPtr<IInterface> value;
+        entry->GetValue((IInterface**)&value);
+        Int64 sub = 0;
+        IInteger64::Probe(value)->GetValue(&sub);
+        if (slotId == slot) {
+            subIds->Add(CoreUtils::Convert(sub));
+        }
+    }
+
+    if (VDBG) {
+        String str("[getSubId]-, subIds = ");
+        assert(0 && "TODO");
+        // str += subIds;
+        Logd(str);
+    }
+    Int32 numSubIds = 0;
+    subIds->GetSize(&numSubIds);
+
+    if (numSubIds == 0) {
+        Logd(String("[getSubId]- numSubIds == 0, return dummy instead"));
+        *result = DUMMY_VALUES;
+        return NOERROR;
+    }
+
+    AutoPtr<ArrayOf<Int64> > subIdArr = ArrayOf<Int64>::Alloc(numSubIds);
+    for (Int32 i = 0; i < numSubIds; i++) {
+        AutoPtr<IInterface> p;
+        subIds->Get(i, (IInterface**)&p);
+        IInteger64::Probe(p)->GetValue(&((*subIdArr)[i]));
+    }
+
+    *result = subIdArr;
+    return NOERROR;
+}
+
+ECode SubscriptionController::GetPhoneId(
+    /* [in] */ Int64 subId,
+    /* [out] */ Int32* result)
+{
+    VALIDATE_NOT_NULL(result)
+    if (VDBG) {
+        String str("[getPhoneId] subId=");
+        str += subId;
+        PrintStackTrace(str);
+    }
+    Int32 phoneId = 0;
+
+    if (subId == ISubscriptionManager::DEFAULT_SUB_ID) {
+        GetDefaultSubId(&subId);
+        String str("[getPhoneId] asked for default subId=");
+        str += subId;
+        Logdl(str);
+    }
+
+    AutoPtr<ISubscriptionManager> sm;
+    CSubscriptionManager::AcquireSingleton((ISubscriptionManager**)&sm);
+    Boolean bValid = FALSE;
+    sm->IsValidSubId(subId, &bValid);
+    if (!bValid) {
+        String str("[getPhoneId]- invalid subId return=");
+        str += ISubscriptionManager::INVALID_PHONE_ID;
+        Logdl(str);
+        *result = ISubscriptionManager::INVALID_PHONE_ID;
+        return NOERROR;
+    }
+
+    //FIXME remove this
+    if (subId < 0) {
+        phoneId = (Int32) (-1 - subId);
+        if (VDBG) {
+            String str("[getPhoneId]- map subId=");
+            str += subId;
+            str += " phoneId=";
+            str += phoneId;
+            Logdl(str);
+        }
+        *result = phoneId;
+        return NOERROR;
+    }
+
+    Int32 size = 0;
+    mSimInfo->GetSize(&size);
+
+    if (size == 0) {
+        phoneId = mDefaultPhoneId;
+        String str("[getPhoneId]- no sims, returning default phoneId=");
+        str += phoneId;
+        Logdl(str);
+        *result = phoneId;
+        return NOERROR;
+    }
+
+    // FIXME: Assumes phoneId == slotId
+    AutoPtr<IArrayList> subIds;
+    CArrayList::New((IArrayList**)&subIds);
+    AutoPtr<ISet> st;
+    mSimInfo->GetEntrySet((ISet**)&st);
+    AutoPtr<IIterator> it;
+    st->GetIterator((IIterator**)&it);
+    Boolean bHasNext = FALSE;
+    while ((it->HasNext(&bHasNext), bHasNext)) {
+        AutoPtr<IInterface> p;
+        it->GetNext((IInterface**)&p);
+        AutoPtr<IMapEntry> entry = IMapEntry::Probe(p);
+        AutoPtr<IInterface> key;
+        entry->GetKey((IInterface**)&key);
+        Int32 sim = 0;
+        IInteger32::Probe(key)->GetValue(&sim);
+        AutoPtr<IInterface> value;
+        entry->GetValue((IInterface**)&value);
+        Int64 sub = 0;
+        IInteger64::Probe(value)->GetValue(&sub);
+
+        if (subId == sub) {
+            if (VDBG) {
+                String str("[getPhoneId]- found subId=");
+                str += subId;
+                str += " phoneId=";
+                str += sim;
+                Logdl(str);
+            }
+            *result = sim;
+            return NOERROR;
+        }
+    }
+
+    phoneId = mDefaultPhoneId;
+    String str("[getPhoneId]- subId=");
+    str += subId;
+    str += " not found return default phoneId=";
+    str += phoneId;
+    Logdl(str);
+    *result = phoneId;
+    return NOERROR;
+}
+
+ECode SubscriptionController::ClearSubInfo(
+    /* [out] */ Int32* result)
+{
+    VALIDATE_NOT_NULL(result)
+    EnforceSubscriptionPermission();
+    Logd(String("[clearSubInfo]+"));
+
+    Int32 size = 0;
+    mSimInfo->GetSize(&size);
+
+    if (size == 0) {
+        String str("[clearSubInfo]- no simInfo size=");
+        str += size;
+        Logdl(str);
+        *result = 0;
+        return NOERROR;
+    }
+
+    mSimInfo->Clear();
+    String str("[clearSubInfo]- clear size=");
+    str += size;
+    Logdl(str);
+    *result = size;
+    return NOERROR;
+}
+
+AutoPtr<ArrayOf<Int32> > SubscriptionController::SetSimResource(
+    /* [in] */ Int32 type)
+{
+    AutoPtr<ArrayOf<Int32> > simResource;
+
+    switch (type) {
+        case RES_TYPE_BACKGROUND_DARK: {
+            simResource = ArrayOf<Int32>::Alloc(4);
+            (*simResource)[0] = R::drawable::sim_dark_blue;
+            (*simResource)[1] = R::drawable::sim_dark_orange;
+            (*simResource)[2] = R::drawable::sim_dark_green;
+            (*simResource)[3] = R::drawable::sim_dark_purple;
+            break;
+        }
+        case RES_TYPE_BACKGROUND_LIGHT: {
+            simResource = ArrayOf<Int32>::Alloc(4);
+            (*simResource)[0] = R::drawable::sim_light_blue;
+            (*simResource)[1] = R::drawable::sim_light_orange;
+            (*simResource)[2] = R::drawable::sim_light_green;
+            (*simResource)[3] = R::drawable::sim_light_purple;
+            break;
+        }
+    }
+
+    return simResource;
+}
+
+void SubscriptionController::Logvl(
+    /* [in] */ String msg)
+{
+    Logv(msg);
+    mLocalLog->Log(msg);
+}
+
+void SubscriptionController::Logv(
+    /* [in] */ String msg)
+{
+    assert(0 && "TODO");
+    // Rlog::V(LOGTAG, msg);
+}
+
+void SubscriptionController::Logdl(
+    /* [in] */ String msg)
+{
+    Logd(msg);
+    mLocalLog->Log(msg);
+}
+
+void SubscriptionController::Slogd(
+    /* [in] */ String msg)
+{
+    assert(0 && "TODO");
+    // Rlog::D(LOGTAG, msg);
+}
+
+void SubscriptionController::Logd(
+    /* [in] */ String msg)
+{
+    assert(0 && "TODO");
+    // Rlog::D(LOGTAG, msg);
+}
+
+void SubscriptionController::Logel(
+    /* [in] */ String msg)
+{
+    Loge(msg);
+    mLocalLog->Log(msg);
+}
+
+void SubscriptionController::Loge(
+    /* [in] */ String msg)
+{
+    assert(0 && "TODO");
+    // Rlog::E(LOGTAG, msg);
+}
+
+ECode SubscriptionController::GetDefaultSubId(
+    /* [out] */ Int64* result)
+{
+    VALIDATE_NOT_NULL(result)
+    //FIXME: Make this smarter, need to handle data only and voice devices
+    Int64 subId = mDefaultVoiceSubId;
+    if (VDBG) {
+        String str("[getDefaultSubId] value = ");
+        str += subId;
+        Logv(str);
+    }
+    *result = subId;
+    return NOERROR;
+}
+
+ECode SubscriptionController::SetDefaultSmsSubId(
+    /* [in] */ Int64 subId)
+{
+    if (subId == ISubscriptionManager::DEFAULT_SUB_ID) {
+        // throw new RuntimeException("setDefaultSmsSubId called with DEFAULT_SUB_ID");
+        return E_RUNTIME_EXCEPTION;
+    }
+    String str("[setDefaultSmsSubId] subId=");
+    str += subId;
+    Logdl(str);
+    AutoPtr<IContentResolver> cr;
+    mContext->GetContentResolver((IContentResolver**)&cr);
+    AutoPtr<ISettingsGlobal> sg;
+    CSettingsGlobal::AcquireSingleton((ISettingsGlobal**)&sg);
+    Boolean res = FALSE;
+    sg->PutInt64(cr,
+            ISettingsGlobal::MULTI_SIM_SMS_SUBSCRIPTION, subId, &res);
+    BroadcastDefaultSmsSubIdChanged(subId);
+    return NOERROR;
+}
+
+void SubscriptionController::BroadcastDefaultSmsSubIdChanged(
+    /* [in] */ Int64 subId)
+{
+    // Broadcast an Intent for default sms sub change
+    String str("[broadcastDefaultSmsSubIdChanged] subId=");
+    str += subId;
+    Logdl(str);
+    AutoPtr<IIntent> intent;
+    CIntent::New(ITelephonyIntents::ACTION_DEFAULT_SMS_SUBSCRIPTION_CHANGED, (IIntent**)&intent);
+    intent->AddFlags(IIntent::FLAG_RECEIVER_REPLACE_PENDING);
+    intent->PutExtra(IPhoneConstants::SUBSCRIPTION_KEY, subId);
+    AutoPtr<IUserHandleHelper> uhhlp;
+    CUserHandleHelper::AcquireSingleton((IUserHandleHelper**)&uhhlp);
+    AutoPtr<IUserHandle> uh;
+    uhhlp->GetALL((IUserHandle**)&uh);
+    mContext->SendStickyBroadcastAsUser(intent, uh);
+}
+
+ECode SubscriptionController::GetDefaultSmsSubId(
+    /* [out] */ Int64* result)
+{
+    VALIDATE_NOT_NULL(result)
+    AutoPtr<IContentResolver> cr;
+    mContext->GetContentResolver((IContentResolver**)&cr);
+    AutoPtr<ISettingsGlobal> sg;
+    CSettingsGlobal::AcquireSingleton((ISettingsGlobal**)&sg);
+    Int64 subId = 0;
+    sg->GetInt64(cr,
+            ISettingsGlobal::MULTI_SIM_SMS_SUBSCRIPTION,
+            ISubscriptionManager::INVALID_SUB_ID,
+            &subId);
+    if (VDBG) {
+        String str("[getDefaultSmsSubId] subId=");
+        str += subId;
+        Logd(str);
+    }
+    *result = subId;
+    return NOERROR;
+}
+
+ECode SubscriptionController::SetDefaultVoiceSubId(
+    /* [in] */ Int64 subId)
+{
+    if (subId == ISubscriptionManager::DEFAULT_SUB_ID) {
+        // throw new RuntimeException("setDefaultVoiceSubId called with DEFAULT_SUB_ID");
+        return E_RUNTIME_EXCEPTION;
+    }
+    String str("[setDefaultVoiceSubId] subId=");
+    str += subId;
+    Logdl(str);
+    AutoPtr<IContentResolver> cr;
+    mContext->GetContentResolver((IContentResolver**)&cr);
+    AutoPtr<ISettingsGlobal> sg;
+    CSettingsGlobal::AcquireSingleton((ISettingsGlobal**)&sg);
+    Boolean res = FALSE;
+    sg->PutInt64(cr,
+            ISettingsGlobal::MULTI_SIM_VOICE_CALL_SUBSCRIPTION, subId, &res);
+    BroadcastDefaultVoiceSubIdChanged(subId);
+    return NOERROR;
+}
+
+void SubscriptionController::BroadcastDefaultVoiceSubIdChanged(
+    /* [in] */ Int64 subId)
+{
+    // Broadcast an Intent for default voice sub change
+    String str("[broadcastDefaultVoiceSubIdChanged] subId=");
+    str += subId;
+    Logdl(str);
+    AutoPtr<IIntent> intent;
+    CIntent::New(ITelephonyIntents::ACTION_DEFAULT_VOICE_SUBSCRIPTION_CHANGED, (IIntent**)&intent);
+    intent->AddFlags(IIntent::FLAG_RECEIVER_REPLACE_PENDING);
+    intent->PutExtra(IPhoneConstants::SUBSCRIPTION_KEY, subId);
+    AutoPtr<IUserHandleHelper> uhhlp;
+    CUserHandleHelper::AcquireSingleton((IUserHandleHelper**)&uhhlp);
+    AutoPtr<IUserHandle> uh;
+    uhhlp->GetALL((IUserHandle**)&uh);
+    mContext->SendStickyBroadcastAsUser(intent, uh);
+}
+
+ECode SubscriptionController::GetDefaultVoiceSubId(
+    /* [out] */ Int64* result)
+{
+    VALIDATE_NOT_NULL(result)
+    AutoPtr<IContentResolver> cr;
+    mContext->GetContentResolver((IContentResolver**)&cr);
+    AutoPtr<ISettingsGlobal> sg;
+    CSettingsGlobal::AcquireSingleton((ISettingsGlobal**)&sg);
+    Int64 subId = 0;
+    sg->GetInt64(cr,
+            ISettingsGlobal::MULTI_SIM_VOICE_CALL_SUBSCRIPTION,
+            ISubscriptionManager::INVALID_SUB_ID,
+            &subId);
+    if (VDBG) {
+        String str("[getDefaultVoiceSubId] subId=");
+        str += subId;
+        Logd(str);
+    }
+    *result = subId;
+    return NOERROR;
+}
+
+ECode SubscriptionController::IsSMSPromptEnabled(
+    /* [out] */ Boolean* result)
+{
+    VALIDATE_NOT_NULL(result)
+    Boolean prompt = FALSE;
+    Int32 value = 0;
+    // try {
+    AutoPtr<IContentResolver> cr;
+    mContext->GetContentResolver((IContentResolver**)&cr);
+    AutoPtr<ISettingsGlobal> sg;
+    CSettingsGlobal::AcquireSingleton((ISettingsGlobal**)&sg);
+    sg->GetInt32(cr,
+            ISettingsGlobal::MULTI_SIM_SMS_PROMPT, &value);
+    // } Catch (SettingNotFoundException snfe) {
+    //     Loge("Settings Exception Reading Dual Sim SMS Prompt Values");
+    // }
+    prompt = (value == 0) ? FALSE : TRUE ;
+    if (VDBG) {
+        String str("SMS Prompt option:");
+        str += prompt;
+        Logd(str);
+    }
+
+   *result = prompt;
+   return NOERROR;
+}
+
+ECode SubscriptionController::SetSMSPromptEnabled(
+    /* [in] */ Boolean enabled)
+{
+    Int32 value = (enabled == FALSE) ? 0 : 1;
+    AutoPtr<IContentResolver> cr;
+    mContext->GetContentResolver((IContentResolver**)&cr);
+    AutoPtr<ISettingsGlobal> sg;
+    CSettingsGlobal::AcquireSingleton((ISettingsGlobal**)&sg);
+    Boolean res = FALSE;
+    sg->PutInt32(cr,
+            ISettingsGlobal::MULTI_SIM_SMS_PROMPT, value, &res);
+    String str("setSMSPromptOption to ");
+    str += enabled;
+    Logd(str);
+    return NOERROR;
+}
+
+ECode SubscriptionController::GetDefaultDataSubId(
+    /* [out] */ Int64* result)
+{
+    VALIDATE_NOT_NULL(result)
+    AutoPtr<IContentResolver> cr;
+    mContext->GetContentResolver((IContentResolver**)&cr);
+    AutoPtr<ISettingsGlobal> sg;
+    CSettingsGlobal::AcquireSingleton((ISettingsGlobal**)&sg);
+    Int64 subId = 0;
+    sg->GetInt64(cr,
+            ISettingsGlobal::MULTI_SIM_DATA_CALL_SUBSCRIPTION,
+            ISubscriptionManager::INVALID_SUB_ID,
+            &subId);
+    if (VDBG) {
+        String str("[getDefaultDataSubId] subId= ");
+        str += subId;
+        Logd(str);
+    }
+    *result = subId;
+    return NOERROR;
+}
+
+ECode SubscriptionController::SetDefaultDataSubId(
+    /* [in] */ Int64 subId)
+{
+    String str("[setDefaultDataSubId] subId=");
+    str += subId;
+    Logdl(str);
+
+    if (mDctController == NULL) {
+        AutoPtr<IDctControllerHelper> hlp;
+        CDctControllerHelper::AcquireSingleton((IDctControllerHelper**)&hlp);
+        hlp->GetInstance((IDctController**)&mDctController);
+        mDctController->RegisterForDefaultDataSwitchInfo(mDataConnectionHandler,
+                EVENT_SET_DEFAULT_DATA_DONE, NULL);
+    }
+    mDctController->SetDefaultDataSubId(subId);
+    return NOERROR;
+}
+
+ECode SubscriptionController::GetCurrentDds(
+    /* [out] */ Int64* result)
+{
+    VALIDATE_NOT_NULL(result)
+    return mScheduler->GetCurrentDds(result);
+}
+
+void SubscriptionController::UpdateDataSubId(
+    /* [in] */ AsyncResult* ar)
+{
+    Int64 subId = 0;
+    IInteger64::Probe(ar->mResult)->GetValue(&subId);
+    Int32 reqStatus = IPhoneConstants::FAILURE;
+
+    String str(" updateDataSubId,  subId=");
+    str += subId;
+    str += " exception ";
+    assert(0 && "TODO");
+    // str += ar->mException;
+    Logd(str);
+    // Update newDds in database if the DDS request succeeded.
+    if (ar->mException == NULL) {
+        SetDataSubId(subId);
+        reqStatus = IPhoneConstants::SUCCESS;
+    }
+    mScheduler->UpdateCurrentDds(NULL);
+    BroadcastDefaultDataSubIdChanged(reqStatus);
+
+    // FIXME is this still needed?
+    UpdateAllDataConnectionTrackers();
+}
+
+ECode SubscriptionController::SetDataSubId(
+    /* [in] */ Int64 subId)
+{
+    AutoPtr<IContentResolver> cr;
+    mContext->GetContentResolver((IContentResolver**)&cr);
+    AutoPtr<ISettingsGlobal> sg;
+    CSettingsGlobal::AcquireSingleton((ISettingsGlobal**)&sg);
+    Boolean res = FALSE;
+    sg->PutInt64(cr,
+            ISettingsGlobal::MULTI_SIM_DATA_CALL_SUBSCRIPTION, subId, &res);
+    return NOERROR;
+}
+
+void SubscriptionController::UpdateAllDataConnectionTrackers()
+{
+    // Tell Phone Proxies to update data connection tracker
+    Int32 len = sProxyPhones->GetLength();
+    String str("[updateAllDataConnectionTrackers] sProxyPhones.length=");
+    str += len;
+    Logdl(str);
+    for (Int32 phoneId = 0; phoneId < len; phoneId++) {
+        (*sProxyPhones)[phoneId]->UpdateDataConnectionTracker();
+    }
+}
+
+void SubscriptionController::BroadcastDefaultDataSubIdChanged(
+    /* [in] */ Int32 status)
+{
+    // Broadcast an Intent for default data sub change
+    Int64 subId = 0;
+    GetDefaultDataSubId(&subId);
+    String str("[broadcastDefaultDataSubIdChanged] subId = ");
+    str += subId;
+    str += " status ";
+    str += status;
+    Logdl(str);
+    AutoPtr<IIntent> intent;
+    CIntent::New(ITelephonyIntents::ACTION_DEFAULT_DATA_SUBSCRIPTION_CHANGED, (IIntent**)&intent);
+    intent->AddFlags(IIntent::FLAG_RECEIVER_REPLACE_PENDING);
+    intent->PutExtra(IPhoneConstants::SUBSCRIPTION_KEY, subId);
+    intent->PutExtra(ITelephonyIntents::EXTRA_RESULT, status);
+    AutoPtr<IUserHandleHelper> uhhlp;
+    CUserHandleHelper::AcquireSingleton((IUserHandleHelper**)&uhhlp);
+    AutoPtr<IUserHandle> uh;
+    uhhlp->GetALL((IUserHandle**)&uh);
+    mContext->SendStickyBroadcastAsUser(intent, uh);
+}
+
+ECode SubscriptionController::SetDefaultSubId(
+    /* [in] */ Int64 subId)
+{
+    if (subId == ISubscriptionManager::DEFAULT_SUB_ID) {
+        // throw new RuntimeException("setDefaultSubId called with DEFAULT_SUB_ID");
+        return E_RUNTIME_EXCEPTION;
+    }
+    String str("[setDefaultSubId] subId=");
+    str += subId;
+    Logdl(str);
+    AutoPtr<ISubscriptionManager> sm;
+    CSubscriptionManager::AcquireSingleton((ISubscriptionManager**)&sm);
+    Boolean bValid = FALSE;
+    sm->IsValidSubId(subId, &bValid);
+    if (bValid) {
+        Int32 phoneId = 0;
+        GetPhoneId(subId, &phoneId);
+        AutoPtr<ITelephonyManagerHelper> tmhlp;
+        CTelephonyManagerHelper::AcquireSingleton((ITelephonyManagerHelper**)&tmhlp);
+        AutoPtr<ITelephonyManager> tm;
+        tmhlp->GetDefault((ITelephonyManager**)&tm);
+        Int32 phonecount = 0, simCount = 0;
+        tm->GetPhoneCount(&phonecount);
+        tm->GetSimCount(&simCount);
+        if (phoneId >= 0 && (phoneId < phonecount
+                || simCount == 1)) {
+            str = "[setDefaultSubId] set mDefaultVoiceSubId=";
+            str += subId;
+            Logdl(str);
+            mDefaultVoiceSubId = subId;
+            // Update MCC MNC device configuration information
+            String defaultMccMnc;
+            tm->GetSimOperator(phoneId, &defaultMccMnc);
+            assert(0 && "TODO");
+            // MccTable::UpdateMccMncConfiguration(mContext, defaultMccMnc, FALSE);
+
+            // Broadcast an Intent for default sub change
+            AutoPtr<IIntent> intent;
+            CIntent::New(ITelephonyIntents::ACTION_DEFAULT_SUBSCRIPTION_CHANGED, (IIntent**)&intent);
+            intent->AddFlags(IIntent::FLAG_RECEIVER_REPLACE_PENDING);
+            sm->PutPhoneIdAndSubIdExtra(intent, phoneId, subId);
+            if (VDBG) {
+                str = "[setDefaultSubId] broadcast default subId changed phoneId=";
+                str += phoneId;
+                str += " subId=";
+                str += subId;
+                Logdl(str);
+            }
+            AutoPtr<IUserHandleHelper> uhhlp;
+            CUserHandleHelper::AcquireSingleton((IUserHandleHelper**)&uhhlp);
+            AutoPtr<IUserHandle> uh;
+            uhhlp->GetALL((IUserHandle**)&uh);
+            mContext->SendStickyBroadcastAsUser(intent, uh);
+        }
+        else {
+            if (VDBG) {
+                String str("[setDefaultSubId] not set invalid phoneId=");
+                str += phoneId;
+                str += " subId=";
+                str += subId;
+                Logdl(str);
+            }
+        }
+    }
+    return NOERROR;
+}
+
+ECode SubscriptionController::ClearDefaultsForInactiveSubIds()
+{
+    AutoPtr<IList> records;
+    GetActiveSubInfoList((IList**)&records);
+    String str("[clearDefaultsForInactiveSubIds] records: ");
+    assert(0 && "TODO");
+    // str += records;
+    Logdl(str);
+    Int64 subId = 0;
+    GetDefaultDataSubId(&subId);
+    if (ShouldDefaultBeCleared(records, subId)) {
+        Logd(String("[clearDefaultsForInactiveSubIds] clearing default data sub id"));
+        SetDefaultDataSubId(ISubscriptionManager::INVALID_SUB_ID);
+    }
+    Int64 smsSubId = 0;
+    GetDefaultSmsSubId(&smsSubId);
+    if (ShouldDefaultBeCleared(records, smsSubId)) {
+        Logdl(String("[clearDefaultsForInactiveSubIds] clearing default sms sub id"));
+        SetDefaultSmsSubId(ISubscriptionManager::INVALID_SUB_ID);
+    }
+    Int64 voiceSubId = 0;
+    GetDefaultVoiceSubId(&voiceSubId);
+    if (ShouldDefaultBeCleared(records, voiceSubId)) {
+        Logdl(String("[clearDefaultsForInactiveSubIds] clearing default voice sub id"));
+        SetDefaultVoiceSubId(ISubscriptionManager::INVALID_SUB_ID);
+    }
+    return NOERROR;
+}
+
+Boolean SubscriptionController::ShouldDefaultBeCleared(
+    /* [in] */ IList* records,
+    /* [in] */ Int64 subId)
+{
+    String str("[shouldDefaultBeCleared: subId] ");
+    str += subId;
+    Logdl(str);
+    if (records == NULL) {
+        str = "[shouldDefaultBeCleared] return TRUE no records subId=";
+        str += subId;
+        Logdl(str);
+        return TRUE;
+    }
+    Int32 size = 0;
+    records->GetSize(&size);
+    if (subId == ISubscriptionManager::ASK_USER_SUB_ID && size > 1) {
+        // Only allow ASK_USER_SUB_ID if there is more than 1 subscription.
+        str = "[shouldDefaultBeCleared] return FALSE only one subId, subId=";
+        str += subId;
+        Logdl(str);
+        return FALSE;
+    }
+    AutoPtr<IIterator> it;
+    records->GetIterator((IIterator**)&it);
+    Boolean bHasNext = FALSE;
+    while ((it->HasNext(&bHasNext), bHasNext)) {
+        AutoPtr<IInterface> p;
+        it->GetNext((IInterface**)&p);
+        AutoPtr<CSubInfoRecord> record = (CSubInfoRecord*)ISubInfoRecord::Probe(p);
+        str = "[shouldDefaultBeCleared] Record.subId: ";
+        str += record->mSubId;
+        Logdl(str);
+        if (record->mSubId == subId) {
+            str = "[shouldDefaultBeCleared] return FALSE subId is active, subId=";
+            str += subId;
+            Logdl(str);
+            return FALSE;
+        }
+    }
+    str = "[shouldDefaultBeCleared] return TRUE not active subId=";
+    str += subId;
+    Logdl(str);
+    return TRUE;
+}
+
+ECode SubscriptionController::GetSubIdUsingPhoneId(
+    /* [in] */ Int32 phoneId,
+    /* [out] */ Int64* result)
+{
+    VALIDATE_NOT_NULL(result)
+    AutoPtr<ArrayOf<Int64> > subIds;
+    GetSubId(phoneId, (ArrayOf<Int64>**)&subIds);
+    if (subIds == NULL || subIds->GetLength() == 0) {
+        *result = ISubscriptionManager::INVALID_SUB_ID;
+        return NOERROR;
+    }
+    *result = (*subIds)[0];
+    return NOERROR;
+}
+
+ECode SubscriptionController::GetSubIdUsingSlotId(
+    /* [in] */ Int32 slotId,
+    /* [out] */ ArrayOf<Int64>** result)
+{
+    VALIDATE_NOT_NULL(result)
+    return GetSubId(slotId, result);
+}
+
+ECode SubscriptionController::GetSubInfoUsingSlotIdWithCheck(
+    /* [in] */ Int32 slotId,
+    /* [in] */ Boolean needCheck,
+    /* [out] */ IList** result)
+{
+    VALIDATE_NOT_NULL(result)
+    String str("[getSubInfoUsingSlotIdWithCheck]+ slotId:");
+    str += slotId;
+    Logd(str);
+    EnforceSubscriptionPermission();
+
+    if (slotId == ISubscriptionManager::DEFAULT_SLOT_ID) {
+        Int64 subId = 0;
+        GetDefaultSubId(&subId);
+        GetSlotId(subId, &slotId);
+    }
+    AutoPtr<ISubscriptionManager> sm;
+    CSubscriptionManager::AcquireSingleton((ISubscriptionManager**)&sm);
+    Boolean bValid = FALSE;
+    sm->IsValidSlotId(slotId, &bValid);
+    if (!bValid) {
+        Logd(String("[getSubInfoUsingSlotIdWithCheck]- invalid slotId"));
+        *result = NULL;
+        return NOERROR;
+    }
+
+    if (needCheck && !IsSubInfoReady()) {
+        Logd(String("[getSubInfoUsingSlotIdWithCheck]- not ready"));
+        *result = NULL;
+        return NOERROR;
+    }
+
+    AutoPtr<IContentResolver> cr;
+    mContext->GetContentResolver((IContentResolver**)&cr);
+    AutoPtr<ArrayOf<String> > arr = ArrayOf<String>::Alloc(1);
+    (*arr)[0] = StringUtils::ToString(slotId);
+    str = ISubscriptionManager::SIM_ID;
+    str += "=?";
+    AutoPtr<IUri> content_uri;
+    sm->GetCONTENT_URI((IUri**)&content_uri);
+    AutoPtr<ICursor> cursor;
+    cr->Query(content_uri,
+            NULL, str, arr, String(NULL),
+            (ICursor**)&cursor);
+    AutoPtr<IArrayList> subList;
+    Boolean bMF = FALSE, bMN = FALSE;
+    if (cursor != NULL && (cursor->MoveToFirst(&bMF), bMF)) {
+        do {
+            AutoPtr<ISubInfoRecord> subInfo = GetSubInfoRecord(cursor);
+            if (subInfo != NULL) {
+                if (subList == NULL) {
+                    CArrayList::New((IArrayList**)&subList);
+                }
+                subList->Add(subInfo);
+            }
+        } while ((cursor->MoveToNext(&bMN), bMN));
+    }
+    if (cursor != NULL) {
+        ICloseable::Probe(cursor)->Close();
+    }
+    Logd(String("[getSubInfoUsingSlotId]- NULL info return"));
+
+    *result = IList::Probe(subList);
+    REFCOUNT_ADD(*result)
+    return NOERROR;
+}
+
+void SubscriptionController::ValidateSubId(
+    /* [in] */ Int64 subId)
+{
+    String str("validateSubId subId: ");
+    str += subId;
+    Logd(str);
+    AutoPtr<ISubscriptionManager> sm;
+    CSubscriptionManager::AcquireSingleton((ISubscriptionManager**)&sm);
+    Boolean bValid = FALSE;
+    sm->IsValidSubId(subId, &bValid);
+    if (!bValid) {
+        // throw new RuntimeException("Invalid sub id passed as parameter");
+        return;
+    }
+    else if (subId == ISubscriptionManager::DEFAULT_SUB_ID) {
+        // throw new RuntimeException("Default sub id passed as parameter");
+        return;
+    }
+}
+
+ECode SubscriptionController::UpdatePhonesAvailability(
+    /* [in] */ ArrayOf<IPhoneProxy*>* phones)
+{
+    sProxyPhones = phones;
+    return NOERROR;
+}
+
+ECode SubscriptionController::GetActiveSubIdList(
+    /* [out] */ ArrayOf<Int64>** result)
+{
+    VALIDATE_NOT_NULL(result)
+    AutoPtr<ISet> simInfoSet;
+    mSimInfo->GetEntrySet((ISet**)&simInfoSet);
+    String str("[getActiveSubIdList] simInfoSet=");
+    assert(0 && "TODO");
+    // str += simInfoSet;
+    Logdl(str);
+
+    Int32 size = 0;
+    simInfoSet->GetSize(&size);
+    AutoPtr<ArrayOf<Int64> > subIdArr = ArrayOf<Int64>::Alloc(size);
+    Int32 i = 0;
+    AutoPtr<IIterator> it;
+    simInfoSet->GetIterator((IIterator**)&it);
+    Boolean bHasNext = FALSE;
+    while ((it->HasNext(&bHasNext), bHasNext)) {
+        AutoPtr<IInterface> p;
+        it->GetNext((IInterface**)&p);
+        AutoPtr<IMapEntry> entry = IMapEntry::Probe(p);
+        AutoPtr<IInterface> val;
+        entry->GetValue((IInterface**)&val);
+        Int64 sub = 0;
+        IInteger64::Probe(val)->GetValue(&sub);
+        (*subIdArr)[i] = sub;
+        i++;
+    }
+
+    str = "[getActiveSubIdList] X subIdArr.length=";
+    str += subIdArr->GetLength();
+    Logdl(str);
+    *result = subIdArr;
+    return NOERROR;
+}
+
+void SubscriptionController::PrintStackTrace(
+    /* [in] */ String msg)
+{
+    assert(0 && "TODO");
+    // AutoPtr<IRuntimeException> re;
+    // CRuntimeException::New((IRuntimeException**)&re);
+    String str("StackTrace - ");
+    str += msg;
+    Slogd(str);
+    AutoPtr<ArrayOf<IStackTraceElement*> > st;
+    assert(0 && "TODO");
+    // re->GetStackTrace((ArrayOf<IStackTraceElement*>**)&st);
+    Boolean first = TRUE;
+    for (Int32 i = 0; i < st->GetLength(); i++) {
+        AutoPtr<IStackTraceElement> ste = (*st)[i];
+        if (first) {
+            first = FALSE;
+        }
+        else {
+            assert(0 && "TODO");
+            // Slogd(ste->ToString());
+        }
+    }
+}
+
+ECode SubscriptionController::Dump(
+    /* [in] */ IFileDescriptor* fd,
+    /* [in] */ IPrintWriter* pw,
+    /* [in] */ ArrayOf<String>* args)
+{
+    assert(0 && "TODO");
+    // mContext->EnforceCallingOrSelfPermission(Manifest::permission::DUMP,
+    //         "Requires DUMP");
+    pw->Println(String("SubscriptionController:"));
+    // pw->Println(" defaultSubId=" + GetDefaultSubId());
+    // pw->Println(" defaultDataSubId=" + GetDefaultDataSubId());
+    // pw->Println(" defaultVoiceSubId=" + GetDefaultVoiceSubId());
+    // pw->Println(" defaultSmsSubId=" + GetDefaultSmsSubId());
+
+    // pw->Println(" defaultDataPhoneId=" + SubscriptionManager->GetDefaultDataPhoneId());
+    // pw->Println(" defaultVoicePhoneId=" + SubscriptionManager->GetDefaultVoicePhoneId());
+    // pw->Println(" defaultSmsPhoneId=" + SubscriptionManager->GetDefaultSmsPhoneId());
+    IFlushable::Probe(pw)->Flush();
+
+    // for (Entry<Integer, Long> entry : mSimInfo->EntrySet()) {
+    //     pw->Println(" mSimInfo[" + entry->GetKey() + "]: subId=" + entry->GetValue());
+    // }
+    IFlushable::Probe(pw)->Flush();
+    pw->Println(String("++++++++++++++++++++++++++++++++"));
+
+    // AutoPtr<IList> sirl = GetActiveSubInfoList();
+    // if (sirl != NULL) {
+    //     pw->Println(" ActiveSubInfoList:");
+    //     for (SubInfoRecord entry : sirl) {
+    //         pw->Println("  " + entry->ToString());
+    //     }
+    // }
+    // else {
+    //     pw->Println(" ActiveSubInfoList: is NULL");
+    // }
+    IFlushable::Probe(pw)->Flush();
+    pw->Println(String("++++++++++++++++++++++++++++++++"));
+
+    // sirl = GetAllSubInfoList();
+    // if (sirl != NULL) {
+    //     pw->Println(" AllSubInfoList:");
+    //     for (SubInfoRecord entry : sirl) {
+    //         pw->Println("  " + entry->ToString());
+    //     }
+    // }
+    // else {
+    //     pw->Println(String(" AllSubInfoList: is NULL"));
+    // }
+    IFlushable::Probe(pw)->Flush();
+    pw->Println(String("++++++++++++++++++++++++++++++++"));
+
+    mLocalLog->Dump(fd, pw, args);
+    IFlushable::Probe(pw)->Flush();
+    pw->Println(String("++++++++++++++++++++++++++++++++"));
+    IFlushable::Probe(pw)->Flush();
+    return NOERROR;
+}
+
+ECode SubscriptionController::ActivateSubId(
+    /* [in] */ Int64 subId)
+{
+    Int32 state = 0;
+    GetSubState(subId, &state);
+    if (state == ISubscriptionManager::ACTIVE) {
+        String str("activateSubId: subscription already active, subId = ");
+        str += subId;
+        Logd(str);
+        return NOERROR;
+    }
+
+    Int32 slotId = 0;
+    GetSlotId(subId, &slotId);
+    assert(0 && "TODO");
+    // SubscriptionHelper->GetInstance()->SetUiccSubscription(slotId, ISubscriptionManager::ACTIVE);
+    return NOERROR;
+}
+
+ECode SubscriptionController::DeactivateSubId(
+    /* [in] */ Int64 subId)
+{
+    Int32 state = 0;
+    GetSubState(subId, &state);
+    if (state == ISubscriptionManager::INACTIVE) {
+        String str("activateSubId: subscription already deactivated, subId = ");
+        str += subId;
+        Logd(str);
+        return NOERROR;
+    }
+
+    Int32 slotId = 0;
+    GetSlotId(subId, &slotId);
+    assert(0 && "TODO");
+    // SubscriptionHelper->GetInstance()->SetUiccSubscription(slotId, ISubscriptionManager::INACTIVE);
+    return NOERROR;
+}
+
+ECode SubscriptionController::SetNwMode(
+    /* [in] */ Int64 subId,
+    /* [in] */ Int32 nwMode)
+{
+    String str("setNwMode, nwMode: ");
+    str += nwMode;
+    str += " subId: ";
+    str += subId;
+    Logd(str);
+    AutoPtr<IContentValues> value;
+    CContentValues::New(1, (IContentValues**)&value);
+    value->Put(ISubscriptionManager::NETWORK_MODE, nwMode);
+    AutoPtr<IContentResolver> cr;
+    mContext->GetContentResolver((IContentResolver**)&cr);
+    str = IBaseColumns::ID;
+    str += "=";
+    str += StringUtils::ToString(subId);
+    AutoPtr<ISubscriptionManager> sm;
+    CSubscriptionManager::AcquireSingleton((ISubscriptionManager**)&sm);
+    AutoPtr<IUri> content_uri;
+    sm->GetCONTENT_URI((IUri**)&content_uri);
+    Int32 res = 0;
+    cr->Update(content_uri,
+            value, str, NULL, &res);
+    return NOERROR;
+}
+
+ECode SubscriptionController::GetNwMode(
+    /* [in] */ Int64 subId,
+    /* [out] */ Int32* result)
+{
+    VALIDATE_NOT_NULL(result)
+    AutoPtr<ISubInfoRecord> subInfo;
+    GetSubInfoForSubscriber(subId, (ISubInfoRecord**)&subInfo);
+    if (subInfo != NULL)  {
+        AutoPtr<CSubInfoRecord> _subInfo = (CSubInfoRecord*)subInfo.Get();
+        assert(0 && "TODO");
+        // *result = _subInfo->mNwMode;
+        return NOERROR;
+    }
+    else {
+        String str("getSubState: invalid subId = ");
+        str += subId;
+        Loge(str);
+        *result = ISubscriptionManager::DEFAULT_NW_MODE;
+        return NOERROR;
+    }
+}
+
+ECode SubscriptionController::SetSubState(
+    /* [in] */ Int64 subId,
+    /* [in] */ Int32 subStatus,
+    /* [out] */ Int32* result)
+{
+    VALIDATE_NOT_NULL(result)
+    Int32 res = 0;
+    String str("setSubState, subStatus: ");
+    str += subStatus;
+    str += " subId: ";
+    str += subId;
+    Logd(str);
+    AutoPtr<IModemStackControllerHelper> mchlp;
+    assert(0 && "TODO");
+    // CModemStackControllerHelper::AcquireSingleton((IModemStackControllerHelper**)&mchlp);
+    AutoPtr<IModemStackController> mc;
+    mchlp->GetInstance((IModemStackController**)&mc);
+    Boolean ready = FALSE;
+    mc->IsStackReady(&ready);
+    if (ready) {
+        AutoPtr<IContentValues> value;
+        CContentValues::New(1, (IContentValues**)&value);
+        value->Put(ISubscriptionManager::SUB_STATE, subStatus);
+        AutoPtr<IContentResolver> cr;
+        mContext->GetContentResolver((IContentResolver**)&cr);
+        str = IBaseColumns::ID;
+        str += "=";
+        str += StringUtils::ToString(subId);
+        AutoPtr<ISubscriptionManager> sm;
+        CSubscriptionManager::AcquireSingleton((ISubscriptionManager**)&sm);
+        AutoPtr<IUri> content_uri;
+        sm->GetCONTENT_URI((IUri**)&content_uri);
+        cr->Update(content_uri,
+                value, str, NULL, &res);
+
+    }
+    BroadcastSimInfoContentChanged(subId,
+            ISubscriptionManager::SUB_STATE, subStatus, ISubscriptionManager::DEFAULT_STRING_VALUE);
+    *result = res;
+    return NOERROR;
+}
+
+ECode SubscriptionController::GetSubState(
+    /* [in] */ Int64 subId,
+    /* [out] */ Int32* result)
+{
+    VALIDATE_NOT_NULL(result)
+    AutoPtr<ISubInfoRecord> subInfo;
+    GetSubInfoForSubscriber(subId, (ISubInfoRecord**)&subInfo);
+    Int32 subStatus = ISubscriptionManager::INACTIVE;
+
+    // Consider the subStatus from subInfo record only if the
+    //  record is associated with a valid slot Id.
+    assert(0 && "TODO");
+    // if ((subInfo != NULL) && (subInfo->mSlotId >= 0)) {
+    //     subStatus = subInfo->mStatus;
+    // }
+    *result = subStatus;
+    return NOERROR;
+}
+
+ECode SubscriptionController::UpdateUserPrefs(
+    /* [in] */ Boolean setDds)
+{
+    AutoPtr<IList> subInfoList;
+    GetActiveSubInfoList((IList**)&subInfoList);
+    Int32 mActCount = 0;
+    AutoPtr<ISubInfoRecord> mNextActivatedSub;
+
+    if (subInfoList == NULL) {
+        String str("updateUserPrefs: subscription are not avaiable dds = ");
+        Int64 dataSubId = 0;
+        GetDefaultDataSubId(&dataSubId);
+        str += dataSubId;
+        str += " voice = ";
+        Int64 voiceSubId = 0;
+        GetDefaultVoiceSubId(&voiceSubId);
+        str += voiceSubId;
+        str += " sms = ";
+        Int64 smsSubId = 0;
+        GetDefaultSmsSubId(&smsSubId);
+        str += smsSubId;
+        str += " setDDs = ";
+        str += setDds;
+        Logd(str);
+        // if no SIM cards present on device, set dummy subId
+        // as data/sms/voice preferred subId.
+        SetDefaultSubId(DUMMY_SUB_ID);
+        SetDefaultVoiceSubId(DUMMY_SUB_ID);
+        SetDefaultSmsSubId(DUMMY_SUB_ID);
+        SetDataSubId(DUMMY_SUB_ID);
+        return NOERROR;
+    }
+
+    //Get num of activated Subs and next available activated sub info.
+    AutoPtr<IIterator> it;
+    subInfoList->GetIterator((IIterator**)&it);
+    Boolean bHasNext = FALSE;
+    while ((it->HasNext(&bHasNext), bHasNext)) {
+        AutoPtr<IInterface> p;
+        it->GetNext((IInterface**)&p);
+        AutoPtr<CSubInfoRecord> subInfo = (CSubInfoRecord*)ISubInfoRecord::Probe(p);
+        Int32 state = 0;
+        GetSubState(subInfo->mSubId, &state);
+        if (state == ISubscriptionManager::ACTIVE) {
+            mActCount++;
+            if (mNextActivatedSub == NULL) {
+                mNextActivatedSub = subInfo;
+            }
+        }
+    }
+
+    String str("updateUserPrefs: active sub count = ");
+    str += mActCount;
+    str += " dds = ";
+    Int64 dataSubId = 0;
+    GetDefaultDataSubId(&dataSubId);
+    str += dataSubId;
+    str += " voice = ";
+    Int64 voiceSubId = 0;
+    GetDefaultVoiceSubId(&voiceSubId);
+    str += voiceSubId;
+    str += " sms = ";
+    Int64 smsSubId = 0;
+    GetDefaultSmsSubId(&smsSubId);
+    str += smsSubId;
+    str += " setDDs = ";
+    str += setDds;
+    Logd(str);
+    //if activated sub count is less than 2, disable prompt.
+    if (mActCount < 2) {
+        SetSMSPromptEnabled(FALSE);
+        SetVoicePromptEnabled(FALSE);
+    }
+
+    //if there are no activated subs available, no need to update. EXIT.
+    if (mNextActivatedSub == NULL) return NOERROR;
+
+    Int64 subId = 0;
+    GetDefaultSubId(&subId);
+    Int32 state = 0;
+    GetSubState(subId, &state);
+    AutoPtr<CSubInfoRecord> _mNextActivatedSub = (CSubInfoRecord*)mNextActivatedSub.Get();
+    if (state == ISubscriptionManager::INACTIVE) {
+        SetDefaultSubId(_mNextActivatedSub->mSubId);
+    }
+
+    Int64 ddsSubId = 0;
+    GetDefaultDataSubId(&ddsSubId);
+    Int32 ddsSubState = 0;
+    GetSubState(ddsSubId, &ddsSubState);
+    //if current data sub is not active, fallback to next active sub.
+    if (setDds || (ddsSubState == ISubscriptionManager::INACTIVE)) {
+        if (ddsSubState == ISubscriptionManager::INACTIVE) ddsSubId = _mNextActivatedSub->mSubId;
+        SetDefaultDataSubId(ddsSubId);
+    }
+    //if current voice sub is not active and prompt not enabled, fallback to next active sub.
+    GetDefaultVoiceSubId(&voiceSubId);
+    GetSubState(voiceSubId, &ddsSubState);
+    Boolean bVoiceEnabled = FALSE;
+    IsVoicePromptEnabled(&bVoiceEnabled);
+    if (ddsSubState == ISubscriptionManager::INACTIVE &&
+        !bVoiceEnabled) {
+        SetDefaultVoiceSubId(_mNextActivatedSub->mSubId);
+    }
+    //if current sms sub is not active and prompt not enabled, fallback to next active sub.
+    GetDefaultSmsSubId(&smsSubId);
+    GetSubState(smsSubId, &ddsSubState);
+    Boolean bSmsEnabled = FALSE;
+    IsSMSPromptEnabled(&bSmsEnabled);
+    if (ddsSubState == ISubscriptionManager::INACTIVE &&
+        !bSmsEnabled) {
+        SetDefaultSmsSubId(_mNextActivatedSub->mSubId);
+    }
+    str = "updateUserPrefs: after currentDds = ";
+    GetDefaultDataSubId(&ddsSubId);
+    str += ddsSubId;
+    str += " voice = ";
+    GetDefaultVoiceSubId(&voiceSubId);
+    str += voiceSubId;
+    str += " sms = ";
+    GetDefaultSmsSubId(&smsSubId);
+    str += smsSubId;
+    str += " newDds = ";
+    str += ddsSubId;
+    Logd(str);
+    return NOERROR;
+}
+
+ECode SubscriptionController::IsVoicePromptEnabled(
+    /* [out] */ Boolean* result)
+{
+    VALIDATE_NOT_NULL(result)
+    Boolean prompt = FALSE;
+    Int32 value = 0;
+    // try {
+    AutoPtr<IContentResolver> cr;
+    mContext->GetContentResolver((IContentResolver**)&cr);
+    AutoPtr<ISettingsGlobal> sg;
+    CSettingsGlobal::AcquireSingleton((ISettingsGlobal**)&sg);
+    sg->GetInt32(cr,
+            ISettingsGlobal::MULTI_SIM_VOICE_PROMPT,
+            &value);
+    // } Catch (SettingNotFoundException snfe) {
+    //     Loge("Settings Exception Reading Dual Sim Voice Prompt Values");
+    // }
+    prompt = (value == 0) ? FALSE : TRUE ;
+    if (VDBG) {
+        String str("Voice Prompt option:");
+        str += prompt;
+        Logd(str);
+    }
+
+    *result = prompt;
+    return NOERROR;
+}
+
+ECode SubscriptionController::SetVoicePromptEnabled(
+    /* [in] */ Boolean enabled)
+{
+    Int32 value = (enabled == FALSE) ? 0 : 1;
+    AutoPtr<IContentResolver> cr;
+    mContext->GetContentResolver((IContentResolver**)&cr);
+    AutoPtr<ISettingsGlobal> sg;
+    CSettingsGlobal::AcquireSingleton((ISettingsGlobal**)&sg);
+    Boolean res = FALSE;
+    sg->PutInt32(cr,
+            ISettingsGlobal::MULTI_SIM_VOICE_PROMPT, value, &res);
+    String str("setVoicePromptOption to ");
+    str += enabled;
+    Logd(str);
+    return NOERROR;
+}
+
+ECode SubscriptionController::GetOnDemandDataSubId(
+    /* [out] */ Int64* result)
+{
+    VALIDATE_NOT_NULL(result)
+    return GetCurrentDds(result);
+}
+
+ECode SubscriptionController::RegisterForOnDemandDdsLockNotification(
+    /* [in] */ Int64 clientSubId,
+    /* [in] */ ISubscriptionControllerOnDemandDdsLockNotifier* callback)
+{
+    String str("registerForOnDemandDdsLockNotification for client=");
+    str += clientSubId;
+    Logd(str);
+    mOnDemandDdsLockNotificationRegistrants->Put(CoreUtils::Convert(clientSubId), callback);
+    return NOERROR;
+}
+
+ECode SubscriptionController::NotifyOnDemandDataSubIdChanged(
+    /* [in] */ INetworkRequest* n)
+{
+    Int64 subId = 0;
+    GetSubIdFromNetworkRequest(n, &subId);
+    AutoPtr<IInteger32> pSubId;
+    CInteger32::New(subId, (IInteger32**)&pSubId);
+    AutoPtr<IInterface> p;
+    mOnDemandDdsLockNotificationRegistrants->Get(
+            pSubId, (IInterface**)&p);
+    AutoPtr<ISubscriptionControllerOnDemandDdsLockNotifier> notifier =
+        ISubscriptionControllerOnDemandDdsLockNotifier::Probe(p);
+    if (notifier != NULL) {
+        notifier->NotifyOnDemandDdsLockGranted(n);
+    }
+    else {
+        Logd(String("No registrants for OnDemandDdsLockGranted event"));
+    }
+    return NOERROR;
+}
+
+ECode SubscriptionController::RemoveStaleSubPreferences(
+    /* [in] */ const String& prefKey)
+{
+    AutoPtr<IList> subInfoList;
+    GetAllSubInfoList((IList**)&subInfoList);
+    AutoPtr<IPreferenceManagerHelper> hlp;
+    CPreferenceManagerHelper::AcquireSingleton((IPreferenceManagerHelper**)&hlp);
+    AutoPtr<ISharedPreferences> sp;
+    hlp->GetDefaultSharedPreferences(mContext, (ISharedPreferences**)&sp);
+    AutoPtr<IIterator> it;
+    subInfoList->GetIterator((IIterator**)&it);
+    Boolean bHasNext = FALSE;
+    while ((it->HasNext(&bHasNext), bHasNext)) {
+        AutoPtr<IInterface> p;
+        it->GetNext((IInterface**)&p);
+        AutoPtr<CSubInfoRecord> subInfo = (CSubInfoRecord*)ISubInfoRecord::Probe(p);
+        if (subInfo->mSlotId == -1) {
+            assert(0 && "TODO");
+            // AutoPtr<ISharedPreferencesEditor> edit;
+            // sp->Edit((ISharedPreferencesEditor**)&edit);
+            // edit->Remove(prefKey+subInfo->mSubId);
+            // edit->Commit();
+        }
+    }
+    return NOERROR;
+}
+
+} // namespace Telephony
+} // namespace Internal
+} // namespace Droid
+} // namespace Elastos

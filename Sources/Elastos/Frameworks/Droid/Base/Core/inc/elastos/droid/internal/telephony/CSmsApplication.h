@@ -2,66 +2,30 @@
 #ifndef __ELASTOS_DROID_INTERNAL_TELEPHONY_SMSAPPLICATION_H__
 #define __ELASTOS_DROID_INTERNAL_TELEPHONY_SMSAPPLICATION_H__
 
-#include "_Elastos.Droid.Internal.h"
+#include "Elastos.Droid.App.h"
+#include "Elastos.Droid.Telephony.h"
+#include "Elastos.CoreLibrary.Utility.h"
+#include "_Elastos_Droid_Internal_Telephony_CSmsApplication.h"
+#include "elastos/droid/internal/content/PackageMonitor.h"
 #include <elastos/core/Singleton.h>
 
-using Elastos::IO::IFileDescriptor;
-using Elastos::IO::IPrintWriter;
-
-using Elastos::Core::Object;
-
-using Elastos::Droid::App::IPendingIntent;
 using Elastos::Droid::Content::IContext;
-using Elastos::Droid::Content::IIntentFilter;
-using Elastos::Droid::Telephony::ICellInfo;
-using Elastos::Droid::Telephony::IServiceState;
-using Elastos::Droid::Telephony::ISignalStrength;
-using Elastos::Droid::Telephony::ITelephonyManager;
+using Elastos::Droid::Content::IComponentName;
+using Elastos::Droid::Content::Pm::IPackageManager;
+using Elastos::Droid::Internal::Content::PackageMonitor;
 
+using Elastos::Core::Singleton;
+using Elastos::Utility::ICollection;
 
 namespace Elastos {
 namespace Droid {
 namespace Internal {
 namespace Telephony {
 
-class SmsApplication
-    : public Singleton
+CarClass(CSmsApplication)
+    , public Singleton
     , public ISmsApplication
 {
-private:
-    /**
-     * Tracks package changes and ensures that the default SMS app is always configured to be the
-     * preferred activity for SENDTO sms/mms intents.
-     */
-    class SmsPackageMonitor
-        : public PackageMonitor
-    {
-    public:
-        SmsPackageMonitor(
-            /* [in] */ IContext* context);
-
-        //@Override
-        CARAPI OnPackageDisappeared(
-            /* [in] */ const String& packageName,
-            /* [in] */ Int32 reason);
-
-        //@Override
-        CARAPI OnPackageAppeared(
-            /* [in] */ const String& packageName,
-            /* [in] */ Int32 reason);
-
-        //@Override
-        CARAPI OnPackageModified(
-            /* [in] */ const String& packageName);
-
-    private:
-        void OnPackageChanged(
-            /* [in] */ const String& packageName);
-
-    private:
-        AutoPtr<IContext> mContext;
-    }
-
 public:
     class SmsApplicationData
         : public Object
@@ -119,10 +83,46 @@ public:
         Int32 mUid;
     };
 
-public:
-    CAR_INTERFACE_DECL()
+private:
+    /**
+     * Tracks package changes and ensures that the default SMS app is always configured to be the
+     * preferred activity for SENDTO sms/mms intents.
+     */
+    class SmsPackageMonitor
+        : public PackageMonitor
+    {
+    public:
+        SmsPackageMonitor(
+            /* [in] */ IContext* context,
+            /* [in] */ CSmsApplication* host);
 
-    SmsApplication();
+        //@Override
+        CARAPI OnPackageDisappeared(
+            /* [in] */ const String& packageName,
+            /* [in] */ Int32 reason);
+
+        //@Override
+        CARAPI OnPackageAppeared(
+            /* [in] */ const String& packageName,
+            /* [in] */ Int32 reason);
+
+        //@Override
+        CARAPI OnPackageModified(
+            /* [in] */ const String& packageName);
+
+    private:
+        void OnPackageChanged(
+            /* [in] */ const String& packageName);
+
+    private:
+        AutoPtr<IContext> mContext;
+        CSmsApplication* mHost;
+    };
+
+public:
+    CAR_SINGLETON_DECL()
+
+    CAR_INTERFACE_DECL()
 
     /**
      * Returns the list of available SMS apps defined as apps that are registered for both the
@@ -224,8 +224,9 @@ public:
         /* [out] */ Boolean* result);
 
 private:
-    static Int32 getIncomingUserId(
+    static Int32 GetIncomingUserId(
         /* [in] */ IContext* context);
+
     static AutoPtr<ICollection> GetApplicationCollectionInternal(
         /* [in] */ IContext* context,
         /* [in] */ Int32 userId);
@@ -233,7 +234,7 @@ private:
      * Checks to see if we have a valid installed SMS application for the specified package name
      * @return Data for the specified package name or null if there isn't one
      */
-    static AutoPtr<ISmsApplicationData> GetApplicationForPackage(
+    static AutoPtr<SmsApplicationData> GetApplicationForPackage(
         /* [in] */ ICollection* applications,
         /* [in] */ const String& packageName);
 
@@ -270,7 +271,7 @@ private:
         /* [in] */ Int32 userId,
         /* [in] */ const String& scheme);
 public:
-    static const String LOG_TAG;
+    static const String LOGTAG;
 
 private:
     static const String PHONE_PACKAGE_NAME;
@@ -283,7 +284,7 @@ private:
     static const String SCHEME_MMSTO;
     static const Boolean DEBUG_MULTIUSER;
 
-    static AutoPtr<ISmsPackageMonitor> sSmsPackageMonitor;
+    static AutoPtr<SmsPackageMonitor> sSmsPackageMonitor;
 
 };
 

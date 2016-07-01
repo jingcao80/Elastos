@@ -1,249 +1,383 @@
-/*
- * Copyright (C) 2008 The Android Open Source Project
- * Copyright (c) 2011-2013, The Linux Foundation. All rights reserved.
- * Not a Contribution.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
 
-package com.android.internal.telephony;
+#include "elastos/droid/internal/telephony/UiccPhoneBookController.h"
+#include "elastos/droid/os/CServiceManager.h"
 
-using Elastos::Droid::Content::IContentValues;
 using Elastos::Droid::Os::IServiceManager;
-using Elastos::Droid::Telephony::IRlog;
+using Elastos::Droid::Os::CServiceManager;
 
-using Elastos::Droid::Internal::Telephony::IIccPhoneBookInterfaceManagerProxy;
-using Elastos::Droid::Internal::Telephony::IIIccPhoneBook;
-using Elastos::Droid::Internal::Telephony::IPhone;
-using Elastos::Droid::Internal::Telephony::Uicc::IAdnRecord;
+namespace Elastos {
+namespace Droid {
+namespace Internal {
+namespace Telephony {
 
-using Elastos::Utility::IList;
+//==============================================================
+//  UiccPhoneBookController::
+//==============================================================
+const String UiccPhoneBookController::TAG("UiccPhoneBookController");
 
-public class UiccPhoneBookController extends IIccPhoneBook.Stub {
-    private static const String TAG = "UiccPhoneBookController";
-    private Phone[] mPhone;
+CAR_INTERFACE_IMPL_2(UiccPhoneBookController, Object, IIIccPhoneBook, IUiccPhoneBookController)
 
-    /* only one UiccPhoneBookController exists */
-    public UiccPhoneBookController(Phone[] phone) {
-        If (ServiceManager->GetService("simphonebook") == NULL) {
-               ServiceManager->AddService("simphonebook", this);
-        }
-        mPhone = phone;
+ECode UiccPhoneBookController::constructor(
+    /* [in] */ ArrayOf<IPhone*>* phone)
+{
+    AutoPtr<IServiceManager> sm;
+    CServiceManager::AcquireSingleton((IServiceManager**)&sm);
+    AutoPtr<IInterface> p;
+    sm->GetService(String("simphonebook"), (IInterface**)&p);
+    if (p == NULL) {
+        sm->AddService(String("simphonebook"), IIIccPhoneBook::Probe(this));
     }
+    mPhone = phone;
+    return NOERROR;
+}
 
-    public Boolean
-    UpdateAdnRecordsInEfBySearch (Int32 efid, String oldTag, String oldPhoneNumber,
-            String newTag, String newPhoneNumber, String pin2) throws android.os.RemoteException {
-        return UpdateAdnRecordsInEfBySearchForSubscriber(GetDefaultSubId(), efid, oldTag,
-                oldPhoneNumber, newTag, newPhoneNumber, pin2);
+ECode UiccPhoneBookController::UpdateAdnRecordsInEfBySearch(
+    /* [in] */ Int32 efid,
+    /* [in] */ const String& oldTag,
+    /* [in] */ const String& oldPhoneNumber,
+    /* [in] */ const String& newTag,
+    /* [in] */ const String& newPhoneNumber,
+    /* [in] */ const String& pin2,
+    /* [out] */ Boolean* result)
+{
+    VALIDATE_NOT_NULL(result)
+    return UpdateAdnRecordsInEfBySearchForSubscriber(GetDefaultSubId(), efid, oldTag,
+            oldPhoneNumber, newTag, newPhoneNumber, pin2, result);
+}
+
+ECode UiccPhoneBookController::UpdateAdnRecordsInEfBySearchForSubscriber(
+    /* [in] */ Int64 subId,
+    /* [in] */ Int32 efid,
+    /* [in] */ const String& oldTag,
+    /* [in] */ const String& oldPhoneNumber,
+    /* [in] */ const String& newTag,
+    /* [in] */ const String& newPhoneNumber,
+    /* [in] */ const String& pin2,
+    /* [out] */ Boolean* result)
+{
+    VALIDATE_NOT_NULL(result)
+    AutoPtr<IIccPhoneBookInterfaceManagerProxy> iccPbkIntMgrProxy =
+                        GetIccPhoneBookInterfaceManagerProxy(subId);
+    if (iccPbkIntMgrProxy != NULL) {
+        return iccPbkIntMgrProxy->UpdateAdnRecordsInEfBySearch(efid, oldTag,
+                oldPhoneNumber, newTag, newPhoneNumber, pin2, result);
     }
-
-    public Boolean
-    UpdateAdnRecordsInEfBySearchForSubscriber(Int64 subId, Int32 efid, String oldTag,
-            String oldPhoneNumber, String newTag, String newPhoneNumber,
-            String pin2) throws android.os.RemoteException {
-        IccPhoneBookInterfaceManagerProxy iccPbkIntMgrProxy =
-                             GetIccPhoneBookInterfaceManagerProxy(subId);
-        If (iccPbkIntMgrProxy != NULL) {
-            return iccPbkIntMgrProxy->UpdateAdnRecordsInEfBySearch(efid, oldTag,
-                    oldPhoneNumber, newTag, newPhoneNumber, pin2);
-        } else {
-            Rlog->E(TAG,"updateAdnRecordsInEfBySearch iccPbkIntMgrProxy is" +
-                      " NULL for Subscription:"+subId);
-            return FALSE;
-        }
-    }
-
-    public Boolean
-    UpdateAdnRecordsInEfByIndex(Int32 efid, String newTag,
-            String newPhoneNumber, Int32 index, String pin2) throws android.os.RemoteException {
-        return UpdateAdnRecordsInEfByIndexForSubscriber(GetDefaultSubId(), efid, newTag,
-                newPhoneNumber, index, pin2);
-    }
-
-    public Boolean
-    UpdateAdnRecordsInEfByIndexForSubscriber(Int64 subId, Int32 efid, String newTag,
-            String newPhoneNumber, Int32 index, String pin2) throws android.os.RemoteException {
-        IccPhoneBookInterfaceManagerProxy iccPbkIntMgrProxy =
-                             GetIccPhoneBookInterfaceManagerProxy(subId);
-        If (iccPbkIntMgrProxy != NULL) {
-            return iccPbkIntMgrProxy->UpdateAdnRecordsInEfByIndex(efid, newTag,
-                    newPhoneNumber, index, pin2);
-        } else {
-            Rlog->E(TAG,"updateAdnRecordsInEfByIndex iccPbkIntMgrProxy is" +
-                      " NULL for Subscription:"+subId);
-            return FALSE;
-        }
-    }
-
-    public Int32[] GetAdnRecordsSize(Int32 efid) throws android.os.RemoteException {
-        return GetAdnRecordsSizeForSubscriber(GetDefaultSubId(), efid);
-    }
-
-    public Int32[]
-    GetAdnRecordsSizeForSubscriber(Int64 subId, Int32 efid) throws android.os.RemoteException {
-        IccPhoneBookInterfaceManagerProxy iccPbkIntMgrProxy =
-                             GetIccPhoneBookInterfaceManagerProxy(subId);
-        If (iccPbkIntMgrProxy != NULL) {
-            return iccPbkIntMgrProxy->GetAdnRecordsSize(efid);
-        } else {
-            Rlog->E(TAG,"getAdnRecordsSize iccPbkIntMgrProxy is" +
-                      " NULL for Subscription:"+subId);
-            return NULL;
-        }
-    }
-
-    public List<AdnRecord> GetAdnRecordsInEf(Int32 efid) throws android.os.RemoteException {
-        return GetAdnRecordsInEfForSubscriber(GetDefaultSubId(), efid);
-    }
-
-    public List<AdnRecord> GetAdnRecordsInEfForSubscriber(Int64 subId, Int32 efid)
-           throws android.os.RemoteException {
-        IccPhoneBookInterfaceManagerProxy iccPbkIntMgrProxy =
-                             GetIccPhoneBookInterfaceManagerProxy(subId);
-        If (iccPbkIntMgrProxy != NULL) {
-            return iccPbkIntMgrProxy->GetAdnRecordsInEf(efid);
-        } else {
-            Rlog->E(TAG,"getAdnRecordsInEf iccPbkIntMgrProxy is" +
-                      "NULL for Subscription:"+subId);
-            return NULL;
-        }
-    }
-
-    public Boolean
-    UpdateAdnRecordsWithContentValuesInEfBySearch(Int32 efid, ContentValues values,
-        String pin2) throws android.os.RemoteException {
-            return UpdateAdnRecordsWithContentValuesInEfBySearchUsingSubId(
-                GetDefaultSubId(), efid, values, pin2);
-    }
-
-    public Boolean
-    UpdateAdnRecordsWithContentValuesInEfBySearchUsingSubId(Int64 subId, Int32 efid,
-        ContentValues values, String pin2)
-        throws android.os.RemoteException {
-
-        IccPhoneBookInterfaceManagerProxy iccPbkIntMgrProxy =
-                             GetIccPhoneBookInterfaceManagerProxy(subId);
-        If (iccPbkIntMgrProxy != NULL) {
-            return iccPbkIntMgrProxy->UpdateAdnRecordsWithContentValuesInEfBySearch(
-                efid, values, pin2);
-        } else {
-            Rlog->E(TAG,"updateAdnRecordsWithContentValuesInEfBySearchUsingSubId " +
-                "iccPbkIntMgrProxy is NULL for Subscription:"+subId);
-            return FALSE;
-        }
-    }
-
-    public Int32 GetAdnCount() throws android.os.RemoteException {
-        return GetAdnCountUsingSubId(GetDefaultSubId());
-    }
-
-    public Int32 GetAdnCountUsingSubId(Int64 subId) throws android.os.RemoteException {
-        IccPhoneBookInterfaceManagerProxy iccPbkIntMgrProxy =
-                             GetIccPhoneBookInterfaceManagerProxy(subId);
-        If (iccPbkIntMgrProxy != NULL) {
-            return iccPbkIntMgrProxy->GetAdnCount();
-        } else {
-            Rlog->E(TAG,"getAdnCount iccPbkIntMgrProxy is" +
-                      "NULL for Subscription:"+subId);
-            return 0;
-        }
-    }
-
-    public Int32 GetAnrCount() throws android.os.RemoteException {
-        return GetAnrCountUsingSubId(GetDefaultSubId());
-    }
-
-    public Int32 GetAnrCountUsingSubId(Int64 subId) throws android.os.RemoteException {
-        IccPhoneBookInterfaceManagerProxy iccPbkIntMgrProxy =
-                             GetIccPhoneBookInterfaceManagerProxy(subId);
-        If (iccPbkIntMgrProxy != NULL) {
-            return iccPbkIntMgrProxy->GetAnrCount();
-        } else {
-            Rlog->E(TAG,"getAnrCount iccPbkIntMgrProxy is" +
-                      "NULL for Subscription:"+subId);
-            return 0;
-        }
-    }
-
-    public Int32 GetEmailCount() throws android.os.RemoteException {
-        return GetEmailCountUsingSubId(GetDefaultSubId());
-    }
-
-    public Int32 GetEmailCountUsingSubId(Int64 subId) throws android.os.RemoteException {
-        IccPhoneBookInterfaceManagerProxy iccPbkIntMgrProxy =
-                             GetIccPhoneBookInterfaceManagerProxy(subId);
-        If (iccPbkIntMgrProxy != NULL) {
-            return iccPbkIntMgrProxy->GetEmailCount();
-        } else {
-            Rlog->E(TAG,"getEmailCount iccPbkIntMgrProxy is" +
-                      "NULL for Subscription:"+subId);
-            return 0;
-        }
-    }
-
-    public Int32 GetSpareAnrCount() throws android.os.RemoteException {
-        return GetSpareAnrCountUsingSubId(GetDefaultSubId());
-    }
-
-    public Int32 GetSpareAnrCountUsingSubId(Int64 subId) throws android.os.RemoteException {
-        IccPhoneBookInterfaceManagerProxy iccPbkIntMgrProxy =
-                             GetIccPhoneBookInterfaceManagerProxy(subId);
-        If (iccPbkIntMgrProxy != NULL) {
-            return iccPbkIntMgrProxy->GetSpareAnrCount();
-        } else {
-            Rlog->E(TAG,"getSpareAnrCount iccPbkIntMgrProxy is" +
-                      "NULL for Subscription:"+subId);
-            return 0;
-        }
-    }
-
-    public Int32 GetSpareEmailCount() throws android.os.RemoteException {
-        return GetSpareEmailCountUsingSubId(GetDefaultSubId());
-    }
-
-    public Int32 GetSpareEmailCountUsingSubId(Int64 subId) throws android.os.RemoteException {
-        IccPhoneBookInterfaceManagerProxy iccPbkIntMgrProxy =
-                             GetIccPhoneBookInterfaceManagerProxy(subId);
-        If (iccPbkIntMgrProxy != NULL) {
-            return iccPbkIntMgrProxy->GetSpareEmailCount();
-        } else {
-            Rlog->E(TAG,"getSpareEmailCount iccPbkIntMgrProxy is" +
-                      "NULL for Subscription:"+subId);
-            return 0;
-        }
-    }
-
-    /**
-     * get phone book interface manager proxy object based on subscription.
-     **/
-    private IccPhoneBookInterfaceManagerProxy
-            GetIccPhoneBookInterfaceManagerProxy(Int64 subId) {
-        Int32 phoneId = SubscriptionController->GetInstance()->GetPhoneId(subId);
-        try {
-            Return ((PhoneProxy)mPhone[phoneId]).GetIccPhoneBookInterfaceManagerProxy();
-        } Catch (NullPointerException e) {
-            Rlog->E(TAG, "Exception is :"+e->ToString()+" For subscription :"+subId );
-            e->PrintStackTrace(); //To print stack trace
-            return NULL;
-        } Catch (ArrayIndexOutOfBoundsException e) {
-            Rlog->E(TAG, "Exception is :"+e->ToString()+" For subscription :"+subId );
-            e->PrintStackTrace();
-            return NULL;
-        }
-    }
-
-    private Int64 GetDefaultSubId() {
-        return SubscriptionController->GetInstance()->GetDefaultSubId();
+    else {
+        String str("updateAdnRecordsInEfBySearch iccPbkIntMgrProxy is");
+        str += " NULL for Subscription:";
+        str += subId;
+        // Rlog::E(TAG, str);
+        *result = FALSE;
+        return NOERROR;
     }
 }
+
+ECode UiccPhoneBookController::UpdateAdnRecordsInEfByIndex(
+    /* [in] */ Int32 efid,
+    /* [in] */ const String& newTag,
+    /* [in] */ const String& newPhoneNumber,
+    /* [in] */ Int32 index,
+    /* [in] */ const String& pin2,
+    /* [out] */ Boolean* result)
+{
+    VALIDATE_NOT_NULL(result)
+    return UpdateAdnRecordsInEfByIndexForSubscriber(GetDefaultSubId(), efid, newTag,
+            newPhoneNumber, index, pin2, result);
+}
+
+ECode UiccPhoneBookController::UpdateAdnRecordsInEfByIndexForSubscriber(
+    /* [in] */ Int64 subId,
+    /* [in] */ Int32 efid,
+    /* [in] */ const String& newTag,
+    /* [in] */ const String& newPhoneNumber,
+    /* [in] */ Int32 index,
+    /* [in] */ const String& pin2,
+    /* [out] */ Boolean* result)
+{
+    VALIDATE_NOT_NULL(result)
+    AutoPtr<IIccPhoneBookInterfaceManagerProxy> iccPbkIntMgrProxy =
+                         GetIccPhoneBookInterfaceManagerProxy(subId);
+    if (iccPbkIntMgrProxy != NULL) {
+        return iccPbkIntMgrProxy->UpdateAdnRecordsInEfByIndex(efid, newTag,
+                newPhoneNumber, index, pin2, result);
+    }
+    else {
+        String str("updateAdnRecordsInEfByIndex iccPbkIntMgrProxy is");
+        str += " NULL for Subscription:";
+        str += subId;
+        // Rlog::E(TAG, str);
+        *result = FALSE;
+        return NOERROR;
+    }
+}
+
+ECode UiccPhoneBookController::GetAdnRecordsSize(
+    /* [in] */ Int32 efid,
+    /* [out] */ ArrayOf<Int32>** result)
+{
+    VALIDATE_NOT_NULL(result)
+    return GetAdnRecordsSizeForSubscriber(GetDefaultSubId(), efid, result);
+}
+
+ECode UiccPhoneBookController::GetAdnRecordsSizeForSubscriber(
+    /* [in] */ Int64 subId,
+    /* [in] */ Int32 efid,
+    /* [out] */ ArrayOf<Int32>** result)
+{
+    VALIDATE_NOT_NULL(result)
+    AutoPtr<IIccPhoneBookInterfaceManagerProxy> iccPbkIntMgrProxy =
+                         GetIccPhoneBookInterfaceManagerProxy(subId);
+    if (iccPbkIntMgrProxy != NULL) {
+        return iccPbkIntMgrProxy->GetAdnRecordsSize(efid, result);
+    }
+    else {
+        String str("getAdnRecordsSize iccPbkIntMgrProxy is");
+        str += " NULL for Subscription:";
+        str += subId;
+        // Rlog::E(TAG, str);
+        *result = NULL;
+        return NOERROR;
+    }
+}
+
+ECode UiccPhoneBookController::GetAdnRecordsInEf(
+    /* [in] */ Int32 efid,
+    /* [out] */ IList** result)
+{
+    VALIDATE_NOT_NULL(result)
+    return GetAdnRecordsInEfForSubscriber(GetDefaultSubId(), efid, result);
+}
+
+ECode UiccPhoneBookController::GetAdnRecordsInEfForSubscriber(
+    /* [in] */ Int64 subId,
+    /* [in] */ Int32 efid,
+    /* [out] */ IList** result)
+{
+    VALIDATE_NOT_NULL(result)
+    AutoPtr<IIccPhoneBookInterfaceManagerProxy> iccPbkIntMgrProxy =
+                         GetIccPhoneBookInterfaceManagerProxy(subId);
+    if (iccPbkIntMgrProxy != NULL) {
+        return iccPbkIntMgrProxy->GetAdnRecordsInEf(efid, result);
+    }
+    else {
+        String str("getAdnRecordsInEf iccPbkIntMgrProxy is");
+        str += "NULL for Subscription:";
+        str += subId;
+        // Rlog::E(TAG, str);
+        *result = NULL;
+        return NOERROR;
+    }
+}
+
+ECode UiccPhoneBookController::UpdateAdnRecordsWithContentValuesInEfBySearch(
+    /* [in] */ Int32 efid,
+    /* [in] */ IContentValues* values,
+    /* [in] */ const String& pin2,
+    /* [out] */ Boolean* result)
+{
+    VALIDATE_NOT_NULL(result)
+    return UpdateAdnRecordsWithContentValuesInEfBySearchUsingSubId(
+        GetDefaultSubId(), efid, values, pin2, result);
+}
+
+ECode UiccPhoneBookController::UpdateAdnRecordsWithContentValuesInEfBySearchUsingSubId(
+    /* [in] */ Int64 subId,
+    /* [in] */ Int32 efid,
+    /* [in] */ IContentValues* values,
+    /* [in] */ const String& pin2,
+    /* [out] */ Boolean* result)
+{
+    VALIDATE_NOT_NULL(result)
+    AutoPtr<IIccPhoneBookInterfaceManagerProxy> iccPbkIntMgrProxy =
+                         GetIccPhoneBookInterfaceManagerProxy(subId);
+    if (iccPbkIntMgrProxy != NULL) {
+        return iccPbkIntMgrProxy->UpdateAdnRecordsWithContentValuesInEfBySearch(
+            efid, values, pin2, result);
+    }
+    else {
+        String str("updateAdnRecordsWithContentValuesInEfBySearchUsingSubId ");
+        str += "iccPbkIntMgrProxy is NULL for Subscription:";
+        str += subId;
+        // Rlog::E(TAG, str);
+        *result = FALSE;
+        return NOERROR;
+    }
+}
+
+ECode UiccPhoneBookController::GetAdnCount(
+    /* [out] */ Int32* result)
+{
+    VALIDATE_NOT_NULL(result)
+    return GetAdnCountUsingSubId(GetDefaultSubId(), result);
+}
+
+ECode UiccPhoneBookController::GetAdnCountUsingSubId(
+    /* [in] */ Int64 subId,
+    /* [out] */ Int32* result)
+{
+    VALIDATE_NOT_NULL(result)
+    AutoPtr<IIccPhoneBookInterfaceManagerProxy> iccPbkIntMgrProxy =
+                         GetIccPhoneBookInterfaceManagerProxy(subId);
+    if (iccPbkIntMgrProxy != NULL) {
+        return iccPbkIntMgrProxy->GetAdnCount(result);
+    }
+    else {
+        String str("getAdnCount iccPbkIntMgrProxy is");
+        str += "NULL for Subscription:";
+        str += subId;
+        // Rlog::E(TAG, str);
+        *result = 0;
+        return NOERROR;
+    }
+}
+
+ECode UiccPhoneBookController::GetAnrCount(
+    /* [out] */ Int32* result)
+{
+    VALIDATE_NOT_NULL(result)
+    return GetAnrCountUsingSubId(GetDefaultSubId(), result);
+}
+
+ECode UiccPhoneBookController::GetAnrCountUsingSubId(
+    /* [in] */ Int64 subId,
+    /* [out] */ Int32* result)
+{
+    VALIDATE_NOT_NULL(result)
+    AutoPtr<IIccPhoneBookInterfaceManagerProxy> iccPbkIntMgrProxy =
+                         GetIccPhoneBookInterfaceManagerProxy(subId);
+    if (iccPbkIntMgrProxy != NULL) {
+        return iccPbkIntMgrProxy->GetAnrCount(result);
+    }
+    else {
+        String str("getAnrCount iccPbkIntMgrProxy is");
+        str += "NULL for Subscription:";
+        str += subId;
+        // Rlog::E(TAG, str);
+        *result = 0;
+        return NOERROR;
+    }
+}
+
+ECode UiccPhoneBookController::GetEmailCount(
+    /* [out] */ Int32* result)
+{
+    VALIDATE_NOT_NULL(result)
+    return GetEmailCountUsingSubId(GetDefaultSubId(), result);
+}
+
+ECode UiccPhoneBookController::GetEmailCountUsingSubId(
+    /* [in] */ Int64 subId,
+    /* [out] */ Int32* result)
+{
+    VALIDATE_NOT_NULL(result)
+    AutoPtr<IIccPhoneBookInterfaceManagerProxy> iccPbkIntMgrProxy =
+                         GetIccPhoneBookInterfaceManagerProxy(subId);
+    if (iccPbkIntMgrProxy != NULL) {
+        return iccPbkIntMgrProxy->GetEmailCount(result);
+    }
+    else {
+        String str("getEmailCount iccPbkIntMgrProxy is");
+        str += "NULL for Subscription:";
+        str += subId;
+        // Rlog::E(TAG, str);
+        *result = 0;
+        return NOERROR;
+    }
+}
+
+ECode UiccPhoneBookController::GetSpareAnrCount(
+    /* [out] */ Int32* result)
+{
+    VALIDATE_NOT_NULL(result)
+    return GetSpareAnrCountUsingSubId(GetDefaultSubId(), result);
+}
+
+ECode UiccPhoneBookController::GetSpareAnrCountUsingSubId(
+    /* [in] */ Int64 subId,
+    /* [out] */ Int32* result)
+{
+    VALIDATE_NOT_NULL(result)
+    AutoPtr<IIccPhoneBookInterfaceManagerProxy> iccPbkIntMgrProxy =
+                         GetIccPhoneBookInterfaceManagerProxy(subId);
+    if (iccPbkIntMgrProxy != NULL) {
+        return iccPbkIntMgrProxy->GetSpareAnrCount(result);
+    }
+    else {
+        String str("getSpareAnrCount iccPbkIntMgrProxy is");
+        str += "NULL for Subscription:";
+        str += subId;
+        // Rlog::E(TAG, str);
+        *result = 0;
+        return NOERROR;
+    }
+}
+
+ECode UiccPhoneBookController::GetSpareEmailCount(
+    /* [out] */ Int32* result)
+{
+    VALIDATE_NOT_NULL(result)
+    return GetSpareEmailCountUsingSubId(GetDefaultSubId(), result);
+}
+
+ECode UiccPhoneBookController::GetSpareEmailCountUsingSubId(
+    /* [in] */ Int64 subId,
+    /* [out] */ Int32* result)
+{
+    VALIDATE_NOT_NULL(result)
+    AutoPtr<IIccPhoneBookInterfaceManagerProxy> iccPbkIntMgrProxy =
+                         GetIccPhoneBookInterfaceManagerProxy(subId);
+    if (iccPbkIntMgrProxy != NULL) {
+        return iccPbkIntMgrProxy->GetSpareEmailCount(result);
+    }
+    else {
+        String str("getSpareEmailCount iccPbkIntMgrProxy is");
+        str += "NULL for Subscription:";
+        str += subId;
+        // Rlog::E(TAG, str);
+        *result = 0;
+        return NOERROR;
+    }
+}
+
+AutoPtr<IIccPhoneBookInterfaceManagerProxy> UiccPhoneBookController::GetIccPhoneBookInterfaceManagerProxy(
+    /* [in] */ Int64 subId)
+{
+    AutoPtr<ISubscriptionControllerHelper> hlp;
+    assert(0 && "TODO");
+    // CSubscriptionControllerHelper::AcquireSingleton((ISubscriptionControllerHelper**)&hlp);
+    AutoPtr<ISubscriptionController> sc;
+    hlp->GetInstance((ISubscriptionController**)&sc);
+    Int32 phoneId = 0;
+    IISub::Probe(sc)->GetPhoneId(subId, &phoneId);
+    // try {
+    AutoPtr<IPhoneProxy> p = IPhoneProxy::Probe((*mPhone)[phoneId]);
+    AutoPtr<IIccPhoneBookInterfaceManagerProxy> res;
+    p->GetIccPhoneBookInterfaceManagerProxy((IIccPhoneBookInterfaceManagerProxy**)&res);
+    return res;
+    // } Catch (NullPointerException e) {
+    //     Rlog->E(TAG, "Exception is :"+e->ToString()+" For subscription :"+subId );
+    //     e->PrintStackTrace(); //To print stack trace
+    //     return NULL;
+    // } Catch (ArrayIndexOutOfBoundsException e) {
+    //     Rlog->E(TAG, "Exception is :"+e->ToString()+" For subscription :"+subId );
+    //     e->PrintStackTrace();
+    //     return NULL;
+    // }
+}
+
+Int64 UiccPhoneBookController::GetDefaultSubId()
+{
+    AutoPtr<ISubscriptionControllerHelper> hlp;
+    assert(0 && "TODO");
+    // CSubscriptionControllerHelper::AcquireSingleton((ISubscriptionControllerHelper**)&hlp);
+    AutoPtr<ISubscriptionController> sc;
+    hlp->GetInstance((ISubscriptionController**)&sc);
+    Int64 res = 0;
+    IISub::Probe(sc)->GetDefaultSubId(&res);
+    return res;
+}
+
+} // namespace Telephony
+} // namespace Internal
+} // namespace Droid
+} // namespace Elastos

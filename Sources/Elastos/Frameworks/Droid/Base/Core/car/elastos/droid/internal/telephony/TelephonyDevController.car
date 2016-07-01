@@ -55,9 +55,6 @@ module
         UnregisterRIL(
             [in] ICommandsInterface* cmdsIf);
 
-        HandleMessage(
-            [in] IMessage* msg);
-
         GetModemCount(
             [out] Int32* result);
     }

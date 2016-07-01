@@ -1,587 +1,912 @@
-/*
- * Copyright (C) 2008 The Android Open Source Project
- * Copyright (c) 2011-2013, The Linux Foundation. All rights reserved.
- * Not a Contribution.
- * Copyright (c) 2015 The CyanogenMod Project
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
 
-package com.android.internal.telephony;
+#include "elastos/droid/internal/telephony/UiccSmsController.h"
+#include "elastos/droid/content/CIntent.h"
+#include "elastos/droid/os/CServiceManager.h"
+#include "elastos/droid/os/CHandler.h"
+#include "elastos/droid/os/CUserHandleHelper.h"
+#include "elastos/droid/os/CBinderHelper.h"
+#include "elastos/droid/telephony/CSubscriptionManager.h"
+#include "elastos/droid/Manifest.h"
+#include <elastos/core/CoreUtils.h>
+#include <elastos/utility/logging/Logger.h>
 
-using Elastos::Droid::IManifest;
+using Elastos::Droid::Manifest;
 using Elastos::Droid::App::IActivity;
 using Elastos::Droid::App::IAppOpsManager;
-using Elastos::Droid::App::IPendingIntent;
-using Elastos::Droid::Content::IBroadcastReceiver;
-using Elastos::Droid::Content::IComponentName;
-using Elastos::Droid::Content::IContext;
-using Elastos::Droid::Content::IIntent;
-using Elastos::Droid::Net::IUri;
-using Elastos::Droid::Os::IHandler;
+using Elastos::Droid::Content::CIntent;
 using Elastos::Droid::Os::IPowerManager;
 using Elastos::Droid::Os::IServiceManager;
+using Elastos::Droid::Os::CServiceManager;
 using Elastos::Droid::Os::IUserHandle;
-using Elastos::Droid::Provider::Telephony::Sms::IIntents;
-using Elastos::Droid::Telephony::IRlog;
-using Elastos::Droid::Telephony::ISmsMessage;
-using Elastos::Droid::Utility::ILog;
+using Elastos::Droid::Os::CHandler;
+using Elastos::Droid::Os::IUserHandleHelper;
+using Elastos::Droid::Os::CUserHandleHelper;
+using Elastos::Droid::Os::IBinderHelper;
+using Elastos::Droid::Os::CBinderHelper;
 using Elastos::Droid::Telephony::ISubscriptionManager;
+using Elastos::Droid::Telephony::CSubscriptionManager;
+using Elastos::Droid::Internal::Telephony::ISmsMessageBase;
 
-using Elastos::Droid::Internal::Telephony::IISms;
-using Elastos::Droid::Internal::Telephony::IPhone;
-using Elastos::Droid::Internal::Telephony::ISmsRawData;
+using Elastos::Core::CoreUtils;
+using Elastos::Utility::CArrayList;
+using Elastos::Utility::ICollection;
+using Elastos::Utility::Logging::Logger;
 
-using Elastos::Utility::IArrayList;
-using Elastos::Utility::IList;
+namespace Elastos {
+namespace Droid {
+namespace Internal {
+namespace Telephony {
 
-/**
- * UiccSmsController to provide an inter-process communication to
- * access Sms in Icc.
- */
-public class UiccSmsController extends ISms.Stub {
+//==============================================================
+//  UiccSmsController::MyBroadcastReceiver::
+//==============================================================
 
-    static const String LOG_TAG = "RIL_UiccSmsController";
+UiccSmsController::MyBroadcastReceiver::MyBroadcastReceiver(
+    /* [in] */ UiccSmsController* host)
+    : mHost(host)
+{}
 
-    protected Phone[] mPhone;
+ECode UiccSmsController::MyBroadcastReceiver::OnReceive(
+    /* [in] */ IContext* context,
+    /* [in] */ IIntent* intent)
+{
+    // check if the message was aborted
+    Int32 code = 0;
+    GetResultCode(&code);
+    if (code != IActivity::RESULT_OK) {
+        return NOERROR;
+    }
+    String destAddr;
+    GetResultData(&destAddr);
+    String scAddr;
+    intent->GetStringExtra(String("scAddr"), &scAddr);
+    Int64 subId = 0;
+    intent->GetInt64Extra(String("subId"), mHost->GetDefaultSmsSubId(), &subId);
+    String callingPackage;
+    intent->GetStringExtra(String("callingPackage"), &callingPackage);
+    AutoPtr<IArrayList> parts;
+    intent->GetStringArrayListExtra(String("parts"), (IArrayList**)&parts);
+    AutoPtr<IArrayList> sentIntents;
+    intent->GetParcelableArrayListExtra(String("sentIntents"), (IArrayList**)&sentIntents);
+    AutoPtr<IArrayList> deliveryIntents;
+    intent->GetParcelableArrayListExtra(String("deliveryIntents"), (IArrayList**)&deliveryIntents);
 
-    protected UiccSmsController(Phone[] phone, Context context){
-        mPhone = phone;
-        mContext = context;
-        If (ServiceManager->GetService("isms") == NULL) {
-            ServiceManager->AddService("isms", this);
-        }
-
-        CreateWakelock();
+    Int32 extra = 0;
+    intent->GetInt32Extra(String("callingUid"), 0, &extra);
+    if (extra != 0) {
+        callingPackage += "\\";
+        callingPackage += extra;
     }
 
-    private void CreateWakelock() {
-        PowerManager pm = (PowerManager)mContext->GetSystemService(Context.POWER_SERVICE);
-        mWakeLock = pm->NewWakeLock(PowerManager.PARTIAL_WAKE_LOCK, "IccSmsInterfaceManager");
-        mWakeLock->SetReferenceCounted(TRUE);
+    Boolean bExtra = FALSE;
+    intent->GetBooleanExtra(String("multipart"), FALSE, &bExtra);
+    if (bExtra) {
+        // if (Rlog::IsLoggable("SMS", Log.VERBOSE)) {
+        //     Log("ProxiedMultiPartSms destAddr: " + destAddr +
+        //             "\n scAddr= " + scAddr +
+        //             "\n subId= " + subId +
+        //             "\n callingPackage= " + callingPackage +
+        //             "\n partsSize= " + parts->Size());
+        // }
+        AutoPtr<IIccSmsInterfaceManager> p = mHost->GetIccSmsInterfaceManager(subId);
+        p->SendMultipartText(callingPackage, destAddr, scAddr, IList::Probe(parts),
+                        IList::Probe(sentIntents), IList::Probe(deliveryIntents));
+        return NOERROR;
     }
 
-    private BroadcastReceiver mReceiver = new BroadcastReceiver() {
-        CARAPI OnReceive(Context context, Intent intent) {
-            // check if the message was aborted
-            If (GetResultCode() != Activity.RESULT_OK) {
-                return;
-            }
-            String destAddr = GetResultData();
-            String scAddr = intent->GetStringExtra("scAddr");
-            Int64 subId = intent->GetLongExtra("subId", GetDefaultSmsSubId());
-            String callingPackage = intent->GetStringExtra("callingPackage");
-            ArrayList<String> parts = intent->GetStringArrayListExtra("parts");
-            ArrayList<PendingIntent> sentIntents = intent->GetParcelableArrayListExtra("sentIntents");
-            ArrayList<PendingIntent> deliveryIntents = intent->GetParcelableArrayListExtra("deliveryIntents");
+    AutoPtr<IPendingIntent> sentIntent;
+    Int32 size = 0;
+    if (sentIntents != NULL && (sentIntents->GetSize(&size), size) > 0) {
+        AutoPtr<IInterface> p;
+        sentIntents->Get(0, (IInterface**)&p);
+        sentIntent = IPendingIntent::Probe(p);
+    }
+    AutoPtr<IPendingIntent> deliveryIntent;
+    if (deliveryIntents != NULL && (deliveryIntents->GetSize(&size), size) > 0) {
+        AutoPtr<IInterface> p;
+        deliveryIntents->Get(0, (IInterface**)&p);
+        deliveryIntent = IPendingIntent::Probe(p);
+    }
+    String text(NULL);
+    if (parts != NULL && (parts->GetSize(&size), size) > 0) {
+        AutoPtr<IInterface> p;
+        parts->Get(0, (IInterface**)&p);
+        ICharSequence::Probe(p)->ToString(&text);
+    }
+    // if (Rlog->IsLoggable("SMS", Log.VERBOSE)) {
+    //     Log("ProxiedSms destAddr: " + destAddr +
+    //             "\n scAddr=" + scAddr +
+    //             "\n subId= " + subId +
+    //             "\n callingPackage=" + callingPackage);
+    // }
+    AutoPtr<IIccSmsInterfaceManager> p = mHost->GetIccSmsInterfaceManager(subId);
+    p->SendText(callingPackage, destAddr,
+            scAddr, text, sentIntent, deliveryIntent);
+    return NOERROR;
+}
 
-            If (intent->GetIntExtra("callingUid", 0) != 0) {
-                callingPackage = callingPackage + "\\" + intent->GetIntExtra("callingUid", 0);
-            }
+//==============================================================
+//  UiccSmsController::
+//==============================================================
+const String UiccSmsController::LOGTAG("RIL_UiccSmsController");
 
-            If (intent->GetBooleanExtra("multipart", FALSE)) {
-                If (Rlog->IsLoggable("SMS", Log.VERBOSE)) {
-                    Log("ProxiedMultiPartSms destAddr: " + destAddr +
-                            "\n scAddr= " + scAddr +
-                            "\n subId= " + subId +
-                            "\n callingPackage= " + callingPackage +
-                            "\n partsSize= " + parts->Size());
-                }
-                GetIccSmsInterfaceManager(subId)
-                        .SendMultipartText(callingPackage, destAddr, scAddr, parts,
-                                sentIntents, deliveryIntents);
-                return;
-            }
+const Int32 UiccSmsController::WAKE_LOCK_TIMEOUT = 5000;
 
-            PendingIntent sentIntent = NULL;
-            If (sentIntents != NULL && sentIntents->Size() > 0) {
-                sentIntent = sentIntents->Get(0);
-            }
-            PendingIntent deliveryIntent = NULL;
-            If (deliveryIntents != NULL && deliveryIntents->Size() > 0) {
-                deliveryIntent = deliveryIntents->Get(0);
-            }
-            String text = NULL;
-            If (parts != NULL && parts->Size() > 0) {
-                text = parts->Get(0);
-            }
-            If (Rlog->IsLoggable("SMS", Log.VERBOSE)) {
-                Log("ProxiedSms destAddr: " + destAddr +
-                        "\n scAddr=" + scAddr +
-                        "\n subId= " + subId +
-                        "\n callingPackage=" + callingPackage);
-            }
-            GetIccSmsInterfaceManager(subId).SendText(callingPackage, destAddr,
-                    scAddr, text, sentIntent, deliveryIntent);
-        }
-    };
+CAR_INTERFACE_IMPL_2(UiccSmsController, Object, IISms, IUiccSmsController)
 
-    private Context mContext;
-    private PowerManager.WakeLock mWakeLock;
-    private static const Int32 WAKE_LOCK_TIMEOUT = 5000;
-    private final Handler mHandler = new Handler();
-    private void DispatchPdus(Byte[][] pdus) {
-        Intent intent = new Intent(Intents.SMS_DELIVER_ACTION);
-        // Direct the intent to only the default SMS app. If we can't find a default SMS app
-        // then send it to all broadcast receivers.
-        ComponentName componentName = SmsApplication->GetDefaultSmsApplication(mContext, TRUE);
-        If (componentName == NULL)
-            return;
+UiccSmsController::UiccSmsController()
+{
+    mReceiver = new MyBroadcastReceiver(this);
 
-        If (Rlog->IsLoggable("SMS", Log.VERBOSE)) {
-            Log("dispatchPdu pdus: " + pdus +
-                    "\n componentName=" + componentName +
-                    "\n format=" + SmsMessage.FORMAT_SYNTHETIC);
-        }
+    CHandler::New((IHandler**)&mHandler);
+}
 
-        // Deliver SMS message only to this receiver
-        intent->SetComponent(componentName);
-        intent->PutExtra("pdus", pdus);
-        intent->PutExtra("format", SmsMessage.FORMAT_SYNTHETIC);
-        Dispatch(intent, Manifest::permission::RECEIVE_SMS);
+ECode UiccSmsController::constructor(
+    /* [in] */ ArrayOf<IPhone*>* phone,
+    /* [in] */ IContext* context)
+{
+    mPhone = phone;
+    mContext = context;
 
-        intent->SetAction(Intents.SMS_RECEIVED_ACTION);
-        intent->SetComponent(NULL);
-        Dispatch(intent, Manifest::permission::RECEIVE_SMS);
+    AutoPtr<IServiceManager> sm;
+    CServiceManager::AcquireSingleton((IServiceManager**)&sm);
+    AutoPtr<IInterface> serv;
+    sm->GetService(String("isms"), (IInterface**)&serv);
+    if (serv == NULL) {
+        sm->AddService(String("isms"), IISms::Probe(this));
     }
 
-    private void Dispatch(Intent intent, String permission) {
-        // Hold a wake lock for WAKE_LOCK_TIMEOUT seconds, enough to give any
-        // receivers time to take their own wake locks.
-        mWakeLock->Acquire(WAKE_LOCK_TIMEOUT);
-        intent->AddFlags(IIntent::FLAG_RECEIVER_NO_ABORT);
-        mContext->SendOrderedBroadcast(intent, permission, AppOpsManager.OP_RECEIVE_SMS, NULL,
-                mHandler, Activity.RESULT_OK, NULL, NULL);
+    CreateWakelock();
+}
+
+void UiccSmsController::CreateWakelock()
+{
+    AutoPtr<IInterface> p;
+    mContext->GetSystemService(IContext::POWER_SERVICE, (IInterface**)&p);
+    AutoPtr<IPowerManager> pm = IPowerManager::Probe(p);
+    pm->NewWakeLock(IPowerManager::PARTIAL_WAKE_LOCK, String("IccSmsInterfaceManager"), (IPowerManagerWakeLock**)&mWakeLock);
+    mWakeLock->SetReferenceCounted(TRUE);
+}
+
+// private void DispatchPdus(Byte[][] pdus)
+// {
+//     Intent intent = new Intent(Intents.SMS_DELIVER_ACTION);
+//     // Direct the intent to only the default SMS app. if we can't find a default SMS app
+//     // then send it to all broadcast receivers.
+//     ComponentName componentName = SmsApplication->GetDefaultSmsApplication(mContext, TRUE);
+//     if (componentName == NULL)
+//         return;
+
+//     if (Rlog->IsLoggable("SMS", Log.VERBOSE)) {
+//         Log("dispatchPdu pdus: " + pdus +
+//                 "\n componentName=" + componentName +
+//                 "\n format=" + SmsMessage.FORMAT_SYNTHETIC);
+//     }
+
+//     // Deliver SMS message only to this receiver
+//     intent->SetComponent(componentName);
+//     intent->PutExtra("pdus", pdus);
+//     intent->PutExtra("format", SmsMessage.FORMAT_SYNTHETIC);
+//     Dispatch(intent, Manifest::permission::RECEIVE_SMS);
+
+//     intent->SetAction(Intents.SMS_RECEIVED_ACTION);
+//     intent->SetComponent(NULL);
+//     Dispatch(intent, Manifest::permission::RECEIVE_SMS);
+// }
+
+void UiccSmsController::Dispatch(
+    /* [in] */ IIntent* intent,
+    /* [in] */ String permission)
+{
+    // Hold a wake lock for WAKE_LOCK_TIMEOUT seconds, enough to give any
+    // receivers time to take their own wake locks.
+    mWakeLock->AcquireLock(WAKE_LOCK_TIMEOUT);
+    intent->AddFlags(IIntent::FLAG_RECEIVER_NO_ABORT);
+    mContext->SendOrderedBroadcast(intent, permission, IAppOpsManager::OP_RECEIVE_SMS, NULL,
+            mHandler, IActivity::RESULT_OK, String(NULL), NULL);
+}
+
+void UiccSmsController::BroadcastOutgoingSms(
+    /* [in] */ Int64 subId,
+    /* [in] */ String callingPackage,
+    /* [in] */ String destAddr,
+    /* [in] */ String scAddr,
+    /* [in] */ Boolean multipart,
+    /* [in] */ IArrayList* parts,
+    /* [in] */ IArrayList* sentIntents,
+    /* [in] */ IArrayList* deliveryIntents,
+    /* [in] */ Int32 priority,
+    /* [in] */ Boolean isExpectMore,
+    /* [in] */ Int32 validityPeriod)
+{
+    AutoPtr<IIntent> broadcast;
+    CIntent::New(IIntent::ACTION_NEW_OUTGOING_SMS, (IIntent**)&broadcast);
+    broadcast->PutExtra(String("destAddr"), destAddr);
+    broadcast->PutExtra(String("scAddr"), scAddr);
+    broadcast->PutExtra(String("subId"), subId);
+    broadcast->PutExtra(String("multipart"), multipart);
+    broadcast->PutExtra(String("callingPackage"), callingPackage);
+    AutoPtr<IBinderHelper> bhlp;
+    CBinderHelper::AcquireSingleton((IBinderHelper**)&bhlp);
+    Int32 uid = 0;
+    bhlp->GetCallingUid(&uid);
+    broadcast->PutExtra(String("callingUid"), uid);
+    broadcast->PutStringArrayListExtra(String("parts"), parts);
+    broadcast->PutParcelableArrayListExtra(String("sentIntents"), sentIntents);
+    broadcast->PutParcelableArrayListExtra(String("deliveryIntents"), deliveryIntents);
+    broadcast->PutExtra(String("priority"), priority);
+    broadcast->PutExtra(String("isExpectMore"), isExpectMore);
+    broadcast->PutExtra(String("validityPeriod"), validityPeriod);
+
+    // if (Rlog::IsLoggable("SMS", Log::VERBOSE)) {
+    //     Log("Broadcasting sms destAddr: " + destAddr +
+    //             "\n scAddr= " + scAddr +
+    //             "\n subId= " + subId +
+    //             "\n multipart= " + multipart +
+    //             "\n callingPackager= " + callingPackage +
+    //             "\n callingUid= " + android.os.Binder->GetCallingUid() +
+    //             "\n parts= " + parts->Size() +
+    //             "\n sentIntents= " + sentIntents->Size() +
+    //             "\n deliveryIntents= " + deliveryIntents->Size() +
+    //             "\n priority= " + priority +
+    //             "\n isExpectMore= " + isExpectMore +
+    //             "\n validityPeriod= " + validityPeriod);
+    // }
+    AutoPtr<IUserHandleHelper> uhhlp;
+    CUserHandleHelper::AcquireSingleton((IUserHandleHelper**)&uhhlp);
+    AutoPtr<IUserHandle> owner;
+    uhhlp->GetOWNER((IUserHandle**)&owner);
+    mContext->SendOrderedBroadcastAsUser(broadcast, owner,
+            Manifest::permission::INTERCEPT_SMS,
+            mReceiver, NULL, IActivity::RESULT_OK, destAddr, NULL);
+}
+
+ECode UiccSmsController::UpdateMessageOnIccEf(
+    /* [in] */ const String& callingPackage,
+    /* [in] */ Int32 index,
+    /* [in] */ Int32 status,
+    /* [in] */ ArrayOf<Byte>* pdu,
+    /* [out] */ Boolean* result)
+{
+    VALIDATE_NOT_NULL(result)
+    return UpdateMessageOnIccEfForSubscriber(GetDefaultSmsSubId(), callingPackage,
+            index, status, pdu, result);
+}
+
+ECode UiccSmsController::UpdateMessageOnIccEfForSubscriber(
+    /* [in] */ Int64 subId,
+    /* [in] */ const String& callingPackage,
+    /* [in] */ Int32 index,
+    /* [in] */ Int32 status,
+    /* [in] */ ArrayOf<Byte>* pdu,
+    /* [out] */ Boolean* result)
+{
+    VALIDATE_NOT_NULL(result)
+    AutoPtr<IIccSmsInterfaceManager> iccSmsIntMgr = GetIccSmsInterfaceManager(subId);
+    if (iccSmsIntMgr != NULL) {
+        return iccSmsIntMgr->UpdateMessageOnIccEf(callingPackage, index, status, pdu, result);
     }
-
-    private void BroadcastOutgoingSms(
-            Int64 subId, String callingPackage, String destAddr, String scAddr, Boolean multipart,
-            ArrayList<String> parts, ArrayList<PendingIntent> sentIntents,
-            ArrayList<PendingIntent> deliveryIntents, Int32 priority, Boolean isExpectMore,
-            Int32 validityPeriod) {
-        Intent broadcast = new Intent(IIntent::ACTION_NEW_OUTGOING_SMS);
-        broadcast->PutExtra("destAddr", destAddr);
-        broadcast->PutExtra("scAddr", scAddr);
-        broadcast->PutExtra("subId", subId);
-        broadcast->PutExtra("multipart", multipart);
-        broadcast->PutExtra("callingPackage", callingPackage);
-        broadcast->PutExtra("callingUid", android.os.Binder->GetCallingUid());
-        broadcast->PutStringArrayListExtra("parts", parts);
-        broadcast->PutParcelableArrayListExtra("sentIntents", sentIntents);
-        broadcast->PutParcelableArrayListExtra("deliveryIntents", deliveryIntents);
-        broadcast->PutExtra("priority", priority);
-        broadcast->PutExtra("isExpectMore", isExpectMore);
-        broadcast->PutExtra("validityPeriod", validityPeriod);
-
-        If (Rlog->IsLoggable("SMS", Log.VERBOSE)) {
-            Log("Broadcasting sms destAddr: " + destAddr +
-                    "\n scAddr= " + scAddr +
-                    "\n subId= " + subId +
-                    "\n multipart= " + multipart +
-                    "\n callingPackager= " + callingPackage +
-                    "\n callingUid= " + android.os.Binder->GetCallingUid() +
-                    "\n parts= " + parts->Size() +
-                    "\n sentIntents= " + sentIntents->Size() +
-                    "\n deliveryIntents= " + deliveryIntents->Size() +
-                    "\n priority= " + priority +
-                    "\n isExpectMore= " + isExpectMore +
-                    "\n validityPeriod= " + validityPeriod);
-        }
-        mContext->SendOrderedBroadcastAsUser(broadcast, UserHandle.OWNER,
-                Manifest::permission::INTERCEPT_SMS,
-                mReceiver, NULL, Activity.RESULT_OK, destAddr, NULL);
-    }
-
-    public Boolean
-    UpdateMessageOnIccEf(String callingPackage, Int32 index, Int32 status, Byte[] pdu)
-            throws android.os.RemoteException {
-        return  UpdateMessageOnIccEfForSubscriber(GetDefaultSmsSubId(), callingPackage,
-                index, status, pdu);
-    }
-
-    public Boolean
-    UpdateMessageOnIccEfForSubscriber(Int64 subId, String callingPackage, Int32 index, Int32 status,
-                Byte[] pdu) throws android.os.RemoteException {
-        IccSmsInterfaceManager iccSmsIntMgr = GetIccSmsInterfaceManager(subId);
-        If (iccSmsIntMgr != NULL) {
-            return iccSmsIntMgr->UpdateMessageOnIccEf(callingPackage, index, status, pdu);
-        } else {
-            Rlog->E(LOG_TAG,"updateMessageOnIccEf iccSmsIntMgr is NULL" +
-                          " for Subscription: " + subId);
-            return FALSE;
-        }
-    }
-
-    public Boolean CopyMessageToIccEf(String callingPackage, Int32 status, Byte[] pdu, Byte[] smsc)
-            throws android.os.RemoteException {
-        return CopyMessageToIccEfForSubscriber(GetDefaultSmsSubId(), callingPackage, status,
-                pdu, smsc);
-    }
-
-    public Boolean CopyMessageToIccEfForSubscriber(Int64 subId, String callingPackage, Int32 status,
-            Byte[] pdu, Byte[] smsc) throws android.os.RemoteException {
-        IccSmsInterfaceManager iccSmsIntMgr = GetIccSmsInterfaceManager(subId);
-        If (iccSmsIntMgr != NULL) {
-            return iccSmsIntMgr->CopyMessageToIccEf(callingPackage, status, pdu, smsc);
-        } else {
-            Rlog->E(LOG_TAG,"copyMessageToIccEf iccSmsIntMgr is NULL" +
-                          " for Subscription: " + subId);
-            return FALSE;
-        }
-    }
-
-    public List<SmsRawData> GetAllMessagesFromIccEf(String callingPackage)
-            throws android.os.RemoteException {
-        return GetAllMessagesFromIccEfForSubscriber(GetDefaultSmsSubId(), callingPackage);
-    }
-
-    public List<SmsRawData> GetAllMessagesFromIccEfForSubscriber(Int64 subId, String callingPackage)
-                throws android.os.RemoteException {
-        IccSmsInterfaceManager iccSmsIntMgr = GetIccSmsInterfaceManager(subId);
-        If (iccSmsIntMgr != NULL) {
-            return iccSmsIntMgr->GetAllMessagesFromIccEf(callingPackage);
-        } else {
-            Rlog->E(LOG_TAG,"getAllMessagesFromIccEf iccSmsIntMgr is" +
-                          " NULL for Subscription: " + subId);
-            return NULL;
-        }
-    }
-
-    CARAPI SendData(String callingPackage, String destAddr, String scAddr, Int32 destPort,
-            Byte[] data, PendingIntent sentIntent, PendingIntent deliveryIntent) {
-         SendDataForSubscriber(GetDefaultSmsSubId(), callingPackage, destAddr, scAddr,
-                 destPort, data, sentIntent, deliveryIntent);
-    }
-
-    CARAPI SendDataForSubscriber(Int64 subId, String callingPackage, String destAddr,
-            String scAddr, Int32 destPort, Byte[] data, PendingIntent sentIntent,
-            PendingIntent deliveryIntent) {
-        IccSmsInterfaceManager iccSmsIntMgr = GetIccSmsInterfaceManager(subId);
-        If (iccSmsIntMgr != NULL) {
-            iccSmsIntMgr->SendData(callingPackage, destAddr, scAddr, destPort, data,
-                    sentIntent, deliveryIntent);
-        } else {
-            Rlog->E(LOG_TAG,"sendText iccSmsIntMgr is NULL for" +
-                          " Subscription: " + subId);
-        }
-    }
-
-    CARAPI SendDataWithOrigPort(String callingPackage, String destAddr, String scAddr,
-            Int32 destPort, Int32 origPort, Byte[] data, PendingIntent sentIntent,
-            PendingIntent deliveryIntent) {
-         SendDataWithOrigPortUsingSubscriber(GetDefaultSmsSubId(), callingPackage, destAddr,
-                 scAddr, destPort, origPort, data, sentIntent, deliveryIntent);
-    }
-
-    CARAPI SendDataWithOrigPortUsingSubscriber(Int64 subId, String callingPackage,
-            String destAddr, String scAddr, Int32 destPort, Int32 origPort, Byte[] data,
-            PendingIntent sentIntent, PendingIntent deliveryIntent) {
-        IccSmsInterfaceManager iccSmsIntMgr = GetIccSmsInterfaceManager(subId);
-        If (iccSmsIntMgr != NULL) {
-            iccSmsIntMgr->SendDataWithOrigPort(callingPackage, destAddr, scAddr, destPort,
-                    origPort, data, sentIntent, deliveryIntent);
-        } else {
-            Rlog->E(LOG_TAG,"sendTextWithOrigPort iccSmsIntMgr is NULL for" +
-                          " Subscription: " + subId);
-        }
-    }
-
-    CARAPI SendText(String callingPackage, String destAddr, String scAddr,
-            String text, PendingIntent sentIntent, PendingIntent deliveryIntent) {
-        SendTextForSubscriber(GetDefaultSmsSubId(), callingPackage, destAddr, scAddr,
-            text, sentIntent, deliveryIntent);
-    }
-
-    CARAPI SendTextForSubscriber(Int64 subId, String callingPackage, String destAddr,
-            String scAddr, String text, PendingIntent sentIntent, PendingIntent deliveryIntent) {
-        SendTextWithOptionsUsingSubscriber(subId, callingPackage, destAddr, scAddr, text,
-                sentIntent, deliveryIntent, -1, FALSE, -1);
-    }
-
-    CARAPI SendTextWithOptionsUsingSubscriber(Int64 subId, String callingPackage,
-            String destAddr, String scAddr, String text, PendingIntent sentIntent,
-            PendingIntent deliveryIntent, Int32 priority, Boolean isExpectMore,
-            Int32 validityPeriod) {
-        mContext->EnforceCallingPermission(
-                Manifest::permission::SEND_SMS,
-                "Sending SMS message");
-        IccSmsInterfaceManager iccSmsIntMgr = GetIccSmsInterfaceManager(subId);
-        If (iccSmsIntMgr->IsShortSMSCode(destAddr)) {
-            iccSmsIntMgr->SendTextWithOptions(callingPackage, destAddr, scAddr, text,
-                    sentIntent, deliveryIntent, priority, isExpectMore, validityPeriod);
-            return;
-        }
-        ArrayList<String> parts = new ArrayList<String>();
-        parts->Add(text);
-        ArrayList<PendingIntent> sentIntents = new ArrayList<PendingIntent>();
-        sentIntents->Add(sentIntent);
-        ArrayList<PendingIntent> deliveryIntents = new ArrayList<PendingIntent>();
-        deliveryIntents->Add(deliveryIntent);
-        BroadcastOutgoingSms(subId, callingPackage, destAddr, scAddr, FALSE, parts, sentIntents,
-                deliveryIntents, priority, isExpectMore, validityPeriod);
-    }
-
-    CARAPI SendMultipartText(String callingPackage, String destAddr, String scAddr,
-            List<String> parts, List<PendingIntent> sentIntents,
-            List<PendingIntent> deliveryIntents) throws android.os.RemoteException {
-         SendMultipartTextForSubscriber(GetDefaultSmsSubId(), callingPackage, destAddr,
-                 scAddr, parts, sentIntents, deliveryIntents);
-    }
-
-    CARAPI SendMultipartTextForSubscriber(Int64 subId, String callingPackage, String destAddr,
-            String scAddr, List<String> parts, List<PendingIntent> sentIntents,
-            List<PendingIntent> deliveryIntents)
-            throws android.os.RemoteException {
-        SendMultipartTextWithOptionsUsingSubscriber(subId, callingPackage, destAddr,
-                scAddr, parts, sentIntents, deliveryIntents, -1, FALSE, -1);
-    }
-
-    CARAPI SendMultipartTextWithOptionsUsingSubscriber(Int64 subId, String callingPackage,
-            String destAddr, String scAddr, List<String> parts, List<PendingIntent> sentIntents,
-            List<PendingIntent> deliveryIntents, Int32 priority, Boolean isExpectMore,
-            Int32 validityPeriod) {
-        mContext->EnforceCallingPermission(
-                Manifest::permission::SEND_SMS,
-                "Sending SMS message");
-        IccSmsInterfaceManager iccSmsIntMgr = GetIccSmsInterfaceManager(subId);
-        If (iccSmsIntMgr->IsShortSMSCode(destAddr)) {
-            iccSmsIntMgr->SendMultipartTextWithOptions(callingPackage, destAddr,
-                    scAddr, parts, sentIntents, deliveryIntents, -1, FALSE, -1);
-            return;
-        }
-        BroadcastOutgoingSms(subId, callingPackage, destAddr, scAddr, TRUE,
-                parts != NULL ? new ArrayList<String>(parts) : NULL,
-                sentIntents != NULL ? new ArrayList<PendingIntent>(sentIntents) : NULL,
-                deliveryIntents != NULL ? new ArrayList<PendingIntent>(deliveryIntents) : NULL,
-                -1, FALSE, -1);
-    }
-
-    public Boolean EnableCellBroadcast(Int32 messageIdentifier) throws android.os.RemoteException {
-        return EnableCellBroadcastForSubscriber(GetDefaultSmsSubId(), messageIdentifier);
-    }
-
-    public Boolean EnableCellBroadcastForSubscriber(Int64 subId, Int32 messageIdentifier)
-                throws android.os.RemoteException {
-        return EnableCellBroadcastRangeForSubscriber(subId, messageIdentifier, messageIdentifier);
-    }
-
-    public Boolean EnableCellBroadcastRange(Int32 startMessageId, Int32 endMessageId)
-            throws android.os.RemoteException {
-        return EnableCellBroadcastRangeForSubscriber(GetDefaultSmsSubId(), startMessageId,
-                endMessageId);
-    }
-
-    public Boolean EnableCellBroadcastRangeForSubscriber(Int64 subId, Int32 startMessageId,
-            Int32 endMessageId) throws android.os.RemoteException {
-        IccSmsInterfaceManager iccSmsIntMgr = GetIccSmsInterfaceManager(subId);
-        If (iccSmsIntMgr != NULL ) {
-            return iccSmsIntMgr->EnableCellBroadcastRange(startMessageId, endMessageId);
-        } else {
-            Rlog->E(LOG_TAG,"enableCellBroadcast iccSmsIntMgr is NULL for" +
-                          " Subscription: " + subId);
-        }
-        return FALSE;
-    }
-
-    public Boolean DisableCellBroadcast(Int32 messageIdentifier) throws android.os.RemoteException {
-        return DisableCellBroadcastForSubscriber(GetDefaultSmsSubId(), messageIdentifier);
-    }
-
-    public Boolean DisableCellBroadcastForSubscriber(Int64 subId, Int32 messageIdentifier)
-                throws android.os.RemoteException {
-        return DisableCellBroadcastRangeForSubscriber(subId, messageIdentifier, messageIdentifier);
-    }
-
-    public Boolean DisableCellBroadcastRange(Int32 startMessageId, Int32 endMessageId)
-            throws android.os.RemoteException {
-        return DisableCellBroadcastRangeForSubscriber(GetDefaultSmsSubId(), startMessageId,
-                endMessageId);
-    }
-
-    public Boolean DisableCellBroadcastRangeForSubscriber(Int64 subId, Int32 startMessageId,
-            Int32 endMessageId) throws android.os.RemoteException {
-        IccSmsInterfaceManager iccSmsIntMgr = GetIccSmsInterfaceManager(subId);
-        If (iccSmsIntMgr != NULL ) {
-            return iccSmsIntMgr->DisableCellBroadcastRange(startMessageId, endMessageId);
-        } else {
-            Rlog->E(LOG_TAG,"disableCellBroadcast iccSmsIntMgr is NULL for" +
-                          " Subscription:"+subId);
-        }
-       return FALSE;
-    }
-
-    public Int32 GetPremiumSmsPermission(String packageName) {
-        return GetPremiumSmsPermissionForSubscriber(GetDefaultSmsSubId(), packageName);
-    }
-
-    //@Override
-    public Int32 GetPremiumSmsPermissionForSubscriber(Int64 subId, String packageName) {
-        IccSmsInterfaceManager iccSmsIntMgr = GetIccSmsInterfaceManager(subId);
-        If (iccSmsIntMgr != NULL ) {
-            return iccSmsIntMgr->GetPremiumSmsPermission(packageName);
-        } else {
-            Rlog->E(LOG_TAG, "getPremiumSmsPermission iccSmsIntMgr is NULL");
-        }
-        //TODO Rakesh
-        return 0;
-    }
-
-    CARAPI SetPremiumSmsPermission(String packageName, Int32 permission) {
-         SetPremiumSmsPermissionForSubscriber(GetDefaultSmsSubId(), packageName, permission);
-    }
-
-    //@Override
-    CARAPI SetPremiumSmsPermissionForSubscriber(Int64 subId, String packageName, Int32 permission) {
-        IccSmsInterfaceManager iccSmsIntMgr = GetIccSmsInterfaceManager(subId);
-        If (iccSmsIntMgr != NULL ) {
-            iccSmsIntMgr->SetPremiumSmsPermission(packageName, permission);
-        } else {
-            Rlog->E(LOG_TAG, "setPremiumSmsPermission iccSmsIntMgr is NULL");
-        }
-    }
-
-    public Boolean IsImsSmsSupported() {
-        return IsImsSmsSupportedForSubscriber(GetDefaultSmsSubId());
-    }
-
-    //@Override
-    public Boolean IsImsSmsSupportedForSubscriber(Int64 subId) {
-        IccSmsInterfaceManager iccSmsIntMgr = GetIccSmsInterfaceManager(subId);
-        If (iccSmsIntMgr != NULL ) {
-            return iccSmsIntMgr->IsImsSmsSupported();
-        } else {
-            Rlog->E(LOG_TAG, "isImsSmsSupported iccSmsIntMgr is NULL");
-        }
-        return FALSE;
-    }
-
-    public String GetImsSmsFormat() {
-        return GetImsSmsFormatForSubscriber(GetDefaultSmsSubId());
-    }
-
-    //@Override
-    public String GetImsSmsFormatForSubscriber(Int64 subId) {
-       IccSmsInterfaceManager iccSmsIntMgr = GetIccSmsInterfaceManager(subId);
-        If (iccSmsIntMgr != NULL ) {
-            return iccSmsIntMgr->GetImsSmsFormat();
-        } else {
-            Rlog->E(LOG_TAG, "getImsSmsFormat iccSmsIntMgr is NULL");
-        }
-        return NULL;
-    }
-
-    //@Override
-    CARAPI UpdateSmsSendStatus(Int32 messageRef, Boolean success) {
-        GetIccSmsInterfaceManager(GetDefaultSmsSubId())
-            .UpdateSmsSendStatus(messageRef, success);
-    }
-
-    //@Override
-    CARAPI InjectSmsPdu(Byte[] pdu, String format, PendingIntent receivedIntent) {
-        InjectSmsPduForSubscriber(GetDefaultSmsSubId(), pdu, format, receivedIntent);
-    }
-
-    // FIXME: Add injectSmsPduForSubscriber to ISms.aidl
-    CARAPI InjectSmsPduForSubscriber(Int64 subId, Byte[] pdu, String format,
-            PendingIntent receivedIntent) {
-        GetIccSmsInterfaceManager(subId).InjectSmsPdu(pdu, format, receivedIntent);
-    }
-
-    //@Override
-    CARAPI SynthesizeMessages(String originatingAddress,
-            String scAddress, List<String> messages, Int64 timestampMillis) throws RemoteException {
-        mContext->EnforceCallingPermission(
-                Manifest::permission::BROADCAST_SMS, "");
-        Byte[][] pdus = new Byte[messages->Size()][];
-        For (Int32 i = 0; i < messages->Size(); i++) {
-            SyntheticSmsMessage message = new SyntheticSmsMessage(originatingAddress,
-                    scAddress, messages->Get(i), timestampMillis);
-            pdus[i] = message->GetPdu();
-        }
-        DispatchPdus(pdus);
-    }
-
-    /**
-     * get sms interface manager object based on subscription.
-     **/
-    private IccSmsInterfaceManager GetIccSmsInterfaceManager(Int64 subId) {
-        Int32 phoneId = SubscriptionController->GetInstance()->GetPhoneId(subId) ;
-        //Fixme: for multi-subscription case
-        If (!SubscriptionManager->IsValidPhoneId(phoneId)
-                || phoneId == SubscriptionManager.DEFAULT_PHONE_ID) {
-            phoneId = 0;
-        }
-
-        try {
-            Return (IccSmsInterfaceManager)
-                ((PhoneProxy)mPhone[phoneId]).GetIccSmsInterfaceManager();
-        } Catch (NullPointerException e) {
-            Rlog->E(LOG_TAG, "Exception is :"+e->ToString()+" For subscription :"+subId );
-            e->PrintStackTrace(); //This will print stact trace
-            return NULL;
-        } Catch (ArrayIndexOutOfBoundsException e) {
-            Rlog->E(LOG_TAG, "Exception is :"+e->ToString()+" For subscription :"+subId );
-            e->PrintStackTrace(); //This will print stack trace
-            return NULL;
-        }
-    }
-
-    private Int64 GetDefaultSmsSubId() {
-        return SubscriptionController->GetInstance()->GetDefaultSmsSubId();
-    }
-
-    //@Override
-    CARAPI SendStoredText(Int64 subId, String callingPkg, Uri messageUri, String scAddress,
-            PendingIntent sentIntent, PendingIntent deliveryIntent) throws RemoteException {
-        IccSmsInterfaceManager iccSmsIntMgr = GetIccSmsInterfaceManager(subId);
-        If (iccSmsIntMgr != NULL) {
-            iccSmsIntMgr->SendStoredText(callingPkg, messageUri, scAddress, sentIntent,
-                    deliveryIntent);
-        } else {
-            Rlog->E(LOG_TAG,"sendStoredText iccSmsIntMgr is NULL for subscription: " + subId);
-        }
-    }
-
-    //@Override
-    CARAPI SendStoredMultipartText(Int64 subId, String callingPkg, Uri messageUri,
-            String scAddress, List<PendingIntent> sentIntents, List<PendingIntent> deliveryIntents)
-            throws RemoteException {
-        IccSmsInterfaceManager iccSmsIntMgr = GetIccSmsInterfaceManager(subId);
-        If (iccSmsIntMgr != NULL ) {
-            iccSmsIntMgr->SendStoredMultipartText(callingPkg, messageUri, scAddress, sentIntents,
-                    deliveryIntents);
-        } else {
-            Rlog->E(LOG_TAG,"sendStoredMultipartText iccSmsIntMgr is NULL for subscription: "
-                    + subId);
-        }
-    }
-
-    /**
-     * Get the capacity count of sms on Icc card.
-     **/
-    public Int32 GetSmsCapacityOnIccForSubscriber(Int64 subId)
-            throws android.os.RemoteException {
-       IccSmsInterfaceManager iccSmsIntMgr = GetIccSmsInterfaceManager(subId);
-
-        If (iccSmsIntMgr != NULL ) {
-            return iccSmsIntMgr->GetSmsCapacityOnIcc();
-        } else {
-            Rlog->E(LOG_TAG, "iccSmsIntMgr is NULL for " + " subId: " + subId);
-            return -1;
-        }
-    }
-
-    protected void Log(String msg) {
-        Logger::D(LOG_TAG, "[UiccSmsController] " + msg);
+    else {
+        // Rlog::E(LOG_TAG, "updateMessageOnIccEf iccSmsIntMgr is NULL" +
+        //               " for Subscription: " + subId);
+        *result = FALSE;
+        return NOERROR;
     }
 }
+
+ECode UiccSmsController::CopyMessageToIccEf(
+    /* [in] */ const String& callingPackage,
+    /* [in] */ Int32 status,
+    /* [in] */ ArrayOf<Byte>* pdu,
+    /* [in] */ ArrayOf<Byte>* smsc,
+    /* [out] */ Boolean* result)
+{
+    VALIDATE_NOT_NULL(result)
+    return CopyMessageToIccEfForSubscriber(GetDefaultSmsSubId(), callingPackage, status,
+            pdu, smsc, result);
+}
+
+ECode UiccSmsController::CopyMessageToIccEfForSubscriber(
+    /* [in] */ Int64 subId,
+    /* [in] */ const String& callingPackage,
+    /* [in] */ Int32 status,
+    /* [in] */ ArrayOf<Byte>* pdu,
+    /* [in] */ ArrayOf<Byte>* smsc,
+    /* [out] */ Boolean* result)
+{
+    VALIDATE_NOT_NULL(result)
+    AutoPtr<IIccSmsInterfaceManager> iccSmsIntMgr = GetIccSmsInterfaceManager(subId);
+    if (iccSmsIntMgr != NULL) {
+        return iccSmsIntMgr->CopyMessageToIccEf(callingPackage, status, pdu, smsc, result);
+    }
+    else {
+        // Rlog::E(LOG_TAG, "copyMessageToIccEf iccSmsIntMgr is NULL" +
+        //               " for Subscription: " + subId);
+        *result = FALSE;
+        return NOERROR;
+    }
+}
+
+ECode UiccSmsController::GetAllMessagesFromIccEf(
+    /* [in] */ const String& callingPackage,
+    /* [out] */ IList** result)
+{
+    VALIDATE_NOT_NULL(result)
+    return GetAllMessagesFromIccEfForSubscriber(GetDefaultSmsSubId(), callingPackage, result);
+}
+
+ECode UiccSmsController::GetAllMessagesFromIccEfForSubscriber(
+    /* [in] */ Int64 subId,
+    /* [in] */ const String& callingPackage,
+    /* [out] */ IList** result)
+{
+    VALIDATE_NOT_NULL(result)
+    AutoPtr<IIccSmsInterfaceManager> iccSmsIntMgr = GetIccSmsInterfaceManager(subId);
+    if (iccSmsIntMgr != NULL) {
+        return iccSmsIntMgr->GetAllMessagesFromIccEf(callingPackage, result);
+    }
+    else {
+        // Rlog::E(LOG_TAG,"getAllMessagesFromIccEf iccSmsIntMgr is" +
+        //               " NULL for Subscription: " + subId);
+        *result = NULL;
+        return NOERROR;
+    }
+}
+
+ECode UiccSmsController::SendData(
+    /* [in] */ const String& callingPackage,
+    /* [in] */ const String& destAddr,
+    /* [in] */ const String& scAddr,
+    /* [in] */ Int32 destPort,
+    /* [in] */ ArrayOf<Byte>* data,
+    /* [in] */ IPendingIntent* sentIntent,
+    /* [in] */ IPendingIntent* deliveryIntent)
+{
+    return SendDataForSubscriber(GetDefaultSmsSubId(), callingPackage, destAddr, scAddr,
+            destPort, data, sentIntent, deliveryIntent);
+}
+
+ECode UiccSmsController::SendDataForSubscriber(
+    /* [in] */ Int64 subId,
+    /* [in] */ const String& callingPackage,
+    /* [in] */ const String& destAddr,
+    /* [in] */ const String& scAddr,
+    /* [in] */ Int32 destPort,
+    /* [in] */ ArrayOf<Byte>* data,
+    /* [in] */ IPendingIntent* sentIntent,
+    /* [in] */ IPendingIntent* deliveryIntent)
+{
+    AutoPtr<IIccSmsInterfaceManager> iccSmsIntMgr = GetIccSmsInterfaceManager(subId);
+    if (iccSmsIntMgr != NULL) {
+        iccSmsIntMgr->SendData(callingPackage, destAddr, scAddr, destPort, data,
+                sentIntent, deliveryIntent);
+    }
+    else {
+        // Rlog->E(LOG_TAG,"sendText iccSmsIntMgr is NULL for" +
+        //               " Subscription: " + subId);
+    }
+    return NOERROR;
+}
+
+ECode UiccSmsController::SendDataWithOrigPort(
+    /* [in] */ const String& callingPackage,
+    /* [in] */ const String& destAddr,
+    /* [in] */ const String& scAddr,
+    /* [in] */ Int32 destPort,
+    /* [in] */ Int32 origPort,
+    /* [in] */ ArrayOf<Byte>* data,
+    /* [in] */ IPendingIntent* sentIntent,
+    /* [in] */ IPendingIntent* deliveryIntent)
+{
+    return SendDataWithOrigPortUsingSubscriber(GetDefaultSmsSubId(), callingPackage, destAddr,
+             scAddr, destPort, origPort, data, sentIntent, deliveryIntent);
+}
+
+ECode UiccSmsController::SendDataWithOrigPortUsingSubscriber(
+    /* [in] */ Int64 subId,
+    /* [in] */ const String& callingPackage,
+    /* [in] */ const String& destAddr,
+    /* [in] */ const String& scAddr,
+    /* [in] */ Int32 destPort,
+    /* [in] */ Int32 origPort,
+    /* [in] */ ArrayOf<Byte>* data,
+    /* [in] */ IPendingIntent* sentIntent,
+    /* [in] */ IPendingIntent* deliveryIntent)
+{
+    AutoPtr<IIccSmsInterfaceManager> iccSmsIntMgr = GetIccSmsInterfaceManager(subId);
+    if (iccSmsIntMgr != NULL) {
+        iccSmsIntMgr->SendDataWithOrigPort(callingPackage, destAddr, scAddr, destPort,
+                origPort, data, sentIntent, deliveryIntent);
+    }
+    else {
+        // Rlog->E(LOG_TAG,"sendTextWithOrigPort iccSmsIntMgr is NULL for" +
+        //               " Subscription: " + subId);
+    }
+    return NOERROR;
+}
+
+ECode UiccSmsController::SendText(
+    /* [in] */ const String& callingPackage,
+    /* [in] */ const String& destAddr,
+    /* [in] */ const String& scAddr,
+    /* [in] */ const String& text,
+    /* [in] */ IPendingIntent* sentIntent,
+    /* [in] */ IPendingIntent* deliveryIntent)
+{
+    return SendTextForSubscriber(GetDefaultSmsSubId(), callingPackage, destAddr, scAddr,
+        text, sentIntent, deliveryIntent);
+}
+
+ECode UiccSmsController::SendTextForSubscriber(
+    /* [in] */ Int64 subId,
+    /* [in] */ const String& callingPackage,
+    /* [in] */ const String& destAddr,
+    /* [in] */ const String& scAddr,
+    /* [in] */ const String& text,
+    /* [in] */ IPendingIntent* sentIntent,
+    /* [in] */ IPendingIntent* deliveryIntent)
+{
+    return SendTextWithOptionsUsingSubscriber(subId, callingPackage, destAddr, scAddr, text,
+            sentIntent, deliveryIntent, -1, FALSE, -1);
+}
+
+ECode UiccSmsController::SendTextWithOptionsUsingSubscriber(
+    /* [in] */ Int64 subId,
+    /* [in] */ const String& callingPackage,
+    /* [in] */ const String& destAddr,
+    /* [in] */ const String& scAddr,
+    /* [in] */ const String& text,
+    /* [in] */ IPendingIntent* sentIntent,
+    /* [in] */ IPendingIntent* deliveryIntent,
+    /* [in] */ Int32 priority,
+    /* [in] */ Boolean isExpectMore,
+    /* [in] */ Int32 validityPeriod)
+{
+    mContext->EnforceCallingPermission(
+            Manifest::permission::SEND_SMS,
+            String("Sending SMS message"));
+    AutoPtr<IIccSmsInterfaceManager> iccSmsIntMgr = GetIccSmsInterfaceManager(subId);
+    Boolean bCode = FALSE;
+    iccSmsIntMgr->IsShortSMSCode(destAddr, &bCode);
+    if (bCode) {
+        iccSmsIntMgr->SendTextWithOptions(callingPackage, destAddr, scAddr, text,
+                sentIntent, deliveryIntent, priority, isExpectMore, validityPeriod);
+        return NOERROR;
+    }
+    AutoPtr<IArrayList> parts;
+    CArrayList::New((IArrayList**)&parts);
+    parts->Add(CoreUtils::Convert(text));
+    AutoPtr<IArrayList> sentIntents;
+    CArrayList::New((IArrayList**)&sentIntents);
+    sentIntents->Add(sentIntent);
+    AutoPtr<IArrayList> deliveryIntents;
+    CArrayList::New((IArrayList**)&deliveryIntents);
+    deliveryIntents->Add(deliveryIntent);
+    BroadcastOutgoingSms(subId, callingPackage, destAddr, scAddr, FALSE, parts, sentIntents,
+            deliveryIntents, priority, isExpectMore, validityPeriod);
+    return NOERROR;
+}
+
+ECode UiccSmsController::SendMultipartText(
+    /* [in] */ const String& callingPackage,
+    /* [in] */ const String& destAddr,
+    /* [in] */ const String& scAddr,
+    /* [in] */ IList* parts,
+    /* [in] */ IList* sentIntents,
+    /* [in] */ IList* deliveryIntents)
+{
+    return SendMultipartTextForSubscriber(GetDefaultSmsSubId(), callingPackage, destAddr,
+             scAddr, parts, sentIntents, deliveryIntents);
+}
+
+ECode UiccSmsController::SendMultipartTextForSubscriber(
+    /* [in] */ Int64 subId,
+    /* [in] */ const String& callingPackage,
+    /* [in] */ const String& destAddr,
+    /* [in] */ const String& scAddr,
+    /* [in] */ IList* parts,
+    /* [in] */ IList* sentIntents,
+    /* [in] */ IList* deliveryIntents)
+{
+    return SendMultipartTextWithOptionsUsingSubscriber(subId, callingPackage, destAddr,
+            scAddr, parts, sentIntents, deliveryIntents, -1, FALSE, -1);
+}
+
+ECode UiccSmsController::SendMultipartTextWithOptionsUsingSubscriber(
+    /* [in] */ Int64 subId,
+    /* [in] */ const String& callingPackage,
+    /* [in] */ const String& destAddr,
+    /* [in] */ const String& scAddr,
+    /* [in] */ IList* parts,
+    /* [in] */ IList* sentIntents,
+    /* [in] */ IList* deliveryIntents,
+    /* [in] */ Int32 priority,
+    /* [in] */ Boolean isExpectMore,
+    /* [in] */ Int32 validityPeriod)
+{
+    mContext->EnforceCallingPermission(
+            Manifest::permission::SEND_SMS,
+            String("Sending SMS message"));
+    AutoPtr<IIccSmsInterfaceManager> iccSmsIntMgr = GetIccSmsInterfaceManager(subId);
+    Boolean bCode = FALSE;
+    iccSmsIntMgr->IsShortSMSCode(destAddr, &bCode);
+    if (bCode) {
+        iccSmsIntMgr->SendMultipartTextWithOptions(callingPackage, destAddr,
+                scAddr, parts, sentIntents, deliveryIntents, -1, FALSE, -1);
+        return NOERROR;
+    }
+
+    AutoPtr<IArrayList> pParts, pSentIntents, pDeliveryIntents;
+    if (parts != NULL) {
+        CArrayList::New(ICollection::Probe(parts), (IArrayList**)&pParts);
+    }
+
+    if (sentIntents != NULL) {
+        CArrayList::New(ICollection::Probe(sentIntents), (IArrayList**)&pParts);
+    }
+
+    if (deliveryIntents != NULL) {
+        CArrayList::New(ICollection::Probe(deliveryIntents), (IArrayList**)&pParts);
+    }
+    BroadcastOutgoingSms(subId, callingPackage, destAddr, scAddr, TRUE,
+            pParts,
+            pSentIntents,
+            pDeliveryIntents,
+            -1, FALSE, -1);
+    return NOERROR;
+}
+
+ECode UiccSmsController::EnableCellBroadcast(
+    /* [in] */ Int32 messageIdentifier,
+    /* [out] */ Boolean* result)
+{
+    VALIDATE_NOT_NULL(result)
+    return EnableCellBroadcastForSubscriber(GetDefaultSmsSubId(), messageIdentifier, result);
+}
+
+ECode UiccSmsController::EnableCellBroadcastForSubscriber(
+    /* [in] */ Int64 subId,
+    /* [in] */ Int32 messageIdentifier,
+    /* [out] */ Boolean* result)
+{
+    VALIDATE_NOT_NULL(result)
+    return EnableCellBroadcastRangeForSubscriber(subId, messageIdentifier, messageIdentifier, result);
+}
+
+ECode UiccSmsController::EnableCellBroadcastRange(
+    /* [in] */ Int32 startMessageId,
+    /* [in] */ Int32 endMessageId,
+    /* [out] */ Boolean* result)
+{
+    VALIDATE_NOT_NULL(result)
+    return EnableCellBroadcastRangeForSubscriber(GetDefaultSmsSubId(), startMessageId,
+            endMessageId, result);
+}
+
+ECode UiccSmsController::EnableCellBroadcastRangeForSubscriber(
+    /* [in] */ Int64 subId,
+    /* [in] */ Int32 startMessageId,
+    /* [in] */ Int32 endMessageId,
+    /* [out] */ Boolean* result)
+{
+    VALIDATE_NOT_NULL(result)
+    AutoPtr<IIccSmsInterfaceManager> iccSmsIntMgr = GetIccSmsInterfaceManager(subId);
+    if (iccSmsIntMgr != NULL ) {
+        return iccSmsIntMgr->EnableCellBroadcastRange(startMessageId, endMessageId, result);
+    }
+    else {
+        // Rlog->E(LOG_TAG,"enableCellBroadcast iccSmsIntMgr is NULL for" +
+        //               " Subscription: " + subId);
+    }
+    *result = FALSE;
+    return NOERROR;
+}
+
+ECode UiccSmsController::DisableCellBroadcast(
+    /* [in] */ Int32 messageIdentifier,
+    /* [out] */ Boolean* result)
+{
+    VALIDATE_NOT_NULL(result)
+    return DisableCellBroadcastForSubscriber(GetDefaultSmsSubId(), messageIdentifier, result);
+}
+
+ECode UiccSmsController::DisableCellBroadcastForSubscriber(
+    /* [in] */ Int64 subId,
+    /* [in] */ Int32 messageIdentifier,
+    /* [out] */ Boolean* result)
+{
+    VALIDATE_NOT_NULL(result)
+    return DisableCellBroadcastRangeForSubscriber(subId, messageIdentifier, messageIdentifier, result);
+}
+
+ECode UiccSmsController::DisableCellBroadcastRange(
+    /* [in] */ Int32 startMessageId,
+    /* [in] */ Int32 endMessageId,
+    /* [out] */ Boolean* result)
+{
+    VALIDATE_NOT_NULL(result)
+    return DisableCellBroadcastRangeForSubscriber(GetDefaultSmsSubId(), startMessageId,
+            endMessageId, result);
+}
+
+ECode UiccSmsController::DisableCellBroadcastRangeForSubscriber(
+    /* [in] */ Int64 subId,
+    /* [in] */ Int32 startMessageId,
+    /* [in] */ Int32 endMessageId,
+    /* [out] */ Boolean* result)
+{
+    VALIDATE_NOT_NULL(result)
+    AutoPtr<IIccSmsInterfaceManager> iccSmsIntMgr = GetIccSmsInterfaceManager(subId);
+    if (iccSmsIntMgr != NULL ) {
+        return iccSmsIntMgr->DisableCellBroadcastRange(startMessageId, endMessageId, result);
+    }
+    else {
+        // Rlog->E(LOG_TAG,"disableCellBroadcast iccSmsIntMgr is NULL for" +
+        //               " Subscription:"+subId);
+    }
+    *result = FALSE;
+    return NOERROR;
+}
+
+ECode UiccSmsController::GetPremiumSmsPermission(
+    /* [in] */ const String& packageName,
+    /* [out] */ Int32* result)
+{
+    VALIDATE_NOT_NULL(result)
+    return GetPremiumSmsPermissionForSubscriber(GetDefaultSmsSubId(), packageName, result);
+}
+
+ECode UiccSmsController::GetPremiumSmsPermissionForSubscriber(
+    /* [in] */ Int64 subId,
+    /* [in] */ const String& packageName,
+    /* [out] */ Int32* result)
+{
+    VALIDATE_NOT_NULL(result)
+    AutoPtr<IIccSmsInterfaceManager> iccSmsIntMgr = GetIccSmsInterfaceManager(subId);
+    if (iccSmsIntMgr != NULL ) {
+        return iccSmsIntMgr->GetPremiumSmsPermission(packageName, result);
+    }
+    else {
+        // Rlog->E(LOG_TAG, "getPremiumSmsPermission iccSmsIntMgr is NULL");
+    }
+    //TODO Rakesh
+    *result = 0;
+    return NOERROR;
+}
+
+ECode UiccSmsController::SetPremiumSmsPermission(
+    /* [in] */ const String& packageName,
+    /* [in] */ Int32 permission)
+{
+    return SetPremiumSmsPermissionForSubscriber(GetDefaultSmsSubId(), packageName, permission);
+}
+
+ECode UiccSmsController::SetPremiumSmsPermissionForSubscriber(
+    /* [in] */ Int64 subId,
+    /* [in] */ const String& packageName,
+    /* [in] */ Int32 permission)
+{
+    AutoPtr<IIccSmsInterfaceManager> iccSmsIntMgr = GetIccSmsInterfaceManager(subId);
+    if (iccSmsIntMgr != NULL ) {
+        iccSmsIntMgr->SetPremiumSmsPermission(packageName, permission);
+    }
+    else {
+        // Rlog->E(LOG_TAG, "setPremiumSmsPermission iccSmsIntMgr is NULL");
+    }
+    return NOERROR;
+}
+
+ECode UiccSmsController::IsImsSmsSupported(
+    /* [out] */ Boolean* result)
+{
+    VALIDATE_NOT_NULL(result)
+    return IsImsSmsSupportedForSubscriber(GetDefaultSmsSubId(), result);
+}
+
+ECode UiccSmsController::IsImsSmsSupportedForSubscriber(
+    /* [in] */ Int64 subId,
+    /* [out] */ Boolean* result)
+{
+    VALIDATE_NOT_NULL(result)
+    AutoPtr<IIccSmsInterfaceManager> iccSmsIntMgr = GetIccSmsInterfaceManager(subId);
+    if (iccSmsIntMgr != NULL ) {
+        return iccSmsIntMgr->IsImsSmsSupported(result);
+    }
+    else {
+        // Rlog->E(LOG_TAG, "isImsSmsSupported iccSmsIntMgr is NULL");
+    }
+    *result = FALSE;
+    return NOERROR;
+}
+
+ECode UiccSmsController::GetImsSmsFormat(
+    /* [out] */ String* result)
+{
+    VALIDATE_NOT_NULL(result)
+    return GetImsSmsFormatForSubscriber(GetDefaultSmsSubId(), result);
+}
+
+ECode UiccSmsController::GetImsSmsFormatForSubscriber(
+    /* [in] */ Int64 subId,
+    /* [out] */ String* result)
+{
+    VALIDATE_NOT_NULL(result)
+    AutoPtr<IIccSmsInterfaceManager> iccSmsIntMgr = GetIccSmsInterfaceManager(subId);
+    if (iccSmsIntMgr != NULL ) {
+        return iccSmsIntMgr->GetImsSmsFormat(result);
+    }
+    else {
+        // Rlog->E(LOG_TAG, "getImsSmsFormat iccSmsIntMgr is NULL");
+    }
+    *result = String(NULL);
+    return NOERROR;
+}
+
+ECode UiccSmsController::UpdateSmsSendStatus(
+    /* [in] */ Int32 messageRef,
+    /* [in] */ Boolean success)
+{
+    AutoPtr<IIccSmsInterfaceManager> iccSmsIntMgr = GetIccSmsInterfaceManager(GetDefaultSmsSubId());
+    iccSmsIntMgr->UpdateSmsSendStatus(messageRef, success);
+    return NOERROR;
+}
+
+ECode UiccSmsController::InjectSmsPdu(
+    /* [in] */ ArrayOf<Byte>* pdu,
+    /* [in] */ const String& format,
+    /* [in] */ IPendingIntent* receivedIntent)
+{
+    return InjectSmsPduForSubscriber(GetDefaultSmsSubId(), pdu, format, receivedIntent);
+}
+
+ECode UiccSmsController::InjectSmsPduForSubscriber(
+    /* [in] */ Int64 subId,
+    /* [in] */ ArrayOf<Byte>* pdu,
+    /* [in] */ const String& format,
+    /* [in] */ IPendingIntent* receivedIntent)
+{
+    AutoPtr<IIccSmsInterfaceManager> iccSmsIntMgr = GetIccSmsInterfaceManager(subId);
+    iccSmsIntMgr->InjectSmsPdu(pdu, format, receivedIntent);
+    return NOERROR;
+}
+
+ECode UiccSmsController::SynthesizeMessages(
+    /* [in] */ const String& originatingAddress,
+    /* [in] */ const String& scAddress,
+    /* [in] */ IList* messages,
+    /* [in] */ Int64 timestampMillis)
+{
+    mContext->EnforceCallingPermission(
+            Manifest::permission::BROADCAST_SMS, String(""));
+    Int32 size = 0;
+    messages->GetSize(&size);
+    assert(0 && "TODO");
+    // Byte[][] pdus = new Byte[size][];
+    // for (Int32 i = 0; i < size; i++) {
+    //     AutoPtr<IInterface> p;
+    //     messages->Get(i, (IInterface**)&p);
+    //     AutoPtr<ISyntheticSmsMessage> message;
+    //     CSyntheticSmsMessage::New(originatingAddress,
+    //             scAddress, p, timestampMillis,
+    //             (ISyntheticSmsMessage**)&message);
+    //     ISmsMessageBase::Probe(message)->GetPdu((ArrayOf<Byte>**)&((*pdus)[i]));
+    // }
+    // DispatchPdus(pdus);
+    return NOERROR;
+}
+
+AutoPtr<IIccSmsInterfaceManager> UiccSmsController::GetIccSmsInterfaceManager(
+    /* [in] */ Int64 subId)
+{
+    AutoPtr<ISubscriptionControllerHelper> hlp;
+    assert(0 && "TODO");
+    // CSubscriptionControllerHelper::AcquireSingleton((ISubscriptionControllerHelper**)&hlp);
+    AutoPtr<ISubscriptionController> sc;
+    hlp->GetInstance((ISubscriptionController**)&sc);
+    Int32 phoneId = 0;
+    IISub::Probe(sc)->GetPhoneId(subId, &phoneId);
+    //Fixme: for multi-subscription case
+    AutoPtr<ISubscriptionManager> sm;
+    CSubscriptionManager::AcquireSingleton((ISubscriptionManager**)&sm);
+    Boolean bValidId = FALSE;
+    sm->IsValidPhoneId(phoneId, &bValidId);
+    if (!bValidId
+            || phoneId == ISubscriptionManager::DEFAULT_PHONE_ID) {
+        phoneId = 0;
+    }
+
+    // try {
+    AutoPtr<IPhoneProxy> p = IPhoneProxy::Probe((*mPhone)[phoneId]);
+    AutoPtr<IIccSmsInterfaceManager> res;
+    p->GetIccSmsInterfaceManager((IIccSmsInterfaceManager**)&res);
+    return res;
+    // } Catch (NullPointerException e) {
+    //     Rlog->E(LOG_TAG, "Exception is :"+e->ToString()+" For subscription :"+subId );
+    //     e->PrintStackTrace(); //This will print stact trace
+    //     return NULL;
+    // } Catch (ArrayIndexOutOfBoundsException e) {
+    //     Rlog->E(LOG_TAG, "Exception is :"+e->ToString()+" For subscription :"+subId );
+    //     e->PrintStackTrace(); //This will print stack trace
+    //     return NULL;
+    // }
+}
+
+Int64 UiccSmsController::GetDefaultSmsSubId()
+{
+    AutoPtr<ISubscriptionControllerHelper> hlp;
+    assert(0 && "TODO");
+    // CSubscriptionControllerHelper::AcquireSingleton((ISubscriptionControllerHelper**)&hlp);
+    AutoPtr<ISubscriptionController> sc;
+    hlp->GetInstance((ISubscriptionController**)&sc);
+    Int64 res = 0;
+    IISub::Probe(sc)->GetDefaultSmsSubId(&res);
+    return res;
+}
+
+ECode UiccSmsController::SendStoredText(
+    /* [in] */ Int64 subId,
+    /* [in] */ const String& callingPkg,
+    /* [in] */ IUri* messageUri,
+    /* [in] */ const String& scAddress,
+    /* [in] */ IPendingIntent* sentIntent,
+    /* [in] */ IPendingIntent* deliveryIntent)
+{
+    AutoPtr<IIccSmsInterfaceManager> iccSmsIntMgr = GetIccSmsInterfaceManager(subId);
+    if (iccSmsIntMgr != NULL) {
+        iccSmsIntMgr->SendStoredText(callingPkg, messageUri, scAddress, sentIntent,
+                deliveryIntent);
+    }
+    else {
+        // Rlog->E(LOG_TAG,"sendStoredText iccSmsIntMgr is NULL for subscription: " + subId);
+    }
+    return NOERROR;
+}
+
+ECode UiccSmsController::SendStoredMultipartText(
+    /* [in] */ Int64 subId,
+    /* [in] */ const String& callingPkg,
+    /* [in] */ IUri* messageUri,
+    /* [in] */ const String& scAddress,
+    /* [in] */ IList* sentIntents,
+    /* [in] */ IList* deliveryIntents)
+{
+    AutoPtr<IIccSmsInterfaceManager> iccSmsIntMgr = GetIccSmsInterfaceManager(subId);
+    if (iccSmsIntMgr != NULL ) {
+        iccSmsIntMgr->SendStoredMultipartText(callingPkg, messageUri, scAddress, sentIntents,
+                deliveryIntents);
+    }
+    else {
+        // Rlog->E(LOG_TAG,"sendStoredMultipartText iccSmsIntMgr is NULL for subscription: "
+        //         + subId);
+    }
+    return NOERROR;
+}
+
+ECode UiccSmsController::GetSmsCapacityOnIccForSubscriber(
+    /* [in] */ Int64 subId,
+    /* [out] */ Int32* result)
+{
+    VALIDATE_NOT_NULL(result)
+    AutoPtr<IIccSmsInterfaceManager> iccSmsIntMgr = GetIccSmsInterfaceManager(subId);
+
+    if (iccSmsIntMgr != NULL ) {
+        return iccSmsIntMgr->GetSmsCapacityOnIcc(result);
+    }
+    else {
+        // Rlog->E(LOG_TAG, "iccSmsIntMgr is NULL for " + " subId: " + subId);
+        *result = -1;
+        return NOERROR;
+    }
+}
+
+ECode UiccSmsController::Log(
+    /* [in] */ String msg)
+{
+    Logger::D(LOG_TAG, "[UiccSmsController] %s", (const char*)msg);
+    return NOERROR;
+}
+
+} // namespace Telephony
+} // namespace Internal
+} // namespace Droid
+} // namespace Elastos
