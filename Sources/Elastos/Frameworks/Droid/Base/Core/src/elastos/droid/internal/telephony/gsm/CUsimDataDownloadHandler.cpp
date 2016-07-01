@@ -1,9 +1,26 @@
+#include "elastos/droid/internal/telephony/IccUtils.h"
+#include "elastos/droid/internal/telephony/uicc/IccIoResult.h"
+#include "elastos/droid/internal/telephony/gsm/CSmsMessage.h"
 #include "elastos/droid/internal/telephony/gsm/CUsimDataDownloadHandler.h"
+#include "elastos/droid/os/AsyncResult.h"
+#include "elastos/droid/telephony/PhoneNumberUtils.h"
+#include <elastos/core/CoreUtils.h>
 #include <elastos/utility/logging/Logger.h>
 
 using Elastos::Droid::App::IActivity;
+using Elastos::Droid::Internal::Telephony::IccUtils;
+using Elastos::Droid::Internal::Telephony::ISmsMessageBase;
+using Elastos::Droid::Internal::Telephony::Uicc::IccIoResult;
+using Elastos::Droid::Os::AsyncResult;
 // TODO:
 // using Elastos::Droid::Provider::Telephony::Sms::IIntents;
+using Elastos::Droid::Telephony::ISmsManager;
+using Elastos::Droid::Telephony::PhoneNumberUtils;
+using Elastos::Core::CArrayOf;
+using Elastos::Core::CoreUtils;
+using Elastos::Core::EIID_IInteger32;
+using Elastos::Core::IArrayOf;
+using Elastos::Core::IInteger32;
 using Elastos::Utility::Logging::Logger;
 
 namespace Elastos {
@@ -46,25 +63,32 @@ ECode CUsimDataDownloadHandler::HandleUsimDataDownload(
      /* [out] */ Int32* result)
 {
     VALIDATE_NOT_NULL(result)
-    assert(0);
-    // // If we receive an SMS-PP message before the UsimServiceTable has been loaded,
-    // // assume that the data download service is not present. This is very unlikely to
-    // // happen because the IMS connection will not be established until after the ISIM
-    // // records have been loaded, after the USIM service table has been loaded.
-    // if (ust != null && ust.isAvailable(
-    //         UsimServiceTable.UsimService.DATA_DL_VIA_SMS_PP)) {
-    //     Rlog.d(TAG, "Received SMS-PP data download, sending to UICC.");
-    //     return startDataDownload(smsMessage);
-    // } else {
-    //     Rlog.d(TAG, "DATA_DL_VIA_SMS_PP service not available, storing message to UICC.");
-    //     String smsc = IccUtils.bytesToHexString(
-    //             PhoneNumberUtils.networkPortionToCalledPartyBCDWithLength(
-    //                     smsMessage.getServiceCenterAddress()));
-    //     mCi.writeSmsToSim(SmsManager.STATUS_ON_ICC_UNREAD, smsc,
-    //             IccUtils.bytesToHexString(smsMessage.getPdu()),
-    //             obtainMessage(EVENT_WRITE_SMS_COMPLETE));
-    //     return Activity.RESULT_OK;  // acknowledge after response from write to USIM
-    // }
+    // If we receive an SMS-PP message before the UsimServiceTable has been loaded,
+    // assume that the data download service is not present. This is very unlikely to
+    // happen because the IMS connection will not be established until after the ISIM
+    // records have been loaded, after the USIM service table has been loaded.
+    Boolean b;
+    if (ust != NULL && (ust->IsAvailable(
+            Elastos::Droid::Internal::Telephony::Uicc::DATA_DL_VIA_SMS_PP, &b), b)) {
+        Logger::D(TAG, "Received SMS-PP data download, sending to UICC.");
+        return StartDataDownload(smsMessage, result);
+    }
+    else {
+        Logger::D(TAG, "DATA_DL_VIA_SMS_PP service not available, storing message to UICC.");
+        String addr;
+        ISmsMessageBase::Probe(smsMessage)->GetServiceCenterAddress(&addr);
+        AutoPtr<ArrayOf<Byte> > bytes;
+        PhoneNumberUtils::NetworkPortionToCalledPartyBCDWithLength(addr, (ArrayOf<Byte>**)&bytes);
+        String smsc = IccUtils::BytesToHexString(bytes);
+
+        AutoPtr<ArrayOf<Byte> > pdu;
+        ISmsMessageBase::Probe(smsMessage)->GetPdu((ArrayOf<Byte>**)&pdu);
+        AutoPtr<IMessage> msg;
+        ObtainMessage(EVENT_WRITE_SMS_COMPLETE, (IMessage**)&msg);
+        mCi->WriteSmsToSim(ISmsManager::STATUS_ON_ICC_UNREAD, smsc,
+                IccUtils::BytesToHexString(pdu), msg);
+        *result = IActivity::RESULT_OK;  // acknowledge after response from write to USIM
+    }
     return NOERROR;
 }
 
@@ -89,107 +113,129 @@ ECode CUsimDataDownloadHandler::StartDataDownload(
 ECode CUsimDataDownloadHandler::HandleMessage(
     /* [in] */ IMessage* msg)
 {
-    assert(0);
-    // AsyncResult ar;
+    AutoPtr<AsyncResult> ar;
 
-    // switch (msg.what) {
-    //     case EVENT_START_DATA_DOWNLOAD:
-    //         handleDataDownload((SmsMessage) msg.obj);
-    //         break;
+    Int32 what;
+    msg->GetWhat(&what);
+    AutoPtr<IInterface> obj;
+    msg->GetObj((IInterface**)&obj);
+    switch (what) {
+        case EVENT_START_DATA_DOWNLOAD:
+            HandleDataDownload(ISmsMessage::Probe(obj));
+            break;
 
-    //     case EVENT_SEND_ENVELOPE_RESPONSE:
-    //         ar = (AsyncResult) msg.obj;
+        case EVENT_SEND_ENVELOPE_RESPONSE: {
+            ar = (AsyncResult*)(IObject*)obj.Get();
 
-    //         if (ar.exception != null) {
-    //             Rlog.e(TAG, "UICC Send Envelope failure, exception: " + ar.exception);
-    //             acknowledgeSmsWithError(
-    //                     CommandsInterface.GSM_SMS_FAIL_CAUSE_USIM_DATA_DOWNLOAD_ERROR);
-    //             return;
-    //         }
+            if (ar->mException != NULL) {
+                // Logger::E(TAG, "UICC Send Envelope failure, exception: " + ar.exception);
+                AcknowledgeSmsWithError(
+                        ICommandsInterface::GSM_SMS_FAIL_CAUSE_USIM_DATA_DOWNLOAD_ERROR);
+                return NOERROR;
+            }
 
-    //         int[] dcsPid = (int[]) ar.userObj;
-    //         sendSmsAckForEnvelopeResponse((IccIoResult) ar.result, dcsPid[0], dcsPid[1]);
-    //         break;
+            AutoPtr<IArrayOf> iArray = IArrayOf::Probe(ar->mUserObj);
+            Int32 dcs, pid;
+            AutoPtr<IInterface> o;
+            iArray->Get(0, (IInterface**)&o);
+            IInteger32::Probe(o)->GetValue(&dcs);
+            o = NULL;
+            iArray->Get(1, (IInterface**)&o);
+            IInteger32::Probe(o)->GetValue(&pid);
 
-    //     case EVENT_WRITE_SMS_COMPLETE:
-    //         ar = (AsyncResult) msg.obj;
-    //         if (ar.exception == null) {
-    //             Rlog.d(TAG, "Successfully wrote SMS-PP message to UICC");
-    //             mCi.acknowledgeLastIncomingGsmSms(true, 0, null);
-    //         } else {
-    //             Rlog.d(TAG, "Failed to write SMS-PP message to UICC", ar.exception);
-    //             mCi.acknowledgeLastIncomingGsmSms(false,
-    //                     CommandsInterface.GSM_SMS_FAIL_CAUSE_UNSPECIFIED_ERROR, null);
-    //         }
-    //         break;
+            SendSmsAckForEnvelopeResponse(IIccIoResult::Probe(ar->mResult), dcs, pid);
+            break;
+        }
+        case EVENT_WRITE_SMS_COMPLETE:
+        ar = (AsyncResult*)(IObject*)obj.Get();
+        if (ar->mException != NULL) {
+                Logger::D(TAG, "Successfully wrote SMS-PP message to UICC");
+                mCi->AcknowledgeLastIncomingGsmSms(TRUE, 0, NULL);
+            }
+            else {
+                // Logger::D(TAG, "Failed to write SMS-PP message to UICC", ar.exception);
+                mCi->AcknowledgeLastIncomingGsmSms(FALSE,
+                        ICommandsInterface::GSM_SMS_FAIL_CAUSE_UNSPECIFIED_ERROR, NULL);
+            }
+            break;
 
-    //     default:
-    //         Rlog.e(TAG, "Ignoring unexpected message, what=" + msg.what);
-    // }
+        default:
+            Logger::E(TAG, "Ignoring unexpected message, what=%d", what);
+    }
     return NOERROR;
 }
 
 void CUsimDataDownloadHandler::HandleDataDownload(
     /* [in] */ ISmsMessage* smsMessage)
 {
-    assert(0);
-    // int dcs = smsMessage.getDataCodingScheme();
-    // int pid = smsMessage.getProtocolIdentifier();
-    // byte[] pdu = smsMessage.getPdu();           // includes SC address
+    Int32 dcs;
+    ((CSmsMessage*)smsMessage)->GetDataCodingScheme(&dcs);
+    Int32 pid;
+    ISmsMessageBase::Probe(smsMessage)->GetProtocolIdentifier(&pid);
+    AutoPtr<ArrayOf<Byte> > pdu;
+    ISmsMessageBase::Probe(smsMessage)->GetPdu((ArrayOf<Byte>**)&pdu);           // includes SC address
 
-    // int scAddressLength = pdu[0] & 0xff;
-    // int tpduIndex = scAddressLength + 1;        // start of TPDU
-    // int tpduLength = pdu.length - tpduIndex;
+    Int32 scAddressLength = (*pdu)[0] & 0xff;
+    Int32 tpduIndex = scAddressLength + 1;        // start of TPDU
+    Int32 tpduLength = pdu->GetLength() - tpduIndex;
 
-    // int bodyLength = getEnvelopeBodyLength(scAddressLength, tpduLength);
+    Int32 bodyLength = GetEnvelopeBodyLength(scAddressLength, tpduLength);
 
-    // // Add 1 byte for SMS-PP download tag and 1-2 bytes for BER-TLV length.
-    // // See ETSI TS 102 223 Annex C for encoding of length and tags.
-    // int totalLength = bodyLength + 1 + (bodyLength > 127 ? 2 : 1);
+    // Add 1 byte for SMS-PP download tag and 1-2 bytes for BER-TLV length.
+    // See ETSI TS 102 223 Annex C for encoding of length and tags.
+    Int32 totalLength = bodyLength + 1 + (bodyLength > 127 ? 2 : 1);
 
-    // byte[] envelope = new byte[totalLength];
-    // int index = 0;
+    AutoPtr<ArrayOf<Byte> > envelope = ArrayOf<Byte>::Alloc(totalLength);
+    Int32 index = 0;
 
-    // // SMS-PP download tag and length (assumed to be < 256 bytes).
-    // envelope[index++] = (byte) BER_SMS_PP_DOWNLOAD_TAG;
-    // if (bodyLength > 127) {
-    //     envelope[index++] = (byte) 0x81;    // length 128-255 encoded as 0x81 + length
-    // }
-    // envelope[index++] = (byte) bodyLength;
+    // SMS-PP download tag and length (assumed to be < 256 bytes).
+    (*envelope)[index++] = (Byte) BER_SMS_PP_DOWNLOAD_TAG;
+    if (bodyLength > 127) {
+        (*envelope)[index++] = (Byte) 0x81;    // length 128-255 encoded as 0x81 + length
+    }
+    (*envelope)[index++] = (Byte) bodyLength;
 
-    // // Device identities TLV
-    // envelope[index++] = (byte) (0x80 | ComprehensionTlvTag.DEVICE_IDENTITIES.value());
-    // envelope[index++] = (byte) 2;
-    // envelope[index++] = (byte) DEV_ID_NETWORK;
-    // envelope[index++] = (byte) DEV_ID_UICC;
+    // Device identities TLV
+    (*envelope)[index++] = (Byte) (0x80 |
+            Elastos::Droid::Internal::Telephony::Cat::ComprehensionTlvTag_DEVICE_IDENTITIES);
+    (*envelope)[index++] = (Byte) 2;
+    (*envelope)[index++] = (Byte) DEV_ID_NETWORK;
+    (*envelope)[index++] = (Byte) DEV_ID_UICC;
 
-    // // Address TLV (if present). Encoded length is assumed to be < 127 bytes.
-    // if (scAddressLength != 0) {
-    //     envelope[index++] = (byte) ComprehensionTlvTag.ADDRESS.value();
-    //     envelope[index++] = (byte) scAddressLength;
-    //     System.arraycopy(pdu, 1, envelope, index, scAddressLength);
-    //     index += scAddressLength;
-    // }
+    // Address TLV (if present). Encoded length is assumed to be < 127 bytes.
+    if (scAddressLength != 0) {
+        (*envelope)[index++] = (Byte)
+            Elastos::Droid::Internal::Telephony::Cat::ComprehensionTlvTag_ADDRESS;
+        (*envelope)[index++] = (Byte) scAddressLength;
+        envelope->Copy(index, pdu, 1, scAddressLength);
+        index += scAddressLength;
+    }
 
-    // // SMS TPDU TLV. Length is assumed to be < 256 bytes.
-    // envelope[index++] = (byte) (0x80 | ComprehensionTlvTag.SMS_TPDU.value());
-    // if (tpduLength > 127) {
-    //     envelope[index++] = (byte) 0x81;    // length 128-255 encoded as 0x81 + length
-    // }
-    // envelope[index++] = (byte) tpduLength;
-    // System.arraycopy(pdu, tpduIndex, envelope, index, tpduLength);
-    // index += tpduLength;
+    // SMS TPDU TLV. Length is assumed to be < 256 bytes.
+    (*envelope)[index++] = (Byte) (0x80 |
+            Elastos::Droid::Internal::Telephony::Cat::ComprehensionTlvTag_SMS_TPDU);
+    if (tpduLength > 127) {
+        (*envelope)[index++] = (Byte) 0x81;    // length 128-255 encoded as 0x81 + length
+    }
+    (*envelope)[index++] = (Byte) tpduLength;
+    envelope->Copy(index, pdu, tpduIndex, tpduLength);
+    index += tpduLength;
 
-    // // Verify that we calculated the payload size correctly.
-    // if (index != envelope.length) {
-    //     Rlog.e(TAG, "startDataDownload() calculated incorrect envelope length, aborting.");
-    //     acknowledgeSmsWithError(CommandsInterface.GSM_SMS_FAIL_CAUSE_UNSPECIFIED_ERROR);
-    //     return;
-    // }
+    // Verify that we calculated the payload size correctly.
+    if (index != envelope->GetLength()) {
+        Logger::E(TAG, "startDataDownload() calculated incorrect envelope length, aborting.");
+        AcknowledgeSmsWithError(ICommandsInterface::GSM_SMS_FAIL_CAUSE_UNSPECIFIED_ERROR);
+    }
 
-    // String encodedEnvelope = IccUtils.bytesToHexString(envelope);
-    // mCi.sendEnvelopeWithStatus(encodedEnvelope, obtainMessage(
-    //         EVENT_SEND_ENVELOPE_RESPONSE, new int[]{ dcs, pid }));
+    String encodedEnvelope = IccUtils::BytesToHexString(envelope);
+    AutoPtr<IArrayOf> iArray;
+    CArrayOf::New(EIID_IInteger32, 2, (IArrayOf**)&iArray);
+    iArray->Set(0, CoreUtils::Convert(dcs));
+    iArray->Set(1, CoreUtils::Convert(pid));
+
+    AutoPtr<IMessage> msg;
+    ObtainMessage(EVENT_SEND_ENVELOPE_RESPONSE, iArray, (IMessage**)&msg);
+    mCi->SendEnvelopeWithStatus(encodedEnvelope, msg);
 }
 
 Int32 CUsimDataDownloadHandler::GetEnvelopeBodyLength(
@@ -212,65 +258,74 @@ void CUsimDataDownloadHandler::SendSmsAckForEnvelopeResponse(
     /* [in] */ Int32 dcs,
     /* [in] */ Int32 pid)
 {
-    assert(0);
-    // int sw1 = response.sw1;
-    // int sw2 = response.sw2;
+    Int32 sw1 = ((IccIoResult*)response)->sw1;
+    Int32 sw2 = ((IccIoResult*)response)->sw2;
 
-    // boolean success;
-    // if ((sw1 == 0x90 && sw2 == 0x00) || sw1 == 0x91) {
-    //     Rlog.d(TAG, "USIM data download succeeded: " + response.toString());
-    //     success = true;
-    // } else if (sw1 == 0x93 && sw2 == 0x00) {
-    //     Rlog.e(TAG, "USIM data download failed: Toolkit busy");
-    //     acknowledgeSmsWithError(CommandsInterface.GSM_SMS_FAIL_CAUSE_USIM_APP_TOOLKIT_BUSY);
-    //     return;
-    // } else if (sw1 == 0x62 || sw1 == 0x63) {
-    //     Rlog.e(TAG, "USIM data download failed: " + response.toString());
-    //     success = false;
-    // } else {
-    //     Rlog.e(TAG, "Unexpected SW1/SW2 response from UICC: " + response.toString());
-    //     success = false;
-    // }
+    Boolean success;
+    String str;
+    if ((sw1 == 0x90 && sw2 == 0x00) || sw1 == 0x91) {
+        Logger::D(TAG, "USIM data download succeeded: %s",
+                (IObject::Probe(response)->ToString(&str), str.string()));
+        success = TRUE;
+    }
+    else if (sw1 == 0x93 && sw2 == 0x00) {
+        Logger::E(TAG, "USIM data download failed: Toolkit busy");
+        AcknowledgeSmsWithError(ICommandsInterface::GSM_SMS_FAIL_CAUSE_USIM_APP_TOOLKIT_BUSY);
+        return;
+    }
+    else if (sw1 == 0x62 || sw1 == 0x63) {
+        Logger::E(TAG, "USIM data download failed: %s",
+                (IObject::Probe(response)->ToString(&str), str.string()));
+        success = FALSE;
+    }
+    else {
+        Logger::E(TAG, "Unexpected SW1/SW2 response from UICC: %s",
+                (IObject::Probe(response)->ToString(&str), str.string()));
+        success = FALSE;
+    }
 
-    // byte[] responseBytes = response.payload;
-    // if (responseBytes == null || responseBytes.length == 0) {
-    //     if (success) {
-    //         mCi.acknowledgeLastIncomingGsmSms(true, 0, null);
-    //     } else {
-    //         acknowledgeSmsWithError(
-    //                 CommandsInterface.GSM_SMS_FAIL_CAUSE_USIM_DATA_DOWNLOAD_ERROR);
-    //     }
-    //     return;
-    // }
+    AutoPtr<ArrayOf<Byte> > responseBytes = ((IccIoResult*)response)->payload;
+    if (responseBytes == NULL || responseBytes->GetLength() == 0) {
+        if (success) {
+            mCi->AcknowledgeLastIncomingGsmSms(TRUE, 0, NULL);
+        }
+        else {
+            AcknowledgeSmsWithError(
+                    ICommandsInterface::GSM_SMS_FAIL_CAUSE_USIM_DATA_DOWNLOAD_ERROR);
+        }
+        return;
+    }
 
-    // byte[] smsAckPdu;
-    // int index = 0;
-    // if (success) {
-    //     smsAckPdu = new byte[responseBytes.length + 5];
-    //     smsAckPdu[index++] = 0x00;      // TP-MTI, TP-UDHI
-    //     smsAckPdu[index++] = 0x07;      // TP-PI: TP-PID, TP-DCS, TP-UDL present
-    // } else {
-    //     smsAckPdu = new byte[responseBytes.length + 6];
-    //     smsAckPdu[index++] = 0x00;      // TP-MTI, TP-UDHI
-    //     smsAckPdu[index++] = (byte)
-    //             CommandsInterface.GSM_SMS_FAIL_CAUSE_USIM_DATA_DOWNLOAD_ERROR;  // TP-FCS
-    //     smsAckPdu[index++] = 0x07;      // TP-PI: TP-PID, TP-DCS, TP-UDL present
-    // }
+    AutoPtr<ArrayOf<Byte> > smsAckPdu;
+    Int32 index = 0;
+    if (success) {
+        smsAckPdu = ArrayOf<Byte>::Alloc(responseBytes->GetLength() + 5);
+        (*smsAckPdu)[index++] = 0x00;      // TP-MTI, TP-UDHI
+        (*smsAckPdu)[index++] = 0x07;      // TP-PI: TP-PID, TP-DCS, TP-UDL present
+    }
+    else {
+        smsAckPdu = ArrayOf<Byte>::Alloc(responseBytes->GetLength() + 6);
+        (*smsAckPdu)[index++] = 0x00;      // TP-MTI, TP-UDHI
+        (*smsAckPdu)[index++] = (Byte)
+                ICommandsInterface::GSM_SMS_FAIL_CAUSE_USIM_DATA_DOWNLOAD_ERROR;  // TP-FCS
+        (*smsAckPdu)[index++] = 0x07;      // TP-PI: TP-PID, TP-DCS, TP-UDL present
+    }
 
-    // smsAckPdu[index++] = (byte) pid;
-    // smsAckPdu[index++] = (byte) dcs;
+    (*smsAckPdu)[index++] = (Byte) pid;
+    (*smsAckPdu)[index++] = (Byte) dcs;
 
-    // if (is7bitDcs(dcs)) {
-    //     int septetCount = responseBytes.length * 8 / 7;
-    //     smsAckPdu[index++] = (byte) septetCount;
-    // } else {
-    //     smsAckPdu[index++] = (byte) responseBytes.length;
-    // }
+    if (Is7bitDcs(dcs)) {
+        Int32 septetCount = responseBytes->GetLength() * 8 / 7;
+        (*smsAckPdu)[index++] = (Byte) septetCount;
+    }
+    else {
+        (*smsAckPdu)[index++] = (Byte) responseBytes->GetLength();
+    }
 
-    // System.arraycopy(responseBytes, 0, smsAckPdu, index, responseBytes.length);
+    smsAckPdu->Copy(index, responseBytes, 0, responseBytes->GetLength());
 
-    // mCi.acknowledgeIncomingGsmSmsWithPdu(success,
-    //         IccUtils.bytesToHexString(smsAckPdu), null);
+    mCi->AcknowledgeIncomingGsmSmsWithPdu(success,
+            IccUtils::BytesToHexString(smsAckPdu), NULL);
 }
 
 void CUsimDataDownloadHandler::AcknowledgeSmsWithError(

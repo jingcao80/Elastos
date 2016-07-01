@@ -42,7 +42,8 @@ private:
     {
     public:
         PbrFile(
-            /* [in] */ IArrayList* records);
+            /* [in] */ IArrayList* records,
+            /* [in] */ CUsimPhoneBookManager* host);
 
         CARAPI ParseTag(
             /* [in] */ ISimTlv* tlv,
@@ -55,12 +56,13 @@ private:
             /* [in] */ IArrayList* anrList,
             /* [in] */ IArrayList* emailList);
 
-    private:
+    public:
         // RecNum <EF Tag, efid>
-        AutoPtr<IHashMap> mFileIds;
+        AutoPtr<IHashMap> mFileIds;         // HashMap<Integer,Map<Integer,Integer>>
         // All Type1 ANR/EMAIL file will be recorded below ArrayList
-        AutoPtr<IHashMap> mAnrFileIds;
-        AutoPtr<IHashMap> mEmailFileIds;
+        AutoPtr<IHashMap> mAnrFileIds;      // HashMap<Integer,ArrayList<Integer>>
+        AutoPtr<IHashMap> mEmailFileIds;    // HashMap<Integer,ArrayList<Integer>>
+        CUsimPhoneBookManager* mHost;
     };
 
 public:
@@ -229,34 +231,34 @@ private:
         /* [in] */ const String& msg);
 
 private:
-    static const String TAG;// = "UsimPhoneBookManager";
+    static const String TAG;    // = "UsimPhoneBookManager";
     static const Boolean DBG = TRUE;
     AutoPtr<PbrFile> mPbrFile;
     Boolean mIsPbrPresent;
     AutoPtr<IIccFileHandler> mFh;
     AutoPtr<IAdnRecordCache> mAdnCache;
     Object mLock; // = new Object();
-    AutoPtr<IArrayList> mPhoneBookRecords;
+    AutoPtr<IArrayList> mPhoneBookRecords;      // ArrayList<AdnRecord>
     Boolean mEmailPresentInIap; // = FALSE;
     Int32 mEmailTagNumberInIap; // = 0;
     Boolean mAnrPresentInIap; // = FALSE;
     Int32 mAnrTagNumberInIap; // = 0;
     Boolean mIapPresent; // = FALSE;
-    AutoPtr<IMap> mIapFileRecord;
-    AutoPtr<IMap> mEmailFileRecord;
-    AutoPtr<IMap> mAnrFileRecord;
-    AutoPtr<IArrayList> mAdnLengthList;
+    AutoPtr<IMap> mIapFileRecord;       // Map<Integer, ArrayList<byte[]>>
+    AutoPtr<IMap> mEmailFileRecord;     // Map<Integer, ArrayList<byte[]>>
+    AutoPtr<IMap> mAnrFileRecord;       // Map<Integer, ArrayList<byte[]>>
+    AutoPtr<IArrayList> mAdnLengthList; // ArrayList<Integer>
     Int32 mPendingExtLoads;
     Boolean mSuccess; // = FALSE;
     Boolean mRefreshCache; // = FALSE;
 
-    AutoPtr<IMap> mAnrFlags;
-    AutoPtr<IMap> mEmailFlags;
-    AutoPtr<ArrayOf<IArrayList*> > mAnrFlagsRecord;
-    AutoPtr<ArrayOf<IArrayList*> > mEmailFlagsRecord;
+    AutoPtr<IMap> mAnrFlags;    // Map<Integer, ArrayList<Integer>>
+    AutoPtr<IMap> mEmailFlags;  // Map<Integer, ArrayList<Integer>>
+    AutoPtr<ArrayOf<IArrayList*> > mAnrFlagsRecord; // ArrayList<Integer>[]
+    AutoPtr<ArrayOf<IArrayList*> > mEmailFlagsRecord;   // ArrayList<Integer>[]
 
     // Variable used to save valid records' recordnum
-    AutoPtr<IMap> mRecordNums;
+    AutoPtr<IMap> mRecordNums;          // Map<Integer, ArrayList<Integer>>
 
     static const Int32 EVENT_PBR_LOAD_DONE = 1;
     static const Int32 EVENT_USIM_ADN_LOAD_DONE = 2;

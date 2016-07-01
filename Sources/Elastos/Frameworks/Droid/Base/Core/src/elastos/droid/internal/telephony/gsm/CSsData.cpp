@@ -1,4 +1,7 @@
 #include "elastos/droid/internal/telephony/gsm/CSsData.h"
+#include <elastos/core/StringUtils.h>
+
+using Elastos::Core::StringUtils;
 
 namespace Elastos {
 namespace Droid {
@@ -73,13 +76,13 @@ ECode CSsData::ToString(
     /* [out] */ String* result)
 {
     VALIDATE_NOT_NULL(result)
-    assert(0);
-    // *result = "[SsData] " + "ServiceType: " + serviceType
-    //     + " RequestType: " + requestType
-    //     + " TeleserviceType: " + teleserviceType
-    //     + " ServiceClass: " + serviceClass
-    //     + " Result: " + result
-    //     + " Is Service Type CF: " + serviceType.isTypeCF();
+    *result = String("[SsData] ServiceType: ") + StringUtils::ToString(mServiceType)
+        + " RequestType: " + StringUtils::ToString(mRequestType)
+        + " TeleserviceType: " + StringUtils::ToString(mTeleserviceType)
+        + " ServiceClass: " + StringUtils::ToString(mServiceClass)
+        + " Result: " + StringUtils::ToString(mResult);
+// TODO: Need ServiceType::isTypeCF
+        // + " Is Service Type CF: " + StringUtils::ToString(mServiceType).isTypeCF();
     return NOERROR;
 }
 

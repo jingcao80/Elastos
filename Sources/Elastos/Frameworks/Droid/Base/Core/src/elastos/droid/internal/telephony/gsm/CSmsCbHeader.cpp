@@ -1,7 +1,15 @@
 #include "elastos/droid/internal/telephony/gsm/CSmsCbHeader.h"
+#include "elastos/droid/telephony/CSmsCbCmasInfo.h"
+#include "elastos/droid/telephony/CSmsCbEtwsInfo.h"
 #include <elastos/core/StringUtils.h>
+#include <elastos/utility/Arrays.h>
 
+using Elastos::Droid::Telephony::CSmsCbCmasInfo;
+using Elastos::Droid::Telephony::CSmsCbEtwsInfo;
+using Elastos::Droid::Telephony::ISmsCbCmasInfo;
+using Elastos::Droid::Telephony::ISmsCbEtwsInfo;
 using Elastos::Core::StringUtils;
+using Elastos::Utility::Arrays;
 
 namespace Elastos {
 namespace Droid {
@@ -40,96 +48,101 @@ ECode CSmsCbHeader::constructor()
 ECode CSmsCbHeader::constructor(
     /* [in] */ ArrayOf<Byte>* pdu)
 {
-    assert(0);
-    // if (pdu == null || pdu.length < PDU_HEADER_LENGTH) {
-    //     throw new IllegalArgumentException("Illegal PDU");
-    // }
+    if (pdu == NULL || pdu->GetLength() < PDU_HEADER_LENGTH) {
+        // throw new IllegalArgumentException("Illegal PDU");
+        return E_ILLEGAL_ARGUMENT_EXCEPTION;
+    }
 
-    // if (pdu.length <= PDU_LENGTH_GSM) {
-    //     // can be ETWS or GSM format.
-    //     // Per TS23.041 9.4.1.2 and 9.4.1.3.2, GSM and ETWS format both
-    //     // contain serial number which contains GS, Message Code, and Update Number
-    //     // per 9.4.1.2.1, and message identifier in same octets
-    //     mGeographicalScope = (pdu[0] & 0xc0) >>> 6;
-    //     mSerialNumber = ((pdu[0] & 0xff) << 8) | (pdu[1] & 0xff);
-    //     mMessageIdentifier = ((pdu[2] & 0xff) << 8) | (pdu[3] & 0xff);
-    //     if (isEtwsMessage() && pdu.length <= PDU_LENGTH_ETWS) {
-    //         mFormat = FORMAT_ETWS_PRIMARY;
-    //         mDataCodingScheme = -1;
-    //         mPageIndex = -1;
-    //         mNrOfPages = -1;
-    //         boolean emergencyUserAlert = (pdu[4] & 0x1) != 0;
-    //         boolean activatePopup = (pdu[5] & 0x80) != 0;
-    //         int warningType = (pdu[4] & 0xfe) >>> 1;
-    //         byte[] warningSecurityInfo;
-    //         // copy the Warning-Security-Information, if present
-    //         if (pdu.length > PDU_HEADER_LENGTH) {
-    //             warningSecurityInfo = Arrays.copyOfRange(pdu, 6, pdu.length);
-    //         } else {
-    //             warningSecurityInfo = null;
-    //         }
-    //         mEtwsInfo = new SmsCbEtwsInfo(warningType, emergencyUserAlert, activatePopup,
-    //                 warningSecurityInfo);
-    //         mCmasInfo = null;
-    //         return;     // skip the ETWS/CMAS initialization code for regular notifications
-    //     } else {
-    //         // GSM pdus are no more than 88 bytes
-    //         mFormat = FORMAT_GSM;
-    //         mDataCodingScheme = pdu[4] & 0xff;
+    if (pdu->GetLength() <= PDU_LENGTH_GSM) {
+        // can be ETWS or GSM format.
+        // Per TS23.041 9.4.1.2 and 9.4.1.3.2, GSM and ETWS format both
+        // contain serial number which contains GS, Message Code, and Update Number
+        // per 9.4.1.2.1, and message identifier in same octets
+        mGeographicalScope = ((*pdu)[0] & 0xc0) >> 6;
+        mSerialNumber = (((*pdu)[0] & 0xff) << 8) | ((*pdu)[1] & 0xff);
+        mMessageIdentifier = (((*pdu)[2] & 0xff) << 8) | ((*pdu)[3] & 0xff);
+        if (IsEtwsMessage() && pdu->GetLength() <= PDU_LENGTH_ETWS) {
+            mFormat = FORMAT_ETWS_PRIMARY;
+            mDataCodingScheme = -1;
+            mPageIndex = -1;
+            mNrOfPages = -1;
+            Boolean emergencyUserAlert = ((*pdu)[4] & 0x1) != 0;
+            Boolean activatePopup = ((*pdu)[5] & 0x80) != 0;
+            Int32 warningType = ((*pdu)[4] & 0xfe) >> 1;
+            AutoPtr<ArrayOf<Byte> > warningSecurityInfo;
+            // copy the Warning-Security-Information, if present
+            if (pdu->GetLength() > PDU_HEADER_LENGTH) {
+                Arrays::CopyOfRange(pdu, 6, pdu->GetLength(), (ArrayOf<Byte>**)&warningSecurityInfo);
+            }
+            else {
+                warningSecurityInfo = NULL;
+            }
+            CSmsCbEtwsInfo::New(warningType, emergencyUserAlert, activatePopup, warningSecurityInfo, (ISmsCbEtwsInfo**)&mEtwsInfo);
+            mCmasInfo = NULL;
+            return NOERROR;     // skip the ETWS/CMAS initialization code for regular notifications
+        }
+        else {
+            // GSM pdus are no more than 88 bytes
+            mFormat = FORMAT_GSM;
+            mDataCodingScheme = (*pdu)[4] & 0xff;
 
-    //         // Check for invalid page parameter
-    //         int pageIndex = (pdu[5] & 0xf0) >>> 4;
-    //         int nrOfPages = pdu[5] & 0x0f;
+            // Check for invalid page parameter
+            Int32 pageIndex = ((*pdu)[5] & 0xf0) >> 4;
+            Int32 nrOfPages = (*pdu)[5] & 0x0f;
 
-    //         if (pageIndex == 0 || nrOfPages == 0 || pageIndex > nrOfPages) {
-    //             pageIndex = 1;
-    //             nrOfPages = 1;
-    //         }
+            if (pageIndex == 0 || nrOfPages == 0 || pageIndex > nrOfPages) {
+                pageIndex = 1;
+                nrOfPages = 1;
+            }
 
-    //         mPageIndex = pageIndex;
-    //         mNrOfPages = nrOfPages;
-    //     }
-    // } else {
-    //     // UMTS pdus are always at least 90 bytes since the payload includes
-    //     // a number-of-pages octet and also one length octet per page
-    //     mFormat = FORMAT_UMTS;
+            mPageIndex = pageIndex;
+            mNrOfPages = nrOfPages;
+        }
+    }
+    else {
+        // UMTS pdus are always at least 90 bytes since the payload includes
+        // a number-of-pages octet and also one length octet per page
+        mFormat = FORMAT_UMTS;
 
-    //     int messageType = pdu[0];
+        Int32 messageType = (*pdu)[0];
 
-    //     if (messageType != MESSAGE_TYPE_CBS_MESSAGE) {
-    //         throw new IllegalArgumentException("Unsupported message type " + messageType);
-    //     }
+        if (messageType != MESSAGE_TYPE_CBS_MESSAGE) {
+            // throw new IllegalArgumentException("Unsupported message type " + messageType);
+            return E_ILLEGAL_ARGUMENT_EXCEPTION;
+        }
 
-    //     mMessageIdentifier = ((pdu[1] & 0xff) << 8) | pdu[2] & 0xff;
-    //     mGeographicalScope = (pdu[3] & 0xc0) >>> 6;
-    //     mSerialNumber = ((pdu[3] & 0xff) << 8) | (pdu[4] & 0xff);
-    //     mDataCodingScheme = pdu[5] & 0xff;
+        mMessageIdentifier = (((*pdu)[1] & 0xff) << 8) | (*pdu)[2] & 0xff;
+        mGeographicalScope = ((*pdu)[3] & 0xc0) >> 6;
+        mSerialNumber = (((*pdu)[3] & 0xff) << 8) | ((*pdu)[4] & 0xff);
+        mDataCodingScheme = (*pdu)[5] & 0xff;
 
-    //     // We will always consider a UMTS message as having one single page
-    //     // since there's only one instance of the header, even though the
-    //     // actual payload may contain several pages.
-    //     mPageIndex = 1;
-    //     mNrOfPages = 1;
-    // }
+        // We will always consider a UMTS message as having one single page
+        // since there's only one instance of the header, even though the
+        // actual payload may contain several pages.
+        mPageIndex = 1;
+        mNrOfPages = 1;
+    }
 
-    // if (isEtwsMessage()) {
-    //     boolean emergencyUserAlert = isEtwsEmergencyUserAlert();
-    //     boolean activatePopup = isEtwsPopupAlert();
-    //     int warningType = getEtwsWarningType();
-    //     mEtwsInfo = new SmsCbEtwsInfo(warningType, emergencyUserAlert, activatePopup, null);
-    //     mCmasInfo = null;
-    // } else if (isCmasMessage()) {
-    //     int messageClass = getCmasMessageClass();
-    //     int severity = getCmasSeverity();
-    //     int urgency = getCmasUrgency();
-    //     int certainty = getCmasCertainty();
-    //     mEtwsInfo = null;
-    //     mCmasInfo = new SmsCbCmasInfo(messageClass, SmsCbCmasInfo.CMAS_CATEGORY_UNKNOWN,
-    //             SmsCbCmasInfo.CMAS_RESPONSE_TYPE_UNKNOWN, severity, urgency, certainty);
-    // } else {
-    //     mEtwsInfo = null;
-    //     mCmasInfo = null;
-    // }
+    if (IsEtwsMessage()) {
+        Boolean emergencyUserAlert = IsEtwsEmergencyUserAlert();
+        Boolean activatePopup = IsEtwsPopupAlert();
+        Int32 warningType = GetEtwsWarningType();
+        CSmsCbEtwsInfo::New(warningType, emergencyUserAlert, activatePopup, NULL, (ISmsCbEtwsInfo**)&mEtwsInfo);
+        mCmasInfo = NULL;
+    }
+    else if (IsCmasMessage()) {
+        Int32 messageClass = GetCmasMessageClass();
+        Int32 severity = GetCmasSeverity();
+        Int32 urgency = GetCmasUrgency();
+        Int32 certainty = GetCmasCertainty();
+        mEtwsInfo = NULL;
+        CSmsCbCmasInfo::New(messageClass, ISmsCbCmasInfo::CMAS_CATEGORY_UNKNOWN,
+                ISmsCbCmasInfo::CMAS_RESPONSE_TYPE_UNKNOWN, severity, urgency, certainty, (ISmsCbCmasInfo**)&mCmasInfo);
+    }
+    else {
+        mEtwsInfo = NULL;
+        mCmasInfo = NULL;
+    }
     return NOERROR;
 }
 

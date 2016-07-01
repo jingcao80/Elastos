@@ -1,15 +1,30 @@
 #include "elastos/droid/internal/telephony/gsm/CUsimPhoneBookManager.h"
 #include "elastos/droid/internal/telephony/gsm/CSimTlv.h"
+#include "elastos/droid/internal/telephony/GsmAlphabet.h"
+#include "elastos/droid/internal/telephony/IccUtils.h"
+#include "elastos/droid/telephony/PhoneNumberUtils.h"
+#include "elastos/droid/os/AsyncResult.h"
+#include <elastos/core/AutoLock.h>
 #include <elastos/core/CoreUtils.h>
+#include <elastos/core/StringUtils.h>
 #include <elastos/utility/logging/Logger.h>
 
+using Elastos::Droid::Internal::Telephony::GsmAlphabet;
 using Elastos::Droid::Internal::Telephony::Uicc::EIID_IIccConstants;
+using Elastos::Droid::Internal::Telephony::Uicc::IAdnRecord;
+using Elastos::Droid::Internal::Telephony::IccUtils;
+using Elastos::Droid::Os::AsyncResult;
+using Elastos::Droid::Telephony::PhoneNumberUtils;
+using Elastos::Core::AutoLock;
 using Elastos::Core::CoreUtils;
+using Elastos::Core::EIID_IByte;
 using Elastos::Core::IArrayOf;
 using Elastos::Core::IByte;
 using Elastos::Core::IInteger32;
+using Elastos::Core::StringUtils;
 using Elastos::Utility::CArrayList;
 using Elastos::Utility::CHashMap;
+using Elastos::Utility::ICollection;
 using Elastos::Utility::Logging::Logger;
 
 namespace Elastos {
@@ -64,7 +79,9 @@ CAR_INTERFACE_IMPL_2(CUsimPhoneBookManager, Handler, IUsimPhoneBookManager, IIcc
 CAR_OBJECT_IMPL(CUsimPhoneBookManager)
 
 CUsimPhoneBookManager::PbrFile::PbrFile(
-    /* [in] */ IArrayList* records)
+    /* [in] */ IArrayList* records,
+    /* [in] */ CUsimPhoneBookManager* host)
+    : mHost(host)
 {
     CHashMap::New((IHashMap**)&mFileIds);
     CHashMap::New((IHashMap**)&mAnrFileIds);
@@ -146,56 +163,57 @@ ECode CUsimPhoneBookManager::PbrFile::ParseEf(
     /* [in] */ IArrayList* anrList,
     /* [in] */ IArrayList* emailList)
 {
-    assert(0);
-    // int tag;
-    // byte[] data;
-    // int tagNumberWithinParentTag = 0;
-    // do {
-    //     tag = tlv.getTag();
-    //     // Check if EFIAP is present. EFIAP must be under TYPE1 tag.
-    //     if (parentTag == USIM_TYPE1_TAG && tag == USIM_EFIAP_TAG) {
-    //         mIapPresent = true;
-    //     }
-    //     if (parentTag == USIM_TYPE2_TAG && mIapPresent && tag == USIM_EFEMAIL_TAG) {
-    //         mEmailPresentInIap = true;
-    //         mEmailTagNumberInIap = tagNumberWithinParentTag;
-    //         log("parseEf: EmailPresentInIap tag = " + mEmailTagNumberInIap);
-    //     }
-    //     if (parentTag == USIM_TYPE2_TAG && mIapPresent && tag == USIM_EFANR_TAG) {
-    //         mAnrPresentInIap = true;
-    //         mAnrTagNumberInIap = tagNumberWithinParentTag;
-    //         log("parseEf: AnrPresentInIap tag = " + mAnrTagNumberInIap);
-    //     }
-    //     switch(tag) {
-    //         case USIM_EFEMAIL_TAG:
-    //         case USIM_EFADN_TAG:
-    //         case USIM_EFEXT1_TAG:
-    //         case USIM_EFANR_TAG:
-    //         case USIM_EFPBC_TAG:
-    //         case USIM_EFGRP_TAG:
-    //         case USIM_EFAAS_TAG:
-    //         case USIM_EFGSD_TAG:
-    //         case USIM_EFUID_TAG:
-    //         case USIM_EFCCP1_TAG:
-    //         case USIM_EFIAP_TAG:
-    //         case USIM_EFSNE_TAG:
-    //             data = tlv.getData();
-    //             int efid = ((data[0] & 0xFF) << 8) | (data[1] & 0xFF);
-    //             val.put(tag, efid);
+    Int32 tag;
+    AutoPtr<ArrayOf<Byte> > data;
+    Int32 tagNumberWithinParentTag = 0;
+    Boolean b;
+    do {
+        tlv->GetTag(&tag);
+        // Check if EFIAP is present. EFIAP must be under TYPE1 tag.
+        if (parentTag == USIM_TYPE1_TAG && tag == USIM_EFIAP_TAG) {
+            mHost->mIapPresent = TRUE;
+        }
+        if (parentTag == USIM_TYPE2_TAG && mHost->mIapPresent && tag == USIM_EFEMAIL_TAG) {
+            mHost->mEmailPresentInIap = TRUE;
+            mHost->mEmailTagNumberInIap = tagNumberWithinParentTag;
+            mHost->Log(String("parseEf: EmailPresentInIap tag = ") + mHost->mEmailTagNumberInIap);
+        }
+        if (parentTag == USIM_TYPE2_TAG && mHost->mIapPresent && tag == USIM_EFANR_TAG) {
+            mHost->mAnrPresentInIap = TRUE;
+            mHost->mAnrTagNumberInIap = tagNumberWithinParentTag;
+            mHost->Log(String("parseEf: AnrPresentInIap tag = ") + mHost->mAnrTagNumberInIap);
+        }
+        switch(tag) {
+            case USIM_EFEMAIL_TAG:
+            case USIM_EFADN_TAG:
+            case USIM_EFEXT1_TAG:
+            case USIM_EFANR_TAG:
+            case USIM_EFPBC_TAG:
+            case USIM_EFGRP_TAG:
+            case USIM_EFAAS_TAG:
+            case USIM_EFGSD_TAG:
+            case USIM_EFUID_TAG:
+            case USIM_EFCCP1_TAG:
+            case USIM_EFIAP_TAG:
+            case USIM_EFSNE_TAG:
+                tlv->GetData((ArrayOf<Byte>**)&data);
+                Int32 efid = (((*data)[0] & 0xFF) << 8) | ((*data)[1] & 0xFF);
+                val->Put(CoreUtils::Convert(tag), CoreUtils::Convert(efid));
 
-    //             if (parentTag == USIM_TYPE1_TAG) {
-    //                 if (tag == USIM_EFANR_TAG) {
-    //                     anrList.add(efid);
-    //                 } else if (tag == USIM_EFEMAIL_TAG) {
-    //                     emailList.add(efid);
-    //                 }
-    //             }
-    //             Logger::D(TAG, "parseEf.put(" + tag + "," + efid + ") parent tag:"
-    //                     + parentTag);
-    //             break;
-    //     }
-    //     tagNumberWithinParentTag ++;
-    // } while(tlv.nextObject());
+                if (parentTag == USIM_TYPE1_TAG) {
+                    if (tag == USIM_EFANR_TAG) {
+                        anrList->Add(CoreUtils::Convert(efid));
+                    }
+                    else if (tag == USIM_EFEMAIL_TAG) {
+                        emailList->Add(CoreUtils::Convert(efid));
+                    }
+                }
+                Logger::D(TAG, "parseEf.put(%d,%d) parent tag: %d"
+                        , tag, efid, parentTag);
+                break;
+        }
+        tagNumberWithinParentTag++;
+    } while(tlv->NextObject(&b), b);
     return NOERROR;
 }
 
@@ -221,47 +239,47 @@ ECode CUsimPhoneBookManager::constructor(
     /* [in] */ IIccFileHandler* fh,
     /* [in] */ IAdnRecordCache* cache)
 {
-    assert(0);
-    // mFh = fh;
-    // mPhoneBookRecords = new ArrayList<AdnRecord>();
-    // mAdnLengthList = new ArrayList<Integer>();
-    // mIapFileRecord = new HashMap<Integer, ArrayList<byte[]>>();
-    // mEmailFileRecord = new HashMap<Integer, ArrayList<byte[]>>();
-    // mAnrFileRecord = new HashMap<Integer, ArrayList<byte[]>>();
-    // mRecordNums = new HashMap<Integer, ArrayList<Integer>>();
-    // mPbrFile = null;
+    mFh = fh;
+    CArrayList::New((IArrayList**)&mPhoneBookRecords);
+    CArrayList::New((IArrayList**)&mAdnLengthList);
+    CHashMap::New((IHashMap**)&mIapFileRecord);
+    CHashMap::New((IHashMap**)&mEmailFileRecord);
+    CHashMap::New((IHashMap**)&mAnrFileRecord);
+    CHashMap::New((IHashMap**)&mRecordNums);
+    mPbrFile = NULL;
 
-    // mAnrFlags = new HashMap<Integer, ArrayList<Integer>>();
-    // mEmailFlags = new HashMap<Integer, ArrayList<Integer>>();
+    CHashMap::New((IHashMap**)&mAnrFlags);
+    CHashMap::New((IHashMap**)&mEmailFlags);
 
-    // // We assume its present, after the first read this is updated.
-    // // So we don't have to read from UICC if its not present on subsequent reads.
-    // mIsPbrPresent = true;
-    // mAdnCache = cache;
+    // We assume its present, after the first read this is updated.
+    // So we don't have to read from UICC if its not present on subsequent reads.
+    mIsPbrPresent = TRUE;
+    mAdnCache = cache;
     return NOERROR;
 }
 
 ECode CUsimPhoneBookManager::Reset()
 {
-    assert(0);
-    // if ((mAnrFlagsRecord != null) && (mEmailFlagsRecord != null) && mPbrFile != null) {
-    //     for (int i = 0; i < mPbrFile.mFileIds.size(); i++) {
-    //         mAnrFlagsRecord[i].clear();
-    //         mEmailFlagsRecord[i].clear();
-    //     }
-    // }
-    // mAnrFlags.clear();
-    // mEmailFlags.clear();
+    if ((mAnrFlagsRecord != NULL) && (mEmailFlagsRecord != NULL) && mPbrFile != NULL) {
+        Int32 size;
+        mPbrFile->mFileIds->GetSize(&size);
+        for (Int32 i = 0; i < size; i++) {
+            (*mAnrFlagsRecord)[i]->Clear();
+            (*mEmailFlagsRecord)[i]->Clear();
+        }
+    }
+    mAnrFlags->Clear();
+    mEmailFlags->Clear();
 
-    // mPhoneBookRecords.clear();
-    // mIapFileRecord.clear();
-    // mEmailFileRecord.clear();
-    // mAnrFileRecord.clear();
-    // mRecordNums.clear();
-    // mPbrFile = null;
-    // mAdnLengthList.clear();
-    // mIsPbrPresent = true;
-    // mRefreshCache = false;
+    mPhoneBookRecords->Clear();
+    mIapFileRecord->Clear();
+    mEmailFileRecord->Clear();
+    mAnrFileRecord->Clear();
+    mRecordNums->Clear();
+    mPbrFile = NULL;
+    mAdnLengthList->Clear();
+    mIsPbrPresent = TRUE;
+    mRefreshCache = FALSE;
     return NOERROR;
 }
 
@@ -269,45 +287,54 @@ ECode CUsimPhoneBookManager::LoadEfFilesFromUsim(
     /* [out] */ IArrayList** result)
 {
     VALIDATE_NOT_NULL(result)
-    assert(0);
-    // synchronized (mLock) {
-    //     if (!mPhoneBookRecords.isEmpty()) {
-    //         if (mRefreshCache) {
-    //             mRefreshCache = false;
-    //             refreshCache();
-    //         }
-    //         return mPhoneBookRecords;
-    //     }
+    AutoLock lock(mLock);
+    Boolean b;
+    if (mPhoneBookRecords->IsEmpty(&b), !b) {
+        if (mRefreshCache) {
+            mRefreshCache = FALSE;
+            RefreshCache();
+        }
+        *result = mPhoneBookRecords;
+        REFCOUNT_ADD(*result)
+        return NOERROR;
+    }
 
-    //     if (!mIsPbrPresent) return null;
+    if (!mIsPbrPresent) {
+        *result = NULL;
+        return NOERROR;
+    }
 
-    //     // Check if the PBR file is present in the cache, if not read it
-    //     // from the USIM.
-    //     if (mPbrFile == null) {
-    //         readPbrFileAndWait();
-    //     }
+    // Check if the PBR file is present in the cache, if not read it
+    // from the USIM.
+    if (mPbrFile == NULL) {
+        ReadPbrFileAndWait();
+    }
 
-    //     if (mPbrFile == null) return null;
+    if (mPbrFile == NULL) {
+        *result = NULL;
+        return NOERROR;
+    }
 
-    //     int numRecs = mPbrFile.mFileIds.size();
+    Int32 numRecs;
+    mPbrFile->mFileIds->GetSize(&numRecs);
 
-    //     if ((mAnrFlagsRecord == null) && (mEmailFlagsRecord == null)) {
-    //         mAnrFlagsRecord = new ArrayList[numRecs];
-    //         mEmailFlagsRecord = new ArrayList[numRecs];
-    //         for (int i = 0; i < numRecs; i++) {
-    //             mAnrFlagsRecord[i] = new ArrayList<Integer>();
-    //             mEmailFlagsRecord[i] = new ArrayList<Integer>();
-    //         }
-    //     }
+    if ((mAnrFlagsRecord == NULL) && (mEmailFlagsRecord == NULL)) {
+        mAnrFlagsRecord = ArrayOf<IArrayList*>::Alloc(numRecs);
+        mEmailFlagsRecord = ArrayOf<IArrayList*>::Alloc(numRecs);
+        for (Int32 i = 0; i < numRecs; i++) {
+            CArrayList::New((IArrayList**)&(*mAnrFlagsRecord)[i]);
+            CArrayList::New((IArrayList**)&(*mEmailFlagsRecord)[i]);
+        }
+    }
 
-    //     for (int i = 0; i < numRecs; i++) {
-    //         readAdnFileAndWait(i);
-    //         readEmailFileAndWait(i);
-    //         readAnrFileAndWait(i);
-    //     }
-    //     // All EF files are loaded, post the response.
-    // }
-    // return mPhoneBookRecords;
+    for (Int32 i = 0; i < numRecs; i++) {
+        ReadAdnFileAndWait(i);
+        ReadEmailFileAndWait(i);
+        ReadAnrFileAndWait(i);
+    }
+    // All EF files are loaded, post the response.
+    *result = mPhoneBookRecords;
+    REFCOUNT_ADD(*result)
     return NOERROR;
 }
 
@@ -319,103 +346,128 @@ ECode CUsimPhoneBookManager::InvalidateCache()
 
 ECode CUsimPhoneBookManager::UpdateEmailFile(
     /* [in] */ Int32 adnRecNum,
-    /* [in] */ const String& oldEmail,
-    /* [in] */ const String& newEmail,
+    /* [in] */ const String& _oldEmail,
+    /* [in] */ const String& _newEmail,
     /* [in] */ Int32 efidIndex,
     /* [out] */ Boolean* result)
 {
     VALIDATE_NOT_NULL(result)
-    assert(0);
-    // int pbrIndex = getPbrIndexBy(adnRecNum - 1);
-    // int efid = getEfidByTag(pbrIndex, USIM_EFEMAIL_TAG, efidIndex);
-    // if (oldEmail == null)
-    //     oldEmail = "";
-    // if (newEmail == null)
-    //     newEmail = "";
-    // String emails = oldEmail + "," + newEmail;
-    // mSuccess = false;
 
-    // log("updateEmailFile oldEmail : " + oldEmail + " newEmail:" + newEmail + " emails:"
-    //             + emails + " efid" + efid + " adnRecNum: " + adnRecNum);
+    String oldEmail = _oldEmail;
+    String newEmail = _newEmail;
+    Int32 pbrIndex;
+    GetPbrIndexBy(adnRecNum - 1, &pbrIndex);
+    Int32 efid = GetEfidByTag(pbrIndex, USIM_EFEMAIL_TAG, efidIndex);
+    if (oldEmail.IsNull())
+        oldEmail = String("");
+    if (newEmail.IsNull())
+        newEmail = String("");
+    String emails = oldEmail + "," + newEmail;
+    mSuccess = FALSE;
 
-    // if (efid == -1)
-    //     return mSuccess;
-    // if (mEmailPresentInIap && (TextUtils.isEmpty(oldEmail) && !TextUtils.isEmpty(newEmail))) {
-    //     if (getEmptyEmailNum_Pbrindex(pbrIndex) == 0) {
-    //         log("updateEmailFile getEmptyEmailNum_Pbrindex=0, pbrIndex is " + pbrIndex);
-    //         mSuccess = true;
-    //         return mSuccess;
-    //     }
+    Log(String("updateEmailFile oldEmail : ") + oldEmail +
+            " newEmail:" + newEmail + " emails:" + emails +
+            " efid" + StringUtils::ToString(efid) +
+            " adnRecNum: " + StringUtils::ToString(adnRecNum));
 
-    //     mSuccess = updateIapFile(adnRecNum, oldEmail, newEmail, USIM_EFEMAIL_TAG);
-    // } else {
-    //     mSuccess = true;
-    // }
-    // if (mSuccess) {
-    //     synchronized (mLock) {
-    //         mFh.getEFLinearRecordSize(efid,
-    //                 obtainMessage(EVENT_EF_EMAIL_RECORD_SIZE_DONE, adnRecNum, efid, emails));
-    //         try {
-    //             mLock.wait();
-    //         } catch (InterruptedException e) {
-    //             Rlog.e(TAG, "interrupted while trying to update by search");
-    //         }
-    //     }
-    // }
-    // if (mEmailPresentInIap && mSuccess
-    //         && (!TextUtils.isEmpty(oldEmail) && TextUtils.isEmpty(newEmail))) {
-    //     mSuccess = updateIapFile(adnRecNum, oldEmail, newEmail, USIM_EFEMAIL_TAG);
-    // }
-    // return mSuccess;
+    if (efid == -1) {
+        *result = mSuccess;
+        return NOERROR;
+    }
+    if (mEmailPresentInIap && (oldEmail.IsEmpty() && !newEmail.IsEmpty())) {
+        Int32 index;
+        GetEmptyEmailNum_Pbrindex(pbrIndex, &index);
+        if (index == 0) {
+            Log(String("updateEmailFile getEmptyEmailNum_Pbrindex=0, pbrIndex is ") +
+                    StringUtils::ToString(pbrIndex));
+            mSuccess = TRUE;
+            *result = mSuccess;
+            return NOERROR;
+        }
+
+        mSuccess = UpdateIapFile(adnRecNum, oldEmail, newEmail, USIM_EFEMAIL_TAG);
+    }
+    else {
+        mSuccess = TRUE;
+    }
+    if (mSuccess) {
+        AutoLock lock(mLock);
+        AutoPtr<IMessage> msg;
+        ObtainMessage(EVENT_EF_EMAIL_RECORD_SIZE_DONE, adnRecNum, efid,
+                CoreUtils::Convert(emails), (IMessage**)&msg);
+        mFh->GetEFLinearRecordSize(efid, msg);
+        // try {
+        mLock.Wait();
+        // } catch (InterruptedException e) {
+        //     Rlog.e(TAG, "interrupted while trying to update by search");
+        // }
+    }
+    if (mEmailPresentInIap && mSuccess
+            && (!oldEmail.IsEmpty() && newEmail.IsEmpty())) {
+        mSuccess = UpdateIapFile(adnRecNum, oldEmail, newEmail, USIM_EFEMAIL_TAG);
+    }
+    *result = mSuccess;
     return NOERROR;
 }
 
 ECode CUsimPhoneBookManager::UpdateAnrFile(
     /* [in] */ Int32 adnRecNum,
-    /* [in] */ const String& oldAnr,
-    /* [in] */ const String& newAnr,
+    /* [in] */ const String& _oldAnr,
+    /* [in] */ const String& _newAnr,
     /* [in] */ Int32 efidIndex,
     /* [out] */ Boolean* result)
 {
     VALIDATE_NOT_NULL(result)
-    assert(0);
-    // int pbrIndex = getPbrIndexBy(adnRecNum - 1);
-    // int efid = getEfidByTag(pbrIndex, USIM_EFANR_TAG, efidIndex);
-    // if (oldAnr == null)
-    //     oldAnr = "";
-    // if (newAnr == null)
-    //     newAnr = "";
-    // String anrs = oldAnr + "," + newAnr;
-    // mSuccess = false;
-    // log("updateAnrFile oldAnr : " + oldAnr + ", newAnr:" + newAnr + " anrs:" + anrs + ", efid"
-    //         + efid + ", adnRecNum: " + adnRecNum);
-    // if (efid == -1)
-    //     return mSuccess;
-    // if (mAnrPresentInIap && (TextUtils.isEmpty(oldAnr) && !TextUtils.isEmpty(newAnr))) {
-    //     if (getEmptyAnrNum_Pbrindex(pbrIndex) == 0) {
-    //         log("updateAnrFile getEmptyAnrNum_Pbrindex=0, pbrIndex is " + pbrIndex);
-    //         mSuccess = true;
-    //         return mSuccess;
-    //     }
 
-    //     mSuccess = updateIapFile(adnRecNum, oldAnr, newAnr, USIM_EFANR_TAG);
-    // } else {
-    //     mSuccess = true;
-    // }
-    // synchronized (mLock) {
-    //     mFh.getEFLinearRecordSize(efid,
-    //             obtainMessage(EVENT_EF_ANR_RECORD_SIZE_DONE, adnRecNum, efid, anrs));
-    //     try {
-    //         mLock.wait();
-    //     } catch (InterruptedException e) {
-    //         Rlog.e(TAG, "interrupted while trying to update by search");
-    //     }
-    // }
-    // if (mAnrPresentInIap && mSuccess
-    //         && (!TextUtils.isEmpty(oldAnr) && TextUtils.isEmpty(newAnr))) {
-    //     mSuccess = updateIapFile(adnRecNum, oldAnr, newAnr, USIM_EFANR_TAG);
-    // }
-    // return mSuccess;
+    String oldAnr = _oldAnr;
+    String newAnr = _newAnr;
+    Int32 pbrIndex;
+    GetPbrIndexBy(adnRecNum - 1, &pbrIndex);
+    Int32 efid = GetEfidByTag(pbrIndex, USIM_EFANR_TAG, efidIndex);
+    if (oldAnr.IsNull())
+        oldAnr = String("");
+    if (newAnr.IsNull())
+        newAnr = String("");
+    String anrs = oldAnr + "," + newAnr;
+    mSuccess = FALSE;
+    Log(String("updateAnrFile oldAnr : ") + oldAnr + ", newAnr:" + newAnr + " anrs:" + anrs + ", efid"
+            + efid + ", adnRecNum: " + adnRecNum);
+    if (efid == -1) {
+        *result = mSuccess;
+        return NOERROR;
+    }
+    if (mAnrPresentInIap && (oldAnr.IsEmpty() && !newAnr.IsEmpty())) {
+        Int32 index;
+        GetEmptyAnrNum_Pbrindex(pbrIndex, &index);
+        if (index == 0) {
+            Log(String("updateAnrFile getEmptyAnrNum_Pbrindex=0, pbrIndex is ") +
+                StringUtils::ToString(pbrIndex));
+            mSuccess = TRUE;
+            *result = mSuccess;
+            return NOERROR;
+        }
+
+        mSuccess = UpdateIapFile(adnRecNum, oldAnr, newAnr, USIM_EFANR_TAG);
+    }
+    else {
+        mSuccess = TRUE;
+    }
+    {
+        AutoLock lock(mLock);
+        AutoPtr<IMessage> msg;
+        ObtainMessage(EVENT_EF_ANR_RECORD_SIZE_DONE, adnRecNum, efid, CoreUtils::Convert(anrs), (IMessage**)&msg);
+        mFh->GetEFLinearRecordSize(efid, msg);
+        // try {
+        mLock.Wait();
+        // } catch (InterruptedException e) {
+        //     Rlog.e(TAG, "interrupted while trying to update by search");
+        // }
+    }
+    if (mAnrPresentInIap && mSuccess
+            && (!oldAnr.IsEmpty() && newAnr.IsEmpty())) {
+        mSuccess = UpdateIapFile(adnRecNum, oldAnr, newAnr, USIM_EFANR_TAG);
+    }
+    *result = mSuccess;
     return NOERROR;
 }
 
@@ -424,16 +476,22 @@ ECode CUsimPhoneBookManager::GetPbrIndexBy(
     /* [out] */ Int32* result)
 {
     VALIDATE_NOT_NULL(result)
-    assert(0);
-    // int len = mAdnLengthList.size();
-    // int size = 0;
-    // for (int i = 0; i < len; i++) {
-    //     size += mAdnLengthList.get(i);
-    //     if (adnIndex < size) {
-    //         return i;
-    //     }
-    // }
-    // return -1;
+
+    Int32 len;
+    mAdnLengthList->GetSize(&len);
+    Int32 size = 0;
+    for (Int32 i = 0; i < len; i++) {
+        AutoPtr<IInterface> obj;
+        mAdnLengthList->Get(i, (IInterface**)&obj);
+        Int32 val;
+        IInteger32::Probe(obj)->GetValue(&val);
+        size += val;
+        if (adnIndex < size) {
+            *result = i;
+            return NOERROR;
+        }
+    }
+    *result = -1;
     return NOERROR;
 }
 
@@ -441,47 +499,65 @@ ECode CUsimPhoneBookManager::ParseType1EmailFile(
     /* [in] */ Int32 numRecs,
     /* [in] */ Int32 pbrIndex)
 {
-    assert(0);
-    // byte[] emailRec = null;
-    // int count;
-    // int numEmailFiles = mPbrFile.mEmailFileIds.get(pbrIndex).size();
-    // ArrayList<String> emailList = new ArrayList<String>();
-    // int adnInitIndex = getInitIndexBy(pbrIndex);
+    AutoPtr<ArrayOf<Byte> > emailRec;
+    Int32 count;
+    AutoPtr<IInterface> obj;
+    mPbrFile->mEmailFileIds->Get(CoreUtils::Convert(pbrIndex), (IInterface**)&obj);
+    Int32 numEmailFiles;
+    IArrayList::Probe(obj)->GetSize(&numEmailFiles);
+    AutoPtr<IArrayList> emailList;
+    CArrayList::New((IArrayList**)&emailList);
+    Int32 adnInitIndex = GetInitIndexBy(pbrIndex);
 
-    // if (!hasRecordIn(mEmailFileRecord, pbrIndex))
-    //     return;
+    if (!HasRecordIn(mEmailFileRecord, pbrIndex))
+        return NOERROR;
 
-    // log("parseType1EmailFile: pbrIndex is: " + pbrIndex + ", numRecs is: " + numRecs);
-    // for (int i = 0; i < numRecs; i++) {
-    //     count = 0;
-    //     emailList.clear();
+    Log(String("parseType1EmailFile: pbrIndex is: ") +
+            StringUtils::ToString(pbrIndex) +
+            ", numRecs is: " + StringUtils::ToString(numRecs));
+    for (Int32 i = 0; i < numRecs; i++) {
+        count = 0;
+        emailList->Clear();
 
-    //     for (int j = 0; j < numEmailFiles; j++) {
-    //         String email = readEmailRecord(i, pbrIndex, j*numRecs);
-    //         emailList.add(email);
-    //         if (TextUtils.isEmpty(email)) {
-    //             email = "";
-    //             continue;
-    //         }
+        for (Int32 j = 0; j < numEmailFiles; j++) {
+            String email = ReadEmailRecord(i, pbrIndex, j*numRecs);
+            emailList->Add(CoreUtils::Convert(email));
+            if (email.IsEmpty()) {
+                email = String("");
+                continue;
+            }
 
-    //         count++;
-    //         //Type1 Email file, no need for mEmailFlags
-    //         mEmailFlags.get(pbrIndex).set(i+j*numRecs, 1);
-    //     }
+            count++;
+            //Type1 Email file, no need for mEmailFlags
+            obj = NULL;
+            mEmailFlags->Get(CoreUtils::Convert(pbrIndex), (IInterface**)&obj);
+            IArrayList::Probe(obj)->Set(i+j*numRecs, CoreUtils::Convert(1));
+        }
 
-    //     // All Email files is null
-    //     if (count == 0) {
-    //         continue;
-    //     }
+        // All Email files is NULL
+        if (count == 0) {
+            continue;
+        }
 
-    //     AdnRecord rec = mPhoneBookRecords.get(i+adnInitIndex);
-    //     if (rec != null) {
-    //         String[] emails = new String[emailList.size()];
-    //         System.arraycopy(emailList.toArray(), 0, emails, 0, emailList.size());
-    //         rec.setAdditionalNumbers(emails);
-    //         mPhoneBookRecords.set(i, rec);
-    //     }
-    // }
+        obj = NULL;
+        mPhoneBookRecords->Get(i+adnInitIndex, (IInterface**)&obj);
+        AutoPtr<IAdnRecord> rec = IAdnRecord::Probe(obj);
+        if (rec != NULL) {
+            Int32 size;
+            emailList->GetSize(&size);
+            AutoPtr<ArrayOf<String> > emails = ArrayOf<String>::Alloc(size);
+
+            AutoPtr<ArrayOf<IInterface *> > array;
+            emailList->ToArray((ArrayOf<IInterface *>**)&array);
+            for (Int32 j = 0; j < size; j++) {
+                String str;
+                ICharSequence::Probe((*array)[j])->ToString(&str);
+                (*emails)[j] = str;
+            }
+            rec->SetAdditionalNumbers(emails);
+            mPhoneBookRecords->Set(i, rec);
+        }
+    }
     return NOERROR;
 }
 
@@ -489,394 +565,623 @@ ECode CUsimPhoneBookManager::ParseType1AnrFile(
     /* [in] */ Int32 numRecs,
     /* [in] */ Int32 pbrIndex)
 {
-    assert(0);
-    // int count;
-    // int numAnrFiles = mPbrFile.mAnrFileIds.get(pbrIndex).size();
-    // ArrayList<String> anrList = new ArrayList<String>();
-    // int adnInitIndex = getInitIndexBy(pbrIndex);
+    Int32 count;
+    Int32 numAnrFiles;
+    AutoPtr<IInterface> obj;
+    mPbrFile->mAnrFileIds->Get(CoreUtils::Convert(pbrIndex), (IInterface**)&obj);
+    IArrayList::Probe(obj)->GetSize(&numAnrFiles);
 
-    // if (!hasRecordIn(mAnrFileRecord, pbrIndex))
-    //     return;
-    // log("parseType1AnrFile: pbrIndex is: " + pbrIndex + ", numRecs is: " + numRecs +
-    //         ", numAnrFiles " + numAnrFiles);
-    // for (int i = 0; i < numRecs; i++) {
-    //     count = 0;
-    //     anrList.clear();
-    //     for (int j = 0; j < numAnrFiles; j++) {
-    //         String anr = readAnrRecord(i, pbrIndex, j*numRecs);
-    //         anrList.add(anr);
-    //         if (TextUtils.isEmpty(anr)) {
-    //             anr = "";
-    //             continue;
-    //         }
+    AutoPtr<IArrayList> anrList;
+    CArrayList::New((IArrayList**)&anrList);
+    Int32 adnInitIndex = GetInitIndexBy(pbrIndex);
 
-    //         count++;
-    //         //Fix Me: For type1 this is not necessary
-    //         mAnrFlags.get(pbrIndex).set(i+j*numRecs, 1);
-    //     }
+    if (!HasRecordIn(mAnrFileRecord, pbrIndex))
+        return NOERROR;
 
-    //     // All anr files is null
-    //     if (count == 0) {
-    //         continue;
-    //     }
+    Log(String("parseType1AnrFile: pbrIndex is: ") + StringUtils::ToString(pbrIndex) +
+        ", numRecs is: " + StringUtils::ToString(numRecs) +
+        ", numAnrFiles " + StringUtils::ToString(numAnrFiles));
+    for (Int32 i = 0; i < numRecs; i++) {
+        count = 0;
+        anrList->Clear();
+        for (Int32 j = 0; j < numAnrFiles; j++) {
+            String anr = ReadAnrRecord(i, pbrIndex, j*numRecs);
+            anrList->Add(CoreUtils::Convert(anr));
+            if (anr.IsEmpty()) {
+                anr = String("");
+                continue;
+            }
 
-    //     AdnRecord rec = mPhoneBookRecords.get(i+adnInitIndex);
-    //     if (rec != null) {
-    //         String[] anrs = new String[anrList.size()];
-    //         System.arraycopy(anrList.toArray(), 0, anrs, 0, anrList.size());
-    //         rec.setAdditionalNumbers(anrs);
-    //         mPhoneBookRecords.set(i, rec);
-    //     }
-    // }
+            count++;
+            //Fix Me: For type1 this is not necessary
+            obj = NULL;
+            mAnrFlags->Get(CoreUtils::Convert(pbrIndex), (IInterface**)&obj);
+            IArrayList::Probe(obj)->Set(i+j*numRecs, CoreUtils::Convert(1));
+        }
+
+        // All anr files is NULL
+        if (count == 0) {
+            continue;
+        }
+
+        obj = NULL;
+        mPhoneBookRecords->Get(i+adnInitIndex, (IInterface**)&obj);
+        AutoPtr<IAdnRecord> rec = IAdnRecord::Probe(obj);
+        if (rec != NULL) {
+            Int32 size;
+            anrList->GetSize(&size);
+            AutoPtr<ArrayOf<String> > anrs = ArrayOf<String>::Alloc(size);
+
+            AutoPtr<ArrayOf<IInterface *> > array;
+            anrList->ToArray((ArrayOf<IInterface *>**)&array);
+            for (Int32 j = 0; j < size; j++) {
+                String str;
+                ICharSequence::Probe((*array)[j])->ToString(&str);
+                (*anrs)[j] = str;
+            }
+
+            rec->SetAdditionalNumbers(anrs);
+            mPhoneBookRecords->Set(i, rec);
+        }
+    }
     return NOERROR;
 }
 
 ECode CUsimPhoneBookManager::HandleMessage(
     /* [in] */ IMessage* msg)
 {
-    assert(0);
-    // AsyncResult ar;
-    // byte data[];
-    // int efid;
-    // int adnRecIndex;
-    // int recordIndex;
-    // int[] recordSize;
-    // int recordNumber;
-    // int efidIndex;
-    // int actualRecNumber;
-    // String oldAnr = null;
-    // String newAnr = null;
-    // String oldEmail = null;
-    // String newEmail = null;
-    // Message response = null;
-    // int pbrIndex;
-    // switch (msg.what) {
-    //     case EVENT_PBR_LOAD_DONE:
-    //         log("Loading PBR done");
-    //         ar = (AsyncResult) msg.obj;
-    //         if (ar.exception == null) {
-    //             createPbrFile((ArrayList<byte[]>) ar.result);
-    //         }
-    //         synchronized (mLock) {
-    //             mLock.notify();
-    //         }
-    //         break;
-    //     case EVENT_USIM_ADN_LOAD_DONE:
-    //         log("Loading USIM ADN records done");
-    //         ar = (AsyncResult) msg.obj;
-    //         pbrIndex = (Integer) ar.userObj;
-    //         if (ar.exception == null) {
-    //             mPhoneBookRecords.addAll((ArrayList<AdnRecord>) ar.result);
-    //             mAdnLengthList.add(pbrIndex, ((ArrayList<AdnRecord>) ar.result).size());
-    //             putValidRecNums(pbrIndex);
-    //         } else {
-    //             log("can't load USIM ADN records");
-    //         }
-    //         synchronized (mLock) {
-    //             mLock.notify();
-    //         }
-    //         break;
-    //     case EVENT_IAP_LOAD_DONE:
-    //         log("Loading USIM IAP records done");
-    //         ar = (AsyncResult) msg.obj;
-    //         pbrIndex = (Integer) ar.userObj;
-    //         if (ar.exception == null) {
-    //             mIapFileRecord.put(pbrIndex, (ArrayList<byte[]>) ar.result);
-    //         }
-    //         synchronized (mLock) {
-    //             mLock.notify();
-    //         }
-    //         break;
-    //     case EVENT_EMAIL_LOAD_DONE:
-    //         log("Loading USIM Email records done");
-    //         ar = (AsyncResult) msg.obj;
-    //         pbrIndex = (Integer) ar.userObj;
-    //         if (ar.exception == null && mPbrFile != null) {
-    //             ArrayList<byte[]> tmpList = mEmailFileRecord.get(pbrIndex);
-    //             if (tmpList == null) {
-    //                 mEmailFileRecord.put(pbrIndex, (ArrayList<byte[]>) ar.result);
-    //             } else {
-    //                 tmpList.addAll((ArrayList<byte[]>) ar.result);
-    //                 mEmailFileRecord.put(pbrIndex, tmpList);
-    //             }
+    AutoPtr<AsyncResult> ar;
+    AutoPtr<ArrayOf<Byte> > data;
+    Int32 efid;
+    Int32 adnRecIndex;
+    Int32 recordIndex;
+    AutoPtr<ArrayOf<Int32> > recordSize;
+    Int32 recordNumber;
+    Int32 efidIndex;
+    Int32 actualRecNumber;
+    String oldAnr;
+    String newAnr;
+    String oldEmail;
+    String newEmail;
+    AutoPtr<IMessage> response;
+    Int32 pbrIndex;
 
-    //             log("handlemessage EVENT_EMAIL_LOAD_DONE size is: "
-    //                     + mEmailFileRecord.get(pbrIndex).size());
-    //         }
-    //         synchronized (mLock) {
-    //             mLock.notify();
-    //         }
-    //         break;
-    //     case EVENT_ANR_LOAD_DONE:
-    //         log("Loading USIM Anr records done");
-    //         ar = (AsyncResult) msg.obj;
-    //         pbrIndex = (Integer) ar.userObj;
-    //         if (ar.exception == null && mPbrFile != null) {
-    //             ArrayList<byte[]> tmp = mAnrFileRecord.get(pbrIndex);
-    //             if (tmp == null) {
-    //                 mAnrFileRecord.put(pbrIndex, (ArrayList<byte[]>) ar.result);
-    //             } else {
-    //                 tmp.addAll((ArrayList<byte[]>) ar.result);
-    //                 mAnrFileRecord.put(pbrIndex, tmp);
-    //             }
+    Int32 what;
+    msg->GetWhat(&what);
+    AutoPtr<IInterface> obj;
+    msg->GetObj((IInterface**)&obj);
 
-    //             log("handlemessage EVENT_ANR_LOAD_DONE size is: "
-    //                     + mAnrFileRecord.get(pbrIndex).size());
-    //         }
-    //         synchronized (mLock) {
-    //             mLock.notify();
-    //         }
-    //         break;
-    //     case EVENT_EF_EMAIL_RECORD_SIZE_DONE:
-    //         log("Loading EF_EMAIL_RECORD_SIZE_DONE");
-    //         ar = (AsyncResult) (msg.obj);
-    //         String emails = (String) (ar.userObj);
-    //         adnRecIndex = ((int) msg.arg1) - 1;
-    //         efid = (int) msg.arg2;
-    //         String email[] = emails.split(",");
-    //         if (email.length == 1) {
-    //             oldEmail = email[0];
-    //             newEmail = "";
-    //         } else if (email.length > 1) {
-    //             oldEmail = email[0];
-    //             newEmail = email[1];
-    //         }
-    //         if (ar.exception != null) {
-    //             mSuccess = false;
-    //             synchronized (mLock) {
-    //                 mLock.notify();
-    //             }
-    //             return;
-    //         }
-    //         recordSize = (int[]) ar.result;
-    //         recordNumber = getEmailRecNumber(adnRecIndex, mPhoneBookRecords.size(), oldEmail);
-    //         if (recordSize.length != 3 || recordNumber > recordSize[2] || recordNumber <= 0) {
-    //             mSuccess = false;
-    //             synchronized (mLock) {
-    //                 mLock.notify();
-    //             }
-    //             return;
-    //         }
-    //         data = buildEmailData(recordSize[0], adnRecIndex, newEmail);
+    switch (what) {
+        case EVENT_PBR_LOAD_DONE:
+            Log(String("Loading PBR done"));
+            ar = (AsyncResult*)(IObject*)obj.Get();
+            if (ar->mException == NULL) {
+                CreatePbrFile(IArrayList::Probe(ar->mResult));
+            }
+            {
+                AutoLock lock(mLock);
+                mLock.Notify();
+            }
+            break;
+        case EVENT_USIM_ADN_LOAD_DONE:
+            Log(String("Loading USIM ADN records done"));
+            ar = (AsyncResult*)(IObject*)obj.Get();
+            IInteger32::Probe(ar->mUserObj)->GetValue(&pbrIndex);
+            if (ar->mException == NULL) {
+                mPhoneBookRecords->AddAll(ICollection::Probe(ar->mResult));
+                Int32 size;
+                IArrayList::Probe(ar->mResult)->GetSize(&size);
+                mAdnLengthList->Add(pbrIndex, CoreUtils::Convert(size));
+                PutValidRecNums(pbrIndex);
+            }
+            else {
+                Log(String("can't load USIM ADN records"));
+            }
+            {
+                AutoLock lock(mLock);
+                mLock.Notify();
+            }
+            break;
+        case EVENT_IAP_LOAD_DONE:
+            Log(String("Loading USIM IAP records done"));
+            ar = (AsyncResult*)(IObject*)obj.Get();
+            IInteger32::Probe(ar->mUserObj)->GetValue(&pbrIndex);
+            if (ar->mException == NULL) {
+                mIapFileRecord->Put(CoreUtils::Convert(pbrIndex), IArrayList::Probe(ar->mResult));
+            }
+            {
+                AutoLock lock(mLock);
+                mLock.Notify();
+            }
+            break;
+        case EVENT_EMAIL_LOAD_DONE:
+            Log(String("Loading USIM Email records done"));
+            ar = (AsyncResult*)(IObject*)obj.Get();
+            IInteger32::Probe(ar->mUserObj)->GetValue(&pbrIndex);
+            if (ar->mException == NULL && mPbrFile != NULL) {
+                AutoPtr<IInterface> o;
+                mEmailFileRecord->Get(CoreUtils::Convert(pbrIndex), (IInterface**)&o);
+                AutoPtr<IArrayList> tmpList = IArrayList::Probe(o);
+                if (tmpList == NULL) {
+                    mEmailFileRecord->Put(CoreUtils::Convert(pbrIndex), IArrayList::Probe(ar->mResult));
+                }
+                else {
+                    tmpList->AddAll(ICollection::Probe(ar->mResult));
+                    mEmailFileRecord->Put(CoreUtils::Convert(pbrIndex), tmpList);
+                }
 
-    //         actualRecNumber = recordNumber;
-    //         if (!mEmailPresentInIap) {
-    //             efidIndex = mPbrFile.mEmailFileIds.get(getPbrIndexBy(
-    //                         adnRecIndex)).indexOf(efid);
-    //             if (efidIndex == -1) {
-    //                 log("wrong efid index:" + efid );
-    //                 return;
-    //             }
+                Int32 size;
+                tmpList->GetSize(&size);
+                Log(String("handlemessage EVENT_EMAIL_LOAD_DONE size is: ")
+                        + StringUtils::ToString(size));
+            }
+            {
+                AutoLock lock(mLock);
+                mLock.Notify();
+            }
+            break;
+        case EVENT_ANR_LOAD_DONE:
+            Log(String("Loading USIM Anr records done"));
+            ar = (AsyncResult*)(IObject*)obj.Get();
+            IInteger32::Probe(ar->mUserObj)->GetValue(&pbrIndex);
+            if (ar->mException == NULL && mPbrFile != NULL) {
+                AutoPtr<IInterface> o;
+                mAnrFileRecord->Get(CoreUtils::Convert(pbrIndex), (IInterface**)&o);
+                AutoPtr<IArrayList> tmp = IArrayList::Probe(o);
+                if (tmp == NULL) {
+                    mAnrFileRecord->Put(CoreUtils::Convert(pbrIndex), IArrayList::Probe(ar->mResult));
+                }
+                else {
+                    tmp->AddAll(ICollection::Probe(ar->mResult));
+                    mAnrFileRecord->Put(CoreUtils::Convert(pbrIndex), tmp);
+                }
 
-    //             actualRecNumber = recordNumber +
-    //                     efidIndex * mAdnLengthList.get(getPbrIndexBy(adnRecIndex));
-    //             log("EMAIL index:" + efidIndex + " efid:" + efid +
-    //                 " actual RecNumber:" + actualRecNumber);
-    //         }
+                Int32 size;
+                tmp->GetSize(&size);
+                Log(String("handlemessage EVENT_ANR_LOAD_DONE size is: ")
+                        + StringUtils::ToString(size));
+            }
+            {
+                AutoLock lock(mLock);
+                mLock.Notify();
+            }
+            break;
+        case EVENT_EF_EMAIL_RECORD_SIZE_DONE: {
+            Log(String("Loading EF_EMAIL_RECORD_SIZE_DONE"));
+            ar = (AsyncResult*)(IObject*)obj.Get();
+            String emails;
+            ICharSequence::Probe(ar->mUserObj)->ToString(&emails);
+            Int32 arg1, arg2;
+            msg->GetArg1(&arg1);
+            msg->GetArg2(&arg2);
+            adnRecIndex = arg1 - 1;
+            efid = arg2;
+            AutoPtr<ArrayOf<String> > email;
+            StringUtils::Split(emails, String(","), (ArrayOf<String>**)&email);
+            if (email->GetLength() == 1) {
+                oldEmail = (*email)[0];
+                newEmail = String("");
+            }
+            else if (email->GetLength() > 1) {
+                oldEmail = (*email)[0];
+                newEmail = (*email)[1];
+            }
+            if (ar->mException != NULL) {
+                mSuccess = FALSE;
+                {
+                    AutoLock lock(mLock);
+                    mLock.Notify();
+                }
+                return NOERROR;
+            }
+            Int32 size;
+            AutoPtr<IArrayOf> iArray = IArrayOf::Probe(ar->mResult);
+            iArray->GetLength(&size);
+            recordSize = ArrayOf<Int32>::Alloc(size);
+            for (Int32 i = 0; i < size; i++) {
+                AutoPtr<IInterface> o;
+                iArray->Get(i, (IInterface**)&o);
+                Int32 value;
+                IInteger32::Probe(o)->GetValue(&value);
+                (*recordSize)[i] = value;
+            }
 
-    //         mFh.updateEFLinearFixed(
-    //                 efid,
-    //                 recordNumber,
-    //                 data,
-    //                 null,
-    //                 obtainMessage(EVENT_UPDATE_EMAIL_RECORD_DONE, actualRecNumber, adnRecIndex,
-    //                         data));
-    //         mPendingExtLoads = 1;
-    //         break;
-    //     case EVENT_EF_ANR_RECORD_SIZE_DONE:
-    //         log("Loading EF_ANR_RECORD_SIZE_DONE");
-    //         ar = (AsyncResult) (msg.obj);
-    //         String anrs = (String) (ar.userObj);
-    //         adnRecIndex = ((int) msg.arg1) - 1;
-    //         efid = (int) msg.arg2;
-    //         String[] anr = anrs.split(",");
-    //         if (anr.length == 1) {
-    //             oldAnr = anr[0];
-    //             newAnr = "";
-    //         } else if (anr.length > 1) {
-    //             oldAnr = anr[0];
-    //             newAnr = anr[1];
-    //         }
-    //         if (ar.exception != null) {
-    //             mSuccess = false;
-    //             synchronized (mLock) {
-    //                 mLock.notify();
-    //             }
-    //             return;
-    //         }
-    //         recordSize = (int[]) ar.result;
-    //         recordNumber = getAnrRecNumber(adnRecIndex, mPhoneBookRecords.size(), oldAnr);
-    //         if (recordSize.length != 3 || recordNumber > recordSize[2] || recordNumber <= 0) {
-    //             mSuccess = false;
-    //             synchronized (mLock) {
-    //                 mLock.notify();
-    //             }
-    //             return;
-    //         }
-    //         data = buildAnrData(recordSize[0], adnRecIndex, newAnr);
-    //         if (data == null) {
-    //             mSuccess = false;
-    //             synchronized (mLock) {
-    //                 mLock.notify();
-    //             }
-    //             return;
-    //         }
+            mPhoneBookRecords->GetSize(&size);
+            recordNumber = GetEmailRecNumber(adnRecIndex, size, oldEmail);
+            if (recordSize->GetLength() != 3 || recordNumber > (*recordSize)[2] || recordNumber <= 0) {
+                mSuccess = FALSE;
+                {
+                    AutoLock lock(mLock);
+                    mLock.Notify();
+                }
+                return NOERROR;
+            }
+            data = BuildEmailData((*recordSize)[0], adnRecIndex, newEmail);
 
-    //         actualRecNumber = recordNumber;
-    //         if (!mAnrPresentInIap) {
-    //             efidIndex = mPbrFile.mAnrFileIds.get(getPbrIndexBy(adnRecIndex)).indexOf(efid);
-    //             if (efidIndex == -1) {
-    //                 log("wrong efid index:" + efid );
-    //                 return;
-    //             }
-    //             actualRecNumber = recordNumber +
-    //                     efidIndex * mAdnLengthList.get(getPbrIndexBy(adnRecIndex));
+            actualRecNumber = recordNumber;
+            if (!mEmailPresentInIap) {
+                Int32 val;
+                GetPbrIndexBy(adnRecIndex, &val);
+                AutoPtr<IInterface> o;
+                mPbrFile->mEmailFileIds->Get(CoreUtils::Convert(val), (IInterface**)&o);
+                IArrayList::Probe(o)->IndexOf(CoreUtils::Convert(efid), &efidIndex);
+                if (efidIndex == -1) {
+                    Log(String("wrong efid index:") + StringUtils::ToString(efid) );
+                    return NOERROR;
+                }
 
-    //             log("ANR index:" + efidIndex + " efid:" + efid +
-    //                 " actual RecNumber:" + actualRecNumber);
-    //         }
+                GetPbrIndexBy(adnRecIndex, &val);
+                o = NULL;
+                mAdnLengthList->Get(val, (IInterface**)&o);
+                IInteger32::Probe(o)->GetValue(&val);
+                actualRecNumber = recordNumber + efidIndex * val;
+                Log(String("EMAIL index:") + StringUtils::ToString(efidIndex) +
+                        " efid:" + StringUtils::ToString(efid) +
+                        " actual RecNumber:" + StringUtils::ToString(actualRecNumber));
+            }
 
-    //         mFh.updateEFLinearFixed(
-    //                 efid,
-    //                 recordNumber,
-    //                 data,
-    //                 null,
-    //                 obtainMessage(EVENT_UPDATE_ANR_RECORD_DONE, actualRecNumber,
-    //                         adnRecIndex, data));
-    //         mPendingExtLoads = 1;
-    //         break;
-    //     case EVENT_UPDATE_EMAIL_RECORD_DONE:
-    //         log("Loading UPDATE_EMAIL_RECORD_DONE");
-    //         ar = (AsyncResult) (msg.obj);
-    //         if (ar.exception != null) {
-    //             mSuccess = false;
-    //         }
-    //         data = (byte[]) (ar.userObj);
-    //         recordNumber = (int) msg.arg1;
-    //         adnRecIndex = (int) msg.arg2;
-    //         pbrIndex = getPbrIndexBy(adnRecIndex);
-    //         log("EVENT_UPDATE_EMAIL_RECORD_DONE");
-    //         mPendingExtLoads = 0;
-    //         mSuccess = true;
-    //         mEmailFileRecord.get(pbrIndex).set(recordNumber - 1, data);
+            AutoPtr<IArrayOf> array;
+            CArrayOf::New(EIID_IByte, data->GetLength(), (IArrayOf**)&array);
+            for (Int32 i = 0; i < data->GetLength(); i++) {
+                array->Set(i, CoreUtils::ConvertByte((*data)[i]));
+            }
 
-    //         for (int i = 0; i < data.length; i++) {
-    //             log("EVENT_UPDATE_EMAIL_RECORD_DONE data = " + data[i] + ",i is " + i);
-    //             if (data[i] != (byte) 0xff) {
-    //                 log("EVENT_UPDATE_EMAIL_RECORD_DONE data !=0xff");
-    //                 mEmailFlags.get(pbrIndex).set(recordNumber - 1, 1);
-    //                 break;
-    //             }
-    //             mEmailFlags.get(pbrIndex).set(recordNumber - 1, 0);
-    //         }
-    //         synchronized (mLock) {
-    //             mLock.notify();
-    //         }
-    //         break;
-    //     case EVENT_UPDATE_ANR_RECORD_DONE:
-    //         log("Loading UPDATE_ANR_RECORD_DONE");
-    //         ar = (AsyncResult) (msg.obj);
-    //         data = (byte[]) (ar.userObj);
-    //         recordNumber = (int) msg.arg1;
-    //         adnRecIndex = (int) msg.arg2;
-    //         pbrIndex = getPbrIndexBy(adnRecIndex);
-    //         if (ar.exception != null) {
-    //             mSuccess = false;
-    //         }
-    //         log("EVENT_UPDATE_ANR_RECORD_DONE");
-    //         mPendingExtLoads = 0;
-    //         mSuccess = true;
-    //         mAnrFileRecord.get(pbrIndex).set(recordNumber - 1, data);
+            AutoPtr<IMessage> msg;
+            ObtainMessage(EVENT_UPDATE_EMAIL_RECORD_DONE, actualRecNumber, adnRecIndex,
+                    array, (IMessage**)&msg);
 
-    //         for (int i = 0; i < data.length; i++) {
-    //             if (data[i] != (byte) 0xff) {
-    //                 mAnrFlags.get(pbrIndex).set(recordNumber - 1, 1);
-    //                 break;
-    //             }
-    //             mAnrFlags.get(pbrIndex).set(recordNumber - 1, 0);
-    //         }
-    //         synchronized (mLock) {
-    //             mLock.notify();
-    //         }
-    //         break;
-    //     case EVENT_EF_IAP_RECORD_SIZE_DONE:
-    //         log("EVENT_EF_IAP_RECORD_SIZE_DONE");
-    //         ar = (AsyncResult) (msg.obj);
-    //         recordNumber = (int) msg.arg2;
-    //         adnRecIndex = ((int) msg.arg1) - 1;
-    //         pbrIndex = getPbrIndexBy(adnRecIndex);
-    //         efid = getEfidByTag(pbrIndex, USIM_EFIAP_TAG, 0);
-    //         int tag = (Integer) ar.userObj;
-    //         if (ar.exception != null) {
-    //             mSuccess = false;
-    //             synchronized (mLock) {
-    //                 mLock.notify();
-    //             }
-    //             return;
-    //         }
-    //         pbrIndex = getPbrIndexBy(adnRecIndex);
-    //         efid = getEfidByTag(pbrIndex, USIM_EFIAP_TAG, 0);
-    //         recordSize = (int[]) ar.result;
-    //         data = null;
+            mFh->UpdateEFLinearFixed(
+                    efid,
+                    recordNumber,
+                    data,
+                    String(NULL),
+                    msg);
+            mPendingExtLoads = 1;
+            break;
+        }
+        case EVENT_EF_ANR_RECORD_SIZE_DONE: {
+            Log(String("Loading EF_ANR_RECORD_SIZE_DONE"));
+            ar = (AsyncResult*)(IObject*)obj.Get();
+            String anrs;
+            ICharSequence::Probe(ar->mUserObj)->ToString(&anrs);
+            Int32 arg1, arg2;
+            msg->GetArg1(&arg1);
+            msg->GetArg2(&arg2);
+            adnRecIndex = arg1 - 1;
+            efid = arg2;
+            AutoPtr<ArrayOf<String> > anr;
+            StringUtils::Split(anrs, String(","), (ArrayOf<String>**)&anr);
 
-    //         recordIndex = adnRecIndex - getInitIndexBy(pbrIndex);
-    //         log("handleIAP_RECORD_SIZE_DONE adnRecIndex is: "
-    //                 + adnRecIndex + ", recordNumber is: " + recordNumber
-    //                 + ", recordIndex is: " + recordIndex);
-    //         if (recordSize.length != 3 || recordIndex + 1 > recordSize[2]
-    //                 || recordNumber == 0) {
-    //             mSuccess = false;
-    //             synchronized (mLock) {
-    //                 mLock.notify();
-    //             }
-    //             return;
-    //         }
-    //         if (hasRecordIn(mIapFileRecord, pbrIndex)) {
-    //             data = mIapFileRecord.get(pbrIndex).get(recordIndex);
-    //             byte[] record_data = new byte[data.length];
-    //             System.arraycopy(data, 0, record_data, 0, record_data.length);
-    //             switch (tag) {
-    //                 case USIM_EFEMAIL_TAG:
-    //                     record_data[mEmailTagNumberInIap] = (byte) recordNumber;
-    //                     break;
-    //                 case USIM_EFANR_TAG:
-    //                     record_data[mAnrTagNumberInIap] = (byte) recordNumber;
-    //                     break;
-    //             }
-    //             mPendingExtLoads = 1;
-    //             log(" IAP  efid= " + efid + ", update IAP index= " + (recordIndex)
-    //                     + " with value= " + IccUtils.bytesToHexString(record_data));
-    //             mFh.updateEFLinearFixed(
-    //                     efid,
-    //                     recordIndex + 1,
-    //                     record_data,
-    //                     null,
-    //                     obtainMessage(EVENT_UPDATE_IAP_RECORD_DONE, adnRecIndex, recordNumber,
-    //                             record_data));
-    //         }
-    //         break;
-    //     case EVENT_UPDATE_IAP_RECORD_DONE:
-    //         log("EVENT_UPDATE_IAP_RECORD_DONE");
-    //         ar = (AsyncResult) (msg.obj);
-    //         if (ar.exception != null) {
-    //             mSuccess = false;
-    //         }
-    //         data = (byte[]) (ar.userObj);
-    //         adnRecIndex = (int) msg.arg1;
-    //         pbrIndex = getPbrIndexBy(adnRecIndex);
-    //         recordIndex = adnRecIndex - getInitIndexBy(pbrIndex);
-    //         log("handleMessage EVENT_UPDATE_IAP_RECORD_DONE recordIndex is: "
-    //                 + recordIndex + ", adnRecIndex is: " + adnRecIndex);
-    //         mPendingExtLoads = 0;
-    //         mSuccess = true;
+            if (anr->GetLength() == 1) {
+                oldAnr = (*anr)[0];
+                newAnr = String("");
+            }
+            else if (anr->GetLength() > 1) {
+                oldAnr = (*anr)[0];
+                newAnr = (*anr)[1];
+            }
+            if (ar->mException != NULL) {
+                mSuccess = FALSE;
+                {
+                    AutoLock lock(mLock);
+                    mLock.Notify();
+                }
+                return NOERROR;
+            }
+            Int32 size;
+            AutoPtr<IArrayOf> iArray = IArrayOf::Probe(ar->mResult);
+            iArray->GetLength(&size);
+            recordSize = ArrayOf<Int32>::Alloc(size);
+            for (Int32 i = 0; i < size; i++) {
+                AutoPtr<IInterface> o;
+                iArray->Get(i, (IInterface**)&o);
+                Int32 value;
+                IInteger32::Probe(o)->GetValue(&value);
+                (*recordSize)[i] = value;
+            }
 
-    //         mIapFileRecord.get(pbrIndex).set(recordIndex, data);
-    //         log("the iap email recordNumber is :" + data[mEmailTagNumberInIap]);
-    //         synchronized (mLock) {
-    //             mLock.notify();
-    //         }
-    //         break;
-    // }
+            mPhoneBookRecords->GetSize(&size);
+            recordNumber = GetAnrRecNumber(adnRecIndex, size, oldAnr);
+            if (recordSize->GetLength() != 3 || recordNumber > (*recordSize)[2] || recordNumber <= 0) {
+                mSuccess = FALSE;
+                {
+                    AutoLock lock(mLock);
+                    mLock.Notify();
+                }
+                return NOERROR;
+            }
+            data = BuildAnrData((*recordSize)[0], adnRecIndex, newAnr);
+            if (data == NULL) {
+                mSuccess = FALSE;
+                {
+                    AutoLock lock(mLock);
+                    mLock.Notify();
+                }
+                return NOERROR;
+            }
+
+            actualRecNumber = recordNumber;
+            if (!mAnrPresentInIap) {
+                Int32 val;
+                GetPbrIndexBy(adnRecIndex, &val);
+                AutoPtr<IInterface> o;
+                mPbrFile->mAnrFileIds->Get(CoreUtils::Convert(val), (IInterface**)&o);
+                IArrayList::Probe(o)->IndexOf(CoreUtils::Convert(efid), &efidIndex);
+
+                if (efidIndex == -1) {
+                    Log(String("wrong efid index:") + efid );
+                    return NOERROR;
+                }
+
+                GetPbrIndexBy(adnRecIndex, &val);
+                o = NULL;
+                mAdnLengthList->Get(val, (IInterface**)&o);
+                IInteger32::Probe(o)->GetValue(&val);
+                actualRecNumber = recordNumber + efidIndex * val;
+
+                Log(String("ANR index:") + StringUtils::ToString(efidIndex) +
+                    " efid:" + StringUtils::ToString(efid) +
+                    " actual RecNumber:" + StringUtils::ToString(actualRecNumber));
+            }
+
+            AutoPtr<IArrayOf> array;
+            CArrayOf::New(EIID_IByte, data->GetLength(), (IArrayOf**)&array);
+            for (Int32 i = 0; i < data->GetLength(); i++) {
+                array->Set(i, CoreUtils::ConvertByte((*data)[i]));
+            }
+
+            AutoPtr<IMessage> msg;
+            ObtainMessage(EVENT_UPDATE_ANR_RECORD_DONE, actualRecNumber,
+                    adnRecIndex, array, (IMessage**)&msg);
+
+            mFh->UpdateEFLinearFixed(
+                    efid,
+                    recordNumber,
+                    data,
+                    String(NULL),
+                    msg);
+            mPendingExtLoads = 1;
+            break;
+        }
+        case EVENT_UPDATE_EMAIL_RECORD_DONE: {
+            Log(String("Loading UPDATE_EMAIL_RECORD_DONE"));
+            ar = (AsyncResult*)(IObject*)obj.Get();
+            if (ar->mException != NULL) {
+                mSuccess = FALSE;
+            }
+
+            AutoPtr<IArrayOf> iArray = IArrayOf::Probe(ar->mUserObj);
+            Int32 size;
+            iArray->GetLength(&size);
+            data = ArrayOf<Byte>::Alloc(size);
+            for (Int32 i = 0; i < size; i++) {
+                AutoPtr<IInterface> o;
+                iArray->Get(i, (IInterface**)&o);
+                Byte b;
+                IByte::Probe(o)->GetValue(&b);
+                (*data)[i] = b;
+            }
+
+            Int32 arg1, arg2;
+            msg->GetArg1(&arg1);
+            msg->GetArg2(&arg2);
+            recordNumber = arg1;
+            adnRecIndex = arg2;
+            GetPbrIndexBy(adnRecIndex, &pbrIndex);
+            Log(String("EVENT_UPDATE_EMAIL_RECORD_DONE"));
+            mPendingExtLoads = 0;
+            mSuccess = TRUE;
+            AutoPtr<IInterface> o;
+            mEmailFileRecord->Get(CoreUtils::Convert(pbrIndex), (IInterface**)&o);
+            IArrayList::Probe(o)->Set(recordNumber - 1, iArray);
+
+            for (Int32 i = 0; i < data->GetLength(); i++) {
+                Log(String("EVENT_UPDATE_EMAIL_RECORD_DONE data = ") + (*data)[i] + ",i is " + i);
+                if ((*data)[i] != (Byte) 0xff) {
+                    Log(String("EVENT_UPDATE_EMAIL_RECORD_DONE data !=0xff"));
+                    AutoPtr<IInterface> o;
+                    mEmailFlags->Get(CoreUtils::Convert(pbrIndex), (IInterface**)&o);
+                    IArrayList::Probe(o)->Set(recordNumber - 1, CoreUtils::Convert(1));
+                    break;
+                }
+                AutoPtr<IInterface> o;
+                mEmailFlags->Get(CoreUtils::Convert(pbrIndex), (IInterface**)&o);
+                IArrayList::Probe(o)->Set(recordNumber - 1, 0);
+            }
+            {
+                AutoLock lock(mLock);
+                mLock.Notify();
+            }
+            break;
+        }
+        case EVENT_UPDATE_ANR_RECORD_DONE: {
+            Log(String("Loading UPDATE_ANR_RECORD_DONE"));
+            ar = (AsyncResult*)(IObject*)obj.Get();
+
+            AutoPtr<IArrayOf> iArray = IArrayOf::Probe(ar->mUserObj);
+            Int32 size;
+            iArray->GetLength(&size);
+            data = ArrayOf<Byte>::Alloc(size);
+            for (Int32 i = 0; i < size; i++) {
+                AutoPtr<IInterface> o;
+                iArray->Get(i, (IInterface**)&o);
+                Byte b;
+                IByte::Probe(o)->GetValue(&b);
+                (*data)[i] = b;
+            }
+
+            Int32 arg1, arg2;
+            msg->GetArg1(&arg1);
+            msg->GetArg2(&arg2);
+            recordNumber = arg1;
+            adnRecIndex = arg2;
+            GetPbrIndexBy(adnRecIndex, &pbrIndex);
+            if (ar->mException != NULL) {
+                mSuccess = FALSE;
+            }
+            Log(String("EVENT_UPDATE_ANR_RECORD_DONE"));
+            mPendingExtLoads = 0;
+            mSuccess = TRUE;
+            AutoPtr<IInterface> o;
+            mAnrFileRecord->Get(CoreUtils::Convert(pbrIndex), (IInterface**)&o);
+            IArrayList::Probe(o)->Set(recordNumber - 1, iArray);
+
+            for (Int32 i = 0; i < data->GetLength(); i++) {
+                if ((*data)[i] != (byte) 0xff) {
+                    AutoPtr<IInterface> o;
+                    mAnrFlags->Get(CoreUtils::Convert(pbrIndex), (IInterface**)&o);
+                    IArrayList::Probe(o)->Set(recordNumber - 1, CoreUtils::Convert(1));
+                    break;
+                }
+                AutoPtr<IInterface> o;
+                mAnrFlags->Get(CoreUtils::Convert(pbrIndex), (IInterface**)&o);
+                IArrayList::Probe(o)->Set(recordNumber - 1, 0);
+            }
+            {
+                AutoLock lock(mLock);
+                mLock.Notify();
+            }
+            break;
+        }
+        case EVENT_EF_IAP_RECORD_SIZE_DONE: {
+            Log(String("EVENT_EF_IAP_RECORD_SIZE_DONE"));
+            ar = (AsyncResult*)(IObject*)obj.Get();
+            Int32 arg1, arg2;
+            msg->GetArg1(&arg1);
+            msg->GetArg2(&arg2);
+            recordNumber = arg2;
+            adnRecIndex = arg1 - 1;
+            GetPbrIndexBy(adnRecIndex, &pbrIndex);
+            efid = GetEfidByTag(pbrIndex, USIM_EFIAP_TAG, 0);
+            Int32 tag;
+            IInteger32::Probe(ar->mUserObj)->GetValue(&tag);
+            if (ar->mException != NULL) {
+                mSuccess = FALSE;
+                {
+                    AutoLock lock(mLock);
+                    mLock.Notify();
+                }
+                return NOERROR;
+            }
+            GetPbrIndexBy(adnRecIndex, &pbrIndex);
+            efid = GetEfidByTag(pbrIndex, USIM_EFIAP_TAG, 0);
+            AutoPtr<IArrayOf> iArray = IArrayOf::Probe(ar->mResult);
+            Int32 size;
+            iArray->GetLength(&size);
+            recordSize = ArrayOf<Int32>::Alloc(size);
+            for (Int32 i = 0; i < size; i++) {
+                AutoPtr<IInterface> o;
+                iArray->Get(i, (IInterface**)&o);
+                Int32 val;
+                IInteger32::Probe(o)->GetValue(&val);
+                (*recordSize)[i] = val;
+            }
+            data = NULL;
+
+            recordIndex = adnRecIndex - GetInitIndexBy(pbrIndex);
+            Log(String("handleIAP_RECORD_SIZE_DONE adnRecIndex is: ")
+                    + StringUtils::ToString(adnRecIndex) +
+                    ", recordNumber is: " + StringUtils::ToString(recordNumber)
+                    + ", recordIndex is: " + StringUtils::ToString(recordIndex));
+            if (recordSize->GetLength() != 3 || recordIndex + 1 > (*recordSize)[2]
+                    || recordNumber == 0) {
+                mSuccess = FALSE;
+                {
+                    AutoLock lock(mLock);
+                    mLock.Notify();
+                }
+                return NOERROR;
+            }
+            if (HasRecordIn(mIapFileRecord, pbrIndex)) {
+                AutoPtr<IInterface> o;
+                mIapFileRecord->Get(CoreUtils::Convert(pbrIndex), (IInterface**)&o);
+                o = NULL;
+                IArrayList::Probe(o)->Get(recordIndex, (IInterface**)&o);
+                AutoPtr<IArrayOf> array = IArrayOf::Probe(o);
+                Int32 size;
+                array->GetLength(&size);
+                data = ArrayOf<Byte>::Alloc(size);
+                for (Int32 i = 0; i < size; i++) {
+                    o = NULL;
+                    array->Get(i, (IInterface**)&o);
+                    Byte b;
+                    IByte::Probe(o)->GetValue(&b);
+                    (*data)[i] = b;
+                }
+
+                AutoPtr<ArrayOf<Byte> > record_data = ArrayOf<Byte>::Alloc(data->GetLength());
+                record_data->Copy(0, data, 0, record_data->GetLength());
+                switch (tag) {
+                    case USIM_EFEMAIL_TAG:
+                        (*record_data)[mEmailTagNumberInIap] = (Byte) recordNumber;
+                        break;
+                    case USIM_EFANR_TAG:
+                        (*record_data)[mAnrTagNumberInIap] = (Byte) recordNumber;
+                        break;
+                }
+                mPendingExtLoads = 1;
+                Log(String(" IAP  efid= ") + efid + ", update IAP index= " + (recordIndex)
+                        + " with value= " + IccUtils::BytesToHexString(record_data));
+
+                array = NULL;
+                CArrayOf::New(EIID_IByte, record_data->GetLength(), (IArrayOf**)&array);
+                for (Int32 i = 0; i < record_data->GetLength(); i++) {
+                    array->Set(i, CoreUtils::ConvertByte((*record_data)[i]));
+                }
+
+                AutoPtr<IMessage> msg;
+                ObtainMessage(EVENT_UPDATE_IAP_RECORD_DONE, adnRecIndex, recordNumber,
+                        array, (IMessage**)&msg);
+                mFh->UpdateEFLinearFixed(
+                        efid,
+                        recordIndex + 1,
+                        record_data,
+                        String(NULL),
+                        msg);
+            }
+            break;
+        }
+        case EVENT_UPDATE_IAP_RECORD_DONE: {
+            Log(String("EVENT_UPDATE_IAP_RECORD_DONE"));
+            ar = (AsyncResult*)(IObject*)obj.Get();
+            if (ar->mException != NULL) {
+                mSuccess = FALSE;
+            }
+
+            AutoPtr<IArrayOf> iArray = IArrayOf::Probe(ar->mUserObj);
+            Int32 size;
+            iArray->GetLength(&size);
+            data = ArrayOf<Byte>::Alloc(size);
+            for (Int32 i = 0; i < size; i++) {
+                AutoPtr<IInterface> o;
+                iArray->Get(i, (IInterface**)&o);
+                Byte b;
+                IByte::Probe(o)->GetValue(&b);
+                (*data)[i] = b;
+            }
+
+            Int32 arg1;
+            msg->GetArg1(&arg1);
+            adnRecIndex = arg1;
+            GetPbrIndexBy(adnRecIndex, &pbrIndex);
+            recordIndex = adnRecIndex - GetInitIndexBy(pbrIndex);
+            Log(String("handleMessage EVENT_UPDATE_IAP_RECORD_DONE recordIndex is: ")
+                    + StringUtils::ToString(recordIndex) +
+                    ", adnRecIndex is: " + StringUtils::ToString(adnRecIndex));
+            mPendingExtLoads = 0;
+            mSuccess = TRUE;
+
+            AutoPtr<IInterface> o;
+            mIapFileRecord->Get(CoreUtils::Convert(pbrIndex), (IInterface**)&o);
+            IArrayList::Probe(o)->Set(recordIndex, iArray);
+            Log(String("the iap email recordNumber is :") + (*data)[mEmailTagNumberInIap]);
+            {
+                AutoLock lock(mLock);
+                mLock.Notify();
+            }
+            break;
+        }
+    }
     return NOERROR;
 }
 
@@ -884,14 +1189,18 @@ ECode CUsimPhoneBookManager::GetAnrCount(
     /* [out] */ Int32* result)
 {
     VALIDATE_NOT_NULL(result)
-    assert(0);
-    // int count = 0;
-    // int pbrIndex = mAnrFlags.size();
-    // for (int j = 0; j < pbrIndex; j++) {
-    //     count += mAnrFlags.get(j).size();
-    // }
-    // log("getAnrCount count is: " + count);
-    // return count;
+    Int32 count = 0;
+    Int32 pbrIndex;
+    mAnrFlags->GetSize(&pbrIndex);
+    for (Int32 j = 0; j < pbrIndex; j++) {
+        AutoPtr<IInterface> obj;
+        mAnrFlags->Get(CoreUtils::Convert(j), (IInterface**)&obj);
+        Int32 size;
+        IArrayList::Probe(obj)->GetSize(&size);
+        count += size;
+    }
+    Log(String("getAnrCount count is: ") + StringUtils::ToString(count));
+    *result = count;
     return NOERROR;
 }
 
@@ -899,14 +1208,18 @@ ECode CUsimPhoneBookManager::GetEmailCount(
     /* [out] */ Int32* result)
 {
     VALIDATE_NOT_NULL(result)
-    assert(0);
-    // int count = 0;
-    // int pbrIndex = mEmailFlags.size();
-    // for (int j = 0; j < pbrIndex; j++) {
-    //     count += mEmailFlags.get(j).size();
-    // }
-    // log("getEmailCount count is: " + count);
-    // return count;
+    Int32 count = 0;
+    Int32 pbrIndex;
+    mEmailFlags->GetSize(&pbrIndex);
+    for (Int32 j = 0; j < pbrIndex; j++) {
+        AutoPtr<IInterface> obj;
+        mEmailFlags->Get(CoreUtils::Convert(j), (IInterface**)&obj);
+        Int32 size;
+        IArrayList::Probe(obj)->GetSize(&size);
+        count += size;
+    }
+    Log(String("getEmailCount count is: ") + StringUtils::ToString(count));
+    *result = count;
     return NOERROR;
 }
 
@@ -914,17 +1227,26 @@ ECode CUsimPhoneBookManager::GetSpareAnrCount(
     /* [out] */ Int32* result)
 {
     VALIDATE_NOT_NULL(result)
-    assert(0);
-    // int count = 0;
-    // int pbrIndex = mAnrFlags.size();
-    // for (int j = 0; j < pbrIndex; j++) {
-    //     for (int i = 0; i < mAnrFlags.get(j).size(); i++) {
-    //         if (0 == mAnrFlags.get(j).get(i))
-    //             count++;
-    //     }
-    // }
-    // log("getSpareAnrCount count is" + count);
-    // return count;
+    Int32 count = 0;
+    Int32 pbrIndex;
+    mAnrFlags->GetSize(&pbrIndex);
+    for (Int32 j = 0; j < pbrIndex; j++) {
+        AutoPtr<IInterface> obj;
+        mAnrFlags->Get(CoreUtils::Convert(j), (IInterface**)&obj);
+        AutoPtr<IArrayList> list = IArrayList::Probe(obj);
+        Int32 size;
+        list->GetSize(&size);
+        for (Int32 i = 0; i < size; i++) {
+            AutoPtr<IInterface> o;
+            list->Get(i, (IInterface**)&o);
+            Int32 val;
+            IInteger32::Probe(o)->GetValue(&val);
+            if (0 == val)
+                count++;
+        }
+    }
+    Log(String("getSpareAnrCount count is") + StringUtils::ToString(count));
+    *result = count;
     return NOERROR;
 }
 
@@ -932,17 +1254,27 @@ ECode CUsimPhoneBookManager::GetSpareEmailCount(
     /* [out] */ Int32* result)
 {
     VALIDATE_NOT_NULL(result)
-    assert(0);
-    // int count = 0;
-    // int pbrIndex = mEmailFlags.size();
-    // for (int j = 0; j < pbrIndex; j++) {
-    //     for (int i = 0; i < mEmailFlags.get(j).size(); i++) {
-    //         if (0 == mEmailFlags.get(j).get(i))
-    //             count++;
-    //     }
-    // }
-    // log("getSpareEmailCount count is: " + count);
-    // return count;
+
+    Int32 count = 0;
+    Int32 pbrIndex;
+    mEmailFlags->GetSize(&pbrIndex);
+    for (Int32 j = 0; j < pbrIndex; j++) {
+        AutoPtr<IInterface> obj;
+        mEmailFlags->Get(CoreUtils::Convert(j), (IInterface**)&obj);
+        AutoPtr<IArrayList> list = IArrayList::Probe(obj);
+        Int32 size;
+        list->GetSize(&size);
+        for (Int32 i = 0; i < size; i++) {
+            AutoPtr<IInterface> o;
+            list->Get(i, (IInterface**)&o);
+            Int32 val;
+            IInteger32::Probe(o)->GetValue(&val);
+            if (0 == val)
+                count++;
+        }
+    }
+    Log(String("getSpareEmailCount count is: ") + StringUtils::ToString(count));
+    *result = count;
     return NOERROR;
 }
 
@@ -950,13 +1282,19 @@ ECode CUsimPhoneBookManager::GetUsimAdnCount(
     /* [out] */ Int32* result)
 {
     VALIDATE_NOT_NULL(result)
-    assert(0);
-    // if ((mPhoneBookRecords != null) && (!mPhoneBookRecords.isEmpty())) {
-    //     log("getUsimAdnCount count is" + mPhoneBookRecords.size());
-    //     return mPhoneBookRecords.size();
-    // } else {
-    //     return 0;
-    // }
+
+    Boolean b;
+    if ((mPhoneBookRecords != NULL) && (mPhoneBookRecords->IsEmpty(&b), !b)) {
+        Int32 size;
+        mPhoneBookRecords->GetSize(&size);
+        Log(String("getUsimAdnCount count is") + StringUtils::ToString(size));
+        *result = size;
+        return NOERROR;
+    }
+    else {
+        *result = 0;
+        return NOERROR;
+    }
     return NOERROR;
 }
 
@@ -965,25 +1303,35 @@ ECode CUsimPhoneBookManager::GetEmptyEmailNum_Pbrindex(
     /* [out] */ Int32* result)
 {
     VALIDATE_NOT_NULL(result)
-    assert(0);
-    // int count = 0;
-    // int size = 0;
 
-    // if (!mEmailPresentInIap) {
-    //     //for Type1 Email, the number is always equal to ADN
-    //     //log("getEmptyEmailNum_Pbrindex pbrIndex:" + pbrindex + " default to 1");
-    //     return 1;
-    // }
+    Int32 count = 0;
+    Int32 size = 0;
 
-    // if (mEmailFlags.containsKey(pbrindex)) {
-    //     size = mEmailFlags.get(pbrindex).size();
-    //     for (int i = 0; i < size; i++) {
-    //         if (0 == mEmailFlags.get(pbrindex).get(i)) count++;
-    //     }
-    // }
-    // //log("getEmptyEmailNum_Pbrindex pbrIndex is: " + pbrindex + " size is: "
-    // //        + size + ", count is " + count);
-    // return count;
+    if (!mEmailPresentInIap) {
+        //for Type1 Email, the number is always equal to ADN
+        //Log("getEmptyEmailNum_Pbrindex pbrIndex:" + pbrindex + " default to 1");
+        *result = 1;
+        return NOERROR;
+    }
+
+    Boolean b;
+    if (mEmailFlags->ContainsKey(CoreUtils::Convert(pbrindex), &b), b) {
+        AutoPtr<IInterface> obj;
+        mEmailFlags->Get(CoreUtils::Convert(pbrindex), (IInterface**)&obj);
+        AutoPtr<IArrayList> list = IArrayList::Probe(obj);
+        list->GetSize(&size);
+
+        for (Int32 i = 0; i < size; i++) {
+            AutoPtr<IInterface> o;
+            list->Get(i, (IInterface**)&o);
+            Int32 val;
+            IInteger32::Probe(o)->GetValue(&val);
+            if (0 == val) count++;
+        }
+    }
+    //Log("getEmptyEmailNum_Pbrindex pbrIndex is: " + pbrindex + " size is: "
+    //        + size + ", count is " + count);
+    *result = count;
     return NOERROR;
 }
 
@@ -992,25 +1340,35 @@ ECode CUsimPhoneBookManager::GetEmptyAnrNum_Pbrindex(
     /* [out] */ Int32* result)
 {
     VALIDATE_NOT_NULL(result)
-    assert(0);
-    // int count = 0;
-    // int size = 0;
 
-    // if (!mAnrPresentInIap) {
-    //     //for Type1 Anr, the number is always equals to ADN
-    //     //log("getEmptyAnrNum_Pbrindex pbrIndex:" + pbrindex + " default to 1");
-    //     return 1;
-    // }
+    Int32 count = 0;
+    Int32 size = 0;
 
-    // if (mAnrFlags.containsKey(pbrindex)) {
-    //     size = mAnrFlags.get(pbrindex).size();
-    //     for (int i = 0; i < size; i++) {
-    //         if (0 == mAnrFlags.get(pbrindex).get(i)) count++;
-    //     }
-    // }
-    // //log("getEmptyAnrNum_Pbrindex pbrIndex is: " + pbrindex + " size is: "
-    // //        + size + ", count is " + count);
-    // return count;
+    if (!mAnrPresentInIap) {
+        //for Type1 Anr, the number is always equals to ADN
+        //Log("getEmptyAnrNum_Pbrindex pbrIndex:" + pbrindex + " default to 1");
+        *result = 1;
+        return NOERROR;
+    }
+
+    Boolean b;
+    if (mAnrFlags->ContainsKey(CoreUtils::Convert(pbrindex), &b), b) {
+        AutoPtr<IInterface> obj;
+        mAnrFlags->Get(CoreUtils::Convert(pbrindex), (IInterface**)&obj);
+        AutoPtr<IArrayList> list = IArrayList::Probe(obj);
+        list->GetSize(&size);
+
+        for (Int32 i = 0; i < size; i++) {
+            AutoPtr<IInterface> o;
+            list->Get(i, (IInterface**)&o);
+            Int32 val;
+            IInteger32::Probe(o)->GetValue(&val);
+            if (0 == val) count++;
+        }
+    }
+    //Log("getEmptyAnrNum_Pbrindex pbrIndex is: " + pbrindex + " size is: "
+    //        + size + ", count is " + count);
+    *result = count;
     return NOERROR;
 }
 
@@ -1018,26 +1376,42 @@ ECode CUsimPhoneBookManager::GetEmailFilesCountEachAdn(
     /* [out] */ Int32* result)
 {
     VALIDATE_NOT_NULL(result)
-    assert(0);
-    // Map <Integer,Integer> fileIds;
-    // if (mPbrFile == null) {
-    //     Rlog.e(TAG, "mPbrFile is NULL, exiting from getEmailFilesCountEachAdn");
-    //     return 0;
-    // } else {
-    //     fileIds = mPbrFile.mFileIds.get(0);
-    // }
-    // if (fileIds == null) return 0;
 
-    // if (fileIds.containsKey(USIM_EFEMAIL_TAG)) {
-    //     if (!mEmailPresentInIap) {
-    //         return mPbrFile.mEmailFileIds.get(0).size();
-    //     } else {
-    //         return 1;
-    //     }
+    AutoPtr<IMap> fileIds;
+    if (mPbrFile == NULL) {
+        Logger::E(TAG, "mPbrFile is NULL, exiting from getEmailFilesCountEachAdn");
+        *result = 0;
+        return NOERROR;
+    }
+    else {
+        AutoPtr<IInterface> obj;
+        mPbrFile->mFileIds->Get(0, (IInterface**)&obj);
+        fileIds = IMap::Probe(obj);
+    }
+    if (fileIds == NULL) {
+        *result = 0;
+        return NOERROR;
+    }
 
-    // } else {
-    //     return 0;
-    // }
+    Boolean b;
+    if (fileIds->ContainsKey(CoreUtils::Convert(USIM_EFEMAIL_TAG), &b), b) {
+        if (!mEmailPresentInIap) {
+            AutoPtr<IInterface> obj;
+            mPbrFile->mEmailFileIds->Get(0, (IInterface**)&obj);
+            Int32 size;
+            IArrayList::Probe(obj)->GetSize(&size);
+            *result = size;
+            return NOERROR;
+        }
+        else {
+            *result = 1;
+            return NOERROR;
+        }
+    }
+    else {
+        *result = 0;
+        return NOERROR;
+    }
     return NOERROR;
 }
 
@@ -1045,47 +1419,63 @@ ECode CUsimPhoneBookManager::GetAnrFilesCountEachAdn(
     /* [out] */ Int32* result)
 {
     VALIDATE_NOT_NULL(result)
-    assert(0);
-    // Map <Integer,Integer> fileIds;
-    // if (mPbrFile == null) {
-    //     Rlog.e(TAG, "mPbrFile is NULL, exiting from getAnrFilesCountEachAdn");
-    //     return 0;
-    // } else {
-    //     fileIds = mPbrFile.mFileIds.get(0);
-    // }
-    // if (fileIds == null) return 0;
 
-    // if (fileIds.containsKey(USIM_EFANR_TAG)) {
-    //     if (!mAnrPresentInIap) {
-    //         return mPbrFile.mAnrFileIds.get(0).size();
-    //     } else {
-    //         return 1;
-    //     }
+    AutoPtr<IMap> fileIds;
+    if (mPbrFile == NULL) {
+        Logger::E(TAG, "mPbrFile is NULL, exiting from getAnrFilesCountEachAdn");
+        *result = 0;
+        return NOERROR;
+    }
+    else {
+        AutoPtr<IInterface> obj;
+        mPbrFile->mFileIds->Get(0, (IInterface**)&obj);
+        fileIds = IMap::Probe(obj);
+    }
+    if (fileIds == NULL) {
+        *result = 0;
+        return NOERROR;
+    }
 
-    // } else {
-    //     return 0;
-    // }
+    Boolean b;
+    if (fileIds->ContainsKey(CoreUtils::Convert(USIM_EFANR_TAG), &b), b) {
+        if (!mAnrPresentInIap) {
+            AutoPtr<IInterface> obj;
+            mPbrFile->mAnrFileIds->Get(0, (IInterface**)&obj);
+            Int32 size;
+            IArrayList::Probe(obj)->GetSize(&size);
+            *result = size;
+            return NOERROR;
+        } else {
+            *result = 1;
+            return NOERROR;
+        }
+    }
+    else {
+        *result = 0;
+        return NOERROR;
+    }
     return NOERROR;
 }
 
 void CUsimPhoneBookManager::RefreshCache()
 {
-    assert(0);
-    // if (mPbrFile == null) return;
-    // mPhoneBookRecords.clear();
+    if (mPbrFile == NULL) return;
+    mPhoneBookRecords->Clear();
 
-    // int numRecs = mPbrFile.mFileIds.size();
-    // for (int i = 0; i < numRecs; i++) {
-    //     readAdnFileAndWait(i);
-    // }
+    Int32 numRecs;
+    mPbrFile->mFileIds->GetSize(&numRecs);
+    for (Int32 i = 0; i < numRecs; i++) {
+        ReadAdnFileAndWait(i);
+    }
 }
 
 void CUsimPhoneBookManager::ReadPbrFileAndWait()
 {
-    assert(0);
-    // mFh.loadEFLinearFixedAll(EF_PBR, obtainMessage(EVENT_PBR_LOAD_DONE));
+    AutoPtr<IMessage> msg;
+    ObtainMessage(EVENT_PBR_LOAD_DONE, (IMessage**)&msg);
+    mFh->LoadEFLinearFixedAll(EF_PBR, msg);
     // try {
-    //     mLock.wait();
+    mLock.Wait();
     // } catch (InterruptedException e) {
     //     Rlog.e(TAG, "Interrupted Exception in readAdnFileAndWait");
     // }
@@ -1094,125 +1484,186 @@ void CUsimPhoneBookManager::ReadPbrFileAndWait()
 void CUsimPhoneBookManager::ReadEmailFileAndWait(
     /* [in] */ Int32 recNum)
 {
-    assert(0);
-    // Map <Integer,Integer> fileIds;
-    // fileIds = mPbrFile.mFileIds.get(recNum);
-    // if (fileIds == null) return;
+    AutoPtr<IMap> fileIds;
+    AutoPtr<IInterface> obj;
+    mPbrFile->mFileIds->Get(CoreUtils::Convert(recNum), (IInterface**)&obj);
+    fileIds = IMap::Probe(obj);
+    if (fileIds == NULL) return;
 
-    // if (fileIds.containsKey(USIM_EFEMAIL_TAG)) {
-    //     // Check if the EFEmail is a Type 1 file or a type 2 file.
-    //     // If mEmailPresentInIap is true, its a type 2 file.
-    //     // So we read the IAP file and then read the email records.
-    //     // instead of reading directly.
-    //     if (mEmailPresentInIap) {
-    //         readIapFileAndWait(fileIds.get(USIM_EFIAP_TAG), recNum);
-    //         if (!hasRecordIn(mIapFileRecord, recNum)) {
-    //             Rlog.e(TAG, "Error: IAP file is empty");
-    //             return;
-    //         }
-    //         mFh.loadEFLinearFixedAll(fileIds.get(USIM_EFEMAIL_TAG),
-    //                 obtainMessage(EVENT_EMAIL_LOAD_DONE, recNum));
+    Boolean b;
+    if (fileIds->ContainsKey(CoreUtils::Convert(USIM_EFEMAIL_TAG), &b), b) {
+        // Check if the EFEmail is a Type 1 file or a type 2 file.
+        // If mEmailPresentInIap is TRUE, its a type 2 file.
+        // So we read the IAP file and then read the email records.
+        // instead of reading directly.
+        if (mEmailPresentInIap) {
+            AutoPtr<IInterface> o;
+            fileIds->Get(CoreUtils::Convert(USIM_EFIAP_TAG), (IInterface**)&o);
+            Int32 val;
+            IInteger32::Probe(o)->GetValue(&val);
+            ReadIapFileAndWait(val, recNum);
+            if (!HasRecordIn(mIapFileRecord, recNum)) {
+                Logger::E(TAG, "Error: IAP file is empty");
+                return;
+            }
+            o = NULL;
+            fileIds->Get(CoreUtils::Convert(USIM_EFEMAIL_TAG), (IInterface**)&o);
+            IInteger32::Probe(o)->GetValue(&val);
 
-    //         log("readEmailFileAndWait email efid is : " + fileIds.get(USIM_EFEMAIL_TAG));
-    //         try {
-    //             mLock.wait();
-    //         } catch (InterruptedException e) {
-    //             Rlog.e(TAG, "Interrupted Exception in readEmailFileAndWait");
-    //         }
+            AutoPtr<IMessage> msg;
+            ObtainMessage(EVENT_EMAIL_LOAD_DONE, CoreUtils::Convert(recNum), (IMessage**)&msg);
+            mFh->LoadEFLinearFixedAll(val, msg);
 
-    //     } else {
-    //         // Read all Email files per Record
-    //         for (int efid: mPbrFile.mEmailFileIds.get(recNum)) {
-    //             mFh.loadEFLinearFixedPart(efid, getValidRecordNums(recNum),
-    //                 obtainMessage(EVENT_EMAIL_LOAD_DONE, recNum));
+            Log(String("readEmailFileAndWait email efid is : ") + StringUtils::ToString(val));
+            // try {
+            mLock.Wait();
+            // } catch (InterruptedException e) {
+            //     Rlog.e(TAG, "Interrupted Exception in readEmailFileAndWait");
+            // }
 
-    //             log("readEmailFileAndWait email efid is : " + efid + " recNum:" + recNum);
-    //             try {
-    //                 mLock.wait();
-    //             } catch (InterruptedException e) {
-    //                 Rlog.e(TAG, "Interrupted Exception in readEmailFileAndWait");
-    //             }
-    //         }
-    //     }
+        }
+        else {
+            // Read all Email files per Record
+            AutoPtr<IInterface> o;
+            mPbrFile->mEmailFileIds->Get(CoreUtils::Convert(recNum), (IInterface**)&o);
+            AutoPtr<IArrayList> list = IArrayList::Probe(o);
+            Int32 size;
+            list->GetSize(&size);
 
-    //     for (int m = 0; m < mEmailFileRecord.get(recNum).size(); m++) {
-    //         mEmailFlagsRecord[recNum].add(0);
-    //     }
-    //     mEmailFlags.put(recNum, mEmailFlagsRecord[recNum]);
+            for (Int32 i = 0; i < size; i++) {
+                obj = NULL;
+                list->Get(i, (IInterface**)&obj);
+                Int32 efid;
+                IInteger32::Probe(obj)->GetValue(&efid);
 
-    //     if (!hasRecordIn(mEmailFileRecord, recNum)) {
-    //         Rlog.e(TAG, "Error: Email file is empty");
-    //         return;
-    //     }
-    //     updatePhoneAdnRecordWithEmail(recNum);
-    // }
+                AutoPtr<IMessage> msg;
+                ObtainMessage(EVENT_EMAIL_LOAD_DONE, CoreUtils::Convert(recNum), (IMessage**)&msg);
+                mFh->LoadEFLinearFixedPart(efid, GetValidRecordNums(recNum), msg);
+
+                Log(String("readEmailFileAndWait email efid is : ") +
+                        StringUtils::ToString(efid) +
+                        " recNum:" + StringUtils::ToString(recNum));
+                // try {
+                mLock.Wait();
+                // } catch (InterruptedException e) {
+                //     Rlog.e(TAG, "Interrupted Exception in readEmailFileAndWait");
+                // }
+            }
+        }
+
+        obj = NULL;
+        mEmailFileRecord->Get(CoreUtils::Convert(recNum), (IInterface**)&obj);
+        AutoPtr<IArrayList> list = IArrayList::Probe(obj);
+        Int32 size;
+        list->GetSize(&size);
+        for (Int32 m = 0; m < size; m++) {
+            (*mEmailFlagsRecord)[recNum]->Add(0);
+        }
+        mEmailFlags->Put(CoreUtils::Convert(recNum), (*mEmailFlagsRecord)[recNum]);
+
+        if (!HasRecordIn(mEmailFileRecord, recNum)) {
+            Logger::E(TAG, "Error: Email file is empty");
+            return;
+        }
+        UpdatePhoneAdnRecordWithEmail(recNum);
+    }
 }
 
 void CUsimPhoneBookManager::ReadAnrFileAndWait(
     /* [in] */ Int32 recNum)
 {
-    assert(0);
-    // Map<Integer, Integer> fileIds;
-    // if (mPbrFile == null) {
-    //     Rlog.e(TAG, "mPbrFile is NULL, exiting from readAnrFileAndWait");
-    //     return;
-    // } else {
-    //     fileIds = mPbrFile.mFileIds.get(recNum);
-    // }
-    // if (fileIds == null || fileIds.isEmpty())
-    //     return;
-    // if (fileIds.containsKey(USIM_EFANR_TAG)) {
-    //     if (mAnrPresentInIap) {
-    //         readIapFileAndWait(fileIds.get(USIM_EFIAP_TAG), recNum);
-    //         if (!hasRecordIn(mIapFileRecord, recNum)) {
-    //             Rlog.e(TAG, "Error: IAP file is empty");
-    //             return;
-    //         }
-    //         mFh.loadEFLinearFixedAll(fileIds.get(USIM_EFANR_TAG),
-    //                 obtainMessage(EVENT_ANR_LOAD_DONE, recNum));
-    //         log("readAnrFileAndWait anr efid is : " + fileIds.get(USIM_EFANR_TAG));
-    //         try {
-    //             mLock.wait();
-    //         } catch (InterruptedException e) {
-    //             Rlog.e(TAG, "Interrupted Exception in readEmailFileAndWait");
-    //         }
-    //     } else {
-    //         // Read all Anr files for each Adn Record
-    //         for (int efid: mPbrFile.mAnrFileIds.get(recNum)) {
-    //             mFh.loadEFLinearFixedPart(efid, getValidRecordNums(recNum),
-    //                 obtainMessage(EVENT_ANR_LOAD_DONE, recNum));
-    //             log("readAnrFileAndWait anr efid is : " + efid + " recNum:" + recNum);
-    //             try {
-    //                 mLock.wait();
-    //             } catch (InterruptedException e) {
-    //                 Rlog.e(TAG, "Interrupted Exception in readEmailFileAndWait");
-    //             }
-    //         }
-    //     }
+    AutoPtr<IMap> fileIds;
+    if (mPbrFile == NULL) {
+        Logger::E(TAG, "mPbrFile is NULL, exiting from readAnrFileAndWait");
+        return;
+    }
+    else {
+        AutoPtr<IInterface> obj;
+        mPbrFile->mFileIds->Get(CoreUtils::Convert(recNum), (IInterface**)&obj);
+        fileIds = IMap::Probe(obj);
+    }
+    Boolean b;
+    if (fileIds == NULL || (fileIds->IsEmpty(&b), b))
+        return;
+    if (fileIds->ContainsKey(CoreUtils::Convert(USIM_EFANR_TAG), &b), b) {
+        if (mAnrPresentInIap) {
+            AutoPtr<IInterface> obj;
+            fileIds->Get(CoreUtils::Convert(USIM_EFIAP_TAG), (IInterface**)&obj);
+            Int32 val;
+            IInteger32::Probe(obj)->GetValue(&val);
+            ReadIapFileAndWait(val, recNum);
+            if (!HasRecordIn(mIapFileRecord, recNum)) {
+                Logger::E(TAG, "Error: IAP file is empty");
+                return;
+            }
+            obj = NULL;
+            fileIds->Get(CoreUtils::Convert(USIM_EFANR_TAG), (IInterface**)&obj);
+            IInteger32::Probe(obj)->GetValue(&val);
+            AutoPtr<IMessage> msg;
+            ObtainMessage(EVENT_ANR_LOAD_DONE, CoreUtils::Convert(recNum), (IMessage**)&msg);
+            mFh->LoadEFLinearFixedAll(val, msg);
+            Log(String("readAnrFileAndWait anr efid is : ") + StringUtils::ToString(val));
+            // try {
+                mLock.Wait();
+            // } catch (InterruptedException e) {
+            //     Logger::E(TAG, "Interrupted Exception in readEmailFileAndWait");
+            // }
+        }
+        else {
+            // Read all Anr files for each Adn Record
+            AutoPtr<IInterface> obj;
+            mPbrFile->mAnrFileIds->Get(CoreUtils::Convert(recNum), (IInterface**)&obj);
+            AutoPtr<IArrayList> list = IArrayList::Probe(obj);
+            Int32 size;
+            list->GetSize(&size);
+            for (Int32 i = 0; i < size; i++) {
+                obj = NULL;
+                list->Get(i, (IInterface**)&obj);
+                Int32 efid;
+                IInteger32::Probe(obj)->GetValue(&efid);
 
-    //     for (int m = 0; m < mAnrFileRecord.get(recNum).size(); m++) {
-    //         mAnrFlagsRecord[recNum].add(0);
-    //     }
-    //     mAnrFlags.put(recNum, mAnrFlagsRecord[recNum]);
+                AutoPtr<IMessage> msg;
+                ObtainMessage(EVENT_ANR_LOAD_DONE, CoreUtils::Convert(recNum), (IMessage**)&msg);
+                mFh->LoadEFLinearFixedPart(efid, GetValidRecordNums(recNum), msg);
+                Log(String("readAnrFileAndWait anr efid is : ") + StringUtils::ToString(efid) +
+                        " recNum:" + StringUtils::ToString(recNum));
+                // try {
+                mLock.Wait();
+                // } catch (InterruptedException e) {
+                //     Logger::E(TAG, "Interrupted Exception in readEmailFileAndWait");
+                // }
+            }
+        }
 
-    //     if (!hasRecordIn(mAnrFileRecord, recNum)) {
-    //         Rlog.e(TAG, "Error: Anr file is empty");
-    //         return;
-    //     }
-    //     updatePhoneAdnRecordWithAnr(recNum);
-    // }
+        AutoPtr<IInterface> obj;
+        mAnrFileRecord->Get(CoreUtils::Convert(recNum), (IInterface**)&obj);
+        AutoPtr<IArrayList> list = IArrayList::Probe(obj);
+        Int32 size;
+        list->GetSize(&size);
+        for (Int32 m = 0; m < size; m++) {
+            (*mAnrFlagsRecord)[recNum]->Add(0);
+        }
+        mAnrFlags->Put(CoreUtils::Convert(recNum), (*mAnrFlagsRecord)[recNum]);
+
+        if (!HasRecordIn(mAnrFileRecord, recNum)) {
+            Logger::E(TAG, "Error: Anr file is empty");
+            return;
+        }
+        UpdatePhoneAdnRecordWithAnr(recNum);
+    }
 }
 
 void CUsimPhoneBookManager::ReadIapFileAndWait(
     /* [in] */ Int32 efid,
     /* [in] */ Int32 recNum)
 {
-    assert(0);
-    // log("pbrIndex is " + recNum + ",iap efid is : " + efid);
-    // mFh.loadEFLinearFixedPart(efid, getValidRecordNums(recNum),
-    //         obtainMessage(EVENT_IAP_LOAD_DONE, recNum));
+    Log(String("pbrIndex is ") + StringUtils::ToString(recNum) +
+            ",iap efid is : " + StringUtils::ToString(efid));
+    AutoPtr<IMessage> msg;
+    ObtainMessage(EVENT_IAP_LOAD_DONE, CoreUtils::Convert(recNum), (IMessage**)&msg);
+    mFh->LoadEFLinearFixedPart(efid, GetValidRecordNums(recNum), msg);
     // try {
-    //     mLock.wait();
+    mLock.Wait();
     // } catch (InterruptedException e) {
     //     Rlog.e(TAG, "Interrupted Exception in readIapFileAndWait");
     // }
@@ -1224,38 +1675,43 @@ Boolean CUsimPhoneBookManager::UpdateIapFile(
     /* [in] */ const String& newValue,
     /* [in] */ Int32 tag)
 {
-    assert(0);
-    // int pbrIndex = getPbrIndexBy(adnRecNum - 1);
-    // int efid = getEfidByTag(pbrIndex, USIM_EFIAP_TAG, 0);
-    // mSuccess = false;
-    // int recordNumber = -1;
-    // if (efid == -1)
-    //     return mSuccess;
-    // switch (tag) {
-    //     case USIM_EFEMAIL_TAG:
-    //         recordNumber = getEmailRecNumber(adnRecNum - 1,
-    //                 mPhoneBookRecords.size(), oldValue);
-    //         break;
-    //     case USIM_EFANR_TAG:
-    //         recordNumber = getAnrRecNumber(adnRecNum - 1, mPhoneBookRecords.size(), oldValue);
-    //         break;
-    // }
-    // if (TextUtils.isEmpty(newValue)) {
-    //     recordNumber = -1;
-    // }
-    // log("updateIapFile  efid=" + efid + ", recordNumber= " + recordNumber + ", adnRecNum="
-    //         + adnRecNum);
-    // synchronized (mLock) {
-    //     mFh.getEFLinearRecordSize(efid,
-    //             obtainMessage(EVENT_EF_IAP_RECORD_SIZE_DONE, adnRecNum, recordNumber, tag));
-    //     try {
-    //         mLock.wait();
-    //     } catch (InterruptedException e) {
-    //         Rlog.e(TAG, "interrupted while trying to update by search");
-    //     }
-    // }
-    // return mSuccess;
-    return TRUE;
+    Int32 pbrIndex;
+    GetPbrIndexBy(adnRecNum - 1, &pbrIndex);
+    Int32 efid = GetEfidByTag(pbrIndex, USIM_EFIAP_TAG, 0);
+    mSuccess = FALSE;
+    Int32 recordNumber = -1;
+    if (efid == -1)
+        return mSuccess;
+
+    Int32 size;
+    mPhoneBookRecords->GetSize(&size);
+    switch (tag) {
+        case USIM_EFEMAIL_TAG:
+            recordNumber = GetEmailRecNumber(adnRecNum - 1,
+                    size, oldValue);
+            break;
+        case USIM_EFANR_TAG:
+            recordNumber = GetAnrRecNumber(adnRecNum - 1, size, oldValue);
+            break;
+    }
+    if (newValue.IsEmpty()) {
+        recordNumber = -1;
+    }
+    Log(String("updateIapFile  efid=") + StringUtils::ToString(efid) +
+            ", recordNumber= " + StringUtils::ToString(recordNumber) +
+            ", adnRecNum=" + StringUtils::ToString(adnRecNum));
+    {
+        AutoLock lock(mLock);
+        AutoPtr<IMessage> msg;
+        ObtainMessage(EVENT_EF_IAP_RECORD_SIZE_DONE, adnRecNum, recordNumber, CoreUtils::Convert(tag), (IMessage**)&msg);
+        mFh->GetEFLinearRecordSize(efid, msg);
+        // try {
+        mLock.Wait();
+        // } catch (InterruptedException e) {
+        //     Rlog.e(TAG, "interrupted while trying to update by search");
+        // }
+    }
+    return mSuccess;
 }
 
 Int32 CUsimPhoneBookManager::GetEfidByTag(
@@ -1263,164 +1719,233 @@ Int32 CUsimPhoneBookManager::GetEfidByTag(
     /* [in] */ Int32 tag,
     /* [in] */ Int32 efidIndex)
 {
-    assert(0);
-    // Map<Integer, Integer> fileIds;
-    // int efid = -1;
-    // int numRecs = mPbrFile.mFileIds.size();
+    AutoPtr<IMap> fileIds;
+    Int32 efid = -1;
+    Int32 numRecs;
+    mPbrFile->mFileIds->GetSize(&numRecs);
 
-    // fileIds = mPbrFile.mFileIds.get(recNum);
-    // if (fileIds == null)
-    //     return -1;
+    AutoPtr<IInterface> obj;
+    mPbrFile->mFileIds->Get(CoreUtils::Convert(recNum), (IInterface**)&obj);
+    fileIds = IMap::Probe(obj);
+    if (fileIds == NULL)
+        return -1;
 
-    // if (!fileIds.containsKey(tag)) {
-    //     return -1;
-    // }
+    Boolean b;
+    if (fileIds->ContainsKey(CoreUtils::Convert(tag), &b), b) {
+        return -1;
+    }
 
-    // if (!mEmailPresentInIap && USIM_EFEMAIL_TAG == tag) {
-    //     efid = mPbrFile.mEmailFileIds.get(recNum).get(efidIndex);
-    // } else if (!mAnrPresentInIap && USIM_EFANR_TAG == tag) {
-    //     efid = mPbrFile.mAnrFileIds.get(recNum).get(efidIndex);
-    // } else {
-    //     efid = fileIds.get(tag);
-    // }
-    // return efid;
-    return 0;
+    if (!mEmailPresentInIap && USIM_EFEMAIL_TAG == tag) {
+        obj = NULL;
+        mPbrFile->mEmailFileIds->Get(CoreUtils::Convert(recNum), (IInterface**)&obj);
+        AutoPtr<IArrayList> list = IArrayList::Probe(obj);
+        obj = NULL;
+        list->Get(efidIndex, (IInterface**)&obj);
+        IInteger32::Probe(obj)->GetValue(&efid);
+    }
+    else if (!mAnrPresentInIap && USIM_EFANR_TAG == tag) {
+        obj = NULL;
+        mPbrFile->mAnrFileIds->Get(CoreUtils::Convert(recNum), (IInterface**)&obj);
+        AutoPtr<IArrayList> list = IArrayList::Probe(obj);
+        obj = NULL;
+        list->Get(efidIndex, (IInterface**)&obj);
+        IInteger32::Probe(obj)->GetValue(&efid);
+    }
+    else {
+        obj = NULL;
+        fileIds->Get(CoreUtils::Convert(tag), (IInterface**)&obj);
+        IInteger32::Probe(obj)->GetValue(&efid);
+    }
+    return efid;
 }
 
 Int32 CUsimPhoneBookManager::GetInitIndexBy(
     /* [in] */ Int32 pbrIndex)
 {
-    assert(0);
-    // int index = 0;
-    // while (pbrIndex > 0) {
-    //     index += mAdnLengthList.get(pbrIndex - 1);
-    //     pbrIndex--;
-    // }
-    // return index;
-    return 0;
+    Int32 index = 0;
+    while (pbrIndex > 0) {
+        AutoPtr<IInterface> obj;
+        mAdnLengthList->Get(pbrIndex - 1, (IInterface**)&obj);
+        Int32 val;
+        IInteger32::Probe(obj)->GetValue(&val);
+        index += val;
+        pbrIndex--;
+    }
+    return index;
 }
 
 Boolean CUsimPhoneBookManager::HasRecordIn(
     /* [in] */ IMap* record,
     /* [in] */ Int32 pbrIndex)
 {
-    assert(0);
-    // if (record == null)
-    //     return false;
+    if (record == NULL)
+        return FALSE;
     // try {
-    //     record.get(pbrIndex);
+    AutoPtr<IInterface> obj;
+    record->Get(CoreUtils::Convert(pbrIndex), (IInterface**)&obj);
     // } catch (IndexOutOfBoundsException e) {
     //     Rlog.e(TAG, "record is empty in pbrIndex" + pbrIndex);
-    //     return false;
+    //     return FALSE;
     // }
-    // return true;
     return TRUE;
 }
 
 void CUsimPhoneBookManager::UpdatePhoneAdnRecordWithEmail(
     /* [in] */ Int32 pbrIndex)
 {
-    assert(0);
-    // if (!hasRecordIn(mEmailFileRecord, pbrIndex))
-    //     return;
-    // int numAdnRecs = mAdnLengthList.get(pbrIndex);
-    // int adnRecIndex;
-    // if (mEmailPresentInIap && hasRecordIn(mIapFileRecord, pbrIndex)) {
-    //     // The number of records in the IAP file is same as the number of records in ADN file.
-    //     // The order of the pointers in an EFIAP shall be the same as the order of file IDs
-    //     // that appear in the TLV object indicated by Tag 'A9' in the reference file record.
-    //     // i.e value of mEmailTagNumberInIap
+    if (!HasRecordIn(mEmailFileRecord, pbrIndex))
+        return;
 
-    //     for (int i = 0; i < numAdnRecs; i++) {
-    //         byte[] record = null;
-    //         try {
-    //             record = mIapFileRecord.get(pbrIndex).get(i);
-    //         } catch (IndexOutOfBoundsException e) {
-    //             Rlog.e(TAG, "Error: Improper ICC card: No IAP record for ADN, continuing");
-    //             break;
-    //         }
-    //         int recNum = record[mEmailTagNumberInIap];
+    AutoPtr<IInterface> obj;
+    mAdnLengthList->Get(pbrIndex, (IInterface**)&obj);
+    Int32 numAdnRecs;
+    IInteger32::Probe(obj)->GetValue(&numAdnRecs);
 
-    //         if (recNum > 0) {
-    //             String[] emails = new String[1];
-    //             // SIM record numbers are 1 based
-    //             emails[0] = readEmailRecord(recNum - 1, pbrIndex, 0);
-    //             adnRecIndex = i + getInitIndexBy(pbrIndex);
-    //             AdnRecord rec = mPhoneBookRecords.get(adnRecIndex);
-    //             if (rec != null && (!TextUtils.isEmpty(emails[0]))) {
-    //                 rec.setEmails(emails);
-    //                 mPhoneBookRecords.set(adnRecIndex, rec);
-    //                 mEmailFlags.get(pbrIndex).set(recNum - 1, 1);
-    //             }
-    //         }
-    //     }
+    Int32 adnRecIndex;
+    if (mEmailPresentInIap && HasRecordIn(mIapFileRecord, pbrIndex)) {
+        // The number of records in the IAP file is same as the number of records in ADN file.
+        // The order of the pointers in an EFIAP shall be the same as the order of file IDs
+        // that appear in the TLV object indicated by Tag 'A9' in the reference file record.
+        // i.e value of mEmailTagNumberInIap
 
-    //     log("updatePhoneAdnRecordWithEmail: no need to parse type1 EMAIL file");
-    //     return;
-    // }
+        for (Int32 i = 0; i < numAdnRecs; i++) {
+            AutoPtr<ArrayOf<Byte> > record;
+            // try {
+            obj = NULL;
+            mIapFileRecord->Get(CoreUtils::Convert(pbrIndex), (IInterface**)&obj);
+            AutoPtr<IArrayList> list = IArrayList::Probe(obj);
+            obj = NULL;
+            list->Get(i, (IInterface**)&obj);
+            AutoPtr<IArrayOf> iArray = IArrayOf::Probe(obj);
 
-    // // ICC cards can be made such that they have an IAP file but all
-    // // records are empty. So we read both type 1 and type 2 file
-    // // email records, just to be sure.
+            Int32 size;
+            iArray->GetLength(&size);
+            record = ArrayOf<Byte>::Alloc(size);
+            for (Int32 j = 0; j < size; j++) {
+                AutoPtr<IInterface> o;
+                iArray->Get(j, (IInterface**)&o);
+                Byte b;
+                IByte::Probe(o)->GetValue(&b);
+                (*record)[j] = b;
+            }
 
-    // int len = mAdnLengthList.get(pbrIndex);
-    // // Type 1 file, the number of records is the same as the number of
-    // // records in the ADN file.
-    // if (!mEmailPresentInIap) {
-    //     parseType1EmailFile(len, pbrIndex);
-    // }
+            // } catch (IndexOutOfBoundsException e) {
+            //     Rlog.e(TAG, "Error: Improper ICC card: No IAP record for ADN, continuing");
+            //     break;
+            // }
+            Int32 recNum = (*record)[mEmailTagNumberInIap];
+
+            if (recNum > 0) {
+                AutoPtr<ArrayOf<String> > emails = ArrayOf<String>::Alloc(1);
+                // SIM record numbers are 1 based
+                (*emails)[0] = ReadEmailRecord(recNum - 1, pbrIndex, 0);
+                adnRecIndex = i + GetInitIndexBy(pbrIndex);
+                obj = NULL;
+                mPhoneBookRecords->Get(adnRecIndex, (IInterface**)&obj);
+                AutoPtr<IAdnRecord> rec = IAdnRecord::Probe(obj);
+                if (rec != NULL && (!(*emails)[0].IsEmpty())) {
+                    rec->SetEmails(emails);
+                    mPhoneBookRecords->Set(adnRecIndex, rec);
+
+                    obj = NULL;
+                    mEmailFlags->Get(CoreUtils::Convert(pbrIndex), (IInterface**)&obj);
+                    AutoPtr<IArrayList> list = IArrayList::Probe(obj);
+                    list->Set(recNum - 1, CoreUtils::Convert(1));
+                }
+            }
+        }
+
+        Log(String("updatePhoneAdnRecordWithEmail: no need to parse type1 EMAIL file"));
+        return;
+    }
+
+    // ICC cards can be made such that they have an IAP file but all
+    // records are empty. So we read both type 1 and type 2 file
+    // email records, just to be sure.
+
+    obj = NULL;
+    mAdnLengthList->Get(pbrIndex, (IInterface**)&obj);
+    Int32 len;
+    IInteger32::Probe(obj)->GetValue(&len);
+    // Type 1 file, the number of records is the same as the number of
+    // records in the ADN file.
+    if (!mEmailPresentInIap) {
+        ParseType1EmailFile(len, pbrIndex);
+    }
 }
 
 void CUsimPhoneBookManager::UpdatePhoneAdnRecordWithAnr(
     /* [in] */ Int32 pbrIndex)
 {
-    assert(0);
-    // if (!hasRecordIn(mAnrFileRecord, pbrIndex))
-    //     return;
-    // int numAdnRecs = mAdnLengthList.get(pbrIndex);
-    // int adnRecIndex;
-    // if (mAnrPresentInIap && hasRecordIn(mIapFileRecord, pbrIndex)) {
-    //     // The number of records in the IAP file is same as the number of records in ADN file.
-    //     // The order of the pointers in an EFIAP shall be the same as the order of file IDs
-    //     // that appear in the TLV object indicated by Tag 'A9' in the reference file record.
-    //     // i.e value of mAnrTagNumberInIap
+    if (!HasRecordIn(mAnrFileRecord, pbrIndex))
+        return;
 
-    //     for (int i = 0; i < numAdnRecs; i++) {
-    //         byte[] record = null;
-    //         try {
-    //             record = mIapFileRecord.get(pbrIndex).get(i);
-    //         } catch (IndexOutOfBoundsException e) {
-    //             Rlog.e(TAG, "Error: Improper ICC card: No IAP record for ADN, continuing");
-    //             break;
-    //         }
-    //         int recNum = record[mAnrTagNumberInIap];
-    //         if (recNum > 0) {
-    //             String[] anrs = new String[1];
-    //             // SIM record numbers are 1 based
-    //             anrs[0] = readAnrRecord(recNum - 1, pbrIndex, 0);
-    //             adnRecIndex = i + getInitIndexBy(pbrIndex);
-    //             AdnRecord rec = mPhoneBookRecords.get(adnRecIndex);
-    //             if (rec != null && (!TextUtils.isEmpty(anrs[0]))) {
-    //                 rec.setAdditionalNumbers(anrs);
-    //                 mPhoneBookRecords.set(adnRecIndex, rec);
-    //             }
+    AutoPtr<IInterface> obj;
+    mAdnLengthList->Get(pbrIndex, (IInterface**)&obj);
+    Int32 numAdnRecs;
+    IInteger32::Probe(obj)->GetValue(&numAdnRecs);
+    Int32 adnRecIndex;
+    if (mAnrPresentInIap && HasRecordIn(mIapFileRecord, pbrIndex)) {
+        // The number of records in the IAP file is same as the number of records in ADN file.
+        // The order of the pointers in an EFIAP shall be the same as the order of file IDs
+        // that appear in the TLV object indicated by Tag 'A9' in the reference file record.
+        // i.e value of mAnrTagNumberInIap
 
-    //         }
-    //     }
+        for (Int32 i = 0; i < numAdnRecs; i++) {
+            AutoPtr<ArrayOf<Byte> > record;
+            // try {
+            AutoPtr<IInterface> obj;
+            mIapFileRecord->Get(CoreUtils::Convert(pbrIndex), (IInterface**)&obj);
+            AutoPtr<IArrayList> list = IArrayList::Probe(obj);
+            obj = NULL;
+            list->Get(i, (IInterface**)&obj);
+            AutoPtr<IArrayOf> iArray = IArrayOf::Probe(obj);
 
-    //     log("updatePhoneAdnRecordWithAnr: no need to parse type1 ANR file");
-    //     return;
-    // }
+            Int32 size;
+            iArray->GetLength(&size);
+            record = ArrayOf<Byte>::Alloc(size);
+            for (Int32 j = 0; j < size; j++) {
+                AutoPtr<IInterface> o;
+                iArray->Get(j, (IInterface**)&o);
+                Byte b;
+                IByte::Probe(o)->GetValue(&b);
+                (*record)[j] = b;
+            }
 
-    // // ICC cards can be made such that they have an IAP file but all
-    // // records are empty. So we read both type 1 and type 2 file
-    // // anr records, just to be sure.
+            // } catch (IndexOutOfBoundsException e) {
+            //     Rlog.e(TAG, "Error: Improper ICC card: No IAP record for ADN, continuing");
+            //     break;
+            // }
+            Int32 recNum = (*record)[mAnrTagNumberInIap];
+            if (recNum > 0) {
+                AutoPtr<ArrayOf<String> > anrs = ArrayOf<String>::Alloc(1);
+                // SIM record numbers are 1 based
+                (*anrs)[0] = ReadAnrRecord(recNum - 1, pbrIndex, 0);
+                adnRecIndex = i + GetInitIndexBy(pbrIndex);
+                obj = NULL;
+                mPhoneBookRecords->Get(adnRecIndex, (IInterface**)&obj);
+                AutoPtr<IAdnRecord> rec = IAdnRecord::Probe(obj);
+                if (rec != NULL && (!(*anrs)[0].IsEmpty())) {
+                    rec->SetAdditionalNumbers(anrs);
+                    mPhoneBookRecords->Set(adnRecIndex, rec);
+                }
 
-    // // Type 1 file, the number of records is the same as the number of
-    // // records in the ADN file.
-    // if (!mAnrPresentInIap) {
-    //     parseType1AnrFile(numAdnRecs, pbrIndex);
-    // }
+            }
+        }
+
+        Log(String("updatePhoneAdnRecordWithAnr: no need to parse type1 ANR file"));
+        return;
+    }
+
+    // ICC cards can be made such that they have an IAP file but all
+    // records are empty. So we read both type 1 and type 2 file
+    // anr records, just to be sure.
+
+    // Type 1 file, the number of records is the same as the number of
+    // records in the ADN file.
+    if (!mAnrPresentInIap) {
+        ParseType1AnrFile(numAdnRecs, pbrIndex);
+    }
 }
 
 String CUsimPhoneBookManager::ReadEmailRecord(
@@ -1428,20 +1953,35 @@ String CUsimPhoneBookManager::ReadEmailRecord(
     /* [in] */ Int32 pbrIndex,
     /* [in] */ Int32 offSet)
 {
-    assert(0);
-    // byte[] emailRec = null;
-    // if (!hasRecordIn(mEmailFileRecord, pbrIndex))
-    //     return null;
+    AutoPtr<ArrayOf<Byte> > emailRec;
+    if (!HasRecordIn(mEmailFileRecord, pbrIndex))
+        return String(NULL);
     // try {
-    //     emailRec = mEmailFileRecord.get(pbrIndex).get(recNum + offSet);
+    AutoPtr<IInterface> obj;
+    mEmailFileRecord->Get(CoreUtils::Convert(pbrIndex), (IInterface**)&obj);
+    AutoPtr<IArrayList> list = IArrayList::Probe(obj);
+    obj = NULL;
+    list->Get(recNum + offSet, (IInterface**)&obj);
+    AutoPtr<IArrayOf> iArray = IArrayOf::Probe(obj);
+
+    Int32 size;
+    iArray->GetLength(&size);
+    emailRec = ArrayOf<Byte>::Alloc(size);
+    for (Int32 i = 0; i < size; i++) {
+        AutoPtr<IInterface> o;
+        iArray->Get(i, (IInterface**)&o);
+        Byte b;
+        IByte::Probe(o)->GetValue(&b);
+        (*emailRec)[i] = b;
+    }
+
     // } catch (IndexOutOfBoundsException e) {
-    //     return null;
+    //     return NULL;
     // }
 
-    // // The length of the record is X+2 byte, where X bytes is the email address
-    // String email = IccUtils.adnStringFieldToString(emailRec, 0, emailRec.length - 2);
-    // return email;
-    return String(NULL);
+    // The length of the record is X+2 byte, where X bytes is the email address
+    String email = IccUtils::AdnStringFieldToString(emailRec, 0, emailRec->GetLength() - 2);
+    return email;
 }
 
 String CUsimPhoneBookManager::ReadAnrRecord(
@@ -1449,45 +1989,72 @@ String CUsimPhoneBookManager::ReadAnrRecord(
     /* [in] */ Int32 pbrIndex,
     /* [in] */ Int32 offSet)
 {
-    assert(0);
-    // byte[] anrRec = null;
-    // if (!hasRecordIn(mAnrFileRecord, pbrIndex))
-    //     return null;
+    AutoPtr<ArrayOf<Byte> > anrRec;
+    if (!HasRecordIn(mAnrFileRecord, pbrIndex))
+        return String(NULL);
     // try {
-    //     anrRec = mAnrFileRecord.get(pbrIndex).get(recNum + offSet);
+    AutoPtr<IInterface> obj;
+    mAnrFileRecord->Get(CoreUtils::Convert(pbrIndex), (IInterface**)&obj);
+    AutoPtr<IArrayList> list = IArrayList::Probe(obj);
+    obj = NULL;
+    list->Get(recNum + offSet, (IInterface**)&obj);
+    AutoPtr<IArrayOf> iArray = IArrayOf::Probe(obj);
+
+    Int32 size;
+    iArray->GetLength(&size);
+    anrRec = ArrayOf<Byte>::Alloc(size);
+    for (Int32 i = 0; i < size; i++) {
+        AutoPtr<IInterface> o;
+        iArray->Get(i, (IInterface**)&o);
+        Byte b;
+        IByte::Probe(o)->GetValue(&b);
+        (*anrRec)[i] = b;
+    }
+
     // } catch (IndexOutOfBoundsException e) {
     //     Rlog.e(TAG, "Error: Improper ICC card: No anr record for ADN, continuing");
-    //     return null;
+    //     return NULL;
     // }
-    // int numberLength = 0xff & anrRec[1];
-    // if (numberLength > MAX_NUMBER_SIZE_BYTES) {
-    //     //log("Invalid number length[" + numberLength + "] in anr record: " + recNum +
-    //     //        " pbrIndex:" + pbrIndex + " offSet:" + offSet);
-    //     return "";
-    // }
-    // return PhoneNumberUtils.calledPartyBCDToString(anrRec, 2, numberLength);
-    return String(NULL);
+    Int32 numberLength = 0xff & (*anrRec)[1];
+    if (numberLength > MAX_NUMBER_SIZE_BYTES) {
+        //Log("Invalid number length[" + numberLength + "] in anr record: " + recNum +
+        //        " pbrIndex:" + pbrIndex + " offSet:" + offSet);
+        return String("");
+    }
+
+    String str;
+    PhoneNumberUtils::CalledPartyBCDToString(anrRec, 2, numberLength, &str);
+    return str;
 }
 
 void CUsimPhoneBookManager::ReadAdnFileAndWait(
     /* [in] */ Int32 recNum)
 {
-    assert(0);
-    // Map <Integer,Integer> fileIds;
-    // fileIds = mPbrFile.mFileIds.get(recNum);
-    // if (fileIds == null || fileIds.isEmpty()) return;
+    AutoPtr<IInterface> obj;
+    mPbrFile->mFileIds->Get(CoreUtils::Convert(recNum), (IInterface**)&obj);
+    AutoPtr<IMap> fileIds = IMap::Probe(obj);
 
+    Boolean b;
+    if (fileIds == NULL || (fileIds->IsEmpty(&b), b)) return;
 
-    // int extEf = 0;
-    // // Only call fileIds.get while EFEXT1_TAG is available
-    // if (fileIds.containsKey(USIM_EFEXT1_TAG)) {
-    //     extEf = fileIds.get(USIM_EFEXT1_TAG);
-    // }
-    // log("readAdnFileAndWait adn efid is : " + fileIds.get(USIM_EFADN_TAG));
-    // mAdnCache.requestLoadAllAdnLike(fileIds.get(USIM_EFADN_TAG), extEf,
-    //         obtainMessage(EVENT_USIM_ADN_LOAD_DONE, recNum));
+    Int32 extEf = 0;
+    // Only call fileIds.get while EFEXT1_TAG is available
+    if (fileIds->ContainsKey(CoreUtils::Convert(USIM_EFEXT1_TAG), &b), b) {
+        AutoPtr<IInterface> o;
+        fileIds->Get(CoreUtils::Convert(USIM_EFEXT1_TAG), (IInterface**)&o);
+        IInteger32::Probe(o)->GetValue(&extEf);
+    }
+
+    obj = NULL;
+    fileIds->Get(CoreUtils::Convert(USIM_EFADN_TAG), (IInterface**)&obj);
+    Int32 val;
+    IInteger32::Probe(obj)->GetValue(&val);
+    Log(String("readAdnFileAndWait adn efid is : ") + StringUtils::ToString(val));
+    AutoPtr<IMessage> msg;
+    ObtainMessage(EVENT_USIM_ADN_LOAD_DONE, CoreUtils::Convert(recNum), (IMessage**)&msg);
+    mAdnCache->RequestLoadAllAdnLike(val, extEf, msg);
     // try {
-    //     mLock.wait();
+    mLock.Wait();
     // } catch (InterruptedException e) {
     //     Rlog.e(TAG, "Interrupted Exception in readAdnFileAndWait");
     // }
@@ -1498,49 +2065,70 @@ Int32 CUsimPhoneBookManager::GetEmailRecNumber(
     /* [in] */ Int32 numRecs,
     /* [in] */ const String& oldEmail)
 {
-    assert(0);
-    // int pbrIndex = getPbrIndexBy(adnRecIndex);
-    // int recordIndex = adnRecIndex - getInitIndexBy(pbrIndex);
-    // int recordNumber = -1;
-    // log("getEmailRecNumber adnRecIndex is: " + adnRecIndex + ", recordIndex is :"
-    //         + recordIndex);
-    // if (!hasRecordIn(mEmailFileRecord, pbrIndex)) {
-    //     log("getEmailRecNumber recordNumber is: " + recordNumber);
-    //     return recordNumber;
-    // }
-    // if (mEmailPresentInIap && hasRecordIn(mIapFileRecord, pbrIndex)) {
-    //     byte[] record = null;
-    //     try {
-    //         record = mIapFileRecord.get(pbrIndex).get(recordIndex);
-    //     } catch (IndexOutOfBoundsException e) {
-    //         Rlog.e(TAG, "IndexOutOfBoundsException in getEmailRecNumber");
-    //     }
-    //     if (record != null && record[mEmailTagNumberInIap] > 0) {
-    //         recordNumber = record[mEmailTagNumberInIap];
-    //         log(" getEmailRecNumber: record is " + IccUtils.bytesToHexString(record)
-    //                 + ", the email recordNumber is :" + recordNumber);
-    //         return recordNumber;
-    //     } else {
-    //         int recsSize = mEmailFileRecord.get(pbrIndex).size();
-    //         log("getEmailRecNumber recsSize is: " + recsSize);
-    //         if (TextUtils.isEmpty(oldEmail)) {
-    //             for (int i = 0; i < recsSize; i++) {
-    //                 String emailRecord = readEmailRecord(i, pbrIndex, 0);
-    //                 if (TextUtils.isEmpty(emailRecord)) {
-    //                     log("getEmailRecNumber: Got empty record.Email record num is :" +
-    //                              (i + 1));
-    //                     return i + 1;
-    //                 }
-    //             }
-    //         }
-    //     }
-    // } else {
-    //     recordNumber = recordIndex + 1;
-    //     return recordNumber;
-    // }
-    // log("getEmailRecNumber: no email record index found");
-    // return recordNumber;
-    return 0;
+    Int32 pbrIndex;
+    GetPbrIndexBy(adnRecIndex, &pbrIndex);
+    Int32 recordIndex = adnRecIndex - GetInitIndexBy(pbrIndex);
+    Int32 recordNumber = -1;
+    Log(String("getEmailRecNumber adnRecIndex is: ") + StringUtils::ToString(adnRecIndex) +
+            ", recordIndex is :" + StringUtils::ToString(recordIndex));
+    if (!HasRecordIn(mEmailFileRecord, pbrIndex)) {
+        Log(String("getEmailRecNumber recordNumber is: ") + StringUtils::ToString(recordNumber));
+        return recordNumber;
+    }
+    if (mEmailPresentInIap && HasRecordIn(mIapFileRecord, pbrIndex)) {
+        AutoPtr<ArrayOf<Byte> > record;
+        // try {
+        AutoPtr<IInterface> obj;
+        mIapFileRecord->Get(CoreUtils::Convert(pbrIndex), (IInterface**)&obj);
+        AutoPtr<IArrayList> list = IArrayList::Probe(obj);
+        obj = NULL;
+        list->Get(recordIndex, (IInterface**)&obj);
+        AutoPtr<IArrayOf> iArray = IArrayOf::Probe(obj);
+
+        Int32 size;
+        iArray->GetLength(&size);
+        record = ArrayOf<Byte>::Alloc(size);
+        for (Int32 i = 0; i < size; i++) {
+            AutoPtr<IInterface> o;
+            iArray->Get(i, (IInterface**)&o);
+            Byte b;
+            IByte::Probe(o)->GetValue(&b);
+            (*record)[i] = b;
+        }
+        // } catch (IndexOutOfBoundsException e) {
+        //     Rlog.e(TAG, "IndexOutOfBoundsException in getEmailRecNumber");
+        // }
+        if (record != NULL && (*record)[mEmailTagNumberInIap] > 0) {
+            recordNumber = (*record)[mEmailTagNumberInIap];
+            Log(String(" getEmailRecNumber: record is ") + IccUtils::BytesToHexString(record)
+                    + ", the email recordNumber is :" + StringUtils::ToString(recordNumber));
+            return recordNumber;
+        }
+        else {
+            AutoPtr<IInterface> obj;
+            mEmailFileRecord->Get(CoreUtils::Convert(pbrIndex), (IInterface**)&obj);
+            Int32 recsSize;
+            IArrayList::Probe(obj)->GetSize(&recsSize);
+
+            Log(String("getEmailRecNumber recsSize is: ") + StringUtils::ToString(recsSize));
+            if (oldEmail.IsEmpty()) {
+                for (Int32 i = 0; i < recsSize; i++) {
+                    String emailRecord = ReadEmailRecord(i, pbrIndex, 0);
+                    if (emailRecord.IsEmpty()) {
+                        Log(String("getEmailRecNumber: Got empty record.Email record num is :") +
+                                 StringUtils::ToString(i + 1));
+                        return i + 1;
+                    }
+                }
+            }
+        }
+    }
+    else {
+        recordNumber = recordIndex + 1;
+        return recordNumber;
+    }
+    Log(String("getEmailRecNumber: no email record index found"));
+    return recordNumber;
 }
 
 Int32 CUsimPhoneBookManager::GetAnrRecNumber(
@@ -1548,44 +2136,61 @@ Int32 CUsimPhoneBookManager::GetAnrRecNumber(
     /* [in] */ Int32 numRecs,
     /* [in] */ const String& oldAnr)
 {
-    assert(0);
-    // int pbrIndex = getPbrIndexBy(adnRecIndex);
-    // int recordIndex = adnRecIndex - getInitIndexBy(pbrIndex);
-    // int recordNumber = -1;
-    // if (!hasRecordIn(mAnrFileRecord, pbrIndex)) {
-    //     return recordNumber;
-    // }
-    // if (mAnrPresentInIap && hasRecordIn(mIapFileRecord, pbrIndex)) {
-    //     byte[] record = null;
-    //     try {
-    //         record = mIapFileRecord.get(pbrIndex).get(recordIndex);
-    //     } catch (IndexOutOfBoundsException e) {
-    //         Rlog.e(TAG, "IndexOutOfBoundsException in getAnrRecNumber");
-    //     }
-    //     if (record != null && record[mAnrTagNumberInIap] > 0) {
-    //         recordNumber = record[mAnrTagNumberInIap];
-    //         log("getAnrRecNumber: recnum from iap is :" + recordNumber);
-    //         return recordNumber;
-    //     } else {
-    //         int recsSize = mAnrFileRecord.get(pbrIndex).size();
-    //         log("getAnrRecNumber: anr record size is :" + recsSize);
-    //         if (TextUtils.isEmpty(oldAnr)) {
-    //             for (int i = 0; i < recsSize; i++) {
-    //                 String anrRecord = readAnrRecord(i, pbrIndex, 0);
-    //                 if (TextUtils.isEmpty(anrRecord)) {
-    //                     log("getAnrRecNumber: Empty anr record. Anr record num is :" + (i + 1));
-    //                     return i + 1;
-    //                 }
-    //             }
-    //         }
-    //     }
-    // } else {
-    //     recordNumber = recordIndex + 1;
-    //     return recordNumber;
-    // }
-    // log("getAnrRecNumber: no anr record index found");
-    // return recordNumber;
-    return 0;
+    Int32 pbrIndex;
+    GetPbrIndexBy(adnRecIndex, &pbrIndex);
+    Int32 recordIndex = adnRecIndex - GetInitIndexBy(pbrIndex);
+    Int32 recordNumber = -1;
+    if (!HasRecordIn(mAnrFileRecord, pbrIndex)) {
+        return recordNumber;
+    }
+    if (mAnrPresentInIap && HasRecordIn(mIapFileRecord, pbrIndex)) {
+        AutoPtr<IArrayOf> record;
+        // try {
+        AutoPtr<IInterface> obj;
+        mAnrFileRecord->Get(CoreUtils::Convert(pbrIndex), (IInterface**)&obj);
+        AutoPtr<IArrayList> list = IArrayList::Probe(obj);
+        obj = NULL;
+        list->Get(recordIndex, (IInterface**)&obj);
+        record = IArrayOf::Probe(obj);
+
+        // } catch (IndexOutOfBoundsException e) {
+        //     Rlog.e(TAG, "IndexOutOfBoundsException in getAnrRecNumber");
+        // }
+        if (record != NULL) {
+            obj = NULL;
+            record->Get(mAnrTagNumberInIap, (IInterface**)&obj);
+            Byte bValue;
+            IByte::Probe(obj)->GetValue(&bValue);
+            if (bValue > 0) {
+                recordNumber = bValue;
+                Log(String("getAnrRecNumber: recnum from iap is :") + StringUtils::ToString(recordNumber));
+                return recordNumber;
+            }
+            else {
+                AutoPtr<IInterface> obj;
+                mAnrFileRecord->Get(CoreUtils::Convert(pbrIndex), (IInterface**)&obj);
+                Int32 recsSize;
+                IArrayList::Probe(obj)->GetSize(&recsSize);
+                Log(String("getAnrRecNumber: anr record size is :") + StringUtils::ToString(recsSize));
+                if (oldAnr.IsEmpty()) {
+                    for (Int32 i = 0; i < recsSize; i++) {
+                        String anrRecord = ReadAnrRecord(i, pbrIndex, 0);
+                        if (anrRecord.IsEmpty()) {
+                            Log(String("getAnrRecNumber: Empty anr record. Anr record num is :") +
+                                    StringUtils::ToString(i + 1));
+                            return i + 1;
+                        }
+                    }
+                }
+            }
+        }
+    }
+    else {
+        recordNumber = recordIndex + 1;
+        return recordNumber;
+    }
+    Log(String("getAnrRecNumber: no anr record index found"));
+    return recordNumber;
 }
 
 AutoPtr<ArrayOf<Byte> > CUsimPhoneBookManager::BuildEmailData(
@@ -1593,25 +2198,25 @@ AutoPtr<ArrayOf<Byte> > CUsimPhoneBookManager::BuildEmailData(
     /* [in] */ Int32 adnRecIndex,
     /* [in] */ const String& email)
 {
-    assert(0);
-    // byte[] data = new byte[length];
-    // for (int i=0; i<length; i++ ) {
-    //     data[i]= (byte)0xff;
-    // }
-    // if (TextUtils.isEmpty(email)) {
-    //     log("[buildEmailData] Empty email record");
-    //     return data; // return the empty record (for delete)
-    // }
-    // byte[] byteEmail = GsmAlphabet.stringToGsm8BitPacked(email);
-    // System.arraycopy(byteEmail, 0, data, 0, byteEmail.length);
-    // int pbrIndex = getPbrIndexBy(adnRecIndex);
-    // int recordIndex = adnRecIndex - getInitIndexBy(pbrIndex);
-    // if (mEmailPresentInIap) {
-    //     data[length - 1] = (byte) (recordIndex + 1);
-    // }
-    // log("buildEmailData: data is" + IccUtils.bytesToHexString(data));
-    // return data;
-    return NULL;
+    AutoPtr<ArrayOf<Byte> > data = ArrayOf<Byte>::Alloc(length);
+    for (Int32 i = 0; i < length; i++) {
+        (*data)[i] = (Byte) 0xff;
+    }
+    if (email.IsEmpty()) {
+        Log(String("[buildEmailData] Empty email record"));
+        return data; // return the empty record (for delete)
+    }
+    AutoPtr<ArrayOf<Byte> > byteEmail;
+    GsmAlphabet::StringToGsm8BitPacked(email, (ArrayOf<Byte>**)&byteEmail);
+    data->Copy(0, byteEmail, 0, byteEmail->GetLength());
+    Int32 pbrIndex;
+    GetPbrIndexBy(adnRecIndex, &pbrIndex);
+    Int32 recordIndex = adnRecIndex - GetInitIndexBy(pbrIndex);
+    if (mEmailPresentInIap) {
+        (*data)[length - 1] = (Byte) (recordIndex + 1);
+    }
+    Log(String("buildEmailData: data is") + IccUtils::BytesToHexString(data));
+    return data;
 }
 
 AutoPtr<ArrayOf<Byte> > CUsimPhoneBookManager::BuildAnrData(
@@ -1619,87 +2224,99 @@ AutoPtr<ArrayOf<Byte> > CUsimPhoneBookManager::BuildAnrData(
     /* [in] */ Int32 adnRecIndex,
     /* [in] */ const String& anr)
 {
-    assert(0);
-    // byte[] data = new byte[length];
-    // for (int i = 0; i < length; i++) {
-    //     data[i] = (byte) 0xff;
-    // }
-    // if (TextUtils.isEmpty(anr)) {
-    //     log("[buildAnrData] Empty anr record");
-    //     return data; // return the empty record (for delete)
-    // }
-    // data[ANR_DESCRIPTION_ID] = (byte) (0x0);
-    // byte[] byteAnr = PhoneNumberUtils.numberToCalledPartyBCD(anr);
+    AutoPtr<ArrayOf<Byte> > data = ArrayOf<Byte>::Alloc(length);
+    for (Int32 i = 0; i < length; i++) {
+        (*data)[i] = (Byte) 0xff;
+    }
+    if (anr.IsEmpty()) {
+        Log(String("[buildAnrData] Empty anr record"));
+        return data; // return the empty record (for delete)
+    }
+    (*data)[ANR_DESCRIPTION_ID] = (Byte) (0x0);
+    AutoPtr<ArrayOf<Byte> > byteAnr;
+    PhoneNumberUtils::NumberToCalledPartyBCD(anr, (ArrayOf<Byte>**)&byteAnr);
 
-    // // If the phone number does not matching format, like "+" return null.
-    // if (byteAnr == null) {
-    //     return null;
-    // }
+    // If the phone number does not matching format, like "+" return NULL.
+    if (byteAnr == NULL) {
+        return NULL;
+    }
 
-    // // numberToCalledPartyBCD has considered TOA byte
-    // int maxlength = ANR_ADDITIONAL_NUMBER_END_ID - ANR_ADDITIONAL_NUMBER_START_ID + 1 + 1;
-    // if (byteAnr.length > maxlength) {
-    //     System.arraycopy(byteAnr, 0, data, ANR_TON_NPI_ID, maxlength);
-    //     data[ANR_BCD_NUMBER_LENGTH] = (byte) (maxlength);
-    // } else {
-    //     System.arraycopy(byteAnr, 0, data, ANR_TON_NPI_ID, byteAnr.length);
-    //     data[ANR_BCD_NUMBER_LENGTH] = (byte) (byteAnr.length);
-    // }
-    // data[ANR_CAPABILITY_ID] = (byte) 0xFF;
-    // data[ANR_EXTENSION_ID] = (byte) 0xFF;
-    // if (length == 17) {
-    //     int pbrIndex = getPbrIndexBy(adnRecIndex);
-    //     int recordIndex = adnRecIndex - getInitIndexBy(pbrIndex);
-    //     data[ANR_ADN_RECORD_IDENTIFIER_ID] = (byte) (recordIndex + 1);
-    // }
-    // log("buildAnrData: data is" + IccUtils.bytesToHexString(data));
-    // return data;
-    return NULL;
+    // numberToCalledPartyBCD has considered TOA byte
+    Int32 maxlength = ANR_ADDITIONAL_NUMBER_END_ID - ANR_ADDITIONAL_NUMBER_START_ID + 1 + 1;
+    if (byteAnr->GetLength() > maxlength) {
+        data->Copy(ANR_TON_NPI_ID, byteAnr, 0, maxlength);
+        (*data)[ANR_BCD_NUMBER_LENGTH] = (Byte) (maxlength);
+    }
+    else {
+        data->Copy(ANR_TON_NPI_ID, byteAnr, 0, byteAnr->GetLength());
+        (*data)[ANR_BCD_NUMBER_LENGTH] = (Byte) (byteAnr->GetLength());
+    }
+    (*data)[ANR_CAPABILITY_ID] = (Byte) 0xFF;
+    (*data)[ANR_EXTENSION_ID] = (Byte) 0xFF;
+    if (length == 17) {
+        Int32 pbrIndex;
+        GetPbrIndexBy(adnRecIndex, &pbrIndex);
+        Int32 recordIndex = adnRecIndex - GetInitIndexBy(pbrIndex);
+        (*data)[ANR_ADN_RECORD_IDENTIFIER_ID] = (Byte) (recordIndex + 1);
+    }
+    Log(String("buildAnrData: data is") + IccUtils::BytesToHexString(data));
+    return data;
 }
 
 void CUsimPhoneBookManager::CreatePbrFile(
     /* [in] */ IArrayList* records)
 {
-    assert(0);
-    // if (records == null) {
-    //     mPbrFile = null;
-    //     mIsPbrPresent = false;
-    //     return;
-    // }
-    // mPbrFile = new PbrFile(records);
+    if (records == NULL) {
+        mPbrFile = NULL;
+        mIsPbrPresent = FALSE;
+        return;
+    }
+    mPbrFile = new PbrFile(records, this);
 }
 
 void CUsimPhoneBookManager::PutValidRecNums(
     /* [in] */ Int32 pbrIndex)
 {
-    assert(0);
-    // ArrayList<Integer> recordNums = new ArrayList<Integer>();
-    // int initAdnIndex = getInitIndexBy(pbrIndex);
-    // log("pbr index is " + pbrIndex + ", initAdnIndex is " + initAdnIndex);
-    // for (int i = 0; i < mAdnLengthList.get(pbrIndex); i++) {
-    //     recordNums.add(i + 1);
-    // }
-    // // Need to read at least one record to inint
-    // // variable mIapFileRecord, mEmailFileRecord,mAnrFileRecord
-    // if (recordNums.size() == 0) {
-    //     recordNums.add(1);
-    // }
-    // mRecordNums.put(pbrIndex, recordNums);
+    AutoPtr<IArrayList> recordNums;
+    CArrayList::New((IArrayList**)&recordNums);
+    Int32 initAdnIndex = GetInitIndexBy(pbrIndex);
+    Log(String("pbr index is ") + StringUtils::ToString(pbrIndex) +
+            ", initAdnIndex is " + StringUtils::ToString(initAdnIndex));
+
+    AutoPtr<IInterface> obj;
+    mAdnLengthList->Get(pbrIndex, (IInterface**)&obj);
+    Int32 val;
+    IInteger32::Probe(obj)->GetValue(&val);
+    for (Int32 i = 0; i < val; i++) {
+        recordNums->Add(CoreUtils::Convert(i + 1));
+    }
+    // Need to read at least one record to inint
+    // variable mIapFileRecord, mEmailFileRecord,mAnrFileRecord
+    Int32 size;
+    recordNums->GetSize(&size);
+    if (size == 0) {
+        recordNums->Add(CoreUtils::Convert(1));
+    }
+    mRecordNums->Put(CoreUtils::Convert(pbrIndex), recordNums);
 }
 
 AutoPtr<IArrayList> CUsimPhoneBookManager::GetValidRecordNums(
     /* [in] */ Int32 pbrIndex)
 {
-    assert(0);
-    // return mRecordNums.get(pbrIndex);
+    AutoPtr<IInterface> obj;
+    mRecordNums->Get(CoreUtils::Convert(pbrIndex), (IInterface**)&obj);
+    return IArrayList::Probe(obj);
 }
 
 Boolean CUsimPhoneBookManager::HasValidRecords(
     /* [in] */ Int32 pbrIndex)
 {
-    assert(0);
-    // return mRecordNums.get(pbrIndex).size() > 0;
-    return TRUE;
+    AutoPtr<IInterface> obj;
+    mRecordNums->Get(CoreUtils::Convert(pbrIndex), (IInterface**)&obj);
+    AutoPtr<IArrayList> list = IArrayList::Probe(obj);
+    Int32 size;
+    list->GetSize(&size);
+    return size > 0;
 }
 
 void CUsimPhoneBookManager::Log(

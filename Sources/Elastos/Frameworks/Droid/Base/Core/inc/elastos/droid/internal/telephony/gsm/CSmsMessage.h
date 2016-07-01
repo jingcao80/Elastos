@@ -30,6 +30,8 @@ public:
         : public Object // TODO: SmsMessageBase::SubmitPduBase
         , public ISmsMessageSubmitPdu
     {
+    public:
+        CAR_INTERFACE_DECL()
     };
 
 private:
@@ -474,7 +476,7 @@ private:
             /* [in] */ const String& destinationAddress,
             /* [in] */ Byte mtiByte,
             /* [in] */ Boolean statusReportRequested,
-            /* [in] */ ISmsMessageSubmitPdu* ret);
+            /* [in] */ SubmitPdu* ret);
 
     /**
      * TS 27.005 3.1, &lt;pdu&gt; definition "In the case of SMS: 3GPP TS 24.011 [6]
@@ -484,7 +486,7 @@ private:
      * characters 2A (IRA 50 and 65))" ...in the case of cell broadcast,
      * something else...
      */
-    CARAPI_(void) ParsePdu(
+    CARAPI ParsePdu(
         /* [in] */ ArrayOf<Byte>* pdu);
 
     /**

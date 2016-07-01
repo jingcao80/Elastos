@@ -33,9 +33,6 @@ GsmInboundSmsHandler::GsmInboundSmsHandler(
     /* [in] */ IPhoneBase* phone)
     : InboundSmsHandler(String("GsmInboundSmsHandler"), context, storageMonitor, phone, CellBroadcastHandler::MakeCellBroadcastHandler(context, phone))
 {
-    // AutoPtr<IGsmCellBroadcastHandler> gcbh;
-    // CGsmCellBroadcastHandler::MakeGsmCellBroadcastHandler(context, phone, (IGsmCellBroadcastHandler**)&gcbh);
-    // InboundSmsHandler(String("GsmInboundSmsHandler"), context, storageMonitor, phone, gcbh);
     AutoPtr<IHandler> handler;
     GetHandler((IHandler**)&handler);
     ((PhoneBase*)phone)->mCi->SetOnNewGsmSms(handler, EVENT_NEW_SMS, NULL);

@@ -206,6 +206,8 @@ protected:
      */
     Int32 mIndexOnIcc;
 
+    /** TP-Message-Reference - Message Reference of sent message. @hide */
+    Int32 mMessageRef;
 };
 
 } // namespace Telephony
