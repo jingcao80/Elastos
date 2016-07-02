@@ -5,6 +5,7 @@
 #include <elastos/core/Object.h>
 #include <elastos/core/StringBuilder.h>
 #include "Elastos.CoreLibrary.Utility.h"
+#include "elastos/droid/dialer/dialpad/SmartDialMatchPosition.h"
 
 using Elastos::Core::StringBuilder;
 using Elastos::Utility::IArrayList;
@@ -23,16 +24,13 @@ namespace Dialpad {
  */
 class SmartDialNameMatcher
     : public Object
-    , public ISmartDialNameMatcher
 {
 public:
-    CAR_INTERFACE_DECL();
-
     // @VisibleForTesting
-    CARAPI constructor(
+    SmartDialNameMatcher(
         /* [in] */ const String& query);
 
-    CARAPI constructor(
+    SmartDialNameMatcher(
         /* [in] */ const String& query,
         /* [in] */ ISmartDialMap* map);
 
@@ -68,11 +66,10 @@ public:
      *         SmartDialMatchPosition with the matching positions otherwise
      */
      // @VisibleForTesting
-    CARAPI MatchesNumber(
-        /* [in] */ String phoneNumber,
-        /* [in] */ String query,
-        /* [in] */ Boolean useNanp,
-        /* [out] */ ISmartDialMatchPosition** position);
+    CARAPI_(AutoPtr<SmartDialMatchPosition>) MatchesNumber(
+        /* [in] */ const String& phoneNumber,
+        /* [in] */ const String& query,
+        /* [in] */ Boolean useNanp);
 
     /**
      * Matches a phone number against the saved query, taking care of formatting characters and also
@@ -82,9 +79,8 @@ public:
      * @return {@literal null} if the number and the query don't match, a valid
      *         SmartDialMatchPosition with the matching positions otherwise
      */
-    CARAPI MatchesNumber(
-        /* [in] */ String phoneNumber,
-        /* [out] */ ISmartDialMatchPosition** position);
+    CARAPI_(AutoPtr<SmartDialMatchPosition>) MatchesNumber(
+        /* [in] */ const String& phoneNumber);
 
     /**
      * Matches a phone number against a query, taking care of formatting characters and also
@@ -95,10 +91,9 @@ public:
      * @return {@literal null} if the number and the query don't match, a valid
      *         SmartDialMatchPosition with the matching positions otherwise
      */
-    CARAPI MatchesNumber(
-        /* [in] */ String phoneNumber,
-        /* [in] */ String query,
-        /* [out] */ ISmartDialMatchPosition** position);
+    CARAPI_(AutoPtr<SmartDialMatchPosition>) MatchesNumber(
+        /* [in] */ const String& phoneNumber,
+        /* [in] */ const String& query);
 
     /**
      * This function iterates through each token in the display name, trying to match the query
@@ -151,6 +146,7 @@ public:
 
     CARAPI GetQuery(
         /* [out] */ String* result);
+
 private:
     /**
      * Constructs empty highlight mask. Bit 0 at a position means there is no match, Bit 1 means
@@ -169,7 +165,7 @@ private:
      */
     CARAPI_(void) ReplaceBitInMask(
         /* [in] */ StringBuilder* builder,
-        /* [in] */ ISmartDialMatchPosition* matchPos);
+        /* [in] */ SmartDialMatchPosition* matchPos);
 
     /**
      * Matches a phone number against a query, taking care of formatting characters
@@ -181,23 +177,23 @@ private:
      * @return {@literal null} if the number and the query don't match, a valid
      *         SmartDialMatchPosition with the matching positions otherwise
      */
-    CARAPI_(AutoPtr<ISmartDialMatchPosition>) MatchesNumberWithOffset(
+    CARAPI_(AutoPtr<SmartDialMatchPosition>) MatchesNumberWithOffset(
         /* [in] */ const String& phoneNumber,
         /* [in] */ const String& query,
         /* [in] */ Int32 offset);
 
 public:
-    static const AutoPtr<ISmartDialMap> LATIN_SMART_DIAL_MAP; // = new LatinSmartDialMap();
+    static const AutoPtr<ISmartDialMap> LATIN_SMART_DIAL_MAP;
 
 private:
     String mQuery;
 
     // Whether or not we allow matches like 57 - (J)ohn (S)mith
-    static const Boolean ALLOW_INITIAL_MATCH; // = true;
+    static const Boolean ALLOW_INITIAL_MATCH;
 
     // The maximum length of the initial we will match - typically set to 1 to minimize false
     // positives
-    static const Int32 INITIAL_LENGTH_LIMIT; // = 1;
+    static const Int32 INITIAL_LENGTH_LIMIT;
 
     AutoPtr<IArrayList> mMatchPositions;
 

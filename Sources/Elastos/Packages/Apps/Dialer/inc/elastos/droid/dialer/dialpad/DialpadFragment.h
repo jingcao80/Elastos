@@ -3,12 +3,6 @@
 #define __ELASTOS_DROID_DIALER_DIALPAD_DIALPADFRAGMENT_H__
 
 #include "_Elastos.Droid.Dialer.h"
-#include <elastos/droid/app/DialogFragment.h>
-#include <elastos/droid/app/Fragment.h>
-#include <elastos/droid/telephony/PhoneStateListener.h>
-#include <elastos/droid/widget/BaseAdapter.h>
-// #include <elastos/droid/widget/PopupMenu.h>
-#include <elastos/droid/widget/RelativeLayout.h>
 #include "Elastos.Droid.App.h"
 #include "Elastos.Droid.Content.h"
 #include "Elastos.Droid.Media.h"
@@ -20,6 +14,13 @@
 #include "Elastos.Droid.Widget.h"
 #include "Elastos.CoreLibrary.Core.h"
 #include "Elastos.CoreLibrary.Utility.h"
+#include <elastos/droid/app/DialogFragment.h>
+#include <elastos/droid/app/Fragment.h>
+#include <elastos/droid/telephony/PhoneStateListener.h>
+#include <elastos/droid/widget/BaseAdapter.h>
+#include <elastos/droid/widget/PopupMenu.h>
+#include <elastos/droid/widget/RelativeLayout.h>
+#include <elastos/droid/dialerbind/analytics/AnalyticsFragment.h>
 
 using Elastos::Droid::App::IActivity;
 using Elastos::Droid::App::IDialog;
@@ -54,11 +55,12 @@ using Elastos::Droid::Widget::IAdapterViewOnItemClickListener;
 using Elastos::Droid::Widget::IEditText;
 using Elastos::Droid::Widget::IListView;
 using Elastos::Droid::Widget::IPopupMenu;
+using Elastos::Droid::Widget::PopupMenu;
 using Elastos::Droid::Widget::RelativeLayout;
 using Elastos::Droid::Widget::IPopupMenuOnMenuItemClickListener;
 using Elastos::Core::ICharSequence;
 using Elastos::Utility::IHashSet;
-// using Elastos::Apps::DialerBind::AnalyticsFragment;
+using Elastos::Droid::DialerBind::Analytics::AnalyticsFragment;
 
 namespace Elastos {
 namespace Droid {
@@ -69,9 +71,7 @@ namespace Dialpad {
  * Fragment that displays a twelve-key phone dialpad.
  */
 class DialpadFragment
-    // TODO:
-    /* : public AnalyticsFragment */
-    : public Fragment
+    : public AnalyticsFragment
     , public IDialpadFragment
     , public IViewOnClickListener
     , public IViewOnLongClickListener
@@ -117,15 +117,14 @@ public:
 
     class ErrorDialogFragment
         : public DialogFragment
-        , public IDialpadFragmentErrorDialogFragment
     {
     public:
         CAR_INTERFACE_DECL();
 
-        static CARAPI_(AutoPtr<IDialpadFragmentErrorDialogFragment>) NewInstance(
+        static CARAPI_(AutoPtr<ErrorDialogFragment>) NewInstance(
             /* [in] */ Int32 messageResId);
 
-        static CARAPI_(AutoPtr<IDialpadFragmentErrorDialogFragment>) NewInstance(
+        static CARAPI_(AutoPtr<ErrorDialogFragment>) NewInstance(
             /* [in] */ Int32 titleResId,
             /* [in] */ Int32 messageResId);
 
@@ -135,15 +134,15 @@ public:
 
         // @Override
         CARAPI OnCreateDialog(
-        /* [in] */ IBundle* savedInstanceState,
-        /* [out] */ IDialog** dialog);
+            /* [in] */ IBundle* savedInstanceState,
+            /* [out] */ IDialog** dialog);
 
     private:
         Int32 mTitleResId;
         Int32 mMessageResId;
 
-        static const String ARG_TITLE_RES_ID; // = "argTitleResId";
-        static const String ARG_MESSAGE_RES_ID; // = "argMessageResId";
+        static const String ARG_TITLE_RES_ID;
+        static const String ARG_MESSAGE_RES_ID;
     };
 
 private:
@@ -162,6 +161,7 @@ private:
         CARAPI OnCallStateChanged(
             /* [in] */ Int32 state,
             /* [in] */ const String& incomingNumber);
+
     private:
         DialpadFragment* mHost;
     };
@@ -183,6 +183,7 @@ private:
                 /* [in] */ const String& s,
                 /* [in] */ IBitmap* b,
                 /* [in] */ Int32 i);
+
         public:
             String mText;
             AutoPtr<IBitmap> mIcon;
@@ -209,14 +210,15 @@ private:
             /* [in] */ IView* convertView,
             /* [in] */ IViewGroup* parent,
             /* [out] */ IView** view);
+
     public:
         // IDs for the possible "choices":
-        static const Int32 DIALPAD_CHOICE_USE_DTMF_DIALPAD; // = 101;
-        static const Int32 DIALPAD_CHOICE_RETURN_TO_CALL; // = 102;
-        static const Int32 DIALPAD_CHOICE_ADD_NEW_CALL; // = 103;
+        static const Int32 DIALPAD_CHOICE_USE_DTMF_DIALPAD;
+        static const Int32 DIALPAD_CHOICE_RETURN_TO_CALL;
+        static const Int32 DIALPAD_CHOICE_ADD_NEW_CALL;
 
     private:
-        static const Int32 NUM_ITEMS; // = 3;
+        static const Int32 NUM_ITEMS;
         AutoPtr<ArrayOf<ChoiceItem*> > mChoiceItems;
         AutoPtr<ILayoutInflater> mInflater;
     };
@@ -254,18 +256,18 @@ private:
         DialpadFragment* mHost;
     };
 
-    // class DialpadPopupMenu
-    //     : public PopupMen
-    // {
-    // public:
-    //     DialpadPopupMenu(
-    //          /* [in] */ DialpadFragment* host);
+    class DialpadPopupMenu
+        : public PopupMenu
+    {
+    public:
+        DialpadPopupMenu(
+             /* [in] */ DialpadFragment* host);
 
-    //     CARAPI Show();
+        CARAPI Show();
 
-    // private:
-    //     DialpadFragment* mHost;
-    // };
+    private:
+        DialpadFragment* mHost;
+    };
 
 public:
     CAR_INTERFACE_DECL();
@@ -399,6 +401,7 @@ public:
 
     CARAPI SetYFraction(
         /* [in] */ Float yFraction);
+
 private:
     /**
      * Return an Intent for launching voicemail screen.
@@ -598,28 +601,28 @@ private:
     CARAPI_(AutoPtr<IIntent>) NewFlashIntent();
 
 private:
-    static const String TAG; // = DialpadFragment.class.getSimpleName();
+    static const String TAG;
 
-    static const Boolean DEBUG; // = DialtactsActivity.DEBUG;
+    static const Boolean DEBUG;
 
     // This is the amount of screen the dialpad fragment takes up when fully displayed
-    static const Float DIALPAD_SLIDE_FRACTION; // = 0.67f;
+    static const Float DIALPAD_SLIDE_FRACTION;
 
     static const String EMPTY_NUMBER;
-    static const Char32 PAUSE; // = ',';
-    static const Char32 WAIT; // = ';';
+    static const Char32 PAUSE;
+    static const Char32 WAIT;
 
     /** The length of DTMF tones in milliseconds */
-    static const Int32 TONE_LENGTH_MS; // = 150;
-    static const Int32 TONE_LENGTH_INFINITE; // = -1;
+    static const Int32 TONE_LENGTH_MS;
+    static const Int32 TONE_LENGTH_INFINITE;
 
     /** The DTMF tone volume relative to other sounds in the stream */
-    static const Int32 TONE_RELATIVE_VOLUME; // = 80;
+    static const Int32 TONE_RELATIVE_VOLUME;
 
     /** Stream type used to play the DTMF tones off call, and mapped to the volume control keys */
-    static const Int32 DIAL_TONE_STREAM_TYPE; // = AudioManager.STREAM_DTMF;
+    static const Int32 DIAL_TONE_STREAM_TYPE;
 
-    AutoPtr<IOnDialpadQueryChangedListener> mDialpadQueryListener;
+    // AutoPtr<IOnDialpadQueryChangedListener> mDialpadQueryListener;
 
     // TODO:
     // AutoPtr<IDialpadView> mDialpadView;
@@ -645,7 +648,7 @@ private:
     AutoPtr<IHashSet> mPressedDialpadKeys;
 
     AutoPtr<IListView> mDialpadChooser;
-    AutoPtr<DialpadChooserAdapter> mDialpadChooserAdapter;
+    // AutoPtr<DialpadChooserAdapter> mDialpadChooserAdapter;
 
     /**
      * Regular expression prohibiting manual phone call. Can be empty, which means "no rule".
@@ -657,7 +660,7 @@ private:
     // in onCreate. This number is displayed when the user hits the
     // send key and cleared in onPause.
     // AutoPtr<ICallLogAsync> mCallLog; // = new CallLogAsync();
-    String mLastNumberDialed; // = EMPTY_NUMBER;
+    String mLastNumberDialed;
 
     // determines if we want to playback local DTMF tones.
     Boolean mDTMFToneEnabled;
@@ -666,7 +669,7 @@ private:
     // AutoPtr<IHapticFeedback> mHaptic; // = new HapticFeedback();
 
     /** Identifier for the "Add Call" intent extra. */
-    static const String ADD_CALL_MODE_KEY; // = "add_call_mode";
+    static const String ADD_CALL_MODE_KEY;
 
     /**
      * Identifier for intent extra for sending an empty Flash message for
@@ -679,11 +682,10 @@ private:
      * in Phone app until this is replaced with the Telephony/Telecom API.
      */
     static const String EXTRA_SEND_EMPTY_FLASH;
-            // = "com.android.phone.extra.SEND_EMPTY_FLASH";
 
     String mCurrentCountryIso;
 
-    AutoPtr<DialpadPhoneStateListener> mPhoneStateListener;
+    // AutoPtr<DialpadPhoneStateListener> mPhoneStateListener;
 
     Boolean mWasEmptyBeforeTextChange;
 
@@ -694,13 +696,13 @@ private:
      */
     Boolean mDigitsFilledByIntent;
 
-    Boolean mStartedFromNewIntent; // = false;
-    Boolean mFirstLaunch; // = false;
-    Boolean mAnimate; // = false;
+    Boolean mStartedFromNewIntent;
+    Boolean mFirstLaunch;
+    Boolean mAnimate;
 
     AutoPtr<IComponentName> mSmsPackageComponentName;
 
-    static const String PREF_DIGITS_FILLED_BY_INTENT; // = "pref_digits_filled_by_intent";
+    static const String PREF_DIGITS_FILLED_BY_INTENT;
 };
 
 } // Dialpad

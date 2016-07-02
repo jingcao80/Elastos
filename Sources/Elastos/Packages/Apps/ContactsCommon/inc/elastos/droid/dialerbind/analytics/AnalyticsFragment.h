@@ -1,14 +1,18 @@
-#ifndef __ELASTOS_APPS_DIALERBIND_ANALYTICS_ANALYTICSLISTFRAGMENT_H__
-#define __ELASTOS_APPS_DIALERBIND_ANALYTICS_ANALYTICSLISTFRAGMENT_H__
+#ifndef __ELASTOS_DROID_DIALERBIND_ANALYTICS_ANALYTICSLISTFRAGMENT_H__
+#define __ELASTOS_DROID_DIALERBIND_ANALYTICS_ANALYTICSLISTFRAGMENT_H__
 
-namespace Elastos{
-namespace Apps{
+#include "_Elastos.Droid.ContactsCommon.h"
+#include <elastos/droid/app/Fragment.h>
+
+using Elastos::Droid::App::Fragment;
+
+namespace Elastos {
+namespace Droid {
 namespace DialerBind {
 namespace Analytics {
 
 class AnalyticsFragment
     : public Fragment
-    , public IAnalyticsFragment
     , public IAnalyticsInterface
 {
 public:
@@ -16,18 +20,17 @@ public:
 
     // @Override
     CARAPI SendHitEvent(
-        /* [in] */ String categoryId,
-        /* [in] */ String actionId,
-        /* [in] */ String labelId);
+        /* [in] */ const String& categoryId,
+        /* [in] */ const String& actionId,
+        /* [in] */ const String& labelId);
 
     // @Override
     CARAPI SendScreenView();
-
 };
 
 } // Analytics
 } // DialerBind
-} // Apps
+} // Droid
 } // Elastos
 
-#endif //__ELASTOS_APPS_DIALERBIND_ANALYTICS_ANALYTICSLISTFRAGMENT_H__
+#endif //__ELASTOS_DROID_DIALERBIND_ANALYTICS_ANALYTICSLISTFRAGMENT_H__

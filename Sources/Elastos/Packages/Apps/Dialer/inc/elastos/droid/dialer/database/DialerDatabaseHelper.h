@@ -8,6 +8,7 @@
 #include "Elastos.Droid.Net.h"
 #include "Elastos.CoreLibrary.Core.h"
 #include "Elastos.CoreLibrary.Utility.h"
+#include "elastos/droid/dialer/dialpad/SmartDialNameMatcher.h"
 
 using Elastos::Droid::Database::ICursor;
 using Elastos::Droid::Database::Sqlite::SQLiteOpenHelper;
@@ -17,7 +18,7 @@ using Elastos::Droid::Os::AsyncTask;
 using Elastos::Core::IInteger64;
 using Elastos::Utility::IArrayList;
 using Elastos::Utility::Concurrent::Atomic::IAtomicBoolean;
-using Elastos::Droid::Dialer::Dialpad::ISmartDialNameMatcher;
+using Elastos::Droid::Dialer::Dialpad::SmartDialNameMatcher;
 
 namespace Elastos {
 namespace Droid {
@@ -26,51 +27,50 @@ namespace Database {
 
 class DialerDatabaseHelper
     : public SQLiteOpenHelper
-    , public IDialerDatabaseHelper
 {
 public:
     class Tables
     {
     public:
         /** Saves the necessary smart dial information of all contacts. */
-        static const String SMARTDIAL_TABLE; // = "smartdial_table";
+        static const String SMARTDIAL_TABLE;
         /** Saves all possible prefixes to refer to a contacts.*/
-        static const String PREFIX_TABLE; // = "prefix_table";
+        static const String PREFIX_TABLE;
         /** Database properties for internal use */
-        static const String PROPERTIES; // = "properties";
+        static const String PROPERTIES;
     };
 
     class SmartDialDbColumns
     {
     public:
-        static const String _ID; // = "id";
-        static const String DATA_ID; // = "data_id";
-        static const String NUMBER; // = "phone_number";
-        static const String CONTACT_ID; // = "contact_id";
-        static const String LOOKUP_KEY; // = "lookup_key";
-        static const String DISPLAY_NAME_PRIMARY; // = "display_name";
-        static const String PHOTO_ID; // = "photo_id";
-        static const String LAST_TIME_USED; // = "last_time_used";
-        static const String TIMES_USED; // = "times_used";
-        static const String STARRED; // = "starred";
-        static const String IS_SUPER_PRIMARY; // = "is_super_primary";
-        static const String IN_VISIBLE_GROUP; // = "in_visible_group";
-        static const String IS_PRIMARY; // = "is_primary";
-        static const String LAST_SMARTDIAL_UPDATE_TIME; // = "last_smartdial_update_time";
+        static const String _ID;
+        static const String DATA_ID;
+        static const String NUMBER;
+        static const String CONTACT_ID;
+        static const String LOOKUP_KEY;
+        static const String DISPLAY_NAME_PRIMARY;
+        static const String PHOTO_ID;
+        static const String LAST_TIME_USED;
+        static const String TIMES_USED;
+        static const String STARRED;
+        static const String IS_SUPER_PRIMARY;
+        static const String IN_VISIBLE_GROUP;
+        static const String IS_PRIMARY;
+        static const String LAST_SMARTDIAL_UPDATE_TIME;
     };
 
     class PrefixColumns
     {
     public:
-        static const String PREFIX; // = "prefix";
-        static const String CONTACT_ID; // = "contact_id";
+        static const String PREFIX;
+        static const String CONTACT_ID;
     };
 
     class PropertiesColumns
     {
     public:
-        static const String PROPERTY_KEY; // = "property_key";
-        static const String PROPERTY_VALUE; // = "property_value";
+        static const String PROPERTY_KEY;
+        static const String PROPERTY_VALUE;
     };
 
     class PhoneQuery
@@ -79,47 +79,44 @@ public:
         static const AutoPtr<IUri> URI;
         static const String PROJECTION[];
 
-        static const Int32 PHONE_ID; // = 0;
-        static const Int32 PHONE_TYPE; // = 1;
-        static const Int32 PHONE_LABEL; // = 2;
-        static const Int32 PHONE_NUMBER; // = 3;
-        static const Int32 PHONE_CONTACT_ID; // = 4;
-        static const Int32 PHONE_LOOKUP_KEY; // = 5;
-        static const Int32 PHONE_DISPLAY_NAME; // = 6;
-        static const Int32 PHONE_PHOTO_ID; // = 7;
-        static const Int32 PHONE_LAST_TIME_USED; // = 8;
-        static const Int32 PHONE_TIMES_USED; // = 9;
-        static const Int32 PHONE_STARRED; // = 10;
-        static const Int32 PHONE_IS_SUPER_PRIMARY; // = 11;
-        static const Int32 PHONE_IN_VISIBLE_GROUP; // = 12;
-        static const Int32 PHONE_IS_PRIMARY; // = 13;
+        static const Int32 PHONE_ID;
+        static const Int32 PHONE_TYPE;
+        static const Int32 PHONE_LABEL;
+        static const Int32 PHONE_NUMBER;
+        static const Int32 PHONE_CONTACT_ID;
+        static const Int32 PHONE_LOOKUP_KEY;
+        static const Int32 PHONE_DISPLAY_NAME;
+        static const Int32 PHONE_PHOTO_ID;
+        static const Int32 PHONE_LAST_TIME_USED;
+        static const Int32 PHONE_TIMES_USED;
+        static const Int32 PHONE_STARRED;
+        static const Int32 PHONE_IS_SUPER_PRIMARY;
+        static const Int32 PHONE_IN_VISIBLE_GROUP;
+        static const Int32 PHONE_IS_PRIMARY;
 
         /** Selects only rows that have been updated after a certain time stamp.*/
-        static const String SELECT_UPDATED_CLAUSE; // =
-                // Phone.CONTACT_LAST_UPDATED_TIMESTAMP + " > ?";
+        static const String SELECT_UPDATED_CLAUSE;
 
         /** Ignores contacts that have an unreasonably long lookup key. These are likely to be
          * the result of multiple (> 50) merged raw contacts, and are likely to cause
          * OutOfMemoryExceptions within SQLite, or cause memory allocation problems later on
          * when iterating through the cursor set (see b/13133579)
          */
-        static const String SELECT_IGNORE_LOOKUP_KEY_TOO_LONG_CLAUSE; // =
-                // "length(" + Phone.LOOKUP_KEY + ") < 1000";
+        static const String SELECT_IGNORE_LOOKUP_KEY_TOO_LONG_CLAUSE;
 
-        static const String SELECTION; // = SELECT_UPDATED_CLAUSE + " AND " +
-                // SELECT_IGNORE_LOOKUP_KEY_TOO_LONG_CLAUSE;
+        static const String SELECTION;
     };
 
     /** Query options for querying the deleted contact database.*/
     class DeleteContactQuery
     {
     public:
-        static const AutoPtr<IUri> URI; // = ContactsContract.DeletedContacts.CONTENT_URI;
+        static const AutoPtr<IUri> URI;
 
         static const String PROJECTION[];
 
-        static const Int32 DELETED_CONTACT_ID; // = 0;
-        static const Int32 DELECTED_TIMESTAMP; // = 1;
+        static const Int32 DELETED_CONTACT_ID;
+        static const Int32 DELECTED_TIMESTAMP;
     };
 
     /**
@@ -164,13 +161,12 @@ private:
     {
     public:
         /** Current contacts - those contacted within the last 3 days (in milliseconds) */
-        static const Int64 LAST_TIME_USED_CURRENT_MS; // = 3L * 24 * 60 * 60 * 1000;
+        static const Int64 LAST_TIME_USED_CURRENT_MS;
         /** Recent contacts - those contacted within the last 30 days (in milliseconds) */
-        static const Int64 LAST_TIME_USED_RECENT_MS; // = 30L * 24 * 60 * 60 * 1000;
+        static const Int64 LAST_TIME_USED_RECENT_MS;
 
         /** Time since last contact. */
-        static const String TIME_SINCE_LAST_USED_MS; // = "( ?1 - " +
-                // Tables.SMARTDIAL_TABLE + "." + SmartDialDbColumns.LAST_TIME_USED + ")";
+        static const String TIME_SINCE_LAST_USED_MS;
 
         /** Contacts that have been used in the past 3 days rank higher than contacts that have
          * been used in the past 30 days, which rank higher than contacts that have not been used
@@ -203,6 +199,7 @@ private:
         CARAPI Equals(
             /* [in] */ IInterface* other,
             /* [out] */ Boolean* result);
+
     private:
         String mLookupKey;
         Int64 mId;
@@ -227,6 +224,7 @@ private:
         // @Override
         CARAPI OnPostExecute(
             /* [in] */ IInterface* result);
+
     private:
         DialerDatabaseHelper* mHost;
     };
@@ -237,14 +235,14 @@ public:
     /**
      * Access function to get the singleton instance of DialerDatabaseHelper.
      */
-    static AutoPtr<IDialerDatabaseHelper> GetInstance(
+    static AutoPtr<DialerDatabaseHelper> GetInstance(
         /* [in] */ IContext* context);
 
     /**
      * Returns a new instance for unit tests. The database will be created in memory.
      */
     // @VisibleForTesting
-    static AutoPtr<IDialerDatabaseHelper> GetNewInstanceForTest(
+    static AutoPtr<DialerDatabaseHelper> GetNewInstanceForTest(
         /* [in] */ IContext* context);
 
     /**
@@ -345,7 +343,7 @@ public:
      */
     CARAPI GetLooseMatches(
         /* [in] */ const String& query,
-        /* [in] */ ISmartDialNameMatcher* nameMatcher,
+        /* [in] */ SmartDialNameMatcher* nameMatcher,
         /* [out] */ IArrayList** result);
 
 protected:
@@ -410,24 +408,34 @@ private:
         /* [in] */ ISQLiteDatabase* db,
         /* [in] */ ICursor* updatedContactCursor);
 
-private:
-    static const String TAG; // = "DialerDatabaseHelper";
-    static const Boolean DEBUG; // = false;
+public:
+    /**
+     * SmartDial DB version ranges:
+     * <pre>
+     *   0-98   KitKat
+     * </pre>
+     */
+    static const Int32 DATABASE_VERSION;
+    static const String DATABASE_NAME;
 
-    static AutoPtr<IDialerDatabaseHelper> sSingleton;
+private:
+    static const String TAG;
+    static const Boolean DEBUG;
+
+    static AutoPtr<DialerDatabaseHelper> sSingleton;
 
     static Object mLock;
-    static const AutoPtr<IAtomicBoolean> sInUpdate; // = new AtomicBoolean(false);
+    static const AutoPtr<IAtomicBoolean> sInUpdate;
     AutoPtr<IContext> mContext;
 
     /**
      * Saves the last update time of smart dial databases to shared preferences.
      */
-    static const String DATABASE_LAST_CREATED_SHARED_PREF; // = "com.android.dialer";
-    static const String LAST_UPDATED_MILLIS; // = "last_updated_millis";
-    static const String DATABASE_VERSION_PROPERTY; // = "database_version";
+    static const String DATABASE_LAST_CREATED_SHARED_PREF;
+    static const String LAST_UPDATED_MILLIS;
+    static const String DATABASE_VERSION_PROPERTY;
 
-    static const Int32 MAX_ENTRIES; // = 20;
+    static const Int32 MAX_ENTRIES;
 };
 
 } // Database

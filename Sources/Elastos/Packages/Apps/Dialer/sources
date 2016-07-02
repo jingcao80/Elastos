@@ -26,5 +26,8 @@ APP_PACKAGE_NAME = Elastos.Droid.Dialer
 RES_NAMESPACE = Elastos.Droid.Dialer
 APPPACK = 1
 EXTRA_RES_DIR = $(MAKEDIR)/../ContactsCommon/res
-AAPT_FLAGS = --auto-add-overlay --extra-packages com.android.contacts.common
+EXTRA_RES_DIR += $(MAKEDIR)/../PhoneCommon/res
+AAPT_FLAGS = --auto-add-overlay \
+    --extra-packages com.android.contacts.common \
+    --extra-packages com.android.phone.common
 DIRRESOURCES += $(MAKEDIR)/res;

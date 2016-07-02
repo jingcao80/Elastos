@@ -6,3 +6,4 @@ TARGET_TYPE= lib
 INCLUDES += ../../../../../
 
 SOURCES = AnalyticsActivity.cpp
+SOURCES += AnalyticsFragment.cpp

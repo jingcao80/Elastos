@@ -7,13 +7,13 @@
 #include "Elastos.Droid.Os.h"
 #include "Elastos.Droid.View.h"
 #include "Elastos.Droid.Widget.h"
+#include "Elastos.Droid.Support.V4.View.h"
 #include "Elastos.CoreLibrary.Core.h"
 #include "Elastos.CoreLibrary.Utility.h"
-#include <elastos/droid/app/Fragment.h>
+#include <elastos/droid/dialerbind/analytics/AnalyticsFragment.h>
 #include <elastos/core/Object.h>
 
 using Elastos::Droid::App::IActionBar;
-using Elastos::Droid::App::Fragment;
 using Elastos::Droid::App::IFragment;
 using Elastos::Droid::App::IFragmentManager;
 using Elastos::Droid::Database::ICursor;
@@ -23,15 +23,17 @@ using Elastos::Droid::View::IView;
 using Elastos::Droid::View::IViewGroup;
 using Elastos::Droid::Widget::IAbsListView;
 using Elastos::Droid::Widget::IListView;
+using Elastos::Droid::Support::V4::View::IViewPagerOnPageChangeListener;
 using Elastos::Core::ICharSequence;
 using Elastos::Utility::IArrayList;
-using Elastos::Droid::Dialer::CallLog::ICallLogAdapter;
+// using Elastos::Droid::Dialer::CallLog::ICallLogAdapter;
 using Elastos::Droid::Dialer::CallLog::ICallLogAdapterCallFetcher;
-using Elastos::Droid::Dialer::CallLog::ICallLogFragment;
-using Elastos::Droid::Dialer::CallLog::ICallLogQueryHandler;
+// using Elastos::Droid::Dialer::CallLog::ICallLogFragment;
+// using Elastos::Droid::Dialer::CallLog::ICallLogQueryHandler;
 using Elastos::Droid::Dialer::CallLog::ICallLogQueryHandlerListener;
-using Elastos::Droid::Dialer::Widget::IOverlappingPaneLayout;
-using Elastos::Droid::Dialer::Widget::IOverlappingPaneLayoutPanelSlideCallbacks;
+// using Elastos::Droid::Dialer::Widget::IOverlappingPaneLayout;
+using Elastos::Droid::Dialer::Widget::IPanelSlideCallbacks;
+using Elastos::Droid::DialerBind::Analytics::AnalyticsFragment;
 
 namespace Elastos {
 namespace Droid {
@@ -47,14 +49,11 @@ namespace List {
  * screen.
  */
 class ListsFragment
-    // TODO:
-    /*: public AnalyticsFragment*/
-    : public Fragment
+    : public AnalyticsFragment
     , public IListsFragment
     , public ICallLogQueryHandlerListener
     , public ICallLogAdapterCallFetcher
-    // TODO:android.support.v4.view.ViewPager.OnPageChangeListener
-    // , public IViewPagerOnPageChangeListener
+    , public IViewPagerOnPageChangeListener
 {
 public:
     class ViewPagerAdapter
@@ -101,7 +100,7 @@ public:
 private:
     class PanelSlideCallbacks
         : public Object
-        , public IOverlappingPaneLayoutPanelSlideCallbacks
+        , public IPanelSlideCallbacks
     {
     public:
         CAR_INTERFACE_DECL()
@@ -177,9 +176,8 @@ public:
     CARAPI DismissShortcut(
         /* [in] */ IView* view);
 
-    // TODO:android.support.v4.view.ViewPager.OnPageChangeListener
-    // CARAPI AddOnPageChangeListener(
-    //     /* [in] */ IViewPagerOnPageChangeListener* onPageChangeListener);
+    CARAPI AddOnPageChangeListener(
+        /* [in] */ IViewPagerOnPageChangeListener* onPageChangeListener);
 
     // @Override
     CARAPI OnPageScrolled(
@@ -218,19 +216,18 @@ private:
     CARAPI GetCurrentListView(
         /* [out] */ IAbsListView** listView);
 
-    CARAPI_(void) SetupPaneLayout(
-        /* [in] */ IOverlappingPaneLayout* paneLayout);
+    // CARAPI_(void) SetupPaneLayout(
+    //     /* [in] */ IOverlappingPaneLayout* paneLayout);
 
 private:
-    static const Boolean DEBUG; // = DialtactsActivity.DEBUG;
-    static const String TAG; // = "ListsFragment";
+    static const Boolean DEBUG;
+    static const String TAG;
 
-    static const Int32 MAX_RECENTS_ENTRIES; // = 20;
+    static const Int32 MAX_RECENTS_ENTRIES;
     // Oldest recents entry to display is 2 weeks old.
-    static const Int64 OLDEST_RECENTS_DATE; // = 1000L * 60 * 60 * 24 * 14;
+    static const Int64 OLDEST_RECENTS_DATE;
 
-    static const String KEY_LAST_DISMISSED_CALL_SHORTCUT_DATE; // =
-            // "key_last_dismissed_call_shortcut_date";
+    static const String KEY_LAST_DISMISSED_CALL_SHORTCUT_DATE;
 
     AutoPtr<IActionBar> mActionBar;
     // TODO:
@@ -238,33 +235,33 @@ private:
     // AutoPtr<IViewPagerTabs> mViewPagerTabs;
     AutoPtr<ViewPagerAdapter> mViewPagerAdapter;
     AutoPtr<IListView> mShortcutCardsListView;
-    AutoPtr<IRemoveView> mRemoveView;
+    // AutoPtr<IRemoveView> mRemoveView;
     AutoPtr<IView> mRemoveViewContent;
-    AutoPtr<ISpeedDialFragment> mSpeedDialFragment;
-    AutoPtr<ICallLogFragment> mRecentsFragment;
-    AutoPtr<IAllContactsFragment> mAllContactsFragment;
+    // AutoPtr<ISpeedDialFragment> mSpeedDialFragment;
+    // AutoPtr<ICallLogFragment> mRecentsFragment;
+    // AutoPtr<IAllContactsFragment> mAllContactsFragment;
     AutoPtr<IArrayList> mOnPageChangeListeners;
 
     AutoPtr<ArrayOf<String> > mTabTitles;
 
-    AutoPtr<IShortcutCardsAdapter> mMergedAdapter;
-    AutoPtr<ICallLogAdapter> mCallLogAdapter;
-    AutoPtr<ICallLogQueryHandler> mCallLogQueryHandler;
+    // AutoPtr<IShortcutCardsAdapter> mMergedAdapter;
+    // AutoPtr<ICallLogAdapter> mCallLogAdapter;
+    // AutoPtr<ICallLogQueryHandler> mCallLogQueryHandler;
 
-    Boolean mIsPanelOpen; // = true;
+    Boolean mIsPanelOpen;
 
     /**
      * Call shortcuts older than this date (persisted in shared preferences) will not show up in
      * at the top of the screen
      */
-    Int64 mLastCallShortcutDate; // = 0;
+    Int64 mLastCallShortcutDate;
 
     /**
      * The date of the current call shortcut that is showing on screen.
      */
-    Int64 mCurrentCallShortcutDate; // = 0;
+    Int64 mCurrentCallShortcutDate;
 
-    AutoPtr<IOverlappingPaneLayoutPanelSlideCallbacks> mPanelSlideCallbacks;
+    AutoPtr<IPanelSlideCallbacks> mPanelSlideCallbacks;
 };
 
 } // List

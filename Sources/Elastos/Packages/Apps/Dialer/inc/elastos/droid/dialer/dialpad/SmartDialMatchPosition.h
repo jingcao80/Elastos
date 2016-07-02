@@ -20,12 +20,9 @@ namespace Dialpad {
  */
 class SmartDialMatchPosition
     : public Object
-    , public ISmartDialMatchPosition
 {
 public:
-    CAR_INTERFACE_DECL();
-
-    CARAPI constructor(
+    SmartDialMatchPosition(
         /* [in] */ Int32 start,
         /* [in] */ Int32 end);
 
@@ -57,7 +54,7 @@ public:
     Int32 mEnd;
 
 private:
-    static const String TAG; // = SmartDialMatchPosition.class.getSimpleName();
+    static const String TAG;
 };
 
 } // Dialpad

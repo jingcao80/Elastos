@@ -2,11 +2,12 @@ module
 {
     importlib("Elastos.Droid.Core.eco");
     importlib("Elastos.Droid.ContactsCommon.eco");
+    importlib("Elastos.Droid.Support.V4.eco");
 
     merge("car/elastos/droid/dialer/activity/TransactionSafeActivity.car");
 //    merge("car/elastos/droid/dialer/calllog/CallDetailHistoryAdapter.car");
 //    merge("car/elastos/droid/dialer/calllog/CallLogActivity.car");
-//    merge("car/elastos/droid/dialer/calllog/CallLogAdapter.car");
+    merge("car/elastos/droid/dialer/calllog/CallLogAdapter.car");
 //    merge("car/elastos/droid/dialer/calllog/CallLogFragment.car");
 //    merge("car/elastos/droid/dialer/calllog/CallLogGroupBuilder.car");
 //    merge("car/elastos/droid/dialer/calllog/CallLogListItemView.car");
@@ -14,7 +15,7 @@ module
 //    merge("car/elastos/droid/dialer/calllog/CallLogNotificationsHelper.car");
 //    merge("car/elastos/droid/dialer/calllog/CallLogNotificationsService.car");
 //    merge("car/elastos/droid/dialer/calllog/CallLogQuery.car");
-//    merge("car/elastos/droid/dialer/calllog/CallLogQueryHandler.car");
+    merge("car/elastos/droid/dialer/calllog/CallLogQueryHandler.car");
 //    merge("car/elastos/droid/dialer/calllog/CallTypeHelper.car");
 //    merge("car/elastos/droid/dialer/calllog/CallTypeIconsView.car");
 //    merge("car/elastos/droid/dialer/calllog/ClearCallLogDialog.car");
@@ -32,10 +33,8 @@ module
     merge("car/elastos/droid/dialer/dialpad/DialpadFragment.car");
 //    merge("car/elastos/droid/dialer/dialpad/LatinSmartDialMap.car");
 //    merge("car/elastos/droid/dialer/dialpad/SmartDialCursorLoader.car");
-//    merge("car/elastos/droid/dialer/dialpad/SmartDialMap.car");
-//    merge("car/elastos/droid/dialer/dialpad/SmartDialMatchPosition.car");
+    merge("car/elastos/droid/dialer/dialpad/SmartDialMap.car");
 //    merge("car/elastos/droid/dialer/dialpad/SmartDialNameMatcher.car");
-//    merge("car/elastos/droid/dialer/dialpad/SmartDialPrefix.car");
 //    merge("car/elastos/droid/dialer/dialpad/UnicodeDialerKeyListener.car");
 //    merge("car/elastos/droid/dialer/interactions/PhoneNumberInteraction.car");
 //    merge("car/elastos/droid/dialer/interactions/UndemoteOutgoingCallReceiver.car");
@@ -51,7 +50,7 @@ module
 //    merge("car/elastos/droid/dialer/list/PhoneFavoriteTileView.car");
 //    merge("car/elastos/droid/dialer/list/RegularSearchFragment.car");
 //    merge("car/elastos/droid/dialer/list/RegularSearchListAdapter.car");
-//    merge("car/elastos/droid/dialer/list/RemoveView.car");
+    merge("car/elastos/droid/dialer/list/RemoveView.car");
     merge("car/elastos/droid/dialer/list/SearchFragment.car");
 //    merge("car/elastos/droid/dialer/list/ShortcutCardsAdapter.car");
 //    merge("car/elastos/droid/dialer/list/SmartDialNumberListAdapter.car");
@@ -74,7 +73,7 @@ module
 //    merge("car/elastos/droid/dialer/voicemail/VoicemailStatusHelper.car");
 //    merge("car/elastos/droid/dialer/voicemail/VoicemailStatusHelperImpl.car");
     merge("car/elastos/droid/dialer/widget/ActionBarController.car");
-//    merge("car/elastos/droid/dialer/widget/OverlappingPaneLayout.car");
+    merge("car/elastos/droid/dialer/widget/OverlappingPaneLayout.car");
     merge("car/elastos/droid/dialer/widget/SearchEditTextLayout.car");
 //    merge("car/elastos/droid/dialer/widget/ViewDragHelper.car");
 //    merge("car/elastos/droid/dialer/CallDetailActivity.car");
@@ -88,11 +87,10 @@ module
 //    merge("car/elastos/droid/dialer/ProximitySensorAware.car");
 //    merge("car/elastos/droid/dialer/ProximitySensorManager.car");
 //    merge("car/elastos/droid/dialer/SpecialCharSequenceMgr.car");
-//    merge("car/elastos/droid/dialerbind/DatabaseHelperManager.car");
 //    merge("car/elastos/droid/dialerbind/ObjectFactory.car");
 //
     using interface Elastos.Droid.App.IActivity;
-//    using interface Elastos.Droid.App.IFragment;
+    using interface Elastos.Droid.App.IFragment;
 //    using interface Elastos.Droid.App.IListFragment;
 //    using interface Elastos.Droid.App.IApplication;
 //    using interface Elastos.Droid.App.IDialogFragment;
@@ -118,7 +116,7 @@ module
 //    using interface Elastos.Droid.Database.Sqlite.ISQLiteOpenHelper;
 //    using interface Elastos.Droid.Net.IUri;
 //    using interface Elastos.Droid.Text.IInputFilter;
-//    using interface Elastos.Droid.Text.ITextWatcher;
+    using interface Elastos.Droid.Text.ITextWatcher;
 //    using interface Elastos.Droid.Text.INoCopySpan;
 //    using interface Elastos.Droid.Text.Method.IBaseKeyListener;
 //    using interface Elastos.Droid.Text.Method.IDialerKeyListener;
@@ -140,16 +138,15 @@ module
     using interface Elastos.Droid.View.IViewParent;
     using interface Elastos.Droid.View.IViewManager;
 //    using interface Elastos.Droid.View.IOnPreDrawListener;
-//    using interface Elastos.Droid.View.IViewOnKeyListener;
+    using interface Elastos.Droid.View.IViewOnKeyListener;
     using interface Elastos.Droid.View.IKeyEventCallback;
-//    using interface Elastos.Droid.View.IViewOnLongClickListener;
+    using interface Elastos.Droid.View.IViewOnLongClickListener;
     using interface Elastos.Droid.View.IViewOnClickListener;
     using interface Elastos.Droid.View.IContextThemeWrapper;
 //    using interface Elastos.Droid.View.ILayoutInflater;
     using interface Elastos.Droid.View.ILayoutInflaterFactory;
     using interface Elastos.Droid.View.ILayoutInflaterFactory2;
     using interface Elastos.Droid.View.IWindowCallback;
-//    using interface Elastos.Droid.View.IViewOnLongClickListener;
     using interface Elastos.Droid.View.IOnWindowDismissedCallback;
     using interface Elastos.Droid.View.IViewOnCreateContextMenuListener;
     using interface Elastos.Droid.View.Accessibility.IAccessibilityEventSource;
@@ -167,17 +164,22 @@ module
 //    using interface Elastos.Droid.Widget.IListAdapter;
 //    using interface Elastos.Droid.Widget.ISpinnerAdapter;
     using interface Elastos.Droid.Widget.IFrameLayout;
-//    using interface Elastos.Droid.Widget.IAdapterViewOnItemClickListener;
+    using interface Elastos.Droid.Widget.IAdapterViewOnItemClickListener;
     using interface Elastos.Droid.Widget.IPopupMenuOnMenuItemClickListener;
-//    using interface Elastos.Droid.Widget.IRelativeLayout;
+    using interface Elastos.Droid.Widget.IRelativeLayout;
 //    using interface Elastos.Droid.Widget.IFilterListener;
 //    using interface Elastos.Droid.Widget.IRemoteAdapterConnectionCallback;
 //    using interface Elastos.Droid.Graphics.Drawable.IDrawable;
     using interface Elastos.Droid.Graphics.Drawable.IDrawableCallback;
+
+    using interface Elastos.Droid.Support.V4.View.IViewPagerOnPageChangeListener;
+
 //    using interface Elastos.Core.IComparable;
 //    using interface Elastos.Core.ICharSequence;
-//
-//
+
+    using interface Elastos.Droid.Contacts.Common.List.IOnPhoneNumberPickerActionListener;
+    using interface Elastos.Droid.DialerBind.Analytics.IAnalyticsInterface;
+
     interface Elastos.Droid.Dialer.Activity.ITransactionSafeActivity;
 //    interface Elastos.Droid.Dialer.CallLog.ICallLogActivity;
 //    interface Elastos.Droid.Dialer.CallLog.ICallTypeHelper;
@@ -186,10 +188,11 @@ module
 //    interface Elastos.Droid.Dialer.CallLog.ICallLogGroupBuilderGroupCreator;
 //    interface Elastos.Droid.Dialer.CallLog.ICallLogAdapter;
 //    interface Elastos.Droid.Dialer.CallLog.ICallLogAdapterHelper;
+    interface Elastos.Droid.Dialer.CallLog.ICallLogAdapterCallFetcher;
 //    interface Elastos.Droid.Dialer.CallLog.ICallLogFragment;
 //    interface Elastos.Droid.Dialer.CallLog.ICallLogQuery;
 //    interface Elastos.Droid.Dialer.CallLog.ICallLogQueryHandler;
-//    interface Elastos.Droid.Dialer.CallLog.ICallLogQueryHandlerListener;
+    interface Elastos.Droid.Dialer.CallLog.ICallLogQueryHandlerListener;
 //    interface Elastos.Droid.Dialer.CallLog.ICallLogListItemView;
 //    interface Elastos.Droid.Dialer.CallLog.ICallLogNotificationsHelper;
 //    interface Elastos.Droid.Dialer.CallLog.ICallLogNotificationsService;
@@ -206,17 +209,13 @@ module
 //    interface Elastos.Droid.Dialer.CallLog.IPhoneQuery;
 //    interface Elastos.Droid.Dialer.Contact.IContactUpdateService;
 //    interface Elastos.Droid.Dialer.Contact.IContactUpdateServiceHelper;
-//    interface Elastos.Droid.Dialer.Database.IDialerDatabaseHelper;
-//    interface Elastos.Droid.Dialer.Database.IDialerDatabaseHelperHelper;
-//    interface Elastos.Droid.Dialer.Dialpad.IDialpadFragment;
+    interface Elastos.Droid.Dialer.Dialpad.IDialpadFragment;
     interface Elastos.Droid.Dialer.Dialpad.IOnDialpadQueryChangedListener;
-//    interface Elastos.Droid.Dialer.Dialpad.IDialpadSlidingRelativeLayout;
+    interface Elastos.Droid.Dialer.Dialpad.IDialpadSlidingRelativeLayout;
 //    interface Elastos.Droid.Dialer.Dialpad.ILatinSmartDialMap;
 //    interface Elastos.Droid.Dialer.Dialpad.ISmartDialMap;
 //    interface Elastos.Droid.Dialer.Dialpad.ISmartDialCursorLoader;
-//    interface Elastos.Droid.Dialer.Dialpad.ISmartDialMatchPosition;
 //    interface Elastos.Droid.Dialer.Dialpad.ISmartDialPrefix;
-//    interface Elastos.Droid.Dialer.Dialpad.ISmartDialNameMatcher;
 //    interface Elastos.Droid.Dialer.Dialpad.IUnicodeDialerKeyListener;
 //    interface Elastos.Droid.Dialer.Dialpad.IUnicodeDialerKeyListenerHelper;
 //    interface Elastos.Droid.Dialer.Interactions.IPhoneDisambiguationDialogFragmentHelper;
@@ -226,7 +225,7 @@ module
 //    interface Elastos.Droid.Dialer.List.IDialerPhoneNumberListAdapter;
 //    interface Elastos.Droid.Dialer.List.IDragItemContainer;
 //    interface Elastos.Droid.Dialer.List.IDragDropController;
-//    interface Elastos.Droid.Dialer.List.IListsFragment;
+    interface Elastos.Droid.Dialer.List.IListsFragment;
     interface Elastos.Droid.Dialer.List.IListsFragmentHostInterface;
     interface Elastos.Droid.Dialer.List.IOnDragDropListener;
 //    interface Elastos.Droid.Dialer.List.IPhoneFavoriteListView;
@@ -237,11 +236,11 @@ module
     interface Elastos.Droid.Dialer.List.ISearchFragmentHostInterface;
 //    interface Elastos.Droid.Dialer.List.IRegularSearchFragment;
 //    interface Elastos.Droid.Dialer.List.IRegularSearchListAdapter;
-//    interface Elastos.Droid.Dialer.List.IRemoveView;
+    interface Elastos.Droid.Dialer.List.IRemoveView;
 //    interface Elastos.Droid.Dialer.List.IShortcutCardsAdapter;
 //    interface Elastos.Droid.Dialer.List.ISmartDialNumberListAdapter;
 //    interface Elastos.Droid.Dialer.List.ISmartDialSearchFragment;
-//    interface Elastos.Droid.Dialer.List.ISpeedDialFragment;
+    interface Elastos.Droid.Dialer.List.ISpeedDialFragment;
     interface Elastos.Droid.Dialer.List.ISpeedDialFragmentHostInterface;
 //    interface Elastos.Droid.Dialer.List.ISwipeHelper;
 //    interface Elastos.Droid.Dialer.List.ISwipeHelperCallback;
@@ -542,79 +541,57 @@ module
 //    } // Droid
 //    } // Elastos
 //
-//
-//    namespace Elastos {
-//    namespace Droid {
-//    namespace Dialer {
-//    namespace Database {
-//
-//    class CDialerDatabaseHelper {
-//        interface ISQLiteOpenHelper;
-//        interface IDialerDatabaseHelper;
-//    }
-//
-//    singleton class CDialerDatabaseHelperHelper {
-//        interface IDialerDatabaseHelperHelper;
-//    }
-//
-//    } // Database
-//    } // Dialer
-//    } // Droid
-//    } // Elastos
-//
-//
-//    namespace Elastos {
-//    namespace Droid {
-//    namespace Dialer {
-//    namespace Dialpad {
-//
-//    class CDialpadFragment {
-//        interface IComponentCallbacks;
-//        interface IComponentCallbacks2;
-//        interface IViewOnCreateContextMenuListener;
-//        interface IFragment;
-//        // TODO:
-//        // interface IAnalyticsFragment;
-//        interface IViewOnClickListener;
-//        interface IViewOnLongClickListener;
-//        interface IViewOnKeyListener;
-//        interface IAdapterViewOnItemClickListener;
-//        interface ITextWatcher;
-//        interface IPopupMenuOnMenuItemClickListener;
-//        // TODO:
-//        // interface IDialpadKeyButtonOnPressedListener;
-//        interface IDialpadFragment;
-//    }
-//
+    namespace Elastos {
+    namespace Droid {
+    namespace Dialer {
+    namespace Dialpad {
+
+    class CDialpadFragment {
+        interface IComponentCallbacks;
+        interface IComponentCallbacks2;
+        interface IViewOnCreateContextMenuListener;
+        interface IFragment;
+        interface IAnalyticsInterface;
+        interface IViewOnClickListener;
+        interface IViewOnLongClickListener;
+        interface IViewOnKeyListener;
+        interface IAdapterViewOnItemClickListener;
+        interface ITextWatcher;
+        interface IPopupMenuOnMenuItemClickListener;
+        // TODO:
+        // interface IDialpadKeyButtonOnPressedListener;
+        interface IDialpadFragment;
+    }
+
 //    singleton class CDialpadFragmentErrorDialogFragmentHelper {
 //        interface IDialpadFragmentErrorDialogFragmentHelper;
 //    }
-//
-//    [local]
-//    class CDialpadSlidingRelativeLayout {
-//        constructor(
-//            [in] IContext* context);
-//
-//        constructor(
-//            [in] IContext* context,
-//            [in] IAttributeSet* attrs);
-//
-//        constructor(
-//            [in] IContext* context,
-//            [in] IAttributeSet* attrs,
-//            [in] Int32 defStyle);
-//
-//        interface IView;
-//        interface IViewGroup;
-//        interface IViewParent;
-//        interface IViewManager;
-//        interface IKeyEventCallback;
-//        interface IAccessibilityEventSource;
-//        interface IDrawableCallback;
-//        interface IRelativeLayout;
-//        interface IDialpadSlidingRelativeLayout;
-//    }
-//
+
+    [local]
+    class CDialpadSlidingRelativeLayout {
+        constructor(
+            [in] IContext* ctx);
+
+        constructor(
+            [in] IContext* ctx,
+            [in] IAttributeSet* attrs);
+
+        constructor(
+            [in] IContext* ctx,
+            [in] IAttributeSet* attrs,
+            [in] Int32 defStyle);
+
+        interface IView;
+        interface IViewGroup;
+        interface IViewParent;
+        interface IViewManager;
+        interface IKeyEventCallback;
+        interface IAccessibilityEventSource;
+        interface IDrawableCallback;
+        interface IRelativeLayout;
+        interface IDialpadSlidingRelativeLayout;
+    }
+
 //    class CLatinSmartDialMap {
 //        interface ILatinSmartDialMap;
 //        interface ISmartDialMap;
@@ -628,33 +605,6 @@ module
 //        interface ILoader;
 //        interface IAsyncTaskLoader;
 //        interface ISmartDialCursorLoader;
-//    }
-//
-//    class CSmartDialMatchPosition {
-//        constructor(
-//            [in] Int32 start,
-//            [in] Int32 end);
-//
-//        interface ISmartDialMatchPosition;
-//    }
-//
-//    singleton class CSmartDialMatchPositionHelper {
-//        interface ISmartDialMatchPositionHelper;
-//    }
-//
-//    class CSmartDialNameMatcher {
-//        constructor(
-//            [in] String query);
-//
-//        constructor(
-//            [in] String query,
-//            [in] ISmartDialMap* map);
-//
-//        interface ISmartDialNameMatcher;
-//    }
-//
-//    singleton class CSmartDialNameMatcherHelper {
-//        interface ISmartDialNameMatcherHelper;
 //    }
 //
 //    singleton class CSmartDialPrefix {
@@ -674,12 +624,12 @@ module
 //    singleton class CUnicodeDialerKeyListenerHelper {
 //        interface IUnicodeDialerKeyListenerHelper;
 //    }
-//
-//    } // Dialpad
-//    } // Dialer
-//    } // Droid
-//    } // Elastos
-//
+
+    } // Dialpad
+    } // Dialer
+    } // Droid
+    } // Elastos
+
 //
 //    namespace Elastos {
 //    namespace Droid {
@@ -704,11 +654,11 @@ module
 //    } // Droid
 //    } // Elastos
 //
-//    namespace Elastos {
-//    namespace Droid {
-//    namespace Dialer {
-//    namespace List {
-//
+    namespace Elastos {
+    namespace Droid {
+    namespace Dialer {
+    namespace List {
+
 //    class CAllContactsFragment {
 //        // TODO:
 //        // interface IContactEntryListFragment;
@@ -734,21 +684,19 @@ module
 //
 //        interface IDragDropController;
 //    }
-//
-//    class CListsFragment {
-//        interface IComponentCallbacks;
-//        interface IComponentCallbacks2;
-//        interface IViewOnCreateContextMenuListener;
-//        interface IFragment;
-//        // TODO:
-//        // interface IAnalyticsFragment;
-//        interface ICallLogQueryHandlerListener;
-//        interface ICallLogAdapterCallFetcher;
-//        // TODO:
-//        // interface IViewPagerOnPageChangeListener;
-//        interface IListsFragment;
-//    }
-//
+
+    class CListsFragment {
+        interface IComponentCallbacks;
+        interface IComponentCallbacks2;
+        interface IViewOnCreateContextMenuListener;
+        interface IFragment;
+        interface IAnalyticsInterface;
+        interface ICallLogQueryHandlerListener;
+        interface ICallLogAdapterCallFetcher;
+        interface IViewPagerOnPageChangeListener;
+        interface IListsFragment;
+    }
+
 //    [local]
 //    class CPhoneFavoriteListView {
 //        constructor(
@@ -991,11 +939,11 @@ module
 //        interface IDrawableCallback;
 //        interface ITileInteractionTeaserView;
 //    }
-//
-//    } // List
-//    } // Dialer
-//    } // Droid
-//    } // Elastos
+
+    } // List
+    } // Dialer
+    } // Droid
+    } // Elastos
 //
 //
 //    namespace Elastos {
@@ -1244,8 +1192,7 @@ module
         interface IComponentCallbacks2;
         interface IOnWindowDismissedCallback;
         interface IActivity;
-        // TODO:
-        // interface IAnalyticsInterface;
+        interface IAnalyticsInterface;
         interface ITransactionSafeActivity;
         interface IViewOnClickListener;
         interface IOnDialpadQueryChangedListener;
@@ -1253,11 +1200,9 @@ module
         interface ISpeedDialFragmentHostInterface;
         interface ISearchFragmentHostInterface;
         interface IOnDragDropListener;
-        // TODO:
-        // interface IOnPhoneNumberPickerActionListener;
+        interface IOnPhoneNumberPickerActionListener;
         interface IPopupMenuOnMenuItemClickListener;
-        // TODO:
-        // interface IViewPagerOnPageChangeListener;
+        interface IViewPagerOnPageChangeListener;
         interface IActionBarControllerActivityUi;
         interface IDialtactsActivity;
     }

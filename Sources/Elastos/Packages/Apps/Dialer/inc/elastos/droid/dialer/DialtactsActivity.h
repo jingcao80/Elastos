@@ -7,8 +7,12 @@
 #include "Elastos.Droid.Text.h"
 #include "Elastos.Droid.View.h"
 #include "Elastos.Droid.Widget.h"
+#include "Elastos.Droid.Support.V4.View.h"
 #include "_Elastos.Droid.Dialer.h"
 #include "elastos/droid/dialer/activity/TransactionSafeActivity.h"
+#include "elastos/droid/dialer/database/DialerDatabaseHelper.h"
+#include "elastos/droid/dialer/dialpad/CDialpadFragment.h"
+#include "elastos/droid/dialer/list/CListsFragment.h"
 #include "elastos/droid/dialer/list/DragDropController.h"
 #include "elastos/droid/dialer/widget/ActionBarController.h"
 #include <elastos/droid/widget/PopupMenu.h>
@@ -38,11 +42,14 @@ using Elastos::Droid::Widget::IFrameLayout;
 using Elastos::Droid::Widget::IPopupMenu;
 using Elastos::Droid::Widget::IPopupMenuOnMenuItemClickListener;
 using Elastos::Droid::Widget::PopupMenu;
+using Elastos::Droid::Support::V4::View::IViewPagerOnPageChangeListener;
 // using Elastos::Core::IInteger64;
 using Elastos::Droid::Dialer::Activity::TransactionSafeActivity;
-// using Elastos::Droid::Dialer::Database::IDialerDatabaseHelper;
+using Elastos::Droid::Dialer::Database::DialerDatabaseHelper;
+using Elastos::Droid::Dialer::Dialpad::CDialpadFragment;
 // using Elastos::Droid::Dialer::Dialpad::IDialpadFragment;
 using Elastos::Droid::Dialer::Dialpad::IOnDialpadQueryChangedListener;
+using Elastos::Droid::Dialer::List::CListsFragment;
 using Elastos::Droid::Dialer::List::DragDropController;
 using Elastos::Droid::Dialer::List::IDragDropController;
 // using Elastos::Droid::Dialer::List::IListsFragment;
@@ -77,8 +84,7 @@ class DialtactsActivity
     , public IOnDragDropListener
     , public IOnPhoneNumberPickerActionListener
     , public IPopupMenuOnMenuItemClickListener
-    //TODO:
-    // , public IViewPagerOnPageChangeListener
+    , public IViewPagerOnPageChangeListener
     , public IActionBarControllerActivityUi
 {
 private:
@@ -588,7 +594,7 @@ private:
     /**
      * Fragment containing the dialpad that slides into view
      */
-    // AutoPtr<CDialpadFragment> mDialpadFragment;
+    AutoPtr<CDialpadFragment> mDialpadFragment;
 
     /**
      * Fragment for searching phone numbers using the alphanumeric keyboard.
@@ -619,7 +625,7 @@ private:
     /**
      * Fragment containing the speed dial list, recents list, and all contacts list.
      */
-    // AutoPtr<CListsFragment> mListsFragment;
+    AutoPtr<CListsFragment> mListsFragment;
 
     Boolean mInDialpadSearch;
     Boolean mInRegularSearch;
@@ -659,7 +665,7 @@ private:
 
     String mSearchQuery;
 
-    // AutoPtr<IDialerDatabaseHelper> mDialerDatabaseHelper;
+    AutoPtr<DialerDatabaseHelper> mDialerDatabaseHelper;
     AutoPtr<DragDropController> mDragDropController;
     AutoPtr<ActionBarController> mActionBarController;
 

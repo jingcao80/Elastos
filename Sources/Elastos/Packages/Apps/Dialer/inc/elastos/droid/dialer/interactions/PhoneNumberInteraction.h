@@ -2,38 +2,39 @@
 #define __ELASTOS_DROID_DIALER_INTERACTIONS_PHONENUMBERINTERACTION_H__
 
 #include "_Elastos.Droid.Dialer.h"
-#include <elastos/droid/app/DialogFragment.h>
-#include <elastos/droid/widget/ArrayAdapter.h>
+// #include <elastos/droid/app/DialogFragment.h>
+// #include <elastos/droid/widget/ArrayAdapter.h>
 #include <elastos/core/Object.h>
-#include "Elastos.Droid.App.h"
+// #include "Elastos.Droid.App.h"
 #include "Elastos.Droid.Content.h"
-#include "Elastos.Droid.Database.h"
-#include "Elastos.Droid.Net.h"
-#include "Elastos.Droid.Os.h"
-#include "Elastos.Droid.View.h"
-#include "Elastos.Droid.Widget.h"
-#include "Elastos.CoreLibrary.Utility.h"
+// #include "Elastos.Droid.Database.h"
+// #include "Elastos.Droid.Net.h"
+// #include "Elastos.Droid.Os.h"
+// #include "Elastos.Droid.View.h"
+// #include "Elastos.Droid.Widget.h"
+// #include "Elastos.CoreLibrary.Utility.h"
 
-using Elastos::Droid::App::DialogFragment;
-using Elastos::Droid::App::IDialog;
-using Elastos::Droid::App::IFragmentManager;
-using Elastos::Droid::Content::IContext;
-using Elastos::Droid::Content::ICursorLoader;
-using Elastos::Droid::Content::IDialogInterface;
-using Elastos::Droid::Content::IDialogInterfaceOnDismissListener;
-using Elastos::Droid::Content::IDialogInterfaceOnClickListener;
-using Elastos::Droid::Content::ILoader;
+// using Elastos::Droid::App::DialogFragment;
+// using Elastos::Droid::App::IDialog;
+// using Elastos::Droid::App::IFragmentManager;
+// using Elastos::Droid::Content::IContext;
+// using Elastos::Droid::Content::ICursorLoader;
+// using Elastos::Droid::Content::IDialogInterface;
+// using Elastos::Droid::Content::IDialogInterfaceOnDismissListener;
+// using Elastos::Droid::Content::IDialogInterfaceOnClickListener;
+// using Elastos::Droid::Content::ILoader;
 using Elastos::Droid::Content::ILoaderOnLoadCompleteListener;
-using Elastos::Droid::Database::ICursor;
-using Elastos::Droid::Net::IUri;
-using Elastos::Droid::Os::IBundle;
-using Elastos::Droid::View::IView;
-using Elastos::Droid::View::IViewGroup;
-using Elastos::Droid::Widget::ArrayAdapter;
-using Elastos::Droid::Widget::IListAdapter;
-using Elastos::Utility::IList;
-using Elastos::Utility::IArrayList;
-using Elastos::Droid::Dialer::Activity::ITransactionSafeActivity;
+// using Elastos::Droid::Database::ICursor;
+// using Elastos::Droid::Net::IUri;
+// using Elastos::Droid::Os::IBundle;
+// using Elastos::Droid::View::IView;
+// using Elastos::Droid::View::IViewGroup;
+// using Elastos::Droid::Widget::ArrayAdapter;
+// using Elastos::Droid::Widget::IListAdapter;
+using Elastos::Core::Object;
+// using Elastos::Utility::IList;
+// using Elastos::Utility::IArrayList;
+// using Elastos::Droid::Dialer::Activity::ITransactionSafeActivity;
 
 namespace Elastos{
 namespace Droid{

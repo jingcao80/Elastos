@@ -1,8 +1,9 @@
 module
 {
-//    using interface Elastos.Droid.View.IView;
-//    interface Elastos.Droid.Dialer.List.IRemoveView;
-//    interface Elastos.Droid.Dialer.List.ISpeedDialFragment;
+    using interface Elastos.Droid.View.IView;
+    using interface Elastos.Droid.Support.V4.View.IViewPagerOnPageChangeListener;
+    interface Elastos.Droid.Dialer.List.IRemoveView;
+    interface Elastos.Droid.Dialer.List.ISpeedDialFragment;
 
     namespace Elastos {
     namespace Droid {
@@ -19,53 +20,52 @@ module
             [in] Int32 offset);
     }
 
-//    /**
-//     * @Involve
-//     * interface Elastos.Droid.Content.IComponentCallbacks
-//     * interface Elastos.Droid.Content.IComponentCallbacks2
-//     * interface Elastos.Droid.View.IViewOnCreateContextMenuListener
-//     * interface Elastos.Droid.App.IFragment
-//     * interface Elastos.Apps.DailerBind.Analytics.IAnalyticsFragment
-//     * interface ICallLogQueryHandlerListener
-//     * interface ICallLogAdapterCallFetcher
-//     * interface IViewPagerOnPageChangeListener
-//     */
-//    [local]
-//    interface IListsFragment {
-//        const Int32 TAB_INDEX_SPEED_DIAL = 0;
-//        const Int32 TAB_INDEX_RECENTS = 1;
-//        const Int32 TAB_INDEX_ALL_CONTACTS = 2;
-//        const Int32 TAB_INDEX_COUNT = 3;
-//
-//        const Float REMOVE_VIEW_SHOWN_ALPHA = 0.5;
-//        const Float REMOVE_VIEW_HIDDEN_ALPHA = 1;
-//
-//        DismissShortcut(
-//            [in] IView* view);
-//
-//        // TODO:android.support.v4.view.ViewPager.OnPageChangeListener
-//        // AddOnPageChangeListener(
-//        //    [in] IViewPagerOnPageChangeListener* onPageChangeListener);
-//
-//        ShowRemoveView(
-//            [in] Boolean show);
-//
-//        ShouldShowActionBar(
-//            [out] Boolean* result);
-//
-//        IsPaneOpen(
-//            [out] Boolean* result);
-//
-//        GetSpeedDialFragment(
-//            [out] ISpeedDialFragment** fragment);
-//
-//        GetRemoveView(
-//            [out] IRemoveView** removeView);
-//
-//        GetRtlPosition(
-//            [in] Int32 position,
-//            [out] Int32* result);
-//    }
+    /**
+     * @Involve
+     * interface Elastos.Droid.Content.IComponentCallbacks
+     * interface Elastos.Droid.Content.IComponentCallbacks2
+     * interface Elastos.Droid.View.IViewOnCreateContextMenuListener
+     * interface Elastos.Droid.App.IFragment
+     * interface Elastos.Droid.DailerBind.Analytics.IAnalyticsInterface
+     * interface ICallLogQueryHandlerListener
+     * interface ICallLogAdapterCallFetcher
+     * interface IViewPagerOnPageChangeListener
+     */
+    [local]
+    interface IListsFragment {
+        const Int32 TAB_INDEX_SPEED_DIAL = 0;
+        const Int32 TAB_INDEX_RECENTS = 1;
+        const Int32 TAB_INDEX_ALL_CONTACTS = 2;
+        const Int32 TAB_INDEX_COUNT = 3;
+
+        const Float REMOVE_VIEW_SHOWN_ALPHA = 0.5;
+        const Float REMOVE_VIEW_HIDDEN_ALPHA = 1;
+
+        DismissShortcut(
+            [in] IView* view);
+
+        AddOnPageChangeListener(
+            [in] IViewPagerOnPageChangeListener* onPageChangeListener);
+
+        ShowRemoveView(
+            [in] Boolean show);
+
+        ShouldShowActionBar(
+            [out] Boolean* result);
+
+        IsPaneOpen(
+            [out] Boolean* result);
+
+        GetSpeedDialFragment(
+            [out] ISpeedDialFragment** fragment);
+
+        GetRemoveView(
+            [out] IRemoveView** removeView);
+
+        GetRtlPosition(
+            [in] Int32 position,
+            [out] Int32* result);
+    }
 
     } //List
     } //Dialer

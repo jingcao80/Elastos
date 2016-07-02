@@ -2,7 +2,7 @@
 #define __ELASTOS_DROID_DIALER_LIST_CLISTSFRAGMENT_H__
 
 #include "_Elastos_Droid_Dialer_List_CListsFragment.h"
-#include "elastos/apps/dialer/list/ListsFragment.h"
+#include "elastos/droid/dialer/list/ListsFragment.h"
 
 namespace Elastos {
 namespace Droid {

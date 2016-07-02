@@ -32,7 +32,6 @@ public:
      */
     class PhoneNumberTokens
         : public Object
-        , public ISmartDialPrefixPhoneNumberTokens
     {
     public:
         CAR_INTERFACE_DECL();
@@ -41,6 +40,7 @@ public:
             /* [in] */ const String& countryCode,
             /* [in] */ Int32 countryCodeOffset,
             /* [in] */ Int32 nanpCodeOffset);
+
     public:
         /** Country code of the phone number. */
         String mCountryCode;
@@ -105,7 +105,7 @@ public:
      * @param number Raw phone number.
      * @return a PhoneNumberToken instance with country code, NANP code information.
      */
-    static CARAPI_(AutoPtr<ISmartDialPrefixPhoneNumberTokens>) ParsePhoneNumber(
+    static CARAPI_(AutoPtr<PhoneNumberTokens>) ParsePhoneNumber(
         /* [in] */ const String& number);
 
     static CARAPI_(AutoPtr<ISmartDialMap>) GetMap();
@@ -128,6 +128,7 @@ public:
      * @return Whether user is in Nanp region.
      */
     static CARAPI_(Boolean) GetUserInNanpRegion();
+
 private:
     /**
      * Checkes whether a country code is valid.
@@ -147,17 +148,16 @@ private:
      * Users can look up this contact by combinations of his initials such as "AF" "BF" "EF" "ABF"
      * "BEF" "ABEF" etc, but can not use combinations such as "CF" "DF" "ACF" "ADF" etc.
      */
-    static const Int32 LAST_TOKENS_FOR_INITIALS; // = 2;
-    static const Int32 FIRST_TOKENS_FOR_INITIALS; // = 2;
+    static const Int32 LAST_TOKENS_FOR_INITIALS;
+    static const Int32 FIRST_TOKENS_FOR_INITIALS;
 
     /** The country code of the user's sim card obtained by calling getSimCountryIso*/
-    static const String PREF_USER_SIM_COUNTRY_CODE; // =
-            // "DialtactsActivity_user_sim_country_code";
-    static const String PREF_USER_SIM_COUNTRY_CODE_DEFAULT; // = null;
-    static String sUserSimCountryCode; // = PREF_USER_SIM_COUNTRY_CODE_DEFAULT;
+    static const String PREF_USER_SIM_COUNTRY_CODE;
+    static const String PREF_USER_SIM_COUNTRY_CODE_DEFAULT;
+    static String sUserSimCountryCode;
 
     /** Indicates whether user is in NANP regions.*/
-    static Boolean sUserInNanpRegion; // = false;
+    static Boolean sUserInNanpRegion;
 
     /** Set of country names that use NANP code.*/
     static AutoPtr<ISet> sNanpCountries;
@@ -166,9 +166,9 @@ private:
     static AutoPtr<ISet> sCountryCodes;
 
     /** Dialpad mapping. */
-    static const AutoPtr<ISmartDialMap> mMap; // = new LatinSmartDialMap();
+    static const AutoPtr<ISmartDialMap> mMap;
 
-    static Boolean sNanpInitialized; // = false;
+    static Boolean sNanpInitialized;
 };
 
 } // Dialpad
