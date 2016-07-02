@@ -110,15 +110,18 @@ public:
      * state, in which case it should implement a subclass of this which
      * contains that state.
      */
-    class SavedState : public BaseSavedState
+    class SavedState
+        : public BaseSavedState
+        , public IViewPagerSavedState
     {
     public:
-        SavedState();
+        SavedState()
+            : mPosition(0)
+        {}
 
-        CARAPI constructor();
+        virtual ~SavedState() {}
 
-        CARAPI constructor(
-            /* [in] */ IParcelable* superState);
+        CAR_INTERFACE_DECL()
 
         // @Override
         CARAPI WriteToParcel(
@@ -326,22 +329,39 @@ public:
     CARAPI SetPageMarginDrawable(
         /* [in] */ Int32 resId);
 
-    /**
-     * This method will be invoked when the current page is scrolled, either as part
-     * of a programmatically initiated smooth scroll or a user initiated touch scroll.
-     * If you override this method you must call through to the superclass implementation
-     * (e.g. super.onPageScrolled(position, offset, offsetPixels)) before onPageScrolled
-     * returns.
-     *
-     * @param position Position index of the first page currently being displayed.
-     *                 Page position+1 will be visible if positionOffset is nonzero.
-     * @param offset Value from [0, 1) indicating the offset from the page at position.
-     * @param offsetPixels Value in pixels indicating the offset from position.
-     */
-    CARAPI OnPageScrolled(
-        /* [in] */ Int32 position,
-        /* [in] */ Float offset,
-        /* [in] */ Int32 offsetPixels);
+    // @Override
+    CARAPI_(AutoPtr<IParcelable>) OnSaveInstanceState();
+
+    // @Override
+    CARAPI_(void) OnRestoreInstanceState(
+        /* [in] */ IParcelable* state);
+
+    // @Override
+    CARAPI AddView(
+        /* [in] */ IView* child,
+        /* [in] */ Int32 index,
+        /* [in] */ IViewGroupLayoutParams* params);
+
+    // @Override
+    CARAPI RemoveView(
+        /* [in] */ IView* view);
+
+    // @Override
+    CARAPI ComputeScroll();
+
+    // @Override
+    CARAPI OnInterceptTouchEvent(
+        /* [in] */ IMotionEvent* ev,
+        /* [out] */ Boolean* res);
+
+    // @Override
+    CARAPI OnTouchEvent(
+        /* [in] */ IMotionEvent* event,
+        /* [out] */ Boolean* res);
+
+    // @Override
+    CARAPI Draw(
+        /* [in] */ ICanvas* canvas);
 
     /**
      * Start a fake drag of the pager.
@@ -515,6 +535,59 @@ protected:
     CARAPI Populate(
         /* [in] */ Int32 newCurrentItem);
 
+    CARAPI_(AutoPtr<ItemInfo>) InfoForChild(
+        /* [in] */ IView* child);
+
+    CARAPI_(AutoPtr<ItemInfo>) InfoForAnyChild(
+        /* [in] */ IView* child);
+
+    CARAPI_(AutoPtr<ItemInfo>) InfoForPosition(
+        /* [in] */ Int32 position);
+
+    // @Override
+    CARAPI OnAttachedToWindow();
+
+    // @Override
+    CARAPI_(void) OnMeasure(
+        /* [in] */ Int32 widthMeasureSpec,
+        /* [in] */ Int32 heightMeasureSpec);
+
+    // @Override
+    CARAPI_(void) OnSizeChanged(
+        /* [in] */ Int32 w,
+        /* [in] */ Int32 h,
+        /* [in] */ Int32 oldw,
+        /* [in] */ Int32 oldh);
+
+    // @Override
+    CARAPI OnLayout(
+        /* [in] */ Boolean changed,
+        /* [in] */ Int32 left,
+        /* [in] */ Int32 top,
+        /* [in] */ Int32 right,
+        /* [in] */ Int32 bottom);
+
+    /**
+     * This method will be invoked when the current page is scrolled, either as part
+     * of a programmatically initiated smooth scroll or a user initiated touch scroll.
+     * If you override this method you must call through to the superclass implementation
+     * (e.g. super.onPageScrolled(position, offset, offsetPixels)) before onPageScrolled
+     * returns.
+     *
+     * @param position Position index of the first page currently being displayed.
+     *                 Page position+1 will be visible if positionOffset is nonzero.
+     * @param offset Value from [0, 1) indicating the offset from the page at position.
+     * @param offsetPixels Value in pixels indicating the offset from position.
+     */
+    CARAPI OnPageScrolled(
+        /* [in] */ Int32 position,
+        /* [in] */ Float offset,
+        /* [in] */ Int32 offsetPixels);
+
+    // @Override
+    CARAPI_(void) OnDraw(
+        /* [in] */ ICanvas* canvas);
+
 private:
     static CARAPI_(AutoPtr<IComparator>) InitComparator();
 
@@ -541,6 +614,44 @@ private:
         /* [in] */ ItemInfo* curItem,
         /* [in] */ Int32 curIndex,
         /* [in] */ ItemInfo* oldCurInfo);
+
+    CARAPI_(void) RecomputeScrollPosition(
+        /* [in] */ Int32 width,
+        /* [in] */ Int32 oldWidth,
+        /* [in] */ Int32 margin,
+        /* [in] */ Int32 oldMargin);
+
+    CARAPI PageScrolled(
+        /* [in] */ Int32 xpos,
+        /* [out] */ Boolean* result);
+
+    CARAPI_(void) CompleteScroll(
+        /* [in] */ Boolean postEvents);
+
+    CARAPI_(Boolean) IsGutterDrag(
+        /* [in] */ Float x,
+        /* [in] */ Float dx);
+
+    CARAPI_(void) EnableLayers(
+        /* [in] */ Boolean enable);
+
+    CARAPI_(void) RequestParentDisallowInterceptTouchEvent(
+        /* [in] */ Boolean disallowIntercept);
+
+    CARAPI_(Boolean) PerformDrag(
+        /* [in] */ Float x);
+
+    /**
+     * @return Info about the page at the current scroll position.
+     *         This can be synthetic for a missing middle page; the 'object' field can be null.
+     */
+    CARAPI_(AutoPtr<ItemInfo>) InfoForCurrentScrollPosition();
+
+    CARAPI_(Int32) DetermineTargetPage(
+        /* [in] */ Int32 currentPage,
+        /* [in] */ Float pageOffset,
+        /* [in] */ Int32 velocity,
+        /* [in] */ Int32 deltaX);
 
 private:
     static const String TAG;

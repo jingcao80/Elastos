@@ -2,8 +2,10 @@
 #include "elastos/droid/support/v4/view/ViewPager.h"
 #include "elastos/droid/support/v4/view/ViewConfigurationCompat.h"
 #include "elastos/droid/support/v4/view/ViewCompat.h"
+#include "elastos/droid/support/v4/view/CViewPagerSavedState.h"
 #include "elastos/droid/support/v4/widget/CEdgeEffectCompat.h"
 #include "elastos/droid/os/Build.h"
+#include "elastos/droid/os/SystemClock.h"
 #include "elastos/droid/R.h"
 #include <elastos/core/Math.h>
 #include <elastos/core/StringUtils.h>
@@ -12,13 +14,20 @@
 using Elastos::Droid::Content::Res::IResources;
 using Elastos::Droid::Graphics::CRect;
 using Elastos::Droid::Os::Build;
+using Elastos::Droid::Os::SystemClock;
 using Elastos::Droid::Support::V4::View::EIID_IViewPager;
 using Elastos::Droid::Support::V4::View::EIID_IViewPagerOnPageChangeListener;
+using Elastos::Droid::Support::V4::View::EIID_IViewPagerSavedState;
 using Elastos::Droid::Support::V4::Widget::CEdgeEffectCompat;
 using Elastos::Droid::Utility::IDisplayMetrics;
 using Elastos::Droid::View::IViewConfiguration;
 using Elastos::Droid::View::IViewConfigurationHelper;
 using Elastos::Droid::View::CViewConfigurationHelper;
+using Elastos::Droid::View::IGravity;
+using Elastos::Droid::View::IVelocityTrackerHelper;
+using Elastos::Droid::View::CVelocityTrackerHelper;
+using Elastos::Droid::View::IMotionEventHelper;
+using Elastos::Droid::View::CMotionEventHelper;
 using Elastos::Droid::Widget::CScroller;
 using Elastos::Core::StringUtils;
 using Elastos::Utility::ICollections;
@@ -106,6 +115,45 @@ ECode ViewPager::SimpleOnPageChangeListener::OnPageScrollStateChanged(
     /* [in] */ Int32 state)
 {
     // This space for rent
+    return NOERROR;
+}
+
+
+//=================================================================
+// ViewPager::SavedState
+//=================================================================
+
+CAR_INTERFACE_IMPL(ViewPager::SavedState, BaseSavedState, IViewPagerSavedState)
+
+ECode ViewPager::SavedState::WriteToParcel(
+    /* [in] */ IParcel* out)
+{
+    BaseSavedState::WriteToParcel(out);
+    out->WriteInt32(mPosition);
+    out->WriteInterfacePtr(mAdapterState);
+    return NOERROR;
+}
+
+ECode ViewPager::SavedState::ReadFromParcel(
+    /* [in] */ IParcel* in)
+{
+    BaseSavedState::ReadFromParcel(source);
+    source->ReadInt32(&mPosition);
+    source->ReadInterfacePtr((Handle32*)(IInterface**)&temp);
+    mAdapterState = IParcelable::Probe(temp)
+    return NOERROR;
+}
+
+ECode ViewPager::SavedState::ToString(
+    /* [out] */ String* str)
+{
+    VALIDATE_NOT_NULL(str)
+    AutoPtr<ISystem> system;
+    CSystem::AcquireSingleton((ISystem**)&system);
+    Int32 hashCode;
+    system->IdentityHashCode((IViewPager*)this, &hashCode);
+    *str = String("FragmentPager.SavedState{") + StringUtils::ToHexString(hashCode)
+            + " position=" + StringUtils::ToString(mPosition) + "}";
     return NOERROR;
 }
 
@@ -346,7 +394,7 @@ void ViewPager::RemoveNonDecorViews()
         GetChildAt(i, (IView**)&child);
         AutoPtr<IViewGroupLayoutParams> lp;
         child->GetLayoutParams((IViewGroupLayoutParams**)&lp);
-        AutoPtr<LayoutParams> params = (LayoutParams*)lp.Get();
+        AutoPtr<ViewPagerLayoutParams> params = (ViewPagerLayoutParams*)lp.Get();
         if (!params->mIsDecor) {
             RemoveViewAt(i);
             i--;
@@ -559,7 +607,7 @@ Int32 ViewPager::GetChildDrawingOrder(
     AutoPtr<IView> v = IView::Probe(value);
     AutoPtr<IViewGroupLayoutParams> lp;
     v->GetLayoutParams((IViewGroupLayoutParams**)&lp);
-    Int32 result = ((LayoutParams*)lp.Get())->mChildIndex;
+    Int32 result = ((ViewPagerLayoutParams*)lp.Get())->mChildIndex;
     return result;
 }
 
@@ -814,7 +862,7 @@ void ViewPager::DataSetChanged()
             GetChildAt(i, (IView**)&child);
             AutoPtr<IViewGroupLayoutParams> lp;
             child->GetLayoutParams((IViewGroupLayoutParams**)&lp);
-            AutoPtr<LayoutParams> params = (LayoutParams*)lp.Get();
+            AutoPtr<ViewPagerLayoutParams> params = (ViewPagerLayoutParams*)lp.Get();
             if (!params->mIsDecor) {
                 params->mWidthFactor = 0.f;
             }
@@ -1058,7 +1106,7 @@ ECode ViewPager::Populate(
         GetChildAt(i, (IView**)&child);
         AutoPtr<IViewGroupLayoutParams> lp;
         child->GetLayoutParams((IViewGroupLayoutParams**)&lp);
-        AutoPtr<LayoutParams> params = (LayoutParams*)lp.Get();
+        AutoPtr<ViewPagerLayoutParams> params = (ViewPagerLayoutParams*)lp.Get();
         params->mChildIndex = i;
         if (!params->mIsDecor && params->mWidthFactor == 0.f) {
             // 0 means requery the adapter for this, it doesn't have a valid width.
@@ -1235,18 +1283,1409 @@ void ViewPager::CalculatePageOffsets(
     mNeedCalculatePageOffsets = FALSE;
 }
 
+AutoPtr<IParcelable> ViewPager::OnSaveInstanceState()
+{
+    AutoPtr<IParcelable> superState = ViewGroup::OnSaveInstanceState();
+    AutoPtr<CViewPagerSavedState> ss;
+    CViewPagerSavedState::NewByFriend(superState, (*CViewPagerSavedState**)&ss);
+    ss->mPosition = mCurItem;
+    if (mAdapter != NULL) {
+        mAdapter->SaveState((IParcelable**)&ss->mAdapterState);
+    }
+    return IParcelable::Probe(ss);
+}
+
+void ViewPager::OnRestoreInstanceState(
+    /* [in] */ IParcelable* state)
+{
+    AutoPtr<IViewPagerSavedState> ss = IViewPagerSavedState::Probe(state);
+    if (savedState == NULL) {
+        ViewGroup::OnRestoreInstanceState(state);
+        return;
+    }
+
+    AutoPtr<IParcelable> superState;
+    ss->GetSuperState((IParcelable**)&superState);
+    ViewGroup::OnRestoreInstanceState(superState);
+
+    AutoPtr<CViewPagerSavedState> ssObj = (CViewPagerSavedState*)ss.Get();
+    if (mAdapter != NULL) {
+        mAdapter->RestoreState(ssObj->mAdapterState, ssObj->mLoader);
+        SetCurrentItemInternal(ss->mPosition, FALSE, TRUE);
+    }
+    else {
+        mRestoredCurItem = ss->mPosition;
+        mRestoredAdapterState = ss->mAdapterState;
+        mRestoredClassLoader = ss->mLoader;
+    }
+}
+
+ECode ViewPager::AddView(
+    /* [in] */ IView* child,
+    /* [in] */ Int32 index,
+    /* [in] */ IViewGroupLayoutParams* params)
+{
+    if (!CheckLayoutParams(params)) {
+        params = GenerateLayoutParams(params);
+    }
+    AutoPtr<ViewPagerLayoutParams> lp = (ViewPagerLayoutParams*)params;
+    AutoPtr<IViewPagerDecor> decor = IViewPagerDecor::Probe(child);
+    lp->mIsDecor |= (decor != NULL);
+    if (mInLayout) {
+        if (lp != NULL && lp->mIsDecor) {
+            Slogger::E(TAG, "Cannot add pager decor view during layout");
+            return E_ILLEGAL_STATE_EXCEPTION;
+        }
+        lp->mNeedsMeasure = TRUE;
+        AddViewInLayout(child, index, params);
+    }
+    else {
+        ViewGroup::AddView(child, index, params);
+    }
+
+    if (USE_CACHE) {
+        Int32 visibility;
+        if (child->GetVisibility(&visibility), visibility != GONE) {
+            child->SetDrawingCacheEnabled(mScrollingCacheEnabled);
+        }
+        else {
+            child->SetDrawingCacheEnabled(FALSE);
+        }
+    }
+    return NOERROR;
+}
+
+ECode ViewPager::RemoveView(
+    /* [in] */ IView* view)
+{
+    if (mInLayout) {
+        RemoveViewInLayout(view);
+    }
+    else {
+        ViewGroup::RemoveView(view);
+    }
+    return NOERROR;
+}
+
+AutoPtr<ItemInfo> ViewPager::InfoForChild(
+    /* [in] */ IView* child)
+{
+    Int32 size;
+    mItems->GetSize(&size);
+    for (Int32 i = 0; i < size; i++) {
+        AutoPtr<IInterface> value;
+        mItems->Get(i, (IInterface**)&value);
+        AutoPtr<ItemInfo> ii = (ItemInfo*)(IObject*)value.Get();
+        Boolean result;
+        if (mAdapter->IsViewFromObject(child, ii->mObject, &result), result) {
+            return ii;
+        }
+    }
+    return NULL;
+}
+
+AutoPtr<ItemInfo> ViewPager::InfoForAnyChild(
+    /* [in] */ IView* child)
+{
+    AutoPtr<IViewParent> parent;
+    child->GetParent((IViewParent**)&parent);
+    while (parent != IViewParent::Probe(this)) {
+        if (parent == NULL || IView::Probe(parent) == NULL) {
+            return NULL;
+        }
+        child = IView::Probe(parent);
+    }
+    return InfoForChild(child);
+}
+
+AutoPtr<ItemInfo> ViewPager::InfoForPosition(
+    /* [in] */ Int32 position)
+{
+    Int32 size;
+    mItems->GetSize(&size);
+    for (Int32 i = 0; i < size; i++) {
+        AutoPtr<IInterface> value;
+        mItems->Get(i, (IInterface**)&value);
+        AutoPtr<ItemInfo> ii = (ItemInfo*)(IObject*)value.Get();
+        if (ii->mPosition == position) {
+            return ii;
+        }
+    }
+    return NULL;
+}
+
+ECode ViewPager::OnAttachedToWindow()
+{
+    ViewGroup::OnAttachedToWindow();
+    mFirstLayout = TRUE;
+    return NOERROR;
+}
+
+void ViewPager::OnMeasure(
+    /* [in] */ Int32 widthMeasureSpec,
+    /* [in] */ Int32 heightMeasureSpec)
+{
+    // For simple implementation, our internal size is always 0.
+    // We depend on the container to specify the layout size of
+    // our view.  We can't really know what it is since we will be
+    // adding and removing different arbitrary views and do not
+    // want the layout to change as this happens.
+    SetMeasuredDimension(GetDefaultSize(0, widthMeasureSpec),
+            GetDefaultSize(0, heightMeasureSpec));
+
+    Int32 measuredWidth;
+    GetMeasuredWidth(&measuredWidth);
+    Int32 maxGutterSize = measuredWidth / 10;
+    mGutterSize = Elastos::Core::Math::Min(maxGutterSize, mDefaultGutterSize);
+
+    // Children are just made to fill our space.
+    Int32 paddingL, paddingR, paddingT, paddingB, height;
+    GetPaddingLeft(&paddingL);
+    GetPaddingRight(&paddingR);
+    GetPaddingTop(&paddingT);
+    GetPaddingBottom(&paddingB);
+    GetMeasuredHeight(&height);
+    Int32 childWidthSize = measuredWidth - paddingL - paddingR;
+    Int32 childHeightSize = height - paddingT - paddingB;
+
+    /*
+     * Make sure all children have been properly measured. Decor views first.
+     * Right now we cheat and make this less complicated by assuming decor
+     * views won't intersect. We will pin to edges based on gravity.
+     */
+    Int32 size;
+    GetChildCount(&size);
+    for (Int32 i = 0; i < size; ++i) {
+        AutoPtr<IView> child;
+        GetChildAt(i, (IView**)&child);
+        Int32 visibility;
+        if (child->GetVisibility(&visibility), visibility != GONE) {
+            AutoPtr<IViewGroupLayoutParams> temp;
+            child->GetLayoutParams((IViewGroupLayoutParams**)&temp);
+            AutoPtr<ViewPagerLayoutParams> lp = (ViewPagerLayoutParams*)temp.Get();
+            if (lp != NULL && lp->mIsDecor) {
+                Int32 hgrav = lp->mGravity & IGravity::HORIZONTAL_GRAVITY_MASK;
+                Int32 vgrav = lp->mGravity & IGravity::VERTICAL_GRAVITY_MASK;
+                Int32 widthMode = MeasureSpec::AT_MOST;
+                Int32 heightMode = MeasureSpec::AT_MOST;
+                Boolean consumeVertical = vgrav == IGravity::TOP || vgrav == IGravity::BOTTOM;
+                Boolean consumeHorizontal = hgrav == IGravity::LEFT || hgrav == IGravity::RIGHT;
+
+                if (consumeVertical) {
+                    widthMode = MeasureSpec::EXACTLY;
+                }
+                else if (consumeHorizontal) {
+                    heightMode = MeasureSpec::EXACTLY;
+                }
+
+                Int32 widthSize = childWidthSize;
+                Int32 heightSize = childHeightSize;
+                if (lp->mWidth != IViewGroupLayoutParams::WRAP_CONTENT) {
+                    widthMode = MeasureSpec.EXACTLY;
+                    if (lp->mWidth != IViewGroupLayoutParams::FILL_PARENT) {
+                        widthSize = lp.width;
+                    }
+                }
+                if (lp->mHeight != IViewGroupLayoutParams::WRAP_CONTENT) {
+                    heightMode = MeasureSpec::EXACTLY;
+                    if (lp->mHeight != IViewGroupLayoutParams::FILL_PARENT) {
+                        heightSize = lp->mHeight;
+                    }
+                }
+                Int32 widthSpec = MeasureSpec::MakeMeasureSpec(widthSize, widthMode);
+                Int32 heightSpec = MeasureSpec::MakeMeasureSpec(heightSize, heightMode);
+                child->Measure(widthSpec, heightSpec);
+
+                if (consumeVertical) {
+                    Int32 h;
+                    child->GetMeasuredHeight(&h);
+                    childHeightSize -= h;
+                }
+                else if (consumeHorizontal) {
+                    Int32 w;
+                    child->GetMeasuredWidth(&w);
+                    childWidthSize -= w;
+                }
+            }
+        }
+    }
+
+    mChildWidthMeasureSpec = MeasureSpec::MakeMeasureSpec(childWidthSize, MeasureSpec::EXACTLY);
+    mChildHeightMeasureSpec = MeasureSpec::MakeMeasureSpec(childHeightSize, MeasureSpec::EXACTLY);
+
+    // Make sure we have created all fragments that we need to have shown.
+    mInLayout = TRUE;
+    Populate();
+    mInLayout = FALSE;
+
+    // Page views next.
+    GetChildCount(&size);
+    for (Int32 i = 0; i < size; ++i) {
+        AutoPtr<IView> child;
+        GetChildAt(i, (IView**)&child);
+        Int32 visibility;
+        if (child->GetVisibility(&visibility), visibility != GONE) {
+            if (DEBUG) {
+                Slogger::V(TAG, "Measuring #%d %s: %d", i, TO_CSTR(child), mChildWidthMeasureSpec);
+            }
+
+            AutoPtr<IViewGroupLayoutParams> temp;
+            child->GetLayoutParams((IViewGroupLayoutParams**)&temp);
+            AutoPtr<ViewPagerLayoutParams> lp = (ViewPagerLayoutParams*)temp.Get();
+            if (lp == NULL || !lp->mIsDecor) {
+                Int32 widthSpec = MeasureSpec::MakeMeasureSpec(
+                        (Int32)(childWidthSize * lp->mWidthFactor), MeasureSpec::EXACTLY);
+                child->Measure(widthSpec, mChildHeightMeasureSpec);
+            }
+        }
+    }
+}
+
+void ViewPager::OnSizeChanged(
+    /* [in] */ Int32 w,
+    /* [in] */ Int32 h,
+    /* [in] */ Int32 oldw,
+    /* [in] */ Int32 oldh)
+{
+    ViewGroup::OnSizeChanged(w, h, oldw, oldh);
+
+    // Make sure scroll position is set correctly.
+    if (w != oldw) {
+        RecomputeScrollPosition(w, oldw, mPageMargin, mPageMargin);
+    }
+}
+
+void ViewPager::RecomputeScrollPosition(
+    /* [in] */ Int32 width,
+    /* [in] */ Int32 oldWidth,
+    /* [in] */ Int32 margin,
+    /* [in] */ Int32 oldMargin)
+{
+    Boolean isEmpty;
+    if (oldWidth > 0 && (mItems->IsEmpty(&isEmpty), !isEmpty)) {
+        Int32 paddingL, paddingR;
+        GetPaddingLeft(&paddingL);
+        GetPaddingRight(&paddingR);
+        Int32 widthWithMargin = width - paddingL - paddingR + margin;
+        Int32 oldWidthWithMargin = oldWidth - paddingL - paddingR + oldMargin;
+        Int32 xpos;
+        GetScrollX(&xpos);
+        Float pageOffset = (Float)xpos / oldWidthWithMargin;
+        Int32 newOffsetPixels = (Int32)(pageOffset * widthWithMargin);
+
+        Int32 ypos;
+        GetScrollY(&ypos);
+        ScrollTo(newOffsetPixels, ypos);
+        Boolean isFinished;
+        if (mScroller->IsFinished(&isFinished), !isFinished) {
+            // We now return to your regularly scheduled scroll, already in progress.
+            Int32 duration;
+            mScroller->GetDuration(&duration);
+            Int32 passed;
+            mScroller->TimePassed(&passed);
+            Int32 newDuration = duration - passed;
+            AutoPtr<ItemInfo> targetInfo = InfoForPosition(mCurItem);
+            mScroller->StartScroll(newOffsetPixels, 0,
+                    (Int32)(targetInfo->mOffset * width), 0, newDuration);
+        }
+    }
+    else {
+        AutoPtr<ItemInfo> ii = InfoForPosition(mCurItem);
+        Float scrollOffset = ii != NULL ? Elastos::Core::Math::Min(ii->mOffset, mLastOffset) : 0;
+        Int32 paddingL, paddingR;
+        GetPaddingLeft(&paddingL);
+        GetPaddingRight(&paddingR);
+        Int32 scrollPos = (Int32)(scrollOffset * (width - paddingL - paddingR));
+        Int32 xpos;
+        if (GetScrollX(&xpos), scrollPos != xpos) {
+            CompleteScroll(FALSE);
+            Int32 ypos;
+            GetScrollY(&ypos);
+            ScrollTo(scrollPos, ypos);
+        }
+    }
+}
+
+ECode ViewPager::OnLayout(
+    /* [in] */ Boolean changed,
+    /* [in] */ Int32 left,
+    /* [in] */ Int32 top,
+    /* [in] */ Int32 right,
+    /* [in] */ Int32 bottom)
+{
+    Int32 count;
+    GetChildCount(&count);
+    Int32 width = r - l;
+    Int32 height = b - t;
+    Int32 paddingLeft;
+    GetPaddingLeft(&paddingLeft);
+    Int32 paddingTop;
+    GetPaddingTop(&paddingTop);
+    Int32 paddingRight;
+    GetPaddingRight(&paddingRight);
+    Int32 paddingBottom;
+    GetPaddingBottom(&paddingBottom);
+    Int32 scrollX;
+    GetScrollX(&scrollX);
+
+    Int32 decorCount = 0;
+
+    // First pass - decor views. We need to do this in two passes so that
+    // we have the proper offsets for non-decor views later.
+    for (Int32 i = 0; i < count; i++) {
+        AutoPtr<IView> child;
+        GetChildAt(i, (IView**)&child);
+        Int32 visibility;
+        if (child->GetVisibility(&visibility), visibility != GONE) {
+            AutoPtr<IViewGroupLayoutParams> temp;
+            child->GetLayoutParams((IViewGroupLayoutParams**)&temp);
+            AutoPtr<ViewPagerLayoutParams> lp = (ViewPagerLayoutParams*)temp.Get();
+            Int32 childLeft = 0;
+            Int32 childTop = 0;
+            if (lp->mIsDecor) {
+                Int32 hgrav = lp->mGravity & IGravity::HORIZONTAL_GRAVITY_MASK;
+                Int32 vgrav = lp->mGravity & IGravity::VERTICAL_GRAVITY_MASK;
+                switch (hgrav) {
+                    default:
+                        childLeft = paddingLeft;
+                        break;
+                    case IGravity::LEFT: {
+                        childLeft = paddingLeft;
+                        Int32 w;
+                        child->GetMeasuredWidth(&w);
+                        paddingLeft += w;
+                        break;
+                    }
+                    case IGravity::CENTER_HORIZONTAL: {
+                        Int32 w;
+                        child->GetMeasuredWidth(&w);
+                        childLeft = Elastos::Core::Math::Max((width - w) / 2, paddingLeft);
+                        break;
+                    }
+                    case IGravity::RIGHT: {
+                        Int32 w;
+                        child->GetMeasuredWidth(&w);
+                        childLeft = width - paddingRight - w;
+                        paddingRight += w;
+                        break;
+                    }
+                }
+                switch (vgrav) {
+                    default:
+                        childTop = paddingTop;
+                        break;
+                    case IGravity::TOP: {
+                        Int32 h;
+                        child->GetMeasuredHeight(&h);
+                        childTop = paddingTop;
+                        paddingTop += h;
+                        break;
+                    }
+                    case IGravity::CENTER_VERTICAL: {
+                        Int32 h;
+                        child->GetMeasuredHeight(&h);
+                        childTop = Elastos::Core::Math::Max((height - h) / 2, paddingTop);
+                        break;
+                    }
+                    case IGravity::BOTTOM: {
+                        Int32 h;
+                        child->GetMeasuredHeight(&h);
+                        childTop = height - paddingBottom - h;
+                        paddingBottom += h;
+                        break;
+                    }
+                }
+                childLeft += scrollX;
+                Int32 w, h;
+                child->GetMeasuredWidth(&w);
+                child->GetMeasuredHeight(&h);
+                child->Layout(childLeft, childTop, childLeft + w, childTop + h);
+                decorCount++;
+            }
+        }
+    }
+
+    Int32 childWidth = width - paddingLeft - paddingRight;
+    // Page views. Do this once we have the right padding offsets from above.
+    for (Int32 i = 0; i < count; i++) {
+        AutoPtr<IView> child;
+        GetChildAt(i, (IView**)&child);
+        Int32 visibility;
+        if (child->GetVisibility(&visibility), visibility != GONE) {
+            AutoPtr<IViewGroupLayoutParams> temp;
+            child->GetLayoutParams((IViewGroupLayoutParams**)&temp);
+            AutoPtr<ViewPagerLayoutParams> lp = (ViewPagerLayoutParams*)temp.Get();
+            AutoPtr<ItemInfo> ii;
+            if (!lp->mIsDecor && (ii = InfoForChild(child)) != NULL) {
+                Int32 loff = (Int32)(childWidth * ii->mOffset);
+                Int32 childLeft = paddingLeft + loff;
+                Int32 childTop = paddingTop;
+                if (lp->mNeedsMeasure) {
+                    // This was added during layout and needs measurement.
+                    // Do it now that we know what we're working with.
+                    lp->mNeedsMeasure = FALSE;
+                    Int32 widthSpec = MeasureSpec::MakeMeasureSpec((Int32)(childWidth * lp->mWidthFactor),
+                            MeasureSpec::EXACTLY);
+                    Int32 heightSpec = MeasureSpec::MakeMeasureSpec((Int32)(height - paddingTop - paddingBottom),
+                            MeasureSpec::EXACTLY);
+                    child->Measure(widthSpec, heightSpec);
+                }
+                if (DEBUG) {
+                    Int32 w, h;
+                    child->GetMeasuredWidth(&w);
+                    child->GetMeasuredHeight(&h);
+                    Slogger::V(TAG, "Positioning #%d %s f=%s:%d,%d %dx%d",
+                            i, TO_CSTR(child), TO_CSTR(ii->mObject), childLeft, childTop, w, h);
+                }
+                Int32 w, h;
+                child->GetMeasuredWidth(&w);
+                child->GetMeasuredHeight(&h);
+                child->Layout(childLeft, childTop, childLeft + w, childTop + h);
+            }
+        }
+    }
+    mTopPageBounds = paddingTop;
+    mBottomPageBounds = height - paddingBottom;
+    mDecorChildCount = decorCount;
+
+    if (mFirstLayout) {
+        ScrollToItem(mCurItem, FALSE, 0, FALSE);
+    }
+    mFirstLayout = FALSE;
+    return NOERROR;
+}
+
+ECode ViewPager::ComputeScroll()
+{
+    Boolean isFinished, result;
+    if ((mScroller->IsFinished(&isFinished), !isFinished) &&
+            (mScroller->ComputeScrollOffset(&result), result)) {
+        Int32 oldX, oldY, x, y;
+        GetScrollX(&oldX);
+        GetScrollY(&oldY);
+        mScroller->GetCurrX(&x);
+        mScroller->GetCurrY(&y);
+
+        if (oldX != x || oldY != y) {
+            ScrollTo(x, y);
+            Boolean pageScrolled;
+            if (pageScrolled(x, &pageScrolled), !pageScrolled) {
+                mScroller->AbortAnimation();
+                ScrollTo(0, y);
+            }
+        }
+
+        // Keep on drawing until the animation has finished.
+        ViewCompat::PostInvalidateOnAnimation(IView::Probe(this));
+        return NOERROR;
+    }
+
+    // Done with scroll, clean up state.
+    CompleteScroll(TRUE);
+    return NOERROR;
+}
+
+ECode ViewPager::PageScrolled(
+    /* [in] */ Int32 xpos,
+    /* [out] */ Boolean* result)
+{
+    VALIDATE_NOT_NULL(result)
+    *result = FALSE;
+
+    Int32 size
+    if (mItems->GetSize(&size), size == 0) {
+        mCalledSuper = FALSE;
+        OnPageScrolled(0, 0, 0);
+        if (!mCalledSuper) {
+            Slogger::E(TAG, "onPageScrolled did not call superclass implementation");
+            return E_ILLEGAL_STATE_EXCEPTION;
+        }
+        *result = FALSE;
+        return NOERROR;
+    }
+    AutoPtr<ItemInfo> ii = InfoForCurrentScrollPosition();
+    Int32 width;
+    GetClientWidth(&width);
+    Int32 widthWithMargin = width + mPageMargin;
+    Float marginOffset = (Float)mPageMargin / width;
+    Int32 currentPage = ii->mPosition;
+    Float pageOffset = (((Float)xpos / width) - ii->mOffset) / (ii->mWidthFactor + marginOffset);
+    Int32 offsetPixels = (Int32)(pageOffset * widthWithMargin);
+
+    mCalledSuper = FALSE;
+    OnPageScrolled(currentPage, pageOffset, offsetPixels);
+    if (!mCalledSuper) {
+        Slogger::E(TAG, "onPageScrolled did not call superclass implementation");
+        return E_ILLEGAL_STATE_EXCEPTION;
+    }
+    *result = TRUE;
+    return NOERROR;
+}
+
 ECode ViewPager::OnPageScrolled(
     /* [in] */ Int32 position,
     /* [in] */ Float offset,
-    /* [in] */ Int32 offsetPixels);
+    /* [in] */ Int32 offsetPixels)
+{
+    if (mDecorChildCount > 0) {
+        Int32 scrollX, paddingLeft, paddingRight;
+        GetScrollX(&scrollX);
+        GetPaddingLeft(&paddingLeft);
+        GetPaddingRight(&paddingRight);
+        Int32 width;
+        GetWidth(&width);
+        Int32 childCount;
+        GetChildCount(&childCount);
+        for (Int32 i = 0; i < childCount; i++) {
+            AutoPtr<IView> child;
+            GetChildAt(i, (IView**)&child);
+            AutoPtr<IViewGroupLayoutParams> temp;
+            child->GetLayoutParams((IViewGroupLayoutParams**)&temp);
+            AutoPtr<ViewPagerLayoutParams> lp = (ViewPagerLayoutParams*)temp.Get();
+            if (!lp->mIsDecor) continue;
+
+            Int32 hgrav = lp->mGravity & IGravity::HORIZONTAL_GRAVITY_MASK;
+            Int32 childLeft = 0;
+            switch (hgrav) {
+                default:
+                    childLeft = paddingLeft;
+                    break;
+                case IGravity::LEFT: {
+                    childLeft = paddingLeft;
+                    Int32 w;
+                    child->GetWidth(&w);
+                    paddingLeft += w;
+                    break;
+                }
+                case IGravity::CENTER_HORIZONTAL: {
+                    Int32 w;
+                    child->GetMeasuredWidth(&w);
+                    childLeft = Elastos::Core::Math::Max((width - w) / 2, paddingLeft);
+                    break;
+                }
+                case IGravity::RIGHT: {
+                    Int32 w;
+                    child->GetMeasuredWidth(&w);
+                    childLeft = width - paddingRight - w;
+                    paddingRight += w;
+                    break;
+                }
+            }
+            childLeft += scrollX;
+
+            Int32 left;
+            child->GetLeft(&left);
+            Int32 childOffset = childLeft - left;
+            if (childOffset != 0) {
+                child->OffsetLeftAndRight(childOffset);
+            }
+        }
+    }
+
+    if (mOnPageChangeListener != NULL) {
+        mOnPageChangeListener->OnPageScrolled(position, offset, offsetPixels);
+    }
+    if (mInternalPageChangeListener != NULL) {
+        mInternalPageChangeListener->OnPageScrolled(position, offset, offsetPixels);
+    }
+
+    if (mPageTransformer != NULL) {
+        Int32 scrollX;
+        GetScrollX(&scrollX);
+        Int32 childCount;
+        GetChildCount(&childCount);
+        for (Int32 i = 0; i < childCount; i++) {
+            AutoPtr<IView> child;
+            GetChildAt(i, (IView**)&child);
+            AutoPtr<IViewGroupLayoutParams> temp;
+            child->GetLayoutParams((IViewGroupLayoutParams**)&temp);
+            AutoPtr<ViewPagerLayoutParams> lp = (ViewPagerLayoutParams*)temp.Get();
+
+            if (lp->mIsDecor) continue;
+
+            Int32 left;
+            child->GetLeft(&left);
+            Int32 width;
+            GetClientWidth(&width);
+            Float transformPos = (Float)(left - scrollX) / width;
+            mPageTransformer->TransformPage(child, transformPos);
+        }
+    }
+
+    mCalledSuper = TRUE;
+    return NOERROR;
+}
+
+void ViewPager::CompleteScroll(
+    /* [in] */ Boolean postEvents)
+{
+    Boolean needPopulate = mScrollState == SCROLL_STATE_SETTLING;
+    if (needPopulate) {
+        // Done with scroll, no longer want to cache view drawing.
+        SetScrollingCacheEnabled(FALSE);
+        mScroller->AbortAnimation();
+        Int32 oldX, oldy;
+        GetScrollX(&oldX);
+        GetScrollY(&oldY);
+        Int32 x, y;
+        mScroller->GetCurrX(&x);
+        mScroller->GetCurrY(&y);
+        if (oldX != x || oldY != y) {
+            ScrollTo(x, y);
+        }
+    }
+    mPopulatePending = FALSE;
+    Int32 size;
+    mItems->GetSize(&size);
+    for (Int32 i = 0; i < size; i++) {
+        AutoPtr<IInterface> value;
+        mItems->Get(i, (IInterface**)&value);
+        AutoPtr<ItemInfo> ii = (ItemInfo*)(IObject*)value.Get();
+        if (ii->mScrolling) {
+            needPopulate = TRUE;
+            ii.scrolling = FALSE;
+        }
+    }
+    if (needPopulate) {
+        if (postEvents) {
+            ViewCompat::PostOnAnimation(IView::Probe(this), mEndScrollRunnable);
+        }
+        else {
+            mEndScrollRunnable->Run();
+        }
+    }
+}
+
+Boolean ViewPager::IsGutterDrag(
+    /* [in] */ Float x,
+    /* [in] */ Float dx)
+{
+    Int32 width;
+    GetWidth(&width);
+    return (x < mGutterSize && dx > 0) || (x > width - mGutterSize && dx < 0);
+}
+
+void ViewPager::EnableLayers(
+    /* [in] */ Boolean enable)
+{
+    Int32 childCount;
+    GetChildCount(&childCount);
+    for (Int32 i = 0; i < childCount; i++) {
+        Int32 layerType = enable ?
+                ViewCompat::LAYER_TYPE_HARDWARE : ViewCompat::LAYER_TYPE_NONE;
+        AutoPtr<IView> child;
+        GetChildAt(i, (IView**)&child);
+        ViewCompat::SetLayerType(child, layerType, NULL);
+    }
+}
+
+ECode ViewPager::OnInterceptTouchEvent(
+    /* [in] */ IMotionEvent* ev,
+    /* [out] */ Boolean* res)
+{
+    VALIDATE_NOT_NULL(res)
+
+    /*
+     * This method JUST determines whether we want to intercept the motion.
+     * If we return true, onMotionEvent will be called and we do the actual
+     * scrolling there.
+     */
+
+    Int32 a;
+    ev->GetAction(&a);
+    Int32 action = a & IMotionEvent::ACTION_MASK;
+
+    // Always take care of the touch gesture being complete.
+    if (action == IMotionEvent::ACTION_CANCEL || action == IMotionEvent::ACTION_UP) {
+        // Release the drag.
+        if (DEBUG) Slogger::V(TAG, "Intercept done!");
+        mIsBeingDragged = FALSE;
+        mIsUnableToDrag = FALSE;
+        mActivePointerId = INVALID_POINTER;
+        if (mVelocityTracker != NULL) {
+            mVelocityTracker->Recycle();
+            mVelocityTracker = NULL;
+        }
+        *res = FALSE;
+        return NOERROR;
+    }
+
+    // Nothing more to do here if we have decided whether or not we
+    // are dragging.
+    if (action != IMotionEvent::ACTION_DOWN) {
+        if (mIsBeingDragged) {
+            if (DEBUG) Slogger::V(TAG, "Intercept returning true!");
+            *res = TRUE;
+            return NOERROR;
+        }
+        if (mIsUnableToDrag) {
+            if (DEBUG) Slogger::V(TAG, "Intercept returning false!");
+            *res = FALSE;
+            return NOERROR;
+        }
+    }
+
+    switch (action) {
+        case IMotionEvent::ACTION_MOVE: {
+            /*
+             * mIsBeingDragged == false, otherwise the shortcut would have caught it. Check
+             * whether the user has moved far enough from his original down touch.
+             */
+
+            /*
+            * Locally do absolute value. mLastMotionY is set to the y value
+            * of the down event.
+            */
+            Int32 activePointerId = mActivePointerId;
+            if (activePointerId == INVALID_POINTER) {
+                // If we don't have a valid id, the touch down wasn't on content.
+                break;
+            }
+
+            Int32 pointerIndex;
+            ev->FindPointerIndex(activePointerId, &pointerIndex);
+            Float x;
+            ev->GetX(pointerIndex, &x);
+            Float dx = x - mLastMotionX;
+            Float xDiff = Elastos::Core::Math::Abs(dx);
+            Float y;
+            ev->GetY(pointerIndex, &y);
+            Float yDiff = Elastos::Core::Math::Abs(y - mInitialMotionY);
+            if (DEBUG) Slogger::V(TAG, "Moved x to %f,%f diff=%f,%f", x, y, xDiff, yDiff);
+
+            if (dx != 0 && !IsGutterDrag(mLastMotionX, dx) &&
+                    CanScroll(IView::Probe(this), FALSE, (Int32)dx, (Int32)x, (Int32)y)) {
+                // Nested view has scrollable area under this point. Let it be handled there.
+                mLastMotionX = x;
+                mLastMotionY = y;
+                mIsUnableToDrag = TRUE;
+                *res = FALSE;
+                return NOERROR;
+            }
+            if (xDiff > mTouchSlop && xDiff * 0.5f > yDiff) {
+                if (DEBUG) Slogger::V(TAG, "Starting drag!");
+                mIsBeingDragged = TRUE;
+                RequestParentDisallowInterceptTouchEvent(TRUE);
+                SetScrollState(SCROLL_STATE_DRAGGING);
+                mLastMotionX = dx > 0 ? mInitialMotionX + mTouchSlop : mInitialMotionX - mTouchSlop;
+                mLastMotionY = y;
+                SetScrollingCacheEnabled(TRUE);
+            }
+            else if (yDiff > mTouchSlop) {
+                // The finger has moved enough in the vertical
+                // direction to be counted as a drag...  abort
+                // any attempt to drag horizontally, to work correctly
+                // with children that have scrolling containers.
+                if (DEBUG) Slogger::V(TAG, "Starting unable to drag!");
+                mIsUnableToDrag = TRUE;
+            }
+            if (mIsBeingDragged) {
+                // Scroll to follow the motion event
+                if (PerformDrag(x)) {
+                    ViewCompat::PostInvalidateOnAnimation(IView::Probe(this);
+                }
+            }
+            break;
+        }
+
+        case IMotionEvent::ACTION_DOWN: {
+            /*
+             * Remember location of down touch.
+             * ACTION_DOWN always refers to pointer index 0.
+             */
+            Float x, y;
+            ev->GetX(&x);
+            ev->GetY(&y);
+            mLastMotionX = mInitialMotionX = x;
+            mLastMotionY = mInitialMotionY = y;
+            ev->GetPointerId(0, &mActivePointerId);
+            mIsUnableToDrag = FALSE;
+
+            mScroller->ComputeScrollOffset();
+            if (mScrollState == SCROLL_STATE_SETTLING) {
+                Int32 finalX, currX;
+                mScroller->GetFinalX(&finalX);
+                mScroller->GetCurrX(currX);
+                if (Elastos::Core::Math::Abs(finalX - currX) > mCloseEnough) {
+                    // Let the user 'catch' the pager as it animates.
+                    mScroller->AbortAnimation();
+                    mPopulatePending = FALSE;
+                    Populate();
+                    mIsBeingDragged = TRUE;
+                    RequestParentDisallowInterceptTouchEvent(TRUE);
+                    SetScrollState(SCROLL_STATE_DRAGGING);
+                }
+                else {
+                    CompleteScroll(FALSE);
+                    mIsBeingDragged = FALSE;
+                }
+            }
+            else {
+                CompleteScroll(FALSE);
+                mIsBeingDragged = FALSE;
+            }
+
+            if (DEBUG) Slogger::V(TAG, "Down at %d,%d mIsBeingDragged=%dmIsUnableToDrag=%d",
+                    mLastMotionX, mLastMotionY, mIsBeingDragged, mIsUnableToDrag);
+            break;
+        }
+
+        case IMotionEvent::ACTION_POINTER_UP:
+            OnSecondaryPointerUp(ev);
+            break;
+    }
+
+    if (mVelocityTracker == NULL) {
+        AutoPtr<IVelocityTrackerHelper> helper;
+        CVelocityTrackerHelper::AcquireSingleton((IVelocityTrackerHelper**)&helper);
+        helper->Obtain((IVelocityTracker**)&mVelocityTracker);
+    }
+    mVelocityTracker->AddMovement(ev);
+
+    /*
+     * The only time we want to intercept motion events is if we are in the
+     * drag mode.
+     */
+    *res = mIsBeingDragged;
+    return NOERROR;
+}
+
+ECode ViewPager::OnTouchEvent(
+    /* [in] */ IMotionEvent* event,
+    /* [out] */ Boolean* res)
+{
+    VALIDATE_NOT_NULL(res)
+    if (mFakeDragging) {
+        // A fake drag is in progress already, ignore this real one
+        // but still eat the touch events.
+        // (It is likely that the user is multi-touching the screen.)
+        *res = TRUE;
+        return NOERROR;
+    }
+
+    Int32 action, flags;
+    if ((ev->GetAction(&action), action == IMotionEvent::ACTION_DOWN) &&
+            (ev->GetEdgeFlags(&flags), flags != 0)) {
+        // Don't handle edge touches immediately -- they may actually belong to one of our
+        // descendants.
+        *res = FALSE;
+        return NOERROR;
+    }
+
+    Int32 count;
+    if (mAdapter == NULL || (mAdapter->GetCount(&count), count == 0)) {
+        // Nothing to present or scroll; nothing to touch.
+        *res = FALSE;
+        return NOERROR;
+    }
+
+    if (mVelocityTracker == NULL) {
+        AutoPtr<IVelocityTrackerHelper> helper;
+        CVelocityTrackerHelper::AcquireSingleton((IVelocityTrackerHelper**)&helper);
+        helper->Obtain((IVelocityTracker**)&mVelocityTracker);
+    }
+    mVelocityTracker->AddMovement(ev);
+
+    ev->GetAction(&action);
+    Boolean needsInvalidate = FALSE;
+
+    switch (action & IMotionEvent::ACTION_MASK) {
+        case IMotionEvent::ACTION_DOWN: {
+            mScroller->AbortAnimation();
+            mPopulatePending = FALSE;
+            Populate();
+
+            // Remember where the motion event started
+            Float x, y;
+            ev->GetX(&x);
+            ev->GetY(&y);
+            mLastMotionX = mInitialMotionX = x;
+            mLastMotionY = mInitialMotionY = y;
+            ev->GetPointerId(0, &mActivePointerId);
+            break;
+        }
+        case IMotionEvent::ACTION_MOVE:
+            if (!mIsBeingDragged) {
+                Int32 pointerIndex;
+                ev->FindPointerIndex(mActivePointerId, &pointerIndex);
+                Float x;
+                ev->GetX(pointerIndex, &x);
+                Float xDiff = Elastos::Core::Math::Abs(x - mLastMotionX);
+                Float y;
+                ev->GetY(pointerIndex, &y);
+                Float yDiff = Elastos::Core::Math::Abs(y - mLastMotionY);
+                if (DEBUG) Slogger::V(TAG, "Moved x to %f,%f diff=%f,%f", x, y, xDiff, yDiff);
+                if (xDiff > mTouchSlop && xDiff > yDiff) {
+                    if (DEBUG) Slogger::V(TAG, "Starting drag!");
+                    mIsBeingDragged = TRUE;
+                    RequestParentDisallowInterceptTouchEvent(TRUE);
+                    mLastMotionX = x - mInitialMotionX > 0 ? mInitialMotionX + mTouchSlop :
+                            mInitialMotionX - mTouchSlop;
+                    mLastMotionY = y;
+                    SetScrollState(SCROLL_STATE_DRAGGING);
+                    SetScrollingCacheEnabled(TRUE);
+
+                    // Disallow Parent Intercept, just in case
+                    AutoPtr<IViewParent> parent;
+                    GetParent((IViewParent**)&parent);
+                    if (parent != NULL) {
+                        parent->RequestDisallowInterceptTouchEvent(TRUE);
+                    }
+                }
+            }
+            // Not else! Note that mIsBeingDragged can be set above.
+            if (mIsBeingDragged) {
+                // Scroll to follow the motion event
+                Int32 activePointerIndex;
+                ev->FindPointerIndex(mActivePointerId, &activePointerIndex);
+                Float x;
+                ev->GetX(activePointerIndex, &x);
+                needsInvalidate |= PerformDrag(x);
+            }
+            break;
+        case IMotionEvent::ACTION_UP:
+            if (mIsBeingDragged) {
+                AutoPtr<IVelocityTracker> velocityTracker = mVelocityTracker;
+                velocityTracker->ComputeCurrentVelocity(1000, mMaximumVelocity);
+                Float xVelocity;
+                velocityTracker->GetXVelocity(velocityTracker, mActivePointerId, &xVelocity);
+                Int32 initialVelocity = (Int32)xVelocity;
+                mPopulatePending = TRUE;
+                Int32 width;
+                GetClientWidth(&width);
+                Int32 scrollX;
+                GetScrollX(&scrollX);
+                AutoPtr<ItemInfo> ii = InfoForCurrentScrollPosition();
+                Int32 currentPage = ii->mPosition;
+                Float pageOffset = (((Float)scrollX / width) - ii->mOffset) / ii->mWidthFactor;
+                Int32 activePointerIndex;
+                ev->FindPointerIndex(mActivePointerId, &activePointerIndex);
+                Float x;
+                ev->GetX(activePointerIndex, &x);
+                Int32 totalDelta = (Int32)(x - mInitialMotionX);
+                Int32 nextPage = DetermineTargetPage(currentPage, pageOffset, initialVelocity,
+                        totalDelta);
+                SetCurrentItemInternal(nextPage, TRUE, TRUE, initialVelocity);
+
+                mActivePointerId = INVALID_POINTER;
+                EndDrag();
+                Boolean onReleaseL, onReleaseR;
+                mLeftEdge->OnRelease(&onReleaseL);
+                mRightEdge->OnRelease(&onReleaseR);
+                needsInvalidate = mLeftEdge.onRelease() | onReleaseR;
+            }
+            break;
+        case IMotionEvent::ACTION_CANCEL:
+            if (mIsBeingDragged) {
+                ScrollToItem(mCurItem, TRUE, 0, FALSE);
+                mActivePointerId = INVALID_POINTER;
+                EndDrag();
+                Boolean onReleaseL, onReleaseR;
+                mLeftEdge->OnRelease(&onReleaseL);
+                mRightEdge->OnRelease(&onReleaseR);
+                needsInvalidate = onReleaseL | onReleaseR;
+            }
+            break;
+        case IMotionEvent::ACTION_POINTER_DOWN: {
+            Int32 index;
+            ev->GetActionIndex(ev, &index);
+            Float x;
+            ev->GetX(index, &x);
+            mLastMotionX = x;
+            ev->GetPointerId(index, &mActivePointerId);
+            break;
+        }
+        case IMotionEvent::ACTION_POINTER_UP:
+            OnSecondaryPointerUp(ev);
+            Int32 index;
+            ev->FindPointerIndex(mActivePointerId, &index);
+            ev->GetX(index, &mLastMotionX);
+            break;
+    }
+    if (needsInvalidate) {
+        ViewCompat::PostInvalidateOnAnimation(IView::Probe(this));
+    }
+    *res = TRUE;
+}
+
+void ViewPager::RequestParentDisallowInterceptTouchEvent(
+    /* [in] */ Boolean disallowIntercept)
+{
+    AutoPtr<IViewParent> parent;
+    GetParent((IViewParent**)&parent);
+    if (parent != NULL) {
+        parent->RequestDisallowInterceptTouchEvent(disallowIntercept);
+    }
+}
+
+Boolean ViewPager::PerformDrag(
+    /* [in] */ Float x)
+{
+    Boolean needsInvalidate = FALSE;
+
+    Float deltaX = mLastMotionX - x;
+    mLastMotionX = x;
+
+    Float oldScrollX;
+    GetScrollX(&oldScrollX);
+    Float scrollX = oldScrollX + deltaX;
+    Int32 width;
+    GetClientWidth(&width);
+
+    Float leftBound = width * mFirstOffset;
+    Float rightBound = width * mLastOffset;
+    Boolean leftAbsolute = TRUE;
+    Boolean rightAbsolute = TRUE;
+
+    AutoPtr<IInterface> value;
+    mItems->Get(0, (IInterface**)&value);
+    AutoPtr<ItemInfo> firstItem = (ItemInfo*)(IObject*)value.Get();
+    Int32 size;
+    mItems->GetSize(&size);
+    AutoPtr<IInterface> last;
+    mItems->Get(size - 1, (IInterface**)&last);
+    AutoPtr<ItemInfo> lastItem = (ItemInfo*)last.Get();
+    if (firstItem->mPosition != 0) {
+        leftAbsolute = FALSE;
+        leftBound = firstItem->mOffset * width;
+    }
+    Int32 count;
+    mAdapter->GetCount(&count);
+    if (lastItem->mPosition != count - 1) {
+        rightAbsolute = FALSE;
+        rightBound = lastItem->mOffset * width;
+    }
+
+    if (scrollX < leftBound) {
+        if (leftAbsolute) {
+            Float over = leftBound - scrollX;
+            mLeftEdge->OnPull(Elastos::Core::Math::Abs(over) / width, &needsInvalidate);
+        }
+        scrollX = leftBound;
+    }
+    else if (scrollX > rightBound) {
+        if (rightAbsolute) {
+            Float over = scrollX - rightBound;
+            mRightEdge->OnPull(Elastos::Core::Math::Abs(over) / width, &needsInvalidate);
+        }
+        scrollX = rightBound;
+    }
+    // Don't lose the rounded component
+    mLastMotionX += scrollX - (Int32)scrollX;
+    Int32 scrollY;
+    GetScrollY(&scrollY);
+    ScrollTo((Int32)scrollX, scrollY);
+    PageScrolled((Int32)scrollX);
+
+    return needsInvalidate;
+}
+
+AutoPtr<ItemInfo> ViewPager::InfoForCurrentScrollPosition()
+{
+    Int32 width;
+    GetClientWidth(&width);
+    Int32 scrollX;
+    GetScrollX(&scrollX);
+    Float scrollOffset = width > 0 ? (Float)scrollX / width : 0;
+    Float marginOffset = width > 0 ? (Float)mPageMargin / width : 0;
+    Int32 lastPos = -1;
+    Float lastOffset = 0.f;
+    Float lastWidth = 0.f;
+    Boolean first = TRUE;
+
+    AutoPtr<ItemInfo> lastItem;
+    mItems->GetSize(&size);
+    for (Int32 i = 0; i < size; i++) {
+        AutoPtr<IInterface> value;
+        mItems->Get(i, (IInterface**)&value);
+        AutoPtr<ItemInfo> ii = (ItemInfo*)value.Get();
+        Float offset;
+        if (!first && ii->mPosition != lastPos + 1) {
+            // Create a synthetic item for a missing page.
+            ii = mTempItem;
+            ii->mOffset = lastOffset + lastWidth + marginOffset;
+            ii->mPosition = lastPos + 1;
+            mAdapter->GetPageWidth(ii->mPosition, &ii->mWidthFactor);
+            i--;
+        }
+        offset = ii->mOffset;
+
+        Float leftBound = offset;
+        Float rightBound = offset + ii->mWidthFactor + marginOffset;
+        if (first || scrollOffset >= leftBound) {
+            if (scrollOffset < rightBound || (mItems->GetSize(&size), i == size - 1) {
+                return ii;
+            }
+        }
+        else {
+            return lastItem;
+        }
+        first = FALSE;
+        lastPos = ii->Position;
+        lastOffset = offset;
+        lastWidth = ii->mWidthFactor;
+        lastItem = ii;
+    }
+
+    return lastItem;
+}
+
+Int32 ViewPager::DetermineTargetPage(
+    /* [in] */ Int32 currentPage,
+    /* [in] */ Float pageOffset,
+    /* [in] */ Int32 velocity,
+    /* [in] */ Int32 deltaX)
+{
+    Int32 targetPage;
+    if (Elastos::Core::Math::Abs(deltaX) > mFlingDistance && Elastos::Core::Math::Abs(velocity) > mMinimumVelocity) {
+        targetPage = velocity > 0 ? currentPage : currentPage + 1;
+    }
+    else {
+        Float truncator = currentPage >= mCurItem ? 0.4f : 0.6f;
+        targetPage = (Int32)(currentPage + pageOffset + truncator);
+    }
+
+    Int32 size;
+    if (mItems->GetSize(&size), size > 0) {
+        AutoPtr<IInterface> first;
+        mItems->Get(0, (IInterface**)&first);
+        AutoPtr<ItemInfo> firstItem = (ItemInfo*)(IObject*)first.Get();
+        AutoPtr<IInterface> last;
+        mItems->Get(size - 1, (IInterface**)&last);
+        AutoPtr<ItemInfo> lastItem = (ItemInfo*)(IObject*)last.Get();
+
+        // Only let the user target pages we have items for
+        targetPage = Elastos::Core::Math::Max(
+                firstItem->mPosition, Elastos::Core::Math::Min(targetPage, lastItem->mPosition));
+    }
+
+    return targetPage;
+}
+
+ECode ViewPager::Draw(
+    /* [in] */ ICanvas* canvas)
+{
+    ViewGroup::Draw(canvas);
+    Boolean needsInvalidate = FALSE;
+
+    Int32 overScrollMode = ViewCompat::GetOverScrollMode(IView::Probe(this));
+    Int32 count;
+    if (overScrollMode == ViewCompat::OVER_SCROLL_ALWAYS ||
+            (overScrollMode == ViewCompat::OVER_SCROLL_IF_CONTENT_SCROLLS &&
+                    mAdapter != NULL && (mAdapter->GetCount(&count), count > 1))) {
+        Boolean isFinished;
+        if (mLeftEdge->IsFinished(&isFinished), !isFinished) {
+            Int32 restoreCount;
+            canvas->Save(&restoreCount);
+            Int32 h, paddingTop, paddingBottom;
+            GetHeight(&h);
+            GetPaddingTop(&paddingTop);
+            GetPaddingBottom(&paddingBottom);
+            Int32 height = h - paddingTop - paddingBottom;
+            Int32 width;
+            GetWidth(&width);
+
+            canvas->Rotate(270);
+            canvas->Translate(-height + paddingTop, mFirstOffset * width);
+            mLeftEdge->SetSize(height, width);
+            Boolean result;
+            mLeftEdge->Draw(canvas, &result);
+            needsInvalidate |= result;
+            canvas->RestoreToCount(restoreCount);
+        }
+        if (mRightEdge->IsFinished(&isFinished), !isFinished) {
+            Int32 restoreCount;
+            canvas->Save(&restoreCount);
+            Int32 width;
+            GetWidth(&width);
+            Int32 h, paddingTop, paddingBottom;
+            GetHeight(&h);
+            GetPaddingTop(&paddingTop);
+            GetPaddingBottom(&paddingBottom);
+            Int32 height = h - paddingTop - paddingBottom;
+
+            canvas->Rotate(90);
+            canvas->Translate(-paddingTop, -(mLastOffset + 1) * width);
+            mRightEdge->SetSize(height, width);
+            Boolean result;
+            mRightEdge->Draw(canvas, &result);
+            needsInvalidate |= result;
+            canvas->RestoreToCount(restoreCount);
+        }
+    }
+    else {
+        mLeftEdge->Finish();
+        mRightEdge->Finish();
+    }
+
+    if (needsInvalidate) {
+        // Keep animating
+        ViewCompat::PostInvalidateOnAnimation(this);
+    }
+    return NOERROR;
+}
+
+void ViewPager::OnDraw(
+    /* [in] */ ICanvas* canvas)
+{
+    ViewGroup::OnDraw(canvas);
+
+    // Draw the margin drawable between pages if needed.
+    Int32 size
+    if (mPageMargin > 0 && mMarginDrawable != null && (mItems->GetSize(&size), size > 0) && mAdapter != NULL) {
+        Int32 scrollX;
+        GetScrollX(&scrollX);
+        Int32 width;
+        GetWidth(&width);
+
+        Float marginOffset = (Float)mPageMargin / width;
+        Int32 itemIndex = 0;
+        AutoPtr<IInterface> first;
+        mItems->Get(0, (IInterface**)&first);
+        AutoPtr<ItemInfo> ii = (ItemInfo*)(IObject*)first.Get();
+        Float offset = ii->mOffset;
+        Int32 itemCount;
+        mItems->GetSize(&itemCount);
+        Int32 firstPos = ii->mPosition;
+        AutoPtr<IInterface> last;
+        mItems->Get(itemCount - 1, (IInterface**)&last);
+        AutoPtr<ItemInfo> lastItem = (ItemInfo*)(IObject*)last.Get();
+        Int32 lastPos = lastItem->mPosition;
+        for (Int32 pos = firstPos; pos < lastPos; pos++) {
+            while (pos > ii->mPosition && itemIndex < itemCount) {
+                AutoPtr<IInterface> value;
+                mItems->Get(++itemIndex, (IInterface**)&value);
+                ii = (ItemInfo*)(IObject*)value.Get();
+            }
+
+            Float drawAt;
+            if (pos == ii->mPosition) {
+                drawAt = (ii->mOffset + ii->mWidthFactor) * width;
+                offset = ii->mOffset + ii->mWidthFactor + marginOffset;
+            }
+            else {
+                Float widthFactor;
+                mAdapter->GetPageWidth(pos, &widthFactor);
+                drawAt = (offset + widthFactor) * width;
+                offset += widthFactor + marginOffset;
+            }
+
+            if (drawAt + mPageMargin > scrollX) {
+                mMarginDrawable->SetBounds((Int32)drawAt, mTopPageBounds,
+                        (Int32)(drawAt + mPageMargin + 0.5f), mBottomPageBounds);
+                mMarginDrawable->Draw(canvas);
+            }
+
+            if (drawAt > scrollX + width) {
+                break; // No more visible, no sense in continuing
+            }
+        }
+    }
+}
 
 ECode ViewPager::BeginFakeDrag(
-    /* [out] */ Boolean* result);
+    /* [out] */ Boolean* result)
+{
+    VALIDATE_NOT_NULL(result)
+    if (mIsBeingDragged) {
+        *result = FALSE;
+        return NOERROR;
+    }
+    mFakeDragging = TRUE;
+    setScrollState(SCROLL_STATE_DRAGGING);
+    mInitialMotionX = mLastMotionX = 0;
+    if (mVelocityTracker == NULL) {
+        AutoPtr<IVelocityTrackerHelper> helper;
+        CVelocityTrackerHelper::AcquireSingleton((IVelocityTrackerHelper**)&helper);
+        helper->Obtain((IVelocityTracker**)&mVelocityTracker);
+    }
+    else {
+        mVelocityTracker->Clear();
+    }
+    Int64 time = SystemClock::GetUptimeMillis();
+    AutoPtr<IMotionEventHelper> helper;
+    CMotionEventHelper::AcquireSingleton((IMotionEventHelper**)&helper);
+    AutoPtr<IMotionEvent> ev;
+    helper->Obtain(time, time, IMotionEvent::ACTION_DOWN, 0, 0, 0, (IMotionEvent**)&ev);
+    mVelocityTracker->AddMovement(ev);
+    ev->Recycle();
+    mFakeDragBeginTime = time;
+    *result = TRUE;
+    return NOERROR;
+}
 
-ECode ViewPager::EndFakeDrag();
+ECode ViewPager::EndFakeDrag()
+{
+    if (!mFakeDragging) {
+        Slogger::E(TAG, "No fake drag in progress. Call beginFakeDrag first.");
+        return E_ILLEGAL_STATE_EXCEPTION;
+    }
+
+    AutoPtr<IVelocityTracker> velocityTracker = mVelocityTracker;
+    velocityTracker->ComputeCurrentVelocity(1000, mMaximumVelocity);
+    Float xVelocity;
+    velocityTracker->GetXVelocity(velocityTracker, mActivePointerId, &xVelocity);
+    Int32 initialVelocity = (Int32)xVelocity;
+    mPopulatePending = TRUE;
+    Int32 width;
+    GetClientWidth(&width);
+    Int32 scrollX;
+    GetScrollX(&scrollX);
+    AutoPtr<ItemInfo> ii = InfoForCurrentScrollPosition();
+    Int32 currentPage = ii->mPosition;
+    Float pageOffset = (((Float) scrollX / width) - ii->mOffset) / ii->mWidthFactor;
+    Int32 totalDelta = (Int32)(mLastMotionX - mInitialMotionX);
+    Int32 nextPage = DetermineTargetPage(currentPage, pageOffset, initialVelocity, totalDelta);
+    SetCurrentItemInternal(nextPage, TRUE, TRUE, initialVelocity);
+    EndDrag();
+
+    mFakeDragging = FALSE;
+    return NOERROR;
+}
 
 ECode ViewPager::FakeDragBy(
-    /* [in] */ Float xOffset);
+    /* [in] */ Float xOffset)
+{
+    // begin from this
+    if (!mFakeDragging) {
+        throw new IllegalStateException("No fake drag in progress. Call beginFakeDrag first.");
+    }
+
+    mLastMotionX += xOffset;
+
+    float oldScrollX = getScrollX();
+    float scrollX = oldScrollX - xOffset;
+    final int width = getClientWidth();
+
+    float leftBound = width * mFirstOffset;
+    float rightBound = width * mLastOffset;
+
+    final ItemInfo firstItem = mItems.get(0);
+    final ItemInfo lastItem = mItems.get(mItems.size() - 1);
+    if (firstItem.position != 0) {
+        leftBound = firstItem.offset * width;
+    }
+    if (lastItem.position != mAdapter.getCount() - 1) {
+        rightBound = lastItem.offset * width;
+    }
+
+    if (scrollX < leftBound) {
+        scrollX = leftBound;
+    } else if (scrollX > rightBound) {
+        scrollX = rightBound;
+    }
+    // Don't lose the rounded component
+    mLastMotionX += scrollX - (int) scrollX;
+    scrollTo((int) scrollX, getScrollY());
+    pageScrolled((int) scrollX);
+
+    // Synthesize an event for the VelocityTracker.
+    final long time = SystemClock.uptimeMillis();
+    final MotionEvent ev = MotionEvent.obtain(mFakeDragBeginTime, time, MotionEvent.ACTION_MOVE,
+            mLastMotionX, 0, 0);
+    mVelocityTracker.addMovement(ev);
+    ev.recycle();
+}
 
 ECode ViewPager::IsFakeDragging(
     /* [out] */ Boolean* result);
