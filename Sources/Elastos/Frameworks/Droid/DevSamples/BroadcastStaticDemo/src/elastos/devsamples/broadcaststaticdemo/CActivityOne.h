@@ -9,6 +9,7 @@
 using Elastos::Droid::App::Activity;
 using Elastos::Droid::Content::IBroadcastReceiver;
 using Elastos::Droid::View::IViewOnClickListener;
+using Elastos::Droid::Widget::ILinearLayout;
 
 namespace Elastos {
 namespace DevSamples {
@@ -65,6 +66,14 @@ private:
         /* [in] */ IIntent *data);
 
     CARAPI Send();
+
+    CARAPI CreateVolumeDialog();
+
+    CARAPI CreateSliders();
+
+    CARAPI AddButton(
+        /* [in] */ ILinearLayout* zenButtons,
+        /* [in] */ const char* text);
 };
 
 } // namespace BroadcastStaticDemo

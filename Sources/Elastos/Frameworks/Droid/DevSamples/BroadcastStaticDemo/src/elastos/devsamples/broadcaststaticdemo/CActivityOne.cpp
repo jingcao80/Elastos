@@ -1,20 +1,41 @@
 
 #include "CActivityOne.h"
 #include "R.h"
+#include "elastos/droid/R.h"
 #include <Elastos.Droid.App.h>
 #include <Elastos.Droid.Content.h>
 #include <Elastos.Droid.Os.h>
 #include <Elastos.Droid.View.h>
+#include <Elastos.Droid.Graphics.h>
 #include <Elastos.Droid.Widget.h>
+#include <elastos/core/CoreUtils.h>
 #include <elastos/utility/logging/Logger.h>
 
+using Elastos::Droid::Graphics::IPixelFormat;
+using Elastos::Droid::App::IDialog;
+using Elastos::Droid::App::CDialog;
 using Elastos::Droid::Content::IContext;
 using Elastos::Droid::Content::IIntent;
 using Elastos::Droid::Content::CIntent;
 using Elastos::Droid::Content::IIntentFilter;
 using Elastos::Droid::Content::CIntentFilter;
+using Elastos::Droid::Graphics::Drawable::CColorDrawable;
+using Elastos::Droid::Graphics::Drawable::IDrawable;
 using Elastos::Droid::View::EIID_IViewOnClickListener;
+using Elastos::Droid::View::IGravity;
+using Elastos::Droid::View::IViewParent;
+using Elastos::Droid::View::IViewGroup;
+using Elastos::Droid::View::IViewGroupLayoutParams;
+using Elastos::Droid::View::IViewGroupMarginLayoutParams;
+using Elastos::Droid::Widget::IRelativeLayout;
 using Elastos::Droid::Widget::IButton;
+using Elastos::Droid::Widget::CButton;
+using Elastos::Droid::Widget::IImageView;
+using Elastos::Droid::Widget::ITextView;
+using Elastos::Droid::Widget::ISeekBar;
+using Elastos::Droid::Widget::ILinearLayoutLayoutParams;
+using Elastos::Droid::Widget::CLinearLayoutLayoutParams;
+using Elastos::Core::CoreUtils;
 using Elastos::Utility::Logging::Logger;
 
 namespace Elastos {
@@ -119,16 +140,117 @@ ECode CActivityOne::OnActivityResult(
 
 ECode CActivityOne::Send()
 {
-    AutoPtr<IIntent> intent;
-    CIntent::New(RECEIVER_KEY, (IIntent**)&intent);
-    intent->PutExtra(String("msg"), String("Hello Broadcast!"));
+    // AutoPtr<IIntent> intent;
+    // CIntent::New(RECEIVER_KEY, (IIntent**)&intent);
+    // intent->PutExtra(String("msg"), String("Hello Broadcast!"));
 
-    if (TEST_ORDERED_BROADCAST) {
-        return SendOrderedBroadcast(intent, String(NULL));
+    // if (TEST_ORDERED_BROADCAST) {
+    //     return SendOrderedBroadcast(intent, String(NULL));
+    // }
+    // else {
+    //     return SendBroadcast(intent);
+    // }
+
+    CreateVolumeDialog();
+    return NOERROR;
+}
+
+ECode CActivityOne::AddButton(
+    /* [in] */ ILinearLayout* zenButtons,
+    /* [in] */ const char* text)
+{
+    AutoPtr<IInterface> obj;
+    GetSystemService(IContext::LAYOUT_INFLATER_SERVICE, (IInterface**)&obj);
+    AutoPtr<ILayoutInflater> inflater = ILayoutInflater::Probe(obj);
+
+    AutoPtr<IView> view;
+    inflater->Inflate(R::layout::segmented_button, IViewGroup::Probe(zenButtons), FALSE, (IView**)&view);
+    AutoPtr<ICharSequence> cs = CoreUtils::Convert(text);
+    ITextView::Probe(view)->SetText(cs);
+
+    AutoPtr<IViewGroupLayoutParams> lp;
+    view->GetLayoutParams((IViewGroupLayoutParams**)&lp);
+    Int32 count;
+    IViewGroup::Probe(zenButtons)->GetChildCount(&count);
+    if (count == 0) {
+        IViewGroupMarginLayoutParams::Probe(lp)->SetRightMargin(0);
+        IViewGroupMarginLayoutParams::Probe(lp)->SetLeftMargin(0); // first button has no margin
     }
-    else {
-        return SendBroadcast(intent);
+    view->SetLayoutParams(lp);
+    IViewGroup::Probe(zenButtons)->AddView(view);
+    return NOERROR;
+}
+
+ECode CActivityOne::CreateVolumeDialog()
+{
+    Boolean bval;
+    AutoPtr<IInterface> obj;
+    GetSystemService(IContext::LAYOUT_INFLATER_SERVICE, (IInterface**)&obj);
+    AutoPtr<ILayoutInflater> inflater = ILayoutInflater::Probe(obj);
+
+    AutoPtr<IDialog> mDialog;
+    CDialog::New(this, (IDialog**)&mDialog);
+
+    AutoPtr<IWindow> window;
+    mDialog->GetWindow((IWindow**)&window);
+    window->RequestFeature(IWindow::FEATURE_NO_TITLE, &bval);
+
+    mDialog->SetCanceledOnTouchOutside(TRUE);
+    mDialog->SetContentView(R::layout::volume_dialog);
+    mDialog->Create();
+
+    AutoPtr<IWindowManagerLayoutParams> lp;
+    window->GetAttributes((IWindowManagerLayoutParams**)&lp);
+    lp->SetType(IWindowManagerLayoutParams::TYPE_TOAST);
+    window->SetAttributes(lp);
+
+    AutoPtr<IDrawable> cd;
+    CColorDrawable::New(0xff882020, (IDrawable**)&cd);
+    window->SetBackgroundDrawable(cd);
+
+    AutoPtr<IView> mView;
+    window->FindViewById(Elastos::Droid::R::id::content, (IView**)&mView);
+
+    AutoPtr<IViewParent> vp;
+    mView->GetParent((IViewParent**)&vp);
+    Logger::I(TAG, " >>> Content view %s get GetParent: %s", TO_CSTR(mView), TO_CSTR(vp));
+
+    AutoPtr<IView> v1, v2, v3;
+    mView->FindViewById(R::id::visible_panel, (IView**)&v1);
+    AutoPtr<IViewGroup> mPanel = IViewGroup::Probe(v1);
+
+    mView->FindViewById(R::id::slider_panel, (IView**)&v2);
+    AutoPtr<IViewGroup> mSliderPanel = IViewGroup::Probe(v2);
+
+
+    {
+        AutoPtr<IButton> button;
+        CButton::New(this, (IButton**)&button);
+
+        AutoPtr<ILinearLayoutLayoutParams> lp;
+        CLinearLayoutLayoutParams::New(
+            IViewGroupLayoutParams::MATCH_PARENT,
+            120,
+            (ILinearLayoutLayoutParams**)&lp);
+        lp->SetGravity(IGravity::CENTER);
+        IView::Probe(button)->SetLayoutParams(IViewGroupLayoutParams::Probe(lp));
+        ITextView::Probe(button)->SetGravity(IGravity::CENTER);
+        ITextView::Probe(button)->SetText(CoreUtils::Convert("Button"));
+        mSliderPanel->AddView(IView::Probe(button));
     }
+
+
+    mDialog->Show();
+    return NOERROR;
+
+}
+
+ECode CActivityOne::CreateSliders()
+{
+
+
+
+    return NOERROR;
 }
 
 } // namespace BroadcastStaticDemo

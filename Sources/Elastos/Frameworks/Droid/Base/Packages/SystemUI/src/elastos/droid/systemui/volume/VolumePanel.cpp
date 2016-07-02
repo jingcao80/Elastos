@@ -64,6 +64,9 @@ namespace Droid {
 namespace SystemUI {
 namespace Volume {
 
+const String VolumePanel::TAG("VolumePanel");
+Boolean VolumePanel::LOGD = TRUE;//Logger::IsLoggable(TAG.string(), Logger::___DEBUG);
+
 //==============================================================================
 // VolumePanel::StreamResources
 //==============================================================================
@@ -621,9 +624,6 @@ static AutoPtr<ArrayOf<VolumePanel::StreamResources*> > InitSTREAMS()
 INIT_PROI_3 const AutoPtr<IAudioAttributes> VolumePanel::VIBRATION_ATTRIBUTES = InitVIBRATION_ATTRIBUTES();
 INIT_PROI_3 const AutoPtr<ArrayOf<VolumePanel::StreamResources*> > VolumePanel::STREAMS = InitSTREAMS();
 
-const String VolumePanel::TAG("VolumePanel");
-Boolean VolumePanel::LOGD = TRUE;//Logger::IsLoggable(TAG.string(), Logger::___DEBUG);
-
 const Int32 VolumePanel::PLAY_SOUND_DELAY;
 const Int32 VolumePanel::VIBRATE_DELAY;
 const Int32 VolumePanel::VIBRATE_DURATION;
@@ -789,8 +789,10 @@ ECode VolumePanel::constructor(
     res->GetBoolean(Elastos::Droid::R::bool_::config_useVolumeKeySounds, &masterVolumeKeySounds);
     mPlayMasterStreamTones = useMasterVolume && masterVolumeKeySounds;
 
-    Logger::I(TAG, " >> config VoiceCapable: %d, zenModeAvailable: %d, playMasterStreamTones: %d",
-        mVoiceCapable, mZenModeAvailable, mPlayMasterStreamTones);
+    if (LOGD) {
+        Logger::D(TAG, "config VoiceCapable: %d, zenModeAvailable: %d, playMasterStreamTones: %d",
+            mVoiceCapable, mZenModeAvailable, mPlayMasterStreamTones);
+    }
 
     RegisterReceiver();
 
@@ -815,12 +817,11 @@ void VolumePanel::UpdateWidth()
     mDialog->GetWindow((IWindow**)&window);
     AutoPtr<IWindowManagerLayoutParams> lp;
     window->GetAttributes((IWindowManagerLayoutParams**)&lp);
-    Int32 size;
-    res->GetDimensionPixelSize(R::dimen::notification_panel_width, &size);
-    IViewGroupLayoutParams::Probe(lp)->SetWidth(size);
-    Int32 i;
-    res->GetInteger(R::integer::notification_panel_layout_gravity, &i);
-    lp->SetGravity(i);
+    Int32 width, gravity;
+    res->GetDimensionPixelSize(R::dimen::notification_panel_width, &width);
+    IViewGroupLayoutParams::Probe(lp)->SetWidth(width);
+    res->GetInteger(R::integer::notification_panel_layout_gravity, &gravity);
+    lp->SetGravity(gravity);
     window->SetAttributes(lp);
 }
 

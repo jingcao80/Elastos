@@ -37,7 +37,7 @@ namespace Wm {
 //                  WindowState::DeathRecipient
 //==============================================================================
 
-CAR_INTERFACE_IMPL(WindowState::DeathRecipient, Object, IProxyDeathRecipient);
+CAR_INTERFACE_IMPL(WindowState::DeathRecipient, Object, IProxyDeathRecipient)
 
 WindowState::DeathRecipient::DeathRecipient(
     /* [in] */ WindowState* owner)
@@ -454,13 +454,9 @@ ECode WindowState::ComputeFrameLw(
         }
     }
 
-    Boolean equals = FALSE;
-    if (IObject::Probe(mParentFrame)->Equals(pf, &equals), !equals) {
-        // Int32 pl, pt, pr, pb, l, t, r, b;
-        // mParentFrame->Get(&pl, &pt, &pr, &pb);
-        // pf->Get(&l, &t, &r, &b);
-        // Slogger::I(TAG, "Window %p content frame from (%d, %d, %d, %d) to (%d, %d, %d, %d)",
-        //         this, pl, pt, pr, pb, l, t, r, b);
+    if (!Object::Equals(mParentFrame, pf)) {
+        Slogger::I(TAG, "Window %p content frame from %s to %s",
+            this, TO_CSTR(mParentFrame), TO_CSTR(pf));
 
         mParentFrame->Set(pf);
         mContentChanged = TRUE;
@@ -507,7 +503,8 @@ ECode WindowState::ComputeFrameLw(
     gravity->Apply(attrsGravity, w, h, mContainingFrame,
             (Int32)(x + attrsHMargin * pw),  (Int32)(y + attrsVMargin * ph), mFrame);
 
-    // System.out.println("Out: " + mFrame);
+    //Slogger::I(TAG, " Apply gravity: x:y=(%.2f, %.2f), pw:ph=(%d, %d), mContentFrame:%s, mFrame:%s",
+    //    x, y, pw, ph, TO_CSTR(mContentFrame), TO_CSTR(mFrame));
 
     // Now make sure the window fits in the overall display.
     gravity->ApplyDisplay(attrsGravity, df, mFrame);
@@ -515,57 +512,37 @@ ECode WindowState::ComputeFrameLw(
     // Make sure the content and visible frames are inside of the
     // final window frame.
     Int32 cfL, cfT, cfR, cfB, fL, fT, fR, fB;
-    mContentFrame->GetLeft(&cfL);
-    mContentFrame->GetTop(&cfT);
-    mContentFrame->GetRight(&cfR);
-    mContentFrame->GetBottom(&cfB);
-    mFrame->GetLeft(&fL);
-    mFrame->GetTop(&fT);
-    mFrame->GetRight(&fR);
-    mFrame->GetBottom(&fB);
-    mContentFrame->Set(Elastos::Core::Math::Max(cfL, fL),
-            Elastos::Core::Math::Max(cfT, fT),
-            Elastos::Core::Math::Min(cfR, fR),
-            Elastos::Core::Math::Min(cfB, fB));
+    mContentFrame->Get(&cfL, &cfT, &cfR, &cfB);
+    mFrame->Get(&fL, &fT, &fR, &fB);
+    mContentFrame->Set(
+        Elastos::Core::Math::Max(cfL, fL), Elastos::Core::Math::Max(cfT, fT),
+        Elastos::Core::Math::Min(cfR, fR), Elastos::Core::Math::Min(cfB, fB));
 
     Int32 vfL, vfT, vfR, vfB;
-    mVisibleFrame->GetLeft(&vfL);
-    mVisibleFrame->GetTop(&vfT);
-    mVisibleFrame->GetRight(&vfR);
-    mVisibleFrame->GetBottom(&vfB);
-    mVisibleFrame->Set(Elastos::Core::Math::Max(vfL, fL),
-            Elastos::Core::Math::Max(vfT, fT),
-            Elastos::Core::Math::Min(vfR, fR),
-            Elastos::Core::Math::Min(vfB, fB));
+    mVisibleFrame->Get(&vfL, &vfT, &vfR, &vfB);
+    mVisibleFrame->Set(
+        Elastos::Core::Math::Max(vfL, fL), Elastos::Core::Math::Max(vfT, fT),
+        Elastos::Core::Math::Min(vfR, fR), Elastos::Core::Math::Min(vfB, fB));
 
     Int32 sfL, sfT, sfR, sfB;
-    mStableFrame->GetLeft(&sfL);
-    mStableFrame->GetTop(&sfT);
-    mStableFrame->GetRight(&sfR);
-    mStableFrame->GetBottom(&sfB);
-    mStableFrame->Set(Elastos::Core::Math::Max(sfL, fL),
-            Elastos::Core::Math::Max(sfT, fT),
-            Elastos::Core::Math::Min(sfR, fR),
-            Elastos::Core::Math::Min(sfB, fB));
+    mStableFrame->Get(&sfL, &sfT, &sfR, &sfB);
+    mStableFrame->Set(
+        Elastos::Core::Math::Max(sfL, fL), Elastos::Core::Math::Max(sfT, fT),
+        Elastos::Core::Math::Min(sfR, fR), Elastos::Core::Math::Min(sfB, fB));
 
     Int32 ofL, ofT, ofR, ofB;
-    mOverscanFrame->GetLeft(&ofL);
-    mOverscanFrame->GetTop(&ofT);
-    mOverscanFrame->GetRight(&ofR);
-    mOverscanFrame->GetBottom(&ofB);
-    mOverscanInsets->Set(Elastos::Core::Math::Max(ofL - fL, 0),
-            Elastos::Core::Math::Max(ofT - fT, 0),
-            Elastos::Core::Math::Max(fR - ofR, 0),
-            Elastos::Core::Math::Max(fB - ofB, 0));
+    mOverscanFrame->Get(&ofL, &ofT, &ofR, &ofB);
+    mOverscanInsets->Set(
+        Elastos::Core::Math::Max(ofL - fL, 0), Elastos::Core::Math::Max(ofT - fT, 0),
+        Elastos::Core::Math::Max(fR - ofR, 0), Elastos::Core::Math::Max(fB - ofB, 0));
 
     mContentInsets->Set(cfL - fL, cfT - fT, fR - cfR, fB - cfB);
 
     mVisibleInsets->Set(vfL - fL, vfT - fT, fR - vfR, fB - vfB);
 
-    mStableInsets->Set(Elastos::Core::Math::Max(sfL - fL, 0),
-            Elastos::Core::Math::Max(sfT - fT, 0),
-            Elastos::Core::Math::Max(fR - sfR, 0),
-            Elastos::Core::Math::Max(fB - sfB, 0));
+    mStableInsets->Set(
+        Elastos::Core::Math::Max(sfL - fL, 0), Elastos::Core::Math::Max(sfT - fT, 0),
+        Elastos::Core::Math::Max(fR - sfR, 0), Elastos::Core::Math::Max(fB - sfB, 0));
 
     mCompatFrame->Set(mFrame);
     if (mEnforceSizeCompat) {
@@ -583,7 +560,8 @@ ECode WindowState::ComputeFrameLw(
     }
 
     Int32 newFW, newFH;
-    if (mIsWallpaper && ((mFrame->GetWidth(&newFW), fw != newFW) || (mFrame->GetHeight(&newFH), fh != newFH))) {
+    if (mIsWallpaper && ((mFrame->GetWidth(&newFW), fw != newFW)
+        || (mFrame->GetHeight(&newFH), fh != newFH))) {
         AutoPtr<DisplayContent> displayContent = GetDisplayContent();
         if (displayContent != NULL) {
             AutoPtr<IDisplayInfo> displayInfo = displayContent->GetDisplayInfo();
@@ -594,14 +572,9 @@ ECode WindowState::ComputeFrameLw(
         }
     }
 
-    // if (DEBUG_LAYOUT || WindowManagerService.localLOGV) Slog.v(TAG,
-    //         "Resolving (mRequestedWidth="
-    //         + mRequestedWidth + ", mRequestedheight="
-    //         + mRequestedHeight + ") to" + " (pw=" + pw + ", ph=" + ph
-    //         + "): frame=" + mFrame.toShortString()
-    //         + " ci=" + mContentInsets.toShortString()
-    //         + " vi=" + mVisibleInsets.toShortString()
-    //         + " vi=" + mStableInsets.toShortString());
+    //Slogger::V(TAG, "Resolving (mRequestedWidth=%d, mRequestedheight=%d) to (pw=%d, ph=%d):"
+    //    " frame=%s, ci=%s, vi=%s, si=%s", mRequestedWidth, mRequestedHeight, pw, ph,
+    //    TO_CSTR(mFrame), TO_CSTR(mContentInsets), TO_CSTR(mVisibleInsets), TO_CSTR(mStableInsets));
     return NOERROR;
 }
 
@@ -699,14 +672,15 @@ ECode WindowState::GetNeedsMenuLw(
     /* [out] */ Boolean* result)
 {
     VALIDATE_NOT_NULL(result)
+    *result = FALSE;
+
     Int32 index = -1;
     AutoPtr<WindowState> ws = this;
     AutoPtr<WindowList> windows = GetWindowList();
     while (TRUE) {
         Int32 flags;
         ws->mAttrs->GetPrivateFlags(&flags);
-        if ((flags
-                & IWindowManagerLayoutParams::PRIVATE_FLAG_SET_NEEDS_MENU_KEY) != 0) {
+        if ((flags & IWindowManagerLayoutParams::PRIVATE_FLAG_SET_NEEDS_MENU_KEY) != 0) {
             ws->mAttrs->GetFlags(&flags);
             *result = (flags & IWindowManagerLayoutParams::FLAG_NEEDS_MENU_KEY) != 0;
             return NOERROR;
@@ -732,6 +706,7 @@ ECode WindowState::GetNeedsMenuLw(
         windows->Get(index, (IInterface**)&obj);
         ws = To_WindowState(obj);
     }
+    return NOERROR;
 }
 
 ECode WindowState::GetSystemUiVisibility(
@@ -769,15 +744,10 @@ ECode WindowState::IsVoiceInteraction(
 
 Boolean WindowState::SetInsetsChanged()
 {
-    Boolean equals1, equals2, equals3, equals4;
-    IObject::Probe(mLastOverscanInsets)->Equals((IInterface*)mOverscanInsets.Get(), &equals1);
-    IObject::Probe(mLastContentInsets)->Equals((IInterface*)mLastContentInsets.Get(), &equals2);
-    IObject::Probe(mLastVisibleInsets)->Equals((IInterface*)mLastVisibleInsets.Get(), &equals3);
-    IObject::Probe(mLastStableInsets)->Equals((IInterface*)mLastStableInsets.Get(), &equals4);
-    mOverscanInsetsChanged |= !equals1;
-    mContentInsetsChanged |= !equals2;
-    mVisibleInsetsChanged |= !equals3;
-    mStableInsetsChanged |= !equals4;
+    mOverscanInsetsChanged |= !Object::Equals(mLastOverscanInsets, mOverscanInsets);
+    mContentInsetsChanged |= !Object::Equals(mLastContentInsets, mContentInsets);
+    mVisibleInsetsChanged |= !Object::Equals(mLastVisibleInsets, mVisibleInsets);
+    mStableInsetsChanged |= !Object::Equals(mLastStableInsets, mStableInsets);
     return mOverscanInsetsChanged || mContentInsetsChanged || mVisibleInsetsChanged;
 }
 
@@ -1353,17 +1323,11 @@ void WindowState::ApplyInsets(
     /* [in] */ IRect* inset)
 {
     Int32 left, top, right, bottom, insetLeft, insetTop, insetRight, insetBottom;
-    frame->GetLeft(&left);
-    frame->GetTop(&top);
-    frame->GetRight(&right);
-    frame->GetBottom(&bottom);
-    inset->GetLeft(&insetLeft);
-    inset->GetTop(&insetTop);
-    inset->GetRight(&insetRight);
-    inset->GetBottom(&insetBottom);
+    frame->Get(&left, &top, &right, &bottom);
+    inset->Get(&insetLeft, &insetTop, &insetRight, &insetBottom);
     Boolean result;
     outRegion->Set(left + insetLeft, top + insetTop,
-            right - insetRight, bottom - insetBottom, &result);
+        right - insetRight, bottom - insetBottom, &result);
 }
 
 void WindowState::GetTouchableRegion(

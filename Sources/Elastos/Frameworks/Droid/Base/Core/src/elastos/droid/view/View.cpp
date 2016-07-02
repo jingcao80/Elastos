@@ -3638,12 +3638,12 @@ ECode View::IsShown(
 }
 
 ECode View::FitSystemWindows(
-    /* [in] */ IRect* _insets,
+    /* [in] */ IRect* insets,
     /* [out] */ Boolean* res)
 {
     VALIDATE_NOT_NULL(res)
     if ((mPrivateFlags3 & PFLAG3_APPLYING_INSETS) == 0) {
-        if (_insets == NULL) {
+        if (insets == NULL) {
             // Null insets by definition have already been consumed.
             // This call cannot apply insets since there are none to apply,
             // so return false.
@@ -3655,10 +3655,10 @@ ECode View::FitSystemWindows(
         // apply insets path and take things from there.
         //try {
         mPrivateFlags3 |= PFLAG3_FITTING_SYSTEM_WINDOWS;
-        AutoPtr<IWindowInsets> sets;
-        CWindowInsets::New(_insets, (IWindowInsets**)&sets);
-        ECode ec = DispatchApplyWindowInsets(sets, (IWindowInsets**)&sets);
-        if (SUCCEEDED(ec)) sets->IsConsumed(res);
+        AutoPtr<IWindowInsets> sets, result;
+        CWindowInsets::New(insets, (IWindowInsets**)&sets);
+        ECode ec = DispatchApplyWindowInsets(sets, (IWindowInsets**)&result);
+        if (SUCCEEDED(ec)) result->IsConsumed(res);
         mPrivateFlags3 &= ~PFLAG3_FITTING_SYSTEM_WINDOWS;
         return ec;
         //} finally {
@@ -3667,7 +3667,7 @@ ECode View::FitSystemWindows(
     else {
         // We're being called from the newer apply insets path.
         // Perform the standard fallback behavior.
-        return FitSystemWindowsInt(_insets, res);
+        return FitSystemWindowsInt(insets, res);
     }
 }
 
@@ -3747,8 +3747,7 @@ ECode View::OnApplyWindowInsets(
         FitSystemWindowsInt(rect, &fitSystemWindowsInt);
         // We were called from within a direct call to fitSystemWindows.
         if (fitSystemWindowsInt) {
-            insets->ConsumeSystemWindowInsets(res);
-            return NOERROR;
+            return insets->ConsumeSystemWindowInsets(res);
         }
     }
     *res = insets;
@@ -8387,6 +8386,10 @@ ECode View::GetZ(
     GetElevation(&elevation);
     GetTranslationZ(&translationZ);
     *z = elevation + translationZ;
+    if (((Int32)*z) == 48) {
+        Logger::I(TAG, " >>> elevation: %.2f, z:%.2f", elevation, translationZ);
+        assert(0);
+    }
     return NOERROR;
 }
 
@@ -12875,8 +12878,8 @@ Boolean View::Draw(
                         const Int32 scrollY = hasDisplayList ? 0 : sy;
                         Int32 result;
                         canvas->SaveLayerAlpha(
-                                (Float)scrollX, (Float)scrollY, scrollX + (mRight - mLeft),
-                                scrollY + (mBottom - mTop), multipliedAlpha, layerFlags, &result);
+                            (Float)scrollX, (Float)scrollY, scrollX + (mRight - mLeft),
+                            scrollY + (mBottom - mTop), multipliedAlpha, layerFlags, &result);
                     }
                 }
                 else {
@@ -14617,13 +14620,11 @@ void View::InternalSetPadding(
             }
         }
         if ((viewFlags & SCROLLBARS_HORIZONTAL) != 0) {
-            if (viewFlags & SCROLLBARS_INSET_MASK) {
-                bottom += 0;
-            } else {
-                Int32 height;
-                GetHorizontalScrollbarHeight(&height);
-                bottom += height;
+            Int32 offset = 0;
+            if ((viewFlags & SCROLLBARS_INSET_MASK) != 0) {
+                GetHorizontalScrollbarHeight(&offset);
             }
+            bottom += offset;
         }
     }
 

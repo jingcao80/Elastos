@@ -4256,6 +4256,8 @@ ECode LauncherModel::GetComponentNameFromResolveInfo(
 
 ECode LauncherModel::DumpState()
 {
+    if (!DEBUG_LOADERS) return NOERROR;
+
     StringBuilder sb;
     sb += "mCallbacks=";
     sb += TO_STR(mCallbacks);

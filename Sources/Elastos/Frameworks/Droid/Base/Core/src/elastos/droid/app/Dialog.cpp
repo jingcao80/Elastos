@@ -144,7 +144,6 @@ Dialog::Dialog()
 Dialog::~Dialog()
 {
     mWindow->SetCallback(NULL);
-    Slogger::V(TAG, ">> destory ~Dialog(): %p", this);
 }
 
 ECode Dialog::constructor(

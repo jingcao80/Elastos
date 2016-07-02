@@ -1580,16 +1580,15 @@ ECode ViewRootImpl::SetView(
         mAttachInfo->mRecomputeGlobalAttributes = TRUE;
         CollectViewAttributes();
 
-        Int32 displayId;
+        Int32 res, displayId, hostVisibility;;
         mDisplay->GetDisplayId(&displayId);
+        GetHostVisibility(&hostVisibility);
         AutoPtr<IRect> tempRect;
         AutoPtr<IInputChannel> tempInputChannel;
-        Int32 res, hostVisibility;
-        GetHostVisibility(&hostVisibility);
 
         ECode ec = mWindowSession->AddToDisplay(
-            mWindow.Get(), mSeq, mWindowAttributes.Get(),
-            hostVisibility, displayId, mAttachInfo->mContentInsets.Get(),
+            mWindow, mSeq, mWindowAttributes,
+            hostVisibility, displayId, mAttachInfo->mContentInsets,
             mInputChannel, (IRect**)&tempRect,
             (IInputChannel**)&tempInputChannel, &res);
 

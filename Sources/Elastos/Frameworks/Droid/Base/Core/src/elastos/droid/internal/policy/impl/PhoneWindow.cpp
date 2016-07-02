@@ -433,7 +433,6 @@ ECode PhoneWindow::_DecorView::StylusGestureFilter::OnFling(
     /* [in] */ Float velocityY,
     /* [out] */ Boolean* res)
 {
-    Slogger::I(TAG, " >>> OnFling");
     VALIDATE_NOT_NULL(res)
     *res = FALSE;
 
@@ -1169,17 +1168,16 @@ AutoPtr<IWindowInsets> PhoneWindow::_DecorView::UpdateColorViews(
     AutoPtr<IWindowInsets> insets = _insets;
     AutoPtr<IWindowManagerLayoutParams> attrs;
     mHost->GetAttributes((IWindowManagerLayoutParams**)&attrs);
-    Int32 sysUiVisibility;
+    Int32 sysUiVisibility, winSysUiVisibility, flags;
+    attrs->GetFlags(&flags);
     attrs->GetSystemUiVisibility(&sysUiVisibility);
-    Int32 winSysUiVisibility;
     GetWindowSystemUiVisibility(&winSysUiVisibility);
     sysUiVisibility |=  winSysUiVisibility;
 
     Boolean isHighEndGfx;
     AutoPtr<IActivityManagerHelper> amHelper;
     CActivityManagerHelper::AcquireSingleton((IActivityManagerHelper**)&amHelper);
-    amHelper->IsHighEndGfx(&isHighEndGfx);
-    if (!mHost->mIsFloating && isHighEndGfx) {
+    if (!mHost->mIsFloating && (amHelper->IsHighEndGfx(&isHighEndGfx), isHighEndGfx)) {
         if (insets != NULL) {
             Int32 i1, i2;
             insets->GetStableInsetTop(&i1);
@@ -1192,9 +1190,7 @@ AutoPtr<IWindowInsets> PhoneWindow::_DecorView::UpdateColorViews(
             insets->GetSystemWindowInsetRight(&i2);
             mLastRightInset = Math::Min(i1, i2);
         }
-        Int32 flags;
-        mHost->GetAttributes((IWindowManagerLayoutParams**)&attrs);
-        attrs->GetFlags(&flags);
+
         mStatusColorView = UpdateColorViewInt(mStatusColorView, sysUiVisibility,
                 SYSTEM_UI_FLAG_FULLSCREEN, IWindowManagerLayoutParams::FLAG_TRANSLUCENT_STATUS,
                 mHost->mStatusBarColor, mLastTopInset, IGravity::TOP,
@@ -1206,15 +1202,12 @@ AutoPtr<IWindowInsets> PhoneWindow::_DecorView::UpdateColorViews(
                 mHost->mNavigationBarColor, mLastBottomInset, IGravity::BOTTOM,
                 NAVIGATION_BAR_BACKGROUND_TRANSITION_NAME,
                 R::id::navigationBarBackground,
-                false /* hiddenByWindowFlag */);
+                FALSE /* hiddenByWindowFlag */);
     }
 
     // When we expand the window with FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS, we still need
     // to ensure that the rest of the view hierarchy doesn't notice it, unless they've
     // explicitly asked for it.
-
-    Int32 flags;
-    attrs->GetFlags(&flags);
     Boolean consumingNavBar =
         (flags & IWindowManagerLayoutParams::FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS) != 0
         && (sysUiVisibility & SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION) == 0
@@ -1232,9 +1225,8 @@ AutoPtr<IWindowInsets> PhoneWindow::_DecorView::UpdateColorViews(
     }
 
     if (lp != NULL) {
-        Int32 right;
+        Int32 right, bottom;
         lp->GetRightMargin(&right);
-        Int32 bottom;
         lp->GetBottomMargin(&bottom);
         if (right != consumedRight || bottom != consumedBottom) {
             lp->SetRightMargin(consumedRight);
@@ -1247,6 +1239,7 @@ AutoPtr<IWindowInsets> PhoneWindow::_DecorView::UpdateColorViews(
                 RequestApplyInsets();
             }
         }
+
         if (insets != NULL) {
             AutoPtr<IWindowInsets> tmp;
             Int32 l,t,r,b;
@@ -1990,8 +1983,7 @@ ECode PhoneWindow::_DecorView::Draw(
     /* [in] */ ICanvas* canvas)
 {
     FrameLayout::Draw(canvas);
-    if (mMenuBackground != NULL)
-    {
+    if (mMenuBackground != NULL) {
         mMenuBackground->Draw(canvas);
     }
     return NOERROR;
@@ -2938,6 +2930,7 @@ PhoneWindow::PhoneWindow()
     , mAlwaysReadCloseOnTouchAttr(FALSE)
     , mEnableGestures(FALSE)
     , mClosingActionMenu(FALSE)
+    , mVolumeControlStreamType(0)
     , mUiOptions(0)
     , mInvalidatePanelMenuPosted(FALSE)
     , mInvalidatePanelMenuFeatures(0)
@@ -4976,8 +4969,7 @@ ECode PhoneWindow::GenerateLayout(
 //        System.out.println(s);
 //    }
 
-    a->GetBoolean(R::styleable::Window_windowIsFloating,
-            FALSE, &mIsFloating);
+    a->GetBoolean(R::styleable::Window_windowIsFloating, FALSE, &mIsFloating);
     Int32 flagsToUpdate = (IWindowManagerLayoutParams::FLAG_LAYOUT_IN_SCREEN
             | IWindowManagerLayoutParams::FLAG_LAYOUT_INSET_DECOR)
             & (~GetForcedWindowFlags());
@@ -4991,8 +4983,7 @@ ECode PhoneWindow::GenerateLayout(
     }
 
     Boolean value;
-    a->GetBoolean(R::styleable::Window_windowNoTitle,
-            FALSE, &value);
+    a->GetBoolean(R::styleable::Window_windowNoTitle, FALSE, &value);
     if (value) {
         RequestFeature(IWindow::FEATURE_NO_TITLE, &value);
     }
@@ -5172,8 +5163,7 @@ ECode PhoneWindow::GenerateLayout(
                 params->mSoftInputMode, &(params->mSoftInputMode));
     }
 
-    a->GetBoolean(R::styleable::Window_backgroundDimEnabled,
-            mIsFloating, &value);
+    a->GetBoolean(R::styleable::Window_backgroundDimEnabled, mIsFloating, &value);
     if (value) {
         /* All dialogs should have the window dimmed */
         if ((GetForcedWindowFlags() & IWindowManagerLayoutParams::FLAG_DIM_BEHIND) == 0) {
@@ -5213,6 +5203,10 @@ ECode PhoneWindow::GenerateLayout(
 //            }
         }
         a->GetDimension(R::styleable::Window_windowElevation, 0, &mElevation);
+        if (mElevation == 48) {
+            Logger::E(TAG, " ================ TODO mElevation is invalid.");
+            mElevation = 0;
+        }
         a->GetBoolean(R::styleable::Window_windowClipToOutline, FALSE, &mClipToOutline);
         a->GetColor(R::styleable::Window_textColor, IColor::TRANSPARENT, &mTextColor);
     }

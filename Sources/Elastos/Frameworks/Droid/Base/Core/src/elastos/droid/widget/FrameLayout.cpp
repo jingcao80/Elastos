@@ -9,13 +9,13 @@
 #include <elastos/core/Math.h>
 
 using Elastos::Droid::Graphics::CRect;
+using Elastos::Droid::Graphics::PorterDuffMode_NONE;
 using Elastos::Droid::Graphics::Drawable::Drawable;
 using Elastos::Droid::Graphics::Drawable::IDrawableCallback;
 using Elastos::Droid::Graphics::Drawable::EIID_IDrawableCallback;
 using Elastos::Droid::View::Gravity;
 using Elastos::Droid::View::IGravity;
 using Elastos::Droid::View::Accessibility::IAccessibilityRecord;
-
 using Elastos::Core::CString;
 
 namespace Elastos {
@@ -97,18 +97,14 @@ ECode FrameLayout::FrameLayoutLayoutParams::SetGravity(
     return NOERROR;
 }
 
-
-static Int32 InitDefaultChildGravity()
-{
-    return IGravity::TOP | IGravity::START;
-}
-Int32 FrameLayout::DEFAULT_CHILD_GRAVITY = InitDefaultChildGravity();
+Int32 FrameLayout::DEFAULT_CHILD_GRAVITY = (IGravity::TOP | IGravity::START);
 
 CAR_INTERFACE_IMPL(FrameLayout, ViewGroup, IFrameLayout);
+
 FrameLayout::FrameLayout()
     : mForegroundInPadding(TRUE)
     , mMeasureAllChildren(FALSE)
-    , mForegroundTintMode(-1)
+    , mForegroundTintMode(PorterDuffMode_NONE)
     , mHasForegroundTint(FALSE)
     , mHasForegroundTintMode(FALSE)
     , mForegroundPaddingLeft(0)
@@ -166,8 +162,7 @@ ECode FrameLayout::constructor(
     }
 
     Boolean value;
-    a->GetBoolean(R::styleable::FrameLayout_measureAllChildren,
-            FALSE, &value);
+    a->GetBoolean(R::styleable::FrameLayout_measureAllChildren, FALSE, &value);
     if (value) {
         SetMeasureAllChildren(TRUE);
     }
@@ -456,7 +451,7 @@ void FrameLayout::OnMeasure(
     Int32 maxHeight = 0;
     Int32 maxWidth = 0;
     Int32 childState = 0;
-    Int32 visibility;
+    Int32 vis;
 
    using Elastos::Core::Math;
 
@@ -467,8 +462,7 @@ void FrameLayout::OnMeasure(
             continue;
         }
 
-        child->GetVisibility(&visibility);
-        if (mMeasureAllChildren || visibility != IView::GONE) {
+        if (mMeasureAllChildren || (child->GetVisibility(&vis), vis != IView::GONE)) {
             MeasureChildWithMargins(child, widthMeasureSpec, 0, heightMeasureSpec, 0);
 
             AutoPtr<IViewGroupLayoutParams> vglp;

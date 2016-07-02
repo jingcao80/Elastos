@@ -551,6 +551,7 @@ ECode Window::RequestFeature(
     /* [in] */ Int32 featureId,
     /* [out] */ Boolean* result)
 {
+    VALIDATE_NOT_NULL(result)
     Int32 flag = 1<<featureId;
     mFeatures |= flag;
     mLocalFeatures |= mContainer != NULL ? (flag & ~mContainer->mFeatures) : flag;
@@ -582,6 +583,7 @@ ECode Window::MakeActive()
 ECode Window::IsActive(
     /* [out] */ Boolean* isActive)
 {
+    VALIDATE_NOT_NULL(isActive)
     *isActive = mIsActive;
     return NOERROR;
 }

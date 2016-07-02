@@ -4024,9 +4024,9 @@ Int32 CWindowManagerService::RelayoutWindow(
         inVisibleInsets->Set(win->mVisibleInsets);
         inStableInsets->Set(win->mStableInsets);
         if (localLOGV) {
-            Slogger::V(TAG, " >>> Relayout given client %p, requestedWidth=%d, requestedHeight=%d, "
+            Slogger::V(TAG, " >>> Relayout given client %s, requestedWidth=%d, requestedHeight=%d, "
                 "viewVisibility=%d\nRelayout returning frame=%s, surface=%s",
-                client, requestedWidth, requestedHeight, viewVisibility,
+                TO_CSTR(client), requestedWidth, requestedHeight, viewVisibility,
                 TO_CSTR(inFrame), TO_CSTR(inSurface));
         }
 

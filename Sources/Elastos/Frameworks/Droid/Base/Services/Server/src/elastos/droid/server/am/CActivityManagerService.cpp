@@ -20815,7 +20815,7 @@ ECode CActivityManagerService::StartInstrumentation(
             msg += " from pid=";
             msg += Binder::GetCallingPid();
             msg += ", uid=";
-            msg += Binder::GetCallingPid();
+            msg += Binder::GetCallingUid();
             msg += " not allowed because package ";
             msg += iiPkgName;
             msg += " does not have a signature matching the target ";

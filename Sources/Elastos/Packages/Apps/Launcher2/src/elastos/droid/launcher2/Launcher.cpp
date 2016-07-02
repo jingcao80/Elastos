@@ -43,8 +43,6 @@
 #include <elastos/utility/logging/Slogger.h>
 #include "R.h"
 
-#include <elastos/core/AutoLock.h>
-using Elastos::Core::AutoLock;
 using Elastos::Droid::Accounts::IAccount;
 using Elastos::Droid::Accounts::IAccountManager;
 using Elastos::Droid::Accounts::IAccountManagerHelper;
@@ -145,6 +143,7 @@ using Elastos::Core::ICharSequence;
 using Elastos::Core::StringUtils;
 using Elastos::Core::StringBuilder;
 using Elastos::Core::CoreUtils;
+using Elastos::Core::AutoLock;
 using Elastos::IO::IInputStream;
 using Elastos::IO::CDataInputStream;
 using Elastos::IO::IDataInputStream;
@@ -6106,6 +6105,8 @@ ECode Launcher::DismissFolderCling(
 
 ECode Launcher::DumpState()
 {
+    if (!LOGD) return NOERROR;
+
     Slogger::D(TAG, "BEGIN launcher2 dump state for launcher %s", TO_CSTR(this));
     Slogger::D(TAG, "mSavedState=%s", TO_CSTR(mSavedState));
     StringBuilder sb, sb1, sb2, sb3;
@@ -6139,6 +6140,8 @@ ECode Launcher::Dump(
     /* [in] */ IPrintWriter* writer,
     /* [in] */ ArrayOf<String>* args)
 {
+    if (!LOGD) return NOERROR;
+
     Activity::Dump(prefix, fd, writer, args);
     writer->Println(String(" "));
     writer->Println(String("Debug logs: "));
@@ -6160,6 +6163,8 @@ ECode Launcher::Dump(
 
 ECode Launcher::DumpDebugLogsToConsole()
 {
+    if (!LOGD) return NOERROR;
+
     Slogger::D(TAG, String(""));
     Slogger::D(TAG, String("*********************"));
     Slogger::D(TAG, String("Launcher debug logs: "));
