@@ -1,17 +1,17 @@
 
-#include "elastos/droid/dialer/database/DialerDatabaseHelper.h"
-#include "elastos/droid/dialer/dialpad/SmartDialPrefix.h"
-#include <elastos/core/AutoLock.h>
-#include <elastos/core/CoreUtils.h>
-#include <elastos/core/StringUtils.h>
-#include <elastos/droid/text/TextUtils.h>
-#include <elastos/utility/logging/Logger.h>
 #include "Elastos.Droid.Content.h"
 #include "Elastos.Droid.Database.h"
 #include "Elastos.Droid.Provider.h"
 #include "Elastos.CoreLibrary.Core.h"
 #include "Elastos.CoreLibrary.IO.h"
 #include "Elastos.CoreLibrary.Utility.h"
+#include "elastos/droid/dialer/database/DialerDatabaseHelper.h"
+#include "elastos/droid/dialer/dialpad/SmartDialPrefix.h"
+#include <elastos/droid/text/TextUtils.h>
+#include <elastos/core/AutoLock.h>
+#include <elastos/core/CoreUtils.h>
+#include <elastos/core/StringUtils.h>
+#include <elastos/utility/logging/Logger.h>
 #include "R.h"
 
 using Elastos::Droid::Content::IContentValues;
@@ -43,6 +43,8 @@ using Elastos::Droid::Provider::IContactsContractContactOptionsColumns;
 using Elastos::Droid::Provider::IContactsContractDeletedContacts;
 using Elastos::Droid::Provider::CContactsContractDeletedContacts;
 using Elastos::Droid::Provider::IContactsContractDeletedContactsColumns;
+using Elastos::Droid::Dialer::Dialpad::SmartDialMatchPosition;
+using Elastos::Droid::Dialer::Dialpad::SmartDialPrefix;
 using Elastos::Core::AutoLock;
 using Elastos::Core::CoreUtils;
 using Elastos::Core::StringUtils;
@@ -58,19 +60,19 @@ using Elastos::Utility::IIterator;
 using Elastos::Utility::Logging::Logger;
 using Elastos::Utility::Concurrent::Atomic::IAtomicBoolean;
 using Elastos::Utility::Concurrent::Atomic::CAtomicBoolean;
-using Elastos::Apps::Dialer::Dialpad::ISmartDialMatchPosition;
-using Elastos::Apps::Dialer::Dialpad::SmartDialPrefix;
 
 namespace Elastos {
 namespace Droid {
 namespace Dialer {
 namespace Database {
+
 //=================================================================
 // DialerDatabaseHelper::Tables
 //=================================================================
 const String DialerDatabaseHelper::Tables::SMARTDIAL_TABLE("smartdial_table");
 const String DialerDatabaseHelper::Tables::PREFIX_TABLE("prefix_table");
 const String DialerDatabaseHelper::Tables::PROPERTIES("properties");
+
 
 //=================================================================
 // DialerDatabaseHelper::SmartDialDbColumns
@@ -90,6 +92,7 @@ const String DialerDatabaseHelper::SmartDialDbColumns::IN_VISIBLE_GROUP("in_visi
 const String DialerDatabaseHelper::SmartDialDbColumns::IS_PRIMARY("is_primary");
 const String DialerDatabaseHelper::SmartDialDbColumns::LAST_SMARTDIAL_UPDATE_TIME("last_smartdial_update_time");
 
+
 //=================================================================
 // DialerDatabaseHelper::PrefixColumns
 //=================================================================
@@ -102,6 +105,7 @@ const String DialerDatabaseHelper::PrefixColumns::CONTACT_ID("contact_id");
 //=================================================================
 const String DialerDatabaseHelper::PropertiesColumns::PROPERTY_KEY("property_key");
 const String DialerDatabaseHelper::PropertiesColumns::PROPERTY_VALUE("property_value");
+
 
 //=================================================================
 // DialerDatabaseHelper::PhoneQuery
@@ -166,7 +170,8 @@ const String DialerDatabaseHelper::PhoneQuery::SELECT_IGNORE_LOOKUP_KEY_TOO_LONG
         String("length(") + IContactsContractContactsColumns::LOOKUP_KEY + ") < 1000";
 
 const String DialerDatabaseHelper::PhoneQuery::SELECTION = SELECT_UPDATED_CLAUSE + " AND " +
-                SELECT_IGNORE_LOOKUP_KEY_TOO_LONG_CLAUSE;
+        SELECT_IGNORE_LOOKUP_KEY_TOO_LONG_CLAUSE;
+
 
 //=================================================================
 // DialerDatabaseHelper::DeleteContactQuery
@@ -190,6 +195,11 @@ const String DialerDatabaseHelper::DeleteContactQuery::PROJECTION[] = {
 
 const Int32 DialerDatabaseHelper::DeleteContactQuery::DELETED_CONTACT_ID = 0;
 const Int32 DialerDatabaseHelper::DeleteContactQuery::DELECTED_TIMESTAMP = 1;
+
+/** Selects only rows that have been deleted after a certain time stamp.*/
+const String DialerDatabaseHelper::DeleteContactQuery::SELECT_UPDATED_CLAUSE =
+        IContactsContractDeletedContactsColumns::CONTACT_DELETED_TIMESTAMP + " > ?";
+
 
 //=================================================================
 // DialerDatabaseHelper::SmartDialSortingOrder
@@ -218,9 +228,12 @@ const String DialerDatabaseHelper::SmartDialSortingOrder::SORT_ORDER =
         + DialerDatabaseHelper::Tables::SMARTDIAL_TABLE + "." + DialerDatabaseHelper::SmartDialDbColumns::CONTACT_ID + ", "
         + DialerDatabaseHelper::Tables::SMARTDIAL_TABLE + "." + DialerDatabaseHelper::SmartDialDbColumns::IS_PRIMARY + " DESC";
 
+
 //=================================================================
 // DialerDatabaseHelper::ContactNumber
 //=================================================================
+CAR_INTERFACE_IMPL(DialerDatabaseHelper::ContactNumber, Object, IContactNumber);
+
 DialerDatabaseHelper::ContactNumber::ContactNumber(
     /* [in] */ Int64 id,
     /* [in] */ Int64 dataID,
@@ -230,12 +243,11 @@ DialerDatabaseHelper::ContactNumber::ContactNumber(
     /* [in] */ Int64 photoId)
     : mId(id)
     , mDataId(dataID)
+    , mDisplayName(displayName)
+    , mPhoneNumber(phoneNumber)
+    , mLookupKey(lookupKey)
     , mPhotoId(photoId)
-{
-    mDisplayName = displayName;
-    mPhoneNumber = phoneNumber;
-    mLookupKey = lookupKey;
-}
+{}
 
 ECode DialerDatabaseHelper::ContactNumber::HashCode(
     /* [out] */ Int32* hashCode)
@@ -253,12 +265,12 @@ ECode DialerDatabaseHelper::ContactNumber::Equals(
 {
     VALIDATE_NOT_NULL(result);
 
-    if ((IObject*)this == other) {
+    if ((IObject*)this == IObject::Probe(other)) {
         *result = TRUE;
         return NOERROR;
     }
-    if (IDialerDatabaseHelperContactNumber::Probe(other)) {
-        ContactNumber* that = (ContactNumber*)IObject::Probe(other);
+    if (IContactNumber::Probe(other)) {
+        ContactNumber* that = (ContactNumber*)IContactNumber::Probe(other);
         *result = mId == that->mId
                 && mDataId == that->mDataId
                 && mDisplayName.Equals(that->mDisplayName)
@@ -271,16 +283,18 @@ ECode DialerDatabaseHelper::ContactNumber::Equals(
     return NOERROR;
 }
 
+
 //=================================================================
 // DialerDatabaseHelper::ContactMatch
 //=================================================================
+CAR_INTERFACE_IMPL(DialerDatabaseHelper::ContactMatch, Object, IContactMatch);
+
 DialerDatabaseHelper::ContactMatch::ContactMatch(
     /* [in] */ String lookupKey,
     /* [in] */ Int64 id)
-    : mId(id)
-{
-    mLookupKey = lookupKey;
-}
+    : mLookupKey(lookupKey)
+    , mId(id)
+{}
 
 ECode DialerDatabaseHelper::ContactMatch::HashCode(
     /* [out] */ Int32* hashCode)
@@ -298,12 +312,12 @@ ECode DialerDatabaseHelper::ContactMatch::Equals(
 {
     VALIDATE_NOT_NULL(result);
 
-    if ((IObject*)this == other) {
+    if ((IObject*)this == IObject::Probe(other)) {
         *result = TRUE;
         return NOERROR;
     }
-    if (IDialerDatabaseHelperContactMatch::Probe(other)) {
-        ContactMatch* that = (ContactMatch*)IObject::Probe(other);
+    if (IContactMatch::Probe(other)) {
+        ContactMatch* that = (ContactMatch*)IContactMatch::Probe(other);
         *result = mId == that->mId
                 && mLookupKey.Equals(that->mLookupKey);
         return NOERROR;
@@ -311,6 +325,7 @@ ECode DialerDatabaseHelper::ContactMatch::Equals(
     *result = FALSE;
     return NOERROR;
 }
+
 
 //=================================================================
 // DialerDatabaseHelper::SmartDialUpdateAsyncTask
@@ -350,11 +365,10 @@ ECode DialerDatabaseHelper::SmartDialUpdateAsyncTask::OnPostExecute(
     return AsyncTask::OnPostExecute(result);
 }
 
+
 //=================================================================
 // DialerDatabaseHelper
 //=================================================================
-CAR_INTERFACE_IMPL(DialerDatabaseHelper, SQLiteOpenHelper, IDialerDatabaseHelper);
-
 AutoPtr<IAtomicBoolean> CreateInUpdate()
 {
     AutoPtr<IAtomicBoolean> inUpdate;
@@ -362,10 +376,13 @@ AutoPtr<IAtomicBoolean> CreateInUpdate()
     return inUpdate;
 }
 
+const Int32 DialerDatabaseHelper::DATABASE_VERSION = 4;
+const String DialerDatabaseHelper::DATABASE_NAME("dialer.db");
+
 const String DialerDatabaseHelper::TAG("DialerDatabaseHelper");
 const Boolean DialerDatabaseHelper::DEBUG = FALSE;
 
-AutoPtr<IDialerDatabaseHelper> DialerDatabaseHelper::sSingleton;
+AutoPtr<DialerDatabaseHelper> DialerDatabaseHelper::sSingleton;
 
 Object DialerDatabaseHelper::mLock;
 const AutoPtr<IAtomicBoolean> DialerDatabaseHelper::sInUpdate = CreateInUpdate();
@@ -375,7 +392,7 @@ const String DialerDatabaseHelper::DATABASE_VERSION_PROPERTY("database_version")
 
 const Int32 DialerDatabaseHelper::MAX_ENTRIES = 20;
 
-AutoPtr<IDialerDatabaseHelper> DialerDatabaseHelper::GetInstance(
+AutoPtr<DialerDatabaseHelper> DialerDatabaseHelper::GetInstance(
     /* [in] */ IContext* context)
 {
     if (DEBUG) {
@@ -387,49 +404,50 @@ AutoPtr<IDialerDatabaseHelper> DialerDatabaseHelper::GetInstance(
         // dialer database helper is still doing work.
         AutoPtr<IContext> appContext;
         context->GetApplicationContext((IContext**)&appContext);
-        sSingleton = (IDialerDatabaseHelper*)new DialerDatabaseHelper(
-                appContext, DATABASE_NAME);
+        sSingleton = new DialerDatabaseHelper();
+        sSingleton->constructor(appContext, DATABASE_NAME);
     }
     return sSingleton;
 }
 
-AutoPtr<IDialerDatabaseHelper> DialerDatabaseHelper::GetNewInstanceForTest(
+AutoPtr<DialerDatabaseHelper> DialerDatabaseHelper::GetNewInstanceForTest(
     /* [in] */ IContext* context)
 {
-    AutoPtr<IDialerDatabaseHelper> helper = (IDialerDatabaseHelper*)
-            new DialerDatabaseHelper(context, String(NULL));
+    AutoPtr<DialerDatabaseHelper> helper = new DialerDatabaseHelper();
+    helper->constructor(context, String(NULL));
     return helper;
 }
 
-DialerDatabaseHelper::DialerDatabaseHelper(
+DialerDatabaseHelper::DialerDatabaseHelper()
+{}
+
+ECode DialerDatabaseHelper::constructor(
     /* [in] */ IContext* context,
     /* [in] */ const String& databaseName)
 {
-    DialerDatabaseHelper(context, databaseName, DATABASE_VERSION);
+    return constructor(context, databaseName, DATABASE_VERSION);
 }
 
-DialerDatabaseHelper::DialerDatabaseHelper(
+ECode DialerDatabaseHelper::constructor(
     /* [in] */ IContext* context,
     /* [in] */ const String& databaseName,
     /* [in] */ Int32 dbVersion)
 {
-    SQLiteOpenHelper::constructor(context, databaseName, NULL, dbVersion);
-    assert(0 && "TODO");
-    // mContext = Preconditions.checkNotNull(context, "Context must not be null");
+    assert(context != NULL);
+    return SQLiteOpenHelper::constructor(context, databaseName, NULL, dbVersion);
 }
 
 ECode DialerDatabaseHelper::OnCreate(
     /* [in] */ ISQLiteDatabase* db)
 {
-    SetupTables(db);
-    return NOERROR;
+    return SetupTables(db);
 }
 
-void DialerDatabaseHelper::SetupTables(
+ECode DialerDatabaseHelper::SetupTables(
     /* [in] */ ISQLiteDatabase* db)
 {
-    DropTables(db);
-    db->ExecSQL(String("CREATE TABLE ") + Tables::SMARTDIAL_TABLE + " (" +
+    FAIL_RETURN(DropTables(db));
+    FAIL_RETURN(db->ExecSQL(String("CREATE TABLE ") + Tables::SMARTDIAL_TABLE + " (" +
             SmartDialDbColumns::_ID + " INTEGER PRIMARY KEY AUTOINCREMENT," +
             SmartDialDbColumns::DATA_ID + " INTEGER, " +
             SmartDialDbColumns::NUMBER + " TEXT," +
@@ -444,30 +462,30 @@ void DialerDatabaseHelper::SetupTables(
             SmartDialDbColumns::IS_SUPER_PRIMARY + " INTEGER, " +
             SmartDialDbColumns::IN_VISIBLE_GROUP + " INTEGER, " +
             SmartDialDbColumns::IS_PRIMARY + " INTEGER" +
-            ");");
+            ");"));
 
-    db->ExecSQL(String("CREATE TABLE ") + Tables::PREFIX_TABLE + " (" +
+    FAIL_RETURN(db->ExecSQL(String("CREATE TABLE ") + Tables::PREFIX_TABLE + " (" +
             IBaseColumns::ID + " INTEGER PRIMARY KEY AUTOINCREMENT," +
             PrefixColumns::PREFIX + " TEXT COLLATE NOCASE, " +
             PrefixColumns::CONTACT_ID + " INTEGER" +
-            ");");
+            ");"));
 
-    db->ExecSQL(String("CREATE TABLE ") + Tables::PROPERTIES + " (" +
+    FAIL_RETURN(db->ExecSQL(String("CREATE TABLE ") + Tables::PROPERTIES + " (" +
             PropertiesColumns::PROPERTY_KEY + " TEXT PRIMARY KEY, " +
             PropertiesColumns::PROPERTY_VALUE + " TEXT " +
-            ");");
+            ");"));
 
-    SetProperty(db, DATABASE_VERSION_PROPERTY, StringUtils::ToString(DATABASE_VERSION));
+    FAIL_RETURN(SetProperty(db, DATABASE_VERSION_PROPERTY, StringUtils::ToString(DATABASE_VERSION)));
     ResetSmartDialLastUpdatedTime();
+    return NOERROR;
 }
 
 ECode DialerDatabaseHelper::DropTables(
     /* [in] */ ISQLiteDatabase* db)
 {
-    db->ExecSQL(String("DROP TABLE IF EXISTS ") + Tables::PREFIX_TABLE);
-    db->ExecSQL(String("DROP TABLE IF EXISTS ") + Tables::SMARTDIAL_TABLE);
-    db->ExecSQL(String("DROP TABLE IF EXISTS ") + Tables::PROPERTIES);
-    return NOERROR;
+    FAIL_RETURN(db->ExecSQL(String("DROP TABLE IF EXISTS ") + Tables::PREFIX_TABLE));
+    FAIL_RETURN(db->ExecSQL(String("DROP TABLE IF EXISTS ") + Tables::SMARTDIAL_TABLE));
+    return db->ExecSQL(String("DROP TABLE IF EXISTS ") + Tables::PROPERTIES);
 }
 
 ECode DialerDatabaseHelper::OnUpgrade(
@@ -1100,7 +1118,7 @@ ECode DialerDatabaseHelper::GetLooseMatches(
     GetReadableDatabase((ISQLiteDatabase**)&db);
 
     /** Uses SQL query wildcard '%' to represent prefix matching.*/
-    String looseQuery = query + "%";
+    String looseQuery = query + "%%";
 
     AutoPtr<IArrayList> result;
     CArrayList::New((IArrayList**)&result);

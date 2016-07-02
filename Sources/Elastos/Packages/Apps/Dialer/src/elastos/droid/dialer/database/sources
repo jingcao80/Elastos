@@ -5,9 +5,4 @@ INCLUDES += $(MAKEDIR)/../../../../../inc
 INCLUDES += $(MAKEDIR)/../../../../../
 INCLUDES += ../../../../../
 
-CAR_FLAGS += -n -u
-LUBE_FLAGS += -n -u
-
 SOURCES += DialerDatabaseHelper.cpp
-SOURCES += CDialerDatabaseHelper.cpp
-SOURCES += CDialerDatabaseHelperHelper.cpp

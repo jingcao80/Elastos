@@ -1246,6 +1246,13 @@ ECode DialtactsActivity::OnListFragmentScroll(
     return NOERROR;
 }
 
+Boolean DialtactsActivity::PhoneIsInUse()
+{
+    Boolean inCall;
+    GetTelecomManager()->IsInCall(&inCall);
+    return inCall;
+}
+
 AutoPtr<IIntent> DialtactsActivity::GetAddNumberToContactIntent(
     /* [in] */ ICharSequence* text)
 {
@@ -1433,7 +1440,7 @@ ECode DialtactsActivity::IsActionBarShowing(
     /* [out] */ Boolean* result)
 {
     VALIDATE_NOT_NULL(result);
-    mActionBarController->IsActionBarShowing(result);
+    *result = mActionBarController->IsActionBarShowing();
     return NOERROR;
 }
 
@@ -1466,7 +1473,8 @@ ECode DialtactsActivity::GetActionBarHeight(
 ECode DialtactsActivity::SetActionBarHideOffset(
     /* [in] */ Int32 hideOffset)
 {
-    return mActionBarController->SetHideOffset(hideOffset);
+    mActionBarController->SetHideOffset(hideOffset);
+    return NOERROR;
 }
 
 void DialtactsActivity::UpdateFloatingActionButtonControllerAlignment(
@@ -1476,6 +1484,13 @@ void DialtactsActivity::UpdateFloatingActionButtonControllerAlignment(
             IFloatingActionButtonController::ALIGN_MIDDLE :
                     IFloatingActionButtonController::ALIGN_END;
     mFloatingActionButtonController->Align(align, 0 /* offsetX */, 0 /* offsetY */, animate);
+}
+
+ECode DialtactsActivity::GetActionBar(
+    /* [out] */ IActionBar** bar)
+{
+    VALIDATE_NOT_NULL(bar);
+    return TransactionSafeActivity::GetActionBar(bar);
 }
 
 } // Dialer

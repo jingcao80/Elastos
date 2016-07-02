@@ -117,6 +117,9 @@ public:
 
         static const Int32 DELETED_CONTACT_ID;
         static const Int32 DELECTED_TIMESTAMP;
+
+        /** Selects only rows that have been deleted after a certain time stamp.*/
+        static const String SELECT_UPDATED_CLAUSE;
     };
 
     /**
@@ -125,8 +128,11 @@ public:
      */
     class ContactNumber
         : public Object
+        , public IContactNumber
     {
     public:
+        CAR_INTERFACE_DECL();
+
         ContactNumber(
             /* [in] */ Int64 id,
             /* [in] */ Int64 dataID,
@@ -185,8 +191,11 @@ private:
      */
     class ContactMatch
         : public Object
+        , public IContactMatch
     {
     public:
+        CAR_INTERFACE_DECL();
+
         ContactMatch(
             /* [in] */ String lookupKey,
             /* [in] */ Int64 id);
@@ -230,8 +239,6 @@ private:
     };
 
 public:
-    CAR_INTERFACE_DECL()
-
     /**
      * Access function to get the singleton instance of DialerDatabaseHelper.
      */
@@ -347,11 +354,13 @@ public:
         /* [out] */ IArrayList** result);
 
 protected:
-    DialerDatabaseHelper(
+    DialerDatabaseHelper();
+
+    CARAPI constructor(
         /* [in] */ IContext* context,
         /* [in] */ const String& databaseName);
 
-    DialerDatabaseHelper(
+    CARAPI constructor(
         /* [in] */ IContext* context,
         /* [in] */ const String& databaseName,
         /* [in] */ Int32 dbVersion);
@@ -370,7 +379,7 @@ protected:
         /* [in] */ IInteger64* currentMillis);
 
 private:
-    CARAPI_(void) SetupTables(
+    CARAPI SetupTables(
         /* [in] */ ISQLiteDatabase* db);
 
     CARAPI_(void) ResetSmartDialLastUpdatedTime();

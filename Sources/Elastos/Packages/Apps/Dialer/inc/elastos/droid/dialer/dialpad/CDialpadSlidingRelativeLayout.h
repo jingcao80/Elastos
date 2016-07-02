@@ -2,7 +2,7 @@
 #ifndef __ELASTOS_DROID_DIALER_DIALPAD_CDIALPADSLIDINGRELATIVELAYOUT_H__
 #define __ELASTOS_DROID_DIALER_DIALPAD_CDIALPADSLIDINGRELATIVELAYOUT_H__
 
-#include "elastos/apps/dialer/dialpad/DialpadFragment.h"
+#include "elastos/droid/dialer/dialpad/DialpadFragment.h"
 #include "_Elastos_Droid_Dialer_Dialpad_CDialpadSlidingRelativeLayout.h"
 
 namespace Elastos {

@@ -4,6 +4,7 @@
 #include "_Elastos.Droid.Dialer.h"
 #include "Elastos.Droid.Content.h"
 #include "Elastos.Droid.View.h"
+#include "Elastos.CoreLibrary.Core.h"
 #include "Elastos.CoreLibrary.Utility.h"
 
 using Elastos::Droid::Content::IComponentName;
@@ -11,6 +12,7 @@ using Elastos::Droid::Content::IContext;
 using Elastos::Droid::Content::IIntent;
 using Elastos::Droid::Content::Res::IResources;
 using Elastos::Droid::View::IView;
+using Elastos::Core::ICharSequence;
 using Elastos::Utility::IIterable;
 
 namespace Elastos {

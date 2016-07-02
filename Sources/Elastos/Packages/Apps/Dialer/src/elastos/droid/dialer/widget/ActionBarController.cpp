@@ -1,14 +1,17 @@
-#include "elastos/droid/dialer/widget/ActionBarController.cpp"
-#include <elastos/core/CoreUtils.h>
-#include <elastos/utility/logging/Logger.h>
-#include "Elastos.Droid.App.h"
-#include "Elastos.Droid.View.h"
 
-using Elastos::Droid::App::IActionBar;
+#include "elastos/droid/dialer/widget/ActionBarController.h"
+#include "Elastos.Droid.App.h"
+#include "Elastos.Droid.Os.h"
+#include "Elastos.Droid.View.h"
+#include <elastos/utility/logging/Logger.h>
+
+using Elastos::Droid::Animation::IAnimator;
 using Elastos::Droid::Animation::IValueAnimatorHelper;
 using Elastos::Droid::Animation::CValueAnimatorHelper;
+using Elastos::Droid::Animation::EIID_IAnimatorUpdateListener;
+using Elastos::Droid::App::IActionBar;
 using Elastos::Droid::View::IViewPropertyAnimator;
-using Elastos::Core::CoreUtils;
+using Elastos::Core::IFloat;
 using Elastos::Utility::Logging::Logger;
 
 namespace Elastos {
@@ -30,67 +33,61 @@ ECode ActionBarController::MyAnimatorUpdateListener::OnAnimationUpdate(
     /* [in] */ IValueAnimator* animation)
 {
     AutoPtr<IInterface> animationValue;
-    animation->GetAnimatedValue(&animationValue);
-    Float value = CoreUtils::Unbox(animationValue);
+    animation->GetAnimatedValue((IInterface**)&animationValue);
+    Float value;
+    IFloat::Probe(animationValue)->GetValue(&value);
     Int32 height;
     mHost->mActivityUi->GetActionBarHeight(&height);
-    SetHideOffset((Int32) (height * value));
+    mHost->SetHideOffset((Int32)(height * value));
     return NOERROR;
 }
+
 
 //================================================================
 // ActionBarController
 //================================================================
-const Boolean ActionBarController::DEBUG = DialtactsActivity::DEBUG;
+const Boolean ActionBarController::DEBUG = TRUE;
 const String ActionBarController::TAG("ActionBarController");
 
 const String ActionBarController::KEY_IS_SLID_UP("key_actionbar_is_slid_up");
 const String ActionBarController::KEY_IS_FADED_OUT("key_actionbar_is_faded_out");
 const String ActionBarController::KEY_IS_EXPANDED("key_actionbar_is_expanded");
 
-CAR_INTERFACE_IMPL(ActionBarController, Object, IActionBarController);
-
-ECode ActionBarController::constructor(
+ActionBarController::ActionBarController(
     /* [in] */ IActionBarControllerActivityUi* activityUi,
-    /* [in] */ ISearchEditTextLayout* searchBox)
+    /* [in] */ CSearchEditTextLayout* searchBox)
 {
     mActivityUi = activityUi;
     mSearchBox = searchBox;
-    return NOERROR;
 }
 
-ECode ActionBarController::IsActionBarShowing(
-    /* [out] */ Boolean* result)
+Boolean ActionBarController::IsActionBarShowing()
 {
-    VALIDATE_NOT_NULL(result);
-
     Boolean isFadedOut;
     mSearchBox->IsFadedOut(&isFadedOut);
-    *result = !mIsActionBarSlidUp && !isFadedOut;
-    return NOERROR;
+    return !mIsActionBarSlidUp && !isFadedOut;
 }
 
-ECode ActionBarController::OnSearchBoxTapped()
+void ActionBarController::OnSearchBoxTapped()
 {
     Boolean result;
     mActivityUi->IsInSearchUi(&result);
     if (DEBUG) {
-        Log::D(TAG, "OnSearchBoxTapped: isInSearchUi %d", result);
+        Logger::D(TAG, "OnSearchBoxTapped: isInSearchUi %d", result);
     }
     if (!result) {
         mSearchBox->Expand(TRUE /* animate */, TRUE /* requestFocus */);
     }
-    return NOERROR;
 }
 
-ECode ActionBarController::OnSearchUiExited()
+void ActionBarController::OnSearchUiExited()
 {
     Boolean isExpanded;
     mSearchBox->IsExpanded(&isExpanded);
     Boolean isFadedOut;
     mSearchBox->IsFadedOut(&isFadedOut);
     Boolean shouldShowActionBar;
-    mActivityUi->ShouldShowActionBar(%shouldShowActionBar);
+    mActivityUi->ShouldShowActionBar(&shouldShowActionBar);
     if (DEBUG) {
         Logger::D(TAG, "OnSearchUIExited: isExpanded %d isFadedOut: %d shouldShowActionBar: %d",
                 isExpanded, isFadedOut, shouldShowActionBar);
@@ -108,10 +105,9 @@ ECode ActionBarController::OnSearchUiExited()
     else {
         SlideActionBar(TRUE /* slideUp */, FALSE /* animate */);
     }
-    return NOERROR;
 }
 
-ECode ActionBarController::OnDialpadDown()
+void ActionBarController::OnDialpadDown()
 {
     Boolean isInSearchUi;
     mActivityUi->IsInSearchUi(&isInSearchUi);
@@ -140,10 +136,9 @@ ECode ActionBarController::OnDialpadDown()
             mSearchBox->FadeIn();
         }
     }
-    return NOERROR;
 }
 
-ECode ActionBarController::OnDialpadUp()
+void ActionBarController::OnDialpadUp()
 {
     Boolean isInSearchUi;
     mActivityUi->IsInSearchUi(&isInSearchUi);
@@ -155,12 +150,12 @@ ECode ActionBarController::OnDialpadUp()
     }
     else {
         // From the lists fragment
-        mSearchBox->FadeOut(mFadeOutCallback);
+        assert(0 && "TODO");
+        // mSearchBox->FadeOut(mFadeOutCallback);
     }
-    return NOERROR;
 }
 
-ECode ActionBarController::SlideActionBar(
+void ActionBarController::SlideActionBar(
     /* [in] */ Boolean slideUp,
     /* [in] */ Boolean animate)
 {
@@ -182,9 +177,8 @@ ECode ActionBarController::SlideActionBar(
             args->Set(1, 0);
             helper->OfFloat(args, (IValueAnimator**)&animator);
         }
-
         animator->AddUpdateListener(new MyAnimatorUpdateListener(this));
-        animator->Start();
+        IAnimator::Probe(animator)->Start();
     }
     else {
         Int32 height;
@@ -192,20 +186,18 @@ ECode ActionBarController::SlideActionBar(
         SetHideOffset(slideUp ? height : 0);
     }
     mIsActionBarSlidUp = slideUp;
-    return NOERROR;
 }
 
-ECode ActionBarController::SetAlpha(
+void ActionBarController::SetAlpha(
     /* [in] */ Float alphaValue)
 {
     AutoPtr<IViewPropertyAnimator> animator;
     IView::Probe(mSearchBox)->Animate((IViewPropertyAnimator**)&animator);
     animator->Alpha(alphaValue);
     animator->Start();
-    return NOERROR;
 }
 
-ECode ActionBarController::SetHideOffset(
+void ActionBarController::SetHideOffset(
     /* [in] */ Int32 offset)
 {
     Int32 height;
@@ -214,21 +206,18 @@ ECode ActionBarController::SetHideOffset(
     AutoPtr<IActionBar> actionBar;
     mActivityUi->GetActionBar((IActionBar**)&actionBar);
     actionBar->SetHideOffset(offset);
-    return NOERROR;
 }
 
-ECode ActionBarController::GetHideOffset(
-    /* [out] */ Int32* offset)
+Int32 ActionBarController::GetHideOffset()
 {
-    VALIDATE_NOT_NULL(offset);
-
     AutoPtr<IActionBar> actionBar;
     mActivityUi->GetActionBar((IActionBar**)&actionBar);
-    actionBar->GetHideOffset(offset);
-    return NOERROR;
+    Int32 offset;
+    actionBar->GetHideOffset(&offset);
+    return offset;
 }
 
-ECode ActionBarController::SaveInstanceState(
+void ActionBarController::SaveInstanceState(
     /* [in] */ IBundle* outState)
 {
     outState->PutBoolean(KEY_IS_SLID_UP, mIsActionBarSlidUp);
@@ -238,10 +227,9 @@ ECode ActionBarController::SaveInstanceState(
     Boolean isExpanded;
     mSearchBox->IsExpanded(&isExpanded);
     outState->PutBoolean(KEY_IS_EXPANDED, isExpanded);
-    return NOERROR;
 }
 
-ECode ActionBarController::RestoreInstanceState(
+void ActionBarController::RestoreInstanceState(
     /* [in] */ IBundle* inState)
 {
     inState->GetBoolean(KEY_IS_SLID_UP, &mIsActionBarSlidUp);
@@ -269,21 +257,16 @@ ECode ActionBarController::RestoreInstanceState(
     else if (mSearchBox->IsExpanded(&isExpanded), isExpanded) {
             mSearchBox->Collapse(FALSE);
     }
-    return NOERROR;
 }
 
-ECode ActionBarController::RestoreActionBarOffset()
+void ActionBarController::RestoreActionBarOffset()
 {
     SlideActionBar(mIsActionBarSlidUp /* slideUp */, FALSE /* animate */);
-    return NOERROR;
 }
 
-ECode ActionBarController::GetIsActionBarSlidUp(
-    /* [out] */ Boolean* result)
+Boolean ActionBarController::GetIsActionBarSlidUp()
 {
-    VALIDATE_NOT_NULL(result);
-    *result = mIsActionBarSlidUp;
-    return NOERROR;
+    return mIsActionBarSlidUp;
 }
 
 } // Widget

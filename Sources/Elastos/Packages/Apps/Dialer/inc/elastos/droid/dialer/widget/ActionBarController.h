@@ -43,8 +43,6 @@ private:
     };
 
 public:
-    CAR_INTERFACE_DECL()
-
     ActionBarController(
         /* [in] */ IActionBarControllerActivityUi* activityUi,
         /* [in] */ CSearchEditTextLayout* searchBox);
@@ -52,68 +50,65 @@ public:
     /**
      * @return Whether or not the action bar is currently showing (both slid down and visible)
      */
-    CARAPI IsActionBarShowing(
-        /* [out] */ Boolean* result);
+    CARAPI_(Boolean) IsActionBarShowing();
 
     /**
      * Called when the user has tapped on the collapsed search box, to start a new search query.
      */
-    CARAPI OnSearchBoxTapped();
+    CARAPI_(void) OnSearchBoxTapped();
 
     /**
      * Called when search UI has been exited for some reason.
      */
-    CARAPI OnSearchUiExited();
+    CARAPI_(void) OnSearchUiExited();
 
     /**
      * Called to indicate that the user is trying to hide the dialpad. Should be called before
      * any state changes have actually occurred.
      */
-    CARAPI OnDialpadDown();
+    CARAPI_(void) OnDialpadDown();
 
     /**
      * Called to indicate that the user is trying to show the dialpad. Should be called before
      * any state changes have actually occurred.
      */
-    CARAPI OnDialpadUp();
+    CARAPI_(void) OnDialpadUp();
 
-    CARAPI SlideActionBar(
+    CARAPI_(void) SlideActionBar(
         /* [in] */ Boolean slideUp,
         /* [in] */ Boolean animate);
 
-    CARAPI SetAlpha(
+    CARAPI_(void) SetAlpha(
         /* [in] */ Float alphaValue);
 
-    CARAPI SetHideOffset(
+    CARAPI_(void) SetHideOffset(
         /* [in] */ Int32 offset);
 
     /**
      * @return The offset the action bar is being translated upwards by
      */
-    CARAPI GetHideOffset(
-        /* [out] */ Int32* offset);
+    CARAPI_(Int32) GetHideOffset();
 
     /**
      * Saves the current state of the action bar into a provided {@link Bundle}
      */
-    CARAPI SaveInstanceState(
+    CARAPI_(void) SaveInstanceState(
         /* [in] */ IBundle* outState);
 
     /**
      * Restores the action bar state from a provided {@link Bundle}.
      */
-    CARAPI RestoreInstanceState(
+    CARAPI_(void) RestoreInstanceState(
         /* [in] */ IBundle* inState);
 
     /**
      * This should be called after onCreateOptionsMenu has been called, when the actionbar has
      * been laid out and actually has a height.
      */
-    CARAPI RestoreActionBarOffset();
+    CARAPI_(void) RestoreActionBarOffset();
 
     // @VisibleForTesting
-    CARAPI GetIsActionBarSlidUp(
-        /* [out] */ Boolean* result);
+    CARAPI_(Boolean) GetIsActionBarSlidUp();
 
 public:
     static const Boolean DEBUG;

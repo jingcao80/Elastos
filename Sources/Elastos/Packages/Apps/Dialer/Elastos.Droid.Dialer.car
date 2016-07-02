@@ -29,7 +29,7 @@ module
 //    merge("car/elastos/droid/dialer/calllog/PhoneQuery.car");
 //    merge("car/elastos/droid/dialer/calllog/VoicemailNotifier.car");
 //    merge("car/elastos/droid/dialer/contact/ContactUpdateService.car");
-//    merge("car/elastos/droid/dialer/database/DialerDatabaseHelper.car");
+    merge("car/elastos/droid/dialer/database/DialerDatabaseHelper.car");
     merge("car/elastos/droid/dialer/dialpad/DialpadFragment.car");
 //    merge("car/elastos/droid/dialer/dialpad/LatinSmartDialMap.car");
 //    merge("car/elastos/droid/dialer/dialpad/SmartDialCursorLoader.car");
@@ -64,7 +64,6 @@ module
 //    merge("car/elastos/droid/dialer/settings/GeneralSettingsFragment.car");
 //    merge("car/elastos/droid/dialer/util/AsyncTaskExecutor.car");
 //    merge("car/elastos/droid/dialer/util/AsyncTaskExecutors.car");
-//    merge("car/elastos/droid/dialer/util/DialerUtils.car");
 //    merge("car/elastos/droid/dialer/util/EmptyLoader.car");
 //    merge("car/elastos/droid/dialer/util/ExpirableCache.car");
 //    merge("car/elastos/droid/dialer/util/OrientationUtil.car");

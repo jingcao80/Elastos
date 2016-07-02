@@ -6,12 +6,13 @@
 #include "Elastos.Droid.Internal.h"
 #include "Elastos.Droid.Net.h"
 #include "Elastos.Droid.Os.h"
+#include "Elastos.Droid.Telecomm.h"
 #include "Elastos.Droid.Widget.h"
-#include <elastos/core/CoreUtils>
-#include <elastos/droid/text/TextUtils>
+#include <elastos/core/CoreUtils.h>
+#include <elastos/droid/text/TextUtils.h>
+#include <elastos/droid/contacts/common/interactions/TouchPointManager.h>
 
 using Elastos::Droid::App::IActivity;
-using Elastos::Droid::Content::IComponentName;
 using Elastos::Droid::Content::CComponentName;
 using Elastos::Droid::Content::Pm::IActivityInfo;
 using Elastos::Droid::Content::Pm::IPackageManager;
@@ -19,18 +20,23 @@ using Elastos::Droid::Content::Pm::IPackageItemInfo;
 using Elastos::Droid::Content::Pm::IResolveInfo;
 using Elastos::Droid::Content::CIntent;
 using Elastos::Droid::Graphics::IPoint;
-using Elastos::Droid::Graphics::IDrawable;
-using Elastos::Droid::Internal::View::IInputMethodManager;
+using Elastos::Droid::Graphics::Drawable::IDrawable;
+using Elastos::Droid::View::InputMethod::IInputMethodManager;
 using Elastos::Droid::Net::IUri;
 using Elastos::Droid::Net::IUriHelper;
 using Elastos::Droid::Net::CUriHelper;
 using Elastos::Droid::Os::IBinder;
+using Elastos::Droid::Os::IBundle;
 using Elastos::Droid::Os::CBundle;
+using Elastos::Droid::Telecomm::Telecom::ITelecomManager;
 using Elastos::Droid::Text::TextUtils;
 using Elastos::Droid::Widget::IImageView;
+using Elastos::Droid::Widget::ITextView;
 using Elastos::Droid::Widget::IToast;
 using Elastos::Droid::Widget::IToastHelper;
 using Elastos::Droid::Widget::CToastHelper;
+using Elastos::Droid::Contacts::Common::Interactions::ITouchPointManager;
+using Elastos::Droid::Contacts::Common::Interactions::TouchPointManager;
 using Elastos::Core::CoreUtils;
 using Elastos::Utility::ILocale;
 using Elastos::Utility::ILocaleHelper;
@@ -64,30 +70,26 @@ void DialerUtils::StartActivityWithErrorToast(
             || IIntent::ACTION_CALL_PRIVILEGED.Equals(action)) {
         // All dialer-initiated calls should pass the touch point to the InCallUI
         AutoPtr<IPoint> touchPoint;
-        assert(0 && "TODO");
-        // TouchPointManager::GetInstance()->GetPoint((IPoint**)&touchPoint);
+        TouchPointManager::GetInstance()->GetPoint((IPoint**)&touchPoint);
         Int32 x, y;
         touchPoint->GetX(&x);
         touchPoint->GetY(&y);
         if (x != 0 || y != 0) {
             AutoPtr<IBundle> extras;
             CBundle::New((IBundle**)&extras);
-            extras->PutParcelable(ITouchPointManager::TOUCH_POINT, touchPoint);
+            extras->PutParcelable(ITouchPointManager::TOUCH_POINT, IParcelable::Probe(touchPoint));
             intent->PutExtra(ITelecomManager::EXTRA_OUTGOING_CALL_EXTRAS, extras);
         }
 
         ec = IActivity::Probe(context)->StartActivityForResult(intent, 0);
-        if (FAILED(ec)) goto exit;
     }
     else {
         ec = context->StartActivity(intent);
-        if (FAILED(ec)) goto exit;
     }
     // } catch (ActivityNotFoundException e) {
     //     Toast.makeText(context, msgId, Toast.LENGTH_SHORT).show();
     // }
-exit:
-    if (ec == E_ACTIVITY_NOT_FOUND_EXCEPTION) {
+    if (FAILED(ec)) {
         AutoPtr<IToastHelper> helper;
         CToastHelper::AcquireSingleton((IToastHelper**)&helper);
         AutoPtr<IToast> toast;
@@ -108,7 +110,7 @@ AutoPtr<IComponentName> DialerUtils::GetSmsComponent(
         AutoPtr<IUriHelper> helper;
         CUriHelper::AcquireSingleton((IUriHelper**)&helper);
         AutoPtr<IUri> uri;
-        helper->FromParts(IContactsUtils::SCHEME_SMSTO, String(""), NULL, (IUri**)&uri);
+        // helper->FromParts(IContactsUtils::SCHEME_SMSTO, String(""), NULL, (IUri**)&uri);
         AutoPtr<IIntent> intent;
         CIntent::New(IIntent::ACTION_SENDTO, uri, (IIntent**)&intent);
         AutoPtr<IList> resolveInfos;
@@ -148,16 +150,16 @@ void DialerUtils::ConfigureEmptyListView(
     IImageView* emptyListViewImage = IImageView::Probe(view);
 
     AutoPtr<IDrawable> drawable;
-    res->GetDrawable(imageResId, (IDrawable**)&drawable)
+    res->GetDrawable(imageResId, (IDrawable**)&drawable);
     emptyListViewImage->SetImageDrawable(drawable);
     String str;
     res->GetString(strResId, &str);
-    emptyListViewImage->SetContentDescription(str);
+    view->SetContentDescription(CoreUtils::Convert(str));
 
     AutoPtr<IView> emptyListViewMessage;
     emptyListView->FindViewById(R::id::emptyListViewMessage,
             (IView**)&emptyListViewMessage);
-    ITextView::Probe(emptyListViewMessage)->SetText(str);
+    ITextView::Probe(emptyListViewMessage)->SetText(CoreUtils::Convert(str));
 }
 
 // TODO:
@@ -205,8 +207,9 @@ void DialerUtils::ShowInputMethod(
     view->GetContext((IContext**)&context);
     AutoPtr<IInterface> service;
     context->GetSystemService(IContext::INPUT_METHOD_SERVICE, (IInterface**)&service);
-    if (imm != NULL) {
-        IInputMethodManager::Probe(imm)->ShowSoftInput(view, 0);
+    if (service != NULL) {
+        Boolean result;
+        IInputMethodManager::Probe(service)->ShowSoftInput(view, 0, &result);
     }
 }
 
@@ -217,10 +220,11 @@ void DialerUtils::HideInputMethod(
     view->GetContext((IContext**)&context);
     AutoPtr<IInterface> service;
     context->GetSystemService(IContext::INPUT_METHOD_SERVICE, (IInterface**)&service);
-    if (imm != NULL) {
+    if (service != NULL) {
         AutoPtr<IBinder> token;
         view->GetWindowToken((IBinder**)&token);
-        IInputMethodManager::Probe(imm)->HideSoftInputFromWindow(token, 0);
+        Boolean result;
+        IInputMethodManager::Probe(service)->HideSoftInputFromWindow(token, 0, &result);
     }
 }
 
