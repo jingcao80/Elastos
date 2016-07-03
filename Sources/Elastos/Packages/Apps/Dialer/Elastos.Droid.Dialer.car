@@ -35,7 +35,6 @@ module
 //    merge("car/elastos/droid/dialer/dialpad/SmartDialCursorLoader.car");
     merge("car/elastos/droid/dialer/dialpad/SmartDialMap.car");
 //    merge("car/elastos/droid/dialer/dialpad/SmartDialNameMatcher.car");
-//    merge("car/elastos/droid/dialer/dialpad/UnicodeDialerKeyListener.car");
 //    merge("car/elastos/droid/dialer/interactions/PhoneNumberInteraction.car");
 //    merge("car/elastos/droid/dialer/interactions/UndemoteOutgoingCallReceiver.car");
 //    merge("car/elastos/droid/dialer/list/AllContactsFragment.car");
@@ -215,8 +214,6 @@ module
 //    interface Elastos.Droid.Dialer.Dialpad.ISmartDialMap;
 //    interface Elastos.Droid.Dialer.Dialpad.ISmartDialCursorLoader;
 //    interface Elastos.Droid.Dialer.Dialpad.ISmartDialPrefix;
-//    interface Elastos.Droid.Dialer.Dialpad.IUnicodeDialerKeyListener;
-//    interface Elastos.Droid.Dialer.Dialpad.IUnicodeDialerKeyListenerHelper;
 //    interface Elastos.Droid.Dialer.Interactions.IPhoneDisambiguationDialogFragmentHelper;
 //    interface Elastos.Droid.Dialer.Interactions.IPhoneNumberInteraction;
 //    interface Elastos.Droid.Dialer.Interactions.IUndemoteOutgoingCallReceiver;
@@ -610,19 +607,6 @@ module
 //        interface ISmartDialPrefix;
 //    }
 //
-//    class CUnicodeDialerKeyListener {
-//        interface IKeyListener;
-//        interface IMetaKeyKeyListener;
-//        interface IInputFilter;
-//        interface IBaseKeyListener;
-//        interface INumberKeyListener;
-//        interface IDialerKeyListener;
-//        interface IUnicodeDialerKeyListener;
-//    }
-//
-//    singleton class CUnicodeDialerKeyListenerHelper {
-//        interface IUnicodeDialerKeyListenerHelper;
-//    }
 
     } // Dialpad
     } // Dialer

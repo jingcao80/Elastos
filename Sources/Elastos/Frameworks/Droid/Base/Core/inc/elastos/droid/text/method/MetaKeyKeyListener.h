@@ -62,7 +62,7 @@ namespace Method {
  * </code>
  */
 //public abstract
-class MetaKeyKeyListener
+class ECO_PUBLIC MetaKeyKeyListener
     : public Object
     , public IMetaKeyKeyListener
 {

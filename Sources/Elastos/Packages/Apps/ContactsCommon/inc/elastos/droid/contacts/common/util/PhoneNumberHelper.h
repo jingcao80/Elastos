@@ -1,8 +1,10 @@
-#ifndef __ELASTOS_APPS_CONTACTS_COMMON_UTIL_PHONENUMBERHELPER_H__
-#define __ELASTOS_APPS_CONTACTS_COMMON_UTIL_PHONENUMBERHELPER_H__
+#ifndef __ELASTOS_DROID_CONTACTS_COMMON_UTIL_PHONENUMBERHELPER_H__
+#define __ELASTOS_DROID_CONTACTS_COMMON_UTIL_PHONENUMBERHELPER_H__
 
-namespace Elastos{
-namespace Apps{
+#include "_Elastos.Droid.ContactsCommon.h"
+
+namespace Elastos {
+namespace Droid {
 namespace Contacts {
 namespace Common {
 namespace Util {
@@ -13,7 +15,6 @@ namespace Util {
  * the public API.
  */
 class PhoneNumberHelper
-    : public Object
 {
 public:
     /**
@@ -94,14 +95,13 @@ public:
         /* [in] */ const String& phoneNumber);
 
 private:
-    static const String LOG_TAG;
-
+    static const String TAG;
 };
 
 } // Util
 } // Common
 } // Contacts
-} // Apps
+} // Droid
 } // Elastos
 
-#endif //__ELASTOS_APPS_CONTACTS_COMMON_UTIL_PHONENUMBERHELPER_H__
+#endif //__ELASTOS_DROID_CONTACTS_COMMON_UTIL_PHONENUMBERHELPER_H__

@@ -285,22 +285,19 @@ public:
     /**
      * Returns the value from the {@link Tables#PROPERTIES} table.
      */
-    CARAPI GetProperty(
+    CARAPI_(String) GetProperty(
         /* [in] */ const String& key,
-        /* [in] */ const String& defaultValue,
-        /* [out] */ String* property);
+        /* [in] */ const String& defaultValue);
 
-    CARAPI GetProperty(
+    CARAPI_(String) GetProperty(
         /* [in] */ ISQLiteDatabase* db,
         /* [in] */ const String& key,
-        /* [in] */ const String& defaultValue,
-        /* [out] */ String* property);
+        /* [in] */ const String& defaultValue);
 
-    CARAPI GetPropertyAsInt(
+    CARAPI_(Int32) GetPropertyAsInt(
         /* [in] */ ISQLiteDatabase* db,
         /* [in] */ const String& key,
-        /* [in] */ Int32 defaultValue,
-        /* [out] */ Int32* property);
+        /* [in] */ Int32 defaultValue);
 
     /**
      * Starts the database upgrade process in the background.

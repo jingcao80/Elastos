@@ -1,16 +1,25 @@
-#ifndef __ELASTOS_APPS_CONTACTS_COMMON_CALLUTIL_H__
-#define __ELASTOS_APPS_CONTACTS_COMMON_CALLUTIL_H__
+#ifndef __ELASTOS_DROID_CONTACTS_COMMON_CALLUTIL_H__
+#define __ELASTOS_DROID_CONTACTS_COMMON_CALLUTIL_H__
+
+#include "_Elastos.Droid.ContactsCommon.h"
+#include "Elastos.Droid.Content.h"
+#include "Elastos.Droid.Net.h"
+#include "Elastos.Droid.Telecomm.h"
+
+using Elastos::Droid::Content::IContext;
+using Elastos::Droid::Content::IIntent;
+using Elastos::Droid::Net::IUri;
+using Elastos::Droid::Telecomm::Telecom::IPhoneAccountHandle;
 
 namespace Elastos{
-namespace Apps{
+namespace Droid {
 namespace Contacts {
 namespace Common {
 
 /**
  * Utilities related to calls.
  */
-class CallUtil
-    : Object
+class ECO_PUBLIC CallUtil
 {
 public:
     /**
@@ -99,7 +108,7 @@ public:
     static CARAPI_(AutoPtr<IIntent>) GetCallIntent(
         /* [in] */ IUri* uri,
         /* [in] */ const String& callOrigin,
-        /* [in] */ IPhoneAccountHandle accountHandle*,
+        /* [in] */ IPhoneAccountHandle* accountHandle,
         /* [in] */ Int32 videoState);
 
 
@@ -116,7 +125,7 @@ public:
 
 } // Common
 } // Contacts
-} // Apps
+} // Droid
 } // Elastos
 
-#endif //__ELASTOS_APPS_CONTACTS_COMMON_CALLUTIL_H__
+#endif //__ELASTOS_DROID_CONTACTS_COMMON_CALLUTIL_H__

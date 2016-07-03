@@ -1,4 +1,6 @@
 
+EXPORT_HEADERS += elastos/droid/contacts/common/CallUtil.h
 EXPORT_HEADERS += elastos/droid/contacts/common/interactions/TouchPointManager.h
+EXPORT_HEADERS += elastos/droid/contacts/common/util/PhoneNumberHelper.h
 EXPORT_HEADERS += elastos/droid/dialerbind/analytics/AnalyticsActivity.h
 EXPORT_HEADERS += elastos/droid/dialerbind/analytics/AnalyticsFragment.h
