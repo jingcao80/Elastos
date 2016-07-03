@@ -15,7 +15,7 @@ namespace Method {
  * with hardware keyboards.  Software input methods have no obligation to trigger
  * the methods in this class.
  */
-class DialerKeyListener
+class ECO_PUBLIC DialerKeyListener
     : public NumberKeyListener
     , public IDialerKeyListener
 {

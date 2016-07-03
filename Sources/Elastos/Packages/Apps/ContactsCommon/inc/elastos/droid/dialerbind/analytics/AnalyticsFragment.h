@@ -11,7 +11,7 @@ namespace Droid {
 namespace DialerBind {
 namespace Analytics {
 
-class AnalyticsFragment
+class ECO_PUBLIC AnalyticsFragment
     : public Fragment
     , public IAnalyticsInterface
 {

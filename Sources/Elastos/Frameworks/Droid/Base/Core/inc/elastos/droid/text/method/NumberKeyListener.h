@@ -25,7 +25,7 @@ namespace Method {
  * the methods in this class.
  */
 //public abstract
-class NumberKeyListener
+class ECO_PUBLIC NumberKeyListener
     : public BaseKeyListener
     , public IInputFilter
     , public INumberKeyListener

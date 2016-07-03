@@ -5,6 +5,7 @@
 #include "_Elastos.Droid.Dialer.h"
 #include "Elastos.Droid.App.h"
 #include "Elastos.Droid.Content.h"
+#include "Elastos.Droid.Graphics.h"
 #include "Elastos.Droid.Media.h"
 #include "Elastos.Droid.Os.h"
 #include "Elastos.Droid.Telecomm.h"
@@ -31,6 +32,7 @@ using Elastos::Droid::Content::IContext;
 using Elastos::Droid::Content::IDialogInterface;
 using Elastos::Droid::Content::IDialogInterfaceOnClickListener;
 using Elastos::Droid::Content::IIntent;
+using Elastos::Droid::Graphics::IBitmap;
 using Elastos::Droid::Media::IToneGenerator;
 using Elastos::Droid::Os::IBundle;
 using Elastos::Droid::Telecomm::Telecom::ITelecomManager;
@@ -119,8 +121,6 @@ public:
         : public DialogFragment
     {
     public:
-        CAR_INTERFACE_DECL();
-
         static CARAPI_(AutoPtr<ErrorDialogFragment>) NewInstance(
             /* [in] */ Int32 messageResId);
 
@@ -622,7 +622,7 @@ private:
     /** Stream type used to play the DTMF tones off call, and mapped to the volume control keys */
     static const Int32 DIAL_TONE_STREAM_TYPE;
 
-    // AutoPtr<IOnDialpadQueryChangedListener> mDialpadQueryListener;
+    AutoPtr<IOnDialpadQueryChangedListener> mDialpadQueryListener;
 
     // TODO:
     // AutoPtr<IDialpadView> mDialpadView;
@@ -648,7 +648,7 @@ private:
     AutoPtr<IHashSet> mPressedDialpadKeys;
 
     AutoPtr<IListView> mDialpadChooser;
-    // AutoPtr<DialpadChooserAdapter> mDialpadChooserAdapter;
+    AutoPtr<DialpadChooserAdapter> mDialpadChooserAdapter;
 
     /**
      * Regular expression prohibiting manual phone call. Can be empty, which means "no rule".
@@ -685,7 +685,7 @@ private:
 
     String mCurrentCountryIso;
 
-    // AutoPtr<DialpadPhoneStateListener> mPhoneStateListener;
+    AutoPtr<DialpadPhoneStateListener> mPhoneStateListener;
 
     Boolean mWasEmptyBeforeTextChange;
 
@@ -709,5 +709,7 @@ private:
 } // Dialer
 } // Droid
 } // Elastos
+
+DEFINE_CONVERSION_FOR(Elastos::Droid::Dialer::Dialpad::DialpadFragment::DialpadChooserAdapter::ChoiceItem, IInterface);
 
 #endif //__ELASTOS_DROID_DIALER_DIALPAD_DIALPADFRAGMENT_H__

@@ -26,7 +26,7 @@ namespace Method {
  * with hardware keyboards.  Software input methods have no obligation to trigger
  * the methods in this class.
  */
-class BaseKeyListener
+class ECO_PUBLIC BaseKeyListener
     : public MetaKeyKeyListener
     , public IKeyListener
 {

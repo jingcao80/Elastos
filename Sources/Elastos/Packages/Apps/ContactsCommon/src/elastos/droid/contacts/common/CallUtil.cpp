@@ -1,8 +1,19 @@
 
-#include "CallUtil.h"
+#include "Elastos.Droid.Internal.h"
+#include "elastos/droid/contacts/common/CallUtil.h"
+#include "elastos/droid/contacts/common/util/PhoneNumberHelper.h"
+#include <elastos/droid/net/Uri.h>
 
-namespace Elastos{
-namespace Apps{
+using Elastos::Droid::Content::CIntent;
+using Elastos::Droid::Net::Uri;
+using Elastos::Droid::Telecomm::Telecom::IPhoneAccount;
+using Elastos::Droid::Telecomm::Telecom::ITelecomManager;
+using Elastos::Droid::Telecomm::Telecom::IVideoProfileVideoState;
+
+using Elastos::Droid::Contacts::Common::Util::PhoneNumberHelper;
+
+namespace Elastos {
+namespace Droid {
 namespace Contacts {
 namespace Common {
 
@@ -15,7 +26,7 @@ AutoPtr<IIntent> CallUtil::GetCallIntent(
 AutoPtr<IIntent> CallUtil::GetCallIntent(
     /* [in] */ IUri* uri)
 {
-    return getCallIntent(uri, String(NULL), NULL);
+    return GetCallIntent(uri, String(NULL), NULL);
 }
 
 AutoPtr<IIntent> CallUtil::GetCallIntent(
@@ -85,18 +96,18 @@ AutoPtr<IIntent> CallUtil::GetVideoCallIntent(
 AutoPtr<IIntent> CallUtil::GetCallIntent(
     /* [in] */ IUri* uri,
     /* [in] */ const String& callOrigin,
-    /* [in] */ IPhoneAccountHandle accountHandle*,
+    /* [in] */ IPhoneAccountHandle* accountHandle,
     /* [in] */ Int32 videoState)
 {
     AutoPtr<IIntent> intent;
     CIntent::New(IIntent::ACTION_CALL_PRIVILEGED, uri, (IIntent**)&intent);
     intent->PutExtra(ITelecomManager::EXTRA_START_CALL_WITH_VIDEO_STATE, videoState);
     if (!callOrigin.IsNull()) {
-        assert(0 && "TODO")
+        assert(0 && "TODO");
         // intent->PutExtra(IPhoneConstants::EXTRA_CALL_ORIGIN, callOrigin);
     }
     if (accountHandle != NULL) {
-        intent->PutExtra(ITelecomManager::EXTRA_PHONE_ACCOUNT_HANDLE, accountHandle);
+        intent->PutExtra(ITelecomManager::EXTRA_PHONE_ACCOUNT_HANDLE, IParcelable::Probe(accountHandle));
     }
 
     return intent;
@@ -105,17 +116,20 @@ AutoPtr<IIntent> CallUtil::GetCallIntent(
 AutoPtr<IUri> CallUtil::GetCallUri(
     /* [in] */ const String& number)
 {
-     if (PhoneNumberHelper::IsUriNumber(number)) {
-         return Uri::FromParts(IPhoneAccount::SCHEME_SIP, number, NULL);
+    AutoPtr<IUri> uri;
+    if (PhoneNumberHelper::IsUriNumber(number)) {
+        Uri::FromParts(IPhoneAccount::SCHEME_SIP, number, String(NULL), (IUri**)&uri);
+        return uri;
     }
-    return Uri::fromParts(IPhoneAccount::SCHEME_TEL, number, NULL);
+    Uri::FromParts(IPhoneAccount::SCHEME_TEL, number, String(NULL), (IUri**)&uri);
+    return uri;
 }
 
 Boolean CallUtil::IsVideoEnabled(
     /* [in] */ IContext* context)
 {
-    AutoPtr<IInerface> service;
-    context->GetSystemService(Context.TELECOM_SERVICE, (IInerface**)&service);
+    AutoPtr<IInterface> service;
+    context->GetSystemService(IContext::TELECOM_SERVICE, (IInterface**)&service);
     ITelecomManager* telecommMgr = ITelecomManager::Probe(service);
     if (telecommMgr == NULL) {
         return FALSE;
@@ -128,5 +142,5 @@ Boolean CallUtil::IsVideoEnabled(
 
 } // Common
 } // Contacts
-} // Apps
+} // Droid
 } // Elastos

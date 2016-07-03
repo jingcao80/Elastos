@@ -1,14 +1,20 @@
 
-#include "PhoneNumberHelper.h"
+#include "elastos/droid/contacts/common/util/PhoneNumberHelper.h"
 #include <elastos/core/Character.h>
+#include <elastos/core/StringBuilder.h>
+#include <elastos/utility/logging/Logger.h>
 
 using Elastos::Core::Character;
+using Elastos::Core::StringBuilder;
+using Elastos::Utility::Logging::Logger;
 
-namespace Elastos{
-namespace Apps{
+namespace Elastos {
+namespace Droid {
 namespace Contacts {
 namespace Common {
 namespace Util {
+
+const String PhoneNumberHelper::TAG("PhoneNumberHelper");
 
 Boolean PhoneNumberHelper::IsUriNumber(
     /* [in] */ const String& number)
@@ -16,7 +22,7 @@ Boolean PhoneNumberHelper::IsUriNumber(
     // Note we allow either "@" or "%40" to indicate a URI, in case
     // the passed-in string is URI-escaped.  (Neither "@" nor "%40"
     // will ever be found in a legal PSTN number.)
-    return number.IsNull() && (number.Contains("@") || number.Contains("%40"));
+    return !number.IsNull() && (number.Contains("@") || number.Contains("%%40"));
 }
 
 String PhoneNumberHelper::FormatNumber(
@@ -26,7 +32,7 @@ String PhoneNumberHelper::FormatNumber(
 {
     assert(0 && "TODO");
 
-    Int32 len = phoneNumber->GetLength();
+    // Int32 len = phoneNumber->GetLength();
     // for (Int32 i = 0; i < len; i++) {
     //     if (!PhoneNumberUtils::IsDialable(phoneNumber->CharAt(i))) {
     //         return phoneNumber;
@@ -63,7 +69,7 @@ String PhoneNumberHelper::FormatNumber(
     /* [in] */ const String& defaultCountryIso)
 {
     // Do not attempt to format numbers that start with a hash or star symbol.
-    if (phoneNumber.StartsWith("#") || phoneNumber.StartsWith("*")) {
+    if (phoneNumber.StartWith("#") || phoneNumber.StartWith("*")) {
         return phoneNumber;
     }
 
@@ -83,23 +89,23 @@ String PhoneNumberHelper::FormatNumber(
 String PhoneNumberHelper::NormalizeNumber(
     /* [in] */ const String& phoneNumber)
 {
-    AutoPtr<StringBuilder> sb = new StringBuilder();
-    Int32 len = phoneNumber->GetLength();
+    StringBuilder sb;
+    Int32 len = phoneNumber.GetLength();
     for (Int32 i = 0; i < len; i++) {
-        Char32 c = phoneNumber->GetChar(i);
+        Char32 c = phoneNumber.GetChar(i);
         // Character.digit() supports ASCII and Unicode digits (fullwidth, Arabic-Indic, etc.)
         Int32 digit = Character::ToDigit(c, 10);
         if (digit != -1) {
-            sb->Append(digit);
+            sb.Append(digit);
         }
         else if (i == 0 && c == '+') {
-            sb->Append(c);
+            sb.AppendChar(c);
         }
         else if ((c >= 'a' && c <= 'z') || (c >= 'A' && c <= 'Z')) {
             // return NormalizeNumber(PhoneNumberUtils::ConvertKeypadLettersToDigits(phoneNumber));
         }
     }
-    return sb->ToString();
+    return sb.ToString();
 }
 
 String PhoneNumberHelper::GetUsernameFromUriNumber(
@@ -107,20 +113,20 @@ String PhoneNumberHelper::GetUsernameFromUriNumber(
 {
     // The delimiter between username and domain name can be
     // either "@" or "%40" (the URI-escaped equivalent.)
-    int delimiterIndex = number.indexOf('@');
+    Int32 delimiterIndex = phoneNumber.IndexOf('@');
     if (delimiterIndex < 0) {
-        delimiterIndex = number.indexOf("%40");
+        delimiterIndex = phoneNumber.IndexOf("%%40");
     }
     if (delimiterIndex < 0) {
-        Log.w(LOG_TAG,
-                "getUsernameFromUriNumber: no delimiter found in SIP addr '" + number + "'");
-        return number;
+        Logger::W(TAG,
+                "getUsernameFromUriNumber: no delimiter found in SIP addr '%s'", phoneNumber.string());
+        return phoneNumber;
     }
-    return number.substring(0, delimiterIndex);
+    return phoneNumber.Substring(0, delimiterIndex);
 }
 
 } // Util
 } // Common
 } // Contacts
-} // Apps
+} // Droid
 } // Elastos
