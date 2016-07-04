@@ -193,7 +193,7 @@ AutoPtr<IRect> CRect::UnflattenFromString(
 ECode CRect::IsEmpty(
     /* [out] */ Boolean* result)
 {
-    VALIDATE_NOT_NULL(result);;
+    VALIDATE_NOT_NULL(result)
 
     *result = mLeft >= mRight || mTop >= mBottom;
     return NOERROR;
@@ -202,7 +202,7 @@ ECode CRect::IsEmpty(
 ECode CRect::GetWidth(
     /* [out] */ Int32* width)
 {
-    VALIDATE_NOT_NULL(width);
+    VALIDATE_NOT_NULL(width)
 
     *width = mRight - mLeft;
     return NOERROR;

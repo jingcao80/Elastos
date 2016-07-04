@@ -1246,7 +1246,7 @@ void WindowStateAnimator::UpdateSurfaceWindowCrop(
     Int32 crl, crt, crr, crb, sil, sit, sir, sib;
     surfaceInsets->Get(&sil, &sit, &sir, &sib);
     clipRect->Get(&crl, &crt, &crr, &crb);
-    clipRect->Set(crl - sil, crt - sit, crr - sir, crb - sib);
+    clipRect->Set(crl - sil, crt - sit, crr + sir, crb + sib);
 
     // If we have an animated clip rect, intersect it with the clip rect.
     if (mHasClipRect) {
@@ -1280,7 +1280,7 @@ void WindowStateAnimator::UpdateSurfaceWindowCrop(
     clipRect->Offset(sil, sit);
 
     Boolean equals;
-    if (IObject::Probe(clipRect)->Equals(mLastClipRect, &equals), !equals) {
+    if (!Object::Equals(clipRect, mLastClipRect)) {
         mLastClipRect->Set(clipRect);
         // try {
         // if (CWindowManagerService::SHOW_TRANSACTIONS) WindowManagerService.logSurface(w,

@@ -513,8 +513,7 @@ ECode CContextImpl::GetTheme(
         GetOuterContext()->GetApplicationInfo((IApplicationInfo**)&appInfo);
         Int32 version;
         appInfo->GetTargetSdkVersion(&version);
-        mThemeResource = CResources::SelectDefaultTheme(mThemeResource,
-                version);
+        mThemeResource = CResources::SelectDefaultTheme(mThemeResource, version);
         mResources->NewTheme((IResourcesTheme**)&mTheme);
         mTheme->ApplyStyle(mThemeResource, TRUE);
     }
