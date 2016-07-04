@@ -8386,10 +8386,6 @@ ECode View::GetZ(
     GetElevation(&elevation);
     GetTranslationZ(&translationZ);
     *z = elevation + translationZ;
-    if (((Int32)*z) == 48) {
-        Logger::I(TAG, " >>> elevation: %.2f, z:%.2f", elevation, translationZ);
-        assert(0);
-    }
     return NOERROR;
 }
 

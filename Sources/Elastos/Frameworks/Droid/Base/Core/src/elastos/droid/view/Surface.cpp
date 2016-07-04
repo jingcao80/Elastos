@@ -232,10 +232,7 @@ ECode Surface::NativeLockCanvas(
     }
 
     if (dirty) {
-        dirty->SetTop(dirtyRect.top);
-        dirty->SetBottom(dirtyRect.bottom);
-        dirty->SetLeft(dirtyRect.left);
-        dirty->SetRight(dirtyRect.right);
+        dirty->Set(dirtyRect.left, dirtyRect.top, dirtyRect.right, dirtyRect.bottom);
     }
 
     // Create another reference to the surface and return it.  This reference
@@ -381,12 +378,9 @@ ECode Surface::NativeSetDirtyRect(
     }
 
     Int32 l, t, r, b;
-    dirty->GetLeft(&l);
-    dirty->GetTop(&t);
-    dirty->GetRight(&r);
-    dirty->GetBottom(&b);
+    dirty->Get(&l, &t, &r, &b);
 
-    Rect rect;
+    android::Rect rect;
     rect.left = l;
     rect.top = t;
     rect.right = r;

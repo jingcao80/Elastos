@@ -184,10 +184,6 @@ ECode CActivityOne::AddButton(
 ECode CActivityOne::CreateVolumeDialog()
 {
     Boolean bval;
-    AutoPtr<IInterface> obj;
-    GetSystemService(IContext::LAYOUT_INFLATER_SERVICE, (IInterface**)&obj);
-    AutoPtr<ILayoutInflater> inflater = ILayoutInflater::Probe(obj);
-
     AutoPtr<IDialog> mDialog;
     CDialog::New(this, (IDialog**)&mDialog);
 
@@ -213,7 +209,6 @@ ECode CActivityOne::CreateVolumeDialog()
 
     AutoPtr<IViewParent> vp;
     mView->GetParent((IViewParent**)&vp);
-    Logger::I(TAG, " >>> Content view %s get GetParent: %s", TO_CSTR(mView), TO_CSTR(vp));
 
     AutoPtr<IView> v1, v2, v3;
     mView->FindViewById(R::id::visible_panel, (IView**)&v1);
@@ -221,7 +216,6 @@ ECode CActivityOne::CreateVolumeDialog()
 
     mView->FindViewById(R::id::slider_panel, (IView**)&v2);
     AutoPtr<IViewGroup> mSliderPanel = IViewGroup::Probe(v2);
-
 
     {
         AutoPtr<IButton> button;
@@ -239,18 +233,9 @@ ECode CActivityOne::CreateVolumeDialog()
         mSliderPanel->AddView(IView::Probe(button));
     }
 
-
     mDialog->Show();
     return NOERROR;
 
-}
-
-ECode CActivityOne::CreateSliders()
-{
-
-
-
-    return NOERROR;
 }
 
 } // namespace BroadcastStaticDemo

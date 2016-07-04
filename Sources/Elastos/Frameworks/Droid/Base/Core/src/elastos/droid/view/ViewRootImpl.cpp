@@ -3843,7 +3843,7 @@ void ViewRootImpl::Draw(
         yOffset -= t;
 
         // Offset dirty rect for surface insets.
-        dirty->Offset(l, r);
+        dirty->Offset(l, t);
     }
 
     Boolean isEmpty;

@@ -3028,7 +3028,6 @@ ECode PhoneWindow::RequestFeature(
 
     if (mContentParent != NULL) {
         Slogger::E(TAG, "requestFeature() must be called before adding content");
-        //throw new AndroidRuntimeException("requestFeature() must be called before adding content");
         return E_RUNTIME_EXCEPTION;
     }
     const Int32 features = GetFeatures();
@@ -3036,10 +3035,9 @@ ECode PhoneWindow::RequestFeature(
     if ((newFeatures & ( 1 << IWindow::FEATURE_CUSTOM_TITLE)) != 0
            && (newFeatures & ~CUSTOM_TITLE_COMPATIBLE_FEATURES) !=0)
     {
-        Slogger::E(TAG, "requestFeature() You cannot combine custom titles with other title features");
         /* Another feature is enabled and the user is trying to enable the custom title feature */
         /* Custom title feature is enabled and the user is trying to enable another feature */
-        //throw new AndroidRuntimeException("You cannot combine custom titles with other title features");
+        Slogger::E(TAG, "requestFeature() You cannot combine custom titles with other title features");
         return E_RUNTIME_EXCEPTION;
     }
 
@@ -3053,12 +3051,10 @@ ECode PhoneWindow::RequestFeature(
     }
 
     if ((features & (1 << FEATURE_ACTION_BAR)) != 0 && featureId == FEATURE_SWIPE_TO_DISMISS) {
-        //throw new AndroidRuntimeException(
         Slogger::E(TAG, "You cannot combine swipe dismissal and the action bar.");
         return E_RUNTIME_EXCEPTION;
     }
     if ((features & (1 << FEATURE_SWIPE_TO_DISMISS)) != 0 && featureId == FEATURE_ACTION_BAR) {
-        //throw new AndroidRuntimeException(
         Slogger::E(TAG, "You cannot combine swipe dismissal and the action bar.");
         return E_RUNTIME_EXCEPTION;
     }
@@ -3069,9 +3065,7 @@ ECode PhoneWindow::RequestFeature(
     context->GetPackageManager((IPackageManager**)&pkManager);
     Boolean hasSystemFeature;
     pkManager->HasSystemFeature(IPackageManager::FEATURE_WATCH, &hasSystemFeature);
-    if (featureId == FEATURE_INDETERMINATE_PROGRESS && hasSystemFeature)
-    {
-        //throw new AndroidRuntimeException("You cannot use indeterminate progress on a watch.");
+    if (featureId == FEATURE_INDETERMINATE_PROGRESS && hasSystemFeature) {
         Slogger::E(TAG, "You cannot use indeterminate progress on a watch.");
         return E_RUNTIME_EXCEPTION;
     }
@@ -5203,10 +5197,6 @@ ECode PhoneWindow::GenerateLayout(
 //            }
         }
         a->GetDimension(R::styleable::Window_windowElevation, 0, &mElevation);
-        if (mElevation == 48) {
-            Logger::E(TAG, " ================ TODO mElevation is invalid.");
-            mElevation = 0;
-        }
         a->GetBoolean(R::styleable::Window_windowClipToOutline, FALSE, &mClipToOutline);
         a->GetColor(R::styleable::Window_textColor, IColor::TRANSPARENT, &mTextColor);
     }
