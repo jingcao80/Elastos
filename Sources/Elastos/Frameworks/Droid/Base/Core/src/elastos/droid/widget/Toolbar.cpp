@@ -329,12 +329,12 @@ ECode Toolbar::ExpandedActionViewMenuPresenter::ExpandItemActionView(
     parent = NULL;
     mHost->mExpandedActionView->GetParent((IViewParent**)&parent);
     if (IView::Probe(parent) != (IView*)mHost) {
-        AutoPtr<IToolbarLayoutParams> lp;
-        mHost->GenerateDefaultLayoutParams((IToolbarLayoutParams**)&lp);
+        AutoPtr<IViewGroupLayoutParams> lp;
+        mHost->GenerateDefaultLayoutParams((IViewGroupLayoutParams**)&lp);
         IActionBarLayoutParams::Probe(lp)->SetGravity(
             IGravity::START | (mHost->mButtonGravity & IGravity::VERTICAL_GRAVITY_MASK));
-        lp->SetViewType(IToolbarLayoutParams::EXPANDED);
-        IView::Probe(mHost->mExpandedActionView)->SetLayoutParams(IViewGroupLayoutParams::Probe(lp));
+        IToolbarLayoutParams::Probe(lp)->SetViewType(IToolbarLayoutParams::EXPANDED);
+        IView::Probe(mHost->mExpandedActionView)->SetLayoutParams(lp);
         mHost->AddView(IView::Probe(mHost->mExpandedActionView));
     }
 
@@ -1171,15 +1171,15 @@ void Toolbar::OnSetLayoutParams(
      * be reflected in the final results.
      */
     if (!CheckLayoutParams(layoutParams)) {
-        AutoPtr<IToolbarLayoutParams> lp;
-        GenerateLayoutParams(layoutParams, (IToolbarLayoutParams**)&lp);
-        child->SetLayoutParams(IViewGroupLayoutParams::Probe(lp));
+        AutoPtr<IViewGroupLayoutParams> lp;
+        GenerateLayoutParams(layoutParams, (IViewGroupLayoutParams**)&lp);
+        child->SetLayoutParams(lp);
     }
 }
 
 ECode Toolbar::GenerateLayoutParams(
     /* [in] */ IAttributeSet* attrs,
-    /* [out] */ IToolbarLayoutParams** layoutParams)
+    /* [out] */ IViewGroupLayoutParams** layoutParams)
 {
     VALIDATE_NOT_NULL(layoutParams)
     AutoPtr<IContext> ctx;
@@ -1189,7 +1189,7 @@ ECode Toolbar::GenerateLayoutParams(
 
 ECode Toolbar::GenerateLayoutParams(
     /* [in] */ IViewGroupLayoutParams* p,
-    /* [out] */ IToolbarLayoutParams** layoutParams)
+    /* [out] */ IViewGroupLayoutParams** layoutParams)
 {
     return CToolbarLayoutParams::New(p, layoutParams);
 }
@@ -1759,7 +1759,7 @@ ECode Toolbar::OnLayout(
 }
 
 ECode Toolbar::GenerateDefaultLayoutParams(
-    /* [out] */ IToolbarLayoutParams** params)
+    /* [out] */ IViewGroupLayoutParams** params)
 {
     return CToolbarLayoutParams::New(
         IViewGroupLayoutParams::WRAP_CONTENT, IViewGroupLayoutParams::WRAP_CONTENT, params);
@@ -1810,11 +1810,11 @@ ECode Toolbar::EnsureMenuView()
         mMenuView->SetPopupTheme(mPopupTheme);
         mMenuView->SetOnMenuItemClickListener(mMenuViewItemClickListener);
         mMenuView->SetMenuCallbacks(mActionMenuPresenterCallback, mMenuBuilderCallback);
-        AutoPtr<IToolbarLayoutParams> lp;
-        GenerateDefaultLayoutParams((IToolbarLayoutParams**)&lp);
+        AutoPtr<IViewGroupLayoutParams> lp;
+        GenerateDefaultLayoutParams((IViewGroupLayoutParams**)&lp);
         IActionBarLayoutParams::Probe(lp)->SetGravity(
                 IGravity::END | (mButtonGravity & IGravity::VERTICAL_GRAVITY_MASK));
-        IView::Probe(mMenuView)->SetLayoutParams(IViewGroupLayoutParams::Probe(lp));
+        IView::Probe(mMenuView)->SetLayoutParams(lp);
         AddSystemView(IView::Probe(mMenuView));
     }
     return NOERROR;
@@ -1835,11 +1835,11 @@ ECode Toolbar::EnsureNavButtonView()
         AutoPtr<IContext> ctx;
         GetContext((IContext**)&ctx);
         CImageButton::New(ctx, NULL, 0, mNavButtonStyle, (IImageButton**)&mNavButtonView);
-        AutoPtr<IToolbarLayoutParams> lp;
-        GenerateDefaultLayoutParams((IToolbarLayoutParams**)&lp);
+        AutoPtr<IViewGroupLayoutParams> lp;
+        GenerateDefaultLayoutParams((IViewGroupLayoutParams**)&lp);
         IActionBarLayoutParams::Probe(lp)->SetGravity(
                 IGravity::START | (mButtonGravity & IGravity::VERTICAL_GRAVITY_MASK));
-        IView::Probe(mNavButtonView)->SetLayoutParams(IViewGroupLayoutParams::Probe(lp));
+        IView::Probe(mNavButtonView)->SetLayoutParams(lp);
     }
     return NOERROR;
 }
@@ -1851,12 +1851,12 @@ ECode Toolbar::EnsureCollapseButtonView()
         GetContext((IContext**)&ctx);
         CImageButton::New(ctx, NULL, 0, mNavButtonStyle, (IImageButton**)&mCollapseButtonView);
         IImageView::Probe(mCollapseButtonView)->SetImageDrawable(mCollapseIcon);
-        AutoPtr<IToolbarLayoutParams> lp;
-        GenerateDefaultLayoutParams((IToolbarLayoutParams**)&lp);
+        AutoPtr<IViewGroupLayoutParams> lp;
+        GenerateDefaultLayoutParams((IViewGroupLayoutParams**)&lp);
         IActionBarLayoutParams::Probe(lp)->SetGravity(
             IGravity::START | (mButtonGravity & IGravity::VERTICAL_GRAVITY_MASK));
-        lp->SetViewType(IToolbarLayoutParams::EXPANDED);
-        IView::Probe(mCollapseButtonView)->SetLayoutParams(IViewGroupLayoutParams::Probe(lp));
+        IToolbarLayoutParams::Probe(lp)->SetViewType(IToolbarLayoutParams::EXPANDED);
+        IView::Probe(mCollapseButtonView)->SetLayoutParams(lp);
         AutoPtr<IViewOnClickListener> listener = new CollapseOnClickListener(this);
         IView::Probe(mCollapseButtonView)->SetOnClickListener(listener);
     }
@@ -1869,19 +1869,19 @@ ECode Toolbar::AddSystemView(
     AutoPtr<IViewGroupLayoutParams> vlp;
     v->GetLayoutParams((IViewGroupLayoutParams**)&vlp);
 
-    AutoPtr<IToolbarLayoutParams> lp;
+    AutoPtr<IViewGroupLayoutParams> lp;
     if (vlp == NULL) {
-        GenerateDefaultLayoutParams((IToolbarLayoutParams**)&lp);
+        GenerateDefaultLayoutParams((IViewGroupLayoutParams**)&lp);
     }
     else if (!CheckLayoutParams(vlp)) {
-        GenerateLayoutParams(vlp, (IToolbarLayoutParams**)&lp);
+        GenerateLayoutParams(vlp, (IViewGroupLayoutParams**)&lp);
     }
     else {
-        lp = IToolbarLayoutParams::Probe(vlp);
+        lp = vlp;
     }
 
-    lp->SetViewType(IToolbarLayoutParams::SYSTEM);
-    AddView(v, IViewGroupLayoutParams::Probe(lp));
+    IToolbarLayoutParams::Probe(lp)->SetViewType(IToolbarLayoutParams::SYSTEM);
+    AddView(v, lp);
     return NOERROR;
 }
 

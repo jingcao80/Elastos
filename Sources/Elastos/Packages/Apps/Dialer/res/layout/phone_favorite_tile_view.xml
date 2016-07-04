@@ -16,7 +16,7 @@
 <view
     xmlns:android="http://schemas.android.com/apk/res/android"
     android:id="@+id/contact_tile"
-    class="Elastos.Apps.Dialer.List.CPhoneFavoriteSquareTileView"
+    class="Elastos.Droid.Dialer.List.CPhoneFavoriteSquareTileView"
     android:paddingEnd="@dimen/contact_tile_divider_width"
     android:paddingBottom="@dimen/contact_tile_divider_width">
 

@@ -77,7 +77,6 @@ using Elastos::Droid::Dialer::Util::DialerUtils;
 using Elastos::Droid::DialerBind::DatabaseHelperManager;
 using Elastos::Droid::Contacts::Common::Interactions::TouchPointManager;
 using Elastos::Droid::Contacts::Common::List::EIID_IOnPhoneNumberPickerActionListener;
-using Elastos::Droid::Contacts::Common::Widget::CFloatingActionButtonController;
 
 namespace Elastos {
 namespace Droid {
@@ -381,6 +380,11 @@ DialtactsActivity::DialtactsActivity()
     mSearchEditTextLayoutListener = new SearchEditTextLayoutListener(this);
 }
 
+ECode DialtactsActivity::constructor()
+{
+    return TransactionSafeActivity::constructor();
+}
+
 ECode DialtactsActivity::DispatchTouchEvent(
     /* [in] */ IMotionEvent* event,
     /* [out] */ Boolean* isConsumed)
@@ -458,9 +462,9 @@ ECode DialtactsActivity::OnCreate(
     FindViewById(R::id::floating_action_button, (IView**)&view);
     AutoPtr<IImageButton> floatingActionButton = IImageButton::Probe(view);
     view->SetOnClickListener(this);
-    CFloatingActionButtonController::New(this,
-            floatingActionButtonContainer, view,
-            (IFloatingActionButtonController**)&mFloatingActionButtonController);
+    mFloatingActionButtonController = new FloatingActionButtonController();
+    mFloatingActionButtonController->constructor(this,
+            floatingActionButtonContainer, view);
 
     view = NULL;
     customView->FindViewById(R::id::dialtacts_options_menu_button, (IView**)&view);
@@ -1481,8 +1485,8 @@ void DialtactsActivity::UpdateFloatingActionButtonControllerAlignment(
     /* [in] */ Boolean animate)
 {
     Int32 align = (!mIsLandscape && mCurrentTabPosition == IListsFragment::TAB_INDEX_SPEED_DIAL) ?
-            IFloatingActionButtonController::ALIGN_MIDDLE :
-                    IFloatingActionButtonController::ALIGN_END;
+            FloatingActionButtonController::ALIGN_MIDDLE :
+                    FloatingActionButtonController::ALIGN_END;
     mFloatingActionButtonController->Align(align, 0 /* offsetX */, 0 /* offsetY */, animate);
 }
 

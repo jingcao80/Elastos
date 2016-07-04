@@ -28,7 +28,7 @@
         android:layout_height="wrap_content"
         android:orientation="horizontal" >
         <view
-            class="Elastos.Apps.Dialer.Calllog.CCallTypeIconsView"
+            class="Elastos.Droid.Dialer.Calllog.CCallTypeIconsView"
             android:id="@+id/call_type_icon"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"

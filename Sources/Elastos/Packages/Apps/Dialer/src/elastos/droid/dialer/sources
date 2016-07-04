@@ -9,10 +9,10 @@ CAR_FLAGS += -n -u
 LUBE_FLAGS += -n -u
 
 SOURCES += DialtactsActivity.cpp
+SOURCES += DialerApplication.cpp
 
 #SOURCES += CCallDetailActivity.cpp
 #SOURCES += CCallDetailActivityQueryHandler.cpp
-#SOURCES += CDialerApplication.cpp
 #SOURCES += CDialerBackupAgent.cpp
 #SOURCES += CDialtactsActivity.cpp
 #SOURCES += CDialtactsActivityHelper.cpp
@@ -24,7 +24,6 @@ SOURCES += DialtactsActivity.cpp
 #SOURCES += CProximitySensorManager.cpp
 #SOURCES += CSpecialCharSequenceMgr.cpp
 #SOURCES += CallDetailActivityQueryHandler.cpp
-#SOURCES += DialerApplication.cpp
 #SOURCES += DialerBackupAgent.cpp
 #SOURCES += PhoneCallDetailsHelper.cpp
 #SOURCES += PhoneCallDetailsViews.cpp

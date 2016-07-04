@@ -6454,6 +6454,7 @@ Boolean ViewGroup::Debug(
         output += "}";
         Logger::D(TAG, "%s", output.string());
     }
+    return TRUE;
 }
 
 /**

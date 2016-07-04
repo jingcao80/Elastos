@@ -1,0 +1,8 @@
+TARGET_NAME= util
+TARGET_TYPE= lib
+
+INCLUDES += $(MAKEDIR)/../../../../../../inc
+INCLUDES += $(MAKEDIR)/../../../../../../
+INCLUDES += ../../../../../../
+
+SOURCES = ViewUtil.cpp

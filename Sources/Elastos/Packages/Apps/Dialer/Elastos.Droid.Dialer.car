@@ -76,7 +76,6 @@ module
 //    merge("car/elastos/droid/dialer/widget/ViewDragHelper.car");
 //    merge("car/elastos/droid/dialer/CallDetailActivity.car");
 //    merge("car/elastos/droid/dialer/CallDetailActivityQueryHandler.car");
-//    merge("car/elastos/droid/dialer/DialerApplication.car");
 //    merge("car/elastos/droid/dialer/DialerBackupAgent.car");
     merge("car/elastos/droid/dialer/DialtactsActivity.car");
 //    merge("car/elastos/droid/dialer/PhoneCallDetails.car");
@@ -90,7 +89,7 @@ module
     using interface Elastos.Droid.App.IActivity;
     using interface Elastos.Droid.App.IFragment;
 //    using interface Elastos.Droid.App.IListFragment;
-//    using interface Elastos.Droid.App.IApplication;
+    using interface Elastos.Droid.App.IApplication;
 //    using interface Elastos.Droid.App.IDialogFragment;
 //    using interface Elastos.Droid.App.IService;
 //    using interface Elastos.Droid.App.IIntentService;
@@ -283,7 +282,7 @@ module
 //    [deprecated, local]
 //    class CCallDetailHistoryAdapter {
 //        constructor(
-//            [in] IContext* context,
+//            [in] IContext* ctx,
 //            [in] ILayoutInflater* layoutInflater,
 //            [in] ICallTypeHelper* callTypeHelper,
 //            [in] ArrayOf<IPhoneCallDetails*>* phoneCallDetails);
@@ -316,7 +315,7 @@ module
 //    [local]
 //    class CCallLogAdapter {
 //        constructor(
-//            [in] IContext* context,
+//            [in] IContext* ctx,
 //            [in] ICallLogAdapterCallFetcher* callFetcher,
 //            [in] IContactInfoHelper* contactInfoHelper,
 //            [in] ICallLogAdapterCallItemExpandedListener* callItemExpandedListener,
@@ -372,14 +371,14 @@ module
 //    [local]
 //    class CCallLogListItemView {
 //        constructor(
-//            [in] IContext* context);
+//            [in] IContext* ctx);
 //
 //        constructor(
-//            [in] IContext* context,
+//            [in] IContext* ctx,
 //            [in] IAttributeSet* attrs);
 //
 //        constructor(
-//            [in] IContext* context,
+//            [in] IContext* ctx,
 //            [in] IAttributeSet* attrs,
 //            [in] Int32 defStyle);
 //
@@ -437,10 +436,10 @@ module
 //    [local]
 //    class CCallTypeIconsView {
 //        constructor(
-//            [in] IContext* context);
+//            [in] IContext* ctx);
 //
 //        constructor(
-//            [in] IContext* context,
+//            [in] IContext* ctx,
 //            [in] IAttributeSet* attrs);
 //
 //        interface IView;
@@ -469,7 +468,7 @@ module
 //    [local]
 //    class CContactInfoHelper {
 //        constructor(
-//            [in] IContext* context,
+//            [in] IContext* ctx,
 //            [in] String currentCountryIso);
 //
 //        interface IContactInfoHelper;
@@ -596,7 +595,7 @@ module
 //    [local]
 //    class CSmartDialCursorLoader{
 //        constructor(
-//            [in] IContext* context);
+//            [in] IContext* ctx);
 //
 //        interface ILoader;
 //        interface IAsyncTaskLoader;
@@ -651,7 +650,7 @@ module
 //    [local]
 //    class CDialerPhoneNumberListAdapter {
 //        constructor(
-//            [in] IContext* context);
+//            [in] IContext* ctx);
 //
 //        // TODO:
 //        // interface IPinnedHeaderListAdapter;
@@ -683,14 +682,14 @@ module
 //    [local]
 //    class CPhoneFavoriteListView {
 //        constructor(
-//            [in] IContext* context);
+//            [in] IContext* ctx);
 //
 //        constructor(
-//            [in] IContext* context,
+//            [in] IContext* ctx,
 //            [in] IAttributeSet* attrs);
 //
 //        constructor(
-//            [in] IContext* context,
+//            [in] IContext* ctx,
 //            [in] IAttributeSet* attrs,
 //            [in] Int32 defStyle);
 //
@@ -718,7 +717,7 @@ module
 //    [local]
 //    class CPhoneFavoriteSquareTileView {
 //        constructor(
-//            [in] IContext* context,
+//            [in] IContext* ctx,
 //            [in] IAttributeSet* attrs);
 //
 //        interface IView;
@@ -737,7 +736,7 @@ module
 //    [local]
 //    class CPhoneFavoriteTileView {
 //        constructor(
-//            [in] IContext* context,
+//            [in] IContext* ctx,
 //            [in] IAttributeSet* attrs);
 //
 //        interface IView;
@@ -756,7 +755,7 @@ module
 //    class CPhoneFavoritesTileAdapter {
 //        // TODO:
 //        // constructor(
-//        //     [in] IContext* context,
+//        //     [in] IContext* ctx,
 //        //     [in] IContactTileViewListener* listener,
 //        //     [in] IOnDataSetChangedForAnimationListener* dataSetChangedListener);
 //
@@ -786,7 +785,7 @@ module
 //    [local]
 //    class CRegularSearchListAdapter {
 //        constructor(
-//            [in] IContext* context);
+//            [in] IContext* ctx);
 //
 //        // TODO:
 //        // interface IPinnedHeaderListAdapter;
@@ -800,14 +799,14 @@ module
 //    [local]
 //    class CRemoveView {
 //        constructor(
-//            [in] IContext* context);
+//            [in] IContext* ctx);
 //
 //        constructor(
-//            [in] IContext* context,
+//            [in] IContext* ctx,
 //            [in] IAttributeSet* attrs);
 //
 //        constructor(
-//            [in] IContext* context,
+//            [in] IContext* ctx,
 //            [in] IAttributeSet* attrs,
 //            [in] Int32 defStyle);
 //
@@ -837,7 +836,7 @@ module
 //    [local]
 //    class CShortcutCardsAdapter {
 //        constructor(
-//            [in] IContext* context,
+//            [in] IContext* ctx,
 //            [in] IListsFragment* fragment,
 //            [in] ICallLogAdapter* callLogAdapter);
 //
@@ -851,7 +850,7 @@ module
 //    [local]
 //    class CSmartDialNumberListAdapter {
 //        constructor(
-//            [in] IContext* context);
+//            [in] IContext* ctx);
 //
 //        // TODO:
 //        // interface IPinnedHeaderListAdapter;
@@ -890,7 +889,7 @@ module
 //    [local]
 //    class CSwipeHelper {
 //        constructor(
-//            [in] IContext* context,
+//            [in] IContext* ctx,
 //            [in] Int32 swipeDirection,
 //            [in] ISwipeHelperCallback* swipeCallback,
 //            [in] Float densityScale,
@@ -906,10 +905,10 @@ module
 //    [local]
 //    class CTileInteractionTeaserView {
 //        constructor(
-//            [in] IContext* context);
+//            [in] IContext* ctx);
 //
 //        constructor(
-//            [in] IContext* context,
+//            [in] IContext* ctx,
 //            [in] IAttributeSet* attrs);
 //
 //        interface IView;
@@ -937,7 +936,7 @@ module
 //    [local]
 //    class CDefaultRingtonePreference {
 //        constructor(
-//            [in] IContext* context,
+//            [in] IContext* ctx,
 //            [in] IAttributeSet* attrs);
 //
 //        interface IPreference;
@@ -1000,7 +999,7 @@ module
 //    [local]
 //    class CEmptyLoader {
 //        constructor(
-//            [in] IContext* context);
+//            [in] IContext* ctx);
 //
 //        interface ILoader;
 //        interface IEmptyLoader;
@@ -1068,14 +1067,14 @@ module
 //    [local]
 //    class COverlappingPaneLayout {
 //        constructor(
-//            [in] IContext* context);
+//            [in] IContext* ctx);
 //
 //        constructor(
-//            [in] IContext* context,
+//            [in] IContext* ctx,
 //            [in] IAttributeSet* attrs);
 //
 //        constructor(
-//            [in] IContext* context,
+//            [in] IContext* ctx,
 //            [in] IAttributeSet* attrs,
 //            [in] Int32 defStyle);
 //
@@ -1092,7 +1091,7 @@ module
     [local]
     class CSearchEditTextLayout {
         constructor(
-            [in] IContext* context,
+            [in] IContext* ctx,
             [in] IAttributeSet* attrs);
 
         interface IView;
@@ -1146,16 +1145,15 @@ module
 //        // interface INoNullCursorAsyncQueryHandler;
 //        interface ICallDetailActivityQueryHandler;
 //    }
-//
-//    class CDialerApplication {
-//        interface IContextWrapper;
-//        interface IContext;
-//        interface IComponentCallbacks2;
-//        interface IComponentCallbacks;
-//        interface IApplication;
-//        interface IDialerApplication;
-//    }
-//
+
+    class CDialerApplication {
+        interface IContextWrapper;
+        interface IContext;
+        interface IComponentCallbacks2;
+        interface IComponentCallbacks;
+        interface IApplication;
+    }
+
 //    class CDialerBackupAgent {
 //        interface IBackupAgent;
 //        interface IBackupAgentHelper;
@@ -1163,6 +1161,8 @@ module
 //    }
 
     class CDialtactsActivity {
+        constructor();
+
         interface IContext;
         interface IContextWrapper;
         interface IContextThemeWrapper;
@@ -1261,7 +1261,7 @@ module
 //    [local]
 //    class CProximitySensorManager {
 //        constructor(
-//            [in] IContext* context,
+//            [in] IContext* ctx,
 //            [in] IProximitySensorManagerListener* listener);
 //
 //        interface IProximitySensorManager;

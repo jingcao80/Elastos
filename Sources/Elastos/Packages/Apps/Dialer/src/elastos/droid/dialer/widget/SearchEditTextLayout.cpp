@@ -1,15 +1,21 @@
 
 #include "elastos/droid/dialer/widget/SearchEditTextLayout.h"
-#include "elastos/droid/dialer/util/DialerUtils.h"
+// #include "elastos/droid/dialer/util/DialerUtils.h"
 #include <elastos/core/CoreUtils.h>
 #include "R.h"
 
+using Elastos::Droid::Animation::IAnimator;
 using Elastos::Droid::Animation::IValueAnimatorHelper;
 using Elastos::Droid::Animation::CValueAnimatorHelper;
+using Elastos::Droid::Animation::EIID_IAnimatorUpdateListener;
 using Elastos::Droid::View::IViewGroupLayoutParams;
 using Elastos::Droid::View::IViewGroupMarginLayoutParams;
+using Elastos::Droid::View::EIID_IViewOnClickListener;
+using Elastos::Droid::View::EIID_IViewOnFocusChangeListener;
+using Elastos::Droid::Widget::ITextView;
 using Elastos::Core::CoreUtils;
-using Elastos::Apps::Dialer::Util::DialerUtils;
+using Elastos::Core::IFloat;
+// using Elastos::Apps::Dialer::Util::DialerUtils;
 
 namespace Elastos {
 namespace Droid {
@@ -31,14 +37,16 @@ ECode SearchEditTextLayout::SearchViewFocusChangeListener::OnFocusChange(
     /* [in] */ IView* v,
     /* [in] */ Boolean hasFocus)
 {
-    if (hasFocus) {
-        DialerUtils::ShowInputMethod(v);
-    }
-    else {
-        DialerUtils::HideInputMethod(v);
-    }
+    assert(0 && "TODO");
+    // if (hasFocus) {
+    //     DialerUtils::ShowInputMethod(v);
+    // }
+    // else {
+    //     DialerUtils::HideInputMethod(v);
+    // }
     return NOERROR;
 }
+
 
 //================================================================
 // SearchEditTextLayout::SearchCloseButtonClickListener
@@ -53,9 +61,10 @@ SearchEditTextLayout::SearchCloseButtonClickListener::SearchCloseButtonClickList
 ECode SearchEditTextLayout::SearchCloseButtonClickListener::OnClick(
     /* [in] */ IView* v)
 {
-    mHost->mSearchView->SetText(NULL);
+    ITextView::Probe(mHost->mSearchView)->SetText((ICharSequence*)NULL);
     return NOERROR;
 }
+
 
 //================================================================
 // SearchEditTextLayout::SearchBackButtonClickListener
@@ -92,10 +101,12 @@ ECode SearchEditTextLayout::AnimatorUpdateListener::OnAnimationUpdate(
 {
     AutoPtr<IInterface> value;
     animation->GetAnimatedValue((IInterface**)&value);
-    Float fraction = CoreUtils::Unbox(value);
+    Float fraction;
+    IFloat::Probe(value)->GetValue(&fraction);
     mHost->SetMargins(fraction);
     return NOERROR;
 }
+
 
 //================================================================
 // SearchEditTextLayout
@@ -105,6 +116,11 @@ CAR_INTERFACE_IMPL(SearchEditTextLayout, FrameLayout, ISearchEditTextLayout);
 SearchEditTextLayout::SearchEditTextLayout()
     : mIsExpanded(FALSE)
     , mIsFadedOut(FALSE)
+    , mTopMargin(0)
+    , mBottomMargin(0)
+    , mLeftMargin(0)
+    , mRightMargin(0)
+    , mCollapsedElevation(0)
 {}
 
 ECode SearchEditTextLayout::constructor(
@@ -154,7 +170,7 @@ ECode SearchEditTextLayout::OnFinishInflate()
     FindViewById(R::id::search_box_expanded, (IView**)&mExpandedSearchBox);
     FindViewById(R::id::search_close_button, (IView**)&mClearButtonView);
 
-    mSearchView->SetOnFocusChangeListener(new SearchViewFocusChangeListener(this));
+    view->SetOnFocusChangeListener(new SearchViewFocusChangeListener(this));
 
     view = NULL;
     FindViewById(R::id::search_close_button, (IView**)&view);
@@ -175,7 +191,8 @@ ECode SearchEditTextLayout::DispatchKeyEventPreIme(
     if (mPreImeKeyListener != NULL) {
         Int32 keyCode;
         event->GetKeyCode(&keyCode);
-        if (mPreImeKeyListener->OnKey(this, keyCode, event)) {
+        Boolean result;
+        if (mPreImeKeyListener->OnKey(this, keyCode, event, &result), result) {
             *res = TRUE;
             return NOERROR;
         }
@@ -234,14 +251,18 @@ ECode SearchEditTextLayout::Expand(
         // AnimUtils.crossFadeViews(mExpanded, mCollapsed, ANIMATION_DURATION);
         AutoPtr<IValueAnimatorHelper> helper;
         CValueAnimatorHelper::AcquireSingleton((IValueAnimatorHelper**)&helper);
-        helper->OfFloat(EXPAND_MARGIN_FRACTION_START, 0f, &mAnimator);
+        AutoPtr< ArrayOf<Float> > values = ArrayOf<Float>::Alloc(2);
+        (*values)[0] = EXPAND_MARGIN_FRACTION_START;
+        (*values)[1] = 0;
+        mAnimator = NULL;
+        helper->OfFloat(values, (IValueAnimator**)&mAnimator);
         SetMargins(EXPAND_MARGIN_FRACTION_START);
         PrepareAnimator(TRUE);
     }
     else {
         mExpanded->SetVisibility(IView::VISIBLE);
         mExpanded->SetAlpha(1);
-        SetMargins(0f);
+        SetMargins(0);
         mCollapsed->SetVisibility(IView::GONE);
     }
 
@@ -260,7 +281,8 @@ ECode SearchEditTextLayout::Expand(
 
     SetElevation(0);
     if (requestFocus) {
-        mSearchView->RequestFocus();
+        Boolean result;
+        IView::Probe(mSearchView)->RequestFocus(&result);
     }
     mIsExpanded = TRUE;
     return NOERROR;
@@ -276,7 +298,11 @@ ECode SearchEditTextLayout::Collapse(
         // AnimUtils.crossFadeViews(mCollapsed, mExpanded, ANIMATION_DURATION);
         AutoPtr<IValueAnimatorHelper> helper;
         CValueAnimatorHelper::AcquireSingleton((IValueAnimatorHelper**)&helper);
-        helper->OfFloat(0, 1, &mAnimator);
+        AutoPtr< ArrayOf<Float> > values = ArrayOf<Float>::Alloc(2);
+        (*values)[0] = 0;
+        (*values)[1] = 1;
+        mAnimator = NULL;
+        helper->OfFloat(values, (IValueAnimator**)&mAnimator);
         PrepareAnimator(FALSE);
     }
     else {
@@ -313,13 +339,13 @@ void SearchEditTextLayout::PrepareAnimator(
     /* [in] */ Boolean expand)
 {
     if (mAnimator != NULL) {
-        mAnimator->Cancel();
+        IAnimator::Probe(mAnimator)->Cancel();
     }
 
-    mAnimator->SddUpdateListener(new AnimatorUpdateListener(this));
+    mAnimator->AddUpdateListener(new AnimatorUpdateListener(this));
 
     mAnimator->SetDuration(ANIMATION_DURATION);
-    mAnimator->Start();
+    IAnimator::Probe(mAnimator)->Start();
 }
 
 

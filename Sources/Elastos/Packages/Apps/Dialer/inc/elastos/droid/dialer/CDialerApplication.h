@@ -2,7 +2,7 @@
 #define __ELASTOS_DROID_DIALER_CDIALERAPPLICATION_H__
 
 #include "_Elastos_Droid_Dialer_CDialerApplication.h"
-#include "elastos/apps/dialer/DialerApplication.h"
+#include "elastos/droid/dialer/DialerApplication.h"
 
 namespace Elastos {
 namespace Droid {
@@ -14,7 +14,6 @@ CarClass(CDialerApplication)
 public:
     CAR_OBJECT_DECL();
 };
-
 
 } // Dialer
 } // Droid

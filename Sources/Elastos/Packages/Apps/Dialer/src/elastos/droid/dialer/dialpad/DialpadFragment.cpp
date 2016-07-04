@@ -453,7 +453,7 @@ DialpadFragment::DialpadFragment()
     , mAnimate(FALSE)
 {
     CHashSet::New(12, (IHashSet**)&mPressedDialpadKeys);
-    assert(0 && "TODO");
+    // TODO:
     // CCallLogAsync::New((ICallLogAsync**)&mCallLog);
     // CHapticFeedback::New((IHapticFeedback**)&mHaptic);
     mPhoneStateListener = new DialpadPhoneStateListener(this);
@@ -663,7 +663,7 @@ ECode DialpadFragment::OnCreateView(
             (IView**)&floatingActionButton);
     floatingActionButton->SetOnClickListener(this);
     assert(0 && "TODO");
-    // CFloatingActionButtonController::New(activity, floatingActionButtonContainer,
+    // FloatingActionButtonController::New(activity, floatingActionButtonContainer,
     //         floatingActionButton, &mFloatingActionButtonController);
 
     *view = fragmentView;

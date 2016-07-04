@@ -388,11 +388,11 @@ public:
 
     CARAPI GenerateLayoutParams(
         /* [in] */ IAttributeSet* attrs,
-        /* [out] */ IToolbarLayoutParams** layoutParams);
+        /* [out] */ IViewGroupLayoutParams** layoutParams);
 
     CARAPI GenerateLayoutParams(
         /* [in] */ IViewGroupLayoutParams* p,
-        /* [out] */ IToolbarLayoutParams** layoutParams);
+        /* [out] */ IViewGroupLayoutParams** layoutParams);
 
     CARAPI GetWrapper(
         /* [out] */ IDecorToolbar** bar);
@@ -424,7 +424,7 @@ protected:
         /* [in] */ Int32 b);
 
     CARAPI GenerateDefaultLayoutParams(
-        /* [out] */ IToolbarLayoutParams** params);
+        /* [out] */ IViewGroupLayoutParams** params);
 
     CARAPI_(Boolean) CheckLayoutParams(
         /* [in] */ IViewGroupLayoutParams* p);

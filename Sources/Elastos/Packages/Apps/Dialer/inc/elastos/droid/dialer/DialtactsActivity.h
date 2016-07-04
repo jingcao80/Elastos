@@ -9,6 +9,7 @@
 #include "Elastos.Droid.Widget.h"
 #include "Elastos.Droid.Support.V4.View.h"
 #include "_Elastos.Droid.Dialer.h"
+#include "elastos/droid/contacts/common/widget/FloatingActionButtonController.h"
 #include "elastos/droid/dialer/activity/TransactionSafeActivity.h"
 #include "elastos/droid/dialer/database/DialerDatabaseHelper.h"
 #include "elastos/droid/dialer/dialpad/CDialpadFragment.h"
@@ -44,6 +45,7 @@ using Elastos::Droid::Widget::IPopupMenuOnMenuItemClickListener;
 using Elastos::Droid::Widget::PopupMenu;
 using Elastos::Droid::Support::V4::View::IViewPagerOnPageChangeListener;
 // using Elastos::Core::IInteger64;
+using Elastos::Droid::Contacts::Common::Widget::FloatingActionButtonController;
 using Elastos::Droid::Dialer::Activity::TransactionSafeActivity;
 using Elastos::Droid::Dialer::Database::DialerDatabaseHelper;
 using Elastos::Droid::Dialer::Dialpad::CDialpadFragment;
@@ -64,7 +66,6 @@ using Elastos::Droid::Dialer::Widget::ActionBarController;
 using Elastos::Droid::Dialer::Widget::IActionBarControllerActivityUi;
 using Elastos::Droid::Dialer::Widget::IOnBackButtonClickedListener;
 using Elastos::Droid::Contacts::Common::List::IOnPhoneNumberPickerActionListener;
-using Elastos::Droid::Contacts::Common::Widget::IFloatingActionButtonController;
 
 namespace Elastos {
 namespace Droid {
@@ -277,6 +278,8 @@ public:
     CAR_INTERFACE_DECL()
 
     DialtactsActivity();
+
+    CARAPI constructor();
 
     // @Override
     CARAPI DispatchTouchEvent(
@@ -669,7 +672,7 @@ private:
     AutoPtr<DragDropController> mDragDropController;
     AutoPtr<ActionBarController> mActionBarController;
 
-    AutoPtr<IFloatingActionButtonController> mFloatingActionButtonController;
+    AutoPtr<FloatingActionButtonController> mFloatingActionButtonController;
 
     Int32 mActionBarHeight;
 

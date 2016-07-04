@@ -40,7 +40,7 @@
         android:title="@string/sounds_and_vibrate_category_title"
         android:persistent="false">
 
-        <Elastos.Apps.Dialer.Settings.CDefaultRingtonePreference
+        <Elastos.Droid.Dialer.Settings.CDefaultRingtonePreference
             android:key="button_ringtone_key"
             android:title="@string/ringtone_title"
             android:dialogTitle="@string/ringtone_title"

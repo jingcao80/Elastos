@@ -15,6 +15,7 @@ SOURCES += Elastos.Droid.Core.cpp
 SOURCES += Elastos.Droid.Support.V4.cpp
 SOURCES += Elastos.Droid.ContactsCommon.cpp
 
+ELASTOS_LIBS += src/elastos/droid/contacts/common/common.lib
 ELASTOS_LIBS += src/elastos/droid/dialer/dialer.lib
 #ELASTOS_LIBS += src/elastos/droid/dialerbind/dialerbind.lib
 

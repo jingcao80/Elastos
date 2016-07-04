@@ -15,7 +15,7 @@
 -->
 
 <view xmlns:android="http://schemas.android.com/apk/res/android"
-    class="Elastos.Apps.Dialer.Calllog.CCallLogListItemView"
+    class="Elastos.Droid.Dialer.Calllog.CCallLogListItemView"
     android:id="@+id/call_log_list_item"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
@@ -106,7 +106,7 @@
                     android:orientation="horizontal"
                     >
                     <view
-                        class="Elastos.Apps.Dialer.Calllog.CCallTypeIconsView"
+                        class="Elastos.Droid.Dialer.Calllog.CCallTypeIconsView"
                         android:id="@+id/call_type_icons"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"

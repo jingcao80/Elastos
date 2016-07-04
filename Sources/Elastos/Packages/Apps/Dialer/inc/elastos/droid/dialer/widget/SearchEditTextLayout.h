@@ -2,13 +2,13 @@
 #define __ELASTOS_DROID_DIALER_WIDGET_SEARCHEDITTEXTLAYOUT_H__
 
 #include "_Elastos.Droid.Dialer.h"
-#include <elastos/core/Object.h>
-#include <elastos/droid/widget/FrameLayout.h>
 #include "Elastos.Droid.Animation.h"
 #include "Elastos.Droid.Content.h"
 #include "Elastos.Droid.Utility.h"
 #include "Elastos.Droid.View.h"
 #include "Elastos.Droid.Widget.h"
+#include <elastos/droid/widget/FrameLayout.h>
+#include <elastos/core/Object.h>
 
 using Elastos::Droid::Animation::IAnimatorUpdateListener;
 using Elastos::Droid::Animation::IValueAnimator;
