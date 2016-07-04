@@ -4,16 +4,18 @@
 
 #include "_Elastos.Droid.Support.V4.View.h"
 #include "elastos/droid/ext/frameworkext.h"
+#include "elastos/droid/database/DataSetObserver.h"
 #include "elastos/droid/os/Runnable.h"
 #include "elastos/droid/view/ViewGroup.h"
 
+using Elastos::Droid::Database::DataSetObserver;
 using Elastos::Droid::Graphics::IRect;
 using Elastos::Droid::Graphics::Drawable::IDrawable;
 using Elastos::Droid::Os::Runnable;
-using Elastos::Droid::Support::V4::Widget::IEdgeEffectCompat;
 using Elastos::Droid::View::IVelocityTracker;
 using Elastos::Droid::View::Animation::IInterpolator;
 using Elastos::Droid::Widget::IScroller;
+using Elastos::Droid::Widget::IEdgeEffect;
 using Elastos::Core::IComparator;
 using Elastos::Core::IClassLoader;
 using Elastos::Utility::IArrayList;
@@ -143,6 +145,98 @@ public:
         AutoPtr<IClassLoader> mLoader;
     };
 
+    class MyAccessibilityDelegate
+        : public AccessibilityDelegate
+    {
+    public:
+        MyAccessibilityDelegate(
+            /* [in] */ ViewPager* host)
+            : mHost(host)
+        {}
+
+        CARAPI OnInitializeAccessibilityEvent(
+            /* [in] */ IView* host,
+            /* [in] */ IAccessibilityEvent* event);
+
+        CARAPI OnInitializeAccessibilityNodeInfo(
+            /* [in] */ IView* host,
+            /* [in] */ IAccessibilityNodeInfo* info);
+
+        CARAPI PerformAccessibilityAction(
+            /* [in] */ IView* host,
+            /* [in] */ Int32 action,
+            /* [in] */ IBundle* args,
+            /* [out] */ Boolean* res);
+
+    private:
+        CARAPI_(Boolean) CanScroll();
+
+    private:
+        ViewPager* mHost;
+    };
+
+    /**
+     * Layout parameters that should be supplied for views added to a
+     * ViewPager.
+     */
+    class ViewPagerLayoutParams
+        : public LayoutParams
+        , public IViewPagerLayoutParams
+    {
+    public:
+        ViewPagerLayoutParams()
+            : mIsDecor(FALSE)
+            , mGravity(0)
+            , mWidthFactor(0.0)
+            , mNeedsMeasure(FALSE)
+            , mPosition(0)
+            , mChildIndex(0)
+        {}
+
+        CAR_INTERFACE_DECL()
+
+        CARAPI constructor();
+
+        CARAPI constructor(
+            /* [in] */ IContext* c,
+            /* [in] */ IAttributeSet* attrs);
+
+    public:
+        /**
+         * true if this view is a decoration on the pager itself and not
+         * a view supplied by the adapter.
+         */
+        Boolean mIsDecor;
+
+        /**
+         * Gravity setting for use on decor views only:
+         * Where to position the view page within the overall ViewPager
+         * container; constants are defined in {@link android.view.Gravity}.
+         */
+        Int32 mGravity;
+
+        /**
+         * Width as a 0-1 multiplier of the measured pager width
+         */
+        Float mWidthFactor = 0.f;
+
+        /**
+         * true if this view was added during layout and needs to be measured
+         * before being positioned.
+         */
+        Boolean mNeedsMeasure;
+
+        /**
+         * Adapter position this view is for if !isDecor
+         */
+        Int32 mPosition;
+
+        /**
+         * Current child index within the ViewPager that this view occupies
+         */
+        Int32 mChildIndex;
+    };
+
 private:
     class ItemInfoComparator
         , public Object
@@ -181,6 +275,24 @@ private:
 
         // @Override
         CARAPI Run();
+
+    private:
+        ViewPager* mHost;
+    };
+
+    class PagerObserver : public DataSetObserver
+    {
+    public:
+        PagerObserver(
+            /* [in] */ ViewPager* host)
+            : mHost(host)
+        {}
+
+        // @Override
+        CARAPI OnChanged();
+
+        // @Override
+        CARAPI OnInvalidated();
 
     private:
         ViewPager* mHost;
@@ -436,6 +548,11 @@ public:
         /* [in] */ Int32 y,
         /* [out] */ Boolean* canScroll);
 
+    // @Override
+    CARAPI DispatchKeyEvent(
+        /* [in] */ IKeyEvent* event,
+        /* [out] */ Boolean* res);
+
     /**
      * You can call this function yourself to have the scroll view perform
      * scrolling from a key event, just as if the event had been dispatched to
@@ -451,6 +568,31 @@ public:
     CARAPI ArrowScroll(
         /* [in] */ Int32 direction,
         /* [out] */ Boolean* result);
+
+    /**
+     * We only want the current page that is being shown to be focusable.
+     */
+    // @Override
+    CARAPI AddFocusables(
+        /* [in] */ IArrayList* views,
+        /* [in] */ Int32 direction);
+
+    /**
+     * We only want the current page that is being shown to be touchable.
+     */
+    // @Override
+    CARAPI AddTouchables(
+        /* [in] */ IArrayList* views);
+
+    // @Override
+    CARAPI DispatchPopulateAccessibilityEvent(
+        /* [in] */ IAccessibilityEvent* event,
+        /* [out] */ Boolean* res);
+
+    // @Override
+    CARAPI GenerateLayoutParams(
+        /* [in] */ IAttributeSet* attrs,
+        /* [out] */ IViewGroupLayoutParams** params);
 
 protected:
     CARAPI_(void) InitViewPager();
@@ -588,6 +730,30 @@ protected:
     CARAPI_(void) OnDraw(
         /* [in] */ ICanvas* canvas);
 
+    CARAPI_(Boolean) PageLeft();
+
+    CARAPI_(Boolean) PageRight();
+
+    /**
+     * We only want the current page that is being shown to be focusable.
+     */
+    // @Override
+    CARAPI_(Boolean) OnRequestFocusInDescendants(
+        /* [in] */ Int32 direction,
+        /* [in] */ IRect* previouslyFocusedRect);
+
+    // @Override
+    CARAPI GenerateDefaultLayoutParams(
+        /* [out] */ IViewGroupLayoutParams** params);
+
+    // @Override
+    CARAPI_(AutoPtr<IViewGroupLayoutParams>) GenerateLayoutParams(
+        /* [in] */ IViewGroupLayoutParams* p);
+
+    // @Override
+    CARAPI_(Boolean) CheckLayoutParams(
+        /* [in] */ IViewGroupLayoutParams* p);
+
 private:
     static CARAPI_(AutoPtr<IComparator>) InitComparator();
 
@@ -652,6 +818,18 @@ private:
         /* [in] */ Float pageOffset,
         /* [in] */ Int32 velocity,
         /* [in] */ Int32 deltaX);
+
+    CARAPI_(void) OnSecondaryPointerUp(
+        /* [in] */ IMotionEvent* ev);
+
+    CARAPI_(void) EndDrag();
+
+    CARAPI_(void) SetScrollingCacheEnabled(
+        /* [in] */ Boolean enabled);
+
+    CARAPI_(AutoPtr<IRect>) GetChildRectInPagerCoordinates(
+        /* [in] */ IRect* outRect,
+        /* [in] */ IView* child);
 
 private:
     static const String TAG;
@@ -760,8 +938,8 @@ private:
     Boolean mFakeDragging;
     Int64 mFakeDragBeginTime;
 
-    AutoPtr<IEdgeEffectCompat> mLeftEdge;
-    AutoPtr<IEdgeEffectCompat> mRightEdge;
+    AutoPtr<IEdgeEffect> mLeftEdge;
+    AutoPtr<IEdgeEffect> mRightEdge;
 
     Boolean mFirstLayout;
     Boolean mNeedCalculatePageOffsets;
@@ -780,6 +958,9 @@ private:
     AutoPtr<IRunnable> mEndScrollRunnable;
 
     Int32 mScrollState;
+
+    friend class MyAccessibilityDelegate;
+    friend class PagerObserver;
 };
 
 } // namespace View

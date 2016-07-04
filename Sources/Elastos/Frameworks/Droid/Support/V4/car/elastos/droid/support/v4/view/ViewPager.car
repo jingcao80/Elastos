@@ -106,6 +106,13 @@ module
     }
 
     /**
+     * @Involve
+     * interface Elastos.Droid.View.IViewGroupLayoutParams
+     */
+     interface IViewPagerLayoutParams {
+     }
+
+    /**
      * Layout manager that allows the user to flip left and right
      * through pages of data.  You supply an implementation of a
      * {@link PagerAdapter} to generate the pages that the view shows.

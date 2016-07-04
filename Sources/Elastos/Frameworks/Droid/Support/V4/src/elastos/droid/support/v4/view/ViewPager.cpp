@@ -1,14 +1,13 @@
 
 #include "elastos/droid/support/v4/view/ViewPager.h"
 #include "elastos/droid/support/v4/view/ViewConfigurationCompat.h"
-#include "elastos/droid/support/v4/view/ViewCompat.h"
 #include "elastos/droid/support/v4/view/CViewPagerSavedState.h"
-#include "elastos/droid/support/v4/widget/CEdgeEffectCompat.h"
 #include "elastos/droid/os/Build.h"
 #include "elastos/droid/os/SystemClock.h"
 #include "elastos/droid/R.h"
 #include <elastos/core/Math.h>
 #include <elastos/core/StringUtils.h>
+#include <elastos/core/StringBuilder.h>
 #include <elastos/utility/logging/Slogger.h>
 
 using Elastos::Droid::Content::Res::IResources;
@@ -18,7 +17,6 @@ using Elastos::Droid::Os::SystemClock;
 using Elastos::Droid::Support::V4::View::EIID_IViewPager;
 using Elastos::Droid::Support::V4::View::EIID_IViewPagerOnPageChangeListener;
 using Elastos::Droid::Support::V4::View::EIID_IViewPagerSavedState;
-using Elastos::Droid::Support::V4::Widget::CEdgeEffectCompat;
 using Elastos::Droid::Utility::IDisplayMetrics;
 using Elastos::Droid::View::IViewConfiguration;
 using Elastos::Droid::View::IViewConfigurationHelper;
@@ -28,8 +26,18 @@ using Elastos::Droid::View::IVelocityTrackerHelper;
 using Elastos::Droid::View::CVelocityTrackerHelper;
 using Elastos::Droid::View::IMotionEventHelper;
 using Elastos::Droid::View::CMotionEventHelper;
+using Elastos::Droid::View::IFocusFinderHelper;
+using Elastos::Droid::View::CFocusFinderHelper;
+using Elastos::Droid::View::IFocusFinder;
+using Elastos::Droid::View::ISoundEffectConstantsHelper;
+using Elastos::Droid::View::CSoundEffectConstantsHelper;
+using Elastos::Droid::View::IAccessibilityDelegate;
+using Elastos::Droid::View::Accessibility::IAccessibilityRecord;
+using Elastos::Droid::View::Accessibility::IAccessibilityRecordHelper;
+using Elastos::Droid::View::Accessibility::CAccessibilityRecordHelper;
 using Elastos::Droid::Widget::CScroller;
 using Elastos::Core::StringUtils;
+using Elastos::Core::StringBuilder;
 using Elastos::Utility::ICollections;
 using Elastos::Utility::CCollections;
 using Elastos::Utility::CArrayList;
@@ -156,6 +164,128 @@ ECode ViewPager::SavedState::ToString(
             + " position=" + StringUtils::ToString(mPosition) + "}";
     return NOERROR;
 }
+
+
+//=================================================================
+// ViewPager::MyAccessibilityDelegate
+//=================================================================
+
+ECode ViewPager::MyAccessibilityDelegate::OnInitializeAccessibilityEvent(
+    /* [in] */ IView* host,
+    /* [in] */ IAccessibilityEvent* event)
+{
+    AccessibilityDelegate::OnInitializeAccessibilityEvent(host, event);
+    EGuid clsId;
+    IObject::Probe(mHost)->GetClassID(&clsId);
+    event->SetClassName(String(clsId.mUunm));
+    AutoPtr<IAccessibilityRecordHelper> helper;
+    CAccessibilityRecordHelper::AcquireSingleton((IAccessibilityRecordHelper**)&helper);
+    AutoPtr<IAccessibilityRecord> record;
+    helper->Obtain((IAccessibilityRecord**)&record);
+    record->SetScrollable(CanScroll());
+    Int32 type;
+    if ((event->GetEventType(&type), type == IAccessibilityEvent::TYPE_VIEW_SCROLLED)
+            && mHost->mAdapter != NULL) {
+        Int32 count;
+        mHost->mAdapter->GetCount(&count);
+        record->SetItemCount(count);
+        record->SetFromIndex(mHost->mCurItem);
+        record->SetToIndex(mHost->mCurItem);
+    }
+    return NOERROR;
+}
+
+ECode ViewPager::MyAccessibilityDelegate::OnInitializeAccessibilityNodeInfo(
+    /* [in] */ IView* host,
+    /* [in] */ IAccessibilityNodeInfo* info)
+{
+    AccessibilityDelegate::OnInitializeAccessibilityNodeInfo(host, info);
+    EGuid clsId;
+    IObject::Probe(mHost)->GetClassID(&clsId);
+    info->SetClassName(String(clsId.mUunm));
+    info->SetScrollable(CanScroll());
+    Boolean canScroll;
+    if (CanScrollHorizontally(1, &canScroll), canScroll) {
+        info->AddAction(IAccessibilityNodeInfo::ACTION_SCROLL_FORWARD);
+    }
+    if (CanScrollHorizontally(-1, &canScroll), canScroll) {
+        info->AddAction(vACTION_SCROLL_BACKWARD);
+    }
+    return NOERROR;
+}
+
+ECode ViewPager::MyAccessibilityDelegate::PerformAccessibilityAction(
+    /* [in] */ IView* host,
+    /* [in] */ Int32 action,
+    /* [in] */ IBundle* args,
+    /* [out] */ Boolean* res)
+{
+    VALIDATE_NOT_NULL(res)
+    Boolean superRes;
+    if (AccessibilityDelegate::PerformAccessibilityAction(host, action, args, &superRes), superRes) {
+        *res = TRUE;
+        return NOERROR;
+    }
+    switch (action) {
+        case IAccessibilityNodeInfo::ACTION_SCROLL_FORWARD: {
+            Boolean canScroll;
+            if (CanScrollHorizontally(1, &canScroll), canScroll) {
+                SetCurrentItem(mCurItem + 1);
+                *res = TRUE;
+                return NOERROR;
+            }
+        }
+        case IAccessibilityNodeInfo::ACTION_SCROLL_BACKWARD: {
+            Boolean canScroll;
+            if (CanScrollHorizontally(-1, &canScroll), canScroll) {
+                SetCurrentItem(mCurItem - 1);
+                *res = TRUE;
+                return NOERROR;
+            }
+        }
+        default:
+            *res = FALSE;
+            return NOERROR;
+    }
+    *res = FALSE;
+    return NOERROR;
+}
+
+Boolean ViewPager::MyAccessibilityDelegate::CanScroll()
+{
+    Int32 count;
+    return (mAdapter != NULL) && (mAdapter->GetCount(&count), count > 1);
+}
+
+
+//=================================================================
+// ViewPager::PagerObserver
+//=================================================================
+
+ECode ViewPager::PagerObserver::OnChanged()
+{
+    mHost->DataSetChanged();
+    return NOERROR;
+}
+
+ECode ViewPager::PagerObserver::OnInvalidated()
+{
+    mHost->DataSetChanged();
+    return NOERROR;
+}
+
+
+//=================================================================
+// ViewPager::ViewPagerLayoutParams
+//=================================================================
+
+CAR_INTERFACE_IMPL(ViewPager::ViewPagerLayoutParams, LayoutParams, IViewPagerLayoutParams)
+
+ECode ViewPager::ViewPagerLayoutParams::constructor();
+
+ECode ViewPager::ViewPagerLayoutParams::constructor(
+    /* [in] */ IContext* c,
+    /* [in] */ IAttributeSet* attrs);
 
 
 //=================================================================
@@ -289,21 +419,20 @@ void ViewPager::InitViewPager()
     ViewConfigurationCompat::GetScaledPagingTouchSlop(configuration, &mTouchSlop);
     mMinimumVelocity = (Int32)(MIN_FLING_VELOCITY * density);
     configuration->GetScaledMaximumFlingVelocity(&mMaximumVelocity);
-    CEdgeEffectCompat::New(context, (IEdgeEffectCompat**)&mLeftEdge);
-    CEdgeEffectCompat::New(context, (IEdgeEffectCompat**)&mRightEdge);
+    CEdgeEffect::New(context, (IEdgeEffectCompat**)&mLeftEdge);
+    CEdgeEffect::New(context, (IEdgeEffectCompat**)&mRightEdge);
 
     mFlingDistance = (Int32)(MIN_DISTANCE_FOR_FLING * density);
     mCloseEnough = (Int32)(CLOSE_ENOUGH * density);
     mDefaultGutterSize = (Int32)(DEFAULT_GUTTER_SIZE * density);
 
-    AutoPtr<IAccessibilityDelegateCompat> delegate = (IAccessibilityDelegateCompat*)new MyAccessibilityDelegate(this);
+    AutoPtr<IAccessibilityDelegate> delegate = (IAccessibilityDelegate*)new MyAccessibilityDelegate(this);
     AutoPtr<IView> v = IView::Probe(this);
-    ViewCompat::SetAccessibilityDelegate(v, delegate);
+    v->SetAccessibilityDelegate(delegate);
 
     Int32 result;
-    if (ViewCompat::GetImportantForAccessibility(v, &result), result
-            == IViewCompat::IMPORTANT_FOR_ACCESSIBILITY_AUTO) {
-        ViewCompat::SetImportantForAccessibility(v, IViewCompat::IMPORTANT_FOR_ACCESSIBILITY_YES);
+    if (v->GetImportantForAccessibility(&result), result == IView::IMPORTANT_FOR_ACCESSIBILITY_AUTO) {
+        v->SetImportantForAccessibility(IView::IMPORTANT_FOR_ACCESSIBILITY_YES);
     }
 }
 
@@ -768,7 +897,7 @@ void ViewPager::SmoothScrollTo(
     duration = Elastos::Core::Math::Min(duration, MAX_SETTLE_DURATION);
 
     mScroller->StartScroll(sx, sy, dx, dy, duration);
-    ViewCompat:PostInvalidateOnAnimation(this);
+    PostInvalidateOnAnimation();
 }
 
 AutoPtr<ItemInfo> ViewPager::AddNewItem(
@@ -1776,7 +1905,7 @@ ECode ViewPager::ComputeScroll()
         }
 
         // Keep on drawing until the animation has finished.
-        ViewCompat::PostInvalidateOnAnimation(IView::Probe(this));
+        PostInvalidateOnAnimation();
         return NOERROR;
     }
 
@@ -1948,7 +2077,7 @@ void ViewPager::CompleteScroll(
     }
     if (needPopulate) {
         if (postEvents) {
-            ViewCompat::PostOnAnimation(IView::Probe(this), mEndScrollRunnable);
+            PostOnAnimation(mEndScrollRunnable);
         }
         else {
             mEndScrollRunnable->Run();
@@ -1971,11 +2100,10 @@ void ViewPager::EnableLayers(
     Int32 childCount;
     GetChildCount(&childCount);
     for (Int32 i = 0; i < childCount; i++) {
-        Int32 layerType = enable ?
-                ViewCompat::LAYER_TYPE_HARDWARE : ViewCompat::LAYER_TYPE_NONE;
+        Int32 layerType = enable ? IView::LAYER_TYPE_HARDWARE : IView::LAYER_TYPE_NONE;
         AutoPtr<IView> child;
         GetChildAt(i, (IView**)&child);
-        ViewCompat::SetLayerType(child, layerType, NULL);
+        child->SetLayerType(layerType, NULL);
     }
 }
 
@@ -2082,7 +2210,7 @@ ECode ViewPager::OnInterceptTouchEvent(
             if (mIsBeingDragged) {
                 // Scroll to follow the motion event
                 if (PerformDrag(x)) {
-                    ViewCompat::PostInvalidateOnAnimation(IView::Probe(this);
+                    PostInvalidateOnAnimation();
                 }
             }
             break;
@@ -2272,7 +2400,7 @@ ECode ViewPager::OnTouchEvent(
                 Boolean onReleaseL, onReleaseR;
                 mLeftEdge->OnRelease(&onReleaseL);
                 mRightEdge->OnRelease(&onReleaseR);
-                needsInvalidate = mLeftEdge.onRelease() | onReleaseR;
+                needsInvalidate = onReleaseL | onReleaseR;
             }
             break;
         case IMotionEvent::ACTION_CANCEL:
@@ -2303,9 +2431,10 @@ ECode ViewPager::OnTouchEvent(
             break;
     }
     if (needsInvalidate) {
-        ViewCompat::PostInvalidateOnAnimation(IView::Probe(this));
+        PostInvalidateOnAnimation();
     }
     *res = TRUE;
+    return NOERROR;
 }
 
 void ViewPager::RequestParentDisallowInterceptTouchEvent(
@@ -2468,10 +2597,11 @@ ECode ViewPager::Draw(
     ViewGroup::Draw(canvas);
     Boolean needsInvalidate = FALSE;
 
-    Int32 overScrollMode = ViewCompat::GetOverScrollMode(IView::Probe(this));
+    Int32 overScrollMode;
+    GetOverScrollMode(&overScrollMode);
     Int32 count;
-    if (overScrollMode == ViewCompat::OVER_SCROLL_ALWAYS ||
-            (overScrollMode == ViewCompat::OVER_SCROLL_IF_CONTENT_SCROLLS &&
+    if (overScrollMode == IView::OVER_SCROLL_ALWAYS ||
+            (overScrollMode == IView::OVER_SCROLL_IF_CONTENT_SCROLLS &&
                     mAdapter != NULL && (mAdapter->GetCount(&count), count > 1))) {
         Boolean isFinished;
         if (mLeftEdge->IsFinished(&isFinished), !isFinished) {
@@ -2520,7 +2650,7 @@ ECode ViewPager::Draw(
 
     if (needsInvalidate) {
         // Keep animating
-        ViewCompat::PostInvalidateOnAnimation(this);
+        PostInvalidateOnAnimation();
     }
     return NOERROR;
 }
@@ -2646,53 +2776,146 @@ ECode ViewPager::EndFakeDrag()
 ECode ViewPager::FakeDragBy(
     /* [in] */ Float xOffset)
 {
-    // begin from this
     if (!mFakeDragging) {
-        throw new IllegalStateException("No fake drag in progress. Call beginFakeDrag first.");
+        Slogger::E(TAG, "No fake drag in progress. Call beginFakeDrag first.");
+        return E_ILLEGAL_STATE_EXCEPTION;
     }
 
     mLastMotionX += xOffset;
 
-    float oldScrollX = getScrollX();
-    float scrollX = oldScrollX - xOffset;
-    final int width = getClientWidth();
+    Float oldScrollX;
+    GetScrollX(&oldScrollX);
+    Float scrollX = oldScrollX - xOffset;
+    Int32 width;
+    GetClientWidth(&width);
 
-    float leftBound = width * mFirstOffset;
-    float rightBound = width * mLastOffset;
+    Float leftBound = width * mFirstOffset;
+    Float rightBound = width * mLastOffset;
 
-    final ItemInfo firstItem = mItems.get(0);
-    final ItemInfo lastItem = mItems.get(mItems.size() - 1);
-    if (firstItem.position != 0) {
-        leftBound = firstItem.offset * width;
+    AutoPtr<IInterface> first;
+    mItems->Get(0, (IInterface**)&first);
+    AutoPtr<ItemInfo> firstItem = (ItemInfo**)first.Get();
+    AutoPtr<IInterface> last;
+    Int32 size;
+    mItems->GetSize(&size);
+    mItems->Get(size - 1, (IInterface**)&last);
+    AutoPtr<ItemInfo> lastItem = (ItemInfo**)last.Get();
+    if (firstItem->mPosition != 0) {
+        leftBound = firstItem->mOffset * width;
     }
-    if (lastItem.position != mAdapter.getCount() - 1) {
-        rightBound = lastItem.offset * width;
+    Int32 count;
+    if (mAdapter->GetCount(&count), lastItem->mPosition != count - 1) {
+        rightBound = lastItem->mOffset * width;
     }
 
     if (scrollX < leftBound) {
         scrollX = leftBound;
-    } else if (scrollX > rightBound) {
+    }
+    else if (scrollX > rightBound) {
         scrollX = rightBound;
     }
     // Don't lose the rounded component
-    mLastMotionX += scrollX - (int) scrollX;
-    scrollTo((int) scrollX, getScrollY());
-    pageScrolled((int) scrollX);
+    mLastMotionX += scrollX - (Int32)scrollX;
+    Int32 scrollY;
+    GetScrollY(&scrollY);
+    ScrollTo((Int32)scrollX, scrollY);
+    PageScrolled((Int32)scrollX);
 
     // Synthesize an event for the VelocityTracker.
-    final long time = SystemClock.uptimeMillis();
-    final MotionEvent ev = MotionEvent.obtain(mFakeDragBeginTime, time, MotionEvent.ACTION_MOVE,
+    Int64 time = SystemClock::GetUptimeMillis();
+    AutoPtr<IMotionEventHelper> helper;
+    CMotionEventHelper::AcquireSingleton((IMotionEventHelper**)&helper);
+    AutoPtr<IMotionEvent> ev;
+    helper->Obtain(mFakeDragBeginTime, time, IMotionEvent::ACTION_MOVE,
             mLastMotionX, 0, 0);
-    mVelocityTracker.addMovement(ev);
-    ev.recycle();
+    mVelocityTracker->AddMovement(ev);
+    ev->Recycle();
+    return NOERROR;
 }
 
 ECode ViewPager::IsFakeDragging(
-    /* [out] */ Boolean* result);
+    /* [out] */ Boolean* result)
+{
+    VALIDATE_NOT_NULL(result)
+    *result = mFakeDragging;
+    return NOERROR;
+}
+
+void ViewPager::OnSecondaryPointerUp(
+    /* [in] */ IMotionEvent* ev)
+{
+    Int32 pointerIndex;
+    ev->GetActionIndex(&pointerIndex);
+    Int32 pointerId;
+    ev->GetPointerId(pointerIndex, &pointerId);
+    if (pointerId == mActivePointerId) {
+        // This was our active pointer going up. Choose a new
+        // active pointer and adjust accordingly.
+        Int32 newPointerIndex = pointerIndex == 0 ? 1 : 0;
+        ev->GetX(newPointerIndex, &mLastMotionX);
+        ev->GetPointerId(newPointerIndex, &mActivePointerId);
+        if (mVelocityTracker != NULL) {
+            mVelocityTracker->Clear();
+        }
+    }
+}
+
+void ViewPager::EndDrag()
+{
+    mIsBeingDragged = FALSE;
+    mIsUnableToDrag = FALSE;
+
+    if (mVelocityTracker != NULL) {
+        mVelocityTracker->Recycle();
+        mVelocityTracker = NULL;
+    }
+}
+
+void ViewPager::SetScrollingCacheEnabled(
+    /* [in] */ Boolean enabled)
+{
+    if (mScrollingCacheEnabled != enabled) {
+        mScrollingCacheEnabled = enabled;
+        if (USE_CACHE) {
+            Int32 size;
+            GetChildCount(&size);
+            for (Int32 i = 0; i < size; ++i) {
+                AutoPtr<IView> child;
+                GetChildAt(i, (IView**)&child);
+                Int32 visibility;
+                if (child->GetVisibility(&visibility), visibility != GONE) {
+                    child->SetDrawingCacheEnabled(enabled);
+                }
+            }
+        }
+    }
+}
 
 ECode ViewPager::CanScrollHorizontally(
     /* [in] */ Int32 direction,
-    /* [out] */ Boolean* canScroll);
+    /* [out] */ Boolean* canScroll)
+{
+    VALIDATE_NOT_NULL(canScroll)
+    if (mAdapter == NULL) {
+        *canScroll = FALSE;
+        return NOERROR;
+    }
+
+    Int32 width;
+    GetClientWidth(&width);
+    Int32 scrollX;
+    GetScrollX(&scrollX);
+    if (direction < 0) {
+        *result = (scrollX > (Int32)(width * mFirstOffset));
+    }
+    else if (direction > 0) {
+        *result = (scrollX < (Int32)(width * mLastOffset));
+    }
+    else {
+        *result = FALSE;
+    }
+    return NOERROR;
+}
 
 ECode ViewPager::CanScroll(
     /* [in] */ IView* v,
@@ -2700,15 +2923,439 @@ ECode ViewPager::CanScroll(
     /* [in] */ Int32 dx,
     /* [in] */ Int32 x,
     /* [in] */ Int32 y,
-    /* [out] */ Boolean* canScroll);
+    /* [out] */ Boolean* canScroll)
+{
+    VALIDATE_NOT_NULL(canScroll)
+    AutoPtr<IViewGroup> group = IViewGroup::Probe(v);
+    if (group != NULL) {
+        Int32 scrollX, scrollY;
+        v->GetScrollX(&scrollX);
+        v->GetScrollY(&scrollY);
+        Int32 count;
+        group->GetChildCount(&count);
+        // Count backwards - let topmost views consume scroll distance first.
+        for (Int32 i = count - 1; i >= 0; i--) {
+            // TODO: Add versioned support here for transformed views.
+            // This will not work for transformed views in Honeycomb+
+            AutoPtr<IView> child;
+            group->GetChildAt(i, (IView**)&child);
+            Int32 left, right, top, bottom;
+            Boolean result;
+            if ((child->GetLeft(&left), x + scrollX >= left) && (child->GetRight(&right), x + scrollX < right) &&
+                    (child->GetTop(&top), y + scrollY >= top) && (child->GetBottom(&bottom), y + scrollY < bottom) &&
+                    (CanScroll(child, TRUE, dx, x + scrollX - left, y + scrollY - top, &result), result)) {
+                *result = TRUE;
+                return NOERROR;
+            }
+        }
+    }
+
+    Boolean result;
+    v->CanScrollHorizontally(-dx, &result);
+    *result = checkV && result;
+    return NOERROR;
+}
+
+ECode ViewPager::DispatchKeyEvent(
+    /* [in] */ IKeyEvent* event,
+    /* [out] */ Boolean* res)
+{
+    VALIDATE_NOT_NULL(res)
+    // Let the focused view and/or our descendants get the key first
+    Boolean result;
+    if (ViewGroup::DispatchKeyEvent(event, &result), result) {
+        *res = result;
+        return NOERROR;
+    }
+    else {
+        return executeKeyEvent(event, res);
+    }
+}
 
 ECode ViewPager::ExecuteKeyEvent(
     /* [in] */ IKeyEvent* event,
-    /* [out] */ Boolean* result);
+    /* [out] */ Boolean* result)
+{
+    VALIDATE_NOT_NULL(result)
+    Boolean handled = FALSE;
+    Int32 action;
+    if (event->GetAction(&action), action == IKeyEvent::ACTION_DOWN) {
+        Int32 code;
+        event->GetKeyCode(&code);
+        switch (code) {
+            case IKeyEvent::KEYCODE_DPAD_LEFT:
+                ArrowScroll(FOCUS_LEFT, &handled);
+                break;
+            case IKeyEvent::KEYCODE_DPAD_RIGHT:
+                ArrowScroll(FOCUS_RIGHT, &handled);
+                break;
+            case IKeyEvent::KEYCODE_TAB:
+                if (Build::VERSION::SDK_INT >= 11) {
+                    // The focus finder had a bug handling FOCUS_FORWARD and FOCUS_BACKWARD
+                    // before Android 3.0. Ignore the tab key on those devices.
+                    Boolean result;
+                    if (event->HasNoModifiers(&result), result) {
+                        ArrowScroll(FOCUS_FORWARD, &handled);
+                    }
+                    else if (event->HasModifiers(IKeyEvent::META_SHIFT_ON, &result), result) {
+                        ArrowScroll(FOCUS_BACKWARD, &handled);
+                    }
+                }
+                break;
+        }
+    }
+    *result = handled;
+    return NOERROR;
+}
 
 ECode ViewPager::ArrowScroll(
     /* [in] */ Int32 direction,
-    /* [out] */ Boolean* result);
+    /* [out] */ Boolean* result)
+{
+    VALIDATE_NOT_NULL(result)
+    AutoPtr<IView> currentFocused;
+    FindFocus((IView**)&currentFocused);
+    if (currentFocused.Get() == IView::Probe(this)) {
+        currentFocused = NULL;
+    }
+    else if (currentFocused != NULL) {
+        Boolean isChild = FALSE;
+        AutoPtr<IViewParent> parent;
+        currentFocused->GetParent((IViewParent**)&parent);
+        while (IViewGroup::Probe(parent) != NULL) {
+            if (parent.Get() == IViewParent::Probe(this)) {
+                isChild = TRUE;
+                break;
+            }
+            AutoPtr<IViewParent> temp;
+            parent->GetParent((IViewParent**)&temp);
+            parent = temp;
+        }
+        if (!isChild) {
+            // This would cause the focus search down below to fail in fun ways.
+            StringBuilder sb;
+            EGuid clsId;
+            IObject::Probe(this)->GetClassID(&clsId);
+            sb.Append(clsId.mUunm);
+            parent = NULL;
+            currentFocused->GetParent((IViewParent**)&parent);
+            while (IViewGroup::Probe(parent) != NULL) {
+                sb.Append(" => ");
+                EGuid clsId1;
+                IObject::Probe(parent)->GetClassID(&clsId1);
+                sb.Append(clsId1.mUunm);
+                AutoPtr<IViewParent> temp;
+                parent->GetParent((IViewParent**)&temp);
+                parent = temp;
+            }
+            Slogger::E(TAG, "arrowScroll tried to find focus based on non-child current focused view %s",
+                    sb.ToString().string());
+            currentFocused = NULL;
+        }
+    }
+
+    Boolean handled = FALSE;
+
+    AutoPtr<IFocusFinderHelper> helper;
+    CFocusFinderHelper::AcquireSingleton((IFocusFinderHelper**)&helpre);
+    AutoPtr<IFocusFinder> ff;
+    helper->GetInstance((IFocusFinder**)&ff);
+    AutoPtr<IView> nextFocused;
+    ff->FindNextFocus(IView::Probe(this), currentFocused, direction, (IView**)&nextFocused);
+    if (nextFocused != NULL && nextFocused.Get() != currentFocused.Get()) {
+        if (direction == IView::FOCUS_LEFT) {
+            // If there is nothing to the left, or this is causing us to
+            // jump to the right, then what we really want to do is page left.
+            AutoPtr<IRect> rect = GetChildRectInPagerCoordinates(mTempRect, nextFocused);
+            Int32 nextLeft;
+            rect->GetLeft(&nextLeft);
+            rect = GetChildRectInPagerCoordinates(mTempRect, currentFocused);
+            Int32 currLeft;
+            rect->GetLeft(&currLeft);
+            if (currentFocused != NULL && nextLeft >= currLeft) {
+                handled = pageLeft();
+            }
+            else {
+                nextFocused->RequestFocus(&handled);
+            }
+        }
+        else if (direction == IView::FOCUS_RIGHT) {
+            // If there is nothing to the right, or this is causing us to
+            // jump to the left, then what we really want to do is page right.
+            AutoPtr<IRect> rect = GetChildRectInPagerCoordinates(mTempRect, nextFocused);
+            Int32 nextLeft;
+            rect->GetLeft(&nextLeft);
+            rect = GetChildRectInPagerCoordinates(mTempRect, currentFocused);
+            Int32 currLeft;
+            rect->GetLeft(&currLeft);
+            if (currentFocused != NULL && nextLeft <= currLeft) {
+                handled = PageRight();
+            }
+            else {
+                nextFocused->RequestFocus(&handled);
+            }
+        }
+    }
+    else if (direction == FOCUS_LEFT || direction == FOCUS_BACKWARD) {
+        // Trying to move left and nothing there; try to page.
+        handled = PageLeft();
+    }
+    else if (direction == FOCUS_RIGHT || direction == FOCUS_FORWARD) {
+        // Trying to move right and nothing there; try to page.
+        handled = PageRight();
+    }
+    if (handled) {
+        AutoPtr<ISoundEffectConstantsHelper> helper;
+        CSoundEffectConstantsHelper::AcquireSingleton((ISoundEffectConstantsHelper**)&helper);
+        Int32 result;
+        helper->GetContantForFocusDirection(direction, &result);
+        PlaySoundEffect(result);
+    }
+    *result = handled;
+    return NOERROR;
+}
+
+AutoPtr<IRect> ViewPager::GetChildRectInPagerCoordinates(
+    /* [in] */ IRect* outRect,
+    /* [in] */ IView* child)
+{
+    if (outRect == NULL) {
+        CRect::New((IRect**)&outRect);
+    }
+    if (child == NULL) {
+        outRect->Set(0, 0, 0, 0);
+        return outRect;
+    }
+    Int32 left, right, top, bottom;
+    child->GetLeft(&left);
+    child->GetRight(&right);
+    child->GetTop(&top);
+    child->GetBottom(&bottom);
+    outRect->SetLeft(left);
+    outRect->SetRight(right);
+    outRect->SetTop(top);
+    outRect->SetBottom(bottom);
+
+    AutoPtr<IViewParent> parent;
+    child->GetParent((IViewParent**)&parent);
+    while (IViewGroup::Probe(parent) != NULL && parent.Get() != IViewParent::Probe(this)) {
+        AutoPtr<IViewGroup> group = IViewGroup::Probe(parent);
+        group->GetLeft(&left);
+        group->GetRight(&right);
+        group->GetTop(&top);
+        group->GetBottom(&bottom);
+        outRect->SetLeft(left);
+        outRect->SetRight(right);
+        outRect->SetTop(top);
+        outRect->SetBottom(bottom);
+
+        AutoPtr<IViewParent> temp;
+        group->GetParent((IViewParent**)&temp);
+        parent = temp;
+    }
+    return outRect;
+}
+
+Boolean ViewPager::PageLeft()
+{
+    if (mCurItem > 0) {
+        SetCurrentItem(mCurItem - 1, TRUE);
+        return TRUE;
+    }
+    return FALSE;
+}
+
+Boolean ViewPager::PageRight()
+{
+    Int32 count;
+    if (mAdapter != NULL && (mAdapter->GetCount(&count), mCurItem < (count - 1))) {
+        SetCurrentItem(mCurItem + 1, TRUE);
+        return TRUE;
+    }
+    return FALSE;
+}
+
+ECode ViewPager::AddFocusables(
+    /* [in] */ IArrayList* views,
+    /* [in] */ Int32 direction)
+{
+    Int32 focusableCount;
+    views->GetSize(&focusableCount);
+
+    Int32 descendantFocusability = GetDescendantFocusability();
+
+    if (descendantFocusability != FOCUS_BLOCK_DESCENDANTS) {
+        Int32 count;
+        GetChildCount(&count);
+        for (Int32 i = 0; i < count; i++) {
+            AutoPtr<IView> child;
+            GetChildAt(i, (IView**)&child);
+            Int32 visibility;
+            if (child->GetVisibility(&visibility), visibility == VISIBLE) {
+                AutoPtr<ItemInfo> ii = InfoForChild(child);
+                if (ii != NULL && ii->mPosition == mCurItem) {
+                    child->AddFocusables(views, direction, focusableMode);
+                }
+            }
+        }
+    }
+
+    // we add ourselves (if focusable) in all cases except for when we are
+    // FOCUS_AFTER_DESCENDANTS and there are some descendants focusable.  this is
+    // to avoid the focus search finding layouts when a more precise search
+    // among the focusable children would be more interesting.
+    Int32 size;
+    if (descendantFocusability != FOCUS_AFTER_DESCENDANTS ||
+            // No focusable descendants
+            (view->GetSize(&size), (focusableCount == size))) {
+        // Note that we can't call the superclass here, because it will
+        // add all views in.  So we need to do the same thing View does.
+        Boolean isFocusable
+        if (IsFocusable(&isFocusable), !isFocusable) {
+            return NOERROR;
+        }
+        Boolean isTouchMode, isFocusableTouchMode;
+        if ((focusableMode & FOCUSABLES_TOUCH_MODE) == FOCUSABLES_TOUCH_MODE &&
+                (IsInTouchMode(&isTouchMode), isTouchMode) &&
+                (IsFocusableInTouchMode(&isFocusableTouchMode), !isFocusableTouchMode)) {
+            return NOERROR;
+        }
+        if (views != NULL) {
+            views->Add(IView::Probe(this));
+        }
+    }
+    return NOERROR;
+}
+
+ECode ViewPager::AddTouchables(
+    /* [in] */ IArrayList* views)
+{
+    // Note that we don't call super.addTouchables(), which means that
+    // we don't call View.addTouchables().  This is okay because a ViewPager
+    // is itself not touchable.
+    Int32 count;
+    GetChildCount(&count);
+    for (Int32 i = 0; i < count; i++) {
+        AutoPtr<IView> child;
+        GetChildAt(i, (IView**)&child);
+        Int32 visibility;
+        if (child->GetVisibility(&visibility), visibility == VISIBLE) {
+            AutoPtr<ItemInfo> ii = InfoForChild(child);
+            if (ii != NULL && ii->mPosition == mCurItem) {
+                child->AddTouchables(views);
+            }
+        }
+    }
+    return NOERROR;
+}
+
+Boolean ViewPager::OnRequestFocusInDescendants(
+    /* [in] */ Int32 direction,
+    /* [in] */ IRect* previouslyFocusedRect)
+{
+    Int32 index;
+    Int32 increment;
+    Int32 end;
+    Int32 count;
+    GetChildCount(&count);
+    if ((direction & FOCUS_FORWARD) != 0) {
+        index = 0;
+        increment = 1;
+        end = count;
+    }
+    else {
+        index = count - 1;
+        increment = -1;
+        end = -1;
+    }
+    for (Int32 i = index; i != end; i += increment) {
+        AutoPtr<IView> child;
+        GetChildAt(i, (IView**)&child);
+        Int32 visibility;
+        if (child->GetVisibility(&visibility), visibility == VISIBLE) {
+            AutoPtr<ItemInfo> ii = InfoForChild(child);
+            if (ii != NULL && ii->mPosition == mCurItem) {
+                Boolean requestFocus;
+                if (child->RequestFocus(direction, previouslyFocusedRect, &requestFocus), requestFocus) {
+                    return TRUE;
+                }
+            }
+        }
+    }
+    return FALSE;
+}
+
+ECode ViewPager::DispatchPopulateAccessibilityEvent(
+    /* [in] */ IAccessibilityEvent* event,
+    /* [out] */ Boolean* res)
+{
+    VALIDATE_NOT_NULL(res)
+    // Dispatch scroll events from this ViewPager.
+    Int32 TYPE;
+    if (event->GetEventType(&type), type == IAccessibilityEvent::TYPE_VIEW_SCROLLED) {
+        return ViewGroup::DispatchPopulateAccessibilityEvent(event, res);
+    }
+
+    // Dispatch all other accessibility events from the current page.
+    Int32 childCount;
+    GetChildCount(&childCount);
+    for (Int32 i = 0; i < childCount; i++) {
+        AutoPtr<IView> child;
+        GetChildAt(i, (IView**)&child);
+        Int32 visibility;
+        if (child->GetVisibility(&visibility), visibility == VISIBLE) {
+            AutoPtr<ItemInfo> ii = InfoForChild(child);
+            Boolean result;
+            if (ii != NULL && ii->mPosition == mCurItem &&
+                    (child->DispatchPopulateAccessibilityEvent(event, &result), result)) {
+                *res = TRUE;
+                return NOERROR;
+            }
+        }
+    }
+
+    *res = FALSE;
+    return NOERROR;
+}
+
+ECode ViewPager::GenerateDefaultLayoutParams(
+    /* [out] */ IViewGroupLayoutParams** params)
+{
+    VALIDATE_NOT_NULL(params)
+    AutoPtr<ViewPagerLayoutParams> lp = new ViewPagerLayoutParams();
+    lp->constructor();
+    *params = (IViewGroupLayoutParams*)lp;
+    REFCOUNT_ADD(*params)
+    return NOERROR;
+}
+
+AutoPtr<IViewGroupLayoutParams> ViewPager::GenerateLayoutParams(
+    /* [in] */ IViewGroupLayoutParams* p)
+{
+    AutoPtr<IViewGroupLayoutParams> out;
+    GenerateDefaultLayoutParams((IViewGroupLayoutParams**)&out);
+    return out;
+}
+
+Boolean ViewPager::CheckLayoutParams(
+    /* [in] */ IViewGroupLayoutParams* p)
+{
+    return IViewPagerLayoutParams::Probe(p) != NULL && ViewGroup::CheckLayoutParams(p);
+}
+
+ECode ViewPager::GenerateLayoutParams(
+    /* [in] */ IAttributeSet* attrs,
+    /* [out] */ IViewGroupLayoutParams** params)
+{
+    VALIDATE_NOT_NULL(params)
+    AutoPtr<IContext> ctx;
+    GetContext((IContext**)&ctx);
+    AutoPtr<ViewPagerLayoutParams> lp = new ViewPagerLayoutParams();
+    lp->constructor(ctx, attrs);
+    *params = (IViewGroupLayoutParams*)lp;
+    REFCOUNT_ADD(*params)
+    return NOERROR;
+}
 
 } // namespace View
 } // namespace V4
