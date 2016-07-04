@@ -250,8 +250,8 @@ protected:
      */
     CARAPI_(Boolean) ShouldFixTimeZoneNow(
         /* [in] */ IPhoneBase* phoneBase,
-        /* [in] */ String operatorNumeric,
-        /* [in] */ String prevOperatorNumeric,
+        /* [in] */ const String& operatorNumeric,
+        /* [in] */ const String& prevOperatorNumeric,
         /* [in] */ Boolean needToFixTimeZone);
 
     /**
@@ -267,8 +267,8 @@ protected:
     CARAPI_(Boolean) IsCallerOnDifferentThread();
 
     CARAPI_(void) UpdateCarrierMccMncConfiguration(
-        /* [in] */ String newOp,
-        /* [in] */ String oldOp,
+        /* [in] */ const String& newOp,
+        /* [in] */ const String& oldOp,
         /* [in] */ IContext* context);
 
     CARAPI_(Boolean) IsIwlanFeatureAvailable();

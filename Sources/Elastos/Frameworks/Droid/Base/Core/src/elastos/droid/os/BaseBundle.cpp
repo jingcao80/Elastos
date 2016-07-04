@@ -1842,13 +1842,13 @@ ECode BaseBundle::WriteToParcelInner(
         }
     }
 
-    if (mJavaData != NULL) {
-        dest->WriteInt32(mJavaData->GetLength());
-        dest->WriteArrayOf((Handle32)mJavaData.Get());
-    }
-    else {
-        dest->WriteInt32(0);
-    }
+    //if (mJavaData != NULL) {
+    //    dest->WriteInt32(mJavaData->GetLength());
+    //    dest->WriteArrayOf((Handle32)mJavaData.Get());
+    //}
+    //else {
+    //    dest->WriteInt32(0);
+    //}
 
     return NOERROR;
 }
@@ -1901,10 +1901,13 @@ ECode BaseBundle::ReadFromParcelInner(
     mParcelledData->AppendFrom(source, offset, length);
     mParcelledData->SetDataPosition(0);
 
-    source->ReadInt32(&length);
-    if (length > 0) {
-        source->ReadArrayOf((Handle32*)&mJavaData);
-    }
+    //Int32 javaDataLength;
+    //source->ReadInt32(&javaDataLength);
+    //if (javaDataLength > 0) {
+    //    AutoPtr<ArrayOf<Byte> > data;
+    //    source->ReadArrayOf((Handle32*)&data);
+    //    mJavaData = data;
+    //}
     return NOERROR;
 }
 

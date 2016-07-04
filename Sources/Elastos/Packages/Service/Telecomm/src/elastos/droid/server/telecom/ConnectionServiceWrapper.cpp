@@ -57,7 +57,8 @@ ECode ConnectionServiceWrapper::Adapter::HandleCreateConnectionComplete(
     /* [in] */ IConnectionRequest* request,
     /* [in] */ IParcelableConnection* connection)
 {
-    mHost->LogIncoming("handleCreateConnectionComplete %s", TO_CSTR(request));
+    mHost->LogIncoming("handleCreateConnectionComplete callId:%s, request:%s, connection:%p",
+            callId.string(), TO_CSTR(request), connection);
     Boolean isValidCallId;
     ((CallIdMapper*) mHost->mCallIdMapper.Get())->IsValidCallId(callId, &isValidCallId);
     if (isValidCallId) {

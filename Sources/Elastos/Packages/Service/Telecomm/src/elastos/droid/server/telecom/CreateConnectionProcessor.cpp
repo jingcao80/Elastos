@@ -228,6 +228,8 @@ ECode CreateConnectionProcessor::AttemptNextPhoneAccount()
         if (mResponse != NULL) {
             AutoPtr<IDisconnectCause> disconnectCause;
             CDisconnectCause::New(IDisconnectCause::ERROR, (IDisconnectCause**)&disconnectCause);
+            //NOTE: tmp here only keep this not destroyed in the called function
+            AutoPtr<CreateConnectionProcessor> tmp = this;
             mResponse->HandleCreateConnectionFailure(mLastErrorDisconnectCause != NULL ?
                     mLastErrorDisconnectCause : disconnectCause);
             mResponse = NULL;

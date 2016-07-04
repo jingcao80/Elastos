@@ -1,12 +1,15 @@
-
 #include "elastos/droid/ext/frameworkext.h"
 #include "elastos/droid/telecomm/telecom/ConnectionRequest.h"
 #include "elastos/droid/telecomm/telecom/Connection.h"
+#include "elastos/droid/telecomm/telecom/CPhoneAccountHandle.h"
 #include "elastos/droid/net/CUriHelper.h"
+#include "elastos/droid/os/CBundle.h"
 #include <elastos/core/StringUtils.h>
 
 using Elastos::Droid::Net::IUriHelper;
 using Elastos::Droid::Net::CUriHelper;
+using Elastos::Droid::Os::CBundle;
+
 using Elastos::Droid::Telecomm::Telecom::Connection;
 using Elastos::Core::CString;
 using Elastos::Core::StringUtils;
@@ -120,9 +123,31 @@ ECode ConnectionRequest::ToString(
 ECode ConnectionRequest::WriteToParcel(
     /* [in] */ IParcel* destination)
 {
-    destination->WriteInterfacePtr(mAccountHandle);
-    destination->WriteInterfacePtr(mAddress);
-    destination->WriteInterfacePtr(mExtras);
+    if (mAccountHandle != NULL) {
+        destination->WriteInt32(1);
+        //IParcelable::Probe(mAccountHandle)->WriteToParcel(destination);
+        destination->WriteInterfacePtr(mAccountHandle);
+    }
+    else {
+        destination->WriteInt32(0);
+    }
+
+    if (mAddress != NULL) {
+        destination->WriteInt32(1);
+        //IParcelable::Probe(mAddress)->WriteToParcel(destination);
+        destination->WriteInterfacePtr(mAddress);
+    }
+    else {
+        destination->WriteInt32(0);
+    }
+    if (mExtras != NULL) {
+        destination->WriteInt32(1);
+        //IParcelable::Probe(mExtras)->WriteToParcel(destination);
+        destination->WriteInterfacePtr(mExtras);
+    }
+    else {
+        destination->WriteInt32(0);
+    }
     destination->WriteInt32(mVideoState);
     return NOERROR;
 }
@@ -130,17 +155,54 @@ ECode ConnectionRequest::WriteToParcel(
 ECode ConnectionRequest::ReadFromParcel(
     /* [in] */ IParcel* in)
 {
-    AutoPtr<IInterface> accountHandle;
-    in->ReadInterfacePtr((Handle32*)&accountHandle);
-    mAccountHandle = IPhoneAccountHandle::Probe(accountHandle);
+    Int32 value = 0;
+    in->ReadInt32(&value);
+    if (value != 0) {
+        //AutoPtr<IPhoneAccountHandle> pa;
+        //CPhoneAccountHandle::New((IPhoneAccountHandle**)&pa);
+        //IParcelable* parcel = IParcelable::Probe(pa);
+        //parcel->ReadFromParcel(in);
+        //mAccountHandle = pa;
+        AutoPtr<IInterface> accountHandle;
+        in->ReadInterfacePtr((Handle32*)&accountHandle);
+        mAccountHandle = IPhoneAccountHandle::Probe(accountHandle);
+    }
+    else {
+        mAccountHandle = NULL;
+    }
 
-    AutoPtr<IInterface> address;
-    in->ReadInterfacePtr((Handle32*)&address);
-    mAddress = IUri::Probe(address);
+    in->ReadInt32(&value);
+    if (value != 0) {
+        //AutoPtr<IUri> address;
+        //AutoPtr<IUriHelper> helper;
+        //CUriHelper::AcquireSingleton((IUriHelper**)&helper);
+        //helper->GetEMPTY((IUri**)&address);
+        //IParcelable* parcel = IParcelable::Probe(address);
+        //parcel->ReadFromParcel(in);
+        //mAddress= address;
+        AutoPtr<IInterface> address;
+        in->ReadInterfacePtr((Handle32*)&address);
+        mAddress = IUri::Probe(address);
+    }
+    else {
+        mAddress = NULL;
+    }
 
-    AutoPtr<IInterface> extras;
-    in->ReadInterfacePtr((Handle32*)&extras);
-    mExtras = IBundle::Probe(extras);
+    in->ReadInt32(&value);
+    if (value != 0) {
+        //AutoPtr<IBundle> bundle;
+        //CBundle::New((IBundle**)&bundle);
+        //IParcelable* parcel = IParcelable::Probe(bundle);
+        //parcel->ReadFromParcel(in);
+        //mExtras = bundle;
+        AutoPtr<IInterface> extras;
+        in->ReadInterfacePtr((Handle32*)&extras);
+        mExtras = IBundle::Probe(extras);
+    }
+    else {
+        mExtras = NULL;
+    }
+
 
     in->ReadInt32(&mVideoState);
     return NOERROR;

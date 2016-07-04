@@ -226,7 +226,7 @@ ECode InCallController::OnCallAdded(
 ECode InCallController::OnCallRemoved(
     /* [in] */ ICall* call)
 {
-    Log::I("InCallController", "onCallRemoved: %s", TO_CSTR(call));
+    Log::I("InCallController", "onCallRemoved: ");//TODO, TO_CSTR(call));
     AutoPtr<IList> calls;
     CallsManager::GetInstance()->GetCalls((IList**)&calls);
     Boolean isEmpty;
