@@ -94,7 +94,6 @@ bool CarNPObjectHasMethod(NPObject* npobj, NPIdentifier identifier) //TODO
 
     instance->begin();
     retValue = (instance->getClass()->methodsNamed(name).size() > 0);
-
     instance->end();
 
     // TODO: use NPN_MemFree

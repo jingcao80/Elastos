@@ -123,17 +123,8 @@ void CarInstanceV8::invokeMethod(const CarMethod* method, CarValue* args, bool* 
                             ec = argumentList->SetInputArgumentOfInt16(i, args[i].mInt16Value);
                             break;
                         case CarDataType_Int32:
-                        {
-                            //just test for CTestArgumentTest::SetInputArgumentOfLocalPtr
-                            if (args[i].mTagSetLocalPtr) {
-                                ec = argumentList->SetInputArgumentOfInt32(i, args[i].mInt32Value); //nomal
-                            }
-                            else {
-                                ec = argumentList->SetInputArgumentOfInt32(i, args[i].mInt32Value); //nomal
-                            }
-
+                            ec = argumentList->SetInputArgumentOfInt32(i, args[i].mInt32Value);
                             break;
-                        }
                         case CarDataType_Int64:
                             ec = argumentList->SetInputArgumentOfInt64(i, args[i].mInt64Value);
                             break;
@@ -141,7 +132,6 @@ void CarInstanceV8::invokeMethod(const CarMethod* method, CarValue* args, bool* 
                             ec = argumentList->SetInputArgumentOfByte(i, args[i].mByteValue);
                             break;
                         case CarDataType_Char32:
-                            //ec = argumentList->SetInputArgumentOfChar32(i, args[i].mCharValue);
                             ec = argumentList->SetInputArgumentOfChar(i, args[i].mCharValue);
                             break;
                         case CarDataType_Float:
@@ -179,8 +169,13 @@ void CarInstanceV8::invokeMethod(const CarMethod* method, CarValue* args, bool* 
                         }
                         case CarDataType_Interface:
                         {
-                            AutoPtr<IInterface> tmpInstance = args[i].mObjectWrapper->getInstance();
-                            ec = argumentList->SetInputArgumentOfObjectPtr(i, tmpInstance.Get());
+                            if (args[i].mObjectWrapper) {
+                                AutoPtr<IInterface> tmpInstance = args[i].mObjectWrapper->getInstance();
+                                ec = argumentList->SetInputArgumentOfObjectPtr(i, tmpInstance.Get());
+                            }
+                            else {
+                                ec = argumentList->SetInputArgumentOfObjectPtr(i, NULL);
+                            }
                             break;
                         }
                         default:
@@ -262,18 +257,6 @@ void CarInstanceV8::invokeMethod(const CarMethod* method, CarValue* args, bool* 
                         case CarDataType_Interface:
                         {
                             ec = argumentList->SetOutputArgumentOfObjectPtrPtr(i, (IInterface **)&args[i].mObjectValue);
-                            if (args[i].mObjectWrapper) {
-                                if (args[i].mObjectWrapper->getDataTypeInfo()) {
-                                    Elastos::String nameBuf_0;
-                                    args[i].mObjectWrapper->getDataTypeInfo()->GetName(&nameBuf_0);
-                                }
-                                else {
-                                    ALOGD("CarInstanceV8::invokeMethod CarDataType_Interface interfaceInfo is NULL============");
-                                }
-                            }
-                            else {
-                                ALOGD("CarInstanceV8::invokeMethod CarDataType_Interface mObjectWrapper is NULL============");
-                            }
                             break;
                         }
                         default:
@@ -306,9 +289,11 @@ void CarInstanceV8::invokeMethod(const CarMethod* method, CarValue* args, bool* 
             //aParameter->Release();
             //aParameter = NULL;
 
-            ALOGD("CarInstanceV8::invokeMethod SetArguments success!");
+            ALOGD("CarInstanceV8::invokeMethod SetArguments success! %d/%d",i,numParams);
         }
+        ALOGD("CarInstanceV8::invokeMethod paramInfos free begin!");
         ArrayOf<IParamInfo*>::Free(paramInfos);
+        ALOGD("CarInstanceV8::invokeMethod paramInfos free end!");
     }
 
     if(method->isRunOnUiThread()) {
@@ -320,7 +305,9 @@ void CarInstanceV8::invokeMethod(const CarMethod* method, CarValue* args, bool* 
         ec = aMethod->Invoke(object, argumentList);
         if (FAILED(ec)) {
             //LOG_ERROR("CarInstanceV8::invokeMethod invoke failed!");
-            ALOGD("CarInstanceV8::invokeMethod invoke failed! Ecode:%x", ec);
+            Elastos::String methodNameBuf;
+            aMethod->GetName(&methodNameBuf);
+            ALOGD("CarInstanceV8::invokeMethod invoke failed! Ecode:%x,methodName:%s", ec,methodNameBuf.string());
             *didRaiseUncaughtException = true;
             return;
         }

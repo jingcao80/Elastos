@@ -4,33 +4,16 @@ var sPackageName = process.argv[2];
 var root = global||window;
 
 root.Elastos = ( function () {
-    var _api = require('../../bin/elastos.node');
-    var _Runtime = require('./elastos_runtime.js')(_api);
-    var _Module_Core = _Runtime.getModuleInfo("/system/lib/Elastos.CoreLibrary.eco");
-    var _Module_Droid = _Runtime.getModuleInfo("/system/lib/Elastos.Droid.Core.eco");
-    var _Bridge_Native = _api.require("/data/elastos/" + sPackageName + ".eco", sPackageName + ".CTestEventListener");
+    var _Elastos = {
+        CObject: {},
 
-    var _Bridge = {
-        init : function (aoNodeBridgeListener) {
-            var pEnqueueUIMessage = _Bridge_Native.GetEnqueueUIMessagePtr();
-            _api.SetEnqueueUIMessagePtr(pEnqueueUIMessage);
+        CReflection: {},
 
-            var iNodeBridge = _api.GetNodeBridge();
-            _Bridge_Native.SetNodeBridge(iNodeBridge,1);
-            _Bridge_Native.SetNodeBridgeListener(aoNodeBridgeListener);
-            _Bridge_Native.Unlock();
-        },
-    };
+        //Runtime_Native : _Runtime_Native,
 
-    var _bindArgs = function (aaArgs, aoArgs) {
-        for (var i = 0, im = aoArgs.length; i < im; i++) aaArgs.push(aoArgs[i]);
-        return aaArgs;
-    };
+        //Test : _Bridge_Native,
 
-    return {
-        Test : _Bridge_Native,
-
-        Runtime : _Runtime,
+        //Runtime : _Runtime,
 
         Core : {
             Get : function () {
@@ -43,7 +26,6 @@ root.Elastos = ( function () {
             },
 
             CString : function (asText) {
-                //return Elastos.Core.New("CStringWrapper",asText);
                 return Elastos.Core.New("Elastos.Core.CString",asText);
             },
         },
@@ -106,7 +88,60 @@ root.Elastos = ( function () {
                 elog("========Ready.end========");
             },
         },
+    };   //Elastos
+
+    var _bindArgs = function (aaArgs, aoArgs) {
+        for (var i = 0, im = aoArgs.length; i < im; i++) aaArgs.push(aoArgs[i]);
+        return aaArgs;
+    };
+
+    var _api = require('../../bin/elastos.node');
+
+    var _Runtime_Native = _api.require("/data/temp/node/bin/Elastos.DevSamples.Node.CarRuntime.eco", "Elastos.DevSamples.Node.CarRuntime.CCarRuntime");
+
+    _Elastos.Runtime_Native = _Runtime_Native;
+
+    var _Runtime = require('./elastos_runtime.js')(_Elastos);
+
+    var _Module_Core = _Runtime.getModuleInfo("/system/lib/Elastos.CoreLibrary.eco");
+    var _Module_Droid = _Runtime.getModuleInfo("/system/lib/Elastos.Droid.Core.eco");
+    var _Bridge_Native = _api.require("/data/elastos/" + sPackageName + ".eco", sPackageName + ".CTestEventListener");
+
+    var _Bridge = {
+        init : function (aoNodeBridgeListener) {
+            var pEnqueueUIMessage = _Bridge_Native.GetEnqueueUIMessagePtr();
+            _api.SetEnqueueUIMessagePtr(pEnqueueUIMessage);
+
+            var iNodeBridge = _api.GetNodeBridge();
+            _Bridge_Native.SetNodeBridge(iNodeBridge,1);
+            _Bridge_Native.SetNodeBridgeListener(aoNodeBridgeListener);
+            _Bridge_Native.Unlock();
+        },
+    };
+
+    _Elastos.Test = _Bridge_Native;
+
+    _Elastos.Runtime = _Runtime;
+
+    _Elastos.CObject.getClassInfo = function(aoCar) {
+        return _Runtime_Native.Test_CObject_ReflectClassInfo(aoCar);
     }
+    _Elastos.CObject.hasInterface = function(aoCar, asName) {
+        var hasInterface = false;
+
+        var oClassInfo = this.getClassInfo(aoCar);
+        var oInterfaces = oClassInfo.GetAllInterfaceInfos();
+        for (var i=0,im=oInterfaces.length;i<im;i++){
+            var sName = oInterfaces[i].GetName();
+            if (sName == asName) {
+                hasInterface = true;
+                break;
+            }
+        }
+        return hasInterface;
+    }
+
+    return _Elastos;
 } )();
 
 root.Application = Elastos.Application;

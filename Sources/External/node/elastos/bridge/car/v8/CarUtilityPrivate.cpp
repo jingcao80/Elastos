@@ -53,6 +53,9 @@
 
 #include <utils/Log.h>
 
+//using Elastos::Core::CString;
+using Elastos::Core::ICharSequence;
+
 namespace JSC {
 namespace Bindings {
 
@@ -644,20 +647,48 @@ void convertNPVariantToCarValue(NPVariant value, CarValue* result)
         }
         case CarDataType_Interface:
         {
-            if (type == NPVariantType_Object) {
-                NPObject* obj = NPVARIANT_TO_OBJECT(value);
-                if (obj->_class == WebCore::npScriptObjectClass) {
-                    CarCallbackObject* cb = CarCallbackObject::S_CreateObject(IInterfaceInfo::Probe(result->mObjectWrapper->getDataTypeInfo()), obj);
-                    result->mObjectWrapper->setInstance((IObject*)cb);
+            switch (type) {
+                case NPVariantType_Void:    //js undefined
+                case NPVariantType_Null:    //js null
+                    result->mObjectWrapper = NULL;
+                    break;
+                case NPVariantType_Bool:
+                    //Illegal parameter
+                    result->mObjectWrapper = NULL;
+                    ALOGD("========convertNPVariantToCarValue CarDataType_Interface===========TODO:js bool to car interface");
+                    break;
+                case NPVariantType_Int32:   //not used in v8
+                case NPVariantType_Double:
+                    //Illegal parameter
+                    result->mObjectWrapper = NULL;
+                    ALOGD("========convertNPVariantToCarValue CarDataType_Interface===========TODO:js number to car interface");
+                    break;
+                case NPVariantType_String:
+                {
+                    //Illegal parameter
+                    result->mObjectWrapper = NULL;
+                    ALOGD("========convertNPVariantToCarValue CarDataType_Interface===========TODO:js string to car interface");
+                    break;
                 }
-                else {
-                    CarNPObject* carObj = reinterpret_cast<CarNPObject*>(obj);
-                    CobjectWrapper* objectWrapper = carObj->mInstance->getInstance();
-                    result->mObjectWrapper = objectWrapper;
+                case NPVariantType_Object:
+                {
+                    NPObject* obj = NPVARIANT_TO_OBJECT(value);
+                    if (obj->_class == WebCore::npScriptObjectClass) {
+                        //js object, normaly, should be callback proxy
+                        CarCallbackObject* cb = CarCallbackObject::S_CreateObject(IInterfaceInfo::Probe(result->mObjectWrapper->getDataTypeInfo()), obj);
+                        result->mObjectWrapper->setInstance((IObject*)cb);
+                    }
+                    else {
+                        //car object wrapper
+                        CarNPObject* carObj = reinterpret_cast<CarNPObject*>(obj);
+                        CobjectWrapper* objectWrapper = carObj->mInstance->getInstance();
+                        result->mObjectWrapper = objectWrapper;
+                    }
+                    break;
                 }
-            }
-            else {
-                ALOGD("=================convertNPVariantToCarValue CarDataType_Interface===========TODO:the value is not a car or js object, type:%d", type);
+                default :
+                    ALOGD("========convertNPVariantToCarValue CarDataType_Interface===========TODO:the value is not a car wrapper or js type, type:%d", type);
+                    break;
             }
 
             break;

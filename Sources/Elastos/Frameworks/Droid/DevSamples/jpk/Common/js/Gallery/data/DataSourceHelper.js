@@ -5,7 +5,7 @@ var CString = aoElastos.Core.CString;
 var Droid_New = aoElastos.Droid.New;
 var Core_New = aoElastos.Core.New;
 
-return {
+var DataSourceHelper =  {
 
 //public:
 SetRootPath : function (asRootPath) {
@@ -105,25 +105,30 @@ IsImageFile : function (asFileName) {
 
 //private:
 Init : function () {
-    elog('=============DataSourceHelper::Init.begin===============');
+    elog('=============DataSourceHelper::Init.begin=====0==========');
 
     if (this.sInited) return;
 
+    elog('=============DataSourceHelper::Init====1====this.sRootPath:'+this.sRootPath);
     var dir = Core_New('Elastos.IO.CFile', this.sRootPath);
+    elog('=============DataSourceHelper::Init====2====');
 
     var ret = dir.IsDirectory();
+    elog('=============DataSourceHelper::Init====3====');
     if (!ret) {
         elog("sRootPath:" + this.sRootPath + " is not a valid directory!");
     }
+    elog('=============DataSourceHelper::Init====4====');
 
     this._GetImageFileMap(this.sRootPath);
+    elog('=============DataSourceHelper::Init====5====');
 
     this.sInited = true;
 
     elog('=============DataSourceHelper::Init.end===============');
 },
 _GetImageFileMap : function (rootPath) {
-    elog('=============DataSourceHelper::_GetImageFileMap.begin===============');
+    elog('=============DataSourceHelper::_GetImageFileMap.begin===============rootPath:'+rootPath);
 
     var dir = Core_New('Elastos.IO.CFile', rootPath);
     elog('=============DataSourceHelper::_GetImageFileMap.begin=======0.1========');
@@ -228,6 +233,10 @@ sInited : false,
 sPath : [], //['']
 sImageSourcePathMap : {},   //{a:['b']}
 
-};  //return
+};  //DataSourceHelper
+
+DataSourceHelper.SetRootPath(DataSourceHelper.ROOT_PATH);
+
+return DataSourceHelper;
 
 };  //module.exports
