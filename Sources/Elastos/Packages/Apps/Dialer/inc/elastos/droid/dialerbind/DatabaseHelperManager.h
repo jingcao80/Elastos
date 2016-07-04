@@ -4,6 +4,7 @@
 
 #include "Elastos.Droid.Content.h"
 #include "_Elastos.Droid.Dialer.h"
+#include "elastos/droid/dialer/database/DialerDatabaseHelper.h"
 
 using Elastos::Droid::Content::IContext;
 using Elastos::Droid::Dialer::Database::DialerDatabaseHelper;

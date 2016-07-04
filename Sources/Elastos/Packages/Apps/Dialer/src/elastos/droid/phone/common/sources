@@ -5,5 +5,4 @@ TARGET_TYPE= lib
 INCLUDES += $(MAKEDIR)/../../../../../inc
 INCLUDES += ../../../../../
 
-ELASTOS_LIBS += util/util.lib
-ELASTOS_LIBS += widget/widget.lib
+ELASTOS_LIBS += animation/animation.lib

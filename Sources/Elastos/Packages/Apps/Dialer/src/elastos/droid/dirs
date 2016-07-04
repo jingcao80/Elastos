@@ -1,4 +1,5 @@
 
 DIRS += contacts/common
 DIRS += dialer
-#DIRS += dialerbind
+DIRS += dialerbind
+DIRS += phone/common

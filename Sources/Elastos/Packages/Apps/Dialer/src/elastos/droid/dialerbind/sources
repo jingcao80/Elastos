@@ -7,5 +7,5 @@ INCLUDES += ../../../../
 CAR_FLAGS += -n -u
 LUBE_FLAGS += -n -u
 
-SOURCES = CDatabaseHelperManager.cpp
-SOURCES += CObjectFactory.cpp
+SOURCES = DatabaseHelperManager.cpp
+#SOURCES += CObjectFactory.cpp

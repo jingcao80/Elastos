@@ -8,6 +8,7 @@
 #include "elastos/droid/dialer/util/DialerUtils.h"
 #include "elastos/droid/dialer/widget/CSearchEditTextLayout.h"
 #include "elastos/droid/dialerbind/DatabaseHelperManager.h"
+#include "elastos/droid/phone/common/animation/AnimUtils.h"
 // #include "Elastos.Droid.Content.h"
 // #include "Elastos.Droid.Os.h"
 // #include "Elastos.Droid.Telephony.h"
@@ -77,6 +78,7 @@ using Elastos::Droid::Dialer::Util::DialerUtils;
 using Elastos::Droid::DialerBind::DatabaseHelperManager;
 using Elastos::Droid::Contacts::Common::Interactions::TouchPointManager;
 using Elastos::Droid::Contacts::Common::List::EIID_IOnPhoneNumberPickerActionListener;
+using Elastos::Droid::Phone::Common::Animation::AnimUtils;
 
 namespace Elastos {
 namespace Droid {
@@ -517,11 +519,10 @@ ECode DialtactsActivity::OnCreate(
                 (IAnimation**)&mSlideOut);
     }
 
-    assert(0 && "TODO");
-//     mSlideIn->SetInterpolator(IAnimUtils::EASE_IN);
-//     mSlideOut->SetInterpolator(IAnimUtils::EASE_OUT);
+    mSlideIn->SetInterpolator(AnimUtils::EASE_IN);
+    mSlideOut->SetInterpolator(AnimUtils::EASE_OUT);
 
-//    mSlideOut->SetAnimationListener(mSlideOutListener);
+    mSlideOut->SetAnimationListener(mSlideOutListener);
 
     view = NULL;
     FindViewById(R::id::dialtacts_mainlayout, (IView**)&view);
@@ -534,7 +535,8 @@ ECode DialtactsActivity::OnCreate(
     SetupActivityOverlay();
 
     mDialerDatabaseHelper = DatabaseHelperManager::GetDatabaseHelper(this);
-    SmartDialPrefix::InitializeNanpSettings(this);
+    // TODO:
+    // SmartDialPrefix::InitializeNanpSettings(this);
     return NOERROR;
 }
 

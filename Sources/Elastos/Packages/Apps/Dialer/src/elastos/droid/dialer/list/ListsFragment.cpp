@@ -314,7 +314,7 @@ ECode ListsFragment::OnCreate(
     GetActivity((IActivity**)&activity);
     AutoPtr<IContentResolver> resolver;
     IContext::Probe(activity)->GetContentResolver((IContentResolver**)&resolver);
-    assert(0 && "TODO");
+    // TODO:
     // CCallLogQueryHandler::New(resolver,
     //         this, 1, (ICallLogQueryHandler**)&mCallLogQueryHandler);
     // String currentCountryIso;

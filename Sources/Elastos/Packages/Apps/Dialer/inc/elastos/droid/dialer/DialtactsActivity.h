@@ -16,6 +16,7 @@
 #include "elastos/droid/dialer/list/CListsFragment.h"
 #include "elastos/droid/dialer/list/DragDropController.h"
 #include "elastos/droid/dialer/widget/ActionBarController.h"
+#include "elastos/droid/phone/common/animation/AnimationListenerAdapter.h"
 #include <elastos/droid/widget/PopupMenu.h>
 #include <elastos/core/Object.h>
 
@@ -66,6 +67,7 @@ using Elastos::Droid::Dialer::Widget::ActionBarController;
 using Elastos::Droid::Dialer::Widget::IActionBarControllerActivityUi;
 using Elastos::Droid::Dialer::Widget::IOnBackButtonClickedListener;
 using Elastos::Droid::Contacts::Common::List::IOnPhoneNumberPickerActionListener;
+using Elastos::Droid::Phone::Common::Animation::AnimationListenerAdapter;
 
 namespace Elastos {
 namespace Droid {
@@ -622,8 +624,7 @@ private:
     /**
      * Listener for after slide out animation completes on dialer fragment.
      */
-    // TODO:
-    // AutoPtr<IAnimationListenerAdapter> mSlideOutListener;
+    AutoPtr<AnimationListenerAdapter> mSlideOutListener;
 
     /**
      * Fragment containing the speed dial list, recents list, and all contacts list.

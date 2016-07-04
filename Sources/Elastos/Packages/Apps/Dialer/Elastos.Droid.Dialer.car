@@ -85,6 +85,7 @@ module
 //    merge("car/elastos/droid/dialer/ProximitySensorManager.car");
 //    merge("car/elastos/droid/dialer/SpecialCharSequenceMgr.car");
 //    merge("car/elastos/droid/dialerbind/ObjectFactory.car");
+    merge("car/elastos/droid/phone/common/animation/AnimUtils.car");
 //
     using interface Elastos.Droid.App.IActivity;
     using interface Elastos.Droid.App.IFragment;
