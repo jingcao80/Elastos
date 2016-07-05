@@ -10,6 +10,7 @@ module
     merge("car/elastos/droid/calculator2/calculatorExpressionTokenizer.car");
     merge("car/elastos/droid/calculator2/calculatorPadLayout.car");
     merge("car/elastos/droid/calculator2/calculatorPadViewPager.car");
+    merge("../../../Frameworks/Droid/Support/V4/Elastos.Droid.Support.V4.car");
 
 
     interface Elastos.Droid.Calculator2.ICalculator;

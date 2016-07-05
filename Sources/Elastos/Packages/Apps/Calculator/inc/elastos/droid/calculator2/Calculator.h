@@ -9,6 +9,7 @@
 #include <elastos/droid/app/Activity.h>
 #include <elastos/droid/ext/frameworkext.h>
 #include <Elastos.Droid.Text.h>
+#include <Elastos.Droid.Support.V4.View.h>
 #include <elastos/core/Object.h>
 
 using Elastos::Droid::Animation::IAnimator;
@@ -27,6 +28,7 @@ using Elastos::Droid::View::IViewGroupOverlay;
 using Elastos::Droid::View::IViewOnLongClickListener;
 using Elastos::Droid::Widget::ITextView;
 using Elastos::Droid::Os::IBundle;
+using Elastos::Droid::Support::V4::View::IViewPager;
 
 namespace Elastos {
 namespace Droid {
@@ -311,8 +313,7 @@ private:
     AutoPtr<IView> mDisplayView;
     static AutoPtr<ICalculatorEditText> mFormulaEditText;
     AutoPtr<ICalculatorEditText> mResultEditText;
-    // assert(0 && "TODO");
-    // ViewPager mPadViewPager;
+    AutoPtr<IViewPager> mPadViewPager;
     AutoPtr<IView> mDeleteButton;
     AutoPtr<IView> mEqualButton;
     AutoPtr<IView> mClearButton;

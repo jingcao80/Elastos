@@ -4,6 +4,10 @@ module
     namespace Droid {
     namespace Calculator2 {
 
+    /**
+     * @Involve
+     * interface IViewPager;
+     */
     interface ICalculatorPadViewPager
     {}
 
