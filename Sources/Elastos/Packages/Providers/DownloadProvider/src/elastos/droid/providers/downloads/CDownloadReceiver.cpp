@@ -123,7 +123,6 @@ ECode CDownloadReceiver::OnReceive(
     /* [in] */ IContext* context,
     /* [in] */ IIntent* intent)
 {
-    Logger::D("xihaoc", "CDownloadReceiver::OnReceive");
     if (mSystemFacade == NULL) {
         mSystemFacade = new RealSystemFacade(context);
     }

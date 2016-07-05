@@ -4922,8 +4922,8 @@ ECode CDevicePolicyManagerService::LoadSettingsLocked(
     policy->mAdminMap->Clear();
     FAIL_RETURN(parser->Next(&type))
     Int32 currentDepth;
-    while (parser->GetDepth(&currentDepth),
-            type != IXmlPullParser::END_DOCUMENT && (type != IXmlPullParser::END_TAG || currentDepth > outerDepth)) {
+    while ((parser->Next(&type), type) != IXmlPullParser::END_DOCUMENT && (type != IXmlPullParser::END_TAG ||
+        (parser->GetDepth(&currentDepth), currentDepth) > outerDepth)) {
         if (type == IXmlPullParser::END_TAG || type == IXmlPullParser::TEXT) {
             continue;
         }
@@ -4940,21 +4940,21 @@ ECode CDevicePolicyManagerService::LoadSettingsLocked(
             AutoPtr<IDeviceAdminInfo> dai;
             FindAdmin(cn, userHandle, (IDeviceAdminInfo**)&dai);
 
-            AutoPtr<IActivityInfo> aInfo;
-            dai->GetActivityInfo((IActivityInfo**)&aInfo);
-            AutoPtr<IApplicationInfo> appInfo;
-            IComponentInfo::Probe(aInfo)->GetApplicationInfo((IApplicationInfo**)&appInfo);
-            Int32 uid;
-            appInfo->GetUid(&uid);
-            if (DBG && (UserHandle::GetUserId(uid) != userHandle)) {
-                StringBuffer buf;
-                buf += "findAdmin returned an incorrect uid ";
-                buf += uid;
-                buf += " for user ";
-                buf += userHandle;
-                Slogger::W(TAG, buf.ToString());
-            }
             if (dai != NULL) {
+                AutoPtr<IActivityInfo> aInfo;
+                dai->GetActivityInfo((IActivityInfo**)&aInfo);
+                AutoPtr<IApplicationInfo> appInfo;
+                IComponentInfo::Probe(aInfo)->GetApplicationInfo((IApplicationInfo**)&appInfo);
+                Int32 uid;
+                appInfo->GetUid(&uid);
+                if (DBG && (UserHandle::GetUserId(uid) != userHandle)) {
+                    StringBuffer buf;
+                    buf += "findAdmin returned an incorrect uid ";
+                    buf += uid;
+                    buf += " for user ";
+                    buf += userHandle;
+                    Slogger::W(TAG, buf.ToString());
+                }
                 AutoPtr<ActiveAdmin> ap = new ActiveAdmin(dai);
                 ap->ReadFromXml(parser);
 

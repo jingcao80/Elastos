@@ -60,6 +60,7 @@
 #include "elastos/droid/content/pm/CLauncherApps.h"
 #include "elastos/droid/internal/policy/CPolicyManager.h"
 #include "elastos/droid/net/CConnectivityManager.h"
+#include "elastos/droid/net/CNetworkPolicyManager.h"
 #include "elastos/droid/net/CNetworkScoreManager.h"
 #include "elastos/droid/wifi/CWifiManager.h"
 #include "elastos/droid/wifi/p2p/CWifiP2pManager.h"
@@ -168,6 +169,9 @@ using Elastos::Droid::Media::Projection::CMediaProjectionManager;
 using Elastos::Droid::Net::IIConnectivityManager;
 using Elastos::Droid::Net::IConnectivityManager;
 using Elastos::Droid::Net::CConnectivityManager;
+using Elastos::Droid::Net::CNetworkPolicyManager;
+using Elastos::Droid::Net::INetworkPolicyManager;
+using Elastos::Droid::Net::IINetworkPolicyManager;
 using Elastos::Droid::Net::INetworkScoreManager;
 using Elastos::Droid::Net::CNetworkScoreManager;
 using Elastos::Droid::Net::EIID_IIEthernetManager;
@@ -2539,15 +2543,11 @@ ECode CContextImpl::GetSystemService(
         return NOERROR;
     }
     else if (IContext::NETWORK_POLICY_SERVICE.Equals(name)) {
-        Slogger::E(TAG, " >>> TODO: Service %s is not ready!", name.string());
-        assert(0 && "TODO");
-        // registerService(NETWORK_POLICY_SERVICE, new ServiceFetcher() {
-        //     @Override
-        //     public Object createService(ContextImpl ctx) {
-        //         return new NetworkPolicyManager(INetworkPolicyManager.Stub.asInterface(
-        //                 ServiceManager.getService(NETWORK_POLICY_SERVICE)));
-        //     }
-        // });
+        AutoPtr<IInterface> service = ServiceManager::GetService(NETWORK_POLICY_SERVICE);
+        AutoPtr<INetworkPolicyManager> npm;
+        CNetworkPolicyManager::New(IINetworkPolicyManager::Probe(service), (INetworkPolicyManager**)&npm);
+        *object = npm.Get();
+        REFCOUNT_ADD(*object)
         return NOERROR;
     }
     else if (IContext::NOTIFICATION_SERVICE.Equals(name)) {

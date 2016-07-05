@@ -396,11 +396,11 @@ void CDownloadProvider::DatabaseHelper::MakeCacheDownloadsInvisible(
     AutoPtr<IContentValues> values;
     CContentValues::New((IContentValues**)&values);
     values->Put(IDownloadsImpl::COLUMN_IS_VISIBLE_IN_DOWNLOADS_UI, FALSE);
-    String cacheSelection(IDownloadsImpl::COLUMN_DESTINATION);
+    StringBuilder cacheSelection(IDownloadsImpl::COLUMN_DESTINATION);
     cacheSelection += " != ";
-    cacheSelection += (Char32) IDownloadsImpl::DESTINATION_EXTERNAL;
+    cacheSelection += IDownloadsImpl::DESTINATION_EXTERNAL;
     Int32 res = 0;
-    db->Update(DB_TABLE, values, cacheSelection, NULL, &res);
+    db->Update(DB_TABLE, values, cacheSelection.ToString(), NULL, &res);
 }
 
 void CDownloadProvider::DatabaseHelper::AddColumn(
@@ -409,20 +409,9 @@ void CDownloadProvider::DatabaseHelper::AddColumn(
     /* [in] */ String columnName,
     /* [in] */ String columnDefinition)
 {
-    AutoPtr<ArrayOf<IInterface*> > arr = ArrayOf<IInterface*>::Alloc(3);
-    AutoPtr<ICharSequence> pDbTable;
-    CString::New(dbTable, (ICharSequence**)&pDbTable);
-    arr->Set(0, pDbTable);
-
-    AutoPtr<ICharSequence> pColumnName;
-    CString::New(columnName, (ICharSequence**)&pColumnName);
-    arr->Set(1, pColumnName);
-
-    AutoPtr<ICharSequence> pColumnDefinition;
-    CString::New(columnDefinition, (ICharSequence**)&pColumnDefinition);
-    arr->Set(2, pColumnDefinition);
-
-    db->ExecSQL(String("ALTER TABLE %s ADD COLUMN %s %s"), arr);
+    String sql;
+    sql.AppendFormat("ALTER TABLE %s ADD COLUMN %s %s", dbTable.string(), columnName.string(), columnDefinition.string());
+    db->ExecSQL(sql);
 }
 
 void CDownloadProvider::DatabaseHelper::CreateDownloadsTable(
@@ -430,37 +419,70 @@ void CDownloadProvider::DatabaseHelper::CreateDownloadsTable(
 {
     // try {
     db->ExecSQL(String("DROP TABLE IF EXISTS ") + DB_TABLE);
-    db->ExecSQL(String("CREATE TABLE ") + DB_TABLE + String("(") +
-            IBaseColumns::ID + String(" INTEGER PRIMARY KEY AUTOINCREMENT,") +
-            IDownloadsImpl::COLUMN_URI + String(" TEXT, ") +
-            Constants::RETRY_AFTER_X_REDIRECT_COUNT + String(" INTEGER, ") +
-            IDownloadsImpl::COLUMN_APP_DATA + String(" TEXT, ") +
-            IDownloadsImpl::COLUMN_NO_INTEGRITY + String(" BOOLEAN, ") +
-            IDownloadsImpl::COLUMN_FILE_NAME_HINT + String(" TEXT, ") +
-            Constants::OTA_UPDATE + String(" BOOLEAN, ") +
-            IDownloadsImpl::_DATA + String(" TEXT, ") +
-            IDownloadsImpl::COLUMN_MIME_TYPE + String(" TEXT, ") +
-            IDownloadsImpl::COLUMN_DESTINATION + String(" INTEGER, ") +
-            Constants::NO_SYSTEM_FILES + String(" BOOLEAN, ") +
-            IDownloadsImpl::COLUMN_VISIBILITY + String(" INTEGER, ") +
-            IDownloadsImpl::COLUMN_CONTROL + String(" INTEGER, ") +
-            IDownloadsImpl::COLUMN_STATUS + String(" INTEGER, ") +
-            IDownloadsImpl::COLUMN_FAILED_CONNECTIONS + String(" INTEGER, ") +
-            IDownloadsImpl::COLUMN_LAST_MODIFICATION + String(" BIGINT, ") +
-            IDownloadsImpl::COLUMN_NOTIFICATION_PACKAGE + String(" TEXT, ") +
-            IDownloadsImpl::COLUMN_NOTIFICATION_CLASS + String(" TEXT, ") +
-            IDownloadsImpl::COLUMN_NOTIFICATION_EXTRAS + String(" TEXT, ") +
-            IDownloadsImpl::COLUMN_COOKIE_DATA + String(" TEXT, ") +
-            IDownloadsImpl::COLUMN_USER_AGENT + String(" TEXT, ") +
-            IDownloadsImpl::COLUMN_REFERER + String(" TEXT, ") +
-            IDownloadsImpl::COLUMN_TOTAL_BYTES + String(" INTEGER, ") +
-            IDownloadsImpl::COLUMN_CURRENT_BYTES + String(" INTEGER, ") +
-            Constants::ETAG + String(" TEXT, ") +
-            Constants::UID + String(" INTEGER, ") +
-            IDownloadsImpl::COLUMN_OTHER_UID + String(" INTEGER, ") +
-            IDownloadsImpl::COLUMN_TITLE + String(" TEXT, ") +
-            IDownloadsImpl::COLUMN_DESCRIPTION + String(" TEXT, ") +
-            IDownloadsImpl::COLUMN_MEDIA_SCANNED + String(" BOOLEAN);"));
+    StringBuilder sb("CREATE TABLE ");
+    sb += DB_TABLE;
+    sb += "(";
+    sb += IBaseColumns::ID;
+    sb += " INTEGER PRIMARY KEY AUTOINCREMENT,";
+    sb += IDownloadsImpl::COLUMN_URI;
+    sb += " TEXT, ";
+    sb += Constants::RETRY_AFTER_X_REDIRECT_COUNT;
+    sb += " INTEGER, ";
+    sb += IDownloadsImpl::COLUMN_APP_DATA;
+    sb += " TEXT, ";
+    sb += IDownloadsImpl::COLUMN_NO_INTEGRITY;
+    sb += " BOOLEAN, ";
+    sb += IDownloadsImpl::COLUMN_FILE_NAME_HINT;
+    sb += " TEXT, ";
+    sb += Constants::OTA_UPDATE;
+    sb += " BOOLEAN, ";
+    sb += IDownloadsImpl::_DATA;
+    sb += " TEXT, ";
+    sb += IDownloadsImpl::COLUMN_MIME_TYPE;
+    sb += " TEXT, ";
+    sb += IDownloadsImpl::COLUMN_DESTINATION;
+    sb += " INTEGER, ";
+    sb += Constants::NO_SYSTEM_FILES;
+    sb += " BOOLEAN, ";
+    sb += IDownloadsImpl::COLUMN_VISIBILITY;
+    sb += " INTEGER, ";
+    sb += IDownloadsImpl::COLUMN_CONTROL;
+    sb += " INTEGER, ";
+    sb += IDownloadsImpl::COLUMN_STATUS;
+    sb += " INTEGER, ";
+    sb += IDownloadsImpl::COLUMN_FAILED_CONNECTIONS;
+    sb += " INTEGER, ";
+    sb += IDownloadsImpl::COLUMN_LAST_MODIFICATION;
+    sb += " BIGINT, ";
+    sb += IDownloadsImpl::COLUMN_NOTIFICATION_PACKAGE;
+    sb += " TEXT, ";
+    sb += IDownloadsImpl::COLUMN_NOTIFICATION_CLASS;
+    sb += " TEXT, ";
+    sb += IDownloadsImpl::COLUMN_NOTIFICATION_EXTRAS;
+    sb += " TEXT, ";
+    sb += IDownloadsImpl::COLUMN_COOKIE_DATA;
+    sb += " TEXT, ";
+    sb += IDownloadsImpl::COLUMN_USER_AGENT;
+    sb += " TEXT, ";
+    sb += IDownloadsImpl::COLUMN_REFERER;
+    sb += " TEXT, ";
+    sb += IDownloadsImpl::COLUMN_TOTAL_BYTES;
+    sb += " INTEGER, ";
+    sb += IDownloadsImpl::COLUMN_CURRENT_BYTES;
+    sb += " INTEGER, ";
+    sb += Constants::ETAG;
+    sb += " TEXT, ";
+    sb += Constants::UID;
+    sb += " INTEGER, ";
+    sb += IDownloadsImpl::COLUMN_OTHER_UID;
+    sb += " INTEGER, ";
+    sb += IDownloadsImpl::COLUMN_TITLE;
+    sb += " TEXT, ";
+    sb += IDownloadsImpl::COLUMN_DESCRIPTION;
+    sb += " TEXT, ";
+    sb += IDownloadsImpl::COLUMN_MEDIA_SCANNED;
+    sb += " BOOLEAN)";
+    db->ExecSQL(sb.ToString());
     // } catch (SQLException ex) {
     //     Logger::E(Constants.TAG, "couldn't create table in downloads database");
     //     throw ex;
@@ -471,12 +493,18 @@ void CDownloadProvider::DatabaseHelper::CreateHeadersTable(
     /* [in] */ ISQLiteDatabase* db)
 {
     db->ExecSQL(String("DROP TABLE IF EXISTS ") + IDownloadsImplRequestHeaders::HEADERS_DB_TABLE);
-    db->ExecSQL(String("CREATE TABLE ") + IDownloadsImplRequestHeaders::HEADERS_DB_TABLE + "(" +
-               String("id INTEGER PRIMARY KEY AUTOINCREMENT,") +
-               IDownloadsImplRequestHeaders::COLUMN_DOWNLOAD_ID + String(" INTEGER NOT NULL,") +
-               IDownloadsImplRequestHeaders::COLUMN_HEADER + String(" TEXT NOT NULL,") +
-               IDownloadsImplRequestHeaders::COLUMN_VALUE + String(" TEXT NOT NULL") +
-               String(");"));
+    StringBuilder sb("CREATE TABLE ");
+    sb += IDownloadsImplRequestHeaders::HEADERS_DB_TABLE;
+    sb += "(";
+    sb += "id INTEGER PRIMARY KEY AUTOINCREMENT,";
+    sb += IDownloadsImplRequestHeaders::COLUMN_DOWNLOAD_ID;
+    sb += " INTEGER NOT NULL,";
+    sb += IDownloadsImplRequestHeaders::COLUMN_HEADER;
+    sb += " TEXT NOT NULL,";
+    sb += IDownloadsImplRequestHeaders::COLUMN_VALUE;
+    sb += " TEXT NOT NULL";
+    sb += ");";
+    db->ExecSQL(sb.ToString());
 }
 
 //===============================================================
@@ -543,10 +571,10 @@ CDownloadProvider::CDownloadProvider()
     CDownloadsImpl::AcquireSingleton((IDownloadsImpl**)&imp);
     AutoPtr<IUri> uri;
     imp->GetCONTENT_URI((IUri**)&uri);
-    (*BASE_URIS)[0] = uri;
+    BASE_URIS->Set(0, uri);
     AutoPtr<IUri> allUri;
     imp->GetALL_DOWNLOADS_CONTENT_URI((IUri**)&allUri);
-    (*BASE_URIS)[1] = allUri;
+    BASE_URIS->Set(1, allUri);
 
     (*sAppReadableColumnsArray)[0] = IBaseColumns::ID,
     (*sAppReadableColumnsArray)[1] = IDownloadsImpl::COLUMN_APP_DATA;
@@ -575,7 +603,6 @@ CDownloadProvider::CDownloadProvider()
 ECode CDownloadProvider::OnCreate(
     /* [out] */ Boolean* result)
 {
-    Logger::D("xihaoc", "CDownloadProvider::OnCreate");
     VALIDATE_NOT_NULL(result)
     AutoPtr<IContext> cxt;
     GetContext((IContext**)&cxt);
@@ -638,7 +665,7 @@ ECode CDownloadProvider::GetType(
             (*arr)[0] = id;
             AutoPtr<IDatabaseUtils> du;
             CDatabaseUtils::AcquireSingleton((IDatabaseUtils**)&du);
-            String str("SELECT ");
+            StringBuilder str("SELECT ");
             str += IDownloadsImpl::COLUMN_MIME_TYPE;
             str += " FROM ";
             str += DB_TABLE;
@@ -646,7 +673,7 @@ ECode CDownloadProvider::GetType(
             str += IBaseColumns::ID;
             str += " = ?";
             String mimeType;
-            du->StringForQuery(db, str, arr, &mimeType);
+            du->StringForQuery(db, str.ToString(), arr, &mimeType);
             AutoPtr<ITextUtils> tu;
             CTextUtils::AcquireSingleton((ITextUtils**)&tu);
             Boolean bEmp = FALSE;
@@ -677,7 +704,7 @@ ECode CDownloadProvider::Insert(
     /* [out] */ IUri** result)
 {
     VALIDATE_NOT_NULL(result)
-    CheckInsertPermissions(values);
+    FAIL_RETURN(CheckInsertPermissions(values))
     AutoPtr<ISQLiteDatabase> db;
     mOpenHelper->GetWritableDatabase((ISQLiteDatabase**)&db);
 
@@ -739,7 +766,7 @@ ECode CDownloadProvider::Insert(
                     Manifest::permission::WRITE_EXTERNAL_STORAGE,
                     pid, uid,
                     String("need WRITE_EXTERNAL_STORAGE permission to use DESTINATION_FILE_URI"));
-            CheckFileUriDestination(values);
+            FAIL_RETURN(CheckFileUriDestination(values))
         }
         else if (dest == IDownloadsImpl::DESTINATION_SYSTEMCACHE_PARTITION) {
             cxt->EnforcePermission(
@@ -907,15 +934,15 @@ ECode CDownloadProvider::Insert(
     return cu->WithAppendedId(content_uri, rowID, result);
 }
 
-void CDownloadProvider::CheckFileUriDestination(
+ECode CDownloadProvider::CheckFileUriDestination(
     /* [in] */ IContentValues* values)
 {
     String fileUri;
     values->GetAsString(IDownloadsImpl::COLUMN_FILE_NAME_HINT, &fileUri);
     if (fileUri == NULL) {
-        // throw new IllegalArgumentException(
-        //         "DESTINATION_FILE_URI must include a file URI under COLUMN_FILE_NAME_HINT");
-        return;
+        Logger::E(Constants::TAG,
+            "DESTINATION_FILE_URI must include a file URI under COLUMN_FILE_NAME_HINT");
+        return E_ILLEGAL_ARGUMENT_EXCEPTION;
     }
     AutoPtr<IUriHelper> hlp;
     CUriHelper::AcquireSingleton((IUriHelper**)&hlp);
@@ -924,14 +951,14 @@ void CDownloadProvider::CheckFileUriDestination(
     String scheme;
     uri->GetScheme(&scheme);
     if (scheme == NULL || !scheme.Equals("file")) {
-        // throw new IllegalArgumentException("Not a file URI: " + uri);
-        return;
+        Logger::E(Constants::TAG, "Not a file URI: %s", TO_CSTR(uri));
+        return E_ILLEGAL_ARGUMENT_EXCEPTION;
     }
     String path;
     uri->GetPath(&path);
     if (path == NULL) {
-        // throw new IllegalArgumentException("Invalid file URI: " + uri);
-        return;
+        Logger::E(Constants::TAG, "Invalid file URI: %s", TO_CSTR(uri));
+        return E_ILLEGAL_ARGUMENT_EXCEPTION;
     }
     // try {
     AutoPtr<IFile> f;
@@ -941,15 +968,16 @@ void CDownloadProvider::CheckFileUriDestination(
     String externalPath;
     Environment::GetExternalStorageDirectory()->GetAbsolutePath(&externalPath);
     if (!canonicalPath.StartWith(externalPath)) {
-        // throw new SecurityException("Destination must be on external storage: " + uri);
-        return;
+        Logger::E(Constants::TAG, "Destination must be on external storage: %s", TO_CSTR(uri));
+        return E_SECURITY_EXCEPTION;
     }
     // } catch (IOException e) {
     //     throw new SecurityException("Problem resolving path: " + uri);
     // }
+    return NOERROR;
 }
 
-void CDownloadProvider::CheckInsertPermissions(
+ECode CDownloadProvider::CheckInsertPermissions(
     /* [in] */ IContentValues* values)
 {
     AutoPtr<IContext> cxt;
@@ -957,11 +985,11 @@ void CDownloadProvider::CheckInsertPermissions(
     Int32 per = 0;
     cxt->CheckCallingOrSelfPermission(IDownloadsImpl::PERMISSION_ACCESS, &per);
     if (per == IPackageManager::PERMISSION_GRANTED) {
-        return;
+        return NOERROR;
     }
 
-    cxt->EnforceCallingOrSelfPermission(Manifest::permission::INTERNET,
-            String("INTERNET permission is required to use the download manager"));
+    FAIL_RETURN(cxt->EnforceCallingOrSelfPermission(Manifest::permission::INTERNET,
+            String("INTERNET permission is required to use the download manager")))
 
     // ensure the request fits within the bounds of a public API request
     // first copy so we can remove values
@@ -972,7 +1000,7 @@ void CDownloadProvider::CheckInsertPermissions(
     CBoolean::New(TRUE, (IBoolean**)&bo);
     AutoPtr<ArrayOf<IInterface*> > arr = ArrayOf<IInterface*>::Alloc(1);
     (*arr)[0] = bo;
-    EnforceAllowedValues(values, IDownloadsImpl::COLUMN_IS_PUBLIC_API, arr);
+    FAIL_RETURN(EnforceAllowedValues(values, IDownloadsImpl::COLUMN_IS_PUBLIC_API, arr))
 
     // validate the destination column
     Int32 cd = 0;
@@ -996,7 +1024,7 @@ void CDownloadProvider::CheckInsertPermissions(
     (*arrVals)[0] = pCachePartition;
     (*arrVals)[1] = pFileUri;
     (*arrVals)[2] = pDownload;
-    EnforceAllowedValues(values, IDownloadsImpl::COLUMN_DESTINATION, arr);
+    FAIL_RETURN(EnforceAllowedValues(values, IDownloadsImpl::COLUMN_DESTINATION, arr))
 
     AutoPtr<IInteger32> pVis;
     CInteger32::New(IDownloadManagerRequest::VISIBILITY_VISIBLE, (IInteger32**)&pVis);
@@ -1014,14 +1042,14 @@ void CDownloadProvider::CheckInsertPermissions(
         (*arr)[1] = pVis;
         (*arr)[2] = pVis_Com;
         (*arr)[3] = pVis_only;
-        EnforceAllowedValues(values, IDownloadsImpl::COLUMN_VISIBILITY, arr);
+        FAIL_RETURN(EnforceAllowedValues(values, IDownloadsImpl::COLUMN_VISIBILITY, arr))
     }
     else {
         AutoPtr<ArrayOf<IInterface*> > arr = ArrayOf<IInterface*>::Alloc(3);
         (*arr)[0] = pVis;
         (*arr)[1] = pVis_Com;
         (*arr)[2] = pVis_only;
-        EnforceAllowedValues(values, IDownloadsImpl::COLUMN_VISIBILITY, arr);
+        FAIL_RETURN(EnforceAllowedValues(values, IDownloadsImpl::COLUMN_VISIBILITY, arr))
     }
 
     // remove the rest of the columns that are allowed (with any value)
@@ -1076,11 +1104,13 @@ void CDownloadProvider::CheckInsertPermissions(
             entry->GetKey((IInterface**)&k);
             error.Append(k);
         }
-        // throw new SecurityException(error->ToString());
+        Logger::E(Constants::TAG, error.ToString());
+        return E_SECURITY_EXCEPTION;
     }
+    return NOERROR;
 }
 
-void CDownloadProvider::EnforceAllowedValues(
+ECode CDownloadProvider::EnforceAllowedValues(
     /* [in] */ IContentValues* values,
     /* [in] */ String column,
     /* [in] */ ArrayOf<IInterface*>* allowedValues)
@@ -1091,13 +1121,14 @@ void CDownloadProvider::EnforceAllowedValues(
     for (Int32 i = 0; i < allowedValues->GetLength(); i++) {
         AutoPtr<IInterface> allowedValue = (*allowedValues)[i];
         if (value == NULL && allowedValue == NULL) {
-            return;
+            return NOERROR;
         }
         if (value != NULL && Object::Equals(value, allowedValue)) {
-            return;
+            return NOERROR;
         }
     }
-    // throw new SecurityException("Invalid value for " + column + ": " + value);
+    Logger::E(Constants::TAG, "Invalid value for %s: %s", column.string(), TO_CSTR(value));
+    return E_SECURITY_EXCEPTION;
 }
 
 AutoPtr<ICursor> CDownloadProvider::QueryCleared(
