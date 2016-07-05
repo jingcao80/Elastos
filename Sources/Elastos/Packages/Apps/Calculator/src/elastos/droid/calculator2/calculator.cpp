@@ -4,7 +4,7 @@
 #include "elastos/droid/calculator2/CCalculatorExpressionEvaluator.h"
 #include "elastos/droid/calculator2/CCalculatorExpressionTokenizer.h"
 #include "elastos/droid/calculator2/CCalculatorPadLayout.h"
-// #include "elastos/droid/calculator2/CCalculatorPadViewPager.h"
+#include "elastos/droid/calculator2/CCalculatorPadViewPager.h"
 
 namespace Elastos{
 namespace Droid {
@@ -16,7 +16,7 @@ CAR_OBJECT_IMPL(CCalculatorExpressionBuilder)
 CAR_OBJECT_IMPL(CCalculatorExpressionEvaluator)
 CAR_OBJECT_IMPL(CCalculatorExpressionTokenizer)
 CAR_OBJECT_IMPL(CCalculatorPadLayout)
-// CAR_OBJECT_IMPL(CCalculatorPadViewPager)
+CAR_OBJECT_IMPL(CCalculatorPadViewPager)
 
 } // namespace Calculator2
 } // namespace Droid

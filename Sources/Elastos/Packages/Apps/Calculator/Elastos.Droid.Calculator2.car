@@ -20,6 +20,8 @@ module
     interface Elastos.Droid.Calculator2.ICalculatorExpressionTokenizer;
     interface Elastos.Droid.Calculator2.ICalculatorExpressionEvaluator;
     interface Elastos.Droid.Calculator2.ICalculatorPadLayout;
+    interface Elastos.Droid.Calculator2.ICalculatorPadViewPager;
+    interface Elastos.Droid.Support.V4.View.IViewPager;
 
     using interface Elastos.Droid.App.IActivity;
     using interface Elastos.Droid.Content.IContext;
@@ -165,8 +167,26 @@ module
         interface IAccessibilityEventSource;
     }
 
-//    class CCalculatorPadViewPager
-//    {}
+    [local]
+    class CCalculatorPadViewPager
+    {
+        constructor(
+            [in] IContext* ctx);
+
+        constructor(
+            [in] IContext* ctx,
+            [in] IAttributeSet* attrs);
+
+        interface ICalculatorPadViewPager;
+        interface IViewPager;
+        interface IViewGroup;
+        interface IViewParent;
+        interface IViewManager;
+        interface IView;
+        interface IDrawableCallback;
+        interface IKeyEventCallback;
+        interface IAccessibilityEventSource;
+    }
 
     } // namespace Calculator2
     } // namespace Droid

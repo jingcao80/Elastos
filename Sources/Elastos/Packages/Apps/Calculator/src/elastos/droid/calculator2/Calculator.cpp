@@ -13,6 +13,7 @@
 #include <elastos/core/Math.h>
 #include <elastos/core/StringUtils.h>
 #include <elastos/core/CoreUtils.h>
+#include <elastos/utility/logging/Slogger.h>
 
 using Elastos::Droid::Animation::CAnimatorSet;
 using Elastos::Droid::Animation::CArgbEvaluator;
@@ -51,6 +52,8 @@ using Elastos::Droid::View::CView;
 using Elastos::Core::CoreUtils;
 using Elastos::Core::StringUtils;
 using Elastos::Core::Math;
+
+using Elastos::Utility::Logging::Slogger;
 
 namespace Elastos {
 namespace Droid {
@@ -338,6 +341,7 @@ ECode Calculator::OnCreate(
     mFormulaEditText = ICalculatorEditText::Probe(FindViewById(R::id::formula));
     mResultEditText = ICalculatorEditText::Probe(FindViewById(R::id::result));
     mPadViewPager = IViewPager::Probe(FindViewById(R::id::pad_pager));
+Slogger::E("calculator2", "~~~~~~~~~~~~~~padViewPager addr:%p", mPadViewPager.Get());
     mDeleteButton = FindViewById(R::id::del);
     mClearButton = FindViewById(R::id::clr);
 
@@ -445,14 +449,14 @@ void Calculator::SetState(
 ECode Calculator::OnBackPressed()
 {
     Int32 currentItem;
-    if (mPadViewPager == NULL || (mPadViewPager->GetCurrentItem(&currentItem), currentItem == 0) {
+    if (mPadViewPager == NULL || (mPadViewPager->GetCurrentItem(&currentItem), currentItem == 0)) {
         // If the user is currently looking at the first pad (or the pad is not paged),
         // allow the system to handle the Back button.
         Activity::OnBackPressed();
     }
     else {
         // Otherwise, select the previous pad.
-        mPadViewPager->GetCurrentItem(&currentItem)
+        mPadViewPager->GetCurrentItem(&currentItem);
         mPadViewPager->SetCurrentItem(currentItem - 1);
     }
     return NOERROR;
