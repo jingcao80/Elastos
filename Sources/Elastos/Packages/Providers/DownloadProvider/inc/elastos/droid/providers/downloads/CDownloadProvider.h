@@ -247,7 +247,7 @@ private:
     /**
      * Check that the file URI provided for DESTINATION_FILE_URI is valid.
      */
-    CARAPI_(void) CheckFileUriDestination(
+    CARAPI CheckFileUriDestination(
         /* [in] */ IContentValues* values);
 
     /**
@@ -258,14 +258,14 @@ private:
      * @param values ContentValues provided to insert()
      * @throws SecurityException if the caller has insufficient permissions
      */
-    CARAPI_(void) CheckInsertPermissions(
+    CARAPI CheckInsertPermissions(
         /* [in] */ IContentValues* values);
 
     /**
      * Remove column from values, and throw a SecurityException if the value isn't within the
      * specified allowedValues.
      */
-    CARAPI_(void) EnforceAllowedValues(
+    CARAPI EnforceAllowedValues(
         /* [in] */ IContentValues* values,
         /* [in] */ String column,
         /* [in] */ ArrayOf<IInterface*>* allowedValues);

@@ -4,12 +4,14 @@
 
 #include "Elastos.Droid.Content.h"
 #include "Elastos.Droid.Net.h"
+#include "Elastos.Droid.Os.h"
 #include "elastos/droid/ext/frameworkext.h"
 #include "_Elastos_Droid_Providers_Downloads_CDownloadThread.h"
 #include <elastos/core/Object.h>
 
 using Elastos::Droid::Content::IContext;
 using Elastos::Droid::Net::IINetworkPolicyListener;
+using Elastos::Droid::Os::IBinder;
 using Elastos::Core::IRunnable;
 using Elastos::Core::IThrowable;
 using Elastos::Net::IHttpURLConnection;
@@ -39,6 +41,34 @@ CarClass(CDownloadThread)
     , public IRunnable
     , public IDownloadThread
 {
+public:
+    class NetworkPolicyListener
+        : public Object
+        , public IINetworkPolicyListener
+        , public IBinder
+    {
+    public:
+        CAR_INTERFACE_DECL()
+
+        CARAPI constructor(
+            /* [in] */ IDownloadThread* host);
+
+        CARAPI OnUidRulesChanged(
+            /* [in] */ Int32 uid,
+            /* [in] */ Int32 uidRules);
+
+        CARAPI OnMeteredIfacesChanged(
+            /* [in] */ ArrayOf<String>* meteredIfaces);
+
+        CARAPI OnRestrictBackgroundChanged(
+            /* [in] */ Boolean restrictBackground);
+
+        CARAPI ToString(
+            /* [out] */ String* str);
+
+    public:
+        CDownloadThread* mHost;
+    };
 private:
     /**
      * Local changes to {@link DownloadInfo}. These are kept local to avoid
@@ -69,26 +99,6 @@ private:
         String mETag;
 
         String mErrorMsg;
-        CDownloadThread* mHost;
-    };
-
-    class INetworkPolicyListener
-    {
-    public:
-        INetworkPolicyListener(
-            /* [in] */ CDownloadThread* host);
-
-        void OnUidRulesChanged(
-            /* [in] */ Int32 uid,
-            /* [in] */ Int32 uidRules);
-
-        void OnMeteredIfacesChanged(
-            /* [in] */ ArrayOf<String>* meteredIfaces);
-
-        void OnRestrictBackgroundChanged(
-            /* [in] */ Boolean restrictBackground);
-
-    public:
         CDownloadThread* mHost;
     };
 

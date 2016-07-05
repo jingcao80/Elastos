@@ -17,6 +17,7 @@ namespace Os {
 CarClass(CWorkSource)
     , public Object
     , public IWorkSource
+    , public IParcelable
 {
 public:
     CAR_INTERFACE_DECL()

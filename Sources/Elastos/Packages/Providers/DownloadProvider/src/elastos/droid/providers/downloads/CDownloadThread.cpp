@@ -10,6 +10,7 @@
 #include "elastos/droid/providers/downloads/CDownloadInfo.h"
 #include "elastos/droid/providers/downloads/Constants.h"
 #include "elastos/droid/providers/downloads/CDownloadDrmHelper.h"
+#include "elastos/droid/providers/downloads/CNetworkPolicyListener.h"
 #include "elastos/droid/providers/downloads/CStorageUtils.h"
 #include "elastos/droid/providers/downloads/CHelpers.h"
 #include "elastos/droid/os/Process.h"
@@ -31,6 +32,7 @@ using Elastos::Droid::Net::INetworkPolicyManager;
 using Elastos::Droid::Net::INetworkPolicyManagerHelper;
 using Elastos::Droid::Net::CNetworkPolicyManagerHelper;
 using Elastos::Droid::Net::INetworkInfo;
+using Elastos::Droid::Net::EIID_IINetworkPolicyListener;
 using Elastos::Droid::Net::ITrafficStats;
 using Elastos::Droid::Net::CTrafficStats;
 using Elastos::Droid::Net::IConnectivityManager;
@@ -45,6 +47,7 @@ using Elastos::Droid::Os::CWorkSource;
 using Elastos::Droid::Os::SystemClock;
 using Elastos::Droid::Os::CParcelFileDescriptor;
 using Elastos::Droid::Os::CParcelFileDescriptorAutoCloseOutputStream;
+using Elastos::Droid::Os::EIID_IBinder;
 using Elastos::Droid::Provider::IDownloadsImpl;
 using Elastos::Droid::Provider::CDownloadsImpl;
 using Elastos::Droid::System::OsConstants;
@@ -121,16 +124,21 @@ void CDownloadThread::DownloadInfoDelta::WriteToDatabase()
 }
 
 //===============================================================
-// CDownloadThread::INetworkPolicyListener::
+// CDownloadThread::NetworkPolicyListener::
 //===============================================================
 
-CDownloadThread::INetworkPolicyListener::INetworkPolicyListener(
-    /* [in] */ CDownloadThread* host)
+CAR_OBJECT_IMPL(CNetworkPolicyListener)
+
+CAR_INTERFACE_IMPL_2(CDownloadThread::NetworkPolicyListener, Object, IINetworkPolicyListener, IBinder)
+
+ECode CDownloadThread::NetworkPolicyListener::constructor(
+    /* [in] */ IDownloadThread* host)
 {
-    mHost = host;
+    mHost = (CDownloadThread*)host;
+    return NOERROR;
 }
 
-void CDownloadThread::INetworkPolicyListener::OnUidRulesChanged(
+ECode CDownloadThread::NetworkPolicyListener::OnUidRulesChanged(
     /* [in] */ Int32 uid,
     /* [in] */ Int32 uidRules)
 {
@@ -139,20 +147,29 @@ void CDownloadThread::INetworkPolicyListener::OnUidRulesChanged(
     if (uid == _info->mUid) {
         mHost->mPolicyDirty = TRUE;
     }
+    return NOERROR;
 }
 
-void CDownloadThread::INetworkPolicyListener::OnMeteredIfacesChanged(
+ECode CDownloadThread::NetworkPolicyListener::OnMeteredIfacesChanged(
     /* [in] */ ArrayOf<String>* meteredIfaces)
 {
     // caller is NPMS, since we only register with them
     mHost->mPolicyDirty = TRUE;
+    return NOERROR;
 }
 
-void CDownloadThread::INetworkPolicyListener::OnRestrictBackgroundChanged(
+ECode CDownloadThread::NetworkPolicyListener::OnRestrictBackgroundChanged(
     /* [in] */ Boolean restrictBackground)
 {
     // caller is NPMS, since we only register with them
     mHost->mPolicyDirty = TRUE;
+    return NOERROR;
+}
+
+ECode CDownloadThread::NetworkPolicyListener::ToString(
+    /* [out] */ String* str)
+{
+    return Object::ToString(str);
 }
 
 //===============================================================
@@ -175,7 +192,9 @@ CDownloadThread::CDownloadThread()
     , mSpeed(0)
     , mSpeedSampleStart(0)
     , mSpeedSampleBytes(0)
-{}
+{
+    CNetworkPolicyListener::New(this, (IINetworkPolicyListener**)&mPolicyListener);
+}
 
 ECode CDownloadThread::constructor(
     /* [in] */ IContext* context,
