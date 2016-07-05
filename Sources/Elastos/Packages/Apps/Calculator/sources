@@ -7,8 +7,10 @@ LUBE_FLAGS += -n -u
 
 INCLUDES += $(MAKEDIR)/inc
 INCLUDES += $(MAKEDIR)/src
+INCLUDES += $(MAKEDIR)/support/v4/inc
 
 VPATH += $(MAKEDIR)/src/elastos/droid/calculator2
+VPATH += $(MAKEDIR)/support/v4/src/elastos/droid/support/v4/view
 
 SOURCES += Elastos.Droid.Calculator2.car
 SOURCES += R.cpp
@@ -18,8 +20,11 @@ SOURCES += CalculatorExpressionBuilder.cpp
 SOURCES += CalculatorExpressionEvaluator.cpp
 SOURCES += CalculatorExpressionTokenizer.cpp
 SOURCES += CalculatorPadLayout.cpp
-#SOURCES += CalculatorPadViewPager.cpp
+SOURCES += CalculatorPadViewPager.cpp
 SOURCES += calculator.cpp
+SOURCES += ViewPager.cpp
+SOURCES += PagerAdapter.cpp
+SOURCES += view.cpp
 SOURCES += Elastos.CoreLibrary.cpp
 SOURCES += Elastos.Droid.Core.cpp
 SOURCES += Org.Javia.Arity.cpp

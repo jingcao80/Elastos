@@ -337,7 +337,7 @@ ECode Calculator::OnCreate(
     mDisplayView = FindViewById(R::id::display);
     mFormulaEditText = ICalculatorEditText::Probe(FindViewById(R::id::formula));
     mResultEditText = ICalculatorEditText::Probe(FindViewById(R::id::result));
-    // mPadViewPager = (ViewPager) FindViewById(R::id::pad_pager);
+    mPadViewPager = IViewPager::Probe(FindViewById(R::id::pad_pager));
     mDeleteButton = FindViewById(R::id::del);
     mClearButton = FindViewById(R::id::clr);
 
@@ -444,15 +444,18 @@ void Calculator::SetState(
 
 ECode Calculator::OnBackPressed()
 {
-    assert(0 && "TODO"); // support.v4
-/*    if (mPadViewPager == null || mPadViewPager.getCurrentItem() == 0) {
+    Int32 currentItem;
+    if (mPadViewPager == NULL || (mPadViewPager->GetCurrentItem(&currentItem), currentItem == 0) {
         // If the user is currently looking at the first pad (or the pad is not paged),
         // allow the system to handle the Back button.
-        super.onBackPressed();
-    } else {
+        Activity::OnBackPressed();
+    }
+    else {
         // Otherwise, select the previous pad.
-        mPadViewPager.setCurrentItem(mPadViewPager.getCurrentItem() - 1);
-    }*/
+        mPadViewPager->GetCurrentItem(&currentItem)
+        mPadViewPager->SetCurrentItem(currentItem - 1);
+    }
+    return NOERROR;
 }
 
 ECode Calculator::OnUserInteraction()

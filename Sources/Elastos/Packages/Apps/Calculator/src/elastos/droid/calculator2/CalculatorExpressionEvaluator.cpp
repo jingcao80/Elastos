@@ -1,5 +1,7 @@
+
 #include "elastos/droid/calculator2/CalculatorExpressionEvaluator.h"
 #include "R.h"
+#include "org/javia/arity/Util.h"
 #include <Elastos.CoreLibrary.h>
 #include <elastos/core/StringUtils.h>
 #include <elastos/core/CoreUtils.h>
@@ -8,6 +10,7 @@ using Elastos::Core::StringUtils;
 using Elastos::Core::CoreUtils;
 using Elastos::Core::IDouble;
 using Org::Javia::Arity::CSymbols;
+using Org::Javia::Arity::Util;
 
 namespace Elastos {
 namespace Droid {
@@ -75,8 +78,8 @@ ECode CalculatorExpressionEvaluator::Evaluate(
             // errors; rounding the result by dropping N digits of precision.
             String resultString;
             assert(0 && "TODO"); // arity.jar
-            // mTokenizer->GetLocalizedExpression(
-            //         Util.doubleToString(result, MAX_DIGITS, ROUNDING_DIGITS), &resultString);
+            mTokenizer->GetLocalizedExpression(
+                    Util::DoubleToString(result, MAX_DIGITS, ROUNDING_DIGITS), &resultString);
             callback->OnEvaluate(strexpr, resultString, ICalculator::INVALID_RES_ID);
         }
     // } catch (SyntaxException e) {

@@ -12,7 +12,7 @@ namespace Arity {
 /**
    Contains static helper methods for formatting double values.
  */
-class Util
+class ECO_PUBLIC Util
 {
 public:
     /** Returns a number which is an approximation of v (within maxError)

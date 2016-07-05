@@ -2,48 +2,104 @@
 #define _ELASTOS_DROID_CALCULATOR2_CALCULATORPADVIEWPAGER_H__
 
 #include "_Elastos.Droid.Calculator2.h"
-#include <elastos/core/Object.h>
-#include <elastos/droid/ext/frameworkext.h>
+#include "elastos/droid/support/v4/view/ViewPager.h"
+#include "elastos/droid/support/v4/view/PagerAdapter.h"
 
 using Elastos::Droid::Content::IContext;
 using Elastos::Droid::Utility::IAttributeSet;
+using Elastos::Droid::Support::V4::View::ViewPager;
+using Elastos::Droid::Support::V4::View::PagerAdapter;
+using Elastos::Droid::Support::V4::View::IPagerAdapter;
+using Elastos::Droid::Support::V4::View::IViewPagerOnPageChangeListener;
+using Elastos::Droid::Support::V4::View::IViewPagerPageTransformer;
 
 namespace Elastos {
 namespace Droid {
 namespace Calculator2 {
 
 class CalculatorPadViewPager
-    : public Object
-    /*, public ViewPager*/
+    : public ViewPager
+    , public ICalculatorPadViewPager
 {
 private:
-    class MyPagerAdapter
+    class MyPagerAdapter : public PagerAdapter
     {
     public:
-        MyPagerAdapter();
-        ~MyPagerAdapter();
+        MyPagerAdapter(
+            /* [in] */ CalculatorPadViewPager* host)
+            : mHost(host)
+        {}
 
+        CARAPI GetCount(
+            /* [out] */ Int32* count);
+
+        CARAPI InstantiateItem(
+            /* [in] */ IViewGroup* container,
+            /* [in] */ Int32 position,
+            /* [out] */ IInterface** item);
+
+        CARAPI DestroyItem(
+            /* [in] */ IViewGroup* container,
+            /* [in] */ Int32 position,
+            /* [in] */ IInterface* object);
+
+        CARAPI IsViewFromObject(
+            /* [in] */ IView* view,
+            /* [in] */ IInterface* object,
+            /* [out] */ Boolean* result);
+
+        CARAPI GetPageWidth(
+            /* [in] */ Int32 position,
+            /* [out] */ Float* width);
+
+    private:
+        CalculatorPadViewPager* mHost;
     };
 
-    class MyOnPageChangeListener
+    class MyOnPageChangeListener : public SimpleOnPageChangeListener
     {
     public:
-        MyOnPageChangeListener();
-        ~MyOnPageChangeListener();
+        MyOnPageChangeListener(
+            /* [in] */ CalculatorPadViewPager* host)
+            : mHost(host)
+        {}
 
+        CARAPI OnPageSelected(
+            /* [in] */ Int32 position);
+
+    private:
+        CARAPI_(void) RecursivelySetEnabled(
+            /* [in] */ IView* view,
+            /* [in] */ Boolean enabled);
+
+    private:
+        CalculatorPadViewPager* mHost;
     };
 
     class MyPageTransformer
+        : public Object
+        , public IViewPagerPageTransformer
     {
     public:
-        MyPageTransformer();
-        ~MyPageTransformer();
+        MyPageTransformer(
+            /* [in] */ CalculatorPadViewPager* host)
+            : mHost(host)
+        {}
+
+        CAR_INTERFACE_DECL()
+
+        CARAPI TransformPage(
+            /* [in] */ IView* page,
+            /* [in] */ Float position);
+
+    private:
+        CalculatorPadViewPager* mHost;
     };
 
 public:
     CalculatorPadViewPager();
 
-    ~CalculatorPadViewPager();
+    virtual ~CalculatorPadViewPager() {}
 
     CAR_INTERFACE_DECL()
 
@@ -58,10 +114,11 @@ protected:
     CARAPI OnFinishInflate();
 
 private:
-    assert(0&* "TODO");
-/*    PagerAdapter mStaticPagerAdapter;
-    OnPageChangeListener mOnPageChangeListener;
-    PageTransformer mPageTransformer;*/
+    AutoPtr<IPagerAdapter> mStaticPagerAdapter;
+    AutoPtr<IViewPagerOnPageChangeListener> mOnPageChangeListener;
+    AutoPtr<IViewPagerPageTransformer> mPageTransformer;
+
+    friend class MyOnPageChangeListener;
 };
 
 } // namespace Calculator2
