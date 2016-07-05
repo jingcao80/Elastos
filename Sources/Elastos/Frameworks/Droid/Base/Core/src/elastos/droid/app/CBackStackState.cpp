@@ -1570,7 +1570,8 @@ AutoPtr<ITransition> BackStackRecord::MergeTransitions(
     return transition;
 }
 
-void BackStackRecord::ConfigureTransitions(Int32 containerId,
+void BackStackRecord::ConfigureTransitions(
+    /* [in] */ Int32 containerId,
     /* [in] */ IBackStackRecordTransitionState* state,
     /* [in] */ Boolean isBack,
     /* [in] */ ISparseArray* /*<Fragment>*/ firstOutFragments,

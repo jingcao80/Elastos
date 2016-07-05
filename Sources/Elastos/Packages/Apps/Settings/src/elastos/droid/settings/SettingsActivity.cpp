@@ -101,7 +101,7 @@ const String SettingsActivity::EXTRA_PREFS_SHOW_BUTTON_BAR("extra_prefs_show_but
 const String SettingsActivity::EXTRA_PREFS_SET_NEXT_TEXT("extra_prefs_set_next_text");
 const String SettingsActivity::EXTRA_PREFS_SET_BACK_TEXT("extra_prefs_set_back_text");
 
-const String SettingsActivity::TAG("Settings");
+const String SettingsActivity::TAG("SettingsActivity");
 
 const String SettingsActivity::SAVE_KEY_CATEGORIES(":settings:categories");
 const String SettingsActivity::SAVE_KEY_SEARCH_MENU_EXPANDED(":settings:search_menu_expanded");
@@ -509,7 +509,7 @@ ECode SettingsActivity::OnCreateOptionsMenu(
 {
     VALIDATE_NOT_NULL(result);
     *result = FALSE;
-    Slogger::D("SettingsActivity", " >> enter OnCreateOptionsMenu ");
+    Slogger::D(TAG, " >> enter OnCreateOptionsMenu ");
 
     if (!mDisplaySearch) {
         return NOERROR;
@@ -1126,7 +1126,7 @@ ECode SettingsActivity::SwitchToFragment(
     *fragment = NULL;
 
     if (validate && !IsValidFragment(fragmentName)) {
-        Slogger::E("SettingsActivity", "Invalid fragment for this activity: %s", fragmentName.string());
+        Slogger::E(TAG, "Invalid fragment for this activity: %s", fragmentName.string());
         return E_ILLEGAL_ARGUMENT_EXCEPTION;
         // throw new IllegalArgumentException("Invalid fragment for this activity: "
         //         + fragmentName);
@@ -1197,7 +1197,7 @@ ECode SettingsActivity::LoadCategoriesFromResource(
     if (!String("dashboard-categories").Equals(nodeName)) {
         String desc;
         IXmlPullParser::Probe(parser)->GetPositionDescription(&desc);
-        Slogger::E("SettingsActivity", "XML document must start with <preference-categories> tag; found %s at %s",
+        Slogger::E(TAG, "XML document must start with <preference-categories> tag; found %s at %s",
                 nodeName.string(), desc.string());
         if (parser != NULL) parser->Close();
         return E_RUNTIME_EXCEPTION;

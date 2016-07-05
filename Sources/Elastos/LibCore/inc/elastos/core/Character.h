@@ -1939,21 +1939,21 @@ public:
      *
      * @since 1.4
      */
-    static const Byte DIRECTIONALITY_LEFT_TO_RIGHT;
+    static const Byte DIRECTIONALITY_LEFT_TO_RIGHT = 0;
 
     /**
      * Unicode bidirectional constant R.
      *
      * @since 1.4
      */
-    static const Byte DIRECTIONALITY_RIGHT_TO_LEFT;
+    static const Byte DIRECTIONALITY_RIGHT_TO_LEFT = 1;
 
     /**
      * Unicode bidirectional constant AL.
      *
      * @since 1.4
      */
-    static const Byte DIRECTIONALITY_RIGHT_TO_LEFT_ARABIC;
+    static const Byte DIRECTIONALITY_RIGHT_TO_LEFT_ARABIC = 2;
 
     /**
      * Unicode bidirectional constant EN.
@@ -2002,7 +2002,7 @@ public:
      *
      * @since 1.4
      */
-    static const Byte DIRECTIONALITY_BOUNDARY_NEUTRAL;
+    static const Byte DIRECTIONALITY_BOUNDARY_NEUTRAL = 9;
 
     /**
      * Unicode bidirectional constant B.
@@ -2037,35 +2037,35 @@ public:
      *
      * @since 1.4
      */
-    static const Byte DIRECTIONALITY_LEFT_TO_RIGHT_EMBEDDING;
+    static const Byte DIRECTIONALITY_LEFT_TO_RIGHT_EMBEDDING = 14;
 
     /**
      * Unicode bidirectional constant LRO.
      *
      * @since 1.4
      */
-    static const Byte DIRECTIONALITY_LEFT_TO_RIGHT_OVERRIDE;
+    static const Byte DIRECTIONALITY_LEFT_TO_RIGHT_OVERRIDE = 15;
 
     /**
      * Unicode bidirectional constant RLE.
      *
      * @since 1.4
      */
-    static const Byte DIRECTIONALITY_RIGHT_TO_LEFT_EMBEDDING;
+    static const Byte DIRECTIONALITY_RIGHT_TO_LEFT_EMBEDDING = 16;
 
     /**
      * Unicode bidirectional constant RLO.
      *
      * @since 1.4
      */
-    static const Byte DIRECTIONALITY_RIGHT_TO_LEFT_OVERRIDE;
+    static const Byte DIRECTIONALITY_RIGHT_TO_LEFT_OVERRIDE = 17;
 
     /**
      * Unicode bidirectional constant PDF.
      *
      * @since 1.4
      */
-    static const Byte DIRECTIONALITY_POP_DIRECTIONAL_FORMAT;
+    static const Byte DIRECTIONALITY_POP_DIRECTIONAL_FORMAT = 18;
 
     static const UInt32 MIN_HIGH_SURROGATE;  //'\uD800';
 
