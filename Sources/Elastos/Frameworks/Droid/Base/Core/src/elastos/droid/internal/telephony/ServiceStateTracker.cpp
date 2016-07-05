@@ -788,8 +788,8 @@ void ServiceStateTracker::CancelPollState()
 
 Boolean ServiceStateTracker::ShouldFixTimeZoneNow(
     /* [in] */ IPhoneBase* phoneBase,
-    /* [in] */ String operatorNumeric,
-    /* [in] */ String prevOperatorNumeric,
+    /* [in] */ const String& operatorNumeric,
+    /* [in] */ const String& prevOperatorNumeric,
     /* [in] */ Boolean needToFixTimeZone)
 {
     assert(0);
@@ -967,8 +967,8 @@ Boolean ServiceStateTracker::IsCallerOnDifferentThread()
 }
 
 void ServiceStateTracker::UpdateCarrierMccMncConfiguration(
-    /* [in] */ String newOp,
-    /* [in] */ String oldOp,
+    /* [in] */ const String& newOp,
+    /* [in] */ const String& oldOp,
     /* [in] */ IContext* context)
 {
     // if we have a change in operator, notify Wifi (even to/from none)

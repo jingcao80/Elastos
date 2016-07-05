@@ -2,8 +2,16 @@
 #include "elastos/droid/ext/frameworkext.h"
 #include "elastos/droid/telecomm/telecom/ParcelableConnection.h"
 #include "elastos/droid/telecomm/telecom/CPhoneCapabilities.h"
+#include "elastos/droid/telecomm/telecom/CPhoneAccountHandle.h"
+#include "elastos/droid/telecomm/telecom/CStatusHints.h"
+#include "elastos/droid/telecomm/telecom/CDisconnectCause.h"
+#include "elastos/droid/net/CUriHelper.h"
 #include <elastos/core/StringBuilder.h>
+#include <elastos/utility/logging/Logger.h>
+using Elastos::Utility::Logging::Logger;
 
+using Elastos::Droid::Net::IUriHelper;
+using Elastos::Droid::Net::CUriHelper;
 using Elastos::Core::StringBuilder;
 
 namespace Elastos {
@@ -26,7 +34,8 @@ ParcelableConnection::ParcelableConnection()
     , mRingbackRequested(FALSE)
     , mIsVoipAudioMode(FALSE)
     , mCallSubstate(0)
-{}
+{
+}
 
 ECode ParcelableConnection::constructor()
 {
@@ -221,28 +230,147 @@ ECode ParcelableConnection::ToString(
 ECode ParcelableConnection::ReadFromParcel(
     /* [in] */ IParcel* source)
 {
+    Int32 value = 0;
+    source->ReadInt32(&value);
+    if (value != 0) {
+        AutoPtr<IPhoneAccountHandle> pa;
+        CPhoneAccountHandle::New((IPhoneAccountHandle**)&pa);
+        IParcelable* parcel = IParcelable::Probe(pa);
+        parcel->ReadFromParcel(source);
+        mPhoneAccount = pa;
+    }
+    else {
+        mPhoneAccount = NULL;
+    }
+
+    source->ReadInt32(&mState);
+    source->ReadInt32(&mCapabilities);
+
+    source->ReadInt32(&value);
+    if (value != 0) {
+        //AutoPtr<IUri> address;
+        //AutoPtr<IUriHelper> helper;
+        //CUriHelper::AcquireSingleton((IUriHelper**)&helper);
+        //helper->GetEMPTY((IUri**)&address);
+        //IParcelable* parcel = IParcelable::Probe(address);
+        //parcel->ReadFromParcel(source);
+        //mAddress= address;
+        AutoPtr<IInterface> address;
+        source->ReadInterfacePtr((Handle32*)&address);
+        mAddress = IUri::Probe(address);
+    }
+    else {
+        mAddress = NULL;
+    }
+
+    source->ReadInt32(&mAddressPresentation);
+    source->ReadString(&mCallerDisplayName);
+    source->ReadInt32(&mCallerDisplayNamePresentation);
+
+    if (source->ReadInt32(&value), value != 0) {
+        AutoPtr<IInterface> obj;
+        source->ReadInterfacePtr((Handle32*)&obj);
+        mVideoProvider = IIVideoProvider::Probe(obj);
+    }
+    else {
+        mVideoProvider = NULL;
+    }
+
+    source->ReadInt32(&mVideoState);
+    source->ReadByte((byte*)&mRingbackRequested);
+    source->ReadByte((byte*)&mIsVoipAudioMode);
+
+    source->ReadInt32(&value);
+    if (value != 0) {
+        AutoPtr<IStatusHints> sh;
+        CStatusHints::New((IStatusHints**)&sh);
+        IParcelable* parcel = IParcelable::Probe(sh);
+        parcel->ReadFromParcel(source);
+        mStatusHints = sh;
+    }
+    else {
+        mStatusHints = NULL;
+    }
+
+    source->ReadInt32(&value);
+    if (value != 0) {
+        AutoPtr<IDisconnectCause> dc;
+        CDisconnectCause::New((IDisconnectCause**)&dc);
+        IParcelable* parcel = IParcelable::Probe(dc);
+        parcel->ReadFromParcel(source);
+        mDisconnectCause = dc;
+    }
+    else {
+        mDisconnectCause = NULL;
+    }
+
+    source->ReadInt32(&value);
+    if (value != 0) {
+        AutoPtr<IInterface> obj;
+        source->ReadInterfacePtr((Handle32*)&obj);
+        mConferenceableConnectionIds = IList::Probe(obj);//TODO is it right??
+    }
+    else {
+        mConferenceableConnectionIds = NULL;
+    }
     return NOERROR;
 }
 
 ECode ParcelableConnection::WriteToParcel(
     /* [in] */ IParcel* destination)
 {
-    IParcelable::Probe(mPhoneAccount)->WriteToParcel(destination);
+    if (mPhoneAccount != NULL) {
+        destination->WriteInt32(1);
+        IParcelable::Probe(mPhoneAccount)->WriteToParcel(destination);
+    }
+    else {
+        destination->WriteInt32(0);
+    }
     destination->WriteInt32(mState);
     destination->WriteInt32(mCapabilities);
-    IParcelable::Probe(mAddress)->WriteToParcel(destination);
+    if (mAddress != NULL) {
+        destination->WriteInt32(1);
+        //IParcelable::Probe(mAddress)->WriteToParcel(destination);
+        destination->WriteInterfacePtr(mAddress);
+    }
+    else {
+        destination->WriteInt32(0);
+    }
     destination->WriteInt32(mAddressPresentation);
     destination->WriteString(mCallerDisplayName);
     destination->WriteInt32(mCallerDisplayNamePresentation);
-    assert(0 && "TODO");
-    // destination.writeStrongBinder(
-    //         mVideoProvider != null ? mVideoProvider.asBinder() : null);
+    if (NULL != mVideoProvider) {
+        destination->WriteInt32(1);
+        destination->WriteInterfacePtr(mVideoProvider);
+    }
+    else {
+        destination->WriteInt32(0);
+    }
     destination->WriteInt32(mVideoState);
     destination->WriteByte((byte) (mRingbackRequested ? 1 : 0));
     destination->WriteByte((byte) (mIsVoipAudioMode ? 1 : 0));
-    IParcelable::Probe(mStatusHints)->WriteToParcel(destination);
-    IParcelable::Probe(mDisconnectCause)->WriteToParcel(destination);
-    IParcelable::Probe(mConferenceableConnectionIds)->WriteToParcel(destination);
+    if (mStatusHints != NULL) {
+        destination->WriteInt32(1);
+        IParcelable::Probe(mStatusHints)->WriteToParcel(destination);
+    }
+    else {
+        destination->WriteInt32(0);
+    }
+    if (mDisconnectCause != NULL) {
+        destination->WriteInt32(1);
+        IParcelable::Probe(mDisconnectCause)->WriteToParcel(destination);
+    }
+    else {
+        destination->WriteInt32(0);
+    }
+    if (mConferenceableConnectionIds != NULL) {
+        destination->WriteInt32(1);
+        //IParcelable::Probe(mConferenceableConnectionIds)->WriteToParcel(destination);
+        destination->WriteInterfacePtr(mConferenceableConnectionIds);//TODO is it right??
+    }
+    else {
+        destination->WriteInt32(0);
+    }
     return NOERROR;
 }
 

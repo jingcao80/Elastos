@@ -175,8 +175,10 @@ ECode CTelephonyConnectionService::OnCreateOutgoingConnection(
     AutoPtr<IPhone> phone = GetPhoneForAccount(handle2, isEmergencyNumber);
     if (phone == NULL) {
         Logger::D("CTelephonyConnectionService", "onCreateOutgoingConnection, phone is null, isEmergencyNumber:%d", isEmergencyNumber);
-        AutoPtr<Elastos::Droid::Telecomm::Telecom::IDisconnectCause> cause = DisconnectCauseUtil::ToTelecomDisconnectCause(
-                Elastos::Droid::Telephony::IDisconnectCause::OUTGOING_FAILURE, String("Phone is null"));
+        AutoPtr<Elastos::Droid::Telecomm::Telecom::IDisconnectCause> cause =
+            DisconnectCauseUtil::ToTelecomDisconnectCause(
+                    Elastos::Droid::Telephony::IDisconnectCause::OUTGOING_FAILURE,
+                    String("Phone is null"));
         return Connection::CreateFailedConnection(cause, result);
     }
 

@@ -14,6 +14,7 @@
 #include "elastos/droid/telecomm/telecom/CConnectionHelper.h"
 #include "elastos/droid/telecomm/telecom/CRemoteServiceCallback.h"
 #include "elastos/droid/telecomm/telecom/CParcelableConference.h"
+#include "elastos/droid/telecomm/telecom/CParcelableConnection.h"
 #include "elastos/droid/telecomm/telecom/CDisconnectCause.h"
 #include "elastos/droid/os/CLooperHelper.h"
 #include <elastos/utility/logging/Logger.h>
@@ -762,26 +763,31 @@ void ConnectionService::CreateConnection(
     AutoPtr<IIVideoProvider> iivp;
     AutoPtr<IPhoneAccountHandle> handle;
     request->GetAccountHandle((IPhoneAccountHandle**)&handle);
-    assert(0 && "TODO");
-    // mAdapter->HandleCreateConnectionComplete(
-    //         callId,
-    //         request,
-    //         new ParcelableConnection(
-    //                 handle,
-    //                 state,
-    //                 capabilities,
-    //                 address,
-    //                 presentation,
-    //                 disName,
-    //                 dnPresentation,
-    //                 videoProvider == NULL ?
-    //                         NULL : (videoProvider->GetInterface((IIVideoProvider**)&iivp), iivp)
-    //                 videoState,
-    //                 isRingbackRequested,
-    //                 isVoip,
-    //                 statusHints,
-    //                 disconnectCause,
-    //                 CreateConnectionIdList(l)));
+
+    AutoPtr<IIVideoProvider> vp;
+    if (videoProvider != NULL) {
+        videoProvider->GetInterface((IIVideoProvider**)&vp);
+    }
+
+    AutoPtr<IParcelableConnection> parcelableConnection;
+    CParcelableConnection::New(
+             handle,
+             state,
+             capabilities,
+             address,
+             presentation,
+             disName,
+             dnPresentation,
+             vp,
+             videoState,
+             isRingbackRequested,
+             isVoip,
+             statusHints,
+             disconnectCause,
+             CreateConnectionIdList(l),
+            (IParcelableConnection**)&parcelableConnection);
+
+     mAdapter->HandleCreateConnectionComplete(callId, request, parcelableConnection);
 }
 
 void ConnectionService::Abort(

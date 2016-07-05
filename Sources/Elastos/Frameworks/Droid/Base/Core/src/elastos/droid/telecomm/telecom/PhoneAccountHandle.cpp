@@ -99,7 +99,16 @@ ECode PhoneAccountHandle::Equals(
 ECode PhoneAccountHandle::WriteToParcel(
     /* [in] */ IParcel* out)
 {
-    IParcelable::Probe(mComponentName)->WriteToParcel(out);
+    if (mComponentName != NULL) {
+        out->WriteInt32(1);
+        //IParcelable::Probe(mComponentName)->WriteToParcel(out);
+        AutoPtr<IComponentNameHelper> helper;
+        CComponentNameHelper::AcquireSingleton((IComponentNameHelper**)&helper);
+        helper->WriteToParcel(mComponentName, out);
+    }
+    else {
+        out->WriteInt32(0);
+    }
     out->WriteString(mId);
     return NOERROR;
 }
@@ -108,9 +117,13 @@ ECode PhoneAccountHandle::ReadFromParcel(
     /* [in] */ IParcel* in)
 {
     mComponentName = NULL;
-    AutoPtr<IComponentNameHelper> helper;
-    CComponentNameHelper::AcquireSingleton((IComponentNameHelper**)&helper);
-    helper->ReadFromParcel(in, (IComponentName**)&mComponentName);
+    Int32 value = 0;
+    in->ReadInt32(&value);
+    if (value != 0) {
+        AutoPtr<IComponentNameHelper> helper;
+        CComponentNameHelper::AcquireSingleton((IComponentNameHelper**)&helper);
+        helper->ReadFromParcel(in, (IComponentName**)&mComponentName);
+    }
     in->ReadString(&mId);
     return NOERROR;
 }
