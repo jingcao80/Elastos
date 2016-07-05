@@ -269,7 +269,7 @@ ECode CMediaSessionLegacyHelper::SessionHolder::Update()
 }
 
 String CMediaSessionLegacyHelper::TAG("MediaSessionHelper");
-Boolean CMediaSessionLegacyHelper::DEBUG = Logger::IsLoggable(TAG, Logger::___DEBUG);
+Boolean CMediaSessionLegacyHelper::DEBUG = FALSE;//Logger::IsLoggable(TAG, Logger::___DEBUG);
 Object CMediaSessionLegacyHelper::sLock;
 AutoPtr<IMediaSessionLegacyHelper> CMediaSessionLegacyHelper::sInstance;
 
@@ -376,7 +376,7 @@ ECode CMediaSessionLegacyHelper::SendVolumeKeyEvent(
             }
         }
 
-        mSessionManager->DispatchAdjustVolume(IAudioManager::USE_DEFAULT_STREAM_TYPE,
+        return mSessionManager->DispatchAdjustVolume(IAudioManager::USE_DEFAULT_STREAM_TYPE,
                 direction, flags);
     }
     return NOERROR;
@@ -387,11 +387,11 @@ ECode CMediaSessionLegacyHelper::SendAdjustVolumeBy(
     /* [in] */ Int32 delta,
     /* [in] */ Int32 flags)
 {
-    mSessionManager->DispatchAdjustVolume(suggestedStream, delta, flags);
     if (DEBUG) {
-        Logger::D(TAG, "dispatched volume adjustment");
+        Logger::D(TAG, "dispatched volume adjustment:suggestedStream:%08x, delta:%d, flags:%08x",
+            suggestedStream, delta, flags);
     }
-    return NOERROR;
+    return mSessionManager->DispatchAdjustVolume(suggestedStream, delta, flags);
 }
 
 ECode CMediaSessionLegacyHelper::IsGlobalPriorityActive(

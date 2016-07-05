@@ -19,8 +19,6 @@
 #include <elastos/utility/etl/List.h>
 #include <elastos/utility/logging/Logger.h>
 
-#include <elastos/core/AutoLock.h>
-using Elastos::Core::AutoLock;
 using Elastos::Droid::App::IPendingIntentHelper;
 using Elastos::Droid::App::IProfileGroup;
 using Elastos::Droid::App::ProfileGroupMode;
@@ -50,6 +48,7 @@ using Elastos::Droid::Os::SystemProperties;
 using Elastos::Droid::Provider::ISettingsSystem;
 using Elastos::Droid::Provider::Settings;
 using Elastos::Droid::View::IKeyEvent;
+using Elastos::Core::AutoLock;
 using Elastos::Core::CInteger32;
 using Elastos::Core::CString;
 using Elastos::Core::ICharSequence;
@@ -169,10 +168,10 @@ ECode CAudioManager::constructor(
     mContext->GetResources((IResources**)&resources);
     resources->GetBoolean(R::bool_::config_useMasterVolume, &mUseMasterVolume);
     resources->GetBoolean(R::bool_::config_useVolumeKeySounds, &mUseVolumeKeySounds);
+    resources->GetBoolean(R::bool_::config_useFixedVolume, &mUseFixedVolume);
 
     mAudioPortEventHandler = new AudioPortEventHandler();
     mAudioPortEventHandler->constructor(this);
-    resources->GetBoolean(R::bool_::config_useFixedVolume, &mUseFixedVolume);
 
     AutoPtr<IInterface> interfaceTmp;
     context->GetSystemService(IContext::PROFILE_SERVICE, (IInterface**)&interfaceTmp);

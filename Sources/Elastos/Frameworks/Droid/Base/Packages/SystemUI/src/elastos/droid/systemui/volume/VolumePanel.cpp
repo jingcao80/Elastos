@@ -105,7 +105,7 @@ static AutoPtr<VolumePanel::StreamResources> InitRingerStream()
         IAudioManager::STREAM_RING,
         Elastos::Droid::R::string::volume_icon_description_ringer,
         R::drawable::ic_ringer_audible,
-        R::drawable::ic_ringer_audible,
+        R::drawable::ic_ringer_vibrate,
         FALSE);
     return sr;
 }
@@ -507,7 +507,7 @@ ECode VolumePanel::ZenPanelCallback::OnExpanded(
     /* [in] */ Boolean expanded)
 {
     if (mHost->mZenPanelExpanded == expanded) {
-        return E_NULL_POINTER_EXCEPTION;
+        return NOERROR;
     }
     mHost->mZenPanelExpanded = expanded;
     mHost->UpdateTimeoutDelay();
@@ -1196,10 +1196,10 @@ void VolumePanel::UpdateSliderEnabled(
         iconView->SetEnabled(TRUE);
         iconView->SetAlpha(1.0f);
     }
+
     // show the silent hint when the disabled slider is touched in silent mode
     Boolean isEnabled;
-    seekbarView->IsEnabled(&isEnabled);
-    if (isRinger && wasEnabled != isEnabled) {
+    if (isRinger && ((seekbarView->IsEnabled(&isEnabled), isEnabled) != wasEnabled)) {
         if (isEnabled) {
             IView::Probe(sc->mGroup)->SetOnTouchListener(NULL);
             iconView->SetClickable(TRUE);
@@ -1431,8 +1431,14 @@ ECode VolumePanel::OnVolumeChanged(
     /* [in] */ Int32 flags)
 {
     if (LOGD) {
-        Logger::D(mTag, "OnVolumeChanged(streamType: %08x, mActiveStreamType:%08x, flags: %08x)",
-            streamType, mActiveStreamType, flags);
+        Logger::D(mTag, "OnVolumeChanged(streamType: %d, mActiveStreamType:%08x, flags: %08x)"
+            ", mRingIsSilent: %d, mActiveStreamType: %d",
+            streamType, mActiveStreamType, flags, mRingIsSilent, mActiveStreamType);
+        Logger::D(mTag, " >> ShowUI: %d, Play sound: %d, vobrate: %d. Remove Vibrate and sound: %d",
+            (flags & IAudioManager::FLAG_SHOW_UI) != 0,
+            (flags & IAudioManager::FLAG_PLAY_SOUND) != 0,
+            (flags & IAudioManager::FLAG_VIBRATE) != 0,
+            (flags & IAudioManager::FLAG_REMOVE_SOUND_AND_VIBRATE) != 0);
     }
 
     Boolean bval;
@@ -1469,7 +1475,7 @@ ECode VolumePanel::OnMuteChanged(
     /* [in] */ Int32 streamType,
     /* [in] */ Int32 flags)
 {
-    if (LOGD) Logger::D(mTag, "onMuteChanged(streamType: %08x, flags: %08x)",streamType, flags);
+    if (LOGD) Logger::D(mTag, "onMuteChanged(streamType: %d, flags: %08x)", streamType, flags);
 
     AutoPtr<IInterface> vpsc;
     mStreamControls->Get(streamType, (IInterface**)&vpsc);
@@ -1496,7 +1502,7 @@ ECode VolumePanel::OnShowVolumeChanged(
     mRingIsSilent = FALSE;
 
     if (LOGD) {
-        Logger::D(mTag, "OnShowVolumeChanged(streamType: %08x, flags: %08x), index: %d",
+        Logger::D(mTag, "OnShowVolumeChanged(streamType: %d, flags: %08x), index: %d",
             streamType, flags ,index);
     }
 
@@ -1636,13 +1642,12 @@ ECode VolumePanel::OnShowVolumeChanged(
     }
 
     // Do a little vibrate if applicable (only when going into vibrate mode)
-    Boolean isStreamAffectedByRingerMode;
-    mAudioManager->IsStreamAffectedByRingerMode(streamType, &isStreamAffectedByRingerMode);
+    Boolean bval;
     Int32 rmode;
-    mAudioManager->GetRingerMode(&rmode);
-    if ((streamType != STREAM_REMOTE_MUSIC) &&
-        ((flags & IAudioManager::FLAG_VIBRATE) != 0) && isStreamAffectedByRingerMode
-        && rmode == IAudioManager::RINGER_MODE_VIBRATE) {
+    if ((streamType != STREAM_REMOTE_MUSIC)
+        && ((flags & IAudioManager::FLAG_VIBRATE) != 0)
+        && (mAudioManager->IsStreamAffectedByRingerMode(streamType, &bval), bval)
+        && (mAudioManager->GetRingerMode(&rmode), rmode) == IAudioManager::RINGER_MODE_VIBRATE) {
         AutoPtr<IMessage> msg;
         ObtainMessage(MSG_VIBRATE, (IMessage**)&msg);
         Boolean sendDelayed;
@@ -1720,7 +1725,7 @@ ECode VolumePanel::OnVibrate()
     Int32 rm;
     mAudioManager->GetRingerMode(&rm);
     if (rm != IAudioManager::RINGER_MODE_VIBRATE) {
-        return E_NULL_POINTER_EXCEPTION;
+        return NOERROR;
     }
 
     mVibrator->Vibrate(VIBRATE_DURATION, VIBRATION_ATTRIBUTES);
@@ -1785,18 +1790,17 @@ ECode VolumePanel::OnSliderVisibilityChanged(
     /* [in] */ Int32 streamType,
     /* [in] */ Int32 visible)
 {
-    {    AutoLock syncLock(this);
-        if (LOGD) Logger::D(mTag, "onSliderVisibilityChanged(stream=%d, visi=%d)",streamType,visible);
-        Boolean isVisible = (visible == 1);
-        for (Int32 i = STREAMS->GetLength() - 1 ; i >= 0 ; i--) {
-            AutoPtr<StreamResources> streamRes = (*STREAMS)[i];
-            if (streamRes->mStreamType == streamType) {
-                streamRes->mShow = isVisible;
-                if (!isVisible && (mActiveStreamType == streamType)) {
-                    mActiveStreamType = -1;
-                }
-                break;
+    AutoLock syncLock(this);
+    if (LOGD) Logger::D(mTag, "onSliderVisibilityChanged(stream=%d, visi=%d)",streamType,visible);
+    Boolean isVisible = (visible == 1);
+    for (Int32 i = STREAMS->GetLength() - 1 ; i >= 0 ; i--) {
+        AutoPtr<StreamResources> streamRes = (*STREAMS)[i];
+        if (streamRes->mStreamType == streamType) {
+            streamRes->mShow = isVisible;
+            if (!isVisible && (mActiveStreamType == streamType)) {
+                mActiveStreamType = -1;
             }
+            break;
         }
     }
     return NOERROR;
@@ -1805,12 +1809,12 @@ ECode VolumePanel::OnSliderVisibilityChanged(
 ECode VolumePanel::OnDisplaySafeVolumeWarning(
     /* [in] */ Int32 flags)
 {
-    if ((flags & (IAudioManager::FLAG_SHOW_UI
-        | IAudioManager::FLAG_SHOW_UI_WARNINGS)) != 0 || IsShowing()) {
+    if ((flags & (IAudioManager::FLAG_SHOW_UI | IAudioManager::FLAG_SHOW_UI_WARNINGS)) != 0
+        || IsShowing()) {
         {
             AutoLock syncLock(sSafetyWarningLock);
             if (sSafetyWarning != NULL) {
-                return E_NULL_POINTER_EXCEPTION;
+                return NOERROR;
             }
 
             CVolumePanelSafetyWarning::New(mContext, this, mAudioManager,
@@ -1819,8 +1823,10 @@ ECode VolumePanel::OnDisplaySafeVolumeWarning(
         }
         UpdateStates();
     }
-    Boolean b;
-    mAccessibilityManager->IsTouchExplorationEnabled(&b);
+    Boolean b = FALSE;
+    if (mAccessibilityManager != NULL) {
+        mAccessibilityManager->IsTouchExplorationEnabled(&b);
+    }
     if (b) {
         RemoveMessages(MSG_TIMEOUT);
     }
@@ -1995,8 +2001,10 @@ ECode VolumePanel::HandleMessage(
 
 void VolumePanel::ResetTimeout()
 {
-    Boolean touchExploration;
-    mAccessibilityManager->IsTouchExplorationEnabled(&touchExploration);
+    Boolean touchExploration = FALSE;
+    if (mAccessibilityManager) {
+        mAccessibilityManager->IsTouchExplorationEnabled(&touchExploration);
+    }
     AutoPtr<ISystem> sys;
     CSystem::AcquireSingleton((ISystem**)&sys);
     Int64 tm;

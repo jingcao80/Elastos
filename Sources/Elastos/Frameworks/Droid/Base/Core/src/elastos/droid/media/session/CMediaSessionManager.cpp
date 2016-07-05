@@ -184,9 +184,10 @@ ECode CMediaSessionManager::AddOnActiveSessionsChangedListener(
     if (handler == NULL) {
         CHandler::New((IHandler**)&handler);
     }
-    {    AutoLock syncLock(mLock);
+    {
+        AutoLock syncLock(mLock);
         AutoPtr<IInterface> obj;
-        IMap::Probe(mListeners)->Get(sessionListener, (IInterface**)&obj);
+        mListeners->Get(sessionListener, (IInterface**)&obj);
         AutoPtr<SessionsChangedWrapper> wrapper = (SessionsChangedWrapper*)IObject::Probe(obj);
         if (wrapper != NULL) {
             Logger::W(TAG, String("Attempted to add session listener twice, ignoring."));
@@ -195,7 +196,7 @@ ECode CMediaSessionManager::AddOnActiveSessionsChangedListener(
         wrapper = new SessionsChangedWrapper(sessionListener, handler, this, mContext);
         // try {
         mService->AddSessionsListener(wrapper->mStub, notificationListener, userId);
-        IMap::Probe(mListeners)->Put(sessionListener, (IInterface*)(IObject*)wrapper);
+        mListeners->Put(sessionListener, (IInterface*)(IObject*)wrapper);
         // } catch (RemoteException e) {
         //     Log.e(TAG, "Error in addOnActiveSessionsChangedListener.", e);
         // }
@@ -210,9 +211,10 @@ ECode CMediaSessionManager::RemoveOnActiveSessionsChangedListener(
         // throw new IllegalArgumentException("listener may not be NULL");
         return E_ILLEGAL_ARGUMENT_EXCEPTION;
     }
-    {    AutoLock syncLock(mLock);
+    {
+        AutoLock syncLock(mLock);
         AutoPtr<IInterface> obj;
-        IMap::Probe(mListeners)->Remove(listener, (IInterface**)&obj);
+        mListeners->Remove(listener, (IInterface**)&obj);
         AutoPtr<SessionsChangedWrapper> wrapper = (SessionsChangedWrapper*)IObject::Probe(obj);
         if (wrapper != NULL) {
             // try {

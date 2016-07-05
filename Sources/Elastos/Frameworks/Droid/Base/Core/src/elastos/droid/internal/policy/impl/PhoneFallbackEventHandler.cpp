@@ -84,6 +84,9 @@ ECode PhoneFallbackEventHandler::OnKeyDown(
     /* [in] */ IKeyEvent *event,
     /* [out] */ Boolean *res)
 {
+    VALIDATE_NOT_NULL(res)
+    *res = FALSE;
+
     /* ****************************************************************************
      * HOW TO DECIDE WHERE YOUR KEY HANDLING GOES.
      * See the comment in PhoneWindow.onKeyDown

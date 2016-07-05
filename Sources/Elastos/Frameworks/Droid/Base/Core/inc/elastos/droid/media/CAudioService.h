@@ -263,12 +263,7 @@ public:
         CAR_INTERFACE_DECL()
 
         VolumeController(
-            /* [in] */ CAudioService* host)
-                : mHost(host)
-                , mVisible(FALSE)
-                , mNextLongPress(0)
-                , mLongPressTimeout(0)
-            {}
+            /* [in] */ CAudioService* host);
 
         CARAPI SetController(
             /* [in] */ IIVolumeController* controller);
@@ -1612,7 +1607,7 @@ private:
     // Inform AudioFlinger of our device's low RAM attribute
     static CARAPI_(void) ReadAndSetLowRamDevice();
 
-    CARAPI_(void) EnforceSelfOrSystemUI(
+    CARAPI EnforceSelfOrSystemUI(
         /* [in] */ const String& action);
 
     static CARAPI_(Boolean) InitStatic();

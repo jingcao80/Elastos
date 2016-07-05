@@ -325,12 +325,10 @@ void CVolumeUI::UpdateController()
     Int32 i;
     ss->GetInt32(resolver, SETTING, DEFAULT, &i);
     if (i != 0) {
-        Logger::D(TAG, " >> Registering volume controller, %s", TO_CSTR(mVolumeController));
         mAudioManager->SetVolumeController(mVolumeController);
         mMediaSessionManager->SetRemoteVolumeController(mRemoteVolumeController);
     }
     else {
-        Logger::D(TAG, " >> Unregistering volume controller");
         mAudioManager->SetVolumeController(NULL);
         mMediaSessionManager->SetRemoteVolumeController(NULL);
     }

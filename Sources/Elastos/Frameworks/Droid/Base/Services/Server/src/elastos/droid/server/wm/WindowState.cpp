@@ -455,9 +455,6 @@ ECode WindowState::ComputeFrameLw(
     }
 
     if (!Object::Equals(mParentFrame, pf)) {
-        Slogger::I(TAG, "Window %p content frame from %s to %s",
-            this, TO_CSTR(mParentFrame), TO_CSTR(pf));
-
         mParentFrame->Set(pf);
         mContentChanged = TRUE;
     }
