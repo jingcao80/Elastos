@@ -7,7 +7,6 @@
 #include "Elastos.Droid.Os.h"
 #include "Elastos.Droid.View.h"
 #include "Elastos.Droid.Widget.h"
-#include "Elastos.Droid.Support.V4.View.h"
 #include "Elastos.CoreLibrary.Core.h"
 #include "Elastos.CoreLibrary.Utility.h"
 #include <elastos/droid/dialerbind/analytics/AnalyticsFragment.h>

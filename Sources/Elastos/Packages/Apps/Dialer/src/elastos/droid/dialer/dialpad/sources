@@ -19,6 +19,4 @@ SOURCES += CDialpadSlidingRelativeLayout.cpp
 #SOURCES += CSmartDialNameMatcherHelper.cpp
 #SOURCES += SmartDialPrefix.cpp
 #SOURCES += CSmartDialPrefix.cpp
-#SOURCES += UnicodeDialerKeyListener.cpp
-#SOURCES += CUnicodeDialerKeyListener.cpp
-#SOURCES += CUnicodeDialerKeyListenerHelper.cpp
+SOURCES += UnicodeDialerKeyListener.cpp

@@ -1,9 +1,10 @@
-TARGET_NAME= util
+
+TARGET_NAME= dialpad
 TARGET_TYPE= lib
 
 INCLUDES += $(MAKEDIR)/../../../../../../inc
 INCLUDES += $(MAKEDIR)/../../../../../../
 INCLUDES += ../../../../../../
 
-SOURCES += PhoneNumberFormatter.cpp
-SOURCES += ViewUtil.cpp
+SOURCES = DialpadView.cpp
+SOURCES += CDialpadView.cpp
