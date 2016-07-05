@@ -1308,6 +1308,28 @@ module
     namespace Dialpad {
 
     [local]
+    class CDialpadKeyButton {
+        constructor(
+            [in] IContext* ctx,
+            [in] IAttributeSet* attrs);
+
+        constructor(
+            [in] IContext* ctx,
+            [in] IAttributeSet* attrs,
+            [in] Int32 defStyle);
+
+        interface IDialpadKeyButton;
+        interface IFrameLayout;
+        interface IView;
+        interface IViewGroup;
+        interface IViewParent;
+        interface IViewManager;
+        interface IKeyEventCallback;
+        interface IAccessibilityEventSource;
+        interface IDrawableCallback;
+    }
+
+    [local]
     class CDialpadView {
         constructor(
             [in] IContext* ctx);

@@ -7,4 +7,5 @@ INCLUDES += $(MAKEDIR)/../../../../../../
 INCLUDES += ../../../../../../
 
 SOURCES = DialpadView.cpp
-SOURCES += CDialpadView.cpp
+SOURCES += DialpadKeyButton.cpp
+SOURCES += dialpad.cpp

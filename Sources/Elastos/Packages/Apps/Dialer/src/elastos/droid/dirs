@@ -4,3 +4,4 @@ DIRS += dialer
 DIRS += dialerbind
 DIRS += phone/common
 DIRS += support/v4/view
+DIRS += support/v13/app
