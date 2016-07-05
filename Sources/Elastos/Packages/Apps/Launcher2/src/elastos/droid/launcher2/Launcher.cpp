@@ -3230,7 +3230,7 @@ ECode Launcher::DispatchKeyEvent(
             {
                 if (IsPropertyEnabled(DUMP_STATE_PROPERTY)) {
                     DumpState();
-                    *result = TRUE;
+                    *result = FALSE;
                     return NOERROR;
                 }
                 break;

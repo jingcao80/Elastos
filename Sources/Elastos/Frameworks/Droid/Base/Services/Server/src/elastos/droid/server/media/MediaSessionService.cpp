@@ -158,7 +158,7 @@ void MediaSessionService::MessageHandler::Post(
 //==============================================================================
 
 const String MediaSessionService::TAG("MediaSessionService");
-const Boolean MediaSessionService::DEBUG;
+const Boolean MediaSessionService::DEBUG = FALSE;
 const Int32 MediaSessionService::WAKELOCK_TIMEOUT;
 
 MediaSessionService::MediaSessionService()

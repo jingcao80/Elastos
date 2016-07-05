@@ -61,6 +61,17 @@ static int check_AudioSystem_Command(android::status_t status)
     return kAudioStatusError;
 }
 
+ECode AudioSystem::CheckAudioSystemCommand(Int32 status)
+{
+    if (status == android::NO_ERROR) {
+        return NOERROR;
+    }
+    else if (status == android::DEAD_OBJECT) {
+        Logger::E("AudioSystem", "error: Media Server died.");
+    }
+    return E_FAIL;
+}
+
 static void elastos_media_AudioSystem_error_callback(android::status_t err)
 {
     Int32 error = IAudioSystem::AUDIO_STATUS_ERROR;
@@ -78,7 +89,7 @@ static void elastos_media_AudioSystem_error_callback(android::status_t err)
 
     // TODO: varible error is unused, is that ok?
     int val = check_AudioSystem_Command(err);
-    AudioSystem::ErrorCallbackFromNative(val);
+    AudioSystem::ErrorCallbackFromNative(error);
 }
 
 AudioSystem::StaticInitializer::StaticInitializer()
@@ -540,7 +551,11 @@ ECode AudioSystem::GetNumStreamTypes(
 ECode AudioSystem::MuteMicrophone(
     /* [in] */ Boolean on)
 {
-    return CheckAudioSystemCommand(android::AudioSystem::muteMicrophone(on));
+    ECode ec = CheckAudioSystemCommand(android::AudioSystem::muteMicrophone(on));
+    if (FAILED(ec)) {
+        Logger::E("AudioSystem", "failed to MuteMicrophone:%d", on);
+    }
+    return ec;
 }
 
 ECode AudioSystem::IsMicrophoneMuted(
@@ -604,8 +619,12 @@ ECode AudioSystem::SetParameters(
     if (keyValuePairs) {
         c_keyValuePairs8 = android::String8(c_keyValuePairs);
     }
-    return CheckAudioSystemCommand(
+    ECode ec = CheckAudioSystemCommand(
         android::AudioSystem::setParameters(0, c_keyValuePairs8));
+    if (FAILED(ec)) {
+        Logger::E("AudioSystem", "failed to SetParameters: %s", keyValuePairs.string());
+    }
+    return ec;
 }
 
 ECode AudioSystem::GetParameters(
@@ -742,11 +761,16 @@ ECode AudioSystem::SetDeviceConnectionState(
     /* [in] */ const String& device_address)
 {
     const char *c_address = device_address.string();
-    return CheckAudioSystemCommand(
+    ECode ec = CheckAudioSystemCommand(
         android::AudioSystem::setDeviceConnectionState(
             static_cast<audio_devices_t>(device),
             static_cast<audio_policy_dev_state_t>(state),
             c_address));
+    if (FAILED(ec)) {
+        Logger::E("AudioSystem", "Failed to setDeviceConnectionState:%d, state:%d, address:%s",
+            device, state, c_address);
+    }
+    return ec;
 }
 
 ECode AudioSystem::GetDeviceConnectionState(
@@ -768,7 +792,8 @@ ECode AudioSystem::SetPhoneState(
     /* [in] */ Int32 state,
     /* [out] */ Int32* result)
 {
-    *result = CheckAudioSystemCommand(
+    VALIDATE_NOT_NULL(result)
+    *result = check_AudioSystem_Command(
         android::AudioSystem::setPhoneState((audio_mode_t)state));
     return NOERROR;
 }
@@ -777,10 +802,14 @@ ECode AudioSystem::SetForceUse(
     /* [in] */ Int32 usage,
     /* [in] */ Int32 config)
 {
-    return CheckAudioSystemCommand(
+    ECode ec = CheckAudioSystemCommand(
         android::AudioSystem::setForceUse(
             static_cast<audio_policy_force_use_t>(usage),
             static_cast<audio_policy_forced_cfg_t>(config)));
+    if (FAILED(ec)) {
+        Logger::E("AudioSystem", "Failed to SetForceUse: usage:%d, config:%d", usage, config);
+    }
+    return ec;
 }
 
 ECode AudioSystem::GetForceUse(
@@ -800,10 +829,15 @@ ECode AudioSystem::InitStreamVolume(
     /* [in] */ Int32 indexMin,
     /* [in] */ Int32 indexMax)
 {
-    return CheckAudioSystemCommand(
+    ECode ec = CheckAudioSystemCommand(
         android::AudioSystem::initStreamVolume(
             static_cast<audio_stream_type_t>(stream),
             indexMin, indexMax));
+    if (FAILED(ec)) {
+        Logger::E("AudioSystem", "Failed to InitStreamVolume: stream:%08x, indexMin:%d, indexMax:%d",
+            stream, indexMin, indexMax);
+    }
+    return ec;
 }
 
 ECode AudioSystem::SetStreamVolumeIndex(
@@ -817,7 +851,7 @@ ECode AudioSystem::SetStreamVolumeIndex(
             index, (audio_devices_t)device));
     if (FAILED(ec)) {
         Logger::E("AudioSystem",
-            "Failed to SetStreamVolumeIndex stream %d, index %d, device %d",
+            "Failed to SetStreamVolumeIndex stream %08x, index %d, device %d",
             stream, index, device);
     }
 
@@ -845,8 +879,12 @@ ECode AudioSystem::GetStreamVolumeIndex(
 ECode AudioSystem::SetMasterVolume(
     /* [in] */ Float value)
 {
-    return CheckAudioSystemCommand(
+    ECode ec= CheckAudioSystemCommand(
         android::AudioSystem::setMasterVolume(value));
+    if (FAILED(ec)) {
+        Logger::E("AudioSystem", "Failed to setMasterVolume: %.2f", value);
+    }
+    return ec;
 }
 
 ECode AudioSystem::GetMasterVolume(
@@ -865,8 +903,12 @@ ECode AudioSystem::GetMasterVolume(
 ECode AudioSystem::SetMasterMute(
     /* [in] */ Boolean mute)
 {
-    return CheckAudioSystemCommand(
+    ECode ec = CheckAudioSystemCommand(
         android::AudioSystem::setMasterMute(mute));
+    if (FAILED(ec)) {
+        Logger::E("AudioSystem", "Failed to SetMasterMute: %d", mute);
+    }
+    return ec;
 }
 
 ECode AudioSystem::GetMasterMute(
@@ -938,7 +980,7 @@ ECode AudioSystem::CheckAudioFlinger(
     /* [out] */ Int32* result)
 {
     VALIDATE_NOT_NULL(result)
-    *result = (Int32)CheckAudioSystemCommand(android::AudioSystem::checkAudioFlinger());
+    *result = (Int32)check_AudioSystem_Command(android::AudioSystem::checkAudioFlinger());
     return NOERROR;
 }
 
@@ -1356,23 +1398,14 @@ void AudioSystem::ErrorCallbackFromNative(
 {
     if (DBG) Logger::E("AudioSystem", "ErrorCallbackFromNative error: %d", error);
     AutoPtr<IAudioSystemErrorCallback> errorCallback;
-    {    AutoLock syncLock(sLock);
+    {
+        AutoLock syncLock(sLock);
         if (sErrorCallback != NULL) {
             errorCallback = sErrorCallback;
         }
     }
     if (errorCallback != NULL) {
         errorCallback->OnError(error);
-    }
-}
-
-ECode AudioSystem::CheckAudioSystemCommand(Int32 status)
-{
-    if (status == android::NO_ERROR) {
-        return NOERROR;
-    } else {
-        Logger::E("AudioSystem", "AudioSystem operator failed status %d", status);
-        return E_FAIL;
     }
 }
 

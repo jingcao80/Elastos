@@ -649,32 +649,31 @@ void CKeyguardViewMediator::Setup()
 
     mPM->IsScreenOn(&mScreenOn);
 
-    // TODO
-    // CSoundPool::New(1, IAudioManager::STREAM_SYSTEM, 0, (ISoundPool**)&mLockSounds);
-    // AutoPtr<ISettingsGlobal> sg;
-    // CSettingsGlobal::AcquireSingleton((ISettingsGlobal**)&sg);
-    // String soundPath;
-    // sg->GetString(cr, ISettingsGlobal::LOCK_SOUND, &soundPath);
-    // if (!soundPath.IsNull()) {
-    //     mLockSounds->Load(soundPath, 1, &mLockSoundId);
-    // }
-    // if (soundPath.IsNull() || mLockSoundId == 0) {
-    //     Logger::W(TAG, "failed to load lock sound from %s", soundPath.string());
-    // }
-    // sg->GetString(cr, ISettingsGlobal::UNLOCK_SOUND, &soundPath);
-    // if (!soundPath.IsNull()) {
-    //     mLockSounds->Load(soundPath, 1, &mUnlockSoundId);
-    // }
-    // if (soundPath.IsNull() || mUnlockSoundId == 0) {
-    //     Logger::W(TAG, "failed to load unlock sound from %s", soundPath.string());
-    // }
-    // sg->GetString(cr, ISettingsGlobal::TRUSTED_SOUND, &soundPath);
-    // if (!soundPath.IsNull()) {
-    //     mLockSounds->Load(soundPath, 1, &mTrustedSoundId);
-    // }
-    // if (soundPath.IsNull() || mTrustedSoundId == 0) {
-    //     Logger::W(TAG, "failed to load trusted sound from %s", soundPath.string());
-    // }
+    CSoundPool::New(1, IAudioManager::STREAM_SYSTEM, 0, (ISoundPool**)&mLockSounds);
+    AutoPtr<ISettingsGlobal> sg;
+    CSettingsGlobal::AcquireSingleton((ISettingsGlobal**)&sg);
+    String soundPath;
+    sg->GetString(cr, ISettingsGlobal::LOCK_SOUND, &soundPath);
+    if (!soundPath.IsNull()) {
+        mLockSounds->Load(soundPath, 1, &mLockSoundId);
+    }
+    if (soundPath.IsNull() || mLockSoundId == 0) {
+        Logger::W(TAG, "failed to load lock sound from %s", soundPath.string());
+    }
+    sg->GetString(cr, ISettingsGlobal::UNLOCK_SOUND, &soundPath);
+    if (!soundPath.IsNull()) {
+        mLockSounds->Load(soundPath, 1, &mUnlockSoundId);
+    }
+    if (soundPath.IsNull() || mUnlockSoundId == 0) {
+        Logger::W(TAG, "failed to load unlock sound from %s", soundPath.string());
+    }
+    sg->GetString(cr, ISettingsGlobal::TRUSTED_SOUND, &soundPath);
+    if (!soundPath.IsNull()) {
+        mLockSounds->Load(soundPath, 1, &mTrustedSoundId);
+    }
+    if (soundPath.IsNull() || mTrustedSoundId == 0) {
+        Logger::W(TAG, "failed to load trusted sound from %s", soundPath.string());
+    }
 
     AutoPtr<IResources> resources;
     mContext->GetResources((IResources**)&resources);
@@ -1374,27 +1373,25 @@ void CKeyguardViewMediator::PlaySound(
     CSettingsSystem::AcquireSingleton((ISettingsSystem**)&ss);
     Int32 v;
     ss->GetInt32(cr, ISettingsSystem::LOCKSCREEN_SOUNDS_ENABLED, 1, &v);
+    if (v == 1) {
+        mLockSounds->Stop(mLockSoundStreamId);
+        // Init mAudioManager
+        if (mAudioManager == NULL) {
+            AutoPtr<IInterface> obj;
+            mContext->GetSystemService(IContext::AUDIO_SERVICE, (IInterface**)&obj);
+            mAudioManager = IAudioManager::Probe(obj);
 
-    Logger::W(TAG, "TODO: Need debug SoundPool.");
-    // if (v == 1) {
-    //     mLockSounds->Stop(mLockSoundStreamId);
-    //     // Init mAudioManager
-    //     if (mAudioManager == NULL) {
-    //         AutoPtr<IInterface> obj;
-    //         mContext->GetSystemService(IContext::AUDIO_SERVICE, (IInterface**)&obj);
-    //         mAudioManager = IAudioManager::Probe(obj);
+            if (mAudioManager == NULL) return;
+            mAudioManager->GetMasterStreamType(&mMasterStreamType);
+        }
+        // If the stream is muted, don't play the sound
+        Boolean b;
+        mAudioManager->IsStreamMute(mMasterStreamType, &b);
+        if (b) return;
 
-    //         if (mAudioManager == NULL) return;
-    //         mAudioManager->GetMasterStreamType(&mMasterStreamType);
-    //     }
-    //     // If the stream is muted, don't play the sound
-    //     Boolean b;
-    //     mAudioManager->IsStreamMute(mMasterStreamType, &b);
-    //     if (b) return;
-
-    //     mLockSounds->Play(soundId, mLockSoundVolume, mLockSoundVolume,
-    //         1/*priortiy*/, 0/*loop*/, 1.0f/*rate*/, &mLockSoundStreamId);
-    // }
+        mLockSounds->Play(soundId, mLockSoundVolume, mLockSoundVolume,
+            1/*priortiy*/, 0/*loop*/, 1.0f/*rate*/, &mLockSoundStreamId);
+    }
 }
 
 void CKeyguardViewMediator::PlayTrustedSound()

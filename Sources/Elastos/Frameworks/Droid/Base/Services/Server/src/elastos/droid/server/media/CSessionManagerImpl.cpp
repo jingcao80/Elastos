@@ -352,8 +352,8 @@ ECode CSessionManagerImpl::DispatchAdjustVolumeLocked(
         if (session != NULL) {
             session->ToString(&description);
         }
-        Slogger::D(MediaSessionService::TAG, "Adjusting session %s by %d. flags=%d, suggestedStream=%d",
-                description.string(), direction, flags, suggestedStream);
+        Slogger::D(MediaSessionService::TAG, "Adjusting session %s by direction=%d. flags=%d, suggestedStream=%d",
+            description.string(), direction, flags, suggestedStream);
 
     }
     if (session == NULL) {

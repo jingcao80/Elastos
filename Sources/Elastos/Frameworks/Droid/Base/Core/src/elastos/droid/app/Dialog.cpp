@@ -734,8 +734,7 @@ ECode Dialog::DispatchKeyEvent(
     event->GetKeyCode(&keyCode);
     Boolean consumed;
     if ((mOnKeyListener != NULL) &&
-        (mOnKeyListener->OnKey(this,
-            keyCode, event, &consumed), consumed)) {
+        (mOnKeyListener->OnKey(this, keyCode, event, &consumed), consumed)) {
         *result = TRUE;
         return NOERROR;
     }
@@ -752,8 +751,7 @@ ECode Dialog::DispatchKeyEvent(
         mDecor->GetKeyDispatcherState((IDispatcherState**)&state);
     }
 
-    event->Dispatch(this,
-        state, TO_IINTERFACE(this), &res);
+    event->Dispatch(this, state, TO_IINTERFACE(this), &res);
 
     *result = res;
     return NOERROR;

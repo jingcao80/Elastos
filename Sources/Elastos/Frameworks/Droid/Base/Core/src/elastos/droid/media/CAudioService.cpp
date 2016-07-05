@@ -32,8 +32,6 @@
 #include <elastos/core/StringUtils.h>
 #include <elastos/utility/logging/Logger.h>
 
-#include <elastos/core/AutoLock.h>
-using Elastos::Core::AutoLock;
 using Elastos::Droid::App::CActivityManager;
 using Elastos::Droid::App::ActivityManagerNative;
 using Elastos::Droid::Bluetooth::CBluetoothAdapter;
@@ -78,6 +76,7 @@ using Elastos::Droid::Server::LocalServices;
 using Elastos::Droid::Utility::MathUtils;
 using Elastos::Droid::Manifest;
 using Elastos::Droid::R;
+using Elastos::Core::AutoLock;
 using Elastos::Core::CBoolean;
 using Elastos::Core::CInteger32;
 using Elastos::Core::CString;
@@ -929,6 +928,14 @@ CAR_INTERFACE_IMPL(CAudioService::VolumeController,
 
 const String CAudioService::VolumeController::TAG("VolumeController");
 
+CAudioService::VolumeController::VolumeController(
+    /* [in] */ CAudioService* host)
+    : mHost(host)
+    , mVisible(FALSE)
+    , mNextLongPress(0)
+    , mLongPressTimeout(0)
+{}
+
 ECode CAudioService::VolumeController::SetController(
     /* [in] */ IIVolumeController* controller)
 {
@@ -962,11 +969,11 @@ ECode CAudioService::VolumeController::SuppressAdjustment(
         }
         else if (mNextLongPress > 0) {  // in a long-press
             if (now > mNextLongPress) {
-                // Int64 press triggered, no more suppression
+                // long press triggered, no more suppression
                 mNextLongPress = 0;
             }
             else {
-                // keep suppressing until the Int64 press triggers
+                // keep suppressing until the long press triggers
                 *result = TRUE;
             }
         }
@@ -3056,8 +3063,6 @@ CAudioService::CAudioService()
             IAudioSystem::DEVICE_OUT_ANLG_DOCK_HEADSET | IAudioSystem::DEVICE_OUT_DGTL_DOCK_HEADSET |
             IAudioSystem::DEVICE_OUT_ALL_USB | IAudioSystem::DEVICE_OUT_LINE;
 
-    mVolumeController = new VolumeController(this);
-
     STREAM_VOLUME_ALIAS_VOICE = ArrayOf<Int32>::Alloc(10);
     STREAM_VOLUME_ALIAS_VOICE->Set(0, IAudioSystem::STREAM_VOICE_CALL);      // STREAM_VOICE_CALL
     STREAM_VOLUME_ALIAS_VOICE->Set(1, IAudioSystem::STREAM_RING);            // STREAM_SYSTEM
@@ -3093,31 +3098,6 @@ CAudioService::CAudioService()
     STREAM_VOLUME_ALIAS_DEFAULT->Set(7, IAudioSystem::STREAM_RING);            // STREAM_SYSTEM_ENFORCED
     STREAM_VOLUME_ALIAS_DEFAULT->Set(8, IAudioSystem::STREAM_RING);            // STREAM_DTMF
     STREAM_VOLUME_ALIAS_DEFAULT->Set(9, IAudioSystem::STREAM_MUSIC);           // STREAM_TTS
-
-    mAudioSystemCallback = new MyAudioSystemCallback(this);
-
-    mReceiver = new AudioServiceBroadcastReceiver(this);
-
-    CHashMap::New((IHashMap**)&mConnectedDevices);
-
-    CArrayList::New((IArrayList**)&mSetModeDeathHandlers);
-
-    CArrayList::New((IArrayList**)&mScoClients);
-
-    CAudioRoutesInfo::New((IAudioRoutesInfo**)&mCurAudioRoutes);
-
-    CRemoteCallbackList::New((IRemoteCallbackList**)&mRoutesObservers);
-
-    CArrayList::New((IArrayList**)&mRmtSbmxFullVolDeathHandlers);
-
-    mSafeMediaVolumeDevices = IAudioSystem::DEVICE_OUT_WIRED_HEADSET |
-            IAudioSystem::DEVICE_OUT_WIRED_HEADPHONE;
-
-    CHashMap::New((IHashMap**)&mAudioPolicies);
-
-    CBoolean::New(FALSE, (IBoolean**)&mCameraSoundForced);
-
-    mBluetoothProfileServiceListener = new BluetoothProfileServiceListener(this);
 }
 
 CAudioService::~CAudioService()
@@ -3134,6 +3114,25 @@ ECode CAudioService::constructor(
 {
     mContext = context;
     context->GetContentResolver((IContentResolver**)&mContentResolver);
+
+    mVolumeController = new VolumeController(this);
+    mAudioSystemCallback = new MyAudioSystemCallback(this);
+    mReceiver = new AudioServiceBroadcastReceiver(this);
+    mBluetoothProfileServiceListener = new BluetoothProfileServiceListener(this);
+    mHdmiDisplayStatusCallback = new MyDisplayStatusCallback(this);
+
+    CHashMap::New((IHashMap**)&mConnectedDevices);
+    CArrayList::New((IArrayList**)&mSetModeDeathHandlers);
+    CArrayList::New((IArrayList**)&mScoClients);
+    CArrayList::New((IArrayList**)&mRmtSbmxFullVolDeathHandlers);
+    CHashMap::New((IHashMap**)&mAudioPolicies);
+    CBoolean::New(FALSE, (IBoolean**)&mCameraSoundForced);
+
+    CAudioRoutesInfo::New((IAudioRoutesInfo**)&mCurAudioRoutes);
+    CRemoteCallbackList::New((IRemoteCallbackList**)&mRoutesObservers);
+
+    mSafeMediaVolumeDevices = IAudioSystem::DEVICE_OUT_WIRED_HEADSET |
+            IAudioSystem::DEVICE_OUT_WIRED_HEADPHONE;
 
     AutoPtr<IInterface> service;
     context->GetSystemService(IContext::APP_OPS_SERVICE, ((IInterface**)&service));
@@ -3164,8 +3163,9 @@ ECode CAudioService::constructor(
     service = NULL;
     context->GetSystemService(IContext::VIBRATOR_SERVICE, ((IInterface**)&service));
     AutoPtr<IVibrator> vibrator = IVibrator::Probe(service);
-
-    mHasVibrator = vibrator == NULL ? FALSE : (vibrator->HasVibrator(&b), b);
+    if (vibrator != NULL) {
+        vibrator->HasVibrator(&mHasVibrator);
+    }
 
     // Intialized volume
     SystemProperties::GetInt32(
@@ -3349,8 +3349,6 @@ ECode CAudioService::AddMediaPlayerAndUpdateRemoteController(
 {
     Int32 mediaPlayerSize = 0;
     mMediaPlayers->GetSize(&mediaPlayerSize);
-    String strMediaPalyerSize = StringUtils::ToString(mediaPlayerSize);
-    Logger::V(TAG, String("addMediaPlayerAndUpdateRemoteController: size of existing list: ") + strMediaPalyerSize);
     Boolean playerToAdd = TRUE;
     if (mediaPlayerSize > 0) {
         AutoPtr<IIterator> rccIterator;
@@ -3369,13 +3367,13 @@ ECode CAudioService::AddMediaPlayerAndUpdateRemoteController(
                 player->SetFocus(TRUE);
             }
             else {
-                Logger::E(TAG, String("Player: ") + playerPackageName+ String("Lost Focus"));
+                Logger::E(TAG, "Player: %s Lost Focus", playerPackageName.string());
                 player->SetFocus(FALSE);
             }
         }
     }
     if (playerToAdd) {
-        Logger::E(TAG, String("Adding Player: ") + packageName + String(" to available player list"));
+        Logger::E(TAG, "Adding Player: %s to available player list", packageName.string());
         AutoPtr<MediaPlayerInfo> playerInfo = new MediaPlayerInfo(packageName, TRUE);
         mMediaPlayers->Add(TO_IINTERFACE(playerInfo));
     }
@@ -3385,8 +3383,7 @@ ECode CAudioService::AddMediaPlayerAndUpdateRemoteController(
     intent->PutBooleanExtra(IAudioManager::EXTRA_FOCUS_CHANGED_VALUE, TRUE);
     intent->PutBooleanExtra(IAudioManager::EXTRA_AVAILABLITY_CHANGED_VALUE, TRUE);
     SendBroadcastToAll(intent);
-    Logger::V(TAG, String("updating focussed RCC change to RCD: CallingPackageName:")
-            + packageName);
+    //Logger::V(TAG, "updating focussed RCC change to RCD: CallingPackageName:%s", packageName.string());
     return NOERROR;
 }
 
@@ -3394,8 +3391,8 @@ ECode CAudioService::UpdateRemoteControllerOnExistingMediaPlayers()
 {
     Int32 mediaPlayerSize = 0;
     mMediaPlayers->GetSize(&mediaPlayerSize);
-    String strMediaPalyerSize = StringUtils::ToString(mediaPlayerSize);
-    Logger::V(TAG, String("updateRemoteControllerOnExistingMediaPlayers: size of Player list: ") + strMediaPalyerSize);
+    Logger::V(TAG, "updateRemoteControllerOnExistingMediaPlayers: size of Player list: %d",
+        mediaPlayerSize);
     if (mediaPlayerSize > 0) {
         Logger::V(TAG, "Inform RemoteController regarding existing RCC entry");
         AutoPtr<IIterator> rccIterator;
@@ -3433,8 +3430,8 @@ ECode CAudioService::RemoveMediaPlayerAndUpdateRemoteController(
 {
     Int32 mediaPlayerSize = 0;
     mMediaPlayers->GetSize(&mediaPlayerSize);
-    String strMediaPalyerSize = StringUtils::ToString(mediaPlayerSize);
-    Logger::V(TAG, String("removeMediaPlayerAndUpdateRemoteController: size of existing list: ") + strMediaPalyerSize);
+    Logger::V(TAG, "removeMediaPlayerAndUpdateRemoteController: size of existing list: %d",
+        mediaPlayerSize);
     Boolean playerToRemove = FALSE;
     Int32 index = -1;
     if (mediaPlayerSize > 0) {
@@ -3457,12 +3454,12 @@ ECode CAudioService::RemoveMediaPlayerAndUpdateRemoteController(
                 break;
             }
             else {
-                Logger::V(TAG, String("Player entry for ") + playerPackageName + String(" is not present"));
+                Logger::V(TAG, "Player entry for %s is not present", playerPackageName.string());
             }
         }
     }
     if (playerToRemove) {
-        Logger::E(TAG, String("Removing Player: ") + packageName + String(" from index") + StringUtils::ToString(index));
+        Logger::E(TAG, "Removing Player: %s from index %d", packageName.string(), index);
         mMediaPlayers->Remove(index);
     }
     AutoPtr<IIntent> intent;
@@ -3472,7 +3469,7 @@ ECode CAudioService::RemoveMediaPlayerAndUpdateRemoteController(
     intent->PutBooleanExtra(IAudioManager::EXTRA_FOCUS_CHANGED_VALUE, FALSE);
     intent->PutBooleanExtra(IAudioManager::EXTRA_AVAILABLITY_CHANGED_VALUE, FALSE);
     SendBroadcastToAll(intent);
-    Logger::V(TAG, String("Updated List size: ") + strMediaPalyerSize);
+    Logger::V(TAG, "Updated List size: %d", mediaPlayerSize);
     return NOERROR;
 }
 
@@ -3535,7 +3532,6 @@ ECode CAudioService::AdjustMasterVolume(
         volume += delta;
     }
 
-    //Log.d(TAG, "adjustMasterVolume volume: " + volume + " steps: " + steps);
     return SetMasterVolume(volume, flags, callingPackage);
 }
 
@@ -3845,7 +3841,8 @@ ECode CAudioService::GetRingerMode(
 {
     VALIDATE_NOT_NULL(result)
 
-    {    AutoLock syncLock(mSettingsLock);
+    {
+        AutoLock syncLock(mSettingsLock);
         *result = mRingerMode;
     }
     return NOERROR;
@@ -4255,7 +4252,7 @@ ECode CAudioService::SetBluetoothA2dpDeviceConnectionState(
     Int32 delay;
     if (profile != IBluetoothProfile::A2DP &&
             profile != IBluetoothProfile::A2DP_SINK) {
-        // throw new IllegalArgumentException("invalid profile " + profile);
+        // Logger::E(TAG, "invalid profile " + profile);
         return E_ILLEGAL_ARGUMENT_EXCEPTION;
     }
     {    AutoLock syncLock(mConnectedDevices);
@@ -4435,7 +4432,7 @@ ECode CAudioService::RegisterAudioPolicy(
 {
     VALIDATE_NOT_NULL(result)
 
-    //Log.v(TAG, "registerAudioPolicy for " + cb + " got policy:" + policyConfig);
+    //Logger::V(TAG, "registerAudioPolicy for " + cb + " got policy:" + policyConfig);
     Int32 val;
     mContext->CheckCallingOrSelfPermission(
                     Manifest::permission::MODIFY_AUDIO_ROUTING, &val);
@@ -4603,7 +4600,7 @@ ECode CAudioService::CheckAudioSettingsPermission(
 ECode CAudioService::SetRemoteStreamVolume(
     /* [in] */ Int32 index)
 {
-    EnforceSelfOrSystemUI(String("set the remote stream volume"));
+    FAIL_RETURN(EnforceSelfOrSystemUI(String("set the remote stream volume")))
     mMediaFocusControl->SetRemoteStreamVolume(index);
     return NOERROR;
 }
@@ -4611,7 +4608,7 @@ ECode CAudioService::SetRemoteStreamVolume(
 ECode CAudioService::SetRingtonePlayer(
     /* [in] */ IIRingtonePlayer* player)
 {
-    mContext->EnforceCallingOrSelfPermission(Manifest::permission::REMOTE_AUDIO_PLAYBACK, String(NULL));
+    FAIL_RETURN(mContext->EnforceCallingOrSelfPermission(Manifest::permission::REMOTE_AUDIO_PLAYBACK, String(NULL)))
     mRingtonePlayer = player;
     return NOERROR;
 }
@@ -4646,7 +4643,7 @@ ECode CAudioService::StartWatchingRoutes(
 
 ECode CAudioService::DisableSafeMediaVolume()
 {
-    EnforceSelfOrSystemUI(String("disable the safe media volume"));
+    FAIL_RETURN(EnforceSelfOrSystemUI(String("disable the safe media volume")))
     {    AutoLock syncLock(mSafeMediaVolumeStateLock);
         SetSafeMediaVolumeEnabled(FALSE);
         if (mPendingVolumeCommand != NULL) {
@@ -4702,7 +4699,7 @@ ECode CAudioService::IsHdmiSystemAudioSupported(
 ECode CAudioService::SetVolumeController(
     /* [in] */ IIVolumeController* controller)
 {
-    EnforceSelfOrSystemUI(String("set the volume controller"));
+    FAIL_RETURN(EnforceSelfOrSystemUI(String("set the volume controller")))
 
     // return early if things are not actually changing
     Boolean b;
@@ -4735,7 +4732,7 @@ ECode CAudioService::NotifyVolumeControllerVisible(
     /* [in] */ IIVolumeController* controller,
     /* [in] */ Boolean visible)
 {
-    EnforceSelfOrSystemUI(String("notify about volume controller visibility"));
+    FAIL_RETURN(EnforceSelfOrSystemUI(String("notify about volume controller visibility")))
 
     // return early if the controller is not current
     Boolean b;
@@ -4763,7 +4760,7 @@ ECode CAudioService::Dump(
     /* [in] */ IPrintWriter* pw,
     /* [in] */ ArrayOf<String>* args)
 {
-    mContext->EnforceCallingOrSelfPermission(Manifest::permission::DUMP, TAG);
+    FAIL_RETURN(mContext->EnforceCallingOrSelfPermission(Manifest::permission::DUMP, TAG))
 
     mMediaFocusControl->Dump(pw);
     DumpStreamStates(pw);
@@ -4997,7 +4994,8 @@ void CAudioService::ReadPersistedSettings()
     if (mUseFixedVolume || IsPlatformTelevision()) {
         ringerMode = IAudioManager::RINGER_MODE_NORMAL;
     }
-    {    AutoLock syncLock(mSettingsLock);
+    {
+        AutoLock syncLock(mSettingsLock);
         mRingerMode = ringerMode;
 
         // System.VIBRATE_ON is not used any more but defaults for mVibrateSetting
@@ -5077,8 +5075,9 @@ void CAudioService::AdjustSuggestedStreamVolume(
     /* [in] */ Int32 uid)
 {
     if (DEBUG_VOL) {
-        Logger::D(TAG, "adjustSuggestedStreamVolume() stream=%d, flags=%08x",
-            suggestedStreamType, flags);
+        Logger::D(TAG, "AdjustSuggestedStreamVolume() stream=%08x, direction=%d, "
+            "flags=%08x, callingPackage=%s, uid=%d",
+            suggestedStreamType, direction, flags, callingPackage.string(), uid);
     }
     Int32 streamType;
     if (mVolumeControlStream != -1) {
@@ -5117,8 +5116,10 @@ void CAudioService::AdjustStreamVolume(
     if (mUseFixedVolume) {
         return;
     }
-    if (DEBUG_VOL) Logger::D(TAG, "adjustStreamVolume() stream=%d, dir=%d, flags=%08x",
+    if (DEBUG_VOL) {
+        Logger::D(TAG, "AdjustStreamVolume() stream=%08x, dir=%d, flags=%08x",
             streamType, direction, flags);
+    }
 
     EnsureValidDirection(direction);
     EnsureValidStreamType(streamType);
@@ -5146,11 +5147,13 @@ void CAudioService::AdjustStreamVolume(
     Int32 val;
     mAppOps->NoteOp((*STEAM_VOLUME_OPS)[streamTypeAlias], uid, callingPackage, &val);
     if (val != IAppOpsManager::MODE_ALLOWED) {
+        Logger::W(TAG, "AdjustStreamVolume not allowed. %d", (*STEAM_VOLUME_OPS)[streamTypeAlias]);
         return;
     }
 
     // reset any pending volume command
-    {    AutoLock syncLock(mSafeMediaVolumeStateLock);
+    {
+        AutoLock syncLock(mSafeMediaVolumeStateLock);
         mPendingVolumeCommand = NULL;
     }
 
@@ -5182,9 +5185,8 @@ void CAudioService::AdjustStreamVolume(
 
     // If either the client forces allowing ringer modes for this adjustment,
     // or the stream type is one that is affected by ringer modes
-    GetMasterStreamType(&val);
     if (((flags & IAudioManager::FLAG_ALLOW_RINGER_MODES) != 0) ||
-            (streamTypeAlias == val)) {
+            ((GetMasterStreamType(&val), val) == streamTypeAlias)) {
         Int32 ringerMode;
         GetRingerMode(&ringerMode);
         // do not vibrate if already in vibrate mode
@@ -5210,7 +5212,8 @@ void CAudioService::AdjustStreamVolume(
         if (streamTypeAlias == IAudioSystem::STREAM_MUSIC &&
             (device & IAudioSystem::DEVICE_OUT_ALL_A2DP) != 0 &&
             (flags & IAudioManager::FLAG_BLUETOOTH_ABS_VOLUME) == 0) {
-            {    AutoLock syncLock(mA2dpAvrcpLock);
+            {
+                AutoLock syncLock(mA2dpAvrcpLock);
                 if (mA2dp != NULL && mAvrcpAbsVolSupported) {
                     mA2dp->AdjustAvrcpAbsoluteVolume(direction);
                 }
@@ -5239,33 +5242,31 @@ void CAudioService::AdjustStreamVolume(
         Int32 newIndex;
         (*mStreamStates)[streamType]->GetIndex(device, &newIndex);
         if (mHdmiManager != NULL) {
-            {
-                AutoLock syncLock(mHdmiManager);
-                if (mHdmiTvClient != NULL &&
-                    streamTypeAlias == IAudioSystem::STREAM_MUSIC &&
-                    (flags & IAudioManager::FLAG_HDMI_SYSTEM_AUDIO_VOLUME) == 0 &&
-                    oldIndex != newIndex) {
-                    Int32 maxIndex;
-                    GetStreamMaxVolume(streamType, &maxIndex);
-                    {
-                        AutoLock syncLock(mHdmiTvClient);
-                        if (mHdmiSystemAudioSupported) {
-                            mHdmiTvClient->SetSystemAudioVolume(
-                                    (oldIndex + 5) / 10, (newIndex + 5) / 10, maxIndex);
-                        }
+            AutoLock syncLock(mHdmiManager);
+            if (mHdmiTvClient != NULL &&
+                streamTypeAlias == IAudioSystem::STREAM_MUSIC &&
+                (flags & IAudioManager::FLAG_HDMI_SYSTEM_AUDIO_VOLUME) == 0 &&
+                oldIndex != newIndex) {
+                Int32 maxIndex;
+                GetStreamMaxVolume(streamType, &maxIndex);
+                {
+                    AutoLock syncLock(mHdmiTvClient);
+                    if (mHdmiSystemAudioSupported) {
+                        mHdmiTvClient->SetSystemAudioVolume(
+                                (oldIndex + 5) / 10, (newIndex + 5) / 10, maxIndex);
                     }
                 }
-                // mHdmiCecSink TRUE => mHdmiPlaybackClient != NULL
-                if (mHdmiCecSink &&
-                        streamTypeAlias == IAudioSystem::STREAM_MUSIC &&
-                        oldIndex != newIndex) {
-                    {
-                        AutoLock syncLock(mHdmiPlaybackClient);
-                        Int32 keyCode = (direction == -1) ? IKeyEvent::KEYCODE_VOLUME_DOWN :
-                                IKeyEvent::KEYCODE_VOLUME_UP;
-                        IHdmiClient::Probe(mHdmiPlaybackClient)->SendKeyEvent(keyCode, TRUE);
-                        IHdmiClient::Probe(mHdmiPlaybackClient)->SendKeyEvent(keyCode, FALSE);
-                    }
+            }
+            // mHdmiCecSink TRUE => mHdmiPlaybackClient != NULL
+            if (mHdmiCecSink &&
+                    streamTypeAlias == IAudioSystem::STREAM_MUSIC &&
+                    oldIndex != newIndex) {
+                {
+                    AutoLock syncLock(mHdmiPlaybackClient);
+                    Int32 keyCode = (direction == -1) ? IKeyEvent::KEYCODE_VOLUME_DOWN :
+                            IKeyEvent::KEYCODE_VOLUME_UP;
+                    IHdmiClient::Probe(mHdmiPlaybackClient)->SendKeyEvent(keyCode, TRUE);
+                    IHdmiClient::Probe(mHdmiPlaybackClient)->SendKeyEvent(keyCode, FALSE);
                 }
             }
         }
@@ -5473,7 +5474,8 @@ void CAudioService::SendVolumeUpdate(
     // If Hdmi-CEC system audio mode is on, show volume bar
     // only when TV receives volume notification from Audio Receiver.
     if (mHdmiTvClient != NULL && streamType == IAudioSystem::STREAM_MUSIC) {
-        {    AutoLock syncLock(mHdmiTvClient);
+        {
+            AutoLock syncLock(mHdmiTvClient);
             if (mHdmiSystemAudioSupported &&
                     ((flags & IAudioManager::FLAG_HDMI_SYSTEM_AUDIO_VOLUME) == 0)) {
                 flags &= ~IAudioManager::FLAG_SHOW_UI;
@@ -5618,7 +5620,7 @@ ECode CAudioService::EnsureValidRingerMode(
 {
     Boolean b;
     if (CAudioManager::IsValidRingerMode(ringerMode, &b), !b) {
-        // throw new IllegalArgumentException("Bad ringer mode " + ringerMode);
+        // Logger::E(TAG, "Bad ringer mode " + ringerMode);
         return E_ILLEGAL_ARGUMENT_EXCEPTION;
     }
     return NOERROR;
@@ -6251,8 +6253,8 @@ Int32 CAudioService::CheckForRingerModeChange(
         break;
     case IAudioManager::RINGER_MODE_VIBRATE:
         if (!mHasVibrator) {
-            Logger::E(TAG, String("checkForRingerModeChange() current ringer mode is vibrate") +
-                    "but no vibrator is present");
+            Logger::E(TAG, "checkForRingerModeChange() current ringer mode is vibrate"
+                "but no vibrator is present");
             break;
         }
         if ((direction == IAudioManager::ADJUST_LOWER)) {
@@ -6304,7 +6306,7 @@ ECode CAudioService::EnsureValidDirection(
     /* [in] */ Int32 direction)
 {
     if (direction < IAudioManager::ADJUST_LOWER || direction > IAudioManager::ADJUST_RAISE) {
-        // throw new IllegalArgumentException("Bad direction " + direction);
+        Logger::E(TAG, "Bad direction %d", direction);
         return E_ILLEGAL_ARGUMENT_EXCEPTION;
     }
     return NOERROR;
@@ -6314,7 +6316,7 @@ ECode CAudioService::EnsureValidSteps(
     /* [in] */ Int32 steps)
 {
     if (Elastos::Core::Math::Abs(steps) > MAX_BATCH_VOLUME_ADJUST_STEPS) {
-        // throw new IllegalArgumentException("Bad volume adjust steps " + steps);
+        Logger::E(TAG, "Bad volume adjust steps %d", steps);
         return E_ILLEGAL_ARGUMENT_EXCEPTION;
     }
     return NOERROR;
@@ -6324,7 +6326,7 @@ ECode CAudioService::EnsureValidStreamType(
     /* [in] */ Int32 streamType)
 {
     if (streamType < 0 || streamType >= mStreamStates->GetLength()) {
-        // throw new IllegalArgumentException("Bad stream type " + streamType);
+        Logger::E(TAG, "Bad stream type %d", streamType);
         return E_ILLEGAL_ARGUMENT_EXCEPTION;
     }
     return NOERROR;
@@ -6364,11 +6366,13 @@ Int32 CAudioService::GetActiveStreamType(
                 Int32 val;
                 AudioSystem::GetForceUse(IAudioSystem::FOR_COMMUNICATION, &val);
                 if (val == IAudioSystem::FORCE_BT_SCO) {
-                    // Log.v(TAG, "getActiveStreamType: Forcing STREAM_BLUETOOTH_SCO...");
+                    if (DEBUG_VOL)
+                        Logger::V(TAG, "getActiveStreamType: Forcing STREAM_BLUETOOTH_SCO...");
                     return IAudioSystem::STREAM_BLUETOOTH_SCO;
                 }
                 else {
-                    // Log.v(TAG, "getActiveStreamType: Forcing STREAM_VOICE_CALL...");
+                    if (DEBUG_VOL)
+                        Logger::V(TAG, "getActiveStreamType: Forcing STREAM_VOICE_CALL...");
                     return IAudioSystem::STREAM_VOICE_CALL;
                 }
             }
@@ -6396,6 +6400,7 @@ Int32 CAudioService::GetActiveStreamType(
                     return IAudioSystem::STREAM_MUSIC;
             }
             break;
+
         default: {
             Boolean b1, b2;
             AudioSystem::IsStreamActive(IAudioSystem::STREAM_NOTIFICATION,
@@ -7308,10 +7313,10 @@ void CAudioService::ReadAndSetLowRamDevice()
     }
 }
 
-void CAudioService::EnforceSelfOrSystemUI(
+ECode CAudioService::EnforceSelfOrSystemUI(
     /* [in] */ const String& action)
 {
-    mContext->EnforceCallingOrSelfPermission(Manifest::permission::STATUS_BAR_SERVICE,
+    return mContext->EnforceCallingOrSelfPermission(Manifest::permission::STATUS_BAR_SERVICE,
             String("Only SystemUI can ") + action);
 }
 

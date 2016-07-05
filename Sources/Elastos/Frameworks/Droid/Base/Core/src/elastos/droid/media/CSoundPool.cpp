@@ -852,7 +852,8 @@ ECode CSoundPool::constructor(
     CAudioAttributesBuilder::New((IAudioAttributesBuilder**)&aab);
     aab->SetInternalLegacyStreamType(streamType);
     AutoPtr<IAudioAttributes> attr;
-    return aab->Build((IAudioAttributes**)&attr);
+    aab->Build((IAudioAttributes**)&attr);
+    return constructor(maxStreams, attr);
 }
 
 ECode CSoundPool::constructor(

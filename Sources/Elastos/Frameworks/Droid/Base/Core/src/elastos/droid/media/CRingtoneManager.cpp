@@ -364,19 +364,23 @@ ECode CRingtoneManager::GetActualDefaultRingtoneUri(
 
     String setting = GetSettingForType(type);
     if (setting == NULL) {
+        Logger::E(TAG, "Invalid type: %d", type);
         return NOERROR;
     }
     AutoPtr<IContentResolver> contentResolver;
     context->GetContentResolver((IContentResolver**)&contentResolver);
     String uriString;
     FAIL_RETURN(Settings::System::GetString(contentResolver, setting, &uriString))
+
     AutoPtr<IUriHelper> uriHelper;
     CUriHelper::AcquireSingleton((IUriHelper**)&uriHelper);
     AutoPtr<IUri> uri;
-    uriHelper->Parse(uriString, (IUri**)&uri);
+    if (uriString != NULL) {
+        uriHelper->Parse(uriString, (IUri**)&uri);
+    }
 
     if ((uriString == NULL) || (type & TYPE_RINGTONE) == 0) {
-        if (!uriString.IsNull()) {
+        if (uriString != NULL) {
             *result = uri;
             REFCOUNT_ADD(*result);
         }
@@ -387,19 +391,20 @@ ECode CRingtoneManager::GetActualDefaultRingtoneUri(
     AutoPtr<IUri> ringToneUri;
     GetStaticDefaultRingtoneUri(context, (IUri**)&ringToneUri);
     AutoPtr<ICursor> cursor;
-    // try {
-        contentResolver->Query(uri, NULL, String(""), NULL, String(""), (ICursor**)&cursor);
+    ECode ec = contentResolver->Query(uri, NULL, String(""), NULL, String(""), (ICursor**)&cursor);
+    if (FAILED(ec)) {
+        Logger::E(TAG, "Failed to query %s", TO_CSTR(uri));
+    }
+    else {
         Int32 count = 0;
         if ((cursor != NULL) && (cursor->GetCount(&count), count > 0)) {
-            ringToneUri = NULL;
             ringToneUri = uri;
         }
-    // } catch (SQLiteException ex) {
-        // Log.e(TAG, "ex " + ex);
-    // } finally {
-        if (cursor != NULL)
-            ICloseable::Probe(cursor)->Close();
-    // }
+    }
+
+    if (cursor != NULL) {
+        ICloseable::Probe(cursor)->Close();
+    }
 
     *result = ringToneUri;
     REFCOUNT_ADD(*result);
