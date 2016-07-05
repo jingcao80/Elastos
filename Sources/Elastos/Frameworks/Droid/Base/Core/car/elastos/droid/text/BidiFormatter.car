@@ -18,8 +18,7 @@ module
          * a string being bidi-wrapped, not just after it. The default is false.
          */
         StereoReset(
-            [in] Boolean stereoReset,
-            [out] IBidiFormatterBuilder** ret);
+            [in] Boolean stereoReset);
 
         /**
          * Specifies the default directionality estimation algorithm to be used by the BidiFormatter.
@@ -29,8 +28,7 @@ module
          * @return the builder itself.
          */
         SetTextDirectionHeuristic(
-            [in] ITextDirectionHeuristic* heuristic,
-            [out] IBidiFormatterBuilder** ret);
+            [in] ITextDirectionHeuristic* heuristic);
 
         /**
          * @return A BidiFormatter with the specified options.

@@ -2,9 +2,11 @@
 #define __ELASTOS_DROID_TEXT_CBIDIFORMATTER_HELPER_H__
 
 #include "_Elastos_Droid_Text_CBidiFormatterHelper.h"
+#include "elastos/droid/ext/frameworkext.h"
 #include <elastos/core/Singleton.h>
 
 using Elastos::Core::ICharSequence;
+using Elastos::Core::Singleton;
 
 namespace Elastos {
 namespace Droid {

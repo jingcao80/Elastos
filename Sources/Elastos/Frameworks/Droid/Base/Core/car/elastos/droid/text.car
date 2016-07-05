@@ -1030,7 +1030,10 @@ module
     }
 
     class CBidiFormatter {
-        constructor();
+        constructor(
+            [in] Boolean isRtlContext,
+            [in] Int32 flags,
+            [in] ITextDirectionHeuristic* heuristic);
 
         interface IBidiFormatter;
     }

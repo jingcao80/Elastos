@@ -472,33 +472,33 @@ private:
      * in {@link #setNameOverrides(android.app.BackStackRecord.TransitionState, java.util.ArrayList,
      * java.util.ArrayList)}.
      */
-    AutoPtr<IBackStackRecordTransitionState> BeginTransition(
+    CARAPI_(AutoPtr<IBackStackRecordTransitionState>) BeginTransition(
         /* [in] */ ISparseArray* firstOutFragments, //SparseArray<Fragment>
         /* [in] */ ISparseArray* lastInFragments, //SparseArray<Fragment>
         /* [in] */ Boolean isBack);
 
-    static AutoPtr<ITransition> CloneTransition(
+    static CARAPI_(AutoPtr<ITransition>) CloneTransition(
         /* [in] */ ITransition* transition);
 
-    static AutoPtr<ITransition> GetEnterTransition(
+    static CARAPI_(AutoPtr<ITransition>) GetEnterTransition(
         /* [in] */ IFragment* inFragment,
         /* [in] */ Boolean isBack);
 
-    static AutoPtr<ITransition> GetExitTransition(
+    static CARAPI_(AutoPtr<ITransition>) GetExitTransition(
         /* [in] */ IFragment* outFragment,
         /* [in] */ Boolean isBack);
 
-    static AutoPtr<ITransition> GetSharedElementTransition(
+    static CARAPI_(AutoPtr<ITransition>) GetSharedElementTransition(
         /* [in] */ IFragment* inFragment,
         /* [in] */ IFragment* outFragment,
         /* [in] */ Boolean isBack);
 
-    static AutoPtr<IArrayList>/*<View>*/ CaptureExitingViews(
+    static CARAPI_(AutoPtr<IArrayList>/*<View>*/) CaptureExitingViews(
         /* [in] */ ITransition* exitTransition,
         /* [in] */ IFragment* outFragment,
         /* [in] */ IArrayMap* namedViews); //  <String, View>
 
-    AutoPtr<IArrayMap>/*<String, View>*/ RemapSharedElements(
+    CARAPI_(AutoPtr<IArrayMap>/*<String, View>*/) RemapSharedElements(
         /* [in] */ IBackStackRecordTransitionState* state,
         /* [in] */ IFragment* outFragment,
         /* [in] */ Boolean isBack);
@@ -514,7 +514,7 @@ private:
      * <p>The shared element transition maps its shared elements immediately prior to
      * capturing the state of the Transition.</p>
      */
-    AutoPtr<IArrayList>/*<View>*/ AddTransitionTargets(
+    CARAPI_(AutoPtr<IArrayList>/*<View>*/) AddTransitionTargets(
         /* [in] */ IBackStackRecordTransitionState* state,
         /* [in] */ ITransition* enterTransition,
         /* [in] */ ITransition* sharedElementTransition,
@@ -526,23 +526,23 @@ private:
         /* [in] */ Boolean isBack,
         /* [in] */ IArrayList* /*<View>*/ sharedElementTargets);
 
-    void CallSharedElementEnd(
+    CARAPI_(void) CallSharedElementEnd(
         /* [in] */ IBackStackRecordTransitionState* state,
         /* [in] */ IFragment* inFragment,
         /* [in] */ IFragment* outFragment,
         /* [in] */ Boolean isBack,
         /* [in] */ IArrayMap* /*<String, View>*/ namedViews);
 
-    void SetEpicenterIn(
+    CARAPI_(void) SetEpicenterIn(
         /* [in] */ IArrayMap* /*<String, View>*/ namedViews,
         /* [in] */ IBackStackRecordTransitionState* state);
 
-    AutoPtr<IArrayMap> /*<String, View>*/ MapSharedElementsIn(
+    CARAPI_(AutoPtr<IArrayMap> /*<String, View>*/) MapSharedElementsIn(
         /* [in] */ IBackStackRecordTransitionState* state,
         /* [in] */ Boolean isBack,
         /* [in] */ IFragment* inFragment);
 
-    static AutoPtr<ITransition> MergeTransitions(
+    static CARAPI_(AutoPtr<ITransition>) MergeTransitions(
         /* [in] */ ITransition* enterTransition,
         /* [in] */ ITransition* exitTransition,
         /* [in] */ ITransition* sharedElementTransition,
@@ -561,7 +561,8 @@ private:
      * @param isBack true if this is popping the back stack or false if this is a
      *               forward operation.
      */
-    void ConfigureTransitions(int containerId,
+    CARAPI_(void) ConfigureTransitions(
+        /* [in] */ Int32 containerId,
         /* [in] */ IBackStackRecordTransitionState* state,
         /* [in] */ Boolean isBack,
         /* [in] */ ISparseArray* firstOutFragments, //SparseArray<Fragment>
@@ -571,7 +572,7 @@ private:
      * After the transition has started, remove all targets that we added to the transitions
      * so that the transitions are left in a clean state.
      */
-    void RemoveTargetedViewsFromTransitions(
+    CARAPI_(void) RemoveTargetedViewsFromTransitions(
         /* [in] */ IViewGroup* sceneRoot,
         /* [in] */ IView* nonExistingView,
         /* [in] */ ITransition* enterTransition,
@@ -583,11 +584,11 @@ private:
         /* [in] */ ITransition* overallTransition,
         /* [in] */ IArrayList* /*<View>*/ hiddenViews);
 
-    static void RemoveTargets(
+    static CARAPI_(void) RemoveTargets(
         /* [in] */ ITransition* transition,
         /* [in] */ IArrayList* /*<View>*/ views);
 
-    static void AddTargets(
+    static CARAPI_(void) AddTargets(
         /* [in] */ ITransition* transition,
         /* [in] */ IArrayList* /*<View>*/ views);
 
@@ -599,7 +600,7 @@ private:
      * @param namedViews The current mapping
      * @return a new Map after it has been mapped with the new names as keys.
      */
-    static AutoPtr<IArrayMap> /*<String, View>*/ RemapNames(
+    static CARAPI_(AutoPtr<IArrayMap> /*<String, View>*/) RemapNames(
         /* [in] */ IArrayList* /* <String> */ inMap,
         /* [in] */ IArrayList* /* <String> */ toGoInMap,
         /* [in] */ IArrayMap* /* <String, View> */ namedViews);
@@ -613,45 +614,45 @@ private:
      * @param isBack true if this is popping the back stack or false if this is a
      *               forward operation.
      */
-    AutoPtr<IArrayMap> /*<String, View>*/ MapEnteringSharedElements(
+    CARAPI_(AutoPtr<IArrayMap> /*<String, View>*/) MapEnteringSharedElements(
         /* [in] */ IBackStackRecordTransitionState* state,
         /* [in] */ IFragment* inFragment,
         /* [in] */ Boolean isBack);
 
-    void ExcludeHiddenFragments(
+    CARAPI_(void) ExcludeHiddenFragments(
         /* [in] */ IArrayList* /* <View> */ hiddenFragmentViews,
         /* [in] */ Int32 containerId,
         /* [in] */ ITransition* transition);
 
-    static void SetEpicenter(
+    static CARAPI_(void) SetEpicenter(
         /* [in] */ ITransition* transition,
         /* [in] */ IView* view);
 
-    void SetSharedElementEpicenter(
+    CARAPI_(void) SetSharedElementEpicenter(
         /* [in] */ ITransition* transition,
         /* [in] */ IBackStackRecordTransitionState* state);
 
-    static void SetNameOverride(
+    static CARAPI_(void) SetNameOverride(
         /* [in] */ IArrayMap* /*<String, String>*/ overrides,
         /* [in] */ const String& source,
         /* [in] */ const String& target);
 
-    static void SetNameOverride(
+    static CARAPI_(void) SetNameOverride(
         /* [in] */ IArrayMap* /*<String, String>*/ overrides,
         /* [in] */ ICharSequence* source,
         /* [in] */ ICharSequence* target);
 
-    static void SetNameOverrides(
+    static CARAPI_(void) SetNameOverrides(
         /* [in] */ IBackStackRecordTransitionState* state,
         /* [in] */ IArrayList* /*<String>*/ sourceNames,
         /* [in] */ IArrayList* /*<String>*/ targetNames);
 
-    void SetBackNameOverrides(
+    CARAPI_(void) SetBackNameOverrides(
         /* [in] */ IBackStackRecordTransitionState* state,
         /* [in] */ IArrayMap* /*<String, View>*/ namedViews,
         /* [in] */ Boolean isEnd);
 
-    void SetNameOverrides(
+    CARAPI_(void) SetNameOverrides(
         /* [in] */ IBackStackRecordTransitionState* state,
         /* [in] */ IArrayMap* /*<String, View>*/ namedViews,
         /* [in] */ Boolean isEnd);

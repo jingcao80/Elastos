@@ -3,6 +3,7 @@
 #define __ELASTOS_DROID_TEXT_CBIDIFORMATTER_H__
 
 #include "_Elastos_Droid_Text_CBidiFormatter.h"
+#include "elastos/droid/ext/frameworkdef.h"
 #include <elastos/core/Object.h>
 
 namespace Elastos {
@@ -13,14 +14,181 @@ CarClass(CBidiFormatter)
     , public Object
     , public IBidiFormatter
 {
-public:
-    CBidiFormatter();
+    friend class CBidiFormatterBuilder;
+private:
+    class DirectionalityEstimator
+        : public Object
+    {
+    public:
+        /**
+         * Constructor.
+         *
+         * @param text The string to scan.
+         * @param isHtml Whether the text to be scanned is to be treated as HTML, i.e. skipping over
+         *     tags and entities.
+         */
+        DirectionalityEstimator(
+            /* [in] */ const String& text,
+            /* [in] */ Boolean isHtml);
 
+        ~DirectionalityEstimator();
+
+        /**
+         * Returns the directionality of the first character with strong directionality in the
+         * string, or DIR_UNKNOWN if none was encountered. Treats a non-BN character between an
+         * LRE/RLE/LRO/RLO and its matching PDF as a strong character, LTR after LRE/LRO, and RTL
+         * after RLE/RLO. The results are undefined for a string containing unbalanced
+         * LRE/RLE/LRO/RLO/PDF characters.
+         */
+        CARAPI_(Int32) GetEntryDir();
+
+        /**
+         * Returns the directionality of the last character with strong directionality in the
+         * string, or DIR_UNKNOWN if none was encountered. For efficiency, actually scans backwards
+         * from the end of the string. Treats a non-BN character between an LRE/RLE/LRO/RLO and its
+         * matching PDF as a strong character, LTR after LRE/LRO, and RTL after RLE/RLO. The results
+         * are undefined for a string containing unbalanced LRE/RLE/LRO/RLO/PDF characters.
+         */
+        CARAPI_(Int32) GetExitDir();
+
+        /**
+         * Returns the Character.DIRECTIONALITY_... value of the next codepoint and advances
+         * charIndex. If isHtml, and the codepoint is '<' or '&', advances through the tag/entity,
+         * and returns Character.DIRECTIONALITY_WHITESPACE. For an entity, it would be best to
+         * figure out the actual character, and return its dirtype, but treating it as whitespace is
+         * good enough for our purposes.
+         *
+         * @throws java.lang.IndexOutOfBoundsException if called when charIndex >= length or < 0.
+         */
+        CARAPI_(Byte) DirTypeForward();
+
+        /**
+         * Returns the Character.DIRECTIONALITY_... value of the preceding codepoint and advances
+         * charIndex backwards. If isHtml, and the codepoint is the end of a complete HTML tag or
+         * entity, advances over the whole tag/entity and returns
+         * Character.DIRECTIONALITY_WHITESPACE. For an entity, it would be best to figure out the
+         * actual character, and return its dirtype, but treating it as whitespace is good enough
+         * for our purposes.
+         *
+         * @throws java.lang.IndexOutOfBoundsException if called when charIndex > length or <= 0.
+         */
+        CARAPI_(Byte) DirTypeBackward();
+
+    private:
+        // Internal methods
+
+        /**
+         * Gets the bidi character class, i.e. Character.getDirectionality(), of a given char, using
+         * a cache for speed. Not designed for supplementary codepoints, whose results we do not
+         * cache.
+         */
+        static CARAPI_(Byte) GetCachedDirectionality(
+            /* [in] */ Char32 c);
+
+        /**
+         * Advances charIndex forward through an HTML tag (after the opening &lt; has already been
+         * read) and returns Character.DIRECTIONALITY_WHITESPACE. If there is no matching &gt;,
+         * does not change charIndex and returns Character.DIRECTIONALITY_OTHER_NEUTRALS (for the
+         * &lt; that hadn't been part of a tag after all).
+         */
+        CARAPI_(Byte) SkipTagForward();
+
+        /**
+         * Advances charIndex backward through an HTML tag (after the closing &gt; has already been
+         * read) and returns Character.DIRECTIONALITY_WHITESPACE. If there is no matching &lt;, does
+         * not change charIndex and returns Character.DIRECTIONALITY_OTHER_NEUTRALS (for the &gt;
+         * that hadn't been part of a tag after all). Nevertheless, the running time for calling
+         * skipTagBackward() in a loop remains linear in the size of the text, even for a text like
+         * "&gt;&gt;&gt;&gt;", because skipTagBackward() also stops looking for a matching &lt;
+         * when it encounters another &gt;.
+         */
+        CARAPI_(Byte) SkipTagBackward();
+
+        /**
+         * Advances charIndex forward through an HTML character entity tag (after the opening
+         * &amp; has already been read) and returns Character.DIRECTIONALITY_WHITESPACE. It would be
+         * best to figure out the actual character and return its dirtype, but this is good enough.
+         */
+        CARAPI_(Byte) SkipEntityForward();
+
+        /**
+         * Advances charIndex backward through an HTML character entity tag (after the closing ;
+         * has already been read) and returns Character.DIRECTIONALITY_WHITESPACE. It would be best
+         * to figure out the actual character and return its dirtype, but this is good enough.
+         * If there is no matching &amp;, does not change charIndex and returns
+         * Character.DIRECTIONALITY_OTHER_NEUTRALS (for the ';' that did not start an entity after
+         * all). Nevertheless, the running time for calling skipEntityBackward() in a loop remains
+         * linear in the size of the text, even for a text like ";;;;;;;", because skipTagBackward()
+         * also stops looking for a matching &amp; when it encounters another ;.
+         */
+        CARAPI_(Byte) SkipEntityBackward();
+
+        static CARAPI_(Boolean) Init();
+
+    private:
+        // Internal static variables and constants.
+
+        /**
+         * Size of the bidi character class cache. The results of the Character.getDirectionality()
+         * calls on the lowest DIR_TYPE_CACHE_SIZE codepoints are kept in an array for speed.
+         * The 0x700 value is designed to leave all the European and Near Eastern languages in the
+         * cache. It can be reduced to 0x180, restricting the cache to the Western European
+         * languages.
+         */
+        static const Int32 DIR_TYPE_CACHE_SIZE;
+
+        /**
+         * The bidi character class cache.
+         */
+        static AutoPtr< ArrayOf<Byte> > DIR_TYPE_CACHE;
+
+        static Boolean InitStatic;
+
+        // Internal instance variables.
+
+        /**
+         * The text to be scanned.
+         */
+        String mText;
+
+        /**
+         * Whether the text to be scanned is to be treated as HTML, i.e. skipping over tags and
+         * entities when looking for the next / preceding dir type.
+         */
+        Boolean mIsHtml;
+
+        /**
+         * The length of the text in chars.
+         */
+        Int32 mLength;
+
+        /**
+         * The current position in the text.
+         */
+        Int32 mCharIndex;
+
+        /**
+         * The char encountered by the last dirTypeForward or dirTypeBackward call. If it
+         * encountered a supplementary codepoint, this contains a char that is not a valid
+         * codepoint. This is ok, because this member is only used to detect some well-known ASCII
+         * syntax, e.g. "http://" and the beginning of an HTML tag or entity.
+         */
+        Char32 mLastChar;
+
+    };
+public:
     CAR_INTERFACE_DECL()
 
     CAR_OBJECT_DECL()
 
-    CARAPI constructor();
+    CBidiFormatter();
+
+    ~CBidiFormatter();
+
+    CARAPI constructor(
+        /* [in] */ Boolean isRtlContext,
+        /* [in] */ Int32 flags,
+        /* [in] */ ITextDirectionHeuristic* heuristic);
 
     /**
      * @return Whether the context directionality is RTL
@@ -165,9 +333,53 @@ public:
 
 private:
     /**
+     * Helper method to return true if the Locale directionality is RTL.
+     *
+     * @param locale The Locale whose directionality will be checked to be RTL or LTR
+     * @return true if the {@code locale} directionality is RTL. False otherwise.
+     */
+    static CARAPI_(Boolean) IsRtlLocale(
+        /* [in] */ ILocale* locale);
+
+    /**
+     * Returns the directionality of the last character with strong directionality in the string, or
+     * DIR_UNKNOWN if none was encountered. For efficiency, actually scans backwards from the end of
+     * the string. Treats a non-BN character between an LRE/RLE/LRO/RLO and its matching PDF as a
+     * strong character, LTR after LRE/LRO, and RTL after RLE/RLO. The results are undefined for a
+     * string containing unbalanced LRE/RLE/LRO/RLO/PDF characters. The intended use is to check
+     * whether a logically separate item that starts with a number or a character of the string's
+     * exit directionality and follows this string inline (not counting any neutral characters in
+     * between) would "stick" to it in an opposite-directionality context, thus being displayed in
+     * an incorrect position. An LRM or RLM character (the one of the context's directionality)
+     * between the two will prevent such sticking.
+     *
+     * @param str the string to check.
+     */
+    static CARAPI_(Int32) GetExitDir(
+        /* [in] */ const String& str);
+
+    /**
+     * Returns the directionality of the first character with strong directionality in the string,
+     * or DIR_UNKNOWN if none was encountered. Treats a non-BN character between an
+     * LRE/RLE/LRO/RLO and its matching PDF as a strong character, LTR after LRE/LRO, and RTL after
+     * RLE/RLO. The results are undefined for a string containing unbalanced LRE/RLE/LRO/RLO/PDF
+     * characters. The intended use is to check whether a logically separate item that ends with a
+     * character of the string's entry directionality and precedes the string inline (not counting
+     * any neutral characters in between) would "stick" to it in an opposite-directionality context,
+     * thus being displayed in an incorrect position. An LRM or RLM character (the one of the
+     * context's directionality) between the two will prevent such sticking.
+     *
+     * @param str the string to check.
+     */
+    static CARAPI_(Int32) GetEntryDir(
+        /* [in] */ const String& str);
+
+
+private:
+    /**
      * The default text direction heuristic.
      */
-    // private static TextDirectionHeuristic DEFAULT_TEXT_DIRECTION_HEURISTIC = FIRSTSTRONG_LTR;
+    static AutoPtr<ITextDirectionHeuristic> DEFAULT_TEXT_DIRECTION_HEURISTIC;
 
     /**
      * Unicode "Left-To-Right Embedding" (LRE) character.
@@ -226,7 +438,14 @@ private:
 
     Boolean mIsRtlContext;
     Int32 mFlags;
-    //TextDirectionHeuristic mDefaultTextDirectionHeuristic;
+    AutoPtr<ITextDirectionHeuristic> mDefaultTextDirectionHeuristic;
+
+    /**
+     * Enum for directionality type.
+     */
+    static const Int32 DIR_LTR;
+    static const Int32 DIR_UNKNOWN;
+    static const Int32 DIR_RTL;
 };
 
 } // namespace Text
