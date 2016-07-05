@@ -15,7 +15,7 @@
 -->
 
 <!-- A layout representing a single key in the dialpad -->
-<com.android.phone.common.dialpad.DialpadKeyButton
+<Elastos.Droid.Phone.Common.Dialpad.CDialpadKeyButton
     xmlns:android="http://schemas.android.com/apk/res/android"
     style="@style/DialpadKeyButtonStyle" >
 
@@ -27,7 +27,7 @@
         <!-- Note in the referenced styles that we assign hard widths to these components
              because we want them to line up vertically when we arrange them in an MxN grid -->
 
-        <com.android.phone.common.dialpad.DialpadTextView
+        <Elastos.Droid.Phone.Common.Dialpad.CDialpadTextView
             android:id="@+id/dialpad_key_number"
             style="@style/DialpadKeyNumberStyle"
             android:layout_gravity="right"
@@ -40,4 +40,4 @@
             android:layout_width="@dimen/dialpad_key_text_width"
             android:layout_gravity="right|bottom" />
     </LinearLayout>
-</com.android.phone.common.dialpad.DialpadKeyButton>
+</Elastos.Droid.Phone.Common.Dialpad.CDialpadKeyButton>

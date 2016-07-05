@@ -13,7 +13,7 @@
      See the License for the specific language governing permissions and
      limitations under the License.
 -->
-<com.android.phone.common.dialpad.DialpadKeyButton
+<Elastos.Droid.Phone.Common.Dialpad.CDialpadKeyButton
     xmlns:android="http://schemas.android.com/apk/res/android"
     android:id="@+id/one"
     style="@style/DialpadKeyButtonStyle">
@@ -22,7 +22,7 @@
         android:orientation="horizontal"
         android:baselineAligned="false"
         android:layout_gravity="right|center_vertical" >
-        <com.android.phone.common.dialpad.DialpadTextView
+        <Elastos.Droid.Phone.Common.Dialpad.CDialpadTextView
             android:id="@+id/dialpad_key_number"
             style="@style/DialpadKeyNumberStyle"
             android:layout_gravity="right"
@@ -42,4 +42,4 @@
                 android:tint="@color/dialpad_voicemail_tint" />
         </FrameLayout>
     </LinearLayout>
-</com.android.phone.common.dialpad.DialpadKeyButton>
+</Elastos.Droid.Phone.Common.Dialpad.CDialpadKeyButton>

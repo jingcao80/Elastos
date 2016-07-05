@@ -13,7 +13,7 @@
      See the License for the specific language governing permissions and
      limitations under the License.
 -->
-<view class="com.android.phone.common.dialpad.DialpadView"
+<view class="Elastos.Droid.Phone.Common.Dialpad.CDialpadView"
     xmlns:android="http://schemas.android.com/apk/res/android"
     android:id="@+id/dialpad_view"
     android:layout_height="match_parent"
@@ -45,7 +45,7 @@
             android:gravity="center"
             android:visibility="invisible" />
 
-        <view class="com.android.phone.common.dialpad.DigitsEditText"
+        <view class="Elastos.Droid.Phone.Common.Dialpad.CDigitsEditText"
             xmlns:ex="http://schemas.android.com/apk/res-auto"
             android:id="@+id/digits"
             android:layout_width="0dp"

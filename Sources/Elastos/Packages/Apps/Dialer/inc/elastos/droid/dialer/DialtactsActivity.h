@@ -7,7 +7,6 @@
 #include "Elastos.Droid.Text.h"
 #include "Elastos.Droid.View.h"
 #include "Elastos.Droid.Widget.h"
-#include "Elastos.Droid.Support.V4.View.h"
 #include "_Elastos.Droid.Dialer.h"
 #include "elastos/droid/contacts/common/widget/FloatingActionButtonController.h"
 #include "elastos/droid/dialer/activity/TransactionSafeActivity.h"

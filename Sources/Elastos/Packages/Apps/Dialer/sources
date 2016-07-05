@@ -12,13 +12,13 @@ SOURCES = Elastos.Droid.Dialer.car
 SOURCES += R.cpp
 SOURCES += Elastos.CoreLibrary.cpp
 SOURCES += Elastos.Droid.Core.cpp
-SOURCES += Elastos.Droid.Support.V4.cpp
 SOURCES += Elastos.Droid.ContactsCommon.cpp
 
 ELASTOS_LIBS += src/elastos/droid/contacts/common/common.lib
 ELASTOS_LIBS += src/elastos/droid/dialer/dialer.lib
 ELASTOS_LIBS += src/elastos/droid/dialerbind/dialerbind.lib
 ELASTOS_LIBS += src/elastos/droid/phone/common/common.lib
+ELASTOS_LIBS += src/elastos/droid/support/v4/view/view.lib
 
 LIBRARIES  = $(XDK_USER_LIB)/Elastos.Runtime.lib
 LIBRARIES += $(XDK_TARGETS)/Elastos.Runtime.eco

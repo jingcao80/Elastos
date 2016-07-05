@@ -1,0 +1,8 @@
+TARGET_NAME= view
+TARGET_TYPE= lib
+
+INCLUDES += $(MAKEDIR)/../../../../../../inc
+INCLUDES += ../../../../../../
+
+SOURCES = ViewPager.cpp
+SOURCES += view.cpp

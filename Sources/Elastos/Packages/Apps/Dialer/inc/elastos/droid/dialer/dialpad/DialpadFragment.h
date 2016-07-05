@@ -21,6 +21,9 @@
 #include <elastos/droid/widget/BaseAdapter.h>
 #include <elastos/droid/widget/PopupMenu.h>
 #include <elastos/droid/widget/RelativeLayout.h>
+#include "elastos/droid/contacts/common/widget/FloatingActionButtonController.h"
+#include "elastos/droid/phone/common/HapticFeedback.h"
+#include "elastos/droid/phone/common/dialpad/CDialpadView.h"
 #include <elastos/droid/dialerbind/analytics/AnalyticsFragment.h>
 
 using Elastos::Droid::App::IActivity;
@@ -62,7 +65,10 @@ using Elastos::Droid::Widget::RelativeLayout;
 using Elastos::Droid::Widget::IPopupMenuOnMenuItemClickListener;
 using Elastos::Core::ICharSequence;
 using Elastos::Utility::IHashSet;
+using Elastos::Droid::Contacts::Common::Widget::FloatingActionButtonController;
 using Elastos::Droid::DialerBind::Analytics::AnalyticsFragment;
+using Elastos::Droid::Phone::Common::HapticFeedback;
+using Elastos::Droid::Phone::Common::Dialpad::CDialpadView;
 
 namespace Elastos {
 namespace Droid {
@@ -624,8 +630,7 @@ private:
 
     AutoPtr<IOnDialpadQueryChangedListener> mDialpadQueryListener;
 
-    // TODO:
-    // AutoPtr<IDialpadView> mDialpadView;
+    AutoPtr<CDialpadView> mDialpadView;
     AutoPtr<IEditText> mDigits;
     Int32 mDialpadSlideInDuration;
 
@@ -639,8 +644,7 @@ private:
     Object mToneGeneratorLock;
     AutoPtr<IView> mSpacer;
 
-    // TODO:
-    // AutoPtr<IFloatingActionButtonController> mFloatingActionButtonController;
+    AutoPtr<FloatingActionButtonController> mFloatingActionButtonController;
 
     /**
      * Set of dialpad keys that are currently being pressed
@@ -666,7 +670,7 @@ private:
     Boolean mDTMFToneEnabled;
 
     // Vibration (haptic feedback) for dialer key presses.
-    // AutoPtr<IHapticFeedback> mHaptic; // = new HapticFeedback();
+    AutoPtr<HapticFeedback> mHaptic;
 
     /** Identifier for the "Add Call" intent extra. */
     static const String ADD_CALL_MODE_KEY;
