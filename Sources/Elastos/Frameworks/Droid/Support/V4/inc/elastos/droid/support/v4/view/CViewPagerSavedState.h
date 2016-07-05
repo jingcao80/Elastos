@@ -3,8 +3,7 @@
 #define __ELASTOS_DROID_SUPPORT_V4_VIEW_CVIEWPAGERSAVEDSTATE_H__
 
 #include "_Elastos_Droid_Support_V4_View_CViewPagerSavedState.h"
-#include <elastos/core/Object.h>
-// #include "elastos/droid/support/v4/view/ViewPager.h"
+#include "elastos/droid/support/v4/view/ViewPager.h"
 
 namespace Elastos {
 namespace Droid {
@@ -13,8 +12,7 @@ namespace V4 {
 namespace View {
 
 CarClass(CViewPagerSavedState)
-    , public Object
-    /*, public ViewPager::SavedState*/
+    , public ViewPager::SavedState
 {
 public:
     CAR_OBJECT_DECL()

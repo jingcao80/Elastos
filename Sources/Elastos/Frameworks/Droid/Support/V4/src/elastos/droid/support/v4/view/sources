@@ -8,6 +8,7 @@ LUBE_FLAGS += -n -u
 INCLUDES += $(MAKEDIR)/../../../../../../inc/
 INCLUDES += ../../../../../../
 
-#SOURCES += ViewPager.cpp
+SOURCES += ViewPager.cpp
 SOURCES += view.cpp
+SOURCES += PagerAdapter.cpp
 

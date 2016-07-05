@@ -1,6 +1,5 @@
 
 #include "elastos/droid/support/v4/view/ViewPager.h"
-#include "elastos/droid/support/v4/view/ViewConfigurationCompat.h"
 #include "elastos/droid/support/v4/view/CViewPagerSavedState.h"
 #include "elastos/droid/os/Build.h"
 #include "elastos/droid/os/SystemClock.h"
@@ -11,9 +10,12 @@
 #include <elastos/utility/logging/Slogger.h>
 
 using Elastos::Droid::Content::Res::IResources;
+using Elastos::Droid::Content::Res::ITypedArray;
+using Elastos::Droid::Database::IDataSetObserver;
 using Elastos::Droid::Graphics::CRect;
 using Elastos::Droid::Os::Build;
 using Elastos::Droid::Os::SystemClock;
+using Elastos::Droid::Os::IBinder;
 using Elastos::Droid::Support::V4::View::EIID_IViewPager;
 using Elastos::Droid::Support::V4::View::EIID_IViewPagerOnPageChangeListener;
 using Elastos::Droid::Support::V4::View::EIID_IViewPagerSavedState;
@@ -32,12 +34,20 @@ using Elastos::Droid::View::IFocusFinder;
 using Elastos::Droid::View::ISoundEffectConstantsHelper;
 using Elastos::Droid::View::CSoundEffectConstantsHelper;
 using Elastos::Droid::View::IAccessibilityDelegate;
+using Elastos::Droid::View::IInputEvent;
 using Elastos::Droid::View::Accessibility::IAccessibilityRecord;
 using Elastos::Droid::View::Accessibility::IAccessibilityRecordHelper;
 using Elastos::Droid::View::Accessibility::CAccessibilityRecordHelper;
+using Elastos::Droid::View::Animation::EIID_IInterpolator;
 using Elastos::Droid::Widget::CScroller;
+using Elastos::Droid::Widget::CEdgeEffect;
+using Elastos::Core::ISystem;
+using Elastos::Core::CSystem;
 using Elastos::Core::StringUtils;
 using Elastos::Core::StringBuilder;
+using Elastos::Core::EIID_IComparator;
+using Elastos::Core::ICharSequence;
+using Elastos::Core::CString;
 using Elastos::Utility::ICollections;
 using Elastos::Utility::CCollections;
 using Elastos::Utility::CArrayList;
@@ -143,12 +153,13 @@ ECode ViewPager::SavedState::WriteToParcel(
 }
 
 ECode ViewPager::SavedState::ReadFromParcel(
-    /* [in] */ IParcel* in)
+    /* [in] */ IParcel* source)
 {
     BaseSavedState::ReadFromParcel(source);
     source->ReadInt32(&mPosition);
+    AutoPtr<IInterface> temp;
     source->ReadInterfacePtr((Handle32*)(IInterface**)&temp);
-    mAdapterState = IParcelable::Probe(temp)
+    mAdapterState = IParcelable::Probe(temp);
     return NOERROR;
 }
 
@@ -176,8 +187,10 @@ ECode ViewPager::MyAccessibilityDelegate::OnInitializeAccessibilityEvent(
 {
     AccessibilityDelegate::OnInitializeAccessibilityEvent(host, event);
     EGuid clsId;
-    IObject::Probe(mHost)->GetClassID(&clsId);
-    event->SetClassName(String(clsId.mUunm));
+    IObject::Probe((IViewPager*)mHost)->GetClassID(&clsId);
+    AutoPtr<ICharSequence> cs;
+    CString::New(String(clsId.mUunm), (ICharSequence**)&cs);
+    IAccessibilityRecord::Probe(event)->SetClassName(cs);
     AutoPtr<IAccessibilityRecordHelper> helper;
     CAccessibilityRecordHelper::AcquireSingleton((IAccessibilityRecordHelper**)&helper);
     AutoPtr<IAccessibilityRecord> record;
@@ -201,15 +214,17 @@ ECode ViewPager::MyAccessibilityDelegate::OnInitializeAccessibilityNodeInfo(
 {
     AccessibilityDelegate::OnInitializeAccessibilityNodeInfo(host, info);
     EGuid clsId;
-    IObject::Probe(mHost)->GetClassID(&clsId);
-    info->SetClassName(String(clsId.mUunm));
+    IObject::Probe((IViewPager*)mHost)->GetClassID(&clsId);
+    AutoPtr<ICharSequence> cs;
+    CString::New(String(clsId.mUunm), (ICharSequence**)&cs);
+    info->SetClassName(cs);
     info->SetScrollable(CanScroll());
     Boolean canScroll;
-    if (CanScrollHorizontally(1, &canScroll), canScroll) {
+    if (mHost->CanScrollHorizontally(1, &canScroll), canScroll) {
         info->AddAction(IAccessibilityNodeInfo::ACTION_SCROLL_FORWARD);
     }
-    if (CanScrollHorizontally(-1, &canScroll), canScroll) {
-        info->AddAction(vACTION_SCROLL_BACKWARD);
+    if (mHost->CanScrollHorizontally(-1, &canScroll), canScroll) {
+        info->AddAction(IAccessibilityNodeInfo::ACTION_SCROLL_BACKWARD);
     }
     return NOERROR;
 }
@@ -229,16 +244,16 @@ ECode ViewPager::MyAccessibilityDelegate::PerformAccessibilityAction(
     switch (action) {
         case IAccessibilityNodeInfo::ACTION_SCROLL_FORWARD: {
             Boolean canScroll;
-            if (CanScrollHorizontally(1, &canScroll), canScroll) {
-                SetCurrentItem(mCurItem + 1);
+            if (mHost->CanScrollHorizontally(1, &canScroll), canScroll) {
+                mHost->SetCurrentItem(mHost->mCurItem + 1);
                 *res = TRUE;
                 return NOERROR;
             }
         }
         case IAccessibilityNodeInfo::ACTION_SCROLL_BACKWARD: {
             Boolean canScroll;
-            if (CanScrollHorizontally(-1, &canScroll), canScroll) {
-                SetCurrentItem(mCurItem - 1);
+            if (mHost->CanScrollHorizontally(-1, &canScroll), canScroll) {
+                mHost->SetCurrentItem(mHost->mCurItem - 1);
                 *res = TRUE;
                 return NOERROR;
             }
@@ -254,7 +269,7 @@ ECode ViewPager::MyAccessibilityDelegate::PerformAccessibilityAction(
 Boolean ViewPager::MyAccessibilityDelegate::CanScroll()
 {
     Int32 count;
-    return (mAdapter != NULL) && (mAdapter->GetCount(&count), count > 1);
+    return (mHost->mAdapter != NULL) && (mHost->mAdapter->GetCount(&count), count > 1);
 }
 
 
@@ -281,12 +296,52 @@ ECode ViewPager::PagerObserver::OnInvalidated()
 
 CAR_INTERFACE_IMPL(ViewPager::ViewPagerLayoutParams, LayoutParams, IViewPagerLayoutParams)
 
-ECode ViewPager::ViewPagerLayoutParams::constructor();
+ECode ViewPager::ViewPagerLayoutParams::constructor()
+{
+    return LayoutParams::constructor(FILL_PARENT, FILL_PARENT);
+}
 
 ECode ViewPager::ViewPagerLayoutParams::constructor(
     /* [in] */ IContext* c,
-    /* [in] */ IAttributeSet* attrs);
+    /* [in] */ IAttributeSet* attrs)
+{
+    LayoutParams::constructor(c, attrs);
 
+    AutoPtr<ITypedArray> a;
+    c->ObtainStyledAttributes(attrs, LAYOUT_ATTRS, (ITypedArray**)&a);
+    a->GetInteger(0, IGravity::TOP, &mGravity);
+    a->Recycle();
+    return NOERROR;
+}
+
+
+//=================================================================
+// ViewPager::ViewPositionComparator
+//=================================================================
+
+CAR_INTERFACE_IMPL(ViewPager::ViewPositionComparator, Object, IComparator)
+
+ECode ViewPager::ViewPositionComparator::Compare(
+    /* [in] */  IInterface* a,
+    /* [in] */  IInterface* b,
+    /* [out] */ Int32* result)
+{
+    VALIDATE_NOT_NULL(result)
+    AutoPtr<IView> lhs = IView::Probe(a);
+    AutoPtr<IView> rhs = IView::Probe(b);
+    AutoPtr<IViewGroupLayoutParams> lp1;
+    lhs->GetLayoutParams((IViewGroupLayoutParams**)&lp1);
+    AutoPtr<ViewPagerLayoutParams> llp = (ViewPagerLayoutParams*)lp1.Get();
+    AutoPtr<IViewGroupLayoutParams> lp2;
+    rhs->GetLayoutParams((IViewGroupLayoutParams**)&lp2);
+    AutoPtr<ViewPagerLayoutParams> rlp = (ViewPagerLayoutParams*)lp2.Get();
+    if (llp->mIsDecor != rlp->mIsDecor) {
+        *result = llp->mIsDecor ? 1 : -1;
+        return NOERROR;
+    }
+    *result = llp->mPosition - rlp->mPosition;
+    return NOERROR;
+}
 
 //=================================================================
 // ViewPager
@@ -326,11 +381,11 @@ const Int32 ViewPager::DRAW_ORDER_DEFAULT;
 const Int32 ViewPager::DRAW_ORDER_FORWARD;
 const Int32 ViewPager::DRAW_ORDER_REVERSE;
 
-AutoPtr<ViewPositionComparator> ViewPager::InitVPComparator()
+AutoPtr<ViewPager::ViewPositionComparator> ViewPager::InitVPComparator()
 {
     return new ViewPositionComparator();
 }
-const AutoPtr<ViewPositionComparator> ViewPager::sPositionComparator = ViewPager::InitVPComparator();
+const AutoPtr<ViewPager::ViewPositionComparator> ViewPager::sPositionComparator = ViewPager::InitVPComparator();
 
 ViewPager::ViewPager()
     : mExpectedAdapterCount(0)
@@ -416,11 +471,11 @@ void ViewPager::InitViewPager()
     Float density;
     dm->GetDensity(&density);
 
-    ViewConfigurationCompat::GetScaledPagingTouchSlop(configuration, &mTouchSlop);
+    configuration->GetScaledPagingTouchSlop(&mTouchSlop);
     mMinimumVelocity = (Int32)(MIN_FLING_VELOCITY * density);
     configuration->GetScaledMaximumFlingVelocity(&mMaximumVelocity);
-    CEdgeEffect::New(context, (IEdgeEffectCompat**)&mLeftEdge);
-    CEdgeEffect::New(context, (IEdgeEffectCompat**)&mRightEdge);
+    CEdgeEffect::New(context, (IEdgeEffect**)&mLeftEdge);
+    CEdgeEffect::New(context, (IEdgeEffect**)&mRightEdge);
 
     mFlingDistance = (Int32)(MIN_DISTANCE_FOR_FLING * density);
     mCloseEnough = (Int32)(CLOSE_ENOUGH * density);
@@ -438,7 +493,8 @@ void ViewPager::InitViewPager()
 
 ECode ViewPager::OnDetachedFromWindow()
 {
-    RemoveCallbacks(mEndScrollRunnable);
+    Boolean result;
+    RemoveCallbacks(mEndScrollRunnable, &result);
     return ViewGroup::OnDetachedFromWindow();
 }
 
@@ -471,9 +527,9 @@ ECode ViewPager::SetAdapter(
             AutoPtr<IInterface> value;
             mItems->Get(i, (IInterface**)&value);
             AutoPtr<ItemInfo> ii = (ItemInfo*)(IObject*)value.Get();
-            mAdapter->DestroyItem(IViewGroup::(this), ii->mPosition, ii->mObject);
+            mAdapter->DestroyItem(IViewGroup::Probe(this), ii->mPosition, ii->mObject);
         }
-        mAdapter->FinishUpdate(IViewGroup::(this));
+        mAdapter->FinishUpdate(IViewGroup::Probe(this));
         mItems->Clear();
         RemoveNonDecorViews();
         mCurItem = 0;
@@ -508,7 +564,7 @@ ECode ViewPager::SetAdapter(
         }
     }
 
-    if (mAdapterChangeListener != NULL && oldAdapter != adapter) {
+    if (mAdapterChangeListener != NULL && oldAdapter.Get() != adapter) {
         mAdapterChangeListener->OnAdapterChanged(oldAdapter, adapter);
     }
     return NOERROR;
@@ -675,7 +731,8 @@ void ViewPager::ScrollToItem(
         }
         CompleteScroll(FALSE);
         ScrollTo(destX, 0);
-        PageScrolled(destX);
+        Boolean result;
+        PageScrolled(destX, &result);
     }
 }
 
@@ -703,6 +760,7 @@ ECode ViewPager::SetPageTransformer(
         }
         if (needsPopulate) Populate();
     }
+    return NOERROR;
 }
 
 void ViewPager::SetChildrenDrawingOrderEnabledCompat(
@@ -810,7 +868,7 @@ ECode ViewPager::SetPageMarginDrawable(
     AutoPtr<IResources> res;
     ctx->GetResources((IResources**)&res);
     AutoPtr<IDrawable> d;
-    GetDrawable(resId, (IDrawable**)&d);
+    res->GetDrawable(resId, (IDrawable**)&d);
     return SetPageMarginDrawable(d);
 }
 
@@ -855,7 +913,7 @@ void ViewPager::SmoothScrollTo(
     /* [in] */ Int32 velocity)
 {
     Int32 count;
-    if (GetChildCount() == 0) {
+    if (GetChildCount(&count), count == 0) {
         // Nothing to do.
         SetScrollingCacheEnabled(FALSE);
         return;
@@ -875,10 +933,9 @@ void ViewPager::SmoothScrollTo(
     SetScrollingCacheEnabled(TRUE);
     SetScrollState(SCROLL_STATE_SETTLING);
 
-    Int32 width;
-    GetClientWidth(&width);
+    Int32 width = GetClientWidth();
     Int32 halfWidth = width / 2;
-    Float distanceRatio = Elastos::Core::Math::Min(1f, 1.0f * Elastos::Core::Math::Abs(dx) / width);
+    Float distanceRatio = Elastos::Core::Math::Min(1.0, 1.0 * Elastos::Core::Math::Abs(dx) / width);
     Float distance = halfWidth + halfWidth *
             DistanceInfluenceForSnapDuration(distanceRatio);
 
@@ -888,8 +945,8 @@ void ViewPager::SmoothScrollTo(
         duration = 4 * Elastos::Core::Math::Round(1000 * Elastos::Core::Math::Abs(distance / velocity));
     }
     else {
-        Int32 pageW;
-        mAdapter->GetPageWidth(mCurItem, &pageW)
+        Float pageW;
+        mAdapter->GetPageWidth(mCurItem, &pageW);
         Float pageWidth = width * pageW;
         Float pageDelta = (Float) Elastos::Core::Math::Abs(dx) / (pageWidth + mPageMargin);
         duration = (Int32)((pageDelta + 1) * 100);
@@ -900,21 +957,21 @@ void ViewPager::SmoothScrollTo(
     PostInvalidateOnAnimation();
 }
 
-AutoPtr<ItemInfo> ViewPager::AddNewItem(
+AutoPtr<ViewPager::ItemInfo> ViewPager::AddNewItem(
     /* [in] */ Int32 position,
     /* [in] */ Int32 index)
 {
     AutoPtr<ItemInfo> ii = new ItemInfo();
     ii->mPosition = position;
     ii->mObject = NULL;
-    mAdapter->InstantiateItem(IView::Probe(this), position, &ii->mObject);
+    mAdapter->InstantiateItem(IViewGroup::Probe(this), position, (IInterface**)&ii->mObject);
     mAdapter->GetPageWidth(position, &ii->mWidthFactor);
     Int32 size;
     if (index < 0 || (mItems->GetSize(&size), index >= size)) {
-        mItems->Add(ii);
+        mItems->Add((IObject*)ii);
     }
     else {
-        mItems->Add(index, ii);
+        mItems->Add(index, (IObject*)ii);
     }
     return ii;
 }
@@ -1020,7 +1077,7 @@ ECode ViewPager::Populate(
 
     if (mAdapter == NULL) {
         SortChildDrawingOrder();
-        return;
+        return NOERROR;
     }
 
     // Bail now if we are waiting to populate.  This is to hold off
@@ -1030,7 +1087,7 @@ ECode ViewPager::Populate(
     if (mPopulatePending) {
         if (DEBUG) Slogger::I(TAG, "populate is pending, skipping for now...");
         SortChildDrawingOrder();
-        return;
+        return NOERROR;
     }
 
     // Also, don't populate until we are attached to a window.  This is to
@@ -1038,7 +1095,7 @@ ECode ViewPager::Populate(
     // state and conflicting with what is restored.
     AutoPtr<IBinder> token;
     if (GetWindowToken((IBinder**)&token), token == NULL) {
-        return;
+        return NOERROR;
     }
 
     mAdapter->StartUpdate(IView::Probe(this));
@@ -1056,7 +1113,7 @@ ECode ViewPager::Populate(
         GetResources((IResources**)&res);
         Int32 id;
         GetId(&id);
-        if (FAILED(res->GetResourcesName(id, &resName))) {
+        if (FAILED(res->GetResourceName(id, &resName))) {
             resName = StringUtils::ToHexString(id);
         }
         // } catch (Resources.NotFoundException e) {
@@ -1098,8 +1155,7 @@ ECode ViewPager::Populate(
             mItems->Get(itemIndex, (IInterface**)&value);
             ii = (ItemInfo*)(IObject*)value.Get();
         }
-        Int32 clientWidth;
-        GetClientWidth(&clientWidth);
+        Int32 clientWidth = GetClientWidth();
         Int32 paddingL;
         GetPaddingLeft(&paddingL);
         Float leftWidthNeeded = clientWidth <= 0 ? 0 :
@@ -1168,7 +1224,7 @@ ECode ViewPager::Populate(
                     }
                     if (pos == ii->mPosition && !ii->mScrolling) {
                         mItems->Remove(itemIndex);
-                        mAdapter->DestroyItem(this, pos, ii->mObject);
+                        mAdapter->DestroyItem(IViewGroup::Probe(this), pos, ii->mObject);
                         if (DEBUG) {
                             Slogger::I(TAG, "populate() - destroyItem() with pos: %d view: %s", pos, TO_CSTR(ii->mObject));
                         }
@@ -1301,8 +1357,7 @@ void ViewPager::CalculatePageOffsets(
 {
     Int32 N;
     mAdapter->GetCount(&N);
-    Int32 width;
-    GetClientWidth(&width);
+    Int32 width = GetClientWidth();
     Float marginOffset = width > 0 ? (Float) mPageMargin / width : 0;
     // Fix up offsets for later layout.
     if (oldCurInfo != NULL) {
@@ -1328,7 +1383,7 @@ void ViewPager::CalculatePageOffsets(
                 while (pos < ii->mPosition) {
                     // We don't have an item populated for this,
                     // ask the adapter for an offset.
-                    Int32 width;
+                    Float width;
                     mAdapter->GetPageWidth(pos, &width);
                     offset += width + marginOffset;
                     pos++;
@@ -1357,7 +1412,7 @@ void ViewPager::CalculatePageOffsets(
                 while (pos > ii->mPosition) {
                     // We don't have an item populated for this,
                     // ask the adapter for an offset.
-                    Int32 width;
+                    Float width;
                     mAdapter->GetPageWidth(pos, &width);
                     offset -= width + marginOffset;
                     pos--;
@@ -1373,16 +1428,16 @@ void ViewPager::CalculatePageOffsets(
     mItems->GetSize(&itemCount);
     Float offset = curItem->mOffset;
     Int32 pos = curItem->mPosition - 1;
-    mFirstOffset = curItem->mPosition == 0 ? curItem->mOffset : -Elastos::Core::Math::Float_MAX_VALUE;
+    mFirstOffset = curItem->mPosition == 0 ? curItem->mOffset : -Elastos::Core::Math::FLOAT_MAX_VALUE;
     mLastOffset = curItem->mPosition == N - 1 ?
-            curItem->mOffset + curItem->mWidthFactor - 1 : Elastos::Core::Math::Float_MAX_VALUE;
+            curItem->mOffset + curItem->mWidthFactor - 1 : Elastos::Core::Math::FLOAT_MAX_VALUE;
     // Previous pages
     for (Int32 i = curIndex - 1; i >= 0; i--, pos--) {
         AutoPtr<IInterface> value;
         mItems->Get(i, (IInterface**)&value);
         AutoPtr<ItemInfo> ii = (ItemInfo*)(IObject*)value.Get();
-        while (pos > ii->Mposition) {
-            Int32 width;
+        while (pos > ii->mPosition) {
+            Float width;
             mAdapter->GetPageWidth(pos--, &width);
             offset -= width + marginOffset;
         }
@@ -1398,7 +1453,7 @@ void ViewPager::CalculatePageOffsets(
         mItems->Get(i, (IInterface**)&value);
         AutoPtr<ItemInfo> ii = (ItemInfo*)(IObject*)value.Get();
         while (pos < ii->mPosition) {
-            Int32 width;
+            Float width;
             mAdapter->GetPageWidth(pos++, &width);
             offset += width + marginOffset;
         }
@@ -1415,8 +1470,9 @@ void ViewPager::CalculatePageOffsets(
 AutoPtr<IParcelable> ViewPager::OnSaveInstanceState()
 {
     AutoPtr<IParcelable> superState = ViewGroup::OnSaveInstanceState();
-    AutoPtr<CViewPagerSavedState> ss;
-    CViewPagerSavedState::NewByFriend(superState, (*CViewPagerSavedState**)&ss);
+    AutoPtr<IViewPagerSavedState> vpss;
+    CViewPagerSavedState::New(superState, (IViewPagerSavedState**)&vpss);
+    AutoPtr<CViewPagerSavedState> ss = (CViewPagerSavedState*)vpss.Get();
     ss->mPosition = mCurItem;
     if (mAdapter != NULL) {
         mAdapter->SaveState((IParcelable**)&ss->mAdapterState);
@@ -1428,24 +1484,24 @@ void ViewPager::OnRestoreInstanceState(
     /* [in] */ IParcelable* state)
 {
     AutoPtr<IViewPagerSavedState> ss = IViewPagerSavedState::Probe(state);
-    if (savedState == NULL) {
+    if (ss == NULL) {
         ViewGroup::OnRestoreInstanceState(state);
         return;
     }
 
+    AutoPtr<CViewPagerSavedState> ssObj = (CViewPagerSavedState*)ss.Get();
     AutoPtr<IParcelable> superState;
-    ss->GetSuperState((IParcelable**)&superState);
+    ssObj->GetSuperState((IParcelable**)&superState);
     ViewGroup::OnRestoreInstanceState(superState);
 
-    AutoPtr<CViewPagerSavedState> ssObj = (CViewPagerSavedState*)ss.Get();
     if (mAdapter != NULL) {
         mAdapter->RestoreState(ssObj->mAdapterState, ssObj->mLoader);
-        SetCurrentItemInternal(ss->mPosition, FALSE, TRUE);
+        SetCurrentItemInternal(ssObj->mPosition, FALSE, TRUE);
     }
     else {
-        mRestoredCurItem = ss->mPosition;
-        mRestoredAdapterState = ss->mAdapterState;
-        mRestoredClassLoader = ss->mLoader;
+        mRestoredCurItem = ssObj->mPosition;
+        mRestoredAdapterState = ssObj->mAdapterState;
+        mRestoredClassLoader = ssObj->mLoader;
     }
 }
 
@@ -1496,7 +1552,7 @@ ECode ViewPager::RemoveView(
     return NOERROR;
 }
 
-AutoPtr<ItemInfo> ViewPager::InfoForChild(
+AutoPtr<ViewPager::ItemInfo> ViewPager::InfoForChild(
     /* [in] */ IView* child)
 {
     Int32 size;
@@ -1513,12 +1569,12 @@ AutoPtr<ItemInfo> ViewPager::InfoForChild(
     return NULL;
 }
 
-AutoPtr<ItemInfo> ViewPager::InfoForAnyChild(
+AutoPtr<ViewPager::ItemInfo> ViewPager::InfoForAnyChild(
     /* [in] */ IView* child)
 {
     AutoPtr<IViewParent> parent;
     child->GetParent((IViewParent**)&parent);
-    while (parent != IViewParent::Probe(this)) {
+    while (parent.Get() != IViewParent::Probe(this)) {
         if (parent == NULL || IView::Probe(parent) == NULL) {
             return NULL;
         }
@@ -1527,7 +1583,7 @@ AutoPtr<ItemInfo> ViewPager::InfoForAnyChild(
     return InfoForChild(child);
 }
 
-AutoPtr<ItemInfo> ViewPager::InfoForPosition(
+AutoPtr<ViewPager::ItemInfo> ViewPager::InfoForPosition(
     /* [in] */ Int32 position)
 {
     Int32 size;
@@ -1610,9 +1666,9 @@ void ViewPager::OnMeasure(
                 Int32 widthSize = childWidthSize;
                 Int32 heightSize = childHeightSize;
                 if (lp->mWidth != IViewGroupLayoutParams::WRAP_CONTENT) {
-                    widthMode = MeasureSpec.EXACTLY;
+                    widthMode = MeasureSpec::EXACTLY;
                     if (lp->mWidth != IViewGroupLayoutParams::FILL_PARENT) {
-                        widthSize = lp.width;
+                        widthSize = lp->mWidth;
                     }
                 }
                 if (lp->mHeight != IViewGroupLayoutParams::WRAP_CONTENT) {
@@ -1744,8 +1800,8 @@ ECode ViewPager::OnLayout(
 {
     Int32 count;
     GetChildCount(&count);
-    Int32 width = r - l;
-    Int32 height = b - t;
+    Int32 width = right - left;
+    Int32 height = bottom - top;
     Int32 paddingLeft;
     GetPaddingLeft(&paddingLeft);
     Int32 paddingTop;
@@ -1898,7 +1954,7 @@ ECode ViewPager::ComputeScroll()
         if (oldX != x || oldY != y) {
             ScrollTo(x, y);
             Boolean pageScrolled;
-            if (pageScrolled(x, &pageScrolled), !pageScrolled) {
+            if (PageScrolled(x, &pageScrolled), !pageScrolled) {
                 mScroller->AbortAnimation();
                 ScrollTo(0, y);
             }
@@ -1921,7 +1977,7 @@ ECode ViewPager::PageScrolled(
     VALIDATE_NOT_NULL(result)
     *result = FALSE;
 
-    Int32 size
+    Int32 size;
     if (mItems->GetSize(&size), size == 0) {
         mCalledSuper = FALSE;
         OnPageScrolled(0, 0, 0);
@@ -1933,8 +1989,7 @@ ECode ViewPager::PageScrolled(
         return NOERROR;
     }
     AutoPtr<ItemInfo> ii = InfoForCurrentScrollPosition();
-    Int32 width;
-    GetClientWidth(&width);
+    Int32 width = GetClientWidth();
     Int32 widthWithMargin = width + mPageMargin;
     Float marginOffset = (Float)mPageMargin / width;
     Int32 currentPage = ii->mPosition;
@@ -2034,8 +2089,7 @@ ECode ViewPager::OnPageScrolled(
 
             Int32 left;
             child->GetLeft(&left);
-            Int32 width;
-            GetClientWidth(&width);
+            Int32 width = GetClientWidth();
             Float transformPos = (Float)(left - scrollX) / width;
             mPageTransformer->TransformPage(child, transformPos);
         }
@@ -2053,7 +2107,7 @@ void ViewPager::CompleteScroll(
         // Done with scroll, no longer want to cache view drawing.
         SetScrollingCacheEnabled(FALSE);
         mScroller->AbortAnimation();
-        Int32 oldX, oldy;
+        Int32 oldX, oldY;
         GetScrollX(&oldX);
         GetScrollY(&oldY);
         Int32 x, y;
@@ -2072,7 +2126,7 @@ void ViewPager::CompleteScroll(
         AutoPtr<ItemInfo> ii = (ItemInfo*)(IObject*)value.Get();
         if (ii->mScrolling) {
             needPopulate = TRUE;
-            ii.scrolling = FALSE;
+            ii->mScrolling = FALSE;
         }
     }
     if (needPopulate) {
@@ -2181,8 +2235,9 @@ ECode ViewPager::OnInterceptTouchEvent(
             Float yDiff = Elastos::Core::Math::Abs(y - mInitialMotionY);
             if (DEBUG) Slogger::V(TAG, "Moved x to %f,%f diff=%f,%f", x, y, xDiff, yDiff);
 
+            Boolean canScroll;
             if (dx != 0 && !IsGutterDrag(mLastMotionX, dx) &&
-                    CanScroll(IView::Probe(this), FALSE, (Int32)dx, (Int32)x, (Int32)y)) {
+                    (CanScroll(IView::Probe(this), FALSE, (Int32)dx, (Int32)x, (Int32)y, &canScroll), canScroll)) {
                 // Nested view has scrollable area under this point. Let it be handled there.
                 mLastMotionX = x;
                 mLastMotionY = y;
@@ -2229,11 +2284,12 @@ ECode ViewPager::OnInterceptTouchEvent(
             ev->GetPointerId(0, &mActivePointerId);
             mIsUnableToDrag = FALSE;
 
-            mScroller->ComputeScrollOffset();
+            Boolean result;
+            mScroller->ComputeScrollOffset(&result);
             if (mScrollState == SCROLL_STATE_SETTLING) {
                 Int32 finalX, currX;
                 mScroller->GetFinalX(&finalX);
-                mScroller->GetCurrX(currX);
+                mScroller->GetCurrX(&currX);
                 if (Elastos::Core::Math::Abs(finalX - currX) > mCloseEnough) {
                     // Let the user 'catch' the pager as it animates.
                     mScroller->AbortAnimation();
@@ -2279,7 +2335,7 @@ ECode ViewPager::OnInterceptTouchEvent(
 }
 
 ECode ViewPager::OnTouchEvent(
-    /* [in] */ IMotionEvent* event,
+    /* [in] */ IMotionEvent* ev,
     /* [out] */ Boolean* res)
 {
     VALIDATE_NOT_NULL(res)
@@ -2376,11 +2432,10 @@ ECode ViewPager::OnTouchEvent(
                 AutoPtr<IVelocityTracker> velocityTracker = mVelocityTracker;
                 velocityTracker->ComputeCurrentVelocity(1000, mMaximumVelocity);
                 Float xVelocity;
-                velocityTracker->GetXVelocity(velocityTracker, mActivePointerId, &xVelocity);
+                velocityTracker->GetXVelocity(mActivePointerId, &xVelocity);
                 Int32 initialVelocity = (Int32)xVelocity;
                 mPopulatePending = TRUE;
-                Int32 width;
-                GetClientWidth(&width);
+                Int32 width = GetClientWidth();
                 Int32 scrollX;
                 GetScrollX(&scrollX);
                 AutoPtr<ItemInfo> ii = InfoForCurrentScrollPosition();
@@ -2397,10 +2452,14 @@ ECode ViewPager::OnTouchEvent(
 
                 mActivePointerId = INVALID_POINTER;
                 EndDrag();
-                Boolean onReleaseL, onReleaseR;
-                mLeftEdge->OnRelease(&onReleaseL);
-                mRightEdge->OnRelease(&onReleaseR);
-                needsInvalidate = onReleaseL | onReleaseR;
+                mLeftEdge->OnRelease();
+                mRightEdge->OnRelease();
+                Boolean isFinishedL, isFinishedR;
+                mLeftEdge->IsFinished(&isFinishedL);
+                mRightEdge->IsFinished(&isFinishedR);
+                needsInvalidate = isFinishedL | isFinishedR;
+                // TODO: Is this ok?
+                // needsInvalidate = mLeftEdge.onRelease() | mRightEdge.onRelease();
             }
             break;
         case IMotionEvent::ACTION_CANCEL:
@@ -2408,15 +2467,19 @@ ECode ViewPager::OnTouchEvent(
                 ScrollToItem(mCurItem, TRUE, 0, FALSE);
                 mActivePointerId = INVALID_POINTER;
                 EndDrag();
-                Boolean onReleaseL, onReleaseR;
-                mLeftEdge->OnRelease(&onReleaseL);
-                mRightEdge->OnRelease(&onReleaseR);
-                needsInvalidate = onReleaseL | onReleaseR;
+                mLeftEdge->OnRelease();
+                mRightEdge->OnRelease();
+                Boolean isFinishedL, isFinishedR;
+                mLeftEdge->IsFinished(&isFinishedL);
+                mRightEdge->IsFinished(&isFinishedR);
+                needsInvalidate = isFinishedL | isFinishedR;
+                // TODO: Is this ok?
+                // needsInvalidate = mLeftEdge.onRelease() | mRightEdge.onRelease();
             }
             break;
         case IMotionEvent::ACTION_POINTER_DOWN: {
             Int32 index;
-            ev->GetActionIndex(ev, &index);
+            ev->GetActionIndex(&index);
             Float x;
             ev->GetX(index, &x);
             mLastMotionX = x;
@@ -2455,11 +2518,10 @@ Boolean ViewPager::PerformDrag(
     Float deltaX = mLastMotionX - x;
     mLastMotionX = x;
 
-    Float oldScrollX;
+    Int32 oldScrollX;
     GetScrollX(&oldScrollX);
     Float scrollX = oldScrollX + deltaX;
-    Int32 width;
-    GetClientWidth(&width);
+    Int32 width = GetClientWidth();
 
     Float leftBound = width * mFirstOffset;
     Float rightBound = width * mLastOffset;
@@ -2473,7 +2535,7 @@ Boolean ViewPager::PerformDrag(
     mItems->GetSize(&size);
     AutoPtr<IInterface> last;
     mItems->Get(size - 1, (IInterface**)&last);
-    AutoPtr<ItemInfo> lastItem = (ItemInfo*)last.Get();
+    AutoPtr<ItemInfo> lastItem = (ItemInfo*)(IObject*)last.Get();
     if (firstItem->mPosition != 0) {
         leftAbsolute = FALSE;
         leftBound = firstItem->mOffset * width;
@@ -2488,14 +2550,16 @@ Boolean ViewPager::PerformDrag(
     if (scrollX < leftBound) {
         if (leftAbsolute) {
             Float over = leftBound - scrollX;
-            mLeftEdge->OnPull(Elastos::Core::Math::Abs(over) / width, &needsInvalidate);
+            mLeftEdge->OnPull(Elastos::Core::Math::Abs(over) / width);
+            needsInvalidate = TRUE;
         }
         scrollX = leftBound;
     }
     else if (scrollX > rightBound) {
         if (rightAbsolute) {
             Float over = scrollX - rightBound;
-            mRightEdge->OnPull(Elastos::Core::Math::Abs(over) / width, &needsInvalidate);
+            mRightEdge->OnPull(Elastos::Core::Math::Abs(over) / width);
+            needsInvalidate = TRUE;
         }
         scrollX = rightBound;
     }
@@ -2504,15 +2568,15 @@ Boolean ViewPager::PerformDrag(
     Int32 scrollY;
     GetScrollY(&scrollY);
     ScrollTo((Int32)scrollX, scrollY);
-    PageScrolled((Int32)scrollX);
+    Boolean result;
+    PageScrolled((Int32)scrollX, &result);
 
     return needsInvalidate;
 }
 
-AutoPtr<ItemInfo> ViewPager::InfoForCurrentScrollPosition()
+AutoPtr<ViewPager::ItemInfo> ViewPager::InfoForCurrentScrollPosition()
 {
-    Int32 width;
-    GetClientWidth(&width);
+    Int32 width = GetClientWidth();
     Int32 scrollX;
     GetScrollX(&scrollX);
     Float scrollOffset = width > 0 ? (Float)scrollX / width : 0;
@@ -2523,11 +2587,12 @@ AutoPtr<ItemInfo> ViewPager::InfoForCurrentScrollPosition()
     Boolean first = TRUE;
 
     AutoPtr<ItemInfo> lastItem;
+    Int32 size;
     mItems->GetSize(&size);
     for (Int32 i = 0; i < size; i++) {
         AutoPtr<IInterface> value;
         mItems->Get(i, (IInterface**)&value);
-        AutoPtr<ItemInfo> ii = (ItemInfo*)value.Get();
+        AutoPtr<ItemInfo> ii = (ItemInfo*)(IObject*)value.Get();
         Float offset;
         if (!first && ii->mPosition != lastPos + 1) {
             // Create a synthetic item for a missing page.
@@ -2542,7 +2607,7 @@ AutoPtr<ItemInfo> ViewPager::InfoForCurrentScrollPosition()
         Float leftBound = offset;
         Float rightBound = offset + ii->mWidthFactor + marginOffset;
         if (first || scrollOffset >= leftBound) {
-            if (scrollOffset < rightBound || (mItems->GetSize(&size), i == size - 1) {
+            if (scrollOffset < rightBound || (mItems->GetSize(&size), i == size - 1)) {
                 return ii;
             }
         }
@@ -2550,7 +2615,7 @@ AutoPtr<ItemInfo> ViewPager::InfoForCurrentScrollPosition()
             return lastItem;
         }
         first = FALSE;
-        lastPos = ii->Position;
+        lastPos = ii->mPosition;
         lastOffset = offset;
         lastWidth = ii->mWidthFactor;
         lastItem = ii;
@@ -2661,8 +2726,8 @@ void ViewPager::OnDraw(
     ViewGroup::OnDraw(canvas);
 
     // Draw the margin drawable between pages if needed.
-    Int32 size
-    if (mPageMargin > 0 && mMarginDrawable != null && (mItems->GetSize(&size), size > 0) && mAdapter != NULL) {
+    Int32 size;
+    if (mPageMargin > 0 && mMarginDrawable != NULL && (mItems->GetSize(&size), size > 0) && mAdapter != NULL) {
         Int32 scrollX;
         GetScrollX(&scrollX);
         Int32 width;
@@ -2722,7 +2787,7 @@ ECode ViewPager::BeginFakeDrag(
         return NOERROR;
     }
     mFakeDragging = TRUE;
-    setScrollState(SCROLL_STATE_DRAGGING);
+    SetScrollState(SCROLL_STATE_DRAGGING);
     mInitialMotionX = mLastMotionX = 0;
     if (mVelocityTracker == NULL) {
         AutoPtr<IVelocityTrackerHelper> helper;
@@ -2738,7 +2803,7 @@ ECode ViewPager::BeginFakeDrag(
     AutoPtr<IMotionEvent> ev;
     helper->Obtain(time, time, IMotionEvent::ACTION_DOWN, 0, 0, 0, (IMotionEvent**)&ev);
     mVelocityTracker->AddMovement(ev);
-    ev->Recycle();
+    IInputEvent::Probe(ev)->Recycle();
     mFakeDragBeginTime = time;
     *result = TRUE;
     return NOERROR;
@@ -2754,11 +2819,10 @@ ECode ViewPager::EndFakeDrag()
     AutoPtr<IVelocityTracker> velocityTracker = mVelocityTracker;
     velocityTracker->ComputeCurrentVelocity(1000, mMaximumVelocity);
     Float xVelocity;
-    velocityTracker->GetXVelocity(velocityTracker, mActivePointerId, &xVelocity);
+    velocityTracker->GetXVelocity(mActivePointerId, &xVelocity);
     Int32 initialVelocity = (Int32)xVelocity;
     mPopulatePending = TRUE;
-    Int32 width;
-    GetClientWidth(&width);
+    Int32 width = GetClientWidth();
     Int32 scrollX;
     GetScrollX(&scrollX);
     AutoPtr<ItemInfo> ii = InfoForCurrentScrollPosition();
@@ -2783,23 +2847,22 @@ ECode ViewPager::FakeDragBy(
 
     mLastMotionX += xOffset;
 
-    Float oldScrollX;
+    Int32 oldScrollX;
     GetScrollX(&oldScrollX);
     Float scrollX = oldScrollX - xOffset;
-    Int32 width;
-    GetClientWidth(&width);
+    Int32 width = GetClientWidth();
 
     Float leftBound = width * mFirstOffset;
     Float rightBound = width * mLastOffset;
 
     AutoPtr<IInterface> first;
     mItems->Get(0, (IInterface**)&first);
-    AutoPtr<ItemInfo> firstItem = (ItemInfo**)first.Get();
+    AutoPtr<ItemInfo> firstItem = (ItemInfo*)(IObject*)first.Get();
     AutoPtr<IInterface> last;
     Int32 size;
     mItems->GetSize(&size);
     mItems->Get(size - 1, (IInterface**)&last);
-    AutoPtr<ItemInfo> lastItem = (ItemInfo**)last.Get();
+    AutoPtr<ItemInfo> lastItem = (ItemInfo*)(IObject*)last.Get();
     if (firstItem->mPosition != 0) {
         leftBound = firstItem->mOffset * width;
     }
@@ -2819,7 +2882,8 @@ ECode ViewPager::FakeDragBy(
     Int32 scrollY;
     GetScrollY(&scrollY);
     ScrollTo((Int32)scrollX, scrollY);
-    PageScrolled((Int32)scrollX);
+    Boolean result;
+    PageScrolled((Int32)scrollX, &result);
 
     // Synthesize an event for the VelocityTracker.
     Int64 time = SystemClock::GetUptimeMillis();
@@ -2827,9 +2891,9 @@ ECode ViewPager::FakeDragBy(
     CMotionEventHelper::AcquireSingleton((IMotionEventHelper**)&helper);
     AutoPtr<IMotionEvent> ev;
     helper->Obtain(mFakeDragBeginTime, time, IMotionEvent::ACTION_MOVE,
-            mLastMotionX, 0, 0);
+            mLastMotionX, 0, 0, (IMotionEvent**)&ev);
     mVelocityTracker->AddMovement(ev);
-    ev->Recycle();
+    IInputEvent::Probe(ev)->Recycle();
     return NOERROR;
 }
 
@@ -2901,18 +2965,17 @@ ECode ViewPager::CanScrollHorizontally(
         return NOERROR;
     }
 
-    Int32 width;
-    GetClientWidth(&width);
+    Int32 width = GetClientWidth();
     Int32 scrollX;
     GetScrollX(&scrollX);
     if (direction < 0) {
-        *result = (scrollX > (Int32)(width * mFirstOffset));
+        *canScroll = (scrollX > (Int32)(width * mFirstOffset));
     }
     else if (direction > 0) {
-        *result = (scrollX < (Int32)(width * mLastOffset));
+        *canScroll = (scrollX < (Int32)(width * mLastOffset));
     }
     else {
-        *result = FALSE;
+        *canScroll = FALSE;
     }
     return NOERROR;
 }
@@ -2944,7 +3007,7 @@ ECode ViewPager::CanScroll(
             if ((child->GetLeft(&left), x + scrollX >= left) && (child->GetRight(&right), x + scrollX < right) &&
                     (child->GetTop(&top), y + scrollY >= top) && (child->GetBottom(&bottom), y + scrollY < bottom) &&
                     (CanScroll(child, TRUE, dx, x + scrollX - left, y + scrollY - top, &result), result)) {
-                *result = TRUE;
+                *canScroll = TRUE;
                 return NOERROR;
             }
         }
@@ -2952,7 +3015,7 @@ ECode ViewPager::CanScroll(
 
     Boolean result;
     v->CanScrollHorizontally(-dx, &result);
-    *result = checkV && result;
+    *canScroll = checkV && result;
     return NOERROR;
 }
 
@@ -2968,7 +3031,7 @@ ECode ViewPager::DispatchKeyEvent(
         return NOERROR;
     }
     else {
-        return executeKeyEvent(event, res);
+        return ExecuteKeyEvent(event, res);
     }
 }
 
@@ -3035,7 +3098,7 @@ ECode ViewPager::ArrowScroll(
             // This would cause the focus search down below to fail in fun ways.
             StringBuilder sb;
             EGuid clsId;
-            IObject::Probe(this)->GetClassID(&clsId);
+            IObject::Probe((IViewPager*)this)->GetClassID(&clsId);
             sb.Append(clsId.mUunm);
             parent = NULL;
             currentFocused->GetParent((IViewParent**)&parent);
@@ -3057,11 +3120,11 @@ ECode ViewPager::ArrowScroll(
     Boolean handled = FALSE;
 
     AutoPtr<IFocusFinderHelper> helper;
-    CFocusFinderHelper::AcquireSingleton((IFocusFinderHelper**)&helpre);
+    CFocusFinderHelper::AcquireSingleton((IFocusFinderHelper**)&helper);
     AutoPtr<IFocusFinder> ff;
     helper->GetInstance((IFocusFinder**)&ff);
     AutoPtr<IView> nextFocused;
-    ff->FindNextFocus(IView::Probe(this), currentFocused, direction, (IView**)&nextFocused);
+    ff->FindNextFocus(IViewGroup::Probe(this), currentFocused, direction, (IView**)&nextFocused);
     if (nextFocused != NULL && nextFocused.Get() != currentFocused.Get()) {
         if (direction == IView::FOCUS_LEFT) {
             // If there is nothing to the left, or this is causing us to
@@ -3073,7 +3136,7 @@ ECode ViewPager::ArrowScroll(
             Int32 currLeft;
             rect->GetLeft(&currLeft);
             if (currentFocused != NULL && nextLeft >= currLeft) {
-                handled = pageLeft();
+                handled = PageLeft();
             }
             else {
                 nextFocused->RequestFocus(&handled);
@@ -3139,7 +3202,7 @@ AutoPtr<IRect> ViewPager::GetChildRectInPagerCoordinates(
     AutoPtr<IViewParent> parent;
     child->GetParent((IViewParent**)&parent);
     while (IViewGroup::Probe(parent) != NULL && parent.Get() != IViewParent::Probe(this)) {
-        AutoPtr<IViewGroup> group = IViewGroup::Probe(parent);
+        AutoPtr<IView> group = IView::Probe(parent);
         group->GetLeft(&left);
         group->GetRight(&right);
         group->GetTop(&top);
@@ -3177,12 +3240,14 @@ Boolean ViewPager::PageRight()
 
 ECode ViewPager::AddFocusables(
     /* [in] */ IArrayList* views,
-    /* [in] */ Int32 direction)
+    /* [in] */ Int32 direction,
+    /* [in] */ Int32 focusableMode)
 {
     Int32 focusableCount;
     views->GetSize(&focusableCount);
 
-    Int32 descendantFocusability = GetDescendantFocusability();
+    Int32 descendantFocusability;
+    GetDescendantFocusability(&descendantFocusability);
 
     if (descendantFocusability != FOCUS_BLOCK_DESCENDANTS) {
         Int32 count;
@@ -3207,10 +3272,10 @@ ECode ViewPager::AddFocusables(
     Int32 size;
     if (descendantFocusability != FOCUS_AFTER_DESCENDANTS ||
             // No focusable descendants
-            (view->GetSize(&size), (focusableCount == size))) {
+            (views->GetSize(&size), (focusableCount == size))) {
         // Note that we can't call the superclass here, because it will
         // add all views in.  So we need to do the same thing View does.
-        Boolean isFocusable
+        Boolean isFocusable;
         if (IsFocusable(&isFocusable), !isFocusable) {
             return NOERROR;
         }
@@ -3291,7 +3356,7 @@ ECode ViewPager::DispatchPopulateAccessibilityEvent(
 {
     VALIDATE_NOT_NULL(res)
     // Dispatch scroll events from this ViewPager.
-    Int32 TYPE;
+    Int32 type;
     if (event->GetEventType(&type), type == IAccessibilityEvent::TYPE_VIEW_SCROLLED) {
         return ViewGroup::DispatchPopulateAccessibilityEvent(event, res);
     }

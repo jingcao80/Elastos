@@ -367,6 +367,10 @@
 # #  Elastos/Frameworks/Droid/Base/Core/src/elastos/droid/webkit/webview
 # >  Elastos/Frameworks/Droid/Base/Core/src/elastos/droid/webkit/webview/chromium
 
+# ==== buid Supprot/V4 ====
+> Elastos/Frameworks/Droid/Support/V4 Elastos.Droid.Support.V4.car
+> Elastos/Frameworks/Droid/Support/V4/src/elastos/droid/support/v4/view
+
 # ==== buid SystemUI ====
   Elastos/Frameworks/Droid/Base/Packages/SystemUI Elastos.Droid.SystemUI.car
   Elastos/Frameworks/Droid/Base/Packages/SystemUI R.cpp

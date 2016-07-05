@@ -7,12 +7,18 @@
 #include "elastos/droid/database/DataSetObserver.h"
 #include "elastos/droid/os/Runnable.h"
 #include "elastos/droid/view/ViewGroup.h"
+#include "Elastos.Droid.Os.h"
+#include "Elastos.Droid.Widget.h"
 
 using Elastos::Droid::Database::DataSetObserver;
 using Elastos::Droid::Graphics::IRect;
 using Elastos::Droid::Graphics::Drawable::IDrawable;
 using Elastos::Droid::Os::Runnable;
+using Elastos::Droid::View::ViewGroup;
 using Elastos::Droid::View::IVelocityTracker;
+using Elastos::Droid::View::IViewGroupLayoutParams;
+using Elastos::Droid::View::IMotionEvent;
+using Elastos::Droid::View::IKeyEvent;
 using Elastos::Droid::View::Animation::IInterpolator;
 using Elastos::Droid::Widget::IScroller;
 using Elastos::Droid::Widget::IEdgeEffect;
@@ -218,7 +224,7 @@ public:
         /**
          * Width as a 0-1 multiplier of the measured pager width
          */
-        Float mWidthFactor = 0.f;
+        Float mWidthFactor;
 
         /**
          * true if this view was added during layout and needs to be measured
@@ -237,9 +243,23 @@ public:
         Int32 mChildIndex;
     };
 
+    class ViewPositionComparator
+        : public Object
+        , public IComparator
+    {
+    public:
+        CAR_INTERFACE_DECL()
+
+        // @Override
+        CARAPI Compare(
+            /* [in] */  IInterface* a,
+            /* [in] */  IInterface* b,
+            /* [out] */ Int32* result);
+    };
+
 private:
     class ItemInfoComparator
-        , public Object
+        : public Object
         , public IComparator
     {
     public:
@@ -575,7 +595,8 @@ public:
     // @Override
     CARAPI AddFocusables(
         /* [in] */ IArrayList* views,
-        /* [in] */ Int32 direction);
+        /* [in] */ Int32 direction,
+        /* [in] */ Int32 focusableMode);
 
     /**
      * We only want the current page that is being shown to be touchable.

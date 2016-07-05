@@ -17,10 +17,10 @@ module
     namespace View {
 
     class CViewPagerSavedState {
-        //constructor();
+        constructor();
 
-        //constructor(
-        //    [in] IParcelable* state);
+        constructor(
+            [in] IParcelable* state);
 
         interface IViewPagerSavedState;
         interface IViewBaseSavedState;
