@@ -3,6 +3,7 @@
 #include "elastos/droid/internal/telephony/CallManager.h"
 #include "elastos/droid/internal/telephony/CallTracker.h"
 #include "elastos/droid/internal/telephony/IccUtils.h"
+#include "elastos/droid/internal/telephony/uicc/CUiccControllerHelper.h"
 #include "elastos/droid/content/CIntentFilter.h"
 #include "elastos/droid/os/Build.h"
 #include "elastos/droid/os/Looper.h"
@@ -74,6 +75,8 @@ using Elastos::Droid::Internal::Telephony::Uicc::IUiccCard;
 using Elastos::Droid::Internal::Telephony::Uicc::IUiccCardApplication;
 using Elastos::Droid::Internal::Telephony::Uicc::IUiccController;
 using Elastos::Droid::Internal::Telephony::Uicc::IUsimServiceTable;
+using Elastos::Droid::Internal::Telephony::Uicc::IUiccControllerHelper;
+using Elastos::Droid::Internal::Telephony::Uicc::CUiccControllerHelper;
 using Elastos::Core::AutoLock;
 using Elastos::Core::CBoolean;
 using Elastos::Core::CInteger32;
@@ -365,7 +368,7 @@ ECode PhoneBase::constructor(
     mActionAttached = /*this.getClass().getPackage().getName()*/sv + ".action_attached";
 
     if (Build::IS_DEBUGGABLE) {
-        assert(0 && "TODO");
+        //TODO assert(0 && "TODO");
         // mTelephonyTester = new TelephonyTester(this);
     }
 
@@ -410,22 +413,24 @@ ECode PhoneBase::constructor(
 
     SetPropertiesByCarrier();
 
+    Logger::E(TAG, "TODO SmsStorageMonitor & SmsUsageMonitor is not ready");
     // Initialize device storage and outgoing SMS usage monitors for SMSDispatchers.
-    mSmsStorageMonitor = new SmsStorageMonitor();
-    mSmsStorageMonitor->constructor(this);
-    mSmsUsageMonitor = new SmsUsageMonitor();
-    mSmsUsageMonitor->constructor(context);
+    //TODO mSmsStorageMonitor = new SmsStorageMonitor();
+    //TODO mSmsStorageMonitor->constructor(this);
+    //TODO mSmsUsageMonitor = new SmsUsageMonitor();
+    //TODO mSmsUsageMonitor->constructor(context);
 
-    assert(0 && "TODO");
-    // mUiccController = UiccController.getInstance();
-    mUiccController->RegisterForIccChanged(this, EVENT_ICC_CHANGED, NULL);
+    Logger::E(TAG, "TODO UiccController is not ready");
+    AutoPtr<IUiccControllerHelper> ucHelper;
+    CUiccControllerHelper::AcquireSingleton((IUiccControllerHelper**)&ucHelper);
+    //TODO ucHelper->GetInstance((IUiccController**)&mUiccController);
+    //TODO mUiccController->RegisterForIccChanged(this, EVENT_ICC_CHANGED, NULL);
 
     // Monitor IMS service
     AutoPtr<IIntentFilter> filter;
     CIntentFilter::New((IIntentFilter**)&filter);
-    assert(0 && "TODO Need IImsManager");
-    // filter->AddAction(IImsManager::ACTION_IMS_SERVICE_UP);
-    // filter->AddAction(IImsManager::ACTION_IMS_SERVICE_DOWN);
+    filter->AddAction(String("com.android.ims.IMS_SERVICE_UP"));//TODO IImsManager::ACTION_IMS_SERVICE_UP);
+    filter->AddAction(String("com.android.ims.IMS_SERVICE_DOWN"));//TODO IImsManager::ACTION_IMS_SERVICE_DOWN);
     AutoPtr<IIntent> i;
     mContext->RegisterReceiver(mImsIntentReceiver, filter, (IIntent**)&i);
 
@@ -446,9 +451,12 @@ ECode PhoneBase::Dispose()
     mDcTracker->CleanUpAllConnections(String(NULL));
     mIsTheCurrentActivePhone = FALSE;
     // Dispose the SMS usage and storage monitors
-    mSmsStorageMonitor->Dispose();
-    mSmsUsageMonitor->Dispose();
-    mUiccController->UnregisterForIccChanged(this);
+    if (mSmsStorageMonitor)
+        mSmsStorageMonitor->Dispose();
+    if (mSmsUsageMonitor)
+        mSmsUsageMonitor->Dispose();
+    if (mUiccController)
+        mUiccController->UnregisterForIccChanged(this);
     mCi->UnregisterForSrvccStateChanged(this);
     mCi->UnSetOnUnsolOemHookRaw(this);
 

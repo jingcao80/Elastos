@@ -107,6 +107,7 @@ public:
         Boolean mIsSystemBarNavigationEnabled;
 
         NotificationMgr* mHost;
+        friend class NotificationMgr;
     };
 
 public:
@@ -120,8 +121,8 @@ public:
      * PhoneApp's public "notificationMgr" field, which is why there's no
      * getInstance() method here.
      */
-    // static CARAPI_(AutoPtr<NotificationMgr>) Init(
-    //     /* [in] */ PhoneGlobals* app);
+    static CARAPI_(AutoPtr<NotificationMgr>) Init(
+         /* [in] */ IPhoneGlobals* app);
 
     /**
      * Updates the message waiting indicator (voicemail) notification.
@@ -164,8 +165,8 @@ public:
         /* [in] */ ICharSequence* msg);
 
 private:
-    //NotificationMgr(
-    //    /* [in] */ PhoneGlobals* app);
+    NotificationMgr(
+        /* [in] */ IPhoneGlobals* app);
 
     /**
      * Display the network selection "no service" notification
@@ -204,7 +205,7 @@ private:
     /** The singleton NotificationMgr instance. */
     static AutoPtr<NotificationMgr> sInstance;
 
-    //AutoPtr<PhoneGlobals> mApp;
+    AutoPtr<IPhoneGlobals> mApp;
     AutoPtr<IPhone> mPhone;
 
     AutoPtr<IContext> mContext;
@@ -212,6 +213,7 @@ private:
     AutoPtr<IStatusBarManager> mStatusBarManager;
     AutoPtr<IUserManager> mUserManager;
     AutoPtr<IToast> mToast;
+    AutoPtr<StatusBarHelper> statusBarHelper;
 
     // used to track the notification of selected network unavailable
     Boolean mSelectedUnavailableNotify;
@@ -223,6 +225,7 @@ private:
 
     /** The projection to use when querying the phones table */
     static const AutoPtr<ArrayOf<String> > PHONES_PROJECTION;
+    static Object sLock;
 };
 
 } // namespace Phone

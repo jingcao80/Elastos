@@ -672,6 +672,10 @@ module
             interface ITelephonyDevControllerHelper;
         }
 
+        singleton class CCallManagerHelper {
+            interface ICallManagerHelper;
+        }
+
     } // Telephony
     } // Internal
     } // Droid

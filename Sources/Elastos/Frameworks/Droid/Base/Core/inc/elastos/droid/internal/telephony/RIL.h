@@ -73,7 +73,7 @@ public:
      *
      * Note: This should only be called once per use.
      */
-    CARAPI_(UInt32) Release();
+    CARAPI_(UInt32) ReleaseRequest();
 
     static CARAPI_(void) ResetSerial();
 

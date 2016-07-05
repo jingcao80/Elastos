@@ -47,6 +47,7 @@ CallTracker::CallTracker()
     , mNumberConverted(FALSE)
     , VALID_COMPARE_LENGTH(3)
 {
+    Handler::constructor();
     CArrayList::New((IArrayList**)&mHandoverConnections);
 }
 

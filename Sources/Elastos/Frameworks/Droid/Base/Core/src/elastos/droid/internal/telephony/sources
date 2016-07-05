@@ -88,6 +88,7 @@ SOURCES += CTelephonyCapabilities.cpp
 SOURCES += ServiceStateTracker.cpp
 SOURCES += CSms7BitEncodingTranslator.cpp
 SOURCES += CSmsApplication.cpp
+SOURCES += CCallManagerHelper.cpp
 
 ELASTOS_LIBS += cat/cat.lib
 ELASTOS_LIBS += cdma/cdma.lib

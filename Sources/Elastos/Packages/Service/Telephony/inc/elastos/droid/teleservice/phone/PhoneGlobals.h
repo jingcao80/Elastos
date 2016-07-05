@@ -401,6 +401,7 @@ private:
      * Used to determine if the preserved call origin is fresh enough.
      */
     static const Int64 CALL_ORIGIN_EXPIRATION_MILLIS;
+    friend class NotificationMgr;
 };
 
 } // namespace Phone

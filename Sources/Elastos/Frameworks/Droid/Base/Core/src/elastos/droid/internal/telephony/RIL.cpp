@@ -1,10 +1,13 @@
 
 #include "Elastos.Droid.Content.h"
+#include "Elastos.Droid.Internal.h"
 #include "Elastos.Droid.Telephony.h"
 #include <Elastos.CoreLibrary.IO.h>
 #include "elastos/droid/content/res/CResourcesHelper.h"
 #include "elastos/droid/internal/telephony/RIL.h"
 #include "elastos/droid/internal/telephony/CallForwardInfo.h"
+#include "elastos/droid/internal/telephony/TelephonyDevController.h"
+#include "elastos/droid/internal/telephony/CTelephonyDevControllerHelper.h"
 #include "elastos/droid/net/CLocalSocket.h"
 #include "elastos/droid/net/CLocalSocketAddress.h"
 #include "elastos/droid/os/AsyncResult.h"
@@ -19,6 +22,8 @@
 #include <elastos/core/StringBuilder.h>
 #include <elastos/core/Math.h>
 #include <elastos/core/StringUtils.h>
+#include <elastos/utility/logging/Logger.h>
+using Elastos::Utility::Logging::Logger;
 
 using Elastos::Droid::Content::Res::IResources;
 using Elastos::Droid::Content::Res::IResourcesHelper;
@@ -158,13 +163,14 @@ AutoPtr<RILRequest> RILRequest::Obtain(
 
     rr->mRequest = request;
     rr->mResult = result;
-    assert(0 && "TODO");
-    // rr->mParcel = Parcel::Obtain();
+    rr->mParcel = NULL;//Parcel::Obtain();
+    CParcel::New((IParcel**)&(rr->mParcel));
 
     if (result != NULL) {
         AutoPtr<IHandler> hdl;
         result->GetTarget((IHandler**)&hdl);
         if (hdl == NULL) {
+            Logger::E("RIL", "line:%d, Message target must not be NULL\n", __LINE__);
             // throw new NullPointerException("Message target must not be NULL");
             return NULL;
         }
@@ -177,7 +183,7 @@ AutoPtr<RILRequest> RILRequest::Obtain(
     return rr;
 }
 
-UInt32 RILRequest::Release()
+UInt32 RILRequest::ReleaseRequest()
 {
     // synchronized (sPoolSync)
     {
@@ -215,8 +221,8 @@ String RILRequest::SerialString()
 
     sn = StringUtils::ToString(adjustedSerial);
 
-    assert(0 && "TODO");
-    //sb.append("J[");
+    sb.Append('J');
+    sb.Append('[');
     sb.Append('[');
     for (Int32 i = 0, s = sn.GetLength() ; i < 4 - s; i++) {
         sb.Append('0');
@@ -233,7 +239,7 @@ void RILRequest::OnError(
 {
     AutoPtr<ICommandException> ex;
 
-    assert(0 && "TODO");
+    //assert(0 && "TODO");
     // ex = CommandException::FromRilErrno(error);
 
     // if (RIL::RILJ_LOGD) {
@@ -243,13 +249,13 @@ void RILRequest::OnError(
     // }
 
     if (mResult != NULL) {
-        assert(0 && "TODO");
-        // AsyncResult::ForMessage(mResult, ret, ex);
+        //assert(0 && "TODO");
+        AsyncResult::ForMessage(mResult, ret, IThrowable::Probe(ex));
         mResult->SendToTarget();
     }
 
     if (mParcel != NULL) {
-        assert(0 && "TODO");
+        //assert(0 && "TODO");
         // mParcel->Recycle();
         mParcel = NULL;
     }
@@ -294,7 +300,7 @@ ECode RIL::RILSender::HandleMessage(
 
                 if (s == NULL) {
                     rr->OnError(IRILConstants::RADIO_NOT_AVAILABLE, NULL);
-                    rr->Release();
+                    rr->ReleaseRequest();
                     mHost->DecrementWakeLock();
                     return NOERROR;
                 }
@@ -728,6 +734,7 @@ ECode RIL::Init(
     /* [in] */ Int32 cdmaSubscription,
     /* [in] */ IInteger32* instanceId)
 {
+    Logger::E("leliang", "line:%d, func:%s\n", __LINE__, __func__);
     mHeaderSize = OEM_IDENTIFIER.GetLength() + 2 * INT_SIZE;
     QCRIL_EVT_HOOK_UNSOL_MODEM_CAPABILITY = OEMHOOK_BASE + 1020;
 
@@ -799,9 +806,9 @@ ECode RIL::Init(
         dm->RegisterDisplayListener(mDisplayListener, NULL);
     }
 
-    assert(0 && "TODO");
-    //TelephonyDevController tdc = TelephonyDevController.getInstance();
-    //tdc->RegisterRIL(this);
+    AutoPtr<ITelephonyDevControllerHelper> tdcHelper;// = TelephonyDevController::GetInstance();
+    CTelephonyDevControllerHelper::AcquireSingleton((ITelephonyDevControllerHelper**)&tdcHelper);
+    tdcHelper->RegisterRIL(this);
     return NOERROR;
 }
 
@@ -3639,7 +3646,7 @@ Boolean RIL::ClearWakeLock()
         if (mWakeLockCount == 0 && bHeld == FALSE) return FALSE;
         // Rlog.d(RILJ_LOG_TAG, "NOTE: mWakeLockCount is " + mWakeLockCount + "at time of clearing");
         mWakeLockCount = 0;
-        mWakeLock->Release();
+        mWakeLock->ReleaseLock();
         mSender->RemoveMessages(EVENT_WAKE_LOCK_TIMEOUT);
         return TRUE;
     }
@@ -3652,7 +3659,7 @@ void RIL::Send(
 
     if (mSocket == NULL) {
         rr->OnError(IRILConstants::RADIO_NOT_AVAILABLE, NULL);
-        rr->Release();
+        rr->ReleaseRequest();
         return;
     }
 
@@ -3676,7 +3683,7 @@ void RIL::ProcessResponse(
     else if (type == RESPONSE_SOLICITED) {
         AutoPtr<RILRequest> rr = ProcessSolicited(p);
         if (rr != NULL) {
-            rr->Release();
+            rr->ReleaseRequest();
             DecrementWakeLock();
         }
     }
@@ -3707,7 +3714,7 @@ void RIL::ClearRequestList(
                 //         requestToString(rr.mRequest));
             }
             rr->OnError(error, NULL);
-            rr->Release();
+            rr->ReleaseRequest();
             DecrementWakeLock();
         }
         mRequestList->Clear();
@@ -6066,6 +6073,10 @@ void RIL::RiljLog(
 {
     // Rlog.d(RILJ_LOG_TAG, msg
     //         + (mInstanceId != NULL ? (" [SUB" + mInstanceId + "]") : ""));
+    Int32 value = -1;
+    if (mInstanceId != NULL)
+        mInstanceId->GetValue(&value);
+    Logger::D(RILJ_LOG_TAG, "msg:%s, [SUB %d ]", msg.string(), value);
 }
 
 void RIL::RiljLogv(
@@ -6073,6 +6084,10 @@ void RIL::RiljLogv(
 {
     // Rlog.v(RILJ_LOG_TAG, msg
     //         + (mInstanceId != NULL ? (" [SUB" + mInstanceId + "]") : ""));
+    Int32 value = -1;
+    if (mInstanceId != NULL)
+        mInstanceId->GetValue(&value);
+    Logger::V(RILJ_LOG_TAG, "msg:%s, [SUB %d ]", msg.string(), value);
 }
 
 void RIL::UnsljLog(

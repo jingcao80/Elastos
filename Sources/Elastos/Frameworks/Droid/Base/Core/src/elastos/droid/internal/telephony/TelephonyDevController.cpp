@@ -1,8 +1,9 @@
 
 #include "elastos/droid/internal/telephony/TelephonyDevController.h"
+#include "elastos/droid/internal/telephony/CTelephonyDevController.h"
+#include "elastos/droid/internal/telephony/HardwareConfig.h"
 #include "elastos/droid/content/res/CResourcesHelper.h"
 #include "elastos/droid/R.h"
-
 #include <elastos/core/AutoLock.h>
 
 using Elastos::Droid::Content::Res::IResources;
@@ -71,7 +72,7 @@ AutoPtr<ITelephonyDevController> TelephonyDevController::Create()
             // throw new RuntimeException("TelephonyDevController already created!?!");
             return NULL;
         }
-        // CTelephonyDevController::New((ITelephonyDevController**)&sTelephonyDevController);
+        CTelephonyDevController::New((ITelephonyDevController**)&sTelephonyDevController);
         return sTelephonyDevController;
     }
 }
@@ -100,16 +101,15 @@ void TelephonyDevController::InitFromResource()
     if (hwStrings != NULL) {
         for (Int32 i = 0; i < hwStrings->GetLength(); i++) {
         String hwString = (*hwStrings)[i];
-            AutoPtr<IHardwareConfig> hw;
-            assert(0 && "TODO");
+            AutoPtr<HardwareConfig> hw = new HardwareConfig(hwString);
             // CHardwareConfig::New(hwString, (IHardwareConfig**)&hw);
             if (hw != NULL) {
-                // if (hw->mType == IHardwareConfig::DEV_HARDWARE_TYPE_MODEM) {
-                //     UpdateOrInsert(hw, mModems);
-                // }
-                // else if (hw->mType == IHardwareConfig::DEV_HARDWARE_TYPE_SIM) {
-                //     UpdateOrInsert(hw, mSims);
-                // }
+                if (hw->mType == IHardwareConfig::DEV_HARDWARE_TYPE_MODEM) {
+                     UpdateOrInsert(hw, mModems);
+                }
+                else if (hw->mType == IHardwareConfig::DEV_HARDWARE_TYPE_SIM) {
+                     UpdateOrInsert(hw, mSims);
+                }
             }
         }
     }
@@ -192,20 +192,23 @@ void TelephonyDevController::UpdateOrInsert(
             AutoPtr<IInterface> p;
             list->Get(i, (IInterface**)&p);
             item = IHardwareConfig::Probe(p);
-            assert(0 && "TODO");
-            // if (item->mUuid->CompareTo(hw->mUuid) == 0) {
-            //     if (DBG) {
-            //         String str("updateOrInsert: removing: ");
-            //         str += item;
-            //         Logd(str);
-            //     }
-            //     list->Remove(i);
-            // }
+            HardwareConfig* hwc = (HardwareConfig*)item.Get();
+            if (hwc->mUuid.Equals(((HardwareConfig*)hw)->mUuid)) {
+                if (DBG) {
+                    String str("updateOrInsert: removing: ");
+                    String itemStr;
+                    IObject::Probe(item)->ToString(&itemStr);;
+                    str += itemStr;
+                    Logd(str);
+                }
+                list->Remove(i);
+            }
         }
         if (DBG) {
             String str("updateOrInsert: inserting: ");
-            assert(0 && "TODO");
-            // str += hw;
+            String hwStr;
+            IObject::Probe(hw)->ToString(&hwStr);
+            str += hwStr;
             Logd(str);
         }
         list->Add(hw);

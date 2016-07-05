@@ -1,5 +1,6 @@
 
 #include "elastos/droid/teleservice/phone/NotificationMgr.h"
+#include "elastos/droid/teleservice/phone/PhoneGlobals.h"
 #include <elastos/utility/logging/Logger.h>
 #include "elastos/droid/text/TextUtils.h"
 #include "Elastos.Droid.App.h"
@@ -15,6 +16,7 @@
 #include <elastos/core/StringUtils.h>
 #include <elastos/core/CoreUtils.h>
 #include "Elastos.CoreLibrary.Utility.h"
+#include "elastos/core/AutoLock.h"
 
 using Elastos::Droid::App::INotification;
 using Elastos::Droid::App::INotificationBuilder;
@@ -65,6 +67,7 @@ using Elastos::Core::StringUtils;
 using Elastos::Core::CSystem;
 using Elastos::Core::ISystem;
 using Elastos::Core::CoreUtils;
+using Elastos::Core::AutoLock;
 using Elastos::Utility::IList;
 using Elastos::Utility::Logging::Logger;
 
@@ -180,55 +183,55 @@ static AutoPtr<ArrayOf<String> > initPHONES_PROJECTION()
     return array;
 }
 
-const AutoPtr<ArrayOf<String> > PHONES_PROJECTION = initPHONES_PROJECTION();
+const AutoPtr<ArrayOf<String> > NotificationMgr::PHONES_PROJECTION = initPHONES_PROJECTION();
+Object NotificationMgr::sLock;
 
-// NotificationMgr::NotificationMgr(
-//     /* [in] */ PhoneGlobals* app)
-//     : mSelectedUnavailableNotify(FALSE)
-//     , mVmNumberRetriesRemaining(MAX_VM_NUMBER_RETRIES)
-//     , mApp(app)
-//     , mContext(app)
-// {
-//     AutoPtr<IInterface> obj;
-//     app->GetSystemService(IContext::NOTIFICATION_SERVICE, (IInterface**)&obj);
-//     mNotificationManager = INotificationManager::Probe(obj);
+NotificationMgr::NotificationMgr(
+    /* [in] */ IPhoneGlobals* app)
+    : mApp(app)
+    , mContext(IContext::Probe(app))
+    , mSelectedUnavailableNotify(FALSE)
+    , mVmNumberRetriesRemaining(MAX_VM_NUMBER_RETRIES)
+{
+    PhoneGlobals* phoneGlobals = (PhoneGlobals*)app;
+    AutoPtr<IInterface> obj;
+    phoneGlobals->GetSystemService(IContext::NOTIFICATION_SERVICE, (IInterface**)&obj);
+    mNotificationManager = INotificationManager::Probe(obj);
 
-//     AutoPtr<IInterface> obj2;
-//     app->GetSystemService(IContext::STATUS_BAR_SERVICE, (IInterface**)&obj2);
-//     mStatusBarManager = IStatusBarManager::Probe(obj2);
+    AutoPtr<IInterface> obj2;
+    phoneGlobals->GetSystemService(IContext::STATUS_BAR_SERVICE, (IInterface**)&obj2);
+    mStatusBarManager = IStatusBarManager::Probe(obj2);
 
-//     AutoPtr<IInterface> obj3;
-//     app->GetSystemService(Context.USER_SERVICE, (IInterface**)&obj3);
-//     mUserManager = IUserManager::Probe(obj3);
+    AutoPtr<IInterface> obj3;
+    phoneGlobals->GetSystemService(IContext::USER_SERVICE, (IInterface**)&obj3);
+    mUserManager = IUserManager::Probe(obj3);
 
-//     mPhone = app->mPhone;  // TODO: better style to use mCM.getDefaultPhone() everywhere instead
-//     statusBarHelper = new StatusBarHelper();
-// }
+    mPhone = phoneGlobals->mPhone;  // TODO: better style to use mCM.getDefaultPhone() everywhere instead
+    statusBarHelper = new StatusBarHelper(this);
+}
 
-// AutoPtr<NotificationMgr> NotificationMgr::Init(
-//     /* [in] */ IPhoneGlobals* app)
-// {
-//     {
-//         assert(0 && "synchronized (NotificationMgr.class)");
-//         AutoLock syncLock(this);
-//         if (sInstance == NULL) {
-//             sInstance = new NotificationMgr(app);
-//         }
-//         else {
-//             StringBuilder sb;
-//             sb += "init() called multiple times!  sInstance = ";
-//             sb += TO_CSTR(sInstance);
-//             Logger::Wtf(TAG, sb.ToString());
-//         }
-//         return sInstance;
-//     }
-// }
+AutoPtr<NotificationMgr> NotificationMgr::Init(
+    /* [in] */ IPhoneGlobals* app)
+{
+    {
+        AutoLock syncLock(sLock);
+        if (sInstance == NULL) {
+            sInstance = new NotificationMgr(app);
+        }
+        else {
+            StringBuilder sb;
+            sb += "init() called multiple times!  sInstance = ";
+            sb += TO_CSTR(sInstance);
+            //TODO Logger::Wtf(TAG, sb.ToString());
+            Logger::E(TAG, sb.ToString());
+        }
+        return sInstance;
+    }
+}
 
 ECode NotificationMgr::UpdateMwi(
     /* [in] */ Boolean visible)
 {
-    assert(0 && "NotificationMgr::Init()  &&  NotificationMgr::NotificationMgr()");
-
 
     if (DBG) {
         StringBuilder sb;

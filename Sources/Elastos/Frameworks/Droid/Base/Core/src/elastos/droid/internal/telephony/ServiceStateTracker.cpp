@@ -1,8 +1,10 @@
 
 #include "Elastos.Droid.Telephony.h"
 #include "elastos/droid/internal/telephony/ServiceStateTracker.h"
+#include "elastos/droid/internal/telephony/uicc/CUiccControllerHelper.h"
 #include "elastos/droid/os/SystemClock.h"
 #include "elastos/droid/os/CMessageHelper.h"
+#include "elastos/droid/os/CRegistrantList.h"
 #include "elastos/droid/telephony/CServiceState.h"
 #include "elastos/droid/telephony/CSignalStrength.h"
 #include "elastos/droid/telephony/CServiceStateHelper.h"
@@ -16,6 +18,7 @@
 #include <elastos/core/Thread.h>
 #include <elastos/core/IntegralToString.h>
 #include <elastos/core/StringToIntegral.h>
+#include <elastos/utility/logging/Logger.h>
 
 using Elastos::Droid::Content::Res::IResources;
 using Elastos::Droid::Internal::Telephony::Uicc::AppState;
@@ -23,6 +26,8 @@ using Elastos::Droid::Internal::Telephony::Uicc::APPSTATE_UNKNOWN;
 using Elastos::Droid::Internal::Telephony::Uicc::IIccRecords;
 using Elastos::Droid::Internal::Telephony::Uicc::IUiccCardApplication;
 using Elastos::Droid::Internal::Telephony::Uicc::IUiccController;
+using Elastos::Droid::Internal::Telephony::Uicc::IUiccControllerHelper;
+using Elastos::Droid::Internal::Telephony::Uicc::CUiccControllerHelper;
 // using Elastos::Droid::Internal::Telephony::Uicc::UiccController;
 using Elastos::Droid::Net::IConnectivityManager;
 using Elastos::Droid::Net::INetworkInfo;
@@ -31,7 +36,7 @@ using Elastos::Droid::Os::IMessageHelper;
 using Elastos::Droid::Os::CMessageHelper;
 // using Elastos::Droid::Os::Registrant;
 using Elastos::Droid::Os::IRegistrantList;
-// using Elastos::Droid::Os::CRegistrantList;
+using Elastos::Droid::Os::CRegistrantList;
 using Elastos::Droid::Os::SystemClock;
 using Elastos::Droid::R;
 using Elastos::Droid::Telephony::IServiceStateHelper;
@@ -52,6 +57,7 @@ using Elastos::Core::StringUtils;
 using Elastos::Core::ISystem;
 using Elastos::Core::IThread;
 using Elastos::Core::Thread;
+using Elastos::Utility::Logging::Logger;
 
 namespace Elastos {
 namespace Droid {
@@ -146,17 +152,17 @@ ServiceStateTracker::ServiceStateTracker()
     CServiceState::New((IServiceState**)&mNewSS);
 
     CSignalStrength::New((ISignalStrength**)&mSignalStrength);
-    assert(0 && "TODO");
-    // CRestrictedState::New((IRestrictedState**)&mRestrictedState);
+    Logger::E("ServiceStateTracker", "TODO CRestrictedState is NOT ready");
+    //TODO CRestrictedState::New((IRestrictedState**)&mRestrictedState);
 
-    // CRegistrantList::New((IRegistrantList**)&mRoamingOnRegistrants);
-    // CRegistrantList::New((IRegistrantList**)&mRoamingOffRegistrants);
-    // CRegistrantList::New((IRegistrantList**)&mAttachedRegistrants);
-    // CRegistrantList::New((IRegistrantList**)&mDetachedRegistrants);
-    // CRegistrantList::New((IRegistrantList**)&mDataRegStateOrRatChangedRegistrants);
-    // CRegistrantList::New((IRegistrantList**)&mNetworkAttachedRegistrants);
-    // CRegistrantList::New((IRegistrantList**)&mPsRestrictEnabledRegistrants);
-    // CRegistrantList::New((IRegistrantList**)&mPsRestrictDisabledRegistrants);
+    CRegistrantList::New((IRegistrantList**)&mRoamingOnRegistrants);
+    CRegistrantList::New((IRegistrantList**)&mRoamingOffRegistrants);
+    CRegistrantList::New((IRegistrantList**)&mAttachedRegistrants);
+    CRegistrantList::New((IRegistrantList**)&mDetachedRegistrants);
+    CRegistrantList::New((IRegistrantList**)&mDataRegStateOrRatChangedRegistrants);
+    CRegistrantList::New((IRegistrantList**)&mNetworkAttachedRegistrants);
+    CRegistrantList::New((IRegistrantList**)&mPsRestrictEnabledRegistrants);
+    CRegistrantList::New((IRegistrantList**)&mPsRestrictDisabledRegistrants);
 }
 
 AutoPtr<ArrayOf<String> > ServiceStateTracker::InitCOUNTCODE()
@@ -201,9 +207,11 @@ ECode ServiceStateTracker::constructor(
     context->GetResources((IResources**)&res);
     res->GetBoolean(R::bool_::config_voice_capable, &mVoiceCapable);
 
-    assert(0 && "TODO");
-    // mUiccController = UiccController->GetInstance();
-    mUiccController->RegisterForIccChanged(this, EVENT_ICC_CHANGED, NULL);
+    Logger::E("ServiceStateTracker", "TODO UiccController is not ready");
+    AutoPtr<IUiccControllerHelper> ucHelper;
+    CUiccControllerHelper::AcquireSingleton((IUiccControllerHelper**)&ucHelper);
+    //TODO ucHelper->GetInstance((IUiccController**)&mUiccController);
+    //TODO mUiccController->RegisterForIccChanged(this, EVENT_ICC_CHANGED, NULL);
     mCi->SetOnSignalStrengthUpdate(this, EVENT_SIGNAL_STRENGTH_UPDATE, NULL);
     mCi->RegisterForCellInfoList(this, EVENT_UNSOL_CELL_INFO_LIST, NULL);
 
