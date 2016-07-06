@@ -2,9 +2,9 @@
 #include "elastos/droid/dialer/widget/ViewDragHelper.h"
 #include "Elastos.Droid.Utility.h"
 #include "Elastos.Droid.Widget.h"
-// #include <elastos/utility/Arrays.h>
+#include <elastos/utility/Arrays.h>
 #include <elastos/utility/logging/Logger.h>
-// #include <elastos/core/Math.h>
+#include <elastos/core/Math.h>
 
 using Elastos::Droid::Content::Res::IResources;
 using Elastos::Droid::Utility::IDisplayMetrics;
@@ -15,8 +15,8 @@ using Elastos::Droid::View::IViewParent;
 // using Elastos::Droid::View::IVelocityTrackerHelper;
 // using Elastos::Droid::View::CVelocityTrackerHelper;
 using Elastos::Droid::Widget::CScroller;
+using Elastos::Utility::Arrays;
 using Elastos::Utility::Logging::Logger;
-// using Elastos::Utility::Arrays;
 
 namespace Elastos {
 namespace Droid {
@@ -158,12 +158,25 @@ ECode ViewDragHelper::SetIdleRunnable::Run()
 //================================================================
 // ViewDragHelper
 //================================================================
-const String TAG("ViewDragHelper");
+const Int32 ViewDragHelper::INVALID_POINTER = -1;
+const Int32 ViewDragHelper::STATE_IDLE = 0;
+const Int32 ViewDragHelper::STATE_DRAGGING = 1;
+const Int32 ViewDragHelper::STATE_SETTLING = 2;
+const Int32 ViewDragHelper::EDGE_LEFT = 1 << 0;
+const Int32 ViewDragHelper::EDGE_RIGHT = 1 << 1;
+const Int32 ViewDragHelper::EDGE_TOP = 1 << 2;
+const Int32 ViewDragHelper::EDGE_BOTTOM = 1 << 3;
+const Int32 ViewDragHelper::EDGE_ALL = EDGE_LEFT | EDGE_TOP | EDGE_RIGHT | EDGE_BOTTOM;
+const Int32 ViewDragHelper::DIRECTION_HORIZONTAL = 1 << 0;
+const Int32 ViewDragHelper::DIRECTION_VERTICAL = 1 << 1;
+const Int32 ViewDragHelper::DIRECTION_ALL = DIRECTION_HORIZONTAL | DIRECTION_VERTICAL;
 
-const Int32 EDGE_SIZE = 20; // dp
+const String ViewDragHelper::TAG("ViewDragHelper");
 
-const Int32 BASE_SETTLE_DURATION = 256; // ms
-const Int32 MAX_SETTLE_DURATION = 600; // ms
+const Int32 ViewDragHelper::EDGE_SIZE = 20; // dp
+
+const Int32 ViewDragHelper::BASE_SETTLE_DURATION = 256; // ms
+const Int32 ViewDragHelper::MAX_SETTLE_DURATION = 600; // ms
 
 AutoPtr<ViewDragHelper> ViewDragHelper::Create(
     /* [in] */ IViewGroup* forParent,
@@ -338,440 +351,433 @@ Boolean ViewDragHelper::SmoothSlideViewTo(
     return ForceSettleCapturedViewAt(finalLeft, finalTop, 0, 0);
 }
 
-// ECode ViewDragHelper::SettleCapturedViewAt(
-//     /* [in] */ Int32 constLeft,
-//     /* [in] */ Int32 constTop,
-//     /* [out] */ Boolean* result)
-// {
-//     VALIDATE_NOT_NULL(result);
-//     if (!mReleaseInProgress) {
-//         Logger::E(TAG, "Cannot settleCapturedViewAt outside of a call to "
-//                  "Callback#onViewReleased");
-//         return E_ILLEGAL_STATE_EXCEPTION;
-//         // throw new IllegalStateException("Cannot settleCapturedViewAt outside of a call to " +
-//         //         "Callback#onViewReleased");
-//     }
+ECode ViewDragHelper::SettleCapturedViewAt(
+    /* [in] */ Int32 constLeft,
+    /* [in] */ Int32 constTop,
+    /* [out] */ Boolean* result)
+{
+    VALIDATE_NOT_NULL(result);
+    if (!mReleaseInProgress) {
+        Logger::E(TAG, "Cannot settleCapturedViewAt outside of a call to "
+                 "Callback#onViewReleased");
+        return E_ILLEGAL_STATE_EXCEPTION;
+        // throw new IllegalStateException("Cannot settleCapturedViewAt outside of a call to " +
+        //         "Callback#onViewReleased");
+    }
 
-//     assert(0 && "TODO");
-//     // *result = ForceSettleCapturedViewAt(finalLeft, finalTop,
-//     //         (int) VelocityTrackerCompat.getXVelocity(mVelocityTracker, mActivePointerId),
-//     //         (int) VelocityTrackerCompat.getYVelocity(mVelocityTracker, mActivePointerId));
-//     return NOERROR;
-// }
+    assert(0 && "TODO");
+    // *result = ForceSettleCapturedViewAt(finalLeft, finalTop,
+    //         (int) VelocityTrackerCompat.getXVelocity(mVelocityTracker, mActivePointerId),
+    //         (int) VelocityTrackerCompat.getYVelocity(mVelocityTracker, mActivePointerId));
+    return NOERROR;
+}
 
-// Boolean ViewDragHelper::ForceSettleCapturedViewAt(
-//     /* [in] */ Int32 constLeft,
-//     /* [in] */ Int32 constTop,
-//     /* [in] */ Int32 xvel,
-//     /* [in] */ Int32 yvel)
-// {
-//     Int32 startLeft;
-//     mCapturedView->GetLeft(&startLeft);
-//     Int32 startTop;
-//     mCapturedView->GetTop(&startTop);
-//     Int32 dx = finalLeft - startLeft;
-//     Int32 dy = finalTop - startTop;
+Boolean ViewDragHelper::ForceSettleCapturedViewAt(
+    /* [in] */ Int32 finalLeft,
+    /* [in] */ Int32 finalTop,
+    /* [in] */ Int32 xvel,
+    /* [in] */ Int32 yvel)
+{
+    Int32 startLeft;
+    mCapturedView->GetLeft(&startLeft);
+    Int32 startTop;
+    mCapturedView->GetTop(&startTop);
+    Int32 dx = finalLeft - startLeft;
+    Int32 dy = finalTop - startTop;
 
-//     if (dx == 0 && dy == 0) {
-//         // Nothing to do. Send callbacks, be done.
-//         mScroller->AbortAnimation();
-//         SetDragState(STATE_IDLE);
-//         return FALSE;
-//     }
+    if (dx == 0 && dy == 0) {
+        // Nothing to do. Send callbacks, be done.
+        mScroller->AbortAnimation();
+        SetDragState(STATE_IDLE);
+        return FALSE;
+    }
 
-//     Int32 duration = ComputeSettleDuration(mCapturedView, dx, dy, xvel, yvel);
-//     mScroller->StartScroll(startLeft, startTop, dx, dy, duration);
-//     mFinalScrollY = startTop + dy;
+    Int32 duration = ComputeSettleDuration(mCapturedView, dx, dy, xvel, yvel);
+    mScroller->StartScroll(startLeft, startTop, dx, dy, duration);
+    mFinalScrollY = startTop + dy;
 
-//     SetDragState(IViewDragHelper::STATE_SETTLING);
-//     return TRUE;
-// }
+    SetDragState(STATE_SETTLING);
+    return TRUE;
+}
 
-// Int32 ViewDragHelper::ComputeSettleDuration(
-//     /* [in] */ IView* child,
-//     /* [in] */ Int32 dx,
-//     /* [in] */ Int32 dy,
-//     /* [in] */ Int32 xvel,
-//     /* [in] */ Int32 yvel)
-// {
-//     xvel = ClampMag(xvel, (int) mMinVelocity, (int) mMaxVelocity);
-//     yvel = ClampMag(yvel, (int) mMinVelocity, (int) mMaxVelocity);
-//     Int32 absDx = Elastos::Core::Math::Abs(dx);
-//     Int32 absDy = Elastos::Core::Math::Abs(dy);
-//     Int32 absXVel = Elastos::Core::Math::Abs(xvel);
-//     Int32 absYVel = Elastos::Core::Math::Abs(yvel);
-//     Int32 addedVel = absXVel + absYVel;
-//     Int32 addedDistance = absDx + absDy;
+Int32 ViewDragHelper::ComputeSettleDuration(
+    /* [in] */ IView* child,
+    /* [in] */ Int32 dx,
+    /* [in] */ Int32 dy,
+    /* [in] */ Int32 xvel,
+    /* [in] */ Int32 yvel)
+{
+    xvel = ClampMag(xvel, (Int32) mMinVelocity, (Int32) mMaxVelocity);
+    yvel = ClampMag(yvel, (Int32) mMinVelocity, (Int32) mMaxVelocity);
+    Int32 absDx = Elastos::Core::Math::Abs(dx);
+    Int32 absDy = Elastos::Core::Math::Abs(dy);
+    Int32 absXVel = Elastos::Core::Math::Abs(xvel);
+    Int32 absYVel = Elastos::Core::Math::Abs(yvel);
+    Int32 addedVel = absXVel + absYVel;
+    Int32 addedDistance = absDx + absDy;
 
-//     Float xweight = xvel != 0 ? (Float) absXVel / addedVel :
-//             (Float) absDx / addedDistance;
-//     Float yweight = yvel != 0 ? (Float) absYVel / addedVel :
-//             (Float) absDy / addedDistance;
+    Float xweight = xvel != 0 ? (Float) absXVel / addedVel :
+            (Float) absDx / addedDistance;
+    Float yweight = yvel != 0 ? (Float) absYVel / addedVel :
+            (Float) absDy / addedDistance;
 
-//     Int32 hDragRange, vDragRange;
-//     mCallback->GetViewHorizontalDragRange(child, &hDragRange);
-//     mCallback->GetViewVerticalDragRange(child, &vDragRange);
-//     Int32 xduration = ComputeAxisDuration(dx, xvel, hDragRange);
-//     Int32 yduration = ComputeAxisDuration(dy, yvel, vDragRange);
+    Int32 hDragRange, vDragRange;
+    mCallback->GetViewHorizontalDragRange(child, &hDragRange);
+    mCallback->GetViewVerticalDragRange(child, &vDragRange);
+    Int32 xduration = ComputeAxisDuration(dx, xvel, hDragRange);
+    Int32 yduration = ComputeAxisDuration(dy, yvel, vDragRange);
 
-//     return (Int32) (xduration * xweight + yduration * yweight);
-// }
+    return (Int32) (xduration * xweight + yduration * yweight);
+}
 
-// Int32 ViewDragHelper::ComputeAxisDuration(
-//     /* [in] */ Int32 delta,
-//     /* [in] */ Int32 velocity,
-//     /* [in] */ Int32 motionRange)
-// {
-//     if (delta == 0) {
-//         return 0;
-//     }
+Int32 ViewDragHelper::ComputeAxisDuration(
+    /* [in] */ Int32 delta,
+    /* [in] */ Int32 velocity,
+    /* [in] */ Int32 motionRange)
+{
+    if (delta == 0) {
+        return 0;
+    }
 
-//     Int32 width;
-//     mParentView->GetWidth(&width);
-//     Int32 halfWidth = width / 2;
-//     Float distanceRatio = Elastos::Core::Math::Min(1f, (Float) Elastos::Core::Math::Abs(delta) / width);
-//     Float distance = halfWidth + halfWidth *
-//             DistanceInfluenceForSnapDuration(distanceRatio);
+    Int32 width;
+    IView::Probe(mParentView)->GetWidth(&width);
+    Int32 halfWidth = width / 2;
+    Float distanceRatio = Elastos::Core::Math::Min(1.0f, (Float) Elastos::Core::Math::Abs(delta) / width);
+    Float distance = halfWidth + halfWidth *
+            DistanceInfluenceForSnapDuration(distanceRatio);
 
-//     Int32 duration;
-//     velocity = Elastos::Core::Math::Abs(velocity);
-//     if (velocity > 0) {
-//         duration = 4 * Elastos::Core::Math::Round(1000 * Elastos::Core::Math::Abs(distance / velocity));
-//     }
-//     else {
-//         Float range = (Float) Elastos::Core::Math::Abs(delta) / motionRange;
-//         duration = (Int32) ((range + 1) * BASE_SETTLE_DURATION);
-//     }
-//     return Elastos::Core::Math::Min(duration, MAX_SETTLE_DURATION);
-// }
+    Int32 duration;
+    velocity = Elastos::Core::Math::Abs(velocity);
+    if (velocity > 0) {
+        duration = 4 * Elastos::Core::Math::Round(1000 * Elastos::Core::Math::Abs(distance / velocity));
+    }
+    else {
+        Float range = (Float) Elastos::Core::Math::Abs(delta) / motionRange;
+        duration = (Int32) ((range + 1) * BASE_SETTLE_DURATION);
+    }
+    return Elastos::Core::Math::Min(duration, MAX_SETTLE_DURATION);
+}
 
-// Int32 ViewDragHelper::ClampMag(
-//     /* [in] */ Int32 value,
-//     /* [in] */ Int32 absMin,
-//     /* [in] */ Int32 absMax)
-// {
-//     Int32 absValue = Elastos::Core::Math::Abs(value);
-//     if (absValue < absMin) return 0;
-//     if (absValue > absMax) return value > 0 ? absMax : -absMax;
-//     return value;
-// }
+Int32 ViewDragHelper::ClampMag(
+    /* [in] */ Int32 value,
+    /* [in] */ Int32 absMin,
+    /* [in] */ Int32 absMax)
+{
+    Int32 absValue = Elastos::Core::Math::Abs(value);
+    if (absValue < absMin) return 0;
+    if (absValue > absMax) return value > 0 ? absMax : -absMax;
+    return value;
+}
 
-// Float ViewDragHelper::ClampMag(
-//     /* [in] */ Float value,
-//     /* [in] */ Float absMin,
-//     /* [in] */ Float absMax)
-// {
-//     Float absValue = Elastos::Core::Math::Abs(value);
-//     if (absValue < absMin) return 0;
-//     if (absValue > absMax) return value > 0 ? absMax : -absMax;
-//     return value;
-// }
+Float ViewDragHelper::ClampMag(
+    /* [in] */ Float value,
+    /* [in] */ Float absMin,
+    /* [in] */ Float absMax)
+{
+    Float absValue = Elastos::Core::Math::Abs(value);
+    if (absValue < absMin) return 0;
+    if (absValue > absMax) return value > 0 ? absMax : -absMax;
+    return value;
+}
 
-// Float ViewDragHelper::DistanceInfluenceForSnapDuration(
-//     /* [in] */ Float f)
-// {
-//     f -= 0.5; // center the values about 0.
-//     f *= 0.3 * Elastos::Core::Math::PI / 2.0;
-//     return (Float) Elastos::Core::Math::Sin(f);
-// }
+Float ViewDragHelper::DistanceInfluenceForSnapDuration(
+    /* [in] */ Float f)
+{
+    f -= 0.5; // center the values about 0.
+    f *= 0.3 * Elastos::Core::Math::PI / 2.0;
+    return (Float) Elastos::Core::Math::Sin(f);
+}
 
-// ECode ViewDragHelper::FlingCapturedView(
-//     /* [in] */ Int32 minLeft,
-//     /* [in] */ Int32 minTop,
-//     /* [in] */ Int32 maxLeft,
-//     /* [in] */ Int32 maxTop)
-// {
-//     if (!mReleaseInProgress) {
-//         Logger::E(TAG, "Cannot flingCapturedView outside of a call to "
-//                 "Callback#onViewReleased");
-//         return E_ILLEGAL_STATE_EXCEPTION;
-//         // throw new IllegalStateException("Cannot flingCapturedView outside of a call to " +
-//         //         "Callback#onViewReleased");
-//     }
+ECode ViewDragHelper::FlingCapturedView(
+    /* [in] */ Int32 minLeft,
+    /* [in] */ Int32 minTop,
+    /* [in] */ Int32 maxLeft,
+    /* [in] */ Int32 maxTop)
+{
+    if (!mReleaseInProgress) {
+        Logger::E(TAG, "Cannot flingCapturedView outside of a call to "
+                "Callback#onViewReleased");
+        return E_ILLEGAL_STATE_EXCEPTION;
+        // throw new IllegalStateException("Cannot flingCapturedView outside of a call to " +
+        //         "Callback#onViewReleased");
+    }
 
-//     Int32 yVelocity;
-//     assert(0 && "TODO");
-//     // (Int32) VelocityTrackerCompat
-//     //         .getYVelocity(mVelocityTracker, mActivePointerId);
-//     Int32 left, top;
-//     mCapturedView->GetLeft(&left);
-//     mCapturedView->GetTop(&top);
-//     // mScroller.fling(left, top,
-//     //         (int) VelocityTrackerCompat.getXVelocity(mVelocityTracker, mActivePointerId),
-//     //         yVelocity, minLeft, maxLeft, minTop, maxTop);
-//     mFinalScrollY = yVelocity < 0 ? minTop : maxTop;
+    Int32 yVelocity;
+    assert(0 && "TODO");
+    // (Int32) VelocityTrackerCompat
+    //         .getYVelocity(mVelocityTracker, mActivePointerId);
+    Int32 left, top;
+    mCapturedView->GetLeft(&left);
+    mCapturedView->GetTop(&top);
+    // mScroller.fling(left, top,
+    //         (int) VelocityTrackerCompat.getXVelocity(mVelocityTracker, mActivePointerId),
+    //         yVelocity, minLeft, maxLeft, minTop, maxTop);
+    mFinalScrollY = yVelocity < 0 ? minTop : maxTop;
 
-//     SetDragState(IViewDragHelper::STATE_SETTLING);
-//     return NOERROR;
-// }
+    SetDragState(STATE_SETTLING);
+    return NOERROR;
+}
 
-// ECode ViewDragHelper::FlingCapturedView(
-//     /* [in] */ Int32 minLeft,
-//     /* [in] */ Int32 minTop,
-//     /* [in] */ Int32 maxLeft,
-//     /* [in] */ Int32 maxTop,
-//     /* [in] */ Int32 yvel)
-// {
-//     if (!mReleaseInProgress) {
-//         Logger::E(TAG, "Cannot flingCapturedView outside of a call to "
-//                 "Callback#onViewReleased");
-//         return E_ILLEGAL_STATE_EXCEPTION;
-//         // throw new IllegalStateException("Cannot flingCapturedView outside of a call to " +
-//         //         "Callback#onViewReleased");
-//     }
-//     mScroller->AbortAnimation();
-//     Int32 left, top;
-//     mCapturedView->GetLeft(&left);
-//     mCapturedView->GetTop(&top);
-//     mScroller->Fling(left, top, 0, yvel,
-//             0x80000000, 0x7FFFFFFF, 0x80000000, 0x7FFFFFFF);
-//     mFinalScrollY = yvel < 0 ? minTop : maxTop;
+ECode ViewDragHelper::FlingCapturedView(
+    /* [in] */ Int32 minLeft,
+    /* [in] */ Int32 minTop,
+    /* [in] */ Int32 maxLeft,
+    /* [in] */ Int32 maxTop,
+    /* [in] */ Int32 yvel)
+{
+    if (!mReleaseInProgress) {
+        Logger::E(TAG, "Cannot flingCapturedView outside of a call to "
+                "Callback#onViewReleased");
+        return E_ILLEGAL_STATE_EXCEPTION;
+        // throw new IllegalStateException("Cannot flingCapturedView outside of a call to " +
+        //         "Callback#onViewReleased");
+    }
+    mScroller->AbortAnimation();
+    Int32 left, top;
+    mCapturedView->GetLeft(&left);
+    mCapturedView->GetTop(&top);
+    mScroller->Fling(left, top, 0, yvel,
+            Elastos::Core::Math::INT32_MIN_VALUE,
+            Elastos::Core::Math::INT32_MAX_VALUE,
+            Elastos::Core::Math::INT32_MIN_VALUE,
+            Elastos::Core::Math::INT32_MAX_VALUE);
+    mFinalScrollY = yvel < 0 ? minTop : maxTop;
 
-//     SetDragState(IViewDragHelper::STATE_SETTLING);
-//     return NOERROR;
-// }
+    SetDragState(STATE_SETTLING);
+    return NOERROR;
+}
 
-// ECode ViewDragHelper::PredictFlingYOffset(
-//     /* [in] */ Int32 yvel,
-//     /* [out] */ Int32* yOffset)
-// {
-//     VALIDATE_NOT_NULL(yOffset);
-//     mScroller->AbortAnimation();
-//     mScroller->Fling(0, 0, 0, yvel, 0x80000000, 0x7FFFFFFF, 0x80000000,
-//             0x7FFFFFFF);
-//     Int32 finalY;
-//     mScroller->GetFinalY(&finalY);
-//     mScroller->AbortAnimation();
-//     *yOffset = finalY;
-//     return NOERROR;
-// }
+Int32 ViewDragHelper::PredictFlingYOffset(
+    /* [in] */ Int32 yvel)
+{
+    mScroller->AbortAnimation();
+    mScroller->Fling(0, 0, 0, yvel,
+            Elastos::Core::Math::INT32_MIN_VALUE,
+            Elastos::Core::Math::INT32_MAX_VALUE,
+            Elastos::Core::Math::INT32_MIN_VALUE,
+            Elastos::Core::Math::INT32_MAX_VALUE);
+    Int32 finalY;
+    mScroller->GetFinalY(&finalY);
+    mScroller->AbortAnimation();
+    return finalY;
+}
 
-// ECode ViewDragHelper::ContinueSettling(
-//     /* [in] */ Boolean deferCallbacks,
-//     /* [out] */ Boolean* result)
-// {
-//     VALIDATE_NOT_NULL(result);
+Boolean ViewDragHelper::ContinueSettling(
+    /* [in] */ Boolean deferCallbacks)
+{
+    if (mDragState == STATE_SETTLING) {
+        Boolean keepGoing;
+        mScroller->ComputeScrollOffset(&keepGoing);
+        Int32 y;
+        mScroller->GetCurrY(&y);
 
-//     if (mDragState == IViewDragHelper::STATE_SETTLING) {
-//         Boolean keepGoing;
-//         mScroller->ComputeScrollOffset(&keepGoing);
-//         Int32 y;
-//         mScroller->GetCurrY(&y);
+        // Since Scroller's getFinalY() can't be properly set (b/17704016), we need to
+        // perform clamping of mScroller.getCurrY() here.
+        Int32 top;
+        mCapturedView->GetTop(&top);
+        if (y - top > 0) {
+            y = Elastos::Core::Math::Min(y, mFinalScrollY);
+        }
+        else {
+            y = Elastos::Core::Math::Max(y, mFinalScrollY);
+        }
+        Int32 dy = y - top;
 
-//         // Since Scroller's getFinalY() can't be properly set (b/17704016), we need to
-//         // perform clamping of mScroller.getCurrY() here.
-//         Int32 top;
-//         mCapturedView->GetTop(&top);
-//         if (y - top > 0) {
-//             y = Elastos::Core::Math::Min(y, mFinalScrollY);
-//         }
-//         else {
-//             y = Elastos::Core::Math::Max(y, mFinalScrollY);
-//         }
-//         Int32 dy = y - top;
+        if (dy != 0) {
+            mCapturedView->OffsetTopAndBottom(dy);
+            mCallback->OnViewPositionChanged(mCapturedView, 0, y, 0, dy);
+        }
 
-//         if (dy != 0) {
-//             mCapturedView->OffsetTopAndBottom(dy);
-//             mCallback->OnViewPositionChanged(mCapturedView, 0, y, 0, dy);
-//         }
+        if (keepGoing && y == mFinalScrollY) {
+            // Close enough. The interpolator/scroller might think we're still moving
+            // but the user sure doesn't.
+            mScroller->AbortAnimation();
+            mScroller->IsFinished(&keepGoing);
+        }
 
-//         if (keepGoing && y == mFinalScrollY) {
-//             // Close enough. The interpolator/scroller might think we're still moving
-//             // but the user sure doesn't.
-//             mScroller->AbortAnimation();
-//             mScroller->IsFinished(&keepGoing);
-//         }
+        if (!keepGoing) {
+            if (deferCallbacks) {
+                Boolean result;
+                IView::Probe(mParentView)->Post(mSetIdleRunnable, &result);
+            }
+            else {
+                SetDragState(STATE_IDLE);
+            }
+        }
+    }
 
-//         if (!keepGoing) {
-//             if (deferCallbacks) {
-//                 mParentView->Post(mSetIdleRunnable);
-//             }
-//             else {
-//                 SetDragState(IViewDragHelper::STATE_IDLE);
-//             }
-//         }
-//     }
+    return mDragState == STATE_SETTLING;
+}
 
-//     *result = mDragState == IViewDragHelper::STATE_SETTLING;
-//     return NOERROR;
-// }
+void ViewDragHelper::ProcessNestedFling(
+    /* [in] */ IView* target,
+    /* [in] */ Int32 yvel)
+{
+    mCapturedView = target;
+    DispatchViewFling(0, yvel);
+}
 
-// ECode ViewDragHelper::ProcessNestedFling(
-//     /* [in] */ IView* target,
-//     /* [in] */ Int32 yvel)
-// {
-//     mCapturedView = target;
-//     DispatchViewFling(0, yvel);
-//     return NOERROR;
-// }
+Int32 ViewDragHelper::GetVelocityMagnitude()
+{
+    // Use Math.abs() to ensure this always returns an absolute value, even if the
+    // ScrollerCompat implementation changes.
+    Float velocity;
+    mScroller->GetCurrVelocity(&velocity);
+    return (Int32) Elastos::Core::Math::Abs(velocity);
+}
 
-// ECode ViewDragHelper::GetVelocityMagnitude(
-//     /* [out] */ Int32* magnitude)
-// {
-//     VALIDATE_NOT_NULL(magnitude);
-//     // Use Math.abs() to ensure this always returns an absolute value, even if the
-//     // ScrollerCompat implementation changes.
-//     Float velocity;
-//     mScroller->GetCurrVelocity(&velocity);
-//     *magnitude =  (Int32) Elastos::Core::Math::Abs(velocity);
-//     return NOERROR;
-// }
+void ViewDragHelper::DispatchViewFling(
+    /* [in] */ Float xvel,
+    /* [in] */ Float yvel)
+{
+    mReleaseInProgress = TRUE;
+    mCallback->OnViewFling(mCapturedView, xvel, yvel);
+    mReleaseInProgress = FALSE;
 
-// void ViewDragHelper::DispatchViewFling(
-//     /* [in] */ Float xvel,
-//     /* [in] */ Float yvel)
-// {
-//     mReleaseInProgress = TRUE;
-//     mCallback->OnViewFling(mCapturedView, xvel, yvel);
-//     mReleaseInProgress = FALSE;
+    if (mDragState == STATE_DRAGGING) {
+        // onViewReleased didn't call a method that would have changed this. Go idle.
+        SetDragState(STATE_IDLE);
+    }
+}
 
-//     if (mDragState == IViewDragHelper::STATE_DRAGGING) {
-//         // onViewReleased didn't call a method that would have changed this. Go idle.
-//         SetDragState(IViewDragHelper::STATE_IDLE);
-//     }
-// }
+void ViewDragHelper::DispatchViewReleased(
+    /* [in] */ Float xvel,
+    /* [in] */ Float yvel)
+{
+    mReleaseInProgress = TRUE;
+    mCallback->OnViewReleased(mCapturedView, xvel, yvel);
+    mReleaseInProgress = FALSE;
 
-// void ViewDragHelper::DispatchViewReleased(
-//     /* [in] */ Float xvel,
-//     /* [in] */ Float yvel)
-// {
-//     mReleaseInProgress = TRUE;
-//     mCallback->OnViewReleased(mCapturedView, xvel, yvel);
-//     mReleaseInProgress = FALSE;
+    if (mDragState == STATE_DRAGGING) {
+        // onViewReleased didn't call a method that would have changed this. Go idle.
+        SetDragState(STATE_IDLE);
+    }
+}
 
-//     if (mDragState == IViewDragHelper::STATE_DRAGGING) {
-//         // onViewReleased didn't call a method that would have changed this. Go idle.
-//         SetDragState(IViewDragHelper::STATE_IDLE);
-//     }
-// }
+void ViewDragHelper::ClearMotionHistory()
+{
+    if (mInitialMotionX == NULL) {
+        return;
+    }
+    Arrays::Fill(mInitialMotionX, 0.0f);
+    Arrays::Fill(mInitialMotionY, 0.0f);
+    Arrays::Fill(mLastMotionX, 0.0f);
+    Arrays::Fill(mLastMotionY, 0.0f);
+    Arrays::Fill(mInitialEdgesTouched, 0);
+    Arrays::Fill(mEdgeDragsInProgress, 0);
+    Arrays::Fill(mEdgeDragsLocked, 0);
+    mPointersDown = 0;
+}
 
-// void ViewDragHelper::ClearMotionHistory()
-// {
-//     if (mInitialMotionX == NULL) {
-//         return;
-//     }
-//     Arrays::Fill(mInitialMotionX, 0);
-//     Arrays::Fill(mInitialMotionY, 0);
-//     Arrays::Fill(mLastMotionX, 0);
-//     Arrays::Fill(mLastMotionY, 0);
-//     Arrays::Fill(mInitialEdgesTouched, 0);
-//     Arrays::Fill(mEdgeDragsInProgress, 0);
-//     Arrays::Fill(mEdgeDragsLocked, 0);
-//     mPointersDown = 0;
-// }
+void ViewDragHelper::ClearMotionHistory(
+    /* [in] */ Int32 pointerId)
+{
+    if (mInitialMotionX == NULL) {
+        return;
+    }
+    (*mInitialMotionX)[pointerId] = 0;
+    (*mInitialMotionY)[pointerId] = 0;
+    (*mLastMotionX)[pointerId] = 0;
+    (*mLastMotionY)[pointerId] = 0;
+    (*mInitialEdgesTouched)[pointerId] = 0;
+    (*mEdgeDragsInProgress)[pointerId] = 0;
+    (*mEdgeDragsLocked)[pointerId] = 0;
+    mPointersDown &= ~(1 << pointerId);
+}
 
-// void ViewDragHelper::ClearMotionHistory(
-//     /* [in] */ Int32 pointerId)
-// {
-//     if (mInitialMotionX == NULL) {
-//         return;
-//     }
-//     mInitialMotionX[pointerId] = 0;
-//     mInitialMotionY[pointerId] = 0;
-//     mLastMotionX[pointerId] = 0;
-//     mLastMotionY[pointerId] = 0;
-//     mInitialEdgesTouched[pointerId] = 0;
-//     mEdgeDragsInProgress[pointerId] = 0;
-//     mEdgeDragsLocked[pointerId] = 0;
-//     mPointersDown &= ~(1 << pointerId);
-// }
+void ViewDragHelper::EnsureMotionHistorySizeForId(
+    /* [in] */ Int32 pointerId)
+{
+    if (mInitialMotionX == NULL || mInitialMotionX->GetLength() <= pointerId) {
+        AutoPtr<ArrayOf<Float> > imx = ArrayOf<Float>::Alloc(pointerId + 1);
+        AutoPtr<ArrayOf<Float> > imy = ArrayOf<Float>::Alloc(pointerId + 1);
+        AutoPtr<ArrayOf<Float> > lmx = ArrayOf<Float>::Alloc(pointerId + 1);
+        AutoPtr<ArrayOf<Float> > lmy = ArrayOf<Float>::Alloc(pointerId + 1);
+        AutoPtr<ArrayOf<Int32> > iit = ArrayOf<Int32>::Alloc(pointerId + 1);
+        AutoPtr<ArrayOf<Int32> > edip = ArrayOf<Int32>::Alloc(pointerId + 1);
+        AutoPtr<ArrayOf<Int32> > edl = ArrayOf<Int32>::Alloc(pointerId + 1);
 
-// void ViewDragHelper::EnsureMotionHistorySizeForId(
-//     /* [in] */ Int32 pointerId)
-// {
-//     if (mInitialMotionX == NULL || mInitialMotionX->GetLength() <= pointerId) {
-//         AutoPtr<ArrayOf<Float> > imx = ArrayOf<Float>::Alloc(pointerId + 1);
-//         AutoPtr<ArrayOf<Float> > imy = ArrayOf<Float>::Alloc(pointerId + 1);
-//         AutoPtr<ArrayOf<Float> > lmx = ArrayOf<Float>::Alloc(pointerId + 1);
-//         AutoPtr<ArrayOf<Float> > lmy = ArrayOf<Float>::Alloc(pointerId + 1);
-//         AutoPtr<ArrayOf<Int32> > iit = ArrayOf<Int32::Alloc(pointerId + 1);
-//         AutoPtr<ArrayOf<Int32> > edip = ArrayOf<Int32::Alloc(pointerId + 1);
-//         AutoPtr<ArrayOf<Int32> > edl = ArrayOf<Int32::Alloc(pointerId + 1);
+        if (mInitialMotionX != NULL) {
+            imx->Copy(mInitialMotionX, 0, mInitialMotionX->GetLength());
+            imy->Copy(mInitialMotionY, 0, mInitialMotionY->GetLength());
+            lmx->Copy(mLastMotionX, 0, mLastMotionX->GetLength());
+            lmy->Copy(mLastMotionY, 0, mLastMotionY->GetLength());
+            iit->Copy(mInitialEdgesTouched, 0, mInitialEdgesTouched->GetLength());
+            edip->Copy(mEdgeDragsInProgress, 0, mEdgeDragsInProgress->GetLength());
+            edl->Copy(mEdgeDragsLocked, 0, mEdgeDragsLocked->GetLength());
+        }
 
-//         if (mInitialMotionX != NULL) {
-//             imx->Copy(mInitialMotionX, 0, mInitialMotionX->GetLength());
-//             imy->Copy(mInitialMotionY, 0, mInitialMotionY->GetLength());
-//             lmx->Copy(mLastMotionX, 0, mLastMotionX->GetLength());
-//             lmy->Copy(mLastMotionY, 0, mLastMotionY->GetLength());
-//             iit->Copy(mInitialEdgesTouched, 0, mInitialEdgesTouched->GetLength());
-//             edip->Copy(mEdgeDragsInProgress, 0, mEdgeDragsInProgress->GetLength());
-//             edl->Copy(mEdgeDragsLocked, 0, mEdgeDragsLocked->GetLength());
-//         }
+        mInitialMotionX = imx;
+        mInitialMotionY = imy;
+        mLastMotionX = lmx;
+        mLastMotionY = lmy;
+        mInitialEdgesTouched = iit;
+        mEdgeDragsInProgress = edip;
+        mEdgeDragsLocked = edl;
+    }
+}
 
-//         mInitialMotionX = imx;
-//         mInitialMotionY = imy;
-//         mLastMotionX = lmx;
-//         mLastMotionY = lmy;
-//         mInitialEdgesTouched = iit;
-//         mEdgeDragsInProgress = edip;
-//         mEdgeDragsLocked = edl;
-//     }
-// }
+void ViewDragHelper::SaveInitialMotion(
+    /* [in] */ Float x,
+    /* [in] */ Float y,
+    /* [in] */ Int32 pointerId)
+{
+    EnsureMotionHistorySizeForId(pointerId);
+    (*mInitialMotionX)[pointerId] = (*mLastMotionX)[pointerId] = x;
+    (*mInitialMotionY)[pointerId] = (*mLastMotionY)[pointerId] = y;
+    (*mInitialEdgesTouched)[pointerId] = GetEdgesTouched((Int32) x, (Int32) y);
+    mPointersDown |= 1 << pointerId;
+}
 
-// void ViewDragHelper::SaveInitialMotion(
-//     /* [in] */ Float x,
-//     /* [in] */ Float y,
-//     /* [in] */ Int32 pointerId)
-// {
-//     InsureMotionHistorySizeForId(pointerId);
-//     mInitialMotionX[pointerId] = mLastMotionX[pointerId] = x;
-//     mInitialMotionY[pointerId] = mLastMotionY[pointerId] = y;
-//     mInitialEdgesTouched[pointerId] = GetEdgesTouched((Int32) x, (Int32) y);
-//     mPointersDown |= 1 << pointerId;
-// }
+void ViewDragHelper::SaveLastMotion(
+    /* [in] */ IMotionEvent* ev)
+{
+    assert(0 && "TODO");
+    // Int32 pointerCount = MotionEventCompat.getPointerCount(ev);
+    // for (Int32 i = 0; i < pointerCount; i++) {
+    //     Int32 pointerId = MotionEventCompat.getPointerId(ev, i);
+    //     Float x = MotionEventCompat.getX(ev, i);
+    //     Float y = MotionEventCompat.getY(ev, i);
+    //     mLastMotionX[pointerId] = x;
+    //     mLastMotionY[pointerId] = y;
+    // }
+}
 
-// void ViewDragHelper::SaveLastMotion(
-//     /* [in] */ IMotionEvent* ev)
-// {
-//     assert(0 && "TODO");
-//     // Int32 pointerCount = MotionEventCompat.getPointerCount(ev);
-//     // for (Int32 i = 0; i < pointerCount; i++) {
-//     //     Int32 pointerId = MotionEventCompat.getPointerId(ev, i);
-//     //     Float x = MotionEventCompat.getX(ev, i);
-//     //     Float y = MotionEventCompat.getY(ev, i);
-//     //     mLastMotionX[pointerId] = x;
-//     //     mLastMotionY[pointerId] = y;
-//     // }
-// }
+Boolean ViewDragHelper::IsPointerDown(
+    /* [in] */ Int32 pointerId)
+{
+    return (mPointersDown & 1 << pointerId) != 0;
+}
 
-// ECode ViewDragHelper::IsPointerDown(
-//     /* [in] */ Int32 pointerId,
-//     /* [out] */ Boolean* result)
-// {
-//     VALIDATE_NOT_NULL(result);
-//     *result = (mPointersDown & 1 << pointerId) != 0;
-//     return NOERROR;
-// }
+void ViewDragHelper::SetDragState(
+    /* [in] */ Int32 state)
+{
+    if (mDragState != state) {
+        mDragState = state;
+        mCallback->OnViewDragStateChanged(state);
+        if (state == STATE_IDLE) {
+            mCapturedView = NULL;
+        }
+    }
+}
 
-// void ViewDragHelper::SetDragState(
-//     /* [in] */ Int32 state)
-// {
-//     if (mDragState != state) {
-//         mDragState = state;
-//         mCallback->OnViewDragStateChanged(state);
-//         if (state == IViewDragHelper::STATE_IDLE) {
-//             mCapturedView = NULL;
-//         }
-//     }
-// }
-
-// Boolean ViewDragHelper::TryCaptureViewForDrag(
-//     /* [in] */ IView* toCapture,
-//     /* [in] */ Int32 pointerId)
-// {
-//     if (toCapture == mCapturedView && mActivePointerId == pointerId) {
-//         // Already done!
-//         return TRUE;
-//     }
-//     Boolean result;
-//     if (toCapture != NULL &&
-//             mCallback->TryCaptureView(toCapture, pointerId, &result), result) {
-//         mActivePointerId = pointerId;
-//         CaptureChildView(toCapture, pointerId);
-//         return TRUE;
-//     }
-//     return FALSE;
-// }
+Boolean ViewDragHelper::TryCaptureViewForDrag(
+    /* [in] */ IView* toCapture,
+    /* [in] */ Int32 pointerId)
+{
+    if (toCapture == mCapturedView && mActivePointerId == pointerId) {
+        // Already done!
+        return TRUE;
+    }
+    Boolean result;
+    if (toCapture != NULL &&
+            (mCallback->TryCaptureView(toCapture, pointerId, &result), result)) {
+        mActivePointerId = pointerId;
+        CaptureChildView(toCapture, pointerId);
+        return TRUE;
+    }
+    return FALSE;
+}
 
 // Boolean ViewDragHelper::CanScroll(
 //     /* [in] */ IView* v,
