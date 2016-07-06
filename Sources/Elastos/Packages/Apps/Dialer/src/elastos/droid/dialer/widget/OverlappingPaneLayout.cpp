@@ -1,16 +1,20 @@
 
 #include "Elastos.Droid.Graphics.h"
+#include "elastos/droid/os/Build.h"
 #include "elastos/droid/dialer/widget/OverlappingPaneLayout.h"
-// #include <elastos/droid/view/View.h>
 #include <elastos/droid/R.h>
-// #include <elastos/core/Math.h>
-// #include <elastos/utility/logging/Logger.h>
 #include <elastos/core/Math.h>
+#include <elastos/utility/logging/Logger.h>
 
-// using Elastos::Droid::Content::Res::ITypedArray;
+using Elastos::Droid::Content::Res::ITypedArray;
 using Elastos::Droid::Graphics::CRect;
-// using Elastos::Droid::View::View;
-// using Elastos::Utility::Logging::Logger;
+using Elastos::Droid::Graphics::IPixelFormat;
+using Elastos::Droid::Os::Build;
+using Elastos::Droid::Utility::IDisplayMetrics;
+using Elastos::Droid::View::IViewConfiguration;
+using Elastos::Droid::View::IViewConfigurationHelper;
+using Elastos::Droid::View::CViewConfigurationHelper;
+using Elastos::Utility::Logging::Logger;
 
 namespace Elastos {
 namespace Droid {
@@ -20,8 +24,6 @@ namespace Widget {
 //================================================================
 // OverlappingPaneLayout::DragHelperCallback
 //================================================================
-CAR_INTERFACE_IMPL(OverlappingPaneLayout::DragHelperCallback, Object, IViewDragHelperCallback)
-
 OverlappingPaneLayout::DragHelperCallback::DragHelperCallback(
     /* [in] */ OverlappingPaneLayout* host)
     : mHost(host)
@@ -499,1064 +501,1039 @@ ECode OverlappingPaneLayout::constructor(
     return constructor(context, attrs, 0);
 }
 
-// ECode OverlappingPaneLayout::constructor(
-//     /* [in] */ IContext* context,
-//     /* [in] */ IAttributeSet* attrs,
-//     /* [in] */ Int32 defStyle)
-// {
-//     ViewGroup::constructor(context, attrs, defStyle);
-
-//     AutoPtr<IResources> res;
-//     context->GetResources((IResources**)&res);
-//     AutoPtr<IDisplayMetrics> dm;
-//     res->GetDisplayMetrics((IDisplayMetrics**)&dm);
-//     Float density;
-//     dm->GetDensity(&density);
-//     mOverhangSize = (Int32)(DEFAULT_OVERHANG_SIZE * density + 0.5f);
-
-//     SetWillNotDraw(FALSE);
-
-//     assert(0 && "TODO");
-//     // ViewCompat.setAccessibilityDelegate(this, new AccessibilityDelegate());
-//     // ViewCompat.setImportantForAccessibility(this, ViewCompat.IMPORTANT_FOR_ACCESSIBILITY_YES);
-
-//     mDragHelper = ViewDragHelper::Create(this, 0.5f, new DragHelperCallback());
-//     mDragHelper->SetMinVelocity(MIN_FLING_VELOCITY * density);
-
-//     AutoPtr<IViewConfigurationHelper> helper;
-//     CViewConfigurationHelper::AcquireSingleton(&helper);
-//     AutoPtr<IContext> ctx;
-//     GetContext((IContext**)&ctx);
-//     AutoPtr<IViewConfiguration> vc;
-//     helper->Get((IViewConfiguration**)&vc);
-//     vc->GetScaledTouchSlop(&mReleaseScrollSlop);
-
-//     return NOERROR;
-// }
-
-// ECode OverlappingPaneLayout::SetIntermediatePinnedOffset(
-//     /* [in] */ Int32 offset)
-// {
-//     mIntermediateOffset = offset;
-//     return NOERROR;
-// }
-
-// ECode OverlappingPaneLayout::SetCapturableView(
-//     /* [in] */ IView* capturableView)
-// {
-//     mCapturableView = capturableView;
-//     return NOERROR;
-// }
-
-// ECode OverlappingPaneLayout::SetPanelSlideCallbacks(
-//     /* [in] */ IOverlappingPaneLayoutPanelSlideCallbacks* listener)
-// {
-//     mPanelSlideCallbacks = listener;
-//     return NOERROR;
-// }
-
-// void OverlappingPaneLayout::DispatchOnPanelSlide(
-//     /* [in] */ IView* panel)
-// {
-//     mPanelSlideCallbacks->OnPanelSlide(panel, mSlideOffset);
-// }
-
-// void OverlappingPaneLayout::DispatchOnPanelOpened(
-//     /* [in] */ IView* panel)
-// {
-//     mPanelSlideCallbacks->OnPanelOpened(panel);
-//     SendAccessibilityEvent(IAccessibilityEvent::TYPE_WINDOW_STATE_CHANGED);
-// }
-
-// void OverlappingPaneLayout::DispatchOnPanelClosed(
-//     /* [in] */ IView* panel)
-// {
-//     mPanelSlideCallbacks->OnPanelClosed(panel);
-//     SendAccessibilityEvent(IAccessibilityEvent::TYPE_WINDOW_STATE_CHANGED);
-// }
-
-// void OverlappingPaneLayout::UpdateObscuredViewsVisibility(
-//     /* [in] */ IView* panel)
-// {
-//     Int32 startBound;
-//     GetPaddingTop(&startBound);
-//     Int32 height, paddingBottom;
-//     GetHeight(&height);
-//     GetPaddingBottom(&paddingBottom);
-//     Int32 endBound = height - paddingBottom;
-
-//     Int32 leftBound;
-//     GetPaddingLeft(&leftBound);
-//     Int32 width, paddingRight;
-//     GetWidth(&width);
-//     GetPaddingRight(&paddingRight);
-//     Int32 rightBound = width - paddingRight;
-//     Int32 left;
-//     Int32 right;
-//     Int32 top;
-//     Int32 bottom;
-//     if (panel != null && ViewIsOpaque(panel)) {
-//         panel->GetLeft(&left);
-//         panel->GetRight(&right);
-//         panel->GetTop(&top);
-//         panel->GetBottom(&bottom);
-//     }
-//     else {
-//         left = right = top = bottom = 0;
-//     }
-
-//     Int32 childCount;
-//     GetChildCount(&childCount);
-//     for (Int32 i = 0; i < childCount; i++) {
-//         AutoPtr<IView> child;
-//         GetChildAt(i, (IView**)&child);
-
-//         if (child == panel) {
-//             // There are still more children above the panel but they won't be affected.
-//             break;
-//         }
-
-//         Int32 cLeft, cRight, cTop, cBottom;
-//         child->GetLeft(&cLeft);
-//         child->GetRight(&cRight);
-//         child->GetTop(&cTop);
-//         child->GetBottom(&cBottom);
-//         Int32 clampedChildLeft = Elastos::Core::Math::Max(leftBound, cLeft);
-//         Int32 clampedChildRight = Elastos::Core::Math::Min(rightBound, cRight);
-//         Int32 clampedChildTop = Elastos::Core::Math::Max(startBound, cTop);
-//         Int32 clampedChildBottom = Elastos::Core::Math::Min(endBound, cBottom);
-
-//         Int32 vis;
-//         if (clampedChildLeft >= left && clampedChildTop >= top &&
-//                 clampedChildRight <= right && clampedChildBottom <= bottom) {
-//             vis = IView::INVISIBLE;
-//         }
-//         else {
-//             vis = IView::VISIBLE;
-//         }
-//         child->SetVisibility(vis);
-//     }
-// }
-
-// void OverlappingPaneLayout::SetAllChildrenVisible()
-// {
-//     Int32 childCount;
-//     GetChildCount(&childCount);
-//     for (Int32 i = 0; i < childCount; i++) {
-//         AutoPtr<IView> child;
-//         GetChildAt(i, (IView**)&child);
-//         Int32 visibility;
-//         if (child->GetVisibility(&visibility), visibility == IView::INVISIBLE) {
-//             child->SetVisibility(IView::VISIBLE);
-//         }
-//     }
-// }
-
-// Boolean OverlappingPaneLayout::ViewIsOpaque(
-//     /* [in] */ IView* v)
-// {
-//     assert(0 && "TODO");
-//     // if (ViewCompat.isOpaque(v)) return TRUE;
-
-//     AutoPtr<IDrawable> bg;
-//     v->GetBackground((IDrawable**)&bg);
-//     if (bg != NULL) {
-//         Int32 opacity;
-//         bg->GetOpacity(&opacity);
-//         return opacity == IPixelFormat::OPAQUE;
-//     }
-//     return FALSE;
-// }
-
-// ECode OverlappingPaneLayout::OnAttachedToWindow()
-// {
-//     ViewGroup::OnAttachedToWindow();
-//     mFirstLayout = TRUE;
-//     return NOERROR;
-// }
-
-// ECode OverlappingPaneLayout::OnDetachedFromWindow()
-// {
-//     ViewGroup::OnDetachedFromWindow();
-//     mFirstLayout = TRUE;
-//     return NOERROR;
-// }
-
-// void OverlappingPaneLayout::OnMeasure(
-//     /* [in] */ Int32 widthMeasureSpec,
-//     /* [in] */ Int32 heightMeasureSpec)
-// {
-//     Int32 widthMode = View::MeasureSpec::GetMode(widthMeasureSpec);
-//     Int32 widthSize = View::MeasureSpec::GetSize(widthMeasureSpec);
-//     Int32 heightMode = View::MeasureSpec::GetMode(heightMeasureSpec);
-//     Int32 heightSize = View::MeasureSpec::GetSize(heightMeasureSpec);
-
-//     if (widthMode != View::MeasureSpec::EXACTLY) {
-//         Boolean isInEditMode;
-//         if (IsInEditMode(&isInEditMode), isInEditMode) {
-//             // Don't crash the layout editor. Consume all of the space if specified
-//             // or pick a magic number from thin air otherwise.
-//             // TODO Better communication with tools of this bogus state.
-//             // It will crash on a real device.
-//             if (widthMode == View::MeasureSpec::AT_MOST) {
-//                 widthMode = View::MeasureSpec::EXACTLY;
-//             }
-//             else if (widthMode == View::MeasureSpec::UNSPECIFIED) {
-//                 widthMode = View::MeasureSpec::EXACTLY;
-//                 widthSize = 300;
-//             }
-//         }
-//         else {
-//             // throw new IllegalStateException("Width must have an exact value or MATCH_PARENT");
-//             return;
-//         }
-//     }
-//     else if (heightMode == View::MeasureSpec::UNSPECIFIED) {
-//         Boolean isInEditMode;
-//         if (IsInEditMode(&isInEditMode), isInEditMode) {
-//             // Don't crash the layout editor. Pick a magic number from thin air instead.
-//             // TODO Better communication with tools of this bogus state.
-//             // It will crash on a real device.
-//             if (heightMode == View::MeasureSpec::UNSPECIFIED) {
-//                 heightMode = View::MeasureSpec::AT_MOST;
-//                 heightSize = 300;
-//             }
-//         }
-//         else {
-//             // throw new IllegalStateException("Height must not be UNSPECIFIED");
-//             return;
-//         }
-//     }
-
-//     Int32 layoutWidth = 0;
-//     Int32 maxLayoutWidth = -1;
-//     switch (widthMode) {
-//         case View::MeasureSpec::EXACTLY:
-//             Int32 paddingLeft, paddingRight;
-//             GetPaddingLeft(&paddingLeft);
-//             GetPaddingRight(&paddingRight);
-//             layoutWidth = maxLayoutWidth = widthSize - paddingLeft - paddingRight;
-//             break;
-//         case View::MeasureSpec::AT_MOST:
-//             Int32 paddingLeft, paddingRight;
-//             GetPaddingLeft(&paddingLeft);
-//             GetPaddingRight(&paddingRight);
-//             maxLayoutWidth = widthSize - paddingLeft - paddingRight;
-//             break;
-//     }
-
-//     Float weightSum = 0;
-//     Boolean canSlide = FALSE;
-//     Int32 paddingTop, paddingBottom;
-//     GetPaddingTop(&paddingTop);
-//     GetPaddingBottom(&paddingBottom);
-//     Int32 heightAvailable = heightSize - paddingTop - paddingBottom;
-//     Int32 heightRemaining = heightAvailable;
-//     Int32 childCount;
-//     GetChildCount(&childCount);
-
-//     if (childCount > 2) {
-//         Logger::E(TAG, "onMeasure: More than two child views are not supported.");
-//     }
-
-//     // We'll find the current one below.
-//     mSlideableView = NULL;
-
-//     // First pass. Measure based on child LayoutParams width/height.
-//     // Weight will incur a second pass.
-//     for (Int32 i = 0; i < childCount; i++) {
-//         AutoPtr<IView> child;
-//         GetChildAt(i, (IView**)&child);
-//         AutoPtr<IViewGroupLayoutParams> lp;
-//         child->GetLayoutParams((IViewGroupLayoutParams**)&lp);
-
-//         Int32 visibility;
-//         if (child->GetVisibility(&visibility), visibility == IView::GONE) {
-//             continue;
-//         }
-
-//         if (((LayoutParams*)lp)->mWeight > 0) {
-//             weightSum += ((LayoutParams*)lp)->mWeight;
-
-//             // If we have no height, weight is the only contributor to the final size.
-//             // Measure this view on the weight pass only.
-//             Int32 height;
-//             if (lp->GetHeight(&height), height == 0) continue;
-//         }
-
-//         Int32 topMargin, bottomMargin;
-//         ((IViewGroupMarginLayoutParams*)lp)->GetTopMargin(&topMargin);
-//         ((IViewGroupMarginLayoutParams*)lp)->GetBottomMargin(&bottomMargin);
-//         Int32 height;
-//         lp->GetHeight(&height);
-
-//         Int32 childHeightSpec;
-//         Int32 verticalMargin = topMargin + bottomMargin;
-//         if (height == IViewGroupLayoutParams::WRAP_CONTENT) {
-//             childHeightSpec = View::MeasureSpec::MakeMeasureSpec(heightAvailable - verticalMargin,
-//                     View::MeasureSpec::AT_MOST);
-//         }
-//         else if (height == IViewGroupLayoutParams::MATCH_PARENT) {
-//             childHeightSpec = View::MeasureSpec::MakeMeasureSpec(heightAvailable - verticalMargin,
-//                     View::MeasureSpec::EXACTLY);
-//         }
-//         else {
-//             childHeightSpec = View::MeasureSpec::MakeMeasureSpec(height, View::MeasureSpec::EXACTLY);
-//         }
-
-//         Int32 width;
-//         lp->GetWidth(&width);
-//         Int32 childWidthSpec;
-//         if (width == IViewGroupLayoutParams::WRAP_CONTENT) {
-//             childWidthSpec = View::MeasureSpec::MakeMeasureSpec(
-//                     maxLayoutWidth, View::MeasureSpec::AT_MOST);
-//         }
-//         else if (width == IViewGroupLayoutParams::MATCH_PARENT) {
-//             childWidthSpec = View::MeasureSpec::MakeMeasureSpec(
-//                     maxLayoutWidth, View::MeasureSpec::EXACTLY);
-//         }
-//         else {
-//             childWidthSpec = View::MeasureSpec::MakeMeasureSpec(
-//                     width, View::MeasureSpec::EXACTLY);
-//         }
-
-//         child->Measure(childWidthSpec, childHeightSpec);
-//         Int32 childWidth;
-//         child->GetMeasuredWidth(&childWidth);
-//         Int32 childHeight;
-//         child->GetMeasuredHeight(&childHeight);
-
-//         if (widthMode == View::MeasureSpec::AT_MOST && childWidth > layoutWidth) {
-//             layoutWidth = Math::Min(childWidth, maxLayoutWidth);
-//         }
-
-//         heightRemaining -= childHeight;
-//         canSlide |= ((LayoutParams*)lp)->mSlideable = heightRemaining < 0;
-//         if (((LayoutParams*)lp)->mSlideable) {
-//             mSlideableView = child;
-//         }
-//     }
-
-//     // Resolve weight and make sure non-sliding panels are smaller than the full screen.
-//     if (canSlide || weightSum > 0) {
-//         Int32 fixedPanelHeightLimit = heightAvailable - mOverhangSize;
-
-//         for (Int32 i = 0; i < childCount; i++) {
-//             AutoPtr<IView> child;
-//             GetChildAt(i, (IView**)&child);
-
-//             Int32 visibility;
-//             if (child->GetVisibility(&visibility), visibility == IView::GONE) {
-//                 continue;
-//             }
-
-//             AutoPtr<IViewGroupLayoutParams> lp;
-//             child->GetLayoutParams((IViewGroupLayoutParams**)&lp);
-
-//             if (child->GetVisibility(&visibility), visibility == IView::GONE) {
-//                 continue;
-//             }
-
-//             Int32 height;
-//             lp->GetHeight(&height);
-//             Int32 width;
-//             lp->GetWidth(&width);
-//             Boolean skippedFirstPass = height == 0 && ((LayoutParams*)lp)->mWeight > 0;
-//             Int32 childMeasuredHeight;
-//             Int32 measuredHeight = skippedFirstPass ? 0 :
-//                     child->GetMeasuredHeight(&childMeasuredHeight), childMeasuredHeight;
-//             if (canSlide && child != mSlideableView) {
-//                 if (height < 0 && (measuredHeight > fixedPanelHeightLimit
-//                         || ((LayoutParams*)lp)->mWeight > 0)) {
-//                     // Fixed panels in a sliding configuration should
-//                     // be clamped to the fixed panel limit.
-//                     Int32 childWidthSpec;
-//                     if (skippedFirstPass) {
-//                         // Do initial width measurement if we skipped measuring this view
-//                         // the first time around.
-//                         if (width == IViewGroupLayoutParams::WRAP_CONTENT) {
-//                             childWidthSpec = View::MeasureSpec::MakeMeasureSpec(maxLayoutWidth,
-//                                     View::MeasureSpec::AT_MOST);
-//                         }
-//                         else if (height == IViewGroupLayoutParams::MATCH_PARENT) {
-//                             childWidthSpec = View::MeasureSpec::MakeMeasureSpec(maxLayoutWidth,
-//                                     View::MeasureSpec::EXACTLY);
-//                         }
-//                         else {
-//                             childWidthSpec = View::MeasureSpec::MakeMeasureSpec(width,
-//                                     View::MeasureSpec::EXACTLY);
-//                         }
-//                     }
-//                     else {
-//                         child->GetMeasuredHeight(&childMeasuredHeight);
-//                         childWidthSpec = View::MeasureSpec::MakeMeasureSpec(
-//                                 childMeasuredHeight, View::MeasureSpec::EXACTLY);
-//                     }
-//                     Int32 childHeightSpec = View::MeasureSpec::MakeMeasureSpec(
-//                             fixedPanelHeightLimit, View::MeasureSpec::EXACTLY);
-//                     child->Measure(childWidthSpec, childHeightSpec);
-//                 }
-//             }
-//             else if (width > 0) {
-//                 Int32 childWidthSpec;
-//                 if (height == 0) {
-//                     // This was skipped the first time; figure out a real width spec.
-//                     if (width == IViewGroupLayoutParams::WRAP_CONTENT) {
-//                         childWidthSpec = View::MeasureSpec::MakeMeasureSpec(maxLayoutWidth,
-//                                 View::MeasureSpec::AT_MOST);
-//                     }
-//                     else if (width == IViewGroupLayoutParams::MATCH_PARENT) {
-//                         childWidthSpec = View::MeasureSpec::MakeMeasureSpec(maxLayoutWidth,
-//                                 View::MeasureSpec::EXACTLY);
-//                     }
-//                     else {
-//                         childWidthSpec = View::MeasureSpec::MakeMeasureSpec(width,
-//                                 View::MeasureSpec::EXACTLY);
-//                     }
-//                 }
-//                 else {
-//                     Int32 measuredWidth;
-//                     child->GetMeasuredWidth(&measuredWidth);
-//                     childWidthSpec = View::MeasureSpec::MakeMeasureSpec(
-//                             measuredWidth, View::MeasureSpec::EXACTLY);
-//                 }
-
-//                 if (canSlide) {
-//                     // Consume available space
-//                     Int32 topMargin, bottomMargin;
-//                     ((IViewGroupMarginLayoutParams*)lp)->GetTopMargin(&topMargin);
-//                     ((IViewGroupMarginLayoutParams*)lp)->GetBottomMargin(&bottomMargin);
-//                     Int32 verticalMargin = topMargin + bottomMargin;
-//                     Int32 newHeight = heightAvailable - verticalMargin;
-//                     Int32 childHeightSpec = View::MeasureSpec::MakeMeasureSpec(
-//                             newHeight, View::MeasureSpec::EXACTLY);
-//                     if (measuredHeight != newHeight) {
-//                         child->Measure(childWidthSpec, childHeightSpec);
-//                     }
-//                 }
-//                 else {
-//                     // Distribute the extra width proportionally similar to LinearLayout
-//                     Int32 heightToDistribute = Math::Max(0, heightRemaining);
-//                     Int32 addedHeight = (Int32)(weight * heightToDistribute / weightSum);
-//                     Int32 childHeightSpec = View::MeasureSpec::MakeMeasureSpec(
-//                             measuredHeight + addedHeight, View::MeasureSpec::EXACTLY);
-//                     child->Measure(childWidthSpec, childHeightSpec);
-//                 }
-//             }
-//         }
-//     }
-
-//     Int32 measuredHeight = heightSize;
-//     Int32 paddingLeft, paddingRight;
-//     GetPaddingLeft(&paddingLeft);
-//     GetPaddingRight(&paddingRight);
-//     Int32 measuredWidth = layoutWidth + paddingLeft + paddingRight;
-
-//     SetMeasuredDimension(measuredWidth, measuredHeight);
-//     mCanSlide = canSlide;
-
-//     Int32 dragHelper;
-//     mDragHelper->GetViewDragState(&dragHelper);
-//     if (dragHelper != IViewDragHelper::STATE_IDLE && !canSlide) {
-//         // Cancel scrolling in progress, it's no longer relevant.
-//         mDragHelper->Abort();
-//     }
-// }
-
-// ECode OverlappingPaneLayout::OnLayout(
-//     /* [in] */ Boolean changed,
-//     /* [in] */ Int32 l,
-//     /* [in] */ Int32 t,
-//     /* [in] */ Int32 r,
-//     /* [in] */ Int32 b)
-// {
-//     mDragHelper->SetEdgeTrackingEnabled(IViewDragHelper::EDGE_TOP);
-
-//     Int32 height = b - t;
-//     Int32 paddingTop;
-//     GetPaddingTop(&paddingTop);
-//     Int32 paddingBottom;
-//     GetPaddingBottom(&paddingBottom);
-//     Int32 paddingLeft;
-//     GetPaddingLeft(&paddingLeft);
-
-//     Int32 childCount;
-//     GetChildCount(&childCount);
-//     Int32 yStart = paddingTop;
-//     Int32 nextYStart = yStart;
-
-//     if (mFirstLayout) {
-//         mSlideOffset = mCanSlide && mPreservedOpenState ? 1.f : 0.f;
-//     }
-
-//     for (Int32 i = 0; i < childCount; i++) {
-//         AutoPtr<IView> child;
-//         GetChildAt(i, (IView**)&child);
-
-//         Int32 visibility;
-//         if (child->GetVisibility(&visibility), visibility == IView::GONE) {
-//             continue;
-//         }
-
-//         AutoPtr<IViewGroupLayoutParams> lp;
-//         child->GetLayoutParams((IViewGroupLayoutParams**)&lp);
-
-//         Int32 childHeight;
-//         child->GetMeasuredHeight(&childHeight);
-
-//         if (((LayoutParams*)lp)->mSlideable) {
-//             Int32 topMargin, bottomMargin;
-//             ((IViewGroupMarginLayoutParams*)lp)->GetTopMargin(&topMargin);
-//             ((IViewGroupMarginLayoutParams*)lp)->GetBottomMargin(&bottomMargin);
-//             Int32 margin = topMargin + bottomMargin;
-//             Int32 range = Elastos::Core::Math::Min(nextYStart,
-//                     height - paddingBottom - mOverhangSize) - yStart - margin;
-//             mSlideRange = range;
-//             Int32 lpMargin = topMargin;
-//             Int32 pos = (Int32)(range * mSlideOffset);
-//             yStart += pos + lpMargin;
-//             UpdateSlideOffset(pos);
-//         }
-//         else {
-//             yStart = nextYStart;
-//         }
-
-//         Int32 childTop = yStart;
-//         Int32 childBottom = childTop + childHeight;
-//         Int32 childLeft = paddingLeft;
-//         Int32 measuredWidth;
-//         child->GetMeasuredWidth(&measuredWidth);
-//         Int32 childRight = childLeft + measuredWidth;
-
-//         child->Layout(childLeft, childTop, childRight, childBottom);
-
-//         Int32 height;
-//         child->GetHeight(&height);
-//         nextYStart += height;
-//     }
-
-//     if (mFirstLayout) {
-//         UpdateObscuredViewsVisibility(mSlideableView);
-//     }
-
-//     mFirstLayout = FALSE;
-//     return NOERROR;
-// }
-
-// void OverlappingPaneLayout::OnSizeChanged(
-//     /* [in] */ Int32 w,
-//     /* [in] */ Int32 h,
-//     /* [in] */ Int32 oldw,
-//     /* [in] */ Int32 oldh)
-// {
-//     ViewGroup::OnSizeChanged(w, h, oldw, oldh);
-//     // Recalculate sliding panes and their details
-//     if (h != oldh) {
-//         mFirstLayout = TRUE;
-//     }
-// }
-
-// ECode OverlappingPaneLayout::RequestChildFocus(
-//     /* [in] */ IView* child,
-//     /* [in] */ IView* focused)
-// {
-//     ViewGroup::RequestChildFocus(child, focused);
-//     Boolean isInTouchMode;
-//     if (isInTouchMode(&isInTouchMode), !isInTouchMode && !mCanSlide) {
-//         mPreservedOpenState = child == mSlideableView;
-//     }
-
-//     return NOERROR;
-// }
-
-// ECode OverlappingPaneLayout::OnInterceptTouchEvent(
-//     /* [in] */ IMotionEvent* ev,
-//     /* [out] */ Boolean* res)
-// {
-//     VALIDATE_NOT_NULL(res);
-//     Int32 action;
-//     assert(0 && "TODO");
-//     // MotionEventCompat.getActionMasked(ev);
-
-//     // Preserve the open state based on the last view that was touched.
-//     Int32 count;
-//     if (!mCanSlide && action == IMotionEvent::ACTION_DOWN
-//             && GetChildCount(&count), count > 1) {
-//         // After the first things will be slideable.
-//         AutoPtr<IView> secondChild;
-//         GetChildAt(1, (IView**)&secondChild);
-//         if (secondChild != NULL) {
-//             Float x, y;
-//             ev->GetX(&x);
-//             ev->GetY(&y);
-//             Int32 isViewUnder;
-//             mDragHelper->IsViewUnder(secondChild,
-//                     (Int32)x, (Int32)y, &isViewUnder);
-//             mPreservedOpenState = !isViewUnder;
-//         }
-//     }
-
-//     if (!mCanSlide || (mIsUnableToDrag && action != IMotionEvent::ACTION_DOWN)) {
-//         if (!mIsInNestedScroll) {
-//             mDragHelper->Cancel();
-//         }
-//         return ViewGroup::OnInterceptTouchEvent(ev, res);
-//     }
-
-//     if (action == IMotionEvent::ACTION_CANCEL || action == IMotionEvent::ACTION_UP) {
-//         if (!mIsInNestedScroll) {
-//             mDragHelper->Cancel();
-//         }
-//         *res = FALSE;
-//         return NOERROR;
-//     }
-
-//     switch (action) {
-//         case IMotionEvent::ACTION_DOWN: {
-//             mIsUnableToDrag = FALSE;
-//             Float x;
-//             ev->GetX(&x);
-//             Float y;
-//             ev->GetY(&y);
-//             mInitialMotionX = x;
-//             mInitialMotionY = y;
-
-//             break;
-//         }
-
-//         case MotionEvent.ACTION_MOVE: {
-//             Float x;
-//             ev->GetX(&x);
-//             Float y;
-//             ev->GetY(&y);
-//             Float adx = Math::Abs(x - mInitialMotionX);
-//             Float ady = Math::Abs(y - mInitialMotionY);
-//             Int32 slop;
-//             mDragHelper->GetTouchSlop(&slop);
-//             if (ady > slop && adx > ady || !IsCapturableViewUnder((Int32) x, (Int32) y)) {
-//                 if (!mIsInNestedScroll) {
-//                     mDragHelper->Cancel();
-//                 }
-//                 mIsUnableToDrag = TRUE;
-//                 *res = FALSE;
-//                 return NOERROR;
-//             }
-//         }
-//     }
-
-//     Boolean interceptForDrag;
-//     mDragHelper->ShouldInterceptTouchEvent(ev, &interceptForDrag);
-
-//     *res = interceptForDrag;
-//     return NOERROR;
-// }
-
-// ECode OverlappingPaneLayout::OnTouchEvent(
-//     /* [in] */ IMotionEvent* event,
-//     /* [out] */ Boolean* res)
-// {
-//     VALIDATE_NOT_NULL(res);
-//     if (!mCanSlide) {
-//         return ViewGroup::OnTouchEvent(ev);
-//     }
-
-//     mDragHelper->ProcessTouchEvent(ev);
-
-//     Int32 action;
-//     ev->GetAction(&action);
-//     Boolean wantTouchEvents = TRUE;
-
-//     assert(0 && "TODO");
-//     // switch (action & MotionEventCompat.ACTION_MASK) {
-//     //     case IMotionEvent::ACTION_DOWN: {
-//     //         Float x;
-//     //         ev->GetX(&x);
-//     //         Float y;
-//     //         ev->GetY(&y);
-//     //         mInitialMotionX = x;
-//     //         mInitialMotionY = y;
-//     //         break;
-//     //     }
-//     // }
-
-//     *res = wantTouchEvents;
-//     return NOERROR;
-// }
-
-// Boolean OverlappingPaneLayout::ClosePane(
-//     /* [in] */ IView* pane,
-//     /* [in] */ Int32 initialVelocity)
-// {
-//     if (mFirstLayout || SmoothSlideTo(0.f, initialVelocity)) {
-//         mPreservedOpenState = FALSE;
-//         return TRUE;
-//     }
-//     return FALSE;
-// }
-
-// Boolean OverlappingPaneLayout::OpenPane(
-//     /* [in] */ IView* pane,
-//     /* [in] */ Int32 initialVelocity)
-// {
-//     if (mFirstLayout || SmoothSlideTo(1.f, initialVelocity)) {
-//         mPreservedOpenState = TRUE;
-//         return TRUE;
-//     }
-//     return FALSE;
-// }
-
-// void OverlappingPaneLayout::UpdateSlideOffset(
-//     /* [in] */ Int32 offsetPx)
-// {
-//     mSlideOffsetPx = offsetPx;
-//     mSlideOffset = (Float) mSlideOffsetPx / mSlideRange;
-// }
-
-// ECode OverlappingPaneLayout::OpenPane(
-//     /* [out] */ Boolean* result)
-// {
-//     VALIDATE_NOT_NULL(result);
-//     *result = OpenPane(mSlideableView, 0);
-//     return NOERROR;
-// }
-
-// ECode OverlappingPaneLayout::ClosePane(
-//     /* [out] */ Boolean* result)
-// {
-//     VALIDATE_NOT_NULL(result);
-//     *result = ClosePane(mSlideableView, 0);
-//     return NOERROR;
-// }
-
-// ECode OverlappingPaneLayout::IsOpen(
-//     /* [out] */ Boolean* result)
-// {
-//     VALIDATE_NOT_NULL(result);
-//     *result = !mCanSlide || mSlideOffset > 0;
-//     return NOERROR;
-// }
-
-// ECode OverlappingPaneLayout::IsSlideable(
-//     /* [out] */ Boolean* result)
-// {
-//     VALIDATE_NOT_NULL(result);
-//     *result = mCanSlide;
-//     return NOERROR;
-// }
-
-// void OverlappingPaneLayout::OnPanelDragged(
-//     /* [in] */ Int32 newTop)
-// {
-//     if (mSlideableView == NULL) {
-//         // This can happen if we're aborting motion during layout because everything now fits.
-//         mSlideOffset = 0;
-//         return;
-//     }
-//     AutoPtr<IViewGroupLayoutParams> lp;
-//     mSlideableView->GetLayoutParams((IViewGroupLayoutParams**)&lp);
-
-//     Int32 lpMargin;
-//     ((IViewGroupMarginLayoutParams*)lp)->GetTopMargin(&lpMargin);
-//     Int32 paddingTop;
-//     GetPaddingTop(&paddingTop);
-//     Int32 topBound = paddingTop + lpMargin;
-
-//     UpdateSlideOffset(newTop - topBound);
-
-//     DispatchOnPanelSlide(mSlideableView);
-// }
-
-// Boolean OverlappingPaneLayout::DrawChild(
-//     /* [in] */ ICanvas* canvas,
-//     /* [in] */ IView* child,
-//     /* [in] */ Int64 drawingTime)
-// {
-//     AutoPtr<IViewGroupLayoutParams> lp;
-//     child->GetLayoutParams((IViewGroupLayoutParams**)&lp);
-//     final LayoutParams lp = (LayoutParams) child.getLayoutParams();
-//     Boolean result;
-//     Int32 save;
-//     canvas->Save(ICanvas::CLIP_SAVE_FLAG, &save);
-
-//     if (mCanSlide && !((LayoutParams*)lp)->mSlideable && mSlideableView != NULL) {
-//         // Clip against the slider; no sense drawing what will immediately be covered.
-//         canvas->GetClipBounds(mTmpRect);
-
-//         Int32 bottom;
-//         mTmpRect->GetBottom(&bottom);
-//         Int32 top;
-//         mSlideableView->GetTop(&top);
-//         mTmpRect->SetBottom(Math::Min(bottom, top));
-//         canvas->ClipRect(mTmpRect);
-//     }
-
-//     if (Build::VERSION::SDK_INT >= 11) { // HC
-//         result = ViewGroup::DrawChild(canvas, child, drawingTime);
-//     }
-//     else {
-//         Boolean isEnabled;
-//         if (child->IsDrawingCacheEnabled(&isEnabled), isEnabled) {
-//             child->SetDrawingCacheEnabled(FALSE);
-//         }
-//         result = ViewGroup::DrawChild(canvas, child, drawingTime);
-//     }
-
-//     canvas->RestoreToCount(save);
-
-//     return result;
-// }
-
-// Boolean OverlappingPaneLayout::SmoothSlideTo(
-//     /* [in] */ Float slideOffset,
-//     /* [in] */ Int32 velocity)
-// {
-//     if (!mCanSlide) {
-//         // Nothing to do.
-//         return FALSE;
-//     }
-
-//     AutoPtr<IViewGroupLayoutParams> lp;
-//     mSlideableView->GetLayoutParams((IViewGroupLayoutParams**)&lp);
-//     final LayoutParams lp = (LayoutParams) mSlideableView.getLayoutParams();
-
-//     Int32 y;
-//     Int32 lpMargin;
-//     ((IViewGroupMarginLayoutParams*)lp)->GetTopMargin(&lpMargin);
-//     Int32 paddingTop;
-//     GetPaddingTop(&paddingTop);
-//     Int32 topBound = paddingTop + topMargin;
-//     y = (Int32) (topBound + slideOffset * mSlideRange);
-
-//     Int32 left;
-//     mSlideableView->GetLeft(&left);
-//     Boolean result;
-//     if (mDragHelper->SmoothSlideViewTo(mSlideableView, left, y, &result), result) {
-//         SetAllChildrenVisible();
-//         assert(0 && "TODO");
-//         // ViewCompat.postInvalidateOnAnimation(this);
-//         return TRUE;
-//     }
-//     return FALSE;
-// }
-
-// ECode OverlappingPaneLayout::ComputeScroll()
-// {
-//     Boolean result;
-//     if (mDragHelper->ContinueSettling(
-//             /* deferCallbacks = */ FALSE, &result), result) {
-//         if (!mCanSlide) {
-//             mDragHelper->Abort();
-//             return NOERROR;
-//         }
-
-//         assert(0 && "TODO");
-//         // ViewCompat.postInvalidateOnAnimation(this);
-//     }
-//     return NOERROR;
-// }
-
-// Boolean OverlappingPaneLayout::IsCapturableViewUnder(
-//     /* [in] */ Int32 x,
-//     /* [in] */ Int32 y)
-// {
-//     AutoPtr<IView> capturableView = mCapturableView != NULL ? mCapturableView : mSlideableView;
-//     if (capturableView == NULL) {
-//         return FALSE;
-//     }
-//     AutoPtr<ArrayOf<Int32> > viewLocation = ArrayOf<Int32>::Alloc(2);
-//     capturableView->GetLocationOnScreen(viewLocation);
-//     AutoPtr<ArrayOf<Int32> > parentLocation = ArrayOf<Int32>::Alloc(2);
-//     GetLocationOnScreen(parentLocation);
-//     Int32 screenX = parentLocation[0] + x;
-//     Int32 screenY = parentLocation[1] + y;
-
-//     Int32 width, height;
-//     capturableView->GetWidth(&width);
-//     capturableView->GetHeight(&height);
-//     return screenX >= viewLocation[0]
-//             && screenX < viewLocation[0] + width
-//             && screenY >= viewLocation[1]
-//             && screenY < viewLocation[1] + height;
-// }
-
-// ECode OverlappingPaneLayout::GenerateDefaultLayoutParams(
-//     /* [out] */ IViewGroupLayoutParams** params)
-// {
-//     VALIDATE_NOT_NULL(params);
-//     AutoPtr<LayoutParams> lp = new LayoutParams(this);
-//     lp->constructor();
-//     *params = (IViewGroupLayoutParams*)lp;
-//     REFCOUNT_ADD(*params);
-//     return NOERROR;
-// }
-
-// AutoPtr<IViewGroupLayoutParams> OverlappingPaneLayout::GenerateLayoutParams(
-//         /* [in] */ IViewGroupLayoutParams* p)
-// {
-//     AutoPtr<LayoutParams> lp;
-//     if (IViewGroupMarginLayoutParams::Probe(p) != NULL){
-//         lp = new LayoutParams(this);
-//         lp->constructor(IViewGroupMarginLayoutParams::Probe(p));
-//     }
-//     else {
-//         lp = new LayoutParams(this);
-//         lp->constructor(p);
-//     }
-//     *params = (IViewGroupLayoutParams*)lp;
-//     REFCOUNT_ADD(*params);
-//     return NOERROR;
-// }
-
-// Boolean OverlappingPaneLayout::CheckLayoutParams(
-//     /* [in] */ IViewGroupLayoutParams* p)
-// {
-//     return IOverlappingPaneLayoutLayoutParams::Probe(p) != NULL
-//             && ViewGroup::CheckLayoutParams(p);
-// }
-
-// ECode OverlappingPaneLayout::GenerateLayoutParams(
-//     /* [in] */ IAttributeSet* attrs,
-//     /* [out] */ IViewGroupLayoutParams** params)
-// {
-//     VALIDATE_NOT_NULL(params);
-//     AutoPtr<IContext> context;
-//     GetContext((IContext**)&context);
-//     AutoPtr<LayoutParams> lp = new LayoutParams(this);
-//     lp->constructor(context, attrs);
-//     *params = (IViewGroupLayoutParams*)lp;
-//     REFCOUNT_ADD(*params);
-//     return NOERROR;
-// }
-
-// AutoPtr<IParcelable> OverlappingPaneLayout::OnSaveInstanceState()
-// {
-//     AutoPtr<IParcelable> superState = ViewGroup::OnSaveInstanceState();
-
-//     AutoPtr<SavedState> ss = new SavedState(this);
-//     ss->constructor(superState);
-//     Boolean isSlideable;
-//     IsSlideable(&isSlideable);
-//     Boolean isOpen;
-//     ss->mIsOpen = isSlideable ? IsOpen(&isOpen), isOpen : mPreservedOpenState;
-
-//     return (IParcelable*)ss;
-// }
-
-// void OverlappingPaneLayout::OnRestoreInstanceState(
-//     /* [in] */ IParcelable* state)
-// {
-//     AutoPtr<SavedState> ss = (SavedState*)state;
-//     AutoPtr<IParcelable> p;
-//     ss->GetSuperState((IParcelable**)&p);
-//     ViewGroup::OnRestoreInstanceState(p);
-
-//     if (ss->mIsOpen) {
-//         OpenPane();
-//     }
-//     else {
-//         ClosePane();
-//     }
-//     mPreservedOpenState = ss->mIsOpen;
-// }
-
-// ECode OverlappingPaneLayout::OnStartNestedScroll(
-//     /* [in] */ IView* child,
-//     /* [in] */ IView* target,
-//     /* [in] */ Int32 nestedScrollAxes,
-//     /* [out] */ Boolean* res)
-// {
-//     VALIDATE_NOT_NULL(res);
-//     Boolean startNestedScroll = (nestedScrollAxes & SCROLL_AXIS_VERTICAL) != 0;
-//     if (startNestedScroll) {
-//         mIsInNestedScroll = TRUE;
-//         mDragHelper->StartNestedScroll(mSlideableView);
-//     }
-//     if (DEBUG) {
-//         Logger::D(TAG, "onStartNestedScroll: %d", startNestedScroll);
-//     }
-//     *res = startNestedScroll;
-//     return NOERROR;
-// }
-
-// ECode OverlappingPaneLayout::OnNestedPreScroll(
-//     /* [in] */ IView* target,
-//     /* [in] */ Int32 dx,
-//     /* [in] */ Int32 dy,
-//     /* [in] */ ArrayOf<Int32>* consumed)
-// {
-//     if (dy == 0) {
-//         // Nothing to do
-//         return NOERROR;
-//     }
-//     if (DEBUG) {
-//         Logger::D(TAG, "onNestedPreScroll: %d", dy);
-//     }
-
-//     mInNestedPreScrollDownwards = dy < 0;
-//     mInNestedPreScrollUpwards = dy > 0;
-//     mIsInNestedFling = FALSE;
-//     mDragHelper->ProcessNestedScroll(mSlideableView, 0, -dy, consumed);
-//     return NOERROR;
-// }
-
-// ECode OverlappingPaneLayout::OnNestedPreFling(
-//     /* [in] */ IView* target,
-//     /* [in] */ Float velocityX,
-//     /* [in] */ Float velocityY,
-//     /* [out] */ Boolean* res)
-// {
-//     VALIDATE_NOT_NULL(res);
-//     Boolean result;
-//     if (!(velocityY > 0 && mSlideOffsetPx != 0
-//             || velocityY < 0 && mSlideOffsetPx < mIntermediateOffset
-//             || velocityY < 0 && mSlideOffsetPx < mSlideRange
-//             && mPanelSlideCallbacks->IsScrollableChildUnscrolled(&result), result)) {
-//         // No need to consume the fling if the fling won't collapse or expand the header.
-//         // How far we are willing to expand the header depends on isScrollableChildUnscrolled().
-//         *res = FALSE;
-//         return NOERROR;
-//     }
-
-//     if (DEBUG) {
-//         Logger::D(TAG, "onNestedPreFling: %d", velocityY);
-//     }
-//     mInUpwardsPreFling = velocityY > 0;
-//     mIsInNestedFling = TRUE;
-//     mIsInNestedScroll = FALSE;
-//     mDragHelper->ProcessNestedFling(mSlideableView, (Int32) -velocityY);
-//     *res = TRUE;
-//     return NOERROR;
-// }
-
-// ECode OverlappingPaneLayout::OnNestedScroll(
-//     /* [in] */ IView* target,
-//     /* [in] */ Int32 dxConsumed,
-//     /* [in] */ Int32 dyConsumed,
-//     /* [in] */ Int32 dxUnconsumed,
-//     /* [in] */ Int32 dyUnconsumed)
-// {
-//     if (DEBUG) {
-//         Logger::D(TAG, "onNestedScroll: %d", dyUnconsumed);
-//     }
-//     mIsInNestedFling = FALSE;
-//     mDragHelper->ProcessNestedScroll(mSlideableView, 0, -dyUnconsumed, NULL);
-//     return NOERROR;
-// }
-
-// ECode OverlappingPaneLayout::OnStopNestedScroll(
-//     /* [in] */ IView* child)
-// {
-//     if (DEBUG) {
-//         Logger::D(TAG, "onStopNestedScroll");
-//     }
-//     if (mIsInNestedScroll && !mIsInNestedFling) {
-//         mDragHelper->StopNestedScroll(mSlideableView);
-//         mInNestedPreScrollDownwards = FALSE;
-//         mInNestedPreScrollUpwards = FALSE;
-//         mIsInNestedScroll = FALSE;
-//     }
-//     return NOERROR;
-// }
+ECode OverlappingPaneLayout::constructor(
+    /* [in] */ IContext* context,
+    /* [in] */ IAttributeSet* attrs,
+    /* [in] */ Int32 defStyle)
+{
+    FAIL_RETURN(ViewGroup::constructor(context, attrs, defStyle));
+
+    AutoPtr<IResources> res;
+    context->GetResources((IResources**)&res);
+    AutoPtr<IDisplayMetrics> dm;
+    res->GetDisplayMetrics((IDisplayMetrics**)&dm);
+    Float density;
+    dm->GetDensity(&density);
+    mOverhangSize = (Int32)(DEFAULT_OVERHANG_SIZE * density + 0.5f);
+
+    SetWillNotDraw(FALSE);
+
+    assert(0 && "TODO");
+    // ViewCompat.setAccessibilityDelegate(this, new AccessibilityDelegate());
+    // ViewCompat.setImportantForAccessibility(this, ViewCompat.IMPORTANT_FOR_ACCESSIBILITY_YES);
+
+    mDragHelper = ViewDragHelper::Create(this, 0.5f, new DragHelperCallback(this));
+    mDragHelper->SetMinVelocity(MIN_FLING_VELOCITY * density);
+
+    AutoPtr<IViewConfigurationHelper> helper;
+    CViewConfigurationHelper::AcquireSingleton((IViewConfigurationHelper**)&helper);
+    AutoPtr<IContext> ctx;
+    GetContext((IContext**)&ctx);
+    AutoPtr<IViewConfiguration> vc;
+    helper->Get(ctx, (IViewConfiguration**)&vc);
+    vc->GetScaledTouchSlop(&mReleaseScrollSlop);
+    return NOERROR;
+}
+
+ECode OverlappingPaneLayout::SetIntermediatePinnedOffset(
+    /* [in] */ Int32 offset)
+{
+    mIntermediateOffset = offset;
+    return NOERROR;
+}
+
+ECode OverlappingPaneLayout::SetCapturableView(
+    /* [in] */ IView* capturableView)
+{
+    mCapturableView = capturableView;
+    return NOERROR;
+}
+
+ECode OverlappingPaneLayout::SetPanelSlideCallbacks(
+    /* [in] */ IPanelSlideCallbacks* listener)
+{
+    mPanelSlideCallbacks = listener;
+    return NOERROR;
+}
+
+void OverlappingPaneLayout::DispatchOnPanelSlide(
+    /* [in] */ IView* panel)
+{
+    mPanelSlideCallbacks->OnPanelSlide(panel, mSlideOffset);
+}
+
+void OverlappingPaneLayout::DispatchOnPanelOpened(
+    /* [in] */ IView* panel)
+{
+    mPanelSlideCallbacks->OnPanelOpened(panel);
+    SendAccessibilityEvent(IAccessibilityEvent::TYPE_WINDOW_STATE_CHANGED);
+}
+
+void OverlappingPaneLayout::DispatchOnPanelClosed(
+    /* [in] */ IView* panel)
+{
+    mPanelSlideCallbacks->OnPanelClosed(panel);
+    SendAccessibilityEvent(IAccessibilityEvent::TYPE_WINDOW_STATE_CHANGED);
+}
+
+void OverlappingPaneLayout::UpdateObscuredViewsVisibility(
+    /* [in] */ IView* panel)
+{
+    Int32 startBound;
+    GetPaddingTop(&startBound);
+    Int32 height, paddingBottom;
+    GetHeight(&height);
+    GetPaddingBottom(&paddingBottom);
+    Int32 endBound = height - paddingBottom;
+
+    Int32 leftBound;
+    GetPaddingLeft(&leftBound);
+    Int32 width, paddingRight;
+    GetWidth(&width);
+    GetPaddingRight(&paddingRight);
+    Int32 rightBound = width - paddingRight;
+    Int32 left;
+    Int32 right;
+    Int32 top;
+    Int32 bottom;
+    if (panel != NULL && ViewIsOpaque(panel)) {
+        panel->GetLeft(&left);
+        panel->GetRight(&right);
+        panel->GetTop(&top);
+        panel->GetBottom(&bottom);
+    }
+    else {
+        left = right = top = bottom = 0;
+    }
+
+    Int32 childCount;
+    GetChildCount(&childCount);
+    for (Int32 i = 0; i < childCount; i++) {
+        AutoPtr<IView> child;
+        GetChildAt(i, (IView**)&child);
+
+        if (child.Get() == panel) {
+            // There are still more children above the panel but they won't be affected.
+            break;
+        }
+
+        Int32 cLeft, cRight, cTop, cBottom;
+        child->GetLeft(&cLeft);
+        child->GetRight(&cRight);
+        child->GetTop(&cTop);
+        child->GetBottom(&cBottom);
+        Int32 clampedChildLeft = Elastos::Core::Math::Max(leftBound, cLeft);
+        Int32 clampedChildRight = Elastos::Core::Math::Min(rightBound, cRight);
+        Int32 clampedChildTop = Elastos::Core::Math::Max(startBound, cTop);
+        Int32 clampedChildBottom = Elastos::Core::Math::Min(endBound, cBottom);
+
+        Int32 vis;
+        if (clampedChildLeft >= left && clampedChildTop >= top &&
+                clampedChildRight <= right && clampedChildBottom <= bottom) {
+            vis = IView::INVISIBLE;
+        }
+        else {
+            vis = IView::VISIBLE;
+        }
+        child->SetVisibility(vis);
+    }
+}
+
+void OverlappingPaneLayout::SetAllChildrenVisible()
+{
+    Int32 childCount;
+    GetChildCount(&childCount);
+    for (Int32 i = 0; i < childCount; i++) {
+        AutoPtr<IView> child;
+        GetChildAt(i, (IView**)&child);
+        Int32 visibility;
+        if (child->GetVisibility(&visibility), visibility == IView::INVISIBLE) {
+            child->SetVisibility(IView::VISIBLE);
+        }
+    }
+}
+
+Boolean OverlappingPaneLayout::ViewIsOpaque(
+    /* [in] */ IView* v)
+{
+    assert(0 && "TODO");
+    // if (ViewCompat.isOpaque(v)) return TRUE;
+
+    AutoPtr<IDrawable> bg;
+    v->GetBackground((IDrawable**)&bg);
+    if (bg != NULL) {
+        Int32 opacity;
+        bg->GetOpacity(&opacity);
+        return opacity == IPixelFormat::OPAQUE;
+    }
+    return FALSE;
+}
+
+ECode OverlappingPaneLayout::OnAttachedToWindow()
+{
+    ViewGroup::OnAttachedToWindow();
+    mFirstLayout = TRUE;
+    return NOERROR;
+}
+
+ECode OverlappingPaneLayout::OnDetachedFromWindow()
+{
+    ViewGroup::OnDetachedFromWindow();
+    mFirstLayout = TRUE;
+    return NOERROR;
+}
+
+void OverlappingPaneLayout::OnMeasure(
+    /* [in] */ Int32 widthMeasureSpec,
+    /* [in] */ Int32 heightMeasureSpec)
+{
+    Int32 widthMode = View::MeasureSpec::GetMode(widthMeasureSpec);
+    Int32 widthSize = View::MeasureSpec::GetSize(widthMeasureSpec);
+    Int32 heightMode = View::MeasureSpec::GetMode(heightMeasureSpec);
+    Int32 heightSize = View::MeasureSpec::GetSize(heightMeasureSpec);
+
+    if (widthMode != View::MeasureSpec::EXACTLY) {
+        Boolean isInEditMode;
+        if (IsInEditMode(&isInEditMode), isInEditMode) {
+            // Don't crash the layout editor. Consume all of the space if specified
+            // or pick a magic number from thin air otherwise.
+            // TODO Better communication with tools of this bogus state.
+            // It will crash on a real device.
+            if (widthMode == View::MeasureSpec::AT_MOST) {
+                widthMode = View::MeasureSpec::EXACTLY;
+            }
+            else if (widthMode == View::MeasureSpec::UNSPECIFIED) {
+                widthMode = View::MeasureSpec::EXACTLY;
+                widthSize = 300;
+            }
+        }
+        else {
+            // throw new IllegalStateException("Width must have an exact value or MATCH_PARENT");
+            return;
+        }
+    }
+    else if (heightMode == View::MeasureSpec::UNSPECIFIED) {
+        Boolean isInEditMode;
+        if (IsInEditMode(&isInEditMode), isInEditMode) {
+            // Don't crash the layout editor. Pick a magic number from thin air instead.
+            // TODO Better communication with tools of this bogus state.
+            // It will crash on a real device.
+            if (heightMode == View::MeasureSpec::UNSPECIFIED) {
+                heightMode = View::MeasureSpec::AT_MOST;
+                heightSize = 300;
+            }
+        }
+        else {
+            // throw new IllegalStateException("Height must not be UNSPECIFIED");
+            assert(0 && "TODO");
+            return;
+        }
+    }
+
+    Int32 layoutWidth = 0;
+    Int32 maxLayoutWidth = -1;
+    switch (widthMode) {
+        case View::MeasureSpec::EXACTLY: {
+            Int32 paddingLeft, paddingRight;
+            GetPaddingLeft(&paddingLeft);
+            GetPaddingRight(&paddingRight);
+            layoutWidth = maxLayoutWidth = widthSize - paddingLeft - paddingRight;
+            break;
+        }
+        case View::MeasureSpec::AT_MOST: {
+            Int32 paddingLeft, paddingRight;
+            GetPaddingLeft(&paddingLeft);
+            GetPaddingRight(&paddingRight);
+            maxLayoutWidth = widthSize - paddingLeft - paddingRight;
+            break;
+        }
+    }
+
+    Float weightSum = 0;
+    Boolean canSlide = FALSE;
+    Int32 paddingTop, paddingBottom;
+    GetPaddingTop(&paddingTop);
+    GetPaddingBottom(&paddingBottom);
+    Int32 heightAvailable = heightSize - paddingTop - paddingBottom;
+    Int32 heightRemaining = heightAvailable;
+    Int32 childCount;
+    GetChildCount(&childCount);
+
+    if (childCount > 2) {
+        Logger::E(TAG, "onMeasure: More than two child views are not supported.");
+    }
+
+    // We'll find the current one below.
+    mSlideableView = NULL;
+
+    // First pass. Measure based on child LayoutParams width/height.
+    // Weight will incur a second pass.
+    for (Int32 i = 0; i < childCount; i++) {
+        AutoPtr<IView> child;
+        GetChildAt(i, (IView**)&child);
+        AutoPtr<IViewGroupLayoutParams> params;
+        child->GetLayoutParams((IViewGroupLayoutParams**)&params);
+        LayoutParams* lp = (LayoutParams*)params.Get();
+
+        Int32 visibility;
+        if (child->GetVisibility(&visibility), visibility == IView::GONE) {
+            continue;
+        }
+
+        if (lp->mWeight > 0) {
+            weightSum += lp->mWeight;
+
+            // If we have no height, weight is the only contributor to the final size.
+            // Measure this view on the weight pass only.
+            if (lp->mHeight == 0) continue;
+        }
+
+        Int32 childHeightSpec;
+        Int32 verticalMargin = lp->mTopMargin + lp->mBottomMargin;
+        if (lp->mHeight == IViewGroupLayoutParams::WRAP_CONTENT) {
+            childHeightSpec = View::MeasureSpec::MakeMeasureSpec(heightAvailable - verticalMargin,
+                    View::MeasureSpec::AT_MOST);
+        }
+        else if (lp->mHeight == IViewGroupLayoutParams::MATCH_PARENT) {
+            childHeightSpec = View::MeasureSpec::MakeMeasureSpec(heightAvailable - verticalMargin,
+                    View::MeasureSpec::EXACTLY);
+        }
+        else {
+            childHeightSpec = View::MeasureSpec::MakeMeasureSpec(lp->mHeight, View::MeasureSpec::EXACTLY);
+        }
+
+        Int32 childWidthSpec;
+        if (lp->mWidth == IViewGroupLayoutParams::WRAP_CONTENT) {
+            childWidthSpec = View::MeasureSpec::MakeMeasureSpec(
+                    maxLayoutWidth, View::MeasureSpec::AT_MOST);
+        }
+        else if (lp->mWidth == IViewGroupLayoutParams::MATCH_PARENT) {
+            childWidthSpec = View::MeasureSpec::MakeMeasureSpec(
+                    maxLayoutWidth, View::MeasureSpec::EXACTLY);
+        }
+        else {
+            childWidthSpec = View::MeasureSpec::MakeMeasureSpec(
+                    lp->mWidth, View::MeasureSpec::EXACTLY);
+        }
+
+        child->Measure(childWidthSpec, childHeightSpec);
+        Int32 childWidth;
+        child->GetMeasuredWidth(&childWidth);
+        Int32 childHeight;
+        child->GetMeasuredHeight(&childHeight);
+
+        if (widthMode == View::MeasureSpec::AT_MOST && childWidth > layoutWidth) {
+            layoutWidth = Elastos::Core::Math::Min(childWidth, maxLayoutWidth);
+        }
+
+        heightRemaining -= childHeight;
+        canSlide |= lp->mSlideable = heightRemaining < 0;
+        if (lp->mSlideable) {
+            mSlideableView = child;
+        }
+    }
+
+    // Resolve weight and make sure non-sliding panels are smaller than the full screen.
+    if (canSlide || weightSum > 0) {
+        Int32 fixedPanelHeightLimit = heightAvailable - mOverhangSize;
+
+        for (Int32 i = 0; i < childCount; i++) {
+            AutoPtr<IView> child;
+            GetChildAt(i, (IView**)&child);
+
+            Int32 visibility;
+            if (child->GetVisibility(&visibility), visibility == IView::GONE) {
+                continue;
+            }
+
+            AutoPtr<IViewGroupLayoutParams> params;
+            child->GetLayoutParams((IViewGroupLayoutParams**)&params);
+            LayoutParams* lp = (LayoutParams*)params.Get();
+
+            if (child->GetVisibility(&visibility), visibility == IView::GONE) {
+                continue;
+            }
+
+            Boolean skippedFirstPass = lp->mHeight == 0 && lp->mWeight > 0;
+            Int32 childMeasuredHeight;
+            Int32 measuredHeight = skippedFirstPass ? 0 :
+                    (child->GetMeasuredHeight(&childMeasuredHeight), childMeasuredHeight);
+            if (canSlide && child != mSlideableView) {
+                if (lp->mHeight < 0 && (measuredHeight > fixedPanelHeightLimit
+                        || lp->mWeight > 0)) {
+                    // Fixed panels in a sliding configuration should
+                    // be clamped to the fixed panel limit.
+                    Int32 childWidthSpec;
+                    if (skippedFirstPass) {
+                        // Do initial width measurement if we skipped measuring this view
+                        // the first time around.
+                        if (lp->mWidth == IViewGroupLayoutParams::WRAP_CONTENT) {
+                            childWidthSpec = View::MeasureSpec::MakeMeasureSpec(maxLayoutWidth,
+                                    View::MeasureSpec::AT_MOST);
+                        }
+                        else if (lp->mHeight == IViewGroupLayoutParams::MATCH_PARENT) {
+                            childWidthSpec = View::MeasureSpec::MakeMeasureSpec(maxLayoutWidth,
+                                    View::MeasureSpec::EXACTLY);
+                        }
+                        else {
+                            childWidthSpec = View::MeasureSpec::MakeMeasureSpec(lp->mWidth,
+                                    View::MeasureSpec::EXACTLY);
+                        }
+                    }
+                    else {
+                        child->GetMeasuredHeight(&childMeasuredHeight);
+                        childWidthSpec = View::MeasureSpec::MakeMeasureSpec(
+                                childMeasuredHeight, View::MeasureSpec::EXACTLY);
+                    }
+                    Int32 childHeightSpec = View::MeasureSpec::MakeMeasureSpec(
+                            fixedPanelHeightLimit, View::MeasureSpec::EXACTLY);
+                    child->Measure(childWidthSpec, childHeightSpec);
+                }
+            }
+            else if (lp->mWeight > 0) {
+                Int32 childWidthSpec;
+                if (lp->mHeight == 0) {
+                    // This was skipped the first time; figure out a real width spec.
+                    if (lp->mWidth == IViewGroupLayoutParams::WRAP_CONTENT) {
+                        childWidthSpec = View::MeasureSpec::MakeMeasureSpec(maxLayoutWidth,
+                                View::MeasureSpec::AT_MOST);
+                    }
+                    else if (lp->mWidth == IViewGroupLayoutParams::MATCH_PARENT) {
+                        childWidthSpec = View::MeasureSpec::MakeMeasureSpec(maxLayoutWidth,
+                                View::MeasureSpec::EXACTLY);
+                    }
+                    else {
+                        childWidthSpec = View::MeasureSpec::MakeMeasureSpec(lp->mWidth,
+                                View::MeasureSpec::EXACTLY);
+                    }
+                }
+                else {
+                    Int32 measuredWidth;
+                    child->GetMeasuredWidth(&measuredWidth);
+                    childWidthSpec = View::MeasureSpec::MakeMeasureSpec(
+                            measuredWidth, View::MeasureSpec::EXACTLY);
+                }
+
+                if (canSlide) {
+                    // Consume available space
+                    Int32 verticalMargin = lp->mTopMargin + lp->mBottomMargin;
+                    Int32 newHeight = heightAvailable - verticalMargin;
+                    Int32 childHeightSpec = View::MeasureSpec::MakeMeasureSpec(
+                            newHeight, View::MeasureSpec::EXACTLY);
+                    if (measuredHeight != newHeight) {
+                        child->Measure(childWidthSpec, childHeightSpec);
+                    }
+                }
+                else {
+                    // Distribute the extra width proportionally similar to LinearLayout
+                    Int32 heightToDistribute = Elastos::Core::Math::Max(0, heightRemaining);
+                    Int32 addedHeight = (Int32)(lp->mWeight * heightToDistribute / weightSum);
+                    Int32 childHeightSpec = View::MeasureSpec::MakeMeasureSpec(
+                            measuredHeight + addedHeight, View::MeasureSpec::EXACTLY);
+                    child->Measure(childWidthSpec, childHeightSpec);
+                }
+            }
+        }
+    }
+
+    Int32 measuredHeight = heightSize;
+    Int32 paddingLeft, paddingRight;
+    GetPaddingLeft(&paddingLeft);
+    GetPaddingRight(&paddingRight);
+    Int32 measuredWidth = layoutWidth + paddingLeft + paddingRight;
+
+    SetMeasuredDimension(measuredWidth, measuredHeight);
+    mCanSlide = canSlide;
+
+    if (mDragHelper->GetViewDragState() != ViewDragHelper::STATE_IDLE && !canSlide) {
+        // Cancel scrolling in progress, it's no longer relevant.
+        mDragHelper->Abort();
+    }
+}
+
+ECode OverlappingPaneLayout::OnLayout(
+    /* [in] */ Boolean changed,
+    /* [in] */ Int32 l,
+    /* [in] */ Int32 t,
+    /* [in] */ Int32 r,
+    /* [in] */ Int32 b)
+{
+    mDragHelper->SetEdgeTrackingEnabled(ViewDragHelper::EDGE_TOP);
+
+    Int32 height = b - t;
+    Int32 paddingTop;
+    GetPaddingTop(&paddingTop);
+    Int32 paddingBottom;
+    GetPaddingBottom(&paddingBottom);
+    Int32 paddingLeft;
+    GetPaddingLeft(&paddingLeft);
+
+    Int32 childCount;
+    GetChildCount(&childCount);
+    Int32 yStart = paddingTop;
+    Int32 nextYStart = yStart;
+
+    if (mFirstLayout) {
+        mSlideOffset = mCanSlide && mPreservedOpenState ? 1.f : 0.f;
+    }
+
+    for (Int32 i = 0; i < childCount; i++) {
+        AutoPtr<IView> child;
+        GetChildAt(i, (IView**)&child);
+
+        Int32 visibility;
+        if (child->GetVisibility(&visibility), visibility == IView::GONE) {
+            continue;
+        }
+
+        AutoPtr<IViewGroupLayoutParams> params;
+        child->GetLayoutParams((IViewGroupLayoutParams**)&params);
+        LayoutParams* lp = (LayoutParams*)params.Get();
+
+        Int32 childHeight;
+        child->GetMeasuredHeight(&childHeight);
+
+        if (lp->mSlideable) {
+            Int32 margin = lp->mTopMargin + lp->mBottomMargin;
+            Int32 range = Elastos::Core::Math::Min(nextYStart,
+                    height - paddingBottom - mOverhangSize) - yStart - margin;
+            mSlideRange = range;
+            Int32 lpMargin = lp->mTopMargin;
+            Int32 pos = (Int32)(range * mSlideOffset);
+            yStart += pos + lpMargin;
+            UpdateSlideOffset(pos);
+        }
+        else {
+            yStart = nextYStart;
+        }
+
+        Int32 childTop = yStart;
+        Int32 childBottom = childTop + childHeight;
+        Int32 childLeft = paddingLeft;
+        Int32 measuredWidth;
+        child->GetMeasuredWidth(&measuredWidth);
+        Int32 childRight = childLeft + measuredWidth;
+
+        child->Layout(childLeft, childTop, childRight, childBottom);
+
+        Int32 height;
+        child->GetHeight(&height);
+        nextYStart += height;
+    }
+
+    if (mFirstLayout) {
+        UpdateObscuredViewsVisibility(mSlideableView);
+    }
+
+    mFirstLayout = FALSE;
+    return NOERROR;
+}
+
+void OverlappingPaneLayout::OnSizeChanged(
+    /* [in] */ Int32 w,
+    /* [in] */ Int32 h,
+    /* [in] */ Int32 oldw,
+    /* [in] */ Int32 oldh)
+{
+    ViewGroup::OnSizeChanged(w, h, oldw, oldh);
+    // Recalculate sliding panes and their details
+    if (h != oldh) {
+        mFirstLayout = TRUE;
+    }
+}
+
+ECode OverlappingPaneLayout::RequestChildFocus(
+    /* [in] */ IView* child,
+    /* [in] */ IView* focused)
+{
+    ViewGroup::RequestChildFocus(child, focused);
+    Boolean isInTouchMode;
+    if ((IsInTouchMode(&isInTouchMode), !isInTouchMode) && !mCanSlide) {
+        mPreservedOpenState = child == mSlideableView;
+    }
+    return NOERROR;
+}
+
+ECode OverlappingPaneLayout::OnInterceptTouchEvent(
+    /* [in] */ IMotionEvent* ev,
+    /* [out] */ Boolean* res)
+{
+    VALIDATE_NOT_NULL(res);
+    Int32 action;
+    assert(0 && "TODO");
+    // MotionEventCompat.getActionMasked(ev);
+
+    // Preserve the open state based on the last view that was touched.
+    Int32 count;
+    if (!mCanSlide && action == IMotionEvent::ACTION_DOWN
+            && (GetChildCount(&count), count > 1)) {
+        // After the first things will be slideable.
+        AutoPtr<IView> secondChild;
+        GetChildAt(1, (IView**)&secondChild);
+        if (secondChild != NULL) {
+            Float x, y;
+            ev->GetX(&x);
+            ev->GetY(&y);
+            mPreservedOpenState = !mDragHelper->IsViewUnder(secondChild,
+                    (Int32)x, (Int32)y);
+        }
+    }
+
+    if (!mCanSlide || (mIsUnableToDrag && action != IMotionEvent::ACTION_DOWN)) {
+        if (!mIsInNestedScroll) {
+            mDragHelper->Cancel();
+        }
+        return ViewGroup::OnInterceptTouchEvent(ev, res);
+    }
+
+    if (action == IMotionEvent::ACTION_CANCEL || action == IMotionEvent::ACTION_UP) {
+        if (!mIsInNestedScroll) {
+            mDragHelper->Cancel();
+        }
+        *res = FALSE;
+        return NOERROR;
+    }
+
+    switch (action) {
+        case IMotionEvent::ACTION_DOWN: {
+            mIsUnableToDrag = FALSE;
+            Float x;
+            ev->GetX(&x);
+            Float y;
+            ev->GetY(&y);
+            mInitialMotionX = x;
+            mInitialMotionY = y;
+
+            break;
+        }
+
+        case IMotionEvent::ACTION_MOVE: {
+            Float x;
+            ev->GetX(&x);
+            Float y;
+            ev->GetY(&y);
+            Float adx = Elastos::Core::Math::Abs(x - mInitialMotionX);
+            Float ady = Elastos::Core::Math::Abs(y - mInitialMotionY);
+            Int32 slop = mDragHelper->GetTouchSlop();
+            if ((ady > slop && adx > ady) || !IsCapturableViewUnder((Int32) x, (Int32) y)) {
+                if (!mIsInNestedScroll) {
+                    mDragHelper->Cancel();
+                }
+                mIsUnableToDrag = TRUE;
+                *res = FALSE;
+                return NOERROR;
+            }
+        }
+    }
+
+    Boolean interceptForDrag = mDragHelper->ShouldInterceptTouchEvent(ev);
+
+    *res = interceptForDrag;
+    return NOERROR;
+}
+
+ECode OverlappingPaneLayout::OnTouchEvent(
+    /* [in] */ IMotionEvent* event,
+    /* [out] */ Boolean* res)
+{
+    VALIDATE_NOT_NULL(res);
+    if (!mCanSlide) {
+        return ViewGroup::OnTouchEvent(event, res);
+    }
+
+    mDragHelper->ProcessTouchEvent(event);
+
+    Int32 action;
+    event->GetAction(&action);
+    Boolean wantTouchEvents = TRUE;
+
+    assert(0 && "TODO");
+    // switch (action & MotionEventCompat.ACTION_MASK) {
+    //     case IMotionEvent::ACTION_DOWN: {
+    //         Float x;
+    //         ev->GetX(&x);
+    //         Float y;
+    //         ev->GetY(&y);
+    //         mInitialMotionX = x;
+    //         mInitialMotionY = y;
+    //         break;
+    //     }
+    // }
+
+    *res = wantTouchEvents;
+    return NOERROR;
+}
+
+Boolean OverlappingPaneLayout::ClosePane(
+    /* [in] */ IView* pane,
+    /* [in] */ Int32 initialVelocity)
+{
+    if (mFirstLayout || SmoothSlideTo(0.f, initialVelocity)) {
+        mPreservedOpenState = FALSE;
+        return TRUE;
+    }
+    return FALSE;
+}
+
+Boolean OverlappingPaneLayout::OpenPane(
+    /* [in] */ IView* pane,
+    /* [in] */ Int32 initialVelocity)
+{
+    if (mFirstLayout || SmoothSlideTo(1.f, initialVelocity)) {
+        mPreservedOpenState = TRUE;
+        return TRUE;
+    }
+    return FALSE;
+}
+
+void OverlappingPaneLayout::UpdateSlideOffset(
+    /* [in] */ Int32 offsetPx)
+{
+    mSlideOffsetPx = offsetPx;
+    mSlideOffset = (Float) mSlideOffsetPx / mSlideRange;
+}
+
+ECode OverlappingPaneLayout::OpenPane(
+    /* [out] */ Boolean* result)
+{
+    VALIDATE_NOT_NULL(result);
+    *result = OpenPane(mSlideableView, 0);
+    return NOERROR;
+}
+
+ECode OverlappingPaneLayout::ClosePane(
+    /* [out] */ Boolean* result)
+{
+    VALIDATE_NOT_NULL(result);
+    *result = ClosePane(mSlideableView, 0);
+    return NOERROR;
+}
+
+ECode OverlappingPaneLayout::IsOpen(
+    /* [out] */ Boolean* result)
+{
+    VALIDATE_NOT_NULL(result);
+    *result = !mCanSlide || mSlideOffset > 0;
+    return NOERROR;
+}
+
+ECode OverlappingPaneLayout::IsSlideable(
+    /* [out] */ Boolean* result)
+{
+    VALIDATE_NOT_NULL(result);
+    *result = mCanSlide;
+    return NOERROR;
+}
+
+void OverlappingPaneLayout::OnPanelDragged(
+    /* [in] */ Int32 newTop)
+{
+    if (mSlideableView == NULL) {
+        // This can happen if we're aborting motion during layout because everything now fits.
+        mSlideOffset = 0;
+        return;
+    }
+    AutoPtr<IViewGroupLayoutParams> params;
+    mSlideableView->GetLayoutParams((IViewGroupLayoutParams**)&params);
+    LayoutParams* lp = (LayoutParams*)params.Get();
+
+    Int32 lpMargin = lp->mTopMargin;
+    Int32 paddingTop;
+    GetPaddingTop(&paddingTop);
+    Int32 topBound = paddingTop + lpMargin;
+
+    UpdateSlideOffset(newTop - topBound);
+
+    DispatchOnPanelSlide(mSlideableView);
+}
+
+Boolean OverlappingPaneLayout::DrawChild(
+    /* [in] */ ICanvas* canvas,
+    /* [in] */ IView* child,
+    /* [in] */ Int64 drawingTime)
+{
+    AutoPtr<IViewGroupLayoutParams> params;
+    child->GetLayoutParams((IViewGroupLayoutParams**)&params);
+    LayoutParams* lp = (LayoutParams*)params.Get();
+    Boolean result;
+    Int32 save;
+    canvas->Save(ICanvas::CLIP_SAVE_FLAG, &save);
+
+    if (mCanSlide && !lp->mSlideable && mSlideableView != NULL) {
+        // Clip against the slider; no sense drawing what will immediately be covered.
+        canvas->GetClipBounds(mTmpRect, &result);
+
+        Int32 bottom;
+        mTmpRect->GetBottom(&bottom);
+        Int32 top;
+        mSlideableView->GetTop(&top);
+        mTmpRect->SetBottom(Elastos::Core::Math::Min(bottom, top));
+        canvas->ClipRect(mTmpRect, &result);
+    }
+
+    if (Build::VERSION::SDK_INT >= 11) { // HC
+        result = ViewGroup::DrawChild(canvas, child, drawingTime);
+    }
+    else {
+        Boolean isEnabled;
+        if (child->IsDrawingCacheEnabled(&isEnabled), isEnabled) {
+            child->SetDrawingCacheEnabled(FALSE);
+        }
+        result = ViewGroup::DrawChild(canvas, child, drawingTime);
+    }
+
+    canvas->RestoreToCount(save);
+
+    return result;
+}
+
+Boolean OverlappingPaneLayout::SmoothSlideTo(
+    /* [in] */ Float slideOffset,
+    /* [in] */ Int32 velocity)
+{
+    if (!mCanSlide) {
+        // Nothing to do.
+        return FALSE;
+    }
+
+    AutoPtr<IViewGroupLayoutParams> params;
+    mSlideableView->GetLayoutParams((IViewGroupLayoutParams**)&params);
+    LayoutParams* lp = (LayoutParams*)params.Get();
+
+    Int32 y;
+    Int32 paddingTop;
+    GetPaddingTop(&paddingTop);
+    Int32 topBound = paddingTop + lp->mTopMargin;
+    y = (Int32) (topBound + slideOffset * mSlideRange);
+
+    Int32 left;
+    mSlideableView->GetLeft(&left);
+    if (mDragHelper->SmoothSlideViewTo(mSlideableView, left, y)) {
+        SetAllChildrenVisible();
+        assert(0 && "TODO");
+        // ViewCompat.postInvalidateOnAnimation(this);
+        return TRUE;
+    }
+    return FALSE;
+}
+
+ECode OverlappingPaneLayout::ComputeScroll()
+{
+    if (mDragHelper->ContinueSettling(
+            /* deferCallbacks = */ FALSE)) {
+        if (!mCanSlide) {
+            mDragHelper->Abort();
+            return NOERROR;
+        }
+
+        assert(0 && "TODO");
+        // ViewCompat.postInvalidateOnAnimation(this);
+    }
+    return NOERROR;
+}
+
+Boolean OverlappingPaneLayout::IsCapturableViewUnder(
+    /* [in] */ Int32 x,
+    /* [in] */ Int32 y)
+{
+    AutoPtr<IView> capturableView = mCapturableView != NULL ? mCapturableView : mSlideableView;
+    if (capturableView == NULL) {
+        return FALSE;
+    }
+    AutoPtr<ArrayOf<Int32> > viewLocation = ArrayOf<Int32>::Alloc(2);
+    capturableView->GetLocationOnScreen(viewLocation);
+    AutoPtr<ArrayOf<Int32> > parentLocation = ArrayOf<Int32>::Alloc(2);
+    GetLocationOnScreen(parentLocation);
+    Int32 screenX = (*parentLocation)[0] + x;
+    Int32 screenY = (*parentLocation)[1] + y;
+
+    Int32 width, height;
+    capturableView->GetWidth(&width);
+    capturableView->GetHeight(&height);
+    return screenX >= (*viewLocation)[0]
+            && screenX < (*viewLocation)[0] + width
+            && screenY >= (*viewLocation)[1]
+            && screenY < (*viewLocation)[1] + height;
+}
+
+ECode OverlappingPaneLayout::GenerateDefaultLayoutParams(
+    /* [out] */ IViewGroupLayoutParams** params)
+{
+    VALIDATE_NOT_NULL(params);
+    AutoPtr<LayoutParams> lp = new LayoutParams();
+    lp->constructor();
+    *params = (IViewGroupLayoutParams*)lp;
+    REFCOUNT_ADD(*params);
+    return NOERROR;
+}
+
+AutoPtr<IViewGroupLayoutParams> OverlappingPaneLayout::GenerateLayoutParams(
+        /* [in] */ IViewGroupLayoutParams* p)
+{
+    AutoPtr<LayoutParams> lp;
+    if (IViewGroupMarginLayoutParams::Probe(p) != NULL){
+        lp = new LayoutParams();
+        lp->constructor(IViewGroupMarginLayoutParams::Probe(p));
+    }
+    else {
+        lp = new LayoutParams();
+        lp->constructor(p);
+    }
+    return (IViewGroupLayoutParams*)lp;
+}
+
+Boolean OverlappingPaneLayout::CheckLayoutParams(
+    /* [in] */ IViewGroupLayoutParams* p)
+{
+    return IOverlappingPaneLayoutLayoutParams::Probe(p) != NULL
+            && ViewGroup::CheckLayoutParams(p);
+}
+
+ECode OverlappingPaneLayout::GenerateLayoutParams(
+    /* [in] */ IAttributeSet* attrs,
+    /* [out] */ IViewGroupLayoutParams** params)
+{
+    VALIDATE_NOT_NULL(params);
+    AutoPtr<IContext> context;
+    GetContext((IContext**)&context);
+    AutoPtr<LayoutParams> lp = new LayoutParams();
+    lp->constructor(context, attrs);
+    *params = (IViewGroupLayoutParams*)lp;
+    REFCOUNT_ADD(*params);
+    return NOERROR;
+}
+
+AutoPtr<IParcelable> OverlappingPaneLayout::OnSaveInstanceState()
+{
+    AutoPtr<IParcelable> superState = ViewGroup::OnSaveInstanceState();
+
+    AutoPtr<SavedState> ss = new SavedState();
+    ss->constructor(superState);
+    Boolean isSlideable;
+    IsSlideable(&isSlideable);
+    Boolean isOpen;
+    ss->mIsOpen = isSlideable ? (IsOpen(&isOpen), isOpen) : mPreservedOpenState;
+
+    return (IParcelable*)ss;
+}
+
+void OverlappingPaneLayout::OnRestoreInstanceState(
+    /* [in] */ IParcelable* state)
+{
+    AutoPtr<SavedState> ss = (SavedState*)state;
+    AutoPtr<IParcelable> p;
+    ss->GetSuperState((IParcelable**)&p);
+    ViewGroup::OnRestoreInstanceState(p);
+
+    if (ss->mIsOpen) {
+        Boolean result;
+        OpenPane(&result);
+    }
+    else {
+        Boolean result;
+        ClosePane(&result);
+    }
+    mPreservedOpenState = ss->mIsOpen;
+}
+
+ECode OverlappingPaneLayout::OnStartNestedScroll(
+    /* [in] */ IView* child,
+    /* [in] */ IView* target,
+    /* [in] */ Int32 nestedScrollAxes,
+    /* [out] */ Boolean* res)
+{
+    VALIDATE_NOT_NULL(res);
+    Boolean startNestedScroll = (nestedScrollAxes & SCROLL_AXIS_VERTICAL) != 0;
+    if (startNestedScroll) {
+        mIsInNestedScroll = TRUE;
+        mDragHelper->StartNestedScroll(mSlideableView);
+    }
+    if (DEBUG) {
+        Logger::D(TAG, "onStartNestedScroll: %d", startNestedScroll);
+    }
+    *res = startNestedScroll;
+    return NOERROR;
+}
+
+ECode OverlappingPaneLayout::OnNestedPreScroll(
+    /* [in] */ IView* target,
+    /* [in] */ Int32 dx,
+    /* [in] */ Int32 dy,
+    /* [in] */ ArrayOf<Int32>* consumed)
+{
+    if (dy == 0) {
+        // Nothing to do
+        return NOERROR;
+    }
+    if (DEBUG) {
+        Logger::D(TAG, "onNestedPreScroll: %d", dy);
+    }
+
+    mInNestedPreScrollDownwards = dy < 0;
+    mInNestedPreScrollUpwards = dy > 0;
+    mIsInNestedFling = FALSE;
+    mDragHelper->ProcessNestedScroll(mSlideableView, 0, -dy, consumed);
+    return NOERROR;
+}
+
+ECode OverlappingPaneLayout::OnNestedPreFling(
+    /* [in] */ IView* target,
+    /* [in] */ Float velocityX,
+    /* [in] */ Float velocityY,
+    /* [out] */ Boolean* res)
+{
+    VALIDATE_NOT_NULL(res);
+    Boolean result;
+    if (!(velocityY > 0 && mSlideOffsetPx != 0
+            || velocityY < 0 && mSlideOffsetPx < mIntermediateOffset
+            || velocityY < 0 && mSlideOffsetPx < mSlideRange
+            && (mPanelSlideCallbacks->IsScrollableChildUnscrolled(&result), result))) {
+        // No need to consume the fling if the fling won't collapse or expand the header.
+        // How far we are willing to expand the header depends on isScrollableChildUnscrolled().
+        *res = FALSE;
+        return NOERROR;
+    }
+
+    if (DEBUG) {
+        Logger::D(TAG, "onNestedPreFling: %d", velocityY);
+    }
+    mInUpwardsPreFling = velocityY > 0;
+    mIsInNestedFling = TRUE;
+    mIsInNestedScroll = FALSE;
+    mDragHelper->ProcessNestedFling(mSlideableView, (Int32) -velocityY);
+    *res = TRUE;
+    return NOERROR;
+}
+
+ECode OverlappingPaneLayout::OnNestedScroll(
+    /* [in] */ IView* target,
+    /* [in] */ Int32 dxConsumed,
+    /* [in] */ Int32 dyConsumed,
+    /* [in] */ Int32 dxUnconsumed,
+    /* [in] */ Int32 dyUnconsumed)
+{
+    if (DEBUG) {
+        Logger::D(TAG, "onNestedScroll: %d", dyUnconsumed);
+    }
+    mIsInNestedFling = FALSE;
+    mDragHelper->ProcessNestedScroll(mSlideableView, 0, -dyUnconsumed, NULL);
+    return NOERROR;
+}
+
+ECode OverlappingPaneLayout::OnStopNestedScroll(
+    /* [in] */ IView* child)
+{
+    if (DEBUG) {
+        Logger::D(TAG, "onStopNestedScroll");
+    }
+    if (mIsInNestedScroll && !mIsInNestedFling) {
+        mDragHelper->StopNestedScroll(mSlideableView);
+        mInNestedPreScrollDownwards = FALSE;
+        mInNestedPreScrollUpwards = FALSE;
+        mIsInNestedScroll = FALSE;
+    }
+    return NOERROR;
+}
 
 } // Widget
 } // Dialer

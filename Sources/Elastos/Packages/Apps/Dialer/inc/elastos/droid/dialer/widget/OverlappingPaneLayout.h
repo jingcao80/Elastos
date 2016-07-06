@@ -139,12 +139,9 @@ public:
 
 private:
     class DragHelperCallback
-        : public Object
-        , public IViewDragHelperCallback
+        : public ViewDragHelper::Callback
     {
     public:
-        CAR_INTERFACE_DECL();
-
         DragHelperCallback(
             /* [in] */ OverlappingPaneLayout* host);
 

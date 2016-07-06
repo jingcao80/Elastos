@@ -283,7 +283,7 @@ public:
      *
      * @param minVel Minimum velocity to detect
      */
-    CARAPI SetMinVelocity(
+    CARAPI_(void) SetMinVelocity(
         /* [in] */ Float minVel);
 
     /**
@@ -907,7 +907,7 @@ private:
     // to keep track of the const scroll position ourselves in mconstScrollY (b/17704016) whenever
     // we programmatically scroll or fling mScroller.
     AutoPtr<IScroller> mScroller;
-    Int32 mconstScrollY;
+    Int32 mFinalScrollY;
 
     AutoPtr<IViewDragHelperCallback> mCallback;
 
