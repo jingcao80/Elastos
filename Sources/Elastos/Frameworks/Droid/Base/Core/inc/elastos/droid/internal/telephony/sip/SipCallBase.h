@@ -4,10 +4,6 @@
 #include "elastos/droid/ext/frameworkext.h"
 #include "elastos/droid/internal/telephony/Call.h"
 
-// import com.android.internal.telephony.Connection;
-// import java.util.Iterator;
-// import java.util.List;
-
 using Elastos::Droid::Internal::Telephony::Call;
 using Elastos::Droid::Internal::Telephony::ICallState;
 using Elastos::Utility::IList;
@@ -40,7 +36,7 @@ public:
 
 protected:
     virtual CARAPI_(void) SetState(
-        /* [in] */ ICallState* newState) = 0;
+        /* [in] */ ICallState newState) = 0;
 };
 
 } // namespace Sip

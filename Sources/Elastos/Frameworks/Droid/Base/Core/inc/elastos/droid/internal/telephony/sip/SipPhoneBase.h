@@ -6,19 +6,6 @@
 #include "elastos/droid/os/RegistrantList.h"
 #include "elastos/droid/internal/telephony/PhoneBase.h"
 
-// import android.os.AsyncResult;
-// import android.os.Registrant;
-// import android.os.SystemProperties;
-// import android.telephony.CellInfo;
-// import android.telephony.Rlog;
-// import com.android.internal.telephony.CallStateException;
-// import com.android.internal.telephony.dataconnection.DataConnection;
-// import com.android.internal.telephony.IccSmsInterfaceManager;
-// import com.android.internal.telephony.MmiCode;
-// import com.android.internal.telephony.TelephonyProperties;
-// import com.android.internal.telephony.UUSInfo;
-// import java.util.ArrayList;
-
 using Elastos::Droid::Content::IContext;
 using Elastos::Droid::Internal::Telephony::PhoneBase;
 using Elastos::Droid::Internal::Telephony::PhoneConstantsDataState;
@@ -36,7 +23,7 @@ using Elastos::Droid::Internal::Telephony::IIccPhoneBookInterfaceManager;
 using Elastos::Droid::Internal::Telephony::Uicc::IIccFileHandler;
 using Elastos::Droid::Os::IHandler;
 using Elastos::Droid::Os::IMessage;
-using Elastos::Droid::Os::RegistrantList;
+using Elastos::Droid::Os::IRegistrantList;
 using Elastos::Droid::Telephony::IServiceState;
 using Elastos::Droid::Telephony::ICellLocation;
 using Elastos::Droid::Telephony::ISignalStrength;
@@ -425,7 +412,7 @@ protected:
 
 private:
     static const String LOGTAG;
-    AutoPtr<RegistrantList> mRingbackRegistrants;
+    AutoPtr<IRegistrantList> mRingbackRegistrants;
     PhoneConstantsState mState;
 };
 

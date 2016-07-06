@@ -5,10 +5,6 @@
 #include "elastos/core/Object.h"
 #include "elastos/droid/internal/telephony/sip/SipPhone.h"
 
-// import android.net.sip.SipProfile;
-// import android.telephony.Rlog;
-// import java.text.ParseException;
-
 using Elastos::Droid::Content::IContext;
 using Elastos::Droid::Internal::Telephony::IPhoneNotifier;
 
@@ -34,7 +30,7 @@ public:
       *      object
       * @return the {@code SipPhone} object or null if the SIP URI is not valid
       */
-    static CARAPI_(AutoPtr<SipPhone>) MakePhone(
+    static CARAPI_(AutoPtr<ISipPhone>) MakePhone(
         /* [in] */ const String& sipUri,
         /* [in] */ IContext* context,
         /* [in] */ IPhoneNotifier* phoneNotifier);

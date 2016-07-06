@@ -4,8 +4,6 @@
 #include "elastos/droid/ext/frameworkext.h"
 #include "elastos/droid/internal/telephony/BaseCommands.h"
 
-// import com.android.internal.telephony.CommandsInterface;
-
 using Elastos::Droid::Content::IContext;
 using Elastos::Droid::Os::IHandler;
 using Elastos::Droid::Os::IMessage;
@@ -30,7 +28,9 @@ class SipCommandInterface
     //, public ICommandsInterface
 {
 public:
-    SipCommandInterface(
+    SipCommandInterface();
+
+    CARAPI constructor(
         /* [in] */ IContext* context);
 
     // @Override
@@ -220,12 +220,12 @@ public:
 
     // @Override
     CARAPI SendDtmf(
-        /* [in] */ Char16 c,
+        /* [in] */ Char32 c,
         /* [in] */ IMessage* result);
 
     // @Override
     CARAPI StartDtmf(
-        /* [in] */ Char16 c,
+        /* [in] */ Char32 c,
         /* [in] */ IMessage* result);
 
     // @Override

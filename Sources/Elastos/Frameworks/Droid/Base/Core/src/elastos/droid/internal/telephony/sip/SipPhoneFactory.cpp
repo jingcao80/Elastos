@@ -1,5 +1,6 @@
 
 #include "Elastos.Droid.Internal.h"
+#include "elastos/droid/internal/telephony/sip/CSipPhone.h"
 #include "elastos/droid/internal/telephony/sip/SipPhoneFactory.h"
 
 namespace Elastos {
@@ -12,22 +13,21 @@ namespace Sip {
 //                           SipPhoneFactory
 //=====================================================================
 
-AutoPtr<SipPhone> SipPhoneFactory::MakePhone(
+AutoPtr<ISipPhone> SipPhoneFactory::MakePhone(
     /* [in] */ const String& sipUri,
     /* [in] */ IContext* context,
     /* [in] */ IPhoneNotifier* phoneNotifier)
 {
-    // ==================before translated======================
     // try {
-    //     SipProfile profile = new SipProfile.Builder(sipUri).build();
-    //     return new SipPhone(context, phoneNotifier, profile);
+// TODO: Need SipProfile
+    // AutoPtr<ISipProfile> profile = new SipProfile.Builder(sipUri).build();
+    AutoPtr<ISipPhone> sipPhone;
+    CSipPhone::New(context, phoneNotifier, NULL/*TODO: profile*/, (ISipPhone**)&sipPhone);
     // } catch (ParseException e) {
     //     Rlog.w("SipPhoneFactory", "makePhone", e);
     //     return null;
     // }
-    assert(0);
-    AutoPtr<SipPhone> empty;
-    return empty;
+    return sipPhone;
 }
 
 } // namespace Sip

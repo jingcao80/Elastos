@@ -6,21 +6,6 @@
 #include "elastos/droid/internal/telephony/sip/SipCallBase.h"
 #include "elastos/droid/internal/telephony/sip/SipConnectionBase.h"
 
-// import android.media.AudioManager;
-// import android.net.sip.SipErrorCode;
-// import android.net.sip.SipException;
-// import android.net.sip.SipSession;
-// import android.os.AsyncResult;
-// import android.telephony.DisconnectCause;
-// import android.telephony.PhoneNumberUtils;
-// import android.text.TextUtils;
-// import android.telephony.Rlog;
-// import com.android.internal.telephony.CallStateException;
-// import com.android.internal.telephony.PhoneConstants;
-// import com.android.internal.telephony.PhoneNotifier;
-// import java.text.ParseException;
-// import java.util.regex.Pattern;
-
 using Elastos::Droid::Internal::Telephony::IPhone;
 using Elastos::Droid::Internal::Telephony::IConnection;
 //TODO using Elastos::Droid::Net::Sip::ISipAudioCall;
@@ -55,6 +40,11 @@ private:
     {
         friend class SipPhone;
     public:
+        SipCall(
+            /* [in] */ SipPhone* host)
+            : mHost(host)
+        {}
+
         // STOPSHIP if true
         virtual CARAPI Reset();
 
@@ -111,7 +101,7 @@ private:
 
     protected:
         // @Override
-        CARAPI SetState(
+        CARAPI_(void) SetState(
             /* [in] */ ICallState newState);
 
     private:
@@ -123,8 +113,9 @@ private:
         CARAPI_(void) Add(
             /* [in] */ SipConnection* conn);
 
-        CARAPI_(Int32) ConvertDtmf(
-            /* [in] */ Char16 c);
+        CARAPI ConvertDtmf(
+            /* [in] */ Char16 c,
+            /* [out] */ Int32* result);
 
         CARAPI_(AutoPtr</*TODO IAudioGroup*/IInterface>) GetAudioGroup();
 
@@ -135,12 +126,15 @@ private:
         static const String SC_TAG;
         static const Boolean SC_DBG;
         static const Boolean SC_VDBG;
+
+        SipPhone* mHost;
     };
 
     class SipAudioCallAdapter
         : public Object
         //TODO , public ISipAudioCallListener
     {
+        friend class SipConnection;
     public:
         // @Override
         CARAPI OnCallEnded(
@@ -174,9 +168,11 @@ private:
         static const Boolean SACA_DBG;
     };
 
+    class InnerSipAudioCallAdapter;
     class SipConnection
         : public SipConnectionBase
     {
+        friend class InnerSipAudioCallAdapter;
     public:
         SipConnection(
             /* [in] */ SipPhone* host,
@@ -236,7 +232,7 @@ private:
 
         // @Override
         CARAPI GetCall(
-            /* [out] */ SipCall** result);
+            /* [out] */ ICall** result);
 
         // @Override
         CARAPI Hangup();
@@ -250,8 +246,7 @@ private:
             /* [in] */ ICallState state);
 
         // @Override
-        CARAPI GetPhone(
-            /* [out] */ IPhone** result);
+        CARAPI_(AutoPtr<IPhone>) GetPhone();
 
     private:
         CARAPI_(void) Log(
@@ -432,9 +427,10 @@ public:
         /* [out] */ IConnection** result);
 
 private:
-    CARAPI_(AutoPtr<IConnection>) DialInternal(
+    CARAPI DialInternal(
         /* [in] */ const String& dialString,
-        /* [in] */ Int32 videoState);
+        /* [in] */ Int32 videoState,
+        /* [out] */ IConnection** result);
 
     CARAPI_(String) GetUriString(
         /* [in] */ /*TODO ISipProfile*/IInterface* p);

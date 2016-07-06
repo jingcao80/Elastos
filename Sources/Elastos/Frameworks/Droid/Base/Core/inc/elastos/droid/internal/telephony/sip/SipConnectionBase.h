@@ -4,13 +4,6 @@
 #include "elastos/droid/ext/frameworkext.h"
 #include "elastos/droid/internal/telephony/Connection.h"
 
-// import com.android.internal.telephony.Call;
-// import com.android.internal.telephony.PhoneConstants;
-// import android.os.SystemClock;
-// import android.telephony.DisconnectCause;
-// import android.telephony.Rlog;
-// import android.telephony.PhoneNumberUtils;
-
 using Elastos::Droid::Internal::Telephony::IUUSInfo;
 using Elastos::Droid::Internal::Telephony::ICallState;
 using Elastos::Droid::Internal::Telephony::IConnection;
@@ -28,7 +21,9 @@ class SipConnectionBase
     : public Connection
 {
 public:
-    SipConnectionBase(
+    SipConnectionBase();
+
+    CARAPI constructor(
         /* [in] */ const String& dialString);
 
     // @Override

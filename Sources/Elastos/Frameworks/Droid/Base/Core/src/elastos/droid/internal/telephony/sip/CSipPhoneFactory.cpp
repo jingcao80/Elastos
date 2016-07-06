@@ -17,7 +17,7 @@ ECode CSipPhoneFactory::MakePhone(
     /* [out] */ ISipPhone** result)
 {
     VALIDATE_NOT_NULL(result);
-    AutoPtr<SipPhone> sipPhone = SipPhoneFactory::MakePhone(sipUri, context, phoneNotifier);
+    AutoPtr<ISipPhone> sipPhone = SipPhoneFactory::MakePhone(sipUri, context, phoneNotifier);
     *result = sipPhone;
     REFCOUNT_ADD(*result);
     return NOERROR;

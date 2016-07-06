@@ -1,6 +1,21 @@
 
 #include "Elastos.Droid.Internal.h"
+#include "Elastos.Droid.Media.h"
 #include "elastos/droid/internal/telephony/sip/SipPhone.h"
+#include "elastos/droid/telephony/PhoneNumberUtils.h"
+#include <elastos/core/AutoLock.h>
+#include <elastos/core/CoreUtils.h>
+#include <elastos/core/StringUtils.h>
+#include <elastos/utility/logging/Logger.h>
+#include <elastos/utility/regex/Pattern.h>
+
+using Elastos::Droid::Media::IAudioManager;
+using Elastos::Droid::Telephony::IDisconnectCause;
+using Elastos::Droid::Telephony::PhoneNumberUtils;
+using Elastos::Core::CoreUtils;
+using Elastos::Core::StringUtils;
+using Elastos::Utility::Logging::Logger;
+using Elastos::Utility::Regex::Pattern;
 
 namespace Elastos {
 namespace Droid {
@@ -18,26 +33,21 @@ const Boolean SipPhone::SipCall::SC_VDBG = FALSE;
 
 ECode SipPhone::SipCall::Reset()
 {
-    // ==================before translated======================
-    // if (SC_DBG) log("reset");
-    // mConnections.clear();
-    // setState(Call.State.IDLE);
-    assert(0);
+    if (SC_DBG) Log(String("reset"));
+    mConnections->Clear();
+    SetState(ICallState_IDLE);
     return NOERROR;
 }
 
 ECode SipPhone::SipCall::SwitchWith(
     /* [in] */ SipCall* that)
 {
-    // ==================before translated======================
-    // if (SC_DBG) log("switchWith");
-    // synchronized (SipPhone.class) {
-    //     SipCall tmp = new SipCall();
-    //     tmp.takeOver(this);
-    //     this.takeOver(that);
-    //     that.takeOver(tmp);
-    // }
-    assert(0);
+    if (SC_DBG) Log(String("switchWith"));
+    AutoLock lock(mHost);    // synchronized (SipPhone.class)
+    AutoPtr<SipCall> tmp = new SipCall(mHost);
+    tmp->TakeOver(this);
+    this->TakeOver(that);
+    that->TakeOver(tmp);
     return NOERROR;
 }
 
@@ -45,9 +55,8 @@ ECode SipPhone::SipCall::GetPhone(
     /* [out] */ IPhone** result)
 {
     VALIDATE_NOT_NULL(result);
-    // ==================before translated======================
-    // return SipPhone.this;
-    assert(0);
+    *result = mHost;
+    REFCOUNT_ADD(*result)
     return NOERROR;
 }
 
@@ -55,13 +64,11 @@ ECode SipPhone::SipCall::GetConnections(
     /* [out] */ IList/*<Connection>*/** result)
 {
     VALIDATE_NOT_NULL(result);
-    // ==================before translated======================
-    // if (SC_VDBG) log("getConnections");
-    // synchronized (SipPhone.class) {
-    //     // FIXME should return Collections.unmodifiableList();
-    //     return mConnections;
-    // }
-    assert(0);
+    if (SC_VDBG) Log(String("getConnections"));
+    AutoLock lock(mHost);    // synchronized (SipPhone.class)
+    // FIXME should return Collections.unmodifiableList();
+    *result = IList::Probe(mConnections);
+    REFCOUNT_ADD(*result)
     return NOERROR;
 }
 
@@ -70,54 +77,59 @@ ECode SipPhone::SipCall::Dial(
     /* [out] */ IConnection** result)
 {
     VALIDATE_NOT_NULL(result);
-    // ==================before translated======================
-    // if (SC_DBG) log("dial: num=" + (SC_VDBG ? originalNumber : "xxx"));
-    // // TODO: Should this be synchronized?
-    // String calleeSipUri = originalNumber;
-    // if (!calleeSipUri.contains("@")) {
-    //     String replaceStr = Pattern.quote(mProfile.getUserName() + "@");
-    //     calleeSipUri = mProfile.getUriString().replaceFirst(replaceStr,
-    //             calleeSipUri + "@");
-    // }
-    // try {
-    //     SipProfile callee =
-    //             new SipProfile.Builder(calleeSipUri).build();
-    //     SipConnection c = new SipConnection(this, callee,
-    //             originalNumber);
-    //     c.dial();
-    //     mConnections.add(c);
-    //     setState(Call.State.DIALING);
-    //     return c;
-    // } catch (ParseException e) {
-    //     throw new SipException("dial", e);
-    // }
-    assert(0);
+    if (SC_DBG) Log(String("dial: num=") + (SC_VDBG ? originalNumber : String("xxx")));
+    // TODO: Should this be synchronized?
+    String calleeSipUri = originalNumber;
+    if (!calleeSipUri.Contains("@")) {
+        String name;
+// TODO: Need ISipProfile
+        // mHost->mProfile->GetUserName(&name);
+        String replaceStr = Pattern::Quote(name + "@");
+// TODO: Need ISipProfile
+        // calleeSipUri = mHost->mProfile->GetUriString().ReplaceFirst(replaceStr,
+        //         calleeSipUri + "@");
+    }
+// TODO: Need ISipProfile, ISipConnection
+    // // try {
+    // AutoPtr<ISipProfile> callee =
+    //         new SipProfile.Builder(calleeSipUri).build();
+    // AutoPtr<ISipConnection> c = new SipConnection(this, callee,
+    //         originalNumber);
+    // c->Dial();
+    // mConnections->Add(c);
+    // SetState(ICallState_DIALING);
+    // *result = c;
+    // REFCOUNT_ADD(*result)
+    // // } catch (ParseException e) {
+    // //     throw new SipException("dial", e);
+    // // }
     return NOERROR;
 }
 
 ECode SipPhone::SipCall::Hangup()
 {
-    // ==================before translated======================
-    // synchronized (SipPhone.class) {
-    //     if (mState.isAlive()) {
-    //         if (SC_DBG) log("hangup: call " + getState()
-    //                 + ": " + this + " on phone " + getPhone());
-    //         setState(State.DISCONNECTING);
-    //         CallStateException excp = null;
-    //         for (Connection c : mConnections) {
-    //             try {
-    //                 c.hangup();
-    //             } catch (CallStateException e) {
-    //                 excp = e;
-    //             }
-    //         }
-    //         if (excp != null) throw excp;
-    //     } else {
-    //         if (SC_DBG) log("hangup: dead call " + getState()
-    //                 + ": " + this + " on phone " + getPhone());
+    AutoLock lock(mHost);    // synchronized (SipPhone.class)
+// TODO: Need ICallState::IsAlive
+    // if (mState->IsAlive()) {
+    //     // if (SC_DBG) Log("hangup: call " + getState()
+    //     //         + ": " + this + " on phone " + getPhone());
+    //     SetState(ICallState_DISCONNECTING);
+    //     // CallStateException excp = NULL;
+    //     for (Connection c : mConnections) {
+    //         // try {
+    //         c->Hangup();
+    //         // } catch (CallStateException e) {
+    //         //     excp = e;
+    //         // }
+    //     }
+    //     if (excp != NULL) {
+    //         return E_CALL_STATE_EXCEPTION; // throw excp;
     //     }
     // }
-    assert(0);
+    // else {
+    //     // if (SC_DBG) Log("hangup: dead call " + getState()
+    //     //         + ": " + this + " on phone " + getPhone());
+    // }
     return NOERROR;
 }
 
@@ -127,51 +139,53 @@ ECode SipPhone::SipCall::InitIncomingCall(
     /* [out] */ SipConnection** result)
 {
     VALIDATE_NOT_NULL(result);
-    // ==================before translated======================
-    // SipProfile callee = sipAudioCall.getPeerProfile();
-    // SipConnection c = new SipConnection(this, callee);
-    // mConnections.add(c);
-    //
-    // Call.State newState = makeCallWait ? State.WAITING : State.INCOMING;
-    // c.initIncomingCall(sipAudioCall, newState);
-    //
-    // setState(newState);
-    // notifyNewRingingConnectionP(c);
-    // return c;
-    assert(0);
+// TODO: Need ISipProfile
+    AutoPtr</*ISipProfile*/IInterface> callee; // = sipAudioCall->GetPeerProfile();
+    AutoPtr<SipConnection> c = new SipConnection(mHost, this, callee);
+    mConnections->Add((IInterface*)(IObject*)c.Get());
+
+    ICallState newState = makeCallWait ? ICallState_WAITING : ICallState_INCOMING;
+    c->InitIncomingCall(sipAudioCall, newState);
+
+    SetState(newState);
+    mHost->NotifyNewRingingConnectionP(c);
+    *result = c;
+    REFCOUNT_ADD(*result)
     return NOERROR;
 }
 
 ECode SipPhone::SipCall::RejectCall()
 {
-    // ==================before translated======================
-    // if (SC_DBG) log("rejectCall:");
-    // hangup();
-    assert(0);
+    if (SC_DBG) Log(String("rejectCall:"));
+    Hangup();
     return NOERROR;
 }
 
 ECode SipPhone::SipCall::AcceptCall()
 {
-    // ==================before translated======================
-    // if (SC_DBG) log("acceptCall: accepting");
-    // if (this != mRingingCall) {
-    //     throw new CallStateException("acceptCall() in a non-ringing call");
-    // }
-    // if (mConnections.size() != 1) {
-    //     throw new CallStateException("acceptCall() in a conf call");
-    // }
-    // ((SipConnection) mConnections.get(0)).acceptCall();
-    assert(0);
+    if (SC_DBG) Log(String("acceptCall: accepting"));
+    if (this != mHost->mRingingCall) {
+        // throw new CallStateException("acceptCall() in a non-ringing call");
+        return E_CALL_STATE_EXCEPTION;
+    }
+    Int32 size;
+    mConnections->GetSize(&size);
+    if (size != 1) {
+        // throw new CallStateException("acceptCall() in a conf call");
+        return E_CALL_STATE_EXCEPTION;
+    }
+    AutoPtr<IInterface> obj;
+    mConnections->Get(0, (IInterface**)&obj);
+    ((SipConnection*)(IObject*)obj.Get())->AcceptCall();
     return NOERROR;
 }
 
 ECode SipPhone::SipCall::SetAudioGroupMode()
 {
-    // ==================before translated======================
+// TODO: Need AudioGroup
     // AudioGroup audioGroup = getAudioGroup();
-    // if (audioGroup == null) {
-    //     if (SC_DBG) log("setAudioGroupMode: audioGroup == null ignore");
+    // if (audioGroup == NULL) {
+    //     if (SC_DBG) Log("setAudioGroupMode: audioGroup == NULL ignore");
     //     return;
     // }
     // int mode = audioGroup.getMode();
@@ -187,44 +201,50 @@ ECode SipPhone::SipCall::SetAudioGroupMode()
     // if (SC_DBG) log(String.format(
     //         "setAudioGroupMode change: %d --> %d", mode,
     //         audioGroup.getMode()));
-    assert(0);
     return NOERROR;
 }
 
 ECode SipPhone::SipCall::Hold()
 {
-    // ==================before translated======================
-    // if (SC_DBG) log("hold:");
-    // setState(State.HOLDING);
-    // for (Connection c : mConnections) ((SipConnection) c).hold();
-    // setAudioGroupMode();
-    assert(0);
+    if (SC_DBG) Log(String("hold:"));
+    SetState(ICallState_HOLDING);
+
+    Int32 size;
+    mConnections->GetSize(&size);
+    for (Int32 i = 0; i < size; i++) {
+        AutoPtr<IInterface> obj;
+        mConnections->Get(i, (IInterface**)&obj);
+        ((SipConnection*)(IObject*)obj.Get())->Hold();
+    }
+    SetAudioGroupMode();
     return NOERROR;
 }
 
 ECode SipPhone::SipCall::Unhold()
 {
-    // ==================before translated======================
-    // if (SC_DBG) log("unhold:");
-    // setState(State.ACTIVE);
+    if (SC_DBG) Log(String("unhold:"));
+    SetState(ICallState_ACTIVE);
+// TODO: Need AudioGroup
     // AudioGroup audioGroup = new AudioGroup();
     // for (Connection c : mConnections) {
     //     ((SipConnection) c).unhold(audioGroup);
     // }
-    // setAudioGroupMode();
-    assert(0);
+    SetAudioGroupMode();
     return NOERROR;
 }
 
 ECode SipPhone::SipCall::SetMute(
     /* [in] */ Boolean muted)
 {
-    // ==================before translated======================
-    // if (SC_DBG) log("setMute: muted=" + muted);
-    // for (Connection c : mConnections) {
-    //     ((SipConnection) c).setMute(muted);
-    // }
-    assert(0);
+    if (SC_DBG) Log(String("setMute: muted=") + StringUtils::ToString(muted));
+
+    Int32 size;
+    mConnections->GetSize(&size);
+    for (Int32 i = 0; i < size; i++) {
+        AutoPtr<IInterface> obj;
+        mConnections->Get(i, (IInterface**)&obj);
+        ((SipConnection*)(IObject*)obj.Get())->SetMute(muted);
+    }
     return NOERROR;
 }
 
@@ -232,23 +252,30 @@ ECode SipPhone::SipCall::GetMute(
     /* [out] */ Boolean* result)
 {
     VALIDATE_NOT_NULL(result);
-    // ==================before translated======================
-    // boolean ret = mConnections.isEmpty()
-    //         ? false
-    //         : ((SipConnection) mConnections.get(0)).getMute();
-    // if (SC_DBG) log("getMute: ret=" + ret);
-    // return ret;
-    assert(0);
+    Boolean b;
+    mConnections->IsEmpty(&b);
+
+    Boolean ret;
+    if (b) {
+        ret = FALSE;
+    }
+    else {
+        AutoPtr<IInterface> obj;
+        mConnections->Get(0, (IInterface**)&obj);
+        ((SipConnection*)(IObject*)obj.Get())->GetMute(&ret);
+    }
+
+    if (SC_DBG) Log(String("getMute: ret=") + StringUtils::ToString(ret));
+    *result = ret;
     return NOERROR;
 }
 
 ECode SipPhone::SipCall::Merge(
     /* [in] */ SipCall* that)
 {
-    // ==================before translated======================
-    // if (SC_DBG) log("merge:");
-    // AudioGroup audioGroup = getAudioGroup();
-    //
+    if (SC_DBG) Log(String("merge:"));
+    AutoPtr</*TODO IAudioGroup*/IInterface> audioGroup = GetAudioGroup();
+
     // // copy to an array to avoid concurrent modification as connections
     // // in that.connections will be removed in add(SipConnection).
     // Connection[] cc = that.mConnections.toArray(
@@ -256,168 +283,189 @@ ECode SipPhone::SipCall::Merge(
     // for (Connection c : cc) {
     //     SipConnection conn = (SipConnection) c;
     //     add(conn);
-    //     if (conn.getState() == Call.State.HOLDING) {
+    //     if (conn.getState() == ICallState_HOLDING) {
     //         conn.unhold(audioGroup);
     //     }
     // }
-    // that.setState(Call.State.IDLE);
-    assert(0);
+    that->SetState(ICallState_IDLE);
     return NOERROR;
 }
 
 ECode SipPhone::SipCall::SendDtmf(
     /* [in] */ Char16 c)
 {
-    // ==================before translated======================
-    // if (SC_DBG) log("sendDtmf: c=" + c);
-    // AudioGroup audioGroup = getAudioGroup();
-    // if (audioGroup == null) {
-    //     if (SC_DBG) log("sendDtmf: audioGroup == null, ignore c=" + c);
-    //     return;
-    // }
-    // audioGroup.sendDtmf(convertDtmf(c));
-    assert(0);
+    if (SC_DBG) Log(String("sendDtmf: c=") + c);
+    AutoPtr</*TODO IAudioGroup*/IInterface> audioGroup = GetAudioGroup();
+    if (audioGroup == NULL) {
+        if (SC_DBG) Log(String("sendDtmf: audioGroup == NULL, ignore c=") + c);
+        return NOERROR;
+    }
+    Int32 val;
+    ConvertDtmf(c, &val);
+// TODO: Need IAudioGroup
+    // audioGroup->SendDtmf(val);
     return NOERROR;
 }
 
 ECode SipPhone::SipCall::OnConnectionStateChanged(
     /* [in] */ SipConnection* conn)
 {
-    // ==================before translated======================
-    // // this can be called back when a conf call is formed
-    // if (SC_DBG) log("onConnectionStateChanged: conn=" + conn);
-    // if (mState != State.ACTIVE) {
-    //     setState(conn.getState());
-    // }
-    assert(0);
+    // this can be called back when a conf call is formed
+    // if (SC_DBG) Log("onConnectionStateChanged: conn=" + conn);
+    if (mState != ICallState_ACTIVE) {
+        ICallState state;
+        conn->GetState(&state);
+        SetState(state);
+    }
     return NOERROR;
 }
 
 ECode SipPhone::SipCall::OnConnectionEnded(
     /* [in] */ SipConnection* conn)
 {
-    // ==================before translated======================
-    // // set state to DISCONNECTED only when all conns are disconnected
-    // if (SC_DBG) log("onConnectionEnded: conn=" + conn);
-    // if (mState != State.DISCONNECTED) {
-    //     boolean allConnectionsDisconnected = true;
-    //     if (SC_DBG) log("---check connections: "
-    //             + mConnections.size());
-    //     for (Connection c : mConnections) {
-    //         if (SC_DBG) log("   state=" + c.getState() + ": "
-    //                 + c);
-    //         if (c.getState() != State.DISCONNECTED) {
-    //             allConnectionsDisconnected = false;
-    //             break;
-    //         }
-    //     }
-    //     if (allConnectionsDisconnected) setState(State.DISCONNECTED);
-    // }
-    // notifyDisconnectP(conn);
-    assert(0);
+    // set state to DISCONNECTED only when all conns are disconnected
+    // if (SC_DBG) Log("onConnectionEnded: conn=" + conn);
+    if (mState != ICallState_DISCONNECTED) {
+        Boolean allConnectionsDisconnected = TRUE;
+        Int32 size;
+        mConnections->GetSize(&size);
+        if (SC_DBG) Log(String("---check connections: ") + StringUtils::ToString(size));
+
+        for (Int32 i = 0; i < size; i++) {
+            AutoPtr<IInterface> obj;
+            mConnections->Get(i, (IInterface**)&obj);
+            AutoPtr<IConnection> c = IConnection::Probe(obj);
+            ICallState state;
+            c->GetState(&state);
+            if (state != ICallState_DISCONNECTED) {
+                allConnectionsDisconnected = FALSE;
+                break;
+            }
+        }
+
+        if (allConnectionsDisconnected) SetState(ICallState_DISCONNECTED);
+    }
+
+    mHost->NotifyDisconnectP(conn);
     return NOERROR;
 }
 
-ECode SipPhone::SipCall::SetState(
+void SipPhone::SipCall::SetState(
     /* [in] */ ICallState newState)
 {
-    // ==================before translated======================
-    // if (mState != newState) {
-    //     if (SC_DBG) log("setState: cur state" + mState
-    //             + " --> " + newState + ": " + this + ": on phone "
-    //             + getPhone() + " " + mConnections.size());
-    //
-    //     if (newState == Call.State.ALERTING) {
-    //         mState = newState; // need in ALERTING to enable ringback
-    //         startRingbackTone();
-    //     } else if (mState == Call.State.ALERTING) {
-    //         stopRingbackTone();
-    //     }
-    //     mState = newState;
-    //     updatePhoneState();
-    //     notifyPreciseCallStateChanged();
-    // }
-    assert(0);
-    return NOERROR;
+    if (mState != newState) {
+        // if (SC_DBG) Log(String("setState: cur state") + mState
+        //         + " --> " + newState + ": " + this + ": on phone "
+        //         + getPhone() + " " + mConnections.size());
+
+        if (newState == ICallState_ALERTING) {
+            mState = newState; // need in ALERTING to enable ringback
+            mHost->StartRingbackTone();
+        }
+        else if (mState == ICallState_ALERTING) {
+            mHost->StopRingbackTone();
+        }
+        mState = newState;
+        mHost->UpdatePhoneState();
+        mHost->NotifyPreciseCallStateChanged();
+    }
 }
 
 void SipPhone::SipCall::TakeOver(
     /* [in] */ SipCall* that)
 {
-    // ==================before translated======================
-    // if (SC_DBG) log("takeOver");
-    // mConnections = that.mConnections;
-    // mState = that.mState;
-    // for (Connection c : mConnections) {
-    //     ((SipConnection) c).changeOwner(this);
-    // }
-    assert(0);
+    if (SC_DBG) Log(String("takeOver"));
+    mConnections = that->mConnections;
+    mState = that->mState;
+
+    Int32 size;
+    mConnections->GetSize(&size);
+    for (Int32 i = 0; i < size; i++) {
+        AutoPtr<IInterface> obj;
+        mConnections->Get(i, (IInterface**)&obj);
+        AutoPtr<IConnection> c = IConnection::Probe(obj);
+        ((SipConnection*)c.Get())->ChangeOwner(this);
+    }
 }
 
 Boolean SipPhone::SipCall::IsSpeakerOn()
 {
-    // ==================before translated======================
-    // Boolean ret = ((AudioManager) mContext.getSystemService(Context.AUDIO_SERVICE))
-    //         .isSpeakerphoneOn();
-    // if (SC_VDBG) log("isSpeakerOn: ret=" + ret);
-    // return ret;
-    assert(0);
-    return FALSE;
+    AutoPtr<IInterface> obj;
+    mHost->mContext->GetSystemService(IContext::AUDIO_SERVICE, (IInterface**)&obj);
+    AutoPtr<IAudioManager> am =  IAudioManager::Probe(obj);
+    Boolean ret;
+    am->IsSpeakerphoneOn(&ret);
+    if (SC_VDBG) Log(String("isSpeakerOn: ret=") + StringUtils::BooleanToString(ret));
+    return ret;
 }
 
 void SipPhone::SipCall::Add(
     /* [in] */ SipConnection* conn)
 {
-    // ==================before translated======================
-    // if (SC_DBG) log("add:");
-    // SipCall call = conn.getCall();
-    // if (call == this) return;
-    // if (call != null) call.mConnections.remove(conn);
-    //
-    // mConnections.add(conn);
-    // conn.changeOwner(this);
-    assert(0);
+    if (SC_DBG) Log(String("add:"));
+    AutoPtr<ICall> c;
+    conn->GetCall((ICall**)&c);
+    AutoPtr<SipCall> call = (SipCall*)c.Get();
+    if (call == this) return;
+    if (call != NULL) call->mConnections->Remove((IInterface*)(IObject*)conn);
+
+    mConnections->Add((IInterface*)(IObject*)conn);
+    conn->ChangeOwner(this);
 }
 
-Int32 SipPhone::SipCall::ConvertDtmf(
-    /* [in] */ Char16 c)
+ECode SipPhone::SipCall::ConvertDtmf(
+    /* [in] */ Char16 c,
+    /* [out] */ Int32* result)
 {
-    // ==================before translated======================
-    // int code = c - '0';
-    // if ((code < 0) || (code > 9)) {
-    //     switch (c) {
-    //         case '*': return 10;
-    //         case '#': return 11;
-    //         case 'A': return 12;
-    //         case 'B': return 13;
-    //         case 'C': return 14;
-    //         case 'D': return 15;
-    //         default:
-    //             throw new IllegalArgumentException(
-    //                     "invalid DTMF char: " + (int) c);
-    //     }
-    // }
-    // return code;
-    assert(0);
-    return 0;
+    *result = 0;
+
+    Int32 code = c - '0';
+    if ((code < 0) || (code > 9)) {
+        switch (c) {
+            case '*':
+                *result = 10;
+                return NOERROR;
+            case '#':
+                *result = 11;
+                return NOERROR;
+            case 'A':
+                *result = 12;
+                return NOERROR;
+            case 'B':
+                *result = 13;
+                return NOERROR;
+            case 'C':
+                *result = 14;
+                return NOERROR;
+            case 'D':
+                *result = 15;
+                return NOERROR;
+            default:
+                // throw new IllegalArgumentException(
+                //         "invalid DTMF char: " + (int) c);
+                return E_ILLEGAL_ARGUMENT_EXCEPTION;
+        }
+    }
+    *result = code;
+    return NOERROR;
 }
 
 AutoPtr</*TODO IAudioGroup*/IInterface> SipPhone::SipCall::GetAudioGroup()
 {
-    // ==================before translated======================
-    // if (mConnections.isEmpty()) return null;
-    // return ((SipConnection) mConnections.get(0)).getAudioGroup();
-    assert(0);
-    AutoPtr</*TODO IAudioGroup*/IInterface> empty;
-    return empty;
+    Boolean b;
+    if (mConnections->IsEmpty(&b), b) return NULL;
+    AutoPtr<IInterface> obj;
+    mConnections->Get(0, (IInterface**)&obj);
+    AutoPtr<SipConnection> conn = (SipConnection*)(IObject*)obj.Get();
+    AutoPtr</*TODO IAudioGroup*/IInterface> ag;
+    conn->GetAudioGroup((/*TODO IAudioGroup*/IInterface**)&ag);
+    return ag;
 }
 
 void SipPhone::SipCall::Log(
     /* [in] */ const String& s)
 {
-    // ==================before translated======================
-    // Rlog.d(SC_TAG, s);
-    assert(0);
+    Logger::D(SC_TAG, s);
 }
 
 //=====================================================================
@@ -431,14 +479,12 @@ SipPhone::SipConnection::SipConnection(
     /* [in] */ SipCall* owner,
     /* [in] */ /*TODO ISipProfile*/IInterface* callee,
     /* [in] */ const String& originalNumber)
-    : SipConnectionBase(originalNumber)
+    : mOwner(owner)
+    , mPeer(callee)
+    , mOriginalNumber(originalNumber)
     , mHost(host)
 {
-    // ==================before translated======================
-    // super(originalNumber);
-    // mOwner = owner;
-    // mPeer = callee;
-    // mOriginalNumber = originalNumber;
+    SipConnectionBase::constructor(originalNumber);
 }
 
 SipPhone::SipConnection::SipConnection(
@@ -447,20 +493,16 @@ SipPhone::SipConnection::SipConnection(
     /* [in] */ /*TODO ISipProfile*/IInterface* callee)
     : SipConnection(host, owner, callee, host->GetUriString(callee))
 {
-    // ==================before translated======================
-    // this(owner, callee, getUriString(callee));
-    mHost = host;
 }
 
 ECode SipPhone::SipConnection::GetCnapName(
     /* [out] */ String* result)
 {
     VALIDATE_NOT_NULL(result);
-    // ==================before translated======================
-    // String displayName = mPeer.getDisplayName();
-    // return TextUtils.isEmpty(displayName) ? null
-    //                                       : displayName;
-    assert(0);
+    String displayName;
+// TODO: Need ISipProfile
+    // mPeer->GetDisplayName(&displayName);
+    *result = displayName.IsEmpty() ? String(NULL) : displayName;
     return NOERROR;
 }
 
@@ -468,9 +510,7 @@ ECode SipPhone::SipConnection::GetNumberPresentation(
     /* [out] */ Int32* result)
 {
     VALIDATE_NOT_NULL(result);
-    // ==================before translated======================
-    // return PhoneConstants.PRESENTATION_ALLOWED;
-    assert(0);
+    *result = IPhoneConstants::PRESENTATION_ALLOWED;
     return NOERROR;
 }
 
@@ -478,33 +518,29 @@ ECode SipPhone::SipConnection::InitIncomingCall(
     /* [in] */ /*TODO ISipAudioCall*/IInterface* sipAudioCall,
     /* [in] */ ICallState newState)
 {
-    // ==================before translated======================
-    // setState(newState);
-    // mSipAudioCall = sipAudioCall;
-    // sipAudioCall.setListener(mAdapter); // call back to set state
-    // mIncoming = true;
-    assert(0);
+    SetState(newState);
+    mSipAudioCall = sipAudioCall;
+// TODO: Need ISipAudioCall
+    // sipAudioCall->SetListener(mAdapter); // call back to set state
+    mIncoming = TRUE;
     return NOERROR;
 }
 
 ECode SipPhone::SipConnection::AcceptCall()
 {
-    // ==================before translated======================
     // try {
-    //     mSipAudioCall.answerCall(TIMEOUT_ANSWER_CALL);
+// TODO: Need ISipAudioCall
+    // mSipAudioCall->AnswerCall(TIMEOUT_ANSWER_CALL);
     // } catch (SipException e) {
     //     throw new CallStateException("acceptCall(): " + e);
     // }
-    assert(0);
     return NOERROR;
 }
 
 ECode SipPhone::SipConnection::ChangeOwner(
     /* [in] */ SipCall* owner)
 {
-    // ==================before translated======================
-    // mOwner = owner;
-    assert(0);
+    mOwner = owner;
     return NOERROR;
 }
 
@@ -512,61 +548,60 @@ ECode SipPhone::SipConnection::GetAudioGroup(
     /* [out] */ /*TODO IAudioGroup*/IInterface** result)
 {
     VALIDATE_NOT_NULL(result);
-    // ==================before translated======================
-    // if (mSipAudioCall == null) return null;
-    // return mSipAudioCall.getAudioGroup();
-    assert(0);
+    if (mSipAudioCall == NULL) {
+        *result = NULL;
+        return NOERROR;
+    }
+// TODO: Need ISipAudioCall
+    // return mSipAudioCall->GetAudioGroup(result);
     return NOERROR;
 }
 
 ECode SipPhone::SipConnection::Dial()
 {
-    // ==================before translated======================
-    // setState(Call.State.DIALING);
-    // mSipAudioCall = mSipManager.makeAudioCall(mProfile, mPeer, null,
+    SetState(ICallState_DIALING);
+// TODO: Need ISipManager, ISipAudioCall
+    // mSipAudioCall = mSipManager->MakeAudioCall(mProfile, mPeer, NULL,
     //         TIMEOUT_MAKE_CALL);
-    // mSipAudioCall.setListener(mAdapter);
-    assert(0);
+    // mSipAudioCall->SetListener(mAdapter);
     return NOERROR;
 }
 
 ECode SipPhone::SipConnection::Hold()
 {
-    // ==================before translated======================
-    // setState(Call.State.HOLDING);
+    SetState(ICallState_HOLDING);
     // try {
-    //     mSipAudioCall.holdCall(TIMEOUT_HOLD_CALL);
+// TODO: Need ISipAudioCall
+    // mSipAudioCall->HoldCall(TIMEOUT_HOLD_CALL);
     // } catch (SipException e) {
     //     throw new CallStateException("hold(): " + e);
     // }
-    assert(0);
     return NOERROR;
 }
 
 ECode SipPhone::SipConnection::Unhold(
     /* [in] */ /*TODO IAudioGroup*/IInterface* audioGroup)
 {
-    // ==================before translated======================
-    // mSipAudioCall.setAudioGroup(audioGroup);
-    // setState(Call.State.ACTIVE);
+// TODO: Need ISipAudioCall
+    // mSipAudioCall->SetAudioGroup(audioGroup);
+    SetState(ICallState_ACTIVE);
     // try {
-    //     mSipAudioCall.continueCall(TIMEOUT_HOLD_CALL);
+// TODO: Need ISipAudioCall
+    // mSipAudioCall->ContinueCall(TIMEOUT_HOLD_CALL);
     // } catch (SipException e) {
     //     throw new CallStateException("unhold(): " + e);
     // }
-    assert(0);
     return NOERROR;
 }
 
 ECode SipPhone::SipConnection::SetMute(
     /* [in] */ Boolean muted)
 {
-    // ==================before translated======================
-    // if ((mSipAudioCall != null) && (muted != mSipAudioCall.isMuted())) {
-    //     if (SCN_DBG) log("setState: prev muted=" + !muted + " new muted=" + muted);
+// TODO: Need ISipAudioCall
+    // if ((mSipAudioCall != NULL) && (muted != mSipAudioCall.isMuted())) {
+    //     if (SCN_DBG) Log("setState: prev muted=" + !muted + " new muted=" + muted);
     //     mSipAudioCall.toggleMute();
     // }
-    assert(0);
     return NOERROR;
 }
 
@@ -574,10 +609,9 @@ ECode SipPhone::SipConnection::GetMute(
     /* [out] */ Boolean* result)
 {
     VALIDATE_NOT_NULL(result);
-    // ==================before translated======================
-    // return (mSipAudioCall == null) ? false
+// TODO: Need ISipAudioCall
+    // return (mSipAudioCall == NULL) ? FALSE
     //                                : mSipAudioCall.isMuted();
-    assert(0);
     return NOERROR;
 }
 
@@ -585,9 +619,7 @@ ECode SipPhone::SipConnection::GetState(
     /* [out] */ ICallState* result)
 {
     VALIDATE_NOT_NULL(result);
-    // ==================before translated======================
-    // return mState;
-    assert(0);
+    *result = mState;
     return NOERROR;
 }
 
@@ -595,9 +627,7 @@ ECode SipPhone::SipConnection::IsIncoming(
     /* [out] */ Boolean* result)
 {
     VALIDATE_NOT_NULL(result);
-    // ==================before translated======================
-    // return mIncoming;
-    assert(0);
+    *result = mIncoming;
     return NOERROR;
 }
 
@@ -605,113 +635,117 @@ ECode SipPhone::SipConnection::GetAddress(
     /* [out] */ String* result)
 {
     VALIDATE_NOT_NULL(result);
-    // ==================before translated======================
-    // // Phone app uses this to query caller ID. Return the original dial
-    // // number (which may be a PSTN number) instead of the peer's SIP
-    // // URI.
-    // return mOriginalNumber;
-    assert(0);
+    // Phone app uses this to query caller ID. Return the original dial
+    // number (which may be a PSTN number) instead of the peer's SIP
+    // URI.
+    *result = mOriginalNumber;
     return NOERROR;
 }
 
 ECode SipPhone::SipConnection::GetCall(
-    /* [out] */ SipCall** result)
+    /* [out] */ ICall** result)
 {
     VALIDATE_NOT_NULL(result);
-    // ==================before translated======================
-    // return mOwner;
-    assert(0);
+    *result = ICall::Probe(mOwner);
+    REFCOUNT_ADD(*result)
     return NOERROR;
 }
 
 ECode SipPhone::SipConnection::Hangup()
 {
-    // ==================before translated======================
-    // synchronized (SipPhone.class) {
-    //     if (SCN_DBG) log("hangup: conn=" + mPeer.getUriString()
-    //             + ": " + mState + ": on phone "
-    //             + getPhone().getPhoneName());
-    //     if (!mState.isAlive()) return;
-    //     try {
-    //         SipAudioCall sipAudioCall = mSipAudioCall;
-    //         if (sipAudioCall != null) {
-    //             sipAudioCall.setListener(null);
-    //             sipAudioCall.endCall();
-    //         }
-    //     } catch (SipException e) {
-    //         throw new CallStateException("hangup(): " + e);
-    //     } finally {
-    //         mAdapter.onCallEnded(((mState == Call.State.INCOMING)
-    //                 || (mState == Call.State.WAITING))
-    //                 ? DisconnectCause.INCOMING_REJECTED
-    //                 : DisconnectCause.LOCAL);
-    //     }
+    AutoLock lock(mHost);    // synchronized (SipPhone.class)
+    // if (SCN_DBG) Log("hangup: conn=" + mPeer.getUriString()
+    //         + ": " + mState + ": on phone "
+    //         + getPhone().getPhoneName());
+// TODO; Need ICallState::IsAlive
+    // if (!mState->IsAlive()) return;
+    // try {
+// TODO: Need ISipAudioCall
+    // AutoPtr<ISipAudioCall> sipAudioCall = mSipAudioCall;
+    // if (sipAudioCall != NULL) {
+    //     sipAudioCall.setListener(NULL);
+    //     sipAudioCall.endCall();
     // }
-    assert(0);
+    // } catch (SipException e) {
+    //     throw new CallStateException("hangup(): " + e);
+    // } finally {
+    mAdapter->OnCallEnded(((mState == ICallState_INCOMING)
+            || (mState == ICallState_WAITING))
+            ? IDisconnectCause::INCOMING_REJECTED
+            : IDisconnectCause::LOCAL);
+    // }
     return NOERROR;
 }
 
 ECode SipPhone::SipConnection::Separate()
 {
-    // ==================before translated======================
-    // synchronized (SipPhone.class) {
-    //     SipCall call = (getPhone() == SipPhone.this)
-    //             ? (SipCall) getBackgroundCall()
-    //             : (SipCall) getForegroundCall();
-    //     if (call.getState() != Call.State.IDLE) {
-    //         throw new CallStateException(
-    //                 "cannot put conn back to a call in non-idle state: "
-    //                 + call.getState());
-    //     }
-    //     if (SCN_DBG) log("separate: conn="
-    //             + mPeer.getUriString() + " from " + mOwner + " back to "
-    //             + call);
-    //
-    //     // separate the AudioGroup and connection from the original call
-    //     Phone originalPhone = getPhone();
-    //     AudioGroup audioGroup = call.getAudioGroup(); // may be null
-    //     call.add(this);
-    //     mSipAudioCall.setAudioGroup(audioGroup);
-    //
-    //     // put the original call to bg; and the separated call becomes
-    //     // fg if it was in bg
-    //     originalPhone.switchHoldingAndActive();
-    //
-    //     // start audio and notify the phone app of the state change
-    //     call = (SipCall) getForegroundCall();
-    //     mSipAudioCall.startAudio();
-    //     call.onConnectionStateChanged(this);
-    // }
-    assert(0);
+    AutoLock lock(mHost);    // synchronized (SipPhone.class)
+    AutoPtr<IPhone> originalPhone = GetPhone();
+    AutoPtr<SipCall> call;
+    if (originalPhone == mHost) {
+        AutoPtr<ICall> c;
+        mHost->GetBackgroundCall((ICall**)&c);
+        call = (SipCall*)c.Get();
+    }
+    else {
+        AutoPtr<ICall> c;
+        mHost->GetForegroundCall((ICall**)&c);
+        call = (SipCall*)c.Get();
+    }
+    ICallState state;
+    call->GetState(&state);
+    if (state != ICallState_IDLE) {
+        // throw new CallStateException(
+        //         "cannot put conn back to a call in non-idle state: "
+        //         + call.getState());
+        return E_CALL_STATE_EXCEPTION;
+    }
+    // if (SCN_DBG) Log("separate: conn="
+    //         + mPeer.getUriString() + " from " + mOwner + " back to "
+    //         + call);
+
+    // separate the AudioGroup and connection from the original call
+// TODO: Need IAudioGroup
+    // AutoPtr<IAudioGroup> audioGroup = call->GetAudioGroup(); // may be NULL
+    // call->Add(this);
+// TODO: Need ISipAudioCall
+    // mSipAudioCall->SetAudioGroup(audioGroup);
+
+    // put the original call to bg; and the separated call becomes
+    // fg if it was in bg
+    originalPhone->SwitchHoldingAndActive();
+
+    // start audio and notify the phone app of the state change
+    AutoPtr<ICall> c;
+    mHost->GetForegroundCall((ICall**)&c);
+    call = (SipCall*)c.Get();
+
+// TODO: Need ISipAudioCall
+    // mSipAudioCall->StartAudio();
+    call->OnConnectionStateChanged(this);
+
     return NOERROR;
 }
 
 void SipPhone::SipConnection::SetState(
     /* [in] */ ICallState state)
 {
-    // ==================before translated======================
-    // if (state == mState) return;
-    // super.setState(state);
-    // mState = state;
-    assert(0);
+    if (state == mState) return;
+    SipConnectionBase::SetState(state);
+    mState = state;
 }
 
-ECode SipPhone::SipConnection::GetPhone(
-    /* [out] */ IPhone** result)
+AutoPtr<IPhone> SipPhone::SipConnection::GetPhone()
 {
-    VALIDATE_NOT_NULL(result);
-    // ==================before translated======================
-    // return mOwner.getPhone();
-    assert(0);
-    return NOERROR;
+    AutoPtr<IPhone> phone;
+    mOwner->GetPhone((IPhone**)&phone);
+    return phone;
 }
 
 void SipPhone::SipConnection::Log(
     /* [in] */ const String& s)
 {
-    // ==================before translated======================
-    // Rlog.d(SCN_TAG, s);
-    assert(0);
+    Logger::D(SCN_TAG, s);
 }
 
 //=====================================================================
@@ -721,101 +755,106 @@ SipPhone::InnerSipAudioCallAdapter::InnerSipAudioCallAdapter(
     /* [in] */ SipConnection* owner)
     : mOwner(owner)
 {
-    // ==================before translated======================
-    // mOwner = owner;
 }
 
 ECode SipPhone::InnerSipAudioCallAdapter::OnCallEstablished(
     /* [in] */ /*TODO ISipAudioCall*/IInterface* call)
 {
-    // ==================before translated======================
-    // onChanged(call);
-    // // Race onChanged synchronized this isn't
-    // if (mState == Call.State.ACTIVE) call.startAudio();
-    assert(0);
+    OnChanged(call);
+    // Race onChanged synchronized this isn't
+    if (mOwner->mState == ICallState_ACTIVE) {
+// TODO: Need ISipAudioCall
+        // call->StartAudio();
+    }
     return NOERROR;
 }
 
 ECode SipPhone::InnerSipAudioCallAdapter::OnCallHeld(
     /* [in] */ /*TODO ISipAudioCall*/IInterface* call)
 {
-    // ==================before translated======================
-    // onChanged(call);
-    // // Race onChanged synchronized this isn't
-    // if (mState == Call.State.HOLDING) call.startAudio();
-    assert(0);
+    OnChanged(call);
+    // Race onChanged synchronized this isn't
+    if (mOwner->mState == ICallState_HOLDING) {
+// TODO: Need ISipAudioCall
+        // call->StartAudio();
+    }
     return NOERROR;
 }
 
 ECode SipPhone::InnerSipAudioCallAdapter::OnChanged(
     /* [in] */ /*TODO ISipAudioCall*/IInterface* call)
 {
-    // ==================before translated======================
-    // synchronized (SipPhone.class) {
-    //     Call.State newState = getCallStateFrom(call);
-    //     if (mState == newState) return;
-    //     if (newState == Call.State.INCOMING) {
-    //         setState(mOwner.getState()); // INCOMING or WAITING
-    //     } else {
-    //         if (mOwner == mRingingCall) {
-    //             if (mRingingCall.getState() == Call.State.WAITING) {
-    //                 try {
-    //                     switchHoldingAndActive();
-    //                 } catch (CallStateException e) {
-    //                     // disconnect the call.
-    //                     onCallEnded(DisconnectCause.LOCAL);
-    //                     return;
-    //                 }
-    //             }
-    //             mForegroundCall.switchWith(mRingingCall);
-    //         }
-    //         setState(newState);
-    //     }
-    //     mOwner.onConnectionStateChanged(SipConnection.this);
-    //     if (SCN_DBG) log("onChanged: "
-    //             + mPeer.getUriString() + ": " + mState
-    //             + " on phone " + getPhone());
-    // }
-    assert(0);
+    AutoLock lock(mOwner->mHost);    // synchronized (SipPhone.class)
+    ICallState newState = GetCallStateFrom(call);
+    if (mOwner->mState == newState) {
+        return NOERROR;
+    }
+    if (newState == ICallState_INCOMING) {
+        ICallState state;
+        mOwner->GetState(&state);
+        mOwner->SetState(state); // INCOMING or WAITING
+    }
+    else {
+        if (mOwner->mOwner == mOwner->mHost->mRingingCall) {
+            ICallState state;
+            mOwner->mHost->mRingingCall->GetState(&state);
+            if (state == ICallState_WAITING) {
+                // try {
+                mOwner->mHost->SwitchHoldingAndActive();
+                // } catch (CallStateException e) {
+                //     // disconnect the call.
+                //     onCallEnded(DisconnectCause.LOCAL);
+                //     return;
+                // }
+            }
+            mOwner->mHost->mForegroundCall->SwitchWith(mOwner->mHost->mRingingCall);
+        }
+        mOwner->SetState(newState);
+    }
+    mOwner->mOwner->OnConnectionStateChanged(/*SipConnection.this*/mOwner);
+    // if (SCN_DBG) Log("onChanged: "
+    //         + mPeer.getUriString() + ": " + mState
+    //         + " on phone " + getPhone());
+
     return NOERROR;
 }
 
 ECode SipPhone::InnerSipAudioCallAdapter::OnCallEnded(
     /* [in] */ Int32 cause)
 {
-    // ==================before translated======================
-    // if (getDisconnectCause() != DisconnectCause.LOCAL) {
-    //     setDisconnectCause(cause);
+    Int32 val;
+    mOwner->GetDisconnectCause(&val);
+    if (val != IDisconnectCause::LOCAL) {
+        mOwner->SetDisconnectCause(cause);
+    }
+
+    AutoLock lock(mOwner->mHost);    // synchronized (SipPhone.class)
+    mOwner->SetState(ICallState_DISCONNECTED);
+    AutoPtr</*TODO ISipAudioCall*/IInterface> sipAudioCall = mOwner->mSipAudioCall;
+    // FIXME: This goes NULL and is synchronized, but many uses aren't sync'd
+    mOwner->mSipAudioCall = NULL;
+// TODO: Need ISipAudioCall
+    // String sessionState = (sipAudioCall == NULL)
+    //         ? ""
+    //         : (sipAudioCall->GetState() + ", ");
+    // // if (SCN_DBG) Log("[SipAudioCallAdapter] onCallEnded: "
+    // //         + mPeer.getUriString() + ": " + sessionState
+    // //         + "cause: " + getDisconnectCause() + ", on phone "
+    // //         + getPhone());
+    // if (sipAudioCall != NULL) {
+    //     sipAudioCall->SetListener(NULL);
+    //     sipAudioCall->Close();
     // }
-    // synchronized (SipPhone.class) {
-    //     setState(Call.State.DISCONNECTED);
-    //     SipAudioCall sipAudioCall = mSipAudioCall;
-    //     // FIXME: This goes null and is synchronized, but many uses aren't sync'd
-    //     mSipAudioCall = null;
-    //     String sessionState = (sipAudioCall == null)
-    //             ? ""
-    //             : (sipAudioCall.getState() + ", ");
-    //     if (SCN_DBG) log("[SipAudioCallAdapter] onCallEnded: "
-    //             + mPeer.getUriString() + ": " + sessionState
-    //             + "cause: " + getDisconnectCause() + ", on phone "
-    //             + getPhone());
-    //     if (sipAudioCall != null) {
-    //         sipAudioCall.setListener(null);
-    //         sipAudioCall.close();
-    //     }
-    //     mOwner.onConnectionEnded(SipConnection.this);
-    // }
-    assert(0);
+    mOwner->mOwner->OnConnectionEnded(/*SipConnection.this*/mOwner);
+
     return NOERROR;
 }
 
 ECode SipPhone::InnerSipAudioCallAdapter::OnError(
     /* [in] */ Int32 cause)
 {
-    // ==================before translated======================
-    // if (SCN_DBG) log("onError: " + cause);
-    // onCallEnded(cause);
-    assert(0);
+    // if (SCN_DBG) Log(String("onError: ") + StringUtils::ToString(cause));
+    OnCallEnded(cause);
     return NOERROR;
 }
 
@@ -828,22 +867,21 @@ const Boolean SipPhone::SipAudioCallAdapter::SACA_DBG = TRUE;
 ECode SipPhone::SipAudioCallAdapter::OnCallEnded(
     /* [in] */ /*TODO ISipAudioCall*/IInterface* call)
 {
-    // ==================before translated======================
-    // if (SACA_DBG) log("onCallEnded: call=" + call);
-    // onCallEnded(call.isInCall()
-    //         ? DisconnectCause.NORMAL
-    //         : DisconnectCause.INCOMING_MISSED);
-    assert(0);
+    // if (SACA_DBG) Log("onCallEnded: call=" + call);
+    Boolean b;
+// TODO: Need ISipAudioCall
+    // call->IsInCall(&b);
+    OnCallEnded(b
+            ? IDisconnectCause::NORMAL
+            : IDisconnectCause::INCOMING_MISSED);
     return NOERROR;
 }
 
 ECode SipPhone::SipAudioCallAdapter::OnCallBusy(
     /* [in] */ /*TODO ISipAudioCall*/IInterface* call)
 {
-    // ==================before translated======================
-    // if (SACA_DBG) log("onCallBusy: call=" + call);
-    // onCallEnded(DisconnectCause.BUSY);
-    assert(0);
+    // if (SACA_DBG) Log(String("onCallBusy: call=") + call);
+    OnCallEnded(IDisconnectCause::BUSY);
     return NOERROR;
 }
 
@@ -852,52 +890,49 @@ ECode SipPhone::SipAudioCallAdapter::OnError(
     /* [in] */ Int32 errorCode,
     /* [in] */ const String& errorMessage)
 {
-    // ==================before translated======================
-    // if (SACA_DBG) {
-    //     log("onError: call=" + call + " code="+ SipErrorCode.toString(errorCode)
-    //         + ": " + errorMessage);
-    // }
-    // switch (errorCode) {
-    //     case SipErrorCode.SERVER_UNREACHABLE:
-    //         onError(DisconnectCause.SERVER_UNREACHABLE);
-    //         break;
-    //     case SipErrorCode.PEER_NOT_REACHABLE:
-    //         onError(DisconnectCause.NUMBER_UNREACHABLE);
-    //         break;
-    //     case SipErrorCode.INVALID_REMOTE_URI:
-    //         onError(DisconnectCause.INVALID_NUMBER);
-    //         break;
-    //     case SipErrorCode.TIME_OUT:
-    //     case SipErrorCode.TRANSACTION_TERMINTED:
-    //         onError(DisconnectCause.TIMED_OUT);
-    //         break;
-    //     case SipErrorCode.DATA_CONNECTION_LOST:
-    //         onError(DisconnectCause.LOST_SIGNAL);
-    //         break;
-    //     case SipErrorCode.INVALID_CREDENTIALS:
-    //         onError(DisconnectCause.INVALID_CREDENTIALS);
-    //         break;
-    //     case SipErrorCode.CROSS_DOMAIN_AUTHENTICATION:
-    //         onError(DisconnectCause.OUT_OF_NETWORK);
-    //         break;
-    //     case SipErrorCode.SERVER_ERROR:
-    //         onError(DisconnectCause.SERVER_ERROR);
-    //         break;
-    //     case SipErrorCode.SOCKET_ERROR:
-    //     case SipErrorCode.CLIENT_ERROR:
-    //     default:
-    //         onError(DisconnectCause.ERROR_UNSPECIFIED);
-    // }
-    assert(0);
+    if (SACA_DBG) {
+        // Log("onError: call=" + call + " code="+ SipErrorCode.toString(errorCode)
+        //     + ": " + errorMessage);
+    }
+    switch (errorCode) {
+// TODO: Need ISipErrorCode
+        // case ISipErrorCode::SERVER_UNREACHABLE:
+        //     OnError(IDisconnectCause::SERVER_UNREACHABLE);
+        //     break;
+        // case ISipErrorCode::PEER_NOT_REACHABLE:
+        //     OnError(IDisconnectCause::NUMBER_UNREACHABLE);
+        //     break;
+        // case ISipErrorCode::INVALID_REMOTE_URI:
+        //     OnError(IDisconnectCause::INVALID_NUMBER);
+        //     break;
+        // case ISipErrorCode::TIME_OUT:
+        // case ISipErrorCode::TRANSACTION_TERMINTED:
+        //     OnError(IDisconnectCause::TIMED_OUT);
+        //     break;
+        // case ISipErrorCode::DATA_CONNECTION_LOST:
+        //     OnError(IDisconnectCause::LOST_SIGNAL);
+        //     break;
+        // case ISipErrorCode::INVALID_CREDENTIALS:
+        //     OnError(IDisconnectCause::INVALID_CREDENTIALS);
+        //     break;
+        // case ISipErrorCode::CROSS_DOMAIN_AUTHENTICATION:
+        //     OnError(IDisconnectCause::OUT_OF_NETWORK);
+        //     break;
+        // case ISipErrorCode::SERVER_ERROR:
+        //     OnError(IDisconnectCause::SERVER_ERROR);
+        //     break;
+        // case ISipErrorCode::SOCKET_ERROR:
+        // case ISipErrorCode::CLIENT_ERROR:
+        default:
+            OnError(IDisconnectCause::ERROR_UNSPECIFIED);
+    }
     return NOERROR;
 }
 
 void SipPhone::SipAudioCallAdapter::Log(
     /* [in] */ const String& s)
 {
-    // ==================before translated======================
-    // Rlog.d(SACA_TAG, s);
-    assert(0);
+    Logger::D(SACA_TAG, s);
 }
 
 //=====================================================================
@@ -921,17 +956,15 @@ ECode SipPhone::constructor(
     /* [in] */ IPhoneNotifier* notifier,
     /* [in] */ /*TODO ISipProfile*/IInterface* profile)
 {
-    //: SipPhoneBase(String(""), context, notifier)//TODO the string value is not correct
-    // ==================before translated======================
-    // super("SIP:" + profile.getUriString(), context, notifier);
-
-    //
-    // if (DBG) log("new SipPhone: " + profile.getUriString());
-    // mRingingCall = new SipCall();
-    // mForegroundCall = new SipCall();
-    // mBackgroundCall = new SipCall();
-    // mProfile = profile;
-    // mSipManager = SipManager.newInstance(context);
+// TODO: Need ISipProfile
+    // SipPhoneBase::constructor(String("SIP:") + profile->GetUriString(), context, notifier);
+    // if (DBG) Log(("new SipPhone: ") + profile->GetUriString());
+    mRingingCall = new SipCall(this);
+    mForegroundCall = new SipCall(this);
+    mBackgroundCall = new SipCall(this);
+    mProfile = profile;
+// TODO: Need SipManager
+    // mSipManager = SipManager::NewInstance(context);
     return NOERROR;
 }
 
@@ -940,12 +973,17 @@ ECode SipPhone::Equals(
     /* [out] */ Boolean* result)
 {
     VALIDATE_NOT_NULL(result);
-    // ==================before translated======================
-    // if (o == this) return true;
-    // if (!(o instanceof SipPhone)) return false;
-    // SipPhone that = (SipPhone) o;
-    // return mProfile.getUriString().equals(that.mProfile.getUriString());
-    assert(0);
+    if (o == TO_IINTERFACE(this)) {
+        *result = TRUE;
+        return NOERROR;
+    }
+    if (ISipPhone::Probe(o) == NULL) {
+        *result = FALSE;
+        return NOERROR;
+    }
+    AutoPtr<SipPhone> that = (SipPhone*)(IObject*)o;
+// TODO: Need ISipProfile
+    // *result = mProfile.getUriString().Equals(that.mProfile.getUriString());
     return NOERROR;
 }
 
@@ -953,9 +991,8 @@ ECode SipPhone::GetSipUri(
     /* [out] */ String* result)
 {
     VALIDATE_NOT_NULL(result);
-    // ==================before translated======================
+// TODO: Need ISipProfile
     // return mProfile.getUriString();
-    assert(0);
     return NOERROR;
 }
 
@@ -964,9 +1001,11 @@ ECode SipPhone::Equals(
     /* [out] */ Boolean* result)
 {
     VALIDATE_NOT_NULL(result);
-    // ==================before translated======================
-    // return getSipUri().equals(phone.getSipUri());
-    assert(0);
+    String str1;
+    GetSipUri(&str1);
+    String str2;
+    phone->GetSipUri(&str2);
+    *result = str1.Equals(str2);
     return NOERROR;
 }
 
@@ -975,100 +1014,108 @@ ECode SipPhone::TakeIncomingCall(
     /* [out] */ IConnection** result)
 {
     VALIDATE_NOT_NULL(result);
-    // ==================before translated======================
-    // // FIXME: Is synchronizing on the class necessary, should we use a mLockObj?
-    // // Also there are many things not synchronized, of course
-    // // this may be true of CdmaPhone and GsmPhone too!!!
-    // synchronized (SipPhone.class) {
-    //     if (!(incomingCall instanceof SipAudioCall)) {
-    //         if (DBG) log("takeIncomingCall: ret=null, not a SipAudioCall");
-    //         return null;
-    //     }
-    //     if (mRingingCall.getState().isAlive()) {
-    //         if (DBG) log("takeIncomingCall: ret=null, ringingCall not alive");
-    //         return null;
-    //     }
-    //
-    //     // FIXME: is it true that we cannot take any incoming call if
-    //     // both foreground and background are active
-    //     if (mForegroundCall.getState().isAlive()
-    //             && mBackgroundCall.getState().isAlive()) {
-    //         if (DBG) {
-    //             log("takeIncomingCall: ret=null," + " foreground and background both alive");
-    //         }
-    //         return null;
-    //     }
-    //
-    //     try {
-    //         SipAudioCall sipAudioCall = (SipAudioCall) incomingCall;
-    //         if (DBG) log("takeIncomingCall: taking call from: "
-    //                 + sipAudioCall.getPeerProfile().getUriString());
-    //         String localUri = sipAudioCall.getLocalProfile().getUriString();
-    //         if (localUri.equals(mProfile.getUriString())) {
-    //             boolean makeCallWait = mForegroundCall.getState().isAlive();
-    //             SipConnection connection = mRingingCall.initIncomingCall(sipAudioCall,
-    //                     makeCallWait);
-    //             if (sipAudioCall.getState() != SipSession.State.INCOMING_CALL) {
-    //                 // Peer cancelled the call!
-    //                 if (DBG) log("    takeIncomingCall: call cancelled !!");
-    //                 mRingingCall.reset();
-    //                 connection = null;
-    //             }
-    //             return connection;
-    //         }
-    //     } catch (Exception e) {
-    //         // Peer may cancel the call at any time during the time we hook
-    //         // up ringingCall with sipAudioCall. Clean up ringingCall when
-    //         // that happens.
-    //         if (DBG) log("    takeIncomingCall: exception e=" + e);
-    //         mRingingCall.reset();
-    //     }
-    //     if (DBG) log("takeIncomingCall: NOT taking !!");
-    //     return null;
+    // FIXME: Is synchronizing on the class necessary, should we use a mLockObj?
+    // Also there are many things not synchronized, of course
+    // this may be TRUE of CdmaPhone and GsmPhone too!!!
+    AutoLock lock(this); // synchronized (SipPhone.class)
+
+// TODO: Need ISipAudioCall
+    // if (ISipAudioCall::Probe(incomingCall) == NULL) {
+    //     if (DBG) Log(String("takeIncomingCall: ret=NULL, not a SipAudioCall"));
+    //     *result = NULL;
+    //     return NOERROR;
     // }
-    assert(0);
+// TODO: Need ICallState::IsAlive
+    // if (mRingingCall.getState().isAlive()) {
+    //     if (DBG) Log("takeIncomingCall: ret=NULL, ringingCall not alive");
+    //     return NULL;
+    // }
+
+    // FIXME: is it TRUE that we cannot take any incoming call if
+    // both foreground and background are active
+// TODO: Need ICallState::IsAlive
+    // if (mForegroundCall.getState().isAlive()
+    //         && mBackgroundCall.getState().isAlive()) {
+    //     if (DBG) {
+    //         Log("takeIncomingCall: ret=NULL," + " foreground and background both alive");
+    //     }
+    //     return NULL;
+    // }
+
+    // try {
+// TODO: Need ISipAudioCall
+    // SipAudioCall sipAudioCall = (SipAudioCall) incomingCall;
+    // if (DBG) Log("takeIncomingCall: taking call from: "
+    //         + sipAudioCall.getPeerProfile().getUriString());
+    // String localUri = sipAudioCall.getLocalProfile().getUriString();
+    // if (localUri.equals(mProfile.getUriString())) {
+    //     boolean makeCallWait = mForegroundCall.getState().isAlive();
+    //     SipConnection connection = mRingingCall.initIncomingCall(sipAudioCall,
+    //             makeCallWait);
+    //     if (sipAudioCall.getState() != SipSession.State.INCOMING_CALL) {
+    //         // Peer cancelled the call!
+    //         if (DBG) Log("    takeIncomingCall: call cancelled !!");
+    //         mRingingCall.reset();
+    //         connection = NULL;
+    //     }
+    //     return connection;
+    // }
+    // } catch (Exception e) {
+    //     // Peer may cancel the call at any time during the time we hook
+    //     // up ringingCall with sipAudioCall. Clean up ringingCall when
+    //     // that happens.
+    //     if (DBG) Log("    takeIncomingCall: exception e=" + e);
+    //     mRingingCall.reset();
+    // }
+    if (DBG) Log(String("takeIncomingCall: NOT taking !!"));
+    *result = NULL;
     return NOERROR;
 }
 
 ECode SipPhone::AcceptCall(
     /* [in] */ Int32 videoState)
 {
-    // ==================before translated======================
-    // synchronized (SipPhone.class) {
-    //     if ((mRingingCall.getState() == Call.State.INCOMING) ||
-    //             (mRingingCall.getState() == Call.State.WAITING)) {
-    //         if (DBG) log("acceptCall: accepting");
-    //         // Always unmute when answering a new call
-    //         mRingingCall.setMute(false);
-    //         mRingingCall.acceptCall();
-    //     } else {
-    //         if (DBG) {
-    //             log("acceptCall:" +
-    //                 " throw CallStateException(\"phone not ringing\")");
-    //         }
-    //         throw new CallStateException("phone not ringing");
-    //     }
-    // }
-    assert(0);
+    AutoLock lock(this);    // synchronized (SipPhone.class)
+    ICallState state;
+    mRingingCall->GetState(&state);
+    if ((state == ICallState_INCOMING) ||
+            (state == ICallState_WAITING)) {
+        if (DBG) Log(String("acceptCall: accepting"));
+        // Always unmute when answering a new call
+        mRingingCall->SetMute(FALSE);
+        mRingingCall->AcceptCall();
+    }
+    else {
+        if (DBG) {
+            Log(String("acceptCall: throw CallStateException(\"phone not ringing\")"));
+        }
+        // throw new CallStateException("phone not ringing");
+        return E_CALL_STATE_EXCEPTION;
+    }
+
     return NOERROR;
 }
 
 ECode SipPhone::RejectCall()
 {
-    // ==================before translated======================
-    // synchronized (SipPhone.class) {
-    //     if (mRingingCall.getState().isRinging()) {
-    //         if (DBG) log("rejectCall: rejecting");
-    //         mRingingCall.rejectCall();
-    //     } else {
-    //         if (DBG) {
-    //             log("rejectCall:" +
-    //                 " throw CallStateException(\"phone not ringing\")");
-    //         }
-    //         throw new CallStateException("phone not ringing");
-    //     }
-    // }
-    assert(0);
+    AutoLock lock(this);    // synchronized (SipPhone.class)
+    ICallState state;
+    mRingingCall->GetState(&state);
+    Boolean b;
+// TODO: Need ICallState::IsRinging
+    // state->IsRinging(&b);
+    if (b) {
+        if (DBG) Log(String("rejectCall: rejecting"));
+        mRingingCall->RejectCall();
+    }
+    else {
+        if (DBG) {
+            Log(String("rejectCall: throw CallStateException(\"phone not ringing\")"));
+        }
+        // throw new CallStateException("phone not ringing");
+        return E_CALL_STATE_EXCEPTION;
+    }
+
     return NOERROR;
 }
 
@@ -1078,24 +1125,26 @@ ECode SipPhone::Dial(
     /* [out] */ IConnection** result)
 {
     VALIDATE_NOT_NULL(result);
-    // ==================before translated======================
-    // synchronized (SipPhone.class) {
-    //     return dialInternal(dialString, videoState);
-    // }
-    assert(0);
+    AutoLock lock(this);    // synchronized (SipPhone.class)
+    return DialInternal(dialString, videoState, result);
+
     return NOERROR;
 }
 
 ECode SipPhone::SwitchHoldingAndActive()
 {
-    // ==================before translated======================
-    // if (DBG) log("dialInternal: switch fg and bg");
-    // synchronized (SipPhone.class) {
-    //     mForegroundCall.switchWith(mBackgroundCall);
-    //     if (mBackgroundCall.getState().isAlive()) mBackgroundCall.hold();
-    //     if (mForegroundCall.getState().isAlive()) mForegroundCall.unhold();
-    // }
-    assert(0);
+    if (DBG) Log(String("dialInternal: switch fg and bg"));
+    AutoLock lock(this);    // synchronized (SipPhone.class)
+    mForegroundCall->SwitchWith(mBackgroundCall);
+    ICallState state;
+    mBackgroundCall->GetState(&state);
+// TODO: Need ICallState::IsAlive
+    // if (state->IsAlive()) mBackgroundCall->Hold();
+
+    mForegroundCall->GetState(&state);
+// TODO: Need ICallState::IsAlive
+    // if (state->IsAlive()) mForegroundCall->Unhold();
+
     return NOERROR;
 }
 
@@ -1103,42 +1152,41 @@ ECode SipPhone::CanConference(
     /* [out] */ Boolean* result)
 {
     VALIDATE_NOT_NULL(result);
-    // ==================before translated======================
-    // if (DBG) log("canConference: ret=true");
-    // return true;
-    assert(0);
+    if (DBG) Log(String("canConference: ret=TRUE"));
+    *result = TRUE;
     return NOERROR;
 }
 
 ECode SipPhone::Conference()
 {
-    // ==================before translated======================
-    // synchronized (SipPhone.class) {
-    //     if ((mForegroundCall.getState() != SipCall.State.ACTIVE)
-    //             || (mForegroundCall.getState() != SipCall.State.ACTIVE)) {
-    //         throw new CallStateException("wrong state to merge calls: fg="
-    //                 + mForegroundCall.getState() + ", bg="
-    //                 + mBackgroundCall.getState());
-    //     }
-    //     if (DBG) log("conference: merge fg & bg");
-    //     mForegroundCall.merge(mBackgroundCall);
-    // }
-    assert(0);
+    AutoLock lock(this);    // synchronized (SipPhone.class)
+    ICallState state1, state2;
+    mForegroundCall->GetState(&state1);
+    mBackgroundCall->GetState(&state2);
+    if ((state1 != ICallState_ACTIVE)
+            || (state2 != ICallState_ACTIVE)) {
+        // throw new CallStateException("wrong state to merge calls: fg="
+        //         + mForegroundCall.getState() + ", bg="
+        //         + mBackgroundCall.getState());
+        return E_CALL_STATE_EXCEPTION;
+    }
+    if (DBG) Log(String("conference: merge fg & bg"));
+    mForegroundCall->Merge(mBackgroundCall);
+
     return NOERROR;
 }
 
 ECode SipPhone::Conference(
     /* [in] */ ICall* that)
 {
-    // ==================before translated======================
-    // synchronized (SipPhone.class) {
-    //     if (!(that instanceof SipCall)) {
-    //         throw new CallStateException("expect " + SipCall.class
-    //                 + ", cannot merge with " + that.getClass());
-    //     }
-    //     mForegroundCall.merge((SipCall) that);
-    // }
-    assert(0);
+    AutoLock lock(this);    // synchronized (SipPhone.class)
+    if ((SipCall*)that == NULL) {
+        // throw new CallStateException("expect " + SipCall.class
+        //         + ", cannot merge with " + that.getClass());
+        return E_CALL_STATE_EXCEPTION;
+    }
+    mForegroundCall->Merge((SipCall*)that);
+
     return NOERROR;
 }
 
@@ -1146,88 +1194,79 @@ ECode SipPhone::CanTransfer(
     /* [out] */ Boolean* result)
 {
     VALIDATE_NOT_NULL(result);
-    // ==================before translated======================
-    // return false;
-    assert(0);
+    *result = FALSE;
     return NOERROR;
 }
 
 ECode SipPhone::ExplicitCallTransfer()
 {
-    // ==================before translated======================
-    // //mCT.explicitCallTransfer();
-    assert(0);
+    //mCT.explicitCallTransfer();
     return NOERROR;
 }
 
 ECode SipPhone::ClearDisconnected()
 {
-    // ==================before translated======================
-    // synchronized (SipPhone.class) {
-    //     mRingingCall.clearDisconnected();
-    //     mForegroundCall.clearDisconnected();
-    //     mBackgroundCall.clearDisconnected();
-    //
-    //     updatePhoneState();
-    //     notifyPreciseCallStateChanged();
-    // }
-    assert(0);
+    AutoLock lock(this);    // synchronized (SipPhone.class)
+    mRingingCall->ClearDisconnected();
+    mForegroundCall->ClearDisconnected();
+    mBackgroundCall->ClearDisconnected();
+
+    UpdatePhoneState();
+    NotifyPreciseCallStateChanged();
+
     return NOERROR;
 }
 
 ECode SipPhone::SendDtmf(
     /* [in] */ Char32 c)
 {
-    // ==================before translated======================
-    // if (!PhoneNumberUtils.is12Key(c)) {
-    //     loge("sendDtmf called with invalid character '" + c + "'");
-    // } else if (mForegroundCall.getState().isAlive()) {
-    //     synchronized (SipPhone.class) {
-    //         mForegroundCall.sendDtmf(c);
-    //     }
+    ICallState state;
+    mBackgroundCall->GetState(&state);
+
+    Boolean b;
+    if (PhoneNumberUtils::Is12Key(c, &b), !b) {
+        Loge(String("sendDtmf called with invalid character '") + c + "'");
+    }
+// TODO: Need ICallState::IsAlive
+    // else if (state->IsAlive()) {
+    //     AutoLock lock(this);    // synchronized (SipPhone.class)
+    //     mForegroundCall->SendDtmf(c);
     // }
-    assert(0);
     return NOERROR;
 }
 
 ECode SipPhone::StartDtmf(
     /* [in] */ Char32 c)
 {
-    // ==================before translated======================
-    // if (!PhoneNumberUtils.is12Key(c)) {
-    //     loge("startDtmf called with invalid character '" + c + "'");
-    // } else {
-    //     sendDtmf(c);
-    // }
-    assert(0);
+    Boolean b;
+    if (PhoneNumberUtils::Is12Key(c, &b), !b) {
+        Loge(String("startDtmf called with invalid character '") + c + "'");
+    }
+    else {
+        SendDtmf(c);
+    }
     return NOERROR;
 }
 
 ECode SipPhone::StopDtmf()
 {
-    // ==================before translated======================
-    // // no op
-    assert(0);
+    // no op
     return NOERROR;
 }
 
 ECode SipPhone::SendBurstDtmf(
     /* [in] */ const String& dtmfString)
 {
-    // ==================before translated======================
-    // loge("sendBurstDtmf() is a CDMA method");
-    assert(0);
+    Loge(String("sendBurstDtmf() is a CDMA method"));
     return NOERROR;
 }
 
 ECode SipPhone::GetOutgoingCallerIdDisplay(
     /* [in] */ IMessage* onComplete)
 {
-    // ==================before translated======================
-    // // FIXME: what to reply?
-    // AsyncResult.forMessage(onComplete, null, null);
-    // onComplete.sendToTarget();
-    assert(0);
+    // FIXME: what to reply?
+    AsyncResult::ForMessage(onComplete, NULL, NULL);
+    onComplete->SendToTarget();
     return NOERROR;
 }
 
@@ -1235,22 +1274,18 @@ ECode SipPhone::SetOutgoingCallerIdDisplay(
     /* [in] */ Int32 commandInterfaceCLIRMode,
     /* [in] */ IMessage* onComplete)
 {
-    // ==================before translated======================
-    // // FIXME: what's this for SIP?
-    // AsyncResult.forMessage(onComplete, null, null);
-    // onComplete.sendToTarget();
-    assert(0);
+    // FIXME: what's this for SIP?
+    AsyncResult::ForMessage(onComplete, NULL, NULL);
+    onComplete->SendToTarget();
     return NOERROR;
 }
 
 ECode SipPhone::GetCallWaiting(
     /* [in] */ IMessage* onComplete)
 {
-    // ==================before translated======================
-    // // FIXME: what to reply?
-    // AsyncResult.forMessage(onComplete, null, null);
-    // onComplete.sendToTarget();
-    assert(0);
+    // FIXME: what to reply?
+    AsyncResult::ForMessage(onComplete, NULL, NULL);
+    onComplete->SendToTarget();
     return NOERROR;
 }
 
@@ -1258,37 +1293,34 @@ ECode SipPhone::SetCallWaiting(
     /* [in] */ Boolean enable,
     /* [in] */ IMessage* onComplete)
 {
-    // ==================before translated======================
-    // // FIXME: what to reply?
-    // loge("call waiting not supported");
-    assert(0);
+    // FIXME: what to reply?
+    Loge(String("call waiting not supported"));
     return NOERROR;
 }
 
 ECode SipPhone::SetEchoSuppressionEnabled()
 {
-    // ==================before translated======================
-    // // Echo suppression may not be available on every device. So, check
-    // // whether it is supported
-    // synchronized (SipPhone.class) {
-    //     AudioManager audioManager = (AudioManager) mContext.getSystemService(Context.AUDIO_SERVICE);
-    //     String echoSuppression = audioManager.getParameters("ec_supported");
-    //     if (echoSuppression.contains("off")) {
-    //         mForegroundCall.setAudioGroupMode();
-    //     }
-    // }
-    assert(0);
+    // Echo suppression may not be available on every device. So, check
+    // whether it is supported
+    AutoLock lock(this);    // synchronized (SipPhone.class)
+    AutoPtr<IInterface> obj;
+    mContext->GetSystemService(IContext::AUDIO_SERVICE, (IInterface**)&obj);
+    AutoPtr<IAudioManager> audioManager = IAudioManager::Probe(obj);
+    String echoSuppression;
+    audioManager->GetParameters(String("ec_supported"), &echoSuppression);
+    if (echoSuppression.Contains("off")) {
+        mForegroundCall->SetAudioGroupMode();
+    }
+
     return NOERROR;
 }
 
 ECode SipPhone::SetMute(
     /* [in] */ Boolean muted)
 {
-    // ==================before translated======================
-    // synchronized (SipPhone.class) {
-    //     mForegroundCall.setMute(muted);
-    // }
-    assert(0);
+    AutoLock lock(this);    // synchronized (SipPhone.class)
+    mForegroundCall->SetMute(muted);
+
     return NOERROR;
 }
 
@@ -1296,11 +1328,13 @@ ECode SipPhone::GetMute(
     /* [out] */ Boolean* result)
 {
     VALIDATE_NOT_NULL(result);
-    // ==================before translated======================
-    // return (mForegroundCall.getState().isAlive()
-    //         ? mForegroundCall.getMute()
-    //         : mBackgroundCall.getMute());
-    assert(0);
+    ICallState state;
+    mForegroundCall->GetState(&state);
+
+// TODO: Need ICallState::IsAlive
+    // return (state->IsAlive()
+    //         ? mForegroundCall->GetMute()
+    //         : mBackgroundCall->GetMute());
     return NOERROR;
 }
 
@@ -1308,9 +1342,8 @@ ECode SipPhone::GetForegroundCall(
     /* [out] */ ICall** result)
 {
     VALIDATE_NOT_NULL(result);
-    // ==================before translated======================
-    // return mForegroundCall;
-    assert(0);
+    *result = mForegroundCall;
+    REFCOUNT_ADD(*result)
     return NOERROR;
 }
 
@@ -1318,9 +1351,8 @@ ECode SipPhone::GetBackgroundCall(
     /* [out] */ ICall** result)
 {
     VALIDATE_NOT_NULL(result);
-    // ==================before translated======================
-    // return mBackgroundCall;
-    assert(0);
+    *result = mBackgroundCall;
+    REFCOUNT_ADD(*result)
     return NOERROR;
 }
 
@@ -1328,9 +1360,8 @@ ECode SipPhone::GetRingingCall(
     /* [out] */ ICall** result)
 {
     VALIDATE_NOT_NULL(result);
-    // ==================before translated======================
-    // return mRingingCall;
-    assert(0);
+    *result = mRingingCall;
+    REFCOUNT_ADD(*result)
     return NOERROR;
 }
 
@@ -1338,12 +1369,9 @@ ECode SipPhone::GetServiceState(
     /* [out] */ IServiceState** result)
 {
     VALIDATE_NOT_NULL(result);
-    // ==================before translated======================
-    // // FIXME: we may need to provide this when data connectivity is lost
-    // // or when server is down
-    // return super.getServiceState();
-    assert(0);
-    return NOERROR;
+    // FIXME: we may need to provide this when data connectivity is lost
+    // or when server is down
+    return SipPhoneBase::GetServiceState(result);
 }
 
 ECode SipPhone::Dial(
@@ -1353,124 +1381,123 @@ ECode SipPhone::Dial(
     /* [out] */ IConnection** result)
 {
     VALIDATE_NOT_NULL(result);
-    // ==================before translated======================
-    // // NOTE: Add implementation if call extras are needed to be
-    // //       passed through SIP phone.
-    // return null;
-    assert(0);
+    // NOTE: Add implementation if call extras are needed to be
+    //       passed through SIP phone.
+    *result = NULL;
     return NOERROR;
 }
 
-AutoPtr<IConnection> SipPhone::DialInternal(
+ECode SipPhone::DialInternal(
     /* [in] */ const String& dialString,
-    /* [in] */ Int32 videoState)
+    /* [in] */ Int32 videoState,
+    /* [out] */ IConnection** result)
 {
-    // ==================before translated======================
-    // if (DBG) log("dialInternal: dialString=" + (VDBG ? dialString : "xxxxxx"));
-    // clearDisconnected();
-    //
-    // if (!canDial()) {
-    //     throw new CallStateException("dialInternal: cannot dial in current state");
-    // }
-    // if (mForegroundCall.getState() == SipCall.State.ACTIVE) {
-    //     switchHoldingAndActive();
-    // }
-    // if (mForegroundCall.getState() != SipCall.State.IDLE) {
-    //     //we should have failed in !canDial() above before we get here
-    //     throw new CallStateException("cannot dial in current state");
-    // }
-    //
-    // mForegroundCall.setMute(false);
+    VALIDATE_NOT_NULL(result)
+
+    if (DBG) Log(String("dialInternal: dialString=") + (VDBG ? dialString : String("xxxxxx")));
+    ClearDisconnected();
+
+    Boolean b;
+    if (CanDial(&b), !b) {
+        // throw new CallStateException("dialInternal: cannot dial in current state");
+        return E_CALL_STATE_EXCEPTION;
+    }
+
+    ICallState state;
+    mForegroundCall->GetState(&state);
+    if (state == ICallState_ACTIVE) {
+        SwitchHoldingAndActive();
+    }
+    if (state != ICallState_IDLE) {
+        //we should have failed in !canDial() above before we get here
+        // throw new CallStateException("cannot dial in current state");
+        return E_CALL_STATE_EXCEPTION;
+    }
+
+    mForegroundCall->SetMute(FALSE);
     // try {
-    //     Connection c = mForegroundCall.dial(dialString);
-    //     return c;
+    AutoPtr<IConnection> c;
+    mForegroundCall->Dial(dialString, (IConnection**)&c);
+    *result = c;
+    REFCOUNT_ADD(*result)
+    return NOERROR;
     // } catch (SipException e) {
-    //     loge("dialInternal: ", e);
+    //     Loge("dialInternal: ", e);
     //     throw new CallStateException("dial error: " + e);
     // }
-    assert(0);
-    AutoPtr<IConnection> empty;
-    return empty;
 }
 
 String SipPhone::GetUriString(
     /* [in] */ /*TODO ISipProfile*/IInterface* p)
 {
-    // ==================before translated======================
-    // // SipProfile.getUriString() may contain "SIP:" and port
-    // return p.getUserName() + "@" + getSipDomain(p);
-    assert(0);
-    return String("");
+    // SipProfile.getUriString() may contain "SIP:" and port
+    String domain;
+// TODO: Need ISipProfile
+    // p->GetSipDomain(&domain);
+    return domain + "@" + GetSipDomain(p);
 }
 
 String SipPhone::GetSipDomain(
     /* [in] */ /*TODO ISipProfile*/IInterface* p)
 {
-    // ==================before translated======================
-    // String domain = p.getSipDomain();
-    // // TODO: move this to SipProfile
-    // if (domain.endsWith(":5060")) {
-    //     return domain.substring(0, domain.length() - 5);
-    // } else {
-    //     return domain;
-    // }
-    assert(0);
-    return String("");
+    String domain;
+// TODO: Need ISipProfile
+    // p->GetSipDomain(&domain);
+    // TODO: move this to SipProfile
+    if (domain.EndWith(":5060")) {
+        return domain.Substring(0, domain.GetLength() - 5);
+    }
+    else {
+        return domain;
+    }
 }
 
 ICallState SipPhone::GetCallStateFrom(
     /* [in] */ /*TODO ISipAudioCall*/IInterface* sipAudioCall)
 {
-    // ==================before translated======================
-    // if (sipAudioCall.isOnHold()) return Call.State.HOLDING;
-    // int sessionState = sipAudioCall.getState();
-    // switch (sessionState) {
-    //     case SipSession.State.READY_TO_CALL:            return Call.State.IDLE;
-    //     case SipSession.State.INCOMING_CALL:
-    //     case SipSession.State.INCOMING_CALL_ANSWERING:  return Call.State.INCOMING;
-    //     case SipSession.State.OUTGOING_CALL:            return Call.State.DIALING;
-    //     case SipSession.State.OUTGOING_CALL_RING_BACK:  return Call.State.ALERTING;
-    //     case SipSession.State.OUTGOING_CALL_CANCELING:  return Call.State.DISCONNECTING;
-    //     case SipSession.State.IN_CALL:                  return Call.State.ACTIVE;
-    //     default:
-    //         slog("illegal connection state: " + sessionState);
-    //         return Call.State.DISCONNECTED;
-    // }
-    assert(0);
+// TODO: Need ISipAudioCall
+    // if (sipAudioCall->IsOnHold()) return ICallState_HOLDING;
+    Int32 sessionState;
+    // sipAudioCall->GetState(&sessionState);
+    switch (sessionState) {
+// TODO: Need SipSession
+        // case SipSession.State.READY_TO_CALL:            return ICallState_IDLE;
+        // case SipSession.State.INCOMING_CALL:
+        // case SipSession.State.INCOMING_CALL_ANSWERING:  return ICallState_INCOMING;
+        // case SipSession.State.OUTGOING_CALL:            return ICallState_DIALING;
+        // case SipSession.State.OUTGOING_CALL_RING_BACK:  return ICallState_ALERTING;
+        // case SipSession.State.OUTGOING_CALL_CANCELING:  return ICallState_DISCONNECTING;
+        // case SipSession.State.IN_CALL:                  return ICallState_ACTIVE;
+        default:
+            Slog(String("illegal connection state: ") + StringUtils::ToString(sessionState));
+            return ICallState_DISCONNECTED;
+    }
     return 0;
 }
 
 void SipPhone::Log(
     /* [in] */ const String& s)
 {
-    // ==================before translated======================
-    // Rlog.d(LOGTAG, s);
-    assert(0);
+    Logger::D(LOGTAG, s);
 }
 
 void SipPhone::Slog(
     /* [in] */ const String& s)
 {
-    // ==================before translated======================
-    // Rlog.d(LOGTAG, s);
-    assert(0);
+    Logger::D(LOGTAG, s);
 }
 
 void SipPhone::Loge(
     /* [in] */ const String& s)
 {
-    // ==================before translated======================
-    // Rlog.e(LOGTAG, s);
-    assert(0);
+    Logger::E(LOGTAG, s);
 }
 
 //void SipPhone::Loge(
 //    /* [in] */ const String& s,
 //    /* [in] */ Exception* e)
 //{
-//    // ==================before translated======================
 //    // Rlog.e(LOGTAG, s, e);
-//    assert(0);
 //}
 
 } // namespace Sip
