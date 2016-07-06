@@ -101,6 +101,7 @@ SOURCES += CIConditionProviderNative.cpp
 SOURCES += CIConditionListenerNative.cpp
 SOURCES += CIParcelFileDescriptorFactoryNative.cpp
 SOURCES += CIWindowSessionCallbackNative.cpp
+SOURCES += CINetworkPolicyListenerNative.cpp
 
 LIBRARIES += $(XDK_USER_LIB)/Elastos.Runtime.lib
 LIBRARIES += $(XDK_TARGETS)/Elastos.Runtime.eco
