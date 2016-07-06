@@ -3,8 +3,8 @@
 #include "elastos/droid/settings/inputmethod/InputMethodAndLanguageSettings.h"
 #include "elastos/droid/settings/inputmethod/InputMethodSettingValuesWrapper.h"
 #include "elastos/droid/settings/inputmethod/InputMethodAndSubtypeUtil.h"
-#include "elastos/droid/settings/inputmethod/InputMethodPreference.h"
-#include "elastos/droid/settings/inputmethod/KeyboardLayoutDialogFragment.h"
+#include "elastos/droid/settings/inputmethod/CInputMethodPreference.h"
+#include "elastos/droid/settings/inputmethod/CKeyboardLayoutDialogFragment.h"
 #include "elastos/droid/settings/inputmethod/KeyboardLayoutPickerFragment.h"
 #include "elastos/droid/settings/inputmethod/UserDictionaryList.h"
 #include "elastos/droid/settings/search/SearchIndexableRaw.h"
@@ -17,6 +17,7 @@
 #include <elastos/core/AutoLock.h>
 #include <elastos/core/CoreUtils.h>
 #include <elastos/core/StringUtils.h>
+#include <elastos/utility/logging/Slogger.h>
 
 using Elastos::Droid::App::IActivity;
 using Elastos::Droid::Content::IComponentName;
@@ -56,6 +57,7 @@ using Elastos::Droid::Settings::Utils;
 using Elastos::Droid::Settings::Search::SearchIndexableRaw;
 using Elastos::Droid::Settings::Search::ISearchIndexableRaw;
 using Elastos::Droid::Settings::Search::EIID_IIndexableSearchIndexProvider;
+using Elastos::Droid::Settings::Search::EIID_IIndexable;
 using Elastos::Droid::Speech::Tts::ITtsEngines;
 using Elastos::Droid::Speech::Tts::CTtsEngines;
 using Elastos::Droid::Text::TextUtils;
@@ -77,6 +79,7 @@ using Elastos::Utility::CArrayList;
 using Elastos::Utility::IHashSet;
 using Elastos::Utility::CHashSet;
 using Elastos::Utility::ILocale;
+using Elastos::Utility::Logging::Slogger;
 
 namespace Elastos {
 namespace Droid {
@@ -190,7 +193,7 @@ ECode InputMethodAndLanguageSettings::MyBaseSearchIndexProvider::GetRawDataToInd
     AutoPtr<IInterface> obj;
     context->GetSystemService(
             IContext::INPUT_METHOD_SERVICE, (IInterface**)&obj);
-    AutoPtr<IInputMethodManager> inputMethodManager = IInputMethodManager::Probe(obj);
+    IInputMethodManager* inputMethodManager = IInputMethodManager::Probe(obj);
 
     // All other IMEs.
     AutoPtr<IList> inputMethods = immValues->GetInputMethodList();//List<InputMethodInfo>
@@ -199,7 +202,7 @@ ECode InputMethodAndLanguageSettings::MyBaseSearchIndexProvider::GetRawDataToInd
     for (Int32 i = 0; i < inputMethodCount; ++i) {
         obj = NULL;
         inputMethods->Get(i, (IInterface**)&obj);
-        AutoPtr<IInputMethodInfo> inputMethod = IInputMethodInfo::Probe(obj);
+        IInputMethodInfo* inputMethod = IInputMethodInfo::Probe(obj);
 
         StringBuilder builder;
         AutoPtr<IList> subtypes;//List<InputMethodSubtype>
@@ -210,7 +213,7 @@ ECode InputMethodAndLanguageSettings::MyBaseSearchIndexProvider::GetRawDataToInd
         for (Int32 j = 0; j < subtypeCount; j++) {
             obj = NULL;
             subtypes->Get(j, (IInterface**)&obj);
-            AutoPtr<IInputMethodSubtype> subtype = IInputMethodSubtype::Probe(obj);
+            IInputMethodSubtype* subtype = IInputMethodSubtype::Probe(obj);
             if (builder.GetLength() > 0) {
                 builder.AppendChar(',');
             }
@@ -231,7 +234,7 @@ ECode InputMethodAndLanguageSettings::MyBaseSearchIndexProvider::GetRawDataToInd
 
         AutoPtr<IServiceInfo> serviceInfo;
         inputMethod->GetServiceInfo((IServiceInfo**)&serviceInfo);
-        AutoPtr<IPackageItemInfo> piObj = IPackageItemInfo::Probe(serviceInfo);
+        IPackageItemInfo* piObj = IPackageItemInfo::Probe(serviceInfo);
         String packageName;
         piObj->GetPackageName(&packageName);
         String name;
@@ -258,7 +261,7 @@ ECode InputMethodAndLanguageSettings::MyBaseSearchIndexProvider::GetRawDataToInd
     obj = NULL;
     context->GetSystemService(
             IContext::INPUT_SERVICE, (IInterface**)&obj);
-    AutoPtr<IInputManager> inputManager = IInputManager::Probe(obj);
+    IInputManager* inputManager = IInputManager::Probe(obj);
     Boolean hasHardKeyboards = FALSE;
 
     AutoPtr<IInputDeviceHelper> helper;
@@ -485,7 +488,7 @@ ECode InputMethodAndLanguageSettings::PreferenceOnPreferenceClickListener::OnPre
             else {
                 // targetFragment = UserDictionaryList.class;
                 mHost->StartFragment(mHost,
-                        String("Elastos.Droid.Settings.Inputmethod.UserDictionaryList"),
+                        String("Elastos.Droid.Settings.Inputmethod.CUserDictionaryList"),
                         -1, -1, extras);
             }
             *res = TRUE;
@@ -521,8 +524,8 @@ ECode InputMethodAndLanguageSettings::Comparator::Compare(
 {
     VALIDATE_NOT_NULL(result)
 
-    AutoPtr<InputMethodPreference> implhs = (InputMethodPreference*)IInputMethodPreference::Probe(lhs);
-    AutoPtr<InputMethodPreference> imprhs = (InputMethodPreference*)IInputMethodPreference::Probe(rhs);
+    AutoPtr<CInputMethodPreference> implhs = (CInputMethodPreference*)IInputMethodPreference::Probe(lhs);
+    AutoPtr<CInputMethodPreference> imprhs = (CInputMethodPreference*)IInputMethodPreference::Probe(rhs);
     *result = implhs->CompareTo(imprhs, mCollator);
     return NOERROR;
 }
@@ -533,7 +536,7 @@ ECode InputMethodAndLanguageSettings::Comparator::Compare(
 
 CAR_INTERFACE_IMPL_5(InputMethodAndLanguageSettings, SettingsPreferenceFragment,
         IPreferenceOnPreferenceChangeListener, IInputDeviceListener,
-        IOnSetupKeyboardLayoutsListener, IIndexableSearchIndexProvider,
+        IOnSetupKeyboardLayoutsListener, IIndexable,
         IOnSavePreferenceListener)
 
 InputMethodAndLanguageSettings::InputMethodAndLanguageSettings()
@@ -547,9 +550,16 @@ InputMethodAndLanguageSettings::InputMethodAndLanguageSettings()
 InputMethodAndLanguageSettings::~InputMethodAndLanguageSettings()
 {}
 
+ECode InputMethodAndLanguageSettings::constructor()
+{
+    return NOERROR;
+}
+
 ECode InputMethodAndLanguageSettings::OnCreate(
     /* [in] */ IBundle* icicle)
 {
+    Slogger::I("InputMethodAndLanguageSettings", " >> enter InputMethodAndLanguageSettings::OnCreate");
+
     SettingsPreferenceFragment::OnCreate(icicle);
 
     AddPreferencesFromResource(R::xml::language_settings);
@@ -558,7 +568,7 @@ ECode InputMethodAndLanguageSettings::OnCreate(
     GetActivity((IActivity**)&activity);
     AutoPtr<IInterface> obj = GetSystemService(IContext::INPUT_METHOD_SERVICE);
     mImm = IInputMethodManager::Probe(obj);
-    AutoPtr<IContext> conObj = IContext::Probe(activity);
+    IContext* conObj = IContext::Probe(activity);
     mInputMethodSettingValues =
             InputMethodSettingValuesWrapper::GetInstance(conObj);
 
@@ -598,7 +608,7 @@ ECode InputMethodAndLanguageSettings::OnCreate(
         UpdateInputMethodSelectorSummary(LoadInputMethodSelectorVisibility());
     }
 
-    AutoPtr<VoiceInputOutputSettings> vios = new VoiceInputOutputSettings(this);
+    AutoPtr<VoiceInputOutputSettings> vios = new VoiceInputOutputSettings((ISettingsPreferenceFragment*)this);
     vios->OnCreate();
 
     // Get references to dynamically constructed categories.
@@ -624,7 +634,7 @@ ECode InputMethodAndLanguageSettings::OnCreate(
     if (mShowsOnlyFullImeAndKeyboardList) {
         AutoPtr<IPreferenceScreen> screen;
         GetPreferenceScreen((IPreferenceScreen**)&screen);
-        AutoPtr<IPreferenceGroup> prefgObj = IPreferenceGroup::Probe(screen);
+        IPreferenceGroup* prefgObj = IPreferenceGroup::Probe(screen);
         prefgObj->RemoveAll();
         Boolean res;
         prefgObj->AddPreference(
@@ -672,10 +682,12 @@ ECode InputMethodAndLanguageSettings::OnCreate(
     AutoPtr<IParcelable> value;
     startingIntent->GetParcelableExtra(ISettings::EXTRA_INPUT_DEVICE_IDENTIFIER,
             (IParcelable**)&value);
-    AutoPtr<IInputDeviceIdentifier> identifier = IInputDeviceIdentifier::Probe(value);
+    IInputDeviceIdentifier* identifier = IInputDeviceIdentifier::Probe(value);
     if (mShowsOnlyFullImeAndKeyboardList && identifier != NULL) {
         ShowKeyboardLayoutDialog(identifier);
     }
+
+    Slogger::I("InputMethodAndLanguageSettings", " << leave InputMethodAndLanguageSettings::OnCreate");
     return NOERROR;
 }
 
@@ -720,6 +732,7 @@ void InputMethodAndLanguageSettings::UpdateUserDictionaryPreference(
 
 ECode InputMethodAndLanguageSettings::OnResume()
 {
+    Slogger::I("InputMethodAndLanguageSettings", " >> enter InputMethodAndLanguageSettings::OnResume");
     SettingsPreferenceFragment::OnResume();
 
     mSettingsObserver->Resume();
@@ -730,7 +743,7 @@ ECode InputMethodAndLanguageSettings::OnResume()
     if (spellChecker != NULL) {
         AutoPtr<IInterface> obj = GetSystemService(
                 IContext::TEXT_SERVICES_MANAGER_SERVICE);
-        AutoPtr<ITextServicesManager> tsm = ITextServicesManager::Probe(obj);
+        ITextServicesManager* tsm = ITextServicesManager::Probe(obj);
         Boolean res;
         if (tsm->IsSpellCheckerEnabled(&res), res) {
             AutoPtr<ISpellCheckerInfo> sci;
@@ -767,11 +780,13 @@ ECode InputMethodAndLanguageSettings::OnResume()
     // "InputMethodInfo"s and "InputMethodSubtype"s
     mInputMethodSettingValues->RefreshAllInputMethodAndSubtypes();
     UpdateInputMethodPreferenceViews();
+    Slogger::I("InputMethodAndLanguageSettings", " << leave InputMethodAndLanguageSettings::OnResume");
     return NOERROR;
 }
 
 ECode InputMethodAndLanguageSettings::OnPause()
 {
+    Slogger::I("InputMethodAndLanguageSettings", " >> enter InputMethodAndLanguageSettings::OnPause");
     SettingsPreferenceFragment::OnPause();
 
     mIm->UnregisterInputDeviceListener(this);
@@ -786,6 +801,7 @@ ECode InputMethodAndLanguageSettings::OnPause()
     InputMethodAndSubtypeUtil::SaveInputMethodSubtypeList(
             this, GetContentResolver(),
             mInputMethodSettingValues->GetInputMethodList(), !res);
+    Slogger::I("InputMethodAndLanguageSettings", " << leave InputMethodAndLanguageSettings::OnPause");
     return NOERROR;
 }
 
@@ -832,16 +848,16 @@ ECode InputMethodAndLanguageSettings::OnPreferenceTreeClick(
         }
         else if (KEY_CURRENT_INPUT_METHOD.Equals(key)) {
             AutoPtr<IInterface> obj = GetSystemService(IContext::INPUT_METHOD_SERVICE);
-            AutoPtr<IInputMethodManager> imm = IInputMethodManager::Probe(obj);
+            IInputMethodManager* imm = IInputMethodManager::Probe(obj);
             imm->ShowInputMethodPicker();
         }
     }
     else if (ICheckBoxPreference::Probe(preference) != NULL) {
-        AutoPtr<ICheckBoxPreference> chkPref = ICheckBoxPreference::Probe(preference);
+        ICheckBoxPreference* chkPref = ICheckBoxPreference::Probe(preference);
         AutoPtr<IPreference> pref;
         IPreferenceGroup::Probe(mGameControllerCategory)->FindPreference(
                 CoreUtils::Convert("vibrate_input_devices"), (IPreference**)&pref);
-        if (chkPref.Get() == ICheckBoxPreference::Probe(pref)) {
+        if (chkPref == ICheckBoxPreference::Probe(pref)) {
             Boolean isChecked;
             ITwoStatePreference::Probe(chkPref)->IsChecked(&isChecked);
             AutoPtr<ISettingsSystem> sys;
@@ -877,7 +893,7 @@ String InputMethodAndLanguageSettings::GetLocaleName(
     for (Int32 i = 0; i < size; ++i) {
         AutoPtr<IInterface> obj;
         locales->Get(i, (IInterface**)&obj);
-        AutoPtr<ILocaleInfo> locale = ILocaleInfo::Probe(obj);
+        ILocaleInfo* locale = ILocaleInfo::Probe(obj);
         AutoPtr<ILocale> loc;
         locale->GetLocale((ILocale**)&loc);
         Boolean res;
@@ -940,14 +956,15 @@ ECode InputMethodAndLanguageSettings::OnPreferenceChange(
 
 void InputMethodAndLanguageSettings::UpdateInputMethodPreferenceViews()
 {
-    {    AutoLock syncLock(mInputMethodPreferenceList);
+    {
+        AutoLock syncLock(mInputMethodPreferenceList);
         // Clear existing "InputMethodPreference"s
         Int32 size;
         mInputMethodPreferenceList->GetSize(&size);
         for (Int32 i = 0; i < size; ++i) {
             AutoPtr<IInterface> obj;
             mInputMethodPreferenceList->Get(i, (IInterface**)&obj);
-            AutoPtr<IInputMethodPreference> pref = IInputMethodPreference::Probe(obj);
+            IInputMethodPreference* pref = IInputMethodPreference::Probe(obj);
             Boolean res;
             IPreferenceGroup::Probe(mKeyboardSettingsCategory)->RemovePreference(
                     IPreference::Probe(pref), &res);
@@ -959,7 +976,7 @@ void InputMethodAndLanguageSettings::UpdateInputMethodPreferenceViews()
         // mDpm->GetPermittedInputMethodsForCurrentUser((IList**)&permittedList);
         AutoPtr<IActivity> activity;
         GetActivity((IActivity**)&activity);
-        AutoPtr<IContext> context = IContext::Probe(activity);
+        IContext* context = IContext::Probe(activity);
 
         //TODO
         AutoPtr<IList> imis;//List<InputMethodInfo>
@@ -981,16 +998,17 @@ void InputMethodAndLanguageSettings::UpdateInputMethodPreferenceViews()
         for (Int32 i = 0; i < N; ++i) {
             AutoPtr<IInterface> obj;
             imis->Get(i, (IInterface**)&obj);
-            AutoPtr<IInputMethodInfo> imi = IInputMethodInfo::Probe(obj);
+            IInputMethodInfo* imi = IInputMethodInfo::Probe(obj);
             String packageName;
             imi->GetPackageName(&packageName);
             Boolean res;
             Boolean isAllowedByOrganization = permittedList == NULL
                     || (permittedList->Contains(CoreUtils::Convert(packageName), &res), res);
-            AutoPtr<InputMethodPreference> pref = new InputMethodPreference(
+            AutoPtr<IInputMethodPreference> pref;
+            CInputMethodPreference::New(
                     context, imi, mShowsOnlyFullImeAndKeyboardList /* hasSwitch */,
-                    isAllowedByOrganization, this);
-            mInputMethodPreferenceList->Add((IInputMethodPreference*)pref);
+                    isAllowedByOrganization, this, (IInputMethodPreference**)&pref);
+            mInputMethodPreferenceList->Add(pref);
         }
         AutoPtr<ICollatorHelper> helper;
         CCollatorHelper::AcquireSingleton((ICollatorHelper**)&helper);
@@ -1003,13 +1021,13 @@ void InputMethodAndLanguageSettings::UpdateInputMethodPreferenceViews()
         for (Int32 i = 0; i < N; ++i) {
             AutoPtr<IInterface> obj;
             mInputMethodPreferenceList->Get(i, (IInterface**)&obj);
-            AutoPtr<IInputMethodPreference> pref = IInputMethodPreference::Probe(obj);
-            AutoPtr<IPreference> prefObj = IPreference::Probe(pref);
+            IInputMethodPreference* pref = IInputMethodPreference::Probe(obj);
+            IPreference* prefObj = IPreference::Probe(pref);
             Boolean res;
             IPreferenceGroup::Probe(mKeyboardSettingsCategory)->AddPreference(
                     prefObj, &res);
             InputMethodAndSubtypeUtil::RemoveUnnecessaryNonPersistentPreference(prefObj);
-            ((InputMethodPreference*)pref.Get())->UpdatePreferenceViews();
+            ((CInputMethodPreference*)pref)->UpdatePreferenceViews();
         }
     }
     UpdateCurrentImeName();
@@ -1024,7 +1042,7 @@ void InputMethodAndLanguageSettings::UpdateInputMethodPreferenceViews()
 ECode InputMethodAndLanguageSettings::OnSaveInputMethodPreference(
     /* [in] */ IInputMethodPreference* pref)
 {
-    AutoPtr<IInputMethodInfo> imi = ((InputMethodPreference*)pref)->GetInputMethodInfo();
+    AutoPtr<IInputMethodInfo> imi = ((CInputMethodPreference*)pref)->GetInputMethodInfo();
     Boolean res;
     if (ITwoStatePreference::Probe(pref)->IsChecked(&res), !res) {
         // An IME is being disabled. Save enabled subtypes of the IME to shared preference to be
@@ -1055,8 +1073,8 @@ ECode InputMethodAndLanguageSettings::OnSaveInputMethodPreference(
     for (Int32 i = 0; i < size; i++) {
         AutoPtr<IInterface> obj;
         mInputMethodPreferenceList->Get(i, (IInterface**)&obj);
-        AutoPtr<IInputMethodPreference> p = IInputMethodPreference::Probe(obj);
-        ((InputMethodPreference*)p.Get())->UpdatePreferenceViews();
+        IInputMethodPreference* p = IInputMethodPreference::Probe(obj);
+        ((CInputMethodPreference*)p)->UpdatePreferenceViews();
     }
     return NOERROR;
 }
@@ -1075,7 +1093,7 @@ void InputMethodAndLanguageSettings::SaveEnabledSubtypesOf(
     for (Int32 i = 0; i < size; i++) {
         AutoPtr<IInterface> obj;
         enabledSubtypes->Get(i, (IInterface**)&obj);
-        AutoPtr<IInputMethodSubtype> subtype = IInputMethodSubtype::Probe(obj);
+        IInputMethodSubtype* subtype = IInputMethodSubtype::Probe(obj);
         Int32 hashcode;
         IObject::Probe(subtype)->GetHashCode(&hashcode);
         String subtypeId = StringUtils::ToString(hashcode);
@@ -1100,7 +1118,7 @@ void InputMethodAndLanguageSettings::RestorePreviouslyEnabledSubtypesOf(
     imi->GetId(&imiId);
     AutoPtr<IInterface> obj;
     imeToEnabledSubtypeIdsMap->Remove(CoreUtils::Convert(imiId), (IInterface**)&obj);
-    AutoPtr<IHashSet> enabledSubtypeIdSet = IHashSet::Probe(obj); //HashSet<String>
+    IHashSet* enabledSubtypeIdSet = IHashSet::Probe(obj); //HashSet<String>
     if (enabledSubtypeIdSet == NULL) {
         return;
     }
@@ -1113,7 +1131,7 @@ void InputMethodAndLanguageSettings::RestorePreviouslyEnabledSubtypesOf(
 {
     AutoPtr<IActivity> activity;
     GetActivity((IActivity**)&activity);
-    AutoPtr<IContext> context = IContext::Probe(activity);
+    IContext* context = IContext::Probe(activity);
     AutoPtr<IPreferenceManagerHelper> helper;
     CPreferenceManagerHelper::AcquireSingleton((IPreferenceManagerHelper**)&helper);
     AutoPtr<ISharedPreferences> prefs;
@@ -1128,7 +1146,7 @@ void InputMethodAndLanguageSettings::SavePreviouslyEnabledSubtypeIdsMap(
 {
     AutoPtr<IActivity> activity;
     GetActivity((IActivity**)&activity);
-    AutoPtr<IContext> context = IContext::Probe(activity);
+    IContext* context = IContext::Probe(activity);
     AutoPtr<IPreferenceManagerHelper> helper;
     CPreferenceManagerHelper::AcquireSingleton((IPreferenceManagerHelper**)&helper);
     AutoPtr<ISharedPreferences> prefs;
@@ -1144,7 +1162,7 @@ void InputMethodAndLanguageSettings::UpdateCurrentImeName()
 {
     AutoPtr<IActivity> activity;
     GetActivity((IActivity**)&activity);
-    AutoPtr<IContext> context = IContext::Probe(activity);
+    IContext* context = IContext::Probe(activity);
     if (context == NULL || mImm == NULL) return;
 
     AutoPtr<IPreferenceScreen> screen;
@@ -1156,7 +1174,8 @@ void InputMethodAndLanguageSettings::UpdateCurrentImeName()
         AutoPtr<ICharSequence> curIme =
                 mInputMethodSettingValues->GetCurrentInputMethodName(context);
         if (!TextUtils::IsEmpty(curIme)) {
-            {    AutoLock syncLock(this);
+            {
+                AutoLock syncLock(this);
                 curPref->SetSummary(curIme);
             }
         }
@@ -1199,7 +1218,7 @@ void InputMethodAndLanguageSettings::UpdateHardKeyboards()
             CPreferenceScreen::New(IContext::Probe(activity), NULL, (IPreferenceScreen**)&pref);
             String name;
             device->GetName(&name);
-            AutoPtr<IPreference> preference = IPreference::Probe(pref);
+            IPreference* preference = IPreference::Probe(pref);
             preference->SetTitle(CoreUtils::Convert(name));
             if (keyboardLayout != NULL) {
                 preference->SetSummary(CoreUtils::Convert(TO_STR(keyboardLayout)));
@@ -1217,7 +1236,7 @@ void InputMethodAndLanguageSettings::UpdateHardKeyboards()
 
     Boolean res;
     if (mHardKeyboardPreferenceList->IsEmpty(&res), !res) {
-        AutoPtr<IPreferenceGroup> prefg = IPreferenceGroup::Probe(mHardKeyboardCategory);
+        IPreferenceGroup* prefg = IPreferenceGroup::Probe(mHardKeyboardCategory);
         Int32 size;
         prefg->GetPreferenceCount(&size);
         for (Int32 i = size; i-- > 0; ) {
@@ -1238,7 +1257,7 @@ void InputMethodAndLanguageSettings::UpdateHardKeyboards()
         for (Int32 i = 0; i < count; i++) {
             AutoPtr<IInterface> obj;
             mHardKeyboardPreferenceList->Get(i, (IInterface**)&obj);
-            AutoPtr<IPreference> pref = IPreference::Probe(obj);
+            IPreference* pref = IPreference::Probe(obj);
             pref->SetOrder(i);
             prefg->AddPreference(pref, &res);
         }
@@ -1259,8 +1278,9 @@ void InputMethodAndLanguageSettings::UpdateHardKeyboards()
 void InputMethodAndLanguageSettings::ShowKeyboardLayoutDialog(
     /* [in] */ IInputDeviceIdentifier* inputDeviceIdentifier)
 {
-    AutoPtr<KeyboardLayoutDialogFragment> fragment = new KeyboardLayoutDialogFragment(
-            inputDeviceIdentifier);
+    AutoPtr<CKeyboardLayoutDialogFragment> fragment;
+    CKeyboardLayoutDialogFragment::NewByFriend(
+            inputDeviceIdentifier, (CKeyboardLayoutDialogFragment**)&fragment);
     fragment->SetTargetFragment(this, 0);
     AutoPtr<IActivity> activity;
     GetActivity((IActivity**)&activity);
@@ -1297,7 +1317,7 @@ ECode InputMethodAndLanguageSettings::OnActivityResult(
         mIntentWaitingForResult->GetParcelableExtra(
                 KeyboardLayoutPickerFragment::EXTRA_INPUT_DEVICE_IDENTIFIER,
                 (IParcelable**)&parcel);
-        AutoPtr<IInputDeviceIdentifier> inputDeviceIdentifier =
+        IInputDeviceIdentifier* inputDeviceIdentifier =
                 IInputDeviceIdentifier::Probe(parcel);
         mIntentWaitingForResult = NULL;
         ShowKeyboardLayoutDialog(inputDeviceIdentifier);
@@ -1309,8 +1329,8 @@ void InputMethodAndLanguageSettings::UpdateGameControllers()
 {
     AutoPtr<IPreferenceScreen> screen;
     GetPreferenceScreen((IPreferenceScreen**)&screen);
-    AutoPtr<IPreferenceGroup> prefg = IPreferenceGroup::Probe(screen);
-    AutoPtr<IPreference> preference = IPreference::Probe(mGameControllerCategory);
+    IPreferenceGroup* prefg = IPreferenceGroup::Probe(screen);
+    IPreference* preference = IPreference::Probe(mGameControllerCategory);
     Boolean res;
     if (HaveInputDeviceWithVibrator()) {
         prefg->AddPreference(preference, &res);

@@ -1,7 +1,13 @@
+#include "Elastos.Droid.App.h"
+#include "Elastos.Droid.Preference.h"
 #include "elastos/droid/settings/VoiceInputOutputSettings.h"
 #include "elastos/droid/settings/voice/VoiceInputHelper.h"
 #include <elastos/core/CoreUtils.h>
 
+using Elastos::Droid::App::IActivity;
+using Elastos::Droid::App::IFragment;
+using Elastos::Droid::Preference::IPreferenceGroup;
+using Elastos::Droid::Preference::IPreferenceFragment;
 using Elastos::Droid::Preference::IPreferenceScreen;
 using Elastos::Droid::Settings::Voice::VoiceInputHelper;
 using Elastos::Droid::Speech::Tts::CTtsEngines;
@@ -18,11 +24,11 @@ const String VoiceInputOutputSettings::KEY_VOICE_INPUT_SETTINGS("voice_input_set
 const String VoiceInputOutputSettings::KEY_TTS_SETTINGS("tts_settings");
 
 VoiceInputOutputSettings::VoiceInputOutputSettings(
-    /* [in] */ SettingsPreferenceFragment* fragment)
+    /* [in] */ ISettingsPreferenceFragment* fragment)
     : mFragment(fragment)
 {
     AutoPtr<IPreferenceScreen> screen;
-    fragment->GetPreferenceScreen((IPreferenceScreen**)&screen);
+    IPreferenceFragment::Probe(fragment)->GetPreferenceScreen((IPreferenceScreen**)&screen);
     AutoPtr<IContext> context;
     IPreference::Probe(screen)->GetContext((IContext**)&context);
     CTtsEngines::New(context, (ITtsEngines**)&mTtsEngines);
@@ -34,7 +40,7 @@ VoiceInputOutputSettings::~VoiceInputOutputSettings()
 ECode VoiceInputOutputSettings::OnCreate()
 {
     AutoPtr<IPreferenceScreen> screen;
-    mFragment->GetPreferenceScreen((IPreferenceScreen**)&screen);
+    IPreferenceFragment::Probe(mFragment)->GetPreferenceScreen((IPreferenceScreen**)&screen);
     mParent = IPreferenceGroup::Probe(screen);
     AutoPtr<IPreference> pref;
     mParent->FindPreference(CoreUtils::Convert(KEY_VOICE_CATEGORY),
@@ -61,7 +67,7 @@ void VoiceInputOutputSettings::PopulateOrRemovePreferences()
         // so it should be safe to hide the preference category
         // entirely.
         AutoPtr<IPreferenceScreen> screen;
-        mFragment->GetPreferenceScreen((IPreferenceScreen**)&screen);
+        IPreferenceFragment::Probe(mFragment)->GetPreferenceScreen((IPreferenceScreen**)&screen);
         Boolean res;
         IPreferenceGroup::Probe(screen)->RemovePreference(
                 IPreference::Probe(mVoiceCategory), &res);
@@ -71,7 +77,7 @@ void VoiceInputOutputSettings::PopulateOrRemovePreferences()
 Boolean VoiceInputOutputSettings::PopulateOrRemoveVoiceInputPrefs()
 {
     AutoPtr<IActivity> activity;
-    mFragment->GetActivity((IActivity**)&activity);
+    IFragment::Probe(mFragment)->GetActivity((IActivity**)&activity);
     AutoPtr<VoiceInputHelper> helper = new VoiceInputHelper(IContext::Probe(activity));
     if (!helper->HasItems()) {
         Boolean res;

@@ -28,10 +28,12 @@ module
     merge("car/elastos/droid/wifi/WpsDialog.car");
 
     using interface Elastos.Droid.App.IActivity;
-    using interface Elastos.Droid.App.IListFragment;
+    using interface Elastos.Droid.App.IDialogFragment;
     using interface Elastos.Droid.App.IFragment;
-    using interface Elastos.Droid.App.IFragmentManagerOnBackStackChangedListener;
     using interface Elastos.Droid.App.IDatePickerDialogOnDateSetListener;
+    using interface Elastos.Droid.App.IFragmentManagerOnBackStackChangedListener;
+    using interface Elastos.Droid.App.IListFragment;
+    using interface Elastos.Droid.App.ILoaderManagerLoaderCallbacks;
     using interface Elastos.Droid.App.ITimePickerDialogOnTimeSetListener;
     using interface Elastos.Droid.AppWidget.IAppWidgetProvider;
     using interface Elastos.Droid.Content.IBroadcastReceiver;
@@ -41,11 +43,18 @@ module
     using interface Elastos.Droid.Content.IComponentCallbacks;
     using interface Elastos.Droid.Content.IComponentCallbacks2;
     using interface Elastos.Droid.Content.IDialogInterfaceOnClickListener;
+    using interface Elastos.Droid.Content.IDialogInterfaceOnCancelListener;
+    using interface Elastos.Droid.Content.IDialogInterfaceOnDismissListener;
     using interface Elastos.Droid.Content.ISharedPreferencesOnSharedPreferenceChangeListener;
     using interface Elastos.Droid.Graphics.Drawable.IDrawableCallback;
+    using interface Elastos.Droid.Hardware.Input.IInputDeviceListener;
+    using interface Elastos.Droid.Hardware.Input.IInputDeviceIdentifier;
     using interface Elastos.Droid.Os.IBundle;
     using interface Elastos.Droid.Preference.IPreference;
+    using interface Elastos.Droid.Preference.ISwitchPreference;
+    using interface Elastos.Droid.Preference.ITwoStatePreference;
     using interface Elastos.Droid.Preference.IPreferenceFragment;
+    using interface Elastos.Droid.Preference.IPreferenceOnPreferenceClickListener;
     using interface Elastos.Droid.Preference.IPreferenceOnPreferenceChangeListener;
     using interface Elastos.Droid.Preference.IPreferenceManagerOnPreferenceTreeClickListener;
     using interface Elastos.Droid.Preference.IPreferenceFragmentOnPreferenceStartFragmentCallback;
@@ -55,6 +64,7 @@ module
     using interface Elastos.Droid.Settings.ISettingsPreferenceFragment;
     using interface Elastos.Droid.Utility.IAttributeSet;
     using interface Elastos.Droid.View.Accessibility.IAccessibilityEventSource;
+    using interface Elastos.Droid.View.InputMethod.IInputMethodInfo;
     using interface Elastos.Droid.View.IAbsSavedState;
     using interface Elastos.Droid.View.IKeyEventCallback;
     using interface Elastos.Droid.View.IOnPreDrawListener;
@@ -166,6 +176,86 @@ module
     }
 
     } // namespace Dashboard
+    } // namespace Settings
+    } // namespace Droid
+    } // namespace Elastos
+
+    namespace Elastos {
+    namespace Droid {
+    namespace Settings {
+    namespace Inputmethod {
+
+    class CInputMethodAndLanguageSettings {
+        constructor();
+
+        interface ISettingsPreferenceFragment;
+        interface IPreferenceFragment;
+        interface IFragment;
+        interface IPreferenceManagerOnPreferenceTreeClickListener;
+        interface IComponentCallbacks;
+        interface IComponentCallbacks2;
+        interface IViewOnCreateContextMenuListener;
+        interface IDialogCreatable;
+
+        interface IPreferenceOnPreferenceChangeListener;
+        interface IInputDeviceListener;
+        interface IOnSetupKeyboardLayoutsListener;
+        interface IIndexable;
+        interface IOnSavePreferenceListener;
+    }
+
+    [local]
+    class CInputMethodPreference {
+        constructor(
+            [in] IContext* context,
+            [in] IInputMethodInfo* imi,
+            [in] Boolean isImeEnabler,
+            [in] Boolean isAllowedByOrganization,
+            [in] IOnSavePreferenceListener* onSaveListener);
+
+        interface IInputMethodPreference;
+
+        interface ISwitchPreference;
+        interface ITwoStatePreference;
+        interface IComparable;
+        interface IPreference;
+
+        interface IPreferenceOnPreferenceClickListener;
+        interface IPreferenceOnPreferenceChangeListener;
+    }
+
+    class CKeyboardLayoutDialogFragment {
+        constructor();
+
+        constructor(
+            [in] IInputDeviceIdentifier* inputDeviceIdentifier);
+
+        interface IDialogFragment;
+        interface IDialogInterfaceOnCancelListener;
+        interface IDialogInterfaceOnDismissListener;
+        interface IFragment;
+        interface IComponentCallbacks;
+        interface IComponentCallbacks2;
+        interface IViewOnCreateContextMenuListener;
+
+        interface IInputDeviceListener;
+        interface ILoaderManagerLoaderCallbacks;
+    }
+
+    class CUserDictionaryList {
+        constructor();
+
+        interface ISettingsPreferenceFragment;
+        interface IPreferenceFragment;
+        interface IFragment;
+        interface IPreferenceManagerOnPreferenceTreeClickListener;
+        interface IComponentCallbacks;
+        interface IComponentCallbacks2;
+        interface IViewOnCreateContextMenuListener;
+        interface IDialogCreatable;
+    }
+
+    } // namespace Inputmethod
     } // namespace Settings
     } // namespace Droid
     } // namespace Elastos

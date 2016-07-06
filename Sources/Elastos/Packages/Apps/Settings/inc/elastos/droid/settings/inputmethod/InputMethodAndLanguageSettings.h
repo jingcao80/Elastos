@@ -30,6 +30,7 @@ using Elastos::Droid::View::InputMethod::IInputMethodManager;
 using Elastos::Droid::Settings::Inputmethod::IOnSavePreferenceListener;
 using Elastos::Droid::Settings::Search::BaseSearchIndexProvider;
 using Elastos::Droid::Settings::Search::IIndexableSearchIndexProvider;
+using Elastos::Droid::Settings::Search::IIndexable;
 using Elastos::Droid::Settings::SettingsPreferenceFragment;
 using Elastos::Core::IComparator;
 using Elastos::Text::ICollator;
@@ -48,7 +49,7 @@ class InputMethodAndLanguageSettings
     , public IPreferenceOnPreferenceChangeListener
     , public IInputDeviceListener
     , public IOnSetupKeyboardLayoutsListener
-    , public IIndexableSearchIndexProvider
+    , public IIndexable
     , public IOnSavePreferenceListener
 {
 public:
@@ -147,6 +148,8 @@ public:
     InputMethodAndLanguageSettings();
 
     ~InputMethodAndLanguageSettings();
+
+    CARAPI constructor();
 
     //@Override
     CARAPI OnCreate(

@@ -76,7 +76,9 @@ public:
      * @param onSaveListener The listener called when this preference has been changed and needs
      *     to save the state to shared preference.
      */
-    InputMethodPreference(
+    InputMethodPreference();
+
+    CARAPI constructor(
         /* [in] */ IContext* context,
         /* [in] */ IInputMethodInfo* imi,
         /* [in] */ Boolean isImeEnabler,
@@ -101,7 +103,7 @@ public:
     CARAPI_(void) UpdatePreferenceViews();
 
     CARAPI_(Int32) CompareTo(
-        /* [in] */ InputMethodPreference* rhs,
+        /* [in] */ IInputMethodPreference* rhs,
         /* [in] */ ICollator* collator);
 
 private:

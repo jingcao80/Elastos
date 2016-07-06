@@ -21,6 +21,12 @@ class UserDictionaryList
     : public SettingsPreferenceFragment
 {
 public:
+    UserDictionaryList();
+
+    ~UserDictionaryList();
+
+    CARAPI constructor();
+
     //@Override
     CARAPI OnCreate(
         /* [in] */ IBundle* icicle);

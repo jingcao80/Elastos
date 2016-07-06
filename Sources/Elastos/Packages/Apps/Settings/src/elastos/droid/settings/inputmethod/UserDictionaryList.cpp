@@ -39,6 +39,17 @@ namespace Inputmethod {
 
 const String UserDictionaryList::USER_DICTIONARY_SETTINGS_INTENT_ACTION("android.settings.USER_DICTIONARY_SETTINGS");
 
+UserDictionaryList::UserDictionaryList()
+{}
+
+UserDictionaryList::~UserDictionaryList()
+{}
+
+ECode UserDictionaryList::constructor()
+{
+    return NOERROR;
+}
+
 ECode UserDictionaryList::OnCreate(
     /* [in] */ IBundle* icicle)
 {
@@ -141,7 +152,7 @@ AutoPtr<ITreeSet> UserDictionaryList::GetUserDictionaryLocalesSet(
 
     AutoPtr<IInterface> obj;
     context->GetSystemService(IContext::INPUT_METHOD_SERVICE, (IInterface**)&obj);
-    AutoPtr<IInputMethodManager> imm = IInputMethodManager::Probe(obj);
+    IInputMethodManager* imm = IInputMethodManager::Probe(obj);
     AutoPtr<IList> imis;//List<InputMethodInfo>
     imm->GetEnabledInputMethodList((IList**)&imis);
     Int32 size;
@@ -149,7 +160,7 @@ AutoPtr<ITreeSet> UserDictionaryList::GetUserDictionaryLocalesSet(
     for (Int32 i = 0; i < size; i++) {
         AutoPtr<IInterface> object;
         imis->Get(i, (IInterface**)&object);
-        AutoPtr<IInputMethodInfo> imi = IInputMethodInfo::Probe(object);
+        IInputMethodInfo* imi = IInputMethodInfo::Probe(object);
 
         AutoPtr<IList> subtypes; //List<InputMethodSubtype>
         imm->GetEnabledInputMethodSubtypeList(
@@ -159,10 +170,10 @@ AutoPtr<ITreeSet> UserDictionaryList::GetUserDictionaryLocalesSet(
         for (Int32 j = 0; j < count; j++) {
             AutoPtr<IInterface> objOther;
             subtypes->Get(i, (IInterface**)&objOther);
-            AutoPtr<IInputMethodSubtype> subtype = IInputMethodSubtype::Probe(objOther);
+            IInputMethodSubtype* subtype = IInputMethodSubtype::Probe(objOther);
 
-             String locale;
-             subtype->GetLocale(&locale);
+            String locale;
+            subtype->GetLocale(&locale);
             if (!TextUtils::IsEmpty(locale)) {
                 localeSet->Add(CoreUtils::Convert(locale));
             }
@@ -192,8 +203,7 @@ void UserDictionaryList::CreateUserDictSettings(
     AutoPtr<IActivity> activity;
     GetActivity((IActivity**)&activity);
     userDictGroup->RemoveAll();
-    AutoPtr<ITreeSet> localeSet =
-            UserDictionaryList::GetUserDictionaryLocalesSet(IContext::Probe(activity));
+    AutoPtr<ITreeSet> localeSet = GetUserDictionaryLocalesSet(IContext::Probe(activity));
     if (!mLocale.IsNull()) {
         // If the caller explicitly specify empty string as a locale, we'll show "all languages"
         // in the list.

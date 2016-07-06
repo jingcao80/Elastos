@@ -10,8 +10,6 @@
 #include <elastos/utility/logging/Logger.h>
 #include <elastos/utility/logging/Slogger.h>
 
-#include <elastos/core/AutoLock.h>
-using Elastos::Core::AutoLock;
 using Elastos::Droid::App::ActivityManagerNative;
 using Elastos::Droid::App::IIActivityManager;
 using Elastos::Droid::Content::Res::IResources;
@@ -21,6 +19,7 @@ using Elastos::Droid::Internal::InputMethod::IInputMethodUtils;
 using Elastos::Droid::Internal::InputMethod::CInputMethodUtils;
 using Elastos::Droid::Internal::InputMethod::CInputMethodSettings;
 using Elastos::Droid::View::InputMethod::IInputMethodSubtype;
+using Elastos::Core::AutoLock;
 using Elastos::Core::CoreUtils;
 using Elastos::Utility::CArrayList;
 using Elastos::Utility::CHashMap;
@@ -38,6 +37,7 @@ namespace Settings {
 namespace Inputmethod {
 
 const String InputMethodSettingValuesWrapper::TAG("InputMethodSettingValuesWrapper");
+Object InputMethodSettingValuesWrapper::tagLock;
 
 AutoPtr<InputMethodSettingValuesWrapper> InputMethodSettingValuesWrapper::sInstance;
 
@@ -67,7 +67,8 @@ AutoPtr<InputMethodSettingValuesWrapper> InputMethodSettingValuesWrapper::GetIns
     /* [in] */ IContext* context)
 {
     if (sInstance == NULL) {
-        {    AutoLock syncLock(CoreUtils::Convert(TAG));
+        {
+            AutoLock syncLock(tagLock);
             if (sInstance == NULL) {
                 sInstance = new InputMethodSettingValuesWrapper(context);
             }
@@ -95,7 +96,8 @@ Int32 InputMethodSettingValuesWrapper::GetDefaultCurrentUserId()
 
 void InputMethodSettingValuesWrapper::RefreshAllInputMethodAndSubtypes()
 {
-    {    AutoLock syncLock(mMethodMap);
+    {
+        AutoLock syncLock(mMethodMap);
         mMethodList->Clear();
         mMethodMap->Clear();
         AutoPtr<IList> imms;
@@ -117,7 +119,8 @@ void InputMethodSettingValuesWrapper::RefreshAllInputMethodAndSubtypes()
 
 void InputMethodSettingValuesWrapper::UpdateAsciiCapableEnabledImis()
 {
-    {    AutoLock syncLock(mMethodMap);
+    {
+        AutoLock syncLock(mMethodMap);
         mAsciiCapableEnabledImis->Clear();
         AutoPtr<IList> enabledImis;
         mSettings->GetEnabledInputMethodListLocked((IList**)&enabledImis);
@@ -148,7 +151,8 @@ void InputMethodSettingValuesWrapper::UpdateAsciiCapableEnabledImis()
 
 AutoPtr<IList> InputMethodSettingValuesWrapper::GetInputMethodList()
 {
-    {    AutoLock syncLock(mMethodMap);
+    {
+        AutoLock syncLock(mMethodMap);
         return IList::Probe(mMethodList);
     }
     return NULL;
@@ -157,7 +161,8 @@ AutoPtr<IList> InputMethodSettingValuesWrapper::GetInputMethodList()
 AutoPtr<ICharSequence> InputMethodSettingValuesWrapper::GetCurrentInputMethodName(
     /* [in] */ IContext* context)
 {
-    {    AutoLock syncLock(mMethodMap);
+    {
+        AutoLock syncLock(mMethodMap);
         String str;
         mSettings->GetSelectedInputMethod(&str);
         AutoPtr<IInterface> obj;
@@ -183,7 +188,8 @@ Boolean InputMethodSettingValuesWrapper::IsAlwaysCheckedIme(
     /* [in] */ IContext* context)
 {
     Boolean isEnabled = IsEnabledImi(imi);
-    {    AutoLock syncLock(mMethodMap);
+    {
+        AutoLock syncLock(mMethodMap);
         AutoPtr<IList> list;
         mSettings->GetEnabledInputMethodListLocked((IList**)&list);
         Int32 size;
@@ -219,7 +225,8 @@ Int32 InputMethodSettingValuesWrapper::GetEnabledValidSystemNonAuxAsciiCapableIm
 {
     Int32 count = 0;
     AutoPtr<IList> enabledImis;
-    {    AutoLock syncLock(mMethodMap);
+    {
+        AutoLock syncLock(mMethodMap);
         mSettings->GetEnabledInputMethodListLocked((IList**)&enabledImis);
     }
 
@@ -243,7 +250,8 @@ Boolean InputMethodSettingValuesWrapper::IsEnabledImi(
     /* [in] */ IInputMethodInfo* imi)
 {
     AutoPtr<IList> enabledImis;
-    {    AutoLock syncLock(mMethodMap);
+    {
+        AutoLock syncLock(mMethodMap);
         mSettings->GetEnabledInputMethodListLocked((IList**)&enabledImis);
     }
 

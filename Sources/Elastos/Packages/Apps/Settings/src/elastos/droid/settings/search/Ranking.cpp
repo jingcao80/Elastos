@@ -137,7 +137,7 @@ static AutoPtr<IHashMap> InitsRankMap()
 
     // IMEs
     InitPut(map,
-            String("Elastos.Droid.Settings.Inputmethod.InputMethodAndLanguageSettings"),
+            String("Elastos.Droid.Settings.Inputmethod.CInputMethodAndLanguageSettings"),
             Ranking::RANK_IME);
     InitPut(map, String("Elastos.Droid.Settings.Voice.VoiceInputSettings"),
             Ranking::RANK_IME);
@@ -188,7 +188,7 @@ Int32 Ranking::GetRankForClassName(
 {
     AutoPtr<IInterface> obj;
     sRankMap->Get(CoreUtils::Convert(className), (IInterface**)&obj);
-    AutoPtr<IInteger32> rank = IInteger32::Probe(obj);
+    IInteger32* rank = IInteger32::Probe(obj);
     if (rank != NULL) {
         Int32 value;
         rank->GetValue(&value);
@@ -203,7 +203,7 @@ Int32 Ranking::GetBaseRankForAuthority(
     {    AutoLock syncLock(sBaseRankMap);
         AutoPtr<IInterface> obj;
         sBaseRankMap->Get(CoreUtils::Convert(authority), (IInterface**)&obj);
-        AutoPtr<IInteger32> base = IInteger32::Probe(obj);
+        IInteger32* base = IInteger32::Probe(obj);
 
         if (base != NULL) {
             Int32 value;

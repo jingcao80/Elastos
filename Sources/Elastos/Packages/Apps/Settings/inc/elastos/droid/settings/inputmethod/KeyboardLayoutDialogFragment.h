@@ -150,10 +150,12 @@ public:
 
     KeyboardLayoutDialogFragment();
 
-    KeyboardLayoutDialogFragment(
-        /* [in] */ IInputDeviceIdentifier* inputDeviceIdentifier);
-
     ~KeyboardLayoutDialogFragment();
+
+    CARAPI constructor();
+
+    CARAPI constructor(
+        /* [in] */ IInputDeviceIdentifier* inputDeviceIdentifier);
 
     //@Override
     CARAPI OnAttach(

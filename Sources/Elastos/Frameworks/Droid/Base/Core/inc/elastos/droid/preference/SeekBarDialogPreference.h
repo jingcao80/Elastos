@@ -14,7 +14,7 @@ namespace Preference {
 /**
  * @hide
  */
-class SeekBarDialogPreference
+class ECO_PUBLIC SeekBarDialogPreference
     : public DialogPreference
     , public ISeekBarDialogPreference
 {
@@ -52,7 +52,7 @@ public:
         /* [out] */ ISeekBar** bar);
 
 private:
-    static const String TAG;
+    ECO_LOCAL static const String TAG;
     AutoPtr<IDrawable> mMyIcon;
 };
 

@@ -34,8 +34,6 @@ using Elastos::Droid::Telephony::ITelephonyManager;
 // using Elastos::Droid::Internal::Telephony::ISmsApplication;
 // using Elastos::Droid::Internal::Telephony::ITelephonyProperties;
 // using Elastos::Droid::Settings::Nfc::INfcEnabler;
-// using Elastos::Droid::Settings::Search::IBaseSearchIndexProvider;
-// using Elastos::Droid::Settings::Search::IIndexable;
 
 namespace Elastos {
 namespace Droid {

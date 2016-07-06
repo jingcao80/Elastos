@@ -182,7 +182,7 @@
         <dashboard-tile
                 android:id="@+id/language_settings"
                 android:title="@string/language_settings"
-                android:fragment="Elastos.Droid.Settings.Inputmethod.InputMethodAndLanguageSettings"
+                android:fragment="Elastos.Droid.Settings.Inputmethod.CInputMethodAndLanguageSettings"
                 android:icon="@drawable/ic_settings_language"
                 />
 

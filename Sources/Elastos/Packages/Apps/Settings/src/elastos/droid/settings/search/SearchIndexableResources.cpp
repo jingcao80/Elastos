@@ -115,7 +115,7 @@ static AutoPtr<IHashMap> InitsResMap()
             SearchIndexableResources::NO_DATA_RES_ID,
             R::drawable::ic_settings_security);
 
-    InitPut(map, String("Elastos.Droid.Settings.Inputmethod.InputMethodAndLanguageSettings"),
+    InitPut(map, String("Elastos.Droid.Settings.Inputmethod.CInputMethodAndLanguageSettings"),
             SearchIndexableResources::NO_DATA_RES_ID,
             R::drawable::ic_settings_language);
 

@@ -2,12 +2,14 @@
 #define __ELASTOS_DROID_SETTINGS_VOICEINPUTOUTPUTSETTINGS_H__
 
 #include "Elastos.Droid.Speech.h"
-#include "elastos/droid/settings/SettingsPreferenceFragment.h"
+#include <elastos/core/Object.h>
+#include "_Elastos.Droid.Settings.h"
 
 using Elastos::Droid::Preference::IPreference;
 using Elastos::Droid::Preference::IPreferenceCategory;
 using Elastos::Droid::Preference::IPreferenceGroup;
 using Elastos::Droid::Speech::Tts::ITtsEngines;
+using Elastos::Core::Object;
 
 namespace Elastos {
 namespace Droid {
@@ -21,7 +23,7 @@ class VoiceInputOutputSettings
 {
 public:
     VoiceInputOutputSettings(
-        /* [in] */ SettingsPreferenceFragment* fragment);
+        /* [in] */ ISettingsPreferenceFragment* fragment);
 
     ~VoiceInputOutputSettings();
 
@@ -45,7 +47,7 @@ private:
     AutoPtr<IPreferenceCategory> mVoiceCategory;
     AutoPtr<IPreference> mVoiceInputSettingsPref;
     AutoPtr<IPreference> mTtsSettingsPref;
-    AutoPtr<SettingsPreferenceFragment> mFragment;
+    AutoPtr<ISettingsPreferenceFragment> mFragment;
     AutoPtr<ITtsEngines> mTtsEngines;
 };
 

@@ -143,6 +143,7 @@ EXPORT_HEADERS += elastos/droid/preference/Preference.h
 EXPORT_HEADERS += elastos/droid/preference/PreferenceFragment.h
 EXPORT_HEADERS += elastos/droid/preference/TwoStatePreference.h
 EXPORT_HEADERS += elastos/droid/preference/SwitchPreference.h
+EXPORT_HEADERS += elastos/droid/preference/SeekBarDialogPreference.h
 EXPORT_HEADERS += elastos/droid/server/LocalServices.h
 EXPORT_HEADERS += elastos/droid/server/net/BaseNetworkObserver.h
 EXPORT_HEADERS += elastos/droid/service/dreams/DreamService.h

@@ -84,14 +84,20 @@ ECode InputMethodPreference::DialogInterfaceOnClickListener::OnClick(
 CAR_INTERFACE_IMPL_3(InputMethodPreference, SwitchPreference, IInputMethodPreference,
         IPreferenceOnPreferenceClickListener, IPreferenceOnPreferenceChangeListener);
 
-InputMethodPreference::InputMethodPreference(
+InputMethodPreference::InputMethodPreference()
+    : mHasPriorityInSorting(FALSE)
+    , mIsAllowedByOrganization(FALSE)
+{}
+
+InputMethodPreference::~InputMethodPreference()
+{}
+
+ECode InputMethodPreference::constructor(
     /* [in] */ IContext* context,
     /* [in] */ IInputMethodInfo* imi,
     /* [in] */ Boolean isImeEnabler,
     /* [in] */ Boolean isAllowedByOrganization,
     /* [in] */ IOnSavePreferenceListener* onSaveListener)
-    : mHasPriorityInSorting(FALSE)
-    , mIsAllowedByOrganization(FALSE)
 {
     SwitchPreference::constructor(context);
     SetPersistent(FALSE);
@@ -135,10 +141,8 @@ InputMethodPreference::InputMethodPreference(
             && mInputMethodSettingValues->IsValidSystemNonAuxAsciiCapableIme(imi, context);
     SetOnPreferenceClickListener(this);
     SetOnPreferenceChangeListener(this);
+    return NOERROR;
 }
-
-InputMethodPreference::~InputMethodPreference()
-{}
 
 AutoPtr<IInputMethodInfo> InputMethodPreference::GetInputMethodInfo()
 {
@@ -279,7 +283,7 @@ String InputMethodPreference::GetSummaryString()
     for (Int32 i = 0; i < size; i++) {
         AutoPtr<IInterface> obj;
         subtypes->Get(i, (IInterface**)&obj);
-        AutoPtr<IInputMethodSubtype> subtype = IInputMethodSubtype::Probe(obj);
+        IInputMethodSubtype* subtype = IInputMethodSubtype::Probe(obj);
         String name;
         mImi->GetPackageName(&name);
         AutoPtr<IServiceInfo> info;
@@ -336,9 +340,10 @@ void InputMethodPreference::ShowSecurityWarnDialog(
 }
 
 Int32 InputMethodPreference::CompareTo(
-    /* [in] */ InputMethodPreference* rhs,
+    /* [in] */ IInputMethodPreference* _rhs,
     /* [in] */ ICollator* collator)
 {
+    InputMethodPreference* rhs = (InputMethodPreference*)_rhs;
     if (this == rhs) {
         return 0;
     }

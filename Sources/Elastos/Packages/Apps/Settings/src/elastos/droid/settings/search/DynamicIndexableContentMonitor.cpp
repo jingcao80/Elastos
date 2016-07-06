@@ -104,7 +104,7 @@ ECode DynamicIndexableContentMonitor::UserDictionaryContentObserver::OnChange(
     Boolean res;
     if (IObject::Probe(conUri)->Equals(uri, &res), res) {
         Index::GetInstance(mHost->mContext)->UpdateFromClassNameResource(
-                String("Elastos.Droid.Settings.Inputmethod.InputMethodAndLanguageSettings"),
+                String("Elastos.Droid.Settings.Inputmethod.CInputMethodAndLanguageSettings"),
                 TRUE, TRUE);
     }
     return NOERROR;
@@ -176,7 +176,7 @@ ECode DynamicIndexableContentMonitor::Register(
     // Cache accessibility service packages to know when they go away.
     AutoPtr<IInterface> obj;
     mContext->GetSystemService(IContext::ACCESSIBILITY_SERVICE, (IInterface**)&obj);
-    AutoPtr<IAccessibilityManager> accessibilityManager = IAccessibilityManager::Probe(obj);
+    IAccessibilityManager* accessibilityManager = IAccessibilityManager::Probe(obj);
     AutoPtr<IList> accessibilityServices;
     accessibilityManager->GetInstalledAccessibilityServiceList((IList**)&accessibilityServices);
     Int32 accessibilityServiceCount;
@@ -184,7 +184,7 @@ ECode DynamicIndexableContentMonitor::Register(
     for (Int32 i = 0; i < accessibilityServiceCount; i++) {
         AutoPtr<IInterface> object;
         accessibilityServices->Get(i, (IInterface**)&object);
-        AutoPtr<IAccessibilityServiceInfo> accessibilityService = IAccessibilityServiceInfo::Probe(object);
+        IAccessibilityServiceInfo* accessibilityService = IAccessibilityServiceInfo::Probe(object);
         AutoPtr<IResolveInfo> resolveInfo;
         accessibilityService->GetResolveInfo((IResolveInfo**)&resolveInfo);
         AutoPtr<IServiceInfo> serviceInfo;
@@ -224,7 +224,7 @@ ECode DynamicIndexableContentMonitor::Register(
     if (mHasFeatureIme) {
         AutoPtr<IInterface> obj;
         mContext->GetSystemService(IContext::INPUT_METHOD_SERVICE, (IInterface**)&obj);
-        AutoPtr<IInputMethodManager> imeManager = IInputMethodManager::Probe(obj);
+        IInputMethodManager* imeManager = IInputMethodManager::Probe(obj);
         AutoPtr<IList> inputMethods;
         imeManager->GetInputMethodList((IList**)&inputMethods);
         Int32 inputMethodCount;
@@ -232,7 +232,7 @@ ECode DynamicIndexableContentMonitor::Register(
         for (Int32 i = 0; i < inputMethodCount; i++) {
             AutoPtr<IInterface> object;
             inputMethods->Get(i, (IInterface**)&object);
-            AutoPtr<IInputMethodInfo> inputMethod = IInputMethodInfo::Probe(object);
+            IInputMethodInfo* inputMethod = IInputMethodInfo::Probe(object);
             AutoPtr<IServiceInfo> serviceInfo;
             inputMethod->GetServiceInfo((IServiceInfo**)&serviceInfo);
             if (serviceInfo == NULL) continue;
@@ -257,7 +257,7 @@ ECode DynamicIndexableContentMonitor::Register(
     // Watch for input device changes.
     obj = NULL;
     context->GetSystemService(IContext::INPUT_SERVICE, (IInterface**)&obj);
-    AutoPtr<IInputManager> inputManager = IInputManager::Probe(obj);
+    IInputManager* inputManager = IInputManager::Probe(obj);
     inputManager->RegisterInputDeviceListener(this, mHandler);
 
     // Start tracking packages.
@@ -271,7 +271,7 @@ ECode DynamicIndexableContentMonitor::Unregister()
 
     AutoPtr<IInterface> obj;
     mContext->GetSystemService(IContext::INPUT_SERVICE, (IInterface**)&obj);
-    AutoPtr<IInputManager> inputManager = IInputManager::Probe(obj);
+    IInputManager* inputManager = IInputManager::Probe(obj);
 
     inputManager->UnregisterInputDeviceListener(this);
 
@@ -326,7 +326,7 @@ ECode DynamicIndexableContentMonitor::OnInputDeviceAdded(
     /* [in] */ Int32 deviceId)
 {
     Index::GetInstance(mContext)->UpdateFromClassNameResource(
-            String("Elastos.Droid.Settings.Inputmethod.InputMethodAndLanguageSettings"), FALSE, TRUE);
+            String("Elastos.Droid.Settings.Inputmethod.CInputMethodAndLanguageSettings"), FALSE, TRUE);
     return NOERROR;
 }
 
@@ -340,7 +340,7 @@ ECode DynamicIndexableContentMonitor::OnInputDeviceChanged(
     /* [in] */ Int32 deviceId)
 {
     Index::GetInstance(mContext)->UpdateFromClassNameResource(
-            String("Elastos.Droid.Settings.Inputmethod.InputMethodAndLanguageSettings"), TRUE, TRUE);
+            String("Elastos.Droid.Settings.Inputmethod.CInputMethodAndLanguageSettings"), TRUE, TRUE);
     return NOERROR;
 }
 
@@ -394,7 +394,7 @@ void DynamicIndexableContentMonitor::HandlePackageAvailable(
             if (list->IsEmpty(&res), !res) {
                 mImeServices->Add(CoreUtils::Convert(packageName));
                 Index::GetInstance(mContext)->UpdateFromClassNameResource(
-                        String("Elastos.Droid.Settings.Inputmethod.InputMethodAndLanguageSettings"), FALSE, TRUE);
+                        String("Elastos.Droid.Settings.Inputmethod.CInputMethodAndLanguageSettings"), FALSE, TRUE);
             }
         }
     }
@@ -428,7 +428,7 @@ void DynamicIndexableContentMonitor::HandlePackageUnavailable(
         if (imeIndex >= 0) {
             mImeServices->Remove(imeIndex);
             Index::GetInstance(mContext)->UpdateFromClassNameResource(
-                    String("Elastos.Droid.Settings.Inputmethod.InputMethodAndLanguageSettings"), TRUE, TRUE);
+                    String("Elastos.Droid.Settings.Inputmethod.CInputMethodAndLanguageSettings"), TRUE, TRUE);
         }
     }
 }

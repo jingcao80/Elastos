@@ -67,7 +67,7 @@ private:
 
 private:
     static const String TAG;// = InputMethodSettingValuesWrapper.class->GetSimpleName();
-
+    static Object tagLock;
     static /*volatile*/ AutoPtr<InputMethodSettingValuesWrapper> sInstance;
     // ArrayList<InputMethodInfo> mMethodList = new ArrayList<>();
     AutoPtr<IArrayList> mMethodList;

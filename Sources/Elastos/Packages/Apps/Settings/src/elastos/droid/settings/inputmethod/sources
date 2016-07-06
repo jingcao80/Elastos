@@ -12,3 +12,4 @@ SOURCES += InputMethodSettingValuesWrapper.cpp
 SOURCES += KeyboardLayoutDialogFragment.cpp
 SOURCES += KeyboardLayoutPickerFragment.cpp
 SOURCES += UserDictionaryList.cpp
+SOURCES += inputmethod.cpp
