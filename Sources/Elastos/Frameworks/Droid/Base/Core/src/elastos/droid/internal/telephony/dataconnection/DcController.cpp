@@ -29,6 +29,7 @@ using Elastos::Droid::Os::IAsyncResult;
 using Elastos::Droid::Os::SystemClock;
 using Elastos::Droid::Telephony::CDataConnectionRealTimeInfo;
 using Elastos::Droid::Telephony::IDataConnectionRealTimeInfo;
+using Elastos::Droid::Internal::Utility::IStateMachine;
 using Elastos::Net::IInetAddress;
 using Elastos::Core::CInteger32;
 using Elastos::Core::IInteger32;
@@ -49,6 +50,12 @@ namespace DataConnection {
 //=============================================================================
 // DcController::DccDefaultState
 //=============================================================================
+DcController::DccDefaultState::DccDefaultState(
+    /* [in] */ DcController* host)
+    : mHost(host)
+{
+}
+
 ECode DcController::DccDefaultState::Enter()
 {
     AutoPtr<IHandler> handler;
@@ -434,12 +441,12 @@ ECode DcController::constructor(
     Log("E ctor");
     mPhone = phone;
     mDct = dct;
-    AddState(mDccDefaultState);
-    SetInitialState(mDccDefaultState);
     Log("X ctor");
     CArrayList::New((IArrayList**)&mDcListAll);
     CHashMap::New((IHashMap**)&mDcListActiveByCid);
     mDccDefaultState = new DccDefaultState(this);
+    AddState(mDccDefaultState);
+    SetInitialState(mDccDefaultState);
     return NOERROR;
 }
 
@@ -451,9 +458,10 @@ ECode DcController::MakeDcc(
 {
     VALIDATE_NOT_NULL(result)
 
-    AutoPtr<IDcController> dcc = new DcController();
-    assert(0 && "TODO: IStateMachine");
-    // IStateMachine::Probe(dcc)->Start();
+    AutoPtr<DcController> dcc = new DcController();
+    dcc->constructor(String("Dcc"), phone, dct, handler);
+
+    IStateMachine::Probe(dcc)->Start();
     *result = dcc;
     REFCOUNT_ADD(*result)
     return NOERROR;

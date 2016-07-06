@@ -232,7 +232,8 @@ ECode PhoneGlobals::MyHandler::HandleMessage(
         {
             AutoPtr<IContext> ctx;
             mHost->GetApplicationContext((IContext**)&ctx);
-            assert(0);
+            Logger::E("PhoneGlobals", "TODO MyHandler::HandleMessage SipService is not ready!");
+            //assert(0);
             //SipService::Start(ctx);
             break;
         }
@@ -513,8 +514,8 @@ ECode PhoneGlobals::OnCreate()
         mPhone->GetIccCard((IIccCard**)&sim);
         if (sim != NULL) {
             if (VDBG) Logger::V(IPhoneGlobals::TAG, "register for ICC status");
-            assert(0);
-            //sim->RegisterForNetworkLocked(mHandler, EVENT_SIM_NETWORK_LOCKED, NULL);
+            Logger::D(TAG, "TODO IccCard is not ready!");
+            //TODO sim->RegisterForPersoLocked(mHandler, EVENT_SIM_NETWORK_LOCKED, NULL);
         }
 
         // register for MMI/USSD

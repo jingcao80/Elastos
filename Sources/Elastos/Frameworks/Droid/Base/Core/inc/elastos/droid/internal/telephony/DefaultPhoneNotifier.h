@@ -182,6 +182,7 @@ protected:
 private:
     static const String TAG;
     static const Boolean DBG; // STOPSHIP if true
+    friend class CPhoneFactory;
 };
 
 } // namespace Telephony

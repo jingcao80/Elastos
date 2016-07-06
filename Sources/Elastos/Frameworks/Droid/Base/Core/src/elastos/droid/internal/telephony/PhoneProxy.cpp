@@ -1,12 +1,17 @@
 
 #include "elastos/droid/internal/telephony/PhoneProxy.h"
 #include "elastos/droid/internal/telephony/IccPhoneBookInterfaceManagerProxy.h"
+#include "elastos/droid/internal/telephony/CPhoneSubInfoProxy.h"
+#include "elastos/droid/internal/telephony/uicc/CIccCardProxy.h"
+#include "elastos/droid/internal/telephony/PhoneBase.h"
+#include "elastos/droid/internal/telephony/IccSmsInterfaceManager.h"
 #include "elastos/droid/app/ActivityManagerNative.h"
 #include "elastos/droid/content/CIntent.h"
 #include "elastos/droid/os/CSystemProperties.h"
 #include "elastos/droid/os/AsyncResult.h"
 #include "elastos/droid/telephony/CServiceStateHelper.h"
 #include "elastos/droid/R.h"
+#include <elastos/utility/logging/Logger.h>
 
 using Elastos::Droid::App::ActivityManagerNative;
 using Elastos::Droid::Content::IIntent;
@@ -23,7 +28,9 @@ using Elastos::Droid::Internal::Telephony::IccPhoneBookInterfaceManagerProxy;
 using Elastos::Droid::Internal::Telephony::Cdma::ICDMAPhone;
 using Elastos::Droid::Internal::Telephony::Gsm::IGSMPhone;
 using Elastos::Droid::Internal::Telephony::Cdma::ICDMALTEPhone;
+using Elastos::Droid::Internal::Telephony::Uicc::CIccCardProxy;
 using Elastos::Droid::R;
+using Elastos::Utility::Logging::Logger;
 
 using Elastos::Core::IInteger32;
 
@@ -43,13 +50,15 @@ const Int32 PhoneProxy::EVENT_SIM_RECORDS_LOADED = 6;
 
 const String PhoneProxy::LOGTAG("PhoneProxy");
 
-CAR_INTERFACE_IMPL(PhoneProxy, Handler, IPhone)
+CAR_INTERFACE_IMPL_2(PhoneProxy, Handler, IPhone, IPhoneProxy)
 
 PhoneProxy::PhoneProxy()
     : mResetModemOnRadioTechnologyChange(FALSE)
     , mRilVersion(0)
     , mPhoneId(0)
-{}
+{
+    Handler::constructor();
+}
 
 ECode PhoneProxy::constructor(
     /* [in] */ IPhoneBase* phone)
@@ -68,31 +77,28 @@ ECode PhoneProxy::constructor(
                                                             interfaceManager);
     AutoPtr<IPhoneSubInfo> phoneInfo;
     IPhone::Probe(phone)->GetPhoneSubInfo((IPhoneSubInfo**)&phoneInfo);
-    assert(0 && "TODO");
-    // CPhoneSubInfoProxy::New((IPhoneSubInfoProxy**)&mPhoneSubInfoProxy);
-    // mCommandsInterface = IPhoneBase::Probe(mActivePhone)->mCi;
+    CPhoneSubInfoProxy::New(phoneInfo, (IPhoneSubInfoProxy**)&mPhoneSubInfoProxy);
+    mCommandsInterface = ((PhoneBase*)IPhoneBase::Probe(mActivePhone))->mCi;
 
     mCommandsInterface->RegisterForRilConnected(this, EVENT_RIL_CONNECTED, NULL);
     mCommandsInterface->RegisterForOn(this, EVENT_RADIO_ON, NULL);
     mCommandsInterface->RegisterForVoiceRadioTechChanged(
                         this, EVENT_VOICE_RADIO_TECH_CHANGED, NULL);
     phone->GetPhoneId(&mPhoneId);
-    assert(0 && "TODO");
-    // mIccSmsInterfaceManager =
-    //         new IccSmsInterfaceManager(IPhoneBase::Probe(this)->mActivePhone);
+    mIccSmsInterfaceManager =
+             new IccSmsInterfaceManager(IPhoneBase::Probe(this->mActivePhone));
     Int32 activePhoneId = 0;
     mActivePhone->GetPhoneId(&activePhoneId);
     AutoPtr<IContext> cxt;
     mActivePhone->GetContext((IContext**)&cxt);
-    assert(0 && "TODO");
-    // mIccCardProxy = new IccCardProxy(cxt,
-    //         mCommandsInterface, activePhoneId);
+    CIccCardProxy::New(cxt, mCommandsInterface, activePhoneId, (IIccCardProxy**)&mIccCardProxy);
 
     Int32 type = 0;
     IPhone::Probe(phone)->GetPhoneType(&type);
     if (type == IPhoneConstants::PHONE_TYPE_GSM) {
         // For the purpose of IccCardProxy we only care about the technology family
-        mIccCardProxy->SetVoiceRadioTech(IServiceState::RIL_RADIO_TECHNOLOGY_UMTS);
+        Logger::E("PhoneProxy", "TODO constructor IccCardProxy is not ready!");
+        //TODO mIccCardProxy->SetVoiceRadioTech(IServiceState::RIL_RADIO_TECHNOLOGY_UMTS);
     }
     else if (type == IPhoneConstants::PHONE_TYPE_CDMA) {
         mIccCardProxy->SetVoiceRadioTech(IServiceState::RIL_RADIO_TECHNOLOGY_1xRTT);

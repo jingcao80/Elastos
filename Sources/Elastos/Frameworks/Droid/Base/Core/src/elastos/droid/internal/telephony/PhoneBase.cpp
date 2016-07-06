@@ -4,6 +4,7 @@
 #include "elastos/droid/internal/telephony/CallTracker.h"
 #include "elastos/droid/internal/telephony/IccUtils.h"
 #include "elastos/droid/internal/telephony/uicc/CUiccControllerHelper.h"
+#include "elastos/droid/internal/telephony/CSubscriptionControllerHelper.h"
 #include "elastos/droid/content/CIntentFilter.h"
 #include "elastos/droid/os/Build.h"
 #include "elastos/droid/os/Looper.h"
@@ -203,6 +204,7 @@ PhoneBase::PhoneBase()
     , mIsVideoCapable(FALSE)
     , mImsServiceReady(FALSE)
 {
+    Handler::constructor();
     CAtomicReference::New((IAtomicReference**)&mIccRecords);
     CAtomicReference::New((IAtomicReference**)&mUiccApplication);
     SystemProperties::GetBoolean(PROPERTY_OOS_IS_DISCONNECT, TRUE, &mOosIsDisconnect);
@@ -2929,8 +2931,11 @@ ECode PhoneBase::GetSubId(
     /* [out] */ Int64* result)
 {
     VALIDATE_NOT_NULL(result);
-    assert(0 && "TODO");
-    // *result = SubscriptionController::GetInstance()->GetSubIdUsingPhoneId(mPhoneId);
+    AutoPtr<ISubscriptionControllerHelper> helper;
+    CSubscriptionControllerHelper::AcquireSingleton((ISubscriptionControllerHelper**)&helper);
+    AutoPtr<ISubscriptionController> ssc;
+    helper->GetInstance((ISubscriptionController**)&ssc);
+    ssc->GetSubIdUsingPhoneId(mPhoneId, result);
     return NOERROR;
 }
 

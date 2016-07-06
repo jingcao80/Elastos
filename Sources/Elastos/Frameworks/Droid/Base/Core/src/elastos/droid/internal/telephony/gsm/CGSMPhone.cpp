@@ -17,6 +17,7 @@
 #include "elastos/droid/preference/PreferenceManager.h"
 #include "elastos/droid/provider/CTelephonyCarriers.h"
 #include "elastos/droid/os/CRegistrant.h"
+#include "elastos/droid/os/CRegistrantList.h"
 #include "elastos/droid/R.h"
 #include "elastos/droid/telephony/CServiceState.h"
 #include "elastos/droid/telephony/CSubscriptionManager.h"
@@ -47,6 +48,7 @@ using Elastos::Droid::Internal::Telephony::Subscription;
 using Elastos::Droid::Internal::Telephony::Uicc::IIccVmNotSupportedException;
 using Elastos::Droid::Net::Uri;
 using Elastos::Droid::Os::CRegistrant;
+using Elastos::Droid::Os::CRegistrantList;
 using Elastos::Droid::Os::SystemProperties;
 using Elastos::Droid::Preference::PreferenceManager;
 using Elastos::Droid::Provider::CTelephonyCarriers;
@@ -63,6 +65,7 @@ using Elastos::Core::CoreUtils;
 using Elastos::Core::IArrayOf;
 using Elastos::Core::IThrowable;
 using Elastos::Core::StringUtils;
+using Elastos::Utility::CArrayList;
 using Elastos::Utility::Logging::Logger;
 
 namespace Elastos {
@@ -90,6 +93,10 @@ CGSMPhone::Cfu::Cfu(
 
 CGSMPhone::CGSMPhone()
 {
+    AutoPtr<IRegistrantList> list;
+    CRegistrantList::New((IRegistrantList**)&list);
+    mSsnRegistrants = (RegistrantList*)(list.Get());
+    CArrayList::New((IArrayList**)&mPendingMMIs);
 }
 
 CGSMPhone::~CGSMPhone()
@@ -184,7 +191,8 @@ ECode CGSMPhone::constructor(
     mCi->RegisterForOn(this, EVENT_RADIO_ON, NULL);
     mCi->SetOnUSSD(this, EVENT_USSD, NULL);
     mCi->SetOnSuppServiceNotification(this, EVENT_SSN, NULL);
-    ((CGsmServiceStateTracker*)mSST.Get())->RegisterForNetworkAttached(this, EVENT_REGISTERED_TO_NETWORK, NULL);
+    //((CGsmServiceStateTracker*)mSST.Get())->RegisterForNetworkAttached(this, EVENT_REGISTERED_TO_NETWORK, NULL);
+    (IServiceStateTracker::Probe(mSST))->RegisterForNetworkAttached(this, EVENT_REGISTERED_TO_NETWORK, NULL);
     mCi->SetOnSs(this, EVENT_SS, NULL);
     SetProperties();
 
@@ -1811,10 +1819,10 @@ ECode CGSMPhone::UpdateCurrentCarrierInProvider(
 
     Int64 id;
     GetSubId(&id);
-    Logger::D(TAG, "updateCurrentCarrierInProvider: mSubId = %Ld currentDds = %ld operatorNumeric = %s"
+    Logger::D(TAG, "updateCurrentCarrierInProvider: mSubId = %lld currentDds = %lld operatorNumeric = %s"
             , id, currentDds, operatorNumeric.string());
 
-    if (!operatorNumeric.IsEmpty() && (id == currentDds)) {
+    if (!operatorNumeric.IsNullOrEmpty() && (id == currentDds)) {
         // try {
         AutoPtr<ITelephonyCarriers> tc;
         CTelephonyCarriers::AcquireSingleton((ITelephonyCarriers**)&tc);

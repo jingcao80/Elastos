@@ -1066,9 +1066,9 @@ ECode CGsmServiceStateTracker::UpdateSpnDisplay()
         AutoPtr<IIntent> intent;
         CIntent::New(ITelephonyIntents::SPN_STRINGS_UPDATED_ACTION, (IIntent**)&intent);
         intent->AddFlags(IIntent::FLAG_RECEIVER_REPLACE_PENDING);
-        intent->PutExtra(ITelephonyIntents::EXTRA_SHOW_SPN, showSpn);
+        intent->PutBooleanExtra(ITelephonyIntents::EXTRA_SHOW_SPN, showSpn);
         intent->PutExtra(ITelephonyIntents::EXTRA_SPN, spn);
-        intent->PutExtra(ITelephonyIntents::EXTRA_SHOW_PLMN, showPlmn);
+        intent->PutBooleanExtra(ITelephonyIntents::EXTRA_SHOW_PLMN, showPlmn);
         intent->PutExtra(ITelephonyIntents::EXTRA_PLMN, plmn);
         Int32 id;
         IPhone::Probe(mPhone)->GetPhoneId(&id);

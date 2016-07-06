@@ -7,6 +7,7 @@
 #include "Elastos.Droid.Content.h"
 #include "elastos/droid/R.h"
 #include <elastos/core/StringUtils.h>
+#include <elastos/utility/logging/Logger.h>
 
 using Elastos::Droid::Content::IContext;
 using Elastos::Droid::Content::Res::IResources;
@@ -17,6 +18,7 @@ using Elastos::Core::StringUtils;
 using Elastos::Utility::CArrayList;
 using Elastos::Utility::ICollection;
 using Elastos::Utility::IIterator;
+using Elastos::Utility::Logging::Logger;
 
 namespace Elastos {
 namespace Droid {
@@ -41,6 +43,9 @@ const Int32 CallTracker::EVENT_CALL_WAITING_INFO_CDMA;
 const Int32 CallTracker::EVENT_THREE_WAY_DIAL_L2_RESULT_CDMA;
 const Int32 CallTracker::EVENT_THREE_WAY_DIAL_BLANK_FLASH;
 const Boolean CallTracker::DBG_POLL = FALSE;
+
+CAR_INTERFACE_IMPL(CallTracker, Handler, ICallTracker);
+
 CallTracker::CallTracker()
     : mPendingOperations(0)
     , mNeedsPoll(FALSE)
@@ -77,7 +82,8 @@ void CallTracker::PollCallsAfterDelay()
 Boolean CallTracker::IsCommandExceptionRadioNotAvailable(
     /* [in] */ IThrowable* e)
 {
-    assert(0 && "TODO");
+    Logger::E("CallTracker", "TODO CallTracker::IsCommandExceptionRadioNotAvailable not implemented");
+    //assert(0 && "TODO");
     // return e != NULL && e instanceof CommandException
     //         && ((CommandException)e).getCommandError()
     //                 == CommandException.Error.RADIO_NOT_AVAILABLE;

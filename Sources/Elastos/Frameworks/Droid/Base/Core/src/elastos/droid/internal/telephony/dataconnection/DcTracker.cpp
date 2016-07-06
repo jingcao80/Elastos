@@ -761,29 +761,29 @@ ECode DcTracker::RegisterForAllEvents()
             IDctConstants::EVENT_DATA_STATE_CHANGED, NULL);
     AutoPtr<ICallTracker> ct;
     mPhone->GetCallTracker((ICallTracker**)&ct);
-    assert(0 && "TODO: ICallTracker");
-    // ct->RegisterForVoiceCallEnded(this,
-    //         IDctConstants::EVENT_VOICE_CALL_ENDED, NULL);
-    // ct->RegisterForVoiceCallStarted (this,
-    //         IDctConstants::EVENT_VOICE_CALL_STARTED, NULL);
+    ct->RegisterForVoiceCallEnded(this,
+             IDctConstants::EVENT_VOICE_CALL_ENDED, NULL);
+    ct->RegisterForVoiceCallStarted (this,
+             IDctConstants::EVENT_VOICE_CALL_STARTED, NULL);
     AutoPtr<IServiceStateTracker> serviceStateTracker;
     mPhone->GetServiceStateTracker((IServiceStateTracker**)&serviceStateTracker);
-    serviceStateTracker->RegisterForDataConnectionAttached(this,
-            IDctConstants::EVENT_DATA_CONNECTION_ATTACHED, NULL);
-    serviceStateTracker->RegisterForDataConnectionDetached(this,
-            IDctConstants::EVENT_DATA_CONNECTION_DETACHED, NULL);
-    serviceStateTracker->RegisterForRoamingOn(this,
-            IDctConstants::EVENT_ROAMING_ON, NULL);
-    serviceStateTracker->RegisterForRoamingOff(this,
-            IDctConstants::EVENT_ROAMING_OFF, NULL);
-    serviceStateTracker->RegisterForPsRestrictedEnabled(this,
-            IDctConstants::EVENT_PS_RESTRICT_ENABLED, NULL);
-    serviceStateTracker->RegisterForPsRestrictedDisabled(this,
-            IDctConstants::EVENT_PS_RESTRICT_DISABLED, NULL);
+    Logger::E("DcTracker", "TODO RegisterForAllEvents ServiceStateTracker is NOT ready");
+    //TODO serviceStateTracker->RegisterForDataConnectionAttached(this,
+    //TODO         IDctConstants::EVENT_DATA_CONNECTION_ATTACHED, NULL);
+    //TODO serviceStateTracker->RegisterForDataConnectionDetached(this,
+    //TODO         IDctConstants::EVENT_DATA_CONNECTION_DETACHED, NULL);
+    //TODO serviceStateTracker->RegisterForRoamingOn(this,
+    //TODO         IDctConstants::EVENT_ROAMING_ON, NULL);
+    //TODO serviceStateTracker->RegisterForRoamingOff(this,
+    //TODO         IDctConstants::EVENT_ROAMING_OFF, NULL);
+    //TODO serviceStateTracker->RegisterForPsRestrictedEnabled(this,
+    //TODO         IDctConstants::EVENT_PS_RESTRICT_ENABLED, NULL);
+    //TODO serviceStateTracker->RegisterForPsRestrictedDisabled(this,
+    //TODO         IDctConstants::EVENT_PS_RESTRICT_DISABLED, NULL);
  //   SubscriptionManager.registerForDdsSwitch(this,
  //          DctConstants.EVENT_CLEAN_UP_ALL_CONNECTIONS, null);
-    serviceStateTracker->RegisterForDataRegStateOrRatChanged(this,
-            IDctConstants::EVENT_DATA_RAT_CHANGED, NULL);
+    //TODO serviceStateTracker->RegisterForDataRegStateOrRatChanged(this,
+    //TODO        IDctConstants::EVENT_DATA_RAT_CHANGED, NULL);
     Int32 phoneType;
     IPhone::Probe(mPhone)->GetPhoneType(&phoneType);
     if (phoneType == IPhoneConstants::PHONE_TYPE_CDMA) {
@@ -3320,6 +3320,8 @@ ECode DcTracker::OnRadioAvailable()
 
 ECode DcTracker::OnRadioOffOrNotAvailable()
 {
+    Logger::E("DcTracker", "TODO OnRadioOffOrNotAvailable not implemented");
+    return NOERROR;
     // Make sure our reconnect delay starts at the initial value
     // next time the radio comes on
     mReregisterOnReconnectFailure = FALSE;

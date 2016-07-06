@@ -604,18 +604,18 @@ ECode CGsmCallTracker::HandleMessage(
     msg->GetObj((IInterface**)&obj);
     switch (what) {
         case EVENT_POLL_CALLS_RESULT:
-            ar = (AsyncResult*)(IObject*)obj.Get();
+            ar = (AsyncResult*)(IObject::Probe(obj));
 
             if (msg == mLastRelevantPoll) {
                 if (DBG_POLL) Log(String("handle EVENT_POLL_CALL_RESULT: set needsPoll=F"));
                 mNeedsPoll = FALSE;
                 mLastRelevantPoll = NULL;
-                HandlePollCalls((AsyncResult*)(IObject*)obj.Get());
+                HandlePollCalls((AsyncResult*)(IObject::Probe(obj)));
             }
         break;
 
         case EVENT_OPERATION_COMPLETE:
-            ar = (AsyncResult*)(IObject*)obj.Get();
+            ar = (AsyncResult*)(IObject::Probe(obj));
             OperationComplete();
         break;
 
@@ -623,7 +623,7 @@ ECode CGsmCallTracker::HandleMessage(
         case EVENT_CONFERENCE_RESULT:
         case EVENT_SEPARATE_RESULT:
         case EVENT_ECT_RESULT:
-            ar = (AsyncResult*)(IObject*)obj.Get();
+            ar = (AsyncResult*)(IObject::Probe(obj));
             if (ar->mException != NULL) {
                 ((CGSMPhone*)mPhone.Get())->NotifySuppServiceFailed(GetFailedService(what));
             }
@@ -632,7 +632,7 @@ ECode CGsmCallTracker::HandleMessage(
 
         case EVENT_GET_LAST_CALL_FAIL_CAUSE: {
             Int32 causeCode;
-            ar = (AsyncResult*)(IObject*)obj.Get();
+            ar = (AsyncResult*)(IObject::Probe(obj));
 
             OperationComplete();
 

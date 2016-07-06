@@ -5,6 +5,7 @@
 #include "elastos/droid/content/CIntentFilter.h"
 #include "elastos/droid/database/ContentObserver.h"
 #include "elastos/droid/internal/telephony/PhoneBase.h"
+#include "elastos/droid/internal/telephony/uicc/CUiccControllerHelper.h"
 #include "elastos/droid/internal/telephony/dataconnection/ApnContext.h"
 #include "elastos/droid/internal/telephony/dataconnection/ApnSetting.h"
 #include "elastos/droid/internal/telephony/dataconnection/CDataProfile.h"
@@ -54,6 +55,8 @@ using Elastos::Droid::Internal::Telephony::IServiceStateTracker;
 using Elastos::Droid::Internal::Telephony::PhoneConstantsDataState_CONNECTED;
 using Elastos::Droid::Internal::Telephony::PhoneConstantsDataState_CONNECTING;
 using Elastos::Droid::Internal::Telephony::PhoneConstantsDataState_DISCONNECTED;
+using Elastos::Droid::Internal::Telephony::Uicc::IUiccControllerHelper;
+using Elastos::Droid::Internal::Telephony::Uicc::CUiccControllerHelper;
 using Elastos::Droid::Internal::Utility::ArrayUtils;
 using Elastos::Droid::Internal::Utility::CAsyncChannel;
 using Elastos::Droid::Internal::Utility::IStateMachine;
@@ -589,9 +592,11 @@ ECode DcTrackerBase::constructor(
     AutoPtr<IContext> context;
     IPhone::Probe(mPhone)->GetContext((IContext**)&context);
     context->GetContentResolver((IContentResolver**)&mResolver);
-    assert(0 && "TODO: UiccController");
-    // mUiccController = UiccController::GetInstance();
-    mUiccController->RegisterForIccChanged(this, IDctConstants::EVENT_ICC_CHANGED, NULL);
+    AutoPtr<IUiccControllerHelper> ucHelper;
+    CUiccControllerHelper::AcquireSingleton((IUiccControllerHelper**)&ucHelper);
+    Logger::E("DcTrackerBase", "TODO constructor uicccontroller is not ready");
+    //TODO ucHelper->GetInstance((IUiccController**)&mUiccController);
+    //TODO mUiccController->RegisterForIccChanged(this, IDctConstants::EVENT_ICC_CHANGED, NULL);
     AutoPtr<IInterface> obj;
     context->GetSystemService(IContext::ALARM_SERVICE, (IInterface**)&obj);
     mAlarmManager = IAlarmManager::Probe(obj);
@@ -657,7 +662,8 @@ ECode DcTrackerBase::Dispose()
     AutoPtr<IContext> context;
     IPhone::Probe(mPhone)->GetContext((IContext**)&context);
     context->UnregisterReceiver(mIntentReceiver);
-    mUiccController->UnregisterForIccChanged(this);
+    if (mUiccController)
+        mUiccController->UnregisterForIccChanged(this);
     mDataRoamingSettingObserver->Unregister();
     ((DcController*) mDcc.Get())->Dispose();
     ((DcController*) mDcTesterFailBringUpAll.Get())->Dispose();

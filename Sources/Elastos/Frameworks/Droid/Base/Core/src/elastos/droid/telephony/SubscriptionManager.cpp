@@ -1,6 +1,7 @@
 #include "elastos/droid/net/CUriHelper.h"
 #include "elastos/droid/R.h"
 #include "elastos/droid/telephony/SubscriptionManager.h"
+#include "elastos/droid/telephony/CTelephonyManagerHelper.h"
 #include <elastos/utility/logging/Logger.h>
 
 using Elastos::Droid::Internal::Telephony::IPhoneConstants;
@@ -750,8 +751,9 @@ ECode SubscriptionManager::IsValidSlotId(
     // not assume that INVALID_SLOT_ID will always be a negative value.  Any negative
     // value is invalid.
     AutoPtr<ITelephonyManager> tm;
-// TODO: Need TelephonyManager
-    // TelephonyManager::GetDefault((ITelephonyManager**)&tm);
+    AutoPtr<ITelephonyManagerHelper> tmHelper;
+    CTelephonyManagerHelper::AcquireSingleton((ITelephonyManagerHelper**)&tmHelper);
+    tmHelper->GetDefault((ITelephonyManager**)&tm);
     Int32 count;
     tm->GetSimCount(&count);
     *result = slotId != ISubscriptionManager::INVALID_SLOT_ID && slotId >= 0 &&

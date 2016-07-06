@@ -599,6 +599,7 @@ public:
     // with MSIM configuration and this is corresponds
     // to phoneId 0.
     static const Int32 DUMMY_SUB_ID;
+    static Object sLock;
 };
 
 } // namespace Telephony
