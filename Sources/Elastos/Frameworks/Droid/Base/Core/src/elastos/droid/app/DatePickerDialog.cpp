@@ -107,9 +107,9 @@ ECode DatePickerDialog::constructor(
     SetButton(IDialogInterface::BUTTON_NEGATIVE, CoreUtils::Convert(cancel), this);
     SetButtonPanelLayoutHint(IAlertDialog::LAYOUT_HINT_SIDE);
 
-    view = NULL;
-    view->FindViewById(R::id::datePicker, (IView**)&view);
-    mDatePicker = IDatePicker::Probe(view);
+    AutoPtr<IView> tmp;
+    view->FindViewById(R::id::datePicker, (IView**)&tmp);
+    mDatePicker = IDatePicker::Probe(tmp);
     mDatePicker->Init(year, monthOfYear, dayOfMonth, this);
     mDatePicker->SetValidationCallback(mValidationCallback);
     return NOERROR;

@@ -134,7 +134,15 @@ ECode TimePickerSpinnerDelegate::TimePickerSpinnerDelegateSavedState::WriteToPar
     dest->WriteInt32(mMinute);
     dest->WriteBoolean(mIs24HourMode);
     dest->WriteBoolean(mInKbMode);
-    dest->WriteInterfacePtr(mTypedTimes);
+    Int32 size;
+    mTypedTimes->GetSize(&size);
+    dest->WriteInt32(size);
+    for (Int32 i = 0; i < size; i++) {
+        AutoPtr<IInterface> obj;
+        mTypedTimes->Get(i, (IInterface**)&obj);
+        dest->WriteInterfacePtr(obj);
+    }
+
     dest->WriteInt32(mCurrentItemShowing);
     return NOERROR;
 }
@@ -148,7 +156,15 @@ ECode TimePickerSpinnerDelegate::TimePickerSpinnerDelegateSavedState::ReadFromPa
     source->ReadInt32(&mMinute);
     source->ReadBoolean(&mIs24HourMode);
     source->ReadBoolean(&mInKbMode);
-    source->ReadInterfacePtr((Handle32*)&mTypedTimes);
+    Int32 size;
+    source->ReadInt32(&size);
+    while (size > 0) {
+        AutoPtr<IInterface> obj;
+        source->ReadInterfacePtr((Handle32*)&obj);
+        mTypedTimes->Add(obj);
+        size--;
+    }
+
     source->ReadInt32(&mCurrentItemShowing);
 
     return NOERROR;
@@ -412,6 +428,7 @@ TimePickerSpinnerDelegate::TimePickerSpinnerDelegate()
     , mAmKeyCode(0)
     , mPmKeyCode(0)
 {
+    CArrayList::New((IArrayList**)&mTypedTimes);
 }
 
 ECode TimePickerSpinnerDelegate::constructor(
@@ -685,14 +702,9 @@ ECode TimePickerSpinnerDelegate::OnSaveInstanceState(
     Is24HourView(&is24Hour);
     Boolean isInKb = InKbMode();
 
-    AutoPtr<ITimePickerSpinnerDelegateSavedState> ss;
-    CTimePickerSpinnerDelegateSavedState::New(
+    return CTimePickerSpinnerDelegateSavedState::New(
             superState, hour, minute, is24Hour, isInKb, GetTypedTimes(),
-            GetCurrentItemShowing(), (ITimePickerSpinnerDelegateSavedState**)&ss);
-
-    *result = IParcelable::Probe(ss);
-    REFCOUNT_ADD(*result);
-    return NOERROR;
+            GetCurrentItemShowing(), result);
 }
 
 ECode TimePickerSpinnerDelegate::OnRestoreInstanceState(
@@ -802,16 +814,22 @@ ECode TimePickerSpinnerDelegate::OnValueSelected(
             announcement += String(". ") + mSelectMinutes;
         }
         else {
-            String strTmp = mHourPickerDescription + String(": ") + StringUtils::ToString(newValue);
-            IView::Probe(mRadialTimePickerView)->SetContentDescription(CoreUtils::Convert(strTmp));
+            StringBuilder buider("");
+            buider += mHourPickerDescription;
+            buider += ": ";
+            buider += newValue;
+            IView::Probe(mRadialTimePickerView)->SetContentDescription(buider.ToCharSequence());
         }
 
         IView::Probe(mRadialTimePickerView)->AnnounceForAccessibility(CoreUtils::Convert(announcement));
     }
     else if (pickerIndex == MINUTE_INDEX){
         UpdateHeaderMinute(newValue);
-        String strTmp = mMinutePickerDescription + String(": ") + StringUtils::ToString(newValue);
-        IView::Probe(mRadialTimePickerView)->SetContentDescription(CoreUtils::Convert(strTmp));
+        StringBuilder buider("");
+        buider += mMinutePickerDescription;
+        buider += ": ";
+        buider += newValue;
+        IView::Probe(mRadialTimePickerView)->SetContentDescription(buider.ToCharSequence());
     }
     else if (pickerIndex == AMPM_INDEX) {
         UpdateAmPmDisplay(newValue);
@@ -888,7 +906,8 @@ Int32 TimePickerSpinnerDelegate::ComputeMaxWidthOfNumbers(
     AutoPtr<IViewGroupLayoutParams> lp;
     CViewGroupLayoutParams::New(IViewGroupLayoutParams::WRAP_CONTENT,
             IViewGroupLayoutParams::WRAP_CONTENT, (IViewGroupLayoutParams**)&lp);
-    IView::Probe(tempView)->SetLayoutParams(lp);
+    IView* _tempView = IView::Probe(tempView);
+    _tempView->SetLayoutParams(lp);
 
     Int32 maxWidth = 0;
     String text;
@@ -899,10 +918,10 @@ Int32 TimePickerSpinnerDelegate::ComputeMaxWidthOfNumbers(
         text = StringUtils::Format(String("%02d"), args);
 
         tempView->SetText(CoreUtils::Convert(text));
-        IView::Probe(tempView)->Measure(Elastos::Droid::View::View::MeasureSpec::UNSPECIFIED,
+        _tempView->Measure(Elastos::Droid::View::View::MeasureSpec::UNSPECIFIED,
                 Elastos::Droid::View::View::MeasureSpec::UNSPECIFIED);
 
-        IView::Probe(tempView)->GetMeasuredWidth(&measuredWidth);
+        _tempView->GetMeasuredWidth(&measuredWidth);
         maxWidth = Elastos::Core::Math::Max(maxWidth, measuredWidth);
     }
     return maxWidth;
@@ -914,7 +933,8 @@ void TimePickerSpinnerDelegate::UpdateHeaderAmPm()
         IView::Probe(mAmPmTextView)->SetVisibility(IView::GONE);
     }
     else {
-        IView::Probe(mAmPmTextView)->SetVisibility(IView::VISIBLE);
+        IView* amPmTextView = IView::Probe(mAmPmTextView);
+        amPmTextView->SetVisibility(IView::VISIBLE);
 
         AutoPtr<IDateFormat> dateFormat;
         CDateFormat::AcquireSingleton((IDateFormat**)&dateFormat);
@@ -932,7 +952,7 @@ void TimePickerSpinnerDelegate::UpdateHeaderAmPm()
         }
 
         AutoPtr<IViewGroupLayoutParams> layoutParamTmp;
-        IView::Probe(mAmPmTextView)->GetLayoutParams((IViewGroupLayoutParams**)&layoutParamTmp);
+        amPmTextView->GetLayoutParams((IViewGroupLayoutParams**)&layoutParamTmp);
         IRelativeLayoutLayoutParams* layoutParamsTmp1 = IRelativeLayoutLayoutParams::Probe(layoutParamTmp);
         IViewGroupMarginLayoutParams* layoutParamsTmp2 = IViewGroupMarginLayoutParams::Probe(layoutParamsTmp1);
 
@@ -949,7 +969,7 @@ void TimePickerSpinnerDelegate::UpdateHeaderAmPm()
 
         UpdateAmPmDisplay(mInitialHourOfDay < 12 ? AM : PM);
         AutoPtr<IViewOnClickListener> ampmOnClickListener = new InnerViewAmPmDisplayOnClickListener(this);
-        IView::Probe(mAmPmTextView)->SetOnClickListener(ampmOnClickListener);
+        amPmTextView->SetOnClickListener(ampmOnClickListener);
     }
 }
 
@@ -1155,19 +1175,27 @@ void TimePickerSpinnerDelegate::SetCurrentItemShowing(
             hours = hours % 12;
         }
 
-        String strTmp = mHourPickerDescription + String(": ") + StringUtils::ToString(hours);
-        IView::Probe(mRadialTimePickerView)->SetContentDescription(CoreUtils::Convert(strTmp));
+        StringBuilder buider("");
+        buider += mHourPickerDescription;
+        buider += ": ";
+        buider += hours;
+        IView* radialTimePickerView = IView::Probe(mRadialTimePickerView);
+        radialTimePickerView->SetContentDescription(buider.ToCharSequence());
         if (announce) {
-            IView::Probe(mRadialTimePickerView)->AnnounceForAccessibility(CoreUtils::Convert(mSelectHours));
+            radialTimePickerView->AnnounceForAccessibility(CoreUtils::Convert(mSelectHours));
         }
     }
     else {
         Int32 minutes = 0;
         mRadialTimePickerView->GetCurrentMinute(&minutes);
-        String strTmp = mMinutePickerDescription + String(": ") + StringUtils::ToString(minutes);
-        IView::Probe(mRadialTimePickerView)->SetContentDescription(CoreUtils::Convert(strTmp));
+        StringBuilder buider("");
+        buider += mMinutePickerDescription;
+        buider += ": ";
+        buider += minutes;
+        IView* radialTimePickerView = IView::Probe(mRadialTimePickerView);
+        radialTimePickerView->SetContentDescription(buider.ToCharSequence());
         if (announce) {
-            IView::Probe(mRadialTimePickerView)->AnnounceForAccessibility(CoreUtils::Convert(mSelectMinutes));
+            radialTimePickerView->AnnounceForAccessibility(CoreUtils::Convert(mSelectMinutes));
         }
     }
 
@@ -1249,8 +1277,7 @@ Boolean TimePickerSpinnerDelegate::AddKeyIfLegal(
     // If we're in 24hour mode, we'll need to check if the input is full. If in AM/PM mode,
     // we'll need to see if AM/PM have been typed.
     Int32 typedTimesSize = 0;
-    mTypedTimes->GetSize(&typedTimesSize);
-    if ((mIs24HourView && typedTimesSize == 4) || (!mIs24HourView && IsTypedTimeFullyLegal())) {
+    if ((mIs24HourView && (mTypedTimes->GetSize(&typedTimesSize), typedTimesSize) == 4) || (!mIs24HourView && IsTypedTimeFullyLegal())) {
         return FALSE;
     }
 
@@ -1267,8 +1294,7 @@ Boolean TimePickerSpinnerDelegate::AddKeyIfLegal(
     IView::Probe(mRadialTimePickerView)->AnnounceForAccessibility(CoreUtils::Convert(formatStr));
     // Automatically fill in 0's if AM or PM was legally entered.
     if (IsTypedTimeFullyLegal()) {
-        mTypedTimes->GetSize(&typedTimesSize);
-        if (!mIs24HourView && typedTimesSize <= 3) {
+        if (!mIs24HourView && (mTypedTimes->GetSize(&typedTimesSize), typedTimesSize) <= 3) {
             mTypedTimes->Add(typedTimesSize - 1, CoreUtils::Convert(IKeyEvent::KEYCODE_0));
             mTypedTimes->GetSize(&typedTimesSize);
             mTypedTimes->Add(typedTimesSize - 1, CoreUtils::Convert(IKeyEvent::KEYCODE_0));
@@ -1312,9 +1338,8 @@ Boolean TimePickerSpinnerDelegate::IsTypedTimeFullyLegal()
         // For AM/PM mode, the time is legal if it contains an AM or PM, as those can only be
         // legally added at specific times based on the tree's algorithm.
         Boolean resTmp = FALSE, resTmp1 = FALSE;
-        mTypedTimes->Contains(CoreUtils::Convert(GetAmOrPmKeyCode(AM)), &resTmp);
-        mTypedTimes->Contains(CoreUtils::Convert(GetAmOrPmKeyCode(PM)), &resTmp1);
-        return (resTmp || resTmp1);
+        return ((mTypedTimes->Contains(CoreUtils::Convert(GetAmOrPmKeyCode(AM)), &resTmp), resTmp) ||
+                (mTypedTimes->Contains(CoreUtils::Convert(GetAmOrPmKeyCode(PM)), &resTmp1), resTmp1));
     }
 }
 
@@ -1354,8 +1379,7 @@ void TimePickerSpinnerDelegate::UpdateDisplay(
     /* [in] */ Boolean allowEmptyDisplay)
 {
     Boolean isEmpty = FALSE;
-    mTypedTimes->IsEmpty(&isEmpty);
-    if (!allowEmptyDisplay && isEmpty) {
+    if (!allowEmptyDisplay && (mTypedTimes->IsEmpty(&isEmpty), isEmpty)) {
         Int32 hour = 0;
         mRadialTimePickerView->GetCurrentHour(&hour);
         Int32 minute = 0;
@@ -1379,16 +1403,21 @@ void TimePickerSpinnerDelegate::UpdateDisplay(
         String minuteFormat = ((*enteredZeros)[1]) ? String("%02d") : String("%2d");
 
         AutoPtr< ArrayOf<IInterface*> > args = ArrayOf<IInterface*>::Alloc(1);
-        args->Set(0, CoreUtils::Convert((*values)[0]));
-        String formatStr = StringUtils::Format(hourFormat, args);
-        formatStr = formatStr.Replace(Char32(' '), mPlaceholderText);
-        String hourStr = ((*values)[0] == -1) ? mDoublePlaceholderText : formatStr;
+        String hourStr = mDoublePlaceholderText;
+        if ((*values)[0] != -1) {
+            args->Set(0, CoreUtils::Convert((*values)[0]));
+            String formatStr = StringUtils::Format(hourFormat, args);
+            formatStr = formatStr.Replace(Char32(' '), mPlaceholderText);
+            hourStr = formatStr;
+        }
 
-        AutoPtr< ArrayOf<IInterface*> > args1 = ArrayOf<IInterface*>::Alloc(1);
-        args1->Set(0, CoreUtils::Convert((*values)[1]));
-        formatStr = StringUtils::Format(minuteFormat, args1);
-        formatStr = formatStr.Replace(Char32(' '), mPlaceholderText);
-        String minuteStr = ((*values)[1] == -1) ? mDoublePlaceholderText : formatStr;
+        String minuteStr = mDoublePlaceholderText;
+        if ((*values)[1] != -1) {
+            args->Set(0, CoreUtils::Convert((*values)[1]));
+            String formatStr = StringUtils::Format(minuteFormat, args);
+            formatStr = formatStr.Replace(Char32(' '), mPlaceholderText);
+            minuteStr = formatStr;
+        }
 
         mHourView->SetText(CoreUtils::Convert(hourStr));
         IView::Probe(mHourView)->SetSelected(FALSE);

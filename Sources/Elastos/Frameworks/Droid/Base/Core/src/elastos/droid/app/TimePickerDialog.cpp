@@ -103,9 +103,9 @@ ECode TimePickerDialog::constructor(
     SetButton(IDialogInterface::BUTTON_NEGATIVE, CoreUtils::Convert(cancel), this);
     SetButtonPanelLayoutHint(IAlertDialog::LAYOUT_HINT_SIDE);
 
-    view = NULL;
-    view->FindViewById(R::id::timePicker, (IView**)&view);
-    mTimePicker = ITimePicker::Probe(view);
+    AutoPtr<IView> tmp;
+    view->FindViewById(R::id::timePicker, (IView**)&tmp);
+    mTimePicker = ITimePicker::Probe(tmp);
     mTimePicker->SetIs24HourView(mIs24HourView);
     mTimePicker->SetCurrentHour(mInitialHourOfDay);
     mTimePicker->SetCurrentMinute(mInitialMinute);

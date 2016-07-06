@@ -1105,27 +1105,29 @@ void RadialTimePickerView::DrawDebug(
     GetContext((IContext**)&context);
     AutoPtr<ITextView> tv;
     CTextView::New(context, (ITextView**)&tv);
-    IView::Probe(tv)->SetLayoutParams(lp);
+    IView* _tv = IView::Probe(tv);
+    _tv->SetLayoutParams(lp);
 
     AutoPtr<ICharSequence> seq;
     CString::New(selected, (ICharSequence**)&seq);
     tv->SetText(seq);
-    IView::Probe(tv)->Measure(View::MeasureSpec::UNSPECIFIED, View::MeasureSpec::UNSPECIFIED);
+    _tv->Measure(View::MeasureSpec::UNSPECIFIED, View::MeasureSpec::UNSPECIFIED);
     AutoPtr<ITextPaint> paint;
     tv->GetPaint((ITextPaint**)&paint);
-    IPaint::Probe(paint)->SetColor(DEBUG_TEXT_COLOR);
+    IPaint* _paint = IPaint::Probe(paint);
+    _paint->SetColor(DEBUG_TEXT_COLOR);
 
     Int32 width = 0;
-    IView::Probe(tv)->GetMeasuredWidth(&width);
+    _tv->GetMeasuredWidth(&width);
 
     Float descent = 0, ascent = 0;
-    IPaint::Probe(paint)->Descent(&descent);
-    IPaint::Probe(paint)->Ascent(&ascent);
+    _paint->Descent(&descent);
+    _paint->Ascent(&ascent);
     Float height = descent - ascent;
     Float x = mXCenter - width / 2;
     Float y = mYCenter + 1.5f * height;
 
-    canvas->DrawText(selected/*.toString()*/, x, y, IPaint::Probe(paint));
+    canvas->DrawText(selected/*.toString()*/, x, y, _paint);
 }
 
 void RadialTimePickerView::CalculateGridSizesHours()

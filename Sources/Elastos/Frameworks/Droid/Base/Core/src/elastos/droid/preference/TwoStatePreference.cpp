@@ -237,8 +237,9 @@ ECode TwoStatePreference::SyncSummaryView(
     /* [in] */ IView* view)
 {
     // Sync the summary view
-    AutoPtr<ITextView> summaryView;
-    view->FindViewById(R::id::summary, (IView**)(ITextView**)&summaryView);
+    AutoPtr<IView> v;
+    view->FindViewById(R::id::summary, (IView**)&v);
+    ITextView* summaryView = ITextView::Probe(v);
     if (summaryView != NULL) {
         Boolean useDefaultSummary = TRUE;
         if (mChecked && !TextUtils::IsEmpty(mSummaryOn)) {
