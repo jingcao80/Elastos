@@ -2,6 +2,7 @@
 #include "elastos/droid/teleservice/phone/CInCallScreenShowActivation.h"
 #include "elastos/droid/teleservice/phone/PhoneGlobals.h"
 #include "elastos/droid/teleservice/phone/PhoneUtils.h"
+#include "Elastos.Droid.Internal.h"
 #include "Elastos.Droid.Os.h"
 #include "Elastos.Droid.Provider.h"
 #include <elastos/core/StringBuilder.h>
@@ -15,6 +16,8 @@ using Elastos::Droid::Content::IContentResolver;
 using Elastos::Droid::Content::Pm::IPackageManager;
 using Elastos::Droid::Content::Pm::IResolveInfo;
 using Elastos::Droid::Content::Res::IResources;
+using Elastos::Droid::Internal::Telephony::ITelephonyCapabilities;
+using Elastos::Droid::Internal::Telephony::CTelephonyCapabilities;
 using Elastos::Droid::Os::ISystemProperties;
 using Elastos::Droid::Os::CSystemProperties;
 using Elastos::Droid::Provider::ISettingsGlobal;
@@ -82,9 +85,10 @@ ECode CInCallScreenShowActivation::OnCreate(
     PhoneGlobals::GetInstance((PhoneGlobals**)&app);
     AutoPtr<IPhone> phone = app->GetPhone();
 
+    AutoPtr<ITelephonyCapabilities> helper;
+    CTelephonyCapabilities::AcquireSingleton((ITelephonyCapabilities**)&helper);
     Boolean res;
-    assert(0);
-    //TelephonyCapabilities::SupportsOtasp(phone, &res);
+    helper->SupportsOtasp(phone, &res);
     if (!res) {
         Logger::W(TAG, "CDMA Provisioning not supported on this device");
         SetResult(RESULT_CANCELED);

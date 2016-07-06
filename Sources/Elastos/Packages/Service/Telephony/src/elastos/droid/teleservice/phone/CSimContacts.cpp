@@ -175,7 +175,7 @@ void CSimContacts::ActuallyImportOneSimContact(
     cursor->GetString(NAME_COLUMN, &column);
     AutoPtr<NamePhoneTypePair> namePhoneTypePair = new NamePhoneTypePair(column);
     String name = namePhoneTypePair->mName;
-    Int32 phoneType = namePhoneTypePair->mPhoneType;
+    //Int32 phoneType = namePhoneTypePair->mPhoneType;
 
     String phoneNumber;
     cursor->GetString(NUMBER_COLUMN, &phoneNumber);

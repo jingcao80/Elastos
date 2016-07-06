@@ -6,6 +6,7 @@
 #include "elastos/droid/teleservice/phone/PhoneGlobals.h"
 #include "elastos/droid/teleservice/phone/CallGatewayManager.h"
 #include "elastos/droid/os/Handler.h"
+#include "elastos/droid/R.h"
 #include "Elastos.Droid.App.h"
 #include "Elastos.Droid.Content.h"
 #include "Elastos.Droid.Internal.h"
@@ -35,6 +36,8 @@ using Elastos::Droid::Internal::Telephony::IMmiCode;
 using Elastos::Droid::Internal::Telephony::ICallerInfo;
 using Elastos::Droid::Internal::Telephony::ICallManager;
 using Elastos::Droid::Internal::Telephony::IConnection;
+using Elastos::Droid::Internal::Telephony::ITelephonyCapabilities;
+using Elastos::Droid::Internal::Telephony::CTelephonyCapabilities;
 using Elastos::Droid::Internal::Telephony::ICallerInfoAsyncQuery;
 using Elastos::Droid::Internal::Telephony::ICallerInfoAsyncQueryOnQueryCompleteListener;
 using Elastos::Droid::View::IView;
@@ -804,6 +807,9 @@ private:
 private:
     friend class CallController;
     friend class CInCallScreenShowActivation;
+    friend class CallNotifier;
+    friend class EmergencyCallHelper;
+    friend class  OtaUtils;
 
     static const String TAG;
     static const Boolean DBG;

@@ -6,6 +6,7 @@
 #include "Elastos.Droid.View.h"
 
 using Elastos::Droid::View::IWindow;
+using Elastos::Droid::View::IViewParent;
 
 namespace Elastos {
 namespace Droid {

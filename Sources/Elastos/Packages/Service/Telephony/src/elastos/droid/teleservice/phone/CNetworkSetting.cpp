@@ -317,14 +317,12 @@ ECode CNetworkSetting::OnCreate(
     // we want this service to just stay in the background until it is killed, we
     // don't bother stopping it from our end.
     AutoPtr<IIntent> intent;
-    assert(0);
-    //CIntent::New(this, NetworkQueryService.class, (IIntent**)&intent);
+    CIntent::New((IContext*)this, ECLSID_CNetworkQueryService, (IIntent**)&intent);
     AutoPtr<IComponentName> name;
     StartService(intent, (IComponentName**)&name);
 
     AutoPtr<IIntent> intent2;
-    assert(0);
-    //CIntent::New(this, NetworkQueryService.class, (IIntent**)&intent2):
+    CIntent::New((IContext*)this, ECLSID_CNetworkQueryService, (IIntent**)&intent2);
     return BindService(intent2, mNetworkQueryServiceConnection, IContext::BIND_AUTO_CREATE, &res);
 }
 

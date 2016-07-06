@@ -16,6 +16,7 @@
 using Elastos::Droid::App::IAlertDialog;
 using Elastos::Droid::App::IAlertDialogBuilder;
 using Elastos::Droid::App::CAlertDialogBuilder;
+using Elastos::Droid::Content::CIntent;
 using Elastos::Droid::Os::IBundle;
 using Elastos::Droid::Os::CBundle;
 using Elastos::Droid::Preference::IPreference;
@@ -37,9 +38,6 @@ using Elastos::Core::CoreUtils;
 using Elastos::Core::StringBuilder;
 using Elastos::Utility::Arrays;
 using Elastos::Utility::Logging::Logger;
-
-
-
 
 namespace Elastos {
 namespace Droid {
@@ -428,8 +426,7 @@ ECode CSipEditor::OnKeyDown(
 void CSipEditor::SetRemovedProfileAndFinish()
 {
     AutoPtr<IIntent> intent;
-    assert(0);
-    //CIntent::New(this, SipSettings.class, (IIntent**)&intent);
+    CIntent::New((IContext*)this, ECLSID_CSipSettings, (IIntent**)&intent);
     SetResult(RESULT_FIRST_USER, intent);
 
     AutoPtr<IToastHelper> helper;

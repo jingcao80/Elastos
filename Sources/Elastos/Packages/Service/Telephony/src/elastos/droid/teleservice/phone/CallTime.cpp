@@ -1,5 +1,6 @@
 
 #include "elastos/droid/teleservice/phone/CallTime.h"
+#include "elastos/droid/teleservice/phone/PhoneGlobals.h"
 #include "elastos/droid/os/SystemClock.h"
 #include "Elastos.CoreLibrary.IO.h"
 #include "Elastos.CoreLibrary.Utility.h"
@@ -227,9 +228,8 @@ void CallTime::StartTrace()
         // For now, we move away from temp directory in favor of
         // the application's data directory to store the trace
         // information (/data/data/com.android.phone).
-        AutoPtr<IPhoneGlobals> phoneGlobals;
-        assert(0 && "TODO : need PhoneGlobals");
-        // phoneGlobals = PhoneGlobals::GetInstance();
+        AutoPtr<PhoneGlobals> phoneGlobals;
+        PhoneGlobals::GetInstance((PhoneGlobals**)&phoneGlobals);
         AutoPtr<IFile> file;
         IContext::Probe(phoneGlobals)->GetDir(String("phoneTrace"), IContext::MODE_PRIVATE, (IFile**)&file);
 

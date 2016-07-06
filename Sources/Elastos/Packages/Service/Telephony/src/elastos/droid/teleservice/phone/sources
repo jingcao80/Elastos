@@ -5,6 +5,7 @@ INCLUDES += ../../../../..
 INCLUDES += $(MAKEDIR)/../../../../..
 INCLUDES += $(MAKEDIR)/../../../../../inc/
 
+SOURCES  = CInCallScreen.cpp
 SOURCES += CDeleteFdnContactScreen.cpp
 SOURCES += CEditFdnContactScreen.cpp
 SOURCES += CEditPhoneNumberPreference.cpp
@@ -25,7 +26,7 @@ SOURCES += CGsmUmtsCallOptions.cpp
 SOURCES += CGsmUmtsOptions.cpp
 SOURCES += CHfaActivity.cpp
 SOURCES += CHfaService.cpp
-SOURCES += CIccPanel.cpp
+SOURCES += IccPanel.cpp
 SOURCES += CInCallScreenShowActivation.cpp
 SOURCES += CMMIDialogActivity.cpp
 SOURCES += CMobileNetworkSettings.cpp
@@ -72,5 +73,6 @@ SOURCES += Ringer.cpp
 SOURCES += SmallerHitTargetTouchListener.cpp
 SOURCES += SpecialCharSequenceMgr.cpp
 SOURCES += CTelephonyDebugService.cpp
+SOURCES += IccNetworkDepersonalizationPanel.cpp
 
 SOURCES += phone.cpp

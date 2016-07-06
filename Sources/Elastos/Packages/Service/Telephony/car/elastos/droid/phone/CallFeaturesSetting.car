@@ -73,6 +73,15 @@ module
          */
         const String IGNORE_PROVIDER_EXTRA = "com.android.phone.ProviderToIgnore";
 
+        /* package */ const String BUTTON_VOICEMAIL_NOTIFICATION_VIBRATE_KEY =
+                "button_voicemail_notification_vibrate_key";
+        // Old preference key for voicemail notification vibration. Used for migration to the new
+        // preference key only.
+        /* package */ const String BUTTON_VOICEMAIL_NOTIFICATION_VIBRATE_WHEN_KEY =
+                "button_voicemail_notification_vibrate_when_key";
+        /* package */ const String BUTTON_VOICEMAIL_NOTIFICATION_RINGTONE_KEY =
+                "button_voicemail_notification_ringtone_key";
+
         const String HAC_KEY = "HACSetting";
         const String HAC_VAL_ON = "ON";
         const String HAC_VAL_OFF = "OFF";

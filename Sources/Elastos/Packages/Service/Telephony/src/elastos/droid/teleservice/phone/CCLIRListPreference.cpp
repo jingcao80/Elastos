@@ -6,17 +6,17 @@ namespace Droid {
 namespace TeleService {
 namespace Phone {
 
-const Int32 MyHandler::MESSAGE_GET_CLIR = 0;
-const Int32 MyHandler::MESSAGE_SET_CLIR = 1;
+const Int32 CCLIRListPreference::MyHandler::MESSAGE_GET_CLIR = 0;
+const Int32 CCLIRListPreference::MyHandler::MESSAGE_SET_CLIR = 1;
 
-MyHandler::MyHandler(
+CCLIRListPreference::MyHandler::MyHandler(
     /* [in] */ CCLIRListPreference* host)
     : mHost(host)
 {
     Handler::constructor();
 }
 
-ECode MyHandler::HandleMessage(
+ECode CCLIRListPreference::MyHandler::HandleMessage(
     /* [in] */ IMessage* msg)
 {
     Int32 what;
@@ -33,7 +33,7 @@ ECode MyHandler::HandleMessage(
 }
 
 
-void MyHandler::HandleGetCLIRResponse(
+void CCLIRListPreference::MyHandler::HandleGetCLIRResponse(
     /* [in] */ IMessage* msg)
 {
     AutoPtr<IInterface> obj;
@@ -91,7 +91,7 @@ void MyHandler::HandleGetCLIRResponse(
     }
 }
 
-void MyHandler::HandleSetCLIRResponse(
+void CCLIRListPreference::MyHandler::HandleSetCLIRResponse(
     /* [in] */ IMessage* msg)
 {
     AutoPtr<IInterface> obj;

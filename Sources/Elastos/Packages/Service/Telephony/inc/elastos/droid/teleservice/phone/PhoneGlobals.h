@@ -326,6 +326,9 @@ private:
     friend class COtaStartupReceiver;
     friend class COutgoingCallBroadcaster;
     friend class CNetworkSetting;
+    friend class CallNotifier;
+    friend class EmergencyCallHelper;
+    friend class NotificationMgr;
 
     static const Boolean DBG;
     static const Boolean VDBG;
@@ -401,7 +404,6 @@ private:
      * Used to determine if the preserved call origin is fresh enough.
      */
     static const Int64 CALL_ORIGIN_EXPIRATION_MILLIS;
-    friend class NotificationMgr;
 };
 
 } // namespace Phone

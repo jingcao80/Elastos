@@ -1,5 +1,7 @@
 
 #include "elastos/droid/teleservice/phone/CCallFeaturesSetting.h"
+#include "elastos/droid/teleservice/phone/PhoneGlobals.h"
+#include "elastos/droid/teleservice/services/telephony/sip/SipUtil.h"
 #include "elastos/droid/internal/telephony/CallForwardInfo.h"
 #include "R.h"
 #include <elastos/droid/R.h>
@@ -59,6 +61,7 @@ using Elastos::Droid::Widget::IAdapter;
 using Elastos::Droid::Widget::IAdapterView;
 using Elastos::Droid::Widget::IListView;
 using Elastos::Droid::Widget::IAdapterViewOnItemClickListener;
+using Elastos::Core::IArrayOf;
 using Elastos::Core::CString;
 using Elastos::Core::CThread;
 using Elastos::Core::StringBuilder;
@@ -177,8 +180,8 @@ ECode CCallFeaturesSetting::VoiceMailProviderSettings::ToString(
     sb += mVoicemailNumber;
 
     assert(0);
-    // return voicemailNumber + ((forwardingSettings != NULL ) ? (", " +
-    //         forwardingSettings.toString()) : "");
+    // return mVoicemailNumber + ((mForwardingSettings != NULL ) ? (", " +
+    //         mForwardingSettings.toString()) : "");
     return NOERROR;
 }
 
@@ -416,10 +419,6 @@ const String CCallFeaturesSetting::BUTTON_VOICEMAIL_KEY("button_voicemail_key");
 const String CCallFeaturesSetting::BUTTON_VOICEMAIL_PROVIDER_KEY("button_voicemail_provider_key");
 const String CCallFeaturesSetting::BUTTON_VOICEMAIL_SETTING_KEY("button_voicemail_setting_key");
 
-const String CCallFeaturesSetting::BUTTON_VOICEMAIL_NOTIFICATION_VIBRATE_KEY("button_voicemail_notification_vibrate_key");
-
-const String CCallFeaturesSetting::BUTTON_VOICEMAIL_NOTIFICATION_VIBRATE_WHEN_KEY("button_voicemail_notification_vibrate_when_key");
-const String CCallFeaturesSetting::BUTTON_VOICEMAIL_NOTIFICATION_RINGTONE_KEY("button_voicemail_notification_ringtone_key");
 const String CCallFeaturesSetting::BUTTON_FDN_KEY("button_fdn_key");
 
 const String CCallFeaturesSetting::BUTTON_DTMF_KEY("button_dtmf_settings");
@@ -977,8 +976,7 @@ ECode CCallFeaturesSetting::OnActivityResult(
                     ICloseable::Probe(cursor)->Close();
                 }
             }
-            assert(0 && "TODO Need CEditPhoneNumberPreference");
-            // ec = ((CEditPhoneNumberPreference*)mSubMenuVoicemailSettings.Get())->OnPickActivityResult(str);
+            ec = mSubMenuVoicemailSettings->OnPickActivityResult(str);
             if (FAILED(ec)) {
                 if (cursor != NULL) {
                     ICloseable::Probe(cursor)->Close();
@@ -1004,8 +1002,7 @@ void CCallFeaturesSetting::HandleVMBtnClickRequest()
     // call now, we won't need to do so here anymore.
 
     String number;
-    assert(0 && "TODO CEditPhoneNumberPreference");
-    // ((CEditPhoneNumberPreference*)mSubMenuVoicemailSettings.Get())->GetPhoneNumber(&number);
+    mSubMenuVoicemailSettings->GetPhoneNumber(&number);
     AutoPtr<VoiceMailProviderSettings> setting = new VoiceMailProviderSettings(number, FWD_SETTINGS_DONT_TOUCH);
     SaveVoiceMailAndForwardingNumber(GetCurrentVoicemailProviderKey(), setting);
 }
@@ -1121,13 +1118,16 @@ void CCallFeaturesSetting::HandleForwardingSettingsReadResult(
     }
 
     // Get the forwarding info
-    AutoPtr<ArrayOf<ICallForwardInfo*> > cfInfoArray;
-    assert(0 && "TODO");
-    // cfInfoArray = (CallForwardInfo[]) ar.result;
-    CallForwardInfo* fi = NULL;
-    for (Int32 i = 0 ; i < cfInfoArray->GetLength(); i++) {
-        if ((((CallForwardInfo*)(*cfInfoArray)[i])->mServiceClass & ICommandsInterface::SERVICE_CLASS_VOICE) != 0) {
-            fi = (CallForwardInfo*)(*cfInfoArray)[i];
+    AutoPtr<IArrayOf> cfInfoArray = IArrayOf::Probe(ar->mResult);
+    AutoPtr<CallForwardInfo> fi;
+    Int32 size;
+    cfInfoArray->GetLength(&size);
+    for (Int32 i = 0 ; i < size; i++) {
+        AutoPtr<IInterface> obj;
+        cfInfoArray->Get(i, (IInterface**)&obj);
+        AutoPtr<CallForwardInfo> tmp = (CallForwardInfo*)ICallForwardInfo::Probe(obj);
+        if ((tmp->mServiceClass & ICommandsInterface::SERVICE_CLASS_VOICE) != 0) {
+            fi = tmp;
             break;
         }
     }
@@ -1607,8 +1607,7 @@ ECode CCallFeaturesSetting::OnCreate(
         Log(String("onCreate(). Intent: ") + TO_CSTR(intent));
     }
 
-    assert(0 && "TODO :need PhoneGlobals");
-    // mPhone = PhoneGlobals::GetPhone();
+    mPhone = PhoneGlobals::GetPhone();
     AutoPtr<IInterface> obj;
     GetSystemService(IContext::AUDIO_SERVICE, (IInterface**)&obj);
     mAudioManager = IAudioManager::Probe(obj);
@@ -1646,12 +1645,12 @@ void CCallFeaturesSetting::InitPhoneAccountPreferences()
     Boolean b = FALSE;
     l->IsEmpty(&b);
     assert(0 && "TODO Need SipUtil");
-    if (count <= 1 && b /*&& !SipUtil::IsVoipSupported(this)*/) {
-        AutoPtr<IPreferenceScreen> screen;
-        GetPreferenceScreen((IPreferenceScreen**)&screen);
-        Boolean tmp = FALSE;
-        IPreferenceGroup::Probe(screen)->RemovePreference(mPhoneAccountSettingsPreference, &tmp);
-    }
+    // if (count <= 1 && b && !SipUtil::IsVoipSupported((IContext*)this)) {
+    //     AutoPtr<IPreferenceScreen> screen;
+    //     GetPreferenceScreen((IPreferenceScreen**)&screen);
+    //     Boolean tmp = FALSE;
+    //     IPreferenceGroup::Probe(screen)->RemovePreference(mPhoneAccountSettingsPreference, &tmp);
+    // }
 }
 
 Boolean CCallFeaturesSetting::CanLaunchIntent(

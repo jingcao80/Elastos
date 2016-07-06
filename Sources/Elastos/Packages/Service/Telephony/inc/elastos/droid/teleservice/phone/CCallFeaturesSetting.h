@@ -538,12 +538,7 @@ private:
     static const String BUTTON_VOICEMAIL_KEY;
     static const String BUTTON_VOICEMAIL_PROVIDER_KEY;
     static const String BUTTON_VOICEMAIL_SETTING_KEY;
-    // New preference key for voicemail notification vibration
-    static const String BUTTON_VOICEMAIL_NOTIFICATION_VIBRATE_KEY;
-    // Old preference key for voicemail notification vibration. Used for migration to the new
-    // preference key only.
-    static const String BUTTON_VOICEMAIL_NOTIFICATION_VIBRATE_WHEN_KEY;
-    static const String BUTTON_VOICEMAIL_NOTIFICATION_RINGTONE_KEY;
+
     static const String BUTTON_FDN_KEY;
 
     static const String BUTTON_DTMF_KEY;

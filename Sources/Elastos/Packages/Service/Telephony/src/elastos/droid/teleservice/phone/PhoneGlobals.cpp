@@ -43,10 +43,12 @@ using Elastos::Droid::Preference::CPreferenceManagerHelper;
 using Elastos::Droid::Internal::Telephony::ICall;
 using Elastos::Droid::Internal::Telephony::ICallState;
 using Elastos::Droid::Internal::Telephony::ICallManagerHelper;
-using Elastos::Droid::Internal::Telephony::CCallManagerHelper;
+//using Elastos::Droid::Internal::Telephony::CCallManagerHelper;
 using Elastos::Droid::Internal::Telephony::ICallState_DIALING;
 using Elastos::Droid::Internal::Telephony::ITelephonyIntents;
 using Elastos::Droid::Internal::Telephony::IPhoneConstants;
+using Elastos::Droid::Internal::Telephony::ITelephonyCapabilities;
+using Elastos::Droid::Internal::Telephony::CTelephonyCapabilities;
 using Elastos::Droid::Internal::Telephony::IIccCardConstants;
 using Elastos::Droid::Internal::Telephony::PhoneConstantsState_IDLE;
 using Elastos::Droid::Internal::Telephony::PhoneConstantsState_OFFHOOK;
@@ -60,7 +62,6 @@ using Elastos::Droid::Telephony::CServiceStateHelper;
 using Elastos::Droid::Telephony::IServiceState;
 using Elastos::Core::CoreUtils;
 using Elastos::Utility::Logging::Logger;
-
 
 namespace Elastos {
 namespace Droid {
@@ -86,8 +87,7 @@ ECode PhoneGlobals::NotificationBroadcastReceiver::OnReceive(
     if (action.Equals(IPhoneGlobals::ACTION_HANG_UP_ONGOING_CALL)) {
         AutoPtr<PhoneGlobals> globals;
         PhoneGlobals::GetInstance((PhoneGlobals**)&globals);
-        assert(0);
-        //PhoneUtils::Hangup(globals->mCM);
+        PhoneUtils::Hangup(globals->mCM);
     }
     else {
         Logger::W(IPhoneGlobals::TAG, "Received hang-up request from notification,"
@@ -173,16 +173,16 @@ ECode PhoneGlobals::PhoneAppBroadcastReceiver::OnReceive(
     }
     else if (action.Equals(ITelephonyIntents::ACTION_EMERGENCY_CALLBACK_MODE_CHANGED)) {
         Boolean res;
-        assert(0);
-        //TelephonyCapabilities::SupportsEcm(mHost->mPhone, &res);
+        AutoPtr<ITelephonyCapabilities> helper;
+        CTelephonyCapabilities::AcquireSingleton((ITelephonyCapabilities**)&helper);
+        helper->SupportsEcm(mHost->mPhone, &res);
         if (res) {
             Logger::D(IPhoneGlobals::TAG, "Emergency Callback Mode arrived in PhoneApp.");
             // Start Emergency Callback Mode service
             Boolean res;
             if (intent->GetBooleanExtra(String("phoneinECMState"), FALSE, &res), res) {
                 AutoPtr<IIntent> intent;
-                assert(0);
-                //CIntent::New(context, EmergencyCallbackModeService.class, (IIntent**)&intent);
+                CIntent::New(context, ECLSID_CEmergencyCallbackModeService, (IIntent**)&intent);
                 AutoPtr<IComponentName> name;
                 context->StartService(intent, (IComponentName**)&name);
             }
@@ -256,7 +256,7 @@ ECode PhoneGlobals::MyHandler::HandleMessage(
                 AutoPtr<PhoneGlobals> globals;
                 PhoneGlobals::GetInstance((PhoneGlobals**)&globals);
                 assert(0);
-                // AutoPtr<IIccNetworkDepersonalizationPanel> ndpPanel;
+                // AutoPtr<IccNetworkDepersonalizationPanel> ndpPanel;
                 // CIccNetworkDepersonalizationPanel::New(globals, (IIccNetworkDepersonalizationPanel**)&&ndpPanel);
                 // ndpPanel->Show();
             }
@@ -278,8 +278,7 @@ ECode PhoneGlobals::MyHandler::HandleMessage(
             break;
         }
         case IPhoneGlobals::MMI_CANCEL:
-            assert(0);
-            //PhoneUtils::CancelMmiCode(phone);
+            PhoneUtils::CancelMmiCode(mHost->mPhone);
             break;
 
         case EVENT_SIM_STATE_CHANGED:
@@ -328,8 +327,7 @@ ECode PhoneGlobals::MyHandler::HandleMessage(
                     (mHost->mBluetoothManager->IsBluetoothHeadsetAudioOn(&res), !res)) {
                 AutoPtr<IContext> context;
                 mHost->GetApplicationContext((IContext**)&context);
-                assert(0);
-                //PhoneUtils::TurnOnSpeaker(context, inDockMode, TRUE);
+                PhoneUtils::TurnOnSpeaker(context, inDockMode, TRUE);
             }
             break;
         }
@@ -426,7 +424,8 @@ ECode PhoneGlobals::OnCreate()
         Boolean res = FALSE;
         //Logger::D(TAG, "TODO Need CallManager::GetInstance");
         AutoPtr<ICallManagerHelper> cmHelper;
-        CCallManagerHelper::AcquireSingleton((ICallManagerHelper**)&cmHelper);
+        assert(0);
+        //CCallManagerHelper::AcquireSingleton((ICallManagerHelper**)&cmHelper);
         cmHelper->GetInstance((ICallManager**)&mCM);
         mCM->RegisterPhone(mPhone, &res);
 
@@ -603,7 +602,6 @@ ECode PhoneGlobals::GetInstance(
     if (sMe == NULL) {
         //throw new IllegalStateException("No PhoneGlobals here!");
         Logger::E(IPhoneGlobals::TAG, "No PhoneGlobals here!");
-        assert(0);
         return E_ILLEGAL_STATE_EXCEPTION;
     }
     *global = sMe;
@@ -649,7 +647,7 @@ AutoPtr<IPendingIntent> PhoneGlobals::CreateHangUpOngoingCallPendingIntent(
     AutoPtr<IIntent> intent;
     assert(0);
     // CIntent::New(IPhoneGlobals::ACTION_HANG_UP_ONGOING_CALL, NULL,
-    //         context, EIID_IPhoneGlobalsNotificationBroadcastReceiver, (IIntent**)&intent); //CPhoneGlobalsNotificationBroadcastReceiver
+    //         context, ECLSID_CPhoneGlobalsNotificationBroadcastReceiver, (IIntent**)&intent);
 
     AutoPtr<IPendingIntentHelper> helper;
     CPendingIntentHelper::AcquireSingleton((IPendingIntentHelper**)&helper);
@@ -826,8 +824,7 @@ ECode PhoneGlobals::UpdateWakeState()
     // Note that we need to make a fresh call to this method any
     // time the speaker state changes.  (That happens in
     // PhoneUtils.turnOnSpeaker().)
-    assert(0);
-    //Boolean isSpeakerInUse = (state == PhoneConstantsState_OFFHOOK) && PhoneUtils::IsSpeakerOn(this);
+    // Boolean isSpeakerInUse = (state == PhoneConstantsState_OFFHOOK) && PhoneUtils::IsSpeakerOn(this);
 
     // TODO (bug 1440854): The screen timeout *might* also need to
     // depend on the bluetooth state, but this isn't as clear-cut as
@@ -919,9 +916,7 @@ ECode PhoneGlobals::OnMMIComplete(
 
     AutoPtr<PhoneGlobals> global;
     FAIL_RETURN(GetInstance((PhoneGlobals**)&global))
-    assert(0);
-    //return PhoneUtils::DisplayMMIComplete(phone, global, mmiCode, NULL, NULL);
-    return NOERROR;
+    return PhoneUtils::DisplayMMIComplete(mPhone, global, mmiCode, NULL, NULL);
 }
 
 void PhoneGlobals::InitForNewRadioTechnology()
@@ -936,16 +931,16 @@ void PhoneGlobals::InitForNewRadioTechnology()
         mCdmaPhoneCallState->CdmaPhoneCallStateInit();
     }
 
-    assert(0);
+    AutoPtr<ITelephonyCapabilities> helper;
+    CTelephonyCapabilities::AcquireSingleton((ITelephonyCapabilities**)&helper);
     Boolean res;
-    // TelephonyCapabilities::SupportsOtasp(mPhone, &res);
+    helper->SupportsOtasp(mPhone, &res);
     if (!res) {
         //Clean up OTA data in GSM/UMTS. It is valid only for CDMA
         ClearOtaState();
     }
 
-    assert(0);
-    //mNotifier->UpdateCallNotifierRegistrationsAfterRadioTechnologyChange();
+    mNotifier->UpdateCallNotifierRegistrationsAfterRadioTechnologyChange();
     mCallStateMonitor->UpdateAfterRadioTechnologyChange();
 
     // Update registration for ICC status after radio technology change
@@ -954,8 +949,8 @@ void PhoneGlobals::InitForNewRadioTechnology()
     if (sim != NULL) {
         if (DBG) Logger::D(IPhoneGlobals::TAG, "Update registration for ICC status...");
 
-        //Register all events new to the new active phone
         assert(0);
+        //Register all events new to the new active phone
         //sim->RegisterForNetworkLocked(mHandler, EVENT_SIM_NETWORK_LOCKED, NULL);
     }
 }

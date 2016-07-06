@@ -23,6 +23,8 @@ using Elastos::Droid::App::IActivityManagerHelper;
 using Elastos::Droid::Content::IContentResolver;
 using Elastos::Droid::Content::ISharedPreferencesEditor;
 using Elastos::Droid::Internal::Telephony::EIID_IITelephony;
+using Elastos::Droid::Internal::Telephony::IPhoneFactory;
+using Elastos::Droid::Internal::Telephony::CPhoneFactory;
 using Elastos::Droid::Internal::Telephony::IPhoneConstants;
 using Elastos::Droid::Internal::Telephony::PhoneConstantsState;
 using Elastos::Droid::Internal::Telephony::PhoneConstantsState_IDLE;
@@ -484,15 +486,25 @@ ECode CPhoneInterfaceManager::MainThreadHandler::HandleMessage(
             request = (MainThreadRequest*) IObject::Probe(ar->mUserObj);
             AutoPtr<IIccOpenLogicalChannelResponse> openChannelResp;
             if (ar->mException == NULL && ar->mResult != NULL) {
-                AutoPtr<ArrayOf<Int32> > result;
-                assert(0 && "TODO");
-                // result = (int[]) ar.result;
-                Int32 channelId = (*result)[0];
+                AutoPtr<IArrayOf> result = IArrayOf::Probe(ar->mResult);
+                AutoPtr<IInterface> obj;
+                result->Get(0, (IInterface**)&obj);
+                AutoPtr<IInteger32> value = IInteger32::Probe(obj);
+                Int32 channelId;
+                value->GetValue(&channelId);
+
                 AutoPtr<ArrayOf<Byte> > selectResponse;
-                if (result->GetLength() > 1) {
-                    selectResponse = ArrayOf<Byte>::Alloc(result->GetLength() - 1);
-                    for (Int32 i = 1; i < result->GetLength(); ++i) {
-                        (*selectResponse)[i - 1] = (Byte)(*result)[i];
+                Int32 size;
+                result->GetLength(&size);
+                if (size > 1) {
+                    selectResponse = ArrayOf<Byte>::Alloc(size - 1);
+                    for (Int32 i = 1; i < size; ++i) {
+                        AutoPtr<IInterface> _obj;
+                        result->Get(i, (IInterface**)&_obj);
+                        AutoPtr<IInteger32> _value = IInteger32::Probe(_obj);
+                        Int32 id;
+                        _value->GetValue(&id);
+                        (*selectResponse)[i - 1] = (Byte)id;
                     }
                 }
                 CIccOpenLogicalChannelResponse::New(channelId,
@@ -1464,10 +1476,12 @@ ECode CPhoneInterfaceManager::NeedMobileRadioShutdown(
     helper->GetDefault((ITelephonyManager**)&manager);
     Int32 count;
     manager->GetPhoneCount(&count);
+
+    AutoPtr<IPhoneFactory> helper2;
+    CPhoneFactory::AcquireSingleton((IPhoneFactory**)&helper2);
     for (Int32 i = 0; i < count; i++) {
         AutoPtr<IPhone> phone;
-        assert(0 && "TODO: Need PhoneFactory");
-        // PhoneFactory::GetPhone(i);
+        helper2->GetPhone(i, (IPhone**)&phone);
         Boolean res;
         if (phone != NULL && (phone->IsRadioAvailable(&res), res)) {
             *result = TRUE;
@@ -1498,9 +1512,11 @@ void CPhoneInterfaceManager::ShutdownRadioUsingPhoneId(
     /* [in] */ Int32 phoneId)
 {
     EnforceModifyPermission();
+
+    AutoPtr<IPhoneFactory> helper;
+    CPhoneFactory::AcquireSingleton((IPhoneFactory**)&helper);
     AutoPtr<IPhone> phone;
-    assert(0 && "TODO: Need PhoneFactory");
-    // PhoneFactory::GetPhone(phoneId);
+    helper->GetPhone(phoneId, (IPhone**)&phone);
     Boolean res;
     if (phone != NULL && (phone->IsRadioAvailable(&res), res)) {
         phone->ShutdownRadio();
@@ -2638,9 +2654,9 @@ ECode CPhoneInterfaceManager::GetCalculatedPreferredNetworkType(
     EnforceReadPermission();
     AutoPtr<IContext> context;
     mPhone->GetContext((IContext**)&context);
-    assert(0 && "TODO: Need PhoneFactory");
-    // return PhoneFactory::CalculatePreferredNetworkType(context, result);
-    return NOERROR;
+    AutoPtr<IPhoneFactory> helper;
+    CPhoneFactory::AcquireSingleton((IPhoneFactory**)&helper);
+    return helper->CalculatePreferredNetworkType(context, result);
 }
 
 ECode CPhoneInterfaceManager::GetPreferredNetworkType(

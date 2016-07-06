@@ -548,8 +548,7 @@ void CEditFdnContactScreen::DeleteSelected()
     if (!mAddContact) {
         AutoPtr<IIntent> intent;
         CIntent::New((IIntent**)&intent);
-        assert(0);
-        //intent->SetClass(this, DeleteFdnContactScreen.class);
+        intent->SetClass((IContext*)this, ECLSID_CDeleteFdnContactScreen);
         intent->PutExtra(INTENT_EXTRA_NAME, mName);
         intent->PutExtra(INTENT_EXTRA_NUMBER, mNumber);
         StartActivity(intent);
@@ -561,8 +560,7 @@ void CEditFdnContactScreen::AuthenticatePin2()
 {
     AutoPtr<IIntent> intent;
     CIntent::New((IIntent**)&intent);
-    assert(0);
-    //intent->SetClass(this, GetPin2Screen.class);
+    intent->SetClass((IContext*)this, ECLSID_CGetPin2Screen);
     StartActivityForResult(intent, PIN2_REQUEST_CODE);
 }
 

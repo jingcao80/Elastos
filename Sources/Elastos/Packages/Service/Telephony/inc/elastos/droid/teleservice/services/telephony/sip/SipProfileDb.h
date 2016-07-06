@@ -3,6 +3,7 @@
 
 #include "_Elastos.Droid.TeleService.h"
 #include "elastos/droid/ext/frameworkext.h"
+#include "elastos/droid/teleservice/services/telephony/sip/SipSharedPreferences.h"
 #include "Elastos.Droid.Content.h"
 #include <elastos/core/Object.h>
 #include <elastos/core/StringBuffer.h>
@@ -64,7 +65,7 @@ private:
     static const String PROFILE_OBJ_FILE;
 
     String mProfilesDirectory;
-    //AutoPtr<SipSharedPreferences> mSipSharedPreferences;
+    AutoPtr<SipSharedPreferences> mSipSharedPreferences;
     Int32 mProfilesCount;
 
     static Object sLock;

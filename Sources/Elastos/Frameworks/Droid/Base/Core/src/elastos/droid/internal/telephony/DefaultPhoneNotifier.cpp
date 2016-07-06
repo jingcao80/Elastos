@@ -30,13 +30,14 @@ namespace Telephony {
 
 const String DefaultPhoneNotifier::TAG("DefaultPhoneNotifier");
 const Boolean DefaultPhoneNotifier::DBG = FALSE; // STOPSHIP if true
-CAR_INTERFACE_DECL()
+
+CAR_INTERFACE_IMPL(DefaultPhoneNotifier, Object, IPhoneNotifier)
 
 /*package*/
 DefaultPhoneNotifier::DefaultPhoneNotifier()
 {
     mRegistry = IITelephonyRegistry::Probe(ServiceManager::GetService(
-                String("telephony.registry")));
+            String("telephony.registry")));
 }
 
 // @Override

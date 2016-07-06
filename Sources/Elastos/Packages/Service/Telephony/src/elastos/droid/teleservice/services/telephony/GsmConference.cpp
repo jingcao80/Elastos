@@ -77,8 +77,7 @@ ECode GsmConference::OnMerge(
     //try {
     ECode ec = NOERROR;
     AutoPtr<IPhone> phone;
-    assert(0);
-    //ITelephonyConnection::Probe(connection)->GetPhone((IPhone**)&phone);
+    ITelephonyConnection::Probe(connection)->GetPhone((IPhone**)&phone);
     if (phone != NULL) {
         ec = phone->Conference();
     }
@@ -93,8 +92,7 @@ ECode GsmConference::OnHold()
 {
     AutoPtr<IGsmConnection> connection = GetFirstConnection();
     if (connection != NULL) {
-        assert(0);
-        //IConnection::Probe(connection)->PerformHold();
+        ITelephonyConnection::Probe(connection)->PerformHold();
     }
     return NOERROR;
 }
@@ -103,8 +101,7 @@ ECode GsmConference::OnUnhold()
 {
     AutoPtr<IGsmConnection> connection = GetFirstConnection();
     if (connection != NULL) {
-        assert(0);
-        //IConnection::Probe(connection)->PerformUnhold();
+        ITelephonyConnection::Probe(connection)->PerformUnhold();
     }
     return NOERROR;
 }
@@ -151,9 +148,8 @@ AutoPtr<Elastos::Droid::Internal::Telephony::IConnection> GsmConference::GetOrig
 {
     if (IGsmConnection::Probe(connection) != NULL) {
         AutoPtr<Elastos::Droid::Internal::Telephony::IConnection> tmp;
-        assert(0);
-        // IGsmConnection::Probe(connection)->GetOriginalConnection((
-        //         Elastos::Droid::Internal::Telephony::IConnection*)&tmp);
+        ITelephonyConnection::Probe(connection)->GetOriginalConnection((
+                Elastos::Droid::Internal::Telephony::IConnection**)&tmp);
         return tmp;
     }
     else {

@@ -6,6 +6,7 @@
 #include "Elastos.Droid.Internal.h"
 #include "Elastos.Droid.Net.h"
 #include "Elastos.Droid.Provider.h"
+#include "Elastos.Droid.Telephony.h"
 #include <elastos/core/CoreUtils.h>
 #include <elastos/core/StringBuilder.h>
 #include <elastos/utility/logging/Logger.h>
@@ -21,6 +22,8 @@ using Elastos::Droid::Provider::IContactsContractCommonDataKindsCallable;
 using Elastos::Droid::Provider::IContactsContractCommonDataKindsPhone;
 using Elastos::Droid::Provider::IContactsContractDataColumns;
 using Elastos::Droid::Provider::IContactsContractContactOptionsColumns;
+using Elastos::Droid::Telephony::IPhoneNumberUtils;
+using Elastos::Droid::Telephony::CPhoneNumberUtils;
 using Elastos::Core::CoreUtils;
 using Elastos::Core::StringBuilder;
 using Elastos::IO::ICloseable;
@@ -211,6 +214,8 @@ void CallerInfoCache::RefreshCacheEntry()
             AutoPtr<IHashMap> newNumberToEntry;
             CHashMap::New(count, (IHashMap**)&newNumberToEntry);
 
+            AutoPtr<IPhoneNumberUtils> helper;
+            CPhoneNumberUtils::AcquireSingleton((IPhoneNumberUtils**)&helper);
             Boolean res;
             while (cursor->MoveToNext(&res), res) {
                 String number;
@@ -220,8 +225,7 @@ void CallerInfoCache::RefreshCacheEntry()
                 if (normalizedNumber.IsNull()) {
                     // There's no guarantee normalized numbers are available every time and
                     // it may become null sometimes. Try formatting the original number.
-                    assert(0 && "TODO: Need PhoneNumberUtils");
-                    // normalizedNumber = PhoneNumberUtils::NormalizeNumber(number);
+                    helper->NormalizeNumber(number, &normalizedNumber);
                 }
                 String customRingtone;
                 FAIL_GOTO(cursor->GetString(INDEX_CUSTOM_RINGTONE, &customRingtone), FINALLY)
@@ -229,28 +233,28 @@ void CallerInfoCache::RefreshCacheEntry()
                 FAIL_GOTO(cursor->GetInt32(INDEX_SEND_TO_VOICEMAIL, &num), FINALLY)
                 Boolean sendToVoicemail = num == 1;
 
-                assert(0 && "TODO: Need PhoneNumberUtils");
-                // if (PhoneNumberUtils::IsUriNumber(number)) {
-                //     // SIP address case
-                //     PutNewEntryWhenAppropriate(
-                //             newNumberToEntry, number, customRingtone, sendToVoicemail);
-                // }
-                // else {
-                //     // PSTN number case
-                //     // Each normalized number may or may not have full content of the number.
-                //     // Contacts database may contain +15001234567 while a dialed number may be
-                //     // just 5001234567. Also we may have inappropriate country
-                //     // code in some cases (e.g. when the location of the device is inconsistent
-                //     // with the device's place). So to avoid confusion we just rely on the last
-                //     // 7 digits here. It may cause some kind of wrong behavior, which is
-                //     // unavoidable anyway in very rare cases..
-                //     Int32 length = normalizedNumber->GetLength();
-                //     String key = length > 7
-                //             ? normalizedNumber.Substring(length - 7, length)
-                //                     : normalizedNumber;
-                //     PutNewEntryWhenAppropriate(
-                //             newNumberToEntry, key, customRingtone, sendToVoicemail);
-                // }
+                Boolean tmp;
+                if (helper->IsUriNumber(number, &tmp), tmp) {
+                    // SIP address case
+                    PutNewEntryWhenAppropriate(
+                            newNumberToEntry, number, customRingtone, sendToVoicemail);
+                }
+                else {
+                    // PSTN number case
+                    // Each normalized number may or may not have full content of the number.
+                    // Contacts database may contain +15001234567 while a dialed number may be
+                    // just 5001234567. Also we may have inappropriate country
+                    // code in some cases (e.g. when the location of the device is inconsistent
+                    // with the device's place). So to avoid confusion we just rely on the last
+                    // 7 digits here. It may cause some kind of wrong behavior, which is
+                    // unavoidable anyway in very rare cases..
+                    Int32 length = normalizedNumber.GetLength();
+                    String key = length > 7
+                            ? normalizedNumber.Substring(length - 7, length)
+                                    : normalizedNumber;
+                    PutNewEntryWhenAppropriate(
+                            newNumberToEntry, key, customRingtone, sendToVoicemail);
+                }
             }
 
             if (VDBG) {
@@ -327,38 +331,41 @@ AutoPtr<CallerInfoCache::CacheEntry> CallerInfoCache::GetCacheEntry(
         return NULL;
     }
 
+    AutoPtr<IPhoneNumberUtils> helper;
+    CPhoneNumberUtils::AcquireSingleton((IPhoneNumberUtils**)&helper);
     AutoPtr<CacheEntry> entry;
-    assert(0 && "TODO: Need PhoneNumberUtils");
-    // if (PhoneNumberUtils::IsUriNumber(number)) {
-    //     if (VDBG) {
-    //         StringBuilder sb;
-    //         sb += "Trying to lookup ";
-    //         sb += number;
-    //         Log(sb.ToString());
-    //     }
+    Boolean res;
+    if (helper->IsUriNumber(number, &res), res) {
+        if (VDBG) {
+            StringBuilder sb;
+            sb += "Trying to lookup ";
+            sb += number;
+            Log(sb.ToString());
+        }
 
-    //     AutoPtr<ICharSequence> cs = CoreUtils::Convert(number);
-    //     AutoPtr<IInterface> obj;
-    //     mNumberToEntry->Get(TO_IINTERFACE(cs), (IInterface**)&obj);
-    //     entry = (CacheEntry*)IObject::Probe(obj);
-    // }
-    // else {
-    //     String normalizedNumber = PhoneNumberUtils::NormalizeNumber(number);
-    //     Int32 length = normalizedNumber.GetLength();
-    //     String key = (length > 7 ? normalizedNumber.Substring(length - 7, length)
-    //                     : normalizedNumber);
-    //     if (VDBG) {
-    //         StringBuilder sb;
-    //         sb += "Trying to lookup ";
-    //         sb += key;
-    //         Log(sb.ToString());
-    //     }
+        AutoPtr<ICharSequence> cs = CoreUtils::Convert(number);
+        AutoPtr<IInterface> obj;
+        mNumberToEntry->Get(TO_IINTERFACE(cs), (IInterface**)&obj);
+        entry = (CacheEntry*)IObject::Probe(obj);
+    }
+    else {
+        String normalizedNumber;
+        helper->NormalizeNumber(number, &normalizedNumber);
+        Int32 length = normalizedNumber.GetLength();
+        String key = (length > 7 ? normalizedNumber.Substring(length - 7, length)
+                        : normalizedNumber);
+        if (VDBG) {
+            StringBuilder sb;
+            sb += "Trying to lookup ";
+            sb += key;
+            Log(sb.ToString());
+        }
 
-    //     AutoPtr<ICharSequence> cs = CoreUtils::Convert(key);
-    //     AutoPtr<IInterface> obj;
-    //     mNumberToEntry->Get(TO_IINTERFACE(cs), (IInterface**)&obj);
-    //     entry = (CacheEntry*)IObject::Probe(obj);
-    // }
+        AutoPtr<ICharSequence> cs = CoreUtils::Convert(key);
+        AutoPtr<IInterface> obj;
+        mNumberToEntry->Get(TO_IINTERFACE(cs), (IInterface**)&obj);
+        entry = (CacheEntry*)IObject::Probe(obj);
+    }
     if (VDBG) {
         StringBuilder sb;
         sb += "Obtained ";

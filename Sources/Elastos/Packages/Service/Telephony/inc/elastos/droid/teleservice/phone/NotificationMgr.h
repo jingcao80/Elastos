@@ -101,13 +101,14 @@ public:
         CARAPI_(void) UpdateStatusBar();
 
     private:
+        friend class NotificationMgr;
+
         // Current desired state of status bar / system bar behavior
         Boolean mIsNotificationEnabled;
         Boolean mIsExpandedViewEnabled;
         Boolean mIsSystemBarNavigationEnabled;
 
         NotificationMgr* mHost;
-        friend class NotificationMgr;
     };
 
 public:
@@ -225,6 +226,7 @@ private:
 
     /** The projection to use when querying the phones table */
     static const AutoPtr<ArrayOf<String> > PHONES_PROJECTION;
+
     static Object sLock;
 };
 

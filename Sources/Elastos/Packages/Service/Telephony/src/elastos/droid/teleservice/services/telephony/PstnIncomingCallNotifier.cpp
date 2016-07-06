@@ -1,6 +1,7 @@
 
 #include "elastos/droid/teleservice/services/telephony/PstnIncomingCallNotifier.h"
 #include "elastos/droid/teleservice/services/telephony/CPstnIncomingCallNotifierBroadcastReceiver.h"
+#include "elastos/droid/teleservice/services/telephony/TelecomAccountRegistry.h"
 #include "elastos/droid/text/TextUtils.h"
 #include "Elastos.Droid.Net.h"
 #include "Elastos.Droid.Telecomm.h"
@@ -268,8 +269,8 @@ void PstnIncomingCallNotifier::AddNewUnknownCall(
     AutoPtr<ITelecomManager> manager;
     helper->From(context, (ITelecomManager**)&manager);
 
-    assert(0 && "need class MakePstnPhoneAccountHandle");
-    AutoPtr<IPhoneAccountHandle> handle;// = TelecomAccountRegistry::MakePstnPhoneAccountHandle(mPhoneProxy);
+    AutoPtr<IPhoneAccountHandle> handle = TelecomAccountRegistry::MakePstnPhoneAccountHandle(
+            Elastos::Droid::Internal::Telephony::IPhone::Probe(mPhoneProxy));
     manager->AddNewUnknownCall(handle, extras);
 }
 
@@ -301,8 +302,8 @@ void PstnIncomingCallNotifier::SendIncomingCallIntent(
     AutoPtr<ITelecomManager> manager;
     helper->From(context, (ITelecomManager**)&manager);
 
-    assert(0 && "need class MakePstnPhoneAccountHandle");
-    AutoPtr<IPhoneAccountHandle> handle;// = TelecomAccountRegistry::MakePstnPhoneAccountHandle(mPhoneProxy);
+    AutoPtr<IPhoneAccountHandle> handle = TelecomAccountRegistry::MakePstnPhoneAccountHandle(
+            Elastos::Droid::Internal::Telephony::IPhone::Probe(mPhoneProxy));
     manager->AddNewIncomingCall(handle, extras);
 }
 

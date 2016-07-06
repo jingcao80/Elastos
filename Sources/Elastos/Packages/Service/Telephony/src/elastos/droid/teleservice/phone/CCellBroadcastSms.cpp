@@ -1,5 +1,6 @@
 
 #include "elastos/droid/teleservice/phone/CCellBroadcastSms.h"
+#include "elastos/droid/teleservice/phone/PhoneGlobals.h"
 #include "R.h"
 #include "Elastos.Droid.Content.h"
 #include "Elastos.Droid.Os.h"
@@ -55,7 +56,6 @@ ECode CCellBroadcastSms::MyHandler::HandleMessage(
             AutoPtr<ArrayOf<Int32> > result;
             assert(0 && "TODO");
             // result = (int[])((AsyncResult)msg.obj).result;
-
             // check if the actual service categoties table size on the NV is '0'
             if ((*result)[0] == 0) {
                 (*result)[0] = NO_OF_SERVICE_CATEGORIES;
@@ -576,8 +576,7 @@ ECode CCellBroadcastSms::OnCreate(
 
     AddPreferencesFromResource(Elastos::Droid::TeleService::R::xml::cell_broadcast_sms);
 
-    assert(0 && "TODO Need PhoneGlobals");
-    // mPhone = PhoneGlobals::GetPhone();
+    mPhone = PhoneGlobals::GetPhone();
     mHandler = new MyHandler(this);
 
     AutoPtr<IPreferenceScreen> prefSet;
@@ -783,6 +782,8 @@ ECode CCellBroadcastSms::OnCreate(
     CString::New(BUTTON_INTERNATIONAL_ENTERTAINMENT_NEWS_KEY, (ICharSequence**)&cs);
     IPreferenceGroup::Probe(prefSet)->FindPreference(cs, (IPreference**)&preference);
     mButtonInternational4 = ICheckBoxPreference::Probe(preference);
+
+    return NOERROR;
 }
 
 ECode CCellBroadcastSms::OnResume()

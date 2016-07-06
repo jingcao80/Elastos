@@ -26,6 +26,9 @@ using Elastos::Droid::Content::EIID_IDialogInterfaceOnClickListener;
 using Elastos::Droid::Content::EIID_IDialogInterfaceOnCancelListener;
 using Elastos::Droid::Content::Res::IResources;
 using Elastos::Droid::Internal::Telephony::IPhone;
+using Elastos::Droid::Internal::Telephony::PhoneConstantsState_IDLE;
+using Elastos::Droid::Internal::Telephony::ITelephonyCapabilities;
+using Elastos::Droid::Internal::Telephony::CTelephonyCapabilities;
 using Elastos::Droid::Net::CUriHelper;
 using Elastos::Droid::Net::IUriHelper;
 using Elastos::Droid::Os::ISystemProperties;
@@ -143,8 +146,9 @@ ECode COutgoingCallBroadcaster::OutgoingCallReceiver::DoReceive(
     // even bother with the NEW_OUTGOING_CALL broadcast if we're going
     // to disallow the outgoing call anyway...
     Boolean res;
-    assert(0);
-    //TelephonyCapabilities::SupportsOtasp(app->mPhone, &res);
+    AutoPtr<ITelephonyCapabilities> helper;
+    CTelephonyCapabilities::AcquireSingleton((ITelephonyCapabilities**)&helper);
+    helper->SupportsOtasp(app->mPhone, &res);
     if (res) {
         Boolean activateState = (app->mCdmaOtaScreenState->mOtaScreenState
                 == OtaUtils::CdmaOtaScreenState::OTA_STATUS_ACTIVATION);
@@ -182,29 +186,31 @@ ECode COutgoingCallBroadcaster::OutgoingCallReceiver::DoReceive(
         }
     }
 
-    assert(0);
-    // Int32 state;
-    // Boolean res;
-    // if (number.IsNull()) {
-    //     if (DBG) Logger::V(TAG, "CALL cancelled (null number), returning...");
-    //     *result = FALSE;
-    //     return NOERROR;
-    // }
-    // else if (TelephonyCapabilities::SupportsOtasp(app->mPhone)
-    //         && ((app->mPhone->GetState(&state), state) != PhoneConstantsState_IDLE)
-    //         && ((app->mPhone->IsOtaSpNumber(number, &res), res))) {
-    //     if (DBG) Logger::V(TAG, "Call is active, a 2nd OTA call cancelled -- returning.");
-    //     *result = FALSE;
-    //     return NOERROR;
-    // } else if (PhoneNumberUtils::IsPotentialLocalEmergencyNumber(context, number)) {
-    //     // Just like 3rd-party apps aren't allowed to place emergency
-    //     // calls via the ACTION_CALL intent, we also don't allow 3rd
-    //     // party apps to use the NEW_OUTGOING_CALL broadcast to rewrite
-    //     // an outgoing call into an emergency number.
-    //     Logger::W(TAG, "Cannot modify outgoing call to emergency number %s.", number.string());
-    //     *result = FALSE;
-    //     return NOERROR;
-    // }
+    AutoPtr<IPhoneNumberUtils> helper2;
+    CPhoneNumberUtils::AcquireSingleton((IPhoneNumberUtils**)&helper2);
+    Int32 state;
+    Boolean isSupport, isNumber;
+    if (number.IsNull()) {
+        if (DBG) Logger::V(TAG, "CALL cancelled (null number), returning...");
+        *result = FALSE;
+        return NOERROR;
+    }
+    else if ((helper->SupportsOtasp(app->mPhone, &isSupport), isSupport)
+            && ((app->mPhone->GetState(&state), state) != PhoneConstantsState_IDLE)
+            && ((app->mPhone->IsOtaSpNumber(number, &isNumber), isNumber))) {
+        if (DBG) Logger::V(TAG, "Call is active, a 2nd OTA call cancelled -- returning.");
+        *result = FALSE;
+        return NOERROR;
+    }
+    else if (helper2->IsPotentialLocalEmergencyNumber(context, number, &isNumber), isNumber) {
+        // Just like 3rd-party apps aren't allowed to place emergency
+        // calls via the ACTION_CALL intent, we also don't allow 3rd
+        // party apps to use the NEW_OUTGOING_CALL broadcast to rewrite
+        // an outgoing call into an emergency number.
+        Logger::W(TAG, "Cannot modify outgoing call to emergency number %s.", number.string());
+        *result = FALSE;
+        return NOERROR;
+    }
 
     intent->GetStringExtra(
             IOutgoingCallBroadcaster::EXTRA_ORIGINAL_URI, &originalUri);
@@ -214,20 +220,20 @@ ECode COutgoingCallBroadcaster::OutgoingCallReceiver::DoReceive(
         return NOERROR;
     }
 
-    AutoPtr<IUriHelper> helper;
-    CUriHelper::AcquireSingleton((IUriHelper**)&helper);
+    AutoPtr<IUriHelper> helper3;
+    CUriHelper::AcquireSingleton((IUriHelper**)&helper3);
     AutoPtr<IUri> uri;
-    helper->Parse(originalUri, (IUri**)&uri);
+    helper3->Parse(originalUri, (IUri**)&uri);
 
     // We already called convertKeypadLettersToDigits() and
     // stripSeparators() way back in onCreate(), before we sent out the
     // NEW_OUTGOING_CALL broadcast.  But we need to do it again here
     // too, since the number might have been modified/rewritten during
     // the broadcast (and may now contain letters or separators again.)
-    AutoPtr<IPhoneNumberUtils> helper2;
-    CPhoneNumberUtils::AcquireSingleton((IPhoneNumberUtils**)&helper2);
-    helper2->ConvertKeypadLettersToDigits(number, &number);
-    helper2->StripSeparators(number, &number);
+    AutoPtr<IPhoneNumberUtils> helper4;
+    CPhoneNumberUtils::AcquireSingleton((IPhoneNumberUtils**)&helper4);
+    helper4->ConvertKeypadLettersToDigits(number, &number);
+    helper4->StripSeparators(number, &number);
 
     if (DBG) Logger::V(TAG, "doReceive: proceeding with call...");
     if (VDBG) Logger::V(TAG, "- uri: %p", TO_CSTR(uri));
@@ -598,8 +604,7 @@ ERROR:
         // InCallScreen to display the in-call UI:
         AutoPtr<PhoneGlobals> globals;
         PhoneGlobals::GetInstance((PhoneGlobals**)&globals);
-        assert(0);
-        //globals->mCallController->PlaceCall(intent);
+        globals->mCallController->PlaceCall(intent);
 
         // Note we do *not* "return" here, but instead continue and
         // send the ACTION_NEW_OUTGOING_CALL broadcast like for any

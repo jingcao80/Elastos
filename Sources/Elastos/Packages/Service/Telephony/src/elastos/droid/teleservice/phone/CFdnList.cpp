@@ -136,8 +136,7 @@ ECode CFdnList::OnOptionsItemSelected(
         case Elastos::Droid::R::id::home:  // See ActionBar#setDisplayHomeAsUpEnabled()
         {
             AutoPtr<IIntent> intent;
-            assert(0);
-            //CIntent::New(this, FdnSetting.class, (IIntent**)&intent);
+            CIntent::New((IContext*)this, ECLSID_CFdnSetting, (IIntent**)&intent);
             intent->SetAction(IIntent::ACTION_MAIN);
             intent->AddFlags(IIntent::FLAG_ACTIVITY_CLEAR_TOP);
             StartActivity(intent);
@@ -181,8 +180,7 @@ void CFdnList::AddContact()
     // EditFdnContactScreen treats it like add contact.
     AutoPtr<IIntent> intent;
     CIntent::New((IIntent**)&intent);
-    assert(0);
-    //intent->SetClass(this, EditFdnContactScreen.class);
+    intent->SetClass((IContext*)this, ECLSID_CEditFdnContactScreen);
     StartActivity(intent);
 }
 
@@ -205,8 +203,7 @@ void CFdnList::EditSelected(
 
         AutoPtr<IIntent> intent;
         CIntent::New((IIntent**)&intent);
-        assert(0);
-        //intent->SetClass(this, EditFdnContactScreen.class);
+        intent->SetClass((IContext*)this, ECLSID_CEditFdnContactScreen);
         intent->PutExtra(INTENT_EXTRA_NAME, name);
         intent->PutExtra(INTENT_EXTRA_NUMBER, number);
         StartActivity(intent);
@@ -226,8 +223,7 @@ void CFdnList::DeleteSelected()
 
         AutoPtr<IIntent> intent;
         CIntent::New((IIntent**)&intent);
-        assert(0);
-        //intent->SetClass(this, DeleteFdnContactScreen.class);
+        intent->SetClass((IContext*)this, ECLSID_CDeleteFdnContactScreen);
         intent->PutExtra(INTENT_EXTRA_NAME, name);
         intent->PutExtra(INTENT_EXTRA_NUMBER, number);
         StartActivity(intent);

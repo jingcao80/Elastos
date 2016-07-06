@@ -1,6 +1,7 @@
 
 #include "elastos/droid/teleservice/phone/OtaUtils.h"
 #include "elastos/droid/teleservice/phone/PhoneGlobals.h"
+#include "elastos/droid/teleservice/phone/PhoneUtils.h"
 #include "elastos/droid/os/SystemClock.h"
 #include "elastos/droid/R.h"
 #include "Elastos.Droid.Internal.h"
@@ -27,6 +28,8 @@ using Elastos::Droid::Content::EIID_IDialogInterfaceOnKeyListener;
 using Elastos::Droid::Content::EIID_IDialogInterfaceOnClickListener;
 using Elastos::Droid::Internal::Telephony::IPhoneConstants;
 using Elastos::Droid::Internal::Telephony::ITelephonyProperties;
+using Elastos::Droid::Internal::Telephony::ITelephonyCapabilities;
+using Elastos::Droid::Internal::Telephony::CTelephonyCapabilities;
 using Elastos::Droid::Net::IUriHelper;
 using Elastos::Droid::Net::CUriHelper;
 using Elastos::Droid::Os::ISystemProperties;
@@ -283,8 +286,7 @@ ECode OtaUtils::StartInteractiveOtasp(
 
     AutoPtr<IIntent> activationScreenIntent;
     CIntent::New((IIntent**)&activationScreenIntent);
-    assert(0);
-    //activationScreenIntent->SetClass(context, InCallScreen.class)
+    activationScreenIntent->SetClass(context, ECLSID_CInCallScreen);
     activationScreenIntent->SetAction(ACTION_DISPLAY_ACTIVATION_SCREEN);
 
     // Watch out: in the scenario where OTASP gets triggered from the
@@ -334,24 +336,22 @@ ECode OtaUtils::StartNonInteractiveOtasp(
     AutoPtr<IPhone> phone = PhoneGlobals::GetPhone();
     String number = OTASP_NUMBER_NON_INTERACTIVE;
     Logger::I(TAG, String("startNonInteractiveOtasp: placing call to '") + number + String("'..."));
-    assert(0);
-    Int32 callStatus;/* = PhoneUtils::PlaceCall(context,
+    Int32 callStatus = PhoneUtils::PlaceCall(context,
             phone,
             number,
-            null,   // contactRef
-            FALSE);*/ //isEmergencyCall
+            NULL,   // contactRef
+            FALSE); //isEmergencyCall
 
-    assert(0);
-    // if (callStatus == IPhoneUtils::CALL_STATUS_DIALED) {
-    //     if (DBG) Log(String("  ==> successful return from placeCall(): callStatus = ")
-    //             + StringUtils::ToString(callStatus));
-    // }
-    // else {
-    //     Logger::W(TAG, "Failure from placeCall() for OTA number '%s': code %d",
-    //             number.string(), callStatus);
-    //     *result = callStatus;
-    //     return NOERROR;
-    // }
+    if (callStatus == PhoneUtils::CALL_STATUS_DIALED) {
+        if (DBG) Log(String("  ==> successful return from placeCall(): callStatus = ")
+                + StringUtils::ToString(callStatus));
+    }
+    else {
+        Logger::W(TAG, "Failure from placeCall() for OTA number '%s': code %d",
+                number.string(), callStatus);
+        *result = callStatus;
+        return NOERROR;
+    }
 
     // TODO: Any other special work to do here?
     // Such as:
@@ -393,8 +393,9 @@ ECode OtaUtils::IsOtaspCallIntent(
     }
 
     Boolean res;
-    assert(0);
-    //TelephonyCapabilities::SupportsOtasp(phone, &res);
+    AutoPtr<ITelephonyCapabilities> helper;
+    CTelephonyCapabilities::AcquireSingleton((ITelephonyCapabilities**)&helper);
+    helper->SupportsOtasp(phone, &res);
     if (!res) {
         *result = FALSE;
         return NOERROR;
@@ -427,8 +428,7 @@ ECode OtaUtils::IsOtaspCallIntent(
     // the magic OTASP numbers.
     String number;
     //try {
-    assert(0);
-    //ECode ec = PhoneUtils::GetInitialNumber(intent, &number);
+    /*ECode ec = */PhoneUtils::GetInitialNumber(intent, &number);
     //} catch (PhoneUtils.VoiceMailNumberMissingException ex) {
     assert(0);
     // if (ec == (ECode)PhoneUtils.VoiceMailNumberMissingException) {
@@ -526,19 +526,17 @@ void OtaUtils::SetSpeaker(
         return;
     }
 
-    assert(0);
-    // if (state == PhoneUtils::IsSpeakerOn(mContext)) {
-    //     if (DBG) Log(String("no change. returning"));
-    //     return;
-    // }
+    if (state == PhoneUtils::IsSpeakerOn(mContext)) {
+        if (DBG) Log(String("no change. returning"));
+        return;
+    }
 
     Boolean res1, res2;
     if (state && (mBluetoothManager->IsBluetoothAvailable(&res1), res1)
             && (mBluetoothManager->IsBluetoothAudioConnected(&res2), res2)) {
         mBluetoothManager->DisconnectBluetoothAudio();
     }
-    assert(0);
-    //PhoneUtils::TurnOnSpeaker(mContext, state, TRUE);
+    PhoneUtils::TurnOnSpeaker(mContext, state, TRUE);
 }
 
 ECode OtaUtils::OnOtaProvisionStatusChanged(
@@ -683,8 +681,7 @@ void OtaUtils::OtaPerformActivation()
         newIntent->SetData(uri);
 
         // Initiate the outgoing call:
-        assert(0);
-        //application->mCallController->PlaceCall(newIntent);
+        application->mCallController->PlaceCall(newIntent);
 
         // ...and get the OTASP-specific UI into the right state.
         OtaShowListeningScreen();
@@ -744,8 +741,7 @@ void OtaUtils::OtaShowListeningScreen()
             // mOtaWidgetData.otaDtmfDialerView.setVisibility(View.VISIBLE);
             IView::Probe(mOtaWidgetData->mCallCardOtaButtonsListenProgress)->SetVisibility(IView::VISIBLE);
             IView::Probe(mOtaWidgetData->mOtaSpeakerButton)->SetVisibility(IView::VISIBLE);
-            assert(0);
-            Boolean speakerOn;// = PhoneUtils::IsSpeakerOn(mContext);
+            Boolean speakerOn = PhoneUtils::IsSpeakerOn(mContext);
             ICheckable::Probe(mOtaWidgetData->mOtaSpeakerButton)->SetChecked(speakerOn);
         }
         application->mCdmaOtaScreenState->mOtaScreenState =
@@ -872,8 +868,7 @@ void OtaUtils::OtaShowInProgressScreen()
         IView::Probe(mOtaWidgetData->mOtaTextProgressBar)->SetVisibility(IView::VISIBLE);
         IView::Probe(mOtaWidgetData->mCallCardOtaButtonsListenProgress)->SetVisibility(IView::VISIBLE);
         IView::Probe(mOtaWidgetData->mOtaSpeakerButton)->SetVisibility(IView::VISIBLE);
-        assert(0);
-        Boolean speakerOn;// = PhoneUtils::IsSpeakerOn(mContext);
+        Boolean speakerOn = PhoneUtils::IsSpeakerOn(mContext);
         ICheckable::Probe(mOtaWidgetData->mOtaSpeakerButton)->SetChecked(speakerOn);
     }
 }
@@ -1218,14 +1213,13 @@ void OtaUtils::OnClickOtaEndButton()
 
     AutoPtr<PhoneGlobals> application = (PhoneGlobals*)mApplication.Get();
     if (!application->mCdmaOtaProvisionData->mInOtaSpcState) {
-        assert(0);
-        // if (PhoneUtils::Hangup(mApplication->mCM) == FALSE) {
-        //     // If something went wrong when placing the OTA call,
-        //     // the screen is not updated by the call disconnect
-        //     // handler and we have to do it here
-        //     SetSpeaker(FALSE);
-        //     // mInCallScreen.handleOtaCallEnd();
-        // }
+        if (PhoneUtils::Hangup(application->mCM) == FALSE) {
+            // If something went wrong when placing the OTA call,
+            // the screen is not updated by the call disconnect
+            // handler and we have to do it here
+            SetSpeaker(FALSE);
+            // mInCallScreen.handleOtaCallEnd();
+        }
     }
 }
 
@@ -1235,8 +1229,7 @@ void OtaUtils::OnClickOtaSpeakerButton()
 
     AutoPtr<PhoneGlobals> application = (PhoneGlobals*)mApplication.Get();
     if (!application->mCdmaOtaProvisionData->mInOtaSpcState) {
-        assert(0);
-        Boolean isChecked;// = !PhoneUtils::IsSpeakerOn(mContext);
+        Boolean isChecked = !PhoneUtils::IsSpeakerOn(mContext);
         SetSpeaker(isChecked);
     }
 }

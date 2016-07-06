@@ -1,5 +1,6 @@
 
 #include "elastos/droid/teleservice/phone/CallLogger.h"
+#include "elastos/droid/teleservice/phone/PhoneUtils.h"
 #include "Elastos.Droid.Content.h"
 #include "Elastos.Droid.Internal.h"
 #include "Elastos.Droid.Net.h"
@@ -14,6 +15,10 @@ using Elastos::Droid::Content::IContext;
 using Elastos::Droid::Internal::Telephony::ICall;
 using Elastos::Droid::Internal::Telephony::IPhone;
 using Elastos::Droid::Internal::Telephony::IPhoneConstants;
+using Elastos::Droid::Internal::Telephony::ICallerInfoHelper;
+using Elastos::Droid::Internal::Telephony::CCallerInfoHelper;
+using Elastos::Droid::Internal::Telephony::ITelephonyCapabilities;
+using Elastos::Droid::Internal::Telephony::CTelephonyCapabilities;
 using Elastos::Droid::Net::IUri;
 using Elastos::Droid::Os::ISystemProperties;
 using Elastos::Droid::Os::CSystemProperties;
@@ -70,15 +75,14 @@ ECode CallLogger::LogCall(
     AutoPtr<ICallerInfo> ci = GetCallerInfoFromConnection(c);  // May be null.
     const String logNumber = GetLogNumber(c, ci);
 
-    assert(0 && "TODO: Need PhoneUtils");
-    // if (DBG) {
-    //     StringBuilder sb;
-    //     sb += "- onDisconnect(): logNumber set to:";
-    //     sb += PhoneUtils::ToLogSafePhoneNumber(logNumber);
-    //     sb += ", number set to: "l;
-    //     sb += PhoneUtils::ToLogSafePhoneNumber(number);
-    //     Log(sb.ToString());
-    // }
+    if (DBG) {
+        StringBuilder sb;
+        sb += "- onDisconnect(): logNumber set to:";
+        sb += PhoneUtils::ToLogSafePhoneNumber(logNumber);
+        sb += ", number set to: ";
+        sb += PhoneUtils::ToLogSafePhoneNumber(number);
+        Log(sb.ToString());
+    }
 
     // TODO: In getLogNumber we use the presentation from
     // the connection for the CNAP. Should we use the one
@@ -87,10 +91,11 @@ ECode CallLogger::LogCall(
     // For international calls, 011 needs to be logged as +
     const Int32 presentation = GetPresentation(c, ci);
 
-    Boolean isOtaspNumber = FALSE, tmp = FALSE;
-    assert(0 && "TODO: Need TelephonyCapabilities");
-    // isOtaspNumber = TelephonyCapabilities::SupportsOtasp(phone)
-    //         && (phone->IsOtaSpNumber(number, &tmp), tmp);
+    Boolean isOtaspNumber = FALSE, res1 = FALSE, res2 = FALSE;
+    AutoPtr<ITelephonyCapabilities> helper;
+    CTelephonyCapabilities::AcquireSingleton((ITelephonyCapabilities**)&helper);
+    isOtaspNumber = (helper->SupportsOtasp(phone, &res1), res1)
+            && (phone->IsOtaSpNumber(number, &res2), res2);
 
     // Don't log OTASP calls.
     if (!isOtaspNumber) {
@@ -155,14 +160,12 @@ AutoPtr<ICallerInfo> CallLogger::GetCallerInfoFromConnection(
     else if (IUri::Probe(o) != NULL) {
         AutoPtr<IContext> context;
         IContext::Probe(mApplication)->GetApplicationContext((IContext**)&context);
-        assert(0 && "TODO CCallerInfoHelper");
-        // AutoPtr<ICallerInfoHelper> helper;
-        // CCallerInfoHelper::AcquireSingleton((ICallerInfoHelper**)&helper);
-        // helper->GetCallerInfo(context, IUri::Probe(o), (ICallerInfo**)&ci);
+        AutoPtr<ICallerInfoHelper> helper;
+        CCallerInfoHelper::AcquireSingleton((ICallerInfoHelper**)&helper);
+        helper->GetCallerInfo(context, IUri::Probe(o), (ICallerInfo**)&ci);
     }
     else {
-        assert(0 && "TODO: Need PhoneUtils");
-        // ci = ((PhoneUtils::CallerInfoToken)IObject::Probe(o))->mCurrentInfo;
+        ci = ((PhoneUtils::CallerInfoToken*)IObject::Probe(o))->mCurrentInfo;
     }
     return ci;
 }
@@ -187,7 +190,7 @@ String CallLogger::GetLogNumber(
         if (callerInfo != NULL) {
             callerInfo->GetPhoneNumber(&pnumber);
         }
-        Boolean res1,res2;
+        Boolean res1, res2;
         if (NULL == callerInfo || TextUtils::IsEmpty(pnumber) ||
                 (callerInfo->IsEmergencyNumber(&res1), res1) ||
                 (callerInfo->IsVoiceMailNumber(&res2), res2)) {
@@ -219,8 +222,7 @@ String CallLogger::GetLogNumber(
 
         // Do final CNAP modifications.
         String newNumber;
-        assert(0 && "TODO: Need PhoneUtils");
-        // newNumber = PhoneUtils::ModifyForSpecialCnapCases(mApplication, callerInfo, number, presentation);
+        newNumber = PhoneUtils::ModifyForSpecialCnapCases(IContext::Probe(mApplication), callerInfo, number, presentation);
 
         AutoPtr<IPhoneNumberUtils> helper;
         CPhoneNumberUtils::AcquireSingleton((IPhoneNumberUtils**)&helper);

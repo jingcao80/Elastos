@@ -6,11 +6,13 @@
 #include "Elastos.Droid.Net.h"
 #include "Elastos.Droid.Os.h"
 #include "Elastos.Droid.Telephony.h"
+#include <elastos/core/CoreUtils.h>
 #include <elastos/core/StringUtils.h>
 #include "elastos/utility/Objects.h"
 #include <elastos/utility/logging/Logger.h>
 #include "R.h"
 
+using Elastos::Droid::Content::CComponentName;
 using Elastos::Droid::Net::IUri;
 using Elastos::Droid::Net::INetworkInfo;
 using Elastos::Droid::Net::IConnectivityManager;
@@ -24,6 +26,7 @@ using Elastos::Droid::Telecomm::Telecom::IPhoneAccountHandle;
 using Elastos::Droid::Telecomm::Telecom::ITelecomManagerHelper;
 using Elastos::Droid::Telecomm::Telecom::CTelecomManagerHelper;
 using Elastos::Core::StringUtils;
+using Elastos::Core::CoreUtils;
 using Elastos::Utility::Objects;
 using Elastos::Utility::Logging::Logger;
 
@@ -43,9 +46,7 @@ ECode CSipConnectionService::OnCreate()
 {
     mSipProfileDb = new SipProfileDb((IContext*)this);
     CHandler::New((IHandler**)&mHandler);
-    assert(0);
-    //return ConnectionService::OnCreate();
-    return NOERROR;
+    return ConnectionService::OnCreate();
 }
 
 ECode CSipConnectionService::OnCreateOutgoingConnection(
@@ -75,7 +76,7 @@ ECode CSipConnectionService::OnCreateOutgoingConnection(
     request->GetAccountHandle((IPhoneAccountHandle**)&accountHandle);
     AutoPtr<IComponentName> sipComponentName;
     assert(0);
-    //CComponentName::New(this, SipConnectionService.class, (IComponentName**)&sipComponentName);
+    //CComponentName::New((IContext*)this, ECLSID_CSipConnectionService, (IComponentName**)&sipComponentName);
     AutoPtr<IComponentName> name;
     accountHandle->GetComponentName((IComponentName**)&name);
     if (!Objects::Equals(name, sipComponentName)) {
@@ -95,9 +96,9 @@ ECode CSipConnectionService::OnCreateOutgoingConnection(
     Boolean attemptCall = TRUE;
 
     if (!SipUtil::IsVoipSupported((IContext*)this)) {
-        AutoPtr<ICharSequence> description;
-        assert(0);
-        //GetString(R::string::no_voip, (ICharSequence**)&description);
+        String str;
+        GetString(R::string::no_voip, &str);
+        AutoPtr<ICharSequence> description = CoreUtils::Convert(str);
         AutoPtr<Elastos::Droid::Telecomm::Telecom::IDisconnectCause> cause;
         Elastos::Droid::Telecomm::Telecom::CDisconnectCause::New(
                 Elastos::Droid::Telecomm::Telecom::IDisconnectCause::ERROR, NULL, description,
@@ -302,8 +303,7 @@ ERROR:
 Boolean CSipConnectionService::IsNetworkConnected()
 {
     AutoPtr<IInterface> obj;
-    assert(0);
-    //GetSystemService(IContext::CONNECTIVITY_SERVICE, (IInterface**)&obj);
+    GetSystemService(IContext::CONNECTIVITY_SERVICE, (IInterface**)&obj);
     AutoPtr<IConnectivityManager> cm = IConnectivityManager::Probe(obj);
     if (cm != NULL) {
         AutoPtr<INetworkInfo> ni;

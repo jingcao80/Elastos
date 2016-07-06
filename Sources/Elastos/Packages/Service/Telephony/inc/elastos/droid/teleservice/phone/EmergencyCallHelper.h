@@ -19,6 +19,8 @@ namespace Phone {
 
 class CallController;
 
+class PhoneGlobals;
+
 /**
  * Helper class for the {@link CallController} that implements special
  * behavior related to emergency calls.  Specifically, this class handles
@@ -190,7 +192,7 @@ private:
     static const Int32 RETRY_TIMEOUT;
 
     AutoPtr<CallController> mCallController;
-    AutoPtr<IPhoneGlobals> mApp;
+    AutoPtr<PhoneGlobals> mApp;
 
     AutoPtr<ICallManager> mCM;
     String mNumber;  // The emergency number we're trying to dial

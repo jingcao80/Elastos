@@ -22,6 +22,8 @@ using Elastos::Droid::Content::IIntent;
 using Elastos::Droid::Content::CIntent;
 using Elastos::Droid::Internal::Telephony::IPhone;
 using Elastos::Droid::Internal::Telephony::ITelephonyIntents;
+using Elastos::Droid::Internal::Telephony::ITelephonyCapabilities;
+using Elastos::Droid::Internal::Telephony::CTelephonyCapabilities;
 using Elastos::Droid::Net::IUri;
 using Elastos::Droid::Net::IUriHelper;
 using Elastos::Droid::Net::CUriHelper;
@@ -211,7 +213,10 @@ void SpecialCharSequenceMgr::ShowDeviceIdPanel(
 
     AutoPtr<IPhone> phone = PhoneGlobals::GetPhone();
     assert(0);
-    Int32 labelId;// = TelephonyCapabilities::GetDeviceIdLabel(phone);
+    AutoPtr<ITelephonyCapabilities> helper;
+    CTelephonyCapabilities::AcquireSingleton((ITelephonyCapabilities**)&helper);
+    Int32 labelId;
+    helper->GetDeviceIdLabel(phone, &labelId);
     String deviceId;
     phone->GetDeviceId(&deviceId);
 

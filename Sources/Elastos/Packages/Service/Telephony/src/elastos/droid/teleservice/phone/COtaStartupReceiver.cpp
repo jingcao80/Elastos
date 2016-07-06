@@ -72,8 +72,8 @@ ECode COtaStartupReceiver::MyHandler::HandleMessage(
             sb += "Attempting OtaActivation from handler, mOtaspMode=";
             sb += mHost->mOtaspMode;
             Logger::V(mHost->TAG, sb.ToString());
-            assert(0);
-            //OtaUtils::MaybeDoOtaCall(mHost->mContext, mHandler, MIN_READY);
+            Boolean res;
+            OtaUtils::MaybeDoOtaCall(mHost->mContext, mHost->mHandler, MIN_READY, &res);
             break;
         }
         case SERVICE_STATE_CHANGED:
@@ -102,8 +102,8 @@ ECode COtaStartupReceiver::MyHandler::HandleMessage(
                 if (DBG) Logger::D(TAG, "call OtaUtils.maybeDoOtaCall after network is available");
                 AutoPtr<IPhone> phone = PhoneGlobals::GetPhone();
                 phone->UnregisterForServiceStateChanged(this);
-                assert(0);
-                //OtaUtils::MaybeDoOtaCall(mHost->mContext, mHandler, MIN_READY);
+                Boolean res;
+                OtaUtils::MaybeDoOtaCall(mHost->mContext, mHost->mHandler, MIN_READY, &res);
             }
             break;
         }

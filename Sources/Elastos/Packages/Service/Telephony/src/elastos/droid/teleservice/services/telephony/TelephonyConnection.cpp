@@ -4,6 +4,7 @@
 #include "elastos/droid/os/AsyncResult.h"
 #include "Elastos.Droid.Net.h"
 #include "Elastos.Droid.Telephony.h"
+#include "elastos/utility/Objects.h"
 #include <elastos/utility/logging/Logger.h>
 #include <Elastos.CoreLibrary.Core.h>
 #include <Elastos.CoreLibrary.Utility.h>
@@ -27,6 +28,7 @@ using Elastos::Droid::Net::CUriHelper;
 using Elastos::Droid::Net::IUriHelper;
 using Elastos::Droid::Os::AsyncResult;
 using Elastos::Core::IBoolean;
+using Elastos::Utility::Objects;
 using Elastos::Utility::Logging::Logger;
 
 namespace Elastos {
@@ -394,9 +396,8 @@ ECode TelephonyConnection::UpdateAddress()
 
         AutoPtr<IUri> tmp;
         GetAddress((IUri**)&tmp);
-        Boolean res;
         Int32 _presentation;
-        if ((IObject::Probe(address)->Equals(tmp, &res), !res) ||
+        if (!Objects::Equals(address, tmp) ||
                 (presentation != (GetAddressPresentation(&_presentation), _presentation))) {
             Logger::V("TelephonyConnection", "updateAddress, address changed");
             SetAddress(address, presentation);

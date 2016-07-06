@@ -193,8 +193,7 @@ ECode CDeleteFdnContactScreen::AuthenticatePin2()
     AutoPtr<IIntent> intent;
     GetIntent((IIntent**)&intent);
 
-    assert(0);
-    //intent->SetClass(this, GetPin2Screen.class);
+    intent->SetClass((IContext*)this, ECLSID_CGetPin2Screen);
     return StartActivityForResult(intent, PIN2_REQUEST_CODE);
 }
 

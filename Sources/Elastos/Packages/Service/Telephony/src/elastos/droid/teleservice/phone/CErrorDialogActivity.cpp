@@ -163,8 +163,7 @@ void CErrorDialogActivity::AddVoiceMailNumberPanel(
     // navigate to the Voicemail setting in the Call Settings activity.
     AutoPtr<IIntent> intent;
     CIntent::New(ICallFeaturesSetting::ACTION_ADD_VOICEMAIL, (IIntent**)&intent);
-    assert(0);
-    //intent->SetClass(this, CallFeaturesSetting.class);
+    intent->SetClass((IContext*)this, ECLSID_CCallFeaturesSetting);
     StartActivity(intent);
     Finish();
 }

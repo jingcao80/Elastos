@@ -99,8 +99,7 @@ ECode PhoneAccountSettingsFragment::OnResume()
         IPreferenceGroup::Probe(preferencescreen)->RemoveAll();
     }
 
-    assert(0);
-    //AddPreferencesFromResource(Elastos::Droid::R::xml::phone_account_settings);
+    AddPreferencesFromResource(R::xml::phone_account_settings);
 
     AutoPtr<ICharSequence> cchar = CoreUtils::Convert(DEFAULT_OUTGOING_ACCOUNT_KEY);
     AutoPtr<IPreference> preference;

@@ -112,7 +112,7 @@ ECode CGsmUmtsAdditionalCallOptions::OnSaveInstanceState(
 {
     TimeConsumingPreferenceActivity::OnSaveInstanceState(outState);
 
-    assert(0);
+    assert(0 && "android:enable = false is setted in *.xml about class CLIRListPreference");
     // AutoPtr<CCLIRListPreference> preference = (CCLIRListPreference*)mCLIRButton;
     // if (preference->mClirArray != NULL) {
     //     String key;

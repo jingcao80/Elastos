@@ -1,6 +1,8 @@
 
 #include "elastos/droid/teleservice/phone/CMobileNetworkSettings.h"
 #include "elastos/droid/teleservice/phone/PhoneGlobals.h"
+#include "elastos/droid/teleservice/phone/CCdmaOptions.h"
+#include "elastos/droid/teleservice/phone/CGsmUmtsOptions.h"
 #include "elastos/droid/os/AsyncResult.h"
 #include "elastos/droid/text/TextUtils.h"
 #include "elastos/droid/R.h"
@@ -556,9 +558,8 @@ ERROR:
                 sPreferredNetworkMode, &settingsNetworkMode);
 
         mButtonPreferredNetworkMode->SetValue(StringUtils::ToString(settingsNetworkMode));
-        assert(0);
-        //CCdmaOptions::New(this, prefSet, mPhone, (ICdmaOptions**)&mCdmaOptions);
-        //CGsmUmtsOptions::New(this, prefSet, (IGsmUmtsOptions**)&mGsmUmtsOptions);
+        CCdmaOptions::New(this, prefSet, mPhone, (ICdmaOptions**)&mCdmaOptions);
+        CGsmUmtsOptions::New(this, prefSet, (IGsmUmtsOptions**)&mGsmUmtsOptions);
     }
     else {
         Boolean tmp;
@@ -572,8 +573,7 @@ ERROR:
                 mButtonEnabledNetworks->SetEntryValues(
                         Elastos::Droid::TeleService::R::array::enabled_networks_cdma_values);
             }
-            assert(0);
-            //CCdmaOptions::New(this, prefSet, mPhone, (ICdmaOptions**)&mCdmaOptions);
+            CCdmaOptions::New(this, prefSet, mPhone, (ICdmaOptions**)&mCdmaOptions);
         }
         else if (phoneType == IPhoneConstants::PHONE_TYPE_GSM) {
             Boolean res1, res2;
@@ -611,8 +611,7 @@ ERROR:
                 mButtonEnabledNetworks->SetEntryValues(
                         Elastos::Droid::TeleService::R::array::enabled_networks_values);
             }
-            assert(0);
-            //CGsmUmtsOptions::New(this, prefSet, (IGsmUmtsOptions**)&mGsmUmtsOptions);
+            CGsmUmtsOptions::New(this, prefSet, (IGsmUmtsOptions**)&mGsmUmtsOptions);
         }
         else {
             //throw new IllegalStateException("Unexpected phone type: " + phoneType);

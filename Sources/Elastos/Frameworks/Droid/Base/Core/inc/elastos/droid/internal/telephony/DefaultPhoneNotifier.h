@@ -19,7 +19,7 @@ namespace Telephony {
 /**
  * broadcast intents
  */
-class DefaultPhoneNotifier
+class ECO_PUBLIC DefaultPhoneNotifier
     : public Object
     , public IPhoneNotifier
 {

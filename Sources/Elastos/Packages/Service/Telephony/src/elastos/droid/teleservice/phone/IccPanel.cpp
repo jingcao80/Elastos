@@ -1,5 +1,5 @@
 
-#include "elastos/droid/teleservice/phone/CIccPanel.h"
+#include "elastos/droid/teleservice/phone/IccPanel.h"
 #include "elastos/droid/teleservice/phone/PhoneGlobals.h"
 #include "Elastos.Droid.App.h"
 #include <elastos/utility/logging/Logger.h>
@@ -17,17 +17,15 @@ namespace Droid {
 namespace TeleService {
 namespace Phone {
 
-const String CIccPanel::TAG("CIccPanel");// = IPhoneGlobals.TAG;
+const String IccPanel::TAG("IccPanel");// = IPhoneGlobals.TAG;
 
-CAR_OBJECT_IMPL(CIccPanel)
-
-ECode CIccPanel::constructor(
+ECode IccPanel::constructor(
     /* [in] */ IContext* context)
 {
     return Dialog::constructor(context, Elastos::Droid::TeleService::R::style::IccPanel);
 }
 
-ECode CIccPanel::OnCreate(
+ECode IccPanel::OnCreate(
     /* [in] */ IBundle* savedInstanceState)
 {
     Dialog::OnCreate(savedInstanceState);
@@ -68,19 +66,19 @@ ECode CIccPanel::OnCreate(
     return RequestWindowFeature(IWindow::FEATURE_NO_TITLE, &res);
 }
 
-ECode CIccPanel::OnStart()
+ECode IccPanel::OnStart()
 {
     Dialog::OnStart();
     return mStatusBarManager->Disable(IStatusBarManager::DISABLE_EXPAND);
 }
 
-ECode CIccPanel::OnStop()
+ECode IccPanel::OnStop()
 {
     Dialog::OnStop();
     return mStatusBarManager->Disable(IStatusBarManager::DISABLE_NONE);
 }
 
-ECode CIccPanel::OnKeyDown(
+ECode IccPanel::OnKeyDown(
     /* [in] */ Int32 keyCode,
     /* [in] */ IKeyEvent* event,
     /* [out] */ Boolean* result)

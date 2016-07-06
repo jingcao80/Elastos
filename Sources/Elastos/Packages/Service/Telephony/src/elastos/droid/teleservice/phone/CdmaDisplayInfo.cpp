@@ -1,5 +1,6 @@
 
 #include "elastos/droid/teleservice/phone/CdmaDisplayInfo.h"
+#include "elastos/droid/teleservice/phone/PhoneGlobals.h"
 #include "R.h"
 #include <elastos/droid/R.h>
 #include "Elastos.Droid.Content.h"
@@ -81,9 +82,9 @@ void CdmaDisplayInfo::DisplayInfoRecord(
     window->AddFlags(IWindowManagerLayoutParams::FLAG_DIM_BEHIND);
 
     IDialog::Probe(sDisplayInfoDialog)->Show();
-    assert(0 && "TODO : Need PhoneGlobals");
-    // AutoPtr<IPhoneGlobals> phoneGlobals = PhoneGlobals::GetInstance();
-    // phoneGlobals->WakeUpScreen();
+    AutoPtr<PhoneGlobals> phoneGlobals;
+    PhoneGlobals::GetInstance((PhoneGlobals**)&phoneGlobals);
+    phoneGlobals->WakeUpScreen();
 }
 
 void CdmaDisplayInfo::DismissDisplayInfoRecord()

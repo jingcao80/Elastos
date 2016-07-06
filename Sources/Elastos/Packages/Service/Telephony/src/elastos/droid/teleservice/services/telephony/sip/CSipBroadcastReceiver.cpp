@@ -1,6 +1,7 @@
 
 #include "elastos/droid/teleservice/services/telephony/sip/CSipBroadcastReceiver.h"
 #include "elastos/droid/teleservice/services/telephony/sip/SipUtil.h"
+#include "elastos/droid/teleservice/services/telephony/sip/SipAccountRegistry.h"
 #include "Elastos.Droid.Os.h"
 #include "Elastos.Droid.Telecomm.h"
 #include <elastos/utility/logging/Logger.h>
@@ -37,8 +38,8 @@ ECode CSipBroadcastReceiver::OnReceive(
         return NOERROR;
     }
 
+    AutoPtr<SipAccountRegistry> sipAccountRegistry = SipAccountRegistry::GetInstance();
     assert(0);
-    //AutoPtr<ISipAccountRegistry> sipAccountRegistry = SipAccountRegistry::GetInstance();
     // if (action.Equals(ISipManager::ACTION_SIP_INCOMING_CALL)) {
     //     TakeCall(context, intent);
     // }

@@ -1,17 +1,22 @@
 
 #include "elastos/droid/teleservice/services/telephony/sip/SipUtil.h"
 #include "elastos/droid/teleservice/services/telephony/sip/SipProfileDb.h"
+#include "elastos/droid/teleservice/services/telephony/sip/SipSharedPreferences.h"
 #include "elastos/droid/text/TextUtils.h"
 #include "elastos/droid/R.h"
 #include "Elastos.Droid.Content.h"
+#include "Elastos.Droid.Provider.h"
 #include <elastos/core/AutoLock.h>
 #include "Elastos.CoreLibrary.Utility.h"
 
 using Elastos::Droid::App::IPendingIntentHelper;
 using Elastos::Droid::App::CPendingIntentHelper;
 using Elastos::Droid::Content::IComponentName;
+using Elastos::Droid::Content::CComponentName;
 using Elastos::Droid::Content::IIntent;
+using Elastos::Droid::Content::CIntent;
 using Elastos::Droid::Content::Res::IResources;
+using Elastos::Droid::Provider::ISettingsSystem;
 using Elastos::Droid::Text::TextUtils;
 using Elastos::Droid::Telecomm::Telecom::ITelecomManager;
 using Elastos::Droid::Telecomm::Telecom::CPhoneAccountHandle;
@@ -45,8 +50,8 @@ AutoPtr<IPendingIntent> SipUtil::CreateIncomingCallPendingIntent(
     /* [in] */ const String& sipUri)
 {
     AutoPtr<IIntent> intent;
+    CIntent::New(context, ECLSID_CSipBroadcastReceiver, (IIntent**)&intent);
     assert(0);
-    //CIntent::New(context, SipBroadcastReceiver.class, (IIntent**)&intent);
     //intent->SetAction(ISipManager::ACTION_SIP_INCOMING_CALL);
     AutoPtr<IPhoneAccountHandle> handle = CreateAccountHandle(context, sipUri);
     intent->PutExtra(EXTRA_PHONE_ACCOUNT, IParcelable::Probe(handle));
@@ -78,7 +83,7 @@ AutoPtr<IPhoneAccountHandle> SipUtil::CreateAccountHandle(
 {
     AutoPtr<IComponentName> name;
     assert(0);
-    //CComponentName::New(context, SipConnectionService.class, (IComponentName**)&name);
+    //CComponentName::New(context, ECLSID_CSipConnectionService, (IComponentName**)&name);
     AutoPtr<IPhoneAccountHandle> handle;
     CPhoneAccountHandle::New(name, sipUri, (IPhoneAccountHandle**)&handle);
     return handle;
@@ -108,14 +113,6 @@ void SipUtil::UseSipToReceiveIncomingCalls(
     /* [in] */ IContext* context,
     /* [in] */ Boolean isEnabled)
 {
-    assert(0);
-    // final SipSharedPreferences sipSharedPreferences = new SipSharedPreferences(context);
-    // return sipSharedPreferences.getSipCallOption().equals(Settings.System.SIP_ALWAYS);
-}
-
-Boolean SipUtil::UseSipForPstnCalls(
-    /* [in] */ IContext* context)
-{
     AutoPtr<SipProfileDb> profileDb = new SipProfileDb(context);
 
     // Mark all profiles as auto-register if we are now receiving calls.
@@ -125,6 +122,15 @@ Boolean SipUtil::UseSipForPstnCalls(
     // for (SipProfile p : sipProfileList) {
     //     updateAutoRegistrationFlag(p, profileDb, isEnabled);
     // }
+}
+
+Boolean SipUtil::UseSipForPstnCalls(
+    /* [in] */ IContext* context)
+{
+    AutoPtr<SipSharedPreferences> sipSharedPreferences = new SipSharedPreferences(context);
+    String option;
+    sipSharedPreferences->GetSipCallOption(&option);
+    return option.Equals(ISettingsSystem::SIP_ALWAYS);
 }
 
 // static CARAPI_(void) UpdateAutoRegistrationFlag(

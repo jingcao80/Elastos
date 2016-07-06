@@ -116,8 +116,7 @@ ECode CEmergencyCallbackModeExitDialog::MyRunnable::Run()
 
     // Bind to the remote service
     AutoPtr<IIntent> intent;
-    assert(0);
-    //CIntent::New(this, EmergencyCallbackModeService.class, (IIntent**)&intent);
+    CIntent::New((IContext*)this, ECLSID_CEmergencyCallbackModeService, (IIntent**)&intent);
     Boolean res;
     mHost->BindService(intent, mHost->mConnection, IContext::BIND_AUTO_CREATE, &res);
 
@@ -451,7 +450,6 @@ AutoPtr<ICharSequence> CEmergencyCallbackModeExitDialog::GetDialogText(
 {
     // Format time
     Int32 minutes = (Int32)(millisUntilFinished / 60000);
-    assert(0);
     String time;
     time.AppendFormat("%d:%02d", minutes, (millisUntilFinished % 60000) / 1000);
 

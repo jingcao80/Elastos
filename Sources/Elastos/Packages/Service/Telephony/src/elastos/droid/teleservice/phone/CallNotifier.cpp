@@ -1,6 +1,8 @@
 
 #include "elastos/droid/teleservice/phone/CallNotifier.h"
 #include "elastos/droid/teleservice/phone/CdmaDisplayInfo.h"
+#include "elastos/droid/teleservice/phone/PhoneGlobals.h"
+#include "elastos/droid/teleservice/phone/PhoneUtils.h"
 #include "elastos/droid/os/AsyncResult.h"
 #include "_Elastos.Droid.Core.h"
 #include "Elastos.Droid.Content.h"
@@ -26,6 +28,8 @@ using Elastos::Droid::Internal::Telephony::IPhoneConstants;
 using Elastos::Droid::Internal::Telephony::PhoneConstantsState;
 using Elastos::Droid::Internal::Telephony::PhoneConstantsState_OFFHOOK;
 using Elastos::Droid::Internal::Telephony::PhoneConstantsState_IDLE;
+using Elastos::Droid::Internal::Telephony::ITelephonyCapabilities;
+using Elastos::Droid::Internal::Telephony::CTelephonyCapabilities;
 using Elastos::Droid::Internal::Telephony::Cdma::ICdmaInformationRecordsCdmaDisplayInfoRec;
 using Elastos::Droid::Media::CAudioAttributesBuilder;
 using Elastos::Droid::Media::CToneGenerator;
@@ -37,6 +41,8 @@ using Elastos::Droid::Os::IMessageHelper;
 using Elastos::Droid::Os::ISystemProperties;
 using Elastos::Droid::Provider::CSettingsGlobal;
 using Elastos::Droid::Provider::ISettingsGlobal;
+using Elastos::Droid::Telephony::IPhoneNumberUtils;
+using Elastos::Droid::Telephony::CPhoneNumberUtils;
 using Elastos::Droid::Telephony::CDisconnectCause;
 using Elastos::Droid::Telephony::EIID_IPhoneStateListener;
 using Elastos::Droid::Telephony::IDisconnectCause;
@@ -157,18 +163,18 @@ ECode CallNotifier::InCallTonePlayer::Run()
             toneLengthMillis = 200;
             break;
          case TONE_OTA_CALL_END: {
-            assert(0 && "TODO Need PhoneGlobals");
-            // if (mHost->mApplication.cdmaOtaConfigData.otaPlaySuccessFailureTone ==
-            //         IOtaUtils::OTA_PLAY_SUCCESS_FAILURE_TONE_ON) {
-            //     toneType = IToneGenerator::TONE_CDMA_ALERT_CALL_GUARD;
-            //     toneVolume = TONE_RELATIVE_VOLUME_HIPRI;
-            //     toneLengthMillis = 750;
-            // }
-            // else {
-            //     toneType = IToneGenerator::TONE_PROP_PROMPT;
-            //     toneVolume = TONE_RELATIVE_VOLUME_HIPRI;
-            //     toneLengthMillis = 200;
-            // }
+            AutoPtr<PhoneGlobals> globals = (PhoneGlobals*)(mHost->mApplication.Get());
+            if (globals->mCdmaOtaConfigData->mOtaPlaySuccessFailureTone ==
+                    IOtaUtils::OTA_PLAY_SUCCESS_FAILURE_TONE_ON) {
+                toneType = IToneGenerator::TONE_CDMA_ALERT_CALL_GUARD;
+                toneVolume = TONE_RELATIVE_VOLUME_HIPRI;
+                toneLengthMillis = 750;
+            }
+            else {
+                toneType = IToneGenerator::TONE_PROP_PROMPT;
+                toneVolume = TONE_RELATIVE_VOLUME_HIPRI;
+                toneLengthMillis = 200;
+            }
             break;
         }
         case TONE_VOICE_PRIVACY:
@@ -454,7 +460,6 @@ AutoPtr<CallNotifier> CallNotifier::Init(
 {
     {
         AutoLock syncLock(THIS);
-        assert(0 && "synchronized (CallNotifier.class)");
         if (sInstance == NULL) {
             sInstance = new CallNotifier(app, phone, callLogger, callStateMonitor,
                     bluetoothManager);
@@ -480,8 +485,8 @@ CallNotifier::CallNotifier(
     , mIsCdmaRedialCall(FALSE)
     , mBluetoothManager(bluetoothManager)
 {
-    assert(0 && "");
-    // mCM = app->mCM;
+    AutoPtr<PhoneGlobals> globals = (PhoneGlobals*)app;
+    mCM = globals->mCM;
     Handler::constructor();
 
     mPhoneStateListener = new MyPhoneStateListener(this);
@@ -567,9 +572,12 @@ ECode CallNotifier::HandleMessage(
             OnUnknownConnectionAppeared(IAsyncResult::Probe(obj));
             break;
 
-        case PHONE_MWI_CHANGED: {
-            assert(0 && "TODO Need PhoneGlobals");
-            // OnMwiChanged(mApplication.phone.getMessageWaitingIndicator());
+        case PHONE_MWI_CHANGED:
+        {
+            AutoPtr<PhoneGlobals> globals = (PhoneGlobals*)mApplication.Get();
+            Boolean res;
+            globals->mPhone->GetMessageWaitingIndicator(&res);
+            OnMwiChanged(res);
             break;
         }
 
@@ -589,12 +597,14 @@ ECode CallNotifier::HandleMessage(
             break;
 
         case CallStateMonitor::EVENT_OTA_PROVISION_CHANGE:
+        {
             if (DBG) Log(String("EVENT_OTA_PROVISION_CHANGE..."));
-            assert(0 && "TODO Need PhoneGlobals");
-            // mApplication->HandleOtaspEvent(msg);
+            AutoPtr<PhoneGlobals> globals = (PhoneGlobals*)mApplication.Get();
+            globals->HandleOtaspEvent(msg);
             break;
-
+        }
         case CallStateMonitor::PHONE_ENHANCED_VP_ON:
+        {
             if (DBG) Log(String("PHONE_ENHANCED_VP_ON..."));
             if (!mVoicePrivacyState) {
                 Int32 toneToPlay = InCallTonePlayer::TONE_VOICE_PRIVACY;
@@ -603,7 +613,7 @@ ECode CallNotifier::HandleMessage(
                 mVoicePrivacyState = TRUE;
             }
             break;
-
+        }
         case CallStateMonitor::PHONE_ENHANCED_VP_OFF:
             if (DBG) Log(String("PHONE_ENHANCED_VP_OFF..."));
             if (mVoicePrivacyState) {
@@ -646,8 +656,7 @@ void CallNotifier::OnNewRingingConnection(
         // that an incoming call occurred.  (This will generally send the
         // caller straight to voicemail, just as if we *had* shown the
         // incoming-call UI and the user had declined the call.)
-        assert(0 && "TODO");
-        // PhoneUtils::HangupRingingCall(ringing);
+        PhoneUtils::HangupRingingCall(ringing);
         return;
     }
 
@@ -669,7 +678,7 @@ void CallNotifier::OnNewRingingConnection(
     c->GetState(&s);
     // State will be either INCOMING or WAITING.
     if (VDBG) Log(String("- connection is ringing!  state = ") + StringUtils::ToString(s));
-    // if (DBG) PhoneUtils.dumpCallState(mPhone);
+    // if (DBG) PhoneUtils::DumpCallState(mPhone);
 
     // No need to do any service state checks here (like for
     // "emergency mode"), since in those states the SIM won't let
@@ -698,8 +707,8 @@ void CallNotifier::OnNewRingingConnection(
     // (This will be upgraded soon to a full wake lock; see
     // showIncomingCall().)
     if (VDBG) Log(String("Holding wake lock on new incoming connection."));
-    assert(0 && "TODO Need PhoneGlobals");
-    // mApplication->RequestWakeState(IPhoneGlobalsWakeState_PARTIAL);
+    AutoPtr<PhoneGlobals> globals = (PhoneGlobals*)mApplication.Get();
+    globals->RequestWakeState(PhoneGlobalsWakeState_PARTIAL);
 
     // Note we *don't* post a status bar notification here, since
     // we're not necessarily ready to actually show the incoming call
@@ -718,23 +727,21 @@ Boolean CallNotifier::IgnoreAllIncomingCalls(
     /* [in] */ IPhone* phone)
 {
     // Incoming calls are totally ignored on non-voice-capable devices.
-    assert(0 && "TODO need PhoneGlobals");
-    // if (!PhoneGlobals::sVoiceCapable) {
-    //     // ...but still log a warning, since we shouldn't have gotten this
-    //     // event in the first place!  (Incoming calls *should* be blocked at
-    //     // the telephony layer on non-voice-capable capable devices.)
-    //     Logger::W(TAG, "Got onNewRingingConnection() on non-voice-capable device! Ignoring...");
-    //     return TRUE;
-    // }
+    if (!PhoneGlobals::sVoiceCapable) {
+        // ...but still log a warning, since we shouldn't have gotten this
+        // event in the first place!  (Incoming calls *should* be blocked at
+        // the telephony layer on non-voice-capable capable devices.)
+        Logger::W(TAG, "Got onNewRingingConnection() on non-voice-capable device! Ignoring...");
+        return TRUE;
+    }
 
     // In ECM (emergency callback mode), we ALWAYS allow incoming calls
     // to get through to the user.  (Note that ECM is applicable only to
     // voice-capable CDMA devices).
-    assert(0 && "TODO");
-    // if (PhoneUtils::IsPhoneInEcm(phone)) {
-    //     if (DBG) Log(String("Incoming call while in ECM: always allow..."));
-    //     return FALSE;
-    // }
+    if (PhoneUtils::IsPhoneInEcm(phone)) {
+        if (DBG) Log(String("Incoming call while in ECM: always allow..."));
+        return FALSE;
+    }
 
     // Incoming calls are totally ignored if the device isn't provisioned yet.
     AutoPtr<IContentResolver> cr;
@@ -750,28 +757,31 @@ Boolean CallNotifier::IgnoreAllIncomingCalls(
     }
 
     // Incoming calls are totally ignored if an OTASP call is active.
-    assert(0 && "TODO Need TelephonyCapabilities");
-    // if (TelephonyCapabilities::SupportsOtasp(phone)) {
-    //     Boolean activateState = (mApplication.cdmaOtaScreenState.otaScreenState
-    //             == OtaUtils.CdmaOtaScreenState.OtaScreenState.OTA_STATUS_ACTIVATION);
-    //     Boolean dialogState = (mApplication.cdmaOtaScreenState.otaScreenState
-    //             == OtaUtils.CdmaOtaScreenState.OtaScreenState.OTA_STATUS_SUCCESS_FAILURE_DLG);
-    //     Boolean spcState = mApplication.cdmaOtaProvisionData.inOtaSpcState;
+    AutoPtr<PhoneGlobals> globals = (PhoneGlobals*)mApplication.Get();
+    AutoPtr<ITelephonyCapabilities> helper2;
+    CTelephonyCapabilities::AcquireSingleton((ITelephonyCapabilities**)&helper2);
+    Boolean res;
+    if (helper2->SupportsOtasp(phone, &res), res) {
+        Boolean activateState = (globals->mCdmaOtaScreenState->mOtaScreenState
+                == OtaUtils::CdmaOtaScreenState::OTA_STATUS_ACTIVATION);
+        Boolean dialogState = (globals->mCdmaOtaScreenState->mOtaScreenState
+                == OtaUtils::CdmaOtaScreenState::OTA_STATUS_SUCCESS_FAILURE_DLG);
+        Boolean spcState = globals->mCdmaOtaProvisionData->mInOtaSpcState;
 
-    //     if (spcState) {
-    //         Logger::I(TAG, "Ignoring incoming call: OTA call is active");
-    //         return TRUE;
-    //     }
-    //     else if (activateState || dialogState) {
-    //         // We *are* allowed to receive incoming calls at this point.
-    //         // But clear out any residual OTASP UI first.
-    //         // TODO: It's an MVC violation to twiddle the OTA UI state here;
-    //         // we should instead provide a higher-level API via OtaUtils.
-    //         if (dialogState) mApplication->DismissOtaDialogs();
-    //         mApplication->ClearOtaState();
-    //         return FALSE;
-    //     }
-    // }
+        if (spcState) {
+            Logger::I(TAG, "Ignoring incoming call: OTA call is active");
+            return TRUE;
+        }
+        else if (activateState || dialogState) {
+            // We *are* allowed to receive incoming calls at this point.
+            // But clear out any residual OTASP UI first.
+            // TODO: It's an MVC violation to twiddle the OTA UI state here;
+            // we should instead provide a higher-level API via OtaUtils.
+            if (dialogState) globals->DismissOtaDialogs();
+            globals->ClearOtaState();
+            return FALSE;
+        }
+    }
 
     // Normal case: allow this call to be presented to the user.
     return FALSE;
@@ -800,8 +810,8 @@ void CallNotifier::OnPhoneStateChanged(
     // Turn status bar notifications on or off depending upon the state
     // of the phone.  Notification Alerts (audible or vibrating) should
     // be on if and only if the phone is IDLE.
-    assert(0 && "TODO Need PhoneGlobals");
-    // mApplication->mNotificationMgr.statusBarHelper->EnableNotificationAlerts(state == PhoneConstantsState_IDLE);
+    AutoPtr<PhoneGlobals> globals = (PhoneGlobals*)mApplication.Get();
+    globals->mNotificationMgr->mStatusBarHelper->EnableNotificationAlerts(state == PhoneConstantsState_IDLE);
 
     AutoPtr<IPhone> fgPhone;
     mCM->GetFgPhone((IPhone**)&fgPhone);
@@ -834,14 +844,12 @@ void CallNotifier::OnPhoneStateChanged(
     mBluetoothManager->UpdateBluetoothIndication();
 
     // Update the phone state and other sensor/lock.
-    assert(0 && "TODO Need PhoneGlobals");
-    // mApplication->UpdatePhoneState(state);
+    globals->UpdatePhoneState(state);
 
     if (state == PhoneConstantsState_OFFHOOK) {
         if (VDBG) Log(String("onPhoneStateChanged: OFF HOOK"));
         // make sure audio is in in-call mode now
-        assert(0 && "TODO");
-        // PhoneUtils::SetAudioMode(mCM);
+        PhoneUtils::SetAudioMode(mCM);
     }
 }
 
@@ -902,22 +910,23 @@ void CallNotifier::OnDisconnect(
     // Stop any signalInfo tone being played when a call gets ended
     StopSignalInfoTone();
 
+    AutoPtr<PhoneGlobals> globals = (PhoneGlobals*)mApplication.Get();
     if ((c != NULL) && (type == IPhoneConstants::PHONE_TYPE_CDMA)) {
         // Resetting the CdmaPhoneCallState members
-        assert(0 && "TODO Need PhoneGlobals");
-        // mApplication.cdmaPhoneCallState->ResetCdmaPhoneCallState();
+        globals->mCdmaPhoneCallState->ResetCdmaPhoneCallState();
     }
 
     // If this is the end of an OTASP call, pass it on to the PhoneApp.
-    assert(0 && "TODO Need TelephonyCapabilities");
-    if (c != NULL /*&& TelephonyCapabilities::SupportsOtasp(phone)*/) {
+    AutoPtr<ITelephonyCapabilities> helper;
+    CTelephonyCapabilities::AcquireSingleton((ITelephonyCapabilities**)&helper);
+    Boolean res;
+    helper->SupportsOtasp(phone, &res);
+    if (c != NULL && res) {
         String number;
         c->GetAddress(&number);
-        Boolean res;
         if (phone->IsOtaSpNumber(number, &res), res) {
             if (DBG) Log(String("onDisconnect: this was an OTASP call!"));
-            assert(0 && "TODO Need PhoneGlobals");
-            // mApplication->HandleOtaspDisconnect();
+            globals->HandleOtaspDisconnect();
         }
     }
 
@@ -965,8 +974,9 @@ void CallNotifier::OnDisconnect(
         call->GetPhone((IPhone**)&phone);
 
         Boolean isEmergencyNumber = FALSE;
-        assert(0 && "TODO : Need PhoneNumberUtils");
-        // isEmergencyNumber = PhoneNumberUtils::IsLocalEmergencyNumber(mApplication, number);
+        AutoPtr<IPhoneNumberUtils> helper;
+        CPhoneNumberUtils::AcquireSingleton((IPhoneNumberUtils**)&helper);
+        helper->IsLocalEmergencyNumber(IContext::Probe(mApplication), number, &isEmergencyNumber);
 
         // Possibly play a "post-disconnect tone" thru the earpiece.
         // We do this here, rather than from the InCallScreen
@@ -1007,11 +1017,10 @@ void CallNotifier::OnDisconnect(
                     // TODO: (Moto): The contact reference data may need to be stored and use
                     // here when redialing a call. For now, pass in NULL as the URI parameter.
                     Int32 status = 0;
-                    assert(0 && "TODO");
-                    // status = PhoneUtils::PlaceCall(mApplication, phone, number, NULL, FALSE);
-                    // if (status != PhoneUtils::CALL_STATUS_FAILED) {
-                    //     mIsCdmaRedialCall = TRUE;
-                    // }
+                    status = PhoneUtils::PlaceCall(IContext::Probe(mApplication), phone, number, NULL, FALSE);
+                    if (status != PhoneUtils::CALL_STATUS_FAILED) {
+                        mIsCdmaRedialCall = TRUE;
+                    }
                 } else {
                     mIsCdmaRedialCall = FALSE;
                 }
@@ -1033,10 +1042,9 @@ void CallNotifier::ResetAudioStateAfterDisconnect()
 
     // call turnOnSpeaker() with state=false and store=true even if speaker
     // is already off to reset user requested speaker state.
-    assert(0 && "TODO");
-    // PhoneUtils::TurnOnSpeaker(mApplication, FALSE, TRUE);
+    PhoneUtils::TurnOnSpeaker(IContext::Probe(mApplication), FALSE, TRUE);
 
-    // PhoneUtils::SetAudioMode(mCM);
+    PhoneUtils::SetAudioMode(mCM);
 }
 
 void CallNotifier::OnMwiChanged(
@@ -1046,19 +1054,18 @@ void CallNotifier::OnMwiChanged(
 
     // "Voicemail" is meaningless on non-voice-capable devices,
     // so ignore MWI events.
-    assert(0 && "TODO need PhoneGlobals");
-    // if (!PhoneGlobals::sVoiceCapable) {
-    //     // ...but still log a warning, since we shouldn't have gotten this
-    //     // event in the first place!
-    //     // (PhoneStateListener.LISTEN_MESSAGE_WAITING_INDICATOR events
-    //     // *should* be blocked at the telephony layer on non-voice-capable
-    //     // capable devices.)
-    //     Logger::W(TAG, "Got onMwiChanged() on non-voice-capable device! Ignoring...");
-    //     return;
-    // }
+    if (!PhoneGlobals::sVoiceCapable) {
+        // ...but still log a warning, since we shouldn't have gotten this
+        // event in the first place!
+        // (PhoneStateListener.LISTEN_MESSAGE_WAITING_INDICATOR events
+        // *should* be blocked at the telephony layer on non-voice-capable
+        // capable devices.)
+        Logger::W(TAG, "Got onMwiChanged() on non-voice-capable device! Ignoring...");
+        return;
+    }
 
-    assert(0 && "TODO Need PhoneGlobals");
-    // mApplication->mNotificationMgr->UpdateMwi(visible);
+    AutoPtr<PhoneGlobals> globals = (PhoneGlobals*)mApplication.Get();
+    globals->mNotificationMgr->UpdateMwi(visible);
 }
 
 ECode CallNotifier::SendMwiChangedDelayed(
@@ -1076,8 +1083,8 @@ void CallNotifier::OnCfiChanged(
     /* [in] */ Boolean visible)
 {
     if (VDBG) Log(String("onCfiChanged(): ") + StringUtils::ToString(visible));
-    assert(0 && "TODO Need PhoneGlobals");
-    // mApplication->mNotificationMgr->UpdateCfi(visible);
+    AutoPtr<PhoneGlobals> globals = (PhoneGlobals*)mApplication.Get();
+    globals->mNotificationMgr->UpdateCfi(visible);
 }
 
 void CallNotifier::OnDisplayInfo(
@@ -1105,11 +1112,10 @@ void CallNotifier::OnSignalInfo(
     /* [in] */ IAsyncResult* r)
 {
     // Signal Info are totally ignored on non-voice-capable devices.
-    assert(0 && "TODO need PhoneGlobals");
-    // if (!PhoneGlobals::sVoiceCapable) {
-    //     Logger::W(TAG, "Got onSignalInfo() on non-voice-capable device! Ignoring...");
-    //     return;
-    // }
+    if (!PhoneGlobals::sVoiceCapable) {
+        Logger::W(TAG, "Got onSignalInfo() on non-voice-capable device! Ignoring...");
+        return;
+    }
 
     AutoPtr<ICall> call;
     mCM->GetFirstActiveRingingCall((ICall**)&call);

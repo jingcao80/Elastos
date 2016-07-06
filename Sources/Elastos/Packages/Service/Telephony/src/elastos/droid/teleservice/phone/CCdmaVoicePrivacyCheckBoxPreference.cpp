@@ -10,6 +10,8 @@ using Elastos::Droid::Content::IContentResolver;
 using Elastos::Droid::Os::AsyncResult;
 using Elastos::Droid::Provider::CSettingsSecure;
 using Elastos::Droid::Provider::ISettingsSecure;
+using Elastos::Core::IArrayOf;
+using Elastos::Core::IInteger32;
 using Elastos::Utility::Logging::Logger;
 
 namespace Elastos {
@@ -57,9 +59,14 @@ void CCdmaVoicePrivacyCheckBoxPreference::MyHandler::HandleGetVPResponse(
     }
     else {
         if (mHost->DBG) Logger::D(TAG, "handleGetVPResponse: VP state successfully queried.");
-        Int32 enable = 0;
-        assert(0 && "TODO");
-        //((int[]) ar.result)[0];
+
+        AutoPtr<IArrayOf> array = IArrayOf::Probe(ar->mResult);
+        AutoPtr<IInterface> obj;
+        array->Get(0, (IInterface**)&obj);
+        AutoPtr<IInteger32> value = IInteger32::Probe(obj);
+        Int32 enable;
+        value->GetValue(&enable);
+
         mHost->SetChecked(enable != 0);
 
         AutoPtr<IContext> context;

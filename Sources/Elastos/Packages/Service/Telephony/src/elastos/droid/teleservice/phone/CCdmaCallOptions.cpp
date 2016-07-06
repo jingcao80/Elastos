@@ -1,5 +1,6 @@
 
 #include "elastos/droid/teleservice/phone/CCdmaCallOptions.h"
+#include "elastos/droid/teleservice/phone/PhoneGlobals.h"
 #include "R.h"
 #include "Elastos.Droid.Internal.h"
 #include "Elastos.Droid.Preference.h"
@@ -40,9 +41,7 @@ ECode CCdmaCallOptions::OnCreate(
     FindPreference(BUTTON_VP_KEY, (IPreference**)&preference);
     mButtonVoicePrivacy = ICheckBoxPreference::Probe(preference);
 
-    AutoPtr<IPhone> phone;
-    assert(0 && "TODO need PhoneGlobals");
-    // phone = PhoneGlobals::GetPhone();
+    AutoPtr<IPhone> phone = PhoneGlobals::GetPhone();
     Int32 type;
     phone->GetPhoneType(&type);
 

@@ -3,6 +3,34 @@
 
 #include "_Elastos.Droid.TeleService.h"
 #include "elastos/droid/ext/frameworkext.h"
+#include "elastos/droid/teleservice/phone/IccPanel.h"
+#include "Elastos.Droid.Content.h"
+#include "Elastos.Droid.Internal.h"
+#include "Elastos.Droid.Os.h"
+#include "Elastos.Droid.Text.h"
+#include "Elastos.Droid.View.h"
+#include "Elastos.Droid.Widget.h"
+#include <elastos/core/Object.h>
+
+using Elastos::Droid::Content::IContext;
+using Elastos::Droid::Internal::Telephony::IPhone;
+using Elastos::Droid::Os::IMessage;
+using Elastos::Droid::Os::IBundle;
+using Elastos::Droid::Os::IHandler;
+using Elastos::Droid::TeleService::Phone::IccPanel;
+using Elastos::Droid::Text::ITextWatcher;
+using Elastos::Droid::Text::INoCopySpan;
+using Elastos::Droid::Text::IEditable;
+using Elastos::Droid::Text::ITextWatcher;
+using Elastos::Droid::View::IView;
+using Elastos::Droid::View::IViewOnClickListener;
+using Elastos::Droid::View::IKeyEvent;
+using Elastos::Droid::Widget::IButton;
+using Elastos::Droid::Widget::ITextView;
+using Elastos::Droid::Widget::IEditText;
+using Elastos::Droid::Widget::ILinearLayout;
+using Elastos::Core::Object;
+using Elastos::Core::ICharSequence;
 
 namespace Elastos {
 namespace Droid {
@@ -29,6 +57,8 @@ private:
     public:
         TO_STRING_IMPL("IccNetworkDepersonalizationPanel::MyTextWatcher")
 
+        CAR_INTERFACE_DECL()
+
         MyTextWatcher(
             /* [in] */ IccNetworkDepersonalizationPanel* host)
             : mHost(host)
@@ -39,14 +69,18 @@ private:
             /* [in] */ Int32 start,
             /* [in] */ Int32 olen,
             /* [in] */ Int32 nlen)
-        {}
+        {
+            return NOERROR;
+        }
 
         CARAPI OnTextChanged(
             /* [in] */ ICharSequence* buffer,
             /* [in] */ Int32 start,
             /* [in] */ Int32 olen,
             /* [in] */ Int32 nlen)
-        {}
+        {
+            return NOERROR;
+        }
 
         CARAPI AfterTextChanged(
             /* [in] */ IEditable* buffer);
@@ -191,13 +225,13 @@ private:
     AutoPtr<IPhone> mPhone;
 
     //UI elements
-    AutoPtr<IEditText>     mPinEntry;
+    AutoPtr<IEditText> mPinEntry;
     AutoPtr<ILinearLayout> mEntryPanel;
     AutoPtr<ILinearLayout> mStatusPanel;
-    AutoPtr<ITextView>     mStatusText;
+    AutoPtr<ITextView> mStatusText;
 
-    AutoPtr<IButton>       mUnlockButton;
-    AutoPtr<IButton>       mDismissButton;
+    AutoPtr<IButton> mUnlockButton;
+    AutoPtr<IButton> mDismissButton;
 
     //private textwatcher to control text entry.
     AutoPtr<ITextWatcher> mPinEntryWatcher;
@@ -214,6 +248,5 @@ private:
 } // namespace TeleService
 } // namespace Droid
 } // namespace Elastos
-
 
 #endif // __ELASTOS_DROID_PHONE_ICCNETWORKDEPERSONALIZATIONPANEL_H__

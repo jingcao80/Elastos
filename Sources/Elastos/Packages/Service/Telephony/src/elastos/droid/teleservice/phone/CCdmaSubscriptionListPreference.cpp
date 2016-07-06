@@ -1,6 +1,7 @@
 
 #include "elastos/droid/teleservice/phone/CCdmaSubscriptionListPreference.h"
 #include "Elastos.Droid.Content.h"
+#include "Elastos.Droid.Internal.h"
 #include "Elastos.Droid.Provider.h"
 #include "elastos/droid/os/AsyncResult.h"
 #include "elastos/droid/provider/Settings.h"
@@ -8,6 +9,8 @@
 #include <elastos/utility/logging/Logger.h>
 
 using Elastos::Droid::Content::IContentResolver;
+using Elastos::Droid::Internal::Telephony::IPhoneFactory;
+using Elastos::Droid::Internal::Telephony::CPhoneFactory;
 using Elastos::Droid::Os::AsyncResult;
 using Elastos::Droid::Provider::CSettingsGlobal;
 using Elastos::Droid::Provider::ISettingsGlobal;
@@ -46,8 +49,9 @@ ECode CCdmaSubscriptionListPreference::CdmaSubscriptionButtonHandler::HandleMess
 void CCdmaSubscriptionListPreference::CdmaSubscriptionButtonHandler::HandleSetCdmaSubscriptionMode(
     /* [in] */ IMessage* msg)
 {
-    assert(0 && "TODO Need PhoneFactory");
-    // mHost->mPhone = PhoneFactory::GetDefaultPhone();
+    AutoPtr<IPhoneFactory> helper;
+    CPhoneFactory::AcquireSingleton((IPhoneFactory**)&helper);
+    helper->GetDefaultPhone((IPhone**)&(mHost->mPhone));
 
     AutoPtr<IInterface> obj;
     msg->GetObj((IInterface**)&obj);
@@ -89,8 +93,9 @@ ECode CCdmaSubscriptionListPreference::constructor(
 {
     ListPreference::constructor(context, attrs);
 
-    assert(0 && "TODO Need PhoneFactory");
-    // mPhone = PhoneFactory::GetDefaultPhone();
+    AutoPtr<IPhoneFactory> helper;
+    CPhoneFactory::AcquireSingleton((IPhoneFactory**)&helper);
+    helper->GetDefaultPhone((IPhone**)&mPhone);
     mHandler = new CdmaSubscriptionButtonHandler(this);
     SetCurrentCdmaSubscriptionModeValue();
     return NOERROR;

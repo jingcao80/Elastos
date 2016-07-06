@@ -1,5 +1,6 @@
 
 #include "elastos/droid/teleservice/phone/settings/CPhoneAccountSettingsActivity.h"
+#include "elastos/droid/teleservice/phone/settings/PhoneAccountSettingsFragment.h"
 #include <Elastos.Droid.App.h>
 #include "elastos/droid/R.h"
 #include "R.h"
@@ -34,8 +35,7 @@ ECode CPhoneAccountSettingsActivity::OnCreate(
     GetFragmentManager((IFragmentManager**)&manager);
     AutoPtr<IFragmentTransaction> transaction;
     manager->BeginTransaction((IFragmentTransaction**)&transaction);
-    assert(0 && "need class PhoneAccountSettingsFragment");
-    AutoPtr<IFragment> fragment;// = new PhoneAccountSettingsFragment();
+    AutoPtr<IFragment> fragment = new PhoneAccountSettingsFragment();
     transaction->Replace(Elastos::Droid::R::id::content, fragment);
     Int32 tmp;
     return transaction->Commit(&tmp);

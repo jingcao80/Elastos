@@ -17,6 +17,8 @@ using Elastos::Droid::Content::CComponentName;
 using Elastos::Droid::Content::CIntentFilter;
 using Elastos::Droid::Content::IIntentFilter;
 using Elastos::Droid::Content::Res::IResources;
+using Elastos::Droid::Internal::Telephony::IPhoneFactory;
+using Elastos::Droid::Internal::Telephony::CPhoneFactory;
 using Elastos::Droid::Internal::Telephony::IPhoneSubInfo;
 using Elastos::Droid::Internal::Telephony::ITelephonyIntents;
 using Elastos::Droid::Net::IUri;
@@ -367,7 +369,7 @@ AutoPtr<IPhoneAccountHandle> TelecomAccountRegistry::MakePstnPhoneAccountHandleW
     AutoPtr<IContext> context;
     phone->GetContext((IContext**)&context);
     assert(0);
-    //CComponentName::New(context, TelephonyConnectionService.class);
+    //CComponentName::New(context, ECLSID_CTelephonyConnectionService, (IComponentName**)&pstnConnectionServiceName);
     // TODO: Should use some sort of special hidden flag to decorate this account as
     // an emergency-only account
     String id;
@@ -412,7 +414,7 @@ void TelecomAccountRegistry::CleanupPhoneAccounts()
 {
     AutoPtr<IComponentName> telephonyComponentName;
     assert(0);
-    //CComponentName::New(mContext, TelephonyConnectionService.class, (IComponentName**)&telephonyComponentName);
+    //CComponentName::New(mContext, ECLSID_CTelephonyConnectionService, (IComponentName**)&telephonyComponentName);
     AutoPtr<IList> accountHandles;
     mTelecomManager->GetAllPhoneAccountHandles((IList**)&accountHandles);
 
@@ -438,9 +440,10 @@ void TelecomAccountRegistry::SetupAccounts()
 {
     // Go through SIM-based phones and register ourselves -- registering an existing account
     // will cause the existing entry to be replaced.
+    AutoPtr<IPhoneFactory> helper;
+    CPhoneFactory::AcquireSingleton((IPhoneFactory**)&helper);
     AutoPtr<ArrayOf<IPhone*> > phones;
-    assert(0);
-    //PhoneFactory::GetPhones((ArrayOf<IPhone>**)&phones);
+    helper->GetPhones((ArrayOf<IPhone*>**)&phones);
     Logger::D("TelecomAccountRegistry", "Found %d phones.  Attempting to register.", phones->GetLength());
 
     for (Int32 i = 0; i < phones->GetLength(); i++) {
@@ -463,18 +466,17 @@ void TelecomAccountRegistry::SetupAccounts()
     Boolean res;
     if (mAccounts->IsEmpty(&res), res) {
         AutoPtr<IPhone> phone;
-        assert(0);
-        //PhoneFactory::GetDefaultPhone((IPhone**)&phone);
+        helper->GetDefaultPhone((IPhone**)&phone);
         AutoPtr<AccountEntry> entry = new AccountEntry(this, phone, TRUE /* emergency */,
                 FALSE /* isDummy */);
         mAccounts->Add(TO_IINTERFACE(entry));
     }
 
     // Add a fake account entry.
-    AutoPtr<ISystem> helper;
-    CSystem::AcquireSingleton((ISystem**)&helper);
+    AutoPtr<ISystem> helper2;
+    CSystem::AcquireSingleton((ISystem**)&helper2);
     String value;
-    helper->GetProperty(String("dummy_sim"), &value);
+    helper2->GetProperty(String("dummy_sim"), &value);
     if (DBG && phones->GetLength() > 0 && String("TRUE").Equals(value)) {
         AutoPtr<AccountEntry> entry = new AccountEntry(this, (*phones)[0], FALSE /* emergency */,
                 TRUE /* isDummy */);

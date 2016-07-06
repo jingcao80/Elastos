@@ -342,7 +342,7 @@ StringBuilder PhoneUtils::sUssdMsg;
 
 const Int32 PhoneUtils::QUERY_TOKEN = -1;
 
-AutoPtr<ICallerInfoAsyncQueryOnQueryCompleteListener> sCallerInfoQueryListener =
+AutoPtr<ICallerInfoAsyncQueryOnQueryCompleteListener> PhoneUtils::sCallerInfoQueryListener =
     new PhoneUtils::MyCallerInfoAsyncQueryOnQueryCompleteListener();
 
 ECode PhoneUtils::InitializeConnectionHandler(
@@ -366,8 +366,7 @@ Boolean PhoneUtils::AnswerCall(
     Log(sb.ToString());
     AutoPtr<PhoneGlobals> app;
     PhoneGlobals::GetInstance((PhoneGlobals**)&app);
-    assert(0);
-    //AutoPtr<CallNotifier> notifier = app->mNotifier;
+    AutoPtr<CallNotifier> notifier = app->mNotifier;
 
     AutoPtr<IPhone> phone;
     ringingCall->GetPhone((IPhone**)&phone);
@@ -382,8 +381,7 @@ Boolean PhoneUtils::AnswerCall(
         Int32 state;
         ringingCall->GetState(&state);
         if (state == ICallState_WAITING) {
-            assert(0);
-            //notifier->StopSignalInfoTone();
+            notifier->StopSignalInfoTone();
         }
     }
 
@@ -1204,8 +1202,7 @@ ECode PhoneUtils::DisplayMMIComplete(
             if (activity != NULL) {
                 // if an attempt to unPUK the device was made, we specify
                 // the title and the message here.
-                assert(0);
-                //title = com.android.internal.R.string.PinMmi;
+                title = Elastos::Droid::R::string::PinMmi;
                 context->GetText(Elastos::Droid::TeleService::R::string::puk_unlocked, (ICharSequence**)&text);
                 break;
             }
@@ -2327,24 +2324,26 @@ Boolean PhoneUtils::OkToSupportHold(
 
     AutoPtr<IPhone> phone;
     fgCall->GetPhone((IPhone**)&phone);
-    assert(0);
-    // if (TelephonyCapabilities::SupportsHoldAndUnhold(phone)) {
-    //     // This phone has the concept of explicit "Hold" and "Unhold" actions.
-    //     supportsHold = TRUE;
-    // }
-    // else if (hasHoldingCall && (fgCallState == ICallState_IDLE)) {
-    //     // Even when foreground phone device doesn't support hold/unhold, phone devices
-    //     // for background holding calls may do.
-    //     AutoPtr<ICall> bgCall;
-    //     cm->GetFirstActiveBgCall((ICall**)&bgCall);
-    //     if (bgCall != NULL) {
-    //         AutoPtr<IPhone> phone;
-    //         bgCall->GetPhone((IPhone**)&phone);
-    //         if (TelephonyCapabilities::SupportsHoldAndUnhold(phone)) {
-    //             supportsHold = TRUE;
-    //         }
-    //     }
-    // }
+    AutoPtr<ITelephonyCapabilities> helper;
+    CTelephonyCapabilities::AcquireSingleton((ITelephonyCapabilities**)&helper);
+    Boolean res;
+    if (helper->SupportsHoldAndUnhold(phone, &res), res) {
+        // This phone has the concept of explicit "Hold" and "Unhold" actions.
+        supportsHold = TRUE;
+    }
+    else if (hasHoldingCall && (fgCallState == ICallState_IDLE)) {
+        // Even when foreground phone device doesn't support hold/unhold, phone devices
+        // for background holding calls may do.
+        AutoPtr<ICall> bgCall;
+        cm->GetFirstActiveBgCall((ICall**)&bgCall);
+        if (bgCall != NULL) {
+            AutoPtr<IPhone> phone;
+            bgCall->GetPhone((IPhone**)&phone);
+            if (helper->SupportsHoldAndUnhold(phone, &res), res) {
+                supportsHold = TRUE;
+            }
+        }
+    }
     return supportsHold;
 }
 
@@ -2655,22 +2654,24 @@ Boolean PhoneUtils::ActivateSpeakerIfDocked(
 Boolean PhoneUtils::IsPhoneInEcm(
     /* [in] */ IPhone* phone)
 {
-    assert(0);
-    // if ((phone != NULL) && TelephonyCapabilities::SupportsEcm(phone)) {
-    //     // For phones that support ECM, return true iff PROPERTY_INECM_MODE == "true".
-    //     // TODO: There ought to be a better API for this than just
-    //     // exposing a system property all the way up to the app layer,
-    //     // probably a method like "inEcm()" provided by the telephony
-    //     // layer.
-    //     AutoPtr<ISystemProperties> helper;
-    //     CSystemProperties::AcquireSingleton((ISystemProperties**)&helper);
-    //     String ecmMode;
-    //     helper->Get(ITelephonyProperties::PROPERTY_INECM_MODE, &ecmMode);
-    //     if (!ecmMode.IsNull()) {
-    //         assert(0 && "Equals with true or TRUE or 1 ???")
-    //         return ecmMode.Equals(String("true"));
-    //     }
-    // }
+    AutoPtr<ITelephonyCapabilities> helper;
+    CTelephonyCapabilities::AcquireSingleton((ITelephonyCapabilities**)&helper);
+    Boolean res;
+    if ((phone != NULL) && (helper->SupportsEcm(phone, &res), res)) {
+        // For phones that support ECM, return true iff PROPERTY_INECM_MODE == "true".
+        // TODO: There ought to be a better API for this than just
+        // exposing a system property all the way up to the app layer,
+        // probably a method like "inEcm()" provided by the telephony
+        // layer.
+        AutoPtr<ISystemProperties> helper;
+        CSystemProperties::AcquireSingleton((ISystemProperties**)&helper);
+        String ecmMode;
+        helper->Get(ITelephonyProperties::PROPERTY_INECM_MODE, &ecmMode);
+        if (!ecmMode.IsNull()) {
+            assert(0 && "Equals with true or TRUE or 1 ???");
+            return ecmMode.Equals(String("true"));
+        }
+    }
     return FALSE;
 }
 

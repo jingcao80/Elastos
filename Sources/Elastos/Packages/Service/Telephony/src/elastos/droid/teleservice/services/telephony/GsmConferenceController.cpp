@@ -1,5 +1,6 @@
 
 #include "elastos/droid/teleservice/services/telephony/GsmConferenceController.h"
+#include "elastos/droid/teleservice/services/telephony/GsmConference.h"
 #include <elastos/utility/logging/Logger.h>
 
 using Elastos::Droid::Telecomm::Telecom::IConnectionService;
@@ -202,9 +203,8 @@ void GsmConferenceController::RecalculateConference()
         AutoPtr<IGsmConnection> connection = IGsmConnection::Probe(obj);
 
         AutoPtr<Elastos::Droid::Internal::Telephony::IConnection> radioConnection;
-        assert(0);
-        // ITelephonyConnection::Probe(connection)->GetOriginalConnection(
-        //         (Elastos::Droid::Internal::Telephony::IConnection**)&radioConnection);
+        ITelephonyConnection::Probe(connection)->GetOriginalConnection(
+                (Elastos::Droid::Internal::Telephony::IConnection**)&radioConnection);
 
         if (radioConnection != NULL) {
             ICallState state;
@@ -265,8 +265,7 @@ void GsmConferenceController::RecalculateConference()
             }
         }
         else {
-            assert(0);
-            //mGsmConference = new GsmConference(NULL);
+            mGsmConference = new GsmConference(NULL);
 
             AutoPtr<ArrayOf<IInterface*> > array;
             conferencedConnections->ToArray((ArrayOf<IInterface*>**)&array);

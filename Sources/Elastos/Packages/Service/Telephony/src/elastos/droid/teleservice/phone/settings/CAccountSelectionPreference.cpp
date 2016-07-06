@@ -3,12 +3,14 @@
 #include <elastos/core/Object.h>
 #include <elastos/core/CoreUtils.h>
 #include <elastos/core/StringUtils.h>
+#include "elastos/utility/Objects.h"
 
 using Elastos::Droid::Preference::EIID_IPreferenceOnPreferenceChangeListener;
 using Elastos::Droid::Telecomm::Telecom::IPhoneAccount;
 using Elastos::Core::Object;
 using Elastos::Core::CoreUtils;
 using Elastos::Core::StringUtils;
+using Elastos::Utility::Objects;
 
 namespace Elastos {
 namespace Droid {
@@ -83,7 +85,7 @@ ECode CAccountSelectionPreference::SetModel(
 
         AutoPtr<ICharSequence> cchar = CoreUtils::Convert(StringUtils::ToString(i));
         mEntryValues->Set(i,  cchar);
-        if (Object::Equals(TO_IINTERFACE(currentSelection), (*mAccounts)[i])) {
+        if (Objects::Equals(TO_IINTERFACE(currentSelection), (*mAccounts)[i])) {
             selectedIndex = i;
         }
     }

@@ -1,11 +1,14 @@
 
 #include "elastos/droid/teleservice/services/telephony/sip/SipProfileDb.h"
+#include "elastos/droid/teleservice/services/telephony/sip/SipUtil.h"
 #include <elastos/core/AutoLock.h>
+#include <elastos/utility/logging/Logger.h>
 
 using Elastos::IO::CFile;
 using Elastos::Utility::CArrayList;
 using Elastos::Utility::ICollections;
 using Elastos::Utility::CCollections;
+using Elastos::Utility::Logging::Logger;
 
 namespace Elastos {
 namespace Droid {
@@ -31,8 +34,7 @@ SipProfileDb::SipProfileDb(
     String path;
     filesDir->GetAbsolutePath(&path);
     mProfilesDirectory = path + PROFILES_DIR;
-    assert(0);
-    //mSipSharedPreferences = new SipSharedPreferences(context);
+    mSipSharedPreferences = new SipSharedPreferences(context);
 }
 
 // ECode DeleteProfile(
@@ -130,8 +132,7 @@ AutoPtr<IList> SipProfileDb::RetrieveSipProfileListInternal()
 void SipProfileDb::Log(
         /* [in] */ const String& msg)
 {
-    assert(0);
-    //Logger::D(SipUtil::TAG, PREFIX + msg);
+    Logger::D(SipUtil::TAG, PREFIX + msg);
 }
 
 } // namespace Sip

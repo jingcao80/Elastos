@@ -1,6 +1,9 @@
 
 #include "elastos/droid/teleservice/phone/CallController.h"
 #include "elastos/droid/teleservice/phone/CallGatewayManager.h"
+#include "elastos/droid/teleservice/phone/PhoneGlobals.h"
+#include "elastos/droid/teleservice/phone/PhoneUtils.h"
+#include "elastos/droid/teleservice/phone/CdmaPhoneCallState.h"
 #include "R.h"
 #include "Elastos.Droid.Content.h"
 #include "Elastos.Droid.Provider.h"
@@ -10,14 +13,20 @@
 #include <elastos/core/StringBuilder.h>
 #include <elastos/utility/logging/Logger.h>
 
+using Elastos::Droid::Content::IContext;
+using Elastos::Droid::Content::CIntent;
 using Elastos::Droid::Content::IComponentName;
 using Elastos::Droid::Internal::Telephony::IPhone;
 using Elastos::Droid::Internal::Telephony::IPhoneConstants;
+using Elastos::Droid::Internal::Telephony::ITelephonyCapabilities;
+using Elastos::Droid::Internal::Telephony::CTelephonyCapabilities;
 using Elastos::Droid::Os::CSystemProperties;
 using Elastos::Droid::Os::IBundle;
 using Elastos::Droid::Os::ISystemProperties;
 using Elastos::Droid::Provider::ICalls;
 using Elastos::Droid::Telephony::IServiceState;
+using Elastos::Droid::Telephony::IPhoneNumberUtils;
+using Elastos::Droid::Telephony::CPhoneNumberUtils;
 using Elastos::Droid::TeleService::R;
 using Elastos::Core::AutoLock;
 using Elastos::Core::CSystem;
@@ -64,7 +73,6 @@ ECode CallController::Init(
 
     {
         AutoLock syncLock(THIS);
-        assert(0 && "synchronized (CallController.class)");
         if (sInstance == NULL) {
             sInstance = new CallController(app, callLogger, callGatewayManager);
         }
@@ -93,8 +101,8 @@ CallController::CallController(
         sb += TO_CSTR(app);
         Log(sb.ToString());
     }
-    assert(0 && "TODO");
-    // mCM = app->mCM;
+    AutoPtr<PhoneGlobals> global = (PhoneGlobals*)app;
+    mCM = global->mCM;
 }
 
 ECode CallController::HandleMessage(
@@ -111,23 +119,26 @@ ECode CallController::HandleMessage(
     msg->GetWhat(&what);
     switch (what) {
         case THREEWAY_CALLERINFO_DISPLAY_DONE:
+        {
             if (DBG) Log(String("THREEWAY_CALLERINFO_DISPLAY_DONE..."));
 
-            assert(0 && "TODO: Need IPhoneGlobals");
-            // Boolean res;
-            // if ((mApp->CdmaPhoneCallState->GetCurrentCallState(&res), res)
-            //     == ICdmaPhoneCallStatePhoneCallState::THRWAY_ACTIVE) {
-            //     // Reset the mThreeWayCallOrigStateDialing state
-            //     mApp->mCdmaPhoneCallState->SetThreeWayCallOrigState(FALSE);
+            AutoPtr<PhoneGlobals> global = (PhoneGlobals*)mApp.Get();
+            CdmaPhoneCallState::PhoneCallState state;
+            if ((global->mCdmaPhoneCallState->GetCurrentCallState(&state), state)
+                == CdmaPhoneCallState::THRWAY_ACTIVE) {
+                // Reset the mThreeWayCallOrigStateDialing state
+                global->mCdmaPhoneCallState->SetThreeWayCallOrigState(FALSE);
 
-            //     // TODO: Remove this code.
-            //     //mApp.getCallModeler().setCdmaOutgoing3WayCall(null);
-            // }
+                // TODO: Remove this code.
+                //global.getCallModeler().setCdmaOutgoing3WayCall(null);
+            }
             break;
-
+        }
         default:
+        {
             Logger::W(TAG, "handleMessage: unexpected code: %s", TO_CSTR(msg));
             break;
+        }
     }
     return NOERROR;
 }
@@ -164,9 +175,10 @@ ECode CallController::PlaceCall(
 
     String scheme;
     uri->GetScheme(&scheme);
+    AutoPtr<IPhoneNumberUtils> helper;
+    CPhoneNumberUtils::AcquireSingleton((IPhoneNumberUtils**)&helper);
     String number;
-    assert(0 && "TODO: Need IPhoneGlobals");
-    // number = PhoneNumberUtils::GetNumberFromIntent(intent, mApp);
+    helper->GetNumberFromIntent(intent, IContext::Probe(mApp), &number);
     if (VDBG) {
         Log(String("- action: ") + action);
         Log(String("- uri: ") + TO_CSTR(uri));
@@ -188,12 +200,15 @@ ECode CallController::PlaceCall(
     // Check to see if this is an OTASP call (the "activation" call
     // used to provision CDMA devices), and if so, do some
     // OTASP-specific setup.
+    AutoPtr<PhoneGlobals> global = (PhoneGlobals*)mApp.Get();
     AutoPtr<IPhone> phone;
-    assert(0 && "TODO: Need IPhoneGlobals");
-    // mApp->mCM->GetDefaultPhone((IPhone**)&phone);
-    // if (TelephonyCapabilities::SupportsOtasp(phone)) {
-    //     CheckForOtaspCall(intent);
-    // }
+    global->mCM->GetDefaultPhone((IPhone**)&phone);
+    AutoPtr<ITelephonyCapabilities> helper2;
+    CTelephonyCapabilities::AcquireSingleton((ITelephonyCapabilities**)&helper2);
+    Boolean res;
+    if (helper2->SupportsOtasp(phone, &res), res) {
+        CheckForOtaspCall(intent);
+    }
 
     // Clear out the "restore mute state" flag since we're
     // initiating a brand-new call.
@@ -203,8 +218,7 @@ ECode CallController::PlaceCall(
     // (i.e. placing an outgoing call, and NOT handling an aborted
     // "Add Call" request), so we should let the mute state be handled
     // by the PhoneUtils phone state change handler.)
-    assert(0 && "TODO: Need IPhoneGlobals");
-    // mApp->SetRestoreMuteOnInCallResume(FALSE);
+    global->SetRestoreMuteOnInCallResume(FALSE);
 
     ConstantsCallStatusCode status = PlaceCallInternal(intent);
 
@@ -272,9 +286,9 @@ ConstantsCallStatusCode CallController::PlaceCallInternal(
     //   around *only* the call that can throw that exception.
 
     //try
+    ECode ec = NOERROR;
     {
-        assert(0 && "TODO: Need PhoneUtils");
-        // FAILE_GOTO(PhoneUtils::GetInitialNumber(intent, &number), ERROR);
+        FAIL_GOTO(ec = PhoneUtils::GetInitialNumber(intent, &number), ERROR)
         if (VDBG) {
             StringBuilder sb;
             sb += "- actual number to dial: '";
@@ -297,8 +311,7 @@ ConstantsCallStatusCode CallController::PlaceCallInternal(
         intent->GetParcelableExtra(
                 IOutgoingCallBroadcaster::EXTRA_THIRD_PARTY_CALL_COMPONENT, (IParcelable**)&obj);
         AutoPtr<IComponentName> thirdPartyCallComponent = IComponentName::Probe(obj);
-        assert(0 && "TODO: Need PhoneUtils");
-        // phone = PhoneUtils::PickPhoneBasedOnNumber(mCM, scheme, number, sipPhoneUri, thirdPartyCallComponent);
+        phone = PhoneUtils::PickPhoneBasedOnNumber(mCM, scheme, number, sipPhoneUri, thirdPartyCallComponent);
         if (VDBG) {
             StringBuilder sb;
             sb += "- got Phone instance: ";
@@ -315,7 +328,7 @@ ConstantsCallStatusCode CallController::PlaceCallInternal(
         sstate->GetState(&state);
         CheckIfOkToInitiateOutgoingCall(state, &okToCallStatus);
     }
-    ERROR:
+ERROR:
     //catch (PhoneUtils.VoiceMailNumberMissingException ex) {
         // If the call status is NOT in an acceptable state, it
         // may effect the way the voicemail number is being
@@ -342,12 +355,12 @@ ConstantsCallStatusCode CallController::PlaceCallInternal(
     // (This is just a sanity-check; this policy *should* really be
     // enforced in OutgoingCallBroadcaster.onCreate(), which is the
     // main entry point for the CALL and CALL_* intents.)
-    Boolean isEmergencyNumber = FALSE;
-    assert(0 && "TODO: Need IPhoneGlobals");
-    // isEmergencyNumber = PhoneNumberUtils::IsLocalEmergencyNumber(mApp, number);
-    Boolean isPotentialEmergencyNumber = FALSE;
-    assert(0 && "TODO: Need IPhoneGlobals");
-    // isPotentialEmergencyNumber = PhoneNumberUtils::IsPotentialLocalEmergencyNumber(mApp, number);
+    AutoPtr<IPhoneNumberUtils> helper;
+    CPhoneNumberUtils::AcquireSingleton((IPhoneNumberUtils**)&helper);
+    Boolean isEmergencyNumber;
+    helper->IsLocalEmergencyNumber(IContext::Probe(mApp), number, &isEmergencyNumber);
+    Boolean isPotentialEmergencyNumber;
+    helper->IsPotentialLocalEmergencyNumber(IContext::Probe(mApp), number, &isPotentialEmergencyNumber);
     String action;
     intent->GetAction(&action);
     Boolean isEmergencyIntent = IIntent::ACTION_CALL_EMERGENCY.Equals(action);
@@ -455,8 +468,8 @@ ConstantsCallStatusCode CallController::PlaceCallInternal(
 
     // Watch out: PhoneUtils.placeCall() returns one of the
     // CALL_STATUS_* constants, not a CallStatusCode enum value.
-    Int32 callStatus = 0;
     assert(0 && "TODO: Need IPhoneGlobals");
+    // Int32 callStatus = 0;
     // callStatus = PhoneUtils::PlaceCall(mApp, phone, number, contactUri, (isEmergencyNumber || isEmergencyIntent),
     //       rawGatewayInfo, mCallGatewayManager);
 
@@ -619,8 +632,7 @@ void CallController::HandleOutgoingCallError(
 {
     if (DBG) Log(String("handleOutgoingCallError(): status = ") + StringUtils::ToString(status));
     AutoPtr<IIntent> intent;
-    assert(0 && "TODO: Need IPhoneGlobals");
-    // CIntent::New(mApp, ErrorDialogActivity.class, (IIntent**)&intent);
+    CIntent::New(IContext::Probe(mApp), ECLSID_CErrorDialogActivity, (IIntent**)&intent);
     Int32 errorMessageId = -1;
     switch (status) {
         case Constants_SUCCESS:
@@ -689,12 +701,10 @@ void CallController::HandleOutgoingCallError(
             // be cleaner to just set a pending call status code here,
             // and then let the InCallScreen display the toast...
             AutoPtr<IIntent> mmiIntent;
-            assert(0 && "TODO: Need IPhoneGlobals");
-            // CIntent::New(mApp, MMIDialogActivity.class, (IIntent**)&mmiIntent);
+            CIntent::New(IContext::Probe(mApp), ECLSID_CMMIDialogActivity, (IIntent**)&mmiIntent);
             mmiIntent->SetFlags(IIntent::FLAG_ACTIVITY_NEW_TASK |
                     IIntent::FLAG_ACTIVITY_EXCLUDE_FROM_RECENTS);
-            assert(0 && "TODO: Need IPhoneGlobals");
-            // mApp->StartActivity(mmiIntent);
+            IContext::Probe(mApp)->StartActivity(mmiIntent);
             return;
         }
         default:
@@ -707,28 +717,27 @@ void CallController::HandleOutgoingCallError(
     if (errorMessageId != -1) {
         intent->PutExtra(IErrorDialogActivity::ERROR_MESSAGE_ID_EXTRA, errorMessageId);
     }
-    assert(0 && "TODO: Need IPhoneGlobals");
-    // mApp->StartActivity(intent);
+    IContext::Probe(mApp)->StartActivity(intent);
 }
 
 void CallController::CheckForOtaspCall(
     /* [in] */ IIntent* intent)
 {
-    assert(0 && "TODO: Need OtaUtils");
-    // if (OtaUtils::IsOtaspCallIntent(intent)) {
-    //     Logger::I(TAG, "checkForOtaspCall: handling OTASP intent! %s", TO_CSTE(intent));
+    Boolean res;
+    if (OtaUtils::IsOtaspCallIntent(intent, &res), res) {
+        Logger::I(TAG, "checkForOtaspCall: handling OTASP intent! %s", TO_CSTR(intent));
 
-    //     // ("OTASP-specific setup" basically means creating and initializing
-    //     // the OtaUtils instance.  Note that this setup needs to be here in
-    //     // the CallController.placeCall() sequence, *not* in
-    //     // OtaUtils.startInteractiveOtasp(), since it's also possible to
-    //     // start an OTASP call by manually dialing "*228" (in which case
-    //     // OtaUtils.startInteractiveOtasp() never gets run at all.)
-    //     OtaUtils::SetupOtaspCall(intent);
-    // }
-    // else {
-    //     if (DBG) Log(String("checkForOtaspCall: not an OTASP call."));
-    // }
+        // ("OTASP-specific setup" basically means creating and initializing
+        // the OtaUtils instance.  Note that this setup needs to be here in
+        // the CallController.placeCall() sequence, *not* in
+        // OtaUtils.startInteractiveOtasp(), since it's also possible to
+        // start an OTASP call by manually dialing "*228" (in which case
+        // OtaUtils.startInteractiveOtasp() never gets run at all.)
+        OtaUtils::SetupOtaspCall(intent);
+    }
+    else {
+        if (DBG) Log(String("checkForOtaspCall: not an OTASP call."));
+    }
 }
 
 void CallController::Log(

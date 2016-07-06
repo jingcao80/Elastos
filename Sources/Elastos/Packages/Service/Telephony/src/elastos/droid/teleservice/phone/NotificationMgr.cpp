@@ -1,6 +1,7 @@
 
 #include "elastos/droid/teleservice/phone/NotificationMgr.h"
 #include "elastos/droid/teleservice/phone/PhoneGlobals.h"
+#include "elastos/droid/teleservice/phone/CCallFeaturesSetting.h"
 #include <elastos/utility/logging/Logger.h>
 #include "elastos/droid/text/TextUtils.h"
 #include "Elastos.Droid.App.h"
@@ -15,6 +16,7 @@
 #include <elastos/core/StringBuilder.h>
 #include <elastos/core/StringUtils.h>
 #include <elastos/core/CoreUtils.h>
+#include <elastos/core/AutoLock.h>
 #include "Elastos.CoreLibrary.Utility.h"
 #include "elastos/core/AutoLock.h"
 
@@ -39,6 +41,7 @@ using Elastos::Droid::Content::Pm::IUserInfo;
 using Elastos::Droid::Graphics::IColor;
 using Elastos::Droid::Internal::Telephony::IPhoneBase;
 using Elastos::Droid::Internal::Telephony::ITelephonyCapabilities;
+using Elastos::Droid::Internal::Telephony::CTelephonyCapabilities;
 using Elastos::Droid::Net::IUri;
 using Elastos::Droid::Net::IUriHelper;
 using Elastos::Droid::Net::CUriHelper;
@@ -70,7 +73,6 @@ using Elastos::Core::CoreUtils;
 using Elastos::Core::AutoLock;
 using Elastos::Utility::IList;
 using Elastos::Utility::Logging::Logger;
-
 
 namespace Elastos {
 namespace Droid {
@@ -184,6 +186,7 @@ static AutoPtr<ArrayOf<String> > initPHONES_PROJECTION()
 }
 
 const AutoPtr<ArrayOf<String> > NotificationMgr::PHONES_PROJECTION = initPHONES_PROJECTION();
+
 Object NotificationMgr::sLock;
 
 NotificationMgr::NotificationMgr(
@@ -232,7 +235,6 @@ AutoPtr<NotificationMgr> NotificationMgr::Init(
 ECode NotificationMgr::UpdateMwi(
     /* [in] */ Boolean visible)
 {
-
     if (DBG) {
         StringBuilder sb;
         sb += "updateMwi(): ";
@@ -304,9 +306,8 @@ ECode NotificationMgr::UpdateMwi(
                     sb += " msec...";
                     Log(sb.ToString());
                 }
-                assert(0);
-                //mApp->mNotifier->SendMwiChangedDelayed(VM_NUMBER_RETRY_DELAY_MILLIS);
-                return NOERROR;
+                AutoPtr<PhoneGlobals> globals = (PhoneGlobals*)mApp.Get();
+                return globals->mNotifier->SendMwiChangedDelayed(VM_NUMBER_RETRY_DELAY_MILLIS);
             }
             else {
                 StringBuilder sb;
@@ -319,14 +320,15 @@ ECode NotificationMgr::UpdateMwi(
             }
         }
 
-        assert(0);
-        // if (TelephonyCapabilities::SupportsVoiceMessageCount(mPhone)) {
-        //     Int32 vmCount;
-        //     mPhone->GetVoiceMessageCount(&vmCount);
-        //     String titleFormat;
-        //     mContext->GetString(Elastos::Droid::TeleService::R::string::notification_voicemail_title_count, &titleFormat);
-        //     notificationTitle.AppendFormat(titleFormat.string(), vmCount);
-        // }
+        AutoPtr<ITelephonyCapabilities> helper;
+        CTelephonyCapabilities::AcquireSingleton((ITelephonyCapabilities**)&helper);
+        if (helper->SupportsVoiceMessageCount(mPhone, &res), res) {
+            Int32 vmCount;
+            mPhone->GetVoiceMessageCount(&vmCount);
+            String titleFormat;
+            mContext->GetString(Elastos::Droid::TeleService::R::string::notification_voicemail_title_count, &titleFormat);
+            notificationTitle.AppendFormat(titleFormat.string(), vmCount);
+        }
 
         String notificationText;
         if (TextUtils::IsEmpty(vmNumber)) {
@@ -344,10 +346,10 @@ ECode NotificationMgr::UpdateMwi(
             notificationText.AppendFormat(tmp.string(), res.string());
         }
 
-        AutoPtr<IUriHelper> helper;
-        CUriHelper::AcquireSingleton((IUriHelper**)&helper);
+        AutoPtr<IUriHelper> helper2;
+        CUriHelper::AcquireSingleton((IUriHelper**)&helper2);
         AutoPtr<IUri> uri;
-        helper->FromParts(IPhoneAccount::SCHEME_VOICEMAIL, String(""), String(NULL), (IUri**)&uri);
+        helper2->FromParts(IPhoneAccount::SCHEME_VOICEMAIL, String(""), String(NULL), (IUri**)&uri);
         AutoPtr<IIntent> intent;
         CIntent::New(IIntent::ACTION_CALL, uri, (IIntent**)&intent);
 
@@ -363,10 +365,9 @@ ECode NotificationMgr::UpdateMwi(
 
         AutoPtr<IUri> ringtoneUri;
         String uriString;
-        assert(0);
-        //prefs->GetString(ICallFeaturesSetting::BUTTON_VOICEMAIL_NOTIFICATION_RINGTONE_KEY, NULL, &uriString);
+        prefs->GetString(ICallFeaturesSetting::BUTTON_VOICEMAIL_NOTIFICATION_RINGTONE_KEY, String(NULL), &uriString);
         if (!TextUtils::IsEmpty(uriString)) {
-            helper->Parse(uriString, (IUri**)&ringtoneUri);
+            helper2->Parse(uriString, (IUri**)&ringtoneUri);
         }
         else {
             AutoPtr<ISettingsSystem> systemH;
@@ -396,11 +397,9 @@ ECode NotificationMgr::UpdateMwi(
         builder->SetColor(color);
         builder->SetOngoing(TRUE);
 
-        assert(0);
-        //CallFeaturesSetting::MigrateVoicemailVibrationSettingsIfNeeded(prefs);
+        CCallFeaturesSetting::MigrateVoicemailVibrationSettingsIfNeeded(prefs, &res);
         Boolean vibrate;
-        assert(0);
-        //prefs->GetBoolean(ICallFeaturesSetting::BUTTON_VOICEMAIL_NOTIFICATION_VIBRATE_KEY, FALSE, &vibrate);
+        prefs->GetBoolean(ICallFeaturesSetting::BUTTON_VOICEMAIL_NOTIFICATION_VIBRATE_KEY, FALSE, &vibrate);
         if (vibrate) {
             builder->SetDefaults(INotification::DEFAULT_VIBRATE);
         }
@@ -516,8 +515,7 @@ ECode NotificationMgr::ShowDataDisconnectedRoaming()
 
     // "Mobile network settings" screen / dialog
     AutoPtr<IIntent> intent;
-    assert(0);
-    //CIntent::New(mContext, EIID_IMobileNetworkSettings, (IIntent**)&intent);
+    CIntent::New(mContext, ECLSID_CMobileNetworkSettings, (IIntent**)&intent);
     AutoPtr<IPendingIntentHelper> helper;
     CPendingIntentHelper::AcquireSingleton((IPendingIntentHelper**)&helper);
     AutoPtr<IPendingIntent> contentIntent;
@@ -653,8 +651,9 @@ ECode NotificationMgr::UpdateNetworkSelection(
     /* [in] */ Int32 serviceState)
 {
     Boolean res;
-    assert(0);
-    //TelephonyCapabilities::SupportsNetworkSelection(mPhone, &res),
+    AutoPtr<ITelephonyCapabilities> helper;
+    CTelephonyCapabilities::AcquireSingleton((ITelephonyCapabilities**)&helper);
+    helper->SupportsNetworkSelection(mPhone, &res);
     if (res) {
         // get the shared preference of network_selection.
         // empty is auto mode, otherwise it is the operator alpha name

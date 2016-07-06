@@ -1,6 +1,8 @@
 
 #include "elastos/droid/teleservice/phone/EmergencyCallHelper.h"
 #include "elastos/droid/teleservice/phone/CallController.h"
+#include "elastos/droid/teleservice/phone/PhoneGlobals.h"
+#include "elastos/droid/teleservice/phone/PhoneUtils.h"
 #include "elastos/droid/os/AsyncResult.h"
 #include "Elastos.Droid.Content.h"
 #include "Elastos.Droid.Provider.h"
@@ -21,12 +23,13 @@ using Elastos::Droid::Telephony::IDisconnectCause;
 using Elastos::Droid::Telephony::IServiceState;
 using Elastos::Droid::Os::AsyncResult;
 using Elastos::Droid::Os::IPowerManager;
+using Elastos::Droid::Os::IUserHandleHelper;
+using Elastos::Droid::Os::CUserHandleHelper;
 using Elastos::Droid::Provider::ISettingsGlobal;
 using Elastos::Droid::Provider::CSettingsGlobal;
 using Elastos::Core::CoreUtils;
 using Elastos::Core::StringBuilder;
 using Elastos::Utility::Logging::Logger;
-
 
 namespace Elastos {
 namespace Droid {
@@ -54,13 +57,11 @@ ECode EmergencyCallHelper::constructor(
 {
     Handler::constructor();
 
-    assert(0);
-
-//     if (DBG) Log(String("EmergencyCallHelper constructor..."));
-//     mCallController = callController;
-//     PhoneGlobals::GetInstance((IPhoneGlobals**)&mApp);
-//     mCM = mApp->mCM;
-//     return NOERROR;
+    if (DBG) Log(String("EmergencyCallHelper constructor..."));
+    mCallController = callController;
+    PhoneGlobals::GetInstance((PhoneGlobals**)&mApp);
+    mCM = mApp->mCM;
+    return NOERROR;
 }
 
 ECode EmergencyCallHelper::HandleMessage(
@@ -142,8 +143,7 @@ void EmergencyCallHelper::StartSequenceInternal(
     // Wake lock to make sure the processor doesn't go to sleep midway
     // through the emergency call sequence.
     AutoPtr<IInterface> obj2;
-    assert(0);
-    //mApp->GetSystemService(IContext::POWER_SERVICE, (IInterface**)&obj2);
+    IContext::Probe(mApp)->GetSystemService(IContext::POWER_SERVICE, (IInterface**)&obj2);
     AutoPtr<IPowerManager> pm = IPowerManager::Probe(obj2);
     pm->NewWakeLock(IPowerManager::PARTIAL_WAKE_LOCK, TAG, (IPowerManagerWakeLock**)&mPartialWakeLock);
     // Acquire with a timeout, just to be sure we won't hold the wake
@@ -342,8 +342,7 @@ void EmergencyCallHelper::PowerOnRadio()
     // If airplane mode is on, we turn it off the same way that the
     // Settings activity turns it off.
     AutoPtr<IContentResolver> contentResolver;
-    assert(0);
-    //mApp->GetContentResolver((IContentResolver**)&contentResolver);
+    IContext::Probe(mApp)->GetContentResolver((IContentResolver**)&contentResolver);
     AutoPtr<ISettingsGlobal> helper;
     CSettingsGlobal::AcquireSingleton((ISettingsGlobal**)&helper);
     Int32 value;
@@ -359,8 +358,11 @@ void EmergencyCallHelper::PowerOnRadio()
         AutoPtr<IIntent> intent;
         CIntent::New(IIntent::ACTION_AIRPLANE_MODE_CHANGED, (IIntent**)&intent);
         intent->PutExtra(String("state"), FALSE);
-        assert(0);
-        //mApp->SendBroadcastAsUser(intent, IUserHandle::ALL);
+        AutoPtr<IUserHandleHelper> helper;
+        CUserHandleHelper::AcquireSingleton((IUserHandleHelper**)&helper);
+        AutoPtr<IUserHandle> allHandle;
+        helper->GetALL((IUserHandle**)&allHandle);
+        IContext::Probe(mApp)->SendBroadcastAsUser(intent, allHandle);
     }
     else {
         // Otherwise, for some strange reason the radio is off
@@ -396,12 +398,10 @@ void EmergencyCallHelper::PlaceEmergencyCall()
 
     AutoPtr<IPhone> phone;
     mCM->GetDefaultPhone((IPhone**)&phone);
-    Int32 callStatus;
-    assert(0);
-    // PhoneUtils::PlaceCall(mApp, phone, mNumber,
-    //             NULL,  // contactUri
-    //             RUE,   // isEmergencyCall
-    //             &callStatus);
+    Int32 callStatus = PhoneUtils::PlaceCall(mApp, phone, mNumber,
+                NULL,  // contactUri
+                TRUE); // isEmergencyCall
+
     if (DBG) {
         StringBuilder sb;
         sb += "- PhoneUtils.placeCall() returned status = ";
@@ -412,20 +412,19 @@ void EmergencyCallHelper::PlaceEmergencyCall()
     Boolean success;
     // Note PhoneUtils.placeCall() returns one of the CALL_STATUS_*
     // constants, not a CallStatusCode enum value.
-    assert(0);
-    // switch (callStatus) {
-    //     case PhoneUtils::CALL_STATUS_DIALED:
-    //         success = TRUE;
-    //         break;
+    switch (callStatus) {
+        case PhoneUtils::CALL_STATUS_DIALED:
+            success = TRUE;
+            break;
 
-    //     case PhoneUtils::CALL_STATUS_DIALED_MMI:
-    //     case PhoneUtils::CALL_STATUS_FAILED:
-    //     default:
-    //         // Anything else is a failure, and we'll need to retry.
-    //         Logger::W(TAG, "placeEmergencyCall(): placeCall() failed: callStatus = %d" + callStatus);
-    //         success = FALSE;
-    //         break;
-    // }
+        case PhoneUtils::CALL_STATUS_DIALED_MMI:
+        case PhoneUtils::CALL_STATUS_FAILED:
+        default:
+            // Anything else is a failure, and we'll need to retry.
+            Logger::W(TAG, "placeEmergencyCall(): placeCall() failed: callStatus = %d", callStatus);
+            success = FALSE;
+            break;
+    }
 
     if (success) {
         if (DBG) Log(String("==> Success from PhoneUtils.placeCall()!"));

@@ -8,6 +8,7 @@
 #include "Elastos.Droid.Telephony.h"
 #include <elastos/core/StringBuilder.h>
 #include <elastos/core/StringUtils.h>
+#include "elastos/utility/Objects.h"
 #include <elastos/utility/logging/Logger.h>
 #include <Elastos.CoreLibrary.Utility.h>
 
@@ -24,6 +25,8 @@ using Elastos::Droid::Internal::Telephony::ICallState;
 using Elastos::Droid::Internal::Telephony::ICallState_WAITING;
 using Elastos::Droid::Internal::Telephony::IPhoneConstants;
 using Elastos::Droid::Internal::Telephony::ISubscriptionController;
+using Elastos::Droid::Internal::Telephony::ISubscriptionControllerHelper;
+using Elastos::Droid::Internal::Telephony::CSubscriptionControllerHelper;
 using Elastos::Droid::Telephony::ITelephonyManager;
 using Elastos::Droid::Telephony::IServiceState;
 using Elastos::Droid::Telephony::CPhoneNumberUtils;
@@ -38,6 +41,7 @@ using Elastos::Utility::Logging::Logger;
 using Elastos::Utility::CArrayList;
 using Elastos::Utility::ICollection;
 using Elastos::Utility::IList;
+using Elastos::Utility::Objects;
 
 namespace Elastos {
 namespace Droid {
@@ -440,8 +444,7 @@ void CTelephonyConnectionService::PlaceOutgoingConnection(
             Logger::D("CTelephonyConnectionService", "dialed MMI code");
             telephonyDisconnectCause = Elastos::Droid::Telephony::IDisconnectCause::DIALED_MMI;
             AutoPtr<IIntent> intent;
-            assert(0);
-            //CIntent::New(this, MMIDialogActivity.class, (IIntent**)&intent);
+            CIntent::New((IContext*)this, Elastos::Droid::TeleService::Phone::ECLSID_CMMIDialogActivity, (IIntent**)&intent);
             intent->SetFlags(IIntent::FLAG_ACTIVITY_NEW_TASK |
                     IIntent::FLAG_ACTIVITY_EXCLUDE_FROM_RECENTS);
             assert(0);
@@ -475,7 +478,8 @@ AutoPtr<ITelephonyConnection> CTelephonyConnectionService::CreateConnectionFor(
                 originalConnection, mEmergencyTonePlayer, allowMute, isOutgoing);
         mCdmaConferenceController->Add(connection);
         return ITelephonyConnection::Probe(connection);
-    } else {
+    }
+    else {
         return NULL;
     }
 }
@@ -518,23 +522,23 @@ AutoPtr<IPhone> CTelephonyConnectionService::GetPhoneForAccount(
 
     AutoPtr<IComponentName> name;
     accountHandle->GetComponentName((IComponentName**)&name);
-    Boolean res;
-    if (IObject::Probe(mExpectedComponentName)->Equals(name, &res), res) {
+    if (Objects::Equals(mExpectedComponentName, name)) {
         String id;
         accountHandle->GetId(&id);
         if (!id.IsNull()) {
             ECode ec = NOERROR;
             //try
             {
+                AutoPtr<ISubscriptionControllerHelper> helper;
+                CSubscriptionControllerHelper::AcquireSingleton((ISubscriptionControllerHelper**)&helper);
                 AutoPtr<ISubscriptionController> controller;
-                assert(0);
-                //SubscriptionController::GetInstance((ISubscriptionController**)&controller);
+                helper->GetInstance((ISubscriptionController**)&controller);
                 Int32 phoneId;
                 FAIL_GOTO(ec = IISub::Probe(controller)->GetPhoneId(StringUtils::ParseInt64(id), &phoneId), ERROR)
-                AutoPtr<IPhoneFactory> helper;
-                CPhoneFactory::AcquireSingleton((IPhoneFactory**)&helper);
+                AutoPtr<IPhoneFactory> helper2;
+                CPhoneFactory::AcquireSingleton((IPhoneFactory**)&helper2);
                 AutoPtr<IPhone> phone;
-                helper->GetPhone(phoneId, (IPhone**)&phone);
+                helper2->GetPhone(phoneId, (IPhone**)&phone);
                 return phone;
             }
             // catch (NumberFormatException e) {

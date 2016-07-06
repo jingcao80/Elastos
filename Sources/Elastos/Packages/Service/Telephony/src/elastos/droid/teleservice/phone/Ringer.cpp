@@ -1,5 +1,6 @@
 
 #include "elastos/droid/teleservice/phone/Ringer.h"
+#include "elastos/droid/teleservice/phone/PhoneUtils.h"
 #include "elastos/droid/os/SystemClock.h"
 #include "elastos/droid/os/Looper.h"
 #include "Elastos.Droid.Provider.h"
@@ -26,8 +27,6 @@ using Elastos::Core::IThread;
 using Elastos::Core::CThread;
 using Elastos::Core::StringBuilder;
 using Elastos::Utility::Logging::Logger;
-
-
 
 namespace Elastos {
 namespace Droid {
@@ -139,8 +138,7 @@ ECode Ringer::MyHandler::HandleMessage(
             r = mHost->mRingtone;
             Boolean tmp;
             if (r != NULL && (HasMessages(STOP_RING, &tmp), !tmp) && (r->IsPlaying(&res), !res)) {
-                assert(0);
-                //PhoneUtils::SetAudioMode();
+                PhoneUtils::SetAudioMode();
                 r->Play();
                 {
                     AutoLock syncLock(mHost);
@@ -396,8 +394,7 @@ ECode Ringer::StopRing()
             msg->SetObj(TO_IINTERFACE(mRingtone));
             Boolean res;
             mRingHandler->SendMessage(msg, &res);
-            assert(0);
-            //PhoneUtils::SetAudioMode();
+            PhoneUtils::SetAudioMode();
             mRingThread = NULL;
             mRingHandler = NULL;
             mRingtone = NULL;

@@ -115,6 +115,12 @@ module
         interface IApplication;
     }
 
+    class CInCallScreen {
+        constructor();
+
+        interface IInCallScreen;
+    }
+
     class CADNList {
         interface IListActivity;
         interface IActivity;

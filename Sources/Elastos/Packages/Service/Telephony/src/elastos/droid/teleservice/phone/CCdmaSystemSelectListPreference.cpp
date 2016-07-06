@@ -1,5 +1,6 @@
 
 #include "elastos/droid/teleservice/phone/CCdmaSystemSelectListPreference.h"
+#include "elastos/droid/teleservice/phone/PhoneGlobals.h"
 #include "Elastos.Droid.Content.h"
 #include "Elastos.Droid.Internal.h"
 #include "Elastos.Droid.Os.h"
@@ -16,6 +17,8 @@ using Elastos::Droid::Os::ISystemProperties;
 using Elastos::Droid::Provider::CSettingsGlobal;
 using Elastos::Droid::Provider::ISettingsGlobal;
 using Elastos::Core::StringUtils;
+using Elastos::Core::IArrayOf;
+using Elastos::Core::IInteger32;
 using Elastos::Utility::Logging::Logger;
 
 namespace Elastos {
@@ -59,8 +62,11 @@ void CCdmaSystemSelectListPreference::MyHandler::HandleQueryCdmaRoamingPreferenc
 
     if (ar->mException == NULL) {
         Int32 statusCdmaRoamingMode = 0;
-        assert(0 && "TODO");
-        // statusCdmaRoamingMode = ((int[])ar.result)[0];
+        AutoPtr<IArrayOf> array = IArrayOf::Probe(ar->mResult);
+        AutoPtr<IInterface> obj;
+        array->Get(0, (IInterface**)&obj);
+        AutoPtr<IInteger32> value = IInteger32::Probe(obj);
+        value->GetValue(&statusCdmaRoamingMode);
 
         AutoPtr<IContext> context;
         mHost->mPhone->GetContext((IContext**)&context);
@@ -160,8 +166,7 @@ ECode CCdmaSystemSelectListPreference::constructor(
 {
     ListPreference::constructor(context, attrs);
 
-    assert(0 && "TODO need PhoneGlobals");
-    // mPhone = PhoneGlobals::GetPhone();
+    mPhone = PhoneGlobals::GetPhone();
     AutoPtr<IMessage> m;
     mHandler->ObtainMessage(MyHandler::MESSAGE_GET_ROAMING_PREFERENCE, (IMessage**)&m);
     return mPhone->QueryCdmaRoamingPreference(m);

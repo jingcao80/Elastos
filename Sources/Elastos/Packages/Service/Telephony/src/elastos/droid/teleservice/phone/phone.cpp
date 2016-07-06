@@ -13,6 +13,7 @@
 #include "elastos/droid/teleservice/phone/CPhoneGlobalsNotificationBroadcastReceiver.h"
 #include "elastos/droid/teleservice/phone/CPhoneGlobalsNotificationBroadcastReceiver.h"
 #include "elastos/droid/teleservice/phone/CIccProvider.h"
+#include "elastos/droid/teleservice/phone/CIccPanel.h"
 
 namespace Elastos {
 namespace Droid {
@@ -32,6 +33,7 @@ CAR_OBJECT_IMPL(CNetworkSettingNetworkQueryServiceCallback)
 CAR_OBJECT_IMPL(CPhoneGlobalsPhoneAppBroadcastReceiver)
 CAR_OBJECT_IMPL(CPhoneGlobalsNotificationBroadcastReceiver)
 CAR_OBJECT_IMPL(CIccProvider)
+CAR_OBJECT_IMPL(CIccPanel)
 
 } // namespace Phone
 } // namespace TeleService

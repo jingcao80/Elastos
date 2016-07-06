@@ -5,6 +5,8 @@
 #include <elastos/utility/logging/Logger.h>
 
 using Elastos::Droid::Os::SystemClock;
+using Elastos::Droid::View::IView;
+using Elastos::Droid::View::IViewParent;
 using Elastos::Core::StringBuilder;
 using Elastos::Utility::Logging::Logger;
 
@@ -30,13 +32,14 @@ ECode Profiler::ProfileViewCreate(
     /* [in] */ const String& tag)
 {
     if (FALSE) {
-        assert(0);
-        // ViewParent p = (ViewParent) win.getDecorView();
-        // while (p instanceof View) {
-        //     p = ((View) p).getParent();
-        // }
-        //((ViewRoot)p).profile();
-        //((ViewRoot)p).setProfileTag(tag);
+        AutoPtr<IView> view;
+        win->GetDecorView((IView**)&view);
+        AutoPtr<IViewParent> p = IViewParent::Probe(view);
+        while (IView::Probe(p) != NULL) {
+            IView::Probe(p)->GetParent((IViewParent**)&p);
+        }
+        // IViewRoot::Probe(p)->Profile();
+        // IViewRoot::Probe(p)->SetProfileTag(tag);
     }
     return NOERROR;
 }
