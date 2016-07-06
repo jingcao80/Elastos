@@ -292,7 +292,7 @@ void CarInstanceV8::invokeMethod(const CarMethod* method, CarValue* args, bool* 
             ALOGD("CarInstanceV8::invokeMethod SetArguments success! %d/%d",i,numParams);
         }
         ALOGD("CarInstanceV8::invokeMethod paramInfos free begin!");
-        ArrayOf<IParamInfo*>::Free(paramInfos);
+        //ArrayOf<IParamInfo*>::Free(paramInfos);
         ALOGD("CarInstanceV8::invokeMethod paramInfos free end!");
     }
 

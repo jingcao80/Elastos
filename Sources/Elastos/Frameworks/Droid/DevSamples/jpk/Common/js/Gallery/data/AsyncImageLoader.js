@@ -1,5 +1,7 @@
 module.exports = function(aoElastos){
 
+var JS_MULTI_READY = false;
+
 //common definition
 var CString = aoElastos.Core.CString;
 var Droid_New = aoElastos.Droid.New;
@@ -17,8 +19,10 @@ function AsyncImageLoader () {};
 
 //private static property:
 var TAG = "AsyncImageLoader";
-var sImgWidth = 320;
-var sImgHeight = 320;
+//var sImgWidth = 320;
+//var sImgHeight = 320;
+var sImgWidth = 952;
+var sImgHeight = 1648;
 
 var sCacheService=null;
 
@@ -55,39 +59,24 @@ var ImageLoaderThread = (function(){
 
     //private method
     function LoadImageFromUrl (path) {
-        elog("====LoadImageFromUrl====begin====path:"+path);
-
         var cacheService = GetCacheService();
-        elog("====LoadImageFromUrl====begin====1====");
         var last = 0;
         var file = Core_New("Elastos.IO.CFile", path);
-        elog("====LoadImageFromUrl====begin====1.1====");
         //var last = file.LastModified();
         var last = file.GetLastModified();
-        elog("====LoadImageFromUrl====begin====1.2====");
-
-//var aa=[];
-//for (var p in file)aa.push(p);
-//elog("====CFile methods:["+aa.join("][")+"]");
 
         //var hashkey = path.GetHashCode();
         var hashkey = file.GetHashCode();
         if (hashkey < 0) hashkey = 0 - hashkey;
-        elog("====LoadImageFromUrl====begin====1.3====");
         var len = file.GetLength();
-        elog("====LoadImageFromUrl====begin====2====");
         var bitmap = cacheService.GetImageData(hashkey, this.mIsHigh, len, last);
-        elog("====LoadImageFromUrl====begin====3===="+bitmap);
         if (bitmap) {
             //Mutex::Autolock lock(sStatusLock);
             sImageSampleStatus[path] = true;
-            elog("====LoadImageFromUrl====begin====3.1====");
             var bitmapDrawable = Droid_New("Elastos.Droid.Graphics.Drawable.CBitmapDrawable",bitmap);
 
-            elog("====LoadImageFromUrl====begin====3.2====");
             return bitmapDrawable;
         }
-        elog("====LoadImageFromUrl====begin====4====");
 
         var opt;
         var inSampleSize = 0;
@@ -97,51 +86,34 @@ var ImageLoaderThread = (function(){
 
         var factory = Droid_New("Elastos.Droid.Graphics.CBitmapFactory");
 
-        elog("====LoadImageFromUrl====begin====5.1====path:"+path);
         var bitmap = factory.DecodeFile(path, opt);
-        elog("====LoadImageFromUrl====begin====5.2====");
 
         if (this.mIsHigh) {
-            elog("====LoadImageFromUrl====begin====5.3====");
-            inSampleSize = ComputeSampleSize(opt, -1, 1280 * 672 * 4);
+            //inSampleSize = ComputeSampleSize(opt, -1, 1280 * 672 * 4);
+            inSampleSize = ComputeSampleSize(opt, -1, 1648 * 952 * 4);
         }
         else {
-            elog("====LoadImageFromUrl====begin====5.4====");
             inSampleSize = ComputeSampleSize(opt, -1, sImgWidth * sImgHeight);
         }
-        elog("====LoadImageFromUrl====begin====6====");
 
         opt.SetInSampleSize(inSampleSize);
         opt.SetInJustDecodeBounds(false);
 
         //Mutex::Autolock lock(sStatusLock);
         sImageSampleStatus[path] = (inSampleSize > 1 || this.mIsHigh);
-        elog("====LoadImageFromUrl====begin====7====");
 
         //bitmap = null;
         bitmap = factory.DecodeFile(path, opt);
-        elog("====LoadImageFromUrl====begin====8===="+bitmap);
-
-//var aa=[];
-//for(var pp in bitmap)aa.push(pp);
-//elog("====bitmap methods:["+aa.join("][")+"]");
-
 
         var bitmapDrawable = Droid_New("Elastos.Droid.Graphics.Drawable.CBitmapDrawable",bitmap);
-        elog("====LoadImageFromUrl====begin====9====");
         if (inSampleSize > 1 && bitmap != null) {
-            elog("====LoadImageFromUrl====begin====10====");
             cacheService.PutImageData(hashkey, this.mIsHigh, len, last, bitmap);
         }
-
-        elog("====LoadImageFromUrl====end====");
 
         return bitmapDrawable;
     }
 
     function ComputeSampleSize (options, minSideLength, maxNumOfPixels) {
-        elog("====ComputeSampleSize====begin====");
-
         var initialSize = ComputeInitialSampleSize(options, minSideLength, maxNumOfPixels);
         var roundedSize = 0;
 
@@ -155,14 +127,10 @@ var ImageLoaderThread = (function(){
             roundedSize = (initialSize + 7) / 8 * 8;
         }
 
-        elog("====ComputeSampleSize====end====");
-
         return roundedSize;
     }
 
     function ComputeInitialSampleSize (options, minSideLength, maxNumOfPixels) {
-        elog("====ComputeInitialSampleSize====begin====");
-
         var w = options.GetOutWidth();
         var h = options.GetOutHeight();
 
@@ -176,8 +144,6 @@ var ImageLoaderThread = (function(){
         var upperBound = (minSideLength == -1/*UNCONSTRAINED*/) ? 128 :
             Math.min(Math.Floor(w / minSideLength),
                 Math.floor(h / minSideLength));
-
-        elog("====ComputeInitialSampleSize====end====");
 
         if (upperBound < lowerBound) {
             // return the larger one when there is no overlapping zone.
@@ -201,16 +167,22 @@ var ImageLoaderThread = (function(){
         _LoadImageFromUrl : LoadImageFromUrl,
 
         start : function () {
-            this.Run();
+            if(!JS_MULTI_READY) {
+                return this.Run();
+            }
+            else {
+                this.Run();
+            }
         },
 
         Run : function () {
-            elog('====ImageLoaderThread::Run.begin======url:'+this.mImageUrl);
             var drawable = this._LoadImageFromUrl(this.mImageUrl);
-            elog('====ImageLoaderThread::Run===1===drawable:'+typeof drawable);
 
             AsyncImageLoader.DrawableLoaded(this.mImageUrl, this.mIsHigh, drawable);
-            elog('====ImageLoaderThread::Run.end======');
+
+            if(!JS_MULTI_READY) {
+                return drawable;
+            }
         },
     }); //extend
 
@@ -219,9 +191,6 @@ var ImageLoaderThread = (function(){
 
 //public static
 function LoadDrawable (imageUrl, isHigh, imageView, imageCallback) {
-
-    elog('====AsyncImageLoader.LoadDrawable.begin======1==='+imageUrl);
-
     var drawable;
 
     //Mutex::Autolock lock(sLock);
@@ -234,14 +203,9 @@ function LoadDrawable (imageUrl, isHigh, imageView, imageCallback) {
     }
     if (drawable) return drawable;
 
-    elog('====AsyncImageLoader.LoadDrawable.begin========2========');
-
     var key = this.MakeImageParamKey(imageUrl, isHigh);
-    elog('====AsyncImageLoader.LoadDrawable.begin========3========'+key);
     var list = sImageLoaderParamCache[key];
-    elog('====AsyncImageLoader.LoadDrawable.begin========4========');
     if (list) {
-        elog('====AsyncImageLoader.LoadDrawable.begin========5========');
         var needAdd = true;
         for (var i=0, im=list.length; i<im; i++) {
             if (list[i] == imageView) {
@@ -249,9 +213,7 @@ function LoadDrawable (imageUrl, isHigh, imageView, imageCallback) {
                 break;
             }
         }
-        elog('====AsyncImageLoader.LoadDrawable.begin========5.1========');
         if (needAdd) {
-            elog('====AsyncImageLoader.LoadDrawable.begin========5.2========');
             list.push({
                 mImageView : imageView,
                 mCallback : imageCallback,
@@ -259,7 +221,6 @@ function LoadDrawable (imageUrl, isHigh, imageView, imageCallback) {
         }
     }
     else {
-        elog('====AsyncImageLoader.LoadDrawable.begin========6========');
         sImageLoaderParamCache[key] = [
             {
                 mImageView : imageView,
@@ -268,20 +229,19 @@ function LoadDrawable (imageUrl, isHigh, imageView, imageCallback) {
         ];
     }
 
-    elog('====AsyncImageLoader.LoadDrawable.begin=========7====url:'+imageUrl);
-
     var loadRunnable = new ImageLoaderThread(isHigh, imageUrl);
 
-    elog('====AsyncImageLoader.LoadDrawable.begin=========8====');
-    loadRunnable.start();
-    elog('====AsyncImageLoader.LoadDrawable.begin=========9====');
+    if(JS_MULTI_READY) {
+        loadRunnable.start();
+    }
+    else {
+        drawable = loadRunnable.start();
+    }
 
-    return drawble;
+    return drawable;
 }
 
 function DrawableLoaded (imageUrl, isHigh, drawable){
-    elog('====AsyncImageLoader.DrawableLoaded.begin=========');
-
     //Mutex::Autolock lock(sLock);
 
     if (isHigh) {
@@ -292,57 +252,80 @@ function DrawableLoaded (imageUrl, isHigh, drawable){
     }
 
     var key = this.MakeImageParamKey(imageUrl, isHigh);
-    elog('====AsyncImageLoader.DrawableLoaded.begin====1=====key:' + key + ' Cache:' + JSON.stringify(sImageLoaderParamCache));
     var list = sImageLoaderParamCache[key];
-    elog('====AsyncImageLoader.DrawableLoaded.begin====2=====');
     if (list) {
         for (var i=0, im=list.length; i<im; i++) {
             var param = list[i];    //ImageLoaderParam
-            elog('====AsyncImageLoader.DrawableLoaded.begin====3=====');
             param.mCallback.ImageLoaded(drawable, param.mImageView);
-            elog('====AsyncImageLoader.DrawableLoaded.begin====4=====');
         }
     }
-
-    elog('====AsyncImageLoader.DrawableLoaded.end=========');
 }
 
 function NeedLoadHighDrawable (imageUrl) {
     //Mutex::Autolock lock(sStatusLock);
-    return sImageSampleStatus[imageUrl];
-    //return true;
+    //return sImageSampleStatus[imageUrl];
+    return true;
 }
 
-function GetOrigionWidthAndHeight (imageUrl, w, h) {
 // Boolean AsyncImageLoader::GetOrigionWidthAndHeight(
+function GetOrigionWidthAndHeight(
 //     /* [in] */ const String& imageUrl,
+        imageUrl,
 //     /* [out] */ Int32* w,
 //     /* [out] */ Int32* h)
+        r)  //r:{w:w,h:h}   more than one out para, must transfer throught object reference
+{
 
 //     // VALIDATE_NOT_NULL(w);
 //     *w = 0;
+        r.w = 0;
 //     // VALIDATE_NOT_NULL(h);
 //     *h = 0;
+        r.h = 0;
 
 //     Mutex::Autolock lock(sImageWHLock);
+        //TODO:multi thread opt
 //     HashMap<String, AutoPtr< ArrayOf<Int32> > >::Iterator it = sHighImageWH.Find(imageUrl);
+        var it = sHighImageWH[imageUrl];
 //     if (it != sHighImageWH.End()) {
+        if (it) {
 //         AutoPtr< ArrayOf<Int32> > tmpArray = it->mSecond;
+            var tmpArray = it;
 //         *w = (*tmpArray)[0];
+            r.w = tmpArray[0];
 //         *h = (*tmpArray)[1];
+            r.h = tmpArray[1];
 //         return TRUE;
+            return true;
 //     }
+        }
 //     AutoPtr<IBitmapFactoryOptions> opt;
+        var opt;
+
 //     CBitmapFactoryOptions::New((IBitmapFactoryOptions**)&opt);
+        opt = Droid_New("Elastos.Droid.Graphics.CBitmapFactoryOptions");
 //     opt->SetInJustDecodeBounds(TRUE);
+        opt.SetInJustDecodeBounds(true);
 //     AutoPtr<IBitmapFactory> factory;
+        var factory;
 //     CBitmapFactory::AcquireSingleton((IBitmapFactory**)&factory);
+        factory = Droid_New("Elastos.Droid.Graphics.CBitmapFactory");
 //     AutoPtr<IBitmap> bitmap;
+        var bitmap;
 //     if (FAILED(factory->DecodeFile(imageUrl, opt, (IBitmap**)&bitmap)))
 //         return FALSE;
+        try {
+            bitmap = factory.DecodeFile(imageUrl, opt);
+        }
+        catch(e) {
+            return false;
+        }
 //     opt->GetOutWidth(w);
+        r.w = opt.GetOutWidth();
 //     opt->GetOutHeight(h);
+        r.h = opt.GetOutHeight();
 //     return TRUE;
+        return true;
 }
 
 function ClearAll () {
@@ -372,24 +355,9 @@ function UpdateImageCache (albumArray) {
 }
 
 function GetCacheService () {
-    var a = {
-        "typeof" : typeof sCacheService,
-        "string" : ''+sCacheService,
-        "isNull2" : sCacheService===null,
-        "isNull3" : sCacheService===null,
-        "isUndefined2" : sCacheService==undefined,
-        "isUndefined3" : sCacheService===undefined,
-        "JSON" : JSON.stringify(sCacheService),
-        "Object" : sCacheService instanceof Object,
-        "ImageCacheService" : sCacheService instanceof ImageCacheService,
-
-    };
-    elog("========GetCacheService========begin========"+JSON.stringify(a));
     if (sCacheService===null) {
-    elog("========GetCacheService========1========");
         sCacheService = new ImageCacheService(sImgWidth, sImgHeight);
     }
-    elog("========GetCacheService========end========"+typeof sCacheService.GetImageData);
     return sCacheService;
 }
 

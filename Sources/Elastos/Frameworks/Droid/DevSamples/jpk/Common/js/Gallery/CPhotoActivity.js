@@ -1,5 +1,7 @@
 module.exports = function(aoElastos, aoActivity){
-    //common definition
+//--------common definition----begin----
+    var CObject = aoElastos.CObject;
+
     var CString = aoElastos.Core.CString;
     var Droid_New = aoElastos.Droid.New;
     var Core_New = aoElastos.Core.New;
@@ -9,11 +11,251 @@ module.exports = function(aoElastos, aoActivity){
     var oActivity = aoActivity.ActivityInstance;
     var oHandler = aoActivity.ActivityHandler;
 
-    //member of CPhotoActivity
+    function CActivityListener(host) {
+        this.mHost = host;
+    }
+    var _apt = CActivityListener.prototype;
+
+    var IView__VISIBLE = 0x00000000;
+    var IView__INVISIBLE = 0x00000004;
+    var IView__GONE = 0x00000008;
+    var IMotionEvent__ACTION_DOWN = 0;
+    var IMotionEvent__ACTION_UP = 1;
+    var IContext__LAYOUT_INFLATER_SERVICE = "layout_inflater";
+
+    var IToast__LENGTH_LONG = 1;
+
+    var timeOnCreate;
+    var timeOnStart;
+
+    //Elastos::Droid::App::EIID_IActivity
+    var EIID_IActivity = [0x1068F256,0x8292,0x2C57,[0x7E,0xCB,0xFE,0xE1,0xA0,0xA4,0x0C,0x1B]];
+
+//--------common definition----end----
+
+//--------CxxxActivity.h----begin----
+
+// #ifndef __CPHOTOACTIVITY_H__
+// #define __CPHOTOACTIVITY_H__
+
+// #include "_CPhotoActivity.h"
+// #include "app/Activity.h"
+// #include "os/HandlerBase.h"
+// #include "src/ui/DetailsHelper.h"
+    var DetailsHelper = require("./ui/DetailsHelper.js")(aoElastos);
+// #include "src/data/AsyncImageLoader.h"
+    var AsyncImageLoader = require("./data/AsyncImageLoader.js")(aoElastos);
+
+// using Elastos::Droid::App::Activity;
+// using Elastos::Droid::App::IDialog;
+// using Elastos::Droid::View::IViewOnClickListener;
+// using Elastos::Droid::Os::HandlerBase;
+// using Elastos::Droid::Widget::IImageView;
+// using Elastos::Droid::Widget::IImageButton;
+// using Elastos::Droid::Widget::ITextView;
+// using Elastos::Droid::Widget::IPopupWindow;
+// using Elastos::Droid::Widget::IPopupWindowOnDismissListener;
+// using Elastos::Droid::Widget::ISeekBarOnSeekBarChangeListener;
+// using Elastos::Droid::Widget::ISeekBar;
+// using Elastos::Droid::Content::IDialogInterface;
+// using Elastos::Droid::Content::IDialogInterfaceOnDismissListener;
+
+// namespace Gallery {
+
+// class CPhotoActivity
+//     : public Activity
+// {
+// private:
+//     class MyHandler
+//         : public HandlerBase
+    var MyHandler;
+//     {
+//     public:
+//         MyHandler(
+    MyHandler = function(
+//             /* [in] */ IWeakReference* host)
+        host)
+//             : mWeakHost(host)
+//         {}
+    {
+        this.mWeakHost = host;
+    }
+
+//         CARAPI HandleMessage(
+//             /* [in] */ IMessage* msg);
+//     private:
+//         AutoPtr<IWeakReference> mWeakHost;
+//     };
+
+//     class MyListener
+//         : public ICloseListener
+//         , public IViewOnClickListener
+//         , public IPopupWindowOnDismissListener
+//         , public ISeekBarOnSeekBarChangeListener
+    var MyListener;
+//     {
+//     public:
+//         MyListener(
+//             /* [in] */ CPhotoActivity* host);
+
+//         CAR_INTERFACE_DECL();
+
+//         CARAPI OnClick(
+//             /* [in] */ IView* v);
+
+//         CARAPI OnDismiss();
+
+//         CARAPI OnProgressChanged(
+//             /* [in] */ ISeekBar* seekBar,
+//             /* [in] */ Int32 progress,
+//             /* [in] */ Boolean fromUser);
+
+//         CARAPI OnStartTrackingTouch(
+//             /* [in] */ ISeekBar* seekBar);
+
+//         CARAPI OnStopTrackingTouch(
+//             /* [in] */ ISeekBar* seekBar);
+
+//         CARAPI OnClose();
+
+//     private:
+//         CPhotoActivity* mHost;
+//     };
+
+//     class DialogListener
+//         : public ElRefBase
+//         , public IDialogInterfaceOnDismissListener
+    var DialogListener;
+//     {
+//     public:
+//         CAR_INTERFACE_DECL();
+
+//         DialogListener(
+//             /* [in] */ CPhotoActivity* host);
+
+//         CARAPI OnDismiss(
+//             /* [in] */ IDialogInterface* dialog);
+
+//     private:
+//         CPhotoActivity* mHost;
+//     };
+
+//     class MyLoadImageCallback
+//         : public ILoadImageCallback
+    var MyLoadImageCallback;
+//     {
+//     public:
+//         MyLoadImageCallback(
+//             /* [in] */ IWeakReference* host,
+//             /* [in] */ const String& path,
+//             /* [in] */ Boolean isHigh);
+
+//         CARAPI ImageLoaded(
+//             /* [in] */ IDrawable* imageDrawable,
+//             /* [in] */ IImageView* imageView);
+
+//     private:
+//         AutoPtr<IWeakReference> mWeakHost;
+//         String mPath;
+//         Boolean mIsHigh;
+//     };
+
+//     class PhotoEntry
+//         : public ElRefBase
+    var PhotoEntry = function () {};    //no constructor
+//     {
+//     public:
+//         String sourcePath;
+//         String desc;
+//     };
+
+// friend class MyListener;
+// friend class MyLoadImageCallback;
+
+// public:
+//     CPhotoActivity();
+//     ~CPhotoActivity();
+
+// protected:
+
+//     CARAPI OnCreate(
+//         /* [in] */ IBundle* savedInstanceState);
+
+//     CARAPI OnStart();
+
+//     CARAPI OnResume();
+
+//     CARAPI OnPause();
+
+//     CARAPI OnStop();
+
+//     CARAPI OnDestroy();
+
+//     CARAPI OnBackPressed();
+
+//     CARAPI OnNewIntent(
+//         /* [in] */ IIntent *intent);
+
+// private:
+//     CARAPI OpenZoomPopupWindow(
+//         /* [in] */ IView* v);
+
+//     CARAPI CloseZoomPopupWindow();
+
+//     CARAPI OpenMorePopupWindow(
+//         /* [in] */ IView* v);
+
+//     CARAPI CloseMorePopupWindow();
+
+//     CARAPI OpenShareDialog();
+
+//     CARAPI ShareDialogOnOK();
+
+//     CARAPI ShareDialogOnCancel();
+
+//     CARAPI OpenDeleteDialog();
+
+//     CARAPI DeleteDialogOnOK();
+
+//     CARAPI DeleteDialogOnCancel();
+
+//     CARAPI_(void) ShowDetails();
+
+//     CARAPI_(void) HideDetails();
+
+//     CARAPI_(void) SetCurrentPhoto();
+
+//     CARAPI_(void) ChangeCurrentPhoto(
+//         /* [in] */ Boolean isNext);
+
+//     CARAPI_(void) MyImageLoaded(
+//         /* [in] */ IDrawable* imageDrawable,
+//         /* [in] */ IImageView* imageView,
+//         /* [in] */ const String& path,
+//         /* [in] */ Boolean isHigh);
+
+//     CARAPI_(void) SetDetailInfo(
+//         /* [in] */ const String& filePath);
+
+//     CARAPI_(void) LoadCurrentImage(
+//         /* [in] */ const String& path,
+//         /* [in] */ Boolean isHighQuality);
+
+//     CARAPI_(void) SwitchDisplayView(
+//         /* [in] */ Boolean showLoading);
+
+//     CARAPI_(void) UpdateLoadingStatus(
+//         /* [in] */ Boolean reload);
+
+//     CARAPI_(void) TriggerLoadingCallback(
+//         /* [in] */ Boolean isCancel);
+
+//     CARAPI_(Boolean) LoadPhotoEntryList(
+//         /* [in] */ IIntent* intent);
 
 // private:
 //     static const String TAG;
-    var TAG = "CPhotoActivity";
+    var TAG;
 //     static const Int32 MSG_IMAGE_LOADED;
     var MSG_IMAGE_LOADED;
 //     static const Int32 MSG_UPDATE_LOADING_STATUS;
@@ -92,340 +334,402 @@ module.exports = function(aoElastos, aoActivity){
 //     AutoPtr<DetailsHelper> mDetailsHelper;
     var mDetailsHelper;
 //     AutoPtr< ArrayOf<String> > mDetailsArray;
-    var mDetailsArray;
+    var mDetailsArray = [];
 //     List< AutoPtr<PhotoEntry> > mPhotoEntryList;
-    var mPhotoEntryList;
+    var mPhotoEntryList = [];
 //     AutoPtr<IHandler> mMyHandler;
     var mMyHandler;
+// };
 
-    //method of CPhotoActivity
+// } // namespace Gallery
 
-    //LoadPhotoEntryList
-    //SetCurrentPhoto
-    //HideDetails
+// #endif // __CPHOTOACTIVITY_H__
 
-    //--------MyListener--------begin--------
+//--------CxxxActivity.h----end----
+
+//--------CxxxActivity.cpp----begin----
+
+// #include "CPhotoActivity.h"
+// #include "src/data/DataSourceHelper.h"
+    var DataSourceHelper = require("./data/DataSourceHelper.js")(aoElastos);
+// #include "src/data/AsyncImageLoader.h"
+// #include "src/util/Utils.h"
+    var Utils = require("./util/Utils.js")(aoElastos);
+// #include "R.h"
+// #include <elastos/Logger.h>
+// #include <elastos/StringBuilder.h>
+// #include <elastos/StringUtils.h>
+// #include <elastos/Math.h>
+// #include "os/SomeArgs.h"
+
+// using Elastos::Droid::Os::SomeArgs;
+// using Elastos::Core::CStringWrapper;
+// using Elastos::Core::StringBuilder;
+// using Elastos::Core::StringUtils;
+// using Elastos::Droid::App::CDialog;
+// using Elastos::Droid::App::IIActivityManager;
+// using Elastos::Droid::Content::CIntent;
+// using Elastos::Droid::Content::IContext;
+// using Elastos::Droid::Content::IIntent;
+// using Elastos::Droid::Content::Res::IResources;
+// using Elastos::Droid::Content::EIID_IDialogInterfaceOnDismissListener;
+// using Elastos::Droid::Graphics::Drawable::IDrawable;
+// using Elastos::Droid::Graphics::Drawable::CBitmapDrawable;
+// using Elastos::Droid::Graphics::Drawable::IBitmapDrawable;
+// using Elastos::Droid::Graphics::Drawable::EIID_IDrawable;
+// using Elastos::Droid::Os::CServiceManager;
+// using Elastos::Droid::Os::IServiceManager;
+// using Elastos::Droid::Utility::CDisplayMetrics;
+// using Elastos::Droid::Utility::IDisplayMetrics;
+// using Elastos::Droid::View::EIID_IViewOnClickListener;
+// using Elastos::Droid::View::IDisplay;
+// using Elastos::Droid::View::IGravity;
+// using Elastos::Droid::Widget::CPopupWindow;
+// using Elastos::Droid::Widget::EIID_IPopupWindowOnDismissListener;
+// using Elastos::Droid::Widget::EIID_ISeekBarOnSeekBarChangeListener;
+// using Elastos::Droid::Widget::IBaseAdapter;
+// using Elastos::Droid::Widget::IButton;
+// using Elastos::Droid::Widget::IGridView;
+// using Elastos::Droid::Widget::IToast;
+// using Elastos::Droid::App::EIID_IActivity;
+// using Elastos::IO::CFile;
+// using Elastos::IO::IFile;
+// using Elastos::Text::CSimpleDateFormat;
+// using Elastos::Text::ISimpleDateFormat;
+// using Elastos::Utility::CDate;
+// using Elastos::Utility::IDate;
+// using Elastos::Utility::Logging::Logger;
+
+// namespace Gallery {
+
+// const String CPhotoActivity::TAG("CPhotoActivity");
+    TAG = "CPhotoActivity: ";
+// const Int32 CPhotoActivity::MSG_IMAGE_LOADED = 0;
+    MSG_IMAGE_LOADED = 0;
+// const Int32 CPhotoActivity::MSG_UPDATE_LOADING_STATUS = 1;
+    MSG_UPDATE_LOADING_STATUS = 1;
+
+// ECode CPhotoActivity::MyHandler::HandleMessage(
+    MyHandler.prototype.HandleMessage = function(
+//     /* [in] */ IMessage* msg)
+        msg)
+// {
+    {
+//     AutoPtr<IActivity> strongObj;
+        //var strongObj;
+//     mWeakHost->Resolve(EIID_IActivity, (IInterface**)&strongObj);
+        //strongObj = this.mWeakHost.Resolve(EIID_IActivity);
+//     if (strongObj == NULL) {
+        //if (!strongObj) {
+//         return NOERROR;
+            //return;
+//     }
+        //}
+
+//     CPhotoActivity* mHost = (CPhotoActivity*)strongObj.Get();
+        //var mHost = strongObj;
+
+//     Int32 what;
+        var what;
+//     msg->GetWhat(&what);
+        what = msg.what;
+//     AutoPtr<IInterface> obj;
+        var obj;
+//     msg->GetObj((IInterface**)&obj);
+        obj = msg.obj;
+
+//     switch(what) {
+        switch(what) {
+//         case CPhotoActivity::MSG_IMAGE_LOADED: {
+            case MSG_IMAGE_LOADED:
+//             SomeArgs* args = (SomeArgs*)obj.Get();
+                var args = obj;
+//             IDrawable* drawable = IDrawable::Probe(args->mArg1);
+                var drawable = args.mArg1;
+//             IImageView* imageView = IImageView::Probe(args->mArg2);
+                var imageView = args.mArg2;
+//             ICharSequence* seq = ICharSequence::Probe(args->mArg3);
+                var seq = args.mArg3;
+//             String path;
+                var path;
+//             seq->ToString(&path);
+                path = seq.ToString();
+//             Boolean isHigh = args->mArgi1 != 0;
+                var isHigh = args.mArgi1 != 0;
+//             mHost->MyImageLoaded(drawable, imageView, path, isHigh);
+                MyImageLoaded(drawable, imageView, path, isHigh);
+//             args->Recycle();
+                //
+//             break;
+                break;
+//         }
+//         case CPhotoActivity::MSG_UPDATE_LOADING_STATUS: {
+            case MSG_UPDATE_LOADING_STATUS:
+//             Int32 arg1;
+                var arg1;
+//             msg->GetArg1(&arg1);
+                arg1 = msg.arg1;
+//             mHost->UpdateLoadingStatus(arg1 == 1);
+                UpdateLoadingStatus(arg1 == 1);
+//             break;
+                break;
+//         }
+//     }
+        }
+
+//     return NOERROR;
+        return;
+// }
+    }
 
 // CPhotoActivity::MyListener::MyListener(
-//      [in]  CPhotoActivity* host)
+    MyListener = function(
+//     /* [in] */ CPhotoActivity* host)
+        host)
 //     : mHost(host)
-// {
-    function MyListener = function(host){
+// {}
+    {
         this.mHost = host;
+    }
+
+// PInterface CPhotoActivity::MyListener::Probe(
+//     /* [in]  */ REIID riid)
+// {
+//     if (riid == EIID_IInterface) {
+//         return (PInterface)(IViewOnClickListener*)this;
+//     }
+//     else if (riid == EIID_IViewOnClickListener) {
+//         return (IViewOnClickListener*)this;
+//     }
+//     else if (riid == EIID_IPopupWindowOnDismissListener) {
+//         return (IPopupWindowOnDismissListener*)this;
+//     }
+//     else if (riid == EIID_ISeekBarOnSeekBarChangeListener) {
+//         return (ISeekBarOnSeekBarChangeListener*)this;
+//     }
+//     else if (riid == EIID_ICloseListener) {
+//         return (PInterface)(ICloseListener*)this;
+//     }
+
+//     return NULL;
 // }
-    };
+
+// UInt32 CPhotoActivity::MyListener::AddRef()
+// {
+//     return ElRefBase::AddRef();
+// }
+
+// UInt32 CPhotoActivity::MyListener::Release()
+// {
+//     return ElRefBase::Release();
+// }
+
+// ECode CPhotoActivity::MyListener::GetInterfaceID(
+//     /* [in] */ IInterface *pObject,
+//     /* [out] */ InterfaceID *pIID)
+// {
+//     if (pIID == NULL) {
+//         return E_INVALID_ARGUMENT;
+//     }
+
+//     if (pObject == (IInterface*)(IViewOnClickListener*)this) {
+//         *pIID = EIID_IViewOnClickListener;
+//     }
+//     else if (pObject == (IInterface*)(IPopupWindowOnDismissListener*)this) {
+//         *pIID = EIID_IPopupWindowOnDismissListener;
+//     }
+//     else if (pObject == (IInterface*)(ISeekBarOnSeekBarChangeListener*)this) {
+//         *pIID = EIID_ISeekBarOnSeekBarChangeListener;
+//     }
+//     else if (pObject == (IInterface*)(ICloseListener*)this) {
+//         *pIID = EIID_ICloseListener;
+//     }
+//     else {
+//         return E_INVALID_ARGUMENT;
+//     }
+//     return NOERROR;
+// }
 
 // ECode CPhotoActivity::MyListener::OnClick(
 //     /* [in] */ IView* v)
 // {
-    MyListener.prototype.OnClick = function(v) {
 //     Int32 viewId = 0;
 //     v->GetId(&viewId);
-        var viewId = v.GetId();
 
 //     switch(viewId) {
-        switch (viewId) {
 //         case R::id::photo_up: {
-            case R.id.photo_up :
 //             Logger::D(TAG, "OnClick()---photo_up");
-                elog(TAG + "OnClick()---photo_up");
 //             mHost->OnBackPressed();
-                this.mHost.OnBackPressed();
 //             break;
-                break;
 //         }
 //         case R::id::photo_slideshow: {
-            case R.id.photo_slideshow :
 //             Logger::D(TAG, "OnClick()---photo_slideshow");
-                elog(TAG + "OnClick()---photo_slideshow");
 //             break;
-                break;
 //         }
 //         case R::id::photo_more: {
-            case
 //             Logger::D(TAG, "OnClick()---photo_more");
-                elog(TAG + "OnClick()---photo_more");
 //             if (mHost->mShowMore) {
-                if (this.mHost.mShowMore) {
 //                 mHost->CloseMorePopupWindow();
-                    this.mHost.CloseMorePopupWindow();
 //             }
-                }
 //             else {
-                else {
 //                 mHost->OpenMorePopupWindow(v);
-                    this.mHost.OpenMorePopupWindow(v);
 //             }
-                }
 //             break;
-                break;
 //         }
 //         case R::id::photo_detail: {
-            case R.id.photo_detail :
 //             Logger::D(TAG, "OnClick()---photo_detail");
-                elog(TAG + "OnClick()---photo_detail");
 //             break;
-                break;
 //         }
 //         case R::id::img_btn_left: {
-            case R.id.img_btn_left :
 //             Logger::D(TAG, "OnClick()---img_btn_left--mCurrentIndex:%d",mHost->mCurrentIndex);
-                elog(TAG + "OnClick()---img_btn_left--mCurrentIndex:" + mHost.mCurrentIndex);
 //             mHost->ChangeCurrentPhoto(FALSE);
-                this.mHost.ChangeCurrentPhoto(false);
 //             break;
-                break;
 //         }
 //         case R::id::img_btn_right: {
-            case R.id.img_btn_right :
 //             Logger::D(TAG, "OnClick()---img_btn_right--mCurrentIndex:%d",mHost->mCurrentIndex);
-                elog(TAG + "OnClick()---img_btn_right--mCurrentIndex:" + mHost.mCurrentIndex);
 //             mHost->ChangeCurrentPhoto(TRUE);
-                this.mHost.ChangeCurrentPhoto(true);
 //             break;
-                break;
 //         }
 //         case R::id::img_btn_zoom: {
-            case R.id.img_btn_zoom :
 //             Logger::D(TAG, "OnClick()---img_btn_zoom");
-                elog(TAG + "OnClick()---img_btn_zoom");
 //             if (mHost->mShowZoom) {
-                if (this.mHost.mShowZoom) {
 //                 mHost->CloseZoomPopupWindow();
-                    this.mHost.CloseZoomPopupWindow();
 //             }
-                }
 //             else {
-                else {
 //                 mHost->OpenZoomPopupWindow(v);
-                    this.mHost.OpenZoomPopupWindow(v);
 //             }
-                }
 //             break;
-                break;
 //         }
 //         case R::id::img_btn_rotate_left: {
-            case R.id.img_btn_rotate_left :
 //             Logger::D(TAG, "OnClick()---img_btn_rotate_left");
-                elog(TAG + "OnClick()---img_btn_rotate_left");
 //             break;
-                break;
 //         }
 //         case R::id::img_btn_rotate_right: {
-            case R.id.img_btn_rotate_right :
 //             Logger::D(TAG, "OnClick()---img_btn_rotate_right");
-                elog(TAG + "OnClick()---img_btn_rotate_right");
 //             break;
-                break;
 //         }
 //         case R::id::img_btn_share: {
-            case R.id.img_btn_share :
 //             Logger::D(TAG, "OnClick()---img_btn_share");
-                elog(TAG + "OnClick()---img_btn_share");
 //             mHost->OpenShareDialog();
-                this.mHost.OpenShareDialog();
 //             break;
-                break;
 //         }
 //         case R::id::img_btn_edit: {
-            case R.id.img_btn_edit :
 //             Logger::D(TAG, "OnClick()---img_btn_edit");
-                elog(TAG + "OnClick()---" + img_btn_edit);
 //             AutoPtr<PhotoEntry> entry = mHost->mPhotoEntryList[mHost->mCurrentIndex];
-                var entry = mHost.mPhotoEntryList[mHost.mCurrentIndex];
 //             AutoPtr<IIntent> intent;
 //             CIntent::New((IIntent**)&intent);
-                var intent = Droid_New("CIntent");
 //             intent->SetClassNameEx(String("Gallery"), String("Gallery.CEditActivity"));
-                intent.SetClassName("Gallery","Gallery.CEditActivity");
 //             intent->PutStringExtra(DataSourceHelper::SOURCE_PATH, entry->sourcePath);
-                intent.PutStringExtra(DataSourceHelper.SOURCE_PATH, entry.sourcePath);
 //             if (FAILED(mHost->StartActivity(intent))) {
-                try {mHost.StartActivity(intent)} catch(e) {
 //                 Logger::E(TAG, "OnClick()---StartActivity CEditActivity failed!");
-                    elog(TAG + "OnClick()---StartActivity CEditActivity failed!");
 //             }
-                }
 //             break;
-                break;
 //         }
 //         case R::id::img_btn_delete: {
-            case R.id.img_btn_delete :
 //             Logger::D(TAG, "OnClick()---img_btn_delete");
-                elog(TAG + "OnClick()---img_btn_delete");
 //             mHost->OpenDeleteDialog();
-                mHost.OpenDeleteDialog();
 //             break;
-                break;
 //         }
 //         case R::id::more_pop_wallpaper: {
-            case R.id.more_pop_wallpaper :
 //             Logger::D(TAG, "OnClick()---more_pop_wallpaper");
-                elog(TAG + "OnClick()---more_pop_wallpaper");
 //             mHost->CloseMorePopupWindow();
-                mHost.CloseMorePopupWindow();
 //             AutoPtr<PhotoEntry> entry = mHost->mPhotoEntryList[mHost->mCurrentIndex];
-                var entry = mHost.mPhotoEntryList[mHost.mCurrentIndex];
 //             AutoPtr<IIntent> intent;
 //             CIntent::New((IIntent**)&intent);
-                var intent = Droid_New("CIntent");
 //             intent->SetClassNameEx(String("Gallery"), String("Gallery.CWallpaperActivity"));
-                intent.SetClassName("Gallery", "Gallery.CWallpaperActivity");
 //             intent->PutStringExtra(DataSourceHelper::SOURCE_PATH, entry->sourcePath);
-                intent.PutStringExtra(DataSourceHelper.SOURCE_PATH, entry.sourcePath);
 //             if (FAILED(mHost->StartActivity(intent))) {
-                try {mHost.StartActivity(intent)} catch(e) {
 //                 Logger::E(TAG, "OnClick()---StartActivity CWallpaperActivity failed!");
-                    elog(TAG + "OnClick()---StartActivity CWallpaperActivity failed!");
 //             }
-                }
 //             break;
-                break;
 //         }
 //         case R::id::more_pop_info: {
-            case R.id.more_pop_info :
 //             Logger::D(TAG, "OnClick()---more_pop_info");
-                elog(TAG + "OnClick()---more_pop_info");
 //             mHost->CloseMorePopupWindow();
-                mHost.CloseMorePopupWindow();
 //             if (mHost->mShowDetails) {
-                if (mHost.mShowDetails) {
 //                 mHost->HideDetails();
-                    mHost.HideDetails();
 //             }
-                }
 //             else {
-                else {
 //                 mHost->ShowDetails();
-                    mHost.ShowDetails();
 //             }
-                }
 //             break;
-                break;
 //         }
 //         case R::id::share_dialog_btn_cancel: {
-            case R.id.share_dialog_btn_cancel :
 //             Logger::D(TAG, "OnClick()---share_dialog_btn_cancel");
-                elog(TAG + "OnClick()---share_dialog_btn_cancel");
 //             mHost->ShareDialogOnCancel();
-                mHost.ShareDialogOnCancel();
 //             break;
 //         }
 //         case R::id::delete_dialog_btn_ok: {
-            case R.id.delete_dialog_btn_ok :
 //             Logger::D(TAG, "OnClick()---delete_dialog_btn_ok");
-                elog(TAG + "OnClick()---delete_dialog_btn_ok");
 //             mHost->DeleteDialogOnOK();
-                mHost.DeleteDialogOnOK();
 //             break;
-                break;
 //         }
 //         case R::id::delete_dialog_btn_cancel: {
-            case R.id.delete_dialog_btn_cancel :
 //             Logger::D(TAG, "OnClick()---delete_dialog_btn_cancel");
-                elog(TAG + "OnClick()---delete_dialog_btn_cancel");
 //             mHost->DeleteDialogOnCancel();
-                mHost.DeleteDialogOnCancel();
 //             break;
-                break;
 //         }
 //         default:
-            default:
 //             break;
-                break;
 //     }
-        }
 
 //     return NOERROR;
-        return;
 // }
-    }
 
 // ECode CPhotoActivity::MyListener::OnDismiss()
 // {
-    MyListener.prototype.OnDismiss = function() {
 //     Logger::D(TAG, "OnDismiss()---: TODO");
-        elog(TAG + "OnDismiss()---: TODO");
 //     if (mHost->mZoomPopupWindow) {
-        if (mZoomPopupWindow) {
 //         mHost->mZoomPopupWindow = NULL;
-            mZoomPopupWindow = null;
 //         mHost->mShowZoom = FALSE;
-            mShowZoom = false;
 //     }
-        }
 
 //     if (mHost->mMorePopupWindow) {
-        if (mMorePopupWindow) {
 //         mHost->mMorePopupWindow = NULL;
-            mMorePopupWindow = null;
 //         mHost->mShowMore = FALSE;
-            mShowMore = false;
 //     }
-        }
 //     return NOERROR;
-        return;
 // }
-    }
 
 // ECode CPhotoActivity::MyListener::OnProgressChanged(
 //     /* [in] */ ISeekBar* seekBar,
 //     /* [in] */ Int32 progress,
 //     /* [in] */ Boolean fromUser)
 // {
-    MyListener.prototype.OnProgressChanged = function(seekBar, progress, fromUser) {
 //     Logger::D(TAG, "OnProgressChanged()---progress:%d", progress);
-        elog(TAG + "OnProgressChanged()---progress:" + progress);
 //     return NOERROR;
-        return;
 // }
-    }
 
 // ECode CPhotoActivity::MyListener::OnStartTrackingTouch(
 //     /* [in] */ ISeekBar* seekBar)
 // {
-    MyListener.prototype.OnStartTrackingTouch = function(seekBar) {
 //     Logger::D(TAG, "OnStartTrackingTouch()---");
-        elog(TAG + "OnStartTrackingTouch()---");
 //     return NOERROR;
-        return;
 // }
-    }
 
 // ECode CPhotoActivity::MyListener::OnStopTrackingTouch(
 //     /* [in] */ ISeekBar* seekBar)
 // {
-    MyListener.prototype.OnStopTrackingTouch = function(seekBar) {
 //     Logger::D(TAG, "OnStopTrackingTouch()---");
-        elog(TAG + "OnStopTrackingTouch()---");
 //     return NOERROR;
-        return;
 // }
-    }
 
 // ECode CPhotoActivity::MyListener::OnClose()
 // {
-    MyListener.prototype.OnClose = function() {
 //     Logger::D(TAG, "OnClose()---");
-        elog(TAG + "OnClose()---");
 //     mHost->HideDetails();
-        mHose.HideDetails();
 //     return NOERROR;
-        return;
 // }
-    }
-
-    //--------MyListener--------end--------
-
-    //--------DialogListener--------begin--------
 
 // CAR_INTERFACE_IMPL(CPhotoActivity::DialogListener, IDialogInterfaceOnDismissListener)
 
 // CPhotoActivity::DialogListener::DialogListener(
+    DialogListener = function(
 //     /* [in] */ CPhotoActivity* host)
+        host)
 //     : mHost(host)
 // {
-    function DialogListener (host) {
+    {
         this.mHost = host;
 // }
     }
@@ -433,53 +737,44 @@ module.exports = function(aoElastos, aoActivity){
 // ECode CPhotoActivity::DialogListener::OnDismiss(
 //     /* [in] */ IDialogInterface* dialog)
 // {
-    DialogListener.prototype.OnDismiss = function (dialog) {
 //     if (IDialogInterface::Probe(mHost->mShareDialog) == dialog) {
-        if (this.mHost.mShareDialog == dialog) {
 //         Logger::D(TAG, "OnDismissShareDialog---: %p", mHost->mShareDialog.Get());
-            elog("TAG" + "OnDismissShareDialog---: ") + mHost.mShareDialog;
 //         mHost->mShareDialog = NULL;
-            mHost.mShareDialog = null;
 //     }
-        }
 //     else if (IDialogInterface::Probe(mHost->mDeleteDialog) == dialog) {
-        else if (mHost.mDeleteDialog == dialog) {
 //         Logger::D(TAG, "OnDismissDeleteDialog---: %p", mHost->mDeleteDialog.Get());
-            elog(TAG + "OnDismissDeleteDialog---: " + mHost.mDeleteDialog);
 //         mHost->mDeleteDialog = NULL;
-            mHost.mDeleteDialog = null;
 //     }
-        }
 
 //     return NOERROR;
-        return;
 // }
-    }
-
-    //--------DialogListener--------end--------
-
-    //--------MyLoadImageCallback--------begin--------
 
 // CPhotoActivity::MyLoadImageCallback::MyLoadImageCallback(
+    MyLoadImageCallback = function(
 //     /* [in] */ IWeakReference* host,
+        host,
 //     /* [in] */ const String& path,
+        path,
 //     /* [in] */ Boolean isHigh)
+        isHigh)
 //     : mWeakHost(host)
 //     , mPath(path)
 //     , mIsHigh(isHigh)
-// {
-    function MyLoadImageCallback = function(host, path, isHigh) {
-        this.mHost = host;
+// {}
+    {
+        this.mWeakHost = host;
         this.mPath = path;
-        this.mIsHight = isHigh;
-// }
+        this.mIsHigh = isHigh;
     }
 
 // ECode CPhotoActivity::MyLoadImageCallback::ImageLoaded(
+    MyLoadImageCallback.prototype.ImageLoaded = function(
 //     /* [in] */ IDrawable* imageDrawable,
+        imageDrawable,
 //     /* [in] */ IImageView* imageView)
+        imageView)
 // {
-    MyLoadImageCallback.prototype.ImageLoaded = function(imageDrawable, imageView) {
+    {
 //     Logger::D(TAG, "ImageLoaded()-----");
         elog(TAG + "ImageLoaded()-----");
 //     AutoPtr<IActivity> strongObj;
@@ -494,407 +789,501 @@ module.exports = function(aoElastos, aoActivity){
 //     }
 
 //     AutoPtr<SomeArgs> args = SomeArgs::Obtain();
+        var args = {};
 //     args->mArg1 = imageDrawable;
+        args.mArg1 = imageDrawable;
 //     args->mArg2 = imageView;
+        args.mArg2 = imageView;
 //     AutoPtr<ICharSequence> seq;
+        var seq;
 //     CStringWrapper::New(mPath, (ICharSequence**)&seq);
+        seq = CString(this.mPath);
 //     args->mArg3 = seq;
+        args.mArg3 = seq;
 //     args->mArgi1 = mIsHigh ? 1 : 0;
-        var args = {
-            mArg1 : imageDrawable,
-            mArg2 : imageView,
-            mArg3 : CString(mPath),
-            mArgi1 : this.mIsHigh ? 1 : 0,
-        }
+        args.mArgi1 = this.mIsHigh ? 1 : 0;
 
 //     AutoPtr<IMessage> msg;
+        var msg;
 //     mHost->mMyHandler->ObtainMessageEx(CPhotoActivity::MSG_IMAGE_LOADED, args, (IMessage**)&msg);
-        mMyHandler.ObtainMessage(MSG_IMAGE_LOADED, args);
+        msg = {what:MSG_IMAGE_LOADED, obj:args};
 //     Boolean result;
+        var result;
 //     return mHost->mMyHandler->SendMessage(msg, &result);
-        var result = mMyHandler.SendMessage(msg);
+        result = mMyHandler.HandleMessage(msg);
+        return result;
 // }
     }
-
-    //--------MyLoadImageCallback--------end--------
-
-    //--------Activity begin----------------
 
 // CPhotoActivity::CPhotoActivity()
     function CPhotoActivity(
 //     : mIndex(0)
-        mIndex,
+        amIndex,
 //     , mCurrentIndex(0)
-        mCurrentIndex,
+        amCurrentIndex,
 //     , mTotalSize(0)
-        mTotalSize,
+        amTotalSize,
 //     , mDisplayWidth(0)
-        mDisplayWidth,
+        amDisplayWidth,
 //     , mDisplayHeight(0)
-        mDisplayHeight,
+        amDisplayHeight,
 //     , mShowMore(FALSE)
+        amShowMore,
 //     , mShowZoom(FALSE)
+        amShowZoom,
 //     , mShowDetails(FALSE)
+        amShowDetails,
 //     , mViewSingleItem(FALSE)
+        amViewSingleItem)
 // {
-    ) {
-        this.mIndex = mIndex || 0;
-        this.mCurrentIndex = mCurrentIndex || 0;
-        this.mTotalSize = mTotalSize || 0;
-        this.mDisplayWidth = mDisplayWidth || 0;
-        this.mDisplayHeight = mDisplayHeight || 0;
+    {
+        mIndex = amIndex || 0;
+        mCurrentIndex = amCurrentIndex || 0;
+        mTotalSize = amTotalSize || 0
+        mDisplayWidth = amDisplayWidth || 0;
+        mDisplayHeight = amDisplayHeight || 0;
+        mShowMore = amShowMore || false;
+        mShowZoom = amShowZoom || false;
+        mShowDetails = amShowDetails || false;
+        mViewSingleItem = amViewSingleItem || false;
 
-        this.mShowMore = false;
-        this.mShowZoom = false;
-        this.ShowDetails = false;
-        this.mViewSingleItem = false;
 //     Logger::D(TAG, "CPhotoActivity(): %p", this);
-        elog(TAG + "CPhotoActivity(): " + TAG);
+        elog(TAG + "CPhotoActivity(): " + typeof this);
 // }
     }
-
-    var _apt = CActivityListener.prototype;
+    var mCPhotoActivity = new CPhotoActivity();
 
 // CPhotoActivity::~CPhotoActivity()
 // {
-    _apt.Destroy = function () {
 //     Logger::D(TAG, "~CPhotoActivity(): %p", this);
-        elog(TAG + "~CPhotoActivity(): " + TAG);
 // }
-    }
 
-// ECode CPhotoActivity::OnBackPressed()
+// ECode CPhotoActivity::OnCreate(
+    _apt.OnCreate = function(context,
+//     /* [in] */ IBundle* savedInstanceState)
+    savedInstanceState)
 // {
-    _apt.OnBackPressed = function() {
-//     Logger::D(TAG, "OnBackPressed()---");
-        elog(TAG + "OnBackPressed()---");
+    {
+        timeOnCreate = new Date().getTime();
 
-//     if (mShowDetails) {
-        if (mShowDetails) {
-//         HideDetails();
-            HideDetails();
-//     }
+//     Logger::D(TAG, "OnCreate()---");
+        elog(TAG + "OnCreate()---");
+//     Activity::OnCreate(savedInstanceState);
+        //TODO:super.OnCreate(savedInstanceState);
+//     SetContentView(R::layout::activity_photo);
+        context.SetContentView(R.layout.activity_photo);
+
+//     AutoPtr<IWeakReference> weakHost;
+        var weakHost;
+//     GetWeakReference((IWeakReference**)&weakHost);
+        weakHost = oActivity.GetWeakReference();
+//     mMyHandler = new MyHandler(weakHost);
+        mMyHandler = new MyHandler(weakHost);
+
+//     mListener = new MyListener(this);
+        mListener = new MyListener(oActivity);
+//     mDialogListener = new DialogListener(this);
+        mDialogListener = new DialogListener(oActivity);
+//     mDetailsArray = ArrayOf<String>::Alloc(6);
+        mDetailsArray = [];
+
+        mPhotoSlideshow = context.FindViewById(R.id.photo_slideshow);
+
+//     AutoPtr<IIntent> intent;
+        var intent;
+//     GetIntent((IIntent**)&intent);
+        intent = context.GetIntent();
+//     if (!LoadPhotoEntryList(intent))
+//         return NOERROR;
+        //if (!LoadPhotoEntryList(intent)) return;
+        if (!LoadPhotoEntryList(intent)) {
+            return;
         }
-//     else if (mShowMore) {
-        else if (mShowMore) {
-//         CloseMorePopupWindow();
-            CloseMorePopupWindow();
-//     }
-        }
-//     else if (mShowZoom) {
-        else if (mShowZoom) {
-//         CloseZoomPopupWindow();
-            CloseZoomPopupWindow();
-//     }
-        }
-//     else {
         else {
-//         Activity::OnBackPressed();
-            //TODO
+        }
+
+//     AutoPtr<IView> view = FindViewById(R::id::photo_up);
+//     mUpButton = IImageView::Probe(view);
+//     assert(mUpButton != NULL);
+        mUpButton = context.FindViewById(R.id.photo_up);
+
+//     view = FindViewById(R::id::photo_name);
+//     mPhotoName = ITextView::Probe(view);
+//     assert(mPhotoName != NULL);
+        mPhotoName = context.FindViewById(R.id.photo_name);
+
+//     view = FindViewById(R::id::photo_slideshow);
+//     mPhotoSlideshow = IImageView::Probe(view);
+//     assert(mPhotoSlideshow != NULL);
+        //mPhotoSlideshow = context.FindViewById(R.id.photo_slideshow);
+
+//     view = FindViewById(R::id::photo_more);
+//     mPhotoMore = IImageView::Probe(view);
+//     assert(mPhotoMore != NULL);
+        mPhotoMore = context.FindViewById(R.id.photo_more);
+
+//     view = FindViewById(R::id::photo_detail);
+//     mPhotoView = IImageView::Probe(view);
+//     assert(mPhotoView != NULL);
+        mPhotoView = context.FindViewById(R.id.photo_detail);
+
+//     view = FindViewById(R::id::photo_loading);
+//     mPhotoLoadingText = ITextView::Probe(view);
+//     assert(mPhotoLoadingText != NULL);
+        mPhotoLoadingText = context.FindViewById(R.id.photo_loading);
+
+//     view = FindViewById(R::id::img_btn_left);
+//     mLeftButton = IImageButton::Probe(view);
+//     assert(mLeftButton != NULL);
+        mLeftButton = context.FindViewById(R.id.img_btn_left);
+
+//     view = FindViewById(R::id::img_btn_right);
+//     mRightButton = IImageButton::Probe(view);
+//     assert(mRightButton != NULL);
+        mRightButton = context.FindViewById(R.id.img_btn_right);
+
+//     view = FindViewById(R::id::img_btn_zoom);
+//     mZoomButton = IImageButton::Probe(view);
+//     assert(mZoomButton != NULL);
+        mZoomButton = context.FindViewById(R.id.img_btn_zoom);
+
+//     view = FindViewById(R::id::img_btn_rotate_left);
+//     mRotateLeftButton = IImageButton::Probe(view);
+//     assert(mRotateLeftButton != NULL);
+        mRotateLeftButton = context.FindViewById(R.id.img_btn_rotate_left);
+
+//     view = FindViewById(R::id::img_btn_rotate_right);
+//     mRotateRightButton = IImageButton::Probe(view);
+//     assert(mRotateRightButton != NULL);
+        mRotateRightButton = context.FindViewById(R.id.img_btn_rotate_right);
+
+//     view = FindViewById(R::id::img_btn_share);
+//     mShareButton = IImageButton::Probe(view);
+//     assert(mShareButton != NULL);
+        mShareButton = context.FindViewById(R.id.img_btn_share);
+
+//     view = FindViewById(R::id::img_btn_edit);
+//     mEditButton = IImageButton::Probe(view);
+//     assert(mEditButton != NULL);
+        mEditButton = context.FindViewById(R.id.img_btn_edit);
+
+//     view = FindViewById(R::id::img_btn_delete);
+//     mDeleteButton = IImageButton::Probe(view);
+//     assert(mDeleteButton != NULL);
+        mDeleteButton = context.FindViewById(R.id.img_btn_delete);
+
+//     AutoPtr<IViewOnClickListener> clickListener = (IViewOnClickListener*)mListener.Get();
+        var clickListener = mListener;
+//     mUpButton->SetOnClickListener(clickListener);
+        mUpButton.SetOnClickListener(clickListener);
+//     mPhotoSlideshow->SetOnClickListener(clickListener);
+        mPhotoSlideshow.SetOnClickListener(clickListener);
+//     mPhotoMore->SetOnClickListener(clickListener);
+        mPhotoMore.SetOnClickListener(clickListener);
+//     mLeftButton->SetOnClickListener(clickListener);
+        mLeftButton.SetOnClickListener(clickListener);
+//     mRightButton->SetOnClickListener(clickListener);
+        mRightButton.SetOnClickListener(clickListener);
+//     mZoomButton->SetOnClickListener(clickListener);
+        mZoomButton.SetOnClickListener(clickListener);
+//     mRotateLeftButton->SetOnClickListener(clickListener);
+        mRotateLeftButton.SetOnClickListener(clickListener);
+//     mRotateRightButton->SetOnClickListener(clickListener);
+        mRotateRightButton.SetOnClickListener(clickListener);
+//     mShareButton->SetOnClickListener(clickListener);
+        mShareButton.SetOnClickListener(clickListener);
+//     mEditButton->SetOnClickListener(clickListener);
+        mEditButton.SetOnClickListener(clickListener);
+//     mDeleteButton->SetOnClickListener(clickListener);
+        mDeleteButton.SetOnClickListener(clickListener);
+
+//     if (mViewSingleItem) {
+        if (mViewSingleItem) {
+//         mUpButton->SetVisibility(IView::INVISIBLE);
+            mUpButton.SetVisibility(IView__INVISIBLE);
+//         mPhotoSlideshow->SetVisibility(IView::INVISIBLE);
+            mPhotoSlideshow.SetVisibility(IView__INVISIBLE);
 //     }
         }
+
+//     // for test
+        //for test
+//     AutoPtr<IDisplayMetrics> dm;
+        var dm;
+//     AutoPtr<IDisplay> dis;
+        var dis;
+//     CDisplayMetrics::New((IDisplayMetrics**)&dm);
+        dm = Droid_New("Elastos.Droid.Utility.CDisplayMetrics");
+//     GetWindowManager()->GetDefaultDisplay((IDisplay**)&dis);
+        dis = context.GetWindowManager().GetDefaultDisplay();
+//     dis->GetMetrics(dm);
+        dis.GetMetrics(dm);
+//     Int32 widthPixels = 0, heightPixels = 0;
+        var widthPixels = 0, heightPixels = 0;
+//     dm->GetWidthPixels(&widthPixels);
+        widthPixels = dm.GetWidthPixels();
+
+//     dm->GetHeightPixels(&heightPixels);
+        heightPixels = dm.GetHeightPixels();
+//     mDisplayWidth = widthPixels - 128;
+        mDisplayWidth = widthPixels - 128;
+//     mDisplayHeight = heightPixels - 128;
+        mDisplayHeight = heightPixels - 128;
+//     Logger::D(TAG, "OnCreate()---widthPixels:%d,heightPixels:%d,mDisplayWidth:%d,mDisplayHeight:%d",
+//         widthPixels, heightPixels, mDisplayWidth, mDisplayHeight);
+        elog(TAG + "OnCreate()---widthPixels:"+widthPixels+",heightPixels:"+heightPixels+",mDisplayWidth:"+mDisplayWidth+",mDisplayHeight:"+mDisplayHeight);
+
+//     SetCurrentPhoto();
+        SetCurrentPhoto();
 
 //     return NOERROR;
         return;
 // }
     }
+
+// ECode CPhotoActivity::OnStart()
+// {
+//     Logger::D(TAG, "OnStart()---");
+//     Activity::OnStart();
+//     return NOERROR;
+// }
+
+// ECode CPhotoActivity::OnResume()
+// {
+//     Logger::D(TAG, "OnResume()---");
+//     Activity::OnResume();
+//     return NOERROR;
+// }
+
+// ECode CPhotoActivity::OnPause()
+// {
+//     Logger::D(TAG, "OnPause()---");
+//     Activity::OnPause();
+//     return NOERROR;
+// }
+
+// ECode CPhotoActivity::OnStop()
+// {
+//     Logger::D(TAG, "OnStop()---");
+//     Activity::OnStop();
+//     return NOERROR;
+// }
+
+// ECode CPhotoActivity::OnDestroy()
+// {
+//     Logger::D(TAG, "OnDestroy()---");
+//     Activity::OnDestroy();
+//     return NOERROR;
+// }
+
+// ECode CPhotoActivity::OnBackPressed()
+// {
+//     Logger::D(TAG, "OnBackPressed()---");
+
+//     if (mShowDetails) {
+//         HideDetails();
+//     }
+//     else if (mShowMore) {
+//         CloseMorePopupWindow();
+//     }
+//     else if (mShowZoom) {
+//         CloseZoomPopupWindow();
+//     }
+//     else {
+//         Activity::OnBackPressed();
+//     }
+
+//     return NOERROR;
+// }
 
 // ECode CPhotoActivity::OpenZoomPopupWindow(
 //     /* [in] */ IView* v)
 // {
-    _apt.OpenZoomPopupWindow = function(v) {
 //     Logger::D(TAG, "OpenZoomPopupWindow()---");
-        elog(TAG + "OpenZoomPopupWindow()---");
 
 //     AutoPtr<ILayoutInflater> inflater;
 //     GetSystemService(IContext::LAYOUT_INFLATER_SERVICE, (IInterface**)&inflater);
-        var inflater = GetSystemService(IContext__LAYOUT_INFLATER_SERVICE);
 
 //     AutoPtr<IView> layout;
 //     inflater->Inflate(R::layout::zoom_popup_dialog, NULL, (IView**)&layout);
-        var layout = inflater.Inflate(R.layout.zoom_popup_dialog);
 //     AutoPtr<IView> view;
 //     layout->FindViewById(R::id::zoom_seeker, (IView**)&view);
 //     AutoPtr<ISeekBar> seekBar = ISeekBar::Probe(view);
 //     assert(seekBar != NULL);
-        var seekBar = layout.FindViewById(R.id.zoom_seeker);
 //     seekBar->SetOnSeekBarChangeListener((ISeekBarOnSeekBarChangeListener*)(mListener.Get()));
-        seekBar.SetOnSeekBarChangeListener(mHost.mListener);
 
 //     assert(mZoomPopupWindow.Get() == NULL);
 //     CPopupWindow::New(layout, 400, 50, TRUE, (IPopupWindow**)&mZoomPopupWindow);
-        mZoomPopupWindow = Droid_New(layout, 400, 50, true);
 //     mZoomPopupWindow->SetTouchable(TRUE);
-        mZoomPopupWindow.SetTouchable(true);
 //     mZoomPopupWindow->SetOutsideTouchable(TRUE);
-        mZoomPopupWindow.SetOutsideTouchable(true);
 
 //     AutoPtr<IResources> res;
 //     GetResources((IResources**)&res);
-        var res = mHost.GetResources();
 //     AutoPtr<IBitmapDrawable> bitmapDrawable;
 //     CBitmapDrawable::New(res, (IBitmap*)NULL, (IBitmapDrawable**)&bitmapDrawable);
-        var bitmapDrawable = Droid_New("CBitmapDrawable", res);
 //     mZoomPopupWindow->SetBackgroundDrawable(IDrawable::Probe(bitmapDrawable));
-        mZoomPopupWindow.SetBackgroundDrawable(bitmapDrawable);
 //     mZoomPopupWindow->SetOnDismissListener((IPopupWindowOnDismissListener*)mListener.Get());
-        mZoomPopupWindow.SetOnDismissListener(mHost.mListener);
 //     mZoomPopupWindow->ShowAtLocation(v, IGravity::NO_GRAVITY, 310, 561);
-        mZoomPopupWindow.ShowAtLocation(v, IGravity__NO_GRAVITY, 310, 561);
 //     mShowZoom = TRUE;
-        mShowZoom = true;
 
 //     return NOERROR;
-        return;
 // }
-    }
 
 // ECode CPhotoActivity::CloseZoomPopupWindow()
 // {
-    _apt.CloseZoomPopupWindow = function() {
 //     Boolean isShow = FALSE;
 //     if (mZoomPopupWindow != NULL && (mZoomPopupWindow->IsShowing(&isShow), isShow)) {
-        if (mZoomPopupWindow && mZoomPopupWindow.IsShowing()) {
 //         Logger::D(TAG, "CloseZoomPopupWindow()---");
-            elog(TAG + "CloseZoomPopupWindow()---");
 //         mZoomPopupWindow->Dismiss();
-            mZoomPopupWindow.Dismiss();
 //         mShowZoom = FALSE;
-            mShowZoom = false;
 //     }
-        }
 //     return NOERROR;
-        return;
 // }
-    }
 
 // ECode CPhotoActivity::OpenMorePopupWindow(
 //     /* [in] */ IView* v)
 // {
-    _apt.OpenMorePopupWindow = function(v) {
 //     Logger::D(TAG, "OpenMorePopupWindow()---");
-        elog(TAG + "OpenMorePopupWindow()---");
 //     AutoPtr<ILayoutInflater> inflater;
 //     GetSystemService(IContext::LAYOUT_INFLATER_SERVICE, (IInterface**)&inflater);
-        var inflater = GetSystemService(IContext__LAYOUT_INFLATER_SERVICE);
 
 //     AutoPtr<IViewOnClickListener> clickListener = (IViewOnClickListener*)mListener.Get();
 //     AutoPtr<IView> layout;
 //     inflater->Inflate(R::layout::more_popup_dialog, NULL, (IView**)&layout);
-        var layout = inflater.Inflate(R.layout.more_popup_dialog);
 //     AutoPtr<IView> view;
 //     layout->FindViewById(R::id::more_pop_wallpaper, (IView**)&view);
 //     AutoPtr<ITextView> popupWallpaper = ITextView::Probe(view);
 //     assert(popupWallpaper != NULL);
-        var popupWallpaper = layout.FindViewById(R.id.more_pop_wallpaper);
 //     popupWallpaper->SetOnClickListener(clickListener);
-        popupWallpaper.SetOnDismissListener(mListener);
 
 //     view = NULL;
 //     layout->FindViewById(R::id::more_pop_info, (IView**)&view);
 //     AutoPtr<ITextView> popupInfo = ITextView::Probe(view);
 //     assert(popupInfo != NULL);
-        var popupInfo = layout.FindViewById(R.id.more_pop_info);
 //     popupInfo->SetOnClickListener(clickListener);
-        popupInfo.SetOnClickListener(mListener);
 
 //     assert(mMorePopupWindow.Get() == NULL);
 //     CPopupWindow::New(layout, 80, 63, TRUE, (IPopupWindow**)&mMorePopupWindow);
-        mMorePopupWindow = Droid_New("CPopupWindow", layout, 80, 63,true);
 //     mMorePopupWindow->SetTouchable(TRUE);
-        mMorePopupWindow.SetTouchable(true);
 //     mMorePopupWindow->SetOutsideTouchable(TRUE);
-        mMorePopupWindow.SetOutsideTouchable(true);
 
 //     AutoPtr<IResources> res;
 //     GetResources((IResources**)&res);
-        var res = GetResources();
 //     AutoPtr<IBitmapDrawable> bitmapDrawable;
 //     CBitmapDrawable::New(res, (IBitmap*)NULL, (IBitmapDrawable**)&bitmapDrawable);
-        var bitmapDrawable = Droid_New("CBitmapDrawable", res);
 //     mMorePopupWindow->SetBackgroundDrawable(IDrawable::Probe(bitmapDrawable));
-        mMorePopupWindow.SetBackgroundDrawable(bitmapDrawable);
 //     mMorePopupWindow->SetOnDismissListener((IPopupWindowOnDismissListener*)mListener.Get());
-        mMorePopupWindow.SetOnDismissListener(mListener);
 //     mMorePopupWindow->ShowAtLocation(v, IGravity::NO_GRAVITY, 1180, 56);
-        mMorePopupWindow.ShowAtLocation(v, IGravity__NO_GRAVITY, 1180, 56);
 //     mShowMore = TRUE;
-        mShowMore = true;
 
 //     return NOERROR;
-        return;
 // }
-    }
 
 // ECode CPhotoActivity::CloseMorePopupWindow()
 // {
-    _apt.CloseMorePopupWindow = function() {
 //     Boolean isShow = FALSE;
 //     if (mMorePopupWindow != NULL && (mMorePopupWindow->IsShowing(&isShow), isShow)) {
-        if (mMorePopupWindow && mMorePopupWindow.IsShowing()) {
 //         Logger::D(TAG, "CloseMorePopupWindow()---");
-            elog(TAG + "CloseMorePopupWindow()---");
 //         mMorePopupWindow->Dismiss();
-            mMorePopupWindow.Dismiss()''
 //         mShowMore = FALSE;
-            mShowMore = false;
 //     }
-        }
 //     return NOERROR;
-        return;
 // }
-    }
 
 // ECode CPhotoActivity::OpenShareDialog()
 // {
-    _apt.OpenShareDialog = function() {
 //     Logger::D(TAG, "OpenShareDialog()--- : prev : %p", mShareDialog.Get());
-        elog(TAG +"OpenShareDialog()--- : prev :" + mShareDialog);
 //     assert(mShareDialog.Get() == 0);
 //     CDialog::New(this, R::style::MyDialog, (IDialog**)&mShareDialog);
-        mShareDialog = Droid_New("CDialog", this, R.style.MyDialog);
 //     mShareDialog->SetOnDismissListener((IDialogInterfaceOnDismissListener*)mDialogListener.Get());
-        mShareDialog.SetOnDismissListener(mDialogListener);
 //     Logger::D(TAG, "OpenShareDialog()--- : new : %p", mShareDialog.Get());
-        elog(TAG + "OpenShareDialog()--- : new : " + mShareDialog);
 //     mShareDialog->SetContentView(R::layout::share_dialog);
-        mShareDialog.SetContentView(R.layout.share_dialog);
 
 //     AutoPtr<IView> view;
 //     mShareDialog->FindViewById(R::id::share_dialog_btn_cancel, (IView**)&view);
 //     AutoPtr<IButton> cancelButton = IButton::Probe(view);
-        var cancelButton = mShareDialog.FindViewById(R.id.share_dialog_btn_cancel);
 //     AutoPtr<IViewOnClickListener> clickListener = (IViewOnClickListener*)mListener.Get();
 //     cancelButton->SetOnClickListener(clickListener);
-        cancelButton.SetOnClickListener(mListener);
 
 //     mShareDialog->Show();
-        mShareDialog.Show();
 //     return NOERROR;
-        return;
 // }
-    }
 
 // ECode CPhotoActivity::ShareDialogOnOK()
 // {
-    _apt.ShareDialogOnOK = function() {
 //     ShareDialogOnCancel(); //TODO
-        ShareDialogOnCancel();
 //     return NOERROR;
-        return;
 // }
-    }
 
 // ECode CPhotoActivity::ShareDialogOnCancel()
 // {
-    _apt.ShareDialogOnCancel = function() {
 //     if (mShareDialog) {
-        if (mShareDialog) {
 //         Logger::D(TAG, "ShareDialogOnCancel---: %p", mShareDialog.Get());
-            elog(TAG + "ShareDialogOnCancel---: " + mShareDialog);
 //         mShareDialog->Cancel();
-            mShareDialog.Cancel();
 //     }
-        }
 //     return NOERROR;
-        return;
 // }
-    }
 
 // ECode CPhotoActivity::DeleteDialogOnOK()
 // {
-    _apt.DeleteDialogOnOK = function () {
 //     DeleteDialogOnCancel(); //TODO
-        DeleteDialogOnCancel();
 //     return NOERROR;
-        reeturn;
 // }
-    }
 
 // ECode CPhotoActivity::DeleteDialogOnCancel()
 // {
-    _apt.DeleteDialogOnCancel = function() {
 //     if (mDeleteDialog) {
-        if (mDeleteDialog) {
 //         Logger::D(TAG, "DeleteDialogOnCancel---: %p", mDeleteDialog.Get());
-            elog(TAG + "DeleteDialogOnCancel---: " + mDeleteDialog);
 //         mDeleteDialog->Cancel();
-            mDeleteDialog.Cancel();
 //     }
 //     return NOERROR;
-        return;
 // }
-    }
 
 // ECode CPhotoActivity::OpenDeleteDialog()
 // {
-    _apt.OpenDeleteDialog = function() {
 //     Logger::D(TAG, "OpenDeleteDialog()--- : prev : %p", mDeleteDialog.Get());
-        elog(TAG + "OpenDeleteDialog()---: prev : " + mDeleteDialog);
 //     assert(mDeleteDialog.Get() == 0);
 //     CDialog::New(this, R::style::MyDialog, (IDialog**)&mDeleteDialog);
-        mDeleteDialog = Droid_New("CDialog", R.style.MyDialog);
 //     mDeleteDialog->SetOnDismissListener((IDialogInterfaceOnDismissListener*)mDialogListener.Get());
-        mDeleteDialog.SetOnDismissListener(mDialogListener);
 //     Logger::D(TAG, "OpenShareDialog()--- : new : %p", mDeleteDialog.Get());
-        elog(TAG + "OpenShareDialog()--- : new : " + mDeleteDialog);
 //     mDeleteDialog->SetContentView(R::layout::delete_dialog);
-        mDeleteDialog.SetContentView(R.layout.delete_dialog);
 
 //     AutoPtr<IView> view;
 //     mDeleteDialog->FindViewById(R::id::delete_dialog_btn_ok, (IView**)&view);
 //     AutoPtr<IButton> okButton = IButton::Probe(view);
-        var okButton = mDeleteDialog.FindViewById(R.id.delete_dialog_btn_ok);
 //     AutoPtr<IViewOnClickListener> clickListener = (IViewOnClickListener*)mListener.Get();
 //     okButton->SetOnClickListener(clickListener);
-        okButton.SetOnClickListener(mListener);
 
 //     view = NULL;
 //     mDeleteDialog->FindViewById(R::id::delete_dialog_btn_cancel, (IView**)&view);
 //     AutoPtr<IButton> cancelButton = IButton::Probe(view);
-        var cancelButton = mDeleteDialog.FindViewById(R.id.delete_dialog_btn_cancel);
 //     cancelButton->SetOnClickListener(clickListener);
-        cancelButton.SetOnClickListener(mListener);
 
 //     mDeleteDialog->Show();
-        mDeleteDialog.Show();
 //     return NOERROR;
-        return;
 // }
-    }
 
 // void CPhotoActivity::ShowDetails()
 // {
-    _apt.ShowDetails = function () {
 //     mShowDetails = TRUE;
-        mShowDetails = true;
 //     if (mDetailsHelper == NULL) {
-        if (!mDetailsHelper) {
 //         mDetailsHelper = new DetailsHelper(this, mDetailsArray);
-            mDetailsHelper = new DetailsHelper();
 //         AutoPtr<ICloseListener> closeListener = (ICloseListener*)mListener.Get();
 //         mDetailsHelper->SetCloseListener(closeListener);
-            mDetailsHelper.SetCloseListener(mListener);
 //     }
-        }
 //     mDetailsHelper->Show();
-        mDetailsHelper.Show();
 // }
-    }
 
 // void CPhotoActivity::HideDetails()
 // {
-    _apt.HideDetails = function () {
 //     mShowDetails = FALSE;
-        mShowDetails = false;
 //     mDetailsHelper->Hide();
-        mDetailsHelper.Hide();
 // }
-    }
 
 // void CPhotoActivity::SetCurrentPhoto()
+    SetCurrentPhoto = function ()
 // {
-    _apt.SetCurrentPhoto = function () {
+    {
 //     Logger::D(TAG, "SetCurrentPhoto()---");
         elog(TAG + "SetCurrentPhoto()---");
 //     if (mCurrentIndex > 0) {
@@ -960,45 +1349,36 @@ module.exports = function(aoElastos, aoActivity){
 // void CPhotoActivity::ChangeCurrentPhoto(
 //     /* [in] */ Boolean isNext)
 // {
-    _apt.ChangeCurrentPhoto = function () {
 //     if (isNext) {
-        if (isNext) {
 //         Int32 tmp = mTotalSize - 1;
-            var tmp = mTotalSize - 1;
 //         if (mCurrentIndex >= tmp) return;
-            if (mCurrentIndex >= tmp) return;
 //         mCurrentIndex++;
-            mCurrentIndex++;
 //         mCurrentIndex = tmp > mCurrentIndex ? mCurrentIndex : tmp;
-            mCurrentIndex = tmp > mCurrentIndex ? mCurrentIndex : tmp;
 //     }
-        }
 //     else {
-        else {
 //         if (mCurrentIndex <= 0) return;
-            if (mCurrentIndex <= 0) return;
 //         mCurrentIndex--;
-            mCurrentIndex--;
 //         mCurrentIndex = mCurrentIndex > 0 ? mCurrentIndex : 0;
-            mCurrentIndex = mCurrentIndex > 0 ? mCurrentIndex : 0;
 //     }
-        }
 //     SetCurrentPhoto();
-        SetCurrentPhoto();
 // }
-    }
 
 // void CPhotoActivity::MyImageLoaded(
+    function MyImageLoaded(
 //     /* [in] */ IDrawable* imageDrawable,
+        imageDrawable,
 //     /* [in] */ IImageView* imageView,
+        imageView,
 //     /* [in] */ const String& path,
+        path,
 //     /* [in] */ Boolean isHigh)
+        isHigh)
 // {
-    _apt.MyImageLoaded = function (imageDrawable,imageView,path,isHigh) {
+    {
 //     Logger::D(TAG, "MyImageLoaded()-----path:%s,isHigh:%d", path.string(), isHigh);
         elog(TAG + "MyImageLoaded()-----path:"+path+",isHigh:"+isHigh);
 //     if (!mCurrentImagePath.Equals(path)) {
-        if (mCurrentImagePath == path) {
+        if (mCurrentImagePath != path) {
 //         Logger::W(TAG, "MyImageLoaded()---not current path, drop!");
             elog(TAG + "MyImageLoaded()---not current path, drop!");
 //         return;
@@ -1007,7 +1387,7 @@ module.exports = function(aoElastos, aoActivity){
         }
 
 //     SwitchDisplayView(FALSE);
-        SwitchDisplayView(FALSE);
+        SwitchDisplayView(false);
 //     Int32 w = 0;
 //     Int32 h = 0;
         var r = {w:0,h:0};
@@ -1019,7 +1399,7 @@ module.exports = function(aoElastos, aoActivity){
 //         if (!ret) {
             if (!ret) {
 //             Logger::W(TAG, "MyImageLoaded()---GetOrigionWidthAndHeight---failed!");
-                elog(TAG + "MyImageLoaded()---GetOrigionWidthAndHeight--failed!");
+                elog(TAG + "MyImageLoaded()---GetOrigionWidthAndHeight---failed!");
 //             imageDrawable->GetIntrinsicWidth(&w);
                 r.w = imageView.GetIntrinsicWidth();
 //             imageDrawable->GetIntrinsicHeight(&h);
@@ -1036,51 +1416,50 @@ module.exports = function(aoElastos, aoActivity){
             r.h = imageDrawable.GetIntrinsicHeight();
 //     }
         }
+
 //     Logger::D(TAG, "MyImageLoaded()---w:%d,h:%d", w, h);
         elog(TAG + "MyImageLoaded()---w:"+r.w+",h:"+r.h);
 //     (*mDetailsArray)[2] = StringUtils::Int32ToString(w);
-        mDetailsArray[2] = w+'';
+        mDetailsArray[2] = r.w+'';
 //     (*mDetailsArray)[3] = StringUtils::Int32ToString(h);
-        mDetailsArray[3] = h+'';
+        mDetailsArray[3] = r.h+'';
 //     imageView->SetImageDrawable(imageDrawable);
         imageView.SetImageDrawable(imageDrawable);
 // }
     }
 
 // void CPhotoActivity::SetDetailInfo(
+    function SetDetailInfo(
 //     /* [in] */ const String& filePath)
+        filePath)
 // {
-    _apt.SetDetailInfo = function(filePath) {
+    {
 //     (*mDetailsArray)[0] = filePath.Substring(filePath.LastIndexOf(DataSourceHelper::PATH_SPLITE) + 1,
 //         filePath.LastIndexOf("."));
-        mDetailsArray[0] = filePath.substring(filePath.LastIndexOf(DataSourceHelper.PATH_SPLITE) + 1,
-            filePath.LastIndexOf("."));
+        mDetailsArray[0] = filePath.substring(filePath.lastIndexOf(DataSourceHelper.PATH_SPLITE) + 1,
+            filePath.lastIndexOf("."));
 //     (*mDetailsArray)[5] = filePath;
         mDetailsArray[5] = filePath;
 //     Logger::D(TAG, "SetDetailInfo()---filePath:%s", filePath.string());
-        elog([
-            TAG,
-            "SetDetailInfo()---",
-            "filePath:" + filePath,
-        ].join(""));
+        elog(TAG, "SetDetailInfo()---filePath:" + filePath);
 //     AutoPtr<IFile> file;
         var file;
 //     CFile::New(filePath, (IFile**)&file);
-        file = Droid_New("CFile", filePath);
+        file = Droid_New("Elastos.IO.CFile", filePath);
 //     if (file != NULL) {
         if (file) {
 //         Int64 last = 0;
             var last = 0;
 //         file->LastModified(&last);
-            last = file.LastModified();
+            last = file.GetLastModified();
 //         AutoPtr<IDate> date;
             var data;
 //         CDate::New(last, (IDate**)&date);
-            date = Droid_New("CDate",last);
+            date = Droid_New("Elastos.Utility.CDate",last);
 //         AutoPtr<ISimpleDateFormat> sdf;
             var sdf;
 //         CSimpleDateFormat::New(String("yyyy-MM-dd HH:mm"), (ISimpleDateFormat**)&sdf);
-            sdf = Droid_New("CSimpleDateFormat","yyyy-MM-dd HH:mm");
+            sdf = Droid_New("Elastos.Text.CSimpleDateFormat","yyyy-MM-dd HH:mm");
 //         String str;
             var str;
 //         sdf->FormatDate(date, &str);
@@ -1098,7 +1477,7 @@ module.exports = function(aoElastos, aoActivity){
 //         if (n > 0) {
             if (n > 0) {
 //             Int32 i = len / (1024 * 1024);
-                Int32 i = len / (1024 * 1024);
+                var i = len / (1024 * 1024);
 //             if (i > 0) {
                 if (i > 0) {
 //                 Float j = (((Float)(len % (1024 * 1024))) / (1024 * 1024)) * 10;
@@ -1118,9 +1497,9 @@ module.exports = function(aoElastos, aoActivity){
 //             else {
                 else {
 //                 Float j = (((Float)(len % 1024)) / 1024) * 10;
-                    Float j = ((len % 1024) / 1024) * 10;
+                    var j = ((len % 1024) / 1024) * 10;
 //                 Int32 m = Elastos::Core::Math::Round(j);
-                    Int32 m = Round(j);
+                    var m = Math.round(j);
 //                 sizeStr += StringUtils::Int32ToString(n);
                     sizeStr += n;
 //                 sizeStr += ".";
@@ -1149,15 +1528,18 @@ module.exports = function(aoElastos, aoActivity){
     }
 
 // void CPhotoActivity::LoadCurrentImage(
+    function LoadCurrentImage(
 //     /* [in] */ const String& path,
+        path,
 //     /* [in] */ Boolean isHighQuality)
+        isHighQuality)
 // {
-    _apt.LoadCurrentImage = function(path,isHighQuality) {
+    {
 //     Logger::D(TAG, "LoadCurrentImage()---isHighQuality:%d", isHighQuality);
         elog([
             TAG,
             "LoadCurrentImage()---",
-            JSON.stringify{
+            JSON.stringify({
                 isHighQuality:isHighQuality,
             }),
         ].join(""));
@@ -1166,9 +1548,10 @@ module.exports = function(aoElastos, aoActivity){
 //     if (isHighQuality) {
         if (isHighQuality) {
 //         AutoPtr<IWeakReference> weakHost;
+            var weakHost;
 //         GetWeakReference((IWeakReference**)&weakHost);
+            var weakHost = oActivity.GetWeakReference();
 //         assert(weakHost != NULL);
-            var weakHost = mHost;
 //         AutoPtr<MyLoadImageCallback> myLoadImage = new MyLoadImageCallback(weakHost, path, TRUE);
             var myLoadImage = new MyLoadImageCallback(weakHost, path, true);
 //         AutoPtr<IBitmapDrawable> drawable = AsyncImageLoader::LoadDrawable(path, TRUE, mPhotoView, myLoadImage);
@@ -1191,9 +1574,9 @@ module.exports = function(aoElastos, aoActivity){
                         JSON.stringify(r),
                     ].join(""));
 //                 (*mDetailsArray)[2] = StringUtils::Int32ToString(w);
-                    mDetailsArray[2] = w + '';
+                    mDetailsArray[2] = r.w + '';
 //                 (*mDetailsArray)[3] = StringUtils::Int32ToString(h);
-                    mDetailsArray[3] = h + '';
+                    mDetailsArray[3] = r.h + '';
 //             }
                 }
 //             else {
@@ -1215,9 +1598,10 @@ module.exports = function(aoElastos, aoActivity){
 //     else {
         else {
 //         AutoPtr<IWeakReference> weakHost;
+            var weakHost;
 //         GetWeakReference((IWeakReference**)&weakHost);
+            weakHost = oActivity.GetWeakReference();
 //         assert(weakHost != NULL);
-            var weakHost = mhost;
 //         AutoPtr<MyLoadImageCallback> myLoadImage = new MyLoadImageCallback(weakHost, path, FALSE);
             var myLoadImage = new MyLoadImageCallback(weakHost, path, false);
 //         AutoPtr<IBitmapDrawable> drawable = AsyncImageLoader::LoadDrawable(path, FALSE, mPhotoView, myLoadImage);
@@ -1235,6 +1619,7 @@ module.exports = function(aoElastos, aoActivity){
 //             drawable->GetIntrinsicHeight(&h);
                 h = drawable.GetIntrinsicHeight();
 //             Logger::D(TAG, "LoadCurrentImage()---w:%d,h:%d", w, h);
+                elog (TAG + "LoadCurrentImage()---w:"+w+",h:"+h);
                 elog([
                     TAG,
                     "LoadCurrentImage()---",
@@ -1261,9 +1646,11 @@ module.exports = function(aoElastos, aoActivity){
     }
 
 // void CPhotoActivity::SwitchDisplayView(
+    function SwitchDisplayView(
 //     /* [in] */ Boolean showLoading)
+        showLoading)
 // {
-    _apt.SwitchDisplayView = function(showLoading) {
+    {
 //     if (showLoading) {
         if (showLoading) {
 //         mPhotoView->SetVisibility(IView::INVISIBLE);
@@ -1288,9 +1675,11 @@ module.exports = function(aoElastos, aoActivity){
     }
 
 // void CPhotoActivity::UpdateLoadingStatus(
+    function UpdateLoadingStatus(
 //     /* [in] */ Boolean needReload)
+        needReload)
 // {
-    _apt.UpdateLoadingStatus = function(needReload) {
+    {
 //     AutoPtr<ICharSequence> cs;
         var cs;
 //     StringBuilder newText("图片加载中 ");
@@ -1322,19 +1711,13 @@ module.exports = function(aoElastos, aoActivity){
 //             cs->ToString(&oldText);
                 oldText = cs.ToString();
 //             Int32 firstIndex = oldText.IndexOf(".");
-                var firstIndex = oldText.IndexOf(".");
+                var firstIndex = oldText.indexOf(".");
 //             Int32 lastIndex = oldText.LastIndexOf(".");
-                var LastIndexOf = oldText.LastIndexOf(".");
+                var lastIndex = oldText.lastIndexOf(".");
 //             Int32 num = lastIndex - firstIndex;
-                var num = LastIndex - firstIndex;
+                var num = lastIndex - firstIndex;
 //             Logger::D(TAG, "UpdateLoadingStatus()---oldText:%s,firstIndex:%d,num:%d", oldText.string(), firstIndex, num);
-                elog([
-                    TAG,
-                    "UpdateLoadingStatus()---",
-                    oldText:oldText,
-                    firstIndex:firstIndex,
-                    num:num
-                ].join(""));
+                elog(TAG + "UpdateLoadingStatus()---oldText:" + oldText + ",firstIndex:" + firstIndex + ",num:" + num);
 //             if (num == 0) {
                 if (num == 0) {
 //                 if (firstIndex > 0) {
@@ -1366,7 +1749,7 @@ module.exports = function(aoElastos, aoActivity){
 //             cs = newText.ToCharSequence();
                 cs = CString(newText);
 //             mPhotoLoadingText->SetText(cs);
-                mPhotoLoadingText.SetText();
+                mPhotoLoadingText.SetText(cs);
 //             TriggerLoadingCallback(FALSE);
                 TriggerLoadingCallback(false);
 //         }
@@ -1374,11 +1757,7 @@ module.exports = function(aoElastos, aoActivity){
 //         else {
             else {
 //             Logger::D(TAG, "UpdateLoadingStatus()---stop:%d", ret);
-                elog([
-                    TAT,
-                    "UpdateLoadingStatus()---",
-                    stop+":"+ret,
-                ].join(""));
+                elog(TAG + "UpdateLoadingStatus()---stop:" + ret);
 //         }
             }
 //     }
@@ -1387,29 +1766,41 @@ module.exports = function(aoElastos, aoActivity){
     }
 
 // void CPhotoActivity::TriggerLoadingCallback(
+    function TriggerLoadingCallback(
 //     /* [in] */ Boolean isCancel)
+        isCancel)
 // {
-    _apt.TriggerLoadingCallback = function(isCancel) {
+    {
+
+//TO BE DELETE
+return;
+
 //     Logger::D(TAG, "TriggerLoadingCallback()---isCancel:%d", isCancel);
-        elog(TAG + "TriggerLoadingCallback()---isCancel:"+isCancel);
+        elog(TAG + "TriggerLoadingCallback()---isCancel:" + isCancel);
 //     if (isCancel) {
         if (isCancel) {
 //         mHandler->RemoveMessages(MSG_UPDATE_LOADING_STATUS);
-            mHandler.RemoveMessages(MSG_UPDATE_LOADING_STATUS);
+            //TODO:
+            //mHandler.RemoveMessages(MSG_UPDATE_LOADING_STATUS);
 //     }
         }
 //     else {
         else {
 //         Boolean needReload = FALSE;
-            needReload = false;
+            var needReload = false;
 //         AutoPtr<IMessage> msg;
+            var msg;
 //         mMyHandler->ObtainMessageEx2(MSG_UPDATE_LOADING_STATUS,
 //             needReload ? 1 : 0, 0, (IMessage**)&msg);
-            msg = mMyHandler.ObtainMessageEx2(MSG_UPDATE_LOADING_STATUS,
-                needReload ? 1 : 0, 0);
+            //TODO:
+            //msg = mMyHandler.ObtainMessageEx2(MSG_UPDATE_LOADING_STATUS,
+            //    needReload ? 1 : 0, 0);
+            msg = {what:MSG_UPDATE_LOADING_STATUS, arg1:(needReload ? 1 : 0), arg2:0};
 //         Boolean result;
 //         mMyHandler->SendMessageDelayed(msg, 1000, &result);
-            var result = mMyHandler.SendMessageDelayed(msg, 1000);
+            //TODO:
+            //var result = mMyHandler.SendMessageDelayed(msg, 1000);
+            mMyHandler.HandleMessage(msg);
 //     }
         }
 // }
@@ -1418,43 +1809,41 @@ module.exports = function(aoElastos, aoActivity){
 // ECode CPhotoActivity::OnNewIntent(
 //     /* [in] */ IIntent *intent)
 // {
-    _apt.OnNewIntent = function(intent) {
 //     mPhotoEntryList.Clear();
-        mPhotoEntryList = [];
 //     if (!LoadPhotoEntryList(intent))
-        if (!LoadPhotoEntryList(intent)) {
 //         return NOERROR;
-            return;
-        }
 
 //     mUpButton->SetVisibility(mViewSingleItem ? IView::INVISIBLE : IView::VISIBLE);
-        mUpButton.SetVisibility(mViewSingleItem ? IView__INVISIBLE : IView__VISIBLE);
 //     mPhotoSlideshow->SetVisibility(mViewSingleItem ? IView::INVISIBLE : IView::VISIBLE);
-        mPhotoSlideshow,SetVisibility(mViewSingleItem ? IView__INVISIBLE : IView__VISIBLE);
 
 //     SetCurrentPhoto();
-        SetCurrentPhoto();
 //     return NOERROR;
-        return;
 // }
-    }
 
 // Boolean CPhotoActivity::LoadPhotoEntryList(
+    function LoadPhotoEntryList(
 //     /* [in] */ IIntent* intent)
+        intent)
 // {
-    _apt.LoadPhotoEntryList = function(intent) {
+    {
 //     if (intent != NULL) {
-        if (intent) {
+        //if (intent) {
+        if (true) {
 //         String action;
+            var action;
 //         String filePath;
             var filePath;
+if (false) {
 //         intent->GetAction(&action);
-            var action = intent.GetAction();
+            action = intent.GetAction();
 //         Logger::D(TAG, "action:%s", action.string());
             elog(TAG + "action:" + action);
 //         AutoPtr<IUri> uri;
+            var uri;
 //         intent->GetData((IUri**)&uri);
-            var uri = intent.GetData();
+            //uri = intent.GetData();
+}
+            var uri = Droid_New("Elastos.Droid.Net.CStringUri", "file:///data/temp/testdisk/icon_01.jpeg");
 //         if (uri != NULL) {
             if (uri) {
 //             String scheme;
@@ -1474,7 +1863,8 @@ module.exports = function(aoElastos, aoActivity){
                         entry.sourcePath = filePath;
 //                     entry->desc = filePath.Substring(filePath.LastIndexOf(DataSourceHelper::PATH_SPLITE) + 1,
 //                         filePath.GetLength());
-                        entry.desc = filePath.split(DataSourceHelper.PATH_SPLITE).pop();
+                        //entry.desc = filePath.split(DataSourceHelper.PATH_SPLITE).pop();
+                        entry.desc = filePath.substring(filePath.lastIndexOf(DataSourceHelper.PATH_SPLITE) + 1, filePath.length);
 //                     Logger::D(TAG, "single photo, path:%s, desc:%s", entry->sourcePath.string(), entry->desc.string());
                         elog(TAG + "single photo, path:"+entry.sourcePath+", desc:"+entry.desc);
 //                     mPhotoEntryList.PushBack(entry);
@@ -1482,7 +1872,7 @@ module.exports = function(aoElastos, aoActivity){
 //                     mCurrentIndex = 0;
                         mCurrentIndex = 0;
 //                     mTotalSize = mPhotoEntryList.GetSize();
-                        mTotalSize = mPhotoEntryList.GetSize();
+                        mTotalSize = mPhotoEntryList.length;
 //                     mViewSingleItem = TRUE;
                         mViewSingleItem = true;
 //                 }
@@ -1492,10 +1882,9 @@ module.exports = function(aoElastos, aoActivity){
 //                     Logger::W(TAG, "image type is not support! filePath:%s", filePath.string());
                         elog(TAG + "image type is not support! filePath:"+filePath);
 //                     Utils::MakeToast(this, String("不支持显示该类型的文件！"), IToast::LENGTH_LONG);
-                        var utils = Droid_New("Utils");
-                        utils.MakeToast(oActivity,"不支持显示该类型的文件！");
+                        Utils.MakeToast(oActivity,"不支持显示该类型的文件！");
 //                     Finish();
-                        Finish();
+                        oActivity.Finish();
 //                     return FALSE;
                         return false;
 //                 }
@@ -1565,241 +1954,70 @@ module.exports = function(aoElastos, aoActivity){
         }
 
 //     if (mPhotoEntryList.IsEmpty()) {
-        if (!mPhotoSlideshow.length) {
+        if (!mPhotoSlideshow) {
 //         Logger::W(TAG, "mPhotoEntryList size is zero!");
-            elgo(TAG + "mPhotoSlideshow size is zero!");
+            elog(TAG + "mPhotoSlideshow size is zero!");
 //         Utils::MakeToast(this, String("没有图片文件！"), IToast::LENGTH_LONG);
-            var utils = Droid_New("Utils");
-            utils.MakeToast(oActivity, "没有图片文件！", IToast__LENGTH_LONG);
+            Utils.MakeToast(oActivity, "没有图片文件！", IToast__LENGTH_LONG);
 //         Finish();
-            Finish();
+            oActivity.Finish();
 //         return FALSE;
             return false;
 //     }
+        }
 
 //     return TRUE;
         return true;
 // }
     }
 
-    //--------Activity end----------------
+// } // namespace Gallery
 
-    //--------ActivityListener begin----------------
+//--------CxxxActivity.cpp----end----
 
-    //return {
-    function CActivityListener (host) {
-        this.host = host;
-    };
-    var _pt = CActivityListener.prototype;
+//--------CActivityListener----default begin----
 
-// ECode CPhotoActivity::OnCreate(
-//     /* [in] */ IBundle* savedInstanceState)
-// {
-    _pt.OnCreate = function(aoContext){
-        var _this = aoContext;
-//     Logger::D(TAG, "OnCreate()---");
-        elog(TAG + "OnCreate()---");
-//     Activity::OnCreate(savedInstanceState);
-//     SetContentView(R::layout::activity_photo);
-        _this.SetContentView(R.layout.activity_photo);
+    // _apt.OnCreate = function(context, savedInstanceState){
+    //     elog('====jso_activity_cb====OnCreate.begin====');
+    // }  //OnCreate
+    _apt.OnStart = function(context){
+        timeOnStart = new Date().getTime();
+        var t = timeOnStart - timeOnCreate;
 
-//     AutoPtr<IWeakReference> weakHost;
-//     GetWeakReference((IWeakReference**)&weakHost);
-//     mMyHandler = new MyHandler(weakHost);
-        mMyHandler = new MyHandler(_this);
-
-//     mListener = new MyListener(this);
-        mListener = new MyListener(_this);
-//     mDialogListener = new DialogListener(this);
-        mDialogListener = new DialogListener(_this);
-//     mDetailsArray = ArrayOf<String>::Alloc(6);
-        mDetailsArray = [];
-
-//     AutoPtr<IIntent> intent;
-//     GetIntent((IIntent**)&intent);
-        var intent = _this.GetIntent();
-//     if (!LoadPhotoEntryList(intent))
-//         return NOERROR;
-        try {LoadPhotoEntryList(intent) catch (e) {
-            return;
-        }
-
-//     AutoPtr<IView> view = FindViewById(R::id::photo_up);
-//     mUpButton = IImageView::Probe(view);
-//     assert(mUpButton != NULL);
-        mUpButton = _this.FindViewById(R.id.photo_up);
-
-//     view = FindViewById(R::id::photo_name);
-//     mPhotoName = ITextView::Probe(view);
-//     assert(mPhotoName != NULL);
-        mPhotoName = _this.FindViewById(R,id,photo_name);
-
-//     view = FindViewById(R::id::photo_slideshow);
-//     mPhotoSlideshow = IImageView::Probe(view);
-//     assert(mPhotoSlideshow != NULL);
-        mPhotoSlideshow = _this.FindViewById(R.id.photo_slideshow);
-
-//     view = FindViewById(R::id::photo_more);
-//     mPhotoMore = IImageView::Probe(view);
-//     assert(mPhotoMore != NULL);
-        mPhotoMore = _this.FindViewById(R.id.photo_more);
-
-//     view = FindViewById(R::id::photo_detail);
-//     mPhotoView = IImageView::Probe(view);
-//     assert(mPhotoView != NULL);
-        mPhotoView = _this.FindViewById(R.id.photo_detail);
-
-//     view = FindViewById(R::id::photo_loading);
-//     mPhotoLoadingText = ITextView::Probe(view);
-//     assert(mPhotoLoadingText != NULL);
-        mPhotoLoadingText = _this.FindViewById(R.id.photo_loading);
-
-//     view = FindViewById(R::id::img_btn_left);
-//     mLeftButton = IImageButton::Probe(view);
-//     assert(mLeftButton != NULL);
-        mLeftButton = _this.FindViewById(R.id.img_btn_left);
-
-//     view = FindViewById(R::id::img_btn_right);
-//     mRightButton = IImageButton::Probe(view);
-//     assert(mRightButton != NULL);
-        mRightButton = _this.FindViewById(R.id.img_btn_right);
-
-//     view = FindViewById(R::id::img_btn_zoom);
-//     mZoomButton = IImageButton::Probe(view);
-//     assert(mZoomButton != NULL);
-        mZoomButton = _this.FindViewById(R.id.img_btn_zoom);
-
-//     view = FindViewById(R::id::img_btn_rotate_left);
-//     mRotateLeftButton = IImageButton::Probe(view);
-//     assert(mRotateLeftButton != NULL);
-        mRotateLeftButton = _this.FindViewById(R.id.img_btn_rotate_left);
-
-//     view = FindViewById(R::id::img_btn_rotate_right);
-//     mRotateRightButton = IImageButton::Probe(view);
-//     assert(mRotateRightButton != NULL);
-        mRotateRightButton = _this.FindViewById(R.id.img_btn_rotate_right);
-
-//     view = FindViewById(R::id::img_btn_share);
-//     mShareButton = IImageButton::Probe(view);
-//     assert(mShareButton != NULL);
-        mShareButton = _this.FindViewById(R.id.img_btn_share);
-
-//     view = FindViewById(R::id::img_btn_edit);
-//     mEditButton = IImageButton::Probe(view);
-//     assert(mEditButton != NULL);
-        mEditButton = _this.FindViewById(R.id.img_btn_edit);
-
-//     view = FindViewById(R::id::img_btn_delete);
-//     mDeleteButton = IImageButton::Probe(view);
-//     assert(mDeleteButton != NULL);
-        mDeleteButton = _this.FindViewById(R.id.img_btn_delete);
-
-//     AutoPtr<IViewOnClickListener> clickListener = (IViewOnClickListener*)mListener.Get();
-//     mUpButton->SetOnClickListener(clickListener);
-        mUpButton.SetOnClickListener(mListener);
-//     mPhotoSlideshow->SetOnClickListener(clickListener);
-        mUpButton.SetOnClickListener(mListener);
-//     mPhotoSlideshow->SetOnClickListener(clickListener);
-        mUpButton.SetOnClickListener(mListener);
-//     mLeftButton->SetOnClickListener(clickListener);
-        mLeftButton.SetOnClickListener(mListener);
-//     mRightButton->SetOnClickListener(clickListener);
-        mRightButton.SetOnClickListener(mListener);
-//     mZoomButton->SetOnClickListener(clickListener);
-        mZoomButton.SetOnClickListener(mListener);
-//     mRotateLeftButton->SetOnClickListener(clickListener);
-        mRotateLeftButton.SetOnClickListener(mListener);
-//     mRotateRightButton->SetOnClickListener(clickListener);
-        mRotateRightButton.SetOnClickListener(mListener);
-//     mShareButton->SetOnClickListener(clickListener);
-        mShareButton.SetOnClickListener(mListener);
-//     mEditButton->SetOnClickListener(clickListener);
-        mEditButton.SetOnClickListener(mListener);
-//     mDeleteButton->SetOnClickListener(clickListener);
-        mDeleteButton.SetOnClickListener(mListener);
-
-//     if (mViewSingleItem) {
-        if (mViewSingleItem) {
-//         mUpButton->SetVisibility(IView::INVISIBLE);
-            mUpButton.SetVisibility(IView__INVISIBLE);
-//         mPhotoSlideshow->SetVisibility(IView::INVISIBLE);
-            mPhotoSlideshow.SetVisibility(IView__INVISIBLE);
-//     }
-        }
-
-//     // for test
-//     AutoPtr<IDisplayMetrics> dm;
-//     AutoPtr<IDisplay> dis;
-//     CDisplayMetrics::New((IDisplayMetrics**)&dm);
-        var dm = Droid_New("CDisplayMetrics");
-//     GetWindowManager()->GetDefaultDisplay((IDisplay**)&dis);
-        var dis = _this.GetWindowManager().GetDefaultDisplay();
-//     dis->GetMetrics(dm);
-        dis.GetMetrics(dm);
-//     Int32 widthPixels = 0, heightPixels = 0;
-//     dm->GetWidthPixels(&widthPixels);
-        var widthPixels = dm.GetWidthPixels();
-//     dm->GetHeightPixels(&heightPixels);
-        var heightPixels = dm.GetHeightPixels();
-//     mDisplayWidth = widthPixels - 128;
-        mDisplayWidth = widthPixels - 128;
-//     mDisplayHeight = heightPixels - 128;
-        mDisplayHeight = heightPixels - 128;
-//     Logger::D(TAG, "OnCreate()---widthPixels:%d,heightPixels:%d,mDisplayWidth:%d,mDisplayHeight:%d",
-//         widthPixels, heightPixels, mDisplayWidth, mDisplayHeight);
-        elog([
-            TAG + "OnCreate()---["
-            "widthPixels:" + widthPixels,
-            "heightPixels" + heightPixels,
-            "mDisplayWidth:" + mDisplayWidth,
-            "mDisplayWidth:" + mDisplayWidth,
-            "]"
-        ].join("]["));
-
-//     SetCurrentPhoto();
-        SetCurrentPhoto();
-//     return NOERROR;
-        return;
-// }
-    }  //OnCreate
-    _pt.OnStart = function(aoContext){
-        elog('====jso_activity_cb====OnStart.begin====');
+        elog('====jso_activity_cb====OnStart.begin====time:'+t);
     }
-    _pt.OnResume = function(aoContext){
-            elog('====jso_activity_cb====OnResume.begin====');
+    _apt.OnResume = function(context){
+        elog('====jso_activity_cb====OnResume.begin====');
     }
-    _pt.OnPause = function(aoContext){
-            elog('====jso_activity_cb====OnPause.begin====');
+    _apt.OnPause = function(context){
+        elog('====jso_activity_cb====OnPause.begin====');
     }
-    _pt.OnStop = function(aoContext){
-            elog('====jso_activity_cb====OnStop.begin====');
+    _apt.OnStop = function(context){
+        elog('====jso_activity_cb====OnStop.begin====');
     }
-    _pt.OnDestroy = function(aoContext){
-            elog('====jso_activity_cb====OnDestroy.begin====');
+    _apt.OnDestroy = function(context){
+        elog('====jso_activity_cb====OnDestroy.begin====');
     }
-    _pt.OnActivityResult = function(aoContext, aiRequestCode, aiResultCode, aoIntentData){
-            elog('====jso_activity_cb====OnActivityResult.begin====');
-        },
-    _pt.OnCreateDialog = function(aoContext, aiId, out_aoDialog){
-            elog('====jso_activity_cb====OnCreateDialog.begin====');
+    _apt.OnActivityResult = function(context, aiRequestCode, aiResultCode, aoIntentData){
+        elog('====jso_activity_cb====OnActivityResult.begin====');
+    }
+    _apt.OnCreateDialog = function(context, aiId, out_aoDialog){
+        elog('====jso_activity_cb====OnCreateDialog.begin====');
     }   //OnCreateDialog
-    _pt.OnCreateContextMenu = function(aoContext, aoMenu, aoV, aoMenuInfo){
-            elog('====jso_activity_cb====OnCreateContextMenu.begin====');
+    _apt.OnCreateContextMenu = function(context, aoMenu, aoV, aoMenuInfo){
+        elog('====jso_activity_cb====OnCreateContextMenu.begin====');
     }
-    _pt.CreateNavigationBar = function(aoContext){
-            elog('====jso_activity_cb====CreateNavigationBar.begin====');
+    _apt.CreateNavigationBar = function(context){
+        elog('====jso_activity_cb====CreateNavigationBar.begin====');
     }
-        //OnExchangeData : function(inObject_0, inObject_1, inObject_2, inObject_3, inObject_4, outObject_0, outObject_1, outObject_2, outObject_3, outObject_4) {
-    _pt.OnExchangeData = function(aiTimes ,aoInObject, aoOutObject) {
-            elog('====jso_activity_cb====OnExchangeData.begin====');
+    _apt.OnExchangeData = function(aiTimes ,aoInObject, aoOutObject) {
+        elog('====jso_activity_cb====OnExchangeData.begin====');
     }
-    _pt.OnHandleMessage = function(aoContext, aoMessage){
-            elog('====jso_activity_cb====OnHandleMessage.begin====');
+    _apt.OnHandleMessage = function(context, aoMessage){
+        elog('====jso_activity_cb====OnHandleMessage.begin====');
     }
-    //}   //return
-    //--------ActivityListener end----------------
 
-    var _js_activity = new CPhotoActivity();
+//--------CActivityListener----default end----
 
-    return new CActivityListener(_js_activity);
+    return new CActivityListener(oActivity);
 };  //module.exports

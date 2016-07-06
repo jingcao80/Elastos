@@ -16,6 +16,9 @@ SOURCES += Elastos.Droid.Core.cpp
 SOURCES += CAlbumActivity.cpp
 SOURCES += CAboutActivity.cpp
 SOURCES += CBrowserActivity.cpp
+SOURCES += CPhotoActivity.cpp
+SOURCES += CEditActivity.cpp
+SOURCES += CWallpaperActivity.cpp
 SOURCES += CTestEventListener.cpp
 
 LIBRARIES  = $(XDK_USER_LIB)/Elastos.Runtime.lib

@@ -1,3 +1,6 @@
-module.exports = {
+module.exports = function(aoElastos){
 
+    var DialogDetailsView = {};
+
+    return DialogDetailsView;
 };

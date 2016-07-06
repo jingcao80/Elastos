@@ -258,24 +258,33 @@ function showMethods(ao) {
 function classinfo__createObject(oModuleInfo,oClassInfo){
     var newObject;
 
+elog("classinfo__createObject======00======");
     if(typeof(oModuleInfo)=='string') {
         oModuleInfo = _getModuleInfo(oModuleInfo);
     }
 
+elog("classinfo__createObject======01======");
     var sClassName = "null";
     if(typeof(oClassInfo)=='string') {
         sClassName = oClassInfo;
         oClassInfo = oModuleInfo.GetClassInfo(oClassInfo);
+        if (!oClassInfo) {
+            elog("classinfo__createObject======can't find class: " + sClassName);
+            return;
+        }
         sClassName = oClassInfo.GetName();
     }
     else {
         sClassName = oClassInfo.GetName();
     }
 
+elog("classinfo__createObject======02======");
     var bCreateOnUIThread = getCreateOnUIThread(sClassName);
 
+elog("classinfo__createObject======03======");
     var length = arguments.length;
     if(length==2){
+elog("classinfo__createObject======04.1======");
         if (bCreateOnUIThread) {
             newObject = oClassInfo.RemoteCreateObject();
         }
@@ -284,12 +293,14 @@ function classinfo__createObject(oModuleInfo,oClassInfo){
         }
     }
     else {
+elog("classinfo__createObject======04.2======");
         var aConstructorInfos = oClassInfo.GetAllConstructorInfos();
 
         var oConstructorInfo;
         var paramCount = length - 2;
         var bSameArgs = false;
         for(var i=0, im=aConstructorInfos.length; i<im; i++){
+elog("classinfo__createObject======05======");
             oConstructorInfo = aConstructorInfos[i];
 
             var _paramCount = oConstructorInfo.GetParamCount();
@@ -347,17 +358,21 @@ function classinfo__createObject(oModuleInfo,oClassInfo){
                 }
                 if (bSameArgs) break;
             }
+elog("classinfo__createObject======06======");
         }
 
         if (!bSameArgs) {
             elog("====classinfo__createObject====can not find constructor : " + sClassName);
             return null;
         }
+elog("classinfo__createObject======07======");
 
         var aParamInfos = oConstructorInfo.GetAllParamInfos();
         var oArgumentList = oConstructorInfo.CreateArgumentList();
+elog("classinfo__createObject======08======");
 
         for(var i = 0, im = paramCount; i<im; i++) {
+elog("classinfo__createObject======09======");
             var paramInfo = aParamInfos[i];
             var oTypeInfo = paramInfo.GetTypeInfo();
 
@@ -436,7 +451,9 @@ function classinfo__createObject(oModuleInfo,oClassInfo){
                     elog('==============classinfo__createObject ===========argument type: to be finished===========rc:'+ i +'======datatype:'+iDataType);
                     break;
             }
+elog("classinfo__createObject======10======");
         }
+elog("classinfo__createObject======11======");
 
         //var sAnnotation = oConstructorInfo.GetAnnotation();
 
@@ -447,7 +464,9 @@ function classinfo__createObject(oModuleInfo,oClassInfo){
         else {
             newObject = oConstructorInfo.LocalCreateObject(oArgumentList);
         }
+elog("classinfo__createObject======12======");
     }
+elog("classinfo__createObject======13======");
 
     return newObject;
 }   //classinfo__createObject
