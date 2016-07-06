@@ -1801,12 +1801,12 @@ ECode BaseBundle::WriteArrayMapInternal(
 ECode BaseBundle::WriteToParcelInner(
     /* [in] */ IParcel* dest)
 {
+    Int32 length = 0;
     if (mParcelledData != NULL) {
         if (mParcelledData == EMPTY_PARCEL) {
             dest->WriteInt32(0);
         }
         else {
-            Int32 length;
             mParcelledData->GetElementSize(&length);
             dest->WriteInt32(length);
             dest->WriteInt32(BUNDLE_MAGIC); // 'B' 'N' 'D' 'L'
@@ -1836,19 +1836,21 @@ ECode BaseBundle::WriteToParcelInner(
 
             // Backpatch length
             dest->SetDataPosition(lengthPos);
-            Int32 length = endPos - startPos;
+            length = endPos - startPos;
             dest->WriteInt32(length);
             dest->SetDataPosition(endPos);
         }
     }
 
-    //if (mJavaData != NULL) {
-    //    dest->WriteInt32(mJavaData->GetLength());
-    //    dest->WriteArrayOf((Handle32)mJavaData.Get());
-    //}
-    //else {
-    //    dest->WriteInt32(0);
-    //}
+    if (length != 0) {
+        if (mJavaData != NULL) {
+           dest->WriteInt32(mJavaData->GetLength());
+           dest->WriteArrayOf((Handle32)mJavaData.Get());
+        }
+        else {
+           dest->WriteInt32(0);
+        }
+    }
 
     return NOERROR;
 }
@@ -1901,13 +1903,13 @@ ECode BaseBundle::ReadFromParcelInner(
     mParcelledData->AppendFrom(source, offset, length);
     mParcelledData->SetDataPosition(0);
 
-    //Int32 javaDataLength;
-    //source->ReadInt32(&javaDataLength);
-    //if (javaDataLength > 0) {
-    //    AutoPtr<ArrayOf<Byte> > data;
-    //    source->ReadArrayOf((Handle32*)&data);
-    //    mJavaData = data;
-    //}
+    Int32 javaDataLength;
+    source->ReadInt32(&javaDataLength);
+    if (javaDataLength > 0) {
+       AutoPtr<ArrayOf<Byte> > data;
+       source->ReadArrayOf((Handle32*)&data);
+       mJavaData = data;
+    }
     return NOERROR;
 }
 

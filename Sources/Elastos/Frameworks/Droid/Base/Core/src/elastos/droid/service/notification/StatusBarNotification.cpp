@@ -148,7 +148,9 @@ ECode StatusBarNotification::ReadFromParcel(
     in->ReadString(&mPkg);
     in->ReadString(&mOpPkg);
     in->ReadInt32(&mId);
-    if (mId != 0) {
+    Int32 value;
+    in->ReadInt32(&value);
+    if (value != 0) {
         in->ReadString(&mTag);
     }
     else {

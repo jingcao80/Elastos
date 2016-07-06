@@ -66,6 +66,7 @@ module
     using interface Elastos.Droid.Media.IIRingtonePlayer;
     using interface Elastos.Droid.Media.IIAudioRoutesObserver;
     using interface Elastos.Droid.Media.IIVolumeController;
+    using interface Elastos.Droid.Net.IINetworkPolicyListener;
     using interface Elastos.Droid.Os.IBinder;
     using interface Elastos.Droid.Os.IICancellationSignal;
     using interface Elastos.Droid.Os.IIMessenger;
@@ -891,6 +892,15 @@ module
             [in] Handle64 jInstance);
 
         interface IIWindowSessionCallback;
+        interface IBinder;
+    }
+
+    class CINetworkPolicyListenerNative {
+        constructor(
+            [in] Handle64 jVM,
+            [in] Handle64 jInstance);
+
+        interface IINetworkPolicyListener;
         interface IBinder;
     }
 

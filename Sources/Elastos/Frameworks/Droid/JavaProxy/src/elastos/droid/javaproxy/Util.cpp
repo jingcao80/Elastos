@@ -8312,6 +8312,7 @@ jobject Util::ToJavaIIntentSender(
     jobject jisender = env->NewObject(pergKlass, m, (jlong)isender);
     CheckErrorAndLog(env, "Util", "ToJavaIIntentSender NewObject: ElIIntentSenderProxy : %d!\n", __LINE__);
     isender->AddRef();
+    Logger::D("xihaoc", "ToJavaIIntentSender isender = %p", isender);
 
     env->DeleteLocalRef(pergKlass);
     return jisender;

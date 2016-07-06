@@ -281,7 +281,7 @@ CConnectivityService::LegacyTypeTracker::LegacyTypeTracker(
 ECode CConnectivityService::LegacyTypeTracker::AddSupportedType(
     /* [in] */ Int32 type)
 {
-    if ((&mTypeLists)[type] != NULL) {
+    if ((*mTypeLists)[type] != NULL) {
         Slogger::E(TAG, "legacy list for type %d already initialized", type);
         return E_ILLEGAL_STATE_EXCEPTION;
     }
