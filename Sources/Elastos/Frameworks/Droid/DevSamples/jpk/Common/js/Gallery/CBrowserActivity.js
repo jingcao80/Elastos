@@ -17,6 +17,13 @@ module.exports = function(aoElastos, aoActivity){
     }
     var _apt = CActivityListener.prototype;
 
+    var IView__VISIBLE = 0x00000000;
+    var IView__INVISIBLE = 0x00000004;
+    var IView__GONE = 0x00000008;
+    var IMotionEvent__ACTION_DOWN = 0;
+    var IMotionEvent__ACTION_UP = 1;
+    var IContext__LAYOUT_INFLATER_SERVICE = "layout_inflater";
+
 //--------common definition----end----
 
 //--------CxxxActivity.h----begin----
@@ -521,12 +528,10 @@ module.exports = function(aoElastos, aoActivity){
         var overlayView = view;
 
 //     if (IMotionEvent::ACTION_DOWN == action) {
-        var IMotionEvent__ACTION_DOWN = 0;  //TODO
         if (IMotionEvent__ACTION_DOWN == action) {
 //         Logger::D(TAG, "onTouch()--ACTION_DOWN");
             elog(TAG + "onTouch()--ACTION_DOWN");
 //         overlayView->SetVisibility(IView::VISIBLE);
-            var IView__VISIBLE = 0x00000000;    //TODO
             overlayView.SetVisibility(IView__VISIBLE);
 //     }
         }
@@ -535,7 +540,6 @@ module.exports = function(aoElastos, aoActivity){
 //         Logger::D(TAG, "onTouch()--ACTION:%d", action);
             elog(TAG + "OnTouch()--ACTION:" + action);
 //         overlayView->SetVisibility(IView::GONE);
-            var IView__GONE = 0x00000008;   //TODO
             overlayView.SetVisibility(IView__GONE);
 //         AutoPtr<IViewParent> viewParent;
             var viewParent;
@@ -554,7 +558,6 @@ module.exports = function(aoElastos, aoActivity){
 //         Logger::D(TAG, "onTouch()--index:%d", index);
             elog(TAG + "OnTouch()--index:" + index);
 //         if (IMotionEvent::ACTION_UP == action) {
-            var IMotionEvent__ACTION_UP = 1;    //TODO
             if (IMotionEvent__ACTION_UP == action) {
 //             AutoPtr<PictureEntry> entry = mHost->mPictureEntryList[index];
                 var entry = mPictureEntryList[index];
@@ -620,13 +623,15 @@ module.exports = function(aoElastos, aoActivity){
 // {
     {
 //     // Logger::D(TAG, "MyViewBinder()---SetViewValue---");
-        elog(TAG + "MyViewBinder()---SetViewValue---");
+        elog(TAG + "MyViewBinder---SetViewValue---");
 //     VALIDATE_NOT_NULL(result)
 //     *result = FALSE;
         result.data = false;
+
 //     if (IRelativeLayout::Probe(view) != NULL) {
         if (CObject.hasInterface(view, "IRelativeLayout")){
 //         // Logger::D(TAG, "MyViewBinder()---SetViewValue---SetOnTouchListener");
+            elog(TAG + "MyViewBinder---SetViewValue---SetOnTouchListener");
 //         AutoPtr<IRelativeLayout> thumbLayout = IRelativeLayout::Probe(view);
             var thumbLayout = view;
 //         thumbLayout->SetOnTouchListener((IViewOnTouchListener*)(mHost->mMyListener->Probe(EIID_IViewOnTouchListener)));
@@ -638,6 +643,7 @@ module.exports = function(aoElastos, aoActivity){
 //     else if (IImageView::Probe(view) != NULL) {
         else if (CObject.hasInterface(view, "IImageView")) {
 //         // Logger::D(TAG, "MyViewBinder()---SetViewValue---text:%s", textRepresentation.string());
+            elog(TAG + "MyViewBinder()---SetViewValue---text::" + textRepresentation);
 //         AutoPtr<IImageView> imageView = IImageView::Probe(view);
             var imageView = view;
 //         AutoPtr<IWeakReference> weakHost;
@@ -786,11 +792,13 @@ module.exports = function(aoElastos, aoActivity){
 //     GetIntent((IIntent**)&intent);
         var intent = _this.GetIntent();
 //     if (intent != NULL) {
-        if (intent) {
+        //if (intent) {
+        if (true) {
 //         String path;
             var path;
 //         intent->GetStringExtra(DataSourceHelper::SOURCE_PATH, &path);
             path = intent.GetStringExtra(DataSourceHelper.SOURCE_PATH);
+            path = "/data/temp/testdisk";
 elog("path===="+path+"===="+DataSourceHelper.SOURCE_PATH +"=="+ (path instanceof String) +"=="+ typeof path);
 //         if (!path.IsNullOrEmpty()) {
             if (typeof path == "string") {
@@ -798,7 +806,8 @@ elog("path===="+path+"===="+DataSourceHelper.SOURCE_PATH +"=="+ (path instanceof
                 var folderName;
 elog("imageItems====1====");
 //             intent->GetStringExtra(DataSourceHelper::SOURCE_DESC, &folderName);
-                folderName = intent.GetStringExtra(DataSourceHelper.SOURCE_DESC)
+                //folderName = intent.GetStringExtra(DataSourceHelper.SOURCE_DESC)
+                folderName = "testdisk";
 elog("imageItems====folderName====" + folderName);
 //             AutoPtr<List<String> > imageItems = DataSourceHelper::GetItemList(path);
                 var imageItems = DataSourceHelper.GetItemList(path);
@@ -812,8 +821,6 @@ elog("imageItems====imageItems:"+(imageItems instanceof Array) + '==' + JSON.str
 //                 for (Int32 i = 0; it != imageItems->End(); ++it, ++i) {
                     for (var i=0,im=imageItems.length;i<im;i++) {
 //                     entry = new PictureEntry();
-                        var entry1 = {a:0,b:0};
-elog("imageItems====entry0:" + JSON.stringify(entry1));
                         entry = {};
 elog("imageItems====entry0:" + JSON.stringify(entry));
 //                     entry->sourcePath = path;
@@ -869,7 +876,7 @@ elog("imageItems====13========");
 //     }
         }
 
-if (true) {
+if (false) {
 elog("Browser::SetListener----0----");
 //     AutoPtr<IViewOnClickListener> clickListener = (IViewOnClickListener*)mMyListener.Get();
         var clickListener = mMyListener;
@@ -976,7 +983,6 @@ elog("Browser::SetListener----5----");
 //     AutoPtr<ILayoutInflater> inflater;
         var inflater;
 //     GetSystemService(IContext::LAYOUT_INFLATER_SERVICE, (IInterface**)&inflater);
-        var IContext__LAYOUT_INFLATER_SERVICE = "layout_inflater"; //TODO
         inflater =  oActivity.GetSystemService(IContext__LAYOUT_INFLATER_SERVICE);
 
 //     AutoPtr<IView> layout;
@@ -1072,7 +1078,7 @@ elog("Browser::SetListener----5----");
 //         AutoPtr<IObjectContainer> dataList;
             var dataList;
 //         CParcelableObjectContainer::New((IObjectContainer**)&dataList);
-            var dataList = Core_New("Elastos.Utility.CArrayList");
+            dataList = Core_New("Elastos.Utility.CArrayList");
 
 //         AutoPtr<PictureEntry> entry;
             var entry;
@@ -1088,15 +1094,19 @@ elog(TAG + "GetSimpleAdapter()----1----");
 //         List< AutoPtr<PictureEntry> >::Iterator it = mPictureEntryList.Begin();
 //         for (; it != mPictureEntryList.End(); ++it) {
             for (var i=0,im=mPictureEntryList.length;i<im;i++) {
+elog(TAG + "GetSimpleAdapter()----"+i+"----1.0----");
 //             entry = *it;
                 entry = mPictureEntryList[i];
 //             AutoPtr<IObjectStringMap> map;
                 var map;
 //             CObjectStringMap::New((IObjectStringMap**)&map);
+elog(TAG + "GetSimpleAdapter()----"+i+"----1.1----");
                 map = Core_New('Elastos.Utility.CHashMap');
+if(false) {
 //             AutoPtr<IFile> file;
                 var file;
 //             CFile::New(entry->sourcePath, (IFile**)&file);
+elog(TAG + "GetSimpleAdapter()----"+i+"----1.2----");
                 var file = Core_New('Elastos.IO.CFile', entry.sourcePath);
 //             Int64 last = 0;
                 var last = 0;
@@ -1104,21 +1114,27 @@ elog(TAG + "GetSimpleAdapter()----1----");
                 last = file.GetLastModified();
 //             Logger::D(TAG, "GetSimpleAdapter()---sort--last:%lld,--path:%s", last, entry->sourcePath.string());
                 elog(TAG + "GetSimpleAdapter()---sort--last:"+last+",--path:"+entry.sourcePath);
+}
 //             AutoPtr<ICharSequence> cs;
                 var cs;
 //             CStringWrapper::New(entry->sourcePath, (ICharSequence**)&cs);
                 cs = CString(entry.sourcePath);
 //             map->Put(key1, cs->Probe(EIID_ICharSequence));
+elog(TAG + "GetSimpleAdapter()----"+i+"----1.3----");
                 map.Put( CString(key1), cs);
 
 //             AutoPtr<IBoolean> boolValue;
                 var boolValue;
 //             CBoolean::New(FALSE, (IBoolean**)&boolValue);
+elog(TAG + "GetSimpleAdapter()----"+i+"----1.4----");
                 boolValue = Core_New('Elastos.Core.CBoolean', false);
 //             map->Put(key2, boolValue->Probe(EIID_IBoolean));
+elog(TAG + "GetSimpleAdapter()----"+i+"----1.5----");
                 map.Put( CString(key2), boolValue);
 //             dataList->Add(map);
+elog(TAG + "GetSimpleAdapter()----"+i+"----1.6----");
                 dataList.Add(map);
+elog(TAG + "GetSimpleAdapter()----"+i+"----1.7----");
 //         }
             }
 elog(TAG + "GetSimpleAdapter()----2----");
@@ -1147,15 +1163,7 @@ elog(TAG + "GetSimpleAdapter()----4----");
             var myViewBinder = new MyViewBinder();
 elog(TAG + "GetSimpleAdapter()----5----");
 //         simpleAdapter->SetViewBinder(ISimpleAdapterViewBinder::Probe(myViewBinder));
-            //simpleAdapter.SetViewBinder(myViewBinder);
-
-
-            simpleAdapter.SetViewBinder({
-                SetViewValue : function (aoView, aoData, asTextRepresentation, out_abResult) {
-                    elog('==================Browser.SetViewValue.begin=============asTextRepresentation:'+asTextRepresentation);
-                    out_abResult.data = true;
-                }
-            })
+            simpleAdapter.SetViewBinder(myViewBinder);
 
 elog(TAG + "GetSimpleAdapter()----6----");
 //     }

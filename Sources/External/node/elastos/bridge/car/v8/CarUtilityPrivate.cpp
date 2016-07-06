@@ -53,9 +53,6 @@
 
 #include <utils/Log.h>
 
-//using Elastos::Core::CString;
-using Elastos::Core::ICharSequence;
-
 namespace JSC {
 namespace Bindings {
 

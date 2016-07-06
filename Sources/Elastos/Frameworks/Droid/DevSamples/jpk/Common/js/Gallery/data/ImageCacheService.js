@@ -14,8 +14,6 @@ function _extend(a,b){for(var p in b)a[p]=b[p];}
 //     , mImgHeight(h)
 // {
 function ImageCacheService(w, h) {
-    elog("====ImageCacheService::ImageCacheService====begin========");
-
     _initProp(this);
 
     var prop = _prop[this.idx];
@@ -23,17 +21,13 @@ function ImageCacheService(w, h) {
     prop.mImgHeight = h;
 
 //     Logger::D(TAG, "ImageCacheService()-----");
-    elog("====ImageCacheService::ImageCacheService=====");
 //     AutoPtr<IFile> cacheDir;
 //     CFile::New(CACHE_PATH, (IFile**)&cacheDir);
     var cacheDir = Core_New("Elastos.IO.CFile", ImageCacheService.CACHE_PATH);
 //     assert(cacheDir != NULL);
 //     Boolean ret = FALSE;
 
-    elog("====ImageCacheService::ImageCacheService=====GetPath.0====");
     var path = cacheDir.GetPath();
-    elog("====ImageCacheService::ImageCacheService=====GetPath.1===="+path);
-
 
     var ret = false;
 //     cacheDir->Exists(&ret);
@@ -55,9 +49,7 @@ function ImageCacheService(w, h) {
 
 //     AutoPtr<ArrayOf<IFile*> > files;
 //     cacheDir->ListFiles((ArrayOf<IFile*>**)&files);
-    elog("====ImageCacheService::ImageCacheService=====ListFiles====begin====");
     var files = cacheDir.ListFiles();
-    elog("====ImageCacheService::ImageCacheService=====ListFiles====end====");
 //     if (files != NULL && files->GetLength() > 0) {
     if (files && files.length) {
 //         Int32 len = files->GetLength();
@@ -111,8 +103,6 @@ function ImageCacheService(w, h) {
 //     /* [out] */ IBitmap** bitmap)
 // {
 function GetImageData(key, isHigh, len, modify) {
-    elog("====ImageCacheService::GetImageData====begin========");
-
     var bitmap = null;
 
     var prop = _prop[this.idx];
@@ -146,10 +136,8 @@ function GetImageData(key, isHigh, len, modify) {
 //                     CBitmapFactory::AcquireSingleton((IBitmapFactory**)&factory);
                     var factory = Droid_New("Elastos.Droid.Graphics.CBitmapFactory");
 //                     return factory->DecodeFile(path, NULL, bitmap);
-                    elog("====ImageCacheService::GetImageData====begin========DecodeFile.1.1 path:"+path);
                     //bitmap = factory.DecodeFile(path, null);
                     bitmap = factory.DecodeFile(path);
-                    elog("====ImageCacheService::GetImageData====begin========DecodeFile.1.2");
 //                 }
                 } else {
 //                 else {
@@ -171,10 +159,8 @@ function GetImageData(key, isHigh, len, modify) {
 //                     CBitmapFactory::AcquireSingleton((IBitmapFactory**)&factory);
                     var factory = Droid_New("Elastos.Droid.Graphics.CBitmapFactory");
 //                     return factory->DecodeFile(path, NULL, bitmap);
-                    elog("====ImageCacheService::GetImageData====begin========DecodeFile.2.1 path:"+path);
                     //bitmap = factory.DecodeFile(path, null);
                     bitmap = factory.DecodeFile(path);
-                    elog("====ImageCacheService::GetImageData====begin========DecodeFile.2.2");
 //                 }
                 }
                 else {
@@ -192,8 +178,6 @@ function GetImageData(key, isHigh, len, modify) {
 
     }
 
-    elog("====ImageCacheService::GetImageData====end========");
-
 //     *bitmap = NULL;
     return bitmap;
 //     return NOERROR;
@@ -208,8 +192,6 @@ function GetImageData(key, isHigh, len, modify) {
 //     /* [in] */ IBitmap* bitmap)
 // {
 function PutImageData(key, isHigh, len, modify, bitmap){
-    elog("====ImageCacheService::PutImageData====begin========");
-
     var TAG = ImageCacheService.TAG;
     var prop = _prop[this.idx];
 
@@ -299,8 +281,6 @@ function PutImageData(key, isHigh, len, modify, bitmap){
 // ECode ImageCacheService::UpdateCache()
 // {
 function UpdateCache(){
-    elog("====ImageCacheService::UpdateCache====begin========");
-
     var prop = _prop[this.idx];
 
 //     Logger::D(TAG, "UpdateCache()----1--size:%d", mCachePathList.GetSize());
@@ -336,8 +316,6 @@ function UpdateCache(){
 // void ImageCacheService::UpdateCacheFilesIfNecessary()
 // {
 function _UpdateCacheFilesIfNecessary(ao_this){
-    elog("====ImageCacheService::_UpdateCacheFilesIfNecessary====begin========");
-
     var prop = _prop[ao_this.idx];
 
 //     List<String>::Iterator it = mCachePathList.Begin();
@@ -411,8 +389,6 @@ function _UpdateCacheFilesIfNecessary(ao_this){
 //     /* [in] */ const String& fileName)
 // {
 function _DeleteFile(fileName){
-    elog("====ImageCacheService::_DeleteFile====begin========");
-
 //     Logger::D(TAG, "DeleteFile()------fileName:%s", fileName.string());
 //     AutoPtr<IFile> file;
 //     CFile::New(CACHE_PATH, fileName, (IFile**)&file);
@@ -436,8 +412,6 @@ function _DeleteFile(fileName){
 //     /* [in] */ Int32 h)
 // {
 function _CreateConfigFile(w, h){
-    elog("====ImageCacheService::_CreateConfigFile====begin========");
-
 //     String configFile(StringUtils::Int32ToString(w));
 //     configFile += "$";
 //     configFile += StringUtils::Int32ToString(h);
@@ -477,8 +451,6 @@ function _CreateConfigFile(w, h){
 // void ImageCacheService::ClearCacheFiles()
 // {
 function _ClearCacheFiles(ao_this){
-    elog("====ImageCacheService::_ClearCacheFiles====begin========");
-
     var prop = _prop[ao_this.idx];
 
 //     Logger::D(TAG, "ClearCacheFiles()------");

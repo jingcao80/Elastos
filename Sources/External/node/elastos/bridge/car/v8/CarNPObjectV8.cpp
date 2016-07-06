@@ -172,6 +172,10 @@ bool _BeRunOnUiThread(
         bRunOnUiThread = true;
     }
 
+    if (!strcmp(name,"MakeText")) {
+        bRunOnUiThread = true;
+    }
+
     // if (!strcmp(name,"New_CSimpleAdapter")) {
     //     bRunOnUiThread = true;
     // }
