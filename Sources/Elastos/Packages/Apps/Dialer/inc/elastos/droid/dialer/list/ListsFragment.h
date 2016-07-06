@@ -10,6 +10,8 @@
 #include "Elastos.CoreLibrary.Core.h"
 #include "Elastos.CoreLibrary.Utility.h"
 #include <elastos/droid/dialerbind/analytics/AnalyticsFragment.h>
+#include <elastos/droid/support/v4/view/CViewPager.h>
+#include <elastos/droid/support/v13/app/FragmentPagerAdapter.h>
 #include <elastos/core/Object.h>
 
 using Elastos::Droid::App::IActionBar;
@@ -22,7 +24,6 @@ using Elastos::Droid::View::IView;
 using Elastos::Droid::View::IViewGroup;
 using Elastos::Droid::Widget::IAbsListView;
 using Elastos::Droid::Widget::IListView;
-using Elastos::Droid::Support::V4::View::IViewPagerOnPageChangeListener;
 using Elastos::Core::ICharSequence;
 using Elastos::Utility::IArrayList;
 // using Elastos::Droid::Dialer::CallLog::ICallLogAdapter;
@@ -33,6 +34,9 @@ using Elastos::Droid::Dialer::CallLog::ICallLogQueryHandlerListener;
 // using Elastos::Droid::Dialer::Widget::IOverlappingPaneLayout;
 using Elastos::Droid::Dialer::Widget::IPanelSlideCallbacks;
 using Elastos::Droid::DialerBind::Analytics::AnalyticsFragment;
+using Elastos::Droid::Support::V4::View::CViewPager;
+using Elastos::Droid::Support::V13::App::FragmentPagerAdapter;
+using Elastos::Droid::Support::V4::View::IViewPagerOnPageChangeListener;
 
 namespace Elastos {
 namespace Droid {
@@ -56,26 +60,20 @@ class ListsFragment
 {
 public:
     class ViewPagerAdapter
-        // TODO:android.support.v13.app.FragmentPagerAdapter
-        // : public FragmentPagerAdapter
-        : public Object
+        : public FragmentPagerAdapter
     {
     public:
         ViewPagerAdapter(
+            /* [in] */ IFragmentManager* fm,
             /* [in] */ ListsFragment* host);
 
-        CARAPI constructor(
-            /* [in] */ IFragmentManager* fm);
+        // @Override
+        CARAPI_(Int64) GetItemId(
+            /* [in] */ Int32 position);
 
         // @Override
-        CARAPI GetItemId(
-            /* [in] */ Int32 position,
-            /* [out] */ Int64* id);
-
-        // @Override
-        CARAPI GetItem(
-            /* [in] */ Int32 position,
-            /* [out] */ IFragment** item);
+        CARAPI_(AutoPtr<IFragment>) GetItem(
+            /* [in] */ Int32 position);
 
         // @Override
         CARAPI InstantiateItem(
@@ -229,8 +227,8 @@ private:
     static const String KEY_LAST_DISMISSED_CALL_SHORTCUT_DATE;
 
     AutoPtr<IActionBar> mActionBar;
+    AutoPtr<CViewPager> mViewPager;
     // TODO:
-    // AutoPtr<IViewPager> mViewPager;
     // AutoPtr<IViewPagerTabs> mViewPagerTabs;
     AutoPtr<ViewPagerAdapter> mViewPagerAdapter;
     AutoPtr<IListView> mShortcutCardsListView;

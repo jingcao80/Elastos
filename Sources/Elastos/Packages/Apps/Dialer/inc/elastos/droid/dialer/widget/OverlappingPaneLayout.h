@@ -2,11 +2,12 @@
 #define __ELASTOS_DROID_DIALER_WIDGET_OVERLAPPINGPAELAYOUT_H__
 
 #include "_Elastos.Droid.Dialer.h"
-#include <elastos/droid/view/ViewGroup.h>
 #include "Elastos.Droid.Content.h"
 #include "Elastos.Droid.Graphics.h"
 #include "Elastos.Droid.Utility.h"
 #include "Elastos.Droid.View.h"
+#include "elastos/droid/dialer/widget/ViewDragHelper.h"
+#include <elastos/droid/view/ViewGroup.h>
 
 using Elastos::Droid::Content::IContext;
 using Elastos::Droid::Graphics::ICanvas;
@@ -41,8 +42,7 @@ public:
     public:
         CAR_INTERFACE_DECL();
 
-        LayoutParams(
-            /* [in] */ OverlappingPaneLayout* host);
+        LayoutParams();
 
         CARAPI constructor();
 
@@ -63,12 +63,15 @@ public:
             /* [in] */ IContext* c,
             /* [in] */ IAttributeSet* attrs);
 
+    private:
+        static CARAPI_(AutoPtr< ArrayOf<Int32> >) Init_ATTRS();
+
     public:
         /**
          * The weighted proportion of how much of the leftover space
          * this child should consume after measurement.
          */
-        Float mWeight; // = 0;
+        Float mWeight;
 
         /**
          * True if this pane is the slideable pane in the layout.
@@ -76,19 +79,19 @@ public:
         Boolean mSlideable;
 
     private:
-        OverlappingPaneLayout* mHost;
-        static const Int32 ATTRS;
+        static const AutoPtr< ArrayOf<Int32> > ATTRS;
     };
 
     class SavedState
         : public BaseSavedState
     {
     public:
-        SavedState(
-            /* [in] */ OverlappingPaneLayout* host);
+        SavedState();
+
+        CARAPI constructor();
 
         CARAPI constructor(
-        /* [in] */ IParcelable* superState);
+            /* [in] */ IParcelable* superState);
 
         // @Override
         CARAPI WriteToParcel(
@@ -100,9 +103,6 @@ public:
 
     public:
         Boolean mIsOpen;
-
-    private:
-        OverlappingPaneLayout* mHost;
     };
 
     // class AccessibilityDelegate
@@ -172,6 +172,12 @@ private:
             /* [in] */ Int32 dy);
 
         // @Override
+        CARAPI OnViewFling(
+            /* [in] */ IView* releasedChild,
+            /* [in] */ Float xVelocity,
+            /* [in] */ Float yVelocity);
+
+        // @Override
         CARAPI OnViewReleased(
             /* [in] */ IView* releasedChild,
             /* [in] */ Float xvel,
@@ -208,6 +214,8 @@ private:
 public:
     CAR_INTERFACE_DECL()
 
+    OverlappingPaneLayout();
+
     CARAPI constructor(
         /* [in] */ IContext* context);
 
@@ -236,7 +244,7 @@ public:
         /* [in] */ IView* capturableView);
 
     CARAPI SetPanelSlideCallbacks(
-        /* [in] */ IOverlappingPaneLayoutPanelSlideCallbacks* listener);
+        /* [in] */ IPanelSlideCallbacks* listener);
 
     CARAPI_(void) DispatchOnPanelSlide(
         /* [in] */ IView* panel);
@@ -429,8 +437,8 @@ private:
         /* [in] */ Int32 y);
 
 private:
-    static const String TAG; // = "SlidingPaneLayout";
-    static const Boolean DEBUG; // = false;
+    static const String TAG;
+    static const Boolean DEBUG;
 
     /**
      * Default size of the overhang for a pane in the open state.
@@ -438,17 +446,17 @@ private:
      * This indicates that there is more content available and provides
      * a "physical" edge to grab to pull it closed.
      */
-    static const Int32 DEFAULT_OVERHANG_SIZE; // = 32; // dp;
+    static const Int32 DEFAULT_OVERHANG_SIZE;
 
     /**
      * If no fade color is given by default it will fade to 80% gray.
      */
-    static const Int32 DEFAULT_FADE_COLOR; // = 0xcccccccc;
+    static const Int32 DEFAULT_FADE_COLOR;
 
     /**
      * Minimum velocity that will be detected as a fling
      */
-    static const Int32 MIN_FLING_VELOCITY; // = 400; // dips per second
+    static const Int32 MIN_FLING_VELOCITY;
 
     /**
      * The size of the overhang in pixels.
@@ -529,14 +537,14 @@ private:
      * state and fully opened state where the panel can be temporarily pinned or opened up to
      * during scrolling.
      */
-    Int32 mIntermediateOffset = 0;
+    Int32 mIntermediateOffset;
 
     Float mInitialMotionX;
     Float mInitialMotionY;
 
-    AutoPtr<IOverlappingPaneLayoutPanelSlideCallbacks> mPanelSlideCallbacks;
+    AutoPtr<IPanelSlideCallbacks> mPanelSlideCallbacks;
 
-    AutoPtr<IViewDragHelper> mDragHelper;
+    AutoPtr<ViewDragHelper> mDragHelper;
 
     /**
      * Stores whether or not the pane was open the last time it was slideable.
@@ -544,9 +552,9 @@ private:
      * instance state save/restore.
      */
     Boolean mPreservedOpenState;
-    Boolean mFirstLayout = true;
+    Boolean mFirstLayout;
 
-    AutoPtr<IRect> mTmpRect; // = new Rect();
+    AutoPtr<IRect> mTmpRect;
 
     /**
      * How many dips we need to scroll past a position before we can snap to the next position

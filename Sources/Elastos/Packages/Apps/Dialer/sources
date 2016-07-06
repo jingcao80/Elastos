@@ -19,6 +19,7 @@ ELASTOS_LIBS += src/elastos/droid/dialer/dialer.lib
 ELASTOS_LIBS += src/elastos/droid/dialerbind/dialerbind.lib
 ELASTOS_LIBS += src/elastos/droid/phone/common/common.lib
 ELASTOS_LIBS += src/elastos/droid/support/v4/view/view.lib
+ELASTOS_LIBS += src/elastos/droid/support/v13/app/app.lib
 
 LIBRARIES  = $(XDK_USER_LIB)/Elastos.Runtime.lib
 LIBRARIES += $(XDK_TARGETS)/Elastos.Runtime.eco

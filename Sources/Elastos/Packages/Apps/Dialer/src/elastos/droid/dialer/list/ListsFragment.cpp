@@ -36,6 +36,7 @@ using Elastos::Utility::Logging::Logger;
 using Elastos::Droid::Dialer::CallLog::EIID_ICallLogAdapterCallFetcher;
 using Elastos::Droid::Dialer::CallLog::EIID_ICallLogQueryHandlerListener;
 using Elastos::Droid::Dialer::Widget::EIID_IPanelSlideCallbacks;
+using Elastos::Droid::Support::V4::View::IViewPager;
 
 namespace Elastos {
 namespace Droid {
@@ -46,32 +47,23 @@ namespace List {
 // ListsFragment::ViewPagerAdapter
 //=================================================================
 ListsFragment::ViewPagerAdapter::ViewPagerAdapter(
+    /* [in] */ IFragmentManager* fm,
     /* [in] */ ListsFragment* host)
-    : mHost(host)
+    : FragmentPagerAdapter(fm)
+    , mHost(host)
 {}
 
-ECode ListsFragment::ViewPagerAdapter::constructor(
-    /* [in] */ IFragmentManager* fm)
+Int64 ListsFragment::ViewPagerAdapter::GetItemId(
+    /* [in] */ Int32 position)
 {
-    assert(0 && "TODO");
-    // return FragmentPagerAdapter::constructor(fm);
-    return NOERROR;
+    Int32 id;
+    mHost->GetRtlPosition(position, &id);
+    return id;
 }
 
-ECode ListsFragment::ViewPagerAdapter::GetItemId(
-    /* [in] */ Int32 position,
-    /* [out] */ Int64* id)
+AutoPtr<IFragment> ListsFragment::ViewPagerAdapter::GetItem(
+    /* [in] */ Int32 position)
 {
-    VALIDATE_NOT_NULL(id);
-    return mHost->GetRtlPosition(position, (Int32*)id);
-}
-
-ECode ListsFragment::ViewPagerAdapter::GetItem(
-    /* [in] */ Int32 position,
-    /* [out] */ IFragment** item)
-{
-    VALIDATE_NOT_NULL(item);
-
     assert(0 && "TODO");
     // Int32 rtl;
     // mHost->GetRtlPosition(position, &rtl);
@@ -103,6 +95,7 @@ ECode ListsFragment::ViewPagerAdapter::GetItem(
     // // throw new IllegalStateException("No fragment at position " + position);
     // Logger::E(ListsFragment::TAG, "No fragment at position %d", position);
     // return E_ILLEGAL_STATE_EXCEPTION;
+    return NULL;
 }
 
 ECode ListsFragment::ViewPagerAdapter::InstantiateItem(
@@ -383,10 +376,10 @@ ECode ListsFragment::OnCreateView(
             container, FALSE, (IView**)&parentView);
     AutoPtr<IView> temp;
 
-    assert(0 && "TODO");
-    // mViewPager = (ViewPager) parentView.findViewById(R.id.lists_pager);
-    // mViewPager = IViewPager::Probe(temp);
+    parentView->FindViewById(R::id::lists_pager, (IView**)&temp);
+    mViewPager = (CViewPager*)IViewPager::Probe(temp);
 
+    assert(0 && "TODO");
     // AutoPtr<IFragmentManager> manager;
     // GetChildFragmentManager((IFragmentManager**)&manager);
     // CViewPagerAdapter::New(manager, (IViewPagerAdapter**)&mViewPagerAdapter);

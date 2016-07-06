@@ -2,19 +2,22 @@
 #define __ELASTOS_DROID_DIALER_WIDGET_VIEWDRAGHELPER_H__
 
 #include "_Elastos.Droid.Dialer.h"
-#include <elastos/core/Object.h>
-#include <elastos/droid/os/Runnable.h>
 #include "Elastos.Droid.Content.h"
 #include "Elastos.Droid.Os.h"
 #include "Elastos.Droid.View.h"
+#include "Elastos.CoreLibrary.Core.h"
+#include <elastos/droid/os/Runnable.h>
+#include <elastos/core/Object.h>
 
 using Elastos::Droid::Content::IContext;
 using Elastos::Droid::Os::Runnable;
-using Elastos::Droid::Os::IRunnable;
 using Elastos::Droid::View::IMotionEvent;
 using Elastos::Droid::View::IView;
 using Elastos::Droid::View::IViewGroup;
 using Elastos::Droid::View::IVelocityTracker;
+using Elastos::Droid::Widget::IScroller;
+using Elastos::Core::IRunnable;
+using Elastos::Core::Object;
 
 namespace Elastos {
 namespace Droid {
@@ -28,7 +31,6 @@ namespace Widget {
  */
 class ViewDragHelper
     : public Object
-    , public IViewDragHelper
 {
 public:
     /**
@@ -250,8 +252,6 @@ private:
     };
 
 public:
-    CAR_INTERFACE_DECL()
-
     /**
      * Factory method to create a new ViewDragHelper.
      *
@@ -259,7 +259,7 @@ public:
      * @param cb Callback to provide information and receive events
      * @return a new ViewDragHelper instance
      */
-    static CARAPI_(AutoPtr<IViewDragHelper>) Create(
+    static CARAPI_(AutoPtr<ViewDragHelper>) Create(
         /* [in] */ IViewGroup* forParent,
         /* [in] */ IViewDragHelperCallback* cb);
 
@@ -272,7 +272,7 @@ public:
      * @param cb Callback to provide information and receive events
      * @return a new ViewDragHelper instance
      */
-    static CARAPI_(AutoPtr<IViewDragHelper>) Create(
+    static CARAPI_(AutoPtr<ViewDragHelper>) Create(
         /* [in] */ IViewGroup* forParent,
         /* [in] */ Float sensitivity,
         /* [in] */ IViewDragHelperCallback* cb);
@@ -293,16 +293,14 @@ public:
      *
      * @return the minimum velocity that will be detected
      */
-    CARAPI GetMinVelocity(
-        /* [out] */ Float* minVel);
+    CARAPI_(Float) GetMinVelocity();
 
     /**
      * Retrieve the current drag state of this helper. This will return one of
      * {@link #STATE_IDLE}, {@link #STATE_DRAGGING} or {@link #STATE_SETTLING}.
      * @return The current drag state
      */
-    CARAPI GetViewDragState(
-        /* [out] */ Int32* state);
+    CARAPI_(Int32) GetViewDragState();
 
     /**
      * Enable edge tracking for the selected edges of the parent view.
@@ -316,7 +314,7 @@ public:
      * @see #EDGE_RIGHT
      * @see #EDGE_BOTTOM
      */
-    CARAPI SetEdgeTrackingEnabled(
+    CARAPI_(void) SetEdgeTrackingEnabled(
         /* [in] */ Int32 edgeFlags);
 
     /**
@@ -326,8 +324,7 @@ public:
      * @return The size of an edge in pixels
      * @see #setEdgeTrackingEnabled(Int32)
      */
-    CARAPI GetEdgeSize(
-        /* [out] */ Int32* size);
+    CARAPI_(Int32) GetEdgeSize();
 
     /**
      * Capture a specific child view for dragging within the parent. The callback will be notified
@@ -344,33 +341,30 @@ public:
     /**
      * @return The currently captured view, or null if no view has been captured.
      */
-    CARAPI GetCapturedView(
-        /* [out] */ IView** view);
+    CARAPI_(AutoPtr<IView>) GetCapturedView();
 
     /**
      * @return The ID of the pointer currently dragging the captured view,
      *         or {@link #INVALID_POINTER}.
      */
-    CARAPI GetActivePointerId(
-        /* [out] */ Int32* id);
+    CARAPI_(Int32) GetActivePointerId();
 
     /**
      * @return The minimum distance in pixels that the user must travel to initiate a drag
      */
-    CARAPI GetTouchSlop(
-        /* [out] */ Int32* touchSlop);
+    CARAPI_(Int32) GetTouchSlop();
 
     /**
      * The result of a call to this method is equivalent to
      * {@link #processTouchEvent(android.view.MotionEvent)} receiving an ACTION_CANCEL event.
      */
-    CARAPI Cancel();
+    CARAPI_(void) Cancel();
 
     /**
      * {@link #cancel()}, but also abort all motion in progress and snap to the end of any
      * animation.
      */
-    CARAPI Abort();
+    CARAPI_(void) Abort();
 
     /**
      * Animate the view <code>child</code> to the given (left, top) position.
@@ -386,11 +380,10 @@ public:
      * @param constTop const top position of child
      * @return true if animation should continue through {@link #continueSettling(boolean)} calls
      */
-    CARAPI SmoothSlideViewTo(
+    CARAPI_(Boolean) SmoothSlideViewTo(
         /* [in] */ IView* child,
         /* [in] */ Int32 constLeft,
-        /* [in] */ Int32 constTop,
-        /* [out] */ Boolean* result);
+        /* [in] */ Int32 constTop);
 
     /**
      * Settle the captured view at the given (left, top) position.
@@ -446,9 +439,8 @@ public:
      * Predict how far a fling with {@param yvel} will cause the view to travel from stand still.
      * @return predicted y offset
      */
-    CARAPI PredictFlingYOffset(
-        /* [in] */ Int32 yvel,
-        /* [out] */ Int32* yOffset);
+    CARAPI_(Int32) PredictFlingYOffset(
+        /* [in] */ Int32 yvel);
 
     /**
      * Move the captured settling view by the appropriate amount for the current time.
@@ -461,16 +453,14 @@ public:
      *                       invoked as part of layout or drawing.
      * @return true if settle is still in progress
      */
-    CARAPI ContinueSettling(
-        /* [in] */ Boolean deferCallbacks,
-        /* [out] */ Boolean* result);
+    CARAPI_(Boolean) ContinueSettling(
+        /* [in] */ Boolean deferCallbacks);
 
-    CARAPI ProcessNestedFling(
+    CARAPI_(void) ProcessNestedFling(
         /* [in] */ IView* target,
         /* [in] */ Int32 yvel);
 
-    CARAPI GetVelocityMagnitude(
-        /* [out] */ Int32* magnitude);
+    CARAPI_(Int32) GetVelocityMagnitude();
 
     /**
      * Check if the given pointer ID represents a pointer that is currently down (to the best
@@ -485,9 +475,8 @@ public:
      * @param pointerId pointer ID to check; corresponds to IDs provided by MotionEvent
      * @return true if the pointer with the given ID is still down
      */
-    CARAPI IsPointerDown(
-        /* [in] */ Int32 pointerId,
-        /* [out] */ Boolean* result);
+    CARAPI_(Boolean) IsPointerDown(
+        /* [in] */ Int32 pointerId);
 
     CARAPI_(void) SetDragState(
         /* [in] */ Int32 state);
@@ -512,9 +501,8 @@ public:
      * @param ev MotionEvent provided to onInterceptTouchEvent
      * @return true if the parent view should return true from onInterceptTouchEvent
      */
-    CARAPI ShouldInterceptTouchEvent(
-        /* [in] */ IMotionEvent* ev,
-        /* [out] */ Boolean* result);
+    CARAPI_(Boolean) ShouldInterceptTouchEvent(
+        /* [in] */ IMotionEvent* ev);
 
     /**
      * Process a touch event received by the parent view. This method will dispatch callback events
@@ -522,7 +510,7 @@ public:
      *
      * @param ev The touch event received by the parent view
      */
-    CARAPI ProcessTouchEvent(
+    CARAPI_(void) ProcessTouchEvent(
         /* [in] */ IMotionEvent* ev);
 
     /**
@@ -539,9 +527,8 @@ public:
      *                   {@link #DIRECTION_VERTICAL}, {@link #DIRECTION_ALL}
      * @return true if the slop threshold has been crossed, false otherwise
      */
-    CARAPI CheckTouchSlop(
-        /* [in] */ Int32 directions,
-        /* [out] */ Boolean* result);
+    CARAPI_(Boolean) CheckTouchSlop(
+        /* [in] */ Int32 directions);
 
     /**
      * Check if the specified pointer tracked in the current gesture has crossed
@@ -558,10 +545,9 @@ public:
      * @param pointerId ID of the pointer to slop check as specified by MotionEvent
      * @return true if the slop threshold has been crossed, false otherwise
      */
-    CARAPI CheckTouchSlop(
+    CARAPI_(Boolean) CheckTouchSlop(
         /* [in] */ Int32 directions,
-        /* [in] */ Int32 pointerId,
-        /* [out] */ Boolean* result);
+        /* [in] */ Int32 pointerId);
 
     /**
      * Check if any of the edges specified were initially touched in the currently active gesture.
@@ -572,9 +558,8 @@ public:
      *              {@link #EDGE_ALL}
      * @return true if any of the edges specified were initially touched in the current gesture
      */
-    CARAPI IsEdgeTouched(
-        /* [in] */ Int32 edges,
-        /* [out] */ Boolean* result);
+    CARAPI_(Boolean) IsEdgeTouched(
+        /* [in] */ Int32 edges);
 
     /**
      * Check if any of the edges specified were initially touched by the pointer with
@@ -586,10 +571,9 @@ public:
      *              {@link #EDGE_ALL}
      * @return true if any of the edges specified were initially touched in the current gesture
      */
-    CARAPI IsEdgeTouched(
+    CARAPI_(Boolean) IsEdgeTouched(
         /* [in] */ Int32 edges,
-        /* [in] */ Int32 pointerId,
-        /* [out] */ Boolean* result);
+        /* [in] */ Int32 pointerId);
 
     /**
      * Determine if the currently captured view is under the given point in the
@@ -600,10 +584,9 @@ public:
      * @param y Y position to test in the parent's coordinate system
      * @return true if the captured view is under the given point, false otherwise
      */
-    CARAPI IsCapturedViewUnder(
+    CARAPI_(Boolean) IsCapturedViewUnder(
         /* [in] */ Int32 x,
-        /* [in] */ Int32 y,
-        /* [out] */ Boolean* result);
+        /* [in] */ Int32 y);
 
     /**
      * Determine if the supplied view is under the given point in the
@@ -614,11 +597,10 @@ public:
      * @param y Y position to test in the parent's coordinate system
      * @return true if the supplied view is under the given point, false otherwise
      */
-    CARAPI IsViewUnder(
+    CARAPI_(Boolean) IsViewUnder(
         /* [in] */ IView* view,
         /* [in] */ Int32 x,
-        /* [in] */ Int32 y,
-        /* [out] */ Boolean* result);
+        /* [in] */ Int32 y);
 
     /**
      * Find the topmost child under the given point within the parent view's coordinate system.
@@ -628,17 +610,16 @@ public:
      * @param y Y position to test in the parent's coordinate system
      * @return The topmost child view under (x, y) or null if none found.
      */
-    CARAPI FindTopChildUnder(
+    CARAPI_(AutoPtr<IView>) FindTopChildUnder(
         /* [in] */ Int32 x,
-        /* [in] */ Int32 y
-        /* [out] */ IView** view);
+        /* [in] */ Int32 y);
 
     /**
      * Prepares the {@link ViewDragHelper} for the beginning of a nested scroll.
      *
      * @param target The child view that is dispatching the nested scroll.
      */
-    CARAPI StartNestedScroll(
+    CARAPI_(void) StartNestedScroll(
         /* [in] */ IView* target);
 
     /**
@@ -646,7 +627,7 @@ public:
      *
      * @param target The child view that is dispatching the nested scroll.
      */
-    CARAPI StopNestedScroll(
+    CARAPI_(void) StopNestedScroll(
         /* [in] */ IView* target);
 
     /**
@@ -827,13 +808,76 @@ private:
         /* [in] */ Int32 x,
         /* [in] */ Int32 y);
 
+public:
+    /**
+     * A null/invalid pointer ID.
+     */
+    static const Int32 INVALID_POINTER;
+
+    /**
+     * A view is not currently being dragged or animating as a result of a fling/snap.
+     */
+    static const Int32 STATE_IDLE;
+
+    /**
+     * A view is currently being dragged. The position is currently changing as a result
+     * of user input or simulated user input.
+     */
+    static const Int32 STATE_DRAGGING;
+
+    /**
+     * A view is currently settling into place as a result of a fling or
+     * predefined non-interactive motion.
+     */
+    static const Int32 STATE_SETTLING;
+
+    /**
+     * Edge flag indicating that the left edge should be affected.
+     */
+    static const Int32 EDGE_LEFT;
+
+    /**
+     * Edge flag indicating that the right edge should be affected.
+     */
+    static const Int32 EDGE_RIGHT;
+
+    /**
+     * Edge flag indicating that the top edge should be affected.
+     */
+    static const Int32 EDGE_TOP;
+
+    /**
+     * Edge flag indicating that the bottom edge should be affected.
+     */
+    static const Int32 EDGE_BOTTOM;
+
+    /**
+     * Edge flag set indicating all edges should be affected.
+     */
+    static const Int32 EDGE_ALL;
+
+    /**
+     * Indicates that a check should occur along the horizontal axis
+     */
+    static const Int32 DIRECTION_HORIZONTAL;
+
+    /**
+     * Indicates that a check should occur along the vertical axis
+     */
+    static const Int32 DIRECTION_VERTICAL;
+
+    /**
+     * Indicates that a check should occur along all axes
+     */
+    static const Int32 DIRECTION_ALL;
+
 private:
-    static const String TAG; // = "ViewDragHelper";
+    static const String TAG;
 
-    static const Int32 EDGE_SIZE; // = 20; // dp
+    static const Int32 EDGE_SIZE;
 
-    static const Int32 BASE_SETTLE_DURATION; // = 256; // ms
-    static const Int32 MAX_SETTLE_DURATION; // = 600; // ms
+    static const Int32 BASE_SETTLE_DURATION;
+    static const Int32 MAX_SETTLE_DURATION;
 
     // Current drag state; idle, dragging or settling
     Int32 mDragState;
@@ -842,7 +886,7 @@ private:
     Int32 mTouchSlop;
 
     // Last known position/pointer tracking
-    Int32 mActivePointerId; // = INVALID_POINTER;
+    Int32 mActivePointerId;
     AutoPtr<ArrayOf<Float> > mInitialMotionX;
     AutoPtr<ArrayOf<Float> > mInitialMotionY;
     AutoPtr<ArrayOf<Float> > mLastMotionX;

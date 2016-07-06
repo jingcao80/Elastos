@@ -2,7 +2,7 @@
 #define __ELASTOS_DROID_DIALER_WIDGET_COVERLAPPINGPAELAYOUT_H__
 
 #include "_Elastos_Droid_Dialer_Widget_COverlappingPaneLayout.h"
-#include "elastos/apps/dialer/widget/OverlappingPaneLayout.h"
+#include "elastos/droid/dialer/widget/OverlappingPaneLayout.h"
 
 namespace Elastos {
 namespace Droid {

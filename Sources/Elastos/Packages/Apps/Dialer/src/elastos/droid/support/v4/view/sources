@@ -4,5 +4,6 @@ TARGET_TYPE= lib
 INCLUDES += $(MAKEDIR)/../../../../../../inc
 INCLUDES += ../../../../../../
 
-SOURCES = ViewPager.cpp
+SOURCES = PagerAdapter.cpp
+SOURCES += ViewPager.cpp
 SOURCES += view.cpp

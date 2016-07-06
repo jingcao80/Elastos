@@ -72,7 +72,7 @@ module
     merge("car/elastos/droid/dialer/widget/ActionBarController.car");
     merge("car/elastos/droid/dialer/widget/OverlappingPaneLayout.car");
     merge("car/elastos/droid/dialer/widget/SearchEditTextLayout.car");
-//    merge("car/elastos/droid/dialer/widget/ViewDragHelper.car");
+    merge("car/elastos/droid/dialer/widget/ViewDragHelper.car");
 //    merge("car/elastos/droid/dialer/CallDetailActivity.car");
 //    merge("car/elastos/droid/dialer/CallDetailActivityQueryHandler.car");
 //    merge("car/elastos/droid/dialer/DialerBackupAgent.car");
@@ -1069,30 +1069,30 @@ module
     namespace Droid {
     namespace Dialer {
     namespace Widget {
-//
-//    [local]
-//    class COverlappingPaneLayout {
-//        constructor(
-//            [in] IContext* ctx);
-//
-//        constructor(
-//            [in] IContext* ctx,
-//            [in] IAttributeSet* attrs);
-//
-//        constructor(
-//            [in] IContext* ctx,
-//            [in] IAttributeSet* attrs,
-//            [in] Int32 defStyle);
-//
-//        interface IView;
-//        interface IDrawableCallback;
-//        interface IKeyEventCallback;
-//        interface IAccessibilityEventSource;
-//        interface IViewParent;
-//        interface IViewManager;
-//        interface IViewGroup;
-//        interface IOverlappingPaneLayout;
-//    }
+
+    [local]
+    class COverlappingPaneLayout {
+        constructor(
+            [in] IContext* ctx);
+
+        constructor(
+            [in] IContext* ctx,
+            [in] IAttributeSet* attrs);
+
+        constructor(
+            [in] IContext* ctx,
+            [in] IAttributeSet* attrs,
+            [in] Int32 defStyle);
+
+        interface IView;
+        interface IDrawableCallback;
+        interface IKeyEventCallback;
+        interface IAccessibilityEventSource;
+        interface IViewParent;
+        interface IViewManager;
+        interface IViewGroup;
+        interface IOverlappingPaneLayout;
+    }
 
     [local]
     class CSearchEditTextLayout {
