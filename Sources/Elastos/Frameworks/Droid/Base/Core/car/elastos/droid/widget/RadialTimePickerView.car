@@ -5,6 +5,14 @@ module
     namespace Droid {
     namespace Widget {
 
+    interface IInt32Holder {
+        SetValue(
+            [in] Int32 value);
+
+        GetValue(
+            [out] Int32* vale);
+    }
+
     interface IOnValueSelectedListener {
         OnValueSelected(
             [in] Int32 pickerIndex,

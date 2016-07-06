@@ -56,6 +56,7 @@
 #include "elastos/droid/widget/CImageButton.h"
 #include "elastos/droid/widget/CImageSwitcher.h"
 #include "elastos/droid/widget/CImageView.h"
+#include "elastos/droid/widget/CInt32Holder.h"
 #include "elastos/droid/widget/CLinearLayout.h"
 #include "elastos/droid/widget/CLinearLayoutLayoutParams.h"
 #include "elastos/droid/widget/CListPopupWindow.h"
@@ -198,6 +199,7 @@ CAR_OBJECT_IMPL(CHorizontalScrollViewSavedState)
 CAR_OBJECT_IMPL(CImageButton)
 CAR_OBJECT_IMPL(CImageSwitcher)
 CAR_OBJECT_IMPL(CImageView)
+CAR_OBJECT_IMPL(CInt32Holder)
 CAR_OBJECT_IMPL(CLinearLayout)
 CAR_OBJECT_IMPL(CLinearLayoutLayoutParams)
 CAR_OBJECT_IMPL(CListPopupWindow)

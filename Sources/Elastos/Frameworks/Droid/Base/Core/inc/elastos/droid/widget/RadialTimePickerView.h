@@ -33,6 +33,29 @@ class RadialTimePickerView
     , public IRadialTimePickerView
     , public IViewOnTouchListener
 {
+public:
+    class Int32Holder
+        : public Object
+        , public IInt32Holder
+    {
+    public:
+        CAR_INTERFACE_DECL()
+
+        Int32Holder();
+
+        CARAPI constructor(
+            /* [in] */ Int32 value);
+
+        CARAPI SetValue(
+            /* [in] */ Int32 value);
+
+        CARAPI GetValue(
+            /* [out] */ Int32* vale);
+
+    private:
+        Int32 mValue;
+    };
+
 private:
     class InvalidateUpdateListener
         : public Object
@@ -50,21 +73,6 @@ private:
 
     private:
         RadialTimePickerView* mHost;
-    };
-
-    class Int32Holder: public Object
-    {
-    public:
-        Int32Holder(
-            /* [in] */ Int32 value);
-
-        CARAPI_(void) SetValue(
-            /* [in] */ Int32 value);
-
-        CARAPI_(Int32) GetValue();
-
-    private:
-        Int32 mValue;
     };
 
     class RadialTimePickerViewOnTouchListener
@@ -329,13 +337,13 @@ private:
         /* [in] */ Float endRadiusMultiplier);
 
     static CARAPI_(AutoPtr<IObjectAnimator>) GetFadeOutAnimator(
-        /* [in] */ Int32Holder* target,
+        /* [in] */ IInt32Holder* target,
         /* [in] */ Int32 startAlpha,
         /* [in] */ Int32 endAlpha,
         /* [in] */ InvalidateUpdateListener* updateListener);
 
     static CARAPI_(AutoPtr<IObjectAnimator>) GetFadeInAnimator(
-        /* [in] */ Int32Holder* target,
+        /* [in] */ IInt32Holder* target,
         /* [in] */ Int32 startAlpha,
         /* [in] */ Int32 endAlpha,
         /* [in] */ InvalidateUpdateListener* updateListener);
@@ -413,13 +421,13 @@ private:
 
     AutoPtr<ArrayOf<IPaint*> > mPaint;
     Int32 mColor[2];
-    AutoPtr<ArrayOf<Int32Holder*> > mAlpha;
+    AutoPtr<ArrayOf<IInt32Holder*> > mAlpha;
 
     AutoPtr<IPaint> mPaintCenter;
 
     AutoPtr<ArrayOf<ArrayOf<IPaint*>*> > mPaintSelector;
     Int32 mColorSelector[2][3];
-    AutoPtr<ArrayOf<ArrayOf<Int32Holder*>* > > mAlphaSelector;
+    AutoPtr<ArrayOf<ArrayOf<IInt32Holder*>* > > mAlphaSelector;
 
     AutoPtr<IPaint> mPaintAmPmText;
     AutoPtr<ArrayOf<IPaint*> > mPaintAmPmCircle;
@@ -508,6 +516,5 @@ private:
 }// namespace Droid
 }// namespace Elastos
 
-DEFINE_CONVERSION_FOR(Elastos::Droid::Widget::RadialTimePickerView::Int32Holder, IInterface);
 
 #endif // __ELASTOS_DROID_WIDGET_RADIATIMEPICKERVIEW_H__

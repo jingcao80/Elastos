@@ -2,6 +2,7 @@
 #include "Elastos.Droid.Animation.h"
 #include "Elastos.Droid.Widget.h"
 #include "elastos/droid/widget/RadialTimePickerView.h"
+#include "elastos/droid/widget/CInt32Holder.h"
 #include "elastos/droid/widget/CTextView.h"
 #include "elastos/droid/widget/TimePickerClockDelegate.h"
 #include "elastos/droid/animation/CAnimatorSet.h"
@@ -13,11 +14,11 @@
 #include "elastos/droid/graphics/CPaint.h"
 #include "elastos/droid/graphics/CRectF.h"
 #include "elastos/droid/graphics/Typeface.h"
-#include "elastos/droid/R.h"
 #include "elastos/droid/text/format/CTime.h"
 #include "elastos/droid/text/format/DateUtils.h"
 #include "elastos/droid/view/CViewGroupLayoutParams.h"
 #include "elastos/droid/utility/CTypedValue.h"
+#include "elastos/droid/R.h"
 #include <elastos/core/StringUtils.h>
 #include <elastos/core/Math.h>
 #include <elastos/utility/logging/Logger.h>
@@ -37,7 +38,6 @@ using Elastos::Droid::Graphics::CPaint;
 using Elastos::Droid::Graphics::CRectF;
 using Elastos::Droid::Graphics::PaintStyle_STROKE;
 using Elastos::Droid::Graphics::Typeface;
-using Elastos::Droid::R;
 using Elastos::Droid::Text::ITextPaint;
 using Elastos::Droid::Text::Format::CTime;
 using Elastos::Droid::Text::Format::ITime;
@@ -51,6 +51,7 @@ using Elastos::Droid::View::IHapticFeedbackConstants;
 using Elastos::Droid::View::IViewGroupLayoutParams;
 using Elastos::Droid::Utility::CTypedValue;
 using Elastos::Droid::Utility::ITypedValue;
+using Elastos::Droid::R;
 using Elastos::Core::CInteger32;
 using Elastos::Core::IInteger32;
 using Elastos::Core::StringUtils;
@@ -68,7 +69,44 @@ namespace Elastos {
 namespace Droid {
 namespace Widget {
 
-CAR_INTERFACE_IMPL(RadialTimePickerView::InvalidateUpdateListener, Object, IAnimatorUpdateListener);
+//=====================================================================
+//          RadialTimePickerView::Int32Holder
+//=====================================================================
+
+CAR_INTERFACE_IMPL(RadialTimePickerView::Int32Holder, Object, IInt32Holder)
+
+RadialTimePickerView::Int32Holder::Int32Holder()
+    : mValue(0)
+{}
+
+ECode RadialTimePickerView::Int32Holder::constructor(
+    /* [in] */ Int32 value)
+{
+    mValue = value;
+    return NOERROR;
+}
+
+ECode RadialTimePickerView::Int32Holder::SetValue(
+    /* [in] */ Int32 value)
+{
+    return NOERROR;
+}
+
+ECode RadialTimePickerView::Int32Holder::GetValue(
+    /* [out] */ Int32* value)
+{
+    VALIDATE_NOT_NULL(value)
+
+    *value = mValue;
+    return NOERROR;
+}
+
+//=====================================================================
+//          RadialTimePickerView::InvalidateUpdateListener
+//=====================================================================
+
+CAR_INTERFACE_IMPL(RadialTimePickerView::InvalidateUpdateListener, Object, IAnimatorUpdateListener)
+
 RadialTimePickerView::InvalidateUpdateListener::InvalidateUpdateListener(
     /* [in] */ RadialTimePickerView* host)
     : mHost(host)
@@ -80,24 +118,12 @@ ECode RadialTimePickerView::InvalidateUpdateListener::OnAnimationUpdate(
     return mHost->Invalidate();
 }
 
-RadialTimePickerView::Int32Holder::Int32Holder(
-    /* [in] */ Int32 value)
-    : mValue(value)
-{
-}
+//=====================================================================
+//          RadialTimePickerView::RadialTimePickerViewOnTouchListener
+//=====================================================================
 
-void RadialTimePickerView::Int32Holder::SetValue(
-    /* [in] */ Int32 value)
-{
-    mValue = value;
-}
+CAR_INTERFACE_IMPL(RadialTimePickerView::RadialTimePickerViewOnTouchListener, Object, IViewOnTouchListener)
 
-Int32 RadialTimePickerView::Int32Holder::GetValue()
-{
-    return mValue;
-}
-
-CAR_INTERFACE_IMPL(RadialTimePickerView::RadialTimePickerViewOnTouchListener, Object, IViewOnTouchListener);
 RadialTimePickerView::RadialTimePickerViewOnTouchListener::RadialTimePickerViewOnTouchListener(
     /* [in] */ RadialTimePickerView* host)
     : mHost(host)
@@ -145,10 +171,10 @@ AutoPtr<ArrayOf<Int32> > RadialTimePickerView::sSnapPrefer30sMap;
 
 Boolean RadialTimePickerView::InitStatic()
 {
-    sSnapPrefer30sMap = ArrayOf<Int32>::Alloc(361);
     STATE_SET_SELECTED = ArrayOf<Int32>::Alloc(1);
     (*STATE_SET_SELECTED)[0] = R::attr::state_selected;
 
+    sSnapPrefer30sMap = ArrayOf<Int32>::Alloc(361);
     // Prepare mapping to snap touchable degrees to selectable degrees.
     PreparePrefer30sMap();
     return TRUE;
@@ -239,7 +265,12 @@ Int32 RadialTimePickerView::SnapOnly30s(
     return degrees;
 }
 
-CAR_INTERFACE_IMPL_2(RadialTimePickerView, View, IRadialTimePickerView, IViewOnTouchListener);
+//=====================================================================
+//          RadialTimePickerView
+//=====================================================================
+
+CAR_INTERFACE_IMPL_2(RadialTimePickerView, View, IRadialTimePickerView, IViewOnTouchListener)
+
 RadialTimePickerView::RadialTimePickerView()
     : mIs24HourMode(FALSE)
     , mShowHours(FALSE)
@@ -274,16 +305,16 @@ RadialTimePickerView::RadialTimePickerView()
     mAmPmText = ArrayOf<String>::Alloc(2);
 
     mPaint = ArrayOf<IPaint*>::Alloc(2);
-    mAlpha = ArrayOf<Int32Holder*>::Alloc(2);
+    mAlpha = ArrayOf<IInt32Holder*>::Alloc(2);
 
     CPaint::New((IPaint**)&mPaintCenter);
 
     mPaintSelector = ArrayOf<ArrayOf<IPaint*>*>::Alloc(2);
     mPaintSelector->Set(0, ArrayOf<IPaint*>::Alloc(3));
     mPaintSelector->Set(1, ArrayOf<IPaint*>::Alloc(3));
-    mAlphaSelector = ArrayOf<ArrayOf<Int32Holder*>* >::Alloc(2);
-    mAlphaSelector->Set(0, ArrayOf<Int32Holder*>::Alloc(3));
-    mAlphaSelector->Set(1, ArrayOf<Int32Holder*>::Alloc(3));
+    mAlphaSelector = ArrayOf<ArrayOf<IInt32Holder*>* >::Alloc(2);
+    mAlphaSelector->Set(0, ArrayOf<IInt32Holder*>::Alloc(3));
+    mAlphaSelector->Set(1, ArrayOf<IInt32Holder*>::Alloc(3));
 
     CPaint::New((IPaint**)&mPaintAmPmText);
     mPaintAmPmCircle = ArrayOf<IPaint*>::Alloc(2);
@@ -370,11 +401,15 @@ ECode RadialTimePickerView::constructor(
 
     // Initialize all alpha values to opaque.
     for (Int32 i = 0; i < mAlpha->GetLength(); i++) {
-        mAlpha->Set(i, new Int32Holder(ALPHA_OPAQUE));
+        AutoPtr<IInt32Holder> ih;
+        CInt32Holder::New(ALPHA_OPAQUE, (IInt32Holder**)&ih);
+        mAlpha->Set(i, ih);
     }
     for (Int32 i = 0; i < mAlphaSelector->GetLength(); i++) {
         for (Int32 j = 0; j < (*mAlphaSelector)[i]->GetLength(); j++) {
-            (*mAlphaSelector)[i]->Set(j, new Int32Holder(ALPHA_OPAQUE));
+            AutoPtr<IInt32Holder> ih;
+            CInt32Holder::New(ALPHA_OPAQUE, (IInt32Holder**)&ih);
+            (*mAlphaSelector)[i]->Set(j, ih);
         }
     }
 
@@ -892,19 +927,20 @@ void RadialTimePickerView::OnDraw(
     DrawCircleBackground(canvas);
     DrawSelector(canvas);
 
+    Int32 value;
     DrawTextElements(canvas, mTextSize[HOURS], mTypeface, mOuterTextHours,
             mTextGridWidths[HOURS], mTextGridHeights[HOURS], (*mPaint)[HOURS],
-            mColor[HOURS], (*mAlpha)[HOURS]->GetValue());
+            mColor[HOURS], ((*mAlpha)[HOURS]->GetValue(&value), value));
 
     if (mIs24HourMode && mInnerTextHours != NULL) {
         DrawTextElements(canvas, mInnerTextSize, mTypeface, mInnerTextHours,
                 mInnerTextGridWidths, mInnerTextGridHeights, (*mPaint)[HOURS],
-                mColor[HOURS], (*mAlpha)[HOURS]->GetValue());
+                mColor[HOURS], ((*mAlpha)[HOURS]->GetValue(&value), value));
     }
 
     DrawTextElements(canvas, mTextSize[MINUTES], mTypeface, mOuterTextMinutes,
             mTextGridWidths[MINUTES], mTextGridHeights[MINUTES], (*mPaint)[MINUTES],
-            mColor[MINUTES], (*mAlpha)[MINUTES]->GetValue());
+            mColor[MINUTES], ((*mAlpha)[MINUTES]->GetValue(&value), value));
 
     DrawCenter(canvas);
     if (!mIs24HourMode) {
@@ -1003,10 +1039,12 @@ void RadialTimePickerView::DrawSelector(
     mLineLength[index] = (Int32) (mCircleRadius[index]
             * mNumbersRadiusMultiplier[index] * mAnimationRadiusMultiplier[index]);
 
-    Double selectionRadians = Elastos::Core::Math::ToRadians(mSelectionDegrees[index]);
+    using Elastos::Core::Math;
 
-    Int32 pointX = mXCenter + (Int32) (mLineLength[index] * Elastos::Core::Math::Sin(selectionRadians));
-    Int32 pointY = mYCenter - (Int32) (mLineLength[index] * Elastos::Core::Math::Cos(selectionRadians));
+    Double selectionRadians = Math::ToRadians(mSelectionDegrees[index]);
+
+    Int32 pointX = mXCenter + (Int32) (mLineLength[index] * Math::Sin(selectionRadians));
+    Int32 pointY = mYCenter - (Int32) (mLineLength[index] * Math::Cos(selectionRadians));
 
     Int32 color = 0;
     Int32 alpha = 0;
@@ -1014,7 +1052,7 @@ void RadialTimePickerView::DrawSelector(
 
     // Draw the selection circle
     color = mColorSelector[index % 2][SELECTOR_CIRCLE];
-    alpha = (*(*mAlphaSelector)[index % 2])[SELECTOR_CIRCLE]->GetValue();
+    (*(*mAlphaSelector)[index % 2])[SELECTOR_CIRCLE]->GetValue(&alpha);
     paint = (*(*mPaintSelector)[index % 2])[SELECTOR_CIRCLE];
     paint->SetColor(color);
     paint->SetAlpha(GetMultipliedAlpha(color, alpha));
@@ -1024,7 +1062,7 @@ void RadialTimePickerView::DrawSelector(
     if (mSelectionDegrees[index] % 30 != 0) {
         // We're not on a direct tick
         color = mColorSelector[index % 2][SELECTOR_DOT];
-        alpha = (*(*mAlphaSelector)[index % 2])[SELECTOR_DOT]->GetValue();
+        (*(*mAlphaSelector)[index % 2])[SELECTOR_DOT]->GetValue(&alpha);
         paint = (*(*mPaintSelector)[index % 2])[SELECTOR_DOT];
         paint->SetColor(color);
         paint->SetAlpha(GetMultipliedAlpha(color, alpha));
@@ -1034,13 +1072,13 @@ void RadialTimePickerView::DrawSelector(
         // We're not drawing the dot, so shorten the line to only go as far as the edge of the
         // selection circle
         Int32 lineLength = mLineLength[index] - mSelectionRadius[index];
-        pointX = mXCenter + (Int32) (lineLength * Elastos::Core::Math::Sin(selectionRadians));
-        pointY = mYCenter - (Int32) (lineLength * Elastos::Core::Math::Cos(selectionRadians));
+        pointX = mXCenter + (Int32) (lineLength * Math::Sin(selectionRadians));
+        pointY = mYCenter - (Int32) (lineLength * Math::Cos(selectionRadians));
     }
 
     // Draw the line
     color = mColorSelector[index % 2][SELECTOR_LINE];
-    alpha = (*(*mAlphaSelector)[index % 2])[SELECTOR_LINE]->GetValue();
+    (*(*mAlphaSelector)[index % 2])[SELECTOR_LINE]->GetValue(&alpha);
     paint = (*(*mPaintSelector)[index % 2])[SELECTOR_LINE];
     paint->SetColor(color);
     paint->SetAlpha(GetMultipliedAlpha(color, alpha));
@@ -1315,7 +1353,7 @@ AutoPtr<IObjectAnimator> RadialTimePickerView::GetRadiusReappearAnimator(
 }
 
 AutoPtr<IObjectAnimator> RadialTimePickerView::GetFadeOutAnimator(
-    /* [in] */ Int32Holder* target,
+    /* [in] */ IInt32Holder* target,
     /* [in] */ Int32 startAlpha,
     /* [in] */ Int32 endAlpha,
     /* [in] */ InvalidateUpdateListener* updateListener)
@@ -1324,7 +1362,7 @@ AutoPtr<IObjectAnimator> RadialTimePickerView::GetFadeOutAnimator(
     AutoPtr<ArrayOf<Int32> > values = ArrayOf<Int32>::Alloc(2);
     (*values)[0] = startAlpha;
     (*values)[1] = endAlpha;
-    AutoPtr<IObjectAnimator> animator = ObjectAnimator::OfInt32(target->Probe(EIID_IInterface), String("value"), values);
+    AutoPtr<IObjectAnimator> animator = ObjectAnimator::OfInt32(target, String("value"), values);
     IAnimator::Probe(animator)->SetDuration(duration);
     IValueAnimator::Probe(animator)->AddUpdateListener(updateListener);
 
@@ -1332,7 +1370,7 @@ AutoPtr<IObjectAnimator> RadialTimePickerView::GetFadeOutAnimator(
 }
 
 AutoPtr<IObjectAnimator> RadialTimePickerView::GetFadeInAnimator(
-    /* [in] */ Int32Holder* target,
+    /* [in] */ IInt32Holder* target,
     /* [in] */ Int32 startAlpha,
     /* [in] */ Int32 endAlpha,
     /* [in] */ InvalidateUpdateListener* updateListener)
@@ -1359,7 +1397,7 @@ AutoPtr<IObjectAnimator> RadialTimePickerView::GetFadeInAnimator(
 
     AutoPtr<ArrayOf<IPropertyValuesHolder*> > values = ArrayOf<IPropertyValuesHolder*>::Alloc(1);
     values->Set(0, fadeIn);
-    AutoPtr<IObjectAnimator> animator = ObjectAnimator::OfPropertyValuesHolder(target->Probe(EIID_IInterface), values);
+    AutoPtr<IObjectAnimator> animator = ObjectAnimator::OfPropertyValuesHolder(target, values);
     IAnimator::Probe(animator)->SetDuration(totalDuration);
     IValueAnimator::Probe(animator)->AddUpdateListener(updateListener);
     return animator;
@@ -1479,7 +1517,8 @@ Int32 RadialTimePickerView::GetDegreesFromXY(
     /* [in] */ Float x,
     /* [in] */ Float y)
 {
-    const Double hypotenuse = Elastos::Core::Math::Sqrt(
+    using Elastos::Core::Math;
+    const Double hypotenuse = Math::Sqrt(
             (y - mYCenter) * (y - mYCenter) + (x - mXCenter) * (x - mXCenter));
 
     // Basic check if we're outside the range of the disk
@@ -1503,7 +1542,7 @@ Int32 RadialTimePickerView::GetDegreesFromXY(
     else {
         const Int32 index =  (mShowHours) ? HOURS : MINUTES;
         const Float length = (mCircleRadius[index] * mNumbersRadiusMultiplier[index]);
-        const Int32 distanceToNumber = (Int32) Elastos::Core::Math::Abs(hypotenuse - length);
+        const Int32 distanceToNumber = (Int32) Math::Abs(hypotenuse - length);
         const Int32 maxAllowedDistance =
                 (Int32) (mCircleRadius[index] * (1 - mNumbersRadiusMultiplier[index]));
         if (distanceToNumber > maxAllowedDistance) {
@@ -1511,8 +1550,8 @@ Int32 RadialTimePickerView::GetDegreesFromXY(
         }
     }
 
-    const Float opposite = Elastos::Core::Math::Abs(y - mYCenter);
-    Double degrees = Elastos::Core::Math::ToDegrees(Elastos::Core::Math::Asin(opposite / hypotenuse));
+    const Float opposite = Math::Abs(y - mYCenter);
+    Double degrees = Math::ToDegrees(Math::Asin(opposite / hypotenuse));
 
     // Now we have to translate to the correct quadrant.
     Boolean rightSide = (x > mXCenter);
@@ -1540,13 +1579,14 @@ Int32 RadialTimePickerView::GetIsTouchingAmOrPm(
     IsLayoutRtl(&isLayoutRtl);
     Int32 squaredYDistance = (Int32) ((y - mAmPmYCenter) * (y - mAmPmYCenter));
 
-    Int32 distanceToAmCenter = (Int32) Elastos::Core::Math::Sqrt(
+    using Elastos::Core::Math;
+    Int32 distanceToAmCenter = (Int32) Math::Sqrt(
             (x - mLeftIndicatorXCenter) * (x - mLeftIndicatorXCenter) + squaredYDistance);
     if (distanceToAmCenter <= mAmPmCircleRadius) {
         return (isLayoutRtl ? PM : AM);
     }
 
-    Int32 distanceToPmCenter = (Int32) Elastos::Core::Math::Sqrt(
+    Int32 distanceToPmCenter = (Int32) Math::Sqrt(
             (x - mRightIndicatorXCenter) * (x - mRightIndicatorXCenter) + squaredYDistance);
     if (distanceToPmCenter <= mAmPmCircleRadius) {
         return (isLayoutRtl ? AM : PM);

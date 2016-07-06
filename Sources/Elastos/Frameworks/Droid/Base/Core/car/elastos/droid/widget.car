@@ -1604,6 +1604,13 @@ module
          interface IScroller;
      }
 
+    class CInt32Holder {
+        constructor(
+            [in] Int32 value);
+
+        interface IInt32Holder;
+    }
+
     [local]
     class CRadialTimePickerView {
         constructor(
