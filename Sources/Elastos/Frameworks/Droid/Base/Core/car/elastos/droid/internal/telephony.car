@@ -676,6 +676,18 @@ module
             interface ICallManagerHelper;
         }
 
+        class CRestrictedState {
+            constructor();
+
+            interface IRestrictedState;
+        }
+
+        class CRetryManager {
+            constructor();
+
+            interface IRetryManager;
+        }
+
     } // Telephony
     } // Internal
     } // Droid
