@@ -13,7 +13,6 @@
 #include <elastos/core/Math.h>
 #include <elastos/core/StringUtils.h>
 #include <elastos/core/CoreUtils.h>
-#include <elastos/utility/logging/Slogger.h>
 
 using Elastos::Droid::Animation::CAnimatorSet;
 using Elastos::Droid::Animation::CArgbEvaluator;
@@ -40,20 +39,17 @@ using Elastos::Droid::Text::EIID_ITextWatcher;
 using Elastos::Droid::Text::TextUtils;
 using Elastos::Droid::View::Animation::CAccelerateDecelerateInterpolator;
 using Elastos::Droid::View::CViewAnimationUtilsHelper;
-using Elastos::Droid::View::EIID_IViewOnLongClickListener;
+using Elastos::Droid::View::EIID_IViewOnKeyListener;
 using Elastos::Droid::View::IKeyEvent;
 using Elastos::Droid::View::IViewAnimationUtilsHelper;
 using Elastos::Droid::View::IViewGroupOverlay;
 using Elastos::Droid::View::IViewOverlay;
-using Elastos::Droid::View::IViewOnKeyListener;
 using Elastos::Droid::View::IWindow;
 using Elastos::Droid::View::CView;
 
 using Elastos::Core::CoreUtils;
 using Elastos::Core::StringUtils;
 using Elastos::Core::Math;
-
-using Elastos::Utility::Logging::Slogger;
 
 namespace Elastos {
 namespace Droid {
@@ -74,10 +70,6 @@ AutoPtr<ICalculatorEditText> Calculator::mFormulaEditText;
 Calculator::MyTextWatcher::MyTextWatcher(
     /* [in] */ Calculator* host)
     : mHost(host)
-{}
-
-
-Calculator::MyTextWatcher::~MyTextWatcher()
 {}
 
 CAR_INTERFACE_IMPL(Calculator::MyTextWatcher, Object, ITextWatcher)
@@ -115,10 +107,7 @@ Calculator::MyOnKeyListener::MyOnKeyListener(
     : mHost(host)
 {}
 
-Calculator::MyOnKeyListener::~MyOnKeyListener()
-{}
-
-CAR_INTERFACE_IMPL(Calculator::MyOnKeyListener, Object, IViewOnLongClickListener)
+CAR_INTERFACE_IMPL(Calculator::MyOnKeyListener, Object, IViewOnKeyListener)
 
 ECode Calculator::MyOnKeyListener::OnKey(
     /* [in] */ IView* view,
@@ -129,18 +118,17 @@ ECode Calculator::MyOnKeyListener::OnKey(
     VALIDATE_NOT_NULL(result);
     switch (keyCode) {
         case IKeyEvent::KEYCODE_NUMPAD_ENTER:
-        case IKeyEvent::KEYCODE_ENTER:
-            {
-                Int32 action;
-                keyEvent->GetAction(&action);
-                if (action == IKeyEvent::ACTION_UP) {
-                    mHost->mCurrentButton = mHost->mEqualButton;
-                    mHost->OnEquals();
-                }
-                // ignore all other actions
-                *result = TRUE;
-                return NOERROR;
+        case IKeyEvent::KEYCODE_ENTER: {
+            Int32 action;
+            keyEvent->GetAction(&action);
+            if (action == IKeyEvent::ACTION_UP) {
+                mHost->mCurrentButton = mHost->mEqualButton;
+                mHost->OnEquals();
             }
+            // ignore all other actions
+            *result = TRUE;
+            return NOERROR;
+        }
     }
     *result = FALSE;
     return NOERROR;
@@ -153,9 +141,6 @@ ECode Calculator::MyOnKeyListener::OnKey(
 Calculator::MyEditableFactory::MyEditableFactory(
     /* [in] */ Calculator* host)
     : mHost(host)
-{}
-
-Calculator::MyEditableFactory::~MyEditableFactory()
 {}
 
 CAR_INTERFACE_IMPL(Calculator::MyEditableFactory, Object, IEditableFactory)
@@ -187,9 +172,6 @@ Calculator::MyAnimatorListenerAdapter::MyAnimatorListenerAdapter(
     , mView(view)
 {}
 
-Calculator::MyAnimatorListenerAdapter::~MyAnimatorListenerAdapter()
-{}
-
 ECode Calculator::MyAnimatorListenerAdapter::OnAnimationEnd(
     /* [in] */ IAnimator* animation)
 {
@@ -206,9 +188,6 @@ Calculator::MySecondAnimatorListenerAdapter::MySecondAnimatorListenerAdapter(
     /* [in] */ ICalculatorEditText* cet)
     : mHost(host)
     , mCet(cet)
-{}
-
-Calculator::MySecondAnimatorListenerAdapter::~MySecondAnimatorListenerAdapter()
 {}
 
 ECode Calculator::MySecondAnimatorListenerAdapter::OnAnimationEnd(
@@ -232,9 +211,6 @@ Calculator::MyThirdAnimatorListenerAdapter::MyThirdAnimatorListenerAdapter(
     , mErrorResId(errorResourceId)
 {}
 
-Calculator::MyThirdAnimatorListenerAdapter::~MyThirdAnimatorListenerAdapter()
-{}
-
 ECode Calculator::MyThirdAnimatorListenerAdapter::OnAnimationEnd(
     /* [in] */ IAnimator* animation)
 {
@@ -250,9 +226,6 @@ Calculator::MyAnimatorUpdateListener::MyAnimatorUpdateListener(
     /* [in] */ ICalculatorEditText* cet)
     : mHost(host)
     , mCet(cet)
-{}
-
-Calculator::MyAnimatorUpdateListener::~MyAnimatorUpdateListener()
 {}
 
 CAR_INTERFACE_IMPL(Calculator::MyAnimatorUpdateListener, Object, IAnimatorUpdateListener)
@@ -286,9 +259,6 @@ Calculator::MyFourthAnimatorListenerAdapter::MyFourthAnimatorListenerAdapter(
     , mColor(color)
 {}
 
-Calculator::MyFourthAnimatorListenerAdapter::~MyFourthAnimatorListenerAdapter()
-{}
-
 ECode Calculator::MyFourthAnimatorListenerAdapter::OnAnimationStart(
     /* [in] */ IAnimator* animation)
 {
@@ -318,7 +288,11 @@ ECode Calculator::MyFourthAnimatorListenerAdapter::OnAnimationEnd(
 //           Calculator
 //----------------------------------------------------------------
 Calculator::Calculator()
-{}
+{
+    mFormulaTextWatcher = new MyTextWatcher(this);
+    mFormulaOnKeyListener = new MyOnKeyListener(this);
+    mFormulaEditableFactory = new MyEditableFactory(this);
+}
 
 Calculator::~Calculator()
 {}
@@ -340,12 +314,12 @@ ECode Calculator::OnCreate(
     mDisplayView = FindViewById(R::id::display);
     mFormulaEditText = ICalculatorEditText::Probe(FindViewById(R::id::formula));
     mResultEditText = ICalculatorEditText::Probe(FindViewById(R::id::result));
+    AutoPtr<IView> tmpView = FindViewById(R::id::pad_pager);
     mPadViewPager = IViewPager::Probe(FindViewById(R::id::pad_pager));
-Slogger::E("calculator2", "~~~~~~~~~~~~~~padViewPager addr:%p", mPadViewPager.Get());
     mDeleteButton = FindViewById(R::id::del);
     mClearButton = FindViewById(R::id::clr);
 
-    AutoPtr<IView> tmpView = FindViewById(R::id::pad_numeric);
+    tmpView = FindViewById(R::id::pad_numeric);
     tmpView->FindViewById(R::id::eq, (IView**)&mEqualButton);
     Int32 visibility;
     mEqualButton->GetVisibility(&visibility);
@@ -380,8 +354,8 @@ Slogger::E("calculator2", "~~~~~~~~~~~~~~padViewPager addr:%p", mPadViewPager.Ge
     ITextView::Probe(mFormulaEditText)->GetText((ICharSequence**)&cs);
     mEvaluator->Evaluate(cs.Get(), IEvaluateCallback::Probe(this));
 
-    ITextView::Probe(mFormulaEditText.Get())->SetEditableFactory(mFormulaEditableFactory.Get());
-    ITextView::Probe(mFormulaEditText.Get())->AddTextChangedListener(mFormulaTextWatcher.Get());
+    ITextView::Probe(mFormulaEditText.Get())->SetEditableFactory(mFormulaEditableFactory);
+    ITextView::Probe(mFormulaEditText.Get())->AddTextChangedListener(mFormulaTextWatcher);
     IView::Probe(mFormulaEditText.Get())->SetOnKeyListener(IViewOnKeyListener::Probe(mFormulaOnKeyListener));
     mFormulaEditText->SetOnTextSizeChangeListener(IOnTextSizeChangeListener::Probe(this));
     return mDeleteButton->SetOnLongClickListener(IViewOnLongClickListener::Probe(this));

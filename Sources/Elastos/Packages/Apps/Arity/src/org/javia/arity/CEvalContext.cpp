@@ -14,10 +14,10 @@ CEvalContext::CEvalContext()
     : mStackBase(0)
 {
     mStackRe = ArrayOf<Double>::Alloc(MAX_STACK_SIZE);
-    AutoPtr<ArrayOf<IComplex*> > mStackComplex = ArrayOf<IComplex*>::Alloc(MAX_STACK_SIZE);
+    mStackComplex = ArrayOf<IComplex*>::Alloc(MAX_STACK_SIZE);
 
-    AutoPtr<ArrayOf<Double> > mArgs1 = ArrayOf<Double>::Alloc(1);
-    AutoPtr<ArrayOf<Double> > mArgs2 = ArrayOf<Double>::Alloc(2);
+    mArgs1 = ArrayOf<Double>::Alloc(1);
+    mArgs2 = ArrayOf<Double>::Alloc(2);
 }
 
 CAR_OBJECT_IMPL(CEvalContext)

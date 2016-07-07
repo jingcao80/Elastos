@@ -19,6 +19,8 @@ namespace Droid {
 namespace Calculator2 {
 
 CalculatorPadLayout::CalculatorPadLayout()
+    : mRowCount(0)
+    , mColumnCount(0)
 {}
 
 CalculatorPadLayout::~CalculatorPadLayout()
@@ -46,7 +48,7 @@ ECode CalculatorPadLayout::constructor(
 {
     ViewGroup::constructor(context, attrs, defStyle);
 
-    AutoPtr<ArrayOf<Int32> > arr = ArrayOf<Int32>::Alloc(2);
+    AutoPtr<ArrayOf<Int32> > arr = ArrayOf<Int32>::Alloc(4);
     (*arr)[0] = Elastos::Droid::R::attr::rowCount;
     (*arr)[1] = Elastos::Droid::R::attr::columnCount;
     (*arr)[2] = defStyle;
@@ -144,6 +146,7 @@ ECode CalculatorPadLayout::GenerateLayoutParams(
     mlp->constructor(context.Get(), attrs);
     *result = IViewGroupLayoutParams::Probe(mlp);
     REFCOUNT_ADD(*result);
+    return NOERROR;
 }
 
 ECode CalculatorPadLayout::GenerateDefaultLayoutParams(

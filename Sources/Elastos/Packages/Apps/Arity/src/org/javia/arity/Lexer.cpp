@@ -95,7 +95,7 @@ void Lexer::Init(
     if (mInput->GetLength() < len + 1) {
         mInput = ArrayOf<Char32>::Alloc(len + 1);
     }
-    mInput = str.GetChars(0, len);
+    mInput->Copy(str.GetChars(0, len), len);
     (*mInput)[len] = END_MARKER;
     mPos = 0;
 }
