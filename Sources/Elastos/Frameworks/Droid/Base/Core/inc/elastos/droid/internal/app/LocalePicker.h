@@ -20,7 +20,7 @@ namespace Droid {
 namespace Internal {
 namespace App {
 
-class LocalePicker
+class ECO_PUBLIC LocalePicker
     : public ListFragment
     , public ILocalePicker
 {
@@ -58,7 +58,7 @@ public:
     };
 
 private:
-    class LocalArrayAdapter
+    class ECO_LOCAL LocalArrayAdapter
         : public ArrayAdapter
     {
     public:
@@ -117,17 +117,17 @@ public:
         /* [in] */ ILocale* locale);
 
 private:
-    static CARAPI_(String) ToTitleCase(
+    ECO_LOCAL static CARAPI_(String) ToTitleCase(
         /* [in] */ const String& s);
 
-    static CARAPI_(String) GetDisplayName(
+    ECO_LOCAL static CARAPI_(String) GetDisplayName(
         /* [in] */ ILocale* l,
         /* [in] */ ArrayOf<String>* specialLocaleCodes,
         /* [in] */ ArrayOf<String>* specialLocaleNames);
 
 private:
-    static const String TAG;
-    static const Boolean DEBUG = FALSE;
+    ECO_LOCAL static const String TAG;
+    ECO_LOCAL static const Boolean DEBUG = FALSE;
     AutoPtr<ILocaleSelectionListener> mListener;
 };
 

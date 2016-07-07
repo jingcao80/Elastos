@@ -16,6 +16,7 @@ SOURCES += R.cpp
 SOURCES += Elastos.Droid.Core.cpp
 SOURCES += Elastos.CoreLibrary.cpp
 SOURCES += AirplaneModeEnabler.cpp
+SOURCES += CLocalePicker.cpp
 SOURCES += DateTimeSettings.cpp
 SOURCES += DateTimeSettingsSetupWizard.cpp
 SOURCES += HelpUtils.cpp

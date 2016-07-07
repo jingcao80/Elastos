@@ -1,5 +1,6 @@
 
 #include "elastos/droid/settings/SettingsPreferenceFragment.h"
+#include "elastos/droid/settings/CSettingsDialogFragment.h"
 #include "elastos/droid/settings/HelpUtils.h"
 #include "elastos/droid/settings/SettingsActivity.h"
 #include "elastos/droid/text/TextUtils.h"
@@ -38,6 +39,8 @@ const String SettingsPreferenceFragment::SettingsDialogFragment::KEY_PARENT_FRAG
 //===============================================================================
 //                  SettingsPreferenceFragment::SettingsDialogFragment
 //===============================================================================
+
+CAR_INTERFACE_IMPL(SettingsPreferenceFragment::SettingsDialogFragment, DialogFragment, ISettingsDialogFragment)
 
 SettingsPreferenceFragment::SettingsDialogFragment::SettingsDialogFragment()
     : mDialogId(0)
@@ -568,7 +571,7 @@ ECode SettingsPreferenceFragment::OnDetach()
     Boolean res;
     if (IsRemoving(&res), res) {
         if (mDialogFragment != NULL) {
-            mDialogFragment->Dismiss();
+            IDialogFragment::Probe(mDialogFragment)->Dismiss();
             mDialogFragment = NULL;
         }
     }
@@ -581,11 +584,11 @@ void SettingsPreferenceFragment::ShowDialog(
     if (mDialogFragment != NULL) {
         Logger::E(TAG, "Old dialog fragment not NULL!");
     }
-    mDialogFragment = new SettingsDialogFragment();
-    mDialogFragment->constructor((IDialogCreatable*)this, dialogId);
+    CSettingsDialogFragment::New(this, dialogId,
+            (ISettingsDialogFragment**)&mDialogFragment);
     AutoPtr<IFragmentManager> manager;
     GetChildFragmentManager((IFragmentManager**)&manager);
-    mDialogFragment->Show(manager, StringUtils::ToString(dialogId));
+    IDialogFragment::Probe(mDialogFragment)->Show(manager, StringUtils::ToString(dialogId));
 }
 
 ECode SettingsPreferenceFragment::OnCreateDialog(
@@ -603,8 +606,8 @@ void SettingsPreferenceFragment::RemoveDialog(
     // mDialogFragment may not be visible yet in parent fragment's OnResume().
     // To be able to dismiss dialog at that time, don't check
     // mDialogFragment->IsVisible().
-    if (mDialogFragment != NULL && mDialogFragment->GetDialogId() == dialogId) {
-        mDialogFragment->Dismiss();
+    if (mDialogFragment != NULL && ((CSettingsDialogFragment*)mDialogFragment.Get())->GetDialogId() == dialogId) {
+        IDialogFragment::Probe(mDialogFragment)->Dismiss();
     }
     mDialogFragment = NULL;
 }
@@ -613,7 +616,7 @@ void SettingsPreferenceFragment::SetOnCancelListener(
     /* [in] */ IDialogInterfaceOnCancelListener* listener)
 {
     if (mDialogFragment != NULL) {
-        mDialogFragment->mOnCancelListener = listener;
+        ((CSettingsDialogFragment*)mDialogFragment.Get())->mOnCancelListener = listener;
     }
 }
 
@@ -621,7 +624,7 @@ void SettingsPreferenceFragment::SetOnDismissListener(
     /* [in] */ IDialogInterfaceOnDismissListener* listener)
 {
     if (mDialogFragment != NULL) {
-        mDialogFragment->mOnDismissListener = listener;
+        ((CSettingsDialogFragment*)mDialogFragment.Get())->mOnDismissListener = listener;
     }
 }
 

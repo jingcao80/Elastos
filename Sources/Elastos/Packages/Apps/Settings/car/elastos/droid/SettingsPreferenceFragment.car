@@ -20,6 +20,19 @@ module
     interface ISettingsPreferenceFragment {
     }
 
+    /**
+     * @Involve
+     * interface Elastos.Droid.App.DialogFragment
+     * interface Elastos.Droid.App.IFragment
+     * interface Elastos.Droid.Content.IDialogInterfaceOnCancelListener
+     * interface Elastos.Droid.Content.IDialogInterfaceOnDismissListener
+     * interface Elastos.Droid.Content.IComponentCallbacks
+     * interface Elastos.Droid.Content.IComponentCallbacks2
+     * interface Elastos.Droid.View.IViewOnCreateContextMenuListener
+     */
+    interface ISettingsDialogFragment {
+    }
+
     } // namespace Settings
     } // namespace Droid
     } // namespace Elastos

@@ -49,6 +49,8 @@ module
     using interface Elastos.Droid.Graphics.Drawable.IDrawableCallback;
     using interface Elastos.Droid.Hardware.Input.IInputDeviceListener;
     using interface Elastos.Droid.Hardware.Input.IInputDeviceIdentifier;
+    using interface Elastos.Droid.Internal.App.ILocalePicker;
+    using interface Elastos.Droid.Internal.App.ILocaleSelectionListener;
     using interface Elastos.Droid.Os.IBundle;
     using interface Elastos.Droid.Preference.IPreference;
     using interface Elastos.Droid.Preference.ISwitchPreference;
@@ -561,6 +563,20 @@ module
         interface IPreferenceFragmentOnPreferenceStartFragmentCallback;
     }
 
+    class CLocalePicker {
+        constructor();
+
+        interface ILocalePicker;
+        interface IListFragment;
+        interface IFragment;
+        interface IComponentCallbacks;
+        interface IComponentCallbacks2;
+        interface IViewOnCreateContextMenuListener;
+
+        interface ILocaleSelectionListener;
+        interface IDialogCreatable;
+    }
+
     class CSettings {
         constructor();
 
@@ -611,6 +627,25 @@ module
         interface ISearchViewOnQueryTextListener;
         interface ISearchViewOnCloseListener;
         interface IOnActionExpandListener;
+    }
+
+    [local]
+    class CSettingsDialogFragment {
+        constructor();
+
+        constructor(
+            [in] IDialogCreatable* fragment,
+            [in] Int32 dialogId);
+
+        interface ISettingsDialogFragment;
+
+        interface IDialogFragment;
+        interface IDialogInterfaceOnCancelListener;
+        interface IDialogInterfaceOnDismissListener;
+        interface IFragment;
+        interface IComponentCallbacks;
+        interface IComponentCallbacks2;
+        interface IViewOnCreateContextMenuListener;
     }
 
     class CSubSettings {

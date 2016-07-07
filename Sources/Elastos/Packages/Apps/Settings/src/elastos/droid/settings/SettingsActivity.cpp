@@ -133,7 +133,7 @@ static AutoPtr< ArrayOf<String> > InitENTRY_FRAGMENTS()
     (*args)[7] = "Elastos.Droid.Settings.Wifi.P2p.CWifiP2pSettings";
     (*args)[8] = "Elastos.Droid.Settings.Vpn2.VpnSettings";
     (*args)[9] = "Elastos.Droid.Settings.CDateTimeSettings";
-    (*args)[10] = "Elastos.Droid.Settings.LocalePicker";
+    (*args)[10] = "Elastos.Droid.Settings.CLocalePicker";
     (*args)[11] = "Elastos.Droid.Settings.Inputmethod.CInputMethodAndLanguageSettings";
     (*args)[12] = "Elastos.Droid.Settings.Voice.VoiceInputSettings";
     (*args)[13] = "Elastos.Droid.Settings.Inputmethod.SpellCheckersSettings";

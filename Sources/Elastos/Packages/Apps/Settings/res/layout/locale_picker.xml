@@ -21,7 +21,7 @@
 
     <fragment
         android:id="@+id/locale_picker_fragment"
-        android:name="Elastos.Droid.Settings.LocalePickerFragment"
+        android:name="com.android.settings.LocalePickerFragment"
         android:layout_width="match_parent"
         android:layout_height="0dip"
         android:layout_weight="1" />

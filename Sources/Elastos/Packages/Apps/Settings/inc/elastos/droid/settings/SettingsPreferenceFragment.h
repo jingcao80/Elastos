@@ -37,9 +37,12 @@ class SettingsPreferenceFragment
 public:
     class SettingsDialogFragment
         : public DialogFragment
+        , public ISettingsDialogFragment
     {
         friend class SettingsPreferenceFragment;
     public:
+        CAR_INTERFACE_DECL()
+
         SettingsDialogFragment();
 
         ~SettingsDialogFragment();
@@ -306,7 +309,7 @@ private:
 
     static const String SAVE_HIGHLIGHTED_KEY;
 
-    AutoPtr<SettingsDialogFragment> mDialogFragment;
+    AutoPtr<ISettingsDialogFragment> mDialogFragment;
 
     String mHelpUrl;
 
