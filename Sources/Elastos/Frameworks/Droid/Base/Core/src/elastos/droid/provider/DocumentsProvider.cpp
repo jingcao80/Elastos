@@ -5,6 +5,7 @@
 #include "Elastos.Droid.Graphics.h"
 #include "Elastos.Droid.Net.h"
 #include "Elastos.Droid.Provider.h"
+#include "elastos/droid/Manifest.h"
 #include "elastos/droid/provider/DocumentsProvider.h"
 #include "elastos/droid/provider/DocumentsContract.h"
 #include "elastos/droid/content/CUriMatcher.h"
@@ -13,6 +14,7 @@
 #include "elastos/droid/os/CBundle.h"
 #include <elastos/utility/logging/Slogger.h>
 
+using Elastos::Droid::Manifest;
 using Elastos::Droid::Content::CUriMatcher;
 using Elastos::Droid::Content::EIID_IComponentCallbacks;
 using Elastos::Droid::Content::EIID_IComponentCallbacks2;
@@ -79,13 +81,11 @@ ECode DocumentsProvider::AttachInfo(
     // Sanity check our setup
     Boolean flag = FALSE;
     if (!(IComponentInfo::Probe(info)->GetExported(&flag), flag)) {
-        // throw new SecurityException("Provider must be exported");
         Slogger::E("DocumentsProvider", "Provider must be exported");
         return E_SECURITY_EXCEPTION;
     }
 
     if (!(info->GetGrantUriPermissions(&flag), flag)) {
-        // throw new SecurityException("Provider must grantUriPermissions");
         Slogger::E("DocumentsProvider", "Provider must grantUriPermissions");
         return E_SECURITY_EXCEPTION;
     }
@@ -94,18 +94,17 @@ ECode DocumentsProvider::AttachInfo(
     String writePermission;
     info->GetReadPermission(&readPermission);
     info->GetWritePermission(&writePermission);
-    assert(0 && "TODO");
-    // if (!Elastos::Droid::Manifest::permission::MANAGE_DOCUMENTS.Equals(readPermission)
-    //         || !Elastos::Droid::Manifest::permission::MANAGE_DOCUMENTS.Equals(writePermission)) {
-    //     // throw new SecurityException("Provider must be protected by MANAGE_DOCUMENTS");
-    //     Slogger::E("DocumentsProvider", "Provider must be protected by MANAGE_DOCUMENTS");
-    //     return E_SECURITY_EXCEPTION;
-    // }
 
-    return AttachInfo(context, info);
+    if (!Manifest::permission::MANAGE_DOCUMENTS.Equals(readPermission)
+        || !Manifest::permission::MANAGE_DOCUMENTS.Equals(writePermission)) {
+        Slogger::E("DocumentsProvider", "Provider must be protected by MANAGE_DOCUMENTS");
+        return E_SECURITY_EXCEPTION;
+    }
+
+    return ContentProvider::AttachInfo(context, info);
 }
 
-void DocumentsProvider::EnforceTree(
+ECode DocumentsProvider::EnforceTree(
     /* [in] */ IUri* documentUri)
 {
     Boolean flag = FALSE;
@@ -116,15 +115,15 @@ void DocumentsProvider::EnforceTree(
         String child;
         DocumentsContract::GetDocumentId(documentUri, &child);
         if (parent.Equals(child)) {
-            return;
+            return NOERROR;
         }
         if (!(IsChildDocument(parent, child, &flag), flag)) {
-            // throw new SecurityException(
-                    // "Document " + child + " is not a descendant of " + parent);
-            Slogger::E("DocumentsProvider", "Document %s is not a descendant of %s", child.string(), parent.string());
-            return;
+            Slogger::E("DocumentsProvider", "Document %s is not a descendant of %s",
+                child.string(), parent.string());
+            return E_SECURITY_EXCEPTION;
         }
     }
+    return NOERROR;
 }
 
 ECode DocumentsProvider::IsChildDocument(
@@ -252,6 +251,8 @@ ECode DocumentsProvider::Query(
     /* [out] */ ICursor** cursor)
 {
     VALIDATE_NOT_NULL(cursor);
+    *cursor = NULL;
+
 // try {
     Int32 matchCode;
     mMatcher->Match(uri, &matchCode);
@@ -284,7 +285,7 @@ ECode DocumentsProvider::Query(
         case MATCH_DOCUMENT:
         case MATCH_DOCUMENT_TREE:
             {
-                EnforceTree(uri);
+                FAIL_RETURN(EnforceTree(uri))
                 DocumentsContract::GetDocumentId(uri, &docID);
                 ec = QueryDocument(docID, projection, cursor);
                 if (!SUCCEEDED(ec)) goto EXIT;
@@ -294,7 +295,7 @@ ECode DocumentsProvider::Query(
         case MATCH_CHILDREN:
         case MATCH_CHILDREN_TREE:
             {
-                EnforceTree(uri);
+                FAIL_RETURN(EnforceTree(uri))
                 DocumentsContract::GetDocumentId(uri, &docID);
                 Boolean isMngCode = FALSE;
                 DocumentsContract::IsManageMode(uri, &isMngCode);
@@ -332,6 +333,8 @@ ECode DocumentsProvider::GetType(
     /* [out] */ String* type)
 {
     VALIDATE_NOT_NULL(type);
+    *type = String(NULL);
+
 // try {
     Int32 matchCode;
     mMatcher->Match(uri, &matchCode);
@@ -346,7 +349,7 @@ ECode DocumentsProvider::GetType(
         case MATCH_DOCUMENT:
         case MATCH_DOCUMENT_TREE:
             {
-                EnforceTree(uri);
+                FAIL_RETURN(EnforceTree(uri))
                 String docID;
                 DocumentsContract::GetDocumentId(uri, &docID);
                 ec = GetDocumentType(docID, type);
@@ -378,6 +381,8 @@ ECode DocumentsProvider::Canonicalize(
     /* [out] */ IUri** result)
 {
     VALIDATE_NOT_NULL(result);
+    *result = NULL;
+
     AutoPtr<IContext> context;
     GetContext((IContext**)&context);
     Int32 matchCode;
@@ -385,7 +390,7 @@ ECode DocumentsProvider::Canonicalize(
     switch (matchCode) {
         case MATCH_DOCUMENT_TREE:
             {
-                EnforceTree(uri);
+                FAIL_RETURN(EnforceTree(uri))
                 String authority;
                 uri->GetAuthority(&authority);
                 String docID;
@@ -427,7 +432,8 @@ Int32 DocumentsProvider::GetCallingOrSelfUriPermissionModeFlags(
         modeFlags |= IIntent::FLAG_GRANT_WRITE_URI_PERMISSION;
     }
 
-    context->CheckCallingOrSelfUriPermission(uri, IIntent::FLAG_GRANT_READ_URI_PERMISSION | IIntent::FLAG_GRANT_PERSISTABLE_URI_PERMISSION, &result);
+    context->CheckCallingOrSelfUriPermission(uri, IIntent::FLAG_GRANT_READ_URI_PERMISSION
+        | IIntent::FLAG_GRANT_PERSISTABLE_URI_PERMISSION, &result);
     if (result == IPackageManager::PERMISSION_GRANTED) {
         modeFlags |= IIntent::FLAG_GRANT_PERSISTABLE_URI_PERMISSION;
     }
@@ -478,6 +484,8 @@ ECode DocumentsProvider::Call(
     /* [out] */ IBundle** bundle)
 {
     VALIDATE_NOT_NULL(bundle);
+    *bundle = NULL;
+
     if (!method.StartWith("android:")) {
         // Ignore non-platform methods
         return Call(method, arg, extras, bundle);
@@ -495,11 +503,12 @@ ECode DocumentsProvider::Call(
     DocumentsContract::GetDocumentId(documentUri, &documentId);
 
     if (mAuthority.Equals(authority)) {
-        Slogger::E("DocumentsProvider", "Requested authority %s doesn't match provider %s ", authority.string(), mAuthority.string());
+        Slogger::E("DocumentsProvider", "Requested authority %s doesn't match provider %s ",
+            authority.string(), mAuthority.string());
         return E_SECURITY_EXCEPTION;
     }
 
-    EnforceTree(documentUri);
+    FAIL_RETURN(EnforceTree(documentUri))
 
     AutoPtr<IBundle> out;
     CBundle::New((IBundle**)&out);
@@ -592,7 +601,9 @@ ECode DocumentsProvider::OpenFile(
     /* [out] */ IParcelFileDescriptor** fileDescriptor)
 {
     VALIDATE_NOT_NULL(fileDescriptor);
-    EnforceTree(uri);
+    *fileDescriptor = NULL;
+
+    FAIL_RETURN(EnforceTree(uri))
     String docID;
     DocumentsContract::GetDocumentId(uri, &docID);
     return OpenDocument(docID, mode, NULL, fileDescriptor);
@@ -606,7 +617,9 @@ ECode DocumentsProvider::OpenFile(
     /* [out] */ IParcelFileDescriptor** fileDescriptor)
 {
     VALIDATE_NOT_NULL(fileDescriptor);
-    EnforceTree(uri);
+    *fileDescriptor = NULL;
+
+    FAIL_RETURN(EnforceTree(uri))
     String docID;
     DocumentsContract::GetDocumentId(uri, &docID);
     return OpenDocument(docID, mode, signal, fileDescriptor);
@@ -620,7 +633,9 @@ ECode DocumentsProvider::OpenAssetFile(
     /* [out] */ IAssetFileDescriptor** fileDescriptor)
 {
     VALIDATE_NOT_NULL(fileDescriptor);
-    EnforceTree(uri);
+    *fileDescriptor = NULL;
+
+    FAIL_RETURN(EnforceTree(uri))
     String docID;
     DocumentsContract::GetDocumentId(uri, &docID);
     AutoPtr<IParcelFileDescriptor> fd;
@@ -645,7 +660,9 @@ ECode DocumentsProvider:: OpenAssetFile(
     /* [out] */ IAssetFileDescriptor** fileDescriptor)
 {
     VALIDATE_NOT_NULL(fileDescriptor);
-    EnforceTree(uri);
+    *fileDescriptor = NULL;
+
+    FAIL_RETURN(EnforceTree(uri))
     String docID;
     DocumentsContract::GetDocumentId(uri, &docID);
     AutoPtr<IParcelFileDescriptor> fd;
@@ -669,7 +686,9 @@ ECode DocumentsProvider::OpenTypedAssetFile(
     /* [out] */ IAssetFileDescriptor** fileDescriptor)
 {
     VALIDATE_NOT_NULL(fileDescriptor);
-    EnforceTree(uri);
+    *fileDescriptor = NULL;
+
+    FAIL_RETURN(EnforceTree(uri))
     Boolean flag = FALSE;
     opts->ContainsKey(IContentResolver::EXTRA_SIZE, &flag);
     if (opts != NULL && flag) {
@@ -694,7 +713,9 @@ ECode DocumentsProvider:: OpenTypedAssetFile(
     /* [out] */ IAssetFileDescriptor** fileDescriptor)
 {
     VALIDATE_NOT_NULL(fileDescriptor);
-    EnforceTree(uri);
+    *fileDescriptor = NULL;
+
+    FAIL_RETURN(EnforceTree(uri))
     Boolean flag = FALSE;
     opts->ContainsKey(IContentResolver::EXTRA_SIZE, &flag);
     if (opts != NULL && flag) {

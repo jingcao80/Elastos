@@ -4,6 +4,7 @@
 #include "_Elastos.Droid.Providers.Media.h"
 #include "Elastos.Droid.App.h"
 #include "Elastos.Droid.Os.h"
+#include <elastos/droid/ext/frameworkext.h>
 #include <elastos/utility/etl/HashMap.h>
 #include <elastos/droid/app/Service.h>
 #include <elastos/droid/content/BroadcastReceiver.h>
@@ -32,7 +33,7 @@ namespace Providers {
 namespace Media {
 
 class MtpService
-    : public Service
+    : public Elastos::Droid::App::Service
     , public IMtpService
 {
 public:
@@ -44,14 +45,14 @@ public:
         friend class MtpService;
 
     public:
+        CAR_INTERFACE_DECL()
+
         MyIMtpService();
 
         virtual ~MyIMtpService();
 
         CARAPI constructor(
             /* [in] */ IMtpService* owner);
-
-        CAR_INTERFACE_DECL()
 
         CARAPI SendObjectAdded(
             /* [in] */ Int32 objectHandle);
@@ -74,12 +75,12 @@ private:
         friend class MtpService;
 
     public:
+        CAR_INTERFACE_DECL()
+
         MyStorageEventListener(
             /* [in] */ MtpService* owner);
 
         virtual ~MyStorageEventListener();
-
-        CAR_INTERFACE_DECL()
 
         CARAPI OnStorageStateChanged(
             /* [in] */ const String& path,
@@ -101,8 +102,6 @@ private:
     public:
         MyRunnable(
             /* [in] */ MtpService* owner);
-
-        CAR_INTERFACE_DECL()
 
         CARAPI Run();
 
@@ -128,9 +127,13 @@ private:
     };
 
 public:
+    CAR_INTERFACE_DECL()
+
     MtpService();
 
     virtual ~MtpService();
+
+    CARAPI constructor();
 
     CARAPI OnCreate();
 

@@ -6,7 +6,7 @@
 #include "Elastos.CoreLibrary.IO.h"
 #include <elastos/droid/content/BroadcastReceiver.h>
 #include <elastos/droid/os/Environment.h>
-#include <elastos/utility/logging/Slogger.h>
+#include <elastos/utility/logging/Logger.h>
 
 using Elastos::Droid::Content::CIntent;
 using Elastos::Droid::Content::IComponentName;
@@ -14,7 +14,7 @@ using Elastos::Droid::Net::IUri;
 using Elastos::Droid::Os::CBundle;
 using Elastos::Droid::Os::IBundle;
 using Elastos::Droid::Os::Environment;
-using Elastos::Utility::Logging::Slogger;
+using Elastos::Utility::Logging::Logger;
 using Elastos::IO::CFile;
 using Elastos::IO::IFile;
 
@@ -23,7 +23,7 @@ namespace Droid {
 namespace Providers {
 namespace Media {
 
-const String MediaScannerReceiver::TAG(String("MediaScannerReceiver"));
+const String MediaScannerReceiver::TAG("MediaScannerReceiver");
 
 CAR_INTERFACE_IMPL(MediaScannerReceiver, BroadcastReceiver, IMediaScannerReceiver)
 
@@ -35,12 +35,14 @@ ECode MediaScannerReceiver::OnReceive(
     intent->GetAction(&action);
     AutoPtr<IUri> uri;
     intent->GetData((IUri**)&uri);
+    Logger::I(TAG, " >> OnReceive: %s, uri: %s", action.string(), TO_CSTR(uri));
+
     if (IIntent::ACTION_BOOT_COMPLETED.Equals(action)) {
         // Scan both internal and external storage
         Scan(context, MediaProvider::INTERNAL_VOLUME);
         Scan(context, MediaProvider::EXTERNAL_VOLUME);
-
-    } else {
+    }
+    else {
         String scheme;
         uri->GetScheme(&scheme);
         if (scheme.Equals("file")) {
@@ -59,7 +61,7 @@ ECode MediaScannerReceiver::OnReceive(
                 ECode ec = tf->GetCanonicalPath(&path);
             // } catch (IOException e) {
                 if (ec == (ECode)E_IO_EXCEPTION) {
-                    Slogger::E(TAG, "couldn't canonicalize %s", path.string());
+                    Logger::E(TAG, "couldn't canonicalize %s", path.string());
                     return NOERROR;
                 }
             if (path.StartWith(legacyPath)) {
@@ -67,7 +69,7 @@ ECode MediaScannerReceiver::OnReceive(
                 path = externalStoragePath + path.Substring(llength);
             }
 
-            Slogger::D(TAG, "action: %s path: %s", action.string(), path.string());
+            Logger::D(TAG, "action: %s path: %s", action.string(), path.string());
             if (IIntent::ACTION_MEDIA_MOUNTED.Equals(action)) {
                 // scan whenever any volume is mounted
                 Scan(context, MediaProvider::EXTERNAL_VOLUME);
@@ -77,6 +79,7 @@ ECode MediaScannerReceiver::OnReceive(
             }
         }
     }
+    return NOERROR;
 }
 
 void MediaScannerReceiver::Scan(

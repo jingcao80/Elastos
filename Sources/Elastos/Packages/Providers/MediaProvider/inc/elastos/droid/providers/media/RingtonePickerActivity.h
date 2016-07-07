@@ -47,10 +47,10 @@ private:
         friend class RingtonePickerActivity;
 
     public:
+        CAR_INTERFACE_DECL()
+
         MyDialogInterfaceOnClickListener(
             /* [in] */ RingtonePickerActivity* owner);
-
-        CAR_INTERFACE_DECL()
 
         CARAPI OnClick(
             /* [in] */ IDialogInterface* dialog,
@@ -80,6 +80,8 @@ public:
     RingtonePickerActivity();
 
     virtual ~RingtonePickerActivity();
+
+    CARAPI constructor();
 
     CARAPI OnSaveInstanceState(
         /* [in] */ IBundle* outState);

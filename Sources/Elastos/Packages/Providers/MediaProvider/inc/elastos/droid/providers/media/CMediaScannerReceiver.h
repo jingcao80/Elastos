@@ -9,7 +9,8 @@ namespace Droid {
 namespace Providers {
 namespace Media {
 
-CarClass(CMediaScannerReceiver), public MediaScannerReceiver
+CarClass(CMediaScannerReceiver)
+    , public MediaScannerReceiver
 {
 public:
     CAR_OBJECT_DECL()

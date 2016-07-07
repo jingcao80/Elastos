@@ -255,7 +255,7 @@ AutoPtr<IIntent> Intent::CreateChooser(
                 mimeTypes = ArrayOf<String>::Alloc(0);
             }
             // CClipData::NewByFriend(NULL, mimeTypes, item,
-            //         (CClipData**)(IClipData**)&targetClipData);
+            //         (CClipData**)&targetClipData);
             assert(0);
         }
         if (targetClipData != NULL) {

@@ -28,7 +28,7 @@ namespace Providers {
 namespace Media {
 
 class MediaScannerService
-    : public Service
+    : public Elastos::Droid::App::Service
     , public IMediaScannerService
     , public IRunnable
 {
@@ -75,8 +75,6 @@ public:
         ServiceHandler(
             /* [in] */ MediaScannerService* owner);
 
-        CAR_INTERFACE_DECL()
-
         CARAPI HandleMessage(
             /* [in] */ IMessage* msg);
 
@@ -85,9 +83,9 @@ public:
     };
 
 public:
-    MediaScannerService();
+    CAR_INTERFACE_DECL()
 
-    ~MediaScannerService();
+    CARAPI constructor();
 
     CARAPI OnCreate();
 

@@ -4,6 +4,7 @@
 #include "Elastos.Droid.Net.h"
 #include "Elastos.Droid.Os.h"
 #include <elastos/droid/content/BroadcastReceiver.h>
+#include <elastos/utility/logging/Logger.h>
 
 using Elastos::Droid::Content::CIntent;
 using Elastos::Droid::Content::IContentResolver;
@@ -15,19 +16,14 @@ using Elastos::Droid::Net::IUri;
 using Elastos::Droid::Net::CUriHelper;
 using Elastos::Droid::Net::IUriHelper;
 using Elastos::Droid::Os::IBundle;
+using Elastos::Utility::Logging::Logger;
 
 namespace Elastos {
 namespace Droid {
 namespace Providers {
 namespace Media {
 
-const String MtpReceiver::TAG(String("UsbReceiver"));
-
-MtpReceiver::MtpReceiver()
-{}
-
-MtpReceiver::~MtpReceiver()
-{}
+const String MtpReceiver::TAG("UsbReceiver");
 
 CAR_INTERFACE_IMPL(MtpReceiver, BroadcastReceiver, IMtpReceiver)
 
@@ -37,6 +33,7 @@ ECode MtpReceiver::OnReceive(
 {
     String action;
     intent->GetAction(&action);
+    Logger::I(TAG, " >> OnReceive: %s", action.string());
     if (IIntent::ACTION_BOOT_COMPLETED.Equals(action)) {
         AutoPtr<IIntent> usbState;
         AutoPtr<IIntentFilter> intentFilter;
@@ -45,9 +42,11 @@ ECode MtpReceiver::OnReceive(
         if (usbState != NULL) {
             HandleUsbState(context, usbState);
         }
-    } else if (IUsbManager::ACTION_USB_STATE.Equals(action)) {
+    }
+    else if (IUsbManager::ACTION_USB_STATE.Equals(action)) {
         HandleUsbState(context, intent);
     }
+    return NOERROR;
 }
 
 ECode MtpReceiver::HandleUsbState(
@@ -69,8 +68,7 @@ ECode MtpReceiver::HandleUsbState(
     CUriHelper::AcquireSingleton((IUriHelper**)&uh);
     if (connected && (mtpEnabled || ptpEnabled)) {
         AutoPtr<IIntent> temp;
-        assert(0 && "TODO");
-        // CIntent::New(context, ECLSID_CMtpService, (IIntent**)&temp);
+        CIntent::New(context, ECLSID_CMtpService, (IIntent**)&temp);
         if (ptpEnabled) {
             temp->PutBooleanExtra(IUsbManager::USB_FUNCTION_PTP, TRUE);
         }
@@ -85,8 +83,7 @@ ECode MtpReceiver::HandleUsbState(
     }
     else {
         AutoPtr<IIntent> temp;
-        assert(0 && "TODO");
-        // CIntent::New(context, ECLSID_CMtpService, (IIntent**)&temp);
+        CIntent::New(context, ECLSID_CMtpService, (IIntent**)&temp);
         Boolean flag = FALSE;
         context->StopService(temp, &flag);
         // tell MediaProvider MTP is disconnected so it can unbind from the service

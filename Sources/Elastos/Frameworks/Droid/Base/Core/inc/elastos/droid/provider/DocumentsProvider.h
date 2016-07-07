@@ -208,7 +208,7 @@ public:
 
 private:
     /** {@hide} */
-    CARAPI_(void) EnforceTree(
+    CARAPI EnforceTree(
         /* [in] */ IUri* documentUri);
 
     static CARAPI_(Int32) GetCallingOrSelfUriPermissionModeFlags(

@@ -3,14 +3,14 @@
 
 #include "_Elastos_Droid_Providers_Media_CIMtpService.h"
 #include "elastos/droid/providers/media/MtpService.h"
-#include "elastos/droid/ext/frameworkext.h"
 
 namespace Elastos {
 namespace Droid {
 namespace Providers {
 namespace Media {
 
-CarClass(CIMtpService), public MtpService::MyIMtpService
+CarClass(CIMtpService)
+    , public MtpService::MyIMtpService
 {
 public:
     CAR_OBJECT_DECL()

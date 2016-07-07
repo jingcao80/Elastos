@@ -3,9 +3,10 @@
 
 #include "_Elastos_Droid_Providers_Media_CMediaThumbRequestHelper.h"
 #include "elastos/droid/ext/frameworkext.h"
-#include <elastos/core/Object.h>
+#include <elastos/core/Singleton.h>
 
 using Elastos::Core::IComparator;
+using Elastos::Core::Singleton;
 
 namespace Elastos {
 namespace Droid {
@@ -13,17 +14,13 @@ namespace Providers {
 namespace Media {
 
 CarClass(CMediaThumbRequestHelper)
-    , public Object
+    , public Singleton
     , public IMediaThumbRequestHelper
 {
 public:
-    CMediaThumbRequestHelper();
-
-    virtual ~CMediaThumbRequestHelper();
-
     CAR_INTERFACE_DECL()
 
-    CAR_OBJECT_DECL()
+    CAR_SINGLETON_DECL()
 
     CARAPI GetComparator(
         /* [out] */ IComparator** result);

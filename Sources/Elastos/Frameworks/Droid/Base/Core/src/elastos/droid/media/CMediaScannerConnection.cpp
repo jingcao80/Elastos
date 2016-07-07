@@ -122,20 +122,22 @@ ECode CMediaScannerConnection::constructor(
 
 ECode CMediaScannerConnection::Connect()
 {
-   AutoLock lock(mThisLock);
+    AutoLock lock(mThisLock);
 
-   if (!mConnected) {
-       AutoPtr<IIntent> intent;
-       // CIntent::New(MediaScannerService.class.getName(), (IIntent**)&intent);
-       CIntent::New(String("IIMediaScannerService"), (IIntent**)&intent);
-       AutoPtr<IComponentName> component;
-       CComponentName::New(String("com.android.providers.media"),
-            String("com.android.providers.media.MediaScannerService"), (IComponentName**)&component);
-       intent->SetComponent(component.Get());
-       Boolean tempState;
-       mContext->BindService(intent.Get(), IServiceConnection::Probe(this), IContext::BIND_AUTO_CREATE, &tempState);
-       mConnected = TRUE;
-   }
+    if (!mConnected) {
+        AutoPtr<IIntent> intent;
+        CIntent::New(String("Elastos.Droid.Providers.Media.CMediaScannerService"), (IIntent**)&intent);
+        AutoPtr<IComponentName> component;
+        CComponentName::New(String("Elastos.Droid.Providers.Media"),
+            String("Elastos.Droid.Providers.Media.CMediaScannerService"), (IComponentName**)&component);
+        intent->SetComponent(component.Get());
+        Boolean tempState;
+        ECode ec = mContext->BindService(intent, this, IContext::BIND_AUTO_CREATE, &tempState);
+        if (FAILED(ec)) {
+            Slogger::E(TAG, "failed to BindService %s", TO_CSTR(intent));
+        }
+        mConnected = TRUE;
+    }
 
     return NOERROR;
 }

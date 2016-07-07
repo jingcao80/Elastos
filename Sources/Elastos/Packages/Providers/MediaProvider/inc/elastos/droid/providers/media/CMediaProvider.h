@@ -9,7 +9,8 @@ namespace Droid {
 namespace Providers {
 namespace Media {
 
-CarClass(CMediaProvider), public MediaProvider
+CarClass(CMediaProvider)
+    , public MediaProvider
 {
 public:
     CAR_OBJECT_DECL()

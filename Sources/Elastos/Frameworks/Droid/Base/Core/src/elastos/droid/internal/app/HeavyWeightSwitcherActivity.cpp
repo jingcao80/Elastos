@@ -131,9 +131,9 @@ ECode HeavyWeightSwitcherActivity::SetText(
     /* [in] */ Int32 id,
     /* [in] */ ICharSequence* text)
 {
-    AutoPtr<ITextView> tView;
-    FindViewById(id, (IView**)(ITextView**)&tView);
-    tView->SetText(text);
+    AutoPtr<IView> tView;
+    FindViewById(id, (IView**)&tView);
+    ITextView::Probe(tView)->SetText(text);
     return NOERROR;
 }
 

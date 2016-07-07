@@ -9,7 +9,8 @@ namespace Droid {
 namespace Providers {
 namespace Media {
 
-CarClass(CMediaThumbRequest), public MediaThumbRequest
+CarClass(CMediaThumbRequest)
+    , public MediaThumbRequest
 {
 public:
     CAR_OBJECT_DECL()

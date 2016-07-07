@@ -2220,8 +2220,8 @@ ECode CActivityThread::PerformLaunchActivity(
     AutoPtr<IClassLoader> cl;
     lp->GetClassLoader((IClassLoader**)&cl);
 
-    Slogger::I(TAG, " >> PerformLaunchActivity: packageName:%s, className:%s, classLoader:%s",
-        packageName.string(), className.string(), TO_CSTR(cl));
+    // Slogger::I(TAG, " >> PerformLaunchActivity: packageName:%s, className:%s, classLoader:%s",
+    //     packageName.string(), className.string(), TO_CSTR(cl));
 
     AutoPtr<IClassInfo> classInfo;
     ec = cl->LoadClass(className, (IClassInfo**)&classInfo);

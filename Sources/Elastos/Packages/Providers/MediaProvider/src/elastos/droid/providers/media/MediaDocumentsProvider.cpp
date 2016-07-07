@@ -13,9 +13,11 @@
 #include "R.h"
 #include <elastos/droid/os/Binder.h>
 #include <elastos/droid/text/TextUtils.h>
+#include <elastos/core/CoreUtils.h>
 #include <elastos/core/StringUtils.h>
+#include <elastos/core/StringBuilder.h>
 #include <elastos/core/Math.h>
-#include <elastos/utility/logging/Slogger.h>
+#include <elastos/utility/logging/Logger.h>
 
 using Elastos::Droid::Content::IContentProvider;
 using Elastos::Droid::Content::IContentResolver;
@@ -66,23 +68,25 @@ using Elastos::Droid::Provider::IMediaStoreAudioArtistsAlbums;
 using Elastos::Droid::Provider::IMediaStoreAudioAudioColumns;
 using Elastos::Droid::Text::Format::IDateUtils;
 using Elastos::Droid::Text::TextUtils;
-using Elastos::Utility::Logging::Slogger;
+using Elastos::Core::CoreUtils;
+using Elastos::Core::StringBuilder;
+using Elastos::Core::StringUtils;
+using Elastos::Utility::Logging::Logger;
 using Elastos::IO::CFile;
 using Elastos::IO::ICloseable;
 using Elastos::IO::IFile;
 using Libcore::IO::CIoUtils;
 using Libcore::IO::IIoUtils;
-using Elastos::Core::StringUtils;
 
 namespace Elastos {
 namespace Droid {
 namespace Providers {
 namespace Media {
 
-const String MediaDocumentsProvider::TAG(String("MediaDocumentsProvider"));
-const String MediaDocumentsProvider::AUTHORITY(String("com.android.providers.media.documents"));
+const String MediaDocumentsProvider::TAG("MediaDocumentsProvider");
+const String MediaDocumentsProvider::AUTHORITY("com.android.providers.media.documents");
 
-static AutoPtr<ArrayOf<String> > initDEFAULT_ROOT_PROJECTION()
+static AutoPtr<ArrayOf<String> > InitDEFAULT_ROOT_PROJECTION()
 {
     AutoPtr<ArrayOf<String> > arr = ArrayOf<String>::Alloc(6);
     (*arr)[0] = IDocumentsContractRoot::COLUMN_ROOT_ID;
@@ -94,9 +98,10 @@ static AutoPtr<ArrayOf<String> > initDEFAULT_ROOT_PROJECTION()
     return arr;
 }
 
-AutoPtr<ArrayOf<String> > MediaDocumentsProvider::DEFAULT_ROOT_PROJECTION = initDEFAULT_ROOT_PROJECTION();
+AutoPtr<ArrayOf<String> > MediaDocumentsProvider::DEFAULT_ROOT_PROJECTION
+    = InitDEFAULT_ROOT_PROJECTION();
 
-static AutoPtr<ArrayOf<String> > initDEFAULT_DOCUMENT_PROJECTION()
+static AutoPtr<ArrayOf<String> > InitDEFAULT_DOCUMENT_PROJECTION()
 {
     AutoPtr<ArrayOf<String> > arr = ArrayOf<String>::Alloc(6);
     (*arr)[0] = IDocumentsContractDocument::COLUMN_DOCUMENT_ID;
@@ -108,49 +113,46 @@ static AutoPtr<ArrayOf<String> > initDEFAULT_DOCUMENT_PROJECTION()
     return arr;
 }
 
-AutoPtr<ArrayOf<String> > MediaDocumentsProvider::DEFAULT_DOCUMENT_PROJECTION = initDEFAULT_DOCUMENT_PROJECTION();
+AutoPtr<ArrayOf<String> > MediaDocumentsProvider::DEFAULT_DOCUMENT_PROJECTION
+    = InitDEFAULT_DOCUMENT_PROJECTION();
 
-String  MediaDocumentsProvider::initIMAGE_MIME_TYPES()
+static String InitAUDIO_MIME_TYPES()
 {
-    AutoPtr<ArrayOf<IInterface*> > arr = ArrayOf<IInterface*>::Alloc(1);
-    (*arr)[0] = TO_IINTERFACE(StringUtils::ParseCharSequence(String("image/*")).Get());
-    return JoinNewline(arr.Get());
+    AutoPtr<ArrayOf<String> > arr = ArrayOf<String>::Alloc(3);
+    (*arr)[0] = String("audio/*");
+    (*arr)[1] = String("application/ogg");
+    (*arr)[2] = String("application/x-flac");
+
+    StringBuilder sb;
+    Boolean firstTime = TRUE;
+    for (Int32 i = 0; i < arr->GetLength(); ++i) {
+        if (firstTime) {
+            firstTime = FALSE;
+        }
+        else {
+            sb.Append("\n");
+        }
+
+        sb.Append((*arr)[i]);
+    }
+    return sb.ToString();
 }
+const String MediaDocumentsProvider::IMAGE_MIME_TYPES("image/*");
+const String MediaDocumentsProvider::VIDEO_MIME_TYPES("video/*");
+const String MediaDocumentsProvider::AUDIO_MIME_TYPES = InitAUDIO_MIME_TYPES();
 
-const String MediaDocumentsProvider::IMAGE_MIME_TYPES = initIMAGE_MIME_TYPES();
-
-String MediaDocumentsProvider::initVIDEO_MIME_TYPES()
-{
-    AutoPtr<ArrayOf<IInterface*> > arr = ArrayOf<IInterface*>::Alloc(1);
-    (*arr)[0] = TO_IINTERFACE(StringUtils::ParseCharSequence(String("video/*")).Get());
-    return JoinNewline(arr.Get());
-}
-
-const String MediaDocumentsProvider::VIDEO_MIME_TYPES = initVIDEO_MIME_TYPES();
-
-String MediaDocumentsProvider::initAUDIO_MIME_TYPES()
-{
-    AutoPtr<ArrayOf<IInterface*> > arr = ArrayOf<IInterface*>::Alloc(3);
-    (*arr)[0] = TO_IINTERFACE(StringUtils::ParseCharSequence(String("audio/*")).Get());
-    (*arr)[1] = TO_IINTERFACE(StringUtils::ParseCharSequence(String("application/ogg")).Get());
-    (*arr)[2] = TO_IINTERFACE(StringUtils::ParseCharSequence(String("application/x-flac")).Get());
-    return JoinNewline(arr.Get());
-}
-
-const String MediaDocumentsProvider::AUDIO_MIME_TYPES = initAUDIO_MIME_TYPES();
-
-const String MediaDocumentsProvider::TYPE_IMAGES_ROOT(String("images_root"));
-const String MediaDocumentsProvider::TYPE_IMAGES_BUCKET(String("images_bucket"));
+const String MediaDocumentsProvider::TYPE_IMAGES_ROOT("images_root");
+const String MediaDocumentsProvider::TYPE_IMAGES_BUCKET("images_bucket");
 const String MediaDocumentsProvider::TYPE_IMAGE(String("image"));
 
-const String MediaDocumentsProvider::TYPE_VIDEOS_ROOT(String("videos_root"));
-const String MediaDocumentsProvider::TYPE_VIDEOS_BUCKET(String("videos_bucket"));
-const String MediaDocumentsProvider::TYPE_VIDEO(String("video"));
+const String MediaDocumentsProvider::TYPE_VIDEOS_ROOT("videos_root");
+const String MediaDocumentsProvider::TYPE_VIDEOS_BUCKET("videos_bucket");
+const String MediaDocumentsProvider::TYPE_VIDEO("video");
 
-const String MediaDocumentsProvider::TYPE_AUDIO_ROOT(String("audio_root"));
-const String MediaDocumentsProvider::TYPE_AUDIO(String("audio"));
-const String MediaDocumentsProvider::TYPE_ARTIST(String("artist"));
-const String MediaDocumentsProvider::TYPE_ALBUM(String("album"));
+const String MediaDocumentsProvider::TYPE_AUDIO_ROOT("audio_root");
+const String MediaDocumentsProvider::TYPE_AUDIO("audio");
+const String MediaDocumentsProvider::TYPE_ARTIST("artist");
+const String MediaDocumentsProvider::TYPE_ALBUM("album");
 
 Boolean MediaDocumentsProvider::sReturnedImagesEmpty = FALSE;
 Boolean MediaDocumentsProvider::sReturnedVideosEmpty = FALSE;
@@ -159,7 +161,7 @@ Boolean MediaDocumentsProvider::sReturnedAudioEmpty = FALSE;
 String MediaDocumentsProvider::Ident::mType;
 Int64 MediaDocumentsProvider::Ident::mId;
 
-static AutoPtr<ArrayOf<String> > initPROJECTION()
+static AutoPtr<ArrayOf<String> > InitPROJECTION()
 {
     AutoPtr<ArrayOf<String> > arr = ArrayOf<String>::Alloc(3);
     (*arr)[0] = IMediaStoreImagesImageColumns::BUCKET_ID;
@@ -168,16 +170,23 @@ static AutoPtr<ArrayOf<String> > initPROJECTION()
     return arr;
 }
 
-AutoPtr<ArrayOf<String> > MediaDocumentsProvider::ImagesBucketQuery::PROJECTION = initPROJECTION();
+AutoPtr<ArrayOf<String> > MediaDocumentsProvider::ImagesBucketQuery::PROJECTION = InitPROJECTION();
 
-String MediaDocumentsProvider::ImagesBucketQuery::SORT_ORDER = IMediaStoreImagesImageColumns::BUCKET_ID + ", " + IMediaStoreMediaColumns::DATE_MODIFIED
-        + " DESC";
+static String InitImagesSORT_ORDER()
+{
+    StringBuilder sb(IMediaStoreImagesImageColumns::BUCKET_ID);
+    sb += ", ";
+    sb += IMediaStoreMediaColumns::DATE_MODIFIED;
+    sb += " DESC";
+    return sb.ToString();
+}
+String MediaDocumentsProvider::ImagesBucketQuery::SORT_ORDER = InitImagesSORT_ORDER();
 
 Int32 MediaDocumentsProvider::ImagesBucketQuery::BUCKET_ID = 0;
 Int32 MediaDocumentsProvider::ImagesBucketQuery::BUCKET_DISPLAY_NAME = 1;
 Int32 MediaDocumentsProvider::ImagesBucketQuery::DATE_MODIFIED = 2;
 
-static AutoPtr<ArrayOf<String> > initImageQueryPROJECTION()
+static AutoPtr<ArrayOf<String> > InitImageQueryPROJECTION()
 {
     AutoPtr<ArrayOf<String> > arr = ArrayOf<String>::Alloc(5);
     (*arr)[0] = IBaseColumns::ID;
@@ -188,14 +197,14 @@ static AutoPtr<ArrayOf<String> > initImageQueryPROJECTION()
     return arr;
 }
 
-AutoPtr<ArrayOf<String> > MediaDocumentsProvider::ImageQuery::PROJECTION = initImageQueryPROJECTION();
+AutoPtr<ArrayOf<String> > MediaDocumentsProvider::ImageQuery::PROJECTION = InitImageQueryPROJECTION();
 Int32 MediaDocumentsProvider::ImageQuery::_ID = 0;
 Int32 MediaDocumentsProvider::ImageQuery::DISPLAY_NAME = 1;
 Int32 MediaDocumentsProvider::ImageQuery::MIME_TYPE = 2;
 Int32 MediaDocumentsProvider::ImageQuery::SIZE = 3;
 Int32 MediaDocumentsProvider::ImageQuery::DATE_MODIFIED = 4;
 
-static AutoPtr<ArrayOf<String> > initVideosBucketQueryPROJECTION()
+static AutoPtr<ArrayOf<String> > InitVideosBucketQueryPROJECTION()
 {
     AutoPtr<ArrayOf<String> > arr = ArrayOf<String>::Alloc(3);
     (*arr)[0] = IMediaStoreVideoVideoColumns::BUCKET_ID;
@@ -204,16 +213,23 @@ static AutoPtr<ArrayOf<String> > initVideosBucketQueryPROJECTION()
     return arr;
 }
 
-AutoPtr<ArrayOf<String> > MediaDocumentsProvider::VideosBucketQuery::PROJECTION = initVideosBucketQueryPROJECTION();
+AutoPtr<ArrayOf<String> > MediaDocumentsProvider::VideosBucketQuery::PROJECTION = InitVideosBucketQueryPROJECTION();
 
-String MediaDocumentsProvider::VideosBucketQuery::SORT_ORDER = IMediaStoreVideoVideoColumns::BUCKET_ID + ", " + IMediaStoreMediaColumns::DATE_MODIFIED
-            + " DESC";
+static String InitVideosSORT_ORDER()
+{
+    StringBuilder sb(IMediaStoreVideoVideoColumns::BUCKET_ID);
+    sb += ", ";
+    sb += IMediaStoreMediaColumns::DATE_MODIFIED;
+    sb += " DESC";
+    return sb.ToString();
+}
+String MediaDocumentsProvider::VideosBucketQuery::SORT_ORDER = InitVideosSORT_ORDER();
 
 Int32 MediaDocumentsProvider::VideosBucketQuery::BUCKET_ID = 0;
 Int32 MediaDocumentsProvider::VideosBucketQuery::BUCKET_DISPLAY_NAME = 1;
 Int32 MediaDocumentsProvider::VideosBucketQuery::DATE_MODIFIED = 2;
 
-static AutoPtr<ArrayOf<String> > initVideoQueryPROJECTION()
+static AutoPtr<ArrayOf<String> > InitVideoQueryPROJECTION()
 {
     AutoPtr<ArrayOf<String> > arr = ArrayOf<String>::Alloc(5);
     (*arr)[0] = IBaseColumns::ID;
@@ -224,14 +240,14 @@ static AutoPtr<ArrayOf<String> > initVideoQueryPROJECTION()
     return arr;
 }
 
-AutoPtr<ArrayOf<String> > MediaDocumentsProvider::VideoQuery::PROJECTION = initVideoQueryPROJECTION();
+AutoPtr<ArrayOf<String> > MediaDocumentsProvider::VideoQuery::PROJECTION = InitVideoQueryPROJECTION();
 Int32 MediaDocumentsProvider::VideoQuery::_ID = 0;
 Int32 MediaDocumentsProvider::VideoQuery::DISPLAY_NAME = 1;
 Int32 MediaDocumentsProvider::VideoQuery::MIME_TYPE = 2;
 Int32 MediaDocumentsProvider::VideoQuery::SIZE = 3;
 Int32 MediaDocumentsProvider::VideoQuery::DATE_MODIFIED = 4;
 
-static AutoPtr<ArrayOf<String> > initArtistQueryPROJECTION()
+static AutoPtr<ArrayOf<String> > InitArtistQueryPROJECTION()
 {
     AutoPtr<ArrayOf<String> > arr = ArrayOf<String>::Alloc(2);
     (*arr)[0] = IBaseColumns::ID;
@@ -239,24 +255,24 @@ static AutoPtr<ArrayOf<String> > initArtistQueryPROJECTION()
     return arr;
 }
 
-AutoPtr<ArrayOf<String> > MediaDocumentsProvider::ArtistQuery::PROJECTION = initArtistQueryPROJECTION();
+AutoPtr<ArrayOf<String> > MediaDocumentsProvider::ArtistQuery::PROJECTION = InitArtistQueryPROJECTION();
 
 Int32 MediaDocumentsProvider::ArtistQuery::_ID = 0;
 Int32 MediaDocumentsProvider::ArtistQuery::ARTIST = 1;
 
-static AutoPtr<ArrayOf<String> > initAlbumQueryPROJECTION()
+static AutoPtr<ArrayOf<String> > InitAlbumQueryPROJECTION()
 {
     AutoPtr<ArrayOf<String> > arr = ArrayOf<String>::Alloc(2);
     (*arr)[0] = IBaseColumns::ID;
     (*arr)[1] = IMediaStoreAudioAlbumColumns::ALBUM;
     return arr;
 }
-AutoPtr<ArrayOf<String> > MediaDocumentsProvider::AlbumQuery::PROJECTION = initAlbumQueryPROJECTION();
+AutoPtr<ArrayOf<String> > MediaDocumentsProvider::AlbumQuery::PROJECTION = InitAlbumQueryPROJECTION();
 
 Int32 MediaDocumentsProvider::AlbumQuery::_ID = 0;
 Int32 MediaDocumentsProvider::AlbumQuery::ALBUM = 1;
 
-static AutoPtr<ArrayOf<String> > initSongQueryPROJECTION()
+static AutoPtr<ArrayOf<String> > InitSongQueryPROJECTION()
 {
     AutoPtr<ArrayOf<String> > arr = ArrayOf<String>::Alloc(5);
     (*arr)[0] = IBaseColumns::ID;
@@ -267,7 +283,7 @@ static AutoPtr<ArrayOf<String> > initSongQueryPROJECTION()
     return arr;
 }
 
-AutoPtr<ArrayOf<String> > MediaDocumentsProvider::SongQuery::PROJECTION = initSongQueryPROJECTION();
+AutoPtr<ArrayOf<String> > MediaDocumentsProvider::SongQuery::PROJECTION = InitSongQueryPROJECTION();
 
 Int32 MediaDocumentsProvider::SongQuery::_ID = 0;
 Int32 MediaDocumentsProvider::SongQuery::TITLE = 1;
@@ -278,7 +294,7 @@ Int32 MediaDocumentsProvider::SongQuery::DATE_MODIFIED = 4;
 // class MediaDocumentsProvider::ImagesBucketThumbnailQuery::
 // {
 // public:
-static AutoPtr<ArrayOf<String> > initImagesBucketThumbnailQueryPROJECTION()
+static AutoPtr<ArrayOf<String> > InitImagesBucketThumbnailQueryPROJECTION()
 {
     AutoPtr<ArrayOf<String> > arr = ArrayOf<String>::Alloc(3);
     (*arr)[0] = IBaseColumns::ID;
@@ -286,25 +302,23 @@ static AutoPtr<ArrayOf<String> > initImagesBucketThumbnailQueryPROJECTION()
     (*arr)[2] = IMediaStoreMediaColumns::DATE_MODIFIED;
     return arr;
 }
-
-AutoPtr<ArrayOf<String> > MediaDocumentsProvider::ImagesBucketThumbnailQuery::PROJECTION = initImagesBucketThumbnailQueryPROJECTION();
+AutoPtr<ArrayOf<String> > MediaDocumentsProvider::ImagesBucketThumbnailQuery::PROJECTION = InitImagesBucketThumbnailQueryPROJECTION();
 
 Int32 MediaDocumentsProvider::ImagesBucketThumbnailQuery::_ID = 0;
 Int32 MediaDocumentsProvider::ImagesBucketThumbnailQuery::BUCKET_ID = 1;
 Int32 MediaDocumentsProvider::ImagesBucketThumbnailQuery::DATE_MODIFIED = 2;
 
-static AutoPtr<ArrayOf<String> > initImageThumbnailQueryPROJECTION()
+static AutoPtr<ArrayOf<String> > InitImageThumbnailQueryPROJECTION()
 {
     AutoPtr<ArrayOf<String> > arr = ArrayOf<String>::Alloc(1);
     (*arr)[0] = IMediaStoreImagesThumbnails::DATA;
     return arr;
 }
-
-AutoPtr<ArrayOf<String> > MediaDocumentsProvider::ImageThumbnailQuery::PROJECTION = initImageThumbnailQueryPROJECTION();
+AutoPtr<ArrayOf<String> > MediaDocumentsProvider::ImageThumbnailQuery::PROJECTION = InitImageThumbnailQueryPROJECTION();
 
 Int32 MediaDocumentsProvider::ImageThumbnailQuery::_DATA = 0;
 
-static AutoPtr<ArrayOf<String> > initVideosBucketThumbnailQueryPROJECTION()
+static AutoPtr<ArrayOf<String> > InitVideosBucketThumbnailQueryPROJECTION()
 {
     AutoPtr<ArrayOf<String> > arr = ArrayOf<String>::Alloc(3);
     (*arr)[0] = IBaseColumns::ID;
@@ -312,41 +326,46 @@ static AutoPtr<ArrayOf<String> > initVideosBucketThumbnailQueryPROJECTION()
     (*arr)[2] = IMediaStoreMediaColumns::DATE_MODIFIED;
     return arr;
 }
-
-AutoPtr<ArrayOf<String> > MediaDocumentsProvider::VideosBucketThumbnailQuery::PROJECTION = initVideosBucketThumbnailQueryPROJECTION();
+AutoPtr<ArrayOf<String> > MediaDocumentsProvider::VideosBucketThumbnailQuery::PROJECTION = InitVideosBucketThumbnailQueryPROJECTION();
 
 Int32 MediaDocumentsProvider::VideosBucketThumbnailQuery::_ID = 0;
 Int32 MediaDocumentsProvider::VideosBucketThumbnailQuery::BUCKET_ID = 1;
 Int32 MediaDocumentsProvider::VideosBucketThumbnailQuery::DATE_MODIFIED = 2;
 
-static AutoPtr<ArrayOf<String> > initVideoThumbnailQueryPROJECTION()
+static AutoPtr<ArrayOf<String> > InitVideoThumbnailQueryPROJECTION()
 {
     AutoPtr<ArrayOf<String> > arr = ArrayOf<String>::Alloc(1);
     (*arr)[0] = IMediaStoreVideoThumbnails::DATA;
     return arr;
 }
-
-AutoPtr<ArrayOf<String> > MediaDocumentsProvider::VideoThumbnailQuery::PROJECTION = initVideoThumbnailQueryPROJECTION();
+AutoPtr<ArrayOf<String> > MediaDocumentsProvider::VideoThumbnailQuery::PROJECTION = InitVideoThumbnailQueryPROJECTION();
 
 Int32 MediaDocumentsProvider::VideoThumbnailQuery::_DATA = 0;
 
-static AutoPtr<ArrayOf<String> > initImageOrientationQueryPROJECTION()
+static AutoPtr<ArrayOf<String> > InitImageOrientationQueryPROJECTION()
 {
     AutoPtr<ArrayOf<String> > arr = ArrayOf<String>::Alloc(1);
     (*arr)[0] = IMediaStoreImagesImageColumns::ORIENTATION;
     return arr;
 }
-
-AutoPtr<ArrayOf<String> > MediaDocumentsProvider::ImageOrientationQuery::PROJECTION = initImageOrientationQueryPROJECTION();
+AutoPtr<ArrayOf<String> > MediaDocumentsProvider::ImageOrientationQuery::PROJECTION = InitImageOrientationQueryPROJECTION();
 
 Int32 MediaDocumentsProvider::ImageOrientationQuery::ORIENTATION = 0;
 
 CAR_INTERFACE_IMPL(MediaDocumentsProvider, DocumentsProvider, IMediaDocumentsProvider)
 
+ECode MediaDocumentsProvider::constructor()
+{
+    Logger::I(TAG, " >> constructor()");
+    return DocumentsProvider::constructor();
+}
+
 ECode MediaDocumentsProvider::OnCreate(
     /* [out] */ Boolean* result)
 {
-    VALIDATE_NOT_NULL(result);
+    Logger::I(TAG, " >> OnCreate()");
+
+    VALIDATE_NOT_NULL(result)
     *result = TRUE;
     return NOERROR;
 }
@@ -383,15 +402,15 @@ void MediaDocumentsProvider::OnMediaStoreDelete(
     if (type == IMediaStoreFilesFileColumns::MEDIA_TYPE_IMAGE) {
         dc->BuildDocumentUri(
                 AUTHORITY, GetDocIdForIdent(TYPE_IMAGE, id), (IUri**)&uri);
-        context->RevokeUriPermission(uri.Get(), ~0);
+        context->RevokeUriPermission(uri, ~0);
     } else if (type == IMediaStoreFilesFileColumns::MEDIA_TYPE_VIDEO) {
         dc->BuildDocumentUri(
                 AUTHORITY, GetDocIdForIdent(TYPE_VIDEO, id), (IUri**)&uri);
-        context->RevokeUriPermission(uri.Get(), ~0);
+        context->RevokeUriPermission(uri, ~0);
     } else if (type == IMediaStoreFilesFileColumns::MEDIA_TYPE_AUDIO) {
         dc->BuildDocumentUri(
                 AUTHORITY, GetDocIdForIdent(TYPE_AUDIO, id), (IUri**)&uri);
-        context->RevokeUriPermission(uri.Get(), ~0);
+        context->RevokeUriPermission(uri, ~0);
     }
 }
 
@@ -399,12 +418,12 @@ ECode MediaDocumentsProvider::QueryRoots(
     /* [in] */ ArrayOf<String>* projection,
     /* [out] */ ICursor** result)
 {
-    VALIDATE_NOT_NULL(result);
+    VALIDATE_NOT_NULL(result)
     AutoPtr<IMatrixCursor> ret;
-    CMatrixCursor::New(ResolveRootProjection(projection).Get(), (IMatrixCursor**)&ret);
-    IncludeImagesRoot(ret.Get());
-    IncludeVideosRoot(ret.Get());
-    IncludeAudioRoot(ret.Get());
+    CMatrixCursor::New(ResolveRootProjection(projection), (IMatrixCursor**)&ret);
+    IncludeImagesRoot(ret);
+    IncludeVideosRoot(ret);
+    IncludeAudioRoot(ret);
     *result = ICursor::Probe(ret);
     REFCOUNT_ADD(*result);
     return NOERROR;
@@ -420,7 +439,7 @@ ECode MediaDocumentsProvider::QueryDocument(
     GetContext((IContext**)&context);
     context->GetContentResolver((IContentResolver**)&resolver);
     AutoPtr<IMatrixCursor> ret;
-    CMatrixCursor::New(ResolveDocumentProjection(projection).Get(), (IMatrixCursor**)&ret);
+    CMatrixCursor::New(ResolveDocumentProjection(projection), (IMatrixCursor**)&ret);
     AutoPtr<Ident> ident;
     GetIdentForDocId(docId, (Ident**)&ident);
 
@@ -442,95 +461,95 @@ ECode MediaDocumentsProvider::QueryDocument(
     // try {
         if (TYPE_IMAGES_ROOT.Equals(ident->mType)) {
             // single root
-            IncludeImagesRootDocument(ret.Get());
+            IncludeImagesRootDocument(ret);
         } else if (TYPE_IMAGES_BUCKET.Equals(ident->mType)) {
             // single bucket
             AutoPtr<IUri> imUri;
             msi->GetEXTERNAL_CONTENT_URI((IUri**)&imUri);
-            resolver->Query(imUri.Get(), ImagesBucketQuery::PROJECTION,
+            resolver->Query(imUri, ImagesBucketQuery::PROJECTION,
                 IMediaStoreImagesImageColumns::BUCKET_ID + "=" + ident->mId,
                     NULL, ImagesBucketQuery::SORT_ORDER, (ICursor**)&cursor);
-            CopyNotificationUri(ret.Get(), cursor.Get());
+            CopyNotificationUri(ret, cursor);
             if ((cursor->MoveToFirst(&flag), flag)) {
-                IncludeImagesBucket(ret.Get(), cursor.Get());
+                IncludeImagesBucket(ret, cursor);
             }
         } else if (TYPE_IMAGE.Equals(ident->mType)) {
             // single image
             msi->GetEXTERNAL_CONTENT_URI((IUri**)&uri);
-            resolver->Query(uri.Get(),
-                    ImageQuery::PROJECTION.Get(), IBaseColumns::ID + "=" + ident->mId, NULL,
+            resolver->Query(uri,
+                    ImageQuery::PROJECTION, IBaseColumns::ID + "=" + ident->mId, NULL,
                     String(NULL), (ICursor**)&cursor);
-            CopyNotificationUri(ret.Get(), cursor.Get());
+            CopyNotificationUri(ret, cursor);
             if ((cursor->MoveToFirst(&flag), flag)) {
-                IncludeImage(ret.Get(), cursor.Get());
+                IncludeImage(ret, cursor);
             }
         } else if (TYPE_VIDEOS_ROOT.Equals(ident->mType)) {
             // single root
-            IncludeVideosRootDocument(ret.Get());
+            IncludeVideosRootDocument(ret);
         } else if (TYPE_VIDEOS_BUCKET.Equals(ident->mType)) {
             // single bucket
             uri = NULL;
             msv->GetEXTERNAL_CONTENT_URI((IUri**)&uri);
 
-            resolver->Query(uri.Get(),
-                    VideosBucketQuery::PROJECTION.Get(), IMediaStoreVideoVideoColumns::BUCKET_ID + "=" + ident->mId,
+            resolver->Query(uri,
+                    VideosBucketQuery::PROJECTION, IMediaStoreVideoVideoColumns::BUCKET_ID + "=" + ident->mId,
                     NULL, VideosBucketQuery::SORT_ORDER, (ICursor**)&cursor);
-            CopyNotificationUri(ret.Get(), cursor.Get());
+            CopyNotificationUri(ret, cursor);
             if ((cursor->MoveToFirst(&flag), flag)) {
-                IncludeVideosBucket(ret.Get(), cursor.Get());
+                IncludeVideosBucket(ret, cursor);
             }
         } else if (TYPE_VIDEO.Equals(ident->mType)) {
             // single video
             uri = NULL;
             msv->GetEXTERNAL_CONTENT_URI((IUri**)&uri);
-            resolver->Query(uri.Get(),
-                    VideoQuery::PROJECTION.Get(), IBaseColumns::ID + "=" + ident->mId, NULL,
+            resolver->Query(uri,
+                    VideoQuery::PROJECTION, IBaseColumns::ID + "=" + ident->mId, NULL,
                     String(NULL), (ICursor**)&cursor);
-            CopyNotificationUri(ret.Get(), cursor.Get());
+            CopyNotificationUri(ret, cursor);
             if ((cursor->MoveToFirst(&flag), flag)) {
-                IncludeVideo(ret.Get(), cursor.Get());
+                IncludeVideo(ret, cursor);
             }
         } else if (TYPE_AUDIO_ROOT.Equals(ident->mType)) {
             // single root
-            IncludeAudioRootDocument(ret.Get());
+            IncludeAudioRootDocument(ret);
         } else if (TYPE_ARTIST.Equals(ident->mType)) {
             // single artist
             AutoPtr<IMediaStoreAudioArtists> msa;
             CMediaStoreAudioArtists::AcquireSingleton((IMediaStoreAudioArtists**)&msa);
             msa->GetEXTERNAL_CONTENT_URI((IUri**)&uri);
-            resolver->Query(uri.Get(),
-                    ArtistQuery::PROJECTION.Get(), IBaseColumns::ID + "=" + ident->mId, NULL,
+            resolver->Query(uri,
+                    ArtistQuery::PROJECTION, IBaseColumns::ID + "=" + ident->mId, NULL,
                     String(NULL), (ICursor**)&cursor);
-            CopyNotificationUri(ret.Get(), cursor.Get());
+            CopyNotificationUri(ret, cursor);
             if ((cursor->MoveToFirst(&flag), flag)) {
-                IncludeArtist(ret.Get(), cursor.Get());
+                IncludeArtist(ret, cursor);
             }
         } else if (TYPE_ALBUM.Equals(ident->mType)) {
             // single album
             AutoPtr<IMediaStoreAudioAlbums> msa;
             CMediaStoreAudioAlbums::AcquireSingleton((IMediaStoreAudioAlbums**)&msa);
             msa->GetEXTERNAL_CONTENT_URI((IUri**)&uri);
-            resolver->Query(uri.Get(),
-                    AlbumQuery::PROJECTION.Get(), IBaseColumns::ID + "=" + ident->mId, NULL,
+            resolver->Query(uri,
+                    AlbumQuery::PROJECTION, IBaseColumns::ID + "=" + ident->mId, NULL,
                     String(NULL), (ICursor**)&cursor);
-            CopyNotificationUri(ret.Get(), cursor.Get());
+            CopyNotificationUri(ret, cursor);
             if ((cursor->MoveToFirst(&flag), flag)) {
-                IncludeAlbum(ret.Get(), cursor.Get());
+                IncludeAlbum(ret, cursor);
             }
         } else if (TYPE_AUDIO.Equals(ident->mType)) {
             // single song
             AutoPtr<IMediaStoreAudioMedia> msa;
             CMediaStoreAudioMedia::AcquireSingleton((IMediaStoreAudioMedia**)&msa);
             msa->GetEXTERNAL_CONTENT_URI((IUri**)&uri);
-            resolver->Query(uri.Get(), SongQuery::PROJECTION.Get(),
+            resolver->Query(uri, SongQuery::PROJECTION,
                 IBaseColumns::ID + "=" + ident->mId, NULL,
                     String(NULL), (ICursor**)&cursor);
-            CopyNotificationUri(ret.Get(), cursor.Get());
+            CopyNotificationUri(ret, cursor);
             if ((cursor->MoveToFirst(&flag), flag)) {
-                IncludeAudio(ret.Get(), cursor.Get());
+                IncludeAudio(ret, cursor);
             }
         } else {
-            Slogger::E(TAG, "Unsupported document %s", docId.string());
+            Logger::E(TAG, "Unsupported document %s", docId.string());
             ioUtils->CloseQuietly(ICloseable::Probe(cursor));
             Binder::RestoreCallingIdentity(token);
             return E_UNSUPPORTED_OPERATION_EXCEPTION;
@@ -557,7 +576,7 @@ ECode MediaDocumentsProvider::QueryChildDocuments(
     AutoPtr<IContentResolver> resolver;
     context->GetContentResolver((IContentResolver**)&resolver);
     AutoPtr<IMatrixCursor> ret;
-    CMatrixCursor::New(ResolveDocumentProjection(projection).Get(), (IMatrixCursor**)&ret);
+    CMatrixCursor::New(ResolveDocumentProjection(projection), (IMatrixCursor**)&ret);
     AutoPtr<Ident> ident;
     GetIdentForDocId(docId, (Ident**)&ident);
 
@@ -588,84 +607,84 @@ ECode MediaDocumentsProvider::QueryChildDocuments(
         if (TYPE_IMAGES_ROOT.Equals(ident->mType)) {
             // include all unique buckets
             msi->GetEXTERNAL_CONTENT_URI((IUri**)&uri);
-            resolver->Query(uri.Get(),
-                    ImagesBucketQuery::PROJECTION.Get(), String(NULL), NULL, ImagesBucketQuery::SORT_ORDER, (ICursor**)&cursor);
+            resolver->Query(uri,
+                    ImagesBucketQuery::PROJECTION, String(NULL), NULL, ImagesBucketQuery::SORT_ORDER, (ICursor**)&cursor);
             // multiple orders
-            CopyNotificationUri(ret.Get(), cursor.Get());
+            CopyNotificationUri(ret, cursor);
             Int64 lastId = Elastos::Core::Math::INT64_MIN_VALUE;
 
             while ((cursor->MoveToNext(&flag), flag)) {
                 Int64 id;
                 cursor->GetInt64(ImagesBucketQuery::BUCKET_ID, &id);
                 if (lastId != id) {
-                    IncludeImagesBucket(ret.Get(), cursor.Get());
+                    IncludeImagesBucket(ret, cursor);
                     lastId = id;
                 }
             }
         } else if (TYPE_IMAGES_BUCKET.Equals(ident->mType)) {
             // include images under bucket
             msi->GetEXTERNAL_CONTENT_URI((IUri**)&uri);
-            resolver->Query(uri.Get(),
-                    ImageQuery::PROJECTION.Get(), IMediaStoreImagesImageColumns::BUCKET_ID + "=" + ident->mId,
+            resolver->Query(uri,
+                    ImageQuery::PROJECTION, IMediaStoreImagesImageColumns::BUCKET_ID + "=" + ident->mId,
                     NULL, String(NULL), (ICursor**)&cursor);
-            CopyNotificationUri(ret.Get(), cursor.Get());
+            CopyNotificationUri(ret, cursor);
             while ((cursor->MoveToNext(&flag), flag)) {
-                IncludeImage(ret.Get(), cursor.Get());
+                IncludeImage(ret, cursor);
             }
         } else if (TYPE_VIDEOS_ROOT.Equals(ident->mType)) {
             // include all unique buckets
             msv->GetEXTERNAL_CONTENT_URI((IUri**)&uri);
-            resolver->Query(uri.Get(),
-                    VideosBucketQuery::PROJECTION.Get(), String(NULL), NULL, VideosBucketQuery::SORT_ORDER, (ICursor**)&cursor);
-            CopyNotificationUri(ret.Get(), cursor.Get());
+            resolver->Query(uri,
+                    VideosBucketQuery::PROJECTION, String(NULL), NULL, VideosBucketQuery::SORT_ORDER, (ICursor**)&cursor);
+            CopyNotificationUri(ret, cursor);
             Int64 lastId = Elastos::Core::Math::INT64_MIN_VALUE;
             while ((cursor->MoveToNext(&flag), flag)) {
                 Int64 id;
                 cursor->GetInt64(VideosBucketQuery::BUCKET_ID, &id);
                 if (lastId != id) {
-                    IncludeVideosBucket(ret.Get(), cursor.Get());
+                    IncludeVideosBucket(ret, cursor);
                     lastId = id;
                 }
             }
         } else if (TYPE_VIDEOS_BUCKET.Equals(ident->mType)) {
             // include videos under bucket
             msv->GetEXTERNAL_CONTENT_URI((IUri**)&uri);
-            resolver->Query(uri.Get(), VideoQuery::PROJECTION.Get(),
+            resolver->Query(uri, VideoQuery::PROJECTION,
                 IMediaStoreVideoVideoColumns::BUCKET_ID + "=" + ident->mId, NULL, String(NULL), (ICursor**)&cursor);
-            CopyNotificationUri(ret.Get(), cursor.Get());
+            CopyNotificationUri(ret, cursor);
             while ((cursor->MoveToNext(&flag), flag)) {
-                IncludeVideo(ret.Get(), cursor.Get());
+                IncludeVideo(ret, cursor);
             }
         } else if (TYPE_AUDIO_ROOT.Equals(ident->mType)) {
             // include all artists
             msa->GetEXTERNAL_CONTENT_URI((IUri**)&uri);
-            resolver->Query(uri.Get(),
-                    ArtistQuery::PROJECTION.Get(), String(NULL), NULL, String(NULL), (ICursor**)&cursor);
-            CopyNotificationUri(ret.Get(), cursor.Get());
+            resolver->Query(uri,
+                    ArtistQuery::PROJECTION, String(NULL), NULL, String(NULL), (ICursor**)&cursor);
+            CopyNotificationUri(ret, cursor);
             while ((cursor->MoveToNext(&flag), flag)) {
-                IncludeArtist(ret.Get(), cursor.Get());
+                IncludeArtist(ret, cursor);
             }
         } else if (TYPE_ARTIST.Equals(ident->mType)) {
             // include all albums under artist
             msaa->GetContentUri(String("external"), ident->mId, (IUri**)&uri);
-            resolver->Query(uri.Get(),
-                    AlbumQuery::PROJECTION.Get(), String(NULL), NULL, String(NULL), (ICursor**)&cursor);
-            CopyNotificationUri(ret.Get(), cursor.Get());
+            resolver->Query(uri,
+                    AlbumQuery::PROJECTION, String(NULL), NULL, String(NULL), (ICursor**)&cursor);
+            CopyNotificationUri(ret, cursor);
             while ((cursor->MoveToNext(&flag), flag)) {
-                IncludeAlbum(ret.Get(), cursor.Get());
+                IncludeAlbum(ret, cursor);
             }
         } else if (TYPE_ALBUM.Equals(ident->mType)) {
             // include all songs under album
             msam->GetEXTERNAL_CONTENT_URI((IUri**)&uri);
-            resolver->Query(uri.Get(),
-                    SongQuery::PROJECTION.Get(), IMediaStoreAudioAudioColumns::ALBUM_ID + "=" + ident->mId,
+            resolver->Query(uri,
+                    SongQuery::PROJECTION, IMediaStoreAudioAudioColumns::ALBUM_ID + "=" + ident->mId,
                     NULL, String(NULL), (ICursor**)&cursor);
-            CopyNotificationUri(ret.Get(), cursor.Get());
+            CopyNotificationUri(ret, cursor);
             while ((cursor->MoveToNext(&flag), flag)) {
-                IncludeAudio(ret.Get(), cursor.Get());
+                IncludeAudio(ret, cursor);
             }
         } else {
-            Slogger::E(TAG, "Unsupported document %s", docId.string());
+            Logger::E(TAG, "Unsupported document %s", docId.string());
             // throw new UnsupportedOperationException("Unsupported document " + docId);
             ioUtils->CloseQuietly(ICloseable::Probe(cursor));
             Binder::RestoreCallingIdentity(token);
@@ -686,14 +705,14 @@ ECode MediaDocumentsProvider::QueryRecentDocuments(
     /* [in] */ ArrayOf<String>* projection,
     /* [out] */ ICursor** result)
 {
-    VALIDATE_NOT_NULL(result);
+    VALIDATE_NOT_NULL(result)
 
     AutoPtr<IContext> context;
     GetContext((IContext**)&context);
     AutoPtr<IContentResolver> resolver;
     context->GetContentResolver((IContentResolver**)&resolver);
     AutoPtr<IMatrixCursor> ret;
-    CMatrixCursor::New(ResolveDocumentProjection(projection).Get(), (IMatrixCursor**)&ret);
+    CMatrixCursor::New(ResolveDocumentProjection(projection), (IMatrixCursor**)&ret);
 
     Int64 token = Binder::ClearCallingIdentity();
     AutoPtr<ICursor> cursor;
@@ -708,11 +727,11 @@ ECode MediaDocumentsProvider::QueryRecentDocuments(
             CMediaStoreImagesMedia::AcquireSingleton((IMediaStoreImagesMedia**)&msi);
             AutoPtr<IUri> imUri;
             msi->GetEXTERNAL_CONTENT_URI((IUri**)&imUri);
-            resolver->Query(imUri.Get(),
-                    ImageQuery::PROJECTION.Get(), String(NULL), NULL, IMediaStoreMediaColumns::DATE_MODIFIED + " DESC", (ICursor**)&cursor);
-            CopyNotificationUri(ret.Get(), cursor.Get());
+            resolver->Query(imUri,
+                    ImageQuery::PROJECTION, String(NULL), NULL, IMediaStoreMediaColumns::DATE_MODIFIED + " DESC", (ICursor**)&cursor);
+            CopyNotificationUri(ret, cursor);
             while ((cursor->MoveToNext(&flag), flag) && ((ICursor::Probe(ret)->GetCount(&count), count) < 64)) {
-                IncludeImage(ret.Get(), cursor.Get());
+                IncludeImage(ret, cursor);
             }
         } else if (TYPE_VIDEOS_ROOT.Equals(rootId)) {
             // include all unique buckets
@@ -720,14 +739,14 @@ ECode MediaDocumentsProvider::QueryRecentDocuments(
             CMediaStoreVideoMedia::AcquireSingleton((IMediaStoreVideoMedia**)&msv);
             AutoPtr<IUri> vUri;
             msv->GetEXTERNAL_CONTENT_URI((IUri**)&vUri);
-            resolver->Query(vUri.Get(),
-                    VideoQuery::PROJECTION.Get(), String(NULL), NULL, IMediaStoreMediaColumns::DATE_MODIFIED + " DESC", (ICursor**)&cursor);
-            CopyNotificationUri(ret.Get(), cursor.Get());
+            resolver->Query(vUri,
+                    VideoQuery::PROJECTION, String(NULL), NULL, IMediaStoreMediaColumns::DATE_MODIFIED + " DESC", (ICursor**)&cursor);
+            CopyNotificationUri(ret, cursor);
             while ((cursor->MoveToNext(&flag), flag) && (ICursor::Probe(ret)->GetCount(&count), count < 64)) {
-                IncludeVideo(ret.Get(), cursor.Get());
+                IncludeVideo(ret, cursor);
             }
         } else {
-            Slogger::E(TAG, "Unsupported root %s", rootId.string());
+            Logger::E(TAG, "Unsupported root %s", rootId.string());
             ioUtils->CloseQuietly(ICloseable::Probe(cursor));
             Binder::RestoreCallingIdentity(token);
             return E_UNSUPPORTED_OPERATION_EXCEPTION;
@@ -754,7 +773,7 @@ ECode MediaDocumentsProvider::OpenDocument(
     GetIdentForDocId(docId, (Ident**)&ident);
 
     if (!String("r").Equals(mode)) {
-        Slogger::E(TAG, "Media is read-only");
+        Logger::E(TAG, "Media is read-only");
         return E_ILLEGAL_ARGUMENT_EXCEPTION;
         // throw new IllegalArgumentException("Media is read-only");
     }
@@ -767,19 +786,19 @@ ECode MediaDocumentsProvider::OpenDocument(
         AutoPtr<IMediaStoreImagesMedia> msi;
         CMediaStoreImagesMedia::AcquireSingleton((IMediaStoreImagesMedia**)&msi);
         msi->GetEXTERNAL_CONTENT_URI((IUri**)&uri);
-        icu->WithAppendedId(uri.Get(), ident->mId, (IUri**)&target);
+        icu->WithAppendedId(uri, ident->mId, (IUri**)&target);
     } else if (TYPE_VIDEO.Equals(ident->mType) && ident->mId != -1) {
         AutoPtr<IMediaStoreVideoMedia> msv;
         CMediaStoreVideoMedia::AcquireSingleton((IMediaStoreVideoMedia**)&msv);
         msv->GetEXTERNAL_CONTENT_URI((IUri**)&uri);
-        icu->WithAppendedId(uri.Get(), ident->mId, (IUri**)&target);
+        icu->WithAppendedId(uri, ident->mId, (IUri**)&target);
     } else if (TYPE_AUDIO.Equals(ident->mType) && ident->mId != -1) {
         AutoPtr<IMediaStoreAudioMedia> msa;
         CMediaStoreAudioMedia::AcquireSingleton((IMediaStoreAudioMedia**)&msa);
         msa->GetEXTERNAL_CONTENT_URI((IUri**)&uri);
-        icu->WithAppendedId(uri.Get(), ident->mId, (IUri**)&target);
+        icu->WithAppendedId(uri, ident->mId, (IUri**)&target);
     } else {
-        Slogger::E(TAG, "Unsupported document %s", docId.string());
+        Logger::E(TAG, "Unsupported document %s", docId.string());
         return E_UNSUPPORTED_OPERATION_EXCEPTION;
         // throw new UnsupportedOperationException("Unsupported document " + docId);
     }
@@ -841,7 +860,7 @@ ECode MediaDocumentsProvider::OpenDocumentThumbnail(
             Binder::RestoreCallingIdentity(token);
             return NOERROR;
         } else {
-            Slogger::E(TAG, "Unsupported document %s", docId.string());
+            Logger::E(TAG, "Unsupported document %s", docId.string());
             Binder::RestoreCallingIdentity(token);
             return E_UNSUPPORTED_OPERATION_EXCEPTION;
             // throw new UnsupportedOperationException("Unsupported document " + docId);
@@ -849,12 +868,6 @@ ECode MediaDocumentsProvider::OpenDocumentThumbnail(
     // } finally {
         // Binder::RestoreCallingIdentity(token);
     // }
-}
-
-String MediaDocumentsProvider::JoinNewline(
-    /* [in] */ ArrayOf<IInterface*>* args)
-{
-    return TextUtils::Join(StringUtils::ParseCharSequence(String("\n")).Get(), args);
 }
 
 void MediaDocumentsProvider::CopyNotificationUri(
@@ -867,7 +880,7 @@ void MediaDocumentsProvider::CopyNotificationUri(
     context->GetContentResolver((IContentResolver**)&resolver);
     AutoPtr<IUri> uri;
     cursor->GetNotificationUri((IUri**)&uri);
-    ICursor::Probe(result)->SetNotificationUri(resolver.Get(), uri.Get());
+    ICursor::Probe(result)->SetNotificationUri(resolver, uri);
 }
 
 void MediaDocumentsProvider::NotifyRootsChanged(
@@ -879,7 +892,7 @@ void MediaDocumentsProvider::NotifyRootsChanged(
     CDocumentsContract::AcquireSingleton((IDocumentsContract**)&dc);
     AutoPtr<IUri> uri;
     dc->BuildRootsUri(AUTHORITY, (IUri**)&uri);
-    resolver->NotifyChange(uri.Get(), NULL, FALSE);
+    resolver->NotifyChange(uri, NULL, FALSE);
 }
 
 
@@ -905,19 +918,30 @@ String MediaDocumentsProvider::GetDocIdForIdent(
     /* [in] */ const String& type,
     /* [in] */ Int64 id)
 {
-    return type + ":" + id;
+    StringBuilder sb(type);
+    sb += ":";
+    sb += id;
+    return sb.ToString();
 }
 
 AutoPtr<ArrayOf<String> > MediaDocumentsProvider::ResolveRootProjection(
     /* [in] */ ArrayOf<String>* projection)
 {
-    return projection != NULL ? projection : DEFAULT_ROOT_PROJECTION.Get();
+    AutoPtr<ArrayOf<String> > result = projection;
+    if (result == NULL) {
+        result = DEFAULT_ROOT_PROJECTION;
+    }
+    return result;
 }
 
 AutoPtr<ArrayOf<String> > MediaDocumentsProvider::ResolveDocumentProjection(
     /* [in] */ ArrayOf<String>* projection)
 {
-    return projection != NULL ? projection : DEFAULT_DOCUMENT_PROJECTION.Get();
+    AutoPtr<ArrayOf<String> > result = projection;
+    if (result == NULL) {
+        result = DEFAULT_DOCUMENT_PROJECTION;
+    }
+    return result;
 }
 
 Boolean MediaDocumentsProvider::IsEmpty(
@@ -932,7 +956,7 @@ Boolean MediaDocumentsProvider::IsEmpty(
     // try {
         AutoPtr<ArrayOf<String> > arr = ArrayOf<String>::Alloc(1);
         (*arr)[0] = IBaseColumns::ID;
-        resolver->Query(uri, arr.Get(), String(NULL), NULL, String(NULL), (ICursor**)&cursor);
+        resolver->Query(uri, arr, String(NULL), NULL, String(NULL), (ICursor**)&cursor);
         Int32 count;
         cursor->GetCount(&count);
         Boolean flag = FALSE;
@@ -956,22 +980,22 @@ void MediaDocumentsProvider::IncludeImagesRoot(
     CMediaStoreImagesMedia::AcquireSingleton((IMediaStoreImagesMedia**)&mim);
     AutoPtr<IUri> uri;
     mim->GetEXTERNAL_CONTENT_URI((IUri**)&uri);
-    if (IsEmpty(uri.Get())) {
+    if (IsEmpty(uri)) {
         flags |= IDocumentsContractRoot::FLAG_EMPTY;
         sReturnedImagesEmpty = TRUE;
     }
 
     AutoPtr<IRowBuilder> row;
     result->NewRow((IRowBuilder**)&row);
-    row->Add(IDocumentsContractRoot::COLUMN_ROOT_ID, StringUtils::ParseCharSequence(TYPE_IMAGES_ROOT).Get());
-    row->Add(IDocumentsContractRoot::COLUMN_FLAGS, StringUtils::ParseCharSequence(StringUtils::ToString(flags)).Get());
+    row->Add(IDocumentsContractRoot::COLUMN_ROOT_ID, CoreUtils::Convert(TYPE_IMAGES_ROOT));
+    row->Add(IDocumentsContractRoot::COLUMN_FLAGS, CoreUtils::Convert(StringUtils::ToString(flags)));
     AutoPtr<IContext> context;
     GetContext((IContext**)&context);
     String str;
     context->GetString(R::string::root_images, &str);
-    row->Add(IDocumentsContractRoot::COLUMN_TITLE, StringUtils::ParseCharSequence(str).Get());
-    row->Add(IDocumentsContractRoot::COLUMN_DOCUMENT_ID, StringUtils::ParseCharSequence(TYPE_IMAGES_ROOT).Get());
-    row->Add(IDocumentsContractRoot::COLUMN_MIME_TYPES, StringUtils::ParseCharSequence(IMAGE_MIME_TYPES).Get());
+    row->Add(IDocumentsContractRoot::COLUMN_TITLE, CoreUtils::Convert(str));
+    row->Add(IDocumentsContractRoot::COLUMN_DOCUMENT_ID, CoreUtils::Convert(TYPE_IMAGES_ROOT));
+    row->Add(IDocumentsContractRoot::COLUMN_MIME_TYPES, CoreUtils::Convert(IMAGE_MIME_TYPES));
 }
 
 void MediaDocumentsProvider::IncludeVideosRoot(
@@ -982,22 +1006,22 @@ void MediaDocumentsProvider::IncludeVideosRoot(
     CMediaStoreVideoMedia::AcquireSingleton((IMediaStoreVideoMedia**)&msv);
     AutoPtr<IUri> uri;
     msv->GetEXTERNAL_CONTENT_URI((IUri**)&uri);
-    if (IsEmpty(uri.Get())) {
+    if (IsEmpty(uri)) {
         flags |= IDocumentsContractRoot::FLAG_EMPTY;
         sReturnedVideosEmpty = TRUE;
     }
 
     AutoPtr<IRowBuilder> row;
     result->NewRow((IRowBuilder**)&row);
-    row->Add(IDocumentsContractRoot::COLUMN_ROOT_ID, StringUtils::ParseCharSequence(TYPE_VIDEOS_ROOT).Get());
-    row->Add(IDocumentsContractRoot::COLUMN_FLAGS, StringUtils::ParseCharSequence(StringUtils::ToString(flags)).Get());
+    row->Add(IDocumentsContractRoot::COLUMN_ROOT_ID, CoreUtils::Convert(TYPE_VIDEOS_ROOT));
+    row->Add(IDocumentsContractRoot::COLUMN_FLAGS, CoreUtils::Convert(StringUtils::ToString(flags)));
     AutoPtr<IContext> context;
     GetContext((IContext**)&context);
     String str;
     context->GetString(R::string::root_videos, &str);
-    row->Add(IDocumentsContractRoot::COLUMN_TITLE, StringUtils::ParseCharSequence(str).Get());
-    row->Add(IDocumentsContractRoot::COLUMN_DOCUMENT_ID, StringUtils::ParseCharSequence(TYPE_VIDEOS_ROOT).Get());
-    row->Add(IDocumentsContractRoot::COLUMN_MIME_TYPES, StringUtils::ParseCharSequence(VIDEO_MIME_TYPES).Get());
+    row->Add(IDocumentsContractRoot::COLUMN_TITLE, CoreUtils::Convert(str));
+    row->Add(IDocumentsContractRoot::COLUMN_DOCUMENT_ID, CoreUtils::Convert(TYPE_VIDEOS_ROOT));
+    row->Add(IDocumentsContractRoot::COLUMN_MIME_TYPES, CoreUtils::Convert(VIDEO_MIME_TYPES));
 }
 
 void MediaDocumentsProvider::IncludeAudioRoot(
@@ -1008,22 +1032,22 @@ void MediaDocumentsProvider::IncludeAudioRoot(
     CMediaStoreAudioMedia::AcquireSingleton((IMediaStoreAudioMedia**)&msm);
     AutoPtr<IUri> uri;
     msm->GetEXTERNAL_CONTENT_URI((IUri**)&uri);
-    if (IsEmpty(uri.Get())) {
+    if (IsEmpty(uri)) {
         flags |= IDocumentsContractRoot::FLAG_EMPTY;
         sReturnedAudioEmpty = TRUE;
     }
 
     AutoPtr<IRowBuilder> row;
     result->NewRow((IRowBuilder**)&row);
-    row->Add(IDocumentsContractRoot::COLUMN_ROOT_ID, StringUtils::ParseCharSequence(TYPE_AUDIO_ROOT).Get());
-    row->Add(IDocumentsContractRoot::COLUMN_FLAGS, StringUtils::ParseCharSequence(StringUtils::ToString(flags)).Get());
+    row->Add(IDocumentsContractRoot::COLUMN_ROOT_ID, CoreUtils::Convert(TYPE_AUDIO_ROOT));
+    row->Add(IDocumentsContractRoot::COLUMN_FLAGS, CoreUtils::Convert(StringUtils::ToString(flags)));
     AutoPtr<IContext> context;
     GetContext((IContext**)&context);
     String str;
     context->GetString(R::string::root_audio, &str);
-    row->Add(IDocumentsContractRoot::COLUMN_TITLE, StringUtils::ParseCharSequence(str).Get());
-    row->Add(IDocumentsContractRoot::COLUMN_DOCUMENT_ID, StringUtils::ParseCharSequence(TYPE_AUDIO_ROOT).Get());
-    row->Add(IDocumentsContractRoot::COLUMN_MIME_TYPES, StringUtils::ParseCharSequence(AUDIO_MIME_TYPES).Get());
+    row->Add(IDocumentsContractRoot::COLUMN_TITLE, CoreUtils::Convert(str));
+    row->Add(IDocumentsContractRoot::COLUMN_DOCUMENT_ID, CoreUtils::Convert(TYPE_AUDIO_ROOT));
+    row->Add(IDocumentsContractRoot::COLUMN_MIME_TYPES, CoreUtils::Convert(AUDIO_MIME_TYPES));
 }
 
 void MediaDocumentsProvider::IncludeImagesRootDocument(
@@ -1031,17 +1055,17 @@ void MediaDocumentsProvider::IncludeImagesRootDocument(
 {
     AutoPtr<IRowBuilder> row;
     result->NewRow((IRowBuilder**)&row);
-    row->Add(IDocumentsContractDocument::COLUMN_DOCUMENT_ID, StringUtils::ParseCharSequence(TYPE_IMAGES_ROOT).Get());
+    row->Add(IDocumentsContractDocument::COLUMN_DOCUMENT_ID, CoreUtils::Convert(TYPE_IMAGES_ROOT));
     AutoPtr<IContext> context;
     GetContext((IContext**)&context);
     String str;
     context->GetString(R::string::root_images, &str);
-    row->Add(IDocumentsContractDocument::COLUMN_DISPLAY_NAME, StringUtils::ParseCharSequence(str).Get());
+    row->Add(IDocumentsContractDocument::COLUMN_DISPLAY_NAME, CoreUtils::Convert(str));
     Int32 vol = IDocumentsContractDocument::FLAG_DIR_PREFERS_GRID
         | IDocumentsContractDocument::FLAG_DIR_PREFERS_LAST_MODIFIED;
     row->Add(IDocumentsContractDocument::COLUMN_FLAGS,
-            StringUtils::ParseCharSequence(StringUtils::ToString(vol)).Get());
-    row->Add(IDocumentsContractDocument::COLUMN_MIME_TYPE, StringUtils::ParseCharSequence(IDocumentsContractDocument::MIME_TYPE_DIR).Get());
+            CoreUtils::Convert(StringUtils::ToString(vol)));
+    row->Add(IDocumentsContractDocument::COLUMN_MIME_TYPE, CoreUtils::Convert(IDocumentsContractDocument::MIME_TYPE_DIR));
 }
 
 void MediaDocumentsProvider::IncludeVideosRootDocument(
@@ -1049,17 +1073,17 @@ void MediaDocumentsProvider::IncludeVideosRootDocument(
 {
     AutoPtr<IRowBuilder> row;
     result->NewRow((IRowBuilder**)&row);
-    row->Add(IDocumentsContractDocument::COLUMN_DOCUMENT_ID, StringUtils::ParseCharSequence(TYPE_VIDEOS_ROOT).Get());
+    row->Add(IDocumentsContractDocument::COLUMN_DOCUMENT_ID, CoreUtils::Convert(TYPE_VIDEOS_ROOT));
     AutoPtr<IContext> context;
     GetContext((IContext**)&context);
     String str;
     context->GetString(R::string::root_videos, &str);
-    row->Add(IDocumentsContractDocument::COLUMN_DISPLAY_NAME, StringUtils::ParseCharSequence(str).Get());
+    row->Add(IDocumentsContractDocument::COLUMN_DISPLAY_NAME, CoreUtils::Convert(str));
     Int32 vol =
         IDocumentsContractDocument::FLAG_DIR_PREFERS_GRID | IDocumentsContractDocument::FLAG_DIR_PREFERS_LAST_MODIFIED;
     row->Add(IDocumentsContractDocument::COLUMN_FLAGS,
-            StringUtils::ParseCharSequence(StringUtils::ToString(vol)).Get());
-    row->Add(IDocumentsContractDocument::COLUMN_MIME_TYPE, StringUtils::ParseCharSequence(IDocumentsContractDocument::MIME_TYPE_DIR).Get());
+            CoreUtils::Convert(StringUtils::ToString(vol)));
+    row->Add(IDocumentsContractDocument::COLUMN_MIME_TYPE, CoreUtils::Convert(IDocumentsContractDocument::MIME_TYPE_DIR));
 }
 
 void MediaDocumentsProvider::IncludeAudioRootDocument(
@@ -1067,12 +1091,12 @@ void MediaDocumentsProvider::IncludeAudioRootDocument(
 {
     AutoPtr<IRowBuilder> row;
     result->NewRow((IRowBuilder**)&row);
-    row->Add(IDocumentsContractDocument::COLUMN_DOCUMENT_ID, StringUtils::ParseCharSequence(TYPE_AUDIO_ROOT).Get());
+    row->Add(IDocumentsContractDocument::COLUMN_DOCUMENT_ID, CoreUtils::Convert(TYPE_AUDIO_ROOT));
     AutoPtr<IContext> context;
     String str;
     context->GetString(R::string::root_audio, &str);
-    row->Add(IDocumentsContractDocument::COLUMN_DISPLAY_NAME, StringUtils::ParseCharSequence(str).Get());
-    row->Add(IDocumentsContractDocument::COLUMN_MIME_TYPE, StringUtils::ParseCharSequence(IDocumentsContractDocument::MIME_TYPE_DIR).Get());
+    row->Add(IDocumentsContractDocument::COLUMN_DISPLAY_NAME, CoreUtils::Convert(str));
+    row->Add(IDocumentsContractDocument::COLUMN_MIME_TYPE, CoreUtils::Convert(IDocumentsContractDocument::MIME_TYPE_DIR));
 }
 
 void MediaDocumentsProvider::IncludeImagesBucket(
@@ -1085,20 +1109,20 @@ void MediaDocumentsProvider::IncludeImagesBucket(
 
     AutoPtr<IRowBuilder> row;
     result->NewRow((IRowBuilder**)&row);
-    row->Add(IDocumentsContractDocument::COLUMN_DOCUMENT_ID, StringUtils::ParseCharSequence(docId).Get());
+    row->Add(IDocumentsContractDocument::COLUMN_DOCUMENT_ID, CoreUtils::Convert(docId));
     String iStr;
     cursor->GetString(ImagesBucketQuery::BUCKET_DISPLAY_NAME, &iStr);
-    row->Add(IDocumentsContractDocument::COLUMN_DISPLAY_NAME, StringUtils::ParseCharSequence(iStr).Get());
+    row->Add(IDocumentsContractDocument::COLUMN_DISPLAY_NAME, CoreUtils::Convert(iStr));
 
-    row->Add(IDocumentsContractDocument::COLUMN_MIME_TYPE, StringUtils::ParseCharSequence(IDocumentsContractDocument::MIME_TYPE_DIR).Get());
+    row->Add(IDocumentsContractDocument::COLUMN_MIME_TYPE, CoreUtils::Convert(IDocumentsContractDocument::MIME_TYPE_DIR));
 
     cursor->GetInt64(ImagesBucketQuery::DATE_MODIFIED, &id);
     row->Add(IDocumentsContractDocument::COLUMN_LAST_MODIFIED,
-            StringUtils::ParseCharSequence(StringUtils::ToString(id * IDateUtils::SECOND_IN_MILLIS)).Get());
+            CoreUtils::Convert(StringUtils::ToString(id * IDateUtils::SECOND_IN_MILLIS)));
     Int32 vol = IDocumentsContractDocument::FLAG_DIR_PREFERS_GRID
             | IDocumentsContractDocument::FLAG_SUPPORTS_THUMBNAIL | IDocumentsContractDocument::FLAG_DIR_PREFERS_LAST_MODIFIED
             | IDocumentsContractDocument::FLAG_DIR_HIDE_GRID_TITLES;
-    row->Add(IDocumentsContractDocument::COLUMN_FLAGS, StringUtils::ParseCharSequence(StringUtils::ToString(vol)).Get());
+    row->Add(IDocumentsContractDocument::COLUMN_FLAGS, CoreUtils::Convert(StringUtils::ToString(vol)));
 }
 
 void MediaDocumentsProvider::IncludeImage(
@@ -1111,19 +1135,19 @@ void MediaDocumentsProvider::IncludeImage(
 
     AutoPtr<IRowBuilder> row;
     result->NewRow((IRowBuilder**)&row);
-    row->Add(IDocumentsContractDocument::COLUMN_DOCUMENT_ID, StringUtils::ParseCharSequence(docId).Get());
+    row->Add(IDocumentsContractDocument::COLUMN_DOCUMENT_ID, CoreUtils::Convert(docId));
     String str;
     cursor->GetString(ImageQuery::DISPLAY_NAME, &str);
-    row->Add(IDocumentsContractDocument::COLUMN_DISPLAY_NAME, StringUtils::ParseCharSequence(str).Get());
+    row->Add(IDocumentsContractDocument::COLUMN_DISPLAY_NAME, CoreUtils::Convert(str));
     Int64 size;
     cursor->GetInt64(ImageQuery::SIZE, &size);
-    row->Add(IDocumentsContractDocument::COLUMN_SIZE, StringUtils::ParseCharSequence(StringUtils::ToString(size)).Get());
+    row->Add(IDocumentsContractDocument::COLUMN_SIZE, CoreUtils::Convert(StringUtils::ToString(size)));
     cursor->GetString(ImageQuery::MIME_TYPE, &str);
-    row->Add(IDocumentsContractDocument::COLUMN_MIME_TYPE, StringUtils::ParseCharSequence(str).Get());
+    row->Add(IDocumentsContractDocument::COLUMN_MIME_TYPE, CoreUtils::Convert(str));
     cursor->GetInt64(ImageQuery::DATE_MODIFIED, &id);
     row->Add(IDocumentsContractDocument::COLUMN_LAST_MODIFIED,
-            StringUtils::ParseCharSequence(StringUtils::ToString(id * IDateUtils::SECOND_IN_MILLIS)).Get());
-    row->Add(IDocumentsContractDocument::COLUMN_FLAGS, StringUtils::ParseCharSequence(StringUtils::ToString(IDocumentsContractDocument::FLAG_SUPPORTS_THUMBNAIL)).Get());
+            CoreUtils::Convert(StringUtils::ToString(id * IDateUtils::SECOND_IN_MILLIS)));
+    row->Add(IDocumentsContractDocument::COLUMN_FLAGS, CoreUtils::Convert(StringUtils::ToString(IDocumentsContractDocument::FLAG_SUPPORTS_THUMBNAIL)));
 }
 
 void MediaDocumentsProvider::IncludeVideosBucket(
@@ -1136,18 +1160,18 @@ void MediaDocumentsProvider::IncludeVideosBucket(
 
     AutoPtr<IRowBuilder> row;
     result->NewRow((IRowBuilder**)&row);
-    row->Add(IDocumentsContractDocument::COLUMN_DOCUMENT_ID, StringUtils::ParseCharSequence(docId).Get());
+    row->Add(IDocumentsContractDocument::COLUMN_DOCUMENT_ID, CoreUtils::Convert(docId));
     String str;
     cursor->GetString(VideosBucketQuery::BUCKET_DISPLAY_NAME, &str);
-    row->Add(IDocumentsContractDocument::COLUMN_DISPLAY_NAME, StringUtils::ParseCharSequence(str).Get());
-    row->Add(IDocumentsContractDocument::COLUMN_MIME_TYPE, StringUtils::ParseCharSequence(IDocumentsContractDocument::MIME_TYPE_DIR).Get());
+    row->Add(IDocumentsContractDocument::COLUMN_DISPLAY_NAME, CoreUtils::Convert(str));
+    row->Add(IDocumentsContractDocument::COLUMN_MIME_TYPE, CoreUtils::Convert(IDocumentsContractDocument::MIME_TYPE_DIR));
     cursor->GetInt64(VideosBucketQuery::DATE_MODIFIED, &id);
     row->Add(IDocumentsContractDocument::COLUMN_LAST_MODIFIED,
-            StringUtils::ParseCharSequence(StringUtils::ToString(id * IDateUtils::SECOND_IN_MILLIS)).Get());
+            CoreUtils::Convert(StringUtils::ToString(id * IDateUtils::SECOND_IN_MILLIS)));
     Int32 vol = IDocumentsContractDocument::FLAG_DIR_PREFERS_GRID
             | IDocumentsContractDocument::FLAG_SUPPORTS_THUMBNAIL | IDocumentsContractDocument::FLAG_DIR_PREFERS_LAST_MODIFIED
             | IDocumentsContractDocument::FLAG_DIR_HIDE_GRID_TITLES;
-    row->Add(IDocumentsContractDocument::COLUMN_FLAGS, StringUtils::ParseCharSequence(StringUtils::ToString(vol)).Get());
+    row->Add(IDocumentsContractDocument::COLUMN_FLAGS, CoreUtils::Convert(StringUtils::ToString(vol)));
 }
 
 void MediaDocumentsProvider::IncludeVideo(
@@ -1160,19 +1184,19 @@ void MediaDocumentsProvider::IncludeVideo(
 
     AutoPtr<IRowBuilder> row;
     result->NewRow((IRowBuilder**)&row);
-    row->Add(IDocumentsContractDocument::COLUMN_DOCUMENT_ID, StringUtils::ParseCharSequence(docId).Get());
+    row->Add(IDocumentsContractDocument::COLUMN_DOCUMENT_ID, CoreUtils::Convert(docId));
     String str;
     cursor->GetString(VideoQuery::DISPLAY_NAME, &str);
-    row->Add(IDocumentsContractDocument::COLUMN_DISPLAY_NAME, StringUtils::ParseCharSequence(str).Get());
+    row->Add(IDocumentsContractDocument::COLUMN_DISPLAY_NAME, CoreUtils::Convert(str));
     Int64 size;
     cursor->GetInt64(VideoQuery::SIZE, &size);
-    row->Add(IDocumentsContractDocument::COLUMN_SIZE, StringUtils::ParseCharSequence(StringUtils::ToString(size)).Get());
+    row->Add(IDocumentsContractDocument::COLUMN_SIZE, CoreUtils::Convert(StringUtils::ToString(size)));
     cursor->GetString(VideoQuery::MIME_TYPE, &str);
-    row->Add(IDocumentsContractDocument::COLUMN_MIME_TYPE, StringUtils::ParseCharSequence(str).Get());
+    row->Add(IDocumentsContractDocument::COLUMN_MIME_TYPE, CoreUtils::Convert(str));
     cursor->GetInt64(VideoQuery::DATE_MODIFIED, &size);
     row->Add(IDocumentsContractDocument::COLUMN_LAST_MODIFIED,
-            StringUtils::ParseCharSequence(StringUtils::ToString(size * (IDateUtils::SECOND_IN_MILLIS))).Get());
-    row->Add(IDocumentsContractDocument::COLUMN_FLAGS, StringUtils::ParseCharSequence(StringUtils::ToString(IDocumentsContractDocument::FLAG_SUPPORTS_THUMBNAIL)).Get());
+            CoreUtils::Convert(StringUtils::ToString(size * (IDateUtils::SECOND_IN_MILLIS))));
+    row->Add(IDocumentsContractDocument::COLUMN_FLAGS, CoreUtils::Convert(StringUtils::ToString(IDocumentsContractDocument::FLAG_SUPPORTS_THUMBNAIL)));
 }
 
 void MediaDocumentsProvider::IncludeArtist(
@@ -1185,11 +1209,11 @@ void MediaDocumentsProvider::IncludeArtist(
 
     AutoPtr<IRowBuilder> row;
     result->NewRow((IRowBuilder**)&row);
-    row->Add(IDocumentsContractDocument::COLUMN_DOCUMENT_ID, StringUtils::ParseCharSequence(docId).Get());
+    row->Add(IDocumentsContractDocument::COLUMN_DOCUMENT_ID, CoreUtils::Convert(docId));
     String str;
     cursor->GetString(ArtistQuery::ARTIST, &str);
-    row->Add(IDocumentsContractDocument::COLUMN_DISPLAY_NAME, StringUtils::ParseCharSequence(str).Get());
-    row->Add(IDocumentsContractDocument::COLUMN_MIME_TYPE, StringUtils::ParseCharSequence(IDocumentsContractDocument::MIME_TYPE_DIR).Get());
+    row->Add(IDocumentsContractDocument::COLUMN_DISPLAY_NAME, CoreUtils::Convert(str));
+    row->Add(IDocumentsContractDocument::COLUMN_MIME_TYPE, CoreUtils::Convert(IDocumentsContractDocument::MIME_TYPE_DIR));
 }
 
 void MediaDocumentsProvider::IncludeAlbum(
@@ -1202,11 +1226,11 @@ void MediaDocumentsProvider::IncludeAlbum(
 
     AutoPtr<IRowBuilder> row;
     result->NewRow((IRowBuilder**)&row);
-    row->Add(IDocumentsContractDocument::COLUMN_DOCUMENT_ID, StringUtils::ParseCharSequence(docId).Get());
+    row->Add(IDocumentsContractDocument::COLUMN_DOCUMENT_ID, CoreUtils::Convert(docId));
     String str;
     cursor->GetString(AlbumQuery::ALBUM, &str);
-    row->Add(IDocumentsContractDocument::COLUMN_DISPLAY_NAME, StringUtils::ParseCharSequence(str).Get());
-    row->Add(IDocumentsContractDocument::COLUMN_MIME_TYPE, StringUtils::ParseCharSequence(IDocumentsContractDocument::MIME_TYPE_DIR).Get());
+    row->Add(IDocumentsContractDocument::COLUMN_DISPLAY_NAME, CoreUtils::Convert(str));
+    row->Add(IDocumentsContractDocument::COLUMN_MIME_TYPE, CoreUtils::Convert(IDocumentsContractDocument::MIME_TYPE_DIR));
 }
 
 void MediaDocumentsProvider::IncludeAudio(
@@ -1219,18 +1243,18 @@ void MediaDocumentsProvider::IncludeAudio(
 
     AutoPtr<IRowBuilder> row;
     result->NewRow((IRowBuilder**)&row);
-    row->Add(IDocumentsContractDocument::COLUMN_DOCUMENT_ID, StringUtils::ParseCharSequence(docId).Get());
+    row->Add(IDocumentsContractDocument::COLUMN_DOCUMENT_ID, CoreUtils::Convert(docId));
     String str;
     cursor->GetString(SongQuery::TITLE, &str);
-    row->Add(IDocumentsContractDocument::COLUMN_DISPLAY_NAME, StringUtils::ParseCharSequence(str).Get());
+    row->Add(IDocumentsContractDocument::COLUMN_DISPLAY_NAME, CoreUtils::Convert(str));
     Int64 size;
     cursor->GetInt64(SongQuery::SIZE, &size);
-    row->Add(IDocumentsContractDocument::COLUMN_SIZE, StringUtils::ParseCharSequence(StringUtils::ToString(size)).Get());
+    row->Add(IDocumentsContractDocument::COLUMN_SIZE, CoreUtils::Convert(StringUtils::ToString(size)));
     cursor->GetString(SongQuery::MIME_TYPE, &str);
-    row->Add(IDocumentsContractDocument::COLUMN_MIME_TYPE, StringUtils::ParseCharSequence(str).Get());
+    row->Add(IDocumentsContractDocument::COLUMN_MIME_TYPE, CoreUtils::Convert(str));
     cursor->GetInt64(SongQuery::DATE_MODIFIED, &size);
     row->Add(IDocumentsContractDocument::COLUMN_LAST_MODIFIED,
-            StringUtils::ParseCharSequence(StringUtils::ToString(size * (IDateUtils::SECOND_IN_MILLIS))).Get());
+            CoreUtils::Convert(StringUtils::ToString(size * (IDateUtils::SECOND_IN_MILLIS))));
 }
 
 Int64 MediaDocumentsProvider::GetImageForBucketCleared(
@@ -1246,8 +1270,8 @@ Int64 MediaDocumentsProvider::GetImageForBucketCleared(
         CMediaStoreImagesMedia::AcquireSingleton((IMediaStoreImagesMedia**)&msi);
         AutoPtr<IUri> uri;
         msi->GetEXTERNAL_CONTENT_URI((IUri**)&uri);
-        resolver->Query(uri.Get(),
-            ImagesBucketThumbnailQuery::PROJECTION.Get(), IMediaStoreImagesImageColumns::BUCKET_ID + "=" + bucketId,
+        resolver->Query(uri,
+            ImagesBucketThumbnailQuery::PROJECTION, IMediaStoreImagesImageColumns::BUCKET_ID + "=" + bucketId,
             NULL, IMediaStoreMediaColumns::DATE_MODIFIED + " DESC", (ICursor**)&cursor);
         Boolean flag = FALSE;
         if ((cursor->MoveToFirst(&flag), flag)) {
@@ -1261,7 +1285,7 @@ Int64 MediaDocumentsProvider::GetImageForBucketCleared(
     // } finally {
         // IoUtils.closeQuietly(cursor);
     // }
-        Slogger::E(TAG, "No video found for bucket");
+        Logger::E(TAG, "No video found for bucket");
         return E_FILE_NOT_FOUND_EXCEPTION;
     // throw new FileNotFoundException("No video found for bucket");
 }
@@ -1281,8 +1305,8 @@ AutoPtr<IParcelFileDescriptor>  MediaDocumentsProvider::OpenImageThumbnailCleare
         CMediaStoreImagesThumbnails::AcquireSingleton((IMediaStoreImagesThumbnails**)&msit);
         AutoPtr<IUri> uri;
         msit->GetEXTERNAL_CONTENT_URI((IUri**)&uri);
-        resolver->Query(uri.Get(),
-                ImageThumbnailQuery::PROJECTION.Get(), IMediaStoreImagesThumbnails::IMAGE_ID + "=" + id, NULL,
+        resolver->Query(uri,
+                ImageThumbnailQuery::PROJECTION, IMediaStoreImagesThumbnails::IMAGE_ID + "=" + id, NULL,
                 String(NULL), signal, (ICursor**)&cursor);
         Boolean flag = FALSE;
         if ((cursor->MoveToFirst(&flag), flag)) {
@@ -1294,7 +1318,7 @@ AutoPtr<IParcelFileDescriptor>  MediaDocumentsProvider::OpenImageThumbnailCleare
             CFile::New(data, (IFile**)&file);
             AutoPtr<IParcelFileDescriptor> pf;
             pfh->Open(
-                    file.Get(), IParcelFileDescriptor::MODE_READ_ONLY, (IParcelFileDescriptor**)&pf);
+                    file, IParcelFileDescriptor::MODE_READ_ONLY, (IParcelFileDescriptor**)&pf);
             AutoPtr<IIoUtils> ioUtils;
             CIoUtils::AcquireSingleton((IIoUtils**)&ioUtils);
             ioUtils->CloseQuietly(ICloseable::Probe(cursor));
@@ -1325,8 +1349,8 @@ AutoPtr<IAssetFileDescriptor> MediaDocumentsProvider::OpenOrCreateImageThumbnail
         AutoPtr<IMediaStoreImagesThumbnails> msit;
         CMediaStoreImagesThumbnails::AcquireSingleton((IMediaStoreImagesThumbnails**)&msit);
         AutoPtr<IBitmap> bm;
-        msit->GetThumbnail(resolver.Get(), id, IMediaStoreImagesThumbnails::MINI_KIND,
-            opts.Get(), (IBitmap**)&bm);
+        msit->GetThumbnail(resolver, id, IMediaStoreImagesThumbnails::MINI_KIND,
+            opts, (IBitmap**)&bm);
 
         pfd = OpenImageThumbnailCleared(id, signal);
     }
@@ -1341,8 +1365,8 @@ AutoPtr<IAssetFileDescriptor> MediaDocumentsProvider::OpenOrCreateImageThumbnail
         AutoPtr<IUri> uri;
         msim->GetEXTERNAL_CONTENT_URI((IUri**)&uri);
         AutoPtr<IUri> fullUri;
-        cu->WithAppendedId(uri.Get(), id, (IUri**)&fullUri);
-        resolver->OpenFileDescriptor(fullUri.Get(), String("r"), signal, (IParcelFileDescriptor**)&pfd);
+        cu->WithAppendedId(uri, id, (IUri**)&fullUri);
+        resolver->OpenFileDescriptor(fullUri, String("r"), signal, (IParcelFileDescriptor**)&pfd);
     }
 
     Int32 orientation = QueryOrientationForImage(id, signal);
@@ -1356,7 +1380,7 @@ AutoPtr<IAssetFileDescriptor> MediaDocumentsProvider::OpenOrCreateImageThumbnail
     }
 
     AutoPtr<IAssetFileDescriptor> afd;
-    CAssetFileDescriptor::New(pfd.Get(), 0, IAssetFileDescriptor::UNKNOWN_LENGTH, extras.Get(), (IAssetFileDescriptor**)&afd);
+    CAssetFileDescriptor::New(pfd, 0, IAssetFileDescriptor::UNKNOWN_LENGTH, extras, (IAssetFileDescriptor**)&afd);
     return afd;
 }
 
@@ -1373,7 +1397,7 @@ Int64 MediaDocumentsProvider::GetVideoForBucketCleared(
         CMediaStoreVideoMedia::AcquireSingleton((IMediaStoreVideoMedia**)&msv);
         AutoPtr<IUri> uri;
         msv->GetEXTERNAL_CONTENT_URI((IUri**)&uri);
-        resolver->Query(uri.Get(), VideosBucketThumbnailQuery::PROJECTION.Get(),
+        resolver->Query(uri, VideosBucketThumbnailQuery::PROJECTION,
             IMediaStoreVideoVideoColumns::BUCKET_ID + "=" + bucketId,
                 NULL, IMediaStoreMediaColumns::DATE_MODIFIED + " DESC", (ICursor**)&cursor);
         Boolean flag = FALSE;
@@ -1388,7 +1412,7 @@ Int64 MediaDocumentsProvider::GetVideoForBucketCleared(
     // } finally {
         // IoUtils.closeQuietly(cursor);
     // }
-        Slogger::E(TAG, "No video found for bucket");
+        Logger::E(TAG, "No video found for bucket");
         return E_FILE_NOT_FOUND_EXCEPTION;
     // throw new FileNotFoundException("No video found for bucket");
 }
@@ -1407,7 +1431,7 @@ AutoPtr<IAssetFileDescriptor> MediaDocumentsProvider::OpenVideoThumbnailCleared(
         CMediaStoreVideoThumbnails::AcquireSingleton((IMediaStoreVideoThumbnails**)&mst);
         AutoPtr<IUri> uri;
         mst->GetEXTERNAL_CONTENT_URI((IUri**)&uri);
-        resolver->Query(uri.Get(), VideoThumbnailQuery::PROJECTION.Get(), IMediaStoreVideoThumbnails::VIDEO_ID + "=" + id, NULL,
+        resolver->Query(uri, VideoThumbnailQuery::PROJECTION, IMediaStoreVideoThumbnails::VIDEO_ID + "=" + id, NULL,
             String(NULL), signal, (ICursor**)&cursor);
         Boolean flag = FALSE;
         if ((cursor->MoveToFirst(&flag), flag)) {
@@ -1418,10 +1442,10 @@ AutoPtr<IAssetFileDescriptor> MediaDocumentsProvider::OpenVideoThumbnailCleared(
             AutoPtr<IFile> file;
             CFile::New(data, (IFile**)&file);
             AutoPtr<IParcelFileDescriptor> pf;
-            ECode ec = pfh->Open(file.Get(),
+            ECode ec = pfh->Open(file,
                 IParcelFileDescriptor::MODE_READ_ONLY, (IParcelFileDescriptor**)&pf);
             AutoPtr<IAssetFileDescriptor> afd;
-            CAssetFileDescriptor::New(pf.Get(), 0, IAssetFileDescriptor::UNKNOWN_LENGTH, (IAssetFileDescriptor**)&afd);
+            CAssetFileDescriptor::New(pf, 0, IAssetFileDescriptor::UNKNOWN_LENGTH, (IAssetFileDescriptor**)&afd);
             AutoPtr<IIoUtils> ioUtils;
             CIoUtils::AcquireSingleton((IIoUtils**)&ioUtils);
             ioUtils->CloseQuietly(ICloseable::Probe(cursor));
@@ -1452,7 +1476,7 @@ AutoPtr<IAssetFileDescriptor> MediaDocumentsProvider::OpenOrCreateVideoThumbnail
         AutoPtr<IMediaStoreVideoThumbnails> msv;
         CMediaStoreVideoThumbnails::AcquireSingleton((IMediaStoreVideoThumbnails**)&msv);
         AutoPtr<IBitmap> bitmap;
-        msv->GetThumbnail(resolver.Get(), id, IMediaStoreVideoThumbnails::MINI_KIND, opts.Get(), (IBitmap**)&bitmap);
+        msv->GetThumbnail(resolver, id, IMediaStoreVideoThumbnails::MINI_KIND, opts, (IBitmap**)&bitmap);
         afd = OpenVideoThumbnailCleared(id, signal);
     }
     return afd;
@@ -1473,8 +1497,8 @@ Int32 MediaDocumentsProvider::QueryOrientationForImage(
         CMediaStoreImagesMedia::AcquireSingleton((IMediaStoreImagesMedia**)&msi);
         AutoPtr<IUri> uri;
         msi->GetEXTERNAL_CONTENT_URI((IUri**)&uri);
-        resolver->Query(uri.Get(),
-                    ImageOrientationQuery::PROJECTION.Get(), IBaseColumns::ID + "=" + id, NULL, String(NULL),
+        resolver->Query(uri,
+                    ImageOrientationQuery::PROJECTION, IBaseColumns::ID + "=" + id, NULL, String(NULL),
                     signal, (ICursor**)&cursor);
 
         Boolean flag = FALSE;
@@ -1487,7 +1511,7 @@ Int32 MediaDocumentsProvider::QueryOrientationForImage(
             ioUtils->CloseQuietly(ICloseable::Probe(cursor));
             return vol;
         } else {
-            Slogger::W(TAG, "Missing orientation data for %ld", id);
+            Logger::W(TAG, "Missing orientation data for %ld", id);
             ioUtils->CloseQuietly(ICloseable::Probe(cursor));
             return 0;
         }

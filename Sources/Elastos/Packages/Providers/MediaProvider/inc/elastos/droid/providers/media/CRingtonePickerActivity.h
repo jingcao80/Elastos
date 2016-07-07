@@ -9,7 +9,8 @@ namespace Droid {
 namespace Providers {
 namespace Media {
 
-CarClass(CRingtonePickerActivity), public RingtonePickerActivity
+CarClass(CRingtonePickerActivity)
+    , public RingtonePickerActivity
 {
 public:
     CAR_OBJECT_DECL()

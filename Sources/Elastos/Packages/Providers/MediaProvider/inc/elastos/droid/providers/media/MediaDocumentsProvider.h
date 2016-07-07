@@ -159,6 +159,8 @@ public:
 public:
     CAR_INTERFACE_DECL()
 
+    CARAPI constructor();
+
     CARAPI OnCreate(
         /* [out] */ Boolean* result);
 
@@ -207,14 +209,6 @@ public:
         /* [out] */ IAssetFileDescriptor** result);
 
 private:
-    static CARAPI_(String) initIMAGE_MIME_TYPES();
-
-    static CARAPI_(String) initVIDEO_MIME_TYPES();
-
-    static CARAPI_(String) initAUDIO_MIME_TYPES();
-
-    static CARAPI_(String) JoinNewline(
-        /* [in] */ ArrayOf<IInterface*>* args);
 
     CARAPI_(void) CopyNotificationUri(
         /* [in] */ IMatrixCursor* result,

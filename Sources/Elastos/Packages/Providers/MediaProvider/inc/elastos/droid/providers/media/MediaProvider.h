@@ -3,8 +3,8 @@
 
 #include "_Elastos.Droid.Providers.Media.h"
 #include "elastos/droid/ext/frameworkext.h"
-#include "elastos/droid/providers/media/MediaThumbRequest.h"
 #include "Elastos.Droid.Media.h"
+#include "elastos/droid/providers/media/MediaThumbRequest.h"
 #include <elastos/droid/content/ContentProvider.h>
 #include <elastos/droid/database/sqlite/SQLiteOpenHelper.h>
 #include <elastos/droid/content/BroadcastReceiver.h>
@@ -163,12 +163,17 @@ private:
     public:
         CAR_INTERFACE_DECL()
 
+        MyMtpServiceConnection(
+            /* [in] */ MediaProvider* host);
+
         CARAPI OnServiceConnected(
             /* [in] */ IComponentName* name,
             /* [in] */ IBinder* service);
 
         CARAPI OnServiceDisconnected(
             /* [in] */ IComponentName* name);
+    private:
+        MediaProvider* mHost;
     };
 
     class MyHandler
@@ -197,12 +202,14 @@ private:
     public:
         CAR_INTERFACE_DECL()
 
-        ScannerClient(
+        ScannerClient();
+
+        ~ScannerClient();
+
+        CARAPI constructor(
             /* [in] */ IContext* context,
             /* [in] */ ISQLiteDatabase* db,
             /* [in] */ const String& path);
-
-        ~ScannerClient();
 
         CARAPI OnMediaScannerConnected();
 
@@ -260,11 +267,13 @@ private:
     };
 
 public:
+    CAR_INTERFACE_DECL()
+
     MediaProvider();
 
     virtual ~MediaProvider();
 
-    CAR_INTERFACE_DECL()
+    CARAPI constructor();
 
     static CARAPI_(Int32) GetDatabaseVersion(
         /* [in] */ IContext* context);
@@ -640,14 +649,16 @@ private:
         /* [in] */ IDatabaseHelper* dbh,
         /* [in] */ Boolean dumpDbLog);
 
-    CARAPI initStaticBlock();
-
-    CARAPI initStaticBlock2();
-
-    CARAPI_(Boolean) initHashMapWithString(
+    CARAPI_(Boolean) InitHashMapWithString(
         /* [in] */ const String& key,
         /* [in] */ const String& value,
         /* [in] */ IHashMap* hp);
+
+    static String GetExternalPath();
+    static String GetCachePath();
+    static String GetLegacyPath();
+
+    static AutoPtr<IUriMatcher> GetURI_MATCHER();
 
 private:
     static const AutoPtr<IUri> MEDIA_URI;
@@ -671,14 +682,14 @@ private:
     AutoPtr<HashMap<String, Int64> > mDirectoryCache;//
 
     // A HashSet of paths that are pending creation of album art thumbnails.
-    static AutoPtr<IHashSet> mPendingThumbs;
+    AutoPtr<IHashSet> mPendingThumbs;
 
     // A Stack of outstanding thumbnail requests.
-    static AutoPtr<IStack> mThumbRequestStack;
+    AutoPtr<IStack> mThumbRequestStack;
 
     // The lock of mMediaThumbQueue protects both mMediaThumbQueue and mCurrentThumbRequest.
-    static AutoPtr<IMediaThumbRequest> mCurrentThumbRequest;
-    static AutoPtr<IPriorityQueue> mMediaThumbQueue;
+    AutoPtr<IMediaThumbRequest> mCurrentThumbRequest;
+    AutoPtr<IPriorityQueue> mMediaThumbQueue;
 
     Boolean mCaseInsensitivePaths;
     static AutoPtr<ArrayOf<String> > mExternalStoragePaths;
@@ -709,12 +720,12 @@ private:
     AutoPtr<IBroadcastReceiver> mUnmountReceiver;
 
     // set to disable sending events when the operation originates from MTP
-    static Boolean mDisableMtpObjectCallbacks;
+    Boolean mDisableMtpObjectCallbacks;
 
     AutoPtr<ICustomFunction> mObjectRemovedCallback;
 
     // synchronize on mMtpServiceConnection when accessing mMtpService
-    static AutoPtr<IIMtpService> mMtpService;
+    AutoPtr<IIMtpService> mMtpService;
 
     AutoPtr<IServiceConnection> mMtpServiceConnection;
 
@@ -724,21 +735,13 @@ private:
     static const String TABLE_ALBUM_ART;
     static const String TABLE_THUMBNAILS;
     static const String TABLE_VIDEO_THUMBNAILS;
-
     static const String IMAGE_COLUMNS;
-
     static const String IMAGE_COLUMNSv407;
-
     static const String AUDIO_COLUMNSv99;
-
     static const String AUDIO_COLUMNSv100;
-
     static const String AUDIO_COLUMNSv405;
-
     static const String VIDEO_COLUMNS;
-
     static const String VIDEO_COLUMNSv407;
-
     static const String PLAYLIST_COLUMNS ;
 
     static const AutoPtr<ArrayOf<String> > GENRE_LOOKUP_PROJECTION;
@@ -758,7 +761,7 @@ private:
 
     static const Int64 OBSOLETE_DATABASE_DB;
 
-    static AutoPtr<IHashMap> mDatabases; // HashMap<String, AutoPtr<DatabaseHelper> >
+    AutoPtr<IHashMap> mDatabases; // HashMap<String, AutoPtr<DatabaseHelper> >
 
     AutoPtr<IHandler> mThumbHandler;
 
@@ -837,11 +840,8 @@ private:
     static AutoPtr<IUriMatcher> URI_MATCHER;
 
     static AutoPtr<ArrayOf<String> > ID_PROJECTION;
-
     static AutoPtr<ArrayOf<String> > PATH_PROJECTION;
-
     static AutoPtr<ArrayOf<String> > MIME_TYPE_PROJECTION;
-
     static AutoPtr<ArrayOf<String> > READY_FLAG_PROJECTION;
 
     static const String OBJECT_REFERENCES_QUERY;

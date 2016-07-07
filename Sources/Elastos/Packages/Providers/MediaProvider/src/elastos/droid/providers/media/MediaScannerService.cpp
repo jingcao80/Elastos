@@ -1,5 +1,6 @@
 #include "elastos/droid/providers/media/MediaProvider.h"
 #include "elastos/droid/providers/media/MediaScannerService.h"
+#include "elastos/droid/providers/media/CIMediaScannerService.h"
 #include "Elastos.Droid.App.h"
 #include "Elastos.Droid.Content.h"
 #include "Elastos.Droid.Media.h"
@@ -9,7 +10,7 @@
 #include "Elastos.CoreLibrary.h"
 #include "Elastos.CoreLibrary.IO.h"
 #include "Elastos.CoreLibrary.Utility.h"
-#include <elastos/utility/logging/Slogger.h>
+#include <elastos/utility/logging/Logger.h>
 #include <elastos/utility/Arrays.h>
 #include <elastos/droid/os/Process.h>
 #include <elastos/droid/os/Looper.h>
@@ -17,8 +18,6 @@
 #include <elastos/core/Thread.h>
 #include <elastos/core/AutoLock.h>
 
-#include <elastos/core/AutoLock.h>
-using Elastos::Core::AutoLock;
 using Elastos::Droid::App::IService;
 using Elastos::Droid::Content::CIntent;
 using Elastos::Droid::Content::CContentValues;
@@ -46,7 +45,7 @@ using Elastos::Droid::Provider::CMediaStore;
 using Elastos::Droid::Provider::IMediaStore;
 using Elastos::Utility::Arrays;
 using Elastos::Utility::ILocale;
-using Elastos::Utility::Logging::Slogger;
+using Elastos::Utility::Logging::Logger;
 using Elastos::IO::CFile;
 using Elastos::IO::IFile;
 using Elastos::Core::AutoLock;
@@ -59,18 +58,17 @@ namespace Droid {
 namespace Providers {
 namespace Media {
 
-const String MediaScannerService::TAG(String("MediaScannerService"));
+const String MediaScannerService::TAG("MediaScannerService");
+
 AutoPtr<ArrayOf<String> > MediaScannerService::mExternalStoragePaths;
 
-MediaScannerService::MediaScannerService()
-{
-    AutoPtr<MyMediaScannerService> ms = new MyMediaScannerService();
-    ms->constructor((IMediaScannerService*)this);
-    mBinder = IIMediaScannerService::Probe(ms);
-}
+CAR_INTERFACE_IMPL_2(MediaScannerService, Service, IMediaScannerService, IRunnable)
 
-MediaScannerService::~MediaScannerService()
-{}
+ECode MediaScannerService::constructor()
+{
+    CIMediaScannerService::New(this, (IIMediaScannerService**)&mBinder);
+    return Service::constructor();
+}
 
 void MediaScannerService::OpenDatabase(
     /* [in] */ const String& volumeName)
@@ -81,24 +79,24 @@ void MediaScannerService::OpenDatabase(
     CContentValues::New((IContentValues**)&values);
     ec = values->Put(String("name"), volumeName);
     if (ec == (ECode)E_ILLEGAL_ARGUMENT_EXCEPTION) {
-        Slogger::W(TAG, "failed to open media database");
+        Logger::W(TAG, "failed to open media database");
     }
     AutoPtr<IContentResolver> resolver;
     ec = ((IContext*)this)->GetContentResolver((IContentResolver**)&resolver);
     if (ec == (ECode)E_ILLEGAL_ARGUMENT_EXCEPTION) {
-        Slogger::W(TAG, "failed to open media database");
+        Logger::W(TAG, "failed to open media database");
     }
     AutoPtr<IUriHelper> uh;
     CUriHelper::AcquireSingleton((IUriHelper**)&uh);
     AutoPtr<IUri> uri;
     ec = uh->Parse(String("content://media/"), (IUri**)&uri);
     if (ec == (ECode)E_ILLEGAL_ARGUMENT_EXCEPTION) {
-        Slogger::W(TAG, "failed to open media database");
+        Logger::W(TAG, "failed to open media database");
     }
     AutoPtr<IUri> oUri;
     ec = resolver->Insert(uri.Get(), values.Get(), (IUri**)&oUri);
     if (ec == (ECode)E_ILLEGAL_ARGUMENT_EXCEPTION) {
-        Slogger::W(TAG, "failed to open media database");
+        Logger::W(TAG, "failed to open media database");
     }
 // } catch (IllegalArgumentException ex) {
     // Log.w(TAG, "failed to open media database");
@@ -146,49 +144,48 @@ void MediaScannerService::Scan(
     // don't sleep while scanning
     mWakeLock->AcquireLock();
 
+    AutoPtr<IContentValues> values;
+    CContentValues::New((IContentValues**)&values);
+    values->Put(IMediaStore::MEDIA_SCANNER_VOLUME, volumeName);
+    // Uri scanUri = getContentResolver().insert(MediaStore.getMediaScannerUri(), values);
+    AutoPtr<IContentResolver> resolver;
+    ((IContext*)this)->GetContentResolver((IContentResolver**)&resolver);
+    AutoPtr<IMediaStore> ms;
+    CMediaStore::AcquireSingleton((IMediaStore**)&ms);
+    AutoPtr<IUri> iUri;
+    ms->GetMediaScannerUri((IUri**)&iUri);
+    AutoPtr<IUri> scanUri;
+    resolver->Insert(iUri.Get(), values.Get(), (IUri**)&scanUri);
+    AutoPtr<IIntent> intent;
+    CIntent::New(IIntent::ACTION_MEDIA_SCANNER_STARTED, uri, (IIntent**)&intent);
+    ((IContext*)this)->SendBroadcast(intent.Get());
+
     // try {
-        AutoPtr<IContentValues> values;
-        CContentValues::New((IContentValues**)&values);
-        values->Put(IMediaStore::MEDIA_SCANNER_VOLUME, volumeName);
-        // Uri scanUri = getContentResolver().insert(MediaStore.getMediaScannerUri(), values);
-        AutoPtr<IContentResolver> resolver;
-        ((IContext*)this)->GetContentResolver((IContentResolver**)&resolver);
-        AutoPtr<IMediaStore> ms;
-        CMediaStore::AcquireSingleton((IMediaStore**)&ms);
-        AutoPtr<IUri> iUri;
-        ms->GetMediaScannerUri((IUri**)&iUri);
-        AutoPtr<IUri> scanUri;
-        resolver->Insert(iUri.Get(), values.Get(), (IUri**)&scanUri);
-        AutoPtr<IIntent> intent;
-        CIntent::New(IIntent::ACTION_MEDIA_SCANNER_STARTED, uri, (IIntent**)&intent);
-        ((IContext*)this)->SendBroadcast(intent.Get());
+        if (volumeName.Equals(MediaProvider::EXTERNAL_VOLUME)) {
+            OpenDatabase(volumeName);
+        }
 
-        // try {
-            if (volumeName.Equals(MediaProvider::EXTERNAL_VOLUME)) {
-                OpenDatabase(volumeName);
-            }
+        AutoPtr<IMediaScanner> scanner = CreateMediaScanner();
+        ECode ec = scanner->ScanDirectories(directories, volumeName);
+    // } catch (Exception e) {
+        if (FAILED(ec)) {
+            Logger::E(TAG, "exception in MediaScanner.scan()%0x", ec);
+        }
 
-            AutoPtr<IMediaScanner> scanner = CreateMediaScanner();
-            ECode ec = scanner->ScanDirectories(directories, volumeName);
-        // } catch (Exception e) {
-            if (!SUCCEEDED(ec)) {
-                Slogger::E(TAG, "exception in MediaScanner.scan()%0x", ec);
-            }
-
-        // }
-        Int32 vol;
-        resolver->Delete(scanUri.Get(), String(NULL), NULL, &vol);
-
-    // } finally {
-        intent = NULL;
-        CIntent::New(IIntent::ACTION_MEDIA_SCANNER_FINISHED, uri, (IIntent**)&intent);
-        ((IContext*)this)->SendBroadcast(intent.Get());
-        mWakeLock->ReleaseLock();
     // }
+    Int32 vol;
+    resolver->Delete(scanUri.Get(), String(NULL), NULL, &vol);
+
+    intent = NULL;
+    CIntent::New(IIntent::ACTION_MEDIA_SCANNER_FINISHED, uri, (IIntent**)&intent);
+    ((IContext*)this)->SendBroadcast(intent.Get());
+    mWakeLock->ReleaseLock();
 }
 
 ECode MediaScannerService::OnCreate()
 {
+    Logger::I(TAG, " >> OnCreate()");
+
     AutoPtr<IInterface> obj;
     ((IContext*)this)->GetSystemService(IContext::POWER_SERVICE, (IInterface**)&obj);
     AutoPtr<IPowerManager> pm = IPowerManager::Probe(obj);
@@ -214,6 +211,11 @@ ECode MediaScannerService::OnStartCommand(
     /* [in] */ Int32 startId,
     /* [out] */ Int32* result)
 {
+    Logger::I(TAG, " >> OnStartCommand()");
+
+    VALIDATE_NOT_NULL(result)
+    *result = FALSE;
+
     while (mServiceHandler == NULL) {
         // {    AutoLock syncLock(this);
             // try {
@@ -225,7 +227,7 @@ ECode MediaScannerService::OnStartCommand(
     }
 
     if (intent == NULL) {
-        Slogger::E(TAG, "Intent is null in onStartCommand: %0x", E_NULL_POINTER_EXCEPTION);
+        Logger::E(TAG, "Intent is null in onStartCommand: %0x", E_NULL_POINTER_EXCEPTION);
         *result = IService::START_NOT_STICKY;
         return NOERROR;
     }
@@ -246,6 +248,7 @@ ECode MediaScannerService::OnStartCommand(
 
 ECode MediaScannerService::OnDestroy()
 {
+    Logger::I(TAG, " >> OnStartCommand()");
     // Make sure thread has started before telling it to quit.
     while (mServiceLooper == NULL) {
         // {    AutoLock syncLock(this);
@@ -276,6 +279,7 @@ ECode MediaScannerService::ScanFile(
     /* [in] */ const String& mimeType,
     /* [out] */ IUri** result)
 {
+    VALIDATE_NOT_NULL(result)
     String volumeName = MediaProvider::EXTERNAL_VOLUME;
     OpenDatabase(volumeName);
     AutoPtr<IMediaScanner> scanner = CreateMediaScanner();
@@ -295,7 +299,7 @@ ECode MediaScannerService::ScanFile(
 
     _EXIT_:
     // } catch (Exception e) {
-        Slogger::E(TAG, "bad path %s in scanFile()%0x", path.string(), ec);
+        Logger::E(TAG, "bad path %s in scanFile()%0x", path.string(), ec);
         *result = NULL;
         return NOERROR;
     // }
@@ -305,16 +309,18 @@ ECode MediaScannerService::OnBind(
     /* [in] */ IIntent* intent,
     /* [out] */ IBinder** result)
 {
-    VALIDATE_NOT_NULL(result);
-    AutoPtr<IInterface> obj = TO_IINTERFACE(mBinder);
-    *result = IBinder::Probe(obj);
+    Logger::I(TAG, " >> OnStartCommand()");
+    VALIDATE_NOT_NULL(result)
+    *result = IBinder::Probe(mBinder);
     REFCOUNT_ADD(*result);
     return NOERROR;
 }
 
-//---------------------------------------------------
-//      MediaScannerService::MyMediaScannerService
-//---------------------------------------------------
+//===========================================================
+// MediaScannerService::MyMediaScannerService
+//===========================================================
+CAR_INTERFACE_IMPL_2(MediaScannerService::MyMediaScannerService, Object, IIMediaScannerService, IBinder)
+
 MediaScannerService::MyMediaScannerService::MyMediaScannerService()
 {}
 
@@ -328,15 +334,13 @@ ECode MediaScannerService::MyMediaScannerService::constructor(
     return NOERROR;
 }
 
-CAR_INTERFACE_IMPL_2(MediaScannerService::MyMediaScannerService, Object, IIMediaScannerService, IBinder)
-
 ECode MediaScannerService::MyMediaScannerService::RequestScanFile(
     /* [in] */ const String& path,
     /* [in] */ const String& mimeType,
     /* [in] */ IIMediaScannerListener* listener)
 {
     if (FALSE) {
-        Slogger::D(TAG, "IMediaScannerService.scanFile: %s mimeType: ", path.string(), mimeType.string());
+        Logger::D(TAG, "IMediaScannerService.scanFile: %s mimeType: ", path.string(), mimeType.string());
     }
     AutoPtr<IBundle> args;
     CBundle::New((IBundle**)&args);
@@ -347,7 +351,7 @@ ECode MediaScannerService::MyMediaScannerService::RequestScanFile(
         args->PutIBinder(String("listener"), bdListener.Get());
     }
     AutoPtr<IIntent> intent;
-    CIntent::New(IContext::Probe(this), ECLSID_CMediaScannerService, (IIntent**)&intent);
+    CIntent::New((IContext*)this, ECLSID_CMediaScannerService, (IIntent**)&intent);
     intent->PutExtras(args.Get());
     AutoPtr<IComponentName> cn;
     return ((IContext*)((IMediaScannerService*)mOwner))->StartService(intent, (IComponentName**)&cn);
@@ -363,19 +367,17 @@ ECode MediaScannerService::MyMediaScannerService::ScanFile(
 ECode MediaScannerService::MyMediaScannerService::ToString(
     /* [out] */ String* str)
 {
-    VALIDATE_NOT_NULL(str);
+    VALIDATE_NOT_NULL(str)
     return NOERROR;
 }
 
-//---------------------------------------------------
-//      MediaScannerService::ServiceHandler
-//---------------------------------------------------
+//===========================================================
+// MediaScannerService::ServiceHandler
+//===========================================================
 MediaScannerService::ServiceHandler::ServiceHandler(
     /* [in] */ MediaScannerService* owner)
     : mOwner(owner)
 {}
-
-CAR_INTERFACE_IMPL(MediaScannerService::ServiceHandler, Handler, IHandler)
 
 ECode MediaScannerService::ServiceHandler::HandleMessage(
     /* [in] */ IMessage* msg)
@@ -405,7 +407,7 @@ ECode MediaScannerService::ServiceHandler::HandleMessage(
             // } catch (Exception e) {
                 // Log.e(TAG, "Exception scanning file", e);
             // }
-                Slogger::E(TAG, "Exception scanning file");
+                Logger::E(TAG, "Exception scanning file");
             }
 
             if (listener != NULL) {
@@ -438,18 +440,18 @@ ECode MediaScannerService::ServiceHandler::HandleMessage(
             if (directories != NULL) {
                 String str;
                 str = Arrays::ToString(directories);
-                if (FALSE) Slogger::D(TAG, "start scanning volume %s: %s", volume.string(), str.string());
+                if (FALSE) Logger::D(TAG, "start scanning volume %s: %s", volume.string(), str.string());
                 mOwner->Scan(directories.Get(), volume);
-                if (FALSE) Slogger::D(TAG, "done scanning volume %s", volume.string());
+                if (FALSE) Logger::D(TAG, "done scanning volume %s", volume.string());
             }
         }
     // } catch (Exception e) {
-        Slogger::E(TAG, "Exception in handleMessage");
+        Logger::E(TAG, "Exception in handleMessage");
     // }
 
     Int32 arg1;
     msg->GetArg1(&arg1);
-    IService::Probe(this)->StopSelf(arg1);
+    mOwner->StopSelf(arg1);
 }
 
 } // namespace Media

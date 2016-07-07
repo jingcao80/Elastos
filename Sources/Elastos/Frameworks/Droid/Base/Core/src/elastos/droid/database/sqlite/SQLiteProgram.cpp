@@ -74,9 +74,6 @@ ECode SQLiteProgram::constructor(
     }
 
     if (bindArgs != NULL && bindArgs->GetLength() > mNumParameters) {
-        //throw new IllegalArgumentException("Too many bind arguments.  "
-        //        + bindArgs.length + " arguments were provided but the statement needs "
-        //        + mNumParameters + " arguments.");
         Slogger::E("SQLiteProgram", "Too many bind arguments. %d arguments were provided"
             " but the statement needs %d arguments.", bindArgs->GetLength(), mNumParameters);
         return E_ILLEGAL_ARGUMENT_EXCEPTION;
@@ -169,7 +166,6 @@ ECode SQLiteProgram::BindString(
     /* [in] */ const String& value)
 {
     if (value.IsNullOrEmpty()) {
-        // throw new IllegalArgumentException("the bind value at index " + index + " is null");
         Slogger::E(String("SQLiteProgram"), "the bind value at index %d is null", index);
         return E_ILLEGAL_ARGUMENT_EXCEPTION;
     }
@@ -223,7 +219,8 @@ ECode SQLiteProgram::Bind(
     /* [in] */ IInterface* value)
 {
     if (index < 1 || index > mNumParameters) {
-        Slogger::E(String("SQLiteProgram"), "Cannot bind argument at index %d because the index is out of range."
+        Slogger::E(String("SQLiteProgram"),
+            "Cannot bind argument at index %d because the index is out of range."
             "  The statement has %d parameters." , index, mNumParameters);
         return E_ILLEGAL_ARGUMENT_EXCEPTION;
     }
