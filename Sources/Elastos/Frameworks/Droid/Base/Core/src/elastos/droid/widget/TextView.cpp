@@ -8878,13 +8878,14 @@ void TextView::StartStopMarquee(
     }
 }
 
-void TextView::OnTextChanged(
+ECode TextView::OnTextChanged(
     /* [in] */ ICharSequence* text,
     /* [in] */ Int32 start,
     /* [in] */ Int32 before,
     /* [in] */ Int32 after)
 {
     // intentionally empty, template pattern method can be overridden by subclasses
+    return NOERROR;
 }
 
 void TextView::OnSelectionChanged(

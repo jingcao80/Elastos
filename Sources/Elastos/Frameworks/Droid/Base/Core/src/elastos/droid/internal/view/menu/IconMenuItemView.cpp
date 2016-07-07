@@ -298,7 +298,7 @@ ECode IconMenuItemView::OnLayout(
     return NOERROR;
 }
 
-void IconMenuItemView::OnTextChanged(
+ECode IconMenuItemView::OnTextChanged(
     /* [in] */ ICharSequence* text,
     /* [in] */ Int32 start,
     /* [in] */ Int32 before,
@@ -308,6 +308,7 @@ void IconMenuItemView::OnTextChanged(
 
     // our layout params depend on the length of the text
     SetLayoutParams(IViewGroupLayoutParams::Probe(GetTextAppropriateLayoutParams()));
+    return NOERROR;
 }
 
 /**
