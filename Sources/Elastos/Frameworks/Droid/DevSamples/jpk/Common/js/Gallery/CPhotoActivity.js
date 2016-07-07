@@ -551,175 +551,317 @@ module.exports = function(aoElastos, aoActivity){
 // }
 
 // ECode CPhotoActivity::MyListener::OnClick(
+    MyListener.prototype.OnClick = function(
 //     /* [in] */ IView* v)
+        v)
 // {
+    {
 //     Int32 viewId = 0;
+        var viewId = 0;
 //     v->GetId(&viewId);
+        viewId = v.GetId();
 
 //     switch(viewId) {
+        switch (viewId) {
 //         case R::id::photo_up: {
+            case R.id.photo_up :
 //             Logger::D(TAG, "OnClick()---photo_up");
+                elog(TAG + "OnClick()---photo_up");
 //             mHost->OnBackPressed();
+                OnBackPressed();
 //             break;
+                break;
 //         }
 //         case R::id::photo_slideshow: {
+            case R.id.photo_slideshow :
 //             Logger::D(TAG, "OnClick()---photo_slideshow");
+                elog(TAG + "OnClick()---photo_slideshow");
 //             break;
+                break;
 //         }
 //         case R::id::photo_more: {
+            case R.id.photo_more :
 //             Logger::D(TAG, "OnClick()---photo_more");
+                elog(TAG + "OnClick()---photo_more");
 //             if (mHost->mShowMore) {
+                if (mShowMore) {
 //                 mHost->CloseMorePopupWindow();
+                    CloseMorePopupWindow();
 //             }
+                }
 //             else {
+                else {
 //                 mHost->OpenMorePopupWindow(v);
+                    OpenMorePopupWindow(v);
 //             }
+                }
 //             break;
+                break;
 //         }
 //         case R::id::photo_detail: {
+            case R.id.photo_detail :
 //             Logger::D(TAG, "OnClick()---photo_detail");
+                elog(TAG + "OnClick()---photo_detail");
 //             break;
+                break;
 //         }
 //         case R::id::img_btn_left: {
+            case R.id.img_btn_left :
 //             Logger::D(TAG, "OnClick()---img_btn_left--mCurrentIndex:%d",mHost->mCurrentIndex);
+                elog(TAG + "OnClick()---img_btn_left--mCurrentIndex:" + mCurrentIndex);
 //             mHost->ChangeCurrentPhoto(FALSE);
+                ChangeCurrentPhoto(false);
 //             break;
+                break;
 //         }
 //         case R::id::img_btn_right: {
+            case R.id.img_btn_right :
 //             Logger::D(TAG, "OnClick()---img_btn_right--mCurrentIndex:%d",mHost->mCurrentIndex);
+                elog(TAG + "OnClick()---img_btn_right--mCurrentIndex:" + mCurrentIndex);
 //             mHost->ChangeCurrentPhoto(TRUE);
+                ChangeCurrentPhoto(true);
 //             break;
+                break;
 //         }
 //         case R::id::img_btn_zoom: {
+            case R.id.img_btn_zoom :
 //             Logger::D(TAG, "OnClick()---img_btn_zoom");
+                elog(TAG + "OnClick()---img_btn_zoom");
 //             if (mHost->mShowZoom) {
+                if (mShowZoom) {
 //                 mHost->CloseZoomPopupWindow();
+                    CloseZoomPopupWindow();
 //             }
+                }
 //             else {
+                else {
 //                 mHost->OpenZoomPopupWindow(v);
+                    OpenZoomPopupWindow(v);
 //             }
+                }
 //             break;
+                break;
 //         }
 //         case R::id::img_btn_rotate_left: {
+            case R.id.img_btn_rotate_left :
 //             Logger::D(TAG, "OnClick()---img_btn_rotate_left");
+                elog(TAG + "OnClick()---img_btn_rotate_left");
 //             break;
+                break;
 //         }
 //         case R::id::img_btn_rotate_right: {
+            case R.id.img_btn_rotate_right :
 //             Logger::D(TAG, "OnClick()---img_btn_rotate_right");
+                elog(TAG + "OnClick()---img_btn_rotate_right");
 //             break;
+                break;
 //         }
 //         case R::id::img_btn_share: {
+            case R.id.img_btn_share :
 //             Logger::D(TAG, "OnClick()---img_btn_share");
+                elog(TAG + "OnClick()---img_btn_share");
 //             mHost->OpenShareDialog();
+                OpenShareDialog();
 //             break;
+                break;
 //         }
 //         case R::id::img_btn_edit: {
+            case R.id.img_btn_edit :
 //             Logger::D(TAG, "OnClick()---img_btn_edit");
+                elog(TAG + "OnClick()---" + img_btn_edit);
 //             AutoPtr<PhotoEntry> entry = mHost->mPhotoEntryList[mHost->mCurrentIndex];
+                var entry = mPhotoEntryList[mHost.mCurrentIndex];
 //             AutoPtr<IIntent> intent;
 //             CIntent::New((IIntent**)&intent);
+                var intent = Droid_New("Elastos.Droid.Content.CIntent");
 //             intent->SetClassNameEx(String("Gallery"), String("Gallery.CEditActivity"));
+                intent.SetClassName("Elastos.DevSamples.Node.JSGallery", "Elastos.DevSamples.Node.JSGallery.CEditActivity");
 //             intent->PutStringExtra(DataSourceHelper::SOURCE_PATH, entry->sourcePath);
+                intent.PutStringExtra(DataSourceHelper.SOURCE_PATH, entry.sourcePath);
 //             if (FAILED(mHost->StartActivity(intent))) {
+                try {oActivity.StartActivity(intent)} catch(e) {
 //                 Logger::E(TAG, "OnClick()---StartActivity CEditActivity failed!");
+                    elog(TAG + "OnClick()---StartActivity CEditActivity failed!");
 //             }
+                }
 //             break;
+                break;
 //         }
 //         case R::id::img_btn_delete: {
+            case R.id.img_btn_delete :
 //             Logger::D(TAG, "OnClick()---img_btn_delete");
+                elog(TAG + "OnClick()---img_btn_delete");
 //             mHost->OpenDeleteDialog();
+                OpenDeleteDialog();
 //             break;
+                break;
 //         }
 //         case R::id::more_pop_wallpaper: {
+            case R.id.more_pop_wallpaper :
 //             Logger::D(TAG, "OnClick()---more_pop_wallpaper");
+                elog(TAG + "OnClick()---more_pop_wallpaper");
 //             mHost->CloseMorePopupWindow();
+                CloseMorePopupWindow();
 //             AutoPtr<PhotoEntry> entry = mHost->mPhotoEntryList[mHost->mCurrentIndex];
+                var entry = mHost.mPhotoEntryList[mHost.mCurrentIndex];
 //             AutoPtr<IIntent> intent;
 //             CIntent::New((IIntent**)&intent);
+                var intent = Droid_New("Elastos.Droid.Content.CIntent");
 //             intent->SetClassNameEx(String("Gallery"), String("Gallery.CWallpaperActivity"));
+                intent.SetClassName("Elastos.DevSamples.Node.JSGallery", "Elastos.DevSamples.Node.JSGallery.CWallpaperActivity");
 //             intent->PutStringExtra(DataSourceHelper::SOURCE_PATH, entry->sourcePath);
+                intent.PutStringExtra(DataSourceHelper.SOURCE_PATH, entry.sourcePath);
 //             if (FAILED(mHost->StartActivity(intent))) {
+                try {StartActivity(intent)} catch(e) {
 //                 Logger::E(TAG, "OnClick()---StartActivity CWallpaperActivity failed!");
+                    elog(TAG + "OnClick()---StartActivity CWallpaperActivity failed!");
 //             }
+                }
 //             break;
+                break;
 //         }
 //         case R::id::more_pop_info: {
+            case R.id.more_pop_info :
 //             Logger::D(TAG, "OnClick()---more_pop_info");
+                elog(TAG + "OnClick()---more_pop_info");
 //             mHost->CloseMorePopupWindow();
+                CloseMorePopupWindow();
 //             if (mHost->mShowDetails) {
+                if (mShowDetails) {
 //                 mHost->HideDetails();
+                    HideDetails();
 //             }
+                }
 //             else {
+                else {
 //                 mHost->ShowDetails();
+                    ShowDetails();
 //             }
+                }
 //             break;
+                break;
 //         }
 //         case R::id::share_dialog_btn_cancel: {
+            case R.id.share_dialog_btn_cancel :
 //             Logger::D(TAG, "OnClick()---share_dialog_btn_cancel");
+                elog(TAG + "OnClick()---share_dialog_btn_cancel");
 //             mHost->ShareDialogOnCancel();
+                ShareDialogOnCancel();
 //             break;
 //         }
 //         case R::id::delete_dialog_btn_ok: {
+            case R.id.delete_dialog_btn_ok :
 //             Logger::D(TAG, "OnClick()---delete_dialog_btn_ok");
+                elog(TAG + "OnClick()---delete_dialog_btn_ok");
 //             mHost->DeleteDialogOnOK();
+                DeleteDialogOnOK();
 //             break;
+                break;
 //         }
 //         case R::id::delete_dialog_btn_cancel: {
+            case R.id.delete_dialog_btn_cancel :
 //             Logger::D(TAG, "OnClick()---delete_dialog_btn_cancel");
+                elog(TAG + "OnClick()---delete_dialog_btn_cancel");
 //             mHost->DeleteDialogOnCancel();
+                DeleteDialogOnCancel();
 //             break;
+                break;
 //         }
 //         default:
+            default:
 //             break;
+                break;
 //     }
+        }
 
 //     return NOERROR;
+        return;
 // }
+    }
 
 // ECode CPhotoActivity::MyListener::OnDismiss()
+    MyListener.prototype.OnDismiss = function()
 // {
+    {
 //     Logger::D(TAG, "OnDismiss()---: TODO");
+        elog(TAG + "OnDismiss()---: TODO");
 //     if (mHost->mZoomPopupWindow) {
+        if (mZoomPopupWindow) {
 //         mHost->mZoomPopupWindow = NULL;
+            mZoomPopupWindow = null;
 //         mHost->mShowZoom = FALSE;
+            mShowZoom = false;
 //     }
+        }
 
 //     if (mHost->mMorePopupWindow) {
+        if (mMorePopupWindow) {
 //         mHost->mMorePopupWindow = NULL;
+            mMorePopupWindow = null;
 //         mHost->mShowMore = FALSE;
+            mShowMore = false;
 //     }
+        }
 //     return NOERROR;
+        return;
 // }
+    }
 
 // ECode CPhotoActivity::MyListener::OnProgressChanged(
+    MyListener.prototype.OnProgressChanged = function(
 //     /* [in] */ ISeekBar* seekBar,
+        seekBar,
 //     /* [in] */ Int32 progress,
+        progress,
 //     /* [in] */ Boolean fromUser)
+        fromUser)
 // {
+    {
 //     Logger::D(TAG, "OnProgressChanged()---progress:%d", progress);
+        elog(TAG + "OnProgressChanged()---progress:" + progress);
 //     return NOERROR;
+        return;
 // }
+    }
 
 // ECode CPhotoActivity::MyListener::OnStartTrackingTouch(
+    MyListener.prototype.OnStartTrackingTouch = function(
 //     /* [in] */ ISeekBar* seekBar)
+        seekBar)
 // {
+    {
 //     Logger::D(TAG, "OnStartTrackingTouch()---");
+        elog(TAG + "OnStartTrackingTouch()---");
 //     return NOERROR;
+        return;
 // }
+    }
 
 // ECode CPhotoActivity::MyListener::OnStopTrackingTouch(
+    MyListener.prototype.OnStopTrackingTouch = function(
 //     /* [in] */ ISeekBar* seekBar)
+        seekBar)
 // {
+    {
 //     Logger::D(TAG, "OnStopTrackingTouch()---");
+        elog(TAG + "OnStopTrackingTouch()---");
 //     return NOERROR;
+        return;
 // }
+    }
 
 // ECode CPhotoActivity::MyListener::OnClose()
+    MyListener.prototype.OnClose = function()
 // {
+    {
 //     Logger::D(TAG, "OnClose()---");
+        elog(TAG + "OnClose()---");
 //     mHost->HideDetails();
+        HideDetails();
 //     return NOERROR;
+        return;
 // }
+    }
 
 // CAR_INTERFACE_IMPL(CPhotoActivity::DialogListener, IDialogInterfaceOnDismissListener)
 
@@ -735,19 +877,32 @@ module.exports = function(aoElastos, aoActivity){
     }
 
 // ECode CPhotoActivity::DialogListener::OnDismiss(
+    DialogListener.prototype.OnDismiss = function (
 //     /* [in] */ IDialogInterface* dialog)
+        dialog)
 // {
+    {
 //     if (IDialogInterface::Probe(mHost->mShareDialog) == dialog) {
+        if (mShareDialog == dialog) {
 //         Logger::D(TAG, "OnDismissShareDialog---: %p", mHost->mShareDialog.Get());
+            elog("TAG" + "OnDismissShareDialog---: ") + mShareDialog;
 //         mHost->mShareDialog = NULL;
+            mShareDialog = null;
 //     }
+        }
 //     else if (IDialogInterface::Probe(mHost->mDeleteDialog) == dialog) {
+        else if (mDeleteDialog == dialog) {
 //         Logger::D(TAG, "OnDismissDeleteDialog---: %p", mHost->mDeleteDialog.Get());
+            elog(TAG + "OnDismissDeleteDialog---: " + mDeleteDialog);
 //         mHost->mDeleteDialog = NULL;
+            mDeleteDialog = null;
 //     }
+        }
 
 //     return NOERROR;
+        return;
 // }
+    }
 
 // CPhotoActivity::MyLoadImageCallback::MyLoadImageCallback(
     MyLoadImageCallback = function(
@@ -1077,208 +1232,372 @@ module.exports = function(aoElastos, aoActivity){
 // }
 
 // ECode CPhotoActivity::OnBackPressed()
+    function OnBackPressed()
 // {
+    {
 //     Logger::D(TAG, "OnBackPressed()---");
+        elog(TAG + "OnBackPressed()---");
 
 //     if (mShowDetails) {
+        if (mShowDetails) {
 //         HideDetails();
+            HideDetails();
 //     }
+        }
 //     else if (mShowMore) {
+        else if (mShowMore) {
 //         CloseMorePopupWindow();
+            CloseMorePopupWindow();
 //     }
+        }
 //     else if (mShowZoom) {
+        else if (mShowZoom) {
 //         CloseZoomPopupWindow();
+            CloseZoomPopupWindow();
 //     }
+        }
 //     else {
+        else {
 //         Activity::OnBackPressed();
+            oActivity.OnBackPressed();
 //     }
+        }
 
 //     return NOERROR;
+        return;
 // }
+    }
 
 // ECode CPhotoActivity::OpenZoomPopupWindow(
+    function OpenZoomPopupWindow(
 //     /* [in] */ IView* v)
+        v)
 // {
+    {
 //     Logger::D(TAG, "OpenZoomPopupWindow()---");
+        elog(TAG + "OpenZoomPopupWindow()---");
 
 //     AutoPtr<ILayoutInflater> inflater;
+        var inflater;
 //     GetSystemService(IContext::LAYOUT_INFLATER_SERVICE, (IInterface**)&inflater);
+        inflater = GetSystemService(IContext__LAYOUT_INFLATER_SERVICE);
 
 //     AutoPtr<IView> layout;
+        var layout;
 //     inflater->Inflate(R::layout::zoom_popup_dialog, NULL, (IView**)&layout);
+        layout = inflater.Inflate(R.layout.zoom_popup_dialog);
 //     AutoPtr<IView> view;
+        var view;
 //     layout->FindViewById(R::id::zoom_seeker, (IView**)&view);
+        view = layout.FindViewById(R.id.zoom_seeker);
 //     AutoPtr<ISeekBar> seekBar = ISeekBar::Probe(view);
+        var seekBar = view;
 //     assert(seekBar != NULL);
+        if (!seekBar) return;
 //     seekBar->SetOnSeekBarChangeListener((ISeekBarOnSeekBarChangeListener*)(mListener.Get()));
+        seekBar.SetOnSeekBarChangeListener(mListener);
 
 //     assert(mZoomPopupWindow.Get() == NULL);
+        if (!mZoomPopupWindow) return;
 //     CPopupWindow::New(layout, 400, 50, TRUE, (IPopupWindow**)&mZoomPopupWindow);
+        mZoomPopupWindow = Droid_New("Elastos.Droid.Widget.CPopupWindow", layout, 400, 50, true);
 //     mZoomPopupWindow->SetTouchable(TRUE);
+        mZoomPopupWindow.SetTouchable(true);
 //     mZoomPopupWindow->SetOutsideTouchable(TRUE);
+        mZoomPopupWindow.SetOutsideTouchable(true);
 
 //     AutoPtr<IResources> res;
+        var res;
 //     GetResources((IResources**)&res);
+        res = mHost.GetResources();
 //     AutoPtr<IBitmapDrawable> bitmapDrawable;
+        var bitmapDrawable;
 //     CBitmapDrawable::New(res, (IBitmap*)NULL, (IBitmapDrawable**)&bitmapDrawable);
+        bitmapDrawable = Droid_New("Elastos.Droid.Graphics.Drawable.CBitmapDrawable", res);
 //     mZoomPopupWindow->SetBackgroundDrawable(IDrawable::Probe(bitmapDrawable));
+        mZoomPopupWindow.SetBackgroundDrawable(bitmapDrawable);
 //     mZoomPopupWindow->SetOnDismissListener((IPopupWindowOnDismissListener*)mListener.Get());
+        mZoomPopupWindow.SetOnDismissListener(mListener);
 //     mZoomPopupWindow->ShowAtLocation(v, IGravity::NO_GRAVITY, 310, 561);
+        mZoomPopupWindow.ShowAtLocation(v, IGravity__NO_GRAVITY, 310, 561);
 //     mShowZoom = TRUE;
+        mShowZoom = true;
 
 //     return NOERROR;
+        return;
 // }
+    }
 
 // ECode CPhotoActivity::CloseZoomPopupWindow()
+    function CloseZoomPopupWindow()
 // {
+    {
 //     Boolean isShow = FALSE;
+        var isShow = false;
 //     if (mZoomPopupWindow != NULL && (mZoomPopupWindow->IsShowing(&isShow), isShow)) {
+        if (mZoomPopupWindow && (isShow = mZoomPopupWindow.IsShowing())) {
 //         Logger::D(TAG, "CloseZoomPopupWindow()---");
+            elog(TAG + "CloseZoomPopupWindow()---");
 //         mZoomPopupWindow->Dismiss();
+            mZoomPopupWindow.Dismiss();
 //         mShowZoom = FALSE;
+            mShowZoom = false;
 //     }
+        }
 //     return NOERROR;
+        return;
 // }
+    }
 
 // ECode CPhotoActivity::OpenMorePopupWindow(
+    function OpenMorePopupWindow(
 //     /* [in] */ IView* v)
+        v)
 // {
+    {
 //     Logger::D(TAG, "OpenMorePopupWindow()---");
+        elog(TAG + "OpenMorePopupWindow()---");
 //     AutoPtr<ILayoutInflater> inflater;
+        var inflater;
 //     GetSystemService(IContext::LAYOUT_INFLATER_SERVICE, (IInterface**)&inflater);
+        inflater = GetSystemService(IContext__LAYOUT_INFLATER_SERVICE);
 
 //     AutoPtr<IViewOnClickListener> clickListener = (IViewOnClickListener*)mListener.Get();
+        var clickListener = mListener;
 //     AutoPtr<IView> layout;
+        var layout;
 //     inflater->Inflate(R::layout::more_popup_dialog, NULL, (IView**)&layout);
+        layout = inflater.Inflate(R.layout.more_popup_dialog, null);
 //     AutoPtr<IView> view;
+        var view;
 //     layout->FindViewById(R::id::more_pop_wallpaper, (IView**)&view);
+        view = layout.FindViewById(R.id.more_pop_wallpaper);
 //     AutoPtr<ITextView> popupWallpaper = ITextView::Probe(view);
+        var popupWallpaper = view;
 //     assert(popupWallpaper != NULL);
+        if(!popupWallpaper) return;
 //     popupWallpaper->SetOnClickListener(clickListener);
+        popupWallpaper.SetOnDismissListener(clickListener);
 
 //     view = NULL;
+        view = null;
 //     layout->FindViewById(R::id::more_pop_info, (IView**)&view);
+        view = layout.FindViewById(R.id.more_pop_info);
 //     AutoPtr<ITextView> popupInfo = ITextView::Probe(view);
+        var popupInfo = view;
 //     assert(popupInfo != NULL);
+        if(!popupInfo) return;
 //     popupInfo->SetOnClickListener(clickListener);
+        popupInfo.SetOnClickListener(clickListener);
 
 //     assert(mMorePopupWindow.Get() == NULL);
+        if(!mMorePopupWindow) return;
 //     CPopupWindow::New(layout, 80, 63, TRUE, (IPopupWindow**)&mMorePopupWindow);
+        mMorePopupWindow = Droid_New("Elastos.Droid.Widget.CPopupWindow", layout, 80, 63,true);
 //     mMorePopupWindow->SetTouchable(TRUE);
+        mMorePopupWindow.SetTouchable(true);
 //     mMorePopupWindow->SetOutsideTouchable(TRUE);
+        mMorePopupWindow.SetOutsideTouchable(true);
 
 //     AutoPtr<IResources> res;
+        var res;
 //     GetResources((IResources**)&res);
+        res = GetResources();
 //     AutoPtr<IBitmapDrawable> bitmapDrawable;
+        var bitmapDrawable;
 //     CBitmapDrawable::New(res, (IBitmap*)NULL, (IBitmapDrawable**)&bitmapDrawable);
+        bitmapDrawable = Droid_New("Elastos.Droid.Graphics.Drawable.CBitmapDrawable", res);
 //     mMorePopupWindow->SetBackgroundDrawable(IDrawable::Probe(bitmapDrawable));
+        mMorePopupWindow.SetBackgroundDrawable(bitmapDrawable);
 //     mMorePopupWindow->SetOnDismissListener((IPopupWindowOnDismissListener*)mListener.Get());
+        mMorePopupWindow.SetOnDismissListener(mListener);
 //     mMorePopupWindow->ShowAtLocation(v, IGravity::NO_GRAVITY, 1180, 56);
+        mMorePopupWindow.ShowAtLocation(v, IGravity__NO_GRAVITY, 1180, 56);
 //     mShowMore = TRUE;
+        mShowMore = true;
 
 //     return NOERROR;
+        return;
 // }
+    }
 
 // ECode CPhotoActivity::CloseMorePopupWindow()
+    function CloseMorePopupWindow()
 // {
+    {
 //     Boolean isShow = FALSE;
+        var isShow = false;
 //     if (mMorePopupWindow != NULL && (mMorePopupWindow->IsShowing(&isShow), isShow)) {
+        if (mMorePopupWindow && (isShow = mMorePopupWindow.IsShowing())) {
 //         Logger::D(TAG, "CloseMorePopupWindow()---");
+            elog(TAG + "CloseMorePopupWindow()---");
 //         mMorePopupWindow->Dismiss();
+            mMorePopupWindow.Dismiss();
 //         mShowMore = FALSE;
+            mShowMore = false;
 //     }
+        }
 //     return NOERROR;
+        return;
 // }
+    }
 
 // ECode CPhotoActivity::OpenShareDialog()
+    function OpenShareDialog()
 // {
+    {
 //     Logger::D(TAG, "OpenShareDialog()--- : prev : %p", mShareDialog.Get());
+        elog(TAG +"OpenShareDialog()--- : prev :" + mShareDialog);
 //     assert(mShareDialog.Get() == 0);
 //     CDialog::New(this, R::style::MyDialog, (IDialog**)&mShareDialog);
+        mShareDialog = Droid_New("Elastos.Droid.App.CDialog", this, R.style.MyDialog);
 //     mShareDialog->SetOnDismissListener((IDialogInterfaceOnDismissListener*)mDialogListener.Get());
+        mShareDialog.SetOnDismissListener(mDialogListener);
 //     Logger::D(TAG, "OpenShareDialog()--- : new : %p", mShareDialog.Get());
+        elog(TAG + "OpenShareDialog()--- : new : " + mShareDialog);
 //     mShareDialog->SetContentView(R::layout::share_dialog);
+        mShareDialog.SetContentView(R.layout.share_dialog);
 
 //     AutoPtr<IView> view;
 //     mShareDialog->FindViewById(R::id::share_dialog_btn_cancel, (IView**)&view);
 //     AutoPtr<IButton> cancelButton = IButton::Probe(view);
+        var cancelButton = mShareDialog.FindViewById(R.id.share_dialog_btn_cancel);
 //     AutoPtr<IViewOnClickListener> clickListener = (IViewOnClickListener*)mListener.Get();
 //     cancelButton->SetOnClickListener(clickListener);
+        cancelButton.SetOnClickListener(mListener);
 
 //     mShareDialog->Show();
+        mShareDialog.Show();
 //     return NOERROR;
+        return;
 // }
+    }
 
 // ECode CPhotoActivity::ShareDialogOnOK()
+    function ShareDialogOnOK()
 // {
-//     ShareDialogOnCancel(); //TODO
+    {
+//     ShareDialogOnCancel();
+        ShareDialogOnCancel();
 //     return NOERROR;
+        return;
 // }
+    }
 
 // ECode CPhotoActivity::ShareDialogOnCancel()
+    function ShareDialogOnCancel()
 // {
+    {
 //     if (mShareDialog) {
+        if (mShareDialog) {
 //         Logger::D(TAG, "ShareDialogOnCancel---: %p", mShareDialog.Get());
+            elog(TAG + "ShareDialogOnCancel---: " + mShareDialog);
 //         mShareDialog->Cancel();
+            mShareDialog.Cancel();
 //     }
+        }
 //     return NOERROR;
+        return;
 // }
+    }
 
 // ECode CPhotoActivity::DeleteDialogOnOK()
+    function DeleteDialogOnOK()
 // {
+    {
 //     DeleteDialogOnCancel(); //TODO
+        DeleteDialogOnCancel();
 //     return NOERROR;
+        return;
 // }
+    }
 
 // ECode CPhotoActivity::DeleteDialogOnCancel()
+    function DeleteDialogOnCancel()
 // {
+    {
 //     if (mDeleteDialog) {
+        if (mDeleteDialog) {
 //         Logger::D(TAG, "DeleteDialogOnCancel---: %p", mDeleteDialog.Get());
+            elog(TAG + "DeleteDialogOnCancel---: " + mDeleteDialog);
 //         mDeleteDialog->Cancel();
+            mDeleteDialog.Cancel();
 //     }
+        }
 //     return NOERROR;
+        return;
 // }
+    }
 
 // ECode CPhotoActivity::OpenDeleteDialog()
+    function OpenDeleteDialog()
 // {
+    {
 //     Logger::D(TAG, "OpenDeleteDialog()--- : prev : %p", mDeleteDialog.Get());
+        elog(TAG + "OpenDeleteDialog()---: prev : " + mDeleteDialog);
 //     assert(mDeleteDialog.Get() == 0);
 //     CDialog::New(this, R::style::MyDialog, (IDialog**)&mDeleteDialog);
+        mDeleteDialog = Droid_New("Elastos.Droid.App.CDialog", R.style.MyDialog);
 //     mDeleteDialog->SetOnDismissListener((IDialogInterfaceOnDismissListener*)mDialogListener.Get());
+        mDeleteDialog.SetOnDismissListener(mDialogListener);
 //     Logger::D(TAG, "OpenShareDialog()--- : new : %p", mDeleteDialog.Get());
+        elog(TAG + "OpenShareDialog()--- : new : " + mDeleteDialog);
 //     mDeleteDialog->SetContentView(R::layout::delete_dialog);
+        mDeleteDialog.SetContentView(R.layout.delete_dialog);
 
 //     AutoPtr<IView> view;
 //     mDeleteDialog->FindViewById(R::id::delete_dialog_btn_ok, (IView**)&view);
 //     AutoPtr<IButton> okButton = IButton::Probe(view);
+        var okButton = mDeleteDialog.FindViewById(R.id.delete_dialog_btn_ok);
 //     AutoPtr<IViewOnClickListener> clickListener = (IViewOnClickListener*)mListener.Get();
 //     okButton->SetOnClickListener(clickListener);
+        okButton.SetOnClickListener(mListener);
 
 //     view = NULL;
 //     mDeleteDialog->FindViewById(R::id::delete_dialog_btn_cancel, (IView**)&view);
 //     AutoPtr<IButton> cancelButton = IButton::Probe(view);
+        var cancelButton = mDeleteDialog.FindViewById(R.id.delete_dialog_btn_cancel);
 //     cancelButton->SetOnClickListener(clickListener);
+        cancelButton.SetOnClickListener(mListener);
 
 //     mDeleteDialog->Show();
+        mDeleteDialog.Show();
 //     return NOERROR;
+        return;
 // }
+    }
 
 // void CPhotoActivity::ShowDetails()
+    function ShowDetails()
 // {
+    {
 //     mShowDetails = TRUE;
+        mShowDetails = true;
 //     if (mDetailsHelper == NULL) {
+        if (!mDetailsHelper) {
 //         mDetailsHelper = new DetailsHelper(this, mDetailsArray);
+            mDetailsHelper = new DetailsHelper();
 //         AutoPtr<ICloseListener> closeListener = (ICloseListener*)mListener.Get();
+            var closeListener = mListener;
 //         mDetailsHelper->SetCloseListener(closeListener);
+            mDetailsHelper.SetCloseListener(closeListener);
 //     }
+        }
 //     mDetailsHelper->Show();
+        mDetailsHelper.Show();
 // }
+    }
 
 // void CPhotoActivity::HideDetails()
+    function HideDetails()
 // {
+    {
 //     mShowDetails = FALSE;
+        mShowDetails = false;
 //     mDetailsHelper->Hide();
+        mDetailsHelper.Hide();
 // }
+    }
 
 // void CPhotoActivity::SetCurrentPhoto()
     SetCurrentPhoto = function ()
@@ -1347,21 +1666,37 @@ module.exports = function(aoElastos, aoActivity){
     }
 
 // void CPhotoActivity::ChangeCurrentPhoto(
+    function ChangeCurrentPhoto(
 //     /* [in] */ Boolean isNext)
+        isNext)
 // {
+    {
 //     if (isNext) {
+        if (isNext) {
 //         Int32 tmp = mTotalSize - 1;
+            var tmp = mTotalSize - 1;
 //         if (mCurrentIndex >= tmp) return;
+            if (mCurrentIndex >= tmp) return;
 //         mCurrentIndex++;
+            mCurrentIndex++;
 //         mCurrentIndex = tmp > mCurrentIndex ? mCurrentIndex : tmp;
+            mCurrentIndex = tmp > mCurrentIndex ? mCurrentIndex : tmp;
 //     }
+        }
 //     else {
+        else {
 //         if (mCurrentIndex <= 0) return;
+            if (mCurrentIndex <= 0) return;
 //         mCurrentIndex--;
+            mCurrentIndex--;
 //         mCurrentIndex = mCurrentIndex > 0 ? mCurrentIndex : 0;
+            mCurrentIndex = mCurrentIndex > 0 ? mCurrentIndex : 0;
 //     }
+        }
 //     SetCurrentPhoto();
+        SetCurrentPhoto();
 // }
+    }
 
 // void CPhotoActivity::MyImageLoaded(
     function MyImageLoaded(
@@ -1771,10 +2106,6 @@ module.exports = function(aoElastos, aoActivity){
         isCancel)
 // {
     {
-
-//TO BE DELETE
-return;
-
 //     Logger::D(TAG, "TriggerLoadingCallback()---isCancel:%d", isCancel);
         elog(TAG + "TriggerLoadingCallback()---isCancel:" + isCancel);
 //     if (isCancel) {
@@ -1807,18 +2138,30 @@ return;
     }
 
 // ECode CPhotoActivity::OnNewIntent(
+    _apt.OnNewIntent = function(context,
 //     /* [in] */ IIntent *intent)
+        intent)
 // {
+    {
 //     mPhotoEntryList.Clear();
+        mPhotoEntryList = [];
 //     if (!LoadPhotoEntryList(intent))
+        if (!LoadPhotoEntryList(intent)) {
 //         return NOERROR;
+            return;
+        }
 
 //     mUpButton->SetVisibility(mViewSingleItem ? IView::INVISIBLE : IView::VISIBLE);
+        mUpButton.SetVisibility(mViewSingleItem ? IView__INVISIBLE : IView__VISIBLE);
 //     mPhotoSlideshow->SetVisibility(mViewSingleItem ? IView::INVISIBLE : IView::VISIBLE);
+        mPhotoSlideshow,SetVisibility(mViewSingleItem ? IView__INVISIBLE : IView__VISIBLE);
 
 //     SetCurrentPhoto();
+        SetCurrentPhoto();
 //     return NOERROR;
+        return;
 // }
+    }
 
 // Boolean CPhotoActivity::LoadPhotoEntryList(
     function LoadPhotoEntryList(
@@ -1843,7 +2186,7 @@ if (false) {
 //         intent->GetData((IUri**)&uri);
             //uri = intent.GetData();
 }
-            var uri = Droid_New("Elastos.Droid.Net.CStringUri", "file:///data/temp/testdisk/icon_01.jpeg");
+            var uri = Droid_New("Elastos.Droid.Net.CStringUri", "file:///data/temp/testdisk/icon_03.jpg");
 //         if (uri != NULL) {
             if (uri) {
 //             String scheme;
