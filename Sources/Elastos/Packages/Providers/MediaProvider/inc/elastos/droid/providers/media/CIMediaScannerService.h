@@ -3,14 +3,14 @@
 
 #include "_Elastos_Droid_Providers_Media_CIMediaScannerService.h"
 #include "elastos/droid/providers/media/MediaScannerService.h"
-#include "elastos/droid/ext/frameworkext.h"
 
 namespace Elastos {
 namespace Droid {
 namespace Providers {
 namespace Media {
 
-CarClass(CIMediaScannerService), public MediaScannerService::MyMediaScannerService
+CarClass(CIMediaScannerService)
+    , public MediaScannerService::MyMediaScannerService
 {
 public:
     CAR_OBJECT_DECL()

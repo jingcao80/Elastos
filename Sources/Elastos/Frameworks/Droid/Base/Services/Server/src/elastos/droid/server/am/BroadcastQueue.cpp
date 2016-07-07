@@ -741,8 +741,9 @@ ECode BroadcastQueue::ProcessNextBroadcast(
                     String action;
                     r->mIntent->GetAction(&action);
                     if (action != IIntent::ACTION_TIME_TICK) {
-                        Slogger::I(TAG, "Finishing broadcast [%s] %s seq=%d app=%s",
-                            mQueueName.string(), action.string(), seq, TO_CSTR(r->mCallerApp));
+                        Slogger::I(TAG, "Finishing broadcast [%s] %s seq=%d app=%s, Send the final result: %s",
+                            mQueueName.string(), action.string(), seq, TO_CSTR(r->mCallerApp),
+                            TO_CSTR(r->mResultTo));
                     }
                 }
                 AutoPtr<IIntent> newIntent;

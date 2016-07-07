@@ -9,7 +9,8 @@ namespace Droid {
 namespace Providers {
 namespace Media {
 
-CarClass(CMtpService), public MtpService
+CarClass(CMtpService)
+    , public MtpService
 {
 public:
     CAR_OBJECT_DECL()

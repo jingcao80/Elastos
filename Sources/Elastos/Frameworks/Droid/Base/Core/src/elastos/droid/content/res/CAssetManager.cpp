@@ -2053,7 +2053,7 @@ ECode CAssetManager::ApplyStyle(
         dest[STYLE_TYPE] = (Int32)value.dataType;
         dest[STYLE_DATA] = (Int32)value.data;
         dest[STYLE_ASSET_COOKIE] =
-            block != kXmlBlock ? (Int32)res.getTableCookie(block) : -1;
+            block != kXmlBlock ? reinterpret_cast<Int32>(res.getTableCookie(block)) : -1;
         dest[STYLE_RESOURCE_ID] = (Int32)resid;
         dest[STYLE_CHANGING_CONFIGURATIONS] = (Int32)typeSetFlags;
         dest[STYLE_DENSITY] = (Int32)config.density;
@@ -2388,7 +2388,7 @@ ECode CAssetManager::RetrieveAttributes(
         dest[STYLE_TYPE] = (Int32)value.dataType;
         dest[STYLE_DATA] = (Int32)value.data;
         dest[STYLE_ASSET_COOKIE] =
-            block != kXmlBlock ? (Int32)res.getTableCookie(block) : -1;
+            block != kXmlBlock ? reinterpret_cast<Int32>(res.getTableCookie(block)) : -1;
         dest[STYLE_RESOURCE_ID] = (Int32)resid;
         dest[STYLE_CHANGING_CONFIGURATIONS] = (Int32)typeSetFlags;
         dest[STYLE_DENSITY] = (Int32)config.density;
@@ -2503,7 +2503,7 @@ ECode CAssetManager::RetrieveArray(
         // Write the final value back to Java.
         dest[STYLE_TYPE] = (Int32)value.dataType;
         dest[STYLE_DATA] = (Int32)value.data;
-        dest[STYLE_ASSET_COOKIE] = (Int32)res.getTableCookie(block);
+        dest[STYLE_ASSET_COOKIE] = reinterpret_cast<Int32>(res.getTableCookie(block));
         dest[STYLE_RESOURCE_ID] = (Int32)resid;
         dest[STYLE_CHANGING_CONFIGURATIONS] = (Int32)typeSetFlags;
         dest[STYLE_DENSITY] = (Int32)config.density;

@@ -10,7 +10,8 @@ namespace Droid {
 namespace Providers {
 namespace Media {
 
-CarClass(CMediaUpgradeReceiver), public MediaUpgradeReceiver
+CarClass(CMediaUpgradeReceiver)
+    , public MediaUpgradeReceiver
 {
 public:
     CAR_OBJECT_DECL()

@@ -22,8 +22,6 @@
 #include <sqlite3.h>
 //#include <sqlite3_android.h>
 
-#include <elastos/core/AutoLock.h>
-using Elastos::Core::AutoLock;
 using Elastos::Droid::Os::Looper;
 using Elastos::Droid::Text::TextUtils;
 using Elastos::Droid::Utility::CArrayMap;
@@ -31,6 +29,7 @@ using Elastos::Droid::Database::DatabaseUtils;
 using Elastos::Droid::Database::CDefaultDatabaseErrorHandler;
 using Elastos::Core::CString;
 using Elastos::Core::StringUtils;
+using Elastos::Core::AutoLock;
 using Elastos::Core::ICloseGuardHelper;
 using Elastos::Core::CCloseGuardHelper;
 using Elastos::IO::CFile;
@@ -1205,7 +1204,8 @@ ECode SQLiteDatabase::ExecuteSql(
     Int32 type = DatabaseUtils::GetSqlStatementType(sql);
     if (type == DatabaseUtils_STATEMENT_ATTACH) {
         Boolean disableWal = FALSE;
-        {    AutoLock syncLock(mLock);
+        {
+            AutoLock syncLock(mLock);
             if (!mHasAttachedDbsLocked) {
                 mHasAttachedDbsLocked = TRUE;
                 disableWal = TRUE;

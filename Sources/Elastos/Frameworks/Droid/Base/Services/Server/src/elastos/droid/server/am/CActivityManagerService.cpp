@@ -1050,18 +1050,15 @@ ECode CActivityManagerService::BootCompletedReceiver::PerformReceive(
     /* [in] */ Boolean sticky,
     /* [in] */ Int32 sendingUser)
 {
-    {    AutoLock syncLock(mHost);
-        mHost->RequestPssAllProcsLocked(SystemClock::GetUptimeMillis(), TRUE, FALSE);
-    }
+    AutoLock syncLock(mHost);
+    mHost->RequestPssAllProcsLocked(SystemClock::GetUptimeMillis(), TRUE, FALSE);
     return NOERROR;
 }
 
 ECode CActivityManagerService::BootCompletedReceiver::ToString(
     /* [out] */ String* str)
 {
-    VALIDATE_NOT_NULL(str)
-    *str = "CActivityManagerService::BootCompletedReceiver";
-    return NOERROR;
+    return Object::ToString(str);
 }
 
 //==============================================================================
@@ -1100,9 +1097,7 @@ ECode CActivityManagerService::SwitchUserReceiver::PerformReceive(
 ECode CActivityManagerService::SwitchUserReceiver::ToString(
     /* [out] */ String* str)
 {
-    VALIDATE_NOT_NULL(str)
-    *str = "CActivityManagerService::SwitchUserReceiver";
-    return NOERROR;
+    return Object::ToString(str);
 }
 
 //==============================================================================
@@ -1131,9 +1126,7 @@ ECode CActivityManagerService::NeedStartReceiver::PerformReceive(
 ECode CActivityManagerService::NeedStartReceiver::ToString(
     /* [out] */ String* str)
 {
-    VALIDATE_NOT_NULL(str)
-    *str = "CActivityManagerService::NeedStartReceiver";
-    return NOERROR;
+    return Object::ToString(str);
 }
 
 //==============================================================================
@@ -1519,6 +1512,7 @@ ECode CActivityManagerService::PreBootCompletedReceiver::constructor(
     /* [in] */ IRunnable* onFinishCallback)
 {
     mHandler = handler;
+    mOnFinishCallback = onFinishCallback;
     return NOERROR;
 }
 
@@ -1531,6 +1525,9 @@ ECode CActivityManagerService::PreBootCompletedReceiver::PerformReceive(
     /* [in] */ Boolean sticky,
     /* [in] */ Int32 sendingUser)
 {
+    // The raw IIntentReceiver interface is called
+    // with the AM lock held, so redispatch to
+    // execute our code without the lock.
     Boolean res;
     return mHandler->Post(mOnFinishCallback, &res);
 }
@@ -1538,9 +1535,7 @@ ECode CActivityManagerService::PreBootCompletedReceiver::PerformReceive(
 ECode CActivityManagerService::PreBootCompletedReceiver::ToString(
     /* [out] */ String* str)
 {
-    VALIDATE_NOT_NULL(str)
-    *str = "CActivityManagerService::PreBootCompletedReceiver";
-    return NOERROR;
+    return Object::ToString(str);
 }
 
 //==============================================================================
@@ -1611,9 +1606,7 @@ ECode CActivityManagerService::SystemReadyReceiver::PerformReceive(
 ECode CActivityManagerService::SystemReadyReceiver::ToString(
     /* [out] */ String* str)
 {
-    VALIDATE_NOT_NULL(str)
-    *str = "CActivityManagerService::SystemReadyReceiver";
-    return NOERROR;
+    return Object::ToString(str);
 }
 
 //==============================================================================
@@ -2433,9 +2426,7 @@ ECode CActivityManagerService::ShutdownReceiver::PerformReceive(
 ECode CActivityManagerService::ShutdownReceiver::ToString(
     /* [out] */ String* str)
 {
-    VALIDATE_NOT_NULL(str)
-    *str = "CActivityManagerService::ShutdownReceiver";
-    return NOERROR;
+    return Object::ToString(str);
 }
 
 //==============================================================================
@@ -2492,9 +2483,7 @@ ECode CActivityManagerService::StoppingReceiver::PerformReceive(
 ECode CActivityManagerService::StoppingReceiver::ToString(
     /* [out] */ String* str)
 {
-    VALIDATE_NOT_NULL(str)
-    *str = "CActivityManagerService::StoppingReceiver";
-    return NOERROR;
+    return Object::ToString(str);
 }
 
 //==============================================================================
@@ -8635,14 +8624,14 @@ ECode CActivityManagerService::GetIntentSender(
     if (intents != NULL) {
         Int32 length = intents->GetLength();
         if (length < 1) {
-            // throw new IllegalArgumentException("Intents array length must be >= 1");
+            Logger::E(TAG, "Intents array length must be >= 1");
             return E_ILLEGAL_ARGUMENT_EXCEPTION;
         }
         for (Int32 i = 0; i < length; i++) {
             AutoPtr<IIntent> intent = (*intents)[i];
             if (intent != NULL) {
                 if (intent->HasFileDescriptors(&bval), bval) {
-                    // throw new IllegalArgumentException("File descriptors passed in Intent");
+                    Logger::E(TAG, "File descriptors passed in Intent");
                     return E_ILLEGAL_ARGUMENT_EXCEPTION;
                 }
 
@@ -8650,8 +8639,7 @@ ECode CActivityManagerService::GetIntentSender(
                 intent->GetFlags(&flags);
                 if (type == IActivityManager::INTENT_SENDER_BROADCAST &&
                     (flags & IIntent::FLAG_RECEIVER_BOOT_UPGRADE) != 0) {
-                    // throw new IllegalArgumentException(
-                    //     "Can't use FLAG_RECEIVER_BOOT_UPGRADE here");
+                    Logger::E(TAG, "Can't use FLAG_RECEIVER_BOOT_UPGRADE here");
                     return E_ILLEGAL_ARGUMENT_EXCEPTION;
                 }
 
@@ -8662,15 +8650,14 @@ ECode CActivityManagerService::GetIntentSender(
         }
 
         if (resolvedTypes != NULL && resolvedTypes->GetLength() != length) {
-            // throw new IllegalArgumentException(
-            //     "Intent array length does not match resolvedTypes length");
+            Logger::E(TAG, "Intent array length does not match resolvedTypes length");
             return E_ILLEGAL_ARGUMENT_EXCEPTION;
         }
     }
 
     if (options != NULL) {
         if (options->HasFileDescriptors(&bval), bval) {
-            // throw new IllegalArgumentException("File descriptors passed in options");
+            Logger::E(TAG, "File descriptors passed in options");
             return E_ILLEGAL_ARGUMENT_EXCEPTION;
         }
     }
@@ -8707,17 +8694,12 @@ ECode CActivityManagerService::GetIntentSender(
                 msg += " is not allowed to send as package ";
                 msg += packageName;
                 Slogger::W(TAG, msg.ToString());
-                // throw new SecurityException(msg);
                 return E_SECURITY_EXCEPTION;
             }
         }
 
         return GetIntentSenderLocked(type, packageName, callingUid, userId,
                 token, resultWho, requestCode, intents, resolvedTypes, flags, options, intentSender);
-
-        // } catch (RemoteException e) {
-        //     throw new SecurityException(e);
-        // }
     }
 }
 
@@ -14560,7 +14542,8 @@ Boolean CActivityManagerService::DeliverPreBootCompleted(
                     CActivityManagerPreBootCompletedReceiver::New(
                         mHandler.Get(), onFinishCallback, (IIntentReceiver**)&finisher);
                 }
-                Slogger::I(TAG, "Sending system update to %s for user %d", TO_CSTR(comp), (*users)[j]);
+                Slogger::I(TAG, "Sending system update to %s for user %d, finisher:%s",
+                    TO_CSTR(comp), (*users)[j], TO_CSTR(finisher));
                 Int32 res;
                 BroadcastIntentLocked(NULL, String(NULL), intent, String(NULL), finisher,
                     0, String(NULL), NULL, String(NULL), IAppOpsManager::OP_NONE,

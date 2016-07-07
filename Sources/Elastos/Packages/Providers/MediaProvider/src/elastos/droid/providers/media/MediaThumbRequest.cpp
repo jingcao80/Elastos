@@ -10,7 +10,7 @@
 #include <Elastos.CoreLibrary.Utility.h>
 #include <elastos/droid/os/Binder.h>
 #include <elastos/core/StringUtils.h>
-#include <elastos/utility/logging/Slogger.h>
+#include <elastos/utility/logging/Logger.h>
 
 using Elastos::Droid::Content::CContentUris;
 using Elastos::Droid::Content::CContentValues;
@@ -37,7 +37,7 @@ using Elastos::Droid::Provider::IMediaStoreImagesImageColumns;
 using Elastos::Utility::CRandom;
 using Elastos::Utility::IRandom;
 using Elastos::Utility::IList;
-using Elastos::Utility::Logging::Slogger;
+using Elastos::Utility::Logging::Logger;
 using Elastos::IO::ICloseable;
 using Elastos::IO::IOutputStream;
 using Elastos::IO::CByteArrayOutputStream;
@@ -54,8 +54,9 @@ namespace Providers {
 namespace Media {
 
 //================================================================================
-//                      MediaThumbRequest::MediaThumbRequestComparator
+// MediaThumbRequest::MediaThumbRequestComparator
 //================================================================================
+CAR_INTERFACE_IMPL(MediaThumbRequest::MediaThumbRequestComparator, Object, IComparator);
 
 MediaThumbRequest::MediaThumbRequestComparator::MediaThumbRequestComparator()
 {
@@ -64,14 +65,12 @@ MediaThumbRequest::MediaThumbRequestComparator::MediaThumbRequestComparator()
 MediaThumbRequest::MediaThumbRequestComparator::~MediaThumbRequestComparator()
 {}
 
-CAR_INTERFACE_IMPL(MediaThumbRequest::MediaThumbRequestComparator, Object, IComparator);
-
 ECode MediaThumbRequest::MediaThumbRequestComparator::Compare(
     /* [in] */ IInterface* _r1,
     /* [in] */ IInterface* _r2,
     /* [out] */ Int32* result)
 {
-    VALIDATE_NOT_NULL(result);
+    VALIDATE_NOT_NULL(result)
     AutoPtr<IMediaThumbRequest> r1 = IMediaThumbRequest::Probe(_r1);
     AutoPtr<IMediaThumbRequest> r2 = IMediaThumbRequest::Probe(_r2);
     Int32 p1, p2;
@@ -92,29 +91,34 @@ ECode MediaThumbRequest::MediaThumbRequestComparator::Compare(
     return NOERROR;
 }
 
-const String MediaThumbRequest::TAG(String("MediaThumbRequest"));
+//================================================================================
+// MediaThumbRequest
+//================================================================================
+const String MediaThumbRequest::TAG("MediaThumbRequest");
 const Int32 MediaThumbRequest::PRIORITY_LOW = 20;
 const Int32 MediaThumbRequest::PRIORITY_NORMAL = 10;
 const Int32 MediaThumbRequest::PRIORITY_HIGH = 5;
 const Int32 MediaThumbRequest::PRIORITY_CRITICAL = 0;
 
-static AutoPtr<ArrayOf<String> > initTHUMB_PROJECTION()
+static AutoPtr<ArrayOf<String> > InitTHUMB_PROJECTION()
 {
     AutoPtr<ArrayOf<String> > arr = ArrayOf<String>::Alloc(1);
     (*arr)[0] = IBaseColumns::ID;
     return arr;
 }
 
-AutoPtr<ArrayOf<String> > MediaThumbRequest::THUMB_PROJECTION = initTHUMB_PROJECTION();
+AutoPtr<ArrayOf<String> > MediaThumbRequest::THUMB_PROJECTION = InitTHUMB_PROJECTION();
 
-static AutoPtr<IRandom> initRandom()
+static AutoPtr<IRandom> InitRandom()
 {
     AutoPtr<IRandom> r;
     CRandom::New((IRandom**)&r);
     return r;
 }
 
-AutoPtr<IRandom> MediaThumbRequest::sRandom = initRandom();
+AutoPtr<IRandom> MediaThumbRequest::sRandom = InitRandom();
+
+CAR_INTERFACE_IMPL(MediaThumbRequest, Object, IMediaThumbRequest)
 
 MediaThumbRequest::MediaThumbRequest()
     : mRequestTime(0)
@@ -129,8 +133,6 @@ MediaThumbRequest::MediaThumbRequest()
 
 MediaThumbRequest::~MediaThumbRequest()
 {}
-
-CAR_INTERFACE_IMPL(MediaThumbRequest, Object, IMediaThumbRequest)
 
 ECode MediaThumbRequest::constructor(
     /* [in] */ IContentResolver* cr,
@@ -186,7 +188,7 @@ ECode MediaThumbRequest::UpdateDatabase(
     /* [in] */ IBitmap* thumbnail,
     /* [out] */ IUri** result)
 {
-    VALIDATE_NOT_NULL(result);
+    VALIDATE_NOT_NULL(result)
     AutoPtr<ICursor> c;
     mCr->Query(mThumbUri.Get(), THUMB_PROJECTION.Get(),
             mOrigColumnName+ " = " + mOrigId, NULL, String(NULL), (ICursor**)&c);
@@ -297,7 +299,7 @@ ECode MediaThumbRequest::Execute()
                     IMediaStoreImagesThumbnails::MINI_KIND, (IBitmap**)&bitmap);
         }
         if (bitmap == NULL) {
-            Slogger::W(TAG, "Can't create mini thumbnail for %s", mPath.string());
+            Logger::W(TAG, "Can't create mini thumbnail for %s", mPath.string());
             return NOERROR;
         }
 
@@ -327,7 +329,7 @@ ECode MediaThumbRequest::Execute()
             ec = miniOutStream->ToByteArray((ArrayOf<Byte>**)&data);
         // } catch (java.io.IOException ex) {
             if (ec == (ECode)E_IO_EXCEPTION) {
-                Slogger::E(TAG, "got exception ex %0x", ec);
+                Logger::E(TAG, "got exception ex %0x", ec);
             }
         // }
 
@@ -353,12 +355,12 @@ ECode MediaThumbRequest::Execute()
                 mMagic = magic;
                 if (ec == (ECode)E_ILLEGAL_STATE_EXCEPTION) {
             // } catch (java.lang.IllegalStateException ex) {
-                Slogger::E(TAG, "got exception while updating database %0x", ec);
+                Logger::E(TAG, "got exception while updating database %0x", ec);
             // }
             }
         }
     } else {
-        Slogger::W(TAG, "can't create bitmap for thumbnail.");
+        Logger::W(TAG, "can't create bitmap for thumbnail.");
     }
     return miniThumbFile->Deactivate();
 }
@@ -366,7 +368,7 @@ ECode MediaThumbRequest::Execute()
 ECode MediaThumbRequest::GetPriority(
     /* [out] */ Int32* result)
 {
-    VALIDATE_NOT_NULL(result);
+    VALIDATE_NOT_NULL(result)
     *result = mPriority;
     return NOERROR;
 }
@@ -374,7 +376,7 @@ ECode MediaThumbRequest::GetPriority(
 ECode MediaThumbRequest::GetRequestTime(
     /* [out] */ Int32* time)
 {
-    VALIDATE_NOT_NULL(time);
+    VALIDATE_NOT_NULL(time)
     AutoPtr<ISystem> isystem;
     CSystem::AcquireSingleton((ISystem**)&isystem);
     Int64 t;
@@ -386,7 +388,7 @@ ECode MediaThumbRequest::GetRequestTime(
 ECode MediaThumbRequest::GetCallingPid(
     /* [out] */ Int32* result)
 {
-    VALIDATE_NOT_NULL(time);
+    VALIDATE_NOT_NULL(result)
     *result = Binder::GetCallingPid();
     return NOERROR;
 }
@@ -394,7 +396,7 @@ ECode MediaThumbRequest::GetCallingPid(
 ECode MediaThumbRequest::GetComparator(
     /* [out] */ IComparator** result)
 {
-    VALIDATE_NOT_NULL(result);
+    VALIDATE_NOT_NULL(result)
     AutoPtr<MediaThumbRequestComparator> trc = new MediaThumbRequestComparator();
     *result = IComparator::Probe(trc);
     REFCOUNT_ADD(*result);

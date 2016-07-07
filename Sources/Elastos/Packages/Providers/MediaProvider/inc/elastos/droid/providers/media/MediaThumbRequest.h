@@ -29,11 +29,11 @@ private:
         , public IComparator
     {
     public:
+        CAR_INTERFACE_DECL()
+
         MediaThumbRequestComparator();
 
         ~MediaThumbRequestComparator();
-
-        CAR_INTERFACE_DECL()
 
         CARAPI Compare(
             /* [in] */ IInterface* _r1,
@@ -42,11 +42,11 @@ private:
     };
 
 public:
+    CAR_INTERFACE_DECL();
+
     MediaThumbRequest();
 
     virtual ~MediaThumbRequest();
-
-    CAR_INTERFACE_DECL();
 
     CARAPI constructor(
         /* [in] */ IContentResolver* cr,

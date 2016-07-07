@@ -169,10 +169,10 @@ ECode GrantCredentialsPermissionActivity::OnCreate(
     //     return;
     // }
 
-    AutoPtr<ITextView> authTokenTypeView;
-    ASSERT_SUCCEEDED(FindViewById(R::id::authtoken_type,
-            (IView**)(ITextView**)&authTokenTypeView));
-    IView::Probe(authTokenTypeView)->SetVisibility(IView::GONE);
+    AutoPtr<IView> view;
+    ASSERT_SUCCEEDED(FindViewById(R::id::authtoken_type, (IView**)&view));
+    AutoPtr<ITextView> authTokenTypeView = ITextView::Probe(view);
+    view->SetVisibility(IView::GONE);
 
     AutoPtr<IAccountManagerCallback> callback
             = (IAccountManagerCallback*)new OnCreateAccountManagerCallback(authTokenTypeView, this);
@@ -188,17 +188,16 @@ ECode GrantCredentialsPermissionActivity::OnCreate(
     accountManager->GetAuthTokenLabel(type, mAuthTokenType, callback,
             NULL, (IAccountManagerFuture**)&future);
 
-    AutoPtr<IButton> allowB;
-    AutoPtr<IButton> denyB;
-    ASSERT_SUCCEEDED(FindViewById(R::id::allow_button, (IView**)(IButton**)&allowB));
-    IView::Probe(allowB)->SetOnClickListener(this);
-    ASSERT_SUCCEEDED(FindViewById(R::id::deny_button, (IView**)(IButton**)&denyB));
-    IView::Probe(denyB)->SetOnClickListener(this);
+    view = NULL;
+    ASSERT_SUCCEEDED(FindViewById(R::id::allow_button, (IView**)&view));
+    view->SetOnClickListener(this);
+    view = NULL;
+    ASSERT_SUCCEEDED(FindViewById(R::id::deny_button, (IView**)&view));
+    view->SetOnClickListener(this);
 
-    AutoPtr<ILinearLayout> packagesListView;
-    ASSERT_SUCCEEDED(FindViewById(R::id::packages_list,
-            (IView**)(ILinearLayout**)&packagesListView));
-
+    view = NULL;
+    ASSERT_SUCCEEDED(FindViewById(R::id::packages_list, (IView**)&view));
+    AutoPtr<IViewGroup> packagesListView = IViewGroup::Probe(view);
     for (Int32 i = 0; i < packages->GetLength(); ++i) {
         String pkg = (*packages)[i];
         String packageLabel;
@@ -222,17 +221,18 @@ ECode GrantCredentialsPermissionActivity::OnCreate(
         IViewGroup::Probe(packagesListView)->AddView(NewPackageView(packageLabel));
     }
 
-    AutoPtr<ITextView> nameT;
-    AutoPtr<ITextView> typeT;
-    ASSERT_SUCCEEDED(FindViewById(R::id::account_name, (IView**)(ITextView**)&nameT));
     String name;
     mAccount->GetName(&name);
     CString::New(name, (ICharSequence**)&csq);
-    nameT->SetText(csq);
-    ASSERT_SUCCEEDED(FindViewById(R::id::account_type, (IView**)(ITextView**)&typeT));
+    view = NULL;
+    ASSERT_SUCCEEDED(FindViewById(R::id::account_name, (IView**)&view));
+    ITextView::Probe(view)->SetText(csq);
+
+    view = NULL;
+    ASSERT_SUCCEEDED(FindViewById(R::id::account_type, (IView**)&view));
     csq = NULL;
     CString::New(accountTypeLabel, (ICharSequence**)&csq);
-    typeT->SetText(csq);
+    ITextView::Probe(view)->SetText(csq);
 
     return NOERROR;
 }
@@ -288,15 +288,12 @@ ECode GrantCredentialsPermissionActivity::GetAccountLabel(
 AutoPtr<IView> GrantCredentialsPermissionActivity::NewPackageView(
     /* [in] */ const String& packageLabel)
 {
-    AutoPtr<IView> view;
-    ASSERT_SUCCEEDED(mInflater->Inflate(R::layout::permissions_package_list_item,
-            NULL, (IView**)&view));
-    AutoPtr<ITextView> text;
-    ASSERT_SUCCEEDED(view->FindViewById(R::id::package_label,
-            (IView**)(ITextView**)&text));
+    AutoPtr<IView> view, textView;
+    ASSERT_SUCCEEDED(mInflater->Inflate(R::layout::permissions_package_list_item, NULL, (IView**)&view));
+    ASSERT_SUCCEEDED(view->FindViewById(R::id::package_label, (IView**)&textView));
     AutoPtr<ICharSequence> csq;
     CString::New(packageLabel, (ICharSequence**)&csq);
-    text->SetText(csq);
+    ITextView::Probe(textView)->SetText(csq);
     return view;
 }
 

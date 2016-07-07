@@ -20,10 +20,6 @@ class MtpReceiver
     , public IMtpReceiver
 {
 public:
-    MtpReceiver();
-
-    virtual ~MtpReceiver();
-
     CAR_INTERFACE_DECL()
 
     CARAPI OnReceive(

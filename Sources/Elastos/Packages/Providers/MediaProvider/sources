@@ -14,15 +14,14 @@ SOURCES += Elastos.Droid.Providers.Media.car
 SOURCES += Elastos.CoreLibrary.cpp
 SOURCES += Elastos.Droid.Core.cpp
 
-
 SOURCES += R.cpp
 SOURCES += MediaDocumentsProvider.cpp
 SOURCES += MediaProvider.cpp
 SOURCES += MediaScannerReceiver.cpp
-#SOURCES += MediaScannerService.cpp
+SOURCES += MediaScannerService.cpp
 SOURCES += MediaUpgradeReceiver.cpp
 SOURCES += MtpReceiver.cpp
-#SOURCES += MtpService.cpp
+SOURCES += MtpService.cpp
 SOURCES += RingtonePickerActivity.cpp
 SOURCES += MediaThumbRequest.cpp
 SOURCES += CMediaThumbRequestHelper.cpp
@@ -36,6 +35,6 @@ LIBRARIES += $(XDK_TARGETS)/Elastos.Droid.Core.eco
 LIBRARIES += -lm -lcutils -licuuc -llog -lutils -landroidfw
 
 APPPACK = 1
-APP_PACKAGE_NAME = elastos.droid.providers.media
+APP_PACKAGE_NAME = Elastos.Droid.Providers.Media
 RES_NAMESPACE = Elastos.Droid.Providers.Media
 DIRRESOURCES += $(MAKEDIR)/res;

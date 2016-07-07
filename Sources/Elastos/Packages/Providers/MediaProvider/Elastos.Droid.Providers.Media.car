@@ -56,6 +56,8 @@ module
     namespace Media {
 
     class CMediaDocumentsProvider {
+        constructor();
+
         interface IDocumentsProvider;
         interface IContentProvider;
         interface IComponentCallbacks;
@@ -64,6 +66,8 @@ module
     }
 
     class CMediaProvider {
+        constructor();
+
         interface IContentProvider;
         interface IComponentCallbacks;
         interface IComponentCallbacks2;
@@ -71,29 +75,64 @@ module
     }
 
     class CMediaScannerReceiver {
+        constructor();
+
         interface IMediaScannerReceiver;
         interface IBroadcastReceiver;
     }
 
-//    class CMediaScannerService {
-//        interface IMediaScannerService;
-//        interface IRunnable;
-//    }
+    class CIMediaScannerService {
+        constructor(
+            [in] IMediaScannerService* owner);
+
+        interface IIMediaScannerService;
+        interface IBinder;
+    }
+
+    class CMediaScannerService {
+        constructor();
+
+        interface IMediaScannerService;
+        interface IRunnable;
+        interface IService;
+        interface IContext;
+        interface IContextWrapper;
+        interface IComponentCallbacks;
+        interface IComponentCallbacks2;
+    }
 
     class CMediaUpgradeReceiver {
+        constructor();
+
         interface IMediaUpgradeReceiver;
         interface IBroadcastReceiver;
     }
 
     class CMtpReceiver {
+        constructor();
+        
         interface IBroadcastReceiver;
         interface IMtpReceiver;
     }
 
-//    class CMtpService {
-//        interface IMtpService;
-//        interface IService;
-//    }
+    class CIMtpService {
+        constructor(
+            [in] IMtpService* owner);
+
+        interface IIMtpService;
+        interface IBinder;
+    }
+
+    class CMtpService {
+        constructor();
+
+        interface IMtpService;
+        interface IService;
+        interface IContext;
+        interface IContextWrapper;
+        interface IComponentCallbacks;
+        interface IComponentCallbacks2;
+    }
 
     class CRingtonePickerActivity {
         constructor();
@@ -118,9 +157,7 @@ module
         interface IAlertControllerAlertParamsOnPrepareListViewListener;
     }
 
-
-    class CMediaThumbRequest
-    {
+    class CMediaThumbRequest {
         constructor(
             [in] IContentResolver* cr,
             [in] String path,
@@ -131,26 +168,7 @@ module
         interface IMediaThumbRequest;
     }
 
-//    class CIMtpService
-//    {
-//        constructor(
-//            [in] IMtpService* owner);
-
-//        interface IIMtpService;
-//        interface IBinder;
-//    }
-
-//    class CIMediaScannerService
-//    {
-//        constructor(
-//            [in] IMediaScannerService* owner);
-
-//        interface IIMediaScannerService;
-//        interface IBinder;
-//    }
-
-    class CMediaThumbRequestHelper
-    {
+    singleton class CMediaThumbRequestHelper {
         interface IMediaThumbRequestHelper;
     }
 
