@@ -656,7 +656,7 @@ void OverlappingPaneLayout::SetAllChildrenVisible()
 Boolean OverlappingPaneLayout::ViewIsOpaque(
     /* [in] */ IView* v)
 {
-    assert(0 && "TODO");
+    // TODO:
     // if (ViewCompat.isOpaque(v)) return TRUE;
 
     AutoPtr<IDrawable> bg;

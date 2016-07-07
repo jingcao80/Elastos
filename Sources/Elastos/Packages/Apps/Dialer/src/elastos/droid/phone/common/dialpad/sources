@@ -8,4 +8,6 @@ INCLUDES += ../../../../../../
 
 SOURCES = DialpadView.cpp
 SOURCES += DialpadKeyButton.cpp
+SOURCES += DigitsEditText.cpp
+SOURCES += DialpadTextView.cpp
 SOURCES += dialpad.cpp

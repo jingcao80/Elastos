@@ -69,6 +69,7 @@ using Elastos::Droid::Contacts::Common::Widget::FloatingActionButtonController;
 using Elastos::Droid::DialerBind::Analytics::AnalyticsFragment;
 using Elastos::Droid::Phone::Common::HapticFeedback;
 using Elastos::Droid::Phone::Common::Dialpad::CDialpadView;
+using Elastos::Droid::Phone::Common::Dialpad::IDialpadKeyButtonOnPressedListener;
 
 namespace Elastos {
 namespace Droid {
@@ -87,8 +88,7 @@ class DialpadFragment
     , public IAdapterViewOnItemClickListener
     , public ITextWatcher
     , public IPopupMenuOnMenuItemClickListener
-    // TODO:
-    /* , public IDialpadKeyButtonOnPressedListener */
+    , public IDialpadKeyButtonOnPressedListener
 {
 public:
     /**

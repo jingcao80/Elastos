@@ -3,6 +3,7 @@
 #include "Elastos.Droid.Content.h"
 #include "elastos/droid/contacts/common/widget/FloatingActionButtonController.h"
 #include "elastos/droid/contacts/common/util/ViewUtil.h"
+#include "elastos/droid/phone/common/animation/AnimUtils.h"
 #include "R.h"
 #include <elastos/droid/view/animation/AnimationUtils.h>
 #include <elastos/droid/R.h>
@@ -14,6 +15,7 @@ using Elastos::Droid::View::IViewGroupLayoutParams;
 using Elastos::Droid::View::IViewPropertyAnimator;
 using Elastos::Droid::View::Animation::AnimationUtils;
 using Elastos::Droid::Contacts::Common::Util::ViewUtil;
+using Elastos::Droid::Phone::Common::Animation::AnimUtils;
 
 namespace Elastos {
 namespace Droid {
@@ -113,8 +115,7 @@ ECode FloatingActionButtonController::Resize(
     /* [in] */ Boolean animate)
 {
     if (animate) {
-        assert(0 && "TODO");
-        // AnimUtils::ChangeDimensions(mFloatingActionButtonContainer, dimension, dimension);
+        AnimUtils::ChangeDimensions(mFloatingActionButtonContainer, dimension, dimension);
     }
     else {
         AutoPtr<IViewGroupLayoutParams> params;
@@ -131,20 +132,18 @@ ECode FloatingActionButtonController::ScaleIn(
     /* [in] */ Int32 delayMs)
 {
     SetVisible(TRUE);
-    assert(0 && "TODO");
-    // AnimUtils::ScaleIn(mFloatingActionButtonContainer, FAB_SCALE_IN_DURATION, delayMs);
-    // AnimUtils::FadeIn(mFloatingActionButton, FAB_SCALE_IN_DURATION,
-    //         delayMs + FAB_SCALE_IN_FADE_IN_DELAY, NULL);
+    AnimUtils::ScaleIn(mFloatingActionButtonContainer, FAB_SCALE_IN_DURATION, delayMs);
+    AnimUtils::FadeIn(mFloatingActionButton, FAB_SCALE_IN_DURATION,
+            delayMs + FAB_SCALE_IN_FADE_IN_DELAY, NULL);
     return NOERROR;
 }
 
 ECode FloatingActionButtonController::ScaleOut()
 {
-    assert(0 && "TODO");
-    // AnimUtils::ScaleOut(mFloatingActionButtonContainer, mAnimationDuration);
-    // // Fade out the icon faster than the scale out animation, so that the icon scaling is less
-    // // obvious. We don't want it to scale, but the resizing the container is not as performant.
-    // AnimUtils::FadeOut(mFloatingActionButton, FAB_ICON_FADE_OUT_DURATION, NULL);
+    AnimUtils::ScaleOut(mFloatingActionButtonContainer, mAnimationDuration);
+    // Fade out the icon faster than the scale out animation, so that the icon scaling is less
+    // obvious. We don't want it to scale, but the resizing the container is not as performant.
+    AnimUtils::FadeOut(mFloatingActionButton, FAB_ICON_FADE_OUT_DURATION, NULL);
     return NOERROR;
 }
 

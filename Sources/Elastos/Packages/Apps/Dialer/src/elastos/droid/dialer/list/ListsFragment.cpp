@@ -342,7 +342,7 @@ ECode ListsFragment::OnResume()
     prefs->GetInt64(KEY_LAST_DISMISSED_CALL_SHORTCUT_DATE, 0, &mLastCallShortcutDate);
     activity->GetActionBar((IActionBar**)&mActionBar);
     FetchCalls();
-    assert(0 && "TODO");
+    // TODO:
     // mCallLogAdapter->SetLoading(TRUE);
     return NOERROR;
 }
@@ -455,10 +455,10 @@ ECode ListsFragment::OnCallsFetched(
 
 ECode ListsFragment::FetchCalls()
 {
-    assert(0 && "TODO");
-    return NOERROR;
+    // TODO:
     // return mCallLogQueryHandler->FetchCalls(
     //         ICallLogQueryHandler::CALL_TYPE_ALL, mLastCallShortcutDate);
+    return NOERROR;
 }
 
 ECode ListsFragment::DismissShortcut(
