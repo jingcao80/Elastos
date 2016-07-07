@@ -374,7 +374,7 @@ module
     }
 
     [local]
-    class CRecycleListView {
+    class CAlertControllerRecycleListView {
         constructor(
             [in] IContext* ctx);
 
@@ -393,7 +393,7 @@ module
             [in] Int32 defStyleAttr,
             [in] Int32 defStyleRes);
 
-        interface IRecycleListView;
+        interface IAlertControllerRecycleListView;
         interface IListView;
         interface IAbsListView;
         interface IAdapterView;

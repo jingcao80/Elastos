@@ -926,7 +926,7 @@ void CAlertControllerAlertParams::CreateListView(
 
     AutoPtr<IView> tempView;
     mInflater->Inflate(dialog->mListLayout, NULL, (IView**)&tempView);
-    AutoPtr<IListView> listView = IListView::Probe(tempView.Get());//IRecycleListView
+    IListView* listView = IListView::Probe(tempView);//IAlertControllerRecycleListView
     assert(listView != NULL);
 
     AutoPtr<IListAdapter> adapter;
@@ -958,8 +958,8 @@ void CAlertControllerAlertParams::CreateListView(
         }
         else {
             AutoPtr<ArrayOf<String> > sParams = ArrayOf<String>::Alloc(1);
-            AutoPtr<ArrayOf<Int32> > iParams = ArrayOf<Int32>::Alloc(1);
             (*sParams)[0] = mLabelColumn;
+            AutoPtr<ArrayOf<Int32> > iParams = ArrayOf<Int32>::Alloc(1);
             (*iParams)[0] = R::id::text1;
             CSimpleCursorAdapter::New(mContext, layout, mCursor, sParams, iParams, (IListAdapter**)&adapter);
         }
@@ -998,7 +998,7 @@ void CAlertControllerAlertParams::CreateListView(
         IAbsListView::Probe(listView)->SetChoiceMode(IAbsListView::CHOICE_MODE_MULTIPLE);
     }
 
-    IRecycleListView::Probe(listView)->SetRecycleOnMeasure(mRecycleOnMeasure);
+    IAlertControllerRecycleListView::Probe(listView)->SetRecycleOnMeasure(mRecycleOnMeasure);
     dialog->mListView = listView;
 }
 

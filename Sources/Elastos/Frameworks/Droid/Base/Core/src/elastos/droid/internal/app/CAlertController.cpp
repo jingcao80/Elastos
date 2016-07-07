@@ -171,8 +171,7 @@ ECode CAlertController::OnApplyWindowInsetsListener::OnApplyWindowInsets(
 //                  CAlertController::RecycleListView
 //==============================================================================
 
-// CAR_INTERFACE_IMPL(CAlertController::RecycleListView, ListView, IRecycleListView);
-CAR_INTERFACE_IMPL(CAlertController::RecycleListView, Object, IRecycleListView);
+CAR_INTERFACE_IMPL(CAlertController::RecycleListView, ListView, IAlertControllerRecycleListView);
 
 CAlertController::RecycleListView::RecycleListView()
     : mRecycleOnMeasure(TRUE)
@@ -516,7 +515,7 @@ ECode CAlertController::GetIconAttributeResId(
 }
 
 ECode CAlertController::SetInverseBackgroundForced(
-       /* [in] */ Boolean forceInverseBackground)
+    /* [in] */ Boolean forceInverseBackground)
 {
     mForceInverseBackground = forceInverseBackground;
     return NOERROR;
@@ -530,7 +529,7 @@ ECode CAlertController::SetListView(
 }
 
 ECode CAlertController::GetListView(
-       /* [out] */ IListView** listview)
+    /* [out] */ IListView** listview)
 {
     VALIDATE_NOT_NULL(listview);
     *listview = mListView;

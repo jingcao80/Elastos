@@ -43,7 +43,7 @@ CarClass(CAlertController)
 public:
     class RecycleListView
         : public ListView
-        , public IRecycleListView
+        , public IAlertControllerRecycleListView
     {
     public:
         RecycleListView();

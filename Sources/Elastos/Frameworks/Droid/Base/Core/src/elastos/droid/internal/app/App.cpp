@@ -13,7 +13,7 @@
 #include "elastos/droid/internal/app/CNetInitiatedActivity.h"
 #include "elastos/droid/internal/app/CPlatLogoActivity.h"
 #include "elastos/droid/internal/app/CProcessMap.h"
-#include "elastos/droid/internal/app/CRecycleListView.h"
+#include "elastos/droid/internal/app/CAlertControllerRecycleListView.h"
 #include "elastos/droid/internal/app/CResolverActivity.h"
 #include "elastos/droid/internal/app/CRestrictionsPinActivity.h"
 #include "elastos/droid/internal/app/CToolbarActionBar.h"
@@ -48,7 +48,7 @@ CAR_OBJECT_IMPL(CPlatLogoActivity)
 
 CAR_OBJECT_IMPL(CProcessMap)
 
-CAR_OBJECT_IMPL(CRecycleListView)
+CAR_OBJECT_IMPL(CAlertControllerRecycleListView)
 
 CAR_OBJECT_IMPL(CResolverActivity)
 

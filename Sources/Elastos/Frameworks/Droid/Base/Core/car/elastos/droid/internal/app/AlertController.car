@@ -117,7 +117,7 @@ module
      * interface Elastos.Droid.Widget.IListView
      */
     [local]
-    interface IRecycleListView {
+    interface IAlertControllerRecycleListView {
         SetRecycleOnMeasure(
             [in] Boolean recycleOnMeasure);
     }

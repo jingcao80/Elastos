@@ -603,7 +603,7 @@ ECode RadialTimePickerView::SetCurrentItemShowing(
             ShowMinutes(animate);
             break;
         default:
-            Logger::E(TAG, "ClockView does not support showing item " + item);
+            Logger::E(TAG, "ClockView does not support showing item %d ", item);
     }
     return NOERROR;
 }
@@ -761,8 +761,7 @@ void RadialTimePickerView::InitHoursAndMinutesText()
         (*mMinutesTexts)[i] = StringUtils::Format(String("%02d"), array);
     }
 
-    AutoPtr<ArrayOf<String> > amPmStrings;
-    amPmStrings = TimePickerClockDelegate::GetAmPmStrings(mContext);
+    AutoPtr<ArrayOf<String> > amPmStrings = TimePickerClockDelegate::GetAmPmStrings(mContext);
     (*mAmPmText)[AM] = (*amPmStrings)[0];
     (*mAmPmText)[PM] = (*amPmStrings)[1];
 }
@@ -1130,7 +1129,7 @@ void RadialTimePickerView::DrawDebug(
     AutoPtr<IInteger32> hObj, mObj;
     CInteger32::New(hour, (IInteger32**)&hObj);
     CInteger32::New(minute, (IInteger32**)&mObj);
-    AutoPtr<ArrayOf<IInterface*> > array = ArrayOf<IInterface*>::Alloc(1);
+    AutoPtr<ArrayOf<IInterface*> > array = ArrayOf<IInterface*>::Alloc(2);
     array->Set(0, hObj);
     array->Set(1, mObj);
     String selected = StringUtils::Format(String("%02d:%02d"), array);
@@ -1755,6 +1754,7 @@ ECode RadialTimePickerView::PerformAccessibilityAction(
     /* [in] */ IBundle* arguments,
     /* [out] */ Boolean* result)
 {
+    VALIDATE_NOT_NULL(result)
     Boolean tmp = FALSE;
     if (View::PerformAccessibilityAction(action, arguments, &tmp), tmp) {
         *result = TRUE;
