@@ -394,7 +394,10 @@ ECode DefaultPhoneNotifier::NotifyOemHookRawEventForSubscriber(
     /* [in] */ ArrayOf<Byte>* rawData)
 {
     // try {
-    mRegistry->NotifyOemHookRawEventForSubscriber(subId, rawData);
+    if (mRegistry != NULL)
+        mRegistry->NotifyOemHookRawEventForSubscriber(subId, rawData);
+    else
+        Logger::E("DefaultPhoneNotifier", "TODO mRegistry is NULL");
     // } catch (RemoteException ex) {
     //     // system process is dead
     // }

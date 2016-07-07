@@ -5,12 +5,14 @@
 #include "elastos/droid/internal/telephony/uicc/CIccCardProxy.h"
 #include "elastos/droid/internal/telephony/PhoneBase.h"
 #include "elastos/droid/internal/telephony/IccSmsInterfaceManager.h"
+#include "elastos/droid/telephony/CSubscriptionManager.h"
 #include "elastos/droid/app/ActivityManagerNative.h"
 #include "elastos/droid/content/CIntent.h"
 #include "elastos/droid/os/CSystemProperties.h"
 #include "elastos/droid/os/AsyncResult.h"
 #include "elastos/droid/telephony/CServiceStateHelper.h"
 #include "elastos/droid/R.h"
+#include "elastos/core/StringUtils.h"
 #include <elastos/utility/logging/Logger.h>
 
 using Elastos::Droid::App::ActivityManagerNative;
@@ -23,6 +25,7 @@ using Elastos::Droid::Os::CSystemProperties;
 using Elastos::Droid::Os::AsyncResult;
 using Elastos::Droid::Telephony::IServiceStateHelper;
 using Elastos::Droid::Telephony::CServiceStateHelper;
+using Elastos::Droid::Telephony::CSubscriptionManager;
 using Elastos::Droid::Telephony::ISubscriptionManager;
 using Elastos::Droid::Internal::Telephony::IccPhoneBookInterfaceManagerProxy;
 using Elastos::Droid::Internal::Telephony::Cdma::ICDMAPhone;
@@ -31,8 +34,9 @@ using Elastos::Droid::Internal::Telephony::Cdma::ICDMALTEPhone;
 using Elastos::Droid::Internal::Telephony::Uicc::CIccCardProxy;
 using Elastos::Droid::R;
 using Elastos::Utility::Logging::Logger;
-
+using Elastos::Core::StringUtils;
 using Elastos::Core::IInteger32;
+using Elastos::Core::IArrayOf;
 
 namespace Elastos {
 namespace Droid {
@@ -113,7 +117,7 @@ ECode PhoneProxy::HandleMessage(
     msg->GetObj((IInterface**)&obj);
     Int32 iwhat = 0;
     msg->GetWhat(&iwhat);
-    AutoPtr<AsyncResult> ar = (AsyncResult*)(IObject*)(obj.Get());
+    AutoPtr<AsyncResult> ar = (AsyncResult*)(IObject::Probe(obj));
     switch(iwhat) {
     case EVENT_RADIO_ON: {
         /* Proactively query voice radio technologies */
@@ -137,15 +141,25 @@ ECode PhoneProxy::HandleMessage(
         String what = (iwhat == EVENT_VOICE_RADIO_TECH_CHANGED) ?
                 String("EVENT_VOICE_RADIO_TECH_CHANGED") : String("EVENT_REQUEST_VOICE_RADIO_TECH_DONE");
         if (ar->mException == NULL) {
-            assert(0 && "TODO");
-            // if ((ar->mResult != NULL) && (((Int32[]) ar->mResult).length != 0)) {
-            //     Int32 newVoiceTech = ((Int32[]) ar->mResult)[0];
-            //     Logd("%s: newVoiceTech=%d", what, newVoiceTech);
-            //     PhoneObjectUpdater(newVoiceTech);
-            // }
-            // else {
-            //     Loge("%s: has no tech!", what);
-            // }
+            if (ar->mResult != NULL) {
+                AutoPtr<IArrayOf> array = IArrayOf::Probe(ar->mResult);
+                Int32 size = 0;
+                if (array != NULL)
+                    array->GetLength(&size);
+                if (size > 0) {
+                    AutoPtr<IInterface> ele;
+                    array->Get(0, (IInterface**)&ele);
+                    Int32 value;
+                    IInteger32::Probe(ele)->GetValue(&value);
+                    PhoneObjectUpdater(value);
+                }
+                else {
+                    Logger::E("PhoneProxy", "%s: has no tech!", what.string());
+                }
+            }
+            else {
+                Logger::E("PhoneProxy", "%s: has no tech!", what.string());
+            }
         }
         else {
             String str;
@@ -192,22 +206,22 @@ ECode PhoneProxy::HandleMessage(
 void PhoneProxy::Logd(
     /* [in] */ String msg)
 {
-    assert(0 && "TODO");
     // Rlog::D(LOG_TAG, "[PhoneProxy] %s", msg);
+    Logger::D(LOG_TAG, "TODO [PhoneProxy] %s", msg.string());
 }
 
 void PhoneProxy::Loge(
     /* [in] */ String msg)
 {
-    assert(0 && "TODO");
     // Rlog::E(LOG_TAG, "[PhoneProxy] %s", msg);
+    Logger::E(LOG_TAG, "TODO [PhoneProxy] %s", msg.string());
 }
 
 void PhoneProxy::PhoneObjectUpdater(
     /* [in] */ Int32 newVoiceRadioTech)
 {
     String str("phoneObjectUpdater: newVoiceRadioTech=");
-    str += newVoiceRadioTech;
+    str += StringUtils::ToString(newVoiceRadioTech);
     Logd(str);
 
     if (mActivePhone != NULL) {
@@ -222,7 +236,7 @@ void PhoneProxy::PhoneObjectUpdater(
             res->GetInteger(
                     R::integer::config_volte_replacement_rat, &volteReplacementRat);
             String str("phoneObjectUpdater: volteReplacementRat=");
-            str += volteReplacementRat;
+            str += StringUtils::ToString(volteReplacementRat);
             Logd(str);
             if (volteReplacementRat != IServiceState::RIL_RADIO_TECHNOLOGY_UNKNOWN) {
                 newVoiceRadioTech = volteReplacementRat;
@@ -314,8 +328,7 @@ void PhoneProxy::PhoneObjectUpdater(
     mActivePhone->GetPhoneSubInfo((IPhoneSubInfo**)&subinfo);
     mPhoneSubInfoProxy->SetmPhoneSubInfo(subinfo);
 
-    assert(0 && "TODO");
-    // mCommandsInterface = IPhoneBase::Probe(mActivePhone)->mCi;
+    mCommandsInterface = ((PhoneBase*)IPhoneBase::Probe(mActivePhone))->mCi;
     mIccCardProxy->SetVoiceRadioTech(newVoiceRadioTech);
 
     // Send an Intent to the PhoneApp that we had a radio technology change
@@ -326,8 +339,7 @@ void PhoneProxy::PhoneObjectUpdater(
     mActivePhone->GetPhoneName(&phoneName);
     intent->PutExtra(IPhoneConstants::PHONE_NAME_KEY, phoneName);
     AutoPtr<ISubscriptionManager> sm;
-    assert(0 && "TODO");
-    // CSubscriptionManager::AcquireSingleton((ISubscriptionManager**)&sm);
+    CSubscriptionManager::AcquireSingleton((ISubscriptionManager**)&sm);
     sm->PutPhoneIdAndSubIdExtra(intent, mPhoneId);
     ActivityManagerNative::BroadcastStickyIntent(intent, String(NULL), IUserHandle::USER_ALL);
 }

@@ -84,6 +84,8 @@ using Elastos::Core::CInteger32;
 using Elastos::Core::IBoolean;
 using Elastos::Core::IInteger32;
 using Elastos::Core::StringUtils;
+using Elastos::Core::IArrayOf;
+using Elastos::Core::IByte;
 using Elastos::IO::IFileDescriptor;
 using Elastos::IO::IFlushable;
 using Elastos::IO::IPrintWriter;
@@ -598,9 +600,18 @@ ECode PhoneBase::HandleMessage(
             msg->GetObj((IInterface**)&obj);
             ar = (AsyncResult*)IObject::Probe(obj);
             if (ar->mException == NULL) {
-                AutoPtr<ArrayOf<Byte> > data;
-                assert(0 && "TODO");
-                // data = (Byte[])ar.result;
+                AutoPtr<IArrayOf> byteArray = IArrayOf::Probe(ar->mResult);
+                Int32 size;
+                byteArray->GetLength(&size);
+                AutoPtr<ArrayOf<Byte> > data = ArrayOf<Byte>::Alloc(size);
+                for(Int32 i = 0; i < size; ++i) {
+                    AutoPtr<IInterface> ele;
+                    byteArray->Get(i, (IInterface**)&ele);
+                    Byte b;
+                    IByte::Probe(ele)->GetValue(&b);
+                    data->Set(i, b);
+                }
+
                 Logger::D(TAG, "EVENT_UNSOL_OEM_HOOK_RAW data=%s", IccUtils::BytesToHexString(data).string());
                 Int64 iv = 0;
                 GetSubId(&iv);

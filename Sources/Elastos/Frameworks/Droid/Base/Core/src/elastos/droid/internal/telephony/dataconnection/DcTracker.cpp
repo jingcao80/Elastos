@@ -3292,7 +3292,8 @@ ECode DcTracker::OnRoamingOn()
 ECode DcTracker::OnRadioAvailable()
 {
     if (DBG) Log("onRadioAvailable");
-    assert(0 && "TODO: ISimulatedRadioControl");
+    //assert(0 && "TODO: ISimulatedRadioControl");
+    Logger::E("DcTracker", "TODO DcTracker::OnRadioAvailable ISimulatedRadioControl is not ready!");
     // AutoPtr<ISimulatedRadioControl> control;
     // mPhone->GetSimulatedRadioControl((ISimulatedRadioControl**)&control);
     // if (control != NULL) {
@@ -3303,10 +3304,12 @@ ECode DcTracker::OnRadioAvailable()
     //     Log("onRadioAvailable: We're on the simulator; assuming data is connected");
     // }
     AutoPtr<IInterface> obj;
-    mIccRecords->Get((IInterface**)&obj);
+    if (mIccRecords)
+        mIccRecords->Get((IInterface**)&obj);
     AutoPtr<IIccRecords> r = IIccRecords::Probe(obj);
     Boolean isRecordsLoaded;
-    r->GetRecordsLoaded(&isRecordsLoaded);
+    if (r != NULL)
+        r->GetRecordsLoaded(&isRecordsLoaded);
     if (r != NULL && isRecordsLoaded) {
         NotifyOffApnsOfAvailability(String(NULL));
     }

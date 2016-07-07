@@ -73,6 +73,7 @@ private:
     {
     public:
         CAR_INTERFACE_DECL()
+        TO_STRING_IMPL("CreateConnectionProcessor::Response");
 
         Response(
             /* [in] */ CreateConnectionProcessor* host);

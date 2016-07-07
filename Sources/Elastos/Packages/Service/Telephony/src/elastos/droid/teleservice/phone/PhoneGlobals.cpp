@@ -43,7 +43,7 @@ using Elastos::Droid::Preference::CPreferenceManagerHelper;
 using Elastos::Droid::Internal::Telephony::ICall;
 using Elastos::Droid::Internal::Telephony::ICallState;
 using Elastos::Droid::Internal::Telephony::ICallManagerHelper;
-//using Elastos::Droid::Internal::Telephony::CCallManagerHelper;
+using Elastos::Droid::Internal::Telephony::CCallManagerHelper;
 using Elastos::Droid::Internal::Telephony::ICallState_DIALING;
 using Elastos::Droid::Internal::Telephony::ITelephonyIntents;
 using Elastos::Droid::Internal::Telephony::IPhoneConstants;
@@ -425,8 +425,7 @@ ECode PhoneGlobals::OnCreate()
         Boolean res = FALSE;
         //Logger::D(TAG, "TODO Need CallManager::GetInstance");
         AutoPtr<ICallManagerHelper> cmHelper;
-        assert(0);
-        //CCallManagerHelper::AcquireSingleton((ICallManagerHelper**)&cmHelper);
+        CCallManagerHelper::AcquireSingleton((ICallManagerHelper**)&cmHelper);
         cmHelper->GetInstance((ICallManager**)&mCM);
         mCM->RegisterPhone(mPhone, &res);
 

@@ -913,15 +913,14 @@ ECode ServiceStateTracker::GetAllCellInfo(
 ECode ServiceStateTracker::GetSignalStrength(
     /* [out] */ ISignalStrength** result)
 {
-    assert(0);
-    //VALIDATE_NOT_NULL(result)
+    VALIDATE_NOT_NULL(result)
 
-    //{
-    //    AutoLock syncLock(mCellInfo);
-    //    *result = mSignalStrength;
-    //    REFCOUNT_ADD(*result)
-    //    return NOERROR;
-    //}
+    {
+        AutoLock syncLock(mCellInfo);
+        *result = mSignalStrength;
+        REFCOUNT_ADD(*result)
+        return NOERROR;
+    }
     return NOERROR;
 }
 
@@ -999,7 +998,6 @@ Boolean ServiceStateTracker::IsIwlanFeatureAvailable()
 void ServiceStateTracker::ProcessIwlanToWwanTransition(
     /* [in] */ IServiceState* ss)
 {
-    assert(0);
     // Wifi Connected(iwlan feature on) AND a Valid(non-wlan) RAT present
     // AND attached AND previous RAT was iwlan.
     //
@@ -1009,16 +1007,15 @@ void ServiceStateTracker::ProcessIwlanToWwanTransition(
     ss->GetRilDataRadioTechnology(&rat);
     ss->GetDataRegState(&state);
 
-    assert(0 && "TODO");
-    // if (IsIwlanFeatureAvailable() &&
-    //         (rat != IServiceState::RIL_RADIO_TECHNOLOGY_IWLAN) &&
-    //         (rat != IServiceState::RIL_RADIO_TECHNOLOGY_UNKNOWN) &&
-    //         (state == IServiceState::STATE_IN_SERVICE) &&
-    //         (mIwlanRatAvailable == TRUE)) {
+    if (IsIwlanFeatureAvailable() &&
+            (rat != IServiceState::RIL_RADIO_TECHNOLOGY_IWLAN) &&
+            (rat != IServiceState::RIL_RADIO_TECHNOLOGY_UNKNOWN) &&
+            (state == IServiceState::STATE_IN_SERVICE) &&
+            (mIwlanRatAvailable == TRUE)) {
 
-    //     Log(String("pollStateDone: Wifi connected and moved out of iwlan and wwan is attached."));
-    //     mAttachedRegistrants->NotifyRegistrants();
-    // }
+        Log(String("pollStateDone: Wifi connected and moved out of iwlan and wwan is attached."));
+        mAttachedRegistrants->NotifyRegistrants();
+    }
 }
 
 } // namespace Telephony

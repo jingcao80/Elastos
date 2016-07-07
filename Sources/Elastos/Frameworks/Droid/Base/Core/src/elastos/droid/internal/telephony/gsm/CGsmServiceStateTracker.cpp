@@ -360,14 +360,14 @@ ECode CGsmServiceStateTracker::HandleMessage(
             //     // Polling will continue when radio turns back on
             //     return NOERROR;
             // }
-            ar = (AsyncResult*)(IObject*)obj.Get();
+            ar = (AsyncResult*)(IObject::Probe(obj));
             OnSignalStrengthResult(ar, TRUE);
             QueueNextSignalStrengthPoll();
 
             break;
         }
         case EVENT_GET_LOC_DONE:
-            ar = (AsyncResult*)(IObject*)obj.Get();
+            ar = (AsyncResult*)(IObject::Probe(obj));
 
             if (ar->mException == NULL) {
                 AutoPtr<IArrayOf> iarray = IArrayOf::Probe(ar->mResult);
@@ -407,7 +407,7 @@ ECode CGsmServiceStateTracker::HandleMessage(
         case EVENT_POLL_STATE_GPRS:
         case EVENT_POLL_STATE_OPERATOR:
         case EVENT_POLL_STATE_NETWORK_SELECTION_MODE:
-            ar = (AsyncResult*)(IObject*)obj.Get();
+            ar = (AsyncResult*)(IObject::Probe(obj));
 
             HandlePollStateResult(what, ar);
             break;
@@ -420,7 +420,7 @@ ECode CGsmServiceStateTracker::HandleMessage(
             break;
         }
         case EVENT_NITZ_TIME: {
-            ar = (AsyncResult*)(IObject*)obj.Get();
+            ar = (AsyncResult*)(IObject::Probe(obj));
 
             AutoPtr<IArrayOf> iarray = IArrayOf::Probe(ar->mResult);
             AutoPtr<IInterface> obj;
@@ -439,7 +439,7 @@ ECode CGsmServiceStateTracker::HandleMessage(
             // This is a notification from
             // CommandsInterface.setOnSignalStrengthUpdate
 
-            ar = (AsyncResult*)(IObject*)obj.Get();
+            ar = (AsyncResult*)(IObject::Probe(obj));
 
             // The radio is telling us about signal strength changes
             // we don't have to ask it
@@ -458,7 +458,7 @@ ECode CGsmServiceStateTracker::HandleMessage(
             break;
 
         case EVENT_LOCATION_UPDATES_ENABLED:
-            ar = (AsyncResult*)(IObject*)obj.Get();
+            ar = (AsyncResult*)(IObject::Probe(obj));
 
             if (ar->mException == NULL) {
                 AutoPtr<IMessage> msg;
@@ -468,14 +468,14 @@ ECode CGsmServiceStateTracker::HandleMessage(
             break;
 
         case EVENT_SET_PREFERRED_NETWORK_TYPE:
-            ar = (AsyncResult*)(IObject*)obj.Get();
+            ar = (AsyncResult*)(IObject::Probe(obj));
             // Don't care the result, only use for dereg network (COPS=2)
             ObtainMessage(EVENT_RESET_PREFERRED_NETWORK_TYPE, ar->mUserObj, (IMessage**)&message);
             mCi->SetPreferredNetworkType(mPreferredNetworkType, message);
             break;
 
         case EVENT_RESET_PREFERRED_NETWORK_TYPE:
-            ar = (AsyncResult*)(IObject*)obj.Get();
+            ar = (AsyncResult*)(IObject::Probe(obj));
             if (ar->mUserObj != NULL) {
                 AutoPtr<IMessage> msg = IMessage::Probe(ar->mUserObj);
                 AsyncResult::ForMessage(msg)->mException = ar->mException;
@@ -484,7 +484,7 @@ ECode CGsmServiceStateTracker::HandleMessage(
             break;
 
         case EVENT_GET_PREFERRED_NETWORK_TYPE: {
-            ar = (AsyncResult*)(IObject*)obj.Get();
+            ar = (AsyncResult*)(IObject::Probe(obj));
 
             if (ar->mException == NULL) {
                 AutoPtr<IArrayOf> iarray = IArrayOf::Probe(ar->mResult);
@@ -527,7 +527,7 @@ ECode CGsmServiceStateTracker::HandleMessage(
 
             if (DBG) Log(String("EVENT_RESTRICTED_STATE_CHANGED"));
 
-            ar = (AsyncResult*)(IObject*)obj.Get();
+            ar = (AsyncResult*)(IObject::Probe(obj));
 
             OnRestrictedStateChanged(ar);
             break;

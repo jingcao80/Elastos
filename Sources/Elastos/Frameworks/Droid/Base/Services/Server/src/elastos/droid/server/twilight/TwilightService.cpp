@@ -442,8 +442,8 @@ ECode TwilightService::UpdateLocationReceiver::OnReceive(
     String action;
     intent->GetAction(&action);
     Boolean result;
-    intent->GetBooleanExtra(String("state"), FALSE, &result);
-    if (IIntent::ACTION_AIRPLANE_MODE_CHANGED.Equals(action) && !result) {
+    if (IIntent::ACTION_AIRPLANE_MODE_CHANGED.Equals(action) &&
+            !(intent->GetBooleanExtra(String("state"), FALSE, &result), result)) {
         // Airplane mode is now off!
         mHost->mLocationHandler->RequestLocationUpdate();
         return NOERROR;
