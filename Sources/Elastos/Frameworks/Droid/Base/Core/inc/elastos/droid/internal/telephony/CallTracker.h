@@ -26,33 +26,37 @@ namespace Telephony {
 /**
  * {@hide}
  */
-class CallTracker: public Handler
+class CallTracker
+    : public Handler
+    , public ICallTracker
 {
 public:
+    CAR_INTERFACE_DECL();
+
     CallTracker();
 
     virtual ~CallTracker();
 
     //***** Overridden from Handler
     // @Override
-    virtual CARAPI HandleMessage(
-        /* [in] */ IMessage* msg) = 0;
+    //virtual CARAPI HandleMessage(
+    //    /* [in] */ IMessage* msg) = 0;
 
-    virtual CARAPI RegisterForVoiceCallStarted(
-        /* [in] */ IHandler* h,
-        /* [in] */ Int32 what,
-        /* [in] */ IInterface* obj) = 0;
+    //virtual CARAPI RegisterForVoiceCallStarted(
+    //    /* [in] */ IHandler* h,
+    //    /* [in] */ Int32 what,
+    //    /* [in] */ IInterface* obj) = 0;
 
-    virtual CARAPI UnregisterForVoiceCallStarted(
-        /* [in] */ IHandler* h) = 0;
+    //virtual CARAPI UnregisterForVoiceCallStarted(
+    //    /* [in] */ IHandler* h) = 0;
 
-    virtual CARAPI RegisterForVoiceCallEnded(
-        /* [in] */ IHandler* h,
-        /* [in] */ Int32 what,
-        /* [in] */ IInterface* obj) = 0;
+    //virtual CARAPI RegisterForVoiceCallEnded(
+    //    /* [in] */ IHandler* h,
+    //    /* [in] */ Int32 what,
+    //    /* [in] */ IInterface* obj) = 0;
 
-    virtual CARAPI UnregisterForVoiceCallEnded(
-        /* [in] */ IHandler* h) = 0;
+    //virtual CARAPI UnregisterForVoiceCallEnded(
+    //    /* [in] */ IHandler* h) = 0;
 
     CARAPI Dump(
         /* [in] */ IFileDescriptor* fd,

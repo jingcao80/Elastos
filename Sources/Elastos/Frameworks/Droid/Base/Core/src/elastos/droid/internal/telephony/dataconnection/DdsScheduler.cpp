@@ -591,6 +591,7 @@ CAR_INTERFACE_IMPL(DdsScheduler, StateMachine, IDdsScheduler)
 
 const String DdsScheduler::TAG("DdsScheduler");
 AutoPtr<IDdsScheduler> DdsScheduler::sDdsScheduler;
+Object DdsScheduler::sInboxLock;
 
 ECode DdsScheduler::CreateDdsScheduler(
     /* [out] */ IDdsScheduler** result)
@@ -646,7 +647,6 @@ DdsScheduler::DdsScheduler()
     CArrayList::New((IArrayList**)&arrayList);
     AutoPtr<ICollections> helper;
     CCollections::AcquireSingleton((ICollections**)&helper);
-    AutoPtr<IList> mInbox;
     helper->SynchronizedList(IList::Probe(arrayList), (IList**)&mInbox);
 
     StateMachine::constructor(String("DdsScheduler"));
@@ -667,7 +667,7 @@ ECode DdsScheduler::constructor()
 ECode DdsScheduler::AddRequest(
     /* [in] */ INetworkRequest* req)
 {
-    AutoLock lock(mInbox);
+    AutoLock lock(sInboxLock);
     AutoPtr<NetworkRequestInfo> info = new NetworkRequestInfo(this);
     info->constructor(req);
     mInbox->Add(TO_IINTERFACE(info));
@@ -677,7 +677,7 @@ ECode DdsScheduler::AddRequest(
 ECode DdsScheduler::RemoveRequest(
     /* [in] */ INetworkRequest* req)
 {
-    AutoLock lock(mInbox);
+    AutoLock lock(sInboxLock);
     Int32 size;
     mInbox->GetSize(&size);
     for (Int32 i = 0; i < size; i++) {
@@ -696,7 +696,7 @@ ECode DdsScheduler::RemoveRequest(
 ECode DdsScheduler::MarkAccepted(
     /* [in] */ INetworkRequest* req)
 {
-    AutoLock lock(mInbox);
+    AutoLock lock(sInboxLock);
     Int32 size;
     mInbox->GetSize(&size);
     for (Int32 i = 0; i < size; i++) {
@@ -719,7 +719,7 @@ ECode DdsScheduler::IsAlreadyAccepted(
     VALIDATE_NOT_NULL(result)
 
     {
-        AutoLock lock(mInbox);
+        AutoLock lock(sInboxLock);
         Int32 size;
         mInbox->GetSize(&size);
         for (Int32 i = 0; i < size; i++) {
@@ -743,7 +743,7 @@ ECode DdsScheduler::GetFirstWaitingRequest(
 {
     VALIDATE_NOT_NULL(result)
 
-    AutoLock lock(mInbox);
+    AutoLock lock(sInboxLock);
     Boolean isEmpty;
     mInbox->IsEmpty(&isEmpty);
     if (isEmpty) {
@@ -766,7 +766,7 @@ ECode DdsScheduler::AcceptWaitingRequest(
 
     Boolean anyAccepted = FALSE;
     {
-        AutoLock lock(mInbox);
+        AutoLock lock(sInboxLock);
         Boolean isEmpty;
         mInbox->IsEmpty(&isEmpty);
         if (!isEmpty) {
@@ -970,7 +970,7 @@ ECode DdsScheduler::IsAnyRequestWaiting(
 {
     VALIDATE_NOT_NULL(result)
 
-    AutoLock lock(mInbox);
+    AutoLock lock(sInboxLock);
     Boolean isEmpty;
     mInbox->IsEmpty(&isEmpty);
     *result = !isEmpty;

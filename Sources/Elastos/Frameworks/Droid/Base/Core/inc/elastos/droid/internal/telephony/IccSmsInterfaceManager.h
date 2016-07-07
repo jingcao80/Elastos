@@ -612,6 +612,7 @@ private:
 
     AutoPtr<IUserManager> mUserManager;
     Object mSelfLock;
+    friend class PhoneProxy;
 };
 
 } // namespace Telephony

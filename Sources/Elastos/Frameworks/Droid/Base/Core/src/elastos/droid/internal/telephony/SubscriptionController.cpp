@@ -3,6 +3,8 @@
 #include "Elastos.Droid.Provider.h"
 #include "Elastos.Droid.Telephony.h"
 #include "elastos/droid/internal/telephony/SubscriptionController.h"
+#include "elastos/droid/internal/telephony/CSubscriptionController.h"
+#include "elastos/droid/internal/telephony/CCallManagerHelper.h"
 #include "elastos/droid/internal/telephony/dataconnection/CDdsSchedulerHelper.h"
 #include "elastos/droid/internal/telephony/dataconnection/CDdsSchedulerAc.h"
 #include "elastos/droid/internal/telephony/dataconnection/CDctControllerHelper.h"
@@ -23,6 +25,7 @@
 #include <elastos/core/AutoLock.h>
 #include <elastos/core/StringUtils.h>
 #include <elastos/core/CoreUtils.h>
+#include <elastos/utility/logging/Logger.h>
 
 using Elastos::Droid::Content::ISharedPreferences;
 using Elastos::Droid::Content::IIntent;
@@ -81,6 +84,7 @@ using Elastos::Utility::IMapEntry;
 using Elastos::Utility::ISet;
 using Elastos::Utility::CLinkedList;
 using Elastos::Utility::IListIterator;
+using Elastos::Utility::Logging::Logger;
 
 namespace Elastos {
 namespace Droid {
@@ -106,8 +110,11 @@ void SubscriptionController::ScLocalLog::Log(
         Int32 pid = Process::MyPid();
         Int32 tid = Process::MyTid();
         mNow->SetToNow();
-        assert(0 && "TODO");
-        // mLog->Add(mNow->Format("%m-%d %H:%M:%S") + " pid=" + pid + " tid=" + tid + " " + msg);
+        String str;
+        mNow->Format(String("%m-%d %H:%M:%S"), &str);
+        //TODO mLog->Add(mNow->Format("%m-%d %H:%M:%S") + " pid=" + pid + " tid=" + tid + " " + msg);
+        str += msg;
+        mLog->Add(CoreUtils::Convert(str));
         Int32 size = 0;
         while ((mLog->GetSize(&size), size) > mMaxLines) {
             AutoPtr<IInterface> p;
@@ -147,7 +154,9 @@ void SubscriptionController::ScLocalLog::Dump(
 SubscriptionController::DataConnectionHandler::DataConnectionHandler(
     /* [in] */ SubscriptionController* host)
     : mHost(host)
-{}
+{
+    Handler::constructor();
+}
 
 ECode SubscriptionController::DataConnectionHandler::HandleMessage(
     /* [in] */ IMessage* msg)
@@ -236,6 +245,7 @@ const Int32 SubscriptionController::EVENT_WRITE_MSISDN_DONE = 1;
 const Int32 SubscriptionController::EVENT_SET_DEFAULT_DATA_DONE = 1;
 
 const Int32 SubscriptionController::DUMMY_SUB_ID = -1;
+Object SubscriptionController::sLock;
 
 CAR_INTERFACE_IMPL_2(SubscriptionController, Object, ISubscriptionController, IISub)
 
@@ -254,10 +264,9 @@ AutoPtr<ISubscriptionController> SubscriptionController::Init(
     /* [in] */ IPhone* phone)
 {
     {
-        // AutoLock syncLock(SubscriptionController.class);
+        AutoLock syncLock(sLock);
         if (sInstance == NULL) {
-            assert(0 && "TODO");
-            // sInstance = new SubscriptionController(phone);
+            CSubscriptionController::New(phone, (ISubscriptionController**)&sInstance);
         }
         else {
             // Logger::Wtf(LOGTAG, "Init() called multiple times!  sInstance = %p", sInstance);
@@ -271,10 +280,9 @@ AutoPtr<ISubscriptionController> SubscriptionController::Init(
     /* [in] */ ArrayOf<ICommandsInterface*>* ci)
 {
     {
-        // AutoLock syncLock(SubscriptionController.class);
+        AutoLock syncLock(sLock);
         if (sInstance == NULL) {
-            assert(0 && "TODO");
-            // sInstance = new SubscriptionController(c);
+            CSubscriptionController::New(c, (ISubscriptionController**)&sInstance);
         }
         else {
             // Log::Wtf(LOGTAG, "Init() called multiple times!  sInstance = %p", sInstance);
@@ -299,8 +307,7 @@ ECode SubscriptionController::constructor(
     Logd(String("SubscriptionController init by Context"));
     mContext = c;
     AutoPtr<ICallManagerHelper> cmhlp;
-    assert(0 && "TODO");
-    // CCallManagerHelper::AcquireSingleton((ICallManagerHelper**)&cmhlp);
+    CCallManagerHelper::AcquireSingleton((ICallManagerHelper**)&cmhlp);
     cmhlp->GetInstance((ICallManager**)&mCM);
 
     AutoPtr<IServiceManager> sm;
@@ -1771,8 +1778,8 @@ void SubscriptionController::Logvl(
 void SubscriptionController::Logv(
     /* [in] */ String msg)
 {
-    assert(0 && "TODO");
-    // Rlog::V(LOGTAG, msg);
+    //TODO Rlog::V(LOGTAG, msg);
+    Logger::V(LOGTAG, "%s", msg.string());
 }
 
 void SubscriptionController::Logdl(
@@ -1785,15 +1792,15 @@ void SubscriptionController::Logdl(
 void SubscriptionController::Slogd(
     /* [in] */ String msg)
 {
-    assert(0 && "TODO");
-    // Rlog::D(LOGTAG, msg);
+    //TODO Rlog::D(LOGTAG, msg);
+    Logger::D(LOGTAG, "%s", msg.string());
 }
 
 void SubscriptionController::Logd(
     /* [in] */ String msg)
 {
-    assert(0 && "TODO");
-    // Rlog::D(LOGTAG, msg);
+    //TODO Rlog::D(LOGTAG, msg);
+    Logger::D(LOGTAG, "%s", msg.string());
 }
 
 void SubscriptionController::Logel(
@@ -1806,8 +1813,8 @@ void SubscriptionController::Logel(
 void SubscriptionController::Loge(
     /* [in] */ String msg)
 {
-    assert(0 && "TODO");
-    // Rlog::E(LOGTAG, msg);
+    //TODO Rlog::E(LOGTAG, msg);
+    Logger::D(LOGTAG, "%s", msg.string());
 }
 
 ECode SubscriptionController::GetDefaultSubId(

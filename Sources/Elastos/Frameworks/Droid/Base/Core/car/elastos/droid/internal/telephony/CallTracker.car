@@ -3,6 +3,8 @@ module
 {
     using interface Elastos.IO.IFileDescriptor;
     using interface Elastos.IO.IPrintWriter;
+    interface Elastos.Droid.Os.IMessage;
+    interface Elastos.Droid.Os.IHandler;
 
     namespace Elastos {
     namespace Droid {
@@ -15,6 +17,26 @@ module
      */
     [deprecated]
     interface ICallTracker {
+
+        HandleMessage(
+            [in] IMessage* msg);
+
+        RegisterForVoiceCallStarted(
+            [in] IHandler* h,
+            [in] Int32 what,
+            [in] IInterface* obj);
+
+        UnregisterForVoiceCallStarted(
+            [in] IHandler* h);
+
+        RegisterForVoiceCallEnded(
+            [in] IHandler* h,
+            [in] Int32 what,
+            [in] IInterface* obj);
+
+        UnregisterForVoiceCallEnded(
+            [in] IHandler* h);
+
         Dump(
             [in] IFileDescriptor* fd,
             [in] IPrintWriter* pw,

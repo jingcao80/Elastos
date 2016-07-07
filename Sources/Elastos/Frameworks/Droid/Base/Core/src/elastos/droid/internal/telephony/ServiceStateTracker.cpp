@@ -5,6 +5,7 @@
 #include "elastos/droid/os/SystemClock.h"
 #include "elastos/droid/os/CMessageHelper.h"
 #include "elastos/droid/os/CRegistrantList.h"
+#include "elastos/droid/os/CRegistrant.h"
 #include "elastos/droid/telephony/CServiceState.h"
 #include "elastos/droid/telephony/CSignalStrength.h"
 #include "elastos/droid/telephony/CServiceStateHelper.h"
@@ -30,6 +31,8 @@ using Elastos::Droid::Internal::Telephony::Uicc::IUiccControllerHelper;
 using Elastos::Droid::Internal::Telephony::Uicc::CUiccControllerHelper;
 // using Elastos::Droid::Internal::Telephony::Uicc::UiccController;
 using Elastos::Droid::Net::IConnectivityManager;
+using Elastos::Droid::Os::IRegistrant;
+using Elastos::Droid::Os::CRegistrant;
 using Elastos::Droid::Net::INetworkInfo;
 using Elastos::Droid::Os::IMessage;
 using Elastos::Droid::Os::IMessageHelper;
@@ -148,6 +151,7 @@ ServiceStateTracker::ServiceStateTracker()
     , mDeviceShuttingDown(FALSE)
     , mLastSignalStrength(NULL)
 {
+    Handler::constructor();
     CServiceState::New((IServiceState**)&mSS);
     CServiceState::New((IServiceState**)&mNewSS);
 
@@ -155,14 +159,28 @@ ServiceStateTracker::ServiceStateTracker()
     Logger::E("ServiceStateTracker", "TODO CRestrictedState is NOT ready");
     //TODO CRestrictedState::New((IRestrictedState**)&mRestrictedState);
 
-    CRegistrantList::New((IRegistrantList**)&mRoamingOnRegistrants);
-    CRegistrantList::New((IRegistrantList**)&mRoamingOffRegistrants);
-    CRegistrantList::New((IRegistrantList**)&mAttachedRegistrants);
-    CRegistrantList::New((IRegistrantList**)&mDetachedRegistrants);
-    CRegistrantList::New((IRegistrantList**)&mDataRegStateOrRatChangedRegistrants);
-    CRegistrantList::New((IRegistrantList**)&mNetworkAttachedRegistrants);
-    CRegistrantList::New((IRegistrantList**)&mPsRestrictEnabledRegistrants);
-    CRegistrantList::New((IRegistrantList**)&mPsRestrictDisabledRegistrants);
+    AutoPtr<IRegistrantList> list;
+    CRegistrantList::New((IRegistrantList**)&list);
+    mRoamingOffRegistrants = (RegistrantList*)(list.Get());
+    list = NULL;
+    CRegistrantList::New((IRegistrantList**)&list);
+    mAttachedRegistrants = (RegistrantList*)(list.Get());
+    list = NULL;
+    CRegistrantList::New((IRegistrantList**)&list);
+    mDetachedRegistrants = (RegistrantList*)(list.Get());
+    list = NULL;
+    CRegistrantList::New((IRegistrantList**)&list);
+    mDataRegStateOrRatChangedRegistrants = (RegistrantList*)(list.Get());
+    list = NULL;
+    CRegistrantList::New((IRegistrantList**)&list);
+    mNetworkAttachedRegistrants = (RegistrantList*)(list.Get());
+    list = NULL;
+    CRegistrantList::New((IRegistrantList**)&list);
+    mPsRestrictEnabledRegistrants = (RegistrantList*)(list.Get());
+    list = NULL;
+    CRegistrantList::New((IRegistrantList**)&list);
+    mPsRestrictDisabledRegistrants = (RegistrantList*)(list.Get());
+    list = NULL;
 }
 
 AutoPtr<ArrayOf<String> > ServiceStateTracker::InitCOUNTCODE()
@@ -243,9 +261,8 @@ ECode ServiceStateTracker::Dispose()
 ECode ServiceStateTracker::GetDesiredPowerState(
     /* [out] */ Boolean* result)
 {
-    assert(0);
-    //VALIDATE_NOT_NULL(result)
-    //*result = mDesiredPowerState;
+    VALIDATE_NOT_NULL(result)
+    *result = mDesiredPowerState;
     return NOERROR;
 }
 
@@ -282,8 +299,7 @@ void ServiceStateTracker::NotifyDataRegStateRilRadioTechnologyChanged()
 
     AutoPtr<IPair> pair;
     CPair::New(CoreUtils::Convert(drs), CoreUtils::Convert(rat), (IPair**)&pair);
-    assert(0 && "TODO IRegistrantList ");
-    // mDataRegStateOrRatChangedRegistrants->NotifyResult(pair);
+    mDataRegStateOrRatChangedRegistrants->NotifyResult(pair);
 }
 
 void ServiceStateTracker::UseDataRegStateForDataOnlyDevices()
@@ -322,15 +338,14 @@ ECode ServiceStateTracker::RegisterForRoamingOn(
     /* [in] */ Int32 what,
     /* [in] */ IInterface* obj)
 {
-    assert(0 && "TODO Registrant ECO_PUBLIC");
-    // AutoPtr<Registrant> r = new Registrant(h, what, obj);
-    // mRoamingOnRegistrants->Add(r);
+    AutoPtr<IRegistrant> r;
+    CRegistrant::New(h, what, obj, (IRegistrant**)&r);
+    mRoamingOnRegistrants->Add(r);
 
     Boolean bRoaming;
     mSS->GetRoaming(&bRoaming);
     if (bRoaming) {
-        assert(0 && "TODO Registrant ECO_PUBLIC");
-        // r->NotifyRegistrant();
+        r->NotifyRegistrant();
     }
     return NOERROR;
 }
@@ -338,8 +353,7 @@ ECode ServiceStateTracker::RegisterForRoamingOn(
 ECode ServiceStateTracker::UnregisterForRoamingOn(
     /* [in] */ IHandler* h)
 {
-    assert(0 && "TODO IRegistrantList ");
-    // return mRoamingOnRegistrants->Remove(h);
+    mRoamingOnRegistrants->Remove(h);
     return NOERROR;
 }
 
@@ -348,16 +362,14 @@ ECode ServiceStateTracker::RegisterForRoamingOff(
     /* [in] */ Int32 what,
     /* [in] */ IInterface* obj)
 {
-    assert(0 && "TODO Registrant ECO_PUBLIC");
-    // AutoPtr<IRegistrant> r;
-    // CRegistrant::New(h, what, obj, (IRegistrant**)&r);
-    // mRoamingOffRegistrants->Add(r);
+    AutoPtr<IRegistrant> r;
+    CRegistrant::New(h, what, obj, (IRegistrant**)&r);
+    mRoamingOffRegistrants->Add(r);
 
     Boolean bRoaming = FALSE;
     mSS->GetRoaming(&bRoaming);
     if (!bRoaming) {
-        assert(0 && "TODO Registrant ECO_PUBLIC");
-        // r->NotifyRegistrant();
+        r->NotifyRegistrant();
     }
     return NOERROR;
 }
@@ -365,8 +377,7 @@ ECode ServiceStateTracker::RegisterForRoamingOff(
 ECode ServiceStateTracker::UnregisterForRoamingOff(
     /* [in] */ IHandler* h)
 {
-    assert(0 && "TODO IRegistrantList ");
-    // return mRoamingOffRegistrants->Remove(h);
+    mRoamingOffRegistrants->Remove(h);
     return NOERROR;
 }
 
@@ -383,8 +394,7 @@ ECode ServiceStateTracker::ReRegisterNetwork(
 ECode ServiceStateTracker::SetRadioPower(
     /* [in] */ Boolean power)
 {
-    assert(0);
-    //mDesiredPowerState = power;
+    mDesiredPowerState = power;
 
     SetPowerStateToDesired();
     return NOERROR;
@@ -525,16 +535,14 @@ ECode ServiceStateTracker::RegisterForDataConnectionAttached(
     /* [in] */ Int32 what,
     /* [in] */ IInterface* obj)
 {
-    assert(0 && "TODO Registrant ECO_PUBLIC");
-    // AutoPtr<IRegistrant> r;
-    // CRegistrant::New(h, what, obj, (IRegistrant**)&r);
-    // mAttachedRegistrants->Add(r);
+    AutoPtr<IRegistrant> r;
+    CRegistrant::New(h, what, obj, (IRegistrant**)&r);
+    mAttachedRegistrants->Add(r);
 
     Int32 state = 0;
     GetCurrentDataConnectionState(&state);
     if (state == IServiceState::STATE_IN_SERVICE) {
-        assert(0 && "TODO");
-        // r->NotifyRegistrant();
+        r->NotifyRegistrant();
     }
     return NOERROR;
 }
@@ -542,8 +550,7 @@ ECode ServiceStateTracker::RegisterForDataConnectionAttached(
 ECode ServiceStateTracker::UnregisterForDataConnectionAttached(
     /* [in] */ IHandler* h)
 {
-    assert(0 && "TODO");
-    // mAttachedRegistrants->Remove(h);
+    mAttachedRegistrants->Remove(h);
     return NOERROR;
 }
 
@@ -552,16 +559,14 @@ ECode ServiceStateTracker::RegisterForDataConnectionDetached(
     /* [in] */ Int32 what,
     /* [in] */ IInterface* obj)
 {
-    assert(0 && "TODO Registrant ECO_PUBLIC");
-    // AutoPtr<IRegistrant> r;
-    // CRegistrant::New(h, what, obj, (IRegistrant**)&r);
-    // mDetachedRegistrants->Add(r);
+    AutoPtr<IRegistrant> r;
+    CRegistrant::New(h, what, obj, (IRegistrant**)&r);
+    mDetachedRegistrants->Add(r);
 
     Int32 state = 0;
     GetCurrentDataConnectionState(&state);
     if (state != IServiceState::STATE_IN_SERVICE) {
-        assert(0 && "TODO");
-        // r->NotifyRegistrant();
+        r->NotifyRegistrant();
     }
     return NOERROR;
 }
@@ -569,8 +574,7 @@ ECode ServiceStateTracker::RegisterForDataConnectionDetached(
 ECode ServiceStateTracker::UnregisterForDataConnectionDetached(
     /* [in] */ IHandler* h)
 {
-    assert(0 && "TODO");
-    // mDetachedRegistrants->Remove(h);
+    mDetachedRegistrants->Remove(h);
     return NOERROR;
 }
 
@@ -579,10 +583,9 @@ ECode ServiceStateTracker::RegisterForDataRegStateOrRatChanged(
     /* [in] */ Int32 what,
     /* [in] */ IInterface* obj)
 {
-    assert(0 && "TODO Registrant ECO_PUBLIC");
-    // AutoPtr<IRegistrant> r;
-    // CRegistrant::New(h, what, obj, (IRegistrant**)&r);
-    // mDataRegStateOrRatChangedRegistrants->Add(r);
+    AutoPtr<IRegistrant> r;
+    CRegistrant::New(h, what, obj, (IRegistrant**)&r);
+    mDataRegStateOrRatChangedRegistrants->Add(r);
     NotifyDataRegStateRilRadioTechnologyChanged();
     return NOERROR;
 }
@@ -590,8 +593,7 @@ ECode ServiceStateTracker::RegisterForDataRegStateOrRatChanged(
 ECode ServiceStateTracker::UnregisterForDataRegStateOrRatChanged(
     /* [in] */ IHandler* h)
 {
-    assert(0 && "TODO");
-    // mDataRegStateOrRatChangedRegistrants->Remove(h);
+    mDataRegStateOrRatChangedRegistrants->Remove(h);
     return NOERROR;
 }
 
@@ -600,16 +602,14 @@ ECode ServiceStateTracker::RegisterForNetworkAttached(
     /* [in] */ Int32 what,
     /* [in] */ IInterface* obj)
 {
-    assert(0 && "TODO Registrant ECO_PUBLIC");
-    // AutoPtr<IRegistrant> r;
-    // CRegistrant::New(h, what, obj, (IRegistrant**)&r);
-    // mNetworkAttachedRegistrants->Add(r);
+    AutoPtr<IRegistrant> r;
+    CRegistrant::New(h, what, obj, (IRegistrant**)&r);
+    mNetworkAttachedRegistrants->Add(r);
 
     Int32 state;
     mSS->GetVoiceRegState(&state);
     if (state == IServiceState::STATE_IN_SERVICE) {
-        assert(0 && "TODO");
-        // r->NotifyRegistrant();
+        r->NotifyRegistrant();
     }
     return NOERROR;
 }
@@ -617,8 +617,7 @@ ECode ServiceStateTracker::RegisterForNetworkAttached(
 ECode ServiceStateTracker::UnregisterForNetworkAttached(
     /* [in] */ IHandler* h)
 {
-    assert(0 && "TODO");
-    // mNetworkAttachedRegistrants->Remove(h);
+    mNetworkAttachedRegistrants->Remove(h);
     return NOERROR;
 }
 
@@ -627,16 +626,14 @@ ECode ServiceStateTracker::RegisterForPsRestrictedEnabled(
     /* [in] */ Int32 what,
     /* [in] */ IInterface* obj)
 {
-    assert(0 && "TODO Registrant ECO_PUBLIC");
-    // AutoPtr<IRegistrant> r;
-    // CRegistrant::New(h, what, obj, (IRegistrant**)&r);
-    // mPsRestrictEnabledRegistrants->Add(r);
+    AutoPtr<IRegistrant> r;
+    CRegistrant::New(h, what, obj, (IRegistrant**)&r);
+    mPsRestrictEnabledRegistrants->Add(r);
 
     Boolean bRestricted = FALSE;
     mRestrictedState->IsPsRestricted(&bRestricted);
     if (bRestricted) {
-        assert(0 && "TODO");
-        // r->NotifyRegistrant();
+        r->NotifyRegistrant();
     }
     return NOERROR;
 }
@@ -644,8 +641,7 @@ ECode ServiceStateTracker::RegisterForPsRestrictedEnabled(
 ECode ServiceStateTracker::UnregisterForPsRestrictedEnabled(
     /* [in] */ IHandler* h)
 {
-    assert(0 && "TODO");
-    // mPsRestrictEnabledRegistrants->Remove(h);
+    mPsRestrictEnabledRegistrants->Remove(h);
     return NOERROR;
 }
 
@@ -654,16 +650,14 @@ ECode ServiceStateTracker::RegisterForPsRestrictedDisabled(
     /* [in] */ Int32 what,
     /* [in] */ IInterface* obj)
 {
-    assert(0 && "TODO Registrant ECO_PUBLIC");
-    // AutoPtr<IRegistrant> r;
-    // CRegistrant::New(h, what, obj, (IRegistrant**)&r);
-    // mPsRestrictDisabledRegistrants->Add(r);
+    AutoPtr<IRegistrant> r;
+    CRegistrant::New(h, what, obj, (IRegistrant**)&r);
+    mPsRestrictDisabledRegistrants->Add(r);
 
     Boolean result = FALSE;
     mRestrictedState->IsPsRestricted(&result);
     if (result) {
-        assert(0 && "TODO");
-        // r->NotifyRegistrant();
+        r->NotifyRegistrant();
     }
     return NOERROR;
 }
@@ -671,8 +665,7 @@ ECode ServiceStateTracker::RegisterForPsRestrictedDisabled(
 ECode ServiceStateTracker::UnregisterForPsRestrictedDisabled(
     /* [in] */ IHandler* h)
 {
-    assert(0 && "TODO");
-    // mPsRestrictDisabledRegistrants->Remove(h);
+    mPsRestrictDisabledRegistrants->Remove(h);
     return NOERROR;
 }
 

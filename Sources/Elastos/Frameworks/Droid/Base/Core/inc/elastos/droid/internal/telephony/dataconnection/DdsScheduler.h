@@ -325,6 +325,7 @@ private:
     AutoPtr<DdsAutoRevertState> mDdsAutoRevertState;
 
     AutoPtr<IList> mInbox;
+    static Object sInboxLock;
 
     Int64 mCurrentDds;
 

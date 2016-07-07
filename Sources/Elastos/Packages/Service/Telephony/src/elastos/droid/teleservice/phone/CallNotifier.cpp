@@ -487,8 +487,10 @@ CallNotifier::CallNotifier(
 {
     AutoPtr<PhoneGlobals> globals = (PhoneGlobals*)app;
     mCM = globals->mCM;
+
     Handler::constructor();
 
+    //((PhoneGlobals*)app)->GetCallManager((ICallManager**)&mCM);
     mPhoneStateListener = new MyPhoneStateListener(this);
 
     mBluetoothProfileServiceListener = new MyBluetoothProfileServiceListener(this);
@@ -514,9 +516,8 @@ CallNotifier::CallNotifier(
     AutoPtr<IInterface> obj2;
     IContext::Probe(app)->GetSystemService(IContext::TELEPHONY_SERVICE, (IInterface**)&obj2);
     AutoPtr<ITelephonyManager> telephonyManager = ITelephonyManager::Probe(obj2);
-    telephonyManager->Listen(mPhoneStateListener,
-            IPhoneStateListener::LISTEN_MESSAGE_WAITING_INDICATOR
-            | IPhoneStateListener::LISTEN_CALL_FORWARDING_INDICATOR);
+    Logger::E("CallNotifier", " TODO: Service %s is not ready!", IContext::TELEPHONY_SERVICE.string());
+    //TODO telephonyManager->Listen(mPhoneStateListener, IPhoneStateListener::LISTEN_MESSAGE_WAITING_INDICATOR | IPhoneStateListener::LISTEN_CALL_FORWARDING_INDICATOR);
 }
 
 void CallNotifier::CreateSignalInfoToneGenerator()

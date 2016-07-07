@@ -73,6 +73,7 @@ using Elastos::Droid::Utility::CSparseArray;
 
 using Elastos::Core::AutoLock;
 using Elastos::Core::CInteger32;
+using Elastos::Core::CThrowable;
 using Elastos::Core::IInteger64;
 using Elastos::Core::CInteger64;
 using Elastos::Core::StringBuilder;
@@ -237,7 +238,9 @@ void RILRequest::OnError(
     /* [in] */ Int32 error,
     /* [in] */ IInterface* ret)
 {
-    AutoPtr<ICommandException> ex;
+    //TODO AutoPtr<ICommandException> ex;
+    AutoPtr<IThrowable> ex;
+    CThrowable::New(String("RIL::OnError"), (IThrowable**)&ex);
 
     //assert(0 && "TODO");
     // ex = CommandException::FromRilErrno(error);
@@ -734,7 +737,6 @@ ECode RIL::Init(
     /* [in] */ Int32 cdmaSubscription,
     /* [in] */ IInteger32* instanceId)
 {
-    Logger::E("leliang", "line:%d, func:%s\n", __LINE__, __func__);
     mHeaderSize = OEM_IDENTIFIER.GetLength() + 2 * INT_SIZE;
     QCRIL_EVT_HOOK_UNSOL_MODEM_CAPABILITY = OEMHOOK_BASE + 1020;
 

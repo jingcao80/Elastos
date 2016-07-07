@@ -215,7 +215,7 @@ IccSmsInterfaceManager::IccSmsInterfaceManager(
     obj = NULL;
     mContext->GetSystemService(IContext::USER_SERVICE, (IInterface**)&obj);
     mUserManager = IUserManager::Probe(obj);
-    assert(0 && "TODO");
+    Logger::E("IccSmsInterfaceManager", "TODO  ImsSMSDispatcher is not ready!");
     // mDispatcher = new ImsSMSDispatcher(phone,
     //         phone.mSmsStorageMonitor, phone.mSmsUsageMonitor);
 }

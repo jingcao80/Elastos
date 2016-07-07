@@ -103,6 +103,7 @@ CallController::CallController(
     }
     AutoPtr<PhoneGlobals> global = (PhoneGlobals*)app;
     mCM = global->mCM;
+    //((PhoneGlobals*)app)->GetCallManager((ICallManager**)&mCM);
 }
 
 ECode CallController::HandleMessage(
