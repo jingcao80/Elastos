@@ -78,6 +78,7 @@ using Elastos::Droid::Dialer::DialtactsActivity;
 // using Elastos::Droid::Dialer::SpecialCharSequenceMgr;
 using Elastos::Droid::Phone::Common::Animation::AnimUtils;
 using Elastos::Droid::Phone::Common::Dialpad::IDialpadView;
+using Elastos::Droid::Phone::Common::Dialpad::IDialpadKeyButton;
 
 namespace Elastos {
 namespace Droid {
@@ -529,7 +530,7 @@ ECode DialpadFragment::OnTextChanged(
 ECode DialpadFragment::AfterTextChanged(
     /* [in] */ IEditable* input)
 {
-    assert(0 && "TODO");
+    // TODO:
 //    // When DTMF dialpad buttons are being pressed, we delay SpecialCharSequencMgr sequence,
 //    // since some of SpecialCharSequenceMgr's behavior is too abrupt for the "touch-down"
 //    // behavior.
@@ -863,31 +864,36 @@ void DialpadFragment::SetFormattedDigits(
 void DialpadFragment::ConfigureKeypadListeners(
     /* [in] */ IView* fragmentView)
 {
-    assert(0 && "TODO");
-    // const Int32 buttonIds[] = {
-    //         R::id::one, R::id::two, R::id::three, R::id::four, R::id::five,
-    //         R::id::six, R::id::seven, R::id::eight, R::id::nine, R::id::star,
-    //         R::id::zero, R::id::pound};
+    AutoPtr< ArrayOf<Int32> > buttonIds = ArrayOf<Int32>::Alloc(12);
+    (*buttonIds)[0] = R::id::one;
+    (*buttonIds)[1] = R::id::two;
+    (*buttonIds)[2] = R::id::three;
+    (*buttonIds)[3] = R::id::four;
+    (*buttonIds)[4] = R::id::five;
+    (*buttonIds)[5] = R::id::six;
+    (*buttonIds)[6] = R::id::seven;
+    (*buttonIds)[7] = R::id::eight;
+    (*buttonIds)[8] = R::id::nine;
+    (*buttonIds)[9] = R::id::star;
+    (*buttonIds)[10] = R::id::zero;
+    (*buttonIds)[11] = R::id::pound;
 
-    // AutoPtr<IDialpadKeyButton> dialpadKey;
+    for (Int32 i = 0; i < buttonIds->GetLength(); i++) {
+        AutoPtr<IView> view;
+        fragmentView->FindViewById((*buttonIds)[i], (IView**)&view);
+        IDialpadKeyButton* dialpadKey = IDialpadKeyButton::Probe(view);
+        dialpadKey->SetOnPressedListener(this);
+    }
 
-    // Int32 length = sizeof(buttonIds) / sizeof(Int32);
-    // for (int i = 0; i < length; i++) {
-    //     AutoPtr<IView> view;
-    //     fragmentView->FindViewById(buttonIds[i], (IView**)&view);
-    //     dialpadKey = IDialpadKeyButton::Probe(view);
-    //     dialpadKey->SetOnPressedListener(this);
-    // }
+    // Long-pressing one button will initiate Voicemail.
+    AutoPtr<IView> one;
+    fragmentView->FindViewById(R::id::one, (IView**)&one);
+    one->SetOnLongClickListener(this);
 
-    // // Long-pressing one button will initiate Voicemail.
-    // AutoPtr<IView> one;
-    // fragmentView->FindViewById(R::id::one, (IView**)&one);
-    // IDialpadKeyButton::Probe(one)->SetOnLongClickListener(this);
-
-    // // Long-pressing zero button will enter '+' instead.
-    // AutoPtr<IView> zero;
-    // fragmentView->FindViewById(R::id::zero, (IView**)&zero);
-    // IDialpadKeyButton::Probe(zero)->SetOnLongClickListener(this);
+    // Long-pressing zero button will enter '+' instead.
+    AutoPtr<IView> zero;
+    fragmentView->FindViewById(R::id::zero, (IView**)&zero);
+    zero->SetOnLongClickListener(this);
 }
 
 ECode DialpadFragment::OnResume()
@@ -898,14 +904,13 @@ ECode DialpadFragment::OnResume()
     GetActivity((IActivity**)&activity);
     mDialpadQueryListener = IOnDialpadQueryChangedListener::Probe(activity);
 
-    assert(0 && "TODO");
+    // TODO:
     // AutoPtr<IStopWatch> stopWatch = StopWatch::Start(String("Dialpad.onResume"));
 
     // Query the last dialed number. Do it first because hitting
     // the DB is 'slow'. This call is asynchronous.
     QueryLastOutgoingCall();
 
-    assert(0 && "TODO");
     // stopWatch->Lap(String("qloc"));
 
     AutoPtr<IContentResolver> contentResolver;
@@ -917,11 +922,10 @@ ECode DialpadFragment::OnResume()
             ISettingsSystem::DTMF_TONE_WHEN_DIALING, 1, &value);
     mDTMFToneEnabled = value == 1;
 
-    assert(0 && "TODO");
     // stopWatch->Lap(String("dtwd"));
 
     // Retrieve the haptic feedback setting.
-    // mHaptic->CheckSystemSetting();
+    mHaptic->CheckSystemSetting();
     // stopWatch->Lap(String("hptc"));
 
     // if the mToneGenerator creation fails, just continue without it.  It is
@@ -942,22 +946,21 @@ ECode DialpadFragment::OnResume()
             // }
         }
     }
-    assert(0 && "TODO");
+
     // stopWatch->Lap(String("tg"));
 
     mPressedDialpadKeys->Clear();
 
     ConfigureScreenFromIntent(activity);
 
-    assert(0 && "TODO");
     // stopWatch->Lap(String("fdin"));
 
     // While we're in the foreground, listen for phone state changes,
     // purely so that we can take down the "dialpad chooser" if the
     // phone becomes idle while the chooser UI is visible.
-    GetTelephonyManager()->Listen(mPhoneStateListener, IPhoneStateListener::LISTEN_CALL_STATE);
+    // TODO:
+    // GetTelephonyManager()->Listen(mPhoneStateListener, IPhoneStateListener::LISTEN_CALL_STATE);
 
-    assert(0 && "TODO");
     // stopWatch->Lap(String("tm"));
 
     // Potentially show hint text in the mDigits field when the user
@@ -993,16 +996,14 @@ ECode DialpadFragment::OnResume()
 
     mFirstLaunch = FALSE;
 
-    assert(0 && "TODO");
     // stopWatch->Lap(String("hnt"));
 
     UpdateDeleteButtonEnabledState();
 
-    assert(0 && "TODO");
     // stopWatch->Lap(String("bes"));
     // stopWatch->StopAndLog(TAG, 50);
 
-    mSmsPackageComponentName = DialerUtils::GetSmsComponent(IContext::Probe(activity));
+    // mSmsPackageComponentName = DialerUtils::GetSmsComponent(IContext::Probe(activity));
 
     // Populate the overflow menu in onResume instead of onCreate, so that if the SMS activity
     // is disabled while Dialer is paused, the "Send a text message" option can be correctly
@@ -1116,8 +1117,7 @@ void DialpadFragment::KeyPressed(
             break;
     }
 
-    assert(0 && "TODO");
-    // mHaptic->Vibrate();
+    mHaptic->Vibrate();
     AutoPtr<IKeyEvent> event;
     CKeyEvent::New(IKeyEvent::ACTION_DOWN, keyCode, (IKeyEvent**)&event);
     Boolean res;
@@ -1254,8 +1254,7 @@ ECode DialpadFragment::OnClick(
     view->GetId(&id);
     switch (id) {
         case R::id::dialpad_floating_action_button:
-            assert(0 && "TODO");
-            // mHaptic->Vibrate();
+            mHaptic->Vibrate();
             HandleDialButtonPressed();
             break;
         case R::id::deleteButton: {
@@ -1658,7 +1657,9 @@ ECode DialpadFragment::IsPhoneInUse(
     /* [out] */ Boolean* result)
 {
     VALIDATE_NOT_NULL(result);
-    GetTelecomManager()->IsInCall(result);
+    // TODO:
+    // GetTelecomManager()->IsInCall(result);
+    *result = FALSE;
     return NOERROR;
 }
 
@@ -1875,7 +1876,7 @@ Boolean DialpadFragment::IsDigitsEmpty()
 void DialpadFragment::QueryLastOutgoingCall()
 {
     mLastNumberDialed = EMPTY_NUMBER;
-    assert(0 && "TODO");
+    // TODO:
     // CallLogAsync.GetLastOutgoingCallArgs lastCallArgs =
     //         new CallLogAsync.GetLastOutgoingCallArgs(
     //             getActivity(),
@@ -1916,10 +1917,9 @@ ECode DialpadFragment::OnHiddenChanged(
     if (activity == NULL) return NOERROR;
 
     if (!hidden && !IsDialpadChooserVisible()) {
-        assert(0 && "TODO");
-        // if (mAnimate) {
-        //     IDialpadView::Probe(dialpadView)->AnimateShow();
-        // }
+        if (mAnimate) {
+            IDialpadView::Probe(dialpadView)->AnimateShow();
+        }
         mFloatingActionButtonController->ScaleIn(mAnimate ? mDialpadSlideInDuration : 0);
         IDialtactsActivity::Probe(activity)->OnDialpadShown();
         Boolean res;

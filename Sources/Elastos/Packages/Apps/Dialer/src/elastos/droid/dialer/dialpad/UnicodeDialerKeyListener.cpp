@@ -23,7 +23,7 @@ ECode UnicodeDialerKeyListener::Filter(
     /* [in] */ Int32 dend,
     /* [out] */ ICharSequence** ret)
 {
-    assert(0 && "TODO");
+    // TODO:
     // String str;
     // source->ToString(&str);
     // AutoPtr<IPhoneNumberUtils> utils;

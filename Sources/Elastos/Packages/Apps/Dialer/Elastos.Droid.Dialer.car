@@ -140,7 +140,7 @@ module
     using interface Elastos.Droid.View.IViewGroup;
     using interface Elastos.Droid.View.IViewParent;
     using interface Elastos.Droid.View.IViewManager;
-//    using interface Elastos.Droid.View.IOnPreDrawListener;
+    using interface Elastos.Droid.View.IOnPreDrawListener;
     using interface Elastos.Droid.View.IViewOnKeyListener;
     using interface Elastos.Droid.View.IKeyEventCallback;
     using interface Elastos.Droid.View.IViewOnLongClickListener;
@@ -170,6 +170,8 @@ module
     using interface Elastos.Droid.Widget.IAdapterViewOnItemClickListener;
     using interface Elastos.Droid.Widget.IPopupMenuOnMenuItemClickListener;
     using interface Elastos.Droid.Widget.IRelativeLayout;
+    using interface Elastos.Droid.Widget.IEditText;
+    using interface Elastos.Droid.Widget.ITextView;
 //    using interface Elastos.Droid.Widget.IFilterListener;
 //    using interface Elastos.Droid.Widget.IRemoteAdapterConnectionCallback;
 //    using interface Elastos.Droid.Graphics.Drawable.IDrawable;
@@ -1352,6 +1354,35 @@ module
         interface IKeyEventCallback;
         interface IAccessibilityEventSource;
         interface IDrawableCallback;
+    }
+
+    [local]
+    class CDigitsEditText {
+        constructor(
+            [in] IContext* ctx,
+            [in] IAttributeSet* attrs);
+
+        interface IEditText;
+        interface ITextView;
+        interface IView;
+        interface IOnPreDrawListener;
+        interface IDrawableCallback;
+        interface IKeyEventCallback;
+        interface IAccessibilityEventSource;
+    }
+
+    [local]
+    class CDialpadTextView {
+        constructor(
+            [in] IContext* ctx,
+            [in] IAttributeSet* attrs);
+
+        interface ITextView;
+        interface IView;
+        interface IOnPreDrawListener;
+        interface IDrawableCallback;
+        interface IKeyEventCallback;
+        interface IAccessibilityEventSource;
     }
 
     } // namespace Dialpad

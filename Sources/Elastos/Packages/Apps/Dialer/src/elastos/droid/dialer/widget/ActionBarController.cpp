@@ -150,7 +150,7 @@ void ActionBarController::OnDialpadUp()
     }
     else {
         // From the lists fragment
-        assert(0 && "TODO");
+        // TODO:
         // mSearchBox->FadeOut(mFadeOutCallback);
     }
 }

@@ -565,7 +565,8 @@ ECode DialtactsActivity::OnResume()
     }
     mFirstLaunch = FALSE;
     PrepareVoiceSearchButton();
-    mDialerDatabaseHelper->StartSmartDialUpdateThread();
+    // TODO:
+    // mDialerDatabaseHelper->StartSmartDialUpdateThread();
     UpdateFloatingActionButtonControllerAlignment(FALSE /* animate */);
     return NOERROR;
 }
@@ -872,7 +873,7 @@ void DialtactsActivity::CommitDialpadFragmentHide()
 
 void DialtactsActivity::UpdateSearchFragmentPosition()
 {
-    assert(0 && "TODO");
+    // TODO:
     // AutoPtr<ISearchFragment> fragment;
     // Boolean isVisible;
     // if (mSmartDialSearchFragment != NULL &&
@@ -1066,7 +1067,7 @@ void DialtactsActivity::EnterSearchUi(
 
     AutoPtr<IFragmentTransaction> transaction;
     manager->BeginTransaction((IFragmentTransaction**)&transaction);
-    assert(0 && "TODO");
+    // TODO:
     // if (mInDialpadSearch && mSmartDialSearchFragment != NULL) {
     //     transaction->Remove(mSmartDialSearchFragment);
     // }
@@ -1087,7 +1088,7 @@ void DialtactsActivity::EnterSearchUi(
     AutoPtr<IFragment> fragment;
     manager->FindFragmentByTag(tag, (IFragment**)&fragment);
     transaction->SetCustomAnimations(Elastos::Droid::R::animator::fade_in, 0);
-    assert(0 && "TODO");
+    // TODO:
     // if (fragment == NULL) {
     //     if (smartDialSearch) {
     //         CSmartDialSearchFragment::New((IFragment**)&fragment);
@@ -1254,9 +1255,11 @@ ECode DialtactsActivity::OnListFragmentScroll(
 
 Boolean DialtactsActivity::PhoneIsInUse()
 {
-    Boolean inCall;
-    GetTelecomManager()->IsInCall(&inCall);
-    return inCall;
+    // TODO:
+    // Boolean inCall;
+    // GetTelecomManager()->IsInCall(&inCall);
+    // return inCall;
+    return FALSE;
 }
 
 AutoPtr<IIntent> DialtactsActivity::GetAddNumberToContactIntent(

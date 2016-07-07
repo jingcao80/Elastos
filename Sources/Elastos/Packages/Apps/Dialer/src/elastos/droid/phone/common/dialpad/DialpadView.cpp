@@ -51,7 +51,7 @@ DialpadView::DialpadView()
     (*mButtonIds)[8] = R::id::eight;
     (*mButtonIds)[9] = R::id::nine;
     (*mButtonIds)[10] = R::id::star;
-    (*mButtonIds)[10] = R::id::pound;
+    (*mButtonIds)[11] = R::id::pound;
 }
 
 ECode DialpadView::constructor(
