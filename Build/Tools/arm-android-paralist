@@ -403,8 +403,8 @@
 > Elastos/Frameworks/Droid/Base/Packages/SettingsProvider
 
 # ==== build Provider.Media ====
-  Elastos/Frameworks/Droid/Base/Packages/Providers/MediaProvider Elastos.Droid.Providers.Media.car
-> Elastos/Frameworks/Droid/Base/Packages/Providers/MediaProvider
+  Elastos/Packages/Providers/MediaProvider Elastos.Droid.Providers.Media.car
+> Elastos/Packages/Providers/MediaProvider
 
 # ==== build DefContainer ====
   Elastos/Frameworks/Droid/Base/Packages/DefaultContainerService/ Elastos.Droid.DefContainer.car
