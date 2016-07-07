@@ -11,6 +11,9 @@ module
      * interface ISerializable;
      */
     interface ILinkedHashMap {
+        GetEldest(
+            [out] IMapEntry** outent);
+
         /**
          * interfaces from IMap
          */

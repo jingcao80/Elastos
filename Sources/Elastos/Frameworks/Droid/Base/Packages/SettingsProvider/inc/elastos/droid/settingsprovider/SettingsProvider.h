@@ -35,6 +35,69 @@ namespace SettingsProvider {
 class SettingsProvider
     : public ContentProvider
 {
+public:
+    class SettingsCache
+        : public LruCache
+    {
+    public:
+        SettingsCache();
+
+        CARAPI constructor(
+            /* [in] */ const String& name);
+
+        /**
+         * Is the whole database table slurped into this cache?
+         */
+        CARAPI_(Boolean) FullyMatchesDisk();
+
+        CARAPI_(void) SetFullyMatchesDisk(
+            /* [in] */ Boolean value);
+
+        /**
+         * Atomic cache population, conditional on size of value and if
+         * we lost a race.
+         *
+         * @returns a Bundle to send back to the client from call(), even
+         *     if we lost the race.
+         */
+        CARAPI_(AutoPtr<IBundle>) PutIfAbsent(
+            /* [in] */ const String& key,
+            /* [in] */ const String& value);
+
+        /**
+         * Populates a key in a given (possibly-null) cache.
+         */
+        static CARAPI_(void) Populate(
+            /* [in] */ SettingsCache* cache,
+            /* [in] */ IContentValues* contentValues);
+
+        CARAPI_(void) Populate(
+            /* [in] */ const String& name,
+            /* [in] */ const String& value);
+
+        /**
+         * For suppressing duplicate/redundant settings inserts early,
+         * checking our cache first (but without faulting it in),
+         * before going to sqlite with the mutation.
+         */
+        static CARAPI_(Boolean) IsRedundantSetValue(
+            /* [in] */ SettingsCache* cache,
+            /* [in] */ const String& name,
+            /* [in] */ const String& value);
+
+    protected:
+        CARAPI EntryRemoved(
+            /* [in] */ Boolean evicted,
+            /* [in] */ IInterface* key,
+            /* [in] */ IInterface* oldValue,
+            /* [in] */ IInterface* newValue);
+
+    private:
+        String mCacheName;
+        Boolean mCacheFullyMatchesDisk;  // has the whole database slurped.
+        friend class SettingsProvider;
+    };
+
 private:
     /**
      * Decode a content URL into the table, projection, and arguments
@@ -106,65 +169,6 @@ private:
     private:
         Int32 mUserHandle;
         SettingsProvider* mHost;
-    };
-
-    class SettingsCache : public LruCache<String, AutoPtr<IBundle> >
-    {
-    public:
-        SettingsCache(
-            /* [in] */ const String& name);
-
-        /**
-         * Is the whole database table slurped into this cache?
-         */
-        CARAPI_(Boolean) FullyMatchesDisk();
-
-        CARAPI_(void) SetFullyMatchesDisk(
-            /* [in] */ Boolean value);
-
-        /**
-         * Atomic cache population, conditional on size of value and if
-         * we lost a race.
-         *
-         * @returns a Bundle to send back to the client from call(), even
-         *     if we lost the race.
-         */
-        CARAPI_(AutoPtr<IBundle>) PutIfAbsent(
-            /* [in] */ const String& key,
-            /* [in] */ const String& value);
-
-        /**
-         * Populates a key in a given (possibly-null) cache.
-         */
-        static CARAPI_(void) Populate(
-            /* [in] */ SettingsCache* cache,
-            /* [in] */ IContentValues* contentValues);
-
-        CARAPI_(void) Populate(
-            /* [in] */ const String& name,
-            /* [in] */ const String& value);
-
-        /**
-         * For suppressing duplicate/redundant settings inserts early,
-         * checking our cache first (but without faulting it in),
-         * before going to sqlite with the mutation.
-         */
-        static CARAPI_(Boolean) IsRedundantSetValue(
-            /* [in] */ SettingsCache* cache,
-            /* [in] */ const String& name,
-            /* [in] */ const String& value);
-
-    protected:
-        CARAPI_(void) EntryRemoved(
-            /* [in] */ Boolean evicted,
-            /* [in] */ String key,
-            /* [in] */ AutoPtr<IBundle> oldValue,
-            /* [in] */ AutoPtr<IBundle> newValue);
-
-    private:
-        String mCacheName;
-        Boolean mCacheFullyMatchesDisk;  // has the whole database slurped.
-        friend class SettingsProvider;
     };
 
     class MyBroadcastReceiver : public BroadcastReceiver

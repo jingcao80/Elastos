@@ -1,6 +1,7 @@
 
 #include "Elastos.Droid.Widget.h"
 #include "Elastos.Droid.View.h"
+#include "Elastos.Droid.Utility.h"
 #include <Elastos.CoreLibrary.Text.h>
 #include "elastos/droid/widget/SpellChecker.h"
 #include "elastos/droid/widget/TextView.h"
@@ -12,8 +13,11 @@
 #include "elastos/droid/text/style/CSpellCheckSpan.h"
 #include "elastos/droid/text/style/CSuggestionSpan.h"
 #include "elastos/droid/view/textservice/CTextInfo.h"
+#include "elastos/droid/utility/CLruCache.h"
 #include <elastos/core/Character.h>
 #include <elastos/core/Math.h>
+#include <elastos/core/CoreUtils.h>
+#include <elastos/core/StringBuilder.h>
 
 using Elastos::Droid::Content::IContext;
 using Elastos::Droid::Internal::Utility::ArrayUtils;
@@ -33,8 +37,12 @@ using Elastos::Droid::View::TextService::ISpellCheckerSubtype;
 using Elastos::Droid::View::TextService::EIID_ISpellCheckerSessionListener;
 using Elastos::Droid::View::TextService::CTextInfo;
 using Elastos::Droid::View::TextService::ITextInfo;
+using Elastos::Droid::Utility::CLruCache;
+using Elastos::Core::CoreUtils;
+using Elastos::Core::IInteger64;
 using Elastos::Core::Character;
 using Elastos::Core::ICharSequence;
+using Elastos::Core::StringBuilder;
 
 namespace Elastos {
 namespace Droid {
@@ -339,15 +347,17 @@ SpellChecker::SpellChecker ()
     , mCookie(0)
     , mLength(0)
     , mSpanSequenceCounter(0)
-    , mSuggestionSpanCache(SUGGESTION_SPAN_CACHE_SIZE)
 {
-    mSpellParsers = ArrayOf<SpellParser*>::Alloc(0);
 }
 
 ECode SpellChecker::constructor(
     /* [in] */ ITextView* textView)
 {
     mTextView = textView;
+
+    mSpellParsers = ArrayOf<SpellParser*>::Alloc(0);
+    CLruCache::New(SUGGESTION_SPAN_CACHE_SIZE, (ILruCache**)&mSuggestionSpanCache);
+
     Int32 size = 1;
     mIds = ArrayUtils::NewUnpaddedInt32Array(size);
     mSpellCheckSpans = ArrayOf<ISpellCheckSpan*>::Alloc(mIds->GetLength());
@@ -466,7 +476,7 @@ void SpellChecker::ResetSession()
     mTextView->GetText((ICharSequence**)&csq);
     AutoPtr<IEditable> editable = IEditable::Probe(csq);
     mTextView->RemoveMisspelledSpans(ISpannable::Probe(editable));
-    mSuggestionSpanCache.EvictAll();
+    mSuggestionSpanCache->EvictAll();
 }
 
 void SpellChecker::SetLocale(
@@ -644,11 +654,13 @@ AutoPtr<ISpellCheckSpan> SpellChecker::OnGetSuggestionsInternal(
 
                     if (spellCheckSpanStart >= 0 && spellCheckSpanEnd > spellCheckSpanStart && end > start) {
                         Int64 key = TextUtils::PackRangeInInt64(start, end);
-                        AutoPtr<ISuggestionSpan> tempSuggestionSpan = mSuggestionSpanCache.Get(key);
-
+                        AutoPtr<IInteger64> keyObj = CoreUtils::Convert(key);
+                        AutoPtr<IInterface> value;
+                        mSuggestionSpanCache->Get(keyObj, (IInterface**)&value);
+                        ISuggestionSpan* tempSuggestionSpan = ISuggestionSpan::Probe(value);
                         if (tempSuggestionSpan) {
                             ISpannable::Probe(editable)->RemoveSpan(tempSuggestionSpan);
-                            mSuggestionSpanCache.Remove(key);
+                            mSuggestionSpanCache->Remove(keyObj, NULL);
                         }
                     }
                 }
@@ -769,11 +781,14 @@ void SpellChecker::CreateMisspelledSuggestionSpan(
 
     if (mIsSentenceSpellCheckSupported) {
         Int64 key = TextUtils::PackRangeInInt64(start, end);
-        AutoPtr<ISuggestionSpan> tempSuggestionSpan = mSuggestionSpanCache.Get(key);
+        AutoPtr<IInteger64> keyObj = CoreUtils::Convert(key);
+        AutoPtr<IInterface> value;
+        mSuggestionSpanCache->Get(keyObj, (IInterface**)&value);
+        ISuggestionSpan* tempSuggestionSpan = ISuggestionSpan::Probe(value);
         if (tempSuggestionSpan) {
             ISpannable::Probe(editable)->RemoveSpan(tempSuggestionSpan);
+            mSuggestionSpanCache->Remove(keyObj, NULL);
         }
-        //mSuggestionSpanCache.put(key, suggestionSpan);
     }
     ISpannable::Probe(editable)->SetSpan(suggestionSpan, start, end, ISpanned::SPAN_EXCLUSIVE_EXCLUSIVE);
     mTextView->InvalidateRegion(start, end, FALSE);

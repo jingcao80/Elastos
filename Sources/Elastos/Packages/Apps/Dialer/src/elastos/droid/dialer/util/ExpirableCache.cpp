@@ -1,6 +1,9 @@
 
 #include "elastos/droid/dialer/util/ExpirableCache.h"
+#include <Elastos.Droid.Utility.h>
 
+using Elastos::Droid::Utility::ILruCache;
+using Elastos::Droid::Utility::CLruCache;
 using Elastos::Utility::Concurrent::Atomic::CAtomicInteger32;
 
 namespace Elastos {
@@ -134,11 +137,9 @@ AutoPtr<IExpirableCache> ExpirableCache::Create(
 AutoPtr<IExpirableCache> ExpirableCache::Create(
     /* [in] */ Int32 maxSize)
 {
-    assert(0 && "TODO");
-    return NULL;
-    // AutoPtr<LruCache<IInterface*, IInterface*> > lruCache =
-    //         new LruCache<IInterface*, IInterface*>(maxSize);
-    // return Create((IInterface*)lruCache);
+    AutoPtr<ILruCache> cache;
+    CLruCache::New(maxSize, (ILruCache**)&cache);
+    return Create(cache.Get());
 }
 
 } // Util

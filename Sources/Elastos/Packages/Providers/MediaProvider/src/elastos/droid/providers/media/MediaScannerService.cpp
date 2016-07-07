@@ -219,8 +219,7 @@ ECode MediaScannerService::OnStartCommand(
     while (mServiceHandler == NULL) {
         // {    AutoLock syncLock(this);
             // try {
-                assert(0 && "TODO");
-                // Wait(100);
+                Wait(100);
             // } catch (InterruptedException e) {
             // }
         // }
@@ -233,13 +232,13 @@ ECode MediaScannerService::OnStartCommand(
     }
 
     AutoPtr<IMessage> msg;
-    IHandler::Probe(mServiceHandler)->ObtainMessage((IMessage**)&msg);
+    mServiceHandler->ObtainMessage((IMessage**)&msg);
     msg->SetArg1(startId);
     AutoPtr<IBundle> bd;
     intent->GetExtras((IBundle**)&bd);
     msg->SetObj(bd.Get());
     Boolean flag = FALSE;
-    IHandler::Probe(mServiceHandler)->SendMessage(msg, &flag);
+    mServiceHandler->SendMessage(msg, &flag);
 
     // Try again later if we are killed before we can finish scanning.
     *result = IService::START_REDELIVER_INTENT;
@@ -271,6 +270,7 @@ ECode MediaScannerService::Run()
     Looper::Prepare();
     mServiceLooper = Looper::GetMyLooper();
     mServiceHandler = new ServiceHandler(this);
+    mServiceHandler->constructor();
     return Looper::Loop();
 }
 
@@ -452,6 +452,7 @@ ECode MediaScannerService::ServiceHandler::HandleMessage(
     Int32 arg1;
     msg->GetArg1(&arg1);
     mOwner->StopSelf(arg1);
+    return NOERROR;
 }
 
 } // namespace Media

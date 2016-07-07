@@ -90,7 +90,7 @@ void MediaScannerReceiver::Scan(
     CBundle::New((IBundle**)&args);
     args->PutString(String("volume"), volume);
     AutoPtr<IIntent> intent;
-    // CIntent::New(context, ECLSID_CMediaScannerService, (IIntent**)&intent);
+    CIntent::New(context, ECLSID_CMediaScannerService, (IIntent**)&intent);
     intent->PutExtras(args.Get());
     AutoPtr<IComponentName> cn;
     context->StartService(intent.Get(), (IComponentName**)&cn);
@@ -104,7 +104,7 @@ void MediaScannerReceiver::ScanFile(
     CBundle::New((IBundle**)&args);
     args->PutString(String("filepath"), path);
     AutoPtr<IIntent> intent;
-    // CIntent::New(context, ECLSID_CMediaScannerService, (IIntent**)&intent);
+    CIntent::New(context, ECLSID_CMediaScannerService, (IIntent**)&intent);
     intent->PutExtras(args.Get());
     AutoPtr<IComponentName> cn;
     context->StartService(intent.Get(), (IComponentName**)&cn);

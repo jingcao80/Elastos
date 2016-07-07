@@ -107,6 +107,7 @@ using Elastos::Droid::Telephony::ITelephonyManager;
 using Elastos::Droid::Telephony::ITelephonyManagerHelper;
 using Elastos::Droid::Text::TextUtils;
 using Elastos::Droid::Utility::Xml;
+using Elastos::Droid::Utility::CLruCache;
 using Elastos::Droid::Utility::CArrayMap;
 using Elastos::Droid::Utility::CArraySet;
 using Elastos::Droid::Utility::IAtomicFile;
@@ -2794,7 +2795,6 @@ NotificationManagerService::NotificationManagerService()
     , mInCall(FALSE)
     , mNotificationPulseEnabled(FALSE)
 {
-    mSpamCache = new LruCache<AutoPtr<IInteger32>, AutoPtr<FilterCacheInfo> >(100);
 }
 
 ECode NotificationManagerService::constructor(
@@ -2802,6 +2802,7 @@ ECode NotificationManagerService::constructor(
 {
     SystemService::constructor(context);
 
+    CLruCache::New(100, (ILruCache**)&mSpamCache);
     AutoPtr<IExecutors> exe;
     CExecutors::AcquireSingleton((IExecutors**)&exe);
     exe->NewSingleThreadExecutor((IExecutorService**)&mSpamExecutor);
@@ -4226,7 +4227,9 @@ Boolean NotificationManagerService::IsNotificationSpam(
     AutoPtr<IInteger32> iNotificationHash;
     CInteger32::New(notificationHash, (IInteger32**)&iNotificationHash);
     Boolean isSpam = FALSE;
-    if (mSpamCache->Get(iNotificationHash) != NULL) {
+    AutoPtr<IInterface> value;
+    mSpamCache->Get(iNotificationHash, (IInterface**)&value);
+    if (value != NULL) {
         isSpam = TRUE;
     }
     else {
@@ -4257,14 +4260,16 @@ Boolean NotificationManagerService::IsNotificationSpam(
                 Int32 notifId = 0;
                 c->GetInt32(ci, &notifId);
                 info->mNotificationId = notifId;
-                mSpamCache->Put(iNotificationHash, info);
+                mSpamCache->Put(iNotificationHash, (IObject*)info.Get(), NULL);
                 isSpam = TRUE;
             }
             ICloseable::Probe(c)->Close();
         }
     }
     if (isSpam) {
-        AutoPtr<FilterCacheInfo> info = mSpamCache->Get(iNotificationHash);
+        value = NULL;
+        mSpamCache->Get(iNotificationHash, (IInterface**)&value);
+        AutoPtr<FilterCacheInfo> info = (FilterCacheInfo*)IObject::Probe(value);
         Int32 notifId = info->mNotificationId;
         AutoPtr<SpamExecutorRunnable> r = new SpamExecutorRunnable(notifId, this);
         AutoPtr<IFuture> fut;

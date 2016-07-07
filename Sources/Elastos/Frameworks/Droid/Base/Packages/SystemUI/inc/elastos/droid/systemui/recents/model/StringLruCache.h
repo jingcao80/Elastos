@@ -17,13 +17,37 @@ namespace Model {
  * The String LRU cache.
  */
 class StringLruCache
-    : public KeyStoreLruCache<String>
+    : public KeyStoreLruCache
 {
 public:
     StringLruCache(
         /* [in] */ Int32 cacheSize)
-        : KeyStoreLruCache<String>(cacheSize)
+        : KeyStoreLruCache(cacheSize)
     {
+    }
+
+    using KeyStoreLruCache::Get;
+
+    CARAPI_(String) Get(
+        /* [in] */ ITaskKey* key)
+    {
+        AutoPtr<IInterface> value = KeyStoreLruCache::Get(key);
+        return Object::ToString(value);
+    }
+
+    CARAPI_(String) GetAndInvalidateIfModified(
+        /* [in] */ ITaskKey* key)
+    {
+        AutoPtr<IInterface> value = KeyStoreLruCache::GetAndInvalidateIfModified(key);
+        return Object::ToString(value);
+    }
+
+    CARAPI_(void) Put(
+        /* [in] */ ITaskKey* key,
+        /* [in] */ const String& value)
+    {
+        AutoPtr<ICharSequence> valueObj = CoreUtils::Convert(value);
+        KeyStoreLruCache::Put(key, valueObj);
     }
 };
 

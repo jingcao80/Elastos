@@ -23,18 +23,18 @@ CarClass(CWifiP2pGroupList)
 {
 private:
     class GroupLruCache
-        : public LruCache< AutoPtr<IInteger32>, AutoPtr<IWifiP2pGroup> >
+        : public LruCache
     {
     public:
-        GroupLruCache(
+        CARAPI constructor(
             /* [in] */ Int32 size,
-            /* [in] */ CWifiP2pGroupList* host);
+            /* [in] */ IWifiP2pGroupList* host);
 
-        virtual CARAPI_(void) EntryRemoved(
+        virtual CARAPI EntryRemoved(
             /* [in] */ Boolean evicted,
-            /* [in] */ AutoPtr<IInteger32> netId,           // key
-            /* [in] */ AutoPtr<IWifiP2pGroup>  oldValue,    // value type
-            /* [in] */ AutoPtr<IWifiP2pGroup>  newValue);   // value type
+            /* [in] */ IInterface* netId,           // key
+            /* [in] */ IInterface* oldValue,        // value type
+            /* [in] */ IInterface* newValue);       // value type
     private:
         CWifiP2pGroupList* mHost;
     };

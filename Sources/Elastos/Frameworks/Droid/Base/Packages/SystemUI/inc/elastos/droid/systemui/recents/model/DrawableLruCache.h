@@ -9,8 +9,6 @@
 using Elastos::Droid::Graphics::Drawable::IDrawable;
 using Elastos::Droid::SystemUI::Recents::Model::KeyStoreLruCache;
 
-DEFINE_OBJECT_HASH_FUNC_FOR(Elastos::Droid::Graphics::Drawable::IDrawable)
-
 namespace Elastos {
 namespace Droid {
 namespace SystemUI {
@@ -21,13 +19,36 @@ namespace Model {
  * The Drawable LRU cache.
  */
 class DrawableLruCache
-    : public KeyStoreLruCache<AutoPtr<IDrawable> >
+    : public KeyStoreLruCache
 {
 public:
     DrawableLruCache(
         /* [in] */ Int32 cacheSize)
-        : KeyStoreLruCache<AutoPtr<IDrawable> >(cacheSize)
+        : KeyStoreLruCache(cacheSize)
     {
+    }
+
+    using KeyStoreLruCache::Get;
+
+    CARAPI_(AutoPtr<IDrawable>) Get(
+        /* [in] */ ITaskKey* key)
+    {
+        AutoPtr<IInterface> value = KeyStoreLruCache::Get(key);
+        return IDrawable::Probe(value);
+    }
+
+    CARAPI_(AutoPtr<IDrawable>) GetAndInvalidateIfModified(
+        /* [in] */ ITaskKey* key)
+    {
+        AutoPtr<IInterface> value = KeyStoreLruCache::GetAndInvalidateIfModified(key);
+        return IDrawable::Probe(value);
+    }
+
+    CARAPI_(void) Put(
+        /* [in] */ ITaskKey* key,
+        /* [in] */ IDrawable* value)
+    {
+        KeyStoreLruCache::Put(key, value);
     }
 };
 

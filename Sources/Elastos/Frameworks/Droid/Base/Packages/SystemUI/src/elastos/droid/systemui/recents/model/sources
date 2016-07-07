@@ -12,3 +12,4 @@ SOURCES += TaskStack.cpp
 SOURCES += SpaceNode.cpp
 SOURCES += RecentsPackageMonitor.cpp
 SOURCES += RecentsTaskLoader.cpp
+SOURCES += KeyStoreLruCache.cpp

@@ -3,6 +3,7 @@
 #define __ELASTOS_DROID_SERVER_NOTIFICATION_NOTIFICATIONMANAGERSERVICE_H__
 
 #include <Elastos.CoreLibrary.Utility.Concurrent.h>
+#include <Elastos.Droid.Utility.h>
 #include "elastos/droid/server/SystemService.h"
 #include "elastos/droid/server/lights/Light.h"
 #include "elastos/droid/server/notification/ConditionProviders.h"
@@ -12,7 +13,6 @@
 #include "elastos/droid/content/BroadcastReceiver.h"
 #include "elastos/droid/database/ContentObserver.h"
 #include "elastos/droid/os/Handler.h"
-#include "elastos/droid/utility/LruCache.h"
 #include <elastos/droid/telephony/PhoneStateListener.h>
 #define HASH_FOR_CORE
 #include <elastos/corehash.h>
@@ -48,7 +48,7 @@ using Elastos::Droid::Telephony::PhoneStateListener;
 using Elastos::Droid::Utility::IArrayMap;
 using Elastos::Droid::Utility::IArraySet;
 using Elastos::Droid::Utility::IAtomicFile;
-using Elastos::Droid::Utility::LruCache;
+using Elastos::Droid::Utility::ILruCache;
 using Elastos::Core::ICharSequence;
 using Elastos::Core::IInteger32;
 using Elastos::Utility::IArrayList;
@@ -1388,7 +1388,7 @@ public:
     Boolean mUseAttentionLight;
     Boolean mSystemReady;
 
-    AutoPtr<LruCache<AutoPtr<IInteger32>, AutoPtr<FilterCacheInfo> > > mSpamCache;
+    AutoPtr<ILruCache> mSpamCache;  //LruCache<AutoPtr<IInteger32>, AutoPtr<FilterCacheInfo> >
     AutoPtr<IExecutorService> mSpamExecutor;
 
     Boolean mDisableNotificationEffects;

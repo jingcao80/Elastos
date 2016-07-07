@@ -3,14 +3,14 @@
 #define __ELASTOS_DROID_SETTINGS_WIFI_ACCESSPOINT_H__
 
 #include "Elastos.Droid.Wifi.h"
+#include "Elastos.Droid.Utility.h"
 #include "elastos/droid/preference/Preference.h"
-#include "elastos/droid/utility/LruCache.h"
 #include "_Elastos.Droid.Settings.h"
 
 using Elastos::Droid::Content::IContext;
 using Elastos::Droid::Net::NetworkInfoDetailedState;
 using Elastos::Droid::Os::IBundle;
-using Elastos::Droid::Utility::LruCache;
+using Elastos::Droid::Utility::ILruCache;
 using Elastos::Droid::View::IView;
 using Elastos::Droid::Wifi::IScanResult;
 using Elastos::Droid::Wifi::IWifiConfiguration;
@@ -169,7 +169,7 @@ public:
      *  For now this data is used only with Verbose Logging so as to show the band and number
      *  of BSSIDs on which that network is seen.
      */
-    AutoPtr< LruCache< String, AutoPtr<IScanResult> > > mScanResultCache;
+    AutoPtr<ILruCache> mScanResultCache;
 
     /**
      * These values are matched in string arrays -- changes must be kept in sync

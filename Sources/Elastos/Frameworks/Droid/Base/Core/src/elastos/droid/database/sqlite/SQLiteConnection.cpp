@@ -12,8 +12,9 @@
 #include "elastos/droid/database/CCursorWindow.h"
 #include "elastos/droid/os/CParcelFileDescriptor.h"
 #include <elastos/core/AutoLock.h>
-#include <elastos/utility/logging/Slogger.h>
 #include <elastos/core/StringUtils.h>
+#include <elastos/core/CoreUtils.h>
+#include <elastos/utility/logging/Slogger.h>
 #include <cutils/ashmem.h>
 #include <sys/mman.h>
 #include <stdio.h>
@@ -21,10 +22,10 @@
 #include <sqlite3.h>
 #include <sqlite3_android.h>
 
-#include <elastos/core/AutoLock.h>
-using Elastos::Core::AutoLock;
 using Elastos::Droid::Os::CParcelFileDescriptor;
 using Elastos::Droid::Os::EIID_ICancellationSignalOnCancelListener;
+using Elastos::Core::AutoLock;
+using Elastos::Core::CoreUtils;
 using Elastos::Core::IByte;
 using Elastos::Core::ICloseGuardHelper;
 using Elastos::Core::CCloseGuardHelper;
@@ -69,23 +70,29 @@ SQLiteConnection::PreparedStatement::PreparedStatement()
     , mInUse(FALSE)
 {}
 
-SQLiteConnection::PreparedStatementCache::PreparedStatementCache(
+//==========================================================
+// SQLiteConnection::PreparedStatementCache
+//==========================================================
+ECode SQLiteConnection::PreparedStatementCache::constructor(
     /* [in] */ Int32 size,
     /* [in]) */ SQLiteConnection* host)
-    : LruCache<String, AutoPtr<PreparedStatement> >(size)
-    , mHost(host)
-{}
-
-void SQLiteConnection::PreparedStatementCache::EntryRemoved(
-    /* [in] */ Boolean evicted,
-    /* [in] */ String key,
-    /* [in] */ AutoPtr<PreparedStatement> oldValue,
-    /* [in] */ AutoPtr<PreparedStatement> newValue)
 {
-    oldValue->mInCache = FALSE;
-    if (!oldValue->mInUse) {
-        mHost->FinalizePreparedStatement(oldValue);
+    mHost = host;
+    return LruCache::constructor(size);
+}
+
+ECode SQLiteConnection::PreparedStatementCache::EntryRemoved(
+    /* [in] */ Boolean evicted,
+    /* [in] */ IInterface* key,
+    /* [in] */ IInterface* oldValue,
+    /* [in] */ IInterface* newValue)
+{
+    PreparedStatement* old = (PreparedStatement*)IObject::Probe(oldValue);
+    old->mInCache = FALSE;
+    if (!old->mInUse) {
+        mHost->FinalizePreparedStatement(old);
     }
+    return NOERROR;
 }
 
 void SQLiteConnection::PreparedStatementCache::Dump(
@@ -1263,7 +1270,6 @@ void SQLiteConnection::NativeResetCancel(
     }
 }
 
-
 CAR_INTERFACE_IMPL(SQLiteConnection, Object, ICancellationSignalOnCancelListener);
 
 SQLiteConnection::SQLiteConnection(
@@ -1283,7 +1289,9 @@ SQLiteConnection::SQLiteConnection(
     mConfiguration = new SQLiteDatabaseConfiguration(configuration);
     mIsReadOnlyConnection = (configuration->mOpenFlags & ISQLiteDatabase::OPEN_READONLY) != 0;
 
-    mPreparedStatementCache = new PreparedStatementCache(mConfiguration->mMaxSqlCacheSize, this);
+    AutoPtr<PreparedStatementCache> psc = new PreparedStatementCache();
+    psc->constructor(mConfiguration->mMaxSqlCacheSize, this);
+    mPreparedStatementCache = psc.Get();
 
     AutoPtr<ICloseGuardHelper> helper;
     CCloseGuardHelper::AcquireSingleton((ICloseGuardHelper**)&helper);
@@ -1627,7 +1635,10 @@ void SQLiteConnection::SetOnlyAllowReadOnlyOperations(
 Boolean SQLiteConnection::IsPreparedStatementInCache(
     /* [in] */ const String& sql)
 {
-    return mPreparedStatementCache->Get(sql) != NULL;
+    AutoPtr<ICharSequence> key = CoreUtils::Convert(sql);
+    AutoPtr<IInterface> value;
+    mPreparedStatementCache->Get(key, (IInterface**)&value);
+    return value != NULL;
 }
 
 Int32 SQLiteConnection::GetConnectionId()
@@ -2038,7 +2049,11 @@ ECode SQLiteConnection::AcquirePreparedStatement(
 {
     VALIDATE_NOT_NULL(result)
     *result = NULL;
-    AutoPtr<PreparedStatement> statement = mPreparedStatementCache->Get(sql);
+
+    AutoPtr<ICharSequence> key = CoreUtils::Convert(sql);
+    AutoPtr<IInterface> value;
+    mPreparedStatementCache->Get(key, (IInterface**)&value);
+    AutoPtr<PreparedStatement> statement = (PreparedStatement*)IObject::Probe(value);
     Boolean skipCache = FALSE;
     if (statement != NULL) {
         if (!statement->mInUse) {
@@ -2064,7 +2079,7 @@ ECode SQLiteConnection::AcquirePreparedStatement(
     Boolean readOnly = NativeIsReadOnly(mConnectionPtr, statementPtr);
     statement = ObtainPreparedStatement(sql, statementPtr, numParameters, type, readOnly);
     if (!skipCache && IsCacheable(type)) {
-        mPreparedStatementCache->Put(sql, statement);
+        mPreparedStatementCache->Put(key, (IObject*)statement, NULL);
         statement->mInCache = TRUE;
     }
     // } catch (RuntimeException ex) {
@@ -2102,7 +2117,8 @@ void SQLiteConnection::ReleasePreparedStatement(
                     " SQL: %d, 0x%08x", TrimSqlForDisplay(statement->mSql).string(), ec);
             }
 
-            mPreparedStatementCache->Remove(statement->mSql);
+            AutoPtr<ICharSequence> key = CoreUtils::Convert(statement->mSql);
+            mPreparedStatementCache->Remove(key, NULL);
         }
         //}
     }
@@ -2387,10 +2403,13 @@ AutoPtr<SQLiteDebug::DbStats> SQLiteConnection::GetMainDbStatsUnsafe(
         sb += mConnectionId;
         sb += ")";
     }
-    AutoPtr<SQLiteDebug::DbStats> dbStates = new SQLiteDebug::DbStats(sb.ToString(), pageCount, pageSize, lookaside,
-           mPreparedStatementCache->HitCount(),
-           mPreparedStatementCache->MissCount(),
-           mPreparedStatementCache->Size());
+
+    Int32 hit, miss, size;
+    mPreparedStatementCache->GetHitCount(&hit);
+    mPreparedStatementCache->GetMissCount(&miss);
+    mPreparedStatementCache->GetSize(&size);
+    AutoPtr<SQLiteDebug::DbStats> dbStates = new SQLiteDebug::DbStats(
+        sb.ToString(), pageCount, pageSize, lookaside, hit, miss, size);
     return dbStates;
 }
 

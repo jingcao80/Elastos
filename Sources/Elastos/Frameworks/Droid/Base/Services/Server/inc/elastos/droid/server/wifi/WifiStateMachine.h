@@ -14,6 +14,7 @@
 #include "Elastos.Droid.Os.h"
 #include "Elastos.Droid.Provider.h"
 #include "Elastos.Droid.Telephony.h"
+#include "Elastos.Droid.Utility.h"
 #include "Elastos.Droid.Wifi.h"
 #include "elastos/droid/content/BroadcastReceiver.h"
 #include "elastos/droid/database/ContentObserver.h"
@@ -30,7 +31,6 @@
 #include "elastos/droid/server/wifi/WifiConfigStore.h"
 #include "elastos/droid/server/wifi/WifiMonitor.h"
 #include "elastos/droid/server/wifi/WifiNative.h"
-#include "elastos/droid/utility/LruCache.h"
 #include <elastos/core/Object.h>
 
 using Elastos::Droid::App::IAlarmManager;
@@ -75,7 +75,7 @@ using Elastos::Droid::Wifi::IWifiConfiguration;
 using Elastos::Droid::Wifi::IWifiConnectionStatistics;
 using Elastos::Droid::Wifi::IWifiInfo;
 using Elastos::Droid::Wifi::IWifiLinkLayerStats;
-using Elastos::Droid::Utility::LruCache;
+using Elastos::Droid::Utility::ILruCache;
 using Elastos::IO::IFileDescriptor;
 using Elastos::IO::IPrintWriter;
 using Elastos::Utility::Concurrent::Atomic::IAtomicBoolean;
@@ -1908,7 +1908,7 @@ private:
     AutoPtr<IArrayList> mScanResults; //= new ArrayList<ScanResult>();
     static AutoPtr<IPattern> scanResultPattern; //= Pattern.compile("\t+");
     static const Int32 SCAN_RESULT_CACHE_SIZE; //= 160;
-    AutoPtr<LruCache<String, AutoPtr<IScanResult> > > mScanResultCache;
+    AutoPtr<ILruCache> mScanResultCache; //LruCache<String, AutoPtr<IScanResult> >
     // For debug, number of known scan results that were found as part of last scan result event,
     // as well the number of scans results returned by the supplicant with that message
     Int32 mNumScanResultsKnown;

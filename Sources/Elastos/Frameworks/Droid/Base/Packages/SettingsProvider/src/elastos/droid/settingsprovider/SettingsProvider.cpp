@@ -111,9 +111,16 @@ static AutoPtr<ISparseArray> InitArg()
     return arr;
 }
 
+static AutoPtr<SettingsProvider::SettingsCache> InitGlabalCache()
+{
+    AutoPtr<SettingsProvider::SettingsCache> cache = new SettingsProvider::SettingsCache();
+    cache->constructor(String("global")/*TABLE_GLOBAL*/);
+    return cache;
+}
+
 AutoPtr<ISparseArray> SettingsProvider::sSystemCaches = InitArg();
 AutoPtr<ISparseArray> SettingsProvider::sSecureCaches = InitArg();
-const AutoPtr<SettingsProvider::SettingsCache> SettingsProvider::sGlobalCache = new SettingsProvider::SettingsCache(TABLE_GLOBAL);
+const AutoPtr<SettingsProvider::SettingsCache> SettingsProvider::sGlobalCache = InitGlabalCache();
 AutoPtr<ISparseArray> SettingsProvider::sKnownMutationsInFlight = InitArg();
 const Int32 SettingsProvider::MAX_CACHE_ENTRY_SIZE;
 
@@ -331,10 +338,7 @@ ECode SettingsProvider::SqlArguments::constructor(
         return NOERROR;
     }
     else {
-        // throw new IllegalArgumentException("Invalid URI: " + url);
-        String str;
-        IObject::Probe(url)->ToString(&str);
-        Logger::E(TAG, "Invalid URI: %s", str.string());
+        Logger::E(TAG, "Invalid URI: %s", TO_CSTR(url));
         return E_ILLEGAL_ARGUMENT_EXCEPTION;
     }
 }
@@ -409,38 +413,40 @@ ECode SettingsProvider::CachePrefetchThread::Run()
 //                  SettingsProvider::SettingsCache
 //===============================================================================
 
-SettingsProvider::SettingsCache::SettingsCache(
-    /* [in] */ const String& name)
-    : LruCache(MAX_CACHE_ENTRIES)
-    , mCacheName(name)
-    , mCacheFullyMatchesDisk(FALSE)
+SettingsProvider::SettingsCache::SettingsCache()
+    : mCacheFullyMatchesDisk(FALSE)
 {}
+
+ECode SettingsProvider::SettingsCache::constructor(
+    /* [in] */ const String& name)
+{
+    mCacheName = name;
+    return LruCache::constructor(MAX_CACHE_ENTRIES);
+}
 
 Boolean SettingsProvider::SettingsCache::FullyMatchesDisk()
 {
-    {    AutoLock syncLock(this);
-        return mCacheFullyMatchesDisk;
-    }
-    return FALSE;
+    AutoLock syncLock(this);
+    return mCacheFullyMatchesDisk;
 }
 
 void SettingsProvider::SettingsCache::SetFullyMatchesDisk(
     /* [in] */ Boolean value)
 {
-    {    AutoLock syncLock(this);
-        mCacheFullyMatchesDisk = value;
-    }
+    AutoLock syncLock(this);
+    mCacheFullyMatchesDisk = value;
 }
 
-void SettingsProvider::SettingsCache::EntryRemoved(
+ECode SettingsProvider::SettingsCache::EntryRemoved(
     /* [in] */ Boolean evicted,
-    /* [in] */ String key,
-    /* [in] */ AutoPtr<IBundle> oldValue,
-    /* [in] */ AutoPtr<IBundle> newValue)
+    /* [in] */ IInterface* key,
+    /* [in] */ IInterface* oldValue,
+    /* [in] */ IInterface* newValue)
 {
     if (evicted) {
         mCacheFullyMatchesDisk = FALSE;
     }
+    return NOERROR;
 }
 
 AutoPtr<IBundle> SettingsProvider::SettingsCache::PutIfAbsent(
@@ -458,8 +464,11 @@ AutoPtr<IBundle> SettingsProvider::SettingsCache::PutIfAbsent(
     }
     if (value.IsNull() || (Int32)value.GetLength() <= MAX_CACHE_ENTRY_SIZE) {
         AutoLock lock(this);
-        if (Get(key) == NULL) {
-            Put(key, bundle);
+        AutoPtr<ICharSequence> keyObj = CoreUtils::Convert(key);
+        AutoPtr<IInterface> valueObj;
+        Get(keyObj, (IInterface**)&valueObj);
+        if (valueObj == NULL) {
+            Put(keyObj, bundle, NULL);
         }
     }
     return bundle;
@@ -487,17 +496,17 @@ void SettingsProvider::SettingsCache::Populate(
     /* [in] */ const String& name,
     /* [in] */ const String& value)
 {
-    {    AutoLock syncLock(this);
-        if (value.IsNull() || (Int32)value.GetLength() <= MAX_CACHE_ENTRY_SIZE) {
-            AutoPtr<IBundleHelper> helper;
-            CBundleHelper::AcquireSingleton((IBundleHelper**)&helper);
-            AutoPtr<IBundle> bundle;
-            helper->ForPair(ISettingsNameValueTable::VALUE, value, (IBundle**)&bundle);
-            Put(name, bundle);
-        }
-        else {
-            Put(name, TOO_LARGE_TO_CACHE_MARKER);
-        }
+    AutoLock syncLock(this);
+    AutoPtr<ICharSequence> keyObj = CoreUtils::Convert(name);
+    if (value.IsNull() || (Int32)value.GetLength() <= MAX_CACHE_ENTRY_SIZE) {
+        AutoPtr<IBundleHelper> helper;
+        CBundleHelper::AcquireSingleton((IBundleHelper**)&helper);
+        AutoPtr<IBundle> bundle;
+        helper->ForPair(ISettingsNameValueTable::VALUE, value, (IBundle**)&bundle);
+        Put(keyObj, bundle.Get(), NULL);
+    }
+    else {
+        Put(keyObj, TOO_LARGE_TO_CACHE_MARKER.Get(), NULL);
     }
 }
 
@@ -507,8 +516,13 @@ Boolean SettingsProvider::SettingsCache::IsRedundantSetValue(
     /* [in] */ const String& value)
 {
     if (cache == NULL) return FALSE;
-    {    AutoLock syncLock(cache);
-        AutoPtr<IBundle> bundle = cache->Get(name);
+
+    {
+        AutoLock syncLock(cache);
+        AutoPtr<ICharSequence> key = CoreUtils::Convert(name);
+        AutoPtr<IInterface> valueObj;
+        cache->Get(key, (IInterface**)&valueObj);
+        IBundle* bundle = IBundle::Probe(valueObj);
         if (bundle == NULL) return FALSE;
         String oldValue;
         IBaseBundle::Probe(bundle)->GetPairValue(&oldValue);
@@ -568,9 +582,10 @@ ECode SettingsProvider::constructor()
 Boolean SettingsProvider::SettingMovedToGlobal(
     /* [in] */ const String& name)
 {
+    AutoPtr<ICharSequence> key = CoreUtils::Convert(name);
     Boolean res1, res2;
-    sSecureGlobalKeys->Contains(CoreUtils::Convert(name), &res1);
-    sSystemGlobalKeys->Contains(CoreUtils::Convert(name), &res2);
+    sSecureGlobalKeys->Contains(key, &res1);
+    sSystemGlobalKeys->Contains(key, &res2);
     return res1 || res2;
 }
 
@@ -743,7 +758,7 @@ ECode SettingsProvider::OnCreate(
     VALIDATE_NOT_NULL(result)
     AutoPtr<IContext> context;
     GetContext((IContext**)&context);
-    Slogger::W(TAG, "TODO: SettingsProvider::OnCreate need CBackupManager!");
+    Logger::W(TAG, "TODO: SettingsProvider::OnCreate need CBackupManager!");
     // CBackupManager::New(context, (IBackupManager**)&mBackupManager);
 
     AutoPtr<IUserManagerHelper> helper;
@@ -766,7 +781,8 @@ ECode SettingsProvider::OnCreate(
 void SettingsProvider::OnUserRemoved(
     /* [in] */ Int32 userHandle)
 {
-    {    AutoLock syncLock(this);
+    {
+        AutoLock syncLock(this);
         // the db file itself will be deleted automatically, but we need to tear down
         // our caches and other internal bookkeeping.
         AutoPtr<IInterface> obj;
@@ -787,7 +803,8 @@ void SettingsProvider::OnUserRemoved(
 
 void SettingsProvider::OnProfilesChanged()
 {
-    {    AutoLock syncLock(this);
+    {
+        AutoLock syncLock(this);
         mUserManager->GetProfiles(IUserHandle::USER_OWNER, (IList**)&mManagedProfiles);
         if (mManagedProfiles != NULL) {
             // Remove the primary user from the list
@@ -810,7 +827,7 @@ void SettingsProvider::OnProfilesChanged()
             }
         }
         if (LOCAL_LOGV) {
-            Slogger::D(TAG, "Managed Profiles = %p", mManagedProfiles.Get());
+            Logger::D(TAG, "Managed Profiles = %p", mManagedProfiles.Get());
         }
     }
 }
@@ -824,7 +841,8 @@ void SettingsProvider::EstablishDbTracking(
 
     AutoPtr<DatabaseHelper> dbhelper;
 
-    {    AutoLock syncLock(this);
+    {
+        AutoLock syncLock(this);
         AutoPtr<IInterface> obj;
         mOpenHelpers->Get(userHandle, (IInterface**)&obj);
         dbhelper = (DatabaseHelper*)ISQLiteOpenHelper::Probe(obj);
@@ -834,8 +852,10 @@ void SettingsProvider::EstablishDbTracking(
             GetContext((IContext**)&context);
             dbhelper = new DatabaseHelper(context, userHandle);
             mOpenHelpers->Append(userHandle, (ISQLiteOpenHelper*)dbhelper);
-            AutoPtr<SettingsCache> systemCache = new SettingsCache(TABLE_SYSTEM);
-            AutoPtr<SettingsCache> secureCache = new SettingsCache(TABLE_SECURE);
+            AutoPtr<SettingsCache> systemCache = new SettingsCache();
+            systemCache->constructor(TABLE_SYSTEM);
+            AutoPtr<SettingsCache> secureCache = new SettingsCache();
+            secureCache->constructor(TABLE_SECURE);
             sSystemCaches->Append(userHandle, TO_IINTERFACE(systemCache));
             sSecureCaches->Append(userHandle, TO_IINTERFACE(secureCache));
             AutoPtr<IAtomicInteger32> integer;
@@ -884,7 +904,8 @@ void SettingsProvider::FullyPopulateCaches(
     /* [in] */ Int32 userHandle)
 {
     AutoPtr<DatabaseHelper> dbHelper;
-    {    AutoLock syncLock(this);
+    {
+        AutoLock syncLock(this);
         AutoPtr<IInterface> obj;
         mOpenHelpers->Get(userHandle, (IInterface**)&obj);
         dbHelper = (DatabaseHelper*)ISQLiteOpenHelper::Probe(obj);
@@ -924,7 +945,8 @@ void SettingsProvider::FullyPopulateCache(
     db->Query(table, args, String(NULL), NULL, String(NULL), String(NULL), String(NULL),
             String("") + StringUtils::ToString(MAX_CACHE_ENTRIES + 1), (ICursor**)&c);
     // try {
-    {    AutoLock syncLock(cache);
+    {
+        AutoLock syncLock(cache);
         cache->EvictAll();
         cache->SetFullyMatchesDisk(TRUE);  // optimistic
         Int32 rows = 0;
@@ -1000,11 +1022,11 @@ ECode SettingsProvider::EnsureAndroidIdIsSet(
         ec = InsertForUser(contentUri, values, userHandle, (IUri**)&uri);
         FAIL_GOTO(ec, failed)
         if (uri == NULL) {
-            Slogger::E(TAG, "Unable to generate new ANDROID_ID for user %d", userHandle);
+            Logger::E(TAG, "Unable to generate new ANDROID_ID for user %d", userHandle);
             ICloseable::Probe(c)->Close();
             return NOERROR;
         }
-        Slogger::D(TAG, "Generated and saved new ANDROID_ID [%s] for user %d",
+        Logger::D(TAG, "Generated and saved new ANDROID_ID [%s] for user %d",
                 newAndroidIdValue.string(), userHandle);
         // Write a dropbox entry if it's a restricted profile
         Boolean res;
@@ -1058,12 +1080,12 @@ ECode SettingsProvider::GetOrEstablishDatabase(
 
     if (callingUser >= IProcess::SYSTEM_UID) {
         if (USER_CHECK_THROWS) {
-            Slogger::E(TAG, "Uid rather than user handle: %d", callingUser);
+            Logger::E(TAG, "Uid rather than user handle: %d", callingUser);
             return E_ILLEGAL_ARGUMENT_EXCEPTION;
             // throw new IllegalArgumentException("Uid rather than user handle: " + callingUser);
         }
         else {
-            Slogger::E(TAG, "establish db for uid rather than user: %d", callingUser);
+            Logger::E(TAG, "establish db for uid rather than user: %d", callingUser);
             // Slog.wtf(TAG, "establish db for uid rather than user: " + callingUser);
         }
     }
@@ -1071,7 +1093,8 @@ ECode SettingsProvider::GetOrEstablishDatabase(
     Int64 oldId = Binder::ClearCallingIdentity();
     // try {
     AutoPtr<DatabaseHelper> dbHelper;
-    {    AutoLock syncLock(this);
+    {
+        AutoLock syncLock(this);
         AutoPtr<IInterface> obj;
         mOpenHelpers->Get(callingUser, (IInterface**)&obj);
         dbHelper = (DatabaseHelper*)ISQLiteOpenHelper::Probe(obj);
@@ -1079,7 +1102,8 @@ ECode SettingsProvider::GetOrEstablishDatabase(
 
     if (NULL == dbHelper) {
         EstablishDbTracking(callingUser);
-        {    AutoLock syncLock(this);
+        {
+        AutoLock syncLock(this);
             AutoPtr<IInterface> obj;
             mOpenHelpers->Get(callingUser, (IInterface**)&obj);
             dbHelper = (DatabaseHelper*)ISQLiteOpenHelper::Probe(obj);
@@ -1117,7 +1141,8 @@ void SettingsProvider::InvalidateCache(
     if (cache == NULL) {
         return;
     }
-    {    AutoLock syncLock(cache);
+    {
+        AutoLock syncLock(cache);
         cache->EvictAll();
         cache->mCacheFullyMatchesDisk = FALSE;
     }
@@ -1126,7 +1151,8 @@ void SettingsProvider::InvalidateCache(
 Boolean SettingsProvider::IsManagedProfile(
     /* [in] */ Int32 callingUser)
 {
-    {    AutoLock syncLock(this);
+    {
+        AutoLock syncLock(this);
         if (mManagedProfiles == NULL) return FALSE;
         Int32 size;
         mManagedProfiles->GetSize(&size);
@@ -1253,7 +1279,7 @@ ECode SettingsProvider::Call(
         String str("");
         str.AppendFormat("Permission denial: writing to settings requires %1$s",
                 Elastos::Droid::Manifest::permission::WRITE_SETTINGS.string());
-        Slogger::E(TAG, "%s", str.string());
+        Logger::E(TAG, "%s", str.string());
         return E_SECURITY_EXCEPTION;
         // throw new SecurityException(
         //         String.format("Permission denial: writing to settings requires %1$s",
@@ -1314,7 +1340,7 @@ ECode SettingsProvider::Call(
                 IUserInfo::Probe(obj)->GetId(&id);
 
                 if (LOCAL_LOGV) {
-                    Slogger::V(TAG, "putting to additional user %d", id);
+                    Logger::V(TAG, "putting to additional user %d", id);
                 }
                 AutoPtr<IUri> resultUri;
                 InsertForUser(uri, values, id, (IUri**)&resultUri);
@@ -1360,14 +1386,14 @@ ECode SettingsProvider::Call(
                 IUserInfo::Probe(obj)->GetId(&id);
 
                 if (LOCAL_LOGV) {
-                    Slogger::V(TAG, "putting to additional user %d", id);
+                    Logger::V(TAG, "putting to additional user %d", id);
                 }
                 // try {
                 AutoPtr<IUri> resultUri;
                 ec = InsertForUser(uri, values, id, (IUri**)&resultUri);
                 if (FAILED(ec)) {
                     // Temporary fix, see b/17450158
-                    Slogger::W(TAG, "Cannot clone request '%s' with value '%s' to managed profile (id %d)",
+                    Logger::W(TAG, "Cannot clone request '%s' with value '%s' to managed profile (id %d)",
                             request.string(), newValue.string(), id);
                 }
                 // } catch (SecurityException e) {
@@ -1422,8 +1448,12 @@ AutoPtr<IBundle> SettingsProvider::LookupValue(
         Logger::E(TAG, "cache is null for user %d : key=%s", userId, key.string());
         return NULL;
     }
-    {    AutoLock syncLock(cache);
-        AutoPtr<IBundle> value = cache->Get(key);
+    {
+        AutoLock syncLock(cache);
+        AutoPtr<ICharSequence> keyObj = CoreUtils::Convert(key);
+        AutoPtr<IInterface> valueObj;
+        cache->Get(keyObj, (IInterface**)&valueObj);
+        AutoPtr<IBundle> value = IBundle::Probe(valueObj);
         if (value != NULL) {
             if (value != TOO_LARGE_TO_CACHE_MARKER) {
                 return value;
@@ -1614,7 +1644,8 @@ ECode SettingsProvider::BulkInsert(
     AutoPtr<SettingsCache> cache = CacheForTable(callingUser, args->mTable);
 
     AutoPtr<IAtomicInteger32> mutationCount;
-    {    AutoLock syncLock(this);
+    {
+        AutoLock syncLock(this);
         AutoPtr<IInterface> obj;
         sKnownMutationsInFlight->Get(callingUser, (IInterface**)&obj);
         mutationCount = IAtomicInteger32::Probe(obj);
@@ -1838,7 +1869,8 @@ ECode SettingsProvider::InsertForUser(
     }
 
     AutoPtr<IAtomicInteger32> mutationCount;
-    {    AutoLock syncLock(this);
+    {
+        AutoLock syncLock(this);
         AutoPtr<IInterface> obj;
         sKnownMutationsInFlight->Get(callingUser, (IInterface**)&obj);
         mutationCount = IAtomicInteger32::Probe(obj);
@@ -1907,7 +1939,8 @@ ECode SettingsProvider::Delete(
     FAIL_RETURN(CheckWritePermissions(args))
 
     AutoPtr<IAtomicInteger32> mutationCount;
-    {    AutoLock syncLock(this);
+    {
+        AutoLock syncLock(this);
         AutoPtr<IInterface> obj;
         sKnownMutationsInFlight->Get(callingUser, (IInterface**)&obj);
         mutationCount = IAtomicInteger32::Probe(obj);
@@ -1972,7 +2005,8 @@ ECode SettingsProvider::Update(
     FAIL_RETURN(CheckUserRestrictions(str, callingUser));
 
     AutoPtr<IAtomicInteger32> mutationCount;
-    {    AutoLock syncLock(this);
+    {
+        AutoLock syncLock(this);
         AutoPtr<IInterface> obj;
         sKnownMutationsInFlight->Get(callingUser, (IInterface**)&obj);
         mutationCount = IAtomicInteger32::Probe(obj);

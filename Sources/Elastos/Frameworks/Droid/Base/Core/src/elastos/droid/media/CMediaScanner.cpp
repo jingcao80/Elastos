@@ -1308,6 +1308,7 @@ Int32 CMediaScanner::MyMediaScannerClient::GetFileTypeFromDrm(
     }
 
     Int32 resultFileType = 0;
+    assert(0 && "TODO");
 /*Eddie(E_NOT_IMPLEMENTED)*/
 //    if (mDrmManagerClient == NULL) {
 //        //mDrmManagerClient = new DrmManagerClient(mContext);
@@ -1529,7 +1530,7 @@ ECode CMediaScanner::ExtractAlbumArt(
     VALIDATE_NOT_NULL(result);
     *result = NULL;
 
-//    ALOGV("extractAlbumArt");
+//    Logger::V("CMediaScanner", "extractAlbumArt");
     android::MediaScanner *mp = mNativeContext;
     if (mp == NULL) {
         Logger::E(TAG, "No scanner available");
@@ -2659,12 +2660,129 @@ ECode CMediaScanner::ProcessPlayLists() //throws RemoteException
 //-----------------
 //    Native method
 //-----------------
+static android::status_t checkAndClearExceptionFromCallback(ECode ec, const char* methodName) {
+    if (FAILED(ec)) {
+        Logger::E("CMediaScanner", "An exception was thrown by callback '%s'.", methodName);
+        return android::UNKNOWN_ERROR;
+    }
+    return android::OK;
+}
+
+// stolen from dalvik/vm/checkJni.cpp
+static bool isValidUtf8(const char* bytes) {
+    while (*bytes != '\0') {
+        unsigned char utf8 = *(bytes++);
+        // Switch on the high four bits.
+        switch (utf8 >> 4) {
+        case 0x00:
+        case 0x01:
+        case 0x02:
+        case 0x03:
+        case 0x04:
+        case 0x05:
+        case 0x06:
+        case 0x07:
+            // Bit pattern 0xxx. No need for any extra bytes.
+            break;
+        case 0x08:
+        case 0x09:
+        case 0x0a:
+        case 0x0b:
+        case 0x0f:
+            /*
+             * Bit pattern 10xx or 1111, which are illegal start bytes.
+             * Note: 1111 is valid for normal UTF-8, but not the
+             * modified UTF-8 used here.
+             */
+            return false;
+        case 0x0e:
+            // Bit pattern 1110, so there are two additional bytes.
+            utf8 = *(bytes++);
+            if ((utf8 & 0xc0) != 0x80) {
+                return false;
+            }
+            // Fall through to take care of the final byte.
+        case 0x0c:
+        case 0x0d:
+            // Bit pattern 110x, so there is one additional byte.
+            utf8 = *(bytes++);
+            if ((utf8 & 0xc0) != 0x80) {
+                return false;
+            }
+            break;
+        }
+    }
+    return true;
+}
+
+class NativeMyMediaScannerClient : public android::MediaScannerClient
+{
+public:
+    NativeMyMediaScannerClient(IMediaScannerClient* client)
+        : mClient(client)
+    {
+        Logger::V("CMediaScanner", "NativeMyMediaScannerClient constructor");
+    }
+
+    virtual ~NativeMyMediaScannerClient()
+    {
+        Logger::V("CMediaScanner", "NativeMyMediaScannerClient destructor");
+    }
+
+    virtual android::status_t scanFile(const char* path, long long lastModified,
+            long long fileSize, bool isDirectory, bool noMedia)
+    {
+        Logger::V("CMediaScanner", "scanFile: path(%s), time(%lld), size(%lld) and isDir(%d)",
+            path, lastModified, fileSize, isDirectory);
+
+        String pathStr(path);
+        ECode ec = mClient->ScanFile(pathStr, lastModified,
+            fileSize, isDirectory, noMedia);
+        return checkAndClearExceptionFromCallback(ec, "scanFile");
+    }
+
+    virtual android::status_t handleStringTag(const char* name, const char* value)
+    {
+        Logger::V("CMediaScanner", "handleStringTag: name(%s) and value(%s)", name, value);
+        String nameStr(name);
+        char *cleaned = NULL;
+        if (!isValidUtf8(value)) {
+            cleaned = strdup(value);
+            char *chp = cleaned;
+            char ch;
+            while ((ch = *chp)) {
+                if (ch & 0x80) {
+                    *chp = '?';
+                }
+                chp++;
+            }
+            value = cleaned;
+        }
+
+        String valueStr(value);
+        free(cleaned);
+
+        ECode ec = mClient->HandleStringTag(nameStr, valueStr);
+        return checkAndClearExceptionFromCallback(ec, "handleStringTag");
+    }
+
+    virtual android::status_t setMimeType(const char* mimeType)
+    {
+        Logger::V("CMediaScanner", "setMimeType: %s", mimeType);
+        String mimeTypeStr(mimeType);
+        ECode ec = mClient->SetMimeType(mimeTypeStr);
+        return checkAndClearExceptionFromCallback(ec, "setMimeType");
+    }
+
+private:
+    AutoPtr<IMediaScannerClient> mClient;
+};
 
 ECode CMediaScanner::ProcessDirectory(
     /* [in] */ const String& path,
     /* [in] */ IMediaScannerClient* client)
 {
-//    ALOGV("processDirectory");
+//    Logger::V("CMediaScanner", "processDirectory");
     android::MediaScanner *mp = mNativeContext;
     if (mp == NULL) {
         //jniThrowException(env, kRunTimeException, "No scanner available");
@@ -2676,12 +2794,11 @@ ECode CMediaScanner::ProcessDirectory(
         return E_ILLEGAL_ARGUMENT_EXCEPTION;
     }
 
-    assert(0 && "TODO");
-    // AutoPtr<MyMediaScannerClient> myClient = new MyMediaScannerClient(this);
-    // android::MediaScanResult result = mp->processDirectory(path.string(), myClient);
-    // if (result == android::MEDIA_SCAN_RESULT_ERROR) {
-    //     Logger::E(TAG, "An error occurred while scanning directory '%s'.", path.string());
-    // }
+    NativeMyMediaScannerClient myClient(client);
+    android::MediaScanResult result = mp->processDirectory(path.string(), myClient);
+    if (result == android::MEDIA_SCAN_RESULT_ERROR) {
+        Logger::E(TAG, "An error occurred while scanning directory '%s'.", path.string());
+    }
 
     return NOERROR;
 }
@@ -2704,18 +2821,17 @@ ECode CMediaScanner::ProcessFile(
         return E_ILLEGAL_ARGUMENT_EXCEPTION;
     }
 
-    assert(0 && "TODO");
-    // AutoPtr<MyMediaScannerClient> myClient = new MyMediaScannerClient(this);
-    // android::MediaScanResult result = mp->processFile(path.string(), mimeType.string(), myClient);
-    // if (result == android::MEDIA_SCAN_RESULT_ERROR) {
-    //     Logger::E(TAG, "An error occurred while scanning file '%s'.", path.string());
-    // }
+    NativeMyMediaScannerClient myClient(client);
+    android::MediaScanResult result = mp->processFile(path.string(), mimeType.string(), myClient);
+    if (result == android::MEDIA_SCAN_RESULT_ERROR) {
+        Logger::E(TAG, "An error occurred while scanning file '%s'.", path.string());
+    }
     return NOERROR;
 }
 
 ECode CMediaScanner::NativeSetup()
 {
-//    ALOGV("native_setup");
+//    Logger::V("CMediaScanner", "native_setup");
     android::MediaScanner *mp = new android::StagefrightMediaScanner;
     if (mp == NULL) {
         //jniThrowException(env, kRunTimeException, "Out of memory");

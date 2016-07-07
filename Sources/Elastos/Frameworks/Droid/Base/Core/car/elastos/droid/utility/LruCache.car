@@ -1,0 +1,123 @@
+module
+{
+    using interface Elastos.Utility.IMap;
+
+    namespace Elastos {
+    namespace Droid {
+    namespace Utility {
+
+    interface ILruCache {
+        /**
+         * Sets the size of the cache.
+         *
+         * @param maxSize The new maximum size.
+         */
+        Resize(
+            [in] Int32 maxSize);
+
+        /**
+         * Returns the value for {@code key} if it exists in the cache or can be
+         * created by {@code #create}. If a value was returned, it is moved to the
+         * head of the queue. This returns null if a value is not cached and cannot
+         * be created.
+         */
+        Get(
+            [in] IInterface* key,
+            [out] IInterface** value);
+
+        /**
+         * Caches {@code value} for {@code key}. The value is moved to the head of
+         * the queue.
+         *
+         * @return the previous value mapped by {@code key}.
+         */
+        Put(
+            [in] IInterface* key,
+            [in] IInterface* value,
+            [out] IInterface** oldValue);
+
+        /**
+         * Remove the eldest entries until the total of remaining entries is at or
+         * below the requested size.
+         *
+         * @param maxSize the maximum size of the cache before returning. May be -1
+         *            to evict even 0-sized elements.
+         */
+        TrimToSize(
+            [in] Int32 maxSize);
+
+        /**
+         * Removes the entry for {@code key} if it exists.
+         *
+         * @return the previous value mapped by {@code key}.
+         */
+        Remove(
+            [in] IInterface* key,
+            [out] IInterface** oldValue);
+
+        /**
+         * Clear the cache, calling {@link #entryRemoved} on each removed entry.
+         */
+        EvictAll();
+
+        /**
+         * For caches that do not override {@link #sizeOf}, this returns the number
+         * of entries in the cache. For all other caches, this returns the sum of
+         * the sizes of the entries in this cache.
+         */
+        GetSize(
+            [out] Int32* size);
+
+        /**
+         * For caches that do not override {@link #sizeOf}, this returns the maximum
+         * number of entries in the cache. For all other caches, this returns the
+         * maximum sum of the sizes of the entries in this cache.
+         */
+        GetMaxSize(
+            [out] Int32* maxSize);
+
+        /**
+         * Returns the number of times {@link #get} returned a value that was
+         * already present in the cache.
+         */
+        GetHitCount(
+            [out] Int32* count);
+
+        /**
+         * Returns the number of times {@link #get} returned null or required a new
+         * value to be created.
+         */
+        GetMissCount(
+            [out] Int32* count);
+
+        /**
+         * Returns the number of times {@link #create(Object)} returned a value.
+         */
+        GetCreateCount(
+            [out] Int32* count);
+
+        /**
+         * Returns the number of times {@link #put} was called.
+         */
+        GetPutCount(
+            [out] Int32* count);
+
+        /**
+         * Returns the number of values that have been evicted.
+         */
+        GetEvictionCount(
+            [out] Int32* count);
+
+        /**
+         * Returns a copy of the current contents of the cache, ordered from least
+         * recently accessed to most recently accessed.
+         */
+        Snapshot(
+            [out] IMap** map);
+
+    }
+
+    } // namespace Utility
+    } // namespace Droid
+    } // namespace Elastos
+}

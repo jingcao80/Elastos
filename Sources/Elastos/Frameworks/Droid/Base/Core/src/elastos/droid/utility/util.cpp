@@ -17,10 +17,12 @@
 #include "elastos/droid/utility/CSparseInt32Array.h"
 #include "elastos/droid/utility/CLinearSpline.h"
 #include "elastos/droid/utility/CMonotoneCubicSpline.h"
+#include "elastos/droid/utility/CLruCache.h"
 
 namespace Elastos {
 namespace Droid {
 namespace Utility {
+
 
 CAR_OBJECT_IMPL(CBase64InputStream)
 CAR_OBJECT_IMPL(CBase64OutputStream)
@@ -32,6 +34,8 @@ CAR_OBJECT_IMPL(CSparseBooleanArray)
 CAR_OBJECT_IMPL(CSparseInt32Array)
 CAR_OBJECT_IMPL(CLinearSpline)
 CAR_OBJECT_IMPL(CMonotoneCubicSpline)
+CAR_OBJECT_IMPL(CLruCache)
+
 
 } // namespace Utility
 } // namespace Droid

@@ -118,6 +118,8 @@ public:
         // In memory caches of artist and album data.
         HashMap<String, Int64> mArtistCache;
         HashMap<String, Int64> mAlbumCache;
+        Object mArtistCacheLock;
+        Object mAlbumCacheLock;
 
     private:
         MediaProvider* mHost;
@@ -239,7 +241,7 @@ private:
 
     class GetTableAndWhereOutParameter
         : public Object
-   {
+    {
     public:
         String mTable;
         String mWhere;
@@ -746,7 +748,7 @@ private:
 
     static const AutoPtr<ArrayOf<String> > GENRE_LOOKUP_PROJECTION;
 
-    /*static*/ const AutoPtr<GetTableAndWhereOutParameter> sGetTableAndWhereParam;
+    static const AutoPtr<GetTableAndWhereOutParameter> sGetTableAndWhereParam;
 
     static const AutoPtr<ArrayOf<String> > openFileColumns;
 
@@ -836,6 +838,9 @@ private:
     // UsbReceiver calls insert() and delete() with this URI to tell us
     // when MTP is connected and disconnected
     static const Int32 MTP_CONNECTED;
+
+    static const Int32 MEDIA_BOOKMARK;
+    static const Int32 MEDIA_BOOKMARK_ID;
 
     static AutoPtr<IUriMatcher> URI_MATCHER;
 

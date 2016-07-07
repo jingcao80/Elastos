@@ -3,12 +3,12 @@
 #define __ELASTOS_DROID_SERVER_NOTIFICATION_VALIDATENOTIFICATIONPEOPLE_H__
 
 #include <Elastos.Droid.Content.h>
+#include <Elastos.Droid.Utility.h>
 #include <Elastos.Droid.Os.h>
 #include <Elastos.CoreLibrary.Utility.h>
 #include <Elastos.CoreLibrary.Utility.Concurrent.h>
 #include "elastos/droid/server/notification/RankingReconsideration.h"
 #include "elastos/droid/database/ContentObserver.h"
-#include "elastos/droid/utility/LruCache.h"
 
 using Elastos::Droid::Content::IContext;
 using Elastos::Droid::Database::ContentObserver;
@@ -17,7 +17,7 @@ using Elastos::Droid::Database::ICursor;
 using Elastos::Droid::Os::IUserHandle;
 using Elastos::Droid::Os::IHandler;
 using Elastos::Droid::Os::IBundle;
-using Elastos::Droid::Utility::LruCache;
+using Elastos::Droid::Utility::ILruCache;
 using Elastos::Utility::Concurrent::ISemaphore;
 using Elastos::Utility::ILinkedList;
 using Elastos::Utility::IMap;
@@ -237,7 +237,7 @@ private:
     AutoPtr<IContext> mBaseContext;
 
     // maps raw person handle to resolved person object
-    LruCache<String, AutoPtr<LookupResult> > mPeopleCache;
+    AutoPtr<ILruCache> mPeopleCache; //LruCache<String, AutoPtr<LookupResult> >
     /* Map<Integer, Context> mUserToContextMap;*/
     AutoPtr<IMap> mUserToContextMap;
     AutoPtr<IHandler> mHandler;

@@ -67,7 +67,7 @@ ECode LinkedHashMap::Init_()
     return NOERROR;
 }
 
-ECode LinkedHashMap::Eldest(
+ECode LinkedHashMap::GetEldest(
     /* [out] */ IMapEntry** outent)
 {
     VALIDATE_NOT_NULL(outent)

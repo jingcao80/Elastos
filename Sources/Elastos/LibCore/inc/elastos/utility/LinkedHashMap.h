@@ -426,7 +426,7 @@ public:
      * Returns the eldest entry in the map, or {@code null} if the map is empty.
      * @hide
      */
-    CARAPI Eldest(
+    CARAPI GetEldest(
         /* [out] */ IMapEntry** outent);
 
     /**

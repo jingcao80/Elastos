@@ -56,6 +56,7 @@ const int R::id::op_sub;
 const int R::id::pad_advanced;
 const int R::id::pad_numeric;
 const int R::id::pad_operator;
+const int R::id::pad_pager;
 const int R::id::result;
 const int R::id::rparen;
 const int R::layout::activity_calculator;

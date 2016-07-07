@@ -5,15 +5,15 @@
 #include "elastos/droid/ext/frameworkext.h"
 #include "Elastos.Droid.Text.h"
 #include <Elastos.CoreLibrary.Utility.h>
+#include <Elastos.Droid.Utility.h>
 #include "elastos/droid/os/Runnable.h"
-#include "elastos/droid/utility/LruCache.h"
 
 using Elastos::Droid::Os::Runnable;
 using Elastos::Droid::Text::IEditable;
 using Elastos::Droid::Text::Method::IWordIterator;
 using Elastos::Droid::Text::Style::ISpellCheckSpan;
 using Elastos::Droid::Text::Style::ISuggestionSpan;
-using Elastos::Droid::Utility::LruCache;
+using Elastos::Droid::Utility::ILruCache;
 using Elastos::Droid::View::TextService::ISuggestionsInfo;
 using Elastos::Droid::View::TextService::ISentenceSuggestionsInfo;
 using Elastos::Droid::View::TextService::ISpellCheckerSession;
@@ -186,7 +186,7 @@ private:
     AutoPtr<ITextServicesManager> mTextServicesManager;
     AutoPtr<SpellCheckerRunnable> mSpellRunnable;
 
-    LruCache<Int64, AutoPtr<ISuggestionSpan> > mSuggestionSpanCache;
+    AutoPtr<ILruCache> mSuggestionSpanCache;//LruCache<Int64, AutoPtr<ISuggestionSpan> >
 };
 
 } // namespace Widget

@@ -3,15 +3,13 @@
 #define __ELASTOS_DROID_UTILITY_LRUCACHE_H__
 
 #include "elastos/droid/ext/frameworkext.h"
+#include "Elastos.Droid.Utility.h"
+#include <Elastos.CoreLibrary.Utility.h>
 #include <elastos/core/Object.h>
-#include <elastos/utility/etl/HashMap.h>
-#include <elastos/utility/logging/Slogger.h>
-#include <elastos/core/StringBuilder.h>
-#include <elastos/core/AutoLock.h>
 
-using Elastos::Core::StringBuilder;
-using Elastos::Utility::Etl::HashMap;
-using Elastos::Utility::Logging::Slogger;
+using Elastos::Utility::IMap;
+using Elastos::Utility::ILinkedHashMap;
+using Elastos::Droid::Utility::ILruCache;
 
 namespace Elastos {
 namespace Droid {
@@ -57,17 +55,21 @@ namespace Utility {
  * of <a href="http://developer.android.com/sdk/compatibility-library.html">Android's
  * Support Package</a> for earlier releases.
  */
-template<typename K, typename V>
-class LruCache
+class ECO_PUBLIC LruCache
     : public Object
+    , public ILruCache
 {
 public:
+    CAR_INTERFACE_DECL()
+
+    LruCache();
+
     /**
      * @param maxSize for caches that do not override {@link #sizeOf}, this is
      *     the maximum number of entries in the cache. For all other caches,
      *     this is the maximum sum of the sizes of the entries in this cache.
      */
-    LruCache(
+    CARAPI constructor(
         /* [in] */ Int32 maxSize);
 
     /**
@@ -75,7 +77,7 @@ public:
      *
      * @param maxSize The new maximum size.
      */
-    CARAPI_(void) Resize(
+    CARAPI Resize(
         /* [in] */ Int32 maxSize);
 
     /**
@@ -84,8 +86,9 @@ public:
      * head of the queue. This returns null if a value is not cached and cannot
      * be created.
      */
-    CARAPI_(V) Get(
-        /* [in] */ K key);
+    CARAPI Get(
+        /* [in] */ IInterface* key,
+        /* [out] */ IInterface** value);
 
     /**
      * Caches {@code value} for {@code key}. The value is moved to the head of
@@ -93,9 +96,10 @@ public:
      *
      * @return the previous value mapped by {@code key}.
      */
-    CARAPI_(V) Put(
-        /* [in] */ K key,
-        /* [in] */ V value);
+    CARAPI Put(
+        /* [in] */ IInterface* key,
+        /* [in] */ IInterface* value,
+        /* [out] */ IInterface** oldValue);
 
     /**
      * Remove the eldest entries until the total of remaining entries is at or
@@ -104,7 +108,7 @@ public:
      * @param maxSize the maximum size of the cache before returning. May be -1
      *            to evict even 0-sized elements.
      */
-    CARAPI_(void) TrimToSize(
+    CARAPI TrimToSize(
         /* [in] */ Int32 maxSize);
 
     /**
@@ -112,62 +116,72 @@ public:
      *
      * @return the previous value mapped by {@code key}.
      */
-    CARAPI_(V) Remove(
-        /* [in] */ K key);
+    CARAPI Remove(
+        /* [in] */ IInterface* key,
+        /* [out] */ IInterface** oldValue);
 
     /**
      * Clear the cache, calling {@link #entryRemoved} on each removed entry.
      */
-    CARAPI_(void) EvictAll();
+    CARAPI EvictAll();
 
     /**
      * For caches that do not override {@link #sizeOf}, this returns the number
      * of entries in the cache. For all other caches, this returns the sum of
      * the sizes of the entries in this cache.
      */
-    CARAPI_(Int32) Size();
+    CARAPI GetSize(
+        /* [out] */ Int32* size);
 
     /**
      * For caches that do not override {@link #sizeOf}, this returns the maximum
      * number of entries in the cache. For all other caches, this returns the
      * maximum sum of the sizes of the entries in this cache.
      */
-    CARAPI_(Int32) MaxSize();
+    CARAPI GetMaxSize(
+        /* [out] */ Int32* maxSize);
 
     /**
      * Returns the number of times {@link #get} returned a value that was
      * already present in the cache.
      */
-    CARAPI_(Int32) HitCount();
+    CARAPI GetHitCount(
+        /* [out] */ Int32* count);
 
     /**
      * Returns the number of times {@link #get} returned null or required a new
      * value to be created.
      */
-    CARAPI_(Int32) MissCount();
+    CARAPI GetMissCount(
+        /* [out] */ Int32* count);
 
     /**
      * Returns the number of times {@link #create(Object)} returned a value.
      */
-    CARAPI_(Int32) CreateCount();
+    CARAPI GetCreateCount(
+        /* [out] */ Int32* count);
 
     /**
      * Returns the number of times {@link #put} was called.
      */
-    CARAPI_(Int32) PutCount();
+    CARAPI GetPutCount(
+        /* [out] */ Int32* count);
 
     /**
      * Returns the number of values that have been evicted.
      */
-    CARAPI_(Int32) EvictionCount();
+    CARAPI GetEvictionCount(
+        /* [out] */ Int32* count);
 
     /**
      * Returns a copy of the current contents of the cache, ordered from least
      * recently accessed to most recently accessed.
      */
-    AutoPtr<HashMap<K, V> > Snapshot();
+    CARAPI Snapshot(
+        /* [out] */ IMap** map);
 
-    virtual CARAPI_(String) ToString();
+    CARAPI ToString(
+        /* [out] */ String* str);
 
 protected:
     /**
@@ -185,11 +199,11 @@ protected:
      *     this removal was caused by a {@link #put}. Otherwise it was caused by
      *     an eviction or a {@link #remove}.
      */
-    virtual CARAPI_(void) EntryRemoved(
+    virtual CARAPI EntryRemoved(
         /* [in] */ Boolean evicted,
-        /* [in] */ K key,
-        /* [in] */ V oldValue,
-        /* [in] */ V newValue);
+        /* [in] */ IInterface* key,
+        /* [in] */ IInterface* oldValue,
+        /* [in] */ IInterface* newValue);
 
     /**
      * Called after a cache miss to compute a value for the corresponding key.
@@ -206,8 +220,8 @@ protected:
      * thread calls {@link #put} while another is creating a value for the same
      * key.
      */
-    virtual CARAPI_(V) Create(
-        /* [in] */ K key);
+    virtual CARAPI_(AutoPtr<IInterface>) Create(
+        /* [in] */ IInterface* key);
 
     /**
      * Returns the size of the entry for {@code key} and {@code value} in
@@ -217,16 +231,16 @@ protected:
      * <p>An entry's size must not change while it is in the cache.
      */
     CARAPI_(Int32) SizeOf(
-        /* [in] */ K key,
-        /* [in] */ V value);
+        /* [in] */ IInterface* key,
+        /* [in] */ IInterface* value);
 
 private:
     CARAPI_(Int32) SafeSizeOf(
-        /* [in] */ K key,
-        /* [in] */ V value);
+        /* [in] */ IInterface* key,
+        /* [in] */ IInterface* value);
 
 private:
-    HashMap<K, V> mMap;
+    AutoPtr<ILinkedHashMap> mMap;
 
     /** Size of this cache in units. Not necessarily the number of elements. */
     Int32 mSize;
@@ -239,307 +253,6 @@ private:
     Int32 mMissCount;
 };
 
-template<typename K, typename V>
-LruCache<K, V>::LruCache(
-    /* [in] */ Int32 maxSize)
-    : mSize(0)
-    , mPutCount(0)
-    , mCreateCount(0)
-    , mEvictionCount(0)
-    , mHitCount(0)
-    , mMissCount(0)
-{
-    if (maxSize <= 0) {
-        Slogger::E("LruCache", "maxSize <= 0");
-        assert(0);
-        // throw new IllegalArgumentException("maxSize <= 0");
-    }
-    mMaxSize = maxSize;
-}
-
-template<typename K, typename V>
-void LruCache<K, V>::Resize(
-    /* [in] */ Int32 maxSize)
-{
-    if (maxSize <= 0) {
-        Slogger::E("LruCache", "maxSize <= 0");
-        assert(0);
-        // throw new IllegalArgumentException("maxSize <= 0");
-    }
-
-    {    AutoLock syncLock(this);
-        mMaxSize = maxSize;
-    }
-
-    TrimToSize(maxSize);
-}
-
-template<typename K, typename V>
-V LruCache<K, V>::Get(
-    /* [in] */ K key)
-{
-    if (key == 0) {
-        Slogger::E("LruCache", "key == null");
-        assert(0);
-        // throw new NullPointerException("key == null");
-    }
-
-    V mapValue;
-    {    AutoLock syncLock(this);
-        typename HashMap<K, V>::Iterator it = mMap.Find(key);
-        if (it != mMap.End()) {
-            mapValue = it->mSecond;
-        }
-        if (mapValue != NULL) {
-            mHitCount++;
-            return mapValue;
-        }
-        mMissCount++;
-
-    }
-
-    /*
-     * Attempt to create a value. This may take a long time, and the map
-     * may be different when create() returns. If a conflicting value was
-     * added to the map while create() was working, we leave that value in
-     * the map and release the created value.
-     */
-
-    V createdValue = Create(key);
-    if (createdValue == NULL) {
-        return (V)NULL;
-    }
-
-    {    AutoLock syncLock(this);
-        mCreateCount++;
-        mapValue = mMap[key];
-        if (mapValue == NULL) {
-            mMap[key] = createdValue;
-            mSize += SafeSizeOf(key, createdValue);
-        }
-    }
-
-    if (mapValue != NULL) {
-        EntryRemoved(FALSE, key, createdValue, mapValue);
-        return mapValue;
-    }
-    else {
-        TrimToSize(mMaxSize);
-        return createdValue;
-    }
-}
-
-template<typename K, typename V>
-V LruCache<K, V>::Put(
-    /* [in] */ K key,
-    /* [in] */ V value)
-{
-    if (key == NULL || value == NULL) {
-        Slogger::E("LruCache", "key == null || value == null");
-        assert(0);
-        // throw new NullPointerException("key == null || value == null");
-    }
-
-    V previous;
-    {    AutoLock syncLock(this);
-        mPutCount++;
-        mSize += SafeSizeOf(key, value);
-
-        typename HashMap<K, V>::Iterator it = mMap.Find(key);
-        if (it != mMap.End()) {
-            previous = it->mSecond;
-        }
-
-        if (previous != NULL) {
-            mSize -= SafeSizeOf(key, previous);
-        }
-        mMap[key] = value;
-    }
-
-    if (previous != NULL) {
-        EntryRemoved(FALSE, key, previous, value);
-    }
-
-    TrimToSize(mMaxSize);
-    return previous;
-}
-
-template<typename K, typename V>
-void LruCache<K, V>::TrimToSize(
-    /* [in] */ Int32 maxSize)
-{
-    while (TRUE) {
-        K key;
-        V value;
-        {
-            AutoLock lock(this);
-            if (mSize < 0 || (mMap.IsEmpty() && mSize != 0)) {
-                Slogger::E("LruCache", ".sizeOf() is reporting inconsistent results!");
-                assert(0);
-                // throw new IllegalStateException(getClass().getName()
-                //         + ".sizeOf() is reporting inconsistent results!");
-            }
-
-            if (mSize <= maxSize) {
-                break;
-            }
-
-            Slogger::W("LruCache", " >> TODO find the eldest record! size: %d", Size());
-            //TODO Map.Entry<K, V> toEvict = map.eldest();
-            typename HashMap<K, V>::Iterator toEvict = mMap.Begin();
-            if (toEvict == mMap.End()) {
-                break;
-            }
-
-            key = toEvict->mFirst;
-            value = toEvict->mSecond;
-            mMap.Erase(toEvict);
-
-            mSize -= SafeSizeOf(key, value);
-            mEvictionCount++;
-        }
-
-        EntryRemoved(TRUE, key, value, (V)NULL);
-    }
-}
-
-template<typename K, typename V>
-V LruCache<K, V>::Remove(
-    /* [in] */ K key)
-{
-    if (key == 0) {
-        Slogger::E("LruCache", "key == null");
-        assert(0);
-        // throw new NullPointerException("key == null");
-    }
-
-    V previous;
-    {    AutoLock syncLock(this);
-        typename HashMap<K, V>::Iterator it = mMap.Find(key);
-        if (it != mMap.End()) {
-            previous = it->mSecond;
-            mMap.Erase(it);
-        }
-        if (previous != NULL) {
-            mSize -= SafeSizeOf(key, previous);
-        }
-    }
-
-    if (previous != NULL) {
-        EntryRemoved(FALSE, key, previous, (V)NULL);
-    }
-    return previous;
-}
-
-template<typename K, typename V>
-void LruCache<K, V>::EntryRemoved(
-    /* [in] */ Boolean evicted,
-    /* [in] */ K key,
-    /* [in] */ V oldValue,
-    /* [in] */ V newValue)
-{
-    Slogger::W("LruCache", " >> base's EntryRemoved() is called. please check para-type of sub's EntryRemoved.");
-}
-
-template<typename K, typename V>
-V LruCache<K, V>::Create(
-    /* [in] */ K key)
-{
-    return (V)NULL;
-}
-
-template<typename K, typename V>
-Int32 LruCache<K, V>::SafeSizeOf(
-    /* [in] */ K key,
-    /* [in] */ V value)
-{
-    Int32 result = SizeOf(key, value);
-    if (result < 0) {
-        assert(0);
-        // throw new IllegalStateException("Negative size: " + key + "=" + value);
-    }
-    return result;
-}
-
-template<typename K, typename V>
-Int32 LruCache<K, V>::SizeOf(
-    /* [in] */ K key,
-    /* [in] */ V value)
-{
-    return 1;
-}
-
-template<typename K, typename V>
-void LruCache<K, V>::EvictAll()
-{
-    TrimToSize(-1); // -1 will evict 0-sized elements
-}
-
-template<typename K, typename V>
-Int32 LruCache<K, V>::Size()
-{
-    return mSize;
-}
-
-template<typename K, typename V>
-Int32 LruCache<K, V>::MaxSize()
-{
-    return mMaxSize;
-}
-
-template<typename K, typename V>
-Int32 LruCache<K, V>::HitCount()
-{
-    return mHitCount;
-}
-
-template<typename K, typename V>
-Int32 LruCache<K, V>::MissCount()
-{
-    return mMissCount;
-}
-
-template<typename K, typename V>
-Int32 LruCache<K, V>::CreateCount()
-{
-    return mCreateCount;
-}
-
-template<typename K, typename V>
-Int32 LruCache<K, V>::PutCount()
-{
-    return mPutCount;
-}
-
-template<typename K, typename V>
-Int32 LruCache<K, V>::EvictionCount()
-{
-    return mEvictionCount;
-}
-
-template<typename K, typename V>
-AutoPtr<HashMap<K, V> > LruCache<K, V>::Snapshot()
-{
-    AutoPtr<HashMap<K, V> > map = new HashMap<K, V>(mMap.Begin(), mMap.End());
-    return map;
-}
-
-template<typename K, typename V>
-String LruCache<K, V>::ToString()
-{
-    Int32 accesses = mHitCount + mMissCount;
-    Int32 hitPercent = accesses != 0 ? (100 * mHitCount / accesses) : 0;
-    StringBuilder sb("LruCache[maxSize=");
-    sb += mMaxSize;
-    sb += ",hits=";
-    sb += mHitCount;
-    sb += ",misses=";
-    sb += mMissCount;
-    sb += ",hitRate=";
-    sb += hitPercent;
-    sb += "]";
-    return sb.ToString();
-}
 
 } // namespace Utility
 } // namespace Droid

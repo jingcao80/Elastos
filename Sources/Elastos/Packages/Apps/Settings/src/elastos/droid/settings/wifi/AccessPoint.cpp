@@ -40,12 +40,16 @@ using Elastos::Droid::Wifi::CWifiConfiguration;
 using Elastos::Droid::Wifi::CWifiConfigurationHelper;
 using Elastos::Droid::Wifi::IWifiConfigurationHelper;
 using Elastos::Droid::Widget::ITextView;
+using Elastos::Droid::Utility::CLruCache;
 using Elastos::Core::CoreUtils;
 using Elastos::Core::CSystem;
 using Elastos::Core::ISystem;
 using Elastos::Core::StringBuilder;
 using Elastos::Core::StringUtils;
 using Elastos::Utility::IBitSet;
+using Elastos::Utility::IMap;
+using Elastos::Utility::ICollection;
+using Elastos::Utility::IIterator;
 using Elastos::Utility::Logging::Logger;
 
 namespace Elastos {
@@ -468,11 +472,12 @@ Boolean AccessPoint::Update(
     }
     if (WifiSettings::mVerboseLogging > 0) {
         if (mScanResultCache == NULL) {
-            mScanResultCache = new LruCache< String, AutoPtr<IScanResult> >(32);
+            CLruCache::New(32, (ILruCache**)&mScanResultCache);
         }
         String BSSID;
         result->GetBSSID(&BSSID);
-        mScanResultCache->Put(BSSID, result);
+        AutoPtr<ICharSequence> key = CoreUtils::Convert(BSSID);
+        mScanResultCache->Put(key, result, NULL);
     }
 
     String SSID;
@@ -645,13 +650,18 @@ String AccessPoint::GetVisibilityStatus()
         Int32 n24 = 0; // Number scan results we included in the string
         Int32 n5 = 0; // Number scan results we included in the string
 
-        AutoPtr< HashMap<String, AutoPtr<IScanResult> > > list = mScanResultCache->Snapshot();
+        AutoPtr<IMap> map;
+        mScanResultCache->Snapshot((IMap**)&map);
+        AutoPtr<ICollection> values;
+        map->GetValues((ICollection**)&values);
 
-        // // TODO: sort list by RSSI or age
-        Int32 i = 0;
-        HashMap<String, AutoPtr<IScanResult> >::Iterator it;
-        for (it = list->Begin(); it != list->End(); ++it, ++i) {
-            AutoPtr<IScanResult> result = it->mSecond;
+        AutoPtr<IIterator> it;
+        values->GetIterator((IIterator**)&it);
+        Boolean hasNext;
+        while (it->HasNext(&hasNext), hasNext) {
+            AutoPtr<IInterface> obj;
+            it->GetNext((IInterface**)&obj);
+            AutoPtr<IScanResult> result = IScanResult::Probe(obj);
             Int64 seen;
             result->GetSeen(&seen);
             if (seen == 0) {

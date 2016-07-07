@@ -137,7 +137,7 @@ void BasicLruCache::TrimToSize(
     Int32 len = 0;
     while ((mMap->GetSize(&len), len) > mMaxSize) {
         AutoPtr<IMapEntry> toEvict;
-        ((CLinkedHashMap*)mMap.Get())->Eldest((IMapEntry**)&toEvict);
+        ((CLinkedHashMap*)mMap.Get())->GetEldest((IMapEntry**)&toEvict);
         AutoPtr<IInterface> key;
         toEvict->GetKey((IInterface**)&key);
         AutoPtr<IInterface> value;

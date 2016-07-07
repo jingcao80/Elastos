@@ -55,6 +55,7 @@ SOURCES += CXmlPullAttributes.cpp
 SOURCES += NativeTextHelper.cpp
 SOURCES += CNativeTextHelper.cpp
 SOURCES += CParcelableList.cpp
+SOURCES += LruCache.cpp
 
 #SOURCES += droid_nio_utils.cpp
 #SOURCES += SparseInt32Array.cpp

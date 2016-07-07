@@ -10,12 +10,6 @@
 DEFINE_OBJECT_HASH_FUNC_FOR(IInterface)
 DEFINE_OBJECT_HASH_FUNC_FOR(IWeakReference)
 
-//
-// Libcore
-//
-DEFINE_OBJECT_HASH_FUNC_FOR(Elastos::Core::ICharSequence)
-
-//
 // Accounts
 //
 #ifdef HASH_FOR_ACCOUNTS
@@ -76,6 +70,15 @@ DEFINE_OBJECT_HASH_FUNC_FOR(Elastos::Droid::Net::INetworkIdentity)
 #include "Elastos.Droid.Os.h"
 DEFINE_OBJECT_HASH_FUNC_USING_ADDR_FOR(Elastos::Droid::Os::IBinder)
 DEFINE_OBJECT_HASH_FUNC_FOR(Elastos::Droid::Os::IMessenger)
+#endif
+
+//
+// Graphics
+//
+#ifdef HASH_FOR_GRAPHICS
+#include "Elastos.Droid.Graphics.h"
+DEFINE_OBJECT_HASH_FUNC_FOR(Elastos::Droid::Graphics::IDrawable)
+DEFINE_OBJECT_HASH_FUNC_FOR(Elastos::Droid::Graphics::IBitmap)
 #endif
 
 //

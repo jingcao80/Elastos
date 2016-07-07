@@ -13,50 +13,50 @@ namespace Model {
 // KeyStoreLruCache::MyLruCache
 //============================================
 
-template<typename V>
-KeyStoreLruCache<V>::MyLruCache<V>::MyLruCache(
+ECode KeyStoreLruCache::MyLruCache::constructor(
     /* [in] */ Int32 cacheSize,
-    /* [in] */ KeyStoreLruCache<V>* host)
-    : LruCache<IInteger32*, V>(cacheSize)
-    , mHost(host)
+    /* [in] */ KeyStoreLruCache* host)
 {
+    mHost = host;
+    return LruCache::constructor(cacheSize);
 }
 
-template<typename V>
-void KeyStoreLruCache<V>::MyLruCache<V>::EntryRemoved(
+ECode KeyStoreLruCache::MyLruCache::EntryRemoved(
     /* [in] */ Boolean evicted,
-    /* [in] */ AutoPtr<IInteger32> taskId,
-    /* [in] */ V oldV,
-    /* [in] */ V newV)
+    /* [in] */ IInterface* taskId,
+    /* [in] */ IInterface* oldV,
+    /* [in] */ IInterface* newV)
 {
     mHost->mTaskKeys->Remove(taskId);
+    return NOERROR;
 }
 
 //============================================
 // KeyStoreLruCache
 //============================================
 
-template<typename V>
-KeyStoreLruCache<V>::KeyStoreLruCache(
+KeyStoreLruCache::KeyStoreLruCache(
     /* [in] */ Int32 cacheSize)
 {
-    AutoPtr<MyLruCache<V> > ml = new MyLruCache<V>(cacheSize, this);
-    mCache = ml;
+    AutoPtr<MyLruCache> ml = new MyLruCache();
+    ml->constructor(cacheSize, this);
+    mCache = ml.Get();
+    CHashMap::New((IHashMap**)&mTaskKeys);
 }
 
-template<typename V>
-V KeyStoreLruCache<V>::Get(
+AutoPtr<IInterface> KeyStoreLruCache::Get(
     /* [in] */ ITaskKey* key)
 {
     AutoPtr<Task::TaskKey> tk = (Task::TaskKey*)key;
     Int32 id = tk->mId;
     AutoPtr<IInteger32> i;
     CInteger32::New(id, (IInteger32**)&i);
-    return mCache->Get(i);
+    AutoPtr<IInterface> value;
+    mCache->Get(i, (IInterface**)&value);
+    return value;
 }
 
-template<typename V>
-V KeyStoreLruCache<V>::GetAndInvalidateIfModified(
+AutoPtr<IInterface> KeyStoreLruCache::GetAndInvalidateIfModified(
     /* [in] */ ITaskKey* key)
 {
     AutoPtr<Task::TaskKey> tk = (Task::TaskKey*)key;
@@ -66,7 +66,7 @@ V KeyStoreLruCache<V>::GetAndInvalidateIfModified(
     AutoPtr<IInterface> lastKeyObj;
     mTaskKeys->Get(i, (IInterface**)&lastKeyObj);
     AutoPtr<ITaskKey> lastKey = ITaskKey::Probe(lastKeyObj);
-    AutoPtr<Task::TaskKey> tkk = (Task::TaskKey*)lastKey;
+    AutoPtr<Task::TaskKey> tkk = (Task::TaskKey*)lastKey.Get();
     if (lastKey != NULL && (tkk->mLastActiveTime < tk->mLastActiveTime)) {
         // The task has updated (been made active since the last time it was put into the
         // LRU cache) so invalidate that item in the cache
@@ -75,51 +75,49 @@ V KeyStoreLruCache<V>::GetAndInvalidateIfModified(
     }
     // Either the task does not exist in the cache, or the last active time is the same as
     // the key specified, so return what is in the cache
-    return mCache->Get(i);
+    AutoPtr<IInterface> value;
+    mCache->Get(i, (IInterface**)&value);
+    return value;
 }
 
-template<typename V>
-void KeyStoreLruCache<V>::Put(
+void KeyStoreLruCache::Put(
     /* [in] */ ITaskKey* key,
-    /* [in] */ V value)
+    /* [in] */ IInterface* value)
 {
     AutoPtr<Task::TaskKey> tk = (Task::TaskKey*)key;
     Int32 id = tk->mId;
     AutoPtr<IInteger32> i;
     CInteger32::New(id, (IInteger32**)&i);
 
-    mCache->Put(i, value);
+    mCache->Put(i, value, NULL);
     mTaskKeys->Put(i, key);
 }
 
-template<typename V>
-void KeyStoreLruCache<V>::Remove(
+void KeyStoreLruCache::Remove(
     /* [in] */ ITaskKey* key)
 {
     AutoPtr<Task::TaskKey> tk = (Task::TaskKey*)key;
     Int32 id = tk->mId;
     AutoPtr<IInteger32> i;
     CInteger32::New(id, (IInteger32**)&i);
-    mCache->Remove(i);
+    mCache->Remove(i, NULL);
     mTaskKeys->Remove(i);
 }
 
-template<typename V>
-void KeyStoreLruCache<V>::EvictAll()
+void KeyStoreLruCache::EvictAll()
 {
     mCache->EvictAll();
     mTaskKeys->Clear();
-    return NOERROR;
 }
 
-template<typename V>
-Int32 KeyStoreLruCache<V>::Size()
+Int32 KeyStoreLruCache::Size()
 {
-    return mCache->Size();
+    Int32 size;
+    mCache->GetSize(&size);
+    return size;
 }
 
-template<typename V>
-void KeyStoreLruCache<V>::TrimToSize(
+void KeyStoreLruCache::TrimToSize(
     /* [in] */ Int32 cacheSize)
 {
     mCache->Resize(cacheSize);

@@ -2393,7 +2393,7 @@ void DatabaseHelper::LoadVolumeLevels(
     db->CompileStatement(String("INSERT OR IGNORE INTO system(name,value) VALUES(?,?);"),
             (ISQLiteStatement**)&stmt);
 
-    Slogger::W(TAG, "TODO: LoadVolumeLevels need CAudioManagerHelper");
+    Logger::W(TAG, "TODO: LoadVolumeLevels need CAudioManagerHelper");
     // AutoPtr<IAudioManagerHelper> helper;
     // CAudioManagerHelper::AcquireSingleton((IAudioManagerHelper**)&helper);
     static Int32 DEFAULT_STREAM_VOLUME[] = { // TODO: delete

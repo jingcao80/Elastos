@@ -7,6 +7,8 @@
 #include <elastos/core/Math.h>
 #include <elastos/core/StringBuilder.h>
 #include <elastos/core/StringUtils.h>
+#include <elastos/core/CoreUtils.h>
+#include <elastos/core/AutoLock.h>
 #include <elastos/utility/logging/Logger.h>
 #include <elastos/utility/logging/Slogger.h>
 
@@ -27,6 +29,7 @@ using Elastos::Droid::Provider::CContactsContractCommonDataKindsEmail;
 using Elastos::Droid::Provider::IContactsContractCommonDataKindsEmail;
 using Elastos::Droid::Text::TextUtils;
 using Elastos::Droid::Utility::ILogHelper;
+using Elastos::Droid::Utility::CLruCache;
 using Elastos::Droid::Utility::CArrayMap;
 using Elastos::Core::CoreUtils;
 using Elastos::Core::EIID_IString;
@@ -37,6 +40,8 @@ using Elastos::Core::IString;
 using Elastos::Core::CSystem;
 using Elastos::Core::ISystem;
 using Elastos::Core::StringBuilder;
+using Elastos::Core::CoreUtils;
+using Elastos::Core::AutoLock;
 using Elastos::Core::StringUtils;
 using Elastos::IO::ICloseable;
 using Elastos::Utility::Concurrent::CTimeUnitHelper;
@@ -230,7 +235,8 @@ ECode ValidateNotificationPeople::PeopleRankingReconsideration::Work()
                 Int32 userId;
                 mContext->GetUserId(&userId);
                 const String cacheKey = mHost->GetCacheKey(userId, handle);
-                mHost->mPeopleCache.Put(cacheKey, lookupResult);
+                AutoPtr<ICharSequence> key = CoreUtils::Convert(cacheKey);
+                mHost->mPeopleCache->Put(key, (IObject*)lookupResult, NULL);
             }
             using Elastos::Core::Math;
             mContactAffinity = Math::Max(mContactAffinity, lookupResult->GetAffinity());
@@ -283,7 +289,7 @@ ECode ValidateNotificationPeople::MyContentObserver::OnChange(
     if (DEBUG || mHost->mEvictionCount % 100 == 0) {
         if (INFO) Slogger::I(TAG, "mEvictionCount: %d", mHost->mEvictionCount);
     }
-    mHost->mPeopleCache.EvictAll();
+    mHost->mPeopleCache->EvictAll();
     mHost->mEvictionCount++;
     return NOERROR;
 }
@@ -317,7 +323,6 @@ CAR_INTERFACE_IMPL_2(ValidateNotificationPeople, Object, IValidateNotificationPe
 
 ValidateNotificationPeople::ValidateNotificationPeople()
     : mEnabled(FALSE)
-    , mPeopleCache(PEOPLE_CACHE_SIZE)
     , mEvictionCount(0)
 {
 }
@@ -329,6 +334,7 @@ ECode ValidateNotificationPeople::Initialize(
     /* [in] */ IContext* context)
 {
     if (DEBUG) Slogger::D(TAG, "Initializing  ValidateNotificationPeople.");
+    CLruCache::New(PEOPLE_CACHE_SIZE, (ILruCache**)&mPeopleCache);
     CArrayMap::New((IMap**)&mUserToContextMap);
     mBaseContext = context;
 
@@ -570,7 +576,10 @@ ECode ValidateNotificationPeople::ValidatePeople(
             Int32 userId;
             context->GetUserId(&userId);
             const String cacheKey = GetCacheKey(userId, handle);
-            AutoPtr<LookupResult> lookupResult = mPeopleCache.Get(cacheKey);
+            AutoPtr<ICharSequence> key = CoreUtils::Convert(cacheKey);
+            AutoPtr<IInterface> value;
+            mPeopleCache->Get(key, (IInterface**)&value);
+            AutoPtr<LookupResult> lookupResult = (LookupResult*)IObject::Probe(value);
             if (lookupResult == NULL || lookupResult->IsExpired()) {
                 pendingLookups->Add(CoreUtils::Convert(handle));
             }

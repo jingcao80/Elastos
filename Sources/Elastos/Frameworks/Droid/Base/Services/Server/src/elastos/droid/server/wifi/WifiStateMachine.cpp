@@ -15,8 +15,6 @@
 #include <elastos/core/StringUtils.h>
 #include <elastos/utility/logging/Logger.h>
 
-#include <elastos/core/AutoLock.h>
-using Elastos::Core::AutoLock;
 using Elastos::Droid::App::Backup::IIBackupManager;
 using Elastos::Droid::App::CPendingIntentHelper;
 using Elastos::Droid::App::IPendingIntentHelper;
@@ -27,6 +25,7 @@ using Elastos::Droid::Content::IContentResolver;
 using Elastos::Droid::Content::IIntentFilter;
 using Elastos::Droid::Content::Pm::IPackageManager;
 using Elastos::Droid::Content::Res::IResources;
+using Elastos::Droid::Utility::CLruCache;
 using Elastos::Droid::Internal::Utility::CAsyncChannel;
 using Elastos::Droid::Net::CDhcpResults;
 using Elastos::Droid::Net::CDhcpStateMachineHelper;
@@ -102,6 +101,7 @@ using Elastos::Droid::Wifi::IWpsResult;
 using Elastos::Droid::Wifi::P2p::IWifiP2pManager;
 using Elastos::Droid::Wifi::WpsResultStatus;
 using Elastos::Droid::Server::Net::CNetlinkTracker;
+using Elastos::Core::AutoLock;
 using Elastos::Core::CoreUtils;
 using Elastos::Core::CSystem;
 using Elastos::Core::CThread;
@@ -1882,7 +1882,8 @@ ECode WifiStateMachine::ConnectModeState::ProcessMessage(
             }
             if (!bssid.IsNull()) {
                 // If we have a BSSID, tell configStore to black list it
-                {    AutoLock syncLock(mHost->mScanResultCache);
+                {
+                    AutoLock syncLock(mHost->mScanResultCache);
                     mHost->mWifiConfigStore->HandleBSSIDBlackList
                             (mHost->mLastNetworkId, bssid, FALSE, &mHost->didBlackListBSSID);
                 }
@@ -1905,7 +1906,8 @@ ECode WifiStateMachine::ConnectModeState::ProcessMessage(
             message->GetArg1(&arg1);
             mHost->Loge(String("ConnectModeState SSID state=") + en + " nid="
                     + StringUtils::ToString(arg1) + " [" + substr + "]");
-            {    AutoLock syncLock(mHost->mScanResultCache);
+            {
+                AutoLock syncLock(mHost->mScanResultCache);
                 String str;
                 mHost->mWifiInfo->GetBSSID(&str);
                 mHost->mWifiConfigStore->HandleSSIDStateChange(arg1, what ==
@@ -2457,7 +2459,8 @@ ECode WifiStateMachine::ConnectModeState::ProcessMessage(
                                 + StringUtils::ToString(networkUpdateResult->GetNetworkId()));
                 }
 
-                {    AutoLock syncLock(mHost->mScanResultCache);
+                {
+                    AutoLock syncLock(mHost->mScanResultCache);
                     /**
                      * If the command comes from WifiManager, then
                      * tell autojoin the user did try to modify and save that network,
@@ -5068,7 +5071,7 @@ WifiStateMachine::WifiStateMachine(
     CIntentFilter::New(IIntent::ACTION_BOOT_COMPLETED, (IIntentFilter**)&filter);
     mContext->RegisterReceiver(bcbr, filter, (IIntent**)&tmpIntent);
 
-    mScanResultCache = new LruCache<String, AutoPtr<IScanResult> >(SCAN_RESULT_CACHE_SIZE);
+    CLruCache::New(SCAN_RESULT_CACHE_SIZE, (ILruCache**)&mScanResultCache);
 
     service = NULL;
     context->GetSystemService(IContext::POWER_SERVICE, (IInterface**)&service);
@@ -5655,7 +5658,8 @@ ECode WifiStateMachine::SyncGetScanResultsList(
     /* [out] */ IList** result)
 {
     VALIDATE_NOT_NULL(result)
-    {    AutoLock syncLock(mScanResultCache);
+    {
+        AutoLock syncLock(mScanResultCache);
         AutoPtr<IArrayList> scanList;
         CArrayList::New((IArrayList**)&scanList);
         Int32 size;
@@ -8418,7 +8422,8 @@ void WifiStateMachine::HandleBSSIDBlacklist(
             + StringUtils::BooleanToString(enable));
     if (bssid != NULL) {
         // Tell configStore to black list it
-        {    AutoLock syncLock(mScanResultCache);
+        {
+            AutoLock syncLock(mScanResultCache);
             mWifiAutoJoinController->HandleBSSIDBlackList( enable, bssid, reason );
             mWifiConfigStore->HandleDisabledAPs( enable, bssid, reason );
         }
@@ -8881,7 +8886,8 @@ void WifiStateMachine::SetScanResults()
     // note that all these splits and substrings keep references to the original
     // huge string buffer while the amount we really want is generally pretty small
     // so make copies instead (one example b/11087956 wasted 400k of heap here).
-    {    AutoLock syncLock(mScanResultCache);
+    {
+        AutoLock syncLock(mScanResultCache);
         CArrayList::New((IArrayList**)&mScanResults);
         AutoPtr<ArrayOf<String> > lines;
         StringUtils::Split(scanResults, String("\n"), (ArrayOf<String>**)&lines);
@@ -8934,7 +8940,10 @@ void WifiStateMachine::SetScanResults()
 
                     AutoPtr<ISystem> system;
                     CSystem::AcquireSingleton((ISystem**)&system);
-                    AutoPtr<IScanResult> scanResult = mScanResultCache->Get(key);
+                    AutoPtr<ICharSequence> keyObj = CoreUtils::Convert(key);
+                    AutoPtr<IInterface> valueObj;
+                    mScanResultCache->Get(keyObj, (IInterface**)&valueObj);
+                    AutoPtr<IScanResult> scanResult = IScanResult::Probe(valueObj);
                     if (scanResult != NULL) {
                         // TODO: average the RSSI, instead of overwriting it
                         scanResult->SetLevel(level);
@@ -8960,7 +8969,7 @@ void WifiStateMachine::SetScanResults()
                         Int64 currentTimeMillis;
                         system->GetCurrentTimeMillis(&currentTimeMillis);
                         scanResult->SetSeen(currentTimeMillis);
-                        mScanResultCache->Put(key, scanResult);
+                        mScanResultCache->Put(keyObj, scanResult, NULL);
                     }
                     mNumScanResultsReturned ++; // Keep track of how many scan results we got
                                                 // as part of this scan's processing
@@ -9011,7 +9020,8 @@ void WifiStateMachine::SetScanResults()
     }
 
     if (mWifiConfigStore->enableAutoJoinWhenAssociated) {
-        {    AutoLock syncLock(mScanResultCache);
+        {
+            AutoLock syncLock(mScanResultCache);
             // AutoJoincontroller will directly acces the scan result list and update it with
             // ScanResult status
             mWifiAutoJoinController->NewSupplicantResults(attemptAutoJoin, &mNumScanResultsKnown);

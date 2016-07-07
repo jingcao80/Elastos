@@ -45,7 +45,8 @@ private:
      * resource disposal because all native statement objects must be freed before
      * the native database object can be closed.  So no finalizers here.
      */
-    class PreparedStatement : public Object
+    class PreparedStatement
+        : public Object
     {
     public:
         PreparedStatement();
@@ -83,10 +84,10 @@ private:
     };
 
     class PreparedStatementCache
-        : public LruCache<String, AutoPtr<PreparedStatement> >
+        : public LruCache
     {
     public:
-        PreparedStatementCache(
+        CARAPI constructor(
             /* [in] */ Int32 size,
             /* [in]) */ SQLiteConnection* host);
 
@@ -94,11 +95,11 @@ private:
             /* [in] */ IPrinter* printer);
 
     protected:
-        CARAPI_(void) EntryRemoved(
+        CARAPI EntryRemoved(
             /* [in] */ Boolean evicted,
-            /* [in] */ String key,
-            /* [in] */ AutoPtr<PreparedStatement> oldValue,
-            /* [in] */ AutoPtr<PreparedStatement> newValue);
+            /* [in] */ IInterface* key,
+            /* [in] */ IInterface* oldValue,
+            /* [in] */ IInterface* newValue);
 
     private:
         SQLiteConnection* mHost;

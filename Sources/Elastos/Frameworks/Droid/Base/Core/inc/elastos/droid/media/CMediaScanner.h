@@ -64,7 +64,6 @@ public:
         CMediaScanner* mOwner;
     };
 
-private:
     /*static*/ class FileEntry : public Object
     {
     public:
@@ -82,19 +81,6 @@ private:
         Int64 mLastModified;
         Int32 mFormat;
         Boolean mLastModifiedChanged;
-    };
-
-    /*static*/ class PlaylistEntry : public Object
-    {
-    public:
-        PlaylistEntry()
-            : mBestmatchid(0)
-            , mBestmatchlevel(0)
-        {}
-
-        String mPath;
-        Int64 mBestmatchid;
-        Int32 mBestmatchlevel;
     };
 
     class MyMediaScannerClient
@@ -216,6 +202,20 @@ private:
         CMediaScanner* mOwner;
     }; // end of anonymous MediaScannerClient instance
 
+private:
+
+    /*static*/ class PlaylistEntry : public Object
+    {
+    public:
+        PlaylistEntry()
+            : mBestmatchid(0)
+            , mBestmatchlevel(0)
+        {}
+
+        String mPath;
+        Int64 mBestmatchid;
+        Int32 mBestmatchlevel;
+    };
     class MediaBulkDeleter : public Object
     {
     public:

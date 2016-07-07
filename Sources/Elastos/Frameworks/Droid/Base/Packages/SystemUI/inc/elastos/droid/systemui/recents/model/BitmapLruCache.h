@@ -5,11 +5,11 @@
 #include "_Elastos.Droid.SystemUI.h"
 #include "Elastos.Droid.Graphics.h"
 #include "elastos/droid/systemui/recents/model/KeyStoreLruCache.h"
+#include <elastos/core/CoreUtils.h>
 
 using Elastos::Droid::Graphics::IBitmap;
 using Elastos::Droid::SystemUI::Recents::Model::KeyStoreLruCache;
-
-DEFINE_OBJECT_HASH_FUNC_FOR(Elastos::Droid::Graphics::IBitmap)
+using Elastos::Core::CoreUtils;
 
 namespace Elastos {
 namespace Droid {
@@ -21,13 +21,36 @@ namespace Model {
  * The Bitmap LRU cache.
  */
 class BitmapLruCache
-    : public KeyStoreLruCache<AutoPtr<IBitmap> >
+    : public KeyStoreLruCache
 {
 public:
     BitmapLruCache(
         /* [in] */ Int32 cacheSize)
-        : KeyStoreLruCache<AutoPtr<IBitmap> >(cacheSize)
+        : KeyStoreLruCache(cacheSize)
     {
+    }
+
+    using KeyStoreLruCache::Get;
+
+    CARAPI_(AutoPtr<IBitmap>) Get(
+        /* [in] */ ITaskKey* key)
+    {
+        AutoPtr<IInterface> value = KeyStoreLruCache::Get(key);
+        return IBitmap::Probe(value);
+    }
+
+    CARAPI_(AutoPtr<IBitmap>) GetAndInvalidateIfModified(
+        /* [in] */ ITaskKey* key)
+    {
+        AutoPtr<IInterface> value = KeyStoreLruCache::GetAndInvalidateIfModified(key);
+        return IBitmap::Probe(value);
+    }
+
+    CARAPI_(void) Put(
+        /* [in] */ ITaskKey* key,
+        /* [in] */ IBitmap* value)
+    {
+        KeyStoreLruCache::Put(key, value);
     }
 };
 
