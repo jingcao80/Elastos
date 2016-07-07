@@ -77,7 +77,6 @@ const AutoPtr<CalculatorEditText::MyActionModeCallback> CalculatorEditText::NO_S
 CalculatorEditText::CalculatorEditText()
     : mWidthConstraint(-1)
 {
-    AutoPtr<IPaint> mTempPaint;
     CTextPaint::New((IPaint**)&mTempPaint);
     CRect::New((IRect**)&mTempRect);
 }

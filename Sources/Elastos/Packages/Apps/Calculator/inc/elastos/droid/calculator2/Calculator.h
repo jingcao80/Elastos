@@ -26,6 +26,7 @@ using Elastos::Droid::View::IKeyEvent;
 using Elastos::Droid::View::IView;
 using Elastos::Droid::View::IViewGroupOverlay;
 using Elastos::Droid::View::IViewOnLongClickListener;
+using Elastos::Droid::View::IViewOnKeyListener;
 using Elastos::Droid::Widget::ITextView;
 using Elastos::Droid::Os::IBundle;
 using Elastos::Droid::Support::V4::View::IViewPager;
@@ -52,8 +53,6 @@ private:
         MyTextWatcher(
             /* [in] */ Calculator* host);
 
-        ~MyTextWatcher();
-
         CAR_INTERFACE_DECL()
 
         CARAPI BeforeTextChanged(
@@ -77,15 +76,13 @@ private:
 
     class MyOnKeyListener
         : public Object
-        , public IViewOnLongClickListener
+        , public IViewOnKeyListener
     {
         friend class Calculator;
 
     public:
         MyOnKeyListener(
             /* [in] */ Calculator* host);
-
-        ~MyOnKeyListener();
 
         CAR_INTERFACE_DECL()
 
@@ -109,8 +106,6 @@ private:
         MyEditableFactory(
             /* [in] */ Calculator* host);
 
-        ~MyEditableFactory();
-
         CAR_INTERFACE_DECL()
 
         CARAPI NewEditable(
@@ -132,8 +127,6 @@ private:
             /* [in] */ IViewGroupOverlay* vgo,
             /* [in] */ IView* view);
 
-        ~MyAnimatorListenerAdapter();
-
         CARAPI OnAnimationEnd(
             /* [in] */ IAnimator* animation);
 
@@ -152,8 +145,6 @@ private:
         MySecondAnimatorListenerAdapter(
             /* [in] */ Calculator* host,
             /* [in] */ ICalculatorEditText* cet);
-
-        ~MySecondAnimatorListenerAdapter();
 
         CARAPI OnAnimationEnd(
             /* [in] */ IAnimator* animation);
@@ -174,8 +165,6 @@ private:
             /* [in] */ ICalculatorEditText* cet,
             /* [in] */ Int32 errorResourceId);
 
-        ~MyThirdAnimatorListenerAdapter();
-
         CARAPI OnAnimationEnd(
             /* [in] */ IAnimator* animation);
 
@@ -195,8 +184,6 @@ private:
         MyAnimatorUpdateListener(
             /* [in] */ Calculator* host,
             /* [in] */ ICalculatorEditText* cet);
-
-        ~MyAnimatorUpdateListener();
 
         CAR_INTERFACE_DECL()
 
@@ -221,8 +208,6 @@ private:
             /* [in] */ IAnimator* animator,
             /* [in] */ const String& str,
             /* [in] */ Int32 color);
-
-        ~MyFourthAnimatorListenerAdapter();
 
         CARAPI OnAnimationStart(
             /* [in] */ IAnimator* animation);
@@ -303,7 +288,7 @@ private:
     static const String KEY_CURRENT_EXPRESSION;
 
     AutoPtr<ITextWatcher> mFormulaTextWatcher;
-    AutoPtr<IViewOnLongClickListener> mFormulaOnKeyListener;
+    AutoPtr<IViewOnKeyListener> mFormulaOnKeyListener;
     AutoPtr<IEditableFactory> mFormulaEditableFactory;
 
     CalculatorState mCurrentState;

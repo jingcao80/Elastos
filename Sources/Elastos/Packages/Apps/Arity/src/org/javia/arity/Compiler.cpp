@@ -32,7 +32,8 @@ ECode Compiler::CompileSimple(
     mSimpleCodeGen->SetSymbols(symbols);
     mRpn->SetConsumer((TokenConsumer*)mSimpleCodeGen.Get());
     FAIL_RETURN(mLexer->Scan(expression, (TokenConsumer*)mRpn.Get()))
-    *func = IFunction::Probe(mSimpleCodeGen->GetFun());
+    AutoPtr<CCompiledFunction> f = mSimpleCodeGen->GetFun();
+    *func = IFunction::Probe(f);
     REFCOUNT_ADD(*func)
     return NOERROR;
 }

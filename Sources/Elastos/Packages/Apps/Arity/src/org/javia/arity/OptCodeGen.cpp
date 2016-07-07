@@ -20,11 +20,11 @@ OptCodeGen::OptCodeGen()
     , mIsPercent(FALSE)
 {
     CEvalContext::NewByFriend((CEvalContext**)&mContext);
-    AutoPtr<ArrayOf<IComplex*> > mStack = mContext->mStackComplex;
-    AutoPtr<ArrayOf<Double> > mTraceConstsRe = ArrayOf<Double>::Alloc(1);
-    AutoPtr<ArrayOf<Double> > mTraceConstsIm = ArrayOf<Double>::Alloc(1);
-    AutoPtr<ArrayOf<IFunction*> > mTraceFuncs = ArrayOf<IFunction*>::Alloc(1);
-    AutoPtr<ArrayOf<Byte> > mTraceCode = ArrayOf<Byte>::Alloc(1);
+    mStack = mContext->mStackComplex;
+    mTraceConstsRe = ArrayOf<Double>::Alloc(1);
+    mTraceConstsIm = ArrayOf<Double>::Alloc(1);
+    mTraceFuncs = ArrayOf<IFunction*>::Alloc(1);
+    mTraceCode = ArrayOf<Byte>::Alloc(1);
     CCompiledFunction::NewByFriend(0, mTraceCode, mTraceConstsRe, mTraceConstsIm, mTraceFuncs,
             (CCompiledFunction**)&mTracer);
 }
