@@ -13,7 +13,6 @@ DEFINE_OBJECT_HASH_FUNC_FOR(IWeakReference)
 //
 // Libcore
 //
-DEFINE_OBJECT_HASH_FUNC_FOR(Elastos::Core::IInteger32)
 DEFINE_OBJECT_HASH_FUNC_FOR(Elastos::Core::ICharSequence)
 
 //
