@@ -12,8 +12,8 @@ using Elastos::Droid::View::IViewConfiguration;
 using Elastos::Droid::View::IViewConfigurationHelper;
 using Elastos::Droid::View::CViewConfigurationHelper;
 using Elastos::Droid::View::IViewParent;
-// using Elastos::Droid::View::IVelocityTrackerHelper;
-// using Elastos::Droid::View::CVelocityTrackerHelper;
+using Elastos::Droid::View::IVelocityTrackerHelper;
+using Elastos::Droid::View::CVelocityTrackerHelper;
 using Elastos::Droid::Widget::CScroller;
 using Elastos::Utility::Arrays;
 using Elastos::Utility::Logging::Logger;
@@ -779,679 +779,633 @@ Boolean ViewDragHelper::TryCaptureViewForDrag(
     return FALSE;
 }
 
-// Boolean ViewDragHelper::CanScroll(
-//     /* [in] */ IView* v,
-//     /* [in] */ Boolean checkV,
-//     /* [in] */ Int32 dx,
-//     /* [in] */ Int32 dy,
-//     /* [in] */ Int32 x,
-//     /* [in] */ Int32 y)
-// {
-//     if (IViewGroup::Probe(v) != NULL) {
-//         IViewGroup* group = IViewGroup::Probe(v);
-//         Int32 scrollX;
-//         v->GetScrollX(&scrollX);
-//         Int32 scrollY;
-//         v->GetScrollY(&scrollY);
-//         Int32 count;
-//         group->GetChildCount(&count);
-//         // Count backwards - let topmost views consume scroll distance first.
-//         for (Int32 i = count - 1; i >= 0; i--) {
-//             // TODO: Add versioned support here for transformed views.
-//             // This will not work for transformed views in Honeycomb+
-//             AutoPtr<IView> child;
-//             group->GetChildAt(i, (IView**)&child);
-//             Int32 left, right, top, bottom;
-//             child->GetLeft(&left);
-//             child->GetRight(&right);
-//             child->GetTop(&top);
-//             child->GetBottom(&bottom);
-//             if (x + scrollX >= left && x + scrollX < right &&
-//                     y + scrollY >= top && y + scrollY < bottom &&
-//                     CanScroll(child, TRUE, dx, dy, x + scrollX - left,
-//                             y + scrollY - top)) {
-//                 return TRUE;
-//             }
-//         }
-//     }
-
-//     assert(0 && "TODO");
-//     // return checkV && (ViewCompat.canScrollHorizontally(v, -dx) ||
-//     //         ViewCompat.canScrollVertically(v, -dy));
-//     return FALSE;
-// }
-
-// ECode ViewDragHelper::ShouldInterceptTouchEvent(
-//     /* [in] */ IMotionEvent* ev,
-//     /* [out] */ Boolean* result)
-// {
-//     VALIDATE_NOT_NULL(result);
-//     Int32 action;
-//     Int32 actionIndex;
-//     assert(0 && "TODO");
-//     // action = MotionEventCompat.getActionMasked(ev);
-//     // actionIndex = MotionEventCompat.getActionIndex(ev);
-
-//     if (action == IMotionEvent::ACTION_DOWN) {
-//         // Reset things for a new event stream, just in case we didn't get
-//         // the whole previous stream.
-//         Cancel();
-//     }
-
-//     if (mVelocityTracker == NULL) {
-//     AutoPtr<IVelocityTrackerHelper> helper;
-//         CVelocityTrackerHelper::AcquireSingleton((IVelocityTrackerHelper**)&helper);
-//         helper->Obtain((IVelocityTracker**)&mVelocityTracker);
-//     }
-//     mVelocityTracker->AddMovement(ev);
-
-//     switch (action) {
-//         case IMotionEvent::ACTION_DOWN: {
-//             Float x;
-//             ev->GetX(&x);
-//             Float y;
-//             ev->GetY(&y);
-//             Int32 pointerId;
-//             assert(0 && "TODO");
-//             // pointerId = MotionEventCompat.getPointerId(ev, 0);
-//             SaveInitialMotion(x, y, pointerId);
-
-//             AutoPtr<IView> toCapture;
-//             FindTopChildUnder((Int32) x, (Int32) y, (IView**)&toCapture);
-
-//             // Catch a settling view if possible.
-//             if (toCapture == mCapturedView && mDragState == IViewDragHelper::STATE_SETTLING) {
-//                 TryCaptureViewForDrag(toCapture, pointerId);
-//             }
-
-//             Int32 edgesTouched = mInitialEdgesTouched[pointerId];
-//             if ((edgesTouched & mTrackingEdges) != 0) {
-//                 mCallback->OnEdgeTouched(edgesTouched & mTrackingEdges, pointerId);
-//             }
-//             break;
-//         }
-
-//         // TODO:
-//         // case MotionEventCompat.ACTION_POINTER_DOWN: {
-//         //     Int32 pointerId = MotionEventCompat.getPointerId(ev, actionIndex);
-//         //     Float x = MotionEventCompat.getX(ev, actionIndex);
-//         //     Float y = MotionEventCompat.getY(ev, actionIndex);
-
-//         //     saveInitialMotion(x, y, pointerId);
-
-//         //     // A ViewDragHelper can only manipulate one view at a time.
-//         //     if (mDragState == IViewDragHelper::STATE_IDLE) {
-//         //         Int32 edgesTouched = mInitialEdgesTouched[pointerId];
-//         //         if ((edgesTouched & mTrackingEdges) != 0) {
-//         //             mCallback.onEdgeTouched(edgesTouched & mTrackingEdges, pointerId);
-//         //         }
-//         //     }
-//         //     else if (mDragState == IViewDragHelper::STATE_SETTLING) {
-//         //         // Catch a settling view if possible.
-//         //         final View toCapture = findTopChildUnder((int) x, (int) y);
-//         //         if (toCapture == mCapturedView) {
-//         //             tryCaptureViewForDrag(toCapture, pointerId);
-//         //         }
-//         //     }
-//         //     break;
-//         // }
-
-//         case IMotionEvent::ACTION_MOVE: {
-//             // First to cross a touch slop over a draggable view wins. Also report edge drags.
-//             Int32 pointerCount;
-//             assert(0 && "TODO");
-//             // pointerCount = MotionEventCompat.getPointerCount(ev);
-//             for (Int32 i = 0; i < pointerCount; i++) {
-//                 Int32 pointerId;
-//                 assert(0 && "TODO");
-//                 // pointerId = MotionEventCompat.getPointerId(ev, i);
-//                 Float x;
-//                 // x = MotionEventCompat.getX(ev, i);
-//                 Float y;
-//                 // y = MotionEventCompat.getY(ev, i);
-//                 Float dx = x - mInitialMotionX[pointerId];
-//                 Float dy = y - mInitialMotionY[pointerId];
-
-//                 ReportNewEdgeDrags(dx, dy, pointerId);
-//                 if (mDragState == IViewDragHelper::STATE_DRAGGING) {
-//                     // Callback might have started an edge drag
-//                     break;
-//                 }
-
-//                 AutoPtr<IView> toCapture;
-//                 FindTopChildUnder((Int32) x, (Int32) y, (IView**)&toCapture);
-//                 Boolean checkRes;
-
-//                 if (toCapture != NULL && CheckTouchSlop(toCapture, dx, dy, &checkRes), checkRes &&
-//                         TryCaptureViewForDrag(toCapture, pointerId)) {
-//                     break;
-//                 }
-//             }
-//             SaveLastMotion(ev);
-//             break;
-//         }
-
-//         // TODO:
-//         // case MotionEventCompat.ACTION_POINTER_UP: {
-//         //     Int32 pointerId = MotionEventCompat.getPointerId(ev, actionIndex);
-//         //     clearMotionHistory(pointerId);
-//         //     break;
-//         // }
-
-//         case IMotionEvent::ACTION_UP:
-//         case IMotionEvent::ACTION_CANCEL: {
-//             Cancel();
-//             break;
-//         }
-//     }
-
-//     *result = mDragState == IViewDragHelper::STATE_DRAGGING;
-//     return NOERROR;
-// }
-
-// ECode ViewDragHelper::ProcessTouchEvent(
-//     /* [in] */ IMotionEvent* ev)
-// {
-//     Int32 action;
-//     assert(0 && "TODO");
-//     // action = MotionEventCompat.getActionMasked(ev);
-//     Int32 actionIndex;
-//     // actionIndex = MotionEventCompat.getActionIndex(ev);
-
-//     if (action == IMotionEvent::ACTION_DOWN) {
-//         // Reset things for a new event stream, just in case we didn't get
-//         // the whole previous stream.
-//         Cancel();
-//     }
-
-//     if (mVelocityTracker == NULL) {
-//         AutoPtr<IVelocityTrackerHelper> helper;
-//         CVelocityTrackerHelper::AcquireSingleton((IVelocityTrackerHelper**)&helper);
-//         helper->Obtain((IVelocityTracker**)&mVelocityTracker);
-//     }
-//     mVelocityTracker->AddMovement(ev);
-
-//     switch (action) {
-//         case IMotionEvent::ACTION_DOWN: {
-//             Float x;
-//             ev->GetX(&x);
-//             Float y;
-//             ev->GetY(&y);
-//             Int32 pointerId;
-//             assert(0 && "TODO");
-//             // pointerId = MotionEventCompat.getPointerId(ev, 0);
-//             AutoPtr<IView> toCapture;
-//             FindTopChildUnder((Int32) x, (Int32) y, (IView**)&toCapture);
-
-//             SaveInitialMotion(x, y, pointerId);
-
-//             // Since the parent is already directly processing this touch event,
-//             // there is no reason to delay for a slop before dragging.
-//             // Start immediately if possible.
-//             TryCaptureViewForDrag(toCapture, pointerId);
-
-//             Int32 edgesTouched = mInitialEdgesTouched[pointerId];
-//             if ((edgesTouched & mTrackingEdges) != 0) {
-//                 mCallback->OnEdgeTouched(edgesTouched & mTrackingEdges, pointerId);
-//             }
-//             break;
-//         }
-
-//         // TODO:
-//         // case MotionEventCompat.ACTION_POINTER_DOWN: {
-//         //     Int32 pointerId = MotionEventCompat.getPointerId(ev, actionIndex);
-//         //     Float x = MotionEventCompat.getX(ev, actionIndex);
-//         //     Float y = MotionEventCompat.getY(ev, actionIndex);
-
-//         //     saveInitialMotion(x, y, pointerId);
-
-//         //     // A ViewDragHelper can only manipulate one view at a time.
-//         //     if (mDragState == STATE_IDLE) {
-//         //         // If we're idle we can do anything! Treat it like a normal down event.
-
-//         //         final View toCapture = findTopChildUnder((int) x, (int) y);
-//         //         tryCaptureViewForDrag(toCapture, pointerId);
-
-//         //         Int32 edgesTouched = mInitialEdgesTouched[pointerId];
-//         //         if ((edgesTouched & mTrackingEdges) != 0) {
-//         //             mCallback.onEdgeTouched(edgesTouched & mTrackingEdges, pointerId);
-//         //         }
-//         //     } else if (isCapturedViewUnder((int) x, (int) y)) {
-//         //         // We're still tracking a captured view. If the same view is under this
-//         //         // point, we'll swap to controlling it with this pointer instead.
-//         //         // (This will still work if we're "catching" a settling view.)
-
-//         //         tryCaptureViewForDrag(mCapturedView, pointerId);
-//         //     }
-//         //     break;
-//         // }
-
-//         case IMotionEvent::ACTION_MOVE: {
-//             if (mDragState == STATE_DRAGGING) {
-//                 Int32 index;
-//                 assert(0 && "TODO");
-//                 // index = MotionEventCompat.findPointerIndex(ev, mActivePointerId);
-//                 Float x;
-//                 // x = MotionEventCompat.getX(ev, index);
-//                 Float y;
-//                 // y = MotionEventCompat.getY(ev, index);
-//                 Int32 idx = (Int32) (x - mLastMotionX[mActivePointerId]);
-//                 Int32 idy = (Int32) (y - mLastMotionY[mActivePointerId]);
-
-//                 Int32 left, top;
-//                 mCapturedView->GetLeft(&left);
-//                 mCapturedView->GetTop(&top);
-//                 DragTo(left + idx, top + idy, idx, idy);
-
-//                 SaveLastMotion(ev);
-//             }
-//             else {
-//                 // Check to see if any pointer is now over a draggable view.
-//                 Int32 pointerCount;
-//                 assert(0 && "TODO");
-//                 // pointerCount = MotionEventCompat.getPointerCount(ev);
-//                 for (Int32 i = 0; i < pointerCount; i++) {
-//                     Int32 pointerId;
-//                     assert(0 && "TODO");
-//                     // pointerId = MotionEventCompat.getPointerId(ev, i);
-//                     Float x;
-//                     // x = MotionEventCompat.getX(ev, i);
-//                     Float y;
-//                     // y = MotionEventCompat.getY(ev, i);
-//                     Float dx = x - mInitialMotionX[pointerId];
-//                     Float dy = y - mInitialMotionY[pointerId];
-
-//                     ReportNewEdgeDrags(dx, dy, pointerId);
-//                     if (mDragState == IViewDragHelper::STATE_DRAGGING) {
-//                         // Callback might have started an edge drag.
-//                         break;
-//                     }
-
-//                     AutoPtr<IView> toCapture;
-//                     FindTopChildUnder((Int32) x, (Int32) y, (IView**)&toCapture);
-//                     Boolean checkRes;
-//                     if (CheckTouchSlop(toCapture, dx, dy, &checkRes), checkRes &&
-//                             TryCaptureViewForDrag(toCapture, pointerId)) {
-//                         break;
-//                     }
-//                 }
-//                 SaveLastMotion(ev);
-//             }
-//             break;
-//         }
-
-//         // TODO:
-//         // case MotionEventCompat.ACTION_POINTER_UP: {
-//         //     Int32 pointerId = MotionEventCompat.getPointerId(ev, actionIndex);
-//         //     if (mDragState == STATE_DRAGGING && pointerId == mActivePointerId) {
-//         //         // Try to find another pointer that's still holding on to the captured view.
-//         //         int newActivePointer = INVALID_POINTER;
-//         //         Int32 pointerCount = MotionEventCompat.getPointerCount(ev);
-//         //         for (int i = 0; i < pointerCount; i++) {
-//         //             Int32 id = MotionEventCompat.getPointerId(ev, i);
-//         //             if (id == mActivePointerId) {
-//         //                 // This one's going away, skip.
-//         //                 continue;
-//         //             }
-
-//         //             Float x = MotionEventCompat.getX(ev, i);
-//         //             Float y = MotionEventCompat.getY(ev, i);
-//         //             if (findTopChildUnder((int) x, (int) y) == mCapturedView &&
-//         //                     tryCaptureViewForDrag(mCapturedView, id)) {
-//         //                 newActivePointer = mActivePointerId;
-//         //                 break;
-//         //             }
-//         //         }
-
-//         //         if (newActivePointer == INVALID_POINTER) {
-//         //             // We didn't find another pointer still touching the view, release it.
-//         //             releaseViewForPointerUp();
-//         //         }
-//         //     }
-//         //     clearMotionHistory(pointerId);
-//         //     break;
-//         // }
-
-//         case IMotionEvent::ACTION_UP: {
-//             if (mDragState == IViewDragHelper::STATE_DRAGGING) {
-//                 ReleaseViewForPointerUp();
-//             }
-//             Cancel();
-//             break;
-//         }
-
-//         case IMotionEvent::ACTION_CANCEL: {
-//             if (mDragState == IViewDragHelper::STATE_DRAGGING) {
-//                 DispatchViewReleased(0, 0);
-//             }
-//             Cancel();
-//             break;
-//         }
-//     }
-//     return NOERROR;
-// }
-
-// void ViewDragHelper::ReportNewEdgeDrags(
-//     /* [in] */ Float dx,
-//     /* [in] */ Float dy,
-//     /* [in] */ Int32 pointerId)
-// {
-//     Int32 dragsStarted = 0;
-//     if (CheckNewEdgeDrag(dx, dy, pointerId, IViewDragHelper::EDGE_LEFT)) {
-//         dragsStarted |= IViewDragHelper::EDGE_LEFT;
-//     }
-//     if (CheckNewEdgeDrag(dy, dx, pointerId, IViewDragHelper::EDGE_TOP)) {
-//         dragsStarted |= IViewDragHelper::EDGE_TOP;
-//     }
-//     if (CheckNewEdgeDrag(dx, dy, pointerId, IViewDragHelper::EDGE_RIGHT)) {
-//         dragsStarted |= IViewDragHelper::EDGE_RIGHT;
-//     }
-//     if (CheckNewEdgeDrag(dy, dx, pointerId, IViewDragHelper::EDGE_BOTTOM)) {
-//         dragsStarted |= IViewDragHelper::EDGE_BOTTOM;
-//     }
-
-//     if (dragsStarted != 0) {
-//         mEdgeDragsInProgress[pointerId] |= dragsStarted;
-//         mCallback->OnEdgeDragStarted(dragsStarted, pointerId);
-//     }
-// }
-
-// Boolean ViewDragHelper::CheckNewEdgeDrag(
-//     /* [in] */ Float delta,
-//     /* [in] */ Float odelta,
-//     /* [in] */ Int32 pointerId,
-//     /* [in] */ Int32 edge)
-// {
-//     Float absDelta = Elastos::Core::Math::Abs(delta);
-//     Float absODelta = Elastos::Core::Math::Abs(odelta);
-
-//     if ((mInitialEdgesTouched[pointerId] & edge) != edge  || (mTrackingEdges & edge) == 0 ||
-//             (mEdgeDragsLocked[pointerId] & edge) == edge ||
-//             (mEdgeDragsInProgress[pointerId] & edge) == edge ||
-//             (absDelta <= mTouchSlop && absODelta <= mTouchSlop)) {
-//         return FALSE;
-//     }
-
-//     Boolean res;
-//     if (absDelta < absODelta * 0.5f && mCallback->OnEdgeLock(edge, &res), res) {
-//         mEdgeDragsLocked[pointerId] |= edge;
-//         return FALSE;
-//     }
-//     return (mEdgeDragsInProgress[pointerId] & edge) == 0 && absDelta > mTouchSlop;
-// }
-
-// Boolean ViewDragHelper::CheckTouchSlop(
-//     /* [in] */ IView* child,
-//     /* [in] */ Float dx,
-//     /* [in] */ Float dy)
-// {
-//     if (child == NULL) {
-//         return FALSE;
-//     }
-//     Int32 range;
-//     mCallback->GetViewHorizontalDragRange(child, &range);
-//     Boolean checkHorizontal = range > 0;
-//     mCallback->GetViewVerticalDragRange(child, &range);
-//     Boolean checkVertical = range > 0;
-
-//     if (checkHorizontal && checkVertical) {
-//         return dx * dx + dy * dy > mTouchSlop * mTouchSlop;
-//     }
-//     else if (checkHorizontal) {
-//         return Elastos::Core::Math::Abs(dx) > mTouchSlop;
-//     }
-//     else if (checkVertical) {
-//         return Elastos::Core::Math::Abs(dy) > mTouchSlop;
-//     }
-//     return FALSE;
-// }
-
-// ECode ViewDragHelper::CheckTouchSlop(
-//     /* [in] */ Int32 directions,
-//     /* [out] */ Boolean* result)
-// {
-//     VALIDATE_NOT_NULL(result);
-//     Int32 count = mInitialMotionX->GetLength();
-//     for (Int32 i = 0; i < count; i++) {
-//         Boolean checkRes;
-//         if (checkTouchSlop(directions, i, &checkRes), checkRes) {
-//             *result = TRUE;
-//             return NOERROR;
-//         }
-//     }
-//     *result = FALSE;
-//     return NOERROR;
-// }
-
-// ECode ViewDragHelper::CheckTouchSlop(
-//     /* [in] */ Int32 directions,
-//     /* [in] */ Int32 pointerId,
-//     /* [out] */ Boolean* result)
-// {
-//     VALIDATE_NOT_NULL(result);
-
-//     Boolean isPointerDown;
-//     if (IsPointerDown(pointerId, &isPointerDown), !isPointerDown) {
-//         *result = FALSE;
-//         return NOERROR;
-//     }
-
-//     Boolean checkHorizontal = (directions & IViewDragHelper::DIRECTION_HORIZONTAL)
-//             == IViewDragHelper::DIRECTION_HORIZONTAL;
-//     Boolean checkVertical = (directions & IViewDragHelper::DIRECTION_VERTICAL)
-//             == IViewDragHelper::DIRECTION_VERTICAL;
-
-//     Float dx = mLastMotionX[pointerId] - mInitialMotionX[pointerId];
-//     Float dy = mLastMotionY[pointerId] - mInitialMotionY[pointerId];
-
-//     if (checkHorizontal && checkVertical) {
-//         *result = dx * dx + dy * dy > mTouchSlop * mTouchSlop;
-//         return NOERROR;
-//     }
-//     else if (checkHorizontal) {
-//         *result = Elastos::Core::Math::Abs(dx) > mTouchSlop;
-//         return NOERROR;
-//     }
-//     else if (checkVertical) {
-//         *result = Elastos::Core::Math::Abs(dy) > mTouchSlop;
-//         return NOERROR;
-//     }
-//     *result = FALSE;
-//     return NOERROR;
-// }
-
-// ECode ViewDragHelper::IsEdgeTouched(
-//     /* [in] */ Int32 edges,
-//     /* [out] */ Boolean* result)
-// {
-//     VALIDATE_NOT_NULL(result);
-//     Int32 count = mInitialEdgesTouched->GetLength();
-//     for (Int32 i = 0; i < count; i++) {
-//         Boolean isEdgeTouched;
-//         if (IsEdgeTouched(edges, i, &isEdgeTouched), isEdgeTouched) {
-//             *result = TRUE;
-//             return NOERROR;
-//         }
-//     }
-//     *result = FALSE;
-//     return NOERROR;
-// }
-
-// ECode ViewDragHelper::IsEdgeTouched(
-//     /* [in] */ Int32 edges,
-//     /* [in] */ Int32 pointerId,
-//     /* [out] */ Boolean* result)
-// {
-//     VALIDATE_NOT_NULL(result);
-//     Boolean isPointerDown;
-//     IsPointerDown(pointerId, &isPointerDown);
-//     *result = isPointerDown && (mInitialEdgesTouched[pointerId] & edges) != 0;
-//     return NOERROR;
-// }
-
-// void ViewDragHelper::ReleaseViewForPointerUp()
-// {
-//     mVelocityTracker->ComputeCurrentVelocity(1000, mMaxVelocity);
-//     assert(0 && "TODO");
-//     // Float xvel = ClampMag(
-//     //         VelocityTrackerCompat.getXVelocity(mVelocityTracker, mActivePointerId),
-//     //         mMinVelocity, mMaxVelocity);
-//     // Float yvel = ClampMag(
-//     //         VelocityTrackerCompat.getYVelocity(mVelocityTracker, mActivePointerId),
-//     //         mMinVelocity, mMaxVelocity);
-//     // DispatchViewReleased(xvel, yvel);
-// }
-
-// void ViewDragHelper::DragTo(
-//     /* [in] */ Int32 left,
-//     /* [in] */ Int32 top,
-//     /* [in] */ Int32 dx,
-//     /* [in] */ Int32 dy)
-// {
-//     Int32 clampedX = left;
-//     Int32 clampedY = top;
-//     Int32 oldLeft;
-//     mCapturedView0>GetLeft(&oldLeft);
-//     Int32 oldTop;
-//     mCapturedView0>GetTop(&oldTop);
-//     if (dx != 0) {
-//         mCallback->ClampViewPositionHorizontal(mCapturedView, left, dx, &clampedX);
-//         mCapturedView->OffsetLeftAndRight(clampedX - oldLeft);
-//     }
-//     if (dy != 0) {
-//         mCallback->ClampViewPositionVertical(mCapturedView, top, dy, &clampedY);
-//         mCapturedView->OffsetTopAndBottom(clampedY - oldTop);
-//     }
-
-//     if (dx != 0 || dy != 0) {
-//         Int32 clampedDx = clampedX - oldLeft;
-//         Int32 clampedDy = clampedY - oldTop;
-//         mCallback->OnViewPositionChanged(mCapturedView, clampedX, clampedY,
-//                 clampedDx, clampedDy);
-//     }
-// }
-
-// ECode ViewDragHelper::IsCapturedViewUnder(
-//     /* [in] */ Int32 x,
-//     /* [in] */ Int32 y,
-//     /* [out] */ Boolean* result)
-// {
-//     VALIDATE_NOT_NULL(result);
-
-//     return IsViewUnder(mCapturedView, x, y, result);
-// }
-
-// ECode ViewDragHelper::IsViewUnder(
-//     /* [in] */ IView* view,
-//     /* [in] */ Int32 x,
-//     /* [in] */ Int32 y,
-//     /* [out] */ Boolean* result)
-// {
-//     VALIDATE_NOT_NULL(result);
-//     if (view == NULL) {
-//         *result = FALSE;
-//     }
-//     Int32 left, right, top, bottom;
-//     view->GetLeft(&left);
-//     view->GetRight(&right);
-//     view->GetTop(&top);
-//     view->GetBottom(&bottom);
-//     *result = x >= left &&  x < right &&
-//             y >= top && y < bottom;
-//     return NOERROR;
-// }
-
-// ECode ViewDragHelper::FindTopChildUnder(
-//     /* [in] */ Int32 x,
-//     /* [in] */ Int32 y
-//     /* [out] */ IView** view)
-// {
-//     VALIDATE_NOT_NULL(view);
-//     Int32 childCount;
-//     mParentView->GetChildCount(&childCount);
-//     for (Int32 i = childCount - 1; i >= 0; i--) {
-//         Int32 index;
-//         mCallback->GetOrderedChildIndex(i, &index);
-//         AutoPtr<IView> child;
-//         mParentView->GetChildAt(index, (IView**)&child);
-//         Int32 left, right, top, bottom;
-//         child->GetLeft(&left);
-//         child->GetRight(&right);
-//         child->GetTop(&top);
-//         child->GetBottom(&bottom);
-//         if (x >= left && x < right &&
-//                 y >= top && y < bottom) {
-//             *view = child;
-//             REFCOUNT_ADD(*view);
-//             return NOERROR;
-//         }
-//     }
-//     *view = NULL;
-//     return NOERROR;
-// }
-
-// Int32 ViewDragHelper::GetEdgesTouched(
-//     /* [in] */ Int32 x,
-//     /* [in] */ Int32 y)
-// {
-//     Int32 result = 0;
-
-//     Int32 left, right, top, bottom;
-//     mParentView->GetLeft(&left);
-//     mParentView->GetRight(&right);
-//     mParentView->GetTop(&top);
-//     mParentView->GetBottom(&bottom);
-//     if (x < left + mEdgeSize) result |= IViewDragHelper::EDGE_LEFT;
-//     if (y < top + mEdgeSize) result |= IViewDragHelper::EDGE_TOP;
-//     if (x > right - mEdgeSize) result |= IViewDragHelper::EDGE_RIGHT;
-//     if (y > bottom - mEdgeSize) result |= IViewDragHelper::EDGE_BOTTOM;
-
-//     return result;
-// }
-
-// ECode ViewDragHelper::StartNestedScroll(
-//     /* [in] */ IView* target)
-// {
-//     if (mVelocityTracker == NULL) {
-//         AutoPtr<IVelocityTrackerHelper> helper;
-//         CVelocityTrackerHelper::AcquireSingleton((IVelocityTrackerHelper**)&helper);
-//         helper->Obtain((IVelocityTracker**)&mVelocityTracker);
-//     }
-//     SetDragState(IViewDragHelper::STATE_DRAGGING);
-//     mCapturedView = target;
-//     return NOERROR;
-// }
-
-// ECode ViewDragHelper::StopNestedScroll(
-//     /* [in] */ IView* target)
-// {
-//     mCapturedView = target;
-//     DispatchViewReleased(0, 0);
-//     return NOERROR;
-// }
-
-// ECode ViewDragHelper::ProcessNestedScroll(
-//     /* [in] */ IView* target,
-//     /* [in] */ Int32 dx,
-//     /* [in] */ Int32 dy,
-//     /* [in] */ ArrayOf<Int32>* consumed)
-// {
-//     Int32 left, top;
-//     mCapturedView->GetLeft(&left);
-//     mCapturedView->GetTop(&top);
-//     Int32 targetX = left + dx;
-//     Int32 targetY = top + dy;
-//     DragTo(targetX, targetY, dx, dy);
-//     if (consumed != null) {
-//         mCapturedView->GetLeft(&left);
-//         mCapturedView->GetTop(&top);
-//         Int32 unconsumedX = targetX - left;
-//         Int32 unconsumedY = targetY - top;
-//         consumed[0] = unconsumedX - dx;
-//         consumed[1] = unconsumedY - dy;
-//     }
-//     return NOERROR;
-// }
+Boolean ViewDragHelper::CanScroll(
+    /* [in] */ IView* v,
+    /* [in] */ Boolean checkV,
+    /* [in] */ Int32 dx,
+    /* [in] */ Int32 dy,
+    /* [in] */ Int32 x,
+    /* [in] */ Int32 y)
+{
+    if (IViewGroup::Probe(v) != NULL) {
+        IViewGroup* group = IViewGroup::Probe(v);
+        Int32 scrollX;
+        v->GetScrollX(&scrollX);
+        Int32 scrollY;
+        v->GetScrollY(&scrollY);
+        Int32 count;
+        group->GetChildCount(&count);
+        // Count backwards - let topmost views consume scroll distance first.
+        for (Int32 i = count - 1; i >= 0; i--) {
+            // TODO: Add versioned support here for transformed views.
+            // This will not work for transformed views in Honeycomb+
+            AutoPtr<IView> child;
+            group->GetChildAt(i, (IView**)&child);
+            Int32 left, right, top, bottom;
+            child->GetLeft(&left);
+            child->GetRight(&right);
+            child->GetTop(&top);
+            child->GetBottom(&bottom);
+            if (x + scrollX >= left && x + scrollX < right &&
+                    y + scrollY >= top && y + scrollY < bottom &&
+                    CanScroll(child, TRUE, dx, dy, x + scrollX - left,
+                            y + scrollY - top)) {
+                return TRUE;
+            }
+        }
+    }
+
+    assert(0 && "TODO");
+    // return checkV && (ViewCompat.canScrollHorizontally(v, -dx) ||
+    //         ViewCompat.canScrollVertically(v, -dy));
+    return FALSE;
+}
+
+Boolean ViewDragHelper::ShouldInterceptTouchEvent(
+    /* [in] */ IMotionEvent* ev)
+{
+    Int32 action;
+    Int32 actionIndex;
+    assert(0 && "TODO");
+    // action = MotionEventCompat.getActionMasked(ev);
+    // actionIndex = MotionEventCompat.getActionIndex(ev);
+
+    if (action == IMotionEvent::ACTION_DOWN) {
+        // Reset things for a new event stream, just in case we didn't get
+        // the whole previous stream.
+        Cancel();
+    }
+
+    if (mVelocityTracker == NULL) {
+        AutoPtr<IVelocityTrackerHelper> helper;
+        CVelocityTrackerHelper::AcquireSingleton((IVelocityTrackerHelper**)&helper);
+        helper->Obtain((IVelocityTracker**)&mVelocityTracker);
+    }
+    mVelocityTracker->AddMovement(ev);
+
+    switch (action) {
+        case IMotionEvent::ACTION_DOWN: {
+            Float x;
+            ev->GetX(&x);
+            Float y;
+            ev->GetY(&y);
+            Int32 pointerId;
+            assert(0 && "TODO");
+            // pointerId = MotionEventCompat.getPointerId(ev, 0);
+            SaveInitialMotion(x, y, pointerId);
+
+            AutoPtr<IView> toCapture = FindTopChildUnder((Int32) x, (Int32) y);
+
+            // Catch a settling view if possible.
+            if (toCapture == mCapturedView && mDragState == STATE_SETTLING) {
+                TryCaptureViewForDrag(toCapture, pointerId);
+            }
+
+            Int32 edgesTouched = (*mInitialEdgesTouched)[pointerId];
+            if ((edgesTouched & mTrackingEdges) != 0) {
+                mCallback->OnEdgeTouched(edgesTouched & mTrackingEdges, pointerId);
+            }
+            break;
+        }
+
+        // TODO:
+        // case MotionEventCompat.ACTION_POINTER_DOWN: {
+        //     Int32 pointerId = MotionEventCompat.getPointerId(ev, actionIndex);
+        //     Float x = MotionEventCompat.getX(ev, actionIndex);
+        //     Float y = MotionEventCompat.getY(ev, actionIndex);
+
+        //     saveInitialMotion(x, y, pointerId);
+
+        //     // A ViewDragHelper can only manipulate one view at a time.
+        //     if (mDragState == IViewDragHelper::STATE_IDLE) {
+        //         Int32 edgesTouched = mInitialEdgesTouched[pointerId];
+        //         if ((edgesTouched & mTrackingEdges) != 0) {
+        //             mCallback.onEdgeTouched(edgesTouched & mTrackingEdges, pointerId);
+        //         }
+        //     }
+        //     else if (mDragState == IViewDragHelper::STATE_SETTLING) {
+        //         // Catch a settling view if possible.
+        //         final View toCapture = findTopChildUnder((int) x, (int) y);
+        //         if (toCapture == mCapturedView) {
+        //             tryCaptureViewForDrag(toCapture, pointerId);
+        //         }
+        //     }
+        //     break;
+        // }
+
+        case IMotionEvent::ACTION_MOVE: {
+            // First to cross a touch slop over a draggable view wins. Also report edge drags.
+            Int32 pointerCount;
+            assert(0 && "TODO");
+            // pointerCount = MotionEventCompat.getPointerCount(ev);
+            for (Int32 i = 0; i < pointerCount; i++) {
+                Int32 pointerId;
+                assert(0 && "TODO");
+                // pointerId = MotionEventCompat.getPointerId(ev, i);
+                Float x;
+                // x = MotionEventCompat.getX(ev, i);
+                Float y;
+                // y = MotionEventCompat.getY(ev, i);
+                Float dx = x - (*mInitialMotionX)[pointerId];
+                Float dy = y - (*mInitialMotionY)[pointerId];
+
+                ReportNewEdgeDrags(dx, dy, pointerId);
+                if (mDragState == STATE_DRAGGING) {
+                    // Callback might have started an edge drag
+                    break;
+                }
+
+                AutoPtr<IView> toCapture = FindTopChildUnder((Int32) x, (Int32) y);
+                Boolean checkRes;
+
+                if (toCapture != NULL && CheckTouchSlop(toCapture, dx, dy) &&
+                        TryCaptureViewForDrag(toCapture, pointerId)) {
+                    break;
+                }
+            }
+            SaveLastMotion(ev);
+            break;
+        }
+
+        // TODO:
+        // case MotionEventCompat.ACTION_POINTER_UP: {
+        //     Int32 pointerId = MotionEventCompat.getPointerId(ev, actionIndex);
+        //     clearMotionHistory(pointerId);
+        //     break;
+        // }
+
+        case IMotionEvent::ACTION_UP:
+        case IMotionEvent::ACTION_CANCEL: {
+            Cancel();
+            break;
+        }
+    }
+
+    return mDragState == STATE_DRAGGING;
+}
+
+void ViewDragHelper::ProcessTouchEvent(
+    /* [in] */ IMotionEvent* ev)
+{
+    Int32 action;
+    assert(0 && "TODO");
+    // action = MotionEventCompat.getActionMasked(ev);
+    Int32 actionIndex;
+    // actionIndex = MotionEventCompat.getActionIndex(ev);
+
+    if (action == IMotionEvent::ACTION_DOWN) {
+        // Reset things for a new event stream, just in case we didn't get
+        // the whole previous stream.
+        Cancel();
+    }
+
+    if (mVelocityTracker == NULL) {
+        AutoPtr<IVelocityTrackerHelper> helper;
+        CVelocityTrackerHelper::AcquireSingleton((IVelocityTrackerHelper**)&helper);
+        helper->Obtain((IVelocityTracker**)&mVelocityTracker);
+    }
+    mVelocityTracker->AddMovement(ev);
+
+    switch (action) {
+        case IMotionEvent::ACTION_DOWN: {
+            Float x;
+            ev->GetX(&x);
+            Float y;
+            ev->GetY(&y);
+            Int32 pointerId;
+            assert(0 && "TODO");
+            // pointerId = MotionEventCompat.getPointerId(ev, 0);
+            AutoPtr<IView> toCapture = FindTopChildUnder((Int32) x, (Int32) y);
+
+            SaveInitialMotion(x, y, pointerId);
+
+            // Since the parent is already directly processing this touch event,
+            // there is no reason to delay for a slop before dragging.
+            // Start immediately if possible.
+            TryCaptureViewForDrag(toCapture, pointerId);
+
+            Int32 edgesTouched = (*mInitialEdgesTouched)[pointerId];
+            if ((edgesTouched & mTrackingEdges) != 0) {
+                mCallback->OnEdgeTouched(edgesTouched & mTrackingEdges, pointerId);
+            }
+            break;
+        }
+
+        // TODO:
+        // case MotionEventCompat.ACTION_POINTER_DOWN: {
+        //     Int32 pointerId = MotionEventCompat.getPointerId(ev, actionIndex);
+        //     Float x = MotionEventCompat.getX(ev, actionIndex);
+        //     Float y = MotionEventCompat.getY(ev, actionIndex);
+
+        //     saveInitialMotion(x, y, pointerId);
+
+        //     // A ViewDragHelper can only manipulate one view at a time.
+        //     if (mDragState == STATE_IDLE) {
+        //         // If we're idle we can do anything! Treat it like a normal down event.
+
+        //         final View toCapture = findTopChildUnder((int) x, (int) y);
+        //         tryCaptureViewForDrag(toCapture, pointerId);
+
+        //         Int32 edgesTouched = mInitialEdgesTouched[pointerId];
+        //         if ((edgesTouched & mTrackingEdges) != 0) {
+        //             mCallback.onEdgeTouched(edgesTouched & mTrackingEdges, pointerId);
+        //         }
+        //     } else if (isCapturedViewUnder((int) x, (int) y)) {
+        //         // We're still tracking a captured view. If the same view is under this
+        //         // point, we'll swap to controlling it with this pointer instead.
+        //         // (This will still work if we're "catching" a settling view.)
+
+        //         tryCaptureViewForDrag(mCapturedView, pointerId);
+        //     }
+        //     break;
+        // }
+
+        case IMotionEvent::ACTION_MOVE: {
+            if (mDragState == STATE_DRAGGING) {
+                Int32 index;
+                assert(0 && "TODO");
+                // index = MotionEventCompat.findPointerIndex(ev, mActivePointerId);
+                Float x;
+                // x = MotionEventCompat.getX(ev, index);
+                Float y;
+                // y = MotionEventCompat.getY(ev, index);
+                Int32 idx = (Int32) (x - (*mLastMotionX)[mActivePointerId]);
+                Int32 idy = (Int32) (y - (*mLastMotionY)[mActivePointerId]);
+
+                Int32 left, top;
+                mCapturedView->GetLeft(&left);
+                mCapturedView->GetTop(&top);
+                DragTo(left + idx, top + idy, idx, idy);
+
+                SaveLastMotion(ev);
+            }
+            else {
+                // Check to see if any pointer is now over a draggable view.
+                Int32 pointerCount;
+                assert(0 && "TODO");
+                // pointerCount = MotionEventCompat.getPointerCount(ev);
+                for (Int32 i = 0; i < pointerCount; i++) {
+                    Int32 pointerId;
+                    assert(0 && "TODO");
+                    // pointerId = MotionEventCompat.getPointerId(ev, i);
+                    Float x;
+                    // x = MotionEventCompat.getX(ev, i);
+                    Float y;
+                    // y = MotionEventCompat.getY(ev, i);
+                    Float dx = x - (*mInitialMotionX)[pointerId];
+                    Float dy = y - (*mInitialMotionY)[pointerId];
+
+                    ReportNewEdgeDrags(dx, dy, pointerId);
+                    if (mDragState == STATE_DRAGGING) {
+                        // Callback might have started an edge drag.
+                        break;
+                    }
+
+                    AutoPtr<IView> toCapture = FindTopChildUnder((Int32) x, (Int32) y);
+                    if (CheckTouchSlop(toCapture, dx, dy) &&
+                            TryCaptureViewForDrag(toCapture, pointerId)) {
+                        break;
+                    }
+                }
+                SaveLastMotion(ev);
+            }
+            break;
+        }
+
+        // TODO:
+        // case MotionEventCompat.ACTION_POINTER_UP: {
+        //     Int32 pointerId = MotionEventCompat.getPointerId(ev, actionIndex);
+        //     if (mDragState == STATE_DRAGGING && pointerId == mActivePointerId) {
+        //         // Try to find another pointer that's still holding on to the captured view.
+        //         int newActivePointer = INVALID_POINTER;
+        //         Int32 pointerCount = MotionEventCompat.getPointerCount(ev);
+        //         for (int i = 0; i < pointerCount; i++) {
+        //             Int32 id = MotionEventCompat.getPointerId(ev, i);
+        //             if (id == mActivePointerId) {
+        //                 // This one's going away, skip.
+        //                 continue;
+        //             }
+
+        //             Float x = MotionEventCompat.getX(ev, i);
+        //             Float y = MotionEventCompat.getY(ev, i);
+        //             if (findTopChildUnder((int) x, (int) y) == mCapturedView &&
+        //                     tryCaptureViewForDrag(mCapturedView, id)) {
+        //                 newActivePointer = mActivePointerId;
+        //                 break;
+        //             }
+        //         }
+
+        //         if (newActivePointer == INVALID_POINTER) {
+        //             // We didn't find another pointer still touching the view, release it.
+        //             releaseViewForPointerUp();
+        //         }
+        //     }
+        //     clearMotionHistory(pointerId);
+        //     break;
+        // }
+
+        case IMotionEvent::ACTION_UP: {
+            if (mDragState == STATE_DRAGGING) {
+                ReleaseViewForPointerUp();
+            }
+            Cancel();
+            break;
+        }
+
+        case IMotionEvent::ACTION_CANCEL: {
+            if (mDragState == STATE_DRAGGING) {
+                DispatchViewReleased(0, 0);
+            }
+            Cancel();
+            break;
+        }
+    }
+}
+
+void ViewDragHelper::ReportNewEdgeDrags(
+    /* [in] */ Float dx,
+    /* [in] */ Float dy,
+    /* [in] */ Int32 pointerId)
+{
+    Int32 dragsStarted = 0;
+    if (CheckNewEdgeDrag(dx, dy, pointerId, EDGE_LEFT)) {
+        dragsStarted |= EDGE_LEFT;
+    }
+    if (CheckNewEdgeDrag(dy, dx, pointerId, EDGE_TOP)) {
+        dragsStarted |= EDGE_TOP;
+    }
+    if (CheckNewEdgeDrag(dx, dy, pointerId, EDGE_RIGHT)) {
+        dragsStarted |= EDGE_RIGHT;
+    }
+    if (CheckNewEdgeDrag(dy, dx, pointerId, EDGE_BOTTOM)) {
+        dragsStarted |= EDGE_BOTTOM;
+    }
+
+    if (dragsStarted != 0) {
+        (*mEdgeDragsInProgress)[pointerId] |= dragsStarted;
+        mCallback->OnEdgeDragStarted(dragsStarted, pointerId);
+    }
+}
+
+Boolean ViewDragHelper::CheckNewEdgeDrag(
+    /* [in] */ Float delta,
+    /* [in] */ Float odelta,
+    /* [in] */ Int32 pointerId,
+    /* [in] */ Int32 edge)
+{
+    Float absDelta = Elastos::Core::Math::Abs(delta);
+    Float absODelta = Elastos::Core::Math::Abs(odelta);
+
+    if (((*mInitialEdgesTouched)[pointerId] & edge) != edge  || (mTrackingEdges & edge) == 0 ||
+            ((*mEdgeDragsLocked)[pointerId] & edge) == edge ||
+            ((*mEdgeDragsInProgress)[pointerId] & edge) == edge ||
+            (absDelta <= mTouchSlop && absODelta <= mTouchSlop)) {
+        return FALSE;
+    }
+
+    Boolean res;
+    if (absDelta < absODelta * 0.5f && (mCallback->OnEdgeLock(edge, &res), res)) {
+        (*mEdgeDragsLocked)[pointerId] |= edge;
+        return FALSE;
+    }
+    return ((*mEdgeDragsInProgress)[pointerId] & edge) == 0 && absDelta > mTouchSlop;
+}
+
+Boolean ViewDragHelper::CheckTouchSlop(
+    /* [in] */ IView* child,
+    /* [in] */ Float dx,
+    /* [in] */ Float dy)
+{
+    if (child == NULL) {
+        return FALSE;
+    }
+    Int32 range;
+    mCallback->GetViewHorizontalDragRange(child, &range);
+    Boolean checkHorizontal = range > 0;
+    mCallback->GetViewVerticalDragRange(child, &range);
+    Boolean checkVertical = range > 0;
+
+    if (checkHorizontal && checkVertical) {
+        return dx * dx + dy * dy > mTouchSlop * mTouchSlop;
+    }
+    else if (checkHorizontal) {
+        return Elastos::Core::Math::Abs(dx) > mTouchSlop;
+    }
+    else if (checkVertical) {
+        return Elastos::Core::Math::Abs(dy) > mTouchSlop;
+    }
+    return FALSE;
+}
+
+Boolean ViewDragHelper::CheckTouchSlop(
+    /* [in] */ Int32 directions)
+{
+    Int32 count = mInitialMotionX->GetLength();
+    for (Int32 i = 0; i < count; i++) {
+        Boolean checkRes;
+        if (CheckTouchSlop(directions, i)) {
+            return TRUE;
+        }
+    }
+    return FALSE;
+}
+
+Boolean ViewDragHelper::CheckTouchSlop(
+    /* [in] */ Int32 directions,
+    /* [in] */ Int32 pointerId)
+{
+    if (!IsPointerDown(pointerId)) {
+        return FALSE;
+    }
+
+    Boolean checkHorizontal = (directions & DIRECTION_HORIZONTAL)
+            == DIRECTION_HORIZONTAL;
+    Boolean checkVertical = (directions & DIRECTION_VERTICAL)
+            == DIRECTION_VERTICAL;
+
+    Float dx = (*mLastMotionX)[pointerId] - (*mInitialMotionX)[pointerId];
+    Float dy = (*mLastMotionY)[pointerId] - (*mInitialMotionY)[pointerId];
+
+    if (checkHorizontal && checkVertical) {
+        return dx * dx + dy * dy > mTouchSlop * mTouchSlop;
+    }
+    else if (checkHorizontal) {
+        return Elastos::Core::Math::Abs(dx) > mTouchSlop;
+    }
+    else if (checkVertical) {
+        return Elastos::Core::Math::Abs(dy) > mTouchSlop;
+    }
+    return FALSE;
+}
+
+Boolean ViewDragHelper::IsEdgeTouched(
+    /* [in] */ Int32 edges)
+{
+    Int32 count = mInitialEdgesTouched->GetLength();
+    for (Int32 i = 0; i < count; i++) {
+        if (IsEdgeTouched(edges, i)) {
+            return TRUE;
+        }
+    }
+    return FALSE;
+}
+
+Boolean ViewDragHelper::IsEdgeTouched(
+    /* [in] */ Int32 edges,
+    /* [in] */ Int32 pointerId)
+{
+    return IsPointerDown(pointerId) && ((*mInitialEdgesTouched)[pointerId] & edges) != 0;
+}
+
+void ViewDragHelper::ReleaseViewForPointerUp()
+{
+    mVelocityTracker->ComputeCurrentVelocity(1000, mMaxVelocity);
+    assert(0 && "TODO");
+    // Float xvel = ClampMag(
+    //         VelocityTrackerCompat.getXVelocity(mVelocityTracker, mActivePointerId),
+    //         mMinVelocity, mMaxVelocity);
+    // Float yvel = ClampMag(
+    //         VelocityTrackerCompat.getYVelocity(mVelocityTracker, mActivePointerId),
+    //         mMinVelocity, mMaxVelocity);
+    // DispatchViewReleased(xvel, yvel);
+}
+
+void ViewDragHelper::DragTo(
+    /* [in] */ Int32 left,
+    /* [in] */ Int32 top,
+    /* [in] */ Int32 dx,
+    /* [in] */ Int32 dy)
+{
+    Int32 clampedX = left;
+    Int32 clampedY = top;
+    Int32 oldLeft;
+    mCapturedView->GetLeft(&oldLeft);
+    Int32 oldTop;
+    mCapturedView->GetTop(&oldTop);
+    if (dx != 0) {
+        mCallback->ClampViewPositionHorizontal(mCapturedView, left, dx, &clampedX);
+        mCapturedView->OffsetLeftAndRight(clampedX - oldLeft);
+    }
+    if (dy != 0) {
+        mCallback->ClampViewPositionVertical(mCapturedView, top, dy, &clampedY);
+        mCapturedView->OffsetTopAndBottom(clampedY - oldTop);
+    }
+
+    if (dx != 0 || dy != 0) {
+        Int32 clampedDx = clampedX - oldLeft;
+        Int32 clampedDy = clampedY - oldTop;
+        mCallback->OnViewPositionChanged(mCapturedView, clampedX, clampedY,
+                clampedDx, clampedDy);
+    }
+}
+
+Boolean ViewDragHelper::IsCapturedViewUnder(
+    /* [in] */ Int32 x,
+    /* [in] */ Int32 y)
+{
+    return IsViewUnder(mCapturedView, x, y);
+}
+
+Boolean ViewDragHelper::IsViewUnder(
+    /* [in] */ IView* view,
+    /* [in] */ Int32 x,
+    /* [in] */ Int32 y)
+{
+    if (view == NULL) {
+        return FALSE;
+    }
+    Int32 left, right, top, bottom;
+    view->GetLeft(&left);
+    view->GetRight(&right);
+    view->GetTop(&top);
+    view->GetBottom(&bottom);
+    return x >= left &&  x < right &&
+            y >= top && y < bottom;
+}
+
+AutoPtr<IView> ViewDragHelper::FindTopChildUnder(
+    /* [in] */ Int32 x,
+    /* [in] */ Int32 y)
+{
+    Int32 childCount;
+    mParentView->GetChildCount(&childCount);
+    for (Int32 i = childCount - 1; i >= 0; i--) {
+        Int32 index;
+        mCallback->GetOrderedChildIndex(i, &index);
+        AutoPtr<IView> child;
+        mParentView->GetChildAt(index, (IView**)&child);
+        Int32 left, right, top, bottom;
+        child->GetLeft(&left);
+        child->GetRight(&right);
+        child->GetTop(&top);
+        child->GetBottom(&bottom);
+        if (x >= left && x < right &&
+                y >= top && y < bottom) {
+            return child;
+        }
+    }
+    return NULL;
+}
+
+Int32 ViewDragHelper::GetEdgesTouched(
+    /* [in] */ Int32 x,
+    /* [in] */ Int32 y)
+{
+    Int32 result = 0;
+
+    Int32 left, right, top, bottom;
+    IView::Probe(mParentView)->GetLeft(&left);
+    IView::Probe(mParentView)->GetRight(&right);
+    IView::Probe(mParentView)->GetTop(&top);
+    IView::Probe(mParentView)->GetBottom(&bottom);
+    if (x < left + mEdgeSize) result |= EDGE_LEFT;
+    if (y < top + mEdgeSize) result |= EDGE_TOP;
+    if (x > right - mEdgeSize) result |= EDGE_RIGHT;
+    if (y > bottom - mEdgeSize) result |= EDGE_BOTTOM;
+
+    return result;
+}
+
+void ViewDragHelper::StartNestedScroll(
+    /* [in] */ IView* target)
+{
+    if (mVelocityTracker == NULL) {
+        AutoPtr<IVelocityTrackerHelper> helper;
+        CVelocityTrackerHelper::AcquireSingleton((IVelocityTrackerHelper**)&helper);
+        helper->Obtain((IVelocityTracker**)&mVelocityTracker);
+    }
+    SetDragState(STATE_DRAGGING);
+    mCapturedView = target;
+}
+
+void ViewDragHelper::StopNestedScroll(
+    /* [in] */ IView* target)
+{
+    mCapturedView = target;
+    DispatchViewReleased(0, 0);
+}
+
+void ViewDragHelper::ProcessNestedScroll(
+    /* [in] */ IView* target,
+    /* [in] */ Int32 dx,
+    /* [in] */ Int32 dy,
+    /* [in] */ ArrayOf<Int32>* consumed)
+{
+    Int32 left, top;
+    mCapturedView->GetLeft(&left);
+    mCapturedView->GetTop(&top);
+    Int32 targetX = left + dx;
+    Int32 targetY = top + dy;
+    DragTo(targetX, targetY, dx, dy);
+    if (consumed != NULL) {
+        mCapturedView->GetLeft(&left);
+        mCapturedView->GetTop(&top);
+        Int32 unconsumedX = targetX - left;
+        Int32 unconsumedY = targetY - top;
+        (*consumed)[0] = unconsumedX - dx;
+        (*consumed)[1] = unconsumedY - dy;
+    }
+}
 
 } // Widget
 } // Dialer

@@ -379,7 +379,7 @@ ECode ListsFragment::OnCreateView(
     parentView->FindViewById(R::id::lists_pager, (IView**)&temp);
     mViewPager = (CViewPager*)IViewPager::Probe(temp);
 
-    assert(0 && "TODO");
+    // TODO:
     // AutoPtr<IFragmentManager> manager;
     // GetChildFragmentManager((IFragmentManager**)&manager);
     // CViewPagerAdapter::New(manager, (IViewPagerAdapter**)&mViewPagerAdapter);
@@ -402,8 +402,8 @@ ECode ListsFragment::OnCreateView(
     mTabTitles->Set(TAB_INDEX_ALL_CONTACTS, contacts);
 
     temp = NULL;
-    parentView->FindViewById(R::id::lists_pager_header, (IView**)&temp);
-    assert(0 && "TODO");
+    // TODO:
+    // parentView->FindViewById(R::id::lists_pager_header, (IView**)&temp);
     // mViewPagerTabs = IViewPagerTabs::Probe(temp);
     // mViewPagerTabs->SetViewPager(mViewPager);
     // AddOnPageChangeListener(mViewPagerTabs);

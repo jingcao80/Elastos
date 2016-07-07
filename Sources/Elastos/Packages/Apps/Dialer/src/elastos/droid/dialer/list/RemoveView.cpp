@@ -11,6 +11,11 @@ namespace List {
 
 CAR_INTERFACE_IMPL(RemoveView, FrameLayout, IRemoveView);
 
+RemoveView::RemoveView()
+    : mUnhighlightedColor(0)
+    , mHighlightedColor(0)
+{}
+
 ECode RemoveView::constructor(
     /* [in] */ IContext* context)
 {
@@ -40,13 +45,11 @@ ECode RemoveView::OnFinishInflate()
     view = NULL;
     FindViewById(R::id::remove_view_icon, (IView**)&view);
     mRemoveIcon = IImageView::Probe(view);
-
     AutoPtr<IResources> r;
     GetResources((IResources**)&r);
     r->GetColor(R::color::remove_text_color, &mUnhighlightedColor);
     r->GetColor(R::color::remove_highlighted_text_color, &mHighlightedColor);
-    r->GetDrawable(R::drawable::ic_remove, &mRemoveDrawable);
-
+    r->GetDrawable(R::drawable::ic_remove, (IDrawable**)&mRemoveDrawable);
     return NOERROR;
 }
 
@@ -79,7 +82,7 @@ ECode RemoveView::OnDragEvent(
             }
             break;
         case IDragEvent::ACTION_DROP:
-            if (mDragDropController != null) {
+            if (mDragDropController != NULL) {
                 Float x, y;
                 event->GetX(&x);
                 event->GetY(&y);

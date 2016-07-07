@@ -2,7 +2,7 @@
 #define __ELASTOS_DROID_DIALER_LIST_CREMOVEVIEW_H__
 
 #include "_Elastos_Droid_Dialer_List_CRemoveView.h"
-#include "elastos/apps/dialer/list/RemoveView.h"
+#include "elastos/droid/dialer/list/RemoveView.h"
 
 namespace Elastos {
 namespace Droid {

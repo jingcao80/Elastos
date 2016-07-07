@@ -10,7 +10,7 @@ String GeoUtil::GetCurrentCountryIso(
     /* [in] */ IContext* context)
 {
     // The {@link CountryDetector} should never return null so this is safe to return as-is.
-    assert(0 && "TODO");
+    // TODO:
     return String("CN");
     // return CountryDetector.getInstance(context).getCurrentCountryIso();
 }
