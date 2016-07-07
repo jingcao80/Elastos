@@ -50,8 +50,7 @@ ECode CPhoneNumberFormattingTextWatcher::constructor(
         return E_ILLEGAL_ARGUMENT_EXCEPTION;
     }
 
-    assert(0);
-// TODO: Need AsYouTypeFormatter
+    // TODO: Need AsYouTypeFormatter
     //mFormatter = PhoneNumberUtil.getInstance().getAsYouTypeFormatter(countryCode);
 
     return NOERROR;

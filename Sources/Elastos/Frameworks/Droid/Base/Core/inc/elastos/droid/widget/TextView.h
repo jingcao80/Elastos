@@ -2819,7 +2819,7 @@ protected:
       *              If text was replaced with new text or inserted,
       *              the length of the new text is <code>after-start</code>.
       */
-     virtual CARAPI_(void) OnTextChanged(
+     virtual CARAPI OnTextChanged(
         /* [in] */ ICharSequence* text,
         /* [in] */ Int32 start,
         /* [in] */ Int32 before,

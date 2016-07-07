@@ -122,7 +122,7 @@ protected:
         /* [in] */ Int32 bottom);
 
     //@Override
-    CARAPI_(void) OnTextChanged(
+    CARAPI OnTextChanged(
         /* [in] */ ICharSequence* text,
         /* [in] */ Int32 start,
         /* [in] */ Int32 before,
