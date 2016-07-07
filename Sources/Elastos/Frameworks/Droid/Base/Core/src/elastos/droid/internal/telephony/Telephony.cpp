@@ -20,6 +20,8 @@
 #include "elastos/droid/internal/telephony/CUUSInfo.h"
 #include "elastos/droid/internal/telephony/CWapPushOverSms.h"
 #include "elastos/droid/internal/telephony/CWspTypeDecoder.h"
+#include "elastos/droid/internal/telephony/CRestrictedState.h"
+#include "elastos/droid/internal/telephony/CRetryManager.h"
 
 namespace Elastos {
 namespace Droid {
@@ -67,6 +69,10 @@ CAR_OBJECT_IMPL(CUUSInfo)
 CAR_OBJECT_IMPL(CWapPushOverSms)
 
 CAR_OBJECT_IMPL(CWspTypeDecoder)
+
+CAR_OBJECT_IMPL(CRestrictedState)
+
+CAR_OBJECT_IMPL(CRetryManager)
 
 } // namespace Telephony
 } // namespace Internal

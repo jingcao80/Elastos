@@ -89,6 +89,8 @@ SOURCES += ServiceStateTracker.cpp
 SOURCES += CSms7BitEncodingTranslator.cpp
 SOURCES += CSmsApplication.cpp
 SOURCES += CCallManagerHelper.cpp
+SOURCES += RestrictedState.cpp
+SOURCES += RetryManager.cpp
 
 ELASTOS_LIBS += cat/cat.lib
 ELASTOS_LIBS += cdma/cdma.lib
