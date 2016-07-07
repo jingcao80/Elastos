@@ -518,7 +518,7 @@ ECode OverlappingPaneLayout::constructor(
 
     SetWillNotDraw(FALSE);
 
-    assert(0 && "TODO");
+    // TODO:
     // ViewCompat.setAccessibilityDelegate(this, new AccessibilityDelegate());
     // ViewCompat.setImportantForAccessibility(this, ViewCompat.IMPORTANT_FOR_ACCESSIBILITY_YES);
 

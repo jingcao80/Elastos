@@ -2,6 +2,7 @@
 #include "Elastos.Droid.Net.h"
 #include "Elastos.Droid.Provider.h"
 #include "Elastos.CoreLibrary.IO.h"
+#include "elastos/droid/contacts/common/GeoUtil.h"
 #include "elastos/droid/contacts/common/util/PhoneNumberFormatter.h"
 #include "elastos/droid/dialer/dialpad/DialpadFragment.h"
 #include "elastos/droid/dialer/dialpad/UnicodeDialerKeyListener.h"
@@ -70,6 +71,7 @@ using Elastos::Core::StringUtils;
 using Elastos::IO::ICloseable;
 using Elastos::Utility::CHashSet;
 using Elastos::Utility::Logging::Logger;
+using Elastos::Droid::Contacts::Common::GeoUtil;
 using Elastos::Droid::Contacts::Common::Util::PhoneNumberFormatter;
 using Elastos::Droid::Dialer::Util::DialerUtils;
 using Elastos::Droid::Dialer::DialtactsActivity;
@@ -566,8 +568,7 @@ ECode DialpadFragment::OnCreate(
     mFirstLaunch = TRUE;
     AutoPtr<IActivity> activity;
     GetActivity((IActivity**)&activity);
-    assert(0 && "TODO");
-    // mCurrentCountryIso = GeoUtil::GetCurrentCountryIso(activity);
+    mCurrentCountryIso = GeoUtil::GetCurrentCountryIso(IContext::Probe(activity));
 
     // try {
     AutoPtr<IResources> resources;
@@ -579,8 +580,7 @@ ECode DialpadFragment::OnCreate(
         Logger::E(TAG, "Vibrate control bool missing.");
     }
     else {
-        assert(0 && "TODO");
-        // mHaptic->Init(activity, enable);
+        mHaptic->Init(IContext::Probe(activity), enable);
     }
     // } catch (Resources.NotFoundException nfe) {
     //      Log.e(TAG, "Vibrate control bool missing.", nfe);

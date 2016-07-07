@@ -28,6 +28,8 @@ class RemoveView
 public:
     CAR_INTERFACE_DECL();
 
+    RemoveView();
+
     CARAPI constructor(
         /* [in] */ IContext* context);
 

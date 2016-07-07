@@ -639,7 +639,7 @@ public:
      * @param consumed An Int32 array for the {@link ViewDragHelper} to report back the scroll
      *         deltas that it consumed.
      */
-    CARAPI ProcessNestedScroll(
+    CARAPI_(void) ProcessNestedScroll(
         /* [in] */ IView* target,
         /* [in] */ Int32 dx,
         /* [in] */ Int32 dy,
