@@ -183,7 +183,8 @@ AutoPtr<IList> FontListConverter::ConvertFonts(
     CFileHelper::AcquireSingleton((IFileHelper**)&helper);
     Char32 separatorChar;
     helper->GetSeparatorChar(&separatorChar);
-    String prefix = mFontDir + separatorChar;
+    String prefix(mFontDir);
+    prefix.Append(separatorChar);
 
     Int32 N;
     fileset->GetSize(&N);

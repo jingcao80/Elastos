@@ -3,6 +3,7 @@
 #include "elastos/droid/os/CStrictMode.h"
 #include "elastos/droid/os/CStrictModeThreadPolicyBuilder.h"
 #include <elastos/core/StringUtils.h>
+#include <elastos/core/StringBuilder.h>
 #include <elastos/utility/logging/Logger.h>
 
 #include <binder/MemoryDealer.h>
@@ -20,6 +21,7 @@ using Elastos::Droid::Os::IStrictModeThreadPolicyBuilder;
 using Elastos::Core::CString;
 using Elastos::Core::ICharSequence;
 using Elastos::Core::StringUtils;
+using Elastos::Core::StringBuilder;
 using Elastos::IO::CBufferedInputStream;
 using Elastos::IO::IBufferedInputStream;
 using Elastos::Net::CCookieHandlerHelper;
@@ -377,8 +379,9 @@ ECode CMediaHTTPConnection::SeekTo(
         }
 
         if (offset > 0) {
+            StringBuilder sb("bytes="); sb += offset; sb += "-";
             IURLConnection::Probe(mConnection)->SetRequestProperty(
-                    String("Range"), String("bytes=") + offset + "-");
+                    String("Range"), sb.ToString());
         }
 
         mConnection->GetResponseCode(&response);

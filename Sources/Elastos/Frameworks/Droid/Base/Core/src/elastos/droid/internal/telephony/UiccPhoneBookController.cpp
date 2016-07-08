@@ -65,7 +65,7 @@ ECode UiccPhoneBookController::UpdateAdnRecordsInEfBySearchForSubscriber(
     else {
         String str("updateAdnRecordsInEfBySearch iccPbkIntMgrProxy is");
         str += " NULL for Subscription:";
-        str += subId;
+        //str += subId;
         // Rlog::E(TAG, str);
         *result = FALSE;
         return NOERROR;
@@ -104,7 +104,7 @@ ECode UiccPhoneBookController::UpdateAdnRecordsInEfByIndexForSubscriber(
     else {
         String str("updateAdnRecordsInEfByIndex iccPbkIntMgrProxy is");
         str += " NULL for Subscription:";
-        str += subId;
+        //str += subId;
         // Rlog::E(TAG, str);
         *result = FALSE;
         return NOERROR;
@@ -131,9 +131,9 @@ ECode UiccPhoneBookController::GetAdnRecordsSizeForSubscriber(
         return iccPbkIntMgrProxy->GetAdnRecordsSize(efid, result);
     }
     else {
-        String str("getAdnRecordsSize iccPbkIntMgrProxy is");
-        str += " NULL for Subscription:";
-        str += subId;
+        // String str("getAdnRecordsSize iccPbkIntMgrProxy is");
+        // str += " NULL for Subscription:";
+        // str += subId;
         // Rlog::E(TAG, str);
         *result = NULL;
         return NOERROR;
@@ -160,9 +160,9 @@ ECode UiccPhoneBookController::GetAdnRecordsInEfForSubscriber(
         return iccPbkIntMgrProxy->GetAdnRecordsInEf(efid, result);
     }
     else {
-        String str("getAdnRecordsInEf iccPbkIntMgrProxy is");
-        str += "NULL for Subscription:";
-        str += subId;
+        // String str("getAdnRecordsInEf iccPbkIntMgrProxy is");
+        // str += "NULL for Subscription:";
+        // str += subId;
         // Rlog::E(TAG, str);
         *result = NULL;
         return NOERROR;
@@ -195,9 +195,9 @@ ECode UiccPhoneBookController::UpdateAdnRecordsWithContentValuesInEfBySearchUsin
             efid, values, pin2, result);
     }
     else {
-        String str("updateAdnRecordsWithContentValuesInEfBySearchUsingSubId ");
-        str += "iccPbkIntMgrProxy is NULL for Subscription:";
-        str += subId;
+        // String str("updateAdnRecordsWithContentValuesInEfBySearchUsingSubId ");
+        // str += "iccPbkIntMgrProxy is NULL for Subscription:";
+        // str += subId;
         // Rlog::E(TAG, str);
         *result = FALSE;
         return NOERROR;
@@ -222,9 +222,9 @@ ECode UiccPhoneBookController::GetAdnCountUsingSubId(
         return iccPbkIntMgrProxy->GetAdnCount(result);
     }
     else {
-        String str("getAdnCount iccPbkIntMgrProxy is");
-        str += "NULL for Subscription:";
-        str += subId;
+        // String str("getAdnCount iccPbkIntMgrProxy is");
+        // str += "NULL for Subscription:";
+        // str += subId;
         // Rlog::E(TAG, str);
         *result = 0;
         return NOERROR;
@@ -249,9 +249,9 @@ ECode UiccPhoneBookController::GetAnrCountUsingSubId(
         return iccPbkIntMgrProxy->GetAnrCount(result);
     }
     else {
-        String str("getAnrCount iccPbkIntMgrProxy is");
-        str += "NULL for Subscription:";
-        str += subId;
+        // String str("getAnrCount iccPbkIntMgrProxy is");
+        // str += "NULL for Subscription:";
+        // str += subId;
         // Rlog::E(TAG, str);
         *result = 0;
         return NOERROR;
@@ -276,9 +276,9 @@ ECode UiccPhoneBookController::GetEmailCountUsingSubId(
         return iccPbkIntMgrProxy->GetEmailCount(result);
     }
     else {
-        String str("getEmailCount iccPbkIntMgrProxy is");
-        str += "NULL for Subscription:";
-        str += subId;
+        // String str("getEmailCount iccPbkIntMgrProxy is");
+        // str += "NULL for Subscription:";
+        // str += subId;
         // Rlog::E(TAG, str);
         *result = 0;
         return NOERROR;
@@ -303,9 +303,9 @@ ECode UiccPhoneBookController::GetSpareAnrCountUsingSubId(
         return iccPbkIntMgrProxy->GetSpareAnrCount(result);
     }
     else {
-        String str("getSpareAnrCount iccPbkIntMgrProxy is");
-        str += "NULL for Subscription:";
-        str += subId;
+        // String str("getSpareAnrCount iccPbkIntMgrProxy is");
+        // str += "NULL for Subscription:";
+        // str += subId;
         // Rlog::E(TAG, str);
         *result = 0;
         return NOERROR;
@@ -330,9 +330,9 @@ ECode UiccPhoneBookController::GetSpareEmailCountUsingSubId(
         return iccPbkIntMgrProxy->GetSpareEmailCount(result);
     }
     else {
-        String str("getSpareEmailCount iccPbkIntMgrProxy is");
-        str += "NULL for Subscription:";
-        str += subId;
+        // String str("getSpareEmailCount iccPbkIntMgrProxy is");
+        // str += "NULL for Subscription:";
+        // str += subId;
         // Rlog::E(TAG, str);
         *result = 0;
         return NOERROR;

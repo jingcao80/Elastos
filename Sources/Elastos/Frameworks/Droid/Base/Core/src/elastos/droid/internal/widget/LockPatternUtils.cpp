@@ -1178,8 +1178,8 @@ String LockPatternUtils::ToHex(
     const String hex("0123456789ABCDEF");
     String ret("");
     for (Int32 i = 0; i < ary->GetLength(); i++) {
-        ret += hex.GetChar(((*ary)[i] >> 4) & 0xf);
-        ret += hex.GetChar((*ary)[i] & 0xf);
+        ret.Append(hex.GetChar(((*ary)[i] >> 4) & 0xf));
+        ret.Append(hex.GetChar((*ary)[i] & 0xf));
     }
     return ret;
 }

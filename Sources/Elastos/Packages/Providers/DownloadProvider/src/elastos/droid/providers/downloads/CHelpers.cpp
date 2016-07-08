@@ -14,6 +14,7 @@
 #include "elastos/droid/os/FileUtils.h"
 #include "elastos/utility/regex/Pattern.h"
 #include <elastos/core/AutoLock.h>
+#include <elastos/core/StringBuilder.h>
 #include <elastos/utility/logging/Logger.h>
 
 using Elastos::Droid::Os::SystemClock;
@@ -29,6 +30,7 @@ using Elastos::Droid::Webkit::IMimeTypeMap;
 using Elastos::Droid::Webkit::IMimeTypeMapHelper;
 using Elastos::Droid::Webkit::CMimeTypeMapHelper;
 using Elastos::Core::CString;
+using Elastos::Core::StringBuilder;
 using Elastos::IO::CFile;
 using Elastos::Utility::CRandom;
 using Elastos::Utility::Regex::IPattern;
@@ -581,7 +583,9 @@ String CHelpers::GenerateAvailableFilenameLocked(
     /* [in] */ String prefix,
     /* [in] */ String suffix)
 {
-    String name = prefix + suffix;
+    StringBuilder sb(prefix);
+    sb += suffix;
+    String name = sb.ToString();
     if (IsFilenameAvailableLocked(parents, name)) {
         return name;
     }
@@ -600,13 +604,16 @@ String CHelpers::GenerateAvailableFilenameLocked(
     * If the filename coming in is [base].[ext], the generated filenames are
     *     [base]-[sequence].[ext].
     */
+
     Int32 sequence = 1;
     for (Int32 magnitude = 1; magnitude < 1000000000; magnitude *= 10) {
         for (Int32 iteration = 0; iteration < 9; ++iteration) {
-            name = prefix;
-            name += Constants::FILENAME_SEQUENCE_SEPARATOR;
-            name += sequence;
-            name += suffix;
+            sb.Reset();
+            sb += prefix;
+            sb += Constants::FILENAME_SEQUENCE_SEPARATOR;
+            sb += sequence;
+            sb += suffix;
+            name = sb.ToString();
             if (IsFilenameAvailableLocked(parents, name)) {
                 return name;
             }
@@ -849,12 +856,12 @@ String CHelpers::ReplaceInvalidVfatCharacters(
             ch == BAR ||
             ch == DEL){
             if (!isRepetition) {
-                str += UNDERSCORE;
+                str.Append(UNDERSCORE);
                 isRepetition = TRUE;
             }
         }
         else {
-            str += ch;
+            str.Append(ch);
             isRepetition = FALSE;
         }
     }

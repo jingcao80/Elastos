@@ -176,12 +176,12 @@ ECode CUsimPhoneBookManager::PbrFile::ParseEf(
         if (parentTag == USIM_TYPE2_TAG && mHost->mIapPresent && tag == USIM_EFEMAIL_TAG) {
             mHost->mEmailPresentInIap = TRUE;
             mHost->mEmailTagNumberInIap = tagNumberWithinParentTag;
-            mHost->Log(String("parseEf: EmailPresentInIap tag = ") + mHost->mEmailTagNumberInIap);
+            Logger::I("CUsimPhoneBookManager", "parseEf: EmailPresentInIap tag = %d", mHost->mEmailTagNumberInIap);
         }
         if (parentTag == USIM_TYPE2_TAG && mHost->mIapPresent && tag == USIM_EFANR_TAG) {
             mHost->mAnrPresentInIap = TRUE;
             mHost->mAnrTagNumberInIap = tagNumberWithinParentTag;
-            mHost->Log(String("parseEf: AnrPresentInIap tag = ") + mHost->mAnrTagNumberInIap);
+            Logger::I("CUsimPhoneBookManager", "parseEf: AnrPresentInIap tag = %d", mHost->mAnrTagNumberInIap);
         }
         switch(tag) {
             case USIM_EFEMAIL_TAG:
@@ -430,8 +430,8 @@ ECode CUsimPhoneBookManager::UpdateAnrFile(
         newAnr = String("");
     String anrs = oldAnr + "," + newAnr;
     mSuccess = FALSE;
-    Log(String("updateAnrFile oldAnr : ") + oldAnr + ", newAnr:" + newAnr + " anrs:" + anrs + ", efid"
-            + efid + ", adnRecNum: " + adnRecNum);
+    Logger::I("CUsimPhoneBookManager", "updateAnrFile oldAnr:%s, newAnr:%s anrs:%s, efid=%d, adnRecNum=%d",
+        oldAnr.string(), newAnr.string(), anrs.string(), efid, adnRecNum);
     if (efid == -1) {
         *result = mSuccess;
         return NOERROR;
@@ -909,7 +909,7 @@ ECode CUsimPhoneBookManager::HandleMessage(
                 IArrayList::Probe(o)->IndexOf(CoreUtils::Convert(efid), &efidIndex);
 
                 if (efidIndex == -1) {
-                    Log(String("wrong efid index:") + efid );
+                    Logger::I("CUsimPhoneBookManager", "wrong efid index:%d", efid );
                     return NOERROR;
                 }
 
@@ -976,7 +976,7 @@ ECode CUsimPhoneBookManager::HandleMessage(
             IArrayList::Probe(o)->Set(recordNumber - 1, iArray);
 
             for (Int32 i = 0; i < data->GetLength(); i++) {
-                Log(String("EVENT_UPDATE_EMAIL_RECORD_DONE data = ") + (*data)[i] + ",i is " + i);
+                Logger::I("CUsimPhoneBookManager", "EVENT_UPDATE_EMAIL_RECORD_DONE data = %s, i is %s", (*data)[i], i);
                 if ((*data)[i] != (Byte) 0xff) {
                     Log(String("EVENT_UPDATE_EMAIL_RECORD_DONE data !=0xff"));
                     AutoPtr<IInterface> o;
@@ -1120,8 +1120,8 @@ ECode CUsimPhoneBookManager::HandleMessage(
                         break;
                 }
                 mPendingExtLoads = 1;
-                Log(String(" IAP  efid= ") + efid + ", update IAP index= " + (recordIndex)
-                        + " with value= " + IccUtils::BytesToHexString(record_data));
+                Logger::I("CUsimPhoneBookManager", " IAP  efid=%d , update IAP index=%d  with value=%s",
+                    efid, recordIndex, IccUtils::BytesToHexString(record_data).string());
 
                 array = NULL;
                 CArrayOf::New(EIID_IByte, record_data->GetLength(), (IArrayOf**)&array);
@@ -1174,7 +1174,7 @@ ECode CUsimPhoneBookManager::HandleMessage(
             AutoPtr<IInterface> o;
             mIapFileRecord->Get(CoreUtils::Convert(pbrIndex), (IInterface**)&o);
             IArrayList::Probe(o)->Set(recordIndex, iArray);
-            Log(String("the iap email recordNumber is :") + (*data)[mEmailTagNumberInIap]);
+            Logger::I("CUsimPhoneBookManager", "the iap email recordNumber is :%d", (*data)[mEmailTagNumberInIap]);
             {
                 AutoLock lock(mLock);
                 mLock.Notify();

@@ -1,6 +1,7 @@
 
 #include "elastos/droid/systemui/CLoadAverageService.h"
 #include <elastos/core/StringUtils.h>
+#include <elastos/core/StringBuilder.h>
 
 using Elastos::Droid::Graphics::CPaint;
 using Elastos::Droid::Graphics::IPixelFormat;
@@ -15,6 +16,7 @@ using Elastos::Droid::Utility::IDisplayMetrics;
 using Elastos::Core::CString;
 using Elastos::Core::ICharSequence;
 using Elastos::Core::StringUtils;
+using Elastos::Core::StringBuilder;
 
 namespace Elastos {
 namespace Droid {
@@ -33,7 +35,9 @@ ECode CLoadAverageService::CpuTracker::OnLoadChanged(
     /* [in] */ Float load5,
     /* [in] */ Float load15)
 {
-    mLoadText = StringUtils::ToString(load1) + String(" / ") + load5 + String(" / ") + load15;
+    StringBuilder sb;
+    sb += load1; sb += "/"; sb += load5; sb += "/"; sb += load15;
+    mLoadText = sb.ToString();
     Float value = 0;
     mPaint->MeasureText(mLoadText, &value);
     mLoadWidth = (Int32) value;

@@ -1,5 +1,6 @@
 #include "elastos/droid/media/CMediaMuxer.h"
 #include "elastos/droid/media/Media_Utils.h"
+#include <elastos/utility/logging/Logger.h>
 
 #include <media/stagefright/foundation/ABuffer.h>
 #include <media/stagefright/foundation/ADebug.h>
@@ -16,6 +17,7 @@ using Elastos::IO::IRandomAccessFile;
 using Elastos::Utility::IMap;
 using Elastos::Utility::IMapEntry;
 using Elastos::Utility::ISet;
+using Elastos::Utility::Logging::Logger;
 
 namespace Elastos {
 namespace Droid {
@@ -117,13 +119,11 @@ ECode CMediaMuxer::SetLocation(
     Int32 longitudex10000 = (Int32) (longitude * 10000 + 0.5);
 
     if (latitudex10000 > 900000 || latitudex10000 < -900000) {
-        String msg = String("Latitude: ") + latitude + " out of range.";
-        // throw new IllegalArgumentException(msg);
+        Logger::E("CMediaMuxer", "latitude: %.2f out of range.", latitude);
         return E_ILLEGAL_ARGUMENT_EXCEPTION;
     }
     if (longitudex10000 > 1800000 || longitudex10000 < -1800000) {
-        String msg = String("Longitude: ") + longitude + " out of range";
-        // throw new IllegalArgumentException(msg);
+        Logger::E("CMediaMuxer", "Longitude: %.2f out of range.", longitude);
         return E_ILLEGAL_ARGUMENT_EXCEPTION;
     }
 

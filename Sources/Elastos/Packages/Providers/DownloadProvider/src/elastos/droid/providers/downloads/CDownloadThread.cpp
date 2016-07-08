@@ -19,6 +19,7 @@
 #include "elastos/droid/system/OsConstants.h"
 #include <elastos/core/AutoLock.h>
 #include <elastos/core/StringUtils.h>
+#include <elastos/core/StringBuilder.h>
 #include <elastos/utility/logging/Logger.h>
 #include <drm/DrmManagerClient.h>
 
@@ -56,6 +57,7 @@ using Elastos::Droid::Utility::IPair;
 using Elastos::Core::EIID_IRunnable;
 using Elastos::Core::ICharSequence;
 using Elastos::Core::StringUtils;
+using Elastos::Core::StringBuilder;
 using Elastos::IO::IFile;
 using Elastos::IO::CFile;
 using Elastos::IO::IFlushable;
@@ -908,10 +910,10 @@ void CDownloadThread::AddRequestHeaders(
         if (mInfoDelta->mETag != NULL) {
             IURLConnection::Probe(conn)->AddRequestProperty(String("If-Match"), mInfoDelta->mETag);
         }
-        String prop("bytes=");
-        prop += mInfoDelta->mCurrentBytes;
-        prop += "-";
-        IURLConnection::Probe(conn)->AddRequestProperty(String("Range"), prop);
+        StringBuilder sb("bytes=");
+        sb += mInfoDelta->mCurrentBytes;
+        sb += "-";
+        IURLConnection::Probe(conn)->AddRequestProperty(String("Range"), sb.ToString());
     }
 }
 

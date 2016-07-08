@@ -1001,7 +1001,9 @@ ECode DataConnection::DcActiveState::Enter()
     AutoPtr<ILooper> looper;
     handler->GetLooper((ILooper**)&looper);
     mHost->mNetworkAgent = new DcNetworkAgent(mHost);
-    ((DcNetworkAgent*) mHost->mNetworkAgent.Get())->constructor(looper, context, String("DcNetworkAgent") + subId, mHost->mNetworkInfo, networkCapabilities, mHost->mLinkProperties, 50);
+    StringBuilder sb("DcNetworkAgent"); sb += subId;
+    ((DcNetworkAgent*) mHost->mNetworkAgent.Get())->constructor(
+        looper, context, sb.ToString(), mHost->mNetworkInfo, networkCapabilities, mHost->mLinkProperties, 50);
     return NOERROR;
 }
 
@@ -2348,7 +2350,7 @@ ECode DataConnection::MakeNetworkCapabilities(
     result->SetLinkDownstreamBandwidthKbps(down);
     Int64 subId;
     mPhone->GetSubId(&subId);
-    result->SetNetworkSpecifier(String("") + subId);
+    result->SetNetworkSpecifier(StringUtils::ToString(subId));
     *_result = result;
     REFCOUNT_ADD(*_result)
     return NOERROR;

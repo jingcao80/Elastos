@@ -2169,8 +2169,11 @@ ECode PhoneNumberUtils::IsEmergencyNumberInternal(
     SubscriptionManager::GetSlotId(subId, &slotId);
     // retrieve the list of emergency numbers
     // check read-write ecclist property first
-    String ecclist = (slotId <= 0) ? String("ril.ecclist") : (String("ril.ecclist") + slotId);
-
+    StringBuilder sb("ril.ecclist");
+    if ((slotId > 0)) {
+        sb += slotId;
+    }
+    String ecclist =  sb.ToString();
     AutoPtr<ISystemProperties> sp;
     CSystemProperties::AcquireSingleton((ISystemProperties**)&sp);
     sp->Get(ecclist, &numbers);

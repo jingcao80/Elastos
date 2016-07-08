@@ -871,9 +871,9 @@ ECode CPhoneFactory::SetDataSubscription(
     // Rlog::D(LOGTAG, "setDataSubscription: %ld", subId);
 
     // Update the current mobile data flag
+    StringBuilder sb(ISettingsGlobal::MOBILE_DATA); sb += subId;
     Int32 num = 0;
-    sg->GetInt32(cr,
-            ISettingsGlobal::MOBILE_DATA + subId, 0, &num);
+    sg->GetInt32(cr, sb.ToString(), 0, &num);
     enabled = num != 0;
     sg->PutInt32(cr,
                 ISettingsGlobal::MOBILE_DATA,
@@ -882,8 +882,8 @@ ECode CPhoneFactory::SetDataSubscription(
     // Rlog::D(LOGTAG, "set mobile_data: %d", enabled);
 
     // Update the current data roaming flag
-    sg->GetInt32(cr,
-            ISettingsGlobal::DATA_ROAMING + subId, 0, &num);
+    sb.Reset(); sb += ISettingsGlobal::DATA_ROAMING; sb += subId;
+    sg->GetInt32(cr, sb.ToString(), 0, &num);
     enabled = num != 0;
     sg->PutInt32(cr,
                 ISettingsGlobal::DATA_ROAMING,

@@ -1034,8 +1034,10 @@ ECode CGsmServiceStateTracker::UpdateSpnDisplay()
     }
     else {
         // Power off state, such as airplane mode
-        if (DBG) Log(String("updateSpnDisplay: radio is off w/ showPlmn=")
-                + showPlmn + " plmn=" + plmn);
+        if (DBG)  {
+            Logger::I("CGsmServiceStateTracker", "updateSpnDisplay: radio is off w/ showPlmn=%d plmn=%s",
+                showPlmn, plmn.string());
+        }
     }
 
     // The value of spn/showSpn are same in different scenarios.
@@ -2137,8 +2139,9 @@ void CGsmServiceStateTracker::SetTimeFromNITZString(
     // tz is in number of quarter-hours
 
     Int64 start = SystemClock::GetElapsedRealtime();
-    if (DBG) {Log(String("NITZ: ") + nitz + "," + nitzReceiveTime +
-                    " start=" + start + " delay=" + (start - nitzReceiveTime));
+    if (DBG) {
+        Logger::I("CGsmServiceStateTracker", "NITZ: %s, %lld, start=%lld, delay=%lld",
+            nitz.string(), nitzReceiveTime, start,  (start - nitzReceiveTime));
     }
 
     // try {
@@ -2283,9 +2286,8 @@ void CGsmServiceStateTracker::SetTimeFromNITZString(
             if (millisSinceNitzReceived > Elastos::Core::Math::INT32_MAX_VALUE) {
                 // If the time is this far off, something is wrong > 24 days!
                 if (DBG) {
-                    Log(String("NITZ: not setting time, processing has taken ")
-                                + (millisSinceNitzReceived / (1000 * 60 * 60 * 24))
-                                + " days");
+                    Logger::I("CGsmServiceStateTracker", "NITZ: not setting time, processing has taken %d days.",
+                        (millisSinceNitzReceived / (1000 * 60 * 60 * 24)));
                 }
                 return;
             }
@@ -2415,8 +2417,8 @@ void CGsmServiceStateTracker::RevertToNitzTime()
         return;
     }
     if (DBG) {
-        Log(String("Reverting to NITZ Time: mSavedTime=") + mSavedTime
-            + " mSavedAtTime=" + mSavedAtTime);
+        Logger::I("CGsmServiceStateTracker", "Reverting to NITZ Time: mSavedTime=%lld mSavedAtTime=%lld",
+            mSavedTime, mSavedAtTime);
     }
     if (mSavedTime != 0 && mSavedAtTime != 0) {
         SetAndBroadcastNetworkSetTime(mSavedTime

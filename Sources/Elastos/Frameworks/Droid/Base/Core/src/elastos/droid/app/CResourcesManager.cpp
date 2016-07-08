@@ -273,7 +273,7 @@ ECode CResourcesManager::GetTopLevelResources(
             }
         }
         else {
-            Logger::W(TAG, "GetTopLevelResources: %s, scale: %.2f", resDir.string(), scale);
+            // Logger::W(TAG, "GetTopLevelResources: %s, scale: %.2f", resDir.string(), scale);
         }
     }
 

@@ -457,6 +457,9 @@ ECode MediaDocumentsProvider::QueryDocument(
     AutoPtr<IMediaStoreVideoMedia> msv;
     CMediaStoreVideoMedia::AcquireSingleton((IMediaStoreVideoMedia**)&msv);
 
+    StringBuilder sb(IBaseColumns::ID); sb += "="; sb += ident->mId;
+    String idStr = sb.ToString();
+    String nullStr;
     AutoPtr<IUri> uri;
     // try {
         if (TYPE_IMAGES_ROOT.Equals(ident->mType)) {
@@ -466,9 +469,9 @@ ECode MediaDocumentsProvider::QueryDocument(
             // single bucket
             AutoPtr<IUri> imUri;
             msi->GetEXTERNAL_CONTENT_URI((IUri**)&imUri);
+            sb.Reset(); sb += IMediaStoreImagesImageColumns::BUCKET_ID; sb += "="; sb += ident->mId;
             resolver->Query(imUri, ImagesBucketQuery::PROJECTION,
-                IMediaStoreImagesImageColumns::BUCKET_ID + "=" + ident->mId,
-                    NULL, ImagesBucketQuery::SORT_ORDER, (ICursor**)&cursor);
+                sb.ToString(), NULL, ImagesBucketQuery::SORT_ORDER, (ICursor**)&cursor);
             CopyNotificationUri(ret, cursor);
             if ((cursor->MoveToFirst(&flag), flag)) {
                 IncludeImagesBucket(ret, cursor);
@@ -477,8 +480,8 @@ ECode MediaDocumentsProvider::QueryDocument(
             // single image
             msi->GetEXTERNAL_CONTENT_URI((IUri**)&uri);
             resolver->Query(uri,
-                    ImageQuery::PROJECTION, IBaseColumns::ID + "=" + ident->mId, NULL,
-                    String(NULL), (ICursor**)&cursor);
+                    ImageQuery::PROJECTION, idStr, NULL,
+                    nullStr, (ICursor**)&cursor);
             CopyNotificationUri(ret, cursor);
             if ((cursor->MoveToFirst(&flag), flag)) {
                 IncludeImage(ret, cursor);
@@ -490,9 +493,9 @@ ECode MediaDocumentsProvider::QueryDocument(
             // single bucket
             uri = NULL;
             msv->GetEXTERNAL_CONTENT_URI((IUri**)&uri);
-
+            sb.Reset(); sb += IMediaStoreVideoVideoColumns::BUCKET_ID; sb += "="; sb += ident->mId;
             resolver->Query(uri,
-                    VideosBucketQuery::PROJECTION, IMediaStoreVideoVideoColumns::BUCKET_ID + "=" + ident->mId,
+                    VideosBucketQuery::PROJECTION, sb.ToString(),
                     NULL, VideosBucketQuery::SORT_ORDER, (ICursor**)&cursor);
             CopyNotificationUri(ret, cursor);
             if ((cursor->MoveToFirst(&flag), flag)) {
@@ -503,8 +506,8 @@ ECode MediaDocumentsProvider::QueryDocument(
             uri = NULL;
             msv->GetEXTERNAL_CONTENT_URI((IUri**)&uri);
             resolver->Query(uri,
-                    VideoQuery::PROJECTION, IBaseColumns::ID + "=" + ident->mId, NULL,
-                    String(NULL), (ICursor**)&cursor);
+                    VideoQuery::PROJECTION, idStr, NULL,
+                    nullStr, (ICursor**)&cursor);
             CopyNotificationUri(ret, cursor);
             if ((cursor->MoveToFirst(&flag), flag)) {
                 IncludeVideo(ret, cursor);
@@ -518,8 +521,8 @@ ECode MediaDocumentsProvider::QueryDocument(
             CMediaStoreAudioArtists::AcquireSingleton((IMediaStoreAudioArtists**)&msa);
             msa->GetEXTERNAL_CONTENT_URI((IUri**)&uri);
             resolver->Query(uri,
-                    ArtistQuery::PROJECTION, IBaseColumns::ID + "=" + ident->mId, NULL,
-                    String(NULL), (ICursor**)&cursor);
+                    ArtistQuery::PROJECTION, idStr, NULL,
+                    nullStr, (ICursor**)&cursor);
             CopyNotificationUri(ret, cursor);
             if ((cursor->MoveToFirst(&flag), flag)) {
                 IncludeArtist(ret, cursor);
@@ -530,8 +533,8 @@ ECode MediaDocumentsProvider::QueryDocument(
             CMediaStoreAudioAlbums::AcquireSingleton((IMediaStoreAudioAlbums**)&msa);
             msa->GetEXTERNAL_CONTENT_URI((IUri**)&uri);
             resolver->Query(uri,
-                    AlbumQuery::PROJECTION, IBaseColumns::ID + "=" + ident->mId, NULL,
-                    String(NULL), (ICursor**)&cursor);
+                    AlbumQuery::PROJECTION, idStr, NULL,
+                    nullStr, (ICursor**)&cursor);
             CopyNotificationUri(ret, cursor);
             if ((cursor->MoveToFirst(&flag), flag)) {
                 IncludeAlbum(ret, cursor);
@@ -542,8 +545,7 @@ ECode MediaDocumentsProvider::QueryDocument(
             CMediaStoreAudioMedia::AcquireSingleton((IMediaStoreAudioMedia**)&msa);
             msa->GetEXTERNAL_CONTENT_URI((IUri**)&uri);
             resolver->Query(uri, SongQuery::PROJECTION,
-                IBaseColumns::ID + "=" + ident->mId, NULL,
-                    String(NULL), (ICursor**)&cursor);
+                idStr, NULL, nullStr, (ICursor**)&cursor);
             CopyNotificationUri(ret, cursor);
             if ((cursor->MoveToFirst(&flag), flag)) {
                 IncludeAudio(ret, cursor);
@@ -601,6 +603,7 @@ ECode MediaDocumentsProvider::QueryChildDocuments(
     AutoPtr<IUri> uri;
     Boolean flag = FALSE;
 
+    String nullStr;
     AutoPtr<IIoUtils> ioUtils;
     CIoUtils::AcquireSingleton((IIoUtils**)&ioUtils);
     // try {
@@ -608,7 +611,7 @@ ECode MediaDocumentsProvider::QueryChildDocuments(
             // include all unique buckets
             msi->GetEXTERNAL_CONTENT_URI((IUri**)&uri);
             resolver->Query(uri,
-                    ImagesBucketQuery::PROJECTION, String(NULL), NULL, ImagesBucketQuery::SORT_ORDER, (ICursor**)&cursor);
+                    ImagesBucketQuery::PROJECTION, nullStr, NULL, ImagesBucketQuery::SORT_ORDER, (ICursor**)&cursor);
             // multiple orders
             CopyNotificationUri(ret, cursor);
             Int64 lastId = Elastos::Core::Math::INT64_MIN_VALUE;
@@ -624,9 +627,10 @@ ECode MediaDocumentsProvider::QueryChildDocuments(
         } else if (TYPE_IMAGES_BUCKET.Equals(ident->mType)) {
             // include images under bucket
             msi->GetEXTERNAL_CONTENT_URI((IUri**)&uri);
+            StringBuilder sb(IMediaStoreImagesImageColumns::BUCKET_ID); sb += "="; sb += ident->mId;
             resolver->Query(uri,
-                    ImageQuery::PROJECTION, IMediaStoreImagesImageColumns::BUCKET_ID + "=" + ident->mId,
-                    NULL, String(NULL), (ICursor**)&cursor);
+                    ImageQuery::PROJECTION, sb.ToString(),
+                    NULL, nullStr, (ICursor**)&cursor);
             CopyNotificationUri(ret, cursor);
             while ((cursor->MoveToNext(&flag), flag)) {
                 IncludeImage(ret, cursor);
@@ -635,7 +639,7 @@ ECode MediaDocumentsProvider::QueryChildDocuments(
             // include all unique buckets
             msv->GetEXTERNAL_CONTENT_URI((IUri**)&uri);
             resolver->Query(uri,
-                    VideosBucketQuery::PROJECTION, String(NULL), NULL, VideosBucketQuery::SORT_ORDER, (ICursor**)&cursor);
+                    VideosBucketQuery::PROJECTION, nullStr, NULL, VideosBucketQuery::SORT_ORDER, (ICursor**)&cursor);
             CopyNotificationUri(ret, cursor);
             Int64 lastId = Elastos::Core::Math::INT64_MIN_VALUE;
             while ((cursor->MoveToNext(&flag), flag)) {
@@ -649,8 +653,9 @@ ECode MediaDocumentsProvider::QueryChildDocuments(
         } else if (TYPE_VIDEOS_BUCKET.Equals(ident->mType)) {
             // include videos under bucket
             msv->GetEXTERNAL_CONTENT_URI((IUri**)&uri);
+            StringBuilder sb(IMediaStoreVideoVideoColumns::BUCKET_ID); sb += "="; sb += ident->mId;
             resolver->Query(uri, VideoQuery::PROJECTION,
-                IMediaStoreVideoVideoColumns::BUCKET_ID + "=" + ident->mId, NULL, String(NULL), (ICursor**)&cursor);
+                sb.ToString(), NULL, nullStr, (ICursor**)&cursor);
             CopyNotificationUri(ret, cursor);
             while ((cursor->MoveToNext(&flag), flag)) {
                 IncludeVideo(ret, cursor);
@@ -659,7 +664,7 @@ ECode MediaDocumentsProvider::QueryChildDocuments(
             // include all artists
             msa->GetEXTERNAL_CONTENT_URI((IUri**)&uri);
             resolver->Query(uri,
-                    ArtistQuery::PROJECTION, String(NULL), NULL, String(NULL), (ICursor**)&cursor);
+                    ArtistQuery::PROJECTION, nullStr, NULL, nullStr, (ICursor**)&cursor);
             CopyNotificationUri(ret, cursor);
             while ((cursor->MoveToNext(&flag), flag)) {
                 IncludeArtist(ret, cursor);
@@ -668,7 +673,7 @@ ECode MediaDocumentsProvider::QueryChildDocuments(
             // include all albums under artist
             msaa->GetContentUri(String("external"), ident->mId, (IUri**)&uri);
             resolver->Query(uri,
-                    AlbumQuery::PROJECTION, String(NULL), NULL, String(NULL), (ICursor**)&cursor);
+                    AlbumQuery::PROJECTION, nullStr, NULL, nullStr, (ICursor**)&cursor);
             CopyNotificationUri(ret, cursor);
             while ((cursor->MoveToNext(&flag), flag)) {
                 IncludeAlbum(ret, cursor);
@@ -676,9 +681,10 @@ ECode MediaDocumentsProvider::QueryChildDocuments(
         } else if (TYPE_ALBUM.Equals(ident->mType)) {
             // include all songs under album
             msam->GetEXTERNAL_CONTENT_URI((IUri**)&uri);
+            StringBuilder sb(IMediaStoreAudioAudioColumns::ALBUM_ID); sb += "="; sb += ident->mId;
             resolver->Query(uri,
-                    SongQuery::PROJECTION, IMediaStoreAudioAudioColumns::ALBUM_ID + "=" + ident->mId,
-                    NULL, String(NULL), (ICursor**)&cursor);
+                    SongQuery::PROJECTION, sb.ToString(),
+                    NULL, nullStr, (ICursor**)&cursor);
             CopyNotificationUri(ret, cursor);
             while ((cursor->MoveToNext(&flag), flag)) {
                 IncludeAudio(ret, cursor);
@@ -1270,8 +1276,9 @@ Int64 MediaDocumentsProvider::GetImageForBucketCleared(
         CMediaStoreImagesMedia::AcquireSingleton((IMediaStoreImagesMedia**)&msi);
         AutoPtr<IUri> uri;
         msi->GetEXTERNAL_CONTENT_URI((IUri**)&uri);
+        StringBuilder sb(IMediaStoreImagesImageColumns::BUCKET_ID); sb += "="; sb += bucketId;
         resolver->Query(uri,
-            ImagesBucketThumbnailQuery::PROJECTION, IMediaStoreImagesImageColumns::BUCKET_ID + "=" + bucketId,
+            ImagesBucketThumbnailQuery::PROJECTION, sb.ToString(),
             NULL, IMediaStoreMediaColumns::DATE_MODIFIED + " DESC", (ICursor**)&cursor);
         Boolean flag = FALSE;
         if ((cursor->MoveToFirst(&flag), flag)) {
@@ -1305,9 +1312,10 @@ AutoPtr<IParcelFileDescriptor>  MediaDocumentsProvider::OpenImageThumbnailCleare
         CMediaStoreImagesThumbnails::AcquireSingleton((IMediaStoreImagesThumbnails**)&msit);
         AutoPtr<IUri> uri;
         msit->GetEXTERNAL_CONTENT_URI((IUri**)&uri);
+        StringBuilder sb(IMediaStoreImagesThumbnails::IMAGE_ID); sb += "="; sb += id;
         resolver->Query(uri,
-                ImageThumbnailQuery::PROJECTION, IMediaStoreImagesThumbnails::IMAGE_ID + "=" + id, NULL,
-                String(NULL), signal, (ICursor**)&cursor);
+            ImageThumbnailQuery::PROJECTION, sb.ToString(), NULL,
+            String(NULL), signal, (ICursor**)&cursor);
         Boolean flag = FALSE;
         if ((cursor->MoveToFirst(&flag), flag)) {
             String data;
@@ -1317,8 +1325,7 @@ AutoPtr<IParcelFileDescriptor>  MediaDocumentsProvider::OpenImageThumbnailCleare
             AutoPtr<IFile> file;
             CFile::New(data, (IFile**)&file);
             AutoPtr<IParcelFileDescriptor> pf;
-            pfh->Open(
-                    file, IParcelFileDescriptor::MODE_READ_ONLY, (IParcelFileDescriptor**)&pf);
+            pfh->Open(file, IParcelFileDescriptor::MODE_READ_ONLY, (IParcelFileDescriptor**)&pf);
             AutoPtr<IIoUtils> ioUtils;
             CIoUtils::AcquireSingleton((IIoUtils**)&ioUtils);
             ioUtils->CloseQuietly(ICloseable::Probe(cursor));
@@ -1397,9 +1404,9 @@ Int64 MediaDocumentsProvider::GetVideoForBucketCleared(
         CMediaStoreVideoMedia::AcquireSingleton((IMediaStoreVideoMedia**)&msv);
         AutoPtr<IUri> uri;
         msv->GetEXTERNAL_CONTENT_URI((IUri**)&uri);
+        StringBuilder sb(IMediaStoreVideoVideoColumns::BUCKET_ID); sb += "="; sb += bucketId;
         resolver->Query(uri, VideosBucketThumbnailQuery::PROJECTION,
-            IMediaStoreVideoVideoColumns::BUCKET_ID + "=" + bucketId,
-                NULL, IMediaStoreMediaColumns::DATE_MODIFIED + " DESC", (ICursor**)&cursor);
+            sb.ToString(), NULL, IMediaStoreMediaColumns::DATE_MODIFIED + " DESC", (ICursor**)&cursor);
         Boolean flag = FALSE;
         if ((cursor->MoveToFirst(&flag), flag)) {
             Int64 vol;
@@ -1431,7 +1438,8 @@ AutoPtr<IAssetFileDescriptor> MediaDocumentsProvider::OpenVideoThumbnailCleared(
         CMediaStoreVideoThumbnails::AcquireSingleton((IMediaStoreVideoThumbnails**)&mst);
         AutoPtr<IUri> uri;
         mst->GetEXTERNAL_CONTENT_URI((IUri**)&uri);
-        resolver->Query(uri, VideoThumbnailQuery::PROJECTION, IMediaStoreVideoThumbnails::VIDEO_ID + "=" + id, NULL,
+        StringBuilder sb(IMediaStoreVideoThumbnails::VIDEO_ID); sb += "="; sb += id;
+        resolver->Query(uri, VideoThumbnailQuery::PROJECTION, sb.ToString(), NULL,
             String(NULL), signal, (ICursor**)&cursor);
         Boolean flag = FALSE;
         if ((cursor->MoveToFirst(&flag), flag)) {
@@ -1497,9 +1505,10 @@ Int32 MediaDocumentsProvider::QueryOrientationForImage(
         CMediaStoreImagesMedia::AcquireSingleton((IMediaStoreImagesMedia**)&msi);
         AutoPtr<IUri> uri;
         msi->GetEXTERNAL_CONTENT_URI((IUri**)&uri);
+        StringBuilder sb(IBaseColumns::ID); sb += "="; sb += id;
         resolver->Query(uri,
-                    ImageOrientationQuery::PROJECTION, IBaseColumns::ID + "=" + id, NULL, String(NULL),
-                    signal, (ICursor**)&cursor);
+            ImageOrientationQuery::PROJECTION, sb.ToString(), NULL, String(NULL),
+            signal, (ICursor**)&cursor);
 
         Boolean flag = FALSE;
         AutoPtr<IIoUtils> ioUtils;

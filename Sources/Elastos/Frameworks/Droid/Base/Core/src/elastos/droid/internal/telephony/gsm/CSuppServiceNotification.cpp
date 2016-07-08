@@ -1,7 +1,9 @@
 #include "elastos/droid/internal/telephony/gsm/CSuppServiceNotification.h"
 #include "elastos/droid/telephony/PhoneNumberUtils.h"
+#include <elastos/core/StringBuilder.h>
 
 using Elastos::Droid::Telephony::PhoneNumberUtils;
+using Elastos::Core::StringBuilder;
 
 namespace Elastos {
 namespace Droid {
@@ -53,13 +55,15 @@ ECode CSuppServiceNotification::ToString(
     /* [out] */ String* result)
 {
     VALIDATE_NOT_NULL(result)
+    StringBuilder sb(" mobile");
+    sb += (mNotificationType == NOTIFICATION_TYPE_MO ? " originated " : " terminated ");
+    sb += " code: "; sb += mCode;
+    sb += " index: "; sb += mIndex;
+    sb += " \"";
     String str;
-    *result = String(" mobile")
-        + (mNotificationType == NOTIFICATION_TYPE_MO ? " originated " : " terminated ")
-        + " code: " + mCode
-        + " index: " + mIndex
-        + " \""
-        + (PhoneNumberUtils::StringFromStringAndTOA(mNumber, mType, &str), str) + "\" ";
+    sb += (PhoneNumberUtils::StringFromStringAndTOA(mNumber, mType, &str), str);
+    sb += "\" ";
+    *result = sb.ToString();
     return NOERROR;
 }
 

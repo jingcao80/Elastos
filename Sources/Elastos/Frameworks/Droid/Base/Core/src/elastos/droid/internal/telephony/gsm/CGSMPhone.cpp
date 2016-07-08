@@ -200,7 +200,7 @@ ECode CGSMPhone::constructor(
     mCi->SetOnSs(this, EVENT_SS, NULL);
     SetProperties();
 
-    Log(String("GSMPhone: constructor: sub = ") + mPhoneId);
+    Logger::I("CGSMPhone", "GSMPhone: constructor: sub = %d", mPhoneId);
 
     SetProperties();
     return NOERROR;
@@ -997,7 +997,8 @@ ECode CGSMPhone::GetVoiceMailNumber(
         PreferenceManager::GetDefaultSharedPreferences(ctx, (ISharedPreferences**)&sp);
         Int64 id;
         GetSubId(&id);
-        sp->GetString(VM_NUMBER + id, String(NULL), &number);
+        StringBuilder sb(VM_NUMBER); sb += id;
+        sp->GetString(sb.ToString(), String(NULL), &number);
     }
 
     if (number.IsEmpty()) {
@@ -1865,7 +1866,8 @@ ECode CGSMPhone::SaveClirSetting(
     sp->Edit((ISharedPreferencesEditor**)&editor);
     Int32 pid;
     GetPhoneId(&pid);
-    editor->PutInt32(CLIR_KEY + pid, commandInterfaceCLIRMode);
+    StringBuilder sb(CLIR_KEY); sb += pid;
+    editor->PutInt32(sb.ToString(), commandInterfaceCLIRMode);
 
     // commit and log the result.
     Boolean b;
@@ -2233,7 +2235,8 @@ void CGSMPhone::SetCallForwardingPreference(
     sp->Edit((ISharedPreferencesEditor**)&edit);
     Int64 id;
     GetSubId(&id);
-    edit->PutBoolean(CF_ENABLED + id, enabled);
+    StringBuilder sb(CF_ENABLED); sb += id;
+    edit->PutBoolean(sb.ToString(), enabled);
     Boolean b;
     edit->Commit(&b);
 
@@ -2253,7 +2256,8 @@ Boolean CGSMPhone::GetCallForwardingPreference()
     Int64 id;
     GetSubId(&id);
     Boolean cf;
-    sp->GetBoolean(CF_ENABLED + id, FALSE, &cf);
+    StringBuilder sb(CF_ENABLED); sb += id;
+    sp->GetBoolean(sb.ToString(), FALSE, &cf);
     return cf;
 }
 
@@ -2267,7 +2271,8 @@ void CGSMPhone::SyncClirSetting()
     Int32 pid;
     GetPhoneId(&pid);
     Int32 clirSetting;
-    sp->GetInt32(CLIR_KEY + pid, -1, &clirSetting);
+    StringBuilder sb(CLIR_KEY); sb += pid;
+    sp->GetInt32(sb.ToString(), -1, &clirSetting);
     if (clirSetting >= 0) {
         mCi->SetCLIR(clirSetting, NULL);
     }
@@ -2355,10 +2360,8 @@ void CGSMPhone::OnSubscriptionActivated()
     //mSubscriptionData = SubscriptionManager.getCurrentSubscription(mSubscription);
 
     AutoPtr<Subscription> sc = (Subscription*)mSubscriptionData.Get();
-    Log(String("SUBSCRIPTION ACTIVATED : slotId : ") + sc->mSlotId
-            + " appid : " + sc->m3gppIndex
-            + " subId : " + sc->mSubId
-            + " subStatus : " + sc->mSubStatus);
+    Logger::I("CGSMPhone", "SUBSCRIPTION ACTIVATED : slotId : %d appid : %d subId : %d subStatus : %d",
+        sc->mSlotId, sc->m3gppIndex, sc->mSubId, sc->mSubStatus);
 
     // Make sure properties are set for proper subscription.
     SetProperties();
@@ -2592,7 +2595,8 @@ void CGSMPhone::StoreVoiceMailNumber(
 
     Int64 id;
     GetSubId(&id);
-    editor->PutString(VM_NUMBER + id, number);
+    StringBuilder sb(VM_NUMBER); sb += id;
+    editor->PutString(sb.ToString(), number);
     editor->Apply();
     String str;
     GetSubscriberId(&str);
@@ -2608,7 +2612,8 @@ String CGSMPhone::GetSimImsi()
     Int64 id;
     GetSubId(&id);
     String str;
-    sp->GetString(SIM_IMSI +id, String(NULL), &str);
+    StringBuilder sb(SIM_IMSI); sb += id;
+    sp->GetString(sb.ToString(), String(NULL), &str);
     return str;
 }
 
@@ -2624,7 +2629,8 @@ void CGSMPhone::SetSimImsi(
     sp->Edit((ISharedPreferencesEditor**)&editor);
     Int64 id;
     GetSubId(&id);
-    editor->PutString(SIM_IMSI + id, imsi);
+    StringBuilder sb(SIM_IMSI); sb += id;
+    editor->PutString(sb.ToString(), imsi);
     editor->Apply();
 }
 
@@ -2821,7 +2827,8 @@ Int32 CGSMPhone::GetStoredVoiceMessageCount()
     Int64 id;
     GetSubId(&id);
     String imsi;
-    sp->GetString(VM_ID + id, String(NULL), &imsi);
+    StringBuilder sb(VM_ID); sb += id;
+    sp->GetString(sb.ToString(), String(NULL), &imsi);
     String currentImsi;
     GetSubscriberId(&currentImsi);
 
@@ -2830,8 +2837,9 @@ Int32 CGSMPhone::GetStoredVoiceMessageCount()
 
     if ((imsi != NULL) && (currentImsi != NULL)
             && (currentImsi.Equals(imsi))) {
+        StringBuilder sb(VM_COUNT); sb += id;
         // get voice mail count from preferences
-        sp->GetInt32(VM_COUNT + id, 0, &countVoiceMessages);
+        sp->GetInt32(sb.ToString(), 0, &countVoiceMessages);
         Logger::D(TAG, "Voice Mail Count from preference = %d", countVoiceMessages );
     }
     return countVoiceMessages;

@@ -33,7 +33,7 @@ ECode CTelephonyCapabilities::SupportsEcm(
     AutoPtr<IPhone> ph;
     phone->GetImsPhone((IPhone**)&ph);
     String str("supportsEcm: Phone type = ");
-    str += type;
+    //str += type;
     str += " Ims Phone = ";
     assert(0 && "TODO");
     // str += ph;

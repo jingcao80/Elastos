@@ -154,8 +154,8 @@ public:
     inline String& operator+=(const char* other);
     inline String operator+(const char* other) const;
 
-    inline String& operator+=(Char32 other);
-    inline String operator+(Char32 other) const;
+    // inline String& operator+=(Char32 other);
+    // inline String operator+(Char32 other) const;
 
     ECode Append(const String& other);
     ECode Append(const String& other, Int32 startChar);
@@ -519,18 +519,18 @@ inline String String::operator+(const char* other) const
     return tmp;
 }
 
-inline String& String::operator+=(Char32 other)
-{
-    Append(other);
-    return *this;
-}
+// inline String& String::operator+=(Char32 other)
+// {
+//     Append(other);
+//     return *this;
+// }
 
-inline String String::operator+(Char32 other) const
-{
-    String tmp(*this);
-    tmp += other;
-    return tmp;
-}
+// inline String String::operator+(Char32 other) const
+// {
+//     String tmp(*this);
+//     tmp += other;
+//     return tmp;
+// }
 
 _ELASTOS_NAMESPACE_END
 

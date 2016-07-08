@@ -1,10 +1,12 @@
 #include "elastos/droid/media/PlayerRecord.h"
 #include "elastos/droid/media/MediaFocusControl.h"
 #include <elastos/core/StringUtils.h>
+#include <elastos/core/StringBuilder.h>
 #include <elastos/utility/logging/Slogger.h>
 
 using Elastos::Utility::Logging::Slogger;
 using Elastos::Core::StringUtils;
+using Elastos::Core::StringBuilder;
 
 namespace Elastos{
 namespace Droid {
@@ -46,7 +48,9 @@ ECode PlayerRecord::RccPlaybackState::ToString(
     /* [out] */ String* result)
 {
     VALIDATE_NOT_NULL(result);
-    *result = StateToString() + String(", ") + PosToString() + String(", ") + mSpeed + String("X");
+    StringBuilder sb(StateToString());
+    sb += ", "; sb += PosToString(); sb += ", "; sb += mSpeed; sb += "X";
+    *result = sb.ToString();
     return NOERROR;
 }
 
@@ -187,31 +191,31 @@ ECode PlayerRecord::Dump(
     /* [in] */ IPrintWriter* pw,
     /* [in] */ Boolean registrationInfo)
 {
-    if (registrationInfo) {
-        pw->Println(String("  pi: "));
-        pw->Println(mMediaIntent.Get());
-        pw->Println(String(" -- pack: ") + mCallingPackageName +
-                    String("  -- ercvr: "));
-        pw->Println(mReceiverComponent.Get());
-        pw->Println(String("  -- client: "));
-        pw->Println(mRcClient.Get());
-        pw->Println(String("  -- uid: ") + mCallingUid +
-                    String("  -- type: ") + mPlaybackType +
-                    String("  state: " ));
-        pw->Println(mPlaybackState.Get());
-    } else {
-        // emphasis on state
-        pw->Println(String("  uid: ") + mCallingUid +
-                    String("  -- id: ") + mRccId +
-                    String("  -- type: ") + mPlaybackType +
-                    String("  -- state: "));
-        pw->Println(mPlaybackState.Get());
-        pw->Println(String("  -- vol handling: ") + mPlaybackVolumeHandling +
-                    String("  -- vol: ") + mPlaybackVolume +
-                    String("  -- volMax: ") + mPlaybackVolumeMax +
-                    String("  -- volObs: "));
-        pw->Println(mRemoteVolumeObs.Get());
-    }
+    // if (registrationInfo) {
+    //     pw->Println(String("  pi: "));
+    //     pw->Println(mMediaIntent.Get());
+    //     pw->Println(String(" -- pack: ") + mCallingPackageName +
+    //                 String("  -- ercvr: "));
+    //     pw->Println(mReceiverComponent.Get());
+    //     pw->Println(String("  -- client: "));
+    //     pw->Println(mRcClient.Get());
+    //     pw->Println(String("  -- uid: ") + mCallingUid +
+    //                 String("  -- type: ") + mPlaybackType +
+    //                 String("  state: " ));
+    //     pw->Println(mPlaybackState.Get());
+    // } else {
+    //     // emphasis on state
+    //     pw->Println(String("  uid: ") + mCallingUid +
+    //                 String("  -- id: ") + mRccId +
+    //                 String("  -- type: ") + mPlaybackType +
+    //                 String("  -- state: "));
+    //     pw->Println(mPlaybackState.Get());
+    //     pw->Println(String("  -- vol handling: ") + mPlaybackVolumeHandling +
+    //                 String("  -- vol: ") + mPlaybackVolume +
+    //                 String("  -- volMax: ") + mPlaybackVolumeMax +
+    //                 String("  -- volObs: "));
+    //     pw->Println(mRemoteVolumeObs.Get());
+    // }
     return NOERROR;
 }
 

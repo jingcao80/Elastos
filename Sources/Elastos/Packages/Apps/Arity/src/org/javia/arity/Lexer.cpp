@@ -254,7 +254,8 @@ ECode Lexer::NextToken(
     }
     else if ((c >= 0x0391 && c <= 0x03a9) || (c >= 0x03b1 && c <= 0x03c9)
                || c == 0x221e) {
-        TOK_CONST->SetAlpha(String("") + c);
+        String str; str.Append(c);
+        TOK_CONST->SetAlpha(str);
         *token = TOK_CONST;
         REFCOUNT_ADD(*token)
         return NOERROR;

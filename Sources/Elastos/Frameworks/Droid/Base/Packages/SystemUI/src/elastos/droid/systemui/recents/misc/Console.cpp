@@ -86,10 +86,8 @@ void Console::Log(
         CSystem::AcquireSingleton((ISystem**)&sys);
         AutoPtr<IPrintStream> out;
         sys->GetOut((IPrintStream**)&out);
-        String s;
-        IObject::Probe(data)->ToString(&s);
-        String str = color + key + AnsiReset + " " + s;
-        out->Println(str);
+        StringBuilder sb; sb += color; sb += key; sb += AnsiReset; sb += " "; sb += TO_CSTR(data);
+        out->Println(sb.ToString());
     }
 }
 
@@ -124,8 +122,8 @@ void Console::LogDivider(
         sys->GetOut((IPrintStream**)&out);
         Int64 value;
         sys->GetCurrentTimeMillis(&value);
-        String str = String("==== [") + value + String("] ====");
-        out->Println(str);
+        StringBuilder sb("==== ["); sb += value; sb += "] ====";
+        out->Println(sb.ToString());
     }
 }
 
@@ -144,7 +142,8 @@ void Console::LogStartTracingTime(
         CInteger64::New(curTime, (IInteger64**)&ct);
         mTimeLogs->Put(keycs, ct);
         AutoPtr<ICharSequence> cs;
-        CString::New(String("started @ ") + curTime, (ICharSequence**)&cs);
+        StringBuilder sb("started @ "); sb += curTime;
+        CString::New(sb.ToString(), (ICharSequence**)&cs);
         Console::Log(condition, String("[Recents|") + key + String("]"), cs);
     }
 }
@@ -167,7 +166,8 @@ void Console::LogTraceTime(
         IInteger64::Probe(obj)->GetValue(&v);
         timeDiff -= v;
         cs = NULL;
-        CString::New(String("+") + timeDiff + String("ms"), (ICharSequence**)&cs);
+        StringBuilder sb("+"); sb += timeDiff; sb += " ms";
+        CString::New(sb.ToString(), (ICharSequence**)&cs);
         Console::Log(condition, String("[Recents|") + key + String("|") + desc + String("]"), cs);
     }
 }

@@ -193,9 +193,9 @@ ECode PhoneProxy::HandleMessage(
         break;
     }
     default: {
-        String str("Error! This handler was not registered for this message type. Message: ");
-        str += iwhat;
-        Loge(str);
+        // String str("Error! This handler was not registered for this message type. Message: ");
+        // str += iwhat;
+        // Loge(str);
         break;
     }
     }
@@ -220,9 +220,9 @@ void PhoneProxy::Loge(
 void PhoneProxy::PhoneObjectUpdater(
     /* [in] */ Int32 newVoiceRadioTech)
 {
-    String str("phoneObjectUpdater: newVoiceRadioTech=");
-    str += StringUtils::ToString(newVoiceRadioTech);
-    Logd(str);
+    // String str("phoneObjectUpdater: newVoiceRadioTech=");
+    // str += newVoiceRadioTech;
+    // Logd(str);
 
     if (mActivePhone != NULL) {
         // Check for a voice over lte replacement
@@ -235,9 +235,9 @@ void PhoneProxy::PhoneObjectUpdater(
             Int32 volteReplacementRat = 0;
             res->GetInteger(
                     R::integer::config_volte_replacement_rat, &volteReplacementRat);
-            String str("phoneObjectUpdater: volteReplacementRat=");
-            str += StringUtils::ToString(volteReplacementRat);
-            Logd(str);
+            // String str("phoneObjectUpdater: volteReplacementRat=");
+            // str += volteReplacementRat;
+            // Logd(str);
             if (volteReplacementRat != IServiceState::RIL_RADIO_TECHNOLOGY_UNKNOWN) {
                 newVoiceRadioTech = volteReplacementRat;
             }
@@ -455,9 +455,9 @@ ECode PhoneProxy::IsImsVtCallPresent(
 ECode PhoneProxy::UpdatePhoneObject(
     /* [in] */ Int32 voiceRadioTech)
 {
-    String str("updatePhoneObject: radioTechnology=");
-    str += voiceRadioTech;
-    Logd(str);
+    // String str("updatePhoneObject: radioTechnology=");
+    // str += voiceRadioTech;
+    // Logd(str);
     AutoPtr<IMessage> msg;
     ObtainMessage(EVENT_UPDATE_PHONE_OBJECT, voiceRadioTech, 0, NULL, (IMessage**)&msg);
     Boolean bSend = FALSE;
@@ -1988,9 +1988,9 @@ ECode PhoneProxy::GetPcscfAddress(
 ECode PhoneProxy::SetImsRegistrationState(
     /* [in] */ Boolean registered)
 {
-    String str("setImsRegistrationState - registered: ");
-    str += registered;
-    Logd(str);
+    // String str("setImsRegistrationState - registered: ");
+    // str += registered;
+    // Logd(str);
 
     mActivePhone->SetImsRegistrationState(registered);
 

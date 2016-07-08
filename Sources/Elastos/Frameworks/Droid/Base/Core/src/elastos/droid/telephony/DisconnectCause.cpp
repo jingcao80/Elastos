@@ -1,4 +1,7 @@
 #include "elastos/droid/telephony/DisconnectCause.h"
+#include <elastos/core/StringBuilder.h>
+
+using Elastos::Core::StringBuilder;
 
 namespace Elastos {
 namespace Droid {
@@ -143,9 +146,11 @@ ECode DisconnectCause::ToString(
         case IDisconnectCause::OUTGOING_CANCELED:
             *result = String("OUTGOING_CANCELED");
             break;
-        default:
-            *result = String("INVALID: ") + cause;
+        default: {
+            StringBuilder sb("INVALID: "); sb += cause;
+            *result = sb.ToString();
             break;
+        }
     }
     return NOERROR;
 }

@@ -3,9 +3,11 @@
 #include "elastos/droid/ext/frameworkext.h"
 #include "elastos/droid/telecomm/telecom/DisconnectCause.h"
 #include "elastos/droid/text/TextUtils.h"
+#include <elastos/core/StringBuilder.h>
 
 using Elastos::Droid::Text::TextUtils;
 using Elastos::Droid::Media::IToneGenerator;
+using Elastos::Core::StringBuilder;
 
 namespace Elastos {
 namespace Droid {
@@ -212,21 +214,22 @@ ECode DisconnectCause::ToString(
     if (!mDisconnectReason.IsNull()) {
         reason = mDisconnectReason;
     }
-    *result = "DisconnectCause [ Code: (";
-    *result += res;
-    *result += ")";
-    *result += " Label: (";
-    *result += label;
-    *result += ")";
-    *result += " Description: (";
-    *result += description;
-    *result += ")";
-    *result += " Reason: (";
-    *result += reason;
-    *result += ")";
-    *result += " Tone: (";
-    *result += mToneToPlay;
-    *result += ") ]";
+    StringBuilder sb("DisconnectCause [ Code: (");
+    sb += res;
+    sb += ")";
+    sb += " Label: (";
+    sb += label;
+    sb += ")";
+    sb += " Description: (";
+    sb += description;
+    sb += ")";
+    sb += " Reason: (";
+    sb += reason;
+    sb += ")";
+    sb += " Tone: (";
+    sb += mToneToPlay;
+    sb += ") ]";
+    *result = sb.ToString();
     return NOERROR;
 }
 

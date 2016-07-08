@@ -763,12 +763,12 @@ ECode RIL::Init(
     mDisplayListener = new DisplayListener(this);
 
     if (RILJ_LOGD) {
-        String str("RIL(context, preferredNetworkType=");
-        str += preferredNetworkType;
-        str += " cdmaSubscription=";
-        str += cdmaSubscription;
-        str += ")";
-        RiljLog(str);
+        // String str("RIL(context, preferredNetworkType=");
+        // str += preferredNetworkType;
+        // str += " cdmaSubscription=";
+        // str += cdmaSubscription;
+        // str += ")";
+        // RiljLog(str);
     }
 
     mContext = context;
@@ -901,14 +901,14 @@ ECode RIL::SetUiccSubscription(
     AutoPtr<RILRequest> rr = RILRequest::Obtain(IRILConstants::RIL_REQUEST_SET_UICC_SUBSCRIPTION, result);
 
     if (RILJ_LOGD) {
-        String str = rr->SerialString();
-        str += "> ";
-        str += RequestToString(rr->mRequest);
-        str += " slot: "; str += slotId;
-        str += " appIndex: "; str += appIndex;
-        str += " subId: "; str += subId;
-        str += " subStatus: "; str += subStatus;
-        RiljLog(str);
+        // String str = rr->SerialString();
+        // str += "> ";
+        // str += RequestToString(rr->mRequest);
+        // str += " slot: "; str += slotId;
+        // str += " appIndex: "; str += appIndex;
+        // str += " subId: "; str += subId;
+        // str += " subStatus: "; str += subStatus;
+        // RiljLog(str);
     }
 
     rr->mParcel->WriteInt32(slotId);
@@ -940,12 +940,12 @@ ECode RIL::SetDataAllowed(
 
     AutoPtr<RILRequest> rr = RILRequest::Obtain(IRILConstants::RIL_REQUEST_ALLOW_DATA, result);
     if (RILJ_LOGD) {
-        String str = rr->SerialString();
-        str += "> ";
-        str += RequestToString(rr->mRequest);
-        str += " ";
-        str += allowed;
-        RiljLog(str);
+        // String str = rr->SerialString();
+        // str += "> ";
+        // str += RequestToString(rr->mRequest);
+        // str += " ";
+        // str += allowed;
+        // RiljLog(str);
     }
 
     rr->mParcel->WriteInt32(1);
@@ -981,12 +981,12 @@ ECode RIL::GetDataCallProfile(
     rr->mParcel->WriteInt32(appType);
 
     if (RILJ_LOGD) {
-        String str = rr->SerialString();
-        str += "> ";
-        str += RequestToString(rr->mRequest);
-        str += " : ";
-        str += appType;
-        RiljLog(str);
+        // String str = rr->SerialString();
+        // str += "> ";
+        // str += RequestToString(rr->mRequest);
+        // str += " : ";
+        // str += appType;
+        // RiljLog(str);
     }
     Send(rr);
     return NOERROR;
@@ -1262,12 +1262,12 @@ ECode RIL::SupplyDepersonalization(
                                 result);
 
     if (RILJ_LOGD) {
-        String str = rr->SerialString();
-        str += "> ";
-        str += RequestToString(rr->mRequest);
-        str += " Type:";
-        str += type;
-        RiljLog(str);
+        // String str = rr->SerialString();
+        // str += "> ";
+        // str += RequestToString(rr->mRequest);
+        // str += " Type:";
+        // str += type;
+        // RiljLog(str);
     }
 
     rr->mParcel->WriteInt32(2);
@@ -1446,20 +1446,20 @@ ECode RIL::HangupConnection(
     /* [in] */ IMessage* result)
 {
     if (RILJ_LOGD) {
-        String str("hangupConnection: gsmIndex=");
-        str += gsmIndex;
-        RiljLog(str);
+        // String str("hangupConnection: gsmIndex=");
+        // str += gsmIndex;
+        // RiljLog(str);
     }
 
     AutoPtr<RILRequest> rr = RILRequest::Obtain(IRILConstants::RIL_REQUEST_HANGUP, result);
 
     if (RILJ_LOGD) {
-        String str = rr->SerialString();
-        str += "> ";
-        str += RequestToString(rr->mRequest);
-        str += " ";
-        str += gsmIndex;
-        RiljLog(str);
+        // String str = rr->SerialString();
+        // str += "> ";
+        // str += RequestToString(rr->mRequest);
+        // str += " ";
+        // str += gsmIndex;
+        // RiljLog(str);
     }
 
     rr->mParcel->WriteInt32(1);
@@ -1573,12 +1573,12 @@ ECode RIL::SeparateConnection(
                 IRILConstants::RIL_REQUEST_SEPARATE_CONNECTION, result);
 
     if (RILJ_LOGD) {
-        String str = rr->SerialString();
-        str += "> ";
-        str += RequestToString(rr->mRequest);
-        str += " ";
-        str += gsmIndex;
-        RiljLog(str);
+        // String str = rr->SerialString();
+        // str += "> ";
+        // str += RequestToString(rr->mRequest);
+        // str += " ";
+        // str += gsmIndex;
+        // RiljLog(str);
     }
 
     rr->mParcel->WriteInt32(1);
@@ -1689,12 +1689,12 @@ ECode RIL::SetMute(
             = RILRequest::Obtain(IRILConstants::RIL_REQUEST_SET_MUTE, response);
 
     if (RILJ_LOGD) {
-        String str = rr->SerialString();
-        str += "> ";
-        str += RequestToString(rr->mRequest);
-        str += " ";
-        str += enableMute;
-        RiljLog(str);
+        // String str = rr->SerialString();
+        // str += "> ";
+        // str += RequestToString(rr->mRequest);
+        // str += " ";
+        // str += enableMute;
+        // RiljLog(str);
     }
 
     rr->mParcel->WriteInt32(1);
@@ -2107,12 +2107,12 @@ ECode RIL::DeleteSmsOnSim(
     rr->mParcel->WriteInt32(index);
 
     if (RILJ_LOGV) {
-        String str = rr->SerialString();
-        str += "> ";
-        str += RequestToString(rr->mRequest);
-        str += " ";
-        str += index;
-        RiljLog(str);
+        // String str = rr->SerialString();
+        // str += "> ";
+        // str += RequestToString(rr->mRequest);
+        // str += " ";
+        // str += index;
+        // RiljLog(str);
     }
 
     Send(rr);
@@ -2130,11 +2130,11 @@ ECode RIL::DeleteSmsOnRuim(
     rr->mParcel->WriteInt32(index);
 
     if (RILJ_LOGV) {
-        String str = rr->SerialString();
-        str += "> ";
-        str += RequestToString(rr->mRequest);
-        str += " "; str += index;
-        RiljLog(str);
+        // String str = rr->SerialString();
+        // str += "> ";
+        // str += RequestToString(rr->mRequest);
+        // str += " "; str += index;
+        // RiljLog(str);
     }
 
     Send(rr);
@@ -2157,12 +2157,12 @@ ECode RIL::WriteSmsToSim(
     rr->mParcel->WriteString(smsc);
 
     if (RILJ_LOGV) {
-        String str = rr->SerialString();
-        str += "> ";
-        str += RequestToString(rr->mRequest);
-        str += " ";
-        str += status;
-        RiljLog(str);
+        // String str = rr->SerialString();
+        // str += "> ";
+        // str += RequestToString(rr->mRequest);
+        // str += " ";
+        // str += status;
+        // RiljLog(str);
     }
 
     Send(rr);
@@ -2184,12 +2184,12 @@ ECode RIL::WriteSmsToRuim(
     ConstructCdmaWriteSmsRilRequest(rr, IccUtils::HexStringToBytes(pdu));
 
     if (RILJ_LOGV) {
-        String str = rr->SerialString();
-        str += "> ";
-        str += RequestToString(rr->mRequest);
-        str += " ";
-        str += status;
-        RiljLog(str);
+        // String str = rr->SerialString();
+        // str += "> ";
+        // str += RequestToString(rr->mRequest);
+        // str += " ";
+        // str += status;
+        // RiljLog(str);
     }
 
     Send(rr);
@@ -2269,21 +2269,21 @@ void RIL::ConstructCdmaWriteSmsRilRequest(
             rr->mParcel->WriteByte(bearerData); // bearerData[i]
         }
 
-        String logMsg(" teleServiceId=");
-        logMsg += teleServiceId; logMsg += " servicePresent=";
-        logMsg += servicePresent; logMsg += " serviceCategory=";
-        logMsg += serviceCategory; logMsg += " address_digit_mode=";
-        logMsg += address_digit_mode; logMsg += " address_nbr_mode=";
-        logMsg += address_nbr_mode; logMsg += " address_ton=";
-        logMsg += address_ton; logMsg += " address_nbr_plan=";
-        logMsg += address_nbr_plan; logMsg += " address_nbr_of_digits=";
-        logMsg += address_nbr_of_digits; logMsg += " subaddressType=";
-        logMsg += subaddressType; logMsg += " subaddr_odd= ";
-        logMsg += subaddr_odd; logMsg += " subaddr_nbr_of_digits=";
-        logMsg += subaddr_nbr_of_digits; logMsg += " bearerDataLength=";
-        logMsg += bearerDataLength;
+        // String logMsg(" teleServiceId=");
+        // logMsg += teleServiceId; logMsg += " servicePresent=";
+        // logMsg += servicePresent; logMsg += " serviceCategory=";
+        // logMsg += serviceCategory; logMsg += " address_digit_mode=";
+        // logMsg += address_digit_mode; logMsg += " address_nbr_mode=";
+        // logMsg += address_nbr_mode; logMsg += " address_ton=";
+        // logMsg += address_ton; logMsg += " address_nbr_plan=";
+        // logMsg += address_nbr_plan; logMsg += " address_nbr_of_digits=";
+        // logMsg += address_nbr_of_digits; logMsg += " subaddressType=";
+        // logMsg += subaddressType; logMsg += " subaddr_odd= ";
+        // logMsg += subaddr_odd; logMsg += " subaddr_nbr_of_digits=";
+        // logMsg += subaddr_nbr_of_digits; logMsg += " bearerDataLength=";
+        // logMsg += bearerDataLength;
 
-        RiljLog(logMsg);
+        // RiljLog(logMsg);
     // } catch (IOException ex) {
     //     if (RILJ_LOGD) {
     //         RiljLog("sendSmsCdma: conversion from input stream to object failed: "
@@ -2348,17 +2348,17 @@ ECode RIL::SetupDataCall(
     rr->mParcel->WriteString(protocol);
 
     if (RILJ_LOGD) {
-        String str = rr->SerialString();
-        str += "> ";
-        str += RequestToString(rr->mRequest);
-        str += " "; str += radioTechnology;
-        str += " "; str += profile;
-        str += " "; str += apn;
-        str += " "; str += user;
-        str += " "; str += password;
-        str += " "; str += authType;
-        str += " "; str += protocol;
-        RiljLog(str);
+        // String str = rr->SerialString();
+        // str += "> ";
+        // str += RequestToString(rr->mRequest);
+        // str += " "; str += radioTechnology;
+        // str += " "; str += profile;
+        // str += " "; str += apn;
+        // str += " "; str += user;
+        // str += " "; str += password;
+        // str += " "; str += authType;
+        // str += " "; str += protocol;
+        // RiljLog(str);
     }
 
     Send(rr);
@@ -2380,14 +2380,14 @@ ECode RIL::DeactivateDataCall(
     rr->mParcel->WriteInt32(reason);
 
     if (RILJ_LOGD) {
-        String str = rr->SerialString();
-        str += "> ";
-        str += RequestToString(rr->mRequest);
-        str += " ";
-        str += cid;
-        str += " ";
-        str += reason;
-        RiljLog(str);
+        // String str = rr->SerialString();
+        // str += "> ";
+        // str += RequestToString(rr->mRequest);
+        // str += " ";
+        // str += cid;
+        // str += " ";
+        // str += reason;
+        // RiljLog(str);
     }
 
     Send(rr);
@@ -2473,14 +2473,14 @@ ECode RIL::AcknowledgeLastIncomingGsmSms(
     rr->mParcel->WriteInt32(cause);
 
     if (RILJ_LOGD) {
-        String str = rr->SerialString();
-        str += "> ";
-        str += RequestToString(rr->mRequest);
-        str += " ";
-        str += success;
-        str += " ";
-        str += cause;
-        RiljLog(str);
+        // String str = rr->SerialString();
+        // str += "> ";
+        // str += RequestToString(rr->mRequest);
+        // str += " ";
+        // str += success;
+        // str += " ";
+        // str += cause;
+        // RiljLog(str);
     }
 
     Send(rr);
@@ -2502,14 +2502,14 @@ ECode RIL::AcknowledgeLastIncomingCdmaSms(
     rr->mParcel->WriteInt32(cause);
 
     if (RILJ_LOGD) {
-        String str = rr->SerialString();
-        str += "> ";
-        str += RequestToString(rr->mRequest);
-        str += " ";
-        str += success;
-        str += " ";
-        str += cause;
-        RiljLog(str);
+        // String str = rr->SerialString();
+        // str += "> ";
+        // str += RequestToString(rr->mRequest);
+        // str += " ";
+        // str += success;
+        // str += " ";
+        // str += cause;
+        // RiljLog(str);
     }
 
     Send(rr);
@@ -2531,15 +2531,15 @@ ECode RIL::AcknowledgeIncomingGsmSmsWithPdu(
     rr->mParcel->WriteString(ackPdu);
 
     if (RILJ_LOGD) {
-        String str = rr->SerialString();
-        str += "> ";
-        str += RequestToString(rr->mRequest);
-        str += ' ';
-        str += success;
-        str += " [";
-        str += ackPdu;
-        str += ']';
-        RiljLog(str);
+        // String str = rr->SerialString();
+        // str += "> ";
+        // str += RequestToString(rr->mRequest);
+        // str += ' ';
+        // str += success;
+        // str += " [";
+        // str += ackPdu;
+        // str += ']';
+        // RiljLog(str);
     }
 
     Send(rr);
@@ -2588,19 +2588,19 @@ ECode RIL::IccIOForApp(
     rr->mParcel->WriteString(aid);
 
     if (RILJ_LOGD) {
-        String str = rr->SerialString();
-        str += "> iccIO: ";
-        str += RequestToString(rr->mRequest);
-        str += " 0x";
-        str += StringUtils::ToHexString(command);
-        str += " 0x";
-        str += StringUtils::ToHexString(fileid);
-        str += " ";
-        str += " path: "; str += path; str += ",";
-        str += p1; str += ","; str += p2;
-        str += ","; str += p3;
-        str += " aid: "; str += aid;
-        RiljLog(str);
+        // String str = rr->SerialString();
+        // str += "> iccIO: ";
+        // str += RequestToString(rr->mRequest);
+        // str += " 0x";
+        // str += StringUtils::ToHexString(command);
+        // str += " 0x";
+        // str += StringUtils::ToHexString(fileid);
+        // str += " ";
+        // str += " path: "; str += path; str += ",";
+        // str += p1; str += ","; str += p2;
+        // str += ","; str += p3;
+        // str += " aid: "; str += aid;
+        // RiljLog(str);
     }
 
     Send(rr);
@@ -2637,12 +2637,12 @@ ECode RIL::SetCLIR(
     rr->mParcel->WriteInt32(clirMode);
 
     if (RILJ_LOGD) {
-        String str = rr->SerialString();
-        str += "> ";
-        str += RequestToString(rr->mRequest);
-        str += " ";
-        str += clirMode;
-        RiljLog(str);
+        // String str = rr->SerialString();
+        // str += "> ";
+        // str += RequestToString(rr->mRequest);
+        // str += " ";
+        // str += clirMode;
+        // RiljLog(str);
     }
 
     Send(rr);
@@ -2662,12 +2662,12 @@ ECode RIL::QueryCallWaiting(
     rr->mParcel->WriteInt32(serviceClass);
 
     if (RILJ_LOGD) {
-        String str = rr->SerialString();
-        str += "> ";
-        str += RequestToString(rr->mRequest);
-        str += " ";
-        str += serviceClass;
-        RiljLog(str);
+        // String str = rr->SerialString();
+        // str += "> ";
+        // str += RequestToString(rr->mRequest);
+        // str += " ";
+        // str += serviceClass;
+        // RiljLog(str);
     }
 
     Send(rr);
@@ -2689,14 +2689,14 @@ ECode RIL::SetCallWaiting(
     rr->mParcel->WriteInt32(serviceClass);
 
     if (RILJ_LOGD) {
-        String str = rr->SerialString();
-        str += "> ";
-        str += RequestToString(rr->mRequest);
-        str += " ";
-        str += enable;
-        str += ", ";
-        str += serviceClass;
-        RiljLog(str);
+        // String str = rr->SerialString();
+        // str += "> ";
+        // str += RequestToString(rr->mRequest);
+        // str += " ";
+        // str += enable;
+        // str += ", ";
+        // str += serviceClass;
+        // RiljLog(str);
     }
 
     Send(rr);
@@ -2808,14 +2808,14 @@ ECode RIL::SetCallForward(
     rr->mParcel->WriteInt32 (timeSeconds);
 
     if (RILJ_LOGD) {
-        String str = rr->SerialString();
-        str += "> ";
-        str += RequestToString(rr->mRequest);
-        str += " "; str += action;
-        str += " "; str += cfReason;
-        str += " "; str += serviceClass;
-        str += timeSeconds;
-        RiljLog(str);
+        // String str = rr->SerialString();
+        // str += "> ";
+        // str += RequestToString(rr->mRequest);
+        // str += " "; str += action;
+        // str += " "; str += cfReason;
+        // str += " "; str += serviceClass;
+        // str += timeSeconds;
+        // RiljLog(str);
     }
 
     Send(rr);
@@ -2845,14 +2845,14 @@ ECode RIL::QueryCallForwardStatus(
     rr->mParcel->WriteInt32 (0);
 
     if (RILJ_LOGD) {
-        String str = rr->SerialString();
-        str += "> ";
-        str += RequestToString(rr->mRequest);
-        str += " ";
-        str += cfReason;
-        str += " ";
-        str += serviceClass;
-        RiljLog(str);
+        // String str = rr->SerialString();
+        // str += "> ";
+        // str += RequestToString(rr->mRequest);
+        // str += " ";
+        // str += cfReason;
+        // str += " ";
+        // str += serviceClass;
+        // RiljLog(str);
     }
 
     Send(rr);
@@ -2966,15 +2966,15 @@ ECode RIL::SetFacilityLockForApp(
                 response);
 
     if (RILJ_LOGD) {
-        String str = rr->SerialString();
-        str += "> ";
-        str += RequestToString(rr->mRequest);
-        str += " ["; str += facility;
-        str += " "; str += lockState;
-        str += " "; str += serviceClass;
-        str += " "; str += appId;
-        str += "]";
-        RiljLog(str);
+        // String str = rr->SerialString();
+        // str += "> ";
+        // str += RequestToString(rr->mRequest);
+        // str += " ["; str += facility;
+        // str += " "; str += lockState;
+        // str += " "; str += serviceClass;
+        // str += " "; str += appId;
+        // str += "]";
+        // RiljLog(str);
     }
 
     Boolean oldRil = FALSE;
@@ -3187,12 +3187,12 @@ ECode RIL::SetBandMode(
     rr->mParcel->WriteInt32(bandMode);
 
     if (RILJ_LOGD) {
-        String str = rr->SerialString();
-        str += "> ";
-        str += RequestToString(rr->mRequest);
-        str += " ";
-        str += bandMode;
-        RiljLog(str);
+        // String str = rr->SerialString();
+        // str += "> ";
+        // str += RequestToString(rr->mRequest);
+        // str += " ";
+        // str += bandMode;
+        // RiljLog(str);
     }
 
     Send(rr);
@@ -3263,13 +3263,13 @@ ECode RIL::SendEnvelopeWithStatus(
             IRILConstants::RIL_REQUEST_STK_SEND_ENVELOPE_WITH_STATUS, response);
 
     if (RILJ_LOGD) {
-        String str = rr->SerialString();
-        str += "> ";
-        str += RequestToString(rr->mRequest);
-        str += '[';
-        str += contents;
-        str += ']';
-        RiljLog(str);
+        // String str = rr->SerialString();
+        // str += "> ";
+        // str += RequestToString(rr->mRequest);
+        // str += '[';
+        // str += contents;
+        // str += ']';
+        // RiljLog(str);
     }
 
     rr->mParcel->WriteString(contents);
@@ -3312,12 +3312,12 @@ ECode RIL::SetPreferredNetworkType(
     mPreferredNetworkType = networkType;
 
     if (RILJ_LOGD) {
-        String str = rr->SerialString();
-        str += "> ";
-        str += RequestToString(rr->mRequest);
-        str += " : ";
-        str += networkType;
-        RiljLog(str);
+        // String str = rr->SerialString();
+        // str += "> ";
+        // str += RequestToString(rr->mRequest);
+        // str += " : ";
+        // str += networkType;
+        // RiljLog(str);
     }
 
     Send(rr);
@@ -3367,12 +3367,12 @@ ECode RIL::SetLocationUpdates(
     rr->mParcel->WriteInt32(enable ? 1 : 0);
 
     if (RILJ_LOGD) {
-        String str = rr->SerialString();
-        str += "> ";
-        str += RequestToString(rr->mRequest);
-        str += ": ";
-        str += enable;
-        RiljLog(str);
+        // String str = rr->SerialString();
+        // str += "> ";
+        // str += RequestToString(rr->mRequest);
+        // str += ": ";
+        // str += enable;
+        // RiljLog(str);
     }
 
     Send(rr);
@@ -3425,12 +3425,12 @@ ECode RIL::ReportSmsMemoryStatus(
     rr->mParcel->WriteInt32(available ? 1 : 0);
 
     if (RILJ_LOGD) {
-        String str = rr->SerialString();
-        str += "> ";
-        str += RequestToString(rr->mRequest);
-        str += ": ";
-        str += available;
-        RiljLog(str);
+        // String str = rr->SerialString();
+        // str += "> ";
+        // str += RequestToString(rr->mRequest);
+        // str += ": ";
+        // str += available;
+        // RiljLog(str);
     }
 
     Send(rr);
@@ -3501,13 +3501,13 @@ ECode RIL::SetGsmBroadcastConfig(
     }
 
     if (RILJ_LOGD) {
-        String str = rr->SerialString();
-        str += "> ";
-        str += RequestToString(rr->mRequest);
-        str += " with ";
-        str += StringUtils::ToString(numOfConfig);
-        str += " configs : ";
-        RiljLog(str);
+        // String str = rr->SerialString();
+        // str += "> ";
+        // str += RequestToString(rr->mRequest);
+        // str += " with ";
+        // str += numOfConfig;
+        // str += " configs : ";
+        // RiljLog(str);
         for (Int32 i = 0; i < numOfConfig; i++) {
             Logger::E(RILJ_LOG_TAG, "TODO ");
             // RiljLog((*config)[i]->ToString());
@@ -3562,12 +3562,12 @@ void RIL::SendScreenState(
     rr->mParcel->WriteInt32(on ? 1 : 0);
 
     if (RILJ_LOGD) {
-        String str = rr->SerialString();
-        str += "> ";
-        str += RequestToString(rr->mRequest);
-        str += ": ";
-        str += on;
-        RiljLog(str);
+        // String str = rr->SerialString();
+        // str += "> ";
+        // str += RequestToString(rr->mRequest);
+        // str += ": ";
+        // str += on;
+        // RiljLog(str);
     }
 
     Send(rr);
@@ -3944,10 +3944,10 @@ AutoPtr<RILRequest> RIL::ProcessSolicited(
     if (rr->mRequest == IRILConstants::RIL_REQUEST_SHUTDOWN) {
         // Set RADIO_STATE to RADIO_UNAVAILABLE to continue shutdown process
         // regardless of error code to continue shutdown procedure.
-        String str("Response to RIL_REQUEST_SHUTDOWN received. Error is ");
-        str += error;
-        str += " Setting Radio State to Unavailable regardless of error.";
-        RiljLog(str);
+        // String str("Response to RIL_REQUEST_SHUTDOWN received. Error is ");
+        // str += error;
+        // str += " Setting Radio State to Unavailable regardless of error.";
+        // RiljLog(str);
         SetRadioState(RADIO_UNAVAILABLE);
     }
 
@@ -3959,9 +3959,9 @@ AutoPtr<RILRequest> RIL::ProcessSolicited(
         case IRILConstants::RIL_REQUEST_ENTER_SIM_PUK2:
             if (mIccStatusChangedRegistrants != NULL) {
                 if (RILJ_LOGD) {
-                    String str("ON enter sim puk fakeSimStatusChanged: reg count=");
-                    str += mIccStatusChangedRegistrants->GetSize();
-                    RiljLog(str);
+                    // String str("ON enter sim puk fakeSimStatusChanged: reg count=");
+                    // str += mIccStatusChangedRegistrants->GetSize();
+                    // RiljLog(str);
                 }
                 mIccStatusChangedRegistrants->NotifyRegistrants();
             }
@@ -3977,9 +3977,9 @@ AutoPtr<RILRequest> RIL::ProcessSolicited(
             case IRILConstants::RIL_REQUEST_SET_FACILITY_LOCK:
                 if (mIccStatusChangedRegistrants != NULL) {
                     if (RILJ_LOGD) {
-                        String str("ON some errors fakeSimStatusChanged: reg count=");
-                        str += mIccStatusChangedRegistrants->GetSize();
-                        RiljLog(str);
+                        // String str("ON some errors fakeSimStatusChanged: reg count=");
+                        // str += mIccStatusChangedRegistrants->GetSize();
+                        // RiljLog(str);
                     }
                     mIccStatusChangedRegistrants->NotifyRegistrants();
                 }
@@ -4245,9 +4245,9 @@ void RIL::ProcessUnsolicited(
             }
             else {
                 if (RILJ_LOGD) {
-                    String str(" NEW_SMS_ON_SIM ERROR with wrong length ");
-                    str += smsIndex->GetLength();
-                    RiljLog(str);
+                    // String str(" NEW_SMS_ON_SIM ERROR with wrong length ");
+                    // str += smsIndex->GetLength();
+                    // RiljLog(str);
                 }
             }
         break;
@@ -5135,14 +5135,14 @@ AutoPtr<IInterface> RIL::ResponseCallList(
     CArrayList::New(num, (IArrayList**)&response);
 
     if (RILJ_LOGV) {
-        String str("responseCallList: num=");
-        str += num;
-        str += " mEmergencyCallbackModeRegistrant=";
-        //TODO assert(0 && "TODO");
-        // str += mEmergencyCallbackModeRegistrant.Get();
-        str += " mTestingEmergencyCall=";
-        // str += mTestingEmergencyCall.Get();
-        RiljLog(str);
+        // String str("responseCallList: num=");
+        // str += num;
+        // str += " mEmergencyCallbackModeRegistrant=";
+        // assert(0 && "TODO");
+        // // str += mEmergencyCallbackModeRegistrant.Get();
+        // str += " mTestingEmergencyCall=";
+        // // str += mTestingEmergencyCall.Get();
+        // RiljLog(str);
     }
     for (Int32 i = 0; i < num; i++) {
         dc = new DriverCall();
@@ -5333,11 +5333,11 @@ AutoPtr<IInterface> RIL::ResponseDataCallList(
     }
     Int32 num = 0;
     p->ReadInt32(&num);
-    String str("responseDataCallList ver=");
-    str += ver;
-    str += " num=";
-    str += num;
-    RiljLog(str);
+    // String str("responseDataCallList ver=");
+    // str += ver;
+    // str += " num=";
+    // str += num;
+    // RiljLog(str);
 
     CArrayList::New(num, (IArrayList**)&response);
     for (Int32 i = 0; i < num; i++) {
@@ -5362,11 +5362,11 @@ AutoPtr<IInterface> RIL::ResponseSetupDataCall(
     Int32 num = 0;
     p->ReadInt32(&num);
     if (RILJ_LOGV) {
-        String str("responseSetupDataCall ver=");
-        str += ver;
-        str += " num=";
-        str += num;
-        RiljLog(str);
+        // String str("responseSetupDataCall ver=");
+        // str += ver;
+        // str += " num=";
+        // str += num;
+        // RiljLog(str);
     }
 
     AutoPtr<IDataCallResponse> dataCall;
@@ -5708,9 +5708,9 @@ AutoPtr<IArrayList> RIL::ResponseGetDataCallProfile(
     Int32 nProfiles = 0;
     p->ReadInt32(&nProfiles);
     if (RILJ_LOGD) {
-        String str("# data call profiles:");
-        str += nProfiles;
-        RiljLog(str);
+        // String str("# data call profiles:");
+        // str += nProfiles;
+        // RiljLog(str);
     }
 
     AutoPtr<IArrayList> response;
@@ -5725,14 +5725,14 @@ AutoPtr<IArrayList> RIL::ResponseGetDataCallProfile(
         assert(0 && "TODO");
         // CApnProfileOmh::New(profileId, priority, (IApnProfileOmh**)&profiles);
         if (RILJ_LOGD) {
-            String str("responseGetDataCallProfile()");
-            Int32 profileIdget = 0, priorityget = 0;
-            IApnSetting::Probe(profile)->GetProfileId(&profileIdget);
-            profile->GetPriority(&priorityget);
-            str += profileIdget;
-            str += ":";
-            str += priorityget;
-            RiljLog(str);
+            // String str("responseGetDataCallProfile()");
+            // Int32 profileIdget = 0, priorityget = 0;
+            // IApnSetting::Probe(profile)->GetProfileId(&profileIdget);
+            // profile->GetPriority(&priorityget);
+            // str += profileIdget;
+            // str += ":";
+            // str += priorityget;
+            // RiljLog(str);
         }
         response->Add(profile);
     }
@@ -5829,9 +5829,9 @@ AutoPtr<IInterface> RIL::ResponseHardwareConfig(
     CArrayList::New(num, (IArrayList**)&response);
 
     if (RILJ_LOGV) {
-        String str("responseHardwareConfig: num=");
-        str += num;
-        RiljLog(str);
+        // String str("responseHardwareConfig: num=");
+        // str += num;
+        // RiljLog(str);
     }
     for (Int32 i = 0 ; i < num ; i++) {
         Int32 type = 0;
@@ -6256,11 +6256,11 @@ ECode RIL::SetPhoneType(
 {
     // Called by CDMAPhone and GSMPhone constructor
     if (RILJ_LOGD) {
-        String str("setPhoneType=");
-        str += phoneType;
-        str += " old value=";
-        str += mPhoneType;
-        RiljLog(str);
+        // String str("setPhoneType=");
+        // str += phoneType;
+        // str += " old value=";
+        // str += mPhoneType;
+        // RiljLog(str);
     }
     mPhoneType = phoneType;
     return NOERROR;
@@ -6294,12 +6294,12 @@ ECode RIL::SetCdmaRoamingPreference(
     rr->mParcel->WriteInt32(cdmaRoamingType);
 
     if (RILJ_LOGD) {
-        String str = rr->SerialString();
-        str += "> ";
-        str += RequestToString(rr->mRequest);
-        str += " : ";
-        str += cdmaRoamingType;
-        RiljLog(str);
+        // String str = rr->SerialString();
+        // str += "> ";
+        // str += RequestToString(rr->mRequest);
+        // str += " : ";
+        // str += cdmaRoamingType;
+        // RiljLog(str);
     }
 
     Send(rr);
@@ -6317,12 +6317,12 @@ ECode RIL::SetCdmaSubscriptionSource(
     rr->mParcel->WriteInt32(cdmaSubscription);
 
     if (RILJ_LOGD) {
-        String str = rr->SerialString();
-        str += "> ";
-        str += RequestToString(rr->mRequest);
-        str += " : ";
-        str += cdmaSubscription;
-        RiljLog(str);
+        // String str = rr->SerialString();
+        // str += "> ";
+        // str += RequestToString(rr->mRequest);
+        // str += " : ";
+        // str += cdmaSubscription;
+        // RiljLog(str);
     }
 
     Send(rr);
@@ -6374,12 +6374,12 @@ ECode RIL::SetTTYMode(
     rr->mParcel->WriteInt32(ttyMode);
 
     if (RILJ_LOGD) {
-        String str = rr->SerialString();
-        str += "> ";
-        str += RequestToString(rr->mRequest);
-        str += " : ";
-        str += ttyMode;
-        RiljLog(str);
+        // String str = rr->SerialString();
+        // str += "> ";
+        // str += RequestToString(rr->mRequest);
+        // str += " : ";
+        // str += ttyMode;
+        // RiljLog(str);
     }
 
     Send(rr);
@@ -6464,13 +6464,13 @@ ECode RIL::SetCdmaBroadcastConfig(
     }
 
     if (RILJ_LOGD) {
-        String str = rr->SerialString();
-        str += "> ";
-        str += RequestToString(rr->mRequest);
-        str += " with ";
-        str += rilConfigs->GetLength();
-        str += " configs : ";
-        RiljLog(str);
+        // String str = rr->SerialString();
+        // str += "> ";
+        // str += RequestToString(rr->mRequest);
+        // str += " with ";
+        // str += rilConfigs->GetLength();
+        // str += " configs : ";
+        // RiljLog(str);
         for (Int32 i = 0; i < rilConfigs->GetLength(); i++) {
             assert(0 && "TODO");
             // RiljLog((*rilConfigs)[i]->ToString());
@@ -6580,9 +6580,9 @@ ECode RIL::SetCellInfoListRate(
     /* [in] */ IMessage* response)
 {
     if (RILJ_LOGD) {
-        String str("setCellInfoListRate: ");
-        str += rateInMillis;
-        RiljLog(str);
+        // String str("setCellInfoListRate: ");
+        // str += rateInMillis;
+        // RiljLog(str);
     }
     AutoPtr<RILRequest> rr = RILRequest::Obtain(IRILConstants::RIL_REQUEST_SET_UNSOL_CELL_INFO_LIST_RATE, response);
 
@@ -6619,15 +6619,15 @@ ECode RIL::SetInitialAttachApn(
     rr->mParcel->WriteString(password);
 
     if (RILJ_LOGD) {
-        String str = rr->SerialString();
-        str += "> ";
-        str += RequestToString(rr->mRequest);
-        str += ", apn:"; str += apn;
-        str += ", protocol:"; str += protocol;
-        str += ", authType:"; str += authType;
-        str += ", username:"; str += username;
-        str += ", password:"; str += password;
-        RiljLog(str);
+        // String str = rr->SerialString();
+        // str += "> ";
+        // str += RequestToString(rr->mRequest);
+        // str += ", apn:"; str += apn;
+        // str += ", protocol:"; str += protocol;
+        // str += ", authType:"; str += authType;
+        // str += ", username:"; str += username;
+        // str += ", password:"; str += password;
+        // RiljLog(str);
     }
 
     Send(rr);
@@ -6823,12 +6823,12 @@ ECode RIL::GetAtr(
     rr->mParcel->WriteInt32(1);
     rr->mParcel->WriteInt32(slotId);
     if (RILJ_LOGD) {
-        String str = rr->SerialString();
-        str += "> iccGetAtr: ";
-        str += RequestToString(rr->mRequest);
-        str += " ";
-        str += slotId;
-        RiljLog(str);
+        // String str = rr->SerialString();
+        // str += "> iccGetAtr: ";
+        // str += RequestToString(rr->mRequest);
+        // str += " ";
+        // str += slotId;
+        // RiljLog(str);
     }
 
     Send(rr);
@@ -6887,12 +6887,12 @@ ECode RIL::NvReadItem(
     rr->mParcel->WriteInt32(itemID);
 
     if (RILJ_LOGD) {
-        String str = rr->SerialString();
-        str += "> ";
-        str += RequestToString(rr->mRequest);
-        str += ' ';
-        str += itemID;
-        RiljLog(str);
+        // String str = rr->SerialString();
+        // str += "> ";
+        // str += RequestToString(rr->mRequest);
+        // str += ' ';
+        // str += itemID;
+        // RiljLog(str);
     }
 
     Send(rr);
@@ -6910,14 +6910,14 @@ ECode RIL::NvWriteItem(
     rr->mParcel->WriteString(itemValue);
 
     if (RILJ_LOGD) {
-        String str = rr->SerialString();
-        str += "> ";
-        str += RequestToString(rr->mRequest);
-        str += ' ';
-        str += itemID;
-        str += ": ";
-        str += itemValue;
-        RiljLog(str);
+        // String str = rr->SerialString();
+        // str += "> ";
+        // str += RequestToString(rr->mRequest);
+        // str += ' ';
+        // str += itemID;
+        // str += ": ";
+        // str += itemValue;
+        // RiljLog(str);
     }
 
     Send(rr);
@@ -6934,13 +6934,10 @@ ECode RIL::NvWriteCdmaPrl(
     // rr->mParcel->WriteByteArray(preferredRoamingList);
 
     if (RILJ_LOGD) {
-        String str = rr->SerialString();
-        str += "> ";
-        str += RequestToString(rr->mRequest);
-        str += " (";
-        str += preferredRoamingList->GetLength();
-        str += " bytes)";
-        RiljLog(str);
+        StringBuilder sb(rr->SerialString());
+        sb += "> "; sb += RequestToString(rr->mRequest);
+        sb += " ("; sb += preferredRoamingList->GetLength(); sb += " bytes)";
+        RiljLog(sb.ToString());
     }
 
     Send(rr);
@@ -6957,12 +6954,9 @@ ECode RIL::NvResetConfig(
     rr->mParcel->WriteInt32(resetType);
 
     if (RILJ_LOGD) {
-        String str = rr->SerialString();
-        str += "> ";
-        str += RequestToString(rr->mRequest);
-        str += ' ';
-        str += resetType;
-        RiljLog(str);
+        StringBuilder sb(rr->SerialString());
+        sb += "> "; sb += RequestToString(rr->mRequest); sb += " "; sb += resetType;
+        RiljLog(sb.ToString());
     }
 
     Send(rr);

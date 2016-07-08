@@ -202,9 +202,9 @@ ECode SubscriptionController::MyHandler::HandleMessage(
             {
                 AutoLock syncLock(mHost->mLock);
                 mHost->mSuccess = (ar->mException == NULL);
-                String str("EVENT_WRITE_MSISDN_DONE, mSuccess = ");
-                str += mHost->mSuccess;
-                mHost->Logd(str);
+                // String str("EVENT_WRITE_MSISDN_DONE, mSuccess = ");
+                // str += mHost->mSuccess;
+                // mHost->Logd(str);
                 mHost->mLock.NotifyAll();
             }
             break;
@@ -426,22 +426,22 @@ void SubscriptionController::BroadcastSimInfoContentChanged(
     intent->PutExtra(ITelephonyIntents::EXTRA_INT_CONTENT, intContent);
     intent->PutExtra(ITelephonyIntents::EXTRA_STRING_CONTENT, stringContent);
     if (intContent != ISubscriptionManager::DEFAULT_INT_VALUE) {
-        String str("[broadcastSimInfoContentChanged] subId");
-        str += subId;
-        str += " changed, ";
-        str += columnName;
-        str += " -> ";
-        str += intContent;
-        Logd(str);
+        // String str("[broadcastSimInfoContentChanged] subId");
+        // str += subId;
+        // str += " changed, ";
+        // str += columnName;
+        // str += " -> ";
+        // str += intContent;
+        // Logd(str);
     }
     else {
-        String str("[broadcastSimInfoContentChanged] subId");
-        str += subId;
-        str += " changed, ";
-        str += columnName;
-        str += " -> ";
-        str += stringContent;
-        Logd(str);
+        // String str("[broadcastSimInfoContentChanged] subId");
+        // str += subId;
+        // str += " changed, ";
+        // str += columnName;
+        // str += " -> ";
+        // str += stringContent;
+        // Logd(str);
     }
     mContext->SendBroadcast(intent);
 }
@@ -513,26 +513,26 @@ AutoPtr<ISubInfoRecord> SubscriptionController::GetSubInfoRecord(
     assert(0 && "TODO");
     // cursor->GetInt32(mNwMode, &(_info->mNwMode));
 
-    String str("[getSubInfoRecord] SubId:");
-    str += _info->mSubId;
-    str += " iccid:";
-    str += _info->mIccId;
-    str += " slotId:";
-    str += _info->mSlotId;
-    str += " displayName:";
-    str += _info->mDisplayName;
-    str += " color:";
-    str += _info->mColor;
-    str += " mcc/mnc:";
-    str += _info->mMcc;
-    str += "/";
-    str += _info->mMnc;
-    str += " subStatus: ";
-    assert(0 && "TODO");
-    // str += _info->mStatus;
-    str += " Nwmode: ";
-    // str += _info->mNwMode;
-    Logd(str);
+    // String str("[getSubInfoRecord] SubId:");
+    // str += _info->mSubId;
+    // str += " iccid:";
+    // str += _info->mIccId;
+    // str += " slotId:";
+    // str += _info->mSlotId;
+    // str += " displayName:";
+    // str += _info->mDisplayName;
+    // str += " color:";
+    // str += _info->mColor;
+    // str += " mcc/mnc:";
+    // str += _info->mMcc;
+    // str += "/";
+    // str += _info->mMnc;
+    // str += " subStatus: ";
+    // assert(0 && "TODO");
+    // // str += _info->mStatus;
+    // str += " Nwmode: ";
+    // // str += _info->mNwMode;
+    // Logd(str);
 
     return info;
 }
@@ -541,12 +541,12 @@ AutoPtr<IList> SubscriptionController::GetSubInfo(
     /* [in] */ String selection,
     /* [in] */ IInterface* queryKey)
 {
-    String str("selection:");
-    str += selection;
-    str += " ";
+    // String str("selection:");
+    // str += selection;
+    // str += " ";
     assert(0 && "TODO");
     // str += queryKey;
-    Logd(str);
+    // Logd(str);
     AutoPtr<ArrayOf<String> > selectionArgs;
     if (queryKey != NULL) {
         selectionArgs = ArrayOf<String>::Alloc(1);
@@ -596,9 +596,9 @@ ECode SubscriptionController::GetSubInfoForSubscriber(
     /* [out] */ ISubInfoRecord** result)
 {
     VALIDATE_NOT_NULL(result)
-    String str("[getSubInfoForSubscriberx]+ subId:");
-    str += subId;
-    Logd(str);
+    // String str("[getSubInfoForSubscriberx]+ subId:");
+    // str += subId;
+    // Logd(str);
     EnforceSubscriptionPermission();
 
     if (subId == ISubscriptionManager::DEFAULT_SUB_ID) {
@@ -609,9 +609,9 @@ ECode SubscriptionController::GetSubInfoForSubscriber(
     Boolean bValid = FALSE;
     sm->IsValidSubId(subId, &bValid);
     if (!bValid || !IsSubInfoReady()) {
-        str = "[getSubInfoForSubscriberx]- invalid subId or not ready, subId = ";
-        str += subId;
-        Logd(str);
+        // str = "[getSubInfoForSubscriberx]- invalid subId or not ready, subId = ";
+        // str += subId;
+        // Logd(str);
         *result = NULL;
         return NOERROR;
     }
@@ -619,13 +619,12 @@ ECode SubscriptionController::GetSubInfoForSubscriber(
     mContext->GetContentResolver((IContentResolver**)&cr);
     AutoPtr<ArrayOf<String> > arr = ArrayOf<String>::Alloc(1);
     (*arr)[0] = StringUtils::ToString(subId);
-    str = IBaseColumns::ID;
-    str += "=?";
+    StringBuilder sb(IBaseColumns::ID); sb += "=?";
     AutoPtr<IUri> content_uri;
     sm->GetCONTENT_URI((IUri**)&content_uri);
     AutoPtr<ICursor> cursor;
     cr->Query(content_uri,
-            NULL, str, arr, String(NULL), (ICursor**)&cursor);
+            NULL, sb.ToString(), arr, String(NULL), (ICursor**)&cursor);
 
     if (cursor != NULL) {
         Boolean bMF = FALSE;
@@ -666,15 +665,15 @@ ECode SubscriptionController::GetSubInfoUsingIccId(
     mContext->GetContentResolver((IContentResolver**)&cr);
     AutoPtr<ArrayOf<String> > arr = ArrayOf<String>::Alloc(1);
     (*arr)[0] = iccId;
-    str = ISubscriptionManager::ICC_ID;
-    str += "=?";
+    StringBuilder sb(ISubscriptionManager::ICC_ID);
+    sb += "=?";
     AutoPtr<ISubscriptionManager> sm;
     CSubscriptionManager::AcquireSingleton((ISubscriptionManager**)&sm);
     AutoPtr<IUri> content_uri;
     sm->GetCONTENT_URI((IUri**)&content_uri);
     AutoPtr<ICursor> cursor;
     cr->Query(content_uri,
-            NULL, str, arr, String(NULL), (ICursor**)&cursor);
+            NULL, sb.ToString(), arr, String(NULL), (ICursor**)&cursor);
     AutoPtr<IArrayList> subList;
 
     if (cursor != NULL) {
@@ -722,10 +721,10 @@ ECode SubscriptionController::GetAllSubInfoList(
     if (subList != NULL) {
         Int32 size = 0;
         subList->GetSize(&size);
-        String str("[getAllSubInfoList]- ");
-        str += size;
-        str += " infos return";
-        Logd(str);
+        // String str("[getAllSubInfoList]- ");
+        // str += size;
+        // str += " infos return";
+        // Logd(str);
     }
     else {
         Logd(String("[getAllSubInfoList]- no info return"));
@@ -752,17 +751,16 @@ ECode SubscriptionController::GetActiveSubInfoList(
         return NOERROR;
     }
 
-    String str(ISubscriptionManager::SIM_ID);
-    str += "!=";
-    str += ISubscriptionManager::INVALID_SLOT_ID;
-    subList = GetSubInfo(str, NULL);
+    StringBuilder sb(ISubscriptionManager::SIM_ID);
+    sb += "!="; sb += ISubscriptionManager::INVALID_SLOT_ID;
+    subList = GetSubInfo(sb.ToString(), NULL);
     if (subList != NULL) {
         Int32 size = 0;
         subList->GetSize(&size);
-        str = "[getActiveSubInfoList]- ";
-        str += size;
-        str += " infos return";
-        Logdl(str);
+        // str = "[getActiveSubInfoList]- ";
+        // str += size;
+        // str += " infos return";
+        // Logdl(str);
     }
     else {
         Logdl(String("[getActiveSubInfoList]- no info return"));
@@ -788,8 +786,8 @@ ECode SubscriptionController::GetActiveSubInfoCount(
     String str("[getActiveSubInfoCount]- count: ");
     Int32 size = 0;
     records->GetSize(&size);
-    str += size;
-    Logd(str);
+    // str += size;
+    // Logd(str);
     *result = size;
     return NOERROR;
 }
@@ -813,10 +811,10 @@ ECode SubscriptionController::GetAllSubInfoCount(
     if (cursor != NULL) {
         Int32 count = 0;
         cursor->GetCount(&count);
-        String str("[getAllSubInfoCount]- ");
-        str += count;
-        str += " SUB(s) in DB";
-        Logd(str);
+        // String str("[getAllSubInfoCount]- ");
+        // str += count;
+        // str += " SUB(s) in DB";
+        // Logd(str);
         *result = count;
         return NOERROR;
     }
@@ -836,10 +834,10 @@ ECode SubscriptionController::AddSubInfoRecord(
 {
     VALIDATE_NOT_NULL(result)
     String str("[addSubInfoRecord]+ iccId:");
-    str += iccId;
-    str += " slotId:";
-    str += slotId;
-    Logdl(str);
+    // str += iccId;
+    // str += " slotId:";
+    // str += slotId;
+    // Logdl(str);
     EnforceSubscriptionPermission();
 
     if (iccId == NULL) {
@@ -859,11 +857,11 @@ ECode SubscriptionController::AddSubInfoRecord(
         Int32 subIdsIndex = 0;
         if (subIds->GetLength() > 1) { // one SIM can have more than one subId
             for (Int32 i = 0; i < subIds->GetLength(); i++) {
-                str = "[addSubInfoRecord] inspecting subIds[";
-                str += i;
-                str += "]: ";
-                str += (*subIds)[i];
-                Logdl(str);
+                // str = "[addSubInfoRecord] inspecting subIds[";
+                // str += i;
+                // str += "]: ";
+                // str += (*subIds)[i];
+                // Logdl(str);
                 AutoPtr<ITelephonyManagerHelper> tmhlp;
                 CTelephonyManagerHelper::AcquireSingleton((ITelephonyManagerHelper**)&tmhlp);
                 AutoPtr<ITelephonyManager> tm;
@@ -873,10 +871,10 @@ ECode SubscriptionController::AddSubInfoRecord(
                 if (!name.Equals("")) {
                     // We have a Carrier here, with a CarrierName and everything!
                     subIdsIndex = i;
-                    str = "[addSubInfoRecord] using subIds[";
-                    str += i;
-                    str += "]: it has a Carrier";
-                    Logdl(str);
+                    // str = "[addSubInfoRecord] using subIds[";
+                    // str += i;
+                    // str += "]: it has a Carrier";
+                    // Logdl(str);
                 }
             }
         }
@@ -890,10 +888,10 @@ ECode SubscriptionController::AddSubInfoRecord(
             else {
                 Int64 currentSubId = 0;
                 IInteger64::Probe(p)->GetValue(&currentSubId);
-                str = "[addSubInfoRecord] currentSubId ";
-                str += currentSubId;
-                str += ", proceed with it";
-                Logdl(str);
+                // str = "[addSubInfoRecord] currentSubId ";
+                // str += currentSubId;
+                // str += ", proceed with it";
+                // Logdl(str);
                 (*subIds)[subIdsIndex] = currentSubId;
             }
         }
@@ -1006,12 +1004,10 @@ ECode SubscriptionController::AddSubInfoRecord(
         Int32 size = 0;
         value->GetSize(&size);
         if (size > 0) {
-            str = IBaseColumns::ID;
-            str += "=";
-            str += StringUtils::ToString(subId);
+            StringBuilder sb(IBaseColumns::ID); sb += "="; sb += subId;
             Int32 res = 0;
             resolver->Update(content_uri, value,
-                    str, NULL, &res);
+                    sb.ToString(), NULL, &res);
         }
 
         Logdl(String("[addSubInfoRecord]- Record already exist"));
@@ -1020,12 +1016,11 @@ ECode SubscriptionController::AddSubInfoRecord(
         ICloseable::Probe(cursor)->Close();
     }
 
-    str = ISubscriptionManager::SIM_ID;
-    str += "=?";
+    StringBuilder sb(ISubscriptionManager::SIM_ID); sb += "=?";
     AutoPtr<ArrayOf<String> > arrVal = ArrayOf<String>::Alloc(1);
     (*arrVal)[0] = StringUtils::ToString(slotId);
     resolver->Query(content_uri, NULL,
-            str, arrVal, String(NULL), (ICursor**)&cursor);
+            sb.ToString(), arrVal, String(NULL), (ICursor**)&cursor);
 
     Boolean bMN = FALSE;
     bMF = FALSE;
@@ -1060,19 +1055,19 @@ ECode SubscriptionController::AddSubInfoRecord(
                 tm->GetSimCount(&simCount);
                 Int64 defaultSubId = 0;
                 GetDefaultSubId(&defaultSubId);
-                str = "[addSubInfoRecord] mSimInfo.size=";
-                Int32 size = 0;
-                mSimInfo->GetSize(&size);
-                str += size;
-                str += " slotId=";
-                str += slotId;
-                str += " subId=";
-                str += subId;
-                str += " defaultSubId=";
-                str += defaultSubId;
-                str += " simCount=";
-                str += simCount;
-                Logdl(str);
+                // str = "[addSubInfoRecord] mSimInfo.size=";
+                // Int32 size = 0;
+                // mSimInfo->GetSize(&size);
+                // str += size;
+                // str += " slotId=";
+                // str += slotId;
+                // str += " subId=";
+                // str += subId;
+                // str += " defaultSubId=";
+                // str += defaultSubId;
+                // str += " simCount=";
+                // str += simCount;
+                // Logdl(str);
 
                 // Set the default sub if not set or if single sim device
                 if (!(sm->IsValidSubId(defaultSubId, &bValid), bValid) || simCount == 1) {
@@ -1080,9 +1075,9 @@ ECode SubscriptionController::AddSubInfoRecord(
                 }
                 // if single sim device, set this subscription as the default for everything
                 if (simCount == 1) {
-                    str = "[addSubInfoRecord] one sim set defaults to subId=";
-                    str += subId;
-                    Logdl(str);
+                    // str = "[addSubInfoRecord] one sim set defaults to subId=";
+                    // str += subId;
+                    // Logdl(str);
                     SetDefaultDataSubId(subId);
                     SetDataSubId(subId);
                     SetDefaultSmsSubId(subId);
@@ -1092,23 +1087,23 @@ ECode SubscriptionController::AddSubInfoRecord(
             else {
                 Logdl(String("[addSubInfoRecord] currentSubId != NULL && currentSubId is valid, IGNORE"));
             }
-            str = "[addSubInfoRecord]- Hashmap(";
-            str += slotId;
-            str += ",";
-            str += subId;
-            str += ")";
-            Logdl(str);
+            // str = "[addSubInfoRecord]- Hashmap(";
+            // str += slotId;
+            // str += ",";
+            // str += subId;
+            // str += ")";
+            // Logdl(str);
         } while ((cursor->MoveToNext(&bMN), bMN));
     }
     if (cursor != NULL) {
         ICloseable::Probe(cursor)->Close();
     }
 
-    Int32 size = 0;
-    mSimInfo->GetSize(&size);
-    str = "[addSubInfoRecord]- info size=";
-    str += size;
-    Logdl(str);
+    // Int32 size = 0;
+    // mSimInfo->GetSize(&size);
+    // str = "[addSubInfoRecord]- info size=";
+    // str += size;
+    // Logdl(str);
 
     // Once the records are loaded, notify DcTracker
     UpdateAllDataConnectionTrackers();
@@ -1124,11 +1119,11 @@ ECode SubscriptionController::SetColor(
     /* [out] */ Int32* result)
 {
     VALIDATE_NOT_NULL(result)
-    String str("[setColor]+ color:");
-    str += color;
-    str += " subId:";
-    str += subId;
-    Logd(str);
+    // String str("[setColor]+ color:");
+    // str += color;
+    // str += " subId:";
+    // str += subId;
+    // Logd(str);
     EnforceSubscriptionPermission();
 
     ValidateSubId(subId);
@@ -1141,23 +1136,21 @@ ECode SubscriptionController::SetColor(
     AutoPtr<IContentValues> value;
     CContentValues::New(1, (IContentValues**)&value);
     value->Put(ISubscriptionManager::COLOR, color);
-    str = "[setColor]- color:";
-    str += color;
-    str += " set";
-    Logd(str);
+    // str = "[setColor]- color:";
+    // str += color;
+    // str += " set";
+    // Logd(str);
 
     AutoPtr<IContentResolver> cr;
     mContext->GetContentResolver((IContentResolver**)&cr);
-    str = IBaseColumns::ID;
-    str += "=";
-    str += StringUtils::ToString(subId);
+    StringBuilder sb(IBaseColumns::ID); sb += "="; sb += subId;
     AutoPtr<ISubscriptionManager> sm;
     CSubscriptionManager::AcquireSingleton((ISubscriptionManager**)&sm);
     AutoPtr<IUri> content_uri;
     sm->GetCONTENT_URI((IUri**)&content_uri);
     Int32 res = 0;
     cr->Update(content_uri, value,
-            str, NULL, &res);
+            sb.ToString(), NULL, &res);
     BroadcastSimInfoContentChanged(subId, ISubscriptionManager::COLOR,
             color, ISubscriptionManager::DEFAULT_STRING_VALUE);
 
@@ -1181,13 +1174,13 @@ ECode SubscriptionController::SetDisplayNameUsingSrc(
     /* [out] */ Int32* result)
 {
     VALIDATE_NOT_NULL(result)
-    String str("[setDisplayName]+  displayName:");
-    str += displayName;
-    str += " subId:";
-    str += subId;
-    str += " nameSource:";
-    str += nameSource;
-    Logd(str);
+    // String str("[setDisplayName]+  displayName:");
+    // str += displayName;
+    // str += " subId:";
+    // str += subId;
+    // str += " nameSource:";
+    // str += nameSource;
+    // Logd(str);
     EnforceSubscriptionPermission();
 
     ValidateSubId(subId);
@@ -1202,28 +1195,26 @@ ECode SubscriptionController::SetDisplayNameUsingSrc(
     CContentValues::New(1, (IContentValues**)&value);
     value->Put(ISubscriptionManager::DISPLAY_NAME, nameToSet);
     if (nameSource >= ISubscriptionManager::NAME_SOURCE_DEFAULT_SOURCE) {
-        str = "Set nameSource=";
-        str += nameSource;
-        Logd(str);
+        // str = "Set nameSource=";
+        // str += nameSource;
+        // Logd(str);
         value->Put(ISubscriptionManager::NAME_SOURCE, nameSource);
     }
-    str = "[setDisplayName]- mDisplayName:";
-    str += nameToSet;
-    str += " set";
-    Logd(str);
+    // str = "[setDisplayName]- mDisplayName:";
+    // str += nameToSet;
+    // str += " set";
+    // Logd(str);
 
     AutoPtr<IContentResolver> cr;
     mContext->GetContentResolver((IContentResolver**)&cr);
-    str = IBaseColumns::ID;
-    str += "=";
-    str += StringUtils::ToString(subId);
+    StringBuilder sb(IBaseColumns::ID); sb += "="; sb += subId;
     AutoPtr<ISubscriptionManager> sm;
     CSubscriptionManager::AcquireSingleton((ISubscriptionManager**)&sm);
     AutoPtr<IUri> content_uri;
     sm->GetCONTENT_URI((IUri**)&content_uri);
     Int32 res = 0;
     cr->Update(content_uri, value,
-            str, NULL, &res);
+            sb.ToString(), NULL, &res);
     BroadcastSimInfoContentChanged(subId, ISubscriptionManager::DISPLAY_NAME,
             ISubscriptionManager::DEFAULT_INT_VALUE, nameToSet);
 
@@ -1237,11 +1228,11 @@ ECode SubscriptionController::SetDisplayNumber(
     /* [out] */ Int32* result)
 {
     VALIDATE_NOT_NULL(result)
-    String str("[setDisplayNumber]+ number:");
-    str += number;
-    str += " subId:";
-    str += subId;
-    Logd(str);
+    // String str("[setDisplayNumber]+ number:");
+    // str += number;
+    // str += " subId:";
+    // str += subId;
+    // Logd(str);
     EnforceSubscriptionPermission();
 
     ValidateSubId(subId);
@@ -1264,10 +1255,10 @@ ECode SubscriptionController::SetDisplayNumber(
     AutoPtr<IContentValues> value;
     CContentValues::New(1, (IContentValues**)&value);
     value->Put(ISubscriptionManager::NUMBER, number);
-    str = "[setDisplayNumber]- number:";
-    str += number;
-    str += " set";
-    Logd(str);
+    // str = "[setDisplayNumber]- number:";
+    // str += number;
+    // str += " set";
+    // Logd(str);
 
     AutoPtr<IPhone> phone = IPhone::Probe((*sProxyPhones)[phoneId]);
     String alphaTag;
@@ -1291,18 +1282,16 @@ ECode SubscriptionController::SetDisplayNumber(
     if (mSuccess) {
         AutoPtr<IContentResolver> cr;
         mContext->GetContentResolver((IContentResolver**)&cr);
-        String str(IBaseColumns::ID);
-        str += "=";
-        str += StringUtils::ToString(subId);
+        StringBuilder sb(IBaseColumns::ID); sb += "="; sb += subId;
         AutoPtr<ISubscriptionManager> sm;
         CSubscriptionManager::AcquireSingleton((ISubscriptionManager**)&sm);
         AutoPtr<IUri> content_uri;
         sm->GetCONTENT_URI((IUri**)&content_uri);
         cr->Update(content_uri, value,
-                str, NULL, &res);
-        str = "[setDisplayNumber]- update result :";
-        str += res;
-        Logd(str);
+                sb.ToString(), NULL, &res);
+        // str = "[setDisplayNumber]- update result :";
+        // str += res;
+        // Logd(str);
         BroadcastSimInfoContentChanged(subId, ISubscriptionManager::NUMBER,
                 ISubscriptionManager::DEFAULT_INT_VALUE, number);
     }
@@ -1317,11 +1306,11 @@ ECode SubscriptionController::SetDisplayNumberFormat(
     /* [out] */ Int32* result)
 {
     VALIDATE_NOT_NULL(result)
-    String str("[setDisplayNumberFormat]+ format:");
-    str += format;
-    str += " subId:";
-    str += subId;
-    Logd(str);
+    // String str("[setDisplayNumberFormat]+ format:");
+    // str += format;
+    // str += " subId:";
+    // str += subId;
+    // Logd(str);
     EnforceSubscriptionPermission();
 
     ValidateSubId(subId);
@@ -1333,23 +1322,21 @@ ECode SubscriptionController::SetDisplayNumberFormat(
     AutoPtr<IContentValues> value;
     CContentValues::New(1, (IContentValues**)&value);
     value->Put(ISubscriptionManager::DISPLAY_NUMBER_FORMAT, format);
-    str = "[setDisplayNumberFormat]- format:";
-    str += format;
-    str += " set";
-    Logd(str);
+    // str = "[setDisplayNumberFormat]- format:";
+    // str += format;
+    // str += " set";
+    // Logd(str);
 
     AutoPtr<IContentResolver> cr;
     mContext->GetContentResolver((IContentResolver**)&cr);
-    str = IBaseColumns::ID;
-    str += "=";
-    str += StringUtils::ToString(subId);
+    StringBuilder sb(IBaseColumns::ID); sb += "="; sb += subId;
     AutoPtr<ISubscriptionManager> sm;
     CSubscriptionManager::AcquireSingleton((ISubscriptionManager**)&sm);
     AutoPtr<IUri> content_uri;
     sm->GetCONTENT_URI((IUri**)&content_uri);
     Int32 res = 0;
     cr->Update(content_uri, value,
-            str, NULL, &res);
+            sb.ToString(), NULL, &res);
     BroadcastSimInfoContentChanged(subId, ISubscriptionManager::DISPLAY_NUMBER_FORMAT,
             format, ISubscriptionManager::DEFAULT_STRING_VALUE);
 
@@ -1364,10 +1351,10 @@ ECode SubscriptionController::SetDataRoaming(
 {
     VALIDATE_NOT_NULL(result)
     String str("[setDataRoaming]+ roaming:");
-    str += roaming;
-    str += " subId:";
-    str += subId;
-    Logd(str);
+    // str += roaming;
+    // str += " subId:";
+    // str += subId;
+    // Logd(str);
     EnforceSubscriptionPermission();
 
     ValidateSubId(subId);
@@ -1379,23 +1366,21 @@ ECode SubscriptionController::SetDataRoaming(
     AutoPtr<IContentValues> value;
     CContentValues::New(1, (IContentValues**)&value);
     value->Put(ISubscriptionManager::DATA_ROAMING, roaming);
-    str = "[setDataRoaming]- roaming:";
-    str += roaming;
-    str += " set";
-    Logd(str);
+    // str = "[setDataRoaming]- roaming:";
+    // str += roaming;
+    // str += " set";
+    // Logd(str);
 
     AutoPtr<IContentResolver> cr;
     mContext->GetContentResolver((IContentResolver**)&cr);
-    str = IBaseColumns::ID;
-    str += "=";
-    str += StringUtils::ToString(subId);
+    StringBuilder sb(IBaseColumns::ID); sb += "="; sb += subId;
     AutoPtr<ISubscriptionManager> sm;
     CSubscriptionManager::AcquireSingleton((ISubscriptionManager**)&sm);
     AutoPtr<IUri> content_uri;
     sm->GetCONTENT_URI((IUri**)&content_uri);
     Int32 res = 0;
     cr->Update(content_uri, value,
-            str, NULL, &res);
+            sb.ToString(), NULL, &res);
     BroadcastSimInfoContentChanged(subId, ISubscriptionManager::DATA_ROAMING,
             roaming, ISubscriptionManager::DEFAULT_STRING_VALUE);
 
@@ -1417,13 +1402,13 @@ ECode SubscriptionController::SetMccMnc(
     // } Catch (NumberFormatException e) {
     //     Logd("[setMccMnc] - couldn't parse mcc/mnc: " + mccMnc);
     // }
-    String str("[setMccMnc]+ mcc/mnc:");
-    str += mcc;
-    str += "/";
-    str += mnc;
-    str += " subId:";
-    str += subId;
-    Logd(str);
+    // String str("[setMccMnc]+ mcc/mnc:");
+    // str += mcc;
+    // str += "/";
+    // str += mnc;
+    // str += " subId:";
+    // str += subId;
+    // Logd(str);
     AutoPtr<IContentValues> value;
     CContentValues::New(2, (IContentValues**)&value);
     value->Put(ISubscriptionManager::MCC, mcc);
@@ -1431,16 +1416,14 @@ ECode SubscriptionController::SetMccMnc(
 
     AutoPtr<IContentResolver> cr;
     mContext->GetContentResolver((IContentResolver**)&cr);
-    str = IBaseColumns::ID;
-    str += "=";
-    str += StringUtils::ToString(subId);
+    StringBuilder sb(IBaseColumns::ID); sb += "="; sb += subId;
     AutoPtr<ISubscriptionManager> sm;
     CSubscriptionManager::AcquireSingleton((ISubscriptionManager**)&sm);
     AutoPtr<IUri> content_uri;
     sm->GetCONTENT_URI((IUri**)&content_uri);
     Int32 res = 0;
     cr->Update(content_uri, value,
-            str, NULL, &res);
+            sb.ToString(), NULL, &res);
     BroadcastSimInfoContentChanged(subId, ISubscriptionManager::MCC, mcc, String(NULL));
 
     *result = res;
@@ -1453,9 +1436,9 @@ ECode SubscriptionController::GetSlotId(
 {
     VALIDATE_NOT_NULL(result)
     if (VDBG) {
-        String str("[getSlotId] subId=");
-        str += subId;
-        PrintStackTrace(str);
+        // String str("[getSlotId] subId=");
+        // str += subId;
+        // PrintStackTrace(str);
     }
 
     if (subId == ISubscriptionManager::DEFAULT_SUB_ID) {
@@ -1500,9 +1483,9 @@ ECode SubscriptionController::GetSlotId(
 
         if (subId == sub) {
             if (VDBG) {
-                String str("[getSlotId]- return = ");
-                str += sim;
-                Logv(str);
+                // String str("[getSlotId]- return = ");
+                // str += sim;
+                // Logv(str);
             }
             *result = sim;
             return NOERROR;
@@ -1520,9 +1503,9 @@ ECode SubscriptionController::GetSubId(
 {
     VALIDATE_NOT_NULL(result)
     if (VDBG) {
-        String str("[getSubId] slotId=");
-        str += slotId;
-        PrintStackTrace(str);
+        // String str("[getSubId] slotId=");
+        // str += slotId;
+        // PrintStackTrace(str);
     }
 
     if (slotId == ISubscriptionManager::DEFAULT_SLOT_ID) {
@@ -1620,17 +1603,17 @@ ECode SubscriptionController::GetPhoneId(
 {
     VALIDATE_NOT_NULL(result)
     if (VDBG) {
-        String str("[getPhoneId] subId=");
-        str += subId;
-        PrintStackTrace(str);
+        // String str("[getPhoneId] subId=");
+        // str += subId;
+        // PrintStackTrace(str);
     }
     Int32 phoneId = 0;
 
     if (subId == ISubscriptionManager::DEFAULT_SUB_ID) {
         GetDefaultSubId(&subId);
-        String str("[getPhoneId] asked for default subId=");
-        str += subId;
-        Logdl(str);
+        // String str("[getPhoneId] asked for default subId=");
+        // str += subId;
+        // Logdl(str);
     }
 
     AutoPtr<ISubscriptionManager> sm;
@@ -1638,9 +1621,9 @@ ECode SubscriptionController::GetPhoneId(
     Boolean bValid = FALSE;
     sm->IsValidSubId(subId, &bValid);
     if (!bValid) {
-        String str("[getPhoneId]- invalid subId return=");
-        str += ISubscriptionManager::INVALID_PHONE_ID;
-        Logdl(str);
+        // String str("[getPhoneId]- invalid subId return=");
+        // str += ISubscriptionManager::INVALID_PHONE_ID;
+        // Logdl(str);
         *result = ISubscriptionManager::INVALID_PHONE_ID;
         return NOERROR;
     }
@@ -1649,11 +1632,11 @@ ECode SubscriptionController::GetPhoneId(
     if (subId < 0) {
         phoneId = (Int32) (-1 - subId);
         if (VDBG) {
-            String str("[getPhoneId]- map subId=");
-            str += subId;
-            str += " phoneId=";
-            str += phoneId;
-            Logdl(str);
+            // String str("[getPhoneId]- map subId=");
+            // str += subId;
+            // str += " phoneId=";
+            // str += phoneId;
+            // Logdl(str);
         }
         *result = phoneId;
         return NOERROR;
@@ -1664,9 +1647,9 @@ ECode SubscriptionController::GetPhoneId(
 
     if (size == 0) {
         phoneId = mDefaultPhoneId;
-        String str("[getPhoneId]- no sims, returning default phoneId=");
-        str += phoneId;
-        Logdl(str);
+        // String str("[getPhoneId]- no sims, returning default phoneId=");
+        // str += phoneId;
+        // Logdl(str);
         *result = phoneId;
         return NOERROR;
     }
@@ -1694,11 +1677,11 @@ ECode SubscriptionController::GetPhoneId(
 
         if (subId == sub) {
             if (VDBG) {
-                String str("[getPhoneId]- found subId=");
-                str += subId;
-                str += " phoneId=";
-                str += sim;
-                Logdl(str);
+                // String str("[getPhoneId]- found subId=");
+                // str += subId;
+                // str += " phoneId=";
+                // str += sim;
+                // Logdl(str);
             }
             *result = sim;
             return NOERROR;
@@ -1706,11 +1689,11 @@ ECode SubscriptionController::GetPhoneId(
     }
 
     phoneId = mDefaultPhoneId;
-    String str("[getPhoneId]- subId=");
-    str += subId;
-    str += " not found return default phoneId=";
-    str += phoneId;
-    Logdl(str);
+    // String str("[getPhoneId]- subId=");
+    // str += subId;
+    // str += " not found return default phoneId=";
+    // str += phoneId;
+    // Logdl(str);
     *result = phoneId;
     return NOERROR;
 }
@@ -1726,17 +1709,17 @@ ECode SubscriptionController::ClearSubInfo(
     mSimInfo->GetSize(&size);
 
     if (size == 0) {
-        String str("[clearSubInfo]- no simInfo size=");
-        str += size;
-        Logdl(str);
+        // String str("[clearSubInfo]- no simInfo size=");
+        // str += size;
+        // Logdl(str);
         *result = 0;
         return NOERROR;
     }
 
     mSimInfo->Clear();
-    String str("[clearSubInfo]- clear size=");
-    str += size;
-    Logdl(str);
+    // String str("[clearSubInfo]- clear size=");
+    // str += size;
+    // Logdl(str);
     *result = size;
     return NOERROR;
 }
@@ -1824,9 +1807,9 @@ ECode SubscriptionController::GetDefaultSubId(
     //FIXME: Make this smarter, need to handle data only and voice devices
     Int64 subId = mDefaultVoiceSubId;
     if (VDBG) {
-        String str("[getDefaultSubId] value = ");
-        str += subId;
-        Logv(str);
+        // String str("[getDefaultSubId] value = ");
+        // str += subId;
+        // Logv(str);
     }
     *result = subId;
     return NOERROR;
@@ -1839,9 +1822,9 @@ ECode SubscriptionController::SetDefaultSmsSubId(
         // throw new RuntimeException("setDefaultSmsSubId called with DEFAULT_SUB_ID");
         return E_RUNTIME_EXCEPTION;
     }
-    String str("[setDefaultSmsSubId] subId=");
-    str += subId;
-    Logdl(str);
+    // String str("[setDefaultSmsSubId] subId=");
+    // str += subId;
+    // Logdl(str);
     AutoPtr<IContentResolver> cr;
     mContext->GetContentResolver((IContentResolver**)&cr);
     AutoPtr<ISettingsGlobal> sg;
@@ -1857,9 +1840,9 @@ void SubscriptionController::BroadcastDefaultSmsSubIdChanged(
     /* [in] */ Int64 subId)
 {
     // Broadcast an Intent for default sms sub change
-    String str("[broadcastDefaultSmsSubIdChanged] subId=");
-    str += subId;
-    Logdl(str);
+    // String str("[broadcastDefaultSmsSubIdChanged] subId=");
+    // str += subId;
+    // Logdl(str);
     AutoPtr<IIntent> intent;
     CIntent::New(ITelephonyIntents::ACTION_DEFAULT_SMS_SUBSCRIPTION_CHANGED, (IIntent**)&intent);
     intent->AddFlags(IIntent::FLAG_RECEIVER_REPLACE_PENDING);
@@ -1885,9 +1868,9 @@ ECode SubscriptionController::GetDefaultSmsSubId(
             ISubscriptionManager::INVALID_SUB_ID,
             &subId);
     if (VDBG) {
-        String str("[getDefaultSmsSubId] subId=");
-        str += subId;
-        Logd(str);
+        // String str("[getDefaultSmsSubId] subId=");
+        // str += subId;
+        // Logd(str);
     }
     *result = subId;
     return NOERROR;
@@ -1900,9 +1883,9 @@ ECode SubscriptionController::SetDefaultVoiceSubId(
         // throw new RuntimeException("setDefaultVoiceSubId called with DEFAULT_SUB_ID");
         return E_RUNTIME_EXCEPTION;
     }
-    String str("[setDefaultVoiceSubId] subId=");
-    str += subId;
-    Logdl(str);
+    // String str("[setDefaultVoiceSubId] subId=");
+    // str += subId;
+    // Logdl(str);
     AutoPtr<IContentResolver> cr;
     mContext->GetContentResolver((IContentResolver**)&cr);
     AutoPtr<ISettingsGlobal> sg;
@@ -1918,9 +1901,9 @@ void SubscriptionController::BroadcastDefaultVoiceSubIdChanged(
     /* [in] */ Int64 subId)
 {
     // Broadcast an Intent for default voice sub change
-    String str("[broadcastDefaultVoiceSubIdChanged] subId=");
-    str += subId;
-    Logdl(str);
+    // String str("[broadcastDefaultVoiceSubIdChanged] subId=");
+    // str += subId;
+    // Logdl(str);
     AutoPtr<IIntent> intent;
     CIntent::New(ITelephonyIntents::ACTION_DEFAULT_VOICE_SUBSCRIPTION_CHANGED, (IIntent**)&intent);
     intent->AddFlags(IIntent::FLAG_RECEIVER_REPLACE_PENDING);
@@ -1946,9 +1929,9 @@ ECode SubscriptionController::GetDefaultVoiceSubId(
             ISubscriptionManager::INVALID_SUB_ID,
             &subId);
     if (VDBG) {
-        String str("[getDefaultVoiceSubId] subId=");
-        str += subId;
-        Logd(str);
+        // String str("[getDefaultVoiceSubId] subId=");
+        // str += subId;
+        // Logd(str);
     }
     *result = subId;
     return NOERROR;
@@ -1972,9 +1955,9 @@ ECode SubscriptionController::IsSMSPromptEnabled(
     // }
     prompt = (value == 0) ? FALSE : TRUE ;
     if (VDBG) {
-        String str("SMS Prompt option:");
-        str += prompt;
-        Logd(str);
+        // String str("SMS Prompt option:");
+        // str += prompt;
+        // Logd(str);
     }
 
    *result = prompt;
@@ -1992,9 +1975,9 @@ ECode SubscriptionController::SetSMSPromptEnabled(
     Boolean res = FALSE;
     sg->PutInt32(cr,
             ISettingsGlobal::MULTI_SIM_SMS_PROMPT, value, &res);
-    String str("setSMSPromptOption to ");
-    str += enabled;
-    Logd(str);
+    // String str("setSMSPromptOption to ");
+    // str += enabled;
+    // Logd(str);
     return NOERROR;
 }
 
@@ -2012,9 +1995,9 @@ ECode SubscriptionController::GetDefaultDataSubId(
             ISubscriptionManager::INVALID_SUB_ID,
             &subId);
     if (VDBG) {
-        String str("[getDefaultDataSubId] subId= ");
-        str += subId;
-        Logd(str);
+        // String str("[getDefaultDataSubId] subId= ");
+        // str += subId;
+        // Logd(str);
     }
     *result = subId;
     return NOERROR;
@@ -2023,9 +2006,9 @@ ECode SubscriptionController::GetDefaultDataSubId(
 ECode SubscriptionController::SetDefaultDataSubId(
     /* [in] */ Int64 subId)
 {
-    String str("[setDefaultDataSubId] subId=");
-    str += subId;
-    Logdl(str);
+    // String str("[setDefaultDataSubId] subId=");
+    // str += subId;
+    // Logdl(str);
 
     if (mDctController == NULL) {
         AutoPtr<IDctControllerHelper> hlp;
@@ -2053,8 +2036,8 @@ void SubscriptionController::UpdateDataSubId(
     Int32 reqStatus = IPhoneConstants::FAILURE;
 
     String str(" updateDataSubId,  subId=");
-    str += subId;
-    str += " exception ";
+    // str += subId;
+    // str += " exception ";
     assert(0 && "TODO");
     // str += ar->mException;
     Logd(str);
@@ -2087,9 +2070,9 @@ void SubscriptionController::UpdateAllDataConnectionTrackers()
 {
     // Tell Phone Proxies to update data connection tracker
     Int32 len = sProxyPhones->GetLength();
-    String str("[updateAllDataConnectionTrackers] sProxyPhones.length=");
-    str += len;
-    Logdl(str);
+    // String str("[updateAllDataConnectionTrackers] sProxyPhones.length=");
+    // str += len;
+    // Logdl(str);
     for (Int32 phoneId = 0; phoneId < len; phoneId++) {
         (*sProxyPhones)[phoneId]->UpdateDataConnectionTracker();
     }
@@ -2101,11 +2084,11 @@ void SubscriptionController::BroadcastDefaultDataSubIdChanged(
     // Broadcast an Intent for default data sub change
     Int64 subId = 0;
     GetDefaultDataSubId(&subId);
-    String str("[broadcastDefaultDataSubIdChanged] subId = ");
-    str += subId;
-    str += " status ";
-    str += status;
-    Logdl(str);
+    // String str("[broadcastDefaultDataSubIdChanged] subId = ");
+    // str += subId;
+    // str += " status ";
+    // str += status;
+    // Logdl(str);
     AutoPtr<IIntent> intent;
     CIntent::New(ITelephonyIntents::ACTION_DEFAULT_DATA_SUBSCRIPTION_CHANGED, (IIntent**)&intent);
     intent->AddFlags(IIntent::FLAG_RECEIVER_REPLACE_PENDING);
@@ -2125,9 +2108,9 @@ ECode SubscriptionController::SetDefaultSubId(
         // throw new RuntimeException("setDefaultSubId called with DEFAULT_SUB_ID");
         return E_RUNTIME_EXCEPTION;
     }
-    String str("[setDefaultSubId] subId=");
-    str += subId;
-    Logdl(str);
+    // String str("[setDefaultSubId] subId=");
+    // str += subId;
+    // Logdl(str);
     AutoPtr<ISubscriptionManager> sm;
     CSubscriptionManager::AcquireSingleton((ISubscriptionManager**)&sm);
     Boolean bValid = FALSE;
@@ -2144,9 +2127,9 @@ ECode SubscriptionController::SetDefaultSubId(
         tm->GetSimCount(&simCount);
         if (phoneId >= 0 && (phoneId < phonecount
                 || simCount == 1)) {
-            str = "[setDefaultSubId] set mDefaultVoiceSubId=";
-            str += subId;
-            Logdl(str);
+            // str = "[setDefaultSubId] set mDefaultVoiceSubId=";
+            // str += subId;
+            // Logdl(str);
             mDefaultVoiceSubId = subId;
             // Update MCC MNC device configuration information
             String defaultMccMnc;
@@ -2160,11 +2143,11 @@ ECode SubscriptionController::SetDefaultSubId(
             intent->AddFlags(IIntent::FLAG_RECEIVER_REPLACE_PENDING);
             sm->PutPhoneIdAndSubIdExtra(intent, phoneId, subId);
             if (VDBG) {
-                str = "[setDefaultSubId] broadcast default subId changed phoneId=";
-                str += phoneId;
-                str += " subId=";
-                str += subId;
-                Logdl(str);
+                // str = "[setDefaultSubId] broadcast default subId changed phoneId=";
+                // str += phoneId;
+                // str += " subId=";
+                // str += subId;
+                // Logdl(str);
             }
             AutoPtr<IUserHandleHelper> uhhlp;
             CUserHandleHelper::AcquireSingleton((IUserHandleHelper**)&uhhlp);
@@ -2174,11 +2157,11 @@ ECode SubscriptionController::SetDefaultSubId(
         }
         else {
             if (VDBG) {
-                String str("[setDefaultSubId] not set invalid phoneId=");
-                str += phoneId;
-                str += " subId=";
-                str += subId;
-                Logdl(str);
+                // String str("[setDefaultSubId] not set invalid phoneId=");
+                // str += phoneId;
+                // str += " subId=";
+                // str += subId;
+                // Logdl(str);
             }
         }
     }
@@ -2218,22 +2201,22 @@ Boolean SubscriptionController::ShouldDefaultBeCleared(
     /* [in] */ IList* records,
     /* [in] */ Int64 subId)
 {
-    String str("[shouldDefaultBeCleared: subId] ");
-    str += subId;
-    Logdl(str);
+    // String str("[shouldDefaultBeCleared: subId] ");
+    // str += subId;
+    // Logdl(str);
     if (records == NULL) {
-        str = "[shouldDefaultBeCleared] return TRUE no records subId=";
-        str += subId;
-        Logdl(str);
+        // str = "[shouldDefaultBeCleared] return TRUE no records subId=";
+        // str += subId;
+        // Logdl(str);
         return TRUE;
     }
     Int32 size = 0;
     records->GetSize(&size);
     if (subId == ISubscriptionManager::ASK_USER_SUB_ID && size > 1) {
         // Only allow ASK_USER_SUB_ID if there is more than 1 subscription.
-        str = "[shouldDefaultBeCleared] return FALSE only one subId, subId=";
-        str += subId;
-        Logdl(str);
+        // str = "[shouldDefaultBeCleared] return FALSE only one subId, subId=";
+        // str += subId;
+        // Logdl(str);
         return FALSE;
     }
     AutoPtr<IIterator> it;
@@ -2243,19 +2226,19 @@ Boolean SubscriptionController::ShouldDefaultBeCleared(
         AutoPtr<IInterface> p;
         it->GetNext((IInterface**)&p);
         AutoPtr<CSubInfoRecord> record = (CSubInfoRecord*)ISubInfoRecord::Probe(p);
-        str = "[shouldDefaultBeCleared] Record.subId: ";
-        str += record->mSubId;
-        Logdl(str);
+        // str = "[shouldDefaultBeCleared] Record.subId: ";
+        // str += record->mSubId;
+        // Logdl(str);
         if (record->mSubId == subId) {
-            str = "[shouldDefaultBeCleared] return FALSE subId is active, subId=";
-            str += subId;
-            Logdl(str);
+            // str = "[shouldDefaultBeCleared] return FALSE subId is active, subId=";
+            // str += subId;
+            // Logdl(str);
             return FALSE;
         }
     }
-    str = "[shouldDefaultBeCleared] return TRUE not active subId=";
-    str += subId;
-    Logdl(str);
+    // str = "[shouldDefaultBeCleared] return TRUE not active subId=";
+    // str += subId;
+    // Logdl(str);
     return TRUE;
 }
 
@@ -2288,9 +2271,9 @@ ECode SubscriptionController::GetSubInfoUsingSlotIdWithCheck(
     /* [out] */ IList** result)
 {
     VALIDATE_NOT_NULL(result)
-    String str("[getSubInfoUsingSlotIdWithCheck]+ slotId:");
-    str += slotId;
-    Logd(str);
+    // String str("[getSubInfoUsingSlotIdWithCheck]+ slotId:");
+    // str += slotId;
+    // Logd(str);
     EnforceSubscriptionPermission();
 
     if (slotId == ISubscriptionManager::DEFAULT_SLOT_ID) {
@@ -2318,13 +2301,12 @@ ECode SubscriptionController::GetSubInfoUsingSlotIdWithCheck(
     mContext->GetContentResolver((IContentResolver**)&cr);
     AutoPtr<ArrayOf<String> > arr = ArrayOf<String>::Alloc(1);
     (*arr)[0] = StringUtils::ToString(slotId);
-    str = ISubscriptionManager::SIM_ID;
-    str += "=?";
+    StringBuilder sb(ISubscriptionManager::SIM_ID); sb += "=?";
     AutoPtr<IUri> content_uri;
     sm->GetCONTENT_URI((IUri**)&content_uri);
     AutoPtr<ICursor> cursor;
     cr->Query(content_uri,
-            NULL, str, arr, String(NULL),
+            NULL, sb.ToString(), arr, String(NULL),
             (ICursor**)&cursor);
     AutoPtr<IArrayList> subList;
     Boolean bMF = FALSE, bMN = FALSE;
@@ -2352,9 +2334,9 @@ ECode SubscriptionController::GetSubInfoUsingSlotIdWithCheck(
 void SubscriptionController::ValidateSubId(
     /* [in] */ Int64 subId)
 {
-    String str("validateSubId subId: ");
-    str += subId;
-    Logd(str);
+    // String str("validateSubId subId: ");
+    // str += subId;
+    // Logd(str);
     AutoPtr<ISubscriptionManager> sm;
     CSubscriptionManager::AcquireSingleton((ISubscriptionManager**)&sm);
     Boolean bValid = FALSE;
@@ -2406,10 +2388,11 @@ ECode SubscriptionController::GetActiveSubIdList(
         i++;
     }
 
-    str = "[getActiveSubIdList] X subIdArr.length=";
-    str += subIdArr->GetLength();
-    Logdl(str);
+    // str = "[getActiveSubIdList] X subIdArr.length=";
+    // str += subIdArr->GetLength();
+    // Logdl(str);
     *result = subIdArr;
+    REFCOUNT_ADD(*result)
     return NOERROR;
 }
 
@@ -2502,9 +2485,9 @@ ECode SubscriptionController::ActivateSubId(
     Int32 state = 0;
     GetSubState(subId, &state);
     if (state == ISubscriptionManager::ACTIVE) {
-        String str("activateSubId: subscription already active, subId = ");
-        str += subId;
-        Logd(str);
+        // String str("activateSubId: subscription already active, subId = ");
+        // str += subId;
+        // Logd(str);
         return NOERROR;
     }
 
@@ -2521,9 +2504,9 @@ ECode SubscriptionController::DeactivateSubId(
     Int32 state = 0;
     GetSubState(subId, &state);
     if (state == ISubscriptionManager::INACTIVE) {
-        String str("activateSubId: subscription already deactivated, subId = ");
-        str += subId;
-        Logd(str);
+        // String str("activateSubId: subscription already deactivated, subId = ");
+        // str += subId;
+        // Logd(str);
         return NOERROR;
     }
 
@@ -2538,26 +2521,25 @@ ECode SubscriptionController::SetNwMode(
     /* [in] */ Int64 subId,
     /* [in] */ Int32 nwMode)
 {
-    String str("setNwMode, nwMode: ");
-    str += nwMode;
-    str += " subId: ";
-    str += subId;
-    Logd(str);
+    // String str("setNwMode, nwMode: ");
+    // str += nwMode;
+    // str += " subId: ";
+    // str += subId;
+    // Logd(str);
     AutoPtr<IContentValues> value;
     CContentValues::New(1, (IContentValues**)&value);
     value->Put(ISubscriptionManager::NETWORK_MODE, nwMode);
     AutoPtr<IContentResolver> cr;
     mContext->GetContentResolver((IContentResolver**)&cr);
-    str = IBaseColumns::ID;
-    str += "=";
-    str += StringUtils::ToString(subId);
+
+    StringBuilder sb(IBaseColumns::ID); sb += "="; sb += subId;
     AutoPtr<ISubscriptionManager> sm;
     CSubscriptionManager::AcquireSingleton((ISubscriptionManager**)&sm);
     AutoPtr<IUri> content_uri;
     sm->GetCONTENT_URI((IUri**)&content_uri);
     Int32 res = 0;
     cr->Update(content_uri,
-            value, str, NULL, &res);
+            value, sb.ToString(), NULL, &res);
     return NOERROR;
 }
 
@@ -2575,9 +2557,9 @@ ECode SubscriptionController::GetNwMode(
         return NOERROR;
     }
     else {
-        String str("getSubState: invalid subId = ");
-        str += subId;
-        Loge(str);
+        // String str("getSubState: invalid subId = ");
+        // str += subId;
+        // Loge(str);
         *result = ISubscriptionManager::DEFAULT_NW_MODE;
         return NOERROR;
     }
@@ -2590,11 +2572,11 @@ ECode SubscriptionController::SetSubState(
 {
     VALIDATE_NOT_NULL(result)
     Int32 res = 0;
-    String str("setSubState, subStatus: ");
-    str += subStatus;
-    str += " subId: ";
-    str += subId;
-    Logd(str);
+    // String str("setSubState, subStatus: ");
+    // str += subStatus;
+    // str += " subId: ";
+    // str += subId;
+    // Logd(str);
     AutoPtr<IModemStackControllerHelper> mchlp;
     assert(0 && "TODO");
     // CModemStackControllerHelper::AcquireSingleton((IModemStackControllerHelper**)&mchlp);
@@ -2608,15 +2590,13 @@ ECode SubscriptionController::SetSubState(
         value->Put(ISubscriptionManager::SUB_STATE, subStatus);
         AutoPtr<IContentResolver> cr;
         mContext->GetContentResolver((IContentResolver**)&cr);
-        str = IBaseColumns::ID;
-        str += "=";
-        str += StringUtils::ToString(subId);
+        StringBuilder sb(IBaseColumns::ID); sb += "="; sb += subId;
         AutoPtr<ISubscriptionManager> sm;
         CSubscriptionManager::AcquireSingleton((ISubscriptionManager**)&sm);
         AutoPtr<IUri> content_uri;
         sm->GetCONTENT_URI((IUri**)&content_uri);
         cr->Update(content_uri,
-                value, str, NULL, &res);
+                value, sb.ToString(), NULL, &res);
 
     }
     BroadcastSimInfoContentChanged(subId,
@@ -2653,21 +2633,21 @@ ECode SubscriptionController::UpdateUserPrefs(
     AutoPtr<ISubInfoRecord> mNextActivatedSub;
 
     if (subInfoList == NULL) {
-        String str("updateUserPrefs: subscription are not avaiable dds = ");
-        Int64 dataSubId = 0;
-        GetDefaultDataSubId(&dataSubId);
-        str += dataSubId;
-        str += " voice = ";
-        Int64 voiceSubId = 0;
-        GetDefaultVoiceSubId(&voiceSubId);
-        str += voiceSubId;
-        str += " sms = ";
-        Int64 smsSubId = 0;
-        GetDefaultSmsSubId(&smsSubId);
-        str += smsSubId;
-        str += " setDDs = ";
-        str += setDds;
-        Logd(str);
+        // String str("updateUserPrefs: subscription are not avaiable dds = ");
+        // Int64 dataSubId = 0;
+        // GetDefaultDataSubId(&dataSubId);
+        // str += dataSubId;
+        // str += " voice = ";
+        // Int64 voiceSubId = 0;
+        // GetDefaultVoiceSubId(&voiceSubId);
+        // str += voiceSubId;
+        // str += " sms = ";
+        // Int64 smsSubId = 0;
+        // GetDefaultSmsSubId(&smsSubId);
+        // str += smsSubId;
+        // str += " setDDs = ";
+        // str += setDds;
+        // Logd(str);
         // if no SIM cards present on device, set dummy subId
         // as data/sms/voice preferred subId.
         SetDefaultSubId(DUMMY_SUB_ID);
@@ -2695,23 +2675,23 @@ ECode SubscriptionController::UpdateUserPrefs(
         }
     }
 
-    String str("updateUserPrefs: active sub count = ");
-    str += mActCount;
-    str += " dds = ";
-    Int64 dataSubId = 0;
-    GetDefaultDataSubId(&dataSubId);
-    str += dataSubId;
-    str += " voice = ";
-    Int64 voiceSubId = 0;
-    GetDefaultVoiceSubId(&voiceSubId);
-    str += voiceSubId;
-    str += " sms = ";
     Int64 smsSubId = 0;
-    GetDefaultSmsSubId(&smsSubId);
-    str += smsSubId;
-    str += " setDDs = ";
-    str += setDds;
-    Logd(str);
+    Int64 dataSubId = 0;
+    Int64 voiceSubId = 0;
+    // String str("updateUserPrefs: active sub count = ");
+    // str += mActCount;
+    // str += " dds = ";
+    // GetDefaultDataSubId(&dataSubId);
+    // str += dataSubId;
+    // str += " voice = ";
+    // GetDefaultVoiceSubId(&voiceSubId);
+    // str += voiceSubId;
+    // str += " sms = ";
+    // GetDefaultSmsSubId(&smsSubId);
+    // str += smsSubId;
+    // str += " setDDs = ";
+    // str += setDds;
+    // Logd(str);
     //if activated sub count is less than 2, disable prompt.
     if (mActCount < 2) {
         SetSMSPromptEnabled(FALSE);
@@ -2757,18 +2737,18 @@ ECode SubscriptionController::UpdateUserPrefs(
         !bSmsEnabled) {
         SetDefaultSmsSubId(_mNextActivatedSub->mSubId);
     }
-    str = "updateUserPrefs: after currentDds = ";
-    GetDefaultDataSubId(&ddsSubId);
-    str += ddsSubId;
-    str += " voice = ";
-    GetDefaultVoiceSubId(&voiceSubId);
-    str += voiceSubId;
-    str += " sms = ";
-    GetDefaultSmsSubId(&smsSubId);
-    str += smsSubId;
-    str += " newDds = ";
-    str += ddsSubId;
-    Logd(str);
+    // str = "updateUserPrefs: after currentDds = ";
+    // GetDefaultDataSubId(&ddsSubId);
+    // str += ddsSubId;
+    // str += " voice = ";
+    // GetDefaultVoiceSubId(&voiceSubId);
+    // str += voiceSubId;
+    // str += " sms = ";
+    // GetDefaultSmsSubId(&smsSubId);
+    // str += smsSubId;
+    // str += " newDds = ";
+    // str += ddsSubId;
+    // Logd(str);
     return NOERROR;
 }
 
@@ -2791,9 +2771,9 @@ ECode SubscriptionController::IsVoicePromptEnabled(
     // }
     prompt = (value == 0) ? FALSE : TRUE ;
     if (VDBG) {
-        String str("Voice Prompt option:");
-        str += prompt;
-        Logd(str);
+        // String str("Voice Prompt option:");
+        // str += prompt;
+        // Logd(str);
     }
 
     *result = prompt;
@@ -2811,9 +2791,9 @@ ECode SubscriptionController::SetVoicePromptEnabled(
     Boolean res = FALSE;
     sg->PutInt32(cr,
             ISettingsGlobal::MULTI_SIM_VOICE_PROMPT, value, &res);
-    String str("setVoicePromptOption to ");
-    str += enabled;
-    Logd(str);
+    // String str("setVoicePromptOption to ");
+    // str += enabled;
+    // Logd(str);
     return NOERROR;
 }
 
@@ -2828,9 +2808,9 @@ ECode SubscriptionController::RegisterForOnDemandDdsLockNotification(
     /* [in] */ Int64 clientSubId,
     /* [in] */ ISubscriptionControllerOnDemandDdsLockNotifier* callback)
 {
-    String str("registerForOnDemandDdsLockNotification for client=");
-    str += clientSubId;
-    Logd(str);
+    // String str("registerForOnDemandDdsLockNotification for client=");
+    // str += clientSubId;
+    // Logd(str);
     mOnDemandDdsLockNotificationRegistrants->Put(CoreUtils::Convert(clientSubId), callback);
     return NOERROR;
 }

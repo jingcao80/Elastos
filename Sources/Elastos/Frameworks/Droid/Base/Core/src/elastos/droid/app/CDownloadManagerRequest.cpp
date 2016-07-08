@@ -5,8 +5,10 @@
 #include "elastos/droid/content/CContentValues.h"
 #include "elastos/droid/net/CUriHelper.h"
 #include "elastos/droid/os/Environment.h"
+#include <elastos/core/StringBuilder.h>
 #include <elastos/utility/logging/Logger.h>
 
+using Elastos::Core::StringBuilder;
 using Elastos::Core::CBoolean;
 using Elastos::Core::IBoolean;
 using Elastos::Core::CInteger32;
@@ -346,9 +348,9 @@ void CDownloadManagerRequest::EncodeHttpHeaders(
         String headerString = header.mFirst + ": " + header.mSecond;
         AutoPtr<ICharSequence> headercs;
         CString::New(headerString, (ICharSequence**)&headercs);
-        String key(IDownloadsImplRequestHeaders::INSERT_KEY_PREFIX);
-        key += index;
-        values->Put(key, headercs);
+        StringBuilder sb(IDownloadsImplRequestHeaders::INSERT_KEY_PREFIX);
+        sb += index;
+        values->Put(sb.ToString(), headercs);
         index++;
     }
 }

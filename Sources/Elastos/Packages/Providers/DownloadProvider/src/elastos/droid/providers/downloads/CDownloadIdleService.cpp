@@ -11,6 +11,7 @@
 #include "elastos/droid/text/TextUtils.h"
 #include "elastos/droid/os/Process.h"
 #include "elastos/droid/os/Environment.h"
+#include <elastos/core/StringBuilder.h>
 #include "elastos/utility/logging/Slogger.h"
 
 using Elastos::Droid::Content::IContentResolver;
@@ -29,6 +30,7 @@ using Elastos::Core::IThread;
 using Elastos::Core::CThread;
 using Elastos::Core::ISystem;
 using Elastos::Core::CSystem;
+using Elastos::Core::StringBuilder;
 using Elastos::Utility::Logging::Slogger;
 using Elastos::Utility::IHashSet;
 using Elastos::Utility::CHashSet;
@@ -149,11 +151,13 @@ ECode CDownloadIdleService::CleanStale()
     CDownloadsImpl::AcquireSingleton((IDownloadsImpl**)&impl);
     AutoPtr<IUri> uri;
     impl->GetALL_DOWNLOADS_CONTENT_URI((IUri**)&uri);
+    StringBuilder sb(IDownloadsImpl::COLUMN_STATUS);
+    sb += " >= '200' AND "; sb += IDownloadsImpl::COLUMN_LAST_MODIFICATION;
+    sb += " <= '"; sb += modifiedBefore;
+    sb += "' AND "; sb += IDownloadsImpl::COLUMN_IS_VISIBLE_IN_DOWNLOADS_UI;
+    sb += " == '0'";
     AutoPtr<ICursor> cursor;
-    resolver->Query(uri,
-            StaleQuery::PROJECTION, IDownloadsImpl::COLUMN_STATUS + " >= '200' AND "
-                    + IDownloadsImpl::COLUMN_LAST_MODIFICATION + " <= '" + modifiedBefore
-                    + "' AND " + IDownloadsImpl::COLUMN_IS_VISIBLE_IN_DOWNLOADS_UI + " == '0'",
+    resolver->Query(uri, StaleQuery::PROJECTION, sb.ToString(),
             NULL, String(NULL), (ICursor**)&cursor);
 
     Int32 count = 0;

@@ -1465,7 +1465,8 @@ Boolean CPinyinIME::ProcessStateInput(
                 if (0 != fullwidth_char) {
                     Int32 pos = TO_CCandidatesContainer(mCandidatesContainer)->GetActiveCandiatePos();
                     String str = mDecInfo->GetCurrentFullSent(pos);
-                    CommitResultText(str + fullwidth_char);
+                    str.Append(fullwidth_char);
+                    CommitResultText(str);
                     ResetToIdleState(FALSE);
                 }
             }
@@ -1578,7 +1579,8 @@ Boolean CPinyinIME::ProcessStatePredict(
         if (0 != fullwidth_char) {
             Int32 pos = TO_CCandidatesContainer(mCandidatesContainer)->GetActiveCandiatePos();
             String str = mDecInfo->GetCandidate(pos);
-            CommitResultText(str + fullwidth_char);
+            str.Append(fullwidth_char);
+            CommitResultText(str);
             ResetToIdleState(FALSE);
         }
         return TRUE;
@@ -1669,7 +1671,8 @@ Boolean CPinyinIME::ProcessStateEditComposing(
                 else {
                     retStr = mDecInfo->GetComposingStr();
                 }
-                CommitResultText(retStr + fullwidth_char);
+                retStr.Append(fullwidth_char);
+                CommitResultText(retStr);
                 ResetToIdleState(FALSE);
             }
             return TRUE;
@@ -1753,13 +1756,11 @@ Boolean CPinyinIME::TryInputRawUnicode(
             if (unicode > 0) {
                 Char32 low = (Char32) (unicode & 0x0000ffff);
                 Char32 high = (Char32) ((unicode & 0xffff0000) >> 16);
-                String lowStr;
-                lowStr += low;
-                CommitResultText(lowStr);
+                String str; str.Append(low);
+                CommitResultText(str);
                 if (0 != high) {
-                    String highStr;
-                    highStr += high;
-                    CommitResultText(highStr);
+                    String str; str.Append(high);
+                    CommitResultText(str);
                 }
             }
             return TRUE;

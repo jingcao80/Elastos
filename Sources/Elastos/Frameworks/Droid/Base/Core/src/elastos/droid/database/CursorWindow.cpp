@@ -188,7 +188,7 @@ Int32 CursorWindow::NativeGetType(
     /* [in] */ Int32 column)
 {
     NativeCursorWindow* window = reinterpret_cast<NativeCursorWindow*>(windowPtr);
-    LOG_WINDOW("returning column type affinity for %d,%d from %p", row, column, window);
+    LOG_WINDOW("returning column type affinity for (%d, %d) from %p", row, column, window);
 
     NativeCursorWindow::FieldSlot* fieldSlot = window->getFieldSlot(row, column);
     if (!fieldSlot) {
@@ -209,7 +209,7 @@ ECode CursorWindow::NativeGetBlob(
     VALIDATE_NOT_NULL(blob)
 
     NativeCursorWindow* window = reinterpret_cast<NativeCursorWindow*>(windowPtr);
-    LOG_WINDOW("Getting blob for %d,%d from %p", row, column, window);
+    LOG_WINDOW("Getting blob for (%d, %d) from %p", row, column, window);
 
     NativeCursorWindow::FieldSlot* fieldSlot = window->getFieldSlot(row, column);
     if (!fieldSlot) {
@@ -256,7 +256,7 @@ ECode CursorWindow::NativeGetString(
     VALIDATE_NOT_NULL(str)
 
     NativeCursorWindow* window = reinterpret_cast<NativeCursorWindow*>(windowPtr);
-    // LOG_WINDOW("Getting string for %d,%d from %p", row, column, window);
+    // LOG_WINDOW("Getting string for (%d, %d) from %p", row, column, window);
 
     NativeCursorWindow::FieldSlot* fieldSlot = window->getFieldSlot(row, column);
     if (!fieldSlot) {
@@ -361,7 +361,7 @@ ECode CursorWindow::NativeCopyStringToBuffer(
     /* [in] */ ICharArrayBuffer* buffer)
 {
     NativeCursorWindow* window = reinterpret_cast<NativeCursorWindow*>(windowPtr);
-    LOG_WINDOW("Copying string for %d,%d from %p", row, column, window);
+    LOG_WINDOW("Copying string for (%d, %d) from %p", row, column, window);
 
     NativeCursorWindow::FieldSlot* fieldSlot = window->getFieldSlot(row, column);
     if (!fieldSlot) {
@@ -410,7 +410,7 @@ ECode CursorWindow::NativeGetInt64(
 {
     VALIDATE_NOT_NULL(value)
     NativeCursorWindow* window = reinterpret_cast<NativeCursorWindow*>(windowPtr);
-    LOG_WINDOW("Getting long for %d,%d from %p", row, column, window);
+    LOG_WINDOW("Getting long for (%d, %d) from %p", row, column, window);
 
     NativeCursorWindow::FieldSlot* fieldSlot = window->getFieldSlot(row, column);
     if (!fieldSlot) {
@@ -453,7 +453,7 @@ ECode CursorWindow::NativeGetDouble(
     VALIDATE_NOT_NULL(value)
 
     NativeCursorWindow* window = reinterpret_cast<NativeCursorWindow*>(windowPtr);
-    LOG_WINDOW("Getting double for %d,%d from %p", row, column, window);
+    LOG_WINDOW("Getting double for (%d, %d) from %p", row, column, window);
 
     NativeCursorWindow::FieldSlot* fieldSlot = window->getFieldSlot(row, column);
     if (!fieldSlot) {

@@ -294,10 +294,10 @@ ECode SipPhone::SipCall::Merge(
 ECode SipPhone::SipCall::SendDtmf(
     /* [in] */ Char16 c)
 {
-    if (SC_DBG) Log(String("sendDtmf: c=") + c);
+    if (SC_DBG) Logger::E("SipPhone", "sendDtmf: c='%c'", c);
     AutoPtr</*TODO IAudioGroup*/IInterface> audioGroup = GetAudioGroup();
     if (audioGroup == NULL) {
-        if (SC_DBG) Log(String("sendDtmf: audioGroup == NULL, ignore c=") + c);
+        if (SC_DBG) Logger::E("SipPhone", "sendDtmf: audioGroup == NULL, ignore c='%c'", c);
         return NOERROR;
     }
     Int32 val;
@@ -1225,7 +1225,7 @@ ECode SipPhone::SendDtmf(
 
     Boolean b;
     if (PhoneNumberUtils::Is12Key(c, &b), !b) {
-        Loge(String("sendDtmf called with invalid character '") + c + "'");
+        Logger::E("SipPhone", "startDtmf called with invalid character '%c'", c);
     }
 // TODO: Need ICallState::IsAlive
     // else if (state->IsAlive()) {
@@ -1240,7 +1240,7 @@ ECode SipPhone::StartDtmf(
 {
     Boolean b;
     if (PhoneNumberUtils::Is12Key(c, &b), !b) {
-        Loge(String("startDtmf called with invalid character '") + c + "'");
+        Logger::E("SipPhone", "startDtmf called with invalid character '%c'", c);
     }
     else {
         SendDtmf(c);

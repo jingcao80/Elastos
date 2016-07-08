@@ -10,6 +10,7 @@
 #include <Elastos.CoreLibrary.Utility.h>
 #include <elastos/droid/os/Binder.h>
 #include <elastos/core/StringUtils.h>
+#include <elastos/core/StringBuilder.h>
 #include <elastos/utility/logging/Logger.h>
 
 using Elastos::Droid::Content::CContentUris;
@@ -47,6 +48,7 @@ using Elastos::Core::EIID_IComparator;
 using Elastos::Core::ICharSequence;
 using Elastos::Core::ISystem;
 using Elastos::Core::StringUtils;
+using Elastos::Core::StringBuilder;
 
 namespace Elastos {
 namespace Droid {
@@ -190,8 +192,9 @@ ECode MediaThumbRequest::UpdateDatabase(
 {
     VALIDATE_NOT_NULL(result)
     AutoPtr<ICursor> c;
+    StringBuilder sb(mOrigColumnName); sb += " = "; sb += mOrigId;
     mCr->Query(mThumbUri.Get(), THUMB_PROJECTION.Get(),
-            mOrigColumnName+ " = " + mOrigId, NULL, String(NULL), (ICursor**)&c);
+            sb.ToString(), NULL, String(NULL), (ICursor**)&c);
     AutoPtr<IUri> oUri;
     if (c == NULL) {
         *result = NULL;
@@ -258,8 +261,9 @@ ECode MediaThumbRequest::Execute()
             AutoPtr<ICursor> c;
             AutoPtr<IParcelFileDescriptor> pfd;
             // try {
+            StringBuilder sb(mOrigColumnName); sb += " = "; sb += mOrigId;
                 mCr->Query(mThumbUri.Get(), THUMB_PROJECTION.Get(),
-                        mOrigColumnName + " = " + mOrigId, NULL, String(NULL), (ICursor**)&c);
+                        sb.ToString(), NULL, String(NULL), (ICursor**)&c);
                 if (c != NULL && (c->MoveToFirst(&flag), flag)) {
                     AutoPtr<IUriBuilder> ub;
                     mThumbUri->BuildUpon((IUriBuilder**)&ub);

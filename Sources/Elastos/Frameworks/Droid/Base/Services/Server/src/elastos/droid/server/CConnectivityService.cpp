@@ -4931,17 +4931,15 @@ void CConnectivityService::SetDefaultDnsSystemProperties(
         it->GetNext((IInterface**)&obj);
         dns = IInetAddress::Probe(obj);
         ++last;
-        String key("net.dns");
-        key += last;
+        StringBuilder sb("net.dns"); sb += last;
         String value;
         dns->GetHostAddress(&value);
-        sysProp->Set(key, value);
+        sysProp->Set(sb.ToString(), value);
     }
 
     for (Int32 i = last + 1; i <= mNumDnsEntries; ++i) {
-        String key("net.dns");
-        key += i;
-        sysProp->Set(key, String(""));
+        StringBuilder sb("net.dns"); sb += i;
+        sysProp->Set(sb.ToString(), String(""));
     }
     mNumDnsEntries = last;
 }

@@ -11,6 +11,7 @@
 #include <elastos/core/AutoLock.h>
 #include <elastos/core/CoreUtils.h>
 #include <elastos/core/StringUtils.h>
+#include <elastos/core/StringBuilder.h>
 #include <elastos/utility/logging/Logger.h>
 
 using Elastos::Droid::App::INotificationBuilder;
@@ -48,6 +49,7 @@ using Elastos::Core::ISystem;
 using Elastos::Core::CSystem;
 using Elastos::Core::CoreUtils;
 using Elastos::Core::StringUtils;
+using Elastos::Core::StringBuilder;
 using Elastos::Utility::ISet;
 using Elastos::Utility::IIterator;
 using Elastos::Utility::CArrayList;
@@ -580,26 +582,17 @@ String CDownloadNotifier::BuildNotificationTag(
 {
     AutoPtr<CDownloadInfo> _info = (CDownloadInfo*)info;
     if (_info->mStatus == IDownloadsImpl::STATUS_QUEUED_FOR_WIFI) {
-        String res;
-        res += TYPE_WAITING;
-        res += String(":");
-        res += _info->mPackage;
-        return res;
+        StringBuilder sb(TYPE_WAITING); sb += ":"; sb += _info->mPackage;
+        return sb.ToString();
     }
     else if (IsActiveAndVisible(info)) {
-        String res;
-        res += TYPE_ACTIVE;
-        res += String(":");
-        res += _info->mPackage;
-        return res;
+        StringBuilder sb(TYPE_ACTIVE); sb += ":"; sb += _info->mPackage;
+        return sb.ToString();
     }
     else if (IsCompleteAndVisible(info)) {
         // Complete downloads always have unique notifs
-        String res;
-        res += TYPE_COMPLETE;
-        res += String(":");
-        res += _info->mId;
-        return res;
+        StringBuilder sb(TYPE_COMPLETE); sb += ":"; sb += _info->mId;
+        return sb.ToString();
     }
     else {
         return String(NULL);

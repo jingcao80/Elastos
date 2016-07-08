@@ -4,6 +4,7 @@
 #include "Elastos.Droid.Net.h"
 #include "Elastos.Droid.Os.h"
 #include <elastos/droid/content/BroadcastReceiver.h>
+#include <elastos/core/StringBuilder.h>
 #include <elastos/utility/logging/Logger.h>
 
 using Elastos::Droid::Content::CIntent;
@@ -17,6 +18,7 @@ using Elastos::Droid::Net::CUriHelper;
 using Elastos::Droid::Net::IUriHelper;
 using Elastos::Droid::Os::IBundle;
 using Elastos::Utility::Logging::Logger;
+using Elastos::Core::StringBuilder;
 
 namespace Elastos {
 namespace Droid {
@@ -92,6 +94,7 @@ ECode MtpReceiver::HandleUsbState(
         Int32 vol;
         resolver->Delete(uri.Get(), String(NULL), NULL, &vol);
     }
+    return NOERROR;
 }
 
 } // namespace Media

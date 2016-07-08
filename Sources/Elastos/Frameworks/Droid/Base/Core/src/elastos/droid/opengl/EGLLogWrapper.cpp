@@ -570,8 +570,7 @@ ECode EGLLogWrapper::CheckError()
 ECode EGLLogWrapper::LogLine(
     /* [in] */ const String& message)
 {
-    Char32 c = '\n';
-    Log(message + c);
+    Log(message + "\n");
     return NOERROR;
 }
 
@@ -588,8 +587,7 @@ ECode EGLLogWrapper::Log(
 ECode EGLLogWrapper::Begin(
     /* [in] */ const String& message)
 {
-    Char32 c = '(';
-    Log(message + c);
+    Log(message + "(");
     mArgCount = 0;
     return NOERROR;
 }

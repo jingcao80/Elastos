@@ -172,7 +172,8 @@ ECode FontListParser::ReadFamily(
     CFileHelper::AcquireSingleton((IFileHelper**)&helper);
     Char32 separatorChar;
     helper->GetSeparatorChar(&separatorChar);
-    String prefix = dirPath + separatorChar;
+    String prefix(dirPath);
+    prefix.Append(separatorChar);
     Int32 next = 0;
     while ((parser->Next(&next), next) != IXmlPullParser::END_TAG) {
         Int32 type = 0;

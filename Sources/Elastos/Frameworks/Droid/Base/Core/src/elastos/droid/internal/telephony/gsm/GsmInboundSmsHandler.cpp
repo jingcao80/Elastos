@@ -127,12 +127,12 @@ Int32 GsmInboundSmsHandler::DispatchMessageRadioSpecific(
         sms->GetNumOfVoicemails(&val);
         UpdateMessageWaitingIndicator(val);
         ISmsMessageBase::Probe(sms)->IsMwiDontStore(&handled);
-        if (DBG) Log(String("Received voice mail indicator set SMS shouldStore=") + !handled);
+        if (DBG) Logger::I("CGsmCellBroadcastHandler", "Received voice mail indicator set SMS shouldStore==%d", !handled);
     }
     else if (ISmsMessageBase::Probe(sms)->IsMWIClearMessage(&b), b) {
         UpdateMessageWaitingIndicator(0);
         ISmsMessageBase::Probe(sms)->IsMwiDontStore(&handled);
-        if (DBG) Log(String("Received voice mail indicator clear SMS shouldStore=") + !handled);
+        if (DBG) Logger::I("CGsmCellBroadcastHandler", "Received voice mail indicator clear SMS shouldStore=%d", !handled);
     }
     if (handled) {
         return 1; //IIntents::RESULT_SMS_HANDLED;

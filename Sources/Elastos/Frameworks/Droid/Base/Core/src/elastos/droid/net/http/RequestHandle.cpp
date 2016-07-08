@@ -339,8 +339,9 @@ ECode RequestHandle::ComputeBasicAuthResponse(
     // TODO: Waiting for Base64
     assert(0);
     // CBase64Helper::AcquireSingleton((IBase64Helper**)&helper);
+    StringBuilder sb(username); sb += ":"; sb += password;
     AutoPtr<ArrayOf<Byte> > in, out;
-    in = (username + Char32(':') + password).GetBytes();
+    in = sb.ToString().GetBytes();
     // helper->EncodeBase64(in, (ArrayOf<Byte>**)&out);
     *result = String(*out);
     return NOERROR;

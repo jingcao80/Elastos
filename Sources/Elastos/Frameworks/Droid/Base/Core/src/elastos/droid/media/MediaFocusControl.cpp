@@ -1820,18 +1820,19 @@ void MediaFocusControl::DumpRCCStack(
             pw->Println(String("\nCurrent remote control generation ID = ") + StringUtils::ToString(mCurrentRcClientGen));
         }
     }
-    {    AutoLock syncLock(mMainRemote);
-        pw->Println(String("\nRemote Volume State:"));
-        pw->Println(String("  has remote: ") + StringUtils::BooleanToString(mHasRemotePlayback));
-        pw->Println(String("  is remote active: ") + StringUtils::BooleanToString(mMainRemoteIsActive));
-        AutoPtr<CPlayerRecordRemotePlaybackState> rps =
-                (CPlayerRecordRemotePlaybackState*)mMainRemote.Get();
-        pw->Println(String("  rccId: ") + rps->mRccId);
-        pw->Println(String("  volume handling: ")
-                + ((rps->mVolumeHandling == IRemoteControlClient::PLAYBACK_VOLUME_FIXED) ?
-                        "PLAYBACK_VOLUME_FIXED(0)" : "PLAYBACK_VOLUME_VARIABLE(1)"));
-        pw->Println(String("  volume: ") + rps->mVolume);
-        pw->Println(String("  volume steps: ") + rps->mVolumeMax);
+    {
+        // AutoLock syncLock(mMainRemote);
+        // pw->Println(String("\nRemote Volume State:"));
+        // pw->Println(String("  has remote: ") + StringUtils::BooleanToString(mHasRemotePlayback));
+        // pw->Println(String("  is remote active: ") + StringUtils::BooleanToString(mMainRemoteIsActive));
+        // AutoPtr<CPlayerRecordRemotePlaybackState> rps =
+        //         (CPlayerRecordRemotePlaybackState*)mMainRemote.Get();
+        // pw->Println(String("  rccId: ") + rps->mRccId);
+        // pw->Println(String("  volume handling: ")
+        //         + ((rps->mVolumeHandling == IRemoteControlClient::PLAYBACK_VOLUME_FIXED) ?
+        //                 "PLAYBACK_VOLUME_FIXED(0)" : "PLAYBACK_VOLUME_VARIABLE(1)"));
+        // pw->Println(String("  volume: ") + rps->mVolume);
+        // pw->Println(String("  volume steps: ") + rps->mVolumeMax);
     }
 }
 

@@ -16,6 +16,7 @@
 #include <elastos/utility/logging/Logger.h>
 #include <elastos/core/AutoLock.h>
 #include <elastos/core/StringUtils.h>
+#include <elastos/core/StringBuilder.h>
 
 using Elastos::Droid::Content::IContentUris;
 using Elastos::Droid::Content::CContentUris;
@@ -31,6 +32,7 @@ using Elastos::IO::ICloseable;
 using Elastos::Utility::Arrays;
 using Elastos::Utility::Logging::Logger;
 using Elastos::Core::StringUtils;
+using Elastos::Core::StringBuilder;
 
 namespace Elastos {
 namespace Droid {
@@ -44,7 +46,7 @@ const Int32 CMediaStoreInternalThumbnails::MINI_KIND = 1;
 const Int32 CMediaStoreInternalThumbnails::FULL_SCREEN_KIND = 2;
 const Int32 CMediaStoreInternalThumbnails::MICRO_KIND = 3;
 
-static const AutoPtr<ArrayOf<String> > initPROJECTION()
+static const AutoPtr<ArrayOf<String> > InitPROJECTION()
 {
     AutoPtr<ArrayOf<String> > str = ArrayOf<String>::Alloc(2);
     (*str)[0] = IBaseColumns::ID;
@@ -52,7 +54,7 @@ static const AutoPtr<ArrayOf<String> > initPROJECTION()
     return str;
 }
 
-const AutoPtr<ArrayOf<String> > CMediaStoreInternalThumbnails::PROJECTION = initPROJECTION();
+const AutoPtr<ArrayOf<String> > CMediaStoreInternalThumbnails::PROJECTION = InitPROJECTION();
 
 const Object CMediaStoreInternalThumbnails::sThumbBufLock;
 
@@ -192,8 +194,9 @@ ECode CMediaStoreInternalThumbnails::GetThumbnail(
             REFCOUNT_ADD(*outBitmap);
             return NOERROR;
         } else if (kind == MINI_KIND) {
-            String column = isVideo ? String("video_id=") : String("image_id=");
-            cr->Query(baseUri, PROJECTION.Get(), column + origId, NULL, String(NULL), (ICursor**)&c);
+            StringBuilder sb(isVideo ? "video_id=" : "image_id=");
+            sb += origId;
+            cr->Query(baseUri, PROJECTION.Get(), sb.ToString(), NULL, String(NULL), (ICursor**)&c);
 
             Boolean bSucceeded;
             if (c != NULL && (c->MoveToFirst(&bSucceeded), bSucceeded)) {

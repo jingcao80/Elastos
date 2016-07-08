@@ -13,6 +13,7 @@
 #include "elastos/droid/providers/downloads/RealSystemFacade.h"
 #include "elastos/droid/providers/downloads/COpenHelper.h"
 #include "R.h"
+#include <elastos/core/StringBuilder.h>
 #include <elastos/utility/logging/Slogger.h>
 #include <elastos/utility/logging/Logger.h>
 
@@ -41,6 +42,7 @@ using Elastos::Droid::Widget::IToastHelper;
 using Elastos::Droid::Widget::CToastHelper;
 using Elastos::Core::IThread;
 using Elastos::Core::EIID_IRunnable;
+using Elastos::Core::StringBuilder;
 using Elastos::IO::ICloseable;
 using Elastos::Utility::Logging::Slogger;
 using Elastos::Utility::Logging::Logger;
@@ -194,11 +196,9 @@ void CDownloadReceiver::HandleUidRemoved(
     CDownloadsImpl::AcquireSingleton((IDownloadsImpl**)&imp);
     AutoPtr<IUri> uri;
     imp->GetALL_DOWNLOADS_CONTENT_URI((IUri**)&uri);
-    String str(Constants::UID);
-    str += "=";
-    str += uid;
+    StringBuilder sb(Constants::UID); sb += "="; sb += uid;
     resolver->Delete(
-            uri, str, NULL, &count);
+            uri, sb.ToString(), NULL, &count);
 
     if (count > 0) {
         Slogger::D(Constants::TAG, "Deleted %d downloads owned by UID %d", count, uid);

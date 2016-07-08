@@ -1397,9 +1397,10 @@ void CDownloadProvider::DeleteRequestHeaders(
     for ((cursor->MoveToFirst(&bMF), bMF); !(cursor->IsAfterLast(&bAL), bAL); (cursor->MoveToNext(&bMN), bMN)) {
         Int64 id = 0;
         cursor->GetInt64(0, &id);
-        String idWhere = IDownloadsImplRequestHeaders::COLUMN_DOWNLOAD_ID + String("=") + id;
+        StringBuilder sb(IDownloadsImplRequestHeaders::COLUMN_DOWNLOAD_ID);
+        sb += "="; sb +=id;
         Int32 val = 0;
-        db->Delete(IDownloadsImplRequestHeaders::HEADERS_DB_TABLE, idWhere, NULL, &val);
+        db->Delete(IDownloadsImplRequestHeaders::HEADERS_DB_TABLE, sb.ToString(), NULL, &val);
     }
     ICloseable::Probe(cursor)->Close();
 }
@@ -1769,9 +1770,10 @@ ECode CDownloadProvider::Dump(
     Int64 mils = 0;
     mSystemFacade->GetCurrentTimeMillis(&mils);
     Int64 modifiedAfter = mils - IDateUtils::HOUR_IN_MILLIS;
+    StringBuilder sb(IDownloadsImpl::COLUMN_LAST_MODIFICATION); sb += ">"; sb += modifiedAfter;
     AutoPtr<ICursor> cursor;
     db->Query(DB_TABLE, NULL,
-            IDownloadsImpl::COLUMN_LAST_MODIFICATION + ">" + modifiedAfter, NULL, String(NULL), String(NULL),
+            sb.ToString(), NULL, String(NULL), String(NULL),
             IBaseColumns::ID + " ASC", (ICursor**)&cursor);
     AutoPtr<ArrayOf<String> > cols;
     cursor->GetColumnNames((ArrayOf<String>**)&cols);
@@ -1781,10 +1783,8 @@ ECode CDownloadProvider::Dump(
     while ((cursor->MoveToNext(&bHasNxt), bHasNxt)) {
         Int32 id = 0;
         cursor->GetInt32(idCol, &id);
-        String str("Download #");
-        str += id;
-        str += ":";
-        IPrintWriter::Probe(pw)->Println(str);
+        StringBuilder sb("Download #"); sb += id; sb += ":";
+        IPrintWriter::Probe(pw)->Println(sb.ToString());
         pw->IncreaseIndent();
         for (Int32 i = 0; i < cols->GetLength(); i++) {
             // Omit sensitive data when dumping

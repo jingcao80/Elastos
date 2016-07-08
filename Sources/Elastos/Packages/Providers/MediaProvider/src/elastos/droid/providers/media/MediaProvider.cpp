@@ -27,12 +27,13 @@
 #include <elastos/droid/system/OsConstants.h>
 #include <elastos/droid/text/format/DateUtils.h>
 #include <elastos/droid/text/TextUtils.h>
-#include <elastos/utility/logging/Logger.h>
 #include <elastos/core/StringUtils.h>
 #include <elastos/core/StringBuilder.h>
 #include <elastos/core/AutoLock.h>
 #include <elastos/core/CoreUtils.h>
 #include <elastos/core/Object.h>
+#include <elastos/utility/Arrays.h>
+#include <elastos/utility/logging/Logger.h>
 
 using Elastos::Droid::App::ISearchManager;
 using Elastos::Droid::Content::CContentUris;
@@ -142,6 +143,17 @@ using Elastos::Droid::Text::Format::IDateUtils;
 using Elastos::Droid::Text::TextUtils;
 using Elastos::Droid::Text::CTextUtils;
 using Elastos::Droid::Text::ITextUtils;
+using Elastos::Core::AutoLock;
+using Elastos::Core::CoreUtils;
+using Elastos::Core::CSystem;
+using Elastos::Core::ICharSequence;
+using Elastos::Core::IInteger32;
+using Elastos::Core::IInteger64;
+using Elastos::Core::ISystem;
+using Elastos::Core::StringBuilder;
+using Elastos::Core::StringUtils;
+using Elastos::Core::CoreUtils;
+using Elastos::Utility::Arrays;
 using Elastos::Utility::CArrayList;
 using Elastos::Utility::CHashSet;
 using Elastos::Utility::CHashMap;
@@ -164,16 +176,6 @@ using Elastos::IO::CFileHelper;
 using Elastos::IO::IFileHelper;
 using Libcore::IO::CIoUtils;
 using Libcore::IO::IIoUtils;
-using Elastos::Core::AutoLock;
-using Elastos::Core::CoreUtils;
-using Elastos::Core::CSystem;
-using Elastos::Core::ICharSequence;
-using Elastos::Core::IInteger32;
-using Elastos::Core::IInteger64;
-using Elastos::Core::ISystem;
-using Elastos::Core::StringBuilder;
-using Elastos::Core::StringUtils;
-using Elastos::Core::CoreUtils;
 
 namespace Elastos {
 namespace Droid {
@@ -325,13 +327,12 @@ static AutoPtr<ArrayOf<String> > InitSearchColsBasic()
     (*array)[3] = String("text1 AS ") + ISearchManager::SUGGEST_COLUMN_TEXT_1;
     (*array)[4] = String("text1 AS ") + ISearchManager::SUGGEST_COLUMN_QUERY;
 
-    sb.Reset();
-    sb += "(CASE WHEN grouporder=1 THEN \'%1\'";        // %1 gets replaced with localized string.
-    sb += " ELSE CASE WHEN grouporder=3 THEN artist || ' - ' || album";
-    sb += " ELSE CASE WHEN text2!='";                   sb += IMediaStore::UNKNOWN_STRING;
-    sb += "\' THEN text2";
-    sb += " ELSE NULL END END END) AS ";                sb += ISearchManager::SUGGEST_COLUMN_TEXT_2;
-    (*array)[5] = sb.ToString();
+    StringBuilder sb1("(CASE WHEN grouporder=1 THEN \'%1\'"); // %1 gets replaced with localized string.
+    sb1 += " ELSE CASE WHEN grouporder=3 THEN artist || ' - ' || album";
+    sb1 += " ELSE CASE WHEN text2!='";                   sb += IMediaStore::UNKNOWN_STRING;
+    sb1 += "\' THEN text2";
+    sb1 += " ELSE NULL END END END) AS ";                sb += ISearchManager::SUGGEST_COLUMN_TEXT_2;
+    (*array)[5] = sb1.ToString();
     (*array)[6] = ISearchManager::SUGGEST_COLUMN_INTENT_DATA;
     return array;
 }
@@ -909,16 +910,13 @@ ECode MediaProvider::MyHandler::HandleMessage(
                 // Check if more requests for the same image are queued.
                 {
                     AutoLock syncLock(mHost->mMediaThumbQueue);
-                    AutoPtr<ArrayOf<IInterface*> > mediaThumbs;
-                    mHost->mMediaThumbQueue->ToArray((ArrayOf<IInterface*>**)&mediaThumbs);
-                    Int32 length = mediaThumbs->GetLength();
-                    AutoPtr<MediaThumbRequest> mtq;
-                    AutoPtr<IInterface> obj;
-                    for (Int32 i = 0; i < length; ++i) {
-                        mtq = NULL;
-                        obj = NULL;
-                        obj = (*mediaThumbs)[i];
-                        mtq = (MediaThumbRequest*)IMediaThumbRequest::Probe(obj);
+                    AutoPtr<IIterator> it;
+                    mHost->mMediaThumbQueue->GetIterator((IIterator**)&it);
+                    Boolean hasNext;
+                    while (it->HasNext(&hasNext), hasNext) {
+                        AutoPtr<IInterface> obj;
+                        it->GetNext((IInterface**)&obj);
+                        MediaThumbRequest* mtq = (MediaThumbRequest*)IMediaThumbRequest::Probe(obj);
                         if ((mtq->mOrigId == mtr->mOrigId) &&
                             (mtq->mIsVideo == mtr->mIsVideo) &&
                             (mtq->mMagic == 0) &&
@@ -1251,8 +1249,8 @@ CAR_INTERFACE_IMPL(MediaProvider, ContentProvider, IMediaProvider);
 
 MediaProvider::MediaProvider()
     : mCaseInsensitivePaths(FALSE)
-    , mDisableMtpObjectCallbacks(FALSE)
     , SEARCH_COLUMN_BASIC_TEXT2(5)
+    , mDisableMtpObjectCallbacks(FALSE)
     , mVolumeId(-1)
 {
 }
@@ -1430,7 +1428,7 @@ ECode MediaProvider::OnCreate(
     String state = Environment::GetExternalStorageState();
     if (Environment::MEDIA_MOUNTED.Equals(state) ||
            Environment::MEDIA_MOUNTED_READ_ONLY.Equals(state)) {
-       AutoPtr<IUri> aat = AttachVolume(EXTERNAL_VOLUME);
+       AttachVolume(EXTERNAL_VOLUME);
     }
 
     AutoPtr<IHandlerThread> ht;
@@ -1444,7 +1442,7 @@ ECode MediaProvider::OnCreate(
     return NOERROR;
 }
 
-void MediaProvider::UpdateDatabase(
+ECode MediaProvider::UpdateDatabase(
     /* [in] */ IContext* context,
     /* [in] */ ISQLiteDatabase* db,
     /* [in] */ Boolean internal,
@@ -1455,14 +1453,14 @@ void MediaProvider::UpdateDatabase(
     Int32 dbversion = GetDatabaseVersion(context);
     if (toVersion != dbversion) {
         Logger::E(TAG, "Illegal update request. Got %d toVersion expected %d", toVersion, dbversion);
-        return;
-        // throw new IllegalArgumentException();
-    } else if (fromVersion > toVersion) {
+        return E_ILLEGAL_ARGUMENT_EXCEPTION;
+    }
+    else if (fromVersion > toVersion) {
         Logger::E(TAG, "Illegal update request: can't downgrade from %d to %d. Did you forget to wipe data?", fromVersion, toVersion);
-        return;
-        // throw new IllegalArgumentException();
+        return E_ILLEGAL_ARGUMENT_EXCEPTION;
     }
     Int64 startTime = SystemClock::GetCurrentTimeMicro();//
+    StringBuilder sb;
 
     // Revisions 84-86 were a failed attempt at supporting the "album artist" id3 tag.
     // We can't downgrade from those revisions, so start over.
@@ -1506,92 +1504,92 @@ void MediaProvider::UpdateDatabase(
         db->ExecSQL(String("DROP TRIGGER IF EXISTS playlists_objects_cleanup"));//
 
         db->ExecSQL(String("CREATE TABLE IF NOT EXISTS images ("
-                    "_id INTEGER PRIMARY KEY,"
-                    "_data TEXT,"
-                    "_size INTEGER,"
-                    "_display_name TEXT,"
-                    "mime_type TEXT,"
-                    "title TEXT,"
-                    "date_added INTEGER,"
-                    "date_modified INTEGER,"
-                    "description TEXT,"
-                    "picasa_id TEXT,"
-                    "isprivate INTEGER,"
-                    "latitude DOUBLE,"
-                    "longitude DOUBLE,"
-                    "datetaken INTEGER,"
-                    "orientation INTEGER,"
-                    "mini_thumb_magic INTEGER,"
-                    "bucket_id TEXT,"
-                    "bucket_display_name TEXT"
-                    ");"));
+                "_id INTEGER PRIMARY KEY,"
+                "_data TEXT,"
+                "_size INTEGER,"
+                "_display_name TEXT,"
+                "mime_type TEXT,"
+                "title TEXT,"
+                "date_added INTEGER,"
+                "date_modified INTEGER,"
+                "description TEXT,"
+                "picasa_id TEXT,"
+                "isprivate INTEGER,"
+                "latitude DOUBLE,"
+                "longitude DOUBLE,"
+                "datetaken INTEGER,"
+                "orientation INTEGER,"
+                "mini_thumb_magic INTEGER,"
+                "bucket_id TEXT,"
+                "bucket_display_name TEXT"
+                ");"));
 
-        db->ExecSQL(String("CREATE INDEX IF NOT EXISTS mini_thumb_magic_index on images(mini_thumb_magic);"));//
+        db->ExecSQL(String("CREATE INDEX IF NOT EXISTS mini_thumb_magic_index on images(mini_thumb_magic);"));
 
         db->ExecSQL(String("CREATE TRIGGER IF NOT EXISTS images_cleanup DELETE ON images "
-                    "BEGIN "
+                "BEGIN "
                     "DELETE FROM thumbnails WHERE image_id = old._id;"
                     "SELECT _DELETE_FILE(old._data);"
-                    "END"));
+                "END"));
 
         // create image thumbnail table
         db->ExecSQL(String("CREATE TABLE IF NOT EXISTS thumbnails ("
-                    "_id INTEGER PRIMARY KEY,"
-                    "_data TEXT,"
-                    "image_id INTEGER,"
-                    "kind INTEGER,"
-                    "width INTEGER,"
-                    "height INTEGER"
-                    ");"));
+                "_id INTEGER PRIMARY KEY,"
+                "_data TEXT,"
+                "image_id INTEGER,"
+                "kind INTEGER,"
+                "width INTEGER,"
+                "height INTEGER"
+                ");"));
 
-        db->ExecSQL(String("CREATE INDEX IF NOT EXISTS image_id_index on thumbnails(image_id);"));//
+        db->ExecSQL(String("CREATE INDEX IF NOT EXISTS image_id_index on thumbnails(image_id);"));
 
         db->ExecSQL(String("CREATE TRIGGER IF NOT EXISTS thumbnails_cleanup DELETE ON thumbnails "
-                    "BEGIN "
+                "BEGIN "
                     "SELECT _DELETE_FILE(old._data);"
-                    "END"));
+                "END"));
 
         // Contains meta data about audio files
         db->ExecSQL(String("CREATE TABLE IF NOT EXISTS audio_meta ("
-                    "_id INTEGER PRIMARY KEY,"
-                    "_data TEXT UNIQUE NOT NULL,"
-                    "_display_name TEXT,"
-                    "_size INTEGER,"
-                    "mime_type TEXT,"
-                    "date_added INTEGER,"
-                    "date_modified INTEGER,"
-                    "title TEXT NOT NULL,"
-                    "title_key TEXT NOT NULL,"
-                    "duration INTEGER,"
-                    "artist_id INTEGER,"
-                    "composer TEXT,"
-                    "album_id INTEGER,"
-                    "track INTEGER,"    // track is an integer to allow proper sorting
-                    "year INTEGER CHECK(year!=0),"
-                    "is_ringtone INTEGER,"
-                    "is_music INTEGER,"
-                    "is_alarm INTEGER,"
-                    "is_notification INTEGER"
-                    ");"));
+                "_id INTEGER PRIMARY KEY,"
+                "_data TEXT UNIQUE NOT NULL,"
+                "_display_name TEXT,"
+                "_size INTEGER,"
+                "mime_type TEXT,"
+                "date_added INTEGER,"
+                "date_modified INTEGER,"
+                "title TEXT NOT NULL,"
+                "title_key TEXT NOT NULL,"
+                "duration INTEGER,"
+                "artist_id INTEGER,"
+                "composer TEXT,"
+                "album_id INTEGER,"
+                "track INTEGER,"     // track is an integer to allow proper sorting
+                "year INTEGER CHECK(year!=0),"
+                "is_ringtone INTEGER,"
+                "is_music INTEGER,"
+                "is_alarm INTEGER,"
+                "is_notification INTEGER"
+                ");"));
 
         // Contains a sort/group "key" and the preferred display name for artists
         db->ExecSQL(String("CREATE TABLE IF NOT EXISTS artists ("
-                    "artist_id INTEGER PRIMARY KEY,"
-                    "artist_key TEXT NOT NULL UNIQUE,"
-                    "artist TEXT NOT NULL"
-                    ");"));
+                "artist_id INTEGER PRIMARY KEY,"
+                "artist_key TEXT NOT NULL UNIQUE,"
+                "artist TEXT NOT NULL"
+                ");"));
 
         // Contains a sort/group "key" and the preferred display name for albums
         db->ExecSQL(String("CREATE TABLE IF NOT EXISTS albums ("
-                    "album_id INTEGER PRIMARY KEY,"
-                    "album_key TEXT NOT NULL UNIQUE,"
-                    "album TEXT NOT NULL"
-                    ");"));
+                "album_id INTEGER PRIMARY KEY,"
+                "album_key TEXT NOT NULL UNIQUE,"
+                "album TEXT NOT NULL"
+                ");"));
 
         db->ExecSQL(String("CREATE TABLE IF NOT EXISTS album_art ("
-                    "album_id INTEGER PRIMARY KEY,"
-                    "_data TEXT"
-                    ");"));
+                "album_id INTEGER PRIMARY KEY,"
+                "_data TEXT"
+               ");"));
 
         RecreateAudioView(db);
 
@@ -1599,1019 +1597,1129 @@ void MediaProvider::UpdateDatabase(
         // Provides some extra info about artists, like the number of tracks
         // and albums for this artist
         db->ExecSQL(String("CREATE VIEW IF NOT EXISTS artist_info AS "
-                    "SELECT artist_id AS _id, artist, artist_key, "
-                    "COUNT(DISTINCT album) AS number_of_albums, "
-                    "COUNT(*) AS number_of_tracks FROM audio WHERE is_music=1 "
-                    "GROUP BY artist_key;"));
+                "SELECT artist_id AS _id, artist, artist_key, "
+                "COUNT(DISTINCT album) AS number_of_albums, "
+                "COUNT(*) AS number_of_tracks FROM audio WHERE is_music=1 "
+                "GROUP BY artist_key;"));
 
         // Provides extra info albums, such as the number of tracks
-        db->ExecSQL(String("CREATE VIEW IF NOT EXISTS album_info AS "
-                    "SELECT audio.album_id AS _id, album, album_key, "
-                    "MIN(year) AS minyear, "
-                    "MAX(year) AS maxyear, artist, artist_id, artist_key, "
-                    "count(*) AS ") + IMediaStoreAudioAlbumColumns::NUMBER_OF_SONGS +
-                    String(",album_art._data AS album_art"
-                    " FROM audio LEFT OUTER JOIN album_art ON audio.album_id=album_art.album_id"
-                    " WHERE is_music=1 GROUP BY audio.album_id;"));
+        sb.Reset();
+        sb += "CREATE VIEW IF NOT EXISTS album_info AS "
+                "SELECT audio.album_id AS _id, album, album_key, "
+                "MIN(year) AS minyear, "
+                "MAX(year) AS maxyear, artist, artist_id, artist_key, "
+                "count(*) AS ";
+        sb += IMediaStoreAudioAlbumColumns::NUMBER_OF_SONGS;
+        sb += ",album_art._data AS album_art"
+                " FROM audio LEFT OUTER JOIN album_art ON audio.album_id=album_art.album_id"
+                " WHERE is_music=1 GROUP BY audio.album_id;";
+        db->ExecSQL(sb.ToString());
 
-           // For a given artist_id, provides the album_id for albums on
-           // which the artist appears.
+        // For a given artist_id, provides the album_id for albums on
+        // which the artist appears.
         db->ExecSQL(String("CREATE VIEW IF NOT EXISTS artists_albums_map AS "
-                    "SELECT DISTINCT artist_id, album_id FROM audio_meta;"));//
+                "SELECT DISTINCT artist_id, album_id FROM audio_meta;"));
 
         /*
         * Only external media volumes can handle genres, playlists, etc.
         */
-       if (!internal) {
+        if (!internal) {
             // Cleans up when an audio file is deleted
             db->ExecSQL(String("CREATE TRIGGER IF NOT EXISTS audio_meta_cleanup DELETE ON audio_meta "
-                        "BEGIN "
+                    "BEGIN "
                         "DELETE FROM audio_genres_map WHERE audio_id = old._id;"
                         "DELETE FROM audio_playlists_map WHERE audio_id = old._id;"
-                        "END"));
+                    "END"));
 
             // Contains audio genre definitions
             db->ExecSQL(String("CREATE TABLE IF NOT EXISTS audio_genres ("
-                        "_id INTEGER PRIMARY KEY,"
-                        "name TEXT NOT NULL"
-                        ");"));
+                    "_id INTEGER PRIMARY KEY,"
+                    "name TEXT NOT NULL"
+                    ");"));
 
             // Contains mappings between audio genres and audio files
             db->ExecSQL(String("CREATE TABLE IF NOT EXISTS audio_genres_map ("
-                        "_id INTEGER PRIMARY KEY,"
-                        "audio_id INTEGER NOT NULL,"
-                        "genre_id INTEGER NOT NULL"
-                        ");"));
+                    "_id INTEGER PRIMARY KEY,"
+                    "audio_id INTEGER NOT NULL,"
+                    "genre_id INTEGER NOT NULL"
+                    ");"));
 
             // Cleans up when an audio genre is delete
             db->ExecSQL(String("CREATE TRIGGER IF NOT EXISTS audio_genres_cleanup DELETE ON audio_genres "
-                        "BEGIN "
+                    "BEGIN "
                         "DELETE FROM audio_genres_map WHERE genre_id = old._id;"
-                        "END"));
+                    "END"));
 
             // Contains audio playlist definitions
             db->ExecSQL(String("CREATE TABLE IF NOT EXISTS audio_playlists ("
-                        "_id INTEGER PRIMARY KEY,"
-                        "_data TEXT,"  // _data is path for file based playlists, or null
-                        "name TEXT NOT NULL,"
-                        "date_added INTEGER,"
-                        "date_modified INTEGER"
-                        ");"));
+                    "_id INTEGER PRIMARY KEY,"
+                    "_data TEXT,"   // _data is path for file based playlists, or null
+                    "name TEXT NOT NULL,"
+                    "date_added INTEGER,"
+                    "date_modified INTEGER"
+                    ");"));
 
             // Contains mappings between audio playlists and audio files
             db->ExecSQL(String("CREATE TABLE IF NOT EXISTS audio_playlists_map ("
-                        "_id INTEGER PRIMARY KEY,"
-                        "audio_id INTEGER NOT NULL,"
-                        "playlist_id INTEGER NOT NULL,"
-                        "play_order INTEGER NOT NULL"
-                        ");"));
+                   "_id INTEGER PRIMARY KEY,"
+                   "audio_id INTEGER NOT NULL,"
+                   "playlist_id INTEGER NOT NULL,"
+                   "play_order INTEGER NOT NULL"
+                   ");"));
 
             // Cleans up when an audio playlist is deleted
             db->ExecSQL(String("CREATE TRIGGER IF NOT EXISTS audio_playlists_cleanup DELETE ON audio_playlists "
-                        "BEGIN "
-                        "DELETE FROM audio_playlists_map WHERE playlist_id = old._id;"
-                        "SELECT _DELETE_FILE(old._data);"
-                        "END"));
+                   "BEGIN "
+                       "DELETE FROM audio_playlists_map WHERE playlist_id = old._id;"
+                       "SELECT _DELETE_FILE(old._data);"
+                   "END"));
 
             // Cleans up album_art table entry when an album is deleted
             db->ExecSQL(String("CREATE TRIGGER IF NOT EXISTS albumart_cleanup1 DELETE ON albums "
-                        "BEGIN "
+                    "BEGIN "
                         "DELETE FROM album_art WHERE album_id = old.album_id;"
-                        "END"));
+                    "END"));
 
             // Cleans up album_art when an album is deleted
             db->ExecSQL(String("CREATE TRIGGER IF NOT EXISTS albumart_cleanup2 DELETE ON album_art "
-                        "BEGIN "
-                        "SELECT _DELETE_FILE(old._data);"
-                        "END"));
-        }
-
-           // Contains meta data about video files
-        db->ExecSQL(String("CREATE TABLE IF NOT EXISTS video ("
-                    "_id INTEGER PRIMARY KEY,"
-                    "_data TEXT NOT NULL,"
-                    "_display_name TEXT,"
-                    "_size INTEGER,"
-                    "mime_type TEXT,"
-                    "date_added INTEGER,"
-                    "date_modified INTEGER,"
-                    "title TEXT,"
-                    "duration INTEGER,"
-                    "artist TEXT,"
-                    "album TEXT,"
-                    "resolution TEXT,"
-                    "description TEXT,"
-                    "isprivate INTEGER,"   // for YouTube videos
-                    "tags TEXT,"           // for YouTube videos
-                    "category TEXT,"       // for YouTube videos
-                    "language TEXT,"       // for YouTube videos
-                    "mini_thumb_data TEXT,"
-                    "latitude DOUBLE,"
-                    "longitude DOUBLE,"
-                    "datetaken INTEGER,"
-                    "mini_thumb_magic INTEGER"
-                    ");"));
-
-        db->ExecSQL(String("CREATE TRIGGER IF NOT EXISTS video_cleanup DELETE ON video "
                     "BEGIN "
-                    "SELECT _DELETE_FILE(old._data);"
+                        "SELECT _DELETE_FILE(old._data);"
                     "END"));
         }
 
-       // At this point the database is at least at schema version 63 (it was
-       // either created at version 63 by the code above, or was already at
-       // version 63 or later)
+        // Contains meta data about video files
+        db->ExecSQL(String("CREATE TABLE IF NOT EXISTS video ("
+                   "_id INTEGER PRIMARY KEY,"
+                   "_data TEXT NOT NULL,"
+                   "_display_name TEXT,"
+                   "_size INTEGER,"
+                   "mime_type TEXT,"
+                   "date_added INTEGER,"
+                   "date_modified INTEGER,"
+                   "title TEXT,"
+                   "duration INTEGER,"
+                   "artist TEXT,"
+                   "album TEXT,"
+                   "resolution TEXT,"
+                   "description TEXT,"
+                   "isprivate INTEGER,"    // for YouTube videos
+                   "tags TEXT,"            // for YouTube videos
+                   "category TEXT,"        // for YouTube videos
+                   "language TEXT,"        // for YouTube videos
+                   "mini_thumb_data TEXT,"
+                   "latitude DOUBLE,"
+                   "longitude DOUBLE,"
+                   "datetaken INTEGER,"
+                   "mini_thumb_magic INTEGER"
+                   ");"));
 
-        if (fromVersion < 64) {
-            // create the index that updates the database to schema version 64
-            db->ExecSQL(String("CREATE INDEX IF NOT EXISTS sort_index on images(datetaken ASC, _id ASC);"));
-        }
+        db->ExecSQL(String("CREATE TRIGGER IF NOT EXISTS video_cleanup DELETE ON video "
+                "BEGIN "
+                    "SELECT _DELETE_FILE(old._data);"
+                "END"));
+    }
 
-        /*
-        *  Android 1.0 shipped with database version 64
-        */
+    // At this point the database is at least at schema version 63 (it was
+    // either created at version 63 by the code above, or was already at
+    // version 63 or later)
 
-        if (fromVersion < 65) {
-            // create the index that updates the database to schema version 65
-            db->ExecSQL(String("CREATE INDEX IF NOT EXISTS titlekey_index on audio_meta(title_key);"));
-        }
+    if (fromVersion < 64) {
+        // create the index that updates the database to schema version 64
+        db->ExecSQL(String("CREATE INDEX IF NOT EXISTS sort_index on images(datetaken ASC, _id ASC);"));
+    }
 
-        // In version 66, originally we updateBucketNames(db, "images"),
-        // but we need to do it in version 89 and therefore save the update here.//
+    /*
+    *  Android 1.0 shipped with database version 64
+    */
 
-        if (fromVersion < 67) {
-            // create the indices that update the database to schema version 67
-            db->ExecSQL(String("CREATE INDEX IF NOT EXISTS albumkey_index on albums(album_key);"));
-            db->ExecSQL(String("CREATE INDEX IF NOT EXISTS artistkey_index on artists(artist_key);"));
-        }
+    if (fromVersion < 65) {
+        // create the index that updates the database to schema version 65
+        db->ExecSQL(String("CREATE INDEX IF NOT EXISTS titlekey_index on audio_meta(title_key);"));
+    }
 
-        if (fromVersion < 68) {
-            // Create bucket_id and bucket_display_name columns for the video table.
-            db->ExecSQL(String("ALTER TABLE video ADD COLUMN bucket_id TEXT;"));
-            db->ExecSQL(String("ALTER TABLE video ADD COLUMN bucket_display_name TEXT"));//
+    // In version 66, originally we updateBucketNames(db, "images"),
+    // but we need to do it in version 89 and therefore save the update here.//
 
-            // In version 68, originally we updateBucketNames(db, "video"),
-            // but we need to do it in version 89 and therefore save the update here.
-        }
+    if (fromVersion < 67) {
+        // create the indices that update the database to schema version 67
+        db->ExecSQL(String("CREATE INDEX IF NOT EXISTS albumkey_index on albums(album_key);"));
+        db->ExecSQL(String("CREATE INDEX IF NOT EXISTS artistkey_index on artists(artist_key);"));
+    }
 
-        if (fromVersion < 69) {
-            UpdateDisplayName(db, String("images"));
-        }
+    if (fromVersion < 68) {
+        // Create bucket_id and bucket_display_name columns for the video table.
+        db->ExecSQL(String("ALTER TABLE video ADD COLUMN bucket_id TEXT;"));
+        db->ExecSQL(String("ALTER TABLE video ADD COLUMN bucket_display_name TEXT"));//
 
-        if (fromVersion < 70) {
-            // Create bookmark column for the video table.
-            db->ExecSQL(String("ALTER TABLE video ADD COLUMN bookmark INTEGER;"));
-        }
+        // In version 68, originally we updateBucketNames(db, "video"),
+        // but we need to do it in version 89 and therefore save the update here.
+    }
 
-        if (fromVersion < 71) {
-            // There is no change to the database schema, however a code change
-            // fixed parsing of metadata for certain files bought from the
-            // iTunes music store, so we want to rescan files that might need it.
-            // We do this by clearing the modification date in the database for
-            // those files, so that the media scanner will see them as updated
-            // and rescan them.
-            db->ExecSQL(String("UPDATE audio_meta SET date_modified=0 WHERE _id IN ("
-                        "SELECT _id FROM audio where mime_type='audio/mp4' AND "
-                        "artist='") + IMediaStore::UNKNOWN_STRING + String("' AND "
-                        "album='") + IMediaStore::UNKNOWN_STRING + String("'"
-                        ");"));
-        }
+    if (fromVersion < 69) {
+        UpdateDisplayName(db, String("images"));
+    }
 
-        if (fromVersion < 72) {
-            // Create is_podcast and bookmark columns for the audio table.
-            db->ExecSQL(String("ALTER TABLE audio_meta ADD COLUMN is_podcast INTEGER;"));
-            db->ExecSQL(String("UPDATE audio_meta SET is_podcast=1 WHERE _data LIKE '%/podcasts/%';"));
-            db->ExecSQL(String("UPDATE audio_meta SET is_music=0 WHERE is_podcast=1"
-                        " AND _data NOT LIKE '%/music/%';"));
-            db->ExecSQL(String("ALTER TABLE audio_meta ADD COLUMN bookmark INTEGER;"));//
+    if (fromVersion < 70) {
+        // Create bookmark column for the video table.
+        db->ExecSQL(String("ALTER TABLE video ADD COLUMN bookmark INTEGER;"));
+    }
 
-            // New columns added to tables aren't visible in views on those tables
-            // without opening and closing the database (or using the 'vacuum' command,
-            // which we can't do here because all this code runs inside a transaction).
-            // To work around this, we drop and recreate the affected view and trigger.
-            RecreateAudioView(db);
-        }
+    if (fromVersion < 71) {
+        // There is no change to the database schema, however a code change
+        // fixed parsing of metadata for certain files bought from the
+        // iTunes music store, so we want to rescan files that might need it.
+        // We do this by clearing the modification date in the database for
+        // those files, so that the media scanner will see them as updated
+        // and rescan them.
+        sb.Reset();
+        sb += "UPDATE audio_meta SET date_modified=0 WHERE _id IN ("
+                "SELECT _id FROM audio where mime_type='audio/mp4' AND ";
+        sb += "artist='"; sb += IMediaStore::UNKNOWN_STRING; sb += "' AND ";
+        sb += "album='"; sb += IMediaStore::UNKNOWN_STRING; sb += "');";
+        db->ExecSQL(sb.ToString());
+    }
 
-        /*
-        *  Android 1.5 shipped with database version 72
-        */
-        if (fromVersion < 73) {
-            // There is no change to the database schema, but we now do case insensitive
-            // matching of folder names when determining whether something is music, a
-            // ringtone, podcast, etc, so we might need to reclassify some files.
-            db->ExecSQL(String("UPDATE audio_meta SET is_music=1 WHERE is_music=0 AND "
-                        "_data LIKE '%/music/%';"));
-            db->ExecSQL(String("UPDATE audio_meta SET is_ringtone=1 WHERE is_ringtone=0 AND "
-                        "_data LIKE '%/ringtones/%';"));
-            db->ExecSQL(String("UPDATE audio_meta SET is_notification=1 WHERE is_notification=0 AND "
-                        "_data LIKE '%/notifications/%';"));
-            db->ExecSQL(String("UPDATE audio_meta SET is_alarm=1 WHERE is_alarm=0 AND "
-                        "_data LIKE '%/alarms/%';"));
-            db->ExecSQL(String("UPDATE audio_meta SET is_podcast=1 WHERE is_podcast=0 AND "
-                        "_data LIKE '%/podcasts/%';"));
-        }
+    if (fromVersion < 72) {
+        // Create is_podcast and bookmark columns for the audio table.
+        db->ExecSQL(String("ALTER TABLE audio_meta ADD COLUMN is_podcast INTEGER;"));
+        db->ExecSQL(String("UPDATE audio_meta SET is_podcast=1 WHERE _data LIKE '%/podcasts/%';"));
+        db->ExecSQL(String("UPDATE audio_meta SET is_music=0 WHERE is_podcast=1"
+                    " AND _data NOT LIKE '%/music/%';"));
+        db->ExecSQL(String("ALTER TABLE audio_meta ADD COLUMN bookmark INTEGER;"));//
 
-        if (fromVersion < 74) {
-            // This view is used instead of the audio view by the union below, to force
-            // sqlite to use the title_key index. This greatly reduces memory usage
-            // (no separate copy pass needed for sorting, which could cause errors on
-            // large datasets) and improves speed (by about 35% on a large dataset)
-            db->ExecSQL(String("CREATE VIEW IF NOT EXISTS searchhelpertitle AS SELECT * FROM audio "
-                        "ORDER BY title_key;"));//
+        // New columns added to tables aren't visible in views on those tables
+        // without opening and closing the database (or using the 'vacuum' command,
+        // which we can't do here because all this code runs inside a transaction).
+        // To work around this, we drop and recreate the affected view and trigger.
+        RecreateAudioView(db);
+    }
 
-            db->ExecSQL(String("CREATE VIEW IF NOT EXISTS search AS "
-                        "SELECT _id,"
-                        "'artist' AS mime_type,"
-                        "artist,"
-                        "NULL AS album,"
-                        "NULL AS title,"
-                        "artist AS text1,"
-                        "NULL AS text2,"
-                        "number_of_albums AS data1,"
-                        "number_of_tracks AS data2,"
-                        "artist_key AS match,"
-                        "'content://media/external/audio/artists/'||_id AS suggest_intent_data,"
-                        "1 AS grouporder "
-                        "FROM artist_info WHERE (artist!='") + IMediaStore::UNKNOWN_STRING + String("') "
-                        "UNION ALL "
-                        "SELECT _id,"
-                        "'album' AS mime_type,"
-                        "artist,"
-                        "album,"
-                        "NULL AS title,"
-                        "album AS text1,"
-                        "artist AS text2,"
-                        "NULL AS data1,"
-                        "NULL AS data2,"
-                        "artist_key||' '||album_key AS match,"
-                        "'content://media/external/audio/albums/'||_id AS suggest_intent_data,"
-                        "2 AS grouporder "
-                        "FROM album_info WHERE (album!='") + IMediaStore::UNKNOWN_STRING + String("') "
-                        "UNION ALL "
-                        "SELECT searchhelpertitle._id AS _id,"
-                        "mime_type,"
-                        "artist,"
-                        "album,"
-                        "title,"
-                        "title AS text1,"
-                        "artist AS text2,"
-                        "NULL AS data1,"
-                        "NULL AS data2,"
-                        "artist_key||' '||album_key||' '||title_key AS match,"
-                        "'content://media/external/audio/media/'||searchhelpertitle._id AS "
-                        "suggest_intent_data,"
-                        "3 AS grouporder "
-                        "FROM searchhelpertitle WHERE (title != '') "));
-        }
+    /*
+    *  Android 1.5 shipped with database version 72
+    */
+    if (fromVersion < 73) {
+        // There is no change to the database schema, but we now do case insensitive
+        // matching of folder names when determining whether something is music, a
+        // ringtone, podcast, etc, so we might need to reclassify some files.
+        db->ExecSQL(String("UPDATE audio_meta SET is_music=1 WHERE is_music=0 AND "
+                    "_data LIKE '%/music/%';"));
+        db->ExecSQL(String("UPDATE audio_meta SET is_ringtone=1 WHERE is_ringtone=0 AND "
+                    "_data LIKE '%/ringtones/%';"));
+        db->ExecSQL(String("UPDATE audio_meta SET is_notification=1 WHERE is_notification=0 AND "
+                    "_data LIKE '%/notifications/%';"));
+        db->ExecSQL(String("UPDATE audio_meta SET is_alarm=1 WHERE is_alarm=0 AND "
+                    "_data LIKE '%/alarms/%';"));
+        db->ExecSQL(String("UPDATE audio_meta SET is_podcast=1 WHERE is_podcast=0 AND "
+                    "_data LIKE '%/podcasts/%';"));
+    }
 
-        if (fromVersion < 75) {
-            // Force a rescan of the audio entries so we can apply the new logic to
-            // distinguish same-named albums.
-            db->ExecSQL(String("UPDATE audio_meta SET date_modified=0;"));
-            db->ExecSQL(String("DELETE FROM albums"));
-        }
+    if (fromVersion < 74) {
+        // This view is used instead of the audio view by the union below, to force
+        // sqlite to use the title_key index. This greatly reduces memory usage
+        // (no separate copy pass needed for sorting, which could cause errors on
+        // large datasets) and improves speed (by about 35% on a large dataset)
+        db->ExecSQL(String("CREATE VIEW IF NOT EXISTS searchhelpertitle AS SELECT * FROM audio "
+                    "ORDER BY title_key;"));
 
-        if (fromVersion < 76) {
-            // We now ignore double quotes when building the key, so we have to remove all of them
-            // from existing keys.
-            db->ExecSQL(String("UPDATE audio_meta SET title_key="
-                        "REPLACE(title_key,x'081D08C29F081D',x'081D') "
-                        "WHERE title_key LIKE '%'||x'081D08C29F081D'||'%';"));
-            db->ExecSQL(String("UPDATE albums SET album_key="
-                        "REPLACE(album_key,x'081D08C29F081D',x'081D') "
-                        "WHERE album_key LIKE '%'||x'081D08C29F081D'||'%';"));
-            db->ExecSQL(String("UPDATE artists SET artist_key="
-                        "REPLACE(artist_key,x'081D08C29F081D',x'081D') "
-                        "WHERE artist_key LIKE '%'||x'081D08C29F081D'||'%';"));
-       }
+        sb.Reset();
+        sb += "CREATE VIEW IF NOT EXISTS search AS "
+                    "SELECT _id,"
+                    "'artist' AS mime_type,"
+                    "artist,"
+                    "NULL AS album,"
+                    "NULL AS title,"
+                    "artist AS text1,"
+                    "NULL AS text2,"
+                    "number_of_albums AS data1,"
+                    "number_of_tracks AS data2,"
+                    "artist_key AS match,"
+                    "'content://media/external/audio/artists/'||_id AS suggest_intent_data,"
+                    "1 AS grouporder "
+                    "FROM artist_info WHERE (artist!='";
+        sb += IMediaStore::UNKNOWN_STRING; sb += "') ";
+        sb += "UNION ALL "
+                    "SELECT _id,"
+                    "'album' AS mime_type,"
+                    "artist,"
+                    "album,"
+                    "NULL AS title,"
+                    "album AS text1,"
+                    "artist AS text2,"
+                    "NULL AS data1,"
+                    "NULL AS data2,"
+                    "artist_key||' '||album_key AS match,"
+                    "'content://media/external/audio/albums/'||_id AS suggest_intent_data,"
+                    "2 AS grouporder "
+                    "FROM album_info WHERE (album!='";
+        sb += IMediaStore::UNKNOWN_STRING; sb += "') ";
+        sb += "UNION ALL "
+                    "SELECT searchhelpertitle._id AS _id,"
+                    "mime_type,"
+                    "artist,"
+                    "album,"
+                    "title,"
+                    "title AS text1,"
+                    "artist AS text2,"
+                    "NULL AS data1,"
+                    "NULL AS data2,"
+                    "artist_key||' '||album_key||' '||title_key AS match,"
+                    "'content://media/external/audio/media/'||searchhelpertitle._id AS "
+                    "suggest_intent_data,"
+                    "3 AS grouporder "
+                    "FROM searchhelpertitle WHERE (title != '') ";
+        db->ExecSQL(sb.ToString());
+    }
 
-       /*
-        *  Android 1.6 shipped with database version 76
-        */
+    if (fromVersion < 75) {
+        // Force a rescan of the audio entries so we can apply the new logic to
+        // distinguish same-named albums.
+        db->ExecSQL(String("UPDATE audio_meta SET date_modified=0;"));
+        db->ExecSQL(String("DELETE FROM albums"));
+    }
 
-        if (fromVersion < 77) {
-            // create video thumbnail table
-            db->ExecSQL(String("CREATE TABLE IF NOT EXISTS videothumbnails ("
-                        "_id INTEGER PRIMARY KEY,"
-                        "_data TEXT,"
-                        "video_id INTEGER,"
-                        "kind INTEGER,"
-                        "width INTEGER,"
-                        "height INTEGER"
-                        ");"));//
+    if (fromVersion < 76) {
+        // We now ignore double quotes when building the key, so we have to remove all of them
+        // from existing keys.
+        db->ExecSQL(String("UPDATE audio_meta SET title_key="
+                    "REPLACE(title_key,x'081D08C29F081D',x'081D') "
+                    "WHERE title_key LIKE '%'||x'081D08C29F081D'||'%';"));
+        db->ExecSQL(String("UPDATE albums SET album_key="
+                    "REPLACE(album_key,x'081D08C29F081D',x'081D') "
+                    "WHERE album_key LIKE '%'||x'081D08C29F081D'||'%';"));
+        db->ExecSQL(String("UPDATE artists SET artist_key="
+                    "REPLACE(artist_key,x'081D08C29F081D',x'081D') "
+                    "WHERE artist_key LIKE '%'||x'081D08C29F081D'||'%';"));
+   }
 
-            db->ExecSQL(String("CREATE INDEX IF NOT EXISTS video_id_index on videothumbnails(video_id);"));//
+   /*
+    *  Android 1.6 shipped with database version 76
+    */
 
-            db->ExecSQL(String("CREATE TRIGGER IF NOT EXISTS videothumbnails_cleanup DELETE ON videothumbnails "
-                        "BEGIN "
+    if (fromVersion < 77) {
+        // create video thumbnail table
+        db->ExecSQL(String("CREATE TABLE IF NOT EXISTS videothumbnails ("
+                    "_id INTEGER PRIMARY KEY,"
+                    "_data TEXT,"
+                    "video_id INTEGER,"
+                    "kind INTEGER,"
+                    "width INTEGER,"
+                    "height INTEGER"
+                    ");"));
+
+        db->ExecSQL(String("CREATE INDEX IF NOT EXISTS video_id_index on videothumbnails(video_id);"));
+
+        db->ExecSQL(String("CREATE TRIGGER IF NOT EXISTS videothumbnails_cleanup DELETE ON videothumbnails "
+                    "BEGIN "
                         "SELECT _DELETE_FILE(old._data);"
-                        "END"));
-        }
+                    "END"));
+    }
 
-        /*
-        *  Android 2.0 and 2.0.1 shipped with database version 77
-        */
+    /*
+    *  Android 2.0 and 2.0.1 shipped with database version 77
+    */
 
-        if (fromVersion < 78) {
-            // Force a rescan of the video entries so we can update
-            // latest changed DATE_TAKEN units (in milliseconds).
-            db->ExecSQL(String("UPDATE video SET date_modified=0;"));
-        }
+    if (fromVersion < 78) {
+        // Force a rescan of the video entries so we can update
+        // latest changed DATE_TAKEN units (in milliseconds).
+        db->ExecSQL(String("UPDATE video SET date_modified=0;"));
+    }
 
-        /*
-        *  Android 2.1 shipped with database version 78
-        */
+    /*
+    *  Android 2.1 shipped with database version 78
+    */
 
-        if (fromVersion < 79) {
-            // move /sdcard/albumthumbs to
-            // /sdcard/Android/data/com.android.providers.media/albumthumbs,
-            // and update the database accordingly//
+    if (fromVersion < 79) {
+        // move /sdcard/albumthumbs to
+        // /sdcard/Android/data/com.android.providers.media/albumthumbs,
+        // and update the database accordingly//
 
-            String oldthumbspath = (*mExternalStoragePaths)[0] + String("/albumthumbs");
-            String newthumbspath = (*mExternalStoragePaths)[0] + String("/") + ALBUM_THUMB_FOLDER;
-            AutoPtr<IFile> thumbsfolder;
-            CFile::New(oldthumbspath, (IFile**)&thumbsfolder);
-            Boolean flag = FALSE;
-            thumbsfolder->Exists(&flag);
+        sb.Reset();
+        sb += (*mExternalStoragePaths)[0];
+        sb += "/albumthumbs";
+        String oldthumbspath = sb.ToString();
+        AutoPtr<IFile> thumbsfolder;
+        CFile::New(oldthumbspath, (IFile**)&thumbsfolder);
+        Boolean flag = FALSE;
+        thumbsfolder->Exists(&flag);
+        if (flag) {
+            sb.Reset();
+            sb += (*mExternalStoragePaths)[0];
+            sb += "/";
+            sb += ALBUM_THUMB_FOLDER;
+            String newthumbspath = sb.ToString();
+            // move folder to its new location
+            AutoPtr<IFile> newthumbsfolder;
+            CFile::New(newthumbspath, (IFile**)&newthumbsfolder);
+            AutoPtr<IFile> parentFile;
+            newthumbsfolder->GetParentFile((IFile**)&parentFile);
+            parentFile->Mkdirs(&flag);
+            thumbsfolder->RenameTo(newthumbsfolder, &flag);
             if (flag) {
-                // move folder to its new location
-                AutoPtr<IFile> newthumbsfolder;
-                CFile::New(newthumbspath, (IFile**)&newthumbsfolder);
-                AutoPtr<IFile> parentFile;
-                newthumbsfolder->GetParentFile((IFile**)&parentFile);
-                parentFile->Mkdirs(&flag);
-                thumbsfolder->RenameTo(newthumbsfolder, &flag);
-                if(flag) {
-                   // update the database
-                   db->ExecSQL(String("UPDATE album_art SET _data=REPLACE(_data, '") +
-                           oldthumbspath + String("','") + newthumbspath + String("');"));
-                }
+                sb.Reset();
+                sb += "UPDATE album_art SET _data=REPLACE(_data, '";
+                sb += oldthumbspath; sb += "','"; sb += newthumbspath; sb += "');";
+               // update the database
+               db->ExecSQL(sb.ToString());
             }
         }
+    }
 
-        if (fromVersion < 80) {
-            // Force rescan of image entries to update DATE_TAKEN as UTC timestamp.
-            db->ExecSQL(String("UPDATE images SET date_modified=0;"));
+    if (fromVersion < 80) {
+        // Force rescan of image entries to update DATE_TAKEN as UTC timestamp.
+        db->ExecSQL(String("UPDATE images SET date_modified=0;"));
+    }
+
+    if (fromVersion < 81 && !internal) {
+        // Delete entries starting with /mnt/sdcard. This is for the benefit
+        // of users running builds between 2.0.1 and 2.1 final only, since
+        // users updating from 2.0 or earlier will not have such entries.//
+
+        // First we need to update the _data fields in the affected tables, since
+        // otherwise deleting the entries will also delete the underlying files
+        // (via a trigger), and we want to keep them.
+        db->ExecSQL(String("UPDATE audio_playlists SET _data='////' WHERE _data LIKE '/mnt/sdcard/%';"));
+        db->ExecSQL(String("UPDATE images SET _data='////' WHERE _data LIKE '/mnt/sdcard/%';"));
+        db->ExecSQL(String("UPDATE video SET _data='////' WHERE _data LIKE '/mnt/sdcard/%';"));
+        db->ExecSQL(String("UPDATE videothumbnails SET _data='////' WHERE _data LIKE '/mnt/sdcard/%';"));
+        db->ExecSQL(String("UPDATE thumbnails SET _data='////' WHERE _data LIKE '/mnt/sdcard/%';"));
+        db->ExecSQL(String("UPDATE album_art SET _data='////' WHERE _data LIKE '/mnt/sdcard/%';"));
+        db->ExecSQL(String("UPDATE audio_meta SET _data='////' WHERE _data LIKE '/mnt/sdcard/%';"));
+        // Once the paths have been renamed, we can safely delete the entries
+        db->ExecSQL(String("DELETE FROM audio_playlists WHERE _data IS '////';"));
+        db->ExecSQL(String("DELETE FROM images WHERE _data IS '////';"));
+        db->ExecSQL(String("DELETE FROM video WHERE _data IS '////';"));
+        db->ExecSQL(String("DELETE FROM videothumbnails WHERE _data IS '////';"));
+        db->ExecSQL(String("DELETE FROM thumbnails WHERE _data IS '////';"));
+        db->ExecSQL(String("DELETE FROM audio_meta WHERE _data  IS '////';"));
+        db->ExecSQL(String("DELETE FROM album_art WHERE _data  IS '////';"));
+
+        // rename existing entries starting with /sdcard to /mnt/sdcard
+        db->ExecSQL(String("UPDATE audio_meta SET _data='/mnt/sdcard'||SUBSTR(_data,8) WHERE _data LIKE '/sdcard/%';"));
+        db->ExecSQL(String("UPDATE audio_playlists SET _data='/mnt/sdcard'||SUBSTR(_data,8) WHERE _data LIKE '/sdcard/%';"));
+        db->ExecSQL(String("UPDATE images SET _data='/mnt/sdcard'||SUBSTR(_data,8) WHERE _data LIKE '/sdcard/%';"));
+        db->ExecSQL(String("UPDATE video SET _data='/mnt/sdcard'||SUBSTR(_data,8) WHERE _data LIKE '/sdcard/%';"));
+        db->ExecSQL(String("UPDATE videothumbnails SET _data='/mnt/sdcard'||SUBSTR(_data,8) WHERE _data LIKE '/sdcard/%';"));
+        db->ExecSQL(String("UPDATE thumbnails SET _data='/mnt/sdcard'||SUBSTR(_data,8) WHERE _data LIKE '/sdcard/%';"));
+        db->ExecSQL(String("UPDATE album_art SET _data='/mnt/sdcard'||SUBSTR(_data,8) WHERE _data LIKE '/sdcard/%';"));
+
+        // Delete albums and artists, then clear the modification time on songs, which
+        // will cause the media scanner to rescan everything, rebuilding the artist and
+        // album tables along the way, while preserving playlists.
+        // We need this rescan because ICU also changed, and now generates different
+        // collation keys
+        db->ExecSQL(String("DELETE from albums"));
+        db->ExecSQL(String("DELETE from artists"));
+        db->ExecSQL(String("UPDATE audio_meta SET date_modified=0;"));
+    }
+
+    if (fromVersion < 82) {
+        // recreate this view with the correct "group by" specifier
+        db->ExecSQL(String("DROP VIEW IF EXISTS artist_info"));
+        db->ExecSQL(String("CREATE VIEW IF NOT EXISTS artist_info AS "
+                   "SELECT artist_id AS _id, artist, artist_key, "
+                   "COUNT(DISTINCT album_key) AS number_of_albums, "
+                   "COUNT(*) AS number_of_tracks FROM audio WHERE is_music=1 "
+                   "GROUP BY artist_key;"));
+    }
+
+    /* we skipped over version 83, and reverted versions 84, 85 and 86 *///
+
+    if (fromVersion < 87) {
+        // The fastscroll thumb needs an index on the strings being displayed,
+        // otherwise the queries it does to determine the correct position
+        // becomes really inefficient
+        db->ExecSQL(String("CREATE INDEX IF NOT EXISTS title_idx on audio_meta(title);"));
+        db->ExecSQL(String("CREATE INDEX IF NOT EXISTS artist_idx on artists(artist);"));
+        db->ExecSQL(String("CREATE INDEX IF NOT EXISTS album_idx on albums(album);"));
+    }
+
+    if (fromVersion < 88) {
+        // Clean up a few more things from versions 84/85/86, and recreate
+        // the few things worth keeping from those changes.
+        db->ExecSQL(String("DROP TRIGGER IF EXISTS albums_update1;"));
+        db->ExecSQL(String("DROP TRIGGER IF EXISTS albums_update2;"));
+        db->ExecSQL(String("DROP TRIGGER IF EXISTS albums_update3;"));
+        db->ExecSQL(String("DROP TRIGGER IF EXISTS albums_update4;"));
+        db->ExecSQL(String("DROP TRIGGER IF EXISTS artist_update1;"));
+        db->ExecSQL(String("DROP TRIGGER IF EXISTS artist_update2;"));
+        db->ExecSQL(String("DROP TRIGGER IF EXISTS artist_update3;"));
+        db->ExecSQL(String("DROP TRIGGER IF EXISTS artist_update4;"));
+        db->ExecSQL(String("DROP VIEW IF EXISTS album_artists;"));
+        db->ExecSQL(String("CREATE INDEX IF NOT EXISTS album_id_idx on audio_meta(album_id);"));
+        db->ExecSQL(String("CREATE INDEX IF NOT EXISTS artist_id_idx on audio_meta(artist_id);"));
+        // For a given artist_id, provides the album_id for albums on
+        // which the artist appears.
+        db->ExecSQL(String("CREATE VIEW IF NOT EXISTS artists_albums_map AS "
+            "SELECT DISTINCT artist_id, album_id FROM audio_meta;"));
+    }
+
+    // In version 89, originally we updateBucketNames(db, "images") and
+    // updateBucketNames(db, "video"), but in version 101 we now updateBucketNames
+    //  for all files and therefore can save the update here.//
+
+    if (fromVersion < 91) {
+        // Never query by mini_thumb_magic_index
+        db->ExecSQL(String("DROP INDEX IF EXISTS mini_thumb_magic_index"));//
+
+        // sort the items by taken date in each bucket
+        db->ExecSQL(String("CREATE INDEX IF NOT EXISTS image_bucket_index ON images(bucket_id, datetaken)"));
+        db->ExecSQL(String("CREATE INDEX IF NOT EXISTS video_bucket_index ON video(bucket_id, datetaken)"));
+    }
+
+
+    // Gingerbread ended up going to version 100, but didn't yet have the "files"
+    // table, so we need to create that if we're at 100 or lower. This means
+    // we won't be able to upgrade pre-release Honeycomb.
+    if (fromVersion <= 100) {
+        // Remove various stages of work in progress for MTP support
+        db->ExecSQL(String("DROP TABLE IF EXISTS objects"));
+        db->ExecSQL(String("DROP TABLE IF EXISTS files"));
+        db->ExecSQL(String("DROP TRIGGER IF EXISTS images_objects_cleanup;"));
+        db->ExecSQL(String("DROP TRIGGER IF EXISTS audio_objects_cleanup;"));
+        db->ExecSQL(String("DROP TRIGGER IF EXISTS video_objects_cleanup;"));
+        db->ExecSQL(String("DROP TRIGGER IF EXISTS playlists_objects_cleanup;"));
+        db->ExecSQL(String("DROP TRIGGER IF EXISTS files_cleanup_images;"));
+        db->ExecSQL(String("DROP TRIGGER IF EXISTS files_cleanup_audio;"));
+        db->ExecSQL(String("DROP TRIGGER IF EXISTS files_cleanup_video;"));
+        db->ExecSQL(String("DROP TRIGGER IF EXISTS files_cleanup_playlists;"));
+        db->ExecSQL(String("DROP TRIGGER IF EXISTS media_cleanup;"));
+
+        // Create a new table to manage all files in our storage.
+        // This contains a union of all the columns from the old
+        // images, audio_meta, videos and audio_playlist tables.
+        db->ExecSQL(String("CREATE TABLE files ("
+                    "_id INTEGER PRIMARY KEY AUTOINCREMENT,"
+                    "_data TEXT,"     // this can be null for playlists
+                    "_size INTEGER,"
+                    "format INTEGER,"
+                    "parent INTEGER,"
+                    "date_added INTEGER,"
+                    "date_modified INTEGER,"
+                    "mime_type TEXT,"
+                    "title TEXT,"
+                    "description TEXT,"
+                    "_display_name TEXT,"
+
+                    // for images
+                    "picasa_id TEXT,"
+                    "orientation INTEGER,"
+
+                    // for images and video
+                    "latitude DOUBLE,"
+                    "longitude DOUBLE,"
+                    "datetaken INTEGER,"
+                    "mini_thumb_magic INTEGER,"
+                    "bucket_id TEXT,"
+                    "bucket_display_name TEXT,"
+                    "isprivate INTEGER,"
+
+                    // for audio
+                    "title_key TEXT,"
+                    "artist_id INTEGER,"
+                    "album_id INTEGER,"
+                    "composer TEXT,"
+                    "track INTEGER,"
+                    "year INTEGER CHECK(year!=0),"
+                    "is_ringtone INTEGER,"
+                    "is_music INTEGER,"
+                    "is_alarm INTEGER,"
+                    "is_notification INTEGER,"
+                    "is_podcast INTEGER,"
+                    "album_artist TEXT,"
+
+                    // for audio and video
+                    "duration INTEGER,"
+                    "bookmark INTEGER,"
+
+                    // for video
+                    "artist TEXT,"
+                    "album TEXT,"
+                    "resolution TEXT,"
+                    "tags TEXT,"
+                    "category TEXT,"
+                    "language TEXT,"
+                    "mini_thumb_data TEXT,"
+
+                    // for playlists
+                    "name TEXT,"
+
+                    // media_type is used by the views to emulate the old
+                    // images, audio_meta, videos and audio_playlist tables.
+                    "media_type INTEGER,"
+
+                    // Value of _id from the old media table.
+                    // Used only for updating other tables during database upgrade.
+                    "old_id INTEGER"
+                    ");"));
+
+        db->ExecSQL(String("CREATE INDEX path_index ON files(_data);"));
+        db->ExecSQL(String("CREATE INDEX media_type_index ON files(media_type);"));//
+
+        // Copy all data from our obsolete tables to the new files table//
+
+        // Copy audio records first, preserving the _id column.
+        // We do this to maintain compatibility for content Uris for ringtones.
+        // Unfortunately we cannot do this for images and videos as well.
+        // We choose to do this for the audio table because the fragility of Uris
+        // for ringtones are the most common problem we need to avoid.
+        sb.Reset();
+        sb += "INSERT INTO files (_id,"; sb += AUDIO_COLUMNSv99;
+        sb += ",old_id,media_type) SELECT _id,"; sb += AUDIO_COLUMNSv99;
+        sb += ",_id,"; sb += IMediaStoreFilesFileColumns::MEDIA_TYPE_AUDIO;
+        sb += " FROM audio_meta;";
+        db->ExecSQL(sb.ToString());
+
+        sb.Reset();
+        sb += "INSERT INTO files (_id,"; sb += IMAGE_COLUMNSv407;
+        sb += ",old_id,media_type) SELECT "; sb += IMAGE_COLUMNSv407;
+        sb += ",_id,"; sb += IMediaStoreFilesFileColumns::MEDIA_TYPE_IMAGE;
+        sb += " FROM images;";
+        db->ExecSQL(sb.ToString());
+
+        sb.Reset();
+        sb += "INSERT INTO files (_id,"; sb += VIDEO_COLUMNSv407;
+        sb += ",old_id,media_type) SELECT "; sb += VIDEO_COLUMNSv407;
+        sb += ",_id,"; sb += IMediaStoreFilesFileColumns::MEDIA_TYPE_VIDEO;
+        sb += " FROM video;";
+        db->ExecSQL(sb.ToString());
+
+        if (!internal) {
+            sb.Reset();
+            sb += "INSERT INTO files (_id,"; sb += PLAYLIST_COLUMNS;
+            sb += ",old_id,media_type) SELECT "; sb += PLAYLIST_COLUMNS;
+            sb += ",_id,"; sb += IMediaStoreFilesFileColumns::MEDIA_TYPE_PLAYLIST;
+            sb += " FROM audio_playlists;";
+            db->ExecSQL(sb.ToString());
         }
 
-        if (fromVersion < 81 && !internal) {
-            // Delete entries starting with /mnt/sdcard. This is for the benefit
-            // of users running builds between 2.0.1 and 2.1 final only, since
-            // users updating from 2.0 or earlier will not have such entries.//
+        // Delete the old tables
+        db->ExecSQL(String("DROP TABLE IF EXISTS images"));
+        db->ExecSQL(String("DROP TABLE IF EXISTS audio_meta"));
+        db->ExecSQL(String("DROP TABLE IF EXISTS video"));
+        db->ExecSQL(String("DROP TABLE IF EXISTS audio_playlists"));
 
-            // First we need to update the _data fields in the affected tables, since
-            // otherwise deleting the entries will also delete the underlying files
-            // (via a trigger), and we want to keep them.
-            db->ExecSQL(String("UPDATE audio_playlists SET _data='////' WHERE _data LIKE '/mnt/sdcard/%';"));
-            db->ExecSQL(String("UPDATE images SET _data='////' WHERE _data LIKE '/mnt/sdcard/%';"));
-            db->ExecSQL(String("UPDATE video SET _data='////' WHERE _data LIKE '/mnt/sdcard/%';"));
-            db->ExecSQL(String("UPDATE videothumbnails SET _data='////' WHERE _data LIKE '/mnt/sdcard/%';"));
-            db->ExecSQL(String("UPDATE thumbnails SET _data='////' WHERE _data LIKE '/mnt/sdcard/%';"));
-            db->ExecSQL(String("UPDATE album_art SET _data='////' WHERE _data LIKE '/mnt/sdcard/%';"));
-            db->ExecSQL(String("UPDATE audio_meta SET _data='////' WHERE _data LIKE '/mnt/sdcard/%';"));
-            // Once the paths have been renamed, we can safely delete the entries
-            db->ExecSQL(String("DELETE FROM audio_playlists WHERE _data IS '////';"));
-            db->ExecSQL(String("DELETE FROM images WHERE _data IS '////';"));
-            db->ExecSQL(String("DELETE FROM video WHERE _data IS '////';"));
-            db->ExecSQL(String("DELETE FROM videothumbnails WHERE _data IS '////';"));
-            db->ExecSQL(String("DELETE FROM thumbnails WHERE _data IS '////';"));
-            db->ExecSQL(String("DELETE FROM audio_meta WHERE _data  IS '////';"));
-            db->ExecSQL(String("DELETE FROM album_art WHERE _data  IS '////';"));
+        // Create views to replace our old tables
+        sb.Reset();
+        sb += "CREATE VIEW images AS SELECT _id,"; sb += IMAGE_COLUMNSv407;
+        sb += " FROM files WHERE "; sb += IMediaStoreFilesFileColumns::MEDIA_TYPE; sb += "=";
+        sb += IMediaStoreFilesFileColumns::MEDIA_TYPE_IMAGE; sb += ";";
+        db->ExecSQL(sb.ToString());
 
-            // rename existing entries starting with /sdcard to /mnt/sdcard
-            db->ExecSQL(String("UPDATE audio_meta SET _data='/mnt/sdcard'||SUBSTR(_data,8) WHERE _data LIKE '/sdcard/%';"));
-            db->ExecSQL(String("UPDATE audio_playlists SET _data='/mnt/sdcard'||SUBSTR(_data,8) WHERE _data LIKE '/sdcard/%';"));
-            db->ExecSQL(String("UPDATE images SET _data='/mnt/sdcard'||SUBSTR(_data,8) WHERE _data LIKE '/sdcard/%';"));
-            db->ExecSQL(String("UPDATE video SET _data='/mnt/sdcard'||SUBSTR(_data,8) WHERE _data LIKE '/sdcard/%';"));
-            db->ExecSQL(String("UPDATE videothumbnails SET _data='/mnt/sdcard'||SUBSTR(_data,8) WHERE _data LIKE '/sdcard/%';"));
-            db->ExecSQL(String("UPDATE thumbnails SET _data='/mnt/sdcard'||SUBSTR(_data,8) WHERE _data LIKE '/sdcard/%';"));
-            db->ExecSQL(String("UPDATE album_art SET _data='/mnt/sdcard'||SUBSTR(_data,8) WHERE _data LIKE '/sdcard/%';"));
+        sb.Reset();
+        sb += "CREATE VIEW audio_meta AS SELECT _id,"; sb += AUDIO_COLUMNSv100;
+        sb += " FROM files WHERE "; sb += IMediaStoreFilesFileColumns::MEDIA_TYPE; sb += "=";
+        sb += IMediaStoreFilesFileColumns::MEDIA_TYPE_AUDIO; sb += ";";
+        db->ExecSQL(sb.ToString());
 
-            // Delete albums and artists, then clear the modification time on songs, which
-            // will cause the media scanner to rescan everything, rebuilding the artist and
-            // album tables along the way, while preserving playlists.
-            // We need this rescan because ICU also changed, and now generates different
-            // collation keys
-            db->ExecSQL(String("DELETE from albums"));
-            db->ExecSQL(String("DELETE from artists"));
-            db->ExecSQL(String("UPDATE audio_meta SET date_modified=0;"));
+        sb.Reset();
+        sb += "CREATE VIEW video AS SELECT _id,"; sb += VIDEO_COLUMNSv407;
+        sb += " FROM files WHERE "; sb += IMediaStoreFilesFileColumns::MEDIA_TYPE; sb += "=";
+        sb += IMediaStoreFilesFileColumns::MEDIA_TYPE_VIDEO; sb += ";";
+        db->ExecSQL(sb.ToString());
+
+        if (!internal) {
+            sb.Reset();
+            sb += "CREATE VIEW audio_playlists AS SELECT _id,"; sb += PLAYLIST_COLUMNS;
+            sb += " FROM files WHERE "; sb += IMediaStoreFilesFileColumns::MEDIA_TYPE; sb += "=";
+            sb += IMediaStoreFilesFileColumns::MEDIA_TYPE_PLAYLIST; sb += ";";
+            db->ExecSQL(sb.ToString());
         }
 
-        if (fromVersion < 82) {
-            // recreate this view with the correct "group by" specifier
-            db->ExecSQL(String("DROP VIEW IF EXISTS artist_info"));
-            db->ExecSQL(String("CREATE VIEW IF NOT EXISTS artist_info AS "
-                       "SELECT artist_id AS _id, artist, artist_key, "
-                       "COUNT(DISTINCT album_key) AS number_of_albums, "
-                       "COUNT(*) AS number_of_tracks FROM audio WHERE is_music=1 "
-                       "GROUP BY artist_key;"));
+        // create temporary index to make the updates go faster
+        db->ExecSQL(String("CREATE INDEX tmp ON files(old_id);"));//
+
+        // update the image_id column in the thumbnails table.
+        sb.Reset();
+        sb += "UPDATE thumbnails SET image_id = (SELECT _id FROM files "
+                "WHERE files.old_id = thumbnails.image_id AND files.media_type = ";
+        sb += IMediaStoreFilesFileColumns::MEDIA_TYPE_IMAGE; sb += ");";
+        db->ExecSQL(sb.ToString());
+
+        if (!internal) {
+            // update audio_id in the audio_genres_map table, and
+            // audio_playlists_map tables and playlist_id in the audio_playlists_map table
+            sb.Reset();
+            sb += "UPDATE audio_genres_map SET audio_id = (SELECT _id FROM files "
+                    "WHERE files.old_id = audio_genres_map.audio_id "
+                    "AND files.media_type = ";
+            sb += IMediaStoreFilesFileColumns::MEDIA_TYPE_AUDIO; sb += ");";
+            db->ExecSQL(sb.ToString());
+
+            sb.Reset();
+            sb += "UPDATE audio_playlists_map SET audio_id = (SELECT _id FROM files "
+                    "WHERE files.old_id = audio_playlists_map.audio_id "
+                    "AND files.media_type = ";
+            sb += IMediaStoreFilesFileColumns::MEDIA_TYPE_AUDIO; sb += ");";
+            db->ExecSQL(sb.ToString());
+
+            sb.Reset();
+            sb += "UPDATE audio_playlists_map SET playlist_id = (SELECT _id FROM files "
+                    "WHERE files.old_id = audio_playlists_map.playlist_id "
+                    "AND files.media_type = ";
+            sb += IMediaStoreFilesFileColumns::MEDIA_TYPE_PLAYLIST; sb += ");";
+            db->ExecSQL(sb.ToString());
         }
 
-        /* we skipped over version 83, and reverted versions 84, 85 and 86 *///
+        // update video_id in the videothumbnails table.
+        sb.Reset();
+        sb += "UPDATE videothumbnails SET video_id = (SELECT _id FROM files "
+                "WHERE files.old_id = videothumbnails.video_id AND files.media_type = ";
+        sb += IMediaStoreFilesFileColumns::MEDIA_TYPE_VIDEO; sb += ");";
+        db->ExecSQL(sb.ToString());
 
-        if (fromVersion < 87) {
-            // The fastscroll thumb needs an index on the strings being displayed,
-            // otherwise the queries it does to determine the correct position
-            // becomes really inefficient
-            db->ExecSQL(String("CREATE INDEX IF NOT EXISTS title_idx on audio_meta(title);"));
-            db->ExecSQL(String("CREATE INDEX IF NOT EXISTS artist_idx on artists(artist);"));
-            db->ExecSQL(String("CREATE INDEX IF NOT EXISTS album_idx on albums(album);"));
+        // we don't need this index anymore now
+        db->ExecSQL(String("DROP INDEX tmp;"));
+
+        // update indices to work on the files table
+        db->ExecSQL(String("DROP INDEX IF EXISTS title_idx"));
+        db->ExecSQL(String("DROP INDEX IF EXISTS album_id_idx"));
+        db->ExecSQL(String("DROP INDEX IF EXISTS image_bucket_index"));
+        db->ExecSQL(String("DROP INDEX IF EXISTS video_bucket_index"));
+        db->ExecSQL(String("DROP INDEX IF EXISTS sort_index"));
+        db->ExecSQL(String("DROP INDEX IF EXISTS titlekey_index"));
+        db->ExecSQL(String("DROP INDEX IF EXISTS artist_id_idx"));
+        db->ExecSQL(String("CREATE INDEX title_idx ON files(title);"));
+        db->ExecSQL(String("CREATE INDEX album_id_idx ON files(album_id);"));
+        db->ExecSQL(String("CREATE INDEX bucket_index ON files(bucket_id, datetaken);"));
+        db->ExecSQL(String("CREATE INDEX sort_index ON files(datetaken ASC, _id ASC);"));
+        db->ExecSQL(String("CREATE INDEX titlekey_index ON files(title_key);"));
+        db->ExecSQL(String("CREATE INDEX artist_id_idx ON files(artist_id);"));
+
+        // Recreate triggers for our obsolete tables on the new files table
+        db->ExecSQL(String("DROP TRIGGER IF EXISTS images_cleanup"));
+        db->ExecSQL(String("DROP TRIGGER IF EXISTS audio_meta_cleanup"));
+        db->ExecSQL(String("DROP TRIGGER IF EXISTS video_cleanup"));
+        db->ExecSQL(String("DROP TRIGGER IF EXISTS audio_playlists_cleanup"));
+        db->ExecSQL(String("DROP TRIGGER IF EXISTS audio_delete"));
+
+        sb.Reset();
+        sb += "CREATE TRIGGER IF NOT EXISTS images_cleanup DELETE ON files "
+                "WHEN old.media_type = "; sb += IMediaStoreFilesFileColumns::MEDIA_TYPE_IMAGE;
+        sb +=   " BEGIN "
+                    "DELETE FROM thumbnails WHERE image_id = old._id;"
+                    "SELECT _DELETE_FILE(old._data);"
+                "END";
+        db->ExecSQL(sb.ToString());
+
+        sb.Reset();
+        sb += "CREATE TRIGGER IF NOT EXISTS video_cleanup DELETE ON files "
+                "WHEN old.media_type = "; sb += IMediaStoreFilesFileColumns::MEDIA_TYPE_VIDEO;
+        sb += " BEGIN SELECT _DELETE_FILE(old._data);END";
+        db->ExecSQL(sb.ToString());
+
+
+        if (!internal) {
+            sb.Reset();
+            sb += "CREATE TRIGGER IF NOT EXISTS audio_meta_cleanup DELETE ON files "
+                    "WHEN old.media_type = "; sb += IMediaStoreFilesFileColumns::MEDIA_TYPE_AUDIO;
+            sb +=   " BEGIN "
+                        "DELETE FROM audio_genres_map WHERE audio_id = old._id;"
+                        "DELETE FROM audio_playlists_map WHERE audio_id = old._id;"
+                    "END";
+            db->ExecSQL(sb.ToString());
+
+            sb.Reset();
+            sb += "CREATE TRIGGER IF NOT EXISTS audio_playlists_cleanup DELETE ON files "
+                    "WHEN old.media_type = "; sb += IMediaStoreFilesFileColumns::MEDIA_TYPE_PLAYLIST;
+            sb +=   " BEGIN "
+                        "DELETE FROM audio_playlists_map WHERE playlist_id = old._id;"
+                        "SELECT _DELETE_FILE(old._data);"
+                    "END";
+            db->ExecSQL(sb.ToString());
+
+            db->ExecSQL(String("CREATE TRIGGER IF NOT EXISTS audio_delete INSTEAD OF DELETE ON audio "
+                "BEGIN "
+                    "DELETE from files where _id=old._id;"
+                    "DELETE from audio_playlists_map where audio_id=old._id;"
+                    "DELETE from audio_genres_map where audio_id=old._id;"
+                "END"));
         }
+    }
 
-        if (fromVersion < 88) {
-            // Clean up a few more things from versions 84/85/86, and recreate
-            // the few things worth keeping from those changes.
-            db->ExecSQL(String("DROP TRIGGER IF EXISTS albums_update1;"));
-            db->ExecSQL(String("DROP TRIGGER IF EXISTS albums_update2;"));
-            db->ExecSQL(String("DROP TRIGGER IF EXISTS albums_update3;"));
-            db->ExecSQL(String("DROP TRIGGER IF EXISTS albums_update4;"));
-            db->ExecSQL(String("DROP TRIGGER IF EXISTS artist_update1;"));
-            db->ExecSQL(String("DROP TRIGGER IF EXISTS artist_update2;"));
-            db->ExecSQL(String("DROP TRIGGER IF EXISTS artist_update3;"));
-            db->ExecSQL(String("DROP TRIGGER IF EXISTS artist_update4;"));
-            db->ExecSQL(String("DROP VIEW IF EXISTS album_artists;"));
-            db->ExecSQL(String("CREATE INDEX IF NOT EXISTS album_id_idx on audio_meta(album_id);"));
-            db->ExecSQL(String("CREATE INDEX IF NOT EXISTS artist_id_idx on audio_meta(artist_id);"));
-            // For a given artist_id, provides the album_id for albums on
-            // which the artist appears.
-            db->ExecSQL(String("CREATE VIEW IF NOT EXISTS artists_albums_map AS SELECT DISTINCT artist_id, album_id FROM audio_meta;"));
-        }
+    if (fromVersion < 301) {
+        db->ExecSQL(String("DROP INDEX IF EXISTS bucket_index"));
+        db->ExecSQL(String("CREATE INDEX bucket_index on files(bucket_id, media_type, datetaken, _id)"));
+        db->ExecSQL(String("CREATE INDEX bucket_name on files(bucket_id, media_type, bucket_display_name)"));
+    }
 
-        // In version 89, originally we updateBucketNames(db, "images") and
-        // updateBucketNames(db, "video"), but in version 101 we now updateBucketNames
-        //  for all files and therefore can save the update here.//
+    if (fromVersion < 302) {
+        db->ExecSQL(String("CREATE INDEX parent_index ON files(parent);"));
+        db->ExecSQL(String("CREATE INDEX format_index ON files(format);"));
+    }
 
-        if (fromVersion < 91) {
-            // Never query by mini_thumb_magic_index
-            db->ExecSQL(String("DROP INDEX IF EXISTS mini_thumb_magic_index"));//
+    if (fromVersion < 303) {
+        // the album disambiguator hash changed, so rescan songs and force
+        // albums to be updated. Artists are unaffected.
+        db->ExecSQL(String("DELETE from albums"));
 
-            // sort the items by taken date in each bucket
-            db->ExecSQL(String("CREATE INDEX IF NOT EXISTS image_bucket_index ON images(bucket_id, datetaken)"));
-            db->ExecSQL(String("CREATE INDEX IF NOT EXISTS video_bucket_index ON video(bucket_id, datetaken)"));
-        }
+        sb.Reset();
+        sb += "UPDATE files SET date_modified=0 WHERE ";
+        sb += IMediaStoreFilesFileColumns::MEDIA_TYPE; sb += "=";
+        sb += IMediaStoreFilesFileColumns::MEDIA_TYPE_AUDIO; sb += ";";
+        db->ExecSQL(sb.ToString());
+    }
 
+    if (fromVersion < 304 && !internal) {
+       // notifies host when files are deleted
+        db->ExecSQL(String("CREATE TRIGGER IF NOT EXISTS files_cleanup DELETE ON files "
+                    "BEGIN "
+                        "SELECT _OBJECT_REMOVED(old._id);"
+                    "END"));
 
-        // Gingerbread ended up going to version 100, but didn't yet have the "files"
-        // table, so we need to create that if we're at 100 or lower. This means
-        // we won't be able to upgrade pre-release Honeycomb.
-        if (fromVersion <= 100) {
-            // Remove various stages of work in progress for MTP support
-            db->ExecSQL(String("DROP TABLE IF EXISTS objects"));
-            db->ExecSQL(String("DROP TABLE IF EXISTS files"));
-            db->ExecSQL(String("DROP TRIGGER IF EXISTS images_objects_cleanup;"));
-            db->ExecSQL(String("DROP TRIGGER IF EXISTS audio_objects_cleanup;"));
-            db->ExecSQL(String("DROP TRIGGER IF EXISTS video_objects_cleanup;"));
-            db->ExecSQL(String("DROP TRIGGER IF EXISTS playlists_objects_cleanup;"));
-            db->ExecSQL(String("DROP TRIGGER IF EXISTS files_cleanup_images;"));
-            db->ExecSQL(String("DROP TRIGGER IF EXISTS files_cleanup_audio;"));
-            db->ExecSQL(String("DROP TRIGGER IF EXISTS files_cleanup_video;"));
-            db->ExecSQL(String("DROP TRIGGER IF EXISTS files_cleanup_playlists;"));
-            db->ExecSQL(String("DROP TRIGGER IF EXISTS media_cleanup;"));
+    }
 
-            // Create a new table to manage all files in our storage.
-            // This contains a union of all the columns from the old
-            // images, audio_meta, videos and audio_playlist tables.
-            db->ExecSQL(String("CREATE TABLE files ("
-                        "_id INTEGER PRIMARY KEY AUTOINCREMENT,"
-                        "_data TEXT,"     // this can be null for playlists
-                        "_size INTEGER,"
-                        "format INTEGER,"
-                        "parent INTEGER,"
-                        "date_added INTEGER,"
-                        "date_modified INTEGER,"
-                        "mime_type TEXT,"
-                        "title TEXT,"
-                        "description TEXT,"
-                        "_display_name TEXT,"
+    if (fromVersion < 305 && internal) {
+        // version 304 erroneously added this trigger to the internal database
+        db->ExecSQL(String("DROP TRIGGER IF EXISTS files_cleanup"));
+    }
 
-                        // for images
-                        "picasa_id TEXT,"
-                        "orientation INTEGER,"
+    if (fromVersion < 306 && !internal) {
+        // The genre list was expanded and genre string parsing was tweaked, so
+        // rebuild the genre list
+        sb.Reset();
+        sb += "UPDATE files SET date_modified=0 WHERE ";
+        sb += IMediaStoreFilesFileColumns::MEDIA_TYPE; sb += "=";
+        sb += IMediaStoreFilesFileColumns::MEDIA_TYPE_AUDIO; sb += ";";
+        db->ExecSQL(sb.ToString());
+        db->ExecSQL(String("DELETE FROM audio_genres_map"));
+        db->ExecSQL(String("DELETE FROM audio_genres"));
+    }
 
-                        // for images and video
-                        "latitude DOUBLE,"
-                        "longitude DOUBLE,"
-                        "datetaken INTEGER,"
-                        "mini_thumb_magic INTEGER,"
-                        "bucket_id TEXT,"
-                        "bucket_display_name TEXT,"
-                        "isprivate INTEGER,"
+    if (fromVersion < 307 && !internal) {
+        // Force rescan of image entries to update DATE_TAKEN by either GPSTimeStamp or
+        // EXIF local time.
+        sb.Reset();
+        sb += "UPDATE files SET date_modified=0 WHERE ";
+        sb += IMediaStoreFilesFileColumns::MEDIA_TYPE; sb += "=";
+        sb += IMediaStoreFilesFileColumns::MEDIA_TYPE_IMAGE; sb += ";";
+        db->ExecSQL(sb.ToString());
+    }
 
-                        // for audio
-                        "title_key TEXT,"
-                        "artist_id INTEGER,"
-                        "album_id INTEGER,"
-                        "composer TEXT,"
-                        "track INTEGER,"
-                        "year INTEGER CHECK(year!=0),"
-                        "is_ringtone INTEGER,"
-                        "is_music INTEGER,"
-                        "is_alarm INTEGER,"
-                        "is_notification INTEGER,"
-                        "is_podcast INTEGER,"
-                        "album_artist TEXT,"
+    // Honeycomb went up to version 307, ICS started at 401//
 
-                        // for audio and video
-                        "duration INTEGER,"
-                        "bookmark INTEGER,"
+    // Database version 401 did not add storage_id to the internal database.
+    // We need it there too, so add it in version 402
+    if (fromVersion < 401 || (fromVersion == 401 && internal)) {
+        // Add column for MTP storage ID
+        db->ExecSQL(String("ALTER TABLE files ADD COLUMN storage_id INTEGER;"));
+        // Anything in the database before this upgrade step will be in the primary storage
+        Int32 storageId;
+        AutoPtr<IMtpStorageHelper> msh;
+        CMtpStorageHelper::AcquireSingleton((IMtpStorageHelper**)&msh);
+        msh->GetStorageId(0, &storageId);
+        sb.Reset();
+        sb += "UPDATE files SET storage_id="; sb += storageId; sb += ";";
+        db->ExecSQL(sb.ToString());
+    }
 
-                        // for video
-                        "artist TEXT,"
-                        "album TEXT,"
-                        "resolution TEXT,"
-                        "tags TEXT,"
-                        "category TEXT,"
-                        "language TEXT,"
-                        "mini_thumb_data TEXT,"
+    if (fromVersion < 403 && !internal) {
+        db->ExecSQL(String("CREATE VIEW audio_genres_map_noid AS "
+                    "SELECT audio_id,genre_id from audio_genres_map;"));
+    }
 
-                        // for playlists
-                        "name TEXT,"
+    if (fromVersion < 404) {
+        // There was a bug that could cause distinct same-named albums to be
+        // combined again. Delete albums and force a rescan.
+        db->ExecSQL(String("DELETE from albums"));
+        sb.Reset();
+        sb += "UPDATE files SET date_modified=0 WHERE ";
+        sb += IMediaStoreFilesFileColumns::MEDIA_TYPE; sb += "=";
+        sb += IMediaStoreFilesFileColumns::MEDIA_TYPE_AUDIO; sb += ";";
+        db->ExecSQL(sb.ToString());
+    }
 
-                        // media_type is used by the views to emulate the old
-                        // images, audio_meta, videos and audio_playlist tables.
-                        "media_type INTEGER,"
+    if (fromVersion < 405) {
+        // Add is_drm column.
+        db->ExecSQL(String("ALTER TABLE files ADD COLUMN is_drm INTEGER;"));
+        db->ExecSQL(String("DROP VIEW IF EXISTS audio_meta"));
+        sb.Reset();
+        sb += "CREATE VIEW audio_meta AS SELECT _id,"; sb += AUDIO_COLUMNSv405;
+        sb += " FROM files WHERE "; sb += IMediaStoreFilesFileColumns::MEDIA_TYPE; sb += "=";
+        sb += IMediaStoreFilesFileColumns::MEDIA_TYPE_AUDIO; sb += ";";
+        db->ExecSQL(sb.ToString());
+        RecreateAudioView(db);
+    }
 
-                        // Value of _id from the old media table.
-                        // Used only for updating other tables during database upgrade.
-                        "old_id INTEGER"
-                        ");"));
+    if (fromVersion < 407) {
+        // Rescan files in the media database because a new column has been added
+        // in table files in version 405 and to recover from problems populating
+        // the genre tables
+        db->ExecSQL(String("UPDATE files SET date_modified=0;"));
+    }
 
-            db->ExecSQL(String("CREATE INDEX path_index ON files(_data);"));
-            db->ExecSQL(String("CREATE INDEX media_type_index ON files(media_type);"));//
+    if (fromVersion < 408) {
+        // Add the width/height columns for images and video
+        db->ExecSQL(String("ALTER TABLE files ADD COLUMN width INTEGER;"));
+        db->ExecSQL(String("ALTER TABLE files ADD COLUMN height INTEGER;"));//
 
-            // Copy all data from our obsolete tables to the new files table//
+        // Rescan files to fill the columns
+        db->ExecSQL(String("UPDATE files SET date_modified=0;"));//
 
-            // Copy audio records first, preserving the _id column.
-            // We do this to maintain compatibility for content Uris for ringtones.
-            // Unfortunately we cannot do this for images and videos as well.
-            // We choose to do this for the audio table because the fragility of Uris
-            // for ringtones are the most common problem we need to avoid.
-            db->ExecSQL(String("INSERT INTO files (_id,") + AUDIO_COLUMNSv99 + String(",old_id,media_type)") +
-                        String(" SELECT _id,") + AUDIO_COLUMNSv99 + String(",_id,") + IMediaStoreFilesFileColumns::MEDIA_TYPE_AUDIO +
-                        String(" FROM audio_meta;"));
+        // Update images and video views to contain the width/height columns
+        db->ExecSQL(String("DROP VIEW IF EXISTS images"));
+        db->ExecSQL(String("DROP VIEW IF EXISTS video"));
+        sb.Reset();
+        sb += "CREATE VIEW images AS SELECT _id,"; sb += IMAGE_COLUMNS;
+        sb += " FROM files WHERE "; sb += IMediaStoreFilesFileColumns::MEDIA_TYPE; sb += "=";
+        sb += IMediaStoreFilesFileColumns::MEDIA_TYPE_IMAGE; sb += ";";
+        db->ExecSQL(sb.ToString());
 
-            db->ExecSQL(String("INSERT INTO files (") + IMAGE_COLUMNSv407 + String(",old_id,media_type) SELECT ")
-                   + IMAGE_COLUMNSv407 + String(",_id,") + IMediaStoreFilesFileColumns::MEDIA_TYPE_IMAGE + String(" FROM images;"));
-            db->ExecSQL(String("INSERT INTO files (") + VIDEO_COLUMNSv407 + String(",old_id,media_type) SELECT ")
-                   + VIDEO_COLUMNSv407 + String(",_id,") + IMediaStoreFilesFileColumns::MEDIA_TYPE_VIDEO + String(" FROM video;"));
-            if (!internal) {
-                db->ExecSQL(String("INSERT INTO files (") + PLAYLIST_COLUMNS + String(",old_id,media_type) SELECT ")
-                       + PLAYLIST_COLUMNS + String(",_id,") + IMediaStoreFilesFileColumns::MEDIA_TYPE_PLAYLIST
-                       + String(" FROM audio_playlists;"));
-            }
+        sb.Reset();
+        sb += "CREATE VIEW video AS SELECT _id,"; sb += VIDEO_COLUMNS;
+        sb += " FROM files WHERE "; sb += IMediaStoreFilesFileColumns::MEDIA_TYPE; sb += "=";
+        sb += IMediaStoreFilesFileColumns::MEDIA_TYPE_VIDEO; sb += ";";
+        db->ExecSQL(sb.ToString());
+    }
 
-            // Delete the old tables
-            db->ExecSQL(String("DROP TABLE IF EXISTS images"));
-            db->ExecSQL(String("DROP TABLE IF EXISTS audio_meta"));
-            db->ExecSQL(String("DROP TABLE IF EXISTS video"));
-            db->ExecSQL(String("DROP TABLE IF EXISTS audio_playlists"));//
+    if (fromVersion < 409 && !internal) {
+        // A bug that prevented numeric genres from being parsed was fixed, so
+        // rebuild the genre list
+        sb.Reset();
+        sb += "UPDATE files SET date_modified=0 WHERE ";
+        sb += IMediaStoreFilesFileColumns::MEDIA_TYPE; sb += "=";
+        sb += IMediaStoreFilesFileColumns::MEDIA_TYPE_AUDIO; sb += ";";
+        db->ExecSQL(sb.ToString());
 
-            // Create views to replace our old tables
-            db->ExecSQL(String("CREATE VIEW images AS SELECT _id,") + IMAGE_COLUMNSv407 +
-                        String(" FROM files WHERE ") + IMediaStoreFilesFileColumns::MEDIA_TYPE + String("=")
-                        + IMediaStoreFilesFileColumns::MEDIA_TYPE_IMAGE + String(";"));
-            db->ExecSQL(String("CREATE VIEW audio_meta AS SELECT _id,") + AUDIO_COLUMNSv100 +
-                        String(" FROM files WHERE ") + IMediaStoreFilesFileColumns::MEDIA_TYPE + String("=")
-                        + IMediaStoreFilesFileColumns::MEDIA_TYPE_AUDIO + String(";"));
-            db->ExecSQL(String("CREATE VIEW video AS SELECT _id,") + VIDEO_COLUMNSv407 +
-                        String(" FROM files WHERE ") + IMediaStoreFilesFileColumns::MEDIA_TYPE + String("=")
-                        + IMediaStoreFilesFileColumns::MEDIA_TYPE_VIDEO + String(";"));
-            if (!internal) {
-                db->ExecSQL(String("CREATE VIEW audio_playlists AS SELECT _id,") + PLAYLIST_COLUMNS +
-                            String(" FROM files WHERE ") + IMediaStoreFilesFileColumns::MEDIA_TYPE + String("=")
-                            + IMediaStoreFilesFileColumns::MEDIA_TYPE_PLAYLIST + String(";"));
-            }
+        db->ExecSQL(String("DELETE FROM audio_genres_map"));
+        db->ExecSQL(String("DELETE FROM audio_genres"));
+    }
 
-            // create temporary index to make the updates go faster
-            db->ExecSQL(String("CREATE INDEX tmp ON files(old_id);"));//
+    // ICS went out with database version 409, JB started at 500//
 
-            // update the image_id column in the thumbnails table.
-            db->ExecSQL(String("UPDATE thumbnails SET image_id = (SELECT _id FROM files ")
-                        + String("WHERE files.old_id = thumbnails.image_id AND files.media_type = ")
-                        + IMediaStoreFilesFileColumns::MEDIA_TYPE_IMAGE + String(");"));//
+    if (fromVersion < 500) {
+        // we're now deleting the file in mediaprovider code, rather than via a trigger
+        db->ExecSQL(String("DROP TRIGGER IF EXISTS videothumbnails_cleanup;"));
+    }
 
-            if (!internal) {
-                // update audio_id in the audio_genres_map table, and
-                // audio_playlists_map tables and playlist_id in the audio_playlists_map table
-                db->ExecSQL(String("UPDATE audio_genres_map SET audio_id = (SELECT _id FROM files ")
-                            + String("WHERE files.old_id = audio_genres_map.audio_id AND files.media_type = ")
-                            + IMediaStoreFilesFileColumns::MEDIA_TYPE_AUDIO + String(");"));
-                db->ExecSQL(String("UPDATE audio_playlists_map SET audio_id = (SELECT _id FROM files ")
-                            + String("WHERE files.old_id = audio_playlists_map.audio_id ")
-                            + String("AND files.media_type = ") + IMediaStoreFilesFileColumns::MEDIA_TYPE_AUDIO + String(");"));
-                db->ExecSQL(String("UPDATE audio_playlists_map SET playlist_id = (SELECT _id FROM files ")
-                            + String("WHERE files.old_id = audio_playlists_map.playlist_id ")
-                            + String("AND files.media_type = ") + IMediaStoreFilesFileColumns::MEDIA_TYPE_PLAYLIST + String(");"));
-            }
+    if (fromVersion < 501) {
+        // we're now deleting the file in mediaprovider code, rather than via a trigger
+        // the images_cleanup trigger would delete the image file and the entry
+        // in the thumbnail table, which in turn would trigger thumbnails_cleanup
+        // to delete the thumbnail image
+        db->ExecSQL(String("DROP TRIGGER IF EXISTS images_cleanup;"));
+        db->ExecSQL(String("DROP TRIGGER IF EXISTS thumbnails_cleanup;"));
+    }
 
-            // update video_id in the videothumbnails table.
-            db->ExecSQL(String("UPDATE videothumbnails SET video_id = (SELECT _id FROM files ")
-                       + String("WHERE files.old_id = videothumbnails.video_id AND files.media_type = ")
-                       + IMediaStoreFilesFileColumns::MEDIA_TYPE_VIDEO + String(");"));//
+    if (fromVersion < 502) {
+        // we're now deleting the file in mediaprovider code, rather than via a trigger
+        db->ExecSQL(String("DROP TRIGGER IF EXISTS video_cleanup;"));
+    }
 
-            // we don't need this index anymore now
-            db->ExecSQL(String("DROP INDEX tmp;"));
+    if (fromVersion < 503) {
+        // genre and playlist cleanup now done in mediaprovider code, instead of in a trigger
+        db->ExecSQL(String("DROP TRIGGER IF EXISTS audio_delete"));
+        db->ExecSQL(String("DROP TRIGGER IF EXISTS audio_meta_cleanup"));
+    }
 
-            // update indices to work on the files table
-            db->ExecSQL(String("DROP INDEX IF EXISTS title_idx"));
-            db->ExecSQL(String("DROP INDEX IF EXISTS album_id_idx"));
-            db->ExecSQL(String("DROP INDEX IF EXISTS image_bucket_index"));
-            db->ExecSQL(String("DROP INDEX IF EXISTS video_bucket_index"));
-            db->ExecSQL(String("DROP INDEX IF EXISTS sort_index"));
-            db->ExecSQL(String("DROP INDEX IF EXISTS titlekey_index"));
-            db->ExecSQL(String("DROP INDEX IF EXISTS artist_id_idx"));
-            db->ExecSQL(String("CREATE INDEX title_idx ON files(title);"));
-            db->ExecSQL(String("CREATE INDEX album_id_idx ON files(album_id);"));
-            db->ExecSQL(String("CREATE INDEX bucket_index ON files(bucket_id, datetaken);"));
-            db->ExecSQL(String("CREATE INDEX sort_index ON files(datetaken ASC, _id ASC);"));
-            db->ExecSQL(String("CREATE INDEX titlekey_index ON files(title_key);"));
-            db->ExecSQL(String("CREATE INDEX artist_id_idx ON files(artist_id);"));
+    if (fromVersion < 504) {
+        // add an index to help with case-insensitive matching of paths
+        db->ExecSQL(String("CREATE INDEX IF NOT EXISTS path_index_lower ON files(_data COLLATE NOCASE);"));
+    }
 
-            // Recreate triggers for our obsolete tables on the new files table
-            db->ExecSQL(String("DROP TRIGGER IF EXISTS images_cleanup"));
-            db->ExecSQL(String("DROP TRIGGER IF EXISTS audio_meta_cleanup"));
-            db->ExecSQL(String("DROP TRIGGER IF EXISTS video_cleanup"));
-            db->ExecSQL(String("DROP TRIGGER IF EXISTS audio_playlists_cleanup"));
-            db->ExecSQL(String("DROP TRIGGER IF EXISTS audio_delete"));
+    if (fromVersion < 505) {
+        // Starting with schema 505 we fill in the width/height/resolution columns for videos,
+        // so force a rescan of videos to fill in the blanks
+        sb.Reset();
+        sb += "UPDATE files SET date_modified=0 WHERE ";
+        sb += IMediaStoreFilesFileColumns::MEDIA_TYPE; sb += "=";
+        sb += IMediaStoreFilesFileColumns::MEDIA_TYPE_VIDEO; sb += ";";
+        db->ExecSQL(sb.ToString());
+    }
 
-            db->ExecSQL(String("CREATE TRIGGER IF NOT EXISTS images_cleanup DELETE ON files ") +
-                        String("WHEN old.media_type = ") + IMediaStoreFilesFileColumns::MEDIA_TYPE_IMAGE + " " +
-                        String("BEGIN ") +
-                        "DELETE FROM thumbnails WHERE image_id = old._id;" +
-                        "SELECT _DELETE_FILE(old._data);" + "END");//
+    if (fromVersion < 506) {
+        // sd card storage got moved to /storage/sdcard0
+        // first delete everything that already got scanned in /storage before this
+        // update step was added
+        db->ExecSQL(String("DROP TRIGGER IF EXISTS files_cleanup"));
+        db->ExecSQL(String("DELETE FROM files WHERE _data LIKE '/storage/%';"));
+        db->ExecSQL(String("DELETE FROM album_art WHERE _data LIKE '/storage/%';"));
+        db->ExecSQL(String("DELETE FROM thumbnails WHERE _data LIKE '/storage/%';"));
+        db->ExecSQL(String("DELETE FROM videothumbnails WHERE _data LIKE '/storage/%';"));
+        // then rename everything from /mnt/sdcard/ to /storage/sdcard0,
+        // and from /mnt/external1 to /storage/sdcard1
+        db->ExecSQL(String("UPDATE files SET _data='/storage/sdcard0'||SUBSTR(_data,12) WHERE _data LIKE '/mnt/sdcard/%';"));
+        db->ExecSQL(String("UPDATE files SET _data='/storage/sdcard1'||SUBSTR(_data,15) WHERE _data LIKE '/mnt/external1/%';"));
+        db->ExecSQL(String("UPDATE album_art SET _data='/storage/sdcard0'||SUBSTR(_data,12) WHERE _data LIKE '/mnt/sdcard/%';"));
+        db->ExecSQL(String("UPDATE album_art SET _data='/storage/sdcard1'||SUBSTR(_data,15) WHERE _data LIKE '/mnt/external1/%';"));
+        db->ExecSQL(String("UPDATE thumbnails SET _data='/storage/sdcard0'||SUBSTR(_data,12) WHERE _data LIKE '/mnt/sdcard/%';"));
+        db->ExecSQL(String("UPDATE thumbnails SET _data='/storage/sdcard1'||SUBSTR(_data,15) WHERE _data LIKE '/mnt/external1/%';"));
+        db->ExecSQL(String("UPDATE videothumbnails SET _data='/storage/sdcard0'||SUBSTR(_data,12) WHERE _data LIKE '/mnt/sdcard/%';"));
+        db->ExecSQL(String("UPDATE videothumbnails SET _data='/storage/sdcard1'||SUBSTR(_data,15) WHERE _data LIKE '/mnt/external1/%';"));//
 
-            db->ExecSQL(String("CREATE TRIGGER IF NOT EXISTS video_cleanup DELETE ON files ") +
-                        "WHEN old.media_type = " + IMediaStoreFilesFileColumns::MEDIA_TYPE_VIDEO + " " +
-                        "BEGIN " + "SELECT _DELETE_FILE(old._data);" + "END");
-
-            if (!internal) {
-                db->ExecSQL(String("CREATE TRIGGER IF NOT EXISTS audio_meta_cleanup DELETE ON files ") +
-                        "WHEN old.media_type = " + IMediaStoreFilesFileColumns::MEDIA_TYPE_AUDIO + " " +
-                        "BEGIN " +
-                        "DELETE FROM audio_genres_map WHERE audio_id = old._id;" +
-                        "DELETE FROM audio_playlists_map WHERE audio_id = old._id;" +
-                        "END");
-
-                db->ExecSQL(String("CREATE TRIGGER IF NOT EXISTS audio_playlists_cleanup DELETE ON files ") +
-                        "WHEN old.media_type = " + IMediaStoreFilesFileColumns::MEDIA_TYPE_PLAYLIST + " " +
-                        "BEGIN " +
-                        "DELETE FROM audio_playlists_map WHERE playlist_id = old._id;" +
-                        "SELECT _DELETE_FILE(old._data);" +
-                        "END");
-
-                db->ExecSQL(String("CREATE TRIGGER IF NOT EXISTS audio_delete INSTEAD OF DELETE ON audio "
-                        "BEGIN "
-                        "DELETE from files where _id=old._id;"
-                        "DELETE from audio_playlists_map where audio_id=old._id;"
-                        "DELETE from audio_genres_map where audio_id=old._id;"
-                        "END"));
-            }
-        }
-
-        if (fromVersion < 301) {
-            db->ExecSQL(String("DROP INDEX IF EXISTS bucket_index"));
-            db->ExecSQL(String("CREATE INDEX bucket_index on files(bucket_id, media_type, datetaken, _id)"));
-            db->ExecSQL(String("CREATE INDEX bucket_name on files(bucket_id, media_type, bucket_display_name)"));
-        }
-
-        if (fromVersion < 302) {
-            db->ExecSQL(String("CREATE INDEX parent_index ON files(parent);"));
-            db->ExecSQL(String("CREATE INDEX format_index ON files(format);"));
-        }
-
-        if (fromVersion < 303) {
-            // the album disambiguator hash changed, so rescan songs and force
-            // albums to be updated. Artists are unaffected.
-            db->ExecSQL(String("DELETE from albums"));
-            db->ExecSQL(String("UPDATE files SET date_modified=0 WHERE ") + IMediaStoreFilesFileColumns::MEDIA_TYPE + "="
-                        + IMediaStoreFilesFileColumns::MEDIA_TYPE_AUDIO + ";");
-        }
-
-        if (fromVersion < 304 && !internal) {
-           // notifies host when files are deleted
+        if (!internal) {
             db->ExecSQL(String("CREATE TRIGGER IF NOT EXISTS files_cleanup DELETE ON files "
                         "BEGIN "
-                        "SELECT _OBJECT_REMOVED(old._id);"
-                        "END"));
-
-        }
-
-        if (fromVersion < 305 && internal) {
-            // version 304 erroneously added this trigger to the internal database
-            db->ExecSQL(String("DROP TRIGGER IF EXISTS files_cleanup"));
-        }
-
-        if (fromVersion < 306 && !internal) {
-            // The genre list was expanded and genre string parsing was tweaked, so
-            // rebuild the genre list
-            db->ExecSQL(String("UPDATE files SET date_modified=0 WHERE ") + IMediaStoreFilesFileColumns::MEDIA_TYPE + "="
-                        + IMediaStoreFilesFileColumns::MEDIA_TYPE_AUDIO + ";");
-            db->ExecSQL(String("DELETE FROM audio_genres_map"));
-            db->ExecSQL(String("DELETE FROM audio_genres"));
-        }
-
-        if (fromVersion < 307 && !internal) {
-            // Force rescan of image entries to update DATE_TAKEN by either GPSTimeStamp or
-            // EXIF local time.
-            db->ExecSQL(String("UPDATE files SET date_modified=0 WHERE ") + IMediaStoreFilesFileColumns::MEDIA_TYPE + "="
-                        + IMediaStoreFilesFileColumns::MEDIA_TYPE_IMAGE + ";");
-        }
-
-        // Honeycomb went up to version 307, ICS started at 401//
-
-        // Database version 401 did not add storage_id to the internal database.
-        // We need it there too, so add it in version 402
-        if (fromVersion < 401 || (fromVersion == 401 && internal)) {
-            // Add column for MTP storage ID
-            db->ExecSQL(String("ALTER TABLE files ADD COLUMN storage_id INTEGER;"));
-            // Anything in the database before this upgrade step will be in the primary storage
-            Int32 storageId;
-            AutoPtr<IMtpStorageHelper> msh;
-            CMtpStorageHelper::AcquireSingleton((IMtpStorageHelper**)&msh);
-            msh->GetStorageId(0, &storageId);
-            db->ExecSQL(String("UPDATE files SET storage_id=") + storageId + ";");
-        }
-
-        if (fromVersion < 403 && !internal) {
-            db->ExecSQL(String("CREATE VIEW audio_genres_map_noid AS ") +
-                        "SELECT audio_id,genre_id from audio_genres_map;");
-        }
-
-        if (fromVersion < 404) {
-            // There was a bug that could cause distinct same-named albums to be
-            // combined again. Delete albums and force a rescan.
-            db->ExecSQL(String("DELETE from albums"));
-            db->ExecSQL(String("UPDATE files SET date_modified=0 WHERE ") + IMediaStoreFilesFileColumns::MEDIA_TYPE + "="
-                        + IMediaStoreFilesFileColumns::MEDIA_TYPE_AUDIO + ";");
-        }
-
-        if (fromVersion < 405) {
-            // Add is_drm column.
-            db->ExecSQL(String("ALTER TABLE files ADD COLUMN is_drm INTEGER;"));//
-
-            db->ExecSQL(String("DROP VIEW IF EXISTS audio_meta"));
-            db->ExecSQL(String("CREATE VIEW audio_meta AS SELECT _id,") + AUDIO_COLUMNSv405 +
-                       " FROM files WHERE " + IMediaStoreFilesFileColumns::MEDIA_TYPE + "="
-                       + IMediaStoreFilesFileColumns::MEDIA_TYPE_AUDIO + ";");//
-            RecreateAudioView(db);
-        }
-
-        if (fromVersion < 407) {
-            // Rescan files in the media database because a new column has been added
-            // in table files in version 405 and to recover from problems populating
-            // the genre tables
-            db->ExecSQL(String("UPDATE files SET date_modified=0;"));
-        }
-
-        if (fromVersion < 408) {
-            // Add the width/height columns for images and video
-            db->ExecSQL(String("ALTER TABLE files ADD COLUMN width INTEGER;"));
-            db->ExecSQL(String("ALTER TABLE files ADD COLUMN height INTEGER;"));//
-
-            // Rescan files to fill the columns
-            db->ExecSQL(String("UPDATE files SET date_modified=0;"));//
-
-            // Update images and video views to contain the width/height columns
-            db->ExecSQL(String("DROP VIEW IF EXISTS images"));
-            db->ExecSQL(String("DROP VIEW IF EXISTS video"));
-            db->ExecSQL(String("CREATE VIEW images AS SELECT _id,") + IMAGE_COLUMNS +
-                       " FROM files WHERE " + IMediaStoreFilesFileColumns::MEDIA_TYPE + "="
-                       + IMediaStoreFilesFileColumns::MEDIA_TYPE_IMAGE + ";");
-            db->ExecSQL(String("CREATE VIEW video AS SELECT _id,") + VIDEO_COLUMNS +
-                       " FROM files WHERE " + IMediaStoreFilesFileColumns::MEDIA_TYPE + "="
-                       + IMediaStoreFilesFileColumns::MEDIA_TYPE_VIDEO + ";");
-        }
-
-        if (fromVersion < 409 && !internal) {
-            // A bug that prevented numeric genres from being parsed was fixed, so
-            // rebuild the genre list
-            db->ExecSQL(String("UPDATE files SET date_modified=0 WHERE ") + IMediaStoreFilesFileColumns::MEDIA_TYPE + "="
-                   + IMediaStoreFilesFileColumns::MEDIA_TYPE_AUDIO + ";");
-            db->ExecSQL(String("DELETE FROM audio_genres_map"));
-            db->ExecSQL(String("DELETE FROM audio_genres"));
-        }
-
-        // ICS went out with database version 409, JB started at 500//
-
-        if (fromVersion < 500) {
-            // we're now deleting the file in mediaprovider code, rather than via a trigger
-            db->ExecSQL(String("DROP TRIGGER IF EXISTS videothumbnails_cleanup;"));
-        }
-        if (fromVersion < 501) {
-            // we're now deleting the file in mediaprovider code, rather than via a trigger
-            // the images_cleanup trigger would delete the image file and the entry
-            // in the thumbnail table, which in turn would trigger thumbnails_cleanup
-            // to delete the thumbnail image
-            db->ExecSQL(String("DROP TRIGGER IF EXISTS images_cleanup;"));
-            db->ExecSQL(String("DROP TRIGGER IF EXISTS thumbnails_cleanup;"));
-        }
-        if (fromVersion < 502) {
-            // we're now deleting the file in mediaprovider code, rather than via a trigger
-            db->ExecSQL(String("DROP TRIGGER IF EXISTS video_cleanup;"));
-        }
-        if (fromVersion < 503) {
-            // genre and playlist cleanup now done in mediaprovider code, instead of in a trigger
-            db->ExecSQL(String("DROP TRIGGER IF EXISTS audio_delete"));
-            db->ExecSQL(String("DROP TRIGGER IF EXISTS audio_meta_cleanup"));
-        }
-        if (fromVersion < 504) {
-            // add an index to help with case-insensitive matching of paths
-            db->ExecSQL(String(
-                        "CREATE INDEX IF NOT EXISTS path_index_lower ON files(_data COLLATE NOCASE);"));
-        }
-        if (fromVersion < 505) {
-            // Starting with schema 505 we fill in the width/height/resolution columns for videos,
-            // so force a rescan of videos to fill in the blanks
-            db->ExecSQL(String("UPDATE files SET date_modified=0 WHERE ") + IMediaStoreFilesFileColumns::MEDIA_TYPE + "="
-                   + IMediaStoreFilesFileColumns::MEDIA_TYPE_VIDEO + ";");
-        }
-        if (fromVersion < 506) {
-            // sd card storage got moved to /storage/sdcard0
-            // first delete everything that already got scanned in /storage before this
-            // update step was added
-            db->ExecSQL(String("DROP TRIGGER IF EXISTS files_cleanup"));
-            db->ExecSQL(String("DELETE FROM files WHERE _data LIKE '/storage/%';"));
-            db->ExecSQL(String("DELETE FROM album_art WHERE _data LIKE '/storage/%';"));
-            db->ExecSQL(String("DELETE FROM thumbnails WHERE _data LIKE '/storage/%';"));
-            db->ExecSQL(String("DELETE FROM videothumbnails WHERE _data LIKE '/storage/%';"));
-            // then rename everything from /mnt/sdcard/ to /storage/sdcard0,
-            // and from /mnt/external1 to /storage/sdcard1
-            db->ExecSQL(String("UPDATE files SET _data='/storage/sdcard0'||SUBSTR(_data,12) WHERE _data LIKE '/mnt/sdcard/%';"));
-            db->ExecSQL(String("UPDATE files SET _data='/storage/sdcard1'||SUBSTR(_data,15) WHERE _data LIKE '/mnt/external1/%';"));
-            db->ExecSQL(String("UPDATE album_art SET _data='/storage/sdcard0'||SUBSTR(_data,12) WHERE _data LIKE '/mnt/sdcard/%';"));
-            db->ExecSQL(String("UPDATE album_art SET _data='/storage/sdcard1'||SUBSTR(_data,15) WHERE _data LIKE '/mnt/external1/%';"));
-            db->ExecSQL(String("UPDATE thumbnails SET _data='/storage/sdcard0'||SUBSTR(_data,12) WHERE _data LIKE '/mnt/sdcard/%';"));
-            db->ExecSQL(String("UPDATE thumbnails SET _data='/storage/sdcard1'||SUBSTR(_data,15) WHERE _data LIKE '/mnt/external1/%';"));
-            db->ExecSQL(String("UPDATE videothumbnails SET _data='/storage/sdcard0'||SUBSTR(_data,12) WHERE _data LIKE '/mnt/sdcard/%';"));
-            db->ExecSQL(String("UPDATE videothumbnails SET _data='/storage/sdcard1'||SUBSTR(_data,15) WHERE _data LIKE '/mnt/external1/%';"));//
-
-            if (!internal) {
-                db->ExecSQL(String("CREATE TRIGGER IF NOT EXISTS files_cleanup DELETE ON files "
-                            "BEGIN "
                             "SELECT _OBJECT_REMOVED(old._id);"
-                            "END"));
-            }
+                        "END"));
         }
-        if (fromVersion < 507) {
-            // we update _data in version 506, we need to update the bucket_id as well
-            UpdateBucketNames(db);
+    }
+
+    if (fromVersion < 507) {
+        // we update _data in version 506, we need to update the bucket_id as well
+        UpdateBucketNames(db);
+    }
+
+    if (fromVersion < 508 && !internal) {
+        // ensure we don't get duplicate entries in the genre map
+        db->ExecSQL(String("CREATE TABLE IF NOT EXISTS audio_genres_map_tmp ("
+                    "_id INTEGER PRIMARY KEY,"
+                    "audio_id INTEGER NOT NULL,"
+                    "genre_id INTEGER NOT NULL,"
+                    "UNIQUE (audio_id,genre_id) ON CONFLICT IGNORE"
+                    ");"));
+        db->ExecSQL(String("INSERT INTO audio_genres_map_tmp (audio_id,genre_id)"
+                    " SELECT DISTINCT audio_id,genre_id FROM audio_genres_map;"));
+       db->ExecSQL(String("DROP TABLE audio_genres_map;"));
+       db->ExecSQL(String("ALTER TABLE audio_genres_map_tmp RENAME TO audio_genres_map;"));
+    }
+
+    if (fromVersion < 509) {
+        db->ExecSQL(String("CREATE TABLE IF NOT EXISTS log (time DATETIME PRIMARY KEY, message TEXT);"));
+    }
+
+    // Emulated external storage moved to user-specific paths
+    if (fromVersion < 510 && Environment::IsExternalStorageEmulated()) {
+        // File.fixSlashes() removes any trailing slashes
+        AutoPtr<IFile> file = Environment::GetExternalStorageDirectory();
+        String externalStorage;
+        file->ToString(&externalStorage);;
+        Logger::D(TAG, "Adjusting external storage paths to: %s", externalStorage.string());//
+
+        AutoPtr<ArrayOf<String> > tables = ArrayOf<String>::Alloc(4);
+        (*tables)[0] = TABLE_FILES;
+        (*tables)[1] = TABLE_ALBUM_ART;
+        (*tables)[2] = TABLE_THUMBNAILS;
+        (*tables)[3] = TABLE_VIDEO_THUMBNAILS;
+        for (Int32 i = 0; i <= 3; i++) {
+            sb.Reset();
+            sb += "UPDATE"; sb += (*tables)[i]; sb += " SET _data='"; sb += externalStorage;
+            sb += "'||SUBSTR(_data,17) WHERE _data LIKE '/storage/sdcard0/%';";
+            db->ExecSQL(sb.ToString());
         }
+    }
 
-        if (fromVersion < 508 && !internal) {
-            // ensure we don't get duplicate entries in the genre map
-            db->ExecSQL(String("CREATE TABLE IF NOT EXISTS audio_genres_map_tmp ("
-                        "_id INTEGER PRIMARY KEY,"
-                        "audio_id INTEGER NOT NULL,"
-                        "genre_id INTEGER NOT NULL,"
-                        "UNIQUE (audio_id,genre_id) ON CONFLICT IGNORE"
-                        ");"));
-            db->ExecSQL(String("INSERT INTO audio_genres_map_tmp (audio_id,genre_id)"
-                        " SELECT DISTINCT audio_id,genre_id FROM audio_genres_map;"));
-           db->ExecSQL(String("DROP TABLE audio_genres_map;"));
-           db->ExecSQL(String("ALTER TABLE audio_genres_map_tmp RENAME TO audio_genres_map;"));
+    if (fromVersion < 511) {
+        // we update _data in version 510, we need to update the bucket_id as well
+        UpdateBucketNames(db);
+    }
+
+    // JB 4.2 went out with database version 511, starting next release with 600//
+
+    if (fromVersion < 600) {
+        // modify _data column to be unique and collate nocase. Because this drops the original
+        // table and replaces it with a new one by the same name, we need to also recreate all
+        // indices and triggers that refer to the files table.
+        // Views don't need to be recreated.//
+        sb.Reset();
+        sb += "CREATE TABLE files2 (_id INTEGER PRIMARY KEY AUTOINCREMENT,"
+                    "_data TEXT UNIQUE";
+        // the internal filesystem is case-sensitive
+        sb += internal ? "," : " COLLATE NOCASE,";
+        sb += "_size INTEGER,format INTEGER,parent INTEGER,date_added INTEGER,"
+                "date_modified INTEGER,mime_type TEXT,title TEXT,description TEXT,"
+                "_display_name TEXT,picasa_id TEXT,orientation INTEGER,latitude DOUBLE,"
+                "longitude DOUBLE,datetaken INTEGER,mini_thumb_magic INTEGER,bucket_id TEXT,"
+                "bucket_display_name TEXT,isprivate INTEGER,title_key TEXT,artist_id INTEGER,"
+                "album_id INTEGER,composer TEXT,track INTEGER,year INTEGER CHECK(year!=0),"
+                "is_ringtone INTEGER,is_music INTEGER,is_alarm INTEGER,"
+                "is_notification INTEGER,is_podcast INTEGER,album_artist TEXT,"
+                "duration INTEGER,bookmark INTEGER,artist TEXT,album TEXT,resolution TEXT,"
+                "tags TEXT,category TEXT,language TEXT,mini_thumb_data TEXT,name TEXT,"
+                "media_type INTEGER,old_id INTEGER,storage_id INTEGER,is_drm INTEGER,"
+                "width INTEGER, height INTEGER);";
+        db->ExecSQL(sb.ToString());
+
+        // copy data from old table, squashing entries with duplicate _data
+        db->ExecSQL(String("INSERT OR REPLACE INTO files2 SELECT * FROM files;"));
+        db->ExecSQL(String("DROP TABLE files;"));
+        db->ExecSQL(String("ALTER TABLE files2 RENAME TO files;"));//
+
+        // recreate indices and triggers
+        db->ExecSQL(String("CREATE INDEX album_id_idx ON files(album_id);"));
+        db->ExecSQL(String("CREATE INDEX artist_id_idx ON files(artist_id);"));
+        db->ExecSQL(String("CREATE INDEX bucket_index on files(bucket_id,media_type,"
+                    "datetaken, _id);"));
+        db->ExecSQL(String("CREATE INDEX bucket_name on files(bucket_id,media_type,"
+                    "bucket_display_name);"));
+        db->ExecSQL(String("CREATE INDEX format_index ON files(format);"));
+        db->ExecSQL(String("CREATE INDEX media_type_index ON files(media_type);"));
+        db->ExecSQL(String("CREATE INDEX parent_index ON files(parent);"));
+        db->ExecSQL(String("CREATE INDEX path_index ON files(_data);"));
+        db->ExecSQL(String("CREATE INDEX sort_index ON files(datetaken ASC, _id ASC);"));
+        db->ExecSQL(String("CREATE INDEX title_idx ON files(title);"));
+        db->ExecSQL(String("CREATE INDEX titlekey_index ON files(title_key);"));
+        if (!internal) {
+            db->ExecSQL(String("CREATE TRIGGER audio_playlists_cleanup DELETE ON files"
+                        " WHEN old.media_type=4"
+                        " BEGIN DELETE FROM audio_playlists_map WHERE playlist_id = old._id;"
+                        "SELECT _DELETE_FILE(old._data);END;"));
+           db->ExecSQL(String("CREATE TRIGGER files_cleanup DELETE ON files"
+                        " BEGIN SELECT _OBJECT_REMOVED(old._id);END;"));
         }
+    }
 
-        if (fromVersion < 509) {
-            db->ExecSQL(String("CREATE TABLE IF NOT EXISTS log (time DATETIME PRIMARY KEY, message TEXT);"));
-        }
+    if (fromVersion < 601) {
+        // remove primary key constraint because column time is not necessarily unique
+        db->ExecSQL(String("CREATE TABLE IF NOT EXISTS log_tmp (time DATETIME, message TEXT);"));
+        db->ExecSQL(String("DELETE FROM log_tmp;"));
+        db->ExecSQL(String("INSERT INTO log_tmp SELECT time, message FROM log order by rowid;"));
+        db->ExecSQL(String("DROP TABLE log;"));
+        db->ExecSQL(String("ALTER TABLE log_tmp RENAME TO log;"));
+    }
 
-        // Emulated external storage moved to user-specific paths
-        if (fromVersion < 510 && Environment::IsExternalStorageEmulated()) {
-            // File.fixSlashes() removes any trailing slashes
-            AutoPtr<IFile> file = Environment::GetExternalStorageDirectory();
-            String externalStorage;
-            file->ToString(&externalStorage);;
-            Logger::D(TAG, "Adjusting external storage paths to: %s", externalStorage.string());//
+    if (fromVersion < 700) {
+        // fix datetaken fields that were added with an incorrect timestamp
+        // datetaken needs to be in milliseconds, so should generally be a few orders of
+        // magnitude larger than date_modified. If it's within the same order of magnitude, it
+        // is probably wrong.
+        // (this could do the wrong thing if your picture was actually taken before ~3/21/1970)
+        db->ExecSQL(String("UPDATE files set datetaken=date_modified*1000"
+                    " WHERE date_modified IS NOT NULL"
+                    " AND datetaken IS NOT NULL"
+                    " AND datetaken<date_modified*5;"));
+   }
 
-            AutoPtr<ArrayOf<String> > tables = ArrayOf<String>::Alloc(4);
-            (*tables)[0] = TABLE_FILES;
-            (*tables)[1] = TABLE_ALBUM_ART;
-            (*tables)[2] = TABLE_THUMBNAILS;
-            (*tables)[3] = TABLE_VIDEO_THUMBNAILS;
-            for (Int32 i = 0; i <= 3; i++) {
-                db->ExecSQL(String("UPDATE ") + (*tables)[i] + " SET " + "_data='" + externalStorage
-                            + "'||SUBSTR(_data,17) WHERE _data LIKE '/storage/sdcard0/%';");
-            }
-        }
-        if (fromVersion < 511) {
-            // we update _data in version 510, we need to update the bucket_id as well
-            UpdateBucketNames(db);
-        }
+   SanityCheck(db, fromVersion);
 
-        // JB 4.2 went out with database version 511, starting next release with 600//
-
-        if (fromVersion < 600) {
-            // modify _data column to be unique and collate nocase. Because this drops the original
-            // table and replaces it with a new one by the same name, we need to also recreate all
-            // indices and triggers that refer to the files table.
-            // Views don't need to be recreated.//
-
-            db->ExecSQL(String("CREATE TABLE files2 (_id INTEGER PRIMARY KEY AUTOINCREMENT,") +
-                        "_data TEXT UNIQUE" +
-                        // the internal filesystem is case-sensitive
-                        (internal ? String(",") : String(" COLLATE NOCASE,")) +
-                        "_size INTEGER,format INTEGER,parent INTEGER,date_added INTEGER,"
-                        "date_modified INTEGER,mime_type TEXT,title TEXT,description TEXT,"
-                        "_display_name TEXT,picasa_id TEXT,orientation INTEGER,latitude DOUBLE,"
-                        "longitude DOUBLE,datetaken INTEGER,mini_thumb_magic INTEGER,bucket_id TEXT,"
-                        "bucket_display_name TEXT,isprivate INTEGER,title_key TEXT,artist_id INTEGER,"
-                        "album_id INTEGER,composer TEXT,track INTEGER,year INTEGER CHECK(year!=0),"
-                        "is_ringtone INTEGER,is_music INTEGER,is_alarm INTEGER,"
-                        "is_notification INTEGER,is_podcast INTEGER,album_artist TEXT,"
-                        "duration INTEGER,bookmark INTEGER,artist TEXT,album TEXT,resolution TEXT,"
-                        "tags TEXT,category TEXT,language TEXT,mini_thumb_data TEXT,name TEXT,"
-                        "media_type INTEGER,old_id INTEGER,storage_id INTEGER,is_drm INTEGER,"
-                        "width INTEGER, height INTEGER);");
-
-            // copy data from old table, squashing entries with duplicate _data
-            db->ExecSQL(String("INSERT OR REPLACE INTO files2 SELECT * FROM files;"));
-            db->ExecSQL(String("DROP TABLE files;"));
-            db->ExecSQL(String("ALTER TABLE files2 RENAME TO files;"));//
-
-            // recreate indices and triggers
-            db->ExecSQL(String("CREATE INDEX album_id_idx ON files(album_id);"));
-            db->ExecSQL(String("CREATE INDEX artist_id_idx ON files(artist_id);"));
-            db->ExecSQL(String("CREATE INDEX bucket_index on files(bucket_id,media_type,"
-                        "datetaken, _id);"));
-            db->ExecSQL(String("CREATE INDEX bucket_name on files(bucket_id,media_type,"
-                        "bucket_display_name);"));
-            db->ExecSQL(String("CREATE INDEX format_index ON files(format);"));
-            db->ExecSQL(String("CREATE INDEX media_type_index ON files(media_type);"));
-            db->ExecSQL(String("CREATE INDEX parent_index ON files(parent);"));
-            db->ExecSQL(String("CREATE INDEX path_index ON files(_data);"));
-            db->ExecSQL(String("CREATE INDEX sort_index ON files(datetaken ASC, _id ASC);"));
-            db->ExecSQL(String("CREATE INDEX title_idx ON files(title);"));
-            db->ExecSQL(String("CREATE INDEX titlekey_index ON files(title_key);"));
-            if (!internal) {
-                db->ExecSQL(String("CREATE TRIGGER audio_playlists_cleanup DELETE ON files"
-                            " WHEN old.media_type=4"
-                            " BEGIN DELETE FROM audio_playlists_map WHERE playlist_id = old._id;"
-                            "SELECT _DELETE_FILE(old._data);END;"));
-               db->ExecSQL(String("CREATE TRIGGER files_cleanup DELETE ON files"
-                            " BEGIN SELECT _OBJECT_REMOVED(old._id);END;"));
-            }
-       }
-
-        if (fromVersion < 601) {
-            // remove primary key constraint because column time is not necessarily unique
-            db->ExecSQL(String("CREATE TABLE IF NOT EXISTS log_tmp (time DATETIME, message TEXT);"));
-            db->ExecSQL(String("DELETE FROM log_tmp;"));
-            db->ExecSQL(String("INSERT INTO log_tmp SELECT time, message FROM log order by rowid;"));
-            db->ExecSQL(String("DROP TABLE log;"));
-            db->ExecSQL(String("ALTER TABLE log_tmp RENAME TO log;"));
-        }
-
-        if (fromVersion < 700) {
-            // fix datetaken fields that were added with an incorrect timestamp
-            // datetaken needs to be in milliseconds, so should generally be a few orders of
-            // magnitude larger than date_modified. If it's within the same order of magnitude, it
-            // is probably wrong.
-            // (this could do the wrong thing if your picture was actually taken before ~3/21/1970)
-            db->ExecSQL(String("UPDATE files set datetaken=date_modified*1000"
-                        " WHERE date_modified IS NOT NULL"
-                        " AND datetaken IS NOT NULL"
-                        " AND datetaken<date_modified*5;"));
-       }
-
-       SanityCheck(db, fromVersion);
-
-       Int64 elapsedSeconds = (SystemClock::GetCurrentTimeMicro() - startTime) / 1000000;
-       LogToDb(db, String("Database upgraded from version ") + fromVersion + " to " + toVersion
-               + " in " + elapsedSeconds + " seconds");
+   Int64 elapsedSeconds = (SystemClock::GetCurrentTimeMicro() - startTime) / 1000000;
+   sb.Reset();
+   sb += "Database upgraded from version "; sb += fromVersion;
+   sb += " to "; sb += "toVersion"; sb += " in "; sb += elapsedSeconds; sb += " seconds";
+   LogToDb(db, sb.ToString());
+   if (LOCAL_LOGV) Logger::V(TAG, sb.ToString());
+   return NOERROR;
 }
 
 void MediaProvider::SanityCheck(
     /* [in] */ ISQLiteDatabase* db,
     /* [in] */ Int32 fromVersion)
 {
-    AutoPtr<ICursor> c1;
-    AutoPtr<ICursor> c2;
+    AutoPtr<ICursor> c1, c2;
     // try {
-        AutoPtr<ArrayOf<String> > arr1 = ArrayOf<String>::Alloc(1);
-        (*arr1)[0] = String("count(*)");
-        db->Query(String("audio_meta"), arr1,
-               String(NULL), NULL, String(NULL), String(NULL), String(NULL), (ICursor**)&c1);
-        AutoPtr<ArrayOf<String> > arr2 = ArrayOf<String>::Alloc(1);
-        (*arr2)[0] = String("count(distinct _data)");
-        db->Query(String("audio_meta"), arr2,
-                String(NULL), NULL, String(NULL), String(NULL), String(NULL), (ICursor**)&c2);
-        Boolean flag = FALSE;
-        c1->MoveToFirst(&flag);
-        c2->MoveToFirst(&flag);
-        Int32 num1;
-        c1->GetInt32(0, &num1);
-        Int32 num2;
-        c2->GetInt32(0, &num2);
-        if (num1 != num2) {
-           Logger::E(TAG, "audio_meta._data column is not unique while upgrading from schema %d : %d/%d", fromVersion, num1, num2);
-           // Delete all audio_meta rows so they will be rebuilt by the media scanner
-           db->ExecSQL(String("DELETE FROM audio_meta;"));
-        }
+    String nullStr;
+    AutoPtr<ArrayOf<String> > array = ArrayOf<String>::Alloc(1);
+    (*array)[0] = "count(*)";
+    db->Query(String("audio_meta"), array,
+           nullStr, NULL, nullStr, nullStr, nullStr, (ICursor**)&c1);
+    (*array)[0] = "count(distinct _data)";
+    db->Query(String("audio_meta"), array,
+            nullStr, NULL, nullStr, nullStr, nullStr, (ICursor**)&c2);
+    Boolean flag = FALSE;
+    c1->MoveToFirst(&flag);
+    c2->MoveToFirst(&flag);
+    Int32 num1, num2;
+    c1->GetInt32(0, &num1);
+    c2->GetInt32(0, &num2);
+    if (num1 != num2) {
+       Logger::E(TAG, "audio_meta._data column is not unique while upgrading from schema %d : %d/%d", fromVersion, num1, num2);
+       // Delete all audio_meta rows so they will be rebuilt by the media scanner
+       db->ExecSQL(String("DELETE FROM audio_meta;"));
+    }
     // } finally {
-       AutoPtr<IIoUtils> ioUtils;
-       CIoUtils::AcquireSingleton((IIoUtils**)&ioUtils);
-       ioUtils->CloseQuietly(ICloseable::Probe(c1));
-       ioUtils->CloseQuietly(ICloseable::Probe(c2));
+    AutoPtr<IIoUtils> ioUtils;
+    CIoUtils::AcquireSingleton((IIoUtils**)&ioUtils);
+    ioUtils->CloseQuietly(ICloseable::Probe(c1));
+    ioUtils->CloseQuietly(ICloseable::Probe(c2));
     // }
 }
 
@@ -2631,46 +2739,45 @@ void MediaProvider::UpdateBucketNames(
     // Rebuild the bucket_display_name column using the natural case rather than lower case.
     db->BeginTransaction();
     // try {
-        AutoPtr<ArrayOf<String> > columns = ArrayOf<String>::Alloc(2);
-        (*columns)[0] = IBaseColumns::ID;
-        (*columns)[1] = IMediaStoreMediaColumns::DATA;
-        // update only images and videos
-        AutoPtr<ICursor> cursor;
-        db->Query(String("files"), columns, String("media_type=1 OR media_type=3"),
-               NULL, String(NULL), String(NULL), String(NULL), (ICursor**)&cursor);
-        // try {
-            Int32 idColumnIndex;
-            cursor->GetColumnIndex(IBaseColumns::ID, &idColumnIndex);
-            Int32 dataColumnIndex;
-            cursor->GetColumnIndex(IMediaStoreMediaColumns::DATA, &dataColumnIndex);
-            AutoPtr<ArrayOf<String> > rowId = ArrayOf<String>::Alloc(1);
-            AutoPtr<IContentValues> values;
-            CContentValues::New((IContentValues**)&values);
-            Boolean bSucceeded = FALSE;
-            Int32 vol;
-            while ((cursor->MoveToNext(&bSucceeded), bSucceeded)) {
-                String data;
-                cursor->GetString(dataColumnIndex, &data);
-                String tmp;
-                cursor->GetString(idColumnIndex, &tmp);
-                (*rowId)[0] = tmp;//
+    AutoPtr<ArrayOf<String> > columns = ArrayOf<String>::Alloc(2);
+    (*columns)[0] = IBaseColumns::ID;
+    (*columns)[1] = IMediaStoreMediaColumns::DATA;
+    // update only images and videos
+    AutoPtr<ICursor> cursor;
+    String nullStr;
+    db->Query(String("files"), columns, String("media_type=1 OR media_type=3"),
+           NULL, nullStr, nullStr, nullStr, (ICursor**)&cursor);
+    // try {
+    Int32 idColumnIndex, dataColumnIndex;
+    cursor->GetColumnIndex(IBaseColumns::ID, &idColumnIndex);
+    cursor->GetColumnIndex(IMediaStoreMediaColumns::DATA, &dataColumnIndex);
+    AutoPtr<ArrayOf<String> > rowId = ArrayOf<String>::Alloc(1);
+    AutoPtr<IContentValues> values;
+    CContentValues::New((IContentValues**)&values);
+    Boolean bval = FALSE;
+    Int32 vol;
+    while ((cursor->MoveToNext(&bval), bval)) {
+        String data, tmp;
+        cursor->GetString(dataColumnIndex, &data);
+        cursor->GetString(idColumnIndex, &tmp);
+        (*rowId)[0] = tmp;//
 
-                if (!data.IsNull()) {
-                   values->Clear();
-                   ComputeBucketValues(data, values);
-                   db->Update(String("files"), values, String("_id=?"), rowId, &vol);
-                } else {
-                   Logger::W(TAG, "null data at id %s", tmp.string());
-                }
-            }
+        if (!data.IsNull()) {
+            values->Clear();
+            ComputeBucketValues(data, values);
+            db->Update(String("files"), values, String("_id=?"), rowId, &vol);
+        } else {
+            Logger::W(TAG, "null data at id %s", tmp.string());
+        }
+    }
        // } finally {
-            AutoPtr<IIoUtils> ioUtils;
-            CIoUtils::AcquireSingleton((IIoUtils**)&ioUtils);
-            ioUtils->CloseQuietly(ICloseable::Probe(cursor));
+    AutoPtr<IIoUtils> ioUtils;
+    CIoUtils::AcquireSingleton((IIoUtils**)&ioUtils);
+    ioUtils->CloseQuietly(ICloseable::Probe(cursor));
        // }
-        db->SetTransactionSuccessful();
+    db->SetTransactionSuccessful();
    // } finally {
-        db->EndTransaction();
+    db->EndTransaction();
    // }
 }
 
@@ -2681,44 +2788,44 @@ void MediaProvider::UpdateDisplayName(
     // Fill in default values for null displayName values
     db->BeginTransaction();
     // try {
-        AutoPtr<ArrayOf<String> > columns = ArrayOf<String>::Alloc(3);
-        (*columns)[0] = IBaseColumns::ID;
-        (*columns)[1] = IMediaStoreMediaColumns::DATA;
-        (*columns)[2] = IMediaStoreMediaColumns::DISPLAY_NAME;
-        AutoPtr<ICursor> cursor;
-        db->Query(tableName, columns, String(NULL), NULL, String(NULL), String(NULL), String(NULL), (ICursor**)&cursor);
-        // try {
-        Int32 idColumnIndex;
-        cursor->GetColumnIndex(IBaseColumns::ID, &idColumnIndex);
-        Int32 dataColumnIndex;
-        cursor->GetColumnIndex(IMediaStoreMediaColumns::DATA, &dataColumnIndex);
-        Int32 displayNameIndex;
-        cursor->GetColumnIndex(IMediaStoreMediaColumns::DISPLAY_NAME, &displayNameIndex);
-        AutoPtr<IContentValues> values;
-        CContentValues::New((IContentValues**)&values);
-        Boolean flag = FALSE;
-        while ((cursor->MoveToNext(&flag), flag)) {
-            String displayName;
-            cursor->GetString(displayNameIndex, &displayName);
-            if (displayName.IsNull()) {
-                String data;
-                cursor->GetString(dataColumnIndex, &data);
-                values->Clear();
-                ComputeDisplayName(data, values);
-                Int32 rowId;
-                cursor->GetInt32(idColumnIndex, &rowId);
-                Int32 vol;
-                db->Update(tableName, values, String("_id=") + rowId, NULL, &vol);
-            }
+    String nullStr;
+    AutoPtr<ArrayOf<String> > columns = ArrayOf<String>::Alloc(3);
+    (*columns)[0] = IBaseColumns::ID;
+    (*columns)[1] = IMediaStoreMediaColumns::DATA;
+    (*columns)[2] = IMediaStoreMediaColumns::DISPLAY_NAME;
+    AutoPtr<ICursor> cursor;
+    db->Query(tableName, columns, nullStr, NULL, nullStr, nullStr, nullStr, (ICursor**)&cursor);
+    // try {
+    Int32 idColumnIndex, dataColumnIndex, displayNameIndex;
+    cursor->GetColumnIndex(IBaseColumns::ID, &idColumnIndex);
+    cursor->GetColumnIndex(IMediaStoreMediaColumns::DATA, &dataColumnIndex);
+    cursor->GetColumnIndex(IMediaStoreMediaColumns::DISPLAY_NAME, &displayNameIndex);
+    AutoPtr<IContentValues> values;
+    CContentValues::New((IContentValues**)&values);
+    Boolean flag = FALSE;
+    while ((cursor->MoveToNext(&flag), flag)) {
+        String displayName;
+        cursor->GetString(displayNameIndex, &displayName);
+        if (displayName.IsNull()) {
+            String data;
+            cursor->GetString(dataColumnIndex, &data);
+            values->Clear();
+            ComputeDisplayName(data, values);
+            Int32 rowId, vol;
+            cursor->GetInt32(idColumnIndex, &rowId);
+            StringBuilder sb("_id=");
+            sb += rowId;
+            db->Update(tableName, values, sb.ToString(), NULL, &vol);
         }
+    }
        // } finally {
-            AutoPtr<IIoUtils> ioUtils;
-            CIoUtils::AcquireSingleton((IIoUtils**)&ioUtils);
-            ioUtils->CloseQuietly(ICloseable::Probe(cursor));
+    AutoPtr<IIoUtils> ioUtils;
+    CIoUtils::AcquireSingleton((IIoUtils**)&ioUtils);
+    ioUtils->CloseQuietly(ICloseable::Probe(cursor));
        // }
-            db->SetTransactionSuccessful();
+    db->SetTransactionSuccessful();
    // } finally {
-        db->EndTransaction();
+    db->EndTransaction();
    // }
 }
 
@@ -2777,18 +2884,15 @@ Boolean MediaProvider::QueryThumbnail(
     uri->GetPathSegments((IList**)&list);
     AutoPtr<IInterface> obj;
     AutoPtr<ICharSequence> cs;
-    String strAppend;
+    StringBuilder sb;
 
     qb->SetTables(table);
     if (hasThumbnailId) {
         // For uri dispatched to this method, the 4th path segment is always
         // the thumbnail id.
         list->Get(3, (IInterface**)&obj);
-        cs = ICharSequence::Probe(obj);
-        String str;
-        cs->ToString(&str);
-        strAppend = String("_id = ") + str;
-        qb->AppendWhere(CoreUtils::Convert(strAppend));
+        sb += "_id = "; sb += TO_STR(obj);
+        qb->AppendWhere(CoreUtils::Convert(sb.ToString()));
         // client already knows which thumbnail it wants, bypass it.
         return TRUE;
    }
@@ -2800,20 +2904,18 @@ Boolean MediaProvider::QueryThumbnail(
         return TRUE;
     }
 
-    String block;
+    String block, cancel;
     uri->GetQueryParameter(String("blocking"), &block);
-    String cancel;
     uri->GetQueryParameter(String("cancel"), &cancel);
-    Boolean needBlocking = String("1").Equals(block);
-    Boolean cancelRequest = String("1").Equals(cancel);
+    Boolean needBlocking = block.Equals("1");
+    Boolean cancelRequest = cancel.Equals("1");
     AutoPtr<IUri> origUri;
     AutoPtr<IUriBuilder> ub;
     uri->BuildUpon((IUriBuilder**)&ub);
-    String path;
-    uri->GetPath(&path);
-    String _path;
-    StringUtils::ReplaceFirst(path, String("thumbnails"), String("media"), &_path);
-    ub->EncodedPath(_path);
+    String path, temp;
+    uri->GetPath(&temp);
+    StringUtils::ReplaceFirst(temp, String("thumbnails"), String("media"), &path);
+    ub->EncodedPath(path);
     ub->AppendPath(origId);
     ub->Build((IUri**)&origUri);
 
@@ -2825,10 +2927,7 @@ Boolean MediaProvider::QueryThumbnail(
         uri->GetQueryParameter(String("group_id"), &groupId);
         obj = NULL;
         list->Get(1, (IInterface**)&obj);
-        cs = NULL;
-        cs = ICharSequence::Probe(obj);
-        cs->ToString(&strAppend);
-        Boolean isVideo = String("video").Equals(strAppend);
+        Boolean isVideo = Object::ToString(obj).Equals("video");
         Int32 pid = Binder::GetCallingPid();
         Int64 id = -1;
         Int64 gid = -1;
@@ -2852,16 +2951,15 @@ Boolean MediaProvider::QueryThumbnail(
                     mtqObj->NotifyAll();
                 }
             }
-            AutoPtr<ArrayOf<IInterface*> > queue;
-            mMediaThumbQueue->ToArray((ArrayOf<IInterface*>**)&queue);
-            Int32 length = queue->GetLength();
-            AutoPtr<IInterface> obj;
-            AutoPtr<IMediaThumbRequest> mtq;
-            for (Int32 i = 0; i < length; ++i) {
-                obj = NULL;
-                mtq = NULL;
-                mtq = IMediaThumbRequest::Probe(obj);
-                MediaThumbRequest* mtqObj = (MediaThumbRequest*)(mtq.Get());
+
+            AutoPtr<IIterator> it;
+            mMediaThumbQueue->GetIterator((IIterator**)&it);
+            Boolean hasNext;
+            while (it->HasNext(&hasNext), hasNext) {
+                AutoPtr<IInterface> obj;
+                it->GetNext((IInterface**)&obj);
+                AutoPtr<IMediaThumbRequest> mtq = IMediaThumbRequest::Probe(obj);
+                MediaThumbRequest* mtqObj = (MediaThumbRequest*)mtq.Get();
                 if (MatchThumbRequest(mtqObj, pid, id, gid, isVideo)) {
                     {
                         AutoLock lock(mtqObj);
@@ -2989,13 +3087,13 @@ AutoPtr<ICursor> MediaProvider::DoAudioSearch(
                    (*searchWords)[i].Equals("the")) ? String("%") : String("%") + key + "%";
     }
 
-    String where(String(""));
+    StringBuilder where("");
     len = searchWords->GetLength();
     for (Int32 i = 0; i < len; i++) {
        if (i == 0) {
-           where = String("match LIKE ? ESCAPE '\\'");
+           where += "match LIKE ? ESCAPE '\\'";
        } else {
-           where += String(" AND match LIKE ? ESCAPE '\\'");
+           where += " AND match LIKE ? ESCAPE '\\'";
        }
     }
 
@@ -3009,7 +3107,7 @@ AutoPtr<ICursor> MediaProvider::DoAudioSearch(
        cols = mSearchColsLegacy;
     }
     AutoPtr<ICursor> c;
-    qb->Query(db, cols, where, wildcardWords, String(NULL), String(NULL), limit, (ICursor**)&c);
+    qb->Query(db, cols, where.ToString(), wildcardWords, String(NULL), String(NULL), limit, (ICursor**)&c);
     return c;
 }
 
@@ -3097,20 +3195,15 @@ Int32 MediaProvider::PlaylistBulkInsert(
 {
     AutoPtr<IDatabaseInsertHelper> helper;
     CDatabaseInsertHelper::New(db, String("audio_playlists_map"), (IDatabaseInsertHelper**)&helper);
-    Int32 audioidcolidx;
+    Int32 audioidcolidx, playlistididx, playorderidx;
     helper->GetColumnIndex(IMediaStoreAudioPlaylistsMembers::AUDIO_ID, &audioidcolidx);
-    Int32 playlistididx;
     helper->GetColumnIndex(IMediaStoreAudioPlaylistsMembers::PLAYLIST_ID, &playlistididx);
-    Int32 playorderidx ;
     helper->GetColumnIndex(IMediaStoreAudioPlaylistsMembers::PLAY_ORDER, &playorderidx);
     AutoPtr<IList> list;
     uri->GetPathSegments((IList**)&list);
     AutoPtr<IInterface> obj;
     list->Get(3, (IInterface**)&obj);
-    AutoPtr<ICharSequence> cs = ICharSequence::Probe(obj);
-    String tmp;
-    cs->ToString(&tmp);
-    Int64 playlistId = StringUtils::ParseInt64(tmp);//
+    Int64 playlistId = StringUtils::ParseInt64(TO_STR(obj));//
 
     db->BeginTransaction();
     Int32 numInserted = 0;
@@ -3354,9 +3447,9 @@ Int64 MediaProvider::GetParent(
                return 0;
             }
         }
-       Int64 cid = (*mDirectoryCache)[parentPath];
-       AutoPtr<IInteger64> iCid = CoreUtils::Convert(cid);
-        if (cid != NULL) {
+        HashMap<String, Int64>::Iterator it = mDirectoryCache->Find(parentPath);
+        if (it != mDirectoryCache->End()) {
+            Int64 cid = it->mSecond;
             if (LOCAL_LOGV) Logger::V(TAG, "Returning cached entry for %s", parentPath.string());
             ioUtils->CloseQuietly(ICloseable::Probe(c));
             return cid;
@@ -3525,7 +3618,9 @@ ECode MediaProvider::InsertFile(
                    Int32 index = path.LastIndexOf('/');
                    albumhash = path.Substring(0, index).GetHashCode();
                 }
-                String cacheName = s + albumhash;
+                StringBuilder sb(s);
+                sb += albumhash;
+                String cacheName = sb.ToString();
                 Int64 itemp = albumCache[cacheName];
                 AutoPtr<IInteger64> iitmp = CoreUtils::Convert(itemp);
                 if (iitmp == NULL) {
@@ -4913,7 +5008,8 @@ ECode MediaProvider::Update(
                         {
                             AutoLock syncLock(dbh->mAlbumCacheLock);
                             HashMap<String, Int64> albumCache = dbh->mAlbumCache;
-                            String cacheName = s + albumHash;
+                            StringBuilder sb(s); sb += albumHash;
+                            String cacheName = sb.ToString();
                             Int64 temp = albumCache[cacheName];
                             AutoPtr<IInteger64> ig = CoreUtils::Convert(temp);
                             if (ig == NULL) {
@@ -4953,10 +5049,7 @@ ECode MediaProvider::Update(
                            uri->GetPathSegments((IList**)&list);
                            AutoPtr<IInterface> obj;
                            list->Get(3, (IInterface**)&obj);
-                           AutoPtr<ICharSequence> cs = ICharSequence::Probe(obj);
-                           String tmp;
-                           cs->ToString(&tmp);
-                           Int64 rowId = StringUtils::ParseInt64(tmp);
+                           Int64 rowId = StringUtils::ParseInt64(TO_STR(obj));
                            UpdateGenre(rowId, genre);
                        } else {
                            // can't handle genres for bulk update or for non-audio files
@@ -5087,51 +5180,75 @@ Int32 MediaProvider::MovePlaylistEntry(
     if (from == to) {
        return 0;
     }
+    String nullStr;
     db->BeginTransaction();
     Int32 numlines = 0;
     AutoPtr<ICursor> c;
     // try {
-       helper->mNumUpdates += 3;
-       AutoPtr<ArrayOf<String> > arr = ArrayOf<String>::Alloc(1);
-       (*arr)[0] = String("play_order");//
+    AutoPtr<IIoUtils> ioUtils;
+    CIoUtils::AcquireSingleton((IIoUtils**)&ioUtils);
 
-       AutoPtr<ArrayOf<String> > arr1 = ArrayOf<String>::Alloc(1);
-       (*arr1)[0] = String("") + playlist;
-       db->Query(String("audio_playlists_map"), arr,
-               String("playlist_id=?"), arr1, String(NULL), String(NULL), String("play_order"),
-               String(",1") + from, (ICursor**)&c);
-       Boolean flag = FALSE;
-       c->MoveToFirst(&flag);
-       Int32 from_play_order;
-       c->GetInt32(0, &from_play_order);
-       AutoPtr<IIoUtils> ioUtils;
-       CIoUtils::AcquireSingleton((IIoUtils**)&ioUtils);
-       ioUtils->CloseQuietly(ICloseable::Probe(c));
-       db->Query(String("audio_playlists_map"), arr,
-               String("playlist_id=?"), arr1, String(NULL), String(NULL), String("play_order"),
-               String(",1") + to, (ICursor**)&c);
-       c->MoveToFirst(&flag);
-       Int32 to_play_order;
-       c->GetInt32(0, &to_play_order);
-       db->ExecSQL(String("UPDATE audio_playlists_map SET play_order=-1") +
-               " WHERE play_order=" + from_play_order + "AND playlist_id=" + playlist);
-       // We could just run both of the next two statements, but only one of
-       // of them will actually do anything, so might as well skip the compile
-       // and execute steps.
-       if (from  < to) {
-           db->ExecSQL(String("UPDATE audio_playlists_map SET play_order=play_order-1") +
-                   " WHERE play_order<=" + to_play_order + "AND play_order>" + from_play_order + "AND playlist_id=" + playlist);
-           numlines = to - from + 1;
-       } else {
-           db->ExecSQL(String("UPDATE audio_playlists_map SET play_order=play_order+1") +
-                   " WHERE play_order>="+ to_play_order + "AND play_order<" + from_play_order + "AND playlist_id=" + playlist);
-           numlines = from - to + 1;
-       }
-       db->ExecSQL(String("UPDATE audio_playlists_map SET play_order=") + to_play_order + "WHEREplay_order=-1 AND playlist_id=" + playlist);
-       db->SetTransactionSuccessful();
+    helper->mNumUpdates += 3;
+    AutoPtr<ArrayOf<String> > arr = ArrayOf<String>::Alloc(1);
+    (*arr)[0] = String("play_order");//
+
+    StringBuilder sb(",1"); sb += from;
+    AutoPtr<ArrayOf<String> > plArray = ArrayOf<String>::Alloc(1);
+    (*plArray)[0] = StringUtils::ToString(playlist);
+    db->Query(String("audio_playlists_map"), arr,
+           String("playlist_id=?"), plArray, nullStr, nullStr, String("play_order"),
+           sb.ToString(), (ICursor**)&c);
+    Boolean flag = FALSE;
+    c->MoveToFirst(&flag);
+    Int32 from_play_order;
+    c->GetInt32(0, &from_play_order);
+    ioUtils->CloseQuietly(ICloseable::Probe(c));
+
+    sb.Reset(); sb += ",1"; sb += to;
+    db->Query(String("audio_playlists_map"), arr,
+           String("playlist_id=?"), plArray, nullStr, nullStr, String("play_order"),
+           sb.ToString(), (ICursor**)&c);
+    c->MoveToFirst(&flag);
+    Int32 to_play_order;
+    c->GetInt32(0, &to_play_order);
+
+    sb.Reset();
+    sb += "UPDATE audio_playlists_map SET play_order=-1"
+        " WHERE play_order=";
+    sb += from_play_order; sb += "AND playlist_id="; sb += playlist;
+
+    db->ExecSQL(sb.ToString());
+
+    // We could just run both of the next two statements, but only one of
+    // of them will actually do anything, so might as well skip the compile
+    // and execute steps.
+    if (from  < to) {
+        sb.Reset();
+        sb += "UPDATE audio_playlists_map SET play_order=play_order-1"
+                " WHERE play_order<=";
+        sb += to_play_order; sb += "AND play_order>"; sb += from_play_order;
+        sb += "AND playlist_id="; sb += playlist;
+        db->ExecSQL(sb.ToString());
+        numlines = to - from + 1;
+    }
+    else {
+        sb.Reset();
+        sb += "UPDATE audio_playlists_map SET play_order=play_order+1"
+                " WHERE play_order<=";
+        sb += to_play_order; sb += "AND play_order>"; sb += from_play_order;
+        sb += "AND playlist_id="; sb += playlist;
+        db->ExecSQL(sb.ToString());
+        numlines = from - to + 1;
+    }
+
+    sb.Reset();
+    sb += "UPDATE audio_playlists_map SET play_order="; sb += to_play_order;
+    sb += "WHEREplay_order=-1 AND playlist_id="; sb += playlist;
+    db->ExecSQL(sb.ToString());
+    db->SetTransactionSuccessful();
     // } finally {
-       db->EndTransaction();
-       ioUtils->CloseQuietly(ICloseable::Probe(c));
+    db->EndTransaction();
+    ioUtils->CloseQuietly(ICloseable::Probe(c));
     // }//
 
     AutoPtr<IMediaStoreAudioPlaylists> msal;
@@ -5614,9 +5731,11 @@ void MediaProvider::LogToDb(
     AutoPtr<ICharSequence> cs = CoreUtils::Convert(message);
     AutoPtr<ArrayOf<IInterface*> > arr = ArrayOf<IInterface*>::Alloc(1);
     arr->Set(0, cs.Get());
-    db->ExecSQL(String("INSERT OR REPLACE INTO log (time,message) VALUES (strftime('%Y-%m-%d %H:%M:%f','now'),?);"),  arr);
+    db->ExecSQL(String("INSERT OR REPLACE"
+        " INTO log (time,message) VALUES (strftime('%Y-%m-%d %H:%M:%f','now'),?);"),  arr);
     // delete all but the last 500 rows
-    db->ExecSQL(String("DELETE FROM log WHERE rowid IN (SELECT rowid FROM log ORDER BY rowid DESC LIMIT 500,-1);"));
+    db->ExecSQL(String("DELETE FROM log WHERE rowid IN"
+        " (SELECT rowid FROM log ORDER BY rowid DESC LIMIT 500,-1);"));
 }
 
 Boolean MediaProvider::WaitForThumbnailReady(
@@ -5829,39 +5948,40 @@ AutoPtr<IUri> MediaProvider::SafeUncanonicalize(
 }
 
 ECode MediaProvider::Query(
-    /* [in] */ IUri* uri,
+    /* [in] */ IUri* inUri,
     /* [in] */ ArrayOf<String>* projectionIn,
     /* [in] */ const String& selection,
     /* [in] */ ArrayOf<String>* selectionArgs,
     /* [in] */ const String& sort,
     /* [out] */ ICursor** ret)
 {
-    AutoPtr<IUri> u = SafeUncanonicalize(uri);
-    uri = u;
+    VALIDATE_NOT_NULL(ret)
+    *ret = NULL;
+
+    AutoPtr<IUri> uri = SafeUncanonicalize(inUri);
 
     Int32 table;
     GetURI_MATCHER()->Match(uri, &table);
     List<String> prependArgs;//
 
-    // Log.v(TAG, "query: uri="+uri+", selection="+selection);
+    if (LOCAL_LOGV) {
+        Logger::V(TAG, "Query: uri=[%s], projectionIn=%s, selection=[%s], selectionArgs=%s",
+            TO_CSTR(uri), Arrays::ToString(projectionIn).string(),
+            selection.string(), Arrays::ToString(selectionArgs).string());
+    }
     // handle MEDIA_SCANNER before calling getDatabaseForUri()
     AutoPtr<IMatrixCursor> c;
     if (table == MEDIA_SCANNER) {
        if (mMediaScannerVolume.IsNull()) {
-           *ret = NULL;
            return NOERROR;
-       } else {
+       }
+       else {
            // create a cursor to return volume currently being scanned by the media scanner
            AutoPtr<ArrayOf<String> > array = ArrayOf<String>::Alloc(1);
            (*array)[0] = IMediaStore::MEDIA_SCANNER_VOLUME;
            CMatrixCursor::New(array, (IMatrixCursor**)&c);
-           AutoPtr<ArrayOf<String> > array2 = ArrayOf<String>::Alloc(1);
-           (*array2)[0] = mMediaScannerVolume;
-           Int32 arrLen = array2->GetLength();
-           AutoPtr<ArrayOf<IInterface*> > inArr = ArrayOf<IInterface*>::Alloc(arrLen);
-           for(Int32 i = 0; i < arrLen; i++) {
-                inArr->Set(i, TO_IINTERFACE(CoreUtils::Convert((*array2)[i])));
-           }
+           AutoPtr<ArrayOf<IInterface*> > inArr = ArrayOf<IInterface*>::Alloc(1);
+           inArr->Set(0, CoreUtils::Convert(mMediaScannerVolume));
            c->AddRow(*inArr);
            *ret = ICursor::Probe(c);
            REFCOUNT_ADD(*ret);
@@ -5875,15 +5995,11 @@ ECode MediaProvider::Query(
     if (table == FS_ID) {
        c = NULL;
        AutoPtr<ArrayOf<String> > fsd = ArrayOf<String>::Alloc(1);
-       (*fsd)[0] = String("fsid");
+       (*fsd)[0] = "fsid";
        CMatrixCursor::New(fsd, (IMatrixCursor**)&c);
-       AutoPtr<ArrayOf<Int32> > vols = ArrayOf<Int32>::Alloc(1);
-       (*vols)[0] = mVolumeId;
-       Int32 arrLen = vols->GetLength();
-       AutoPtr<ArrayOf<IInterface*> > inArr = ArrayOf<IInterface*>::Alloc(arrLen);
-       for(Int32 i = 0; i < arrLen; i++) {
-            inArr->Set(i, TO_IINTERFACE(CoreUtils::Convert((*vols)[i])));
-       }
+
+       AutoPtr<ArrayOf<IInterface*> > inArr = ArrayOf<IInterface*>::Alloc(1);
+       inArr->Set(0, CoreUtils::Convert(mVolumeId));
        c->AddRow(*inArr);
        *ret = ICursor::Probe(c);
        REFCOUNT_ADD(*ret);
@@ -5893,18 +6009,13 @@ ECode MediaProvider::Query(
     if (table == VERSION) {
        c = NULL;
        AutoPtr<ArrayOf<String> > vs = ArrayOf<String>::Alloc(1);
-       (*vs)[0] = String("version");
+       (*vs)[0] = "version";
        CMatrixCursor::New(vs, (IMatrixCursor**)&c);
        AutoPtr<IContext> context;
        GetContext((IContext**)&context);
        Int32 vol = GetDatabaseVersion(context);
-       AutoPtr<ArrayOf<Int32> > is = ArrayOf<Int32>::Alloc(1);
-       (*is)[0] = vol;
-       Int32 arrLen = is->GetLength();
-       AutoPtr<ArrayOf<IInterface*> > inArr = ArrayOf<IInterface*>::Alloc(arrLen);
-       for(Int32 i = 0; i < arrLen; i++) {
-            inArr->Set(i, TO_IINTERFACE(CoreUtils::Convert((*is)[i])));
-       }
+       AutoPtr<ArrayOf<IInterface*> > inArr = ArrayOf<IInterface*>::Alloc(1);
+       inArr->Set(0, CoreUtils::Convert(vol));
        c->AddRow(*inArr);
        *ret = ICursor::Probe(c);
        REFCOUNT_ADD(*ret);
@@ -5915,22 +6026,20 @@ ECode MediaProvider::Query(
     AutoPtr<IDatabaseHelper> helper;
     GetDatabaseForUri(uri, (IDatabaseHelper**)&helper);
     if (helper == NULL) {
-       *ret = NULL;
        return NOERROR;
     }
-    ((DatabaseHelper*)helper.Get())->mNumQueries++;
-
+    DatabaseHelper* dbh = (DatabaseHelper*)helper.Get();
+    dbh->mNumQueries++;
     AutoPtr<ISQLiteDatabase> db;
-    ((DatabaseHelper*)helper.Get())->GetReadableDatabase((ISQLiteDatabase**)&db);
+    dbh->GetReadableDatabase((ISQLiteDatabase**)&db);
     if (db == NULL) {
-       *ret = NULL;
        return NOERROR;
     }
+
     AutoPtr<ISQLiteQueryBuilder> qb;
     CSQLiteQueryBuilder::New((ISQLiteQueryBuilder**)&qb);
-    String limit;
+    String limit, filter;
     uri->GetQueryParameter(String("limit"), &limit);
-    String filter;
     uri->GetQueryParameter(String("filter"), &filter);
     AutoPtr<ArrayOf<String> > keywords;
     if (!filter.IsNull()) {
@@ -5946,19 +6055,22 @@ ECode MediaProvider::Query(
            keywords = ArrayOf<String>::Alloc(swLength);
            AutoPtr<IMediaStoreAudio> msa;
            CMediaStoreAudio::AcquireSingleton((IMediaStoreAudio**)&msa);
-           String key;
-           String ret;
+           String key, ret;
            for (Int32 i = 0; i < swLength; i++) {
                msa->KeyFor((*searchWords)[i], &key);
-               StringUtils::Replace(key, String("\\"), String("\\\\"), &ret);
+               StringUtils::Replace(key, "\\", "\\\\", &ret);
                key = ret;
-               StringUtils::Replace(key, String("%"), String("\\%"), &ret);
+               StringUtils::Replace(key, "%", "\\%", &ret);
                key = ret;
-               StringUtils::Replace(key, String("_"), String("\\_"), &ret);
+               StringUtils::Replace(key, "_", "\\_", &ret);
                key = ret;
                (*keywords)[i] = key;
            }
        }
+    }
+
+    if (LOCAL_LOGV) {
+        Logger::V(TAG, " >> keywords: %s", Arrays::ToString(keywords).string());
     }
 
     String str;
@@ -5968,266 +6080,241 @@ ECode MediaProvider::Query(
     }
 
     Boolean hasThumbnailId = FALSE;
-
-    String tmp;
     AutoPtr<ICharSequence> acs;
     AutoPtr<IList> segments;
     uri->GetPathSegments((IList**)&segments);
     AutoPtr<IInterface> obj;
-    String seg;
     Int32 plength = 0, klength = 0;
-    if (projectionIn != NULL) klength = projectionIn->GetLength();
+    if (projectionIn != NULL) plength = projectionIn->GetLength();
     if (keywords != NULL) klength = keywords->GetLength();
     switch (table) {
-       case IMAGES_MEDIA:
-       {
-           qb->SetTables(String("images"));
-           uri->GetQueryParameter(String("distinct"), &tmp);
-           if (!tmp.IsNull())
-               qb->SetDistinct(TRUE);//
+        case IMAGES_MEDIA:
+        {
+            qb->SetTables(String("images"));
+            String tmp;
+            uri->GetQueryParameter(String("distinct"), &tmp);
+            if (!tmp.IsNull())
+                qb->SetDistinct(TRUE);
 
-           // set the project map so that data dir is prepended to _data.
-           //qb.setProjectionMap(mImagesProjectionMap, true);
-           break;
-       }
+            // set the project map so that data dir is prepended to _data.
+            //qb.setProjectionMap(mImagesProjectionMap, true);
+            break;
+        }
 
-       case IMAGES_MEDIA_ID:
-       {
-           qb->SetTables(String("images"));
-           uri->GetQueryParameter(String("distinct"), &tmp);
-           if (!tmp.IsNull())
-               qb->SetDistinct(TRUE);//
+        case IMAGES_MEDIA_ID:
+        {
+            qb->SetTables(String("images"));
+            String tmp;
+            uri->GetQueryParameter(String("distinct"), &tmp);
+            if (!tmp.IsNull())
+                qb->SetDistinct(TRUE);
 
-           // set the project map so that data dir is prepended to _data.
-           //qb.setProjectionMap(mImagesProjectionMap, true);
-           AutoPtr<ICharSequence> cs = CoreUtils::Convert(String("_id=?"));
-           qb->AppendWhere(cs);
-           obj = NULL;
-           segments->Get(3, (IInterface**)&obj);
-           seg = Object::ToString(obj);
-           prependArgs.PushBack(seg);
-           break;
-       }
+            // set the project map so that data dir is prepended to _data.
+            //qb.setProjectionMap(mImagesProjectionMap, true);
+            AutoPtr<ICharSequence> cs = CoreUtils::Convert("_id=?");
+            qb->AppendWhere(cs);
+            obj = NULL;
+            segments->Get(3, (IInterface**)&obj);
+            prependArgs.PushBack(TO_STR(obj));
+            break;
+        }
 
-       case IMAGES_THUMBNAILS_ID:
-       {
-           hasThumbnailId = TRUE;
-           break;
-       }
-       case IMAGES_THUMBNAILS:
-       {
-           if (!QueryThumbnail(qb, uri, String("thumbnails"), String("image_id"), hasThumbnailId)) {
-               *ret = NULL;
+        case IMAGES_THUMBNAILS_ID:
+        {
+            hasThumbnailId = TRUE;
+            // fall through
+        }
+        case IMAGES_THUMBNAILS:
+        {
+            if (!QueryThumbnail(qb, uri, String("thumbnails"), String("image_id"), hasThumbnailId)) {
                return NOERROR;
-           }
-           break;
-       }
-       case AUDIO_MEDIA:
-       {
+            }
+            break;
+        }
+        case AUDIO_MEDIA:
+        {
            if (projectionIn != NULL && plength == 1 &&  selectionArgs == NULL
                    && (selection.IsNull() || selection.EqualsIgnoreCase("is_music=1")
                      || selection.EqualsIgnoreCase("is_podcast=1") )
                    && (*projectionIn)[0].EqualsIgnoreCase("count(*)")
                    && keywords != NULL) {
-               //Log.i("@@@@", "taking fast path for counting songs");
-               qb->SetTables(String("audio_meta"));
-           } else {
-               qb->SetTables(String("audio"));
-               for (Int32 i = 0; keywords != NULL && i < klength; i++) {
-                   if (i > 0) {
-                       acs = NULL;
-                       acs = CoreUtils::Convert(String(" AND "));
-                       qb->AppendWhere(acs);
-                   }
-                   acs =  NULL;
-                   acs = CoreUtils::Convert(IMediaStoreAudioAudioColumns::ARTIST_KEY +
-                           "||" + IMediaStoreAudioAudioColumns::ALBUM_KEY +
-                           "||" + IMediaStoreAudioAudioColumns::TITLE_KEY + " LIKE ? ESCAPE '\\'");
-                   qb->AppendWhere(acs);
-                   prependArgs.PushBack(String("%") + (*keywords)[i] + "%");
-               }
+                //Log.i("@@@@", "taking fast path for counting songs");
+                qb->SetTables(String("audio_meta"));
+           }
+           else {
+                qb->SetTables(String("audio"));
+                AutoPtr<ICharSequence> andCs = CoreUtils::Convert(" AND ");
+                StringBuilder sb(IMediaStoreAudioAudioColumns::ARTIST_KEY);
+                sb += "||"; sb += IMediaStoreAudioAudioColumns::ALBUM_KEY;
+                sb += "||"; sb += IMediaStoreAudioAudioColumns::TITLE_KEY;
+                sb += " LIKE ? ESCAPE '\\'";
+                acs = CoreUtils::Convert(sb.ToString());
+                for (Int32 i = 0; i < klength; i++) {
+                    if (i > 0) {
+                        qb->AppendWhere(andCs);
+                    }
+                    qb->AppendWhere(acs);
+                    StringBuilder sb("%"); sb += (*keywords)[i]; sb += "%";
+                    prependArgs.PushBack(sb.ToString());
+                }
            }
            break;
-       }
+        }
 
-       case AUDIO_MEDIA_ID:
-       {
-           qb->SetTables(String("audio"));
-           acs = NULL;
-           acs = CoreUtils::Convert(String("_id=?"));
-           qb->AppendWhere(acs);
-           obj = NULL;
-           segments->Get(3, (IInterface**)&obj);
-           seg = Object::ToString(obj);
-           prependArgs.PushBack(seg);
-           break;
-       }
+        case AUDIO_MEDIA_ID:
+        {
+            qb->SetTables(String("audio"));
+            qb->AppendWhere(CoreUtils::Convert("_id=?"));
+            obj = NULL;
+            segments->Get(3, (IInterface**)&obj);
+            prependArgs.PushBack(TO_STR(obj));
+            break;
+        }
 
-       case AUDIO_MEDIA_ID_GENRES:
-       {
-           qb->SetTables(String("audio_genres"));
-           acs = NULL;
-           acs = CoreUtils::Convert(String("_id IN (SELECT genre_id FROM ") +
+        case AUDIO_MEDIA_ID_GENRES:
+        {
+            qb->SetTables(String("audio_genres"));
+            acs = NULL;
+            acs = CoreUtils::Convert("_id IN (SELECT genre_id FROM "
                    "audio_genres_map WHERE audio_id=?)");
-           qb->AppendWhere(acs);
-           obj = NULL;
-           segments->Get(3, (IInterface**)&obj);
-           seg = Object::ToString(obj);
-           prependArgs.PushBack(seg);
-           break;
-       }
+            qb->AppendWhere(acs);
+            obj = NULL;
+            segments->Get(3, (IInterface**)&obj);
+            prependArgs.PushBack(TO_STR(obj));
+            break;
+        }
 
-       case AUDIO_MEDIA_ID_GENRES_ID:
-       {
-           qb->SetTables(String("audio_genres"));
-           acs = NULL;
-           acs = CoreUtils::Convert(String("_id=?"));
-           qb->AppendWhere(acs);
-           obj = NULL;
-           segments->Get(5, (IInterface**)&obj);
-           seg = Object::ToString(obj);
-           prependArgs.PushBack(seg);
-           break;
-       }
+        case AUDIO_MEDIA_ID_GENRES_ID:
+        {
+            qb->SetTables(String("audio_genres"));
+            qb->AppendWhere(CoreUtils::Convert("_id=?"));
+            obj = NULL;
+            segments->Get(5, (IInterface**)&obj);
+            prependArgs.PushBack(TO_STR(obj));
+            break;
+        }
 
-       case AUDIO_MEDIA_ID_PLAYLISTS:
-       {
-           qb->SetTables(String("audio_playlists"));
-           acs = NULL;
-           acs = CoreUtils::Convert(String("_id IN (SELECT playlist_id FROM ") +
+        case AUDIO_MEDIA_ID_PLAYLISTS:
+        {
+            qb->SetTables(String("audio_playlists"));
+            acs = NULL;
+            acs = CoreUtils::Convert("_id IN (SELECT playlist_id FROM "
                    "audio_playlists_map WHERE audio_id=?)");
-           qb->AppendWhere(acs);
-           obj = NULL;
-           segments->Get(3, (IInterface**)&obj);
-           seg = Object::ToString(obj);
-           prependArgs.PushBack(seg);
-           break;
-       }
+            qb->AppendWhere(acs);
+            obj = NULL;
+            segments->Get(3, (IInterface**)&obj);
+            prependArgs.PushBack(TO_STR(obj));
+            break;
+        }
 
-       case AUDIO_MEDIA_ID_PLAYLISTS_ID:
-       {
-           qb->SetTables(String("audio_playlists"));
-           acs = NULL;
-           acs = CoreUtils::Convert(String("_id=?"));
-           qb->AppendWhere(acs);
-           obj = NULL;
-           segments->Get(5, (IInterface**)&obj);
-           seg = Object::ToString(obj);
-           prependArgs.PushBack(seg);
-           break;
-       }
-       case AUDIO_GENRES:
-       {
-           qb->SetTables(String("audio_genres"));
-           break;
-       }
+        case AUDIO_MEDIA_ID_PLAYLISTS_ID:
+        {
+            qb->SetTables(String("audio_playlists"));
+            qb->AppendWhere(CoreUtils::Convert("_id=?"));
+            obj = NULL;
+            segments->Get(5, (IInterface**)&obj);
+            prependArgs.PushBack(TO_STR(obj));
+            break;
+        }
+        case AUDIO_GENRES:
+        {
+            qb->SetTables(String("audio_genres"));
+            break;
+        }
 
-       case AUDIO_GENRES_ID:
-       {
-           qb->SetTables(String("audio_genres"));
-           acs = NULL;
-           acs = CoreUtils::Convert(String("_id=?"));
-           qb->AppendWhere(acs);
-           obj = NULL;
-           segments->Get(3, (IInterface**)&obj);
-           seg = Object::ToString(obj);
-           prependArgs.PushBack(seg);
-           break;
-       }
+        case AUDIO_GENRES_ID:
+        {
+            qb->SetTables(String("audio_genres"));
+            qb->AppendWhere(CoreUtils::Convert("_id=?"));
+            obj = NULL;
+            segments->Get(3, (IInterface**)&obj);
+            prependArgs.PushBack(TO_STR(obj));
+            break;
+        }
 
-       case AUDIO_GENRES_ALL_MEMBERS:
-       case AUDIO_GENRES_ID_MEMBERS:
-           {
-               // if simpleQuery is true, we can do a simpler query on just audio_genres_map
-               // we can do this if we have no keywords and our projection includes just columns
-               // from audio_genres_map
-               Boolean simpleQuery = (keywords == NULL && projectionIn != NULL
-                       && (selection.IsNull() || selection.EqualsIgnoreCase("genre_id=?")));
-               if (projectionIn != NULL) {
-                   for (Int32 i = 0; i < plength; i++) {
-                       String p = (*projectionIn)[i];
-                       if (p.Equals("_id")) {
-                           // note, this is different from playlist below, because
-                           // "_id" used to (wrongly) be the audio id in this query, not
-                           // the row id of the entry in the map, and we preserve this
-                           // behavior for backwards compatibility
-                           simpleQuery = FALSE;
-                       }
-                       if (simpleQuery && !(p.Equals("audio_id") ||
-                               p.Equals("genre_id"))) {
-                           simpleQuery = FALSE;
-                       }
-                   }
-               }
-               if (simpleQuery) {
-                   qb->SetTables(String("audio_genres_map_noid"));
-                   if (table == AUDIO_GENRES_ID_MEMBERS) {
-                       acs = NULL;
-                       acs = CoreUtils::Convert(String("genre_id=?"));
-                       qb->AppendWhere(acs);
-                       obj = NULL;
-                       segments->Get(3, (IInterface**)&obj);
-                       seg = Object::ToString(obj);
-                       prependArgs.PushBack(seg);
-                   }
-               } else {
-                   qb->SetTables(String("audio_genres_map_noid, audio"));
-                   acs = NULL;
-                   acs = CoreUtils::Convert(String("audio._id = audio_id"));
-                   qb->AppendWhere(acs);
-                   if (table == AUDIO_GENRES_ID_MEMBERS) {
-                       acs = NULL;
-                       acs = CoreUtils::Convert(String(" AND genre_id=?"));
-                       qb->AppendWhere(acs);
-                       obj = NULL;
-                       segments->Get(3, (IInterface**)&obj);
-                       seg = Object::ToString(obj);
-                       prependArgs.PushBack(seg);
-                   }
-                   for (Int32 i = 0; keywords != NULL && i < klength; i++) {
-                       acs = NULL;
-                       acs = CoreUtils::Convert(String(" AND "));
-                       qb->AppendWhere(acs);
-                       acs = NULL;
-                       acs = CoreUtils::Convert(IMediaStoreAudioAudioColumns::ARTIST_KEY +
-                               "||" + IMediaStoreAudioAudioColumns::ALBUM_KEY +
-                               "||" + IMediaStoreAudioAudioColumns::TITLE_KEY +
-                               " LIKE ? ESCAPE '\\'");
-                       qb->AppendWhere(acs);
-                       prependArgs.PushBack(String("%") + (*keywords)[i] + "%");
-                   }
-               }
-           }
-           break;
+        case AUDIO_GENRES_ALL_MEMBERS:
+        case AUDIO_GENRES_ID_MEMBERS:
+        {
+            // if simpleQuery is true, we can do a simpler query on just audio_genres_map
+            // we can do this if we have no keywords and our projection includes just columns
+            // from audio_genres_map
+            Boolean simpleQuery = (keywords == NULL && projectionIn != NULL
+                   && (selection.IsNull() || selection.EqualsIgnoreCase("genre_id=?")));
+            if (projectionIn != NULL) {
+                for (Int32 i = 0; i < plength; i++) {
+                    String p = (*projectionIn)[i];
+                    if (p.Equals("_id")) {
+                        // note, this is different from playlist below, because
+                        // "_id" used to (wrongly) be the audio id in this query, not
+                        // the row id of the entry in the map, and we preserve this
+                        // behavior for backwards compatibility
+                        simpleQuery = FALSE;
+                    }
+                    if (simpleQuery && !(p.Equals("audio_id") ||
+                        p.Equals("genre_id"))) {
+                        simpleQuery = FALSE;
+                    }
+                }
+            }
+            if (simpleQuery) {
+                qb->SetTables(String("audio_genres_map_noid"));
+                if (table == AUDIO_GENRES_ID_MEMBERS) {
+                    qb->AppendWhere(CoreUtils::Convert("genre_id=?"));
+                    obj = NULL;
+                    segments->Get(3, (IInterface**)&obj);
+                    prependArgs.PushBack(TO_STR(obj));
+                }
+            }
+            else {
+                qb->SetTables(String("audio_genres_map_noid, audio"));
+                qb->AppendWhere(CoreUtils::Convert("audio._id = audio_id"));
+                if (table == AUDIO_GENRES_ID_MEMBERS) {
+                    qb->AppendWhere(CoreUtils::Convert(" AND genre_id=?"));
+                    obj = NULL;
+                    segments->Get(3, (IInterface**)&obj);
+                    prependArgs.PushBack(TO_STR(obj));
+                }
+                AutoPtr<ICharSequence> andCs = CoreUtils::Convert(" AND ");
+                StringBuilder sb(IMediaStoreAudioAudioColumns::ARTIST_KEY);
+                sb += "||"; sb += IMediaStoreAudioAudioColumns::ALBUM_KEY;
+                sb += "||"; sb += IMediaStoreAudioAudioColumns::TITLE_KEY;
+                sb += " LIKE ? ESCAPE '\\'";
+                acs = CoreUtils::Convert(sb.ToString());
+                for (Int32 i = 0; i < klength; i++) {
+                    qb->AppendWhere(andCs);
+                    qb->AppendWhere(acs);
+                    StringBuilder sb("%"); sb += (*keywords)[i]; sb += "%";
+                    prependArgs.PushBack(sb.ToString());
+                }
+            }
+            break;
+        }
 
-       case AUDIO_PLAYLISTS:
-       {
-           qb->SetTables(String("audio_playlists"));
-           break;
-       }
+        case AUDIO_PLAYLISTS:
+        {
+            qb->SetTables(String("audio_playlists"));
+            break;
+        }
 
-       case AUDIO_PLAYLISTS_ID:
-       {
-           qb->SetTables(String("audio_playlists"));
-           acs = NULL;
-           acs = CoreUtils::Convert(String("_id=?"));
-           qb->AppendWhere(acs);
-           obj = NULL;
-           segments->Get(3, (IInterface**)&obj);
-           seg = Object::ToString(obj);
-           prependArgs.PushBack(seg);
-           break;
-       }
+        case AUDIO_PLAYLISTS_ID:
+        {
+            qb->SetTables(String("audio_playlists"));
+            qb->AppendWhere(CoreUtils::Convert("_id=?"));
+            obj = NULL;
+            segments->Get(3, (IInterface**)&obj);
+            prependArgs.PushBack(TO_STR(obj));
+            break;
+        }
 
-       case AUDIO_PLAYLISTS_ID_MEMBERS_ID:
-       case AUDIO_PLAYLISTS_ID_MEMBERS:
-       {
-           // if simpleQuery is true, we can do a simpler query on just audio_playlists_map
-           // we can do this if we have no keywords and our projection includes just columns
-           // from audio_playlists_map
-           Boolean simpleQuery = (keywords == NULL && projectionIn != NULL
+        case AUDIO_PLAYLISTS_ID_MEMBERS_ID:
+        case AUDIO_PLAYLISTS_ID_MEMBERS:
+        {
+            // if simpleQuery is true, we can do a simpler query on just audio_playlists_map
+            // we can do this if we have no keywords and our projection includes just columns
+            // from audio_playlists_map
+            Boolean simpleQuery = (keywords == NULL && projectionIn != NULL
                    && (selection.IsNull() || selection.EqualsIgnoreCase("playlist_id=?")));
-           if (projectionIn != NULL) {
+            if (projectionIn != NULL) {
                for (Int32 i = 0; i < plength; i++) {
                    String p = (*projectionIn)[i];
                    if (simpleQuery && !(p.Equals("audio_id") ||
@@ -6235,273 +6322,246 @@ ECode MediaProvider::Query(
                        simpleQuery = FALSE;
                    }
                    if (p.Equals("_id")) {
-                       (*projectionIn)[i] = String("audio_playlists_map._id AS _id");
+                       (*projectionIn)[i] = "audio_playlists_map._id AS _id";
                    }
                }
-           }
-           if (simpleQuery) {
+            }
+            if (simpleQuery) {
                qb->SetTables(String("audio_playlists_map"));
-               acs = NULL;
-               acs = CoreUtils::Convert(String("playlist_id=?"));
-               qb->AppendWhere(acs);
+               qb->AppendWhere(CoreUtils::Convert("playlist_id=?"));
                obj = NULL;
                segments->Get(3, (IInterface**)&obj);
-               seg = Object::ToString(obj);
-               prependArgs.PushBack(seg);
-           }
-           else {
+               prependArgs.PushBack(TO_STR(obj));
+            }
+            else {
                qb->SetTables(String("audio_playlists_map, audio"));
-               acs = NULL;
-               acs = CoreUtils::Convert(String("audio._id = audio_id AND playlist_id=?"));
-               qb->AppendWhere(acs);
+               qb->AppendWhere(CoreUtils::Convert("audio._id = audio_id AND playlist_id=?"));
                obj = NULL;
                segments->Get(3, (IInterface**)&obj);
-               seg = Object::ToString(obj);
-               prependArgs.PushBack(seg);
-               for (Int32 i = 0; keywords != NULL && i < klength; i++) {
-                   acs = NULL;
-                   acs = CoreUtils::Convert(String(" AND "));
+               prependArgs.PushBack(TO_STR(obj));
+
+               AutoPtr<ICharSequence> andCs = CoreUtils::Convert(" AND ");
+               StringBuilder sb(IMediaStoreAudioAudioColumns::ARTIST_KEY);
+               sb += "||"; sb += IMediaStoreAudioAudioColumns::ALBUM_KEY;
+               sb += "||"; sb += IMediaStoreAudioAudioColumns::TITLE_KEY;
+               sb += " LIKE ? ESCAPE '\\'";
+               acs = CoreUtils::Convert(sb.ToString());
+               for (Int32 i = 0; i < klength; i++) {
+                   qb->AppendWhere(andCs);
                    qb->AppendWhere(acs);
-                   acs = NULL;
-                   acs = CoreUtils::Convert(IMediaStoreAudioAudioColumns::ARTIST_KEY +
-                           "||" + IMediaStoreAudioAudioColumns::ALBUM_KEY +
-                           "||" + IMediaStoreAudioAudioColumns::TITLE_KEY +
-                           " LIKE ? ESCAPE '\\'");
-                   qb->AppendWhere(acs);
-                   prependArgs.PushBack(String("%") + (*keywords)[i] + "%");
+                   StringBuilder sb("%"); sb += (*keywords)[i]; sb += "%";
+                   prependArgs.PushBack(sb.ToString());
                }
-           }
-           if (table == AUDIO_PLAYLISTS_ID_MEMBERS_ID) {
-               acs = NULL;
-               acs = CoreUtils::Convert(String(" AND audio_playlists_map._id=?"));
-               qb->AppendWhere(acs);
+            }
+            if (table == AUDIO_PLAYLISTS_ID_MEMBERS_ID) {
+               qb->AppendWhere(CoreUtils::Convert(" AND audio_playlists_map._id=?"));
                obj = NULL;
                segments->Get(5, (IInterface**)&obj);
-               seg = Object::ToString(obj);
-               prependArgs.PushBack(seg);
-           }
-           break;
-       }
+               prependArgs.PushBack(TO_STR(obj));
+            }
+            break;
+        }
 
-       case VIDEO_MEDIA:
-       {
-           qb->SetTables(String("video"));
-           break;
-       }
-       case VIDEO_MEDIA_ID:
-       {
-           qb->SetTables(String("video"));
-           acs = NULL;
-           acs = CoreUtils::Convert(String("_id=?"));
-           qb->AppendWhere(acs);
-           obj = NULL;
-           segments->Get(3, (IInterface**)&obj);
-           seg = Object::ToString(obj);
-           prependArgs.PushBack(seg);
-           break;
-       }
+        case VIDEO_MEDIA:
+        {
+            qb->SetTables(String("video"));
+            break;
+        }
+        case VIDEO_MEDIA_ID:
+        {
+            qb->SetTables(String("video"));
+            qb->AppendWhere(CoreUtils::Convert("_id=?"));
+            obj = NULL;
+            segments->Get(3, (IInterface**)&obj);
+            prependArgs.PushBack(TO_STR(obj));
+            break;
+        }
 
-       case VIDEO_THUMBNAILS_ID:
-       {
-           hasThumbnailId = TRUE;
-           break;
-       }
-
-       case VIDEO_THUMBNAILS:
-       {
+        case VIDEO_THUMBNAILS_ID:
+        {
+            hasThumbnailId = TRUE;
+            //fall through
+        }
+        case VIDEO_THUMBNAILS:
+        {
            if (!QueryThumbnail(qb, uri, String("videothumbnails"), String("video_id"), hasThumbnailId)) {
-               *ret = NULL;
                return NOERROR;
            }
            break;
-       }
+        }
 
-       case AUDIO_ARTISTS:
-       {
-           if (projectionIn != NULL && plength == 1 &&  selectionArgs == NULL
-                   && (selection.IsNull() || selection.GetLength() == 0)
-                   && (*projectionIn)[0].EqualsIgnoreCase("count(*)")
-                   && keywords != NULL) {
-               //Log.i("@@@@", "taking fast path for counting artists");
-               qb->SetTables(String("audio_meta"));
-               (*projectionIn)[0] = String("count(distinct artist_id)");
-               acs = NULL;
-               acs = CoreUtils::Convert(String("is_music=1"));
-               qb->AppendWhere(acs);
-           } else {
-               qb->SetTables(String("artist_info"));
-               for (Int32 i = 0; keywords != NULL && i < klength; i++) {
+        case AUDIO_ARTISTS:
+        {
+            if (projectionIn != NULL && plength == 1 &&  selectionArgs == NULL
+               && (selection.IsNull() || selection.GetLength() == 0)
+               && (*projectionIn)[0].EqualsIgnoreCase("count(*)")
+               && keywords != NULL) {
+                //Log.i("@@@@", "taking fast path for counting artists");
+                qb->SetTables(String("audio_meta"));
+                (*projectionIn)[0] = "count(distinct artist_id)";
+                qb->AppendWhere(CoreUtils::Convert("is_music=1"));
+            }
+            else {
+                qb->SetTables(String("artist_info"));
+                AutoPtr<ICharSequence> andCs = CoreUtils::Convert(" AND ");
+                StringBuilder sb(IMediaStoreAudioAudioColumns::ARTIST_KEY);
+                sb += " LIKE ? ESCAPE '\\'";
+                acs = CoreUtils::Convert(sb.ToString());
+                for (Int32 i = 0; i < klength; i++) {
                    if (i > 0) {
-                       acs = NULL;
-                       acs = CoreUtils::Convert(String(" AND "));
-                       qb->AppendWhere(acs);
+                       qb->AppendWhere(andCs);
                    }
-                   acs = NULL;
-                   acs = CoreUtils::Convert(IMediaStoreAudioAudioColumns::ARTIST_KEY +
-                           " LIKE ? ESCAPE '\\'");
                    qb->AppendWhere(acs);
-                   prependArgs.PushBack(String("%") + (*keywords)[i] + "%");
-               }
-           }
-           break;
-       }
-       case AUDIO_ARTISTS_ID:
-       {
+                   StringBuilder sb("%"); sb += (*keywords)[i]; sb += "%";
+                   prependArgs.PushBack(sb.ToString());
+                }
+            }
+            break;
+        }
+        case AUDIO_ARTISTS_ID:
+        {
            qb->SetTables(String("artist_info"));
-           acs = NULL;
-           acs = CoreUtils::Convert(String("_id=?"));
-           qb->AppendWhere(acs);
+           qb->AppendWhere(CoreUtils::Convert("_id=?"));
            obj = NULL;
            segments->Get(3, (IInterface**)&obj);
-           seg = Object::ToString(obj);
-           prependArgs.PushBack(seg);
+           prependArgs.PushBack(TO_STR(obj));
            break;
-       }//
+        }//
 
-       case AUDIO_ARTISTS_ID_ALBUMS:
-       {
-           String aid;
-           obj = NULL;
-           segments->Get(3, (IInterface**)&obj);
-           aid = Object::ToString(obj);
-           qb->SetTables(String("audio LEFT OUTER JOIN album_art ON") +
-                   " audio.album_id=album_art.album_id");
-           acs = NULL;
-           acs = CoreUtils::Convert(String("is_music=1 AND audio.album_id IN (SELECT album_id FROM ") +
+        case AUDIO_ARTISTS_ID_ALBUMS:
+        {
+            qb->SetTables(String("audio LEFT OUTER JOIN album_art ON"
+                   " audio.album_id=album_art.album_id"));
+            acs = CoreUtils::Convert("is_music=1 AND audio.album_id IN (SELECT album_id FROM "
                    "artists_albums_map WHERE artist_id=?)");
-           qb->AppendWhere(acs);
-           prependArgs.PushBack(aid);
-           for (Int32 i = 0; keywords != NULL && i < klength; i++) {
-               acs = NULL;
-               acs = CoreUtils::Convert(String(" AND "));
-               qb->AppendWhere(acs);
-               acs = NULL;
-               acs = CoreUtils::Convert(IMediaStoreAudioAudioColumns::ARTIST_KEY +
-                       "||" + IMediaStoreAudioAudioColumns::ALBUM_KEY +
-                       " LIKE ? ESCAPE '\\'");
-               qb->AppendWhere(acs);
-               prependArgs.PushBack(String("%") + (*keywords)[i] + "%");
-           }
-           groupBy = String("audio.album_id");
-           InitHashMapWithString(IMediaStoreAudioAlbumColumns::NUMBER_OF_SONGS_FOR_ARTIST, String("count(CASE WHEN artist_id==") + aid + " THEN 'foo' ELSE NULL END) AS " +
-                   IMediaStoreAudioAlbumColumns::NUMBER_OF_SONGS_FOR_ARTIST, sArtistAlbumsMap);
-           qb->SetProjectionMap(IMap::Probe(sArtistAlbumsMap));
-           break;
-       }
-       case AUDIO_ALBUMS:
-       {
-           if (projectionIn != NULL && plength == 1 &&  selectionArgs == NULL
-                   && (selection == NULL || selection.GetLength() == 0)
-                   && (*projectionIn)[0].EqualsIgnoreCase("count(*)")
-                   && keywords != NULL) {
-               //Log.i("@@@@", "taking fast path for counting albums");
-               qb->SetTables(String("audio_meta"));
-               (*projectionIn)[0] = String("count(distinct album_id)");
-               acs = NULL;
-               acs = CoreUtils::Convert(String("is_music=1"));
-               qb->AppendWhere(acs);
-           } else {
-               qb->SetTables(String("album_info"));
-               for (Int32 i = 0; keywords != NULL && i < klength; i++) {
-                   if (i > 0) {
-                       acs = NULL;
-                       acs = CoreUtils::Convert(String(" AND "));
-                       qb->AppendWhere(acs);
-                   }
-                   acs = NULL;
-                   acs = CoreUtils::Convert(IMediaStoreAudioAudioColumns::ARTIST_KEY +
-                           "||" + IMediaStoreAudioAudioColumns::ALBUM_KEY +
-                           " LIKE ? ESCAPE '\\'");
-                   qb->AppendWhere(acs);
-                   prependArgs.PushBack(String("%") + (*keywords)[i] + "%");
-               }
-           }
-           break;
-       }
+            qb->AppendWhere(acs);
+            obj = NULL;
+            segments->Get(3, (IInterface**)&obj);
+            String aid = TO_STR(obj);
+            prependArgs.PushBack(aid);
+            AutoPtr<ICharSequence> andCs = CoreUtils::Convert(" AND ");
+            StringBuilder sb(IMediaStoreAudioAudioColumns::ARTIST_KEY);
+            sb += "||"; sb += IMediaStoreAudioAudioColumns::ALBUM_KEY;
+            sb += " LIKE ? ESCAPE '\\'";
+            acs = CoreUtils::Convert(sb.ToString());
+            for (Int32 i = 0; i < klength; i++) {
+                qb->AppendWhere(andCs);
+                qb->AppendWhere(acs);
+                StringBuilder sb("%"); sb += (*keywords)[i]; sb += "%";
+                prependArgs.PushBack(sb.ToString());
+            }
+            groupBy = "audio.album_id";
+            sb.Reset(); sb += "count(CASE WHEN artist_id==";
+            sb += aid;  sb += " THEN 'foo' ELSE NULL END) AS ";
+            sb += IMediaStoreAudioAlbumColumns::NUMBER_OF_SONGS_FOR_ARTIST;
+            InitHashMapWithString(IMediaStoreAudioAlbumColumns::NUMBER_OF_SONGS_FOR_ARTIST,
+                sb.ToString(), sArtistAlbumsMap);
+            qb->SetProjectionMap(IMap::Probe(sArtistAlbumsMap));
+            break;
+        }
+        case AUDIO_ALBUMS:
+        {
+            if (projectionIn != NULL && plength == 1 &&  selectionArgs == NULL
+                && (selection == NULL || selection.GetLength() == 0)
+                && (*projectionIn)[0].EqualsIgnoreCase("count(*)")
+                && keywords != NULL) {
+                //Log.i("@@@@", "taking fast path for counting albums");
+                qb->SetTables(String("audio_meta"));
+                (*projectionIn)[0] = "count(distinct album_id)";
+                qb->AppendWhere(CoreUtils::Convert("is_music=1"));
+            }
+            else {
+                qb->SetTables(String("album_info"));
+                AutoPtr<ICharSequence> andCs = CoreUtils::Convert(" AND ");
+                StringBuilder sb(IMediaStoreAudioAudioColumns::ARTIST_KEY);
+                sb += "||"; sb += IMediaStoreAudioAudioColumns::ALBUM_KEY;
+                sb += " LIKE ? ESCAPE '\\'";
+                acs = CoreUtils::Convert(sb.ToString());
+                for (Int32 i = 0; i < klength; i++) {
+                    if (i > 0) {
+                        qb->AppendWhere(andCs);
+                    }
+                    qb->AppendWhere(acs);
+                    StringBuilder sb("%"); sb += (*keywords)[i]; sb += "%";
+                    prependArgs.PushBack(sb.ToString());
+                }
+            }
+            break;
+        }
 
-       case AUDIO_ALBUMS_ID:
-       {
-           qb->SetTables(String("album_info"));
-           acs = NULL;
-           acs = CoreUtils::Convert(String("_id=?"));
-           qb->AppendWhere(acs);
-           obj = NULL;
-           segments->Get(3, (IInterface**)&obj);
-           seg = Object::ToString(obj);
-           prependArgs.PushBack(seg);
-           break;
-       }
+        case AUDIO_ALBUMS_ID:
+        {
+            qb->SetTables(String("album_info"));
+            qb->AppendWhere(CoreUtils::Convert("_id=?"));
+            obj = NULL;
+            segments->Get(3, (IInterface**)&obj);
+            prependArgs.PushBack(TO_STR(obj));
+            break;
+        }
 
-       case AUDIO_ALBUMART_ID:
-       {
+        case AUDIO_ALBUMART_ID:
+        {
            qb->SetTables(String("album_art"));
-           acs = NULL;
-           acs = CoreUtils::Convert(String("album_id=?"));
-           qb->AppendWhere(acs);
+           qb->AppendWhere(CoreUtils::Convert("album_id=?"));
            obj = NULL;
            segments->Get(3, (IInterface**)&obj);
-           seg = Object::ToString(obj);
-           prependArgs.PushBack(seg);
+           prependArgs.PushBack(TO_STR(obj));
            break;
-       }
+        }
 
-       case AUDIO_SEARCH_LEGACY:
-       {
+        case AUDIO_SEARCH_LEGACY:
+        {
            Logger::W(TAG, "Legacy media search Uri used. Please update your code.");
-           break;
            // fall through
-       }
-       case AUDIO_SEARCH_FANCY:
-       case AUDIO_SEARCH_BASIC:
-       {
+        }
+        case AUDIO_SEARCH_FANCY:
+        case AUDIO_SEARCH_BASIC:
+        {
            AutoPtr<ICursor> cc;
            cc = DoAudioSearch(db, qb, uri, projectionIn, selection,
                    Combine(prependArgs, selectionArgs), sort, table, limit);
            *ret = cc;
            REFCOUNT_ADD(*ret);
            return NOERROR;
-       }
+        }
 
-       case FILES_ID:
-       case MTP_OBJECTS_ID:
-       {
-           acs = NULL;
-           acs = CoreUtils::Convert(String("_id=?"));
-           qb->AppendWhere(acs);
+        case FILES_ID:
+        case MTP_OBJECTS_ID:
+        {
+           qb->AppendWhere(CoreUtils::Convert("_id=?"));
            obj = NULL;
            segments->Get(2, (IInterface**)&obj);
-           seg = Object::ToString(obj);
-           prependArgs.PushBack(seg);
-       }
-       // fall through
-       case FILES:
-       case MTP_OBJECTS:
-       {
+           prependArgs.PushBack(TO_STR(obj));
+            // fall through
+        }
+        case FILES:
+        case MTP_OBJECTS:
+        {
            qb->SetTables(String("files"));
            break;
-       }
+        }
 
-       case MTP_OBJECT_REFERENCES:
-       {
+        case MTP_OBJECT_REFERENCES:
+        {
            obj = NULL;
            segments->Get(2, (IInterface**)&obj);
-           seg = Object::ToString(obj);
-           Int32 handle = StringUtils::ParseInt32(seg);
-           *ret = GetObjectReferences(((DatabaseHelper*)helper.Get()), db, handle);
+           Int32 handle = StringUtils::ParseInt32(TO_STR(obj));
+           AutoPtr<ICursor> cc = GetObjectReferences(dbh, db, handle);
+           *ret = cc;
            REFCOUNT_ADD(*ret);
            return NOERROR;
-       }
-       case MEDIA_BOOKMARK:
-       {
+        }
+
+        case MEDIA_BOOKMARK:
+        {
            qb->SetTables(String("bookmarks"));
            break;
-       }
+        }
         case MEDIA_BOOKMARK_ID:
         {
            qb->SetTables(String("bookmarks"));
            obj = NULL;
            segments->Get(2, (IInterface**)&obj);
-           seg = Object::ToString(obj);
            StringBuilder sb("_id = ");
            sb += TO_CSTR(obj);
            acs = CoreUtils::Convert(sb.ToString());
@@ -6515,11 +6575,13 @@ ECode MediaProvider::Query(
         }
     }
 
-    // Log.v(TAG, "query = "+ qb.buildQuery(projectionIn, selection,
-    //        combine(prependArgs, selectionArgs), groupBy, null, sort, limit));
+    String nullStr;
+    AutoPtr<ArrayOf<String> > args = Combine(prependArgs, selectionArgs);
+    String querySql;
+    qb->BuildQuery(projectionIn, selection, args, groupBy, nullStr, sort, limit, &querySql);
+    Logger::V(TAG, "query = [%s]", querySql.string());
     AutoPtr<ICursor> ic;
-    qb->Query(db, projectionIn, selection,
-           Combine(prependArgs, selectionArgs), groupBy, String(NULL), sort, limit, (ICursor**)&ic);//
+    qb->Query(db, projectionIn, selection, args, groupBy, nullStr, sort, limit, (ICursor**)&ic);
 
     if (ic != NULL) {
        String nonotify;
@@ -7186,7 +7248,8 @@ Int64 MediaProvider::GetKeyIdForName(
                        AutoPtr<IUri> uri;
                        AutoPtr<IUriHelper> uh;
                        CUriHelper::AcquireSingleton((IUriHelper**)&uh);
-                       uh->Parse(String("content://media/") + volume + "/audio/" + table + "/" + rowId, (IUri**)&uri);
+                       sb.Reset(); sb += "content://media/"; sb += volume; sb += "/audio/"; sb += table; sb += "/"; sb += rowId;
+                       uh->Parse(sb.ToString(), (IUri**)&uri);
                        AutoPtr<IContext> context;
                        GetContext((IContext**)&context);
                        AutoPtr<IContentResolver> resolver;
@@ -7219,7 +7282,8 @@ Int64 MediaProvider::GetKeyIdForName(
                        AutoPtr<IUri> uri;
                        AutoPtr<IUriHelper> uh;
                        CUriHelper::AcquireSingleton((IUriHelper**)&uh);
-                       uh->Parse(String("content://media/") + volume + "/audio/" + table + "/" + rowId, (IUri**)&uri);
+                       sb.Reset(); sb += "content://media/"; sb += volume; sb += "/audio/"; sb += table; sb += "/"; sb += rowId;
+                       uh->Parse(sb.ToString(), (IUri**)&uri);
                        AutoPtr<IContext> context;
                        GetContext((IContext**)&context);
                        AutoPtr<IContentResolver> resolver;
@@ -7460,8 +7524,6 @@ AutoPtr<IUri> MediaProvider::AttachVolume(
     if (callingPid != myPid) {
        Logger::E(TAG, "Opening and closing databases not allowed.");
        return NULL;
-       // throw new SecurityException(
-       //         "Opening and closing databases not allowed.");
     }
 
     AutoPtr<IUriHelper> uh;
@@ -7516,15 +7578,15 @@ AutoPtr<IUri> MediaProvider::AttachVolume(
                    }//
 
                    Logger::E(TAG, "Can't obtain external volume ID for %s volume.", volume.string());
-                   // throw new IllegalArgumentException("Can't obtain external volume ID for " +
-                   //         volume + " volume.");
                }
 
                // generate database name based on volume ID
-               dbName = String("external-") + StringUtils::ToHexString(volumeId) + ".db";
+               StringBuilder sb("external-");
+               sb += StringUtils::ToHexString(volumeId);
+               sb += ".db";
+               dbName = sb.ToString();
                helper = new DatabaseHelper();
-               helper->constructor(this, context, dbName, FALSE,
-                       FALSE, mObjectRemovedCallback);
+               helper->constructor(this, context, dbName, FALSE, FALSE, mObjectRemovedCallback);
                mVolumeId = volumeId;
            }
            else {
@@ -7543,31 +7605,31 @@ AutoPtr<IUri> MediaProvider::AttachVolume(
                    AutoPtr<IFile> file;
                    AutoPtr<ArrayOf<String> > dblist;
                    context->GetDatabaseList((ArrayOf<String>**)&dblist);
-                   Int32 dblength = dblist->GetLength();
-                   // for (String database : context.databaseList()) {
-                   String database;//
-
-                   for(Int32 i = 0; i < dblength; i++) {
-                       database = (*dblist)[i];
-                       if (database.StartWith("external-") && database.EndWith(".db")) {
-                           file = NULL;
-                           context->GetDatabasePath(database, (IFile**)&file);
-                           Int64 flf;
-                           file->GetLastModified(&flf);
-                           Int64 lmf;
-                           recentDbFile->GetLastModified(&lmf);
-                           if (recentDbFile == NULL) {
-                               recentDbFile = file;
-                           } else if (flf > lmf) {
-                               recentDbFile->GetName(&dbName);
-                               context->DeleteDatabase(dbName, &flag);
-                               recentDbFile = file;
-                           } else {
-                               file->GetName(&dbName);
-                               context->DeleteDatabase(dbName, &flag);
+                   if (dblist != NULL) {
+                        Int32 dblength = dblist->GetLength();
+                       String database;
+                       for(Int32 i = 0; i < dblength; i++) {
+                           database = (*dblist)[i];
+                           if (database.StartWith("external-") && database.EndWith(".db")) {
+                               file = NULL;
+                               context->GetDatabasePath(database, (IFile**)&file);
+                               Int64 flf, lmf;
+                               file->GetLastModified(&flf);
+                               recentDbFile->GetLastModified(&lmf);
+                               if (recentDbFile == NULL) {
+                                   recentDbFile = file;
+                               } else if (flf > lmf) {
+                                   recentDbFile->GetName(&dbName);
+                                   context->DeleteDatabase(dbName, &flag);
+                                   recentDbFile = file;
+                               } else {
+                                   file->GetName(&dbName);
+                                   context->DeleteDatabase(dbName, &flag);
+                               }
                            }
                        }
                    }
+
                    if (recentDbFile != NULL) {
                        recentDbFile->RenameTo(dbFile, &flag);
                        if (flag) {
@@ -7585,15 +7647,14 @@ AutoPtr<IUri> MediaProvider::AttachVolume(
                }
                dbFile->GetName(&dbName);
                helper = new DatabaseHelper();
-               helper->constructor(this, context, dbName, FALSE,
-                       FALSE, mObjectRemovedCallback);
+               helper->constructor(this, context, dbName, FALSE, FALSE, mObjectRemovedCallback);
            }
        } else {
            Logger::E(TAG, "There is no volume named %s", volume.string());
-           // throw new IllegalArgumentException("There is no volume named " + volume);
+           return NULL;
        }
 
-       mDatabases->Put(CoreUtils::Convert(volume), IDatabaseHelper::Probe(helper));
+       mDatabases->Put(CoreUtils::Convert(volume), (IDatabaseHelper*)helper.Get());
 
        if (!helper->mInternal) {
            // create default directories (only happens on first boot)
@@ -7610,14 +7671,14 @@ AutoPtr<IUri> MediaProvider::AttachVolume(
            HashSet<String> fileSet;
            if (files != NULL) {
                 Int32 flength = files->GetLength();
-               String hsPath;
-               for (Int32 i = 0; files != NULL && i < flength; i++) {
-                   (*files)[i]->GetPath(&hsPath);
-                   fileSet.Insert(hsPath);
-               }
+                String hsPath;
+                for (Int32 i = 0; files != NULL && i < flength; i++) {
+                    (*files)[i]->GetPath(&hsPath);
+                    fileSet.Insert(hsPath);
+                }
            }
 
-
+           String nullStr;
            AutoPtr<ICursor> cursor;
            AutoPtr<ArrayOf<String> > qarr = ArrayOf<String>::Alloc(1);
            (*qarr)[0] = IMediaStoreAudioAlbumColumns::ALBUM_ART;//
@@ -7626,7 +7687,8 @@ AutoPtr<IUri> MediaProvider::AttachVolume(
            CMediaStoreAudioAlbums::AcquireSingleton((IMediaStoreAudioAlbums**)&msaa);
            AutoPtr<IUri> quri;
            msaa->GetEXTERNAL_CONTENT_URI((IUri**)&quri);
-           Query(quri, qarr, String(NULL), NULL, String(NULL), (ICursor**)&cursor);
+           Logger::D(TAG, " >>> Query:[%s], projection:[%s]", TO_CSTR(quri), IMediaStoreAudioAlbumColumns::ALBUM_ART.string());
+           Query(quri, qarr, nullStr, NULL, nullStr, (ICursor**)&cursor);
            // try {
                String arrStr;
                while (cursor != NULL && (cursor->MoveToNext(&flag), flag)) {
@@ -7641,10 +7703,10 @@ AutoPtr<IUri> MediaProvider::AttachVolume(
 
            HashSet<String>::Iterator it = fileSet.Begin();
            String fileName;
-           AutoPtr<IFile> tFile;
            for (; it != fileSet.End(); ++it) {
                fileName = *it;
                if (LOCAL_LOGV) Logger::V(TAG, "deleting obsolete album art %s", fileName.string());
+               AutoPtr<IFile> tFile;
                CFile::New(fileName, (IFile**)&tFile);
                tFile->Delete();
            }

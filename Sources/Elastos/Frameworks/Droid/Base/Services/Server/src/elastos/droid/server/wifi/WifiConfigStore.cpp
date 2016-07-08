@@ -4547,20 +4547,20 @@ void WifiConfigStore::ReadIpAndProxyConfigurations()
         Int32 autoJoinStatus = 0;
         Boolean duplicateNetwork;
         if (config == NULL || (config->GetAutoJoinStatus(&autoJoinStatus), autoJoinStatus) == IWifiConfiguration::AUTO_JOIN_DELETED) {
-            String str("configuration found for missing network, nid=");
-            str += id; str += ", ignored, networks.size=";
-            str += size;
-            Loge(str);
+            // String str("configuration found for missing network, nid=");
+            // str += id; str += ", ignored, networks.size=";
+            // str += size;
+            // Loge(str);
         }
         else if (config != NULL && (config->GetDuplicateNetwork(&duplicateNetwork), duplicateNetwork) == TRUE) {
             if (VDBG) {
-                Int32 networkId = 0;
-                config->GetNetworkId(&networkId);
-                String ssid;
-                config->GetSSID(&ssid);
-                String str("Network configuration is not updated for duplicate network id=");
-                str += networkId; str += " SSID="; str += ssid;
-                Loge(str);
+                // Int32 networkId = 0;
+                // config->GetNetworkId(&networkId);
+                // String ssid;
+                // config->GetSSID(&ssid);
+                // String str("Network configuration is not updated for duplicate network id=");
+                // str += networkId; str += " SSID="; str += ssid;
+                // Loge(str);
             }
         }
         else {
@@ -4833,10 +4833,10 @@ AutoPtr<NetworkUpdateResult> WifiConfigStore::AddOrUpdateNetworkNative(
                                 netId,
                                 (*wepKeyVarNames)[i],
                                 (*wepKeys)[i])) {
-                        String str("failed to set wep_key");
-                        str += i; str += ": ";
-                        str += (*wepKeys)[i];
-                        Loge(str);
+                        // String str("failed to set wep_key");
+                        // str += i; str += ": ";
+                        // str += (*wepKeys)[i];
+                        // Loge(str);
                         goto setVariables;
                     }
                     hasSetKey = TRUE;
@@ -4851,9 +4851,9 @@ AutoPtr<NetworkUpdateResult> WifiConfigStore::AddOrUpdateNetworkNative(
                         netId,
                         IWifiConfiguration::wepTxKeyIdxVarName,
                         StringUtils::ToString(wepTxKeyIndex))) {
-                String str("failed to set wep_tx_keyidx: ");
-                str += wepTxKeyIndex;
-                Loge(str);
+                // String str("failed to set wep_tx_keyidx: ");
+                // str += wepTxKeyIndex;
+                // Loge(str);
                 goto setVariables;
             }
         }
@@ -4864,10 +4864,10 @@ AutoPtr<NetworkUpdateResult> WifiConfigStore::AddOrUpdateNetworkNative(
                     netId,
                     IWifiConfiguration::priorityVarName,
                     StringUtils::ToString(priority))) {
-            String str(ssid);
-            str += ": failed to set priority: ";
-            str += priority;
-            Loge(str);
+            // String str(ssid);
+            // str += ": failed to set priority: ";
+            // str += priority;
+            // Loge(str);
             goto setVariables;
         }
 
@@ -4877,10 +4877,10 @@ AutoPtr<NetworkUpdateResult> WifiConfigStore::AddOrUpdateNetworkNative(
                     netId,
                     IWifiConfiguration::hiddenSSIDVarName,
                     StringUtils::ToString(hiddenSSID ? 1 : 0))) {
-            String str(ssid);
-            str += ": failed to set hiddenSSID: ";
-            str += hiddenSSID;
-            Loge(str);
+            // String str(ssid);
+            // str += ": failed to set hiddenSSID: ";
+            // str += hiddenSSID;
+            // Loge(str);
             goto setVariables;
         }
 
@@ -4890,10 +4890,10 @@ AutoPtr<NetworkUpdateResult> WifiConfigStore::AddOrUpdateNetworkNative(
                     netId,
                     IWifiConfiguration::pmfVarName,
                     String("2"))) {
-            String str(ssid);
-            str += ": failed to set requirePMF: ";
-            str += requirePMF;
-            Loge(str);
+            // String str(ssid);
+            // str += ": failed to set requirePMF: ";
+            // str += requirePMF;
+            // Loge(str);
             goto setVariables;
         }
 
@@ -4982,10 +4982,10 @@ AutoPtr<NetworkUpdateResult> WifiConfigStore::AddOrUpdateNetworkNative(
                             key,
                             value)) {
                     RemoveKeys(enterpriseConfig);
-                    String str(ssid);
-                    str += ": failed to set ";
-                    str += key; str += ": "; str += value;
-                    Loge(str);
+                    // String str(ssid);
+                    // str += ": failed to set ";
+                    // str += key; str += ": "; str += value;
+                    // Loge(str);
                     goto setVariables;
                 }
             }
@@ -4997,9 +4997,9 @@ AutoPtr<NetworkUpdateResult> WifiConfigStore::AddOrUpdateNetworkNative(
     if (updateFailed) {
         if (newNetwork) {
             mWifiNative->RemoveNetwork(netId);
-            String str("Failed to set a network variable, removed network: ");
-            str += netId;
-            Loge(str);
+            // String str("Failed to set a network variable, removed network: ");
+            // str += netId;
+            // Loge(str);
         }
         return new NetworkUpdateResult(IWifiConfiguration::INVALID_NETWORK_ID);
     }
@@ -5078,12 +5078,12 @@ AutoPtr<NetworkUpdateResult> WifiConfigStore::AddOrUpdateNetworkNative(
         currentConfig->SetSelfAdded(FALSE);
         currentConfig->SetDidSelfAdd(FALSE);
         if (DBG) {
-            String ck;
-            currentConfig->ConfigKey(&ck);
-            String str("remove deleted status netId=");
-            str += netId; str += " ";
-            str += ck;
-            Loge(str);
+            // String ck;
+            // currentConfig->ConfigKey(&ck);
+            // String str("remove deleted status netId=");
+            // str += netId; str += " ";
+            // str += ck;
+            // Loge(str);
         }
     }
 

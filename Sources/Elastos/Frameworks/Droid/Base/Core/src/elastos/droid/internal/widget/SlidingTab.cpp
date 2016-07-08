@@ -506,7 +506,7 @@ ECode SlidingTab::constructor(
     AutoPtr<IDisplayMetrics> metrics;
     r->GetDisplayMetrics((IDisplayMetrics**)&metrics);
     mDensity = ((CDisplayMetrics*)metrics.Get())->mDensity;
-    if (DBG) Log(String("- Density: ") + mDensity);
+    // if (DBG) Log(String("- Density: ") + mDensity);
 
     mLeftSlider = new Slider(this,
         R::drawable::jog_tab_left_generic,

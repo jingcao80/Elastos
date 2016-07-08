@@ -381,7 +381,7 @@ private:
         /* [in] */ DatabaseHelper* helper,
         /* [in] */ ISQLiteDatabase* db);//
 
-    static CARAPI_(void) UpdateDatabase(
+    static CARAPI UpdateDatabase(
         /* [in] */ IContext* context,
         /* [in] */ ISQLiteDatabase* db,
         /* [in] */ Boolean internal,

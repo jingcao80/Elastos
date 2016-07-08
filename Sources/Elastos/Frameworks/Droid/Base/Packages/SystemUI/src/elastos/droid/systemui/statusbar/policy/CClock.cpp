@@ -8,6 +8,7 @@
 #include <elastos/droid/text/format/DateFormat.h>
 #include <elastos/core/Character.h>
 #include <elastos/core/StringUtils.h>
+#include <elastos/core/StringBuilder.h>
 
 using Elastos::Droid::Content::CIntentFilter;
 using Elastos::Droid::Content::IIntentFilter;
@@ -38,6 +39,7 @@ using Elastos::Core::CSystem;
 using Elastos::Core::ICharSequence;
 using Elastos::Core::ISystem;
 using Elastos::Core::StringUtils;
+using Elastos::Core::StringBuilder;
 using Libcore::ICU::CLocaleDataHelper;
 using Libcore::ICU::ILocaleDataHelper;
 using Libcore::ICU::ILocaleData;
@@ -266,8 +268,9 @@ AutoPtr<ICharSequence> CClock::GetSmallTime()
                 while (a > 0 && Character::IsWhitespace(format.GetChar(a - 1))) {
                     a--;
                 }
-                format = format.Substring(0, a) + MAGIC1 + format.Substring(a, b)
-                    + "a" + MAGIC2 + format.Substring(b + 1);
+                StringBuilder sb(format.Substring(0, a)); sb += MAGIC1; sb += format.Substring(a, b);
+                sb += "a"; sb += MAGIC2; sb += format.Substring(b + 1);
+                format = sb.ToString();
             }
         }
         CSimpleDateFormat::New(format, (ISimpleDateFormat**)&sdf);

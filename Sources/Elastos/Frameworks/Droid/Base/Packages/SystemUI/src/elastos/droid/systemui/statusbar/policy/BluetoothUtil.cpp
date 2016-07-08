@@ -2,11 +2,13 @@
 #include "elastos/droid/systemui/statusbar/policy/BluetoothUtil.h"
 #include <elastos/droid/bluetooth/BluetoothUuid.h>
 #include <elastos/droid/text/TextUtils.h>
+#include <elastos/core/StringBuilder.h>
 
 using Elastos::Droid::Bluetooth::IBluetoothAdapter;
 using Elastos::Droid::Bluetooth::BluetoothUuid;
 using Elastos::Droid::Text::TextUtils;
 using Elastos::Core::CString;
+using Elastos::Core::StringBuilder;
 using Elastos::Core::ICharSequence;
 
 namespace Elastos {
@@ -193,25 +195,25 @@ String BluetoothUtil::UuidToString(
     /* [in] */ IParcelUuid* uuid)
 {
     Boolean e = FALSE;
-    if (IObject::Probe(BluetoothUuid::AudioSink)->Equals(uuid, &e), e) return String("AudioSink");
-    if (IObject::Probe(BluetoothUuid::AudioSource)->Equals(uuid, &e), e) return String("AudioSource");
-    if (IObject::Probe(BluetoothUuid::AdvAudioDist)->Equals(uuid, &e), e) return String("AdvAudioDist");
-    if (IObject::Probe(BluetoothUuid::HSP)->Equals(uuid, &e), e) return String("HSP");
-    if (IObject::Probe(BluetoothUuid::HSP_AG)->Equals(uuid, &e), e) return String("HSP_AG");
-    if (IObject::Probe(BluetoothUuid::Handsfree)->Equals(uuid, &e), e) return String("Handsfree");
-    if (IObject::Probe(BluetoothUuid::Handsfree_AG)->Equals(uuid, &e), e) return String("Handsfree_AG");
-    if (IObject::Probe(BluetoothUuid::AvrcpController)->Equals(uuid, &e), e) return String("AvrcpController");
-    if (IObject::Probe(BluetoothUuid::AvrcpTarget)->Equals(uuid, &e), e) return String("AvrcpTarget");
-    if (IObject::Probe(BluetoothUuid::ObexObjectPush)->Equals(uuid, &e), e) return String("ObexObjectPush");
-    if (IObject::Probe(BluetoothUuid::Hid)->Equals(uuid, &e), e) return String("Hid");
-    if (IObject::Probe(BluetoothUuid::Hogp)->Equals(uuid, &e), e) return String("Hogp");
-    if (IObject::Probe(BluetoothUuid::PANU)->Equals(uuid, &e), e) return String("PANU");
-    if (IObject::Probe(BluetoothUuid::NAP)->Equals(uuid, &e), e) return String("NAP");
-    if (IObject::Probe(BluetoothUuid::BNEP)->Equals(uuid, &e), e) return String("BNEP");
-    if (IObject::Probe(BluetoothUuid::PBAP_PSE)->Equals(uuid, &e), e) return String("PBAP_PSE");
-    if (IObject::Probe(BluetoothUuid::MAP)->Equals(uuid, &e), e) return String("MAP");
-    if (IObject::Probe(BluetoothUuid::MNS)->Equals(uuid, &e), e) return String("MNS");
-    if (IObject::Probe(BluetoothUuid::MAS)->Equals(uuid, &e), e) return String("MAS");
+    if (Object::Equals(BluetoothUuid::AudioSink, uuid)) return String("AudioSink");
+    if (Object::Equals(BluetoothUuid::AudioSource, uuid)) return String("AudioSource");
+    if (Object::Equals(BluetoothUuid::AdvAudioDist, uuid)) return String("AdvAudioDist");
+    if (Object::Equals(BluetoothUuid::HSP, uuid)) return String("HSP");
+    if (Object::Equals(BluetoothUuid::HSP_AG, uuid)) return String("HSP_AG");
+    if (Object::Equals(BluetoothUuid::Handsfree, uuid)) return String("Handsfree");
+    if (Object::Equals(BluetoothUuid::Handsfree_AG, uuid)) return String("Handsfree_AG");
+    if (Object::Equals(BluetoothUuid::AvrcpController, uuid)) return String("AvrcpController");
+    if (Object::Equals(BluetoothUuid::AvrcpTarget, uuid)) return String("AvrcpTarget");
+    if (Object::Equals(BluetoothUuid::ObexObjectPush, uuid)) return String("ObexObjectPush");
+    if (Object::Equals(BluetoothUuid::Hid, uuid)) return String("Hid");
+    if (Object::Equals(BluetoothUuid::Hogp, uuid)) return String("Hogp");
+    if (Object::Equals(BluetoothUuid::PANU, uuid)) return String("PANU");
+    if (Object::Equals(BluetoothUuid::NAP, uuid)) return String("NAP");
+    if (Object::Equals(BluetoothUuid::BNEP, uuid)) return String("BNEP");
+    if (Object::Equals(BluetoothUuid::PBAP_PSE, uuid)) return String("PBAP_PSE");
+    if (Object::Equals(BluetoothUuid::MAP, uuid)) return String("MAP");
+    if (Object::Equals(BluetoothUuid::MNS, uuid)) return String("MNS");
+    if (Object::Equals(BluetoothUuid::MAS, uuid)) return String("MAS");
     if (uuid != NULL) {
         String s;
         IObject::Probe(uuid)->ToString(&s);
@@ -233,9 +235,13 @@ String BluetoothUtil::ConnectionStateToString(
 String BluetoothUtil::DeviceToString(
     /* [in] */ IBluetoothDevice* device)
 {
+    if (device == NULL) return String(NULL);
+
     String s, v;
-    return device == NULL ? String(NULL) :
-        ((device->GetAddress(&s), s) + (Char32)'[' + (device->GetAliasName(&v), v) + (Char32)']');
+    device->GetAddress(&s);
+    device->GetAliasName(&v);
+    StringBuilder sb(s); sb += "["; sb += v; sb += "]";
+    return sb.ToString();
 }
 
 String BluetoothUtil::UuidsToString(
@@ -260,17 +266,17 @@ Int32 BluetoothUtil::UuidToProfile(
     /* [in] */ IParcelUuid* uuid)
 {
     Boolean e = FALSE;
-    if (IObject::Probe(BluetoothUuid::AudioSink)->Equals(uuid, &e), e) return IBluetoothProfile::A2DP;
-    if (IObject::Probe(BluetoothUuid::AdvAudioDist)->Equals(uuid, &e), e) return IBluetoothProfile::A2DP;
+    if (Object::Equals(BluetoothUuid::AudioSink, uuid)) return IBluetoothProfile::A2DP;
+    if (Object::Equals(BluetoothUuid::AdvAudioDist, uuid)) return IBluetoothProfile::A2DP;
 
-    if (IObject::Probe(BluetoothUuid::HSP)->Equals(uuid, &e), e) return IBluetoothProfile::HEADSET;
-    if (IObject::Probe(BluetoothUuid::Handsfree)->Equals(uuid, &e), e) return IBluetoothProfile::HEADSET;
+    if (Object::Equals(BluetoothUuid::HSP, uuid)) return IBluetoothProfile::HEADSET;
+    if (Object::Equals(BluetoothUuid::Handsfree, uuid)) return IBluetoothProfile::HEADSET;
 
-    if (IObject::Probe(BluetoothUuid::MAP)->Equals(uuid, &e), e) return IBluetoothProfile::MAP;
-    if (IObject::Probe(BluetoothUuid::MNS)->Equals(uuid, &e), e) return IBluetoothProfile::MAP;
-    if (IObject::Probe(BluetoothUuid::MAS)->Equals(uuid, &e), e) return IBluetoothProfile::MAP;
+    if (Object::Equals(BluetoothUuid::MAP, uuid)) return IBluetoothProfile::MAP;
+    if (Object::Equals(BluetoothUuid::MNS, uuid)) return IBluetoothProfile::MAP;
+    if (Object::Equals(BluetoothUuid::MAS, uuid)) return IBluetoothProfile::MAP;
 
-    if (IObject::Probe(BluetoothUuid::AvrcpController)->Equals(uuid, &e), e) return IBluetoothProfile::AVRCP_CONTROLLER;
+    if (Object::Equals(BluetoothUuid::AvrcpController, uuid)) return IBluetoothProfile::AVRCP_CONTROLLER;
 
     return 0;
 }

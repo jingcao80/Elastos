@@ -76,6 +76,7 @@ ECode SQLiteProgram::constructor(
     if (bindArgs != NULL && bindArgs->GetLength() > mNumParameters) {
         Slogger::E("SQLiteProgram", "Too many bind arguments. %d arguments were provided"
             " but the statement needs %d arguments.", bindArgs->GetLength(), mNumParameters);
+        assert(0);
         return E_ILLEGAL_ARGUMENT_EXCEPTION;
     }
 

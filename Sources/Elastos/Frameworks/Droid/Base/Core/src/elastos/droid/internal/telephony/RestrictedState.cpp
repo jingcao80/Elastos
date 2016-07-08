@@ -1,5 +1,8 @@
 
 #include "elastos/droid/internal/telephony/RestrictedState.h"
+#include <elastos/core/StringBuilder.h>
+
+using Elastos::Core::StringBuilder;
 
 namespace Elastos {
 namespace Droid {
@@ -112,11 +115,9 @@ ECode RestrictedState::ToString(
         csString = "normal call";
     }
 
-    String res("Restricted State CS: ");
-    res += csString;
-    res += " PS:";
-    res += mPsRestricted;
-    *str = res;
+    StringBuilder sb("Restricted State CS: ");
+    sb += csString; sb += " PS:"; sb += mPsRestricted;
+    *str = sb.ToString();
     return NOERROR;
 }
 

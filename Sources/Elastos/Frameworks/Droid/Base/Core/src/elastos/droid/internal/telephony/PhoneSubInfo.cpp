@@ -352,11 +352,11 @@ void PhoneSubInfo::Dump(
     mContext->CheckCallingOrSelfPermission(Manifest::permission::DUMP, &permission);
     String str;
     if (permission != IPackageManager::PERMISSION_GRANTED) {
-        str = "Permission Denial: can't dump PhoneSubInfo from from pid=";
-        str += Binder::GetCallingPid();
-        str += ", uid=";
-        str += Binder::GetCallingUid();
-        pw->Println(str);
+        // str = "Permission Denial: can't dump PhoneSubInfo from from pid=";
+        // str += Binder::GetCallingPid();
+        // str += ", uid=";
+        // str += Binder::GetCallingUid();
+        // pw->Println(str);
         return;
     }
 

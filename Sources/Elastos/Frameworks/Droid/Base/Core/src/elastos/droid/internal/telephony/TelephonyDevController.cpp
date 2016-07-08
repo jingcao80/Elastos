@@ -170,9 +170,9 @@ ECode TelephonyDevController::HandleMessage(
         }
         break;
         default: {
-            String str("handleMessage: Unknown Event ");
-            str += what;
-            Loge(str);
+            // String str("handleMessage: Unknown Event ");
+            // str += what;
+            // Loge(str);
         break;
         }
     }
@@ -251,9 +251,9 @@ Int32 TelephonyDevController::GetModemCount()
         Int32 count = 0;
         mModems->GetSize(&count);
         if (DBG) {
-            String str("getModemCount: ");
-            str += count;
-            Logd(str);
+            // String str("getModemCount: ");
+            // str += count;
+            // Logd(str);
         }
         return count;
     }
@@ -276,19 +276,19 @@ ECode TelephonyDevController::GetModem(
 
         Int32 count = GetModemCount();
         if (index > count) {
-            String str("getModem: out-of-bounds access for modem device ");
-            str += index;
-            str += " max: ";
-            str += count;
-            Loge(str);
+            // String str("getModem: out-of-bounds access for modem device ");
+            // str += index;
+            // str += " max: ";
+            // str += count;
+            // Loge(str);
             *result = NULL;
             return NOERROR;
         }
 
         if (DBG) {
-            String str("getModem: ");
-            str += index;
-            Logd(str);
+            // String str("getModem: ");
+            // str += index;
+            // Logd(str);
         }
         AutoPtr<IInterface> p;
         mModems->Get(index, (IInterface**)&p);
@@ -307,9 +307,9 @@ ECode TelephonyDevController::GetSimCount(
         Int32 count = 0;
         mSims->GetSize(&count);
         if (DBG) {
-            String str("getSimCount: ");
-            str += count;
-            Logd(str);
+            // String str("getSimCount: ");
+            // str += count;
+            // Logd(str);
         }
         *result = count;
         return NOERROR;
@@ -334,19 +334,19 @@ ECode TelephonyDevController::GetSim(
         Int32 count = 0;
         GetSimCount(&count);
         if (index > count) {
-            String str("getSim: out-of-bounds access for sim device ");
-            str += index;
-            str += " max: ";
-            str += count;
-            Loge(str);
+            // String str("getSim: out-of-bounds access for sim device ");
+            // str += index;
+            // str += " max: ";
+            // str += count;
+            // Loge(str);
             *result = NULL;
             return NOERROR;
         }
 
         if (DBG) {
-            String str("getSim: ");
-            str += index;
-            Logd(str);
+            // String str("getSim: ");
+            // str += index;
+            // Logd(str);
         }
         AutoPtr<IInterface> p;
         mSims->Get(index, (IInterface**)&p);
@@ -375,19 +375,19 @@ ECode TelephonyDevController::GetModemForSim(
         Int32 count = 0;
         GetSimCount(&count);
         if (simIndex > count) {
-            String str("getModemForSim: out-of-bounds access for sim device ");
-            str += simIndex;
-            str += " max: ";
-            str += count;
-            Loge(str);
+            // String str("getModemForSim: out-of-bounds access for sim device ");
+            // str += simIndex;
+            // str += " max: ";
+            // str += count;
+            // Loge(str);
             *result = NULL;
             return NOERROR;
         }
 
         if (DBG) {
-            String str("getModemForSim ");
-            str += simIndex;
-            Logd(str);
+            // String str("getModemForSim ");
+            // str += simIndex;
+            // Logd(str);
         }
 
         AutoPtr<IHardwareConfig> sim;
@@ -428,19 +428,19 @@ ECode TelephonyDevController::GetAllSimsForModem(
 
         Int32 count = GetModemCount();
         if (modemIndex > count) {
-            String str("getAllSimsForModem: out-of-bounds access for modem device ");
-            str += modemIndex;
-            str += " max: ";
-            str += count;
-            Loge(str);
+            // String str("getAllSimsForModem: out-of-bounds access for modem device ");
+            // str += modemIndex;
+            // str += " max: ";
+            // str += count;
+            // Loge(str);
             *result = NULL;
             return NOERROR;
         }
 
         if (DBG) {
-            String str("getAllSimsForModem ");
-            str += modemIndex;
-            Logd(str);
+            // String str("getAllSimsForModem ");
+            // str += modemIndex;
+            // Logd(str);
         }
 
         AutoPtr<IArrayList> res;

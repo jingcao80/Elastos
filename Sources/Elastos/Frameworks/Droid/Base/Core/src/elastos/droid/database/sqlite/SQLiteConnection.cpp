@@ -672,15 +672,15 @@ ECode SQLiteConnection::NativePrepareStatement(
         // Error messages like 'near ")": syntax error' are not
         // always helpful enough, so construct an error string that
         // includes the query itself.
-        char *message = (char*) malloc(sqlLength + 50);
-        if (message) {
-            strcpy(message, ", while compiling: "); // less than 50 chars
-            strcat(message, sql.string());
-        }
-        Slogger::E(TAG, "%s, while compiling: %s", sqlite3_errstr(err), sql.string());
-        ECode ec = throw_sqlite3_exception(connection->db, message);
-        free(message);
+        StringBuilder sb(sqlite3_errstr(err));
+        sb += ", while compiling: [";
+        sb += sql;
+        sb += "]";
+        String info = sb.ToString();
+        Slogger::E(TAG, info.string());
+        ECode ec = throw_sqlite3_exception(connection->db, info.string());
         *result = 0;
+        assert(0);
         return ec;
     }
 

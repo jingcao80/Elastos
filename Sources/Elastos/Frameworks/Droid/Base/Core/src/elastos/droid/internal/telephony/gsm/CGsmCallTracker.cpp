@@ -796,7 +796,7 @@ void CGsmCallTracker::HandlePollCalls(
                 if (mHangupPendingMO) {
                     mHangupPendingMO = FALSE;
                     // try {
-                    if (IPhone::DEBUG_PHONE) Log(String("poll: hangupPendingMO, hangup conn ") + i);
+                    if (IPhone::DEBUG_PHONE) Logger::I(TAG, "poll: hangupPendingMO, hangup conn %d", i);
                     Hangup((*mConnections)[i]);
                     // } catch (CallStateException ex) {
                     //     Logger::E(TAG, "unexpected error on hangup");
@@ -953,8 +953,8 @@ void CGsmCallTracker::HandlePollCalls(
             }
 
             if (IPhone::DEBUG_PHONE) {
-                Log(String("missed/rejected call, conn.cause=") + conn->mCause);
-                Log(String("setting cause to ") + cause);
+                Logger::I(TAG, "missed/rejected call, conn.cause=%d", conn->mCause);
+                Logger::I(TAG, "setting cause to  %d", cause);
             }
             mDroppedDuringPoll->Remove(i);
             hasAnyCallDisconnected |= (conn->OnDisconnect(cause, &b), b);
@@ -1044,8 +1044,10 @@ AutoPtr<IMessage> CGsmCallTracker::ObtainCompleteMessage(
     mLastRelevantPoll = NULL;
     mNeedsPoll = TRUE;
 
-    if (DBG_POLL) Log(String("ObtainCompleteMessage: pendingOperations=") +
-            mPendingOperations + ", needsPoll=" + StringUtils::BooleanToString(mNeedsPoll));
+    if (DBG_POLL) {
+        Logger::I("CGsmCallTracker", "ObtainCompleteMessage: pendingOperations=%d, needsPoll=%d",
+            mPendingOperations, mNeedsPoll);
+    }
 
     AutoPtr<IMessage> msg;
     ObtainMessage(what, (IMessage**)&msg);
@@ -1056,8 +1058,10 @@ void CGsmCallTracker::OperationComplete()
 {
     mPendingOperations--;
 
-    if (DBG_POLL) Log(String("operationComplete: pendingOperations=") +
-            mPendingOperations + ", needsPoll=" + StringUtils::BooleanToString(mNeedsPoll));
+    if (DBG_POLL) {
+        Logger::I("CGsmCallTracker", "operationComplete: pendingOperations=%d, needsPoll=%d",
+            mPendingOperations, mNeedsPoll);
+    }
 
     if (mPendingOperations == 0 && mNeedsPoll) {
         ObtainMessage(EVENT_POLL_CALLS_RESULT, (IMessage**)&mLastRelevantPoll);

@@ -73,10 +73,10 @@ WifiAutoJoinController::WifiAutoJoinController(
     mContext->GetSystemService(IContext::NETWORK_SCORE_SERVICE, (IInterface**)&_scoreManager);
     mScoreManager = INetworkScoreManager::Probe(_scoreManager);
     if (mScoreManager == NULL) {
-        String str("Registered scoreManager NULL ");
-        str += " service ";
-        str += IContext::NETWORK_SCORE_SERVICE;
-        LogDbg(str);
+        // String str("Registered scoreManager NULL ");
+        // str += " service ";
+        // str += IContext::NETWORK_SCORE_SERVICE;
+        // LogDbg(str);
     }
 
     if (mScoreManager != NULL) {
@@ -85,11 +85,11 @@ WifiAutoJoinController::WifiAutoJoinController(
         mScoreManager->RegisterNetworkScoreCache(INetworkKey::TYPE_WIFI, mNetworkScoreCache);
     }
     else {
-        String str("No network score service: Couldnt register as a WiFi score Manager, type=");
-        str += StringUtils::ToString(INetworkKey::TYPE_WIFI);
-        str += " service ";
-        str += IContext::NETWORK_SCORE_SERVICE;
-        LogDbg(str);
+        // String str("No network score service: Couldnt register as a WiFi score Manager, type=");
+        // str += StringUtils::ToString(INetworkKey::TYPE_WIFI);
+        // str += " service ";
+        // str += IContext::NETWORK_SCORE_SERVICE;
+        // LogDbg(str);
         mNetworkScoreCache = NULL;
     }
     CArrayList::New((IArrayList**)&mBlacklistedBssids);
@@ -181,35 +181,35 @@ ECode WifiAutoJoinController::AddToScanCache(
                 unknownScanResults->Add(nkey);
             }
             if (VDBG) {
-                String cap("");
-                result->GetCapabilities(&cap);
-                Int32 level = 0;
-                result->GetLevel(&level);
-                String str(sid);
-                str += String(" ");
-                str += bsid;
-                str += " rssi="; str += StringUtils::ToString(level);
-                str += " cap "; str += cap;
-                str += " is not scored";
-                LogDbg(str);
+                // String cap("");
+                // result->GetCapabilities(&cap);
+                // Int32 level = 0;
+                // result->GetLevel(&level);
+                // String str(sid);
+                // str += String(" ");
+                // str += bsid;
+                // str += " rssi="; str += StringUtils::ToString(level);
+                // str += " cap "; str += cap;
+                // str += " is not scored";
+                // LogDbg(str);
             }
         }
         else {
             if (VDBG) {
-                String cap("");
-                result->GetCapabilities(&cap);
-                Int32 score = 0;
-                mNetworkScoreCache->GetNetworkScore(result, &score);
-                Int32 level = 0;
-                result->GetLevel(&level);
-                String str(sid);
-                str += " ";
-                str += bsid;
-                str += " rssi="; str += level;
-                str += " cap "; str += cap;
-                str += " is scored :";
-                str += score;
-                LogDbg(str);
+                // String cap("");
+                // result->GetCapabilities(&cap);
+                // Int32 score = 0;
+                // mNetworkScoreCache->GetNetworkScore(result, &score);
+                // Int32 level = 0;
+                // result->GetLevel(&level);
+                // String str(sid);
+                // str += " ";
+                // str += bsid;
+                // str += " rssi="; str += level;
+                // str += " cap "; str += cap;
+                // str += " is scored :";
+                // str += score;
+                // LogDbg(str);
             }
         }
 
@@ -227,11 +227,11 @@ ECode WifiAutoJoinController::AddToScanCache(
             String configSID;
             if (associatedConfig != NULL && !(associatedConfig->GetSSID(&configSID), configSID.IsNull())) {
                 if (VDBG) {
-                    String str("addToScanCache save associated config ");
-                    str += configSID;
-                    str += " with ";
-                    str += sid;
-                    LogDbg(str);
+                    // String str("addToScanCache save associated config ");
+                    // str += configSID;
+                    // str += " with ";
+                    // str += sid;
+                    // LogDbg(str);
                 }
                 mWifiStateMachine->SendMessage(
                          WifiStateMachine::CMD_AUTO_SAVE_NETWORK, associatedConfig);
@@ -315,15 +315,15 @@ ECode WifiAutoJoinController::NewSupplicantResults(
     AddToScanCache(scanList, &numScanResultsKnown);
     AgeScanResultsOut(mScanResultMaximumAge);
     if (DBG) {
-        String str("newSupplicantResults size=");
-        Int32 size = 0;
-        mScanResultCache->GetSize(&size);
-        str += StringUtils::ToString(size);
-        str += " known=";
-        str += StringUtils::ToString(numScanResultsKnown);
-        str += " ";
-        str += StringUtils::ToString(doAutoJoin);
-        LogDbg(str);
+        // String str("newSupplicantResults size=");
+        // Int32 size = 0;
+        // mScanResultCache->GetSize(&size);
+        // str += StringUtils::ToString(size);
+        // str += " known=";
+        // str += StringUtils::ToString(numScanResultsKnown);
+        // str += " ";
+        // str += StringUtils::ToString(doAutoJoin);
+        // LogDbg(str);
     }
     if (doAutoJoin) {
         AttemptAutoJoin();
@@ -360,20 +360,20 @@ ECode WifiAutoJoinController::UpdateConfigurationHistory(
     AutoPtr<IWifiConfiguration> selected;
     mWifiConfigStore->GetWifiConfiguration(netId, (IWifiConfiguration**)&selected);
     if (selected == NULL) {
-        String str("updateConfigurationHistory nid=");
-        str += netId;
-        str += " no selected configuration!";
-        LogDbg(str);
+        // String str("updateConfigurationHistory nid=");
+        // str += netId;
+        // str += " no selected configuration!";
+        // LogDbg(str);
         return NOERROR;
     }
 
     String sid;
     selected->GetSSID(&sid);
     if (sid.IsNull()) {
-        String str("updateConfigurationHistory nid=");
-        str += netId;
-        str += " no SSID in selected configuration!";
-        LogDbg(str);
+        // String str("updateConfigurationHistory nid=");
+        // str += netId;
+        // str += " no SSID in selected configuration!";
+        // LogDbg(str);
         return NOERROR;
     }
 
@@ -389,26 +389,26 @@ ECode WifiAutoJoinController::UpdateConfigurationHistory(
         AutoPtr<IHashMap> hm;
         selected->GetConnectChoices((IHashMap**)&hm);
         if (hm != NULL) {
-            String str("updateConfigurationHistory will update ");
-            str += netId;
-            str += " now: ";
-            Int32 size = 0;
-            hm->GetSize(&size);
-            str += size;
-            str += " uid=";
-            Int32 uid = 0;
-            selected->GetCreatorUid(&uid);
-            str += uid;
-            LogDbg(str, TRUE);
+            // String str("updateConfigurationHistory will update ");
+            // str += netId;
+            // str += " now: ";
+            // Int32 size = 0;
+            // hm->GetSize(&size);
+            // str += size;
+            // str += " uid=";
+            // Int32 uid = 0;
+            // selected->GetCreatorUid(&uid);
+            // str += uid;
+            // LogDbg(str, TRUE);
         }
         else {
-            String str("updateConfigurationHistory will update ");
-            str += netId;
-            str += " uid=";
-            Int32 uid = 0;
-            selected->GetCreatorUid(&uid);
-            str += uid;
-            LogDbg(str, TRUE);
+            // String str("updateConfigurationHistory will update ");
+            // str += netId;
+            // str += " uid=";
+            // Int32 uid = 0;
+            // selected->GetCreatorUid(&uid);
+            // str += uid;
+            // LogDbg(str, TRUE);
         }
     }
 
@@ -429,10 +429,10 @@ ECode WifiAutoJoinController::UpdateConfigurationHistory(
         AutoPtr<IList> networks;
         mWifiConfigStore->GetRecentConfiguredNetworks(12000, FALSE, (IList**)&networks);
         if (networks != NULL) networks->GetSize(&size);
-        String dbgStr("updateConfigurationHistory found ");
-        dbgStr += size;
-        dbgStr += " networks";
-        LogDbg(dbgStr);
+        // String dbgStr("updateConfigurationHistory found ");
+        // dbgStr += size;
+        // dbgStr += " networks";
+        // LogDbg(dbgStr);
         if (networks != NULL) {
             AutoPtr<IIterator> itNW;
             networks->GetIterator((IIterator**)&itNW);
@@ -442,15 +442,15 @@ ECode WifiAutoJoinController::UpdateConfigurationHistory(
                 itNW->GetNext((IInterface**)&p);
                 AutoPtr<IWifiConfiguration> config = IWifiConfiguration::Probe(p);
                 if (DBG) {
-                    String sid;
-                    config->GetSSID(&sid);
-                    Int32 id = 0;
-                    config->GetNetworkId(&id);
-                    String str("updateConfigurationHistory got ");
-                    str += sid;
-                    str += " nid=";
-                    str += id;
-                    LogDbg(str);
+                    // String sid;
+                    // config->GetSSID(&sid);
+                    // Int32 id = 0;
+                    // config->GetNetworkId(&id);
+                    // String str("updateConfigurationHistory got ");
+                    // str += sid;
+                    // str += " nid=";
+                    // str += id;
+                    // LogDbg(str);
                 }
 
                 String strSelet, strConfig;
@@ -501,13 +501,13 @@ ECode WifiAutoJoinController::UpdateConfigurationHistory(
                     selected->SetConnectChoices(selHM);
                 }
 
-                dbgStr = "updateConfigurationHistory add a choice ";
-                dbgStr += strSelet;
-                dbgStr += " over ";
-                dbgStr += strConfig;
-                dbgStr += " choice ";
-                dbgStr += choice;
-                LogDbg(dbgStr);
+                // dbgStr = "updateConfigurationHistory add a choice ";
+                // dbgStr += strSelet;
+                // dbgStr += " over ";
+                // dbgStr += strConfig;
+                // dbgStr += " choice ";
+                // dbgStr += choice;
+                // LogDbg(dbgStr);
 
                 AutoPtr<IInterface> _currentChoice;
                 selHM->Get(CoreUtils::Convert(strConfig), (IInterface**)&_currentChoice);
@@ -525,11 +525,11 @@ ECode WifiAutoJoinController::UpdateConfigurationHistory(
                 config->GetConnectChoices((IHashMap**)&cfhm);
                 if (cfhm != NULL) {
                     if (VDBG) {
-                        dbgStr = "updateConfigurationHistory will remove ";
-                        dbgStr += strSelet;
-                        dbgStr += " from ";
-                        dbgStr += strConfig;
-                        LogDbg(dbgStr);
+                        // dbgStr = "updateConfigurationHistory will remove ";
+                        // dbgStr += strSelet;
+                        // dbgStr += " from ";
+                        // dbgStr += strConfig;
+                        // LogDbg(dbgStr);
                     }
                     // Remove the selected from the recently seen config's connectChoice list
                     cfhm->Remove(CoreUtils::Convert(strSelet));
@@ -557,24 +557,24 @@ ECode WifiAutoJoinController::UpdateConfigurationHistory(
                 // scan cache.
                 // In that case we will need a new scan before attempting to connect to this
                 // configuration anyhow and thus we can process the scan results then.
-                dbgStr = "updateConfigurationHistory try to connect to an old network!! : ";
-                String strSelet;
-                selected->ConfigKey(TRUE, &strSelet);
-                dbgStr += strSelet;
-                LogDbg(dbgStr);
+                // dbgStr = "updateConfigurationHistory try to connect to an old network!! : ";
+                // String strSelet;
+                // selected->ConfigKey(TRUE, &strSelet);
+                // dbgStr += strSelet;
+                // LogDbg(dbgStr);
             }
 
             AutoPtr<IHashMap> shm;
             selected->GetConnectChoices((IHashMap**)&shm);
             if (shm != NULL) {
                 if (VDBG) {
-                    Int32 size = 0;
-                    shm->GetSize(&size);
-                    dbgStr = "updateConfigurationHistory ";
-                    dbgStr += netId;
-                    dbgStr += " now: ";
-                    dbgStr += size;
-                    LogDbg(dbgStr);
+                    // Int32 size = 0;
+                    // shm->GetSize(&size);
+                    // dbgStr = "updateConfigurationHistory ";
+                    // dbgStr += netId;
+                    // dbgStr += " now: ";
+                    // dbgStr += size;
+                    // LogDbg(dbgStr);
                 }
             }
         }
@@ -742,28 +742,28 @@ ECode WifiAutoJoinController::CompareWifiConfigurationsRSSI(
     }
 
     if (VDBG) {
-        Int32 arssi5 = 0, brssi5 = 0, arssi24 = 0, brssi24 = 0;
-        astatus->GetRssi5(&arssi5);
-        astatus->GetRssi24(&arssi24);
-        bstatus->GetRssi5(&brssi5);
-        bstatus->GetRssi24(&brssi24);
-        StringBuilder str("    compareWifiConfigurationsRSSI: ");
-        str += aCK;
-        str += " ";
-        str += arssi24;
-        str += ",";
-        str += arssi5;
-        str += " boost=";
-        str += aRssiBoost;
-        str += " ";
-        str += bCK;
-        str += " ";
-        str += brssi24;
-        str += ",";
-        str += brssi5;
-        str += " boost=";
-        str += bRssiBoost;
-        LogDbg(str.ToString());
+        // Int32 arssi5 = 0, brssi5 = 0, arssi24 = 0, brssi24 = 0;
+        // astatus->GetRssi5(&arssi5);
+        // astatus->GetRssi24(&arssi24);
+        // bstatus->GetRssi5(&brssi5);
+        // bstatus->GetRssi24(&brssi24);
+        // StringBuilder str("    compareWifiConfigurationsRSSI: ");
+        // str += aCK;
+        // str += " ";
+        // str += arssi24;
+        // str += ",";
+        // str += arssi5;
+        // str += " boost=";
+        // str += aRssiBoost;
+        // str += " ";
+        // str += bCK;
+        // str += " ";
+        // str += brssi24;
+        // str += ",";
+        // str += brssi5;
+        // str += " boost=";
+        // str += bRssiBoost;
+        // LogDbg(str.ToString());
     }
 
     GetScoreFromVisibility(astatus, aRssiBoost, aCK, &scoreA);
@@ -783,40 +783,40 @@ ECode WifiAutoJoinController::CompareWifiConfigurationsRSSI(
     }
 
     if (VDBG) {
-        String prefer(" = ");
-        if (order > 0) {
-            prefer = " < "; // Ascending
-        }
-        else if (order < 0) {
-            prefer = " > "; // Descending
-        }
-        Int32 arssi5 = 0, brssi5 = 0, arssi24 = 0, brssi24 = 0;
-        astatus->GetRssi5(&arssi5);
-        astatus->GetRssi24(&arssi24);
-        bstatus->GetRssi5(&brssi5);
-        bstatus->GetRssi24(&brssi24);
-        Int32 anum5 = 0, anum24 = 0, bnum5 = 0, bnum24 = 0;
-        astatus->GetNum5(&anum5);
-        astatus->GetNum24(&anum24);
-        bstatus->GetNum5(&bnum5);
-        bstatus->GetNum24(&bnum24);
-        StringBuilder str("    compareWifiConfigurationsRSSI ");
-        str += aCK;
-        str += " rssi=("; str += arssi24;
-        str += ","; str += arssi5;
-        str += ") num=("; str += anum24;
-        str += ","; str += anum5;
-        str += ")";
-        str += " scorea="; str += scoreA;
-        str += prefer;
-        str += bCK;
-        str += " rssi=("; str += brssi24; str += ",";
-        str += brssi5; str += ") num=(";
-        str += bnum24; str += ",";
-        str += bnum5; str += ")";
-        str += " scoreb="; str += scoreB;
-        str += " -> "; str += order;
-        LogDbg(str.ToString());
+        // String prefer(" = ");
+        // if (order > 0) {
+        //     prefer = " < "; // Ascending
+        // }
+        // else if (order < 0) {
+        //     prefer = " > "; // Descending
+        // }
+        // Int32 arssi5 = 0, brssi5 = 0, arssi24 = 0, brssi24 = 0;
+        // astatus->GetRssi5(&arssi5);
+        // astatus->GetRssi24(&arssi24);
+        // bstatus->GetRssi5(&brssi5);
+        // bstatus->GetRssi24(&brssi24);
+        // Int32 anum5 = 0, anum24 = 0, bnum5 = 0, bnum24 = 0;
+        // astatus->GetNum5(&anum5);
+        // astatus->GetNum24(&anum24);
+        // bstatus->GetNum5(&bnum5);
+        // bstatus->GetNum24(&bnum24);
+        // StringBuilder str("    compareWifiConfigurationsRSSI ");
+        // str += aCK;
+        // str += " rssi=("; str += arssi24;
+        // str += ","; str += arssi5;
+        // str += ") num=("; str += anum24;
+        // str += ","; str += anum5;
+        // str += ")";
+        // str += " scorea="; str += scoreA;
+        // str += prefer;
+        // str += bCK;
+        // str += " rssi=("; str += brssi24; str += ",";
+        // str += brssi5; str += ") num=(";
+        // str += bnum24; str += ",";
+        // str += bnum5; str += ")";
+        // str += " scoreb="; str += scoreB;
+        // str += " -> "; str += order;
+        // LogDbg(str.ToString());
     }
 
     *result = order;
@@ -890,21 +890,21 @@ ECode WifiAutoJoinController::CompareWifiConfigurationsWithScorer(
         avisibility->GetNum24(&anum24);
         bvisibility->GetNum5(&bnum5);
         bvisibility->GetNum24(&bnum24);
-        StringBuilder str("    compareWifiConfigurationsWithScorer ");
-        str += aConKey;
-        str += " rssi=("; str += arssi24;
-        str += ","; str += arssi5;
-        str += ") num=("; str += anum24;
-        str += ","; str += anum5; str += ")";
-        str += " sc="; str += scoreA;
-        str += prefer; str += bConKey;
-        str += " rssi=("; str += brssi24;
-        str += ","; str += brssi5;
-        str += ") num=("; str += bnum24;
-        str += ","; str += bnum5; str += ")";
-        str += " sc="; str += scoreB;
-        str += " -> "; str += scoreB - scoreA;
-        LogDbg(str.ToString());
+        // StringBuilder str("    compareWifiConfigurationsWithScorer ");
+        // str += aConKey;
+        // str += " rssi=("; str += arssi24;
+        // str += ","; str += arssi5;
+        // str += ") num=("; str += anum24;
+        // str += ","; str += anum5; str += ")";
+        // str += " sc="; str += scoreA;
+        // str += prefer; str += bConKey;
+        // str += " rssi=("; str += brssi24;
+        // str += ","; str += brssi5;
+        // str += ") num=("; str += bnum24;
+        // str += ","; str += bnum5; str += ")";
+        // str += " sc="; str += scoreB;
+        // str += " -> "; str += scoreB - scoreA;
+        // LogDbg(str.ToString());
     }
 
     // If scoreA > scoreB, the comparison is descending hence the return value is negative
@@ -987,12 +987,12 @@ ECode WifiAutoJoinController::CompareWifiConfigurations(
             // a is of higher priority - descending
             order = order - choice;
             if (VDBG) {
-                String str("    compareWifiConfigurations prefers ");
-                str += aConKey; str += " over ";
-                str += bConKey; str += " due to user choice of ";
-                str += choice; str += " order -> ";
-                str += order;
-                LogDbg(str);
+                // String str("    compareWifiConfigurations prefers ");
+                // str += aConKey; str += " over ";
+                // str += bConKey; str += " due to user choice of ";
+                // str += choice; str += " order -> ";
+                // str += order;
+                // LogDbg(str);
             }
         }
 
@@ -1001,12 +1001,12 @@ ECode WifiAutoJoinController::CompareWifiConfigurations(
             // a is of lower priority - ascending
             order = order + choice;
             if (VDBG) {
-                String str("    compareWifiConfigurations prefers ");
-                str += bConKey; str += " over ";
-                str += aConKey; str += " due to user choice of ";
-                str += choice; str += " order ->";
-                str += order;
-                LogDbg(str);
+                // String str("    compareWifiConfigurations prefers ");
+                // str += bConKey; str += " over ";
+                // str += aConKey; str += " due to user choice of ";
+                // str += choice; str += " order ->";
+                // str += order;
+                // LogDbg(str);
             }
         }
     }
@@ -1018,10 +1018,10 @@ ECode WifiAutoJoinController::CompareWifiConfigurations(
         if (aPriority > bPriority) {
             // a is of higher priority - descending
             if (VDBG) {
-                String str("    compareWifiConfigurations prefers -1 ");
-                str += aConKey; str += " over ";
-                str += bConKey; str += " due to priority";
-                LogDbg(str);
+                // String str("    compareWifiConfigurations prefers -1 ");
+                // str += aConKey; str += " over ";
+                // str += bConKey; str += " due to priority";
+                // LogDbg(str);
             }
 
             order = -1;
@@ -1029,10 +1029,10 @@ ECode WifiAutoJoinController::CompareWifiConfigurations(
         else if (aPriority < bPriority) {
             // a is of lower priority - ascending
             if (VDBG) {
-                String str("    compareWifiConfigurations prefers +1 ");
-                str += bConKey; str += " over ";
-                str += aConKey; str += " due to priority";
-                LogDbg(str);
+                // String str("    compareWifiConfigurations prefers +1 ");
+                // str += bConKey; str += " over ";
+                // str += aConKey; str += " due to priority";
+                // LogDbg(str);
             }
             order = 1;
         }
@@ -1047,11 +1047,11 @@ ECode WifiAutoJoinController::CompareWifiConfigurations(
     }
 
     if (VDBG) {
-        String str("compareWifiConfigurations: ");
-        str += aConKey; str += sorder;
-        str += bConKey; str += " order ";
-        str += order;
-        LogDbg(str);
+        // String str("compareWifiConfigurations: ");
+        // str += aConKey; str += sorder;
+        // str += bConKey; str += " order ";
+        // str += order;
+        // LogDbg(str);
     }
 
     *result = order;
@@ -1085,10 +1085,10 @@ ECode WifiAutoJoinController::CompareWifiConfigurationsTop(
 
     if (scorerOrder * order < 0) {
         if (VDBG) {
-            String str("    -> compareWifiConfigurationsTop: ");
-            str += "scorer override "; str += scorerOrder;
-            str += " "; str += order;
-            LogDbg(str);
+            // String str("    -> compareWifiConfigurationsTop: ");
+            // str += "scorer override "; str += scorerOrder;
+            // str += " "; str += order;
+            // LogDbg(str);
         }
         // For debugging purpose, remember that an override happened
         // during that autojoin Attempt
@@ -1134,11 +1134,11 @@ ECode WifiAutoJoinController::RssiBoostFrom5GHzRssi(
             boost = 50;
         }
         if (VDBG && !dbg.IsNull()) {
-            String str("        ");
-            str += dbg; str += ":    rssi5 ";
-            str += rssi; str += " boost ";
-            str += boost;
-            LogDbg(str);
+            // String str("        ");
+            // str += dbg; str += ":    rssi5 ";
+            // str += rssi; str += " boost ";
+            // str += boost;
+            // LogDbg(str);
         }
         *result = boost;
         return NOERROR;
@@ -1190,10 +1190,10 @@ ECode WifiAutoJoinController::AttemptRoam(
     scanResultCache->GetSize(&size);
     if (size > 6) {
         if (VDBG) {
-            String str("attemptRoam scan cache size ");
-            str += size;
-            str += " --> bail";
-            LogDbg(str);
+            // String str("attemptRoam scan cache size ");
+            // str += size;
+            // str += " --> bail";
+            // LogDbg(str);
         }
         // Implement same SSID roaming only for configurations
         // that have less than 4 BSSIDs
@@ -1270,14 +1270,14 @@ ECode WifiAutoJoinController::AttemptRoam(
         b->GetFrequency(&bFrequency);
         if (bNumIpConfigFailures < (aNumIpConfigFailures - 1)) {
             // Prefer a BSSID that doesn't have less number of Ip config failures
-            String str("attemptRoam: ");
-            str += bBSSID; str += " rssi="; str += bLevel;
-            str += " ipfail="; str += bNumIpConfigFailures;
-            str += " freq="; str += bFrequency;
-            str += " > "; str += aBSSID; str += " rssi=";
-            str += aLevel; str += " ipfail="; str += aNumIpConfigFailures;
-            str += " freq="; str += aFrequency;
-            LogDbg(str);
+            // String str("attemptRoam: ");
+            // str += bBSSID; str += " rssi="; str += bLevel;
+            // str += " ipfail="; str += bNumIpConfigFailures;
+            // str += " freq="; str += bFrequency;
+            // str += " > "; str += aBSSID; str += " rssi=";
+            // str += aLevel; str += " ipfail="; str += aNumIpConfigFailures;
+            // str += " freq="; str += aFrequency;
+            // LogDbg(str);
             a = b;
             continue;
         }
@@ -1327,15 +1327,15 @@ ECode WifiAutoJoinController::AttemptRoam(
             if (bLevel + bRssiBoost + bRssiBoost5 > aLevel + aRssiBoost + aRssiBoost5) {
                 comp = " > ";
             }
-            String str("attemptRoam: ");
-            str += bBSSID; str += " rssi="; str += bLevel;
-            str += " boost="; str += bRssiBoost; str += "/";
-            str += bRssiBoost5; str += " freq=";
-            str += bFrequency; str += comp; str += aBSSID;
-            str += " rssi="; str += aLevel; str += " boost=";
-            str += aRssiBoost; str += "/"; str += aRssiBoost5;
-            str += " freq="; str += aFrequency;
-            LogDbg(str);
+            // String str("attemptRoam: ");
+            // str += bBSSID; str += " rssi="; str += bLevel;
+            // str += " boost="; str += bRssiBoost; str += "/";
+            // str += bRssiBoost5; str += " freq=";
+            // str += bFrequency; str += comp; str += aBSSID;
+            // str += " rssi="; str += aLevel; str += " boost=";
+            // str += aRssiBoost; str += "/"; str += aRssiBoost5;
+            // str += " freq="; str += aFrequency;
+            // LogDbg(str);
         }
 
         // Compare the RSSIs after applying the hysteresis boost and the 5GHz
@@ -1444,19 +1444,19 @@ ECode WifiAutoJoinController::GetConfigNetworkScore(
         startScore = WifiNetworkScoreCache::INVALID_NETWORK_SCORE;
     }
     if (VDBG) {
-        if (startScore == WifiNetworkScoreCache::INVALID_NETWORK_SCORE) {
-            String str("    getConfigNetworkScore for ");
-            str += ck;
-            str += " -> no available score";
-            LogDbg(str);
-        }
-        else {
-            String str("    getConfigNetworkScore for ");
-            str += ck; str += " boost=";
-            str += rssiBoost; str += " score = ";
-            str += startScore;
-            LogDbg(str);
-        }
+        // if (startScore == WifiNetworkScoreCache::INVALID_NETWORK_SCORE) {
+        //     String str("    getConfigNetworkScore for ");
+        //     str += ck;
+        //     str += " -> no available score";
+        //     LogDbg(str);
+        // }
+        // else {
+        //     String str("    getConfigNetworkScore for ");
+        //     str += ck; str += " boost=";
+        //     str += rssiBoost; str += " score = ";
+        //     str += startScore;
+        //     LogDbg(str);
+        // }
     }
 
     *result = startScore;
@@ -1602,13 +1602,13 @@ ECode WifiAutoJoinController::AttemptAutoJoin()
             last = " last=";
             last += lastSelectedConfiguration;
         }
-        String str("attemptAutoJoin() num recent config ");
-        Int32 s = 0;
-        list->GetSize(&s);
-        str += StringUtils::ToString(s);
-        str += conf; str += last;
-        str += " ---> suppNetId="; str += StringUtils::ToString(supplicantNetId);
-        LogDbg(str);
+        // String str("attemptAutoJoin() num recent config ");
+        // Int32 s = 0;
+        // list->GetSize(&s);
+        // str += StringUtils::ToString(s);
+        // str += conf; str += last;
+        // str += " ---> suppNetId="; str += StringUtils::ToString(supplicantNetId);
+        // LogDbg(str);
     }
 
     if (currentConfiguration != NULL) {
@@ -1619,11 +1619,11 @@ ECode WifiAutoJoinController::AttemptAutoJoin()
                 //mark this confition as an error only if the mismatched networkId are valid
                 && supplicantNetId != IWifiConfiguration::INVALID_NETWORK_ID
                 && networkId != IWifiConfiguration::INVALID_NETWORK_ID) {
-            String str("attemptAutoJoin() ERROR wpa_supplicant out of sync nid=");
-            str += supplicantNetId;
-            str += " WifiStateMachine=";
-            str += networkId;
-            LogDbg(str);
+            // String str("attemptAutoJoin() ERROR wpa_supplicant out of sync nid=");
+            // str += supplicantNetId;
+            // str += " WifiStateMachine=";
+            // str += networkId;
+            // LogDbg(str);
             mWifiStateMachine->DisconnectCommand();
             return NOERROR;
         }
@@ -2088,19 +2088,19 @@ ECode WifiAutoJoinController::AttemptAutoJoin()
             current = " with current ";
             current += ck;
         }
-        String str("attemptAutoJoin networkSwitching candidate ");
-        String cck;
-        candidate->ConfigKey(&cck);
-        str += cck;
-        str += current;
-        str += " linked=";
-        Boolean b = FALSE;
-        str += (currentConfiguration != NULL
-                        && (currentConfiguration->IsLinked(candidate, &b), b));
-        str += " : delta=";
-        str += StringUtils::ToString(networkDelta);
-        str += " "; str += doSwitch;
-        LogDbg(str);
+        // String str("attemptAutoJoin networkSwitching candidate ");
+        // String cck;
+        // candidate->ConfigKey(&cck);
+        // str += cck;
+        // str += current;
+        // str += " linked=";
+        // Boolean b = FALSE;
+        // str += (currentConfiguration != NULL
+        //                 && (currentConfiguration->IsLinked(candidate, &b), b));
+        // str += " : delta=";
+        // str += StringUtils::ToString(networkDelta);
+        // str += " "; str += doSwitch;
+        // LogDbg(str);
     }
 
     /**

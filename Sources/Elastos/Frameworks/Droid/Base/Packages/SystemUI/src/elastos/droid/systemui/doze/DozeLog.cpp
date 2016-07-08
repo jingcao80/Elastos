@@ -3,15 +3,16 @@
 #include "Elastos.CoreLibrary.IO.h"
 #include "Elastos.CoreLibrary.Utility.h"
 #include <elastos/core/AutoLock.h>
+#include <elastos/core/StringBuilder.h>
 #include <elastos/core/Math.h>
 #include <elastos/droid/os/Build.h>
 #include <elastos/droid/utility/TimeUtils.h>
 #include <elastos/utility/logging/Logger.h>
 
-#include <elastos/core/AutoLock.h>
-using Elastos::Core::AutoLock;
 using Elastos::Droid::Os::Build;
 using Elastos::Droid::Utility::TimeUtils;
+using Elastos::Core::AutoLock;
+using Elastos::Core::StringBuilder;
 using Elastos::Core::CSystem;
 using Elastos::Core::ISystem;
 using Elastos::Text::CSimpleDateFormat;
@@ -60,7 +61,8 @@ void DozeLog::TracePickupPulse(
     /* [in] */ Boolean withinVibrationThreshold)
 {
     if (!ENABLED) return;
-    Log(String("pickupPulse withinVibrationThreshold=") + (Char32)withinVibrationThreshold);
+    StringBuilder sb("pickupPulse withinVibrationThreshold="); sb += withinVibrationThreshold;
+    Log(sb.ToString());
     (withinVibrationThreshold ? sPickupPulseNearVibrationStats.Get()
             : sPickupPulseNotNearVibrationStats.Get())->Append();
 }
@@ -83,7 +85,8 @@ void DozeLog::TraceNotificationPulse(
     /* [in] */ Int64 instance)
 {
     if (!ENABLED) return;
-    Log(String("notificationPulse instance=") + instance);
+    StringBuilder sb("notificationPulse instance="); sb += instance;
+    Log(sb.ToString());
     sNotificationPulseStats->Append();
 }
 
@@ -113,7 +116,8 @@ void DozeLog::TraceDozing(
             // KeyguardUpdateMonitor.getInstance(context).registerCallback(sKeyguardCallback);
         }
     }
-    Log(String("dozing ") + (Char32)dozing);
+    StringBuilder sb("dozing "); sb += dozing;
+    Log(sb.ToString());
 }
 
 void DozeLog::TraceFling(
@@ -123,8 +127,8 @@ void DozeLog::TraceFling(
     /* [in] */ Boolean screenOnFromTouch)
 {
     if (!ENABLED) return;
-    Log(String("fling expand=") + (Char32)expand + " aboveThreshold=" + (Char32)aboveThreshold + " thresholdNeeded="
-            + (Char32)thresholdNeeded + " screenOnFromTouch=" + (Char32)screenOnFromTouch);
+    // Log(String("fling expand=") + (Char32)expand + " aboveThreshold=" + (Char32)aboveThreshold + " thresholdNeeded="
+    //         + (Char32)thresholdNeeded + " screenOnFromTouch=" + (Char32)screenOnFromTouch);
 }
 
 void DozeLog::TraceEmergencyCall()
@@ -138,13 +142,15 @@ void DozeLog::TraceKeyguardBouncerChanged(
     /* [in] */ Boolean showing)
 {
     if (!ENABLED) return;
-    Log(String("bouncer ") + (Char32)showing);
+    StringBuilder sb("bouncer "); sb += showing;
+    Log(sb.ToString());
 }
 
 void DozeLog::TraceScreenOn()
 {
     if (!ENABLED) return;
-    Log(String("screenOn pulsing=") + (Char32)sPulsing);
+    StringBuilder sb("screenOn pulsing="); sb += sPulsing;
+    Log(sb.ToString());
     (sPulsing ? sScreenOnPulsingStats : sScreenOnNotPulsingStats)->Append();
     sPulsing = FALSE;
 }
@@ -153,14 +159,16 @@ void DozeLog::TraceScreenOff(
     /* [in] */ Int32 why)
 {
     if (!ENABLED) return;
-    Log(String("screenOff why=") + (Char32)why);
+    StringBuilder sb("keyguard"); sb += why;
+    Log(sb.ToString());
 }
 
 void DozeLog::TraceKeyguard(
     /* [in] */ Boolean showing)
 {
     if (!ENABLED) return;
-    Log(String("keyguard ") + (Char32)showing);
+    StringBuilder sb("keyguard"); sb += showing;
+    Log(sb.ToString());
     if (!showing) {
         sPulsing = FALSE;
     }
@@ -171,7 +179,8 @@ void DozeLog::TraceProximityResult(
     /* [in] */ Int64 millis)
 {
     if (!ENABLED) return;
-    Log(String("proximityResult near=") + (Char32)near + " millis=" + millis);
+    StringBuilder sb("proximityResult near="); sb += near; sb += " millis="; sb += millis;
+    Log(sb.ToString());
     (near ? sProxNearStats : sProxFarStats)->Append();
 }
 

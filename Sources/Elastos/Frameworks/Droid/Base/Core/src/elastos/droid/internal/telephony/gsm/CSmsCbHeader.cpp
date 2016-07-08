@@ -2,6 +2,7 @@
 #include "elastos/droid/telephony/CSmsCbCmasInfo.h"
 #include "elastos/droid/telephony/CSmsCbEtwsInfo.h"
 #include <elastos/core/StringUtils.h>
+#include <elastos/core/StringBuilder.h>
 #include <elastos/utility/Arrays.h>
 
 using Elastos::Droid::Telephony::CSmsCbCmasInfo;
@@ -9,6 +10,7 @@ using Elastos::Droid::Telephony::CSmsCbEtwsInfo;
 using Elastos::Droid::Telephony::ISmsCbCmasInfo;
 using Elastos::Droid::Telephony::ISmsCbEtwsInfo;
 using Elastos::Core::StringUtils;
+using Elastos::Core::StringBuilder;
 using Elastos::Utility::Arrays;
 
 namespace Elastos {
@@ -241,12 +243,15 @@ ECode CSmsCbHeader::ToString(
     /* [out] */ String* result)
 {
     VALIDATE_NOT_NULL(result)
-    *result = String("SmsCbHeader{GS=") + mGeographicalScope + ", serialNumber=0x" +
-            StringUtils::ToHexString(mSerialNumber) +
-            ", messageIdentifier=0x" + StringUtils::ToHexString(mMessageIdentifier) +
-            ", DCS=0x" + StringUtils::ToHexString(mDataCodingScheme) +
-            ", page " + StringUtils::ToString(mPageIndex) +
-            " of " + StringUtils::ToString(mNrOfPages) + '}';
+    StringBuilder sb("SmsCbHeader{GS=");
+    sb += mGeographicalScope; sb += ", serialNumber=0x";
+    sb += StringUtils::ToHexString(mSerialNumber);
+    sb += ", messageIdentifier=0x"; sb += StringUtils::ToHexString(mMessageIdentifier);
+    sb += ", DCS=0x"; sb += StringUtils::ToHexString(mDataCodingScheme);
+    sb += ", page "; sb += StringUtils::ToString(mPageIndex);
+    sb += " of "; sb += StringUtils::ToString(mNrOfPages);
+    sb += "}";
+    *result = sb.ToString();
     return NOERROR;
 }
 

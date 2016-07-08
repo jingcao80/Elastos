@@ -1,8 +1,10 @@
 #include "Elastos.CoreLibrary.Utility.h"
 #include "elastos/droid/media/RemoteDisplayState.h"
 #include "elastos/droid/text/TextUtils.h"
+#include <elastos/core/StringBuilder.h>
 
 using Elastos::Droid::Text::TextUtils;
+using Elastos::Core::StringBuilder;
 using Elastos::Utility::CArrayList;
 
 namespace Elastos{
@@ -21,13 +23,13 @@ CAR_INTERFACE_IMPL_2(RemoteDisplayState::RemoteDisplayInfo, Object, IParcelable,
 
 ECode RemoteDisplayState::RemoteDisplayInfo::constructor()
 {
-	return NOERROR;
+    return NOERROR;
 }
 
 ECode RemoteDisplayState::RemoteDisplayInfo::constructor(
-	/* [in] */ const String& id)
+    /* [in] */ const String& id)
 {
-	mId = id;
+    mId = id;
     mStatus = STATUS_NOT_AVAILABLE;
     mVolumeHandling = PLAYBACK_VOLUME_FIXED;
     mPresentationDisplayId = -1;
@@ -35,9 +37,9 @@ ECode RemoteDisplayState::RemoteDisplayInfo::constructor(
 }
 
 ECode RemoteDisplayState::RemoteDisplayInfo::constructor(
-	/* [in] */ IRemoteDisplayStateRemoteDisplayInfo* other_)
+    /* [in] */ IRemoteDisplayStateRemoteDisplayInfo* other_)
 {
-	AutoPtr<RemoteDisplayInfo> other = (RemoteDisplayInfo*)other_;
+    AutoPtr<RemoteDisplayInfo> other = (RemoteDisplayInfo*)other_;
     mId = other->mId;
     mName = other->mName;
     mDescription = other->mDescription;
@@ -50,9 +52,9 @@ ECode RemoteDisplayState::RemoteDisplayInfo::constructor(
 }
 
 ECode RemoteDisplayState::RemoteDisplayInfo::ReadFromParcel(
-	/* [in] */ IParcel* in)
+    /* [in] */ IParcel* in)
 {
-	VALIDATE_NOT_NULL(in);
+    VALIDATE_NOT_NULL(in);
     in->ReadString(&mId);
     in->ReadString(&mName);
     in->ReadString(&mDescription);
@@ -80,35 +82,36 @@ ECode RemoteDisplayState::RemoteDisplayInfo::WriteToParcel(
 }
 
 ECode RemoteDisplayState::RemoteDisplayInfo::IsValid(
-	/* [out] */ Boolean* result)
+    /* [out] */ Boolean* result)
 {
-	VALIDATE_NOT_NULL(result);
+    VALIDATE_NOT_NULL(result);
     *result = !TextUtils::IsEmpty(mId) && !TextUtils::IsEmpty(mName);
     return NOERROR;
 }
 
 ECode RemoteDisplayState::RemoteDisplayInfo::DescribeContents(
-	/* [out] */ Int32* result)
+    /* [out] */ Int32* result)
 {
-	VALIDATE_NOT_NULL(result);
-	*result = 0;
-	return NOERROR;
+    VALIDATE_NOT_NULL(result);
+    *result = 0;
+    return NOERROR;
 }
 
 ECode RemoteDisplayState::RemoteDisplayInfo::ToString(
-	/* [out] */ String* result)
+    /* [out] */ String* result)
 {
-	VALIDATE_NOT_NULL(result);
-    *result = String("RemoteDisplayInfo{ id=") + mId
-                + ", name=" + mName
-                + ", description=" + mDescription
-                + ", status=" + mStatus
-                + ", volume=" + mVolume
-                + ", volumeMax=" + mVolumeMax
-                + ", volumeHandling=" + mVolumeHandling
-                + ", presentationDisplayId=" + mPresentationDisplayId
-                + " }";
-
+    VALIDATE_NOT_NULL(result);
+    StringBuilder sb("RemoteDisplayInfo{ id=");
+    sb += mId;
+    sb += ", name="; sb += mName;
+    sb += ", description="; sb += mDescription;
+    sb += ", status="; sb += mStatus;
+    sb += ", volume="; sb += mVolume;
+    sb += ", volumeMax="; sb += mVolumeMax;
+    sb += ", volumeHandling="; sb += mVolumeHandling;
+    sb += ", presentationDisplayId="; sb += mPresentationDisplayId;
+    sb += "}";
+    *result = sb.ToString();
     return NOERROR;
 }
 
@@ -251,32 +254,32 @@ ECode RemoteDisplayState::constructor()
 }
 
 ECode RemoteDisplayState::ReadFromParcel(
-	/* [in] */ IParcel* src)
+    /* [in] */ IParcel* src)
 {
-	VALIDATE_NOT_NULL(src);
+    VALIDATE_NOT_NULL(src);
     return src->ReadInterfacePtr((Handle32*)&mDisplays);
 }
 
 ECode RemoteDisplayState::IsValid(
-	/* [out] */ Boolean* result)
+    /* [out] */ Boolean* result)
 {
-	VALIDATE_NOT_NULL(result);
+    VALIDATE_NOT_NULL(result);
 
     if (mDisplays == NULL) {
-    	*result = FALSE;
+        *result = FALSE;
         return NOERROR;
     }
     Int32 count;
     mDisplays->GetSize(&count);
     Boolean flag = FALSE;
     for (Int32 i = 0; i < count; i++) {
-    	AutoPtr<IInterface> obj;
-    	mDisplays->Get(i, (IInterface**)&obj);
-    	AutoPtr<IParcelable> pl = IParcelable::Probe(obj);
-    	AutoPtr<RemoteDisplayInfo> rd = (RemoteDisplayInfo*)pl.Get();
-    	rd->IsValid(&flag);
+        AutoPtr<IInterface> obj;
+        mDisplays->Get(i, (IInterface**)&obj);
+        AutoPtr<IParcelable> pl = IParcelable::Probe(obj);
+        AutoPtr<RemoteDisplayInfo> rd = (RemoteDisplayInfo*)pl.Get();
+        rd->IsValid(&flag);
         if (!flag) {
-        	*result = FALSE;
+            *result = FALSE;
             return NOERROR;
         }
     }
@@ -286,17 +289,17 @@ ECode RemoteDisplayState::IsValid(
 }
 
 ECode RemoteDisplayState::DescribeContents(
-	/* [out] */ Int32* result)
+    /* [out] */ Int32* result)
 {
-	VALIDATE_NOT_NULL(result);
-	*result = 0;
-	return NOERROR;
+    VALIDATE_NOT_NULL(result);
+    *result = 0;
+    return NOERROR;
 }
 
 ECode RemoteDisplayState::WriteToParcel(
-	/* [in] */ IParcel* dest)
+    /* [in] */ IParcel* dest)
 {
-	VALIDATE_NOT_NULL(dest);
+    VALIDATE_NOT_NULL(dest);
     return dest->WriteInterfacePtr(IObject::Probe(mDisplays));
 }
 

@@ -3,18 +3,19 @@
 #include <Elastos.CoreLibrary.IO.h>
 #include "elastos/droid/server/AppOpsPolicy.h"
 #include <elastos/core/AutoLock.h>
+#include <elastos/core/StringBuilder.h>
 #include <elastos/core/CoreUtils.h>
 #include <elastos/utility/logging/Slogger.h>
 #include "elastos/droid/internal/utility/XmlUtils.h"
 
-#include <elastos/core/AutoLock.h>
-using Elastos::Core::AutoLock;
 using Elastos::Droid::App::IAppOpsManager;
 using Elastos::Droid::App::IAppOpsManagerHelper;
 using Elastos::Droid::App::CAppOpsManagerHelper;
 using Elastos::Droid::Content::Pm::IApplicationInfo;
 using Elastos::Droid::Content::Pm::IPackageManager;
 using Elastos::Droid::Internal::Utility::XmlUtils;
+using Elastos::Core::AutoLock;
+using Elastos::Core::StringBuilder;
 using Elastos::IO::IFileInputStream;
 using Elastos::IO::CFileInputStream;
 using Elastos::IO::IInputStream;
@@ -58,15 +59,16 @@ ECode AppOpsPolicy::PolicyPkg::ToString(
     /* [out] */ String* result)
 {
     VALIDATE_NOT_NULL(result)
-    *result = "PolicyPkg [packageName=";
-    *result += mPackageName;
-    *result += ", mode=";
-    *result += mMode;
-    *result += ", show=";
-    *result += mShow;
-    *result += ", type=";
-    *result += mType;
-    *result += "]";
+    StringBuilder sb("PolicyPkg [packageName=");
+    sb += mPackageName;
+    sb += ", mode=";
+    sb += mMode;
+    sb += ", show=";
+    sb += mShow;
+    sb += ", type=";
+    sb += mType;
+    sb += "]";
+    *result = sb.ToString();
     return NOERROR;
 }
 
@@ -88,13 +90,14 @@ ECode AppOpsPolicy::PolicyOp::ToString(
     /* [out] */ String* result)
 {
     VALIDATE_NOT_NULL(result)
-    *result = "PolicyOp [op=";
-    *result += mOp;
-    *result += ", mode=";
-    *result += mMode;
-    *result += ", show=";
-    *result += mShow;
-    *result += "]";
+    StringBuilder sb("PolicyOp [op=");
+    sb += mOp;
+    sb += ", mode=";
+    sb += mMode;
+    sb += ", show=";
+    sb += mShow;
+    sb += "]";
+    *result = sb.ToString();
     return NOERROR;
 }
 

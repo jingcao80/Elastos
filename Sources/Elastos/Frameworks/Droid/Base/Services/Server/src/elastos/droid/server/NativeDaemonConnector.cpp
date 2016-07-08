@@ -200,11 +200,11 @@ void NativeDaemonConnector::ResponseQueue::Dump(
         List< AutoPtr<PendingCmd> >::Iterator iter;
         for (iter = mPendingCmds.Begin(); iter != mPendingCmds.End(); ++iter) {
            AutoPtr<PendingCmd> pendingCmd = *iter;
-           String str("  Cmd ");
-           str += pendingCmd->mCmdNum;
-           str += " - ";
-           str += pendingCmd->mLogCmd;
-           pw->Println(str);
+           StringBuilder sb("  Cmd ");
+           sb += pendingCmd->mCmdNum;
+           sb += " - ";
+           sb += pendingCmd->mLogCmd;
+           pw->Println(sb.ToString());
         }
     }
 }

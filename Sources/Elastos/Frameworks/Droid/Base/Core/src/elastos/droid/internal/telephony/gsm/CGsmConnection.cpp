@@ -515,7 +515,7 @@ ECode CGsmConnection::Update (
         if (IPhone::DEBUG_PHONE) Log(String("update: mOrigConnection is not null"));
     }
     else {
-        Log(String(" mNumberConverted ") + mNumberConverted);
+        Logger::I("CGsmConnection", " mNumberConverted %d", mNumberConverted);
         Boolean b1, b2;
         if ((EqualsHandlesNulls(CoreUtils::Convert(mAddress), CoreUtils::Convert(((DriverCall*)dc)->mNumber), &b1), !b1) && (!mNumberConverted
                 || (EqualsHandlesNulls(CoreUtils::Convert(mConvertedNumber), CoreUtils::Convert(((DriverCall*)dc)->mNumber), &b2), b2))) {
@@ -619,7 +619,7 @@ ECode CGsmConnection::OnConnectedInOrOut()
     // it sounds like the user has picked up the call.
 
     if (IPhone::DEBUG_PHONE) {
-        Log(String("onConnectedInOrOut: connectTime=") + mConnectTime);
+        Logger::I("CGsmConnection", "onConnectedInOrOut: connectTime=%lld", mConnectTime);
     }
 
     if (!mIsIncoming) {
@@ -800,7 +800,7 @@ void CGsmConnection::ProcessNextPostDialChar()
             mHandler->ObtainMessage(EVENT_NEXT_POST_DIAL, (IMessage**)&msg);
             msg->SendToTarget();
             // Don't notify application
-            Logger::E("GSM", String("ProcessNextPostDialChar: c=") + c + " isn't valid!");
+            Logger::E("GSM", "ProcessNextPostDialChar: c=%c isn't valid!", c);
             return;
         }
     }

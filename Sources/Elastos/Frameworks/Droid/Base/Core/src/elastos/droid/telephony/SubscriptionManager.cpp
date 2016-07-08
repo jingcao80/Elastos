@@ -69,7 +69,7 @@ ECode SubscriptionManager::GetSubInfoUsingIccId(
     /* [out] */ IList** result)
 {
     VALIDATE_NOT_NULL(result)
-    if (VDBG) Logd(String("[getSubInfoUsingIccId]+ iccId=") + iccId);
+    // if (VDBG) Logd(String("[getSubInfoUsingIccId]+ iccId=") + iccId);
     if (iccId == NULL) {
         Logd(String("[getSubInfoUsingIccId]- null iccid"));
         *result = NULL;
@@ -228,7 +228,7 @@ ECode SubscriptionManager::AddSubInfoRecord(
     VALIDATE_NOT_NULL(result)
     *result = NULL;
 
-    if (VDBG) Logd(String("[addSubInfoRecord]+ iccId:") + iccId + " slotId:" + slotId);
+    // if (VDBG) Logd(String("[addSubInfoRecord]+ iccId:") + iccId + " slotId:" + slotId);
     if (iccId == NULL) {
         Logd(String("[addSubInfoRecord]- null iccId"));
     }
@@ -260,7 +260,7 @@ ECode SubscriptionManager::SetColor(
     VALIDATE_NOT_NULL(result)
     *result = 0;
 
-    if (VDBG) Logd(String("[setColor]+ color:") + color + " subId:" + subId);
+    // if (VDBG) Logd(String("[setColor]+ color:") + color + " subId:" + subId);
     Int32 size = sSimBackgroundDarkRes->GetLength();
 
     Boolean b;
@@ -302,9 +302,9 @@ ECode SubscriptionManager::SetDisplayName(
     *result = 0;
 
     if (VDBG) {
-        Logd(String("[setDisplayName]+  displayName:") + displayName
-                + " subId:" + subId
-                + " nameSource:" + nameSource);
+        // Logd(String("[setDisplayName]+  displayName:") + displayName
+        //         + " subId:" + subId
+        //         + " nameSource:" + nameSource);
     }
     Boolean b;
     if (IsValidSubId(subId, &b), b) {
@@ -362,8 +362,8 @@ ECode SubscriptionManager::SetDisplayNumberFormat(
     VALIDATE_NOT_NULL(result)
     *result = 0;
 
-    if (VDBG) Logd(String("[setDisplayNumberFormat]+ format:") + format
-            + " subId:" + subId);
+    // if (VDBG) Logd(String("[setDisplayNumberFormat]+ format:") + format
+    //         + " subId:" + subId);
 
     Boolean b;
     if (format < 0 || (IsValidSubId(subId, &b), !b)) {
@@ -393,8 +393,8 @@ ECode SubscriptionManager::SetDataRoaming(
     VALIDATE_NOT_NULL(result)
     *result = 0;
 
-    if (VDBG) Logd(String("[setDataRoaming]+ roaming:") + roaming
-            + " subId:" + subId);
+    // if (VDBG) Logd(String("[setDataRoaming]+ roaming:") + roaming
+    //         + " subId:" + subId);
 
     Boolean b;
     if (roaming < 0 || (IsValidSubId(subId, &b), b)) {
@@ -492,7 +492,7 @@ ECode SubscriptionManager::GetPhoneId(
     //     // ignore it
     // }
 
-    if (VDBG) Logd(String("[getPhoneId]- phoneId=") + *result);
+    // if (VDBG) Logd(String("[getPhoneId]- phoneId=") + *result);
     return NOERROR;
 }
 
@@ -512,7 +512,7 @@ ECode SubscriptionManager::GetDefaultSubId(
     //     // ignore it
     // }
 
-    if (VDBG) Logd(String("getDefaultSubId=") + *result);
+    // if (VDBG) Logd(String("getDefaultSubId=") + *result);
     return NOERROR;
 }
 
@@ -532,14 +532,14 @@ ECode SubscriptionManager::GetDefaultVoiceSubId(
     //     // ignore it
     // }
 
-    if (VDBG) Logd(String("getDefaultVoiceSubId, sub id = ") + *result);
+    // if (VDBG) Logd(String("getDefaultVoiceSubId, sub id = ") + *result);
     return NOERROR;
 }
 
 ECode SubscriptionManager::SetDefaultVoiceSubId(
     /* [in] */ Int64 subId)
 {
-    if (VDBG) Logd(String("setDefaultVoiceSubId sub id = ") + subId);
+    // if (VDBG) Logd(String("setDefaultVoiceSubId sub id = ") + subId);
     // try {
 // TODO: Need ISub
     // ISub iSub = ISub.Stub.asInterface(ServiceManager.getService("isub"));
@@ -584,14 +584,14 @@ ECode SubscriptionManager::GetDefaultSmsSubId(
     //     // ignore it
     // }
 
-    if (VDBG) Logd(String("getDefaultSmsSubId, sub id = ") + *result);
+    // if (VDBG) Logd(String("getDefaultSmsSubId, sub id = ") + *result);
     return NOERROR;
 }
 
 ECode SubscriptionManager::SetDefaultSmsSubId(
     /* [in] */ Int64 subId)
 {
-    if (VDBG) Logd(String("setDefaultSmsSubId sub id = ") + subId);
+    // if (VDBG) Logd(String("setDefaultSmsSubId sub id = ") + subId);
     // try {
 // TODO: Need ISub
     // ISub iSub = ISub.Stub.asInterface(ServiceManager.getService("isub"));
@@ -638,14 +638,14 @@ ECode SubscriptionManager::GetDefaultDataSubId(
     //     // ignore it
     // }
 
-    if (VDBG) Logd(String("getDefaultDataSubId, sub id = ") + *result);
+    // if (VDBG) Logd(String("getDefaultDataSubId, sub id = ") + *result);
     return NOERROR;
 }
 
 ECode SubscriptionManager::SetDefaultDataSubId(
     /* [in] */ Int64 subId)
 {
-    if (VDBG) Logd(String("setDataSubscription sub id = ") + subId);
+    // if (VDBG) Logd(String("setDataSubscription sub id = ") + subId);
     // try {
 // TODO: Need ISub
     // ISub iSub = ISub.Stub.asInterface(ServiceManager.getService("isub"));
@@ -800,7 +800,7 @@ ECode SubscriptionManager::PutPhoneIdAndSubIdExtra(
     /* [in] */ Int32 phoneId,
     /* [in] */ Int64 subId)
 {
-    if (VDBG) Logd(String("putPhoneIdAndSubIdExtra: phoneId=") + phoneId + " subId=" + subId);
+    // if (VDBG) Logd(String("putPhoneIdAndSubIdExtra: phoneId=") + phoneId + " subId=" + subId);
     intent->PutExtra(IPhoneConstants::SUBSCRIPTION_KEY, subId);
     intent->PutExtra(IPhoneConstants::PHONE_KEY, phoneId);
     //FIXME this is using phoneId and slotId interchangeably

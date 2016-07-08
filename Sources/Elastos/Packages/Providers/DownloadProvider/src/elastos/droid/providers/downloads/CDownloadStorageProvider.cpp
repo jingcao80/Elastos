@@ -12,6 +12,7 @@
 #include "elastos/droid/R.h"
 #include "R.h"
 #include <elastos/core/CoreUtils.h>
+#include <elastos/core/StringBuilder.h>
 #include <elastos/core/StringUtils.h>
 #include <elastos/utility/logging/Logger.h>
 
@@ -39,6 +40,7 @@ using Elastos::Droid::Webkit::CMimeTypeMapHelper;
 using Elastos::Droid::R;
 using Elastos::Core::CoreUtils;
 using Elastos::Core::StringUtils;
+using Elastos::Core::StringBuilder;
 using Elastos::Core::IInteger64;
 using Elastos::Core::CInteger64;
 using Elastos::IO::IFile;
@@ -189,11 +191,11 @@ ECode CDownloadStorageProvider::CreateDocument(
     Int32 n = 0;
     Boolean bExt = FALSE;
     while ((file->Exists(&bExt), bExt) && n++ < 32) {
-        String strName(_displayName);
-        strName += " (";
-        strName += n;
-        strName += ")";
-        CFile::New(parent, AddExtension(mimeType, strName), (IFile**)&file);
+        StringBuilder sb(_displayName);
+        sb += " (";
+        sb += n;
+        sb += ")";
+        CFile::New(parent, AddExtension(mimeType, sb.ToString()), (IFile**)&file);
     }
 
     Boolean bCNF = FALSE;

@@ -74,8 +74,9 @@ ECode UiccSmsController::MyBroadcastReceiver::OnReceive(
     Int32 extra = 0;
     intent->GetInt32Extra(String("callingUid"), 0, &extra);
     if (extra != 0) {
-        callingPackage += "\\";
-        callingPackage += extra;
+        StringBuilder sb(callingPackage);
+        sb += "\\"; sb += extra;
+        callingPackage = sb.ToString();
     }
 
     Boolean bExtra = FALSE;

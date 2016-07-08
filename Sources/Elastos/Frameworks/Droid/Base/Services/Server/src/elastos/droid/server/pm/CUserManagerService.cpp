@@ -16,13 +16,14 @@
 #include <elastos/core/AutoLock.h>
 #include <elastos/core/Math.h>
 #include <elastos/core/StringUtils.h>
+#include <elastos/core/StringBuilder.h>
 #include <elastos/utility/etl/List.h>
 #include <elastos/utility/logging/Logger.h>
 #include <elastos/utility/logging/Slogger.h>
 
-#include <elastos/core/AutoLock.h>
 using Elastos::Core::AutoLock;
 using Elastos::Core::StringUtils;
+using Elastos::Core::StringBuilder;
 using Elastos::Core::IBoolean;
 using Elastos::Core::CBoolean;
 using Elastos::Core::EIID_IRunnable;
@@ -2193,9 +2194,11 @@ String CUserManagerService::PasswordToHash(
         return String(NULL);
     }
     String algo(NULL);
-    String hashed(salt + password);
+    StringBuilder sb(salt); sb += password;
+    String hashed = sb.ToString();
     // try {
-    AutoPtr<ArrayOf<Byte> > saltedPassword = (password + salt).GetBytes();
+    sb.Reset(); sb += password; sb += salt;
+    AutoPtr<ArrayOf<Byte> > saltedPassword = sb.ToString().GetBytes();
     AutoPtr<IMessageDigestHelper> helper;
     CMessageDigestHelper::AcquireSingleton((IMessageDigestHelper**)&helper);
     AutoPtr<IMessageDigest> md;
@@ -2217,12 +2220,12 @@ String CUserManagerService::ToHex(
     /* [in] */ ArrayOf<Byte>* ary)
 {
     String hex("0123456789ABCDEF");
-    String ret("");
+    StringBuilder sb("");
     for (Int32 i = 0; i < ary->GetLength(); i++) {
-        ret += hex.GetChar(((*ary)[i] >> 4) & 0xf);
-        ret += hex.GetChar((*ary)[i] & 0xf);
+        sb += hex.GetChar(((*ary)[i] >> 4) & 0xf);
+        sb += hex.GetChar((*ary)[i] & 0xf);
     }
-    return ret;
+    return sb.ToString();
 }
 
 Int32 CUserManagerService::GetUidForPackage(

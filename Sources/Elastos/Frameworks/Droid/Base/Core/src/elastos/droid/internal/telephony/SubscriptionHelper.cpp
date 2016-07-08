@@ -171,11 +171,11 @@ ECode SubscriptionHelper::constructor(
     cr->RegisterContentObserver(uri, FALSE, mNwModeObserver);
 
 
-    String str("SubscriptionHelper init by Context, num phones = ");
-    str += sNumPhones;
-    str += " ApmSIMNotPwdn = ";
-    str += sApmSIMNotPwdn;
-    Logd(str);
+    // String str("SubscriptionHelper init by Context, num phones = ");
+    // str += sNumPhones;
+    // str += " ApmSIMNotPwdn = ";
+    // str += sApmSIMNotPwdn;
+    // Logd(str);
     return NOERROR;
 }
 
@@ -207,11 +207,11 @@ void SubscriptionHelper::UpdateNwModesInSubIdTable(
             // }
             Int32 nwModeinSubIdTable = 0;
             subCtrlr->GetNwMode((*subIdList)[0], &nwModeinSubIdTable);
-            String str("updateNwModesInSubIdTable: nwModeinSubIdTable: ");
-            str += nwModeinSubIdTable;
-            str += ", nwModeInDb: ";
-            str += nwModeInDb;
-            Logd(str);
+            // String str("updateNwModesInSubIdTable: nwModeinSubIdTable: ");
+            // str += nwModeinSubIdTable;
+            // str += ", nwModeInDb: ";
+            // str += nwModeInDb;
+            // Logd(str);
 
             //store Db value to table only if value in table is default
             //OR if override is set to True.
@@ -245,10 +245,10 @@ ECode SubscriptionHelper::HandleMessage(
             String str(" Received SIM refresh, reset sub state ");
             Int32 iIndex = 0;
             index->GetValue(&iIndex);
-            str += iIndex;
-            str += " old sub state ";
-            str += (*mSubStatus)[iIndex];
-            Logi(str);
+            // str += iIndex;
+            // str += " old sub state ";
+            // str += (*mSubStatus)[iIndex];
+            // Logi(str);
             (*mSubStatus)[iIndex] = SUB_INIT_STATE;
             break;
         }
@@ -280,28 +280,28 @@ ECode SubscriptionHelper::UpdateSubActivation(
     for (Int32 slotId = 0; slotId < sNumPhones; slotId++) {
         if ((*simStatus)[slotId] == SUB_SIM_NOT_INSERTED) {
             (*mSubStatus)[slotId] = (*simStatus)[slotId];
-            String str(" Sim not inserted in slot [");
-            str += slotId;
-            str += "] simStatus= ";
-            str += (*simStatus)[slotId];
-            Logd(str);
+            // String str(" Sim not inserted in slot [");
+            // str += slotId;
+            // str += "] simStatus= ";
+            // str += (*simStatus)[slotId];
+            // Logd(str);
             continue;
         }
         AutoPtr<ArrayOf<Int64> > subId;
         IISub::Probe(subCtrlr)->GetSubId(slotId, (ArrayOf<Int64>**)&subId);
         Int32 subState = 0;
         IISub::Probe(subCtrlr)->GetSubState((*subId)[0], &subState);
-        String str("setUicc for [");
-        str += slotId;
-        str += "] = ";
-        str += subState;
-        str += "subId = ";
-        str += (*subId)[0];
-        str += " prev subState = ";
-        str += (*mSubStatus)[slotId];
-        str += " stackReady ";
-        str += isStackReadyEvent;
-        Logd(str);
+        // String str("setUicc for [");
+        // str += slotId;
+        // str += "] = ";
+        // str += subState;
+        // str += "subId = ";
+        // str += (*subId)[0];
+        // str += " prev subState = ";
+        // str += (*mSubStatus)[slotId];
+        // str += " stackReady ";
+        // str += isStackReadyEvent;
+        // Logd(str);
         // Do not send SET_UICC if its already sent with same state
         if (((*mSubStatus)[slotId] != subState) || isStackReadyEvent) {
             // if sim card present in the slot, get the stored sub status and
@@ -313,9 +313,9 @@ ECode SubscriptionHelper::UpdateSubActivation(
     // if at least one uiccrequest sent, UpdateUserPrefs() will be called
     // from ProcessSetUiccSubscriptionDone()
     if (IsAllSubsAvailable() && (!setUiccSent)) {
-        String str("Received all sim info, update user pref subs, triggerDds= ");
-        str += sTriggerDds;
-        Logd(str);
+        // String str("Received all sim info, update user pref subs, triggerDds= ");
+        // str += sTriggerDds;
+        // Logd(str);
         subCtrlr->UpdateUserPrefs(sTriggerDds);
         sTriggerDds = FALSE;
     }
@@ -346,10 +346,10 @@ ECode SubscriptionHelper::SetUiccSubscription(
     AutoPtr<IUiccCard> uiccCard;
     uc->GetUiccCard(slotId, (IUiccCard**)&uiccCard);
     if (uiccCard == NULL) {
-        String str("setUiccSubscription: slotId:");
-        str += slotId;
-        str += " card info not available";
-        Logd(str);
+        // String str("setUiccSubscription: slotId:");
+        // str += slotId;
+        // str += " card info not available";
+        // Logd(str);
         return NOERROR;
     }
 
@@ -407,11 +407,11 @@ void SubscriptionHelper::ProcessSetUiccSubscriptionDone(
     subCtrlr->GetSubIdUsingSlotId(slotId, (ArrayOf<Int64>**)&subId);
 
     if (ar->mException != NULL) {
-        String str("Exception in SET_UICC_SUBSCRIPTION, slotId = ");
-        str += slotId;
-        str += " newSubState ";
-        str += newSubState;
-        Loge(str);
+        // String str("Exception in SET_UICC_SUBSCRIPTION, slotId = ");
+        // str += slotId;
+        // str += " newSubState ";
+        // str += newSubState;
+        // Loge(str);
         // broadcast set uicc failure
         (*mSubStatus)[slotId] = SUB_SET_UICC_FAIL;
         BroadcastSetUiccResult(slotId, newSubState, IPhoneConstants::FAILURE);
@@ -429,13 +429,13 @@ void SubscriptionHelper::ProcessSetUiccSubscriptionDone(
     (*mSubStatus)[slotId] = newSubState;
     // After activating all subs, updated the user preferred sub values
     if (IsAllSubsAvailable()) {
-        String str("Received all subs, now update user preferred subs, slotid = ");
-        str += slotId;
-        str += " newSubState = ";
-        str += newSubState;
-        str += " sTriggerDds = ";
-        str += sTriggerDds;
-        Logd(str);
+        // String str("Received all subs, now update user preferred subs, slotid = ");
+        // str += slotId;
+        // str += " newSubState = ";
+        // str += newSubState;
+        // str += " sTriggerDds = ";
+        // str += sTriggerDds;
+        // Logd(str);
         subCtrlr->UpdateUserPrefs(sTriggerDds);
         sTriggerDds = FALSE;
     }
@@ -527,17 +527,17 @@ ECode SubscriptionHelper::ProceedToHandleIccEvent(
     Boolean bRadioOn = FALSE;
     IsRadioOn(slotId, &bRadioOn);
     if ((!sApmSIMNotPwdn) && (!bRadioOn || (apmState == 1))) {
-        String str(" proceedToHandleIccEvent, radio off/unavailable, slotId = ");
-        str += slotId;
-        Logi(str);
+        // String str(" proceedToHandleIccEvent, radio off/unavailable, slotId = ");
+        // str += slotId;
+        // Logi(str);
         (*mSubStatus)[slotId] = SUB_INIT_STATE;
     }
 
     // Do not handle if SIM powers down in APM mode
     if ((apmState == 1) && (!sApmSIMNotPwdn)) {
-        String str(" proceedToHandleIccEvent, sApmSIMNotPwdn = ");
-        str += sApmSIMNotPwdn;
-        Logd(str);
+        // String str(" proceedToHandleIccEvent, sApmSIMNotPwdn = ");
+        // str += sApmSIMNotPwdn;
+        // Logd(str);
         *result = FALSE;
         return NOERROR;
     }
@@ -546,9 +546,9 @@ ECode SubscriptionHelper::ProceedToHandleIccEvent(
     Boolean bAvailable = FALSE;
     IsRadioAvailable(slotId, &bAvailable);
     if (!bAvailable) {
-        String str(" proceedToHandleIccEvent, radio not available, slotId = ");
-        str += slotId;
-        Logi(str);
+        // String str(" proceedToHandleIccEvent, radio not available, slotId = ");
+        // str += slotId;
+        // Logi(str);
         *result = FALSE;
         return NOERROR;
     }

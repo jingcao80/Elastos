@@ -1,7 +1,9 @@
 #include "elastos/droid/internal/telephony/gsm/CSmsBroadcastConfigInfo.h"
 #include <elastos/core/StringUtils.h>
+#include <elastos/core/StringBuilder.h>
 
 using Elastos::Core::StringUtils;
+using Elastos::Core::StringBuilder;
 
 namespace Elastos {
 namespace Droid {
@@ -121,12 +123,12 @@ ECode CSmsBroadcastConfigInfo::ToString(
     /* [out] */ String* result)
 {
     VALIDATE_NOT_NULL(result)
-    *result = String("SmsBroadcastConfigInfo: Id [")
-            + StringUtils::ToString(mFromServiceId) + ','
-            + StringUtils::ToString(mToServiceId) + "] Code ["
-            + StringUtils::ToString(mFromCodeScheme) + ','
-            + StringUtils::ToString(mToCodeScheme) + "] " +
-            (mSelected ? "ENABLED" : "DISABLED");
+    StringBuilder sb("SmsBroadcastConfigInfo: Id [");
+    sb += mFromServiceId;
+    sb += ", "; sb += mToServiceId; sb += "] Code [";
+    sb += mFromCodeScheme; sb += ", "; sb += mToCodeScheme; sb += "] ";
+    sb += (mSelected ? "ENABLED" : "DISABLED");
+    *result = sb.ToString();
     return NOERROR;
 }
 
