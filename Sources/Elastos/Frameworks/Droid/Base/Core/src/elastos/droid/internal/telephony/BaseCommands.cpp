@@ -347,7 +347,9 @@ ECode BaseCommands::SetOnNewGsmSms(
     /* [in] */ Int32 what,
     /* [in] */ IInterface* obj)
 {
-    CRegistrant::New(h, what, obj, (IRegistrant**)&mGsmSmsRegistrant);
+    AutoPtr<IRegistrant> r;
+    CRegistrant::New(h, what, obj, (IRegistrant**)&r);
+    mGsmSmsRegistrant = (Registrant*)(r.Get());
     return NOERROR;
 }
 
@@ -368,7 +370,10 @@ ECode BaseCommands::SetOnNewCdmaSms(
     /* [in] */ Int32 what,
     /* [in] */ IInterface* obj)
 {
-    CRegistrant::New(h, what, obj, (IRegistrant**)&mCdmaSmsRegistrant);
+    AutoPtr<IRegistrant> r;
+    CRegistrant::New(h, what, obj, (IRegistrant**)&r);
+    mCdmaSmsRegistrant = (Registrant*)(r.Get());
+
     return NOERROR;
 }
 
@@ -389,7 +394,9 @@ ECode BaseCommands::SetOnNewGsmBroadcastSms(
     /* [in] */ Int32 what,
     /* [in] */ IInterface* obj)
 {
-    CRegistrant::New(h, what, obj, (IRegistrant**)&mGsmBroadcastSmsRegistrant);
+    AutoPtr<IRegistrant> r;
+    CRegistrant::New(h, what, obj, (IRegistrant**)&r);
+    mGsmBroadcastSmsRegistrant = (Registrant*)(r.Get());
     return NOERROR;
 }
 
@@ -410,7 +417,9 @@ ECode BaseCommands::SetOnSmsOnSim(
     /* [in] */ Int32 what,
     /* [in] */ IInterface* obj)
 {
-    CRegistrant::New(h, what, obj, (IRegistrant**)&mSmsOnSimRegistrant);
+    AutoPtr<IRegistrant> r;
+    CRegistrant::New(h, what, obj, (IRegistrant**)&r);
+    mSmsOnSimRegistrant = (Registrant*)(r.Get());
     return NOERROR;
 }
 
@@ -431,7 +440,10 @@ ECode BaseCommands::SetOnSmsStatus(
     /* [in] */ Int32 what,
     /* [in] */ IInterface* obj)
 {
-    CRegistrant::New(h, what, obj, (IRegistrant**)&mSmsStatusRegistrant);
+    AutoPtr<IRegistrant> r;
+    CRegistrant::New(h, what, obj, (IRegistrant**)&r);
+    mSmsStatusRegistrant = (Registrant*)(r.Get());
+
     return NOERROR;
 }
 
@@ -452,7 +464,9 @@ ECode BaseCommands::SetOnSignalStrengthUpdate(
     /* [in] */ Int32 what,
     /* [in] */ IInterface* obj)
 {
-    CRegistrant::New(h, what, obj, (IRegistrant**)&mSignalStrengthRegistrant);
+    AutoPtr<IRegistrant> r;
+    CRegistrant::New(h, what, obj, (IRegistrant**)&r);
+    mSignalStrengthRegistrant = (Registrant*)(r.Get());
     return NOERROR;
 }
 
@@ -473,7 +487,9 @@ ECode BaseCommands::SetOnNITZTime(
     /* [in] */ Int32 what,
     /* [in] */ IInterface* obj)
 {
-    CRegistrant::New(h, what, obj, (IRegistrant**)&mNITZTimeRegistrant);
+    AutoPtr<IRegistrant> r;
+    CRegistrant::New(h, what, obj, (IRegistrant**)&r);
+    mNITZTimeRegistrant = (Registrant*)(r.Get());
     return NOERROR;
 }
 
@@ -494,7 +510,9 @@ ECode BaseCommands::SetOnUSSD(
     /* [in] */ Int32 what,
     /* [in] */ IInterface* obj)
 {
-    CRegistrant::New(h, what, obj, (IRegistrant**)&mUSSDRegistrant);
+    AutoPtr<IRegistrant> r;
+    CRegistrant::New(h, what, obj, (IRegistrant**)&r);
+    mUSSDRegistrant = (Registrant*)(r.Get());
     return NOERROR;
 }
 
@@ -515,7 +533,9 @@ ECode BaseCommands::SetOnSuppServiceNotification(
     /* [in] */ Int32 what,
     /* [in] */ IInterface* obj)
 {
-    CRegistrant::New(h, what, obj, (IRegistrant**)&mSsnRegistrant);
+    AutoPtr<IRegistrant> r;
+    CRegistrant::New(h, what, obj, (IRegistrant**)&r);
+    mSsnRegistrant = (Registrant*)(r.Get());
     return NOERROR;
 }
 
@@ -536,7 +556,9 @@ ECode BaseCommands::SetOnCatSessionEnd(
     /* [in] */ Int32 what,
     /* [in] */ IInterface* obj)
 {
-    CRegistrant::New(h, what, obj, (IRegistrant**)&mCatSessionEndRegistrant);
+    AutoPtr<IRegistrant> r;
+    CRegistrant::New(h, what, obj, (IRegistrant**)&r);
+    mCatSessionEndRegistrant = (Registrant*)(r.Get());
     return NOERROR;
 }
 
@@ -557,7 +579,9 @@ ECode BaseCommands::SetOnCatProactiveCmd(
     /* [in] */ Int32 what,
     /* [in] */ IInterface* obj)
 {
-    CRegistrant::New(h, what, obj, (IRegistrant**)&mCatProCmdRegistrant);
+    AutoPtr<IRegistrant> r;
+    CRegistrant::New(h, what, obj, (IRegistrant**)&r);
+    mCatProCmdRegistrant = (Registrant*)(r.Get());
     return NOERROR;
 }
 
@@ -578,7 +602,9 @@ ECode BaseCommands::SetOnCatEvent(
     /* [in] */ Int32 what,
     /* [in] */ IInterface* obj)
 {
-    CRegistrant::New(h, what, obj, (IRegistrant**)&mCatEventRegistrant);
+    AutoPtr<IRegistrant> r;
+    CRegistrant::New(h, what, obj, (IRegistrant**)&r);
+    mCatEventRegistrant = (Registrant*)(r.Get());
     return NOERROR;
 }
 
@@ -599,7 +625,9 @@ ECode BaseCommands::SetOnCatCallSetUp(
     /* [in] */ Int32 what,
     /* [in] */ IInterface* obj)
 {
-    CRegistrant::New(h, what, obj, (IRegistrant**)&mCatCallSetUpRegistrant);
+    AutoPtr<IRegistrant> r;
+    CRegistrant::New(h, what, obj, (IRegistrant**)&r);
+    mCatCallSetUpRegistrant = (Registrant*)(r.Get());
     return NOERROR;
 }
 
@@ -621,7 +649,9 @@ ECode BaseCommands::SetOnCatSendSmsResult(
     /* [in] */ Int32 what,
     /* [in] */ IInterface* obj)
 {
-    CRegistrant::New(h, what, obj, (IRegistrant**)&mCatSendSmsResultRegistrant);
+    AutoPtr<IRegistrant> r;
+    CRegistrant::New(h, what, obj, (IRegistrant**)&r);
+    mCatSendSmsResultRegistrant = (Registrant*)(r.Get());
     return NOERROR;
 }
 
@@ -637,7 +667,9 @@ ECode BaseCommands::SetOnIccSmsFull(
     /* [in] */ Int32 what,
     /* [in] */ IInterface* obj)
 {
-    CRegistrant::New(h, what, obj, (IRegistrant**)&mIccSmsFullRegistrant);
+    AutoPtr<IRegistrant> r;
+    CRegistrant::New(h, what, obj, (IRegistrant**)&r);
+    mIccSmsFullRegistrant = (Registrant*)(r.Get());
     return NOERROR;
 }
 
@@ -678,7 +710,9 @@ ECode BaseCommands::SetEmergencyCallbackMode(
     /* [in] */ Int32 what,
     /* [in] */ IInterface* obj)
 {
-    CRegistrant::New(h, what, obj, (IRegistrant**)&mEmergencyCallbackModeRegistrant);
+    AutoPtr<IRegistrant> r;
+    CRegistrant::New(h, what, obj, (IRegistrant**)&r);
+    mEmergencyCallbackModeRegistrant = (Registrant*)(r.Get());
     return NOERROR;
 }
 
@@ -701,7 +735,9 @@ ECode BaseCommands::SetOnCallRing(
     /* [in] */ Int32 what,
     /* [in] */ IInterface* obj)
 {
-    CRegistrant::New(h, what, obj, (IRegistrant**)&mRingRegistrant);
+    AutoPtr<IRegistrant> r;
+    CRegistrant::New(h, what, obj, (IRegistrant**)&r);
+    mRingRegistrant = (Registrant*)(r.Get());
     return NOERROR;
 }
 
@@ -722,7 +758,9 @@ ECode BaseCommands::SetOnSs(
     /* [in] */ Int32 what,
     /* [in] */ IInterface* obj)
 {
-    CRegistrant::New(h, what, obj, (IRegistrant**)&mSsRegistrant);
+    AutoPtr<IRegistrant> r;
+    CRegistrant::New(h, what, obj, (IRegistrant**)&r);
+    mSsRegistrant = (Registrant*)(r.Get());
     return NOERROR;
 }
 
@@ -738,7 +776,10 @@ ECode BaseCommands::SetOnCatCcAlphaNotify(
     /* [in] */ Int32 what,
     /* [in] */ IInterface* obj)
 {
-    CRegistrant::New(h, what, obj, (IRegistrant**)&mCatCcAlphaRegistrant);
+    AutoPtr<IRegistrant> r;
+    CRegistrant::New(h, what, obj, (IRegistrant**)&r);
+    mCatCcAlphaRegistrant = (Registrant*)(r.Get());
+
     return NOERROR;
 }
 
@@ -790,7 +831,9 @@ ECode BaseCommands::SetOnRestrictedStateChanged(
     /* [in] */ Int32 what,
     /* [in] */ IInterface* obj)
 {
-    CRegistrant::New(h, what, obj, (IRegistrant**)&mRestrictedStateRegistrant);
+    AutoPtr<IRegistrant> r;
+    CRegistrant::New(h, what, obj, (IRegistrant**)&r);
+    mRestrictedStateRegistrant = (Registrant*)(r.Get());
     return NOERROR;
 }
 
@@ -858,7 +901,9 @@ ECode BaseCommands::SetOnUnsolOemHookRaw(
     /* [in] */ Int32 what,
     /* [in] */ IInterface* obj)
 {
-    CRegistrant::New(h, what, obj, (IRegistrant**)&mUnsolOemHookRawRegistrant);
+    AutoPtr<IRegistrant> iReg;
+    CRegistrant::New(h, what, obj, (IRegistrant**)&iReg);
+    mUnsolOemHookRawRegistrant = (Registrant*)(iReg.Get());
     return NOERROR;
 }
 

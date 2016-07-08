@@ -196,6 +196,16 @@ public:
 
     static const AutoPtr< ArrayOf<String> > SIGNAL_STRENGTH_NAMES;
 
+    /**
+     * Make a SignalStrength object from the given parcel as passed up by
+     * the ril which does not have isGsm. isGsm will be changed by ServiceStateTracker
+     * so the default is a don't care.
+     *
+     * @hide
+     */
+    static CARAPI_(AutoPtr<ISignalStrength>) MakeSignalStrengthFromRilParcel(
+        /* [in] */ IParcel* in);
+
 protected:
     CARAPI CopyFrom(
         /* [in] */ ISignalStrength* s);

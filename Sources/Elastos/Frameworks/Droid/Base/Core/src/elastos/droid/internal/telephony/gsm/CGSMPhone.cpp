@@ -134,7 +134,9 @@ ECode CGSMPhone::constructor(
     CGsmCallTracker::New(this, (IGsmCallTracker**)&mCT);
 
     CGsmServiceStateTracker::New(this, (IGsmServiceStateTracker**)&mSST);
-    CDcTracker::New(this, (IDcTracker**)&mDcTracker);
+    AutoPtr<IDcTracker> dcTracker;
+    CDcTracker::New(this, (IDcTracker**)&dcTracker);
+    mDcTracker = IDcTrackerBase::Probe(dcTracker);
 
     if (!unitTestMode) {
         CSimPhoneBookInterfaceManager::New(this, (ISimPhoneBookInterfaceManager**)&mSimPhoneBookIntManager);
@@ -179,7 +181,9 @@ ECode CGSMPhone::constructor(
     CGsmCallTracker::New(this, (IGsmCallTracker**)&mCT);
 
     CGsmServiceStateTracker::New(this, (IGsmServiceStateTracker**)&mSST);
-    CDcTracker::New(IPhoneBase::Probe(this), (IDcTracker**)&mDcTracker);
+    AutoPtr<IDcTracker> dcTracker;
+    CDcTracker::New(this, (IDcTracker**)&dcTracker);
+    mDcTracker = IDcTrackerBase::Probe(dcTracker);
 
     if (!unitTestMode) {
         CSimPhoneBookInterfaceManager::New(this, (ISimPhoneBookInterfaceManager**)&mSimPhoneBookIntManager);
@@ -1600,9 +1604,10 @@ ECode CGSMPhone::HandleMessage(
         break;
 
         case EVENT_GET_BASEBAND_VERSION_DONE:
-            ar = (AsyncResult*)(IObject*)obj.Get();
+            ar = (AsyncResult*)(IObject::Probe(obj));
 
             if (ar->mException != NULL) {
+                Logger::D(TAG, "TODO remove this Baseband version get error");
                 break;
             }
 
@@ -1611,11 +1616,12 @@ ECode CGSMPhone::HandleMessage(
                 String str;
                 ICharSequence::Probe(ar->mResult)->ToString(&str);
                 SetSystemProperty(ITelephonyProperties::PROPERTY_BASEBAND_VERSION, str);
+                Logger::D(TAG, "Baseband version: %s", str.string());//, ar->mResult);
             }
         break;
 
         case EVENT_GET_IMEI_DONE:
-            ar = (AsyncResult*)(IObject*)obj.Get();
+            ar = (AsyncResult*)(IObject::Probe(obj));
 
             if (ar->mException != NULL) {
                 break;
@@ -1625,7 +1631,7 @@ ECode CGSMPhone::HandleMessage(
         break;
 
         case EVENT_GET_IMEISV_DONE:
-            ar = (AsyncResult*)(IObject*)obj.Get();
+            ar = (AsyncResult*)(IObject::Probe(obj));
 
             if (ar->mException != NULL) {
                 break;
@@ -1635,7 +1641,7 @@ ECode CGSMPhone::HandleMessage(
         break;
 
         case EVENT_USSD: {
-            ar = (AsyncResult*)(IObject*)obj.Get();
+            ar = (AsyncResult*)(IObject::Probe(obj));
 
             AutoPtr<IArrayOf> ussdResult = IArrayOf::Probe(ar->mResult);
 
@@ -1677,13 +1683,13 @@ ECode CGSMPhone::HandleMessage(
         }
 
         case EVENT_SSN: {
-            ar = (AsyncResult*)(IObject*)obj.Get();
+            ar = (AsyncResult*)(IObject::Probe(obj));
             AutoPtr<ISuppServiceNotification> no = ISuppServiceNotification::Probe(ar->mResult);
             mSsnRegistrants->NotifyRegistrants(ar);
         break;
         }
         case EVENT_SET_CALL_FORWARD_DONE: {
-            ar = (AsyncResult*)(IObject*)obj.Get();
+            ar = (AsyncResult*)(IObject::Probe(obj));
             AutoPtr<IInterface> obj;
             mIccRecords->Get((IInterface**)&obj);
             AutoPtr<IIccRecords> r = IIccRecords::Probe(obj);
@@ -1702,7 +1708,7 @@ ECode CGSMPhone::HandleMessage(
             break;
         }
         case EVENT_SET_VM_NUMBER_DONE:
-            ar = (AsyncResult*)(IObject*)obj.Get();
+            ar = (AsyncResult*)(IObject::Probe(obj));
             if (IIccVmNotSupportedException::Probe(ar->mException) != NULL) {
                 StoreVoiceMailNumber(mVmNumber);
                 ar->mException = NULL;
@@ -1715,7 +1721,7 @@ ECode CGSMPhone::HandleMessage(
             break;
 
         case EVENT_GET_CALL_FORWARD_DONE:
-            ar = (AsyncResult*)(IObject*)obj.Get();
+            ar = (AsyncResult*)(IObject::Probe(obj));
             if (ar->mException == NULL) {
                 AutoPtr<IArrayOf> iarray = IArrayOf::Probe(ar->mResult);
                 Int32 len;
@@ -1737,7 +1743,7 @@ ECode CGSMPhone::HandleMessage(
 
         case EVENT_SET_NETWORK_AUTOMATIC: {
             // Automatic network selection from EF_CSP SIM record
-            ar = (AsyncResult*)(IObject*)obj.Get();
+            ar = (AsyncResult*)(IObject::Probe(obj));
             Boolean b;
             if (((CGsmServiceStateTracker*)mSST.Get())->mSS->GetIsManualSelection(&b), b) {
                 SetNetworkSelectionModeAutomatic(IMessage::Probe(ar->mResult));
@@ -1750,14 +1756,14 @@ ECode CGSMPhone::HandleMessage(
             break;
         }
         case EVENT_ICC_RECORD_EVENTS: {
-            ar = (AsyncResult*)(IObject*)obj.Get();
+            ar = (AsyncResult*)(IObject::Probe(obj));
             Int32 val;
             IInteger32::Probe(ar->mResult)->GetValue(&val);
             ProcessIccRecordEvents(val);
             break;
         }
         case EVENT_SET_CLIR_COMPLETE:
-            ar = (AsyncResult*)(IObject*)obj.Get();
+            ar = (AsyncResult*)(IObject::Probe(obj));
             if (ar->mException == NULL) {
                 Int32 arg1;
                 msg->GetArg1(&arg1);
@@ -1781,7 +1787,7 @@ ECode CGSMPhone::HandleMessage(
             break;
 
         case EVENT_SS: {
-            ar = (AsyncResult*)(IObject*)obj.Get();
+            ar = (AsyncResult*)(IObject::Probe(obj));
             Logger::D(TAG, "Event EVENT_SS received");
             // SS data is already being handled through MMI codes.
             // So, this result if processed as MMI response would help

@@ -54,7 +54,7 @@ GsmConferenceController::GsmConferenceController(
 {
     mConnectionListener = new MyConnectionListener(this);
 
-    CArrayList::New((IArrayList**)&mGsmConnections);
+    CArrayList::New((IList**)&mGsmConnections);
 }
 
 ECode GsmConferenceController::Add(

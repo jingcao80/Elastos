@@ -896,6 +896,44 @@ ECode CSignalStrength::CopyFrom(
     return NOERROR;
 }
 
+AutoPtr<ISignalStrength> CSignalStrength::MakeSignalStrengthFromRilParcel(
+    /* [in] */ IParcel* source)
+{
+    AutoPtr<ISignalStrength> signalStrength;
+    CSignalStrength::New((ISignalStrength**)&signalStrength);
+
+    Int32 gsmSignalStrength;
+    source->ReadInt32(&gsmSignalStrength);
+    Int32 gsmBitErrorRate;
+    source->ReadInt32(&gsmBitErrorRate);
+    Int32 cdmaDbm;
+    source->ReadInt32(&cdmaDbm);
+    Int32 cdmaEcio;
+    source->ReadInt32(&cdmaEcio);
+    Int32 evdoDbm;
+    source->ReadInt32(&evdoDbm);
+    Int32 evdoEcio;
+    source->ReadInt32(&evdoEcio);
+    Int32 evdoSnr;
+    source->ReadInt32(&evdoSnr);
+    Int32 lteSignalStrength;
+    source->ReadInt32(&lteSignalStrength);
+    Int32 lteRsrp;
+    source->ReadInt32(&lteRsrp);
+    Int32 lteRsrq;
+    source->ReadInt32(&lteRsrq);
+    Int32 lteRssnr;
+    source->ReadInt32(&lteRssnr);
+    Int32 lteCqi;
+    source->ReadInt32(&lteCqi);
+    (CSignalStrength*)(signalStrength.Get())->Initialize(
+            gsmSignalStrength, gsmBitErrorRate, cdmaDbm, cdmaEcio, evdoDbm, evdoEcio,
+            evdoSnr, lteSignalStrength, lteRsrp, lteRsrq, lteRssnr, lteCqi, TRUE);//TODO
+
+    return signalStrength;
+}
+
+
 } // namespace Telephony
 } // namespace Droid
 } // namespace Elastos
