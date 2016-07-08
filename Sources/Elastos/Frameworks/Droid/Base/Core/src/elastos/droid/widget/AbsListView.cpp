@@ -473,10 +473,9 @@ ECode AbsListView::ListItemAccessibilityDelegate::PerformAccessibilityAction(
         return NOERROR;
     }
 
-    Boolean adapterEnabled;
-    adapter->IsEnabled(position, &adapterEnabled);
     Boolean res;
-    if ((mHost->IsEnabled(&res), !res) || !adapterEnabled) {
+    Boolean adapterEnabled;
+    if ((mHost->IsEnabled(&res), !res) || (adapter->IsEnabled(position, &adapterEnabled), !adapterEnabled)) {
         // Cannot perform actions on disabled items.
         return NOERROR;
     }
@@ -3062,8 +3061,7 @@ ECode AbsListView::SetItemChecked(
         mCheckStates->Get(position, &oldValue);
         mCheckStates->Put(position, value);
         Boolean hasId;
-        IAdapter::Probe(mAdapter)->HasStableIds(&hasId);
-        if (mCheckedIdStates != NULL && hasId) {
+        if (mCheckedIdStates != NULL && (IAdapter::Probe(mAdapter)->HasStableIds(&hasId), hasId)) {
             Int64 key;
             IAdapter::Probe(mAdapter)->GetItemId(position, &key);
 
@@ -3092,13 +3090,11 @@ ECode AbsListView::SetItemChecked(
     }
     else {
         Boolean hasId;
-        IAdapter::Probe(mAdapter)->HasStableIds(&hasId);
-        Boolean updateIds = mCheckedIdStates != NULL && hasId;
+        Boolean updateIds = mCheckedIdStates != NULL && (IAdapter::Probe(mAdapter)->HasStableIds(&hasId), hasId);
         // Clear all values if we're checking something, or unchecking the currently
         // selected item
         Boolean checked;
-        IsItemChecked(position, &checked);
-        if (value || checked) {
+        if (value || (IsItemChecked(position, &checked), checked)) {
             mCheckStates->Clear();
             if (updateIds) {
                 mCheckedIdStates->Clear();
@@ -3155,8 +3151,7 @@ ECode AbsListView::PerformItemClick(
             mCheckStates->Put(position, checked);
 
             Boolean hasId;
-            adapter->HasStableIds(&hasId);
-            if (mCheckedIdStates != NULL && hasId) {
+            if (mCheckedIdStates != NULL && (adapter->HasStableIds(&hasId), hasId)) {
                 if (checked) {
                     Int64 id;
                     adapter->GetItemId(position, &id);
@@ -3189,8 +3184,7 @@ ECode AbsListView::PerformItemClick(
                 mCheckStates->Clear();
                 mCheckStates->Put(position, TRUE);
                 Boolean hasId;
-                adapter->HasStableIds(&hasId);
-                if (mCheckedIdStates != NULL && hasId) {
+                if (mCheckedIdStates != NULL && (adapter->HasStableIds(&hasId), hasId)) {
                     mCheckedIdStates->Clear();
                     Int64 itemId;
                     adapter->GetItemId(position, &itemId);
@@ -4844,9 +4838,8 @@ void AbsListView::KeyPressed()
     AutoPtr<IDrawable> selector = mSelector;
     AutoPtr<IRect> selectorRect = mSelectorRect;
     Boolean rectEmpty;
-    selectorRect->IsEmpty(&rectEmpty);
     if (selector != NULL && ((IsFocused(&res), res) || TouchModeDrawsInPressedState())
-            && !rectEmpty) {
+            && (selectorRect->IsEmpty(&rectEmpty), !rectEmpty)) {
         AutoPtr<IView> v;
         GetChildAt(mSelectedPosition - mFirstPosition, (IView**)&v);
         if (v != NULL) {
@@ -5403,9 +5396,8 @@ Boolean AbsListView::StartScrollIfNeeded(
     Boolean overscroll = mScrollY != 0;
 
     Int32 axes;
-    GetNestedScrollAxes(&axes);
     if ((overscroll || distance > mTouchSlop) &&
-            (axes & SCROLL_AXIS_VERTICAL) == 0) {
+            ((GetNestedScrollAxes(&axes), axes) & SCROLL_AXIS_VERTICAL) == 0) {
         CreateScrollingCache();
         if (overscroll) {
             mTouchMode = TOUCH_MODE_OVERSCROLL;

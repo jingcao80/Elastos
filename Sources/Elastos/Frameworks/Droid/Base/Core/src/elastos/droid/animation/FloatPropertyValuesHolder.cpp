@@ -2,12 +2,14 @@
 #include "elastos/droid/animation/FloatPropertyValuesHolder.h"
 #include <elastos/core/AutoLock.h>
 #include <elastos/core/CoreUtils.h>
+#include <elastos/utility/logging/Logger.h>
 
 using Elastos::Core::AutoLock;
 using Elastos::Core::IFloat;
 using Elastos::Core::CFloat;
 using Elastos::Core::EIID_IFloat;
 using Elastos::Core::CoreUtils;
+using Elastos::Utility::Logging::Logger;
 
 namespace Elastos {
 namespace Droid {
@@ -147,6 +149,12 @@ ECode FloatPropertyValuesHolder::SetupSetter(
                     sNativeGetterSetterPropertyMap[target] = propertyMap;
                 }
                 (*propertyMap)[methodName] = mNativeSetter;
+            }
+            else {
+                String className;
+                target->GetName(&className);
+                Logger::E("FloatPropertyValuesHolder", "Error: Method [%s] is not found on target class %s",
+                    methodName.string(), className.string());
             }
         }
     }

@@ -75,6 +75,14 @@ module
 
         SetInputEnabled(
             [in] Boolean inputEnabled);
+
+        // Used for animating the hours by changing their radius
+        SetAnimationRadiusMultiplierHours(
+            [in] Float animationRadiusMultiplier);
+
+        // Used for animating the minutes by changing their radius
+        SetAnimationRadiusMultiplierMinutes(
+            [in] Float animationRadiusMultiplier);
     }
 
     }// namespace Widget

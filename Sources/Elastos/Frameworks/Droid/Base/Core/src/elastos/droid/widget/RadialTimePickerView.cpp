@@ -89,6 +89,7 @@ ECode RadialTimePickerView::Int32Holder::constructor(
 ECode RadialTimePickerView::Int32Holder::SetValue(
     /* [in] */ Int32 value)
 {
+    mValue = value;
     return NOERROR;
 }
 
@@ -137,7 +138,10 @@ ECode RadialTimePickerView::RadialTimePickerViewOnTouchListener::OnTouch(
     return mHost->OnTouch(v, event, resValue);
 }
 
-Boolean RadialTimePickerView::sInit = RadialTimePickerView::InitStatic();
+//=====================================================================
+//          RadialTimePickerView
+//=====================================================================
+
 const String RadialTimePickerView::TAG("ClockView");
 const Boolean RadialTimePickerView::DEBUG = FALSE;
 const Int32 RadialTimePickerView::DEBUG_COLOR = 0x20FF0000;
@@ -161,20 +165,26 @@ const Float RadialTimePickerView::COSINE_30_DEGREES = ((Float) Elastos::Core::Ma
 const Float RadialTimePickerView::SINE_30_DEGREES = 0.5f;
 const Int32 RadialTimePickerView::DEGREES_FOR_ONE_HOUR = 30;
 const Int32 RadialTimePickerView::DEGREES_FOR_ONE_MINUTE = 6;
-const Int32 RadialTimePickerView::CENTER_RADIUS = 2;
 const Int32 RadialTimePickerView::HOURS_NUMBERS[] = {12, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11};
 const Int32 RadialTimePickerView::HOURS_NUMBERS_24[] = {0, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23};
 const Int32 RadialTimePickerView::MINUTES_NUMBERS[] = {0, 5, 10, 15, 20, 25, 30, 35, 40, 45, 50, 55};
-AutoPtr<ArrayOf<Int32> > RadialTimePickerView::STATE_SET_SELECTED;
+const Int32 RadialTimePickerView::CENTER_RADIUS = 2;
 
-AutoPtr<ArrayOf<Int32> > RadialTimePickerView::sSnapPrefer30sMap;
+static AutoPtr< ArrayOf<Int32> > InitSTATE_SET_SELECTED()
+{
+    AutoPtr< ArrayOf<Int32> > args = ArrayOf<Int32>::Alloc(1);
+    (*args)[0] = R::attr::state_selected;
+    return args;
+}
+
+AutoPtr<ArrayOf<Int32> > RadialTimePickerView::STATE_SET_SELECTED = InitSTATE_SET_SELECTED();
+
+AutoPtr<ArrayOf<Int32> > RadialTimePickerView::sSnapPrefer30sMap = ArrayOf<Int32>::Alloc(361);
+
+Boolean RadialTimePickerView::sInit = RadialTimePickerView::InitStatic();
 
 Boolean RadialTimePickerView::InitStatic()
 {
-    STATE_SET_SELECTED = ArrayOf<Int32>::Alloc(1);
-    (*STATE_SET_SELECTED)[0] = R::attr::state_selected;
-
-    sSnapPrefer30sMap = ArrayOf<Int32>::Alloc(361);
     // Prepare mapping to snap touchable degrees to selectable degrees.
     PreparePrefer30sMap();
     return TRUE;
@@ -264,10 +274,6 @@ Int32 RadialTimePickerView::SnapOnly30s(
     }
     return degrees;
 }
-
-//=====================================================================
-//          RadialTimePickerView
-//=====================================================================
 
 CAR_INTERFACE_IMPL_2(RadialTimePickerView, View, IRadialTimePickerView, IViewOnTouchListener)
 
@@ -611,7 +617,7 @@ ECode RadialTimePickerView::SetCurrentItemShowing(
 ECode RadialTimePickerView::GetCurrentItemShowing(
     /* [out] */ Int32* showing)
 {
-    VALIDATE_NOT_NULL(showing);
+    VALIDATE_NOT_NULL(showing)
     *showing = mShowHours ? HOURS : MINUTES;
     return NOERROR;
 }
@@ -650,7 +656,7 @@ ECode RadialTimePickerView::SetCurrentHour(
 ECode RadialTimePickerView::GetCurrentHour(
     /* [out] */ Int32* result)
 {
-    VALIDATE_NOT_NULL(result);
+    VALIDATE_NOT_NULL(result)
     Int32 hour = (mSelectionDegrees[mIsOnInnerCircle ?
             HOURS_INNER : HOURS] / DEGREES_FOR_ONE_HOUR) % 12;
     if (mIs24HourMode) {
@@ -683,7 +689,7 @@ ECode RadialTimePickerView::SetCurrentMinute(
 ECode RadialTimePickerView::GetCurrentMinute(
     /* [out] */ Int32* minute)
 {
-    VALIDATE_NOT_NULL(minute);
+    VALIDATE_NOT_NULL(minute)
     *minute = (mSelectionDegrees[MINUTES] / DEGREES_FOR_ONE_MINUTE);
     return NOERROR;
 }
@@ -699,7 +705,7 @@ ECode RadialTimePickerView::SetAmOrPm(
 ECode RadialTimePickerView::GetAmOrPm(
     /* [out] */ Int32* amOrPm)
 {
-    VALIDATE_NOT_NULL(amOrPm);
+    VALIDATE_NOT_NULL(amOrPm)
     *amOrPm = mAmOrPm;
     return NOERROR;
 }
@@ -979,9 +985,9 @@ void RadialTimePickerView::DrawAmPm(
     IsLayoutRtl(&isLayoutRtl);
 
     Int32 amColor = mAmPmUnselectedColor;
-    Int32 amAlpha = ALPHA_OPAQUE;
+    Int32 amAlpha = ALPHA_TRANSPARENT; //ALPHA_OPAQUE;
     Int32 pmColor = mAmPmUnselectedColor;
-    Int32 pmAlpha = ALPHA_OPAQUE;
+    Int32 pmAlpha = ALPHA_TRANSPARENT; //ALPHA_OPAQUE;
     if (mAmOrPm == AM) {
         amColor = mAmPmSelectedColor;
         amAlpha = ALPHA_AMPM_SELECTED;
@@ -1269,17 +1275,19 @@ void RadialTimePickerView::DrawTextElements(
     canvas->DrawText((*texts)[11], textGridWidths[2], textGridHeights[1], paint);
 }
 
-void RadialTimePickerView::SetAnimationRadiusMultiplierHours(
+ECode RadialTimePickerView::SetAnimationRadiusMultiplierHours(
     /* [in] */ Float animationRadiusMultiplier)
 {
     mAnimationRadiusMultiplier[HOURS] = animationRadiusMultiplier;
     mAnimationRadiusMultiplier[HOURS_INNER] = animationRadiusMultiplier;
+    return NOERROR;
 }
 
-void RadialTimePickerView::SetAnimationRadiusMultiplierMinutes(
+ECode RadialTimePickerView::SetAnimationRadiusMultiplierMinutes(
     /* [in] */ Float animationRadiusMultiplier)
 {
     mAnimationRadiusMultiplier[MINUTES] = animationRadiusMultiplier;
+    return NOERROR;
 }
 
 AutoPtr<IObjectAnimator> RadialTimePickerView::GetRadiusDisappearAnimator(
@@ -1600,7 +1608,8 @@ ECode RadialTimePickerView::OnTouch(
     /* [in] */ IMotionEvent* event,
     /* [out] */ Boolean* resValue)
 {
-    VALIDATE_NOT_NULL(resValue);
+    VALIDATE_NOT_NULL(resValue)
+
     if(!mInputEnabled) {
         *resValue = TRUE;
         return NOERROR;
@@ -1717,7 +1726,7 @@ ECode RadialTimePickerView::DispatchPopulateAccessibilityEvent(
     /* [in] */ IAccessibilityEvent* event,
     /* [out] */ Boolean* result)
 {
-    VALIDATE_NOT_NULL(result);
+    VALIDATE_NOT_NULL(result)
     Int32 type = 0;
     if ((event->GetEventType(&type), type) == IAccessibilityEvent::TYPE_WINDOW_STATE_CHANGED) {
         // Clear the event's current text so that only the current time will be spoken.

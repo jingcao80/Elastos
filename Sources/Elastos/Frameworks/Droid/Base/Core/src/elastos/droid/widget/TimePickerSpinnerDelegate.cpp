@@ -361,7 +361,6 @@ ECode TimePickerSpinnerDelegate::InnerViewOnKeyListener::OnKey(
     /* [out] */ Boolean* result)
 {
     VALIDATE_NOT_NULL(result);
-
     Int32 action = 0;
     event->GetAction(&action);
     if (action == IKeyEvent::ACTION_UP) {
@@ -406,14 +405,14 @@ ECode TimePickerSpinnerDelegate::InnerViewOnFocusChangeListener::OnFocusChange(
 //                      TimePickerSpinnerDelegate
 //=====================================================================
 const String TimePickerSpinnerDelegate::TAG("TimePickerDelegate");
-const Int32 TimePickerSpinnerDelegate::HOUR_INDEX;
-const Int32 TimePickerSpinnerDelegate::MINUTE_INDEX;
-const Int32 TimePickerSpinnerDelegate::AMPM_INDEX;
-const Int32 TimePickerSpinnerDelegate::ENABLE_PICKER_INDEX;
-const Int32 TimePickerSpinnerDelegate::AM;
-const Int32 TimePickerSpinnerDelegate::PM;
+const Int32 TimePickerSpinnerDelegate::HOUR_INDEX = 0;
+const Int32 TimePickerSpinnerDelegate::MINUTE_INDEX = 1;
+const Int32 TimePickerSpinnerDelegate::AMPM_INDEX = 2;
+const Int32 TimePickerSpinnerDelegate::ENABLE_PICKER_INDEX = 3;
+const Int32 TimePickerSpinnerDelegate::AM = 0;
+const Int32 TimePickerSpinnerDelegate::PM = 1;
 const Boolean TimePickerSpinnerDelegate::DEFAULT_ENABLED_STATE = TRUE;
-const Int32 TimePickerSpinnerDelegate::HOURS_IN_HALF_DAY;
+const Int32 TimePickerSpinnerDelegate::HOURS_IN_HALF_DAY = 12;
 
 CAR_INTERFACE_IMPL_2(TimePickerSpinnerDelegate, TimePicker::AbstractTimePickerDelegate, ITimePickerSpinnerDelegate, IOnValueSelectedListener)
 

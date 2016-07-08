@@ -315,11 +315,11 @@ private:
         /* [in] */ Int32 alpha);
 
     // Used for animating the hours by changing their radius
-    CARAPI_(void) SetAnimationRadiusMultiplierHours(
+    CARAPI SetAnimationRadiusMultiplierHours(
         /* [in] */ Float animationRadiusMultiplier);
 
     // Used for animating the minutes by changing their radius
-    CARAPI_(void) SetAnimationRadiusMultiplierMinutes(
+    CARAPI SetAnimationRadiusMultiplierMinutes(
         /* [in] */ Float animationRadiusMultiplier);
 
     static CARAPI_(AutoPtr<IObjectAnimator>) GetRadiusDisappearAnimator(
@@ -361,7 +361,6 @@ private:
         /* [in] */ Float y);
 
 private:
-    static Boolean sInit;
     static const String TAG;
     static const Boolean DEBUG;
 
@@ -411,6 +410,7 @@ private:
     static AutoPtr<ArrayOf<Int32> > STATE_SET_SELECTED;
 
     static AutoPtr<ArrayOf<Int32> > sSnapPrefer30sMap;
+    static Boolean sInit;
 
     AutoPtr<ArrayOf<String> > mHours12Texts;
     AutoPtr<ArrayOf<String> > mOuterHours24Texts;

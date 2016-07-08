@@ -8,6 +8,7 @@
 #include "elastos/droid/R.h"
 #include "R.h"
 #include <elastos/core/CoreUtils.h>
+#include <elastos/utility/logging/Slogger.h>
 
 using Elastos::Droid::App::IActivity;
 using Elastos::Droid::App::IAlarmManager;
@@ -32,6 +33,7 @@ using Elastos::Utility::ILocaleHelper;
 using Elastos::Utility::CLocaleHelper;
 using Elastos::Utility::ITimeZoneHelper;
 using Elastos::Utility::CTimeZoneHelper;
+using Elastos::Utility::Logging::Slogger;
 using Libcore::ICU::ITimeZoneNames;
 using Libcore::ICU::CTimeZoneNames;
 using Org::Xmlpull::V1::IXmlPullParser;
@@ -97,7 +99,7 @@ ECode ZonePicker::ZoneGetter::GetZones(
     AutoPtr<IResources> resources;
     context->GetResources((IResources**)&resources);
     AutoPtr<IXmlResourceParser> xrp;
-    resources->GetXml(R::xml::timezones, (IXmlResourceParser**)&xrp);
+    ECode ec = resources->GetXml(R::xml::timezones, (IXmlResourceParser**)&xrp);
     Int32 next;
     IXmlPullParser* xpp = IXmlPullParser::Probe(xrp);
     while ((xpp->Next(&next), next) != IXmlPullParser::START_TAG) {
@@ -336,6 +338,7 @@ AutoPtr<ITimeZone> ZonePicker::ObtainTimeZoneFromItem(
 ECode ZonePicker::OnActivityCreated(
     /* [in] */ IBundle* savedInstanceState)
 {
+    Slogger::D("ZonePicker", " >> enter OnActivityCreated ");
     ListFragment::OnActivityCreated(savedInstanceState);
 
     AutoPtr<IActivity> activity;
@@ -347,6 +350,7 @@ ECode ZonePicker::OnActivityCreated(
     // Sets the adapter
     SetSorting(TRUE);
     SetHasOptionsMenu(TRUE);
+    Slogger::D("ZonePicker", " << leave OnActivityCreated ");
     return NOERROR;
 }
 
@@ -358,6 +362,8 @@ ECode ZonePicker::OnCreateView(
 {
     VALIDATE_NOT_NULL(result)
 
+    Slogger::D("ZonePicker", " >> enter OnCreateView ");
+
     AutoPtr<IView> view;
     ListFragment::OnCreateView(inflater, container, savedInstanceState, (IView**)&view);
     AutoPtr<IView> tmp;
@@ -366,6 +372,7 @@ ECode ZonePicker::OnCreateView(
     Utils::ForcePrepareCustomPreferencesList(container, view, list, FALSE);
     *result = view;
     REFCOUNT_ADD(*result)
+    Slogger::D("ZonePicker", " << leave OnCreateView ");
     return NOERROR;
 }
 
@@ -373,6 +380,7 @@ ECode ZonePicker::OnCreateOptionsMenu(
     /* [in] */ IMenu* menu,
     /* [in] */ IMenuInflater* inflater)
 {
+    Slogger::D("ZonePicker", " >> enter OnCreateOptionsMenu ");
     AutoPtr<IMenuItem> item;
     menu->Add(0, MENU_ALPHABETICAL, 0, R::string::zone_list_menu_sort_alphabetically, (IMenuItem**)&item);
     item->SetIcon(Elastos::Droid::R::drawable::ic_menu_sort_alphabetically);
@@ -380,12 +388,16 @@ ECode ZonePicker::OnCreateOptionsMenu(
     item = NULL;
     menu->Add(0, MENU_TIMEZONE, 0, R::string::zone_list_menu_sort_by_timezone, (IMenuItem**)&item);
     item->SetIcon(R::drawable::ic_menu_3d_globe);
-    return ListFragment::OnCreateOptionsMenu(menu, inflater);
+    ListFragment::OnCreateOptionsMenu(menu, inflater);
+
+    Slogger::D("ZonePicker", " << leave OnCreateOptionsMenu ");
+    return NOERROR;
 }
 
 ECode ZonePicker::OnPrepareOptionsMenu(
     /* [in] */ IMenu* menu)
 {
+    Slogger::D("ZonePicker", " >> enter OnPrepareOptionsMenu ");
     if (mSortedByTimezone) {
         AutoPtr<IMenuItem> item;
         menu->FindItem(MENU_TIMEZONE, (IMenuItem**)&item);
@@ -402,6 +414,7 @@ ECode ZonePicker::OnPrepareOptionsMenu(
         menu->FindItem(MENU_ALPHABETICAL, (IMenuItem**)&item);
         item->SetVisible(FALSE);
     }
+    Slogger::D("ZonePicker", " << leave OnPrepareOptionsMenu ");
     return NOERROR;
 }
 

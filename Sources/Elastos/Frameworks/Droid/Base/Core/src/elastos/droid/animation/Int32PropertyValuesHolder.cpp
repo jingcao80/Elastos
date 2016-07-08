@@ -3,12 +3,14 @@
 #include "elastos/droid/animation/Int32PropertyValuesHolder.h"
 #include <elastos/core/AutoLock.h>
 #include <elastos/core/CoreUtils.h>
+#include <elastos/utility/logging/Logger.h>
 
 using Elastos::Core::AutoLock;
 using Elastos::Core::EIID_IInteger32;
 using Elastos::Core::IInteger32;
 using Elastos::Core::CInteger32;
 using Elastos::Core::CoreUtils;
+using Elastos::Utility::Logging::Logger;
 
 namespace Elastos {
 namespace Droid {
@@ -147,6 +149,12 @@ ECode Int32PropertyValuesHolder::SetupSetter(
                     sNativeGetterSetterPropertyMap[target] = propertyMap;
                 }
                 (*propertyMap)[methodName] = mNativeSetter;
+            }
+            else {
+                String className;
+                target->GetName(&className);
+                Logger::E("Int32PropertyValuesHolder", "Error: Method [%s] is not found on target class %s",
+                    methodName.string(), className.string());
             }
         }
     }

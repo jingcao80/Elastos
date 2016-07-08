@@ -671,12 +671,11 @@ ECode AdapterView::SetEmptyView(
 {
     mEmptyView = emptyView;
 
-    Int32 accessibility;
-    emptyView->GetImportantForAccessibility(&accessibility);
     // If not explicitly specified this view is important for accessibility.
-    if (emptyView != NULL
-        &&  accessibility== IView::IMPORTANT_FOR_ACCESSIBILITY_AUTO) {
-            emptyView->SetImportantForAccessibility(IView::IMPORTANT_FOR_ACCESSIBILITY_YES);
+    Int32 accessibility;
+    if (emptyView != NULL &&
+            (emptyView->GetImportantForAccessibility(&accessibility), accessibility) == IView::IMPORTANT_FOR_ACCESSIBILITY_AUTO) {
+        emptyView->SetImportantForAccessibility(IView::IMPORTANT_FOR_ACCESSIBILITY_YES);
     }
 
     AutoPtr<IAdapter> adapter;
@@ -739,8 +738,7 @@ ECode AdapterView::SetFocusable(
     }
 
     Boolean isInMode = FALSE;
-    IsInFilterMode(&isInMode);
-    return ViewGroup::SetFocusable(focusable && (!empty || isInMode));
+    return ViewGroup::SetFocusable(focusable && (!empty || (IsInFilterMode(&isInMode), isInMode)));
 }
 
 //@Override
@@ -762,9 +760,8 @@ ECode AdapterView::SetFocusableInTouchMode(
     }
 
     Boolean isInMode = FALSE;
-    IsInFilterMode(&isInMode);
     return ViewGroup::SetFocusableInTouchMode(
-        focusable && (!empty || isInMode));
+        focusable && (!empty || (IsInFilterMode(&isInMode), isInMode)));
 }
 
 ECode AdapterView::CheckFocus()
@@ -779,8 +776,7 @@ ECode AdapterView::CheckFocus()
     }
 
     Boolean isInMode = FALSE;
-    IsInFilterMode(&isInMode);
-    Boolean focusable = !empty || isInMode;
+    Boolean focusable = !empty || (IsInFilterMode(&isInMode), isInMode);
     // The order in which we set focusable in touch mode/focusable may matter
     // for the client, see View.setFocusableInTouchMode() comments for more
     // details
@@ -928,8 +924,7 @@ void AdapterView::SelectionChanged()
     AutoPtr<IAccessibilityManager> manager;
     Boolean enable = TRUE;
     CAccessibilityManager::GetInstance(mContext, (IAccessibilityManager**)&manager);
-    manager->IsEnabled(&enable);
-    if (mOnItemSelectedListener != NULL || enable) {
+    if (mOnItemSelectedListener != NULL || (manager->IsEnabled(&enable), enable)) {
         if (mInLayout || mBlockLayoutRequests) {
             // If we are in a layout traversal, defer notification
             // by posting. This ensures that the view tree is
@@ -999,10 +994,9 @@ ECode AdapterView::DispatchPopulateAccessibilityEvent(
     GetSelectedView((IView**)&selectedView);
     Int32 visible;
     Boolean hasDispatch;
-    selectedView->GetVisibility(&visible);
-    selectedView->DispatchPopulateAccessibilityEvent(event, &hasDispatch);
-    if (selectedView != NULL && visible == IView::VISIBLE
-        && hasDispatch) {
+    if (selectedView != NULL &&
+            (selectedView->GetVisibility(&visible), visible) == IView::VISIBLE
+            && (selectedView->DispatchPopulateAccessibilityEvent(event, &hasDispatch), hasDispatch)) {
         *result = TRUE;
         return NOERROR;
     }
@@ -1174,10 +1168,10 @@ Boolean AdapterView::IsScrollableForAccessibility()
         Int32 itemCount = 0;
         adapter->GetCount(&itemCount);
         Int32 firstPosition = 0;
-        GetFirstVisiblePosition(&firstPosition);
         Int32 lastPosition = 0;
-        GetLastVisiblePosition(&lastPosition);
-        return itemCount > 0 && (firstPosition > 0 || lastPosition < itemCount - 1);
+        return itemCount > 0 &&
+                ((GetFirstVisiblePosition(&firstPosition), firstPosition > 0) ||
+                    (GetLastVisiblePosition(&lastPosition), lastPosition) < itemCount - 1);
     }
     return FALSE;
 }

@@ -506,17 +506,17 @@ private:
 private:
     static const String TAG;
     // Index used by RadialPickerLayout
-    static const Int32 HOUR_INDEX = 0;
-    static const Int32 MINUTE_INDEX = 1;
+    static const Int32 HOUR_INDEX;
+    static const Int32 MINUTE_INDEX;
     // NOT a real index for the purpose of what's showing.
-    static const Int32 AMPM_INDEX = 2;
+    static const Int32 AMPM_INDEX;
     // Also NOT a real index, just used for keyboard mode.
-    static const Int32 ENABLE_PICKER_INDEX = 3;
-    static const Int32 AM = 0;
-    static const Int32 PM = 1;
+    static const Int32 ENABLE_PICKER_INDEX;
+    static const Int32 AM;
+    static const Int32 PM;
     static const Boolean DEFAULT_ENABLED_STATE;
     Boolean mIsEnabled;
-    static const Int32 HOURS_IN_HALF_DAY = 12;
+    static const Int32 HOURS_IN_HALF_DAY;
     AutoPtr<IView> mHeaderView;
     AutoPtr<ITextView> mHourView;
     AutoPtr<ITextView> mMinuteView;
