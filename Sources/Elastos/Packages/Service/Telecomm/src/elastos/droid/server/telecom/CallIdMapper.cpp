@@ -160,7 +160,7 @@ ECode CallIdMapper::IsValidCallId(
     VALIDATE_NOT_NULL(result)
 
     // Note, no need for thread check, this method is thread safe.
-    *result = callId != NULL && callId.StartWith(mCallIdPrefix);
+    *result = (!callId.IsNullOrEmpty()) && callId.StartWith(mCallIdPrefix);
     return NOERROR;
 }
 
@@ -170,7 +170,7 @@ ECode CallIdMapper::IsValidConferenceId(
 {
     VALIDATE_NOT_NULL(result)
 
-    *result = callId != NULL;
+    *result = !callId.IsNullOrEmpty();
     return NOERROR;
 }
 

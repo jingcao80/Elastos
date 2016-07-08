@@ -226,7 +226,7 @@ private:
             /* [in] */ IMessage* msg);
 
     private:
-        ConnectionServiceWrapper* mHost;
+        AutoPtr<ConnectionServiceWrapper> mHost;// life is longer
     };
 
     class SubQueryBindCallback

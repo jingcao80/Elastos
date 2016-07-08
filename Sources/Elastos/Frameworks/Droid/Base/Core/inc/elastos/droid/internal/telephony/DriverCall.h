@@ -19,18 +19,19 @@ namespace Telephony {
 class DriverCall
     : public Object
     , public IComparable
+    , public IDriverCall
 {
 public:
-    enum State {
-        ACTIVE,
-        HOLDING,
-        DIALING,    // MO call only
-        ALERTING,   // MO call only
-        INCOMING,   // MT call only
-        WAITING    // MT call only
-        // If you add a state, make sure to look for the switch()
-        // statements that use this enum
-    };
+    //enum State {
+    //    ACTIVE,
+    //    HOLDING,
+    //    DIALING,    // MO call only
+    //    ALERTING,   // MO call only
+    //    INCOMING,   // MT call only
+    //    WAITING    // MT call only
+    //    // If you add a state, make sure to look for the switch()
+    //    // statements that use this enum
+    //};
 
 public:
     CAR_INTERFACE_DECL()
@@ -47,7 +48,7 @@ public:
 
     static CARAPI StateFromCLCC(
         /* [in] */ Int32 state,
-        /* [out] */ State* result) /*throws ATParseEx*/;
+        /* [out] */ IDriverCallState* result) /*throws ATParseEx*/;
 
     static CARAPI PresentationFromCLIP(
         /* [in] */ Int32 cli,
@@ -65,7 +66,7 @@ public:
     static const String TAG;
     Int32 mIndex;
     Boolean mIsMT;
-    State mState;     // May be null if unavail
+    IDriverCallState mState;     // May be null if unavail
     Boolean mIsMpty;
     String mNumber;
     Int32 mTOA;

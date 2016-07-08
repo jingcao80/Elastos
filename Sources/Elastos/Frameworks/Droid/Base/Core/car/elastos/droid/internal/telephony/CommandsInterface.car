@@ -1119,11 +1119,11 @@ module
          * CLIR_SUPPRESSION == on "CLIR suppression" (allow CLI presentation)
          * CLIR_INVOCATION  == on "CLIR invocation" (restrict CLI presentation)
          */
-        // Dial(
-        //     [in] String address,
-        //     [in] Int32 clirMode,
-        //     [in] IUUSInfo* uusInfo,
-        //     [in] IMessage* result);
+        Dial(
+            [in] String address,
+            [in] Int32 clirMode,
+            [in] IUUSInfo* uusInfo,
+            [in] IMessage* result);
 
         /**
          *  returned message

@@ -45,7 +45,7 @@ private:
             /* [in] */ IMessage* msg);
 
     private:
-        TelephonyConnection* mHost;
+        AutoPtr<TelephonyConnection> mHost;//the handler's life is longer than the host
     };
 
 

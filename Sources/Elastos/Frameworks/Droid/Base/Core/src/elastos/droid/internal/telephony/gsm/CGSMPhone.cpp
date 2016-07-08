@@ -815,8 +815,9 @@ ECode CGSMPhone::Dial(
     AutoPtr<IImsPhone> imsPhone = mImsPhone;
 
     Boolean b1, b2;
-    Boolean imsUseEnabled;
+    Boolean imsUseEnabled = FALSE;
 // TODO: Need CImsManager
+    Logger::E(TAG, "TODO Dial, CImsManager is not ready, imsUseEnable default to FALSE");
     // imsUseEnabled =
     //         (CImsManager::IsEnhanced4gLteModeSettingEnabledByPlatform(mContext, &b1), b1) &&
     //         (CImsManager::IsEnhanced4gLteModeSettingEnabledByUser(mContext, &b2), b2);
@@ -2281,6 +2282,8 @@ void CGSMPhone::SyncClirSetting()
 AutoPtr<IUiccCardApplication> CGSMPhone::GetUiccCardApplication()
 {
     AutoPtr<IUiccCardApplication> app;
+    if (mUiccController == NULL)
+        return NULL;
     IUiccController::Probe(mUiccController)->GetUiccCardApplication(mPhoneId,
         IUiccController::APP_FAM_3GPP, (IUiccCardApplication**)&app);
     return app;

@@ -9,6 +9,7 @@
 #include "Elastos.Droid.Net.h"
 #include <Elastos.CoreLibrary.Utility.Concurrent.h>
 #include "elastos/droid/internal/telephony/BaseCommands.h"
+#include "elastos/droid/internal/telephony/RILParcel.h"
 #include "elastos/droid/os/Handler.h"
 #include <elastos/core/Object.h>
 
@@ -97,7 +98,7 @@ public:
     Int32 mSerial;
     Int32 mRequest;
     AutoPtr<IMessage> mResult;
-    AutoPtr<IParcel> mParcel;
+    AutoPtr<RILParcel> mParcel;
     AutoPtr<RILRequest> mNext;
 
 private:
@@ -992,7 +993,7 @@ protected:
         /* [in] */ RILRequest* rr);
 
     CARAPI_(void) ProcessResponse(
-        /* [in] */ IParcel* p);
+        /* [in] */ RILParcel* p);
 
     /**
      * Release each request in mRequestList then clear the list
@@ -1007,14 +1008,14 @@ protected:
         /* [in] */ Int32 serial);
 
     CARAPI_(AutoPtr<RILRequest>) ProcessSolicited(
-        /* [in] */ IParcel* p);
+        /* [in] */ RILParcel* p);
 
     static CARAPI_(String) RetToString(
         /* [in] */ Int32 req,
         /* [in] */ IInterface* ret);
 
     CARAPI_(void) ProcessUnsolicited(
-        /* [in] */ IParcel* p);
+        /* [in] */ RILParcel* p);
 
     /**
      * Notifiy all registrants that the ril has connected or disconnected.
@@ -1038,86 +1039,86 @@ protected:
         /* [in] */ IInteger32* phoneId);
 
     CARAPI_(AutoPtr<IInterface>) ResponseInts(
-        /* [in] */ IParcel* p);
+        /* [in] */ RILParcel* p);
 
     CARAPI_(AutoPtr<IInterface>) ResponseVoid(
-        /* [in] */ IParcel* p);
+        /* [in] */ RILParcel* p);
 
     CARAPI_(AutoPtr<IInterface>) ResponseCallForward(
-        /* [in] */ IParcel* p);
+        /* [in] */ RILParcel* p);
 
     CARAPI_(AutoPtr<IInterface>) ResponseSuppServiceNotification(
-        /* [in] */ IParcel* p);
+        /* [in] */ RILParcel* p);
 
     CARAPI_(AutoPtr<IInterface>) ResponseCdmaSms(
-        /* [in] */ IParcel* p);
+        /* [in] */ RILParcel* p);
 
     CARAPI_(AutoPtr<IInterface>) ResponseString(
-        /* [in] */ IParcel* p);
+        /* [in] */ RILParcel* p);
 
     CARAPI_(AutoPtr<IInterface>) ResponseStrings(
-        /* [in] */ IParcel* p);
+        /* [in] */ RILParcel* p);
 
     CARAPI_(AutoPtr<IInterface>) ResponseRaw(
-        /* [in] */ IParcel* p);
+        /* [in] */ RILParcel* p);
 
     CARAPI_(AutoPtr<IInterface>) ResponseSMS(
-        /* [in] */ IParcel* p);
+        /* [in] */ RILParcel* p);
 
     CARAPI_(AutoPtr<IInterface>) ResponseICC_IO(
-        /* [in] */ IParcel* p);
+        /* [in] */ RILParcel* p);
 
     CARAPI_(AutoPtr<IInterface>) ResponseIccCardStatus(
-        /* [in] */ IParcel* p);
+        /* [in] */ RILParcel* p);
 
     CARAPI_(AutoPtr<IInterface>) ResponseSimRefresh(
-        /* [in] */ IParcel* p);
+        /* [in] */ RILParcel* p);
 
     CARAPI_(AutoPtr<IInterface>) ResponseCallList(
-        /* [in] */ IParcel* p);
+        /* [in] */ RILParcel* p);
 
     CARAPI_(AutoPtr<IDataCallResponse>) GetDataCallResponse(
-        /* [in] */ IParcel* p,
+        /* [in] */ RILParcel* p,
         /* [in] */ Int32 version);
 
     CARAPI_(AutoPtr<IInterface>) ResponseDataCallList(
-        /* [in] */ IParcel* p);
+        /* [in] */ RILParcel* p);
 
     CARAPI_(AutoPtr<IInterface>) ResponseSetupDataCall(
-        /* [in] */ IParcel* p);
+        /* [in] */ RILParcel* p);
 
     CARAPI_(AutoPtr<IInterface>) ResponseOperatorInfos(
-        /* [in] */ IParcel* p);
+        /* [in] */ RILParcel* p);
 
     CARAPI_(AutoPtr<IInterface>) ResponseCellList(
-        /* [in] */ IParcel* p);
+        /* [in] */ RILParcel* p);
 
     CARAPI_(AutoPtr<IInterface>) ResponseGetPreferredNetworkType(
-        /* [in] */ IParcel* p);
+        /* [in] */ RILParcel* p);
 
     CARAPI_(AutoPtr<IInterface>) ResponseGmsBroadcastConfig(
-        /* [in] */ IParcel* p);
+        /* [in] */ RILParcel* p);
 
     CARAPI_(AutoPtr<IInterface>) ResponseCdmaBroadcastConfig(
-        /* [in] */ IParcel* p);
+        /* [in] */ RILParcel* p);
 
     CARAPI_(AutoPtr<IInterface>) ResponseSignalStrength(
-        /* [in] */ IParcel* p);
+        /* [in] */ RILParcel* p);
 
     CARAPI_(AutoPtr<IArrayList>) ResponseCdmaInformationRecord(
-        /* [in] */ IParcel* p);
+        /* [in] */ RILParcel* p);
 
     CARAPI_(AutoPtr<IInterface>) ResponseCdmaCallWaiting(
-        /* [in] */ IParcel* p);
+        /* [in] */ RILParcel* p);
 
     CARAPI_(AutoPtr<IInterface>) ResponseCallRing(
-        /* [in] */ IParcel* p);
+        /* [in] */ RILParcel* p);
 
     CARAPI_(void) NotifyRegistrantsCdmaInfoRec(
         /* [in] */ ICdmaInformationRecords* infoRec);
 
     CARAPI_(AutoPtr<IArrayList>) ResponseCellInfoList(
-        /* [in] */ IParcel* p);
+        /* [in] */ RILParcel* p);
 
     static CARAPI_(String) RequestToString(
         /* [in] */ Int32 request);
@@ -1147,7 +1148,7 @@ protected:
         /* [in] */ IInterface* ret);
 
     CARAPI_(AutoPtr<IInterface>) ResponseSsData(
-        /* [in] */ IParcel* p);
+        /* [in] */ RILParcel* p);
 
 private:
     /**
@@ -1229,13 +1230,13 @@ private:
         /* [in] */ IByteBuffer* oemHookResponse);
 
     CARAPI_(AutoPtr<IInterface>) ResponseICC_IOBase64(
-        /* [in] */ IParcel* p);
+        /* [in] */ RILParcel* p);
 
     CARAPI_(AutoPtr<IArrayList>) ResponseGetDataCallProfile(
-        /* [in] */ IParcel* p);
+        /* [in] */ RILParcel* p);
 
     CARAPI_(AutoPtr<IInterface>) ResponseHardwareConfig(
-        /* [in] */ IParcel* p);
+        /* [in] */ RILParcel* p);
 
     /*
      * Helper function for the iccTransmitApdu* commands above.

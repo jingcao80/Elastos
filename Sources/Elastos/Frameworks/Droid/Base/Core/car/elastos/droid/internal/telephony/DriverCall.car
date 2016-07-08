@@ -19,13 +19,13 @@ module {
 
     interface IDriverCall {
 
-        StateFromCLCC(
-            [in] Int32 state,
-            [out] IDriverCallState* result);
+        //StateFromCLCC(
+        //    [in] Int32 state,
+        //    [out] IDriverCallState* result);
 
-        PresentationFromCLIP(
-            [in] Int32 cli,
-            [out] Int32* result);
+        //PresentationFromCLIP(
+        //    [in] Int32 cli,
+        //    [out] Int32* result);
     }
 
     }//Telephony

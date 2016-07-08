@@ -117,6 +117,7 @@ CAR_INTERFACE_IMPL(ServiceBinder, Object, IServiceBinder)
 
 ServiceBinder::ServiceBinder()
     : mAssociatedCallCount(0)
+    , mIsBindingAborted(FALSE)
 {
     CHashSet::New((ISet**)&mCallbacks);
     AutoPtr<IMap> map;

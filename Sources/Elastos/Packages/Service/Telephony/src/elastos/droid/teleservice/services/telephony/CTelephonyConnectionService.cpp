@@ -441,7 +441,7 @@ void CTelephonyConnectionService::PlaceOutgoingConnection(
         Int32 type;
         phone->GetPhoneType(&type);
         if (type == IPhoneConstants::PHONE_TYPE_GSM) {
-            Logger::D("CTelephonyConnectionService", "dialed MMI code");
+            Logger::D("CTelephonyConnectionService", "TODO dialed MMI code");
             telephonyDisconnectCause = Elastos::Droid::Telephony::IDisconnectCause::DIALED_MMI;
             AutoPtr<IIntent> intent;
             CIntent::New((IContext*)this, Elastos::Droid::TeleService::Phone::ECLSID_CMMIDialogActivity, (IIntent**)&intent);

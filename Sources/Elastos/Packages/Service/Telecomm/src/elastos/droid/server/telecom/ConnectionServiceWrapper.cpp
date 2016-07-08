@@ -1580,8 +1580,8 @@ ECode ConnectionServiceWrapper::HandleCreateConnectionComplete(
         if (isContainsKey) {
             AutoPtr<IInterface> obj;
             mPendingResponses->Remove(StringUtils::ParseCharSequence(callId), (IInterface**)&obj);
-            AutoPtr<ICall> call = ICall::Probe(obj);
-            ((Call*) call.Get())->HandleCreateConnectionSuccess(mCallIdMapper, connection);
+            AutoPtr<ICreateConnectionResponse> response = ICreateConnectionResponse::Probe(obj);
+            response->HandleCreateConnectionSuccess(mCallIdMapper, connection);
         }
     }
     return NOERROR;
@@ -1606,6 +1606,7 @@ ECode ConnectionServiceWrapper::HandleConnectionServiceDeath()
         }
     }
     ((CallIdMapper*) mCallIdMapper.Get())->Clear();
+    mHandler = NULL;//need more check avoid cross-reference
     return NOERROR;
 }
 

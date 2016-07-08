@@ -25,6 +25,8 @@ using Elastos::Core::ICloneable;
 using Elastos::Core::IInteger32;
 using Elastos::Core::StringUtils;
 using Elastos::Utility::CArrayList;
+using Elastos::Core::IArrayOf;
+using Elastos::Core::CArrayOf;
 using Elastos::Utility::IList;
 using Elastos::Utility::Logging::Logger;
 
@@ -188,8 +190,7 @@ ECode CGsmCallTracker::Dial(
     String addr;
     ((CGsmConnection*)mPendingMO.Get())->GetAddress(&addr);
     if ( addr.IsNull() || addr.GetLength() == 0
-            || addr.IndexOf(IPhoneNumberUtils::WILD) >= 0
-    ) {
+            || addr.IndexOf(IPhoneNumberUtils::WILD) >= 0) {
         // Phone number is invalid
         ((CGsmConnection*)mPendingMO.Get())->mCause = IDisconnectCause::INVALID_NUMBER;
 
@@ -201,8 +202,8 @@ ECode CGsmCallTracker::Dial(
         // Always unmute when initiating a new call
         SetMute(FALSE);
 
-// TODO: Need ICommandsInterface
-        // mCi->Dial(addr, clirMode, uusInfo, ObtainCompleteMessage());
+        //((RIL*)(IRIL::Probe(mCi)))->Dial(addr, clirMode, uusInfo, ObtainCompleteMessage());
+        mCi->Dial(addr, clirMode, uusInfo, ObtainCompleteMessage());
     }
 
     if (mNumberConverted) {
@@ -274,14 +275,13 @@ ECode CGsmCallTracker::RejectCall()
     // so if the phone isn't ringing, this could hang up held
     ICallState state;
     ICall::Probe(mRingingCall)->GetState(&state);
-// TODO: Need ICallState::IsRinging
-    // if (state.IsRinging()) {
-    //     mCi->RejectCall(ObtainCompleteMessage());
-    // }
-    // else {
-    //     // throw new CallStateException("phone not ringing");
-    //     return E_CALL_STATE_EXCEPTION;
-    // }
+    if (state == ICallState_INCOMING || state == ICallState_WAITING) {
+        mCi->RejectCall(ObtainCompleteMessage());
+    }
+    else {
+        // throw new CallStateException("phone not ringing");
+        return E_CALL_STATE_EXCEPTION;
+    }
     return NOERROR;
 }
 
@@ -644,7 +644,7 @@ ECode CGsmCallTracker::HandleMessage(
                         "Exception during getLastCallFailCause, assuming normal disconnect");
             }
             else {
-                AutoPtr<IArrayList> array = IArrayList::Probe(ar->mResult);
+                AutoPtr<IArrayOf> array = IArrayOf::Probe(ar->mResult);
                 AutoPtr<IInterface> obj;
                 array->Get(0, (IInterface**)&obj);
                 IInteger32::Probe(obj)->GetValue(&causeCode);
@@ -657,9 +657,10 @@ ECode CGsmCallTracker::HandleMessage(
                 causeCode == ICallFailCause::QOS_NOT_AVAIL ||
                 causeCode == ICallFailCause::BEARER_NOT_AVAIL ||
                 causeCode == ICallFailCause::ERROR_UNSPECIFIED) {
-                AutoPtr<ICellLocation> cl;
-                ((CGSMPhone*)mPhone.Get())->GetCellLocation((ICellLocation**)&cl);
-                AutoPtr<IGsmCellLocation> loc = IGsmCellLocation::Probe(cl);
+                Logger::E(TAG, "TODO CGsmCallTracker, log the cause Code is not ready!, causeCode:%d", causeCode);
+                //TODO AutoPtr<ICellLocation> cl;
+                //TODO ((CGSMPhone*)mPhone.Get())->GetCellLocation((ICellLocation**)&cl);
+                //TODO AutoPtr<IGsmCellLocation> loc = IGsmCellLocation::Probe(cl);
                 // EventLog::WriteEvent(EventLogTags.CALL_DROP,
                 //         causeCode, loc != NULL ? loc.getCid() : -1,
                 //         TelephonyManager.getDefault().getNetworkType());

@@ -176,8 +176,8 @@ AutoPtr<RILRequest> RILRequest::Obtain(
 
     rr->mRequest = request;
     rr->mResult = result;
-    rr->mParcel = NULL;//Parcel::Obtain();
-    CParcel::New((IParcel**)&(rr->mParcel));
+    rr->mParcel = new RILParcel();//Parcel::Obtain();
+    //CParcel::New((RILParcel**)&(rr->mParcel));
 
     if (result != NULL) {
         AutoPtr<IHandler> hdl;
@@ -193,6 +193,7 @@ AutoPtr<RILRequest> RILRequest::Obtain(
     rr->mParcel->WriteInt32(request);
     rr->mParcel->WriteInt32(rr->mSerial);
 
+    Logger::E("leliang", "line:%d, func:%s, request:%d, serial:%d\n", __LINE__, __func__, request, rr->mSerial);
     return rr;
 }
 
@@ -304,8 +305,9 @@ ECode RIL::RILSender::HandleMessage(
 
     Int32 what = 0;
     msg->GetWhat(&what);
+    Logger::E("leliang", "line:%d, func:%s, what:%d\n", __LINE__, __func__, what);
     switch (what) {
-        case 1: {
+        case 1: {// EVENT_SEND
             // try {
                 AutoPtr<ILocalSocket> s;
 
@@ -321,7 +323,7 @@ ECode RIL::RILSender::HandleMessage(
                 // synchronized (mRequestList)
                 {
                     AutoLock lock(mHost->listLock);
-                    mHost->mRequestList->Append(rr->mSerial, (IInterface*)(IObject*)rr.Get());
+                    mHost->mRequestList->Append(rr->mSerial, TO_IINTERFACE(rr));
                 }
 
                 AutoPtr<ArrayOf<Byte> > data;
@@ -330,6 +332,7 @@ ECode RIL::RILSender::HandleMessage(
                 // rr->mParcel->Recycle();
                 rr->mParcel = NULL;
 
+                Logger::E("RILJ", "writing packet: %d bytes, mSerial:%d", data->GetLength(), rr->mSerial);
                 if (data->GetLength() > RIL_MAX_COMMAND_BYTES) {
                     // throw new RuntimeException(
                     //         "Parcel larger than max bytes allowed! "
@@ -371,7 +374,8 @@ ECode RIL::RILSender::HandleMessage(
             // }
         }
         break;
-        case 2: {
+        case 2: { // EVENT_WAKE_LOCK_TIMEOUT
+            Logger::E("RILJ", "EVENT_WAKE_LOCK_TIMEOUT");
             // Haven't heard back from the last request.  Assume we're
             // not getting a response and  release the wake lock.
 
@@ -506,7 +510,7 @@ ECode RIL::RILReceiver::Run()
             mHost->mSocket->GetInputStream((IInputStream**)&is);
 
             for (;;) {
-                AutoPtr<IParcel> p;
+                AutoPtr<RILParcel> p;
 
                 length = ReadRilMessage(is, mBuffer);
 
@@ -516,7 +520,8 @@ ECode RIL::RILReceiver::Run()
                 }
 
                 // p = Parcel::Obtain();
-                CParcel::New((IParcel**)&p);
+                //CParcel::New((RILParcel**)&p);
+                p = new RILParcel();
                 p->Unmarshall(mBuffer, 0, length);
                 p->SetDataPosition(0);
 
@@ -1334,6 +1339,7 @@ ECode RIL::Dial(
     /* [in] */ IUUSInfo* uusInfo,
     /* [in] */ IMessage* result)
 {
+    Logger::E("leliang", "line:%d, func:%s, address:%s, uusInfo:%p\n", __LINE__, __func__, address.string(), uusInfo);
     AutoPtr<RILRequest> rr = RILRequest::Obtain(
                                 IRILConstants::RIL_REQUEST_DIAL,
                                 result);
@@ -1354,7 +1360,7 @@ ECode RIL::Dial(
         rr->mParcel->WriteInt32(dcs);
         AutoPtr<ArrayOf<Byte> > usdata;
         uusInfo->GetUserData((ArrayOf<Byte>**)&usdata);
-        rr->mParcel->WriteArrayOf((Handle32)usdata.Get());
+        rr->mParcel->WriteByteArray(usdata.Get());
     }
 
     if (RILJ_LOGD) {
@@ -1824,7 +1830,9 @@ ECode RIL::SendDtmf(
         RiljLog(str);
     }
 
-    rr->mParcel->WriteChar(c);
+    char carray[] = {c};
+    String str(carray);
+    rr->mParcel->WriteString(str);
 
     Send(rr);
     return NOERROR;
@@ -1845,7 +1853,9 @@ ECode RIL::StartDtmf(
         RiljLog(str);
     }
 
-    rr->mParcel->WriteChar(c);
+    char carray[] = {c};
+    String str(carray);
+    rr->mParcel->WriteString(str);
 
     Send(rr);
     return NOERROR;
@@ -3148,7 +3158,7 @@ ECode RIL::InvokeOemRilRequestRaw(
         RiljLog(str);
     }
 
-    rr->mParcel->WriteArrayOf((Handle32)data);
+    rr->mParcel->WriteByteArray(data);
 
     Send(rr);
     return NOERROR;
@@ -3169,7 +3179,7 @@ ECode RIL::InvokeOemRilRequestStrings(
         RiljLog(str);
     }
 
-    rr->mParcel->WriteArrayOfString(strings);
+    rr->mParcel->WriteStringArray(strings);
 
     Send(rr);
     return NOERROR;
@@ -3294,7 +3304,7 @@ ECode RIL::HandleCallSetupRequestFromSim(
 
     AutoPtr<ArrayOf<Int32> > param = ArrayOf<Int32>::Alloc(1);
     (*param)[0] = accept ? 1 : 0;
-    rr->mParcel->WriteArrayOf((Handle32)param.Get());
+    rr->mParcel->WriteInt32Array(param.Get());
     Send(rr);
     return NOERROR;
 }
@@ -3673,8 +3683,9 @@ void RIL::Send(
         rr->ReleaseRequest();
         return;
     }
+    Logger::E("leliang", "line:%d, func:%s\n", __LINE__, __func__);
 
-    mSender->ObtainMessage(EVENT_SEND, (IInterface*)(IObject*)rr, (IMessage**)&msg);
+    mSender->ObtainMessage(EVENT_SEND, TO_IINTERFACE(rr), (IMessage**)&msg);
 
     AcquireWakeLock();
 
@@ -3682,7 +3693,7 @@ void RIL::Send(
 }
 
 void RIL::ProcessResponse(
-    /* [in] */ IParcel* p)
+    /* [in] */ RILParcel* p)
 {
     Int32 type = 0;
 
@@ -3751,7 +3762,7 @@ AutoPtr<RILRequest> RIL::FindAndRemoveRequestFromList(
 }
 
 AutoPtr<RILRequest> RIL::ProcessSolicited(
-    /* [in] */ IParcel* p)
+    /* [in] */ RILParcel* p)
 {
     Int32 serial = 0, error = 0;
     // Boolean found = FALSE;
@@ -3772,8 +3783,10 @@ AutoPtr<RILRequest> RIL::ProcessSolicited(
 
     AutoPtr<IInterface> ret;
 
-    Logger::E(RILJ_LOG_TAG, "TODO RIL::ProcessSolicited, parcel->DataAvail???");
-    if (error == 0 /*TODO || p->DataAvail() > 0*/) {
+    Int32 dataAvail = 0;
+    p->DataAvail(&dataAvail);
+    Logger::E("leliang", "RIL::ProcessSolicited, serial:%d,dataAvail:%d, error:%d", serial, dataAvail, error);
+    if (error == 0 || dataAvail > 0) {
         // either command succeeds or command fails but with data payload
         // try {
         switch (rr->mRequest) {
@@ -4097,7 +4110,7 @@ String RIL::RetToString(
 }
 
 void RIL::ProcessUnsolicited(
-    /* [in] */ IParcel* p)
+    /* [in] */ RILParcel* p)
 {
     Int32 response = 0;
     AutoPtr<IInterface> ret;
@@ -4210,13 +4223,13 @@ void RIL::ProcessUnsolicited(
             AutoPtr<ISmsMessage> sms;
 
             AutoPtr<ISmsMessageHelper> hlp;
-            assert(0 && "TODO");
-            // CSmsMessageHelper::AcquireSingleton((ISmsMessageHelper**)&hlp);
-            hlp->NewFromCMT(a, (ISmsMessage**)&sms);
-            if (mGsmSmsRegistrant != NULL) {
-                AutoPtr<AsyncResult> arSms = new AsyncResult(NULL, sms, NULL);
-                mGsmSmsRegistrant->NotifyRegistrant(arSms);
-            }
+            Logger::E("RILJ", "TODO ProcessUnsolicited RIL_UNSOL_RESPONSE_NEW_SMS is not ready!");
+            //TODO CSmsMessageHelper::AcquireSingleton((ISmsMessageHelper**)&hlp);
+            //TODO hlp->NewFromCMT(a, (ISmsMessage**)&sms);
+            //TODO if (mGsmSmsRegistrant != NULL) {
+            //TODO     AutoPtr<AsyncResult> arSms = new AsyncResult(NULL, sms, NULL);
+            //TODO     mGsmSmsRegistrant->NotifyRegistrant(arSms);
+            //TODO }
         break;
         }
         case IRILConstants::RIL_UNSOL_RESPONSE_NEW_SMS_STATUS_REPORT: {
@@ -4803,23 +4816,26 @@ void RIL::NotifyModemCap(
 
     //Had notifyRegistrants not discarded userObj, we could have easily
     //passed the subId as ar.userObj.
-    AutoPtr<AsyncResult> ar = new AsyncResult(NULL, (IInterface*)(IObject*)buffer.Get(), NULL);
+    AutoPtr<AsyncResult> ar = new AsyncResult(NULL, TO_IINTERFACE(buffer), NULL);
 
     mModemCapRegistrants->NotifyRegistrants(ar);
     // Rlog.d(RILJ_LOG_TAG, "MODEM_CAPABILITY on phone=" + phoneId + " notified to registrants");
 }
 
 AutoPtr<IInterface> RIL::ResponseInts(
-    /* [in] */ IParcel* p)
+    /* [in] */ RILParcel* p)
 {
     Int32 numInts = 0;
 
     p->ReadInt32(&numInts);
+    Logger::E("leliang", "line:%d, func:%s, numInts:%d\n", __LINE__, __func__, numInts);
 
     AutoPtr<ArrayOf<Int32> > response = ArrayOf<Int32>::Alloc(numInts);
 
     for (Int32 i = 0 ; i < numInts ; i++) {
-        p->ReadInt32(&((*response)[i]));
+        Int32 value;
+        p->ReadInt32(&value);
+        response->Set(i, value);
     }
 
     return CoreUtils::Convert(response);
@@ -4827,13 +4843,13 @@ AutoPtr<IInterface> RIL::ResponseInts(
 }
 
 AutoPtr<IInterface> RIL::ResponseVoid(
-    /* [in] */ IParcel* p)
+    /* [in] */ RILParcel* p)
 {
     return NULL;
 }
 
 AutoPtr<IInterface> RIL::ResponseCallForward(
-    /* [in] */ IParcel* p)
+    /* [in] */ RILParcel* p)
 {
     Int32 numInfos = 0;
 
@@ -4874,7 +4890,7 @@ AutoPtr<IInterface> RIL::ResponseCallForward(
 }
 
 AutoPtr<IInterface> RIL::ResponseSuppServiceNotification(
-    /* [in] */ IParcel* p)
+    /* [in] */ RILParcel* p)
 {
     AutoPtr<ISuppServiceNotification> notification;
     assert(0 && "TODO");
@@ -4904,7 +4920,7 @@ AutoPtr<IInterface> RIL::ResponseSuppServiceNotification(
 }
 
 AutoPtr<IInterface> RIL::ResponseCdmaSms(
-    /* [in] */ IParcel* p)
+    /* [in] */ RILParcel* p)
 {
     AutoPtr<ISmsMessage> sms;
     assert(0 && "TODO");
@@ -4914,26 +4930,31 @@ AutoPtr<IInterface> RIL::ResponseCdmaSms(
 }
 
 AutoPtr<IInterface> RIL::ResponseString(
-    /* [in] */ IParcel* p)
+    /* [in] */ RILParcel* p)
 {
     String response;
 
     p->ReadString(&response);
 
+    Logger::E("leliang", "line:%d, func:%s, response:%s\n", __LINE__, __func__, response.string());
     AutoPtr<ICharSequence> pResult;
     CString::New(response, (ICharSequence**)&pResult);
     return pResult;
 }
 
 AutoPtr<IInterface> RIL::ResponseStrings(
-    /* [in] */ IParcel* p)
+    /* [in] */ RILParcel* p)
 {
     Int32 num;
     AutoPtr<ArrayOf<String> > response;
 
     //now read string error
     Logger::E("RIL", "TODO TODO ReadArrayOfString fail line:%d, \n", __LINE__);
-    //TODO p->ReadArrayOfString((ArrayOf<String>**)&response);
+    AutoPtr<ArrayOf<String> > test;
+    p->ReadStringArray((ArrayOf<String>**)&test);
+    for(Int32 i = 0; i < test->GetLength(); ++i) {
+        Logger::E("leliang", "RIL::ResponseStrings, %d is %s", i, ((*test)[i]).string());
+    }
     //fake code
     response = ArrayOf<String>::Alloc(2);
     (*response)[0] = String("Hello");
@@ -4943,18 +4964,18 @@ AutoPtr<IInterface> RIL::ResponseStrings(
 }
 
 AutoPtr<IInterface> RIL::ResponseRaw(
-    /* [in] */ IParcel* p)
+    /* [in] */ RILParcel* p)
 {
     Int32 num;
     AutoPtr<ArrayOf<Byte> > response;
 
-    p->ReadArrayOf((Handle32*)&response);
+    p->CreateByteArray((ArrayOf<Byte>**)&response);
 
     return CoreUtils::ConvertByteArray(response);
 }
 
 AutoPtr<IInterface> RIL::ResponseSMS(
-    /* [in] */ IParcel* p)
+    /* [in] */ RILParcel* p)
 {
     Int32 messageRef = 0, errorCode = 0;
     String ackPDU;
@@ -4971,7 +4992,7 @@ AutoPtr<IInterface> RIL::ResponseSMS(
 }
 
 AutoPtr<IInterface> RIL::ResponseICC_IO(
-    /* [in] */ IParcel* p)
+    /* [in] */ RILParcel* p)
 {
     Int32 sw1 = 0, sw2 = 0;
     AutoPtr<IMessage> ret;
@@ -4999,7 +5020,7 @@ AutoPtr<IInterface> RIL::ResponseICC_IO(
 }
 
 AutoPtr<IInterface> RIL::ResponseICC_IOBase64(
-    /* [in] */ IParcel* p)
+    /* [in] */ RILParcel* p)
 {
     Int32 sw1 = 0, sw2 = 0;
     AutoPtr<IMessage> ret;
@@ -5050,7 +5071,7 @@ ECode RIL::NeedsOldRilFeature(
 }
 
 AutoPtr<IInterface> RIL::ResponseIccCardStatus(
-    /* [in] */ IParcel* p)
+    /* [in] */ RILParcel* p)
 {
     AutoPtr<IIccCardApplicationStatus> appStatus;
 
@@ -5113,7 +5134,7 @@ AutoPtr<IInterface> RIL::ResponseIccCardStatus(
 }
 
 AutoPtr<IInterface> RIL::ResponseSimRefresh(
-    /* [in] */ IParcel* p)
+    /* [in] */ RILParcel* p)
 {
     AutoPtr<IccRefreshResponse> response = new IccRefreshResponse();
 
@@ -5124,7 +5145,7 @@ AutoPtr<IInterface> RIL::ResponseSimRefresh(
 }
 
 AutoPtr<IInterface> RIL::ResponseCallList(
-    /* [in] */ IParcel* p)
+    /* [in] */ RILParcel* p)
 {
     Int32 num = 0;
     Int32 voiceSettings = 0;
@@ -5184,7 +5205,7 @@ AutoPtr<IInterface> RIL::ResponseCallList(
             p->ReadInt32(&dcs);
             dc->mUusInfo->SetDcs(dcs);
             AutoPtr<ArrayOf<Byte> > userData;
-            p->ReadArrayOf((Handle32*)&userData);
+            p->CreateByteArray((ArrayOf<Byte>**)&userData);
             dc->mUusInfo->SetUserData(userData);
             String str1("Incoming UUS : type=");
             // str1 += dc->mUusInfo->GetType();
@@ -5210,6 +5231,7 @@ AutoPtr<IInterface> RIL::ResponseCallList(
         // dc->mNumber = PhoneNumberUtils::StringFromStringAndTOA(dc->mNumber, dc->mTOA);
 
         response->Add(TO_IINTERFACE(dc));
+        Logger::E("leliang", "line:%d, func:%s, dc_obj:%p\n", __LINE__, __func__, TO_IINTERFACE(dc));
 
         if (dc->mIsVoicePrivacy) {
             mVoicePrivacyOnRegistrants->NotifyRegistrants();
@@ -5242,7 +5264,7 @@ AutoPtr<IInterface> RIL::ResponseCallList(
 }
 
 AutoPtr<IDataCallResponse> RIL::GetDataCallResponse(
-    /* [in] */ IParcel* p,
+    /* [in] */ RILParcel* p,
     /* [in] */ Int32 version)
 {
     assert(0 && "TODO");
@@ -5319,7 +5341,7 @@ AutoPtr<IDataCallResponse> RIL::GetDataCallResponse(
 }
 
 AutoPtr<IInterface> RIL::ResponseDataCallList(
-    /* [in] */ IParcel* p)
+    /* [in] */ RILParcel* p)
 {
     AutoPtr<IArrayList> response;
     Boolean oldRil = FALSE;
@@ -5348,7 +5370,7 @@ AutoPtr<IInterface> RIL::ResponseDataCallList(
 }
 
 AutoPtr<IInterface> RIL::ResponseSetupDataCall(
-    /* [in] */ IParcel* p)
+    /* [in] */ RILParcel* p)
 {
     Boolean oldRil = FALSE;
     NeedsOldRilFeature(String("datacall"), &oldRil);
@@ -5450,7 +5472,7 @@ AutoPtr<IInterface> RIL::ResponseSetupDataCall(
 }
 
 AutoPtr<IInterface> RIL::ResponseOperatorInfos(
-    /* [in] */ IParcel* p)
+    /* [in] */ RILParcel* p)
 {
     assert(0 && "TODO");
     AutoPtr<ArrayOf<String> > strings;// = (String [])ResponseStrings(p);
@@ -5480,7 +5502,7 @@ AutoPtr<IInterface> RIL::ResponseOperatorInfos(
 }
 
 AutoPtr<IInterface> RIL::ResponseCellList(
-    /* [in] */ IParcel* p)
+    /* [in] */ RILParcel* p)
 {
     Int32 num = 0, rssi = 0;
     String location;
@@ -5533,7 +5555,7 @@ AutoPtr<IInterface> RIL::ResponseCellList(
 }
 
 AutoPtr<IInterface> RIL::ResponseGetPreferredNetworkType(
-    /* [in] */ IParcel* p)
+    /* [in] */ RILParcel* p)
 {
     assert(0 && "TODO");
     AutoPtr<ArrayOf<Int32> > response;// = (Int32[]) ResponseInts(p);
@@ -5549,7 +5571,7 @@ AutoPtr<IInterface> RIL::ResponseGetPreferredNetworkType(
 }
 
 AutoPtr<IInterface> RIL::ResponseGmsBroadcastConfig(
-    /* [in] */ IParcel* p)
+    /* [in] */ RILParcel* p)
 {
     Int32 num = 0;
     AutoPtr<IArrayList> response;
@@ -5580,7 +5602,7 @@ AutoPtr<IInterface> RIL::ResponseGmsBroadcastConfig(
 }
 
 AutoPtr<IInterface> RIL::ResponseCdmaBroadcastConfig(
-    /* [in] */ IParcel* p)
+    /* [in] */ RILParcel* p)
 {
     Int32 numServiceCategories;
     AutoPtr<ArrayOf<Int32> > response;
@@ -5621,16 +5643,21 @@ AutoPtr<IInterface> RIL::ResponseCdmaBroadcastConfig(
 }
 
 AutoPtr<IInterface> RIL::ResponseSignalStrength(
-    /* [in] */ IParcel* p)
+    /* [in] */ RILParcel* p)
 {
     // Assume this is gsm, but doesn't matter as ServiceStateTracker
     // sets the proper value.
-    AutoPtr<ISignalStrength> signalStrength = CSignalStrength::MakeSignalStrengthFromRilParcel(p);
+    AutoPtr<IParcel> parcel;
+    CParcel::New((IParcel**)&parcel);
+    AutoPtr<ArrayOf<Byte> > data;
+    p->Marshall((ArrayOf<Byte>**)&data);
+    parcel->Unmarshall(data, 0, data->GetLength());
+    AutoPtr<ISignalStrength> signalStrength = CSignalStrength::MakeSignalStrengthFromRilParcel(parcel);
     return signalStrength;
 }
 
 AutoPtr<IArrayList> RIL::ResponseCdmaInformationRecord(
-    /* [in] */ IParcel* p)
+    /* [in] */ RILParcel* p)
 {
     Int32 numberOfInfoRecs = 0;
     AutoPtr<IArrayList> response;
@@ -5653,7 +5680,7 @@ AutoPtr<IArrayList> RIL::ResponseCdmaInformationRecord(
 }
 
 AutoPtr<IInterface> RIL::ResponseCdmaCallWaiting(
-    /* [in] */ IParcel* p)
+    /* [in] */ RILParcel* p)
 {
     AutoPtr<ICdmaCallWaitingNotification> notification;
     assert(0 && "TODO");
@@ -5677,7 +5704,7 @@ AutoPtr<IInterface> RIL::ResponseCdmaCallWaiting(
 }
 
 AutoPtr<IInterface> RIL::ResponseCallRing(
-    /* [in] */ IParcel* p)
+    /* [in] */ RILParcel* p)
 {
     AutoPtr<ArrayOf<Char32> > response = ArrayOf<Char32>::Alloc(4);
 
@@ -5703,7 +5730,7 @@ AutoPtr<IInterface> RIL::ResponseCallRing(
 }
 
 AutoPtr<IArrayList> RIL::ResponseGetDataCallProfile(
-    /* [in] */ IParcel* p)
+    /* [in] */ RILParcel* p)
 {
     Int32 nProfiles = 0;
     p->ReadInt32(&nProfiles);
@@ -5797,7 +5824,7 @@ void RIL::NotifyRegistrantsCdmaInfoRec(
 }
 
 AutoPtr<IArrayList> RIL::ResponseCellInfoList(
-    /* [in] */ IParcel* p)
+    /* [in] */ RILParcel* p)
 {
     Int32 numberOfInfoRecs = 0;
     AutoPtr<IArrayList> response;
@@ -5819,7 +5846,7 @@ AutoPtr<IArrayList> RIL::ResponseCellInfoList(
 }
 
 AutoPtr<IInterface> RIL::ResponseHardwareConfig(
-    /* [in] */ IParcel* p)
+    /* [in] */ RILParcel* p)
 {
     Int32 num = 0;
     AutoPtr<IArrayList> response;
@@ -6147,7 +6174,7 @@ void RIL::UnsljLogvRet(
 }
 
 AutoPtr<IInterface> RIL::ResponseSsData(
-    /* [in] */ IParcel* p)
+    /* [in] */ RILParcel* p)
 {
     Int32 num = 0;
     AutoPtr<ISsData> ssData;

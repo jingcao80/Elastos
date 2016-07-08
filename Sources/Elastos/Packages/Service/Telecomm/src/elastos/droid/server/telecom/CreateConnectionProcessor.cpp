@@ -93,6 +93,9 @@ ECode CreateConnectionProcessor::Response::HandleCreateConnectionSuccess(
     } else {
         // Success -- share the good news and remember that we are no longer interested
         // in hearing about any more attempts
+        //NOTE, because in HandleCreateConnectionSuccess will destroy mHost,
+        //so here use a variable to hold it;
+        AutoPtr<CreateConnectionProcessor> tmp = mHost;
         mHost->mResponse->HandleCreateConnectionSuccess(idMapper, connection);
         mHost->mResponse = NULL;
     }

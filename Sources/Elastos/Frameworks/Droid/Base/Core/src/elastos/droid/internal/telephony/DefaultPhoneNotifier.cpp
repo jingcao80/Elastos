@@ -334,10 +334,12 @@ ECode DefaultPhoneNotifier::NotifyPreciseCallState(
     if (ringingCall != NULL && foregroundCall != NULL && backgroundCall != NULL) {
         // try {
         ICallState cs;
-        mRegistry->NotifyPreciseCallState(
+        if (mRegistry) {
+            mRegistry->NotifyPreciseCallState(
                 ConvertPreciseCallState1((ringingCall->GetState(&cs), cs)),
                 ConvertPreciseCallState1((foregroundCall->GetState(&cs), cs)),
                 ConvertPreciseCallState1((backgroundCall->GetState(&cs), cs)));
+        }
         // } catch (RemoteException ex) {
         //     // system process is dead
         // }
@@ -351,7 +353,8 @@ ECode DefaultPhoneNotifier::NotifyDisconnectCause(
 {
     // FIXME: subId?
     // try {
-    mRegistry->NotifyDisconnectCause(cause, preciseCause);
+    if (mRegistry != NULL)
+        mRegistry->NotifyDisconnectCause(cause, preciseCause);
     // } catch (RemoteException ex) {
     //     // system process is dead
     // }
@@ -367,7 +370,8 @@ ECode DefaultPhoneNotifier::NotifyPreciseDataConnectionFailed(
 {
     // FIXME: subId?
     // try {
-    mRegistry->NotifyPreciseDataConnectionFailed(reason, apnType, apn, failCause);
+    if (mRegistry != NULL)
+        mRegistry->NotifyPreciseDataConnectionFailed(reason, apnType, apn, failCause);
     // } catch (RemoteException ex) {
     //     // system process is dead
     // }
@@ -381,7 +385,8 @@ ECode DefaultPhoneNotifier::NotifyVoLteServiceStateChanged(
 {
     // FIXME: subID
     // try {
-    mRegistry->NotifyVoLteServiceStateChanged(lteState);
+    if (mRegistry != NULL)
+        mRegistry->NotifyVoLteServiceStateChanged(lteState);
     // } catch (RemoteException ex) {
     //     // system process is dead
     // }

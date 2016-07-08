@@ -16,7 +16,7 @@ namespace Internal {
 namespace Telephony {
 
 const String DriverCall::TAG("DriverCall");
-CAR_INTERFACE_IMPL(DriverCall, Object, IComparable)
+CAR_INTERFACE_IMPL_2(DriverCall, Object, IComparable, IDriverCall)
 /** returns null on error */
 AutoPtr<DriverCall> DriverCall::FromCLCCLine(
     /* [in] */ const String& line)
@@ -138,32 +138,32 @@ ECode DriverCall::ToString(
 
 ECode DriverCall::StateFromCLCC(
     /* [in] */ Int32 state,
-    /* [out] */ State* result) /*throws ATParseEx*/
+    /* [out] */ IDriverCallState* result) /*throws ATParseEx*/
 {
     VALIDATE_NOT_NULL(result);
     switch(state) {
         case 0: {
-            *result = ACTIVE;
+            *result = DriverCallState_ACTIVE;
             return NOERROR;
         }
         case 1: {
-            *result = HOLDING;
+            *result = DriverCallState_HOLDING;
             return NOERROR;
         }
         case 2: {
-            *result = DIALING;
+            *result = DriverCallState_DIALING;
             return NOERROR;
         }
         case 3: {
-            *result = ALERTING;
+            *result = DriverCallState_ALERTING;
             return NOERROR;
         }
         case 4: {
-            *result = INCOMING;
+            *result = DriverCallState_INCOMING;
             return NOERROR;
         }
         case 5: {
-            *result = WAITING;
+            *result = DriverCallState_WAITING;
             return NOERROR;
         }
     }

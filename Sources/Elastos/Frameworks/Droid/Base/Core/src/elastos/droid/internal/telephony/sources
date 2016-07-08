@@ -91,6 +91,7 @@ SOURCES += CSmsApplication.cpp
 SOURCES += CCallManagerHelper.cpp
 SOURCES += RestrictedState.cpp
 SOURCES += RetryManager.cpp
+SOURCES += RILParcel.cpp
 
 ELASTOS_LIBS += cat/cat.lib
 ELASTOS_LIBS += cdma/cdma.lib

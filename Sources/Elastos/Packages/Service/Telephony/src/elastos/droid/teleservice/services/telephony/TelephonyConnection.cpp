@@ -430,14 +430,16 @@ ECode TelephonyConnection::SetOriginalConnection(
 {
     Logger::V("TelephonyConnection", "new TelephonyConnection, originalConnection: %s", TO_CSTR(originalConnection));
     AutoPtr<IPhone> phone;
-    GetPhone((IPhone**)&phone);
     if (mOriginalConnection != NULL) {
+        GetPhone((IPhone**)&phone);
         phone->UnregisterForPreciseCallStateChanged(mHandler);
         phone->UnregisterForRingbackTone(mHandler);
         phone->UnregisterForHandoverStateChanged(mHandler);
         phone->UnregisterForDisconnect(mHandler);
+        phone = NULL;
     }
     mOriginalConnection = originalConnection;
+    GetPhone((IPhone**)&phone);
     phone->RegisterForPreciseCallStateChanged(
             mHandler, MSG_PRECISE_CALL_STATE_CHANGED, NULL);
     phone->RegisterForHandoverStateChanged(
@@ -596,12 +598,11 @@ Boolean TelephonyConnection::IsValidRingingCall()
     ICallState state;
     ringingCall->GetState(&state);
 
-    assert(0);
-    //Boolean res;
-    // if (state->IsRinging(&res), !res) {
-    //     Logger::V("TelephonyConnection", "isValidRingingCall, ringing call is not in ringing state");
-    //     return FALSE;
-    // }
+    Boolean res;
+    if (!(state == ICallState_INCOMING || state == ICallState_WAITING)) {
+        Logger::V("TelephonyConnection", "isValidRingingCall, ringing call is not in ringing state");
+        return FALSE;
+    }
 
     AutoPtr<Elastos::Droid::Internal::Telephony::IConnection> tmp;
     ringingCall->GetEarliestConnection((Elastos::Droid::Internal::Telephony::IConnection**)&tmp);
@@ -712,6 +713,7 @@ void TelephonyConnection::Close()
         phone->UnregisterForHandoverStateChanged(mHandler);
     }
     mOriginalConnection = NULL;
+    mHandler = NULL;//TODO more check needed, avoid across-reference
     Destroy();
 }
 

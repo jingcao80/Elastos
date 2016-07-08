@@ -526,8 +526,8 @@ ECode CGsmConnection::Update (
     }
 
     // A null cnapName should be the same as ""
-    if (((DriverCall*)dc)->mName.IsEmpty()) {
-        if (!mCnapName.IsEmpty()) {
+    if (((DriverCall*)dc)->mName.IsNullOrEmpty()) {
+        if (!mCnapName.IsNullOrEmpty()) {
             changed = TRUE;
             mCnapName = String("");
         }
