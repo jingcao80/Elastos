@@ -670,7 +670,7 @@ module.exports = function(aoElastos, aoActivity){
 //             Logger::D(TAG, "OnClick()---img_btn_edit");
                 elog(TAG + "OnClick()---" + img_btn_edit);
 //             AutoPtr<PhotoEntry> entry = mHost->mPhotoEntryList[mHost->mCurrentIndex];
-                var entry = mPhotoEntryList[mHost.mCurrentIndex];
+                var entry = mPhotoEntryList[mCurrentIndex];
 //             AutoPtr<IIntent> intent;
 //             CIntent::New((IIntent**)&intent);
                 var intent = Droid_New("Elastos.Droid.Content.CIntent");
@@ -703,7 +703,7 @@ module.exports = function(aoElastos, aoActivity){
 //             mHost->CloseMorePopupWindow();
                 CloseMorePopupWindow();
 //             AutoPtr<PhotoEntry> entry = mHost->mPhotoEntryList[mHost->mCurrentIndex];
-                var entry = mHost.mPhotoEntryList[mHost.mCurrentIndex];
+                var entry = mPhotoEntryList[mCurrentIndex];
 //             AutoPtr<IIntent> intent;
 //             CIntent::New((IIntent**)&intent);
                 var intent = Droid_New("Elastos.Droid.Content.CIntent");
@@ -1055,6 +1055,7 @@ module.exports = function(aoElastos, aoActivity){
             return;
         }
         else {
+            //
         }
 
 //     AutoPtr<IView> view = FindViewById(R::id::photo_up);
@@ -1087,10 +1088,13 @@ module.exports = function(aoElastos, aoActivity){
 //     assert(mPhotoLoadingText != NULL);
         mPhotoLoadingText = context.FindViewById(R.id.photo_loading);
 
+elog("====OnCreate====mLeftButton");
 //     view = FindViewById(R::id::img_btn_left);
 //     mLeftButton = IImageButton::Probe(view);
 //     assert(mLeftButton != NULL);
         mLeftButton = context.FindViewById(R.id.img_btn_left);
+
+elog("====OnCreate====mLeftButton id:"+mLeftButton.GetId().toString(16).toUpperCase());
 
 //     view = FindViewById(R::id::img_btn_right);
 //     mRightButton = IImageButton::Probe(view);
@@ -1309,7 +1313,7 @@ module.exports = function(aoElastos, aoActivity){
 //     AutoPtr<IResources> res;
         var res;
 //     GetResources((IResources**)&res);
-        res = mHost.GetResources();
+        res = GetResources();
 //     AutoPtr<IBitmapDrawable> bitmapDrawable;
         var bitmapDrawable;
 //     CBitmapDrawable::New(res, (IBitmap*)NULL, (IBitmapDrawable**)&bitmapDrawable);
@@ -1604,9 +1608,10 @@ module.exports = function(aoElastos, aoActivity){
 // {
     {
 //     Logger::D(TAG, "SetCurrentPhoto()---");
-        elog(TAG + "SetCurrentPhoto()---");
+        elog(TAG + "SetCurrentPhoto()---" + mCurrentIndex);
+
 //     if (mCurrentIndex > 0) {
-        if (mCurrentIndex) {
+        if (mCurrentIndex > 0) {
 //         mLeftButton->SetImageResource(R::drawable::photo_arrow_left);
             mLeftButton.SetImageResource(R.drawable.photo_arrow_left);
 //     }
@@ -1618,7 +1623,7 @@ module.exports = function(aoElastos, aoActivity){
 //     }
         }
 //     if (mCurrentIndex >= (mTotalSize - 1)) {
-        if (mCurrentIndex > mTotalSize) {
+        if (mCurrentIndex >= mTotalSize - 1) {
 //         mRightButton->SetImageResource(R::drawable::photo_arrow_right_disable);
             mRightButton.SetImageResource(R.drawable.photo_arrow_right_disable);
 //     }
@@ -1693,6 +1698,7 @@ module.exports = function(aoElastos, aoActivity){
             mCurrentIndex = mCurrentIndex > 0 ? mCurrentIndex : 0;
 //     }
         }
+
 //     SetCurrentPhoto();
         SetCurrentPhoto();
 // }
@@ -1780,7 +1786,7 @@ module.exports = function(aoElastos, aoActivity){
 //     AutoPtr<IFile> file;
         var file;
 //     CFile::New(filePath, (IFile**)&file);
-        file = Droid_New("Elastos.IO.CFile", filePath);
+        file = Core_New("Elastos.IO.CFile", filePath);
 //     if (file != NULL) {
         if (file) {
 //         Int64 last = 0;
@@ -1790,15 +1796,15 @@ module.exports = function(aoElastos, aoActivity){
 //         AutoPtr<IDate> date;
             var data;
 //         CDate::New(last, (IDate**)&date);
-            date = Droid_New("Elastos.Utility.CDate",last);
+            date = Core_New("Elastos.Utility.CDate",last);
 //         AutoPtr<ISimpleDateFormat> sdf;
             var sdf;
 //         CSimpleDateFormat::New(String("yyyy-MM-dd HH:mm"), (ISimpleDateFormat**)&sdf);
-            sdf = Droid_New("Elastos.Text.CSimpleDateFormat","yyyy-MM-dd HH:mm");
+            sdf = Core_New("Elastos.Text.CSimpleDateFormat","yyyy-MM-dd HH:mm");
 //         String str;
             var str;
 //         sdf->FormatDate(date, &str);
-            str = sdf.FormatDate(date);
+            str = sdf.Format(date);
 //         (*mDetailsArray)[1] = str;
             mDetailsArray[1] = str;
 //         Int64 len = 0;
@@ -1818,7 +1824,7 @@ module.exports = function(aoElastos, aoActivity){
 //                 Float j = (((Float)(len % (1024 * 1024))) / (1024 * 1024)) * 10;
                     var j = (len % (1024 * 1024) / (1024 * 1024)) * 10;
 //                 Int32 m = Elastos::Core::Math::Round(j);
-                    var m = Round(j);
+                    var m = Math.round(j);
 //                 sizeStr += StringUtils::Int32ToString(i);
                     sizeStr += i;
 //                 sizeStr += ".";
@@ -2169,6 +2175,7 @@ module.exports = function(aoElastos, aoActivity){
         intent)
 // {
     {
+elog("========LoadPhotoEntryList====begin====");
 //     if (intent != NULL) {
         //if (intent) {
         if (true) {
@@ -2186,7 +2193,7 @@ if (false) {
 //         intent->GetData((IUri**)&uri);
             //uri = intent.GetData();
 }
-            var uri = Droid_New("Elastos.Droid.Net.CStringUri", "file:///data/temp/testdisk/icon_03.jpg");
+            //var uri = Droid_New("Elastos.Droid.Net.CStringUri", "file:///data/temp/testdisk/icon_03.jpg");
 //         if (uri != NULL) {
             if (uri) {
 //             String scheme;
@@ -2244,22 +2251,28 @@ if (false) {
             }
 //         else {
             else {
+elog("========LoadPhotoEntryList====01====");
 //             intent->GetStringExtra(DataSourceHelper::SOURCE_PATH, &filePath);
-                filePath = intent.GetStringExtra(DataSourceHelper.SOURCE_PATH);
+                //filePath = intent.GetStringExtra(DataSourceHelper.SOURCE_PATH);
+                filePath = "/data/temp/testdisk/icon_01.jpeg";
 //             if (!filePath.IsNullOrEmpty()) {
                 if (filePath.length) {
 //                 intent->GetInt32Extra(DataSourceHelper::SOURCE_INDEX, 0, &mCurrentIndex);
-                    mCurrentIndex = intent.GetInt32Extra(DataSourceHelper.SOURCE_INDEX, 0);
+                    //mCurrentIndex = intent.GetInt32Extra(DataSourceHelper.SOURCE_INDEX, 0);
+                    mCurrentIndex = 0;
 //                 mFolderPath = filePath.Substring(0, filePath.LastIndexOf(DataSourceHelper::PATH_SPLITE));
-                    mFolderPath = filePath.slice(-filePath.LastIndexOf(DataSourceHelper.PATH_SPLITE));
+                    mFolderPath = filePath.substring(0, filePath.lastIndexOf(DataSourceHelper.PATH_SPLITE));
+elog("========LoadPhotoEntryList====01====folderPaht:" + mFolderPath);
 //                 AutoPtr<List<String> > imageItems = DataSourceHelper::GetItemList(mFolderPath);
                     var imageItems = DataSourceHelper.GetItemList(mFolderPath);
+elog("LoadPhotoEntryList====01====imageItems:" + JSON.stringify(imageItems));
 //                 if (imageItems != NULL) {
                     if (imageItems) {
 //                     AutoPtr<PhotoEntry> entry;
                         var entry;
 //                     List<String>::Iterator it = imageItems->Begin();
 //                     for (Int32 i = 0; it != imageItems->End(); ++it, ++i) {
+                        mPhotoEntryList = [];
                         for (var i=0,im=imageItems.length;i<im;i++) {
 //                         entry = new PhotoEntry();
                             entry = {};
@@ -2308,6 +2321,7 @@ if (false) {
             return false;
 //     }
         }
+elog("========LoadPhotoEntryList====end====");
 
 //     return TRUE;
         return true;
