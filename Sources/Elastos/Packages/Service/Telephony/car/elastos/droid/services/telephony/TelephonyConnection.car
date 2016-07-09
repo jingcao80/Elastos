@@ -13,6 +13,7 @@ module
     /**
      * Base class for CDMA and GSM connections.
      */
+    [local]
     interface ITelephonyConnection {
         PerformHold();
 

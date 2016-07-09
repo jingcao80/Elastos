@@ -77,6 +77,12 @@ module
          */
         const String PROPERTY_LTE_ON_CDMA_DEVICE = "telephony.lteOnCdmaDevice";
 
+        /**
+         * {@see BaseCommands#getLteOnGsmMode()}
+         */
+        const String PROPERTY_LTE_ON_GSM_DEVICE = "telephony.lteOnGsmDevice";
+
+
         const String CURRENT_ACTIVE_PHONE = "gsm.current.phone-type";
 
         //****** SIM Card

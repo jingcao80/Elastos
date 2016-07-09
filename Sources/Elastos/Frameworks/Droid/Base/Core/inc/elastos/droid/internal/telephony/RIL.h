@@ -1291,15 +1291,12 @@ public:
     AutoPtr<IDisplay> mDefaultDisplay;
     Int32 mDefaultDisplayState;
     AutoPtr<IPowerManagerWakeLock> mWakeLock;
-    Object wakeLock;
     Int32 mWakeLockTimeout;
     // The number of wakelock requests currently active.  Don't release the lock
     // until dec'd to 0
     Int32 mWakeLockCount;
 
     AutoPtr<ISparseArray> mRequestList;
-    Object listLock;
-
     AutoPtr<IInterface> mLastNITZTimeInfo;
 
     // When we are testing emergency calls

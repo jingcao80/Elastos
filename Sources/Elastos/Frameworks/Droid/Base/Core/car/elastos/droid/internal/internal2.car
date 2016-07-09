@@ -1,0 +1,4 @@
+module
+{
+    merge("utility/XmlUtils.car");
+}

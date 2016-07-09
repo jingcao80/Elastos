@@ -1,8 +1,13 @@
-#include "Elastos.Droid.Content.h"
-#include "Elastos.Droid.Internal.h"
-#include "Elastos.CoreLibrary.Utility.Concurrent.h"
 
 #include "elastos/droid/internal/telephony/cdma/CdmaSubscriptionSourceManager.h"
+#include "elastos/droid/provider/Settings.h"
+#include "Elastos.Droid.Content.h"
+#include "Elastos.Droid.Internal.h"
+#include "Elastos.Droid.Provider.h"
+#include "Elastos.CoreLibrary.Utility.Concurrent.h"
+
+using Elastos::Droid::Provider::ISettingsGlobal;
+using Elastos::Droid::Provider::Settings;
 
 namespace Elastos {
 namespace Droid {
@@ -43,7 +48,7 @@ AutoPtr<ICdmaSubscriptionSourceManager> CdmaSubscriptionSourceManager::GetInstan
     // return sInstance;
     assert(0);
     AutoPtr<CdmaSubscriptionSourceManager> empty;
-    return empty;
+    return (ICdmaSubscriptionSourceManager*)empty->Probe(EIID_ICdmaSubscriptionSourceManager);
 }
 
 ECode CdmaSubscriptionSourceManager::Dispose(
@@ -88,7 +93,7 @@ ECode CdmaSubscriptionSourceManager::HandleMessage(
     //         log("EVENT_SUBSCRIPTION_STATUS_CHANGED");
     //         ar = (AsyncResult)msg.obj;
     //         if (ar.exception == null) {
-    //             int actStatus = ((int[])ar.result)[0];
+    //             Int32 actStatus = ((Int32[])ar.result)[0];
     //             log("actStatus = " + actStatus);
     //             if (actStatus == SUBSCRIPTION_ACTIVATED) { // Subscription Activated
     //                 // In case of multi-SIM, framework should wait for the subscription ready
@@ -122,13 +127,13 @@ ECode CdmaSubscriptionSourceManager::GetCdmaSubscriptionSource(
 Int32 CdmaSubscriptionSourceManager::GetDefault(
     /* [in] */ IContext* context)
 {
-    // ==================before translated======================
-    // // Get the default value from the Settings
-    // int subscriptionSource = Settings.Global.getInt(context.getContentResolver(),
-    //         Settings.Global.CDMA_SUBSCRIPTION_MODE, PREFERRED_CDMA_SUBSCRIPTION);
-    // return subscriptionSource;
-    assert(0);
-    return 0;
+    // Get the default value from the Settings
+    Int32 subscriptionSource = 0;
+    AutoPtr<IContentResolver> cr;
+    context->GetContentResolver((IContentResolver**)&cr);
+    Settings::Global::GetInt32(cr, ISettingsGlobal::CDMA_SUBSCRIPTION_MODE
+            , ICdmaSubscriptionSourceManager::PREFERRED_CDMA_SUBSCRIPTION, &subscriptionSource);
+    return subscriptionSource;
 }
 
 CdmaSubscriptionSourceManager::CdmaSubscriptionSourceManager(
@@ -140,7 +145,7 @@ CdmaSubscriptionSourceManager::CdmaSubscriptionSourceManager(
     // mCi = ci;
     // mCi.registerForCdmaSubscriptionChanged(this, EVENT_CDMA_SUBSCRIPTION_SOURCE_CHANGED, null);
     // mCi.registerForOn(this, EVENT_RADIO_ON, null);
-    // int subscriptionSource = getDefault(context);
+    // Int32 subscriptionSource = getDefault(context);
     // mCdmaSubscriptionSource.set(subscriptionSource);
     // mCi.registerForSubscriptionStatusChanged(this, EVENT_SUBSCRIPTION_STATUS_CHANGED, null);
 }
@@ -161,7 +166,7 @@ void CdmaSubscriptionSourceManager::HandleGetCdmaSubscriptionSource(
 {
     // ==================before translated======================
     // if ((ar.exception == null) && (ar.result != null)) {
-    //     int newSubscriptionSource = ((int[]) ar.result)[0];
+    //     Int32 newSubscriptionSource = ((Int32[]) ar.result)[0];
     //
     //     if (newSubscriptionSource != mCdmaSubscriptionSource.get()) {
     //         log("Subscription Source Changed : " + mCdmaSubscriptionSource + " >> "

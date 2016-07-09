@@ -30,6 +30,8 @@ using Elastos::Droid::Telephony::ISubscriptionManager;
 using Elastos::Droid::Telephony::ITelephonyManager;
 using Elastos::Core::AutoLock;
 using Elastos::Core::CInteger32;
+using Elastos::Core::IArrayOf;
+using Elastos::Core::IByte;
 using Elastos::Core::IInteger32;
 using Elastos::Core::StringUtils;
 using Elastos::IO::ByteOrder;
@@ -241,6 +243,8 @@ ModemStackController::ModemStackController(
     , mModemRatCapabilitiesAvailable(FALSE)
     , mDeactivationInProgress(FALSE)
 {
+    Handler::constructor();
+
     Logd(String("Constructor - Enter"));
 
     AutoPtr<ITelephonyManager> tm;
@@ -261,6 +265,8 @@ ModemStackController::ModemStackController(
     mModemCapInfo = ArrayOf<ModemCapabilityInfo*>::Alloc(mNumPhones);
 
     for (Int32 i = 0; i < mCi->GetLength(); i++) {
+        if ((*mCi)[i] == NULL) continue;
+
         AutoPtr<IInteger32> obj;
         CInteger32::New(i, (IInteger32**)&obj);
         (*mCi)[i]->RegisterForAvailable(this, EVENT_RADIO_AVAILABLE, obj);
@@ -305,14 +311,29 @@ ECode ModemStackController::HandleMessage(
             ProcessRadioAvailable(ar, v);
             break;
 
-        case EVENT_GET_MODEM_CAPS_DONE:
+        case EVENT_GET_MODEM_CAPS_DONE: {
             ar = (AsyncResult*)IObject::Probe(obj);
             phoneId = IInteger32::Probe(ar->mUserObj);
             Logd(String("EVENT_GET_MODEM_CAPS_DONE"));
-            assert(0 && "TODO");
             phoneId->GetValue(&v);
-            // OnGetModemCapabilityDone(ar, (Byte[])ar.result, v);
+            AutoPtr<IArrayOf> result = IArrayOf::Probe(ar->mResult);
+            AutoPtr<ArrayOf<Byte> > bs;
+            if (result != NULL) {
+                Int32 len = 0;
+                result->GetLength(&len);
+                bs = ArrayOf<Byte>::Alloc(len);
+                for (Int32 i = 0; i < len; i++) {
+                    AutoPtr<IInterface> o;
+                    result->Get(i, (IInterface**)&o);
+                    Byte b;
+                    IByte::Probe(o)->GetValue(&b);
+                    (*bs)[i] = b;
+                }
+            }
+
+            OnGetModemCapabilityDone(ar, bs, v);
             break;
+        }
 
         case EVENT_MODEM_CAPABILITY_CHANGED:
             ar = (AsyncResult*)IObject::Probe(obj);
@@ -400,14 +421,13 @@ void ModemStackController::OnGetModemCapabilityDone(
     /* [in] */ ArrayOf<Byte>* result,
     /* [in] */ Int32 phoneId)
 {
-    assert(0 && "TODO");
-    // if (result == NULL && ar.exception instanceof CommandException) {
-    //     Loge(String("onGetModemCapabilityDone: EXIT!, result NULL or Exception =") + TO_CSTR(ar->mException));
-    //     //On Modem Packages which do not support GetModemCaps RIl will return exception
-    //     //On such Modem packages notify stack is ready so that SUB Activation can continue.
-    //     NotifyStackReady(FALSE);
-    //     return;
-    // }
+    if (result == NULL/* && ar.exception instanceof CommandException*/) {
+        Loge(String("onGetModemCapabilityDone: EXIT!, result NULL or Exception =") + TO_CSTR(ar->mException));
+        //On Modem Packages which do not support GetModemCaps RIl will return exception
+        //On such Modem packages notify stack is ready so that SUB Activation can continue.
+        NotifyStackReady(FALSE);
+        return;
+    }
 
     // Logd(String("onGetModemCapabilityDone on phoneId[")
     //         + StringUtils::ToString(phoneId)

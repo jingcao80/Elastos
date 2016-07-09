@@ -3,6 +3,7 @@
 #include "Elastos.Droid.Accounts.h"
 #include "Elastos.Droid.Location.h"
 #include "Elastos.Droid.Media.h"
+#include "Elastos.Droid.Telephony.h"
 #include "Elastos.Droid.Wifi.h"
 #include "Elastos.Droid.Service.h"
 #include "elastos/droid/app/CContextImpl.h"
@@ -62,6 +63,7 @@
 #include "elastos/droid/net/CConnectivityManager.h"
 #include "elastos/droid/net/CNetworkPolicyManager.h"
 #include "elastos/droid/net/CNetworkScoreManager.h"
+#include "elastos/droid/telephony/CTelephonyManager.h"
 #include "elastos/droid/wifi/CWifiManager.h"
 #include "elastos/droid/wifi/p2p/CWifiP2pManager.h"
 #include "elastos/droid/view/accessibility/CAccessibilityManager.h"
@@ -205,6 +207,8 @@ using Elastos::Droid::Privacy::IPrivacySettingsManager;
 using Elastos::Droid::Service::Persistentdata::IIPersistentDataBlockService;
 using Elastos::Droid::Service::Persistentdata::IPersistentDataBlockManager;
 using Elastos::Droid::Service::Persistentdata::CPersistentDataBlockManager;
+using Elastos::Droid::Telephony::CTelephonyManager;
+using Elastos::Droid::Telephony::ITelephonyManager;
 using Elastos::Droid::View::DisplayAdjustments;
 using Elastos::Droid::View::WindowManagerImpl;
 using Elastos::Droid::View::IContextThemeWrapper;
@@ -2619,11 +2623,12 @@ ECode CContextImpl::GetSystemService(
         return NOERROR;
     }
     else if (IContext::TELEPHONY_SERVICE.Equals(name)) {
-        Slogger::E(TAG, " >>> TODO: Service %s is not ready!", name.string());
-        // public Object createService(ContextImpl ctx) {
-        //     return new TelephonyManager(ctx.getOuterContext());
-        // }});
-        return E_NOT_IMPLEMENTED;
+        AutoPtr<ITelephonyManager> tm;
+        CTelephonyManager::New(GetOuterContext(), (ITelephonyManager**)&tm);
+        *object = tm.Get();
+        mServiceCache[name] = *object;
+        REFCOUNT_ADD(*object);
+        return NOERROR;
     }
     else if (IContext::TELECOM_SERVICE.Equals(name)) {
         Slogger::E(TAG, " >>> TODO: Service %s is not ready!", name.string());

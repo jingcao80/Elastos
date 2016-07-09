@@ -45,7 +45,7 @@ module
             [out] Boolean* result);
     }
 
-    [deprecated]
+    [local, deprecated]
     interface ISubscriptionHelperHelper {
 
         Init(

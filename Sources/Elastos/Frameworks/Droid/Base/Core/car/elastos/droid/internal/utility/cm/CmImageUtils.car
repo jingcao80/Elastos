@@ -10,6 +10,7 @@ module
     namespace Utility {
     namespace Cm {
 
+    [local]
     interface ICmImageUtils {
         /**
          * Gets the Width and Height of the image

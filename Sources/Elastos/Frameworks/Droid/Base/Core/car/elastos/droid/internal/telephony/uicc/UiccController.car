@@ -16,6 +16,7 @@ module
     /**
      * interface IHandler
      */
+    [local]
     interface IUiccController {
         const Int32 APP_FAM_UNKNOWN =  -1;
         const Int32 APP_FAM_3GPP =  1;
@@ -61,7 +62,7 @@ module
 
     }
 
-    [deprecated]
+    [local, deprecated]
     interface IUiccControllerHelper {
         Make(
             [in] IContext* c,

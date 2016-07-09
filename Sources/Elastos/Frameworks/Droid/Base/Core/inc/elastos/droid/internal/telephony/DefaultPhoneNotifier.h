@@ -162,7 +162,6 @@ public:
     static CARAPI_(ICallState) ConvertPreciseCallState2(
         /* [in] */ Int32 state);
 
-protected:
     /*package*/
     DefaultPhoneNotifier();
 

@@ -1469,8 +1469,7 @@ ECode BaseCommands::GetLteOnGsmMode(
     /* [out] */ Int32* mode)
 {
     VALIDATE_NOT_NULL(mode);
-    assert(0 && "TODO");
-    // return CTelephonyManager::GetLteOnGsmModeStatic(mode);
+    *mode = CTelephonyManager::GetLteOnGsmModeStatic();
     return NOERROR;
 }
 

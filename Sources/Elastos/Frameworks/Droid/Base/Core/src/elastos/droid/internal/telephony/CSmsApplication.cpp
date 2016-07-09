@@ -65,6 +65,8 @@ namespace Droid {
 namespace Internal {
 namespace Telephony {
 
+AutoPtr<IHashMap> gReceivers;
+
 CSmsApplication::SmsPackageMonitor::SmsPackageMonitor(
     /* [in] */ IContext* context,
     /* [in] */ CSmsApplication* host)
@@ -223,6 +225,7 @@ AutoPtr<ICollection> CSmsApplication::GetApplicationCollectionInternal(
 
     AutoPtr<IHashMap> receivers;
     CHashMap::New((IHashMap**)&receivers);
+    gReceivers = receivers;
 
     // Add one entry to the map for every sms Receiver (ignoring duplicate sms receivers)
     AutoPtr<IIterator> it;
@@ -442,8 +445,7 @@ AutoPtr<CSmsApplication::SmsApplicationData> CSmsApplication::GetApplication(
 
     AutoPtr<ICollection> applications = GetApplicationCollectionInternal(context, userId);
     if (DEBUG_MULTIUSER) {
-        assert(0 && "TODO");
-        // Logger::I(LOGTAG, "getApplication userId=%d", userId);
+        Logger::I(LOGTAG, "getApplication userId=%d", userId);
     }
     // Determine which application receives the broadcast
     AutoPtr<IContentResolver> cr;
@@ -455,8 +457,7 @@ AutoPtr<CSmsApplication::SmsApplicationData> CSmsApplication::GetApplication(
     ss->GetStringForUser(cr,
             ISettingsSecure::SMS_DEFAULT_APPLICATION, userId, &defaultApplication);
     if (DEBUG_MULTIUSER) {
-        assert(0 && "TODO");
-        // Logger::I(LOGTAG, "getApplication defaultApp=%d", defaultApplication);
+        Logger::I(LOGTAG, "getApplication defaultApp=%s", defaultApplication.string());
     }
 
     AutoPtr<SmsApplicationData> applicationData;
@@ -464,8 +465,7 @@ AutoPtr<CSmsApplication::SmsApplicationData> CSmsApplication::GetApplication(
         applicationData = GetApplicationForPackage(applications, defaultApplication);
     }
     if (DEBUG_MULTIUSER) {
-        assert(0 && "TODO");
-        // Logger::I(LOGTAG, "getApplication appData=%d", applicationData);
+        Logger::I(LOGTAG, "getApplication appData=%s", TO_CSTR(applicationData));
     }
     // Picking a new SMS app requires AppOps and Settings.Secure permissions, so we only do
     // this if the caller asked us to.
@@ -510,9 +510,8 @@ AutoPtr<CSmsApplication::SmsApplicationData> CSmsApplication::GetApplication(
             appOps->CheckOp(IAppOpsManager::OP_WRITE_SMS, applicationData->mUid,
                     applicationData->mPackageName, &mode);
             if (mode != IAppOpsManager::MODE_ALLOWED) {
-                assert(0 && "TODO");
-                // Rlog->E(LOGTAG, applicationData.mPackageName + " lost OP_WRITE_SMS: " +
-                //         (updateIfNeeded ? " (fixing)" : " (no permission to fix)"));
+                Logger::E(LOGTAG, "%s lost OP_WRITE_SMS: ", applicationData->mPackageName.string(),
+                        (updateIfNeeded ? " (fixing)" : " (no permission to fix)"));
                 if (updateIfNeeded) {
                     appOps->SetMode(IAppOpsManager::OP_WRITE_SMS, applicationData->mUid,
                             applicationData->mPackageName, IAppOpsManager::MODE_ALLOWED);
@@ -548,16 +547,14 @@ AutoPtr<CSmsApplication::SmsApplicationData> CSmsApplication::GetApplication(
                 Int32 mode = 0;
                 appOps->CheckOp(IAppOpsManager::OP_WRITE_SMS, uid, PHONE_PACKAGE_NAME, &mode);
                 if (mode != IAppOpsManager::MODE_ALLOWED) {
-                    assert(0 && "TODO");
-                    // Rlog->E(LOGTAG, PHONE_PACKAGE_NAME + " lost OP_WRITE_SMS:  (fixing)");
+                    Logger::E(LOGTAG, "%s lost OP_WRITE_SMS:  (fixing)", PHONE_PACKAGE_NAME.string());
                     appOps->SetMode(IAppOpsManager::OP_WRITE_SMS, uid,
                             PHONE_PACKAGE_NAME, IAppOpsManager::MODE_ALLOWED);
                 }
             }
             else {//} Catch (NameNotFoundException e) {
                 // No phone app on this Device (unexpected, even for non-phone devices)
-                assert(0 && "TODO");
-                // Rlog->E(LOGTAG, "Phone package not found: " + PHONE_PACKAGE_NAME);
+                Logger::E(LOGTAG, "Phone package not found: %s", PHONE_PACKAGE_NAME.string());
                 applicationData = NULL;
             }
 
@@ -571,16 +568,14 @@ AutoPtr<CSmsApplication::SmsApplicationData> CSmsApplication::GetApplication(
                 Int32 mode = 0;
                 appOps->CheckOp(IAppOpsManager::OP_WRITE_SMS, uid, BLUETOOTH_PACKAGE_NAME, &mode);
                 if (mode != IAppOpsManager::MODE_ALLOWED) {
-                    assert(0 && "TODO");
-                    // Rlog->E(LOGTAG, BLUETOOTH_PACKAGE_NAME + " lost OP_WRITE_SMS:  (fixing)");
+                    Logger::E(LOGTAG, "%s lost OP_WRITE_SMS:  (fixing)", BLUETOOTH_PACKAGE_NAME.string());
                     appOps->SetMode(IAppOpsManager::OP_WRITE_SMS, uid,
                             BLUETOOTH_PACKAGE_NAME, IAppOpsManager::MODE_ALLOWED);
                 }
             }
             else {// Catch (NameNotFoundException e) {
                 // No BT app on this device
-                assert(0 && "TODO");
-                // Rlog->E(LOGTAG, "Bluetooth package not found: " + BLUETOOTH_PACKAGE_NAME);
+                Logger::E(LOGTAG, "Bluetooth package not found: %s", BLUETOOTH_PACKAGE_NAME.string());
             }
 
             info = NULL;
@@ -593,16 +588,14 @@ AutoPtr<CSmsApplication::SmsApplicationData> CSmsApplication::GetApplication(
                 Int32 mode = 0;
                 appOps->CheckOp(IAppOpsManager::OP_WRITE_SMS, uid, MMS_SERVICE_PACKAGE_NAME, &mode);
                 if (mode != IAppOpsManager::MODE_ALLOWED) {
-                    assert(0 && "TODO");
-                    // Rlog->E(LOGTAG, MMS_SERVICE_PACKAGE_NAME + " lost OP_WRITE_SMS:  (fixing)");
+                    Logger::E(LOGTAG, "%s lost OP_WRITE_SMS:  (fixing)", MMS_SERVICE_PACKAGE_NAME.string());
                     appOps->SetMode(IAppOpsManager::OP_WRITE_SMS, uid,
                             MMS_SERVICE_PACKAGE_NAME, IAppOpsManager::MODE_ALLOWED);
                 }
             }
             else {//Catch (NameNotFoundException e) {
                 // No phone app on this Device (unexpected, even for non-phone devices)
-                assert(0 && "TODO");
-                // Rlog->E(LOGTAG, "MmsService package not found: " + MMS_SERVICE_PACKAGE_NAME);
+                Logger::E(LOGTAG, "MmsService package not found: %s", MMS_SERVICE_PACKAGE_NAME.string());
                 applicationData = NULL;
             }
 

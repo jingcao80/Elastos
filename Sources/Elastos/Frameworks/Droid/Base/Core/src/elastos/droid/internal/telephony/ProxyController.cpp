@@ -1,7 +1,14 @@
 
 #include "elastos/droid/internal/telephony/ProxyController.h"
+#include "elastos/droid/internal/telephony/CUiccPhoneBookController.h"
+#include "elastos/droid/internal/telephony/CPhoneSubInfoController.h"
+#include "elastos/droid/internal/telephony/CUiccSmsController.h"
+#include "elastos/droid/internal/telephony/PhoneBase.h"
+#include "elastos/droid/internal/telephony/SubscriptionController.h"
+#include "elastos/droid/internal/telephony/dataconnection/DctController.h"
 #include "elastos/droid/os/CHandlerThread.h"
 #include "elastos/droid/telephony/CTelephonyManagerHelper.h"
+#include <elastos/utility/logging/Logger.h>
 
 using Elastos::Droid::Os::IHandlerThread;
 using Elastos::Droid::Os::CHandlerThread;
@@ -11,10 +18,9 @@ using Elastos::Droid::Telephony::CTelephonyManagerHelper;
 using Elastos::Droid::Telephony::ITelephonyManagerHelper;
 using Elastos::Droid::Internal::Telephony::IPhoneBase;
 using Elastos::Droid::Internal::Telephony::IPhoneProxy;
-using Elastos::Droid::Internal::Telephony::DataConnection::IDctControllerHelper;
-// using Elastos::Droid::Internal::Telephony::DataConnection::CDctControllerHelper;
-
+using Elastos::Droid::Internal::Telephony::DataConnection::DctController;
 using Elastos::Core::IThread;
+using Elastos::Utility::Logging::Logger;
 
 namespace Elastos {
 namespace Droid {
@@ -38,8 +44,7 @@ ECode ProxyController::GetInstance(
 {
     VALIDATE_NOT_NULL(result)
     if (sProxyController == NULL) {
-        assert(0 && "TODO");
-        // sProxyController = new ProxyController(context, phoneProxy, uiccController, ci);
+        sProxyController = new ProxyController(context, phoneProxy, uiccController, ci);
     }
     *result = sProxyController;
     REFCOUNT_ADD(*result)
@@ -72,16 +77,12 @@ ProxyController::ProxyController(
     CHandlerThread::New(String("DctControllerThread"), (IHandlerThread**)&t);
     IThread::Probe(t)->Start();
 
-    AutoPtr<IDctControllerHelper> hlp;
-    assert(0 && "TODO");
-    // CDctControllerHelper::AcquireSingleton((IDctControllerHelper**)&hlp);
     AutoPtr<ILooper> lp;
     t->GetLooper((ILooper**)&lp);
-    hlp->MakeDctController((ArrayOf<IPhoneProxy*>*)phoneProxy, lp, (IDctController**)&mDctController);
-    assert(0 && "TODO");
-    // mUiccPhoneBookController = new UiccPhoneBookController(mProxyPhones);
-    // mPhoneSubInfoController = new PhoneSubInfoController(mProxyPhones);
-    // mUiccSmsController = new UiccSmsController(mProxyPhones, context);
+    DctController::MakeDctController((ArrayOf<IPhoneProxy*>*)phoneProxy, lp, (IDctController**)&mDctController);
+    CUiccPhoneBookController::New(mProxyPhones, (IUiccPhoneBookController**)&mUiccPhoneBookController);
+    CPhoneSubInfoController::New(mProxyPhones, (IPhoneSubInfoController**)&mPhoneSubInfoController);
+    CUiccSmsController::New(mProxyPhones, context, (IUiccSmsController**)&mUiccSmsController);
     // mSubscriptionManager = SubscriptionManager->GetInstance(context, uiccController, ci);
 
     Logd(String("Constructor - Exit"));
@@ -127,11 +128,7 @@ ECode ProxyController::RegisterForAllDataDisconnected(
     /* [in] */ Int32 what,
     /* [in] */ IInterface* obj)
 {
-    AutoPtr<ISubscriptionControllerHelper> hlp;
-    assert(0 && "TODO");
-    // CSubscriptionControllerHelper::AcquireSingleton((ISubscriptionControllerHelper**)&hlp);
-    AutoPtr<ISubscriptionController> sc;
-    hlp->GetInstance((ISubscriptionController**)&sc);
+    AutoPtr<ISubscriptionController> sc = SubscriptionController::GetInstance();
     Int32 phoneId = 0;
     IISub::Probe(sc)->GetPhoneId(subId, &phoneId);
 
@@ -152,11 +149,7 @@ ECode ProxyController::UnregisterForAllDataDisconnected(
     /* [in] */ Int64 subId,
     /* [in] */ IHandler* h)
 {
-    AutoPtr<ISubscriptionControllerHelper> hlp;
-    assert(0 && "TODO");
-    // CSubscriptionControllerHelper::AcquireSingleton((ISubscriptionControllerHelper**)&hlp);
-    AutoPtr<ISubscriptionController> sc;
-    hlp->GetInstance((ISubscriptionController**)&sc);
+    AutoPtr<ISubscriptionController> sc = SubscriptionController::GetInstance();
     Int32 phoneId = 0;
     IISub::Probe(sc)->GetPhoneId(subId, &phoneId);
 
@@ -177,12 +170,8 @@ ECode ProxyController::IsDataDisconnected(
     /* [in] */ Int64 subId,
     /* [out] */ Boolean* result)
 {
-    VALIDATE_NOT_NULL(result)
-    AutoPtr<ISubscriptionControllerHelper> hlp;
-    assert(0 && "TODO");
-    // CSubscriptionControllerHelper::AcquireSingleton((ISubscriptionControllerHelper**)&hlp);
-    AutoPtr<ISubscriptionController> sc;
-    hlp->GetInstance((ISubscriptionController**)&sc);
+    VALIDATE_NOT_NULL(result);
+    AutoPtr<ISubscriptionController> sc = SubscriptionController::GetInstance();
     Int32 phoneId = 0;
     IISub::Probe(sc)->GetPhoneId(subId, &phoneId);
 
@@ -196,21 +185,17 @@ ECode ProxyController::IsDataDisconnected(
         AutoPtr<IPhone> index = (*mProxyPhones)[phoneId];
         AutoPtr<IPhone> activePhone;
         IPhoneProxy::Probe(index)->GetActivePhone((IPhone**)&activePhone);
-        assert(0 && "TODO");
-        // return IPhoneBase::Probe(activePhone)->mDcTracker->IsDisconnected(result);
-        return NOERROR;
+
+        return ((PhoneBase*)activePhone.Get())->mDcTracker->IsDisconnected(result);
     }
-    else {
-        *result = FALSE;
-        return NOERROR;
-    }
+    *result = FALSE;
+    return NOERROR;
 }
 
 void ProxyController::Logd(
     /* [in] */ String string)
 {
-    assert(0 && "TODO");
-    // Rlog::D(LOGTAG, string);
+    Logger::D(LOGTAG, string);
 }
 
 } // namespace Telephony

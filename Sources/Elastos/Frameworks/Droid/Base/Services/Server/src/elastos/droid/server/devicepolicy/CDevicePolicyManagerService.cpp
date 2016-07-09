@@ -4938,7 +4938,36 @@ ECode CDevicePolicyManagerService::LoadSettingsLocked(
             AutoPtr<IComponentName> cn;
             cnHelper->UnflattenFromString(name, (IComponentName**)&cn);
             AutoPtr<IDeviceAdminInfo> dai;
-            FindAdmin(cn, userHandle, (IDeviceAdminInfo**)&dai);
+
+            if (FAILED(FindAdmin(cn, userHandle, (IDeviceAdminInfo**)&dai))) {
+                //IOException
+                Slogger::W(TAG, "failed parsing %s", TO_CSTR(file));
+                break;
+            }
+
+            if (DBG && dai == NULL) {
+                //NullPointerException
+                Slogger::W(TAG, "failed parsing %s", TO_CSTR(file));
+                break;
+            }
+
+            Int32 uid = 0;
+            if (dai != NULL) {
+                AutoPtr<IActivityInfo> aInfo;
+                dai->GetActivityInfo((IActivityInfo**)&aInfo);
+                AutoPtr<IApplicationInfo> appInfo;
+                IComponentInfo::Probe(aInfo)->GetApplicationInfo((IApplicationInfo**)&appInfo);
+                appInfo->GetUid(&uid);
+            }
+
+            if (DBG && (UserHandle::GetUserId(uid) != userHandle)) {
+                StringBuffer buf;
+                buf += "findAdmin returned an incorrect uid ";
+                buf += uid;
+                buf += " for user ";
+                buf += userHandle;
+                Slogger::W(TAG, buf.ToString());
+            }
 
             if (dai != NULL) {
                 AutoPtr<IActivityInfo> aInfo;

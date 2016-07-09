@@ -23,6 +23,26 @@ module
     }
 
     submodule Elastos.Droid.Internal {
+        merge("../../../car/elastos/droid/internal/internal2.car");
+    }
+
+    submodule Elastos.Droid.Os {
+    merge("../../../car/elastos/droid/os.car");
+    }
+
+    submodule Elastos.Droid.Text {
+    merge("../../../car/elastos/droid/text.car");
+    }
+
+    submodule Elastos.Droid.Database {
+    merge("../../../car/elastos/droid/database.car"); //should after os.car
+    }
+
+    submodule Elastos.Droid.Content {
+    merge("../../../car/elastos/droid/content.car"); //should after os.car and text.car
+    }
+
+    submodule Elastos.Droid.Internal {
     merge("../../../car/elastos/droid/internal/app.car");
     merge("../../../car/elastos/droid/internal/appwidget.car");
     merge("../../../car/elastos/droid/internal/backup.car");
@@ -40,28 +60,12 @@ module
     merge("../../../car/elastos/droid/internal/view2.car");
     }
 
-    submodule Elastos.Droid.Os {
-    merge("../../../car/elastos/droid/os.car");
-    }
-
-    submodule Elastos.Droid.Database {
-    merge("../../../car/elastos/droid/database.car"); //should after os.car
-    }
-
     submodule Elastos.Droid.Location {
     merge("../../../car/elastos/droid/location.car");
     }
 
     submodule Elastos.Droid.Utility {
     merge("../../../car/elastos/droid/utility.car");
-    }
-
-    submodule Elastos.Droid.Text {
-    merge("../../../car/elastos/droid/text.car");
-    }
-
-    submodule Elastos.Droid.Content {
-    merge("../../../car/elastos/droid/content.car"); //should after os.car and text.car
     }
 
     submodule Elastos.Droid.View {

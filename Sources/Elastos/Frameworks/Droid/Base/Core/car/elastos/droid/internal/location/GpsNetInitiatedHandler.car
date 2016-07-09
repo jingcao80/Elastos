@@ -185,6 +185,7 @@ module
 
     }
 
+    [local]
     interface IGpsNetInitiatedHandlerHelper {
         GetDialogTitle(
             [in] IGpsNiNotification* notif,

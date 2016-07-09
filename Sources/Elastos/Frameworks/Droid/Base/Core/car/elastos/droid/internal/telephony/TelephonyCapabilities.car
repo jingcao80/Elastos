@@ -6,6 +6,7 @@ module {
     namespace Internal {
     namespace Telephony {
 
+    [local]
     interface ITelephonyCapabilities {
         SupportsEcm(
             [in] IPhone* phone,

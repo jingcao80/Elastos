@@ -1,5 +1,6 @@
 
 #include "Elastos.Droid.Telephony.h"
+#include "elastos/droid/internal/telephony/CRestrictedState.h"
 #include "elastos/droid/internal/telephony/ServiceStateTracker.h"
 #include "elastos/droid/internal/telephony/uicc/CUiccControllerHelper.h"
 #include "elastos/droid/os/SystemClock.h"
@@ -156,8 +157,7 @@ ServiceStateTracker::ServiceStateTracker()
     CServiceState::New((IServiceState**)&mNewSS);
 
     CSignalStrength::New((ISignalStrength**)&mSignalStrength);
-    Logger::E("ServiceStateTracker", "TODO CRestrictedState is NOT ready");
-    //TODO CRestrictedState::New((IRestrictedState**)&mRestrictedState);
+    CRestrictedState::New((IRestrictedState**)&mRestrictedState);
 
     AutoPtr<IRegistrantList> list;
     CRegistrantList::New((IRegistrantList**)&list);

@@ -12,6 +12,7 @@ module
     namespace Internal {
     namespace Telephony {
 
+    [local]
     interface IPhoneFactory {
         MakeDefaultPhones(
             [in] IContext* context);

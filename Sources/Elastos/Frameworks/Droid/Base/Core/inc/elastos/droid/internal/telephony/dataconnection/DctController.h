@@ -286,11 +286,11 @@ public:
     CARAPI IsDctControllerLocked(
         /* [out] */ Boolean* result);
 
-private:
     CARAPI constructor(
         /* [in] */ ArrayOf<IPhoneProxy*>* phones,
         /* [in] */ ILooper* looper);
 
+private:
     CARAPI GetIccCardState(
         /* [in] */ Int32 phoneId,
         /* [out] */ IccCardConstantsState* result);

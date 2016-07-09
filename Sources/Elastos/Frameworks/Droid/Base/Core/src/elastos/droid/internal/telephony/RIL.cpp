@@ -6,7 +6,7 @@
 #include "elastos/droid/content/res/CResourcesHelper.h"
 #include "elastos/droid/internal/telephony/RIL.h"
 #include "elastos/droid/internal/telephony/CallForwardInfo.h"
-#include "elastos/droid/internal/telephony/TelephonyDevController.h"
+#include "elastos/droid/internal/telephony/CSmsResponse.h"
 #include "elastos/droid/internal/telephony/CTelephonyDevControllerHelper.h"
 #include "elastos/droid/telephony/CSignalStrength.h"
 #include "elastos/droid/internal/telephony/CallForwardInfo.h"
@@ -15,6 +15,8 @@
 #include "elastos/droid/internal/telephony/uicc/IccRefreshResponse.h"
 #include "elastos/droid/internal/telephony/DriverCall.h"
 #include "elastos/droid/internal/telephony/UUSInfo.h"
+#include "elastos/droid/internal/telephony/TelephonyDevController.h"
+#include "elastos/droid/internal/telephony/uicc/CIccIoResult.h"
 #include "elastos/droid/net/CLocalSocket.h"
 #include "elastos/droid/net/CLocalSocketAddress.h"
 #include "elastos/droid/os/AsyncResult.h"
@@ -22,16 +24,15 @@
 #include "elastos/droid/os/CHandlerThread.h"
 #include "elastos/droid/telephony/CPhoneNumberUtils.h"
 #include "elastos/droid/text/TextUtils.h"
+#include "elastos/droid/utility/CBase64.h"
 #include "elastos/droid/utility/CSparseArray.h"
 #include "elastos/droid/R.h"
-#include "elastos/core/CoreUtils.h"
-
 #include <elastos/core/AutoLock.h>
-#include <elastos/core/StringBuilder.h>
+#include <elastos/core/CoreUtils.h>
 #include <elastos/core/Math.h>
+#include <elastos/core/StringBuilder.h>
 #include <elastos/core/StringUtils.h>
 #include <elastos/utility/logging/Logger.h>
-using Elastos::Utility::Logging::Logger;
 
 using Elastos::Droid::Content::Res::IResources;
 using Elastos::Droid::Content::Res::IResourcesHelper;
@@ -53,6 +54,7 @@ using Elastos::Droid::Internal::Telephony::DataConnection::IApnProfileOmh;
 using Elastos::Droid::Internal::Telephony::DataConnection::IApnSetting;
 using Elastos::Droid::Internal::Telephony::Gsm::ISsData;
 using Elastos::Droid::Internal::Telephony::Gsm::ISuppServiceNotification;
+using Elastos::Droid::Internal::Telephony::Uicc::CIccIoResult;
 using Elastos::Droid::Internal::Telephony::Uicc::IIccIoResult;
 using Elastos::Droid::Internal::Telephony::Uicc::CIccIoResult;
 using Elastos::Droid::Internal::Telephony::Uicc::IIccCardApplicationStatus;
@@ -80,11 +82,14 @@ using Elastos::Droid::Telephony::ICellInfo;
 using Elastos::Droid::Telephony::INeighboringCellInfo;
 using Elastos::Droid::Telephony::CSignalStrength;
 using Elastos::Droid::Text::TextUtils;
+using Elastos::Droid::Utility::CBase64;
 using Elastos::Droid::Utility::CSparseArray;
+using Elastos::Droid::Utility::IBase64;
 
 using Elastos::Core::AutoLock;
 using Elastos::Core::CInteger32;
 using Elastos::Core::CThrowable;
+using Elastos::Core::CoreUtils;
 using Elastos::Core::IInteger64;
 using Elastos::Core::CInteger64;
 using Elastos::Core::StringBuilder;
@@ -118,6 +123,7 @@ using Elastos::Utility::CCollections;
 using Elastos::Utility::IList;
 using Elastos::Utility::Concurrent::Atomic::CAtomicInteger32;
 using Elastos::Utility::Concurrent::Atomic::CAtomicBoolean;
+using Elastos::Utility::Logging::Logger;
 
 namespace Elastos {
 namespace Droid {
@@ -320,10 +326,9 @@ ECode RIL::RILSender::HandleMessage(
                     return NOERROR;
                 }
 
-                // synchronized (mRequestList)
                 {
-                    AutoLock lock(mHost->listLock);
-                    mHost->mRequestList->Append(rr->mSerial, TO_IINTERFACE(rr));
+                    AutoLock lock(mHost->mRequestList);
+                    mHost->mRequestList->Append(rr->mSerial, (IInterface*)(IObject*)rr.Get());
                 }
 
                 AutoPtr<ArrayOf<Byte> > data;
@@ -389,7 +394,7 @@ ECode RIL::RILSender::HandleMessage(
 
             // synchronized (mRequestList)
             {
-                AutoLock lock(mHost->listLock);
+                AutoLock lock(mHost->mRequestList);
                 if (mHost->ClearWakeLock()) {
                     if (RILJ_LOGD) {
                         Int32 count = 0;
@@ -3626,50 +3631,41 @@ void RIL::SwitchToRadioState(
 
 void RIL::AcquireWakeLock()
 {
-    // synchronized (mWakeLock)
-    {
-        AutoLock lock(wakeLock);
-        mWakeLock->AcquireLock();
-        mWakeLockCount++;
+    AutoLock lock(mWakeLock);
+    mWakeLock->AcquireLock();
+    mWakeLockCount++;
 
-        mSender->RemoveMessages(EVENT_WAKE_LOCK_TIMEOUT);
-        AutoPtr<IMessage> msg;
-        mSender->ObtainMessage(EVENT_WAKE_LOCK_TIMEOUT, (IMessage**)&msg);
-        Boolean bSnd = FALSE;
-        mSender->SendMessageDelayed(msg, mWakeLockTimeout, &bSnd);
-    }
+    mSender->RemoveMessages(EVENT_WAKE_LOCK_TIMEOUT);
+    AutoPtr<IMessage> msg;
+    mSender->ObtainMessage(EVENT_WAKE_LOCK_TIMEOUT, (IMessage**)&msg);
+    Boolean bSnd = FALSE;
+    mSender->SendMessageDelayed(msg, mWakeLockTimeout, &bSnd);
 }
 
 void RIL::DecrementWakeLock()
 {
-    // synchronized (mWakeLock)
-    {
-        AutoLock lock(wakeLock);
-        if (mWakeLockCount > 1) {
-            mWakeLockCount--;
-        }
-        else {
-            mWakeLockCount = 0;
-            mWakeLock->ReleaseLock();
-            mSender->RemoveMessages(EVENT_WAKE_LOCK_TIMEOUT);
-        }
+    AutoLock lock(mWakeLock);
+    if (mWakeLockCount > 1) {
+        mWakeLockCount--;
+    }
+    else {
+        mWakeLockCount = 0;
+        mWakeLock->ReleaseLock();
+        mSender->RemoveMessages(EVENT_WAKE_LOCK_TIMEOUT);
     }
 }
 
 Boolean RIL::ClearWakeLock()
 {
-    // synchronized (mWakeLock)
-    {
-        AutoLock lock(wakeLock);
-        Boolean bHeld = FALSE;
-        mWakeLock->IsHeld(&bHeld);
-        if (mWakeLockCount == 0 && bHeld == FALSE) return FALSE;
-        // Rlog.d(RILJ_LOG_TAG, "NOTE: mWakeLockCount is " + mWakeLockCount + "at time of clearing");
-        mWakeLockCount = 0;
-        mWakeLock->ReleaseLock();
-        mSender->RemoveMessages(EVENT_WAKE_LOCK_TIMEOUT);
-        return TRUE;
-    }
+    AutoLock lock(mWakeLock);
+    Boolean bHeld = FALSE;
+    mWakeLock->IsHeld(&bHeld);
+    if (mWakeLockCount == 0 && bHeld == FALSE) return FALSE;
+    // Rlog.d(RILJ_LOG_TAG, "NOTE: mWakeLockCount is " + mWakeLockCount + "at time of clearing");
+    mWakeLockCount = 0;
+    mWakeLock->ReleaseLock();
+    mSender->RemoveMessages(EVENT_WAKE_LOCK_TIMEOUT);
+    return TRUE;
 }
 
 void RIL::Send(
@@ -3716,9 +3712,8 @@ void RIL::ClearRequestList(
     /* [in] */ Boolean loggable)
 {
     AutoPtr<RILRequest> rr;
-    // synchronized (mRequestList)
     {
-        AutoLock lock(listLock);
+        AutoLock lock(mRequestList);
         Int32 count = 0;
         mRequestList->GetSize(&count);
         if (RILJ_LOGD && loggable) {
@@ -3747,9 +3742,8 @@ AutoPtr<RILRequest> RIL::FindAndRemoveRequestFromList(
     /* [in] */ Int32 serial)
 {
     AutoPtr<RILRequest> rr = NULL;
-    // synchronized (mRequestList)
     {
-        AutoLock lock(listLock);
+        AutoLock lock(mRequestList);
         AutoPtr<IInterface> p;
         mRequestList->Get(serial, (IInterface**)&p);
         rr = (RILRequest*)IObject::Probe(p);
@@ -3935,9 +3929,11 @@ AutoPtr<RILRequest> RIL::ProcessSolicited(
             case IRILConstants::RIL_REQUEST_GET_HARDWARE_CONFIG: ret = ResponseHardwareConfig(p); break;
             case IRILConstants::RIL_REQUEST_SIM_AUTHENTICATION: ret =  ResponseICC_IOBase64(p); break;
             case IRILConstants::RIL_REQUEST_SHUTDOWN: ret = ResponseVoid(p); break;
-            default:
+            default: {
                 // throw new RuntimeException("Unrecognized solicited response: " + rr.mRequest);
-            break;
+                assert(0 && "Unrecognized solicited response");
+                break;
+            }
         }
         // } catch (Throwable tr) {
         //     // Exceptions here usually mean invalid RIL responses
@@ -4985,8 +4981,7 @@ AutoPtr<IInterface> RIL::ResponseSMS(
     p->ReadInt32(&errorCode);
 
     AutoPtr<ISmsResponse> response;
-    assert(0 && "TODO");
-    // CSmsResponse::New(messageRef, ackPDU, errorCode, (ISmsResponse**)&response);
+    CSmsResponse::New(messageRef, ackPDU, errorCode, (ISmsResponse**)&response);
 
     return response;
 }
@@ -5042,9 +5037,12 @@ AutoPtr<IInterface> RIL::ResponseICC_IOBase64(
         RiljLog(str);
     }
 
+    AutoPtr<IBase64> base64;
+    CBase64::AcquireSingleton((IBase64**)&base64);
+    AutoPtr<ArrayOf<Byte> > vs;
+    base64->Decode(s, IBase64::DEFAULT, (ArrayOf<Byte>**)&vs);
     AutoPtr<IIccIoResult> res;
-    assert(0 && "TODO");
-    // CIccIoResult::New(sw1, sw2, android.util.Base64.decode(s, android.util.Base64.DEFAULT), (IIccIoResult**)&res);
+    CIccIoResult::New(sw1, sw2, vs, (IIccIoResult**)&res);
     return res;
 }
 
@@ -6115,7 +6113,7 @@ void RIL::RiljLog(
 {
     // Rlog.d(RILJ_LOG_TAG, msg
     //         + (mInstanceId != NULL ? (" [SUB" + mInstanceId + "]") : ""));
-    Int32 value = -1;
+    Int32 value = 0;
     if (mInstanceId != NULL)
         mInstanceId->GetValue(&value);
     Logger::D(RILJ_LOG_TAG, "msg:%s, [SUB %d ]", msg.string(), value);
@@ -6126,7 +6124,7 @@ void RIL::RiljLogv(
 {
     // Rlog.v(RILJ_LOG_TAG, msg
     //         + (mInstanceId != NULL ? (" [SUB" + mInstanceId + "]") : ""));
-    Int32 value = -1;
+    Int32 value = 0;
     if (mInstanceId != NULL)
         mInstanceId->GetValue(&value);
     Logger::V(RILJ_LOG_TAG, "msg:%s, [SUB %d ]", msg.string(), value);
@@ -6718,12 +6716,10 @@ ECode RIL::Dump(
     pw->Println(mWakeLock);
     pw->Println(String(" mWakeLockTimeout="));
     pw->Println(mWakeLockTimeout);
-    // synchronized (listLock)
     {
-        AutoLock lock(listLock);
-        // synchronized (mWakeLock)
+        AutoLock lock(mRequestList);
         {
-            AutoLock lock(wakeLock);
+            AutoLock lock(mWakeLock);
             pw->Println(String(" mWakeLockCount="));
             pw->Println(mWakeLockCount);
         }

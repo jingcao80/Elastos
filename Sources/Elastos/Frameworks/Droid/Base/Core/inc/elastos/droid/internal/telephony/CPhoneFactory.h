@@ -3,6 +3,7 @@
 #define __ELASTOS_DROID_INTERNAL_TELEPHONY_CPHONEFACTORY_H__
 
 #include "_Elastos_Droid_Internal_Telephony_CPhoneFactory.h"
+#include "elastos/droid/internal/telephony/ModemStackController.h"
 #include <elastos/core/Singleton.h>
 
 using Elastos::Droid::Content::IContext;
@@ -152,12 +153,13 @@ public:
         /* [out] */ ISubInfoRecordUpdater** result);
 
 private:
-    static CARAPI_(AutoPtr<IInterface>) InstantiateCustomRIL(
+    static CARAPI InstantiateCustomRIL(
         /* [in] */ String sRILClassname,
         /* [in] */ IContext* context,
         /* [in] */ Int32 networkMode,
         /* [in] */ Int32 cdmaSubscription,
-        /* [in] */ IInteger32* instanceId);
+        /* [in] */ IInteger32* instanceId,
+        /* [out] */ IInterface** result);
 
     static CARAPI_(Boolean) IsValidphoneId(
         /* [in] */ Int32 phoneId);
@@ -175,7 +177,7 @@ public:
     static Object sLockProxyPhones;
 
 private:
-    static AutoPtr<ArrayOf<IPhoneProxy*> > sProxyPhones;
+    static AutoPtr<ArrayOf<IPhone*> > sProxyPhones;
     static AutoPtr<IPhoneProxy> sProxyPhone;
 
     static AutoPtr<ArrayOf<ICommandsInterface*> > sCommandsInterfaces;
@@ -186,7 +188,7 @@ private:
     static AutoPtr<ICommandsInterface> sCommandsInterface;
     static AutoPtr<ISubInfoRecordUpdater> sSubInfoRecordUpdater;
     static AutoPtr<IModemBindingPolicyHandler> sModemBindingPolicyHandler;
-    static AutoPtr<IModemStackController> sModemStackController;
+    static AutoPtr<ModemStackController> sModemStackController;
 
     static Boolean sMadeDefaults;
     static AutoPtr<IPhoneNotifier> sPhoneNotifier;

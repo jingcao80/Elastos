@@ -466,6 +466,16 @@
 > Elastos/Packages/Service/Telecomm Elastos.Droid.Server.Telecom.car
 > Elastos/Packages/Service/Telecomm
 
+# ==== build Packages/Service/Telephony ====
+#> Elastos/Packages/Service/Telephony Elastos.Droid.TeleService.car
+#  Elastos/Packages/Service/Telephony R.cpp
+#  Elastos/Packages/Service/Telephony/src/elastos/droid/teleservice/phone/settings
+#  Elastos/Packages/Service/Telephony/src/elastos/droid/teleservice/phone
+#  Elastos/Packages/Service/Telephony/src/elastos/droid/teleservice/services/telephony/common
+#  Elastos/Packages/Service/Telephony/src/elastos/droid/teleservice/services/telephony/sip
+#  Elastos/Packages/Service/Telephony/src/elastos/droid/teleservice/services/telephony
+#- Elastos/Packages/Service/Telephony
+
 # ==== build Packages/Apps/Settings ====
   Elastos/Packages/Apps/Settings Elastos.Droid.Settings.car
   Elastos/Packages/Apps/Settings R.cpp

@@ -331,6 +331,7 @@ module
         interface ISearchIndexablesProvider;
     }
 
+    [local]
     class CPhoneInterfaceManager {
         constructor(
             [in] IPhoneGlobals* pg,

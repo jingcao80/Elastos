@@ -540,11 +540,11 @@ ECode SystemServer::StartOtherServices()
     if (FAILED(ec)) ReportWtf("starting Scheduling Policy service", ec);
     ServiceManager::AddService(String("scheduling_policy"), sps.Get());
 
-    Slogger::I(TAG, "Telephony Registry todo");
-    // AutoPtr<IITelephonyRegistry> telephonyRegistry;
-    // ec = CTelephonyRegistry::New(context, (IITelephonyRegistry**)&telephonyRegistry);
-    // if (FAILED(ec)) ReportWtf("starting Telephony Registry", ec);
-    // ServiceManager::AddService(String("telephony.registry"), telephonyRegistry.Get());
+    Slogger::I(TAG, "Telephony Registry");
+    AutoPtr<IITelephonyRegistry> telephonyRegistry;
+    ec = CTelephonyRegistry::New(context, (IITelephonyRegistry**)&telephonyRegistry);
+    if (FAILED(ec)) ReportWtf("starting Telephony Registry", ec);
+    ServiceManager::AddService(String("telephony.registry"), telephonyRegistry.Get());
 
     Slogger::I(TAG, "Entropy Mixer");
     AutoPtr<IEntropyMixer> em;

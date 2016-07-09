@@ -1,8 +1,9 @@
 
 #include "elastos/droid/internal/telephony/dataconnection/DcSwitchState.h"
-#include "elastos/droid/internal/telephony/PhoneBase.h"
 #include "elastos/droid/internal/telephony/dataconnection/DataConnection.h"
 #include "elastos/droid/internal/telephony/dataconnection/DcSwitchAsyncChannel.h"
+#include "elastos/droid/internal/telephony/PhoneBase.h"
+#include "elastos/droid/internal/telephony/SubscriptionController.h"
 #include "elastos/droid/internal/utility/CAsyncChannel.h"
 #include "elastos/droid/internal/utility/StateMachine.h"
 #include "elastos/droid/os/CRegistrant.h"
@@ -50,8 +51,7 @@ DcSwitchState::IdleState::IdleState(
 
 ECode DcSwitchState::IdleState::Enter()
 {
-    assert(0 && "TODO: IRegistrantList");
-    // return mHost->mIdleRegistrants->NotifyRegistrants();
+    ((RegistrantList*) mHost->mIdleRegistrants.Get())->NotifyRegistrants();
     return NOERROR;
 }
 
@@ -86,10 +86,9 @@ ECode DcSwitchState::IdleState::ProcessMessage(
         // When isPrimarySubFeatureEnable is enabled apps will take care
         // of sending DDS request during device power-up.
         if (!isPrimarySubFeatureEnable) {
-            assert(0 && "TODO: SubscriptionController");
-            // AutoPtr<ISubscriptionController> subscriptionController
-            //         = SubscriptionController::GetInstance();
-            // subscriptionController->SetDefaultDataSubId(subId);
+            AutoPtr<ISubscriptionController> subscriptionController
+                    = SubscriptionController::GetInstance();
+            ((SubscriptionController*)subscriptionController.Get())->SetDefaultDataSubId(subId);
         }
         Int32 result;
         mHost->SetupConnection(type, &result);

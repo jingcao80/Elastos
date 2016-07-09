@@ -58,7 +58,7 @@ module
      * {@hide}
      *
      */
-    [deprecated]
+    [local, deprecated]
     interface IPhone {
 
         /** used to enable additional debug messages */

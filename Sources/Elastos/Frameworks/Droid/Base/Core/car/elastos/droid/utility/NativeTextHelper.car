@@ -7,6 +7,7 @@ module
     namespace Droid {
     namespace Utility {
 
+    [local]
     interface INativeTextHelper {
         /**
          * parse the string to current language string in public resources.

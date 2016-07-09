@@ -26,12 +26,12 @@ namespace Connectivity {
 //=====================================================================
 // DataConnectionStats::MyPhoneStateListener
 //=====================================================================
-// CAR_INTERFACE_IMPL(DataConnectionStats::MyPhoneStateListener, Object, IPhoneStateListener)
-
 DataConnectionStats::MyPhoneStateListener::MyPhoneStateListener(
     /* [in] */ DataConnectionStats* host)
     : mHost(host)
-{}
+{
+    PhoneStateListener::constructor();
+}
 
 ECode DataConnectionStats::MyPhoneStateListener::OnSignalStrengthsChanged(
     /* [in] */ ISignalStrength* signalStrength)
@@ -76,7 +76,7 @@ DataConnectionStats::DataConnectionStats(
 {
     mSimState = IccCardConstantsState_READY;
     mDataState = ITelephonyManager::DATA_DISCONNECTED;
-    mPhoneStateListener = (IPhoneStateListener*)new MyPhoneStateListener(this);
+    mPhoneStateListener = new MyPhoneStateListener(this);
 
     mContext = context;
     mBatteryStats = CBatteryStatsService::GetService();

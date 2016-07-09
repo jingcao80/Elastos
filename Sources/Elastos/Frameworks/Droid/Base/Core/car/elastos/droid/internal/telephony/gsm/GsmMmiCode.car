@@ -14,8 +14,8 @@ module
      * interface IHandler
      * interface IMmiCode
      */
+    [local]
     interface IGsmMmiCode {
-
         // Max Size of the Short Code (aka Short String from TS 22.030 6.5.2)
         const Int32 MAX_LENGTH_SHORT_CODE = 2;
 

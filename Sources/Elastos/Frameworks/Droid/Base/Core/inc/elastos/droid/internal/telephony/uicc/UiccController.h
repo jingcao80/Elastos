@@ -1,7 +1,7 @@
 #ifndef __ELASTOS_DROID_INTERNAL_TELEPHONY_UICC_UICCCONTROLLER_H__
 #define __ELASTOS_DROID_INTERNAL_TELEPHONY_UICC_UICCCONTROLLER_H__
 
-#include "elastos/droid/ext/frameworkext.h"
+#include "_Elastos.Droid.Internal.h"
 #include "elastos/core/Object.h"
 #include "elastos/droid/os/AsyncResult.h"
 #include "elastos/droid/os/Handler.h"

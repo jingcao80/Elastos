@@ -9,6 +9,7 @@ module
     namespace Utility {
     namespace Cm {
 
+    [local]
     interface IQSUtils {
         GetAvailableTiles(
             [in] IContext* ctx,

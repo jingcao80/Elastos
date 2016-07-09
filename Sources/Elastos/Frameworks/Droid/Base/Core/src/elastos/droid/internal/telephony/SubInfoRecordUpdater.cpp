@@ -5,12 +5,14 @@
 #include "elastos/droid/content/CIntentFilter.h"
 #include "elastos/droid/R.h"
 #include "elastos/droid/Manifest.h"
+#include "elastos/droid/internal/telephony/ModemStackController.h"
 #include "elastos/droid/internal/telephony/SubInfoRecordUpdater.h"
+#include "elastos/droid/internal/telephony/SubscriptionHelper.h"
+#include "elastos/droid/internal/telephony/uicc/UiccController.h"
 #include "elastos/droid/telephony/CTelephonyManagerHelper.h"
 #include "elastos/droid/telephony/SubscriptionManager.h"
 #include <elastos/core/IntegralToString.h>
-
-using Elastos::Core::IntegralToString;
+#include <elastos/utility/logging/Logger.h>
 
 //using Elastos::Droid::Manifest;
 using Elastos::Droid::App::ActivityManagerNative;
@@ -43,15 +45,15 @@ using Elastos::Droid::Internal::Telephony::Uicc::ISpnOverride;
 using Elastos::Droid::Internal::Telephony::Uicc::IUiccCard;
 using Elastos::Droid::Internal::Telephony::Uicc::IUiccCardApplication;
 using Elastos::Droid::Internal::Telephony::Uicc::IUiccController;
-using Elastos::Droid::Internal::Telephony::Uicc::IUiccControllerHelper;
-//using Elastos::Droid::Internal::Telephony::Uicc::CUiccControllerHelper;
+using Elastos::Droid::Internal::Telephony::Uicc::UiccController;
 //using Elastos::Droid::Telephony::IRlog;
 using Elastos::Droid::Telephony::SubscriptionManager;
 using Elastos::Droid::Telephony::ISubscriptionManager;
 using Elastos::Droid::Telephony::ISubInfoRecord;
 using Elastos::Droid::Telephony::CTelephonyManagerHelper;
-
+using Elastos::Core::IntegralToString;
 using Elastos::Utility::IList;
+using Elastos::Utility::Logging::Logger;
 
 namespace Elastos {
 namespace Droid {
@@ -238,24 +240,19 @@ ECode SubInfoRecordUpdater::constructor(
     /* [in] */ ArrayOf<IPhone*>* phoneProxy,
     /* [in] */ ArrayOf<ICommandsInterface*>* ci)
 {
+    Handler::constructor();
     Logd(String("Constructor invoked"));
 
     sContext = context;
     sPhone = phoneProxy;
     sCi = ci;
-    assert(0 && "TODO");
-//    SubscriptionHelper->Init(context, ci);
+    SubscriptionHelper::Init(context, ci);
 
-//    AutoPtr<IUiccControllerHelper> uiccCtrlHelper;
-//    CUiccControllerHelper::AcquireSingleton((IUiccControllerHelper**)&uiccCtrlHelper);
-//    uiccCtrlHelper->GetInstance((IUiccController**)&mUiccController);
-    mUiccController->RegisterForIccChanged(this, EVENT_ICC_CHANGED, NULL);
+    Logger::D("SubInfoRecordUpdater", "[TODO] ===========mUiccController");
+    // mUiccController = UiccController::GetInstance();
+    // mUiccController->RegisterForIccChanged(this, EVENT_ICC_CHANGED, NULL);
 
-    AutoPtr<IModemStackControllerHelper> msCtrlHelper;
-    AutoPtr<IModemStackController> msCtrl;
-//    CModemStackControllerHelper::AcquireSingleton((IModemStackControllerHelper**)&msCtrlHelper);
-//    msCtrlHelper->GetInstance((IModemStackController**)&msCtrl);
-    msCtrl->RegisterForStackReady(this, EVENT_STACK_READY, NULL);
+    ModemStackController::GetInstance()->RegisterForStackReady(this, EVENT_STACK_READY, NULL);
     for (Int32 i = 0; i < PROJECT_SIM_NUM; i++) {
         (*sCardState)[i] = Elastos::Droid::Internal::Telephony::Uicc::CARDSTATE_ABSENT;
     }
@@ -321,7 +318,7 @@ ECode SubInfoRecordUpdater::SetDisplayNameForNewSub(
 CARAPI SubInfoRecordUpdater::HandleMessage(
     /* [in] */ IMessage* msg)
 {
-    assert(0 && "TODO");
+    Logger::D(LOGTAG, "[TODO] ==============HandleMessage=============");
     Int32 msgNum, arg1, arg2;
     msg->GetWhat(&msgNum);
     msg->GetArg1(&arg1);

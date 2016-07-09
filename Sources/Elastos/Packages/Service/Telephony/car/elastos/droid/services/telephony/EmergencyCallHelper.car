@@ -16,6 +16,7 @@ module
             [in] Boolean isRadioReady);
     }
 
+    [local]
     interface IEmergencyCallHelper {
         // Number of times to retry the call, and time between retry attempts.
         const Int32 MAX_NUM_RETRIES = 5;

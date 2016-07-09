@@ -424,19 +424,20 @@ module
             constructor(
                 [in] IPhoneBase* phoneBase);
 
-            //interface IHandler;
+            interface IHandler;
             interface ISmsStorageMonitor;
         }
 
+        [local]
         class CSmsUsageMonitor {
             constructor(
                 [in]  IContext* ctx);
 
-            //interface IHandler;
+            interface IHandler;
             interface ISmsUsageMonitor;
         }
 
-        [deprecated]
+        [local, deprecated]
         class CSubInfoRecordUpdater {
             constructor(
                 [in]  IContext* ctx,
@@ -501,9 +502,10 @@ module
 
             interface IPhoneProxy;
             interface IPhone;
-            // interface IHandler;
+            interface IHandler;
         }
 
+        [local]
         class CPhoneStateIntentReceiver {
             constructor();
 
@@ -512,9 +514,10 @@ module
                 [in] IHandler* target);
 
             interface IPhoneStateIntentReceiver;
-            // interface IBroadcastReceiver;
+            interface IBroadcastReceiver;
         }
 
+        [local]
         class CPhoneSubInfo {
             constructor(
                 [in] IPhone* phone);
@@ -522,7 +525,7 @@ module
             interface IPhoneSubInfo;
         }
 
-        [deprecated]
+        [local, deprecated]
         class CPhoneSubInfoController {
             constructor(
                 [in] ArrayOf<IPhone*>* phone);
@@ -543,6 +546,7 @@ module
             interface IProxyControllerHelper;
         }
 
+        [local]
         class CRIL {
             constructor(
                 [in] IContext* ctx,
@@ -560,6 +564,7 @@ module
             interface IRIL;
         }
 
+        [local]
         class CSubscriptionController {
             constructor(
                 [in] IContext* c);
@@ -571,14 +576,14 @@ module
             interface IISub;
         }
 
-        [deprecated]
+        [local, deprecated]
         class CSubscriptionHelper {
             constructor(
                 [in] IContext* c,
                 [in] ArrayOf<ICommandsInterface*>* ci);
 
             interface ISubscriptionHelper;
-            // interface IHandler;
+            interface IHandler;
         }
 
         class CSyntheticSmsMessage {
@@ -596,10 +601,10 @@ module
             constructor();
 
             interface ITelephonyDevController;
-            // interface IHandler;
+            interface IHandler;
         }
 
-        [deprecated]
+        [local, deprecated]
         class CUiccPhoneBookController {
             constructor(
                 [in] ArrayOf<IPhone*>* phone);
@@ -608,7 +613,7 @@ module
             interface IIIccPhoneBook;
         }
 
-        [deprecated]
+        [local, deprecated]
         class CUiccSmsController {
             constructor(
                 [in] ArrayOf<IPhone*>* phone,
@@ -628,11 +633,12 @@ module
             interface IUUSInfo;
         }
 
+        [local]
         class CWapPushOverSms {
             constructor(
                 [in] IContext* context);
 
-            // interface IServiceConnection;
+            interface IServiceConnection;
             interface IWapPushOverSms;
         }
 
@@ -713,6 +719,7 @@ module
     namespace Telephony {
     namespace DataConnection {
 
+        [local]
         class CApnContext {
             constructor(
                 [in] IContext* ctx,
@@ -845,6 +852,7 @@ module
             interface IDcSwitchAsyncChannel;
         }
 
+        [local]
         class CDcSwitchState {
             constructor(
                 [in] IPhone* phone,
@@ -881,9 +889,14 @@ module
             interface IDcTracker;
         }
 
-        [deprecated]
+        [local, deprecated]
         class CDctController {
+            constructor(
+                [in] ArrayOf<IPhoneProxy*>* phones,
+                [in] ILooper* looper);
+
             interface IDctController;
+            interface IHandler;
         }
 
         singleton class CDctControllerHelper {
@@ -952,6 +965,7 @@ module
             interface ICatResponseMessage;
         }
 
+        [local]
         class CCatService {
             constructor(
                 [in] ICommandsInterface* ci,
@@ -959,7 +973,7 @@ module
                 [in] IIccFileHandler* fh,
                 [in] Int32 slotId);
 
-            //TODO interface IHandler;
+            interface IHandler;
             interface IAppInterface;
             interface ICatService;
         }
@@ -1108,11 +1122,10 @@ module
         }
 
         class CAdnRecordCache {
-
             constructor(
                 [in] IIccFileHandler* fh);
 
-            //interface IHandler;
+            interface IHandler;
             interface IAdnRecordCache;
             interface IIccConstants;
         }
@@ -1121,7 +1134,7 @@ module
             constructor(
                 [in] IIccFileHandler* fh);
 
-            //interface IHandler;
+            interface IHandler;
             interface IAdnRecordLoader;
         }
 
@@ -1141,6 +1154,7 @@ module
             interface IIccCardApplicationStatus;
         }
 
+        [local]
         class CIccCardProxy {
             constructor(
                 [in] IContext* ctx,
@@ -1151,7 +1165,7 @@ module
                 [in] ICommandsInterface* ci,
                 [in] Int32 cardIndex);
 
-            //interface IHandler;
+            interface IHandler;
             interface IIccCard;
             interface IIccCardProxy;
         }
@@ -1219,13 +1233,14 @@ module
 
         }
 
+        [local]
         class CIsimUiccRecords {
             constructor(
                 [in] IUiccCardApplication* app,
                 [in] IContext* ctx,
                 [in] ICommandsInterface* ci);
 
-            //interface IHandler;
+            interface IHandler;
             interface IIccConstants;
             interface IIccRecords;
             interface IIsimRecords;
@@ -1241,6 +1256,7 @@ module
             interface IRuimFileHandler;
         }
 
+        [local]
         class CRuimRecords {
             constructor(
                 [in] IUiccCardApplication* app,
@@ -1262,6 +1278,7 @@ module
             interface ISIMFileHandler;
         }
 
+        [local]
         class CSIMRecords {
             constructor(
                 [in] IUiccCardApplication* app,
@@ -1280,6 +1297,7 @@ module
             interface IUICCConfig;
         }
 
+        [local]
         class CUiccCard {
             constructor(
                 [in] IContext* ctx,
@@ -1290,6 +1308,7 @@ module
             interface IUiccCard;
         }
 
+        [local]
         class CUiccCardApplication {
             constructor(
                 [in] IUiccCard* uiccCard,
@@ -1300,22 +1319,23 @@ module
             interface IUiccCardApplication;
         }
 
+        [local]
         class CUiccCarrierPrivilegeRules {
             constructor(
                 [in] IUiccCard* uiccCard,
                 [in] IMessage* loadedCallback);
 
-            //interface IHandler;
+            interface IHandler;
             interface IUiccCarrierPrivilegeRules;
         }
 
-        [deprecated]
+        [local, deprecated]
         class CUiccController {
             constructor(
                 [in] IContext* ctx,
                 [in] ArrayOf<ICommandsInterface*>* ci);
 
-            //interface IHandler;
+            interface IHandler;
             interface IUiccController;
         }
 
@@ -1365,6 +1385,7 @@ module
     namespace Telephony {
     namespace Sip {
 
+        [local]
         class CSipPhone {
             constructor(
                 [in] IContext* ctx,
@@ -1372,7 +1393,7 @@ module
                 [in] /*TODO ISipProfile*/IInterface* profile);
 
             interface IPhone;
-            //interface IHandler;
+            interface IHandler;
             interface IPhoneBase;
             interface ISipPhoneBase;
             interface ISipPhone;
@@ -1394,6 +1415,7 @@ module
     namespace Telephony {
     namespace ImsPhone {
 
+        [local]
         class CImsPhone {
             constructor(
                 [in] IContext* ctx,
@@ -1401,7 +1423,7 @@ module
                 [in] IPhone* defaultPhone);
 
             interface IPhone;
-            //interface IHandler;
+            interface IHandler;
             interface IPhoneBase;
             interface IImsPhone;
         }
@@ -1421,11 +1443,12 @@ module
             constructor(
                 [in] IImsPhone* phone);
 
-            //interface IHandler;
+            interface IHandler;
             interface ICallTracker;
             interface IImsPhoneCallTracker;
         }
 
+        [local]
         class CImsPhoneConnection {
             constructor(
                 [in] IContext* ctx,
@@ -1453,7 +1476,7 @@ module
             constructor(
                 [in] IImsPhone* phone);
 
-            //interface IHandler;
+            interface IHandler;
             interface IMmiCode;
             interface IImsPhoneMmiCode;
         }
@@ -1520,8 +1543,8 @@ module
     namespace Telephony {
     namespace Cdma {
 
+        [local]
         class CCDMALTEPhone {
-
             constructor(
                 [in] IContext* ctx,
                 [in] ICommandsInterface* ci,
@@ -1541,12 +1564,13 @@ module
                 [in] IPhoneNotifier* notifier);
 
             interface IPhone;
-            //interface IHandler;
+            interface IHandler;
             interface IPhoneBase;
             interface ICDMAPhone;
             interface ICDMALTEPhone;
         }
 
+        [local]
         class CCDMAPhone {
             constructor();
 
@@ -1569,7 +1593,7 @@ module
 
 
             interface IPhone;
-            //interface IHandler;
+            interface IHandler;
             interface IPhoneBase;
             interface ICDMAPhone;
         }
@@ -1586,7 +1610,7 @@ module
             constructor(
                 [in] ICDMAPhone* phone);
 
-            //interface IHandler;
+            interface IHandler;
             interface ICdmaCallTracker;
         }
 
@@ -1598,6 +1622,7 @@ module
             interface ICdmaCallWaitingNotificationHelper;
         }
 
+        [local]
         class CCdmaConnection {
             constructor(
                 [in] IContext* ctx,
@@ -1651,7 +1676,7 @@ module
             constructor(
                 [in] ICDMALTEPhone* phone);
 
-            //interface IHandler;
+            interface IHandler;
             interface IServiceStateTracker;
             interface ICdmaServiceStateTracker;
             interface ICdmaLteServiceStateTracker;
@@ -1662,7 +1687,7 @@ module
                 [in] ICDMAPhone* phone,
                 [in] IUiccCardApplication* app);
 
-            //interface IHandler;
+            interface IHandler;
             interface IMmiCode;
             interface ICdmaMmiCode;
         }
@@ -1674,11 +1699,12 @@ module
                 [in] ISmsUsageMonitor* usageMonitor,
                 [in] IImsSMSDispatcher* imsSMSDispatcher);
 
-            //interface IHandler;
+            interface IHandler;
             interface ISMSDispatcher;
             interface ICdmaSMSDispatcher;
         }
 
+        [local]
         class CCdmaServiceCategoryProgramHandler {
             constructor(
                 [in] IContext* ctx,
@@ -1695,7 +1721,7 @@ module
             constructor(
                 [in] ICDMAPhone* phone);
 
-            //interface IHandler;
+            interface IHandler;
             interface IServiceStateTracker;
             interface ICdmaServiceStateTracker;
         }
@@ -1774,6 +1800,7 @@ module
     namespace Telephony {
     namespace Gsm {
 
+        [local]
         class CGSMPhone {
             constructor();
 
@@ -1804,7 +1831,7 @@ module
             interface IGSMPhone;
             interface IPhoneBase;
             interface IPhone;
-            //interface IHandler;
+            interface IHandler;
         }
 
         class CGsmCall {
@@ -1825,7 +1852,7 @@ module
 
             interface IGsmCallTracker;
             interface ICallTracker;
-            //interface IHandler;
+            interface IHandler;
         }
 
         [local]
@@ -1846,6 +1873,7 @@ module
             interface IGsmCellBroadcastHandlerHelper;
         }
 
+        [local]
         class CGsmConnection {
             constructor();
 
@@ -1892,7 +1920,7 @@ module
 
             interface IGsmMmiCode;
             interface IMmiCode;
-            //interface IHandler;
+            interface IHandler;
         }
 
         [local]
@@ -1907,7 +1935,7 @@ module
 
             interface IGsmSMSDispatcher;
             interface ISMSDispatcher;
-            //interface IHandler;
+            interface IHandler;
         }
 
         class CGsmServiceStateTracker {
@@ -1918,7 +1946,7 @@ module
 
             interface IGsmServiceStateTracker;
             interface IServiceStateTracker;
-            //interface IHandler;
+            interface IHandler;
         }
 
         [deprecated]
@@ -2019,7 +2047,7 @@ module
                 [in] ICommandsInterface* commandsInterface);
 
             interface IUsimDataDownloadHandler;
-            //interface IHandler;
+            interface IHandler;
         }
 
         class CUsimPhoneBookManager {
@@ -2031,7 +2059,7 @@ module
 
             interface IUsimPhoneBookManager;
             interface IIccConstants;
-            //interface IHandler;
+            interface IHandler;
         }
 
     } // Gsm

@@ -4,6 +4,7 @@
 #include "elastos/droid/content/CIntentFilter.h"
 #include "elastos/droid/content/res/CResources.h"
 #include "elastos/droid/internal/telephony/CPhoneFactory.h"
+#include "elastos/droid/internal/telephony/CRestrictedState.h"
 #include "elastos/droid/internal/telephony/gsm/CGsmCallTracker.h"
 #include "elastos/droid/internal/telephony/gsm/CGSMPhone.h"
 #include "elastos/droid/internal/telephony/gsm/CGsmServiceStateTracker.h"
@@ -1905,8 +1906,7 @@ void CGsmServiceStateTracker::OnRestrictedStateChanged(
     /* [in] */ AsyncResult* ar)
 {
     AutoPtr<IRestrictedState> newRs;
-// TODO: Need CRestrictedState
-    // CRestrictedState::New((IRestrictedState**)&newRs);
+    CRestrictedState::New((IRestrictedState**)&newRs);
 
     // if (DBG) Log(String("onRestrictedStateChanged: E rs ")+ mRestrictedState);
 

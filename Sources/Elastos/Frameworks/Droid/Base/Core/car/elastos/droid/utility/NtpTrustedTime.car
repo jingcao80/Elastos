@@ -19,6 +19,7 @@ module
             [out] Int64* cachedNtpTimeReference);
     }
 
+    [local]
     interface INtpTrustedTimeHelper {
         GetInstance(
             [in] IContext* ctx,

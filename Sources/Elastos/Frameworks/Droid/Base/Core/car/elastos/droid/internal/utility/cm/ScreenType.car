@@ -8,6 +8,7 @@ module
     namespace Utility {
     namespace Cm {
 
+    [local]
     interface IScreenType {
         IsPhone(
             [in] IContext* ctx,

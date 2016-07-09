@@ -4,7 +4,8 @@
 #include "Elastos.Droid.Telephony.h"
 #include "elastos/droid/internal/telephony/SubscriptionController.h"
 #include "elastos/droid/internal/telephony/CSubscriptionController.h"
-#include "elastos/droid/internal/telephony/CCallManagerHelper.h"
+#include "elastos/droid/internal/telephony/CallManager.h"
+#include "elastos/droid/internal/telephony/MccTable.h"
 #include "elastos/droid/internal/telephony/dataconnection/CDdsSchedulerHelper.h"
 #include "elastos/droid/internal/telephony/dataconnection/CDdsSchedulerAc.h"
 #include "elastos/droid/internal/telephony/dataconnection/CDctControllerHelper.h"
@@ -21,7 +22,6 @@
 #include "elastos/droid/os/Process.h"
 #include "elastos/droid/Manifest.h"
 #include "elastos/droid/R.h"
-
 #include <elastos/core/AutoLock.h>
 #include <elastos/core/StringUtils.h>
 #include <elastos/core/CoreUtils.h>
@@ -138,8 +138,7 @@ void SubscriptionController::ScLocalLog::Dump(
         str += ": ";
         AutoPtr<IInterface> p;
         IIterator::Probe(itr)->GetNext((IInterface**)&p);
-        assert(0 && "TODO");
-        // str += p;
+        str += TO_CSTR(p);
         pw->Println(str);
         // Flush periodically so we don't drop lines
         if ((i % LOOPS_PER_FLUSH) == 0) {
@@ -169,8 +168,7 @@ ECode SubscriptionController::DataConnectionHandler::HandleMessage(
             msg->GetObj((IInterface**)&obj);
             AutoPtr<AsyncResult> ar = (AsyncResult*)(IObject*)obj.Get();
             String str("EVENT_SET_DEFAULT_DATA_DONE subId:");
-            assert(0 && "TODO");
-            // str += ar->mResult;
+            str += TO_CSTR(ar->mResult);
             mHost->Logd(str);
             mHost->UpdateDataSubId(ar);
             break;
@@ -185,7 +183,9 @@ ECode SubscriptionController::DataConnectionHandler::HandleMessage(
 SubscriptionController::MyHandler::MyHandler(
     /* [in] */ SubscriptionController* host)
     : mHost(host)
-{}
+{
+    Handler::constructor();
+}
 
 ECode SubscriptionController::MyHandler::HandleMessage(
     /* [in] */ IMessage* msg)
@@ -263,39 +263,34 @@ SubscriptionController::SubscriptionController()
 AutoPtr<ISubscriptionController> SubscriptionController::Init(
     /* [in] */ IPhone* phone)
 {
-    {
-        AutoLock syncLock(sLock);
-        if (sInstance == NULL) {
-            CSubscriptionController::New(phone, (ISubscriptionController**)&sInstance);
-        }
-        else {
-            // Logger::Wtf(LOGTAG, "Init() called multiple times!  sInstance = %p", sInstance);
-        }
-        return sInstance;
+    AutoLock syncLock(sLock);
+    if (sInstance == NULL) {
+        CSubscriptionController::New(phone, (ISubscriptionController**)&sInstance);
     }
+    else {
+        Logger::D(LOGTAG, "Init() called multiple times!  sInstance = %p", sInstance.Get());
+    }
+    return sInstance;
 }
 
 AutoPtr<ISubscriptionController> SubscriptionController::Init(
     /* [in] */ IContext* c,
     /* [in] */ ArrayOf<ICommandsInterface*>* ci)
 {
-    {
-        AutoLock syncLock(sLock);
-        if (sInstance == NULL) {
-            CSubscriptionController::New(c, (ISubscriptionController**)&sInstance);
-        }
-        else {
-            // Log::Wtf(LOGTAG, "Init() called multiple times!  sInstance = %p", sInstance);
-        }
-        return sInstance;
+    AutoLock syncLock(sLock);
+    if (sInstance == NULL) {
+        CSubscriptionController::New(c, (ISubscriptionController**)&sInstance);
     }
+    else {
+        Logger::D(LOGTAG, "Init() called multiple times!  sInstance = %p", sInstance.Get());
+    }
+    return sInstance;
 }
 
 AutoPtr<ISubscriptionController> SubscriptionController::GetInstance()
 {
     if (sInstance == NULL) {
-        assert(0 && "TODO");
-       // Log::Wtf(LOGTAG, "getInstance NULL");
+       Logger::D(LOGTAG, "getInstance NULL");
     }
 
     return sInstance;
@@ -306,9 +301,7 @@ ECode SubscriptionController::constructor(
 {
     Logd(String("SubscriptionController init by Context"));
     mContext = c;
-    AutoPtr<ICallManagerHelper> cmhlp;
-    CCallManagerHelper::AcquireSingleton((ICallManagerHelper**)&cmhlp);
-    cmhlp->GetInstance((ICallManager**)&mCM);
+    mCM = CallManager::GetInstance();
 
     AutoPtr<IServiceManager> sm;
     CServiceManager::AcquireSingleton((IServiceManager**)&sm);
@@ -336,10 +329,7 @@ ECode SubscriptionController::constructor(
     /* [in] */ IPhone* phone)
 {
     phone->GetContext((IContext**)&mContext);
-    AutoPtr<ICallManagerHelper> cmhlp;
-    assert(0 && "TODO");
-    // CCallManagerHelper::AcquireSingleton((ICallManagerHelper**)&cmhlp);
-    cmhlp->GetInstance((ICallManager**)&mCM);
+    mCM = CallManager::GetInstance();
 
     AutoPtr<IServiceManager> sm;
     CServiceManager::AcquireSingleton((IServiceManager**)&sm);
@@ -2036,10 +2026,9 @@ void SubscriptionController::UpdateDataSubId(
     Int32 reqStatus = IPhoneConstants::FAILURE;
 
     String str(" updateDataSubId,  subId=");
-    // str += subId;
-    // str += " exception ";
-    assert(0 && "TODO");
-    // str += ar->mException;
+    str += StringUtils::ToString(subId);
+    str += " exception ";
+    str += TO_CSTR(ar->mException);
     Logd(str);
     // Update newDds in database if the DDS request succeeded.
     if (ar->mException == NULL) {
@@ -2134,8 +2123,7 @@ ECode SubscriptionController::SetDefaultSubId(
             // Update MCC MNC device configuration information
             String defaultMccMnc;
             tm->GetSimOperator(phoneId, &defaultMccMnc);
-            assert(0 && "TODO");
-            // MccTable::UpdateMccMncConfiguration(mContext, defaultMccMnc, FALSE);
+            MccTable::UpdateMccMncConfiguration(mContext, defaultMccMnc, FALSE);
 
             // Broadcast an Intent for default sub change
             AutoPtr<IIntent> intent;
@@ -2173,8 +2161,7 @@ ECode SubscriptionController::ClearDefaultsForInactiveSubIds()
     AutoPtr<IList> records;
     GetActiveSubInfoList((IList**)&records);
     String str("[clearDefaultsForInactiveSubIds] records: ");
-    assert(0 && "TODO");
-    // str += records;
+    str += TO_CSTR(records);
     Logdl(str);
     Int64 subId = 0;
     GetDefaultDataSubId(&subId);
@@ -2365,8 +2352,7 @@ ECode SubscriptionController::GetActiveSubIdList(
     AutoPtr<ISet> simInfoSet;
     mSimInfo->GetEntrySet((ISet**)&simInfoSet);
     String str("[getActiveSubIdList] simInfoSet=");
-    assert(0 && "TODO");
-    // str += simInfoSet;
+    str += TO_CSTR(simInfoSet);
     Logdl(str);
 
     Int32 size = 0;

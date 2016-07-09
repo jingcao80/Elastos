@@ -11,6 +11,7 @@ module
     namespace Telephony {
     namespace Cat {
 
+    [local]
     interface ICatServiceFactory {
         /**
          * Used for instantiating the Service from the Card.

@@ -11,7 +11,7 @@ module
     namespace Internal {
     namespace Telephony {
 
-    [deprecated]
+    [local, deprecated]
     interface IPhoneNotifier {
 
         NotifyPhoneState(

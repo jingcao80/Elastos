@@ -74,7 +74,7 @@ module
             [out] Boolean* result);
     }
 
-    [deprecated]
+    [local, deprecated]
     interface IDctControllerHelper {
         GetInstance(
             [out] IDctController** result);

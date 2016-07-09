@@ -42,7 +42,6 @@ module
     merge("utility/UserIcons.car");
     merge("utility/VirtualRefBasePtr.car");
     merge("utility/WithFramework.car");
-    merge("utility/XmlUtils.car");
 
     interface Elastos.Droid.Content.IContext;
     interface Elastos.Droid.Utility.IPrinter;
@@ -75,6 +74,7 @@ module
         interface ICmImageUtils;
     }
 
+    [local]
     class CLockscreenShortcutsHelper {
         constructor();
 

@@ -3,6 +3,7 @@
 #include "elastos/droid/content/Intent.h"
 #include "elastos/droid/internal/os/SomeArgs.h"
 #include "elastos/droid/internal/telephony/PhoneBase.h"
+#include "elastos/droid/internal/telephony/SubscriptionController.h"
 #include "elastos/droid/internal/telephony/dataconnection/CDcSwitchAsyncChannel.h"
 #include "elastos/droid/internal/telephony/dataconnection/CDcSwitchState.h"
 #include "elastos/droid/internal/telephony/dataconnection/CDctController.h"
@@ -81,7 +82,9 @@ namespace DataConnection {
 DctController::SubHandler::SubHandler(
     /* [in] */ DctController* host)
     : mHost(host)
-{}
+{
+    Handler::constructor();
+}
 
 ECode DctController::SubHandler::HandleMessage(
     /* [in] */ IMessage* msg)
@@ -531,8 +534,7 @@ ECode DctController::MakeDctController(
     VALIDATE_NOT_NULL(result)
 
     if (sDctController == NULL) {
-        CDctController::New((IDctController**)&sDctController);
-        ((DctController*) sDctController.Get())->constructor(phones, looper);
+        CDctController::New(phones, looper, (IDctController**)&sDctController);
         DdsScheduler::Init();
     }
     *result = sDctController;
@@ -553,10 +555,20 @@ ECode DctController::constructor(
     /* [in] */ ILooper* looper)
 {
     Handler::constructor(looper);
+
+    CRegistrantList::New((IRegistrantList**)&mNotifyDefaultDataSwitchInfo);
+    CRegistrantList::New((IRegistrantList**)&mNotifyOnDemandDataSwitchInfo);
+    CRegistrantList::New((IRegistrantList**)&mNotifyOnDemandPsAttach);
+    CHashSet::New((IHashSet**)&mApnTypes);
+    mRspHander = new SubHandler(this);
+    mDataStateChangedCallback = new SubIDataStateChangedCallback(this);
+    mSubController = SubscriptionController::GetInstance();
+
     if (phones == NULL || phones->GetLength() == 0) {
         if (phones == NULL) {
             Loge("DctController(phones): UNEXPECTED phones=null, ignore");
-        } else {
+        }
+        else {
             Loge("DctController(phones): UNEXPECTED phones.length=0, ignore");
         }
         return NOERROR;
@@ -610,14 +622,6 @@ ECode DctController::constructor(
     mDdsSwitchSerializer= new DdsSwitchSerializerHandler(this);
     mDdsSwitchSerializer->constructor(tLooper);
 
-    CRegistrantList::New((IRegistrantList**)&mNotifyDefaultDataSwitchInfo);
-    CRegistrantList::New((IRegistrantList**)&mNotifyOnDemandDataSwitchInfo);
-    CRegistrantList::New((IRegistrantList**)&mNotifyOnDemandPsAttach);
-    CHashSet::New((IHashSet**)&mApnTypes);
-    mRspHander = new SubHandler(this);
-    mDataStateChangedCallback = new SubIDataStateChangedCallback(this);
-    assert(0 && "TODO: SubscriptionController");
-    // AutoPtr<ISubscriptionController> mSubController = SubscriptionController::GetInstance();
     return NOERROR;
 }
 

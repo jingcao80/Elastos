@@ -9,6 +9,7 @@ module
     namespace Telephony {
     namespace Utility {
 
+    [local]
     interface IBlacklistUtils {
         // Blacklist matching type
         const Int32 MATCH_NONE = 0;

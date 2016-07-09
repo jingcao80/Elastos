@@ -33,18 +33,19 @@ using Elastos::Droid::Text::Format::CTime;
 using Elastos::Droid::Content::CIntent;
 using Elastos::Droid::Content::CIntentFilter;
 using Elastos::Droid::Server::Am::BatteryStatsService;
-// using Elastos::Droid::Telephony::CSignalStrength;
-// using Elastos::Droid::Telephony::CServiceState;
-// using Elastos::Droid::Telephony::CVoLteServiceState;
+using Elastos::Droid::Telephony::CSignalStrength;
+using Elastos::Droid::Telephony::CServiceState;
+using Elastos::Droid::Telephony::CVoLteServiceState;
+using Elastos::Droid::Telephony::CDataConnectionRealTimeInfo;
 // using Elastos::Droid::Telephony::CDisconnectCause;
-// using Elastos::Droid::Telephony::CPreciseCallState;
-// using Elastos::Droid::Telephony::CPreciseDataConnectionState;
+using Elastos::Droid::Telephony::CPreciseCallState;
+using Elastos::Droid::Telephony::CPreciseDataConnectionState;
+using Elastos::Droid::Telephony::CCellLocationHelper;
 using Elastos::Droid::Telephony::ICellLocationHelper;
-// using Elastos::Droid::Telephony::CCellLocationHelper;
 using Elastos::Droid::Telephony::ITelephonyManagerHelper;
 using Elastos::Droid::Telephony::CTelephonyManagerHelper;
 using Elastos::Droid::Telephony::ISubscriptionManager;
-// using Elastos::Droid::Telephony::CSubscriptionManagerHelper;
+using Elastos::Droid::Telephony::CSubscriptionManager;
 using Elastos::Droid::Internal::Telephony::EIID_IITelephonyRegistry;
 // using Elastos::Droid::Opt::Internal::Telephony::IDefaultPhoneNotifierHelper;
 // using Elastos::Droid::Opt::Internal::Telephony::CDefaultPhoneNotifierHelper;
@@ -248,11 +249,10 @@ CTelephonyRegistry::~CTelephonyRegistry()
 ECode CTelephonyRegistry::constructor(
     /* [in] */ IContext* context)
 {
-    assert(0 && "TODO");
-    // CVoLteServiceState::New((IVoLteServiceState**)&mVoLteServiceState);
-    // CDataConnectionRealTimeInfo::New((IDataConnectionRealTimeInfo**)&mDcRtInfo);
-    // CPreciseCallState::New((IPreciseCallState**)&mPreciseCallState);
-    // CPreciseDataConnectionState::New((IPreciseDataConnectionState**)&mPreciseDataConnectionState);nState();
+    CVoLteServiceState::New((IVoLteServiceState**)&mVoLteServiceState);
+    CDataConnectionRealTimeInfo::New((IDataConnectionRealTimeInfo**)&mDcRtInfo);
+    CPreciseCallState::New((IPreciseCallState**)&mPreciseCallState);
+    CPreciseDataConnectionState::New((IPreciseDataConnectionState**)&mPreciseDataConnectionState);
 
     mHandler = new MyHandler(this);
     mBroadcastReceiver = new MyBroadcastReceiver(this);
@@ -293,8 +293,8 @@ ECode CTelephonyRegistry::constructor(
         CArrayList::New(&((*mConnectedApns)[i]));
         (*mDataConnectionState)[i] = ITelephonyManager::DATA_UNKNOWN;
         (*mCallIncomingNumber)[i] = "";
-        // CServiceState::New((Elastos::Droid::Telephony::IServiceState**)&(*mServiceState)[i]);
-        // CSignalStrength::New((ISignalStrength**)&(*mSignalStrength)[i]);
+        CServiceState::New((Elastos::Droid::Telephony::IServiceState**)&(*mServiceState)[i]);
+        CSignalStrength::New((ISignalStrength**)&(*mSignalStrength)[i]);
         (*mDataConnectionReason)[i] =  emptStr;
         (*mDataConnectionApn)[i] =  emptStr;
         CBundle::New((IBundle**)&(*mCellLocation)[i]);
@@ -304,8 +304,7 @@ ECode CTelephonyRegistry::constructor(
     // Note that location can be NULL for non-phone builds like
     // like the generic one.
     AutoPtr<ICellLocationHelper> clHelper;
-    assert(0 && "TODO");
-    // CCellLocationHelper::AcquireSingleton((ICellLocationHelper**)&clHelper);
+    CCellLocationHelper::AcquireSingleton((ICellLocationHelper**)&clHelper);
     AutoPtr<ICellLocation> location;
     clHelper->GetEmpty((ICellLocation**)&location);
     if (location != NULL) {
@@ -370,7 +369,7 @@ ECode CTelephonyRegistry::Listen(
             // register
             AutoPtr<Record> r;
             AutoPtr<ISubscriptionManager> smHelper;
-            //CSubscriptionManagerHelper::AcquireSingleton((ISubscriptionManagerHelper**)&smHelper);
+            CSubscriptionManager::AcquireSingleton((ISubscriptionManager**)&smHelper);
             Boolean found = FALSE, bval;
             AutoPtr<IBinder> b = IBinder::Probe(callback);
             List<AutoPtr<Record> >::Iterator it;
@@ -416,7 +415,7 @@ ECode CTelephonyRegistry::Listen(
                     if (VDBG) Slogger::D(TAG, "listen: call onSSC state=%s",
                         TO_CSTR((*mServiceState)[phoneId]));
                     AutoPtr<Elastos::Droid::Telephony::IServiceState> ss;
-                    // CServiceState::New((*mServiceState)[phoneId]), (Elastos::Droid::Telephony::IServiceState**)&ss)
+                    CServiceState::New((*mServiceState)[phoneId], (Elastos::Droid::Telephony::IServiceState**)&ss);
                     ec = r->mCallback->OnServiceStateChanged(ss);
                     if (ec == (ECode)E_REMOTE_EXCEPTION) {
                         Remove(r->mBinder);
@@ -580,7 +579,7 @@ ECode CTelephonyRegistry::NotifyCallStateForSubscriber(
     ECode ec = NOERROR;
     {    AutoLock syncLock(mRecordsLock);
         AutoPtr<ISubscriptionManager> smHelper;
-        //CSubscriptionManagerHelper::AcquireSingleton((ISubscriptionManagerHelper**)&smHelper);
+        CSubscriptionManager::AcquireSingleton((ISubscriptionManager**)&smHelper);
         Int32 phoneId;
         smHelper->GetPhoneId(subId, &phoneId);
         if (ValidatePhoneId(phoneId)) {
@@ -640,7 +639,7 @@ ECode CTelephonyRegistry::NotifyServiceStateForPhoneId(
                             TO_CSTR(r), subId, phoneId, TO_CSTR(state));
                     }
                     AutoPtr<Elastos::Droid::Telephony::IServiceState> ss;
-                    //CServiceState::New(state, (Elastos::Droid::Telephony::IServiceState**)&ss);
+                    CServiceState::New(state, (Elastos::Droid::Telephony::IServiceState**)&ss);
                     ec = r->mCallback->OnServiceStateChanged(ss);
                     if (ec == (ECode)E_REMOTE_EXCEPTION) {
                         mRemoveList.PushBack(r->mBinder);
@@ -677,7 +676,7 @@ ECode CTelephonyRegistry::NotifySignalStrengthForSubscriber(
     ECode ec = NOERROR;
     {    AutoLock syncLock(mRecordsLock);
         AutoPtr<ISubscriptionManager> smHelper;
-        //CSubscriptionManagerHelper::AcquireSingleton((ISubscriptionManagerHelper**)&smHelper);
+        CSubscriptionManager::AcquireSingleton((ISubscriptionManager**)&smHelper);
         Int32 phoneId;
         smHelper->GetPhoneId(subId, &phoneId);
         if (ValidatePhoneId(phoneId)) {
@@ -749,9 +748,10 @@ ECode CTelephonyRegistry::NotifyCellInfoForSubscriber(
     }
 
     ECode ec = NOERROR;
-    {    AutoLock syncLock(mRecordsLock);
+    {
+        AutoLock syncLock(mRecordsLock);
         AutoPtr<ISubscriptionManager> smHelper;
-        //CSubscriptionManagerHelper::AcquireSingleton((ISubscriptionManagerHelper**)&smHelper);
+        CSubscriptionManager::AcquireSingleton((ISubscriptionManager**)&smHelper);
         Int32 phoneId;
         smHelper->GetPhoneId(subId, &phoneId);
         if (ValidatePhoneId(phoneId)) {
@@ -862,9 +862,10 @@ ECode CTelephonyRegistry::NotifyCallForwardingChangedForSubscriber(
             subId, cfi);
     }
     ECode ec = NOERROR;
-    {    AutoLock syncLock(mRecordsLock);
+    {
+        AutoLock syncLock(mRecordsLock);
         AutoPtr<ISubscriptionManager> smHelper;
-        //CSubscriptionManagerHelper::AcquireSingleton((ISubscriptionManagerHelper**)&smHelper);
+        CSubscriptionManager::AcquireSingleton((ISubscriptionManager**)&smHelper);
         Int32 phoneId;
         smHelper->GetPhoneId(subId, &phoneId);
         if (ValidatePhoneId(phoneId)) {
@@ -901,9 +902,10 @@ ECode CTelephonyRegistry::NotifyDataActivityForSubscriber(
         return NOERROR;
     }
     ECode ec = NOERROR;
-    {    AutoLock syncLock(mRecordsLock);
+    {
+        AutoLock syncLock(mRecordsLock);
         AutoPtr<ISubscriptionManager> smHelper;
-        //CSubscriptionManagerHelper::AcquireSingleton((ISubscriptionManagerHelper**)&smHelper);
+        CSubscriptionManager::AcquireSingleton((ISubscriptionManager**)&smHelper);
         Int32 phoneId;
         smHelper->GetPhoneId(subId, &phoneId);
         (*mDataActivity)[phoneId] = state;
@@ -960,9 +962,10 @@ ECode CTelephonyRegistry::NotifyDataConnectionForSubscriber(
             networkType, mRecords.GetSize());
     }
     ECode ec = NOERROR;
-    {    AutoLock syncLock(mRecordsLock);
+    {
+        AutoLock syncLock(mRecordsLock);
         AutoPtr<ISubscriptionManager> smHelper;
-        //CSubscriptionManagerHelper::AcquireSingleton((ISubscriptionManagerHelper**)&smHelper);
+        CSubscriptionManager::AcquireSingleton((ISubscriptionManager**)&smHelper);
         Int32 phoneId;
         smHelper->GetPhoneId(subId, &phoneId);
         Boolean modified = FALSE;
@@ -1026,9 +1029,8 @@ ECode CTelephonyRegistry::NotifyDataConnectionForSubscriber(
             HandleRemoveListLocked();
         }
         mPreciseDataConnectionState = NULL;
-        assert(0 && "TODO");
-        // CPreciseDataConnectionState::New(state, networkType, apnType, apn,
-        //     reason, linkProperties, String(""), (IPreciseDataConnectionState**)&mPreciseDataConnectionState);
+        CPreciseDataConnectionState::New(state, networkType, apnType, apn,
+            reason, linkProperties, String(""), (IPreciseDataConnectionState**)&mPreciseDataConnectionState);
         List<AutoPtr<Record> >::Iterator it = mRecords.Begin();
         for (; it != mRecords.End(); ++it) {
             Record* r = *it;
@@ -1069,11 +1071,12 @@ ECode CTelephonyRegistry::NotifyDataConnectionFailedForSubscriber(
     }
     ECode ec = NOERROR;
     String emptyStr("");
-    {    AutoLock syncLock(mRecordsLock);
+    {
+        AutoLock syncLock(mRecordsLock);
         mPreciseDataConnectionState = NULL;
-        // CPreciseDataConnectionState::New(
-        //     ITelephonyManager::DATA_UNKNOWN,ITelephonyManager::NETWORK_TYPE_UNKNOWN,
-        //     apnType, emptyStr, reason, NULL, emptyStr, (IPreciseDataConnectionState**)&mPreciseDataConnectionState);
+        CPreciseDataConnectionState::New(
+            ITelephonyManager::DATA_UNKNOWN,ITelephonyManager::NETWORK_TYPE_UNKNOWN,
+            apnType, emptyStr, reason, NULL, emptyStr, (IPreciseDataConnectionState**)&mPreciseDataConnectionState);
         List<AutoPtr<Record> >::Iterator it = mRecords.Begin();
         for (; it != mRecords.End(); ++it) {
             Record* r = *it;
@@ -1110,9 +1113,10 @@ ECode CTelephonyRegistry::NotifyCellLocationForSubscriber(
     }
 
     ECode ec = NOERROR;
-    {    AutoLock syncLock(mRecordsLock);
+    {
+        AutoLock syncLock(mRecordsLock);
         AutoPtr<ISubscriptionManager> smHelper;
-        //CSubscriptionManagerHelper::AcquireSingleton((ISubscriptionManagerHelper**)&smHelper);
+        CSubscriptionManager::AcquireSingleton((ISubscriptionManager**)&smHelper);
         Int32 phoneId;
         smHelper->GetPhoneId(subId, &phoneId);
         if (ValidatePhoneId(phoneId)) {
@@ -1241,12 +1245,13 @@ ECode CTelephonyRegistry::NotifyPreciseDataConnectionFailed(
         return NOERROR;
     }
     ECode ec = NOERROR;
-    {    AutoLock syncLock(mRecordsLock);
+    {
+        AutoLock syncLock(mRecordsLock);
         mPreciseDataConnectionState = NULL;
-        // CPreciseDataConnectionState::New(
-        //     ITelephonyManager::DATA_UNKNOWN, ITelephonyManager::NETWORK_TYPE_UNKNOWN,
-        //     apnType, apn, reason, NULL, failCause,
-        //     (IPreciseDataConnectionState**)&mPreciseDataConnectionState);
+        CPreciseDataConnectionState::New(
+            ITelephonyManager::DATA_UNKNOWN, ITelephonyManager::NETWORK_TYPE_UNKNOWN,
+            apnType, apn, reason, NULL, failCause,
+            (IPreciseDataConnectionState**)&mPreciseDataConnectionState);
         List<AutoPtr<Record> >::Iterator it = mRecords.Begin();
         for (; it != mRecords.End(); ++it) {
             Record* r = *it;
@@ -1277,7 +1282,7 @@ ECode CTelephonyRegistry::NotifyVoLteServiceStateChanged(
             Record* r = *it;
             if ((r->mEvents & IPhoneStateListener::LISTEN_VOLTE_STATE) != 0) {
                 AutoPtr<IVoLteServiceState> vss;
-                // CVoLteServiceState::New(mVoLteServiceState, (IVoLteServiceState**)&vss);
+                CVoLteServiceState::New(mVoLteServiceState, (IVoLteServiceState**)&vss);
                 ec = r->mCallback->OnVoLteServiceStateChanged(vss);
                 if (ec == (ECode)E_REMOTE_EXCEPTION) {
                     mRemoveList.PushBack(r->mBinder);

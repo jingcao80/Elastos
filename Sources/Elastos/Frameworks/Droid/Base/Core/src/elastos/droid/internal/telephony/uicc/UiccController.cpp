@@ -1,7 +1,21 @@
 
+#include "elastos/droid/internal/telephony/uicc/UiccController.h"
+#include "elastos/droid/internal/telephony/uicc/CUiccController.h"
+#include "elastos/droid/os/CRegistrant.h"
+#include "elastos/droid/os/SystemProperties.h"
 #include "Elastos.Droid.Content.h"
 #include "Elastos.Droid.Internal.h"
-#include "elastos/droid/internal/telephony/uicc/UiccController.h"
+#include "elastos/droid/R.h"
+#include <elastos/core/AutoLock.h>
+#include <elastos/utility/logging/Logger.h>
+
+using Elastos::Droid::Content::Res::IResources;
+using Elastos::Droid::Os::CRegistrant;
+using Elastos::Droid::Os::IRegistrant;
+using Elastos::Droid::Os::SystemProperties;
+using Elastos::Core::CInteger32;
+using Elastos::Core::IInteger32;
+using Elastos::Utility::Logging::Logger;
 
 namespace Elastos {
 namespace Droid {
@@ -32,31 +46,40 @@ ECode UiccController::constructor(
     /* [in] */ IContext* c,
     /* [in] */ ArrayOf<ICommandsInterface*>* ci)
 {
-    // ==================before translated======================
-    // if (DBG) log("Creating UiccController");
-    // mContext = c;
-    // mCis = ci;
-    // mOEMHookSimRefresh = mContext.getResources().getBoolean(
-    //         com.android.internal.R.bool.config_sim_refresh_for_dual_mode_card);
-    // for (int i = 0; i < mCis.length; i++) {
-    //     Integer index = new Integer(i);
-    //     if (SystemProperties.getBoolean("persist.radio.apm_sim_not_pwdn", false)) {
-    //         // Reading ICC status in airplane mode is only supported in QCOM
-    //         // RILs when this property is set to true
-    //         mCis[i].registerForAvailable(this, EVENT_ICC_STATUS_CHANGED, index);
-    //     } else {
-    //         mCis[i].registerForOn(this, EVENT_ICC_STATUS_CHANGED, index);
-    //     }
-    //
-    //     mCis[i].registerForIccStatusChanged(this, EVENT_ICC_STATUS_CHANGED, index);
-    //     // TODO remove this once modem correctly notifies the unsols
-    //     mCis[i].registerForNotAvailable(this, EVENT_RADIO_UNAVAILABLE, index);
-    //     if (mOEMHookSimRefresh) {
-    //         mCis[i].registerForSimRefreshEvent(this, EVENT_REFRESH_OEM, index);
-    //     } else {
-    //         mCis[i].registerForIccRefresh(this, EVENT_REFRESH, index);
-    //     }
-    // }
+    Handler::constructor();
+
+    if (DBG) Log(String("Creating UiccController"));
+    mContext = c;
+    mCis = ci;
+
+    AutoPtr<IResources> res;
+    mContext->GetResources((IResources**)&res);
+    res->GetBoolean(Elastos::Droid::R::bool_::config_sim_refresh_for_dual_mode_card, &mOEMHookSimRefresh);
+    Boolean tmp = FALSE;
+    for (Int32 i = 0; i < mCis->GetLength(); i++) {
+        if ((*mCis)[i] == NULL) continue;
+
+        AutoPtr<IInteger32> index;
+        CInteger32::New(i, (IInteger32**)&index);
+        if (SystemProperties::GetBoolean(String("persist.radio.apm_sim_not_pwdn"), FALSE, &tmp), tmp) {
+            // Reading ICC status in airplane mode is only supported in QCOM
+            // RILs when this property is set to true
+            (*mCis)[i]->RegisterForAvailable(this, EVENT_ICC_STATUS_CHANGED, index);
+        }
+        else {
+            (*mCis)[i]->RegisterForOn(this, EVENT_ICC_STATUS_CHANGED, index);
+        }
+
+        (*mCis)[i]->RegisterForIccStatusChanged(this, EVENT_ICC_STATUS_CHANGED, index);
+        // TODO remove this once modem correctly notifies the unsols
+        (*mCis)[i]->RegisterForNotAvailable(this, EVENT_RADIO_UNAVAILABLE, index);
+        if (mOEMHookSimRefresh) {
+            (*mCis)[i]->RegisterForSimRefreshEvent(this, EVENT_REFRESH_OEM, index);
+        }
+        else {
+            (*mCis)[i]->RegisterForIccRefresh(this, EVENT_REFRESH, index);
+        }
+    }
     return NOERROR;
 }
 
@@ -64,32 +87,24 @@ AutoPtr<IUiccController> UiccController::Make(
     /* [in] */ IContext* c,
     /* [in] */ ArrayOf<ICommandsInterface*>* ci)
 {
-    // ==================before translated======================
-    // synchronized (mLock) {
-    //     if (mInstance != null) {
-    //         throw new RuntimeException("MSimUiccController.make() should only be called once");
-    //     }
-    //     mInstance = new UiccController(c, ci);
-    //     return (UiccController)mInstance;
-    // }
-    assert(0);
-    AutoPtr<IUiccController> empty;
-    return empty;
+    AutoLock lock(mLock);
+    if (mInstance != NULL) {
+        // throw new RuntimeException("MSimUiccController.make() should only be called once");
+        assert(0 && "MSimUiccController.make() should only be called once");
+    }
+    CUiccController::New(c, ci, (IUiccController**)&mInstance);
+    return mInstance;
 }
 
 AutoPtr<IUiccController> UiccController::GetInstance()
 {
-    // ==================before translated======================
-    // synchronized (mLock) {
-    //     if (mInstance == null) {
-    //         throw new RuntimeException(
-    //                 "UiccController.getInstance can't be called before make()");
-    //     }
-    //     return mInstance;
-    // }
-    assert(0);
-    AutoPtr<IUiccController> empty;
-    return empty;
+    AutoLock lock(mLock);
+    if (mInstance == NULL) {
+        // throw new RuntimeException(
+        //         "UiccController.getInstance can't be called before make()");
+        assert(0 && "UiccController.getInstance can't be called before make()");
+    }
+    return mInstance;
 }
 
 ECode UiccController::GetUiccCard(
@@ -202,15 +217,15 @@ ECode UiccController::RegisterForIccChanged(
     /* [in] */ Int32 what,
     /* [in] */ IInterface* obj)
 {
-    // ==================before translated======================
-    // synchronized (mLock) {
-    //     Registrant r = new Registrant (h, what, obj);
-    //     mIccChangedRegistrants.add(r);
-    //     //Notify registrant right after registering, so that it will get the latest ICC status,
-    //     //otherwise which may not happen until there is an actual change in ICC status.
-    //     r.notifyRegistrant();
-    // }
-    assert(0);
+    {
+        AutoLock lock(mLock);
+        AutoPtr<IRegistrant> r;
+        CRegistrant::New(h, what, obj, (IRegistrant**)&r);
+        mIccChangedRegistrants->Add(r);
+        //Notify registrant right after registering, so that it will get the latest ICC status,
+        //otherwise which may not happen until there is an actual change in ICC status.
+        r->NotifyRegistrant();
+    }
     return NOERROR;
 }
 
@@ -228,6 +243,7 @@ ECode UiccController::UnregisterForIccChanged(
 ECode UiccController::HandleMessage(
     /* [in] */ IMessage* msg)
 {
+    Logger::D("UiccController", "[TODO] ======== HandleMessage ");
     // ==================before translated======================
     // synchronized (mLock) {
     //     Integer index = getCiIndex(msg);
@@ -278,7 +294,6 @@ ECode UiccController::HandleMessage(
     //             Rlog.e(LOGTAG, " Unknown Event " + msg.what);
     //     }
     // }
-    assert(0);
     return NOERROR;
 }
 
@@ -466,9 +481,7 @@ Boolean UiccController::IsValidCardIndex(
 void UiccController::Log(
     /* [in] */ const String& string)
 {
-    // ==================before translated======================
-    // Rlog.d(LOGTAG, string);
-    assert(0);
+    Logger::D(LOGTAG, string);
 }
 
 } // namespace Uicc

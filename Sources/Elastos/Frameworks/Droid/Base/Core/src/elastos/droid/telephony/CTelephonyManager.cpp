@@ -349,6 +349,13 @@ ECode CTelephonyManager::GetPhoneType(
     return GetCurrentPhoneType(res);
 }
 
+Int32 CTelephonyManager::GetLteOnGsmModeStatic()
+{
+    Int32 v = 0;
+    SystemProperties::GetInt32(ITelephonyProperties::PROPERTY_LTE_ON_GSM_DEVICE, 0, &v);
+    return v;
+}
+
 ECode CTelephonyManager::GetNetworkOperatorName(
     /* [out] */ String* res)
 {

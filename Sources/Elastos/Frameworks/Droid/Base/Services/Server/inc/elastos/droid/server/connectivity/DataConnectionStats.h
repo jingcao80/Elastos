@@ -3,7 +3,7 @@
 #define __ELASTOS_DROID_SERVER_CONNECTIVITY_DATA_CONNECTION_STATS_H__
 
 #include <elastos/droid/content/BroadcastReceiver.h>
-// #include <elastos/droid/Telephony/PhoneStateListener.h>
+#include <elastos/droid/telephony/PhoneStateListener.h>
 // #include "elastos/droid/server/am/CBatteryStatsService.h"
 #include <Elastos.Droid.Telephony.h>
 #include <Elastos.Droid.Internal.h>
@@ -13,7 +13,7 @@ using Elastos::Droid::Content::IContext;
 using Elastos::Droid::Content::IIntent;
 using Elastos::Droid::Content::IIntentFilter;
 using Elastos::Droid::Net::IConnectivityManager;
-// using Elastos::Droid::Telephony::PhoneStateListener;
+using Elastos::Droid::Telephony::PhoneStateListener;
 using Elastos::Droid::Telephony::IPhoneStateListener;
 //using Elastos::Droid::Telephony::IServiceState;
 using Elastos::Droid::Telephony::ISignalStrength;
@@ -34,12 +34,9 @@ class DataConnectionStats
 {
 private:
     class MyPhoneStateListener
-        : public Object
-        // , public PhoneStateListener
+        : public PhoneStateListener
     {
     public:
-        // CAR_INTERFACE_DECL()
-
         MyPhoneStateListener(
             /* [in] */ DataConnectionStats* host);
 

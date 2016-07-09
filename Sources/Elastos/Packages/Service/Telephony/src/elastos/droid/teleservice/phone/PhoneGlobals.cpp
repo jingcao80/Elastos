@@ -406,7 +406,6 @@ ECode PhoneGlobals::OnCreate()
     // sVoiceCapable =
     //   getPackageManager().hasSystemFeature(PackageManager.FEATURE_TELEPHONY_VOICE_CALLS);
 
-    //Logger::D(TAG, "TODO PhoneGlobals::OnCreate mPhone");
     if (mPhone == NULL) {
         // Initialize the telephony framework
         AutoPtr<IPhoneFactory> helper;
@@ -549,7 +548,6 @@ ECode PhoneGlobals::OnCreate()
         // correctly, given the current state of the phone.
         PhoneUtils::SetAudioMode(mCM);
     }
-
 
     mCdmaOtaProvisionData = new OtaUtils::CdmaOtaProvisionData();
     mCdmaOtaConfigData = new OtaUtils::CdmaOtaConfigData();

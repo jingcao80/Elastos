@@ -8,7 +8,7 @@ module
     namespace Utility {
     namespace Cm {
 
-    [deprecated]
+    [local, deprecated]
     interface IActionUtils {
         /**
          * Kills the top most / most recent user application, but leaves out the launcher.

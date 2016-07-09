@@ -28,6 +28,7 @@ module
             [out] Int32* result);
     }
 
+    [local]
     interface ICdmaSubscriptionSourceManagerHelper {
         /**
          * This function creates a single instance of this class

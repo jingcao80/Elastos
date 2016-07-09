@@ -201,6 +201,12 @@ public:
     CARAPI GetPhoneType(
         /* [out] */ Int32* val);
 
+    /**
+     * Return if the current radio is LTE on GSM
+     * @hide
+     */
+    static CARAPI_(Int32) GetLteOnGsmModeStatic();
+
     CARAPI GetNetworkOperatorName(
         /* [out] */ String* res);
 
