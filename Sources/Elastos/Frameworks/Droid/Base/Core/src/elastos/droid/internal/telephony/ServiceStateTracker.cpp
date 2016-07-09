@@ -11,10 +11,10 @@
 #include "elastos/droid/telephony/CSignalStrength.h"
 #include "elastos/droid/telephony/CServiceStateHelper.h"
 #include "elastos/droid/telephony/CTelephonyManagerHelper.h"
+#include "elastos/droid/internal/telephony/uicc/UiccController.h"
 #include "elastos/droid/utility/CPair.h"
 #include "elastos/droid/R.h"
 #include "elastos/droid/text/TextUtils.h"
-
 #include <elastos/core/AutoLock.h>
 #include <elastos/core/CoreUtils.h>
 #include <elastos/core/Thread.h>
@@ -30,7 +30,7 @@ using Elastos::Droid::Internal::Telephony::Uicc::IUiccCardApplication;
 using Elastos::Droid::Internal::Telephony::Uicc::IUiccController;
 using Elastos::Droid::Internal::Telephony::Uicc::IUiccControllerHelper;
 using Elastos::Droid::Internal::Telephony::Uicc::CUiccControllerHelper;
-// using Elastos::Droid::Internal::Telephony::Uicc::UiccController;
+using Elastos::Droid::Internal::Telephony::Uicc::UiccController;
 using Elastos::Droid::Net::IConnectivityManager;
 using Elastos::Droid::Os::IRegistrant;
 using Elastos::Droid::Os::CRegistrant;
@@ -225,11 +225,9 @@ ECode ServiceStateTracker::constructor(
     context->GetResources((IResources**)&res);
     res->GetBoolean(R::bool_::config_voice_capable, &mVoiceCapable);
 
-    Logger::E("ServiceStateTracker", "TODO UiccController is not ready");
-    AutoPtr<IUiccControllerHelper> ucHelper;
-    CUiccControllerHelper::AcquireSingleton((IUiccControllerHelper**)&ucHelper);
-    //TODO ucHelper->GetInstance((IUiccController**)&mUiccController);
-    //TODO mUiccController->RegisterForIccChanged(this, EVENT_ICC_CHANGED, NULL);
+    mUiccController = UiccController::GetInstance();
+    Logger::E("ServiceStateTracker", "[TODO] constructor==RegisterForIccChanged");
+    // mUiccController->RegisterForIccChanged(this, EVENT_ICC_CHANGED, NULL);
     mCi->SetOnSignalStrengthUpdate(this, EVENT_SIGNAL_STRENGTH_UPDATE, NULL);
     mCi->RegisterForCellInfoList(this, EVENT_UNSOL_CELL_INFO_LIST, NULL);
 

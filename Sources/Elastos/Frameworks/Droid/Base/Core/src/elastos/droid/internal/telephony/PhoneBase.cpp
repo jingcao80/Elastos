@@ -3,7 +3,7 @@
 #include "elastos/droid/internal/telephony/CallManager.h"
 #include "elastos/droid/internal/telephony/CallTracker.h"
 #include "elastos/droid/internal/telephony/IccUtils.h"
-#include "elastos/droid/internal/telephony/uicc/CUiccControllerHelper.h"
+#include "elastos/droid/internal/telephony/uicc/UiccController.h"
 #include "elastos/droid/internal/telephony/CSubscriptionControllerHelper.h"
 #include "elastos/droid/content/CIntentFilter.h"
 #include "elastos/droid/os/Build.h"
@@ -76,8 +76,7 @@ using Elastos::Droid::Internal::Telephony::Uicc::IUiccCard;
 using Elastos::Droid::Internal::Telephony::Uicc::IUiccCardApplication;
 using Elastos::Droid::Internal::Telephony::Uicc::IUiccController;
 using Elastos::Droid::Internal::Telephony::Uicc::IUsimServiceTable;
-using Elastos::Droid::Internal::Telephony::Uicc::IUiccControllerHelper;
-using Elastos::Droid::Internal::Telephony::Uicc::CUiccControllerHelper;
+using Elastos::Droid::Internal::Telephony::Uicc::UiccController;
 using Elastos::Core::AutoLock;
 using Elastos::Core::CBoolean;
 using Elastos::Core::CInteger32;
@@ -424,11 +423,9 @@ ECode PhoneBase::constructor(
     //TODO mSmsUsageMonitor = new SmsUsageMonitor();
     //TODO mSmsUsageMonitor->constructor(context);
 
-    Logger::E(TAG, "TODO UiccController is not ready");
-    AutoPtr<IUiccControllerHelper> ucHelper;
-    CUiccControllerHelper::AcquireSingleton((IUiccControllerHelper**)&ucHelper);
-    //TODO ucHelper->GetInstance((IUiccController**)&mUiccController);
-    //TODO mUiccController->RegisterForIccChanged(this, EVENT_ICC_CHANGED, NULL);
+    mUiccController = UiccController::GetInstance();
+    Logger::E(TAG, "[TODO] PhoneBase==RegisterForIccChanged");
+    // mUiccController->RegisterForIccChanged(this, EVENT_ICC_CHANGED, NULL);
 
     // Monitor IMS service
     AutoPtr<IIntentFilter> filter;

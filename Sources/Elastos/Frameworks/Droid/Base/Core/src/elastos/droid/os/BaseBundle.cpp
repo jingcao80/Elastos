@@ -594,6 +594,7 @@ void BaseBundle::TypeWarning(
     sb.Append(", className: ");
     sb.Append(className);
     Logger::W(TAG, sb.ToString());
+    assert(0 && "Please fix error!");
 }
 
 AutoPtr<IInterface> BaseBundle::GetValue(

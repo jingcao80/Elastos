@@ -431,7 +431,7 @@ ECode CServiceState::FillInNotifierBundle(
     m->PutBoolean(String("manual"), mIsManualNetworkSelection);
     m->PutInt32(String("radioTechnology"), mRilVoiceRadioTechnology);
     m->PutInt32(String("dataRadioTechnology"), mRilDataRadioTechnology);
-    m->PutInt32(String("cssIndicator"), mCssIndicator);
+    m->PutBoolean(String("cssIndicator"), mCssIndicator);
     m->PutInt32(String("networkId"), mNetworkId);
     m->PutInt32(String("systemId"), mSystemId);
     m->PutInt32(String("cdmaRoamingIndicator"), mCdmaRoamingIndicator);
