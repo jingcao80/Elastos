@@ -196,7 +196,7 @@ ECode CalculatorEditText::OnSaveInstanceState(
     return NOERROR;
 }
 
-void CalculatorEditText::OnTextChanged(
+ECode CalculatorEditText::OnTextChanged(
     /* [in] */ ICharSequence* text,
     /* [in] */ Int32 start,
     /* [in] */ Int32 lengthBefore,
@@ -218,7 +218,7 @@ void CalculatorEditText::OnTextChanged(
     text->ToString(&str);
     Float vol;
     GetVariableTextSize(str, &vol);
-    SetTextSize(ITypedValue::COMPLEX_UNIT_PX, vol);
+    return SetTextSize(ITypedValue::COMPLEX_UNIT_PX, vol);
 }
 
 ECode CalculatorEditText::SetTextSize(

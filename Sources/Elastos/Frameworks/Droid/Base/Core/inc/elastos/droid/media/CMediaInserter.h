@@ -61,12 +61,6 @@ private:
         /* [in] */ IList* list);
 
 private:
-    // typedef List< AutoPtr<IContentValues> > ContentValuesList;
-    // typedef typename ContentValuesList::Iterator ContentValuesListIterator;
-    // typedef HashMap<AutoPtr<IUri>, AutoPtr<ContentValuesList> > UriContentValuesMap;
-    // typedef typename UriContentValuesMap::Iterator UriContentValuesMapIterator;
-    // UriContentValuesMap mRowMap;
-    // UriContentValuesMap mPriorityRowMap;
     AutoPtr<IHashMap> mRowMap;
     AutoPtr<IHashMap> mPriorityRowMap;
 

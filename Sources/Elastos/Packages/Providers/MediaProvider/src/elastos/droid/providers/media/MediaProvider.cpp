@@ -2170,14 +2170,14 @@ ECode MediaProvider::UpdateDatabase(
         db->ExecSQL(sb.ToString());
 
         sb.Reset();
-        sb += "INSERT INTO files (_id,"; sb += IMAGE_COLUMNSv407;
+        sb += "INSERT INTO files ("; sb += IMAGE_COLUMNSv407;
         sb += ",old_id,media_type) SELECT "; sb += IMAGE_COLUMNSv407;
         sb += ",_id,"; sb += IMediaStoreFilesFileColumns::MEDIA_TYPE_IMAGE;
         sb += " FROM images;";
         db->ExecSQL(sb.ToString());
 
         sb.Reset();
-        sb += "INSERT INTO files (_id,"; sb += VIDEO_COLUMNSv407;
+        sb += "INSERT INTO files ("; sb += VIDEO_COLUMNSv407;
         sb += ",old_id,media_type) SELECT "; sb += VIDEO_COLUMNSv407;
         sb += ",_id,"; sb += IMediaStoreFilesFileColumns::MEDIA_TYPE_VIDEO;
         sb += " FROM video;";
@@ -2185,7 +2185,7 @@ ECode MediaProvider::UpdateDatabase(
 
         if (!internal) {
             sb.Reset();
-            sb += "INSERT INTO files (_id,"; sb += PLAYLIST_COLUMNS;
+            sb += "INSERT INTO files ("; sb += PLAYLIST_COLUMNS;
             sb += ",old_id,media_type) SELECT "; sb += PLAYLIST_COLUMNS;
             sb += ",_id,"; sb += IMediaStoreFilesFileColumns::MEDIA_TYPE_PLAYLIST;
             sb += " FROM audio_playlists;";
@@ -2592,7 +2592,7 @@ ECode MediaProvider::UpdateDatabase(
         (*tables)[3] = TABLE_VIDEO_THUMBNAILS;
         for (Int32 i = 0; i <= 3; i++) {
             sb.Reset();
-            sb += "UPDATE"; sb += (*tables)[i]; sb += " SET _data='"; sb += externalStorage;
+            sb += "UPDATE "; sb += (*tables)[i]; sb += " SET _data='"; sb += externalStorage;
             sb += "'||SUBSTR(_data,17) WHERE _data LIKE '/storage/sdcard0/%';";
             db->ExecSQL(sb.ToString());
         }
@@ -2681,10 +2681,10 @@ ECode MediaProvider::UpdateDatabase(
 
    SanityCheck(db, fromVersion);
 
-   Int64 elapsedSeconds = (SystemClock::GetCurrentTimeMicro() - startTime) / 1000000;
+   Int64 elapsedSeconds = (SystemClock::GetCurrentTimeMicro() - startTime) / 1000;
    sb.Reset();
    sb += "Database upgraded from version "; sb += fromVersion;
-   sb += " to "; sb += "toVersion"; sb += " in "; sb += elapsedSeconds; sb += " seconds";
+   sb += " to "; sb += toVersion; sb += " in "; sb += elapsedSeconds; sb += " ms";
    LogToDb(db, sb.ToString());
    if (LOCAL_LOGV) Logger::V(TAG, sb.ToString());
    return NOERROR;
@@ -2849,11 +2849,12 @@ void MediaProvider::ComputeTakenTime(
     if (!flag) {
         // This only happens when MediaScanner finds an image file that doesn't have any useful
         // reference to get this value. (e.g. GPSTimeStamp)
-        Int64 lastModified;
-        values->GetAsInt64(IMediaStoreMediaColumns::DATE_MODIFIED, &lastModified);
-        AutoPtr<IInteger64> lm = CoreUtils::Convert(lastModified);
-        if (lm != NULL) {
-            values->Put(IMediaStoreImagesImageColumns::DATE_TAKEN, lastModified * 1000);
+        AutoPtr<IInteger64> lastModified;
+        values->GetAsInteger64(IMediaStoreMediaColumns::DATE_MODIFIED, (IInteger64**)&lastModified);
+        if (lastModified != NULL) {
+            Int64 value;
+            lastModified->GetValue(&value);
+            values->Put(IMediaStoreImagesImageColumns::DATE_TAKEN, value * 1000);
         }
     }
 }
@@ -2933,8 +2934,8 @@ Boolean MediaProvider::QueryThumbnail(
         Int64 gid = -1;
 
         // try {
-            id = StringUtils::ParseInt64(origId);
-            gid = StringUtils::ParseInt64(groupId);
+        id = StringUtils::ParseInt64(origId);
+        gid = StringUtils::ParseInt64(groupId);
        // } catch (NumberFormatException ex) {
            // invalid cancel request
            // return false;
@@ -2975,9 +2976,8 @@ Boolean MediaProvider::QueryThumbnail(
     }
 
     if (!origId.IsNull()) {
-        String str = column + String(" = ") + origId;
-        cs = NULL;
-        cs = CoreUtils::Convert(column + String(" = ") + origId);
+        StringBuilder sb(column); sb += " = "; sb += origId;
+        cs = CoreUtils::Convert(sb.ToString());
         qb->AppendWhere(cs);
     }
     return TRUE;
@@ -3106,8 +3106,9 @@ AutoPtr<ICursor> MediaProvider::DoAudioSearch(
     } else {
        cols = mSearchColsLegacy;
     }
+    String nullStr;
     AutoPtr<ICursor> c;
-    qb->Query(db, cols, where.ToString(), wildcardWords, String(NULL), String(NULL), limit, (ICursor**)&c);
+    qb->Query(db, cols, where.ToString(), wildcardWords, nullStr, nullStr, limit, (ICursor**)&c);
     return c;
 }
 
@@ -3119,6 +3120,8 @@ ECode MediaProvider::EnsureFile(
     /* [out] */ IContentValues** result)
 {
     VALIDATE_NOT_NULL(result)
+    *result = NULL;
+
     AutoPtr<IContentValues> values;
     String file;
     initialValues->GetAsString(IMediaStoreMediaColumns::DATA, &file);
@@ -3130,7 +3133,8 @@ ECode MediaProvider::EnsureFile(
        file = GenerateFileName(internal, preferredExtension, directoryName);
        CContentValues::New(initialValues, (IContentValues**)&values);
        values->Put(IMediaStoreMediaColumns::DATA, file);
-    } else {
+    }
+    else {
        values = initialValues;
     }
 
@@ -3177,13 +3181,10 @@ void MediaProvider::NotifyMtp(
     rowIds->GetSize(&size);
     Int64 vol;
     AutoPtr<IInterface> obj;
-    AutoPtr<IInteger64> intervol;
     for (Int32 i = 0; i < size; ++i) {
         obj = NULL;
         rowIds->Get(i, (IInterface**)&obj);
-        intervol = NULL;
-        intervol = IInteger64::Probe(obj);
-        intervol->GetValue(&vol);
+        IInteger64::Probe(obj)->GetValue(&vol);
         SendObjectAdded(vol);
     }
 }
@@ -3209,8 +3210,6 @@ Int32 MediaProvider::PlaylistBulkInsert(
     Int32 numInserted = 0;
     // try {
         Int32 len = values->GetLength();
-        AutoPtr<IInteger64> integer64;
-        AutoPtr<IInteger32> integer32;
         Int64 audioid;
         Int32 playorder;
         Int64 ret;
@@ -3219,19 +3218,16 @@ Int32 MediaProvider::PlaylistBulkInsert(
             // getting the raw Object and converting it long ourselves saves
             // an allocation (the alternative is ContentValues.getAsLong, which
             // returns a Long object)
-            obj = NULL;//
-
+            obj = NULL;
             ((*values)[i])->Get(IMediaStoreAudioPlaylistsMembers::AUDIO_ID, (IInterface**)&obj);
-            integer64 = NULL;
-            integer64 = IInteger64::Probe(obj);
-            integer64->GetValue(&audioid);
+            IInteger64::Probe(obj)->GetValue(&audioid);
             helper->BindInt64(audioidcolidx, audioid);
             helper->BindInt64(playlistididx, playlistId);
+
             // convert to int ourselves to save an allocation.
             obj = NULL;
             (*values)[i]->Get(IMediaStoreAudioPlaylistsMembers::PLAY_ORDER, (IInterface**)&obj);
-            integer32 = IInteger32::Probe(obj);
-            integer32->GetValue(&playorder);
+            IInteger32::Probe(obj)->GetValue(&playorder);
             helper->BindInt32(playorderidx, playorder);
             helper->Execute(&ret);
        }
@@ -3254,21 +3250,27 @@ ECode MediaProvider::BulkInsert(
     /* [in] */ ArrayOf<IContentValues*>* values,
     /* [out] */ Int32* result)
 {
+    Logger::I(TAG, "====================BulkInsert: %s, %d",
+        TO_CSTR(uri), values ? values->GetLength() : 0);
+    VALIDATE_NOT_NULL(result)
+    *result = 0;
+
     Int32 match;
     GetURI_MATCHER()->Match(uri, &match);
     if (match == VOLUMES) {
         return ContentProvider::BulkInsert(uri, values, result);
     }
-    AutoPtr<DatabaseHelper> helper;
-    // helper = GetDatabaseForUri(uri);
-    if (helper == NULL) {
-        Logger::E(TAG, "Unknown URI: %p", uri);
+    AutoPtr<IDatabaseHelper> dbh;
+    GetDatabaseForUri(uri, (IDatabaseHelper**)&dbh);
+    if (dbh == NULL) {
+        Logger::E(TAG, "Unknown URI: s", TO_CSTR(uri));
         return E_UNSUPPORTED_OPERATION_EXCEPTION;
     }
+    DatabaseHelper* helper = (DatabaseHelper*)dbh.Get();
     AutoPtr<ISQLiteDatabase> db;
     helper->GetWritableDatabase((ISQLiteDatabase**)&db);
     if (db == NULL) {
-        Logger::E(TAG, "Couldn't open database for %p", uri);
+        Logger::E(TAG, "Couldn't open database for %s", TO_CSTR(uri));
         return E_ILLEGAL_STATE_EXCEPTION;
     }
 
@@ -3281,31 +3283,27 @@ ECode MediaProvider::BulkInsert(
         uri->GetPathSegments((IList**)&list);
         AutoPtr<IInterface> obj;
         list->Get(2, (IInterface**)&obj);
-        AutoPtr<ICharSequence> cs = ICharSequence::Probe(obj);
-        String str;
-        cs->ToString(&str);
-        Int32 handle = StringUtils::ParseInt32(str);
+        Int32 handle = StringUtils::ParseInt32(TO_STR(obj));
         *result = SetObjectReferences(helper, db, handle, values);
         return NOERROR;
     }
+
     db->BeginTransaction();
     AutoPtr<IArrayList> notifyRowIds;
     CArrayList::New((IArrayList**)&notifyRowIds);
     Int32 numInserted = 0;
-    // try {
-        Int32 len = values->GetLength();
-        AutoPtr<IUri> tmpUri;
-        for (Int32 i = 0; i < len; i++) {
-            if ((*values)[i] != NULL) {
-                tmpUri = NULL;
-                InsertInternal(uri, match, (*values)[i], notifyRowIds, (IUri**)&tmpUri);
-            }
+
+    Int32 len = values->GetLength();
+    AutoPtr<IUri> tmpUri;
+    for (Int32 i = 0; i < len; i++) {
+        if ((*values)[i] != NULL) {
+            tmpUri = NULL;
+            InsertInternal(uri, match, (*values)[i], notifyRowIds, (IUri**)&tmpUri);
         }
-        numInserted = len;
-        db->SetTransactionSuccessful();
-    // } finally {
-        db->EndTransaction();
-    // }//
+    }
+    numInserted = len;
+    db->SetTransactionSuccessful();
+    db->EndTransaction();
 
     // Notify MTP (outside of successful transaction)
     NotifyMtp(notifyRowIds);
@@ -3322,7 +3320,11 @@ ECode MediaProvider::Insert(
     /* [in] */ IContentValues* initialValues,
     /* [out] */ IUri** result)
 {
+    if (LOCAL_LOGV) Logger::V(TAG, " >> Insert: %s, values: %s", TO_CSTR(uri), TO_CSTR(initialValues));
+
     VALIDATE_NOT_NULL(result)
+    *result = NULL;
+
     Int32 match;
     GetURI_MATCHER()->Match(uri, &match);
 
@@ -3434,16 +3436,11 @@ Int64 MediaProvider::GetParent(
     /* [in] */ const String& path)
 {
     Int32 lastSlash = path.LastIndexOf('/');
-    AutoPtr<IIoUtils> ioUtils;
-    CIoUtils::AcquireSingleton((IIoUtils**)&ioUtils);
-
-    AutoPtr<ICursor> c;
     if (lastSlash > 0) {
-       String parentPath = path.Substring(0, lastSlash);
-       Int32 length = mExternalStoragePaths->GetLength();
+        String parentPath = path.Substring(0, lastSlash);
+        Int32 length = mExternalStoragePaths->GetLength();
         for (Int32 i = 0; i < length; i++) {
             if (parentPath.Equals((*mExternalStoragePaths)[i])) {
-               ioUtils->CloseQuietly(ICloseable::Probe(c));
                return 0;
             }
         }
@@ -3451,44 +3448,39 @@ Int64 MediaProvider::GetParent(
         if (it != mDirectoryCache->End()) {
             Int64 cid = it->mSecond;
             if (LOCAL_LOGV) Logger::V(TAG, "Returning cached entry for %s", parentPath.string());
-            ioUtils->CloseQuietly(ICloseable::Probe(c));
             return cid;
         }
 
-       String selection = IMediaStoreMediaColumns::DATA + "=?";
-       AutoPtr<ArrayOf<String> > selargs = ArrayOf<String>::Alloc(1);
-       (*selargs)[0] = parentPath;
-       helper->mNumQueries++;
-       db->Query(String("files"), sIdOnlyColumn, selection, selargs, String(NULL), String(NULL), String(NULL), (ICursor**)&c);
-       // try {
-           Int64 id;
-           Int32 count;
-           c->GetCount(&count);
-            if (c == NULL || count == 0) {
-               // parent isn't in the database - so add it
-               id = InsertDirectory(helper, db, parentPath);
-               if (LOCAL_LOGV) Logger::V(TAG, "Inserted %s", parentPath.string());
-            } else {
-                if (count > 1) {
-                   Logger::E(TAG, "more than one match for %s", parentPath.string());
-                }
-                Boolean flag = FALSE;
-                c->MoveToFirst(&flag);
-                c->GetInt64(0, &id);
-                if (LOCAL_LOGV) Logger::V(TAG, "Queried %s", parentPath.string());
+        AutoPtr<IIoUtils> ioUtils;
+        CIoUtils::AcquireSingleton((IIoUtils**)&ioUtils);
+        String selection = IMediaStoreMediaColumns::DATA + "=?";
+        AutoPtr<ArrayOf<String> > selargs = ArrayOf<String>::Alloc(1);
+        (*selargs)[0] = parentPath;
+        helper->mNumQueries++;
+        AutoPtr<ICursor> c;
+        db->Query(String("files"), sIdOnlyColumn, selection, selargs, String(NULL), String(NULL), String(NULL), (ICursor**)&c);
+        Int64 id;
+        Int32 count;
+        if (c == NULL || (c->GetCount(&count), count == 0)) {
+           // parent isn't in the database - so add it
+           id = InsertDirectory(helper, db, parentPath);
+           if (LOCAL_LOGV) Logger::V(TAG, "Inserted %s", parentPath.string());
+        }
+        else {
+            if (count > 1) {
+               Logger::E(TAG, "more than one match for %s", parentPath.string());
             }
-            (*mDirectoryCache)[parentPath] = id;
-            ioUtils->CloseQuietly(ICloseable::Probe(c));
-            return id;
-       // } finally {
-           // AutoPtr<IIoUtils> ioUtils;
-           // CIoUtils::AcquireSingleton((IIoUtils**)&ioUtils);
-           // ioUtils->CloseQuietly(ICloseable::Probe(c));
-       // }
-    } else {
-        ioUtils->CloseQuietly(ICloseable::Probe(c));
-        return 0;
+            Boolean flag = FALSE;
+            c->MoveToFirst(&flag);
+            c->GetInt64(0, &id);
+            if (LOCAL_LOGV) Logger::V(TAG, "Queried %s", parentPath.string());
+        }
+        if (c) ioUtils->CloseQuietly(ICloseable::Probe(c));
+
+        (*mDirectoryCache)[parentPath] = id;
+        return id;
     }
+    return 0;
 }
 
 Int32 MediaProvider::GetStorageId(
@@ -3525,31 +3517,36 @@ ECode MediaProvider::InsertFile(
 {
     VALIDATE_NOT_NULL(result)
     *result = 0;
+
     AutoPtr<ISQLiteDatabase> db;
     helper->GetWritableDatabase((ISQLiteDatabase**)&db);
-    AutoPtr<IContentValues> values;//
+    AutoPtr<IContentValues> values;
 
     AutoPtr<ISystem> isystem;
     CSystem::AcquireSingleton((ISystem**)&isystem);
-    Int64 timeMillis;//
+    Int64 timeMillis;
 
-    Boolean flag = FALSE;//
+    Boolean flag = FALSE;
 
     AutoPtr<IMediaFile> mf;
     CMediaFile::AcquireSingleton((IMediaFile**)&mf);
 
     switch (mediaType) {
         case IMediaStoreFilesFileColumns::MEDIA_TYPE_IMAGE: {
-           EnsureFile(helper->mInternal, initialValues, String(".jpg"), String("Pictures"), (IContentValues**)&values);//
+            ECode ec = EnsureFile(helper->mInternal, initialValues,
+                String(".jpg"), String("Pictures"), (IContentValues**)&values);
+            FAIL_RETURN(ec)
 
-           values->Put(IMediaStoreMediaColumns::DATE_ADDED, (isystem->GetCurrentTimeMillis(&timeMillis), timeMillis) / 1000);
-           String data;
-           values->GetAsString(IMediaStoreMediaColumns::DATA, &data);
-           if (!(values->ContainsKey(IMediaStoreMediaColumns::DISPLAY_NAME, &flag), flag)) {
-               ComputeDisplayName(data, values);
-           }
-           ComputeTakenTime(values);
-           break;
+            isystem->GetCurrentTimeMillis(&timeMillis);
+            values->Put(IMediaStoreMediaColumns::DATE_ADDED, (timeMillis) / 1000);
+            String data;
+            values->GetAsString(IMediaStoreMediaColumns::DATA, &data);
+            values->ContainsKey(IMediaStoreMediaColumns::DISPLAY_NAME, &flag);
+            if (!flag) {
+                ComputeDisplayName(data, values);
+            }
+            ComputeTakenTime(values);
+            break;
         }//
 
         case IMediaStoreFilesFileColumns::MEDIA_TYPE_AUDIO: {
@@ -3558,23 +3555,20 @@ ECode MediaProvider::InsertFile(
             // If doing this here turns out to be a performance bottleneck,
             // consider moving this to native code and using triggers on
             // the view.
-            CContentValues::New(initialValues, (IContentValues**)&values);//
+            CContentValues::New(initialValues, (IContentValues**)&values);
 
-            String albumartist;
+            String albumartist, compilation;
             values->GetAsString(IMediaStoreAudioAudioColumns::ALBUM_ARTIST, &albumartist);
-            String compilation;
             values->GetAsString(IMediaStoreAudioAudioColumns::COMPILATION, &compilation);
-            values->Remove(IMediaStoreAudioAudioColumns::COMPILATION);//
+            values->Remove(IMediaStoreAudioAudioColumns::COMPILATION);
 
+            const String artistStr("artist");
             // Insert the artist into the artist table and remove it from
             // the input values
             AutoPtr<IInterface> so;
-            values->Get(String("artist"), (IInterface**)&so);
-            AutoPtr<ICharSequence> cs = ICharSequence::Probe(so);
-            String tmp;
-            cs->ToString(&tmp);
-            String s = (so == NULL ? String("") : tmp);
-            values->Remove(String("artist"));
+            values->Get(artistStr, (IInterface**)&so);
+            String s = (so == NULL ? String("") : TO_STR(so));
+            values->Remove(artistStr);
             Int64 artistRowId;
 
             String path;
@@ -3582,62 +3576,56 @@ ECode MediaProvider::InsertFile(
             {
                 AutoLock syncLock(helper->mArtistCacheLock);
                 HashMap<String, Int64> artistCache = helper->mArtistCache;
-                Int64 temp = artistCache[s];
-                AutoPtr<IInteger64> itmp = CoreUtils::Convert(temp);
-                if (itmp == NULL) {
+                HashMap<String, Int64>::Iterator it = artistCache.Find(s);
+                if (it == artistCache.End()) {
                     artistRowId = GetKeyIdForName(helper, db,
-                            String("artists"), String("artist_key"), String("artist"),
-                            s, s, path, 0, String(NULL), artistCache, uri);
+                        String("artists"), String("artist_key"), artistStr,
+                        s, s, path, 0, String(NULL), artistCache, uri);
                 }
                 else {
-                   artistRowId = temp;
+                   artistRowId = it->mSecond;
                 }
             }
-            String artist = s;//
+            String artist = s;
 
-           // Do the same for the album field
-           so = NULL;
-           values->Get(String("album"), (IInterface**)&so);
-           cs = NULL;
-           cs = ICharSequence::Probe(so);
-           cs->ToString(&tmp);
-           s = (so == NULL ? String("") : tmp);
-           values->Remove(String("album"));
+            // Do the same for the album field
+            so = NULL;
+            values->Get(String("album"), (IInterface**)&so);
+            s = (so == NULL ? String("") : TO_STR(so));
+            values->Remove(String("album"));
             Int64 albumRowId;
             {
                 AutoLock syncLock(helper->mAlbumCacheLock);
                 HashMap<String, Int64> albumCache = helper->mAlbumCache;
                 Int32 albumhash = 0;
                 if (!albumartist.IsNull()) {
-                   albumhash = albumartist.GetHashCode();
+                    albumhash = albumartist.GetHashCode();
                 }
                 else if (!compilation.IsNull() && compilation.Equals("1")) {
                    // nothing to do, hash already set
                 }
                 else {
-                   Int32 index = path.LastIndexOf('/');
-                   albumhash = path.Substring(0, index).GetHashCode();
+                    Int32 index = path.LastIndexOf('/');
+                    albumhash = path.Substring(0, index).GetHashCode();
                 }
                 StringBuilder sb(s);
                 sb += albumhash;
                 String cacheName = sb.ToString();
-                Int64 itemp = albumCache[cacheName];
-                AutoPtr<IInteger64> iitmp = CoreUtils::Convert(itemp);
-                if (iitmp == NULL) {
+                HashMap<String, Int64>::Iterator it = albumCache.Find(cacheName);
+                if (it == albumCache.End()) {
                     albumRowId = GetKeyIdForName(helper, db,
-                            String("albums"), String("album_key"), String("album"),
-                            s, cacheName, path, albumhash, artist, albumCache, uri);
+                        String("albums"), String("album_key"), String("album"),
+                        s, cacheName, path, albumhash, artist, albumCache, uri);
                 }
                 else {
-                    albumRowId = itemp;
+                    albumRowId = it->mSecond;
                 }
-            }//
+            }
 
-            values->Put(String("artist_id"), StringUtils::ToString(artistRowId));
-            values->Put(String("album_id"), StringUtils::ToString(albumRowId));
-            String tmpTitle;
-            values->GetAsString(String("title"), &tmpTitle);
-            s = tmpTitle;
+            values->Put(String("artist_id"), StringUtils::ToString((Int32)artistRowId));
+            values->Put(String("album_id"), StringUtils::ToString((Int32)albumRowId));
+            values->GetAsString(String("title"), &s);
+
             AutoPtr<IMediaStoreAudio> msa;
             CMediaStoreAudio::AcquireSingleton((IMediaStoreAudio**)&msa);
             String key;
@@ -3646,16 +3634,17 @@ ECode MediaProvider::InsertFile(
             // do a final trim of the title, in case it started with the special
             // "sort first" character (ascii \001)
             values->Remove(String("title"));
-            values->Put(String("title"), s.Trim());//
+            values->Put(String("title"), s.Trim());
 
-            String vStr;
-            values->GetAsString(IMediaStoreMediaColumns::DATA, &vStr);
-            ComputeDisplayName(vStr, values);
+            values->GetAsString(IMediaStoreMediaColumns::DATA, &s);
+            ComputeDisplayName(s, values);
             break;
         }
 
         case IMediaStoreFilesFileColumns::MEDIA_TYPE_VIDEO: {
-            EnsureFile(helper->mInternal, initialValues, String(".3gp"), String("video"), (IContentValues**)&values);
+            ECode ec = EnsureFile(helper->mInternal, initialValues,
+                String(".3gp"), String("video"), (IContentValues**)&values);
+            FAIL_RETURN(ec)
             String data;
             values->GetAsString(IMediaStoreMediaColumns::DATA, &data);
             ComputeDisplayName(data, values);
@@ -3673,66 +3662,72 @@ ECode MediaProvider::InsertFile(
     if (!path.IsNull()) {
        ComputeBucketValues(path, values);
     }
-    values->Put(IMediaStoreMediaColumns::DATE_ADDED, (isystem->GetCurrentTimeMillis(&timeMillis), timeMillis) / 1000);//
+    isystem->GetCurrentTimeMillis(&timeMillis);
+    values->Put(IMediaStoreMediaColumns::DATE_ADDED, timeMillis / 1000);
 
     Int64 rowId = 0;
-    values->GetAsInt64(
-           IMediaStoreMediaColumns::MEDIA_SCANNER_NEW_OBJECT_ID, &rowId);
-    AutoPtr<IInteger64> iinteger64 = CoreUtils::Convert(rowId);
-    if (iinteger64 != NULL) {
-       CContentValues::New(values, (IContentValues**)&values);
-       values->Remove(IMediaStoreMediaColumns::MEDIA_SCANNER_NEW_OBJECT_ID);
-    }//
+    AutoPtr<IInteger32> ivalObj;
+    values->GetAsInteger32(IMediaStoreMediaColumns::MEDIA_SCANNER_NEW_OBJECT_ID, (IInteger32**)&ivalObj);
+    if (ivalObj != 0) {
+        Int32 ival;
+        ivalObj->GetValue(&ival);
+        rowId = ival;
+        CContentValues::New(values, (IContentValues**)&values);
+        values->Remove(IMediaStoreMediaColumns::MEDIA_SCANNER_NEW_OBJECT_ID);
+    }
 
     String title;
     values->GetAsString(IMediaStoreMediaColumns::TITLE, &title);
     if (title.IsNull() && !path.IsNull()) {
        mf->GetFileTitle(path, &title);
     }
-    values->Put(IMediaStoreFilesFileColumns::TITLE, title);//
+    values->Put(IMediaStoreFilesFileColumns::TITLE, title);
 
     String mimeType;
     values->GetAsString(IMediaStoreMediaColumns::MIME_TYPE, &mimeType);
-    Int32 tmpformatObject;
-    values->GetAsInt32(IMediaStoreFilesFileColumns::FORMAT, &tmpformatObject);
-    AutoPtr<IInteger32> formatObject = CoreUtils::Convert(tmpformatObject);
-    Int32 format = (formatObject == NULL ? 0 : tmpformatObject);
+    AutoPtr<IInteger32> formatObject;
+    values->GetAsInteger32(IMediaStoreFilesFileColumns::FORMAT, (IInteger32**)&formatObject);
+    Int32 format = 0;
+    if (formatObject != NULL) formatObject->GetValue(&format);
     if (format == 0) {
        if (TextUtils::IsEmpty(path)) {
-           // special case device created playlists
-           if (mediaType == IMediaStoreFilesFileColumns::MEDIA_TYPE_PLAYLIST) {
-               values->Put(IMediaStoreFilesFileColumns::FORMAT, IMtpConstants::FORMAT_ABSTRACT_AV_PLAYLIST);
-               // create a file path for the benefit of MTP
-               String vStr;
-               values->GetAsString(IMediaStoreAudioPlaylistsColumns::NAME, &vStr);
-               path = (*mExternalStoragePaths)[0]
-                       + String("/Playlists/") + vStr;
-               values->Put(IMediaStoreMediaColumns::DATA, path);
-               values->Put(IMediaStoreFilesFileColumns::PARENT, GetParent(helper, db, path));
-           } else {
-               Logger::E(TAG, "path is empty in insertFile()");
-           }
-       } else {
-           mf->GetFormatCode(path, mimeType, &format);
+            // special case device created playlists
+            if (mediaType == IMediaStoreFilesFileColumns::MEDIA_TYPE_PLAYLIST) {
+                values->Put(IMediaStoreFilesFileColumns::FORMAT, IMtpConstants::FORMAT_ABSTRACT_AV_PLAYLIST);
+                // create a file path for the benefit of MTP
+                String vStr;
+                values->GetAsString(IMediaStoreAudioPlaylistsColumns::NAME, &vStr);
+                StringBuilder sb((*mExternalStoragePaths)[0]);
+                sb += "/Playlists/"; sb += vStr;
+                path = sb.ToString();
+                values->Put(IMediaStoreMediaColumns::DATA, path);
+                values->Put(IMediaStoreFilesFileColumns::PARENT, GetParent(helper, db, path));
+            }
+            else {
+                Logger::E(TAG, "path is empty in insertFile()");
+            }
+       }
+       else {
+            mf->GetFormatCode(path, mimeType, &format);
        }
     }
     if (format != 0) {
         values->Put(IMediaStoreFilesFileColumns::FORMAT, format);
         if (mimeType.IsNull()) {
-          mf->GetMimeTypeForFormatCode(format, &mimeType);
-       }
-    }//
+            mf->GetMimeTypeForFormatCode(format, &mimeType);
+        }
+    }
 
     if (mimeType.IsNull() && !path.IsNull()) {
-       mf->GetMimeTypeForFile(path, &mimeType);
+        mf->GetMimeTypeForFile(path, &mimeType);
     }
     if (!mimeType.IsNull()) {
-        values->Put(IMediaStoreMediaColumns::MIME_TYPE, mimeType);//
+        values->Put(IMediaStoreMediaColumns::MIME_TYPE, mimeType);
 
         AutoPtr<IMediaScannerHelper> msh;
         CMediaScannerHelper::AcquireSingleton((IMediaScannerHelper**)&msh);
-        msh->IsNoMediaPath(path, &flag);
-        if (mediaType == IMediaStoreFilesFileColumns::MEDIA_TYPE_NONE && !flag) {
+        if (mediaType == IMediaStoreFilesFileColumns::MEDIA_TYPE_NONE
+            && (msh->IsNoMediaPath(path, &flag), !flag)) {
             Int32 fileType;
             mf->GetFileTypeForMimeType(mimeType, &fileType);
             if ((mf->IsAudioFileType(fileType, &flag), flag)) {
@@ -3749,7 +3744,7 @@ ECode MediaProvider::InsertFile(
             }
         }
     }
-    values->Put(IMediaStoreFilesFileColumns::MEDIA_TYPE, mediaType);//
+    values->Put(IMediaStoreFilesFileColumns::MEDIA_TYPE, mediaType);
 
     if (rowId == 0) {
        if (mediaType == IMediaStoreFilesFileColumns::MEDIA_TYPE_PLAYLIST) {
@@ -3759,8 +3754,6 @@ ECode MediaProvider::InsertFile(
                 // MediaScanner will compute the name from the path if we have one
                 Logger::E(TAG, "no name was provided when inserting abstract playlist");
                 return E_ILLEGAL_ARGUMENT_EXCEPTION;
-                // throw new IllegalArgumentException(
-                //         "no name was provided when inserting abstract playlist");
             }
         }
         else {
@@ -3769,8 +3762,6 @@ ECode MediaProvider::InsertFile(
                 // or transfered via MTP
                 Logger::E(TAG, "no path was provided when inserting new file");
                 return E_ILLEGAL_ARGUMENT_EXCEPTION;
-                // throw new IllegalArgumentException(
-                //         "no path was provided when inserting new file");
             }
         }
 
@@ -3795,38 +3786,38 @@ ECode MediaProvider::InsertFile(
             }
         }
 
-        Int64 parent;
-        values->GetAsInt64(IMediaStoreFilesFileColumns::PARENT, &parent);
-        AutoPtr<IInteger64> ipatent = CoreUtils::Convert(parent);
-        if (ipatent == NULL) {
+        AutoPtr<IInteger64> parent;
+        values->GetAsInteger64(IMediaStoreFilesFileColumns::PARENT, (IInteger64**)&parent);
+        if (parent != NULL) {
             if (!path.IsNull()) {
                 Int64 parentId = GetParent(helper, db, path);
                 values->Put(IMediaStoreFilesFileColumns::PARENT, parentId);
             }
         }
 
-        Int32 storage;
-        values->GetAsInt32(IMediaStoreFilesFileColumns::STORAGE_ID, &storage);
-        AutoPtr<IInteger32> istorage = CoreUtils::Convert(storage);
-        if (istorage == NULL) {
+        AutoPtr<IInteger32> storage;
+        values->GetAsInteger32(IMediaStoreFilesFileColumns::STORAGE_ID, (IInteger32**)&storage);
+        if (storage == NULL) {
            Int32 storageId = GetStorageId(path);
            values->Put(IMediaStoreFilesFileColumns::STORAGE_ID, storageId);
         }
 
         helper->mNumInserts++;
         db->Insert(String("files"), IMediaStoreMediaColumns::DATE_MODIFIED, values, &rowId);
-        if (LOCAL_LOGV) Logger::V(TAG, "insertFile: values=%s returned: %ld", TO_CSTR(values), rowId);
+        if (LOCAL_LOGV) Logger::V(TAG, "insertFile: values=%s returned: %lld", TO_CSTR(values), rowId);
 
         if (rowId != -1 && notify) {
            AutoPtr<IInteger64> irowId = CoreUtils::Convert(rowId);
            notifyRowIds->Add(irowId);
         }
-    } else {
+    }
+    else {
         helper->mNumUpdates++;
         AutoPtr<ArrayOf<String> > sarr = ArrayOf<String>::Alloc(1);
         (*sarr)[0] = StringUtils::ToString(rowId);
+        StringBuilder sb(IBaseColumns::ID); sb += "=?";
         Int32 vol;
-        db->Update(String("files"), values, IBaseColumns::ID + String("=?"), sarr, &vol);
+        db->Update(String("files"), values, sb.ToString(), sarr, &vol);
     }
     if (format == IMtpConstants::FORMAT_ASSOCIATION) {
         (*mDirectoryCache)[path] = rowId;
@@ -3929,28 +3920,30 @@ Int32 MediaProvider::SetObjectReferences(
     Int32 count = values->GetLength();
     Int32 added = 0;
     AutoPtr<ArrayOf<IContentValues*> > valuesList = ArrayOf<IContentValues*>::Alloc(count);
+    String nullStr;
 
     for (Int32 i = 0; i < count; i++) {
-       // convert object ID to audio ID
-       Int64 audioId = 0;
-       Int64 objectId;
-       (*values)[i]->GetAsInt64(IBaseColumns::ID, &objectId);
-       helper->mNumQueries++;
-       c = NULL;
-       AutoPtr<ArrayOf<String> > r2 = ArrayOf<String>::Alloc(1);
-       (*r2)[0] = StringUtils::ToString(objectId);
-       db->Query(String("files"), sMediaTableColumns, String("_id=?"),
-               r2, String(NULL), String(NULL), String(NULL), (ICursor**)&c);
+        // convert object ID to audio ID
+        Int64 audioId = 0, objectId = 0;
+        AutoPtr<IInteger64> valObj;
+        (*values)[i]->GetAsInteger64(IBaseColumns::ID, (IInteger64**)&valObj);
+        valObj->GetValue(&objectId);
+        helper->mNumQueries++;
+        c = NULL;
+        AutoPtr<ArrayOf<String> > r2 = ArrayOf<String>::Alloc(1);
+        (*r2)[0] = StringUtils::ToString(objectId);
+        db->Query(String("files"), sMediaTableColumns, String("_id=?"),
+            r2, nullStr, nullStr, nullStr, (ICursor**)&c);
        // try {
-           if (c != NULL && (c->MoveToNext(&flag), flag)) {
-               Int32 mediaType;
-               c->GetInt32(1, &mediaType);
-               if (mediaType != IMediaStoreFilesFileColumns::MEDIA_TYPE_AUDIO) {
-                   // we only allow audio files in playlists, so skip
-                   continue;
-               }
-               c->GetInt64(0, &audioId);
-           }
+        if (c != NULL && (c->MoveToNext(&flag), flag)) {
+            Int32 mediaType;
+            c->GetInt32(1, &mediaType);
+            if (mediaType != IMediaStoreFilesFileColumns::MEDIA_TYPE_AUDIO) {
+                // we only allow audio files in playlists, so skip
+                continue;
+            }
+            c->GetInt64(0, &audioId);
+        }
        // } finally {
 
            // ioUtils->CloseQuietly(ICloseable:Probe(c));
@@ -4045,19 +4038,24 @@ ECode MediaProvider::InsertInternal(
     /* [in] */ IArrayList* notifyRowIds,
     /* [out] */ IUri** result)
 {
-    String volumeName = GetVolumeName(uri);
+    VALIDATE_NOT_NULL(result)
+    *result = NULL;
 
+    String volumeName = GetVolumeName(uri);
     Int64 rowId;
 
-    if (LOCAL_LOGV) Logger::V(TAG, "insertInternal: %s, initValues=%s", TO_CSTR(uri), TO_CSTR(initialValues));
+    if (LOCAL_LOGV) Logger::V(TAG, "volumeName: %s, insertInternal: %s, initValues=%s",
+        volumeName.string(), TO_CSTR(uri), TO_CSTR(initialValues));
+
+    AutoPtr<IUriHelper> uh;
+    CUriHelper::AcquireSingleton((IUriHelper**)&uh);
 
     // handle MEDIA_SCANNER before calling getDatabaseForUri()
     if (match == MEDIA_SCANNER) {
         initialValues->GetAsString(IMediaStore::MEDIA_SCANNER_VOLUME, &mMediaScannerVolume);
+        StringBuilder sb("content://media/"); sb += mMediaScannerVolume; sb += "/audio";
         AutoPtr<IUri> iuri;
-        AutoPtr<IUriHelper> uh;
-        CUriHelper::AcquireSingleton((IUriHelper**)&uh);
-        uh->Parse(String("content://media/")+ mMediaScannerVolume + "/audio", (IUri**)&iuri);
+        uh->Parse(sb.ToString(), (IUri**)&iuri);
         AutoPtr<IDatabaseHelper> database;
         GetDatabaseForUri(iuri, (IDatabaseHelper**)&database);
         if (database == NULL) {
@@ -4089,8 +4087,6 @@ ECode MediaProvider::InsertInternal(
     if (helper == NULL && match != VOLUMES && match != MTP_CONNECTED) {
         Logger::E(TAG, "Unknown URI: %s", TO_CSTR(uri));
         return E_UNSUPPORTED_OPERATION_EXCEPTION;
-        // throw new UnsupportedOperationException(
-        //         "Unknown URI: " + uri);
     }
 
     DatabaseHelper* dbh = (DatabaseHelper*)helper.Get();
@@ -4124,7 +4120,12 @@ ECode MediaProvider::InsertInternal(
                 mim->GetContentUri(volumeName, (IUri**)&iiuri);
                 icu->WithAppendedId(iiuri, rowId, (IUri**)&newUri);
             }
-           break;
+            else {
+                if (LOCAL_LOGV) {
+                    Logger::W(TAG, "Failed to insert images %s, initValues: %s", TO_CSTR(uri), TO_CSTR(initialValues));
+                }
+            }
+            break;
         }
 
          // This will be triggered by requestMediaThumbnail (see getThumbnailUri)
@@ -4139,6 +4140,11 @@ ECode MediaProvider::InsertInternal(
                 CMediaStoreImagesThumbnails::AcquireSingleton((IMediaStoreImagesThumbnails**)&mit);
                 mit->GetContentUri(volumeName, (IUri**)&tUri);
                 icu->WithAppendedId(tUri, rowId, (IUri**)&newUri);
+            }
+            else {
+                if (LOCAL_LOGV) {
+                    Logger::W(TAG, "Failed to insert thumbnails, initValues: %s", TO_CSTR(values));
+                }
             }
             break;
         }
@@ -4155,6 +4161,11 @@ ECode MediaProvider::InsertInternal(
                 AutoPtr<IUri> iiuri;
                 mvt->GetContentUri(volumeName, (IUri**)&iiuri);
                 icu->WithAppendedId(iiuri, rowId, (IUri**)&newUri);
+            }
+            else {
+                if (LOCAL_LOGV) {
+                    Logger::W(TAG, "Failed to insert videothumbnails, initValues: %s", TO_CSTR(values));
+                }
             }
             break;
         }
@@ -4174,14 +4185,17 @@ ECode MediaProvider::InsertInternal(
                     UpdateGenre(rowId, genre);
                 }
             }
+            else {
+                if (LOCAL_LOGV) {
+                    Logger::W(TAG, "Failed to insert audio %s, initValues: %s", TO_CSTR(uri), TO_CSTR(initialValues));
+                }
+            }
             break;
         }
 
         case AUDIO_MEDIA_ID_GENRES: {
             list->Get(2, (IInterface**)&obj);
-            cs = ICharSequence::Probe(obj);
-            cs->ToString(&tmp);
-            Int64 audioId = StringUtils::ParseInt64(tmp);
+            Int64 audioId = StringUtils::ParseInt64(TO_STR(obj));
             AutoPtr<IContentValues> values;
             CContentValues::New(initialValues, (IContentValues**)&values);
             values->Put(IMediaStoreAudioGenresMembers::AUDIO_ID, audioId);
@@ -4190,14 +4204,17 @@ ECode MediaProvider::InsertInternal(
             if (rowId > 0) {
                 icu->WithAppendedId(uri, rowId, (IUri**)&newUri);
             }
+            else {
+                if (LOCAL_LOGV) {
+                    Logger::W(TAG, "Failed to insert audio_genres_map, initValues: %s", TO_CSTR(values));
+                }
+            }
             break;
         }
 
         case AUDIO_MEDIA_ID_PLAYLISTS: {
             list->Get(2, (IInterface**)&obj);
-            cs = ICharSequence::Probe(obj);
-            cs->ToString(&tmp);
-            Int64 audioId = StringUtils::ParseInt64(tmp);
+            Int64 audioId = StringUtils::ParseInt64(TO_STR(obj));
             AutoPtr<IContentValues> values;
             CContentValues::New(initialValues, (IContentValues**)&values);
             values->Put(IMediaStoreAudioPlaylistsMembers::AUDIO_ID, audioId);
@@ -4206,6 +4223,11 @@ ECode MediaProvider::InsertInternal(
                     values, &rowId);
             if (rowId > 0) {
                 icu->WithAppendedId(uri, rowId, (IUri**)&newUri);
+            }
+            else {
+                if (LOCAL_LOGV) {
+                    Logger::W(TAG, "Failed to insert audio_playlists_map, initValues: %s", TO_CSTR(values));
+                }
             }
             break;
         }
@@ -4220,14 +4242,17 @@ ECode MediaProvider::InsertInternal(
                 msag->GetContentUri(volumeName, (IUri**)&iiuri);
                 icu->WithAppendedId(iiuri, rowId, (IUri**)&newUri);
             }
+            else {
+                if (LOCAL_LOGV) {
+                    Logger::W(TAG, "Failed to insert audio_genres, initValues: %s", TO_CSTR(initialValues));
+                }
+            }
             break;
         }
 
         case AUDIO_GENRES_ID_MEMBERS: {
             list->Get(3, (IInterface**)&obj);
-            cs = ICharSequence::Probe(obj);
-            cs->ToString(&tmp);
-            Int64 genreId = StringUtils::ParseInt64(tmp);
+            Int64 genreId = StringUtils::ParseInt64(TO_STR(obj));
             AutoPtr<IContentValues> values;
             CContentValues::New(initialValues, (IContentValues**)&values);
             values->Put(IMediaStoreAudioGenresMembers::GENRE_ID, genreId);
@@ -4235,6 +4260,11 @@ ECode MediaProvider::InsertInternal(
             db->Insert(String("audio_genres_map"), String("genre_id"), values, &rowId);
             if (rowId > 0) {
                 icu->WithAppendedId(uri, rowId, (IUri**)&newUri);
+            }
+            else {
+                if (LOCAL_LOGV) {
+                    Logger::W(TAG, "Failed to insert audio_genres_map, initValues: %s", TO_CSTR(values));
+                }
             }
             break;
         }
@@ -4255,15 +4285,18 @@ ECode MediaProvider::InsertInternal(
                 msap->GetContentUri(volumeName, (IUri**)&iiuri);
                 icu->WithAppendedId(iiuri, rowId, (IUri**)&newUri);
             }
+            else {
+                if (LOCAL_LOGV) {
+                    Logger::W(TAG, "Failed to insert audio playlist %s, initValues: %s", TO_CSTR(uri), TO_CSTR(values));
+                }
+            }
             break;
         }
 
         case AUDIO_PLAYLISTS_ID:
         case AUDIO_PLAYLISTS_ID_MEMBERS: {
             list->Get(3, (IInterface**)&obj);
-            cs = ICharSequence::Probe(obj);
-            cs->ToString(&tmp);
-            Int64 playlistId = StringUtils::ParseInt64(tmp);
+            Int64 playlistId = StringUtils::ParseInt64(TO_STR(obj));
             AutoPtr<IContentValues> values;
             CContentValues::New(initialValues, (IContentValues**)&values);
             values->Put(IMediaStoreAudioPlaylistsMembers::PLAYLIST_ID, playlistId);
@@ -4272,12 +4305,17 @@ ECode MediaProvider::InsertInternal(
             if (rowId > 0) {
                 icu->WithAppendedId(uri, rowId, (IUri**)&newUri);
             }
+            else {
+                if (LOCAL_LOGV) {
+                    Logger::W(TAG, "Failed to insert %s, initValues: %s", "audio_playlists_map", TO_CSTR(values));
+                }
+            }
             break;
         }
 
         case VIDEO_MEDIA: {
             InsertFile(dbh, uri, initialValues,
-                   IMediaStoreFilesFileColumns::MEDIA_TYPE_VIDEO, TRUE, notifyRowIds, &rowId);
+                IMediaStoreFilesFileColumns::MEDIA_TYPE_VIDEO, TRUE, notifyRowIds, &rowId);
             if (rowId > 0) {
                 MediaDocumentsProvider::OnMediaStoreInsert(
                         context, volumeName, IMediaStoreFilesFileColumns::MEDIA_TYPE_VIDEO, rowId);
@@ -4286,6 +4324,11 @@ ECode MediaProvider::InsertInternal(
                 CMediaStoreVideoMedia::AcquireSingleton((IMediaStoreVideoMedia**)&msvm);
                 msvm->GetContentUri(volumeName, (IUri**)&iiuri);
                 icu->WithAppendedId(iiuri, rowId, (IUri**)&newUri);
+            }
+            else {
+                if (LOCAL_LOGV) {
+                    Logger::W(TAG, "Failed to insert video %s, initValues: %s", TO_CSTR(uri), TO_CSTR(initialValues));
+                }
             }
             break;
         }
@@ -4297,18 +4340,20 @@ ECode MediaProvider::InsertInternal(
                // throw new UnsupportedOperationException("no internal album art allowed");
             }
             AutoPtr<IContentValues> values;
-           // try {
-               ECode ec = EnsureFile(FALSE, initialValues, String(""), ALBUM_THUMB_FOLDER, (IContentValues**)&values);
-               if(ec == (ECode)E_ILLEGAL_STATE_EXCEPTION) {
-           // } catch (IllegalStateException ex) {
-                   // probably no more room to store albumthumbs
-                   values = initialValues;
-               }
-           // }
+            ECode ec = EnsureFile(FALSE, initialValues, String(""), ALBUM_THUMB_FOLDER, (IContentValues**)&values);
+            if(ec == (ECode)E_ILLEGAL_STATE_EXCEPTION) {
+                // probably no more room to store albumthumbs
+                values = initialValues;
+            }
             dbh->mNumInserts++;
             db->Insert(String("album_art"), IMediaStoreMediaColumns::DATA, values, &rowId);
             if (rowId > 0) {
                icu->WithAppendedId(uri, rowId, (IUri**)&newUri);
+            }
+            else {
+                if (LOCAL_LOGV) {
+                    Logger::W(TAG, "Failed to insert %s, initValues: %s", "album_art", TO_CSTR(values));
+                }
             }
             break;
         }
@@ -4323,7 +4368,8 @@ ECode MediaProvider::InsertInternal(
                GetDatabaseForUri(attachedVolume, (IDatabaseHelper**)&dbhelper);
                if (dbhelper == NULL) {
                    Logger::E(TAG, "no database for attached volume %s", TO_CSTR(attachedVolume));
-               } else {
+               }
+               else {
                    ((DatabaseHelper*)dbhelper.Get())->mScanStartTime = SystemClock::GetCurrentTimeMicro();
                }
            }
@@ -4336,41 +4382,56 @@ ECode MediaProvider::InsertInternal(
             {
                 AutoLock syncLock(mMtpServiceConnection);
                 if (mMtpService == NULL) {
-                   AutoPtr<IContext> context;
-                   GetContext((IContext**)&context);
-                   // MTP is connected, so grab a connection to MtpService
-                   AutoPtr<IIntent> obj;
+                    AutoPtr<IContext> context;
+                    GetContext((IContext**)&context);
+                    // MTP is connected, so grab a connection to MtpService
+                    AutoPtr<IIntent> obj;
                     CIntent::New(context, ECLSID_CMtpService, (IIntent**)&obj);
-                   context->BindService(obj, mMtpServiceConnection, IContext::BIND_AUTO_CREATE, &flag);
-               }
+                    context->BindService(obj, mMtpServiceConnection, IContext::BIND_AUTO_CREATE, &flag);
+                }
             }
-           break;
+            break;
 
         case FILES:
-           InsertFile(dbh, uri, initialValues,
+            InsertFile(dbh, uri, initialValues,
                    IMediaStoreFilesFileColumns::MEDIA_TYPE_NONE, TRUE, notifyRowIds, &rowId);
-           if (rowId > 0) {
-              AutoPtr<IMediaStoreFiles> msf;
-              CMediaStoreFiles::AcquireSingleton((IMediaStoreFiles**)&msf);
-              msf->GetContentUri(volumeName, rowId, (IUri**)&newUri);
-           }
-           break;
+            if (rowId > 0) {
+                AutoPtr<IMediaStoreFiles> msf;
+                CMediaStoreFiles::AcquireSingleton((IMediaStoreFiles**)&msf);
+                msf->GetContentUri(volumeName, rowId, (IUri**)&newUri);
+            }
+            else {
+                if (LOCAL_LOGV) {
+                    Logger::W(TAG, "Failed to insert files %s, initValues: %s", TO_CSTR(uri), TO_CSTR(initialValues));
+                }
+            }
+            break;
 
         case MTP_OBJECTS:
-           // We don't send a notification if the insert originated from MTP
-           InsertFile(dbh, uri, initialValues,
+            // We don't send a notification if the insert originated from MTP
+            InsertFile(dbh, uri, initialValues,
                    IMediaStoreFilesFileColumns::MEDIA_TYPE_NONE, FALSE, notifyRowIds, &rowId);
-           if (rowId > 0) {
-              AutoPtr<IMediaStoreFiles> msf;
-              CMediaStoreFiles::AcquireSingleton((IMediaStoreFiles**)&msf);
-              msf->GetMtpObjectsUri(volumeName, rowId, (IUri**)&newUri);
-           }
-           break;
+            if (rowId > 0) {
+                AutoPtr<IMediaStoreFiles> msf;
+                CMediaStoreFiles::AcquireSingleton((IMediaStoreFiles**)&msf);
+                msf->GetMtpObjectsUri(volumeName, rowId, (IUri**)&newUri);
+            }
+            else {
+                if (LOCAL_LOGV) {
+                    Logger::W(TAG, "Failed to insert objects %s, initValues: %s", TO_CSTR(uri), TO_CSTR(initialValues));
+                }
+            }
+            break;
 
         case MEDIA_BOOKMARK: {
             db->Insert(String("bookmarks"), String("mime_type"), initialValues, &rowId);
             if (rowId > 0) {
                icu->WithAppendedId(uri, rowId, (IUri**)&newUri);
+            }
+            else {
+                if (LOCAL_LOGV) {
+                    Logger::W(TAG, "Failed to insert bookmarks %s, initValues: %s", "bookmarks", TO_CSTR(initialValues));
+                }
             }
             break;
         }
@@ -4397,9 +4458,10 @@ void MediaProvider::ProcessNewNoMediaPath(
     AutoPtr<IFile> nomedia;
     CFile::New(path, (IFile**)&nomedia);
     Boolean flag = FALSE;
-    if ((nomedia->Exists(&flag), flag)) {
+    if (nomedia->Exists(&flag), flag) {
        HidePath(helper, db, path);
-    } else {
+    }
+    else {
        // File doesn't exist. Try again in a little while.
        // XXX there's probably a better way of doing this
        AutoPtr<MyThread> myThread = new MyThread(this, nomedia, helper, db, path);
@@ -4504,35 +4566,32 @@ Boolean MediaProvider::EnsureFileExists(
     file->Exists(&flag);
     if (flag) {
        return TRUE;
-    } else {
-       // try {
-           CheckAccess(uri, file,
-                   IParcelFileDescriptor::MODE_READ_WRITE | IParcelFileDescriptor::MODE_CREATE);
-       // } catch (FileNotFoundException e) {
-           return FALSE;
-       // }
-       // we will not attempt to create the first directory in the path
-       // (for example, do not create /sdcard if the SD card is not mounted)
-       Int32 secondSlash = path.IndexOf('/', 1);
-       if (secondSlash < 1) return FALSE;
-       String directoryPath = path.Substring(0, secondSlash);
-       AutoPtr<IFile> directory;
-       CFile::New(directoryPath, (IFile**)&directory);
-       directory->Exists(&flag);
-       if (!flag) return FALSE;
-       AutoPtr<IFile> parentFile;
-       file->GetParentFile((IFile**)&parentFile);
-       parentFile->Mkdirs(&flag);
-       // try {
-          ECode ec = file->CreateNewFile(&flag);
-           return flag;
-       // } catch(IOException ioe) {
-           if (ec == (ECode)E_IO_EXCEPTION) {
-               Logger::E(TAG, "File creation failed");
-           }
-       // }
+    }
+
+    ECode ec = CheckAccess(uri, file,
+        IParcelFileDescriptor::MODE_READ_WRITE | IParcelFileDescriptor::MODE_CREATE);
+    if (FAILED(ec)) {
        return FALSE;
     }
+
+    // we will not attempt to create the first directory in the path
+    // (for example, do not create /sdcard if the SD card is not mounted)
+    Int32 secondSlash = path.IndexOf('/', 1);
+    if (secondSlash < 1) return FALSE;
+    String directoryPath = path.Substring(0, secondSlash);
+    AutoPtr<IFile> directory;
+    CFile::New(directoryPath, (IFile**)&directory);
+    directory->Exists(&flag);
+    if (!flag) return FALSE;
+    AutoPtr<IFile> parentFile;
+    file->GetParentFile((IFile**)&parentFile);
+    parentFile->Mkdirs(&flag);
+    ec = file->CreateNewFile(&flag);
+    if (FAILED(ec)) {
+        Logger::E(TAG, "File creation failed. %s", path.string());
+        return FALSE;
+    }
+    return flag;
 }
 
 void MediaProvider::GetTableAndWhere(
@@ -4862,13 +4921,11 @@ ECode MediaProvider::Update(
                AutoPtr<ICursor> cursor;
                db->Query(sGetTableAndWhereParam->mTable, PATH_PROJECTION,
                    userWhere, whereArgs, String(NULL), String(NULL), String(NULL), (ICursor**)&cursor);
-               // try {
-                   if (cursor != NULL && (cursor->MoveToNext(&flag), flag)) {
-                       cursor->GetString(1, &oldPath);
-                   }
-               // } finally {
-                   ioUtils->CloseQuietly(ICloseable::Probe(cursor));
-               // }
+               if (cursor != NULL && (cursor->MoveToNext(&flag), flag)) {
+                   cursor->GetString(1, &oldPath);
+               }
+                if (cursor) ioUtils->CloseQuietly(ICloseable::Probe(cursor));
+
                if (!oldPath.IsNull()) {
                    mDirectoryCache->Erase(oldPath);
                    // first rename the row for the directory
@@ -4938,8 +4995,8 @@ ECode MediaProvider::Update(
                    // Insert the artist into the artist table and remove it from
                    // the input values
                    String artist;
-                   values->GetAsString(String("artist"), &artist);
-                   values->Remove(String("artist"));
+                   values->GetAsString(artist, &artist);
+                   values->Remove(artist);
                    if (!artist.IsNull()) {
                         Int64 artistRowId;
                         {
@@ -4949,7 +5006,7 @@ ECode MediaProvider::Update(
                             AutoPtr<IInteger64> it = CoreUtils::Convert(temp);
                             if (it == NULL) {
                                 artistRowId = GetKeyIdForName(dbh, db,
-                                       String("artists"), String("artist_key"), String("artist"),
+                                       String("artists"), String("artist_key"), artist,
                                        artist, artist, String(NULL), 0, String(NULL), artistCache, uri);
                             } else {
                                 artistRowId = temp;
@@ -5120,21 +5177,17 @@ ECode MediaProvider::Update(
                       String key = IMediaStoreAudioPlaylistsMembers::PLAY_ORDER;
                       if ((initialValues->ContainsKey(key, &flag), flag)) {
                           Int32 newpos;
-                          initialValues->GetAsInt32(key, &newpos);
+                          AutoPtr<IInteger32> newposObj;
+                          initialValues->GetAsInteger32(key, (IInteger32**)&newposObj);
+                          newposObj->GetValue(&newpos);
                           AutoPtr<IList> segments;
                           uri->GetPathSegments((IList**)&segments);
                           AutoPtr<IInterface> obj;
                           segments->Get(3, (IInterface**)&obj);
-                          AutoPtr<ICharSequence> cs = ICharSequence::Probe(obj);
-                          String tmp;
-                          cs->ToString(&tmp);
-                          Int64 playlist = StringUtils::ParseInt64(tmp);
+                          Int64 playlist = StringUtils::ParseInt64(TO_STR(obj));
                           obj = NULL;
                           segments->Get(5, (IInterface**)&obj);
-                          cs = NULL;
-                          cs = ICharSequence::Probe(obj);
-                          cs->ToString(&tmp);
-                          Int32 oldpos = StringUtils::ParseInt64(tmp);
+                          Int32 oldpos = StringUtils::ParseInt64(TO_STR(obj));
                           *result = MovePlaylistEntry(dbh, db, playlist, oldpos, newpos);
                           return NOERROR;
                     }
@@ -5275,6 +5328,9 @@ ECode MediaProvider::OpenFile(
     /* [in] */ const String& mode,
     /* [out] */ IParcelFileDescriptor** result)
 {
+    VALIDATE_NOT_NULL(result)
+    *result = NULL;
+
     uri = SafeUncanonicalize(uri);
     AutoPtr<IParcelFileDescriptor> pfd;
     ECode ec = NOERROR;
@@ -5283,139 +5339,116 @@ ECode MediaProvider::OpenFile(
 
     Int32 match;
     Boolean flag = FALSE;
-
+    String nullStr;
     if ((GetURI_MATCHER()->Match(uri, &match), match == AUDIO_ALBUMART_FILE_ID)) {
-       // get album art for the specified media file
-       AutoPtr<IDatabaseHelper> database;
-       GetDatabaseForUri(uri, (IDatabaseHelper**)&database);
-       if (database == NULL) {
-           Logger::E(TAG, "Couldn't open database for %p", uri);
-           return E_ILLEGAL_STATE_EXCEPTION;
-       }
-       AutoPtr<ISQLiteDatabase> db;
-       ((DatabaseHelper*)(database.Get()))->GetReadableDatabase((ISQLiteDatabase**)&db);//
+        // get album art for the specified media file
+        AutoPtr<IDatabaseHelper> database;
+        GetDatabaseForUri(uri, (IDatabaseHelper**)&database);
+        if (database == NULL) {
+            Logger::E(TAG, "Couldn't open database for %s", TO_CSTR(uri));
+            return E_ILLEGAL_STATE_EXCEPTION;
+        }
+        AutoPtr<ISQLiteDatabase> db;
+        ((DatabaseHelper*)(database.Get()))->GetReadableDatabase((ISQLiteDatabase**)&db);//
 
-       if (db == NULL) {
-           Logger::E(TAG, "Couldn't open database for %p", uri);
-           return E_ILLEGAL_STATE_EXCEPTION;
-           // throw new IllegalStateException("Couldn't open database for " + uri);
-       }
-       AutoPtr<ISQLiteQueryBuilder> qb;
-       CSQLiteQueryBuilder::New((ISQLiteQueryBuilder**)&qb);
-       AutoPtr<IList> list;
-       uri->GetPathSegments((IList**)&list);
-       AutoPtr<IInterface> obj;
-       list->Get(3, (IInterface**)&obj);
-       AutoPtr<ICharSequence> cs = ICharSequence::Probe(obj);
-       String tmp;
-       cs->ToString(&tmp);
-       Int32 songid = StringUtils::ParseInt32(tmp);
-       qb->SetTables(String("audio_meta"));
-       StringBuilder sb("_id="); sb += songid;
-       qb->AppendWhere(CoreUtils::Convert(sb.ToString()));
-       AutoPtr<ICursor> c;
-       AutoPtr<ArrayOf<String> > arr1 = ArrayOf<String>::Alloc(2);
-       (*arr1)[0] = IMediaStoreMediaColumns::DATA;
-       (*arr1)[1] = IMediaStoreAudioAlbumColumns::ALBUM_ID;
-       qb->Query(db,
-               arr1,
-               String(NULL), NULL, String(NULL), String(NULL), String(NULL), (ICursor**)&c);
-       // try {
+        if (db == NULL) {
+            Logger::E(TAG, "Couldn't open database for %s", TO_CSTR(uri));
+            return E_ILLEGAL_STATE_EXCEPTION;
+        }
+        AutoPtr<ISQLiteQueryBuilder> qb;
+        CSQLiteQueryBuilder::New((ISQLiteQueryBuilder**)&qb);
+        AutoPtr<IList> list;
+        uri->GetPathSegments((IList**)&list);
+        AutoPtr<IInterface> obj;
+        list->Get(3, (IInterface**)&obj);
+        Int32 songid = StringUtils::ParseInt32(TO_STR(obj));
+        qb->SetTables(String("audio_meta"));
+        StringBuilder sb("_id="); sb += songid;
+        qb->AppendWhere(CoreUtils::Convert(sb.ToString()));
+        AutoPtr<ICursor> c;
+        AutoPtr<ArrayOf<String> > arr1 = ArrayOf<String>::Alloc(2);
+        (*arr1)[0] = IMediaStoreMediaColumns::DATA;
+        (*arr1)[1] = IMediaStoreAudioAlbumColumns::ALBUM_ID;
+        qb->Query(db, arr1, nullStr, NULL, nullStr, nullStr, nullStr, (ICursor**)&c);
+        // try {
+        if ((c->MoveToFirst(&flag), flag)) {
+            String audiopath;
+            Int32 albumid;
+            c->GetString(0, &audiopath);
+            c->GetInt32(1, &albumid);
+            // Try to get existing album art for this album first, which
+            // could possibly have been obtained from a different file.
+            // If that fails, try to get it from this specific file.
+            AutoPtr<IUri> newUri;
+            AutoPtr<IContentUris> cus;
+            CContentUris::AcquireSingleton((IContentUris**)&cus);
+            cus->WithAppendedId(ALBUMART_URI, albumid, (IUri**)&newUri);
+            // try {
+            ec = OpenFileAndEnforcePathPermissionsHelper(newUri, mode, (IParcelFileDescriptor**)&pfd);
+            if (FAILED(ec)) {
+               // That didn't work, now try to get it from the specific file
+               pfd = GetThumb(((DatabaseHelper*)(database.Get())), db, audiopath, (Int64)albumid, NULL);
+            }
+        }
 
-           if ((c->MoveToFirst(&flag), flag)) {
-               String audiopath;
-               c->GetString(0, &audiopath);
-               Int32 albumid;
-               c->GetInt32(1, &albumid);
-               // Try to get existing album art for this album first, which
-               // could possibly have been obtained from a different file.
-               // If that fails, try to get it from this specific file.
-               AutoPtr<IUri> newUri;
-               AutoPtr<IContentUris> cus;
-               CContentUris::AcquireSingleton((IContentUris**)&cus);
-               cus->WithAppendedId(ALBUMART_URI, albumid, (IUri**)&newUri);
-               // try {
-                  ec = OpenFileAndEnforcePathPermissionsHelper(newUri, mode, (IParcelFileDescriptor**)&pfd);
-               // } catch (FileNotFoundException ex) {
-                   // That didn't work, now try to get it from the specific file
-                   if(ec == (ECode)E_FILE_NOT_FOUND_EXCEPTION) {//
-
-                   }
-                   pfd = GetThumb(((DatabaseHelper*)(database.Get())), db, audiopath, (Int64)albumid, NULL);
-               // }
-           }
-       // } finally {
-           // ioUtils->CloseQuietly(ICloseable::Probe(c));
-       // }
-       *result = pfd;
-       REFCOUNT_ADD(*result);
-       ioUtils->CloseQuietly(ICloseable::Probe(c));
-       return NOERROR;
+        *result = pfd;
+        REFCOUNT_ADD(*result);
+        ioUtils->CloseQuietly(ICloseable::Probe(c));
+        return NOERROR;
     }
 
-    // try {
-       ec = OpenFileAndEnforcePathPermissionsHelper(uri, mode, (IParcelFileDescriptor**)&pfd);
-    // } catch (FileNotFoundException ex) {
-       if(ec == (ECode)E_FILE_NOT_FOUND_EXCEPTION) {
-           if (mode.Contains("w")) {
-           // if the file couldn't be created, we shouldn't extract album art
-           return E_FILE_NOT_FOUND_EXCEPTION;
-       }
+    ec = OpenFileAndEnforcePathPermissionsHelper(uri, mode, (IParcelFileDescriptor**)&pfd);
+    if (FAILED(ec)) {
+        if (mode.Contains("w")) {
+            // if the file couldn't be created, we shouldn't extract album art
+            return E_FILE_NOT_FOUND_EXCEPTION;
+        }
 
-       Int32 match;
-       GetURI_MATCHER()->Match(uri, &match);
-       if (match == AUDIO_ALBUMART_ID) {
-           // Tried to open an album art file which does not exist. Regenerate.
-           AutoPtr<IDatabaseHelper> database;
-           GetDatabaseForUri(uri, (IDatabaseHelper**)&database);
-           if (database == NULL) {
+        Int32 match;
+        GetURI_MATCHER()->Match(uri, &match);
+        if (match == AUDIO_ALBUMART_ID) {
+            // Tried to open an album art file which does not exist. Regenerate.
+            AutoPtr<IDatabaseHelper> database;
+            GetDatabaseForUri(uri, (IDatabaseHelper**)&database);
+            if (database == NULL) {
                return E_FILE_NOT_FOUND_EXCEPTION;
-           }
-           AutoPtr<ISQLiteDatabase> db;
-           ((DatabaseHelper*)(database.Get()))->GetReadableDatabase((ISQLiteDatabase**)&db);
-           if (db == NULL) {
-               Logger::E(TAG, "Couldn't open database for %p", uri);
-               return E_ILLEGAL_STATE_EXCEPTION;
-               // throw new IllegalStateException("Couldn't open database for " + uri);
-           }
-           AutoPtr<ISQLiteQueryBuilder> qb;
-           CSQLiteQueryBuilder::New((ISQLiteQueryBuilder**)&qb);
-           AutoPtr<IList> list;
-           uri->GetPathSegments((IList**)&list);
-           AutoPtr<IInterface> obj;
-           list->Get(3, (IInterface**)&obj);
-           AutoPtr<ICharSequence> cs = ICharSequence::Probe(obj);
-           String tmp;
-           cs->ToString(&tmp);
-           Int32 albumid = StringUtils::ParseInt32(tmp);
-           qb->SetTables(String("audio_meta"));
-           StringBuilder sb("album_id=");
-           sb += albumid;
-           qb->AppendWhere(CoreUtils::Convert(sb.ToString()));
-           AutoPtr<ICursor> c;
-           AutoPtr<ArrayOf<String> > array = ArrayOf<String>::Alloc(1);
-           (*array)[0] = IMediaStoreMediaColumns::DATA;//
+            }
+            AutoPtr<ISQLiteDatabase> db;
+            ((DatabaseHelper*)(database.Get()))->GetReadableDatabase((ISQLiteDatabase**)&db);
+            if (db == NULL) {
+                Logger::E(TAG, "Couldn't open database for %s", TO_CSTR(uri));
+                return E_ILLEGAL_STATE_EXCEPTION;
+            }
+            AutoPtr<ISQLiteQueryBuilder> qb;
+            CSQLiteQueryBuilder::New((ISQLiteQueryBuilder**)&qb);
+            AutoPtr<IList> list;
+            uri->GetPathSegments((IList**)&list);
+            AutoPtr<IInterface> obj;
+            list->Get(3, (IInterface**)&obj);
+            Int32 albumid = StringUtils::ParseInt32(TO_STR(obj));
+            qb->SetTables(String("audio_meta"));
+            StringBuilder sb("album_id=");
+            sb += albumid;
+            qb->AppendWhere(CoreUtils::Convert(sb.ToString()));
 
-           qb->Query(db, array, String(NULL), NULL, String(NULL),
-               String(NULL), IMediaStoreAudioAudioColumns::TRACK, (ICursor**)&c);
-           // try {
-               if ((c->MoveToFirst(&flag), flag)) {
-                   String audiopath;
-                   c->GetString(0, &audiopath);
-                   pfd = GetThumb(((DatabaseHelper*)(database.Get())), db, audiopath, albumid, uri);
-               }
-           // } finally {//
+            AutoPtr<ArrayOf<String> > array = ArrayOf<String>::Alloc(1);
+            (*array)[0] = IMediaStoreMediaColumns::DATA;//
+            AutoPtr<ICursor> c;
+            qb->Query(db, array, String(NULL), NULL, String(NULL),
+                String(NULL), IMediaStoreAudioAudioColumns::TRACK, (ICursor**)&c);
+            if ((c->MoveToFirst(&flag), flag)) {
+                String audiopath;
+                c->GetString(0, &audiopath);
+                pfd = GetThumb(((DatabaseHelper*)(database.Get())), db, audiopath, albumid, uri);
+            }
 
-               ioUtils->CloseQuietly(ICloseable::Probe(c));
-           // }
-       }
-       if (pfd == NULL) {
-           return E_FILE_NOT_FOUND_EXCEPTION;
-       }
+            ioUtils->CloseQuietly(ICloseable::Probe(c));
+        }
+        if (pfd == NULL) {
+            return E_FILE_NOT_FOUND_EXCEPTION;
+        }
+    }
 
-       }
-
-    // }
     *result = pfd;
     REFCOUNT_ADD(*result);
     return NOERROR;
@@ -5483,12 +5516,12 @@ ECode MediaProvider::OpenFileAndEnforcePathPermissionsHelper(
 
     AutoPtr<IFile> file = QueryForDataFile(uri);//
 
-    CheckAccess(uri, file, modeBits);//
+    FAIL_RETURN(CheckAccess(uri, file, modeBits))
 
     // Bypass emulation layer when file is opened for reading, but only
     // when opening read-only and we have an exact match.
     if (modeBits == IParcelFileDescriptor::MODE_READ_ONLY) {
-       file = Environment::MaybeTranslateEmulatedPathToInternal(file);
+        file = Environment::MaybeTranslateEmulatedPathToInternal(file);
     }
 
     return pfh->Open(file, modeBits, result);
@@ -5498,30 +5531,29 @@ void MediaProvider::DeleteIfAllowed(
     /* [in] */ IUri* uri,
     /* [in] */ const String& path)
 {
-    // try {
-       AutoPtr<IFile> file;
-       CFile::New(path, (IFile**)&file);
-       CheckAccess(uri, file, IParcelFileDescriptor::MODE_WRITE_ONLY);
-       file->Delete();
-    // } catch (Exception e) {
-       // Log.e(TAG, "Couldn't delete " + path);
-    // }
+    AutoPtr<IFile> file;
+    CFile::New(path, (IFile**)&file);
+    ECode ec = CheckAccess(uri, file, IParcelFileDescriptor::MODE_WRITE_ONLY);
+    if (FAILED(ec)) {
+        Logger::E(TAG, "Couldn't delete %s", path.string());
+        return;
+   }
+
+   file->Delete();
 }
 
-void MediaProvider::CheckAccess(
+ECode MediaProvider::CheckAccess(
     /* [in] */ IUri* uri,
     /* [in] */ IFile* file,
     /* [in] */ Int32 modeBits)
 {
     Boolean isWrite = (modeBits & IParcelFileDescriptor::MODE_WRITE_ONLY) != 0;
     String path;
-    // try {
-       file->GetCanonicalPath(&path);
-    // } catch (IOException e) {
-       Logger::E(TAG, "Unable to resolve canonical path for %p", file);
-       return;
-       // throw new IllegalArgumentException("Unable to resolve canonical path for " + file, e);
-    // }
+    ECode ec = file->GetCanonicalPath(&path);
+    if (FAILED(ec)) {
+        Logger::E(TAG, "Unable to resolve canonical path for %s", TO_CSTR(file));
+        return E_ILLEGAL_ARGUMENT_EXCEPTION;
+    }
 
     AutoPtr<IContext> c;
     GetContext((IContext**)&c);
@@ -5529,51 +5561,57 @@ void MediaProvider::CheckAccess(
     Boolean writeGranted = FALSE;
     Int32 vol;
     if (isWrite) {
-       c->CheckCallingOrSelfUriPermission(uri, IIntent::FLAG_GRANT_WRITE_URI_PERMISSION, &vol);
-       writeGranted = vol == IPackageManager::PERMISSION_GRANTED;
-    } else {
-       c->CheckCallingOrSelfUriPermission(uri, IIntent::FLAG_GRANT_READ_URI_PERMISSION, &vol);
-       readGranted = vol == IPackageManager::PERMISSION_GRANTED;
+        FAIL_RETURN(c->CheckCallingOrSelfUriPermission(uri, IIntent::FLAG_GRANT_WRITE_URI_PERMISSION, &vol))
+        writeGranted = vol == IPackageManager::PERMISSION_GRANTED;
+    }
+    else {
+        FAIL_RETURN(c->CheckCallingOrSelfUriPermission(uri, IIntent::FLAG_GRANT_READ_URI_PERMISSION, &vol))
+        readGranted = vol == IPackageManager::PERMISSION_GRANTED;
     }
 
     if (path.StartWith(GetExternalPath()) || path.StartWith(GetLegacyPath())) {
-       if (isWrite) {
+        if (isWrite) {
            if (!writeGranted) {
-               c->EnforceCallingOrSelfPermission(
-                   Manifest::permission::WRITE_EXTERNAL_STORAGE, String("External path: ") + path);
+               FAIL_RETURN(c->EnforceCallingOrSelfPermission(
+                   Manifest::permission::WRITE_EXTERNAL_STORAGE, String("External path: ") + path))
            }
-       } else if (!readGranted) {
-           c->EnforceCallingOrSelfPermission(
-               Manifest::permission::READ_EXTERNAL_STORAGE, String("External path: ") + path);
-       }
-    } else if (path.StartWith(GetCachePath())) {
-       if ((isWrite && !writeGranted) || !readGranted) {
-           c->EnforceCallingOrSelfPermission(Manifest::permission::ACCESS_CACHE_FILESYSTEM, String("Cache path: ") + path);
-       }
-    } else if (IsSecondaryExternalPath(path)) {
+        }
+        else if (!readGranted) {
+            FAIL_RETURN(c->EnforceCallingOrSelfPermission(
+                Manifest::permission::READ_EXTERNAL_STORAGE, String("External path: ") + path))
+        }
+    }
+    else if (path.StartWith(GetCachePath())) {
+        if ((isWrite && !writeGranted) || !readGranted) {
+            FAIL_RETURN(c->EnforceCallingOrSelfPermission(
+                Manifest::permission::ACCESS_CACHE_FILESYSTEM, String("Cache path: ") + path))
+        }
+    }
+    else if (IsSecondaryExternalPath(path)) {
        // read access is OK with the appropriate permission
-       if (!readGranted) {
-           c->CheckCallingOrSelfPermission(Manifest::permission::WRITE_MEDIA_STORAGE, &vol);
-           if (vol == IPackageManager::PERMISSION_DENIED) {
-               c->EnforceCallingOrSelfPermission(
-                       Manifest::permission::READ_EXTERNAL_STORAGE, String("External path: ") + path);
+        if (!readGranted) {
+            c->CheckCallingOrSelfPermission(Manifest::permission::WRITE_MEDIA_STORAGE, &vol);
+            if (vol == IPackageManager::PERMISSION_DENIED) {
+                FAIL_RETURN(c->EnforceCallingOrSelfPermission(
+                    Manifest::permission::READ_EXTERNAL_STORAGE, String("External path: ") + path))
            }
-       }
-       if (isWrite) {
+        }
+        if (isWrite) {
             Int32 vol;
             c->CheckCallingOrSelfUriPermission(uri, IIntent::FLAG_GRANT_WRITE_URI_PERMISSION, &vol);
-           if (vol != IPackageManager::PERMISSION_GRANTED) {
-               c->EnforceCallingOrSelfPermission(
-                       Manifest::permission::WRITE_MEDIA_STORAGE, String("External path: ") + path);
-           }
-       }
-    } else if (isWrite) {
-       // don't write to non-cache, non-sdcard files.
-       Logger::E(TAG, "Can't access %p", file);
-       // throw new FileNotFoundException("Can't access " + file);
-    } else {
-       CheckWorldReadAccess(path);
+            if (vol != IPackageManager::PERMISSION_GRANTED) {
+                FAIL_RETURN(c->EnforceCallingOrSelfPermission(
+                    Manifest::permission::WRITE_MEDIA_STORAGE, String("External path: ") + path))
+            }
+        }
     }
+    else if (isWrite) {
+        // don't write to non-cache, non-sdcard files.
+        Logger::E(TAG, "Can't access %s", TO_CSTR(file));
+        return E_FILE_NOT_FOUND_EXCEPTION;
+    }
+
+    return CheckWorldReadAccess(path);
 }
 
 Boolean MediaProvider::IsSecondaryExternalPath(
@@ -5581,88 +5619,76 @@ Boolean MediaProvider::IsSecondaryExternalPath(
 {
     Int32 length = mExternalStoragePaths->GetLength();
     for (Int32 i = length - 1; i >= 0; --i) {
-       if (path.StartWith((*mExternalStoragePaths)[i])) {
-           return TRUE;
-       }
+        if (path.StartWith((*mExternalStoragePaths)[i])) {
+            return TRUE;
+        }
     }
     return FALSE;
 }
 
-void MediaProvider::CheckWorldReadAccess(
+ECode MediaProvider::CheckWorldReadAccess(
     /* [in] */ const String& path)
 {
-    // try {
     AutoPtr<IStructStat> stat;
     Elastos::Droid::System::Os::Stat(path, (IStructStat**)&stat);
     Int32 accessBits = OsConstants::_S_IROTH;
     Int32 mode;
     stat->GetMode(&mode);
-    if (OsConstants::S_IsREG(mode) &&
-       ((mode & accessBits) == accessBits)) {
-       CheckLeadingPathComponentsWorldExecutable(path);
-       return;
+    if (OsConstants::S_IsREG(mode) && ((mode & accessBits) == accessBits)) {
+       return CheckLeadingPathComponentsWorldExecutable(path);
     }
-    // } catch (ErrnoException e) {
+
     // couldn't stat the file, either it doesn't exist or isn't
     // accessible to us
     Logger::E(TAG, "Can't access %s", path.string());
-    // throw new FileNotFoundException("Can't access " + path);
+    return E_FILE_NOT_FOUND_EXCEPTION;
 }
 
-void MediaProvider::CheckLeadingPathComponentsWorldExecutable(
+ECode MediaProvider::CheckLeadingPathComponentsWorldExecutable(
     /* [in] */ const String& filePath)
 {
     AutoPtr<IFile> file;
     CFile::New(filePath, (IFile**)&file);
     AutoPtr<IFile> parent;
-    file->GetParentFile((IFile**)&parent);
+    FAIL_RETURN(file->GetParentFile((IFile**)&parent))
 
     Int32 accessBits = OsConstants::_S_IXOTH;
 
     Boolean flag = FALSE;
     AutoPtr<IFile> pf;
     while (parent != NULL) {
-       parent->Exists(&flag);
-       if (! flag) {
-           Logger::E(TAG, "access denied");
-           // parent dir doesn't exist, give up
-           return;
-           // throw new FileNotFoundException("access denied");
-       }
+        FAIL_RETURN(parent->Exists(&flag))
+        if (!flag) {
+            Logger::E(TAG, "access denied %s", filePath.string());
+            // parent dir doesn't exist, give up
+            return E_FILE_NOT_FOUND_EXCEPTION;
+        }
        // try {
-           AutoPtr<IStructStat> stat;
-           String path;
-           ECode ec = parent->GetPath(&path);
-           if (!SUCCEEDED(ec)) {
-               if (ec == (ECode)E_ERRNO_EXCEPTION) {
-                   Logger::E(TAG, "Can't access %s", filePath.string());
-                   return;
-               }
-               // throw new FileNotFoundException("Can't access " + filePath);
-           }
-           Elastos::Droid::System::Os::Stat(path, (IStructStat**)&stat);
-           Int32 mode;
-           ec = stat->GetMode(&mode);
-           if (!SUCCEEDED(ec)) {
-               if (ec == (ECode)E_ERRNO_EXCEPTION) {
-                   Logger::E(TAG, "Can't access %s", filePath.string());
-                   return;
-               }
-               // throw new FileNotFoundException("Can't access " + filePath);
-           }
-           if ((mode & accessBits) != accessBits) {
-               // the parent dir doesn't have the appropriate access
-               Logger::E(TAG, "Can't access %s", filePath.string());
-               return;
-               // throw new FileNotFoundException("Can't access " + filePath);
-           }
-       // } catch (ErrnoException e1) {
-           // couldn't stat() parent
-       // }
-       pf = NULL;
-       parent->GetParentFile((IFile**)&pf);
-       parent = pf;
+        AutoPtr<IStructStat> stat;
+        String path;
+        ECode ec = parent->GetPath(&path);
+        if (FAILED(ec)) {
+           Logger::E(TAG, "Can't access %s", filePath.string());
+           return E_FILE_NOT_FOUND_EXCEPTION;
+        }
+
+        Elastos::Droid::System::Os::Stat(path, (IStructStat**)&stat);
+        Int32 mode;
+        ec = stat->GetMode(&mode);
+        if (FAILED(ec)) {
+           Logger::E(TAG, "Can't access %s", filePath.string());
+           return E_FILE_NOT_FOUND_EXCEPTION;
+        }
+        if ((mode & accessBits) != accessBits) {
+           Logger::E(TAG, "Can't access %s", filePath.string());
+           return E_FILE_NOT_FOUND_EXCEPTION;
+        }
+
+        pf = NULL;
+        parent->GetParentFile((IFile**)&pf);
+        parent = pf;
     }
+    return NOERROR;
 }
 
 void MediaProvider::MakeThumbAsync(
@@ -5717,7 +5743,7 @@ Boolean MediaProvider::IsRootStorageDir(
 {
     Int32 length = mExternalStoragePaths->GetLength();
     for (Int32 i = 0; i < length; i++) {
-       if (!(*mExternalStoragePaths)[i].IsNull() &&
+        if (!(*mExternalStoragePaths)[i].IsNull() &&
                (artPath.EqualsIgnoreCase((*mExternalStoragePaths)[i])))
            return TRUE;
     }
@@ -5751,37 +5777,28 @@ Boolean MediaProvider::WaitForThumbnailReady(
     AutoPtr<IIoUtils> ioUtils;
     CIoUtils::AcquireSingleton((IIoUtils**)&ioUtils);//
 
-    // try {
-       c->MoveToFirst(&result);
-       if (c != NULL && result) {
-           Int64 id;
-           c->GetInt64(0, &id);
-           String path;
-           c->GetString(1, &path);
-           Int64 magic;
-           c->GetInt64(2, &magic);//
+    if (c != NULL && (c->MoveToFirst(&result), result)) {
+        Int64 id, magic;
+        String path;
+        c->GetInt64(0, &id);
+        c->GetString(1, &path);
+        c->GetInt64(2, &magic);//
 
-           AutoPtr<MediaThumbRequest> req = RequestMediaThumbnail(path, origUri,
-                   MediaThumbRequest::PRIORITY_HIGH, magic);
-           if (req != NULL) {
-               {
-                    AutoLock syncLock(req);
-                   // try {
-                       while (req->mState == WAIT) {
-                           req->Wait();
-                       }
-                   // } catch (InterruptedException e) {
-                       // Log.w(TAG, e);
-                   // }
-                   if (req->mState == DONE) {
-                       result = TRUE;
-                   }
-               }
-           }
-       }
-    // } finally {
-       ioUtils->CloseQuietly(ICloseable::Probe(c));
-    // }
+        AutoPtr<MediaThumbRequest> req = RequestMediaThumbnail(path, origUri,
+               MediaThumbRequest::PRIORITY_HIGH, magic);
+        if (req != NULL) {
+            AutoLock syncLock(req);
+            while (req->mState == WAIT) {
+               req->Wait();
+            }
+
+            if (req->mState == DONE) {
+                result = TRUE;
+            }
+        }
+    }
+    if (c) ioUtils->CloseQuietly(ICloseable::Probe(c));
+
     return result;
 }
 
@@ -5790,40 +5807,42 @@ ECode MediaProvider::Canonicalize(
     /* [out] */ IUri** result)
 {
     VALIDATE_NOT_NULL(result)
+    *result = NULL;
+
     Int32 match;
     GetURI_MATCHER()->Match(uri, &match);
 
     // only support canonicalizing specific audio Uris
     if (match != AUDIO_MEDIA_ID) {
-       *result = NULL;
        return NOERROR;
     }
+
+    AutoPtr<IIoUtils> ioUtils;
+    CIoUtils::AcquireSingleton((IIoUtils**)&ioUtils);
+
     AutoPtr<ICursor> c;
     Query(uri, NULL, String(NULL), NULL,  String(NULL), (ICursor**)&c);
-    String title;//
+    String title;
+    Boolean flag = FALSE;
+    Int32 count = 0;
+    if (c != NULL) {
+        c->GetCount(&count);
+        c->MoveToNext(&flag);
+    }
+    if (c == NULL || count != 1 || !flag) {
+        if (c) ioUtils->CloseQuietly(ICloseable::Probe(c));
+       return NOERROR;
+    }
 
-    // try {
-       Int32 count;
-       c->GetCount(&count);
-       Boolean flag = FALSE;
-       c->MoveToNext(&flag);
-       if (c == NULL || count != 1 || !flag) {
-           *result = NULL;
-           return NOERROR;
-       }
+    // Construct a canonical Uri by tacking on some query parameters
+    AutoPtr<IUriBuilder> builder;
+    uri->BuildUpon((IUriBuilder**)&builder);
+    builder->AppendQueryParameter(CANONICAL, String("1"));
+    Int32 tmp;
+    c->GetColumnIndex(IMediaStoreMediaColumns::TITLE, &tmp);
+    c->GetString(tmp, &title);
+    ioUtils->CloseQuietly(ICloseable::Probe(c));
 
-       // Construct a canonical Uri by tacking on some query parameters
-       AutoPtr<IUriBuilder> builder;
-       uri->BuildUpon((IUriBuilder**)&builder);
-       builder->AppendQueryParameter(CANONICAL, String("1"));
-       Int32 tmp;
-       c->GetColumnIndex(IMediaStoreMediaColumns::TITLE, &tmp);
-       c->GetString(tmp, &title);
-    // } finally {
-       AutoPtr<IIoUtils> ioUtils;
-       CIoUtils::AcquireSingleton((IIoUtils**)&ioUtils);
-       ioUtils->CloseQuietly(ICloseable::Probe(c));
-    // }
     if (TextUtils::IsEmpty(title)) {
        *result = NULL;
        return NOERROR;
@@ -5837,102 +5856,104 @@ ECode MediaProvider::Canonicalize(
 }
 
 ECode MediaProvider::Uncanonicalize(
-    /* [in] */ IUri* uri,
+    /* [in] */ IUri* inUri,
     /* [out] */ IUri** result)
 {
+    VALIDATE_NOT_NULL(result)
+    *result = NULL;
+
+    AutoPtr<IUri> uri = inUri;
     String qpr;
     uri->GetQueryParameter(CANONICAL,&qpr);
 
     AutoPtr<IIoUtils> ioUtils;
     CIoUtils::AcquireSingleton((IIoUtils**)&ioUtils);
-    AutoPtr<ICursor> c;
-    if (uri != NULL && String("1").Equals(qpr)) {
-       Int32 match;
-       GetURI_MATCHER()->Match(uri, &match);
-       if (match != AUDIO_MEDIA_ID) {
+
+    if (uri != NULL && qpr.Equals("1")) {
+        Int32 match;
+        GetURI_MATCHER()->Match(uri, &match);
+        if (match != AUDIO_MEDIA_ID) {
            // this type of canonical Uri is not supported
            *result = NULL;
            return NOERROR;
-       }
-       String titleFromUri;
-       uri->GetQueryParameter(IMediaStoreMediaColumns::TITLE, &titleFromUri);
-       if (titleFromUri.IsNull()) {
+        }
+        String titleFromUri;
+        uri->GetQueryParameter(IMediaStoreMediaColumns::TITLE, &titleFromUri);
+        if (titleFromUri.IsNull()) {
            // the required parameter is missing
            *result = NULL;
            return NOERROR;
-       }
+        }
        // clear the query parameters, we don't need them anymore
-       AutoPtr<IUriBuilder> ub;
-       uri->BuildUpon((IUriBuilder**)&ub);
-       ub->ClearQuery();
-       uri = NULL;
-       ub->Build((IUri**)&uri);
-       Query(uri, NULL, String(NULL), NULL, String(NULL), (ICursor**)&c);
+        AutoPtr<IUriBuilder> ub;
+        uri->BuildUpon((IUriBuilder**)&ub);
+        ub->ClearQuery();
+        uri = NULL;
+        ub->Build((IUri**)&uri);
+
+        AutoPtr<ICursor> c;
+        Query(uri, NULL, String(NULL), NULL, String(NULL), (ICursor**)&c);
        // try {
-           Int32 titleIdx;
-           c->GetColumnIndex(IMediaStoreMediaColumns::TITLE, &titleIdx);
-           Int32 count;
-           c->GetCount(&count);
-           Boolean flag = FALSE;
-           c->MoveToNext(&flag);
-           String title;
-           c->GetString(titleIdx, &title);
-           if (c != NULL && count == 1 && flag &&
-                   titleFromUri.Equals(title)) {
-               // the result matched perfectly
-               *result = uri;
-               REFCOUNT_ADD(*result);
-               ioUtils->CloseQuietly(ICloseable::Probe(c));
-               return NOERROR;
-           }//
+        Int32 titleIdx;
+        c->GetColumnIndex(IMediaStoreMediaColumns::TITLE, &titleIdx);
+        Int32 count = 0;
+        Boolean flag = FALSE;
+        String title;
+        if (c != NULL) {
+            c->GetCount(&count);
+            c->MoveToNext(&flag);
+            c->GetString(titleIdx, &title);
+        }
+        if (c != NULL && count == 1 && flag && titleFromUri.Equals(title)) {
+            // the result matched perfectly
+            *result = uri;
+            REFCOUNT_ADD(*result);
+            ioUtils->CloseQuietly(ICloseable::Probe(c));
+            return NOERROR;
+        }
+        if (c != NULL) {
+            ioUtils->CloseQuietly(ICloseable::Probe(c));
+            c = NULL;
+        }
 
-           ioUtils->CloseQuietly(ICloseable::Probe(c));
-           // do a lookup by title
-           AutoPtr<IMediaStoreAudioMedia> msa;
-           CMediaStoreAudioMedia::AcquireSingleton((IMediaStoreAudioMedia**)&msa);
-           AutoPtr<IList> segments;
-           uri->GetPathSegments((IList**)&segments);
-           AutoPtr<IInterface> obj;
-           segments->Get(0, (IInterface**)&obj);
-           AutoPtr<ICharSequence> cs = ICharSequence::Probe(obj);
-           String uStr;
-           cs->ToString(&uStr);
-           AutoPtr<IUri> newUri;
-           msa->GetContentUri(uStr, (IUri**)&newUri);//
+        // do a lookup by title
+        AutoPtr<IMediaStoreAudioMedia> msa;
+        CMediaStoreAudioMedia::AcquireSingleton((IMediaStoreAudioMedia**)&msa);
+        AutoPtr<IList> segments;
+        uri->GetPathSegments((IList**)&segments);
+        AutoPtr<IInterface> obj;
+        segments->Get(0, (IInterface**)&obj);
+        AutoPtr<IUri> newUri;
+        msa->GetContentUri(TO_STR(obj), (IUri**)&newUri);//
 
-           AutoPtr<ArrayOf<String> > array = ArrayOf<String>::Alloc(2);
-           (*array)[0] = titleFromUri;
-           (*array)[1] = String(NULL);
-           c = NULL;
-           Query(newUri, NULL, IMediaStoreMediaColumns::TITLE + "=?",
-                   array, String(NULL), (ICursor**)&c);
-           if (c == NULL) {
-               *result = NULL;
-               ioUtils->CloseQuietly(ICloseable::Probe(c));
-               return NOERROR;
-           }
-           c->MoveToNext(&flag);
-           if (!flag) {
-               *result = NULL;
-               ioUtils->CloseQuietly(ICloseable::Probe(c));
-               return NOERROR;
-           }
-           // get the first matching entry and return a Uri for it
-           Int64 id;
-           Int32 columeId;
-           c->GetColumnIndex(IBaseColumns::ID, &columeId);
-           c->GetInt64(columeId, &id);
-           AutoPtr<IContentUris> cur;
-           CContentUris::AcquireSingleton((IContentUris**)&cur);
+        AutoPtr<ArrayOf<String> > array = ArrayOf<String>::Alloc(2);
+        (*array)[0] = titleFromUri;
+        (*array)[1] = String(NULL);
+        Query(newUri, NULL, IMediaStoreMediaColumns::TITLE + "=?",
+               array, String(NULL), (ICursor**)&c);
+        if (c == NULL) {
+           return NOERROR;
+        }
+
+        c->MoveToNext(&flag);
+        if (!flag) {
+           *result = NULL;
            ioUtils->CloseQuietly(ICloseable::Probe(c));
-           return cur->WithAppendedId(newUri, id, result);
-       // } finally {
-       // }
+           return NOERROR;
+        }
+        // get the first matching entry and return a Uri for it
+        Int64 id;
+        Int32 columeId;
+        c->GetColumnIndex(IBaseColumns::ID, &columeId);
+        c->GetInt64(columeId, &id);
+        AutoPtr<IContentUris> cur;
+        CContentUris::AcquireSingleton((IContentUris**)&cur);
+        ioUtils->CloseQuietly(ICloseable::Probe(c));
+        return cur->WithAppendedId(newUri, id, result);
     }
 
     *result = uri;
     REFCOUNT_ADD(*result);
-    ioUtils->CloseQuietly(ICloseable::Probe(c));
     return NOERROR;
 }
 
@@ -5962,13 +5983,14 @@ ECode MediaProvider::Query(
 
     Int32 table;
     GetURI_MATCHER()->Match(uri, &table);
-    List<String> prependArgs;//
+    List<String> prependArgs;
 
     if (LOCAL_LOGV) {
-        Logger::V(TAG, "Query: uri=[%s], projectionIn=%s, selection=[%s], selectionArgs=%s",
-            TO_CSTR(uri), Arrays::ToString(projectionIn).string(),
+        Logger::V(TAG, "Query: table=%d, uri=[%s], projectionIn=%s, selection=[%s], selectionArgs=%s",
+            table, TO_CSTR(uri), Arrays::ToString(projectionIn).string(),
             selection.string(), Arrays::ToString(selectionArgs).string());
     }
+
     // handle MEDIA_SCANNER before calling getDatabaseForUri()
     AutoPtr<IMatrixCursor> c;
     if (table == MEDIA_SCANNER) {
@@ -6070,7 +6092,7 @@ ECode MediaProvider::Query(
     }
 
     if (LOCAL_LOGV) {
-        Logger::V(TAG, " >> keywords: %s", Arrays::ToString(keywords).string());
+        Logger::V(TAG, "keywords: %s", Arrays::ToString(keywords).string());
     }
 
     String str;
@@ -6579,20 +6601,20 @@ ECode MediaProvider::Query(
     AutoPtr<ArrayOf<String> > args = Combine(prependArgs, selectionArgs);
     String querySql;
     qb->BuildQuery(projectionIn, selection, args, groupBy, nullStr, sort, limit, &querySql);
-    Logger::V(TAG, "query = [%s]", querySql.string());
+    if (LOCAL_LOGV) Logger::V(TAG, "query = [%s]", querySql.string());
     AutoPtr<ICursor> ic;
     qb->Query(db, projectionIn, selection, args, groupBy, nullStr, sort, limit, (ICursor**)&ic);
 
     if (ic != NULL) {
-       String nonotify;
-       uri->GetQueryParameter(String("nonotify"), &nonotify);
-       if (nonotify.IsNull() || !nonotify.Equals("1")) {
-           AutoPtr<IContext> context;
-           GetContext((IContext**)&context);
-           AutoPtr<IContentResolver> resolver;
-           context->GetContentResolver((IContentResolver**)&resolver);
-           ic->SetNotificationUri(resolver, uri);
-       }
+        String nonotify;
+        uri->GetQueryParameter(String("nonotify"), &nonotify);
+        if (nonotify.IsNull() || !nonotify.Equals("1")) {
+            AutoPtr<IContext> context;
+            GetContext((IContext**)&context);
+            AutoPtr<IContentResolver> resolver;
+            context->GetContentResolver((IContentResolver**)&resolver);
+            ic->SetNotificationUri(resolver, uri);
+        }
     }
 
     *ret = ic;
@@ -6686,9 +6708,8 @@ ECode MediaProvider::GetType(
                return NOERROR;
            }
     }
-    Logger::E(TAG, "Unknown URL : %p", url);
+    Logger::E(TAG, "Unknown URL : %s", TO_CSTR(url));
     return  E_ILLEGAL_STATE_EXCEPTION;
-    // throw new IllegalStateException("Unknown URL : " + url);
 }
 
 AutoPtr<MediaThumbRequest> MediaProvider::RequestMediaThumbnail(
@@ -6718,37 +6739,45 @@ AutoPtr<MediaThumbRequest> MediaProvider::RequestMediaThumbnail(
 }
 
 ECode MediaProvider::Delete(
-    /* [in] */ IUri* uri,
+    /* [in] */ IUri* inUri,
     /* [in] */ const String& userWhere,
     /* [in] */ ArrayOf<String>* whereArgs,
     /* [out] */ Int32* result)
 {
-    uri = SafeUncanonicalize(uri);
-    Int32 count;
-    Int32 match;
+    VALIDATE_NOT_NULL(result)
+    *result = 0;
+
+    if (LOCAL_LOGV) {
+        Logger::V(TAG, " Delete:[%s], where:[%s], args:%s", TO_CSTR(inUri), userWhere.string(),
+            Arrays::ToString(whereArgs).string());
+    }
+
+    AutoPtr<IUriHelper> uh;
+    CUriHelper::AcquireSingleton((IUriHelper**)&uh);
+    AutoPtr<IUri> uri = SafeUncanonicalize(inUri);
+    Int32 count, match;
     GetURI_MATCHER()->Match(uri, &match);
 
     // handle MEDIA_SCANNER before calling getDatabaseForUri()
     if (match == MEDIA_SCANNER) {
         if (mMediaScannerVolume.IsNull()) {
-            *result = 0;
            return NOERROR;
         }
+
+        StringBuilder sb("content://media/"); sb += mMediaScannerVolume; sb += "/audio";
         AutoPtr<IUri> oUri;
-        AutoPtr<IUriHelper> uh;
-        CUriHelper::AcquireSingleton((IUriHelper**)&uh);
-        uh->Parse(String("content://media/") + mMediaScannerVolume + "/audio", (IUri**)&oUri);
+        uh->Parse(sb.ToString(), (IUri**)&oUri);
         AutoPtr<IDatabaseHelper> database;
         GetDatabaseForUri(oUri, (IDatabaseHelper**)&database);
         if (database == NULL) {
             Logger::W(TAG, "no database for scanned volume %s", mMediaScannerVolume.string());
         }
         else {
-            DatabaseHelper* db = ((DatabaseHelper*)database.Get());
-            db->mScanStopTime = SystemClock::GetCurrentTimeMicro();
+            DatabaseHelper* dbh = ((DatabaseHelper*)database.Get());
+            dbh->mScanStopTime = SystemClock::GetCurrentTimeMicro();
             String msg = Dump(database, FALSE);
             AutoPtr<ISQLiteDatabase> sd;
-            db->GetWritableDatabase((ISQLiteDatabase**)&sd);
+            dbh->GetWritableDatabase((ISQLiteDatabase**)&sd);
             LogToDb(sd, msg);
         }
         mMediaScannerVolume = String(NULL);
@@ -6762,48 +6791,51 @@ ECode MediaProvider::Delete(
 
     AutoPtr<IIoUtils> ioUtils;
     CIoUtils::AcquireSingleton((IIoUtils**)&ioUtils);
+
     if (match == VOLUMES_ID) {
        DetachVolume(uri);
        count = 1;
     }
     else if (match == MTP_CONNECTED) {
-       {
-            AutoLock syncLock(mMtpServiceConnection);
-           if (mMtpService != NULL) {
-               // MTP has disconnected, so release our connection to MtpService//
-
-               context->UnbindService(mMtpServiceConnection);
-               count = 1;
-               // mMtpServiceConnection.onServiceDisconnected might not get called,
-               // so set mMtpService = null here
-               mMtpService = NULL;
-           } else {
-               count = 0;
-           }
+        AutoLock syncLock(mMtpServiceConnection);
+        if (mMtpService != NULL) {
+           // MTP has disconnected, so release our connection to MtpService//
+           context->UnbindService(mMtpServiceConnection);
+           count = 1;
+           // mMtpServiceConnection.onServiceDisconnected might not get called,
+           // so set mMtpService = null here
+           mMtpService = NULL;
+       }
+       else {
+           count = 0;
        }
     }
     else {
-       String volumeName = GetVolumeName(uri);
+        AutoPtr<IDatabaseHelper> database;
+        GetDatabaseForUri(uri, (IDatabaseHelper**)&database);
+        if (database == NULL) {
+            Logger::E(TAG, "Unknown URI: %s match: %d", TO_CSTR(uri), match);
+            return E_UNSUPPORTED_OPERATION_EXCEPTION;
+        }
+        DatabaseHelper* dbh = ((DatabaseHelper*)database.Get());
+        dbh->mNumDeletes++;
+        AutoPtr<ISQLiteDatabase> db;
+        dbh->GetWritableDatabase((ISQLiteDatabase**)&db);
+        String volumeName = GetVolumeName(uri);
 
-       AutoPtr<IDatabaseHelper> database;
-       GetDatabaseForUri(uri, (IDatabaseHelper**)&database);
-       if (database == NULL) {
-           Logger::E(TAG, "Unknown URI: %p match: %d", uri, match);
-           return E_UNSUPPORTED_OPERATION_EXCEPTION;
-           // throw new UnsupportedOperationException(
-           //         "Unknown URI: " + uri + " match: " + match);
-       }
-       DatabaseHelper* dbh = ((DatabaseHelper*)database.Get());
-       dbh->mNumDeletes++;
-       AutoPtr<ISQLiteDatabase> db;
-       dbh->GetWritableDatabase((ISQLiteDatabase**)&db);
-
-       {
+        {
             AutoLock syncLock(sGetTableAndWhereParam);
             String nullStr;
             AutoPtr<ICursor> c;
             GetTableAndWhere(uri, match, userWhere, sGetTableAndWhereParam);
-            if (sGetTableAndWhereParam->mTable.Equals(String("files"))) {
+
+            if (LOCAL_LOGV) {
+                Logger::V(TAG, "Delete table:[%s], where:[%s], args:%s",
+                    sGetTableAndWhereParam->mTable.string(), sGetTableAndWhereParam->mWhere.string(),
+                    Arrays::ToString(whereArgs).string());
+            }
+
+            if (sGetTableAndWhereParam->mTable.Equals("files")) {
                 String deleteparam;
                 uri->GetQueryParameter(IMediaStore::PARAM_DELETE_DATA, &deleteparam);
                 if (deleteparam.IsNull() || ! deleteparam.Equals("false")) {
@@ -6812,166 +6844,160 @@ ECode MediaProvider::Delete(
                        sMediaTypeDataId,
                        sGetTableAndWhereParam->mWhere, whereArgs, nullStr, nullStr, nullStr, (ICursor**)&c);
                    AutoPtr<ArrayOf<String> > idvalue = ArrayOf<String>::Alloc(1);
-                   (*idvalue)[0] = String("");//
+                   (*idvalue)[0] = String("");
 
                    AutoPtr<ArrayOf<String> > playlistvalues = ArrayOf<String>::Alloc(2);
                    (*playlistvalues)[0] = String("");
                    (*playlistvalues)[1] = String("");
-                   // try {
-                       while ((c->MoveToNext(&flag), flag)) {
-                           Int32 mediaType;
-                           c->GetInt32(0, &mediaType);
-                           String data;
-                           c->GetString(1, &data);
-                           Int64 id;
-                           c->GetInt64(2, &id);
 
-                           if (mediaType == IMediaStoreFilesFileColumns::MEDIA_TYPE_IMAGE) {
-                                DeleteIfAllowed(uri, data);
+                    while ((c->MoveToNext(&flag), flag)) {
+                        Int32 mediaType;
+                        String data;
+                        Int64 id;
+                        c->GetInt32(0, &mediaType);
+                        c->GetString(1, &data);
+                        c->GetInt64(2, &id);
+
+                        if (mediaType == IMediaStoreFilesFileColumns::MEDIA_TYPE_IMAGE) {
+                            DeleteIfAllowed(uri, data);
+                            MediaDocumentsProvider::OnMediaStoreDelete(context,
+                                volumeName, IMediaStoreFilesFileColumns::MEDIA_TYPE_IMAGE, id);//
+
+                            (*idvalue)[0] = StringUtils::ToString(id);
+                            dbh->mNumQueries++;
+                            AutoPtr<ICursor> cc;
+                            db->Query(String("thumbnails"), sDataOnlyColumn,
+                                String("image_id=?"), idvalue, nullStr, nullStr, nullStr, (ICursor**)&cc);
+                            String cs;
+                            while ((cc->MoveToNext(&flag), flag)) {
+                                cc->GetString(0, &cs);
+                                DeleteIfAllowed(uri, cs);
+                            }
+                            dbh->mNumDeletes++;
+
+                            Int32 vol;
+                            db->Delete(String("thumbnails"), String("image_id=?"), idvalue, &vol);
+                            ioUtils->CloseQuietly(ICloseable::Probe(cc));
+                        }
+                        else if (mediaType == IMediaStoreFilesFileColumns::MEDIA_TYPE_VIDEO) {
+                            DeleteIfAllowed(uri, data);
+                            MediaDocumentsProvider::OnMediaStoreDelete(context,
+                                volumeName, IMediaStoreFilesFileColumns::MEDIA_TYPE_VIDEO, id);
+
+                        }
+                        else if (mediaType == IMediaStoreFilesFileColumns::MEDIA_TYPE_AUDIO) {
+                            if (!dbh->mInternal) {
                                 MediaDocumentsProvider::OnMediaStoreDelete(context,
-                                       volumeName, IMediaStoreFilesFileColumns::MEDIA_TYPE_IMAGE, id);//
+                                    volumeName, IMediaStoreFilesFileColumns::MEDIA_TYPE_AUDIO, id);
 
                                 (*idvalue)[0] = StringUtils::ToString(id);
-                                dbh->mNumQueries++;
+                                dbh->mNumDeletes += 2; // also count the one below
+                                Int32 dvol;
+                                db->Delete(String("audio_genres_map"), String("audio_id=?"), idvalue, &dvol);
+                                // for each playlist that the item appears in, move
+                                // all the items behind it forward by one
                                 AutoPtr<ICursor> cc;
-                                db->Query(String("thumbnails"), sDataOnlyColumn,
-                                    String("image_id=?"), idvalue, nullStr, nullStr, nullStr, (ICursor**)&cc);
-                               // try {
-                                   String cs;
-                                   while ((cc->MoveToNext(&flag), flag)) {
-                                       cc->GetString(0, &cs);
-                                       DeleteIfAllowed(uri, cs);
-                                   }
-                                   dbh->mNumDeletes++;
+                                db->Query(String("audio_playlists_map"), sPlaylistIdPlayOrder,
+                                    String("audio_id=?"), idvalue, nullStr, nullStr, nullStr, (ICursor**)&cc);
+                                // try {
+                                Int64 i;
+                                Int32 j;
+                                AutoPtr<ArrayOf<IInterface*> > arr = ArrayOf<IInterface*>::Alloc(2);
+                                while ((cc->MoveToNext(&flag), flag)) {
+                                    cc->GetInt64(0, &i);
+                                    cc->GetInt32(1, &j);
+                                    (*playlistvalues)[0] = StringUtils::ToString(i);
+                                    (*playlistvalues)[1] = StringUtils::ToString(j);
+                                    dbh->mNumUpdates++;
+                                    arr->Set(0, CoreUtils::Convert((*playlistvalues)[0]));
+                                    arr->Set(1, CoreUtils::Convert((*playlistvalues)[1]));
+                                    db->ExecSQL(
+                                        String("UPDATE audio_playlists_map SET play_order=play_order-1"
+                                            " WHERE playlist_id=? AND play_order>?"), arr);
+                                }
+                                Int32 vol;
+                                db->Delete(String("audio_playlists_map"), String("audio_id=?"), idvalue, &vol);
+                                // } finally {
+                                ioUtils->CloseQuietly(ICloseable::Probe(cc));
+                                // }
+                            }
+                        }
+                        else if (mediaType == IMediaStoreFilesFileColumns::MEDIA_TYPE_PLAYLIST) {
+                           // TODO, maybe: remove the audio_playlists_cleanup trigger and
+                           // implement functionality here (clean up the playlist map)
+                        }
+                    }
+                    ioUtils->CloseQuietly(ICloseable::Probe(c));
+                }
+            }
 
-                                   Int32 vol;
-                                   db->Delete(String("thumbnails"), String("image_id=?"), idvalue, &vol);
-                               // } finally {
-                                   ioUtils->CloseQuietly(ICloseable::Probe(cc));
-                               // }
-                           } else if (mediaType == IMediaStoreFilesFileColumns::MEDIA_TYPE_VIDEO) {
-                               DeleteIfAllowed(uri, data);
-                               MediaDocumentsProvider::OnMediaStoreDelete(context,
-                                       volumeName, IMediaStoreFilesFileColumns::MEDIA_TYPE_VIDEO, id);//
+            switch (match) {
+                case MTP_OBJECTS:
+                case MTP_OBJECTS_ID:
+                {
+                    // don't send objectRemoved event since this originated from MTP
+                    mDisableMtpObjectCallbacks = TRUE;
+                    dbh->mNumDeletes++;
+                    db->Delete(String("files"), sGetTableAndWhereParam->mWhere, whereArgs, &count);
+                    mDisableMtpObjectCallbacks = FALSE;
+                    break;
+                }
 
-                           } else if (mediaType == IMediaStoreFilesFileColumns::MEDIA_TYPE_AUDIO) {
-                               if (!dbh->mInternal) {
-                                   MediaDocumentsProvider::OnMediaStoreDelete(context,
-                                           volumeName, IMediaStoreFilesFileColumns::MEDIA_TYPE_AUDIO, id);//
+                case AUDIO_GENRES_ID_MEMBERS:
+                {
+                    dbh->mNumDeletes++;
+                    db->Delete(String("audio_genres_map"),
+                       sGetTableAndWhereParam->mWhere, whereArgs, &count);
+                    break;
+                }
 
-                                   (*idvalue)[0] = StringUtils::ToString(id);
-                                   dbh->mNumDeletes += 2; // also count the one below
-                                   Int32 dvol;
-                                   db->Delete(String("audio_genres_map"), String("audio_id=?"), idvalue, &dvol);
-                                   // for each playlist that the item appears in, move
-                                   // all the items behind it forward by one
-                                   AutoPtr<ICursor> cc;
-                                   db->Query(String("audio_playlists_map"), sPlaylistIdPlayOrder,
-                                       String("audio_id=?"), idvalue, nullStr, nullStr, nullStr, (ICursor**)&cc);
-                                   // try {
-                                        Int64 i;
-                                        Int32 j;
-                                        AutoPtr<ArrayOf<IInterface*> > arr = ArrayOf<IInterface*>::Alloc(2);
-                                        while ((cc->MoveToNext(&flag), flag)) {
-                                            cc->GetInt64(0, &i);
-                                            (*playlistvalues)[0] = StringUtils::ToString(i);
-                                            cc->GetInt32(1, &j);
-                                            (*playlistvalues)[1] = StringUtils::ToString(j);
-                                            dbh->mNumUpdates++;
-                                            arr = NULL;
-                                            (*arr)[0] = TO_IINTERFACE(CoreUtils::Convert((*playlistvalues)[0]));
-                                            (*arr)[1] = TO_IINTERFACE(CoreUtils::Convert((*playlistvalues)[1]));
-                                            db->ExecSQL(
-                                                String("UPDATE audio_playlists_map SET play_order=play_order-1"
-                                                    " WHERE playlist_id=? AND play_order>?"), arr);
-                                        }
-                                        Int32 vol;
-                                        db->Delete(String("audio_playlists_map"), String("audio_id=?"), idvalue, &vol);
-                                   // } finally {
-                                        ioUtils->CloseQuietly(ICloseable::Probe(cc));
-                                   // }
-                               }
-                           } else if (mediaType == IMediaStoreFilesFileColumns::MEDIA_TYPE_PLAYLIST) {
-                               // TODO, maybe: remove the audio_playlists_cleanup trigger and
-                               // implement functionality here (clean up the playlist map)
-                           }
-                       }
-                   // } finally {
-                       ioUtils->CloseQuietly(ICloseable::Probe(c));
-                   // }
-               }
-           }
+                case IMAGES_THUMBNAILS_ID:
+                case IMAGES_THUMBNAILS:
+                case VIDEO_THUMBNAILS_ID:
+                case VIDEO_THUMBNAILS:
+                {
+                    // Delete the referenced files first.
+                    AutoPtr<ICursor> c;
+                    db->Query(sGetTableAndWhereParam->mTable,
+                        sDataOnlyColumn,
+                        sGetTableAndWhereParam->mWhere, whereArgs, nullStr, nullStr, nullStr, (ICursor**)&c);
+                    if (c != NULL) {
+                        while ((c->MoveToNext(&flag), flag)) {
+                            String str;
+                            c->GetString(0, &str);
+                            DeleteIfAllowed(uri, str);
+                        }
+                        ioUtils->CloseQuietly(ICloseable::Probe(c));
+                    }
+                    dbh->mNumDeletes++;
+                    db->Delete(sGetTableAndWhereParam->mTable,
+                       sGetTableAndWhereParam->mWhere, whereArgs, &count);
+                    break;
+                }
 
-           switch (match) {
-               case MTP_OBJECTS:
-               case MTP_OBJECTS_ID:
-               {
-                   // try {
-                       // don't send objectRemoved event since this originated from MTP
-                       mDisableMtpObjectCallbacks = TRUE;
-                       dbh->mNumDeletes++;
-                       db->Delete(String("files"), sGetTableAndWhereParam->mWhere, whereArgs, &count);
-                   // } finally {
-                       mDisableMtpObjectCallbacks = FALSE;
-                   // }
-                   break;
-               }
-               case AUDIO_GENRES_ID_MEMBERS:
-               {
-                   dbh->mNumDeletes++;
-                   db->Delete(String("audio_genres_map"),
-                           sGetTableAndWhereParam->mWhere, whereArgs, &count);
-                   break;
-               }
-               case IMAGES_THUMBNAILS_ID:
-               case IMAGES_THUMBNAILS:
-               case VIDEO_THUMBNAILS_ID:
-               case VIDEO_THUMBNAILS:
-               {
-                   // Delete the referenced files first.
-                   AutoPtr<ICursor> c;
-                   db->Query(sGetTableAndWhereParam->mTable,
-                           sDataOnlyColumn,
-                           sGetTableAndWhereParam->mWhere, whereArgs, String(NULL), String(NULL), String(NULL), (ICursor**)&c);
-                   if (c != NULL) {
-                       // try {
-                           while ((c->MoveToNext(&flag), flag)) {
-                               String str;
-                               c->GetString(0, &str);
-                               DeleteIfAllowed(uri, str);
-                           }
-                       // } finally {
-                           ioUtils->CloseQuietly(ICloseable::Probe(c));
-                       // }
-                   }
-                   dbh->mNumDeletes++;
-                   db->Delete(sGetTableAndWhereParam->mTable,
-                           sGetTableAndWhereParam->mWhere, whereArgs, &count);
-                   break;
-               }
+                default:
+                {
+                    dbh->mNumDeletes++;
+                    db->Delete(sGetTableAndWhereParam->mTable,
+                        sGetTableAndWhereParam->mWhere, whereArgs, &count);
+                    break;
+                }
+            }
 
-               default:
-               {
-                   dbh->mNumDeletes++;
-                   db->Delete(sGetTableAndWhereParam->mTable,
-                           sGetTableAndWhereParam->mWhere, whereArgs, &count);
-                   break;
-               }
-           }
-
-           // Since there are multiple Uris that can refer to the same files
-           // and deletes can affect other objects in storage (like subdirectories
-           // or playlists) we will notify a change on the entire volume to make
-           // sure no listeners miss the notification.
-           AutoPtr<IUri> notifyUri;
-           AutoPtr<IUriHelper> uh;
-           CUriHelper::AcquireSingleton((IUriHelper**)&uh);
-           uh->Parse(String("content://") + IMediaStore::AUTHORITY + "/" + volumeName, (IUri**)&notifyUri);
-           AutoPtr<IContentResolver> resolver;
-           context->GetContentResolver((IContentResolver**)&resolver);
-           resolver->NotifyChange(notifyUri, NULL);
-       }
+            // Since there are multiple Uris that can refer to the same files
+            // and deletes can affect other objects in storage (like subdirectories
+            // or playlists) we will notify a change on the entire volume to make
+            // sure no listeners miss the notification.
+            StringBuilder sb("content://"); sb += IMediaStore::AUTHORITY;
+            sb += "/"; sb += volumeName;
+            AutoPtr<IUri> notifyUri;
+            uh->Parse(sb.ToString(), (IUri**)&notifyUri);
+            AutoPtr<IContentResolver> resolver;
+            context->GetContentResolver((IContentResolver**)&resolver);
+            resolver->NotifyChange(notifyUri, NULL);
+        }
     }
+
     *result = count;
     return NOERROR;
 }
@@ -6983,127 +7009,116 @@ AutoPtr<ArrayOf<Byte> > MediaProvider::GetCompressedAlbumArt(
     AutoPtr<ArrayOf<Byte> > compressed;
 
     // try {
-       AutoPtr<IFile> f;
-       CFile::New(path, (IFile**)&f);
-       AutoPtr<IParcelFileDescriptorHelper> pfdhelper;
-       CParcelFileDescriptorHelper::AcquireSingleton((IParcelFileDescriptorHelper**)&pfdhelper);
-       AutoPtr<IParcelFileDescriptor> pfd;
-       pfdhelper->Open(f, IParcelFileDescriptor::MODE_READ_ONLY, (IParcelFileDescriptor**)&pfd);//
+    AutoPtr<IFile> f;
+    CFile::New(path, (IFile**)&f);
+    AutoPtr<IParcelFileDescriptorHelper> pfdhelper;
+    CParcelFileDescriptorHelper::AcquireSingleton((IParcelFileDescriptorHelper**)&pfdhelper);
+    AutoPtr<IParcelFileDescriptor> pfd;
+    pfdhelper->Open(f, IParcelFileDescriptor::MODE_READ_ONLY, (IParcelFileDescriptor**)&pfd);//
 
-       AutoPtr<IMediaScanner> scanner;
-       CMediaScanner::New(context, (IMediaScanner**)&scanner);
-       AutoPtr<IFileDescriptor> fd;
-       pfd->GetFileDescriptor((IFileDescriptor**)&fd);
-       scanner->ExtractAlbumArt(fd, (ArrayOf<Byte>**)&compressed);
-       pfd->Close();//
+    AutoPtr<IMediaScanner> scanner;
+    CMediaScanner::New(context, (IMediaScanner**)&scanner);
+    AutoPtr<IFileDescriptor> fd;
+    pfd->GetFileDescriptor((IFileDescriptor**)&fd);
+    scanner->ExtractAlbumArt(fd, (ArrayOf<Byte>**)&compressed);
+    pfd->Close();//
 
-       // If no embedded art exists, look for a suitable image file in the
-       // same directory as the media file, except if that directory is
-       // is the root directory of the sd card or the download directory.
-       // We look for, in order of preference:
-       // 0 AlbumArt.jpg
-       // 1 AlbumArt*Large.jpg
-       // 2 Any other jpg image with 'albumart' anywhere in the name
-       // 3 Any other jpg image
-       // 4 any other png image
-       if (compressed == NULL && !path.IsNull()) {
-           Int32 lastSlash = path.LastIndexOf('/');
-           if (lastSlash > 0) {
-               String artPath = path.Substring(0, lastSlash);
-               f = NULL;
-               f = Environment::GetExternalStoragePublicDirectory(
-                       Environment::DIRECTORY_DOWNLOADS);
-               String dwndir;
-               f->GetAbsolutePath(&dwndir);//
+    // If no embedded art exists, look for a suitable image file in the
+    // same directory as the media file, except if that directory is
+    // is the root directory of the sd card or the download directory.
+    // We look for, in order of preference:
+    // 0 AlbumArt.jpg
+    // 1 AlbumArt*Large.jpg
+    // 2 Any other jpg image with 'albumart' anywhere in the name
+    // 3 Any other jpg image
+    // 4 any other png image
+    if (compressed == NULL && !path.IsNull()) {
+       Int32 lastSlash = path.LastIndexOf('/');
+       if (lastSlash > 0) {
+           String artPath = path.Substring(0, lastSlash);
+           f = Environment::GetExternalStoragePublicDirectory(Environment::DIRECTORY_DOWNLOADS);
+           String dwndir;
+           f->GetAbsolutePath(&dwndir);//
 
-               String bestmatch;
-               Boolean flag = FALSE;
-               AutoPtr<ICharSequence> key;
-               AutoPtr<ICharSequence> value;
-               AutoPtr<IInterface> obj;
-               {
-                    AutoLock syncLock(sFolderArtMap);
-                    key = CoreUtils::Convert(artPath);
-                    sFolderArtMap->ContainsKey(key, &flag);
-                    if (flag) {
-                        sFolderArtMap->Get(key, (IInterface**)&obj);
-                        key = NULL;
-                        key->ToString(&bestmatch);
-                    } else if (!(IsRootStorageDir(artPath)) &&
-                           !(artPath.EqualsIgnoreCase(dwndir))) {
-                       AutoPtr<IFile> dir;
-                       CFile::New(artPath, (IFile**)&dir);
-                       AutoPtr<ArrayOf<String> > entrynames;
-                       dir->List((ArrayOf<String>**)&entrynames);
-                       if (entrynames == NULL) {
-                           return NULL;
-                       }
-                       bestmatch = String(NULL);
-                       Int32 matchlevel = 1000;
-                       Int32 length = entrynames->GetLength();
-                       for (Int32 i = length - 1; i >=0; i--) {
-                           String entry = (*entrynames)[i].ToLowerCase();
-                           if (entry.Equals("albumart.jpg")) {
-                               bestmatch = (*entrynames)[i];
-                               break;
-                           } else if (entry.StartWith("albumart")
-                                   && entry.EndWith("large.jpg")
-                                   && matchlevel > 1) {
-                               bestmatch = (*entrynames)[i];
-                               matchlevel = 1;
-                           } else if (entry.Contains("albumart")
-                                   && entry.EndWith(".jpg")
-                                   && matchlevel > 2) {
-                               bestmatch = (*entrynames)[i];
-                               matchlevel = 2;
-                           } else if (entry.EndWith(".jpg") && matchlevel > 3) {
-                               bestmatch = (*entrynames)[i];
-                               matchlevel = 3;
-                           } else if (entry.EndWith(".png") && matchlevel > 4) {
-                               bestmatch = (*entrynames)[i];
-                               matchlevel = 4;
-                           }
-                       }
-                       // note that this may insert null if no album art was found
-                       value = CoreUtils::Convert(bestmatch);
-                       sFolderArtMap->Put(key, value);
+           String bestmatch;
+           Boolean flag = FALSE;
+           AutoPtr<ICharSequence> key;
+           AutoPtr<ICharSequence> value;
+           AutoPtr<IInterface> obj;
+           {
+                AutoLock syncLock(sFolderArtMap);
+                key = CoreUtils::Convert(artPath);
+                sFolderArtMap->ContainsKey(key, &flag);
+                if (flag) {
+                    sFolderArtMap->Get(key, (IInterface**)&obj);
+                    bestmatch = TO_STR(obj);
+                }
+                else if (!(IsRootStorageDir(artPath)) &&
+                       !(artPath.EqualsIgnoreCase(dwndir))) {
+                   AutoPtr<IFile> dir;
+                   CFile::New(artPath, (IFile**)&dir);
+                   AutoPtr<ArrayOf<String> > entrynames;
+                   dir->List((ArrayOf<String>**)&entrynames);
+                   if (entrynames == NULL) {
+                       return NULL;
                    }
-               }//
-
-               if (!bestmatch.IsNull()) {
-                   AutoPtr<IFile> file;
-                   CFile::New(artPath, bestmatch, (IFile**)&file);
-                   Boolean flag = FALSE;
-                   file->Exists(&flag);
-                   if (flag) {
-                       AutoPtr<IFileInputStream> stream;
-                       // try {
-                           Int64 fileLength;
-                           file->GetLength(&fileLength);
-                           compressed = ArrayOf<Byte>::Alloc(fileLength);
-                           CFileInputStream::New(file, (IFileInputStream**)&stream);
-                           // stream = new FileInputStream(file);
-                           Int32 number;
-                           ECode ec = IInputStream::Probe(stream)->Read(compressed, &number);
-                       // } catch (IOException ex) {
-                           if (ec == (ECode)E_IO_EXCEPTION) {
-                               compressed = NULL;
-                           }
-                       // } catch (OutOfMemoryError ex) {
-                           // Log.w(TAG, ex);
-                           // compressed = null;
-                       // } finally {
-                           if (stream != NULL) {
-                               ICloseable::Probe(stream)->Close();
-                           }
-                       // }
+                   bestmatch = String(NULL);
+                   Int32 matchlevel = 1000;
+                   Int32 length = entrynames->GetLength();
+                   for (Int32 i = length - 1; i >=0; i--) {
+                       String entry = (*entrynames)[i].ToLowerCase();
+                       if (entry.Equals("albumart.jpg")) {
+                           bestmatch = (*entrynames)[i];
+                           break;
+                       } else if (entry.StartWith("albumart")
+                               && entry.EndWith("large.jpg")
+                               && matchlevel > 1) {
+                           bestmatch = (*entrynames)[i];
+                           matchlevel = 1;
+                       } else if (entry.Contains("albumart")
+                               && entry.EndWith(".jpg")
+                               && matchlevel > 2) {
+                           bestmatch = (*entrynames)[i];
+                           matchlevel = 2;
+                       } else if (entry.EndWith(".jpg") && matchlevel > 3) {
+                           bestmatch = (*entrynames)[i];
+                           matchlevel = 3;
+                       } else if (entry.EndWith(".png") && matchlevel > 4) {
+                           bestmatch = (*entrynames)[i];
+                           matchlevel = 4;
+                       }
                    }
+                   // note that this may insert null if no album art was found
+                   value = CoreUtils::Convert(bestmatch);
+                   sFolderArtMap->Put(key, value);
                }
-           }
-       }
-    // } catch (IOException e) {
-    // }
+           }//
 
+           if (!bestmatch.IsNull()) {
+               AutoPtr<IFile> file;
+               CFile::New(artPath, bestmatch, (IFile**)&file);
+               Boolean flag = FALSE;
+               file->Exists(&flag);
+               if (flag) {
+                    AutoPtr<IFileInputStream> stream;
+                    Int64 fileLength;
+                    file->GetLength(&fileLength);
+                    compressed = ArrayOf<Byte>::Alloc(fileLength);
+                    CFileInputStream::New(file, (IFileInputStream**)&stream);
+                    // stream = new FileInputStream(file);
+                    Int32 number;
+                    ECode ec = IInputStream::Probe(stream)->Read(compressed, &number);
+                    if (FAILED(ec)) {
+                        compressed = NULL;
+                    }
+
+                    if (stream != NULL) {
+                       ICloseable::Probe(stream)->Close();
+                    }
+                }
+            }
+        }
+    }
     return compressed;
 }
 
@@ -7120,51 +7135,51 @@ AutoPtr<IUri> MediaProvider::GetAlbumArtOutputUri(
     AutoPtr<IIoUtils> ioUtils;
     CIoUtils::AcquireSingleton((IIoUtils**)&ioUtils);//
 
-    AutoPtr<ICursor> c;
+
     if (albumart_uri != NULL) {
        AutoPtr<ArrayOf<String> > arr1 = ArrayOf<String>::Alloc(1);
        (*arr1)[0] = IMediaStoreMediaColumns::DATA;
+       AutoPtr<ICursor> c;
        Query(albumart_uri, arr1, String(NULL), NULL, String(NULL), (ICursor**)&c);
-       // try {
-           Boolean flag = FALSE;
-           c->MoveToFirst(&flag);
-           if (c != NULL && flag) {
-               String albumart_path;
-               c->GetString(0, &albumart_path);
-               if (EnsureFileExists(albumart_uri, albumart_path)) {
-                   out = albumart_uri;
-               }
-           } else {
-               albumart_uri = NULL;
+       Boolean flag = FALSE;
+       if (c != NULL && (c->MoveToFirst(&flag), flag)) {
+           String albumart_path;
+           c->GetString(0, &albumart_path);
+           if (EnsureFileExists(albumart_uri, albumart_path)) {
+               out = albumart_uri;
            }
-       // } finally {
-           ioUtils->CloseQuietly(ICloseable::Probe(c));
-       // }
+       }
+       else {
+           albumart_uri = NULL;
+       }
+
+       if (c) ioUtils->CloseQuietly(ICloseable::Probe(c));
     }
+
     if (albumart_uri == NULL){
-       AutoPtr<IContentValues> initialValues;
-       CContentValues::New((IContentValues**)&initialValues);
-       initialValues->Put(String("album_id"), album_id);
+        AutoPtr<IContentValues> initialValues;
+        CContentValues::New((IContentValues**)&initialValues);
+        initialValues->Put(String("album_id"), album_id);
        // try {
-           AutoPtr<IContentValues> values;
-           EnsureFile(FALSE, initialValues, String(""), ALBUM_THUMB_FOLDER, (IContentValues**)&values);
-           helper->mNumInserts++;
-           Int64 rowId;
-           db->Insert(String("album_art"), IMediaStoreMediaColumns::DATA, values, &rowId);
-           if (rowId > 0) {
-               AutoPtr<IContentUris> cu;
-               CContentUris::AcquireSingleton((IContentUris**)&cu);
-               cu->WithAppendedId(ALBUMART_URI, rowId, (IUri**)&out);
-               // ensure the parent directory exists
-               String albumart_path;
-               values->GetAsString(IMediaStoreMediaColumns::DATA, &albumart_path);
-               EnsureFileExists(out, albumart_path);
-           }
+        AutoPtr<IContentValues> values;
+        EnsureFile(FALSE, initialValues, String(""), ALBUM_THUMB_FOLDER, (IContentValues**)&values);
+        helper->mNumInserts++;
+        Int64 rowId;
+        db->Insert(String("album_art"), IMediaStoreMediaColumns::DATA, values, &rowId);
+        if (rowId > 0) {
+            AutoPtr<IContentUris> cu;
+            CContentUris::AcquireSingleton((IContentUris**)&cu);
+            cu->WithAppendedId(ALBUMART_URI, rowId, (IUri**)&out);
+            // ensure the parent directory exists
+            String albumart_path;
+            values->GetAsString(IMediaStoreMediaColumns::DATA, &albumart_path);
+            EnsureFileExists(out, albumart_path);
+        }
        // } catch (IllegalStateException ex) {
-           Logger::E(TAG, "error creating album thumb file");
+            // Logger::E(TAG, "error creating album thumb file");
        // }
     }
-    ioUtils->CloseQuietly(ICloseable::Probe(c));
+
     return out;
 }
 
@@ -7221,91 +7236,96 @@ Int64 MediaProvider::GetKeyIdForName(
     AutoPtr<ArrayOf<String> > selargs = ArrayOf<String>::Alloc(1);
     (*selargs)[0] = k;
     helper->mNumQueries++;
+    String nullStr;
     AutoPtr<ICursor> c;
-    db->Query(table, NULL, keyField + "=?", selargs, String(NULL), String(NULL), String(NULL), (ICursor**)&c);//
+    db->Query(table, NULL, keyField + "=?", selargs, nullStr, nullStr, nullStr, (ICursor**)&c);//
 
     // try {
-       Int32 count;
-       c->GetCount(&count);
-       Boolean flag = FALSE;
-       switch (count) {
-           case 0: {
-                   // insert new entry into table
-                   AutoPtr<IContentValues> otherValues;
-                   CContentValues::New((IContentValues**)&otherValues);
-                   otherValues->Put(keyField, k);
-                   otherValues->Put(nameField, rawName_);
-                   helper->mNumInserts++;
-                   db->Insert(table, String("duration"), otherValues, &rowId);
-                   if (path.IsNull() && isAlbum && ! isUnknown) {
-                       // We just inserted a new album. Now create an album art thumbnail for it.
-                       MakeThumbAsync(helper, db, path, rowId);
-                   }
-                   if (rowId > 0) {
-                       String volume;
-                       String str = Object::ToString(srcuri);
-                       str.Substring(16, 24); // extract internal/external
-                       AutoPtr<IUri> uri;
-                       AutoPtr<IUriHelper> uh;
-                       CUriHelper::AcquireSingleton((IUriHelper**)&uh);
-                       sb.Reset(); sb += "content://media/"; sb += volume; sb += "/audio/"; sb += table; sb += "/"; sb += rowId;
-                       uh->Parse(sb.ToString(), (IUri**)&uri);
-                       AutoPtr<IContext> context;
-                       GetContext((IContext**)&context);
-                       AutoPtr<IContentResolver> resolver;
-                       context->GetContentResolver((IContentResolver**)&resolver);
-                       resolver->NotifyChange(uri, NULL);
-                   }
-               }
-               break;
-           case 1: {
-                   // Use the existing entry
-                   c->MoveToFirst(&flag);
-                   c->GetInt64(0, &rowId);
+    Int32 count;
+    c->GetCount(&count);
+    Boolean flag = FALSE;
+        switch (count) {
+        case 0: {
+            // insert new entry into table
+            AutoPtr<IContentValues> otherValues;
+            CContentValues::New((IContentValues**)&otherValues);
+            otherValues->Put(keyField, k);
+            otherValues->Put(nameField, rawName_);
+            helper->mNumInserts++;
+            db->Insert(table, String("duration"), otherValues, &rowId);
+            if (path.IsNull() && isAlbum && ! isUnknown) {
+            // We just inserted a new album. Now create an album art thumbnail for it.
+            MakeThumbAsync(helper, db, path, rowId);
+            }
+            if (rowId > 0) {
+            String volume;
+            String str = Object::ToString(srcuri);
+            str.Substring(16, 24); // extract internal/external
+            AutoPtr<IUri> uri;
+            AutoPtr<IUriHelper> uh;
+            CUriHelper::AcquireSingleton((IUriHelper**)&uh);
+            sb.Reset(); sb += "content://media/"; sb += volume; sb += "/audio/"; sb += table; sb += "/"; sb += rowId;
+            uh->Parse(sb.ToString(), (IUri**)&uri);
+            AutoPtr<IContext> context;
+            GetContext((IContext**)&context);
+            AutoPtr<IContentResolver> resolver;
+            context->GetContentResolver((IContentResolver**)&resolver);
+            resolver->NotifyChange(uri, NULL);
+            }
+            break;
+        }
 
-                   // Determine whether the current rawName is better than what's
-                   // currently stored in the table, and update the table if it is.
-                   String currentFancyName;
-                   c->GetString(2, &currentFancyName);
-                   String bestName = MakeBestName(rawName_, currentFancyName);
-                   if (!bestName.Equals(currentFancyName)) {
-                       // update the table with the new name
-                       AutoPtr<IContentValues> newValues;
-                       CContentValues::New((IContentValues**)&newValues);
-                       newValues->Put(nameField, bestName);
-                       helper->mNumUpdates++;
-                       Int32 vol;
-                       db->Update(table, newValues, String("rowid=") + StringUtils::ToString(rowId), NULL, &vol);
-                       String volume;
-                       String tmp = Object::ToString(srcuri);
-                       tmp.Substring(16, 24); // extract internal/external
-                       AutoPtr<IUri> uri;
-                       AutoPtr<IUriHelper> uh;
-                       CUriHelper::AcquireSingleton((IUriHelper**)&uh);
-                       sb.Reset(); sb += "content://media/"; sb += volume; sb += "/audio/"; sb += table; sb += "/"; sb += rowId;
-                       uh->Parse(sb.ToString(), (IUri**)&uri);
-                       AutoPtr<IContext> context;
-                       GetContext((IContext**)&context);
-                       AutoPtr<IContentResolver> resolver;
-                       context->GetContentResolver((IContentResolver**)&resolver);
-                       resolver->NotifyChange(uri, NULL);
-                   }
-               }
-               break;
-           default:
-               // corrupt database
-               Logger::E(TAG, "Multiple entries in table %s for key %s", table.string(), k.string());
-               rowId = -1;
-               break;
-       }
+        case 1: {
+            // Use the existing entry
+            c->MoveToFirst(&flag);
+            c->GetInt64(0, &rowId);
+
+            // Determine whether the current rawName is better than what's
+            // currently stored in the table, and update the table if it is.
+            String currentFancyName;
+            c->GetString(2, &currentFancyName);
+            String bestName = MakeBestName(rawName_, currentFancyName);
+            if (!bestName.Equals(currentFancyName)) {
+                // update the table with the new name
+                AutoPtr<IContentValues> newValues;
+                CContentValues::New((IContentValues**)&newValues);
+                newValues->Put(nameField, bestName);
+                helper->mNumUpdates++;
+                Int32 vol;
+                sb.Reset(); sb += "rowid="; sb += rowId;
+                db->Update(table, newValues, sb.ToString(), NULL, &vol);
+                String volume;
+                String tmp = Object::ToString(srcuri);
+                tmp.Substring(16, 24); // extract internal/external
+                AutoPtr<IUri> uri;
+                AutoPtr<IUriHelper> uh;
+                CUriHelper::AcquireSingleton((IUriHelper**)&uh);
+                sb.Reset(); sb += "content://media/"; sb += volume; sb += "/audio/";
+                sb += table; sb += "/"; sb += rowId;
+                uh->Parse(sb.ToString(), (IUri**)&uri);
+                AutoPtr<IContext> context;
+                GetContext((IContext**)&context);
+                AutoPtr<IContentResolver> resolver;
+                context->GetContentResolver((IContentResolver**)&resolver);
+                resolver->NotifyChange(uri, NULL);
+            }
+            break;
+        }
+
+        default:
+            // corrupt database
+            Logger::E(TAG, "Multiple entries in table %s for key %s", table.string(), k.string());
+            rowId = -1;
+            break;
+    }
     // } finally {
-       AutoPtr<IIoUtils> ioUtils;
-       CIoUtils::AcquireSingleton((IIoUtils**)&ioUtils);
-       ioUtils->CloseQuietly(ICloseable::Probe(c));
+    AutoPtr<IIoUtils> ioUtils;
+    CIoUtils::AcquireSingleton((IIoUtils**)&ioUtils);
+    ioUtils->CloseQuietly(ICloseable::Probe(c));
     // }
 
     if (cache.GetSize() == 0 && ! isUnknown) {
-       cache[cacheName] = rowId;
+        cache[cacheName] = rowId;
     }
     return rowId;
 }
@@ -7319,7 +7339,8 @@ String MediaProvider::MakeBestName(
     // Longer names are usually better.
     if (one.GetLength() > two.GetLength()) {
        name = one;
-    } else {
+    }
+    else {
        // Names with accents are usually better, and conveniently sort later
        if (one.ToLowerCase().Compare(two.ToLowerCase()) > 0) {
            name = one;
@@ -7333,7 +7354,9 @@ String MediaProvider::MakeBestName(
         name.EndWith(", an") || name.EndWith(",an") ||
         name.EndWith(", a") || name.EndWith(",a")) {
         String fix = name.Substring(1 + name.LastIndexOf(','));
-        name = fix.Trim() + " " + name.Substring(0, name.LastIndexOf(','));
+        StringBuilder sb(fix.Trim()); sb += " ";
+        sb += name.Substring(0, name.LastIndexOf(','));
+        name = sb.ToString();
     }
 
     // TODO: word-capitalize the resulting name
@@ -7351,30 +7374,29 @@ void MediaProvider::WriteAlbumArt(
     AutoPtr<IIoUtils> ioUtils;
     CIoUtils::AcquireSingleton((IIoUtils**)&ioUtils);
 
-    // try {
-       AutoPtr<IContext> context;
-       GetContext((IContext**)&context);
-       AutoPtr<IContentResolver> resolver;
-       context->GetContentResolver((IContentResolver**)&resolver);
-       resolver->OpenOutputStream(out, (IOutputStream**)&outstream);
+   AutoPtr<IContext> context;
+   GetContext((IContext**)&context);
+   AutoPtr<IContentResolver> resolver;
+   context->GetContentResolver((IContentResolver**)&resolver);
+   resolver->OpenOutputStream(out, (IOutputStream**)&outstream);
 
-       if (!need_to_recompress) {
-           // No need to recompress here, just write out the original
-           // compressed data here.
-           outstream->Write(compressed);
-       } else {
-           Boolean flag = FALSE;
-           bm->Compress(BitmapCompressFormat_JPEG, 85, outstream, &flag);
-           if (!flag) {
-               Logger::E(TAG, "failed to compress bitmap");
-               ioUtils->CloseQuietly(ICloseable::Probe(outstream));
-               // return E_IO_EXCEPTION;
-               return;
-           }
+   if (!need_to_recompress) {
+       // No need to recompress here, just write out the original
+       // compressed data here.
+       outstream->Write(compressed);
+   }
+   else {
+       Boolean flag = FALSE;
+       bm->Compress(BitmapCompressFormat_JPEG, 85, outstream, &flag);
+       if (!flag) {
+           Logger::E(TAG, "failed to compress bitmap");
+           ioUtils->CloseQuietly(ICloseable::Probe(outstream));
+           // return E_IO_EXCEPTION;
+           return;
        }
-    // } finally {
-       ioUtils->CloseQuietly(ICloseable::Probe(outstream));
-    // }
+   }
+
+   ioUtils->CloseQuietly(ICloseable::Probe(outstream));
 }
 
 AutoPtr<IParcelFileDescriptor> MediaProvider::GetThumb(
@@ -7407,110 +7429,108 @@ AutoPtr<IParcelFileDescriptor> MediaProvider::MakeThumbInternal(
     AutoPtr<IBitmap> bm;
     Boolean need_to_recompress = TRUE;
 
-    // try {
-       // get the size of the bitmap
-       AutoPtr<IBitmapFactoryOptions> opts;
-       CBitmapFactoryOptions::New((IBitmapFactoryOptions**)&opts);
+    // get the size of the bitmap
+    AutoPtr<IBitmapFactoryOptions> opts;
+    CBitmapFactoryOptions::New((IBitmapFactoryOptions**)&opts);
 
-       opts->SetInJustDecodeBounds(TRUE);
-       opts->SetInSampleSize(1);
-       AutoPtr<IBitmapFactory> bitMapFactory;
-       CBitmapFactory::AcquireSingleton((IBitmapFactory**)&bitMapFactory);
-       Int32 length = compressed->GetLength();
-       AutoPtr<IBitmap> bitmap;
-       bitMapFactory->DecodeByteArray(compressed, 0, length, opts, (IBitmap**)&bitmap);
+    opts->SetInJustDecodeBounds(TRUE);
+    opts->SetInSampleSize(1);
+    AutoPtr<IBitmapFactory> bitMapFactory;
+    CBitmapFactory::AcquireSingleton((IBitmapFactory**)&bitMapFactory);
+    Int32 length = compressed->GetLength();
+    AutoPtr<IBitmap> bitmap;
+    bitMapFactory->DecodeByteArray(compressed, 0, length, opts, (IBitmap**)&bitmap);
 
-       // request a reasonably sized output image
-       AutoPtr<IResources> r;
-       context->GetResources((IResources**)&r);
-       Int32 maximumThumbSize;
-       r->GetDimensionPixelSize(R::dimen::maximum_thumb_size, &maximumThumbSize);
-       Int32 oHeight, oWidth, iSampleSize;
-       while((opts->GetOutHeight(&oHeight), oHeight > maximumThumbSize) || (opts->GetOutWidth(&oWidth), oWidth > maximumThumbSize)) {
-           opts->SetOutHeight(oHeight/= 2);
-           opts->SetOutWidth(oWidth /= 2);
-           opts->GetInSampleSize(&iSampleSize);
-           opts->SetInSampleSize(iSampleSize * 2);
-       }
+    // request a reasonably sized output image
+    AutoPtr<IResources> r;
+    context->GetResources((IResources**)&r);
+    Int32 maximumThumbSize;
+    r->GetDimensionPixelSize(R::dimen::maximum_thumb_size, &maximumThumbSize);
+    Int32 oHeight, oWidth, iSampleSize;
+    while((opts->GetOutHeight(&oHeight), oHeight > maximumThumbSize)
+        || (opts->GetOutWidth(&oWidth), oWidth > maximumThumbSize)) {
+        opts->SetOutHeight(oHeight/= 2);
+        opts->SetOutWidth(oWidth /= 2);
+        opts->GetInSampleSize(&iSampleSize);
+        opts->SetInSampleSize(iSampleSize * 2);
+    }
 
-       opts->GetInSampleSize(&iSampleSize);
-       if (iSampleSize == 1) {
-           // The original album art was of proper size, we won't have to
-           // recompress the bitmap later.
-           need_to_recompress = FALSE;
-       } else {
-           // get the image for real now
-           opts->SetInJustDecodeBounds(FALSE);
-           opts->SetInPreferredConfig(BitmapConfig_RGB_565);
-           bitMapFactory->DecodeByteArray(compressed, 0, length, IBitmapFactoryOptions::Probe(opts), (IBitmap**)&bm);//
+    opts->GetInSampleSize(&iSampleSize);
+    if (iSampleSize == 1) {
+       // The original album art was of proper size, we won't have to
+       // recompress the bitmap later.
+       need_to_recompress = FALSE;
+    }
+    else {
+        // get the image for real now
+        opts->SetInJustDecodeBounds(FALSE);
+        opts->SetInPreferredConfig(BitmapConfig_RGB_565);
+        bitMapFactory->DecodeByteArray(compressed, 0, length,
+            IBitmapFactoryOptions::Probe(opts), (IBitmap**)&bm);//
 
-           Int32 bc;
-           bm->GetConfig(&bc);//
+        Int32 bc;
+        bm->GetConfig(&bc);//
 
-           if (bm != NULL && bc == 0) {
-               AutoPtr<IBitmap> nbm;
-               bm->Copy(BitmapConfig_RGB_565, FALSE, (IBitmap**)&nbm);
-               if (nbm != NULL && nbm != bm) {
-                   bm->Recycle();
-                   bm = nbm;
-               }
-           }
-       }
-    // } catch (Exception e) {
-    // }
+        if (bm != NULL && bc == 0) {
+            AutoPtr<IBitmap> nbm;
+            bm->Copy(BitmapConfig_RGB_565, FALSE, (IBitmap**)&nbm);
+            if (nbm != NULL && nbm != bm) {
+                bm->Recycle();
+                bm = nbm;
+            }
+        }
+    }
 
     if (need_to_recompress && bm == NULL) {
-       return NULL;
+        return NULL;
     }
 
     if (d->mAlbumart_uri == NULL) {
        // this one doesn't need to be saved (probably a song with an unknown album),
        // so stick it in a memory file and return that
-       // try {
-           AutoPtr<IParcelFileDescriptorHelper> pfds;
-           CParcelFileDescriptorHelper::AcquireSingleton((IParcelFileDescriptorHelper**)&pfds);
-           AutoPtr<IParcelFileDescriptor> opfd;
-           pfds->FromData(compressed, String("albumthumb"), (IParcelFileDescriptor**)&opfd);
-           return opfd;
-       // } catch (IOException e) {
-       // }
-    } else {
-       // This one needs to actually be saved on the sd card.
-       // This is wrapped in a transaction because there are various things
-       // that could go wrong while generating the thumbnail, and we only want
-       // to update the database when all steps succeeded.
-       d->mDb->BeginTransaction();
-       AutoPtr<IUri> out;
-       AutoPtr<IParcelFileDescriptor> pfd;
-       // try {
-           AutoPtr<IContentResolver> resolver;
-           context->GetContentResolver((IContentResolver**)&resolver);
-           out = GetAlbumArtOutputUri(d->mHelper, d->mDb, d->mAlbum_id, d->mAlbumart_uri);//
+        AutoPtr<IParcelFileDescriptorHelper> pfds;
+        CParcelFileDescriptorHelper::AcquireSingleton((IParcelFileDescriptorHelper**)&pfds);
+        AutoPtr<IParcelFileDescriptor> opfd;
+        pfds->FromData(compressed, String("albumthumb"), (IParcelFileDescriptor**)&opfd);
+        return opfd;
+    }
+    else {
+        // This one needs to actually be saved on the sd card.
+        // This is wrapped in a transaction because there are various things
+        // that could go wrong while generating the thumbnail, and we only want
+        // to update the database when all steps succeeded.
+        d->mDb->BeginTransaction();
+        AutoPtr<IUri> out;
+        AutoPtr<IParcelFileDescriptor> pfd;
+        // try {
+        AutoPtr<IContentResolver> resolver;
+        context->GetContentResolver((IContentResolver**)&resolver);
+        out = GetAlbumArtOutputUri(d->mHelper, d->mDb, d->mAlbum_id, d->mAlbumart_uri);//
 
-           if (out != NULL) {
-               WriteAlbumArt(need_to_recompress, out, compressed, bm);
-               resolver->NotifyChange(MEDIA_URI, NULL);
-               OpenFileHelper(out, String("r"), (IParcelFileDescriptor**)&pfd);
-               d->mDb->SetTransactionSuccessful();
-               return pfd;
-           }
+        if (out != NULL) {
+           WriteAlbumArt(need_to_recompress, out, compressed, bm);
+           resolver->NotifyChange(MEDIA_URI, NULL);
+           OpenFileHelper(out, String("r"), (IParcelFileDescriptor**)&pfd);
+           d->mDb->SetTransactionSuccessful();
+           return pfd;
+        }
        // } catch (IOException ex) {
            // do nothing, just return null below
        // } catch (UnsupportedOperationException ex) {
            // do nothing, just return null below
        // } finally {
-           d->mDb->EndTransaction();
-           if (bm != NULL) {
-               bm->Recycle();
-           }
-           if (pfd == NULL && out != NULL) {
-               // Thumbnail was not written successfully, delete the entry that refers to it.
-               // Note that this only does something if getAlbumArtOutputUri() reused an
-               // existing entry from the database. If a new entry was created, it will
-               // have been rolled back as part of backing out the transaction.
-               Int32 vol;
-               resolver->Delete(out, String(NULL), NULL, &vol);
-           }
+        d->mDb->EndTransaction();
+        if (bm != NULL) {
+            bm->Recycle();
+        }
+        if (pfd == NULL && out != NULL) {
+            // Thumbnail was not written successfully, delete the entry that refers to it.
+            // Note that this only does something if getAlbumArtOutputUri() reused an
+            // existing entry from the database. If a new entry was created, it will
+            // have been rolled back as part of backing out the transaction.
+            Int32 vol;
+            resolver->Delete(out, String(NULL), NULL, &vol);
+        }
        // }
     }
     return NULL;
@@ -7519,6 +7539,7 @@ AutoPtr<IParcelFileDescriptor> MediaProvider::MakeThumbInternal(
 AutoPtr<IUri> MediaProvider::AttachVolume(
     /* [in] */ const String& volume)
 {
+    if (LOCAL_LOGV) Logger::V(TAG, "AttachVolume %s", volume.string());
     Int32 callingPid = Binder::GetCallingPid();
     Int32 myPid = Process::MyPid();
     if (callingPid != myPid) {
@@ -7544,7 +7565,6 @@ AutoPtr<IUri> MediaProvider::AttachVolume(
         GetContext((IContext**)&context);
         AutoPtr<DatabaseHelper> helper;
         if (INTERNAL_VOLUME.Equals(volume)) {
-
             helper = new DatabaseHelper();
             helper->constructor(this, context, INTERNAL_DATABASE_NAME, TRUE,
                    FALSE, mObjectRemovedCallback);
@@ -7558,36 +7578,36 @@ AutoPtr<IUri> MediaProvider::AttachVolume(
                 Int32 volumeId;
                 actualVolume->GetFatVolumeId(&volumeId);//
 
-               // Must check for failure!
-               // If the volume is not (yet) mounted, this will create a new
-               // external-ffffffff.db database instead of the one we expect.  Then, if
-               // android.process.media is later killed and respawned, the real external
-               // database will be attached, containing stale records, or worse, be empty.
-               if (volumeId == -1) {
-                   String state = Environment::GetExternalStorageState();
-                   if (Environment::MEDIA_MOUNTED.Equals(state) ||
-                           Environment::MEDIA_MOUNTED_READ_ONLY.Equals(state)) {
-                       // This may happen if external storage was _just_ mounted.  It may also
-                       // happen if the volume ID is _actually_ 0xffffffff, in which case it
-                       // must be changed since FileUtils::getFatVolumeId doesn't allow for
-                       // that.  It may also indicate that FileUtils::getFatVolumeId is broken
-                       // (missing ioctl), which is also impossible to disambiguate.
-                       Logger::E(TAG, "Can't obtain external volume ID even though it's mounted.");
-                   } else {
-                       Logger::I(TAG, "External volume is not (yet) mounted, cannot attach.");
-                   }//
+                // Must check for failure!
+                // If the volume is not (yet) mounted, this will create a new
+                // external-ffffffff.db database instead of the one we expect.  Then, if
+                // android.process.media is later killed and respawned, the real external
+                // database will be attached, containing stale records, or worse, be empty.
+                if (volumeId == -1) {
+                    String state = Environment::GetExternalStorageState();
+                    if (Environment::MEDIA_MOUNTED.Equals(state) ||
+                            Environment::MEDIA_MOUNTED_READ_ONLY.Equals(state)) {
+                        // This may happen if external storage was _just_ mounted.  It may also
+                        // happen if the volume ID is _actually_ 0xffffffff, in which case it
+                        // must be changed since FileUtils::getFatVolumeId doesn't allow for
+                        // that.  It may also indicate that FileUtils::getFatVolumeId is broken
+                        // (missing ioctl), which is also impossible to disambiguate.
+                        Logger::E(TAG, "Can't obtain external volume ID even though it's mounted.");
+                    } else {
+                        Logger::I(TAG, "External volume is not (yet) mounted, cannot attach.");
+                    }
 
-                   Logger::E(TAG, "Can't obtain external volume ID for %s volume.", volume.string());
-               }
+                    Logger::E(TAG, "Can't obtain external volume ID for %s volume.", volume.string());
+                }
 
-               // generate database name based on volume ID
-               StringBuilder sb("external-");
-               sb += StringUtils::ToHexString(volumeId);
-               sb += ".db";
-               dbName = sb.ToString();
-               helper = new DatabaseHelper();
-               helper->constructor(this, context, dbName, FALSE, FALSE, mObjectRemovedCallback);
-               mVolumeId = volumeId;
+                // generate database name based on volume ID
+                StringBuilder sb("external-");
+                sb += StringUtils::ToHexString(volumeId);
+                sb += ".db";
+                dbName = sb.ToString();
+                helper = new DatabaseHelper();
+                helper->constructor(this, context, dbName, FALSE, FALSE, mObjectRemovedCallback);
+                mVolumeId = volumeId;
            }
            else {
                // external database name should be EXTERNAL_DATABASE_NAME
@@ -7598,119 +7618,122 @@ AutoPtr<IUri> MediaProvider::AttachVolume(
                context->GetDatabasePath(EXTERNAL_DATABASE_NAME, (IFile**)&dbFile);
                dbFile->Exists(&flag);
                if (!flag) {
-                   // find the most recent external database and rename it to
-                   // EXTERNAL_DATABASE_NAME, and delete any other older
-                   // external database files
-                   AutoPtr<IFile> recentDbFile;
-                   AutoPtr<IFile> file;
-                   AutoPtr<ArrayOf<String> > dblist;
-                   context->GetDatabaseList((ArrayOf<String>**)&dblist);
-                   if (dblist != NULL) {
+                    // find the most recent external database and rename it to
+                    // EXTERNAL_DATABASE_NAME, and delete any other older
+                    // external database files
+                    AutoPtr<IFile> recentDbFile;
+                    AutoPtr<IFile> file;
+                    AutoPtr<ArrayOf<String> > dblist;
+                    context->GetDatabaseList((ArrayOf<String>**)&dblist);
+                    if (dblist != NULL) {
                         Int32 dblength = dblist->GetLength();
-                       String database;
-                       for(Int32 i = 0; i < dblength; i++) {
-                           database = (*dblist)[i];
-                           if (database.StartWith("external-") && database.EndWith(".db")) {
-                               file = NULL;
-                               context->GetDatabasePath(database, (IFile**)&file);
-                               Int64 flf, lmf;
-                               file->GetLastModified(&flf);
-                               recentDbFile->GetLastModified(&lmf);
-                               if (recentDbFile == NULL) {
-                                   recentDbFile = file;
-                               } else if (flf > lmf) {
-                                   recentDbFile->GetName(&dbName);
-                                   context->DeleteDatabase(dbName, &flag);
-                                   recentDbFile = file;
-                               } else {
-                                   file->GetName(&dbName);
-                                   context->DeleteDatabase(dbName, &flag);
-                               }
-                           }
-                       }
-                   }
+                        String database;
+                        for(Int32 i = 0; i < dblength; i++) {
+                            database = (*dblist)[i];
+                            if (database.StartWith("external-") && database.EndWith(".db")) {
+                                file = NULL;
+                                context->GetDatabasePath(database, (IFile**)&file);
+                                Int64 flf, lmf;
+                                file->GetLastModified(&flf);
+                                recentDbFile->GetLastModified(&lmf);
+                                if (recentDbFile == NULL) {
+                                    recentDbFile = file;
+                                }
+                                else if (flf > lmf) {
+                                    recentDbFile->GetName(&dbName);
+                                    context->DeleteDatabase(dbName, &flag);
+                                    recentDbFile = file;
+                                }
+                                else {
+                                    file->GetName(&dbName);
+                                    context->DeleteDatabase(dbName, &flag);
+                                }
+                            }
+                        }
+                    }
 
                    if (recentDbFile != NULL) {
-                       recentDbFile->RenameTo(dbFile, &flag);
-                       if (flag) {
+                        recentDbFile->RenameTo(dbFile, &flag);
+                        if (flag) {
                            recentDbFile->GetName(&dbName);
                            Logger::D(TAG, "renamed database %s to %s", dbName.string(), EXTERNAL_DATABASE_NAME.string());
-                       } else {
-                           recentDbFile->GetName(&dbName);
-                           Logger::E(TAG, "Failed to rename database %s to %s", dbName.string(), EXTERNAL_DATABASE_NAME.string());
-                           // This shouldn't happen, but if it does, continue using
-                           // the file under its old name
-                           dbFile = recentDbFile;
-                       }
-                   }
+                        }
+                        else {
+                            recentDbFile->GetName(&dbName);
+                            Logger::E(TAG, "Failed to rename database %s to %s", dbName.string(), EXTERNAL_DATABASE_NAME.string());
+                            // This shouldn't happen, but if it does, continue using
+                            // the file under its old name
+                            dbFile = recentDbFile;
+                        }
+                    }
                    // else DatabaseHelper will create one named EXTERNAL_DATABASE_NAME
                }
-               dbFile->GetName(&dbName);
-               helper = new DatabaseHelper();
-               helper->constructor(this, context, dbName, FALSE, FALSE, mObjectRemovedCallback);
-           }
-       } else {
-           Logger::E(TAG, "There is no volume named %s", volume.string());
-           return NULL;
-       }
 
-       mDatabases->Put(CoreUtils::Convert(volume), (IDatabaseHelper*)helper.Get());
+                dbFile->GetName(&dbName);
+                helper = new DatabaseHelper();
+                helper->constructor(this, context, dbName, FALSE, FALSE, mObjectRemovedCallback);
+            }
+        } else {
+            Logger::E(TAG, "There is no volume named %s", volume.string());
+            return NULL;
+        }
 
-       if (!helper->mInternal) {
-           // create default directories (only happens on first boot)
-           AutoPtr<ISQLiteDatabase> sdb;
-           helper->GetWritableDatabase((ISQLiteDatabase**)&sdb);
-           CreateDefaultFolders(helper, sdb);//
+        mDatabases->Put(CoreUtils::Convert(volume), (IDatabaseHelper*)helper.Get());
 
-           // clean up stray album art files: delete every file not in the database
-           AutoPtr<IFile> f;
-           CFile::New((*mExternalStoragePaths)[0], ALBUM_THUMB_FOLDER, (IFile**)&f);
-           AutoPtr<ArrayOf<IFile*> > files;
-           f->ListFiles((ArrayOf<IFile*>**)&files);//
+        if (!helper->mInternal) {
+            // create default directories (only happens on first boot)
+            AutoPtr<ISQLiteDatabase> sdb;
+            helper->GetWritableDatabase((ISQLiteDatabase**)&sdb);
+            CreateDefaultFolders(helper, sdb);//
 
-           HashSet<String> fileSet;
-           if (files != NULL) {
+            // clean up stray album art files: delete every file not in the database
+            AutoPtr<IFile> f;
+            CFile::New((*mExternalStoragePaths)[0], ALBUM_THUMB_FOLDER, (IFile**)&f);
+            AutoPtr<ArrayOf<IFile*> > files;
+            f->ListFiles((ArrayOf<IFile*>**)&files);//
+
+            HashSet<String> fileSet;
+            if (files != NULL) {
                 Int32 flength = files->GetLength();
                 String hsPath;
                 for (Int32 i = 0; files != NULL && i < flength; i++) {
                     (*files)[i]->GetPath(&hsPath);
                     fileSet.Insert(hsPath);
                 }
-           }
+            }
 
-           String nullStr;
-           AutoPtr<ICursor> cursor;
-           AutoPtr<ArrayOf<String> > qarr = ArrayOf<String>::Alloc(1);
-           (*qarr)[0] = IMediaStoreAudioAlbumColumns::ALBUM_ART;//
+            String nullStr;
+            AutoPtr<ICursor> cursor;
+            AutoPtr<ArrayOf<String> > qarr = ArrayOf<String>::Alloc(1);
+            (*qarr)[0] = IMediaStoreAudioAlbumColumns::ALBUM_ART;//
 
-           AutoPtr<IMediaStoreAudioAlbums> msaa;
-           CMediaStoreAudioAlbums::AcquireSingleton((IMediaStoreAudioAlbums**)&msaa);
-           AutoPtr<IUri> quri;
-           msaa->GetEXTERNAL_CONTENT_URI((IUri**)&quri);
-           Logger::D(TAG, " >>> Query:[%s], projection:[%s]", TO_CSTR(quri), IMediaStoreAudioAlbumColumns::ALBUM_ART.string());
-           Query(quri, qarr, nullStr, NULL, nullStr, (ICursor**)&cursor);
+            AutoPtr<IMediaStoreAudioAlbums> msaa;
+            CMediaStoreAudioAlbums::AcquireSingleton((IMediaStoreAudioAlbums**)&msaa);
+            AutoPtr<IUri> quri;
+            msaa->GetEXTERNAL_CONTENT_URI((IUri**)&quri);
+            Query(quri, qarr, nullStr, NULL, nullStr, (ICursor**)&cursor);
            // try {
-               String arrStr;
-               while (cursor != NULL && (cursor->MoveToNext(&flag), flag)) {
-                   cursor->GetString(0, &arrStr);
-                   fileSet.Erase(arrStr);
-               }
-           // } finally {
-               AutoPtr<IIoUtils> ioUtils;
-               CIoUtils::AcquireSingleton((IIoUtils**)&ioUtils);
-               ioUtils->CloseQuietly(ICloseable::Probe(cursor));
-           // }
+            if (cursor != NULL) {
+                String arrStr;
+                while ((cursor->MoveToNext(&flag), flag)) {
+                    cursor->GetString(0, &arrStr);
+                    fileSet.Erase(arrStr);
+                }
+            }
+            AutoPtr<IIoUtils> ioUtils;
+            CIoUtils::AcquireSingleton((IIoUtils**)&ioUtils);
+            ioUtils->CloseQuietly(ICloseable::Probe(cursor));
 
-           HashSet<String>::Iterator it = fileSet.Begin();
-           String fileName;
-           for (; it != fileSet.End(); ++it) {
-               fileName = *it;
-               if (LOCAL_LOGV) Logger::V(TAG, "deleting obsolete album art %s", fileName.string());
-               AutoPtr<IFile> tFile;
-               CFile::New(fileName, (IFile**)&tFile);
-               tFile->Delete();
-           }
-       }
+            HashSet<String>::Iterator it = fileSet.Begin();
+            String fileName;
+            for (; it != fileSet.End(); ++it) {
+                fileName = *it;
+                if (LOCAL_LOGV) Logger::V(TAG, "deleting obsolete album art %s", fileName.string());
+                AutoPtr<IFile> tFile;
+                CFile::New(fileName, (IFile**)&tFile);
+                tFile->Delete();
+            }
+        }
     }
 
     if (LOCAL_LOGV) Logger::V(TAG, "Attached volume: %s", volume.string());
@@ -7723,19 +7746,19 @@ ECode MediaProvider::GetDatabaseForUri(
     /* [in] */ IUri* uri,
     /* [out] */ IDatabaseHelper** result)
 {
-    {
-        AutoLock syncLock(mDatabases);
-        AutoPtr<IList> segments;
-        uri->GetPathSegments((IList**)&segments);
+    VALIDATE_NOT_NULL(result)
+
+    AutoLock syncLock(mDatabases);
+    AutoPtr<IList> segments;
+    uri->GetPathSegments((IList**)&segments);
+    if (segments != NULL) {
         Int32 size;
         segments->GetSize(&size);
         if (size >= 1) {
-            AutoPtr<IInterface> obj;
+            AutoPtr<IInterface> obj, value;
             segments->Get(0, (IInterface**)&obj);
-            AutoPtr<ICharSequence> cs = ICharSequence::Probe(obj);
-            obj = NULL;
-            mDatabases->Get(cs, (IInterface**)&obj);
-            *result = IDatabaseHelper::Probe(obj);
+            mDatabases->Get(obj, (IInterface**)&value);
+            *result = IDatabaseHelper::Probe(value);
             REFCOUNT_ADD(*result);
             return NOERROR;
         }
@@ -7775,27 +7798,20 @@ void MediaProvider::DetachVolume(
     if (Binder::GetCallingPid() != Process::MyPid()) {
        Logger::E(TAG, "Opening and closing databases not allowed.");
        return;
-       // throw new SecurityException(
-       //         "Opening and closing databases not allowed.");
     }
 
     AutoPtr<IList> list;
     uri->GetPathSegments((IList**)&list);
     AutoPtr<IInterface> obj;
     list->Get(0, (IInterface**)&obj);
-    AutoPtr<ICharSequence> cs = ICharSequence::Probe(obj);
-    String volume;
-    cs->ToString(&volume);
+    String volume = TO_STR(obj);
     if (INTERNAL_VOLUME.Equals(volume)) {
        Logger::E(TAG, "Deleting the internal volume is not allowed");
        return;
-       // throw new UnsupportedOperationException(
-       //         "Deleting the internal volume is not allowed");
-    } else if (!EXTERNAL_VOLUME.Equals(volume)) {
-       Logger::E(TAG, "There is no volume named ");
+    }
+    else if (!EXTERNAL_VOLUME.Equals(volume)) {
+       Logger::E(TAG, "There is no volume named %s", volume.string());
        return;
-       // throw new IllegalArgumentException(
-       //         "There is no volume named " + volume);
     }
 
     {
@@ -7805,26 +7821,22 @@ void MediaProvider::DetachVolume(
         AutoPtr<IDatabaseHelper> database = IDatabaseHelper::Probe(obj);
         if (database == NULL) return;
 
-       // try {
-           // touch the database file to show it is most recently used
-           AutoPtr<ISQLiteDatabase> db;
-           ((DatabaseHelper*)database.Get())->GetReadableDatabase((ISQLiteDatabase**)&db);
-           String path;
-           db->GetPath(&path);
-           AutoPtr<IFile> file;
-           CFile::New(path, (IFile**)&file);
-           AutoPtr<ISystem> isystem;
-           CSystem::AcquireSingleton((ISystem**)&isystem);
-           Int64 timeMillis;
-           isystem->GetCurrentTimeMillis(&timeMillis);
-           Boolean flag = FALSE;
-           file->SetLastModified(timeMillis, &flag);
-       // } catch (Exception e) {
-           Logger::E(TAG, "Can't touch database file");
-       // }
+        // touch the database file to show it is most recently used
+        AutoPtr<ISQLiteDatabase> db;
+        ((DatabaseHelper*)database.Get())->GetReadableDatabase((ISQLiteDatabase**)&db);
+        String path;
+        db->GetPath(&path);
+        AutoPtr<IFile> file;
+        CFile::New(path, (IFile**)&file);
+        AutoPtr<ISystem> isystem;
+        CSystem::AcquireSingleton((ISystem**)&isystem);
+        Int64 timeMillis;
+        isystem->GetCurrentTimeMillis(&timeMillis);
+        Boolean flag = FALSE;
+        file->SetLastModified(timeMillis, &flag);
 
-       mDatabases->Remove(CoreUtils::Convert(volume));
-       ISQLiteOpenHelper::Probe(database)->Close();
+        mDatabases->Remove(CoreUtils::Convert(volume));
+        ISQLiteOpenHelper::Probe(database)->Close();
     }
 
     AutoPtr<IContext> context;
@@ -7841,16 +7853,12 @@ String MediaProvider::GetVolumeName(
     AutoPtr<IList> segments;
     uri->GetPathSegments((IList**)&segments);
     Int32 size;
-    segments->GetSize(&size);
-    AutoPtr<ICharSequence> cs;
-    AutoPtr<IInterface> obj;
-    String tmp;
-    if (segments != NULL && size > 0) {
-       segments->Get(0, (IInterface**)&obj);
-       cs = ICharSequence::Probe(obj);
-       cs->ToString(&tmp);
-       return tmp;
-    } else {
+    if (segments != NULL && (segments->GetSize(&size), size > 0)) {
+        AutoPtr<IInterface> obj;
+        segments->Get(0, (IInterface**)&obj);
+        return TO_STR(obj);
+    }
+    else {
        return String(NULL);
     }
 }
@@ -7892,33 +7900,32 @@ String MediaProvider::Dump(
     AutoPtr<ICursor> c;
     AutoPtr<IIoUtils> ioUtils;
     CIoUtils::AcquireSingleton((IIoUtils**)&ioUtils);
-    ioUtils->CloseQuietly(ICloseable::Probe(c));//
 
     if (db == NULL) {
        sb.Append("NULL");
     }
     else {
-       Int32 version;
-       db->GetVersion(&version);
-       sb += "version";
-       sb += version;
-       sb += ", ";
-       AutoPtr<ArrayOf<String> > arr = ArrayOf<String>::Alloc(1);
-       (*arr)[0] = String("count(*)");
-       db->Query(String("files"), arr, String(NULL), NULL, String(NULL), String(NULL), String(NULL), (ICursor**)&c);
-       // try {
-           Boolean flag = FALSE;
-           c->MoveToFirst(&flag);
-           if (c != NULL && flag) {
-               Int32 num;
-               c->GetInt32(0, &num);
-               sb += num;
-               sb += " rows, ";
-           } else {
-               sb.Append("couldn't get row count, ");
-           }
-       // } finally {
-       // }
+        Int32 version;
+        db->GetVersion(&version);
+        sb += "version";
+        sb += version;
+        sb += ", ";
+        AutoPtr<ArrayOf<String> > arr = ArrayOf<String>::Alloc(1);
+        (*arr)[0] = String("count(*)");
+        db->Query(String("files"), arr, String(NULL), NULL, String(NULL), String(NULL), String(NULL), (ICursor**)&c);
+        // try {
+        Boolean flag = FALSE;
+        if (c != NULL && (c->MoveToFirst(&flag), flag)) {
+           Int32 num;
+           c->GetInt32(0, &num);
+           sb += num;
+           sb += " rows, ";
+        } else {
+           sb.Append("couldn't get row count, ");
+        }
+        // } finally {
+        // }
+
         sb += helper->mNumInserts; sb += " inserts, ";
         sb += helper->mNumUpdates; sb += " updates, ";
         sb += helper->mNumDeletes; sb += " deletes, ";
@@ -7959,28 +7966,28 @@ String MediaProvider::Dump(
             AutoPtr<ArrayOf<String> > array = ArrayOf<String>::Alloc(2);
             (*array)[0] = String("time");
             (*array)[1] = String("message");
+            AutoPtr<ICursor> cur;
             db->Query(String("log"), array,
-                   String(NULL), NULL, String(NULL), String(NULL), String("rowid"), (ICursor**)&c);
-           // try {
-            if (c != NULL) {
+                   String(NULL), NULL, String(NULL), String(NULL), String("rowid"), (ICursor**)&cur);
+            if (cur != NULL) {
                 Boolean bMoved = FALSE;
-                while ((c->MoveToNext(&bMoved), bMoved)) {
+                while ((cur->MoveToNext(&bMoved), bMoved)) {
                     String when;
-                    c->GetString(0, &when);
+                    cur->GetString(0, &when);
                     String msg;
-                    c->GetString(1, &msg);
+                    cur->GetString(1, &msg);
                     sb += "\n";
                     sb += when;
                     sb += " : ";
                     sb += msg;
                 }
+                ioUtils->CloseQuietly(ICloseable::Probe(cur));
             }
-           // } finally {
-            ioUtils->CloseQuietly(ICloseable::Probe(c));
-           // }
         }
     }
-    ioUtils->CloseQuietly(ICloseable::Probe(c));
+    if (c != NULL) {
+        ioUtils->CloseQuietly(ICloseable::Probe(c));
+    }
     return sb.ToString();
 }
 

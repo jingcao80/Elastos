@@ -495,17 +495,17 @@ ECode CContentProviderOperation::ResolveValueBackReferences(
             entry->GetKey((IInterface**)&ko);
             String key = Object::ToString(ko);
 
-            Int32 backRefIndex;
-            FAIL_RETURN(mValuesBackReferences->GetAsInt32(key, &backRefIndex))
-            if (0 == backRefIndex) {
-                String str;
-                FAIL_RETURN(ToString(&str))
-                Logger::E(TAG, str);
-                // throw new IllegalArgumentException("values backref " + key + " is not an integer");
+            AutoPtr<IInteger32> backRefIndex;
+            FAIL_RETURN(mValuesBackReferences->GetAsInteger32(key, (IInteger32**)&backRefIndex))
+            if (NULL == backRefIndex) {
+                Logger::E(TAG, "values backref %s is not an integer.", key.string());
                 return E_ILLEGAL_ARGUMENT_EXCEPTION;
             }
+
+            Int32 ival;
+            backRefIndex->GetValue(&ival);
             Int64 backRefValue;
-            FAIL_RETURN(BackRefToValue(backRefs, numBackRefs, backRefIndex, &backRefValue))
+            FAIL_RETURN(BackRefToValue(backRefs, numBackRefs, ival, &backRefValue))
             FAIL_RETURN((*contentValues)->Put(key, backRefValue))
         }
     }

@@ -198,10 +198,9 @@ ECode TrustAgentService::OnCreate()
     AutoPtr<IServiceInfo> serviceInfo;
     ec = pm->GetServiceInfo(component, 0, (IServiceInfo**)&serviceInfo);
     if (FAILED(ec)) {
-        String str("Can't get ServiceInfo for ");
         String str2;
         component->ToShortString(&str2);
-        Logger::E(TAG, str + str2);
+        Logger::E(TAG, "Can't get ServiceInfo for %s", str2.string());
         return E_PACKAGEMANAGER_NAME_NOT_FOUND_EXCEPTION;
     }
     String permission;
@@ -209,7 +208,8 @@ ECode TrustAgentService::OnCreate()
     if (!Manifest::permission::BIND_TRUST_AGENT.Equals(permission)) {
         String str;
         component->FlattenToShortString(&str);
-        Logger::E(TAG, str + " is not declared with the permission \"" + Manifest::permission::BIND_TRUST_AGENT + "\"");
+        Logger::E(TAG, "%s is not declared with the permission \"%s\"",
+            str.string(), Manifest::permission::BIND_TRUST_AGENT.string());
         return E_ILLEGAL_STATE_EXCEPTION;
     }
     return NOERROR;

@@ -268,9 +268,9 @@ public:
      * @param key the value to get
      * @return the Long value, or null if the value is missing or cannot be converted
      */
-    CARAPI GetAsInt64(
+    CARAPI GetAsInteger64(
         /* [in] */ const String& key,
-        /* [out] */ Int64* value);
+        /* [out] */ IInteger64** value);
 
     /**
      * Gets a value and converts it to an Integer.
@@ -278,9 +278,9 @@ public:
      * @param key the value to get
      * @return the Integer value, or null if the value is missing or cannot be converted
      */
-    CARAPI GetAsInt32(
+    CARAPI GetAsInteger32(
         /* [in] */ const String& key,
-        /* [out] */ Int32* value);
+        /* [out] */ IInteger32** value);
 
     /**
      * Gets a value and converts it to a Short.
@@ -288,9 +288,9 @@ public:
      * @param key the value to get
      * @return the Short value, or null if the value is missing or cannot be converted
      */
-    CARAPI GetAsInt16(
+    CARAPI GetAsInteger16(
         /* [in] */ const String& key,
-        /* [out] */ Int16* value);
+        /* [out] */ IInteger16** value);
 
     /**
      * Gets a value and converts it to a Byte.
@@ -300,7 +300,7 @@ public:
      */
     CARAPI GetAsByte(
         /* [in] */ const String& key,
-        /* [out] */ Byte* value);
+        /* [out] */ IByte** value);
 
     /**
      * Gets a value and converts it to a Double.
@@ -310,7 +310,7 @@ public:
      */
     CARAPI GetAsDouble(
         /* [in] */ const String& key,
-        /* [out] */ Double* value);
+        /* [out] */ IDouble** value);
 
     /**
      * Gets a value and converts it to a Float.
@@ -320,7 +320,7 @@ public:
      */
     CARAPI GetAsFloat(
         /* [in] */ const String& key,
-        /* [out] */ Float* value);
+        /* [out] */ IFloat** value);
 
     /**
      * Gets a value and converts it to a Boolean.
@@ -330,7 +330,7 @@ public:
      */
     CARAPI GetAsBoolean(
         /* [in] */ const String& key,
-        /* [out] */ Boolean* value);
+        /* [out] */ IBoolean** value);
 
     /**
      * Gets a value that is a byte array. Note that this method will not convert

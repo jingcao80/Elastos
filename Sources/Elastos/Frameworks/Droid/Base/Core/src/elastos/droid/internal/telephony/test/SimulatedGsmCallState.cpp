@@ -75,11 +75,11 @@ class CallInfo {
 
     String
     ToCLCCLine(Int32 index) {
-        return
-            "+CLCC: "
-            + index + "," + (mIsMT ? "1" : "0") +","
-            + mState->Value() + ",0," + (mIsMpty ? "1" : "0")
-            + ",\"" + mNumber + "\"," + mTOA;
+        StringBuilder sb("+CLCC: "); sb += index; sb += ",";
+        sb += (mIsMT ? "1" : "0"); sb += ","; sb += mState->Value();
+        sb += ",0,"; sb += (mIsMpty ? "1" : "0"); sb += ",\"";
+        sb += mNumber; sb += "\",", sb += mTOA;
+        return sb.ToString();
     }
 
     DriverCall

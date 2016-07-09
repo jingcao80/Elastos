@@ -63,6 +63,8 @@ using Elastos::Core::ISystem;
 using Elastos::Core::CSystem;
 using Elastos::Core::IInteger32;
 using Elastos::Core::CInteger32;
+using Elastos::Core::IInteger64;
+using Elastos::Core::CInteger64;
 using Elastos::Core::IBoolean;
 using Elastos::Core::CBoolean;
 using Elastos::Core::StringUtils;
@@ -712,8 +714,7 @@ ECode CDownloadProvider::Insert(
     Int32 match = 0;
     sURIMatcher->Match(uri, &match);
     if (match != MY_DOWNLOADS) {
-        Logger::D(Constants::TAG, "calling insert on an unknown/invalid URI: %p", uri);
-        //throw new IllegalArgumentException("Unknown/Invalid URI " + uri);
+        Logger::D(Constants::TAG, "calling insert on an unknown/invalid URI: %s", TO_CSTR(uri));
         return E_ILLEGAL_ARGUMENT_EXCEPTION;
     }
 
@@ -727,14 +728,18 @@ ECode CDownloadProvider::Insert(
     CopyString(IDownloadsImpl::COLUMN_MIME_TYPE, values, filteredValues);
     CopyBoolean(IDownloadsImpl::COLUMN_IS_PUBLIC_API, values, filteredValues);
 
-    Boolean isPublicApi = FALSE;
-    values->GetAsBoolean(IDownloadsImpl::COLUMN_IS_PUBLIC_API, &isPublicApi);
-    isPublicApi = isPublicApi == TRUE;
+    AutoPtr<IBoolean> bobj;
+    values->GetAsBoolean(IDownloadsImpl::COLUMN_IS_PUBLIC_API, (IBoolean**)&bobj);
+    Boolean bval;
+    bobj->GetValue(&bval);
+    Boolean isPublicApi = bval == TRUE;
 
     // validate the destination column
     Int32 dest = 0;
-    values->GetAsInt32(IDownloadsImpl::COLUMN_DESTINATION, &dest);
-    if (dest != 0) {
+    AutoPtr<IInteger32> destObj;
+    values->GetAsInteger32(IDownloadsImpl::COLUMN_DESTINATION, (IInteger32**)&destObj);
+    if (destObj != NULL) {
+        destObj->GetValue(&dest);
         AutoPtr<IContext> cxt;
         GetContext((IContext**)&cxt);
         Int32 per = 0;
@@ -778,9 +783,9 @@ ECode CDownloadProvider::Insert(
     }
 
     // validate the visibility column
-    Int32 vis = 0;
-    values->GetAsInt32(IDownloadsImpl::COLUMN_VISIBILITY, &vis);
-    if (vis == 0) {
+    AutoPtr<IInteger32> vis;
+    values->GetAsInteger32(IDownloadsImpl::COLUMN_VISIBILITY, (IInteger32**)&vis);
+    if (vis == NULL) {
         if (dest == IDownloadsImpl::DESTINATION_EXTERNAL) {
             filteredValues->Put(IDownloadsImpl::COLUMN_VISIBILITY,
                     IDownloadsImpl::VISIBILITY_VISIBLE_NOTIFY_COMPLETED);
@@ -791,7 +796,9 @@ ECode CDownloadProvider::Insert(
         }
     }
     else {
-        filteredValues->Put(IDownloadsImpl::COLUMN_VISIBILITY, vis);
+        Int32 ival = 0;
+        vis->GetValue(&ival);
+        filteredValues->Put(IDownloadsImpl::COLUMN_VISIBILITY, ival);
     }
     // copy the control column as is
     CopyInteger(IDownloadsImpl::COLUMN_CONTROL, values, filteredValues);
@@ -801,13 +808,15 @@ ECode CDownloadProvider::Insert(
      * DownloadManager.addCompletedDownload(String, String, String,
      * Boolean, String, String, long) need special treatment
      */
-    Int32 cd = 0;
-    values->GetAsInt32(IDownloadsImpl::COLUMN_DESTINATION, &cd);
+    AutoPtr<IInteger32> cdObj;
+    values->GetAsInteger32(IDownloadsImpl::COLUMN_DESTINATION, (IInteger32**)&cdObj);
+    Int32 cd = 0; cdObj->GetValue(&cd);
     if (cd == IDownloadsImpl::DESTINATION_NON_DOWNLOADMANAGER_DOWNLOAD) {
         // these requests always are marked as 'completed'
         filteredValues->Put(IDownloadsImpl::COLUMN_STATUS, IDownloadsImpl::STATUS_SUCCESS);
-        Int64 longVal = 0;
-        values->GetAsInt64(IDownloadsImpl::COLUMN_TOTAL_BYTES, &longVal);
+        AutoPtr<IInteger64> lobj;
+        values->GetAsInteger64(IDownloadsImpl::COLUMN_TOTAL_BYTES, (IInteger64**)&lobj);
+        Int64 longVal = 0; lobj->GetValue(&longVal);
         filteredValues->Put(IDownloadsImpl::COLUMN_TOTAL_BYTES, longVal);
         filteredValues->Put(IDownloadsImpl::COLUMN_CURRENT_BYTES, 0);
         CopyInteger(IDownloadsImpl::COLUMN_MEDIA_SCANNED, values, filteredValues);
@@ -895,14 +904,14 @@ ECode CDownloadProvider::Insert(
     }
 
     if (Constants::LOGVV) {
-        Int32 cuid = 0;
-        filteredValues->GetAsInt32(Constants::UID, &cuid);
-        Logger::V(Constants::TAG, "initiating download with UID %d", cuid);
+        AutoPtr<IInteger32> cuid;
+        filteredValues->GetAsInteger32(Constants::UID, (IInteger32**)&cuid);
+        Logger::V(Constants::TAG, "initiating download with UID %s", TO_CSTR(cuid));
         Boolean bCUID = FALSE;
         if ((filteredValues->ContainsKey(IDownloadsImpl::COLUMN_OTHER_UID, &bCUID), bCUID)) {
-            Int32 cou = 0;
-            filteredValues->GetAsInt32(IDownloadsImpl::COLUMN_OTHER_UID, &cou);
-            Logger::V(Constants::TAG, "other UID %d", cou);
+            AutoPtr<IInteger32> cou;
+            filteredValues->GetAsInteger32(IDownloadsImpl::COLUMN_OTHER_UID, (IInteger32**)&cou);
+            Logger::V(Constants::TAG, "other UID %s", TO_CSTR(cou));
         }
     }
 
@@ -1003,8 +1012,9 @@ ECode CDownloadProvider::CheckInsertPermissions(
     FAIL_RETURN(EnforceAllowedValues(values, IDownloadsImpl::COLUMN_IS_PUBLIC_API, arr))
 
     // validate the destination column
-    Int32 cd = 0;
-    values->GetAsInt32(IDownloadsImpl::COLUMN_DESTINATION, &cd);
+    AutoPtr<IInteger32> cdObj;
+    values->GetAsInteger32(IDownloadsImpl::COLUMN_DESTINATION, (IInteger32**)&cdObj);
+    Int32 cd = 0; cdObj->GetValue(&cd);
     if (cd == IDownloadsImpl::DESTINATION_NON_DOWNLOADMANAGER_DOWNLOAD) {
         /* this row is inserted by
          * DownloadManager.addCompletedDownload(String, String, String,
@@ -1021,9 +1031,9 @@ ECode CDownloadProvider::CheckInsertPermissions(
     AutoPtr<IInteger32> pDownload;
     CInteger32::New(IDownloadsImpl::DESTINATION_NON_DOWNLOADMANAGER_DOWNLOAD, (IInteger32**)&pDownload);
     AutoPtr<ArrayOf<IInterface*> > arrVals = ArrayOf<IInterface*>::Alloc(3);
-    (*arrVals)[0] = pCachePartition;
-    (*arrVals)[1] = pFileUri;
-    (*arrVals)[2] = pDownload;
+    arrVals->Set(0, pCachePartition);
+    arrVals->Set(1, pFileUri);
+    arrVals->Set(2, pDownload);
     FAIL_RETURN(EnforceAllowedValues(values, IDownloadsImpl::COLUMN_DESTINATION, arr))
 
     AutoPtr<IInteger32> pVis;
@@ -1038,17 +1048,15 @@ ECode CDownloadProvider::CheckInsertPermissions(
         AutoPtr<IInteger32> pVis_hid;
         CInteger32::New(IDownloadManagerRequest::VISIBILITY_HIDDEN, (IInteger32**)&pVis_hid);
         AutoPtr<ArrayOf<IInterface*> > arr = ArrayOf<IInterface*>::Alloc(4);
-        (*arr)[0] = pVis_hid;
-        (*arr)[1] = pVis;
-        (*arr)[2] = pVis_Com;
-        (*arr)[3] = pVis_only;
+        arr->Set(0, pVis_hid); arr->Set(1, pVis);
+        arr->Set(2, pVis_Com); arr->Set(3, pVis_only);
         FAIL_RETURN(EnforceAllowedValues(values, IDownloadsImpl::COLUMN_VISIBILITY, arr))
     }
     else {
         AutoPtr<ArrayOf<IInterface*> > arr = ArrayOf<IInterface*>::Alloc(3);
-        (*arr)[0] = pVis;
-        (*arr)[1] = pVis_Com;
-        (*arr)[2] = pVis_only;
+        arr->Set(0, pVis);
+        arr->Set(1, pVis_Com);
+        arr->Set(2, pVis_only);
         FAIL_RETURN(EnforceAllowedValues(values, IDownloadsImpl::COLUMN_VISIBILITY, arr))
     }
 
@@ -1437,8 +1445,9 @@ ECode CDownloadProvider::Update(
 
     Boolean bCK = FALSE;
     if ((values->ContainsKey(IDownloadsImpl::COLUMN_DELETED, &bCK), bCK)) {
-        Int32 cd = 0;
-        values->GetAsInt32(IDownloadsImpl::COLUMN_DELETED, &cd);
+        AutoPtr<IInteger32> cdObj;
+        values->GetAsInteger32(IDownloadsImpl::COLUMN_DELETED, (IInteger32**)&cdObj);
+        Int32 cd = 0; cdObj->GetValue(&cd);
         if (cd == 1) {
             // some rows are to be 'deleted'. need to start DownloadService.
             startService = TRUE;
@@ -1454,11 +1463,10 @@ ECode CDownloadProvider::Update(
         CContentValues::New((IContentValues**)&filteredValues);
         CopyString(IDownloadsImpl::COLUMN_APP_DATA, values, filteredValues);
         CopyInteger(IDownloadsImpl::COLUMN_VISIBILITY, values, filteredValues);
-        Int32 cc = 0;
-        values->GetAsInt32(IDownloadsImpl::COLUMN_CONTROL, &cc);
-        AutoPtr<IInteger32> i;
-        CInteger32::New(cc, (IInteger32**)&i);
-        if (i != NULL) {
+        AutoPtr<IInteger32> cc;
+        values->GetAsInteger32(IDownloadsImpl::COLUMN_CONTROL, (IInteger32**)&cc);
+        if (cc != NULL) {
+            Int32 i; cc->GetValue(&i);
             filteredValues->Put(IDownloadsImpl::COLUMN_CONTROL, i);
             startService = TRUE;
         }
@@ -1493,12 +1501,16 @@ ECode CDownloadProvider::Update(
             iou->CloseQuietly(ICloseable::Probe(c));
         }
 
-        Int32 status = 0;
-        values->GetAsInt32(IDownloadsImpl::COLUMN_STATUS, &status);
-        Boolean isRestart = status == IDownloadsImpl::STATUS_PENDING;
-        Boolean isUserBypassingSizeLimit = FALSE;
-        values->ContainsKey(IDownloadsImpl::COLUMN_BYPASS_RECOMMENDED_SIZE_LIMIT, &isUserBypassingSizeLimit);
-        if (isRestart || isUserBypassingSizeLimit) {
+        Boolean isRestart = FALSE;
+        AutoPtr<IInteger32> status;
+        values->GetAsInteger32(IDownloadsImpl::COLUMN_STATUS, (IInteger32**)&status);
+        if (status != NULL) {
+            Int32 val; status->GetValue(&val);
+            isRestart = val == IDownloadsImpl::STATUS_PENDING;
+        }
+        Boolean bval = FALSE;
+        values->ContainsKey(IDownloadsImpl::COLUMN_BYPASS_RECOMMENDED_SIZE_LIMIT, &bval);
+        if (isRestart || bval) {
             startService = TRUE;
         }
     }
@@ -1873,13 +1885,11 @@ void CDownloadProvider::CopyInteger(
     /* [in] */ IContentValues* from,
     /* [in] */ IContentValues* to)
 {
-    Int32 i = 0;
-    from->GetAsInt32(key, &i);
-    // if (i != 0) {
-    AutoPtr<IInteger32> pI;
-    CInteger32::New(i, (IInteger32**)&pI);
-    to->Put(key, pI);
-    // }
+    AutoPtr<IInteger32> i;
+    from->GetAsInteger32(key, (IInteger32**)&i);
+    if (i != NULL) {
+        to->Put(key, i);
+    }
 }
 
 void CDownloadProvider::CopyBoolean(
@@ -1887,11 +1897,11 @@ void CDownloadProvider::CopyBoolean(
     /* [in] */ IContentValues* from,
     /* [in] */ IContentValues* to)
 {
-    Boolean b = FALSE;
-    from->GetAsBoolean(key, &b);
-    // if (b != NULL) {
-    to->Put(key, b);
-    // }
+    AutoPtr<IBoolean> b;
+    from->GetAsBoolean(key, (IBoolean**)&b);
+    if (b != NULL) {
+        to->Put(key, b);
+    }
 }
 
 void CDownloadProvider::CopyString(

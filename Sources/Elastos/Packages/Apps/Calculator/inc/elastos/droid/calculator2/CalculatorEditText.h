@@ -102,7 +102,7 @@ protected:
         /* [in] */ Int32 widthMeasureSpec,
         /* [in] */ Int32 heightMeasureSpec);
 
-    CARAPI_(void) OnTextChanged(
+    CARAPI OnTextChanged(
         /* [in] */ ICharSequence* text,
         /* [in] */ Int32 start,
         /* [in] */ Int32 lengthBefore,

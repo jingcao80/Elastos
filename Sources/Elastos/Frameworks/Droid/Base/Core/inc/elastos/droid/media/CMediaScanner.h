@@ -61,7 +61,7 @@ public:
 
         String mPlayListDirectory;
 
-        CMediaScanner* mOwner;
+        CMediaScanner* mHost;
     };
 
     /*static*/ class FileEntry : public Object
@@ -199,7 +199,7 @@ public:
         Int32 mWidth;
         Int32 mHeight;
 
-        CMediaScanner* mOwner;
+        CMediaScanner* mHost;
     }; // end of anonymous MediaScannerClient instance
 
 private:
@@ -230,7 +230,7 @@ private:
         CARAPI Flush(); // throws RemoteException
 
     private:
-        StringBuilder whereClause;
+        StringBuilder mWhereClause;
         List<String> mWhereArgs; // = new ArrayList<String>(100);
         AutoPtr<IIContentProvider> mProvider;
         String mPackageName;

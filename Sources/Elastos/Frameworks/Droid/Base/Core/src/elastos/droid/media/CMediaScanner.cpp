@@ -53,6 +53,7 @@ using Elastos::Droid::Provider::CMediaStoreFiles;
 using Elastos::Droid::Provider::CMediaStoreImagesThumbnails;
 using Elastos::Droid::Provider::CMediaStoreAudioPlaylists;
 using Elastos::Droid::Provider::IMediaStoreAudioPlaylists;
+using Elastos::Droid::Provider::IMediaStoreAudioAudioColumns;
 using Elastos::Droid::Provider::IMediaStore;
 using Elastos::Droid::Provider::IMediaStoreAudioMedia;
 using Elastos::Droid::Provider::IMediaStoreAudioPlaylistsMembers;
@@ -60,8 +61,10 @@ using Elastos::Droid::Provider::IMediaStoreFiles;
 using Elastos::Droid::Provider::IMediaStoreFilesFileColumns;
 using Elastos::Droid::Provider::IMediaStoreImagesMedia;
 using Elastos::Droid::Provider::IMediaStoreImagesThumbnails;
+using Elastos::Droid::Provider::IMediaStoreImagesImageColumns;
 using Elastos::Droid::Provider::IMediaStoreMediaColumns;
 using Elastos::Droid::Provider::IMediaStoreVideoMedia;
+using Elastos::Droid::Provider::IMediaStoreVideoVideoColumns;
 using Elastos::Droid::Provider::ISettingsSystem;
 using Elastos::Droid::Provider::Settings;
 using Elastos::Droid::Content::CContentUris;
@@ -312,7 +315,7 @@ AutoPtr< ArrayOf<String> > CMediaScanner::FILES_PRESCAN_PROJECTION = InitFILES_P
 AutoPtr< ArrayOf<String> > CMediaScanner::ID_PROJECTION = InitID_PROJECTION();
 AutoPtr< ArrayOf<String> > CMediaScanner::PLAYLIST_MEMBERS_PROJECTION = InitPLAYLIST_MEMBERS_PROJECTION();
 
-
+static const Boolean DBG = TRUE;
 const String CMediaScanner::TAG("MediaScanner");
 
 const Int32 CMediaScanner::FILES_PRESCAN_ID_COLUMN_INDEX = 0;
@@ -366,7 +369,7 @@ ECode CMediaScanner::WplHandler::Start(
    String path;
    attributes->GetValue(String(""), String("src"), &path);
    if (!path.IsNull()) {
-       mOwner->CachePlaylistEntry(path, mPlayListDirectory);
+       mHost->CachePlaylistEntry(path, mPlayListDirectory);
    }
    return NOERROR;
 }
@@ -424,7 +427,7 @@ CMediaScanner::MyMediaScannerClient::MyMediaScannerClient(
     , mNoMedia(0)
     , mWidth(0)
     , mHeight(0)
-    , mOwner(owner)
+    , mHost(owner)
 {}
 
 AutoPtr<CMediaScanner::FileEntry> CMediaScanner::MyMediaScannerClient::BeginFile(
@@ -457,7 +460,7 @@ AutoPtr<CMediaScanner::FileEntry> CMediaScanner::MyMediaScannerClient::BeginFile
         // if mimeType was not specified, compute file type based on file extension.
         if (mFileType == 0) {
             AutoPtr<IMediaFileType> mediaFileType;
-            mediaFile->GetFileType(mimeType, (IMediaFileType**)&mediaFileType);
+            mediaFile->GetFileType(path, (IMediaFileType**)&mediaFileType);
 
             if (mediaFileType != NULL) {
                 mediaFileType->GetFileType(&mFileType);
@@ -467,14 +470,15 @@ AutoPtr<CMediaScanner::FileEntry> CMediaScanner::MyMediaScannerClient::BeginFile
             }
         }
 
+
         Boolean tempState;
         mediaFile->IsDrmFileType(mFileType, &tempState);
-        if (mOwner->IsDrmEnabled() && tempState) {
+        if (mHost->IsDrmEnabled() && tempState) {
             mFileType = GetFileTypeFromDrm(path);
         }
     }
 
-    AutoPtr<FileEntry> entry = mOwner->MakeEntryFor(path);
+    AutoPtr<FileEntry> entry = mHost->MakeEntryFor(path);
     // add some slack to avoid a rounding error
     Int64 delta = (entry != NULL) ? (lastModified - entry->mLastModified) : 0;
     Boolean wasModified = delta > 1 || delta < -1;
@@ -493,8 +497,8 @@ AutoPtr<CMediaScanner::FileEntry> CMediaScanner::MyMediaScannerClient::BeginFile
     CMediaFile::AcquireSingleton((IMediaFile**)&mediaFile);
     Boolean tempState;
     mediaFile->IsPlayListFileType(mFileType, &tempState);
-    if (mOwner->mProcessPlaylists && tempState) {
-        mOwner->mPlayLists.PushBack(entry);
+    if (mHost->mProcessPlaylists && tempState) {
+        mHost->mPlayLists.PushBack(entry);
         // we don't process playlists in the main scan, so return null
         return NULL;
     }
@@ -527,8 +531,8 @@ ECode CMediaScanner::MyMediaScannerClient::ScanFile(
     /* [in] */ Boolean noMedia)
 {
     // This is the callback funtion from native codes.
-    // Log.v(TAG, "scanFile: "+path);
-    DoScanFile(path, String(""), lastModified, fileSize, isDirectory, FALSE, noMedia);
+    String nullStr;
+    DoScanFile(path, nullStr, lastModified, fileSize, isDirectory, FALSE, noMedia);
     return NOERROR;
 }
 
@@ -541,74 +545,81 @@ AutoPtr<IUri> CMediaScanner::MyMediaScannerClient::DoScanFile(
     /* [in] */ Boolean scanAlways,
     /* [in] */ Boolean noMedia)
 {
+    if (DBG) {
+        Logger::V(TAG, ">> ScanFile:[%s], mimeType:%s, isDirectory:%d, scanAlways:%d, noMedia:%d",
+            path.string(), mimeType.string(), isDirectory, scanAlways, noMedia);
+    }
     AutoPtr<IUri> result = NULL;
     String dpath = path;
-//    long t1 = System.currentTimeMillis();
-//    try {
-        AutoPtr<FileEntry> entry = BeginFile(dpath, mimeType, lastModified, fileSize, isDirectory, noMedia);
+    AutoPtr<ISystem> sys;
+    CSystem::AcquireSingleton((ISystem**)&sys);
+    Int64 t1;
+    sys->GetCurrentTimeMillis(&t1);
 
-        // if this file was just inserted via mtp, set the rowid to zero
-        // (even though it already exists in the database), to trigger
-        // the correct code path for updating its entry
-        if (mOwner->mMtpObjectHandle != 0) {
-            entry->mRowId = 0;
+    AutoPtr<FileEntry> entry = BeginFile(dpath, mimeType, lastModified, fileSize, isDirectory, noMedia);
+
+    // if this file was just inserted via mtp, set the rowid to zero
+    // (even though it already exists in the database), to trigger
+    // the correct code path for updating its entry
+    if (mHost->mMtpObjectHandle != 0 && entry != NULL) {
+        entry->mRowId = 0;
+    }
+
+    // rescan for metadata if file was modified since last scan
+    if (entry != NULL && (entry->mLastModifiedChanged || scanAlways)) {
+        if (noMedia) {
+            result = EndFile(entry, FALSE, FALSE, FALSE, FALSE, FALSE);
         }
-        // rescan for metadata if file was modified since last scan
-        if (entry != NULL && (entry->mLastModifiedChanged || scanAlways)) {
-            if (noMedia) {
-                result = EndFile(entry, FALSE, FALSE, FALSE, FALSE, FALSE);
-            }
-            else {
-                String lowpath = dpath.ToLowerCase();
-                Boolean ringtones = (lowpath.IndexOf(RINGTONES_DIR) > 0);
-                Boolean notifications = (lowpath.IndexOf(NOTIFICATIONS_DIR) > 0);
-                Boolean alarms = (lowpath.IndexOf(ALARMS_DIR) > 0);
-                Boolean podcasts = (lowpath.IndexOf(PODCAST_DIR) > 0);
-                Boolean music = (lowpath.IndexOf(MUSIC_DIR) > 0) ||
-                    (!ringtones && !notifications && !alarms && !podcasts);
+        else {
+            String lowpath = dpath.ToLowerCase();
+            Boolean ringtones = (lowpath.IndexOf(RINGTONES_DIR) > 0);
+            Boolean notifications = (lowpath.IndexOf(NOTIFICATIONS_DIR) > 0);
+            Boolean alarms = (lowpath.IndexOf(ALARMS_DIR) > 0);
+            Boolean podcasts = (lowpath.IndexOf(PODCAST_DIR) > 0);
+            Boolean music = (lowpath.IndexOf(MUSIC_DIR) > 0) ||
+                (!ringtones && !notifications && !alarms && !podcasts);
 
-                AutoPtr<IMediaFile> mediaFile;
-                CMediaFile::AcquireSingleton((IMediaFile**)&mediaFile);
-                Boolean isaudio;
-                mediaFile->IsAudioFileType(mFileType, &isaudio);
-                Boolean isvideo;
-                mediaFile->IsVideoFileType(mFileType, &isvideo);
-                Boolean isimage;
-                mediaFile->IsImageFileType(mFileType, &isimage);
-
-                if (isaudio || isvideo || isimage) {
-                    if (mOwner->mExternalIsEmulated && dpath.StartWith(mOwner->mExternalStoragePath)) {
-                        // try to rewrite the path to bypass the sd card fuse layer
-                        AutoPtr<IFile> file = Environment::GetExternalStorageDirectory();
-                        String directPath;
-                        file->ToString(&directPath);
-                        directPath += dpath.Substring(mOwner->mExternalStoragePath.GetLength());
-                        AutoPtr<IFile> f;
-                        CFile::New(directPath,(IFile**)&f);
-                        Boolean tempState;
-                        if ((f->Exists(&tempState), tempState)) {
-                            dpath = directPath;
-                        }
+            AutoPtr<IMediaFile> mediaFile;
+            CMediaFile::AcquireSingleton((IMediaFile**)&mediaFile);
+            Boolean isaudio, isvideo, isimage;
+            mediaFile->IsAudioFileType(mFileType, &isaudio);
+            mediaFile->IsVideoFileType(mFileType, &isvideo);
+            mediaFile->IsImageFileType(mFileType, &isimage);
+            if (isaudio || isvideo || isimage) {
+                if (mHost->mExternalIsEmulated && dpath.StartWith(mHost->mExternalStoragePath)) {
+                    // try to rewrite the path to bypass the sd card fuse layer
+                    AutoPtr<IFile> file = Environment::GetExternalStorageDirectory();
+                    String directPath;
+                    file->ToString(&directPath);
+                    directPath += dpath.Substring(mHost->mExternalStoragePath.GetLength());
+                    AutoPtr<IFile> f;
+                    CFile::New(directPath,(IFile**)&f);
+                    Boolean tempState;
+                    if ((f->Exists(&tempState), tempState)) {
+                        dpath = directPath;
                     }
                 }
-
-                // we only extract metadata for audio and video files
-                if (isaudio || isvideo) {
-                    mOwner->ProcessFile(dpath, mimeType, this);
-                }
-
-                if (isimage) {
-                    ProcessImageFile(dpath);
-                }
-                result = EndFile(entry, ringtones, notifications, alarms, music, podcasts);
             }
-        }
-//    } catch (RemoteException e) {
-//        Logger::E(TAG, "RemoteException in CMediaScanner.scanFile()"/*, e*/);
-//    }
-//            Int64 t2 = System.currentTimeMillis();
-//            Log.v(TAG, "scanFile: " + path + " took " + (t2-t1));
 
+            // we only extract metadata for audio and video files
+            if (isaudio || isvideo) {
+                mHost->ProcessFile(dpath, mimeType, this);
+            }
+
+            if (isimage) {
+                ProcessImageFile(dpath);
+            }
+
+            result = EndFile(entry, ringtones, notifications, alarms, music, podcasts);
+        }
+    }
+
+    Int64 t2;
+    sys->GetCurrentTimeMillis(&t2);
+    if (DBG) {
+        Logger::V(TAG, " << ScanFile:[%s], mMimeType:%s, mFileType:%d, took %lld ms.",
+            path.string(), mMimeType.string(), mFileType, t2-t1);
+    }
     return result;
 }
 
@@ -635,7 +646,7 @@ ECode CMediaScanner::MyMediaScannerClient::HandleStringTag(
     else if (name.EqualsIgnoreCase("composer") || name.StartWith("composer;")) {
         mComposer = value.Trim();
     }
-    else if (mOwner->mProcessGenres && (name.EqualsIgnoreCase("genre") || name.StartWith("genre;"))) {
+    else if (mHost->mProcessGenres && (name.EqualsIgnoreCase("genre") || name.StartWith("genre;"))) {
         GetGenreName(value, &mGenre);
     }
     else if (name.EqualsIgnoreCase("year") || name.StartWith("year;")) {
@@ -673,7 +684,8 @@ ECode CMediaScanner::MyMediaScannerClient::HandleStringTag(
         mHeight = ParseSubstring(value, 0, 0);
     }
     else {
-        //Log.v(TAG, "unknown tag: " + name + " (" + mProcessGenres + ")");
+        Logger::V(TAG, "unknown tag: name:%s, value:%s,  (%d)",
+            name.string(), value.string(), mHost->mProcessGenres);
     }
     return NOERROR;
 }
@@ -764,8 +776,7 @@ ECode CMediaScanner::MyMediaScannerClient::GetGenreName(
 ECode CMediaScanner::MyMediaScannerClient::SetMimeType(
     /* [in] */ const String& mimeType)
 {
-    if (String("audio/mp4").Equals(mMimeType) &&
-           mimeType.StartWith("video")) {
+    if (mMimeType.Equals("audio/mp4") && mimeType.StartWith("video")) {
         // for feature parity with Donut, we force m4a files to keep the
         // audio/mp4 mimetype, even if they are really "enhanced podcasts"
         // with a video track
@@ -844,16 +855,16 @@ void CMediaScanner::MyMediaScannerClient::ProcessImageFile(
     /* [in] */ const String& path)
 {
 //    try {
-        mOwner->mBitmapOptions->SetOutWidth(0);
-        mOwner->mBitmapOptions->SetOutHeight(0);
+        mHost->mBitmapOptions->SetOutWidth(0);
+        mHost->mBitmapOptions->SetOutHeight(0);
 
         AutoPtr<IBitmapFactory> bf;
         CBitmapFactory::AcquireSingleton((IBitmapFactory**)&bf);
         AutoPtr<IBitmap> result;
-        bf->DecodeFile(path, mOwner->mBitmapOptions, (IBitmap**)&result);
+        bf->DecodeFile(path, mHost->mBitmapOptions, (IBitmap**)&result);
 
-        mOwner->mBitmapOptions->GetOutWidth(&mWidth);
-        mOwner->mBitmapOptions->GetOutHeight(&mHeight);
+        mHost->mBitmapOptions->GetOutWidth(&mWidth);
+        mHost->mBitmapOptions->GetOutHeight(&mHeight);
 //    } catch (Throwable th) {
 //        // ignore;
 //    }
@@ -864,18 +875,20 @@ AutoPtr<IContentValues> CMediaScanner::MyMediaScannerClient::ToValues()
     AutoPtr<IContentValues> map;
     CContentValues::New((IContentValues**)&map);
 
-    map->Put(String("_data"), mPath);
-    map->Put(String("title"), mTitle);
-    map->Put(String("date_modified"), mLastModified);
-    map->Put(String("_size"), mFileSize);
-    map->Put(String("mime_type"), mMimeType);
-    map->Put(String("is_drm"), mIsDrm);
+    map->Put(IMediaStoreMediaColumns::DATA, mPath);
+    map->Put(IMediaStoreMediaColumns::TITLE, mTitle);
+    map->Put(IMediaStoreMediaColumns::DATE_MODIFIED, mLastModified);
+    map->Put(IMediaStoreMediaColumns::SIZE, mFileSize);
+    map->Put(IMediaStoreMediaColumns::MIME_TYPE, mMimeType);
+    map->Put(IMediaStoreMediaColumns::IS_DRM, mIsDrm);
 
     String resolution;
     if (mWidth > 0 && mHeight > 0) {
-        map->Put(String("width"), mWidth);
-        map->Put(String("height"), mHeight);
-        resolution = mWidth + "x" + mHeight;
+        map->Put(IMediaStoreMediaColumns::WIDTH, mWidth);
+        map->Put(IMediaStoreMediaColumns::HEIGHT, mHeight);
+        StringBuilder sb;
+        sb += mWidth; sb += "x"; sb += mHeight;
+        resolution = sb.ToString();
     }
 
     if (!mNoMedia) {
@@ -885,22 +898,22 @@ AutoPtr<IContentValues> CMediaScanner::MyMediaScannerClient::ToValues()
         mediaFile->IsVideoFileType(mFileType, &tempState);
         if (tempState) {
             if (!mArtist.IsNullOrEmpty()) {
-                map->Put(String("artist"), mArtist);
+                map->Put(IMediaStoreVideoVideoColumns::ARTIST, mArtist);
             }
             else {
-                map->Put(String("artist"), String("<unknown>"));
+                map->Put(IMediaStoreVideoVideoColumns::ARTIST, IMediaStore::UNKNOWN_STRING);
             }
 
             if (!mAlbum.IsNullOrEmpty()) {
-                map->Put(String("album"), mAlbum);
+                map->Put(IMediaStoreVideoVideoColumns::ALBUM, mAlbum);
             }
             else {
-                map->Put(String("album"), String("<unknown>"));
+                map->Put(IMediaStoreVideoVideoColumns::ALBUM, IMediaStore::UNKNOWN_STRING);
             }
 
-            map->Put(String("duration"), mDuration);
+            map->Put(IMediaStoreVideoVideoColumns::DURATION, mDuration);
             if (resolution != NULL) {
-                map->Put(resolution, resolution);
+                map->Put(IMediaStoreVideoVideoColumns::RESOLUTION, resolution);
             }
         }
         else if ((mediaFile->IsImageFileType(mFileType, &tempState), tempState)) {
@@ -908,35 +921,35 @@ AutoPtr<IContentValues> CMediaScanner::MyMediaScannerClient::ToValues()
         }
         else if ((mediaFile->IsAudioFileType(mFileType, &tempState), tempState)) {
             if (!mArtist.IsNullOrEmpty()) {
-                map->Put(String("artist"), mArtist);
+                map->Put(IMediaStoreAudioAudioColumns::ARTIST, mArtist);
             }
             else {
-                map->Put(String("artist"), String("<unknown>"));
+                map->Put(IMediaStoreAudioAudioColumns::ARTIST, IMediaStore::UNKNOWN_STRING);
             }
 
             if (!mAlbumArtist.IsNullOrEmpty()) {
-                map->Put(String("album_artist"), mAlbumArtist);
+                map->Put(IMediaStoreAudioAudioColumns::ALBUM_ARTIST, mAlbumArtist);
             }
             else {
-                map->Put(String("album_artist"), String("<unknown>"));
+                map->Put(IMediaStoreAudioAudioColumns::ALBUM_ARTIST, IMediaStore::UNKNOWN_STRING);
             }
 
             if (!mAlbum.IsNullOrEmpty()) {
-                map->Put(String("album"), mAlbum);
+                map->Put(IMediaStoreAudioAudioColumns::ALBUM, mAlbum);
             }
             else {
-                map->Put(String("album"), String("<unknown>"));
+                map->Put(IMediaStoreAudioAudioColumns::ALBUM, IMediaStore::UNKNOWN_STRING);
             }
 
-            map->Put(String("composer"), String("composer"));
-            map->Put(String("genre"), String("genre"));
+            map->Put(IMediaStoreAudioAudioColumns::COMPOSER, mComposer);
+            map->Put(IMediaStoreAudioAudioColumns::GENRE, mGenre);
 
             if (mYear != 0) {
-                map->Put(String("year"), mYear);
+                map->Put(IMediaStoreAudioAudioColumns::YEAR, mYear);
             }
-            map->Put(String("track"), mTrack);
-            map->Put(String("duration"), mDuration);
-            map->Put(String("compilation"), mCompilation);
+            map->Put(IMediaStoreAudioAudioColumns::TRACK, mTrack);
+            map->Put(IMediaStoreAudioAudioColumns::DURATION, mDuration);
+            map->Put(IMediaStoreAudioAudioColumns::COMPILATION, mCompilation);
         }
     }
     return map;
@@ -961,18 +974,18 @@ AutoPtr<IUri> CMediaScanner::MyMediaScannerClient::EndFile( // throws RemoteExce
     String title;
     values->GetAsString(IMediaStoreMediaColumns::TITLE, &title);
 
+    AutoPtr<IMediaFile> mediaFile;
+    CMediaFile::AcquireSingleton((IMediaFile**)&mediaFile);
     if (title.IsNull() || TextUtils::IsEmpty(title.Trim())) {
-        AutoPtr<IMediaFile> mediaFile;
-        CMediaFile::AcquireSingleton((IMediaFile**)&mediaFile);
         String tempText;
-        values->GetAsString(String("_data"), &tempText);
+        values->GetAsString(IMediaStoreMediaColumns::DATA, &tempText);
         mediaFile->GetFileTitle(tempText, &title);
-        values->Put(String("title"), title);
+        values->Put(IMediaStoreMediaColumns::TITLE, title);
     }
     String album;
-    values->GetAsString(String("album"), &album);
-    if (String("<unknown>").Equals(album)) {
-        values->GetAsString(String("_data"), &album);
+    values->GetAsString(IMediaStoreAudioAudioColumns::ALBUM, &album);
+    if (IMediaStore::UNKNOWN_STRING.Equals(album)) {
+        values->GetAsString(IMediaStoreMediaColumns::DATA, &album);
         // extract last path segment before file name
         Int32 lastSlash = album.LastIndexOf('/');
         if (lastSlash >= 0) {
@@ -986,45 +999,39 @@ AutoPtr<IUri> CMediaScanner::MyMediaScannerClient::EndFile( // throws RemoteExce
             }
             if (previousSlash != 0) {
                 album = album.Substring(previousSlash + 1, lastSlash);
-                values->Put(String("album"), album);
+                values->Put(IMediaStoreAudioAudioColumns::ALBUM, album);
             }
         }
     }
     Int64 rowId = entry->mRowId;
 
-    AutoPtr<IMediaFile> mediaFile;
-    CMediaFile::AcquireSingleton((IMediaFile**)&mediaFile);
     Boolean tempState;
     mediaFile->IsAudioFileType(mFileType, &tempState);
-    if (tempState && (rowId == 0 || mOwner->mMtpObjectHandle != 0)) {
+    if (tempState && (rowId == 0 || mHost->mMtpObjectHandle != 0)) {
         // Only set these for new entries. For existing entries, they
         // may have been modified later, and we want to keep the current
         // values so that custom ringtones still show up in the ringtone
         // picker.
-        values->Put(String("is_ringtone"), ringtones);
-        values->Put(String("is_notification"), notifications);
-        values->Put(String("is_alarm"), alarms);
-        values->Put(String("is_music"), music);
-        values->Put(String("is_podcast"), podcasts);
+        values->Put(IMediaStoreAudioAudioColumns::IS_RINGTONE, ringtones);
+        values->Put(IMediaStoreAudioAudioColumns::IS_NOTIFICATION, notifications);
+        values->Put(IMediaStoreAudioAudioColumns::IS_ALARM, alarms);
+        values->Put(IMediaStoreAudioAudioColumns::IS_MUSIC, music);
+        values->Put(IMediaStoreAudioAudioColumns::IS_PODCAST, podcasts);
     }
     else if (mFileType == IMediaFile::FILE_TYPE_JPEG && !mNoMedia) {
-        AutoPtr<IExifInterface> exif = NULL;
-//        try {
-            CExifInterface::New(entry->mPath, (IExifInterface**)&exif);
-//        } catch (IOException ex) {
-//            // exif is NULL
-//        }
+        AutoPtr<IExifInterface> exif;
+        CExifInterface::New(entry->mPath, (IExifInterface**)&exif);
         if (exif != NULL) {
             AutoPtr< ArrayOf<Float> > latlng = ArrayOf<Float>::Alloc(2);
             Boolean tempState;
             if ((exif->GetLatLong(latlng, &tempState), tempState)) {
-                values->Put(String("latitude"), (*latlng)[0]);
-                values->Put(String("longitude"), (*latlng)[1]);
+                values->Put(IMediaStoreImagesImageColumns::LATITUDE, (*latlng)[0]);
+                values->Put(IMediaStoreImagesImageColumns::LONGITUDE, (*latlng)[1]);
             }
             Int64 time;
             exif->GetGpsDateTime(&time);
             if (time != -1) {
-                values->Put(String("datetaken"), time);
+                values->Put(IMediaStoreImagesImageColumns::DATE_TAKEN, time);
             }
             else {
                 // If no time zone information is available, we should consider using
@@ -1033,104 +1040,95 @@ AutoPtr<IUri> CMediaScanner::MyMediaScannerClient::EndFile( // throws RemoteExce
                 // will use file time as taken time.
                 exif->GetDateTime(&time);
                 if (time != -1 && Elastos::Core::Math::Abs(mLastModified * 1000 - time) >= 86400000) {
-                    values->Put(String("datetaken"), time);
+                    values->Put(IMediaStoreImagesImageColumns::DATE_TAKEN, time);
                 }
             }
 
             Int32 orientation;
-            exif->GetAttributeInt32(String("Orientation"), -1, &orientation);
+            exif->GetAttributeInt32(IExifInterface::TAG_ORIENTATION, -1, &orientation);
             if (orientation != -1) {
                 // We only recognize a subset of orientation tag values.
-                Int32 degree;
+                Int32 degree = 0;
                 switch(orientation) {
-                    case IExifInterface::ORIENTATION_ROTATE_90:
-                    {
-                        degree = 90;
-                        break;
-                    }
-                    case IExifInterface::ORIENTATION_ROTATE_180:
-                    {
-                        degree = 180;
-                        break;
-                    }
-                    case IExifInterface::ORIENTATION_ROTATE_270:
-                    {
-                        degree = 270;
-                        break;
-                    }
-                    default:
-                    {
-                        degree = 0;
-                        break;
-                    }
+                case IExifInterface::ORIENTATION_ROTATE_90:
+                    degree = 90;
+                    break;
+                case IExifInterface::ORIENTATION_ROTATE_180:
+                    degree = 180;
+                    break;
+                case IExifInterface::ORIENTATION_ROTATE_270:
+                    degree = 270;
+                    break;
+                default:
+                    degree = 0;
+                    break;
                 }
-                values->Put(String("orientation"), degree);
+                values->Put(IMediaStoreImagesImageColumns::ORIENTATION, degree);
             }
         }
     }
 
-    AutoPtr<IUri> tableUri = mOwner->mFilesUri;
-    AutoPtr<IMediaInserter> inserter = mOwner->mMediaInserter;
+    AutoPtr<IUri> tableUri = mHost->mFilesUri;
+    AutoPtr<IMediaInserter> inserter = mHost->mMediaInserter;
     if (!mNoMedia) {
-        AutoPtr<IMediaFile> mediaFile;
-        CMediaFile::AcquireSingleton((IMediaFile**)&mediaFile);
         Boolean tempState;
         mediaFile->IsVideoFileType(mFileType, &tempState);
         if (tempState) {
-            tableUri = mOwner->mVideoUri;
+            tableUri = mHost->mVideoUri;
         }
         else if ((mediaFile->IsImageFileType(mFileType, &tempState), tempState)) {
-            tableUri = mOwner->mImagesUri;
+            tableUri = mHost->mImagesUri;
         }
         else if ((mediaFile->IsAudioFileType(mFileType, &tempState), tempState)) {
-            tableUri = mOwner->mAudioUri;
+            tableUri = mHost->mAudioUri;
         }
     }
 
     AutoPtr<IUri> result = NULL;
     Boolean needToSetSettings = FALSE;
     if (rowId == 0) {
-        if (mOwner->mMtpObjectHandle != 0) {
+        if (mHost->mMtpObjectHandle != 0) {
             AutoPtr<IInteger32> interger32;
-            CInteger32::New(mOwner->mMtpObjectHandle, (IInteger32**)&interger32);
-            values->Put(String("media_scanner_new_object_id"), interger32);
+            CInteger32::New(mHost->mMtpObjectHandle, (IInteger32**)&interger32);
+            values->Put(IMediaStoreMediaColumns::MEDIA_SCANNER_NEW_OBJECT_ID, interger32);
         }
-        if (tableUri == mOwner->mFilesUri) {
+        if (tableUri == mHost->mFilesUri) {
             Int32 format = entry->mFormat;
             if (format == 0) {
-                AutoPtr<IMediaFile> mediaFile;
-                CMediaFile::AcquireSingleton((IMediaFile**)&mediaFile);
                 mediaFile->GetFormatCode(entry->mPath, mMimeType, &format);
             }
-            values->Put(String("format"), format);
+            values->Put(IMediaStoreFilesFileColumns::FORMAT, format);
         }
         // Setting a flag in order not to use bulk insert for the file related with
         // notifications, ringtones, and alarms, because the rowId of the inserted file is
         // needed.
-        if (mOwner->mWasEmptyPriorToScan) {
-            if (notifications && !mOwner->mDefaultNotificationSet) {
-                if (TextUtils::IsEmpty(mOwner->mDefaultNotificationFilename) ||
-                        DoesPathHaveFilename(entry->mPath, mOwner->mDefaultNotificationFilename)) {
+        if (mHost->mWasEmptyPriorToScan) {
+            if (notifications && !mHost->mDefaultNotificationSet) {
+                if (TextUtils::IsEmpty(mHost->mDefaultNotificationFilename) ||
+                        DoesPathHaveFilename(entry->mPath, mHost->mDefaultNotificationFilename)) {
                     needToSetSettings = TRUE;
                 }
             }
             else if (ringtones && !RingtoneDefaultsSet()) {
                 AutoPtr<ITelephonyManager> defaultTelephonyManager;
                 CTelephonyManager::GetDefault((ITelephonyManager**)&defaultTelephonyManager);
-                Int32 phoneCount = 0;
-                defaultTelephonyManager->GetPhoneCount(&phoneCount);
-                for (Int32 i = 0; i < phoneCount; ++i) {
-                    // Check if ringtone matches default ringtone
-                    if (TextUtils::IsEmpty((*(mOwner->mDefaultRingtoneFilenames))[i]) ||
-                            DoesPathHaveFilename(entry->mPath, (*(mOwner->mDefaultRingtoneFilenames))[i])) {
-                        needToSetSettings = TRUE;
-                        break;
+                if (defaultTelephonyManager) {
+                    Int32 phoneCount = 0;
+                    defaultTelephonyManager->GetPhoneCount(&phoneCount);
+                    for (Int32 i = 0; i < phoneCount; ++i) {
+                        String rin = (*(mHost->mDefaultRingtoneFilenames))[i];
+                        // Check if ringtone matches default ringtone
+                        if (TextUtils::IsEmpty(rin) ||
+                                DoesPathHaveFilename(entry->mPath, rin)) {
+                            needToSetSettings = TRUE;
+                            break;
+                        }
                     }
                 }
             }
-            else if (alarms && !mOwner->mDefaultAlarmSet) {
-                if (TextUtils::IsEmpty(mOwner->mDefaultAlarmAlertFilename) ||
-                        DoesPathHaveFilename(entry->mPath, mOwner->mDefaultAlarmAlertFilename)) {
+            else if (alarms && !mHost->mDefaultAlarmSet) {
+                if (TextUtils::IsEmpty(mHost->mDefaultAlarmAlertFilename) ||
+                        DoesPathHaveFilename(entry->mPath, mHost->mDefaultAlarmAlertFilename)) {
                     needToSetSettings = TRUE;
                 }
             }
@@ -1145,7 +1143,7 @@ AutoPtr<IUri> CMediaScanner::MyMediaScannerClient::EndFile( // throws RemoteExce
             if (inserter != NULL) {
                 inserter->FlushAll();
             }
-            mOwner->mMediaProvider->Insert(mOwner->mPackageName, tableUri, values, (IUri**)&result);
+            mHost->mMediaProvider->Insert(mHost->mPackageName, tableUri, values, (IUri**)&result);
         }
         else if (entry->mFormat == (Int32)IMtpConstants::FORMAT_ASSOCIATION) {
             inserter->InsertwithPriority(tableUri, values);
@@ -1168,72 +1166,74 @@ AutoPtr<IUri> CMediaScanner::MyMediaScannerClient::EndFile( // throws RemoteExce
         contentUris->WithAppendedId(tableUri, rowId, (IUri**)&result);
         // path should never change, and we want to avoid replacing mixed cased paths
         // with squashed lower case paths
-        values->Remove(String("_data"));
+        values->Remove(IMediaStoreMediaColumns::DATA);
 
         Int32 mediaType = 0;
         Boolean tempState;
         if (!(IsNoMediaPath(entry->mPath, &tempState), tempState)) {
-            AutoPtr<IMediaFile> mediaFile;
-            CMediaFile::AcquireSingleton((IMediaFile**)&mediaFile);
             Int32 fileType;
             mediaFile->GetFileTypeForMimeType(mMimeType, &fileType);
             if ((mediaFile->IsAudioFileType(fileType, &tempState), tempState)) {
-                mediaType = 2;
+                mediaType = IMediaStoreFilesFileColumns::MEDIA_TYPE_AUDIO;
             }
             else if ((mediaFile->IsVideoFileType(fileType, &tempState), tempState)) {
-                mediaType = 3;
+                mediaType = IMediaStoreFilesFileColumns::MEDIA_TYPE_VIDEO;
             }
             else if ((mediaFile->IsImageFileType(fileType, &tempState), tempState)) {
-                mediaType = 1;
+                mediaType = IMediaStoreFilesFileColumns::MEDIA_TYPE_IMAGE;
             }
             else if ((mediaFile->IsPlayListFileType(fileType, &tempState), tempState)) {
-                mediaType = 4;
+                mediaType = IMediaStoreFilesFileColumns::MEDIA_TYPE_PLAYLIST;
             }
-            values->Put(String("media_type"), mediaType);
+            values->Put(IMediaStoreFilesFileColumns::MEDIA_TYPE, mediaType);
         }
         Int32 tempValue;
         String nullStr;
-        mOwner->mMediaProvider->Update(mOwner->mPackageName, result, values, nullStr, NULL, &tempValue);
+        mHost->mMediaProvider->Update(mHost->mPackageName, result, values, nullStr, NULL, &tempValue);
     }
 
-    if(needToSetSettings) {
+    if (needToSetSettings) {
         if (notifications) {
             SetSettingIfNotSet(ISettingsSystem::NOTIFICATION_SOUND, tableUri, rowId);
-            mOwner->mDefaultNotificationSet = TRUE;
+            mHost->mDefaultNotificationSet = TRUE;
         }
         else if (ringtones) {
             // memorize default system ringtone persistently
             SetSettingIfNotSet(ISettingsSystem::DEFAULT_RINGTONE, tableUri, rowId);
             AutoPtr<ITelephonyManager> defaultTelephonyManager;
             CTelephonyManager::GetDefault((ITelephonyManager**)&defaultTelephonyManager);
-            Int32 phoneCount = 0;
-            defaultTelephonyManager->GetPhoneCount(&phoneCount);
-            String uri;
-            for (Int32 i = 0; i < phoneCount; ++i) {
-                if ((*(mOwner->mDefaultRingtonesSet))[i]) {
-                    continue;
-                }
+            if (defaultTelephonyManager != NULL) {
+                Int32 phoneCount = 0;
+                defaultTelephonyManager->GetPhoneCount(&phoneCount);
+                String uri;
+                for (Int32 i = 0; i < phoneCount; ++i) {
+                    if ((*(mHost->mDefaultRingtonesSet))[i]) {
+                        continue;
+                    }
 
-                // Check if ringtone matches default ringtone
-                if (!TextUtils::IsEmpty((*(mOwner->mDefaultRingtoneFilenames))[i]) &&
-                        !DoesPathHaveFilename(entry->mPath, (*(mOwner->mDefaultRingtoneFilenames))[i])) {
-                    continue;
-                }
-                if (i == DEFAULT_SIM_INDEX) {
-                    uri = ISettingsSystem::RINGTONE;
-                }
-                else {
-                    uri = ISettingsSystem::RINGTONE + String("_") + StringUtils::ToString(i + 1);
-                }
+                    // Check if ringtone matches default ringtone
+                    String rin = (*(mHost->mDefaultRingtoneFilenames))[i];
+                    if (!TextUtils::IsEmpty(rin) &&
+                            !DoesPathHaveFilename(entry->mPath, rin)) {
+                        continue;
+                    }
+                    if (i == DEFAULT_SIM_INDEX) {
+                        uri = ISettingsSystem::RINGTONE;
+                    }
+                    else {
+                        StringBuilder sb(ISettingsSystem::RINGTONE); sb += "_"; sb += (i + 1);
+                        uri = sb.ToString();
+                    }
 
-                // Set default ringtone
-                SetSettingIfNotSet(uri, tableUri, rowId);
-                (*(mOwner->mDefaultRingtonesSet))[i] = TRUE;
+                    // Set default ringtone
+                    SetSettingIfNotSet(uri, tableUri, rowId);
+                    (*(mHost->mDefaultRingtonesSet))[i] = TRUE;
+                }
             }
         }
         else if (alarms) {
             SetSettingIfNotSet(ISettingsSystem::ALARM_ALERT, tableUri, rowId);
-            mOwner->mDefaultAlarmSet = TRUE;
+            mHost->mDefaultAlarmSet = TRUE;
         }
     }
     return result;
@@ -1248,12 +1248,12 @@ Boolean CMediaScanner::MyMediaScannerClient::RingtoneDefaultsSet()
     defaultTelephonyManager->IsMultiSimEnabled(&isMultiSimEnabled);
 
     if (!isMultiSimEnabled) {
-        return (*(mOwner->mDefaultRingtonesSet))[DEFAULT_SIM_INDEX];
+        return (*(mHost->mDefaultRingtonesSet))[DEFAULT_SIM_INDEX];
     }
     // Otherwise check if all defaults were accounted for
     Boolean defaultSet = FALSE;
-    for (Int32 i=0; i<mOwner->mDefaultRingtonesSet->GetLength(); ++i) {
-        defaultSet = (*(mOwner->mDefaultRingtonesSet))[i];
+    for (Int32 i=0; i<mHost->mDefaultRingtonesSet->GetLength(); ++i) {
+        defaultSet = (*(mHost->mDefaultRingtonesSet))[i];
         if (!defaultSet) {
             return FALSE;
         }
@@ -1281,14 +1281,14 @@ void CMediaScanner::MyMediaScannerClient::SetSettingIfNotSet(
     /* [in] */ Int64 rowId)
 {
     AutoPtr<IContentResolver> cr;
-    mOwner->mContext->GetContentResolver((IContentResolver**)&cr);
+    mHost->mContext->GetContentResolver((IContentResolver**)&cr);
 
     String value;
     Settings::System::GetString(cr, settingName, &value);
     if (TextUtils::IsEmpty(value)) {
         // Set the setting to the given URI
         cr = NULL;
-        mOwner->mContext->GetContentResolver((IContentResolver**)&cr);
+        mHost->mContext->GetContentResolver((IContentResolver**)&cr);
 
         AutoPtr<IContentUris> contentUris;
         CContentUris::AcquireSingleton((IContentUris**)&contentUris);
@@ -1303,7 +1303,7 @@ void CMediaScanner::MyMediaScannerClient::SetSettingIfNotSet(
 Int32 CMediaScanner::MyMediaScannerClient::GetFileTypeFromDrm(
     /* [in] */ const String& path)
 {
-    if (!mOwner->IsDrmEnabled()) {
+    if (!mHost->IsDrmEnabled()) {
         return 0;
     }
 
@@ -1338,19 +1338,18 @@ CMediaScanner::MediaBulkDeleter::MediaBulkDeleter(
     , mPackageName(packageName)
     , mBaseUri(baseUri)
 {
-    mWhereArgs.Resize(100);
 }
 
 ECode CMediaScanner::MediaBulkDeleter::Delete( // throws RemoteException
     /* [in] */ Int64 id)
 {
     Int32 r;
-    whereClause.GetLength(&r);
+    mWhereClause.GetLength(&r);
     if (r != 0) {
-        whereClause += ",";
+        mWhereClause += ",";
     }
-    whereClause += "?";
-    mWhereArgs.PushBack( String("" + id) );
+    mWhereClause += "?";
+    mWhereArgs.PushBack(StringUtils::ToString(id));
     if (mWhereArgs.GetSize() > 100) {
         Flush();
     }
@@ -1368,11 +1367,10 @@ ECode CMediaScanner::MediaBulkDeleter::Flush() // throws RemoteException
         }
 
         Int32 numrows;
-        String tempText;
-        whereClause.ToString(&tempText);
-        mProvider->Delete(mPackageName, mBaseUri, String("_id") + String(" IN (") + tempText + String(")"), foo, &numrows);
-        //Logger::I("@@@@@@@@@", String("rows deleted: ") + StringUtils::Int32ToString(numrows));
-        whereClause.Reset();
+        StringBuilder sb("_id"); sb += " IN ("; sb += mWhereClause.ToString(); sb += ")";
+        mProvider->Delete(mPackageName, mBaseUri, sb.ToString(), foo, &numrows);
+        Logger::V("CMediaScanner", "BulkDeleter %d rows deleted: ", numrows);
+        mWhereClause.Reset();
         mWhereArgs.Clear();
     }
     return NOERROR;
@@ -1585,26 +1583,26 @@ ECode CMediaScanner::Prescan( //throws RemoteException
     /* [in] */ Boolean prescanFiles)
 {
     AutoPtr<ICursor> c;
-    String where;
+    StringBuilder sb;
     AutoPtr< ArrayOf<String> > selectionArgs;
 
     mPlayLists.Clear();
 
     if (!filePath.IsNull()) {
         // query for only one file
-        where.AppendFormat("%s>? AND %s=?",
-            IMediaStoreAudioPlaylistsMembers::ID.string(),
-            IMediaStoreMediaColumns::DATA.string());
+        sb += IMediaStoreAudioPlaylistsMembers::ID;  sb += ">? AND ";
+        sb += IMediaStoreMediaColumns::DATA; sb += "=?";
 
         selectionArgs = ArrayOf<String>::Alloc(2);
         selectionArgs->Set(0, String(""));
         selectionArgs->Set(0, filePath);
     }
     else {
-        where.AppendFormat("%s>?", IMediaStoreAudioPlaylistsMembers::ID.string());
+        sb += IMediaStoreAudioPlaylistsMembers::ID;  sb += ">?";
         selectionArgs = ArrayOf<String>::Alloc(1);
         selectionArgs->Set(0, String(""));
     }
+    String where = sb.ToString();
 
     // Tell the provider to not delete the file.
     // If the file is truly gone the delete is unnecessary, and we want to avoid
@@ -1661,7 +1659,7 @@ ECode CMediaScanner::Prescan( //throws RemoteException
         mWasEmptyPriorToScan = TRUE;
 
         while (TRUE) {
-            selectionArgs->Set(0, String("") + StringUtils::ToString(lastId));
+            selectionArgs->Set(0, StringUtils::ToString(lastId));
             if (c != NULL) {
                 ICloseable::Probe(c)->Close();
                 c = NULL;
@@ -1676,10 +1674,10 @@ ECode CMediaScanner::Prescan( //throws RemoteException
             }
 
             c->GetCount(&num);
-
             if (num == 0) {
                 break;
             }
+
             mWasEmptyPriorToScan = FALSE;
             while ((c->MoveToNext(&hasNext), hasNext)) {
                 ec = c->GetInt64(FILES_PRESCAN_ID_COLUMN_INDEX, &rowId);
@@ -1700,8 +1698,7 @@ ECode CMediaScanner::Prescan( //throws RemoteException
                     exists = FALSE;
 
                     ios->Access(path, OsConstants::_F_OK, &exists);
-                    mtpConstants->IsAbstractObject(format, &bval);
-                    if (!exists && !bval) {
+                    if (!exists && (mtpConstants->IsAbstractObject(format, &bval), !bval)) {
                         // do not delete missing playlists, since they may have been
                         // modified by the user.
                         // The user can delete them in the media player instead.
@@ -1715,6 +1712,7 @@ ECode CMediaScanner::Prescan( //throws RemoteException
 
                         mfHelper->IsPlayListFileType(fileType, &bval);
                         if (!bval) {
+                        Logger::V("CMediaScanner", " > Prescan %s: row: %lld, path: %s", path.string(), rowId, filePath.string());
                             deleter->Delete(rowId);
                             if (path.ToLowerCase().EndWith("/.nomedia")) {
                                 deleter->Flush();
@@ -1722,7 +1720,8 @@ ECode CMediaScanner::Prescan( //throws RemoteException
                                 CFile::New(path, (IFile**)&file);
                                 file->GetParent(&parentPath);
                                 bundle = NULL;
-                                mMediaProvider->Call(mPackageName, IMediaStore::UNHIDE_CALL, parentPath, NULL, (IBundle**)&bundle);
+                                mMediaProvider->Call(mPackageName, IMediaStore::UNHIDE_CALL,
+                                    parentPath, NULL, (IBundle**)&bundle);
                             }
                         }
                     }
@@ -1744,7 +1743,9 @@ _EXIT_:
 
     // compute original size of images
     mOriginalCount = 0;
-    ec = mMediaProvider->Query(mPackageName, mImagesUri, ID_PROJECTION, nullStr, NULL, nullStr, NULL, (ICursor**)&c);
+    c = NULL;
+    ec = mMediaProvider->Query(mPackageName, mImagesUri, ID_PROJECTION,
+        nullStr, NULL, nullStr, NULL, (ICursor**)&c);
     if (c != NULL) {
         c->GetCount(&mOriginalCount);
         ICloseable::Probe(c)->Close();
@@ -1786,7 +1787,7 @@ void CMediaScanner::PruneDeadThumbnailFiles()
 
 //    try {
         AutoPtr< ArrayOf<String> > tempArray = ArrayOf<String>::Alloc(1);
-        tempArray->Set(0, String("_data"));
+        tempArray->Set(0, IMediaStoreMediaColumns::DATA);
         String nullStr;
         mMediaProvider->Query(mPackageName, mThumbsUri, tempArray, nullStr, NULL, nullStr, NULL, (ICursor**)&c);
         Logger::V(TAG, "pruneDeadThumbnailFiles... " /*+ c*/);
@@ -2233,35 +2234,31 @@ AutoPtr<CMediaScanner::FileEntry> CMediaScanner::MakeEntryFor(
     /* [in] */ const String& path)
 {
     AutoPtr<FileEntry> fileEntry;
-    String where;
-    AutoPtr< ArrayOf<String> > selectionArgs;
-    AutoPtr<ICursor> c;
 
-//    try {
-        where = IMediaStoreMediaColumns::DATA + String("=?");
-        selectionArgs = ArrayOf<String>::Alloc(1);
-        (*selectionArgs)[0] = path;
-        // Boolean hasWildCards = path.Contains("_") || path.Contains("%");
-        String nullStr;
-        mMediaProvider->Query(mPackageName, mFilesUriNoNotify.Get(), FILES_PRESCAN_PROJECTION, where, selectionArgs,
-            nullStr, NULL, (ICursor**)&c);
-        Boolean is;
-        if ((c->MoveToFirst(&is), is)) {
-            Int64 rowId;
-            c->GetInt64(FILES_PRESCAN_ID_COLUMN_INDEX, &rowId);
-            Int32 format;
-            c->GetInt32(FILES_PRESCAN_FORMAT_COLUMN_INDEX, &format);
-            Int64 lastModified;
-            c->GetInt64(FILES_PRESCAN_DATE_MODIFIED_COLUMN_INDEX, &lastModified);
-            fileEntry = new FileEntry(rowId, path, lastModified, format);
-        }
-//    } catch (RemoteException e) {
-//    } finally {
-        if (c != NULL) {
-            ICloseable::Probe(c)->Close();
-            c = NULL;
-        }
-//    }
+    StringBuilder sb(IMediaStoreMediaColumns::DATA); sb += "=?";
+    String where = sb.ToString();
+    AutoPtr< ArrayOf<String> > selectionArgs = ArrayOf<String>::Alloc(1);
+    (*selectionArgs)[0] = path;
+    String nullStr;
+
+    AutoPtr<ICursor> c;
+    mMediaProvider->Query(mPackageName, mFilesUriNoNotify, FILES_PRESCAN_PROJECTION, where, selectionArgs,
+        nullStr, NULL, (ICursor**)&c);
+    Boolean bval;
+    if ((c->MoveToFirst(&bval), bval)) {
+        Int32 format;
+        Int64 rowId, lastModified;
+        c->GetInt64(FILES_PRESCAN_ID_COLUMN_INDEX, &rowId);
+        c->GetInt32(FILES_PRESCAN_FORMAT_COLUMN_INDEX, &format);
+        c->GetInt64(FILES_PRESCAN_DATE_MODIFIED_COLUMN_INDEX, &lastModified);
+        fileEntry = new FileEntry(rowId, path, lastModified, format);
+    }
+
+    if (c != NULL) {
+        ICloseable::Probe(c)->Close();
+        c = NULL;
+    }
+
     return fileEntry;
 }
 
@@ -2587,7 +2584,7 @@ ECode CMediaScanner::ProcessPlayList( // throws RemoteException
     AutoPtr<IContentUris> contentUris;
     CContentUris::AcquireSingleton((IContentUris**)&contentUris);
     if (rowId == 0) {
-        values->Put(String("_data"), path);
+        values->Put(IMediaStoreMediaColumns::DATA, path);
 
         mMediaProvider->Insert(mPackageName, mPlaylistsUri, values, (IUri**)&uri);
         contentUris->ParseId(uri, &rowId);
@@ -2721,19 +2718,18 @@ public:
     NativeMyMediaScannerClient(IMediaScannerClient* client)
         : mClient(client)
     {
-        Logger::V("CMediaScanner", "NativeMyMediaScannerClient constructor");
     }
 
     virtual ~NativeMyMediaScannerClient()
     {
-        Logger::V("CMediaScanner", "NativeMyMediaScannerClient destructor");
     }
 
     virtual android::status_t scanFile(const char* path, long long lastModified,
             long long fileSize, bool isDirectory, bool noMedia)
     {
-        Logger::V("CMediaScanner", "scanFile: path(%s), time(%lld), size(%lld) and isDir(%d)",
-            path, lastModified, fileSize, isDirectory);
+        if (DBG)
+            Logger::V("CMediaScanner", "scanFile: path(%s), time(%lld), size(%lld) and isDir(%d)",
+                path, lastModified, fileSize, isDirectory);
 
         String pathStr(path);
         ECode ec = mClient->ScanFile(pathStr, lastModified,
@@ -2743,7 +2739,8 @@ public:
 
     virtual android::status_t handleStringTag(const char* name, const char* value)
     {
-        Logger::V("CMediaScanner", "handleStringTag: name(%s) and value(%s)", name, value);
+        if (DBG)
+            Logger::V("CMediaScanner", "handleStringTag: name(%s) and value(%s)", name, value);
         String nameStr(name);
         char *cleaned = NULL;
         if (!isValidUtf8(value)) {
@@ -2768,7 +2765,8 @@ public:
 
     virtual android::status_t setMimeType(const char* mimeType)
     {
-        Logger::V("CMediaScanner", "setMimeType: %s", mimeType);
+        if (DBG)
+            Logger::V("CMediaScanner", "setMimeType: %s", mimeType);
         String mimeTypeStr(mimeType);
         ECode ec = mClient->SetMimeType(mimeTypeStr);
         return checkAndClearExceptionFromCallback(ec, "setMimeType");
@@ -2808,16 +2806,16 @@ ECode CMediaScanner::ProcessFile(
     /* [in] */ const String& mimeType,
     /* [in] */ IMediaScannerClient* client)
 {
+    Logger::I(TAG, " >> ProcessFile: %s, mimeType:%s", path.string(), mimeType.string());
     // Lock already hold by processDirectory
     android::MediaScanner *mp = mNativeContext;
     if (mp == NULL) {
         Logger::E(TAG, "No scanner available");
-        //jniThrowException(env, kRunTimeException, "No scanner available");
         return E_RUNTIME_EXCEPTION;
     }
 
     if (path.IsNull()) {
-        //jniThrowException(env, kIllegalArgumentException, NULL);
+        Logger::E(TAG, "process file path is null.");
         return E_ILLEGAL_ARGUMENT_EXCEPTION;
     }
 

@@ -1152,7 +1152,7 @@ ECode SQLiteConnection::NativeExecuteForCursorWindow(
     Int32 numColumns = sqlite3_column_count(statement);
     status = window->setNumColumns(numColumns);
     if (status) {
-        StringBuilder msg("Failed to set the cursor window column count to");
+        StringBuilder msg("Failed to set the cursor window column count to ");
         msg += numColumns;
         msg += ", status=";
         msg += status;
@@ -1223,7 +1223,7 @@ ECode SQLiteConnection::NativeExecuteForCursorWindow(
         }
     }
 
-    Slogger::W(TAG, "Resetting statement %p after fetching %d rows and adding %d rows"
+    Slogger::W(TAG, "Resetting statement %p after fetching %d rows and adding %d rows "
            "to the window in %d bytes",
            statement, totalRows, addedRows, window->size() - window->freeSpace());
     sqlite3_reset(statement);

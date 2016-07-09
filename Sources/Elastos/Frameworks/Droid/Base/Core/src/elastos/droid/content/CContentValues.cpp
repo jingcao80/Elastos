@@ -353,94 +353,97 @@ ECode CContentValues::GetAsString(
     return NOERROR;
 }
 
-ECode CContentValues::GetAsInt64(
+ECode CContentValues::GetAsInteger64(
     /* [in] */ const String& key,
-    /* [out] */ Int64* value)
+    /* [out] */ IInteger64** value)
 {
     VALIDATE_NOT_NULL(value)
-    *value = 0;
+    *value = NULL;
     if (key.IsNull()) return E_INVALID_ARGUMENT;
+
     AutoPtr<ICharSequence> ko = CoreUtils::Convert(key);
     AutoPtr<IInterface> obj;
     mValues->Get(ko, (IInterface**)&obj);
 
     if (NULL != obj) {
+        Int64 val;
         if (INumber::Probe(obj) != NULL) {
-            FAIL_RETURN(INumber::Probe(obj)->Int64Value(value))
-            return NOERROR;
+            FAIL_RETURN(INumber::Probe(obj)->Int64Value(&val))
         }
         else if (ICharSequence::Probe(obj) != NULL) {
             String str = Object::ToString(obj);
-            *value = StringUtils::ParseInt64(str);
-            return NOERROR;
+            val = StringUtils::ParseInt64(str);
         }
         else {
-            // E_CLASS_CAST_EXCEPTION
-            Logger::E(TAG, String("Cannot cast value for ") + key + " to a Int64");
+            Logger::E(TAG, "Cannot cast value for %s to a Int64", key.string());
             return NOERROR;
         }
+
+        return CInteger64::New(val, value);
     }
 
     return NOERROR;
 }
 
-ECode CContentValues::GetAsInt32(
+ECode CContentValues::GetAsInteger32(
     /* [in] */ const String& key,
-    /* [out] */ Int32* value)
+    /* [out] */ IInteger32** value)
 {
     VALIDATE_NOT_NULL(value)
-    *value = 0;
+    *value = NULL;
+
     if (key.IsNull()) return E_INVALID_ARGUMENT;
     AutoPtr<ICharSequence> ko = CoreUtils::Convert(key);
     AutoPtr<IInterface> obj;
     mValues->Get(ko, (IInterface**)&obj);
 
     if (NULL != obj) {
+        Int32 ival;
         if (INumber::Probe(obj) != NULL) {
-            FAIL_RETURN(INumber::Probe(obj)->Int32Value(value))
-            return NOERROR;
+            FAIL_RETURN(INumber::Probe(obj)->Int32Value(&ival))
         }
         else if (ICharSequence::Probe(obj) != NULL) {
             String str = Object::ToString(obj);
-            *value = StringUtils::ParseInt32(str);
-            return NOERROR;
+            ival = StringUtils::ParseInt32(str);
         }
         else {
-            // E_CLASS_CAST_EXCEPTION
-            Logger::E(TAG, String("Cannot cast value for ") + key + " to a Int32");
+            Logger::E(TAG, "Cannot cast value for %s to a Int32", key.string());
             return NOERROR;
         }
+
+        return CInteger32::New(ival, value);
     }
 
     return NOERROR;
 }
 
-ECode CContentValues::GetAsInt16(
+ECode CContentValues::GetAsInteger16(
     /* [in] */ const String& key,
-    /* [out] */ Int16* value)
+    /* [out] */ IInteger16** value)
 {
     VALIDATE_NOT_NULL(value)
-    *value = 0;
+    *value = NULL;
     if (key.IsNull()) return E_INVALID_ARGUMENT;
+
     AutoPtr<ICharSequence> ko = CoreUtils::Convert(key);
     AutoPtr<IInterface> obj;
     mValues->Get(ko, (IInterface**)&obj);
 
     if (NULL != obj) {
+        Int16 val;
         if (INumber::Probe(obj) != NULL) {
-            FAIL_RETURN(INumber::Probe(obj)->Int16Value(value))
-            return NOERROR;
+            FAIL_RETURN(INumber::Probe(obj)->Int16Value(&val))
         }
         else if (ICharSequence::Probe(obj) != NULL) {
             String str = Object::ToString(obj);
-            *value = StringUtils::ParseInt16(str);
-            return NOERROR;
+            val = StringUtils::ParseInt16(str);
         }
         else {
-            // E_CLASS_CAST_EXCEPTION
-            Logger::E(TAG, String("Cannot cast value for ") + key + " to a Int16");
+            Logger::E(TAG, "Cannot cast value for %s to a Int16", key.string());
             return NOERROR;
         }
+
+        return CInteger16::New(val, value);
     }
 
     return NOERROR;
@@ -448,32 +451,32 @@ ECode CContentValues::GetAsInt16(
 
 ECode CContentValues::GetAsByte(
     /* [in] */ const String& key,
-    /* [out] */ Byte* value)
+    /* [out] */ IByte** value)
 {
     VALIDATE_NOT_NULL(value)
-    *value = 0;
+    *value = NULL;
     if (key.IsNull()) return E_INVALID_ARGUMENT;
     AutoPtr<ICharSequence> ko = CoreUtils::Convert(key);
     AutoPtr<IInterface> obj;
     mValues->Get(ko, (IInterface**)&obj);
 
     if (NULL != obj) {
+        Byte val;
         if (INumber::Probe(obj) != NULL) {
             Int16 tmpValue = 0;
             FAIL_RETURN(INumber::Probe(obj)->Int16Value(&tmpValue))
-            *value = (Byte)tmpValue;
-            return NOERROR;
+            val = (Byte)tmpValue;
         }
         else if (ICharSequence::Probe(obj) != NULL) {
             String str = Object::ToString(obj);
-            *value = (Byte)StringUtils::ParseInt32(str);
-            return NOERROR;
+            val = (Byte)StringUtils::ParseInt32(str);
         }
         else {
-            // E_CLASS_CAST_EXCEPTION
-            Logger::E(TAG, String("Cannot cast value for ") + key + " to a Byte");
+            Logger::E(TAG, "Cannot cast value for %s to a Byte", key.string());
             return NOERROR;
         }
+
+        return CByte::New(val, value);
     }
 
     return NOERROR;
@@ -481,30 +484,30 @@ ECode CContentValues::GetAsByte(
 
 ECode CContentValues::GetAsDouble(
     /* [in] */ const String& key,
-    /* [out] */ Double* value)
+    /* [out] */ IDouble** value)
 {
     VALIDATE_NOT_NULL(value)
-    *value = 0.0;
+    *value = NULL;
     if (key.IsNull()) return E_INVALID_ARGUMENT;
     AutoPtr<ICharSequence> ko = CoreUtils::Convert(key);
     AutoPtr<IInterface> obj;
     mValues->Get(ko, (IInterface**)&obj);
 
     if (NULL != obj) {
+        Double val;
         if (INumber::Probe(obj) != NULL) {
-            FAIL_RETURN(INumber::Probe(obj)->DoubleValue(value))
-            return NOERROR;
+            FAIL_RETURN(INumber::Probe(obj)->DoubleValue(&val))
         }
         else if (ICharSequence::Probe(obj) != NULL) {
             String str = Object::ToString(obj);
-            *value = StringUtils::ParseDouble(str);
-            return NOERROR;
+            val = StringUtils::ParseDouble(str);
         }
         else {
-            // E_CLASS_CAST_EXCEPTION
-            Logger::E(TAG, String("Cannot cast value for ") + key + " to a Double");
+            Logger::E(TAG, "Cannot cast value for %s to a Double", key.string());
             return NOERROR;
         }
+
+        return CDouble::New(val, value);
     }
 
     return NOERROR;
@@ -512,30 +515,30 @@ ECode CContentValues::GetAsDouble(
 
 ECode CContentValues::GetAsFloat(
     /* [in] */ const String& key,
-    /* [out] */ Float* value)
+    /* [out] */ IFloat** value)
 {
     VALIDATE_NOT_NULL(value)
-    *value = 0.0;
+    *value = NULL;
     if (key.IsNull()) return E_INVALID_ARGUMENT;
     AutoPtr<ICharSequence> ko = CoreUtils::Convert(key);
     AutoPtr<IInterface> obj;
     mValues->Get(ko, (IInterface**)&obj);
 
     if (NULL != obj) {
+        Float val;
         if (INumber::Probe(obj) != NULL) {
-            FAIL_RETURN(INumber::Probe(obj)->FloatValue(value))
-            return NOERROR;
+            FAIL_RETURN(INumber::Probe(obj)->FloatValue(&val))
         }
         else if (ICharSequence::Probe(obj) != NULL) {
             String str = Object::ToString(obj);
-            *value = StringUtils::ParseFloat(str);
-            return NOERROR;
+            val = StringUtils::ParseFloat(str);
         }
         else {
-            // E_CLASS_CAST_EXCEPTION
-            Logger::E(TAG, String("Cannot cast value for ") + key + " to a Float");
+            Logger::E(TAG, "Cannot cast value for %s to a Float", key.string());
             return NOERROR;
         }
+
+        return CFloat::New(val, value);
     }
 
     return NOERROR;
@@ -543,36 +546,35 @@ ECode CContentValues::GetAsFloat(
 
 ECode CContentValues::GetAsBoolean(
     /* [in] */ const String& key,
-    /* [out] */ Boolean* value)
+    /* [out] */ IBoolean** value)
 {
     VALIDATE_NOT_NULL(value)
-    *value = FALSE;
+    *value = NULL;
     if (key.IsNull()) return E_INVALID_ARGUMENT;
     AutoPtr<ICharSequence> ko = CoreUtils::Convert(key);
     AutoPtr<IInterface> obj;
     mValues->Get(ko, (IInterface**)&obj);
 
     if (NULL != obj) {
+        Boolean val;
         if (IBoolean::Probe(obj) != NULL) {
-            FAIL_RETURN(((IBoolean*) (IInterface*) obj)->GetValue(value))
-            return NOERROR;
+            FAIL_RETURN(IBoolean::Probe(obj)->GetValue(&val))
         }
         else if (INumber::Probe(obj) != NULL) {
             Int32 tmp = 0;
             FAIL_RETURN(INumber::Probe(obj)->Int32Value(&tmp))
-            *value = tmp != 0;
-            return NOERROR;
+            val = tmp != 0;
         }
         else if (ICharSequence::Probe(obj) != NULL) {
             String str = Object::ToString(obj);
-            *value = str.EqualsIgnoreCase("TRUE");
-            return NOERROR;
+            val = str.EqualsIgnoreCase("TRUE");
         }
         else {
-            // E_CLASS_CAST_EXCEPTION
-            Logger::E(TAG, String("Cannot cast value for ") + key + " to a Boolean");
+            Logger::E(TAG, "Cannot cast value for %s to a Boolean", key.string());
             return NOERROR;
         }
+
+        return CBoolean::New(val, value);
     }
 
     return NOERROR;

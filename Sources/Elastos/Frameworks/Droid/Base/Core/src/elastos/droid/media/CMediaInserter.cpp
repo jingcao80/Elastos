@@ -1,14 +1,19 @@
 
 #include "elastos/droid/media/CMediaInserter.h"
 #include "elastos/droid/content/CContentValues.h"
+#include <elastos/utility/logging/Logger.h>
 
 using Elastos::Droid::Content::CContentValues;
 using Elastos::Utility::CArrayList;
 using Elastos::Utility::CHashMap;
+using Elastos::Utility::IIterator;
+using Elastos::Utility::Logging::Logger;
 
 namespace Elastos {
 namespace Droid {
 namespace Media {
+
+static const String TAG("CMediaInserter");
 
 CAR_INTERFACE_IMPL(CMediaInserter, Object, IMediaInserter)
 
@@ -69,6 +74,7 @@ ECode CMediaInserter::Insert(
     rowmap->Get(tableUri, (IInterface**)&obj);
     AutoPtr<IArrayList> list;
     if (list == NULL) {
+        Logger::I(TAG, " >> Not found record for : [%s]", TO_CSTR(tableUri));
         CArrayList::New((IArrayList**)&list);
         rowmap->Put(tableUri, list);
     }
@@ -78,6 +84,8 @@ ECode CMediaInserter::Insert(
     list->Add(contentValues);
     Int32 size;
     list->GetSize(&size);
+    Logger::I(TAG, " ===== Insert: %s, values: %s, size: %d",
+        TO_CSTR(tableUri), TO_CSTR(values), size);
     if (size >= mBufferSizePerUri) {
         FlushAllPriority();
         Flush(tableUri, IList::Probe(list));
@@ -90,13 +98,16 @@ ECode CMediaInserter::FlushAll()
     FlushAllPriority();
     AutoPtr<ISet> set;
     mRowMap->GetKeySet((ISet**)&set);
-    AutoPtr<ArrayOf<IInterface*> > array;
-    set->ToArray((ArrayOf<IInterface*>**)&array);
-    for (Int32 i = 0; i < array->GetLength(); i++) {
-        AutoPtr<IUri> tableUri = IUri::Probe((*array)[i]);
-        AutoPtr<IInterface> obj;
-        mRowMap->Get(tableUri, (IInterface**)&obj);
-        Flush(tableUri, IList::Probe(obj));
+    AutoPtr<IIterator> it;
+    set->GetIterator((IIterator**)&it);
+    Boolean hasNext;
+    Int32 i = 0;
+    while (it->HasNext(&hasNext), hasNext) {
+        AutoPtr<IInterface> key;
+        it->GetNext((IInterface**)&key);
+        AutoPtr<IInterface> value;
+        mRowMap->Get(key, (IInterface**)&value);
+        Flush(IUri::Probe(key), IList::Probe(value));
     }
     mRowMap->Clear();
     return NOERROR;
@@ -106,13 +117,16 @@ ECode CMediaInserter::FlushAllPriority() // throws RemoteException
 {
     AutoPtr<ISet> set;
     mPriorityRowMap->GetKeySet((ISet**)&set);
-    AutoPtr<ArrayOf<IInterface*> > array;
-    set->ToArray((ArrayOf<IInterface*>**)&array);
-    for (Int32 i = 0; i < array->GetLength(); i++) {
-        AutoPtr<IUri> tableUri = IUri::Probe((*array)[i]);
-        AutoPtr<IInterface> obj;
-        mPriorityRowMap->Get(tableUri, (IInterface**)&obj);
-        Flush(tableUri, IList::Probe(obj));
+    AutoPtr<IIterator> it;
+    set->GetIterator((IIterator**)&it);
+    Boolean hasNext;
+    Int32 i = 0;
+    while (it->HasNext(&hasNext), hasNext) {
+        AutoPtr<IInterface> key;
+        it->GetNext((IInterface**)&key);
+        AutoPtr<IInterface> value;
+        mPriorityRowMap->Get(key, (IInterface**)&value);
+        Flush(IUri::Probe(key), IList::Probe(value));
     }
     mPriorityRowMap->Clear();
     return NOERROR;
@@ -123,16 +137,21 @@ ECode CMediaInserter::Flush(
     /* [in] */ IList* list)
 {
     if (list != NULL) {
-        AutoPtr<ArrayOf<IInterface*> > array;
-        list->ToArray((ArrayOf<IInterface*>**)&array);
-        AutoPtr<ArrayOf<IContentValues*> > valuesArray =
-                ArrayOf<IContentValues*>::Alloc(array->GetLength());
-        for (Int32 i = 0; i < array->GetLength(); i++) {
-            valuesArray->Set(i, IContentValues::Probe((*array)[i]));
-        }
+        Int32 size;
+        list->GetSize(&size);
+        AutoPtr<ArrayOf<IContentValues*> > values = ArrayOf<IContentValues*>::Alloc(size);
 
+        AutoPtr<IIterator> it;
+        list->GetIterator((IIterator**)&it);
+        Boolean hasNext;
+        Int32 i = 0;
+        while (it->HasNext(&hasNext), hasNext) {
+            AutoPtr<IInterface> obj;
+            it->GetNext((IInterface**)&obj);
+            values->Set(i++, IContentValues::Probe(obj));
+        }
         Int32 result;
-        mProvider->BulkInsert(mPackageName, tableUri, valuesArray, &result);
+        mProvider->BulkInsert(mPackageName, tableUri, values, &result);
         list->Clear();
     }
     return NOERROR;

@@ -38,7 +38,7 @@ using Elastos::Core::CByte;
 using Elastos::Core::EIID_IByte;
 using Elastos::IO::ICloseable;
 using Elastos::Text::ICollatorHelper;
-//using Elastos::Text::CCollatorHelper;
+using Elastos::Text::CCollatorHelper;
 using Elastos::Text::ICollationKey;
 using Elastos::Utility::ISet;
 using Elastos::Utility::IIterator;
@@ -798,8 +798,7 @@ AutoPtr< ArrayOf<Byte> > DatabaseUtils::GetCollationKeyInBytes(
 {
     if (mColl == NULL) {
         AutoPtr<ICollatorHelper> helper;
-        assert(0 && "TODO CCollatorHelper");
-        //CCollatorHelper::AcquireSingleton((ICollatorHelper**)&helper);
+        CCollatorHelper::AcquireSingleton((ICollatorHelper**)&helper);
         helper->GetInstance((ICollator**)&mColl);
         mColl->SetStrength(ICollator::PRIMARY);
     }

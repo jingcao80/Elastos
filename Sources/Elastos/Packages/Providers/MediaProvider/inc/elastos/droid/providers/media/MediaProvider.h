@@ -571,7 +571,7 @@ private:
         /* [in] */ IUri* uri,
         /* [in] */ const String& path);
 
-    CARAPI_(void) CheckAccess(
+    CARAPI CheckAccess(
         /* [in] */ IUri* uri,
         /* [in] */ IFile* file,
         /* [in] */ Int32 modeBits);
@@ -579,10 +579,10 @@ private:
     CARAPI_(Boolean) IsSecondaryExternalPath(
         /* [in] */ const String& path);
 
-    CARAPI_(void) CheckWorldReadAccess(
+    CARAPI CheckWorldReadAccess(
         /* [in] */ const String& path);
 
-    CARAPI_(void) CheckLeadingPathComponentsWorldExecutable(
+    CARAPI CheckLeadingPathComponentsWorldExecutable(
         /* [in] */ const String& filePath);//
 
     CARAPI_(void) MakeThumbAsync(

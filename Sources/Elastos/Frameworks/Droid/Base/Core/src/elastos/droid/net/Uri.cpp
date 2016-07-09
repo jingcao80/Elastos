@@ -438,7 +438,6 @@ ECode StringUri::ToString(
     /* [out] */ String* result)
 {
     VALIDATE_NOT_NULL(result);
-
     *result = mUriString;
     return NOERROR;
 }
@@ -2091,15 +2090,18 @@ ECode Uri::Equals(
     /* [out] */ Boolean* result)
 {
     VALIDATE_NOT_NULL(result)
+    *result = FALSE;
+    IUri* uri = IUri::Probe(o);
+    if (uri == NULL) return NOERROR;
 
-    if (TO_IINTERFACE(this) == IInterface::Probe(o)) FUNC_RETURN(TRUE)
-    if (IUri::Probe(o) == NULL) {
-        FUNC_RETURN(FALSE)
+    if (uri == (IUri*)this) {
+        *result = TRUE;
+        return NOERROR;
     }
-    String sThis, sO;
-    ToString(&sThis);
-    IObject::Probe(o)->ToString(&sO);
-    *result = sO.Equals(sThis);
+
+    String s1, s2 = Object::ToString(o);
+    ToString(&s1);
+    *result = s1.Equals(s2);
     return NOERROR;
 }
 
@@ -2115,15 +2117,13 @@ ECode Uri::GetHashCode(
 }
 
 ECode Uri::CompareTo(
-    /* [in] */ IInterface* other,
+    /* [in] */ IInterface* o,
     /* [out] */ Int32* result)
 {
     VALIDATE_NOT_NULL(result);
-
-    String s, sOther;
-    ToString(&s);
-    IObject::Probe(other)->ToString(&sOther);
-    *result = s.Compare(sOther);
+    String s1, s2 = Object::ToString(o);
+    ToString(&s1);
+    *result = s1.Compare(s2);
     return NOERROR;
 }
 

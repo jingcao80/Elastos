@@ -523,19 +523,21 @@ ECode Am::IntentReceiver::PerformReceive(
     /* [in] */ Boolean sticky,
     /* [in] */ Int32 sendingUser)
 {
-    String line("Broadcast completed: result=");
-    line += StringUtils::ToString(resultCode);
+    StringBuilder line("Broadcast completed: result=");
+    line += resultCode;
     if (!data.IsNull()) {
-        line = line + ", data=\"" + data + "\"";
+        line +=", data=\"";
+        line += data; line += "\"";
     }
     if (extras != NULL) {
         String extrasString;
         IObject::Probe(extras)->ToString(&extrasString);
-        line = line + ", extras: " + extrasString;
+        line += ", extras: "; line += extrasString;
     }
-    System::Out->Println(line);
+    System::Out->Println(line.ToString());
 
-    {    AutoLock syncLock(this);
+    {
+        AutoLock syncLock(this);
         mFinished = TRUE;
         return NotifyAll();
     }
@@ -546,7 +548,8 @@ ECode Am::IntentReceiver::PerformReceive(
 
 ECode Am::IntentReceiver::WaitForFinish()
 {
-    {    AutoLock syncLock(this);
+    {
+        AutoLock syncLock(this);
     // try {
         while (!mFinished) {
             ECode ec = Wait();
@@ -579,7 +582,8 @@ ECode Am::InstrumentationWatcher::InstrumentationStatus(
 {
     VALIDATE_NOT_NULL(results);
 
-    {    AutoLock syncLock(this);
+    {
+        AutoLock syncLock(this);
         // pretty printer mode?
         String pretty;
         if (!mRawMode && results != NULL) {
