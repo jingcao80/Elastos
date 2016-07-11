@@ -8,7 +8,7 @@
 #include <stddef.h>
 #include <stdint.h>
 
-#if LOG_NDEBUG
+#if 1
 
 #define IF_LOG_WINDOW() if (false)
 #define LOG_WINDOW(...)

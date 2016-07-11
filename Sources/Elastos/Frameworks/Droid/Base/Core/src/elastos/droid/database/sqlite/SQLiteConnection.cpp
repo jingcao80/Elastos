@@ -1200,7 +1200,7 @@ ECode SQLiteConnection::NativeExecuteForCursorWindow(
         }
         else if (err == SQLITE_DONE) {
             // All rows processed, bail
-            Slogger::W(TAG, "Processed all rows");
+            // Slogger::W(TAG, "Processed all rows");
             break;
         }
         else if (err == SQLITE_LOCKED || err == SQLITE_BUSY) {
@@ -1223,9 +1223,9 @@ ECode SQLiteConnection::NativeExecuteForCursorWindow(
         }
     }
 
-    Slogger::W(TAG, "Resetting statement %p after fetching %d rows and adding %d rows "
-           "to the window in %d bytes",
-           statement, totalRows, addedRows, window->size() - window->freeSpace());
+    // Slogger::W(TAG, "Resetting statement %p after fetching %d rows and adding %d rows "
+    //        "to the window in %d bytes",
+    //        statement, totalRows, addedRows, window->size() - window->freeSpace());
     sqlite3_reset(statement);
 
     // Report the total number of rows on request.

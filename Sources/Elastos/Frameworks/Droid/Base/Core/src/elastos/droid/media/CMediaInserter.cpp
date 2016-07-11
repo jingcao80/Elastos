@@ -6,6 +6,7 @@
 using Elastos::Droid::Content::CContentValues;
 using Elastos::Utility::CArrayList;
 using Elastos::Utility::CHashMap;
+using Elastos::Utility::IMapEntry;
 using Elastos::Utility::IIterator;
 using Elastos::Utility::Logging::Logger;
 
@@ -72,9 +73,8 @@ ECode CMediaInserter::Insert(
     AutoPtr<IHashMap> rowmap = priority ? mPriorityRowMap : mRowMap;
     AutoPtr<IInterface> obj;
     rowmap->Get(tableUri, (IInterface**)&obj);
-    AutoPtr<IArrayList> list;
+    AutoPtr<IArrayList> list = IArrayList::Probe(obj);
     if (list == NULL) {
-        Logger::I(TAG, " >> Not found record for : [%s]", TO_CSTR(tableUri));
         CArrayList::New((IArrayList**)&list);
         rowmap->Put(tableUri, list);
     }
@@ -84,8 +84,6 @@ ECode CMediaInserter::Insert(
     list->Add(contentValues);
     Int32 size;
     list->GetSize(&size);
-    Logger::I(TAG, " ===== Insert: %s, values: %s, size: %d",
-        TO_CSTR(tableUri), TO_CSTR(values), size);
     if (size >= mBufferSizePerUri) {
         FlushAllPriority();
         Flush(tableUri, IList::Probe(list));
@@ -96,17 +94,18 @@ ECode CMediaInserter::Insert(
 ECode CMediaInserter::FlushAll()
 {
     FlushAllPriority();
+
     AutoPtr<ISet> set;
-    mRowMap->GetKeySet((ISet**)&set);
+    mRowMap->GetEntrySet((ISet**)&set);
     AutoPtr<IIterator> it;
     set->GetIterator((IIterator**)&it);
     Boolean hasNext;
-    Int32 i = 0;
     while (it->HasNext(&hasNext), hasNext) {
-        AutoPtr<IInterface> key;
-        it->GetNext((IInterface**)&key);
-        AutoPtr<IInterface> value;
-        mRowMap->Get(key, (IInterface**)&value);
+        AutoPtr<IInterface> obj, key, value;
+        it->GetNext((IInterface**)&obj);
+        IMapEntry* me = IMapEntry::Probe(obj);
+        me->GetKey((IInterface**)&key);
+        me->GetValue((IInterface**)&value);
         Flush(IUri::Probe(key), IList::Probe(value));
     }
     mRowMap->Clear();
@@ -116,16 +115,16 @@ ECode CMediaInserter::FlushAll()
 ECode CMediaInserter::FlushAllPriority() // throws RemoteException
 {
     AutoPtr<ISet> set;
-    mPriorityRowMap->GetKeySet((ISet**)&set);
+    mPriorityRowMap->GetEntrySet((ISet**)&set);
     AutoPtr<IIterator> it;
     set->GetIterator((IIterator**)&it);
     Boolean hasNext;
-    Int32 i = 0;
     while (it->HasNext(&hasNext), hasNext) {
-        AutoPtr<IInterface> key;
-        it->GetNext((IInterface**)&key);
-        AutoPtr<IInterface> value;
-        mPriorityRowMap->Get(key, (IInterface**)&value);
+        AutoPtr<IInterface> obj, key, value;
+        it->GetNext((IInterface**)&obj);
+        IMapEntry* me = IMapEntry::Probe(obj);
+        me->GetKey((IInterface**)&key);
+        me->GetValue((IInterface**)&value);
         Flush(IUri::Probe(key), IList::Probe(value));
     }
     mPriorityRowMap->Clear();

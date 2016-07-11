@@ -474,7 +474,7 @@ static AutoPtr<ArrayOf<String> > InitopenFileColumns()
 const AutoPtr<ArrayOf<String> > MediaProvider::openFileColumns = InitopenFileColumns();//
 
 String MediaProvider::TAG("MediaProvider");
-const Boolean MediaProvider::LOCAL_LOGV = TRUE;
+const Boolean MediaProvider::LOCAL_LOGV = FALSE;
 
 const String MediaProvider::INTERNAL_DATABASE_NAME("internal.db");
 const String MediaProvider::EXTERNAL_DATABASE_NAME("external.db");//

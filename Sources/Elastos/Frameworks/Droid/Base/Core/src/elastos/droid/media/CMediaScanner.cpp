@@ -315,7 +315,7 @@ AutoPtr< ArrayOf<String> > CMediaScanner::FILES_PRESCAN_PROJECTION = InitFILES_P
 AutoPtr< ArrayOf<String> > CMediaScanner::ID_PROJECTION = InitID_PROJECTION();
 AutoPtr< ArrayOf<String> > CMediaScanner::PLAYLIST_MEMBERS_PROJECTION = InitPLAYLIST_MEMBERS_PROJECTION();
 
-static const Boolean DBG = TRUE;
+static const Boolean DBG = FALSE;
 const String CMediaScanner::TAG("MediaScanner");
 
 const Int32 CMediaScanner::FILES_PRESCAN_ID_COLUMN_INDEX = 0;
