@@ -668,7 +668,7 @@ module.exports = function(aoElastos, aoActivity){
 //         case R::id::img_btn_edit: {
             case R.id.img_btn_edit :
 //             Logger::D(TAG, "OnClick()---img_btn_edit");
-                elog(TAG + "OnClick()---" + img_btn_edit);
+                elog(TAG + "OnClick()---img_btn_edit");
 //             AutoPtr<PhotoEntry> entry = mHost->mPhotoEntryList[mHost->mCurrentIndex];
                 var entry = mPhotoEntryList[mCurrentIndex];
 //             AutoPtr<IIntent> intent;
@@ -677,7 +677,7 @@ module.exports = function(aoElastos, aoActivity){
 //             intent->SetClassNameEx(String("Gallery"), String("Gallery.CEditActivity"));
                 intent.SetClassName("Elastos.DevSamples.Node.JSGallery", "Elastos.DevSamples.Node.JSGallery.CEditActivity");
 //             intent->PutStringExtra(DataSourceHelper::SOURCE_PATH, entry->sourcePath);
-                intent.PutStringExtra(DataSourceHelper.SOURCE_PATH, entry.sourcePath);
+                intent.PutExtra(DataSourceHelper.SOURCE_PATH, entry.sourcePath);
 //             if (FAILED(mHost->StartActivity(intent))) {
                 try {oActivity.StartActivity(intent)} catch(e) {
 //                 Logger::E(TAG, "OnClick()---StartActivity CEditActivity failed!");

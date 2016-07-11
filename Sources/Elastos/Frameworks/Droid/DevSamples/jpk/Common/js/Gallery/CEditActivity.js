@@ -14,6 +14,8 @@ module.exports = function(aoElastos, aoActivity){
     }
     var _apt = CActivityListener.prototype;
 
+    var EIID_IActivity = [0x1068F256,0x8292,0x2C57,[0x7E,0xCB,0xFE,0xE1,0xA0,0xA4,0x0C,0x1B]];
+
 //--------CEditActivity.h--------begin--------
 // #ifndef __CEDITACTIVITY_H__
 // #define __CEDITACTIVITY_H__
@@ -21,6 +23,7 @@ module.exports = function(aoElastos, aoActivity){
 // #include "_CEditActivity.h"
 // #include "app/Activity.h"
 // #include "src/data/AsyncImageLoader.h"
+    var AsyncImageLoader = require("./data/AsyncImageLoader.js")(aoElastos);
 // #include "os/HandlerBase.h"
 
 // using Elastos::Droid::Os::HandlerBase;
@@ -37,26 +40,29 @@ module.exports = function(aoElastos, aoActivity){
 // {
 // public:
 //     class MyHandler : public HandlerBase
+    var MyHandler;
 //     {
 //     public:
 //         MyHandler(
+    MyHandler = function(
 //             /* [in] */ IWeakReference* host)
+        host)
 //             : mWeakHost(host)
 //         {}
+    {
+        this.mWeakHost = host;
+    }
 
 //         CARAPI HandleMessage(
 //             /* [in] */ IMessage* msg);
 //     private:
 //         AutoPtr<IWeakReference> mWeakHost;
 //     };
-    function MyHandler(host) {
-        this.mHost = host;
-    }
-    //PROTO: MyHandler.prototype.HandleMessage = function(msg){};
 
 //     class MyListener
 //         : public ElRefBase
 //         , public IViewOnClickListener
+    var MyListener;
 //     {
 //     public:
 //         MyListener(
@@ -70,13 +76,10 @@ module.exports = function(aoElastos, aoActivity){
 //     private:
 //         CEditActivity* mHost;
 //     };
-    function MyListener = function(host) {
-        this.mHost = host;
-    }
-    //PROTO: MyListener.prototype.Onclick = function(v){};
 
 //     class MyLoadImageCallback
 //         : public ILoadImageCallback
+    var MyLoadImageCallback;
 //     {
 //     public:
 //         MyLoadImageCallback(
@@ -89,10 +92,6 @@ module.exports = function(aoElastos, aoActivity){
 //     private:
 //         AutoPtr<IWeakReference> mWeakHost;
 //     };
-    function MyLoadImageCallback = function(host) {
-        this.mHost = host;
-    }
-    //PROTO: MyLoadImageCallback.prototype.ImageLoaded = function(imageDrawable, imageView){}
 
 // friend class MyListener;
 // friend class MyLoadImageCallback;
@@ -118,7 +117,6 @@ module.exports = function(aoElastos, aoActivity){
 //     CARAPI_(void) MyImageLoaded(
 //         /* [in] */ IDrawable* imageDrawable,
 //         /* [in] */ IImageView* imageView);
-    //PROTO: function MyImageLoaded = function(imageDrawable, imageView){}
 
 // private:
 //     static const String TAG;
@@ -145,6 +143,7 @@ module.exports = function(aoElastos, aoActivity){
 
 // #include "CEditActivity.h"
 // #include "src/data/DataSourceHelper.h"
+    var DataSourceHelper = require("./data/DataSourceHelper.js")(aoElastos);
 // #include "src/data/AsyncImageLoader.h"
 // #include "R.h"
 // #include <elastos/Logger.h>
@@ -172,13 +171,18 @@ module.exports = function(aoElastos, aoActivity){
 // {
     MyHandler.prototype.HandleMessage = function(msg) {
 //     AutoPtr<IActivity> strongObj;
+        var strongObj;
 //     mWeakHost->Resolve(EIID_IActivity, (IInterface**)&strongObj);
+        strongObj = this.mWeakHost.Resolve(EIID_IActivity);
 //     if (strongObj == NULL) {
+        if (!strongObj) {
 //         return NOERROR;
+            return;
 //     }
+        }
 
 //     CEditActivity* mHost = (CEditActivity*)strongObj.Get();
-        var mHost = this.mHost; //not used
+        var mHost = strongObj;
 
 //     Int32 what;
         var what;
@@ -209,7 +213,8 @@ module.exports = function(aoElastos, aoActivity){
 //             break;
                 break;
 //         }
-            }
+            default:
+                break;
 //     }
         }
 
@@ -219,9 +224,14 @@ module.exports = function(aoElastos, aoActivity){
     }
 
 // CEditActivity::MyListener::MyListener(
+    MyListener = function(
 //     /* [in] */ CEditActivity* host)
+        host)
 //     : mHost(host)
 // {}
+    {
+        this.mHost = host;
+    }
 
 // PInterface CEditActivity::MyListener::Probe(
 //     /* [in]  */ REIID riid)
@@ -266,7 +276,7 @@ module.exports = function(aoElastos, aoActivity){
 // ECode CEditActivity::MyListener::OnClick(
 //     /* [in] */ IView* v)
 // {
-    MyListener.prototype.Onclick = function(v) {
+    MyListener.prototype.OnClick = function(v) {
 //     Int32 viewId = 0;
         var viewId = 0;
 //     v->GetId(&viewId);
@@ -296,9 +306,14 @@ module.exports = function(aoElastos, aoActivity){
     }
 
 // CEditActivity::MyLoadImageCallback::MyLoadImageCallback(
+    MyLoadImageCallback = function(
 //     /* [in] */ IWeakReference* host)
+        host)
 //     : mWeakHost(host)
 // {}
+    {
+        this.mWeakHost = host;
+    }
 
 // ECode CEditActivity::MyLoadImageCallback::ImageLoaded(
 //     /* [in] */ IDrawable* imageDrawable,
@@ -309,16 +324,24 @@ module.exports = function(aoElastos, aoActivity){
 //     Logger::D(TAG, "ImageLoaded()-----");
         elog(TAG + "ImageLoaded()-----");
 //     AutoPtr<IActivity> strongObj;
+        var strongObj;
 //     mWeakHost->Resolve(EIID_IActivity, (IInterface**)&strongObj);
+        strongObj = this.mWeakHost.Resolve(EIID_IActivity);
 //     if (strongObj == NULL) {
+        if (!strongObj) {
 //         return NOERROR;
+            return;
 //     }
+        }
 
 //     CEditActivity* mHost = (CEditActivity*)strongObj.Get();
+        var mHost = strongObj;
 //     if (mHost->mMyHandler == NULL) {
+        if (mMyHandler) {
 //         return NOERROR;
+            return;
 //     }
-        var mHost = this.mHost; //not used
+        }
 
 //     AutoPtr<SomeArgs> args = SomeArgs::Obtain();
         var args = {};
@@ -358,20 +381,25 @@ module.exports = function(aoElastos, aoActivity){
         _this.SetContentView(R.layout.activity_edit);
 
 //     AutoPtr<IWeakReference> weakHost;
+        var weakHost;
 //     GetWeakReference((IWeakReference**)&weakHost);
+        weakHost = _this.GetWeakReference();
 //     mMyHandler = new MyHandler(weakHost);
-        mMyHandler = new MyHandler(_this);
+        mMyHandler = new MyHandler(weakHost);
 
 //     AutoPtr<MyListener> l = new MyListener(this);
         var l = new MyListener(_this);
 
 //     AutoPtr<IView> view = FindViewById(R::id::edit_back);
+        var view = _this.FindViewById(R.id.edit_back);
 //     mBackButton = IImageView::Probe(view);
-        mBackButton = _this.FindViewById(R.id.edit_back);
+        mBackButton = view;
 //     assert(mBackButton != NULL);
+        //TODO:asset
 //     view = FindViewById(R::id::edit_photo);
+        view = _this.FindViewById(R.id.edit_photo);
 //     mEditView = IImageView::Probe(view);
-        mEditView = _this.FindViewById(R.id.edit_photo);
+        mEditView = view;
 //     assert(mEditView != NULL);
 //     mBackButton->SetOnClickListener(l.Get());
         mBackButton.SetOnClickListener(l);
@@ -385,11 +413,11 @@ module.exports = function(aoElastos, aoActivity){
 //         intent->GetStringExtra(DataSourceHelper::SOURCE_PATH, &mFilePath);
             mFilePath = intent.GetStringExtra(DataSourceHelper.SOURCE_PATH);
 //         if (!mFilePath.IsNullOrEmpty()) {
-            if (mFilePath instanceof String) {
+            if (typeof mFilePath == "string") {
 //             Logger::D(TAG, "OnCreate()---mFilePath:", mFilePath.string());
                 elog(TAG + "OnCreate()---mFilePath:" + mFilePath);
 //             AutoPtr<MyLoadImageCallback> myLoadImage = new MyLoadImageCallback(weakHost);
-                var myLoadImage = new MyLoadImageCallback(_this);
+                var myLoadImage = new MyLoadImageCallback(weakHost);
 //             AutoPtr<IBitmapDrawable> drawable = AsyncImageLoader::LoadDrawable(mFilePath, TRUE, mEditView, myLoadImage);
                 var drawable = AsyncImageLoader.LoadDrawable(mFilePath, true, mEditView, myLoadImage);
 //             if (drawable != NULL) {
@@ -483,6 +511,7 @@ module.exports = function(aoElastos, aoActivity){
 //     return NOERROR;
         return;
 // }
+    }
 
 // void CEditActivity::MyImageLoaded(
 //     /* [in] */ IDrawable* imageDrawable,
@@ -512,7 +541,7 @@ module.exports = function(aoElastos, aoActivity){
     _apt.OnCreateContextMenu = function(aoContext, aoMenu, aoV, aoMenuInfo) {
             elog('====jso_activity_cb====OnCreateContextMenu.begin====');
     }
-    CActivityListener.prototype.CreateNavigationBar:function(aoContext) {
+    _apt.CreateNavigationBar = function(aoContext) {
             elog('====jso_activity_cb====CreateNavigationBar.begin====');
     }
     _apt.OnExchangeData = function(aiTimes ,aoInObject, aoOutObject) {

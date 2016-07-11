@@ -118,6 +118,10 @@ function getCreateOnUIThread(as_ClassName) {
         bRet = true;
     }
 
+    if (as_ClassName == "Elastos.Droid.Webkit.CWebView") {
+        bRet = true;
+    }
+
     return bRet;
 }
 
