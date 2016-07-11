@@ -1279,7 +1279,8 @@ ECode CGsmServiceStateTracker::HandlePollStateResult(
 
                 if (opNames != NULL && opNames->GetLength() >= 3) {
                     AutoPtr<IUiccCard> uc;
-                    mUiccController->GetUiccCard((IUiccCard**)&uc);
+                    if (mUiccController != NULL)
+                        mUiccController->GetUiccCard((IUiccCard**)&uc);
                     String brandOverride;
                     if (uc != NULL) {
                         uc->GetOperatorBrandOverride(&brandOverride);
@@ -1638,8 +1639,10 @@ void CGsmServiceStateTracker::PollStateDone()
                 Boolean testOneUniqueOffsetPath = b &&
                         ((SystemClock::GetUptimeMillis() & 1) == 0);
 
-                AutoPtr<ArrayOf<ITimeZone *> > uniqueZones = TimeUtils::GetTimeZonesWithUniqueOffsets(iso);
-                Int32 size = uniqueZones->GetLength();
+                Logger::E("CGsmServiceStateTracker", "TODO GetTimeZonesWithUniqueOffsets is not ready!");
+                AutoPtr<ArrayOf<ITimeZone *> > uniqueZones;//TODO  = TimeUtils::GetTimeZonesWithUniqueOffsets(iso);
+                Int32 size = 0;
+                //TODO size = uniqueZones->GetLength();
                 if ((size == 1) || testOneUniqueOffsetPath) {
                     zone = (*uniqueZones)[0];
                     if (DBG) {
@@ -1661,8 +1664,9 @@ void CGsmServiceStateTracker::PollStateDone()
                 }
             }
 
-            if (ShouldFixTimeZoneNow(IPhoneBase::Probe(mPhone), operatorNumeric, prevOperatorNumeric,
-                    mNeedFixZoneAfterNitz)) {
+            Logger::E("CGsmServiceStateTracker", "TODO ShouldFixTimeZoneNow is not ready!");
+            if (FALSE/*ShouldFixTimeZoneNow(IPhoneBase::Probe(mPhone), operatorNumeric, prevOperatorNumeric,
+                    mNeedFixZoneAfterNitz)*/) {
                 // If the offset is (0, FALSE) and the timezone property
                 // is set, use the timezone property rather than
                 // GMT.
@@ -2518,7 +2522,8 @@ AutoPtr<IUiccCardApplication> CGsmServiceStateTracker::GetUiccCardApplication()
     Int32 pid;
     IPhone::Probe(mPhone)->GetPhoneId(&pid);
     AutoPtr<IUiccCardApplication> app;
-    mUiccController->GetUiccCardApplication(pid, IUiccController::APP_FAM_3GPP,
+    if (mUiccController)
+        mUiccController->GetUiccCardApplication(pid, IUiccController::APP_FAM_3GPP,
             (IUiccCardApplication**)&app);
     return app;
 }

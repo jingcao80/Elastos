@@ -823,8 +823,16 @@ ECode CActivityOne::OnTestConnectivityManager()
 
 ECode CActivityOne::OnTestTelephony()
 {
-    Logger::D("CActivityOne", "OnTestTelephony 2016/06/24/16:01");
     String callNumber("911");
+    Logger::D("CActivityOne", "OnTestTelephony 2016/06/24/16:01");
+    AutoPtr<ICharSequence> text;
+    ITextView::Probe(mEditText)->GetText((ICharSequence**)&text);
+    String textStr;
+    text->ToString(&textStr);
+    if (textStr.GetLength() > 0) {
+        callNumber = textStr;
+    }
+    Logger::D("CActivityOne", "OnTestTelephony call number is %s", callNumber.string());
     AutoPtr<IUriHelper> uriHelper;
     CUriHelper::AcquireSingleton((IUriHelper**)&uriHelper);
     AutoPtr<IUri> uri;

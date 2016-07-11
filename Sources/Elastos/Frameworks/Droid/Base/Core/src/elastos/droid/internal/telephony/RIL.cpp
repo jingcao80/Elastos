@@ -4936,16 +4936,17 @@ AutoPtr<IInterface> RIL::ResponseStrings(
     AutoPtr<ArrayOf<String> > response;
 
     //now read string error
-    Logger::E("RIL", "TODO TODO ReadArrayOfString fail line:%d, \n", __LINE__);
-    AutoPtr<ArrayOf<String> > test;
-    p->ReadStringArray((ArrayOf<String>**)&test);
-    for(Int32 i = 0; i < test->GetLength(); ++i) {
-        Logger::E("leliang", "RIL::ResponseStrings, %d is %s", i, ((*test)[i]).string());
+    p->ReadStringArray((ArrayOf<String>**)&response);
+    for(Int32 i = 0; i < response->GetLength(); ++i) {
+        if ((*response)[i] == NULL)
+            (*response)[i] = String("");
+        Logger::E("leliang", "RIL::ResponseStrings, %d is %s", i, ((*response)[i]).string());
     }
     //fake code
-    response = ArrayOf<String>::Alloc(2);
-    (*response)[0] = String("Hello");
-    (*response)[1] = String("World");
+    //AutoPtr<ArrayOf<String> > test;
+    //test = ArrayOf<String>::Alloc(2);
+    //(*test)[0] = String("Hello");
+    //(*test)[1] = String("World");
 
     return CoreUtils::Convert(response);
 }

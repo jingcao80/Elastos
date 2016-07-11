@@ -972,7 +972,8 @@ void ServiceStateTracker::UpdateCarrierMccMncConfiguration(
     if (((newOp.IsNull()) && (TextUtils::IsEmpty(oldOp) == FALSE)) ||
             ((!newOp.IsNull()) && (newOp.Equals(oldOp) == FALSE))) {
         Log(String("update mccmnc=") + newOp + String(" fromServiceState=TRUE"));
-        assert(0 && "TODO");
+        Logger::E("ServiceStateTracker", "TODO UpdateCarrierMccMncConfiguration is not ready!");
+        // assert(0 && "TODO");
         // AutoPtr<IMccTableHelper> mccTableHelper;
         // CMccTableHelper::AcquireSingleton((IMccTableHelper**)&mccTableHelper);
         // mccTableHelper->UpdateMccMncConfiguration(context, newOp, TRUE);

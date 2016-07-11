@@ -5,6 +5,7 @@
 #include "elastos/droid/internal/telephony/IccUtils.h"
 #include "elastos/droid/internal/telephony/uicc/UiccController.h"
 #include "elastos/droid/internal/telephony/CSubscriptionControllerHelper.h"
+#include "elastos/droid/internal/telephony/CPhoneFactory.h"
 #include "elastos/droid/content/CIntentFilter.h"
 #include "elastos/droid/os/Build.h"
 #include "elastos/droid/os/Looper.h"
@@ -1459,8 +1460,9 @@ ECode PhoneBase::UpdatePhoneObject(
     Logger::D(TAG, "updatePhoneObject: phoneid = %d rat = %d", mPhoneId, voiceRadioTech);
     // Only the PhoneProxy can update the phone object.
     AutoPtr<IPhone> phoneProxy;
-    assert(0 && "TODO");
-    // phoneProxy = PhoneFactory::GetPhone(mPhoneId);
+    AutoPtr<IPhoneFactory> pf;
+    CPhoneFactory::AcquireSingleton((IPhoneFactory**)&pf);
+    pf->GetPhone(mPhoneId, (IPhone**)&phoneProxy);
     if (phoneProxy != NULL) {
         phoneProxy->UpdatePhoneObject(voiceRadioTech);
     }
