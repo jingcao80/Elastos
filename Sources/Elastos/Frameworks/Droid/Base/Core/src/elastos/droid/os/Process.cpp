@@ -1,6 +1,7 @@
 
 #include <Elastos.CoreLibrary.IO.h>
 #include "Elastos.Droid.Content.h"
+#include "Elastos.Droid.Internal.h"
 #include "Elastos.Droid.Net.h"
 #include "elastos/droid/os/Process.h"
 #include "elastos/droid/os/CProcessStartResult.h"
@@ -53,6 +54,7 @@ using Elastos::IO::IOutputStream;
 using Elastos::Utility::Etl::Vector;
 using Elastos::Utility::Logging::Logger;
 using Elastos::Droid::DroidRuntime;
+using Elastos::Droid::Internal::Os::IZygote;
 using Elastos::Droid::Net::CLocalSocket;
 using Elastos::Droid::Net::ILocalSocketAddress;
 using Elastos::Droid::Net::CLocalSocketAddress;
@@ -472,12 +474,12 @@ ECode Process::StartViaZygote(
         // if ((debugFlags & Zygote.DEBUG_ENABLE_ASSERT) != 0) {
         //     argsForZygote->add("--enable-assert");
         // }
-        // if (mountExternal == Zygote.MOUNT_EXTERNAL_MULTIUSER) {
-        //     argsForZygote->add("--mount-external-multiuser");
-        // }
-        // else if (mountExternal == Zygote.MOUNT_EXTERNAL_MULTIUSER_ALL) {
-        //     argsForZygote->add("--mount-external-multiuser-all");
-        // }
+        if (mountExternal == IZygote::MOUNT_EXTERNAL_MULTIUSER) {
+            argsForZygote->PushBack(String("--mount-external-multiuser"));
+        }
+        else if (mountExternal == IZygote::MOUNT_EXTERNAL_MULTIUSER_ALL) {
+            argsForZygote->PushBack(String("--mount-external-multiuser-all"));
+        }
         if (refreshTheme) {
             argsForZygote->PushBack(String("--refresh_theme"));
         }

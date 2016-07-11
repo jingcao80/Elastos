@@ -1,4 +1,5 @@
 
+#include <sys/mount.h>
 #include "elastos/droid/DroidRuntime.h"
 #include <elastos/coredef.h>
 #include <elastos/utility/logging/Logger.h>
@@ -208,6 +209,46 @@ static void BlockSignals()
 //    }
 }
 
+// Do zygote-mode-only initialization.
+static bool InitZygote()
+{
+#ifdef __linux__
+    // zygote goes into its own process group
+    setpgid(0, 0);
+
+    // See storage config details at http://source.android.com/tech/storage/
+    // Create private mount namespace shared by all children
+    if (unshare(CLONE_NEWNS) == -1) {
+        Logger::E("DroidRuntime", "Failed to unshare()");
+        return false;
+    }
+
+    // Mark rootfs as being a slave so that changes from default
+    // namespace only flow into our children.
+    if (mount("rootfs", "/", NULL, (MS_SLAVE | MS_REC), NULL) == -1) {
+        Logger::E("DroidRuntime", "Failed to mount() rootfs as MS_SLAVE");
+        return false;
+    }
+
+    // Create a staging tmpfs that is shared by our children; they will
+    // bind mount storage into their respective private namespaces, which
+    // are isolated from each other.
+    const char* target_base = getenv("EMULATED_STORAGE_TARGET");
+    if (target_base != NULL) {
+        if (mount("tmpfs", target_base, "tmpfs", MS_NOSUID | MS_NODEV,
+                "uid=0,gid=1028,mode=0751") == -1) {
+            Logger::E("DroidRuntime", "Failed to mount tmpfs to %s", target_base);
+            return false;
+        }
+    }
+
+    return true;
+#else
+    UNIMPLEMENTED(FATAL);
+    return false;
+#endif
+}
+
 /*
  * Start the Android runtime.  This involves starting the virtual machine
  * and calling the "static void main(String[] args)" method in the class
@@ -257,7 +298,10 @@ void DroidRuntime::Start(
     //ALOGD("Found LD_ASSUME_KERNEL='%s'\n", kernelHack);
 
     // from startVm
-    BlockSignals();
+    BlockSignals(); // call from Runtime::Create in JNI_CreateJavaVM
+
+    bool inited = InitZygote(); // call from Runtime::Start in JNI_CreateJavaVM
+    assert(inited);
 
     CallMain(moduleName, className, options);
 
