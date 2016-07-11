@@ -4,9 +4,10 @@
 #include "_Elastos.Droid.Calculator2.h"
 #include <elastos/core/Object.h>
 #include <elastos/droid/ext/frameworkext.h>
+#include <elastos/utility/etl/HashMap.h>
 
 using Elastos::Droid::Content::IContext;
-using Elastos::Utility::IHashMap;
+using Elastos::Utility::Etl::HashMap;
 
 namespace Elastos {
 namespace Droid {
@@ -35,7 +36,7 @@ public:
         /* [out] */ String* result);
 
 private:
-    AutoPtr<IHashMap> mReplacementMap;
+    HashMap<String, String> mReplacementMap;
 };
 
 } // namespace Calculator2

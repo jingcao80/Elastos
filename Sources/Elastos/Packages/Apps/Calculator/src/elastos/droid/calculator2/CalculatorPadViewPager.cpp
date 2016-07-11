@@ -3,14 +3,11 @@
 #include "R.h"
 #include <elastos/core/Math.h>
 #include "elastos/droid/R.h"
-#include <elastos/utility/logging/Slogger.h>
 
 using Elastos::Droid::Content::Res::IResources;
 using Elastos::Droid::Calculator2::EIID_ICalculatorPadViewPager;
 using Elastos::Droid::Support::V4::View::EIID_IViewPagerOnPageChangeListener;
 using Elastos::Droid::Support::V4::View::EIID_IViewPagerPageTransformer;
-
-using Elastos::Utility::Logging::Slogger;
 
 namespace Elastos {
 namespace Droid {
@@ -35,7 +32,7 @@ ECode CalculatorPadViewPager::MyPagerAdapter::InstantiateItem(
     VALIDATE_NOT_NULL(item)
     AutoPtr<IView> child;
     mHost->GetChildAt(position, (IView**)&child);
-    *item = (IInterface*)child.Get();
+    *item = IInterface::Probe(child);
     REFCOUNT_ADD(*item)
     return NOERROR;
 }
@@ -141,7 +138,6 @@ ECode CalculatorPadViewPager::MyPageTransformer::TransformPage(
 
 CalculatorPadViewPager::CalculatorPadViewPager()
 {
-    Slogger::D("CalculatorPadViewPager", "~~~~~~~~~~~~viewpager create");
     mStaticPagerAdapter = (IPagerAdapter*)new MyPagerAdapter(this);
     mOnPageChangeListener = (IViewPagerOnPageChangeListener*)new MyOnPageChangeListener(this);
     mPageTransformer = (IViewPagerPageTransformer*)new MyPageTransformer(this);

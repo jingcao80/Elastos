@@ -280,6 +280,7 @@ private:
 
     CARAPI_(void) OnResult(
         /* [in] */ const String& result);
+
 private:
     static const String NAME;
 
@@ -293,10 +294,10 @@ private:
 
     CalculatorState mCurrentState;
     AutoPtr<ICalculatorExpressionTokenizer> mTokenizer;
-    static AutoPtr<ICalculatorExpressionEvaluator> mEvaluator;
+    AutoPtr<ICalculatorExpressionEvaluator> mEvaluator;
 
     AutoPtr<IView> mDisplayView;
-    static AutoPtr<ICalculatorEditText> mFormulaEditText;
+    AutoPtr<ICalculatorEditText> mFormulaEditText;
     AutoPtr<ICalculatorEditText> mResultEditText;
     AutoPtr<IViewPager> mPadViewPager;
     AutoPtr<IView> mDeleteButton;

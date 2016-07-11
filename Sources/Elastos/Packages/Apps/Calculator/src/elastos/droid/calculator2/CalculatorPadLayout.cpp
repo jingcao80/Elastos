@@ -2,11 +2,13 @@
 #include "R.h"
 #include <elastos/droid/R.h>
 #include "Elastos.Droid.View.h"
+#include <elastos/droid/os/Build.h>
 #include <elastos/droid/view/ViewGroup.h>
 #include <elastos/droid/view/View.h>
 #include <elastos/core/Math.h>
 
 using Elastos::Droid::Content::Res::ITypedArray;
+using Elastos::Droid::Os::Build;
 using Elastos::Droid::View::IView;
 using Elastos::Droid::View::IViewGroupLayoutParams;
 using Elastos::Droid::View::IViewGroup;
@@ -21,7 +23,9 @@ namespace Calculator2 {
 CalculatorPadLayout::CalculatorPadLayout()
     : mRowCount(0)
     , mColumnCount(0)
-{}
+{
+    mName = String("CalculatorPadLayout");
+}
 
 CalculatorPadLayout::~CalculatorPadLayout()
 {}
@@ -54,7 +58,7 @@ ECode CalculatorPadLayout::constructor(
     (*arr)[2] = defStyle;
     (*arr)[3] = 0;
     AutoPtr<ITypedArray> a;
-    context->ObtainStyledAttributes(attrs, arr.Get(), (ITypedArray**)&a);
+    context->ObtainStyledAttributes(attrs, arr, (ITypedArray**)&a);
     a->GetInt32(0, 1, &mRowCount);
     a->GetInt32(1, 1, &mColumnCount);
 
@@ -85,9 +89,16 @@ ECode CalculatorPadLayout::OnLayout(
     Int32 paddingBottom;
     GetPaddingBottom(&paddingBottom);
 
-    Int32 ld;
-    GetLayoutDirection(&ld);
-    Boolean isRTL = ld == IView::LAYOUT_DIRECTION_RTL;
+    Boolean isRTL;
+    if (Build::VERSION::SDK_INT >= 17) {
+        Int32 ld;
+        GetLayoutDirection(&ld);
+        isRTL = ld == IView::LAYOUT_DIRECTION_RTL;
+    }
+    else {
+        isRTL = FALSE;
+    }
+
     Int32 columnWidth =
             Elastos::Core::Math::Round((Float) (right - left - paddingLeft - paddingRight)) / mColumnCount;
     Int32 rowHeight =
@@ -96,7 +107,6 @@ ECode CalculatorPadLayout::OnLayout(
     Int32 rowIndex = 0, columnIndex = 0;
     Int32 count;
     GetChildCount(&count);
-    AutoPtr<IViewGroupLayoutParams> lp;
     for (Int32 childIndex = 0; childIndex < count; ++childIndex) {
         AutoPtr<IView> childView;
         GetChildAt(childIndex, (IView**)&childView);
@@ -105,26 +115,23 @@ ECode CalculatorPadLayout::OnLayout(
             continue;
         }
 
-        lp = NULL;
-        childView->GetLayoutParams((IViewGroupLayoutParams**)&lp);
-
-        Int32 childTop = paddingTop + ((ViewGroup::MarginLayoutParams*)lp.Get())->mTopMargin + rowIndex * rowHeight;
-        Int32 childBottom = childTop - ((ViewGroup::MarginLayoutParams*)lp.Get())->mTopMargin - ((ViewGroup::MarginLayoutParams*)lp.Get())->mBottomMargin + rowHeight;
-        Int32 childLeft = paddingLeft + ((ViewGroup::MarginLayoutParams*)lp.Get())->mLeftMargin +
+        AutoPtr<IViewGroupLayoutParams> temp;
+        childView->GetLayoutParams((IViewGroupLayoutParams**)&temp);
+        AutoPtr<MarginLayoutParams> lp = (MarginLayoutParams*)temp.Get();
+        Int32 childTop = paddingTop + lp->mTopMargin + rowIndex * rowHeight;
+        Int32 childBottom = childTop - lp->mTopMargin - lp->mBottomMargin + rowHeight;
+        Int32 childLeft = paddingLeft + lp->mLeftMargin +
                 (isRTL ? (mColumnCount - 1) - columnIndex : columnIndex) * columnWidth;
-        Int32 childRight = childLeft - ((ViewGroup::MarginLayoutParams*)lp.Get())->mLeftMargin - ((ViewGroup::MarginLayoutParams*)lp.Get())->mRightMargin + columnWidth;
+        Int32 childRight = childLeft - lp->mLeftMargin - lp->mRightMargin + columnWidth;
 
         Int32 childWidth = childRight - childLeft;
         Int32 childHeight = childBottom - childTop;
-        Int32 gmwidth;
-        childView->GetMeasuredWidth(&gmwidth);
-        Int32 gmHeight;
-        childView->GetMeasuredHeight(&gmHeight);
-        if (childWidth != gmwidth ||
-                childHeight != gmHeight) {
+        Int32 gmwidth, gmHeight;
+        if ((childView->GetMeasuredWidth(&gmwidth), childWidth != gmwidth) ||
+                (childView->GetMeasuredHeight(&gmHeight), childHeight != gmHeight)) {
             childView->Measure(
-                    View::MeasureSpec::MakeMeasureSpec(childWidth, View::MeasureSpec::EXACTLY),
-                    View::MeasureSpec::MakeMeasureSpec(childHeight, View::MeasureSpec::EXACTLY));
+                    MeasureSpec::MakeMeasureSpec(childWidth, MeasureSpec::EXACTLY),
+                    MeasureSpec::MakeMeasureSpec(childHeight, MeasureSpec::EXACTLY));
         }
         childView->Layout(childLeft, childTop, childRight, childBottom);
 
@@ -141,9 +148,8 @@ ECode CalculatorPadLayout::GenerateLayoutParams(
     VALIDATE_NOT_NULL(result);
     AutoPtr<IContext> context;
     GetContext((IContext**)&context);
-    AutoPtr<ViewGroup::MarginLayoutParams> mlp;
-    mlp = new ViewGroup::MarginLayoutParams();
-    mlp->constructor(context.Get(), attrs);
+    AutoPtr<MarginLayoutParams> mlp = new MarginLayoutParams();
+    mlp->constructor(context, attrs);
     *result = IViewGroupLayoutParams::Probe(mlp);
     REFCOUNT_ADD(*result);
     return NOERROR;
@@ -153,8 +159,7 @@ ECode CalculatorPadLayout::GenerateDefaultLayoutParams(
     /* [out] */ IViewGroupLayoutParams** result)
 {
     VALIDATE_NOT_NULL(result);
-    AutoPtr<ViewGroup::MarginLayoutParams> mlp;
-    mlp = new ViewGroup::MarginLayoutParams();
+    AutoPtr<MarginLayoutParams> mlp = new MarginLayoutParams();
     mlp->constructor(IViewGroupLayoutParams::WRAP_CONTENT, IViewGroupLayoutParams::WRAP_CONTENT);
     *result = IViewGroupLayoutParams::Probe(mlp);
     REFCOUNT_ADD(*result);
@@ -166,8 +171,7 @@ ECode CalculatorPadLayout::GenerateLayoutParams(
     /* [out] */ IViewGroupLayoutParams** result)
 {
     VALIDATE_NOT_NULL(result);
-    AutoPtr<ViewGroup::MarginLayoutParams> vmp;
-    vmp = new ViewGroup::MarginLayoutParams();
+    AutoPtr<MarginLayoutParams> vmp = new ViewGroup::MarginLayoutParams();
     vmp->constructor(p);
     *result = IViewGroupLayoutParams::Probe(vmp);
     REFCOUNT_ADD(*result);
@@ -179,6 +183,7 @@ ECode CalculatorPadLayout::CheckLayoutParams(
     /* [out] */ Boolean* result)
 {
     VALIDATE_NOT_NULL(result);
+    *result = FALSE;
     if (IViewGroupLayoutParams::Probe(p)) {
         *result = TRUE;
     }

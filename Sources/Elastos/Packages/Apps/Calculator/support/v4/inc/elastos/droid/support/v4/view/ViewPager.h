@@ -20,6 +20,7 @@ using Elastos::Droid::View::IViewGroupLayoutParams;
 using Elastos::Droid::View::IMotionEvent;
 using Elastos::Droid::View::IKeyEvent;
 using Elastos::Droid::View::Animation::IInterpolator;
+using Elastos::Droid::Animation::ITimeInterpolator;
 using Elastos::Droid::Widget::IScroller;
 using Elastos::Droid::Widget::IEdgeEffect;
 using Elastos::Core::IComparator;
@@ -275,6 +276,7 @@ private:
     class MyInterpolator
         : public Object
         , public IInterpolator
+        , public ITimeInterpolator
     {
     public:
         CAR_INTERFACE_DECL()
@@ -283,6 +285,9 @@ private:
         CARAPI GetInterpolation(
             /* [in] */ Float input,
             /* [out] */ Float* interpolation);
+
+        CARAPI HasNativeInterpolator(
+            /* [out] */ Boolean* res);
     };
 
     class EndScrollRunnable : public Runnable

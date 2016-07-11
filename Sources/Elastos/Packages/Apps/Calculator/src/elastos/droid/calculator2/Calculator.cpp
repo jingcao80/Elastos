@@ -55,14 +55,9 @@ namespace Elastos {
 namespace Droid {
 namespace Calculator2 {
 
-const String Calculator::NAME(String("Calculator"));
-
-// instance state keys
+const String Calculator::NAME("Calculator");
 const String Calculator::KEY_CURRENT_STATE = NAME + "_currentState";
 const String Calculator::KEY_CURRENT_EXPRESSION = NAME + "_currentExpression";
-
-AutoPtr<ICalculatorExpressionEvaluator> Calculator::mEvaluator;
-AutoPtr<ICalculatorEditText> Calculator::mFormulaEditText;
 
 //----------------------------------------------------------------
 //           Calculator::MyTextWatcher
@@ -96,7 +91,7 @@ ECode Calculator::MyTextWatcher::AfterTextChanged(
     /* [in] */ IEditable* editable)
 {
     mHost->SetState(INPUT);
-    return mEvaluator->Evaluate(ICharSequence::Probe(editable), IEvaluateCallback::Probe(this));
+    return mHost->mEvaluator->Evaluate(ICharSequence::Probe(editable), IEvaluateCallback::Probe(this));
 }
 
 //----------------------------------------------------------------
@@ -195,7 +190,7 @@ ECode Calculator::MySecondAnimatorListenerAdapter::OnAnimationEnd(
 {
 
     AutoPtr<IEditable> editable;
-    ITextView::Probe(mFormulaEditText)->GetEditableText((IEditable**)&editable);
+    ITextView::Probe(mHost->mFormulaEditText)->GetEditableText((IEditable**)&editable);
     return editable->Clear();
 }
 
@@ -322,8 +317,8 @@ ECode Calculator::OnCreate(
     tmpView = FindViewById(R::id::pad_numeric);
     tmpView->FindViewById(R::id::eq, (IView**)&mEqualButton);
     Int32 visibility;
-    mEqualButton->GetVisibility(&visibility);
-    if (mEqualButton == NULL || visibility != IView::VISIBLE) {
+    ;
+    if (mEqualButton == NULL || (mEqualButton->GetVisibility(&visibility), visibility != IView::VISIBLE)) {
         tmpView = NULL;
         tmpView = FindViewById(R::id::pad_operator);
         tmpView->FindViewById(R::id::eq, (IView**)&mEqualButton);
@@ -349,13 +344,14 @@ ECode Calculator::OnCreate(
     savedInstanceState->GetString(KEY_CURRENT_EXPRESSION, String(""), &str);
     String text;
     mTokenizer->GetLocalizedExpression(str, &text);
-    ITextView::Probe(mFormulaEditText)->SetText(StringUtils::ParseCharSequence(text).Get());
+    AutoPtr<ITextView> textView = ITextView::Probe(mFormulaEditText);
+    textView->SetText(StringUtils::ParseCharSequence(text));
     AutoPtr<ICharSequence> cs;
-    ITextView::Probe(mFormulaEditText)->GetText((ICharSequence**)&cs);
-    mEvaluator->Evaluate(cs.Get(), IEvaluateCallback::Probe(this));
+    textView->GetText((ICharSequence**)&cs);
+    mEvaluator->Evaluate(cs, IEvaluateCallback::Probe(this));
 
-    ITextView::Probe(mFormulaEditText.Get())->SetEditableFactory(mFormulaEditableFactory);
-    ITextView::Probe(mFormulaEditText.Get())->AddTextChangedListener(mFormulaTextWatcher);
+    textView->SetEditableFactory(mFormulaEditableFactory);
+    textView->AddTextChangedListener(mFormulaTextWatcher);
     IView::Probe(mFormulaEditText.Get())->SetOnKeyListener(IViewOnKeyListener::Probe(mFormulaOnKeyListener));
     mFormulaEditText->SetOnTextSizeChangeListener(IOnTextSizeChangeListener::Probe(this));
     return mDeleteButton->SetOnLongClickListener(IViewOnLongClickListener::Probe(this));

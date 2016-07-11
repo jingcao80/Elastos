@@ -39,6 +39,7 @@ using Elastos::Droid::View::Accessibility::IAccessibilityRecord;
 using Elastos::Droid::View::Accessibility::IAccessibilityRecordHelper;
 using Elastos::Droid::View::Accessibility::CAccessibilityRecordHelper;
 using Elastos::Droid::View::Animation::EIID_IInterpolator;
+using Elastos::Droid::Animation::EIID_ITimeInterpolator;
 using Elastos::Droid::Widget::CScroller;
 using Elastos::Droid::Widget::CEdgeEffect;
 using Elastos::Core::ISystem;
@@ -82,7 +83,7 @@ ECode ViewPager::ItemInfoComparator::Compare(
 // ViewPager::MyInterpolator
 //=================================================================
 
-CAR_INTERFACE_IMPL(ViewPager::MyInterpolator, Object, IInterpolator)
+CAR_INTERFACE_IMPL_2(ViewPager::MyInterpolator, Object, IInterpolator, ITimeInterpolator)
 
 ECode ViewPager::MyInterpolator::GetInterpolation(
     /* [in] */ Float t,
@@ -94,6 +95,14 @@ ECode ViewPager::MyInterpolator::GetInterpolation(
     return NOERROR;
 }
 
+ECode ViewPager::MyInterpolator::HasNativeInterpolator(
+    /* [out] */ Boolean* res)
+{
+    VALIDATE_NOT_NULL(res)
+    *res = FALSE;
+    return NOERROR;
+}
+
 
 //=================================================================
 // ViewPager::EndScrollRunnable
@@ -102,8 +111,7 @@ ECode ViewPager::MyInterpolator::GetInterpolation(
 ECode ViewPager::EndScrollRunnable::Run()
 {
     mHost->SetScrollState(IViewPager::SCROLL_STATE_IDLE);
-    mHost->Populate();
-    return NOERROR;
+    return mHost->Populate();
 }
 
 
@@ -539,7 +547,6 @@ ECode ViewPager::SetAdapter(
     AutoPtr<IPagerAdapter> oldAdapter = mAdapter;
     mAdapter = adapter;
     mExpectedAdapterCount = 0;
-
     if (mAdapter != NULL) {
         if (mObserver == NULL) {
             mObserver = new PagerObserver(this);
@@ -664,7 +671,7 @@ void ViewPager::SetCurrentItemInternal(
     if (item < 0) {
         item = 0;
     }
-    else if (mAdapter->GetCount(&count), item <= count) {
+    else if (mAdapter->GetCount(&count), item >= count) {
         item = count - 1;
     }
     Int32 pageLimit = mOffscreenPageLimit;
@@ -995,7 +1002,6 @@ void ViewPager::DataSetChanged()
         AutoPtr<ItemInfo> ii = (ItemInfo*)(IObject*)value.Get();
         Int32 newPos;
         mAdapter->GetItemPosition(ii->mObject, &newPos);
-
         if (newPos == IPagerAdapter::POSITION_UNCHANGED) {
             continue;
         }
@@ -1053,7 +1059,6 @@ void ViewPager::DataSetChanged()
                 params->mWidthFactor = 0.f;
             }
         }
-
         SetCurrentItemInternal(newCurrItem, FALSE, TRUE);
         RequestLayout();
     }
@@ -2103,6 +2108,7 @@ void ViewPager::CompleteScroll(
     /* [in] */ Boolean postEvents)
 {
     Boolean needPopulate = mScrollState == SCROLL_STATE_SETTLING;
+    Slogger::E(TAG, "############# CompleteScroll, needPopulate: %d ###########", needPopulate);
     if (needPopulate) {
         // Done with scroll, no longer want to cache view drawing.
         SetScrollingCacheEnabled(FALSE);
