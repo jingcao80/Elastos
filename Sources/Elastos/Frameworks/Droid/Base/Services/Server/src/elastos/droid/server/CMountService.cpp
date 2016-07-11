@@ -2563,7 +2563,7 @@ void CMountService::CreateEmulatedVolumeForUserLocked(
 ECode CMountService::AddVolumeLocked(
     /* [in] */ IStorageVolume* volume)
 {
-    Slogger::D(TAG, "addVolumeLocked() %p", volume);
+    Slogger::D(TAG, "addVolumeLocked() %s", TO_CSTR(volume));
 
     mVolumes.PushBack(volume);
 
