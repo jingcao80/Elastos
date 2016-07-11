@@ -424,8 +424,7 @@ ECode PhoneBase::constructor(
     //TODO mSmsUsageMonitor->constructor(context);
 
     mUiccController = UiccController::GetInstance();
-    Logger::E(TAG, "[TODO] PhoneBase==RegisterForIccChanged");
-    // mUiccController->RegisterForIccChanged(this, EVENT_ICC_CHANGED, NULL);
+    mUiccController->RegisterForIccChanged(this, EVENT_ICC_CHANGED, NULL);
 
     // Monitor IMS service
     AutoPtr<IIntentFilter> filter;

@@ -32,10 +32,7 @@ APP_PACKAGE_NAME = Elastos.Droid.TeleService
 RES_NAMESPACE = Elastos.Droid.TeleService
 EXTRA_RES_DIR = $(MAKEDIR)/../../Apps/PhoneCommon/res
 EXTRA_RES_DIR += $(MAKEDIR)/sip/res
-AAPT_FLAGS := \
-    --auto-add-overlay \
-    --extra-packages com.android.phone.common \
-    --extra-packages com.android.services.telephony.sip
+AAPT_FLAGS :=  --auto-add-overlay --extra-packages com.android.phone.common --extra-packages com.android.services.telephony.sip
 
 APPPACK = 1
 DIRRESOURCES += $(MAKEDIR)/res;

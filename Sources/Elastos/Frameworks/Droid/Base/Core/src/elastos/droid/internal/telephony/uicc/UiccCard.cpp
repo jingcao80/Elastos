@@ -1,8 +1,11 @@
+
+#include "elastos/droid/internal/telephony/uicc/UiccCard.h"
 #include "Elastos.Droid.Content.h"
 #include "Elastos.Droid.Internal.h"
-#include "elastos/droid/internal/telephony/uicc/UiccCard.h"
+#include <elastos/core/AutoLock.h>
 
 using Elastos::Droid::Content::EIID_IDialogInterfaceOnClickListener;
+
 namespace Elastos {
 namespace Droid {
 namespace Internal {
@@ -111,6 +114,7 @@ const Int32 UiccCard::EVENT_SIM_GET_ATR_DONE;
 
 UiccCard::UiccCard()
 {
+    mUiccApplications = ArrayOf<IUiccCardApplication*>::Alloc(IIccCardStatus::CARD_MAX_APPS);
 }
 
 ECode UiccCard::constructor(
@@ -350,26 +354,25 @@ ECode UiccCard::GetApplication(
     /* [out] */ IUiccCardApplication** result)
 {
     VALIDATE_NOT_NULL(result);
-    // ==================before translated======================
-    // synchronized (mLock) {
-    //     int index = IccCardStatus.CARD_MAX_APPS;
-    //     switch (family) {
-    //         case UiccController.APP_FAM_3GPP:
-    //             index = mGsmUmtsSubscriptionAppIndex;
-    //             break;
-    //         case UiccController.APP_FAM_3GPP2:
-    //             index = mCdmaSubscriptionAppIndex;
-    //             break;
-    //         case UiccController.APP_FAM_IMS:
-    //             index = mImsSubscriptionAppIndex;
-    //             break;
-    //     }
-    //     if (index >= 0 && index < mUiccApplications.length) {
-    //         return mUiccApplications[index];
-    //     }
-    //     return null;
-    // }
-    assert(0);
+    AutoLock lock(mLock);
+    Int32 index = IIccCardStatus::CARD_MAX_APPS;
+    switch (family) {
+        case IUiccController::APP_FAM_3GPP:
+            index = mGsmUmtsSubscriptionAppIndex;
+            break;
+        case IUiccController::APP_FAM_3GPP2:
+            index = mCdmaSubscriptionAppIndex;
+            break;
+        case IUiccController::APP_FAM_IMS:
+            index = mImsSubscriptionAppIndex;
+            break;
+    }
+    if (index >= 0 && index < mUiccApplications->GetLength()) {
+        *result = (*mUiccApplications)[index];
+        REFCOUNT_ADD(*result);
+        return NOERROR;
+    }
+    *result = NULL;
     return NOERROR;
 }
 

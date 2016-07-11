@@ -148,7 +148,7 @@ ECode IccPhoneBookInterfaceManager::Dispose()
 ECode IccPhoneBookInterfaceManager::SetIccCard(
     /* [in] */ IUiccCard* card)
 {
-    Logd(String("Card update received: ") + TO_CSTR(card));
+    Logd(String("Card update received: ") + (card == NULL ? "NULL" : TO_CSTR(card)));
 
     if (card == NULL) {
         Logd(String("Card is NULL. Cleanup"));

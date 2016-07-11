@@ -226,8 +226,7 @@ ECode ServiceStateTracker::constructor(
     res->GetBoolean(R::bool_::config_voice_capable, &mVoiceCapable);
 
     mUiccController = UiccController::GetInstance();
-    Logger::E("ServiceStateTracker", "[TODO] constructor==RegisterForIccChanged");
-    // mUiccController->RegisterForIccChanged(this, EVENT_ICC_CHANGED, NULL);
+    mUiccController->RegisterForIccChanged(this, EVENT_ICC_CHANGED, NULL);
     mCi->SetOnSignalStrengthUpdate(this, EVENT_SIGNAL_STRENGTH_UPDATE, NULL);
     mCi->RegisterForCellInfoList(this, EVENT_UNSOL_CELL_INFO_LIST, NULL);
 

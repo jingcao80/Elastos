@@ -1,8 +1,16 @@
 
 #include "elastos/droid/internal/telephony/uicc/UiccController.h"
+#include "elastos/droid/internal/telephony/uicc/CIccRefreshResponse.h"
+#include "elastos/droid/internal/telephony/uicc/CUiccCard.h"
 #include "elastos/droid/internal/telephony/uicc/CUiccController.h"
+#include "elastos/droid/internal/telephony/SubscriptionController.h"
+#include "elastos/droid/telephony/CTelephonyManager.h"
+#include "elastos/droid/os/AsyncResult.h"
 #include "elastos/droid/os/CRegistrant.h"
+#include "elastos/droid/os/RegistrantList.h"
 #include "elastos/droid/os/SystemProperties.h"
+#include "elastos/droid/telephony/CServiceState.h"
+#include "Elastos.CoreLibrary.IO.h"
 #include "Elastos.Droid.Content.h"
 #include "Elastos.Droid.Internal.h"
 #include "elastos/droid/R.h"
@@ -10,11 +18,25 @@
 #include <elastos/utility/logging/Logger.h>
 
 using Elastos::Droid::Content::Res::IResources;
+using Elastos::Droid::Os::AsyncResult;
 using Elastos::Droid::Os::CRegistrant;
+using Elastos::Droid::Os::IAsyncResult;
 using Elastos::Droid::Os::IRegistrant;
+using Elastos::Droid::Os::RegistrantList;
 using Elastos::Droid::Os::SystemProperties;
+using Elastos::Droid::Telephony::CServiceState;
+using Elastos::Droid::Telephony::CTelephonyManager;
+using Elastos::Droid::Telephony::IServiceState;
+using Elastos::Droid::Telephony::ITelephonyManager;
 using Elastos::Core::CInteger32;
+using Elastos::Core::IArrayOf;
+using Elastos::Core::IByte;
 using Elastos::Core::IInteger32;
+using Elastos::IO::ByteOrder;
+using Elastos::IO::CByteOrderHelper;
+using Elastos::IO::CByteBufferHelper;
+using Elastos::IO::IByteBufferHelper;
+using Elastos::IO::IByteOrderHelper;
 using Elastos::Utility::Logging::Logger;
 
 namespace Elastos {
@@ -40,6 +62,12 @@ AutoPtr<IUiccController> UiccController::mInstance;
 
 UiccController::UiccController()
 {
+    mIccChangedRegistrants = new RegistrantList();
+    AutoPtr<ITelephonyManager> tm;
+    CTelephonyManager::GetDefault((ITelephonyManager**)&tm);
+    Int32 count = 0;
+    tm->GetPhoneCount(&count);
+    mUiccCards = ArrayOf<IUiccCard*>::Alloc(count);
 }
 
 ECode UiccController::constructor(
@@ -111,10 +139,12 @@ ECode UiccController::GetUiccCard(
     /* [out] */ IUiccCard** result)
 {
     VALIDATE_NOT_NULL(result);
-    // ==================before translated======================
-    // return getUiccCard(SubscriptionController.getInstance().getPhoneId(SubscriptionController.getInstance().getDefaultSubId()));
-    assert(0);
-    return NOERROR;
+    AutoPtr<ISubscriptionController> sc = SubscriptionController::GetInstance();
+    Int64 subId = 0;
+    IISub::Probe(sc)->GetDefaultSubId(&subId);
+    Int32 id = 0;
+    IISub::Probe(sc)->GetPhoneId(subId, &id);
+    return GetUiccCard(id, result);
 }
 
 ECode UiccController::GetUiccCard(
@@ -122,14 +152,12 @@ ECode UiccController::GetUiccCard(
     /* [out] */ IUiccCard** result)
 {
     VALIDATE_NOT_NULL(result);
-    // ==================before translated======================
-    // synchronized (mLock) {
-    //     if (isValidCardIndex(slotId)) {
-    //         return mUiccCards[slotId];
-    //     }
-    //     return null;
-    // }
-    assert(0);
+    AutoLock lock(mLock);
+    if (IsValidCardIndex(slotId)) {
+        *result = (*mUiccCards)[slotId];
+        REFCOUNT_ADD(*result);
+    }
+    *result = NULL;
     return NOERROR;
 }
 
@@ -137,13 +165,11 @@ ECode UiccController::GetUiccCards(
     /* [out] */ ArrayOf<IUiccCard*>** result)
 {
     VALIDATE_NOT_NULL(result);
-    // ==================before translated======================
-    // // Return cloned array since we don't want to give out reference
-    // // to internal data structure.
-    // synchronized (mLock) {
-    //     return mUiccCards.clone();
-    // }
-    assert(0);
+    // Return cloned array since we don't want to give out reference
+    // to internal data structure.
+    AutoLock lock(mLock);
+    *result = mUiccCards->Clone();
+    REFCOUNT_ADD(*result);
     return NOERROR;
 }
 
@@ -152,11 +178,12 @@ ECode UiccController::GetUiccCardApplication(
     /* [out] */ IUiccCardApplication** result)
 {
     VALIDATE_NOT_NULL(result);
-    // ==================before translated======================
-    // return getUiccCardApplication(SubscriptionController.getInstance().getPhoneId(
-    //         SubscriptionController.getInstance().getDefaultSubId()), family);
-    assert(0);
-    return NOERROR;
+    AutoPtr<ISubscriptionController> sc = SubscriptionController::GetInstance();
+    Int64 subId = 0;
+    IISub::Probe(sc)->GetDefaultSubId(&subId);
+    Int32 id = 0;
+    IISub::Probe(sc)->GetPhoneId(subId, &id);
+    return GetUiccCardApplication(id, family, result);
 }
 
 ECode UiccController::GetIccRecords(
@@ -165,15 +192,13 @@ ECode UiccController::GetIccRecords(
     /* [out] */ IIccRecords** result)
 {
     VALIDATE_NOT_NULL(result);
-    // ==================before translated======================
-    // synchronized (mLock) {
-    //     UiccCardApplication app = getUiccCardApplication(slotId, family);
-    //     if (app != null) {
-    //         return app.getIccRecords();
-    //     }
-    //     return null;
-    // }
-    assert(0);
+    AutoLock lock(mLock);
+    AutoPtr<IUiccCardApplication> app;
+    GetUiccCardApplication(slotId, family, (IUiccCardApplication**)&app);
+    if (app != NULL) {
+        return app->GetIccRecords(result);
+    }
+    *result = NULL;
     return NOERROR;
 }
 
@@ -183,32 +208,31 @@ ECode UiccController::GetIccFileHandler(
     /* [out] */ IIccFileHandler** result)
 {
     VALIDATE_NOT_NULL(result);
-    // ==================before translated======================
-    // synchronized (mLock) {
-    //     UiccCardApplication app = getUiccCardApplication(slotId, family);
-    //     if (app != null) {
-    //         return app.getIccFileHandler();
-    //     }
-    //     return null;
-    // }
-    assert(0);
+    AutoLock lock(mLock);
+    AutoPtr<IUiccCardApplication> app;
+    GetUiccCardApplication(slotId, family, (IUiccCardApplication**)&app);
+    if (app != NULL) {
+        return app->GetIccFileHandler(result);
+    }
+    *result = NULL;
     return NOERROR;
 }
 
 Int32 UiccController::GetFamilyFromRadioTechnology(
     /* [in] */ Int32 radioTechnology)
 {
-    // ==================before translated======================
-    // if (ServiceState.isGsm(radioTechnology) ||
-    //         radioTechnology == ServiceState.RIL_RADIO_TECHNOLOGY_EHRPD) {
-    //     return  UiccController.APP_FAM_3GPP;
-    // } else if (ServiceState.isCdma(radioTechnology)) {
-    //     return  UiccController.APP_FAM_3GPP2;
-    // } else {
-    //     // If it is UNKNOWN rat
-    //     return UiccController.APP_FAM_UNKNOWN;
-    // }
-    assert(0);
+    Boolean tmp = FALSE;
+    if ((CServiceState::IsGsm(radioTechnology, &tmp), tmp) ||
+            radioTechnology == IServiceState::RIL_RADIO_TECHNOLOGY_EHRPD) {
+        return  IUiccController::APP_FAM_3GPP;
+    }
+    else if (CServiceState::IsCdma(radioTechnology, &tmp), tmp) {
+        return IUiccController::APP_FAM_3GPP2;
+    }
+    else {
+        // If it is UNKNOWN rat
+        return IUiccController::APP_FAM_UNKNOWN;
+    }
     return 0;
 }
 
@@ -232,100 +256,134 @@ ECode UiccController::RegisterForIccChanged(
 ECode UiccController::UnregisterForIccChanged(
     /* [in] */ IHandler* h)
 {
-    // ==================before translated======================
-    // synchronized (mLock) {
-    //     mIccChangedRegistrants.remove(h);
-    // }
-    assert(0);
+    AutoLock lock(mLock);
+    mIccChangedRegistrants->Remove(h);
     return NOERROR;
 }
 
 ECode UiccController::HandleMessage(
     /* [in] */ IMessage* msg)
 {
-    Logger::D("UiccController", "[TODO] ======== HandleMessage ");
-    // ==================before translated======================
-    // synchronized (mLock) {
-    //     Integer index = getCiIndex(msg);
-    //
-    //     if (index < 0 || index >= mCis.length) {
-    //         Rlog.e(LOGTAG, "Invalid index : " + index + " received with event " + msg.what);
-    //         return;
-    //     }
-    //
-    //     switch (msg.what) {
-    //         case EVENT_ICC_STATUS_CHANGED:
-    //             if (DBG) log("Received EVENT_ICC_STATUS_CHANGED, calling getIccCardStatus");
-    //             mCis[index].getIccCardStatus(obtainMessage(EVENT_GET_ICC_STATUS_DONE, index));
-    //             break;
-    //         case EVENT_GET_ICC_STATUS_DONE:
-    //             if (DBG) log("Received EVENT_GET_ICC_STATUS_DONE");
-    //             AsyncResult ar = (AsyncResult)msg.obj;
-    //             onGetIccCardStatusDone(ar, index);
-    //             break;
-    //         case EVENT_RADIO_UNAVAILABLE:
-    //             if (DBG) log("EVENT_RADIO_UNAVAILABLE, dispose card");
-    //             if (mUiccCards[index] != null) {
-    //                 mUiccCards[index].dispose();
-    //             }
-    //             mUiccCards[index] = null;
-    //             mIccChangedRegistrants.notifyRegistrants(new AsyncResult(null, index, null));
-    //             break;
-    //         case EVENT_REFRESH:
-    //             ar = (AsyncResult)msg.obj;
-    //             if (DBG) log("Sim REFRESH received");
-    //             if (ar.exception == null) {
-    //                 handleRefresh((IccRefreshResponse)ar.result, index);
-    //             } else {
-    //                 log ("Exception on refresh " + ar.exception);
-    //             }
-    //             break;
-    //         case EVENT_REFRESH_OEM:
-    //             ar = (AsyncResult)msg.obj;
-    //             if (DBG) log("Sim REFRESH OEM received");
-    //             if (ar.exception == null) {
-    //                 ByteBuffer payload = ByteBuffer.wrap((byte[])ar.result);
-    //                 handleRefresh(parseOemSimRefresh(payload), index);
-    //             } else {
-    //                 log ("Exception on refresh " + ar.exception);
-    //             }
-    //             break;
-    //         default:
-    //             Rlog.e(LOGTAG, " Unknown Event " + msg.what);
-    //     }
-    // }
+    AutoLock lock(mLock);
+    AutoPtr<IInteger32> _index = GetCiIndex(msg);
+    Int32 index = 0;
+    _index->GetValue(&index);
+
+    Int32 what = 0;
+    msg->GetWhat(&what);
+    if (index < 0 || index >= mCis->GetLength()) {
+        Logger::E(LOGTAG, "Invalid index : %d received with event %d", index, what);
+        return NOERROR;
+    }
+
+    switch (what) {
+        case EVENT_ICC_STATUS_CHANGED: {
+            if (DBG) Log(String("Received EVENT_ICC_STATUS_CHANGED, calling getIccCardStatus"));
+            AutoPtr<IMessage> m;
+            ObtainMessage(EVENT_GET_ICC_STATUS_DONE, _index, (IMessage**)&m);
+            (*mCis)[index]->GetIccCardStatus(m);
+            break;
+        }
+        case EVENT_GET_ICC_STATUS_DONE: {
+            if (DBG) Log(String("Received EVENT_GET_ICC_STATUS_DONE"));
+            AutoPtr<IInterface> obj;
+            msg->GetObj((IInterface**)&obj);
+            AsyncResult* ar = (AsyncResult*)IAsyncResult::Probe(obj);
+            OnGetIccCardStatusDone(ar, _index);
+            break;
+        }
+        case EVENT_RADIO_UNAVAILABLE: {
+            if (DBG) Log(String("EVENT_RADIO_UNAVAILABLE, dispose card"));
+            if ((*mUiccCards)[index] != NULL) {
+                (*mUiccCards)[index]->Dispose();
+            }
+            (*mUiccCards)[index] = NULL;
+            AutoPtr<AsyncResult> a = new AsyncResult(NULL, _index, NULL);
+            mIccChangedRegistrants->NotifyRegistrants(a);
+            break;
+        }
+        case EVENT_REFRESH: {
+            AutoPtr<IInterface> obj;
+            msg->GetObj((IInterface**)&obj);
+
+            AsyncResult* ar = (AsyncResult*)IAsyncResult::Probe(obj);
+            if (DBG) Log(String("Sim REFRESH received"));
+            if (ar->mException == NULL) {
+                HandleRefresh(IIccRefreshResponse::Probe(ar->mResult), index);
+            }
+            else {
+                Log(String("Exception on refresh ") + TO_CSTR(ar->mException));
+            }
+            break;
+        }
+        case EVENT_REFRESH_OEM: {
+            AutoPtr<IInterface> obj;
+            msg->GetObj((IInterface**)&obj);
+
+            AsyncResult* ar = (AsyncResult*)IAsyncResult::Probe(obj);
+            if (DBG) Log(String("Sim REFRESH OEM received"));
+            if (ar->mException == NULL) {
+                AutoPtr<IByteBufferHelper> helper;
+                CByteBufferHelper::AcquireSingleton((IByteBufferHelper**)&helper);
+                Int32 len = 0;
+                AutoPtr<IArrayOf> ao = IArrayOf::Probe(ar->mResult);
+                assert(ao);
+                ao->GetLength(&len);
+                AutoPtr<ArrayOf<Byte> > bs = ArrayOf<Byte>::Alloc(len);
+                for(Int32 i = 0; i < len; i++) {
+                    AutoPtr<IInterface> b;
+                    ao->Get(i, (IInterface**)&b);
+                    Byte v;
+                    IByte::Probe(b)->GetValue(&v);
+                    (*bs)[i] = v;
+                }
+                AutoPtr<IByteBuffer> payload;
+                helper->Wrap(bs, (IByteBuffer**)&payload);
+                HandleRefresh(ParseOemSimRefresh(payload), index);
+            }
+            else {
+                Log(String("Exception on refresh ") + TO_CSTR(ar->mException));
+            }
+            break;
+        }
+        default: {
+            Logger::E(LOGTAG, " Unknown Event %d", what);
+        }
+    }
     return NOERROR;
 }
 
 AutoPtr<IIccRefreshResponse> UiccController::ParseOemSimRefresh(
     /* [in] */ IByteBuffer* payload)
 {
-    // ==================before translated======================
-    // IccRefreshResponse response = new IccRefreshResponse();
-    // /* AID maximum size */
-    // final int QHOOK_MAX_AID_SIZE = 20*2+1+3;
-    //
-    // /* parse from payload */
-    // payload.order(ByteOrder.nativeOrder());
-    //
-    // response.refreshResult = payload.getInt();
-    // response.efId  = payload.getInt();
-    // int aidLen = payload.getInt();
-    // byte[] aid = new byte[QHOOK_MAX_AID_SIZE];
-    // payload.get(aid, 0, QHOOK_MAX_AID_SIZE);
-    // //Read the aid string with QHOOK_MAX_AID_SIZE from payload at first because need
-    // //corresponding to the aid array length sent from qcril and need parse the payload
-    // //to get app type and sub id in IccRecords.java after called this method.
-    // response.aid = (aidLen == 0) ? null : (new String(aid)).substring(0, aidLen);
-    //
-    // if (DBG){
-    //     Rlog.d(LOGTAG, "refresh SIM card " + ", refresh result:" + response.refreshResult
-    //             + ", ef Id:" + response.efId + ", aid:" + response.aid);
-    // }
-    // return response;
-    assert(0);
-    AutoPtr<IIccRefreshResponse> empty;
-    return empty;
+    AutoPtr<CIccRefreshResponse> response;
+    CIccRefreshResponse::NewByFriend((CIccRefreshResponse**)&response);
+    /* AID maximum size */
+    const Int32 QHOOK_MAX_AID_SIZE = 20*2+1+3;
+
+    /* parse from payload */
+    AutoPtr<IByteOrderHelper> helper;
+    CByteOrderHelper::AcquireSingleton((IByteOrderHelper**)&helper);
+    ByteOrder bo;
+    helper->GetNativeOrder(&bo);
+    payload->SetOrder(bo);
+
+    payload->GetInt32(&response->refreshResult);
+    payload->GetInt32(&response->efId);
+    Int32 aidLen = 0;
+    payload->GetInt32(&aidLen);
+    AutoPtr<ArrayOf<Byte> > aid = ArrayOf<Byte>::Alloc(QHOOK_MAX_AID_SIZE);
+    payload->Get(aid, 0, QHOOK_MAX_AID_SIZE);
+    //Read the aid string with QHOOK_MAX_AID_SIZE from payload at first because need
+    //corresponding to the aid array length sent from qcril and need parse the payload
+    //to get app type and sub id in IccRecords.java after called this method.
+    response->aid = (aidLen == 0) ? String(NULL) : String(*aid).Substring(0, aidLen);
+
+    if (DBG){
+        Logger::D(LOGTAG, "refresh SIM card , refresh result:%d, ef Id:%d, aid:%s"
+                , response->refreshResult, response->efId, response->aid.string());
+    }
+    return response;
 }
 
 ECode UiccController::GetUiccCardApplication(
@@ -334,17 +392,14 @@ ECode UiccController::GetUiccCardApplication(
     /* [out] */ IUiccCardApplication** result)
 {
     VALIDATE_NOT_NULL(result);
-    // ==================before translated======================
-    // synchronized (mLock) {
-    //     if (isValidCardIndex(slotId)) {
-    //         UiccCard c = mUiccCards[slotId];
-    //         if (c != null) {
-    //             return mUiccCards[slotId].getApplication(family);
-    //         }
-    //     }
-    //     return null;
-    // }
-    assert(0);
+    AutoLock lock(mLock);
+    if (IsValidCardIndex(slotId)) {
+        AutoPtr<IUiccCard> c = (*mUiccCards)[slotId];
+        if (c != NULL) {
+            return (*mUiccCards)[slotId]->GetApplication(family, result);
+        }
+    }
+    *result = NULL;
     return NOERROR;
 }
 
@@ -375,107 +430,108 @@ ECode UiccController::Dump(
 
 AutoPtr<ArrayOf<IUiccCard*> > UiccController::MiddleInitMuicccards()
 {
-    // ==================before translated======================
-    // UiccCard[] result = new UiccCard[TelephonyManager.getDefault().getPhoneCount()];
-    assert(0);
-    AutoPtr<ArrayOf<IUiccCard*> > empty;
-    return empty;
+    AutoPtr<ITelephonyManager> tm;
+    CTelephonyManager::GetDefault((ITelephonyManager**)&tm);
+    Int32 count = 0;
+    tm->GetPhoneCount(&count);
+    AutoPtr<ArrayOf<IUiccCard*> > result = ArrayOf<IUiccCard*>::Alloc(count);
+    return result;
 }
 
 AutoPtr<IInteger32> UiccController::GetCiIndex(
     /* [in] */ IMessage* msg)
 {
-    // ==================before translated======================
-    // AsyncResult ar;
-    // Integer index = new Integer(PhoneConstants.DEFAULT_CARD_INDEX);
-    //
-    // /*
-    //  * The events can be come in two ways. By explicitly sending it using
-    //  * sendMessage, in this case the user object passed is msg.obj and from
-    //  * the CommandsInterface, in this case the user object is msg.obj.userObj
-    //  */
-    // if (msg != null) {
-    //     if (msg.obj != null && msg.obj instanceof Integer) {
-    //         index = (Integer)msg.obj;
-    //     } else if(msg.obj != null && msg.obj instanceof AsyncResult) {
-    //         ar = (AsyncResult)msg.obj;
-    //         if (ar.userObj != null && ar.userObj instanceof Integer) {
-    //             index = (Integer)ar.userObj;
-    //         }
-    //     }
-    // }
-    // return index;
-    assert(0);
-    AutoPtr<IInteger32> empty;
-    return empty;
+    AsyncResult* ar = NULL;
+    AutoPtr<IInteger32> index;
+    CInteger32::New(IPhoneConstants::DEFAULT_CARD_INDEX, (IInteger32**)&index);
+
+    /*
+     * The events can be come in two ways. By explicitly sending it using
+     * sendMessage, in this case the user object passed is msg.obj and from
+     * the CommandsInterface, in this case the user object is msg.obj.userObj
+     */
+    if (msg != NULL) {
+        AutoPtr<IInterface> obj;
+        msg->GetObj((IInterface**)&obj);
+        if (obj != NULL && IInteger32::Probe(obj)) {
+            index = IInteger32::Probe(obj);
+        }
+        else if(obj != NULL && IAsyncResult::Probe(obj)) {
+            ar = (AsyncResult*)IAsyncResult::Probe(obj);
+            if (ar->mUserObj != NULL && IInteger32::Probe(ar->mUserObj)) {
+                index = IInteger32::Probe(ar->mUserObj);
+            }
+        }
+    }
+    return index;
 }
 
 void UiccController::HandleRefresh(
     /* [in] */ IIccRefreshResponse* refreshResponse,
     /* [in] */ Int32 index)
 {
-    // ==================before translated======================
-    // if (refreshResponse == null) {
-    //     log("handleRefresh received without input");
-    //     return;
-    // }
-    //
-    // // Let the card know right away that a refresh has occurred
-    // if (mUiccCards[index] != null) {
-    //     mUiccCards[index].onRefresh(refreshResponse);
-    // }
-    // // The card status could have changed. Get the latest state
-    // mCis[index].getIccCardStatus(obtainMessage(EVENT_GET_ICC_STATUS_DONE));
-    assert(0);
+    if (refreshResponse == NULL) {
+        Log(String("handleRefresh received without input"));
+        return;
+    }
+
+    // Let the card know right away that a refresh has occurred
+    if ((*mUiccCards)[index] != NULL) {
+        ((CUiccCard*)(*mUiccCards)[index])->OnRefresh(refreshResponse);
+    }
+    // The card status could have changed. Get the latest state
+    AutoPtr<IMessage> msg;
+    ObtainMessage(EVENT_GET_ICC_STATUS_DONE, (IMessage**)&msg);
+    (*mCis)[index]->GetIccCardStatus(msg);
 }
 
 // synchronized
 void UiccController::OnGetIccCardStatusDone(
     /* [in] */ AsyncResult* ar,
-    /* [in] */ IInteger32* index)
+    /* [in] */ IInteger32* _index)
 {
-    // ==================before translated======================
-    //         if (ar.exception != null) {
-    //             Rlog.e(LOGTAG,"Error getting ICC status. "
-    //                     + "RIL_REQUEST_GET_ICC_STATUS should "
-    //                     + "never return an error", ar.exception);
-    //             return;
-    //         }
-    //         if (!isValidCardIndex(index)) {
-    //             Rlog.e(LOGTAG,"onGetIccCardStatusDone: invalid index : " + index);
-    //             return;
-    //         }
-    //
-    //         IccCardStatus status = (IccCardStatus)ar.result;
-    //
-    //         if (mUiccCards[index] == null) {
-    //             //Create new card
-    //             mUiccCards[index] = new UiccCard(mContext, mCis[index], status, index);
-    //
-    // /*
-    //             // Update the UiccCard in base class, so that if someone calls
-    //             // UiccManager.getUiccCard(), it will return the default card.
-    //             if (index == PhoneConstants.DEFAULT_CARD_INDEX) {
-    //                 mUiccCard = mUiccCards[index];
-    //             }
-    // */
-    //         } else {
-    //             //Update already existing card
-    //             mUiccCards[index].update(mContext, mCis[index] , status);
-    //         }
-    //
-    //         if (DBG) log("Notifying IccChangedRegistrants");
-    //         mIccChangedRegistrants.notifyRegistrants(new AsyncResult(null, index, null));
-    assert(0);
+    Int32 index = 0;
+    _index->GetValue(&index);
+    if (ar->mException != NULL) {
+        Logger::E(LOGTAG,"Error getting ICC status. RIL_REQUEST_GET_ICC_STATUS should never return an error%s"
+                , TO_CSTR(ar->mException));
+        return;
+    }
+    if (!IsValidCardIndex(index)) {
+        Logger::E(LOGTAG,"onGetIccCardStatusDone: invalid index : %d", index);
+        return;
+    }
+
+    AutoPtr<IIccCardStatus> status = IIccCardStatus::Probe(ar->mResult);
+
+    if ((*mUiccCards)[index] == NULL) {
+        //Create new card
+        AutoPtr<IUiccCard> uc;
+        CUiccCard::New(mContext, (*mCis)[index], status, index, (IUiccCard**)&uc);
+        mUiccCards->Set(index, uc);
+
+/*
+        // Update the UiccCard in base class, so that if someone calls
+        // UiccManager.getUiccCard(), it will return the default card.
+        if (index == PhoneConstants.DEFAULT_CARD_INDEX) {
+            mUiccCard = mUiccCards[index];
+        }
+*/
+    }
+    else {
+        //Update already existing card
+        (*mUiccCards)[index]->Update(mContext, (*mCis)[index] , status);
+    }
+
+    if (DBG) Log(String("Notifying IccChangedRegistrants"));
+    AutoPtr<AsyncResult> tmp = new AsyncResult(NULL, _index, NULL);
+    mIccChangedRegistrants->NotifyRegistrants(tmp);
 }
 
 Boolean UiccController::IsValidCardIndex(
     /* [in] */ Int32 index)
 {
-    // ==================before translated======================
-    // return (index >= 0 && index < mUiccCards.length);
-    assert(0);
-    return FALSE;
+    return (index >= 0 && index < mUiccCards->GetLength());
 }
 
 void UiccController::Log(

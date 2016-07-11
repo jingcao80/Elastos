@@ -1,7 +1,7 @@
 #ifndef __ELASTOS_DROID_INTERNAL_TELEPHONY_UICC_ICCCARDAPPLICATIONSTATUS_H__
 #define __ELASTOS_DROID_INTERNAL_TELEPHONY_UICC_ICCCARDAPPLICATIONSTATUS_H__
 
-#include "elastos/droid/ext/frameworkext.h"
+#include "_Elastos.Droid.Internal.h"
 #include "elastos/core/Object.h"
 
 // import android.telephony.Rlog;
@@ -24,6 +24,8 @@ class IccCardApplicationStatus
 {
 public:
     CAR_INTERFACE_DECL();
+
+    IccCardApplicationStatus();
 
     virtual CARAPI AppTypeFromRILInt(
         /* [in] */ Int32 type,
@@ -51,18 +53,18 @@ private:
 
 public:
     // TODO: Replace with constants from PhoneConstants.APPTYPE_xxx
-    AppType app_type;
-    AppState app_state;
-    // applicable only if app_state == RIL_APPSTATE_SUBSCRIPTION_PERSO
-    PersoSubState perso_substate;
+    AppType mApp_type;
+    AppState mApp_state;
+    // applicable only if mApp_state == RIL_APPSTATE_SUBSCRIPTION_PERSO
+    PersoSubState mPerso_substate;
     // null terminated string, e.g., from 0xA0, 0x00 -> 0x41, 0x30, 0x30, 0x30 */
-    String aid;
+    String mAid;
     // null terminated string
-    String app_label;
+    String mApp_label;
     // applicable to USIM and CSIM
-    Int32 pin1_replaced;
-    PinState pin1;
-    PinState pin2;
+    Int32 mPin1_replaced;
+    PinState mPin1;
+    PinState mPin2;
 };
 
 } // namespace Uicc

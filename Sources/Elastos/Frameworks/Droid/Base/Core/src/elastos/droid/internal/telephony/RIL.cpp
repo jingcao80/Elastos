@@ -12,11 +12,12 @@
 #include "elastos/droid/internal/telephony/CallForwardInfo.h"
 #include "elastos/droid/internal/telephony/IccUtils.h"
 #include "elastos/droid/internal/telephony/uicc/CIccIoResult.h"
+#include "elastos/droid/internal/telephony/uicc/CIccCardStatus.h"
+#include "elastos/droid/internal/telephony/uicc/IccCardApplicationStatus.h"
 #include "elastos/droid/internal/telephony/uicc/IccRefreshResponse.h"
 #include "elastos/droid/internal/telephony/DriverCall.h"
 #include "elastos/droid/internal/telephony/UUSInfo.h"
 #include "elastos/droid/internal/telephony/TelephonyDevController.h"
-#include "elastos/droid/internal/telephony/uicc/CIccIoResult.h"
 #include "elastos/droid/net/CLocalSocket.h"
 #include "elastos/droid/net/CLocalSocketAddress.h"
 #include "elastos/droid/os/AsyncResult.h"
@@ -30,6 +31,7 @@
 #include <elastos/core/AutoLock.h>
 #include <elastos/core/CoreUtils.h>
 #include <elastos/core/Math.h>
+#include <elastos/core/Thread.h>
 #include <elastos/core/StringBuilder.h>
 #include <elastos/core/StringUtils.h>
 #include <elastos/utility/logging/Logger.h>
@@ -55,11 +57,12 @@ using Elastos::Droid::Internal::Telephony::DataConnection::IApnSetting;
 using Elastos::Droid::Internal::Telephony::Gsm::ISsData;
 using Elastos::Droid::Internal::Telephony::Gsm::ISuppServiceNotification;
 using Elastos::Droid::Internal::Telephony::Uicc::CIccIoResult;
+using Elastos::Droid::Internal::Telephony::Uicc::CIccCardStatus;
 using Elastos::Droid::Internal::Telephony::Uicc::IIccIoResult;
-using Elastos::Droid::Internal::Telephony::Uicc::CIccIoResult;
 using Elastos::Droid::Internal::Telephony::Uicc::IIccCardApplicationStatus;
 using Elastos::Droid::Internal::Telephony::Uicc::IIccCardStatus;
 using Elastos::Droid::Internal::Telephony::Uicc::IIccRefreshResponse;
+using Elastos::Droid::Internal::Telephony::Uicc::IccCardApplicationStatus;
 using Elastos::Droid::Internal::Telephony::Uicc::IccRefreshResponse;
 using Elastos::Droid::Net::CLocalSocket;
 using Elastos::Droid::Net::ILocalSocketAddress;
@@ -92,6 +95,7 @@ using Elastos::Core::CThrowable;
 using Elastos::Core::CoreUtils;
 using Elastos::Core::IInteger64;
 using Elastos::Core::CInteger64;
+using Elastos::Core::Thread;
 using Elastos::Core::StringBuilder;
 using Elastos::Core::Math;
 using Elastos::Core::EIID_IRunnable;
@@ -448,43 +452,30 @@ ECode RIL::RILReceiver::Run()
             rilSocket = (*SOCKET_NAME_RIL)[id];
         }
 
-        // try {
-            CLocalSocket::New((ILocalSocket**)&s);
-            CLocalSocketAddress::New(rilSocket,
-                    LocalSocketAddressNamespace_RESERVED, (ILocalSocketAddress**)&l);
-            s->Connect(l);
-        // } catch (IOException ex){
-        //     try {
-        //         if (s != NULL) {
-        //             s.close();
-        //         }
-        //     } catch (IOException ex2) {
-        //         //ignore failure to close after failure to connect
-        //     }
+        CLocalSocket::New((ILocalSocket**)&s);
+        CLocalSocketAddress::New(rilSocket,
+                LocalSocketAddressNamespace_RESERVED, (ILocalSocketAddress**)&l);
+        if (FAILED(s->Connect(l))) {
+            if (s != NULL) {
+                ICloseable::Probe(s)->Close();
+            }
 
-        //     // don't print an error message after the the first time
-        //     // or after the 8th time
+            // don't print an error message after the the first time
+            // or after the 8th time
+            if (retryCount == 8) {
+                Logger::E(RILJ_LOG_TAG,
+                    "Couldn't find '%s' socket after %d times, continuing to retry silently"
+                    , rilSocket.string(), retryCount);
+            }
+            else if (retryCount > 0 && retryCount < 8) {
+                Logger::I(RILJ_LOG_TAG, "Couldn't find '%s' socket; retrying after timeout", rilSocket.string());
+            }
 
-        //     if (retryCount == 8) {
-        //         Rlog.e (RILJ_LOG_TAG,
-        //             "Couldn't find '" + rilSocket
-        //             + "' socket after " + retryCount
-        //             + " times, continuing to retry silently");
-        //     }
-        //     else if (retryCount > 0 && retryCount < 8) {
-        //         Rlog.i (RILJ_LOG_TAG,
-        //             "Couldn't find '" + rilSocket
-        //             + "' socket; retrying after timeout");
-        //     }
+            Thread::Sleep(SOCKET_OPEN_RETRY_MILLIS);
 
-        //     try {
-        //         Thread.sleep(SOCKET_OPEN_RETRY_MILLIS);
-        //     } catch (InterruptedException er) {
-        //     }
-
-        //     retryCount++;
-        //     continue;
-        // }
+            retryCount++;
+            continue;
+        }
 
         retryCount = 0;
 
@@ -5071,27 +5062,25 @@ ECode RIL::NeedsOldRilFeature(
 AutoPtr<IInterface> RIL::ResponseIccCardStatus(
     /* [in] */ RILParcel* p)
 {
-    AutoPtr<IIccCardApplicationStatus> appStatus;
+    AutoPtr<IccCardApplicationStatus> appStatus;
 
     Boolean oldRil = FALSE;
     NeedsOldRilFeature(String("icccardstatus"), &oldRil);
 
-    AutoPtr<IIccCardStatus> cardStatus;
-    assert(0 && "TODO");
-    // CIccCardStatus::New((IIccCardStatus**)&cardStatus);
+    AutoPtr<CIccCardStatus> cardStatus;
+    CIccCardStatus::NewByFriend((CIccCardStatus**)&cardStatus);
     Int32 cardState = 0;
     p->ReadInt32(&cardState);
     cardStatus->SetCardState(cardState);
     Int32 pinState = 0;
     p->ReadInt32(&pinState);
     cardStatus->SetUniversalPinState(pinState);
-    assert(0 && "TODO");
-    // p->ReadInt32(&(cardStatus->mGsmUmtsSubscriptionAppIndex));
-    // p->ReadInt32(&(cardStatus->mCdmaSubscriptionAppIndex));
+    p->ReadInt32(&(cardStatus->mGsmUmtsSubscriptionAppIndex));
+    p->ReadInt32(&(cardStatus->mCdmaSubscriptionAppIndex));
 
-    // if (!oldRil) {
-    //     p->ReadInt32(*(cardStatus->mImsSubscriptionAppIndex));
-    // }
+    if (!oldRil) {
+        p->ReadInt32(&(cardStatus->mImsSubscriptionAppIndex));
+    }
 
     Int32 numApplications = 0;
     p->ReadInt32(&numApplications);
@@ -5100,35 +5089,34 @@ AutoPtr<IInterface> RIL::ResponseIccCardStatus(
     if (numApplications > IIccCardStatus::CARD_MAX_APPS) {
         numApplications = IIccCardStatus::CARD_MAX_APPS;
     }
-    assert(0 && "TODO");
-    // cardStatus->mApplications = new IccCardApplicationStatus[numApplications];
+    cardStatus->mApplications = ArrayOf<IIccCardApplicationStatus*>::Alloc(numApplications);
 
     for (Int32 i = 0 ; i < numApplications ; i++) {
-        // appStatus = new IccCardApplicationStatus();
+        appStatus = new IccCardApplicationStatus();
         Int32 typeFromRILInt = 0;
         p->ReadInt32(&typeFromRILInt);
-        // appStatus->mApp_type       = appStatus->AppTypeFromRILInt(typeFromRILInt);
+        appStatus->AppTypeFromRILInt(typeFromRILInt, &appStatus->mApp_type);
 
         Int32 stateFromRILInt = 0;
         p->ReadInt32(&stateFromRILInt);
-        // appStatus->mApp_state      = appStatus->AppStateFromRILInt(stateFromRILInt);
+        appStatus->AppStateFromRILInt(stateFromRILInt, &appStatus->mApp_state);
 
         Int32 perso_substate = 0;
         p->ReadInt32(&perso_substate);
-        // appStatus->mPerso_substate = appStatus->PersoSubstateFromRILInt(perso_substate);
+        appStatus->PersoSubstateFromRILInt(perso_substate, &appStatus->mPerso_substate);
 
-        // p->ReadString(&(appStatus->mAid));
-        // p->ReadString(&(appStatus->mApp_label));
-        // p->ReadInt32(&(appStatus->mPin1_replaced));
+        p->ReadString(&(appStatus->mAid));
+        p->ReadString(&(appStatus->mApp_label));
+        p->ReadInt32(&(appStatus->mPin1_replaced));
         Int32 pin1 = 0;
         p->ReadInt32(&pin1);
-        // appStatus->mPin1           = appStatus->PinStateFromRILInt(pin1);
+        appStatus->PinStateFromRILInt(pin1, &appStatus->mPin1);
         Int32 pin2 = 0;
         p->ReadInt32(&pin2);
-        // appStatus->mPin2           = appStatus->PinStateFromRILInt(pin2);
-        // cardStatus->mApplications[i] = appStatus;
+        appStatus->PinStateFromRILInt(pin2, &appStatus->mPin2);
+        cardStatus->mApplications->Set(i, (IIccCardApplicationStatus*)appStatus);
     }
-    return cardStatus;
+    return cardStatus->Probe(EIID_IInterface);
 }
 
 AutoPtr<IInterface> RIL::ResponseSimRefresh(

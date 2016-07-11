@@ -11,10 +11,10 @@
 #include "elastos/droid/internal/telephony/uicc/UiccController.h"
 #include "elastos/droid/telephony/CTelephonyManagerHelper.h"
 #include "elastos/droid/telephony/SubscriptionManager.h"
+#include <elastos/core/AutoLock.h>
 #include <elastos/core/IntegralToString.h>
 #include <elastos/utility/logging/Logger.h>
 
-//using Elastos::Droid::Manifest;
 using Elastos::Droid::App::ActivityManagerNative;
 using Elastos::Droid::Content::IBroadcastReceiver;
 using Elastos::Droid::Content::IContext;
@@ -145,7 +145,7 @@ ECode SubInfoRecordUpdater::MyBroadcastReceiver::OnReceive(
                 AutoPtr<ISubInfoRecord> subInfo;
                 SubscriptionManager::GetSubInfoForSubscriber(subId, (ISubInfoRecord**)&subInfo);
                 assert(0 && "TODO");
-                Int32 nameSource;
+                // Int32 nameSource;
 //                if (subInfo != NULL && (subInfo->GetNameSource(&nameSource), nameSource != ISubscriptionManager::NAME_SOURCE_USER_INPUT)) {
 //                    AutoPtr<ISpnOverride> mSpnOverride;
 //                    CSpnOverride::New((ISpnOverride**)&mSpnOverride);
@@ -378,6 +378,7 @@ CARAPI SubInfoRecordUpdater::HandleMessage(
 //        default:
 //            Logd(String("Unknown msg:") + IntegralToString::ToString(msgNum));
 //    }
+    return NOERROR;
 }
 
 void SubInfoRecordUpdater::UpdateIccAvailability(
@@ -491,10 +492,10 @@ CARAPI SubInfoRecordUpdater::UpdateSubIdForNV(
     return NOERROR;
 }
 
-//TODO
 //synchronized
 CARAPI SubInfoRecordUpdater::UpdateSimInfoByIccId()
 {
+    AutoLock lock(THIS);
     Logd(String("[updateSimInfoByIccId]+ Start"));
     sNeedUpdate = FALSE;
 

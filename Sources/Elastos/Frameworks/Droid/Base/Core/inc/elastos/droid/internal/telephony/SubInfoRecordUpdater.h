@@ -125,6 +125,7 @@ private:
     Boolean isNVSubAvailable;
 
     AutoPtr<MyBroadcastReceiver> sReceiver;
+    Object THIS;
 };
 
 } // namespace Telephony
