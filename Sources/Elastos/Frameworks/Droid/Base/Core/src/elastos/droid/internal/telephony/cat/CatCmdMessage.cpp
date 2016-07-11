@@ -8,15 +8,15 @@ namespace Internal {
 namespace Telephony {
 namespace Cat {
 
-////=====================================================================
-////                CatCmdMessage::BrowserSettings
-////=====================================================================
+//=====================================================================
+//                CatCmdMessage::BrowserSettings
+//=====================================================================
 CAR_INTERFACE_IMPL(CatCmdMessage::BrowserSettings, Object, IBrowserSettings);
 
 ECode CatCmdMessage::BrowserSettings::SetUrl(
     /* [in] */ const String& _url)
 {
-    url = _url;
+    mUrl = _url;
     return NOERROR;
 }
 
@@ -24,14 +24,14 @@ ECode CatCmdMessage::BrowserSettings::GetUrl(
     /* [out] */ String* _url)
 {
     VALIDATE_NOT_NULL(_url);
-    *_url = url;
+    *_url = mUrl;
     return NOERROR;
 }
 
 ECode CatCmdMessage::BrowserSettings::SetMode(
     /* [in] */ LaunchBrowserMode _mode)
 {
-    mode = _mode;
+    mMode = _mode;
     return NOERROR;
 }
 
@@ -39,19 +39,19 @@ ECode CatCmdMessage::BrowserSettings::GetMode(
     /* [out] */ LaunchBrowserMode* _mode)
 {
     VALIDATE_NOT_NULL(_mode);
-    *_mode = mode;
+    *_mode = mMode;
     return NOERROR;
 }
 
-////=====================================================================
-////                CatCmdMessage::CallSettings
-////=====================================================================
+//=====================================================================
+//                CatCmdMessage::CallSettings
+//=====================================================================
 CAR_INTERFACE_IMPL(CatCmdMessage::CallSettings, Object, ICallSettings);
 
 ECode CatCmdMessage::CallSettings::SetConfirmMsg(
     /* [in] */ ITextMessage* _confirmMsg)
 {
-    confirmMsg = _confirmMsg;
+    mConfirmMsg = _confirmMsg;
     return NOERROR;
 }
 
@@ -59,7 +59,7 @@ ECode CatCmdMessage::CallSettings::GetConfirmMsg(
     /* [out] */ ITextMessage** result)
 {
     VALIDATE_NOT_NULL(result);
-    *result = confirmMsg;
+    *result = mConfirmMsg;
     REFCOUNT_ADD(*result);
     return NOERROR;
 }
@@ -67,7 +67,7 @@ ECode CatCmdMessage::CallSettings::GetConfirmMsg(
 ECode CatCmdMessage::CallSettings::SetCallMsg(
     /* [in] */ ITextMessage* _callMsg)
 {
-    callMsg = _callMsg;
+    mCallMsg = _callMsg;
     return NOERROR;
 }
 
@@ -75,20 +75,20 @@ ECode CatCmdMessage::CallSettings::GetCallMsg(
     /* [out] */ ITextMessage** result)
 {
     VALIDATE_NOT_NULL(result);
-    *result = callMsg;
+    *result = mCallMsg;
     REFCOUNT_ADD(*result);
     return NOERROR;
 }
 
-////=====================================================================
-////                CatCmdMessage::SetupEventListSettings
-////=====================================================================
+//=====================================================================
+//                CatCmdMessage::SetupEventListSettings
+//=====================================================================
 CAR_INTERFACE_IMPL(CatCmdMessage::SetupEventListSettings, Object, ISetupEventListSettings);
 
 ECode CatCmdMessage::SetupEventListSettings::SetEventList(
     /* [in] */ ArrayOf<Int32>* _eventList)
 {
-    eventList = _eventList;
+    mEventList = _eventList;
     return NOERROR;
 }
 
@@ -96,20 +96,10 @@ ECode CatCmdMessage::SetupEventListSettings::GetEventList(
     /* [out] */ ArrayOf<Int32>** result)
 {
     VALIDATE_NOT_NULL(result);
-    *result = eventList;
+    *result = mEventList;
     REFCOUNT_ADD(*result);
     return NOERROR;
 }
-
-
-//const Int32 CatCmdMessage::SetupEventListConstants::USER_ACTIVITY_EVENT;
-//const Int32 CatCmdMessage::SetupEventListConstants::IDLE_SCREEN_AVAILABLE_EVENT;
-//const Int32 CatCmdMessage::SetupEventListConstants::LANGUAGE_SELECTION_EVENT;
-//const Int32 CatCmdMessage::SetupEventListConstants::BROWSER_TERMINATION_EVENT;
-//const Int32 CatCmdMessage::SetupEventListConstants::BROWSING_STATUS_EVENT;
-//const Int32 CatCmdMessage::SetupEventListConstants::HCI_CONNECTIVITY_EVENT;
-//const Int32 CatCmdMessage::BrowserTerminationCauses::USER_TERMINATION;
-//const Int32 CatCmdMessage::BrowserTerminationCauses::ERROR_TERMINATION;
 
 ////=====================================================================
 ////                CatCmdMessage::InnerParcelableCreator
@@ -168,157 +158,180 @@ ECode CatCmdMessage::constructor(
     /* [in] */ /*CommandParams*/IInterface* _cmdParams)
 {
     AutoPtr<CommandParams> cmdParams = (CommandParams*)(IObject::Probe(_cmdParams));
-    // ==================before translated======================
-    // mCmdDet = cmdParams.mCmdDet;
-    // mLoadIconFailed =  cmdParams.mLoadIconFailed;
-    // switch(getCmdType()) {
-    // case SET_UP_MENU:
-    // case SELECT_ITEM:
-    //     mMenu = ((SelectItemParams) cmdParams).mMenu;
-    //     break;
-    // case DISPLAY_TEXT:
-    // case SET_UP_IDLE_MODE_TEXT:
-    // case SEND_DTMF:
-    // case SEND_SMS:
-    // case REFRESH:
-    // case SEND_SS:
-    // case SEND_USSD:
-    //     mTextMsg = ((DisplayTextParams) cmdParams).mTextMsg;
-    //     break;
-    // case GET_INPUT:
-    // case GET_INKEY:
-    //     mInput = ((GetInputParams) cmdParams).mInput;
-    //     break;
-    // case LAUNCH_BROWSER:
-    //     mTextMsg = ((LaunchBrowserParams) cmdParams).mConfirmMsg;
-    //     mBrowserSettings = new BrowserSettings();
-    //     mBrowserSettings.url = ((LaunchBrowserParams) cmdParams).mUrl;
-    //     mBrowserSettings.mode = ((LaunchBrowserParams) cmdParams).mMode;
-    //     break;
-    // case PLAY_TONE:
-    //     PlayToneParams params = (PlayToneParams) cmdParams;
-    //     mToneSettings = params.mSettings;
-    //     mTextMsg = params.mTextMsg;
-    //     break;
-    // case GET_CHANNEL_STATUS:
-    //     mTextMsg = ((CallSetupParams) cmdParams).mConfirmMsg;
-    //     break;
-    // case SET_UP_CALL:
-    //     mCallSettings = new CallSettings();
-    //     mCallSettings.confirmMsg = ((CallSetupParams) cmdParams).mConfirmMsg;
-    //     mCallSettings.callMsg = ((CallSetupParams) cmdParams).mCallMsg;
-    //     break;
-    // case OPEN_CHANNEL:
-    // case CLOSE_CHANNEL:
-    // case RECEIVE_DATA:
-    // case SEND_DATA:
-    //     BIPClientParams param = (BIPClientParams) cmdParams;
-    //     mTextMsg = param.mTextMsg;
-    //     break;
-    // case SET_UP_EVENT_LIST:
-    //     mSetupEventListSettings = new SetupEventListSettings();
-    //     mSetupEventListSettings.eventList = ((SetEventListParams) cmdParams).mEventInfo;
-    //     break;
-    // case ACTIVATE:
-    // case PROVIDE_LOCAL_INFORMATION:
-    // default:
-    //     break;
-    // }
+    mCmdDet = cmdParams->mCmdDet;
+    mLoadIconFailed = cmdParams->mLoadIconFailed;
+    CommandType type;
+    GetCmdType(&type);
+    switch(type) {
+    case SET_UP_MENU:
+    case SELECT_ITEM: {
+        mMenu = ((SelectItemParams*) cmdParams.Get())->mMenu;
+        break;
+    }
+    case DISPLAY_TEXT:
+    case SET_UP_IDLE_MODE_TEXT:
+    case SEND_DTMF:
+    case SEND_SMS:
+    case REFRESH:
+    case SEND_SS:
+    case SEND_USSD: {
+        mTextMsg = ((DisplayTextParams*) cmdParams.Get())->mTextMsg;
+        break;
+    }
+    case GET_INPUT:
+    case GET_INKEY: {
+        mInput = ((GetInputParams*) cmdParams.Get())->mInput;
+        break;
+    }
+    case LAUNCH_BROWSER: {
+        mTextMsg = ((LaunchBrowserParams*) cmdParams.Get())->mConfirmMsg;
+        mBrowserSettings = new BrowserSettings();
+        mBrowserSettings->SetUrl(((LaunchBrowserParams*) cmdParams.Get())->mUrl);
+        mBrowserSettings->SetMode(((LaunchBrowserParams*) cmdParams.Get())->mMode);
+        break;
+    }
+    case PLAY_TONE: {
+        AutoPtr<PlayToneParams> params = (PlayToneParams*) cmdParams.Get();
+        mToneSettings = params->mSettings;
+        mTextMsg = params->mTextMsg;
+        break;
+    }
+    case GET_CHANNEL_STATUS: {
+        mTextMsg = ((CallSetupParams*) cmdParams.Get())->mConfirmMsg;
+        break;
+    }
+    case SET_UP_CALL: {
+        mCallSettings = new CallSettings();
+        mCallSettings->SetConfirmMsg(((CallSetupParams*) cmdParams.Get())->mConfirmMsg);
+        mCallSettings->SetCallMsg(((CallSetupParams*) cmdParams.Get())->mCallMsg);
+        break;
+    }
+    case OPEN_CHANNEL:
+    case CLOSE_CHANNEL:
+    case RECEIVE_DATA:
+    case SEND_DATA: {
+        AutoPtr<BIPClientParams> param = (BIPClientParams*) cmdParams.Get();
+        mTextMsg = param->mTextMsg;
+        break;
+    }
+    case SET_UP_EVENT_LIST: {
+        mSetupEventListSettings = new SetupEventListSettings();
+        mSetupEventListSettings->SetEventList(((SetEventListParams*) cmdParams.Get())->mEventInfo);
+        break;
+    }
+    case ACTIVATE:
+    case PROVIDE_LOCAL_INFORMATION:
+    default:
+        break;
+    }
     return NOERROR;
 }
 
-ECode CatCmdMessage::constructor(
+ECode CatCmdMessage::ReadFromParcel(
     /* [in] */ IParcel* in)
 {
-    // ==================before translated======================
-    // mCmdDet = in.readParcelable(null);
-    // mTextMsg = in.readParcelable(null);
-    // mMenu = in.readParcelable(null);
-    // mInput = in.readParcelable(null);
-    // mLoadIconFailed = (in.readByte() == 1);
-    // switch (getCmdType()) {
-    // case LAUNCH_BROWSER:
-    //     mBrowserSettings = new BrowserSettings();
-    //     mBrowserSettings.url = in.readString();
-    //     mBrowserSettings.mode = LaunchBrowserMode.values()[in.readInt()];
-    //     break;
-    // case PLAY_TONE:
-    //     mToneSettings = in.readParcelable(null);
-    //     break;
-    // case SET_UP_CALL:
-    //     mCallSettings = new CallSettings();
-    //     mCallSettings.confirmMsg = in.readParcelable(null);
-    //     mCallSettings.callMsg = in.readParcelable(null);
-    //     break;
-    // case SET_UP_EVENT_LIST:
-    //     mSetupEventListSettings = new SetupEventListSettings();
-    //     int length = in.readInt();
-    //     mSetupEventListSettings.eventList = new int[length];
-    //     for (int i = 0; i < length; i++) {
-    //         mSetupEventListSettings.eventList[i] = in.readInt();
-    //     }
-    //     break;
-    // default:
-    //     break;
-    // }
+    assert(0 && "TODO");
+    // in->ReadParcelable(NULL, &mCmdDet);
+    // in->ReadParcelable(NULL, &mTextMsg);
+    // in->ReadParcelable(NULL, &mMenu);
+    // in->ReadParcelable(NULL, &mInput);
+    Byte num = 0;
+    in->ReadByte(&num);
+    mLoadIconFailed = (num == 1);
+    Int32 type = 0;
+    GetCmdType(&type);
+    switch (type) {
+    case LAUNCH_BROWSER: {
+        mBrowserSettings = new BrowserSettings();
+        String str;
+        in->ReadString(&str);
+        mBrowserSettings->SetUrl(str);
+        Int32 mode = 0;
+        in->ReadInt32(&mode);
+        mBrowserSettings->SetMode(mode);
+        break;
+    }
+    case PLAY_TONE: {
+        // mToneSettings = in->ReadParcelable(NULL);
+        break;
+    }
+    case SET_UP_CALL: {
+        mCallSettings = new CallSettings();
+        // in->ReadParcelable(NULL, &(mCallSettings->mConfirmMsg));
+        // in->ReadParcelable(NULL, &(mCallSettings->mCallMsg));
+        break;
+    }
+    case SET_UP_EVENT_LIST: {
+        mSetupEventListSettings = new SetupEventListSettings();
+        Int32 length = 0;
+        in->ReadInt32(&length);
+        AutoPtr<ArrayOf<Int32> > eventList;
+        mSetupEventListSettings->GetEventList((ArrayOf<Int32>**)&eventList);
+        eventList = ArrayOf<Int32>::Alloc(length);
+        for (Int32 i = 0; i < length; i++) {
+            Int32 r = 0;
+            in->ReadInt32(&r);
+            (*eventList)[i] = r;
+        }
+        break;
+    }
+    default:
+        break;
+    }
     return NOERROR;
 }
 
 ECode CatCmdMessage::WriteToParcel(
     /* [in] */ IParcel* dest)
 {
-    // ==================before translated======================
-    // dest.writeParcelable(mCmdDet, 0);
-    // dest.writeParcelable(mTextMsg, 0);
-    // dest.writeParcelable(mMenu, 0);
-    // dest.writeParcelable(mInput, 0);
-    // dest.writeByte((byte) (mLoadIconFailed ? 1 : 0));
-    // switch(getCmdType()) {
-    // case LAUNCH_BROWSER:
-    //     dest.writeString(mBrowserSettings.url);
-    //     dest.writeInt(mBrowserSettings.mode.ordinal());
-    //     break;
-    // case PLAY_TONE:
-    //     dest.writeParcelable(mToneSettings, 0);
-    //     break;
-    // case SET_UP_CALL:
-    //     dest.writeParcelable(mCallSettings.confirmMsg, 0);
-    //     dest.writeParcelable(mCallSettings.callMsg, 0);
-    //     break;
-    // case SET_UP_EVENT_LIST:
-    //     dest.writeIntArray(mSetupEventListSettings.eventList);
-    //     break;
-    // default:
-    //     break;
-    // }
-    assert(0);
+    IParcelable::Probe(mCmdDet)->WriteToParcel(dest);
+    IParcelable::Probe(mTextMsg)->WriteToParcel(dest);
+    IParcelable::Probe(mMenu)->WriteToParcel(dest);
+    IParcelable::Probe(mInput)->WriteToParcel(dest);
+    dest->WriteByte((Byte) (mLoadIconFailed ? 1 : 0));
+    Int32 type = 0;
+    GetCmdType(&type);
+    switch(type) {
+    case LAUNCH_BROWSER: {
+        String url;
+        mBrowserSettings->GetUrl(&url);
+        dest->WriteString(url);
+        LaunchBrowserMode mode;
+        mBrowserSettings->GetMode(&mode);
+        dest->WriteInt32(mode);
+        break;
+    }
+    case PLAY_TONE: {
+        IParcelable::Probe(mToneSettings)->WriteToParcel(dest);
+        break;
+    }
+    case SET_UP_CALL: {
+        AutoPtr<ITextMessage> confirmMsg;
+        mCallSettings->GetConfirmMsg((ITextMessage**)&confirmMsg);
+        IParcelable::Probe(confirmMsg)->WriteToParcel(dest);
+        AutoPtr<ITextMessage> callMsg;
+        mCallSettings->GetConfirmMsg((ITextMessage**)&callMsg);
+        IParcelable::Probe(callMsg)->WriteToParcel(dest);
+        break;
+    }
+    case SET_UP_EVENT_LIST: {
+        AutoPtr<ArrayOf<Int32> > eventList;
+        mSetupEventListSettings->GetEventList((ArrayOf<Int32>**)&eventList);
+        assert(0 && "TODO");
+        // dest->Write(eventList);
+        break;
+    }
+    default:
+        break;
+    }
     return NOERROR;
 }
-
-ECode CatCmdMessage::ReadFromParcel(
-        /* [in] */ IParcel* source)
-{
-    constructor(source);
-    return NOERROR;
-}
-
-//ECode CatCmdMessage::DescribeContents(
-//    /* [out] */ Int32* result)
-//{
-//    VALIDATE_NOT_NULL(result);
-//    // ==================before translated======================
-//    // return 0;
-//    assert(0);
-//    return NOERROR;
-//}
 
 ECode CatCmdMessage::GetCmdType(
     /* [out] */ CommandType* result)
 {
     VALIDATE_NOT_NULL(result);
-    // ==================before translated======================
-    // return AppInterface.CommandType.fromInt(mCmdDet.typeOfCommand);
-    assert(0);
+    *result = mCmdDet->mTypeOfCommand;
     return NOERROR;
 }
 
@@ -326,9 +339,8 @@ ECode CatCmdMessage::GetMenu(
     /* [out] */ IMenu** result)
 {
     VALIDATE_NOT_NULL(result);
-    // ==================before translated======================
-    // return mMenu;
-    assert(0);
+    *result = mMenu;
+    REFCOUNT_ADD(*result)
     return NOERROR;
 }
 
@@ -336,9 +348,8 @@ ECode CatCmdMessage::GeInput(
     /* [out] */ IInput** result)
 {
     VALIDATE_NOT_NULL(result);
-    // ==================before translated======================
-    // return mInput;
-    assert(0);
+    *result = mInput;
+    REFCOUNT_ADD(*result)
     return NOERROR;
 }
 
@@ -346,9 +357,8 @@ ECode CatCmdMessage::GeTextMessage(
     /* [out] */ ITextMessage** result)
 {
     VALIDATE_NOT_NULL(result);
-    // ==================before translated======================
-    // return mTextMsg;
-    assert(0);
+    *result = mTextMsg;
+    REFCOUNT_ADD(*result)
     return NOERROR;
 }
 
@@ -356,9 +366,8 @@ ECode CatCmdMessage::GetBrowserSettings(
     /* [out] */ IBrowserSettings** result)
 {
     VALIDATE_NOT_NULL(result);
-    // ==================before translated======================
-    // return mBrowserSettings;
-    assert(0);
+    *result = mBrowserSettings;
+    REFCOUNT_ADD(*result)
     return NOERROR;
 }
 
@@ -366,9 +375,8 @@ ECode CatCmdMessage::GetToneSettings(
     /* [out] */ IToneSettings** result)
 {
     VALIDATE_NOT_NULL(result);
-    // ==================before translated======================
-    // return mToneSettings;
-    assert(0);
+    *result = mToneSettings;
+    REFCOUNT_ADD(*result)
     return NOERROR;
 }
 
@@ -376,9 +384,8 @@ ECode CatCmdMessage::GetCallSettings(
     /* [out] */ ICallSettings** result)
 {
     VALIDATE_NOT_NULL(result);
-    // ==================before translated======================
-    // return mCallSettings;
-    assert(0);
+    *result = mCallSettings;
+    REFCOUNT_ADD(*result)
     return NOERROR;
 }
 
@@ -386,9 +393,7 @@ ECode CatCmdMessage::HasIconLoadFailed(
     /* [out] */ Boolean* result)
 {
     VALIDATE_NOT_NULL(result);
-    // ==================before translated======================
-    // return mLoadIconFailed;
-    assert(0);
+    *result = mLoadIconFailed;
     return NOERROR;
 }
 
@@ -396,26 +401,25 @@ ECode CatCmdMessage::IsRefreshResetOrInit(
     /* [out] */ Boolean* result)
 {
     VALIDATE_NOT_NULL(result);
-    // ==================before translated======================
-    // if ((mCmdDet.commandQualifier == REFRESH_NAA_INIT_AND_FULL_FILE_CHANGE)
-    //     || (mCmdDet.commandQualifier == REFRESH_NAA_INIT_AND_FILE_CHANGE )
-    //     || (mCmdDet.commandQualifier == REFRESH_NAA_INIT)
-    //     || (mCmdDet.commandQualifier == REFRESH_UICC_RESET)) {
-    //     return true;
-    // } else {
-    //     return false;
-    // }
-    assert(0);
-    return NOERROR;
+    if ((mCmdDet->mCommandQualifier == REFRESH_NAA_INIT_AND_FULL_FILE_CHANGE)
+        || (mCmdDet->mCommandQualifier == REFRESH_NAA_INIT_AND_FILE_CHANGE )
+        || (mCmdDet->mCommandQualifier == REFRESH_NAA_INIT)
+        || (mCmdDet->mCommandQualifier == REFRESH_UICC_RESET)) {
+        *result = TRUE;
+        return NOERROR;
+    }
+    else {
+        *result = FALSE;
+        return NOERROR;
+    }
 }
 
 ECode CatCmdMessage::GetSetEventList(
     /* [out] */ ISetupEventListSettings** result)
 {
     VALIDATE_NOT_NULL(result);
-    // ==================before translated======================
-    // return mSetupEventListSettings;
-    assert(0);
+    *result = mSetupEventListSettings;
+    REFCOUNT_ADD(*result)
     return NOERROR;
 }
 

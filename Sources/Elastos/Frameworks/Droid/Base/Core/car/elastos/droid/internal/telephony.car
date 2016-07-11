@@ -947,15 +947,8 @@ module
             constructor(
                 [in] IInterface* cmdParams);
 
-            constructor(
-                [in] IParcel* parcel);
-
             interface ICatCmdMessage;
             interface IParcelable;
-        }
-
-        class CCatLog {
-            interface ICatLog;
         }
 
         class CCatResponseMessage {
@@ -1006,9 +999,6 @@ module
             constructor(
                 [in] Int32 id,
                 [in] String text);
-
-            constructor(
-                [in] IParcel* parcel);
 
             interface IItem;
             interface IParcelable;

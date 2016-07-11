@@ -4,6 +4,9 @@
 #include "Elastos.CoreLibrary.Utility.h"
 #include "elastos/droid/internal/telephony/cat/CatMenu.h"
 
+using Elastos::Utility::IArrayList;
+using Elastos::Utility::CArrayList;
+
 namespace Elastos {
 namespace Droid {
 namespace Internal {
@@ -51,19 +54,18 @@ CAR_INTERFACE_IMPL_2(CatMenu, Object, IMenu, IParcelable);
 
 CatMenu::CatMenu()
 {
-    // ==================before translated======================
-    // // Create an empty list.
-    // items = new ArrayList<Item>();
-    // title = null;
-    // titleAttrs = null;
-    // defaultItem = 0;
-    // softKeyPreferred = false;
-    // helpAvailable = false;
-    // titleIconSelfExplanatory = false;
-    // itemsIconSelfExplanatory = false;
-    // titleIcon = null;
-    // // set default style to be navigation menu.
-    // presentationType = PresentationType.NAVIGATION_OPTIONS;
+    // Create an empty list.
+    CArrayList::New((IList**)&mItems);
+    mTitle = NULL;
+    mTitleAttrs = NULL;
+    mDefaultItem = 0;
+    mSoftKeyPreferred = FALSE;
+    mHelpAvailable = FALSE;
+    mTitleIconSelfExplanatory = FALSE;
+    mItemsIconSelfExplanatory = FALSE;
+    mTitleIcon = NULL;
+    // set default style to be navigation menu.
+    mPresentationType = PresentationType_NAVIGATION_OPTIONS;
 }
 
 ECode CatMenu::constructor()
@@ -71,65 +73,59 @@ ECode CatMenu::constructor()
     return NOERROR;
 }
 
-//ECode Menu::DescribeContents(
-//    /* [out] */ Int32* result)
-//{
-//    VALIDATE_NOT_NULL(result);
-//    // ==================before translated======================
-//    // return 0;
-//    assert(0);
-//    return NOERROR;
-//}
-
 ECode CatMenu::WriteToParcel(
     /* [in] */ IParcel* dest)
-    ///* [in] */ Int32 flags)
 {
-    // ==================before translated======================
-    // dest.writeString(title);
-    // dest.writeParcelable(titleIcon, flags);
-    // // write items list to the parcel.
-    // int size = items.size();
-    // dest.writeInt(size);
-    // for (int i=0; i<size; i++) {
-    //     dest.writeParcelable(items.get(i), flags);
-    // }
-    // dest.writeInt(defaultItem);
-    // dest.writeInt(softKeyPreferred ? 1 : 0);
-    // dest.writeInt(helpAvailable ? 1 : 0);
-    // dest.writeInt(titleIconSelfExplanatory ? 1 : 0);
-    // dest.writeInt(itemsIconSelfExplanatory ? 1 : 0);
-    // dest.writeInt(presentationType.ordinal());
-    assert(0);
+    dest->WriteString(mTitle);
+    IParcelable::Probe(mTitleIcon)->WriteToParcel(dest);
+    // write items list to the parcel.
+    Int32 size = 0;
+    mItems->GetSize(&size);
+    dest->WriteInt32(size);
+    for (Int32 i = 0; i < size; i++) {
+        AutoPtr<IInterface> p;
+        mItems->Get(i, (IInterface**)&p);
+        IParcelable::Probe(p)->WriteToParcel(dest);
+    }
+    dest->WriteInt32(mDefaultItem);
+    dest->WriteInt32(mSoftKeyPreferred ? 1 : 0);
+    dest->WriteInt32(mHelpAvailable ? 1 : 0);
+    dest->WriteInt32(mTitleIconSelfExplanatory ? 1 : 0);
+    dest->WriteInt32(mItemsIconSelfExplanatory ? 1 : 0);
+    dest->WriteInt32(mPresentationType);
     return NOERROR;
 }
 
 ECode CatMenu::ReadFromParcel(
-    /* [in] */ IParcel* source)
-{
-    constructor(source);
-    return NOERROR;
-}
-
-ECode CatMenu::constructor(
     /* [in] */ IParcel* in)
 {
-    // ==================before translated======================
-    // title = in.readString();
-    // titleIcon = in.readParcelable(null);
-    // // rebuild items list.
-    // items = new ArrayList<Item>();
-    // int size = in.readInt();
-    // for (int i=0; i<size; i++) {
-    //     Item item = in.readParcelable(null);
-    //     items.add(item);
-    // }
-    // defaultItem = in.readInt();
-    // softKeyPreferred = in.readInt() == 1 ? true : false;
-    // helpAvailable = in.readInt() == 1 ? true : false;
-    // titleIconSelfExplanatory = in.readInt() == 1 ? true : false;
-    // itemsIconSelfExplanatory = in.readInt() == 1 ? true : false;
-    // presentationType = PresentationType.values()[in.readInt()];
+    in->ReadString(&mTitle);
+    IParcelable::Probe(mTitleIcon)->ReadFromParcel(in);
+    // rebuild items list.
+    CArrayList::New((IArrayList**)&mItems);
+    Int32 size = 0;
+    in->ReadInt32(&size);
+    for (Int32 i = 0; i < size; i++) {
+        assert(0 && "TODO");
+        AutoPtr<IItem> item;// = in->ReadParcelable(NULL);
+        mItems->Add(item);
+    }
+    in->ReadInt32(&mDefaultItem);
+    Int32 softKeyPreferred = 0;
+    in->ReadInt32(&softKeyPreferred);
+    mSoftKeyPreferred = softKeyPreferred == 1 ? TRUE : FALSE;
+    Int32 helpAvailable = 0;
+    in->ReadInt32(&helpAvailable);
+    mHelpAvailable = helpAvailable == 1 ? TRUE : FALSE;
+    Int32 titleIconSelfExplanatory = 0;
+    in->ReadInt32(&titleIconSelfExplanatory);
+    mTitleIconSelfExplanatory = titleIconSelfExplanatory == 1 ? TRUE : FALSE;
+    Int32 itemsIconSelfExplanatory = 0;
+    in->ReadInt32(&itemsIconSelfExplanatory);
+    mItemsIconSelfExplanatory = itemsIconSelfExplanatory == 1 ? TRUE : FALSE;
+    Int32 presentationType = 0;
+    in->ReadInt32(&presentationType);
+    mPresentationType = presentationType;
     return NOERROR;
 }
 

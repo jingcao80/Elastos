@@ -13,25 +13,21 @@ namespace Telephony {
 namespace Cat {
 
 class CatLog
-    : public Object
-    , public ICatLog
 {
 public:
-    CAR_INTERFACE_DECL();
-
-    CARAPI D(
+    static CARAPI D(
         /* [in] */ IInterface* caller,
         /* [in] */ const String& msg);
 
-    CARAPI D(
+    static CARAPI D(
         /* [in] */ const String& caller,
         /* [in] */ const String& msg);
 
-    CARAPI E(
+    static CARAPI E(
         /* [in] */ IInterface* caller,
         /* [in] */ const String& msg);
 
-    CARAPI E(
+    static CARAPI E(
         /* [in] */ const String& caller,
         /* [in] */ const String& msg);
 

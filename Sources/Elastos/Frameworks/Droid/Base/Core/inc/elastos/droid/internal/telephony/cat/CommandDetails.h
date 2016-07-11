@@ -67,24 +67,19 @@ public:
     // @Override
     CARAPI WriteToParcel(
         /* [in] */ IParcel* dest);
-        ///* [in] */ Int32 flags);
 
     CARAPI ReadFromParcel(
         /* [in] */ IParcel* source);
-
-    // @Override
-    //CARAPI DescribeContents(
-    //    /* [out] */ Int32* result);
 
     // @Override
     CARAPI ToString(
         /* [out] */ String* result);
 
 public:
-    Boolean compRequired;
-    Int32 commandNumber;
-    Int32 typeOfCommand;
-    Int32 commandQualifier;
+    Boolean mCompRequired;
+    Int32 mCommandNumber;
+    Int32 mTypeOfCommand;
+    Int32 mCommandQualifier;
     //static const AutoPtr<IParcelable> AutoPtr< ::Creator<CommandDetails> > CREATOR;
 };
 

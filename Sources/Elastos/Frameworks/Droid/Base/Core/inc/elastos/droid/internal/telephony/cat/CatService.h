@@ -7,20 +7,8 @@
 #include "elastos/droid/internal/telephony/cat/CommandDetails.h"
 #include "elastos/droid/internal/telephony/cat/ResponseData.h"
 #include "elastos/droid/internal/telephony/cat/RilMessageDecoder.h"
-
-// import android.content.Intent;
-// import android.content.pm.PackageManager;
-// import android.content.pm.ResolveInfo;
-// import android.content.res.Resources.NotFoundException;
-// import android.os.AsyncResult;
-// import android.os.SystemProperties;
-// import com.android.internal.telephony.CommandsInterface;
-// import com.android.internal.telephony.PhoneConstants;
-// import com.android.internal.telephony.SubscriptionController;
-// import com.android.internal.telephony.uicc.IccUtils;
-// import com.android.internal.telephony.uicc.UiccCard;
-// import java.util.List;
-// import java.util.Locale;
+#include "elastos/droid/internal/telephony/cat/CatCmdMessage.h"
+#include "elastos/droid/internal/telephony/cat/CatResponseMessage.h"
 
 using Elastos::Droid::Content::IContext;
 using Elastos::Droid::Internal::Telephony::ICommandsInterface;
@@ -39,29 +27,6 @@ namespace Internal {
 namespace Telephony {
 namespace Cat {
 
-//// import static com.android.internal.telephony.cat.CatCmdMessage.
-// SetupEventListConstants.IDLE_SCREEN_AVAILABLE_EVENT;
-//// import static com.android.internal.telephony.cat.CatCmdMessage.
-// SetupEventListConstants.LANGUAGE_SELECTION_EVENT;
-//// import static com.android.internal.telephony.cat.CatCmdMessage.
-// SetupEventListConstants.HCI_CONNECTIVITY_EVENT;
-//class RilMessage
-//    : public Object
-//{
-//public:
-//    RilMessage(
-//        /* [in] */ Int32 msgId,
-//        /* [in] */ const String& rawData);
-//
-//    RilMessage(
-//        /* [in] */ RilMessage* other);
-//
-//public:
-//    Int32 mId;
-//    AutoPtr<IInterface> mData;
-//    ResultCode mResCode;
-//};
-
 /**
   * Class that implements SIM Toolkit Telephony Service. Interacts with the RIL
   * and application.
@@ -77,6 +42,7 @@ public:
     CAR_INTERFACE_DECL();
 
     CatService();
+
     /* For multisim catservice should not be singleton */
     CARAPI constructor(
         /* [in] */ ICommandsInterface* ci,
@@ -178,13 +144,13 @@ private:
         /* [in] */ const String& alphaString);
 
     CARAPI_(Boolean) ValidateResponse(
-        /* [in] */ ICatResponseMessage* resMsg);
+        /* [in] */ CatResponseMessage* resMsg);
 
     CARAPI_(Boolean) RemoveMenu(
         /* [in] */ IMenu* menu);
 
     CARAPI_(void) HandleCmdResponse(
-        /* [in] */ ICatResponseMessage* resMsg);
+        /* [in] */ CatResponseMessage* resMsg);
 
     CARAPI_(Boolean) IsStkAppInstalled();
 
@@ -235,8 +201,8 @@ private:
     // Class members
     AutoPtr<ICommandsInterface> mCmdIf;
     AutoPtr<IContext> mContext;
-    AutoPtr<ICatCmdMessage> mCurrntCmd;
-    AutoPtr<ICatCmdMessage> mMenuCmd;
+    AutoPtr<CatCmdMessage> mCurrntCmd;
+    AutoPtr<CatCmdMessage> mMenuCmd;
     AutoPtr<RilMessageDecoder> mMsgDecoder;
     Boolean mStkAppInstalled;
     AutoPtr<IUiccController> mUiccController;

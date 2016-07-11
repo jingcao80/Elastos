@@ -218,8 +218,8 @@ public:
         /* [in] */ const String& smsPdu);
 
 public:
-    String pdu;
-    String smscAddress;
+    String mPdu;
+    String mSmscAddress;
 };
 
 class SendUSSDParams
@@ -232,7 +232,7 @@ public:
         /* [in] */ const String& ussdstring);
 
 public:
-    String ussdString;
+    String mUssdString;
 };
 
 } // namespace Cat

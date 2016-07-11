@@ -32,13 +32,13 @@ AutoPtr<CommandParamsFactory> CommandParamsFactory::GetInstance(
     /* [in] */ IIccFileHandler* fh)
 {
     // ==================before translated======================
-    // if (sInstance != null) {
+    // if (sInstance != NULL) {
     //     return sInstance;
     // }
-    // if (fh != null) {
+    // if (fh != NULL) {
     //     return new CommandParamsFactory(caller, fh);
     // }
-    // return null;
+    // return NULL;
     assert(0);
     AutoPtr<CommandParamsFactory> empty;
     return empty;
@@ -48,23 +48,23 @@ ECode CommandParamsFactory::Make(
     /* [in] */ BerTlv* berTlv)
 {
     // ==================before translated======================
-    // if (berTlv == null) {
+    // if (berTlv == NULL) {
     //     return;
     // }
     // // reset global state parameters.
-    // mCmdParams = null;
+    // mCmdParams = NULL;
     // mIconLoadState = LOAD_NO_ICON;
     // // only proactive command messages are processed.
     // if (berTlv.getTag() != BerTlv.BER_PROACTIVE_COMMAND_TAG) {
-    //     sendCmdParams(ResultCode.CMD_TYPE_NOT_UNDERSTOOD);
+    //     sendCmdParams(ResultCode_CMD_TYPE_NOT_UNDERSTOOD);
     //     return;
     // }
     // boolean cmdPending = false;
     // List<ComprehensionTlv> ctlvs = berTlv.getComprehensionTlvs();
     // // process command dtails from the tlv list.
     // CommandDetails cmdDet = processCommandDetails(ctlvs);
-    // if (cmdDet == null) {
-    //     sendCmdParams(ResultCode.CMD_TYPE_NOT_UNDERSTOOD);
+    // if (cmdDet == NULL) {
+    //     sendCmdParams(ResultCode_CMD_TYPE_NOT_UNDERSTOOD);
     //     return;
     // }
     //
@@ -72,18 +72,18 @@ ECode CommandParamsFactory::Make(
     // // the Command Details object.
     // AppInterface.CommandType cmdType = AppInterface.CommandType
     //         .fromInt(cmdDet.typeOfCommand);
-    // if (cmdType == null) {
+    // if (cmdType == NULL) {
     //     // This PROACTIVE COMMAND is presently not handled. Hence set
     //     // result code as BEYOND_TERMINAL_CAPABILITY in TR.
     //     mCmdParams = new CommandParams(cmdDet);
-    //     sendCmdParams(ResultCode.BEYOND_TERMINAL_CAPABILITY);
+    //     sendCmdParams(ResultCode_BEYOND_TERMINAL_CAPABILITY);
     //     return;
     // }
     //
     // // proactive command length is incorrect.
     // if (!berTlv.isLengthValid()) {
     //     mCmdParams = new CommandParams(cmdDet);
-    //     sendCmdParams(ResultCode.CMD_DATA_NOT_UNDERSTOOD);
+    //     sendCmdParams(ResultCode_CMD_DATA_NOT_UNDERSTOOD);
     //     return;
     // }
     //
@@ -144,17 +144,17 @@ ECode CommandParamsFactory::Make(
     //     default:
     //         // unsupported proactive commands
     //         mCmdParams = new CommandParams(cmdDet);
-    //         sendCmdParams(ResultCode.BEYOND_TERMINAL_CAPABILITY);
+    //         sendCmdParams(ResultCode_BEYOND_TERMINAL_CAPABILITY);
     //         return;
     //     }
     // } catch (ResultException e) {
-    //     CatLog.d(this, "make: caught ResultException e=" + e);
+    //     CatLog::D(this, "make: caught ResultException e=" + e);
     //     mCmdParams = new CommandParams(cmdDet);
     //     sendCmdParams(e.result());
     //     return;
     // }
     // if (!cmdPending) {
-    //     sendCmdParams(ResultCode.OK);
+    //     sendCmdParams(ResultCode_OK);
     // }
     assert(0);
     return NOERROR;
@@ -177,10 +177,10 @@ ECode CommandParamsFactory::Dispose()
 {
     // ==================before translated======================
     // mIconLoader.dispose();
-    // mIconLoader = null;
-    // mCmdParams = null;
-    // mCaller = null;
-    // sInstance = null;
+    // mIconLoader = NULL;
+    // mCmdParams = NULL;
+    // mCaller = NULL;
+    // sInstance = NULL;
     assert(0);
     return NOERROR;
 }
@@ -198,17 +198,17 @@ AutoPtr<CommandDetails> CommandParamsFactory::ProcessCommandDetails(
     /* [in] */ IList/*<ComprehensionTlv*>*/* ctlvs)
 {
     // ==================before translated======================
-    // CommandDetails cmdDet = null;
+    // CommandDetails cmdDet = NULL;
     //
-    // if (ctlvs != null) {
+    // if (ctlvs != NULL) {
     //     // Search for the Command Details object.
     //     ComprehensionTlv ctlvCmdDet = searchForTag(
     //             ComprehensionTlvTag.COMMAND_DETAILS, ctlvs);
-    //     if (ctlvCmdDet != null) {
+    //     if (ctlvCmdDet != NULL) {
     //         try {
     //             cmdDet = ValueParser.retrieveCommandDetails(ctlvCmdDet);
     //         } catch (ResultException e) {
-    //             CatLog.d(this,
+    //             CatLog::D(this,
     //                     "processCommandDetails: Failed to procees command details e=" + e);
     //         }
     //     }
@@ -223,19 +223,19 @@ ResultCode CommandParamsFactory::SetIcons(
     /* [in] */ IInterface* data)
 {
     // ==================before translated======================
-    // Bitmap[] icons = null;
+    // Bitmap[] icons = NULL;
     // int iconIndex = 0;
     //
-    // if (data == null) {
+    // if (data == NULL) {
     //     if (mloadIcon) {
-    //         CatLog.d(this, "Optional Icon data is NULL");
+    //         CatLog::D(this, String("Optional Icon data is NULL"));
     //         mCmdParams.mLoadIconFailed = true;
     //         mloadIcon = false;
     //         /** In case of icon load fail consider the
     //          ** received proactive command as valid (sending RESULT OK) */
-    //         return ResultCode.OK;
+    //         return ResultCode_OK;
     //     }
-    //     return ResultCode.PRFRMD_ICON_NOT_DISPLAYED;
+    //     return ResultCode_PRFRMD_ICON_NOT_DISPLAYED;
     // }
     // switch(mIconLoadState) {
     // case LOAD_SINGLE_ICON:
@@ -246,14 +246,14 @@ ResultCode CommandParamsFactory::SetIcons(
     //     // set each item icon.
     //     for (Bitmap icon : icons) {
     //         mCmdParams.setIcon(icon);
-    //         if (icon == null && mloadIcon) {
-    //             CatLog.d(this, "Optional Icon data is NULL while loading multi icons");
+    //         if (icon == NULL && mloadIcon) {
+    //             CatLog::D(this, String("Optional Icon data is NULL while loading multi icons"));
     //             mCmdParams.mLoadIconFailed = true;
     //         }
     //     }
     //     break;
     // }
-    // return ResultCode.OK;
+    // return ResultCode_OK;
     assert(0);
     return 0;
 }
@@ -290,7 +290,7 @@ AutoPtr<ComprehensionTlv> CommandParamsFactory::SearchForNextTag(
     //         return ctlv;
     //     }
     // }
-    // return null;
+    // return NULL;
     assert(0);
     AutoPtr<ComprehensionTlv> empty;
     return empty;
@@ -302,35 +302,35 @@ Boolean CommandParamsFactory::ProcessDisplayText(
 {
     // ==================before translated======================
     //
-    // CatLog.d(this, "process DisplayText");
+    // CatLog::D(this, String("process DisplayText"));
     //
     // TextMessage textMsg = new TextMessage();
-    // IconId iconId = null;
+    // IconId iconId = NULL;
     //
     // ComprehensionTlv ctlv = searchForTag(ComprehensionTlvTag.TEXT_STRING,
     //         ctlvs);
-    // if (ctlv != null) {
+    // if (ctlv != NULL) {
     //     textMsg.text = ValueParser.retrieveTextString(ctlv);
     // }
-    // // If the tlv object doesn't exist or the it is a null object reply
+    // // If the tlv object doesn't exist or the it is a NULL object reply
     // // with command not understood.
-    // if (textMsg.text == null) {
-    //     throw new ResultException(ResultCode.CMD_DATA_NOT_UNDERSTOOD);
+    // if (textMsg.text == NULL) {
+    //     throw new ResultException(ResultCode_CMD_DATA_NOT_UNDERSTOOD);
     // }
     //
     // ctlv = searchForTag(ComprehensionTlvTag.IMMEDIATE_RESPONSE, ctlvs);
-    // if (ctlv != null) {
+    // if (ctlv != NULL) {
     //     textMsg.responseNeeded = false;
     // }
     // // parse icon identifier
     // ctlv = searchForTag(ComprehensionTlvTag.ICON_ID, ctlvs);
-    // if (ctlv != null) {
+    // if (ctlv != NULL) {
     //     iconId = ValueParser.retrieveIconId(ctlv);
     //     textMsg.iconSelfExplanatory = iconId.selfExplanatory;
     // }
     // // parse tone duration
     // ctlv = searchForTag(ComprehensionTlvTag.DURATION, ctlvs);
-    // if (ctlv != null) {
+    // if (ctlv != NULL) {
     //     textMsg.duration = ValueParser.retrieveDuration(ctlv);
     // }
     //
@@ -340,7 +340,7 @@ Boolean CommandParamsFactory::ProcessDisplayText(
     //
     // mCmdParams = new DisplayTextParams(cmdDet, textMsg);
     //
-    // if (iconId != null) {
+    // if (iconId != NULL) {
     //     mloadIcon = true;
     //     mIconLoadState = LOAD_SINGLE_ICON;
     //     mIconLoader.loadIcon(iconId.recordNumber, this
@@ -358,19 +358,19 @@ Boolean CommandParamsFactory::ProcessSetUpIdleModeText(
 {
     // ==================before translated======================
     //
-    // CatLog.d(this, "process SetUpIdleModeText");
+    // CatLog::D(this, String("process SetUpIdleModeText"));
     //
     // TextMessage textMsg = new TextMessage();
-    // IconId iconId = null;
+    // IconId iconId = NULL;
     //
     // ComprehensionTlv ctlv = searchForTag(ComprehensionTlvTag.TEXT_STRING,
     //         ctlvs);
-    // if (ctlv != null) {
+    // if (ctlv != NULL) {
     //     textMsg.text = ValueParser.retrieveTextString(ctlv);
     // }
     //
     // ctlv = searchForTag(ComprehensionTlvTag.ICON_ID, ctlvs);
-    // if (ctlv != null) {
+    // if (ctlv != NULL) {
     //     iconId = ValueParser.retrieveIconId(ctlv);
     //     textMsg.iconSelfExplanatory = iconId.selfExplanatory;
     // }
@@ -380,12 +380,12 @@ Boolean CommandParamsFactory::ProcessSetUpIdleModeText(
     //  * explanatory then reply with command not understood.
     //  */
     //
-    // if (textMsg.text == null && iconId != null && !textMsg.iconSelfExplanatory) {
-    //     throw new ResultException(ResultCode.CMD_DATA_NOT_UNDERSTOOD);
+    // if (textMsg.text == NULL && iconId != NULL && !textMsg.iconSelfExplanatory) {
+    //     throw new ResultException(ResultCode_CMD_DATA_NOT_UNDERSTOOD);
     // }
     // mCmdParams = new DisplayTextParams(cmdDet, textMsg);
     //
-    // if (iconId != null) {
+    // if (iconId != NULL) {
     //     mloadIcon = true;
     //     mIconLoadState = LOAD_SINGLE_ICON;
     //     mIconLoader.loadIcon(iconId.recordNumber, this
@@ -403,27 +403,27 @@ Boolean CommandParamsFactory::ProcessGetInkey(
 {
     // ==================before translated======================
     //
-    // CatLog.d(this, "process GetInkey");
+    // CatLog::D(this, String("process GetInkey"));
     //
     // Input input = new Input();
-    // IconId iconId = null;
+    // IconId iconId = NULL;
     //
     // ComprehensionTlv ctlv = searchForTag(ComprehensionTlvTag.TEXT_STRING,
     //         ctlvs);
-    // if (ctlv != null) {
+    // if (ctlv != NULL) {
     //     input.text = ValueParser.retrieveTextString(ctlv);
     // } else {
-    //     throw new ResultException(ResultCode.REQUIRED_VALUES_MISSING);
+    //     throw new ResultException(ResultCode_REQUIRED_VALUES_MISSING);
     // }
     // // parse icon identifier
     // ctlv = searchForTag(ComprehensionTlvTag.ICON_ID, ctlvs);
-    // if (ctlv != null) {
+    // if (ctlv != NULL) {
     //     iconId = ValueParser.retrieveIconId(ctlv);
     // }
     //
     // // parse duration
     // ctlv = searchForTag(ComprehensionTlvTag.DURATION, ctlvs);
-    // if (ctlv != null) {
+    // if (ctlv != NULL) {
     //     input.duration = ValueParser.retrieveDuration(ctlv);
     // }
     //
@@ -438,7 +438,7 @@ Boolean CommandParamsFactory::ProcessGetInkey(
     //
     // mCmdParams = new GetInputParams(cmdDet, input);
     //
-    // if (iconId != null) {
+    // if (iconId != NULL) {
     //     mloadIcon = true;
     //     mIconLoadState = LOAD_SINGLE_ICON;
     //     mIconLoader.loadIcon(iconId.recordNumber, this
@@ -456,40 +456,40 @@ Boolean CommandParamsFactory::ProcessGetInput(
 {
     // ==================before translated======================
     //
-    // CatLog.d(this, "process GetInput");
+    // CatLog::D(this, String("process GetInput"));
     //
     // Input input = new Input();
-    // IconId iconId = null;
+    // IconId iconId = NULL;
     //
     // ComprehensionTlv ctlv = searchForTag(ComprehensionTlvTag.TEXT_STRING,
     //         ctlvs);
-    // if (ctlv != null) {
+    // if (ctlv != NULL) {
     //     input.text = ValueParser.retrieveTextString(ctlv);
     // } else {
-    //     throw new ResultException(ResultCode.REQUIRED_VALUES_MISSING);
+    //     throw new ResultException(ResultCode_REQUIRED_VALUES_MISSING);
     // }
     //
     // ctlv = searchForTag(ComprehensionTlvTag.RESPONSE_LENGTH, ctlvs);
-    // if (ctlv != null) {
+    // if (ctlv != NULL) {
     //     try {
     //         byte[] rawValue = ctlv.getRawValue();
     //         int valueIndex = ctlv.getValueIndex();
     //         input.minLen = rawValue[valueIndex] & 0xff;
     //         input.maxLen = rawValue[valueIndex + 1] & 0xff;
     //     } catch (IndexOutOfBoundsException e) {
-    //         throw new ResultException(ResultCode.CMD_DATA_NOT_UNDERSTOOD);
+    //         throw new ResultException(ResultCode_CMD_DATA_NOT_UNDERSTOOD);
     //     }
     // } else {
-    //     throw new ResultException(ResultCode.REQUIRED_VALUES_MISSING);
+    //     throw new ResultException(ResultCode_REQUIRED_VALUES_MISSING);
     // }
     //
     // ctlv = searchForTag(ComprehensionTlvTag.DEFAULT_TEXT, ctlvs);
-    // if (ctlv != null) {
+    // if (ctlv != NULL) {
     //     input.defaultText = ValueParser.retrieveTextString(ctlv);
     // }
     // // parse icon identifier
     // ctlv = searchForTag(ComprehensionTlvTag.ICON_ID, ctlvs);
-    // if (ctlv != null) {
+    // if (ctlv != NULL) {
     //     iconId = ValueParser.retrieveIconId(ctlv);
     // }
     //
@@ -502,18 +502,18 @@ Boolean CommandParamsFactory::ProcessGetInput(
     // // Truncate the maxLen if it exceeds the max number of chars that can
     // // be encoded. Limit depends on DCS in Command Qualifier.
     // if (input.ucs2 && input.maxLen > MAX_UCS2_CHARS) {
-    //     CatLog.d(this, "UCS2: received maxLen = " + input.maxLen +
+    //     CatLog::D(this, "UCS2: received maxLen = " + input.maxLen +
     //           ", truncating to " + MAX_UCS2_CHARS);
     //     input.maxLen = MAX_UCS2_CHARS;
     // } else if (!input.packed && input.maxLen > MAX_GSM7_DEFAULT_CHARS) {
-    //     CatLog.d(this, "GSM 7Bit Default: received maxLen = " + input.maxLen +
+    //     CatLog::D(this, "GSM 7Bit Default: received maxLen = " + input.maxLen +
     //           ", truncating to " + MAX_GSM7_DEFAULT_CHARS);
     //     input.maxLen = MAX_GSM7_DEFAULT_CHARS;
     // }
     //
     // mCmdParams = new GetInputParams(cmdDet, input);
     //
-    // if (iconId != null) {
+    // if (iconId != NULL) {
     //     mloadIcon = true;
     //     mIconLoadState = LOAD_SINGLE_ICON;
     //     mIconLoader.loadIcon(iconId.recordNumber, this
@@ -531,22 +531,22 @@ Boolean CommandParamsFactory::ProcessSelectItem(
 {
     // ==================before translated======================
     //
-    // CatLog.d(this, "process SelectItem");
+    // CatLog::D(this, String("process SelectItem"));
     //
     // Menu menu = new Menu();
-    // IconId titleIconId = null;
-    // ItemsIconId itemsIconId = null;
+    // IconId titleIconId = NULL;
+    // ItemsIconId itemsIconId = NULL;
     // Iterator<ComprehensionTlv> iter = ctlvs.iterator();
     //
     // ComprehensionTlv ctlv = searchForTag(ComprehensionTlvTag.ALPHA_ID,
     //         ctlvs);
-    // if (ctlv != null) {
+    // if (ctlv != NULL) {
     //     menu.title = ValueParser.retrieveAlphaId(ctlv);
     // }
     //
     // while (true) {
     //     ctlv = searchForNextTag(ComprehensionTlvTag.ITEM, iter);
-    //     if (ctlv != null) {
+    //     if (ctlv != NULL) {
     //         menu.items.add(ValueParser.retrieveItem(ctlv));
     //     } else {
     //         break;
@@ -555,25 +555,25 @@ Boolean CommandParamsFactory::ProcessSelectItem(
     //
     // // We must have at least one menu item.
     // if (menu.items.size() == 0) {
-    //     throw new ResultException(ResultCode.REQUIRED_VALUES_MISSING);
+    //     throw new ResultException(ResultCode_REQUIRED_VALUES_MISSING);
     // }
     //
     // ctlv = searchForTag(ComprehensionTlvTag.ITEM_ID, ctlvs);
-    // if (ctlv != null) {
+    // if (ctlv != NULL) {
     //     // CAT items are listed 1...n while list start at 0, need to
     //     // subtract one.
     //     menu.defaultItem = ValueParser.retrieveItemId(ctlv) - 1;
     // }
     //
     // ctlv = searchForTag(ComprehensionTlvTag.ICON_ID, ctlvs);
-    // if (ctlv != null) {
+    // if (ctlv != NULL) {
     //     mIconLoadState = LOAD_SINGLE_ICON;
     //     titleIconId = ValueParser.retrieveIconId(ctlv);
     //     menu.titleIconSelfExplanatory = titleIconId.selfExplanatory;
     // }
     //
     // ctlv = searchForTag(ComprehensionTlvTag.ITEM_ICON_ID_LIST, ctlvs);
-    // if (ctlv != null) {
+    // if (ctlv != NULL) {
     //     mIconLoadState = LOAD_MULTI_ICONS;
     //     itemsIconId = ValueParser.retrieveItemsIconId(ctlv);
     //     menu.itemsIconSelfExplanatory = itemsIconId.selfExplanatory;
@@ -590,7 +590,7 @@ Boolean CommandParamsFactory::ProcessSelectItem(
     // menu.softKeyPreferred = (cmdDet.commandQualifier & 0x04) != 0;
     // menu.helpAvailable = (cmdDet.commandQualifier & 0x80) != 0;
     //
-    // mCmdParams = new SelectItemParams(cmdDet, menu, titleIconId != null);
+    // mCmdParams = new SelectItemParams(cmdDet, menu, titleIconId != NULL);
     //
     // // Load icons data if needed.
     // switch(mIconLoadState) {
@@ -603,7 +603,7 @@ Boolean CommandParamsFactory::ProcessSelectItem(
     //     break;
     // case LOAD_MULTI_ICONS:
     //     int[] recordNumbers = itemsIconId.recordNumbers;
-    //     if (titleIconId != null) {
+    //     if (titleIconId != NULL) {
     //         // Create a new array for all the icons (title and items).
     //         recordNumbers = new int[itemsIconId.recordNumbers.length + 1];
     //         recordNumbers[0] = titleIconId.recordNumber;
@@ -626,17 +626,17 @@ Boolean CommandParamsFactory::ProcessEventNotify(
 {
     // ==================before translated======================
     //
-    // CatLog.d(this, "process EventNotify");
+    // CatLog::D(this, String("process EventNotify"));
     //
     // TextMessage textMsg = new TextMessage();
-    // IconId iconId = null;
+    // IconId iconId = NULL;
     //
     // ComprehensionTlv ctlv = searchForTag(ComprehensionTlvTag.ALPHA_ID,
     //         ctlvs);
     // textMsg.text = ValueParser.retrieveAlphaId(ctlv);
     //
     // ctlv = searchForTag(ComprehensionTlvTag.ICON_ID, ctlvs);
-    // if (ctlv != null) {
+    // if (ctlv != NULL) {
     //     iconId = ValueParser.retrieveIconId(ctlv);
     //     textMsg.iconSelfExplanatory = iconId.selfExplanatory;
     // }
@@ -646,37 +646,37 @@ Boolean CommandParamsFactory::ProcessEventNotify(
     // AppInterface.CommandType cmdType = AppInterface.CommandType.fromInt(cmdDet.typeOfCommand);
     // boolean isSamsungStk = Resources.getSystem().getBoolean(com.android.internal.R.bool.config_samsung_stk);
     // if (cmdType == AppInterface.CommandType.SEND_SMS && isSamsungStk) {
-    //     String smscAddress = null;
-    //     String pdu = null;
+    //     String smscAddress = NULL;
+    //     String pdu = NULL;
     //
     //     ctlv = searchForTag(ComprehensionTlvTag.ADDRESS, ctlvs);
-    //     if (ctlv != null) {
+    //     if (ctlv != NULL) {
     //         smscAddress = ValueParser.retrieveSMSCaddress(ctlv);
-    //         CatLog.d(this, "The smsc address is " + smscAddress);
+    //         CatLog::D(this, "The smsc address is " + smscAddress);
     //     }
     //     else {
-    //         CatLog.d(this, "The smsc address is null");
+    //         CatLog::D(this, String("The smsc address is NULL"));
     //     }
     //
     //     ctlv = searchForTag(ComprehensionTlvTag.SMS_TPDU, ctlvs);
-    //     if (ctlv != null) {
+    //     if (ctlv != NULL) {
     //         pdu = ValueParser.retrieveSMSTPDU(ctlv);
-    //         CatLog.d(this, "The SMS tpdu is " + pdu);
+    //         CatLog::D(this, "The SMS tpdu is " + pdu);
     //     }
     //     else {
-    //         CatLog.d(this, "The SMS tpdu is null");
+    //         CatLog::D(this, String("The SMS tpdu is NULL"));
     //     }
     //     mCmdParams = new SendSMSParams(cmdDet, textMsg, smscAddress, pdu);
     // }
     // else if (cmdType == AppInterface.CommandType.SEND_USSD && isSamsungStk) {
-    //     String ussdString = null;
+    //     String ussdString = NULL;
     //     ctlv = searchForTag(ComprehensionTlvTag.USSD_STRING, ctlvs);
-    //     if (ctlv != null) {
+    //     if (ctlv != NULL) {
     //         ussdString = ValueParser.retrieveUSSDString(ctlv);
-    //         CatLog.d(this, "The ussd string is " + ussdString);
+    //         CatLog::D(this, "The ussd string is " + ussdString);
     //     }
     //     else {
-    //         CatLog.d(this, "The ussd string is null");
+    //         CatLog::D(this, "The ussd string is NULL");
     //     }
     //     mCmdParams = new SendUSSDParams(cmdDet, textMsg, ussdString);
     // }
@@ -684,7 +684,7 @@ Boolean CommandParamsFactory::ProcessEventNotify(
     //     mCmdParams = new DisplayTextParams(cmdDet, textMsg);
     // }
     //
-    // if (iconId != null) {
+    // if (iconId != NULL) {
     //     mloadIcon = true;
     //     mIconLoadState = LOAD_SINGLE_ICON;
     //     mIconLoader.loadIcon(iconId.recordNumber, this
@@ -702,9 +702,9 @@ Boolean CommandParamsFactory::ProcessSetUpEventList(
 {
     // ==================before translated======================
     //
-    // CatLog.d(this, "process SetUpEventList");
+    // CatLog::D(this, "process SetUpEventList");
     // ComprehensionTlv ctlv = searchForTag(ComprehensionTlvTag.EVENT_LIST, ctlvs);
-    // if (ctlv != null) {
+    // if (ctlv != NULL) {
     //     try {
     //         byte[] rawValue = ctlv.getRawValue();
     //         int valueIndex = ctlv.getValueIndex();
@@ -748,14 +748,14 @@ Boolean CommandParamsFactory::ProcessLaunchBrowser(
 {
     // ==================before translated======================
     //
-    // CatLog.d(this, "process LaunchBrowser");
+    // CatLog::D(this, "process LaunchBrowser");
     //
     // TextMessage confirmMsg = new TextMessage();
-    // IconId iconId = null;
-    // String url = null;
+    // IconId iconId = NULL;
+    // String url = NULL;
     //
     // ComprehensionTlv ctlv = searchForTag(ComprehensionTlvTag.URL, ctlvs);
-    // if (ctlv != null) {
+    // if (ctlv != NULL) {
     //     try {
     //         byte[] rawValue = ctlv.getRawValue();
     //         int valueIndex = ctlv.getValueIndex();
@@ -764,10 +764,10 @@ Boolean CommandParamsFactory::ProcessLaunchBrowser(
     //             url = GsmAlphabet.gsm8BitUnpackedToString(rawValue,
     //                     valueIndex, valueLen);
     //         } else {
-    //             url = null;
+    //             url = NULL;
     //         }
     //     } catch (IndexOutOfBoundsException e) {
-    //         throw new ResultException(ResultCode.CMD_DATA_NOT_UNDERSTOOD);
+    //         throw new ResultException(ResultCode_CMD_DATA_NOT_UNDERSTOOD);
     //     }
     // }
     //
@@ -777,7 +777,7 @@ Boolean CommandParamsFactory::ProcessLaunchBrowser(
     //
     // // parse icon identifier
     // ctlv = searchForTag(ComprehensionTlvTag.ICON_ID, ctlvs);
-    // if (ctlv != null) {
+    // if (ctlv != NULL) {
     //     iconId = ValueParser.retrieveIconId(ctlv);
     //     confirmMsg.iconSelfExplanatory = iconId.selfExplanatory;
     // }
@@ -799,7 +799,7 @@ Boolean CommandParamsFactory::ProcessLaunchBrowser(
     //
     // mCmdParams = new LaunchBrowserParams(cmdDet, confirmMsg, url, mode);
     //
-    // if (iconId != null) {
+    // if (iconId != NULL) {
     //     mIconLoadState = LOAD_SINGLE_ICON;
     //     mIconLoader.loadIcon(iconId.recordNumber, this
     //             .obtainMessage(MSG_ID_LOAD_ICON_DONE));
@@ -816,16 +816,16 @@ Boolean CommandParamsFactory::ProcessPlayTone(
 {
     // ==================before translated======================
     //
-    // CatLog.d(this, "process PlayTone");
+    // CatLog::D(this, "process PlayTone");
     //
-    // Tone tone = null;
+    // Tone tone = NULL;
     // TextMessage textMsg = new TextMessage();
-    // Duration duration = null;
-    // IconId iconId = null;
+    // Duration duration = NULL;
+    // IconId iconId = NULL;
     //
     // ComprehensionTlv ctlv = searchForTag(ComprehensionTlvTag.TONE, ctlvs);
-    // if (ctlv != null) {
-    //     // Nothing to do for null objects.
+    // if (ctlv != NULL) {
+    //     // Nothing to do for NULL objects.
     //     if (ctlv.getLength() > 0) {
     //         try {
     //             byte[] rawValue = ctlv.getRawValue();
@@ -834,27 +834,27 @@ Boolean CommandParamsFactory::ProcessPlayTone(
     //             tone = Tone.fromInt(toneVal);
     //         } catch (IndexOutOfBoundsException e) {
     //             throw new ResultException(
-    //                     ResultCode.CMD_DATA_NOT_UNDERSTOOD);
+    //                     ResultCode_CMD_DATA_NOT_UNDERSTOOD);
     //         }
     //     }
     // }
     // // parse alpha identifier
     // ctlv = searchForTag(ComprehensionTlvTag.ALPHA_ID, ctlvs);
-    // if (ctlv != null) {
+    // if (ctlv != NULL) {
     //     textMsg.text = ValueParser.retrieveAlphaId(ctlv);
     //     // Assign the tone message text to empty string, if alpha identifier
-    //     // data is null. If no alpha identifier tlv is present, then tone
-    //     // message text will be null.
-    //     if (textMsg.text == null) textMsg.text = "";
+    //     // data is NULL. If no alpha identifier tlv is present, then tone
+    //     // message text will be NULL.
+    //     if (textMsg.text == NULL) textMsg.text = "";
     // }
     // // parse tone duration
     // ctlv = searchForTag(ComprehensionTlvTag.DURATION, ctlvs);
-    // if (ctlv != null) {
+    // if (ctlv != NULL) {
     //     duration = ValueParser.retrieveDuration(ctlv);
     // }
     // // parse icon identifier
     // ctlv = searchForTag(ComprehensionTlvTag.ICON_ID, ctlvs);
-    // if (ctlv != null) {
+    // if (ctlv != NULL) {
     //     iconId = ValueParser.retrieveIconId(ctlv);
     //     textMsg.iconSelfExplanatory = iconId.selfExplanatory;
     // }
@@ -864,7 +864,7 @@ Boolean CommandParamsFactory::ProcessPlayTone(
     // textMsg.responseNeeded = false;
     // mCmdParams = new PlayToneParams(cmdDet, textMsg, tone, duration, vibrate);
     //
-    // if (iconId != null) {
+    // if (iconId != NULL) {
     //     mIconLoadState = LOAD_SINGLE_ICON;
     //     mIconLoader.loadIcon(iconId.recordNumber, this
     //             .obtainMessage(MSG_ID_LOAD_ICON_DONE));
@@ -880,47 +880,47 @@ Boolean CommandParamsFactory::ProcessSetupCall(
     /* [in] */ IList/*<ComprehensionTlv*>*/* ctlvs)
 {
     // ==================before translated======================
-    // CatLog.d(this, "process SetupCall");
+    // CatLog::D(this, "process SetupCall");
     //
     // Iterator<ComprehensionTlv> iter = ctlvs.iterator();
-    // ComprehensionTlv ctlv = null;
+    // ComprehensionTlv ctlv = NULL;
     // // User confirmation phase message.
     // TextMessage confirmMsg = new TextMessage();
     // // Call set up phase message.
     // TextMessage callMsg = new TextMessage();
-    // IconId confirmIconId = null;
-    // IconId callIconId = null;
+    // IconId confirmIconId = NULL;
+    // IconId callIconId = NULL;
     //
     // // get confirmation message string.
     // ctlv = searchForNextTag(ComprehensionTlvTag.ALPHA_ID, iter);
     // confirmMsg.text = ValueParser.retrieveAlphaId(ctlv);
     //
     // ctlv = searchForTag(ComprehensionTlvTag.ICON_ID, ctlvs);
-    // if (ctlv != null) {
+    // if (ctlv != NULL) {
     //     confirmIconId = ValueParser.retrieveIconId(ctlv);
     //     confirmMsg.iconSelfExplanatory = confirmIconId.selfExplanatory;
     // }
     //
     // // get call set up message string.
     // ctlv = searchForNextTag(ComprehensionTlvTag.ALPHA_ID, iter);
-    // if (ctlv != null) {
+    // if (ctlv != NULL) {
     //     callMsg.text = ValueParser.retrieveAlphaId(ctlv);
     // }
     //
     // ctlv = searchForTag(ComprehensionTlvTag.ICON_ID, ctlvs);
-    // if (ctlv != null) {
+    // if (ctlv != NULL) {
     //     callIconId = ValueParser.retrieveIconId(ctlv);
     //     callMsg.iconSelfExplanatory = callIconId.selfExplanatory;
     // }
     //
     // mCmdParams = new CallSetupParams(cmdDet, confirmMsg, callMsg);
     //
-    // if (confirmIconId != null || callIconId != null) {
+    // if (confirmIconId != NULL || callIconId != NULL) {
     //     mIconLoadState = LOAD_MULTI_ICONS;
     //     int[] recordNumbers = new int[2];
-    //     recordNumbers[0] = confirmIconId != null
+    //     recordNumbers[0] = confirmIconId != NULL
     //             ? confirmIconId.recordNumber : -1;
-    //     recordNumbers[1] = callIconId != null ? callIconId.recordNumber
+    //     recordNumbers[1] = callIconId != NULL ? callIconId.recordNumber
     //             : -1;
     //
     //     mIconLoader.loadIcons(recordNumbers, this
@@ -937,20 +937,20 @@ Boolean CommandParamsFactory::ProcessProvideLocalInfo(
     /* [in] */ IList/*<ComprehensionTlv*>*/* ctlvs)
 {
     // ==================before translated======================
-    // CatLog.d(this, "process ProvideLocalInfo");
+    // CatLog::D(this, "process ProvideLocalInfo");
     // switch (cmdDet.commandQualifier) {
     //     case DTTZ_SETTING:
-    //         CatLog.d(this, "PLI [DTTZ_SETTING]");
+    //         CatLog::D(this, "PLI [DTTZ_SETTING]");
     //         mCmdParams = new CommandParams(cmdDet);
     //         break;
     //     case LANGUAGE_SETTING:
-    //         CatLog.d(this, "PLI [LANGUAGE_SETTING]");
+    //         CatLog::D(this, "PLI [LANGUAGE_SETTING]");
     //         mCmdParams = new CommandParams(cmdDet);
     //         break;
     //     default:
-    //         CatLog.d(this, "PLI[" + cmdDet.commandQualifier + "] Command Not Supported");
+    //         CatLog::D(this, "PLI[" + cmdDet.commandQualifier + "] Command Not Supported");
     //         mCmdParams = new CommandParams(cmdDet);
-    //         throw new ResultException(ResultCode.BEYOND_TERMINAL_CAPABILITY);
+    //         throw new ResultException(ResultCode_BEYOND_TERMINAL_CAPABILITY);
     // }
     // return false;
     assert(0);
@@ -964,26 +964,26 @@ Boolean CommandParamsFactory::ProcessBIPClient(
     // ==================before translated======================
     // AppInterface.CommandType commandType =
     //                             AppInterface.CommandType.fromInt(cmdDet.typeOfCommand);
-    // if (commandType != null) {
-    //     CatLog.d(this, "process "+ commandType.name());
+    // if (commandType != NULL) {
+    //     CatLog::D(this, "process "+ commandType.name());
     // }
     //
     // TextMessage textMsg = new TextMessage();
-    // IconId iconId = null;
-    // ComprehensionTlv ctlv = null;
+    // IconId iconId = NULL;
+    // ComprehensionTlv ctlv = NULL;
     // boolean has_alpha_id = false;
     //
     // // parse alpha identifier
     // ctlv = searchForTag(ComprehensionTlvTag.ALPHA_ID, ctlvs);
-    // if (ctlv != null) {
+    // if (ctlv != NULL) {
     //     textMsg.text = ValueParser.retrieveAlphaId(ctlv);
-    //     CatLog.d(this, "alpha TLV text=" + textMsg.text);
+    //     CatLog::D(this, "alpha TLV text=" + textMsg.text);
     //     has_alpha_id = true;
     // }
     //
     // // parse icon identifier
     // ctlv = searchForTag(ComprehensionTlvTag.ICON_ID, ctlvs);
-    // if (ctlv != null) {
+    // if (ctlv != NULL) {
     //     iconId = ValueParser.retrieveIconId(ctlv);
     //     textMsg.iconSelfExplanatory = iconId.selfExplanatory;
     // }
@@ -991,7 +991,7 @@ Boolean CommandParamsFactory::ProcessBIPClient(
     // textMsg.responseNeeded = false;
     // mCmdParams = new BIPClientParams(cmdDet, textMsg, has_alpha_id);
     //
-    // if (iconId != null) {
+    // if (iconId != NULL) {
     //     mIconLoadState = LOAD_SINGLE_ICON;
     //     mIconLoader.loadIcon(iconId.recordNumber, obtainMessage(MSG_ID_LOAD_ICON_DONE));
     //     return true;
@@ -1008,19 +1008,19 @@ Boolean CommandParamsFactory::ProcessActivate(
     // ==================before translated======================
     // AppInterface.CommandType commandType =
     //         AppInterface.CommandType.fromInt(cmdDet.typeOfCommand);
-    // CatLog.d(this, "process " + commandType.name());
+    // CatLog::D(this, "process " + commandType.name());
     //
-    // ComprehensionTlv ctlv = null;
+    // ComprehensionTlv ctlv = NULL;
     // int target;
     //
     // //parse activate descriptor
     // ctlv = searchForTag(ComprehensionTlvTag.ACTIVATE_DESCRIPTOR, ctlvs);
-    // if (ctlv != null) {
+    // if (ctlv != NULL) {
     //     target = ValueParser.retrieveTarget(ctlv);
     //     mCmdParams = new CommandParams(cmdDet);
-    //     CatLog.d(this, "Activate cmd target = " + target);
+    //     CatLog::D(this, "Activate cmd target = " + target);
     // } else {
-    //     CatLog.d(this, "ctlv is null");
+    //     CatLog::D(this, "ctlv is NULL");
     // }
     // return false;
     assert(0);

@@ -2,6 +2,10 @@
 #include "Elastos.Droid.Internal.h"
 #include "elastos/droid/internal/telephony/cat/CatLog.h"
 
+#include <elastos/utility/logging/Logger.h>
+
+using Elastos::Utility::Logging::Logger;
+
 namespace Elastos {
 namespace Droid {
 namespace Internal {
@@ -11,23 +15,20 @@ namespace Cat {
 //=====================================================================
 //                                CatLog
 //=====================================================================
-CAR_INTERFACE_IMPL(CatLog, Object, ICatLog);
-
 const Boolean CatLog::DEBUG = TRUE;
 
 ECode CatLog::D(
     /* [in] */ IInterface* caller,
     /* [in] */ const String& msg)
 {
-    // ==================before translated======================
-    // if (!DEBUG) {
-    //     return;
-    // }
-    //
-    // String className = caller.getClass().getName();
-    // Rlog.d("CAT", className.substring(className.lastIndexOf('.') + 1) + ": "
-    //         + msg);
-    assert(0);
+    if (!DEBUG) {
+        return NOERROR;
+    }
+
+    assert(0 && "TODO");
+    String className; // = caller.getClass().getName();
+    Logger::D("CAT", className.Substring(className.LastIndexOf('.') + 1) + ": "
+            + msg);
     return NOERROR;
 }
 
@@ -35,13 +36,11 @@ ECode CatLog::D(
     /* [in] */ const String& caller,
     /* [in] */ const String& msg)
 {
-    // ==================before translated======================
-    // if (!DEBUG) {
-    //     return;
-    // }
-    //
-    // Rlog.d("CAT", caller + ": " + msg);
-    assert(0);
+    if (!DEBUG) {
+        return NOERROR;
+    }
+
+    Logger::D("CAT", caller + ": " + msg);
     return NOERROR;
 }
 
@@ -49,11 +48,10 @@ ECode CatLog::E(
     /* [in] */ IInterface* caller,
     /* [in] */ const String& msg)
 {
-    // ==================before translated======================
-    // String className = caller.getClass().getName();
-    // Rlog.e("CAT", className.substring(className.lastIndexOf('.') + 1) + ": "
-    //         + msg);
-    assert(0);
+    assert(0 && "TODO");
+    String className;// = caller.getClass().getName();
+    Logger::E("CAT", className.Substring(className.LastIndexOf('.') + 1) + ": "
+            + msg);
     return NOERROR;
 }
 
@@ -61,9 +59,7 @@ ECode CatLog::E(
     /* [in] */ const String& caller,
     /* [in] */ const String& msg)
 {
-    // ==================before translated======================
-    // Rlog.e("CAT", caller + ": " + msg);
-    assert(0);
+    Logger::E("CAT", caller + ": " + msg);
     return NOERROR;
 }
 

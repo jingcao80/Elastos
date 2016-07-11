@@ -46,8 +46,8 @@ public:
             /* [out] */ LaunchBrowserMode* mode);
 
     private:
-        String url;
-        LaunchBrowserMode mode;
+        String mUrl;
+        LaunchBrowserMode mMode;
     };
 
     /*
@@ -73,8 +73,8 @@ public:
             /* [out] */ ITextMessage** result);
 
     private:
-        AutoPtr<ITextMessage> confirmMsg;
-        AutoPtr<ITextMessage> callMsg;
+        AutoPtr<ITextMessage> mConfirmMsg;
+        AutoPtr<ITextMessage> mCallMsg;
     };
 
     class SetupEventListSettings
@@ -91,27 +91,8 @@ public:
             /* [out] */ ArrayOf<Int32>** eventList);
 
     private:
-        AutoPtr<ArrayOf<Int32> > eventList;
+        AutoPtr<ArrayOf<Int32> > mEventList;
     };
-
-    //class SetupEventListConstants
-    //{
-    //public:
-    //    // Event values in SETUP_EVENT_LIST Proactive Command as per ETSI 102.223
-    //    static const Int32 USER_ACTIVITY_EVENT = 0x04;
-    //    static const Int32 IDLE_SCREEN_AVAILABLE_EVENT = 0x05;
-    //    static const Int32 LANGUAGE_SELECTION_EVENT = 0x07;
-    //    static const Int32 BROWSER_TERMINATION_EVENT = 0x08;
-    //    static const Int32 BROWSING_STATUS_EVENT = 0x0F;
-    //    static const Int32 HCI_CONNECTIVITY_EVENT = 0x13;
-    //};
-
-    //class BrowserTerminationCauses
-    //{
-    //public:
-    //    static const Int32 USER_TERMINATION = 0x00;
-    //    static const Int32 ERROR_TERMINATION = 0x01;
-    //};
 
 //private:
     //class InnerParcelableCreator
@@ -146,19 +127,12 @@ public:
     CARAPI constructor(
         /* [in] */ IInterface/*CommandParams*/* cmdParams);
 
-    CARAPI constructor(
-        /* [in] */ IParcel* in);
-
     CARAPI ReadFromParcel(
-        /* [in] */ IParcel* source);
+        /* [in] */ IParcel* in);
 
     CARAPI WriteToParcel(
         /* [in] */ IParcel* dest);
         ///* [in] */ Int32 flags);
-
-    // @Override
-    //CARAPI DescribeContents(
-    //    /* [out] */ Int32* result);
 
     /* external API to be used by application */
     virtual CARAPI GetCmdType(

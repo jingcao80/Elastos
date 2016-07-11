@@ -36,7 +36,6 @@ SOURCES += CCatCmdMessage.cpp
 SOURCES += CCatCmdMessageBrowserSettings.cpp
 SOURCES += CCatCmdMessageCallSettings.cpp
 SOURCES += CCatCmdMessageSetupEventListSettings.cpp
-SOURCES += CCatLog.cpp
 SOURCES += CCatResponseMessage.cpp
 SOURCES += CCatService.cpp
 SOURCES += CCatServiceFactory.cpp

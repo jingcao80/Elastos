@@ -53,33 +53,24 @@ public:
 
     CARAPI constructor();
 
-    //// @Override
-    //CARAPI DescribeContents(
-    //    /* [out] */ Int32* result);
-
     // @Override
     CARAPI WriteToParcel(
         /* [in] */ IParcel* dest);
-        ///* [in] */ Int32 flags);
 
     CARAPI ReadFromParcel(
         /* [in] */ IParcel* source);
 
-private:
-    CARAPI constructor(
-        /* [in] */ IParcel* in);
-
 public:
-    AutoPtr<IList/*<Item>*/> items;
-    AutoPtr<IList/*<TextAttribute>*/> titleAttrs;
-    PresentationType presentationType;
-    String title;
-    AutoPtr<IBitmap> titleIcon;
-    Int32 defaultItem;
-    Boolean softKeyPreferred;
-    Boolean helpAvailable;
-    Boolean titleIconSelfExplanatory;
-    Boolean itemsIconSelfExplanatory;
+    AutoPtr<IList/*<Item>*/> mItems;
+    AutoPtr<IList/*<TextAttribute>*/> mTitleAttrs;
+    PresentationType mPresentationType;
+    String mTitle;
+    AutoPtr<IBitmap> mTitleIcon;
+    Int32 mDefaultItem;
+    Boolean mSoftKeyPreferred;
+    Boolean mHelpAvailable;
+    Boolean mTitleIconSelfExplanatory;
+    Boolean mItemsIconSelfExplanatory;
     //static const AutoPtr<IParcelable> AutoPtr< ::Creator<Menu> > CREATOR;
 };
 
