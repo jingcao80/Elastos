@@ -137,13 +137,13 @@ function getRunOnUIThread(as_MethodName) {
 }
 
 //--------proto info begin--------
-function getSubDataTypeCarString(ao_TypeInfo){
+function __getSubDataTypeCarString(ao_TypeInfo){
     var a = [],s;
 
     var iDataType = ao_TypeInfo.GetDataType();
     switch (iDataType) {
         case CarDataType.IInterface:
-            s = "<"+ao_TypeInfo.GetName()+">";
+            s = ao_TypeInfo.GetName();
             a.push(s);
 
             break;
@@ -152,7 +152,7 @@ function getSubDataTypeCarString(ao_TypeInfo){
             var iElementDataType = oElementTypeInfo.GetDataType();
             s = getDataTypeCarString(iElementDataType);
             a.push(s);
-            s = getSubDataTypeCarString(oElementTypeInfo);
+            s = __getSubDataTypeCarString(oElementTypeInfo);
             a.push(s);
 
             break;
@@ -161,7 +161,7 @@ function getSubDataTypeCarString(ao_TypeInfo){
             var iElementDataType = oElementTypeInfo.GetDataType();
             s = getDataTypeCarString(iElementDataType);
             a.push(s);
-            s = getSubDataTypeCarString(oElementTypeInfo);
+            s = __getSubDataTypeCarString(oElementTypeInfo);
             a.push(s);
 
             break;
@@ -181,14 +181,14 @@ function __getCarDataTypeString(ao_TypeInfo){
     var s;
     s = getDataTypeCarString(iDataType);
     a.push(s);
-    s = getSubDataTypeCarString(ao_TypeInfo);
+    s = __getSubDataTypeCarString(ao_TypeInfo);
     a.push(s);
 
     return a.join("");
 }
 
 //return: ParamProto=ParamName[]
-function getParamProto(ao_ParamInfo){
+function __getParamProto(ao_ParamInfo){
     var aProto = [];
 
     aProto.push(ao_ParamInfo.GetName());
@@ -204,7 +204,7 @@ function getParamProto(ao_ParamInfo){
 }
 
 //return: ConstructorProto=Constructor(ParamProtos);
-function getConstructorProto(ao_ConstructorInfo){
+function __getConstructorProto(ao_ConstructorInfo){
     var aProto = [];
 
     aProto.push(ao_ConstructorInfo.GetName());
@@ -216,7 +216,7 @@ function getConstructorProto(ao_ConstructorInfo){
         var bProto = [];
         var aParamInfos = ao_ConstructorInfo.GetAllParamInfos();
         for (var i=0,im=aParamInfos.length;i<im;i++) {
-            var sParamProto = getParamProto(aParamInfos[i]);
+            var sParamProto = __getParamProto(aParamInfos[i]);
             bProto.push(sParamProto);
         }
         aProto.push(bProto.join(","));
@@ -228,8 +228,8 @@ function getConstructorProto(ao_ConstructorInfo){
 }
 
 //return: ClassName{ConstructorProtos};
-function getConstructorProtos(ao_ClassInfo){
-    elog("====getConstructorProtos====begin");
+function _getConstructorProtos(ao_ClassInfo){
+    elog("====__getConstructorProtos====begin");
 
     var aProto = [];
 
@@ -241,7 +241,7 @@ function getConstructorProtos(ao_ClassInfo){
     var aConstructorInfos = ao_ClassInfo.GetAllConstructorInfos();
     for (var i=0,im=aConstructorInfos.length;i<im;i++) {
         aProto.push("=="+i+"==");
-        var sConstructorProto = getConstructorProto(aConstructorInfos[i]);
+        var sConstructorProto = __getConstructorProto(aConstructorInfos[i]);
         aProto.push(sConstructorProto);
     }
 
@@ -250,12 +250,52 @@ function getConstructorProtos(ao_ClassInfo){
     return aProto.join("");
 }
 
-function showMethods(ao) {
-    var a = [];
-    for (var p in ao) a.push(p);
-    var s = "====methods====[" + a.join("][") + "]";
-    elog(s);
+function getConstructorProtos(as_EcoName, as_ClassName){
+    var oModuleInfo = _getModuleInfo(as_EcoName);
+    var oClassInfo = oModuleInfo.GetClassInfo(as_ClassName);
+    _getConstructorProtos(oClassInfo);
 }
+
+function _getMethodInfos(as_EcoName, as_ClassName, as_MethodName){
+    var oModuleInfo = _getModuleInfo(as_EcoName);
+    var oClassInfo = oModuleInfo.GetClassInfo(as_ClassName);
+    var aAllMethodInfos = oClassInfo.GetAllMethodInfos();
+    var aMethodInfos;
+    if (arguments.length == 2) {
+        aMethodInfos = aAllMethodInfos;
+    }
+    else {
+        aMethodInfos = [];
+        for(var i=0,im=aAllMethodInfos.length;i<im;i++) {
+            var oMethodInfo = aAllMethodInfos[i];
+            var sMethodName = oMethodInfo.GetName();
+            if (sMethodName == as_MethodName) {
+                aMethodInfos.push(oMethodInfo);
+            }
+        }
+    }
+    return aMethodInfos;
+}
+function _getMethodProtos(as_EcoName, as_ClassName, as_MethodName){
+    var aProto = [];
+
+    aProto.push(as_ClassName);
+    aProto.push("{");
+
+    var aMethodInfos = _getMethodInfos(as_EcoName, as_ClassName, as_MethodName);
+    for (var i=0,im=aMethodInfos.length;i<im;i++) {
+        aProto.push("=="+i+"==");
+        var sMethodProto = __getConstructorProto(aMethodInfos[i]);
+        aProto.push(sMethodProto);
+    }
+
+    aProto.push("}");
+
+    return aProto.join("");
+}
+
+CObject.getConstructorProtos = getConstructorProtos;
+CObject.getMethodProtos = _getMethodProtos;
 
 //--------proto info end--------
 
@@ -343,7 +383,6 @@ elog("classinfo__createObject======05======");
                                     break;
                                 case CarDataType.ArrayOf:
                                     //TODO:
-                                    //showMethods(arg_in);
                                     if (typeof arg_in.GetClassID == 'function') bSameArgs = false;
                                     break;
                                 default:

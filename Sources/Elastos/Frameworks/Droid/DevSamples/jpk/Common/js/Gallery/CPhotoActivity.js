@@ -31,6 +31,8 @@ module.exports = function(aoElastos, aoActivity){
     //Elastos::Droid::App::EIID_IActivity
     var EIID_IActivity = [0x1068F256,0x8292,0x2C57,[0x7E,0xCB,0xFE,0xE1,0xA0,0xA4,0x0C,0x1B]];
 
+    var _debug = false;
+
 //--------common definition----end----
 
 //--------CxxxActivity.h----begin----
@@ -1088,13 +1090,10 @@ module.exports = function(aoElastos, aoActivity){
 //     assert(mPhotoLoadingText != NULL);
         mPhotoLoadingText = context.FindViewById(R.id.photo_loading);
 
-elog("====OnCreate====mLeftButton");
 //     view = FindViewById(R::id::img_btn_left);
 //     mLeftButton = IImageButton::Probe(view);
 //     assert(mLeftButton != NULL);
         mLeftButton = context.FindViewById(R.id.img_btn_left);
-
-elog("====OnCreate====mLeftButton id:"+mLeftButton.GetId().toString(16).toUpperCase());
 
 //     view = FindViewById(R::id::img_btn_right);
 //     mRightButton = IImageButton::Probe(view);
@@ -2149,6 +2148,7 @@ elog("====OnCreate====mLeftButton id:"+mLeftButton.GetId().toString(16).toUpperC
         intent)
 // {
     {
+        elog(TAG + "====OnNewIntent.begin====");
 //     mPhotoEntryList.Clear();
         mPhotoEntryList = [];
 //     if (!LoadPhotoEntryList(intent))
@@ -2175,7 +2175,6 @@ elog("====OnCreate====mLeftButton id:"+mLeftButton.GetId().toString(16).toUpperC
         intent)
 // {
     {
-elog("========LoadPhotoEntryList====begin====");
 //     if (intent != NULL) {
         //if (intent) {
         if (true) {
@@ -2183,7 +2182,7 @@ elog("========LoadPhotoEntryList====begin====");
             var action;
 //         String filePath;
             var filePath;
-if (false) {
+if (!_debug) {
 //         intent->GetAction(&action);
             action = intent.GetAction();
 //         Logger::D(TAG, "action:%s", action.string());
@@ -2191,11 +2190,12 @@ if (false) {
 //         AutoPtr<IUri> uri;
             var uri;
 //         intent->GetData((IUri**)&uri);
-            //uri = intent.GetData();
+            uri = intent.GetData();
 }
             //var uri = Droid_New("Elastos.Droid.Net.CStringUri", "file:///data/temp/testdisk/icon_03.jpg");
 //         if (uri != NULL) {
-            if (uri) {
+            //if (uri) {
+            if (false) {
 //             String scheme;
 //             uri->GetScheme(&scheme);
                 var scheme = uri.GetScheme();
@@ -2251,21 +2251,26 @@ if (false) {
             }
 //         else {
             else {
-elog("========LoadPhotoEntryList====01====");
 //             intent->GetStringExtra(DataSourceHelper::SOURCE_PATH, &filePath);
-                //filePath = intent.GetStringExtra(DataSourceHelper.SOURCE_PATH);
+if (_debug) {
                 filePath = "/data/temp/testdisk/icon_01.jpeg";
+}
+else {
+                filePath = intent.GetStringExtra(DataSourceHelper.SOURCE_PATH);
+}
 //             if (!filePath.IsNullOrEmpty()) {
                 if (filePath.length) {
 //                 intent->GetInt32Extra(DataSourceHelper::SOURCE_INDEX, 0, &mCurrentIndex);
-                    //mCurrentIndex = intent.GetInt32Extra(DataSourceHelper.SOURCE_INDEX, 0);
+if (_debug) {
                     mCurrentIndex = 0;
+}
+else {
+                    mCurrentIndex = intent.GetInt16Extra(DataSourceHelper.SOURCE_INDEX, 0);
+}
 //                 mFolderPath = filePath.Substring(0, filePath.LastIndexOf(DataSourceHelper::PATH_SPLITE));
                     mFolderPath = filePath.substring(0, filePath.lastIndexOf(DataSourceHelper.PATH_SPLITE));
-elog("========LoadPhotoEntryList====01====folderPaht:" + mFolderPath);
 //                 AutoPtr<List<String> > imageItems = DataSourceHelper::GetItemList(mFolderPath);
                     var imageItems = DataSourceHelper.GetItemList(mFolderPath);
-elog("LoadPhotoEntryList====01====imageItems:" + JSON.stringify(imageItems));
 //                 if (imageItems != NULL) {
                     if (imageItems) {
 //                     AutoPtr<PhotoEntry> entry;
@@ -2321,7 +2326,6 @@ elog("LoadPhotoEntryList====01====imageItems:" + JSON.stringify(imageItems));
             return false;
 //     }
         }
-elog("========LoadPhotoEntryList====end====");
 
 //     return TRUE;
         return true;

@@ -123,6 +123,19 @@ root.Elastos = ( function () {
 
     _Elastos.Runtime = _Runtime;
 
+    _Elastos.CObject.testShowMethods = function(aoCar,asTag) {
+        var a = [];
+        for (var p in aoCar){
+            var bAdd = true;
+            if (typeof asTag == "string") {
+                if (p.indexOf(asTag) < 0) bAdd = false;
+            }
+            if (bAdd) a.push(p);
+        }
+        var s = "====methods====[" + a.join("][") + "]";
+        elog(s);
+    }
+
     _Elastos.CObject.getClassInfo = function(aoCar) {
         return _Runtime_Native.Test_CObject_ReflectClassInfo(aoCar);
     }
