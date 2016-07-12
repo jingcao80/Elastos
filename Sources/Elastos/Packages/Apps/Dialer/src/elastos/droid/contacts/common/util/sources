@@ -6,4 +6,5 @@ INCLUDES += $(MAKEDIR)/../../../../../../
 INCLUDES += ../../../../../../
 
 SOURCES += PhoneNumberFormatter.cpp
+SOURCES += PhoneNumberHelper.cpp
 SOURCES += ViewUtil.cpp

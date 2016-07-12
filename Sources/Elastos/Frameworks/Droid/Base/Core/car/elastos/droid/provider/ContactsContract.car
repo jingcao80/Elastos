@@ -3640,6 +3640,17 @@ module {
     }
 
     /**
+     * Columns in the Data_Usage_Stat table
+     */
+    interface IContactsContractDataUsageStatColumns {
+        /** The last time (in milliseconds) this {@link Data} was used. */
+        const String LAST_TIME_USED = "last_time_used";
+
+        /** The number of times the referenced {@link Data} has been used. */
+        const String TIMES_USED = "times_used";
+    }
+
+    /**
      * Combines all columns returned by {@link ContactsContract.Data} table queries.
      *
      * @see ContactsContract.Data
@@ -3654,6 +3665,7 @@ module {
      * interface IContactsContractContactNameColumns
      * interface IContactsContractContactOptionsColumns
      * interface IContactsContractContactStatusColumns
+     * interface IContactsContractDataUsageStatColumns
      */
     interface IContactsContractDataColumnsWithJoins
     {}

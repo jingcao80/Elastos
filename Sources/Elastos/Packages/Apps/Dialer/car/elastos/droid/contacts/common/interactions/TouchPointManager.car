@@ -1,0 +1,31 @@
+
+module
+{
+    using interface Elastos.Droid.Graphics.IPoint;
+
+    namespace Elastos{
+    namespace Droid {
+    namespace Contacts {
+    namespace Common {
+    namespace Interactions {
+
+    interface ITouchPointManager {
+        const String TOUCH_POINT = "touchPoint";
+
+        GetPoint(
+            [out] IPoint** point);
+
+        SetPoint(
+            [in] Int32 x,
+            [in] Int32 y);
+
+        HasValidPoint(
+            [out] Boolean* result);
+    }
+
+    } // Interactions
+    } // Common
+    } // Contacts
+    } // Droid
+    } // Elastos
+}

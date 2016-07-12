@@ -5,7 +5,9 @@ TARGET_TYPE= lib
 INCLUDES += $(MAKEDIR)/../../../../../inc
 INCLUDES += ../../../../../
 
+SOURCES += CallUtil.cpp
 SOURCES += GeoUtil.cpp
 
+ELASTOS_LIBS += interactions/interactions.lib
 ELASTOS_LIBS += util/util.lib
 ELASTOS_LIBS += widget/widget.lib

@@ -1,0 +1,8 @@
+
+TARGET_NAME= interactions
+TARGET_TYPE= lib
+
+INCLUDES += $(MAKEDIR)/../../../../../../inc
+INCLUDES += ../../../../../../
+
+SOURCES = TouchPointManager.cpp

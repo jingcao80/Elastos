@@ -867,8 +867,7 @@ void DialtactsActivity::CommitDialpadFragmentHide()
     Int32 id;
     ft->Commit(&id);
 
-    assert(0 && "TODO");
-    // mFloatingActionButtonController->ScaleIn(IAnimUtils::NO_DELAY);
+    mFloatingActionButtonController->ScaleIn(AnimUtils::NO_DELAY);
 }
 
 void DialtactsActivity::UpdateSearchFragmentPosition()

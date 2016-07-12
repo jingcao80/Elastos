@@ -76,8 +76,8 @@ public:
     class PhoneQuery
     {
     public:
-        static const AutoPtr<IUri> URI;
-        static const String PROJECTION[];
+        static AutoPtr<IUri> URI;
+        static AutoPtr< ArrayOf<String> > PROJECTION;
 
         static const Int32 PHONE_ID;
         static const Int32 PHONE_TYPE;
@@ -111,9 +111,9 @@ public:
     class DeleteContactQuery
     {
     public:
-        static const AutoPtr<IUri> URI;
+        static AutoPtr<IUri> URI;
 
-        static const String PROJECTION[];
+        static AutoPtr< ArrayOf<String> > PROJECTION;
 
         static const Int32 DELETED_CONTACT_ID;
         static const Int32 DELECTED_TIMESTAMP;
@@ -172,18 +172,18 @@ private:
         static const Int64 LAST_TIME_USED_RECENT_MS;
 
         /** Time since last contact. */
-        static const String TIME_SINCE_LAST_USED_MS;
+        static String TIME_SINCE_LAST_USED_MS;
 
         /** Contacts that have been used in the past 3 days rank higher than contacts that have
          * been used in the past 30 days, which rank higher than contacts that have not been used
          * in recent 30 days.
          */
-        static const String SORT_BY_DATA_USAGE;
+        static String SORT_BY_DATA_USAGE;
 
         /** This sort order is similar to that used by the ContactsProvider when returning a list
          * of frequently called contacts.
          */
-        static const String SORT_ORDER;
+        static String SORT_ORDER;
     };
 
     /**
@@ -236,6 +236,12 @@ private:
 
     private:
         DialerDatabaseHelper* mHost;
+    };
+
+    class StaticInitializer
+    {
+    public:
+        StaticInitializer();
     };
 
 public:
@@ -431,7 +437,7 @@ private:
     static AutoPtr<DialerDatabaseHelper> sSingleton;
 
     static Object mLock;
-    static const AutoPtr<IAtomicBoolean> sInUpdate;
+    static AutoPtr<IAtomicBoolean> sInUpdate;
     AutoPtr<IContext> mContext;
 
     /**
@@ -442,6 +448,7 @@ private:
     static const String DATABASE_VERSION_PROPERTY;
 
     static const Int32 MAX_ENTRIES;
+    static const StaticInitializer sInitializer;
 };
 
 } // Database

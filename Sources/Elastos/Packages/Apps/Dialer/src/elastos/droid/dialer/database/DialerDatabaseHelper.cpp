@@ -110,44 +110,8 @@ const String DialerDatabaseHelper::PropertiesColumns::PROPERTY_VALUE("property_v
 //=================================================================
 // DialerDatabaseHelper::PhoneQuery
 //=================================================================
-AutoPtr<IUri> CreatePhoneQueryUri()
-{
-    AutoPtr<IContactsContractCommonDataKindsPhone> phone;
-    CContactsContractCommonDataKindsPhone::AcquireSingleton(
-            (IContactsContractCommonDataKindsPhone**)&phone);
-    AutoPtr<IUri> contentUri;
-    phone->GetCONTENT_URI((IUri**)&contentUri);
-
-    AutoPtr<IUriBuilder> builder;
-    contentUri->BuildUpon((IUriBuilder**)&builder);
-    builder->AppendQueryParameter(IContactsContract::DIRECTORY_PARAM_KEY,
-        StringUtils::ToString(IContactsContractDirectory::DEFAULT));
-    builder->AppendQueryParameter(IContactsContract::REMOVE_DUPLICATE_ENTRIES,
-        String("true"));
-    AutoPtr<IUri> uri;
-    builder->Build((IUri**)&uri);
-    return uri;
-}
-
-const AutoPtr<IUri> DialerDatabaseHelper::PhoneQuery::URI = CreatePhoneQueryUri();
-const String DialerDatabaseHelper::PhoneQuery::PROJECTION[] = {
-    IBaseColumns::ID,                          // 0
-    IContactsContractCommonDataKindsCommonColumns::TYPE,                         // 1
-    IContactsContractCommonDataKindsCommonColumns::LABEL,                        // 2
-    IContactsContractCommonDataKindsPhone::NUMBER,                       // 3
-    IContactsContractRawContactsColumns::CONTACT_ID,                   // 4
-    IContactsContractContactsColumns::LOOKUP_KEY,                   // 5
-    IContactsContractContactNameColumns::DISPLAY_NAME_PRIMARY,         // 6
-    IContactsContractContactsColumns::PHOTO_ID,                     // 7
-    // TODO:
-    // IContactsContractDataUsageStatColumns::LAST_TIME_USED,                // 8
-    // IContactsContractDataUsageStatColumns::TIMES_USED,                    // 9
-    IContactsContractContactOptionsColumns::STARRED,                   // 10
-    IContactsContractDataColumns::IS_SUPER_PRIMARY,              // 11
-    IContactsContractContactsColumns::IN_VISIBLE_GROUP,          // 12
-    IContactsContractDataColumns::IS_PRIMARY,                    // 13
-};
-
+AutoPtr<IUri> DialerDatabaseHelper::PhoneQuery::URI;
+AutoPtr< ArrayOf<String> > DialerDatabaseHelper::PhoneQuery::PROJECTION;
 const Int32 DialerDatabaseHelper::PhoneQuery::PHONE_ID = 0;
 const Int32 DialerDatabaseHelper::PhoneQuery::PHONE_TYPE = 1;
 const Int32 DialerDatabaseHelper::PhoneQuery::PHONE_LABEL = 2;
@@ -176,26 +140,10 @@ const String DialerDatabaseHelper::PhoneQuery::SELECTION = SELECT_UPDATED_CLAUSE
 //=================================================================
 // DialerDatabaseHelper::DeleteContactQuery
 //=================================================================
-AutoPtr<IUri> CreateDeleteContactQueryUri()
-{
-    AutoPtr<IContactsContractDeletedContacts> contacts;
-    CContactsContractDeletedContacts::AcquireSingleton(
-            (IContactsContractDeletedContacts**)&contacts);
-    AutoPtr<IUri> uri;
-    contacts->GetCONTENT_URI((IUri**)&uri);
-    return uri;
-}
-
-const AutoPtr<IUri> DialerDatabaseHelper::DeleteContactQuery::URI = CreateDeleteContactQueryUri();
-
-const String DialerDatabaseHelper::DeleteContactQuery::PROJECTION[] = {
-    IContactsContractDeletedContactsColumns::CONTACT_ID,                          // 0
-    IContactsContractDeletedContactsColumns::CONTACT_DELETED_TIMESTAMP,           // 1
-};
-
+AutoPtr<IUri> DialerDatabaseHelper::DeleteContactQuery::URI;
+AutoPtr< ArrayOf<String> > DialerDatabaseHelper::DeleteContactQuery::PROJECTION;
 const Int32 DialerDatabaseHelper::DeleteContactQuery::DELETED_CONTACT_ID = 0;
 const Int32 DialerDatabaseHelper::DeleteContactQuery::DELECTED_TIMESTAMP = 1;
-
 /** Selects only rows that have been deleted after a certain time stamp.*/
 const String DialerDatabaseHelper::DeleteContactQuery::SELECT_UPDATED_CLAUSE =
         IContactsContractDeletedContactsColumns::CONTACT_DELETED_TIMESTAMP + " > ?";
@@ -206,27 +154,9 @@ const String DialerDatabaseHelper::DeleteContactQuery::SELECT_UPDATED_CLAUSE =
 //=================================================================
 const Int64 DialerDatabaseHelper::SmartDialSortingOrder::LAST_TIME_USED_CURRENT_MS = 3LL * 24 * 60 * 60 * 1000;
 const Int64 DialerDatabaseHelper::SmartDialSortingOrder::LAST_TIME_USED_RECENT_MS = 30LL * 24 * 60 * 60 * 1000;
-
-const String DialerDatabaseHelper::SmartDialSortingOrder::TIME_SINCE_LAST_USED_MS = String("( ?1 - ") +
-        DialerDatabaseHelper::Tables::SMARTDIAL_TABLE + "."
-        + DialerDatabaseHelper::SmartDialDbColumns::LAST_TIME_USED + ")";
-
-const String DialerDatabaseHelper::SmartDialSortingOrder::SORT_BY_DATA_USAGE =
-        String("(CASE WHEN ") + TIME_SINCE_LAST_USED_MS + " < " + LAST_TIME_USED_CURRENT_MS +
-        " THEN 0 " +
-        " WHEN " + TIME_SINCE_LAST_USED_MS + " < " + LAST_TIME_USED_RECENT_MS +
-        " THEN 1 " +
-        " ELSE 2 END)";
-
-const String DialerDatabaseHelper::SmartDialSortingOrder::SORT_ORDER =
-        DialerDatabaseHelper::Tables::SMARTDIAL_TABLE + "." + DialerDatabaseHelper::SmartDialDbColumns::STARRED + " DESC, "
-        + DialerDatabaseHelper::Tables::SMARTDIAL_TABLE + "." + DialerDatabaseHelper::SmartDialDbColumns::IS_SUPER_PRIMARY + " DESC, "
-        + SORT_BY_DATA_USAGE + ", "
-        + DialerDatabaseHelper::Tables::SMARTDIAL_TABLE + "." + DialerDatabaseHelper::SmartDialDbColumns::TIMES_USED + " DESC, "
-        + DialerDatabaseHelper::Tables::SMARTDIAL_TABLE + "." + DialerDatabaseHelper::SmartDialDbColumns::IN_VISIBLE_GROUP + " DESC, "
-        + DialerDatabaseHelper::Tables::SMARTDIAL_TABLE + "." + DialerDatabaseHelper::SmartDialDbColumns::DISPLAY_NAME_PRIMARY + ", "
-        + DialerDatabaseHelper::Tables::SMARTDIAL_TABLE + "." + DialerDatabaseHelper::SmartDialDbColumns::CONTACT_ID + ", "
-        + DialerDatabaseHelper::Tables::SMARTDIAL_TABLE + "." + DialerDatabaseHelper::SmartDialDbColumns::IS_PRIMARY + " DESC";
+String DialerDatabaseHelper::SmartDialSortingOrder::TIME_SINCE_LAST_USED_MS;
+String DialerDatabaseHelper::SmartDialSortingOrder::SORT_BY_DATA_USAGE;
+String DialerDatabaseHelper::SmartDialSortingOrder::SORT_ORDER;
 
 
 //=================================================================
@@ -367,15 +297,120 @@ ECode DialerDatabaseHelper::SmartDialUpdateAsyncTask::OnPostExecute(
 
 
 //=================================================================
-// DialerDatabaseHelper
+// DialerDatabaseHelper::StaticInitializer
 //=================================================================
-AutoPtr<IAtomicBoolean> CreateInUpdate()
+DialerDatabaseHelper::StaticInitializer::StaticInitializer()
 {
-    AutoPtr<IAtomicBoolean> inUpdate;
-    CAtomicBoolean::New(FALSE, (IAtomicBoolean**)&inUpdate);
-    return inUpdate;
+    // Initialize PhoneQuery
+    AutoPtr<IContactsContractCommonDataKindsPhone> phone;
+    CContactsContractCommonDataKindsPhone::AcquireSingleton(
+            (IContactsContractCommonDataKindsPhone**)&phone);
+    AutoPtr<IUri> contentUri;
+    phone->GetCONTENT_URI((IUri**)&contentUri);
+
+    AutoPtr<IUriBuilder> builder;
+    contentUri->BuildUpon((IUriBuilder**)&builder);
+    builder->AppendQueryParameter(IContactsContract::DIRECTORY_PARAM_KEY,
+            StringUtils::ToString(IContactsContractDirectory::DEFAULT));
+    builder->AppendQueryParameter(IContactsContract::REMOVE_DUPLICATE_ENTRIES,
+            String("true"));
+    AutoPtr<IUri> uri;
+    builder->Build((IUri**)&uri);
+    PhoneQuery::URI = uri;
+
+    AutoPtr< ArrayOf<String> > projection = ArrayOf<String>::Alloc(14);
+    (*projection)[0] = IBaseColumns::ID;                                            // 0
+    (*projection)[1] = IContactsContractCommonDataKindsCommonColumns::TYPE;         // 1
+    (*projection)[2] = IContactsContractCommonDataKindsCommonColumns::LABEL;        // 2
+    (*projection)[3] = IContactsContractCommonDataKindsPhone::NUMBER;               // 3
+    (*projection)[4] = IContactsContractRawContactsColumns::CONTACT_ID;             // 4
+    (*projection)[5] = IContactsContractContactsColumns::LOOKUP_KEY;                // 5
+    (*projection)[6] = IContactsContractContactNameColumns::DISPLAY_NAME_PRIMARY;   // 6
+    (*projection)[7] = IContactsContractContactsColumns::PHOTO_ID;                  // 7
+    (*projection)[8] = IContactsContractDataUsageStatColumns::LAST_TIME_USED;       // 8
+    (*projection)[9] = IContactsContractDataUsageStatColumns::TIMES_USED;           // 9
+    (*projection)[10] = IContactsContractContactOptionsColumns::STARRED;            // 10
+    (*projection)[11] = IContactsContractDataColumns::IS_SUPER_PRIMARY;             // 11
+    (*projection)[12] = IContactsContractContactsColumns::IN_VISIBLE_GROUP;         // 12
+    (*projection)[13] = IContactsContractDataColumns::IS_PRIMARY;                   // 13
+    PhoneQuery::PROJECTION = projection;
+
+    // Initialize DeleteContactQuery
+    AutoPtr<IContactsContractDeletedContacts> contacts;
+    CContactsContractDeletedContacts::AcquireSingleton(
+            (IContactsContractDeletedContacts**)&contacts);
+    uri = NULL;
+    contacts->GetCONTENT_URI((IUri**)&uri);
+    DeleteContactQuery::URI = uri;
+
+    projection = ArrayOf<String>::Alloc(2);
+    (*projection)[0] = IContactsContractDeletedContactsColumns::CONTACT_ID;         // 0
+    (*projection)[1] = IContactsContractDeletedContactsColumns::CONTACT_DELETED_TIMESTAMP; // 1
+    DeleteContactQuery::PROJECTION = projection;
+
+    // Initialize SmartDialSortingOrder
+    StringBuilder sb;
+    sb += "( ?1 - ";
+    sb += DialerDatabaseHelper::Tables::SMARTDIAL_TABLE;
+    sb += ".";
+    sb += DialerDatabaseHelper::SmartDialDbColumns::LAST_TIME_USED;
+    sb += ")";
+    SmartDialSortingOrder::TIME_SINCE_LAST_USED_MS = sb.ToString();
+
+    sb.Reset();
+    sb += "(CASE WHEN ";
+    sb += SmartDialSortingOrder::TIME_SINCE_LAST_USED_MS;
+    sb += " < ";
+    sb += SmartDialSortingOrder::LAST_TIME_USED_CURRENT_MS;
+    sb += " THEN 0 ";
+    sb += " WHEN ";
+    sb += SmartDialSortingOrder::TIME_SINCE_LAST_USED_MS;
+    sb += " < ";
+    sb += SmartDialSortingOrder::LAST_TIME_USED_RECENT_MS;
+    sb += " THEN 1 ";
+    sb += " ELSE 2 END)";
+    SmartDialSortingOrder::SORT_BY_DATA_USAGE = sb.ToString();
+
+    sb.Reset();
+    sb += DialerDatabaseHelper::Tables::SMARTDIAL_TABLE;
+    sb += ".";
+    sb += DialerDatabaseHelper::SmartDialDbColumns::STARRED;
+    sb += " DESC, ";
+    sb += DialerDatabaseHelper::Tables::SMARTDIAL_TABLE;
+    sb += ".";
+    sb += DialerDatabaseHelper::SmartDialDbColumns::IS_SUPER_PRIMARY;
+    sb += " DESC, ";
+    sb += SmartDialSortingOrder::SORT_BY_DATA_USAGE;
+    sb += ", ";
+    sb += DialerDatabaseHelper::Tables::SMARTDIAL_TABLE;
+    sb += ".";
+    sb += DialerDatabaseHelper::SmartDialDbColumns::TIMES_USED;
+    sb += " DESC, ";
+    sb += DialerDatabaseHelper::Tables::SMARTDIAL_TABLE;
+    sb += ".";
+    sb += DialerDatabaseHelper::SmartDialDbColumns::IN_VISIBLE_GROUP;
+    sb += " DESC, ";
+    sb += DialerDatabaseHelper::Tables::SMARTDIAL_TABLE;
+    sb += ".";
+    sb += DialerDatabaseHelper::SmartDialDbColumns::DISPLAY_NAME_PRIMARY;
+    sb += ", ";
+    sb += DialerDatabaseHelper::Tables::SMARTDIAL_TABLE;
+    sb += ".";
+    sb += DialerDatabaseHelper::SmartDialDbColumns::CONTACT_ID;
+    sb += ", ";
+    sb += DialerDatabaseHelper::Tables::SMARTDIAL_TABLE;
+    sb += ".";
+    sb += DialerDatabaseHelper::SmartDialDbColumns::IS_PRIMARY;
+    sb += " DESC";
+    SmartDialSortingOrder::SORT_ORDER = sb.ToString();
+
+    // Initialize DialerDatabaseHelper
+    CAtomicBoolean::New(FALSE, (IAtomicBoolean**)&sInUpdate);
 }
 
+//=================================================================
+// DialerDatabaseHelper
+//=================================================================
 const Int32 DialerDatabaseHelper::DATABASE_VERSION = 4;
 const String DialerDatabaseHelper::DATABASE_NAME("dialer.db");
 
@@ -385,12 +420,14 @@ const Boolean DialerDatabaseHelper::DEBUG = FALSE;
 AutoPtr<DialerDatabaseHelper> DialerDatabaseHelper::sSingleton;
 
 Object DialerDatabaseHelper::mLock;
-const AutoPtr<IAtomicBoolean> DialerDatabaseHelper::sInUpdate = CreateInUpdate();
+AutoPtr<IAtomicBoolean> DialerDatabaseHelper::sInUpdate;
 const String DialerDatabaseHelper::DATABASE_LAST_CREATED_SHARED_PREF("com.android.dialer");
 const String DialerDatabaseHelper::LAST_UPDATED_MILLIS("last_updated_millis");
 const String DialerDatabaseHelper::DATABASE_VERSION_PROPERTY("database_version");
 
 const Int32 DialerDatabaseHelper::MAX_ENTRIES = 20;
+
+const DialerDatabaseHelper::StaticInitializer DialerDatabaseHelper::sInitializer;
 
 AutoPtr<DialerDatabaseHelper> DialerDatabaseHelper::GetInstance(
     /* [in] */ IContext* context)
@@ -650,10 +687,10 @@ void DialerDatabaseHelper::RemoveDeletedContacts(
             DeleteContactQuery::DELETED_CONTACT_ID, &deleteContactId), exit);
 
         Int32 value;
-        FAIL_GOTO(db->Delete(Tables::SMARTDIAL_TABLE,
-                SmartDialDbColumns::CONTACT_ID + "=" + deleteContactId, NULL, &value), exit);
-        FAIL_GOTO(db->Delete(Tables::PREFIX_TABLE,
-                PrefixColumns::CONTACT_ID + "=" + deleteContactId, NULL, &value), exit);
+        // FAIL_GOTO(db->Delete(Tables::SMARTDIAL_TABLE,
+        //         SmartDialDbColumns::CONTACT_ID + "=" + deleteContactId, NULL, &value), exit);
+        // FAIL_GOTO(db->Delete(Tables::PREFIX_TABLE,
+        //         PrefixColumns::CONTACT_ID + "=" + deleteContactId, NULL, &value), exit);
         FAIL_GOTO(deletedContactCursor->MoveToNext(&succeeded), exit);
     }
 
@@ -715,10 +752,10 @@ void DialerDatabaseHelper::RemoveUpdatedContacts(
             PhoneQuery::PHONE_CONTACT_ID, &contactId), exit);
 
         Int32 value;
-        FAIL_GOTO(db->Delete(Tables::SMARTDIAL_TABLE, SmartDialDbColumns::CONTACT_ID + "=" +
-                contactId, NULL, &value), exit);
-        FAIL_GOTO(db->Delete(Tables::PREFIX_TABLE, PrefixColumns::CONTACT_ID + "=" +
-                contactId, NULL, &value), exit);
+        // FAIL_GOTO(db->Delete(Tables::SMARTDIAL_TABLE, SmartDialDbColumns::CONTACT_ID + "=" +
+        //         contactId, NULL, &value), exit);
+        // FAIL_GOTO(db->Delete(Tables::PREFIX_TABLE, PrefixColumns::CONTACT_ID + "=" +
+        //         contactId, NULL, &value), exit);
     }
 
     db->SetTransactionSuccessful();

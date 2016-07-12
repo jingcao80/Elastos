@@ -9,3 +9,5 @@ LUBE_FLAGS += -n -u
 
 SOURCES = DatabaseHelperManager.cpp
 #SOURCES += CObjectFactory.cpp
+
+ELASTOS_LIBS += analytics/analytics.lib

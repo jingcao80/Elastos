@@ -12,7 +12,6 @@ SOURCES = Elastos.Droid.Dialer.car
 SOURCES += R.cpp
 SOURCES += Elastos.CoreLibrary.cpp
 SOURCES += Elastos.Droid.Core.cpp
-SOURCES += Elastos.Droid.ContactsCommon.cpp
 
 ELASTOS_LIBS += src/elastos/droid/contacts/common/common.lib
 ELASTOS_LIBS += src/elastos/droid/dialer/dialer.lib
@@ -25,7 +24,6 @@ LIBRARIES  = $(XDK_USER_LIB)/Elastos.Runtime.lib
 LIBRARIES += $(XDK_TARGETS)/Elastos.Runtime.eco
 LIBRARIES += $(XDK_TARGETS)/Elastos.Droid.Core.eco
 LIBRARIES += $(XDK_TARGETS)/Elastos.CoreLibrary.eco
-LIBRARIES += $(XDK_TARGETS)/Elastos.Droid.ContactsCommon.eco
 LIBRARIES += $(XDK_USER_LIB)/crt0.lib
 LIBRARIES += -lm -licuuc -llog -lutils -landroidfw
 
