@@ -47,8 +47,7 @@ ECode DashboardSummary::MyHandler::HandleMessage(
         case MSG_REBUILD_UI: {
             AutoPtr<IActivity> act;
             mHost->GetActivity((IActivity**)&act);
-            AutoPtr<IContext> context = IContext::Probe(act);
-            mHost->RebuildUI(context);
+            mHost->RebuildUI(IContext::Probe(act));
         } break;
     }
 

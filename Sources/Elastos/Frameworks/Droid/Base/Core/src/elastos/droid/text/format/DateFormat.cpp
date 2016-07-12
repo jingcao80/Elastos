@@ -1,6 +1,7 @@
 
 #include <Elastos.CoreLibrary.Libcore.h>
 #include <Elastos.CoreLibrary.Utility.h>
+#include <Elastos.CoreLibrary.h>
 #include "Elastos.Droid.Content.h"
 #include "Elastos.Droid.Provider.h"
 #include "elastos/droid/text/format/DateFormat.h"
@@ -9,14 +10,11 @@
 #include "elastos/droid/text/CSpannableStringBuilder.h"
 #include "elastos/droid/provider/CSettingsSystem.h"
 #include "elastos/droid/R.h"
-#include <elastos/core/StringBuilder.h>
-#include <Elastos.CoreLibrary.h>
-#include <elastos/core/StringUtils.h>
+#include <elastos/core/AutoLock.h>
 #include <elastos/core/Object.h>
-#include <elastos/core/AutoLock.h>
+#include <elastos/core/StringBuilder.h>
+#include <elastos/core/StringUtils.h>
 
-#include <elastos/core/AutoLock.h>
-using Elastos::Core::AutoLock;
 using Elastos::Droid::Content::IContentResolver;
 using Elastos::Droid::Content::Res::IResources;
 using Elastos::Droid::Content::Res::IConfiguration;
@@ -27,6 +25,7 @@ using Elastos::Droid::Text::CSpannableStringBuilder;
 using Elastos::Droid::Text::ISpannedString;
 using Elastos::Droid::Text::CSpannedString;
 using Elastos::Droid::Text::IEditable;
+using Elastos::Core::AutoLock;
 using Elastos::Core::StringUtils;
 using Elastos::Core::StringBuilder;
 using Elastos::Core::CString;
@@ -193,7 +192,8 @@ String DateFormat::GetDateFormatStringForSetting(
         if (month >= 0 && day >= 0 && year >= 0) {
             String temp;
             context->GetString(R::string::numeric_date_template, &temp);
-            String value_ = value;
+
+            String value_("");
             if (year < month && year < day) {
                 if (month < day) {
                     value_.AppendFormat(temp.string(), "yyyy", "MM", "dd");

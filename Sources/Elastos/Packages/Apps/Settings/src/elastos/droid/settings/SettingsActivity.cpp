@@ -426,6 +426,9 @@ ECode SettingsActivity::OnPreferenceStartFragment(
 {
     VALIDATE_NOT_NULL(result);
 
+    Slogger::I(TAG, " >> enter SettingsActivity::OnPreferenceStartFragment");
+
+
     // Override the fragment title for Wallpaper settings
     Int32 titleRes;
     pref->GetTitleRes(&titleRes);
@@ -455,6 +458,7 @@ ECode SettingsActivity::OnPreferenceStartFragment(
     StartPreferencePanel(str, bundle, titleRes, cs, NULL, 0);
 
     *result = TRUE;
+    Slogger::I(TAG, " << leave SettingsActivity::OnPreferenceStartFragment");
     return NOERROR;
 }
 
@@ -509,9 +513,10 @@ ECode SettingsActivity::OnCreateOptionsMenu(
 {
     VALIDATE_NOT_NULL(result);
     *result = FALSE;
-    Slogger::D(TAG, " >> enter OnCreateOptionsMenu ");
+    Slogger::I(TAG, " >> enter OnCreateOptionsMenu ");
 
     if (!mDisplaySearch) {
+        Slogger::I(TAG, " << leave OnCreateOptionsMenu 1 ");
         return NOERROR;
     }
 
@@ -529,6 +534,7 @@ ECode SettingsActivity::OnCreateOptionsMenu(
     mSearchView = ISearchView::Probe(view);
 
     if (mSearchMenuItem == NULL || mSearchView == NULL) {
+        Slogger::I(TAG, " << leave OnCreateOptionsMenu 2 ");
         return NOERROR;
     }
 
@@ -547,7 +553,7 @@ ECode SettingsActivity::OnCreateOptionsMenu(
     mSearchView->SetQuery(CoreUtils::Convert(query), TRUE /* submit */);
 
     *result = TRUE;
-    Slogger::D("SettingsActivity", " << leave OnCreateOptionsMenu ");
+    Slogger::I("SettingsActivity", " << leave OnCreateOptionsMenu ");
     return NOERROR;
 }
 
@@ -737,19 +743,19 @@ ECode SettingsActivity::OnCreate(
             AutoPtr<IButton> backButton = IButton::Probe(_view);
             AutoPtr<OnCreateOnClickListener> myListener =
                     new OnCreateOnClickListener(this, 0);
-            IView::Probe(backButton)->SetOnClickListener(myListener);
+            _view->SetOnClickListener(myListener);
 
             _view = NULL;
             FindViewById(R::id::skip_button, (IView**)&_view);
             AutoPtr<IButton> skipButton = IButton::Probe(_view);
             AutoPtr<OnCreateOnClickListener> myListener1 =
                     new OnCreateOnClickListener(this, 1);
-            IView::Probe(skipButton)->SetOnClickListener(myListener1);
+            _view->SetOnClickListener(myListener1);
 
             _view = NULL;
             FindViewById(R::id::next_button, (IView**)&_view);
             mNextButton = IButton::Probe(_view);
-            IView::Probe(mNextButton)->SetOnClickListener(myListener1);
+            _view->SetOnClickListener(myListener1);
 
             // set our various button parameters
             if (intent->HasExtra(EXTRA_PREFS_SET_NEXT_TEXT, &res), res) {
@@ -1045,6 +1051,7 @@ ECode SettingsActivity::StartPreferencePanel(
     /* [in] */ IFragment* resultTo,
     /* [in] */ Int32 resultRequestCode)
 {
+    Slogger::I(TAG, " >> enter SettingsActivity::StartPreferencePanel");
     String title;
     if (titleRes < 0) {
         if (titleText != NULL) {
@@ -1057,6 +1064,7 @@ ECode SettingsActivity::StartPreferencePanel(
     }
     Utils::StartWithFragment(this, fragmentClass, args, resultTo, resultRequestCode,
             titleRes, CoreUtils::Convert(title), mIsShortcut);
+    Slogger::I(TAG, " << leave SettingsActivity::StartPreferencePanel");
     return NOERROR;
 }
 
@@ -1378,7 +1386,7 @@ ECode SettingsActivity::UpdateTilesList(
 
     AutoPtr<IInterface> obj;
     GetSystemService(IContext::USER_SERVICE, (IInterface**)&obj);
-    AutoPtr<IUserManager> um = IUserManager::Probe(obj);
+    IUserManager* um = IUserManager::Probe(obj);
 
     Int32 size;
     target->GetSize(&size);
@@ -1419,7 +1427,7 @@ ECode SettingsActivity::UpdateTilesList(
             else if (id == R::id::data_usage_settings) {
                 // Remove data usage when kernel module not enabled
                 AutoPtr<IInterface> obj = ServiceManager::GetService(IContext::NETWORKMANAGEMENT_SERVICE);
-                AutoPtr<IINetworkManagementService> netManager = IINetworkManagementService::Probe(obj);
+                IINetworkManagementService* netManager = IINetworkManagementService::Probe(obj);
                 // try {
                 if (netManager->IsBandwidthControlEnabled(&res), !res) {
                     removeTile = TRUE;

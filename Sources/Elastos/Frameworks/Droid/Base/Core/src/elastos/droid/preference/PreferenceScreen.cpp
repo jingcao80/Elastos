@@ -69,7 +69,7 @@ ECode PreferenceScreen::Bind(
     av->SetOnItemClickListener(this);
     AutoPtr<IListAdapter> adapter;
     GetRootAdapter((IListAdapter**)&adapter);
-    AutoPtr<IAdapter> a = IAdapter::Probe(adapter);
+    IAdapter* a = IAdapter::Probe(adapter);
     av->SetAdapter(a);
 
     OnAttachedToActivity();
@@ -95,13 +95,13 @@ ECode PreferenceScreen::ShowDialog(
     AutoPtr<IContext> context;
     GetContext((IContext**)&context);
     if (mListView != NULL) {
-        AutoPtr<IAdapterView> av = IAdapterView::Probe(mListView);
+        IAdapterView* av = IAdapterView::Probe(mListView);
         av->SetAdapter(NULL);
     }
 
     AutoPtr<IInterface> obj;
     context->GetSystemService(IContext::LAYOUT_INFLATER_SERVICE, (IInterface**)&obj);
-    AutoPtr<ILayoutInflater> inflater = ILayoutInflater::Probe(obj);
+    ILayoutInflater* inflater = ILayoutInflater::Probe(obj);
     AutoPtr<IView> childPrefScreen;
     inflater->Inflate(R::layout::preference_list_fragment, NULL, (IView**)&childPrefScreen);
     AutoPtr<IView> listViewObj;
@@ -159,10 +159,10 @@ ECode PreferenceScreen::GetDialog(
 }
 
 ECode PreferenceScreen::OnItemClick(
-    /* [in] */IAdapterView* parent,
-    /* [in] */IView* view,
-    /* [in] */Int32 position,
-    /* [in] */Int64 id)
+    /* [in] */ IAdapterView* parent,
+    /* [in] */ IView* view,
+    /* [in] */ Int32 position,
+    /* [in] */ Int64 id)
 {
     // If the list has headers, subtract them from the index.
     if (IListView::Probe(parent) != NULL) {
@@ -173,10 +173,10 @@ ECode PreferenceScreen::OnItemClick(
     GetRootAdapter((IListAdapter**)&adapter);
     AutoPtr<IInterface> item;
     IAdapter::Probe(adapter)->GetItem(position, (IInterface**)&item);
-    if (IPreference::Probe(item) == NULL) {
+    IPreference* preference = IPreference::Probe(item);
+    if (preference == NULL) {
         return NOERROR;
     }
-    AutoPtr<IPreference> preference = IPreference::Probe(item);
     preference->PerformClick(this);
     return NOERROR;
 }

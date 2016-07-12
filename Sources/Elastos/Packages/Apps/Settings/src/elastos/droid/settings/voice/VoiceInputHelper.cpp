@@ -198,11 +198,11 @@ ECode VoiceInputHelper::BuildUi()
     for (Int32 i = 0; i < size; i++) {
         AutoPtr<IInterface> obj;
         mAvailableVoiceInteractions->Get(i, (IInterface**)&obj);
-        AutoPtr<IResolveInfo> resolveInfo = IResolveInfo::Probe(obj);
+        IResolveInfo* resolveInfo = IResolveInfo::Probe(obj);
         AutoPtr<IServiceInfo> serviceInfo;
         resolveInfo->GetServiceInfo((IServiceInfo**)&serviceInfo);
 
-        AutoPtr<IPackageItemInfo> pii = IPackageItemInfo::Probe(serviceInfo);
+        IPackageItemInfo* pii = IPackageItemInfo::Probe(serviceInfo);
         String packageName, name;
         pii->GetPackageName(&packageName);
         pii->GetName(&name);
@@ -251,12 +251,12 @@ ECode VoiceInputHelper::BuildUi()
     for (Int32 i = 0; i < size; i++) {
         AutoPtr<IInterface> obj;
         mAvailableRecognition->Get(i, (IInterface**)&obj);
-        AutoPtr<IResolveInfo> resolveInfo = IResolveInfo::Probe(obj);
+        IResolveInfo* resolveInfo = IResolveInfo::Probe(obj);
 
         AutoPtr<IServiceInfo> serviceInfo;
         resolveInfo->GetServiceInfo((IServiceInfo**)&serviceInfo);
 
-        AutoPtr<IPackageItemInfo> pii = IPackageItemInfo::Probe(serviceInfo);
+        IPackageItemInfo* pii = IPackageItemInfo::Probe(serviceInfo);
         String packageName, name;
         pii->GetPackageName(&packageName);
         pii->GetName(&name);
@@ -288,7 +288,7 @@ ECode VoiceInputHelper::BuildUi()
         AutoPtr<IResources> res;
         pkm->GetResourcesForApplication(applicationInfo, (IResources**)&res);
 
-        AutoPtr<IXmlPullParser> xpp = IXmlPullParser::Probe(parser);
+        IXmlPullParser* xpp = IXmlPullParser::Probe(parser);
         AutoPtr<IAttributeSet> attrs = Xml::AsAttributeSet(xpp);
 
         Int32 type;

@@ -271,11 +271,11 @@ ECode SearchResultsSummary::SuggestionsAdapter::GetView(
 
     AutoPtr<IView> otherView;
     view->FindViewById(R::id::title, (IView**)&otherView);
-    AutoPtr<ITextView> query = ITextView::Probe(otherView);
+    ITextView* query = ITextView::Probe(otherView);
 
     AutoPtr<IInterface> obj;
     GetItem(position, (IInterface**)&obj);
-    AutoPtr<SuggestionItem> item = (SuggestionItem*)IObject::Probe(obj);
+    SuggestionItem* item = (SuggestionItem*)IObject::Probe(obj);
     query->SetText(CoreUtils::Convert(item->mQuery));
 
     *result = view;
@@ -484,7 +484,7 @@ ECode SearchResultsSummary::SearchResultsAdapter::GetView(
     AutoPtr<IInterface> obj;
     GetItem(position, (IInterface**)&obj);
 
-    AutoPtr<SearchResult> result = (SearchResult*)IObject::Probe(obj);
+    SearchResult* result = (SearchResult*)IObject::Probe(obj);
     textTitle->SetText(CoreUtils::Convert(result->mTitle));
 
     if (result->mIconResId != R::drawable::empty_icon) {
@@ -640,10 +640,11 @@ ECode SearchResultsSummary::OnCreate(
 {
     Fragment::OnCreate(savedInstanceState);
 
-    AutoPtr<IActivity> activity;
-    GetActivity((IActivity**)&activity);
-    mResultsAdapter = new SearchResultsAdapter(IContext::Probe(activity));
-    mSuggestionsAdapter = new SuggestionsAdapter(IContext::Probe(activity));
+    AutoPtr<IActivity> _activity;
+    GetActivity((IActivity**)&_activity);
+    IContext* activity = IContext::Probe(_activity);
+    mResultsAdapter = new SearchResultsAdapter(activity);
+    mSuggestionsAdapter = new SuggestionsAdapter(activity);
 
     if (savedInstanceState != NULL) {
         savedInstanceState->GetBoolean(SAVE_KEY_SHOW_RESULTS, &mShowResults);

@@ -99,7 +99,7 @@ ECode ZonePicker::ZoneGetter::GetZones(
     AutoPtr<IResources> resources;
     context->GetResources((IResources**)&resources);
     AutoPtr<IXmlResourceParser> xrp;
-    ECode ec = resources->GetXml(R::xml::timezones, (IXmlResourceParser**)&xrp);
+    resources->GetXml(R::xml::timezones, (IXmlResourceParser**)&xrp);
     Int32 next;
     IXmlPullParser* xpp = IXmlPullParser::Probe(xrp);
     while ((xpp->Next(&next), next) != IXmlPullParser::START_TAG) {
@@ -308,7 +308,7 @@ Int32 ZonePicker::GetTimeZoneIndex(
         // Using HashMap<String, Object> induces unnecessary warning.
         AutoPtr<IInterface> obj;
         _adapter->GetItem(i, (IInterface**)&obj);
-        IHashMap* map = IHashMap::Probe(obj);
+        AutoPtr<IHashMap> map = IHashMap::Probe(obj);
         obj = NULL;
         map->Get(CoreUtils::Convert(KEY_ID), (IInterface**)&obj);
         String id;

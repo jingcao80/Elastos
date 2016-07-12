@@ -179,7 +179,7 @@ Boolean Utils::UpdatePreferenceToSpecificActivityOrRemove(
         for (Int32 i = 0; i < listSize; i++) {
             AutoPtr<IInterface> obj;
             list->Get(i, (IInterface**)&obj);
-            AutoPtr<IResolveInfo> resolveInfo = IResolveInfo::Probe(obj);
+            IResolveInfo* resolveInfo = IResolveInfo::Probe(obj);
             AutoPtr<IActivityInfo> activityInfo;
             resolveInfo->GetActivityInfo((IActivityInfo**)&activityInfo);
             AutoPtr<IApplicationInfo> applicationInfo;
@@ -234,7 +234,7 @@ Boolean Utils::UpdateTileToSpecificActivityFromMetaDataOrRemove(
         for (Int32 i = 0; i < listSize; i++) {
             AutoPtr<IInterface> obj;
             list->Get(i, (IInterface**)&obj);
-            AutoPtr<IResolveInfo> resolveInfo = IResolveInfo::Probe(obj);
+            IResolveInfo* resolveInfo = IResolveInfo::Probe(obj);
             AutoPtr<IActivityInfo> activityInfo;
             resolveInfo->GetActivityInfo((IActivityInfo**)&activityInfo);
             AutoPtr<IApplicationInfo> applicationInfo;
@@ -314,7 +314,7 @@ Boolean Utils::IsVoiceCapable(
 {
     AutoPtr<IInterface> obj;
     context->GetSystemService(IContext::TELEPHONY_SERVICE, (IInterface**)&obj);
-    AutoPtr<ITelephonyManager> telephony = ITelephonyManager::Probe(obj);
+    ITelephonyManager* telephony = ITelephonyManager::Probe(obj);
     Boolean res;
     return telephony != NULL && (telephony->IsVoiceCapable(&res), res);
 }
@@ -324,7 +324,7 @@ Boolean Utils::IsWifiOnly(
 {
     AutoPtr<IInterface> obj;
     context->GetSystemService(IContext::CONNECTIVITY_SERVICE, (IInterface**)&obj);
-    AutoPtr<IConnectivityManager> cm = IConnectivityManager::Probe(obj);
+    IConnectivityManager* cm = IConnectivityManager::Probe(obj);
     Boolean res;
     return (cm->IsNetworkSupported(IConnectivityManager::TYPE_MOBILE, &res), res) == FALSE;
 }
@@ -334,7 +334,7 @@ String Utils::GetWifiIpAddresses(
 {
     AutoPtr<IInterface> obj;
     context->GetSystemService(IContext::CONNECTIVITY_SERVICE, (IInterface**)&obj);
-    AutoPtr<IConnectivityManager> cm = IConnectivityManager::Probe(obj);
+    IConnectivityManager* cm = IConnectivityManager::Probe(obj);
     AutoPtr<ILinkProperties> prop;
     cm->GetLinkProperties(IConnectivityManager::TYPE_WIFI,(ILinkProperties**)&prop);
     return FormatIpAddresses(prop);
@@ -640,7 +640,7 @@ Boolean Utils::CopyMeProfilePhoto(
     Int32 userId = user != NULL ? (user->GetId(&id), id) : UserHandle::GetMyUserId();
     AutoPtr<IInterface> obj;
     context->GetSystemService(IContext::USER_SERVICE, (IInterface**)&obj);
-    AutoPtr<IUserManager> um = IUserManager::Probe(obj);
+    IUserManager* um = IUserManager::Probe(obj);
     AutoPtr<IBitmapFactory> factory;
     CBitmapFactory::AcquireSingleton((IBitmapFactory**)&factory);
     AutoPtr<IBitmap> icon;
@@ -890,7 +890,7 @@ AutoPtr<IUserHandle> Utils::GetManagedProfile(
     for (Int32 i = 0; i < count; i++) {
         AutoPtr<IInterface> obj;
         userProfiles->Get(i, (IInterface**)&obj);
-        AutoPtr<IUserHandle> profile = IUserHandle::Probe(obj);
+        IUserHandle* profile = IUserHandle::Probe(obj);
         Int32 id, userHandle;
         profile->GetIdentifier(&id);
         if (id == (userManager->GetUserHandle(&userHandle), userHandle)) {
@@ -1080,7 +1080,7 @@ AutoPtr<IDialog> Utils::CreateRemoveConfirmationDialog(
 {
     AutoPtr<IInterface> obj;
     context->GetSystemService(IContext::USER_SERVICE, (IInterface**)&obj);
-    AutoPtr<IUserManager> um = IUserManager::Probe(obj);
+    IUserManager* um = IUserManager::Probe(obj);
     AutoPtr<IUserInfo> userInfo;
     um->GetUserInfo(removingUserId, (IUserInfo**)&userInfo);
     Int32 titleResId;
@@ -1119,10 +1119,8 @@ Boolean Utils::IsOemUnlockEnabled(
     /* [in] */ IContext* context)
 {
     AutoPtr<IInterface> obj;
-    context->GetSystemService(IContext::PERSISTENT_DATA_BLOCK_SERVICE,
-            (IInterface**)&obj);
-    AutoPtr<IPersistentDataBlockManager> manager =
-            IPersistentDataBlockManager::Probe(obj);
+    context->GetSystemService(IContext::PERSISTENT_DATA_BLOCK_SERVICE, (IInterface**)&obj);
+    IPersistentDataBlockManager* manager = IPersistentDataBlockManager::Probe(obj);
     Boolean res;
     manager->GetOemUnlockEnabled(&res);
     return res;
@@ -1133,10 +1131,8 @@ void Utils::SetOemUnlockEnabled(
     /* [in] */ Boolean enabled)
 {
     AutoPtr<IInterface> obj;
-    context->GetSystemService(IContext::PERSISTENT_DATA_BLOCK_SERVICE,
-            (IInterface**)&obj);
-    AutoPtr<IPersistentDataBlockManager> manager =
-            IPersistentDataBlockManager::Probe(obj);
+    context->GetSystemService(IContext::PERSISTENT_DATA_BLOCK_SERVICE, (IInterface**)&obj);
+    IPersistentDataBlockManager* manager = IPersistentDataBlockManager::Probe(obj);
     manager->SetOemUnlockEnabled(enabled);
 }
 
@@ -1169,7 +1165,7 @@ Boolean Utils::ShowSimCardTile(
 {
     AutoPtr<IInterface> obj;
     context->GetSystemService(IContext::TELEPHONY_SERVICE, (IInterface**)&obj);
-    AutoPtr<ITelephonyManager> tm = ITelephonyManager::Probe(obj);
+    ITelephonyManager* tm = ITelephonyManager::Probe(obj);
 
     // TODO: Uncomment to re-enable SimSettings.
     // return tm->GetSimCount() > 0;

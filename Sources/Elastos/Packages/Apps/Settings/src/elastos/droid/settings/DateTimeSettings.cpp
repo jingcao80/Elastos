@@ -545,7 +545,7 @@ void DateTimeSettings::TimeUpdated(
 {
     AutoPtr<IIntent> timeChanged;
     CIntent::New(IIntent::ACTION_TIME_CHANGED, (IIntent**)&timeChanged);
-    timeChanged->PutExtra(IIntent::EXTRA_TIME_PREF_24_HOUR_FORMAT, is24Hour);
+    timeChanged->PutBooleanExtra(IIntent::EXTRA_TIME_PREF_24_HOUR_FORMAT, is24Hour);
     AutoPtr<IActivity> activity;
     GetActivity((IActivity**)&activity);
     IContext::Probe(activity)->SendBroadcast(timeChanged);

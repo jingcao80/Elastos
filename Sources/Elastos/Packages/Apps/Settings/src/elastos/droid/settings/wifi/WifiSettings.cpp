@@ -544,7 +544,7 @@ AutoPtr<WifiEnabler> WifiSettings::CreateWifiEnabler()
 {
     AutoPtr<IActivity> _activity;
     GetActivity((IActivity**)&_activity);
-    AutoPtr<CSettingsActivity> activity = (CSettingsActivity*)ISettingsActivity::Probe(_activity);
+    CSettingsActivity* activity = (CSettingsActivity*)ISettingsActivity::Probe(_activity);
     AutoPtr<ISwitchBar> switchBar;
     activity->GetSwitchBar((ISwitchBar**)&switchBar);
     AutoPtr<WifiEnabler> abler = new WifiEnabler(IContext::Probe(activity), switchBar);
@@ -1280,7 +1280,7 @@ AutoPtr<IList> WifiSettings::ConstructAccessPoints(
             for (Int32 j = 0; j < len; j++) {
                 AutoPtr<IInterface> object;
                 list->Get(j, (IInterface**)&object);
-                AutoPtr<CAccessPoint> accessPoint = (CAccessPoint*)IAccessPoint::Probe(object);
+                CAccessPoint* accessPoint = (CAccessPoint*)IAccessPoint::Probe(object);
                 if (accessPoint->Update(result)) {
                     found = TRUE;
                 }
@@ -1369,8 +1369,8 @@ void WifiSettings::UpdateConnectionState(
         AutoPtr<IPreference> preference;
         IPreferenceGroup::Probe(screen)->GetPreference(i, (IPreference**)&preference);
         if (IAccessPoint::Probe(preference) != NULL) {
-            AutoPtr<IAccessPoint> accessPoint = IAccessPoint::Probe(preference);
-            ((CAccessPoint*)accessPoint.Get())->Update(mLastInfo, mLastState);
+            IAccessPoint* accessPoint = IAccessPoint::Probe(preference);
+            ((CAccessPoint*)accessPoint)->Update(mLastInfo, mLastState);
         }
     }
 }

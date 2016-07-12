@@ -330,7 +330,7 @@ protected:
     CARAPI OnSaveInstanceState(
         /* [in] */ IBundle* outState);
 
-    CARAPI_(Boolean) IsValidFragment(
+    virtual CARAPI_(Boolean) IsValidFragment(
         /* [in] */ const String& fragmentName);
 
 private:

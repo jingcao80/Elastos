@@ -108,7 +108,7 @@ void InputMethodSettingValuesWrapper::RefreshAllInputMethodAndSubtypes()
         for (Int32 i = 0; i < size; i++) {
             AutoPtr<IInterface> obj;
             imms->Get(i, (IInterface**)&obj);
-            AutoPtr<IInputMethodInfo> imi = IInputMethodInfo::Probe(obj);
+            IInputMethodInfo* imi = IInputMethodInfo::Probe(obj);
             String strId;
             imi->GetId(&strId);
             mMethodMap->Put(CoreUtils::Convert(strId), imi);
@@ -129,7 +129,7 @@ void InputMethodSettingValuesWrapper::UpdateAsciiCapableEnabledImis()
         for (Int32 i = 0; i < size; i++) {
             AutoPtr<IInterface> obj;
             enabledImis->Get(i, (IInterface**)&obj);
-            AutoPtr<IInputMethodInfo> imi = IInputMethodInfo::Probe(obj);
+            IInputMethodInfo* imi = IInputMethodInfo::Probe(obj);
             Int32 subtypeCount;
             imi->GetSubtypeCount(&subtypeCount);
             for (Int32 j = 0; j < subtypeCount; ++j) {
@@ -167,7 +167,7 @@ AutoPtr<ICharSequence> InputMethodSettingValuesWrapper::GetCurrentInputMethodNam
         mSettings->GetSelectedInputMethod(&str);
         AutoPtr<IInterface> obj;
         mMethodMap->Get(CoreUtils::Convert(str), (IInterface**)&obj);
-        AutoPtr<IInputMethodInfo> imi = IInputMethodInfo::Probe(obj);
+        IInputMethodInfo* imi = IInputMethodInfo::Probe(obj);
         if (imi == NULL) {
             Logger::W(TAG, "Invalid selected imi: %s", str.string());
             return CoreUtils::Convert("");
@@ -235,7 +235,7 @@ Int32 InputMethodSettingValuesWrapper::GetEnabledValidSystemNonAuxAsciiCapableIm
     for (Int32 i = 0; i < size; i++) {
         AutoPtr<IInterface> obj;
         enabledImis->Get(i, (IInterface**)&obj);
-        AutoPtr<IInputMethodInfo> imi = IInputMethodInfo::Probe(obj);
+        IInputMethodInfo* imi = IInputMethodInfo::Probe(obj);
         if (IsValidSystemNonAuxAsciiCapableIme(imi, context)) {
             ++count;
         }
@@ -260,7 +260,7 @@ Boolean InputMethodSettingValuesWrapper::IsEnabledImi(
     for (Int32 i = 0; i < size; i++) {
         AutoPtr<IInterface> obj;
         enabledImis->Get(i, (IInterface**)&obj);
-        AutoPtr<IInputMethodInfo> tempImi = IInputMethodInfo::Probe(obj);
+        IInputMethodInfo* tempImi = IInputMethodInfo::Probe(obj);
         String id1, id2;
         tempImi->GetId(&id1);
         imi->GetId(&id2);

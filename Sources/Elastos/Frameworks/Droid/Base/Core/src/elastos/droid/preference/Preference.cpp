@@ -274,21 +274,21 @@ ECode Preference::OnCreateView(
     VALIDATE_NOT_NULL(view)
     AutoPtr<IInterface> obj;
     mContext->GetSystemService(IContext::LAYOUT_INFLATER_SERVICE, (IInterface**)&obj);
-    AutoPtr<ILayoutInflater> layoutInflater = ILayoutInflater::Probe(obj);
+    ILayoutInflater* layoutInflater = ILayoutInflater::Probe(obj);
 
     AutoPtr<IView> layout;
     layoutInflater->Inflate(mLayoutResId, parent, FALSE, (IView**)&layout);
 
     AutoPtr<IView> v;
     layout->FindViewById(R::id::widget_frame, (IView**)&v);
-    AutoPtr<IViewGroup> widgetFrame = IViewGroup::Probe(v);
+    IViewGroup* widgetFrame = IViewGroup::Probe(v);
     if (widgetFrame != NULL) {
         if (mWidgetLayoutResId != 0) {
             AutoPtr<IView> t;
             layoutInflater->Inflate(mWidgetLayoutResId, widgetFrame, (IView**)&t);
         }
         else {
-            AutoPtr<IView> vv = IView::Probe(widgetFrame);
+            IView* vv = IView::Probe(widgetFrame);
             vv->SetVisibility(IView::GONE);
         }
     }

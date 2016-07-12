@@ -527,7 +527,7 @@ void WifiSettingsForSetupWizardXL::ShowConfigUi(
     mConnectingStatusLayout->SetVisibility(IView::GONE);
     AutoPtr<IView> tmp;
     FindViewById(R::id::wifi_config_ui, (IView**)&tmp);
-    AutoPtr<IViewGroup> parent = IViewGroup::Probe(tmp);
+    IViewGroup* parent = IViewGroup::Probe(tmp);
     tmp->SetVisibility(IView::VISIBLE);
     parent->RemoveAllViews();
     mWifiConfig = new WifiConfigUiForSetupWizardXL(this, parent, selectedAccessPoint, edit);
@@ -679,10 +679,9 @@ void WifiSettingsForSetupWizardXL::OnConnectButtonPressed()
     IView::Probe(mBackButton)->SetVisibility(IView::VISIBLE);
     ITextView::Probe(mBackButton)->SetText(R::string::wifi_setup_back);
 
-    AutoPtr<IView> tmp;
-    FindViewById(R::id::wifi_config_ui, (IView**)&tmp);
-    AutoPtr<IViewGroup> parent = IViewGroup::Probe(tmp);
-    tmp->SetVisibility(IView::GONE);
+    AutoPtr<IView> parent;
+    FindViewById(R::id::wifi_config_ui, (IView**)&parent);
+    parent->SetVisibility(IView::GONE);
     mConnectingStatusLayout->SetVisibility(IView::VISIBLE);
     mConnectingStatusView->SetText(R::string::wifi_setup_description_connecting);
 
@@ -720,7 +719,7 @@ void WifiSettingsForSetupWizardXL::OnBackButtonPressed()
         for (Int32 i = 0; i < count; i++) {
             AutoPtr<IInterface> obj;
             configs->Get(i, (IInterface**)&obj);
-            AutoPtr<IWifiConfiguration> config = IWifiConfiguration::Probe(obj);
+            IWifiConfiguration* config = IWifiConfiguration::Probe(obj);
             String SSID;
             config->GetSSID(&SSID);
             Int32 networkId;
@@ -753,7 +752,7 @@ void WifiSettingsForSetupWizardXL::OnBackButtonPressed()
     mConnectingStatusLayout->SetVisibility(IView::GONE);
     AutoPtr<IView> tmp;
     FindViewById(R::id::wifi_config_ui, (IView**)&tmp);
-    AutoPtr<IViewGroup> parent = IViewGroup::Probe(tmp);
+    IViewGroup* parent = IViewGroup::Probe(tmp);
     parent->RemoveAllViews();
     tmp->SetVisibility(IView::GONE);
     mWifiConfig = NULL;
@@ -841,10 +840,9 @@ void WifiSettingsForSetupWizardXL::OnAuthenticationFailure()
         ShowEditingTitle();
     }
 
-    AutoPtr<IView> tmp;
-    FindViewById(R::id::wifi_config_ui, (IView**)&tmp);
-    AutoPtr<IViewGroup> parent = IViewGroup::Probe(tmp);
-    tmp->SetVisibility(IView::VISIBLE);
+    AutoPtr<IView> parent;
+    FindViewById(R::id::wifi_config_ui, (IView**)&parent);
+    parent->SetVisibility(IView::VISIBLE);
     mConnectingStatusLayout->SetVisibility(IView::GONE);
 
     ShowDisconnectedProgressBar();

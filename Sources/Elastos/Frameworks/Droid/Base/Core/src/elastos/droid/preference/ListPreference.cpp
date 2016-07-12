@@ -1,13 +1,15 @@
 
 #include "elastos/droid/preference/ListPreference.h"
 #include "elastos/droid/preference/CListPreferenceSavedState.h"
+#include <elastos/core/StringUtils.h>
 #include <elastos/utility/logging/Logger.h>
 
-using Elastos::Core::CString;
-using Elastos::Utility::Logging::Logger;
 using Elastos::Droid::Content::EIID_IDialogInterfaceOnClickListener;
 using Elastos::Droid::Content::Res::IResources;
 using Elastos::Droid::View::IAbsSavedState;
+using Elastos::Core::CString;
+using Elastos::Core::StringUtils;
+using Elastos::Utility::Logging::Logger;
 
 namespace Elastos {
 namespace Droid {
@@ -180,10 +182,12 @@ ECode ListPreference::GetSummary(
     if (mSummary.IsNull() || entry == NULL) {
         return DialogPreference::GetSummary(summary);
     }
+    else {
+        AutoPtr< ArrayOf<IInterface*> > args = ArrayOf<IInterface*>::Alloc(1);
+        args->Set(0, entry);
 
-    String str;
-    str.AppendFormat(mSummary.string(), entry.Get());
-    return CString::New(str, summary);
+        return CString::New(StringUtils::Format(mSummary, args), summary);
+    }
 }
 
 ECode ListPreference::SetSummary(
@@ -227,6 +231,8 @@ ECode ListPreference::GetValue(
 ECode ListPreference::GetEntry(
     /* [out] */ ICharSequence** entry)
 {
+    VALIDATE_NOT_NULL(entry)
+
     Int32 index = GetValueIndex();
     if (index >= 0 && mEntries != NULL) {
         *entry = (*mEntries)[index];

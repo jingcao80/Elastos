@@ -85,7 +85,7 @@ ECode PreferenceFragment::PreferenceFragmentOnKeyListener::OnKey(
     VALIDATE_NOT_NULL(result)
     AutoPtr<IInterface> selectedItem;
     IAdapterView::Probe(mHost->mList)->GetSelectedItem((IInterface**)&selectedItem);
-    AutoPtr<IPreference> preferernce = IPreference::Probe(selectedItem);
+    IPreference* preferernce = IPreference::Probe(selectedItem);
     if (preferernce != NULL) {
         AutoPtr<IView> selectedView;
         IAdapterView::Probe(mHost->mList)->GetSelectedView((IView**)&selectedView);
@@ -140,7 +140,7 @@ ECode PreferenceFragment::OnCreateView(
     AutoPtr<ArrayOf<Int32> > attrIds = TO_ATTRS_ARRAYOF(R::styleable::PreferenceFragment);
     AutoPtr<ITypedArray> a;
     IContext::Probe(activity)->ObtainStyledAttributes(NULL, attrIds,
-         R::attr::preferenceFragmentStyle, 0, (ITypedArray**)&a);
+            R::attr::preferenceFragmentStyle, 0, (ITypedArray**)&a);
 
     a->GetResourceId(R::styleable::PreferenceFragment_layout, mLayoutResId, &mLayoutResId);
     a->Recycle();
@@ -296,11 +296,13 @@ ECode PreferenceFragment::OnPreferenceTreeClick(
     /*[out]*/ Boolean* result)
 {
     VALIDATE_NOT_NULL(result)
+
     String fragment;
+    preference->GetFragment(&fragment);
     AutoPtr<IActivity> activity;
-    if ((preference->GetFragment(&fragment), !fragment.IsNull()) &&
-            (GetActivity((IActivity**)&activity),  IPreferenceFragmentOnPreferenceStartFragmentCallback::Probe(activity) != NULL)) {
-        AutoPtr<IPreferenceFragmentOnPreferenceStartFragmentCallback> cb = IPreferenceFragmentOnPreferenceStartFragmentCallback::Probe(activity);
+    if (!fragment.IsNull() &&
+            (GetActivity((IActivity**)&activity), IPreferenceFragmentOnPreferenceStartFragmentCallback::Probe(activity) != NULL)) {
+        IPreferenceFragmentOnPreferenceStartFragmentCallback* cb = IPreferenceFragmentOnPreferenceStartFragmentCallback::Probe(activity);
         return cb->OnPreferenceStartFragment(this, preference, result);
     }
     *result = FALSE;

@@ -180,7 +180,7 @@ ECode SwitchBar::constructor(
     mTextView->SetText(R::string::switch_off_text);
     AutoPtr<IViewGroupLayoutParams> params;
     IView::Probe(mTextView)->GetLayoutParams((IViewGroupLayoutParams**)&params);
-    AutoPtr<IViewGroupMarginLayoutParams> lp = IViewGroupMarginLayoutParams::Probe(params);
+    IViewGroupMarginLayoutParams* lp = IViewGroupMarginLayoutParams::Probe(params);
     lp->SetMarginStart(switchBarMarginStart);
 
     view = NULL;

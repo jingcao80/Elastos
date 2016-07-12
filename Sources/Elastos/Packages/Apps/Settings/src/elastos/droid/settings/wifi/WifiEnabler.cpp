@@ -71,7 +71,7 @@ ECode WifiEnabler::InitBroadcastReceiver::OnReceive(
     else if (IWifiManager::NETWORK_STATE_CHANGED_ACTION.Equals(action)) {
         AutoPtr<IParcelable> parcel;
         intent->GetParcelableExtra(IWifiManager::EXTRA_NETWORK_INFO, (IParcelable**)&parcel);
-        AutoPtr<INetworkInfo> info = INetworkInfo::Probe(parcel);
+        INetworkInfo* info = INetworkInfo::Probe(parcel);
         Boolean isConnected;
         info->IsConnected(&isConnected);
         mHost->mConnected->Set(isConnected);

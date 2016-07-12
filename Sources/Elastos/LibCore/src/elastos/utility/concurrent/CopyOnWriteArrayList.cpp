@@ -327,7 +327,8 @@ ECode CopyOnWriteArrayList::Get(
 {
     VALIDATE_NOT_NULL(object)
 
-    *object = (*mElements)[location];
+    AutoPtr<IInterface> result = (*mElements)[location];
+    *object = result;
     REFCOUNT_ADD(*object)
     return NOERROR;
 }
@@ -372,6 +373,7 @@ ECode CopyOnWriteArrayList::GetListIterator(
 
     AutoPtr< ArrayOf<IInterface*> > snapshot = mElements;
     if (location < 0 || location > snapshot->GetLength()) {
+        *it = NULL;
         // throw new IndexOutOfBoundsException("index=" + index + ", length=" + snapshot.length);
         return E_INDEX_OUT_OF_BOUNDS_EXCEPTION;
     }
@@ -436,6 +438,7 @@ ECode CopyOnWriteArrayList::GetSubList(
 
     AutoPtr< ArrayOf<IInterface*> > snapshot = mElements;
     if (start < 0 || start > end || end > snapshot->GetLength()) {
+        *subList = NULL;
         // throw new IndexOutOfBoundsException("from=" + from + ", to=" + to +
         //         ", list size=" + snapshot.length);
         return E_INDEX_OUT_OF_BOUNDS_EXCEPTION;
@@ -1090,6 +1093,7 @@ ECode CopyOnWriteArrayList::CowSubList::GetSubList(
     Int32 length = 0;
     GetSize(&length);
     if (start < 0 || start > end || end > length) {
+        *subList = NULL;
         // throw new IndexOutOfBoundsException("from=" + from + ", to=" + to +
         //         ", list size=" + size());
         return E_INDEX_OUT_OF_BOUNDS_EXCEPTION;
@@ -1155,6 +1159,7 @@ ECode CopyOnWriteArrayList::CowIterator::GetPrevious(
         return NOERROR;
     }
     else {
+        *object = NULL;
         // throw new NoSuchElementException();
         return E_NO_SUCH_ELEMENT_EXCEPTION;
     }
@@ -1198,6 +1203,7 @@ ECode CopyOnWriteArrayList::CowIterator::GetNext(
         return NOERROR;
     }
     else {
+        *object = NULL;
         // throw new NoSuchElementException();
         return E_NO_SUCH_ELEMENT_EXCEPTION;
     }

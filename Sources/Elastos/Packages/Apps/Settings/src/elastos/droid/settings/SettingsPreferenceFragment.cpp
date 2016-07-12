@@ -2,7 +2,7 @@
 #include "elastos/droid/settings/SettingsPreferenceFragment.h"
 #include "elastos/droid/settings/CSettingsDialogFragment.h"
 #include "elastos/droid/settings/HelpUtils.h"
-#include "elastos/droid/settings/SettingsActivity.h"
+#include "elastos/droid/settings/CSettingsActivity.h"
 #include "elastos/droid/text/TextUtils.h"
 #include "R.h"
 #include <elastos/core/CoreUtils.h>
@@ -358,7 +358,7 @@ ECode SettingsPreferenceFragment::OnResume()
     AutoPtr<IBundle> args;
     GetArguments((IBundle**)&args);
     if (args != NULL) {
-        args->GetString(SettingsActivity::EXTRA_FRAGMENT_ARG_KEY, &mPreferenceKey);
+        args->GetString(CSettingsActivity::EXTRA_FRAGMENT_ARG_KEY, &mPreferenceKey);
         return HighlightPreferenceIfNeeded();
     }
     return NOERROR;
@@ -441,7 +441,7 @@ Int32 SettingsPreferenceFragment::CanUseListViewForHighLighting(
     GetListView((IListView**)&listView);
     AutoPtr<IAdapter> adap;
     IAdapterView::Probe(listView)->GetAdapter((IAdapter**)&adap);
-    AutoPtr<IListAdapter> adapter = IListAdapter::Probe(adap);
+    IListAdapter* adapter = IListAdapter::Probe(adap);
 
     if (adapter != NULL && IPreferenceGroupAdapter::Probe(adapter) != NULL) {
         return FindListPositionFromKey(adapter, key);
@@ -463,10 +463,10 @@ void SettingsPreferenceFragment::HighlightPreference(
         GetListView((IListView**)&listView);
         AutoPtr<IAdapter> adap;
         IAdapterView::Probe(listView)->GetAdapter((IAdapter**)&adap);
-        AutoPtr<IListAdapter> adapter = IListAdapter::Probe(adap);
+        IPreferenceGroupAdapter* adapter = IPreferenceGroupAdapter::Probe(adap);
 
-        IPreferenceGroupAdapter::Probe(adapter)->SetHighlightedDrawable(highlight);
-        IPreferenceGroupAdapter::Probe(adapter)->SetHighlighted(position);
+        adapter->SetHighlightedDrawable(highlight);
+        adapter->SetHighlighted(position);
 
         AutoPtr<RunnableInHighlightPreference> runnable = new RunnableInHighlightPreference(
                 listView, position, highlight);
@@ -485,7 +485,7 @@ Int32 SettingsPreferenceFragment::FindListPositionFromKey(
         AutoPtr<IInterface> item;
         IAdapter::Probe(adapter)->GetItem(n, (IInterface**)&item);
         if (IPreference::Probe(item) != NULL) {
-            AutoPtr<IPreference> preference = IPreference::Probe(item);
+            IPreference* preference = IPreference::Probe(item);
             String preferenceKey;
             preference->GetKey(&preferenceKey);
             if (!preferenceKey.IsNull() && preferenceKey.Equals(key)) {
@@ -539,7 +539,7 @@ AutoPtr<IContentResolver> SettingsPreferenceFragment::GetContentResolver()
 {
     AutoPtr<IActivity> activity;
     GetActivity((IActivity**)&activity);
-    AutoPtr<IContext> context = IContext::Probe(activity);
+    IContext* context = IContext::Probe(activity);
     if (context != NULL) {
         mContentResolver = NULL;
         context->GetContentResolver((IContentResolver**)&mContentResolver);
@@ -670,13 +670,13 @@ Boolean SettingsPreferenceFragment::StartFragment(
     GetActivity((IActivity**)&activity);
 
     if (ISettingsActivity::Probe(activity) != NULL) {
-        AutoPtr<ISettingsActivity> sa = ISettingsActivity::Probe(activity);
-        ((SettingsActivity*)sa.Get())->StartPreferencePanel(fragmentClass,
+        ISettingsActivity* sa = ISettingsActivity::Probe(activity);
+        ((CSettingsActivity*)sa)->StartPreferencePanel(fragmentClass,
                 extras, titleRes, NULL, caller, requestCode);
         return TRUE;
     }
     else if (IPreferenceActivity::Probe(activity) != NULL) {
-        AutoPtr<IPreferenceActivity> sa = IPreferenceActivity::Probe(activity);
+        IPreferenceActivity* sa = IPreferenceActivity::Probe(activity);
         sa->StartPreferencePanel(fragmentClass, extras, titleRes, NULL,
                 caller, requestCode);
         return TRUE;

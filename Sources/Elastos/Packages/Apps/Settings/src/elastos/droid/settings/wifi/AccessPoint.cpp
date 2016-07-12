@@ -317,10 +317,9 @@ ECode AccessPoint::OnBindView(
     GetContext((IContext**)&context);
     UpdateIcon(GetLevel(), context);
 
-    AutoPtr<IView> _view;
-    view->FindViewById(Elastos::Droid::R::id::summary, (IView**)&_view);
-    AutoPtr<ITextView> summaryView = ITextView::Probe(_view);
-    IView::Probe(summaryView)->SetVisibility(mShowSummary ? IView::VISIBLE : IView::GONE);
+    AutoPtr<IView> summaryView;
+    view->FindViewById(Elastos::Droid::R::id::summary, (IView**)&summaryView);
+    summaryView->SetVisibility(mShowSummary ? IView::VISIBLE : IView::GONE);
 
     NotifyChanged();
     return NOERROR;
@@ -346,13 +345,14 @@ void AccessPoint::UpdateIcon(
             theme->ObtainStyledAttributes(wifi_signal_attributes, (ITypedArray**)&styles);
             AutoPtr<IDrawable> draw;
             styles->GetDrawable(0, (IDrawable**)&draw);
-            AutoPtr<IStateListDrawable> sld = IStateListDrawable::Probe(draw);
+            IStateListDrawable* sld = IStateListDrawable::Probe(draw);
             // If sld is NULL then we are indexing and therefore do not have access to
             // (nor need to display) the drawable.
             if (sld != NULL) {
                 Boolean res;
-                IDrawable::Probe(sld)->SetState((mSecurity != SECURITY_NONE) ? STATE_SECURED : STATE_NONE, &res);
-                IDrawable::Probe(sld)->GetCurrent((IDrawable**)&drawable);
+                IDrawable* _sld = IDrawable::Probe(sld);
+                _sld->SetState((mSecurity != SECURITY_NONE) ? STATE_SECURED : STATE_NONE, &res);
+                _sld->GetCurrent((IDrawable**)&drawable);
                 SetIcon(drawable);
             }
         }
@@ -661,7 +661,7 @@ String AccessPoint::GetVisibilityStatus()
         while (it->HasNext(&hasNext), hasNext) {
             AutoPtr<IInterface> obj;
             it->GetNext((IInterface**)&obj);
-            AutoPtr<IScanResult> result = IScanResult::Probe(obj);
+            IScanResult* result = IScanResult::Probe(obj);
             Int64 seen;
             result->GetSeen(&seen);
             if (seen == 0) {

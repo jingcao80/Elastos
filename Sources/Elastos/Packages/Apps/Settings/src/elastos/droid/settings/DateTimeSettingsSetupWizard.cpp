@@ -5,7 +5,7 @@
 #include "elastos/droid/settings/ZonePicker.h"
 #include "R.h"
 #include <elastos/core/CoreUtils.h>
-#include <elastos/utility/logging/Logger.h>
+#include <elastos/utility/logging/Slogger.h>
 
 using Elastos::Droid::App::IActivity;
 using Elastos::Droid::App::IAlarmManager;
@@ -28,7 +28,7 @@ using Elastos::Utility::ICalendarHelper;
 using Elastos::Utility::CCalendarHelper;
 using Elastos::Utility::ITimeZoneHelper;
 using Elastos::Utility::CTimeZoneHelper;
-using Elastos::Utility::Logging::Logger;
+using Elastos::Utility::Logging::Slogger;
 
 namespace Elastos {
 namespace Droid {
@@ -82,6 +82,7 @@ ECode DateTimeSettingsSetupWizard::constructor()
 ECode DateTimeSettingsSetupWizard::OnCreate(
     /* [in] */ IBundle* savedInstanceState)
 {
+    Slogger::I(TAG, " >> enter OnCreate ");
     Boolean res;
     RequestWindowFeature(IWindow::FEATURE_NO_TITLE, &res);
     Activity::OnCreate(savedInstanceState);
@@ -114,6 +115,7 @@ ECode DateTimeSettingsSetupWizard::OnCreate(
         FindViewById(R::id::layout_root, (IView**)&layoutRoot);
         layoutRoot->SetSystemUiVisibility(IView::STATUS_BAR_DISABLE_BACK);
     }
+    Slogger::I(TAG, " << leave OnCreate ");
     return NOERROR;
 }
 
@@ -129,6 +131,7 @@ ECode DateTimeSettingsSetupWizard::InitUiForXl()
     mAutoTimeZoneButton->SetText(autoTimeZoneEnabled ? R::string::zone_auto_summaryOn :
             R::string::zone_auto_summaryOff);*/
 
+    Slogger::I(TAG, " >> enter InitUiForXl ");
     AutoPtr<ITimeZoneHelper> helper;
     CTimeZoneHelper::AcquireSingleton((ITimeZoneHelper**)&helper);
     AutoPtr<ITimeZone> tz;
@@ -179,15 +182,17 @@ ECode DateTimeSettingsSetupWizard::InitUiForXl()
     tmp->SetOnClickListener(this);
     tmp = NULL;
     FindViewById(R::id::skip_button, (IView**)&tmp);
-    IButton* skipButton = IButton::Probe(tmp);
+    AutoPtr<IButton> skipButton = IButton::Probe(tmp);
     if (skipButton != NULL) {
         tmp->SetOnClickListener(this);
     }
+    Slogger::I(TAG, " << leave InitUiForXl ");
     return NOERROR;
 }
 
 ECode DateTimeSettingsSetupWizard::OnResume()
 {
+    Slogger::I(TAG, " >> enter OnResume ");
     Activity::OnResume();
     AutoPtr<IIntentFilter> filter;
     CIntentFilter::New((IIntentFilter**)&filter);
@@ -196,19 +201,23 @@ ECode DateTimeSettingsSetupWizard::OnResume()
     filter->AddAction(IIntent::ACTION_TIMEZONE_CHANGED);
     AutoPtr<IIntent> intent;
     RegisterReceiver(mIntentReceiver, filter, String(NULL), NULL, (IIntent**)&intent);
+    Slogger::I(TAG, " << leave OnResume ");
     return NOERROR;
 }
 
 ECode DateTimeSettingsSetupWizard::OnPause()
 {
+    Slogger::I(TAG, " >> enter OnPause ");
     Activity::OnPause();
     UnregisterReceiver(mIntentReceiver);
+    Slogger::I(TAG, " << leave OnPause ");
     return NOERROR;
 }
 
 ECode DateTimeSettingsSetupWizard::OnClick(
     /* [in] */ IView* view)
 {
+    Slogger::I(TAG, " >> enter OnClick ");
     Int32 id;
     view->GetId(&id);
     switch (id) {
@@ -226,7 +235,7 @@ ECode DateTimeSettingsSetupWizard::OnClick(
                 Boolean res;
                 systemTimeZone->Equals(mSelectedTimeZone, &res);
                 if (!res) {
-                    Logger::I(TAG, "Another TimeZone is selected by a user. Changing system TimeZone.");
+                    Slogger::I(TAG, "Another TimeZone is selected by a user. Changing system TimeZone.");
                     AutoPtr<IInterface> obj;
                     GetSystemService(IContext::ALARM_SERVICE, (IInterface**)&obj);
                     IAlarmManager* alarm = IAlarmManager::Probe(obj);
@@ -262,6 +271,7 @@ ECode DateTimeSettingsSetupWizard::OnClick(
             break;
         }
     }
+    Slogger::I(TAG, " << leave OnClick ");
     return NOERROR;
 }
 
@@ -313,6 +323,7 @@ ECode DateTimeSettingsSetupWizard::OnItemClick(
     /* [in] */ Int32 position,
     /* [in] */ Int64 id)
 {
+    Slogger::I(TAG, " >> enter OnItemClick ");
     AutoPtr<IInterface> obj;
     parent->GetItemAtPosition(position, (IInterface**)&obj);
     AutoPtr<ITimeZone> tz = ZonePicker::ObtainTimeZoneFromItem(obj);
@@ -355,6 +366,7 @@ ECode DateTimeSettingsSetupWizard::OnItemClick(
         settingsFragment->UpdateTimeAndDateDisplay(this);
     }
     mTimeZonePopup->Dismiss();
+    Slogger::I(TAG, " << leave OnItemClick ");
     return NOERROR;
 }
 
@@ -363,9 +375,11 @@ ECode DateTimeSettingsSetupWizard::OnPreferenceStartFragment(
     /* [in] */ IPreference* pref,
     /* [out] */ Boolean* result)
 {
+    Slogger::I(TAG, " >> enter OnPreferenceStartFragment ");
     VALIDATE_NOT_NULL(result)
     ShowTimezonePicker(R::id::timezone_dropdown_anchor);
     *result = TRUE;
+    Slogger::I(TAG, " << leave OnPreferenceStartFragment ");
     return NOERROR;
 }
 
@@ -375,7 +389,7 @@ void DateTimeSettingsSetupWizard::ShowTimezonePicker(
     AutoPtr<IView> anchorView;
     FindViewById(anchorViewId, (IView**)&anchorView);
     if (anchorView == NULL) {
-        Logger::E(TAG, "Unable to find zone picker anchor view %d", anchorViewId);
+        Slogger::E(TAG, "Unable to find zone picker anchor view %d", anchorViewId);
         return;
     }
     CListPopupWindow::New(this, NULL, (IListPopupWindow**)&mTimeZonePopup);

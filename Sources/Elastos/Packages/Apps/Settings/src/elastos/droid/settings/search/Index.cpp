@@ -323,7 +323,7 @@ Boolean Index::UpdateIndexTask::ProcessDataToUpdate(
     for (Int32 n = 0; n < count; n++) {
         AutoPtr<IInterface> obj;
         dataToUpdate->Get(n, (IInterface**)&obj);
-        AutoPtr<ISearchIndexableData> data = ISearchIndexableData::Probe(obj);
+        ISearchIndexableData* data = ISearchIndexableData::Probe(obj);
         // try {
         mHost->IndexOneSearchIndexableData(database, localeStr, data, nonIndexableKeys);
         // } catch (Exception e) {
@@ -354,7 +354,7 @@ Boolean Index::UpdateIndexTask::ProcessDataToDelete(
     for (Int32 n = 0; n < count; n++) {
         AutoPtr<IInterface> obj;
         dataToDelete->Get(n, (IInterface**)&obj);
-        AutoPtr<ISearchIndexableData> data = ISearchIndexableData::Probe(obj);
+        ISearchIndexableData* data = ISearchIndexableData::Probe(obj);
         if (data == NULL) {
             continue;
         }
@@ -643,7 +643,7 @@ ECode Index::Update()
     for (Int32 n = 0; n < size; n++) {
         AutoPtr<IInterface> obj;
         list->Get(n, (IInterface**)&obj);
-        AutoPtr<IResolveInfo> info = IResolveInfo::Probe(obj);
+        IResolveInfo* info = IResolveInfo::Probe(obj);
         if (!IsWellKnownProvider(info)) {
             continue;
         }
@@ -1375,7 +1375,7 @@ void Index::IndexOneResource(
     if (xmlResId > SearchIndexableResources::NO_DATA_RES_ID) {
         AutoPtr<IInterface> obj;
         nonIndexableKeysFromResource->Get(CoreUtils::Convert(packageName), (IInterface**)&obj);
-        AutoPtr<IList> resNonIndxableKeys = IList::Probe(obj);
+        IList* resNonIndxableKeys = IList::Probe(obj);
         Int32 size;
         if (resNonIndxableKeys != NULL && (resNonIndxableKeys->GetSize(&size), size) > 0) {
             nonIndexableKeys->AddAll(ICollection::Probe(resNonIndxableKeys));
@@ -1466,7 +1466,7 @@ ECode Index::IndexFromResource(
     context->GetResources((IResources**)&resource);
     resource->GetXml(xmlResId, (IXmlResourceParser**)&parser);
 
-    AutoPtr<IXmlPullParser> pullParser = IXmlPullParser::Probe(parser);
+    IXmlPullParser* pullParser = IXmlPullParser::Probe(parser);
 
     Int32 type;
     while ((pullParser->Next(&type), type) != IXmlPullParser::END_DOCUMENT
@@ -1599,7 +1599,7 @@ void Index::IndexFromProvider(
         for (Int32 i = 0; i < rawSize; i++) {
             AutoPtr<IInterface> obj;
             rawList->Get(i, (IInterface**)&obj);
-            AutoPtr<SearchIndexableRaw> raw = (SearchIndexableRaw*)ISearchIndexableRaw::Probe(obj);
+            SearchIndexableRaw* raw = (SearchIndexableRaw*)ISearchIndexableRaw::Probe(obj);
 
             // Should be the same locale as the one we are processing
             String str;
@@ -1639,7 +1639,7 @@ void Index::IndexFromProvider(
         for (Int32 i = 0; i < resSize; i++) {
             AutoPtr<IInterface> obj;
             resList->Get(i, (IInterface**)&obj);
-            AutoPtr<ISearchIndexableResource> item = ISearchIndexableResource::Probe(obj);
+            ISearchIndexableResource* item = ISearchIndexableResource::Probe(obj);
 
             // Should be the same locale as the one we are processing
             String str;

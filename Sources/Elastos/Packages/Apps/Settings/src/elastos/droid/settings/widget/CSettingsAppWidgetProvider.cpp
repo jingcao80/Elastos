@@ -353,7 +353,7 @@ ECode CSettingsAppWidgetProvider::WifiStateTracker::RequestStateChange(
 {
     AutoPtr<IInterface> obj;
     context->GetSystemService(IContext::WIFI_SERVICE, (IInterface**)&obj);
-    AutoPtr<IWifiManager> wifiManager = IWifiManager::Probe(obj);
+    IWifiManager* wifiManager = IWifiManager::Probe(obj);
 
     if (wifiManager == NULL) {
         Logger::D(TAG, "No wifiManager.");
@@ -672,7 +672,7 @@ void CSettingsAppWidgetProvider::UpdateButtons(
         Int32 brightness = GetBrightness(context);
         AutoPtr<IInterface> obj;
         context->GetSystemService(IContext::POWER_SERVICE, (IInterface**)&obj);
-        AutoPtr<IPowerManager> pm = IPowerManager::Probe(obj);
+        IPowerManager* pm = IPowerManager::Probe(obj);
         // Set the icon
         Int32 screenBrightness;
         pm->GetMaximumScreenBrightnessSetting(&screenBrightness);
