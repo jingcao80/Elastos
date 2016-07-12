@@ -1,6 +1,7 @@
 
 #include "elastos/droid/dialer/widget/SearchEditTextLayout.h"
-// #include "elastos/droid/dialer/util/DialerUtils.h"
+#include "elastos/droid/dialer/util/DialerUtils.h"
+#include "elastos/droid/phone/common/animation/AnimUtils.h"
 #include <elastos/core/CoreUtils.h>
 #include "R.h"
 
@@ -15,7 +16,8 @@ using Elastos::Droid::View::EIID_IViewOnFocusChangeListener;
 using Elastos::Droid::Widget::ITextView;
 using Elastos::Core::CoreUtils;
 using Elastos::Core::IFloat;
-// using Elastos::Apps::Dialer::Util::DialerUtils;
+using Elastos::Droid::Dialer::Util::DialerUtils;
+using Elastos::Droid::Phone::Common::Animation::AnimUtils;
 
 namespace Elastos {
 namespace Droid {
@@ -37,13 +39,12 @@ ECode SearchEditTextLayout::SearchViewFocusChangeListener::OnFocusChange(
     /* [in] */ IView* v,
     /* [in] */ Boolean hasFocus)
 {
-    assert(0 && "TODO");
-    // if (hasFocus) {
-    //     DialerUtils::ShowInputMethod(v);
-    // }
-    // else {
-    //     DialerUtils::HideInputMethod(v);
-    // }
+    if (hasFocus) {
+        DialerUtils::ShowInputMethod(v);
+    }
+    else {
+        DialerUtils::HideInputMethod(v);
+    }
     return NOERROR;
 }
 
@@ -111,6 +112,9 @@ ECode SearchEditTextLayout::AnimatorUpdateListener::OnAnimationUpdate(
 //================================================================
 // SearchEditTextLayout
 //================================================================
+const Float SearchEditTextLayout::EXPAND_MARGIN_FRACTION_START = 0.8f;
+const Int32 SearchEditTextLayout::ANIMATION_DURATION = 200;
+
 CAR_INTERFACE_IMPL(SearchEditTextLayout, FrameLayout, ISearchEditTextLayout);
 
 SearchEditTextLayout::SearchEditTextLayout()
@@ -202,24 +206,20 @@ ECode SearchEditTextLayout::DispatchKeyEventPreIme(
 
 ECode SearchEditTextLayout::FadeOut()
 {
-    assert(0 && "TODO");
-    // return FadeOut(NULL);
+    return FadeOut(NULL);
+}
+
+ECode SearchEditTextLayout::FadeOut(
+    /* [in] */ IAnimationCallback* callback)
+{
+    AnimUtils::FadeOut(this, ANIMATION_DURATION, callback);
+    mIsFadedOut = TRUE;
     return NOERROR;
 }
 
-// TODO:
-// ECode SearchEditTextLayout::FadeOut(
-//     /* [in] */ AnimUtils.AnimationCallback callback)
-// {
-//     AnimUtils.fadeOut(this, ANIMATION_DURATION, callback);
-//     mIsFadedOut = TRUE;
-//     return NOERROR;
-// }
-
 ECode SearchEditTextLayout::FadeIn()
 {
-    assert(0 && "TODO");
-    // AnimUtils.fadeIn(this, ANIMATION_DURATION);
+    AnimUtils::FadeIn(this, ANIMATION_DURATION);
     mIsFadedOut = FALSE;
     return NOERROR;
 }
@@ -247,8 +247,7 @@ ECode SearchEditTextLayout::Expand(
     UpdateVisibility(TRUE /* isExpand */);
 
     if (animate) {
-        assert(0 && "TODO");
-        // AnimUtils.crossFadeViews(mExpanded, mCollapsed, ANIMATION_DURATION);
+        AnimUtils::CrossFadeViews(mExpanded, mCollapsed, ANIMATION_DURATION);
         AutoPtr<IValueAnimatorHelper> helper;
         CValueAnimatorHelper::AcquireSingleton((IValueAnimatorHelper**)&helper);
         AutoPtr< ArrayOf<Float> > values = ArrayOf<Float>::Alloc(2);
@@ -294,8 +293,7 @@ ECode SearchEditTextLayout::Collapse(
     UpdateVisibility(FALSE /* isExpand */);
 
     if (animate) {
-        assert(0 && "TODO");
-        // AnimUtils.crossFadeViews(mCollapsed, mExpanded, ANIMATION_DURATION);
+        AnimUtils::CrossFadeViews(mCollapsed, mExpanded, ANIMATION_DURATION);
         AutoPtr<IValueAnimatorHelper> helper;
         CValueAnimatorHelper::AcquireSingleton((IValueAnimatorHelper**)&helper);
         AutoPtr< ArrayOf<Float> > values = ArrayOf<Float>::Alloc(2);

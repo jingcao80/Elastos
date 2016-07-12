@@ -36,8 +36,7 @@ using Elastos::Droid::Provider::IContactsContractCommonDataKindsCommonColumns;
 using Elastos::Droid::Provider::IContactsContractRawContactsColumns;
 using Elastos::Droid::Provider::IContactsContractContactsColumns;
 using Elastos::Droid::Provider::IContactsContractContactNameColumns;
-// TODO:
-// using Elastos::Droid::Provider::IContactsContractDataUsageStatColumns;
+using Elastos::Droid::Provider::IContactsContractDataUsageStatColumns;
 using Elastos::Droid::Provider::IContactsContractDataColumns;
 using Elastos::Droid::Provider::IContactsContractContactOptionsColumns;
 using Elastos::Droid::Provider::IContactsContractDeletedContacts;

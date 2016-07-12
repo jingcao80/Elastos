@@ -193,7 +193,7 @@ ECode DialtactsActivity::PhoneSearchQueryTextListener::OnTextChanged(
         }
     }
 
-    assert(0 && "TODO");
+    // TODO:
     // Boolean visible;
     // if (mHost->mSmartDialSearchFragment != NULL &&
     //         mHost->mSmartDialSearchFragment->IsVisible(&visible), visible) {
@@ -462,7 +462,6 @@ ECode DialtactsActivity::OnCreate(
             (IView**)&floatingActionButtonContainer);
     view = NULL;
     FindViewById(R::id::floating_action_button, (IView**)&view);
-    AutoPtr<IImageButton> floatingActionButton = IImageButton::Probe(view);
     view->SetOnClickListener(this);
     mFloatingActionButtonController = new FloatingActionButtonController();
     mFloatingActionButtonController->constructor(this,
@@ -1131,7 +1130,7 @@ void DialtactsActivity::ExitSearchUi()
 
     AutoPtr<IFragmentTransaction> transaction;
     manager->BeginTransaction((IFragmentTransaction**)&transaction);
-    assert(0 && "TODO");
+    // TODO:
     // if (mSmartDialSearchFragment != NULL) {
     //     transaction->Remove(mSmartDialSearchFragment);
     // }
@@ -1165,7 +1164,7 @@ ECode DialtactsActivity::OnBackPressed()
         Boolean isVisible;
         AutoPtr<IInterface> adapter;
         Int32 count;
-        assert(0 && "TODO");
+        // TODO:
         // if (TextUtils::IsEmpty(mSearchQuery) ||
         //         (mSmartDialSearchFragment != NULL &&
         //                 (mSmartDialSearchFragment->IsVisible(&isVisible), isVisible) &&

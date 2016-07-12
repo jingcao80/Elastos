@@ -2,6 +2,7 @@
 #include "elastos/droid/telephony/CPhoneNumberFormattingTextWatcher.h"
 #include "elastos/droid/telephony/PhoneNumberUtils.h"
 #include "elastos/droid/text/Selection.h"
+#include <elastos/utility/logging/Logger.h>
 
 using Elastos::Droid::Text::EIID_INoCopySpan;
 using Elastos::Droid::Text::EIID_ITextWatcher;
@@ -11,6 +12,7 @@ using Elastos::Core::CString;
 using Elastos::Utility::CLocaleHelper;
 using Elastos::Utility::ILocale;
 using Elastos::Utility::ILocaleHelper;
+using Elastos::Utility::Logging::Logger;
 
 namespace Elastos {
 namespace Droid {
@@ -135,8 +137,8 @@ String CPhoneNumberFormattingTextWatcher::Reformat(
     // The index of Char32 to the leftward of the cursor.
     Int32 curIndex = cursor - 1;
     String formatted;
-    assert(0);
-// TODO: Need AsYouTypeFormatter
+    // TODO:
+    Logger::D("CPhoneNumberFormattingTextWatcher", "== TODO: Need AsYouTypeFormatter");
     //mFormatter.clear();
     Char32 lastNonSeparator = 0;
     Boolean hasCursor = FALSE, tmpRes;
@@ -167,11 +169,13 @@ String CPhoneNumberFormattingTextWatcher::GetFormattedNumber(
     /* [in] */ Char32 lastNonSeparator,
     /* [in] */ Boolean hasCursor)
 {
-    assert(0);
-// TODO: Need AsYouTypeFormatter
+    // TODO:
+    Logger::D("CPhoneNumberFormattingTextWatcher", "== TODO: Need AsYouTypeFormatter");
     /*return hasCursor ? mFormatter.inputDigitAndRememberPosition(lastNonSeparator)
             : mFormatter.inputDigit(lastNonSeparator);*/
-    return String(NULL);
+    String str("");
+    str.Append(lastNonSeparator);
+    return str;
 }
 
 void CPhoneNumberFormattingTextWatcher::StopFormatting()

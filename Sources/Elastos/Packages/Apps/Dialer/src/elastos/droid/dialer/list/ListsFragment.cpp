@@ -351,7 +351,7 @@ ECode ListsFragment::OnPause()
 {
     // Wipe the cache to refresh the call shortcut item. This is not that expensive because
     // it only contains one item.
-    assert(0 && "TODO");
+    // TODO:
     // mCallLogAdapter->InvalidateCache();
     return AnalyticsFragment::OnPause();
 }

@@ -21,6 +21,7 @@ using Elastos::Droid::View::IViewOnFocusChangeListener;
 using Elastos::Droid::View::IViewOnKeyListener;
 using Elastos::Droid::Widget::FrameLayout;
 using Elastos::Droid::Widget::IEditText;
+using Elastos::Droid::Phone::Common::Animation::IAnimationCallback;
 
 namespace Elastos {
 namespace Droid {
@@ -127,9 +128,8 @@ public:
 
     CARAPI FadeOut();
 
-    // TODO:
-    // CARAPI FadeOut(
-    //     /* [in] */ AnimUtils.AnimationCallback callback);
+    CARAPI FadeOut(
+        /* [in] */ IAnimationCallback* callback);
 
     CARAPI FadeIn();
 
