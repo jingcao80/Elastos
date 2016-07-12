@@ -312,7 +312,7 @@ TelecomAccountRegistry::TelecomAccountRegistry(
 {
     CTelecomAccountRegistryBroadcastReceiver::New(this, (IBroadcastReceiver**)&mReceiver);
 
-    AutoPtr<IPhoneStateListener> mPhoneStateListener = new MyPhoneStateListener(this);
+    mPhoneStateListener = new MyPhoneStateListener(this);
 
     CLinkedList::New((IList**)&mAccounts);
 

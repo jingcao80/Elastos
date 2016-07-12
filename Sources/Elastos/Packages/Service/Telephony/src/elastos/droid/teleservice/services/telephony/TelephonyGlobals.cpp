@@ -1,8 +1,12 @@
 
 #include "elastos/droid/teleservice/services/telephony/TelephonyGlobals.h"
+#include "elastos/droid/teleservice/services/telephony/TelecomAccountRegistry.h"
+#include "Elastos.Droid.Internal.h"
 #include <elastos/core/AutoLock.h>
 #include <elastos/utility/logging/Logger.h>
 
+using Elastos::Droid::Internal::Telephony::CPhoneFactory;
+using Elastos::Droid::Internal::Telephony::IPhoneFactory;
 using Elastos::Utility::Logging::Logger;
 
 namespace Elastos {
@@ -36,17 +40,17 @@ AutoPtr<TelephonyGlobals> TelephonyGlobals::GetInstance(
 
 ECode TelephonyGlobals::OnCreate()
 {
-    Logger::D("TelephonyGlobals", "[TODO] need class PhoneFactory");
     // // TODO: Make this work with Multi-SIM devices
-    // AutoPtr<IPhone> phone;
-    // PhoneFactory::GetDefaultPhone((IPhone**)&phone);
-    // if (phone != NULL) {
-    //     mTtyManager = new TtyManager(mContext, phone);
-    // }
+    AutoPtr<IPhone> phone;
+    AutoPtr<IPhoneFactory> helper;
+    CPhoneFactory::AcquireSingleton((IPhoneFactory**)&helper);
+    helper->GetDefaultPhone((IPhone**)&phone);
+    if (phone != NULL) {
+        mTtyManager = new TtyManager(mContext, phone);
+    }
 
-    // AutoPtr<TelecomAccountRegistry> registry = TelecomAccountRegistry::GetInstance(mContext);
-    // return registry->SetupOnBoot();
-    return NOERROR;
+    AutoPtr<TelecomAccountRegistry> registry = TelecomAccountRegistry::GetInstance(mContext);
+    return registry->SetupOnBoot();
 }
 
 } // namespace Telephony

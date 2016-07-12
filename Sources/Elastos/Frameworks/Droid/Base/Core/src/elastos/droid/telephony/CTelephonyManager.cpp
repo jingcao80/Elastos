@@ -1078,7 +1078,7 @@ ECode CTelephonyManager::Listen(
     // try {
     Boolean notifyNow = (GetITelephony() != NULL);
     AutoPtr<CPhoneStateListener> l = (CPhoneStateListener*)listener;
-    return sRegistry->ListenForSubscriber(l->mSubId, pkgForDebug, l->callback, events, notifyNow);
+    return sRegistry->ListenForSubscriber(l->mSubId, pkgForDebug, l->mCallback, events, notifyNow);
     // } catch (RemoteException ex) {
     //     // system process dead
     // } catch (NullPointerException ex) {

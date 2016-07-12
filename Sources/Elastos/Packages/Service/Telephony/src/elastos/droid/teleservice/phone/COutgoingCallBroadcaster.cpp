@@ -449,18 +449,19 @@ ERROR:
     intent->GetComponent((IComponentName**)&componentName);
     String cname;
     componentName->GetClassName(&cname);
-    assert(0);
-    // if (getClass().getName().Equals(cname)) {
-    //     // If we were launched directly from the OutgoingCallBroadcaster,
-    //     // not one of its more privileged aliases, then make sure that
-    //     // only the non-privileged actions are allowed.
-    //     String action;
-    //     intent->GetAction(&action);
-    //     if (!IIntent::ACTION_CALL.Equals(action)) {
-    //         Logger::W(TAG, "Attempt to deliver non-CALL action; forcing to CALL");
-    //         intent->SetAction(IIntent::ACTION_CALL);
-    //     }
-    // }
+    AutoPtr<IComponentName> cn;
+    GetComponentName((IComponentName**)&cn);
+    String clsName;
+    cn->GetClassName(&clsName);
+    if (clsName.Equals(cname)) {
+        // If we were launched directly from the OutgoingCallBroadcaster,
+        // not one of its more privileged aliases, then make sure that
+        // only the non-privileged actions are allowed.
+        if (!IIntent::ACTION_CALL.Equals(action)) {
+            Logger::W(TAG, "Attempt to deliver non-CALL action; forcing to CALL");
+            intent->SetAction(IIntent::ACTION_CALL);
+        }
+    }
 
     // Check whether or not this is an emergency number, in order to
     // enforce the restriction that only the CALL_PRIVILEGED and

@@ -60,7 +60,9 @@ CAR_INTERFACE_IMPL(TelecomServiceImpl::MainThreadRequest, Object, ITelecomServic
 TelecomServiceImpl::MainThreadHandler::MainThreadHandler(
     /* [in] */ TelecomServiceImpl* host)
     : mHost(host)
-{}
+{
+    Handler::constructor();
+}
 
 ECode TelecomServiceImpl::MainThreadHandler::HandleMessage(
     /* [in] */ IMessage* msg)
@@ -141,7 +143,7 @@ const Int32 TelecomServiceImpl::MSG_GET_CURRENT_TTY_MODE = 7;
 
 TelecomServiceImpl::TelecomServiceImpl()
 {
-    AutoPtr<MainThreadHandler> mMainThreadHandler = new MainThreadHandler(this);
+    mMainThreadHandler = new MainThreadHandler(this);
 }
 
 ECode TelecomServiceImpl::AsBinder(
@@ -160,14 +162,14 @@ ECode TelecomServiceImpl::constructor(
     /* [in] */ IInterface* callsManager,
     /* [in] */ IContext* context)
 {
-        mMissedCallNotifier = (MissedCallNotifier*)(IObject::Probe(missedCallNotifier));
-        mPhoneAccountRegistrar = (PhoneAccountRegistrar*)(IObject::Probe(phoneAccountRegistrar));
-        mCallsManager = (CallsManager*)(IObject::Probe(callsManager));
-        mContext = context;
-        AutoPtr<IInterface> obj;
-        mContext->GetSystemService(IContext::APP_OPS_SERVICE, (IInterface**)&obj);
-        mAppOpsManager = IAppOpsManager::Probe(obj);
-        return NOERROR;
+    mMissedCallNotifier = (MissedCallNotifier*)(IObject::Probe(missedCallNotifier));
+    mPhoneAccountRegistrar = (PhoneAccountRegistrar*)(IObject::Probe(phoneAccountRegistrar));
+    mCallsManager = (CallsManager*)(IObject::Probe(callsManager));
+    mContext = context;
+    AutoPtr<IInterface> obj;
+    mContext->GetSystemService(IContext::APP_OPS_SERVICE, (IInterface**)&obj);
+    mAppOpsManager = IAppOpsManager::Probe(obj);
+    return NOERROR;
 }
 
 ECode TelecomServiceImpl::GetDefaultOutgoingPhoneAccount(

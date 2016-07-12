@@ -260,7 +260,8 @@ ECode PhoneNumberUtils::GetNumberFromIntent(
     AutoPtr<IUri> uri;
     intent->GetData((IUri**)&uri);
     if (uri == NULL) {
-        return NULL;
+        *res = String(NULL);
+        return NOERROR;
     }
 
     String scheme;
@@ -1595,7 +1596,9 @@ ECode PhoneNumberUtils::ConvertKeypadLettersToDigits(
     for (Int32 i = 0; i < len; i++) {
         Char32 c = (*out)[i];
         // If this char isn't in KEYPAD_MAP at all, just leave it alone.
-        //out[i] = (Char32) KEYPAD_MAP.Get(c, c);
+        Int32 v = 0;
+        KEYPAD_MAP->Get(c, c, &v);
+        (*out)[i] = (Char32) v;
     }
 
     *res = String(*out);

@@ -2,7 +2,7 @@
 #define  __ELASTOS_DROID_SERVICES_TELEPHONY_TELEPHONEGLOABLE_H__
 
 #include "_Elastos.Droid.TeleService.h"
-#include "elastos/droid/ext/frameworkext.h"
+#include "elastos/droid/teleservice/services/telephony/TtyManager.h"
 #include <Elastos.Droid.Content.h>
 #include <elastos/core/Object.h>
 
@@ -50,7 +50,7 @@ private:
     /** The application context. */
     AutoPtr<IContext> mContext;
 
-    //AutoPtr<TtyManager> mTtyManager;
+    AutoPtr<TtyManager> mTtyManager;
 };
 
 } // namespace Telephony

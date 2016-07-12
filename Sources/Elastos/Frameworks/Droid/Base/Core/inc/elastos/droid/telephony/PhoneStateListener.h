@@ -29,6 +29,7 @@ public:
         : public Object
         , public IIPhoneStateListener
     {
+    public:
         CAR_INTERFACE_DECL()
 
         PhoneStateListenerCallback(
@@ -191,7 +192,7 @@ private:
     static const String TAG;;
 
     AutoPtr<MyHandler> mHandler;
-    AutoPtr<IIPhoneStateListener> callback;
+    AutoPtr<IIPhoneStateListener> mCallback;
 };
 
 } // namespace Telephony

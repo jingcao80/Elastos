@@ -302,6 +302,7 @@ ECode PhoneStateListener::MyHandler::HandleMessage(
 PhoneStateListener::PhoneStateListener()
     : mSubId(0)
 {
+    mCallback = new PhoneStateListenerCallback(this);
 }
 
 ECode PhoneStateListener::constructor()

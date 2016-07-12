@@ -1,5 +1,6 @@
 #include "elastos/droid/server/CTelephonyRegistry.h"
 #include "elastos/droid/server/am/BatteryStatsService.h"
+#include "elastos/droid/internal/telephony/DefaultPhoneNotifier.h"
 #include <elastos/droid/Manifest.h>
 #include <elastos/droid/os/Binder.h>
 #include <elastos/droid/os/UserHandle.h>
@@ -46,9 +47,8 @@ using Elastos::Droid::Telephony::ITelephonyManagerHelper;
 using Elastos::Droid::Telephony::CTelephonyManagerHelper;
 using Elastos::Droid::Telephony::ISubscriptionManager;
 using Elastos::Droid::Telephony::CSubscriptionManager;
+using Elastos::Droid::Internal::Telephony::DefaultPhoneNotifier;
 using Elastos::Droid::Internal::Telephony::EIID_IITelephonyRegistry;
-// using Elastos::Droid::Opt::Internal::Telephony::IDefaultPhoneNotifierHelper;
-// using Elastos::Droid::Opt::Internal::Telephony::CDefaultPhoneNotifierHelper;
 
 using Elastos::Core::StringBuilder;
 using Elastos::Core::StringUtils;
@@ -1438,11 +1438,7 @@ ECode CTelephonyRegistry::BroadcastCallStateChanged(
 
     Binder::RestoreCallingIdentity(ident);
 
-    assert(0 && "TODO");
-    Int32 ival;
-    // AutoPtr<IDefaultPhoneNotifierHelper> dpnHelper;
-    // CDefaultPhoneNotifierHelper::AcquireSingleton((IDefaultPhoneNotifierHelper**)&dpnHelper);
-    // dpnHelper->ConvertCallState(state, &ival);
+    Int32 ival = DefaultPhoneNotifier::ConvertCallState2(state);
     AutoPtr<IIntent> intent;
     CIntent::New(ITelephonyManager::ACTION_PHONE_STATE_CHANGED, (IIntent**)&intent);
     intent->PutExtra(IPhoneConstants::STATE_KEY, StringUtils::ToString(ival));
@@ -1471,11 +1467,7 @@ ECode CTelephonyRegistry::BroadcastDataConnectionStateChanged(
     AutoPtr<IIntent> intent;
     CIntent::New(ITelephonyIntents::ACTION_ANY_DATA_CONNECTION_STATE_CHANGED, (IIntent**)&intent);
 
-    assert(0 && "TODO");
-    Int32 ival;
-    // AutoPtr<IDefaultPhoneNotifierHelper> dpnHelper;
-    // CDefaultPhoneNotifierHelper::AcquireSingleton((IDefaultPhoneNotifierHelper**)&dpnHelper);
-    // dpnHelper->ConvertCallState(state, &ival);
+    Int32 ival = DefaultPhoneNotifier::ConvertCallState2(state);
     intent->PutExtra(IPhoneConstants::STATE_KEY, StringUtils::ToString(ival));
     if (!isDataConnectivityPossible) {
         intent->PutBooleanExtra(IPhoneConstants::NETWORK_UNAVAILABLE_KEY, TRUE);

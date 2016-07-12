@@ -847,7 +847,7 @@ ECode ServiceStateTracker::GetAllCellInfo(
 {
     VALIDATE_NOT_NULL(result)
 
-    AutoPtr<CellInfoResult> res;
+    AutoPtr<CellInfoResult> res = new CellInfoResult();
     if (VDBG) Log(String("SST->GetAllCellInfo(): E"));
 
     Int32 ver = 0;
