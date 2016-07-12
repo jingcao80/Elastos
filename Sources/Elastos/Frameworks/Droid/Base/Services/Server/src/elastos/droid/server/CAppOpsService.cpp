@@ -291,6 +291,7 @@ ECode CAppOpsService::ClientState::constructor(
         // For local clients, there is no reason to track them.
         mStartedOps = NULL;
     }
+    return NOERROR;
 }
 
 //@Override
