@@ -29,8 +29,7 @@ Int32 NumberKeyListener::Lookup(
 {
     Int32 metaState;
     MetaKeyKeyListener::GetMetaState(ICharSequence::Probe(content), event, &metaState);
-    AutoPtr< ArrayOf<Char32> > accepedChars;
-    accepedChars = GetAcceptedChars();
+    AutoPtr< ArrayOf<Char32> > accepedChars = GetAcceptedChars();
     Char32 c;
     event->GetMatch(accepedChars.Get(), metaState, &c);
     return (Int32)c;
@@ -133,9 +132,10 @@ ECode NumberKeyListener::OnKeyDown(
             if (selStart != selEnd) {
                 Selection::SetSelection(ISpannable::Probe(content), selEnd);
             }
-
+            String str("");
+            str.Append((Char32)i);
             AutoPtr<ICharSequence> cs;
-            CString::New(StringUtils::ToBinaryString(i), (ICharSequence**)&cs);
+            CString::New(str, (ICharSequence**)&cs);
             content->Replace(selStart, selEnd, cs);
 
             AdjustMetaAfterKeypress(ISpannable::Probe(content));
