@@ -1,10 +1,38 @@
-
 #ifndef __CACTIVITYONE_H__
 #define __CACTIVITYONE_H__
 
-#define JSAppName JSTextViewDemo
+#define JSPkgName JSTextViewDemo
+#define JSEvtName CTestEventListener
+#define JSActName CActivityOne
 
-#include "_Elastos_DevSamples_Node_JSTextViewDemo_CActivityOne.h"
+#ifndef JSCarClassHead
+
+#define AA(y) #y
+#define BB(x,y) AA(x##y.h)
+#define CC(x,y,z) BB(x##z,y)
+#define DD(x,y,z) CC(z##x,y,_)
+#define EE(x,y) DD(x,y,_Elastos_DevSamples_Node_)
+#define FF(x) AA(x)
+
+#define JSEvtCarClassHead EE(JSPkgName,JSEvtName)
+#define JSActCarClassHead EE(JSPkgName,JSActName)
+
+#define JSPkgNameStr FF(JSPkgName)
+#define JSEvtNameStr FF(JSEvtName)
+#define JSActNameStr FF(JSActName)
+
+#define JSCarClass(x) CarClass(x)
+
+#define JS_TO_STRING_IMPL_0(x) TO_STRING_IMPL(#x)
+#define JS_TO_STRING_IMPL(x,y) JS_TO_STRING_IMPL_0(x::y)
+
+#define JS_CAR_INTERFACE_IMPL(x,y,z) CAR_INTERFACE_IMPL(x,y,z)
+#define JS_CAR_OBJECT_IMPL(x) CAR_OBJECT_IMPL(x)
+
+#endif
+
+#include JSActCarClassHead
+
 #include <elastos/droid/app/Activity.h>
 #include <elastos/droid/os/Handler.h>
 
@@ -20,10 +48,9 @@ using Elastos::Droid::Os::IMessage;
 namespace Elastos {
 namespace DevSamples {
 namespace Node {
-//namespace JSTextViewDemo {
-namespace JSAppName {
+namespace JSPkgName {
 
-CarClass(CActivityOne)
+JSCarClass(JSActName)
     , public Activity
     , public IActivityOne
 {
@@ -31,10 +58,10 @@ public:
     class MyHandler : public Handler
     {
     public:
-        TO_STRING_IMPL("CActivityOne::MyHandler")
+        JS_TO_STRING_IMPL(JSActName,MyHandler)
 
         MyHandler(
-            /* [in] */ CActivityOne* host)
+            /* [in] */ JSActName* host)
             : mHost(host)
         {};
 
@@ -42,7 +69,7 @@ public:
             /* [in] */ IMessage* msg);
 
     private:
-        AutoPtr<CActivityOne> mHost;
+        AutoPtr<JSActName> mHost;
     };
 
 public:
@@ -83,11 +110,6 @@ private:
         /* [in] */ Int32 resultCode,
         /* [in] */ IIntent *data);
 
-    CARAPI Require(
-        /* [in] */ const String& moduleName,
-        /* [in] */ const String& className,
-        /* [out] */ IInterface** object);
-
 private:
     static const String TAG;
 
@@ -98,9 +120,9 @@ private:
     AutoPtr<IActivityListener> mListener;
 };
 
-} // namespace JSTextViewDemo
+} // namespace JSPkgName
 } // namespace Node
 } // namespace DevSamples
 } // namespace Elastos
 
-#endif // __CACTIVITYONE_H__
+#endif // __H__

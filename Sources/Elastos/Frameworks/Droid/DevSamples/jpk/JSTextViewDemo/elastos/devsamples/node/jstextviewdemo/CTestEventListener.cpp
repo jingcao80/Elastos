@@ -10,10 +10,9 @@ using Elastos::Utility::Logging::Logger;
 namespace Elastos {
 namespace DevSamples {
 namespace Node {
-//namespace JSTextViewDemo {
-namespace JSAppName {
+namespace JSPkgName {
 
-static const String DBG_TAG("CTestEventListener");
+static const String DBG_TAG(JSEvtNameStr);
 
 IHandler* myHandler;
 
@@ -172,7 +171,7 @@ ECode CTestEventListener::SetNodeBridge(
     return NOERROR;
 }
 
-}   //namespace JSTextViewDemo
+}   //namespace JSPkgName
 }   //namespace Node
 }   //namespace DevSamples
 }   //namespace Elastos

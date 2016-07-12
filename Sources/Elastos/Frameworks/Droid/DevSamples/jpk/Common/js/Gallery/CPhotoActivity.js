@@ -2195,7 +2195,7 @@ if (!_debug) {
             //var uri = Droid_New("Elastos.Droid.Net.CStringUri", "file:///data/temp/testdisk/icon_03.jpg");
 //         if (uri != NULL) {
             //if (uri) {
-            if (false) {
+            if (false) {    //TOFIX:CIntent::GetData shoud not always returns an uri object even when no uri data exits
 //             String scheme;
 //             uri->GetScheme(&scheme);
                 var scheme = uri.GetScheme();

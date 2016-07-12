@@ -62,19 +62,24 @@ module.exports = function(aoElastos, aoActivity){
 // {
 // public:
 //     class MyHandler : public HandlerBase
+    var MyHandler;
 //     {
 //     public:
 //         MyHandler(
+    MyHandler = function(
 //             /* [in] */ IWeakReference* host)
+        host)
 //             : mWeakHost(host)
 //         {}
+    {
+        this.mWeakHost = host;
+    }
 
 //         CARAPI HandleMessage(
 //             /* [in] */ IMessage* msg);
 //     private:
 //         AutoPtr<IWeakReference> mWeakHost;
 //     };
-    function MyHandler() {};
 
 //     class MyListener
 //         : public ElRefBase
@@ -82,6 +87,7 @@ module.exports = function(aoElastos, aoActivity){
 //         , public IPopupWindowOnDismissListener
 //         , public IViewOnTouchListener
 //         , public ICompoundButtonOnCheckedChangeListener
+    var MyListener;
 //     {
 //     public:
 //         MyListener(
@@ -106,11 +112,11 @@ module.exports = function(aoElastos, aoActivity){
 //     private:
 //         CBrowserActivity* mHost;
 //     };
-    function MyListener() {};
 
 //     class MyViewBinder
 //         : public ElRefBase
 //         , public ISimpleAdapterViewBinder
+    var MyViewBinder;
 //     {
 //     public:
 //         MyViewBinder(
@@ -127,10 +133,10 @@ module.exports = function(aoElastos, aoActivity){
 //     private:
 //             CBrowserActivity* mHost;
 //     };
-    function MyViewBinder() {};
 
 //     class MyLoadImageCallback
 //         : public ILoadImageCallback
+    var MyLoadImageCallback;
 //     {
 //     public:
 //         MyLoadImageCallback(
@@ -146,12 +152,13 @@ module.exports = function(aoElastos, aoActivity){
 
 //     class PictureEntry
 //         : public ElRefBase
+    var PictureEntry;
 //     {
 //     public:
 //         String sourcePath;
 //         String desc;
 //     };
-    function MyLoadImageCallback() {};
+    PictureEntry = function () {};  //no constructor
 
 // friend class MyListener;
 // friend class MyViewBinder;
@@ -338,9 +345,14 @@ module.exports = function(aoElastos, aoActivity){
     }
 
 // CBrowserActivity::MyListener::MyListener(
+    MyListener = function(
 //     /* [in] */ CBrowserActivity* host)
+        host)
 //     : mHost(host)
 // {}
+    {
+        this.mHost = host;
+    }
 
 // PInterface CBrowserActivity::MyListener::Probe(
 //     /* [in]  */ REIID riid)
@@ -606,9 +618,14 @@ module.exports = function(aoElastos, aoActivity){
     }
 
 // CBrowserActivity::MyViewBinder::MyViewBinder(
+    MyViewBinder = function(
 //     /* [in] */ CBrowserActivity* host)
+        host)
 //     : mHost(host)
 // {}
+    {
+        this.mHost = host;
+    }
 
 // CAR_INTERFACE_IMPL(CBrowserActivity::MyViewBinder, ISimpleAdapterViewBinder)
 
@@ -649,10 +666,13 @@ module.exports = function(aoElastos, aoActivity){
 //         AutoPtr<IImageView> imageView = IImageView::Probe(view);
             var imageView = view;
 //         AutoPtr<IWeakReference> weakHost;
+            var weakHost;
 //         mHost->GetWeakReference((IWeakReference**)&weakHost);
+            //weakHost = this.mHost.GetWeakReference();
+            weakHost = oActivity.GetWeakReference();
 //         assert(weakHost != NULL);
 //         AutoPtr<MyLoadImageCallback> myLoadImage = new MyLoadImageCallback(weakHost);
-            var myLoadImage = new MyLoadImageCallback();
+            var myLoadImage = new MyLoadImageCallback(weakHost);
 //         AutoPtr<IBitmapDrawable> drawable = AsyncImageLoader::LoadDrawable(textRepresentation, FALSE, imageView, myLoadImage);
             var drawable = AsyncImageLoader.LoadDrawable(textRepresentation, false, imageView, myLoadImage);
 //         if (drawable != NULL) {
@@ -680,6 +700,8 @@ module.exports = function(aoElastos, aoActivity){
 // //    }
         else {
             elog("SetViewValue: not defined!");
+            CObject.showMethods(view);
+            elog("SetViewValue: not defined!===1");
         }
 //     return NOERROR;
         return;
@@ -687,9 +709,14 @@ module.exports = function(aoElastos, aoActivity){
     }
 
 // CBrowserActivity::MyLoadImageCallback::MyLoadImageCallback(
+    MyLoadImageCallback = function(
 //     /* [in] */ IWeakReference* host)
+        host)
 //     : mWeakHost(host)
 // {}
+    {
+        this.mWeakHost = host;
+    }
 
 // ECode CBrowserActivity::MyLoadImageCallback::ImageLoaded(
     MyLoadImageCallback.prototype.ImageLoaded = function(
@@ -749,11 +776,14 @@ module.exports = function(aoElastos, aoActivity){
         _this.SetContentView(R.layout.activity_browser);
 
 //     AutoPtr<IWeakReference> weakHost;
+        var weakHost;
 //     GetWeakReference((IWeakReference**)&weakHost);
+        weakHost = context.GetWeakReference();
 //     mMyHandler = new MyHandler(weakHost);
+        mMyHandler = new MyHandler(weakHost);
 
 //     mMyListener = new MyListener(this);
-        mMyListener = new MyListener();
+        mMyListener = new MyListener(_this);
 
 //     AutoPtr<IView> view = FindViewById(R::id::pic_back);
 //     mBackButton = IImageView::Probe(view);
@@ -794,13 +824,13 @@ module.exports = function(aoElastos, aoActivity){
 //     GetIntent((IIntent**)&intent);
         var intent = _this.GetIntent();
 //     if (intent != NULL) {
-        //if (intent) {
-        if (true) {
+        if (intent) {
+        //if (true) {
 //         String path;
             var path;
 //         intent->GetStringExtra(DataSourceHelper::SOURCE_PATH, &path);
             path = intent.GetStringExtra(DataSourceHelper.SOURCE_PATH);
-            path = "/data/temp/testdisk";
+            //path = "/data/temp/testdisk";
 //         if (!path.IsNullOrEmpty()) {
             if (typeof path == "string") {
 //             String folderName;
@@ -818,7 +848,8 @@ module.exports = function(aoElastos, aoActivity){
 //                 for (Int32 i = 0; it != imageItems->End(); ++it, ++i) {
                     for (var i=0,im=imageItems.length;i<im;i++) {
 //                     entry = new PictureEntry();
-                        entry = {};
+                        //entry = {};
+                        entry = new PictureEntry();
 //                     entry->sourcePath = path;
                         entry.sourcePath = path;
 //                     entry->sourcePath += DataSourceHelper::PATH_SPLITE;
@@ -1046,6 +1077,8 @@ module.exports = function(aoElastos, aoActivity){
     function GetSimpleAdapter()
 // {
     {
+        var _this = oActivity;
+
 //     Logger::D(TAG, "GetSimpleAdapter()---");
         elog(TAG + "GetSimpleAdapter()---");
 //     AutoPtr<ISimpleAdapter> simpleAdapter;
@@ -1127,7 +1160,7 @@ elog(TAG + "GetSimpleAdapter()----"+i+"----1.2----");
 //         CSimpleAdapter::New(this, dataList, R::layout::pic_item, from, to, (ISimpleAdapter**)&simpleAdapter);
             simpleAdapter = Droid_New('Elastos.Droid.Widget.CSimpleAdapter', oActivity, dataList, R.layout.pic_item, from, to);
 //         AutoPtr<MyViewBinder> myViewBinder = new MyViewBinder(this);
-            var myViewBinder = new MyViewBinder();
+            var myViewBinder = new MyViewBinder(_this);
 //         simpleAdapter->SetViewBinder(ISimpleAdapterViewBinder::Probe(myViewBinder));
             simpleAdapter.SetViewBinder(myViewBinder);
 //     }

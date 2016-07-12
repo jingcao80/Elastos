@@ -1,7 +1,6 @@
+#include "CTestEventListener.h"
 
 #include "CActivityOne.h"
-
-#include "CTestEventListener.h"
 
 #include <elastos/utility/logging/Logger.h>
 
@@ -12,8 +11,7 @@ using Elastos::Utility::Logging::Logger;
 namespace Elastos {
 namespace DevSamples {
 namespace Node {
-//namespace JSTextViewDemo {
-namespace JSAppName {
+namespace JSPkgName {
 
 EXTERN const _ELASTOS ClassID ECLSID_CActivityOne;
 
@@ -22,9 +20,9 @@ EXTERN NodeBridge** g_ppNodeBridge;
 
 EXTERN IHandler* myHandler;
 
-const String CActivityOne::TAG("CActivityOne");
+const String JSActName::TAG(JSActNameStr);
 
-static const String DBG_TAG("CActivityOne");
+static const String DBG_TAG(JSActNameStr);
 
 ECode CActivityOne::MyHandler::HandleMessage(
     /* [in] */ IMessage* msg)
@@ -33,18 +31,18 @@ ECode CActivityOne::MyHandler::HandleMessage(
     return listener->OnHandleMessage(mHost, msg);
 }
 
-CAR_INTERFACE_IMPL(CActivityOne, Activity, IActivityOne)
+CAR_INTERFACE_IMPL(JSActName, Activity, IActivityOne)
 
-CAR_OBJECT_IMPL(CActivityOne)
+JS_CAR_OBJECT_IMPL(JSActName)
 
-ECode CActivityOne::constructor()
+ECode JSActName::constructor()
 {
     Logger::I(TAG, " >> constructor()");
 
     return Activity::constructor();
 }
 
-ECode CActivityOne::OnCreate(
+ECode JSActName::OnCreate(
     /* [in] */ IBundle* savedInstanceState)
 {
     Logger::D(TAG, "OnCreate()-----");
@@ -54,27 +52,32 @@ ECode CActivityOne::OnCreate(
 
     myHandler = mHandler;
 
-    mPackageName = String("Elastos.DevSamples.Node.JSTextViewDemo");
-    mActivityName = String("CActivityOne");
+    String _pkgPath = String("/data/temp/node/bin/");
+    String _pkgName = String(JSPkgNameStr);
+    String _nspName = String("Elastos.DevSamples.Node.");
+
+    mPackageName = _nspName + _pkgName;
+    mActivityName = String(JSActNameStr);
 
     AutoPtr<IInterface> helper;
-    ECode ec = Require(String("/data/temp/node/bin/Elastos.DevSamples.Node.JSTextViewDemo.Helper.eco"), String("CActivityOneHelper"), (IInterface**)&helper);
-    if (FAILED(ec)) {
-        ALOGD("CActivityOne::OnCreate========create CActivityOneHelper failed!======nodejs module will be used");
+    String _helperEcoName = _pkgPath + _nspName + _pkgName + String(".Helper.eco");
+    String _helperClsName = _nspName + _pkgName + String(".") + mActivityName + String("Helper");
+    ECode ec = CTestEventListener::Require(_helperEcoName, _helperClsName, (IInterface**)&helper);
 
+    if (FAILED(ec)) {
+        ALOGD("OnCreate========create Helper failed!======nodejs module will be used");
         AutoPtr<IInterface> _this = this->Probe(EIID_IInterface);
         CTestEventListener::RegisterActivity(mPackageName, mActivityName, _this, (IActivityListener**)&mListener, mHandler.Get());
     }
     else {
-        ALOGD("CActivityOne::OnCreate========create CActivityOneHelper success!======C++ epk will be used");
-
+        ALOGD("OnCreate========create Helper success!======C++ epk will be used");
         mListener = IActivityListener::Probe(helper);
     }
 
     return mListener->OnCreate(this, savedInstanceState);
 }
 
-ECode CActivityOne::OnStart()
+ECode JSActName::OnStart()
 {
     Logger::I(DBG_TAG, " >> OnStart()");
     ECode ec = Activity::OnStart();
@@ -82,7 +85,7 @@ ECode CActivityOne::OnStart()
     return ec;
 }
 
-ECode CActivityOne::OnResume()
+ECode JSActName::OnResume()
 {
     Logger::I(DBG_TAG, " >> OnResume()");
     ECode ec = Activity::OnResume();
@@ -90,7 +93,7 @@ ECode CActivityOne::OnResume()
     return ec;
 }
 
-ECode CActivityOne::OnPause()
+ECode JSActName::OnPause()
 {
     Logger::I(DBG_TAG, " >> OnPause()");
     ECode ec = Activity::OnPause();
@@ -98,7 +101,7 @@ ECode CActivityOne::OnPause()
     return ec;
 }
 
-ECode CActivityOne::OnStop()
+ECode JSActName::OnStop()
 {
     Logger::I(DBG_TAG, " >> OnStop()");
     ECode ec = Activity::OnStop();
@@ -106,7 +109,7 @@ ECode CActivityOne::OnStop()
     return ec;
 }
 
-ECode CActivityOne::OnDestroy()
+ECode JSActName::OnDestroy()
 {
     Logger::I(DBG_TAG, " >> OnDestroy()");
     ECode ec = Activity::OnDestroy();
@@ -114,7 +117,7 @@ ECode CActivityOne::OnDestroy()
     return ec;
 }
 
-ECode CActivityOne::OnActivityResult(
+ECode JSActName::OnActivityResult(
     /* [in] */ Int32 requestCode,
     /* [in] */ Int32 resultCode,
     /* [in] */ IIntent *data)
@@ -122,7 +125,7 @@ ECode CActivityOne::OnActivityResult(
     return mListener->OnActivityResult(this, requestCode, resultCode, data);
 }
 
-AutoPtr<IDialog> CActivityOne::OnCreateDialog(
+AutoPtr<IDialog> JSActName::OnCreateDialog(
    /* [in] */ Int32 id)
 {
     AutoPtr<IDialog> dlg;
@@ -134,7 +137,7 @@ AutoPtr<IDialog> CActivityOne::OnCreateDialog(
     return dlg;
 }
 
-ECode CActivityOne::OnCreateContextMenu(
+ECode JSActName::OnCreateContextMenu(
     /* [in] */ IContextMenu* menu,
     /* [in] */ IView* v,
     /* [in] */ IContextMenuInfo* menuInfo)
@@ -142,58 +145,13 @@ ECode CActivityOne::OnCreateContextMenu(
     return mListener->OnCreateContextMenu(this, menu, v, menuInfo);
 }
 
-ECode CActivityOne::OnClickPopupWindow(
+ECode JSActName::OnClickPopupWindow(
     /* [in] */ IView* view)
 {
     return NOERROR;
 }
 
-ECode CActivityOne::Require(
-    /* [in] */ const String& moduleName,
-    /* [in] */ const String& className,
-    /* [out] */ IInterface** object)
-{
-    ALOGD("==== File: %s, Function: %s ====", __FILE__, __FUNCTION__);
-    assert(object != NULL);
-
-    AutoPtr<IModuleInfo> moduleInfo;
-    ECode ec = _CReflector_AcquireModuleInfo(
-            moduleName, (IModuleInfo**)&moduleInfo);
-    if (FAILED(ec)) {
-        ALOGD("Acquire \"%s\" module info failed!\n", moduleName.string());
-        return ec;
-    }
-    else {
-        ALOGD("Acquire \"%s\" module info success!\n", moduleName.string());
-    }
-
-    AutoPtr<IClassInfo> classInfo;
-    ec = moduleInfo->GetClassInfo(
-            className, (IClassInfo**)&classInfo);
-    if (FAILED(ec)) {
-        ALOGD("Acquire \"%s\" class info failed!\n", className.string());
-        return ec;
-    }
-    else {
-        ALOGD("Acquire \"%s\" class info success!\n", className.string());
-    }
-
-    AutoPtr<IInterface> testObject;
-    ec = classInfo->CreateObject((IInterface**)&testObject);
-    if (FAILED(ec)) {
-        ALOGD("Create object failed!\n");
-        return ec;
-    }
-    else {
-        ALOGD("Create object success!\n");
-    }
-
-    *object = testObject;
-    REFCOUNT_ADD(*object);
-    return NOERROR;
-}
-
-} // namespace JSTextViewDemo
+} // namespace JSPkgName
 } // namespace Node
 } // namespace DevSamples
 } // namespace Elastos

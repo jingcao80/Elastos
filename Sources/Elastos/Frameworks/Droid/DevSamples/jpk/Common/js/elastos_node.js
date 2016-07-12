@@ -123,7 +123,7 @@ root.Elastos = ( function () {
 
     _Elastos.Runtime = _Runtime;
 
-    _Elastos.CObject.testShowMethods = function(aoCar,asTag) {
+    _Elastos.CObject.showMethods = function(aoCar,asTag) {
         var a = [];
         for (var p in aoCar){
             var bAdd = true;

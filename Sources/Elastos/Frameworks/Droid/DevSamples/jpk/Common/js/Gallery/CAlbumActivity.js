@@ -736,7 +736,7 @@ module.exports = function(aoElastos, aoActivity){
 //     }
         }
 //     *result = TRUE;
-        data.result = true;
+        result.data = true;
 //     return NOERROR;
         return;
 // }
@@ -1159,15 +1159,12 @@ module.exports = function(aoElastos, aoActivity){
 //             CObjectStringMap::New((IObjectStringMap**)&map);
                 map = Core_New('Elastos.Utility.CHashMap');
 
-        elog(TAG + "GetSimpleAdapter()-----put.0------");
-
 //             cs = NULL;
                 cs = null;
 //             CStringWrapper::New(entry->sourcePath, (ICharSequence**)&cs);
                 cs = CString(entry.sourcePath);
 //             map->Put(key1, cs);
                 map.Put( CString(key1), cs );
-        elog(TAG + "GetSimpleAdapter()-----put.1------");
 
 //             cs = NULL;
                 cs = null;
@@ -1175,7 +1172,6 @@ module.exports = function(aoElastos, aoActivity){
                 cs = CString(entry.num+'');
 //             map->Put(key2, cs);
                 map.Put( CString(key2), cs );
-        elog(TAG + "GetSimpleAdapter()-----put.2------");
 
 //             boolValue = NULL;
                 var boolValue = null;
@@ -1183,7 +1179,6 @@ module.exports = function(aoElastos, aoActivity){
                 boolValue = Core_New('Elastos.Core.CBoolean', false);
 //             map->Put(key3, boolValue);
                 map.Put( CString(key3), boolValue );
-        elog(TAG + "GetSimpleAdapter()-----put.3------");
 
 //             cs = NULL;
                 cs = null;
@@ -1191,11 +1186,9 @@ module.exports = function(aoElastos, aoActivity){
                 cs = CString(entry.desc);
 //             map->Put(key4, cs);
                 map.Put( CString(key4), cs );
-        elog(TAG + "GetSimpleAdapter()-----put.4------");
 
 //             dataList->Add(map);
                 dataList.Add(map);
-        elog(TAG + "GetSimpleAdapter()-----put.5------");
 
 //             // Logger::D(TAG, " > album %d, path:%s, num:%s, desc:%s",
 //             //     i, entry->sourcePath.string(), entry->num.string(), entry->desc.string());

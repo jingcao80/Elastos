@@ -1,15 +1,43 @@
 #ifndef __CTESTEVENTLISTENER_H__
 #define __CTESTEVENTLISTENER_H__
 
-#define JSAppName JSTextViewDemo
+#define JSPkgName JSTextViewDemo
+#define JSEvtName CTestEventListener
+#define JSActName CActivityOne
+
+#ifndef JSCarClassHead
+
+#define AA(y) #y
+#define BB(x,y) AA(x##y.h)
+#define CC(x,y,z) BB(x##z,y)
+#define DD(x,y,z) CC(z##x,y,_)
+#define EE(x,y) DD(x,y,_Elastos_DevSamples_Node_)
+#define FF(x) AA(x)
+
+#define JSEvtCarClassHead EE(JSPkgName,JSEvtName)
+#define JSActCarClassHead EE(JSPkgName,JSActName)
+
+#define JSPkgNameStr FF(JSPkgName)
+#define JSEvtNameStr FF(JSEvtName)
+#define JSActNameStr FF(JSActName)
+
+#define JSCarClass(x) CarClass(x)
+
+#define JS_TO_STRING_IMPL_0(x) TO_STRING_IMPL(#x)
+#define JS_TO_STRING_IMPL(x,y) JS_TO_STRING_IMPL_0(x::y)
+
+#define JS_CAR_INTERFACE_IMPL(x,y,z) CAR_INTERFACE_IMPL(x,y,z)
+#define JS_CAR_OBJECT_IMPL(x) CAR_OBJECT_IMPL(x)
+
+#endif
+
+#include JSEvtCarClassHead
 
 #include <Elastos.CoreLibrary.Utility.h>
 #include "Elastos.Droid.Content.h"
 #include "Elastos.Droid.Net.h"
 #include "Elastos.Droid.Os.h"
 #include "elastos/droid/ext/frameworkext.h"
-
-#include "_Elastos_DevSamples_Node_JSTextViewDemo_CTestEventListener.h"
 
 #include <elastos/droid/ext/frameworkdef.h>
 #include <elastos/core/Object.h>
@@ -112,19 +140,12 @@ struct NodeBridge
 namespace Elastos {
 namespace DevSamples {
 namespace Node {
-//namespace JSTextViewDemo {
-namespace JSAppName {
+namespace JSPkgName {
 
 EXTERN IHandler* myHandler;
 
 EXTERN NodeBridge* g_pNodeBridge;
 EXTERN NodeBridge** g_ppNodeBridge;
-
-    // interface ICallbackRunnable {
-    //     GetInstance(
-    //         [out] IInterface** instance);
-    // }
-
 
 class CallbackRunnable
     : public Object
@@ -144,28 +165,16 @@ public:
 
     CAR_INTERFACE_DECL()
 
-    //CAR_OBJECT_DECL()
-
-    // CARAPI constructor(
-    //     /* [in] */ IInterface* object,
-    //     /* [in] */ IMethodInfo* method,
-    //     /* [in] */ IArgumentList* argumentList,
-    //     /* [in] */ pthread_mutex_t* mutex);
-
     CARAPI Run();
 
     CARAPI GetInstance(IInterface** ppInstance);
 
     static void NodeMessage_FireCallback(void* payload) {
-        ALOGD("NodeMessage_FireCallback================begin================");
-
         ECode ec = NOERROR;
 
         AutoPtr<IMessage> msg = (IMessage*)payload;
         AutoPtr<IRunnable> runnable;
         msg->GetCallback((IRunnable**)&runnable);
-
-        ALOGD("NodeMessage_FireCallback================1================");
 
         IInterface* _interface = runnable->Probe(EIID_IInterface);
         //IInterface* _object = runnable->Probe(EIID_IObject);
@@ -179,28 +188,16 @@ public:
         CallbackRunnable* callback_1;
         _callbackRunnable->GetInstance((IInterface**)&callback_1);
 
-        ALOGD("NodeMessage_FireCallback================2================");
-        ALOGD("NodeMessage_FireCallback================2.0================mTag:%d",callback_1->mTag);
-        ALOGD("NodeMessage_FireCallback================2.1================mTag:%d",callback->mTag);
-
-        ALOGD("NodeMessage_FireCallback================2.2================check args");
         IMethodInfo* _methodInfo = callback_1->mMethod.Get();
-        ALOGD("NodeMessage_FireCallback================2.3================mMethod:%p",_methodInfo);
         IInterface* _object = callback_1->mObject.Get();
-        ALOGD("NodeMessage_FireCallback================2.4================mObject:%p",_object);
         IArgumentList* _argumentList = callback_1->mArgumentList.Get();
-        ALOGD("NodeMessage_FireCallback================2.5================mArgumentList:%p",_argumentList);
 
         //ec = callback->mMethod->Invoke(callback->mObject, callback->mArgumentList);
         ec = callback_1->mMethod->Invoke(callback_1->mObject, callback_1->mArgumentList);
 
-        ALOGD("NodeMessage_FireCallback================3================");
-
         if (FAILED(ec)) {
             ALOGD("NodeMessage_FireCallback================Invoke failed================");
         }
-
-        ALOGD("NodeMessage_FireCallback================end================");
     }
 
     static void NodeMessage_Send(void* payload) {
@@ -290,8 +287,6 @@ public:
     };
 
     static void RegisterActivity(const String& packageName, const String& activityName, IInterface* activityInstance, IActivityListener** activityListener, IHandler* activityHandler) {
-        ALOGD("CTestEventListener::RegisterActivity================begin================");
-
         if (!CTestEventListener::mNodeInit) {
             CTestEventListener::InitBridge(packageName);
             CTestEventListener::mNodeInit = true;
@@ -299,20 +294,48 @@ public:
 
         Boolean result = false;
         if(CTestEventListener::mNodeBridgeListener) {
-            ALOGD("CTestEventListener::RegisterActivity================mNodeBridgeListener OnRegistActivity.begin================");
-
             CTestEventListener::mNodeBridgeListener->OnRegistActivity(
                 packageName, activityName, activityInstance, (Int32)activityListener, activityHandler, &result);
-
-            ALOGD("CTestEventListener::RegisterActivity================mNodeBridgeListener OnRegistActivity.end================");
         }
         else {
-            ALOGD("CTestEventListener::RegisterActivity================mNodeBridgeListener is null================");
+            ALOGD("RegisterActivity================mNodeBridgeListener is null================");
+        }
+    }
+
+    static ECode Require(
+        /* [in] */ const String& moduleName,
+        /* [in] */ const String& className,
+        /* [out] */ IInterface** object)
+    {
+        assert(object != NULL);
+
+        ECode ec = NOERROR;
+
+        AutoPtr<IModuleInfo> moduleInfo;
+        ec = _CReflector_AcquireModuleInfo(moduleName, (IModuleInfo**)&moduleInfo);
+        if (FAILED(ec)) {
+            ALOGD("Acquire \"%s\" module info failed!\n", moduleName.string());
+            return ec;
         }
 
-        ALOGD("CTestEventListener::RegisterActivity================end================");
+        AutoPtr<IClassInfo> classInfo;
+        ec = moduleInfo->GetClassInfo(className, (IClassInfo**)&classInfo);
+        if (FAILED(ec)) {
+            ALOGD("Acquire \"%s\" class info failed!\n", className.string());
+            return ec;
+        }
 
-        //g_pNodeBridge->vt->RegisterActivity(packageName.string(), activityName.string());
+        AutoPtr<IInterface> testObject;
+        ec = classInfo->CreateObject((IInterface**)&testObject);
+        if (FAILED(ec)) {
+            ALOGD("Create object failed!\n");
+            return ec;
+        }
+
+        *object = testObject;
+        REFCOUNT_ADD(*object);
+
+        return ec;
     }
 
 public:
@@ -352,17 +375,14 @@ private:
 public:
     static pthread_mutex_t mMutex;
 
-    //String mPackageName;
-    //String mActivityName;
-
     static AutoPtr<INodeBridgeListener> mNodeBridgeListener;
 
     static bool mNodeInit;
 };
 
-}   //namespace JSTextViewDemo
+}   //namespace JSPkgName
 }   //namespace Node
 }   //namespace DevSamples
 }   //namespace Elastos
 
-#endif // __CTESTEVENTLISTENER_H__
+#endif // __H__
