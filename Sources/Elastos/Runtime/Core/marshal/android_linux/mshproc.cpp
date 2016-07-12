@@ -749,41 +749,43 @@ ECode Stub_ProcessMsh_Out(
                         {
                             parcel->WriteArrayOf((Handle32)*outBuffer);
                             PCARQUINTET p = (PCARQUINTET)*outBuffer;
-                            if (!BT_IS_CALLEE(params[n])) {
-                                if (CarQuintetFlag_Type_IObject == (p->mFlags
-                                        & CarQuintetFlag_TypeMask)) {
-                                    int used = ((PCARQUINTET)*args)->mUsed
-                                                / sizeof(IInterface *);
-                                    int *buf = (int*)((PCARQUINTET)*args)->mBuf;
-                                    for (int i = 0; i < used; i++) {
-                                        if (buf[i]) {
-                                            ((IInterface *)buf[i])->Release();
-                                            buf[i] = 0;
-                                        }
-                                    }
-                                }
-                                else if (CarQuintetFlag_Type_String == (p->mFlags
-                                        & CarQuintetFlag_TypeMask)) {
-                                    int size = ((PCARQUINTET)*args)->mSize
-                                                / sizeof(String);
-                                    String *buf = (String*)((PCARQUINTET)*args)->mBuf;
-                                    for (int i = 0; i < size; i++) {
-                                        if (!buf[i].IsNull()) {
-                                            buf[i] = NULL;
-                                        }
-                                    }
-                                }
-                                free(p->mBuf);
-                                free(p);
-                            }
-                            else {
-                                if (CarQuintetFlag_Type_IObject == (p->mFlags
-                                        & CarQuintetFlag_TypeMask)) {
-                                    ((ArrayOf<IInterface*>*)p)->Release();
-                                }
-                                else if (CarQuintetFlag_Type_String == (p->mFlags
+                            if (p != NULL) {
+                                if (!BT_IS_CALLEE(params[n])) {
+                                    if (CarQuintetFlag_Type_IObject == (p->mFlags
                                             & CarQuintetFlag_TypeMask)) {
-                                    ((ArrayOf<String>*)p)->Release();
+                                        int used = ((PCARQUINTET)*args)->mUsed
+                                                    / sizeof(IInterface *);
+                                        int *buf = (int*)((PCARQUINTET)*args)->mBuf;
+                                        for (int i = 0; i < used; i++) {
+                                            if (buf[i]) {
+                                                ((IInterface *)buf[i])->Release();
+                                                buf[i] = 0;
+                                            }
+                                        }
+                                    }
+                                    else if (CarQuintetFlag_Type_String == (p->mFlags
+                                            & CarQuintetFlag_TypeMask)) {
+                                        int size = ((PCARQUINTET)*args)->mSize
+                                                    / sizeof(String);
+                                        String *buf = (String*)((PCARQUINTET)*args)->mBuf;
+                                        for (int i = 0; i < size; i++) {
+                                            if (!buf[i].IsNull()) {
+                                                buf[i] = NULL;
+                                            }
+                                        }
+                                    }
+                                    free(p->mBuf);
+                                    free(p);
+                                }
+                                else {
+                                    if (CarQuintetFlag_Type_IObject == (p->mFlags
+                                            & CarQuintetFlag_TypeMask)) {
+                                        ((ArrayOf<IInterface*>*)p)->Release();
+                                    }
+                                    else if (CarQuintetFlag_Type_String == (p->mFlags
+                                                & CarQuintetFlag_TypeMask)) {
+                                        ((ArrayOf<String>*)p)->Release();
+                                    }
                                 }
                             }
                             outBuffer++;

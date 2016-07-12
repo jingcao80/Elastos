@@ -7365,6 +7365,8 @@ ECode CActivityManagerService::GetProcessMemoryInfo(
 {
     VALIDATE_NOT_NULL(retInfos);
     *retInfos = NULL;
+    Logger::E(TAG, "TODO: GetProcessMemoryInfo() need CDebug");
+    return NOERROR;
     FAIL_RETURN(EnforceNotIsolatedCaller(String("getProcessMemoryInfo")));
     Int32 length = pids->GetLength();
     AutoPtr<ArrayOf<IDebugMemoryInfo*> > infos = ArrayOf<IDebugMemoryInfo*>::Alloc(length);

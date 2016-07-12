@@ -500,9 +500,9 @@ android::status_t CAppOpsService::NativeAppOpsService::onTransact(
             data.enforceInterface(interfaceName);
             Int32 op = data.readInt32();
             android::String8 packageName(data.readString16());
-            android::sp<android::IAppOpsCallback> callback =
-                android::interface_cast<android::IAppOpsCallback>(data.readStrongBinder());
-            AutoPtr<AppOpsCallback> elCallback = new AppOpsCallback(callback.get());
+            android::sp<IBinder> callback = data.readStrongBinder();
+            AutoPtr<AppOpsCallback> elCallback = new AppOpsCallback(
+                android::interface_cast<android::IAppOpsCallback>(callback).get());
             mCallbackMap[reinterpret_cast<Int64>(callback.get())] = elCallback;
             mHost->StartWatchingMode(op, String(packageName.string()), elCallback);
             reply->writeNoException();
@@ -510,12 +510,13 @@ android::status_t CAppOpsService::NativeAppOpsService::onTransact(
         } break;
         case STOP_WATCHING_MODE_TRANSACTION: {
             data.enforceInterface(interfaceName);
-            android::sp<android::IAppOpsCallback> callback =
-                android::interface_cast<android::IAppOpsCallback>(data.readStrongBinder());
-            AutoPtr<AppOpsCallback> elCallback = mCallbackMap[reinterpret_cast<Int64>(callback.get())];
-            assert(elCallback != NULL);
-            mCallbackMap.Erase(reinterpret_cast<Int64>(callback.get()));
-            mHost->StopWatchingMode(elCallback);
+            android::sp<IBinder> callback = data.readStrongBinder();
+            if (callback != NULL) {
+                AutoPtr<AppOpsCallback> elCallback = mCallbackMap[reinterpret_cast<Int64>(callback.get())];
+                assert(elCallback != NULL);
+                mCallbackMap.Erase(reinterpret_cast<Int64>(callback.get()));
+                mHost->StopWatchingMode(elCallback);
+            }
             reply->writeNoException();
             return android::NO_ERROR;
         } break;
