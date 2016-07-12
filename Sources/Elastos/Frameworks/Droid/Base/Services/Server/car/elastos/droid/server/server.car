@@ -319,6 +319,15 @@ module
         interface IBinder;
     }
 
+    class CAppOpsServiceClientState {
+        constructor(
+            [in] IBinder* appToken,
+            [in] IIAppOpsService* host);
+
+        interface IBinder;
+        interface IProxyDeathRecipient;
+    }
+
     [local]
     class CCmHardwareService {
         constructor(

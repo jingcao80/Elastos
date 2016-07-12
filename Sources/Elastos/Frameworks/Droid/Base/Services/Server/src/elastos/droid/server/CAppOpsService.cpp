@@ -1,5 +1,6 @@
 
 #include "elastos/droid/server/CAppOpsService.h"
+#include "elastos/droid/server/CAppOpsServiceClientState.h"
 #include "elastos/droid/server/AppOpsPolicy.h"
 #include "elastos/droid/server/CPermissionDialog.h"
 #include "elastos/droid/app/AppOpsManager.h"
@@ -18,6 +19,9 @@
 #include <elastos/core/StringUtils.h>
 #include <elastos/core/CoreUtils.h>
 #include <elastos/utility/logging/Slogger.h>
+#include <binder/IServiceManager.h>
+#include <binder/Parcel.h>
+#include <utils/String8.h>
 
 using Elastos::Droid::Manifest;
 using Elastos::Droid::App::AppOpsManager;
@@ -55,6 +59,7 @@ using Elastos::Droid::Utility::CPair;
 using Elastos::Droid::Utility::CSparseArray;
 using Elastos::Droid::Utility::CSparseInt32Array;
 using Elastos::Droid::Internal::App::EIID_IIAppOpsService;
+using Elastos::Droid::Internal::App::EIID_IIAppOpsCallback;
 using Elastos::Droid::Internal::Utility::XmlUtils;
 using Elastos::Droid::Internal::Utility::CFastXmlSerializer;
 using Elastos::Core::AutoLock;
@@ -269,12 +274,12 @@ ECode CAppOpsService::Callback::ProxyDied()
 
 CAR_INTERFACE_IMPL_2(CAppOpsService::ClientState, Object, IProxyDeathRecipient, IBinder)
 
-CAppOpsService::ClientState::ClientState(
+ECode CAppOpsService::ClientState::constructor(
     /* [in] */ IBinder* appToken,
-    /* [in] */ CAppOpsService* host)
-    : mAppToken(appToken)
-    , mHost(host)
+    /* [in] */ IIAppOpsService* host)
 {
+    mAppToken = appToken;
+    mHost = (CAppOpsService*)host;
     mPid = Binder::GetCallingPid();
 
     AutoPtr<IProxy> proxy = (IProxy*)appToken->Probe(EIID_IProxy);
@@ -352,6 +357,207 @@ CAppOpsService::Restriction::Restriction()
 }
 
 //================================================================================
+// NativeAppOpsService
+//================================================================================
+
+enum {
+    CHECK_OPERATION_TRANSACTION = IBinder::FIRST_CALL_TRANSACTION,
+    NOTE_OPERATION_TRANSACTION = IBinder::FIRST_CALL_TRANSACTION+1,
+    START_OPERATION_TRANSACTION = IBinder::FIRST_CALL_TRANSACTION+2,
+    FINISH_OPERATION_TRANSACTION = IBinder::FIRST_CALL_TRANSACTION+3,
+    START_WATCHING_MODE_TRANSACTION = IBinder::FIRST_CALL_TRANSACTION+4,
+    STOP_WATCHING_MODE_TRANSACTION = IBinder::FIRST_CALL_TRANSACTION+5,
+    GET_TOKEN_TRANSACTION = IBinder::FIRST_CALL_TRANSACTION+6,
+};
+
+CAR_INTERFACE_IMPL(CAppOpsService::NativeAppOpsService::AppOpsCallback, Object, IIAppOpsCallback)
+
+ECode CAppOpsService::NativeAppOpsService::AppOpsCallback::OpChanged(
+    /* [in] */ Int32 op,
+    /* [in] */ const String& packageName)
+{
+    mCallback->opChanged(op, android::String16(packageName.string()));
+    return NOERROR;
+}
+
+UInt32 CAppOpsService::NativeAppOpsService::ClientToken::AddRef()
+{
+    return ElRefBase::AddRef();
+}
+
+UInt32 CAppOpsService::NativeAppOpsService::ClientToken::Release()
+{
+    return ElRefBase::Release();
+}
+
+PInterface CAppOpsService::NativeAppOpsService::ClientToken::Probe(
+    /* [in] */ REIID riid)
+{
+    if (riid == EIID_IInterface) {
+        return (IInterface*)(Elastos::Droid::Os::IBinder*)this;
+    }
+    else if (riid == EIID_IBinder) {
+        return (Elastos::Droid::Os::IBinder*)this;
+    }
+    return Object::Probe(riid);
+}
+
+ECode CAppOpsService::NativeAppOpsService::ClientToken::GetInterfaceID(
+    /* [in] */ IInterface* object,
+    /* [out] */ InterfaceID* iid)
+{
+    VALIDATE_NOT_NULL(iid);
+
+    if (object == (IInterface*)(Elastos::Droid::Os::IBinder*)this) {
+        *iid = EIID_IBinder;
+        return NOERROR;
+    }
+    return Object::GetInterfaceID(object, iid);
+}
+
+
+ECode CAppOpsService::NativeAppOpsService::ClientToken::LinkToDeath(
+    /* [in] */ IProxyDeathRecipient* recipient,
+    /* [in] */ NativeAppOpsService* host)
+{
+    if (!mClientToken->localBinder()) {
+        android::sp<ClientTokenDeathRecipient> ctdr =
+            new ClientTokenDeathRecipient(recipient, host);
+        android::status_t err = mClientToken->linkToDeath(ctdr, NULL, 0);
+        if (err != android::NO_ERROR) {
+            Logger::D(TAG, "NativeAppOpsService::ClientToken::LinkToDeath failed");
+            return E_FAIL;
+        }
+    }
+    return NOERROR;
+}
+
+void CAppOpsService::NativeAppOpsService::ClientTokenDeathRecipient::binderDied(
+    /* [in] */ const android::wp<android::IBinder>& who)
+{
+    if (mRecipient != NULL) {
+        mRecipient->ProxyDied();
+        AutoLock lock(mHost->mTokenMapLock);
+        mHost->mClientTokenMap.Erase(reinterpret_cast<Int64>(who.promote().get()));
+        mHost->mTokenMap.Erase(Elastos::Droid::Os::IBinder::Probe(mRecipient));
+    }
+}
+
+android::status_t CAppOpsService::NativeAppOpsService::onTransact(
+    /* [in] */ uint32_t code,
+    /* [in] */ const android::Parcel& data,
+    /* [in] */ android::Parcel* reply,
+    /* [in] */ uint32_t flags)
+{
+    android::String16 interfaceName("com.android.internal.app.IAppOpsService");
+    switch(code) {
+        case CHECK_OPERATION_TRANSACTION: {
+            data.enforceInterface(interfaceName);
+            Int32 code = data.readInt32();
+            Int32 uid = data.readInt32();
+            android::String8 packageName(data.readString16());
+            Int32 res;
+            mHost->CheckOperation(code, uid, String(packageName.string()), &res);
+            reply->writeNoException();
+            reply->writeInt32(res);
+            return android::NO_ERROR;
+        } break;
+        case NOTE_OPERATION_TRANSACTION: {
+            data.enforceInterface(interfaceName);
+            Int32 code = data.readInt32();
+            Int32 uid = data.readInt32();
+            android::String8 packageName(data.readString16());
+            Int32 res;
+            mHost->NoteOperation(code, uid, String(packageName.string()), &res);
+            reply->writeNoException();
+            reply->writeInt32(res);
+            return android::NO_ERROR;
+        } break;
+        case START_OPERATION_TRANSACTION: {
+            data.enforceInterface(interfaceName);
+            android::sp<IBinder> token = data.readStrongBinder();
+            Int32 code = data.readInt32();
+            Int32 uid = data.readInt32();
+            android::String8 packageName(data.readString16());
+            Int32 res;
+            mHost->StartOperation(((Token*)token.get())->mToken, code, uid, String(packageName.string()), &res);
+            reply->writeNoException();
+            reply->writeInt32(res);
+            return android::NO_ERROR;
+        } break;
+        case FINISH_OPERATION_TRANSACTION: {
+            data.enforceInterface(interfaceName);
+            android::sp<IBinder> token = data.readStrongBinder();
+            Int32 code = data.readInt32();
+            Int32 uid = data.readInt32();
+            android::String8 packageName(data.readString16());
+            mHost->FinishOperation(((Token*)token.get())->mToken, code, uid, String(packageName.string()));
+            reply->writeNoException();
+            return android::NO_ERROR;
+        } break;
+        case START_WATCHING_MODE_TRANSACTION: {
+            data.enforceInterface(interfaceName);
+            Int32 op = data.readInt32();
+            android::String8 packageName(data.readString16());
+            android::sp<android::IAppOpsCallback> callback =
+                android::interface_cast<android::IAppOpsCallback>(data.readStrongBinder());
+            AutoPtr<AppOpsCallback> elCallback = new AppOpsCallback(callback.get());
+            mCallbackMap[reinterpret_cast<Int64>(callback.get())] = elCallback;
+            mHost->StartWatchingMode(op, String(packageName.string()), elCallback);
+            reply->writeNoException();
+            return android::NO_ERROR;
+        } break;
+        case STOP_WATCHING_MODE_TRANSACTION: {
+            data.enforceInterface(interfaceName);
+            android::sp<android::IAppOpsCallback> callback =
+                android::interface_cast<android::IAppOpsCallback>(data.readStrongBinder());
+            AutoPtr<AppOpsCallback> elCallback = mCallbackMap[reinterpret_cast<Int64>(callback.get())];
+            assert(elCallback != NULL);
+            mCallbackMap.Erase(reinterpret_cast<Int64>(callback.get()));
+            mHost->StopWatchingMode(elCallback);
+            reply->writeNoException();
+            return android::NO_ERROR;
+        } break;
+        case GET_TOKEN_TRANSACTION: {
+            data.enforceInterface(interfaceName);
+            android::sp<IBinder> clientToken = data.readStrongBinder();
+            AutoPtr<ClientToken> elClientToken;
+            {
+                AutoLock lock(mTokenMapLock);
+                elClientToken = mClientTokenMap[reinterpret_cast<Int64>(clientToken.get())];
+                if (elClientToken == NULL) {
+                    elClientToken = new ClientToken(clientToken.get());
+                    mClientTokenMap[reinterpret_cast<Int64>(clientToken.get())] = elClientToken;
+                }
+            }
+            AutoPtr<Elastos::Droid::Os::IBinder> elToken;
+            mHost->GetToken(elClientToken, (Elastos::Droid::Os::IBinder**)&elToken);
+
+            android::sp<android::IBinder> token;
+            {
+                AutoLock lock(mTokenMapLock);
+                HashMap<AutoPtr<Elastos::Droid::Os::IBinder>, android::sp<android::IBinder> >::Iterator it = mTokenMap.Find(elToken);
+                if (it != mTokenMap.End()) {
+                    token = it->mSecond;
+                }
+                else {
+                    token = new Token(elToken);
+                    mTokenMap[elToken] = token;
+                    elClientToken->LinkToDeath(IProxyDeathRecipient::Probe(elToken), this);
+                }
+            }
+
+            reply->writeNoException();
+            reply->writeStrongBinder(token);
+            return android::NO_ERROR;
+        } break;
+        default:
+            return BBinder::onTransact(code, data, reply, flags);
+    }
+    return android::NO_ERROR;
+}
+
+//================================================================================
 // CAppOpsService
 //================================================================================
 
@@ -380,6 +586,8 @@ AutoPtr<ArrayOf<Int32> > CAppOpsService::PRIVACY_GUARD_OP_STATES = InitPRIVACY_G
 CAR_INTERFACE_IMPL_2(CAppOpsService, Object, IIAppOpsService, IBinder)
 
 CAR_OBJECT_IMPL(CAppOpsService)
+
+CAR_OBJECT_IMPL(CAppOpsServiceClientState)
 
 CAppOpsService::CAppOpsService()
     : mWriteScheduled(FALSE)
@@ -424,7 +632,17 @@ ECode CAppOpsService::Publish(
 {
     mContext = context;
     ReadPolicy();
-    return ServiceManager::AddService(IContext::APP_OPS_SERVICE, (IBinder*)this);
+    FAIL_RETURN(ServiceManager::AddService(IContext::APP_OPS_SERVICE, (IBinder*)this))
+    if (mNative == NULL) {
+        mNative = new NativeAppOpsService(this);
+        android::sp<android::IServiceManager> sm = android::defaultServiceManager();
+        int res = sm->addService(android::String16("appops"), mNative);
+        if (res != 0) {
+            Slogger::E(TAG, "add service appops failed");
+            return E_RUNTIME_EXCEPTION;
+        }
+    }
+    return NOERROR;
 }
 
 ECode CAppOpsService::SystemReady()
@@ -1064,7 +1282,9 @@ ECode CAppOpsService::GetToken(
     mClients->Get(clientToken, (IInterface**)&obj);
     AutoPtr<ClientState> cs = (ClientState*)IObject::Probe(obj);
     if (cs == NULL) {
-        cs = new ClientState(clientToken, this);
+        AutoPtr<IBinder> _cs;
+        CAppOpsServiceClientState::New(clientToken, this, (IBinder**)&_cs);
+        cs = (ClientState*)_cs.Get();
         mClients->Put(clientToken, TO_IINTERFACE(cs));
     }
     *token = IBinder::Probe(cs);

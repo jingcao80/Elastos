@@ -8312,7 +8312,6 @@ jobject Util::ToJavaIIntentSender(
     jobject jisender = env->NewObject(pergKlass, m, (jlong)isender);
     CheckErrorAndLog(env, "Util", "ToJavaIIntentSender NewObject: ElIIntentSenderProxy : %d!\n", __LINE__);
     isender->AddRef();
-    Logger::D("xihaoc", "ToJavaIIntentSender isender = %p", isender);
 
     env->DeleteLocalRef(pergKlass);
     return jisender;
@@ -8940,11 +8939,11 @@ jobject Util::ToJavaContentValues(
                 jclass booleanKlass = env->FindClass("java/lang/Boolean");
                 Util::CheckErrorAndLog(env, "ToJavaContentValues", "Fail FindClass: Boolean %d", __LINE__);
 
-                jmethodID mInit = env->GetMethodID(booleanKlass, "<init>", "(Z)V");
-                Util::CheckErrorAndLog(env, "ToJavaContentValues", "Fail GetMethodID: Boolean %d", __LINE__);
+                jmethodID mv = env->GetStaticMethodID(booleanKlass, "valueOf", "(Z)Ljava/lang/Boolean;");
+                Util::CheckErrorAndLog(env, "ToJavaContentValues", "Fail GetMethodID: valueOf %d", __LINE__);
 
-                jobject jValue = env->NewObject(booleanKlass, mInit, bv);
-                Util::CheckErrorAndLog(env, "ToJavaContentValues", "Fail NewObject: Double %d", __LINE__);
+                jobject jValue = env->CallStaticObjectMethod(booleanKlass, mv, bv);
+                Util::CheckErrorAndLog(env, "ToJavaContentValues", "Fail CallObjectMethod valueOf %d", __LINE__);
 
                 env->CallVoidMethod(jContentValues, m, jKey, jValue);
                 env->DeleteLocalRef(booleanKlass);

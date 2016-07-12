@@ -138,7 +138,7 @@ template <typename rc_t>
 static rc_t ErrorIfMinusOne(const char* name, rc_t rc, ECode* ec) {
     *ec = NOERROR;
     if (rc == rc_t(-1)) {
-        // ALOGI("CPosix: System-call error: %s", name);
+        ALOGE("CPosix: System-call error: %s %s", name, strerror(errno));
         *ec = E_ERRNO_EXCEPTION;
     }
     return rc;

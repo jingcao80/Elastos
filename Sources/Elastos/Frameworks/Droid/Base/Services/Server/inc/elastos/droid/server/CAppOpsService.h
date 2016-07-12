@@ -8,12 +8,16 @@
 #include <elastos/droid/server/PermissionDialogReqQueue.h>
 #include <elastos/droid/utility/SparseArray.h>
 #include <elastos/utility/etl/HashSet.h>
+#include <elastos/utility/etl/HashMap.h>
 #include <Elastos.Droid.App.h>
 #include <Elastos.Droid.Content.h>
 #include <Elastos.Droid.Os.h>
 #include <Elastos.Droid.Utility.h>
 #include <Elastos.CoreLibrary.IO.h>
 #include <Elastos.CoreLibrary.External.h>
+#include <binder/IAppOpsCallback.h>
+#define HASH_FOR_OS
+#include "elastos/droid/ext/frameworkhash.h"
 
 using Elastos::Droid::App::IActivityThread;
 using Elastos::Droid::App::IAppOpsManager;
@@ -41,6 +45,7 @@ using Elastos::IO::IFileInputStream;
 using Elastos::IO::IFileOutputStream;
 using Elastos::IO::IPrintWriter;
 using Elastos::Utility::Etl::HashSet;
+using Elastos::Utility::Etl::HashMap;
 using Elastos::Utility::IArrayList;
 using Elastos::Utility::IHashMap;
 using Elastos::Utility::IIterator;
@@ -67,7 +72,130 @@ CarClass(CAppOpsService)
     , public IIAppOpsService
     , public IBinder
 {
+public:
+    class ClientState
+        : public Object
+        , public IProxyDeathRecipient
+        , public IBinder
+    {
+    public:
+        CAR_INTERFACE_DECL()
+
+        CARAPI constructor(
+            /* [in] */ IBinder* appToken,
+            /* [in] */ IIAppOpsService* host);
+
+        //@Override
+        CARAPI ToString(
+            /* [out] */ String* str);
+
+        //@Override
+        CARAPI ProxyDied();
+
+    private:
+        friend class CAppOpsService;
+        AutoPtr<IBinder> mAppToken;
+        Int32 mPid;
+        AutoPtr<IArrayList> mStartedOps; //ArrayList<Op>
+        CAppOpsService* mHost;
+    };
+
 private:
+    class NativeAppOpsService : public android::BBinder
+    {
+    private:
+        class Token : public android::BBinder
+        {
+        public:
+            Token(
+                /* [in] */ Elastos::Droid::Os::IBinder* token)
+                : mToken(token)
+            {}
+
+        public:
+            AutoPtr<Elastos::Droid::Os::IBinder> mToken;
+        };
+
+        class AppOpsCallback
+            : public Object
+            , public IIAppOpsCallback
+        {
+        public:
+            AppOpsCallback(
+                /* [in] */ android::IAppOpsCallback* callback)
+                : mCallback(callback)
+            {}
+
+            CAR_INTERFACE_DECL()
+
+            CARAPI OpChanged(
+                /* [in] */ Int32 op,
+                /* [in] */ const String& packageName);
+
+        private:
+            android::sp<android::IAppOpsCallback> mCallback;
+        };
+
+        class ClientToken
+            : public Object
+            , public Elastos::Droid::Os::IBinder
+        {
+        public:
+            ClientToken(
+                /* [in] */ android::IBinder* clientToken)
+                : mClientToken(clientToken)
+            {}
+
+            CAR_INTERFACE_DECL()
+
+            CARAPI LinkToDeath(
+                /* [in] */ IProxyDeathRecipient* recipient,
+                /* [in] */ NativeAppOpsService* host);
+
+            TO_STRING_IMPL("NativeAppOpsService::ClientToken")
+
+        private:
+            android::sp<android::IBinder> mClientToken;
+        };
+
+        class ClientTokenDeathRecipient : public android::IBinder::DeathRecipient
+        {
+        public:
+            ClientTokenDeathRecipient(
+                /* [in] */ IProxyDeathRecipient* recipient,
+                /* [in] */ NativeAppOpsService* host)
+                : mRecipient(recipient)
+                , mHost(host)
+            {}
+
+            void binderDied(
+                /* [in] */ const android::wp<android::IBinder>& who);
+
+        private:
+            AutoPtr<IProxyDeathRecipient> mRecipient;
+            NativeAppOpsService* mHost;
+        };
+
+    public:
+        NativeAppOpsService(
+            /* [in] */ CAppOpsService* host)
+            : mHost(host)
+        {}
+
+        android::status_t onTransact(
+            /* [in] */ uint32_t code,
+            /* [in] */ const android::Parcel& data,
+            /* [in] */ android::Parcel* reply,
+            /* [in] */ uint32_t flags = 0);
+
+    private:
+        CAppOpsService* mHost;
+        Object mTokenMapLock;
+        HashMap<AutoPtr<Elastos::Droid::Os::IBinder>, android::sp<android::IBinder> > mTokenMap;
+        HashMap<Int64, AutoPtr<ClientToken> > mClientTokenMap;
+        HashMap<Int64, AutoPtr<AppOpsCallback> > mCallbackMap;
+    };
+
     class WriteStateTask
         : public AsyncTask
     {
@@ -176,33 +304,6 @@ private:
         friend class CAppOpsService;
 
         AutoPtr<IIAppOpsCallback> mCallback;
-        CAppOpsService* mHost;
-    };
-
-    class ClientState
-        : public Object
-        , public IProxyDeathRecipient
-        , public IBinder
-    {
-    public:
-        CAR_INTERFACE_DECL()
-
-        ClientState(
-            /* [in] */ IBinder* appToken,
-            /* [in] */ CAppOpsService* host);
-
-        //@Override
-        CARAPI ToString(
-            /* [out] */ String* str);
-
-        //@Override
-        CARAPI ProxyDied();
-
-    private:
-        friend class CAppOpsService;
-        AutoPtr<IBinder> mAppToken;
-        Int32 mPid;
-        AutoPtr<IArrayList> mStartedOps; //ArrayList<Op>
         CAppOpsService* mHost;
     };
 
@@ -541,6 +642,8 @@ private:
     AutoPtr<ISparseArray> mLoadPrivLaterPkgs;
 
     AutoPtr<IArrayMap> mClients;// = new ArrayMap<IBinder, ClientState>();
+
+    android::sp<NativeAppOpsService> mNative;
 };
 
 } // Server
