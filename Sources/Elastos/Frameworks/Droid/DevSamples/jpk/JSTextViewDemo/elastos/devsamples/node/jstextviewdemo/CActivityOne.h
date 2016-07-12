@@ -1,35 +1,12 @@
-#ifndef __CACTIVITYONE_H__
-#define __CACTIVITYONE_H__
+#ifndef __CActivityOne_H__
+#define __CActivityOne_H__
 
-#define JSPkgName JSTextViewDemo
-#define JSEvtName CTestEventListener
 #define JSActName CActivityOne
 
-#ifndef JSCarClassHead
+#include "CTestEventListener.h"
 
-#define AA(y) #y
-#define BB(x,y) AA(x##y.h)
-#define CC(x,y,z) BB(x##z,y)
-#define DD(x,y,z) CC(z##x,y,_)
-#define EE(x,y) DD(x,y,_Elastos_DevSamples_Node_)
-#define FF(x) AA(x)
-
-#define JSEvtCarClassHead EE(JSPkgName,JSEvtName)
 #define JSActCarClassHead EE(JSPkgName,JSActName)
-
-#define JSPkgNameStr FF(JSPkgName)
-#define JSEvtNameStr FF(JSEvtName)
 #define JSActNameStr FF(JSActName)
-
-#define JSCarClass(x) CarClass(x)
-
-#define JS_TO_STRING_IMPL_0(x) TO_STRING_IMPL(#x)
-#define JS_TO_STRING_IMPL(x,y) JS_TO_STRING_IMPL_0(x::y)
-
-#define JS_CAR_INTERFACE_IMPL(x,y,z) CAR_INTERFACE_IMPL(x,y,z)
-#define JS_CAR_OBJECT_IMPL(x) CAR_OBJECT_IMPL(x)
-
-#endif
 
 #include JSActCarClassHead
 

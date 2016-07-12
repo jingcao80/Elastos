@@ -3,7 +3,6 @@
 
 #define JSPkgName JSTextViewDemo
 #define JSEvtName CTestEventListener
-#define JSActName CActivityOne
 
 #ifndef JSCarClassHead
 
@@ -15,11 +14,9 @@
 #define FF(x) AA(x)
 
 #define JSEvtCarClassHead EE(JSPkgName,JSEvtName)
-#define JSActCarClassHead EE(JSPkgName,JSActName)
 
 #define JSPkgNameStr FF(JSPkgName)
 #define JSEvtNameStr FF(JSEvtName)
-#define JSActNameStr FF(JSActName)
 
 #define JSCarClass(x) CarClass(x)
 
@@ -32,6 +29,8 @@
 #endif
 
 #include JSEvtCarClassHead
+
+#include "Elastos.Node.Bridge.h"
 
 #include <Elastos.CoreLibrary.Utility.h>
 #include "Elastos.Droid.Content.h"
@@ -56,86 +55,6 @@ using Elastos::Core::EIID_IRunnable;
 using Elastos::Droid::Os::IHandler;
 using Elastos::Droid::Os::IMessage;
 using Elastos::Droid::Os::CMessage;
-
-//----------------NodeBridge Definition Start---------------
-
-enum NodeMessage_Status {
-        NodeMessage_Status_Null = 0,
-        NodeMessage_Status_Ready = 1,
-        NodeMessage_Status_Running = 2,
-        NodeMessage_Status_Finish = 3,
-};
-
-struct NodeMessage;
-struct NodeMessageQueue;
-struct NodeBridge;
-
-struct NodeMessage
-{
-    void* mObj;
-    void (*mSend)(void*);
-    void (*mProc)(void*);
-    void* mPayload;
-    int mSync;
-
-    int mStatus;
-
-    NodeMessageQueue* mQueue;
-    int mIndex;
-
-    int mFromIdx;
-    NodeMessage* mSource;
-};
-
-struct NodeMessageQueue
-{
-    NodeBridge* mBridge;
-    int mIndex;
-    NodeMessage** mMessages;
-    pthread_mutex_t mMutex;
-    int mPid;   //pid_t
-    int mTid;   //pthread_t
-    int mMax;
-    int mTop;
-    char* mActivityName;
-    void* mActivity;    //activity/service/provider/receiver
-    void* mActivityListener;
-    void* mHandler;
-    void* mHandlerListener;
-
-    pthread_mutex_t queue_mtx;
-    pthread_cond_t queue_cond;
-    bool queue_waiting;
-};
-
-struct NodeBridgeVT
-{
-    void (*Enqueue) (void* _this, void* obj, void (*send)(void*), void (*proc)(void*), void* payload);
-    void (*Invoke)  (void* _this);
-    void (*Tick)    (void* _this);
-    void (*Init)    (void* _this);
-};
-
-struct NodeBridge
-{
-    NodeBridgeVT* vt;
-
-    void** mQueues;
-    pthread_mutex_t mMutex;
-
-    int mMax;
-    int mTop;
-
-    int mTag;
-    bool mInit;
-
-    int mNODE;
-    int mEPK;
-
-    char* mPackageName;
-};
-
-//----------------NodeBridge Definition End---------------
 
 namespace Elastos {
 namespace DevSamples {
@@ -247,7 +166,7 @@ private:
     Int32 mTag;
 };
 
-CarClass(CTestEventListener)
+JSCarClass(JSEvtName)
     , public Object
     , public ITestEventListener
 {
@@ -287,14 +206,14 @@ public:
     };
 
     static void RegisterActivity(const String& packageName, const String& activityName, IInterface* activityInstance, IActivityListener** activityListener, IHandler* activityHandler) {
-        if (!CTestEventListener::mNodeInit) {
-            CTestEventListener::InitBridge(packageName);
-            CTestEventListener::mNodeInit = true;
+        if (!JSEvtName::mNodeInit) {
+            JSEvtName::InitBridge(packageName);
+            JSEvtName::mNodeInit = true;
         }
 
         Boolean result = false;
-        if(CTestEventListener::mNodeBridgeListener) {
-            CTestEventListener::mNodeBridgeListener->OnRegistActivity(
+        if(JSEvtName::mNodeBridgeListener) {
+            JSEvtName::mNodeBridgeListener->OnRegistActivity(
                 packageName, activityName, activityInstance, (Int32)activityListener, activityHandler, &result);
         }
         else {

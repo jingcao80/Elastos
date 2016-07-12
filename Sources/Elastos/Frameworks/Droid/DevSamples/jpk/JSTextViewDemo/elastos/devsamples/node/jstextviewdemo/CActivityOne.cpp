@@ -1,5 +1,3 @@
-#include "CTestEventListener.h"
-
 #include "CActivityOne.h"
 
 #include <elastos/utility/logging/Logger.h>
@@ -13,8 +11,6 @@ namespace DevSamples {
 namespace Node {
 namespace JSPkgName {
 
-EXTERN const _ELASTOS ClassID ECLSID_CActivityOne;
-
 EXTERN NodeBridge* g_pNodeBridge;
 EXTERN NodeBridge** g_ppNodeBridge;
 
@@ -24,7 +20,7 @@ const String JSActName::TAG(JSActNameStr);
 
 static const String DBG_TAG(JSActNameStr);
 
-ECode CActivityOne::MyHandler::HandleMessage(
+ECode JSActName::MyHandler::HandleMessage(
     /* [in] */ IMessage* msg)
 {
     AutoPtr<IMessageListener> listener = IMessageListener::Probe(mHost->mListener);
@@ -59,15 +55,16 @@ ECode JSActName::OnCreate(
     mPackageName = _nspName + _pkgName;
     mActivityName = String(JSActNameStr);
 
+    String _helperEcoName = _pkgPath + mPackageName + String(".Helper.eco");
+    String _helperClsName = mPackageName + String(".") + mActivityName + String("Helper");
+
     AutoPtr<IInterface> helper;
-    String _helperEcoName = _pkgPath + _nspName + _pkgName + String(".Helper.eco");
-    String _helperClsName = _nspName + _pkgName + String(".") + mActivityName + String("Helper");
-    ECode ec = CTestEventListener::Require(_helperEcoName, _helperClsName, (IInterface**)&helper);
+    ECode ec = JSEvtName::Require(_helperEcoName, _helperClsName, (IInterface**)&helper);
 
     if (FAILED(ec)) {
         ALOGD("OnCreate========create Helper failed!======nodejs module will be used");
         AutoPtr<IInterface> _this = this->Probe(EIID_IInterface);
-        CTestEventListener::RegisterActivity(mPackageName, mActivityName, _this, (IActivityListener**)&mListener, mHandler.Get());
+        JSEvtName::RegisterActivity(mPackageName, mActivityName, _this, (IActivityListener**)&mListener, mHandler.Get());
     }
     else {
         ALOGD("OnCreate========create Helper success!======C++ epk will be used");

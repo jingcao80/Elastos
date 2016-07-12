@@ -19,11 +19,11 @@ IHandler* myHandler;
 NodeBridge* g_pNodeBridge;
 NodeBridge** g_ppNodeBridge;
 
-pthread_mutex_t CTestEventListener::mMutex;
+pthread_mutex_t JSEvtName::mMutex;
 
-AutoPtr<INodeBridgeListener> CTestEventListener::mNodeBridgeListener = NULL;
+AutoPtr<INodeBridgeListener> JSEvtName::mNodeBridgeListener = NULL;
 
-bool CTestEventListener::mNodeInit = false;
+bool JSEvtName::mNodeInit = false;
 
 CallbackRunnable* CallbackRunnable::mInstances[5];  //CallbackRunnable to be renameed: EpkCallbackRunnable
 
@@ -69,7 +69,7 @@ CallbackRunnable::~CallbackRunnable()
     //TODO
 }
 
-ECode CTestEventListener::_Thread::Run()
+ECode JSEvtName::_Thread::Run()
 {
     int argc = 3;
     char** argv = new char*[4];
@@ -101,53 +101,53 @@ ECode CTestEventListener::_Thread::Run()
     return NOERROR;
 }
 
-CAR_INTERFACE_IMPL(CTestEventListener, Object, ITestEventListener)
+CAR_INTERFACE_IMPL(JSEvtName, Object, ITestEventListener)
 
-CAR_OBJECT_IMPL(CTestEventListener)
+JS_CAR_OBJECT_IMPL(JSEvtName)
 
-ECode CTestEventListener::constructor()
+ECode JSEvtName::constructor()
 {
     Logger::I(DBG_TAG, " >> constructor()");
     return Object::constructor();
     //return NOERROR;
 }
 
-ECode CTestEventListener::OnNodeEvent(
+ECode JSEvtName::OnNodeEvent(
     /* [in] */ Int32 eventId)
 {
     // TODO: Add your code here
     return E_NOT_IMPLEMENTED;
 }
 
-ECode CTestEventListener::GetEnqueueUIMessagePtr(
+ECode JSEvtName::GetEnqueueUIMessagePtr(
     /* [out] */ Int32 * pOutPtr)
 {
     *pOutPtr = (Int32)CallbackRunnable::EnqueueUIMessage;
     return NOERROR;
 }
 
-ECode CTestEventListener::Sleep(
+ECode JSEvtName::Sleep(
     /* [in] */ Int32 interval)
 {
     sleep(interval);
     return NOERROR;
 }
 
-ECode CTestEventListener::Lock()
+ECode JSEvtName::Lock()
 {
-    pthread_mutex_t* pMutex = &CTestEventListener::mMutex;
+    pthread_mutex_t* pMutex = &JSEvtName::mMutex;
     pthread_mutex_lock(pMutex);
     return NOERROR;
 }
 
-ECode CTestEventListener::Unlock()
+ECode JSEvtName::Unlock()
 {
-    pthread_mutex_t* pMutex = &CTestEventListener::mMutex;
+    pthread_mutex_t* pMutex = &JSEvtName::mMutex;
     pthread_mutex_unlock(pMutex);
    return NOERROR;
 }
 
-ECode CTestEventListener::SetActivityListener(
+ECode JSEvtName::SetActivityListener(
     /* [in] */ Int32 ppActivityListener,    //IActivityListener**
     /* [in] */ IActivityListener* pJsActivityListener)
 {
@@ -155,14 +155,14 @@ ECode CTestEventListener::SetActivityListener(
     return NOERROR;
 }
 
-ECode CTestEventListener::SetNodeBridgeListener(
+ECode JSEvtName::SetNodeBridgeListener(
     /* [in] */ INodeBridgeListener* pNodeBridgeListener)
 {
-    CTestEventListener::mNodeBridgeListener = pNodeBridgeListener;
+    JSEvtName::mNodeBridgeListener = pNodeBridgeListener;
     return NOERROR;
 }
 
-ECode CTestEventListener::SetNodeBridge(
+ECode JSEvtName::SetNodeBridge(
     /* [in] */ Int32 from,
     /* [in] */ Int32 threadIndex)
 {
