@@ -1260,7 +1260,6 @@ MediaProvider::~MediaProvider()
 
 ECode MediaProvider::constructor()
 {
-    Logger::I(TAG, " >> constructor()");
     mDirectoryCache = new HashMap<String, Int64>();
     CHashSet::New((IHashSet**)&mPendingThumbs);
     CStack::New((IStack**)&mThumbRequestStack);
@@ -1377,8 +1376,6 @@ Boolean MediaProvider::InitHashMapWithString(
 ECode MediaProvider::OnCreate(
     /* [out] */ Boolean* result)
 {
-    Logger::I(TAG, " >> OnCreate()");
-
     VALIDATE_NOT_NULL(result)
     *result = FALSE;
 

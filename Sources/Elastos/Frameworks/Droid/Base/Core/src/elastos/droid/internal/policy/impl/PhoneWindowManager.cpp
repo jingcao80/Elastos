@@ -2113,7 +2113,8 @@ void PhoneWindowManager::ShowGlobalActionsInternal()
 {
     SendCloseSystemWindows(SYSTEM_DIALOG_REASON_GLOBAL_ACTIONS);
     if (mGlobalActions == NULL) {
-        mGlobalActions = new GlobalActions(mContext, mWindowManagerFuncs);
+        mGlobalActions = new GlobalActions();
+        mGlobalActions->constructor(mContext, mWindowManagerFuncs);
     }
     const Boolean keyguardShowing = KeyguardIsShowingTq();
     mGlobalActions->ShowDialog(keyguardShowing, IsDeviceProvisioned());

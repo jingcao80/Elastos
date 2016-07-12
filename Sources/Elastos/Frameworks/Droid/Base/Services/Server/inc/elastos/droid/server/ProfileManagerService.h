@@ -193,13 +193,13 @@ private:
         /* [in] */ IXmlPullParser* xpp,
         /* [in] */ IContext* context);
 
-    CARAPI_(void) InitialiseStructure();
+    CARAPI InitialiseStructure();
 
     CARAPI_(String) GetXmlString();
 
     CARAPI_(void) PersistIfDirty();
 
-    CARAPI_(void) EnforceChangePermissions();
+    CARAPI EnforceChangePermissions();
 
 private:
     static const String TAG;

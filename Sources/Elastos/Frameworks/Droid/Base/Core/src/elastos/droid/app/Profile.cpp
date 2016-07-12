@@ -12,12 +12,10 @@
 #include "elastos/droid/text/TextUtils.h"
 #include <elastos/core/CoreUtils.h>
 #include <elastos/core/StringUtils.h>
+#include <elastos/core/StringBuilder.h>
 #include <elastos/utility/logging/Logger.h>
 #include <Elastos.Droid.Content.h>
 
-using Elastos::Core::CoreUtils;
-using Elastos::Core::StringUtils;
-using Elastos::Core::EIID_IComparable;
 using Elastos::Droid::App::CAirplaneModeSettings;
 using Elastos::Droid::App::CBrightnessSettings;
 using Elastos::Droid::App::CConnectionSettings;
@@ -29,6 +27,10 @@ using Elastos::Droid::Os::IParcelUuid;
 using Elastos::Droid::Os::CParcelUuid;
 using Elastos::Droid::Media::IAudioManager;
 using Elastos::Droid::Text::TextUtils;
+using Elastos::Core::CoreUtils;
+using Elastos::Core::StringUtils;
+using Elastos::Core::StringBuilder;
+using Elastos::Core::EIID_IComparable;
 using Elastos::Utility::CArrayList;
 using Elastos::Utility::CHashMap;
 using Elastos::Utility::IMapEntry;
@@ -240,7 +242,8 @@ ECode Profile::constructor(
     AutoPtr<IUUIDHelper> helper;
     CUUIDHelper::AcquireSingleton((IUUIDHelper**)&helper);
     AutoPtr<IUUID> uuid;
-    helper->RandomUUID((IUUID**)&uuid);
+    Logger::E(TAG, " >> TODO Need UUID");
+    // helper->RandomUUID((IUUID**)&uuid);
     return constructor(name, -1, uuid);
 }
 
@@ -637,7 +640,8 @@ ECode Profile::GetUuid(
     if (mUuid == NULL) {
         AutoPtr<IUUIDHelper> helper;
         CUUIDHelper::AcquireSingleton((IUUIDHelper**)&helper);
-        helper->RandomUUID((IUUID**)&mUuid);
+        Logger::E(TAG, " >> TODO Need UUID");
+        // helper->RandomUUID((IUUID**)&mUuid);
     }
 
     *uuid = mUuid;
@@ -897,9 +901,7 @@ ECode Profile::GetXmlString(
     builder->Append(String("\" uuid=\""));
     AutoPtr<IUUID> uuid;
     GetUuid((IUUID**)&uuid);
-    String str;
-    uuid->ToString(&str);
-    builder->Append(TextUtils::HtmlEncode(str));
+    builder->Append(TextUtils::HtmlEncode(TO_STR(uuid)));
     builder->Append(String("\">\n"));
 
     builder->Append(String("<uuids>"));
@@ -909,8 +911,7 @@ ECode Profile::GetXmlString(
         builder->Append(String("<uuid>"));
         AutoPtr<IInterface> item;
         mSecondaryUuids->Get(i, (IInterface**)&item);
-        IUUID::Probe(item)->ToString(&str);
-        builder->Append(TextUtils::HtmlEncode(str));
+        builder->Append(TextUtils::HtmlEncode(TO_STR(item)));
         builder->Append(String("</uuid>"));
     }
     builder->Append(String("</uuids>\n"));
@@ -936,9 +937,7 @@ ECode Profile::GetXmlString(
     builder->Append(String("</expanded-desktop-mode>\n"));
 
     mAirplaneMode->GetXmlString(builder, context);
-
     mBrightness->GetXmlString(builder, context);
-
     mRingMode->GetXmlString(builder, context);
 
     AutoPtr<ICollection> values;
@@ -1022,6 +1021,10 @@ AutoPtr<IList> Profile::ReadSecondaryUuidsFromXml(
                     Logger::W(TAG, "UUID not recognized");
                     continue;
                 }
+                else if (FAILED(ec)) {
+                    Logger::W(TAG, "failed to read invalid UUID");
+                    continue;
+                }
                 uuids->Add(uuid);
                 // } catch (NullPointerException e) {
                 //     Log.w(TAG, "Null Pointer - invalid UUID");
@@ -1098,38 +1101,27 @@ AutoPtr<IProfile> Profile::FromXml(
 
     AutoPtr<IUUIDHelper> helper;
     CUUIDHelper::AcquireSingleton((IUUIDHelper**)&helper);
-    AutoPtr<IUUID> profileUuid;
-    helper->RandomUUID((IUUID**)&profileUuid);
+    AutoPtr<IUUID> profileUuid, strUuid;
+    Logger::D(TAG, " >> TODO need UUID ");
+    // helper->RandomUUID((IUUID**)&profileUuid);
     // try {
     xpp->GetAttributeValue(String(NULL), String("uuid"), &value);
-    ECode ec = helper->FromString(value, (IUUID**)&profileUuid);
+    ECode ec = helper->FromString(value, (IUUID**)&strUuid);
     if (ec == (ECode)E_NULL_POINTER_EXCEPTION) {
-        String uuidStr;
-        profileUuid->ToString(&uuidStr);
         Logger::W(TAG, "Null Pointer - UUID not found for %s.  New UUID generated: %s",
-                profileName.string(), uuidStr.string());
+                profileName.string(), TO_CSTR(profileUuid));
     }
     else if (ec == (ECode)E_ILLEGAL_ARGUMENT_EXCEPTION) {
-        String uuidStr;
-        profileUuid->ToString(&uuidStr);
         Logger::W(TAG, "UUID not recognized for %s.  New UUID generated: %s",
-                profileName.string(), uuidStr.string());
+                profileName.string(), TO_CSTR(profileUuid));
     }
-    // } catch (NullPointerException e) {
-    //     Log.w(TAG,
-    //             "Null Pointer - UUID not found for "
-    //             + profileName
-    //             + ".  New UUID generated: "
-    //             + profileUuid.toString()
-    //             );
-    // } catch (IllegalArgumentException e) {
-    //     Log.w(TAG,
-    //             "UUID not recognized for "
-    //             + profileName
-    //             + ".  New UUID generated: "
-    //             + profileUuid.toString()
-    //             );
-    // }
+    else if (FAILED(ec)) {
+        Logger::W(TAG, "Failed to read UUID for %s.  New UUID generated: %s",
+                profileName.string(), TO_CSTR(profileUuid));
+    }
+    else {
+        profileUuid = strUuid;
+    }
 
     AutoPtr<IProfile> profile;
     CProfile::New(profileName, profileNameResId, profileUuid, (IProfile**)&profile);
@@ -1288,7 +1280,6 @@ ECode Profile::SetStreamSettings(
 ECode Profile::GetStreamSettings(
     /* [out] */ ICollection** descriptors)
 {
-    VALIDATE_NOT_NULL(descriptors)
     return mStreams->GetValues(descriptors);
 }
 
@@ -1316,7 +1307,6 @@ ECode Profile::SetConnectionSettings(
 ECode Profile::GetConnectionSettings(
     /* [out] */ ICollection** descriptors)
 {
-    VALIDATE_NOT_NULL(descriptors)
     return mConnections->GetValues(descriptors);
 }
 
@@ -1324,7 +1314,11 @@ ECode Profile::ToString(
     /* [out] */ String* str)
 {
     VALIDATE_NOT_NULL(str)
-    *str = "Profile";
+    StringBuilder sb("Profile{");
+    sb += StringUtils::ToHexString((Int32)this);
+    sb += ", name="; sb += mName;
+    sb += "}";
+    *str = sb.ToString();
     return NOERROR;
 }
 

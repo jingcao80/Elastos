@@ -42,7 +42,9 @@ private:
 public:
     TO_STRING_IMPL("ProfileTriggerHelper")
 
-    ProfileTriggerHelper(
+    ProfileTriggerHelper();
+
+    CARAPI constructor(
         /* [in] */ IContext* context,
         /* [in] */ IIProfileManager* service);
 

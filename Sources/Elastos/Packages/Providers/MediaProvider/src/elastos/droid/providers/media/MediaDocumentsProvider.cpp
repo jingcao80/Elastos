@@ -356,15 +356,12 @@ CAR_INTERFACE_IMPL(MediaDocumentsProvider, DocumentsProvider, IMediaDocumentsPro
 
 ECode MediaDocumentsProvider::constructor()
 {
-    Logger::I(TAG, " >> constructor()");
     return DocumentsProvider::constructor();
 }
 
 ECode MediaDocumentsProvider::OnCreate(
     /* [out] */ Boolean* result)
 {
-    Logger::I(TAG, " >> OnCreate()");
-
     VALIDATE_NOT_NULL(result)
     *result = TRUE;
     return NOERROR;

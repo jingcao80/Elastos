@@ -3,9 +3,11 @@
 #define __ORG_XMLPULL_V1_XMLPULLPARSERFACTORY_H__
 
 #include "Elastos.CoreLibrary.External.h"
+#include <Elastos.CoreLibrary.Utility.h>
 #include <elastos/core/Object.h>
 #include <elastos/utility/etl/HashMap.h>
 
+using Elastos::Utility::IArrayList;
 using Elastos::Utility::Etl::HashMap;
 using Org::Xmlpull::V1::IXmlPullParserFactory;
 
@@ -27,6 +29,8 @@ class XmlPullParserFactory
 {
 public:
     CAR_INTERFACE_DECL()
+
+    CARAPI constructor();
 
     CARAPI SetFeature(
         /* [in] */ const String& name,
@@ -81,8 +85,8 @@ public:
 protected:
     String mClassNamesLocation;
 
-    // ArrayList mParserClasses;
-    // ArrayList mSerializerClasses;
+    AutoPtr<IArrayList> mParserClasses;
+    AutoPtr<IArrayList> mSerializerClasses;
 
     // features are kept there
     HashMap<String, Boolean> mFeatures;

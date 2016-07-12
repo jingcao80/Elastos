@@ -18,6 +18,7 @@
 #include "elastos/droid/server/CNsdService.h"
 #include "elastos/droid/server/CBatteryService.h"
 #include "elastos/droid/server/CCmHardwareService.h"
+#include "elastos/droid/server/CProfileManagerService.h"
 #include "elastos/droid/server/accessibility/CAccessibilityManagerService.h"
 #include "elastos/droid/server/accounts/CAccountManagerService.h"
 #include "elastos/droid/server/appwidget/CAppWidgetService.h"
@@ -75,6 +76,7 @@ using Elastos::Droid::Internal::Os::BinderInternal;
 using Elastos::Droid::Internal::Telephony::IITelephonyRegistry;
 using Elastos::Droid::App::IContextImpl;
 using Elastos::Droid::App::IIAlarmManager;
+using Elastos::Droid::App::IIProfileManager;
 using Elastos::Droid::App::IINotificationManager;
 using Elastos::Droid::App::IActivityThread;
 using Elastos::Droid::App::IActivityThreadHelper;
@@ -493,7 +495,7 @@ ECode SystemServer::StartOtherServices()
     AutoPtr<CConsumerIrService> consumerIr;
     AutoPtr<IAudioService> audioService;
     // AutoPtr<CMmsServiceBroker> mmsService;
-    // ProfileManagerService profile = null;
+    AutoPtr<IIProfileManager> profile;
 
     AutoPtr<CStatusBarManagerService> statusBar;
     AutoPtr<IINotificationManager> notification;
@@ -915,15 +917,12 @@ ECode SystemServer::StartOtherServices()
             ServiceManager::AddService(IContext::WALLPAPER_SERVICE, TO_IINTERFACE(wallpaper));
         }
 
-        // if (!disableNonCoreServices) {
-        //     try {
-        //         Slogger::I(TAG, "Profile Manager");
-        //         profile = new ProfileManagerService(context);
-        //         ServiceManager.addService(Context.PROFILE_SERVICE, profile);
-        //     } catch (Throwable e) {
-        //         reportWtf("Failure starting Profile Manager", e);
-        //     }
-        // }
+        if (!disableNonCoreServices) {
+            Slogger::I(TAG, "Profile Manager");
+            ec = CProfileManagerService::New(context, (IIProfileManager**)&profile);
+            if (FAILED(ec)) ReportWtf("Failure starting Profile Manager", ec);
+            ServiceManager::AddService(IContext::PROFILE_SERVICE, profile);
+        }
 
         if (!disableMedia &&
             (systemProperties->Get(String("system_init.startaudioservice"), &str), !str.Equals("0"))) {

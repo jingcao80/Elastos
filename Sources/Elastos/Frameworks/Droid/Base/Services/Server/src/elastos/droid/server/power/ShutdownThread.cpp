@@ -13,10 +13,9 @@
 #include "elastos/droid/R.h"
 #include <elastos/core/AutoLock.h>
 #include <elastos/core/StringUtils.h>
+#include <elastos/core/StringBuilder.h>
 #include <elastos/utility/logging/Logger.h>
 
-#include <elastos/core/AutoLock.h>
-using Elastos::Core::AutoLock;
 using Elastos::Droid::App::IKeyguardManager;
 using Elastos::Droid::App::IAlertDialogBuilder;
 using Elastos::Droid::App::CAlertDialogBuilder;
@@ -64,8 +63,10 @@ using Elastos::Droid::Server::Pm::CPackageManagerService;
 using Elastos::Droid::View::IIWindowManager;
 using Elastos::Droid::View::IWindow;
 using Elastos::Droid::View::IWindowManagerLayoutParams;
+using Elastos::Core::AutoLock;
 using Elastos::Core::ICharSequence;
 using Elastos::Core::StringUtils;
+using Elastos::Core::StringBuilder;
 using Elastos::Core::CPathClassLoader;
 using Elastos::Core::ICharSequence;
 using Elastos::Core::CString;
@@ -78,6 +79,7 @@ namespace Droid {
 namespace Server {
 namespace Power {
 
+static const Boolean DBG = FALSE;
 const String ShutdownThread::SHUTDOWN_ACTION_PROPERTY("sys.shutdown.requested");
 const String ShutdownThread::REBOOT_SAFEMODE_PROPERTY("persist.sys.safemode");
 const String ShutdownThread::TAG("ShutdownThread");
@@ -97,9 +99,18 @@ Object ShutdownThread::sIsStartedGuard;
 Boolean ShutdownThread::sIsStarted = FALSE;
 Boolean ShutdownThread::sReboot = FALSE;
 Boolean ShutdownThread::sRebootSafeMode = FALSE;
-String ShutdownThread::sRebootReason(NULL);
+String ShutdownThread::sRebootReason;
 
-AutoPtr<ShutdownThread> ShutdownThread::sInstance = new ShutdownThread();
+AutoPtr<ShutdownThread> ShutdownThread::sInstance;
+
+AutoPtr<ShutdownThread> ShutdownThread::GetInstance()
+{
+    if (sInstance == NULL) {
+        sInstance = new ShutdownThread();
+        sInstance->constructor();
+    }
+    return sInstance;
+}
 
 AutoPtr<IAudioAttributes> ShutdownThread::InitVIBRATION_ATTRIBUTES()
 {
@@ -139,7 +150,7 @@ ECode ShutdownThread::MountShutdownObserver::constructor(
 ECode ShutdownThread::MountShutdownObserver::OnShutDownComplete(
     /* [in] */ Int32 statusCode)
 {
-    Logger::W(TAG, "Result code %d from MountService.shutdown", statusCode);
+    if (DBG) Logger::I(TAG, "Result code %d from MountService.shutdown", statusCode);
     mHost->ActionDone();
     return NOERROR;
 }
@@ -150,15 +161,17 @@ ECode ShutdownThread::MountShutdownObserver::OnShutDownComplete(
 
 CAR_INTERFACE_IMPL(ShutdownThread::CloseDialogReceiver, BroadcastReceiver, IDialogInterfaceOnDismissListener);
 
-ShutdownThread::CloseDialogReceiver::CloseDialogReceiver(
+ShutdownThread::CloseDialogReceiver::CloseDialogReceiver()
+{}
+
+ECode ShutdownThread::CloseDialogReceiver::constructor(
     /* [in] */IContext* context)
-    : mContext(context)
 {
+    mContext = context;
     AutoPtr<IIntentFilter> filter;
-    ASSERT_SUCCEEDED(CIntentFilter::New(IIntent::ACTION_CLOSE_SYSTEM_DIALOGS, (IIntentFilter**)&filter));
+    CIntentFilter::New(IIntent::ACTION_CLOSE_SYSTEM_DIALOGS, (IIntentFilter**)&filter);
     AutoPtr<IIntent> intent;
-    ASSERT_SUCCEEDED(context->RegisterReceiver(this,
-            filter, (IIntent**)&intent));
+    return context->RegisterReceiver(this, filter, (IIntent**)&intent);
 }
 
 ECode ShutdownThread::CloseDialogReceiver::OnReceive(
@@ -192,7 +205,6 @@ ECode ShutdownThread::DialogInterfaceOnClickListener::OnClick(
     /* [in] */ Int32 which)
 {
     if (mAdvancedReboot) {
-        //Boolean softReboot = FALSE;
         AutoPtr<IListView> reasonsList;
         IAlertDialog::Probe(dialog)->GetListView((IListView**)&reasonsList);
         Int32 selected;
@@ -336,24 +348,23 @@ ECode ShutdownThread::ShutdownRadiosThread::Run()
     //     radioOff = true;
     // }
 
-    Logger::I(TAG, "Waiting for NFC, Bluetooth and Radio...");
+    if (DBG) Logger::I(TAG, "Waiting for NFC, Bluetooth and Radio...");
 
     while (SystemClock::GetElapsedRealtime() < mEndTime) {
         if (!bluetoothOff) {
-            assert(0 && "TODO");
-            // // try {
-            // if (FAILED(bluetooth->IsEnabled(&res))) {
-            //     Logger::E(TAG, "RemoteException during bluetooth shutdown");
-            //     bluetoothOff = TRUE;
+            // try {
+            if (FAILED(bluetooth->IsEnabled(&res))) {
+                Logger::E(TAG, "RemoteException during bluetooth shutdown");
+                bluetoothOff = TRUE;
+            }
+            bluetoothOff = !res;
+            // } catch (RemoteException ex) {
+            //     Log.e(TAG, "RemoteException during bluetooth shutdown", ex);
+            //     bluetoothOff = true;
             // }
-            // bluetoothOff = !res;
-            // // } catch (RemoteException ex) {
-            // //     Log.e(TAG, "RemoteException during bluetooth shutdown", ex);
-            // //     bluetoothOff = true;
-            // // }
-            // if (bluetoothOff) {
-            //     Logger::I(TAG, "Bluetooth turned off.");
-            // }
+            if (bluetoothOff) {
+                Logger::I(TAG, "Bluetooth turned off.");
+            }
         }
         if (!radioOff) {
             // try {
@@ -427,9 +438,11 @@ ShutdownThread::ShutdownMusicHandler::HandleMessage(
 {
     AutoPtr<IInterface> obj;
     msg->GetObj((IInterface**)&obj);
-    String path;
-    ICharSequence::Probe(obj)->ToString(&path);
-    CMediaPlayer::New((IMediaPlayer**)&sMediaPlayer);
+    String path = TO_STR(obj);
+    if (sMediaPlayer == NULL) {
+        CMediaPlayer::New((IMediaPlayer**)&sMediaPlayer);
+    }
+
     // try {
     sMediaPlayer->Reset();
     sMediaPlayer->SetDataSource(path);
@@ -452,12 +465,19 @@ ShutdownThread::ShutdownThread()
     : mActionDone(FALSE)
     , mIsShutdownMusicPlaying(FALSE)
 {
-    Thread::constructor();
-    mShutdownMusicHandler = new ShutdownMusicHandler(this);
 }
 
 ShutdownThread::~ShutdownThread()
 {
+}
+
+ECode ShutdownThread::constructor()
+{
+    Thread::constructor();
+    AutoPtr<ShutdownMusicHandler> smh = new ShutdownMusicHandler(this);
+    smh->constructor();
+    mShutdownMusicHandler = smh.Get();
+    return NOERROR;
 }
 
 void ShutdownThread::Shutdown(
@@ -543,10 +563,13 @@ void ShutdownThread::ShutdownInner(
         resourceId = Elastos::Droid::R::string::reboot_confirm;
     }
 
-    Logger::D(TAG, "Notifying thread to start shutdown longPressBehavior=%d, confirm:%d", longPressBehavior, confirm);
+    if (DBG) Logger::D(TAG, "Notifying thread to start shutdown longPressBehavior=%d, confirm:%d",
+        longPressBehavior, confirm);
 
     if (confirm) {
-        AutoPtr<CloseDialogReceiver> closer = new CloseDialogReceiver(context);
+        AutoPtr<CloseDialogReceiver> closer = new CloseDialogReceiver();
+        closer->constructor(context);
+
         Boolean advancedReboot = IsAdvancedRebootPossible(context);
         if (sConfirmDialog != NULL) {
             IDialogInterface::Probe(sConfirmDialog)->Dismiss();
@@ -632,11 +655,10 @@ String ShutdownThread::GetShutdownMusicFilePath()
     (*fileName)[1] = SHUTDOWN_MUSIC_FILE;
     AutoPtr<IFile> checkFile;
     for (Int32 i = 0; i < fileName->GetLength(); ++i) {
-        String music = (*fileName)[i];
-        CFile::New(music, (IFile**)&checkFile);
+        CFile::New((*fileName)[i], (IFile**)&checkFile);
         Boolean exists;
         if (checkFile->Exists(&exists), exists) {
-            return music;
+            return (*fileName)[i];
         }
     }
     return String(NULL);
@@ -661,7 +683,8 @@ void ShutdownThread::LockDevice()
 void ShutdownThread::BeginShutdownSequence(
     /* [in] */ IContext* context)
 {
-    {    AutoLock syncLock(sIsStartedGuard);
+    {
+        AutoLock syncLock(sIsStartedGuard);
         if (sIsStarted) {
             Logger::D(TAG, "Shutdown sequence already running, returning.");
             return;
@@ -707,62 +730,63 @@ void ShutdownThread::BeginShutdownSequence(
         IDialog::Probe(pd)->Show();
     }
 
-    sInstance->mContext = context;
+    GetInstance()->mContext = context;
     AutoPtr<IInterface> obj;
     context->GetSystemService(IContext::POWER_SERVICE, (IInterface**)&obj);
-    sInstance->mPowerManager = IPowerManager::Probe(obj);
+    GetInstance()->mPowerManager = IPowerManager::Probe(obj);
 
     // make sure we never fall asleep again
-    sInstance->mCpuWakeLock = NULL;
+    GetInstance()->mCpuWakeLock = NULL;
     // try {
-    ECode ec = sInstance->mPowerManager->NewWakeLock(
+    ECode ec = GetInstance()->mPowerManager->NewWakeLock(
             IPowerManager::PARTIAL_WAKE_LOCK, TAG + String("-cpu"),
-            (IPowerManagerWakeLock**)&sInstance->mCpuWakeLock);
+            (IPowerManagerWakeLock**)&GetInstance()->mCpuWakeLock);
     if (ec == (ECode)E_SECURITY_EXCEPTION) {
         Logger::W(TAG, "No permission to acquire wake lock 0x%08x", ec);
-        sInstance->mCpuWakeLock = NULL;
+        GetInstance()->mCpuWakeLock = NULL;
     }
-    if (sInstance->mCpuWakeLock != NULL) {
-        sInstance->mCpuWakeLock->SetReferenceCounted(FALSE);
-        sInstance->mCpuWakeLock->AcquireLock();
+    if (GetInstance()->mCpuWakeLock != NULL) {
+        GetInstance()->mCpuWakeLock->SetReferenceCounted(FALSE);
+        GetInstance()->mCpuWakeLock->AcquireLock();
     }
     // } catch (SecurityException e) {
     //     Log.w(TAG, "No permission to acquire wake lock", e);
-    //     sInstance.mCpuWakeLock = null;
+    //     GetInstance().mCpuWakeLock = null;
     // }
 
     // also make sure the screen stays on for better user experience
-    sInstance->mScreenWakeLock = NULL;
     Boolean isScreenOn;
-    if (sInstance->mPowerManager->IsScreenOn(&isScreenOn), isScreenOn) {
+    if (GetInstance()->mPowerManager->IsScreenOn(&isScreenOn), isScreenOn) {
         // try {
-        ec = sInstance->mPowerManager->NewWakeLock(
+        GetInstance()->mScreenWakeLock = NULL;
+        ec = GetInstance()->mPowerManager->NewWakeLock(
                 IPowerManager::FULL_WAKE_LOCK, TAG + String("-screen"),
-                (IPowerManagerWakeLock**)&sInstance->mScreenWakeLock);
+                (IPowerManagerWakeLock**)&GetInstance()->mScreenWakeLock);
         if (ec == (ECode)E_SECURITY_EXCEPTION) {
             Logger::W(TAG, "No permission to acquire wake lock %08x0x", ec);
-            sInstance->mScreenWakeLock = NULL;
+            GetInstance()->mScreenWakeLock = NULL;
         }
-        if (sInstance->mScreenWakeLock != NULL) {
-            sInstance->mScreenWakeLock->SetReferenceCounted(FALSE);
-            sInstance->mScreenWakeLock->AcquireLock();
+        if (GetInstance()->mScreenWakeLock != NULL) {
+            GetInstance()->mScreenWakeLock->SetReferenceCounted(FALSE);
+            GetInstance()->mScreenWakeLock->AcquireLock();
         }
         // } catch (SecurityException e) {
         //     Log.w(TAG, "No permission to acquire wake lock", e);
-        //     sInstance.mScreenWakeLock = null;
+        //     GetInstance().mScreenWakeLock = null;
         // }
     }
 
     // start the thread that initiates shutdown
     AutoPtr<IHandler> handler;
     CHandler::New((IHandler**)&handler);
-    sInstance->mHandler = handler;
-    sInstance->Start();
+    GetInstance()->mHandler = handler;
+    GetInstance()->Start();
 }
 
 void ShutdownThread::ActionDone()
 {
-    {    AutoLock syncLock(mActionDoneSync);
+    {
+        AutoLock syncLock(mActionDoneSync);
         mActionDone = TRUE;
         mActionDoneSync.NotifyAll();
     }
@@ -780,9 +804,9 @@ ECode ShutdownThread::Run()
      * the beginning of the SystemServer startup.
      */
     {
-        String reason = (sReboot ? String("1") : String("0"))
-                + (sRebootReason != NULL ? sRebootReason : String(""));
-        sysProp->Set(SHUTDOWN_ACTION_PROPERTY, reason);
+        StringBuilder sb(sReboot ? "1" : "0");
+        sb += sRebootReason != NULL ? sRebootReason : String("");
+        sysProp->Set(SHUTDOWN_ACTION_PROPERTY, sb.ToString());
     }
 
     /*
@@ -793,7 +817,7 @@ ECode ShutdownThread::Run()
         sysProp->Set(REBOOT_SAFEMODE_PROPERTY, String("1"));
     }
 
-    Logger::I(TAG, "Sending shutdown broadcast...");
+    if (DBG) Logger::I(TAG, "Sending shutdown broadcast...");
 
     // First send the high-level shut down broadcast.
     mActionDone = FALSE;
@@ -808,7 +832,8 @@ ECode ShutdownThread::Run()
             mHandler, 0, String(NULL), NULL);
 
     Int64 endTime = SystemClock::GetElapsedRealtime() + MAX_BROADCAST_TIME;
-    {    AutoLock syncLock(mActionDoneSync);
+    {
+        AutoLock syncLock(mActionDoneSync);
         while (!mActionDone) {
             Int64 delay = endTime - SystemClock::GetElapsedRealtime();
             if (delay <= 0) {
@@ -822,7 +847,7 @@ ECode ShutdownThread::Run()
         }
     }
 
-    Logger::I(TAG, "Shutting down activity manager...");
+    if (DBG) Logger::I(TAG, "Shutting down activity manager...");
 
     AutoPtr<IServiceManager> serviceManager;
     CServiceManager::AcquireSingleton((IServiceManager**)&serviceManager);
@@ -838,7 +863,7 @@ ECode ShutdownThread::Run()
         // }
     }
 
-    Logger::I(TAG, "Shutting down package manager...");
+    if (DBG) Logger::I(TAG, "Shutting down package manager...");
 
     obj = NULL;
     serviceManager->GetService(String("package"), (IInterface**)&obj);
@@ -847,11 +872,11 @@ ECode ShutdownThread::Run()
         pm->Shutdown();
     }
 
-    String shutDownFile(NULL);
+    String shutDownFile;
 
     //showShutdownAnimation() is called from here to sync
     //music and animation properly
-    if(CheckAnimationFileExist()) {
+    if (CheckAnimationFileExist()) {
         LockDevice();
         ShowShutdownAnimation();
 
@@ -866,10 +891,11 @@ ECode ShutdownThread::Run()
         }
     }
 
-    Logger::I(TAG, "wait for shutdown music");
+    if (DBG) Logger::I(TAG, "wait for shutdown music");
 
     Int64 endTimeForMusic = SystemClock::GetElapsedRealtime() + MAX_BROADCAST_TIME;
-    {    AutoLock syncLock(mActionDoneSync);
+    {
+        AutoLock syncLock(mActionDoneSync);
         while (mIsShutdownMusicPlaying) {
             Int64 delay = endTimeForMusic - SystemClock::GetElapsedRealtime();
             if (delay <= 0) {
@@ -893,12 +919,13 @@ ECode ShutdownThread::Run()
     AutoPtr<IIMountShutdownObserver> observer;
     CMountShutdownObserver::New(this, (IIMountShutdownObserver**)&observer);
 
-    Logger::I(TAG, "Shutting down MountService");
+    if (DBG) Logger::I(TAG, "Shutting down MountService");
 
     // Set initial variables and time out time.
     mActionDone = FALSE;
     Int64 endShutTime = SystemClock::GetElapsedRealtime() + MAX_SHUTDOWN_WAIT_TIME;
-    {    AutoLock syncLock(mActionDoneSync);
+    {
+        AutoLock syncLock(mActionDoneSync);
         // try {
         obj = NULL;
         serviceManager->CheckService(String("mount"), (IInterface**)&obj);
@@ -955,12 +982,11 @@ void ShutdownThread::RebootOrShutdown(
     /* [in] */ Boolean reboot,
     /* [in] */ const String& reason)
 {
-    // TODO
-    // DeviceRebootOrShutdown(reboot, reason);
+    DeviceRebootOrShutdown(reboot, reason);
     if (reboot) {
-        Logger::I(TAG, "Rebooting, reason: %s", (const char*)reason);
+        if (DBG) Logger::I(TAG, "Rebooting, reason: %s", reason.string());
         PowerManagerService::LowLevelReboot(reason);
-        Logger::E(TAG, "Reboot failed, will attempt shutdown instead");
+        if (DBG) Logger::E(TAG, "Reboot failed, will attempt shutdown instead");
     }
     else if (SHUTDOWN_VIBRATE_MS > 0) {
         // vibrate before shutting down
@@ -983,7 +1009,7 @@ void ShutdownThread::RebootOrShutdown(
     }
 
     // Shutdown power
-    Logger::I(TAG, "Performing low-level shutdown...");
+    if (DBG) Logger::I(TAG, "Performing low-level shutdown...");
     PowerManagerService::LowLevelShutdown();
 }
 
@@ -991,6 +1017,9 @@ void ShutdownThread::DeviceRebootOrShutdown(
     /* [in] */ Boolean reboot,
     /* [in] */ const String& reason)
 {
+    Logger::W(TAG, "TODO DeviceRebootOrShutdown");
+    return;
+
     // Class<?> cl;
     AutoPtr<IClassLoader> oemClassLoader;
     if (FAILED(CPathClassLoader::New(String("/system/framework/oem-services.jar"), NULL, (IClassLoader**)&oemClassLoader))) {
@@ -1000,6 +1029,7 @@ void ShutdownThread::DeviceRebootOrShutdown(
     // PathClassLoader oemClassLoader = new PathClassLoader("/system/framework/oem-services.jar",
     //         ClassLoader.getSystemClassLoader());
     String deviceShutdownClassName("com.qti.server.power.ShutdownOem");
+    assert(0 && "TODO");
     // try{
     // cl = Class.forName(deviceShutdownClassName);
     // Method m;
@@ -1053,7 +1083,6 @@ void ShutdownThread::ShowShutdownAnimation()
     AutoPtr<ISystemProperties> prop;
     CSystemProperties::AcquireSingleton((ISystemProperties**)&prop);
     prop->Set(String("service.bootanim.exit"), String("0")) ;
-
     prop->Set(String("ctl.start"), String("bootanim")) ;
 }
 

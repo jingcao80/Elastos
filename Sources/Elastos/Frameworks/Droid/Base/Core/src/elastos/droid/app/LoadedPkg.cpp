@@ -18,6 +18,7 @@
 #include "elastos/droid/text/TextUtils.h"
 #include <elastos/droid/DroidRuntime.h>
 #include <elastos/core/AutoLock.h>
+#include <elastos/core/StringUtils.h>
 #include <elastos/core/StringBuilder.h>
 #include <elastos/core/StringBuffer.h>
 #include <elastos/core/ClassLoader.h>
@@ -37,6 +38,7 @@ using Elastos::Droid::Content::Pm::CApplicationInfo;
 using Elastos::Droid::Text::TextUtils;
 using Elastos::Droid::View::DisplayAdjustments;
 
+using Elastos::Core::StringUtils;
 using Elastos::Core::EIID_IRunnable;
 using Elastos::Core::ClassLoader;
 using Elastos::Core::CPathClassLoader;
@@ -63,6 +65,7 @@ AutoPtr<HashMap<String, String> > InitA2EClassnameMap()
     (*classnameMap)[String("android.preference.")]                 = String("Elastos.Droid.Preference.C");
     (*classnameMap)[String("android.webkit.")]                     = String("Elastos.Droid.Webkit.C");
     (*classnameMap)[String("android.widget.")]                     = String("Elastos.Droid.Widget.C");
+    (*classnameMap)[String("com.android.internal.app.")]           = String("Elastos.Droid.Internal.App.C");
     (*classnameMap)[String("com.android.internal.widget.")]        = String("Elastos.Droid.Internal.Widget.C");
     (*classnameMap)[String("com.android.internal.view.menu.")]     = String("Elastos.Droid.Internal.View.Menu.C");
     (*classnameMap)[String("com.android.server.")]                 = String("Elastos.Droid.Server.C");
@@ -775,24 +778,18 @@ String LoadedPkg::GetModulePath(
     return sb.ToString();
 }
 
-// static String Replace(const String& name, const char* regix, const char* replacement)
-// {
-//     String result;
-//     StringUtils::ReplaceAll(name, String(regix), String(replacement), &result);
-//     return result;
-// }
-
 String LoadedPkg::GetElastosClassName(
     /* [in] */ const String& packageName,
-    /* [in] */ const String& className)
+    /* [in] */ const String& androidClassName)
 {
-    // String className(androidClassName);
-    // if (className.IndexOf("$") >= 0) {
-    //     // inner class case: systemui.statusbar.tablet.NotificationIconArea$IconLayout
-    //     // NotificationIconArea$IconLayout to NotificationIconAreaIconLayout
-    //     className = Replace(className, "\\$", "");
-    // }
-
+    String className(androidClassName);
+    if (className.IndexOf("$") >= 0) {
+        // inner class case: systemui.statusbar.tablet.NotificationIconArea$IconLayout
+        // convert NotificationIconArea$IconLayout to NotificationIconAreaIconLayout
+        String tmp;
+        StringUtils::ReplaceAll(className, "\\$", "", &tmp);
+        className = tmp;
+    }
 
     if (className.StartWith(".")) {
         StringBuilder sb(packageName);

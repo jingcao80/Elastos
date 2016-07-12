@@ -79,7 +79,7 @@ Boolean ProfileManagerService::LOCAL_LOGV = FALSE;
 
 const String ProfileManagerService::PERMISSION_CHANGE_SETTINGS("android.permission.WRITE_SETTINGS");
 
-static AutoPtr<IFile> initPROFILE_FILE()
+static AutoPtr<IFile> InitPROFILE_FILE()
 {
     AutoPtr<IFile> _file = Environment::GetSystemSecureDirectory();
     AutoPtr<IFile> file;
@@ -87,9 +87,9 @@ static AutoPtr<IFile> initPROFILE_FILE()
     return file;
 }
 
-const AutoPtr<IFile> ProfileManagerService::PROFILE_FILE = initPROFILE_FILE();
+const AutoPtr<IFile> ProfileManagerService::PROFILE_FILE = InitPROFILE_FILE();
 
-static AutoPtr<IUUID> initWildcardUUID()
+static AutoPtr<IUUID> InitWildcardUUID()
 {
     AutoPtr<IUUIDHelper> uuidHelper;
     CUUIDHelper::AcquireSingleton((IUUIDHelper**)&uuidHelper);
@@ -98,7 +98,7 @@ static AutoPtr<IUUID> initWildcardUUID()
     return uuid;
 }
 
-const AutoPtr<IUUID> ProfileManagerService::mWildcardUUID = initWildcardUUID();
+const AutoPtr<IUUID> ProfileManagerService::mWildcardUUID = InitWildcardUUID();
 
 //--------------------------------------------------------------------------------
 //                ProfileManagerService::MyBroadcastReceiver
@@ -127,22 +127,28 @@ ECode ProfileManagerService::MyBroadcastReceiver::OnReceive(
 //--------------------------------------------------------------------------------
 //                ProfileManagerService
 //--------------------------------------------------------------------------------
-ProfileManagerService::ProfileManagerService()
-{}
 
 CAR_INTERFACE_IMPL_2(ProfileManagerService, Object, IIProfileManager, IBinder)
+
+ProfileManagerService::ProfileManagerService()
+    : mDirty(FALSE)
+{}
 
 ECode ProfileManagerService::constructor(
     /* [in] */ IContext* context)
 {
     mContext = context;
-    assert(0 && "TODO");
-    // CBackupManager::New(mContext.Get(), (IBackupManager**)&mBackupManager);
-    mTriggerHelper = new ProfileTriggerHelper(mContext, this);
+    Logger::I(TAG, " >> TODO needs CBackupManager");
+    //CBackupManager::New(mContext.Get(), (IBackupManager**)&mBackupManager);
+    mTriggerHelper = new ProfileTriggerHelper();
+    mTriggerHelper->constructor(mContext, this);
     String str;
     context->GetString(R::string::wildcardProfile, &str);
-    CNotificationGroup::New(str, R::string::wildcardProfile, mWildcardUUID, (INotificationGroup**)&mWildcardGroup);
+    CNotificationGroup::New(str, R::string::wildcardProfile,
+        mWildcardUUID, (INotificationGroup**)&mWildcardGroup);
+
     Initialize();
+
     AutoPtr<IIntentFilter> filter;
     CIntentFilter::New((IIntentFilter**)&filter);
     filter->AddAction(IIntent::ACTION_LOCALE_CHANGED);
@@ -166,27 +172,24 @@ void ProfileManagerService::Initialize(
     mDirty = FALSE;
     Boolean init = skipFile;
     if (!skipFile) {
-        // try {
-            LoadFromFile();
-        // } catch (XmlPullParserException e) {
-            // init = true;
-        // } catch (IOException e) {
-            // init = true;
-        // }
+        ECode ec = LoadFromFile();
+        if (FAILED(ec)) {
+            init = TRUE;
+        }
     }
 
     if (init) {
         // try {
-            InitialiseStructure();
-        // } catch (Throwable ex) {
-            // Log.e(TAG, "Error loading xml from resource: ", ex);
-        // }
+        ECode ec = InitialiseStructure();
+        if (FAILED(ec)) {
+            Logger::E(TAG, "Error loading xml from resource: %08x", ec);
+        }
     }
 }
 
 ECode ProfileManagerService::ResetAll()
 {
-    EnforceChangePermissions();
+    FAIL_RETURN(EnforceChangePermissions())
     Initialize(TRUE);
     return NOERROR;
 }
@@ -237,9 +240,7 @@ ECode ProfileManagerService::SetActiveProfile(
     Boolean flag = FALSE;
     FAIL_RETURN(mProfiles->ContainsKey(profileUuid, &flag));
     if (!flag) {
-        String tmp;
-        profileUuid->ToString(&tmp);
-        Logger::E(TAG, "Cannot set active profile to:  - does not exist.", tmp.string());
+        Logger::E(TAG, "Cannot set active profile to:  - does not exist.", TO_CSTR(profileUuid));
         *result = FALSE;
         return NOERROR;
     }
@@ -264,15 +265,15 @@ void ProfileManagerService::SetActiveProfile(
      * list, and THEN add it.
      */
 
-    EnforceChangePermissions();
+    if (FAILED(EnforceChangePermissions())) {
+        return;
+    }
 
+    String name;
     AutoPtr<IUUID> uuid;
     newActiveProfile->GetUuid((IUUID**)&uuid);
-    String tmp;
-    uuid->ToString(&tmp);
-    String name;
     newActiveProfile->GetName(&name);
-    Logger::D(TAG, "Set active profile to: %s - ", tmp.string(), name.string());
+    Logger::D(TAG, "Set active profile to: %s - ", TO_CSTR(uuid), name.string());
 
     AutoPtr<IProfile> lastProfile = mActiveProfile;
     mActiveProfile = newActiveProfile;
@@ -304,14 +305,12 @@ void ProfileManagerService::SetActiveProfile(
         broadcast->PutExtra(IProfileManager::EXTRA_PROFILE_NAME, name);
         uuid =  NULL;
         mActiveProfile->GetUuid((IUUID**)&uuid);
-        uuid->ToString(&tmp);
-        broadcast->PutExtra(IProfileManager::EXTRA_PROFILE_UUID, tmp);
+        broadcast->PutExtra(IProfileManager::EXTRA_PROFILE_UUID, TO_STR(uuid));
         lastProfile->GetName(&name);
         broadcast->PutExtra(IProfileManager::EXTRA_LAST_PROFILE_NAME, name);
         uuid = NULL;
         lastProfile->GetUuid((IUUID**)&uuid);
-        uuid->ToString(&tmp);
-        broadcast->PutExtra(IProfileManager::EXTRA_LAST_PROFILE_UUID, tmp);
+        broadcast->PutExtra(IProfileManager::EXTRA_LAST_PROFILE_UUID, TO_STR(uuid));
 
         mContext->SendBroadcastAsUser(broadcast.Get(), all.Get());
         Binder::RestoreCallingIdentity(token);
@@ -325,8 +324,7 @@ void ProfileManagerService::SetActiveProfile(
         mActiveProfile->GetName(&name);
         broadcast->PutExtra(IProfileManager::EXTRA_PROFILE_NAME, name);
         uuid = NULL;
-        uuid->ToString(&tmp);
-        broadcast->PutExtra(IProfileManager::EXTRA_PROFILE_UUID, tmp);
+        broadcast->PutExtra(IProfileManager::EXTRA_PROFILE_UUID, TO_STR(uuid));
         mContext->SendBroadcastAsUser(broadcast.Get(), all);
         Binder::RestoreCallingIdentity(token);
     }
@@ -336,7 +334,7 @@ ECode ProfileManagerService::AddProfile(
     /* [in] */ IProfile* profile,
     /* [out] */ Boolean* result)
 {
-    EnforceChangePermissions();
+    FAIL_RETURN(EnforceChangePermissions())
     AddProfileInternal(profile);
     PersistIfDirty();
     *result = TRUE;
@@ -479,19 +477,13 @@ AutoPtr<IProfile> ProfileManagerService::GetProfile(
     list->GetSize(&size);
     AutoPtr<IProfile> p;
     AutoPtr<ArrayOf<IUUID*> > uuids;
-    AutoPtr<IUUID> uuid;
     for (Int32 i = 0; i < size; ++i) {
-        obj = NULL;
-        p = NULL;
         p = IProfile::Probe(obj);
         uuids = NULL;
         p->GetSecondaryUuids((ArrayOf<IUUID*>**)&uuids);
         Int32 length = uuids->GetLength();
         for (Int32 j = 0; j < length; ++j) {
-            uuid = NULL;
-            uuid = (*uuids)[j];
-            profileUuid->Equals(uuid, &flag);
-            if (flag) return p;
+            if (Object::Equals(profileUuid, (*uuids)[j])) return p;
         }
     }
     // nothing found
@@ -540,7 +532,7 @@ ECode ProfileManagerService::RemoveProfile(
     /* [out] */ Boolean* result)
 {
     VALIDATE_NOT_NULL(result);
-    EnforceChangePermissions();
+    FAIL_RETURN(EnforceChangePermissions())
     String name;
     profile->GetName(&name);
     AutoPtr<IInterface> obj;
@@ -564,7 +556,7 @@ ECode ProfileManagerService::RemoveProfile(
 ECode ProfileManagerService::UpdateProfile(
     /* [in] */ IProfile* profile)
 {
-    EnforceChangePermissions();
+    FAIL_RETURN(EnforceChangePermissions())
     AutoPtr<IUUID> uuid;
     profile->GetUuid((IUUID**)&uuid);
     AutoPtr<IInterface> obj;
@@ -592,9 +584,7 @@ ECode ProfileManagerService::UpdateProfile(
     mActiveProfile->GetUuid((IUUID**)&uuid);
     AutoPtr<IUUID> puuid;
     profile->GetUuid((IUUID**)&puuid);
-    Boolean flag = FALSE;
-    uuid->Equals(puuid, &flag);
-    if (mActiveProfile != NULL && flag) {
+    if (mActiveProfile != NULL && Object::Equals(puuid, uuid)) {
         SetActiveProfile(profile, TRUE);
     }
     return NOERROR;
@@ -615,31 +605,27 @@ ECode ProfileManagerService::ProfileExistsByName(
     /* [out] */ Boolean* result)
 {
     VALIDATE_NOT_NULL(result);
-    AutoPtr<ISet> entrySet;
-    mProfileNames->GetEntrySet((ISet**)&entrySet);
+    AutoPtr<ISet> set;
+    mProfileNames->GetKeySet((ISet**)&set);
 
-    AutoPtr<IIterator> it;
-    entrySet->GetIterator((IIterator**)&it);
-    Boolean bHasNxt = FALSE;
-    while ((it->HasNext(&bHasNxt), bHasNxt)) {
-        AutoPtr<IInterface> p;
-        it->GetNext((IInterface**)&p);
-        AutoPtr<IMapEntry> entry = IMapEntry::Probe(p);
-        AutoPtr<IInterface> k;
-        entry->GetKey((IInterface**)&k);
-        AutoPtr<ICharSequence> cs = ICharSequence::Probe(k);
-        String str;
-        cs->ToString(&str);
-        if (str.EqualsIgnoreCase(profileName)) {
-            *result = TRUE;
-            return NOERROR;
+    if (set != NULL) {
+        AutoPtr<IIterator> it;
+        set->GetIterator((IIterator**)&it);
+        Boolean hasNext = FALSE;
+        while ((it->HasNext(&hasNext), hasNext)) {
+            AutoPtr<IInterface> obj;
+            it->GetNext((IInterface**)&obj);
+            String str = TO_STR(obj);
+            if (str.EqualsIgnoreCase(profileName)) {
+                *result = TRUE;
+                return NOERROR;
+            }
         }
     }
 
     *result = FALSE;
     return NOERROR;
 }
-
 
 ECode ProfileManagerService::NotificationGroupExistsByName(
     /* [in] */ const String& notificationGroupName,
@@ -650,20 +636,21 @@ ECode ProfileManagerService::NotificationGroupExistsByName(
     AutoPtr<ICollection> values;
     mGroups->GetValues((ICollection**)&values);
 
-    AutoPtr<IIterator> it;
-    values->GetIterator((IIterator**)&it);
-    Boolean bHasNxt = FALSE;
-    while ((it->HasNext(&bHasNxt), bHasNxt)) {
-        AutoPtr<IInterface> p;
-        it->GetNext((IInterface**)&p);
-        AutoPtr<INotificationGroup> group = INotificationGroup::Probe(p);
+    if (values != NULL) {
+        AutoPtr<IIterator> it;
+        values->GetIterator((IIterator**)&it);
+        Boolean hasNext = FALSE;
         String name;
-        group->GetName(&name);
-        if (name.EqualsIgnoreCase(notificationGroupName)) {
-            *result = TRUE;
-            return NOERROR;
+        while ((it->HasNext(&hasNext), hasNext)) {
+            AutoPtr<IInterface> p;
+            it->GetNext((IInterface**)&p);
+            INotificationGroup* group = INotificationGroup::Probe(p);
+            group->GetName(&name);
+            if (name.EqualsIgnoreCase(notificationGroupName)) {
+                *result = TRUE;
+                return NOERROR;
+            }
         }
-        it = IIterator::Probe(p);
     }
 
     *result = FALSE;
@@ -676,17 +663,26 @@ ECode ProfileManagerService::GetNotificationGroups(
     VALIDATE_NOT_NULL(result);
     AutoPtr<ICollection> values;
     mGroups->GetValues((ICollection**)&values);
-    Int32 size;
-    mGroups->GetSize(&size);
-    AutoPtr<ArrayOf<IInterface*> > inArray = ArrayOf<IInterface*>::Alloc(size);
-    AutoPtr<ArrayOf<IInterface*> > outArray;
-    values->ToArray(inArray.Get(), (ArrayOf<IInterface*>**)&outArray);
-    Int32 length = outArray->GetLength();
-    AutoPtr<ArrayOf<INotificationGroup*> > groups = ArrayOf<INotificationGroup*>::Alloc(length);
-    for (Int32 i = 0; i < length; ++i) {
-        groups->Set(i, INotificationGroup::Probe((*outArray)[i]));
+    AutoPtr<ArrayOf<INotificationGroup*> > groups;
+    if (values != NULL) {
+        Int32 size;
+        values->GetSize(&size);
+        groups = ArrayOf<INotificationGroup*>::Alloc(size);
+        AutoPtr<IIterator> it;
+        values->GetIterator((IIterator**)&it);
+        Int32 i = 0;
+        Boolean hasNext;
+        while (it->HasNext(&hasNext), hasNext) {
+            AutoPtr<IInterface> obj;
+            it->GetNext((IInterface**)&obj);
+            groups->Set(i++, INotificationGroup::Probe(obj));
+        }
     }
-    *result = groups.Get();
+    else {
+        groups = ArrayOf<INotificationGroup*>::Alloc(0);
+    }
+
+    *result = groups;
     REFCOUNT_ADD(*result);
     return NOERROR;
 }
@@ -694,7 +690,7 @@ ECode ProfileManagerService::GetNotificationGroups(
 ECode ProfileManagerService::AddNotificationGroup(
     /* [in] */ INotificationGroup* group)
 {
-    EnforceChangePermissions();
+    FAIL_RETURN(EnforceChangePermissions())
     AddNotificationGroupInternal(group);
     PersistIfDirty();
     return NOERROR;
@@ -711,15 +707,16 @@ void ProfileManagerService::AddNotificationGroupInternal(
         // the profile. Ensure it is added.
         AutoPtr<ICollection> values;
         mProfiles->GetValues((ICollection**)&values);
-
-        AutoPtr<IIterator> it;
-        values->GetIterator((IIterator**)&it);
-        Boolean bHasNxt = FALSE;
-        while ((it->HasNext(&bHasNxt), bHasNxt)) {
-            AutoPtr<IInterface> p;
-            it->GetNext((IInterface**)&p);
-            AutoPtr<IProfile> profile = IProfile::Probe(p);
-            EnsureGroupInProfile(profile.Get(), group, FALSE);
+        if (values != NULL) {
+            AutoPtr<IIterator> it;
+            values->GetIterator((IIterator**)&it);
+            Boolean hasNext = FALSE;
+            while ((it->HasNext(&hasNext), hasNext)) {
+                AutoPtr<IInterface> p;
+                it->GetNext((IInterface**)&p);
+                AutoPtr<IProfile> profile = IProfile::Probe(p);
+                EnsureGroupInProfile(profile.Get(), group, FALSE);
+            }
         }
     }
     mDirty = TRUE;
@@ -728,7 +725,7 @@ void ProfileManagerService::AddNotificationGroupInternal(
 ECode ProfileManagerService::RemoveNotificationGroup(
     /* [in] */ INotificationGroup* group)
 {
-    EnforceChangePermissions();
+    FAIL_RETURN(EnforceChangePermissions())
     AutoPtr<IUUID> uuid;
     group->GetUuid((IUUID**)&uuid);
     AutoPtr<IInterface> obj;
@@ -738,15 +735,16 @@ ECode ProfileManagerService::RemoveNotificationGroup(
     // they use it.
     AutoPtr<ICollection> values;
     mProfiles->GetValues((ICollection**)&values);
-
-    AutoPtr<IIterator> it;
-    values->GetIterator((IIterator**)&it);
-    Boolean bHasNxt = FALSE;
-    while ((it->HasNext(&bHasNxt), bHasNxt)) {
-        AutoPtr<IInterface> p;
-        it->GetNext((IInterface**)&p);
-        AutoPtr<IProfile> profile = IProfile::Probe(p);
-        profile->RemoveProfileGroup(uuid);
+    if (values != NULL) {
+        AutoPtr<IIterator> it;
+        values->GetIterator((IIterator**)&it);
+        Boolean hasNext = FALSE;
+        while ((it->HasNext(&hasNext), hasNext)) {
+            AutoPtr<IInterface> p;
+            it->GetNext((IInterface**)&p);
+            AutoPtr<IProfile> profile = IProfile::Probe(p);
+            profile->RemoveProfileGroup(uuid);
+        }
     }
 
     PersistIfDirty();
@@ -756,7 +754,7 @@ ECode ProfileManagerService::RemoveNotificationGroup(
 ECode ProfileManagerService::UpdateNotificationGroup(
     /* [in] */ INotificationGroup* group)
 {
-    EnforceChangePermissions();
+    FAIL_RETURN(EnforceChangePermissions())
     AutoPtr<IUUID> uuid;
     group->GetUuid((IUUID**)&uuid);
     AutoPtr<IInterface> obj;
@@ -782,21 +780,24 @@ ECode ProfileManagerService::GetNotificationGroupForPackage(
     AutoPtr<ICollection> values;
     mGroups->GetValues((ICollection**)&values);
 
-    AutoPtr<IIterator> it;
-    values->GetIterator((IIterator**)&it);
-    Boolean bHasNxt = FALSE;
-    Boolean flag = FALSE;
-    while ((it->HasNext(&bHasNxt), bHasNxt)) {
-        AutoPtr<IInterface> p;
-        it->GetNext((IInterface**)&p);
-        AutoPtr<INotificationGroup> group = INotificationGroup::Probe(p);
-        group->HasPackage(pkg, &flag);
-        if (flag) {
-            *result = group;
-            REFCOUNT_ADD(*result);
-            return NOERROR;
+    if (values != NULL) {
+        AutoPtr<IIterator> it;
+        values->GetIterator((IIterator**)&it);
+        Boolean hasNext = FALSE;
+        Boolean flag = FALSE;
+        while ((it->HasNext(&hasNext), hasNext)) {
+            AutoPtr<IInterface> p;
+            it->GetNext((IInterface**)&p);
+            AutoPtr<INotificationGroup> group = INotificationGroup::Probe(p);
+            group->HasPackage(pkg, &flag);
+            if (flag) {
+                *result = group;
+                REFCOUNT_ADD(*result);
+                return NOERROR;
+            }
         }
     }
+
     *result = NULL;
     return NOERROR;
 }
@@ -806,15 +807,16 @@ void ProfileManagerService::SettingsRestored()
     Initialize();
     AutoPtr<ICollection> values;
     mProfiles->GetValues((ICollection**)&values);
-
-    AutoPtr<IIterator> it;
-    values->GetIterator((IIterator**)&it);
-    Boolean bHasNxt = FALSE;
-    while ((it->HasNext(&bHasNxt), bHasNxt)) {
-        AutoPtr<IInterface> obj;
-        it->GetNext((IInterface**)&obj);
-        AutoPtr<IProfile> p = IProfile::Probe(obj);
-        p->ValidateRingtones(mContext);
+    if (values != NULL) {
+        AutoPtr<IIterator> it;
+        values->GetIterator((IIterator**)&it);
+        Boolean hasNext = FALSE;
+        while ((it->HasNext(&hasNext), hasNext)) {
+            AutoPtr<IInterface> obj;
+            it->GetNext((IInterface**)&obj);
+            IProfile* p = IProfile::Probe(obj);
+            p->ValidateRingtones(mContext);
+        }
     }
 
     PersistIfDirty();
@@ -863,7 +865,7 @@ ECode ProfileManagerService::LoadXml(
                 if (active.IsNull()) {
                     AutoPtr<IUUID> uuid;
                     prof->GetUuid((IUUID**)&uuid);
-                    uuid->ToString(&active);
+                    active = TO_STR(uuid);
                 }
             }
             else if (name.Equals("notificationGroup")) {
@@ -875,8 +877,8 @@ ECode ProfileManagerService::LoadXml(
             }
         }
         else if (event == IXmlPullParser::END_DOCUMENT) {
-            Slogger::E("ProfileManagerService", "Premature end of file while reading %p", PROFILE_FILE.Get());
-            // throw new IOException("Premature end of file while reading " + PROFILE_FILE);
+            Slogger::E("ProfileManagerService", "Premature end of file while reading %s",
+                TO_CSTR(PROFILE_FILE));
             return E_IO_EXCEPTION;
         }
         xpp->Next(&event);
@@ -899,20 +901,20 @@ ECode ProfileManagerService::LoadXml(
             if (flag) {
                 AutoPtr<IInterface> obj;
                 mProfileNames->Get(StringUtils::ParseCharSequence(active), (IInterface**)&obj);
-                IUUID* uid = IUUID::Probe(obj);
-                SetActiveProfile(uid, FALSE, &flag);
+                SetActiveProfile(IUUID::Probe(obj), FALSE, &flag);
             }
             else {
                 // Final fail-safe: We must have SOME profile active.
                 // If we couldn't select one by now, we'll pick the first in the set.
                 AutoPtr<ICollection> values;
                 mProfiles->GetValues((ICollection**)&values);
-                AutoPtr<IIterator> it;
-                values->GetIterator((IIterator**)&it);
-                AutoPtr<IInterface> obj;
-                it->GetNext((IInterface**)&obj);
-                IProfile* profile = IProfile::Probe(obj);
-                SetActiveProfile(profile, FALSE);
+                if (values != NULL) {
+                    AutoPtr<IIterator> it;
+                    values->GetIterator((IIterator**)&it);
+                    AutoPtr<IInterface> obj;
+                    it->GetNext((IInterface**)&obj);
+                    SetActiveProfile(IProfile::Probe(obj), FALSE);
+                }
             }
             // This is a hint that we probably just upgraded the XML file. Save changes.
             mDirty = TRUE;
@@ -921,19 +923,18 @@ ECode ProfileManagerService::LoadXml(
     return NOERROR;
 }
 
-void ProfileManagerService::InitialiseStructure()
+ECode ProfileManagerService::InitialiseStructure()
 {
     AutoPtr<IResources> res;
     mContext->GetResources((IResources**)&res);
     AutoPtr<IXmlResourceParser> xml;
     res->GetXml(R::xml::profile_default, (IXmlResourceParser**)&xml);
     // try {
-    LoadXml((IXmlPullParser*)((Object*)xml.Get()), mContext.Get());
+    ECode ec = LoadXml(IXmlPullParser::Probe(xml), mContext.Get());
     mDirty = TRUE;
     PersistIfDirty();
-    // } finally {
-        ((ICloseable*)((Object*)xml.Get()))->Close();
-    // }
+    ICloseable::Probe(xml)->Close();
+    return ec;
 }
 
 String ProfileManagerService::GetXmlString()
@@ -944,35 +945,37 @@ String ProfileManagerService::GetXmlString()
     GetActiveProfile((IProfile**)&profile);
     AutoPtr<IUUID> uuid;
     profile->GetUuid((IUUID**)&uuid);
-    String str;
-    uuid->ToString(&str);
-    builder->Append(TextUtils::HtmlEncode(str));
+    builder->Append(TextUtils::HtmlEncode(TO_STR(uuid)));
     builder->Append("</active>\n");
 
     AutoPtr<ICollection> values;
     mProfiles->GetValues((ICollection**)&values);
-    AutoPtr<IIterator> it;
-    values->GetIterator((IIterator**)&it);
-    Boolean bHasNxt = FALSE;
-    while ((it->HasNext(&bHasNxt), bHasNxt)) {
-        AutoPtr<IInterface> obj;
-        it->GetNext((IInterface**)&obj);
-        AutoPtr<IProfile> p = IProfile::Probe(obj);
-        p->GetXmlString(IStringBuilder::Probe(builder), mContext.Get());
-        it = IIterator::Probe(obj);
+    if (values != NULL) {
+        AutoPtr<IIterator> it;
+        values->GetIterator((IIterator**)&it);
+        Boolean hasNext = FALSE;
+        while ((it->HasNext(&hasNext), hasNext)) {
+            AutoPtr<IInterface> obj;
+            it->GetNext((IInterface**)&obj);
+            IProfile* p = IProfile::Probe(obj);
+            p->GetXmlString((IStringBuilder*)builder, mContext.Get());
+        }
     }
 
     AutoPtr<ICollection> groups;
-    mProfiles->GetValues((ICollection**)&groups);
-
-    values->GetIterator((IIterator**)&it);
-    while ((it->HasNext(&bHasNxt), bHasNxt)) {
-        AutoPtr<IInterface> obj;
-        it->GetNext((IInterface**)&obj);
-        AutoPtr<INotificationGroup> g = INotificationGroup::Probe(obj);
-        g->GetXmlString(IStringBuilder::Probe(builder), mContext.Get());
-        it = IIterator::Probe(obj);
+    mGroups->GetValues((ICollection**)&groups);
+    if (groups != NULL) {
+        AutoPtr<IIterator> it;
+        groups->GetIterator((IIterator**)&it);
+        Boolean hasNext = FALSE;
+        while ((it->HasNext(&hasNext), hasNext)) {
+            AutoPtr<IInterface> obj;
+            it->GetNext((IInterface**)&obj);
+            INotificationGroup* g = INotificationGroup::Probe(obj);
+            g->GetXmlString((IStringBuilder*)builder, mContext.Get());
+        }
     }
+
     builder->Append("</profiles>\n");
     return builder->ToString();
 }
@@ -982,20 +985,17 @@ ECode ProfileManagerService::GetNotificationGroup(
     /* [out] */ INotificationGroup** result)
 {
     VALIDATE_NOT_NULL(result);
-    AutoPtr<IUUID> _uuid;
+    AutoPtr<IUUID> _uuid, uid;
     mWildcardGroup->GetUuid((IUUID**)&_uuid);
-    AutoPtr<IUUID> uid;
     uuid->GetUuid((IUUID**)&uid);
-    Boolean flag = FALSE;
-    if (uid->Equals(_uuid.Get(), &flag), flag) {
+    if (Object::Equals(_uuid, uid)) {
         *result = mWildcardGroup;
         REFCOUNT_ADD(*result);
         return NOERROR;
     }
     AutoPtr<IInterface> obj;
     mGroups->Get(uid, (IInterface**)&obj);
-    AutoPtr<INotificationGroup> ng = INotificationGroup::Probe(obj);
-    *result = ng;
+    *result = INotificationGroup::Probe(obj);
     REFCOUNT_ADD(*result);
     return NOERROR;
 }
@@ -1003,9 +1003,7 @@ ECode ProfileManagerService::GetNotificationGroup(
 ECode ProfileManagerService::ToString(
     /* [out] */ String* str)
 {
-    VALIDATE_NOT_NULL(str);
-    *str = "CProfileManagerService";
-    return NOERROR;
+    return Object::ToString(str);
 }
 
 void ProfileManagerService::PersistIfDirty()
@@ -1017,57 +1015,64 @@ void ProfileManagerService::PersistIfDirty()
     if (!dirty) {
         AutoPtr<ICollection> profiles;
         mProfiles->GetValues((ICollection**)&profiles);
-        AutoPtr<IIterator> it;
-        profiles->GetIterator((IIterator**)&it);
-        while (it->HasNext(&hasNext), hasNext) {
-            AutoPtr<IInterface> obj;
-            it->GetNext((IInterface**)&obj);
-            IProfile* profile = IProfile::Probe(obj);
-            if (profile->IsDirty(&flag), flag) {
-                dirty = TRUE;
-                break;
+        if (profiles != NULL) {
+            AutoPtr<IIterator> it;
+            profiles->GetIterator((IIterator**)&it);
+            while (it->HasNext(&hasNext), hasNext) {
+                AutoPtr<IInterface> obj;
+                it->GetNext((IInterface**)&obj);
+                IProfile* profile = IProfile::Probe(obj);
+                if (profile->IsDirty(&flag), flag) {
+                    dirty = TRUE;
+                    break;
+                }
             }
         }
+
     }
 
     if (!dirty) {
         AutoPtr<ICollection> groups;
         mGroups->GetValues((ICollection**)&groups);
-        AutoPtr<IIterator> it;
-        groups->GetIterator((IIterator**)&it);
-        while (it->HasNext(&hasNext), hasNext) {
-            AutoPtr<IInterface> obj;
-            it->GetNext((IInterface**)&obj);
-            INotificationGroup* group = INotificationGroup::Probe(obj);
-            if (group->IsDirty(&flag), flag) {
-                dirty = TRUE;
-                break;
+        if (groups != NULL) {
+            AutoPtr<IIterator> it;
+            groups->GetIterator((IIterator**)&it);
+            while (it->HasNext(&hasNext), hasNext) {
+                AutoPtr<IInterface> obj;
+                it->GetNext((IInterface**)&obj);
+                INotificationGroup* group = INotificationGroup::Probe(obj);
+                if (group->IsDirty(&flag), flag) {
+                    dirty = TRUE;
+                    break;
+                }
             }
         }
     }
 
     if (dirty) {
         // try {
-            Logger::D(TAG, "Saving profile data...");
-            AutoPtr<IFileWriter> fw;
-            CFileWriter::New(PROFILE_FILE, (IFileWriter**)&fw);
-            IWriter::Probe(fw)->Write(GetXmlString());
-            ICloseable::Probe(fw)->Close();
-            Logger::D(TAG, "Save completed.");
-            mDirty = FALSE;
+        Logger::D(TAG, "Saving profile data...");
+        AutoPtr<IFileWriter> fw;
+        CFileWriter::New(PROFILE_FILE, (IFileWriter**)&fw);
+        IWriter::Probe(fw)->Write(GetXmlString());
+        ICloseable::Probe(fw)->Close();
+        Logger::D(TAG, "Save completed.");
+        mDirty = FALSE;
 
-            Int64 token = Binder::ClearCallingIdentity();
+        Int64 token = Binder::ClearCallingIdentity();
+        if (mBackupManager) {
             mBackupManager->DataChanged();
-            Binder::RestoreCallingIdentity(token);
+        }
+        Binder::RestoreCallingIdentity(token);
         // } catch (Throwable e) {
             // e.printStackTrace();
         // }
     }
 }
 
-void ProfileManagerService::EnforceChangePermissions()
+ECode ProfileManagerService::EnforceChangePermissions()
 {
-    mContext->EnforceCallingOrSelfPermission(PERMISSION_CHANGE_SETTINGS,
+    return mContext->EnforceCallingOrSelfPermission(PERMISSION_CHANGE_SETTINGS,
             String("You do not have permissions to change the Profile Manager."));
 }
 

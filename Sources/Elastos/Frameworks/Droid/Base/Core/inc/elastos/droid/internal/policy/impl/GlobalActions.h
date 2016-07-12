@@ -9,23 +9,33 @@
 #include "elastos/droid/internal/policy/impl/EnableAccessibilityController.h"
 #include "elastos/droid/os/Handler.h"
 #include "elastos/droid/widget/BaseAdapter.h"
+#include "elastos/droid/telephony/PhoneStateListener.h"
+#include "Elastos.Droid.Telephony.h"
 
+using Elastos::Droid::Os::IBinder;
 using Elastos::Droid::App::Dialog;
+using Elastos::Droid::App::IProfile;
+using Elastos::Droid::App::IProfileManager;
 using Elastos::Droid::Content::BroadcastReceiver;
 using Elastos::Droid::Content::IContext;
+using Elastos::Droid::Content::IComponentName;
+using Elastos::Droid::Content::IServiceConnection;
 using Elastos::Droid::Content::IDialogInterface;
 using Elastos::Droid::Content::IDialogInterfaceOnClickListener;
 using Elastos::Droid::Content::IDialogInterfaceOnDismissListener;
 using Elastos::Droid::Content::IIntent;
 using Elastos::Droid::Content::Pm::IUserInfo;
 using Elastos::Droid::Database::ContentObserver;
+using Elastos::Droid::Graphics::IBitmap;
 using Elastos::Droid::Graphics::Drawable::IDrawable;
 using Elastos::Droid::Internal::App::IAlertController;
 using Elastos::Droid::Internal::App::IAlertControllerAlertParams;
 using Elastos::Droid::Internal::Policy::Impl::EnableAccessibilityController;
 using Elastos::Droid::Media::IAudioManager;
 using Elastos::Droid::Service::Dreams::IIDreamManager;
-//TODO using Elastos::Droid::Telephony::IPhoneStateListener;
+using Elastos::Droid::Telephony::IServiceState;
+using Elastos::Droid::Telephony::PhoneStateListener;
+using Elastos::Droid::Telephony::IPhoneStateListener;
 using Elastos::Droid::View::Accessibility::IAccessibilityEvent;
 using Elastos::Droid::View::ILayoutInflater;
 using Elastos::Droid::View::IView;
@@ -45,8 +55,6 @@ namespace Internal {
 namespace Policy {
 namespace Impl {
 
-//extern "C" const InterfaceID EIID_SilentModeTriStateAction;
-
 /**
  * Helper to show the global actions dialog.  Each item is an {@link Action} that
  * may show depending on whether the keyguard is showing, and whether the device
@@ -54,10 +62,32 @@ namespace Impl {
  */
 class GlobalActions
     : public Object
-    , public IDialogInterfaceOnDismissListener
-    , public IDialogInterfaceOnClickListener
 {
 private:
+    class DialogListener
+        : public Object
+        , public IDialogInterfaceOnDismissListener
+        , public IDialogInterfaceOnClickListener
+    {
+    public:
+        CAR_INTERFACE_DECL()
+
+        DialogListener(
+            /* [in] */ GlobalActions* host);
+
+        /** {@inheritDoc} */
+        CARAPI OnDismiss(
+            /* [in] */ IDialogInterface* dialog);
+
+        /** {@inheritDoc} */
+        CARAPI OnClick(
+            /* [in] */ IDialogInterface* dialog,
+            /* [in] */ Int32 which);
+
+    private:
+        GlobalActions* mHost;
+    };
+
     /**
      * The adapter used for the list within the global actions dialog, taking
      * into account whether the keyguard is showing via
@@ -80,54 +110,22 @@ private:
         CARAPI AreAllItemsEnabled(
             /* [out] */ Boolean* enabled);
 
-        CARAPI RegisterDataSetObserver(
-            /* [in] */ IDataSetObserver* observer);
-
-        CARAPI UnregisterDataSetObserver(
-            /* [in] */ IDataSetObserver* observer);
-
-        CARAPI_(Int32) GetCount();
-
         CARAPI GetCount(
             /* [out] */ Int32* count);
-
-        CARAPI_(AutoPtr<IInterface>) GetItem(
-            /* [in] */ Int32 position);
 
         CARAPI GetItem(
             /* [in] */ Int32 position,
             /* [out] */ IInterface** item);
 
-        CARAPI_(Int64) GetItemId(
-        /* [in] */ Int32 position);
-
         CARAPI GetItemId(
             /* [in] */ Int32 position,
             /* [out] */ Int64* itemId);
-
-        CARAPI HasStableIds(
-            /* [out] */ Boolean* hasStableIds);
-
-        CARAPI_(AutoPtr<IView>) GetView(
-        /* [in] */ Int32 position,
-        /* [in] */ IView* convertView,
-        /* [in] */ IViewGroup* parent);
 
         CARAPI GetView(
             /* [in] */ Int32 position,
             /* [in] */ IView* convertView,
             /* [in] */ IViewGroup* parent,
             /* [out] */ IView** view);
-
-        CARAPI GetItemViewType(
-            /* [in] */ Int32 position,
-            /* [out] */ Int32* viewType);
-
-        CARAPI GetViewTypeCount(
-            /* [out] */ Int32* count);
-
-        CARAPI IsEmpty(
-            /* [out] */ Boolean* isEmpty);
 
     private:
         GlobalActions* mHost;
@@ -146,17 +144,6 @@ private:
         : public Object
     {
     public:
-        //CARAPI GetInterfaceID(
-        //    /* [in] */ IInterface *pObject,
-        //    /* [out] */ InterfaceID *pIID);
-
-        //virtual CARAPI_(PInterface) Probe(
-        //    /* [in]  */ REIID riid);
-
-        //CARAPI_(UInt32) AddRef();
-
-        //CARAPI_(UInt32) Release();
-
         /**
           * @return Text that will be announced when dialog is created.  null
           *     for none.
@@ -170,9 +157,7 @@ private:
             /* [in] */ IViewGroup* parent,
             /* [in] */ ILayoutInflater* inflater) = 0;
 
-        virtual CARAPI_(void) OnPress() = 0;
-
-        //virtual CARAPI_(Boolean) OnLongPress() = 0;
+        virtual CARAPI OnPress() = 0;
 
         /**
          * @return whether this action should appear in the dialog when the keygaurd
@@ -210,28 +195,30 @@ private:
         CAR_INTERFACE_DECL()
 
         SinglePressAction(
-            /* [in] */ GlobalActions* owner,
+            /* [in] */ GlobalActions* host,
             /* [in] */ Int32 iconResId,
             /* [in] */ Int32 messageResId);
 
         SinglePressAction(
-            /* [in] */ GlobalActions* owner,
+            /* [in] */ GlobalActions* host,
             /* [in] */ Int32 iconResId,
             /* [in] */ IDrawable* icon,
             /* [in] */ ICharSequence* message);
 
         SinglePressAction(
-            /* [in] */ GlobalActions* owner,
+            /* [in] */ GlobalActions* host,
             /* [in] */ Int32 iconResId,
             /* [in] */ ICharSequence* message);
 
         CARAPI_(Boolean) IsEnabled();
 
-        virtual CARAPI_(String) GetStatus();
+        virtual CARAPI_(AutoPtr<ICharSequence>) GetStatus();
 
-        virtual CARAPI_(void) OnPress() = 0;
+        virtual CARAPI SetStatus(
+            /* [in] */ ICharSequence* status);
 
-        //virtual CARAPI_(Boolean) OnLongPress();
+        virtual CARAPI OnPress() = 0;
+
         virtual CARAPI_(AutoPtr<ICharSequence>) GetLabelForAccessibility(
             /* [in] */ IContext* context);
 
@@ -242,13 +229,14 @@ private:
             /* [in] */ ILayoutInflater* inflater);
 
     protected:
-        GlobalActions* mOwner;
+        GlobalActions* mHost;
 
     private:
         const Int32 mIconResId;
         const AutoPtr<IDrawable> mIcon;
         const Int32 mMessageResId;
         const AutoPtr<ICharSequence> mMessage;
+        AutoPtr<ICharSequence> mStatusMessage;
     };
 
     class PowerAction
@@ -258,8 +246,10 @@ private:
     public:
         CAR_INTERFACE_DECL()
 
+        TO_STRING_IMPL("GlobalActions::PowerAction")
+
         PowerAction(
-            /* [in] */ GlobalActions* owner);
+            /* [in] */ GlobalActions* host);
 
         virtual CARAPI_(Boolean) OnLongPress();
 
@@ -267,8 +257,25 @@ private:
 
         virtual CARAPI_(Boolean) ShowBeforeProvisioning();
 
-        virtual CARAPI_(void) OnPress();
+        virtual CARAPI OnPress();
     };
+
+    class RebootAction
+        : public SinglePressAction
+    {
+    public:
+        TO_STRING_IMPL("GlobalActions::RebootAction")
+
+        RebootAction(
+            /* [in] */ GlobalActions* host);
+
+        virtual CARAPI_(Boolean) ShowDuringKeyguard();
+
+        virtual CARAPI_(Boolean) ShowBeforeProvisioning();
+
+        virtual CARAPI OnPress();
+    };
+
     /**
      * A toggle action knows whether it is on or off, and displays an icon
      * and status message accordingly.
@@ -281,22 +288,18 @@ private:
             : public Object
         {
         public:
-            static const AutoPtr<State> Off;
-            static const AutoPtr<State> TurningOn;
-            static const AutoPtr<State> TurningOff;
-            static const AutoPtr<State> On;
-
-        public:
             State(
                 /* [in] */ Boolean intermediate);
 
             CARAPI_(Boolean) InTransition();
 
         private:
-            const Boolean inTransition;
+            const Boolean mInTransition;
         };
 
     public:
+        TO_STRING_IMPL("GlobalActions::ToggleAction")
+
         /**
          * @param enabledIconResId The icon for when this action is on.
          * @param disabledIconResid The icon for when this action is off.
@@ -305,7 +308,7 @@ private:
          * @param disabledStatusMessageResId The off status message, e.g. 'sound enabled'
          */
         ToggleAction(
-            /* [in] */ GlobalActions* owner,
+            /* [in] */ GlobalActions* host,
             /* [in] */ Int32 enabledIconResId,
             /* [in] */ Int32 disabledIconResid,
             /* [in] */ Int32 message,
@@ -324,15 +327,14 @@ private:
             /* [in] */ IViewGroup* parent,
             /* [in] */ ILayoutInflater* inflater);
 
-        CARAPI_(void) OnPress();
+        CARAPI OnPress();
 
-        //CARAPI_(Boolean) OnLongPress();
         CARAPI_(AutoPtr<ICharSequence>) GetLabelForAccessibility(
             /* [in] */ IContext* context);
 
         CARAPI_(Boolean) IsEnabled();
 
-        virtual CARAPI_(void) OnToggle(
+        virtual CARAPI OnToggle(
             /* [in] */ Boolean on) = 0;
 
         CARAPI_(void) UpdateState(
@@ -348,6 +350,11 @@ private:
         virtual CARAPI_(void) ChangeStateFromPress(
             /* [in] */ Boolean buttonOn);
 
+    public:
+        static const AutoPtr<State> Off;
+        static const AutoPtr<State> TurningOn;
+        static const AutoPtr<State> TurningOff;
+        static const AutoPtr<State> On;
     protected:
         AutoPtr<State> mState;
 
@@ -357,17 +364,19 @@ private:
         Int32 mMessageResId;
         Int32 mEnabledStatusMessageResId;
         Int32 mDisabledStatusMessageResId;
-        GlobalActions* mOwner;
+        GlobalActions* mHost;
     };
 
     class SilentModeToggleAction
         : public ToggleAction
     {
     public:
-        SilentModeToggleAction(
-            /* [in] */ GlobalActions* owner);
+        TO_STRING_IMPL("GlobalActions::SilentModeToggleAction")
 
-        CARAPI_(void) OnToggle(
+        SilentModeToggleAction(
+            /* [in] */ GlobalActions* host);
+
+        CARAPI OnToggle(
             /* [in] */ Boolean on);
 
         CARAPI_(Boolean) ShowDuringKeyguard();
@@ -384,6 +393,8 @@ private:
     public:
         CAR_INTERFACE_DECL()
 
+        TO_STRING_IMPL("GlobalActions::SilentModeToggleAction")
+
         SilentModeTriStateAction(
             /* [in] */ IContext* context,
             /* [in] */ IAudioManager* audioManager,
@@ -395,9 +406,8 @@ private:
             /* [in] */ IViewGroup* parent,
             /* [in] */ ILayoutInflater* inflater);
 
-        CARAPI_(void) OnPress();
+        CARAPI OnPress();
 
-        //CARAPI_(Boolean) OnLongPress();
         CARAPI_(AutoPtr<ICharSequence>) GetLabelForAccessibility(
             /* [in] */ IContext* context);
 
@@ -436,25 +446,25 @@ private:
         {
         public:
             EnableAccessibilityControllerRunnable(
-                /* [in] */ GlobalActionsDialog* owner);
+                /* [in] */ GlobalActionsDialog* host);
 
             // @Override
             CARAPI Run();
         private:
-            GlobalActionsDialog* mOwner;
+            GlobalActionsDialog* mHost;
         };
+
     public:
-        GlobalActionsDialog(
+        GlobalActionsDialog();
+
+        CARAPI constructor(
             /* [in] */ IContext* context,
             /* [in] */ IAlertControllerAlertParams* params);
 
-        CARAPI Cancel();
-
-        CARAPI Dismiss();
-
         // @Override
-        CARAPI_(Boolean) DispatchTouchEvent(
-            /* [in] */ IMotionEvent* event);
+        CARAPI DispatchTouchEvent(
+            /* [in] */ IMotionEvent* event,
+            /* [out] */ Boolean* result);
 
         CARAPI_(AutoPtr<IListView>) GetListView();
 
@@ -464,14 +474,16 @@ private:
             /* [out] */ Boolean* result);
 
         // @Override
-        CARAPI_(Boolean) OnKeyDown(
+        CARAPI OnKeyDown(
             /* [in] */ Int32 keyCode,
-            /* [in] */ IKeyEvent* event);
+            /* [in] */ IKeyEvent* event,
+            /* [out] */ Boolean* result);
 
         // @Override
-        CARAPI_(Boolean) OnKeyUp(
+        CARAPI OnKeyUp(
             /* [in] */ Int32 keyCode,
-            /* [in] */ IKeyEvent* event);
+            /* [in] */ IKeyEvent* event,
+            /* [out] */ Boolean* result);
 
     protected:
         // @Override
@@ -489,7 +501,7 @@ private:
             /* [in] */ IContext* context);
 
     private:
-        const AutoPtr<IContext> mContext;
+        AutoPtr<IContext> mContext;
         Int32 mWindowTouchSlop;
         AutoPtr<IAlertController> mAlert;
         AutoPtr<MyAdapter> mAdapter;
@@ -534,17 +546,21 @@ private:
         GlobalActions* mHost;
     };
 
-    // TODO: PhoneStateListener is not implement.
-    // class PhoneStateListener() {
-    //     @Override
-    //     public void onServiceStateChanged(ServiceState serviceState) {
-    //         if (!mHasTelephony) return;
-    //         final boolean inAirplaneMode = serviceState.getState() == ServiceState.STATE_POWER_OFF;
-    //         mAirplaneState = inAirplaneMode ? ToggleAction.State.On : ToggleAction.State.Off;
-    //         mAirplaneModeOn.updateState(mAirplaneState);
-    //         mAdapter.notifyDataSetChanged();
-    //     }
-    // };
+    class MyPhoneStateListener
+        : public PhoneStateListener
+    {
+    public:
+        TO_STRING_IMPL("GlobalActions::MyPhoneStateListener")
+
+        MyPhoneStateListener(
+            /* [in] */ GlobalActions* host);
+
+        CARAPI OnServiceStateChanged(
+            /* [in] */ IServiceState* serviceState);
+
+    private:
+        GlobalActions* mHost;
+    };
 
     class RingerModeReceiver
         : public BroadcastReceiver
@@ -570,8 +586,10 @@ private:
         TO_STRING_IMPL("GlobalActions::AirplaneModeObserver")
 
         AirplaneModeObserver(
-            /* [in] */ IHandler* handler,
             /* [in] */ GlobalActions* host);
+
+        CARAPI constructor(
+            /* [in] */ IHandler* handler);
 
         // @Override
         CARAPI OnChange(
@@ -599,14 +617,14 @@ private:
 
 // Inner class of local variable.
 private:
-    class AirplaneModeOn
+    class AirplaneModeOnAction
         : public ToggleAction
     {
     public:
-        AirplaneModeOn(
-            /* [in] */ GlobalActions* owner);
+        AirplaneModeOnAction(
+            /* [in] */ GlobalActions* host);
 
-        CARAPI_(void) OnToggle(
+        CARAPI OnToggle(
             /* [in] */ Boolean on);
 
         CARAPI_(Boolean) ShowDuringKeyguard();
@@ -621,22 +639,50 @@ private:
         GlobalActions* mHost;
     };
 
-    //class PowerSinglePressAction
-    //    : public SinglePressAction
-    //{
-    //public:
-    //    PowerSinglePressAction(
-    //        /* [in] */ GlobalActions* host);
+     /**
+     * A single press action maintains no state, just responds to a press
+     * and takes an action.
+     */
+    class ProfileChooseAction
+        : public Action
+    {
+    public:
+        ProfileChooseAction(
+            /* [in] */ GlobalActions* host);
 
-    //    CARAPI_(void) OnPress();
+        CARAPI_(Boolean) IsEnabled();
 
-    //    CARAPI_(Boolean) OnLongPress();
+        virtual CARAPI OnPress() = 0;
 
-    //    CARAPI_(Boolean) ShowDuringKeyguard();
+        CARAPI_(AutoPtr<IView>) Create(
+            /* [in] */ IContext* context,
+            /* [in] */ IView* convertView,
+            /* [in] */ IViewGroup* parent,
+            /* [in] */ ILayoutInflater* inflater);
 
-    //    CARAPI_(Boolean) ShowBeforeProvisioning();
+    protected:
+        AutoPtr<IProfileManager> mProfileManager;
+        GlobalActions* mHost;
+    };
 
-    //};
+    class ProfileAction
+        : public ProfileChooseAction
+    {
+    public:
+        ProfileAction(
+            /* [in] */ GlobalActions* host);
+
+        CARAPI OnPress();
+
+        CARAPI_(Boolean) OnLongPress();
+
+        CARAPI_(Boolean) ShowDuringKeyguard();
+
+        CARAPI_(Boolean) ShowBeforeProvisioning();
+
+        CARAPI_(AutoPtr<ICharSequence>) GetLabelForAccessibility(
+            /* [in] */ IContext* context);
+    };
 
     class BugRunnable
         : public Runnable
@@ -646,14 +692,14 @@ private:
         CARAPI Run();
     };
 
-    class DialogOnClickListener
+    class BugReportDialogOnClickListener
         : public Object
         , public IDialogInterfaceOnClickListener
     {
     public:
         CAR_INTERFACE_DECL()
 
-        DialogOnClickListener(
+        BugReportDialogOnClickListener(
             /* [in] */ GlobalActions* host);
 
         // @Override
@@ -665,6 +711,27 @@ private:
         GlobalActions* mHost;
     };
 
+    class ProfileDialogOnClickListener
+        : public Object
+        , public IDialogInterfaceOnClickListener
+    {
+    public:
+        CAR_INTERFACE_DECL()
+
+        ProfileDialogOnClickListener(
+            /* [in] */ GlobalActions* host,
+            /* [in] */ ArrayOf<IProfile*>* profiles);
+
+        // @Override
+        CARAPI OnClick(
+            /* [in] */ IDialogInterface* dialog,
+            /* [in] */ Int32 which);
+
+    private:
+        GlobalActions* mHost;
+        AutoPtr<ArrayOf<IProfile*> > mProfiles;
+    };
+
     class BugSinglePressAction
         : public SinglePressAction
     {
@@ -672,7 +739,7 @@ private:
         BugSinglePressAction(
             /* [in] */ GlobalActions* host);
 
-        CARAPI_(void) OnPress();
+        CARAPI OnPress();
 
         //CARAPI_(Boolean) OnLongPress();
 
@@ -680,7 +747,7 @@ private:
 
         CARAPI_(Boolean) ShowBeforeProvisioning();
 
-        CARAPI_(String) GetStatus();
+        virtual CARAPI_(AutoPtr<ICharSequence>) GetStatus();
     };
 
     class SettingsSinglePressAction
@@ -690,9 +757,7 @@ private:
         SettingsSinglePressAction(
             /* [in] */ GlobalActions* host);
 
-        CARAPI_(void) OnPress();
-
-        //CARAPI_(Boolean) OnLongPress();
+        CARAPI OnPress();
 
         CARAPI_(Boolean) ShowDuringKeyguard();
 
@@ -706,14 +771,11 @@ private:
         LockdownSinglePressAction(
             /* [in] */ GlobalActions* host);
 
-        CARAPI_(void) OnPress();
-
-        //CARAPI_(Boolean) OnLongPress();
+        CARAPI OnPress();
 
         CARAPI_(Boolean) ShowDuringKeyguard();
 
         CARAPI_(Boolean) ShowBeforeProvisioning();
-
     };
 
     class MyAdapterViewOnItemLongClickListener
@@ -721,10 +783,10 @@ private:
         , public IAdapterViewOnItemLongClickListener
     {
     public:
+        CAR_INTERFACE_DECL()
+
         MyAdapterViewOnItemLongClickListener(
             /* [in] */ GlobalActions* host);
-
-        CAR_INTERFACE_DECL()
 
         // @Override
         CARAPI OnItemLongClick(
@@ -743,12 +805,13 @@ private:
     {
     public:
         UserSinglePressAction(
-            /* [in] */ GlobalActions* owner,
+            /* [in] */ GlobalActions* host,
+            /* [in] */ Int32 iconId,
             /* [in] */ IDrawable* icon,
             /* [in] */ ICharSequence* message,
             /* [in] */ Int32 userId);
 
-        CARAPI_(void) OnPress();
+        CARAPI OnPress();
 
         CARAPI_(Boolean) ShowDuringKeyguard();
 
@@ -758,14 +821,81 @@ private:
         Int32 mUserId;
     };
 
-public:
+    class ScreenshotAction
+        : public SinglePressAction
+    {
+    public:
+        ScreenshotAction(
+            /* [in] */ GlobalActions* host);
 
-    CAR_INTERFACE_DECL()
+        CARAPI OnPress();
+
+        CARAPI_(Boolean) ShowDuringKeyguard();
+
+        CARAPI_(Boolean) ShowBeforeProvisioning();
+
+    private:
+        Int32 mUserId;
+    };
+
+    class  ScreenshotTimeoutRunnable
+        : public Runnable
+    {
+    public:
+        ScreenshotTimeoutRunnable(
+            /* [in] */ GlobalActions* host);
+
+        CARAPI Run();
+
+    private:
+        GlobalActions* mHost;
+    };
+
+    class TakeScreenshotServiceConnection
+        : public Object
+        , public IServiceConnection
+    {
+    public:
+        CAR_INTERFACE_DECL()
+
+        TakeScreenshotServiceConnection(
+            /* [in] */ GlobalActions* host);
+
+        CARAPI OnServiceConnected(
+            /* [in] */ IComponentName* name,
+            /* [in] */ IBinder* service);
+
+        CARAPI OnServiceDisconnected(
+            /* [in] */ IComponentName* name);
+    private:
+        GlobalActions* mHost;
+    };
+
+    class TakeScreenshotHandler
+        : public Handler
+    {
+    public:
+        TakeScreenshotHandler(
+            /* [in] */ GlobalActions* host,
+            /* [in] */ IServiceConnection* conn);
+
+        CARAPI constructor(
+            /* [in] */ ILooper* looper);
+
+        CARAPI HandleMessage(
+            /* [in] */ IMessage* msg);
+    private:
+        GlobalActions* mHost;
+        AutoPtr<IServiceConnection> mConnection;
+    };
+
+public:
+    GlobalActions();
 
     /**
      * @param context everything needs a context :(
      */
-    GlobalActions(
+    CARAPI constructor(
         /* [in] */ IContext* context,
         /* [in] */ IWindowManagerPolicyWindowManagerFuncs* windowManagerFuncs);
 
@@ -776,15 +906,6 @@ public:
     CARAPI_(void) ShowDialog(
         /* [in] */ Boolean keyguardShowing,
         /* [in] */ Boolean isDeviceProvisioned);
-
-    /** {@inheritDoc} */
-    CARAPI OnDismiss(
-        /* [in] */ IDialogInterface* dialog);
-
-    /** {@inheritDoc} */
-    CARAPI OnClick(
-        /* [in] */ IDialogInterface* dialog,
-        /* [in] */ Int32 which);
 
 private:
     CARAPI_(void) AwakenIfNecessary();
@@ -801,6 +922,8 @@ private:
 
     CARAPI_(void) CreateProfileDialog();
 
+    CARAPI_(AutoPtr<Action>) GetScreenshotAction();
+
     CARAPI_(AutoPtr<Action>) GetBugReportAction();
 
     CARAPI_(AutoPtr<Action>) GetSettingsAction();
@@ -814,9 +937,13 @@ private:
     CARAPI_(void) AddUsersToMenu(
         /* [in] */ List< AutoPtr<Action> >* items);
 
+    CARAPI_(void) TakeScreenshot();
+
     CARAPI_(void) PrepareDialog();
 
     CARAPI_(void) RefreshSilentMode();
+
+    CARAPI_(void) UpdatePowerMenuActions();
 
     CARAPI_(void) OnAirplaneModeChanged();
 
@@ -826,19 +953,25 @@ private:
     CARAPI_(void) ChangeAirplaneModeSystemSetting(
         /* [in] */ Boolean on);
 
+    CARAPI_(void) StartQuickBoot();
+
+
+    /**
+     * Generate a new bitmap (width x height pixels, ARGB_8888) with the input bitmap scaled
+     * to fit and clipped to an inscribed circle.
+     * @param input Bitmap to resize and clip
+     * @param width Width of output bitmap (and diameter of circle)
+     * @param height Height of output bitmap
+     * @return A shiny new bitmap for you to use
+     */
+    CARAPI_(AutoPtr<IBitmap>) CreateCircularClip(
+        /* [in] */ IBitmap* bmp,
+        /* [in] */ Int32 width,
+        /* [in] */ Int32 height);
+
 private:
     static const String TAG;
-
     static const Boolean SHOW_SILENT_TOGGLE;
-    /* Valid settings for global actions keys.
-     * see config.xml config_globalActionList */
-    static const String GLOBAL_ACTION_KEY_POWER;// = "power";
-    static const String GLOBAL_ACTION_KEY_AIRPLANE;// = "airplane";
-    static const String GLOBAL_ACTION_KEY_BUGREPORT;// = "bugreport";
-    static const String GLOBAL_ACTION_KEY_SILENT;// = "silent";
-    static const String GLOBAL_ACTION_KEY_USERS;// = "users";
-    static const String GLOBAL_ACTION_KEY_SETTINGS;// = "settings";
-    static const String GLOBAL_ACTION_KEY_LOCKDOWN;// = "lockdown";
 
     static const Int32 MESSAGE_DISMISS;
     static const Int32 MESSAGE_REFRESH;
@@ -867,12 +1000,24 @@ private:
     Boolean mHasTelephony;
     Boolean mHasVibrator;
     Boolean mShowSilentToggle;
+    AutoPtr<IProfile> mChosenProfile;
 
-private:
+    // Power menu customizations
+    String mActions;
+    Boolean mProfilesEnabled;
+
+    /**
+     * functions needed for taking screenhots.
+     * This leverages the built in ICS screenshot functionality
+     */
+    Object mScreenshotLock;
+    AutoPtr<IServiceConnection> mScreenshotConnection;
+
+    AutoPtr<IRunnable> mScreenshotTimeout;
+
     AutoPtr<MyBroadcastReceiver> mBroadcastReceiver;
     AutoPtr<IBroadcastReceiver> mThemeChangeReceiver;
-    // TODO: PhoneStateListener is not implement.
-    //AutoPtr<IPhoneStateListener> mPhoneStateListener;
+    AutoPtr<IPhoneStateListener> mPhoneStateListener;
     AutoPtr<RingerModeReceiver> mRingerModeReceiver;
     AutoPtr<AirplaneModeObserver> mAirplaneModeObserver;
     AutoPtr<DialogHandler> mHandler;

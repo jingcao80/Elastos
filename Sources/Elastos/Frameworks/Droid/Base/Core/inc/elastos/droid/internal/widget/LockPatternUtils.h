@@ -11,8 +11,7 @@
 
 using Elastos::Droid::App::Admin::IDevicePolicyManager;
 using Elastos::Droid::App::IAlarmClockInfo;
-//TODO: Need IProfileManager
-// using Elastos::Droid::App::IProfileManager;
+using Elastos::Droid::App::IProfileManager;
 using Elastos::Droid::App::Trust::ITrustManager;
 using Elastos::Droid::Content::IContext;
 using Elastos::Droid::Content::IContentResolver;
@@ -569,8 +568,7 @@ private:
     AutoPtr<IContentResolver> mContentResolver;
     AutoPtr<IDevicePolicyManager> mDevicePolicyManager;
     AutoPtr<IILockSettings> mLockSettingsService;
-//TODO: Need IProfileManager
-    // AutoPtr<IProfileManager> mProfileManager;
+    AutoPtr<IProfileManager> mProfileManager;
 
     Boolean mMultiUserMode;
 

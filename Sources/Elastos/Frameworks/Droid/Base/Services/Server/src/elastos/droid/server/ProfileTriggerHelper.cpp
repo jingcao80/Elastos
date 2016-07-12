@@ -59,10 +59,13 @@ ECode ProfileTriggerHelper::MyContentObserver::OnChange(
 //-----------------------------------------------------------------------
 //              ProfileTriggerHelper
 //-----------------------------------------------------------------------
-ProfileTriggerHelper::ProfileTriggerHelper(
+ProfileTriggerHelper::ProfileTriggerHelper()
+    : mFilterRegistered(FALSE)
+{}
+
+ECode ProfileTriggerHelper::constructor(
     /* [in] */ IContext* context,
     /* [in] */ IIProfileManager* service)
-    : mFilterRegistered(FALSE)
 {
     mContext = context;
     mService = service;
@@ -90,6 +93,7 @@ ProfileTriggerHelper::ProfileTriggerHelper(
     CHandler::New((IHandler**)&handler);
     AutoPtr<MyContentObserver> sob = new MyContentObserver(IHandler::Probe(handler), this);
     mSettingsObserver = IContentObserver::Probe(sob);
+    return NOERROR;
 }
 
 void ProfileTriggerHelper::UpdateEnabled()
@@ -106,12 +110,12 @@ void ProfileTriggerHelper::UpdateEnabled()
     if (enabled && !mFilterRegistered) {
         Logger::V(TAG, "Enabling");
         AutoPtr<IIntent> intent;
-        mContext->RegisterReceiver(IBroadcastReceiver::Probe(this), mIntentFilter.Get(), (IIntent**)&intent);
+        mContext->RegisterReceiver(this, mIntentFilter.Get(), (IIntent**)&intent);
         mFilterRegistered = TRUE;
     }
     else if (!enabled && mFilterRegistered) {
         Logger::V(TAG, "Disabling");
-        mContext->UnregisterReceiver(IBroadcastReceiver::Probe(this));
+        mContext->UnregisterReceiver(this);
         mFilterRegistered = FALSE;
     }
 }

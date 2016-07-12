@@ -163,10 +163,10 @@ ECode LockPatternUtils::constructor(
 {
     mContext = context;
     context->GetContentResolver((IContentResolver**)&mContentResolver);
-//TODO: Need IProfileManager
-    AutoPtr<IInterface> service;
-    // context->GetSystemService(IContext::PROFILE_SERVICE, (IInterface**)&service);
-    // mProfileManager = IProfileManager::Probe(service);
+
+    AutoPtr<IInterface> obj;
+    mContext->GetSystemService(IContext::PROFILE_SERVICE, (IInterface**)&obj);
+    mProfileManager = IProfileManager::Probe(obj);
 
     // If this is being called by the system or by an application like keyguard that
     // has permision INTERACT_ACROSS_USERS, then LockPatternUtils will operate in multi-user

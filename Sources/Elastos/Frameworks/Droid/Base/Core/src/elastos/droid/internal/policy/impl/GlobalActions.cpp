@@ -1,4 +1,6 @@
 #include "Elastos.Droid.Service.h"
+#include "Elastos.Droid.Graphics.h"
+#include "Elastos.Droid.Provider.h"
 #include "elastos/droid/internal/policy/impl/GlobalActions.h"
 #include "elastos/droid/R.h"
 #include "elastos/droid/app/ActivityManagerNative.h"
@@ -6,28 +8,40 @@
 #include "elastos/droid/app/CAlertDialogBuilder.h"
 #include "elastos/droid/content/CIntent.h"
 #include "elastos/droid/content/CIntentFilter.h"
+#include "elastos/droid/content/CComponentName.h"
 #include "elastos/droid/content/pm/ThemeUtils.h"
+#include "elastos/droid/graphics/CRectF.h"
+#include "elastos/droid/graphics/CBitmap.h"
+#include "elastos/droid/graphics/CCanvas.h"
+#include "elastos/droid/graphics/CPaint.h"
+#include "elastos/droid/graphics/CMatrix.h"
+#include "elastos/droid/graphics/CBitmapShader.h"
 #include "elastos/droid/graphics/drawable/Drawable.h"
+#include "elastos/droid/graphics/drawable/CBitmapDrawable.h"
 #include "elastos/droid/internal/app/CAlertController.h"
 #include "elastos/droid/internal/app/CAlertControllerAlertParams.h"
 #include "elastos/droid/internal/policy/impl/CPhoneWindowManager.h"
+#include "elastos/droid/internal/utility/UserIcons.h"
 #include "elastos/droid/os/Build.h"
-#include "elastos/droid/os/CServiceManager.h"
-#include "elastos/droid/os/CUserHandleHelper.h"
+#include "elastos/droid/os/ServiceManager.h"
+#include "elastos/droid/os/UserHandle.h"
 #include "elastos/droid/os/SystemClock.h"
 #include "elastos/droid/os/SystemProperties.h"
-#include "elastos/droid/provider/CSettingsGlobal.h"
-#include "elastos/droid/provider/CSettingsSecure.h"
-#include "elastos/droid/text/CTextUtils.h"
+#include "elastos/droid/os/CMessenger.h"
+#include "elastos/droid/os/CMessageHelper.h"
+#include "elastos/droid/provider/Settings.h"
+#include "elastos/droid/text/TextUtils.h"
 #include "elastos/droid/utility/CTypedValue.h"
+#include "elastos/droid/view/LayoutInflater.h"
 #include "elastos/droid/view/CMotionEventHelper.h"
 #include "elastos/droid/view/CViewConfigurationHelper.h"
 #include "elastos/droid/view/CWindowManagerGlobalHelper.h"
-//TODO #include "elastos/droid/widget/internal/CLockPatternUtils.h"
+#include "elastos/droid/internal/widget/CLockPatternUtils.h"
 #include <elastos/core/StringUtils.h>
+#include <elastos/core/CoreUtils.h>
 #include "elastos/utility/etl/HashSet.h"
 #include <elastos/utility/logging/Logger.h>
-#include <elastos/utility/logging/Slogger.h>
+#include <elastos/utility/logging/Logger.h>
 
 using Elastos::Droid::App::CActivityManagerHelper;
 using Elastos::Droid::App::IActivityManagerHelper;
@@ -36,8 +50,10 @@ using Elastos::Droid::App::CAlertDialogBuilder;
 using Elastos::Droid::App::IAlertDialog;
 using Elastos::Droid::App::IAlertDialogBuilder;
 using Elastos::Droid::App::IDialog;
+using Elastos::Droid::Content::CComponentName;
 using Elastos::Droid::Content::CIntent;
 using Elastos::Droid::Content::CIntentFilter;
+using Elastos::Droid::Content::EIID_IServiceConnection;
 using Elastos::Droid::Content::EIID_IDialogInterface;
 using Elastos::Droid::Content::EIID_IDialogInterfaceOnClickListener;
 using Elastos::Droid::Content::EIID_IDialogInterfaceOnDismissListener;
@@ -47,32 +63,45 @@ using Elastos::Droid::Content::Pm::IUserInfo;
 using Elastos::Droid::Content::Pm::ThemeUtils;
 using Elastos::Droid::Content::Res::IResources;
 using Elastos::Droid::Content::Res::IResourcesTheme;
-using Elastos::Droid::Internal::App::CAlertController;
-using Elastos::Droid::Internal::App::CAlertControllerAlertParams;
-using Elastos::Droid::Internal::Policy::Impl::CPhoneWindowManager;
-using Elastos::Droid::Internal::Telephony::ITelephonyIntents;
-using Elastos::Droid::Internal::Telephony::ITelephonyProperties;
 using Elastos::Droid::Net::IConnectivityManager;
+using Elastos::Droid::Telephony::ITelephonyManager;
 using Elastos::Droid::Os::Build;
-using Elastos::Droid::Os::CServiceManager;
-using Elastos::Droid::Os::CUserHandleHelper;
-using Elastos::Droid::Os::IServiceManager;
+using Elastos::Droid::Os::IMessenger;
+using Elastos::Droid::Os::CMessenger;
+using Elastos::Droid::Os::IMessageHelper;
+using Elastos::Droid::Os::CMessageHelper;
+using Elastos::Droid::Os::UserHandle;
 using Elastos::Droid::Os::IUserHandle;
-using Elastos::Droid::Os::IUserHandleHelper;
 using Elastos::Droid::Os::IVibrator;
+using Elastos::Droid::Os::IIPowerManager;
+using Elastos::Droid::Os::ServiceManager;
+using Elastos::Droid::Os::IServiceManager;
 using Elastos::Droid::Os::SystemClock;
 using Elastos::Droid::Os::SystemProperties;
-using Elastos::Droid::Provider::CSettingsGlobal;
-using Elastos::Droid::Provider::CSettingsSecure;
+using Elastos::Droid::Provider::Settings;
 using Elastos::Droid::Provider::ISettings;
 using Elastos::Droid::Provider::ISettingsGlobal;
 using Elastos::Droid::Provider::ISettingsSecure;
+using Elastos::Droid::Provider::ISettingsSystem;
 using Elastos::Droid::Service::Dreams::IDreamService;
-using Elastos::Droid::Text::CTextUtils;
-using Elastos::Droid::Text::ITextUtils;
+using Elastos::Droid::Text::TextUtils;
 using Elastos::Droid::Utility::CTypedValue;
 using Elastos::Droid::Utility::ITypedValue;
-using Elastos::Droid::View::Accessibility::IAccessibilityRecord;
+using Elastos::Droid::Graphics::IMatrix;
+using Elastos::Droid::Graphics::CMatrix;
+using Elastos::Droid::Graphics::IPaint;
+using Elastos::Droid::Graphics::CPaint;
+using Elastos::Droid::Graphics::IShader;
+using Elastos::Droid::Graphics::CCanvas;
+using Elastos::Droid::Graphics::CBitmap;
+using Elastos::Droid::Graphics::IBitmapShader;
+using Elastos::Droid::Graphics::CBitmapShader;
+using Elastos::Droid::Graphics::IRectF;
+using Elastos::Droid::Graphics::CRectF;
+using Elastos::Droid::Graphics::ShaderTileMode_CLAMP;
+using Elastos::Droid::Graphics::BitmapConfig_ARGB_8888;
+using Elastos::Droid::Graphics::MatrixScaleToFit_CENTER;
+using Elastos::Droid::Graphics::Drawable::CBitmapDrawable;
 using Elastos::Droid::View::CWindowManagerGlobalHelper;
 using Elastos::Droid::View::IWindowManagerGlobalHelper;
 using Elastos::Droid::View::CMotionEventHelper;
@@ -80,25 +109,36 @@ using Elastos::Droid::View::CViewConfigurationHelper;
 using Elastos::Droid::View::EIID_IViewOnClickListener;
 using Elastos::Droid::View::IInputDevice;
 using Elastos::Droid::View::IInputEvent;
+using Elastos::Droid::View::LayoutInflater;
 using Elastos::Droid::View::IIWindowManager;
 using Elastos::Droid::View::IMotionEventHelper;
 using Elastos::Droid::View::IViewConfiguration;
 using Elastos::Droid::View::IViewConfigurationHelper;
+using Elastos::Droid::View::Accessibility::IAccessibilityRecord;
 using Elastos::Droid::Widget::EIID_IAdapterViewOnItemClickListener;
-//TODO using Elastos::Droid::Widget::Internal::CLockPatternUtils;
-//TODO using Elastos::Droid::Widget::Internal::ILockPatternUtils;
 using Elastos::Droid::Widget::IImageView;
 using Elastos::Droid::Widget::ITextView;
+using Elastos::Droid::Internal::Utility::UserIcons;
+using Elastos::Droid::Internal::Widget::CLockPatternUtils;
+using Elastos::Droid::Internal::Widget::ILockPatternUtils;
+using Elastos::Droid::Internal::App::CAlertController;
+using Elastos::Droid::Internal::App::CAlertControllerAlertParams;
+using Elastos::Droid::Internal::Policy::Impl::CPhoneWindowManager;
+using Elastos::Droid::Internal::Utility::Cm::IPowerMenuConstants;
+using Elastos::Droid::Internal::Telephony::ITelephonyIntents;
+using Elastos::Droid::Internal::Telephony::ITelephonyProperties;
 using Elastos::Core::CInteger32;
 using Elastos::Core::CString;
 using Elastos::Core::ICharSequence;
 using Elastos::Core::IInteger32;
+using Elastos::Core::CoreUtils;
 using Elastos::Core::StringUtils;
 using Elastos::Utility::Etl::HashSet;
+using Elastos::Utility::IUUID;
 using Elastos::Utility::IList;
 using Elastos::Utility::IIterator;
 using Elastos::Utility::Logging::Logger;
-using Elastos::Utility::Logging::Slogger;
+using Elastos::Utility::Logging::Logger;
 
 
 namespace Elastos {
@@ -107,32 +147,14 @@ namespace Internal {
 namespace Policy {
 namespace Impl {
 
-//extern "C" const InterfaceID EIID_SilentModeTriStateAction =
-//        { 0x7e1e9c2f, 0x50e0, 0x4a07, { 0xb8, 0x2a, 0x5c, 0x73, 0x40, 0x7e, 0xea, 0xe2 } };
-
 const String GlobalActions::TAG("GlobalActions");
 
 const Boolean GlobalActions::SHOW_SILENT_TOGGLE = TRUE;
-const String GlobalActions::GLOBAL_ACTION_KEY_POWER("power");
-const String GlobalActions::GLOBAL_ACTION_KEY_AIRPLANE("airplane");
-const String GlobalActions::GLOBAL_ACTION_KEY_BUGREPORT("bugreport");
-const String GlobalActions::GLOBAL_ACTION_KEY_SILENT("silent");
-const String GlobalActions::GLOBAL_ACTION_KEY_USERS("users");
-const String GlobalActions::GLOBAL_ACTION_KEY_SETTINGS("settings");
-const String GlobalActions::GLOBAL_ACTION_KEY_LOCKDOWN("lockdown");
-
 
 const Int32 GlobalActions::MESSAGE_DISMISS = 0;
 const Int32 GlobalActions::MESSAGE_REFRESH = 1;
 const Int32 GlobalActions::MESSAGE_SHOW = 2;
 const Int32 GlobalActions::DIALOG_DISMISS_DELAY = 300; // ms
-
-// Static variable of emnu 'State'
-const AutoPtr<GlobalActions::ToggleAction::State> GlobalActions::ToggleAction::State::On = new State(FALSE);
-const AutoPtr<GlobalActions::ToggleAction::State> GlobalActions::ToggleAction::State::Off = new State(FALSE);
-const AutoPtr<GlobalActions::ToggleAction::State> GlobalActions::ToggleAction::State::TurningOn = new State(TRUE);
-const AutoPtr<GlobalActions::ToggleAction::State> GlobalActions::ToggleAction::State::TurningOff = new State(TRUE);
-
 
 GlobalActions::MyAdapter::MyAdapter(
     /* [in] */ GlobalActions* host)
@@ -140,51 +162,14 @@ GlobalActions::MyAdapter::MyAdapter(
 {
 }
 
-ECode GlobalActions::MyAdapter::IsEnabled(
-    /* [in] */ Int32 position,
-    /* [out] */ Boolean* enabled)
-{
-    AutoPtr<IInterface> action;
-    GetItem(position, (IInterface**)&action);
-    Action* a = (Action*)IGlobalActionsSilentModeTriStateAction::Probe(action);
-    *enabled = a->IsEnabled();
-    return NOERROR;
-}
-
-ECode GlobalActions::MyAdapter::AreAllItemsEnabled(
-    /* [out] */ Boolean* enabled)
-{
-    *enabled = FALSE;
-    return NOERROR;
-}
-
-ECode GlobalActions::MyAdapter::RegisterDataSetObserver(
-    /* [in] */ IDataSetObserver* observer)
-{
-    return BaseAdapter::RegisterDataSetObserver(observer);
-}
-
-ECode GlobalActions::MyAdapter::UnregisterDataSetObserver(
-    /* [in] */ IDataSetObserver* observer)
-{
-    return BaseAdapter::UnregisterDataSetObserver(observer);
-}
-
-Int32 GlobalActions::MyAdapter::GetCount()
-{
-    Int32 count = 0;
-    GetCount(&count);
-    return count;
-}
-
 ECode GlobalActions::MyAdapter::GetCount(
     /* [out] */ Int32* count)
 {
+    VALIDATE_NOT_NULL(count)
     Int32 temp = 0;
     List< AutoPtr<Action> >::Iterator it = mHost->mItems->Begin();
     for (; it != mHost->mItems->End(); ++it) {
-        const AutoPtr<Action> action = *it;
-
+        AutoPtr<Action> action = *it;
         if (mHost->mKeyguardShowing && !action->ShowDuringKeyguard()) {
             continue;
         }
@@ -197,12 +182,24 @@ ECode GlobalActions::MyAdapter::GetCount(
     return NOERROR;
 }
 
-AutoPtr<IInterface> GlobalActions::MyAdapter::GetItem(
-    /* [in] */ Int32 position)
+ECode GlobalActions::MyAdapter::IsEnabled(
+    /* [in] */ Int32 position,
+    /* [out] */ Boolean* enabled)
 {
-    AutoPtr<IInterface> item;
-    GetItem(position, (IInterface**)&item);
-    return item;
+    VALIDATE_NOT_NULL(enabled)
+    AutoPtr<IInterface> action;
+    GetItem(position, (IInterface**)&action);
+    Action* a = (Action*)IObject::Probe(action);
+    *enabled = a->IsEnabled();
+    return NOERROR;
+}
+
+ECode GlobalActions::MyAdapter::AreAllItemsEnabled(
+    /* [out] */ Boolean* enabled)
+{
+    VALIDATE_NOT_NULL(enabled)
+    *enabled = FALSE;
+    return NOERROR;
 }
 
 ECode GlobalActions::MyAdapter::GetItem(
@@ -213,7 +210,7 @@ ECode GlobalActions::MyAdapter::GetItem(
     Int32 filteredPos = 0;
     List< AutoPtr<Action> >::Iterator it = mHost->mItems->Begin();
     for (; it != mHost->mItems->End(); ++it) {
-        const AutoPtr<Action> action = *it;
+        AutoPtr<Action> action = *it;
         if (mHost->mKeyguardShowing && !action->ShowDuringKeyguard()) {
             continue;
         }
@@ -221,27 +218,19 @@ ECode GlobalActions::MyAdapter::GetItem(
             continue;
         }
         if (filteredPos == position) {
-            *item = TO_IINTERFACE(action);
+            *item = (IObject*)action.Get();
             REFCOUNT_ADD(*item);
             return NOERROR;
         }
         filteredPos++;
     }
 
+    Int32 count;
+    GetCount(&count);
+    Logger::E(TAG, "position: %d  out of range of showable actions, "
+        "filtered count=%d, keyguardshowing=%d, provisioned=%d",
+        position, count, mHost->mKeyguardShowing, mHost->mDeviceProvisioned);
     return E_ILLEGAL_ARGUMENT_EXCEPTION;
-    // throw new IllegalArgumentException("position " + position
-    //         + " out of range of showable actions"
-    //         + ", filtered count=" + getCount()
-    //         + ", keyguardshowing=" + mKeyguardShowing
-    //         + ", provisioned=" + mDeviceProvisioned);
-}
-
-Int64 GlobalActions::MyAdapter::GetItemId(
-    /* [in] */ Int32 position)
-{
-    Int64 itemId = 0;
-    GetItemId(position, &itemId);
-    return itemId;
 }
 
 ECode GlobalActions::MyAdapter::GetItemId(
@@ -253,23 +242,6 @@ ECode GlobalActions::MyAdapter::GetItemId(
     return NOERROR;
 }
 
-CARAPI GlobalActions::MyAdapter::HasStableIds(
-    /* [out] */ Boolean* hasStableIds)
-{
-    BaseAdapter::HasStableIds(hasStableIds);
-    return NOERROR;
-}
-
-AutoPtr<IView> GlobalActions::MyAdapter::GetView(
-    /* [in] */ Int32 position,
-    /* [in] */ IView* convertView,
-    /* [in] */ IViewGroup* parent)
-{
-    AutoPtr<IView> view;
-    GetView(position, convertView, parent, (IView**)&view);
-    return view;
-}
-
 ECode GlobalActions::MyAdapter::GetView(
     /* [in] */ Int32 position,
     /* [in] */ IView* convertView,
@@ -279,85 +251,37 @@ ECode GlobalActions::MyAdapter::GetView(
     VALIDATE_NOT_NULL(view);
     AutoPtr<IInterface> obj;
     GetItem(position, (IInterface**)&obj);
-    Action* action = ((Action*)IObject::Probe(obj));
-    AutoPtr<IInterface> service;
-    mHost->mContext->GetSystemService(IContext::LAYOUT_INFLATER_SERVICE, (IInterface**)&service);
-    AutoPtr<ILayoutInflater> inflater = ILayoutInflater::Probe(service);
-    AutoPtr<IView> viewTemp = action->Create(mHost->GetUiContext(), convertView, parent, inflater);
+    Action* action = (Action*)IObject::Probe(obj);
+    AutoPtr<ILayoutInflater> inflater;
+    LayoutInflater::From(mHost->mContext, (ILayoutInflater**)&inflater);
+    AutoPtr<IView> viewTemp = action->Create(
+        mHost->GetUiContext(), convertView, parent, inflater);
     *view = viewTemp;
     REFCOUNT_ADD(*view);
     return NOERROR;
 }
 
-CARAPI GlobalActions::MyAdapter::GetItemViewType(
-    /* [in] */ Int32 position,
-    /* [out] */ Int32* viewType)
-{
-    BaseAdapter::GetItemViewType(position, viewType);
-    return NOERROR;
-}
-
-CARAPI GlobalActions::MyAdapter::GetViewTypeCount(
-    /* [out] */ Int32* count)
-{
-    BaseAdapter::GetViewTypeCount(count);
-    return NOERROR;
-}
-
-CARAPI GlobalActions::MyAdapter::IsEmpty(
-    /* [out] */ Boolean* isEmpty)
-{
-    BaseAdapter::IsEmpty(isEmpty);
-    return NOERROR;
-}
-
-
-//ECode GlobalActions::Action::GetInterfaceID(
-//    /* [in] */ IInterface *pObject,
-//    /* [out] */ InterfaceID *pIID)
-//{
-//    return NOERROR;
-//}
-//
-//PInterface GlobalActions::Action::Probe(
-//    /* [in]  */ REIID riid)
-//{
-//    if (riid == EIID_IInterface) {
-//        return (PInterface)this;
-//    }
-//    return NULL;
-//}
-//
-//UInt32 GlobalActions::Action::AddRef()
-//{
-//    return ElRefBase::AddRef();
-//}
-//
-//UInt32 GlobalActions::Action::Release()
-//{
-//    return ElRefBase::Release();
-//}
-
+//==========================================================================
+// GlobalActions::SinglePressAction
+//==========================================================================
 CAR_INTERFACE_IMPL(GlobalActions::SinglePressAction, Action, IGlobalActionsSinglePressAction);
 
 GlobalActions::SinglePressAction::SinglePressAction(
-    /* [in] */ GlobalActions* owner,
+    /* [in] */ GlobalActions* host,
     /* [in] */ Int32 iconResId,
     /* [in] */ Int32 messageResId)
-    : mOwner(owner)
+    : mHost(host)
     , mIconResId(iconResId)
-    , mIcon(NULL)
     , mMessageResId(messageResId)
-    , mMessage(NULL)
 {
 }
 
 GlobalActions::SinglePressAction::SinglePressAction(
-    /* [in] */ GlobalActions* owner,
+    /* [in] */ GlobalActions* host,
     /* [in] */ Int32 iconResId,
     /* [in] */ IDrawable* icon,
     /* [in] */ ICharSequence* message)
-    : mOwner(owner)
+    : mHost(host)
     , mIconResId(iconResId)
     , mIcon(icon)
     , mMessageResId(0)
@@ -366,12 +290,11 @@ GlobalActions::SinglePressAction::SinglePressAction(
 }
 
 GlobalActions::SinglePressAction::SinglePressAction(
-    /* [in] */ GlobalActions* owner,
+    /* [in] */ GlobalActions* host,
     /* [in] */ Int32 iconResId,
     /* [in] */ ICharSequence* message)
-    : mOwner(owner)
+    : mHost(host)
     , mIconResId(iconResId)
-    , mIcon(NULL)
     , mMessageResId(0)
     , mMessage(message)
 {
@@ -382,33 +305,29 @@ Boolean GlobalActions::SinglePressAction::IsEnabled()
     return TRUE;
 }
 
-String GlobalActions::SinglePressAction::GetStatus()
+AutoPtr<ICharSequence> GlobalActions::SinglePressAction::GetStatus()
 {
-    return String(NULL);
+    return mStatusMessage;
 }
 
-//Boolean GlobalActions::SinglePressAction::OnLongPress()
-//{
-//    return FALSE;
-//}
+ECode GlobalActions::SinglePressAction::SetStatus(
+    /* [in] */ ICharSequence* status)
+{
+    mStatusMessage= status;
+    return NOERROR;
+}
 
 AutoPtr<ICharSequence> GlobalActions::SinglePressAction::GetLabelForAccessibility(
     /* [in] */ IContext* context)
 {
-    if (mMessage != NULL)
-    {
+    if (mMessage != NULL) {
         return mMessage;
     }
-    else
-    {
-        String result;
-        mOwner->mContext->GetString(mMessageResId, &result);
-        AutoPtr<ICharSequence> cs;
-        CString::New(result, (ICharSequence**)&cs);
-        return cs;
-    }
-}
 
+    String result;
+    mHost->mContext->GetString(mMessageResId, &result);
+    return CoreUtils::Convert(result);
+}
 
 AutoPtr<IView> GlobalActions::SinglePressAction::Create(
     /* [in] */ IContext* context,
@@ -429,20 +348,12 @@ AutoPtr<IView> GlobalActions::SinglePressAction::Create(
 
     viewTemp = NULL;
     v->FindViewById(R::id::status, (IView**)&viewTemp);
-    String status = GetStatus();
-    AutoPtr<ITextUtils> textUtils;
-    CTextUtils::AcquireSingleton((ITextUtils**)&textUtils);
-    Boolean isEmpty;
-    textUtils->IsEmpty(status, &isEmpty);
-    if (!isEmpty)
-    {
+    AutoPtr<ICharSequence> status = GetStatus();
+    if (!TextUtils::IsEmpty(status)) {
         AutoPtr<ITextView> statusView = ITextView::Probe(viewTemp);
-        AutoPtr<ICharSequence> csStatus;
-        CString::New(status, (ICharSequence**)&csStatus);
-        statusView->SetText(csStatus);
+        statusView->SetText(status);
     }
-    else
-    {
+    else {
         viewTemp->SetVisibility(IView::GONE);
     }
 
@@ -451,12 +362,11 @@ AutoPtr<IView> GlobalActions::SinglePressAction::Create(
         icon->SetScaleType(Elastos::Droid::Widget::ImageViewScaleType_CENTER_CROP);
     }
     else if (mIconResId != 0) {
-        //AutoPtr<IResources> resources;
-        //context->GetResources((IResources**)&resources);
         AutoPtr<IDrawable> drawable;
         context->GetDrawable(mIconResId, (IDrawable**)&drawable);
         icon->SetImageDrawable(drawable);
     }
+
     if (mMessage != NULL) {
         messageView->SetText(mMessage);
     }
@@ -467,17 +377,23 @@ AutoPtr<IView> GlobalActions::SinglePressAction::Create(
     return v;
 }
 
+//======================================================================
+// GlobalActions::PowerAction
+//======================================================================
 CAR_INTERFACE_IMPL(GlobalActions::PowerAction, SinglePressAction, IGlobalActionsLongPressAction);
 
 GlobalActions::PowerAction::PowerAction(
-    /* [in] */ GlobalActions* owner)
-    :SinglePressAction(owner, R::drawable::ic_lock_power_off,R::string::global_action_power_off)
+    /* [in] */ GlobalActions* host)
+    : SinglePressAction(
+        host,
+        R::drawable::ic_lock_power_off, R::string::global_action_power_off)
 {
 }
 
 Boolean GlobalActions::PowerAction::OnLongPress()
 {
-    mOwner->mWindowManagerFuncs->RebootSafeMode(TRUE);
+    Logger::I(TAG, " >> PowerAction:: OnLongPress");
+    mHost->mWindowManagerFuncs->RebootSafeMode(TRUE);
     return TRUE;
 }
 
@@ -491,42 +407,118 @@ Boolean GlobalActions::PowerAction::ShowBeforeProvisioning()
     return TRUE;
 }
 
-void GlobalActions::PowerAction::OnPress()
+ECode GlobalActions::PowerAction::OnPress()
 {
+    Logger::I(TAG, " >> PowerAction:: OnPress");
+    AutoPtr<IContentResolver> cr;
+    mHost->mContext->GetContentResolver((IContentResolver**)&cr);
+    Int32 ival;
+    Settings::System::GetInt32(cr, String("enable_quickboot"), 0, &ival);
+    Boolean quickbootEnabled = ival == 1;
+
+    // go to quickboot mode if enabled
+    if (quickbootEnabled) {
+        mHost->StartQuickBoot();
+        return NOERROR;
+    }
+
     // shutdown by making sure radio and power are handled accordingly.
-    mOwner->mWindowManagerFuncs->Shutdown(false /* confirm */);
+    return mHost->mWindowManagerFuncs->Shutdown(false /* confirm */);
 }
+
+//======================================================================
+// GlobalActions::RebootAction
+//======================================================================
+GlobalActions::RebootAction::RebootAction(
+    /* [in] */ GlobalActions* host)
+    : SinglePressAction(
+        host,
+        R::drawable::ic_lock_power_reboot, R::string::global_action_reboot)
+{
+}
+
+Boolean GlobalActions::RebootAction::ShowDuringKeyguard()
+{
+    return TRUE;
+}
+
+Boolean GlobalActions::RebootAction::ShowBeforeProvisioning()
+{
+    return TRUE;
+}
+
+ECode GlobalActions::RebootAction::OnPress()
+{
+    Logger::I(TAG, " >> RebootAction:: OnPress");
+
+    AutoPtr<IInterface> obj = ServiceManager::GetService(IContext::POWER_SERVICE);
+    AutoPtr<IIPowerManager> pm = IIPowerManager::Probe(obj);
+    if (pm) {
+        ECode ec = pm->Reboot(TRUE, String(NULL), FALSE);
+        if (FAILED(ec)) {
+            Logger::E(TAG, "PowerManager service died!");
+            return NOERROR;
+        }
+    }
+
+    return NOERROR;
+}
+
+
+//======================================================================
+// GlobalActions::ToggleAction::State
+//======================================================================
 
 GlobalActions::ToggleAction::State::State(
     /* [in] */ Boolean intermediate)
-    : inTransition(intermediate)
+    : mInTransition(intermediate)
 {
 }
 
 Boolean GlobalActions::ToggleAction::State::InTransition()
 {
-    return inTransition;
+    return mInTransition;
 }
 
+//======================================================================
+// GlobalActions::ToggleAction
+//======================================================================
+const AutoPtr<GlobalActions::ToggleAction::State> GlobalActions::ToggleAction::Off
+    = new GlobalActions::ToggleAction::State(FALSE);
+const AutoPtr<GlobalActions::ToggleAction::State> GlobalActions::ToggleAction::TurningOn
+    = new GlobalActions::ToggleAction::State(TRUE);
+const AutoPtr<GlobalActions::ToggleAction::State> GlobalActions::ToggleAction::TurningOff
+    = new GlobalActions::ToggleAction::State(TRUE);
+const AutoPtr<GlobalActions::ToggleAction::State> GlobalActions::ToggleAction::On
+    = new GlobalActions::ToggleAction::State(FALSE);
+
 GlobalActions::ToggleAction::ToggleAction(
-    /* [in] */ GlobalActions* owner,
+    /* [in] */ GlobalActions* host,
     /* [in] */ Int32 enabledIconResId,
     /* [in] */ Int32 disabledIconResid,
     /* [in] */ Int32 message,
     /* [in] */ Int32 enabledStatusMessageResId,
     /* [in] */ Int32 disabledStatusMessageResId)
-    : mState(State::Off)
+    : mState(Off)
     , mEnabledIconResId(enabledIconResId)
     , mDisabledIconResid(disabledIconResid)
     , mMessageResId(message)
     , mEnabledStatusMessageResId(enabledStatusMessageResId)
     , mDisabledStatusMessageResId(disabledStatusMessageResId)
-    , mOwner(owner)
+    , mHost(host)
 {
 }
 
 void GlobalActions::ToggleAction::WillCreate()
 {
+}
+
+AutoPtr<ICharSequence> GlobalActions::ToggleAction::GetLabelForAccessibility(
+    /* [in] */ IContext* context)
+{
+    String result;
+    mHost->mContext->GetString(mMessageResId, &result);
+    return CoreUtils::Convert(result);
 }
 
 AutoPtr<IView> GlobalActions::ToggleAction::Create(
@@ -559,10 +551,8 @@ AutoPtr<IView> GlobalActions::ToggleAction::Create(
         view->SetEnabled(enabled);
     }
 
-    Boolean on = ((mState == State::On) || (mState == State::TurningOn));
+    Boolean on = ((mState == ToggleAction::On) || (mState == ToggleAction::TurningOn));
     if (icon != NULL) {
-        //AutoPtr<IResources> resources;
-        //context->GetResources((IResources**)&resources);
         AutoPtr<IDrawable> drawable;
         context->GetDrawable((on ? mEnabledIconResId : mDisabledIconResid), (IDrawable**)&drawable);
         icon->SetImageDrawable(drawable);
@@ -581,35 +571,28 @@ AutoPtr<IView> GlobalActions::ToggleAction::Create(
     return v;
 }
 
-void GlobalActions::ToggleAction::OnPress()
+ECode GlobalActions::ToggleAction::OnPress()
 {
     if (mState->InTransition()) {
-        Slogger::W(TAG, "shouldn't be able to toggle when in transition");
-        return;
+        Logger::W(TAG, "shouldn't be able to toggle when in transition");
+        return NOERROR;
     }
 
-    const Boolean nowOn = !(mState == State::On);
+    const Boolean nowOn = !(mState == ToggleAction::On);
     OnToggle(nowOn);
     ChangeStateFromPress(nowOn);
-}
-
-//Boolean GlobalActions::ToggleAction::OnLongPress()
-//{
-//    return FALSE;
-//}
-AutoPtr<ICharSequence> GlobalActions::ToggleAction::GetLabelForAccessibility(
-    /* [in] */ IContext* context)
-{
-    String result;
-    mOwner->mContext->GetString(mMessageResId, &result);
-    AutoPtr<ICharSequence> cs;
-    CString::New(result, (ICharSequence**)&cs);
-    return cs;
+    return NOERROR;
 }
 
 Boolean GlobalActions::ToggleAction::IsEnabled()
 {
     return !mState->InTransition();
+}
+
+void GlobalActions::ToggleAction::ChangeStateFromPress(
+    /* [in] */ Boolean buttonOn)
+{
+    mState = buttonOn ? ToggleAction::On : ToggleAction::Off;
 }
 
 void GlobalActions::ToggleAction::UpdateState(
@@ -618,17 +601,13 @@ void GlobalActions::ToggleAction::UpdateState(
     mState = state;
 }
 
-void GlobalActions::ToggleAction::ChangeStateFromPress(
-    /* [in] */ Boolean buttonOn)
-{
-    mState = buttonOn ? State::On : State::Off;
-}
-
-
+//======================================================================
+// GlobalActions::SilentModeToggleAction
+//======================================================================
 GlobalActions::SilentModeToggleAction::SilentModeToggleAction(
-    /* [in] */ GlobalActions* owner)
+    /* [in] */ GlobalActions* host)
     : ToggleAction(
-            owner,
+            host,
             R::drawable::ic_audio_vol_mute,
             R::drawable::ic_audio_vol,
             R::string::global_action_toggle_silent_mode,
@@ -637,14 +616,16 @@ GlobalActions::SilentModeToggleAction::SilentModeToggleAction(
 {
 }
 
-void GlobalActions::SilentModeToggleAction::OnToggle(
+ECode GlobalActions::SilentModeToggleAction::OnToggle(
     /* [in] */ Boolean on)
 {
     if (on) {
-        mOwner->mAudioManager->SetRingerMode(IAudioManager::RINGER_MODE_SILENT);
-    } else {
-        mOwner->mAudioManager->SetRingerMode(IAudioManager::RINGER_MODE_NORMAL);
+        mHost->mAudioManager->SetRingerMode(IAudioManager::RINGER_MODE_SILENT);
     }
+    else {
+        mHost->mAudioManager->SetRingerMode(IAudioManager::RINGER_MODE_NORMAL);
+    }
+    return NOERROR;
 }
 
 Boolean GlobalActions::SilentModeToggleAction::ShowDuringKeyguard()
@@ -657,7 +638,11 @@ Boolean GlobalActions::SilentModeToggleAction::ShowBeforeProvisioning()
     return FALSE;
 }
 
-CAR_INTERFACE_IMPL_2(GlobalActions::SilentModeTriStateAction, GlobalActions::Action, IViewOnClickListener, IGlobalActionsSilentModeTriStateAction)
+//======================================================================
+// GlobalActions::SilentModeTriStateAction
+//======================================================================
+CAR_INTERFACE_IMPL_2(GlobalActions::SilentModeTriStateAction, GlobalActions::Action, \
+    IViewOnClickListener, IGlobalActionsSilentModeTriStateAction)
 
 GlobalActions::SilentModeTriStateAction::SilentModeTriStateAction(
     /* [in] */ IContext* context,
@@ -672,6 +657,26 @@ GlobalActions::SilentModeTriStateAction::SilentModeTriStateAction(
     (*ITEM_IDS)[0] = R::id::option1;
     (*ITEM_IDS)[1] = R::id::option2;
     (*ITEM_IDS)[2] = R::id::option3;
+}
+
+Int32 GlobalActions::SilentModeTriStateAction::RingerModeToIndex(
+    /* [in] */ Int32 ringerMode)
+{
+    // They just happen to coincide
+    return ringerMode;
+}
+
+Int32 GlobalActions::SilentModeTriStateAction::IndexToRingerMode(
+    /* [in] */ Int32 index)
+{
+    // They just happen to coincide
+    return index;
+}
+
+AutoPtr<ICharSequence> GlobalActions::SilentModeTriStateAction::GetLabelForAccessibility(
+    /* [in] */ IContext* context)
+{
+    return NULL;
 }
 
 AutoPtr<IView> GlobalActions::SilentModeTriStateAction::Create(
@@ -691,27 +696,15 @@ AutoPtr<IView> GlobalActions::SilentModeTriStateAction::Create(
         v->FindViewById((*ITEM_IDS)[i], (IView**)&itemView);
         itemView->SetSelected(selectedIndex == i);
         // Set up click handler
-        AutoPtr<IInteger32> pValue;
-        CInteger32::New(i, (IInteger32**)&pValue);
-        itemView->SetTag(pValue);
+        itemView->SetTag(CoreUtils::Convert(i));
         itemView->SetOnClickListener(this);
     }
     return v;
 }
 
-void GlobalActions::SilentModeTriStateAction::OnPress()
+ECode GlobalActions::SilentModeTriStateAction::OnPress()
 {
-}
-
-//Boolean GlobalActions::SilentModeTriStateAction::OnLongPress()
-//{
-//    return FALSE;
-//}
-
-AutoPtr<ICharSequence> GlobalActions::SilentModeTriStateAction::GetLabelForAccessibility(
-    /* [in] */ IContext* context)
-{
-    return NULL;
+    return NOERROR;
 }
 
 Boolean GlobalActions::SilentModeTriStateAction::ShowDuringKeyguard()
@@ -746,237 +739,58 @@ ECode GlobalActions::SilentModeTriStateAction::OnClick(
     Int32 index = 0;
     integer->GetValue(&index);
     mAudioManager->SetRingerMode(IndexToRingerMode(index));
-    AutoPtr<IMessage> message;
-    mHandler->ObtainMessage(MESSAGE_DISMISS, (IMessage**)&message);
     Boolean isSuccess = FALSE;
-    mHandler->SendMessageDelayed(message, DIALOG_DISMISS_DELAY, &isSuccess);
+    mHandler->SendEmptyMessageDelayed(MESSAGE_DISMISS, DIALOG_DISMISS_DELAY, &isSuccess);
     return NOERROR;
 }
 
-Int32 GlobalActions::SilentModeTriStateAction::RingerModeToIndex(
-    /* [in] */ Int32 ringerMode)
-{
-    // They just happen to coincide
-    return ringerMode;
-}
-
-Int32 GlobalActions::SilentModeTriStateAction::IndexToRingerMode(
-    /* [in] */ Int32 index)
-{
-    // They just happen to coincide
-    return index;
-}
-
+//======================================================================
+// GlobalActions::GlobalActionsDialog::EnableAccessibilityControllerRunnable
+//======================================================================
 GlobalActions::GlobalActionsDialog::EnableAccessibilityControllerRunnable::EnableAccessibilityControllerRunnable(
-    /* [in] */ GlobalActionsDialog* owner)
-    :mOwner(owner)
+    /* [in] */ GlobalActionsDialog* host)
+    :mHost(host)
 {
 }
 
 ECode GlobalActions::GlobalActionsDialog::EnableAccessibilityControllerRunnable::Run()
 {
-    return mOwner->Dismiss();
+    return mHost->Dismiss();
 }
 
-GlobalActions::GlobalActionsDialog::GlobalActionsDialog(
+//======================================================================
+// GlobalActions::GlobalActionsDialog
+//======================================================================
+GlobalActions::GlobalActionsDialog::GlobalActionsDialog()
+    : mWindowTouchSlop(0)
+    , mIntercepted(FALSE)
+    , mCancelOnUp(FALSE)
+{}
+
+ECode GlobalActions::GlobalActionsDialog::constructor(
     /* [in] */ IContext* context,
     /* [in] */ IAlertControllerAlertParams* params)
-    : mContext(context)
 {
+    mContext = context;
     Dialog::constructor(context, GetDialogTheme(context));
+
     AutoPtr<IWindow> w;
     GetWindow((IWindow**)&w);
     CAlertController::New(mContext, this, w, (IAlertController**)&mAlert);
     AutoPtr<IListAdapter> lAdapter;
     params->GetAdapter((IListAdapter**)&lAdapter);
-    mAdapter = (MyAdapter*)(BaseAdapter*)(lAdapter.Get());
+    mAdapter = (MyAdapter*)lAdapter.Get();
     AutoPtr<IViewConfigurationHelper> helper;
     CViewConfigurationHelper::AcquireSingleton((IViewConfigurationHelper**)&helper);
     AutoPtr<IViewConfiguration> viewConfiguration;
     helper->Get(context, (IViewConfiguration**)&viewConfiguration);
     viewConfiguration->GetScaledWindowTouchSlop(&mWindowTouchSlop);
     params->Apply(mAlert);
-}
 
-//CAR_INTERFACE_IMPL(GlobalActions::GlobalActionsDialog, IDialogInterface);
-
-ECode GlobalActions::GlobalActionsDialog::Cancel()
-{
-    return Dialog::Cancel();
-}
-
-ECode GlobalActions::GlobalActionsDialog::Dismiss()
-{
-    return Dialog::Dismiss();
-}
-
-
-Boolean GlobalActions::GlobalActionsDialog::DispatchTouchEvent(
-    /* [in] */ IMotionEvent* inEvent)
-{
-    AutoPtr<IMotionEvent> event = inEvent;
-    if (mEnableAccessibilityController != NULL) {
-        Int32 action = 0;
-        event->GetActionMasked(&action);
-        if (action == IMotionEvent::ACTION_DOWN) {
-            AutoPtr<IWindow> window;
-            GetWindow((IWindow**)&window);
-            AutoPtr<IView> decor;
-            window->GetDecorView((IView**)&decor);
-            Float x = 0.0f;
-            event->GetX(&x);
-            Int32 eventX = (Int32)x;
-            Float y = 0.0f;
-            event->GetY(&y);
-            Int32 eventY = (Int32)y;
-            Int32 width = 0;
-            decor->GetWidth(&width);
-            Int32 height = 0;
-            decor->GetHeight(&height);
-            if (eventX < -mWindowTouchSlop
-                    || eventY < -mWindowTouchSlop
-                    || eventX >= width + mWindowTouchSlop
-                    || eventY >= height + mWindowTouchSlop) {
-                mCancelOnUp = TRUE;
-            }
-        }
-        // try {
-        if (!mIntercepted) {
-            mEnableAccessibilityController->OnInterceptTouchEvent(event, &mIntercepted);
-            if (mIntercepted) {
-                Int64 now = SystemClock::GetUptimeMillis();
-                AutoPtr<IMotionEventHelper> helper;
-                CMotionEventHelper::AcquireSingleton((IMotionEventHelper**)&helper);
-                event = NULL;
-                helper->Obtain(now, now,
-                    IMotionEvent::ACTION_CANCEL, 0.0f, 0.0f, 0, (IMotionEvent**)&event);
-                IInputEvent* inputE = IInputEvent::Probe(event);
-                inputE->SetSource(IInputDevice::SOURCE_TOUCHSCREEN);
-                mCancelOnUp = TRUE;
-            }
-        }
-        else {
-            if (action == IMotionEvent::ACTION_UP) {
-                if (mCancelOnUp) {
-                    Dialog::Cancel();
-                }
-                mCancelOnUp = FALSE;
-                mIntercepted = FALSE;
-            }
-            Boolean res;
-            mEnableAccessibilityController->OnTouchEvent(event, &res);
-            return res;
-        }
-        // } finally {
-        if (action == IMotionEvent::ACTION_UP) {
-            if (mCancelOnUp) {
-                Dialog::Cancel();
-            }
-            mCancelOnUp = FALSE;
-            mIntercepted = FALSE;
-        }
-        // }
-    }
-    Boolean res;
-    Dialog::DispatchTouchEvent(event, &res);
-    return res;
-}
-
-AutoPtr<IListView> GlobalActions::GlobalActionsDialog::GetListView()
-{
-    AutoPtr<IListView> listView;
-    mAlert->GetListView((IListView**)&listView);
-    return listView;
-}
-
-// @Override
-ECode GlobalActions::GlobalActionsDialog::DispatchPopulateAccessibilityEvent(
-    /* [in] */ IAccessibilityEvent* event,
-    /* [out] */ Boolean* result)
-{
-    Int32 eventType;
-    event->GetEventType(&eventType);
-    if (eventType == IAccessibilityEvent::TYPE_WINDOW_STATE_CHANGED)
-    {
-        Int32 count;
-        mAdapter->GetCount(&count);
-        for (Int32 i = 0; i < count; ++i)
-        {
-            AutoPtr<IInterface> item;
-            mAdapter->GetItem(i, (IInterface**)&item);
-            AutoPtr<Action> action = (Action*)(IObject::Probe(item));
-            AutoPtr<IContext> ctx;
-            GetContext((IContext**)&ctx);
-            AutoPtr<ICharSequence> label = action->GetLabelForAccessibility(ctx);
-            if (label != NULL)
-            {
-                //event.getText().add(label);
-                AutoPtr<IList> list;
-                IAccessibilityRecord* ar = IAccessibilityRecord::Probe(event);
-                ar->GetText((IList**)&list);
-                list->Add(TO_IINTERFACE(label));
-            }
-        }
-    }
-    return Dialog::DispatchPopulateAccessibilityEvent(event, result);
-}
-
-Boolean GlobalActions::GlobalActionsDialog::OnKeyDown(
-    /* [in] */ Int32 keyCode,
-    /* [in] */ IKeyEvent* event)
-{
-    Boolean isOnKeyDown = FALSE;
-    if (mAlert->OnKeyDown(keyCode, event, &isOnKeyDown), isOnKeyDown) {
-        return TRUE;
-    }
-    Dialog::OnKeyDown(keyCode, event, &isOnKeyDown);
-    return isOnKeyDown;
-}
-
-Boolean GlobalActions::GlobalActionsDialog::OnKeyUp(
-    /* [in] */ Int32 keyCode,
-    /* [in] */ IKeyEvent* event)
-{
-    Boolean isOnKeyUp = FALSE;
-    if (mAlert->OnKeyUp(keyCode, event, &isOnKeyUp), isOnKeyUp) {
-        return TRUE;
-    }
-    Dialog::OnKeyUp(keyCode, event, &isOnKeyUp);
-    return isOnKeyUp;
-}
-
-ECode GlobalActions::GlobalActionsDialog::OnStart()
-{
-    // If global accessibility gesture can be performed, we will take care
-    // of dismissing the dialog on touch outside. This is because the dialog
-    // is dismissed on the first down while the global gesture is a long press
-    // with two fingers anywhere on the screen.
-
-    if (EnableAccessibilityController::CanEnableAccessibilityViaGesture(mContext)) {
-        mEnableAccessibilityController = new EnableAccessibilityController();
-        AutoPtr<IRunnable> eacRun = new GlobalActionsDialog::EnableAccessibilityControllerRunnable(this);
-        mEnableAccessibilityController->constructor(mContext, eacRun);
-        Dialog::SetCanceledOnTouchOutside(FALSE);
-    } else {
-        mEnableAccessibilityController = NULL;
-        Dialog::SetCanceledOnTouchOutside(TRUE);
-    }
-    return Dialog::OnStart();
-}
-
-ECode GlobalActions::GlobalActionsDialog::OnStop()
-{
-    if (mEnableAccessibilityController != NULL) {
-        mEnableAccessibilityController->OnDestroy();
-    }
-    return Dialog::OnStop();
-}
-
-ECode GlobalActions::GlobalActionsDialog::OnCreate(
-    /* [in] */ IBundle* savedInstanceState)
-{
-    Dialog::OnCreate(savedInstanceState);
-    mAlert->InstallContent();
+    // if (false && context.getResources().getBoolean(R.bool.config_ui_blur_enabled)) {
+    //     getWindow().addFlags(WindowManager.LayoutParams.FLAG_BLUR_BEHIND);
+    //     getWindow().clearFlags(WindowManager.LayoutParams.FLAG_DIM_BEHIND);
+    // }
     return NOERROR;
 }
 
@@ -996,7 +810,181 @@ Int32 GlobalActions::GlobalActionsDialog::GetDialogTheme(
     return resourceId;
 }
 
+ECode GlobalActions::GlobalActionsDialog::OnStart()
+{
+    // If global accessibility gesture can be performed, we will take care
+    // of dismissing the dialog on touch outside. This is because the dialog
+    // is dismissed on the first down while the global gesture is a long press
+    // with two fingers anywhere on the screen.
 
+    if (EnableAccessibilityController::CanEnableAccessibilityViaGesture(mContext)) {
+        mEnableAccessibilityController = new EnableAccessibilityController();
+        AutoPtr<IRunnable> eacRun = new GlobalActionsDialog::EnableAccessibilityControllerRunnable(this);
+        mEnableAccessibilityController->constructor(mContext, eacRun);
+        Dialog::SetCanceledOnTouchOutside(FALSE);
+    }
+    else {
+        mEnableAccessibilityController = NULL;
+        Dialog::SetCanceledOnTouchOutside(TRUE);
+    }
+    return Dialog::OnStart();
+}
+
+ECode GlobalActions::GlobalActionsDialog::OnStop()
+{
+    if (mEnableAccessibilityController != NULL) {
+        mEnableAccessibilityController->OnDestroy();
+    }
+    return Dialog::OnStop();
+}
+
+ECode GlobalActions::GlobalActionsDialog::DispatchTouchEvent(
+    /* [in] */ IMotionEvent* inEvent,
+    /* [out] */ Boolean* result)
+{
+    VALIDATE_NOT_NULL(result)
+    *result = FALSE;
+
+    AutoPtr<IMotionEvent> event = inEvent;
+    if (mEnableAccessibilityController != NULL) {
+        Int32 action = 0;
+        event->GetActionMasked(&action);
+        if (action == IMotionEvent::ACTION_DOWN) {
+            AutoPtr<IWindow> window;
+            GetWindow((IWindow**)&window);
+            AutoPtr<IView> decor;
+            window->GetDecorView((IView**)&decor);
+            Float x = 0.0f, y = 0.0f;
+            event->GetX(&x);
+            event->GetY(&y);
+            Int32 eventX = (Int32)x;
+            Int32 eventY = (Int32)y;
+            Int32 width = 0, height = 0;
+            decor->GetWidth(&width);
+            decor->GetHeight(&height);
+            if (eventX < -mWindowTouchSlop
+                    || eventY < -mWindowTouchSlop
+                    || eventX >= width + mWindowTouchSlop
+                    || eventY >= height + mWindowTouchSlop) {
+                mCancelOnUp = TRUE;
+            }
+        }
+
+        if (!mIntercepted) {
+            mEnableAccessibilityController->OnInterceptTouchEvent(event, &mIntercepted);
+            if (mIntercepted) {
+                Int64 now = SystemClock::GetUptimeMillis();
+                AutoPtr<IMotionEventHelper> helper;
+                CMotionEventHelper::AcquireSingleton((IMotionEventHelper**)&helper);
+                event = NULL;
+                helper->Obtain(now, now,
+                    IMotionEvent::ACTION_CANCEL, 0.0f, 0.0f, 0, (IMotionEvent**)&event);
+                IInputEvent* inputE = IInputEvent::Probe(event);
+                inputE->SetSource(IInputDevice::SOURCE_TOUCHSCREEN);
+                mCancelOnUp = TRUE;
+            }
+
+            if (action == IMotionEvent::ACTION_UP) {
+                if (mCancelOnUp) {
+                    Dialog::Cancel();
+                }
+                mCancelOnUp = FALSE;
+                mIntercepted = FALSE;
+            }
+        }
+        else {
+            mEnableAccessibilityController->OnTouchEvent(event, result);
+
+            if (action == IMotionEvent::ACTION_UP) {
+                if (mCancelOnUp) {
+                    Dialog::Cancel();
+                }
+                mCancelOnUp = FALSE;
+                mIntercepted = FALSE;
+            }
+            return NOERROR;
+        }
+    }
+
+    return Dialog::DispatchTouchEvent(event, result);
+}
+
+AutoPtr<IListView> GlobalActions::GlobalActionsDialog::GetListView()
+{
+    AutoPtr<IListView> listView;
+    mAlert->GetListView((IListView**)&listView);
+    return listView;
+}
+
+ECode GlobalActions::GlobalActionsDialog::OnCreate(
+    /* [in] */ IBundle* savedInstanceState)
+{
+    Dialog::OnCreate(savedInstanceState);
+    mAlert->InstallContent();
+    return NOERROR;
+}
+
+// @Override
+ECode GlobalActions::GlobalActionsDialog::DispatchPopulateAccessibilityEvent(
+    /* [in] */ IAccessibilityEvent* event,
+    /* [out] */ Boolean* result)
+{
+    VALIDATE_NOT_NULL(result)
+    *result = FALSE;
+
+    Int32 eventType;
+    event->GetEventType(&eventType);
+    if (eventType == IAccessibilityEvent::TYPE_WINDOW_STATE_CHANGED) {
+        Int32 count;
+        mAdapter->GetCount(&count);
+        AutoPtr<IContext> ctx;
+        GetContext((IContext**)&ctx);
+        for (Int32 i = 0; i < count; ++i) {
+            AutoPtr<IInterface> item;
+            mAdapter->GetItem(i, (IInterface**)&item);
+            AutoPtr<Action> action = (Action*)(IObject::Probe(item));
+            AutoPtr<ICharSequence> label = action->GetLabelForAccessibility(ctx);
+            if (label != NULL)  {
+                AutoPtr<IList> list;
+                IAccessibilityRecord::Probe(event)->GetText((IList**)&list);
+                list->Add(label);
+            }
+        }
+    }
+    return Dialog::DispatchPopulateAccessibilityEvent(event, result);
+}
+
+ECode GlobalActions::GlobalActionsDialog::OnKeyDown(
+    /* [in] */ Int32 keyCode,
+    /* [in] */ IKeyEvent* event,
+    /* [out] */ Boolean* result)
+{
+    VALIDATE_NOT_NULL(result)
+    Boolean isOnKeyDown = FALSE;
+    if (mAlert->OnKeyDown(keyCode, event, &isOnKeyDown), isOnKeyDown) {
+        *result = TRUE;
+        return NOERROR;
+    }
+    return Dialog::OnKeyDown(keyCode, event, result);
+}
+
+ECode GlobalActions::GlobalActionsDialog::OnKeyUp(
+    /* [in] */ Int32 keyCode,
+    /* [in] */ IKeyEvent* event,
+    /* [out] */ Boolean* result)
+{
+    VALIDATE_NOT_NULL(result)
+    Boolean isOnKeyUp = FALSE;
+    if (mAlert->OnKeyUp(keyCode, event, &isOnKeyUp), isOnKeyUp) {
+        *result = TRUE;
+        return NOERROR;
+    }
+    return Dialog::OnKeyUp(keyCode, event, result);
+}
+
+//======================================================================
+// GlobalActions::MyBroadcastReceiver
+//======================================================================
 GlobalActions::MyBroadcastReceiver::MyBroadcastReceiver(
     /* [in] */ GlobalActions* host)
     : mHost(host)
@@ -1014,25 +1002,29 @@ ECode GlobalActions::MyBroadcastReceiver::OnReceive(
         String reason;
         intent->GetStringExtra(CPhoneWindowManager::SYSTEM_DIALOG_REASON_KEY, &reason);
         if (!CPhoneWindowManager::SYSTEM_DIALOG_REASON_GLOBAL_ACTIONS.Equals(reason)) {
-            AutoPtr<IMessage> message;
-            mHost->mHandler->ObtainMessage(MESSAGE_DISMISS, (IMessage**)&message);
             Boolean isSuccess = FALSE;
-            mHost->mHandler->SendMessage(message, &isSuccess);
+            mHost->mHandler->SendEmptyMessage(MESSAGE_DISMISS, &isSuccess);
         }
-    } else if (ITelephonyIntents::ACTION_EMERGENCY_CALLBACK_MODE_CHANGED.Equals(action)) {
+    }
+    else if (ITelephonyIntents::ACTION_EMERGENCY_CALLBACK_MODE_CHANGED.Equals(action)) {
         // Airplane mode can be changed after ECM exits if airplane toggle button
         // is pressed during ECM mode
         Boolean bTemp = FALSE;
-        if (!((intent->GetBooleanExtra(String("PHONE_IN_ECM_STATE"), FALSE, &bTemp), bTemp)) &&
-                mHost->mIsWaitingForEcmExit) {
+        intent->GetBooleanExtra(String("PHONE_IN_ECM_STATE"), FALSE, &bTemp);
+        if (!bTemp && mHost->mIsWaitingForEcmExit) {
             mHost->mIsWaitingForEcmExit = FALSE;
             mHost->ChangeAirplaneModeSystemSetting(TRUE);
         }
     }
+    else if (IIntent::UPDATE_POWER_MENU.Equals(action)) {
+        mHost->UpdatePowerMenuActions();
+    }
     return NOERROR;
 }
 
-
+//======================================================================
+// GlobalActions::ThemeChangeReceiver
+//======================================================================
 GlobalActions::ThemeChangeReceiver::ThemeChangeReceiver(
     /* [in] */ GlobalActions* host)
     : mHost(host)
@@ -1047,6 +1039,9 @@ ECode GlobalActions::ThemeChangeReceiver::OnReceive(
     return NOERROR;
 }
 
+//======================================================================
+// GlobalActions::RingerModeReceiver
+//======================================================================
 GlobalActions::RingerModeReceiver::RingerModeReceiver(
     /* [in] */ GlobalActions* host)
     : mHost(host)
@@ -1060,20 +1055,25 @@ ECode GlobalActions::RingerModeReceiver::OnReceive(
     String action;
     intent->GetAction(&action);
     if (IAudioManager::RINGER_MODE_CHANGED_ACTION.Equals(action)) {
-        AutoPtr<IMessage> message;
-        mHost->mHandler->ObtainMessage(MESSAGE_REFRESH, (IMessage**)&message);
         Boolean isSuccess = FALSE;
-        mHost->mHandler->SendMessage(message, &isSuccess);
+        mHost->mHandler->SendEmptyMessage(MESSAGE_REFRESH, &isSuccess);
     }
     return NOERROR;
 }
 
+//======================================================================
+// GlobalActions::AirplaneModeObserver
+//======================================================================
 GlobalActions::AirplaneModeObserver::AirplaneModeObserver(
-    /* [in] */ IHandler* handler,
     /* [in] */ GlobalActions* host)
     : mHost(host)
 {
-    ContentObserver::constructor(handler);
+}
+
+GlobalActions::AirplaneModeObserver::constructor(
+    /* [in] */ IHandler* handler)
+{
+    return ContentObserver::constructor(handler);
 }
 
 ECode GlobalActions::AirplaneModeObserver::OnChange(
@@ -1083,6 +1083,9 @@ ECode GlobalActions::AirplaneModeObserver::OnChange(
     return NOERROR;
 }
 
+//======================================================================
+// GlobalActions::DialogHandler
+//======================================================================
 GlobalActions::DialogHandler::DialogHandler(
     /* [in] */ GlobalActions* host)
     : mHost(host)
@@ -1112,21 +1115,23 @@ ECode GlobalActions::DialogHandler::HandleMessage(
     return NOERROR;
 }
 
-
-GlobalActions::AirplaneModeOn::AirplaneModeOn(
-    /* [in] */ GlobalActions* owner)
+//====================================================================
+// GlobalActions::AirplaneModeOnAction
+//====================================================================
+GlobalActions::AirplaneModeOnAction::AirplaneModeOnAction(
+    /* [in] */ GlobalActions* host)
     : ToggleAction(
-            owner,
+            host,
             R::drawable::ic_lock_airplane_mode,
             R::drawable::ic_lock_airplane_mode_off,
             R::string::global_actions_toggle_airplane_mode,
             R::string::global_actions_airplane_mode_on_status,
             R::string::global_actions_airplane_mode_off_status)
-    , mHost(owner)
+    , mHost(host)
 {
 }
 
-void GlobalActions::AirplaneModeOn::OnToggle(
+ECode GlobalActions::AirplaneModeOnAction::OnToggle(
     /* [in] */ Boolean on)
 {
     String value;
@@ -1142,22 +1147,23 @@ void GlobalActions::AirplaneModeOn::OnToggle(
     } else {
         mHost->ChangeAirplaneModeSystemSetting(on);
     }
+    return NOERROR;
 }
 
-Boolean GlobalActions::AirplaneModeOn::ShowDuringKeyguard()
+Boolean GlobalActions::AirplaneModeOnAction::ShowDuringKeyguard()
 {
     return TRUE;
 }
 
-Boolean GlobalActions::AirplaneModeOn::ShowBeforeProvisioning()
+Boolean GlobalActions::AirplaneModeOnAction::ShowBeforeProvisioning()
 {
     return FALSE;
 }
 
-void GlobalActions::AirplaneModeOn::ChangeStateFromPress(
+void GlobalActions::AirplaneModeOnAction::ChangeStateFromPress(
     /* [in] */ Boolean buttonOn)
 {
-    if (!mOwner->mHasTelephony) {
+    if (!mHost->mHasTelephony) {
         return;
     }
 
@@ -1166,61 +1172,129 @@ void GlobalActions::AirplaneModeOn::ChangeStateFromPress(
     SystemProperties::Get(ITelephonyProperties::PROPERTY_INECM_MODE, &value);
     Boolean bValue = StringUtils::ParseBoolean(value);
     if (!(bValue)) {
-        mState = buttonOn ? ToggleAction::State::TurningOn : ToggleAction::State::TurningOff;
+        mState = buttonOn ? ToggleAction::TurningOn : ToggleAction::TurningOff;
         mHost->mAirplaneState = mState;
     }
 }
 
+//====================================================================
+// GlobalActions::ProfileChooseAction
+//====================================================================
 
-//GlobalActions::PowerSinglePressAction::PowerSinglePressAction(
-//    /* [in] */ GlobalActions* host)
-//    : SinglePressAction(R::drawable::ic_lock_power_off,
-//            R::string::global_action_power_off)
-//    , mHost(host)
-//{
-//}
-//
-//void GlobalActions::PowerSinglePressAction::OnPress()
-//{
-//    // shutdown by making sure radio and power are handled accordingly.
-//    mHost->mWindowManagerFuncs->Shutdown(TRUE);
-//}
-//
-//Boolean GlobalActions::PowerSinglePressAction::OnLongPress()
-//{
-//    mHost->mWindowManagerFuncs->RebootSafeMode(TRUE);
-//    return TRUE;
-//}
-//
-//Boolean GlobalActions::PowerSinglePressAction::ShowDuringKeyguard()
-//{
-//    return TRUE;
-//}
-//
-//Boolean GlobalActions::PowerSinglePressAction::ShowBeforeProvisioning()
-//{
-//    return TRUE;
-//}
-
-
-ECode GlobalActions::BugRunnable::Run()
+GlobalActions::ProfileChooseAction::ProfileChooseAction(
+    /* [in] */ GlobalActions* host)
+    : mHost(host)
 {
-    // try {
-    ActivityManagerNative::GetDefault()->RequestBugReport();
-    // } catch (RemoteException e) {
-    // }
+    AutoPtr<IInterface> obj;
+    mHost->mContext->GetSystemService(IContext::PROFILE_SERVICE, (IInterface**)&obj);
+    mProfileManager = IProfileManager::Probe(obj);
+}
+
+Boolean GlobalActions::ProfileChooseAction::IsEnabled()
+{
+    return TRUE;
+}
+
+AutoPtr<IView> GlobalActions::ProfileChooseAction::Create(
+    /* [in] */ IContext* context,
+    /* [in] */ IView* convertView,
+    /* [in] */ IViewGroup* parent,
+    /* [in] */ ILayoutInflater* inflater)
+{
+    AutoPtr<IView> v;
+    inflater->Inflate(R::layout::global_actions_item, parent, FALSE, (IView**)&v);
+
+    AutoPtr<IView> tmp;
+    v->FindViewById(R::id::icon, (IView**)&tmp);
+    AutoPtr<IImageView> icon = IImageView::Probe(tmp);
+
+    tmp = NULL;
+    v->FindViewById(R::id::message, (IView**)&tmp);
+    AutoPtr<ITextView> messageView = ITextView::Probe(tmp);
+
+
+    tmp = NULL;
+    v->FindViewById(R::id::status, (IView**)&tmp);
+    AutoPtr<ITextView> statusView = ITextView::Probe(tmp);
+
+    if (statusView != NULL) {
+        IView::Probe(statusView)->SetVisibility(IView::VISIBLE);
+        AutoPtr<IProfile> profile;
+        mProfileManager->GetActiveProfile((IProfile**)&profile);
+        String name;
+        profile->GetName(&name);
+        statusView->SetText(CoreUtils::Convert(name));
+    }
+
+    if (icon != NULL) {
+        AutoPtr<IDrawable> drawable;
+        mHost->mContext->GetDrawable(R::drawable::ic_lock_profile, (IDrawable**)&drawable);
+        icon->SetImageDrawable(drawable);
+    }
+
+    if (messageView != NULL) {
+        messageView->SetText(R::string::global_action_choose_profile);
+    }
+
+    return v;
+}
+
+//====================================================================
+// GlobalActions::ProfileAction
+//====================================================================
+GlobalActions::ProfileAction::ProfileAction(
+    /* [in] */ GlobalActions* host)
+    : ProfileChooseAction(host)
+{}
+
+ECode GlobalActions::ProfileAction::OnPress()
+{
+    mHost->CreateProfileDialog();
     return NOERROR;
 }
 
-CAR_INTERFACE_IMPL(GlobalActions::DialogOnClickListener, Object, IDialogInterfaceOnClickListener);
+Boolean GlobalActions::ProfileAction::OnLongPress()
+{
+    return TRUE;
+}
 
-GlobalActions::DialogOnClickListener::DialogOnClickListener(
+Boolean GlobalActions::ProfileAction::ShowDuringKeyguard()
+{
+    return FALSE;
+}
+
+Boolean GlobalActions::ProfileAction::ShowBeforeProvisioning()
+{
+    return FALSE;
+}
+
+AutoPtr<ICharSequence> GlobalActions::ProfileAction::GetLabelForAccessibility(
+    /* [in] */ IContext* context)
+{
+    return NULL;
+}
+
+//==========================================================================
+// GlobalActions::BugRunnable
+//==========================================================================
+ECode GlobalActions::BugRunnable::Run()
+{
+    return ActivityManagerNative::GetDefault()->RequestBugReport();
+}
+
+//==========================================================================
+// GlobalActions::BugReportDialogOnClickListener
+//==========================================================================
+CAR_INTERFACE_IMPL(GlobalActions::BugReportDialogOnClickListener, \
+    Object, IDialogInterfaceOnClickListener);
+
+GlobalActions::BugReportDialogOnClickListener::BugReportDialogOnClickListener(
     /* [in] */ GlobalActions* host)
     : mHost(host)
 {
 }
 
-ECode GlobalActions::DialogOnClickListener::OnClick(
+ECode GlobalActions::BugReportDialogOnClickListener::OnClick(
     /* [in] */ IDialogInterface* dialog,
     /* [in] */ Int32 which)
 {
@@ -1230,8 +1304,7 @@ ECode GlobalActions::DialogOnClickListener::OnClick(
     CActivityManagerHelper::AcquireSingleton((IActivityManagerHelper**)&amHelper);
     Boolean userAMonkey;
     amHelper->IsUserAMonkey(&userAMonkey);
-    if (userAMonkey)
-    {
+    if (userAMonkey) {
         return NOERROR;
     }
     // Add a little delay before executing, to give the
@@ -1242,30 +1315,31 @@ ECode GlobalActions::DialogOnClickListener::OnClick(
     return mHost->mHandler->PostDelayed(bugRunnable, 500, &isSuccess);
 }
 
-
+//==========================================================================
+// GlobalActions::BugSinglePressAction
+//==========================================================================
 GlobalActions::BugSinglePressAction::BugSinglePressAction(
     /* [in] */ GlobalActions* host)
-    : SinglePressAction(host, R::drawable::ic_lock_bugreport,
-            R::string::bugreport_title)
+    : SinglePressAction(host,
+        R::drawable::ic_lock_bugreport, R::string::bugreport_title)
 {
 }
 
-void GlobalActions::BugSinglePressAction::OnPress()
+ECode GlobalActions::BugSinglePressAction::OnPress()
 {
     AutoPtr<IAlertDialogBuilder> builder;
-    CAlertDialogBuilder::New(mOwner->mContext, (IAlertDialogBuilder**)&builder);
+    CAlertDialogBuilder::New(mHost->mContext, (IAlertDialogBuilder**)&builder);
     builder->SetTitle(R::string::bugreport_title);
     builder->SetMessage(R::string::bugreport_message);
     builder->SetNegativeButton(R::string::cancel, NULL);
     builder->SetPositiveButton(R::string::report,
-            new DialogOnClickListener(mOwner));
+            new BugReportDialogOnClickListener(mHost));
     AutoPtr<IAlertDialog> dialog;
     builder->Create((IAlertDialog**)&dialog);
     AutoPtr<IWindow> window;
-    IDialog* idialog = IDialog::Probe(dialog);
-    idialog->GetWindow((IWindow**)&window);
+    IDialog::Probe(dialog)->GetWindow((IWindow**)&window);
     window->SetType(IWindowManagerLayoutParams::TYPE_KEYGUARD_DIALOG);
-    idialog->Show();
+    return IDialog::Probe(dialog)->Show();
 }
 
 Boolean GlobalActions::BugSinglePressAction::ShowDuringKeyguard()
@@ -1278,39 +1352,35 @@ Boolean GlobalActions::BugSinglePressAction::ShowBeforeProvisioning()
     return FALSE;
 }
 
-String GlobalActions::BugSinglePressAction::GetStatus()
+AutoPtr<ICharSequence> GlobalActions::BugSinglePressAction::GetStatus()
 {
-    AutoPtr<ICharSequence> id;
-    CString::New(Build::ID, (ICharSequence**)&id);
-    AutoPtr<ICharSequence> release;
-    CString::New(Build::VERSION::RELEASE, (ICharSequence**)&release);
+    AutoPtr<ICharSequence> id = CoreUtils::Convert(Build::ID);
+    AutoPtr<ICharSequence> release = CoreUtils::Convert(Build::VERSION::RELEASE);
     AutoPtr<ArrayOf<IInterface*> > fArgs = ArrayOf<IInterface*>::Alloc(2);
-    fArgs->Set(0, TO_IINTERFACE(release));
-    fArgs->Set(1, TO_IINTERFACE(id));
-    //return mContext.getString(
-    //        com.android.internal.R.string.bugreport_status,
-    //        Build.VERSION.RELEASE,
-    //        Build.ID);
+    fArgs->Set(0, release);
+    fArgs->Set(1, id);
     String result;
-    mOwner->mContext->GetString(R::string::bugreport_status, fArgs, &result);
-    return result;
+    mHost->mContext->GetString(R::string::bugreport_status, fArgs, &result);
+    return CoreUtils::Convert(result);
 }
 
+//==========================================================================
+// GlobalActions::SettingsSinglePressAction
+//==========================================================================
 GlobalActions::SettingsSinglePressAction::SettingsSinglePressAction(
     /* [in] */ GlobalActions* host)
-    : SinglePressAction(host, R::drawable::ic_settings,
-            R::string::global_action_settings)
+    : SinglePressAction(
+        host,
+        R::drawable::ic_settings, R::string::global_action_settings)
 {
 }
 
-void GlobalActions::SettingsSinglePressAction::OnPress()
+ECode GlobalActions::SettingsSinglePressAction::OnPress()
 {
-    //Intent intent = new Intent(Settings.ACTION_SETTINGS);
-    //intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TOP);
     AutoPtr<IIntent> intent;
     CIntent::New(ISettings::ACTION_SETTINGS, (IIntent**)&intent);
-    intent->AddFlags(IIntent::FLAG_ACTIVITY_NEW_TASK|IIntent::FLAG_ACTIVITY_CLEAR_TOP);
-    mOwner->mContext->StartActivity(intent);
+    intent->AddFlags(IIntent::FLAG_ACTIVITY_NEW_TASK | IIntent::FLAG_ACTIVITY_CLEAR_TOP);
+    return mHost->mContext->StartActivity(intent);
 }
 
 Boolean GlobalActions::SettingsSinglePressAction::ShowDuringKeyguard()
@@ -1323,28 +1393,28 @@ Boolean GlobalActions::SettingsSinglePressAction::ShowBeforeProvisioning()
     return TRUE;
 }
 
+//==========================================================================
+// GlobalActions::LockdownSinglePressAction
+//==========================================================================
 GlobalActions::LockdownSinglePressAction::LockdownSinglePressAction(
     /* [in] */ GlobalActions* host)
-    : SinglePressAction(host, R::drawable::ic_lock_lock, R::string::global_action_lockdown)
+    : SinglePressAction(
+        host,
+        R::drawable::ic_lock_lock, R::string::global_action_lockdown)
 {
 }
 
-void GlobalActions::LockdownSinglePressAction::OnPress()
+ECode GlobalActions::LockdownSinglePressAction::OnPress()
 {
-    //new LockPatternUtils(mContext).requireCredentialEntry(UserHandle.USER_ALL);
-    //TODO AutoPtr<ILockPatternUtils> lpu;
-    //TODO CLockPatternUtils::New(mContext, (ILockPatternUtils**)&lpu);
-    //TODO lpu->RequireCredentialEntry(IUserHandle::USER_ALL);
+    AutoPtr<ILockPatternUtils> lpu;
+    CLockPatternUtils::New(mHost->mContext, (ILockPatternUtils**)&lpu);
+    lpu->RequireCredentialEntry(IUserHandle::USER_ALL);
     //try {
     AutoPtr<IWindowManagerGlobalHelper> wmgh;
     CWindowManagerGlobalHelper::AcquireSingleton((IWindowManagerGlobalHelper**)&wmgh);
-    //WindowManagerGlobal.getWindowManagerService().lockNow(null);
     AutoPtr<IIWindowManager> wm;
     wmgh->GetWindowManagerService((IIWindowManager**)&wm);
-    wm->LockNow(NULL);
-    //} catch (RemoteException e) {
-    //    Log.e(TAG, "Error while trying to lock device.", e);
-    //}
+    return wm->LockNow(NULL);
 }
 
 Boolean GlobalActions::LockdownSinglePressAction::ShowDuringKeyguard()
@@ -1357,13 +1427,16 @@ Boolean GlobalActions::LockdownSinglePressAction::ShowBeforeProvisioning()
     return FALSE;
 }
 
+//==========================================================================
+// GlobalActions::MyAdapterViewOnItemLongClickListener
+//==========================================================================
+CAR_INTERFACE_IMPL(GlobalActions::MyAdapterViewOnItemLongClickListener, Object, IAdapterViewOnItemClickListener);
+
 GlobalActions::MyAdapterViewOnItemLongClickListener::MyAdapterViewOnItemLongClickListener(
     /* [in] */ GlobalActions* host)
     : mHost(host)
 {
 }
-
-CAR_INTERFACE_IMPL(GlobalActions::MyAdapterViewOnItemLongClickListener, Object, IAdapterViewOnItemClickListener);
 
 ECode GlobalActions::MyAdapterViewOnItemLongClickListener::OnItemLongClick(
     /* [in] */ IAdapterView* parent,
@@ -1385,27 +1458,28 @@ ECode GlobalActions::MyAdapterViewOnItemLongClickListener::OnItemLongClick(
     return NOERROR;
 }
 
-
+//==========================================================================
+// GlobalActions::UserSinglePressAction
+//==========================================================================
 GlobalActions::UserSinglePressAction::UserSinglePressAction(
-    /* [in] */ GlobalActions* owner,
+    /* [in] */ GlobalActions* host,
+    /* [in] */ Int32 iconId,
     /* [in] */ IDrawable* icon,
     /* [in] */ ICharSequence* message,
     /* [in] */ Int32 userId)
-    : SinglePressAction(owner, R::drawable::ic_menu_cc, icon, message)
+    : SinglePressAction(host, iconId, icon, message)
     , mUserId(userId)
 {
 }
 
-void GlobalActions::UserSinglePressAction::OnPress()
+ECode GlobalActions::UserSinglePressAction::OnPress()
 {
-    // try {
     Boolean value = FALSE;
     ECode ec = ActivityManagerNative::GetDefault()->SwitchUser(mUserId, &value);
-    // } catch (RemoteException re) {
     if (FAILED(ec)) {
-        Slogger::E(TAG, "Couldn't switch user %d" + mUserId);
+        Logger::E(TAG, "Couldn't switch user %d" + mUserId);
     }
-    // }
+    return NOERROR;
 }
 
 Boolean GlobalActions::UserSinglePressAction::ShowDuringKeyguard()
@@ -1418,22 +1492,263 @@ Boolean GlobalActions::UserSinglePressAction::ShowBeforeProvisioning()
     return FALSE;
 }
 
-CAR_INTERFACE_IMPL_2(GlobalActions, Object, IDialogInterfaceOnDismissListener, IDialogInterfaceOnClickListener);
+//==========================================================================
+// GlobalActions::ScreenshotAction
+//==========================================================================
+GlobalActions::ScreenshotAction::ScreenshotAction(
+    /* [in] */ GlobalActions* host)
+    : SinglePressAction(
+        host,
+        R::drawable::ic_lock_screenshot, R::string::global_action_screenshot)
+{
+}
 
-GlobalActions::GlobalActions(
+ECode GlobalActions::ScreenshotAction::OnPress()
+{
+    mHost->TakeScreenshot();
+    return NOERROR;
+}
+
+Boolean GlobalActions::ScreenshotAction::ShowDuringKeyguard()
+{
+    return TRUE;
+}
+
+Boolean GlobalActions::ScreenshotAction::ShowBeforeProvisioning()
+{
+    return TRUE;
+}
+
+//==========================================================================
+// GlobalActions::ProfileDialogOnClickListener
+//==========================================================================
+CAR_INTERFACE_IMPL(GlobalActions::ProfileDialogOnClickListener, Object, IDialogInterfaceOnClickListener)
+
+GlobalActions::ProfileDialogOnClickListener::ProfileDialogOnClickListener(
+    /* [in] */ GlobalActions* host,
+    /* [in] */ ArrayOf<IProfile*>* profiles)
+    : mHost(host)
+    , mProfiles(profiles)
+{}
+
+ECode GlobalActions::ProfileDialogOnClickListener::OnClick(
+    /* [in] */ IDialogInterface* dialog,
+    /* [in] */ Int32 which)
+{
+    if (which < 0)
+        return NOERROR;
+    mHost->mChosenProfile = (*mProfiles)[which];
+
+    AutoPtr<IUUID> uuid;
+    mHost->mChosenProfile->GetUuid((IUUID**)&uuid);
+
+    AutoPtr<IInterface> obj;
+    mHost->mContext->GetSystemService(IContext::PROFILE_SERVICE, (IInterface**)&obj);
+    AutoPtr<IProfileManager> profileManager = IProfileManager::Probe(obj);
+    profileManager->SetActiveProfile(uuid);
+    return dialog->Cancel();
+}
+
+//==========================================================================
+// GlobalActions::ScreenshotTimeoutRunnable
+//==========================================================================
+GlobalActions::ScreenshotTimeoutRunnable::ScreenshotTimeoutRunnable(
+    /* [in] */ GlobalActions* host)
+    : mHost(host)
+{}
+
+ECode GlobalActions::ScreenshotTimeoutRunnable::Run()
+{
+    AutoLock syncLock(mHost->mScreenshotLock);
+
+    if (mHost->mScreenshotConnection != NULL) {
+        mHost->mContext->UnbindService(mHost->mScreenshotConnection);
+        mHost->mScreenshotConnection = NULL;
+    }
+    return NOERROR;
+}
+
+//==========================================================================
+// GlobalActions::TakeScreenshotHandler
+//==========================================================================
+GlobalActions::TakeScreenshotHandler::TakeScreenshotHandler(
+    /* [in] */ GlobalActions* host,
+    /* [in] */ IServiceConnection* conn)
+    : mHost(host)
+    , mConnection(conn)
+{}
+
+ECode GlobalActions::TakeScreenshotHandler::constructor(
+    /* [in] */ ILooper* looper)
+{
+    return Handler::constructor(looper);
+}
+
+ECode GlobalActions::TakeScreenshotHandler::HandleMessage(
+    /* [in] */ IMessage* msg)
+{
+    AutoLock syncLock(mHost->mScreenshotLock);
+    if (mHost->mScreenshotConnection == mConnection) {
+        mHost->mContext->UnbindService(mHost->mScreenshotConnection);
+        mHost->mScreenshotConnection = NULL;
+        mHost->mHandler->RemoveCallbacks(mHost->mScreenshotTimeout);
+    }
+    return NOERROR;
+}
+
+//==========================================================================
+// GlobalActions::TakeScreenshotHandler
+//==========================================================================
+CAR_INTERFACE_IMPL(GlobalActions::TakeScreenshotServiceConnection, Object, IServiceConnection)
+
+GlobalActions::TakeScreenshotServiceConnection::TakeScreenshotServiceConnection(
+    /* [in] */ GlobalActions* host)
+    : mHost(host)
+{}
+
+ECode GlobalActions::TakeScreenshotServiceConnection::OnServiceConnected(
+    /* [in] */ IComponentName* name,
+    /* [in] */ IBinder* service)
+{
+    AutoLock syncLock(mHost->mScreenshotLock);
+    if (mHost->mScreenshotConnection != this) {
+        return NOERROR;
+    }
+    AutoPtr<IMessenger> messenger;
+    CMessenger::New(IIMessenger::Probe(service), (IMessenger**)&messenger);
+    AutoPtr<IMessage> msg;
+    AutoPtr<IMessageHelper> helper;
+    CMessageHelper::AcquireSingleton((IMessageHelper**)&helper);
+    helper->Obtain(NULL, 1, (IMessage**)&msg);
+
+    AutoPtr<IServiceConnection> myConn = this;
+    AutoPtr<ILooper> looper;
+    mHost->mHandler->GetLooper((ILooper**)&looper);
+    AutoPtr<TakeScreenshotHandler> h = new TakeScreenshotHandler(mHost, this);
+    h->constructor(looper);
+    AutoPtr<IMessenger> newMessager;
+    CMessenger::New(h.Get(), (IMessenger**)&newMessager);
+    msg->SetReplyTo(newMessager);
+    msg->SetArg1(0);
+    msg->SetArg2(0);
+
+    /*  remove for the time being
+    if (mStatusBar != null && mStatusBar.isVisibleLw())
+        msg.arg1 = 1;
+    if (mNavigationBar != null && mNavigationBar.isVisibleLw())
+        msg.arg2 = 1;
+     */
+
+    /* wait for the dialog box to close */
+    // try {
+        Thread::Sleep(1000);
+    // } catch (InterruptedException ie) {
+    //     // Do nothing
+    // }
+
+    /* take the screenshot */
+    // try {
+        messenger->Send(msg);
+    // } catch (RemoteException e) {
+    //     // Do nothing
+    // }
+    return NOERROR;
+}
+
+ECode GlobalActions::TakeScreenshotServiceConnection::OnServiceDisconnected(
+    /* [in] */ IComponentName* name)
+{
+    return NOERROR;
+}
+
+//==========================================================================
+// GlobalActions::DialogListener
+//==========================================================================
+CAR_INTERFACE_IMPL_2(GlobalActions::DialogListener, Object, \
+    IDialogInterfaceOnDismissListener, IDialogInterfaceOnClickListener)
+
+GlobalActions::DialogListener::DialogListener(
+    /* [in] */ GlobalActions* host)
+    : mHost(host)
+{}
+
+ECode GlobalActions::DialogListener::OnDismiss(
+    /* [in] */ IDialogInterface* dialog)
+{
+    if (mHost->mShowSilentToggle) {
+        ECode ec = mHost->mContext->UnregisterReceiver(mHost->mRingerModeReceiver);
+        if (FAILED(ec))
+            Logger::W(TAG, "GlobalActions::OnDismiss");
+    }
+    return NOERROR;
+}
+
+ECode GlobalActions::DialogListener::OnClick(
+    /* [in] */ IDialogInterface* dialog,
+    /* [in] */ Int32 which)
+{
+    AutoPtr<IInterface> action;
+    mHost->mAdapter->GetItem(which, (IInterface**)&action);
+    if (IGlobalActionsSilentModeTriStateAction::Probe(action) == NULL) {
+        dialog->Dismiss();
+    }
+
+    ((Action*)IObject::Probe(action))->OnPress();
+    return NOERROR;
+}
+
+//==========================================================================
+// GlobalActions::MyPhoneStateListener
+//==========================================================================
+GlobalActions::MyPhoneStateListener::MyPhoneStateListener(
+    /* [in] */ GlobalActions* host)
+    : mHost(host)
+{}
+
+ECode GlobalActions::MyPhoneStateListener::OnServiceStateChanged(
+    /* [in] */ IServiceState* serviceState)
+{
+    if (!mHost->mHasTelephony) return NOERROR;
+    Int32 state;
+    serviceState->GetState(&state);
+    Boolean inAirplaneMode = state == IServiceState::STATE_POWER_OFF;
+    mHost->mAirplaneState = inAirplaneMode ? ToggleAction::On : ToggleAction::Off;
+    mHost->mAirplaneModeOn->UpdateState(mHost->mAirplaneState);
+    mHost->mAdapter->NotifyDataSetChanged();
+    return NOERROR;
+}
+
+//==========================================================================
+// GlobalActions
+//==========================================================================
+GlobalActions::GlobalActions()
+    : mKeyguardShowing(FALSE)
+    , mDeviceProvisioned(FALSE)
+    , mAirplaneState(ToggleAction::Off)
+    , mIsWaitingForEcmExit(FALSE)
+    , mHasTelephony(FALSE)
+    , mHasVibrator(FALSE)
+    , mShowSilentToggle(FALSE)
+    , mProfilesEnabled(FALSE)
+{}
+
+ECode GlobalActions::constructor(
     /* [in] */ IContext* context,
     /* [in] */ IWindowManagerPolicyWindowManagerFuncs* windowManagerFuncs)
 {
     // Init global variable of inner class.
+    mScreenshotTimeout = new ScreenshotTimeoutRunnable(this);
     mBroadcastReceiver = new MyBroadcastReceiver(this);
     mThemeChangeReceiver = new ThemeChangeReceiver(this);
-    // TODO: PhoneStateListener is not implement.
-    // PhoneStateListener mPhoneStateListener;
+    AutoPtr<MyPhoneStateListener> psl = new MyPhoneStateListener(this);
+    psl->constructor();
+    mPhoneStateListener = psl.Get();
     mRingerModeReceiver = new RingerModeReceiver(this);
+    mAirplaneModeObserver = new AirplaneModeObserver(this);
+    mAirplaneModeObserver->constructor(mHandler);
+    mScreenshotTimeout = new ScreenshotTimeoutRunnable(this);
     mHandler = new DialogHandler(this);
     mHandler->constructor();
-
-    mAirplaneModeObserver = new AirplaneModeObserver(mHandler, this);
 
     mContext = context;
     mWindowManagerFuncs = windowManagerFuncs;
@@ -1441,10 +1756,7 @@ GlobalActions::GlobalActions(
     mContext->GetSystemService(IContext::AUDIO_SERVICE, (IInterface**)&obj);
     mAudioManager = IAudioManager::Probe(obj);
 
-    AutoPtr<IServiceManager> sm;
-    CServiceManager::AcquireSingleton((IServiceManager**)&sm);
-    obj = NULL;
-    sm->GetService(IDreamService::DREAM_SERVICE, (IInterface**)&obj);
+    obj = ServiceManager::GetService(IDreamService::DREAM_SERVICE);
     mDreamManager = IIDreamManager::Probe(obj);
 
     // receive broadcasts
@@ -1453,7 +1765,6 @@ GlobalActions::GlobalActions(
     filter->AddAction(IIntent::ACTION_CLOSE_SYSTEM_DIALOGS);
     filter->AddAction(IIntent::ACTION_SCREEN_OFF);
     filter->AddAction(IIntent::UPDATE_POWER_MENU);
-    // TODO: Telephone is not implement.
     filter->AddAction(ITelephonyIntents::ACTION_EMERGENCY_CALLBACK_MODE_CHANGED);
     AutoPtr<IIntent> intent;
     context->RegisterReceiver(mBroadcastReceiver, filter, (IIntent**)&intent);
@@ -1464,34 +1775,35 @@ GlobalActions::GlobalActions(
     mContext->GetSystemService(IContext::CONNECTIVITY_SERVICE, (IInterface**)&obj);
     AutoPtr<IConnectivityManager> cm = IConnectivityManager::Probe(obj);
     cm->IsNetworkSupported(IConnectivityManager::TYPE_MOBILE, &mHasTelephony);
-    // get notified of phone state changes
-    // TODO: Telephone is not implement.
-    // TelephonyManager telephonyManager =
-    //         (TelephonyManager) context.getSystemService(Context.TELEPHONY_SERVICE);
-    // telephonyManager.listen(mPhoneStateListener, PhoneStateListener.LISTEN_SERVICE_STATE);
+
+    obj = NULL;
+    mContext->GetSystemService(IContext::TELEPHONY_SERVICE, (IInterface**)&obj);
+    AutoPtr<ITelephonyManager> telephonyManager = ITelephonyManager::Probe(obj);
+    if (telephonyManager) {
+        telephonyManager->Listen(mPhoneStateListener, IPhoneStateListener::LISTEN_SERVICE_STATE);
+    }
 
     AutoPtr<IContentResolver> contentResolver;
     mContext->GetContentResolver((IContentResolver**)&contentResolver);
-    AutoPtr<ISettingsGlobal> settingsGlobal;
-    CSettingsGlobal::AcquireSingleton((ISettingsGlobal**)&settingsGlobal);
     AutoPtr<IUri> uri;
-    settingsGlobal->GetUriFor(ISettingsGlobal::AIRPLANE_MODE_ON, (IUri**)&uri);
-    contentResolver->RegisterContentObserver(
-            uri, TRUE,
-            mAirplaneModeObserver);
+    Settings::Global::GetUriFor(ISettingsGlobal::AIRPLANE_MODE_ON, (IUri**)&uri);
+    contentResolver->RegisterContentObserver(uri, TRUE, mAirplaneModeObserver);
 
     obj = NULL;
     mContext->GetSystemService(IContext::VIBRATOR_SERVICE, (IInterface**)&obj);
     AutoPtr<IVibrator> vibrator = IVibrator::Probe(obj);
-    Boolean hasVibrator = FALSE;
-    mHasVibrator = vibrator != NULL && (vibrator->HasVibrator(&hasVibrator), hasVibrator);
+    if (vibrator != NULL) {
+        vibrator->HasVibrator(&mHasVibrator);
+    }
 
     AutoPtr<IResources> resources;
     context->GetResources((IResources**)&resources);
     Boolean useFixedV;
     resources->GetBoolean(R::bool_::config_useFixedVolume, &useFixedV);
-
     mShowSilentToggle = SHOW_SILENT_TOGGLE && !useFixedV;
+
+    UpdatePowerMenuActions();
+    return NOERROR;
 }
 
 void GlobalActions::ShowDialog(
@@ -1504,11 +1816,10 @@ void GlobalActions::ShowDialog(
         mDialog->Dismiss();
         mDialog = NULL;
         // Show delayed, so that the dismiss of the previous dialog completes
-        AutoPtr<IMessage> message;
-        mHandler->ObtainMessage(MESSAGE_SHOW, (IMessage**)&message);
         Boolean isSuccess = FALSE;
-        mHandler->SendMessage(message, &isSuccess);
-    } else {
+        mHandler->SendEmptyMessage(MESSAGE_SHOW, &isSuccess);
+    }
+    else {
         mDialog = CreateDialog();
         HandleShow();
     }
@@ -1517,14 +1828,10 @@ void GlobalActions::ShowDialog(
 void GlobalActions::AwakenIfNecessary()
 {
     if (mDreamManager != NULL) {
-        // try {
         Boolean isDreaming = FALSE;
         if (mDreamManager->IsDreaming(&isDreaming), isDreaming) {
             mDreamManager->Awaken();
         }
-        // } catch (RemoteException e) {
-            // we tried
-        // }
     }
 }
 
@@ -1539,13 +1846,10 @@ void GlobalActions::HandleShow()
     if (count == 1) {
         AutoPtr<IInterface> item;
         mAdapter->GetItem(0, (IInterface**)&item);
-        //mAdapter.getItem(0) instanceof SinglePressAction
         IGlobalActionsSinglePressAction* ispAction = IGlobalActionsSinglePressAction::Probe(item);
         if (ispAction != NULL) {
-            //&& !(mAdapter.getItem(0) instanceof LongPressAction))
             IGlobalActionsLongPressAction* ilpAction = IGlobalActionsLongPressAction::Probe(item);
             if (ilpAction != NULL) {
-                //((SinglePressAction) mAdapter.getItem(0)).onPress();
                 SinglePressAction* spAction = (SinglePressAction*)ispAction;
                 spAction->OnPress();
                 return;
@@ -1558,9 +1862,7 @@ void GlobalActions::HandleShow()
         mDialog->GetWindow((IWindow**)&window);
         AutoPtr<IWindowManagerLayoutParams> attrs;
         window->GetAttributes((IWindowManagerLayoutParams**)&attrs);
-        AutoPtr<ICharSequence> title;
-        CString::New(String("GlobalActions"), (ICharSequence**)&title);
-        attrs->SetTitle(title);
+        attrs->SetTitle(CoreUtils::Convert("GlobalActions"));
         window->SetAttributes(attrs);
         mDialog->Show();
         AutoPtr<IView> decorView;
@@ -1583,158 +1885,173 @@ AutoPtr<GlobalActions::GlobalActionsDialog> GlobalActions::CreateDialog()
     // Simple toggle style if there's no vibrator, otherwise use a tri-state
     if (!mHasVibrator) {
         mSilentModeAction = new SilentModeToggleAction(this);
-    } else {
+    }
+    else {
         mSilentModeAction = new SilentModeTriStateAction(mContext, mAudioManager, mHandler);
     }
 
-    mAirplaneModeOn = new AirplaneModeOn(this);
-
+    mAirplaneModeOn = new AirplaneModeOnAction(this);
     OnAirplaneModeChanged();
 
     mItems = new List< AutoPtr<Action> >();
-    AutoPtr<ArrayOf<String> > defaultActions;
-    AutoPtr<IResources> resources;
-    mContext->GetResources((IResources**)&resources);
-    resources->GetStringArray(R::array::config_globalActionsList, (ArrayOf<String>**)&defaultActions);
 
-    //ArraySet<String> addedKeys = new ArraySet<String>();
+    AutoPtr<ArrayOf<String> > actionsArray;
+    if (mActions == NULL) {
+        AutoPtr<IResources> resources;
+        mContext->GetResources((IResources**)&resources);
+        resources->GetStringArray(R::array::config_globalActionsList, (ArrayOf<String>**)&actionsArray);
+    }
+    else {
+        StringUtils::Split(mActions, "\\|", (ArrayOf<String>**)&actionsArray);
+    }
+
+    // Always add the power off option
+    AutoPtr<Action> action = new PowerAction(this);
+    mItems->PushBack(action);
+
     HashSet<String> addedKeys;
-    for (Int32 i = 0; i < defaultActions->GetLength(); ++i)
-    {
-        String actionKey = (*defaultActions)[i];
+    for (Int32 i = 0; i < actionsArray->GetLength(); ++i) {
+        String actionKey = (*actionsArray)[i];
         HashSet<String>::Iterator iter = addedKeys.Find(actionKey);
-        //if (addedKeys.contains(actionKey))
-        if (iter != addedKeys.End())
-        {
+        if (iter != addedKeys.End()) {
             // If we already have added this, don't add it again.
             continue;
         }
-        if (GLOBAL_ACTION_KEY_POWER.Equals(actionKey))
-        {
-            //mItems.add(new PowerAction());
-            AutoPtr<PowerAction> pAction = new PowerAction(this);
-            mItems->PushBack(pAction);
+
+        if (IPowerMenuConstants::GLOBAL_ACTION_KEY_POWER.Equals(actionKey)) {
+            continue;
         }
-        else if (GLOBAL_ACTION_KEY_AIRPLANE.Equals(actionKey))
-        {
-            //mItems.add(mAirplaneModeOn);
+        else if (IPowerMenuConstants::GLOBAL_ACTION_KEY_REBOOT.Equals(actionKey)) {
+            action = new RebootAction(this);
+            mItems->PushBack(action);
+        }
+        else if (IPowerMenuConstants::GLOBAL_ACTION_KEY_SCREENSHOT.Equals(actionKey)) {
+            mItems->PushBack(GetScreenshotAction());
+        }
+        else if (IPowerMenuConstants::GLOBAL_ACTION_KEY_AIRPLANE.Equals(actionKey)) {
             mItems->PushBack(mAirplaneModeOn);
         }
-        else if (GLOBAL_ACTION_KEY_BUGREPORT.Equals(actionKey))
-        {
-            //if (Settings.Global.getInt(mContext.getContentResolver(),
-            //            Settings.Global.BUGREPORT_IN_POWER_MENU, 0) != 0 && isCurrentUserOwner()) {
-            //    mItems.add(getBugReportAction());
-            //}
+        else if (IPowerMenuConstants::GLOBAL_ACTION_KEY_BUGREPORT.Equals(actionKey)) {
             AutoPtr<IContentResolver> contentResolver;
             mContext->GetContentResolver((IContentResolver**)&contentResolver);
-            AutoPtr<ISettingsGlobal> settingsGlobal;
-            CSettingsGlobal::AcquireSingleton((ISettingsGlobal**)&settingsGlobal);
             Int32 value;
-            settingsGlobal->GetInt32(contentResolver, ISettingsGlobal::BUGREPORT_IN_POWER_MENU, 0, &value);
-            if (value != 0 && IsCurrentUserOwner())
-            {
+            Settings::Global::GetInt32(contentResolver, ISettingsGlobal::BUGREPORT_IN_POWER_MENU, 0, &value);
+            if (value != 0 && IsCurrentUserOwner()) {
                 mItems->PushBack(GetBugReportAction());
             }
-
         }
-        else if (GLOBAL_ACTION_KEY_SILENT.Equals(actionKey))
-        {
-            if (mShowSilentToggle)
-            {
-                //mItems.add(mSilentModeAction);
+        else if (IPowerMenuConstants::GLOBAL_ACTION_KEY_SILENT.Equals(actionKey)) {
+            if (mShowSilentToggle) {
                 mItems->PushBack(mSilentModeAction);
             }
         }
-        else if (GLOBAL_ACTION_KEY_USERS.Equals(actionKey))
-        {
+        else if (IPowerMenuConstants::GLOBAL_ACTION_KEY_USERS.Equals(actionKey)) {
             Boolean proRes;
             SystemProperties::GetBoolean(String("fw.power_user_switcher"), FALSE, &proRes);
-            if (proRes)
-            {
+            if (proRes) {
                 AddUsersToMenu(mItems);
             }
         }
-        else if (GLOBAL_ACTION_KEY_SETTINGS.Equals(actionKey))
-        {
-            //mItems.add(getSettingsAction());
+        else if (IPowerMenuConstants::GLOBAL_ACTION_KEY_SETTINGS.Equals(actionKey)) {
             mItems->PushBack(GetSettingsAction());
         }
-        else if (GLOBAL_ACTION_KEY_LOCKDOWN.Equals(actionKey))
-        {
-            //mItems.add(getLockdownAction());
+        else if (IPowerMenuConstants::GLOBAL_ACTION_KEY_LOCKDOWN.Equals(actionKey)) {
             mItems->PushBack(GetLockdownAction());
         }
-        else
-        {
+        else if (IPowerMenuConstants::GLOBAL_ACTION_KEY_PROFILE.Equals(actionKey)) {
+            if (!mProfilesEnabled) continue;
+            action = new ProfileAction(this);
+            mItems->PushBack(action);
+        }
+        else {
             Logger::E(TAG, "Invalid global action key %s", actionKey.string());
         }
+
         // Add here so we don't add more than one.
-        //addedKeys.add(actionKey);
         addedKeys.Insert(actionKey);
     }
 
     mAdapter = new MyAdapter(this);
+    AutoPtr<DialogListener> diodl = new DialogListener(this);
 
     AutoPtr<IAlertControllerAlertParams> params;
     CAlertControllerAlertParams::New(GetUiContext(), (IAlertControllerAlertParams**)&params);
     params->SetAdapter(mAdapter.Get());
-    params->SetOnClickListener(this);
+    params->SetOnClickListener(diodl);
     params->SetForceInverseBackground(TRUE);
 
-    AutoPtr<GlobalActionsDialog> dialog = new GlobalActionsDialog(GetUiContext(), params);
+    AutoPtr<GlobalActionsDialog> dialog = new GlobalActionsDialog();
+    dialog->constructor(GetUiContext(), params);
     dialog->SetCanceledOnTouchOutside(FALSE); // Handled by the custom class.
 
-    dialog->GetListView()->SetItemsCanFocus(TRUE);
     AutoPtr<IListView> listv = dialog->GetListView();
+    listv->SetItemsCanFocus(TRUE);
     IView* vForList = IView::Probe(listv);
     vForList->SetLongClickable(TRUE);
     IAdapterView* aForList = IAdapterView::Probe(listv);
-    aForList->SetOnItemLongClickListener(new MyAdapterViewOnItemLongClickListener(this));
+    AutoPtr<IAdapterViewOnItemLongClickListener> avoic = new MyAdapterViewOnItemLongClickListener(this);
+    aForList->SetOnItemLongClickListener(avoic);
     AutoPtr<IWindow> window;
     dialog->GetWindow((IWindow**)&window);
     window->SetType(IWindowManagerLayoutParams::TYPE_KEYGUARD_DIALOG);
 
-    dialog->SetOnDismissListener(this);
+    dialog->SetOnDismissListener(diodl);
 
     return dialog;
 }
 
 void GlobalActions::CreateProfileDialog()
 {
-    assert(0 && "TODO");
-    // final ProfileManager profileManager = (ProfileManager) mContext
-    //         .getSystemService(Context.PROFILE_SERVICE);
+    AutoPtr<IInterface> obj;
+    mContext->GetSystemService(IContext::PROFILE_SERVICE, (IInterface**)&obj);
+    AutoPtr<IProfileManager> profileManager = IProfileManager::Probe(obj);
 
-    // final Profile[] profiles = profileManager.getProfiles();
-    // UUID activeProfile = profileManager.getActiveProfile().getUuid();
-    // final CharSequence[] names = new CharSequence[profiles.length];
+    AutoPtr<ArrayOf<IProfile*> > profiles;
+    profileManager->GetProfiles((ArrayOf<IProfile*>**)&profiles);
 
-    // int i = 0;
-    // int checkedItem = 0;
+    AutoPtr<IProfile> activeProfile;
+    profileManager->GetActiveProfile((IProfile**)&activeProfile);
+    AutoPtr<IUUID> activeUUID;
+    activeProfile->GetUuid((IUUID**)&activeUUID);
 
-    // for (Profile profile : profiles) {
-    //     if (profile.getUuid().equals(activeProfile)) {
-    //         checkedItem = i;
-    //         mChosenProfile = profile;
-    //     }
-    //     names[i++] = profile.getName();
-    // }
+    AutoPtr<ArrayOf<ICharSequence*> > names;
+    Int32 checkedItem = 0;
 
-    // final AlertDialog.Builder ab = new AlertDialog.Builder(getUiContext());
+    if (profiles) {
+        names = ArrayOf<ICharSequence*>::Alloc(profiles->GetLength());
+        String name;
+        for (Int32 i = 0; i < profiles->GetLength(); ++i) {
+            IProfile* profile = (*profiles)[i];
+            AutoPtr<IUUID> uuid;
+            profile->GetUuid((IUUID**)&uuid);
+            if (Object::Equals(activeUUID, uuid)) {
+                checkedItem = i;
+                mChosenProfile = profile;
+            }
 
-    // AlertDialog dialog = ab.setSingleChoiceItems(names, checkedItem,
-    //         new DialogInterface.OnClickListener() {
-    //             public void onClick(DialogInterface dialog, int which) {
-    //                if (which < 0)
-    //                     return;
-    //                 mChosenProfile = profiles[which];
-    //                 profileManager.setActiveProfile(mChosenProfile.getUuid());
-    //                 dialog.cancel();
-    //             }
-    //         }).create();
-    // dialog.getWindow().setType(WindowManager.LayoutParams.TYPE_SYSTEM_DIALOG);
-    // dialog.show();
+            profile->GetName(&name);
+            names->Set(i, CoreUtils::Convert(name));
+        }
+    }
+
+    AutoPtr<IAlertDialogBuilder> ab;
+    CAlertDialogBuilder::New(GetUiContext(), (IAlertDialogBuilder**)&ab);
+    AutoPtr<IDialogInterfaceOnClickListener> listener = new ProfileDialogOnClickListener(this, profiles);
+    ab->SetSingleChoiceItems(names, checkedItem, listener);
+    AutoPtr<IAlertDialog> dialog;
+    ab->Create((IAlertDialog**)&dialog);
+
+    AutoPtr<IWindow> window;
+    IDialog::Probe(dialog)->GetWindow((IWindow**)&window);
+    window->SetType(IWindowManagerLayoutParams::TYPE_SYSTEM_DIALOG);
+    IDialog::Probe(dialog)->Show();
+}
+
+
+AutoPtr<GlobalActions::Action> GlobalActions::GetScreenshotAction()
+{
+    AutoPtr<Action> action = new ScreenshotAction(this);
+    return action;
 }
 
 AutoPtr<GlobalActions::Action> GlobalActions::GetBugReportAction()
@@ -1781,47 +2098,93 @@ void GlobalActions::AddUsersToMenu(
     mContext->GetSystemService(IContext::USER_SERVICE, (IInterface**)&obj);
     AutoPtr<IUserManager> userManager = IUserManager::Probe(obj);
     Boolean isSwitchEnabled = FALSE;
-    //TODO userManager->IsUserSwitcherEnabled(&isSwitchEnabled);
-    if (isSwitchEnabled)
-    {
+    userManager->IsUserSwitcherEnabled(&isSwitchEnabled);
+    if (isSwitchEnabled) {
         AutoPtr<IList> users;
         userManager->GetUsers((IList**)&users);
+        if (users == NULL) return;
+
         AutoPtr<IUserInfo> currentUser = GetCurrentUser();
+        Int32 avatarSize;
+        AutoPtr<IResources> res;
+        mContext->GetResources((IResources**)&res);
+        res->GetDimensionPixelSize(R::dimen::global_actions_avatar_size, &avatarSize);
 
         AutoPtr<IIterator> iterator;
         users->GetIterator((IIterator**)&iterator);
         Boolean hasNext = FALSE;
+        Boolean supportST;
         while (iterator->HasNext(&hasNext), hasNext) {
             AutoPtr<IInterface> obj;
             iterator->GetNext((IInterface**)&obj);
-            AutoPtr<IUserInfo> user = IUserInfo::Probe(obj);
-            Boolean supportST;
+            IUserInfo* user = IUserInfo::Probe(obj);
             user->SupportsSwitchTo(&supportST);
-            if (supportST)
-            {
-                Int32 userId = 0;
-                user->GetId(&userId);
-                Int32 currentUserId = 0;
-                currentUser->GetId(&currentUserId);
-                Boolean isCurrentUser = currentUser == NULL
-                    ? userId == 0 : (currentUserId == userId);
-                String iconPath;
-                user->GetIconPath(&iconPath);
-                AutoPtr<IDrawable> icon;
-                if (iconPath != NULL) {
-                    Elastos::Droid::Graphics::Drawable::Drawable::CreateFromPath(iconPath, (IDrawable**)&icon);
+            Int32 userId = 0;
+            user->GetId(&userId);
+            if (supportST) {
+                Boolean isCurrentUser = FALSE;
+                if (currentUser == NULL) {
+                    isCurrentUser = userId == 0;
                 }
+                else {
+                    Int32 currentUserId = 0;
+                    currentUser->GetId(&currentUserId);
+                    isCurrentUser = (currentUserId == userId);
+                }
+
+                AutoPtr<IBitmap> rawAvatar;
+                userManager->GetUserIcon(userId, (IBitmap**)&rawAvatar);
+                if (rawAvatar == NULL) {
+                    Boolean isGuest;
+                    user->IsGuest(&isGuest);
+                    AutoPtr<IDrawable> defaultIcon;
+                    UserIcons::GetDefaultUserIcon(
+                        isGuest ? IUserHandle::USER_NULL : userId, /*light=*/ FALSE,
+                        (IDrawable**)&defaultIcon);
+                    UserIcons::ConvertToBitmap(defaultIcon, (IBitmap**)&rawAvatar);
+                }
+                AutoPtr<IDrawable> avatar;
+                CBitmapDrawable::New(res, CreateCircularClip(rawAvatar, avatarSize, avatarSize),
+                    (IDrawable**)&avatar);
+
                 String userName;
                 user->GetName(&userName);
-                String str = (userName != NULL ? userName : String("Primary"))
-                    + (isCurrentUser ? String(" \u2714") : String(""));
-                AutoPtr<ICharSequence> value;
-                CString::New(str, (ICharSequence**)&value);
+                String str = (userName != NULL ? userName : String("Primary"));
+                AutoPtr<ICharSequence> value = CoreUtils::Convert(str);
                 AutoPtr<UserSinglePressAction> switchToUser = new UserSinglePressAction(this,
-                        icon, value, userId);
+                        R::drawable::ic_lock_user, avatar, value, userId);
+                if (isCurrentUser) {
+                    mContext->GetString(R::string::global_action_current_user, &str);
+                    switchToUser->SetStatus(CoreUtils::Convert(str));
+                }
                 items->PushBack(switchToUser);
             }
         }
+    }
+}
+
+void GlobalActions::TakeScreenshot()
+{
+    AutoLock syncLock(mScreenshotLock);
+    if (mScreenshotConnection != NULL) {
+        return;
+    }
+
+    AutoPtr<IComponentName> cn;
+    CComponentName::New(
+        String("Elastos.Droid.SystemUI"),
+        String("Elastos.Droid.SystemUI.Screenshot.CTakeScreenshotService"),
+        (IComponentName**)&cn);
+    AutoPtr<IIntent> intent;
+    CIntent::New((IIntent**)&intent);
+    intent->SetComponent(cn);
+    AutoPtr<IServiceConnection> conn = new TakeScreenshotServiceConnection(this);
+    Boolean bval;
+    mContext->BindServiceAsUser(intent, conn, IContext::BIND_AUTO_CREATE,
+        UserHandle::CURRENT, &bval);
+    if (bval) {
+        mScreenshotConnection = conn;
+        mHandler->PostDelayed(mScreenshotTimeout, 10000, &bval);
     }
 }
 
@@ -1833,8 +2196,7 @@ void GlobalActions::PrepareDialog()
     AutoPtr<IWindow> window;
     mDialog->GetWindow((IWindow**)&window);
     window->SetType(IWindowManagerLayoutParams::TYPE_KEYGUARD_DIALOG);
-    if (mShowSilentToggle)
-    {
+    if (mShowSilentToggle) {
         AutoPtr<IIntentFilter> filter;
         CIntentFilter::New(IAudioManager::RINGER_MODE_CHANGED_ACTION, (IIntentFilter**)&filter);
         AutoPtr<IIntent> intent;
@@ -1849,34 +2211,21 @@ void GlobalActions::RefreshSilentMode()
         mAudioManager->GetRingerMode(&ringerMode);
         Boolean silentModeOn = ringerMode != IAudioManager::RINGER_MODE_NORMAL;
         ((ToggleAction*)mSilentModeAction.Get())->UpdateState(
-                silentModeOn ? ToggleAction::State::On : ToggleAction::State::Off);
+                silentModeOn ? ToggleAction::On : ToggleAction::Off);
     }
 }
 
-ECode GlobalActions::OnDismiss(
-    /* [in] */ IDialogInterface* dialog)
+void GlobalActions::UpdatePowerMenuActions()
 {
-    if (mShowSilentToggle)
-    {
-        ECode ec = mContext->UnregisterReceiver(mRingerModeReceiver);
-        if (FAILED(ec))
-            Logger::W(TAG, "GlobalActions::OnDismiss");
-    }
-    return NOERROR;
-}
+    AutoPtr<IContentResolver> resolver;
+    mContext->GetContentResolver((IContentResolver**)&resolver);
+    Settings::Secure::GetStringForUser(resolver,
+        ISettingsSecure::POWER_MENU_ACTIONS, UserHandle::USER_CURRENT, &mActions);
 
-ECode GlobalActions::OnClick(
-    /* [in] */ IDialogInterface* dialog,
-    /* [in] */ Int32 which)
-{
-    AutoPtr<IInterface> action;
-    mAdapter->GetItem(which, (IInterface**)&action);
-    //if (action->Probe(EIID_SilentModeTriStateAction) == NULL)
-    if (IGlobalActionsSilentModeTriStateAction::Probe(action) == NULL) {
-        dialog->Dismiss();
-    }
-    ((Action*)IGlobalActionsSilentModeTriStateAction::Probe(action))->OnPress();
-    return NOERROR;
+    Int32 ival;
+    Settings::System::GetInt32(resolver,
+        ISettingsSystem::SYSTEM_PROFILES_ENABLED, 1, &ival);
+    mProfilesEnabled = ival != 0;
 }
 
 void GlobalActions::OnAirplaneModeChanged()
@@ -1888,14 +2237,11 @@ void GlobalActions::OnAirplaneModeChanged()
 
     AutoPtr<IContentResolver> contentResolver;
     mContext->GetContentResolver((IContentResolver**)&contentResolver);
-    AutoPtr<ISettingsGlobal> settingsGlobal;
-    CSettingsGlobal::AcquireSingleton((ISettingsGlobal**)&settingsGlobal);
     Int32 value = 0;
-    Boolean airplaneModeOn = (settingsGlobal->GetInt32(
-            contentResolver,
-            ISettingsGlobal::AIRPLANE_MODE_ON,
-            0, &value), value) == 1;
-    mAirplaneState = airplaneModeOn ? ToggleAction::State::On : ToggleAction::State::Off;
+    Settings::Global::GetInt32(contentResolver,
+        ISettingsGlobal::AIRPLANE_MODE_ON, 0, &value);
+    Boolean airplaneModeOn = value == 1;
+    mAirplaneState = airplaneModeOn ? ToggleAction::On : ToggleAction::Off;
     mAirplaneModeOn->UpdateState(mAirplaneState);
 }
 
@@ -1904,27 +2250,60 @@ void GlobalActions::ChangeAirplaneModeSystemSetting(
 {
     AutoPtr<IContentResolver> contentResolver;
     mContext->GetContentResolver((IContentResolver**)&contentResolver);
-    AutoPtr<ISettingsGlobal> settingsGlobal;
-    CSettingsGlobal::AcquireSingleton((ISettingsGlobal**)&settingsGlobal);
     Boolean isSuccess = FALSE;
-    settingsGlobal->PutInt32(
-            contentResolver,
-            ISettingsGlobal::AIRPLANE_MODE_ON,
-            on ? 1 : 0, &isSuccess);
+    Settings::Global::PutInt32(contentResolver,
+        ISettingsGlobal::AIRPLANE_MODE_ON, on ? 1 : 0, &isSuccess);
     AutoPtr<IIntent> intent;
     CIntent::New(IIntent::ACTION_AIRPLANE_MODE_CHANGED, (IIntent**)&intent);
     intent->AddFlags(IIntent::FLAG_RECEIVER_REPLACE_PENDING);
     intent->PutBooleanExtra(String("state"), on);
-    AutoPtr<IUserHandleHelper> helper;
-    CUserHandleHelper::AcquireSingleton((IUserHandleHelper**)&helper);
-    AutoPtr<IUserHandle> all;
-    helper->GetALL((IUserHandle**)&all);
 
-    mContext->SendBroadcastAsUser(intent, all);
+    mContext->SendBroadcastAsUser(intent, UserHandle::ALL);
     if (!mHasTelephony) {
-        mAirplaneState = on ? ToggleAction::State::On : ToggleAction::State::Off;
+        mAirplaneState = on ? ToggleAction::On : ToggleAction::Off;
     }
 }
+
+void GlobalActions::StartQuickBoot()
+{
+    AutoPtr<IIntent> intent;
+    CIntent::New(String("org.codeaurora.action.QUICKBOOT"), (IIntent**)&intent);
+    intent->PutExtra(String("mode"), 0);
+    mContext->StartActivityAsUser(intent, UserHandle::CURRENT);
+}
+
+AutoPtr<IBitmap> GlobalActions::CreateCircularClip(
+    /* [in] */ IBitmap* input,
+    /* [in] */ Int32 width,
+    /* [in] */ Int32 height)
+{
+    if (input == NULL) return NULL;
+
+    Int32 inWidth, inHeight;
+    input->GetWidth(&inWidth);
+    input->GetHeight(&inHeight);
+    AutoPtr<IBitmap> output;
+    CBitmap::CreateBitmap(width, height, BitmapConfig_ARGB_8888, (IBitmap**)&output);
+    AutoPtr<ICanvas> canvas;
+    CCanvas::New(output, (ICanvas**)&canvas);
+    AutoPtr<IPaint> paint;
+    CPaint::New((IPaint**)&paint);
+    AutoPtr<IShader> bs;
+    CBitmapShader::New(input, ShaderTileMode_CLAMP, ShaderTileMode_CLAMP, (IShader**)&bs);
+    paint->SetShader(bs);
+    paint->SetAntiAlias(TRUE);
+    AutoPtr<IRectF> srcRect, dstRect;
+    CRectF::New(0, 0, inWidth, inHeight, (IRectF**)&dstRect);
+    CRectF::New(0, 0, width, height, (IRectF**)&dstRect);
+    AutoPtr<IMatrix> m;
+    CMatrix::New((IMatrix**)&m);
+    Boolean bval;
+    m->SetRectToRect(srcRect, dstRect, MatrixScaleToFit_CENTER, &bval);
+    canvas->SetMatrix(m);
+    canvas->DrawCircle(inWidth / 2, inHeight / 2, inWidth / 2, paint);
+    return output;
+}
+
 
 } // namespace Impl
 } // namespace Policy

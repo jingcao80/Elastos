@@ -1655,26 +1655,35 @@ ECode GridView::SetSelectionInt(
     return NOERROR;
 }
 
-Boolean GridView::OnKeyDown(
+ECode GridView::OnKeyDown(
     /* [in] */ Int32 keyCode,
-    /* [in] */ IKeyEvent* event)
+    /* [in] */ IKeyEvent* event,
+    /* [out] */ Boolean* result)
 {
-    return CommonKey(keyCode, 1, event);
+    VALIDATE_NOT_NULL(result)
+    *result = CommonKey(keyCode, 1, event);
+    return NOERROR;
 }
 
-Boolean GridView::OnKeyMultiple(
+ECode GridView::OnKeyMultiple(
     /* [in] */ Int32 keyCode,
     /* [in] */ Int32 repeatCount,
-    /* [in] */ IKeyEvent* event)
+    /* [in] */ IKeyEvent* event,
+    /* [out] */ Boolean* result)
 {
-    return CommonKey(keyCode, repeatCount, event);
+    VALIDATE_NOT_NULL(result)
+    *result = CommonKey(keyCode, repeatCount, event);
+    return NOERROR;
 }
 
-Boolean GridView::OnKeyUp(
+ECode GridView::OnKeyUp(
     /* [in] */ Int32 keyCode,
-    /* [in] */ IKeyEvent* event)
+    /* [in] */ IKeyEvent* event,
+    /* [out] */ Boolean* result)
 {
-    return CommonKey(keyCode, 1, event);
+    VALIDATE_NOT_NULL(result)
+    *result = CommonKey(keyCode, 1, event);
+    return NOERROR;
 }
 
 Boolean GridView::CommonKey(

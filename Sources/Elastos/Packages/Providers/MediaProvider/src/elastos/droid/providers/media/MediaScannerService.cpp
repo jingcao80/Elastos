@@ -183,8 +183,6 @@ void MediaScannerService::Scan(
 
 ECode MediaScannerService::OnCreate()
 {
-    Logger::I(TAG, " >> OnCreate()");
-
     AutoPtr<IInterface> obj;
     GetSystemService(IContext::POWER_SERVICE, (IInterface**)&obj);
     AutoPtr<IPowerManager> pm = IPowerManager::Probe(obj);
@@ -210,18 +208,17 @@ ECode MediaScannerService::OnStartCommand(
     /* [in] */ Int32 startId,
     /* [out] */ Int32* result)
 {
-    Logger::I(TAG, " >> OnStartCommand()");
-
     VALIDATE_NOT_NULL(result)
     *result = FALSE;
 
     while (mServiceHandler == NULL) {
-        // {    AutoLock syncLock(this);
+        {
+            AutoLock syncLock(this);
             // try {
                 Wait(100);
             // } catch (InterruptedException e) {
             // }
-        // }
+        }
     }
 
     if (intent == NULL) {
@@ -246,16 +243,15 @@ ECode MediaScannerService::OnStartCommand(
 
 ECode MediaScannerService::OnDestroy()
 {
-    Logger::I(TAG, " >> OnStartCommand()");
     // Make sure thread has started before telling it to quit.
     while (mServiceLooper == NULL) {
-        // {    AutoLock syncLock(this);
+        {
+            AutoLock syncLock(this);
             // try {
-            assert(0 && "TODO");
-                // Wait(100);
+            Wait(100);
             // } catch (InterruptedException e) {
             // }
-        // }
+        }
     }
     return mServiceLooper->Quit();
 }
@@ -308,7 +304,6 @@ ECode MediaScannerService::OnBind(
     /* [in] */ IIntent* intent,
     /* [out] */ IBinder** result)
 {
-    Logger::I(TAG, " >> OnStartCommand()");
     VALIDATE_NOT_NULL(result)
     *result = IBinder::Probe(mBinder);
     REFCOUNT_ADD(*result);

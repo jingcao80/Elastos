@@ -103,18 +103,21 @@ public:
     virtual CARAPI SetSelection(
         /* [in] */ Int32 position);
 
-    virtual CARAPI_(Boolean) OnKeyDown(
+    virtual CARAPI OnKeyDown(
         /* [in] */ Int32 keyCode,
-        /* [in] */ IKeyEvent* event);
+        /* [in] */ IKeyEvent* event,
+        /* [out] */ Boolean* res);
 
-    virtual CARAPI_(Boolean) OnKeyMultiple(
+    virtual CARAPI OnKeyUp(
+        /* [in] */ Int32 keyCode,
+        /* [in] */ IKeyEvent* event,
+        /* [out] */ Boolean* res);
+
+    virtual CARAPI OnKeyMultiple(
         /* [in] */ Int32 keyCode,
         /* [in] */ Int32 repeatCount,
-        /* [in] */ IKeyEvent* event);
-
-    virtual CARAPI_(Boolean) OnKeyUp(
-        /* [in] */ Int32 keyCode,
-        /* [in] */ IKeyEvent* event);
+        /* [in] */ IKeyEvent* event,
+        /* [out] */ Boolean* res);
 
     virtual CARAPI SetGravity(
         /* [in] */ Int32 gravity);

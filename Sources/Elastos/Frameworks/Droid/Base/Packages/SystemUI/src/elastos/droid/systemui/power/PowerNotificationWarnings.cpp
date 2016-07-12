@@ -18,7 +18,6 @@ using Elastos::Droid::App::IAlertDialog;
 using Elastos::Droid::App::IAlertDialogBuilder;
 using Elastos::Droid::App::IDialog;
 using Elastos::Droid::App::INotification;
-using Elastos::Droid::App::INotificationStyle;
 using Elastos::Droid::App::CPendingIntentHelper;
 using Elastos::Droid::App::IPendingIntent;
 using Elastos::Droid::App::IPendingIntentHelper;
@@ -92,7 +91,6 @@ ECode PowerNotificationWarnings::Receiver::OnReceive(
 {
     String action;
     intent->GetAction(&action);
-    Slogger::I(TAG, "Received %s", action.string());
     if (action.Equals(PowerNotificationWarnings::ACTION_SHOW_BATTERY_SETTINGS)) {
         mHost->DismissLowBatteryNotification();
         AutoPtr<IUserHandleHelper> uhh;
@@ -170,8 +168,8 @@ ECode PowerNotificationWarnings::MyOnDismissListener::OnDismiss(
 // PowerNotificationWarnings
 //-----------------------------------------------------------------------------------
 
-const String PowerNotificationWarnings::TAG(CPowerUI::TAG + ".Notification");
-const Boolean PowerNotificationWarnings::DEBUG = CPowerUI::DEBUG;
+const String PowerNotificationWarnings::TAG("PowerNotificationWarnings");
+const Boolean PowerNotificationWarnings::DEBUG = FALSE;
 
 const String PowerNotificationWarnings::TAG_NOTIFICATION("low_battery");
 const Int32 PowerNotificationWarnings::ID_NOTIFICATION;
@@ -211,11 +209,8 @@ const AutoPtr<IAudioAttributes> PowerNotificationWarnings::AUDIO_ATTRIBUTES = In
 
 CAR_INTERFACE_IMPL(PowerNotificationWarnings, Object, IPowerUIWarningsUI)
 
-PowerNotificationWarnings::PowerNotificationWarnings(
-    /* [in] */ IContext* context,
-    /* [in] */ IPhoneStatusBar* phoneStatusBar)
-    : mContext(context)
-    , mBatteryLevel(0)
+PowerNotificationWarnings::PowerNotificationWarnings()
+    : mBatteryLevel(0)
     , mBucket(0)
     , mScreenOffTime(0L)
     , mShowing(0)
@@ -224,20 +219,27 @@ PowerNotificationWarnings::PowerNotificationWarnings(
     , mWarning(FALSE)
     , mPlaySound(FALSE)
     , mInvalidCharger(FALSE)
+{}
+
+ECode PowerNotificationWarnings::constructor(
+    /* [in] */ IContext* context,
+    /* [in] */ IPhoneStatusBar* phoneStatusBar)
 {
+    mContext = context;
     AutoPtr<IInterface> obj;
     context->GetSystemService(IContext::NOTIFICATION_SERVICE, (IInterface**)&obj);
     mNoMan = INotificationManager::Probe(obj);
     AutoPtr<IInterface> obj2;
     context->GetSystemService(IContext::POWER_SERVICE, (IInterface**)&obj2);
     mPowerMan = IPowerManager::Probe(obj2);
-    mReceiver->Init();
     mStartSaverMode = new MyOnClickListener(this);
 
     CHandler::New((IHandler**)&mHandler);
     mReceiver = new Receiver(this);
+    mReceiver->Init();
     mOpenBatterySettings = Settings(IIntent::ACTION_POWER_USAGE_SUMMARY);
     mOpenSaverSettings = Settings(ISettings::ACTION_BATTERY_SAVER_SETTINGS);
+    return NOERROR;
 }
 
 ECode PowerNotificationWarnings::Update(
@@ -387,7 +389,7 @@ void PowerNotificationWarnings::ShowWarningNotification()
         mPlaySound = FALSE;
     }
     AutoPtr<INotification> n;
-    INotificationStyle::Probe(nb)->Build((INotification**)&n);
+    nb->Build((INotification**)&n);
     AutoPtr<IRemoteViews> headsUpContentView;
     n->GetHeadsUpContentView((IRemoteViews**)&headsUpContentView);
     if (headsUpContentView != NULL) {
@@ -433,7 +435,7 @@ void PowerNotificationWarnings::ShowSaverNotification()
         nb->SetContentIntent(PendingActivity(mOpenSaverSettings));
     }
     AutoPtr<INotification> n;
-    INotificationStyle::Probe(nb)->Build((INotification**)&n);
+    nb->Build((INotification**)&n);
     AutoPtr<IUserHandleHelper> uhh;
     CUserHandleHelper::AcquireSingleton((IUserHandleHelper**)&uhh);
     AutoPtr<IUserHandle> uh;
@@ -647,6 +649,12 @@ void PowerNotificationWarnings::SetSaverMode(
 {
     Boolean b;
     IIPowerManager::Probe(mPowerMan)->SetPowerSaveMode(mode, &b);
+}
+
+ECode PowerNotificationWarnings::Dump(
+    /* [in] */ IPrintWriter* pw)
+{
+    return NOERROR;
 }
 
 } // namespace Power

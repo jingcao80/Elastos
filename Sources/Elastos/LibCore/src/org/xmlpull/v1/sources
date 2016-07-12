@@ -16,6 +16,7 @@ INCLUDES += $(MAKEDIR)/../../../../inc/org/xml/sax/helpers
 INCLUDES += $(MAKEDIR)/../../../../inc/elastos
 INCLUDES += $(MAKEDIR)/../../../../inc/elastos/core
 INCLUDES += $(MAKEDIR)/../../../../inc/elastos/net
+INCLUDES += $(MAKEDIR)/../../../../inc/elastos/utility
 
 VPATH := $(MAKEDIR)/sax2
 

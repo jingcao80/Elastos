@@ -1,6 +1,15 @@
 
 #include "XmlPullParserFactory.h"
 #include "CXmlPullParserFactory.h"
+#include "CPathClassLoader.h"
+#include "CArrayList.h"
+#include <elastos/utility/logging/Logger.h>
+
+using Elastos::Core::IClassLoader;
+using Elastos::Core::CPathClassLoader;
+using Elastos::Utility::IIterator;
+using Elastos::Utility::CArrayList;
+using Elastos::Utility::Logging::Logger;
 
 namespace Org {
 namespace Xmlpull {
@@ -10,6 +19,23 @@ const String XmlPullParserFactory::PROPERTY_NAME("org.xmlpull.v1.XmlPullParserFa
 const String XmlPullParserFactory::RESOURCE_NAME("/META-INF/services/org.xmlpull.v1.XmlPullParserFactory");
 
 CAR_INTERFACE_IMPL(XmlPullParserFactory, Object, IXmlPullParserFactory)
+
+
+ECode XmlPullParserFactory::constructor()
+{
+    CArrayList::New((IArrayList**)&mParserClasses);
+    CArrayList::New((IArrayList**)&mSerializerClasses);
+
+    AutoPtr<IClassLoader> cl;
+    CPathClassLoader::New(String("/system/lib/Elastos.CoreLibrary.eco"), NULL, (IClassLoader**)&cl);
+    AutoPtr<IClassInfo> ci;
+    cl->LoadClass(String("Org.Kxml2.IO.CKXmlParser"), (IClassInfo**)&ci);
+    mParserClasses->Add(ci);
+    ci = NULL;
+    cl->LoadClass(String("Org.Kxml2.IO.CKXmlSerializer"), (IClassInfo**)&ci);
+    mSerializerClasses->Add(ci);
+    return NOERROR;
+}
 
 ECode XmlPullParserFactory::SetFeature(
     /* [in] */ const String& name,
@@ -91,29 +117,28 @@ ECode XmlPullParserFactory::GetParserInstance(
     VALIDATE_NOT_NULL(parser)
     *parser = NULL;
 
-    assert(0 && "TODO");
-    // ArrayList<Exception> exceptions = null;
 
-    // if (parserClasses != null && !parserClasses.isEmpty()) {
-    //     exceptions = new ArrayList<Exception>();
-    //     for (Object o : parserClasses) {
-    //         try {
-    //             if (o != null) {
-    //                 Class<?> parserClass = (Class<?>) o;
-    //                 return (XmlPullParser) parserClass.newInstance();
-    //             }
-    //         } catch (InstantiationException e) {
-    //             exceptions.add(e);
-    //         } catch (IllegalAccessException e) {
-    //             exceptions.add(e);
-    //         } catch (ClassCastException e) {
-    //             exceptions.add(e);
-    //         }
-    //     }
-    // }
+    if (mParserClasses) {
+        AutoPtr<IIterator> it;
+        mParserClasses->GetIterator((IIterator**)&it);
+        Boolean hasNext;
+        while (it->HasNext(&hasNext), hasNext) {
+            AutoPtr<IInterface> obj;
+            it->GetNext((IInterface**)&obj);
+            if (obj != NULL) {
+                AutoPtr<IClassInfo> ci = IClassInfo::Probe(ci);
+                AutoPtr<IInterface> object;
+                ECode ec = ci->CreateObject((IInterface**)&object);
+                if (FAILED(ec)) continue;
+                *parser = IXmlPullParser::Probe(object);
+                REFCOUNT_ADD(*parser)
+                return NOERROR;
+            }
+        }
+    }
 
-    // throw newInstantiationException("Invalid parser class list", exceptions);
-    return NOERROR;
+    Logger::E("XmlPullParserFactory", "Invalid parser class list.");
+    return E_FAIL;
 }
 
 ECode XmlPullParserFactory::GetSerializerInstance(

@@ -26,6 +26,7 @@ using Elastos::Droid::Os::Runnable;
 using Elastos::Droid::SystemUI::Power::IPowerUIWarningsUI;
 using Elastos::Droid::SystemUI::StatusBar::Phone::IPhoneStatusBar;
 using Elastos::Droid::SystemUI::StatusBar::Phone::ISystemUIDialog;
+using Elastos::IO::IPrintWriter;
 
 namespace Elastos {
 namespace Droid {
@@ -61,6 +62,8 @@ private:
         : public Runnable
     {
     public:
+        TO_STRING_IMPL("PowerNotificationWarnings.MyOnClickRunnable")
+
         MyOnClickRunnable(
             /* [in] */ PowerNotificationWarnings* host);
 
@@ -76,6 +79,8 @@ private:
         , public IDialogInterfaceOnClickListener
     {
     public:
+        TO_STRING_IMPL("PowerNotificationWarnings.MyOnClickListener")
+
         CAR_INTERFACE_DECL()
 
         MyOnClickListener(
@@ -95,6 +100,8 @@ private:
         , public IDialogInterfaceOnDismissListener
     {
     public:
+        TO_STRING_IMPL("PowerNotificationWarnings.MyOnDismissListener")
+
         CAR_INTERFACE_DECL()
 
         MyOnDismissListener(
@@ -111,7 +118,9 @@ private:
 public:
     CAR_INTERFACE_DECL()
 
-    PowerNotificationWarnings(
+    PowerNotificationWarnings();
+
+    CARAPI constructor(
         /* [in] */ IContext* context,
         /* [in] */ IPhoneStatusBar* phoneStatusBar);
 
@@ -145,6 +154,8 @@ public:
     // @Override
     CARAPI ShowInvalidChargerWarning();
 
+    CARAPI Dump(
+        /* [in] */ IPrintWriter* pw);
 private:
     CARAPI_(void) UpdateNotification();
 

@@ -76,9 +76,13 @@ private:
         , public IDialogInterfaceOnDismissListener
     {
     public:
+        TO_STRING_IMPL("ShutdownThread::CloseDialogReceiver")
+
         CAR_INTERFACE_DECL()
 
-        CloseDialogReceiver(
+        CloseDialogReceiver();
+
+        CARAPI constructor(
             /* [in] */IContext* context);
 
         //@Override
@@ -90,17 +94,8 @@ private:
         CARAPI OnDismiss(
             /* [in] */ IDialogInterface* unused);
 
-        CARAPI ToString(
-            /* [out] */ String* info)
-        {
-            VALIDATE_NOT_NULL(info);
-            *info = "ShutdownThread::CloseDialogReceiver: ";
-            info->AppendFormat("%p", this);
-            return NOERROR;
-        }
-
     public:
-        AutoPtr<IDialog> mDialog;
+        IDialog* mDialog;
 
     private:
         AutoPtr<IContext> mContext;
@@ -133,6 +128,8 @@ private:
         : public BroadcastReceiver
     {
     public:
+        TO_STRING_IMPL("ShutdownThread::ActionDoneBroadcastReceiver")
+
         ActionDoneBroadcastReceiver(
             /* [in] */ ShutdownThread* host);
 
@@ -140,15 +137,6 @@ private:
         CARAPI OnReceive(
             /* [in] */ IContext* context,
             /* [in] */ IIntent* intent);
-
-        CARAPI ToString(
-            /* [out] */ String* info)
-        {
-            VALIDATE_NOT_NULL(info);
-            *info = "ShutdownThread::ActionDoneBroadcastReceiver: ";
-            info->AppendFormat("%p", this);
-            return NOERROR;
-        }
 
     private:
         ShutdownThread* mHost;
@@ -171,7 +159,8 @@ private:
         Int64 mEndTime;
     };
 
-    class ShutdownMusicHandler : public Handler
+    class ShutdownMusicHandler
+        : public Handler
     {
     private:
         class OnCompletionListener
@@ -209,6 +198,8 @@ private:
     };
 
 public:
+    CARAPI constructor();
+
     /**
      * Request a clean shutdown, waiting for subsystems to clean up their
      * state etc.  Must be called from a Looper thread in which its UI
@@ -301,6 +292,8 @@ private:
     static CARAPI_(Boolean) IsSilentMode();
 
     static CARAPI_(void) ShowShutdownAnimation();
+
+    static CARAPI_(AutoPtr<ShutdownThread>) GetInstance();
 
 public:
     // Provides shutdown assurance in case the system_server is killed

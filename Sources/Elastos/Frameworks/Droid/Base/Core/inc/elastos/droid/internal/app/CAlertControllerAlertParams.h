@@ -113,7 +113,7 @@ private:
             /* [in] */ Int64 id);
 
     private:
-        CAlertControllerAlertParams* mAlertParams;
+        AutoPtr<CAlertControllerAlertParams> mAlertParams;
         AutoPtr<IAlertController> mAlertController;
         AutoPtr<IListView> mListView;
         Boolean mIsClick;
