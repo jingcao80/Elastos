@@ -2132,7 +2132,7 @@ void Settings::WriteLPr()
             AutoPtr< ArrayOf<Int32> > gids = pkg->GetGids();
 
             // Avoid any application that has a space in its path.
-            if (dataPath.IndexOf(" ") >= 0 || val < IProcess::FIRST_APPLICATION_UID)
+            if (dataPath.IndexOf(" ") >= 0)
                 continue;
 
             // we store on each line the following information for now:
