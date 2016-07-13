@@ -121,8 +121,8 @@ private:
      */
     AutoPtr<IClassLoader> mParent;
 
-    HashMap<String, IClassInfo*> mClassTable;
-    AutoPtr<IModuleInfo> mModuleInfo;
+    HashMap<String, AutoPtr<IClassInfo> > mClassTable;
+    HashMap<String, AutoPtr<IModuleInfo> > mModuleTable;
 };
 
 // /**

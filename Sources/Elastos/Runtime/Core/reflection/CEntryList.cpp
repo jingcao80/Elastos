@@ -82,7 +82,9 @@ ECode CEntryList::InitElemList()
                 aliasDir = getAliasDirAddr(mBase, mClsMod->mAliasDirs, i);
                 mObjElement[j].mIndex = i;
                 mObjElement[j].mName = adjustNameAddr(mBase, aliasDir->mName);
-                if (!mHTIndexs.Put(mObjElement[j].mName, j)) {
+                String strKey(mObjElement[j].mName);
+                UInt32 key = strKey.GetHashCode();
+                if (!mHTIndexs.Put((PVoid)&key, j)) {
                     return E_OUT_OF_MEMORY;
                 }
                 j++;
@@ -105,7 +107,8 @@ ECode CEntryList::InitElemList()
             else {
                 strKey = mObjElement[i].mName;
             }
-            if (!mHTIndexs.Put(const_cast<char*>(strKey.string()), i)) {
+            UInt32 key = strKey.GetHashCode();
+            if (!mHTIndexs.Put((PVoid)&key, i)) {
                 return E_OUT_OF_MEMORY;
             }
         }
@@ -128,8 +131,10 @@ ECode CEntryList::InitElemList()
                         ((MethodDescriptor *)mObjElement[n].mDesc)->mName);
                 mObjElement[n].mNamespaceOrSignature = adjustNameAddr(mBase,
                         ((MethodDescriptor *)mObjElement[n].mDesc)->mSignature);
-                String strKey = String(mObjElement[n].mName) + String(mObjElement[n].mNamespaceOrSignature);
-                if (!mHTIndexs.Put(const_cast<char*>(strKey.string()), n)) {
+                String strKey(mObjElement[n].mName);
+                strKey += mObjElement[n].mNamespaceOrSignature;
+                UInt32 key = strKey.GetHashCode();
+                if (!mHTIndexs.Put((PVoid)&key, n)) {
                     return E_OUT_OF_MEMORY;
                 }
             }
@@ -218,7 +223,8 @@ ECode CEntryList::InitElemList()
         else {
             strKey = mObjElement[i].mName;
         }
-        if (!mHTIndexs.Put(const_cast<char*>(strKey.string()), i)) {
+        UInt32 key = strKey.GetHashCode();
+        if (!mHTIndexs.Put((PVoid)&key, i)) {
             return E_OUT_OF_MEMORY;
         }
     }
@@ -240,7 +246,8 @@ ECode CEntryList::AcquireObjByName(
         return ec;
     }
 
-    UInt32* index = mHTIndexs.Get((PVoid)name.string());
+    UInt32 key = name.GetHashCode();
+    UInt32* index = mHTIndexs.Get((PVoid)&key);
     if (index == NULL) {
         return E_DOES_NOT_EXIST;
     }

@@ -116,7 +116,7 @@ Boolean HashTable<T, type>::keycmp(
     Int32 ret = 0;
     switch (type) {
         case Type_UInt32:
-            ret = memcmp(e->mKey, key, sizeof(Int32));
+            ret = memcmp(e->mKey, key, sizeof(UInt32));
             break;
         case Type_UInt64:
             ret = memcmp(e->mKey, key, sizeof(UInt64));
@@ -171,7 +171,7 @@ Int32 HashTable<T, type>::keylen(
     Int32 len = 0;
     switch (type) {
         case Type_UInt32:
-            len = sizeof(Int32);
+            len = sizeof(UInt32);
             break;
         case Type_UInt64:
             len = sizeof(UInt64);

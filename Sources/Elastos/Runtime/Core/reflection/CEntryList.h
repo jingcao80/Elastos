@@ -83,7 +83,7 @@ private:
     IFIndexEntry*       mIFList;
     UInt32              mListCount;
 
-    HashTable<UInt32, Type_String> mHTIndexs;
+    HashTable<UInt32, Type_UInt32> mHTIndexs;
 };
 
 #endif // __CENTRYLIST_H__
