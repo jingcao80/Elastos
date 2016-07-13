@@ -255,7 +255,7 @@ AutoPtr<IPreference> UserDictionaryList::CreateUserDictionaryPreference(
         newPref->SetTitle(CoreUtils::Convert(name));
     }
     else {
-        if (String("").Equals(locale)) {
+        if (locale.Equals("")) {
             String str;
             GetString(R::string::user_dict_settings_all_languages, &str);
             newPref->SetTitle(CoreUtils::Convert(str));

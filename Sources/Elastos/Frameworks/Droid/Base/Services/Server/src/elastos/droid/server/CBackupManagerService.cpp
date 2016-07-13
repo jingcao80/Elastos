@@ -1348,7 +1348,7 @@ CBackupManagerService::PerformFullBackupTask::PerformFullBackupTask(
     // the user use a nonempty encryption password as well.  if one is supplied
     // in the UI we use that, but if the UI was left empty we fall back to the
     // current backup password (which was supplied by the user as well).
-    if (encryptPassword == NULL || String("").Equals(encryptPassword)) {
+    if (encryptPassword.IsNullOrEmpty()) {
         mEncryptPassword = curPassword;
     }
     else {
@@ -3469,10 +3469,10 @@ ECode CBackupManagerService::PerformFullRestoreTask::ReadPaxExtendedHeader(
         String valStr(tempData, eol-value-1);
         //String valStr = new String(data, value+1, eol-value-1, "UTF-8");
 
-        if (String("path").Equals(keyStr)) {
+        if (keyStr.Equals("path")) {
             info->mPath = valStr;
         }
-        else if (String("size").Equals(keyStr)) {
+        else if (keyStr.Equals("size")) {
             StringUtils::ParseInt64(valStr, &(info->mSize));
         }
         else {

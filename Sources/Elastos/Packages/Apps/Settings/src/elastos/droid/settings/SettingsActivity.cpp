@@ -1033,9 +1033,9 @@ String SettingsActivity::GetStartingFragmentClass(
     thisKlass->GetNamespace(&klassNamespace);
     if (intentClass.Equals(klassNamespace + "." + klassName)) return String(NULL);
 
-    if (String("Elastos.Droid.Settings.ManageApplications").Equals(intentClass)
-            || String("Elastos.Droid.Settings.RunningServices").Equals(intentClass)
-            || String("Elastos.Droid.Settings.Applications.StorageUse").Equals(intentClass)) {
+    if (intentClass.Equals("Elastos.Droid.Settings.ManageApplications")
+            || intentClass.Equals("Elastos.Droid.Settings.RunningServices")
+            || intentClass.Equals("Elastos.Droid.Settings.Applications.StorageUse")) {
         // Old names of manage apps.
         intentClass = "Elastos.Droid.Settings.Applications.ManageApplications";
     }
@@ -1202,7 +1202,7 @@ ECode SettingsActivity::LoadCategoriesFromResource(
 
     String nodeName;
     IXmlPullParser::Probe(parser)->GetName(&nodeName);
-    if (!String("dashboard-categories").Equals(nodeName)) {
+    if (!nodeName.Equals("dashboard-categories")) {
         String desc;
         IXmlPullParser::Probe(parser)->GetPositionDescription(&desc);
         Slogger::E(TAG, "XML document must start with <preference-categories> tag; found %s at %s",
@@ -1228,7 +1228,7 @@ ECode SettingsActivity::LoadCategoriesFromResource(
 
         nodeName = String(NULL);
         IXmlPullParser::Probe(parser)->GetName(&nodeName);
-        if (String("dashboard-category").Equals(nodeName)) {
+        if (nodeName.Equals("dashboard-category")) {
             AutoPtr<CDashboardCategory> category;
             CDashboardCategory::NewByFriend((CDashboardCategory**)&category);
 

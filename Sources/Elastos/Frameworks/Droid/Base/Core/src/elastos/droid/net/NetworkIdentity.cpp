@@ -176,7 +176,7 @@ ECode NetworkIdentity::ScrubSubscriberId(
 
     using Elastos::Core::Math;
 
-    if (String("eng").Equals(Build::TYPE)) {
+    if (Build::TYPE.Equals("eng")) {
         *result = subscriberId;
     }
     else if (!(subscriberId.IsNull())) {

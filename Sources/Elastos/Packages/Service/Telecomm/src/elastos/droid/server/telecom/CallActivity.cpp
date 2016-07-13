@@ -89,7 +89,7 @@ ECode CallActivity::VerifyCallAction(
     intent->GetComponent((IComponentName**)&component);
     String className;
     component->GetClassName(&className);
-    if (String("CallActivity").Equals(className)) {
+    if (className.Equals("CallActivity")) {
         // If we were launched directly from the CallActivity, not one of its more privileged
         // aliases, then make sure that only the non-privileged actions are allowed.
         String action;

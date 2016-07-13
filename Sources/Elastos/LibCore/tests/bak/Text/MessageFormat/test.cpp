@@ -208,11 +208,11 @@ int CTest::test_formatLjava_lang_ObjectLjava_lang_StringBufferLjava_text_FieldPo
     String outstr;
     outbuf->ToString(&outstr);
     // assertEquals("Wrong result", "54", buffer.toString());
-    assert(String("54").Equals(outstr));
+    assert(outstr.Equals("54"));
     format->FormatObjects(objlst, buffer, sfp, (IStringBuffer**)&outbuf);
     outbuf->ToString(&outstr);
     // assertEquals("Wrong result", "5454", buffer.toString());
-    assert(String("5454").Equals(outstr));
+    assert(outstr.Equals("5454"));
 
     buffer = new StringBuffer();
     format->ApplyPattern(String("{0,choice,0#zero|1#one '{1,choice,2#two {2,time}}'}"));

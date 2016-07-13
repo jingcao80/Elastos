@@ -5030,18 +5030,18 @@ ECode CPhoneStatusBar::DispatchDemoCommand(
         if (notifications != NULL) {
             String visible;
             args->GetString(String("visible"), &visible);
-            Int32 vis = mDemoMode && String("FALSE").Equals(visible) ? IView::INVISIBLE : IView::VISIBLE;
+            Int32 vis = mDemoMode && visible.Equals("FALSE") ? IView::INVISIBLE : IView::VISIBLE;
             notifications->SetVisibility(vis);
         }
     }
     if (command.Equals(COMMAND_BARS)) {
         String mode;
         args->GetString(String("mode"), &mode);
-        Int32 barMode = String("opaque").Equals(mode) ? BarTransitions::MODE_OPAQUE :
-                String("translucent").Equals(mode) ? BarTransitions::MODE_TRANSLUCENT :
-                String("semi-transparent").Equals(mode) ? BarTransitions::MODE_SEMI_TRANSPARENT :
-                String("transparent").Equals(mode) ? BarTransitions::MODE_TRANSPARENT :
-                String("warning").Equals(mode) ? BarTransitions::MODE_WARNING :
+        Int32 barMode = mode.Equals("opaque") ? BarTransitions::MODE_OPAQUE :
+                mode.Equals("translucent") ? BarTransitions::MODE_TRANSLUCENT :
+                mode.Equals("semi-transparent") ? BarTransitions::MODE_SEMI_TRANSPARENT :
+                mode.Equals("transparent") ? BarTransitions::MODE_TRANSPARENT :
+                mode.Equals("warning") ? BarTransitions::MODE_WARNING :
                 -1;
         if (barMode != -1) {
             Boolean animate = TRUE;

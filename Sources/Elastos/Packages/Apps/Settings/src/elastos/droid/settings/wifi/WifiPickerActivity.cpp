@@ -33,10 +33,10 @@ ECode WifiPickerActivity::GetIntent(
 Boolean WifiPickerActivity::IsValidFragment(
     /* [in] */ const String& fragmentName)
 {
-    if (String("Elastos.Droid.Settings.Wifi.CWifiSettings").Equals(fragmentName)
-            || String("Elastos.Droid.Settings.Wifi.P2p.CWifiP2pSettings").Equals(fragmentName)
-            || String("Elastos.Droid.Settings.Wifi.CSavedAccessPointsWifiSettings").Equals(fragmentName)
-            || String("Elastos.Droid.Settings.Wifi.CAdvancedWifiSettings").Equals(fragmentName)) return TRUE;
+    if (fragmentName.Equals("Elastos.Droid.Settings.Wifi.CWifiSettings")
+            || fragmentName.Equals("Elastos.Droid.Settings.Wifi.P2p.CWifiP2pSettings")
+            || fragmentName.Equals("Elastos.Droid.Settings.Wifi.CSavedAccessPointsWifiSettings")
+            || fragmentName.Equals("Elastos.Droid.Settings.Wifi.CAdvancedWifiSettings")) return TRUE;
     return FALSE;
 }
 

@@ -475,7 +475,7 @@ Boolean ResourceExtractor::ShouldSkipPakExtraction()
 {
     // Must call setMandatoryPaksToExtract before beginning resource extraction.
     assert(sMandatoryPaks != NULL);
-    return sMandatoryPaks->GetLength() == 1 && String("").Equals((*sMandatoryPaks)[0]);
+    return sMandatoryPaks->GetLength() == 1 && (*sMandatoryPaks)[0].Equals("");
 }
 
 } // namespace Browser

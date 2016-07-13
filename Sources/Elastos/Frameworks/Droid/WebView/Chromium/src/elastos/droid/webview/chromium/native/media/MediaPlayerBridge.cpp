@@ -492,7 +492,7 @@ Boolean MediaPlayerBridge::SetDataUriDataSource(
     String headerContent = header.Substring(5);
     //AutoPtr< ArrayOf<String> > headerInfo = headerContent.Split(";");
     //if (headerInfo->GetLength() != 2) return FALSE;
-    //if (!String("base64").Equals((*headerInfo)[1])) return FALSE;
+    //if (!(*headerInfo)[1].Equals("base64")) return FALSE;
     //TODO pay attention here
     Int32 scStop = headerContent.IndexOf(";");
     if (scStop == -1) return FALSE;
@@ -502,7 +502,7 @@ Boolean MediaPlayerBridge::SetDataUriDataSource(
     {
         codec = codec.Substring(0, scStop);
     }
-    if (!String("base64").Equals(codec)) return FALSE;
+    if (!codec.Equals("base64")) return FALSE;
 
     mLoadDataUriTask = new LoadDataUriTask(this, context, data);
     //TODO is this OK, the params no use here

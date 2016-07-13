@@ -7088,7 +7088,7 @@ Boolean WebViewChromium::IsBase64Encoded(
     // ==================before translated======================
     // return "base64".equals(encoding);
 
-    return String("base64").Equals(encoding);
+    return encoding.Equals("base64");
 }
 
 ECode WebViewChromium::LoadUrlOnUiThread(

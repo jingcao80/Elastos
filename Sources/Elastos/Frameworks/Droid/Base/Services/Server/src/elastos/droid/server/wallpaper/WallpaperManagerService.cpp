@@ -2128,7 +2128,7 @@ ECode WallpaperManagerService::LoadSettingsLocked(
             if (type == IXmlPullParser::START_TAG) {
                 String tag;
                 ec = parser->GetName(&tag);
-                if (String("wp").Equals(tag)) {
+                if (tag.Equals("wp")) {
                     String attriValue1;
                     ec = parser->GetAttributeValue(String(NULL), String("width"), &attriValue1);
                     wallpaper->mWidth = StringUtils::ParseInt32(attriValue1);
@@ -2365,7 +2365,7 @@ ECode WallpaperManagerService::SettingsRestored()
         else {
             // If there's a wallpaper name, we use that.  If that can't be loaded, then we
             // use the default.
-            if (String("").Equals(_wallpaper->mName)) {
+            if (_wallpaper->mName.Equals("")) {
                 if (DEBUG) Slogger::V(TAG, "settingsRestored: name is empty");
                 success = TRUE;
             }
@@ -2403,7 +2403,7 @@ ECode WallpaperManagerService::RestoreNamedResourceLocked(
 {
     VALIDATE_NOT_NULL(isRestored)
     AutoPtr<WallpaperData> wallpaper = (WallpaperData*)_wallpaper;
-    if (wallpaper->mName.GetLength() > 4 && String("res:").Equals(wallpaper->mName.Substring(0, 4))) {
+    if (wallpaper->mName.GetLength() > 4 && wallpaper->mName.Substring(0, 4).Equals("res:")) {
         String resName = wallpaper->mName.Substring(4);
 
         String pkg(NULL);

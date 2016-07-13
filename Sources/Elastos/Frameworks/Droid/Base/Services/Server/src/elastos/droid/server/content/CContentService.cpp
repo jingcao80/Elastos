@@ -154,7 +154,7 @@ void CContentService::ObserverNode::DumpLocked(
 
     if (!mChildren.IsEmpty()) {
         if (innerName.IsNull()) {
-            if (String("").Equals(name)) {
+            if (name.Equals("")) {
                 innerName = mName;
             }
             else {

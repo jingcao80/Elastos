@@ -143,7 +143,7 @@ void UsbDeviceManager::MyUEventObserver::OnUEvent(
     if (!state.IsNull()) {
         mHost->mHandler->UpdateState(state);
     }
-    else if (String("START").Equals(accessory)) {
+    else if (accessory.Equals("START")) {
         if (UsbDeviceManager::DEBUG) {
             Slogger::D(UsbDeviceManager::TAG, "got accessory start");
         }
@@ -326,15 +326,15 @@ void UsbDeviceManager::UsbHandler::UpdateState(
 {
     Int32 connected, configured;
 
-    if (String("DISCONNECTED").Equals(state)) {
+    if (state.Equals("DISCONNECTED")) {
         connected = 0;
         configured = 0;
     }
-    else if (String("CONNECTED").Equals(state)) {
+    else if (state.Equals("CONNECTED")) {
         connected = 1;
         configured = 0;
     }
-    else if (String("CONFIGURED").Equals(state)) {
+    else if (state.Equals("CONFIGURED")) {
         connected = 1;
         configured = 1;
     }
@@ -892,7 +892,7 @@ void UsbDeviceManager::UsbHandler::UpdateAdbNotification()
         CSystemProperties::AcquireSingleton((ISystemProperties**)&sysProp);
         String value;
         sysProp->Get(String("persist.adb.notify"), &value);
-        if (String("0").Equals(value)) return;
+        if (value.Equals("0")) return;
 
         if (!mAdbNotificationShown) {
             AutoPtr<IResources> r;
@@ -1010,7 +1010,7 @@ ECode UsbDeviceManager::Init(
     CSystemProperties::AcquireSingleton((ISystemProperties**)&sysProp);
     String value;
     sysProp->Get(String("ro.adb.secure"), &value);
-    if (String("1").Equals(value)) {
+    if (value.Equals("1")) {
         mDebuggingManager = new UsbDebuggingManager(context);
     }
 }

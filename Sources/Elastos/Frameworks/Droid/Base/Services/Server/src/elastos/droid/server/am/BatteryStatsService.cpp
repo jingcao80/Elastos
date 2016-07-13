@@ -1273,11 +1273,11 @@ Int32 BatteryStatsService::DoEnableOrDisable(
         DumpHelp(pw);
         return -1;
     }
-    if (String("full-wake-history").Equals((*args)[i]) || String("full-history").Equals((*args)[i])) {
+    if ((*args)[i].Equals("full-wake-history") || (*args)[i].Equals("full-history")) {
         AutoLock lock(mStats);
         mStats->SetRecordAllHistoryLocked(enable);
     }
-    else if (String("no-auto-reset").Equals((*args)[i])) {
+    else if ((*args)[i].Equals("no-auto-reset")) {
         AutoLock lock(mStats);
         mStats->SetNoAutoReset(enable);
     }
@@ -1321,10 +1321,10 @@ ECode BatteryStatsService::Dump(
                 useCheckinFormat = TRUE;
                 isRealCheckin = TRUE;
             }
-            else if (String("--history").Equals(arg)) {
+            else if (arg.Equals("--history")) {
                 flags |= IBatteryStats::DUMP_HISTORY_ONLY;
             }
-            else if (String("--history-start").Equals(arg)) {
+            else if (arg.Equals("--history-start")) {
                 flags |= IBatteryStats::DUMP_HISTORY_ONLY;
                 i++;
                 if (i >= args->GetLength()) {
@@ -1335,14 +1335,14 @@ ECode BatteryStatsService::Dump(
                 historyStart = StringUtils::ParseInt64((*args)[i]);
                 writeData = TRUE;
             }
-            else if (String("-c").Equals(arg)) {
+            else if (arg.Equals("-c")) {
                 useCheckinFormat = TRUE;
                 flags |= IBatteryStats::DUMP_INCLUDE_HISTORY;
             }
-            else if (String("--unplugged").Equals(arg)) {
+            else if (arg.Equals("--unplugged")) {
                 flags |= IBatteryStats::DUMP_UNPLUGGED_ONLY;
             }
-            else if (String("--charged").Equals(arg)) {
+            else if (arg.Equals("--charged")) {
                 flags |= IBatteryStats::DUMP_CHARGED_ONLY;
             }
             else if (arg.Equals(String("--reset"))) {
@@ -1357,7 +1357,7 @@ ECode BatteryStatsService::Dump(
                 pw->Print(String("Battery stats written."));
                 noOutput = TRUE;
             }
-            else if (String("--enable").Equals(arg) || String("enable").Equals(arg)) {
+            else if (arg.Equals("--enable") || arg.Equals("enable")) {
                 i = DoEnableOrDisable(pw, i, args, TRUE);
                 if (i < 0) {
                     return NOERROR;
@@ -1365,7 +1365,7 @@ ECode BatteryStatsService::Dump(
                 pw->Println(String("Enabled: ") + (*args)[i]);
                 return NOERROR;
             }
-            else if (String("--disable").Equals(arg) || String("disable").Equals(arg)) {
+            else if (arg.Equals("--disable") || arg.Equals("disable")) {
                 i = DoEnableOrDisable(pw, i, args, FALSE);
                 if (i < 0) {
                     return NOERROR;

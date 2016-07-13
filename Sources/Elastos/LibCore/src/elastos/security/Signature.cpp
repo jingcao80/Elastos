@@ -453,7 +453,7 @@ ECode Signature::InitVerify(
                 i->GetNext((IInterface**)&strObj);
                 String str;
                 ICharSequence::Probe(strObj)->ToString(&str);
-                if (String("2.5.29.15").Equals(str)) {
+                if (str.Equals("2.5.29.15")) {
                     //KeyUsage OID = 2.5.29.15
                     critical = TRUE;
                     break;

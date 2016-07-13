@@ -136,7 +136,7 @@ ECode CSkbContainer::constructor(
     CSystemProperties::AcquireSingleton((ISystemProperties**)&sp);
     String temp;
     sp->Get(String("ro.kernel.qemu"), &temp);
-    if (String("1").Equals(temp)) {
+    if (temp.Equals("1")) {
         mYBiasCorrection = 0;
     }
     else {

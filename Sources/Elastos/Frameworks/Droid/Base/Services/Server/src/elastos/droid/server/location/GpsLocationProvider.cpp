@@ -1713,14 +1713,14 @@ ECode GpsLocationProvider::SendExtraCommand(
     Int64 identity = Binder::ClearCallingIdentity();
     *result = FALSE;
 
-    if (String("delete_aiding_data").Equals(command)) {
+    if (command.Equals("delete_aiding_data")) {
         *result = DeleteAidingData(extras);
     }
-    else if (String("force_time_injection").Equals(command)) {
+    else if (command.Equals("force_time_injection")) {
         SendMessage(INJECT_NTP_TIME, 0, NULL);
         *result = TRUE;
     }
-    else if (String("force_xtra_injection").Equals(command)) {
+    else if (command.Equals("force_xtra_injection")) {
         if (mSupportsXtra) {
             XtraDownloadRequest();
             *result = TRUE;
@@ -2592,13 +2592,13 @@ Int32 GpsLocationProvider::TranslateToApnIpType(
     /* [in] */ const String& ipProtocol,
     /* [in] */ const String& apn)
 {
-    if (String("IP").Equals(ipProtocol)) {
+    if (ipProtocol.Equals("IP")) {
         return APN_IPV4;
     }
-    if (String("IPV6").Equals(ipProtocol)) {
+    if (ipProtocol.Equals("IPV6")) {
         return APN_IPV6;
     }
-    if (String("IPV4V6").Equals(ipProtocol)) {
+    if (ipProtocol.Equals("IPV4V6")) {
         return APN_IPV4V6;
     }
 

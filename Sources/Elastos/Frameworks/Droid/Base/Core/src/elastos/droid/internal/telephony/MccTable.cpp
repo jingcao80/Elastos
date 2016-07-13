@@ -361,7 +361,7 @@ AutoPtr<ILocale> MccTable::GetLocaleForLanguageCountry(
 
         // Only consider locales with both language and country.
         String lan, ct;
-        if (l == NULL || String("und").Equals((l->GetLanguage(&lan), lan)) ||
+        if (l == NULL || (l->GetLanguage(&lan), lan.Equals("und")) ||
                 lan.IsEmpty() || (l->GetCountry(&ct), ct).IsEmpty()) {
             continue;
         }

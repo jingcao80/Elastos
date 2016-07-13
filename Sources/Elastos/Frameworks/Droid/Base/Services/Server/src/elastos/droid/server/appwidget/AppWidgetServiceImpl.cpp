@@ -1277,7 +1277,7 @@ ECode AppWidgetServiceImpl::BackupRestoreController::RestoreWidgetState(
                 if (type == IXmlPullParser::START_TAG) {
                     String tag;
                     parser->GetName(&tag);
-                    if (String("ws").Equals(tag)) {
+                    if (tag.Equals("ws")) {
                         String version;
                         parser->GetAttributeValue(String(NULL), String("version"), &version);
                         Int32 versionNumber = StringUtils::ParseInt32(version);
@@ -1293,7 +1293,7 @@ ECode AppWidgetServiceImpl::BackupRestoreController::RestoreWidgetState(
                             return NOERROR;
                         }
                     }
-                    else if (String("p").Equals(tag)) {
+                    else if (tag.Equals("p")) {
                         String pkg;
                         parser->GetAttributeValue(String(NULL), String("pkg"), &pkg);
                         String cl;
@@ -1316,7 +1316,7 @@ ECode AppWidgetServiceImpl::BackupRestoreController::RestoreWidgetState(
                         }
                         restoredProviders->Add(TO_IINTERFACE(p));
                     }
-                    else if (String("h").Equals(tag)) {
+                    else if (tag.Equals("h")) {
                         String pkg;
                         parser->GetAttributeValue(String(NULL), String("pkg"), &pkg);
                         Int32 uid = mOwner->GetUidForPackage(pkg, userId);
@@ -1336,7 +1336,7 @@ ECode AppWidgetServiceImpl::BackupRestoreController::RestoreWidgetState(
                             Slogger::I(TAG, "   host[%d]: {%s}", size, TO_CSTR(h->mId));
                         }
                     }
-                    else if (String("g").Equals(tag)) {
+                    else if (tag.Equals("g")) {
                         String strTmp;
                         parser->GetAttributeValue(String(NULL), String("id"), &strTmp);
                         Int32 restoredId = StringUtils::ParseInt32(strTmp, 16);
@@ -4725,7 +4725,7 @@ AutoPtr<AppWidgetServiceImpl::Provider> AppWidgetServiceImpl::ParseProviderInfoX
 
         String nodeName;
         IXmlPullParser::Probe(parser)->GetName(&nodeName);
-        if (!String("appwidget-provider").Equals(nodeName)) {
+        if (!nodeName.Equals("appwidget-provider")) {
             Slogger::W(TAG, "Meta-data does not start with appwidget-provider tag for"
                 " AppWidget provider %s for user %d", TO_CSTR(providerId->mComponentName), providerId->mUid);
             return NULL;
@@ -5262,7 +5262,7 @@ Int32 AppWidgetServiceImpl::ReadProfileStateFromFileLocked(
         if (type == IXmlPullParser::START_TAG) {
             String tag;
             ec = parser->GetName(&tag);
-            if (String("gs").Equals(tag)) {
+            if (tag.Equals("gs")) {
                 String attributeValue;
                 parser->GetAttributeValue(nullStr, String("version"), &attributeValue);
                 //try {
@@ -5272,7 +5272,7 @@ Int32 AppWidgetServiceImpl::ReadProfileStateFromFileLocked(
                 //    version = 0;
                 //}
             }
-            else if (String("p").Equals(tag)) {
+            else if (tag.Equals("p")) {
                 legacyProviderIndex++;
                 String pkg;
                 parser->GetAttributeValue(nullStr, String("pkg"), &pkg);
@@ -5321,7 +5321,7 @@ Int32 AppWidgetServiceImpl::ReadProfileStateFromFileLocked(
                         ? StringUtils::ParseInt32(tagAttribute, 16) : legacyProviderIndex;
                 provider->mTag = providerTag;
             }
-            else if (String("h").Equals(tag)) {
+            else if (tag.Equals("h")) {
                 legacyHostIndex++;
                 AutoPtr<Host> host = new Host();
                 // TODO: do we need to check that this package has the same signature
@@ -5351,7 +5351,7 @@ Int32 AppWidgetServiceImpl::ReadProfileStateFromFileLocked(
                     mHosts->Add(TO_IINTERFACE(host));
                 }
             }
-            else if (String("b").Equals(tag)) {
+            else if (tag.Equals("b")) {
                 String packageName;
                 parser->GetAttributeValue(nullStr, String("packageName"), &packageName);
                 Int32 uid = GetUidForPackage(packageName, userId);
@@ -5363,7 +5363,7 @@ Int32 AppWidgetServiceImpl::ReadProfileStateFromFileLocked(
                     ICollection::Probe(mPackagesWithBindWidgetPermission)->Add(packageId);
                 }
             }
-            else if (String("g").Equals(tag)) {
+            else if (tag.Equals("g")) {
                 AutoPtr<Widget> widget = new Widget();
                 String attrValue;
                 parser->GetAttributeValue(nullStr, String("id"), &attrValue);

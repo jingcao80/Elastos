@@ -472,7 +472,7 @@ ECode DigestScheme::CreateDigestHeader(
         }
         String name;
         INameValuePair::Probe(param)->GetName(&name);
-        Boolean noQuotes = String("nc").Equals(name) || String("qop").Equals(name);
+        Boolean noQuotes = name.Equals("nc") || name.Equals("qop");
         AutoPtr<ICharArrayBuffer> b;
         IHeaderValueFormatter::Probe(BasicHeaderValueFormatter::DEFAULT)->FormatNameValuePair(
                 buffer, INameValuePair::Probe(param), !noQuotes, (ICharArrayBuffer**)&b);

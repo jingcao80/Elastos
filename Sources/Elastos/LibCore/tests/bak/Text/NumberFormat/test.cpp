@@ -59,7 +59,7 @@ PFL
 PFL_EX("object : %p" , object)
     nf->FormatObject(object, &result);
 PFL_EX("result : %s" , result.string())
-    assert(String("123").Equals(result));
+    assert(result.Equals("123"));
     return 0;
 }
 
@@ -133,12 +133,12 @@ int CTest::test_getIntegerInstance_ar(int argc, char* argv[])
     String str("");
     df->ToPattern(&str);
     PFL_EX("#,##0.###;#,##0.###-  ==  %s " ,str.string())
-    assert(String("#,##0.###;#,##0.###-").Equals(str));
+    assert(str.Equals("#,##0.###;#,##0.###-"));
 
     AutoPtr<IDecimalFormat> df2 = reinterpret_cast<IDecimalFormat *>(integerFormat->Probe(EIID_INumberFormat));
     df2->ToPattern(&str);
     PFL_EX("#,##0;#,##0- == %s" , str.string())
-    assert(String("#,##0;#,##0-").Equals(str));
+    assert(str.Equals("#,##0;#,##0-"));
 
     return 0;
 }
@@ -177,9 +177,9 @@ int CTest::test_10333(int argc, char* argv[])
     nfh->GetPercentInstanceEx(Locale_US, (INumberFormat**)&nf);
     String str("");
     nf->FormatDouble(0.15, &str);
-    assert(String("15%").Equals(str));
+    assert(str.Equals("15%"));
     nf->FormatDouble(15, &str);
-    assert(String("1,500%").Equals(str));
+    assert(str.Equals("1,500%"));
 /*
         try {
             nf.format("15");
@@ -202,7 +202,7 @@ int CTest::test_10514(int argc, char* argv[])
     ASSERT_SUCCEEDED(ec);
     ec = pTCF->FormatDouble(Elastos::Core::Math::DOUBLE_NEGATIVE_INFINITY , &fms);
     ASSERT_SUCCEEDED(ec);
-    assert(String("Tiny Apple").Equals(fms));
+    assert(fms.Equals("Tiny Apple"));
 }
 
 int CTest::test_10522(int argc, char* argv[])

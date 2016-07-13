@@ -119,19 +119,19 @@ ECode UsbSettingsManager::DeviceFilter::Read(
         parser->GetAttributeValue(i, &attrValue);
         Int32 value = StringUtils::ParseInt32(attrValue);
 
-        if (String("vendor-id").Equals(name)) {
+        if (name.Equals("vendor-id")) {
             vendorId = value;
         }
-        else if (String("product-id").Equals(name)) {
+        else if (name.Equals("product-id")) {
             productId = value;
         }
-        else if (String("class").Equals(name)) {
+        else if (name.Equals("class")) {
             deviceClass = value;
         }
-        else if (String("subclass").Equals(name)) {
+        else if (name.Equals("subclass")) {
             deviceSubclass = value;
         }
-        else if (String("protocol").Equals(name)) {
+        else if (name.Equals("protocol")) {
             deviceProtocol = value;
         }
     }
@@ -348,13 +348,13 @@ ECode UsbSettingsManager::AccessoryFilter::Read(
         String value;
         parser->GetAttributeValue(i, &value);
 
-        if (String("manufacturer").Equals(name)) {
+        if (name.Equals("manufacturer")) {
             manufacturer = value;
         }
-        else if (String("model").Equals(name)) {
+        else if (name.Equals("model")) {
             model = value;
         }
-        else if (String("version").Equals(name)) {
+        else if (name.Equals("version")) {
             version = value;
         }
     }

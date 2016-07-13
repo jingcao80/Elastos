@@ -594,7 +594,7 @@ Boolean NotificationData::ShowNotificationEvenIfUnprovisioned(
     data->GetBoolean(INotification::EXTRA_ALLOW_DURING_SETUP, &tmp);
     String name;
     sbn->GetPackageName(&name);
-    return String("android").Equals(name) && tmp;
+    return name.Equals("android") && tmp;
 }
 
 void NotificationData::Dump(
@@ -664,7 +664,7 @@ Boolean NotificationData::IsSystemNotification(
 {
     String sbnPackage;
     sbn->GetPackageName(&sbnPackage);
-    return String("android").Equals(sbnPackage) || String("Elastos.Droid.SystemUI").Equals(sbnPackage);
+    return sbnPackage.Equals("android") || sbnPackage.Equals("Elastos.Droid.SystemUI");
 }
 
 } // namespace StatusBar

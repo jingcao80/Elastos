@@ -847,7 +847,7 @@ ECode ProfileManagerService::LoadXml(
     xpp->Next(&event);
     String active;
     String _name;
-    while (event != IXmlPullParser::END_TAG || !String("profiles").Equals((xpp->GetName(&_name), _name))) {
+    while (event != IXmlPullParser::END_TAG || !(xpp->GetName(&_name), _name).Equals("profiles")) {
         if (event == IXmlPullParser::START_TAG) {
             String name;
             xpp->GetName(&name);

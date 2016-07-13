@@ -36,54 +36,54 @@ int CTest::test_en_US(int argc, char* argv[]) {
     locdatahep->Get(usloc , (ILocaleData**)&l);
     AutoPtr<ArrayOf<String> > amPm;
     l->GetAmPm((ArrayOf<String> **)&amPm);
-    assert(String("AM").Equals((*amPm)[0]));
+    assert((*amPm)[0].Equals("AM"));
 
     l->GetEras((ArrayOf<String> **)&amPm);
-    assert(String("BC").Equals((*amPm)[0]));
+    assert((*amPm)[0].Equals("BC"));
 
     l->GetLongMonthNames((ArrayOf<String> **)&amPm);
-    assert(String("January").Equals((*amPm)[0]));
+    assert((*amPm)[0].Equals("January"));
 
     l->GetShortMonthNames((ArrayOf<String> **)&amPm);
-    assert(String("Jan").Equals((*amPm)[0]));
+    assert((*amPm)[0].Equals("Jan"));
 
     l->GetTinyMonthNames((ArrayOf<String> **)&amPm);
-    assert(String("J").Equals((*amPm)[0]));
+    assert((*amPm)[0].Equals("J"));
 
     l->GetLongStandAloneMonthNames((ArrayOf<String> **)&amPm);
-    assert(String("January").Equals((*amPm)[0]));
+    assert((*amPm)[0].Equals("January"));
 
     l->GetShortStandAloneMonthNames((ArrayOf<String> **)&amPm);
-    assert(String("Jan").Equals((*amPm)[0]));
+    assert((*amPm)[0].Equals("Jan"));
 
     l->GetTinyStandAloneMonthNames((ArrayOf<String> **)&amPm);
-    assert(String("J").Equals((*amPm)[0]));
+    assert((*amPm)[0].Equals("J"));
 
     l->GetLongWeekdayNames((ArrayOf<String> **)&amPm);
-    assert(String("Sunday").Equals((*amPm)[1]));
+    assert((*amPm)[1].Equals("Sunday"));
 
     l->GetShortWeekdayNames((ArrayOf<String> **)&amPm);
-    assert(String("Sun").Equals((*amPm)[1]));
+    assert((*amPm)[1].Equals("Sun"));
 
     l->GetTinyWeekdayNames((ArrayOf<String> **)&amPm);
-    assert(String("S").Equals((*amPm)[1]));
+    assert((*amPm)[1].Equals("S"));
 
     l->GetLongStandAloneWeekdayNames((ArrayOf<String> **)&amPm);
-    assert(String("Sunday").Equals((*amPm)[1]));
+    assert((*amPm)[1].Equals("Sunday"));
 
     l->GetShortStandAloneWeekdayNames((ArrayOf<String> **)&amPm);
-    assert(String("Sun").Equals((*amPm)[1]));
+    assert((*amPm)[1].Equals("Sun"));
 
     l->GetTinyStandAloneWeekdayNames((ArrayOf<String> **)&amPm);
-    assert(String("S").Equals((*amPm)[1]));
+    assert((*amPm)[1].Equals("S"));
 
     String yesterday, today,tomorrow;
     l->GetYesterday(&yesterday);
     l->GetToday(&today);
     l->GetTomorrow(&tomorrow);
-    assert(String("Yesterday").Equals(yesterday));
-    assert(String("Today").Equals(today));
-    assert(String("Tomorrow").Equals(tomorrow));
+    assert(yesterday.Equals("Yesterday"));
+    assert(today.Equals("Today"));
+    assert(tomorrow.Equals("Tomorrow"));
 }
 
 int CTest::test_de_DE(int argc, char* argv[]) {
@@ -95,9 +95,9 @@ int CTest::test_de_DE(int argc, char* argv[]) {
     l->GetYesterday(&yesterday);
     l->GetToday(&today);
     l->GetTomorrow(&tomorrow);
-    assert(String("Gestern").Equals(yesterday));
-    assert(String("Heute").Equals(today));
-    assert(String("Morgen").Equals(tomorrow));
+    assert(yesterday.Equals("Gestern"));
+    assert(today.Equals("Heute"));
+    assert(tomorrow.Equals("Morgen"));
 }
 
 int CTest::test_cs_CZ(int argc, char* argv[]) {
@@ -108,18 +108,18 @@ int CTest::test_cs_CZ(int argc, char* argv[]) {
 
     AutoPtr<ArrayOf<String> > amPm;
     l->GetLongMonthNames((ArrayOf<String> **)&amPm);
-    assert(String("ledna").Equals((*amPm)[0]));
+    assert((*amPm)[0].Equals("ledna"));
     l->GetShortMonthNames((ArrayOf<String> **)&amPm);
-    assert(String("Led").Equals((*amPm)[0]));
+    assert((*amPm)[0].Equals("Led"));
     l->GetTinyMonthNames((ArrayOf<String> **)&amPm);
-    assert(String("1").Equals((*amPm)[0]));
+    assert((*amPm)[0].Equals("1"));
 
     l->GetLongStandAloneMonthNames((ArrayOf<String> **)&amPm);
-    assert(String("leden").Equals((*amPm)[0]));
+    assert((*amPm)[0].Equals("leden"));
     l->GetShortStandAloneMonthNames((ArrayOf<String> **)&amPm);
-    assert(String("1.").Equals((*amPm)[0]));
+    assert((*amPm)[0].Equals("1."));
     l->GetTinyStandAloneMonthNames((ArrayOf<String> **)&amPm);
-    assert(String("l").Equals((*amPm)[0]));
+    assert((*amPm)[0].Equals("l"));
 }
 
 int CTest::test_ru_RU(int argc, char* argv[]) {
@@ -130,17 +130,17 @@ int CTest::test_ru_RU(int argc, char* argv[]) {
 
     AutoPtr<ArrayOf<String> > amPm;
     l->GetLongWeekdayNames((ArrayOf<String> **)&amPm);
-    assert(String("胁芯褋泻褉械褋械薪褜械").Equals((*amPm)[1]));
+    assert((*amPm)[1].Equals("胁芯褋泻褉械褋械薪褜械"));
     l->GetShortWeekdayNames((ArrayOf<String> **)&amPm);
-    assert(String("胁褋").Equals((*amPm)[1]));
+    assert((*amPm)[1].Equals("胁褋"));
     l->GetTinyWeekdayNames((ArrayOf<String> **)&amPm);
-    assert(String("袙").Equals((*amPm)[1]));
+    assert((*amPm)[1].Equals("袙"));
 
     // // Russian stand-alone weekday names get an initial capital.
     l->GetLongStandAloneWeekdayNames((ArrayOf<String> **)&amPm);
-    assert(String("袙芯褋泻褉械褋械薪褜械").Equals((*amPm)[1]));
+    assert((*amPm)[1].Equals("袙芯褋泻褉械褋械薪褜械"));
     l->GetShortStandAloneWeekdayNames((ArrayOf<String> **)&amPm);
-    assert(String("胁褋").Equals((*amPm)[1]));
+    assert((*amPm)[1].Equals("胁褋"));
     l->GetTinyStandAloneMonthNames((ArrayOf<String> **)&amPm);
-    assert(String("袙").Equals((*amPm)[1]));
+    assert((*amPm)[1].Equals("袙"));
 }

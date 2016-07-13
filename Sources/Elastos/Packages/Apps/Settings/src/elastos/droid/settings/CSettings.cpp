@@ -10,7 +10,7 @@ CAR_OBJECT_IMPL(CSettings)
 Boolean CSettings::AppOpsSummaryActivity::IsValidFragment(
     /* [in] */ const String& className)
 {
-    if (String("Elastos.Droid.Settings.Applications.AppOpsSummary").Equals(className)) {
+    if (className.Equals("Elastos.Droid.Settings.Applications.AppOpsSummary")) {
         return TRUE;
     }
     return SettingsActivity::IsValidFragment(className);

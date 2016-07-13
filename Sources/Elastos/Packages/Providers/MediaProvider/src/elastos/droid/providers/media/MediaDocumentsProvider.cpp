@@ -391,7 +391,7 @@ void MediaDocumentsProvider::OnMediaStoreDelete(
     /* [in] */ Int32 type,
     /* [in] */ Int64 id)
 {
-    if (!String("external").Equals(volumeName)) return;
+    if (!volumeName.Equals("external")) return;
 
     AutoPtr<IUri> uri;
     AutoPtr<IDocumentsContract> dc;
@@ -775,7 +775,7 @@ ECode MediaDocumentsProvider::OpenDocument(
     AutoPtr<Ident> ident;
     GetIdentForDocId(docId, (Ident**)&ident);
 
-    if (!String("r").Equals(mode)) {
+    if (!mode.Equals("r")) {
         Logger::E(TAG, "Media is read-only");
         return E_ILLEGAL_ARGUMENT_EXCEPTION;
         // throw new IllegalArgumentException("Media is read-only");

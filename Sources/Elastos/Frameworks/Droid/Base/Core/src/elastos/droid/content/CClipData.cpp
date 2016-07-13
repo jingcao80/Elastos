@@ -115,7 +115,7 @@ ECode CClipData::NewUri(
     AutoPtr< ArrayOf<String> > mimeTypes;
     String scheme;
     uri->GetScheme(&scheme);
-    if (String("content").Equals(scheme)) {
+    if (scheme.Equals("content")) {
         String realType;
         resolver->GetType(uri, &realType);
         resolver->GetStreamTypes(uri, String("*/*"), (ArrayOf<String>**)&mimeTypes);

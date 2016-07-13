@@ -483,7 +483,7 @@ ECode Provider::PutService(
     }
     String type;
     s->GetType(&type);
-    if (String("Provider").Equals(type)) { // Provider service type cannot be added
+    if (type.Equals("Provider")) { // Provider service type cannot be added
         return NOERROR;
     }
     ServicesChanged();

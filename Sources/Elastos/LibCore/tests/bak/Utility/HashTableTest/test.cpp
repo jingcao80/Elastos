@@ -508,7 +508,7 @@ PFL
     initial = ICharSequence::Probe(result);
     String str;
     initial->ToString(&str);
-    assert(String("initial").Equals(str));
+    assert(str.Equals("initial"));
     // } catch (NoSuchElementException e) {
     //     exception = true;
     // }

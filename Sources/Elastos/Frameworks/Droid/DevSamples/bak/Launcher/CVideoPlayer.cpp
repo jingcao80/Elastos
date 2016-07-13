@@ -37,7 +37,7 @@ ECode CVideoPlayer::OnCreate(
     String spec;
     String scheme;
     data->GetScheme(&scheme) ;
-    if (String("vnd.youtube").Equals(scheme)) {
+    if (scheme.Equals("vnd.youtube")) {
         String ssp;
         data->GetSchemeSpecificPart(&ssp);
         String id = ssp.Substring(0, ssp.IndexOf('?'));

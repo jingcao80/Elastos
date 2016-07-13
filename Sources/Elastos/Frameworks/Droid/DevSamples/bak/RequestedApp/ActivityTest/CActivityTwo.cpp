@@ -86,7 +86,7 @@ Slogger::D("CActivityTwo", "===============================OnCreate===========1"
     intent->GetType(&type);
 Slogger::D("CActivityTwo", "===============================OnCreate===========2");
     if (IIntent::ACTION_SEND.Equals(action) && type != NULL) {
-        if (String("text/plain").Equals(type)) {
+        if (type.Equals("text/plain")) {
             HandleSendText(intent); // Handle text being sent
         } else if (type.StartWith("image/")) {
             // HandleSendImage(intent); // Handle single image being sent

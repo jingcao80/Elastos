@@ -72,7 +72,7 @@ ECode ResourceRewriter::RewriteRValues(
 
         // The resources are always called com.android.webview even if the manifest has had the
         // package renamed.
-        if (String("com.android.webview").Equals(name)) {
+        if (name.Equals("com.android.webview")) {
             packageIdentifiers->KeyAt(i, &id);
 
             // TODO: We should use jarjar to remove the redundant R classes here, but due

@@ -524,7 +524,8 @@ ECode CNetworkManagementService::constructor(
     AutoPtr<ISystemProperties> sysProp;
     CSystemProperties::AcquireSingleton((ISystemProperties**)&sysProp);
     String value;
-    if (sysProp->Get(String("ro.product.device"), &value), String("simulator").Equals(value)) {
+    sysProp->Get(String("ro.product.device"), &value);
+    if (value.Equals("simulator")) {
         mConnector = NULL;
         mThread = NULL;
         mDaemonHandler = NULL;
@@ -536,8 +537,11 @@ ECode CNetworkManagementService::constructor(
     // the network actually went inactive.  (It might be nice to still do this,
     // but I don't want to do it through the power manager because that pollutes the
     // battery stats history with pointless noise.)
-    //PowerManager pm = (PowerManager)context.getSystemService(Context.POWER_SERVICE);
-    AutoPtr<IPowerManagerWakeLock> wl; //pm.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, NETD_TAG);
+    AutoPtr<IInterface> obj;
+    context->GetSystemService(IContext::POWER_SERVICE, (IInterface**)&obj);
+    AutoPtr<IPowerManager> pm = IPowerManager::Probe(obj);
+    AutoPtr<IPowerManagerWakeLock> wl;
+    pm->NewWakeLock(IPowerManager::PARTIAL_WAKE_LOCK, NETD_TAG, (IPowerManagerWakeLock**)&wl);
 
     //Waiting for NativeDaemonConnector
     mConnector = new NativeDaemonConnector(
@@ -552,7 +556,7 @@ ECode CNetworkManagementService::constructor(
     psl->constructor(ISubscriptionManager::DEFAULT_SUB_ID, looper);
     mPhoneStateListener = psl;
 
-    AutoPtr<IInterface> obj;
+    obj = NULL;
     context->GetSystemService(IContext::TELEPHONY_SERVICE, (IInterface**)&obj);
     AutoPtr<ITelephonyManager> tm = ITelephonyManager::Probe(obj);
     if (tm != NULL) {
@@ -602,7 +606,7 @@ ECode CNetworkManagementService::RegisterObserver(
     /* [in] */ IINetworkManagementEventObserver* observer)
 {
     FAIL_RETURN(mContext->EnforceCallingOrSelfPermission(
-        Elastos::Droid::Manifest::permission::CONNECTIVITY_INTERNAL/*CONNECTIVITY_INTERNAL*/, TAG));
+        Elastos::Droid::Manifest::permission::CONNECTIVITY_INTERNAL, TAG));
     Boolean result;
     return mObservers->Register(observer, &result);
 }
@@ -611,7 +615,7 @@ ECode CNetworkManagementService::UnregisterObserver(
     /* [in] */ IINetworkManagementEventObserver* observer)
 {
     FAIL_RETURN(mContext->EnforceCallingOrSelfPermission(
-        Elastos::Droid::Manifest::permission::CONNECTIVITY_INTERNAL/*CONNECTIVITY_INTERNAL*/, TAG));
+        Elastos::Droid::Manifest::permission::CONNECTIVITY_INTERNAL, TAG));
     Boolean result;
     return mObservers->Unregister(observer, &result);
 }

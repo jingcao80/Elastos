@@ -97,8 +97,8 @@ static void ThreadAndroidPolicyMakeKey()
 
 const String CStrictMode::TAG("StrictMode");
 const Boolean CStrictMode::LOG_V = Logger::IsLoggable(TAG, Logger::VERBOSE);
-const Boolean CStrictMode::IS_USER_BUILD = String("user").Equals(Build::TYPE);
-const Boolean CStrictMode::IS_ENG_BUILD = String("eng").Equals(Build::TYPE);
+const Boolean CStrictMode::IS_USER_BUILD = Build::TYPE.Equals("user");
+const Boolean CStrictMode::IS_ENG_BUILD = Build::TYPE.Equals("eng");
 const Int64 CStrictMode::MIN_LOG_INTERVAL_MS = 1000;
 const Int64 CStrictMode::MIN_DIALOG_INTERVAL_MS = 30000;
 const Int32 CStrictMode::MAX_SPAN_TAGS = 20;

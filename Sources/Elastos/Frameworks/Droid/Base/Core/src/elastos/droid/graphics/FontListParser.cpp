@@ -187,7 +187,7 @@ ECode FontListParser::ReadFamily(
 
             String value;
             FAIL_RETURN(parser->GetAttributeValue(String(NULL), String("style"), &value));
-            Boolean isItalic = String("italic").Equals(value);
+            Boolean isItalic = value.Equals("italic");
             String filename;
             FAIL_RETURN(parser->NextText(&filename));
             String fullFilename = prefix + filename;

@@ -361,7 +361,7 @@ ECode CInstallAppProgress::OnCreate(
 
     String scheme;
     mPackageURI->GetScheme(&scheme);
-    if (scheme != NULL && !String("file").Equals(scheme) && !String("package").Equals(scheme)) {
+    if (scheme != NULL && !scheme.Equals("file") && !scheme.Equals("package")) {
         mInstallFlowAnalytics->SetFlowFinished(InstallFlowAnalytics::RESULT_FAILED_UNSUPPORTED_SCHEME);
         //throw new IllegalArgumentException("unexpected scheme " + scheme);
         return E_ILLEGAL_ARGUMENT_EXCEPTION;
@@ -527,7 +527,7 @@ ECode CInstallAppProgress::InitView()
     AutoPtr<PackageUtil::AppSnippet> as;
     String scheme;
     mPackageURI->GetScheme(&scheme);
-    if (String("package").Equals(scheme)) {
+    if (scheme.Equals("package")) {
 
         AutoPtr<ICharSequence> charSequenceTmp;
         pm->GetApplicationLabel(mAppInfo, (ICharSequence**)&charSequenceTmp);
@@ -602,7 +602,7 @@ ECode CInstallAppProgress::InitView()
 
     //--: PackageInstallObserver observer = new PackageInstallObserver();
     //--: mPackageURI->GetScheme(&scheme);
-    if (String("package").Equals(scheme)) {
+    if (scheme.Equals("package")) {
         //try {
             String packageName;
             IPackageItemInfo::Probe(mAppInfo)->GetPackageName(&packageName);

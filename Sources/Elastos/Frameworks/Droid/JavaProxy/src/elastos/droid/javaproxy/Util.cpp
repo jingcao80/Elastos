@@ -3647,7 +3647,7 @@ Boolean Util::GetElBundle(
                             String itemClassName = GetClassName(env, jParcelItem);
                             // Logger::E("GetElBundle", "GetElBundle(); item in arrayOf type:%s", itemClassName.string());
 
-                            if (String("android.content.Intent").Equals(itemClassName)){
+                            if (itemClassName.Equals("android.content.Intent")){
                                 AutoPtr<IIntent> intent;
                                 Util::GetElIntent(env, jParcelItem, (IIntent**)&intent);
                                 AutoPtr<IParcelable> pracelable = IParcelable::Probe(intent);

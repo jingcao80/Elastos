@@ -539,7 +539,7 @@ Int32 AccessibilityInjector::GetAxsUrlParameterValue()
             INameValuePair* param = INameValuePair::Probe(obj);
             String name;
             param->GetName(&name);
-            if (String("axs").Equals(name)) {
+            if (name.Equals("axs")) {
                 String value;
                 param->GetValue(&value);
                 return StringUtils::ParseInt32(value);

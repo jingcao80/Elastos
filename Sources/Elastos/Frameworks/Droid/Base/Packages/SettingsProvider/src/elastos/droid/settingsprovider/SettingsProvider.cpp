@@ -682,7 +682,7 @@ void SettingsProvider::SendNotify(
 
     String notify;
     uri->GetQueryParameter(String("notify"), &notify);
-    if (notify.IsNull() || String("true").Equals(notify)) {
+    if (notify.IsNull() || notify.Equals("true")) {
         Int32 notifyTarget = isGlobal ? IUserHandle::USER_ALL : userHandle;
         Int64 oldId = Binder::ClearCallingIdentity();
         // try {

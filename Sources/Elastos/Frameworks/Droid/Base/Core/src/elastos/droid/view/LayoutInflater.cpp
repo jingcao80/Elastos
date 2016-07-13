@@ -32,6 +32,8 @@ using Elastos::Droid::Os::EIID_IHandlerCallback;
 using Elastos::Droid::App::LoadedPkg;
 using Elastos::Droid::Widget::CBlinkLayout;
 using Elastos::Droid::Widget::IFrameLayout;
+using Elastos::Core::ISystem;
+using Elastos::Core::CSystem;
 using Elastos::Core::ICharSequence;
 using Elastos::Core::CString;
 using Elastos::IO::ICloseable;
@@ -50,6 +52,7 @@ namespace Droid {
 namespace View {
 
 static const Boolean DEBUG = FALSE;
+static Int64 sTotalCreateViewTime = 0;
 
 #define LAYOUT_INFLATOR_CATCH_EXCEPTION1(expr, whereInfo) \
     do { \
@@ -553,6 +556,11 @@ ECode LayoutInflater::Inflate(
     VALIDATE_NOT_NULL(view)
     *view = NULL;
 
+    // AutoPtr<ISystem> sys;
+    // CSystem::AcquireSingleton((ISystem**)&sys);
+    // Int64 startTime;
+    // sys->GetCurrentTimeMillis(&startTime);
+
     AutoLock lock(mConstructorArgsLock);
     AutoPtr<IAttributeSet> attrs = Xml::AsAttributeSet(parser);
     AutoPtr<IContext> lastContext = IContext::Probe((*mConstructorArgs)[0]);
@@ -660,6 +668,15 @@ _EXIT_:
 
     mConstructorArgs->Set(0, lastContext);
     mConstructorArgs->Set(1, NULL);
+
+    // Int64 now;
+    // sys->GetCurrentTimeMillis(&now);
+    // Slogger::D(TAG, " ======================= Inflate: %s, cost: %lld s and %lld ms.",
+    //     TO_CSTR(result), (now - startTime) / 1000, (now - startTime) % 1000);
+    // sTotalCreateViewTime += (now - startTime);
+    // Slogger::D(TAG, " ======================= Inflate total cost: %lld s and %lld ms.",
+    //     sTotalCreateViewTime / 1000, sTotalCreateViewTime % 1000);
+
     return NOERROR;
 }
 
@@ -983,7 +1000,7 @@ ECode LayoutInflater::RInflate(
         else if (TAG_TAG.Equals(name)) {
             FAIL_RETURN(ParseViewTag(parser, parent, attrs));
         }
-        else if (String(TAG_INCLUDE).Equals(name)) {
+        else if (name.Equals(TAG_INCLUDE)) {
             Int32 d;
             FAIL_RETURN(parser->GetDepth(&d));
             if (d == 0) {

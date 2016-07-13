@@ -341,7 +341,7 @@ ECode CWallpaperInfo::constructor(
 
     String nodeName;
     p->GetName(&nodeName);
-    if (!String("wallpaper").Equals(nodeName)) {
+    if (!nodeName.Equals("wallpaper")) {
         Slogger::E(TAG, "Meta-data does not start with wallpaper tag");
         parser->Close();
         return E_XML_PULL_PARSER_EXCEPTION;

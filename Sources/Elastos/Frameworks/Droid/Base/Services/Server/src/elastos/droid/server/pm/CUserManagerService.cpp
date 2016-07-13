@@ -1037,7 +1037,7 @@ void CUserManagerService::UpgradeIfNecessaryLock()
         assert(user != NULL);
         String temp;
         user->GetName(&temp);
-        if (String("Primary").Equals(temp)) {
+        if (temp.Equals("Primary")) {
             AutoPtr<IResources> resources;
             mContext->GetResources((IResources**)&resources);
             resources->GetString(R::string::owner_name, &temp);

@@ -78,7 +78,7 @@ AutoPtr<HashMap<String, String> > Operators::InitList()
                 break;
             }
 
-            if (!String("spnOverride").Equals(name)) {
+            if (!name.Equals("spnOverride")) {
                 break;
             }
 

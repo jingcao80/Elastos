@@ -1313,7 +1313,7 @@ void CPackageManagerService::ActivityIntentResolver::AddActivity(
     List<AutoPtr<PackageParser::ActivityIntentInfo> >::Iterator it;
     for (it = a->mIntents.Begin(); it != a->mIntents.End(); ++it) {
         AutoPtr<PackageParser::ActivityIntentInfo> intent = *it;
-        if (!systemApp && intent->GetPriority() > 0 && String("activity").Equals(type)) {
+        if (!systemApp && intent->GetPriority() > 0 && type.Equals("activity")) {
             intent->SetPriority(0);
 //             Log.w(TAG, "Package " + a.info.applicationInfo.packageName + " has activity "
 //                     + a.className + " with priority > 0, forcing to 0");
@@ -4352,7 +4352,7 @@ ECode CPackageManagerService::constructor(
     String value;
     sysProp->Get(String("ro.build.type"), &value);
     Boolean dexopt;
-    mLazyDexOpt = String("eng").Equals(value) || (String("userdebug").Equals(value) &&
+    mLazyDexOpt = value.Equals("eng") || (value.Equals("userdebug") &&
             (sysProp->GetBoolean(String("persist.sys.lazy.dexopt"), FALSE, &dexopt), dexopt));
     CDisplayMetrics::New((IDisplayMetrics**)&mMetrics);
     mSettings = new Settings(context);
@@ -4376,7 +4376,7 @@ ECode CPackageManagerService::constructor(
     String separateProcesses;
     sysProp->Get(String("debug.separate_processes"), &separateProcesses);
     if (!separateProcesses.IsNullOrEmpty()) {
-        if (String("*").Equals(separateProcesses)) {
+        if (separateProcesses.Equals("*")) {
             mDefParseFlags = PackageParser::PARSE_IGNORE_PROCESSES;
             mSeparateProcesses = NULL;
             Slogger::W(TAG, "Running with debug.separate_processes: * (ALL)");
@@ -5151,7 +5151,7 @@ void CPackageManagerService::ReadPermission(
 
         String tagName;
         parser->GetName(&tagName);
-        if (String("group").Equals(tagName)) {
+        if (tagName.Equals("group")) {
             String gidStr;
             parser->GetAttributeValue(String(NULL), String("gid"), &gidStr);
             if (!gidStr.IsNull()) {

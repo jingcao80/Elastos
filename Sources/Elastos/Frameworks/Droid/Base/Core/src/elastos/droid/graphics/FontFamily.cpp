@@ -30,9 +30,9 @@ FontFamily::FontFamily(
     /* [in] */ const String& variant)
 {
     Int32 varEnum = 0;
-    if (String("compact").Equals(variant)) {
+    if (variant.Equals("compact")) {
         varEnum = 1;
-    } else if (String("elegant").Equals(variant)) {
+    } else if (variant.Equals("elegant")) {
         varEnum = 2;
     }
     mNativePtr = NativeCreateFamily(lang, varEnum);

@@ -741,7 +741,7 @@ ECode TrustManagerService::GetSettingsComponentName(
         if (FAILED(ec)) break;
         String nodeName;
         IXmlPullParser::Probe(parser)->GetName(&nodeName);
-        if (!String("trust-agent").Equals(nodeName)) {
+        if (!nodeName.Equals("trust-agent")) {
             Slogger::W(TAG, "Meta-data does not start with trust-agent tag");
             *result = NULL;
             return NOERROR;

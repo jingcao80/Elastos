@@ -142,7 +142,7 @@ ECode PhoneGlobals::PhoneAppBroadcastReceiver::OnReceive(
         Boolean res;
         Boolean disconnectedDueToRoaming =
                 (mHost->mPhone->GetDataRoamingEnabled(&res), !res)
-                && String("DISCONNECTED").Equals(str)
+                && str.Equals("DISCONNECTED")
                 && IPhone::REASON_ROAMING_ON.Equals(str2);
         mHost->mHandler->SendEmptyMessage(disconnectedDueToRoaming
                                   ? EVENT_DATA_ROAMING_DISCONNECTED

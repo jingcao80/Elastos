@@ -4324,7 +4324,7 @@ AutoPtr<IArrayList> ActivityStack::GetDumpActivitiesLocked(
     AutoPtr<IArrayList> activities;
     CArrayList::New((IArrayList**)&activities);
 
-    if (String("all").Equals(name)) {
+    if (name.Equals("all")) {
         Int32 taskSize;
         mTaskHistory->GetSize(&taskSize);
         for (Int32 taskNdx = taskSize - 1; taskNdx >= 0; --taskNdx) {
@@ -4333,7 +4333,7 @@ AutoPtr<IArrayList> ActivityStack::GetDumpActivitiesLocked(
             TaskRecord* task = (TaskRecord*)IObject::Probe(taskobj);
             activities->AddAll(ICollection::Probe(task->mActivities));
         }
-    } else if (String("top").Equals(name)) {
+    } else if (name.Equals("top")) {
         Int32 top;
         mTaskHistory->GetSize(&top);
         --top;

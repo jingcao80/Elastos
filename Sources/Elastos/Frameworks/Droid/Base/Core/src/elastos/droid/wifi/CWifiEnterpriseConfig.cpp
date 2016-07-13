@@ -548,7 +548,7 @@ ECode CWifiEnterpriseConfig::GetFieldValue(
     String value;
     ICharSequence::Probe(iValue)->ToString(&value);
     // Uninitialized or known to be empty after reading from supplicant
-    if (TextUtils::IsEmpty(value) || String(EMPTY_VALUE).Equals(value)) {
+    if (TextUtils::IsEmpty(value) || value.Equals(EMPTY_VALUE)) {
         *result = "";
         return NOERROR;
     }

@@ -75,13 +75,13 @@ DumpFilter::~DumpFilter()
 AutoPtr<DumpFilter> DumpFilter::ParseFromArguments(
     /* [in] */ ArrayOf<String>* args)
 {
-    if (args != NULL && args->GetLength() == 2 && String("p").Equals((*args)[0])
+    if (args != NULL && args->GetLength() == 2 && (*args)[0].Equals("p")
             && !(*args)[1].IsNull() && !(*args)[1].Trim().IsEmpty()) {
         AutoPtr<DumpFilter> filter = new DumpFilter();
         filter->mPkgFilter = (*args)[1].Trim().ToLowerCase();
         return filter;
     }
-    if (args != NULL && args->GetLength() == 1 && String("zen").Equals((*args)[0])) {
+    if (args != NULL && args->GetLength() == 1 && (*args)[0].Equals("zen")) {
         AutoPtr<DumpFilter> filter = new DumpFilter();
         filter->mZen = TRUE;
         return filter;

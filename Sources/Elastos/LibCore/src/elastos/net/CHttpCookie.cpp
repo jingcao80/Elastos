@@ -121,7 +121,7 @@ ECode CHttpCookie::CookieParser::Parse(
              * scan until a semicolon when parsing these attributes.
              */
             String terminators = pre2965
-                    || String("expires").Equals(attributeName) || String("port").Equals(attributeName)
+                    || attributeName.Equals("expires") || attributeName.Equals("port")
                     ? String(";")
                     : String(";,");
             if (ReadEqualsSign()) {

@@ -468,7 +468,7 @@ ECode CUsageStatsService::ReadHistoryStatsFLOCK(
     }
     String tagName;
     parser->GetName(&tagName);
-    if (String("usage-history").Equals(tagName)) {
+    if (tagName.Equals("usage-history")) {
         String pkg = String(NULL);
         do {
             parser->Next(&eventType);
@@ -505,7 +505,7 @@ ECode CUsageStatsService::ReadHistoryStatsFLOCK(
             } else if (eventType == IXmlPullParser::END_TAG) {
                 String pName;
                 parser->GetName(&pName);
-                if (String("pkg").Equals(pName)) {
+                if (pName.Equals("pkg")) {
                     pkg = String(NULL);
                 }
             }

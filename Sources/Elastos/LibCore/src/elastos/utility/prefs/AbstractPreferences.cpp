@@ -470,7 +470,7 @@ ECode AbstractPreferences::GetNode(
             *pfs = this;
             REFCOUNT_ADD(*pfs);
             return NOERROR;
-        } else if (String("/").Equals(name)) {
+        } else if (name.Equals("/")) {
             *pfs = (IPreferences*)mRoot->Probe(EIID_IPreferences);
             REFCOUNT_ADD(*pfs);
             return NOERROR;
@@ -592,7 +592,7 @@ ECode AbstractPreferences::IsNodeExists(
             return E_ILLEGAL_STATE_EXCEPTION;
         }
         FAIL_RETURN(ValidateName(name));
-        if (name.IsEmpty() || String("/").Equals(name)) {
+        if (name.IsEmpty() || name.Equals("/")) {
             *exist = TRUE;
             return NOERROR;
         }

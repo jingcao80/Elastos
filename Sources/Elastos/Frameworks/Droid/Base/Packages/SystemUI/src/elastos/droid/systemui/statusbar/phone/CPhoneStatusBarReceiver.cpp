@@ -67,7 +67,7 @@ ECode CPhoneStatusBarReceiver::OnReceive(
             }
         }
     }
-    else if (String("fake_artwork").Equals(action)) {
+    else if (action.Equals("fake_artwork")) {
         if (CPhoneStatusBar::DEBUG_MEDIA_FAKE_ARTWORK) {
             mHost->UpdateMediaMetaData(TRUE);
         }

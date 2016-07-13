@@ -241,7 +241,7 @@ Boolean CInCallScreenShowActivation::IsWizardRunning(
     CSystemProperties::AcquireSingleton((ISystemProperties**)&helper2);
     String mode;
     helper2->Get(String("ro.setupwizard.mode"), String("REQUIRED"), &mode);
-    Boolean runningSetupWizard = String("REQUIRED").Equals(mode) || String("OPTIONAL").Equals(mode);
+    Boolean runningSetupWizard = mode.Equals("REQUIRED") || mode.Equals("OPTIONAL");
     if (DBG) {
         StringBuilder sb;
         sb += "resolvInfo = ";

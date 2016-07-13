@@ -946,7 +946,7 @@ ECode CPackageInstallerActivity::OnCreate(
 
     String scheme;
     mPackageURI->GetScheme(&scheme);
-    if (scheme != String("") && !String("file").Equals(scheme) && !String("package").Equals(scheme)) {
+    if (scheme != String("") && !scheme.Equals("file") && !scheme.Equals("package")) {
         Logger::W(TAG, String("Unsupported scheme ") + scheme);
         SetPmResult(IPackageManager::INSTALL_FAILED_INVALID_URI);
         mInstallFlowAnalytics->SetFlowFinished(InstallFlowAnalytics::RESULT_FAILED_UNSUPPORTED_SCHEME);
@@ -956,7 +956,7 @@ ECode CPackageInstallerActivity::OnCreate(
 
     AutoPtr<PackageUtil::AppSnippet> as;
     mPackageURI->GetScheme(&scheme);
-    if (String("package").Equals(scheme)) {
+    if (scheme.Equals("package")) {
         mInstallFlowAnalytics->SetFileUri(FALSE);
         //try {
             String schemeSpecificPart;

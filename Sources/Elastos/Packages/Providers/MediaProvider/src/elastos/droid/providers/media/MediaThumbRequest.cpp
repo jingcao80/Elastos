@@ -155,7 +155,7 @@ ECode MediaThumbRequest::constructor(
     AutoPtr<ICharSequence> cs = ICharSequence::Probe(obj);
     String video;
     cs->ToString(&video);
-    mIsVideo = String("video").Equals(video);
+    mIsVideo = video.Equals("video");
     AutoPtr<IContentUris> cu;
     CContentUris::AcquireSingleton((IContentUris**)&cu);
     cu->ParseId(uri, &mOrigId);

@@ -27,7 +27,7 @@ int CTest::test_toString(int argc, char* argv[])
     CDate::New(0 ,(IDate**)&date);
     date->ToString(&str);
     PFL_EX("Wed Dec 31 18:00:00 CST 1969 == %s" ,str.string())
-    assert(String("Wed Dec 31 18:00:00 CST 1969").Equals(str));
+    assert(str.Equals("Wed Dec 31 18:00:00 CST 1969"));
     return 0;
 }
 
@@ -52,19 +52,19 @@ int CTest::test_toGMTString(int argc, char* argv[])
     c->GetDate((IDate**)&date);
     date->ToString(&outstr);
     PFL_EX("Wed Jan 01 00:00:00 PST 21 == %s " , outstr.string())
-    assert(String("Wed Jan 01 00:00:00 PST 21").Equals(outstr));
+    assert(outstr.Equals("Wed Jan 01 00:00:00 PST 21"));
 
     date->ToGMTString(&outstr);
     PFL_EX("1 Jan 21 08:00:00 GMT == %s" , outstr.string())
-    assert(String("1 Jan 21 08:00:00 GMT").Equals(outstr));
+    assert(outstr.Equals("1 Jan 21 08:00:00 GMT"));
     c->Set(ICalendar::YEAR, 321);
     c->GetDate((IDate**)&date);
     date->ToString(&outstr);
     PFL_EX("Sun Jan 01 00:00:00 PST 321 == %s " , outstr.string())
-    assert(String("Sun Jan 01 00:00:00 PST 321").Equals(outstr));
+    assert(outstr.Equals("Sun Jan 01 00:00:00 PST 321"));
     date->ToGMTString(&outstr);
     PFL_EX("1 Jan 321 08:00:00 GMT == %s" , outstr.string())
-    assert(String("1 Jan 321 08:00:00 GMT").Equals(outstr));
+    assert(outstr.Equals("1 Jan 321 08:00:00 GMT"));
     return 0;
 }
 

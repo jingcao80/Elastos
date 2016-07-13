@@ -3242,7 +3242,7 @@ Boolean ActiveServices::DumpService(
     {
         AutoLock lock(mAm);
         AutoPtr< ArrayOf<Int32> > users = mAm->GetUsersLocked();
-        if (String("all").Equals(name)) {
+        if (name.Equals("all")) {
             for (Int32 i = 0; i < users->GetLength(); ++i) {
                 Int32 user = (*users)[i];
                 AutoPtr<ServiceMap> smap;

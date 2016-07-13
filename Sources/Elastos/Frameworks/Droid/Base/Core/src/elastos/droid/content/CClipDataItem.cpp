@@ -261,7 +261,7 @@ ECode CClipDataItem::CoerceToHtmlOrStyledText(
         Boolean hasText = FALSE;
         if (types != NULL) {
             for (Int32 i = 0; i < types->GetLength(); ++i) {
-                if (String("text/html").Equals((*types)[i])) {
+                if ((*types)[i].Equals("text/html")) {
                     hasHtml = TRUE;
                 }
                 else if ((*types)[i].StartWith("text/")) {

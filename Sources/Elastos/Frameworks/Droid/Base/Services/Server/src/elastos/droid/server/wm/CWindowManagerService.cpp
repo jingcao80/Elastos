@@ -8279,8 +8279,8 @@ Boolean CWindowManagerService::IsSystemSecure()
     AutoPtr<ISystemProperties> sysProp;
     CSystemProperties::AcquireSingleton((ISystemProperties**)&sysProp);
     String value1, value2;
-    return (sysProp->Get(SYSTEM_SECURE, String("1"), &value1), String("1").Equals(value1)) &&
-            (sysProp->Get(SYSTEM_DEBUGGABLE, String("0"), &value2), String("0").Equals(value2));
+    return (sysProp->Get(SYSTEM_SECURE, String("1"), &value1), value1.Equals("1")) &&
+            (sysProp->Get(SYSTEM_DEBUGGABLE, String("0"), &value2), value2.Equals("0"));
 }
 
 ECode CWindowManagerService::StopViewServer(

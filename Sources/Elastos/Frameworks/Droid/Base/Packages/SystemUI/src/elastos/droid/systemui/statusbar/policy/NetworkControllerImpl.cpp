@@ -1563,7 +1563,7 @@ void NetworkControllerImpl::RefreshViews()
         AutoPtr<ICharSequence> cs;
         CString::New(wifiLabel, (ICharSequence**)&cs);
         v->SetText(cs);
-        if (String("").Equals(wifiLabel)) {
+        if (wifiLabel.Equals("")) {
             IView::Probe(v)->SetVisibility(IView::GONE);
         }
         else {
@@ -1581,7 +1581,7 @@ void NetworkControllerImpl::RefreshViews()
         AutoPtr<ICharSequence> cs;
         CString::New(mobileLabel, (ICharSequence**)&cs);
         v->SetText(cs);
-        if (String("").Equals(mobileLabel)) {
+        if (mobileLabel.Equals("")) {
             IView::Probe(v)->SetVisibility(IView::GONE);
         }
         else {

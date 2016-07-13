@@ -89,7 +89,7 @@ ECode VoiceInteractionServiceInfo::constructor(
 
     String nodeName;
     IXmlPullParser::Probe(parser)->GetName(&nodeName);
-    if (!String("voice-interaction-service").Equals(nodeName)) {
+    if (!nodeName.Equals("voice-interaction-service")) {
         mParseError = String("Meta-data does not start with voice-interaction-service tag");
         return E_NULL_POINTER_EXCEPTION;
     }

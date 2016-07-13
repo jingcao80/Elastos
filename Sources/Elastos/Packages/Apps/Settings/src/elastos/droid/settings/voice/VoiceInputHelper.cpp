@@ -298,7 +298,7 @@ ECode VoiceInputHelper::BuildUi()
 
         String nodeName;
         xpp->GetName(&nodeName);
-        if (!String("recognition-service").Equals(nodeName)) {
+        if (!nodeName.Equals("recognition-service")) {
             if (parser != NULL) parser->Close();
             Logger::E(TAG, "Meta-data does not start with recognition-service tag");
             return E_XML_PULL_PARSER_EXCEPTION;

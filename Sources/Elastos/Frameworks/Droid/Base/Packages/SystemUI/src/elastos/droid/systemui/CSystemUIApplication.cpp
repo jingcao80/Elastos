@@ -87,7 +87,7 @@ ECode CSystemUIApplication::StartServicesIfNeeded()
         CSystemProperties::AcquireSingleton((ISystemProperties**)&sp);
         String property;
         sp->Get(String("sys.boot_completed"), &property);
-        if (String("1").Equals(property)) {
+        if (property.Equals("1")) {
             mBootCompleted = TRUE;
             if (DEBUG) Logger::V(TAG, "BOOT_COMPLETED was already sent");
         }

@@ -65,7 +65,7 @@ ECode UsbAccessoryUriActivity::OnCreate(
     }
     String scheme;
     mUri->GetScheme(&scheme);
-    if (!String("http").Equals(scheme) && !String("https").Equals(scheme)) {
+    if (!scheme.Equals("http") && !scheme.Equals("https")) {
         Logger::E(TAG, "Uri not http or https: %s", TO_CSTR(mUri));
         Finish();
         return E_NULL_POINTER_EXCEPTION;

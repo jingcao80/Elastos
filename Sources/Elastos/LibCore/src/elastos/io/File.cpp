@@ -187,7 +187,7 @@ ECode File::CheckURI(
     }
     String scheme;
     uri->GetScheme(&scheme);
-    if (!String("file").Equals(scheme)) {
+    if (!scheme.Equals("file")) {
         return E_ILLEGAL_ARGUMENT_EXCEPTION;
     }
     String rawPath;

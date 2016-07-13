@@ -15,14 +15,14 @@ int CTest::test_toString(int argc, char* argv[]) {
     CBitSet::New((IBitSet**)&bs);
     String str;
     bs->ToString(&str);
-    assert(String("{}").Equals(str));
+    assert(str.Equals("{}"));
     bs->Set(2);
     bs->ToString(&str);
-    assert(String("{2}").Equals(str));
+    assert(str.Equals("{2}"));
     bs->Set(4);
     bs->Set(10);
     bs->ToString(&str);
-    assert(String("{2, 4, 10}").Equals(str));
+    assert(str.Equals("{2, 4, 10}"));
 }
 
 void assertBitSet(AutoPtr<IBitSet> bs, ArrayOf<Int64>& longs, String s) {
@@ -357,22 +357,22 @@ int CTest::test_differentSizes(int argc, char* argv[]) {
     result->And(resultsmall);
     String str;
     result->ToString(&str);
-    assert(String("{}").Equals(str));
+    assert(str.Equals("{}"));
     result = small();
     AutoPtr<IBitSet> resultbig = big();
     result->And(resultbig);
     result->ToString(&str);
-    assert(String("{}").Equals(str));
+    assert(str.Equals("{}"));
     result = big();
     result->AndNot(resultsmall);
     result->ToString(&str);
     PFL_EX("{1000} == %s " , str.string())
-    // assert(String("{1000}").Equals(str));
+    // assert(str.Equals("{1000}"));
     result = small();
     result->AndNot(resultbig);
     result->ToString(&str);
     PFL_EX("{10} == %s " ,str.string())
-    // assert(String("{10}").Equals(str));
+    // assert(str.Equals("{10}"));
     Boolean flag;
     result = big();
     result->Intersects(resultsmall,&flag);
@@ -384,22 +384,22 @@ int CTest::test_differentSizes(int argc, char* argv[]) {
     result->Or(small());
     result->ToString(&str);
     PFL_EX("{10 , 1000} == %s" ,str.string())
-    // assert(String("{10, 1000}").Equals(str));
+    // assert(str.Equals("{10, 1000}"));
     result = small();
     result->Or(big());
     result->ToString(&str);
     PFL_EX("{10, 1000} == %s",str.string())
-    // assert(String("{10, 1000}").Equals(str));
+    // assert(str.Equals("{10, 1000}"));
 
     result = big();
     result->Xor(small());
     result->ToString(&str);
     PFL_EX("{10, 1000} == %s" ,str.string())
-    // assert(String("{10, 1000}").Equals(str));
+    // assert(str.Equals("{10, 1000}"));
     result = small();
     result->Xor(big());
     result->ToString(&str);
     PFL_EX("{10, 1000} == %s" , str.string())
-    // assert(String("{10, 1000}").Equals(str));
+    // assert(str.Equals("{10, 1000}"));
 }
 

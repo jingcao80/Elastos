@@ -455,8 +455,8 @@ ECode CPackageHelper::ExtractPublicFiles(
             arrayList->Get(i, (IInterface**)&obj);
             zipEntry = IZipEntry::Probe(obj);
             zipEntry->GetName(&zipEntryName);
-            if (String("AndroidManifest.xml").Equals(zipEntryName)
-                    || String("resources.arsc").Equals(zipEntryName)
+            if (zipEntryName.Equals("AndroidManifest.xml")
+                    || zipEntryName.Equals("resources.arsc")
                     || zipEntryName.StartWith("res/")) {
                 Int64 entrySize = 0;
                 zipEntry->GetSize(&entrySize);

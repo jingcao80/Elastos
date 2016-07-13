@@ -631,7 +631,7 @@ int CTest::test_getI(int argc, char* argv[]) {
 	cs = ICharSequence::Probe(inter);
 	String str;
 	cs->ToString(&str);
-	assert(String("Test 80").Equals(str));
+	assert(str.Equals("Test 80"));
 	Boolean flag = FALSE;
 
 	tVector->AddEx(25, NULL);
@@ -772,7 +772,7 @@ int CTest::test_lastElement(int argc, char* argv[]) {
 	cs = ICharSequence::Probe(inter);
 	String str;
 	cs->ToString(&str);
-	assert(String("Test 99").Equals(str));
+	assert(str.Equals("Test 99"));
 
 	tVector->AddElement(NULL);
 	tVector->LastElement((IInterface**)&inter);
@@ -979,7 +979,7 @@ int CTest::test_removeElementLjava_lang_Object(int argc, char* argv[]) {
 	v->ElementAt(98, (IInterface**)&obj);
 	cs = ICharSequence::Probe(obj);
 	cs->ToString(&str);
-	assert(String("Test 99").Equals(str));
+	assert(str.Equals("Test 99"));
 
 	Int32 size;
 	v->GetSize(&size);

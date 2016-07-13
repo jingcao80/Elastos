@@ -149,7 +149,7 @@ ECode KeyphraseEnrollmentInfo::constructor(
 
     ec = IXmlPullParser::Probe(parser)->GetName(&nodeName);
     FAIL_GOTO(ec, EXIT1)
-    if (!String("voice-enrollment-application").Equals(nodeName)) {
+    if (!nodeName.Equals("voice-enrollment-application")) {
         mParseError = String("Meta-data does not start with voice-enrollment-application tag");
         goto EXIT;
     }

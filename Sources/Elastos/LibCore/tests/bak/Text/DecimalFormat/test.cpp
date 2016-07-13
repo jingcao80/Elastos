@@ -18,14 +18,14 @@ int CTest::test_exponentSeparator(int argc, char* argv[])
     String str;
     df->FormatDouble(12345., &str);
     PFL_EX("str: %s " , str.string())
-    assert(String("1E4").Equals(str));
+    assert(str.Equals("1E4"));
     AutoPtr<IDecimalFormatSymbols> dfs;
     df->GetDecimalFormatSymbols((IDecimalFormatSymbols**)&dfs);
     dfs->SetExponentSeparator(String("-useless-api-"));
     df->SetDecimalFormatSymbols(dfs);
     df->FormatDouble(12345., &str);
     PFL_EX("str: %s " , str.string())
-    assert(String("1-useless-api-4").Equals(str));
+    assert(str.Equals("1-useless-api-4"));
     return 0;
 }
 
@@ -46,11 +46,11 @@ int CTest::test_setMaximumFractionDigitsAffectsRoundingMode(int argc, char* argv
     String outstr(NULL);
     df->FormatDouble(-0.2,&outstr);
     PFL_EX("outstr: %s" , outstr.string())
-    assert(String("-0").Equals(outstr));
+    assert(outstr.Equals("-0"));
     df->SetMaximumFractionDigits(1);
     df->FormatDouble(-0.2,&outstr);
     PFL_EX("outstr: %s " ,outstr.string())
-    assert(String("-0.2").Equals(outstr));
+    assert(outstr.Equals("-0.2"));
 
     return 0;
 }
@@ -123,7 +123,7 @@ int CTest::test_BigDecimalBug1897917(int argc, char* argv[]) {
     outbuf->ToString(&outstr);
 
     PFL_EX("outstr: %s " ,outstr.string())
-    assert(String("17%").Equals(outstr));
+    assert(outstr.Equals("17%"));
 
     // Test long decimal formatted in PercentInstance with various fractions.
     String longDec("11.2345678901234567890123456789012345678901234567890");

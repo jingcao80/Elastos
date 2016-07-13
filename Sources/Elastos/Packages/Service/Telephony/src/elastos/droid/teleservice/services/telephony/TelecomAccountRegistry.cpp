@@ -477,7 +477,7 @@ void TelecomAccountRegistry::SetupAccounts()
     CSystem::AcquireSingleton((ISystem**)&helper2);
     String value;
     helper2->GetProperty(String("dummy_sim"), &value);
-    if (DBG && phones->GetLength() > 0 && String("TRUE").Equals(value)) {
+    if (DBG && phones->GetLength() > 0 && value.Equals("TRUE")) {
         AutoPtr<AccountEntry> entry = new AccountEntry(this, (*phones)[0], FALSE /* emergency */,
                 TRUE /* isDummy */);
         mAccounts->Add(TO_IINTERFACE(entry));

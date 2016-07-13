@@ -1356,7 +1356,7 @@ void PhoneBase::SetPropertiesByCarrier()
     String carrier;
     SystemProperties::Get(String("ro.carrier"), &carrier);
 
-    if (NULL == carrier || 0 == carrier.GetLength() || String("unknown").Equals(carrier)) {
+    if (NULL == carrier || 0 == carrier.GetLength() || carrier.Equals("unknown")) {
         return;
     }
 

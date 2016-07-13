@@ -5,9 +5,12 @@
 #include "elastos/droid/app/CNotificationBuilder.h"
 #include "elastos/droid/os/ServiceManager.h"
 #include "elastos/droid/os/UserHandle.h"
+#include "elastos/droid/os/CStrictMode.h"
 #include <elastos/utility/logging/Slogger.h>
 
 using Elastos::Droid::Os::UserHandle;
+using Elastos::Droid::Os::CStrictMode;
+using Elastos::Droid::Os::IStrictMode;
 using Elastos::Core::ICloneable;
 using Elastos::Utility::Logging::Slogger;
 
@@ -140,10 +143,12 @@ ECode NotificationManager::NotifyAsUser(
         AutoPtr<IUri> newSound;
         sound->GetCanonicalUri((IUri**)&newSound);
         notification->SetSound(newSound);
-        assert(0 && "TODO");
-        // if (StrictMode.vmFileUriExposureEnabled()) {
-        //     newSound->CheckFileUriExposed("Notification.sound");
-        // }
+        AutoPtr<IStrictMode> sm;
+        CStrictMode::AcquireSingleton((IStrictMode**)&sm);
+        Boolean bval;
+        if (sm->VmFileUriExposureEnabled(&bval), bval) {
+            newSound->CheckFileUriExposed(String("Notification.sound"));
+        }
     }
 
     if (localLOGV) {
@@ -238,10 +243,11 @@ ECode NotificationManager::GetShowNotificationForPackageOnKeyguard(
     VALIDATE_NOT_NULL(result)
     AutoPtr<IINotificationManager> service = GetService();
     // try {
-    return service->GetShowNotificationForPackageOnKeyguard(pkg, uid, result);
-    // } catch (RemoteException e) {
-    //     return Notification.SHOW_ALL_NOTI_ON_KEYGUARD;
-    // }
+    ECode ec = service->GetShowNotificationForPackageOnKeyguard(pkg, uid, result);
+    if (FAILED(ec)) {
+        *result = INotification::SHOW_ALL_NOTI_ON_KEYGUARD;
+    }
+    return NOERROR;
 }
 
 }

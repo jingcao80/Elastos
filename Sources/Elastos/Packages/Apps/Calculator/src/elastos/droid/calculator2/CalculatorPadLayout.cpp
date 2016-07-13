@@ -20,15 +20,16 @@ namespace Elastos {
 namespace Droid {
 namespace Calculator2 {
 
+CAR_INTERFACE_IMPL(CalculatorPadLayout, ViewGroup, ICalculatorPadLayout)
+
 CalculatorPadLayout::CalculatorPadLayout()
     : mRowCount(0)
     , mColumnCount(0)
-{}
+{
+}
 
 CalculatorPadLayout::~CalculatorPadLayout()
 {}
-
-CAR_INTERFACE_IMPL(CalculatorPadLayout, ViewGroup, ICalculatorPadLayout)
 
 ECode CalculatorPadLayout::constructor(
     /* [in] */ IContext* context)

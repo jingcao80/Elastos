@@ -31,7 +31,7 @@ namespace Accessibility {
 
 const String CAccessibilityCache::TAG("AccessibilityCache");
 const Boolean CAccessibilityCache::DEBUG = FALSE;
-const Boolean CAccessibilityCache::CHECK_INTEGRITY = String("eng").Equals(Build::TYPE);
+const Boolean CAccessibilityCache::CHECK_INTEGRITY = Build::TYPE.Equals("eng");
 
 CAR_INTERFACE_IMPL(CAccessibilityCache, Object, IAccessibilityCache)
 

@@ -1841,7 +1841,7 @@ ECode ActivityStackSupervisor::StartSpecificActivityLocked(
         String packageName;
         IPackageItemInfo::Probe(r->mInfo)->GetPackageName(&packageName);
             if ((flags&IActivityInfo::FLAG_MULTIPROCESS) == 0
-                    || !String("android").Equals(packageName)) {
+                    || !packageName.Equals("android")) {
                 // Don't add this if it is a platform component that is marked
                 // to run in multiple processes, because this is actually
                 // part of the framework so doesn't make sense to track as a

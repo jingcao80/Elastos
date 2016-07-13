@@ -247,7 +247,7 @@ Boolean SSLCertificateSocketFactory::IsSslCheckRelaxed()
     String s1, s2;
     SystemProperties::Get(String("ro.debuggable"), &s1);
     SystemProperties::Get(String("socket.relaxsslcheck"), &s2);
-    return String("1").Equals(s1) && String("yes").Equals(s2);
+    return s1.Equals("1") && s2.Equals("yes");
 }
 
 AutoPtr<ISSLSocketFactory> SSLCertificateSocketFactory::GetDelegate()

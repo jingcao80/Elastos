@@ -483,7 +483,7 @@ ECode ClipboardService::CheckUriOwnerLocked(
 {
     String scheme;
     uri->GetScheme(&scheme);
-    if (!String("content").Equals(scheme)) {
+    if (!scheme.Equals("content")) {
         return NOERROR;
     }
     Int64 ident = Binder::ClearCallingIdentity();
