@@ -87,6 +87,9 @@ module
 //    merge("car/elastos/droid/dialer/SpecialCharSequenceMgr.car");
 //    merge("car/elastos/droid/dialerbind/ObjectFactory.car");
     merge("car/elastos/droid/dialerbind/analytics/AnalyticsInterface.car");
+//    merge("car/elastos/droid/incallui/InCallActivity.car");
+    merge("car/elastos/droid/incallui/Presenter.car");
+    merge("car/elastos/droid/incallui/Ui.car");
     merge("car/elastos/droid/phone/common/animation/AnimUtils.car");
     merge("car/elastos/droid/phone/common/dialpad/DialpadKeyButton.car");
     merge("car/elastos/droid/phone/common/dialpad/DialpadView.car");
@@ -136,6 +139,7 @@ module
 //    using interface Elastos.Droid.Preference.//IPreferenceFragmentOnPreferenceStartFragmentCallback;
 //    using interface Elastos.Droid.Preference.IPreferenceActivity;
 //    using interface Elastos.Droid.Os.IHandler;
+    using interface Elastos.Droid.Telecomm.Telecom.IInCallService;
     using interface Elastos.Droid.Utility.IAttributeSet;
     using interface Elastos.Droid.View.IAbsSavedState;
     using interface Elastos.Droid.View.IView;
@@ -1305,6 +1309,37 @@ module
 //    } //namespace Dialer
 //    } //namespace Droid
 //    } //namespace Elastos
+
+    namespace Elastos {
+    namespace Droid {
+    namespace InCallUI {
+
+//    class CInCallActivity {
+//        constructor();
+//
+//        interface IInCallActivity;
+//        interface IActivity;
+//        interface IContext;
+//        interface IContextThemeWrapper;
+//        interface ILayoutInflaterFactory;
+//        interface ILayoutInflaterFactory2;
+//        interface IWindowCallback;
+//        interface IKeyEventCallback;
+//        interface IViewOnCreateContextMenuListener;
+//        interface IComponentCallbacks;
+//        interface IComponentCallbacks2;
+//        interface IOnWindowDismissedCallback;
+//    }
+
+    class CInCallServiceImpl {
+        constructor();
+
+        interface IInCallService;
+    }
+
+    } //namespace InCallUI
+    } //namespace Droid
+    } //namespace Elastos
 
     namespace Elastos {
     namespace Droid {

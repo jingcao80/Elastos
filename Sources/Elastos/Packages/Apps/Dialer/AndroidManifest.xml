@@ -263,35 +263,28 @@
              from outside the phone app; instead, it's either launched by
              the OutgoingCallBroadcaster (for outgoing calls), or as the
              fullScreenIntent of a notification (for incoming calls.) -->
-        <!-- <activity android:name="Elastos.Droid.Incallui.CInCallActivity"
+        <activity android:name="Elastos.Droid.InCallUI.CInCallActivity"
                   android:theme="@style/Theme.InCallScreen"
                   android:label="@string/phoneAppLabel"
                   android:excludeFromRecents="true"
                   android:launchMode="singleInstance"
                   android:configChanges="keyboardHidden"
                   android:exported="false"
-                  android:process="com.android.incallui"
-                  android:screenOrientation="nosensor" > -->
-        <activity android:name="Elastos.Droid.Incallui.CInCallActivity"
-                  android:excludeFromRecents="true"
-                  android:launchMode="singleInstance"
-                  android:configChanges="keyboardHidden"
-                  android:exported="false"
-                  android:process="com.android.incallui"
+                  android:process="Elastos.Droid.InCallUI"
                   android:screenOrientation="nosensor" >
         </activity>
 
         <!-- BroadcastReceiver for receiving Intents from Notification mechanism. -->
-        <receiver android:name="Elastos.Droid.Incallui.CInCallApp$NotificationBroadcastReceiver"
+        <receiver android:name="Elastos.Droid.InCallUI.CInCallApp$NotificationBroadcastReceiver"
                   android:exported="false"
-                  android:process="com.android.incallui">
+                  android:process="Elastos.Droid.InCallUI">
             <intent-filter>
                 <action android:name="com.android.incallui.ACTION_HANG_UP_ONGOING_CALL" />
             </intent-filter>
         </receiver>
 
-        <service android:name="Elastos.Droid.Incallui.CInCallServiceImpl"
-                 android:process="com.android.incallui"
+        <service android:name="Elastos.Droid.InCallUI.CInCallServiceImpl"
+                 android:process="Elastos.Droid.InCallUI"
                  android:permission="android.permission.BIND_INCALL_SERVICE" >
             <intent-filter>
                 <action android:name="android.telecom.InCallService"/>

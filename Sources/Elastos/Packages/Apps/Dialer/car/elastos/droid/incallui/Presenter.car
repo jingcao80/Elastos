@@ -1,0 +1,59 @@
+
+module
+{
+    interface Elastos.Droid.InCallUI.IUi;
+
+    namespace Elastos {
+    namespace Droid {
+    namespace InCallUI {
+
+    /**
+     * @Involve
+     * interface IActivity;
+     * interface IContext;
+     * interface IContextThemeWrapper;
+     * interface ILayoutInflaterFactory;
+     * interface ILayoutInflaterFactory2;
+     * interface IWindowCallback;
+     * interface IKeyEventCallback;
+     * interface IViewOnCreateContextMenuListener;
+     * interface IComponentCallbacks;
+     * interface IComponentCallbacks2;
+     * interface IOnWindowDismissedCallback;
+     * /
+    interface IInCallActivity {
+    }
+
+    /**
+     * Base class for Presenters.
+     */
+    interface IPresenter {
+        /**
+         * Called after the UI view has been created.  That is when fragment.onViewCreated() is called.
+         *
+         * @param ui The Ui implementation that is now ready to be used.
+         */
+        OnUiReady(
+            [in] IUi* ui);
+
+        /**
+         * Called when the UI view is destroyed in Fragment.onDestroyView().
+         */
+        OnUiDestroy(
+            [in] IUi* ui);
+
+        /**
+         * To be overriden by Presenter implementations.  Called when the fragment is being
+         * destroyed but before ui is set to null.
+         */
+        OnUiUnready(
+            [in] IUi* ui);
+
+        GetUi(
+            [out] IUi** ui);
+    }
+
+    } // namespace InCallUI
+    } // namespace Droid
+    } // namespace Elastos
+}

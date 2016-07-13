@@ -170,6 +170,7 @@ EXPORT_HEADERS += elastos/droid/text/format/Formatter.h
 EXPORT_HEADERS += elastos/droid/telecomm/telecom/Conference.h
 EXPORT_HEADERS += elastos/droid/telecomm/telecom/Connection.h
 EXPORT_HEADERS += elastos/droid/telecomm/telecom/ConnectionService.h
+EXPORT_HEADERS += elastos/droid/telecomm/telecom/InCallService.h
 
 EXPORT_HEADERS += elastos/droid/utility/Xml.h
 EXPORT_HEADERS += elastos/droid/utility/MathUtils.h

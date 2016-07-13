@@ -1,0 +1,10 @@
+TARGET_NAME= incallui
+TARGET_TYPE= lib
+
+INCLUDES += $(MAKEDIR)/../../../../inc
+INCLUDES += ../../../../
+
+SOURCES += BaseFragment.cpp
+#SOURCES += CInCallActivity.cpp
+SOURCES += CInCallServiceImpl.cpp
+SOURCES += Presenter.cpp

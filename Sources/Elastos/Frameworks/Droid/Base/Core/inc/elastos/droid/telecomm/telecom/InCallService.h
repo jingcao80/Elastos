@@ -5,14 +5,12 @@
 #include "Elastos.Droid.Telecomm.h"
 #include "elastos/droid/app/Service.h"
 #include "elastos/droid/os/Handler.h"
-#include <elastos/core/Object.h>
 
 using Elastos::Droid::App::Service;
 using Elastos::Droid::Content::IIntent;
 using Elastos::Droid::Os::Handler;
 using Elastos::Droid::Os::IMessage;
 using Elastos::Droid::Os::IBinder;
-using Elastos::Core::Object;
 
 namespace Elastos {
 namespace Droid {
@@ -26,9 +24,8 @@ namespace Telecom {
  *
  * {@hide}
  */
-// public Service
-class InCallService
-    : public Object
+class ECO_PUBLIC InCallService
+    : public Elastos::Droid::App::Service
     , public IInCallService
 {
 public:

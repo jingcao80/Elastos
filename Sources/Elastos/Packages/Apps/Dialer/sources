@@ -16,6 +16,7 @@ SOURCES += Elastos.Droid.Core.cpp
 ELASTOS_LIBS += src/elastos/droid/contacts/common/common.lib
 ELASTOS_LIBS += src/elastos/droid/dialer/dialer.lib
 ELASTOS_LIBS += src/elastos/droid/dialerbind/dialerbind.lib
+ELASTOS_LIBS += src/elastos/droid/incallui/incallui.lib
 ELASTOS_LIBS += src/elastos/droid/phone/common/common.lib
 ELASTOS_LIBS += src/elastos/droid/support/v4/view/view.lib
 ELASTOS_LIBS += src/elastos/droid/support/v13/app/app.lib
@@ -32,7 +33,9 @@ RES_NAMESPACE = Elastos.Droid.Dialer
 APPPACK = 1
 EXTRA_RES_DIR = $(MAKEDIR)/../ContactsCommon/res
 EXTRA_RES_DIR += $(MAKEDIR)/../PhoneCommon/res
+EXTRA_RES_DIR += $(MAKEDIR)/../InCallUI/res
 AAPT_FLAGS = --auto-add-overlay \
+    --extra-packages com.android.incallui \
     --extra-packages com.android.contacts.common \
     --extra-packages com.android.phone.common
 DIRRESOURCES += $(MAKEDIR)/res;
