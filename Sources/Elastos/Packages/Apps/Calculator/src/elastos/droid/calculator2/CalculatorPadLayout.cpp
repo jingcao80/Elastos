@@ -23,9 +23,7 @@ namespace Calculator2 {
 CalculatorPadLayout::CalculatorPadLayout()
     : mRowCount(0)
     , mColumnCount(0)
-{
-    mName = String("CalculatorPadLayout");
-}
+{}
 
 CalculatorPadLayout::~CalculatorPadLayout()
 {}
