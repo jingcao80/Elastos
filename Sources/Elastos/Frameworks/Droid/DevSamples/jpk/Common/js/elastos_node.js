@@ -70,6 +70,8 @@ root.Elastos = ( function () {
 
                 elog("========Run.begin.1========typeof _api.receive:" + typeof _api.receive);
 
+                _Bridge_Native.Unlock();
+
                 _api.receive(5, function (err, val) {
                     assert.equal(null, err);
                     //assert.equal(10, val);
@@ -105,7 +107,7 @@ root.Elastos = ( function () {
 
     var _Module_Core = _Runtime.getModuleInfo("/system/lib/Elastos.CoreLibrary.eco");
     var _Module_Droid = _Runtime.getModuleInfo("/system/lib/Elastos.Droid.Core.eco");
-    var _Bridge_Native = _api.require("/data/elastos/" + sPackageName + ".eco", sPackageName + ".CTestEventListener");
+    var _Bridge_Native = _api.require("/data/elastos/" + sPackageName + ".eco", sPackageName + ".CNodeListener");
 
     var _Bridge = {
         init : function (aoNodeBridgeListener) {
@@ -115,7 +117,7 @@ root.Elastos = ( function () {
             var iNodeBridge = _api.GetNodeBridge();
             _Bridge_Native.SetNodeBridge(iNodeBridge,1);
             _Bridge_Native.SetNodeBridgeListener(aoNodeBridgeListener);
-            _Bridge_Native.Unlock();
+            //_Bridge_Native.Unlock();
         },
     };
 

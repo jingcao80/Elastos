@@ -1,4 +1,4 @@
-#include "CTestEventListener.h"
+#include "CNodeListener.h"
 
 #include <elastos/utility/logging/Logger.h>
 
@@ -101,7 +101,7 @@ ECode JSEvtName::_Thread::Run()
     return NOERROR;
 }
 
-CAR_INTERFACE_IMPL(JSEvtName, Object, ITestEventListener)
+CAR_INTERFACE_IMPL(JSEvtName, Object, INodeListener)
 
 JS_CAR_OBJECT_IMPL(JSEvtName)
 

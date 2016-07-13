@@ -13,8 +13,8 @@ SOURCES = Elastos.DevSamples.Node.JSTextViewDemo.car
 SOURCES += R.cpp
 SOURCES += Elastos.CoreLibrary.cpp
 SOURCES += Elastos.Droid.Core.cpp
-SOURCES += CActivityOne.cpp
-SOURCES += CTestEventListener.cpp
+SOURCES += CNodeListener.cpp
+SOURCES += CNodeApp.cpp
 
 LIBRARIES  = $(XDK_USER_LIB)/Elastos.Runtime.lib
 LIBRARIES += $(XDK_TARGETS)/Elastos.Runtime.eco

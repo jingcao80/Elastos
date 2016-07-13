@@ -50,7 +50,7 @@ public:
         /* [out] */ IInterface ** ppOutObject);
 
     CARAPI Test_AddEventListener(
-        /* [in] */ Elastos::DevSamples::Node::CarRuntime::ITestEventListener * pListener);
+        /* [in] */ Elastos::DevSamples::Node::CarRuntime::INodeListener * pListener);
 
     //------------reflection------------
 

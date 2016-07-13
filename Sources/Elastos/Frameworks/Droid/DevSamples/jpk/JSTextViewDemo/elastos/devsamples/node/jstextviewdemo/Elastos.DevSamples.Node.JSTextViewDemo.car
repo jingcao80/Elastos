@@ -91,7 +91,7 @@ module
     }
 
     [deprecated]
-    interface ITestEventListener {
+    interface INodeListener {
         OnNodeEvent(
             [in] Int32 eventId);
 
@@ -129,7 +129,7 @@ module
             [in] IView* v);
     }
 
-    class CActivityOne {
+    class CDemoActivity {
         constructor();
 
         interface IActivity;
@@ -146,10 +146,10 @@ module
         interface IActivityOne;
     }
 
-    class CTestEventListener {
+    class CNodeListener {
         constructor();
 
-        interface ITestEventListener;
+        interface INodeListener;
     }
 
     } // namespace JSTextViewDemo

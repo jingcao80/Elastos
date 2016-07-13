@@ -26,12 +26,12 @@ public:
     {
     public:
         _Thread(
-            /* [in] */ ITestEventListener* listener);
+            /* [in] */ INodeListener* listener);
 
         CARAPI Run();
 
     private:
-        AutoPtr<ITestEventListener> mListener;
+        AutoPtr<INodeListener> mListener;
     };
 
 public:
@@ -219,7 +219,7 @@ public:
         /* [out] */ IInterface** object);
 
     CARAPI Test_AddEventListener(
-        /* [in] */ ITestEventListener* listener);
+        /* [in] */ INodeListener* listener);
 
 private:
     // TODO: Add your private member variables here.

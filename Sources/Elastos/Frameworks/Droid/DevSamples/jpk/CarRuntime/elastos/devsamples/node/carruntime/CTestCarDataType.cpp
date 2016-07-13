@@ -11,7 +11,7 @@ CAR_INTERFACE_IMPL_2(CTestCarDataType, Object, ITestCarDataType, ITestCarRuntime
 CAR_OBJECT_IMPL(CTestCarDataType)
 
 CTestCarDataType::_Thread::_Thread(
-    /* [in] */ ITestEventListener* listener)
+    /* [in] */ INodeListener* listener)
     : mListener(listener)
 {
     Thread::constructor(String("CTestCarDataType::_Thread"));
@@ -507,7 +507,7 @@ ECode CTestCarDataType::Test_CreateInstance(
 }
 
 ECode CTestCarDataType::Test_AddEventListener(
-    /* [in] */ ITestEventListener* listener)
+    /* [in] */ INodeListener* listener)
 {
     ALOGD("==== File: %s, Function: %s ====", __FILE__, __FUNCTION__);
     listener->OnEvent1(9);

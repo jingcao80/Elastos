@@ -1,4 +1,4 @@
-#include "CActivityOne.h"
+#include "CNodeActivity.h"
 
 #include <elastos/utility/logging/Logger.h>
 

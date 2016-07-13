@@ -1,9 +1,7 @@
-#ifndef __CActivityOne_H__
-#define __CActivityOne_H__
+#ifndef __CNodeActivity_H__
+#define __CNodeActivity_H__
 
-#define JSActName CActivityOne
-
-#include "CTestEventListener.h"
+#include "CNodeListener.h"
 
 #define JSActCarClassHead EE(JSPkgName,JSActName)
 #define JSActNameStr FF(JSActName)

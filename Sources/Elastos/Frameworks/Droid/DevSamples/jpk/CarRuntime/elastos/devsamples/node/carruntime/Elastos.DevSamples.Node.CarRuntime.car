@@ -101,7 +101,7 @@ module
     }
 
     [deprecated]
-    interface ITestEventListener {
+    interface INodeListener {
         OnEvent1(
             [in] Int32 eventId);
         OnEvent2(
@@ -129,7 +129,7 @@ module
             [out] IInterface** outObject);
 
         Test_AddEventListener(
-            [in] ITestEventListener* listener);
+            [in] INodeListener* listener);
 
         //------------reflection------------
         Test_CReflector_AcquireModuleInfo(
@@ -358,7 +358,7 @@ module
             [out] IInterface** object);
 
         Test_AddEventListener(
-            [in] ITestEventListener* listener);
+            [in] INodeListener* listener);
     }
 
     [deprecated]

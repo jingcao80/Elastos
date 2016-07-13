@@ -72,7 +72,7 @@ ECode CCarRuntime::Test_Require_Activity(
 }
 
 ECode CCarRuntime::Test_AddEventListener(
-    /* [in] */ Elastos::DevSamples::Node::CarRuntime::ITestEventListener * pListener)
+    /* [in] */ Elastos::DevSamples::Node::CarRuntime::INodeListener * pListener)
 {
     // TODO: Add your code here
     return E_NOT_IMPLEMENTED;

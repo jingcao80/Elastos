@@ -48,7 +48,7 @@ try {
     //sClassName = "CTestCarDataType";
 
     //sEcoName = "/data/elastos/TextViewDemo.eco";
-    //sClassName = "CTestEventListener";
+    //sClassName = "CNodeListener";
 
     sEcoName = "/data/elastos/JSCarRoot.eco";
     sClassName = "CCarRoot";
@@ -132,13 +132,13 @@ try {
     whmlog('==============ssss.10.1=================');
 
     sEcoName = "/data/elastos/TextViewDemo.eco";
-    sClassName = "CTestEventListener";
+    sClassName = "CNodeListener";
 
-    var oTestEventListener = elastos.require(sEcoName, sClassName);
+    var oNodeListener = elastos.require(sEcoName, sClassName);
 
-    var pEnqueueUIMessage = oTestEventListener.GetEnqueueUIMessagePtr();
+    var pEnqueueUIMessage = oNodeListener.GetEnqueueUIMessagePtr();
     elastos.SetEnqueueUIMessagePtr(pEnqueueUIMessage);
-    var oActivity = oTestEventListener.GetMainActivity();
+    var oActivity = oNodeListener.GetMainActivity();
 
     var oConstructorInfo = aConstructorInfos[0];
     var oArgumentList = oConstructorInfo.CreateArgumentList();

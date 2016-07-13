@@ -2,7 +2,7 @@
 #define __CTESTEVENTLISTENER_H__
 
 #define JSPkgName JSTextViewDemo
-#define JSEvtName CTestEventListener
+#define JSEvtName CNodeListener
 
 #ifndef JSCarClassHead
 
@@ -168,7 +168,7 @@ private:
 
 JSCarClass(JSEvtName)
     , public Object
-    , public ITestEventListener
+    , public INodeListener
 {
 
 public:
@@ -179,7 +179,7 @@ public:
             /* [in] */ const String& packageName)
             : mPackageName(packageName)
         {
-            Thread::constructor(String("CTestEventListener::_Thread"));
+            Thread::constructor(String("CNodeListener::_Thread"));
         }
 
         CARAPI Run();
