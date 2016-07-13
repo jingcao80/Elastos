@@ -68,13 +68,9 @@ public:
 //    CARAPI DescribeContents(
 //        /* [out] */ Int32* result);
 
-private:
-    CARAPI constructor(
-        /* [in] */ IParcel* in);
-
 public:
-    Int32 timeInterval;
-    IDurationTimeUnit timeUnit;
+    Int32 mTimeInterval;
+    IDurationTimeUnit mTimeUnit;
     //static const AutoPtr<IParcelable> AutoPtr< ::Creator<Duration> > CREATOR;
 };
 

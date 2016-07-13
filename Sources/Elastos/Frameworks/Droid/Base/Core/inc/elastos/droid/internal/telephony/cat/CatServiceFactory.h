@@ -2,13 +2,7 @@
 #define __ELASTOS_DROID_INTERNAL_TELEPHONY_CAT_CATSERVICEFACTORY_H__
 
 #include "elastos/droid/ext/frameworkext.h"
-#include "elastos/core/Object.h"
-
-// import android.telephony.TelephonyManager;
-// import com.android.internal.telephony.uicc.IccCardApplicationStatus.AppType;
-// import com.android.internal.telephony.uicc.IccFileHandler;
-// import com.android.internal.telephony.uicc.UiccCardApplication;
-// import com.android.internal.telephony.uicc.UiccController;
+#include <elastos/core/Object.h>
 
 using Elastos::Droid::Content::IContext;
 using Elastos::Droid::Internal::Telephony::Cat::ICatService;
@@ -27,12 +21,8 @@ namespace Cat {
   * {@hide}
   */
 class CatServiceFactory
-    : public Object
-    //, public ICatServiceFactory
 {
 public:
-    //CAR_INTERFACE_DECL();
-
     /**
       * Used for instantiating the Service from the Card.
       *
@@ -51,12 +41,12 @@ public:
     static CARAPI_(AutoPtr<ICatService>) GetCatService(
         /* [in] */ Int32 slotId);
 
-    static CARAPI_(void) DisposeCatService(
+    static CARAPI DisposeCatService(
         /* [in] */ Int32 slotId);
 
 private:
     static AutoPtr<ArrayOf<ICatService*> > sCatServices;
-    static const Int32 sSimCount;// = TelephonyManager.getDefault().getSimCount();
+    static const Int32 sSimCount;
     // Protects singleton instance lazy initialization.
     static Object sInstanceLock;
 };

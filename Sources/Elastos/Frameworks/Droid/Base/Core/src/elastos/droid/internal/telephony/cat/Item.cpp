@@ -50,7 +50,6 @@ CAR_INTERFACE_IMPL_2(Item, Object, IItem, IParcelable);
 
 Item::Item()
 {
-    constructor(-1, String(NULL));
 }
 
 ECode Item::constructor()
@@ -63,20 +62,9 @@ ECode Item::constructor(
     /* [in] */ Int32 id,
     /* [in] */ const String& text)
 {
-    // ==================before translated======================
-    // this.id = id;
-    // this.text = text;
-    // this.icon = null;
-    return NOERROR;
-}
-
-ECode Item::constructor(
-    /* [in] */ IParcel* in)
-{
-    // ==================before translated======================
-    // id = in.readInt();
-    // text = in.readString();
-    // icon = in.readParcelable(null);
+    mId = id;
+    mText = text;
+    mIcon = NULL;
     return NOERROR;
 }
 
@@ -94,18 +82,18 @@ ECode Item::WriteToParcel(
     /* [in] */ IParcel* dest)
     ///* [in] */ Int32 flags)
 {
-    // ==================before translated======================
-    // dest.writeInt(id);
-    // dest.writeString(text);
-    // dest.writeParcelable(icon, flags);
-    assert(0);
+    dest->WriteInt32(mId);
+    dest->WriteString(mText);
+    IParcelable::Probe(mIcon)->WriteToParcel(dest);
     return NOERROR;
 }
 
 ECode Item::ReadFromParcel(
-    /* [in] */ IParcel* source)
+    /* [in] */ IParcel* in)
 {
-    constructor(source);
+    in->ReadInt32(&mId);
+    in->ReadString(&mText);
+    IParcelable::Probe(mIcon)->ReadFromParcel(in);
     return NOERROR;
 }
 
@@ -113,9 +101,7 @@ ECode Item::ToString(
     /* [out] */ String* result)
 {
     VALIDATE_NOT_NULL(result);
-    // ==================before translated======================
-    // return text;
-    assert(0);
+    *result = mText;
     return NOERROR;
 }
 

@@ -1,6 +1,9 @@
 
 #include "Elastos.Droid.Internal.h"
 #include "elastos/droid/internal/telephony/cat/CommandParams.h"
+#include "elastos/droid/internal/telephony/cat/CTextMessage.h"
+#include "elastos/droid/internal/telephony/cat/CInput.h"
+#include "elastos/droid/internal/telephony/cat/CToneSettings.h"
 
 namespace Elastos {
 namespace Droid {
@@ -14,17 +17,14 @@ namespace Cat {
 CommandParams::CommandParams(
     /* [in] */ CommandDetails* cmdDet)
 {
-    // ==================before translated======================
-    // mCmdDet = cmdDet;
+    mCmdDet = cmdDet;
 }
 
 ECode CommandParams::GetCommandType(
     /* [out] */ CommandType* result)
 {
     VALIDATE_NOT_NULL(result);
-    // ==================before translated======================
-    // return AppInterface.CommandType.fromInt(mCmdDet.typeOfCommand);
-    assert(0);
+    *result = mCmdDet->mTypeOfCommand;
     return NOERROR;
 }
 
@@ -33,9 +33,7 @@ ECode CommandParams::SetIcon(
     /* [out] */ Boolean* result)
 {
     VALIDATE_NOT_NULL(result);
-    // ==================before translated======================
-    // return true;
-    assert(0);
+    *result = TRUE;
     return NOERROR;
 }
 
@@ -43,10 +41,7 @@ ECode CommandParams::ToString(
     /* [out] */ String* result)
 {
     VALIDATE_NOT_NULL(result);
-    // ==================before translated======================
-    // return mCmdDet.toString();
-    assert(0);
-    return NOERROR;
+    return mCmdDet->ToString(result);
 }
 
 //=====================================================================
@@ -57,9 +52,7 @@ DisplayTextParams::DisplayTextParams(
     /* [in] */ ITextMessage* textMsg)
     : CommandParams(cmdDet)
 {
-    // ==================before translated======================
-    // super(cmdDet);
-    // mTextMsg = textMsg;
+    mTextMsg = textMsg;
 }
 
 ECode DisplayTextParams::SetIcon(
@@ -67,13 +60,13 @@ ECode DisplayTextParams::SetIcon(
     /* [out] */ Boolean* result)
 {
     VALIDATE_NOT_NULL(result);
-    // ==================before translated======================
-    // if (icon != null && mTextMsg != null) {
-    //     mTextMsg.icon = icon;
-    //     return true;
-    // }
-    // return false;
-    assert(0);
+    if (icon != NULL && mTextMsg != NULL) {
+        AutoPtr<CTextMessage> _mTextMsg = (CTextMessage*)mTextMsg.Get();
+        _mTextMsg->mIcon = icon;
+        *result = TRUE;
+        return NOERROR;
+    }
+    *result = FALSE;
     return NOERROR;
 }
 
@@ -87,25 +80,23 @@ LaunchBrowserParams::LaunchBrowserParams(
     /* [in] */ LaunchBrowserMode mode)
     : CommandParams(cmdDet)
 {
-    // ==================before translated======================
-    // super(cmdDet);
-    // mConfirmMsg = confirmMsg;
-    // mMode = mode;
-    // mUrl = url;
+    mConfirmMsg = confirmMsg;
+    mMode = mode;
+    mUrl = url;
 }
 
 ECode LaunchBrowserParams::SetIcon(
     /* [in] */ IBitmap* icon,
     /* [out] */ Boolean* result)
 {
-    VALIDATE_NOT_NULL(result);
-    // ==================before translated======================
-    // if (icon != null && mConfirmMsg != null) {
-    //     mConfirmMsg.icon = icon;
-    //     return true;
-    // }
-    // return false;
-    assert(0);
+    VALIDATE_NOT_NULL(result)
+    if (icon != NULL && mConfirmMsg != NULL) {
+        AutoPtr<CTextMessage> _mConfirmMsg = (CTextMessage*)mConfirmMsg.Get();
+        _mConfirmMsg->mIcon = icon;
+        *result = TRUE;
+        return NOERROR;
+    }
+    *result = FALSE;
     return NOERROR;
 }
 
@@ -117,9 +108,7 @@ SetEventListParams::SetEventListParams(
     /* [in] */ ArrayOf<Int32>* eventInfo)
     : CommandParams(cmdDet)
 {
-    // ==================before translated======================
-    // super(cmdDet);
-    // this.mEventInfo = eventInfo;
+    mEventInfo = eventInfo;
 }
 
 //=====================================================================
@@ -133,10 +122,8 @@ PlayToneParams::PlayToneParams(
     /* [in] */ Boolean vibrate)
     : CommandParams(cmdDet)
 {
-    // ==================before translated======================
-    // super(cmdDet);
-    // mTextMsg = textMsg;
-    // mSettings = new ToneSettings(duration, tone, vibrate);
+    mTextMsg = textMsg;
+    CToneSettings::New(duration, tone, vibrate, (IToneSettings**)&mSettings);
 }
 
 ECode PlayToneParams::SetIcon(
@@ -144,13 +131,13 @@ ECode PlayToneParams::SetIcon(
     /* [out] */ Boolean* result)
 {
     VALIDATE_NOT_NULL(result);
-    // ==================before translated======================
-    // if (icon != null && mTextMsg != null) {
-    //     mTextMsg.icon = icon;
-    //     return true;
-    // }
-    // return false;
-    assert(0);
+    if (icon != NULL && mTextMsg != NULL) {
+        AutoPtr<CTextMessage> _mTextMsg = (CTextMessage*)mTextMsg.Get();
+        _mTextMsg->mIcon = icon;
+        *result = TRUE;
+        return NOERROR;
+    }
+    *result = FALSE;
     return NOERROR;
 }
 
@@ -163,10 +150,8 @@ CallSetupParams::CallSetupParams(
     /* [in] */ ITextMessage* callMsg)
     : CommandParams(cmdDet)
 {
-    // ==================before translated======================
-    // super(cmdDet);
-    // mConfirmMsg = confirmMsg;
-    // mCallMsg = callMsg;
+    mConfirmMsg = confirmMsg;
+    mCallMsg = callMsg;
 }
 
 ECode CallSetupParams::SetIcon(
@@ -174,19 +159,23 @@ ECode CallSetupParams::SetIcon(
     /* [out] */ Boolean* result)
 {
     VALIDATE_NOT_NULL(result);
-    // ==================before translated======================
-    // if (icon == null) {
-    //     return false;
-    // }
-    // if (mConfirmMsg != null && mConfirmMsg.icon == null) {
-    //     mConfirmMsg.icon = icon;
-    //     return true;
-    // } else if (mCallMsg != null && mCallMsg.icon == null) {
-    //     mCallMsg.icon = icon;
-    //     return true;
-    // }
-    // return false;
-    assert(0);
+    if (icon == NULL) {
+        *result = FALSE;
+        return NOERROR;
+    }
+    AutoPtr<CTextMessage> _mConfirmMsg = (CTextMessage*)mConfirmMsg.Get();
+    AutoPtr<CTextMessage> _mCallMsg = (CTextMessage*)mCallMsg.Get();
+    if (_mConfirmMsg != NULL && _mConfirmMsg->mIcon == NULL) {
+        _mConfirmMsg->mIcon = icon;
+        *result = TRUE;
+        return NOERROR;
+    }
+    else if (_mCallMsg != NULL && _mCallMsg->mIcon == NULL) {
+        _mCallMsg->mIcon = icon;
+        *result = TRUE;
+        return NOERROR;
+    }
+    *result = FALSE;
     return NOERROR;
 }
 
@@ -199,10 +188,8 @@ SelectItemParams::SelectItemParams(
     /* [in] */ Boolean loadTitleIcon)
     : CommandParams(cmdDet)
 {
-    // ==================before translated======================
-    // super(cmdDet);
-    // mMenu = menu;
-    // mLoadTitleIcon = loadTitleIcon;
+    mMenu = menu;
+    mLoadTitleIcon = loadTitleIcon;
 }
 
 ECode SelectItemParams::SetIcon(
@@ -210,23 +197,24 @@ ECode SelectItemParams::SetIcon(
     /* [out] */ Boolean* result)
 {
     VALIDATE_NOT_NULL(result);
-    // ==================before translated======================
-    // if (icon != null && mMenu != null) {
-    //     if (mLoadTitleIcon && mMenu.titleIcon == null) {
-    //         mMenu.titleIcon = icon;
-    //     } else {
-    //         for (Item item : mMenu.items) {
-    //             if (item.icon != null) {
-    //                 continue;
-    //             }
-    //             item.icon = icon;
-    //             break;
-    //         }
-    //     }
-    //     return true;
-    // }
-    // return false;
-    assert(0);
+    if (icon != NULL && mMenu != NULL) {
+        assert(0 && "TODO");
+        // if (mLoadTitleIcon && mMenu->mTitleIcon == NULL) {
+        //     mMenu->mTitleIcon = icon;
+        // }
+        // else {
+        //     for (Item item : mMenu->mItems) {
+        //         if (item->mIcon != NULL) {
+        //             continue;
+        //         }
+        //         item->mIcon = icon;
+        //         break;
+        //     }
+        // }
+        *result = TRUE;
+        return NOERROR;
+    }
+    *result = FALSE;
     return NOERROR;
 }
 
@@ -238,9 +226,7 @@ GetInputParams::GetInputParams(
     /* [in] */ IInput* input)
     : CommandParams(cmdDet)
 {
-    // ==================before translated======================
-    // super(cmdDet);
-    // mInput = input;
+    mInput = input;
 }
 
 ECode GetInputParams::SetIcon(
@@ -248,12 +234,11 @@ ECode GetInputParams::SetIcon(
     /* [out] */ Boolean* result)
 {
     VALIDATE_NOT_NULL(result);
-    // ==================before translated======================
-    // if (icon != null && mInput != null) {
-    //     mInput.icon = icon;
-    // }
-    // return true;
-    assert(0);
+    if (icon != NULL && mInput != NULL) {
+        AutoPtr<CInput> _mInput = (CInput*)mInput.Get();
+        _mInput->mIcon = icon;
+    }
+    *result = TRUE;
     return NOERROR;
 }
 
@@ -266,10 +251,8 @@ BIPClientParams::BIPClientParams(
     /* [in] */ Boolean has_alpha_id)
     : CommandParams(cmdDet)
 {
-    // ==================before translated======================
-    // super(cmdDet);
-    // mTextMsg = textMsg;
-    // mHasAlphaId = has_alpha_id;
+    mTextMsg = textMsg;
+    mHasAlphaId = has_alpha_id;
 }
 
 ECode BIPClientParams::SetIcon(
@@ -277,13 +260,13 @@ ECode BIPClientParams::SetIcon(
     /* [out] */ Boolean* result)
 {
     VALIDATE_NOT_NULL(result);
-    // ==================before translated======================
-    // if (icon != null && mTextMsg != null) {
-    //     mTextMsg.icon = icon;
-    //     return true;
-    // }
-    // return false;
-    assert(0);
+    if (icon != NULL && mTextMsg != NULL) {
+        AutoPtr<CTextMessage> _mTextMsg = (CTextMessage*)mTextMsg.Get();
+        _mTextMsg->mIcon = icon;
+        *result = TRUE;
+        return NOERROR;
+    }
+    *result = FALSE;
     return NOERROR;
 }
 
@@ -295,9 +278,7 @@ ActivateParams::ActivateParams(
     /* [in] */ Int32 target)
     : CommandParams(cmdDet)
 {
-    // ==================before translated======================
-    // super(cmdDet);
-    // mActivateTarget = target;
+    mActivateTarget = target;
 }
 
 //=====================================================================
@@ -310,10 +291,8 @@ SendSMSParams::SendSMSParams(
     /* [in] */ const String& smsPdu)
     : DisplayTextParams(cmdDet, textmessage)
 {
-    // ==================before translated======================
-    // super(cmdDet, textmessage);
-    // smscAddress = smscaddress;
-    // pdu = smsPdu;
+    mSmscAddress = smscaddress;
+    mPdu = smsPdu;
 }
 
 //=====================================================================
@@ -325,9 +304,7 @@ SendUSSDParams::SendUSSDParams(
     /* [in] */ const String& ussdstring)
     : DisplayTextParams(cmdDet, textmessage)
 {
-    // ==================before translated======================
-    // super(cmdDet, textmessage);
-    // ussdString = ussdstring;
+    mUssdString = ussdstring;
 }
 
 } // namespace Cat

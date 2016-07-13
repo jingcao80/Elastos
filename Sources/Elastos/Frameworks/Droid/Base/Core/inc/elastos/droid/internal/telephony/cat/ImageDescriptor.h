@@ -2,7 +2,7 @@
 #define __ELASTOS_DROID_INTERNAL_TELEPHONY_CAT_IMAGEDESCRIPTOR_H__
 
 #include "elastos/droid/ext/frameworkext.h"
-#include "elastos/core/Object.h"
+#include <elastos/core/Object.h>
 
 namespace Elastos {
 namespace Droid {

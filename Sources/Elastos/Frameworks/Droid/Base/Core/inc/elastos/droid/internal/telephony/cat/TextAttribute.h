@@ -36,15 +36,15 @@ public:
         /* [in] */ TextColor color);
 
 public:
-    Int32 start;
-    Int32 length;
-    TextAlignment align;
-    FontSize size;
-    Boolean bold;
-    Boolean italic;
-    Boolean underlined;
-    Boolean strikeThrough;
-    TextColor color;
+    Int32 mStart;
+    Int32 mLength;
+    TextAlignment mAlign;
+    FontSize mSize;
+    Boolean mBold;
+    Boolean mItalic;
+    Boolean mUnderlined;
+    Boolean mStrikeThrough;
+    TextColor mColor;
 };
 
 } // namespace Cat

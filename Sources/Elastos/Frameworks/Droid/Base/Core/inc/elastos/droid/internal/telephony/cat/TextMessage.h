@@ -46,6 +46,7 @@ public:
     TextMessage();
 
     CARAPI constructor();
+
     // @Override
     //CARAPI DescribeContents(
     //    /* [out] */ Int32* result);
@@ -56,21 +57,17 @@ public:
         ///* [in] */ Int32 flags);
 
     CARAPI ReadFromParcel(
-            /* [in] */ IParcel* source);
-
-private:
-    CARAPI constructor(
-        /* [in] */ IParcel* in);
+            /* [in] */ IParcel* in);
 
 public:
-    String title;
-    String text;
-    AutoPtr<IBitmap> icon;
-    Boolean iconSelfExplanatory;
-    Boolean isHighPriority;
-    Boolean responseNeeded;
-    Boolean userClear;
-    AutoPtr<IDuration> duration;
+    String mTitle;
+    String mText;
+    AutoPtr<IBitmap> mIcon;
+    Boolean mIconSelfExplanatory;
+    Boolean mIsHighPriority;
+    Boolean mResponseNeeded;
+    Boolean mUserClear;
+    AutoPtr<IDuration> mDuration;
     //static const AutoPtr<IParcelable> AutoPtr< ::Creator<TextMessage> > CREATOR;
 };
 

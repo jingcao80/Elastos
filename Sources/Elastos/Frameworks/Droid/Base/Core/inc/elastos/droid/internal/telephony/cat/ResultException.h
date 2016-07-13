@@ -17,7 +17,7 @@ namespace Cat {
   */
 class ResultException
     : public Object
-    //, public ICatException
+    , public IResultException
 {
 public:
     CAR_INTERFACE_DECL();

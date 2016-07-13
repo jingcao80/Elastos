@@ -1,6 +1,21 @@
 
 #include "Elastos.Droid.Internal.h"
 #include "elastos/droid/internal/telephony/cat/RilMessageDecoder.h"
+#include "elastos/droid/internal/telephony/cat/CatLog.h"
+#include "elastos/droid/internal/telephony/cat/CatService.h"
+#include "elastos/droid/internal/telephony/uicc/CIccUtils.h"
+#include "elastos/droid/telephony/CTelephonyManagerHelper.h"
+
+#include <elastos/core/StringUtils.h>
+
+using Elastos::Droid::Telephony::ITelephonyManager;
+using Elastos::Droid::Telephony::ISubscriptionManager;
+using Elastos::Droid::Telephony::ITelephonyManagerHelper;
+using Elastos::Droid::Telephony::CTelephonyManagerHelper;
+using Elastos::Droid::Internal::Telephony::Uicc::IIccUtils;
+using Elastos::Droid::Internal::Telephony::Uicc::CIccUtils;
+
+using Elastos::Core::StringUtils;
 
 namespace Elastos {
 namespace Droid {
@@ -11,46 +26,66 @@ namespace Cat {
 //=====================================================================
 //                    RilMessageDecoder::StateStart
 //=====================================================================
+RilMessageDecoder::StateStart::StateStart(
+    /* [in] */ RilMessageDecoder* host)
+    : mHost(host)
+{
+}
+
 ECode RilMessageDecoder::StateStart::ProcessMessage(
     /* [in] */ IMessage* msg,
     /* [out] */ Boolean* result)
 {
     VALIDATE_NOT_NULL(result);
-    // ==================before translated======================
-    // if (msg.what == CMD_START) {
-    //     if (decodeMessageParams((RilMessage)msg.obj)) {
-    //         transitionTo(mStateCmdParamsReady);
-    //     }
-    // } else {
-    //     CatLog.d(this, "StateStart unexpected expecting START=" +
-    //              CMD_START + " got " + msg.what);
-    // }
-    // return true;
-    assert(0);
+    Int32 what = 0;
+    msg->GetWhat(&what);
+    if (what == CMD_START) {
+        AutoPtr<IInterface> obj;
+        msg->GetObj((IInterface**)&obj);
+        if (mHost->DecodeMessageParams((RilMessage*)(IObject*)obj.Get())) {
+            mHost->TransitionTo(mHost->mStateCmdParamsReady);
+        }
+    }
+    else {
+        CatLog::D(IState::Probe(this), String("StateStart unexpected expecting START=") +
+                StringUtils::ToString(CMD_START) + String(" got ") + StringUtils::ToString(what));
+    }
+    *result = TRUE;
     return NOERROR;
 }
 
 //=====================================================================
 //                RilMessageDecoder::StateCmdParamsReady
 //=====================================================================
+RilMessageDecoder::StateCmdParamsReady::StateCmdParamsReady(
+    /* [in] */ RilMessageDecoder* host)
+    : mHost(host)
+{
+}
+
 ECode RilMessageDecoder::StateCmdParamsReady::ProcessMessage(
     /* [in] */ IMessage* msg,
     /* [out] */ Boolean* result)
 {
     VALIDATE_NOT_NULL(result);
-    // ==================before translated======================
-    // if (msg.what == CMD_PARAMS_READY) {
-    //     mCurrentRilMessage.mResCode = ResultCode.fromInt(msg.arg1);
-    //     mCurrentRilMessage.mData = msg.obj;
-    //     sendCmdForExecution(mCurrentRilMessage);
-    //     transitionTo(mStateStart);
-    // } else {
-    //     CatLog.d(this, "StateCmdParamsReady expecting CMD_PARAMS_READY="
-    //              + CMD_PARAMS_READY + " got " + msg.what);
-    //     deferMessage(msg);
-    // }
-    // return true;
-    assert(0);
+    Int32 what = 0;
+    msg->GetWhat(&what);
+    AutoPtr<IInterface> obj;
+    msg->GetObj((IInterface**)&obj);
+    Int32 arg1 = 0;
+    msg->GetArg1(&arg1);
+    if (what == CMD_PARAMS_READY) {
+        mHost->mCurrentRilMessage->mResCode = arg1;
+        mHost->mCurrentRilMessage->mData = obj;
+        mHost->SendCmdForExecution(mHost->mCurrentRilMessage);
+        mHost->TransitionTo(mHost->mStateStart);
+    }
+    else {
+        CatLog::D(IState::Probe(this), String("StateCmdParamsReady expecting CMD_PARAMS_READY=")
+                + StringUtils::ToString(CMD_PARAMS_READY) + String(" got ") + StringUtils::ToString(what));
+        mHost->DeferMessage(msg);
+    }
+    *result = TRUE;
     return NOERROR;
 }
 
@@ -68,38 +103,39 @@ AutoPtr<RilMessageDecoder> RilMessageDecoder::GetInstance(
     /* [in] */ IIccFileHandler* fh,
     /* [in] */ Int32 slotId)
 {
-    // ==================before translated======================
-    // if (null == mInstance) {
-    //     mSimCount = TelephonyManager.getDefault().getSimCount();
-    //     mInstance = new RilMessageDecoder[mSimCount];
-    //     for (int i = 0; i < mSimCount; i++) {
-    //         mInstance[i] = null;
-    //     }
-    // }
-    //
-    // if (slotId != SubscriptionManager.INVALID_SLOT_ID && slotId < mSimCount) {
-    //     if (null == mInstance[slotId]) {
-    //         mInstance[slotId] = new RilMessageDecoder(caller, fh);
-    //     }
-    // } else {
-    //     CatLog.d("RilMessageDecoder", "invaild slot id: " + slotId);
-    //     return null;
-    // }
-    //
-    // return mInstance[slotId];
-    assert(0);
-    AutoPtr<RilMessageDecoder> empty;
-    return empty;
+    if (NULL == mInstance) {
+        AutoPtr<ITelephonyManagerHelper> hlp;
+        CTelephonyManagerHelper::AcquireSingleton((ITelephonyManagerHelper**)&hlp);
+        AutoPtr<ITelephonyManager> tm;
+        hlp->GetDefault((ITelephonyManager**)&tm);
+        tm->GetSimCount(&mSimCount);
+        assert(0 && "TODO");
+        // mInstance = ArrayOf<RilMessageDecoder*>::Alloc(mSimCount);
+        for (Int32 i = 0; i < mSimCount; i++) {
+            (*mInstance)[i] = NULL;
+        }
+    }
+
+    if (slotId != ISubscriptionManager::INVALID_SLOT_ID && slotId < mSimCount) {
+        if (NULL == (*mInstance)[slotId]) {
+            (*mInstance)[slotId] = new RilMessageDecoder(caller, fh);
+        }
+    }
+    else {
+        CatLog::D(String("RilMessageDecoder"), String("invaild slot id: ") + StringUtils::ToString(slotId));
+        return NULL;
+    }
+
+    return (*mInstance)[slotId];
 }
 
 ECode RilMessageDecoder::SendStartDecodingMessageParams(
     /* [in] */ RilMessage* rilMsg)
 {
-    // ==================before translated======================
-    // Message msg = obtainMessage(CMD_START);
-    // msg.obj = rilMsg;
-    // sendMessage(msg);
-    assert(0);
+    AutoPtr<IMessage> msg;
+    ObtainMessage(CMD_START, (IMessage**)&msg);
+    msg->SetObj((IInterface*)(IObject*)rilMsg);
+    SendMessage(msg);
     return NOERROR;
 }
 
@@ -107,28 +143,25 @@ ECode RilMessageDecoder::SendMsgParamsDecoded(
     /* [in] */ ResultCode resCode,
     /* [in] */ CommandParams* cmdParams)
 {
-    // ==================before translated======================
-    // Message msg = obtainMessage(RilMessageDecoder.CMD_PARAMS_READY);
-    // msg.arg1 = resCode.value();
-    // msg.obj = cmdParams;
-    // sendMessage(msg);
-    assert(0);
+    AutoPtr<IMessage> msg;
+    ObtainMessage(CMD_PARAMS_READY, (IMessage**)&msg);
+    msg->SetArg1(resCode);
+    msg->SetObj((IInterface*)(IObject*)cmdParams);
+    SendMessage(msg);
     return NOERROR;
 }
 
 ECode RilMessageDecoder::Dispose(
     /* [in] */ Int32 slotId)
 {
-    // ==================before translated======================
-    // quitNow();
-    // mStateStart = null;
-    // mStateCmdParamsReady = null;
-    // mCmdParamsFactory.dispose();
-    // mCmdParamsFactory = null;
-    // mCurrentRilMessage = null;
-    // mCaller = null;
-    // mInstance[slotId] = null;
-    assert(0);
+    QuitNow();
+    mStateStart = NULL;
+    mStateCmdParamsReady = NULL;
+    mCmdParamsFactory->Dispose();
+    mCmdParamsFactory = NULL;
+    mCurrentRilMessage = NULL;
+    mCaller = NULL;
+    (*mInstance)[slotId] = NULL;
     return NOERROR;
 }
 
@@ -136,78 +169,78 @@ RilMessageDecoder::RilMessageDecoder(
     /* [in] */ IHandler* caller,
     /* [in] */ IIccFileHandler* fh)
 {
-    // ==================before translated======================
-    // super("RilMessageDecoder");
-    //
-    // addState(mStateStart);
-    // addState(mStateCmdParamsReady);
-    // setInitialState(mStateStart);
-    //
-    // mCaller = caller;
-    // mCmdParamsFactory = CommandParamsFactory.getInstance(this, fh);
+    StateMachine::constructor(String("RilMessageDecoder"));
+    AddState(mStateStart);
+    AddState(mStateCmdParamsReady);
+    SetInitialState(mStateStart);
+
+    mCaller = caller;
+    mCmdParamsFactory = CommandParamsFactory::GetInstance(this, fh);
 }
 
 RilMessageDecoder::RilMessageDecoder()
 {
-    // ==================before translated======================
-    // super("RilMessageDecoder");
+    StateMachine::constructor(String("RilMessageDecoder"));
 }
 
 void RilMessageDecoder::SendCmdForExecution(
     /* [in] */ RilMessage* rilMsg)
 {
-    // ==================before translated======================
-    // Message msg = mCaller.obtainMessage(CatService.MSG_ID_RIL_MSG_DECODED,
-    //         new RilMessage(rilMsg));
-    // msg.sendToTarget();
-    assert(0);
+    AutoPtr<RilMessage> p = new RilMessage(rilMsg);
+    AutoPtr<IMessage> msg;
+    mCaller->ObtainMessage(CatService::MSG_ID_RIL_MSG_DECODED,
+            (IInterface*)(IObject*)p.Get(), (IMessage**)&msg);
+    msg->SendToTarget();
 }
 
 Boolean RilMessageDecoder::DecodeMessageParams(
     /* [in] */ RilMessage* rilMsg)
 {
-    // ==================before translated======================
-    // boolean decodingStarted;
-    //
-    // mCurrentRilMessage = rilMsg;
-    // switch(rilMsg.mId) {
-    // case CatService.MSG_ID_SESSION_END:
-    // case CatService.MSG_ID_CALL_SETUP:
-    //     mCurrentRilMessage.mResCode = ResultCode.OK;
-    //     sendCmdForExecution(mCurrentRilMessage);
-    //     decodingStarted = false;
-    //     break;
-    // case CatService.MSG_ID_PROACTIVE_COMMAND:
-    // case CatService.MSG_ID_EVENT_NOTIFY:
-    // case CatService.MSG_ID_REFRESH:
-    //     byte[] rawData = null;
-    //     try {
-    //         rawData = IccUtils.hexStringToBytes((String) rilMsg.mData);
-    //     } catch (Exception e) {
-    //         // zombie messages are dropped
-    //         CatLog.d(this, "decodeMessageParams dropping zombie messages");
-    //         decodingStarted = false;
-    //         break;
-    //     }
-    //     try {
-    //         // Start asynch parsing of the command parameters.
-    //         mCmdParamsFactory.make(BerTlv.decode(rawData));
-    //         decodingStarted = true;
-    //     } catch (ResultException e) {
-    //         // send to Service for proper RIL communication.
-    //         CatLog.d(this, "decodeMessageParams: caught ResultException e=" + e);
-    //         mCurrentRilMessage.mResCode = e.result();
-    //         sendCmdForExecution(mCurrentRilMessage);
-    //         decodingStarted = false;
-    //     }
-    //     break;
-    // default:
-    //     decodingStarted = false;
-    //     break;
-    // }
-    // return decodingStarted;
-    assert(0);
-    return FALSE;
+    Boolean decodingStarted;
+
+    mCurrentRilMessage = rilMsg;
+    switch(rilMsg->mId) {
+    case CatService::MSG_ID_SESSION_END:
+    case CatService::MSG_ID_CALL_SETUP: {
+        mCurrentRilMessage->mResCode = ResultCode_OK;
+        SendCmdForExecution(mCurrentRilMessage);
+        decodingStarted = FALSE;
+        break;
+    }
+    case CatService::MSG_ID_PROACTIVE_COMMAND:
+    case CatService::MSG_ID_EVENT_NOTIFY:
+    case CatService::MSG_ID_REFRESH: {
+        AutoPtr<ArrayOf<Byte> > rawData;
+        // try {
+            String str;
+            ICharSequence::Probe(rilMsg->mData)->ToString(&str);
+            AutoPtr<Elastos::Droid::Internal::Telephony::Uicc::IIccUtils> iccu;
+            CIccUtils::AcquireSingleton((Elastos::Droid::Internal::Telephony::Uicc::IIccUtils**)&iccu);
+            iccu->HexStringToBytes(str, (ArrayOf<Byte>**)&rawData);
+        // } catch (Exception e) {
+        //     // zombie messages are dropped
+        //     CatLog.d(this, "decodeMessageParams dropping zombie messages");
+        //     decodingStarted = FALSE;
+        //     break;
+        // }
+        // try {
+            // Start asynch parsing of the command parameters.
+            mCmdParamsFactory->Make(BerTlv::Decode(rawData));
+            decodingStarted = TRUE;
+        // } catch (ResultException e) {
+        //     // send to Service for proper RIL communication.
+        //     CatLog.d(this, "decodeMessageParams: caught ResultException e=" + e);
+        //     mCurrentRilMessage.mResCode = e.result();
+        //     sendCmdForExecution(mCurrentRilMessage);
+        //     decodingStarted = FALSE;
+        // }
+        break;
+    }
+    default:
+        decodingStarted = FALSE;
+        break;
+    }
+    return decodingStarted;
 }
 
 } // namespace Cat

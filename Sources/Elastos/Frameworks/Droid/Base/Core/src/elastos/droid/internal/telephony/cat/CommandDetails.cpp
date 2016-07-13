@@ -2,6 +2,10 @@
 #include "Elastos.Droid.Internal.h"
 #include "elastos/droid/internal/telephony/cat/CommandDetails.h"
 
+#include <elastos/core/StringUtils.h>
+
+using Elastos::Core::StringUtils;
+
 namespace Elastos {
 namespace Droid {
 namespace Internal {
@@ -51,14 +55,8 @@ CommandDetails::CommandDetails()
 {
 }
 
-ECode CommandDetails::constructor(
-    /* [in] */ IParcel* in)
+ECode CommandDetails::constructor()
 {
-    // ==================before translated======================
-    // compRequired = in.readInt() != 0;
-    // commandNumber = in.readInt();
-    // typeOfCommand = in.readInt();
-    // commandQualifier = in.readInt();
     return NOERROR;
 }
 
@@ -66,9 +64,7 @@ ECode CommandDetails::GetTag(
     /* [out] */ ComprehensionTlvTag* result)
 {
     VALIDATE_NOT_NULL(result);
-    // ==================before translated======================
-    // return ComprehensionTlvTag.COMMAND_DETAILS;
-    assert(0);
+    *result = ComprehensionTlvTag_COMMAND_DETAILS;
     return NOERROR;
 }
 
@@ -77,32 +73,32 @@ ECode CommandDetails::CompareTo(
     /* [out] */ Boolean* result)
 {
     VALIDATE_NOT_NULL(result);
-    // ==================before translated======================
-    // return (this.compRequired == other.compRequired &&
-    //         this.commandNumber == other.commandNumber &&
-    //         this.commandQualifier == other.commandQualifier &&
-    //         this.typeOfCommand == other.typeOfCommand);
-    assert(0);
+    *result = (mCompRequired == other->mCompRequired &&
+            mCommandNumber == other->mCommandNumber &&
+            mCommandQualifier == other->mCommandQualifier &&
+            mTypeOfCommand == other->mTypeOfCommand);
+    return NOERROR;
+}
+
+ECode CommandDetails::ReadFromParcel(
+    /* [in] */ IParcel* in)
+{
+    Int32 compRequired = 0;
+    in->ReadInt32(&compRequired);
+    mCompRequired = compRequired != 0;
+    in->ReadInt32(&mCommandNumber);
+    in->ReadInt32(&mTypeOfCommand);
+    in->ReadInt32(&mCommandQualifier);
     return NOERROR;
 }
 
 ECode CommandDetails::WriteToParcel(
     /* [in] */ IParcel* dest)
-    ///* [in] */ Int32 flags)
 {
-    // ==================before translated======================
-    // dest.writeInt(compRequired ? 1 : 0);
-    // dest.writeInt(commandNumber);
-    // dest.writeInt(typeOfCommand);
-    // dest.writeInt(commandQualifier);
-    assert(0);
-    return NOERROR;
-}
-
-ECode CommandDetails::ReadFromParcel(
-    /* [in] */ IParcel* source)
-{
-    constructor(source);
+    dest->WriteInt32(mCompRequired ? 1 : 0);
+    dest->WriteInt32(mCommandNumber);
+    dest->WriteInt32(mTypeOfCommand);
+    dest->WriteInt32(mCommandQualifier);
     return NOERROR;
 }
 
@@ -120,12 +116,10 @@ ECode CommandDetails::ToString(
     /* [out] */ String* result)
 {
     VALIDATE_NOT_NULL(result);
-    // ==================before translated======================
-    // return "CmdDetails: compRequired=" + compRequired +
-    //         " commandNumber=" + commandNumber +
-    //         " typeOfCommand=" + typeOfCommand +
-    //         " commandQualifier=" + commandQualifier;
-    assert(0);
+    *result = String("CmdDetails: compRequired=") + StringUtils::ToString(mCompRequired) +
+            String(" commandNumber=") + StringUtils::ToString(mCommandNumber) +
+            String(" typeOfCommand=") + StringUtils::ToString(mTypeOfCommand) +
+            String(" commandQualifier=") + StringUtils::ToString(mCommandQualifier);
     return NOERROR;
 }
 
@@ -136,9 +130,7 @@ ECode DeviceIdentities::GetTag(
     /* [out] */ ComprehensionTlvTag* result)
 {
     VALIDATE_NOT_NULL(result);
-    // ==================before translated======================
-    // return ComprehensionTlvTag.DEVICE_IDENTITIES;
-    assert(0);
+    *result = ComprehensionTlvTag_DEVICE_IDENTITIES;
     return NOERROR;
 }
 
@@ -149,9 +141,7 @@ ECode IconId::GetTag(
     /* [out] */ ComprehensionTlvTag* result)
 {
     VALIDATE_NOT_NULL(result);
-    // ==================before translated======================
-    // return ComprehensionTlvTag.ICON_ID;
-    assert(0);
+    *result = ComprehensionTlvTag_ICON_ID;
     return NOERROR;
 }
 
@@ -162,9 +152,7 @@ ECode ItemsIconId::GetTag(
     /* [out] */ ComprehensionTlvTag* result)
 {
     VALIDATE_NOT_NULL(result);
-    // ==================before translated======================
-    // return ComprehensionTlvTag.ITEM_ICON_ID_LIST;
-    assert(0);
+    *result = ComprehensionTlvTag_ITEM_ICON_ID_LIST;
     return NOERROR;
 }
 
@@ -175,9 +163,7 @@ ECode ActivateDescriptor::GetTag(
     /* [out] */ ComprehensionTlvTag* result)
 {
     VALIDATE_NOT_NULL(result);
-    // ==================before translated======================
-    // return ComprehensionTlvTag.ACTIVATE_DESCRIPTOR;
-    assert(0);
+    *result = ComprehensionTlvTag_ACTIVATE_DESCRIPTOR;
     return NOERROR;
 }
 

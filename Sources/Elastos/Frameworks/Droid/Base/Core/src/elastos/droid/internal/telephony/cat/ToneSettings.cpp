@@ -61,10 +61,9 @@ ECode ToneSettings::constructor(
     /* [in] */ Tone tone,
     /* [in] */ Boolean vibrate)
 {
-    // ==================before translated======================
-    // this.duration = duration;
-    // this.tone = tone;
-    // this.vibrate = vibrate;
+    mDuration = duration;
+    mTone = tone;
+    mVibrate = vibrate;
     return NOERROR;
 }
 
@@ -82,28 +81,20 @@ ECode ToneSettings::WriteToParcel(
     /* [in] */ IParcel* dest)
     ///* [in] */ Int32 flags)
 {
-    // ==================before translated======================
-    // dest.writeParcelable(duration, 0);
-    // dest.writeParcelable(tone, 0);
-    // dest.writeInt(vibrate ? 1 : 0);
-    assert(0);
+    IParcelable::Probe(mDuration)->WriteToParcel(dest);
+    dest->WriteInt32(mTone);
+    dest->WriteInt32(mVibrate ? 1 : 0);
     return NOERROR;
 }
 
 ECode ToneSettings::ReadFromParcel(
-    /* [in] */ IParcel* source)
-{
-    constructor(source);
-    return NOERROR;
-}
-
-ECode ToneSettings::constructor(
     /* [in] */ IParcel* in)
 {
-    // ==================before translated======================
-    // duration = in.readParcelable(null);
-    // tone = in.readParcelable(null);
-    // vibrate = in.readInt() == 1;
+    IParcelable::Probe(mDuration)->ReadFromParcel(in);
+    in->ReadInt32(&mTone);
+    Int32 vibrate = 0;
+    in->ReadInt32(&vibrate);
+    mVibrate = vibrate == 1;
     return NOERROR;
 }
 

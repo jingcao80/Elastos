@@ -8,11 +8,6 @@
 #include "elastos/droid/internal/telephony/cat/RilMessage.h"
 #include "elastos/droid/internal/telephony/cat/CommandParamsFactory.h"
 
-// import android.telephony.SubscriptionManager;
-// import com.android.internal.telephony.uicc.IccUtils;
-// import com.android.internal.telephony.PhoneConstants;
-// import android.telephony.TelephonyManager;
-
 using Elastos::Droid::Os::IMessage;
 using Elastos::Droid::Os::IHandler;
 using Elastos::Droid::Internal::Telephony::Uicc::IIccFileHandler;
@@ -37,20 +32,32 @@ private:
         : public State
     {
     public:
+        StateStart(
+            /* [in] */ RilMessageDecoder* host);
+
         // @Override
         CARAPI ProcessMessage(
             /* [in] */ IMessage* msg,
             /* [out] */ Boolean* result);
+
+    public:
+        RilMessageDecoder* mHost;
     };
 
     class StateCmdParamsReady
         : public State
     {
     public:
+        StateCmdParamsReady(
+            /* [in] */ RilMessageDecoder* host);
+
         // @Override
         CARAPI ProcessMessage(
             /* [in] */ IMessage* msg,
             /* [out] */ Boolean* result);
+
+    public:
+        RilMessageDecoder* mHost;
     };
 
 public:

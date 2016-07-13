@@ -1,5 +1,7 @@
 
-module {
+module
+{
+    interface Elastos.Droid.Graphics.IBitmap;
 
     namespace Elastos {
     namespace Droid {
@@ -12,6 +14,78 @@ module {
      * interface IParcelable
      */
     interface IInput {
+        SetIcon(
+            [in] IBitmap* Icon,
+            [out] Boolean* result);
+
+        GetIcon(
+            [out] IBitmap** result);
+
+        GetText(
+            [out] String* result);
+
+        SetText(
+            [in] String text);
+
+        GetDefaultText(
+            [out] String* result);
+
+        SetDefaultText(
+            [in] String defaltText);
+
+        GetMinLen(
+            [out] Int32* result);
+
+        SetMinLen(
+            [in] Int32 len);
+
+        GetMaxLen(
+            [out] Int32* result);
+
+        SetMaxLen(
+            [in] Int32 len);
+
+        GetUcs2(
+            [out] Boolean* result);
+
+        SetUcs2(
+            [in] Boolean text);
+
+        GetPacked(
+            [out] Boolean* result);
+
+        SetPacked(
+            [in] Boolean text);
+
+        GetDigitOnly(
+            [out] Boolean* result);
+
+        SetDigitOnly(
+            [in] Boolean text);
+
+        GetEcho(
+            [out] Boolean* result);
+
+        SetEcho(
+            [in] Boolean text);
+
+        GetYesNo(
+            [out] Boolean* result);
+
+        SetYesNo(
+            [in] Boolean text);
+
+        GetHelpAvailable(
+            [out] Boolean* result);
+
+        SetHelpAvailable(
+            [in] Boolean text);
+
+        GetDuration(
+            [out] IDuration** result);
+
+        SetDuration(
+            [in] IDuration* duration);
     }
 
     }//Cat

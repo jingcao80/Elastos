@@ -1,6 +1,8 @@
 #ifndef __ELASTOS_DROID_INTERNAL_TELEPHONY_CAT_COMMANDPARAMSFACTORY_H__
 #define __ELASTOS_DROID_INTERNAL_TELEPHONY_CAT_COMMANDPARAMSFACTORY_H__
 
+#include "Elastos.CoreLibrary.Utility.h"
+#include "Elastos.Droid.Graphics.h"
 #include "elastos/droid/ext/frameworkext.h"
 #include "elastos/droid/os/Handler.h"
 #include "elastos/droid/internal/telephony/cat/CommandParams.h"
@@ -10,13 +12,9 @@
 #include "elastos/droid/internal/telephony/cat/BerTlv.h"
 #include "elastos/droid/internal/telephony/cat/IconLoader.h"
 
-// import android.content.res.Resources;
-// import android.graphics.Bitmap;
-// import android.os.Handler;
-// import com.android.internal.telephony.GsmAlphabet;
-
 using Elastos::Droid::Internal::Telephony::Uicc::IIccFileHandler;
 using Elastos::Droid::Os::IMessage;
+
 using Elastos::Utility::IIterator;
 using Elastos::Utility::IList;
 
@@ -28,18 +26,6 @@ namespace Cat {
 
 class RilMessageDecoder;
 
-//// import static com.android.internal.telephony.cat.CatCmdMessage.
-// SetupEventListConstants.USER_ACTIVITY_EVENT;
-//// import static com.android.internal.telephony.cat.CatCmdMessage.
-// SetupEventListConstants.IDLE_SCREEN_AVAILABLE_EVENT;
-//// import static com.android.internal.telephony.cat.CatCmdMessage.
-// SetupEventListConstants.LANGUAGE_SELECTION_EVENT;
-//// import static com.android.internal.telephony.cat.CatCmdMessage.
-// SetupEventListConstants.BROWSER_TERMINATION_EVENT;
-//// import static com.android.internal.telephony.cat.CatCmdMessage.
-// SetupEventListConstants.BROWSING_STATUS_EVENT;
-//// import static com.android.internal.telephony.cat.CatCmdMessage.
-// SetupEventListConstants.HCI_CONNECTIVITY_EVENT;
 /**
   * Factory class, used for decoding raw byte arrays, received from baseband,
   * into a CommandParams object.

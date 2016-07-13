@@ -1,6 +1,18 @@
 
 #include "Elastos.Droid.Internal.h"
 #include "elastos/droid/internal/telephony/cat/CatServiceFactory.h"
+#include "elastos/droid/internal/telephony/cat/CCatService.h"
+#include "elastos/droid/telephony/CTelephonyManagerHelper.h"
+
+#include <elastos/core/AutoLock.h>
+
+using Elastos::Droid::Telephony::ITelephonyManagerHelper;
+using Elastos::Droid::Telephony::CTelephonyManagerHelper;
+using Elastos::Droid::Telephony::ITelephonyManager;
+using Elastos::Droid::Internal::Telephony::Uicc::IUiccCardApplication;
+using Elastos::Droid::Internal::Telephony::Uicc::IIccFileHandler;
+using Elastos::Droid::Internal::Telephony::Uicc::AppType;
+using Elastos::Droid::Internal::Telephony::Uicc::APPTYPE_UNKNOWN;
 
 namespace Elastos {
 namespace Droid {
@@ -11,12 +23,17 @@ namespace Cat {
 //=====================================================================
 //                          CatServiceFactory
 //=====================================================================
-//CAR_INTERFACE_IMPL(CatServiceFactory, Object, ICatServiceFactory);
+AutoPtr<ArrayOf<ICatService*> > CatServiceFactory::sCatServices;
 
 static Int32 InitSimCount()
 {
-    //TODO return TelephonyManager.getDefault().getSimCount();
-    return 1;
+    AutoPtr<ITelephonyManagerHelper> hlp;
+    CTelephonyManagerHelper::AcquireSingleton((ITelephonyManagerHelper**)&hlp);
+    AutoPtr<ITelephonyManager> tm;
+    hlp->GetDefault((ITelephonyManager**)&tm);
+    Int32 count = 0;
+    tm->GetSimCount(&count);
+    return count;
 }
 const Int32 CatServiceFactory::sSimCount = InitSimCount();
 Object CatServiceFactory::sInstanceLock;
@@ -27,57 +44,56 @@ AutoPtr<ICatService> CatServiceFactory::MakeCatService(
     /* [in] */ IUiccCard* ic,
     /* [in] */ Int32 slotId)
 {
-    // ==================before translated======================
-    // UiccCardApplication ca = null;
-    // IccFileHandler fh = null;
-    //
-    // if (sCatServices == null) {
-    //     sCatServices = new CatService[sSimCount];
-    // }
-    //
-    // if (ci == null || context == null || ic == null) return null;
-    //
-    // //get first valid filehandler in the card.
-    // for (int i = 0; i < ic.getNumApplications(); i++) {
-    //     ca = ic.getApplicationIndex(i);
-    //     if (ca != null && (ca.getType() != AppType.APPTYPE_UNKNOWN)) {
-    //         fh = ca.getIccFileHandler();
-    //         break;
-    //     }
-    // }
-    //
-    // synchronized (sInstanceLock) {
-    //     if (fh == null) return null;
-    //
-    //     if (sCatServices[slotId] == null) {
-    //         sCatServices[slotId] = new CatService(ci, context, fh, slotId);
-    //     }
-    // }
-    // return sCatServices[slotId];
-    assert(0);
-    AutoPtr<ICatService> empty;
-    return empty;
+    AutoPtr<IUiccCardApplication> ca;
+    AutoPtr<IIccFileHandler> fh;
+
+    if (sCatServices == NULL) {
+        sCatServices = ArrayOf<ICatService*>::Alloc(sSimCount);
+    }
+
+    if (ci == NULL || context == NULL || ic == NULL) {
+        return NULL;
+    }
+
+    //get first valid filehandler in the card.
+    Int32 num = 0;
+    ic->GetNumApplications(&num);
+    for (Int32 i = 0; i < num; i++) {
+        ic->GetApplicationIndex(i, (IUiccCardApplication**)&ca);
+        AppType type;
+        if (ca != NULL && ((ca->GetType(&type), type) != APPTYPE_UNKNOWN)) {
+            ca->GetIccFileHandler((IIccFileHandler**)&fh);
+            break;
+        }
+    }
+
+    {
+        AutoLock lock(sInstanceLock);
+        if (fh == NULL) {
+            return NULL;
+        }
+
+        if ((*sCatServices)[slotId] == NULL) {
+            CCatService::New(ci, context, fh, slotId, (ICatService**)&((*sCatServices)[slotId]));
+        }
+    }
+    return (*sCatServices)[slotId];
 }
 
 AutoPtr<ICatService> CatServiceFactory::GetCatService(
     /* [in] */ Int32 slotId)
 {
-    // ==================before translated======================
-    // return ((sCatServices == null) ? null : sCatServices[slotId]);
-    assert(0);
-    AutoPtr<ICatService> empty;
-    return empty;
+    return ((sCatServices == NULL) ? NULL : (*sCatServices)[slotId]);
 }
 
-void CatServiceFactory::DisposeCatService(
+ECode CatServiceFactory::DisposeCatService(
     /* [in] */ Int32 slotId)
 {
-    // ==================before translated======================
-    // if (sCatServices != null) {
-    //     sCatServices[slotId].dispose();
-    //     sCatServices[slotId] = null;
-    // }
-    assert(0);
+    if (sCatServices != NULL) {
+        (*sCatServices)[slotId]->Dispose();
+        (*sCatServices)[slotId] = NULL;
+    }
+    return NOERROR;
 }
 
 } // namespace Cat

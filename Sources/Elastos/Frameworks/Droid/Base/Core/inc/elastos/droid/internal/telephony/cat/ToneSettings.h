@@ -64,16 +64,12 @@ public:
         ///* [in] */ Int32 flags);
 
     CARAPI ReadFromParcel(
-        /* [in] */ IParcel* source);
-
-private:
-    CARAPI constructor(
         /* [in] */ IParcel* in);
 
 public:
-    AutoPtr<IDuration> duration;
-    Tone tone;
-    Boolean vibrate;
+    AutoPtr<IDuration> mDuration;
+    Tone mTone;
+    Boolean mVibrate;
     //static const AutoPtr<IParcelable> AutoPtr< ::Creator<ToneSettings> > CREATOR;
 };
 

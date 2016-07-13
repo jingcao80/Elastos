@@ -2,11 +2,8 @@
 #define __ELASTOS_DROID_INTERNAL_TELEPHONY_CAT_COMPREHENSIONTLV_H__
 
 #include "elastos/droid/ext/frameworkext.h"
-#include "elastos/core/Object.h"
+#include <elastos/core/Object.h>
 
-// import android.telephony.Rlog;
-// import java.util.ArrayList;
-// import java.util.List;
 using Elastos::Utility::IList;
 
 namespace Elastos {
@@ -39,7 +36,7 @@ public:
         /* [out] */ Int32* result);
 
     virtual CARAPI GetRawValue(
-        /* [out] */ ArrayOf<Byte>* result);
+        /* [out] */ ArrayOf<Byte>** result);
 
     /**
       * Parses a list of COMPREHENSION-TLV objects from a byte array.

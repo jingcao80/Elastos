@@ -50,19 +50,18 @@ CAR_INTERFACE_IMPL_2(Input, Object, IInput, IParcelable);
 
 Input::Input()
 {
-    // ==================before translated======================
-    // text = "";
-    // defaultText = null;
-    // icon = null;
-    // minLen = 0;
-    // maxLen = 1;
-    // ucs2 = false;
-    // packed = false;
-    // digitOnly = false;
-    // echo = false;
-    // yesNo = false;
-    // helpAvailable = false;
-    // duration = null;
+    mText = "";
+    mDefaultText = NULL;
+    mIcon = NULL;
+    mMinLen = 0;
+    mMaxLen = 1;
+    mUcs2 = FALSE;
+    mPacked = FALSE;
+    mDigitOnly = FALSE;
+    mEcho = FALSE;
+    mYesNo = FALSE;
+    mHelpAvailable = FALSE;
+    mDuration = NULL;
 }
 
 ECode Input::constructor()
@@ -84,27 +83,48 @@ ECode Input::WriteToParcel(
     /* [in] */ IParcel* dest)
     ///* [in] */ Int32 flags)
 {
-    // ==================before translated======================
-    // dest.writeString(text);
-    // dest.writeString(defaultText);
-    // dest.writeParcelable(icon, 0);
-    // dest.writeInt(minLen);
-    // dest.writeInt(maxLen);
-    // dest.writeInt(ucs2 ? 1 : 0);
-    // dest.writeInt(packed ? 1 : 0);
-    // dest.writeInt(digitOnly ? 1 : 0);
-    // dest.writeInt(echo ? 1 : 0);
-    // dest.writeInt(yesNo ? 1 : 0);
-    // dest.writeInt(helpAvailable ? 1 : 0);
-    // dest.writeParcelable(duration, 0);
-    assert(0);
+    dest->WriteString(mText);
+    dest->WriteString(mDefaultText);
+    IParcelable::Probe(mIcon)->WriteToParcel(dest);
+    dest->WriteInt32(mMinLen);
+    dest->WriteInt32(mMaxLen);
+    dest->WriteInt32(mUcs2 ? 1 : 0);
+    dest->WriteInt32(mPacked ? 1 : 0);
+    dest->WriteInt32(mDigitOnly ? 1 : 0);
+    dest->WriteInt32(mEcho ? 1 : 0);
+    dest->WriteInt32(mYesNo ? 1 : 0);
+    dest->WriteInt32(mHelpAvailable ? 1 : 0);
+    IParcelable::Probe(mDuration)->WriteToParcel(dest);
     return NOERROR;
 }
 
 ECode Input::ReadFromParcel(
-    /* [in] */ IParcel* source)
+    /* [in] */ IParcel* in)
 {
-    constructor(source);
+    in->ReadString(&mText);
+    in->ReadString(&mDefaultText);
+    IParcelable::Probe(mIcon)->ReadFromParcel(in);
+    in->ReadInt32(&mMinLen);
+    in->ReadInt32(&mMaxLen);
+    Int32 ucs2 = 0;
+    in->ReadInt32(&ucs2);
+    mUcs2 = ucs2 == 1 ? TRUE : FALSE;
+    Int32 packed = 0;
+    in->ReadInt32(&packed);
+    mPacked = packed == 1 ? TRUE : FALSE;
+    Int32 digitOnly = 0;
+    in->ReadInt32(&digitOnly);
+    mDigitOnly = digitOnly == 1 ? TRUE : FALSE;
+    Int32 echo = 0;
+    in->ReadInt32(&echo);
+    mEcho = echo == 1 ? TRUE : FALSE;
+    Int32 yesNo = 0;
+    in->ReadInt32(&yesNo);
+    mYesNo = yesNo == 1 ? TRUE : FALSE;
+    Int32 helpAvailable = 0;
+    in->ReadInt32(&helpAvailable);
+    mHelpAvailable = helpAvailable == 1 ? TRUE : FALSE;
+    IParcelable::Probe(mDuration)->ReadFromParcel(in);
     return NOERROR;
 }
 
@@ -113,28 +133,182 @@ ECode Input::SetIcon(
     /* [out] */ Boolean* result)
 {
     VALIDATE_NOT_NULL(result);
-    // ==================before translated======================
-    // return true;
-    assert(0);
+    *result = TRUE;
     return NOERROR;
 }
 
-ECode Input::constructor(
-    /* [in] */ IParcel* in)
+ECode Input::GetIcon(
+    /* [out] */ IBitmap** result)
 {
-    // ==================before translated======================
-    // text = in.readString();
-    // defaultText = in.readString();
-    // icon = in.readParcelable(null);
-    // minLen = in.readInt();
-    // maxLen = in.readInt();
-    // ucs2 = in.readInt() == 1 ? true : false;
-    // packed = in.readInt() == 1 ? true : false;
-    // digitOnly = in.readInt() == 1 ? true : false;
-    // echo = in.readInt() == 1 ? true : false;
-    // yesNo = in.readInt() == 1 ? true : false;
-    // helpAvailable = in.readInt() == 1 ? true : false;
-    // duration = in.readParcelable(null);
+    VALIDATE_NOT_NULL(result);
+    *result = mIcon;
+    REFCOUNT_ADD(*result)
+    return NOERROR;
+}
+
+ECode Input::GetText(
+    /* [out] */ String* result)
+{
+    VALIDATE_NOT_NULL(result);
+    *result = mText;
+    return NOERROR;
+}
+
+ECode Input::SetText(
+    /* [in] */ const String& text)
+{
+    mText = text;
+    return NOERROR;
+}
+
+ECode Input::GetDefaultText(
+    /* [out] */ String* result)
+{
+    VALIDATE_NOT_NULL(result);
+    *result = mDefaultText;
+    return NOERROR;
+}
+
+ECode Input::SetDefaultText(
+    /* [in] */ const String& defaltText)
+{
+    mDefaultText = defaltText;
+    return NOERROR;
+}
+
+ECode Input::GetMinLen(
+    /* [out] */ Int32* result)
+{
+    VALIDATE_NOT_NULL(result)
+    *result = mMinLen;
+    return NOERROR;
+}
+
+ECode Input::SetMinLen(
+    /* [in] */ Int32 len)
+{
+    mMinLen = len;
+    return NOERROR;
+}
+
+ECode Input::GetMaxLen(
+    /* [out] */ Int32* result)
+{
+    VALIDATE_NOT_NULL(result);
+    *result = mMaxLen;
+    return NOERROR;
+}
+
+ECode Input::SetMaxLen(
+    /* [in] */ Int32 len)
+{
+    mMaxLen = len;
+    return NOERROR;
+}
+
+ECode Input::GetUcs2(
+    /* [out] */ Boolean* result)
+{
+    VALIDATE_NOT_NULL(result);
+    *result = mUcs2;
+    return NOERROR;
+}
+
+ECode Input::SetUcs2(
+    /* [in] */ Boolean ucs2)
+{
+    mUcs2 = ucs2;
+    return NOERROR;
+}
+
+ECode Input::GetPacked(
+    /* [out] */ Boolean* result)
+{
+    VALIDATE_NOT_NULL(result);
+    *result = mPacked;
+    return NOERROR;
+}
+
+ECode Input::SetPacked(
+    /* [in] */ Boolean packed)
+{
+    mPacked = packed;
+    return NOERROR;
+}
+
+ECode Input::GetDigitOnly(
+    /* [out] */ Boolean* result)
+{
+    VALIDATE_NOT_NULL(result);
+    *result = mDigitOnly;
+    return NOERROR;
+}
+
+ECode Input::SetDigitOnly(
+    /* [in] */ Boolean digitOnly)
+{
+    mDigitOnly = digitOnly;
+    return NOERROR;
+}
+
+ECode Input::GetEcho(
+    /* [out] */ Boolean* result)
+{
+    VALIDATE_NOT_NULL(result);
+    *result = mEcho;
+    return NOERROR;
+}
+
+ECode Input::SetEcho(
+    /* [in] */ Boolean echo)
+{
+    mEcho = echo;
+    return NOERROR;
+}
+
+ECode Input::GetYesNo(
+    /* [out] */ Boolean* result)
+{
+    VALIDATE_NOT_NULL(result);
+    *result = mYesNo;
+    return NOERROR;
+}
+
+ECode Input::SetYesNo(
+    /* [in] */ Boolean yesNo)
+{
+    mYesNo = yesNo;
+    return NOERROR;
+}
+
+ECode Input::GetHelpAvailable(
+    /* [out] */ Boolean* result)
+{
+    VALIDATE_NOT_NULL(result);
+    *result = mHelpAvailable;
+    return NOERROR;
+}
+
+ECode Input::SetHelpAvailable(
+    /* [in] */ Boolean helpAvailable)
+{
+    mHelpAvailable = helpAvailable;
+    return NOERROR;
+}
+
+ECode Input::GetDuration(
+    /* [out] */ IDuration** result)
+{
+    VALIDATE_NOT_NULL(result)
+    *result = mDuration;
+    REFCOUNT_ADD(*result)
+    return NOERROR;
+}
+
+ECode Input::SetDuration(
+    /* [in] */ IDuration* duration)
+{
+    mDuration = duration;
     return NOERROR;
 }
 

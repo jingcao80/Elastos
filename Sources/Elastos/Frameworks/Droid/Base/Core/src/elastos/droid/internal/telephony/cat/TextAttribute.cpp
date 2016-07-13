@@ -28,16 +28,15 @@ ECode TextAttribute::constructor(
     /* [in] */ Boolean strikeThrough,
     /* [in] */ TextColor color)
 {
-    // ==================before translated======================
-    // this.start = start;
-    // this.length = length;
-    // this.align = align;
-    // this.size = size;
-    // this.bold = bold;
-    // this.italic = italic;
-    // this.underlined = underlined;
-    // this.strikeThrough = strikeThrough;
-    // this.color = color;
+    mStart = start;
+    mLength = length;
+    mAlign = align;
+    mSize = size;
+    mBold = bold;
+    mItalic = italic;
+    mUnderlined = underlined;
+    mStrikeThrough = strikeThrough;
+    mColor = color;
     return NOERROR;
 }
 

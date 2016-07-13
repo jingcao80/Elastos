@@ -2,7 +2,7 @@
 #define __ELASTOS_DROID_INTERNAL_TELEPHONY_CAT_ITEM_H__
 
 #include "elastos/droid/ext/frameworkext.h"
-#include "elastos/core/Object.h"
+#include <elastos/core/Object.h>
 
 using Elastos::Droid::Graphics::IBitmap;
 
@@ -56,9 +56,6 @@ public:
         /* [in] */ Int32 id,
         /* [in] */ const String& text);
 
-    CARAPI constructor(
-        /* [in] */ IParcel* in);
-
     // @Override
     //CARAPI DescribeContents(
     //    /* [out] */ Int32* result);
@@ -69,7 +66,7 @@ public:
         ///* [in] */ Int32 flags);
 
     CARAPI ReadFromParcel(
-        /* [in] */ IParcel* source);
+        /* [in] */ IParcel* in);
 
     // @Override
     CARAPI ToString(
@@ -77,11 +74,11 @@ public:
 
 public:
     /** Identifier of the item. */
-    Int32 id;
+    Int32 mId;
     /** Text string of the item. */
-    String text;
+    String mText;
     /** Icon of the item */
-    AutoPtr<IBitmap> icon;
+    AutoPtr<IBitmap> mIcon;
     //static const AutoPtr<IParcelable> AutoPtr< ::Creator<Item> > CREATOR;
 };
 

@@ -52,18 +52,17 @@ Duration::Duration()
 {
 }
 
-CARAPI Duration::constructor()
+ECode Duration::constructor()
 {
     return NOERROR;
 }
 
-CARAPI Duration::constructor(
+ECode Duration::constructor(
     /* [in] */ Int32 timeInterval,
     /* [in] */ IDurationTimeUnit timeUnit)
 {
-    // ==================before translated======================
-    // this.timeInterval = timeInterval;
-    // this.timeUnit = timeUnit;
+    mTimeInterval = timeInterval;
+    mTimeUnit = timeUnit;
     return NOERROR;
 }
 
@@ -71,17 +70,17 @@ ECode Duration::WriteToParcel(
     /* [in] */ IParcel* dest)
     ///* [in] */ Int32 flags)
 {
-    // ==================before translated======================
-    // dest.writeInt(timeInterval);
-    // dest.writeInt(timeUnit.ordinal());
-    assert(0);
+    dest->WriteInt32(mTimeInterval);
+    dest->WriteInt32(mTimeUnit);
     return NOERROR;
 }
 
 ECode Duration::ReadFromParcel(
-    /* [in] */ IParcel* dest)
+    /* [in] */ IParcel* in)
 {
-    constructor(dest);
+    in->ReadInt32(&mTimeInterval);
+    assert(0 && "TODO");
+    // mTimeUnit = TimeUnit.values()[in.readInt()];
     return NOERROR;
 }
 
@@ -94,15 +93,6 @@ ECode Duration::ReadFromParcel(
 //    assert(0);
 //    return NOERROR;
 //}
-
-CARAPI Duration::constructor(
-    /* [in] */ IParcel* in)
-{
-    // ==================before translated======================
-    // timeInterval = in.readInt();
-    // timeUnit = TimeUnit.values()[in.readInt()];
-    return NOERROR;
-}
 
 } // namespace Cat
 } // namespace Telephony

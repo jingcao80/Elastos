@@ -4,14 +4,6 @@
 #include "elastos/droid/ext/frameworkext.h"
 #include "elastos/core/Object.h"
 
-// import com.android.internal.telephony.EncodeException;
-// import com.android.internal.telephony.GsmAlphabet;
-// import java.util.TimeZone;
-// import android.os.SystemProperties;
-// import android.text.TextUtils;
-// import com.android.internal.telephony.cat.AppInterface.CommandType;
-// import java.io.UnsupportedEncodingException;
-
 using Elastos::IO::IByteArrayOutputStream;
 using Elastos::Utility::ICalendar;
 

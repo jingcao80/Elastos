@@ -14,7 +14,8 @@ class ValueObject
     : public Object
 {
 public:
-    virtual CARAPI_(ComprehensionTlvTag) GetTag() = 0;
+    virtual CARAPI GetTag(
+        /* [out] */ ComprehensionTlvTag* result) = 0;
 };
 
 /**
@@ -53,8 +54,7 @@ public:
 
     CommandDetails();
 
-    CARAPI constructor(
-        /* [in] */ IParcel* in);
+    CARAPI constructor();
 
     // @Override
     CARAPI GetTag(
@@ -92,8 +92,8 @@ public:
         /* [out] */ ComprehensionTlvTag* result);
 
 public:
-    Int32 sourceId;
-    Int32 destinationId;
+    Int32 mSourceId;
+    Int32 mDestinationId;
 };
 
 // Container class to hold icon identifier value.
@@ -106,8 +106,8 @@ public:
         /* [out] */ ComprehensionTlvTag* result);
 
 public:
-    Int32 recordNumber;
-    Boolean selfExplanatory;
+    Int32 mRecordNumber;
+    Boolean mSelfExplanatory;
 };
 
 // Container class to hold item icon identifier list value.
@@ -120,8 +120,8 @@ public:
         /* [out] */ ComprehensionTlvTag* result);
 
 public:
-    AutoPtr<ArrayOf<Int32> > recordNumbers;
-    Boolean selfExplanatory;
+    AutoPtr<ArrayOf<Int32> > mRecordNumbers;
+    Boolean mSelfExplanatory;
 };
 
 class ActivateDescriptor
@@ -133,7 +133,7 @@ public:
         /* [out] */ ComprehensionTlvTag* result);
 
 public:
-    Int32 target;
+    Int32 mTarget;
 };
 
 } // namespace Cat

@@ -590,10 +590,10 @@ void CatService::HandleCommand(
         }
         case LAUNCH_BROWSER: {
             AutoPtr<TextMessage> tm = (TextMessage*)(((LaunchBrowserParams*) cmdParams)->mConfirmMsg.Get());
-            if ((tm->text != NULL)
-                    && (tm->text.Equals(STK_DEFAULT))) {
+            if ((tm->mText != NULL)
+                    && (tm->mText.Equals(STK_DEFAULT))) {
                 mContext->GetText(R::string::launchBrowserDefault, (ICharSequence**)&message);
-                message->ToString(&(tm->text));
+                message->ToString(&(tm->mText));
             }
             break;
         }
@@ -616,10 +616,10 @@ void CatService::HandleCommand(
                 HandleProactiveCommandSendUSSD((SendUSSDParams*)cmdParams);
             }
             AutoPtr<TextMessage> tm = (TextMessage*)(((DisplayTextParams*) cmdParams)->mTextMsg.Get());
-            if ((tm->text != NULL)
-                    && (tm->text.Equals(STK_DEFAULT))) {
+            if ((tm->mText != NULL)
+                    && (tm->mText.Equals(STK_DEFAULT))) {
                 mContext->GetText(R::string::sending, (ICharSequence**)&message);
-                message->ToString(&(tm->text));
+                message->ToString(&(tm->mText));
             }
             break;
         }
@@ -627,10 +627,10 @@ void CatService::HandleCommand(
             break;
         case SET_UP_CALL: {
             AutoPtr<TextMessage> tm = (TextMessage*)(((CallSetupParams*) cmdParams)->mConfirmMsg.Get());
-            if ((tm->text != NULL)
-                    && (tm->text.Equals(STK_DEFAULT))) {
+            if ((tm->mText != NULL)
+                    && (tm->mText.Equals(STK_DEFAULT))) {
                 mContext->GetText(R::string::SetupCallDefault, (ICharSequence**)&message);
-                message->ToString(&(tm->text));
+                message->ToString(&(tm->mText));
             }
             break;
         }
@@ -654,7 +654,7 @@ void CatService::HandleCommand(
             //     noAlphaUsrCnf = FALSE;
             // }
             AutoPtr<TextMessage> tm = (TextMessage*)(cmd->mTextMsg.Get());
-            if ((tm->text == NULL) && (cmd->mHasAlphaId || noAlphaUsrCnf)) {
+            if ((tm->mText == NULL) && (cmd->mHasAlphaId || noAlphaUsrCnf)) {
                 CommandType type;
                 cmdParams->GetCommandType(&type);
                 CatLog::D(ICatService::Probe(this), String("cmd ")
@@ -859,10 +859,10 @@ void CatService::GetInKeyResponse(
     IOutputStream::Probe(buf)->Write(tag);
     IOutputStream::Probe(buf)->Write(0x02); // length
     AutoPtr<Input> cinput = (Input*)cmdInput;
-    AutoPtr<Duration> cd = (Duration*)(cinput->duration.Get());
+    AutoPtr<Duration> cd = (Duration*)(cinput->mDuration.Get());
     assert(0 && "TODO");
     // IOutputStream::Probe(buf)->Write(cd->timeUnit.TimeUnit_SECOND); // Time (Unit,Seconds)
-    IOutputStream::Probe(buf)->Write(cd->timeInterval); // Time Duration
+    IOutputStream::Probe(buf)->Write(cd->mTimeInterval); // Time Duration
 }
 
 void CatService::GetPliResponse(
@@ -1145,12 +1145,12 @@ void CatService::HandleCmdResponse(
             AutoPtr<IInput> input;
             mCurrntCmd->GeInput((IInput**)&input);
             AutoPtr<Input> _input = (Input*)input.Get();
-            if (!_input->yesNo) {
+            if (!_input->mYesNo) {
                 // when help is requested there is no need to send the text
                 // string object.
                 if (!helpRequired) {
                     resp = new GetInkeyInputResponseData(resMsg->mUsersInput,
-                            _input->ucs2, _input->packed);
+                            _input->mUcs2, _input->mPacked);
                 }
             }
             else {

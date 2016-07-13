@@ -6,15 +6,6 @@
 #include "elastos/droid/internal/telephony/cat/ComprehensionTlv.h"
 #include "elastos/droid/internal/telephony/cat/CommandDetails.h"
 
-// import com.android.internal.telephony.GsmAlphabet;
-// import com.android.internal.telephony.cat.Duration.TimeUnit;
-// import com.android.internal.telephony.uicc.IccUtils;
-// import android.content.res.Resources;
-// import android.content.res.Resources.NotFoundException;
-// import java.io.UnsupportedEncodingException;
-// import java.util.ArrayList;
-// import java.util.List;
-
 namespace Elastos {
 namespace Droid {
 namespace Internal {
