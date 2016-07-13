@@ -397,12 +397,11 @@ ECode CObjInfoList::AcquireClassInfo(
         return E_INVALID_ARGUMENT;
     }
 
-    LockHashTable(EntryType_Class);
     if (*object) {
-        UnlockHashTable(EntryType_Class);
         return NOERROR;
     }
 
+    LockHashTable(EntryType_Class);
     IInterface** obj = mClassInfos.Get(&clsDirEntry);
     if (!obj) {
         IInterface *interfaceObj = NULL;
@@ -457,12 +456,11 @@ ECode CObjInfoList::AcquireStaticStructInfo(
         return E_INVALID_ARGUMENT;
     }
 
-    LockHashTable(EntryType_Struct);
     if (*object) {
-        UnlockHashTable(EntryType_Struct);
         return NOERROR;
     }
 
+    LockHashTable(EntryType_Struct);
     IInterface** obj = mStructInfos.Get(&structDirEntry);
     if (!obj) {
         IInterface *interfaceObj = NULL;
@@ -591,12 +589,11 @@ ECode CObjInfoList::AcquireStaticEnumInfo(
         return E_INVALID_ARGUMENT;
     }
 
-    LockHashTable(EntryType_Enum);
     if (*object) {
-        UnlockHashTable(EntryType_Enum);
         return NOERROR;
     }
 
+    LockHashTable(EntryType_Enum);
     IInterface** obj = mEnumInfos.Get(&enumDirEntry);
     if (!obj) {
         IInterface *interfaceObj = NULL;
@@ -745,12 +742,11 @@ ECode CObjInfoList::AcquireTypeAliasInfo(
         return E_INVALID_ARGUMENT;
     }
 
-    LockHashTable(EntryType_TypeAliase);
     if (*object) {
-        UnlockHashTable(EntryType_TypeAliase);
         return NOERROR;
     }
 
+    LockHashTable(EntryType_TypeAliase);
     IInterface** obj = mTypeAliasInfos.Get(&aliasDirEntry);
     if (!obj) {
         IInterface *interfaceObj = NULL;
@@ -800,12 +796,11 @@ ECode CObjInfoList::AcquireInterfaceInfo(
         return E_INVALID_ARGUMENT;
     }
 
-    LockHashTable(EntryType_Interface);
     if (*object) {
-        UnlockHashTable(EntryType_Interface);
         return NOERROR;
     }
 
+    LockHashTable(EntryType_Interface);
     InterfaceDirEntry* ifDir = getInterfaceDirAddr(clsModule->mBase,
             clsModule->mClsMod->mInterfaceDirs, index);
     EIID iid = adjustInterfaceDescAddr(clsModule->mBase, ifDir->mDesc)->mIID;
@@ -861,12 +856,11 @@ ECode CObjInfoList::AcquireMethodInfo(
         return E_INVALID_ARGUMENT;
     }
 
-    LockHashTable(EntryType_Method);
     if (*object) {
-        UnlockHashTable(EntryType_Method);
         return NOERROR;
     }
 
+    LockHashTable(EntryType_Method);
     UInt64 keyValue;
     memcpy(&keyValue, &methodDescriptor, 4);
     memcpy((PByte)&keyValue + 4, &index, 4);
@@ -1283,12 +1277,11 @@ ECode CObjInfoList::AcquireConstantInfo(
         return E_INVALID_ARGUMENT;
     }
 
-    LockHashTable(EntryType_Constant);
     if (*object) {
-        UnlockHashTable(EntryType_Constant);
         return NOERROR;
     }
 
+    LockHashTable(EntryType_Constant);
     CConstantInfo* constantInfoObj = new CConstantInfo(clsModule, constDirEntry);
     if (constantInfoObj == NULL) {
         UnlockHashTable(EntryType_Constant);
@@ -1313,12 +1306,11 @@ ECode CObjInfoList::AcquireConstructorInfo(
         return E_INVALID_ARGUMENT;
     }
 
-    LockHashTable(EntryType_Constructor);
     if (*object) {
-        UnlockHashTable(EntryType_Constructor);
         return NOERROR;
     }
 
+    LockHashTable(EntryType_Constructor);
     AutoPtr<CConstructorInfo> constructInfoObj = new CConstructorInfo();
     if (constructInfoObj == NULL) {
         UnlockHashTable(EntryType_Constructor);
@@ -1350,12 +1342,11 @@ ECode CObjInfoList::AcquireCBMethodInfoInfo(
         return E_INVALID_ARGUMENT;
     }
 
-    LockHashTable(EntryType_CBMethod);
     if (*object) {
-        UnlockHashTable(EntryType_CBMethod);
         return NOERROR;
     }
 
+    LockHashTable(EntryType_CBMethod);
     AutoPtr<CCallbackMethodInfo> cbMethodInfoObj = new CCallbackMethodInfo();
     if (cbMethodInfoObj == NULL) {
         UnlockHashTable(EntryType_CBMethod);

@@ -239,11 +239,13 @@ ECode CEntryList::AcquireObjByName(
         return E_INVALID_ARGUMENT;
     }
 
-    g_objInfoList.LockHashTable(mType);
-    ECode ec = InitElemList();
-    g_objInfoList.UnlockHashTable(mType);
-    if (FAILED(ec)) {
-        return ec;
+    if (mObjElement == NULL) {
+        g_objInfoList.LockHashTable(mType);
+        ECode ec = InitElemList();
+        g_objInfoList.UnlockHashTable(mType);
+        if (FAILED(ec)) {
+            return ec;
+        }
     }
 
     UInt32 key = name.GetHashCode();
@@ -268,11 +270,14 @@ ECode CEntryList::AcquireObjByIndex(
         return E_DOES_NOT_EXIST;
     }
 
-    g_objInfoList.LockHashTable(mType);
-    ECode ec = InitElemList();
-    g_objInfoList.UnlockHashTable(mType);
-    if (FAILED(ec)) {
-        return ec;
+    ECode ec = NOERROR;
+    if (mObjElement == NULL) {
+        g_objInfoList.LockHashTable(mType);
+        ec = InitElemList();
+        g_objInfoList.UnlockHashTable(mType);
+        if (FAILED(ec)) {
+            return ec;
+        }
     }
 
     UInt32 i = 0;

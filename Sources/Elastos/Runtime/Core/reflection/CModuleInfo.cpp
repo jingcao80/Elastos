@@ -87,16 +87,17 @@ ECode CModuleInfo::GetClassCount(
 ECode CModuleInfo::AcquireClassList()
 {
     ECode ec = NOERROR;
-    g_objInfoList.LockHashTable(EntryType_Class);
     if (!mClassList) {
-        mClassList = new CEntryList(EntryType_Class,
-                mClsMod, mClsMod->mClassCount, mClsModule);
+        g_objInfoList.LockHashTable(EntryType_Class);
         if (!mClassList) {
-            ec = E_OUT_OF_MEMORY;
+            mClassList = new CEntryList(EntryType_Class,
+                    mClsMod, mClsMod->mClassCount, mClsModule);
+            if (!mClassList) {
+                ec = E_OUT_OF_MEMORY;
+            }
         }
+        g_objInfoList.UnlockHashTable(EntryType_Class);
     }
-    g_objInfoList.UnlockHashTable(EntryType_Class);
-
     return ec;
 }
 
@@ -141,16 +142,17 @@ ECode CModuleInfo::GetInterfaceCount(
 ECode CModuleInfo::AcquireInterfaceList()
 {
     ECode ec = NOERROR;
-    g_objInfoList.LockHashTable(EntryType_Interface);
     if (!mInterfaceList) {
-        mInterfaceList = new CEntryList(EntryType_Interface,
-                mClsMod, mClsMod->mInterfaceCount, mClsModule);
+        g_objInfoList.LockHashTable(EntryType_Interface);
         if (!mInterfaceList) {
-            ec = E_OUT_OF_MEMORY;
+            mInterfaceList = new CEntryList(EntryType_Interface,
+                    mClsMod, mClsMod->mInterfaceCount, mClsModule);
+            if (!mInterfaceList) {
+                ec = E_OUT_OF_MEMORY;
+            }
         }
+        g_objInfoList.UnlockHashTable(EntryType_Interface);
     }
-    g_objInfoList.UnlockHashTable(EntryType_Interface);
-
     return ec;
 }
 
@@ -195,15 +197,17 @@ ECode CModuleInfo::GetStructCount(
 ECode CModuleInfo::AcquireStructList()
 {
     ECode ec = NOERROR;
-    g_objInfoList.LockHashTable(EntryType_Struct);
     if (!mStructList) {
-        mStructList = new CEntryList(EntryType_Struct,
-                mClsMod, mClsMod->mStructCount, mClsModule);
+        g_objInfoList.LockHashTable(EntryType_Struct);
         if (!mStructList) {
-            ec = E_OUT_OF_MEMORY;
+            mStructList = new CEntryList(EntryType_Struct,
+                    mClsMod, mClsMod->mStructCount, mClsModule);
+            if (!mStructList) {
+                ec = E_OUT_OF_MEMORY;
+            }
         }
+        g_objInfoList.UnlockHashTable(EntryType_Struct);
     }
-    g_objInfoList.UnlockHashTable(EntryType_Struct);
 
     return ec;
 }
@@ -249,15 +253,17 @@ ECode CModuleInfo::GetEnumCount(
 ECode CModuleInfo::AcquireEnumList()
 {
     ECode ec = NOERROR;
-    g_objInfoList.LockHashTable(EntryType_Enum);
     if (!mEnumList) {
-        mEnumList = new CEntryList(EntryType_Enum,
-                mClsMod, mClsMod->mEnumCount, mClsModule);
+        g_objInfoList.LockHashTable(EntryType_Enum);
         if (!mEnumList) {
-            ec = E_OUT_OF_MEMORY;
+            mEnumList = new CEntryList(EntryType_Enum,
+                    mClsMod, mClsMod->mEnumCount, mClsModule);
+            if (!mEnumList) {
+                ec = E_OUT_OF_MEMORY;
+            }
         }
+        g_objInfoList.UnlockHashTable(EntryType_Enum);
     }
-    g_objInfoList.UnlockHashTable(EntryType_Enum);
 
     return ec;
 }
@@ -310,20 +316,22 @@ ECode CModuleInfo::GetTypeAliasCount(
 ECode CModuleInfo::AcquireAliasList()
 {
     ECode ec = NOERROR;
-    g_objInfoList.LockHashTable(EntryType_TypeAliase);
     if (!mAliasList) {
-        mAliasCount = 0;
-        for (Int32 i = 0; i < mClsMod->mAliasCount; i++) {
-            if (!IsSysAlaisType(mClsModule, i)) mAliasCount++;
-        }
-
-        mAliasList = new CEntryList(EntryType_TypeAliase,
-                mClsMod, mAliasCount, mClsModule);
+        g_objInfoList.LockHashTable(EntryType_TypeAliase);
         if (!mAliasList) {
-            ec = E_OUT_OF_MEMORY;
+            mAliasCount = 0;
+            for (Int32 i = 0; i < mClsMod->mAliasCount; i++) {
+                if (!IsSysAlaisType(mClsModule, i)) mAliasCount++;
+            }
+
+            mAliasList = new CEntryList(EntryType_TypeAliase,
+                    mClsMod, mAliasCount, mClsModule);
+            if (!mAliasList) {
+                ec = E_OUT_OF_MEMORY;
+            }
         }
+        g_objInfoList.UnlockHashTable(EntryType_TypeAliase);
     }
-    g_objInfoList.UnlockHashTable(EntryType_TypeAliase);
 
     return ec;
 }
@@ -369,15 +377,17 @@ ECode CModuleInfo::GetConstantCount(
 ECode CModuleInfo::AcquireConstantList()
 {
     ECode ec = NOERROR;
-    g_objInfoList.LockHashTable(EntryType_Constant);
     if (!mConstantList) {
-        mConstantList = new CEntryList(EntryType_Constant,
-                mClsMod, mClsMod->mConstCount, mClsModule);
+        g_objInfoList.LockHashTable(EntryType_Constant);
         if (!mConstantList) {
-            ec = E_OUT_OF_MEMORY;
+            mConstantList = new CEntryList(EntryType_Constant,
+                    mClsMod, mClsMod->mConstCount, mClsModule);
+            if (!mConstantList) {
+                ec = E_OUT_OF_MEMORY;
+            }
         }
+        g_objInfoList.UnlockHashTable(EntryType_Constant);
     }
-    g_objInfoList.UnlockHashTable(EntryType_Constant);
 
     return ec;
 }

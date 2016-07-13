@@ -116,10 +116,10 @@ Boolean HashTable<T, type>::keycmp(
     Int32 ret = 0;
     switch (type) {
         case Type_UInt32:
-            ret = memcmp(e->mKey, key, sizeof(UInt32));
+            ret = !(*(UInt32 *)key == *(UInt32 *)e->mKey);
             break;
         case Type_UInt64:
-            ret = memcmp(e->mKey, key, sizeof(UInt64));
+            ret = !(*(UInt64 *)key == *(UInt64 *)e->mKey);
             break;
         case Type_String:
             ret = strcmp((char *)e->mKey, (char*)key);

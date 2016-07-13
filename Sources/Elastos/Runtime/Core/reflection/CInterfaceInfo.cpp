@@ -201,16 +201,17 @@ ECode CInterfaceInfo::GetMethodCount(
 ECode CInterfaceInfo::AcquireMethodList()
 {
     ECode ec = NOERROR;
-    g_objInfoList.LockHashTable(EntryType_Method);
     if (!mMethodList) {
-        mMethodList = new CEntryList(EntryType_Method,
-            mDesc, mMethodCount, mClsModule, mIFList, mIFCount);
+        g_objInfoList.LockHashTable(EntryType_Method);
         if (!mMethodList) {
-            ec = E_OUT_OF_MEMORY;
+            mMethodList = new CEntryList(EntryType_Method,
+                mDesc, mMethodCount, mClsModule, mIFList, mIFCount);
+            if (!mMethodList) {
+                ec = E_OUT_OF_MEMORY;
+            }
         }
+        g_objInfoList.UnlockHashTable(EntryType_Method);
     }
-    g_objInfoList.UnlockHashTable(EntryType_Method);
-
     return ec;
 
     return NOERROR;
