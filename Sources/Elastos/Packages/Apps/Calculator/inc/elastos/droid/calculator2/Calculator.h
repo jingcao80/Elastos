@@ -116,13 +116,13 @@ private:
         Calculator* mHost;
     };
 
-    class MyAnimatorListenerAdapter
+    class RevealAnimatorListenerAdapter
         : public AnimatorListenerAdapter
     {
         friend class Calculator;
 
     public:
-        MyAnimatorListenerAdapter(
+        RevealAnimatorListenerAdapter(
             /* [in] */ Calculator* host,
             /* [in] */ IViewGroupOverlay* vgo,
             /* [in] */ IView* view);
@@ -132,37 +132,34 @@ private:
 
     private:
         Calculator* mHost;
-        AutoPtr<IViewGroupOverlay> mvgo;
+        AutoPtr<IViewGroupOverlay> mVgo;
         AutoPtr<IView> mView;
     };
 
-    class MySecondAnimatorListenerAdapter
+    class OnClearAnimatorListenerAdapter
         : public AnimatorListenerAdapter
     {
         friend class Calculator;
 
     public:
-        MySecondAnimatorListenerAdapter(
-            /* [in] */ Calculator* host,
-            /* [in] */ ICalculatorEditText* cet);
+        OnClearAnimatorListenerAdapter(
+            /* [in] */ Calculator* host);
 
         CARAPI OnAnimationEnd(
             /* [in] */ IAnimator* animation);
 
     private:
         Calculator* mHost;
-        AutoPtr<ICalculatorEditText> mCet;
     };
 
-    class MyThirdAnimatorListenerAdapter
+    class OnErrorAnimatorListenerAdapter
         : public AnimatorListenerAdapter
     {
         friend class Calculator;
 
     public:
-        MyThirdAnimatorListenerAdapter(
+        OnErrorAnimatorListenerAdapter(
             /* [in] */ Calculator* host,
-            /* [in] */ ICalculatorEditText* cet,
             /* [in] */ Int32 errorResourceId);
 
         CARAPI OnAnimationEnd(
@@ -170,7 +167,6 @@ private:
 
     private:
         Calculator* mHost;
-        AutoPtr<ICalculatorEditText> mCet;
         Int32 mErrorResId;
     };
 
@@ -182,8 +178,7 @@ private:
 
     public:
         MyAnimatorUpdateListener(
-            /* [in] */ Calculator* host,
-            /* [in] */ ICalculatorEditText* cet);
+            /* [in] */ Calculator* host);
 
         CAR_INTERFACE_DECL()
 
@@ -192,21 +187,17 @@ private:
 
     private:
         Calculator* mHost;
-        AutoPtr<ICalculatorEditText> mCet;
     };
 
-    class MyFourthAnimatorListenerAdapter
+    class OnResultAnimatorListenerAdapter
         : public AnimatorListenerAdapter
     {
         friend class Calculator;
 
     public:
-        MyFourthAnimatorListenerAdapter(
+        OnResultAnimatorListenerAdapter(
             /* [in] */ Calculator* host,
-            /* [in] */ ICalculatorEditText* cet1,
-            /* [in] */ ICalculatorEditText* cet2,
-            /* [in] */ IAnimator* animator,
-            /* [in] */ const String& str,
+            /* [in] */ const String& result,
             /* [in] */ Int32 color);
 
         CARAPI OnAnimationStart(
@@ -217,9 +208,6 @@ private:
 
     private:
         Calculator* mHost;
-        AutoPtr<ICalculatorEditText> mCet1;
-        AutoPtr<ICalculatorEditText> mCet2;
-        AutoPtr<IAnimator> mAnimator;
         String mResult;
         Int32 mColor;
     };

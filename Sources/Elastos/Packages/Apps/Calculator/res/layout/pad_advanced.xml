@@ -25,84 +25,84 @@
         android:id="@+id/fun_sin"
         style="@style/PadButtonStyle.Advanced"
         android:contentDescription="@string/desc_fun_sin"
-        android:onClick="onButtonClick"
+        android:onClick="OnButtonClick"
         android:text="@string/fun_sin" />
 
     <Button
         android:id="@+id/fun_cos"
         style="@style/PadButtonStyle.Advanced"
         android:contentDescription="@string/desc_fun_cos"
-        android:onClick="onButtonClick"
+        android:onClick="OnButtonClick"
         android:text="@string/fun_cos" />
 
     <Button
         android:id="@+id/fun_tan"
         style="@style/PadButtonStyle.Advanced"
         android:contentDescription="@string/desc_fun_tan"
-        android:onClick="onButtonClick"
+        android:onClick="OnButtonClick"
         android:text="@string/fun_tan" />
 
     <Button
         android:id="@+id/fun_ln"
         style="@style/PadButtonStyle.Advanced"
         android:contentDescription="@string/desc_fun_ln"
-        android:onClick="onButtonClick"
+        android:onClick="OnButtonClick"
         android:text="@string/fun_ln" />
 
     <Button
         android:id="@+id/fun_log"
         style="@style/PadButtonStyle.Advanced"
         android:contentDescription="@string/desc_fun_log"
-        android:onClick="onButtonClick"
+        android:onClick="OnButtonClick"
         android:text="@string/fun_log" />
 
     <Button
         android:id="@+id/op_fact"
         style="@style/PadButtonStyle.Advanced"
         android:contentDescription="@string/desc_op_fact"
-        android:onClick="onButtonClick"
+        android:onClick="OnButtonClick"
         android:text="@string/op_fact" />
 
     <Button
         android:id="@+id/const_pi"
         style="@style/PadButtonStyle.Advanced"
         android:contentDescription="@string/desc_const_pi"
-        android:onClick="onButtonClick"
+        android:onClick="OnButtonClick"
         android:text="@string/const_pi" />
 
     <Button
         android:id="@+id/const_e"
         style="@style/PadButtonStyle.Advanced"
         android:contentDescription="@string/desc_const_e"
-        android:onClick="onButtonClick"
+        android:onClick="OnButtonClick"
         android:text="@string/const_e" />
 
     <Button
         android:id="@+id/op_pow"
         style="@style/PadButtonStyle.Advanced"
         android:contentDescription="@string/desc_op_pow"
-        android:onClick="onButtonClick"
+        android:onClick="OnButtonClick"
         android:text="@string/op_pow" />
 
     <Button
         android:id="@+id/lparen"
         style="@style/PadButtonStyle.Advanced"
         android:contentDescription="@string/desc_lparen"
-        android:onClick="onButtonClick"
+        android:onClick="OnButtonClick"
         android:text="@string/lparen" />
 
     <Button
         android:id="@+id/rparen"
         style="@style/PadButtonStyle.Advanced"
         android:contentDescription="@string/desc_rparen"
-        android:onClick="onButtonClick"
+        android:onClick="OnButtonClick"
         android:text="@string/rparen" />
 
     <Button
         android:id="@+id/op_sqrt"
         style="@style/PadButtonStyle.Advanced"
         android:contentDescription="@string/desc_op_sqrt"
-        android:onClick="onButtonClick"
+        android:onClick="OnButtonClick"
         android:text="@string/op_sqrt" />
 
 </Elastos.Droid.Calculator2.CCalculatorPadLayout>

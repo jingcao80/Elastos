@@ -25,8 +25,7 @@ CAR_INTERFACE_IMPL(CalculatorPadLayout, ViewGroup, ICalculatorPadLayout)
 CalculatorPadLayout::CalculatorPadLayout()
     : mRowCount(0)
     , mColumnCount(0)
-{
-}
+{}
 
 CalculatorPadLayout::~CalculatorPadLayout()
 {}
