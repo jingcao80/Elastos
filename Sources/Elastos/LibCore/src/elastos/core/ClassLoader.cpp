@@ -140,7 +140,7 @@ AutoPtr<IClassInfo> ClassLoader::FindLoadedClass(
     /* [in] */ const String& className)
 {
     AutoPtr<IClassInfo> klass;
-    HashMap<String, IClassInfo*>::Iterator it = mClassTable.Find(className);
+    HashMap<String, AutoPtr<IClassInfo> >::Iterator it = mClassTable.Find(className);
     if (it != mClassTable.End()) {
         klass = it->mSecond;
     }
@@ -182,19 +182,26 @@ ECode ClassLoader::FindClass(
         return E_INVALID_ARGUMENT;
     }
 
+    HashMap<String, AutoPtr<IModuleInfo> >::Iterator it;
     ECode ec = NOERROR;
     for (Int32 i = 0; i < mClassPaths->GetLength(); i++) {
+        AutoPtr<IModuleInfo> moduleInfo;
         String path = (*mClassPaths)[i];
-        if (mModuleInfo == NULL) {
-            ec = CReflector::AcquireModuleInfo(path, (IModuleInfo**)&mModuleInfo);
-            if (FAILED(ec) || mModuleInfo == NULL) {
+        it = mModuleTable.Find(path);
+        if (it == mModuleTable.End()) {
+            ec = CReflector::AcquireModuleInfo(path, (IModuleInfo**)&moduleInfo);
+            if (FAILED(ec) || moduleInfo == NULL) {
                 ALOGE("ClassLoader::FindClass %s, failed to AcquireModuleInfo at path %d/%d: %s",
                     className.string(), i +1, mClassPaths->GetLength(), path.string());
                 continue;
             }
+            mModuleTable[path] = moduleInfo;
+        }
+        else {
+            moduleInfo = it->mSecond;
         }
 
-        ec = mModuleInfo->GetClassInfo(className, klass);
+        ec = moduleInfo->GetClassInfo(className, klass);
         if (SUCCEEDED(ec)) {
             (*klass)->SetClassLoader((IClassLoader*)this);
             return NOERROR;
