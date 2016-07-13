@@ -1159,7 +1159,7 @@ void testQuintet()
     // testSplit();
 }
 
-int testReflectionCost()
+void testReflectionCost()
 {
     AutoPtr<ISystem> sys;
     CSystem::AcquireSingleton((ISystem**)&sys);
@@ -1169,7 +1169,8 @@ int testReflectionCost()
     Int64 now;
 
     const String moduleName("/system/lib/Elastos.Droid.Core.eco");
-    const String klassName("Elastos.Droid.Internal.Widget.CActionBarOverlayLayout");
+    const String klassName1("Elastos.Droid.Internal.Widget.CActionBarOverlayLayout");
+    const String klassName2("Elastos.Droid.Widget.CTextView");
 
     AutoPtr<IModuleInfo> moduleInfo;
     ECode ec = _CReflector_AcquireModuleInfo(moduleName, (IModuleInfo**)&moduleInfo);
@@ -1183,13 +1184,24 @@ int testReflectionCost()
     prev = now;
 
     AutoPtr<IClassInfo> classInfo;
-    ec = moduleInfo->GetClassInfo(klassName, (IClassInfo**)&classInfo);
+    ec = moduleInfo->GetClassInfo(klassName1, (IClassInfo**)&classInfo);
     if (FAILED(ec)) {
-        printf("Acquire \"%s\" class info failed!\n", klassName.string());
+        printf("Acquire \"%s\" class info failed!\n", klassName1.string());
     }
 
     sys->GetCurrentTimeMillis(&now);
-    printf(" >> GetClassInfo cost: %lld s and %lld ms.\n",
+    printf(" >> GetClassInfo 1 cost: %lld s and %lld ms.\n",
+        (now - prev) / 1000, (now - prev) % 1000);
+    prev = now;
+
+    AutoPtr<IClassInfo> classInfo2;
+    ec = moduleInfo->GetClassInfo(klassName2, (IClassInfo**)&classInfo2);
+    if (FAILED(ec)) {
+        printf("Acquire \"%s\" class info failed!\n", klassName2.string());
+    }
+
+    sys->GetCurrentTimeMillis(&now);
+    printf(" >> GetClassInfo 2 cost: %lld s and %lld ms.\n",
         (now - prev) / 1000, (now - prev) % 1000);
     printf(" == Total cost: %lld s and %lld ms.\n",
         (now - startTime) / 1000, (now - startTime) % 1000);

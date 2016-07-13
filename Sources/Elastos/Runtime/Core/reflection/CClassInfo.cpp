@@ -358,16 +358,17 @@ ECode CClassInfo::GetAspectCount(
 ECode CClassInfo::AcquireAspectList()
 {
     ECode ec = NOERROR;
-    g_objInfoList.LockHashTable(EntryType_Aspect);
     if (!mAspectList) {
-        mAspectList = new CEntryList(EntryType_Aspect,
-            mDesc, mDesc->mAspectCount, mClsModule);
+        g_objInfoList.LockHashTable(EntryType_Aspect);
         if (!mAspectList) {
-            ec = E_OUT_OF_MEMORY;
+            mAspectList = new CEntryList(EntryType_Aspect,
+                mDesc, mDesc->mAspectCount, mClsModule);
+            if (!mAspectList) {
+                ec = E_OUT_OF_MEMORY;
+            }
         }
+        g_objInfoList.UnlockHashTable(EntryType_Aspect);
     }
-    g_objInfoList.UnlockHashTable(EntryType_Aspect);
-
     return ec;
 }
 
@@ -430,16 +431,17 @@ ECode CClassInfo::GetAggregateeCount(
 ECode CClassInfo::AcquireAggregateeList()
 {
     ECode ec = NOERROR;
-    g_objInfoList.LockHashTable(EntryType_Aggregatee);
     if (!mAggregateeList) {
-        mAggregateeList = new CEntryList(EntryType_Aggregatee,
-                mDesc, mDesc->mAggregateCount, mClsModule);
+        g_objInfoList.LockHashTable(EntryType_Aggregatee);
         if (!mAggregateeList) {
-            ec = E_OUT_OF_MEMORY;
+            mAggregateeList = new CEntryList(EntryType_Aggregatee,
+                    mDesc, mDesc->mAggregateCount, mClsModule);
+            if (!mAggregateeList) {
+                ec = E_OUT_OF_MEMORY;
+            }
         }
+        g_objInfoList.UnlockHashTable(EntryType_Aggregatee);
     }
-    g_objInfoList.UnlockHashTable(EntryType_Aggregatee);
-
     return ec;
 }
 
@@ -478,35 +480,37 @@ ECode CClassInfo::AcquireConstructorList()
     }
 
     ECode ec = NOERROR;
-    g_objInfoList.LockHashTable(EntryType_Class);
     if (!mCtorClassInfo) {
-        AutoPtr<IModuleInfo> pModuleInfo;
+        g_objInfoList.LockHashTable(EntryType_Class);
+        if (!mCtorClassInfo) {
+            AutoPtr<IModuleInfo> pModuleInfo;
 
-        ec = mClsModule->GetModuleInfo((IModuleInfo**)&pModuleInfo);
-        if (FAILED(ec)) {
-            g_objInfoList.UnlockHashTable(EntryType_Class);
-            return ec;
+            ec = mClsModule->GetModuleInfo((IModuleInfo**)&pModuleInfo);
+            if (FAILED(ec)) {
+                g_objInfoList.UnlockHashTable(EntryType_Class);
+                return ec;
+            }
+
+            String clsName, ns;
+            clsName = adjustNameAddr(mBase, mClassDirEntry->mName);
+            clsName += "ClassObject";
+            ns = adjustNameAddr(mBase, mClassDirEntry->mNameSpace);
+
+            String relectionClsName(ns);
+            if (!ns.IsNullOrEmpty())
+                relectionClsName += ".";
+            relectionClsName += clsName;
+            AutoPtr<IClassInfo> classInfo;
+            ec = pModuleInfo->GetClassInfo(relectionClsName, (IClassInfo**)&classInfo);
+            if (FAILED(ec)) {
+                g_objInfoList.UnlockHashTable(EntryType_Class);
+                return ec;
+            }
+
+            mCtorClassInfo = (CClassInfo*)classInfo.Get();
         }
-
-        String clsName, ns;
-        clsName = adjustNameAddr(mBase, mClassDirEntry->mName);
-        clsName += "ClassObject";
-        ns = adjustNameAddr(mBase, mClassDirEntry->mNameSpace);
-
-        String relectionClsName(ns);
-        if (!ns.IsNullOrEmpty())
-            relectionClsName += ".";
-        relectionClsName += clsName;
-        AutoPtr<IClassInfo> classInfo;
-        ec = pModuleInfo->GetClassInfo(relectionClsName, (IClassInfo**)&classInfo);
-        if (FAILED(ec)) {
-            g_objInfoList.UnlockHashTable(EntryType_Class);
-            return ec;
-        }
-
-        mCtorClassInfo = (CClassInfo*)classInfo.Get();
+        g_objInfoList.UnlockHashTable(EntryType_Class);
     }
-    g_objInfoList.UnlockHashTable(EntryType_Class);
 
     mCtorList = NULL;
     return mCtorClassInfo->AcquireSpecialMethodList(
@@ -659,16 +663,17 @@ ECode CClassInfo::GetInterfaceCount(
 ECode CClassInfo::AcquireInterfaceList()
 {
     ECode ec = NOERROR;
-    g_objInfoList.LockHashTable(EntryType_ClassInterface);
     if (!mInterfaceList) {
-        mInterfaceList = new CEntryList(EntryType_ClassInterface,
-                mDesc, mIFCount, mClsModule, mIFList, mIFCount);
+        g_objInfoList.LockHashTable(EntryType_ClassInterface);
         if (!mInterfaceList) {
-            ec = E_OUT_OF_MEMORY;
+            mInterfaceList = new CEntryList(EntryType_ClassInterface,
+                    mDesc, mIFCount, mClsModule, mIFList, mIFCount);
+            if (!mInterfaceList) {
+                ec = E_OUT_OF_MEMORY;
+            }
         }
+        g_objInfoList.UnlockHashTable(EntryType_ClassInterface);
     }
-    g_objInfoList.UnlockHashTable(EntryType_ClassInterface);
-
     return ec;
 }
 
@@ -736,16 +741,17 @@ ECode CClassInfo::AcquireCBInterfaceList()
     }
 
     ECode ec = NOERROR;
-    g_objInfoList.LockHashTable(EntryType_ClassInterface);
     if (!mCBInterfaceList) {
-        mCBInterfaceList = new CEntryList(EntryType_ClassInterface,
-            mDesc, mCBIFCount, mClsModule, mCBIFList, mCBIFCount);
+        g_objInfoList.LockHashTable(EntryType_ClassInterface);
         if (!mCBInterfaceList) {
-            ec = E_OUT_OF_MEMORY;
+            mCBInterfaceList = new CEntryList(EntryType_ClassInterface,
+                mDesc, mCBIFCount, mClsModule, mCBIFList, mCBIFCount);
+            if (!mCBInterfaceList) {
+                ec = E_OUT_OF_MEMORY;
+            }
         }
+        g_objInfoList.UnlockHashTable(EntryType_ClassInterface);
     }
-    g_objInfoList.UnlockHashTable(EntryType_ClassInterface);
-
     return ec;
 }
 
@@ -801,40 +807,42 @@ ECode CClassInfo::AcquireSpecialMethodList(
 {
     ECode ec = NOERROR;
 
-    g_objInfoList.LockHashTable(type);
     if (!*entryList) {
-        UInt32 methodCount = mMethodCount;
-        if (type == EntryType_Constructor) {
-            //delete functions of IInterface
-            methodCount -= mIFList[0].mDesc->mMethodCount;
+        g_objInfoList.LockHashTable(type);
+        if (!*entryList) {
+            UInt32 methodCount = mMethodCount;
+            if (type == EntryType_Constructor) {
+                //delete functions of IInterface
+                methodCount -= mIFList[0].mDesc->mMethodCount;
 
-            //delete functions of IClassObject
-            methodCount -= mIFList[1].mDesc->mMethodCount;
-        }
+                //delete functions of IClassObject
+                methodCount -= mIFList[1].mDesc->mMethodCount;
+            }
 
-        IFIndexEntry* ifList = NULL;
-        UInt32 listCount = 0;;
+            IFIndexEntry* ifList = NULL;
+            UInt32 listCount = 0;;
 
-        if (type == EntryType_Constructor) {
-            //the index of customer class object interface is 2
-            ifList = &mIFList[2];
-            listCount = mIFCount - 2;
-        }
-        else {
-            ifList = mIFList;
-            listCount = mIFCount;
-        }
+            if (type == EntryType_Constructor) {
+                //the index of customer class object interface is 2
+                ifList = &mIFList[2];
+                listCount = mIFCount - 2;
+            }
+            else {
+                ifList = mIFList;
+                listCount = mIFCount;
+            }
 
-        *entryList = new CEntryList(type,
-                mDesc, methodCount, mClsModule, ifList, listCount, this);
-        if (*entryList) {
-            (*entryList)->AddRef();
+            *entryList = new CEntryList(type,
+                    mDesc, methodCount, mClsModule, ifList, listCount, this);
+            if (*entryList) {
+                (*entryList)->AddRef();
+            }
+            else {
+                ec = E_OUT_OF_MEMORY;
+            }
         }
-        else {
-            ec = E_OUT_OF_MEMORY;
-        }
+        g_objInfoList.UnlockHashTable(type);
     }
-    g_objInfoList.UnlockHashTable(type);
 
     return ec;
 }
@@ -883,17 +891,18 @@ ECode CClassInfo::GetCallbackMethodCount(
 ECode CClassInfo::AcquireCBMethodList()
 {
     ECode ec = NOERROR;
-    g_objInfoList.LockHashTable(EntryType_CBMethod);
     if (!mCBMethodList) {
-        mCBMethodList = new CEntryList(EntryType_CBMethod,
-                mClassDirEntry->mDesc, mCBMethodCount, mClsModule,
-                mCBIFList, mCBIFCount, this);
+        g_objInfoList.LockHashTable(EntryType_CBMethod);
         if (!mCBMethodList) {
-            ec = E_OUT_OF_MEMORY;
+            mCBMethodList = new CEntryList(EntryType_CBMethod,
+                    mClassDirEntry->mDesc, mCBMethodCount, mClsModule,
+                    mCBIFList, mCBIFCount, this);
+            if (!mCBMethodList) {
+                ec = E_OUT_OF_MEMORY;
+            }
         }
+        g_objInfoList.UnlockHashTable(EntryType_CBMethod);
     }
-    g_objInfoList.UnlockHashTable(EntryType_CBMethod);
-
     return ec;
 }
 
