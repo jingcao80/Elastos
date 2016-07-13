@@ -1,6 +1,4 @@
-#include "CBrowserActivity.h"
-
-#include "CTestEventListener.h"
+#include "CNodeActivity.h"
 
 #include <elastos/utility/logging/Logger.h>
 
@@ -19,21 +17,21 @@ EXTERN NodeBridge** g_ppNodeBridge;
 EXTERN IHandler* myHandler;
 
 const String JSActName::TAG(JSActNameStr);
-static const String DBG_TAG(JSActNameStr);
 
-CAR_INTERFACE_IMPL(JSActName::MyHandler, Object, IHandler);
+#ifndef DBG_TAG_DEF
+#define DBG_TAG_DEF
+static const String DBG_TAG(JSActNameStr);
+#endif
 
 ECode JSActName::MyHandler::HandleMessage(
     /* [in] */ IMessage* msg)
 {
-    ECode ec = NOERROR;
-    if (mHost->mListener) {
-        ec = mHost->mListener->OnHandleMessage(mHost, msg);
-    }
-    return ec;
+    AutoPtr<IMessageListener> listener = IMessageListener::Probe(mHost->mListener);
+    return listener->OnHandleMessage(mHost, msg);
 }
 
 CAR_INTERFACE_IMPL(JSActName, Activity, IActivityOne)
+
 JS_CAR_OBJECT_IMPL(JSActName)
 
 ECode JSActName::constructor()
@@ -60,15 +58,16 @@ ECode JSActName::OnCreate(
     mPackageName = _nspName + _pkgName;
     mActivityName = String(JSActNameStr);
 
+    String _helperEcoName = _pkgPath + mPackageName + String(".Helper.eco");
+    String _helperClsName = mPackageName + String(".") + mActivityName + String("Helper");
+
     AutoPtr<IInterface> helper;
-    String _helperEcoName = _pkgPath + _nspName + _pkgName + String(".Helper.eco");
-    String _helperClsName = _nspName + _pkgName + String(".") + mActivityName + String("Helper");
-    ECode ec = CTestEventListener::Require(_helperEcoName, _helperClsName, (IInterface**)&helper);
+    ECode ec = JSEvtName::Require(_helperEcoName, _helperClsName, (IInterface**)&helper);
 
     if (FAILED(ec)) {
         ALOGD("OnCreate========create Helper failed!======nodejs module will be used");
         AutoPtr<IInterface> _this = this->Probe(EIID_IInterface);
-        CTestEventListener::RegisterActivity(mPackageName, mActivityName, _this, (IActivityListener**)&mListener, mHandler.Get());
+        JSEvtName::RegisterActivity(mPackageName, mActivityName, _this, (IActivityListener**)&mListener, mHandler.Get());
     }
     else {
         ALOGD("OnCreate========create Helper success!======C++ epk will be used");
@@ -147,9 +146,9 @@ ECode JSActName::OnCreateContextMenu(
 }
 
 ECode JSActName::OnClickPopupWindow(
-   /* [in] */ IView* view)
+    /* [in] */ IView* view)
 {
-   return NOERROR;
+    return NOERROR;
 }
 
 } // namespace JSPkgName

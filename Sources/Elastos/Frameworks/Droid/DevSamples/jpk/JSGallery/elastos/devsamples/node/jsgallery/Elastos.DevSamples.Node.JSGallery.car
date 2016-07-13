@@ -94,7 +94,7 @@ module
     }
 
     [deprecated]
-    interface ITestEventListener {
+    interface INodeListener {
         OnNodeEvent(
             [in] Int32 eventId);
 
@@ -132,10 +132,10 @@ module
             [in] IView* v);
     }
 
-    class CTestEventListener {
+    class CNodeListener {
         constructor();
 
-        interface ITestEventListener;
+        interface INodeListener;
     }
 
     class CAlbumActivity {
