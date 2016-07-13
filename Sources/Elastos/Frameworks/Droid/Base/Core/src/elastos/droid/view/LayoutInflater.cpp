@@ -556,10 +556,10 @@ ECode LayoutInflater::Inflate(
     VALIDATE_NOT_NULL(view)
     *view = NULL;
 
-    // AutoPtr<ISystem> sys;
-    // CSystem::AcquireSingleton((ISystem**)&sys);
-    // Int64 startTime;
-    // sys->GetCurrentTimeMillis(&startTime);
+    AutoPtr<ISystem> sys;
+    CSystem::AcquireSingleton((ISystem**)&sys);
+    Int64 startTime;
+    sys->GetCurrentTimeMillis(&startTime);
 
     AutoLock lock(mConstructorArgsLock);
     AutoPtr<IAttributeSet> attrs = Xml::AsAttributeSet(parser);
@@ -669,13 +669,13 @@ _EXIT_:
     mConstructorArgs->Set(0, lastContext);
     mConstructorArgs->Set(1, NULL);
 
-    // Int64 now;
-    // sys->GetCurrentTimeMillis(&now);
-    // Slogger::D(TAG, " ======================= Inflate: %s, cost: %lld s and %lld ms.",
-    //     TO_CSTR(result), (now - startTime) / 1000, (now - startTime) % 1000);
-    // sTotalCreateViewTime += (now - startTime);
-    // Slogger::D(TAG, " ======================= Inflate total cost: %lld s and %lld ms.",
-    //     sTotalCreateViewTime / 1000, sTotalCreateViewTime % 1000);
+    Int64 now;
+    sys->GetCurrentTimeMillis(&now);
+    Slogger::D(TAG, " ======================= Inflate: %s, cost: %lld s and %lld ms.",
+        TO_CSTR(result), (now - startTime) / 1000, (now - startTime) % 1000);
+    sTotalCreateViewTime += (now - startTime);
+    Slogger::D(TAG, " ======================= Inflate total cost: %lld s and %lld ms.",
+        sTotalCreateViewTime / 1000, sTotalCreateViewTime % 1000);
 
     return NOERROR;
 }
