@@ -3213,7 +3213,7 @@ ECode CPackageManagerService::FileInstallArgs::CleanUpResourcesLI()
 
     CleanUp();
 
-    if (allCodePaths->IsEmpty() == FALSE) {
+    if (allCodePaths != NULL && allCodePaths->IsEmpty() == FALSE) {
         if (mInstructionSets == NULL) {
             Slogger::E(CPackageManagerService::TAG, "instructionSet == null");
             return E_ILLEGAL_STATE_EXCEPTION;
