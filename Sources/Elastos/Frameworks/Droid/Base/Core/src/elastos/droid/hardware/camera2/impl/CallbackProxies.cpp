@@ -3,9 +3,12 @@
 #include "elastos/droid/hardware/camera2/dispatch/CMethodNameInvoker.h"
 #include "elastos/droid/internal/utility/Preconditions.h"
 #include <elastos/core/CoreUtils.h>
+#include <elastos/core/ClassLoader.h>
 
 using Elastos::Droid::Hardware::Camera2::Dispatch::CMethodNameInvoker;
 using Elastos::Droid::Internal::Utility::Preconditions;
+using Elastos::Core::ClassLoader;
+using Elastos::Core::IClassLoader;
 using Elastos::Core::IInteger32;
 using Elastos::Core::IInteger64;
 using Elastos::Core::StringUtils;
@@ -29,12 +32,10 @@ ECode CallbackProxies::DeviceStateCallbackProxy::constructor(
 {
     FAIL_RETURN(Preconditions::CheckNotNull(dispatchTarget, String("dispatchTarget must not be null")))
     assert(0);
-    const String moduleName("............../Elastos.Droid.Core.eco");
-    const String klassName(".............../CCameraDeviceImplStateCallbackKK;");
+    const String klassName("Elastos.Droid.XXXX.CCameraDeviceImplStateCallbackKK;");
+    AutoPtr<IClassLoader> cl = ClassLoader::GetSystemClassLoader();
     AutoPtr<IClassInfo> classInfo;
-    AutoPtr<IModuleInfo> moduleInfo;
-    ASSERT_SUCCEEDED(_CReflector_AcquireModuleInfo(moduleName, (IModuleInfo**)&moduleInfo));
-    ASSERT_SUCCEEDED(moduleInfo->GetClassInfo(klassName, (IClassInfo**)&classInfo))
+    ASSERT_SUCCEEDED(cl->LoadClass(klassName, (IClassInfo**)&classInfo))
     return CMethodNameInvoker::New(dispatchTarget, classInfo, (IMethodNameInvoker**)&mProxy);
 }
 
@@ -118,12 +119,10 @@ ECode CallbackProxies::DeviceCaptureCallbackProxy::constructor(
 {
     FAIL_RETURN(Preconditions::CheckNotNull(dispatchTarget, String("dispatchTarget must not be null")))
     assert(0);
-    const String moduleName("............../Elastos.Droid.Core.eco");
     const String klassName(".............../CCameraDeviceImplCaptureCallback;");
+    AutoPtr<IClassLoader> cl = ClassLoader::GetSystemClassLoader();
     AutoPtr<IClassInfo> classInfo;
-    AutoPtr<IModuleInfo> moduleInfo;
-    ASSERT_SUCCEEDED(_CReflector_AcquireModuleInfo(moduleName, (IModuleInfo**)&moduleInfo));
-    ASSERT_SUCCEEDED(moduleInfo->GetClassInfo(klassName, (IClassInfo**)&classInfo))
+    ASSERT_SUCCEEDED(cl->LoadClass(klassName, (IClassInfo**)&classInfo))
     return CMethodNameInvoker::New(dispatchTarget, classInfo, (IMethodNameInvoker**)&mProxy);
 }
 
@@ -229,12 +228,10 @@ ECode CallbackProxies::SessionStateCallbackProxy::constructor(
 {
     FAIL_RETURN(Preconditions::CheckNotNull(dispatchTarget, String("dispatchTarget must not be null")))
     assert(0);
-    const String moduleName("............../Elastos.Droid.Core.eco");
     const String klassName(".............../CCameraCaptureSessionStateCallback;");
+    AutoPtr<IClassLoader> cl = ClassLoader::GetSystemClassLoader();
     AutoPtr<IClassInfo> classInfo;
-    AutoPtr<IModuleInfo> moduleInfo;
-    ASSERT_SUCCEEDED(_CReflector_AcquireModuleInfo(moduleName, (IModuleInfo**)&moduleInfo));
-    ASSERT_SUCCEEDED(moduleInfo->GetClassInfo(klassName, (IClassInfo**)&classInfo))
+    ASSERT_SUCCEEDED(cl->LoadClass(klassName, (IClassInfo**)&classInfo))
     return CMethodNameInvoker::New(dispatchTarget, classInfo, (IMethodNameInvoker**)&mProxy);
 }
 

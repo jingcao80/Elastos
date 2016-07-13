@@ -8,6 +8,7 @@
 #include "elastos/droid/server/NetworkManagementSocketTagger.h"
 #include <elastos/droid/DroidRuntime.h>
 #include <elastos/core/StringBuilder.h>
+#include <elastos/core/ClassLoader.h>
 #include <elastos/utility/logging/Logger.h>
 #include <elastos/utility/logging/Slogger.h>
 
@@ -17,7 +18,8 @@ using Elastos::Droid::Server::NetworkManagementSocketTagger;
 using Elastos::Droid::DroidRuntime;
 using Elastos::Core::StringBuilder;
 using Elastos::Core::CSystem;
-using Elastos::Core::ISystem;
+using Elastos::Core::ClassLoader;
+using Elastos::Core::IClassLoader;
 using Elastos::IO::ICloseable;
 using Elastos::Utility::ITimeZoneHelper;
 using Elastos::Utility::CTimeZoneHelper;
@@ -139,8 +141,8 @@ ECode RuntimeInit::CommonInit()
      * Sets the default HTTP User-Agent used by HttpURLConnection.
      */
     String userAgent = GetDefaultUserAgent();
-    AutoPtr<ISystem> system;
-    CSystem::AcquireSingleton((ISystem**)&system);
+    AutoPtr<Elastos::Core::ISystem> system;
+    Elastos::Core::CSystem::AcquireSingleton((Elastos::Core::ISystem**)&system);
     String oldValue;
     system->SetProperty(String("http.agent"), userAgent, &oldValue);
 
@@ -173,8 +175,8 @@ String RuntimeInit::GetDefaultUserAgent()
     StringBuilder result(64);
     result += "Dalvik/";
 
-    AutoPtr<ISystem> system;
-    CSystem::AcquireSingleton((ISystem**)&system);
+    AutoPtr<Elastos::Core::ISystem> system;
+    Elastos::Core::CSystem::AcquireSingleton((Elastos::Core::ISystem**)&system);
     String vmVersion;
     system->GetProperty(String("java.vm.version"), &vmVersion);//// such as 1.1.0
     result += vmVersion;
@@ -223,13 +225,21 @@ ECode RuntimeInit::InvokeStaticMain(
     AutoPtr<IInterface> object;
     AutoPtr<IMethodInfo> methodInfo;
 
-    ECode ec = _CReflector_AcquireModuleInfo(moduleName, (IModuleInfo**)&moduleInfo);
-    if (FAILED(ec)) {
-        Slogger::E("RuntimeInit::InvokeStaticMain", "Acquire %s module info failed!\n", moduleName.string());
-        return ec;
+    ECode ec = NOERROR;
+    if (moduleName.EndWith("Elastos.Droid.Core.eco")) {
+        AutoPtr<IClassLoader> cl = ClassLoader::GetSystemClassLoader();
+        ec = cl->LoadClass(className, (IClassInfo**)&classInfo);
+    }
+    else {
+        ec = _CReflector_AcquireModuleInfo(moduleName, (IModuleInfo**)&moduleInfo);
+        if (FAILED(ec)) {
+            Slogger::E("RuntimeInit::InvokeStaticMain", "Acquire %s module info failed!\n", moduleName.string());
+            return ec;
+        }
+
+        ec = moduleInfo->GetClassInfo(className, (IClassInfo**)&classInfo);
     }
 
-    ec = moduleInfo->GetClassInfo(className, (IClassInfo**)&classInfo);
     if (FAILED(ec)) {
         Slogger::E("RuntimeInit::InvokeStaticMain", "Acquire %s, %s class info failed!\n",
             moduleName.string(), className.string());
@@ -342,8 +352,8 @@ ECode RuntimeInit::ApplicationInit(
 
 void RuntimeInit::RedirectLogStreams()
 {
-    AutoPtr<ISystem> system;
-    CSystem::AcquireSingleton((ISystem**)&system);
+    AutoPtr<Elastos::Core::ISystem> system;
+    Elastos::Core::CSystem::AcquireSingleton((Elastos::Core::ISystem**)&system);
     AutoPtr<IPrintStream> out;
     system->GetOut((IPrintStream**)&out);
     ICloseable::Probe(out)->Close();
