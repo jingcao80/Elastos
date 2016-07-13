@@ -35,7 +35,8 @@ static Int32 InitSimCount()
     tm->GetSimCount(&count);
     return count;
 }
-const Int32 CatServiceFactory::sSimCount = InitSimCount();
+// TODO:
+const Int32 CatServiceFactory::sSimCount = 0;// = InitSimCount();
 Object CatServiceFactory::sInstanceLock;
 
 AutoPtr<ICatService> CatServiceFactory::MakeCatService(
