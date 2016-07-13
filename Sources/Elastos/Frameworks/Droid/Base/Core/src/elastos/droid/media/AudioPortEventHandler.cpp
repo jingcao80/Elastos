@@ -79,12 +79,30 @@ void JNIAudioPortCallback::onServiceDied()
 //===================================================================================
 //              AudioPortEventHandler::EventHandler
 //===================================================================================
+AudioPortEventHandler::EventHandler::EventHandler(
+    /* [in] */ ILooper* looper,
+    /* [in] */ AudioPortEventHandler* host)
+    : Handler(looper)
+{
+    AutoPtr<IWeakReference> wr;
+    host->GetWeakReference((IWeakReference**)&wr);
+    mHost = wr;
+}
 
 ECode AudioPortEventHandler::EventHandler::HandleMessage(
     /* [in] */ IMessage* msg)
 {
+    AutoPtr<IInterface> o;
+    mHost->Resolve(EIID_IInterface, (IInterface**)&o);
+    AudioPortEventHandler* host = (AudioPortEventHandler*)IObject::Probe(o);
+
+    if (host == NULL) {
+        return NOERROR;
+    }
+
     AutoPtr<IArrayList> listeners;
-    {    AutoLock syncLock(this);
+    {
+        AutoLock syncLock(this);
         Int32 what;
         msg->GetWhat(&what);
         if (what == AUDIOPORT_EVENT_NEW_LISTENER) {
@@ -92,12 +110,13 @@ ECode AudioPortEventHandler::EventHandler::HandleMessage(
             AutoPtr<IInterface> obj;
             msg->GetObj((IInterface**)&obj);
             Boolean b;
-            mHost->mListeners->Contains(obj, &b);
+            host->mListeners->Contains(obj, &b);
             if (b) {
                 listeners->Add(obj);
             }
-        } else {
-            listeners = mHost->mListeners;
+        }
+        else {
+            listeners = host->mListeners;
         }
     }
     Boolean b;
@@ -112,7 +131,7 @@ ECode AudioPortEventHandler::EventHandler::HandleMessage(
             what == AUDIOPORT_EVENT_PATCH_LIST_UPDATED ||
             what == AUDIOPORT_EVENT_SERVICE_DIED) {
         Int32 gen;
-        mHost->mAudioManager->ResetAudioPortGeneration(&gen);
+        host->mAudioManager->ResetAudioPortGeneration(&gen);
     }
     AutoPtr<IArrayList> ports;
     CArrayList::New((IArrayList**)&ports);
@@ -120,7 +139,7 @@ ECode AudioPortEventHandler::EventHandler::HandleMessage(
     CArrayList::New((IArrayList**)&patches);
     if (what != AUDIOPORT_EVENT_SERVICE_DIED) {
         Int32 status;
-        mHost->mAudioManager->UpdateAudioPortCache(ports, patches, &status);
+        host->mAudioManager->UpdateAudioPortCache(ports, patches, &status);
         if (status != IAudioManager::SUCCESS) {
             return NOERROR;
         }
@@ -206,7 +225,7 @@ ECode AudioPortEventHandler::constructor(
     // find the looper for our new event handler
     AutoPtr<ILooper> looper = Looper::GetMainLooper();
     if (looper != NULL) {
-        mHandler = new EventHandler(this, looper);
+        mHandler = new EventHandler(looper, this);
     }
 
     AutoPtr<IWeakReference> wr;
@@ -218,7 +237,8 @@ ECode AudioPortEventHandler::constructor(
 ECode AudioPortEventHandler::RegisterListener(
     /* [in] */ IAudioManagerOnAudioPortUpdateListener* l)
 {
-    {    AutoLock syncLock(this);
+    {
+        AutoLock syncLock(this);
         mListeners->Add(l);
     }
     if (mHandler != NULL) {
@@ -233,7 +253,8 @@ ECode AudioPortEventHandler::RegisterListener(
 ECode AudioPortEventHandler::UnregisterListener(
     /* [in] */ IAudioManagerOnAudioPortUpdateListener* l)
 {
-    {    AutoLock syncLock(this);
+    {
+        AutoLock syncLock(this);
         mListeners->Remove(l);
     }
     return NOERROR;
@@ -251,8 +272,6 @@ ECode AudioPortEventHandler::Handler(
 ECode AudioPortEventHandler::NativeSetup(
     /* [in] */ IWeakReference* weak_this)
 {
-    // Logger::V(TAG, "eventHandlerSetup");
-
     android::sp<JNIAudioPortCallback> callback = new JNIAudioPortCallback(weak_this);
     android::AudioSystem::setAudioPortCallback(callback);
     return NOERROR;
@@ -260,8 +279,6 @@ ECode AudioPortEventHandler::NativeSetup(
 
 ECode AudioPortEventHandler::NativeFinalize()
 {
-    // Logger::V(TAG, "eventHandlerFinalize");
-
     android::sp<JNIAudioPortCallback> callback;
     android::AudioSystem::setAudioPortCallback(callback);
     return NOERROR;

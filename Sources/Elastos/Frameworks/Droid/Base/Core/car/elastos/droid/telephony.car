@@ -49,7 +49,9 @@ module
     merge("telephony/gsm/SmsMessage.car");
 
     interface Elastos.Droid.Content.IContext;
+    interface Elastos.Droid.Internal.Telephony.IIPhoneStateListener;
     interface Elastos.Droid.Net.ILinkProperties;
+    interface Elastos.Droid.Os.IBinder;
     interface Elastos.Droid.Os.IBundle;
     interface Elastos.Droid.Os.ILooper;
     interface Elastos.Droid.Os.IParcel;
@@ -415,6 +417,14 @@ module
         singleton class CPhoneNumberUtils {
 
             interface IPhoneNumberUtils;
+        }
+
+        class CPhoneStateListenerCallback {
+            constructor(
+                [in] IPhoneStateListener* host);
+
+            interface IIPhoneStateListener;
+            interface IBinder;
         }
 
         class CPhoneStateListener {

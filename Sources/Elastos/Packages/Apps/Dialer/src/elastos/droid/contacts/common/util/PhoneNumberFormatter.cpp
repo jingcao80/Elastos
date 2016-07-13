@@ -19,10 +19,12 @@ ECode PhoneNumberFormatter::TextWatcherLoadAsyncTask::DoInBackground(
     /* [out] */ IInterface** result)
 {
     VALIDATE_NOT_NULL(result);
-    AutoPtr<IPhoneNumberFormattingTextWatcher> watcher;
-    CPhoneNumberFormattingTextWatcher::New(mCountryCode, (IPhoneNumberFormattingTextWatcher**)&watcher);
-    *result = watcher;
-    REFCOUNT_ADD(*result);
+    // TODO:
+    // AutoPtr<IPhoneNumberFormattingTextWatcher> watcher;
+    // CPhoneNumberFormattingTextWatcher::New(mCountryCode, (IPhoneNumberFormattingTextWatcher**)&watcher);
+    // *result = watcher;
+    // REFCOUNT_ADD(*result);
+    *result = NULL;
     return NOERROR;
 }
 

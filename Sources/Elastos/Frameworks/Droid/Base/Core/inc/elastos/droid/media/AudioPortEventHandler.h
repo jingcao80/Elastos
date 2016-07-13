@@ -31,17 +31,14 @@ private:
         TO_STRING_IMPL("AudioPortEventHandler::EventHandler")
 
         EventHandler(
-            /* [in] */ AudioPortEventHandler* host,
-            /* [in] */ ILooper* looper)
-            : Handler(looper)
-            , mHost(host)
-        {}
+            /* [in] */ ILooper* looper,
+            /* [in] */ AudioPortEventHandler* host);
 
         CARAPI HandleMessage(
             /* [in] */ IMessage* msg);
 
     private:
-        AudioPortEventHandler* mHost;
+        AutoPtr<IWeakReference> mHost;
     };
 
 public:

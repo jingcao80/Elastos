@@ -3,7 +3,7 @@
 #include "elastos/droid/provider/Settings.h"
 #include "elastos/droid/R.h"
 #include "elastos/droid/telephony/CellLocation.h"
-#include "elastos/droid/telephony/CPhoneStateListener.h"
+#include "elastos/droid/telephony/PhoneStateListener.h"
 #include "elastos/droid/telephony/CTelephonyManager.h"
 #include "elastos/droid/telephony/SubscriptionManager.h"
 #include <elastos/core/StringUtils.h>
@@ -1077,7 +1077,7 @@ ECode CTelephonyManager::Listen(
 
     // try {
     Boolean notifyNow = (GetITelephony() != NULL);
-    AutoPtr<CPhoneStateListener> l = (CPhoneStateListener*)listener;
+    PhoneStateListener* l = (PhoneStateListener*)listener;
     return sRegistry->ListenForSubscriber(l->mSubId, pkgForDebug, l->mCallback, events, notifyNow);
     // } catch (RemoteException ex) {
     //     // system process dead

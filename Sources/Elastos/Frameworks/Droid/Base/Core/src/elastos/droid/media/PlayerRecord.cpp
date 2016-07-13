@@ -144,7 +144,7 @@ ECode PlayerRecord::RcClientDeathHandler::BinderDied()
     Slogger::W(TAG, "  RemoteControlClient died");
     // remote control client died, make sure the displays don't use it anymore
     //  by setting its remote control client to null
-    Int32 ret = ((MediaFocusControl*)((mHost->sController).Get()))->RegisterRemoteControlClient(mMediaIntent.Get(), NULL/*rcClient*/, String(NULL)/*ignored*/);
+    ((MediaFocusControl*)((mHost->sController).Get()))->RegisterRemoteControlClient(mMediaIntent.Get(), NULL/*rcClient*/, String(NULL)/*ignored*/);
     // the dead client was maybe handling remote playback, the controller should reevaluate
     ((MediaFocusControl*)((mHost->sController).Get()))->PostReevaluateRemote();
     return NOERROR;
@@ -173,13 +173,13 @@ Int32 PlayerRecord::sLastRccId = 0;
 AutoPtr<IMediaFocusControl> PlayerRecord::sController;
 
 PlayerRecord::PlayerRecord()
-    : mRccId(-1)
-    , mCallingUid(0)
-    , mPlaybackType(0)
+    : mPlaybackType(0)
     , mPlaybackVolume(0)
     , mPlaybackVolumeMax(0)
     , mPlaybackVolumeHandling(0)
     , mPlaybackStream(0)
+    , mRccId(-1)
+    , mCallingUid(0)
 {}
 
 PlayerRecord::~PlayerRecord()
@@ -366,7 +366,7 @@ ECode PlayerRecord::HasMatchingMediaButtonIntent(
             return NOERROR;
         }
     }
-
+    return NOERROR;
 }
 
 ECode PlayerRecord::IsPlaybackActive(

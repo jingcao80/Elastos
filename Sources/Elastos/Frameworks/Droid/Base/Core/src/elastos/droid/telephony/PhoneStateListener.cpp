@@ -1,11 +1,13 @@
 
 #include "elastos/droid/telephony/CCellLocationHelper.h"
 #include "elastos/droid/telephony/PhoneStateListener.h"
+#include "elastos/droid/telephony/CPhoneStateListenerCallback.h"
 #include "elastos/droid/os/Looper.h"
 
 using Elastos::Droid::Internal::Telephony::EIID_IIPhoneStateListener;
 using Elastos::Droid::Os::IMessage;
 using Elastos::Droid::Os::Looper;
+using Elastos::Droid::Os::EIID_IBinder;
 using Elastos::Droid::Privacy::IIPrivacySettingsManager;
 using Elastos::Droid::Privacy::IPrivacySettings;
 using Elastos::Droid::Privacy::IPrivacySettingsManager;
@@ -28,13 +30,15 @@ CAR_INTERFACE_IMPL(PhoneStateListener, Object, IPhoneStateListener)
 // PhoneStateListener::PhoneStateListenerCallback
 //==============================================================================
 
-CAR_INTERFACE_IMPL(PhoneStateListener::PhoneStateListenerCallback,
-        Object, IIPhoneStateListener);
+CAR_INTERFACE_IMPL_2(PhoneStateListener::PhoneStateListenerCallback,
+        Object, IIPhoneStateListener, IBinder);
 
-PhoneStateListener::PhoneStateListenerCallback::PhoneStateListenerCallback(
-            /* [in] */ PhoneStateListener* host)
-    : mHost(host)
-{}
+ECode PhoneStateListener::PhoneStateListenerCallback::constructor(
+    /* [in] */ IPhoneStateListener* host)
+{
+    mHost = (PhoneStateListener*)host;
+    return NOERROR;
+}
 
 ECode PhoneStateListener::PhoneStateListenerCallback::OnServiceStateChanged(
     /* [in] */ IServiceState* serviceState)
@@ -211,6 +215,14 @@ ECode PhoneStateListener::PhoneStateListenerCallback::OnOemHookRawEvent(
     return NOERROR;
 }
 
+ECode PhoneStateListener::PhoneStateListenerCallback::ToString(
+    /* [out] */ String* str)
+{
+    VALIDATE_NOT_NULL(str);
+    *str = "PhoneStateListenerCallback";
+    return NOERROR;
+}
+
 //==============================================================================
 // PhoneStateListener::MyHandler
 //==============================================================================
@@ -302,7 +314,7 @@ ECode PhoneStateListener::MyHandler::HandleMessage(
 PhoneStateListener::PhoneStateListener()
     : mSubId(0)
 {
-    mCallback = new PhoneStateListenerCallback(this);
+    CPhoneStateListenerCallback::New(this, (IIPhoneStateListener**)&mCallback);
 }
 
 ECode PhoneStateListener::constructor()

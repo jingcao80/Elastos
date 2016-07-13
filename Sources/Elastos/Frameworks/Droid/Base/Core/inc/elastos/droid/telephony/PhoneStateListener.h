@@ -12,6 +12,7 @@
 using Elastos::Droid::Internal::Telephony::IIPhoneStateListener;
 using Elastos::Droid::Os::Handler;
 using Elastos::Droid::Os::IBundle;
+using Elastos::Droid::Os::IBinder;
 using Elastos::Utility::IList;
 
 namespace Elastos {
@@ -28,12 +29,13 @@ public:
     class PhoneStateListenerCallback
         : public Object
         , public IIPhoneStateListener
+        , public IBinder
     {
     public:
         CAR_INTERFACE_DECL()
 
-        PhoneStateListenerCallback(
-            /* [in] */ PhoneStateListener* host);
+        CARAPI constructor(
+            /* [in] */ IPhoneStateListener* host);
 
         CARAPI OnServiceStateChanged(
             /* [in] */ IServiceState* serviceState);
@@ -84,6 +86,9 @@ public:
 
         CARAPI OnOemHookRawEvent(
             /* [in] */ ArrayOf<Byte>* rawData);
+
+        CARAPI ToString(
+            /* [out] */ String* str);
 
     private:
         PhoneStateListener* mHost;

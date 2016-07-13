@@ -141,10 +141,13 @@ ECode DialpadFragment::DialpadSlidingRelativeLayout::SetYFraction(
 //=================================================================
 // DialpadFragment::DialpadPhoneStateListener
 //=================================================================
-DialpadFragment::DialpadPhoneStateListener::DialpadPhoneStateListener(
+ECode DialpadFragment::DialpadPhoneStateListener::constructor(
     /* [in] */ DialpadFragment* host)
-    : mHost(host)
-{}
+{
+    FAIL_RETURN(PhoneStateListener::constructor());
+    mHost = host;
+    return NOERROR;
+}
 
 ECode DialpadFragment::DialpadPhoneStateListener::OnCallStateChanged(
     /* [in] */ Int32 state,
@@ -464,7 +467,8 @@ DialpadFragment::DialpadFragment()
     // TODO:
     // CCallLogAsync::New((ICallLogAsync**)&mCallLog);
     mHaptic = new HapticFeedback();
-    mPhoneStateListener = new DialpadPhoneStateListener(this);
+    mPhoneStateListener = new DialpadPhoneStateListener();
+    mPhoneStateListener->constructor(this);
 }
 
 AutoPtr<IIntent> DialpadFragment::GetVoicemailIntent()
@@ -557,7 +561,7 @@ ECode DialpadFragment::AfterTextChanged(
 //        IObject::Probe(text)->ToString(&str);
 //        mDialpadQueryListener->OnDialpadQueryChanged(str);
 //    }
-//    UpdateDeleteButtonEnabledState();
+    UpdateDeleteButtonEnabledState();
 
     return NOERROR;
 }
@@ -958,8 +962,7 @@ ECode DialpadFragment::OnResume()
     // While we're in the foreground, listen for phone state changes,
     // purely so that we can take down the "dialpad chooser" if the
     // phone becomes idle while the chooser UI is visible.
-    // TODO:
-    // GetTelephonyManager()->Listen(mPhoneStateListener, IPhoneStateListener::LISTEN_CALL_STATE);
+    GetTelephonyManager()->Listen(mPhoneStateListener, IPhoneStateListener::LISTEN_CALL_STATE);
 
     // stopWatch->Lap(String("tm"));
 
@@ -1042,7 +1045,7 @@ ECode DialpadFragment::OnPause()
     // lookup the last dialed number has completed.
     mLastNumberDialed = EMPTY_NUMBER;  // Since we are going to query again, free stale number.
 
-    assert(0 && "TODO");
+    // TODO:
     // SpecialCharSequenceMgr::Cleanup();
     return NOERROR;
 }

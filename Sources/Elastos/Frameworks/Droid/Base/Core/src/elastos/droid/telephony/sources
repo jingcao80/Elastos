@@ -39,6 +39,7 @@ SOURCES += CNeighboringCellInfo.cpp
 SOURCES += CPhoneNumberFormattingTextWatcher.cpp
 SOURCES += PhoneNumberUtils.cpp
 SOURCES += CPhoneNumberUtils.cpp
+SOURCES += CPhoneStateListenerCallback.cpp
 SOURCES += PhoneStateListener.cpp
 SOURCES += CPhoneStateListener.cpp
 SOURCES += CPreciseCallState.cpp

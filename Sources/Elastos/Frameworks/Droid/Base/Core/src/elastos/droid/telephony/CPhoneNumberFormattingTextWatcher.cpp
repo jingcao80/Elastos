@@ -96,7 +96,8 @@ ECode CPhoneNumberFormattingTextWatcher::AfterTextChanged(
     if (mStopFormatting) {
         // Restart the formatting when all texts were clear.
         Int32 len;
-        mStopFormatting = !((ICharSequence::Probe(s)->GetLength(&len), len) == 0);
+        ICharSequence::Probe(s)->GetLength(&len);
+        mStopFormatting = !(len == 0);
         return NOERROR;
     }
     if (mSelfChange) {

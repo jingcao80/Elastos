@@ -2,6 +2,7 @@
 #include "Elastos.Droid.Internal.h"
 #include "elastos/droid/contacts/common/CallUtil.h"
 #include "elastos/droid/contacts/common/util/PhoneNumberHelper.h"
+#include "elastos/droid/phone/common/PhoneConstants.h"
 #include <elastos/droid/net/Uri.h>
 
 using Elastos::Droid::Content::CIntent;
@@ -11,6 +12,7 @@ using Elastos::Droid::Telecomm::Telecom::ITelecomManager;
 using Elastos::Droid::Telecomm::Telecom::IVideoProfileVideoState;
 
 using Elastos::Droid::Contacts::Common::Util::PhoneNumberHelper;
+using Elastos::Droid::Phone::Common::PhoneConstants;
 
 namespace Elastos {
 namespace Droid {
@@ -103,8 +105,7 @@ AutoPtr<IIntent> CallUtil::GetCallIntent(
     CIntent::New(IIntent::ACTION_CALL_PRIVILEGED, uri, (IIntent**)&intent);
     intent->PutExtra(ITelecomManager::EXTRA_START_CALL_WITH_VIDEO_STATE, videoState);
     if (!callOrigin.IsNull()) {
-        assert(0 && "TODO");
-        // intent->PutExtra(IPhoneConstants::EXTRA_CALL_ORIGIN, callOrigin);
+        intent->PutExtra(PhoneConstants::EXTRA_CALL_ORIGIN, callOrigin);
     }
     if (accountHandle != NULL) {
         intent->PutExtra(ITelecomManager::EXTRA_PHONE_ACCOUNT_HANDLE, IParcelable::Probe(accountHandle));

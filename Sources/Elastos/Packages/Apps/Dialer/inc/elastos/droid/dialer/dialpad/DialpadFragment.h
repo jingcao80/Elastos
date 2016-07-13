@@ -156,7 +156,10 @@ private:
         : public PhoneStateListener
     {
     public:
-        DialpadPhoneStateListener(
+        DialpadPhoneStateListener()
+        {}
+
+        CARAPI constructor(
             /* [in] */ DialpadFragment* host);
 
         /**

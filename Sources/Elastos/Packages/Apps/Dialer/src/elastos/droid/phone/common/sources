@@ -6,6 +6,7 @@ INCLUDES += $(MAKEDIR)/../../../../../inc
 INCLUDES += ../../../../../
 
 SOURCES += HapticFeedback.cpp
+SOURCES += PhoneConstants.cpp
 
 ELASTOS_LIBS += animation/animation.lib
 ELASTOS_LIBS += dialpad/dialpad.lib
