@@ -13,7 +13,9 @@
 #include <elastos/core/Math.h>
 #include <elastos/core/StringUtils.h>
 #include <elastos/core/CoreUtils.h>
+#include <elastos/utility/logging/Slogger.h>
 
+using Elastos::Utility::Logging::Slogger;
 using Elastos::Droid::Animation::CAnimatorSet;
 using Elastos::Droid::Animation::CArgbEvaluator;
 using Elastos::Droid::Animation::CObjectAnimatorHelper;
@@ -46,7 +48,7 @@ using Elastos::Droid::View::IViewGroupOverlay;
 using Elastos::Droid::View::IViewOverlay;
 using Elastos::Droid::View::IWindow;
 using Elastos::Droid::View::CView;
-
+using Elastos::Droid::View::View;
 using Elastos::Core::CoreUtils;
 using Elastos::Core::StringUtils;
 using Elastos::Core::Math;
@@ -91,7 +93,7 @@ ECode Calculator::MyTextWatcher::AfterTextChanged(
     /* [in] */ IEditable* editable)
 {
     mHost->SetState(INPUT);
-    return mHost->mEvaluator->Evaluate(ICharSequence::Probe(editable), IEvaluateCallback::Probe(this));
+    return mHost->mEvaluator->Evaluate(ICharSequence::Probe(editable), IEvaluateCallback::Probe(mHost));
 }
 
 //----------------------------------------------------------------
@@ -110,7 +112,7 @@ ECode Calculator::MyOnKeyListener::OnKey(
     /* [in] */ IKeyEvent* keyEvent,
     /* [out] */ Boolean* result)
 {
-    VALIDATE_NOT_NULL(result);
+    VALIDATE_NOT_NULL(result)
     switch (keyCode) {
         case IKeyEvent::KEYCODE_NUMPAD_ENTER:
         case IKeyEvent::KEYCODE_ENTER: {
@@ -156,71 +158,65 @@ ECode Calculator::MyEditableFactory::NewEditable(
 }
 
 //----------------------------------------------------------------
-//           Calculator::MyAnimatorListenerAdapter
+//           Calculator::RevealAnimatorListenerAdapter
 //----------------------------------------------------------------
-Calculator::MyAnimatorListenerAdapter::MyAnimatorListenerAdapter(
+Calculator::RevealAnimatorListenerAdapter::RevealAnimatorListenerAdapter(
     /* [in] */ Calculator* host,
     /* [in] */ IViewGroupOverlay* vgo,
     /* [in] */ IView* view)
     : mHost(host)
-    , mvgo(vgo)
+    , mVgo(vgo)
     , mView(view)
 {}
 
-ECode Calculator::MyAnimatorListenerAdapter::OnAnimationEnd(
+ECode Calculator::RevealAnimatorListenerAdapter::OnAnimationEnd(
     /* [in] */ IAnimator* animation)
 {
-    mvgo->Remove(mView);
+    mVgo->Remove(mView);
     mHost->mCurrentAnimator = NULL;
     return NOERROR;
 }
 
 //----------------------------------------------------------------
-//           Calculator::MySecondAnimatorListenerAdapter
+//           Calculator::OnClearAnimatorListenerAdapter
 //----------------------------------------------------------------
-Calculator::MySecondAnimatorListenerAdapter::MySecondAnimatorListenerAdapter(
-    /* [in] */ Calculator* host,
-    /* [in] */ ICalculatorEditText* cet)
+Calculator::OnClearAnimatorListenerAdapter::OnClearAnimatorListenerAdapter(
+    /* [in] */ Calculator* host)
     : mHost(host)
-    , mCet(cet)
 {}
 
-ECode Calculator::MySecondAnimatorListenerAdapter::OnAnimationEnd(
+ECode Calculator::OnClearAnimatorListenerAdapter::OnAnimationEnd(
     /* [in] */ IAnimator* animation)
 {
-
     AutoPtr<IEditable> editable;
     ITextView::Probe(mHost->mFormulaEditText)->GetEditableText((IEditable**)&editable);
     return editable->Clear();
 }
 
 //----------------------------------------------------------------
-//           Calculator::MyThirdAnimatorListenerAdapter
+//           Calculator::OnErrorAnimatorListenerAdapter
 //----------------------------------------------------------------
-Calculator::MyThirdAnimatorListenerAdapter::MyThirdAnimatorListenerAdapter(
+Calculator::OnErrorAnimatorListenerAdapter::OnErrorAnimatorListenerAdapter(
     /* [in] */ Calculator* host,
-    /* [in] */ ICalculatorEditText* cet,
     /* [in] */ Int32 errorResourceId)
     : mHost(host)
-    , mCet(cet)
     , mErrorResId(errorResourceId)
 {}
 
-ECode Calculator::MyThirdAnimatorListenerAdapter::OnAnimationEnd(
+ECode Calculator::OnErrorAnimatorListenerAdapter::OnAnimationEnd(
     /* [in] */ IAnimator* animation)
 {
     mHost->SetState(ERROR);
-    return ITextView::Probe(mHost->mResultEditText)->SetText(StringUtils::ParseCharSequence(StringUtils::ToString(mErrorResId)).Get());
+    return ITextView::Probe(mHost->mResultEditText)->SetText(
+            StringUtils::ParseCharSequence(StringUtils::ToString(mErrorResId)));
 }
 
 //----------------------------------------------------------------
 //           Calculator::MyAnimatorUpdateListener
 //----------------------------------------------------------------
 Calculator::MyAnimatorUpdateListener::MyAnimatorUpdateListener(
-    /* [in] */ Calculator* host,
-    /* [in] */ ICalculatorEditText* cet)
+    /* [in] */ Calculator* host)
     : mHost(host)
-    , mCet(cet)
 {}
 
 CAR_INTERFACE_IMPL(Calculator::MyAnimatorUpdateListener, Object, IAnimatorUpdateListener)
@@ -237,30 +233,24 @@ ECode Calculator::MyAnimatorUpdateListener::OnAnimationUpdate(
 }
 
 //----------------------------------------------------------------
-//           Calculator::MyFourthAnimatorListenerAdapter
+//           Calculator::OnResultAnimatorListenerAdapter
 //----------------------------------------------------------------
-Calculator::MyFourthAnimatorListenerAdapter::MyFourthAnimatorListenerAdapter(
+Calculator::OnResultAnimatorListenerAdapter::OnResultAnimatorListenerAdapter(
     /* [in] */ Calculator* host,
-    /* [in] */ ICalculatorEditText* cet1,
-    /* [in] */ ICalculatorEditText* cet2,
-    /* [in] */ IAnimator* animator,
-    /* [in] */ const String& str,
+    /* [in] */ const String& result,
     /* [in] */ Int32 color)
     : mHost(host)
-    , mCet1(cet1)
-    , mCet2(cet2)
-    , mAnimator(animator)
-    , mResult(str)
+    , mResult(result)
     , mColor(color)
 {}
 
-ECode Calculator::MyFourthAnimatorListenerAdapter::OnAnimationStart(
+ECode Calculator::OnResultAnimatorListenerAdapter::OnAnimationStart(
     /* [in] */ IAnimator* animation)
 {
-    return ITextView::Probe(mHost->mResultEditText)->SetText(StringUtils::ParseCharSequence(mResult).Get());
+    return ITextView::Probe(mHost->mResultEditText)->SetText(StringUtils::ParseCharSequence(mResult));
 }
 
-ECode Calculator::MyFourthAnimatorListenerAdapter::OnAnimationEnd(
+ECode Calculator::OnResultAnimatorListenerAdapter::OnAnimationEnd(
     /* [in] */ IAnimator* animation)
 {
     // Reset all of the values modified during the animation.
@@ -273,7 +263,7 @@ ECode Calculator::MyFourthAnimatorListenerAdapter::OnAnimationEnd(
     IView::Probe(mHost->mFormulaEditText)->SetTranslationY(0.0f);
 
     // Finally update the formula to use the current result.
-    ITextView::Probe(mHost->mResultEditText)->SetText(StringUtils::ParseCharSequence(mResult).Get());
+    ITextView::Probe(mHost->mResultEditText)->SetText(StringUtils::ParseCharSequence(mResult));
     mHost->SetState(RESULT);
 
     mHost->mCurrentAnimator = NULL;
@@ -294,7 +284,6 @@ Calculator::~Calculator()
 
 ECode Calculator::constructor()
 {
-    Logger::I("Calculator", " >> constructor()");
     return Activity::constructor();
 }
 
@@ -352,7 +341,7 @@ ECode Calculator::OnCreate(
 
     textView->SetEditableFactory(mFormulaEditableFactory);
     textView->AddTextChangedListener(mFormulaTextWatcher);
-    IView::Probe(mFormulaEditText.Get())->SetOnKeyListener(IViewOnKeyListener::Probe(mFormulaOnKeyListener));
+    IView::Probe(mFormulaEditText)->SetOnKeyListener(IViewOnKeyListener::Probe(mFormulaOnKeyListener));
     mFormulaEditText->SetOnTextSizeChangeListener(IOnTextSizeChangeListener::Probe(this));
     return mDeleteButton->SetOnLongClickListener(IViewOnLongClickListener::Probe(this));
 }
@@ -371,7 +360,7 @@ ECode Calculator::OnSaveInstanceState(
 
     outState->PutInt32(KEY_CURRENT_STATE, mCurrentState);
     AutoPtr<ICharSequence> cs;
-    ITextView::Probe(mFormulaEditText.Get())->GetText((ICharSequence**)&cs);
+    ITextView::Probe(mFormulaEditText)->GetText((ICharSequence**)&cs);
     String str;
     cs->ToString(&str);
     String ret;
@@ -398,20 +387,21 @@ void Calculator::SetState(
         GetResources((IResources**)&res);
         AutoPtr<IWindow> window;
         GetWindow((IWindow**)&window);
-        Int32 errorColor;
         if (state == ERROR) {
+            Int32 errorColor;
             res->GetColor(R::color::calculator_error_color, &errorColor);
             ITextView::Probe(mFormulaEditText)->SetTextColor(errorColor);
             ITextView::Probe(mResultEditText)->SetTextColor(errorColor);
             window->SetStatusBarColor(errorColor);
         }
         else {
-            res->GetColor(R::color::display_formula_text_color, &errorColor);
-            ITextView::Probe(mFormulaEditText)->SetTextColor(errorColor);
-            res->GetColor(R::color::calculator_error_color, &errorColor);
-            ITextView::Probe(mResultEditText)->SetTextColor(errorColor);
-            res->GetColor(R::color::calculator_accent_color, &errorColor);
-            window->SetStatusBarColor(errorColor);
+            Int32 color;
+            res->GetColor(R::color::display_formula_text_color, &color);
+            ITextView::Probe(mFormulaEditText)->SetTextColor(color);
+            res->GetColor(R::color::display_result_text_color, &color);
+            ITextView::Probe(mResultEditText)->SetTextColor(color);
+            res->GetColor(R::color::calculator_accent_color, &color);
+            window->SetStatusBarColor(color);
         }
     }
 }
@@ -471,7 +461,7 @@ ECode Calculator::OnButtonClick(
                 AutoPtr<ICharSequence> cs;
                 ITextView::Probe(iview)->GetText((ICharSequence**)&cs);
                 ITextView::Probe(mFormulaEditText)->Append(cs);
-                ITextView::Probe(mFormulaEditText)->Append(StringUtils::ParseCharSequence(String("(")).Get());
+                ITextView::Probe(mFormulaEditText)->Append(StringUtils::ParseCharSequence(String("(")));
                 break;
             }
 
@@ -511,7 +501,7 @@ ECode Calculator::OnEvaluate(
     /* [in] */ Int32 errorResourceId)
 {
     if (mCurrentState == INPUT) {
-        ITextView::Probe(mResultEditText)->SetText(StringUtils::ParseCharSequence(result).Get());
+        ITextView::Probe(mResultEditText)->SetText(StringUtils::ParseCharSequence(result));
     }
     else if (errorResourceId != INVALID_RES_ID) {
         OnError(errorResourceId);
@@ -543,18 +533,16 @@ ECode Calculator::OnTextSizeChanged(
     textView->GetTextSize(&textSize);
     Float textScale = oldSize / textSize;
 
+    AutoPtr<IView> tv = IView::Probe(textView);
     Int32 width;
-    IView::Probe(textView)->GetWidth(&width);
-
+    tv->GetWidth(&width);
     Int32 paddingEnd;
-    IView::Probe(textView)->GetPaddingEnd(&paddingEnd);
+    tv->GetPaddingEnd(&paddingEnd);
     Float translationX = (1.0f - textScale) * (width / 2.0f - paddingEnd);
-
     Int32 height;
-    IView::Probe(textView)->GetHeight(&height);
-
+    tv->GetHeight(&height);
     Int32 bottom;
-    IView::Probe(textView)->GetPaddingBottom(&bottom);
+    tv->GetPaddingBottom(&bottom);
     Float translationY = (1.0f - textScale) * (height / 2.0f - bottom);
 
     AutoPtr<IAnimatorSet> animatorSet;
@@ -565,41 +553,40 @@ ECode Calculator::OnTextSizeChanged(
     AutoPtr<ArrayOf<Float> > arr1 = ArrayOf<Float>::Alloc(2);
     (*arr1)[0] = textScale;
     (*arr1)[1] = 1.0;
+    AutoPtr<IObjectAnimator> o1;
+    oah->OfFloat(textView, Elastos::Droid::View::View::SCALE_X, arr1, (IObjectAnimator**)&o1);
+    AutoPtr<IObjectAnimator> o2;
+    oah->OfFloat(textView, Elastos::Droid::View::View::SCALE_Y, arr1, (IObjectAnimator**)&o2);
 
     AutoPtr<ArrayOf<Float> > arr2 = ArrayOf<Float>::Alloc(2);
     (*arr2)[0] = translationX;
     (*arr2)[1] = 0.0;
+    AutoPtr<IObjectAnimator> o3;
+    oah->OfFloat(textView, Elastos::Droid::View::View::TRANSLATION_X, arr2, (IObjectAnimator**)&o3);
 
     AutoPtr<ArrayOf<Float> > arr3 = ArrayOf<Float>::Alloc(2);
     (*arr2)[0] = translationY;
     (*arr2)[1] = 0.0;
-
-    AutoPtr<IObjectAnimator> o1;
-    oah->OfFloat(textView, Elastos::Droid::View::View::SCALE_X.Get(), arr1.Get(), (IObjectAnimator**)&o1);
-    AutoPtr<IObjectAnimator> o2;
-    oah->OfFloat(textView, Elastos::Droid::View::View::SCALE_Y.Get(), arr1.Get(), (IObjectAnimator**)&o2);
-    AutoPtr<IObjectAnimator> o3;
-    oah->OfFloat(textView, Elastos::Droid::View::View::TRANSLATION_X.Get(), arr2.Get(), (IObjectAnimator**)&o3);
     AutoPtr<IObjectAnimator> o4;
-    oah->OfFloat(textView, Elastos::Droid::View::View::TRANSLATION_Y.Get(), arr3.Get(), (IObjectAnimator**)&o4);
+    oah->OfFloat(textView, Elastos::Droid::View::View::TRANSLATION_Y, arr3, (IObjectAnimator**)&o4);
 
-    AutoPtr<ArrayOf<IAnimator*> > arr4 =  ArrayOf<IAnimator*>::Alloc(4);
-    (*arr4)[0] = IAnimator::Probe(o1);
-    (*arr4)[1] = IAnimator::Probe(o2);
-    (*arr4)[2] = IAnimator::Probe(o3);
-    (*arr4)[3] = IAnimator::Probe(o4);
-
-    animatorSet->PlayTogether(arr4.Get());
+    AutoPtr<ArrayOf<IAnimator*> > animators =  ArrayOf<IAnimator*>::Alloc(4);
+    animators->Set(0, IAnimator::Probe(o1));
+    animators->Set(1, IAnimator::Probe(o2));
+    animators->Set(2, IAnimator::Probe(o3));
+    animators->Set(3, IAnimator::Probe(o4));
+    animatorSet->PlayTogether(animators);
 
     AutoPtr<IResources> res;
     GetResources((IResources**)&res);
     Int32 integer;
     res->GetInteger(Elastos::Droid::R::integer::config_mediumAnimTime, &integer);
-    IAnimator::Probe(animatorSet)->SetDuration((Int64)integer);
+    AutoPtr<IAnimator> as = IAnimator::Probe(animatorSet);
+    as->SetDuration((Int64)integer);
     AutoPtr<ITimeInterpolator> tip;
     CAccelerateDecelerateInterpolator::New((ITimeInterpolator**)&tip);
-    IAnimator::Probe(animatorSet)->SetInterpolator(tip.Get());
-    return IAnimator::Probe(animatorSet)->Start();
+    as->SetInterpolator(tip);
+    return as->Start();
 }
 
 void Calculator::OnEquals()
@@ -608,7 +595,7 @@ void Calculator::OnEquals()
         SetState(EVALUATE);
         AutoPtr<ICharSequence> cs;
         ITextView::Probe(mFormulaEditText)->GetText((ICharSequence**)&cs);
-        mEvaluator->Evaluate(cs.Get(), IEvaluateCallback::Probe(this));
+        mEvaluator->Evaluate(cs, IEvaluateCallback::Probe(this));
     }
 }
 
@@ -639,7 +626,7 @@ void Calculator::Reveal(
 
     AutoPtr<IRect> displayRect;
     CRect::New((IRect**)&displayRect);
-    Boolean flag = FALSE;
+    Boolean flag;
     mDisplayView->GetGlobalVisibleRect(displayRect, &flag);
 
     // Make reveal cover the display and status bar.
@@ -659,10 +646,10 @@ void Calculator::Reveal(
     Int32 color;
     res->GetColor(colorRes, &color);
     revealView->SetBackgroundColor(color);
-    groupOverlay->Add(revealView.Get());
+    groupOverlay->Add(revealView);
 
     AutoPtr<ArrayOf<Int32> > clearLocation = ArrayOf<Int32>::Alloc(2);
-    sourceView->GetLocationInWindow(clearLocation.Get());
+    sourceView->GetLocationInWindow(clearLocation);
     Int32 width;
     sourceView->GetWidth(&width);
     Int32 height;
@@ -670,21 +657,24 @@ void Calculator::Reveal(
     (*clearLocation)[0] += width / 2;
     (*clearLocation)[1] += height / 2;
 
+    revealView->GetLeft(&left);
     Int32 revealCenterX = (*clearLocation)[0] - left;
     Int32 top;
     revealView->GetTop(&top);
     Int32 revealCenterY = (*clearLocation)[1] - top;
 
     Double x1_2 = Elastos::Core::Math::Pow((Double)(left - revealCenterX), (Double)2);
+    revealView->GetRight(&right);
     Double x2_2 = Elastos::Core::Math::Pow((Double)(right - revealCenterX), (Double)2);
     Double y_2 = Elastos::Core::Math::Pow((Double)(top - revealCenterY), (Double)2);
-    Float revealRadius = (Float)Elastos::Core::Math::Max(Elastos::Core::Math::Sqrt(x1_2 + y_2), Elastos::Core::Math::Sqrt(x2_2 + y_2));
+    Float revealRadius = (Float)Elastos::Core::Math::Max(
+            Elastos::Core::Math::Sqrt(x1_2 + y_2), Elastos::Core::Math::Sqrt(x2_2 + y_2));
 
     AutoPtr<IViewAnimationUtilsHelper> vau;
     CViewAnimationUtilsHelper::AcquireSingleton((IViewAnimationUtilsHelper**)&vau);
     AutoPtr<IAnimator> revealAnimator;
-    vau->CreateCircularReveal(
-        revealView.Get(), revealCenterX, revealCenterY, 0.0f, revealRadius, (IAnimator**)&revealAnimator);
+    vau->CreateCircularReveal(revealView, revealCenterX, revealCenterY, 0.0f,
+            revealRadius, (IAnimator**)&revealAnimator);
 
     Int32 integer;
     res->GetInteger(Elastos::Droid::R::integer::config_longAnimTime, &integer);
@@ -697,7 +687,7 @@ void Calculator::Reveal(
     AutoPtr<ArrayOf<Float> > arr = ArrayOf<Float>::Alloc(1);
     (*arr)[0] = 0.0f;
     AutoPtr<IObjectAnimator> oba;
-    oah->OfFloat(revealView.Get(), Elastos::Droid::View::View::ALPHA.Get(), arr.Get(), (IObjectAnimator**)&oba);
+    oah->OfFloat(revealView, Elastos::Droid::View::View::View::ALPHA, arr, (IObjectAnimator**)&oba);
     AutoPtr<IAnimator> alphaAnimator = IAnimator::Probe(oba);
     res->GetInteger(Elastos::Droid::R::integer::config_mediumAnimTime, &integer);
     alphaAnimator->SetDuration((Int64)(integer));
@@ -705,31 +695,30 @@ void Calculator::Reveal(
     AutoPtr<IAnimatorSet> animatorSet;
     CAnimatorSet::New((IAnimatorSet**)&animatorSet);
     AutoPtr<IAnimatorSetBuilder> asb;
-    animatorSet->Play(revealAnimator.Get(), (IAnimatorSetBuilder**)&asb);
+    animatorSet->Play(revealAnimator, (IAnimatorSetBuilder**)&asb);
     asb->Before(alphaAnimator);
     AutoPtr<ITimeInterpolator> tip;
     CAccelerateDecelerateInterpolator::New((ITimeInterpolator**)&tip);
-    IAnimator::Probe(animatorSet)->SetInterpolator(tip.Get());
+    AutoPtr<IAnimator> as = IAnimator::Probe(animatorSet);
+    as->SetInterpolator(tip);
 
-    AutoPtr<MyAnimatorListenerAdapter> myala =
-        new MyAnimatorListenerAdapter(this, groupOverlay.Get(), revealView.Get());
-    IAnimator::Probe(animatorSet)->AddListener(IAnimatorListener::Probe(myala));
+    AutoPtr<RevealAnimatorListenerAdapter> adapter = new RevealAnimatorListenerAdapter(this, groupOverlay, revealView);
+    as->AddListener(IAnimatorListener::Probe(adapter));
 
-    mCurrentAnimator = IAnimator::Probe(animatorSet);
-    IAnimator::Probe(animatorSet)->Start();
+    mCurrentAnimator = as;
+    as->Start();
 }
 
 void Calculator::OnClear()
 {
     AutoPtr<ICharSequence> cs;
-    ITextView::Probe(mFormulaEditText.Get())->GetText((ICharSequence**)&cs);
-
-    if (TextUtils::IsEmpty(cs.Get())) {
+    ITextView::Probe(mFormulaEditText)->GetText((ICharSequence**)&cs);
+    if (TextUtils::IsEmpty(cs)) {
         return;
     }
 
-    AutoPtr<MySecondAnimatorListenerAdapter> msal = new MySecondAnimatorListenerAdapter(this, mFormulaEditText);
-    Reveal(mCurrentButton.Get(), R::color::calculator_accent_color, IAnimatorListener::Probe(msal));
+    AutoPtr<OnClearAnimatorListenerAdapter> msal = new OnClearAnimatorListenerAdapter(this);
+    Reveal(mCurrentButton, R::color::calculator_accent_color, IAnimatorListener::Probe(msal));
 }
 
 void Calculator::OnError(
@@ -741,9 +730,8 @@ void Calculator::OnError(
         return;
     }
 
-    AutoPtr<MyThirdAnimatorListenerAdapter> mal =
-        new MyThirdAnimatorListenerAdapter(this, mResultEditText, errorResourceId);
-    Reveal(mCurrentButton.Get(), R::color::calculator_error_color, IAnimatorListener::Probe(mal));
+    AutoPtr<OnErrorAnimatorListenerAdapter> adapter = new OnErrorAnimatorListenerAdapter(this, errorResourceId);
+    Reveal(mCurrentButton, R::color::calculator_error_color, IAnimatorListener::Probe(adapter));
 }
 
 void Calculator::OnResult(
@@ -751,37 +739,27 @@ void Calculator::OnResult(
 {
     // Calculate the values needed to perform the scale and translation animations,
     // accounting for how the scale will affect the final position of the text.
-    Float vts;
-    ((CalculatorEditText*)mFormulaEditText.Get())->GetVariableTextSize(result, &vts);
-    Float ts;
-    ITextView::Probe(mResultEditText)->GetTextSize(&ts);
-    Float resultScale;
-    resultScale = (Float)(vts / ts);
-    Int32 width;
-    IView::Probe(mResultEditText)->GetWidth(&width);
-    Int32 paddingEnd;
-    IView::Probe(mResultEditText)->GetPaddingEnd(&paddingEnd);
+    Float formulaSize;
+    mFormulaEditText->GetVariableTextSize(result, &formulaSize);
+    Float resultSize;
+    ITextView::Probe(mResultEditText)->GetTextSize(&resultSize);
+    Float resultScale = formulaSize / resultSize;
+    AutoPtr<IView> resultEditText = IView::Probe(mResultEditText);
+    Int32 width, paddingEnd;
+    resultEditText->GetWidth(&width);
+    resultEditText->GetPaddingEnd(&paddingEnd);
     Float resultTranslationX = (1.0f - resultScale) * (width / 2.0f - paddingEnd);
-
-    Int32 height;
-    IView::Probe(mResultEditText)->GetHeight(&height);
-    Int32 paddingBottom;
-    IView::Probe(mResultEditText)->GetPaddingBottom(&paddingBottom);
-
-    Int32 bottom;
-    IView::Probe(mFormulaEditText)->GetBottom(&bottom);
-    Int32 rbottom;
-    IView::Probe(mResultEditText)->GetBottom(&rbottom);
-
-    Int32 fpaddingBottom;
-    IView::Probe(mFormulaEditText)->GetPaddingBottom(&fpaddingBottom);
-
-    Float resultTranslationY = (1.0f - resultScale) *
-            (height / 2.0f - paddingBottom) +
-            (bottom - rbottom) +
-            (paddingBottom - fpaddingBottom);
-
-    Float formulaTranslationY = -bottom;
+    Int32 height, paddingBottom, bottom;
+    resultEditText->GetHeight(&height);
+    resultEditText->GetPaddingBottom(&paddingBottom);
+    resultEditText->GetBottom(&bottom);
+    AutoPtr<IView> formulaEditText = IView::Probe(mFormulaEditText);
+    Int32 formulaBottom, formulaPaddingBottom;
+    formulaEditText->GetBottom(&formulaBottom);
+    formulaEditText->GetPaddingBottom(&formulaPaddingBottom);
+    Float resultTranslationY = (1.0f - resultScale) * (height / 2.0f - paddingBottom) +
+            (formulaBottom - bottom) + (paddingBottom - formulaPaddingBottom);
+    Float formulaTranslationY = -formulaBottom;
 
     // Use a value animator to fade to the final text color over the course of the animation.
     Int32 resultTextColor;
@@ -789,71 +767,70 @@ void Calculator::OnResult(
     Int32 formulaTextColor;
     ITextView::Probe(mFormulaEditText)->GetCurrentTextColor(&formulaTextColor);
 
-    AutoPtr<IValueAnimatorHelper> vah;
-    CValueAnimatorHelper::AcquireSingleton((IValueAnimatorHelper**)&vah);
     AutoPtr<ITypeEvaluator> te;
     CArgbEvaluator::New((ITypeEvaluator**)&te);
-
+    AutoPtr<IValueAnimatorHelper> vah;
+    CValueAnimatorHelper::AcquireSingleton((IValueAnimatorHelper**)&vah);
     AutoPtr<ArrayOf<IInterface*> > arr =  ArrayOf<IInterface*>::Alloc(2);
-    (*arr)[0] = TO_IINTERFACE(CoreUtils::Convert(resultTextColor));
-    (*arr)[1] = TO_IINTERFACE(CoreUtils::Convert(formulaTextColor));
+    arr->Set(0, CoreUtils::Convert(resultTextColor));
+    arr->Set(1, CoreUtils::Convert(formulaTextColor));
     AutoPtr<IValueAnimator> textColorAnimator;
-    vah->OfObject(te.Get(), arr.Get(), (IValueAnimator**)&textColorAnimator);
+    vah->OfObject(te, arr, (IValueAnimator**)&textColorAnimator);
 
-    AutoPtr<MyAnimatorUpdateListener> maul = new MyAnimatorUpdateListener(this, mResultEditText.Get());
-    textColorAnimator->AddUpdateListener(IAnimatorUpdateListener::Probe(maul));
+    AutoPtr<IAnimatorUpdateListener> maul = (IAnimatorUpdateListener*)new MyAnimatorUpdateListener(this);
+    textColorAnimator->AddUpdateListener(maul);
 
     AutoPtr<IAnimatorSet> animatorSet;
     CAnimatorSet::New((IAnimatorSet**)&animatorSet);
     AutoPtr<IObjectAnimatorHelper> oah;
     CObjectAnimatorHelper::AcquireSingleton((IObjectAnimatorHelper**)&oah);
+
     AutoPtr<ArrayOf<Float> > arr1 = ArrayOf<Float>::Alloc(1);
     (*arr1)[0] = resultScale;
+    AutoPtr<IObjectAnimator> ioa1;
+    oah->OfFloat(mResultEditText, Elastos::Droid::View::View::SCALE_X, arr1, (IObjectAnimator**)&ioa1);
+
+    AutoPtr<IObjectAnimator> ioa2;
+    oah->OfFloat(mResultEditText, Elastos::Droid::View::View::SCALE_Y, arr1, (IObjectAnimator**)&ioa2);
 
     AutoPtr<ArrayOf<Float> > arr2 = ArrayOf<Float>::Alloc(1);
     (*arr2)[0] = resultTranslationX;
+    AutoPtr<IObjectAnimator> ioa3;
+    oah->OfFloat(mResultEditText, Elastos::Droid::View::View::TRANSLATION_X, arr2, (IObjectAnimator**)&ioa3);
 
     AutoPtr<ArrayOf<Float> > arr3 = ArrayOf<Float>::Alloc(1);
     (*arr3)[0] = resultTranslationY;
+    AutoPtr<IObjectAnimator> ioa4;
+    oah->OfFloat(mResultEditText, Elastos::Droid::View::View::TRANSLATION_Y, arr3, (IObjectAnimator**)&ioa4);
 
     AutoPtr<ArrayOf<Float> > arr4 = ArrayOf<Float>::Alloc(1);
     (*arr4)[0] = formulaTranslationY;
+    AutoPtr<IObjectAnimator> ioa5;
+    oah->OfFloat(mFormulaEditText, Elastos::Droid::View::View::TRANSLATION_Y, arr4, (IObjectAnimator**)&ioa5);
 
-    AutoPtr<ArrayOf<IAnimator*> > animators = ArrayOf<IAnimator*>::Alloc(4);
-    (*animators)[0] = IAnimator::Probe(textColorAnimator);
-    AutoPtr<IObjectAnimator> ioa;
-    oah->OfFloat(ICalculatorEditText::Probe(mResultEditText), Elastos::Droid::View::View::SCALE_X.Get(), arr1.Get(), (IObjectAnimator**)&ioa);
-    (*animators)[1] = IAnimator::Probe(ioa);
-    ioa = NULL;
-    oah->OfFloat(ICalculatorEditText::Probe(mResultEditText), Elastos::Droid::View::View::SCALE_Y.Get(), arr1.Get(), (IObjectAnimator**)&ioa);
-    (*animators)[2] = IAnimator::Probe(ioa);
-    ioa = NULL;
-    oah->OfFloat(ICalculatorEditText::Probe(mResultEditText), Elastos::Droid::View::View::TRANSLATION_X.Get(), arr2.Get(), (IObjectAnimator**)&ioa);
-    (*animators)[3] = IAnimator::Probe(ioa);
-    ioa = NULL;
-    oah->OfFloat(ICalculatorEditText::Probe(mFormulaEditText), Elastos::Droid::View::View::TRANSLATION_Y.Get(), arr3.Get(), (IObjectAnimator**)&ioa);
-    (*animators)[4] = IAnimator::Probe(ioa);
-    ioa = NULL;
-    oah->OfFloat(ICalculatorEditText::Probe(mFormulaEditText), Elastos::Droid::View::View::TRANSLATION_Y.Get(), arr4.Get(), (IObjectAnimator**)&ioa);
-    (*animators)[5] = IAnimator::Probe(ioa);
-    animatorSet->PlayTogether(animators.Get());
+    AutoPtr<ArrayOf<IAnimator*> > animators = ArrayOf<IAnimator*>::Alloc(6);
+    animators->Set(0, IAnimator::Probe(textColorAnimator));
+    animators->Set(1, IAnimator::Probe(ioa1));
+    animators->Set(2, IAnimator::Probe(ioa2));
+    animators->Set(3, IAnimator::Probe(ioa3));
+    animators->Set(4, IAnimator::Probe(ioa4));
+    animators->Set(5, IAnimator::Probe(ioa5));
+    animatorSet->PlayTogether(animators);
 
+    AutoPtr<IAnimator> as = IAnimator::Probe(animatorSet);
     AutoPtr<IResources> res;
     GetResources((IResources**)&res);
     Int32 vol;
     res->GetInteger(Elastos::Droid::R::integer::config_longAnimTime, &vol);
-    IAnimator::Probe(animatorSet)->SetDuration((Int64)vol);
-
+    as->SetDuration((Int64)vol);
     AutoPtr<ITimeInterpolator> tip;
     CAccelerateDecelerateInterpolator::New((ITimeInterpolator**)&tip);
-    IAnimator::Probe(animatorSet)->SetInterpolator(tip.Get());
+    as->SetInterpolator(tip);
+    AutoPtr<OnResultAnimatorListenerAdapter> adapter = new OnResultAnimatorListenerAdapter(this, result, resultTextColor);
+    as->AddListener(IAnimatorListener::Probe(adapter));
 
-    AutoPtr<MyFourthAnimatorListenerAdapter> mfal =
-        new MyFourthAnimatorListenerAdapter(this, mResultEditText.Get(), mFormulaEditText.Get(), mCurrentAnimator.Get(), result, resultTextColor);
-    IAnimator::Probe(animatorSet)->AddListener(IAnimatorListener::Probe(mfal));
-
-    mCurrentAnimator = IAnimator::Probe(animatorSet);
-    IAnimator::Probe(animatorSet)->Start();
+    mCurrentAnimator = as;
+    as->Start();
 }
 
 } // namespace Calculator2

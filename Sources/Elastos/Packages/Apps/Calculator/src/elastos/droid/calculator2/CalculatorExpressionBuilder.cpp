@@ -36,8 +36,7 @@ ECode CalculatorExpressionBuilder::Replace(
     /* [in] */ Int32 end,
     /* [in] */ ICharSequence* tb,
     /* [in] */ Int32 tbstart,
-    /* [in] */ Int32 tbend
-    /*SpannableStringBuilder** result*/)
+    /* [in] */ Int32 tbend)
 {
     Int32 length;
     GetLength(&length);
@@ -46,13 +45,12 @@ ECode CalculatorExpressionBuilder::Replace(
         return SpannableStringBuilder::Replace(start, end, tb, tbstart, tbend);
     }
 
-    String appendExpr;
     AutoPtr<ICharSequence> cs;
     tb->SubSequence(tbstart, tbend, (ICharSequence**)&cs);
-    cs->ToString(&appendExpr);
     String str;
-    mTokenizer->GetNormalizedExpression(appendExpr, &str);
-
+    cs->ToString(&str);
+    String appendExpr;
+    mTokenizer->GetNormalizedExpression(str, &appendExpr);
     if (appendExpr.GetLength() == 1) {
         String tmpStr;
         ToString(&tmpStr);
@@ -65,7 +63,7 @@ ECode CalculatorExpressionBuilder::Replace(
                     Int32 index = expr.LastIndexOf('.');
                     String subStr = expr.Substring(index + 1, start);
 
-                    if (index != -1 && TextUtils::IsDigitsOnly(StringUtils::ParseCharSequence(subStr).Get())) {
+                    if (index != -1 && TextUtils::IsDigitsOnly(StringUtils::ParseCharSequence(subStr))) {
                         appendExpr = String("");
                     }
                     break;
@@ -114,7 +112,7 @@ ECode CalculatorExpressionBuilder::Replace(
     String tmp;
     mTokenizer->GetLocalizedExpression(appendExpr, &tmp);
     appendExpr = tmp;
-    return Replace(start, end, StringUtils::ParseCharSequence(appendExpr).Get(), 0, appendExpr.GetLength());
+    return SpannableStringBuilder::Replace(start, end, StringUtils::ParseCharSequence(appendExpr), 0, appendExpr.GetLength());
 }
 
 } // namespace Calculator2

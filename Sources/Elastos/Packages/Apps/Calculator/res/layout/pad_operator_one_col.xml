@@ -27,14 +27,14 @@
         android:id="@+id/del"
         style="@style/PadButtonStyle.Operator.Text"
         android:contentDescription="@string/desc_del"
-        android:onClick="onButtonClick"
+        android:onClick="OnButtonClick"
         android:text="@string/del" />
 
     <Button
         android:id="@+id/clr"
         style="@style/PadButtonStyle.Operator.Text"
         android:contentDescription="@string/desc_clr"
-        android:onClick="onButtonClick"
+        android:onClick="OnButtonClick"
         android:text="@string/clr"
         android:visibility="gone" />
 
@@ -42,28 +42,28 @@
         android:id="@+id/op_div"
         style="@style/PadButtonStyle.Operator"
         android:contentDescription="@string/desc_op_div"
-        android:onClick="onButtonClick"
+        android:onClick="OnButtonClick"
         android:text="@string/op_div" />
 
     <Button
         android:id="@+id/op_mul"
         style="@style/PadButtonStyle.Operator"
         android:contentDescription="@string/desc_op_mul"
-        android:onClick="onButtonClick"
+        android:onClick="OnButtonClick"
         android:text="@string/op_mul" />
 
     <Button
         android:id="@+id/op_sub"
         style="@style/PadButtonStyle.Operator"
         android:contentDescription="@string/desc_op_sub"
-        android:onClick="onButtonClick"
+        android:onClick="OnButtonClick"
         android:text="@string/op_sub" />
 
     <Button
         android:id="@+id/op_add"
         style="@style/PadButtonStyle.Operator"
         android:contentDescription="@string/desc_op_add"
-        android:onClick="onButtonClick"
+        android:onClick="OnButtonClick"
         android:text="@string/op_add" />
 
 </Elastos.Droid.Calculator2.CCalculatorPadLayout>

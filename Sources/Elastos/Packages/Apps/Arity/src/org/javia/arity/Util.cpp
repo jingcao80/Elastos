@@ -71,7 +71,7 @@ String Util::DoubleToString(
     if (ePos != -1) {
         buf.SetLength(ePos);
     }
-    Int32 len = buf.GetLength(&len);
+    Int32 len = buf.GetLength();
 
     //remove dot
     Int32 dotPos;
@@ -99,27 +99,26 @@ String Util::DoubleToString(
                 buf.SetCharAt(p, (Char32)(buf.GetCharAt(p) + 1));
             }
             else {
-                buf.Insert(0, '1');
+                buf.InsertChar(0, '1');
                 ++roundingStart;
                 ++exp;
             }
         }
         buf.SetLength(roundingStart);
     }
-
     //re-insert dot
     if ((exp < -5) || (exp > 10)) {
-        buf.Insert(1, '.');
+        buf.InsertChar(1, '.');
         --exp;
     }
     else {
         for (Int32 i = len; i < exp; ++i) {
-            buf.Append('0');
+            buf.AppendChar('0');
         }
         for (Int32 i = exp; i <= 0; ++i) {
-            buf.Insert(0, '0');
+            buf.InsertChar(0, '0');
         }
-        buf.Insert((exp <= 0)? 1 : exp, '.');
+        buf.InsertChar((exp <= 0)? 1 : exp, '.');
         exp = 0;
     }
     len = buf.GetLength();
@@ -138,7 +137,7 @@ String Util::DoubleToString(
         buf.Append(exp);
     }
     if (v < 0) {
-        buf.Insert(0, '-');
+        buf.InsertChar(0, '-');
     }
     return buf.ToString();
 }

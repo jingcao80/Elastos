@@ -74,11 +74,13 @@ ECode CalculatorExpressionTokenizer::GetNormalizedExpression(
     /* [in] */ const String& _expr,
     /* [out] */ String* result)
 {
-    VALIDATE_NOT_NULL(result);
+    VALIDATE_NOT_NULL(result)
     String expr = _expr;
     HashMap<String, String>::Iterator it = mReplacementMap.Begin();
     for (; it != mReplacementMap.End(); ++it) {
-        StringUtils::Replace(expr, it->mSecond, it->mFirst, &expr);
+        String temp;
+        StringUtils::Replace(expr, it->mSecond, it->mFirst, &temp);
+        expr = temp;
     }
     *result = expr;
     return NOERROR;
@@ -88,11 +90,13 @@ ECode CalculatorExpressionTokenizer::GetLocalizedExpression(
     /* [in] */ const String& _expr,
     /* [out] */ String* result)
 {
-    VALIDATE_NOT_NULL(result);
+    VALIDATE_NOT_NULL(result)
     String expr = _expr;
     HashMap<String, String>::Iterator it = mReplacementMap.Begin();
     for (; it != mReplacementMap.End(); ++it) {
-        StringUtils::Replace(expr, it->mFirst, it->mSecond, &expr);
+        String temp;
+        StringUtils::Replace(expr, it->mFirst, it->mSecond, &temp);
+        expr = temp;
     }
     *result = expr;
     return NOERROR;

@@ -5,6 +5,9 @@
 #include <Elastos.CoreLibrary.h>
 #include <elastos/core/StringUtils.h>
 #include <elastos/core/CoreUtils.h>
+#include <elastos/utility/logging/Slogger.h>
+
+using Elastos::Utility::Logging::Slogger;
 
 using Elastos::Core::StringUtils;
 using Elastos::Core::CoreUtils;
@@ -57,35 +60,46 @@ ECode CalculatorExpressionEvaluator::Evaluate(
     }
 
     // try {
-        if (strexpr.GetLength() == 0 || CoreUtils::Convert(StringUtils::ParseDouble(strexpr)) != NULL) {
-            callback->OnEvaluate(strexpr, String(NULL), ICalculator::INVALID_RES_ID);
-            return NOERROR;
-        }
+    Double value;
+    if (strexpr.GetLength() == 0 || StringUtils::Parse(strexpr, &value) == (ECode)NOERROR) {
+        callback->OnEvaluate(strexpr, String(NULL), ICalculator::INVALID_RES_ID);
+        return NOERROR;
+    }
     // } catch (NumberFormatException e) {
         // strexpr is not a simple number
     // }
 
     // try {
-        Double result;
-        mSymbols->Eval(strexpr, &result);
-        Boolean flag = FALSE;
-        if ((CoreUtils::Convert(result)->IsNaN(&flag), flag)) {
-            callback->OnEvaluate(strexpr, String(NULL), R::string::error_nan);
+    Double result;
+    mSymbols->Eval(strexpr, &result);
+    Slogger::D("CalculatorExpressionEvaluator", "############### str: %s, result: %d ##############",
+                strexpr.string(), result);
+    Boolean flag = FALSE;
+    if ((CoreUtils::Convert(result)->IsNaN(&flag), flag)) {
+        ECode ec = callback->OnEvaluate(strexpr, String(NULL), R::string::error_nan);
+        if (ec == (ECode)E_SYNTAX_EXCEPTION) {
+            return callback->OnEvaluate(strexpr, String(NULL), R::string::error_syntax);
         }
-        else {
-            // The arity library uses floating point arithmetic when evaluating the expression
-            // leading to precision errors in the result. The method doubleToString hides these
-            // errors; rounding the result by dropping N digits of precision.
-            String resultString;
-            assert(0 && "TODO"); // arity.jar
-            mTokenizer->GetLocalizedExpression(
-                    Util::DoubleToString(result, MAX_DIGITS, ROUNDING_DIGITS), &resultString);
-            callback->OnEvaluate(strexpr, resultString, ICalculator::INVALID_RES_ID);
+    }
+    else {
+        // The arity library uses floating point arithmetic when evaluating the expression
+        // leading to precision errors in the result. The method doubleToString hides these
+        // errors; rounding the result by dropping N digits of precision.
+        String temp = Util::DoubleToString(result, MAX_DIGITS, ROUNDING_DIGITS);
+        String resultString;
+        mTokenizer->GetLocalizedExpression(
+                Util::DoubleToString(result, MAX_DIGITS, ROUNDING_DIGITS), &resultString);
+        Slogger::D("CalculatorExpressionEvaluator", "############### str: %s, temp: %s, resultString: %s ##############",
+                strexpr.string(), temp.string(), resultString.string());
+        ECode ec = callback->OnEvaluate(strexpr, resultString, ICalculator::INVALID_RES_ID);
+        if (ec == (ECode)E_SYNTAX_EXCEPTION) {
+            return callback->OnEvaluate(strexpr, String(NULL), R::string::error_syntax);
         }
+    }
     // } catch (SyntaxException e) {
-        callback->OnEvaluate(strexpr, String(NULL), R::string::error_syntax);
+    // return callback->OnEvaluate(strexpr, String(NULL), R::string::error_syntax);
     // }
-
+    return NOERROR;
 }
 
 } // namespace Calculator2
