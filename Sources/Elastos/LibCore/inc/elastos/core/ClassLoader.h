@@ -33,6 +33,7 @@ private:
     {
     public:
         static AutoPtr<IClassLoader> sLoader;
+        static String sSystemClasspath;
     };
 
 public:
@@ -64,6 +65,8 @@ public:
     CARAPI ToString(
         /* [out] */ String* str);
 
+    static CARAPI_(String) GetSystemClasspath();
+
     /**
      * Returns the system class loader. This is the parent for new
      * {@code ClassLoader} instances and is typically the class loader used to
@@ -73,6 +76,7 @@ public:
 
     static CARAPI_(AutoPtr<IClassLoader>) GetClassLoader(
         /* [in] */ IClassInfo* clsInfo);
+
 protected:
     /**
      * Overridden by subclasses, throws a {@code ClassNotFoundException} by
@@ -118,6 +122,7 @@ private:
     AutoPtr<IClassLoader> mParent;
 
     HashMap<String, IClassInfo*> mClassTable;
+    AutoPtr<IModuleInfo> mModuleInfo;
 };
 
 // /**

@@ -1848,8 +1848,10 @@ void LockPatternUtils::FinishBiometricWeak()
     CIntent::New((IIntent**)&intent);
 
     //is right?
-    intent->SetClassName(String("Elastos.Droid.Core.eco"),
-            String("SetupEndScreen"));
+    assert(0 && "TODO");
+    // intent.setClassName("com.android.facelock",
+    //         "com.android.facelock.SetupEndScreen");
+    intent->SetClassName(String("Elastos.Droid.Core.eco"), String("SetupEndScreen"));
     mContext->StartActivity(intent);
 }
 

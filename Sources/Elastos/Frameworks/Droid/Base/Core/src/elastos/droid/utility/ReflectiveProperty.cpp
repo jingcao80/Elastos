@@ -40,8 +40,7 @@ ReflectiveProperty::ReflectiveProperty(
 {
      AutoPtr<IModuleInfo> moduleInfo;
      String path(clsId.pUunm);
-     ECode ec = _CReflector_AcquireModuleInfo(
-            path, (IModuleInfo**)&moduleInfo);
+     ECode ec = _CReflector_AcquireModuleInfo(path, (IModuleInfo**)&moduleInfo);
      if (FAILED(ec)) {
         assert(0);
     }

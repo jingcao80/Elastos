@@ -32,8 +32,6 @@ using Elastos::Droid::Os::EIID_IHandlerCallback;
 using Elastos::Droid::App::LoadedPkg;
 using Elastos::Droid::Widget::CBlinkLayout;
 using Elastos::Droid::Widget::IFrameLayout;
-using Elastos::Core::ISystem;
-using Elastos::Core::CSystem;
 using Elastos::Core::ICharSequence;
 using Elastos::Core::CString;
 using Elastos::IO::ICloseable;
@@ -52,7 +50,6 @@ namespace Droid {
 namespace View {
 
 static const Boolean DEBUG = FALSE;
-static Int64 sTotalCreateViewTime = 0;
 
 #define LAYOUT_INFLATOR_CATCH_EXCEPTION1(expr, whereInfo) \
     do { \
@@ -270,10 +267,10 @@ ECode LayoutInflater::BlinkLayout::DispatchDraw(
 
 void LayoutInflater::BlinkLayout::MakeBlink()
 {
-        AutoPtr<IMessage> message;
-        mHandler->ObtainMessage(MESSAGE_BLINK, (IMessage**)&message);
-        Boolean res;
-        mHandler->SendMessageDelayed(message, BLINK_DELAY, &res);
+    AutoPtr<IMessage> message;
+    mHandler->ObtainMessage(MESSAGE_BLINK, (IMessage**)&message);
+    Boolean res;
+    mHandler->SendMessageDelayed(message, BLINK_DELAY, &res);
 }
 
 //=======================================================================================
@@ -556,11 +553,6 @@ ECode LayoutInflater::Inflate(
     VALIDATE_NOT_NULL(view)
     *view = NULL;
 
-    AutoPtr<ISystem> sys;
-    CSystem::AcquireSingleton((ISystem**)&sys);
-    Int64 startTime;
-    sys->GetCurrentTimeMillis(&startTime);
-
     AutoLock lock(mConstructorArgsLock);
     AutoPtr<IAttributeSet> attrs = Xml::AsAttributeSet(parser);
     AutoPtr<IContext> lastContext = IContext::Probe((*mConstructorArgs)[0]);
@@ -668,15 +660,6 @@ _EXIT_:
 
     mConstructorArgs->Set(0, lastContext);
     mConstructorArgs->Set(1, NULL);
-
-    Int64 now;
-    sys->GetCurrentTimeMillis(&now);
-    Slogger::D(TAG, " ======================= Inflate: %s, cost: %lld s and %lld ms.",
-        TO_CSTR(result), (now - startTime) / 1000, (now - startTime) % 1000);
-    sTotalCreateViewTime += (now - startTime);
-    Slogger::D(TAG, " ======================= Inflate total cost: %lld s and %lld ms.",
-        sTotalCreateViewTime / 1000, sTotalCreateViewTime % 1000);
-
     return NOERROR;
 }
 

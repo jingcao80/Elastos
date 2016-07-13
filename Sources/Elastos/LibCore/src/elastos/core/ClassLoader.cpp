@@ -17,6 +17,7 @@ namespace Core {
 //  ClassLoader::SystemClassLoader
 //--------------------------------------------
 AutoPtr<IClassLoader> ClassLoader::SystemClassLoader::sLoader;
+String ClassLoader::SystemClassLoader::sSystemClasspath;
 
 //--------------------------------------------
 //  ClassLoader
@@ -92,15 +93,21 @@ static String GetSystemProperties(
     return String("");
 }
 
+String ClassLoader::GetSystemClasspath()
+{
+    if (SystemClassLoader::sSystemClasspath.IsNull()) {
+        SystemClassLoader::sSystemClasspath = GetSystemProperties(String("elastos.class.path"), String(NULL));
+        if (SystemClassLoader::sSystemClasspath.IsNullOrEmpty()) {
+            SystemClassLoader::sSystemClasspath = "/system/lib/Elastos.Droid.Core.eco";
+        }
+    }
+    return SystemClassLoader::sSystemClasspath;
+}
+
 AutoPtr<IClassLoader> ClassLoader::CreateSystemClassLoader()
 {
-    String classPath = GetSystemProperties(String("elastos.class.path"), String(NULL));
-    if (classPath.IsNullOrEmpty()) {
-        classPath = "/system/lib/Elastos.Droid.Core.eco";
-    }
-
     AutoPtr<IClassLoader> passClassLoader;
-    CPathClassLoader::New(classPath, NULL, (IClassLoader**)&passClassLoader);
+    CPathClassLoader::New(GetSystemClasspath(), NULL, (IClassLoader**)&passClassLoader);
     return passClassLoader;
 }
 
@@ -175,17 +182,19 @@ ECode ClassLoader::FindClass(
         return E_INVALID_ARGUMENT;
     }
 
+    ECode ec = NOERROR;
     for (Int32 i = 0; i < mClassPaths->GetLength(); i++) {
         String path = (*mClassPaths)[i];
-        AutoPtr<IModuleInfo> module;
-        ECode ec = CReflector::AcquireModuleInfo(path, (IModuleInfo**)&module);
-        if (FAILED(ec) || module == NULL) {
-            ALOGE("ClassLoader::FindClass %s, failed to AcquireModuleInfo at path %d/%d: %s",
-                className.string(), i +1, mClassPaths->GetLength(), path.string());
-            continue;
+        if (mModuleInfo == NULL) {
+            ec = CReflector::AcquireModuleInfo(path, (IModuleInfo**)&mModuleInfo);
+            if (FAILED(ec) || mModuleInfo == NULL) {
+                ALOGE("ClassLoader::FindClass %s, failed to AcquireModuleInfo at path %d/%d: %s",
+                    className.string(), i +1, mClassPaths->GetLength(), path.string());
+                continue;
+            }
         }
 
-        ec = module->GetClassInfo(className, klass);
+        ec = mModuleInfo->GetClassInfo(className, klass);
         if (SUCCEEDED(ec)) {
             (*klass)->SetClassLoader((IClassLoader*)this);
             return NOERROR;

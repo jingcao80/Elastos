@@ -1159,10 +1159,47 @@ void testQuintet()
     // testSplit();
 }
 
+int testReflectionCost()
+{
+    AutoPtr<ISystem> sys;
+    CSystem::AcquireSingleton((ISystem**)&sys);
+    Int64 startTime;
+    sys->GetCurrentTimeMillis(&startTime);
+    Int64 prev = startTime;
+    Int64 now;
+
+    const String moduleName("/system/lib/Elastos.Droid.Core.eco");
+    const String klassName("Elastos.Droid.Internal.Widget.CActionBarOverlayLayout");
+
+    AutoPtr<IModuleInfo> moduleInfo;
+    ECode ec = _CReflector_AcquireModuleInfo(moduleName, (IModuleInfo**)&moduleInfo);
+    if (FAILED(ec)) {
+        printf("Acquire \"%s\" module info failed!\n", moduleName.string());
+    }
+
+    sys->GetCurrentTimeMillis(&now);
+    printf(" >> AcquireModuleInfo cost: %lld s and %lld ms.\n",
+        (now - prev) / 1000, (now - prev) % 1000);
+    prev = now;
+
+    AutoPtr<IClassInfo> classInfo;
+    ec = moduleInfo->GetClassInfo(klassName, (IClassInfo**)&classInfo);
+    if (FAILED(ec)) {
+        printf("Acquire \"%s\" class info failed!\n", klassName.string());
+    }
+
+    sys->GetCurrentTimeMillis(&now);
+    printf(" >> GetClassInfo cost: %lld s and %lld ms.\n",
+        (now - prev) / 1000, (now - prev) % 1000);
+    printf(" == Total cost: %lld s and %lld ms.\n",
+        (now - startTime) / 1000, (now - startTime) % 1000);
+}
+
 int main(int argc, char *argv[])
 {
     printf("==== call testQuintet ====\n");
-    testQuintet();
+    // testQuintet();
+    testReflectionCost();
     printf("\n==== call testQuintet end ====\n");
 
     return 0;

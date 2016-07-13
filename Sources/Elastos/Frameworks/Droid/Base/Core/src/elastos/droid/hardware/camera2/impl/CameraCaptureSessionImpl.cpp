@@ -13,6 +13,7 @@
 #include <elastos/core/AutoLock.h>
 #include <elastos/core/StringBuilder.h>
 #include <elastos/core/CoreUtils.h>
+#include <elastos/core/ClassLoader.h>
 #include <elastos/utility/logging/Slogger.h>
 
 #include <elastos/core/AutoLock.h>
@@ -37,6 +38,8 @@ using Elastos::Droid::Internal::Utility::Preconditions;
 using Elastos::Core::StringBuilder;
 using Elastos::Core::IInteger32;
 using Elastos::Core::CoreUtils;
+using Elastos::Core::ClassLoader;
+using Elastos::Core::IClassLoader;
 using Elastos::Utility::Logging::Slogger;
 
 namespace Elastos {
@@ -805,12 +808,10 @@ ECode CameraCaptureSessionImpl::CreateCaptureCallbackProxy(
 
     AutoPtr<IDuckTypingDispatcher> duckToSession;
     assert(0);
-    const String moduleName("............../Elastos.Droid.Core.eco");
     const String klassName(".............../CCameraDeviceImplCaptureCallback;");
+    AutoPtr<IClassLoader> cl = ClassLoader::GetSystemClassLoader();
     AutoPtr<IClassInfo> classInfo;
-    AutoPtr<IModuleInfo> moduleInfo;
-    ASSERT_SUCCEEDED(_CReflector_AcquireModuleInfo(moduleName, (IModuleInfo**)&moduleInfo));
-    ASSERT_SUCCEEDED(moduleInfo->GetClassInfo(klassName, (IClassInfo**)&classInfo))
+    ASSERT_SUCCEEDED(cl->LoadClass(klassName, (IClassInfo**)&classInfo))
     CDuckTypingDispatcher::New(IDispatchable::Probe(handlerPassthrough),
             classInfo, (IDuckTypingDispatcher**)&duckToSession);
 
