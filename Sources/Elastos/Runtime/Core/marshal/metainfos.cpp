@@ -246,7 +246,11 @@ ECode AcquireClassInfo(
 
     char path[260];
     strcpy(path, classId.mUunm);
+#ifdef _DEBUG
     void* module = dlopen(path, RTLD_NOW);
+#else
+    void* module = dlopen(path, RTLD_LAZY);
+#endif
 
     strcpy(path, "DllGetClassObject");
     CarDllGetClassObject_t func = (CarDllGetClassObject_t)dlsym(module, path);
