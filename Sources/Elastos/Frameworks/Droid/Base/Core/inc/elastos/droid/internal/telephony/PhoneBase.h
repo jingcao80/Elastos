@@ -873,7 +873,7 @@ public:
         /* [in] */ IInterface* obj);
 
      // @Override
-    Cvirtual ARAPI UnregisterForDisplayInfo(
+    virtual CARAPI UnregisterForDisplayInfo(
         /* [in] */ IHandler* h);
 
     // @Override
