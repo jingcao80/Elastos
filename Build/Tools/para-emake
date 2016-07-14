@@ -395,7 +395,6 @@ build_car() {
                               '$mirror_path/$ext_cls_file'"
     carc -n \
         -u \
-	-a \
         -I"$src_path" \
         -c "$cls_file" \
         -E "$ext_cls_file" \
