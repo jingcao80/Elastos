@@ -192,7 +192,10 @@ ECode DefaultContainerService::MediaContainerService::GetMinimalPackageInfo(
     ECode ec = parser->ParsePackageLite(packageFile, 0, (IPackageLite**)&pkg);
     AutoPtr<IPackageHelper> helper;
     CPackageHelper::AcquireSingleton((IPackageHelper**)&helper);
-    ECode ec1 = helper->CalculateInstalledSize(pkg, isForwardLocked, abiOverride, &sizeBytes);
+    ECode ec1 = NOERROR;
+    if (SUCCEEDED(ec)) {
+        ec1 = helper->CalculateInstalledSize(pkg, isForwardLocked, abiOverride, &sizeBytes);
+    }
     if (ec == (ECode)E_PACKAGE_PARSER_EXCEPTION || ec1 == (ECode)E_IO_EXCEPTION) {
         //Slog.w(TAG, "Failed to parse package at " + packagePath + ": " + e);
         Boolean exists;

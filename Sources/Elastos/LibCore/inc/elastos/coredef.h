@@ -209,12 +209,12 @@ _ETL_NAMESPACE_END
                                                            \
     UInt32 ClassName::AddRef()                             \
     {                                                      \
-        return ElRefBase::AddRef();                        \
+        return SupperClassName::AddRef();                  \
     }                                                      \
                                                            \
     UInt32 ClassName::Release()                            \
     {                                                      \
-        return ElRefBase::Release();                       \
+        return SupperClassName::Release();                 \
     }                                                      \
                                                            \
     PInterface ClassName::Probe(                           \
@@ -285,12 +285,12 @@ _ETL_NAMESPACE_END
 #define CAR_INTERFACE_IMPL_2(ClassName, SupperClassName, Interface1, Interface2) \
     UInt32 ClassName::AddRef()                                  \
     {                                                           \
-        return ElRefBase::AddRef();                             \
+        return SupperClassName::AddRef();                       \
     }                                                           \
                                                                 \
     UInt32 ClassName::Release()                                 \
     {                                                           \
-        return ElRefBase::Release();                            \
+        return SupperClassName::Release();                      \
     }                                                           \
                                                                 \
     PInterface ClassName::Probe(                                \
@@ -377,12 +377,12 @@ _ETL_NAMESPACE_END
 #define CAR_INTERFACE_IMPL_3(ClassName, SupperClassName, Interface1, Interface2, Interface3) \
     UInt32 ClassName::AddRef()                                              \
     {                                                                       \
-        return ElRefBase::AddRef();                                         \
+        return SupperClassName::AddRef();                                   \
     }                                                                       \
                                                                             \
     UInt32 ClassName::Release()                                             \
     {                                                                       \
-        return ElRefBase::Release();                                        \
+        return SupperClassName::Release();                                  \
     }                                                                       \
                                                                             \
     PInterface ClassName::Probe(                                            \
@@ -481,12 +481,12 @@ _ETL_NAMESPACE_END
 #define CAR_INTERFACE_IMPL_4(ClassName, SupperClassName, Interface1, Interface2, Interface3, Interface4) \
     UInt32 ClassName::AddRef()                                                          \
     {                                                                                   \
-        return ElRefBase::AddRef();                                                     \
+        return SupperClassName::AddRef();                                               \
     }                                                                                   \
                                                                                         \
     UInt32 ClassName::Release()                                                         \
     {                                                                                   \
-        return ElRefBase::Release();                                                    \
+        return SupperClassName::Release();                                              \
     }                                                                                   \
                                                                                         \
     PInterface ClassName::Probe(                                                        \
@@ -597,12 +597,12 @@ _ETL_NAMESPACE_END
 #define CAR_INTERFACE_IMPL_5(ClassName, SupperClassName, Interface1, Interface2, Interface3, Interface4, Interface5) \
     UInt32 ClassName::AddRef()                                                          \
     {                                                                                   \
-        return ElRefBase::AddRef();                                                     \
+        return SupperClassName::AddRef();                                               \
     }                                                                                   \
                                                                                         \
     UInt32 ClassName::Release()                                                         \
     {                                                                                   \
-        return ElRefBase::Release();                                                    \
+        return SupperClassName::Release();                                              \
     }                                                                                   \
                                                                                         \
     PInterface ClassName::Probe(                                                        \
@@ -661,12 +661,12 @@ _ETL_NAMESPACE_END
 #define CAR_INTERFACE_IMPL_6(ClassName, SupperClassName, Interface1, Interface2, Interface3, Interface4, Interface5, Interface6) \
     UInt32 ClassName::AddRef()                                                          \
     {                                                                                   \
-        return ElRefBase::AddRef();                                                     \
+        return SupperClassName::AddRef();                                               \
     }                                                                                   \
                                                                                         \
     UInt32 ClassName::Release()                                                         \
     {                                                                                   \
-        return ElRefBase::Release();                                                    \
+        return SupperClassName::Release();                                              \
     }                                                                                   \
                                                                                         \
     PInterface ClassName::Probe(                                                        \
@@ -731,12 +731,12 @@ _ETL_NAMESPACE_END
 #define CAR_INTERFACE_IMPL_7(ClassName, SupperClassName, Interface1, Interface2, Interface3, Interface4, Interface5, Interface6, Interface7) \
     UInt32 ClassName::AddRef()                                                          \
     {                                                                                   \
-        return ElRefBase::AddRef();                                                     \
+        return SupperClassName::AddRef();                                               \
     }                                                                                   \
                                                                                         \
     UInt32 ClassName::Release()                                                         \
     {                                                                                   \
-        return ElRefBase::Release();                                                    \
+        return SupperClassName::Release();                                              \
     }                                                                                   \
                                                                                         \
     PInterface ClassName::Probe(                                                        \
@@ -807,12 +807,12 @@ _ETL_NAMESPACE_END
 #define CAR_INTERFACE_IMPL_8(ClassName, SupperClassName, Interface1, Interface2, Interface3, Interface4, Interface5, Interface6, Interface7, Interface8) \
     UInt32 ClassName::AddRef()                                                          \
     {                                                                                   \
-        return ElRefBase::AddRef();                                                     \
+        return SupperClassName::AddRef();                                               \
     }                                                                                   \
                                                                                         \
     UInt32 ClassName::Release()                                                         \
     {                                                                                   \
-        return ElRefBase::Release();                                                    \
+        return SupperClassName::Release();                                              \
     }                                                                                   \
                                                                                         \
     PInterface ClassName::Probe(                                                        \
@@ -889,12 +889,12 @@ _ETL_NAMESPACE_END
 #define CAR_INTERFACE_IMPL_9(ClassName, SupperClassName, i1, i2, i3, i4, i5, i6, i7, i8, i9) \
     UInt32 ClassName::AddRef()                                                          \
     {                                                                                   \
-        return ElRefBase::AddRef();                                                     \
+        return SupperClassName::AddRef();                                               \
     }                                                                                   \
                                                                                         \
     UInt32 ClassName::Release()                                                         \
     {                                                                                   \
-        return ElRefBase::Release();                                                    \
+        return SupperClassName::Release();                                              \
     }                                                                                   \
                                                                                         \
     PInterface ClassName::Probe(                                                        \
@@ -977,12 +977,12 @@ _ETL_NAMESPACE_END
 #define CAR_INTERFACE_IMPL_10(ClassName, SupperClassName, i1, i2, i3, i4, i5, i6, i7, i8, i9, i10) \
     UInt32 ClassName::AddRef()                                                          \
     {                                                                                   \
-        return ElRefBase::AddRef();                                                     \
+        return SupperClassName::AddRef();                                               \
     }                                                                                   \
                                                                                         \
     UInt32 ClassName::Release()                                                         \
     {                                                                                   \
-        return ElRefBase::Release();                                                    \
+        return SupperClassName::Release();                                              \
     }                                                                                   \
                                                                                         \
     PInterface ClassName::Probe(                                                        \
@@ -1071,12 +1071,12 @@ _ETL_NAMESPACE_END
 #define CAR_INTERFACE_IMPL_11(ClassName, SupperClassName, i1, i2, i3, i4, i5, i6, i7, i8, i9, i10, i11) \
     UInt32 ClassName::AddRef()                                                          \
     {                                                                                   \
-        return ElRefBase::AddRef();                                                     \
+        return SupperClassName::AddRef();                                               \
     }                                                                                   \
                                                                                         \
     UInt32 ClassName::Release()                                                         \
     {                                                                                   \
-        return ElRefBase::Release();                                                    \
+        return SupperClassName::Release();                                              \
     }                                                                                   \
                                                                                         \
     PInterface ClassName::Probe(                                                        \
@@ -1257,12 +1257,12 @@ public:                                                                         
                                                            \
     UInt32 AddRef()                                        \
     {                                                      \
-        return ElRefBase::AddRef();                        \
+        return SupperClassName::AddRef();                  \
     }                                                      \
                                                            \
     UInt32 Release()                                       \
     {                                                      \
-        return ElRefBase::Release();                       \
+        return SupperClassName::Release();                 \
     }                                                      \
                                                            \
     PInterface Probe(                                      \

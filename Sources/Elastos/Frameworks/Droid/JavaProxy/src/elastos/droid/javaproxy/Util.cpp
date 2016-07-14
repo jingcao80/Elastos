@@ -2671,7 +2671,7 @@ Boolean Util::GetElApplicationInfo(
     if (jnativeLibraryDir != NULL) {
         String nativeLibraryDir = Util::GetElString(env, jnativeLibraryDir);
         env->DeleteLocalRef(jnativeLibraryDir);
-        (*appInfo)->SetPublicSourceDir(nativeLibraryDir);
+        (*appInfo)->SetNativeLibraryDir(nativeLibraryDir);
     }
 
     f = env->GetFieldID(appInfoKlass, "secondaryNativeLibraryDir", "Ljava/lang/String;");

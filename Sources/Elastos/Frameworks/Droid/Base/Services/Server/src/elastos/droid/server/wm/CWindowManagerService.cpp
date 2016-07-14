@@ -4056,6 +4056,8 @@ Int32 CWindowManagerService::RelayoutWindow(
 
     *outFrame = inFrame;
     REFCOUNT_ADD(*outFrame);
+    *outOverscanInsets = inOverscanInsets;
+    REFCOUNT_ADD(*outOverscanInsets);
     *outContentInsets = inContentInsets;
     REFCOUNT_ADD(*outContentInsets);
     *outVisibleInsets = inVisibleInsets;

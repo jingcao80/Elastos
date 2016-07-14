@@ -15,10 +15,7 @@ Singleton::~Singleton()
 
 UInt32 Singleton::AddRef()
 {
-    GetSelfSpinLock().Lock();
-    Int32 ref = Object::AddRef();
-    GetSelfSpinLock().Unlock();
-    return (UInt32)ref;
+    return Object::AddRef();
 }
 
 UInt32 Singleton::Release()
