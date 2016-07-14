@@ -1,0 +1,96 @@
+
+module
+{
+    using interface Elastos.Droid.Content.IContext;
+
+    namespace Elastos {
+    namespace Droid {
+    namespace InCallUI {
+
+    /**
+     * @Involve
+     * interface IUi
+     */
+    [local]
+    interface ICallButtonUi {
+        SetEnabled(
+            [in] Boolean on);
+
+        SetMute(
+            [in] Boolean on);
+
+        EnableMute(
+            [in] Boolean enabled);
+
+        ShowAudioButton(
+            [in] Boolean show);
+
+        ShowChangeToVoiceButton(
+            [in] Boolean show);
+
+        ShowDialpadButton(
+            [in] Boolean show);
+
+        SetHold(
+            [in] Boolean on);
+
+        ShowHoldButton(
+            [in] Boolean show);
+
+        EnableHold(
+            [in] Boolean enabled);
+
+        ShowSwapButton(
+            [in] Boolean show);
+
+        ShowChangeToVideoButton(
+            [in] Boolean show);
+
+        ShowSwitchCameraButton(
+            [in] Boolean show);
+
+        SetSwitchCameraButton(
+            [in] Boolean isBackFacingCamera);
+
+        ShowAddCallButton(
+            [in] Boolean show);
+
+        ShowMergeButton(
+            [in] Boolean show);
+
+        ShowPauseVideoButton(
+            [in] Boolean show);
+
+        SetPauseVideoButton(
+            [in] Boolean isPaused);
+
+        ShowOverflowButton(
+            [in] Boolean show);
+
+        DisplayDialpad(
+            [in] Boolean on,
+            [in] Boolean animate);
+
+        IsDialpadVisible(
+            [out] Boolean* visible);
+
+        SetAudio(
+            [in] Int32 mode);
+
+        SetSupportedAudio(
+            [in] Int32 mask);
+
+        ConfigureOverflowMenu(
+            [in] Boolean showMergeMenuOption,
+            [in] Boolean showAddMenuOption,
+            [in] Boolean showHoldMenuOption,
+            [in] Boolean showSwapMenuOption);
+
+        GetContext(
+            [out] IContext** context);
+    }
+
+    } // namespace InCallUI
+    } // namespace Droid
+    } // namespace Elastos
+}

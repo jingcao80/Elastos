@@ -1,0 +1,72 @@
+
+module
+{
+    using interface Elastos.Droid.Telecomm.Telecom.ICallDetails;
+
+    namespace Elastos {
+    namespace Droid {
+    namespace InCallUI {
+
+    enum InCallState {
+        // InCall Screen is off and there are no calls
+        InCallState_NO_CALLS,
+
+        // Incoming-call screen is up
+        InCallState_INCOMING,
+
+        // In-call experience is showing
+        InCallState_INCALL,
+
+        // Waiting for user input before placing outgoing call
+        InCallState_WAITING_FOR_ACCOUNT,
+
+        // UI is starting up but no call has been initiated yet.
+        // The UI is waiting for Telecomm to respond.
+        InCallState_PENDING_OUTGOING,
+
+        // User is dialing out
+        InCallState_OUTGOING,
+    }
+
+    /**
+     * Interface implemented by classes that need to know about the InCall State.
+     */
+    interface IInCallStateListener {
+        // TODO: Enhance state to contain the call objects instead of passing CallList
+        OnStateChange(
+            [in] InCallState oldState,
+            [in] InCallState newState,
+            [in] ICallList* callList);
+    }
+
+    interface IIncomingCallListener {
+        OnIncomingCall(
+            [in] InCallState oldState,
+            [in] InCallState newState,
+            [in] ICall* call);
+    }
+
+    interface IInCallDetailsListener {
+        OnDetailsChanged(
+            [in] ICall* call,
+            [in] ICallDetails* details);
+    }
+
+    interface IInCallOrientationListener {
+        OnDeviceOrientationChanged(
+            [in] Int32 orientation);
+    }
+
+    /**
+     * Interface implemented by classes that need to know about events which occur within the
+     * In-Call UI.  Used as a means of communicating between fragments that make up the UI.
+     */
+    interface IInCallEventListener {
+        OnFullScreenVideoStateChanged(
+            [in] Boolean isFullScreenVideo);
+    }
+
+    } // namespace InCallUI
+    } // namespace Droid
+    } // namespace Elastos
+}

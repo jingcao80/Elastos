@@ -8,23 +8,6 @@ module
     namespace InCallUI {
 
     /**
-     * @Involve
-     * interface IActivity;
-     * interface IContext;
-     * interface IContextThemeWrapper;
-     * interface ILayoutInflaterFactory;
-     * interface ILayoutInflaterFactory2;
-     * interface IWindowCallback;
-     * interface IKeyEventCallback;
-     * interface IViewOnCreateContextMenuListener;
-     * interface IComponentCallbacks;
-     * interface IComponentCallbacks2;
-     * interface IOnWindowDismissedCallback;
-     * /
-    interface IInCallActivity {
-    }
-
-    /**
      * Base class for Presenters.
      */
     interface IPresenter {

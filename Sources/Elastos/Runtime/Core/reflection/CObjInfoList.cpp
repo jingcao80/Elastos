@@ -21,6 +21,7 @@
 #include "CCallbackMethodInfo.h"
 #include <pthread.h>
 #include <dlfcn.h>
+#include <utils/Log.h>
 
 typedef
 struct ModuleRsc {
@@ -284,6 +285,8 @@ ECode CObjInfoList::AcquireModuleInfo(
     void* module = dlopen(name.string(), RTLD_LAZY);
 #endif
     if(NULL == module){
+        ALOGE("<%s, %d> dlopen '%s' failed.\n", __FILE__, __LINE__, name.string());
+        ALOGE("error: %s\n", dlerror());
         return E_FILE_NOT_FOUND;
     }
 

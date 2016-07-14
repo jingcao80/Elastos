@@ -87,7 +87,13 @@ module
 //    merge("car/elastos/droid/dialer/SpecialCharSequenceMgr.car");
 //    merge("car/elastos/droid/dialerbind/ObjectFactory.car");
     merge("car/elastos/droid/dialerbind/analytics/AnalyticsInterface.car");
-//    merge("car/elastos/droid/incallui/InCallActivity.car");
+    merge("car/elastos/droid/incallui/AudioModeProvider.car");
+    merge("car/elastos/droid/incallui/Call.car");
+    merge("car/elastos/droid/incallui/CallButtonFragment.car");
+    merge("car/elastos/droid/incallui/CallButtonPresenter.car");
+    merge("car/elastos/droid/incallui/CallList.car");
+    merge("car/elastos/droid/incallui/InCallActivity.car");
+    merge("car/elastos/droid/incallui/InCallPresenter.car");
     merge("car/elastos/droid/incallui/Presenter.car");
     merge("car/elastos/droid/incallui/Ui.car");
     merge("car/elastos/droid/phone/common/animation/AnimUtils.car");
@@ -165,6 +171,7 @@ module
 //    using interface Elastos.Droid.View.IViewOnTouchListener;
 //    using interface Elastos.Droid.View.IOnGlobalLayoutListener;
 //    using interface Elastos.Droid.View.IOnTouchModeChangeListener;
+    using interface Elastos.Droid.Widget.ICompoundButtonOnCheckedChangeListener;
     using interface Elastos.Droid.Widget.ILinearLayout;
 //    using interface Elastos.Droid.Widget.IAdapter;
 //    using interface Elastos.Droid.Widget.IAdapterView;
@@ -175,6 +182,7 @@ module
 //    using interface Elastos.Droid.Widget.ISpinnerAdapter;
     using interface Elastos.Droid.Widget.IFrameLayout;
     using interface Elastos.Droid.Widget.IAdapterViewOnItemClickListener;
+    using interface Elastos.Droid.Widget.IPopupMenuOnDismissListener;
     using interface Elastos.Droid.Widget.IPopupMenuOnMenuItemClickListener;
     using interface Elastos.Droid.Widget.IRelativeLayout;
     using interface Elastos.Droid.Widget.IEditText;
@@ -1313,6 +1321,22 @@ module
     namespace Elastos {
     namespace Droid {
     namespace InCallUI {
+
+    class CCallButtonFragment {
+        constructor();
+
+        interface ICallButtonFragment;
+        interface IFragment;
+        interface IComponentCallbacks;
+        interface IComponentCallbacks2;
+        interface IViewOnCreateContextMenuListener;
+        interface ICallButtonUi;
+        interface IUi;
+        interface IPopupMenuOnMenuItemClickListener;
+        interface IPopupMenuOnDismissListener;
+        interface IViewOnClickListener;
+        interface ICompoundButtonOnCheckedChangeListener;
+    }
 
 //    class CInCallActivity {
 //        constructor();

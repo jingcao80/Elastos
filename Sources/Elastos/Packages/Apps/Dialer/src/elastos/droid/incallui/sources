@@ -2,9 +2,12 @@ TARGET_NAME= incallui
 TARGET_TYPE= lib
 
 INCLUDES += $(MAKEDIR)/../../../../inc
+INCLUDES += $(MAKEDIR)/../../../../
 INCLUDES += ../../../../
 
 SOURCES += BaseFragment.cpp
+SOURCES += Call.cpp
+SOURCES += CCallButtonFragment.cpp
 #SOURCES += CInCallActivity.cpp
 SOURCES += CInCallServiceImpl.cpp
 SOURCES += Presenter.cpp
