@@ -19,6 +19,8 @@ class RenderNode
     : public Object
     , public IRenderNode
 {
+    friend class ThreadedRenderer;
+
 public:
     CAR_INTERFACE_DECL()
 

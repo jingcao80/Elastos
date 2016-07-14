@@ -546,11 +546,8 @@ ECode ThreadedRenderer::NotifyFramePending()
 ECode ThreadedRenderer::RegisterAnimatingRenderNode(
     /* [in] */ IRenderNode* animator)
 {
-    Int64 nativeRenderNode1, nativeRenderNode2;
-    RenderNode* node = (RenderNode*)mRootNode.Get();
-    node->GetNativeDisplayList(&nativeRenderNode1);
-    RenderNode* nAnimator = (RenderNode*)animator;
-    nAnimator->GetNativeDisplayList(&nativeRenderNode2);
+    Int64 nativeRenderNode1 = ((RenderNode*)mRootNode.Get())->mNativeRenderNode;
+    Int64 nativeRenderNode2 = ((RenderNode*)animator)->mNativeRenderNode;
     NativeRegisterAnimatingRenderNode(nativeRenderNode1, nativeRenderNode2);
     return NOERROR;
 }
