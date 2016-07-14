@@ -7,6 +7,7 @@ LUBE_FLAGS += -n -u
 
 INCLUDES += $(MAKEDIR)/inc
 INCLUDES += $(MAKEDIR)/src
+INCLUDES += $(MAKEDIR)/../Arity/inc
 INCLUDES += $(MAKEDIR)/support/v4/inc
 
 VPATH += $(MAKEDIR)/src/elastos/droid/calculator2
@@ -40,6 +41,7 @@ APPPACK = 1
 APP_PACKAGE_NAME = Elastos.Droid.Calculator2
 RES_NAMESPACE = Elastos.Droid.Calculator2
 DIRRESOURCES += $(MAKEDIR)/res;
+EXTRA_PACKAGE_ECO = $(XDK_TARGETS)/Org.Javia.Arity.eco
 
 
 
