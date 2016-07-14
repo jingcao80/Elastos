@@ -38,6 +38,7 @@ public:
 public:
     // 0: disabled, 1: enabled
     Int32 mStatus;
+    String mIcbNum;
 };
 
 } // namespace Ims

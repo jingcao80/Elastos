@@ -29,7 +29,6 @@ using Elastos::Droid::Internal::Telephony::IUUSInfo;
 using Elastos::Droid::Internal::Telephony::IConnection;
 using Elastos::Droid::Internal::Telephony::IPhoneBase;
 using Elastos::Droid::Internal::Telephony::PhoneBase;
-using Elastos::Droid::Internal::Telephony::IPhoneConstants;
 using Elastos::Droid::Internal::Telephony::IIccCard;
 using Elastos::Droid::Internal::Telephony::IOperatorInfo;
 using Elastos::Droid::Internal::Telephony::IPhoneSubInfo;
@@ -70,6 +69,8 @@ public:
         /* [in] */ IUUSInfo* uusInfo,
         /* [in] */ Int32 videoState,
         /* [out] */ IConnection** result);
+
+    using PhoneBase::Dial;
 
     // @Override
     CARAPI MigrateFrom(
@@ -112,7 +113,7 @@ public:
 
     // @Override
     CARAPI GetState(
-        /* [out] */ IPhoneConstants** result);
+        /* [out] */ PhoneConstantsState* result);
 
     // @Override
     CARAPI GetPhoneType(
@@ -424,7 +425,6 @@ public:
 
     virtual CARAPI UpdatePhoneState();
 
-protected:
     virtual CARAPI_(void) StartRingbackTone();
 
     virtual CARAPI_(void) StopRingbackTone();

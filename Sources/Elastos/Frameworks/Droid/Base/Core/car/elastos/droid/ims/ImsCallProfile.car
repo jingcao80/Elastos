@@ -117,6 +117,7 @@ module
         const String EXTRA_OIR = "oir";
         const String EXTRA_CNAP = "cnap";
         const String EXTRA_DIALSTRING = "dialstring";
+        const String EXTRA_CALL_DOMAIN = "call_domain";
 
         /**
          * Values for EXTRA_OIR / EXTRA_CNAP
@@ -136,6 +137,18 @@ module
         const Int32 DIALSTRING_USSD = 2;
 
         /**
+         * Values for causes that restricts that restrict call types
+         */
+        // Default cause not restricted at peer and HD is supported
+        const Int32 CALL_RESTRICT_CAUSE_NONE = 0;
+        // Service not supported by RAT at peer
+        const Int32 CALL_RESTRICT_CAUSE_RAT = 1;
+        // Service Disabled at peer
+        const Int32 CALL_RESTRICT_CAUSE_DISABLED = 2;
+        // HD is not supported
+        const Int32 CALL_RESTRICT_CAUSE_HD = 3;
+
+        /**
          * String extra properties
          *  oi : Originating identity (number), MT only
          *  cna : Calling name
@@ -146,6 +159,15 @@ module
         const String EXTRA_CNA = "cna";
         const String EXTRA_USSD = "ussd";
         const String EXTRA_REMOTE_URI = "remote_uri";
+        const String EXTRA_PARENT_CALL_ID = "parentCallId";
+        const String EXTRA_CHILD_NUMBER = "ChildNum";
+        const String EXTRA_CODEC = "Codec";
+        const String EXTRA_DISPLAY_TEXT = "DisplayText";
+        const String EXTRA_ADDITIONAL_CALL_INFO = "AdditionalCallInfo";
+
+        // Extra string for internal use only. OEMs should not use
+        // this for packing extras.
+        const String EXTRA_OEM_EXTRAS = "OemCallExtras";
 
         GetCallExtra(
             [in] String name,

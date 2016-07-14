@@ -7,6 +7,7 @@
 #include "elastos/droid/os/AsyncResult.h"
 #include "elastos/droid/os/RegistrantList.h"
 #include "elastos/droid/content/BroadcastReceiver.h"
+#include <elastos/core/Thread.h>
 
 // import android.content.Intent;
 // import android.content.IntentFilter;
@@ -64,6 +65,7 @@ using Elastos::Droid::Os::IMessage;
 using Elastos::Droid::Os::AsyncResult;
 using Elastos::IO::IFileDescriptor;
 using Elastos::IO::IPrintWriter;
+using Elastos::Core::Thread;
 using Elastos::Utility::IArrayList;
 using Elastos::Utility::IList;
 
@@ -246,8 +248,29 @@ private:
         ImsPhoneCallTracker* mOwner;
     };
 
+    class InnerThread
+         : public Thread
+    {
+    public:
+        InnerThread(
+            /* [in] */ ImsPhoneCallTracker* host)
+            : mOwner(host)
+        {
+            constructor(String("InnerThread"));
+        }
+
+        CARAPI Run();
+
+    private:
+        ImsPhoneCallTracker* mOwner;
+    };
+
 public:
     CAR_INTERFACE_DECL();
+
+    ImsPhoneCallTracker();
+
+    virtual ~ImsPhoneCallTracker();
 
     //***** Events
     //***** Constructors
@@ -489,7 +512,7 @@ private:
     static const Boolean DBG;
     Boolean mIsVolteEnabled;
     Boolean mIsVtEnabled;
-    AutoPtr<IBroadcastReceiver> mReceiver;
+    AutoPtr<InnerBroadcastReceiver> mReceiver;
     static const Int32 EVENT_HANGUP_PENDINGMO = 18;
     static const Int32 EVENT_RESUME_BACKGROUND = 19;
     static const Int32 EVENT_DIAL_PENDINGMO = 20;
@@ -500,7 +523,7 @@ private:
     AutoPtr<RegistrantList> mVoiceCallStartedRegistrants;
     AutoPtr<IImsPhoneConnection> mPendingMO;
     Int32 mClirMode;
-    AutoPtr<IInterface> mSyncHold;
+    Object mSyncHold;
     AutoPtr</*TODO IImsCall*/IInterface> mUssdSession;
     AutoPtr<IMessage> mPendingUssd;
     Boolean mDesiredMute;

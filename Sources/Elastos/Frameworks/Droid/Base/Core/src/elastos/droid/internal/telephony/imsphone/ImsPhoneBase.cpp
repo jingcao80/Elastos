@@ -1,6 +1,19 @@
 
 #include "Elastos.Droid.Internal.h"
 #include "elastos/droid/internal/telephony/imsphone/ImsPhoneBase.h"
+#include "elastos/droid/internal/telephony/imsphone/ImsPhoneCommandInterface.h"
+#include "elastos/droid/os/SystemProperties.h"
+#include "elastos/droid/telephony/CServiceState.h"
+#include "elastos/droid/telephony/CSignalStrength.h"
+#include <elastos/core/CoreUtils.h>
+#include <elastos/utility/logging/Logger.h>
+
+using Elastos::Droid::Os::SystemProperties;
+using Elastos::Droid::Telephony::CServiceState;
+using Elastos::Droid::Telephony::CSignalStrength;
+using Elastos::Core::CoreUtils;
+using Elastos::Utility::CArrayList;
+using Elastos::Utility::Logging::Logger;
 
 namespace Elastos {
 namespace Droid {
@@ -14,7 +27,10 @@ namespace ImsPhone {
 const String ImsPhoneBase::LOGTAG("ImsPhoneBase");
 
 ImsPhoneBase::ImsPhoneBase()
+    : mState(PhoneConstantsState_IDLE)
 {
+    mRingbackRegistrants = new RegistrantList();
+    mOnHoldRegistrants = new RegistrantList();
 }
 
 ECode ImsPhoneBase::constructor(
@@ -22,9 +38,10 @@ ECode ImsPhoneBase::constructor(
     /* [in] */ IContext* context,
     /* [in] */ IPhoneNotifier* notifier)
 {
-    // ==================before translated======================
-    // super(name, notifier, context, new ImsPhoneCommandInterface(context), false);
-    return NOERROR;
+    AutoPtr<ImsPhoneCommandInterface> ci = new ImsPhoneCommandInterface();
+    ci->constructor(context);
+    return PhoneBase::constructor(name, notifier, context,
+            ICommandsInterface::Probe(ci), FALSE);
 }
 
 ECode ImsPhoneBase::Dial(
@@ -34,20 +51,15 @@ ECode ImsPhoneBase::Dial(
     /* [out] */ IConnection** result)
 {
     VALIDATE_NOT_NULL(result);
-    // ==================before translated======================
-    // // ignore UUSInfo
-    // return dial(dialString, videoState);
-    assert(0);
-    return NOERROR;
+    // ignore UUSInfo
+    return Dial(dialString, videoState, result);
 }
 
 ECode ImsPhoneBase::MigrateFrom(
     /* [in] */ IPhoneBase* from)
 {
-    // ==================before translated======================
-    // super.migrateFrom(from);
-    // migrate(mRingbackRegistrants, ((ImsPhoneBase)from).mRingbackRegistrants);
-    assert(0);
+    PhoneBase::MigrateFrom(from);
+    Migrate(mRingbackRegistrants, ((ImsPhoneBase*)from)->mRingbackRegistrants);
     return NOERROR;
 }
 
@@ -56,18 +68,14 @@ ECode ImsPhoneBase::RegisterForRingbackTone(
     /* [in] */ Int32 what,
     /* [in] */ IInterface* obj)
 {
-    // ==================before translated======================
-    // mRingbackRegistrants.addUnique(h, what, obj);
-    assert(0);
+    mRingbackRegistrants->AddUnique(h, what, obj);
     return NOERROR;
 }
 
 ECode ImsPhoneBase::UnregisterForRingbackTone(
     /* [in] */ IHandler* h)
 {
-    // ==================before translated======================
-    // mRingbackRegistrants.remove(h);
-    assert(0);
+    mRingbackRegistrants->Remove(h);
     return NOERROR;
 }
 
@@ -76,18 +84,14 @@ ECode ImsPhoneBase::RegisterForOnHoldTone(
     /* [in] */ Int32 what,
     /* [in] */ IInterface* obj)
 {
-    // ==================before translated======================
-    // mOnHoldRegistrants.addUnique(h, what, obj);
-    assert(0);
+    mOnHoldRegistrants->AddUnique(h, what, obj);
     return NOERROR;
 }
 
 ECode ImsPhoneBase::UnregisterForOnHoldTone(
     /* [in] */ IHandler* h)
 {
-    // ==================before translated======================
-    // mOnHoldRegistrants.remove(h);
-    assert(0);
+    mOnHoldRegistrants->Remove(h);
     return NOERROR;
 }
 
@@ -95,13 +99,13 @@ ECode ImsPhoneBase::GetServiceState(
     /* [out] */ IServiceState** result)
 {
     VALIDATE_NOT_NULL(result);
-    // ==================before translated======================
-    // // FIXME: we may need to provide this when data connectivity is lost
-    // // or when server is down
-    // ServiceState s = new ServiceState();
-    // s.setState(ServiceState.STATE_IN_SERVICE);
-    // return s;
-    assert(0);
+    // FIXME: we may need to provide this when data connectivity is lost
+    // or when server is down
+    AutoPtr<IServiceState> s;
+    CServiceState::New((IServiceState**)&s);
+    s->SetState(IServiceState::STATE_IN_SERVICE);
+    *result = s;
+    REFCOUNT_ADD(*result)
     return NOERROR;
 }
 
@@ -109,9 +113,9 @@ ECode ImsPhoneBase::GetAllCellInfo(
     /* [out] */ IList/*<CellInfo>*/** result)
 {
     VALIDATE_NOT_NULL(result);
-    // ==================before translated======================
-    // return getServiceStateTracker().getAllCellInfo();
-    assert(0);
+    AutoPtr<IServiceStateTracker> sst;
+    GetServiceStateTracker((IServiceStateTracker**)&sst);
+    sst->GetAllCellInfo(result);
     return NOERROR;
 }
 
@@ -119,19 +123,15 @@ ECode ImsPhoneBase::GetCellLocation(
     /* [out] */ ICellLocation** result)
 {
     VALIDATE_NOT_NULL(result);
-    // ==================before translated======================
-    // return null;
-    assert(0);
+    *result = NULL;
     return NOERROR;
 }
 
 ECode ImsPhoneBase::GetState(
-    /* [out] */ IPhoneConstants** result)
+    /* [out] */ PhoneConstantsState* result)
 {
     VALIDATE_NOT_NULL(result);
-    // ==================before translated======================
-    // return mState;
-    assert(0);
+    *result = mState;
     return NOERROR;
 }
 
@@ -139,9 +139,7 @@ ECode ImsPhoneBase::GetPhoneType(
     /* [out] */ Int32* result)
 {
     VALIDATE_NOT_NULL(result);
-    // ==================before translated======================
-    // return PhoneConstants.PHONE_TYPE_IMS;
-    assert(0);
+    *result = IPhoneConstants::PHONE_TYPE_IMS;
     return NOERROR;
 }
 
@@ -149,19 +147,14 @@ ECode ImsPhoneBase::GetSignalStrength(
     /* [out] */ ISignalStrength** result)
 {
     VALIDATE_NOT_NULL(result);
-    // ==================before translated======================
-    // return new SignalStrength();
-    assert(0);
-    return NOERROR;
+    return CSignalStrength::New(result);
 }
 
 ECode ImsPhoneBase::GetMessageWaitingIndicator(
     /* [out] */ Boolean* result)
 {
     VALIDATE_NOT_NULL(result);
-    // ==================before translated======================
-    // return false;
-    assert(0);
+    *result = FALSE;
     return NOERROR;
 }
 
@@ -169,9 +162,7 @@ ECode ImsPhoneBase::GetCallForwardingIndicator(
     /* [out] */ Boolean* result)
 {
     VALIDATE_NOT_NULL(result);
-    // ==================before translated======================
-    // return false;
-    assert(0);
+    *result = FALSE;
     return NOERROR;
 }
 
@@ -179,9 +170,10 @@ ECode ImsPhoneBase::GetPendingMmiCodes(
     /* [out] */ IList/*<? extends MmiCode>*/** result)
 {
     VALIDATE_NOT_NULL(result);
-    // ==================before translated======================
-    // return new ArrayList<MmiCode>(0);
-    assert(0);
+    AutoPtr<IArrayList> list;
+    CArrayList::New(0, (IArrayList**)&list);
+    *result = IList::Probe(list);
+    REFCOUNT_ADD(*result)
     return NOERROR;
 }
 
@@ -189,9 +181,7 @@ ECode ImsPhoneBase::GetDataConnectionState(
     /* [out] */ PhoneConstantsDataState* result)
 {
     VALIDATE_NOT_NULL(result);
-    // ==================before translated======================
-    // return PhoneConstants.DataState.DISCONNECTED;
-    assert(0);
+    *result = PhoneConstantsDataState_DISCONNECTED;
     return NOERROR;
 }
 
@@ -200,9 +190,7 @@ ECode ImsPhoneBase::GetDataConnectionState(
     /* [out] */ PhoneConstantsDataState* result)
 {
     VALIDATE_NOT_NULL(result);
-    // ==================before translated======================
-    // return PhoneConstants.DataState.DISCONNECTED;
-    assert(0);
+    *result = PhoneConstantsDataState_DISCONNECTED;
     return NOERROR;
 }
 
@@ -210,93 +198,101 @@ ECode ImsPhoneBase::GetDataActivityState(
     /* [out] */ IPhoneDataActivityState* result)
 {
     VALIDATE_NOT_NULL(result);
-    // ==================before translated======================
-    // return DataActivityState.NONE;
-    assert(0);
+    *result = IPhoneDataActivityState_NONE;
     return NOERROR;
 }
 
 ECode ImsPhoneBase::NotifyPhoneStateChanged()
 {
-    // ==================before translated======================
-    // mNotifier.notifyPhoneState(this);
-    assert(0);
-    return NOERROR;
+    return mNotifier->NotifyPhoneState(this);
 }
 
 ECode ImsPhoneBase::NotifyPreciseCallStateChanged()
 {
-    // ==================before translated======================
-    // /* we'd love it if this was package-scoped*/
-    // super.notifyPreciseCallStateChangedP();
-    assert(0);
+    /* we'd love it if this was package-scoped*/
+    PhoneBase::NotifyPreciseCallStateChangedP();
     return NOERROR;
 }
 
 ECode ImsPhoneBase::NotifyDisconnect(
     /* [in] */ IConnection* cn)
 {
-    // ==================before translated======================
-    // mDisconnectRegistrants.notifyResult(cn);
-    assert(0);
+    mDisconnectRegistrants->NotifyResult(cn);
     return NOERROR;
 }
 
 ECode ImsPhoneBase::NotifyUnknownConnection()
 {
-    // ==================before translated======================
-    // mUnknownConnectionRegistrants.notifyResult(this);
-    assert(0);
+    mUnknownConnectionRegistrants->NotifyResult(TO_IINTERFACE(this));
     return NOERROR;
 }
 
 ECode ImsPhoneBase::NotifySuppServiceFailed(
     /* [in] */ IPhoneSuppService code)
 {
-    // ==================before translated======================
-    // mSuppServiceFailedRegistrants.notifyResult(code);
-    assert(0);
+    mSuppServiceFailedRegistrants->NotifyResult(CoreUtils::Convert(code));
     return NOERROR;
 }
 
 ECode ImsPhoneBase::NotifyServiceStateChanged(
     /* [in] */ IServiceState* ss)
 {
-    // ==================before translated======================
-    // super.notifyServiceStateChangedP(ss);
-    assert(0);
+    PhoneBase::NotifyServiceStateChangedP(ss);
     return NOERROR;
 }
 
 ECode ImsPhoneBase::NotifyCallForwardingIndicator()
 {
-    // ==================before translated======================
-    // mNotifier.notifyCallForwardingChanged(this);
-    assert(0);
-    return NOERROR;
+    return mNotifier->NotifyCallForwardingChanged(this);
 }
 
 ECode ImsPhoneBase::CanDial(
     /* [out] */ Boolean* result)
 {
     VALIDATE_NOT_NULL(result);
-    // ==================before translated======================
-    // int serviceState = getServiceState().getState();
-    // Rlog.v(LOGTAG, "canDial(): serviceState = " + serviceState);
-    // if (serviceState == ServiceState.STATE_POWER_OFF) return false;
-    //
-    // String disableCall = SystemProperties.get(
-    //         TelephonyProperties.PROPERTY_DISABLE_CALL, "false");
-    // Rlog.v(LOGTAG, "canDial(): disableCall = " + disableCall);
-    // if (disableCall.equals("true")) return false;
-    //
-    // Rlog.v(LOGTAG, "canDial(): ringingCall: " + getRingingCall().getState());
-    // Rlog.v(LOGTAG, "canDial(): foregndCall: " + getForegroundCall().getState());
-    // Rlog.v(LOGTAG, "canDial(): backgndCall: " + getBackgroundCall().getState());
-    // return !getRingingCall().isRinging()
-    //         && (!getForegroundCall().getState().isAlive()
-    //             || !getBackgroundCall().getState().isAlive());
-    assert(0);
+    AutoPtr<IServiceState> ss;
+    GetServiceState((IServiceState**)&ss);
+    Int32 serviceState;
+    ss->GetState(&serviceState);
+    Logger::V(LOGTAG, "canDial(): serviceState = %d", serviceState);
+    if (serviceState == IServiceState::STATE_POWER_OFF) {
+        *result = FALSE;
+        return NOERROR;
+    }
+
+    String disableCall;
+    SystemProperties::Get(
+            ITelephonyProperties::PROPERTY_DISABLE_CALL, String("FALSE"), &disableCall);
+    Logger::V(LOGTAG, "canDial(): disableCall = %s", disableCall.string());
+    if (disableCall.Equals("TRUE")) {
+        *result = FALSE;
+        return NOERROR;
+    }
+
+    AutoPtr<ICall> fgc;
+    GetForegroundCall((ICall**)&fgc);
+    ICallState foregroundCallState;
+    fgc->GetState(&foregroundCallState);
+
+    AutoPtr<ICall> bgc;
+    GetBackgroundCall((ICall**)&bgc);
+    ICallState backgroundCallState;
+    bgc->GetState(&backgroundCallState);
+
+    AutoPtr<ICall> call;
+    GetRingingCall((ICall**)&call);
+    ICallState ringingCallState;
+    call->GetState(&ringingCallState);
+
+    Logger::V(LOGTAG, "canDial(): ringingCall: %d", ringingCallState);
+    Logger::V(LOGTAG, "canDial(): foregndCall: %d", foregroundCallState);
+    Logger::V(LOGTAG, "canDial(): backgndCall: %d", backgroundCallState);
+
+    Boolean b1, b2, b3;
+// TODO: Need ICallState::isAlive
+    // *result = (call->IsRinging(&b1), !b1)
+    //         && ((foregroundCallState->IsAlive(&b2), !b2)
+    //             || (backgroundCallState->IsAlive(&b3), !b3));
     return NOERROR;
 }
 
@@ -305,9 +301,7 @@ ECode ImsPhoneBase::HandleInCallMmiCommands(
     /* [out] */ Boolean* result)
 {
     VALIDATE_NOT_NULL(result);
-    // ==================before translated======================
-    // return false;
-    assert(0);
+    *result = FALSE;
     return NOERROR;
 }
 
@@ -315,14 +309,25 @@ ECode ImsPhoneBase::IsInCall(
     /* [out] */ Boolean* result)
 {
     VALIDATE_NOT_NULL(result);
-    // ==================before translated======================
-    //  Call.State foregroundCallState = getForegroundCall().getState();
-    //  Call.State backgroundCallState = getBackgroundCall().getState();
-    //  Call.State ringingCallState = getRingingCall().getState();
-    //
-    // return (foregroundCallState.isAlive() || backgroundCallState.isAlive()
-    //         || ringingCallState.isAlive());
-    assert(0);
+
+    AutoPtr<ICall> fgc;
+    GetForegroundCall((ICall**)&fgc);
+    ICallState foregroundCallState;
+    fgc->GetState(&foregroundCallState);
+
+    AutoPtr<ICall> bgc;
+    GetBackgroundCall((ICall**)&bgc);
+    ICallState backgroundCallState;
+    bgc->GetState(&backgroundCallState);
+
+    AutoPtr<ICall> call;
+    GetRingingCall((ICall**)&call);
+    ICallState ringingCallState;
+    call->GetState(&ringingCallState);
+
+// TODO: Need ICallState::isAlive
+    // *rsult = (foregroundCallState->IsAlive() || backgroundCallState->IsAlive()
+    //         || ringingCallState->IsAlive());
     return NOERROR;
 }
 
@@ -331,16 +336,13 @@ ECode ImsPhoneBase::HandlePinMmi(
     /* [out] */ Boolean* result)
 {
     VALIDATE_NOT_NULL(result);
-    // ==================before translated======================
-    // return false;
-    assert(0);
+    *result = FALSE;
     return NOERROR;
 }
 
 ECode ImsPhoneBase::SendUssdResponse(
     /* [in] */ const String& ussdMessge)
 {
-    assert(0);
     return NOERROR;
 }
 
@@ -349,21 +351,18 @@ ECode ImsPhoneBase::RegisterForSuppServiceNotification(
     /* [in] */ Int32 what,
     /* [in] */ IInterface* obj)
 {
-    assert(0);
     return NOERROR;
 }
 
 ECode ImsPhoneBase::UnregisterForSuppServiceNotification(
     /* [in] */ IHandler* h)
 {
-    assert(0);
     return NOERROR;
 }
 
 ECode ImsPhoneBase::SetRadioPower(
     /* [in] */ Boolean power)
 {
-    assert(0);
     return NOERROR;
 }
 
@@ -371,9 +370,7 @@ ECode ImsPhoneBase::GetVoiceMailNumber(
     /* [out] */ String* result)
 {
     VALIDATE_NOT_NULL(result);
-    // ==================before translated======================
-    // return null;
-    assert(0);
+    *result = String(NULL);
     return NOERROR;
 }
 
@@ -381,9 +378,7 @@ ECode ImsPhoneBase::GetVoiceMailAlphaTag(
     /* [out] */ String* result)
 {
     VALIDATE_NOT_NULL(result);
-    // ==================before translated======================
-    // return null;
-    assert(0);
+    *result = String(NULL);
     return NOERROR;
 }
 
@@ -391,9 +386,7 @@ ECode ImsPhoneBase::GetDeviceId(
     /* [out] */ String* result)
 {
     VALIDATE_NOT_NULL(result);
-    // ==================before translated======================
-    // return null;
-    assert(0);
+    *result = String(NULL);
     return NOERROR;
 }
 
@@ -401,9 +394,7 @@ ECode ImsPhoneBase::GetDeviceSvn(
     /* [out] */ String* result)
 {
     VALIDATE_NOT_NULL(result);
-    // ==================before translated======================
-    // return null;
-    assert(0);
+    *result = String(NULL);
     return NOERROR;
 }
 
@@ -411,9 +402,7 @@ ECode ImsPhoneBase::GetImei(
     /* [out] */ String* result)
 {
     VALIDATE_NOT_NULL(result);
-    // ==================before translated======================
-    // return null;
-    assert(0);
+    *result = String(NULL);
     return NOERROR;
 }
 
@@ -421,10 +410,8 @@ ECode ImsPhoneBase::GetEsn(
     /* [out] */ String* result)
 {
     VALIDATE_NOT_NULL(result);
-    // ==================before translated======================
-    // Rlog.e(LOGTAG, "[VoltePhone] getEsn() is a CDMA method");
-    // return "0";
-    assert(0);
+    Logger::E(LOGTAG, "[VoltePhone] getEsn() is a CDMA method");
+    *result = String("0");
     return NOERROR;
 }
 
@@ -432,10 +419,8 @@ ECode ImsPhoneBase::GetMeid(
     /* [out] */ String* result)
 {
     VALIDATE_NOT_NULL(result);
-    // ==================before translated======================
-    // Rlog.e(LOGTAG, "[VoltePhone] getMeid() is a CDMA method");
-    // return "0";
-    assert(0);
+    Logger::E(LOGTAG, "[VoltePhone] getMeid() is a CDMA method");
+    *result = String("0");
     return NOERROR;
 }
 
@@ -443,9 +428,7 @@ ECode ImsPhoneBase::GetSubscriberId(
     /* [out] */ String* result)
 {
     VALIDATE_NOT_NULL(result);
-    // ==================before translated======================
-    // return null;
-    assert(0);
+    *result = String(NULL);
     return NOERROR;
 }
 
@@ -453,9 +436,7 @@ ECode ImsPhoneBase::GetGroupIdLevel1(
     /* [out] */ String* result)
 {
     VALIDATE_NOT_NULL(result);
-    // ==================before translated======================
-    // return null;
-    assert(0);
+    *result = String(NULL);
     return NOERROR;
 }
 
@@ -463,9 +444,7 @@ ECode ImsPhoneBase::GetIccSerialNumber(
     /* [out] */ String* result)
 {
     VALIDATE_NOT_NULL(result);
-    // ==================before translated======================
-    // return null;
-    assert(0);
+    *result = String(NULL);
     return NOERROR;
 }
 
@@ -473,9 +452,7 @@ ECode ImsPhoneBase::GetLine1Number(
     /* [out] */ String* result)
 {
     VALIDATE_NOT_NULL(result);
-    // ==================before translated======================
-    // return null;
-    assert(0);
+    *result = String(NULL);
     return NOERROR;
 }
 
@@ -483,9 +460,7 @@ ECode ImsPhoneBase::GetLine1AlphaTag(
     /* [out] */ String* result)
 {
     VALIDATE_NOT_NULL(result);
-    // ==================before translated======================
-    // return null;
-    assert(0);
+    *result = String(NULL);
     return NOERROR;
 }
 
@@ -494,11 +469,9 @@ ECode ImsPhoneBase::SetLine1Number(
     /* [in] */ const String& number,
     /* [in] */ IMessage* onComplete)
 {
-    // ==================before translated======================
-    // // FIXME: what to reply for Volte?
-    // AsyncResult.forMessage(onComplete, null, null);
-    // onComplete.sendToTarget();
-    assert(0);
+    // FIXME: what to reply for Volte?
+    AsyncResult::ForMessage(onComplete, NULL, NULL);
+    onComplete->SendToTarget();
     return NOERROR;
 }
 
@@ -507,11 +480,9 @@ ECode ImsPhoneBase::SetVoiceMailNumber(
     /* [in] */ const String& voiceMailNumber,
     /* [in] */ IMessage* onComplete)
 {
-    // ==================before translated======================
-    // // FIXME: what to reply for Volte?
-    // AsyncResult.forMessage(onComplete, null, null);
-    // onComplete.sendToTarget();
-    assert(0);
+    // FIXME: what to reply for Volte?
+    AsyncResult::ForMessage(onComplete, NULL, NULL);
+    onComplete->SendToTarget();
     return NOERROR;
 }
 
@@ -519,7 +490,6 @@ ECode ImsPhoneBase::GetCallForwardingOption(
     /* [in] */ Int32 commandInterfaceCFReason,
     /* [in] */ IMessage* onComplete)
 {
-    assert(0);
     return NOERROR;
 }
 
@@ -530,7 +500,6 @@ ECode ImsPhoneBase::SetCallForwardingOption(
     /* [in] */ Int32 timerSeconds,
     /* [in] */ IMessage* onComplete)
 {
-    assert(0);
     return NOERROR;
 }
 
@@ -544,18 +513,15 @@ ECode ImsPhoneBase::SetCallForwardingUncondTimerOption(
     /* [in] */ const String& dialingNumber,
     /* [in] */ IMessage* onComplete)
 {
-    assert(0);
     return NOERROR;
 }
 
 ECode ImsPhoneBase::GetOutgoingCallerIdDisplay(
     /* [in] */ IMessage* onComplete)
 {
-    // ==================before translated======================
-    // // FIXME: what to reply?
-    // AsyncResult.forMessage(onComplete, null, null);
-    // onComplete.sendToTarget();
-    assert(0);
+    // FIXME: what to reply?
+    AsyncResult::ForMessage(onComplete, NULL, NULL);
+    onComplete->SendToTarget();
     return NOERROR;
 }
 
@@ -563,21 +529,17 @@ ECode ImsPhoneBase::SetOutgoingCallerIdDisplay(
     /* [in] */ Int32 commandInterfaceCLIRMode,
     /* [in] */ IMessage* onComplete)
 {
-    // ==================before translated======================
-    // // FIXME: what's this for Volte?
-    // AsyncResult.forMessage(onComplete, null, null);
-    // onComplete.sendToTarget();
-    assert(0);
+    // FIXME: what's this for Volte?
+    AsyncResult::ForMessage(onComplete, NULL, NULL);
+    onComplete->SendToTarget();
     return NOERROR;
 }
 
 ECode ImsPhoneBase::GetCallWaiting(
     /* [in] */ IMessage* onComplete)
 {
-    // ==================before translated======================
-    // AsyncResult.forMessage(onComplete, null, null);
-    // onComplete.sendToTarget();
-    assert(0);
+    AsyncResult::ForMessage(onComplete, NULL, NULL);
+    onComplete->SendToTarget();
     return NOERROR;
 }
 
@@ -585,9 +547,7 @@ ECode ImsPhoneBase::SetCallWaiting(
     /* [in] */ Boolean enable,
     /* [in] */ IMessage* onComplete)
 {
-    // ==================before translated======================
-    // Rlog.e(LOGTAG, "call waiting not supported");
-    assert(0);
+    Logger::E(LOGTAG, "call waiting not supported");
     return NOERROR;
 }
 
@@ -595,9 +555,7 @@ ECode ImsPhoneBase::GetIccRecordsLoaded(
     /* [out] */ Boolean* result)
 {
     VALIDATE_NOT_NULL(result);
-    // ==================before translated======================
-    // return false;
-    assert(0);
+    *result = FALSE;
     return NOERROR;
 }
 
@@ -605,23 +563,19 @@ ECode ImsPhoneBase::GetIccCard(
     /* [out] */ IIccCard** result)
 {
     VALIDATE_NOT_NULL(result);
-    // ==================before translated======================
-    // return null;
-    assert(0);
+    *result = NULL;
     return NOERROR;
 }
 
 ECode ImsPhoneBase::GetAvailableNetworks(
     /* [in] */ IMessage* response)
 {
-    assert(0);
     return NOERROR;
 }
 
 ECode ImsPhoneBase::SetNetworkSelectionModeAutomatic(
     /* [in] */ IMessage* response)
 {
-    assert(0);
     return NOERROR;
 }
 
@@ -629,21 +583,18 @@ ECode ImsPhoneBase::SelectNetworkManually(
     /* [in] */ IOperatorInfo* network,
     /* [in] */ IMessage* response)
 {
-    assert(0);
     return NOERROR;
 }
 
 ECode ImsPhoneBase::GetNeighboringCids(
     /* [in] */ IMessage* response)
 {
-    assert(0);
     return NOERROR;
 }
 
 ECode ImsPhoneBase::GetDataCallList(
     /* [in] */ IMessage* response)
 {
-    assert(0);
     return NOERROR;
 }
 
@@ -651,27 +602,22 @@ ECode ImsPhoneBase::GetCurrentDataConnectionList(
     /* [out] */ IList/*<DataConnection>*/** result)
 {
     VALIDATE_NOT_NULL(result);
-    // ==================before translated======================
-    // return null;
-    assert(0);
+    *result = NULL;
     return NOERROR;
 }
 
 ECode ImsPhoneBase::UpdateServiceLocation()
 {
-    assert(0);
     return NOERROR;
 }
 
 ECode ImsPhoneBase::EnableLocationUpdates()
 {
-    assert(0);
     return NOERROR;
 }
 
 ECode ImsPhoneBase::DisableLocationUpdates()
 {
-    assert(0);
     return NOERROR;
 }
 
@@ -679,16 +625,13 @@ ECode ImsPhoneBase::GetDataRoamingEnabled(
     /* [out] */ Boolean* result)
 {
     VALIDATE_NOT_NULL(result);
-    // ==================before translated======================
-    // return false;
-    assert(0);
+    *result = FALSE;
     return NOERROR;
 }
 
 ECode ImsPhoneBase::SetDataRoamingEnabled(
     /* [in] */ Boolean enable)
 {
-    assert(0);
     return NOERROR;
 }
 
@@ -696,16 +639,13 @@ ECode ImsPhoneBase::GetDataEnabled(
     /* [out] */ Boolean* result)
 {
     VALIDATE_NOT_NULL(result);
-    // ==================before translated======================
-    // return false;
-    assert(0);
+    *result = FALSE;
     return NOERROR;
 }
 
 ECode ImsPhoneBase::SetDataEnabled(
     /* [in] */ Boolean enable)
 {
-    assert(0);
     return NOERROR;
 }
 
@@ -713,9 +653,7 @@ ECode ImsPhoneBase::EnableDataConnectivity(
     /* [out] */ Boolean* result)
 {
     VALIDATE_NOT_NULL(result);
-    // ==================before translated======================
-    // return false;
-    assert(0);
+    *result = FALSE;
     return NOERROR;
 }
 
@@ -723,9 +661,7 @@ ECode ImsPhoneBase::DisableDataConnectivity(
     /* [out] */ Boolean* result)
 {
     VALIDATE_NOT_NULL(result);
-    // ==================before translated======================
-    // return false;
-    assert(0);
+    *result = FALSE;
     return NOERROR;
 }
 
@@ -733,9 +669,7 @@ ECode ImsPhoneBase::IsDataConnectivityPossible(
     /* [out] */ Boolean* result)
 {
     VALIDATE_NOT_NULL(result);
-    // ==================before translated======================
-    // return false;
-    assert(0);
+    *result = FALSE;
     return NOERROR;
 }
 
@@ -743,16 +677,13 @@ ECode ImsPhoneBase::UpdateCurrentCarrierInProvider(
     /* [out] */ Boolean* result)
 {
     VALIDATE_NOT_NULL(result);
-    // ==================before translated======================
-    // return false;
-    assert(0);
+    *result = FALSE;
     return NOERROR;
 }
 
 ECode ImsPhoneBase::SaveClirSetting(
     /* [in] */ Int32 commandInterfaceCLIRMode)
 {
-    assert(0);
     return NOERROR;
 }
 
@@ -760,9 +691,7 @@ ECode ImsPhoneBase::GetPhoneSubInfo(
     /* [out] */ IPhoneSubInfo** result)
 {
     VALIDATE_NOT_NULL(result);
-    // ==================before translated======================
-    // return null;
-    assert(0);
+    *result = NULL;
     return NOERROR;
 }
 
@@ -770,9 +699,7 @@ ECode ImsPhoneBase::GetIccPhoneBookInterfaceManager(
     /* [out] */ IIccPhoneBookInterfaceManager** result)
 {
     VALIDATE_NOT_NULL(result);
-    // ==================before translated======================
-    // return null;
-    assert(0);
+    *result = NULL;
     return NOERROR;
 }
 
@@ -780,9 +707,7 @@ ECode ImsPhoneBase::GetIccFileHandler(
     /* [out] */ IIccFileHandler** result)
 {
     VALIDATE_NOT_NULL(result);
-    // ==================before translated======================
-    // return null;
-    assert(0);
+    *result = NULL;
     return NOERROR;
 }
 
@@ -790,18 +715,14 @@ ECode ImsPhoneBase::ActivateCellBroadcastSms(
     /* [in] */ Int32 activate,
     /* [in] */ IMessage* response)
 {
-    // ==================before translated======================
-    // Rlog.e(LOGTAG, "Error! This functionality is not implemented for Volte.");
-    assert(0);
+    Logger::E(LOGTAG, "Error! This functionality is not implemented for Volte.");
     return NOERROR;
 }
 
 ECode ImsPhoneBase::GetCellBroadcastSmsConfig(
     /* [in] */ IMessage* response)
 {
-    // ==================before translated======================
-    // Rlog.e(LOGTAG, "Error! This functionality is not implemented for Volte.");
-    assert(0);
+    Logger::E(LOGTAG, "Error! This functionality is not implemented for Volte.");
     return NOERROR;
 }
 
@@ -809,9 +730,7 @@ ECode ImsPhoneBase::SetCellBroadcastSmsConfig(
     /* [in] */ ArrayOf<Int32>* configValuesArray,
     /* [in] */ IMessage* response)
 {
-    // ==================before translated======================
-    // Rlog.e(LOGTAG, "Error! This functionality is not implemented for Volte.");
-    assert(0);
+    Logger::E(LOGTAG, "Error! This functionality is not implemented for Volte.");
     return NOERROR;
 }
 
@@ -819,10 +738,8 @@ ECode ImsPhoneBase::NeedsOtaServiceProvisioning(
     /* [out] */ Boolean* result)
 {
     VALIDATE_NOT_NULL(result);
-    // ==================before translated======================
-    // // FIXME: what's this for Volte?
-    // return false;
-    assert(0);
+    // FIXME: what's this for Volte?
+    *result = FALSE;
     return NOERROR;
 }
 
@@ -831,70 +748,69 @@ ECode ImsPhoneBase::GetLinkProperties(
     /* [out] */ ILinkProperties** result)
 {
     VALIDATE_NOT_NULL(result);
-    // ==================before translated======================
-    // // FIXME: what's this for Volte?
-    // return null;
-    assert(0);
+    // FIXME: what's this for Volte?
+    *result = NULL;
     return NOERROR;
 }
 
 ECode ImsPhoneBase::UpdatePhoneState()
 {
-    // ==================before translated======================
-    // PhoneConstants.State oldState = mState;
-    //
-    // if (getRingingCall().isRinging()) {
-    //     mState = PhoneConstants.State.RINGING;
-    // } else if (getForegroundCall().isIdle()
-    //         && getBackgroundCall().isIdle()) {
-    //     mState = PhoneConstants.State.IDLE;
-    // } else {
-    //     mState = PhoneConstants.State.OFFHOOK;
-    // }
-    //
-    // if (mState != oldState) {
-    //     Rlog.d(LOGTAG, " ^^^ new phone state: " + mState);
-    //     notifyPhoneStateChanged();
-    // }
-    assert(0);
+    PhoneConstantsState oldState = mState;
+
+    AutoPtr<ICall> fgc;
+    GetForegroundCall((ICall**)&fgc);
+
+    AutoPtr<ICall> bgc;
+    GetBackgroundCall((ICall**)&bgc);
+
+    AutoPtr<ICall> call;
+    GetRingingCall((ICall**)&call);
+
+    Boolean b1, b2;
+    if (call->IsRinging(&b1), b1) {
+        mState = PhoneConstantsState_RINGING;
+    }
+    else if ((fgc->IsIdle(&b1), b1)
+            && (bgc->IsIdle(&b2), b2)) {
+        mState = PhoneConstantsState_IDLE;
+    }
+    else {
+        mState = PhoneConstantsState_OFFHOOK;
+    }
+
+    if (mState != oldState) {
+        Logger::D(LOGTAG, " ^^^ new phone state: %d", mState);
+        NotifyPhoneStateChanged();
+    }
     return NOERROR;
 }
 
 void ImsPhoneBase::StartRingbackTone()
 {
-    // ==================before translated======================
-    // AsyncResult result = new AsyncResult(null, Boolean.TRUE, null);
-    // mRingbackRegistrants.notifyRegistrants(result);
-    assert(0);
+    AutoPtr<AsyncResult> result = new AsyncResult(NULL, CoreUtils::Convert(TRUE), NULL);
+    mRingbackRegistrants->NotifyRegistrants(result);
 }
 
 void ImsPhoneBase::StopRingbackTone()
 {
-    // ==================before translated======================
-    // AsyncResult result = new AsyncResult(null, Boolean.FALSE, null);
-    // mRingbackRegistrants.notifyRegistrants(result);
-    assert(0);
+    AutoPtr<AsyncResult> result = new AsyncResult(NULL, CoreUtils::Convert(FALSE), NULL);
+    mRingbackRegistrants->NotifyRegistrants(result);
 }
 
 void ImsPhoneBase::StartOnHoldTone()
 {
-    // ==================before translated======================
-    // AsyncResult result = new AsyncResult(null, Boolean.TRUE, null);
-    // mOnHoldRegistrants.notifyRegistrants(result);
-    assert(0);
+    AutoPtr<AsyncResult> result = new AsyncResult(NULL, CoreUtils::Convert(TRUE), NULL);
+    mOnHoldRegistrants->NotifyRegistrants(result);
 }
 
 void ImsPhoneBase::StopOnHoldTone()
 {
-    // ==================before translated======================
-    // AsyncResult result = new AsyncResult(null, Boolean.FALSE, null);
-    // mOnHoldRegistrants.notifyRegistrants(result);
-    assert(0);
+    AutoPtr<AsyncResult> result = new AsyncResult(NULL, CoreUtils::Convert(FALSE), NULL);
+    mOnHoldRegistrants->NotifyRegistrants(result);
 }
 
 ECode ImsPhoneBase::OnUpdateIccAvailability()
 {
-    assert(0);
     return NOERROR;
 }
 

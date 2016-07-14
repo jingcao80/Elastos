@@ -2,10 +2,44 @@
 #include "Elastos.Droid.Content.h"
 #include "Elastos.Droid.Internal.h"
 #include "Elastos.CoreLibrary.Utility.h"
+#include "elastos/droid/content/res/CResources.h"
+#include "elastos/droid/ims/CImsSsInfo.h"
+#include "elastos/droid/internal/telephony/CallForwardInfo.h"
+#include "elastos/droid/internal/telephony/imsphone/CImsPhoneCallTracker.h"
+#include "elastos/droid/internal/telephony/imsphone/CImsPhoneMmiCode.h"
+#include "elastos/droid/internal/telephony/imsphone/ImsPhone.h"
 #include "elastos/droid/internal/telephony/imsphone/ImsPhoneMmiCode.h"
+#include "elastos/droid/internal/telephony/PhoneBase.h"
+#include "elastos/droid/R.h"
+#include "elastos/droid/telephony/PhoneNumberUtils.h"
+#include "elastos/droid/text/CSpannableStringBuilder.h"
+#include "elastos/droid/text/TextUtils.h"
+#include <elastos/core/CoreUtils.h>
+#include <elastos/core/StringBuilder.h>
+#include <elastos/core/StringUtils.h>
 
-using Elastos::Utility::Regex::IPatternHelper;
+using Elastos::Droid::Content::Res::CResources;
+using Elastos::Droid::Content::Res::IResources;
+using Elastos::Droid::Ims::CImsSsInfo;
+using Elastos::Droid::Ims::IImsSsInfo;
+using Elastos::Droid::Internal::Telephony::CallForwardInfo;
+using Elastos::Droid::Internal::Telephony::IPhone;
+using Elastos::Droid::Internal::Telephony::IPhoneBase;
+using Elastos::Droid::Internal::Telephony::PhoneBase;
+using Elastos::Droid::R;
+using Elastos::Droid::Telephony::PhoneNumberUtils;
+using Elastos::Droid::Text::CSpannableStringBuilder;
+using Elastos::Droid::Text::ISpannableStringBuilder;
+using Elastos::Droid::Text::TextUtils;
+using Elastos::Core::CoreUtils;
+using Elastos::Core::IArrayOf;
+using Elastos::Core::IInteger32;
+using Elastos::Core::StringBuilder;
+using Elastos::Core::StringUtils;
 using Elastos::Utility::Regex::CPatternHelper;
+using Elastos::Utility::Regex::IMatcher;
+using Elastos::Utility::Regex::IMatchResult;
+using Elastos::Utility::Regex::IPatternHelper;
 
 namespace Elastos {
 namespace Droid {
@@ -102,19 +136,28 @@ const Int32 ImsPhoneMmiCode::MATCH_GROUP_DIALING_NUMBER;
 AutoPtr< ArrayOf<String> > ImsPhoneMmiCode::sTwoDigitNumberPattern;
 
 ImsPhoneMmiCode::ImsPhoneMmiCode()
+    : mIsPendingUSSD(FALSE)
+    , mIsUssdRequest(FALSE)
+    , mIsCallFwdReg(FALSE)
+    , mState(IMmiCodeState_PENDING)
 {
 }
 
 ECode ImsPhoneMmiCode::constructor(
     /* [in] */ IImsPhone* phone)
 {
-    // ==================before translated======================
-    // // The telephony unit-test cases may create ImsPhoneMmiCode's
-    // // in secondary threads
-    // super(phone.getHandler().getLooper());
-    // mPhone = phone;
-    // mContext = phone.getContext();
-    // mIccRecords = mPhone.mDefaultPhone.mIccRecords.get();
+    // The telephony unit-test cases may create ImsPhoneMmiCode's
+    // in secondary threads
+    AutoPtr<IHandler> handler;
+    IPhoneBase::Probe(phone)->GetHandler((IHandler**)&handler);
+    AutoPtr<ILooper> looper;
+    handler->GetLooper((ILooper**)&looper);
+    Handler::constructor(looper);
+    mPhone = phone;
+    IPhone::Probe(phone)->GetContext((IContext**)&mContext);
+    AutoPtr<IInterface> obj;
+    ((PhoneBase*)((ImsPhone*)mPhone.Get())->mDefaultPhone.Get())->mIccRecords->Get((IInterface**)&obj);
+    mIccRecords = IIccRecords::Probe(obj);
     return NOERROR;
 }
 
@@ -122,54 +165,57 @@ AutoPtr<IImsPhoneMmiCode> ImsPhoneMmiCode::NewFromDialString(
     /* [in] */ const String& dialString,
     /* [in] */ IImsPhone* phone)
 {
-    // ==================before translated======================
-    // Matcher m;
-    // ImsPhoneMmiCode ret = null;
-    //
-    // m = sPatternSuppService.matcher(dialString);
-    //
-    // // Is this formatted like a standard supplementary service code?
-    // if (m.matches()) {
-    //     ret = new ImsPhoneMmiCode(phone);
-    //     ret.mPoundString = makeEmptyNull(m.group(MATCH_GROUP_POUND_STRING));
-    //     ret.mAction = makeEmptyNull(m.group(MATCH_GROUP_ACTION));
-    //     ret.mSc = makeEmptyNull(m.group(MATCH_GROUP_SERVICE_CODE));
-    //     ret.mSia = makeEmptyNull(m.group(MATCH_GROUP_SIA));
-    //     ret.mSib = makeEmptyNull(m.group(MATCH_GROUP_SIB));
-    //     ret.mSic = makeEmptyNull(m.group(MATCH_GROUP_SIC));
-    //     ret.mPwd = makeEmptyNull(m.group(MATCH_GROUP_PWD_CONFIRM));
-    //     ret.mDialingNumber = makeEmptyNull(m.group(MATCH_GROUP_DIALING_NUMBER));
-    //     // According to TS 22.030 6.5.2 "Structure of the MMI",
-    //     // the dialing number should not ending with #.
-    //     // The dialing number ending # is treated as unique USSD,
-    //     // eg, *400#16 digit number# to recharge the prepaid card
-    //     // in India operator(Mumbai MTNL)
-    //     if (ret.mDialingNumber != null &&
-    //             ret.mDialingNumber.endsWith("#") &&
-    //             dialString.endsWith("#")){
-    //         ret = new ImsPhoneMmiCode(phone);
-    //         ret.mPoundString = dialString;
-    //     }
-    // } else if (dialString.endsWith("#")) {
-    //     // TS 22.030 sec 6.5.3.2
-    //     // "Entry of any characters defined in the 3GPP TS 23.038 [8] Default Alphabet
-    //     // (up to the maximum defined in 3GPP TS 24.080 [10]), followed by #SEND".
-    //
-    //     ret = new ImsPhoneMmiCode(phone);
-    //     ret.mPoundString = dialString;
-    // } else if (isTwoDigitShortCode(phone.getContext(), dialString)) {
-    //     //Is a country-specific exception to short codes as defined in TS 22.030, 6.5.3.2
-    //     ret = null;
-    // } else if (isShortCode(dialString, phone)) {
-    //     // this may be a short code, as defined in TS 22.030, 6.5.3.2
-    //     ret = new ImsPhoneMmiCode(phone);
-    //     ret.mDialingNumber = dialString;
-    // }
-    //
-    // return ret;
-    assert(0);
-    AutoPtr<IImsPhoneMmiCode> empty;
-    return empty;
+    AutoPtr<IMatcher> m;
+    AutoPtr<CImsPhoneMmiCode> ret;
+
+    sPatternSuppService->Matcher(dialString, (IMatcher**)&m);
+
+    // Is this formatted like a standard supplementary service code?
+    AutoPtr<IContext> ctx;
+    IPhone::Probe(phone)->GetContext((IContext**)&ctx);
+    Boolean b;
+    if (m->Matches(&b), b) {
+        CImsPhoneMmiCode::NewByFriend(phone, (CImsPhoneMmiCode**)&ret);
+        String str;
+        ret->mPoundString = MakeEmptyNull((IMatchResult::Probe(m)->Group(MATCH_GROUP_POUND_STRING, &str), str));
+        ret->mAction = MakeEmptyNull((IMatchResult::Probe(m)->Group(MATCH_GROUP_ACTION, &str), str));
+        ret->mSc = MakeEmptyNull((IMatchResult::Probe(m)->Group(MATCH_GROUP_SERVICE_CODE, &str), str));
+        ret->mSia = MakeEmptyNull((IMatchResult::Probe(m)->Group(MATCH_GROUP_SIA, &str), str));
+        ret->mSib = MakeEmptyNull((IMatchResult::Probe(m)->Group(MATCH_GROUP_SIB, &str), str));
+        ret->mSic = MakeEmptyNull((IMatchResult::Probe(m)->Group(MATCH_GROUP_SIC, &str), str));
+        ret->mPwd = MakeEmptyNull((IMatchResult::Probe(m)->Group(MATCH_GROUP_PWD_CONFIRM, &str), str));
+        ret->mDialingNumber = MakeEmptyNull((IMatchResult::Probe(m)->Group(MATCH_GROUP_DIALING_NUMBER, &str), str));
+        // According to TS 22.030 6.5.2 "Structure of the MMI",
+        // the dialing number should not ending with #.
+        // The dialing number ending # is treated as unique USSD,
+        // eg, *400#16 digit number# to recharge the prepaid card
+        // in India operator(Mumbai MTNL)
+        if (ret->mDialingNumber != NULL &&
+                ret->mDialingNumber.EndWith("#") &&
+                dialString.EndWith("#")){
+            CImsPhoneMmiCode::NewByFriend(phone, (CImsPhoneMmiCode**)&ret);
+            ret->mPoundString = dialString;
+        }
+    }
+    else if (dialString.EndWith("#")) {
+        // TS 22.030 sec 6.5.3.2
+        // "Entry of any characters defined in the 3GPP TS 23.038 [8] Default Alphabet
+        // (up to the maximum defined in 3GPP TS 24.080 [10]), followed by #SEND".
+
+        CImsPhoneMmiCode::NewByFriend(phone, (CImsPhoneMmiCode**)&ret);
+        ret->mPoundString = dialString;
+    }
+    else if (IsTwoDigitShortCode(ctx, dialString)) {
+        //Is a country-specific exception to short codes as defined in TS 22.030, 6.5.3.2
+        ret = NULL;
+    }
+    else if (IsShortCode(dialString, phone)) {
+        // this may be a short code, as defined in TS 22.030, 6.5.3.2
+        CImsPhoneMmiCode::NewByFriend(phone, (CImsPhoneMmiCode**)&ret);
+        ret->mDialingNumber = dialString;
+    }
+
+    return IImsPhoneMmiCode::Probe(ret);
 }
 
 AutoPtr<IImsPhoneMmiCode> ImsPhoneMmiCode::NewNetworkInitiatedUssd(
@@ -177,143 +223,152 @@ AutoPtr<IImsPhoneMmiCode> ImsPhoneMmiCode::NewNetworkInitiatedUssd(
     /* [in] */ Boolean isUssdRequest,
     /* [in] */ IImsPhone* phone)
 {
-    // ==================before translated======================
-    // ImsPhoneMmiCode ret;
-    //
-    // ret = new ImsPhoneMmiCode(phone);
-    //
-    // ret.mMessage = ussdMessage;
-    // ret.mIsUssdRequest = isUssdRequest;
-    //
-    // // If it's a request, set to PENDING so that it's cancelable.
-    // if (isUssdRequest) {
-    //     ret.mIsPendingUSSD = true;
-    //     ret.mState = State.PENDING;
-    // } else {
-    //     ret.mState = State.COMPLETE;
-    // }
-    //
-    // return ret;
-    assert(0);
-    AutoPtr<IImsPhoneMmiCode> empty;
-    return empty;
+    AutoPtr<CImsPhoneMmiCode> ret;
+
+    CImsPhoneMmiCode::NewByFriend(phone, (CImsPhoneMmiCode**)&ret);
+
+    ret->mMessage = CoreUtils::Convert(ussdMessage);
+    ret->mIsUssdRequest = isUssdRequest;
+
+    // If it's a request, set to PENDING so that it's cancelable.
+    if (isUssdRequest) {
+        ret->mIsPendingUSSD = TRUE;
+        ret->mState = IMmiCodeState_PENDING;
+    }
+    else {
+        ret->mState = IMmiCodeState_COMPLETE;
+    }
+
+    return IImsPhoneMmiCode::Probe(ret);
 }
 
 AutoPtr<IImsPhoneMmiCode> ImsPhoneMmiCode::NewFromUssdUserInput(
-    /* [in] */ const String& ussdMessge,
+    /* [in] */ const String& ussdMessage,
     /* [in] */ IImsPhone* phone)
 {
-    // ==================before translated======================
-    // ImsPhoneMmiCode ret = new ImsPhoneMmiCode(phone);
-    //
-    // ret.mMessage = ussdMessge;
-    // ret.mState = State.PENDING;
-    // ret.mIsPendingUSSD = true;
-    //
-    // return ret;
-    assert(0);
-    AutoPtr<IImsPhoneMmiCode> empty;
-    return empty;
+    AutoPtr<CImsPhoneMmiCode> ret;
+
+    CImsPhoneMmiCode::NewByFriend(phone, (CImsPhoneMmiCode**)&ret);
+
+    ret->mMessage = CoreUtils::Convert(ussdMessage);
+    ret->mState = IMmiCodeState_PENDING;
+    ret->mIsPendingUSSD = TRUE;
+
+    return IImsPhoneMmiCode::Probe(ret);
 }
 
 Boolean ImsPhoneMmiCode::IsScMatchesSuppServType(
     /* [in] */ const String& dialString)
 {
-    // ==================before translated======================
-    // boolean isMatch = false;
-    // Matcher m = sPatternSuppService.matcher(dialString);
-    // if (m.matches()) {
-    //     String sc = makeEmptyNull(m.group(MATCH_GROUP_SERVICE_CODE));
-    //     if (sc.equals(SC_CFUT)) {
-    //         isMatch = true;
-    //     } else if(sc.equals(SC_BS_MT)) {
-    //         isMatch = true;
-    //     }
-    // }
-    // return isMatch;
-    assert(0);
-    return FALSE;
+    Boolean isMatch = FALSE;
+    AutoPtr<IMatcher> m;
+    sPatternSuppService->Matcher(dialString, (IMatcher**)&m);
+
+    Boolean b;
+    if (m->Matches(&b), b) {
+        String str;
+        String sc = MakeEmptyNull((IMatchResult::Probe(m)->Group(MATCH_GROUP_SERVICE_CODE, &str), str));
+        if (sc.Equals(SC_CFUT)) {
+            isMatch = TRUE;
+        }
+        else if(sc.Equals(SC_BS_MT)) {
+            isMatch = TRUE;
+        }
+    }
+    return isMatch;
 }
 
 Boolean ImsPhoneMmiCode::IsServiceCodeCallForwarding(
     /* [in] */ const String& sc)
 {
-    // ==================before translated======================
-    // return sc != null &&
-    //         (sc.equals(SC_CFU)
-    //         || sc.equals(SC_CFB) || sc.equals(SC_CFNRy)
-    //         || sc.equals(SC_CFNR) || sc.equals(SC_CF_All)
-    //         || sc.equals(SC_CF_All_Conditional));
-    assert(0);
-    return FALSE;
+    return sc != NULL &&
+            (sc.Equals(SC_CFU)
+            || sc.Equals(SC_CFB) || sc.Equals(SC_CFNRy)
+            || sc.Equals(SC_CFNR) || sc.Equals(SC_CF_All)
+            || sc.Equals(SC_CF_All_Conditional));
 }
 
 Boolean ImsPhoneMmiCode::IsServiceCodeUncondCallFwdTimer(
     /* [in] */ const String& sc)
 {
-    // ==================before translated======================
-    // return sc != null && sc.equals(SC_CFUT);
-    assert(0);
-    return FALSE;
+    return !sc.IsNull() && sc.Equals(SC_CFUT);
 }
 
 Boolean ImsPhoneMmiCode::IsServiceCodeCallBarring(
     /* [in] */ const String& sc)
 {
-    // ==================before translated======================
-    // Resources resource = Resources.getSystem();
-    // if (sc != null) {
-    //     String[] barringMMI = resource.getStringArray(
-    //         com.android.internal.R.array.config_callBarringMMI);
-    //     if (barringMMI != null) {
-    //         for (String match : barringMMI) {
-    //             if (sc.equals(match)) return true;
-    //         }
-    //     }
-    // }
-    // return false;
-    assert(0);
+    AutoPtr<IResources> resource = CResources::GetSystem();
+
+    if (sc != NULL) {
+        AutoPtr<ArrayOf<String> > barringMMI;
+        resource->GetStringArray(
+            R::array::config_callBarringMMI, (ArrayOf<String>**)&barringMMI);
+        if (barringMMI != NULL) {
+            for (Int32 i = 0; i < barringMMI->GetLength(); i++) {
+                String match = (*barringMMI)[i];
+                if (sc.Equals(match)) return TRUE;
+            }
+        }
+    }
     return FALSE;
 }
 
-String ImsPhoneMmiCode::ScToBarringFacility(
-    /* [in] */ const String& sc)
+ECode ImsPhoneMmiCode::ScToBarringFacility(
+    /* [in] */ const String& sc,
+    /* [out] */ String* result)
 {
-    // ==================before translated======================
-    // if (sc == null) {
-    //     throw new RuntimeException ("invalid call barring sc");
-    // }
-    //
-    // if (sc.equals(SC_BAOC)) {
-    //     return CommandsInterface.CB_FACILITY_BAOC;
-    // } else if (sc.equals(SC_BAOIC)) {
-    //     return CommandsInterface.CB_FACILITY_BAOIC;
-    // } else if (sc.equals(SC_BAOICxH)) {
-    //     return CommandsInterface.CB_FACILITY_BAOICxH;
-    // } else if (sc.equals(SC_BAIC)) {
-    //     return CommandsInterface.CB_FACILITY_BAIC;
-    // } else if (sc.equals(SC_BAICr)) {
-    //     return CommandsInterface.CB_FACILITY_BAICr;
-    // } else if (sc.equals(SC_BA_ALL)) {
-    //     return CommandsInterface.CB_FACILITY_BA_ALL;
-    // } else if (sc.equals(SC_BA_MO)) {
-    //     return CommandsInterface.CB_FACILITY_BA_MO;
-    // } else if (sc.equals(SC_BA_MT)) {
-    //     return CommandsInterface.CB_FACILITY_BA_MT;
-    // } else {
-    //     throw new RuntimeException ("invalid call barring sc");
-    // }
-    assert(0);
-    return String("");
+    VALIDATE_NOT_NULL(result)
+    *result = NULL;
+
+    if (sc == NULL) {
+        // throw new RuntimeException ("invalid call barring sc");
+        return E_RUNTIME_EXCEPTION;
+    }
+
+    if (sc.Equals(SC_BAOC)) {
+        *result = ICommandsInterface::CB_FACILITY_BAOC;
+        return NOERROR;
+    }
+    else if (sc.Equals(SC_BAOIC)) {
+        *result = ICommandsInterface::CB_FACILITY_BAOIC;
+        return NOERROR;
+    }
+    else if (sc.Equals(SC_BAOICxH)) {
+        *result = ICommandsInterface::CB_FACILITY_BAOICxH;
+        return NOERROR;
+    }
+    else if (sc.Equals(SC_BAIC)) {
+        *result = ICommandsInterface::CB_FACILITY_BAIC;
+        return NOERROR;
+    }
+    else if (sc.Equals(SC_BAICr)) {
+        *result = ICommandsInterface::CB_FACILITY_BAICr;
+        return NOERROR;
+    }
+    else if (sc.Equals(SC_BA_ALL)) {
+        *result = ICommandsInterface::CB_FACILITY_BA_ALL;
+        return NOERROR;
+    }
+    else if (sc.Equals(SC_BA_MO)) {
+        *result = ICommandsInterface::CB_FACILITY_BA_MO;
+        return NOERROR;
+    }
+    else if (sc.Equals(SC_BA_MT)) {
+        *result = ICommandsInterface::CB_FACILITY_BA_MT;
+        return NOERROR;
+    }
+    else {
+        // throw new RuntimeException ("invalid call barring sc");
+        return E_RUNTIME_EXCEPTION;
+    }
+    return NOERROR;
 }
 
 ECode ImsPhoneMmiCode::GetState(
     /* [out] */ IMmiCodeState* result)
 {
     VALIDATE_NOT_NULL(result);
-    // ==================before translated======================
-    // return mState;
-    assert(0);
+    *result = mState;
     return NOERROR;
 }
 
@@ -321,9 +376,8 @@ ECode ImsPhoneMmiCode::GetMessage(
     /* [out] */ ICharSequence** result)
 {
     VALIDATE_NOT_NULL(result);
-    // ==================before translated======================
-    // return mMessage;
-    assert(0);
+    *result = mMessage;
+    REFCOUNT_ADD(*result)
     return NOERROR;
 }
 
@@ -331,28 +385,26 @@ ECode ImsPhoneMmiCode::GetPhone(
     /* [out] */ IPhone** result)
 {
     VALIDATE_NOT_NULL(result);
-    // ==================before translated======================
-    // return mPhone;
-    assert(0);
+    *result = IPhone::Probe(mPhone);
+    REFCOUNT_ADD(*result)
     return NOERROR;
 }
 
 ECode ImsPhoneMmiCode::Cancel()
 {
-    // ==================before translated======================
-    // // Complete or failed cannot be cancelled
-    // if (mState == State.COMPLETE || mState == State.FAILED) {
-    //     return;
-    // }
-    //
-    // mState = State.CANCELLED;
-    //
-    // if (mIsPendingUSSD) {
-    //     mPhone.cancelUSSD();
-    // } else {
-    //     mPhone.onMMIDone (this);
-    // }
-    assert(0);
+    // Complete or failed cannot be cancelled
+    if (mState == IMmiCodeState_COMPLETE || mState == IMmiCodeState_FAILED) {
+        return NOERROR;
+    }
+
+    mState = IMmiCodeState_CANCELLED;
+
+    if (mIsPendingUSSD) {
+        ((ImsPhone*)mPhone.Get())->CancelUSSD();
+    }
+    else {
+        ((ImsPhone*)mPhone.Get())->OnMMIDone(IImsPhoneMmiCode::Probe(this));
+    }
     return NOERROR;
 }
 
@@ -360,10 +412,8 @@ ECode ImsPhoneMmiCode::IsCancelable(
     /* [out] */ Boolean* result)
 {
     VALIDATE_NOT_NULL(result);
-    // ==================before translated======================
-    // /* Can only cancel pending USSD sessions. */
-    // return mIsPendingUSSD;
-    assert(0);
+    /* Can only cancel pending USSD sessions. */
+    *result = mIsPendingUSSD;
     return NOERROR;
 }
 
@@ -371,9 +421,7 @@ ECode ImsPhoneMmiCode::GetDialingNumber(
     /* [out] */ String* result)
 {
     VALIDATE_NOT_NULL(result);
-    // ==================before translated======================
-    // return mDialingNumber;
-    assert(0);
+    *result = mDialingNumber;
     return NOERROR;
 }
 
@@ -381,9 +429,7 @@ ECode ImsPhoneMmiCode::IsMMI(
     /* [out] */ Boolean* result)
 {
     VALIDATE_NOT_NULL(result);
-    // ==================before translated======================
-    // return mPoundString != null;
-    assert(0);
+    *result = mPoundString != NULL;
     return NOERROR;
 }
 
@@ -391,10 +437,8 @@ ECode ImsPhoneMmiCode::IsShortCode(
     /* [out] */ Boolean* result)
 {
     VALIDATE_NOT_NULL(result);
-    // ==================before translated======================
-    // return mPoundString == null
-    //             && mDialingNumber != null && mDialingNumber.length() <= 2;
-    assert(0);
+    *result = mPoundString == NULL
+                && mDialingNumber != NULL && mDialingNumber.GetLength() <= 2;
     return NOERROR;
 }
 
@@ -402,10 +446,8 @@ ECode ImsPhoneMmiCode::IsPinPukCommand(
     /* [out] */ Boolean* result)
 {
     VALIDATE_NOT_NULL(result);
-    // ==================before translated======================
-    // return mSc != null && (mSc.equals(SC_PIN) || mSc.equals(SC_PIN2)
-    //                       || mSc.equals(SC_PUK) || mSc.equals(SC_PUK2));
-    assert(0);
+    *result = mSc != NULL && (mSc.Equals(SC_PIN) || mSc.Equals(SC_PIN2)
+                          || mSc.Equals(SC_PUK) || mSc.Equals(SC_PUK2));
     return NOERROR;
 }
 
@@ -413,10 +455,9 @@ ECode ImsPhoneMmiCode::IsTemporaryModeCLIR(
     /* [out] */ Boolean* result)
 {
     VALIDATE_NOT_NULL(result);
-    // ==================before translated======================
-    // return mSc != null && mSc.equals(SC_CLIR) && mDialingNumber != null
-    //         && (isActivate() || isDeactivate());
-    assert(0);
+    Boolean b1, b2;
+    *result = mSc != NULL && mSc.Equals(SC_CLIR) && mDialingNumber != NULL
+            && ((IsActivate(&b1), b1) || (IsDeactivate(&b2), b2));
     return NOERROR;
 }
 
@@ -424,17 +465,19 @@ ECode ImsPhoneMmiCode::GetCLIRMode(
     /* [out] */ Int32* result)
 {
     VALIDATE_NOT_NULL(result);
-    // ==================before translated======================
-    // if (mSc != null && mSc.equals(SC_CLIR)) {
-    //     if (isActivate()) {
-    //         return CommandsInterface.CLIR_SUPPRESSION;
-    //     } else if (isDeactivate()) {
-    //         return CommandsInterface.CLIR_INVOCATION;
-    //     }
-    // }
-    //
-    // return CommandsInterface.CLIR_DEFAULT;
-    assert(0);
+    if (mSc != NULL && mSc.Equals(SC_CLIR)) {
+        Boolean b;
+        if (IsActivate(&b), b) {
+            *result = ICommandsInterface::CLIR_SUPPRESSION;
+            return NOERROR;
+        }
+        else if (IsDeactivate(&b), b) {
+            *result = ICommandsInterface::CLIR_INVOCATION;
+            return NOERROR;
+        }
+    }
+
+    *result = ICommandsInterface::CLIR_DEFAULT;
     return NOERROR;
 }
 
@@ -442,9 +485,7 @@ ECode ImsPhoneMmiCode::IsActivate(
     /* [out] */ Boolean* result)
 {
     VALIDATE_NOT_NULL(result);
-    // ==================before translated======================
-    // return mAction != null && mAction.equals(ACTION_ACTIVATE);
-    assert(0);
+    *result = mAction != NULL && mAction.Equals(ACTION_ACTIVATE);
     return NOERROR;
 }
 
@@ -452,9 +493,7 @@ ECode ImsPhoneMmiCode::IsDeactivate(
     /* [out] */ Boolean* result)
 {
     VALIDATE_NOT_NULL(result);
-    // ==================before translated======================
-    // return mAction != null && mAction.equals(ACTION_DEACTIVATE);
-    assert(0);
+    *result = mAction != NULL && mAction.Equals(ACTION_DEACTIVATE);
     return NOERROR;
 }
 
@@ -462,9 +501,7 @@ ECode ImsPhoneMmiCode::IsInterrogate(
     /* [out] */ Boolean* result)
 {
     VALIDATE_NOT_NULL(result);
-    // ==================before translated======================
-    // return mAction != null && mAction.equals(ACTION_INTERROGATE);
-    assert(0);
+    *result = mAction != NULL && mAction.Equals(ACTION_INTERROGATE);
     return NOERROR;
 }
 
@@ -472,9 +509,7 @@ ECode ImsPhoneMmiCode::IsRegister(
     /* [out] */ Boolean* result)
 {
     VALIDATE_NOT_NULL(result);
-    // ==================before translated======================
-    // return mAction != null && mAction.equals(ACTION_REGISTER);
-    assert(0);
+    *result = mAction != NULL && mAction.Equals(ACTION_REGISTER);
     return NOERROR;
 }
 
@@ -482,9 +517,7 @@ ECode ImsPhoneMmiCode::IsErasure(
     /* [out] */ Boolean* result)
 {
     VALIDATE_NOT_NULL(result);
-    // ==================before translated======================
-    // return mAction != null && mAction.equals(ACTION_ERASURE);
-    assert(0);
+    *result = mAction != NULL && mAction.Equals(ACTION_ERASURE);
     return NOERROR;
 }
 
@@ -492,9 +525,7 @@ ECode ImsPhoneMmiCode::IsPendingUSSD(
     /* [out] */ Boolean* result)
 {
     VALIDATE_NOT_NULL(result);
-    // ==================before translated======================
-    // return mIsPendingUSSD;
-    assert(0);
+    *result = mIsPendingUSSD;
     return NOERROR;
 }
 
@@ -502,9 +533,7 @@ ECode ImsPhoneMmiCode::IsUssdRequest(
     /* [out] */ Boolean* result)
 {
     VALIDATE_NOT_NULL(result);
-    // ==================before translated======================
-    // return mIsUssdRequest;
-    assert(0);
+    *result = mIsUssdRequest;
     return NOERROR;
 }
 
@@ -512,33 +541,47 @@ ECode ImsPhoneMmiCode::IsSupportedOverImsPhone(
     /* [out] */ Boolean* result)
 {
     VALIDATE_NOT_NULL(result);
-    // ==================before translated======================
-    // if (isShortCode()) return true;
-    // else if (mDialingNumber != null) return false;
-    // else if (isServiceCodeCallForwarding(mSc)
-    //         || isServiceCodeCallBarring(mSc)
-    //         || (mSc != null && mSc.equals(SC_WAIT))
-    //         || (mSc != null && mSc.equals(SC_CLIR))
-    //         || (mSc != null && mSc.equals(SC_CLIP))
-    //         || (mSc != null && mSc.equals(SC_COLR))
-    //         || (mSc != null && mSc.equals(SC_COLP))
-    //         || (mSc != null && mSc.equals(SC_BS_MT))
-    //         || (mSc != null && mSc.equals(SC_BAICa))) {
-    //
-    //     int serviceClass = siToServiceClass(mSib);
-    //     if (serviceClass != SERVICE_CLASS_NONE
-    //             && serviceClass != SERVICE_CLASS_VOICE) {
-    //         return false;
-    //     }
-    //     return true;
-    // } else if (isPinPukCommand()
-    //         || (mSc != null
-    //             && (mSc.equals(SC_PWD) || mSc.equals(SC_CLIP) || mSc.equals(SC_CLIR)))) {
-    //     return false;
-    // } else if (mPoundString != null) return true;
-    //
-    // return false;
-    assert(0);
+    Boolean b;
+    if (IsShortCode(&b), b) {
+        *result = TRUE;
+        return NOERROR;
+    }
+    else if (!mDialingNumber.IsNull()) {
+        *result = FALSE;
+        return NOERROR;
+    }
+    else if (IsServiceCodeCallForwarding(mSc)
+            || IsServiceCodeCallBarring(mSc)
+            || (mSc != NULL && mSc.Equals(SC_WAIT))
+            || (mSc != NULL && mSc.Equals(SC_CLIR))
+            || (mSc != NULL && mSc.Equals(SC_CLIP))
+            || (mSc != NULL && mSc.Equals(SC_COLR))
+            || (mSc != NULL && mSc.Equals(SC_COLP))
+            || (mSc != NULL && mSc.Equals(SC_BS_MT))
+            || (mSc != NULL && mSc.Equals(SC_BAICa))) {
+
+        Int32 serviceClass;
+        SiToServiceClass(mSib, &serviceClass);
+        if (serviceClass != ICommandsInterface::SERVICE_CLASS_NONE
+                && serviceClass != ICommandsInterface::SERVICE_CLASS_VOICE) {
+            *result = FALSE;
+            return NOERROR;
+        }
+        *result = TRUE;
+        return NOERROR;
+    }
+    else if ((IsPinPukCommand(&b), b)
+            || (mSc != NULL
+                && (mSc.Equals(SC_PWD) || mSc.Equals(SC_CLIP) || mSc.Equals(SC_CLIR)))) {
+        *result = FALSE;
+        return NOERROR;
+    }
+    else if (mPoundString != NULL) {
+        *result = TRUE;
+        return NOERROR;
+    }
+
+    *result = FALSE;
     return NOERROR;
 }
 
@@ -547,29 +590,39 @@ ECode ImsPhoneMmiCode::CalForwardAction(
     /* [out] */ Int32* result)
 {
     VALIDATE_NOT_NULL(result);
-    // ==================before translated======================
-    // if (isActivate()) {
-    //     // 3GPP TS 22.030 6.5.2
-    //     // a call forwarding request with a single * would be
-    //     // interpreted as registration if containing a forwarded-to
-    //     // number, or an activation if not
-    //     if (isEmptyOrNull(dialingNumber)) {
-    //         mIsCallFwdReg = false;
-    //         return CommandsInterface.CF_ACTION_ENABLE;
-    //     } else {
-    //         mIsCallFwdReg = true;
-    //         return CommandsInterface.CF_ACTION_REGISTRATION;
-    //     }
-    // } else if (isDeactivate()) {
-    //     return CommandsInterface.CF_ACTION_DISABLE;
-    // } else if (isRegister()) {
-    //     return CommandsInterface.CF_ACTION_REGISTRATION;
-    // } else if (isErasure()) {
-    //     return CommandsInterface.CF_ACTION_ERASURE;
-    // } else {
-    //     throw new RuntimeException ("invalid action");
-    // }
-    assert(0);
+    Boolean b;
+    if (IsActivate(&b), b) {
+        // 3GPP TS 22.030 6.5.2
+        // a call forwarding request with a single * would be
+        // interpreted as registration if containing a forwarded-to
+        // number, or an activation if not
+        if (IsEmptyOrNull(CoreUtils::Convert(dialingNumber))) {
+            mIsCallFwdReg = FALSE;
+            *result = ICommandsInterface::CF_ACTION_ENABLE;
+            return NOERROR;
+        }
+        else {
+            mIsCallFwdReg = TRUE;
+            *result = ICommandsInterface::CF_ACTION_REGISTRATION;
+            return NOERROR;
+        }
+    }
+    else if (IsDeactivate(&b), b) {
+        *result = ICommandsInterface::CF_ACTION_DISABLE;
+        return NOERROR;
+    }
+    else if (IsRegister(&b), b) {
+        *result = ICommandsInterface::CF_ACTION_REGISTRATION;
+        return NOERROR;
+    }
+    else if (IsErasure(&b), b) {
+        *result = ICommandsInterface::CF_ACTION_ERASURE;
+        return NOERROR;
+    }
+    else {
+        // throw new RuntimeException ("invalid action");
+        return E_RUNTIME_EXCEPTION;
+    }
     return NOERROR;
 }
 
@@ -578,286 +631,374 @@ ECode ImsPhoneMmiCode::CallBarrAction(
     /* [out] */ Int32* result)
 {
     VALIDATE_NOT_NULL(result);
-    // ==================before translated======================
-    // if (isActivate()) {
-    //     return CommandsInterface.CF_ACTION_ENABLE;
-    // } else if (isDeactivate()) {
-    //     return CommandsInterface.CF_ACTION_DISABLE;
-    // } else if (isRegister()) {
-    //     if (!isEmptyOrNull(dialingNumber)) {
-    //         return CommandsInterface.CF_ACTION_REGISTRATION;
-    //     } else {
-    //         throw new RuntimeException ("invalid action");
-    //     }
-    // } else if (isErasure()) {
-    //     return CommandsInterface.CF_ACTION_ERASURE;
-    // } else {
-    //     throw new RuntimeException ("invalid action");
-    // }
-    assert(0);
+    Boolean b;
+    if (IsActivate(&b), b) {
+        *result = ICommandsInterface::CF_ACTION_ENABLE;
+        return NOERROR;
+    }
+    else if (IsDeactivate(&b), b) {
+        *result = ICommandsInterface::CF_ACTION_DISABLE;
+        return NOERROR;
+    }
+    else if (IsRegister(&b), b) {
+        if (!IsEmptyOrNull(CoreUtils::Convert(dialingNumber))) {
+            *result = ICommandsInterface::CF_ACTION_REGISTRATION;
+            return NOERROR;
+        }
+        else {
+            // throw new RuntimeException ("invalid action");
+            return E_RUNTIME_EXCEPTION;
+        }
+    }
+    else if (IsErasure(&b), b) {
+        *result = ICommandsInterface::CF_ACTION_ERASURE;
+        return NOERROR;
+    }
+    else {
+        // throw new RuntimeException ("invalid action");
+        return E_RUNTIME_EXCEPTION;
+    }
     return NOERROR;
 }
 
 ECode ImsPhoneMmiCode::ProcessCode()
 {
-    // ==================before translated======================
     // try {
-    //     if (isShortCode()) {
-    //         Rlog.d(LOGTAG, "isShortCode");
-    //
-    //         // These just get treated as USSD.
-    //         Rlog.d(LOGTAG, "Sending short code '"
-    //                + mDialingNumber + "' over CS pipe.");
-    //         throw new CallStateException(ImsPhone.CS_FALLBACK);
-    //     } else if (isServiceCodeCallForwarding(mSc)) {
-    //         Rlog.d(LOGTAG, "is CF");
-    //         // service group is not supported
-    //
-    //         String dialingNumber = mSia;
-    //         int reason = scToCallForwardReason(mSc);
-    //         int time = siToTime(mSic);
-    //
-    //         if (isInterrogate()) {
-    //             mPhone.getCallForwardingOption(reason,
-    //                     obtainMessage(EVENT_QUERY_CF_COMPLETE, this));
-    //         } else {
-    //             int cfAction;
-    //
-    //             cfAction = calForwardAction(dialingNumber);
-    //
-    //             int isSettingUnconditional =
-    //                     ((reason == CommandsInterface.CF_REASON_UNCONDITIONAL) ||
-    //                      (reason == CommandsInterface.CF_REASON_ALL)) ? 1 : 0;
-    //
-    //             int isEnableDesired =
-    //                 ((cfAction == CommandsInterface.CF_ACTION_ENABLE) ||
-    //                         (cfAction == CommandsInterface.CF_ACTION_REGISTRATION)) ? 1 : 0;
-    //
-    //             Rlog.d(LOGTAG, "is CF setCallForward");
-    //             mPhone.setCallForwardingOption(cfAction, reason,
-    //                     dialingNumber, time, obtainMessage(
-    //                             EVENT_SET_CFF_COMPLETE,
-    //                             isSettingUnconditional,
-    //                             isEnableDesired, this));
-    //         }
-    //     } else if (isServiceCodeUncondCallFwdTimer(mSc)) {
-    //         Rlog.d(LOGTAG, "is UncondCFTimer");
-    //
-    //         String dialingNumber = mSia;
-    //         int reason = scToCallForwardReason(mSc);
-    //
-    //         if (isInterrogate()) {
-    //
-    //             mPhone.getCallForwardingOption(reason,
-    //                     obtainMessage(EVENT_QUERY_CFUT_COMPLETE, this));
-    //         } else {
-    //             int cfTimerAction;
-    //             int startHour = 0;
-    //             int startMinute = 0;
-    //             int endHour = 0;
-    //             int endMinute = 0;
-    //             if (mSic != null) {
-    //                 // sic contains string in the format HH:MM$HH:MM.String
-    //                 // will be splitted by '$' that gives two halves.First half
-    //                 // signifies starthour and startminute and second half
-    //                 // signifies endhour and endminute.
-    //                 String duration[] = mSic.split("\\$");
-    //
-    //                 if((duration[0] !=null) && (duration[1]!=null)) {
-    //                     //splitting to get starthour and startminute
-    //                     String start[] = duration[0].split("\\:");
-    //                     if (start[0] != null) {
-    //                         startHour = Integer.parseInt(start[0]);
-    //                     }
-    //                     if (start[1] != null) {
-    //                         startMinute = Integer.parseInt(start[1]);
-    //                     }
-    //                     //splitting to get endhour and endminute
-    //                     String end[] = duration[1].split("\\:");
-    //                     if (end[0] !=null) {
-    //                         endHour = Integer.parseInt(end[0]);
-    //                     }
-    //                     if (end[1] !=null) {
-    //                         endMinute = Integer.parseInt(end[1]);
-    //                     }
-    //                 }
-    //             }
-    //             cfTimerAction = calForwardAction(dialingNumber);
-    //             Rlog.d(LOGTAG, "is CFUT setCallForward");
-    //             mPhone.setCallForwardingUncondTimerOption(startHour,
-    //                     startMinute, endHour, endMinute, cfTimerAction,
-    //                     reason, dialingNumber,
-    //                     obtainMessage(EVENT_SET_CFF_TIMER_COMPLETE,this));
-    //         }
-    //     } else if (isServiceCodeCallBarring(mSc)) {
-    //         // sia = password
-    //         // sib = basic service group
-    //         // service group is not supported
-    //
-    //         String password = mSia;
-    //         String facility = scToBarringFacility(mSc);
-    //
-    //         if (isInterrogate()) {
-    //             mPhone.getCallBarring(facility,
-    //                     obtainMessage(EVENT_SUPP_SVC_QUERY_COMPLETE, this));
-    //         } else if (isActivate() || isDeactivate()) {
-    //             mPhone.setCallBarring(facility, isActivate(), password,
-    //                     obtainMessage(EVENT_SET_COMPLETE, this));
-    //         } else {
-    //             throw new RuntimeException ("Invalid or Unsupported MMI Code");
-    //         }
-    //     } else if (mSc != null && mSc.equals(SC_CLIR)) {
-    //         // NOTE: Since these supplementary services are accessed only
-    //         //       via MMI codes, methods have not been added to ImsPhone.
-    //         //       Only the UT interface handle is used.
-    //         if (isActivate()) {
-    //             try {
-    //                 mPhone.mCT.getUtInterface().updateCLIR(CommandsInterface.CLIR_INVOCATION,
-    //                     obtainMessage(EVENT_SET_COMPLETE, this));
-    //             } catch (ImsException e) {
-    //                 Rlog.d(LOGTAG, "Could not get UT handle for updateCLIR.");
-    //             }
-    //         } else if (isDeactivate()) {
-    //             try {
-    //                 mPhone.mCT.getUtInterface().updateCLIR(CommandsInterface.CLIR_SUPPRESSION,
-    //                     obtainMessage(EVENT_SET_COMPLETE, this));
-    //             } catch (ImsException e) {
-    //                 Rlog.d(LOGTAG, "Could not get UT handle for updateCLIR.");
-    //             }
-    //         } else if (isInterrogate()) {
-    //             try {
-    //                 mPhone.mCT.getUtInterface()
-    //                     .queryCLIR(obtainMessage(EVENT_GET_CLIR_COMPLETE, this));
-    //             } catch (ImsException e) {
-    //                 Rlog.d(LOGTAG, "Could not get UT handle for queryCLIR.");
-    //             }
-    //         } else {
-    //             throw new RuntimeException ("Invalid or Unsupported MMI Code");
-    //         }
-    //     } else if (mSc != null && mSc.equals(SC_CLIP)) {
-    //         // NOTE: Refer to the note above.
-    //         if (isInterrogate()) {
-    //             try {
-    //                 mPhone.mCT.getUtInterface()
-    //                     .queryCLIP(obtainMessage(EVENT_SUPP_SVC_QUERY_COMPLETE, this));
-    //             } catch (ImsException e) {
-    //                 Rlog.d(LOGTAG, "Could not get UT handle for queryCLIP.");
-    //             }
-    //         } else if (isActivate() || isDeactivate()) {
-    //             try {
-    //                 mPhone.mCT.getUtInterface().updateCLIP(isActivate(),
-    //                         obtainMessage(EVENT_SET_COMPLETE, this));
-    //             } catch (ImsException e) {
-    //                 Rlog.d(LOGTAG, "Could not get UT handle for updateCLIP.");
-    //             }
-    //         } else {
-    //             throw new RuntimeException ("Invalid or Unsupported MMI Code");
-    //         }
-    //     } else if (mSc != null && mSc.equals(SC_COLP)) {
-    //         // NOTE: Refer to the note above.
-    //         if (isInterrogate()) {
-    //             try {
-    //                 mPhone.mCT.getUtInterface()
-    //                     .queryCOLP(obtainMessage(EVENT_SUPP_SVC_QUERY_COMPLETE, this));
-    //             } catch (ImsException e) {
-    //                 Rlog.d(LOGTAG, "Could not get UT handle for queryCOLP.");
-    //             }
-    //         } else if (isActivate() || isDeactivate()) {
-    //             try {
-    //                 mPhone.mCT.getUtInterface().updateCOLP(isActivate(),
-    //                          obtainMessage(EVENT_SET_COMPLETE, this));
-    //              } catch (ImsException e) {
-    //                  Rlog.d(LOGTAG, "Could not get UT handle for updateCOLP.");
-    //              }
-    //         } else {
-    //             throw new RuntimeException ("Invalid or Unsupported MMI Code");
-    //         }
-    //     } else if (mSc != null && mSc.equals(SC_COLR)) {
-    //         // NOTE: Refer to the note above.
-    //         if (isActivate()) {
-    //             try {
-    //                 mPhone.mCT.getUtInterface().updateCOLR(NUM_PRESENTATION_RESTRICTED,
-    //                         obtainMessage(EVENT_SET_COMPLETE, this));
-    //             } catch (ImsException e) {
-    //                 Rlog.d(LOGTAG, "Could not get UT handle for updateCOLR.");
-    //             }
-    //         } else if (isDeactivate()) {
-    //             try {
-    //                 mPhone.mCT.getUtInterface().updateCOLR(NUM_PRESENTATION_ALLOWED,
-    //                         obtainMessage(EVENT_SET_COMPLETE, this));
-    //             } catch (ImsException e) {
-    //                 Rlog.d(LOGTAG, "Could not get UT handle for updateCOLR.");
-    //             }
-    //         } else if (isInterrogate()) {
-    //             try {
-    //                 mPhone.mCT.getUtInterface()
-    //                     .queryCOLR(obtainMessage(EVENT_SUPP_SVC_QUERY_COMPLETE, this));
-    //             } catch (ImsException e) {
-    //                 Rlog.d(LOGTAG, "Could not get UT handle for queryCOLR.");
-    //             }
-    //         } else {
-    //             throw new RuntimeException ("Invalid or Unsupported MMI Code");
-    //         }
-    //     } else if (mSc != null && (mSc.equals(SC_BS_MT))) {
-    //         try {
-    //             if (isInterrogate()) {
-    //                 mPhone.mCT.getUtInterface()
-    //                 .queryCallBarring(ImsUtInterface.CB_BS_MT,
-    //                                   obtainMessage(EVENT_QUERY_ICB_COMPLETE,this));
-    //             } else {
-    //                 processIcbMmiCodeForUpdate();
-    //             }
-    //          // TODO: isRegister() case needs to be handled.
-    //         } catch (ImsException e) {
-    //             Rlog.d(LOGTAG, "Could not get UT handle for ICB.");
-    //         }
-    //     } else if (mSc != null && mSc.equals(SC_BAICa)) {
-    //         int callAction =0;
-    //         // TODO: Should we route through queryCallBarring() here?
-    //         try {
-    //             if (isInterrogate()) {
-    //                 mPhone.mCT.getUtInterface()
-    //                 .queryCallBarring(ImsUtInterface.CB_BIC_ACR,
-    //                                   obtainMessage(EVENT_SUPP_SVC_QUERY_COMPLETE,this));
-    //             } else {
-    //                 if (isActivate()) {
-    //                     callAction = CommandsInterface.CF_ACTION_ENABLE;
-    //                 } else if (isDeactivate()) {
-    //                     callAction = CommandsInterface.CF_ACTION_DISABLE;
-    //                 }
-    //                 mPhone.mCT.getUtInterface()
-    //                         .updateCallBarring(ImsUtInterface.CB_BIC_ACR,
-    //                         callAction,
-    //                         obtainMessage(EVENT_SET_COMPLETE,this),
-    //                         null);
-    //             }
-    //         } catch (ImsException e) {
-    //             Rlog.d(LOGTAG, "Could not get UT handle for ICBa.");
-    //         }
-    //     } else if (mSc != null && mSc.equals(SC_WAIT)) {
-    //         // sia = basic service group
-    //         // service group is not supported
-    //         if (isActivate() || isDeactivate()) {
-    //             mPhone.setCallWaiting(isActivate(),
-    //                     obtainMessage(EVENT_SET_COMPLETE, this));
-    //         } else if (isInterrogate()) {
-    //             mPhone.getCallWaiting(obtainMessage(EVENT_QUERY_COMPLETE, this));
-    //         } else {
-    //             throw new RuntimeException ("Invalid or Unsupported MMI Code");
-    //         }
-    //     } else if (mPoundString != null) {
-    //         Rlog.d(LOGTAG, "Sending pound string '"
-    //                + mDialingNumber + "' over CS pipe.");
-    //         throw new CallStateException(ImsPhone.CS_FALLBACK);
-    //     } else {
-    //         throw new RuntimeException ("Invalid or Unsupported MMI Code");
-    //     }
+    Boolean b;
+    if (IsShortCode(&b), b) {
+        Logger::D(LOGTAG, "isShortCode");
+
+        // These just get treated as USSD.
+        Logger::D(LOGTAG, "Sending short code '%s' over CS pipe.", mDialingNumber.string());
+        // throw new CallStateException(ImsPhone.CS_FALLBACK);
+        return E_CALL_STATE_EXCEPTION;
+    }
+    else if (IsServiceCodeCallForwarding(mSc)) {
+        Logger::D(LOGTAG, "is CF");
+        // service group is not supported
+
+        String dialingNumber = mSia;
+        Int32 reason;
+        ScToCallForwardReason(mSc, &reason);
+        Int32 time = SiToTime(mSic);
+
+        if (IsInterrogate(&b), b) {
+            AutoPtr<IMessage> msg;
+            ObtainMessage(EVENT_QUERY_CF_COMPLETE, TO_IINTERFACE(this), (IMessage**)&msg);
+            IPhone::Probe(mPhone)->GetCallForwardingOption(reason, msg);
+        }
+        else {
+            Int32 cfAction;
+
+            CalForwardAction(dialingNumber, &cfAction);
+
+            Int32 isSettingUnconditional =
+                    ((reason == ICommandsInterface::CF_REASON_UNCONDITIONAL) ||
+                     (reason == ICommandsInterface::CF_REASON_ALL)) ? 1 : 0;
+
+            Int32 isEnableDesired =
+                ((cfAction == ICommandsInterface::CF_ACTION_ENABLE) ||
+                        (cfAction == ICommandsInterface::CF_ACTION_REGISTRATION)) ? 1 : 0;
+
+            Logger::D(LOGTAG, "is CF setCallForward");
+            AutoPtr<IMessage> msg;
+            ObtainMessage(
+                    EVENT_SET_CFF_COMPLETE,
+                    isSettingUnconditional,
+                    isEnableDesired, TO_IINTERFACE(this), (IMessage**)&msg);
+            IPhone::Probe(mPhone)->SetCallForwardingOption(cfAction, reason,
+                    dialingNumber, time, msg);
+        }
+    }
+    else if (IsServiceCodeUncondCallFwdTimer(mSc)) {
+        Logger::D(LOGTAG, "is UncondCFTimer");
+
+        String dialingNumber = mSia;
+        Int32 reason;
+        ScToCallForwardReason(mSc, &reason);
+
+        if (IsInterrogate(&b), b) {
+
+            AutoPtr<IMessage> msg;
+            ObtainMessage(EVENT_QUERY_CFUT_COMPLETE, TO_IINTERFACE(this), (IMessage**)&msg);
+            IPhone::Probe(mPhone)->GetCallForwardingOption(reason, msg);
+        }
+        else {
+            Int32 cfTimerAction;
+            Int32 startHour = 0;
+            Int32 startMinute = 0;
+            Int32 endHour = 0;
+            Int32 endMinute = 0;
+            if (mSic != NULL) {
+                // sic contains string in the format HH:MM$HH:MM.String
+                // will be splitted by '$' that gives two halves.First half
+                // signifies starthour and startminute and second half
+                // signifies endhour and endminute.
+                AutoPtr<ArrayOf<String> > duration;
+                StringUtils::Split(mSic, String("\\$"), (ArrayOf<String>**)&duration);
+
+                if(((*duration)[0] !=NULL) && ((*duration)[1]!=NULL)) {
+                    //splitting to get starthour and startminute
+                    AutoPtr<ArrayOf<String> > start;
+                    StringUtils::Split((*duration)[0], String("\\:"), (ArrayOf<String>**)&start);
+                    if ((*start)[0] != NULL) {
+                        startHour = StringUtils::ParseInt32((*start)[0]);
+                    }
+                    if ((*start)[1] != NULL) {
+                        startMinute = StringUtils::ParseInt32((*start)[1]);
+                    }
+                    //splitting to get endhour and endminute
+                    AutoPtr<ArrayOf<String> > end;
+                    StringUtils::Split((*duration)[1], String("\\:"), (ArrayOf<String>**)&end);
+                    if ((*end)[0] !=NULL) {
+                        endHour = StringUtils::ParseInt32((*end)[0]);
+                    }
+                    if ((*end)[1] !=NULL) {
+                        endMinute = StringUtils::ParseInt32((*end)[1]);
+                    }
+                }
+            }
+            CalForwardAction(dialingNumber, &cfTimerAction);
+            Logger::D(LOGTAG, "is CFUT setCallForward");
+            AutoPtr<IMessage> msg;
+            ObtainMessage(EVENT_SET_CFF_TIMER_COMPLETE, TO_IINTERFACE(this), (IMessage**)&msg);
+            IPhone::Probe(mPhone)->SetCallForwardingUncondTimerOption(startHour,
+                    startMinute, endHour, endMinute, cfTimerAction,
+                    reason, dialingNumber, msg);
+        }
+    }
+    else if (IsServiceCodeCallBarring(mSc)) {
+        // sia = password
+        // sib = basic service group
+        // service group is not supported
+
+        String password = mSia;
+        String facility;
+        ScToBarringFacility(mSc, &facility);
+
+        Boolean b1, b2;
+        if (IsInterrogate(&b), b) {
+            AutoPtr<IMessage> msg;
+            ObtainMessage(EVENT_SUPP_SVC_QUERY_COMPLETE, TO_IINTERFACE(this), (IMessage**)&msg);
+            ((ImsPhone*)mPhone.Get())->GetCallBarring(facility, msg);
+        }
+        else if ((IsActivate(&b1), b1) || (IsDeactivate(&b2), b2)) {
+            AutoPtr<IMessage> msg;
+            ObtainMessage(EVENT_SET_COMPLETE, TO_IINTERFACE(this), (IMessage**)&msg);
+            ((ImsPhone*)mPhone.Get())->SetCallBarring(facility, b1, password, msg);
+        }
+        else {
+            // throw new RuntimeException ("Invalid or Unsupported MMI Code");
+            return E_RUNTIME_EXCEPTION;
+        }
+    }
+    else if (mSc != NULL && mSc.Equals(SC_CLIR)) {
+        // NOTE: Since these supplementary services are accessed only
+        //       via MMI codes, methods have not been added to ImsPhone.
+        //       Only the UT interface handle is used.
+        if (IsActivate(&b), b) {
+            // try {
+            AutoPtr<IMessage> msg;
+            ObtainMessage(EVENT_SET_COMPLETE, TO_IINTERFACE(this), (IMessage**)&msg);
+// TODO: Need IImsUtInterface
+            // (ImsPhoneCallTracker*)(((ImsPhone*)mPhone.Get())->mCT.Get())->GetUtInterface()->UpdateCLIR(ICommandsInterface::CLIR_INVOCATION, msg);
+            // } catch (ImsException e) {
+            //     Logger::D(LOGTAG, "Could not get UT handle for updateCLIR.");
+            // }
+        }
+        else if (IsDeactivate(&b), b) {
+            // try {
+            AutoPtr<IMessage> msg;
+            ObtainMessage(EVENT_SET_COMPLETE, TO_IINTERFACE(this), (IMessage**)&msg);
+// TODO: Need IImsUtInterface
+            // (ImsPhoneCallTracker*)(((ImsPhone*)mPhone.Get())->mCT.Get())->GetUtInterface()->UpdateCLIR(ICommandsInterface::CLIR_SUPPRESSION, msg);
+            // } catch (ImsException e) {
+            //     Logger::D(LOGTAG, "Could not get UT handle for updateCLIR.");
+            // }
+        }
+        else if (IsInterrogate(&b), b) {
+            // try {
+            AutoPtr<IMessage> msg;
+            ObtainMessage(EVENT_GET_CLIR_COMPLETE, TO_IINTERFACE(this), (IMessage**)&msg);
+// TODO: Need IImsUtInterface
+            // (ImsPhoneCallTracker*)(((ImsPhone*)mPhone.Get())->mCT.Get())->GetUtInterface()->QueryCLIR(msg);
+            // } catch (ImsException e) {
+            //     Logger::D(LOGTAG, "Could not get UT handle for queryCLIR.");
+            // }
+        }
+        else {
+            // throw new RuntimeException ("Invalid or Unsupported MMI Code");
+            return E_RUNTIME_EXCEPTION;
+        }
+    }
+    else if (mSc != NULL && mSc.Equals(SC_CLIP)) {
+        // NOTE: Refer to the note above.
+        Boolean b1, b2;
+        if (IsInterrogate(&b), b) {
+            // try {
+            AutoPtr<IMessage> msg;
+            ObtainMessage(EVENT_SUPP_SVC_QUERY_COMPLETE, TO_IINTERFACE(this), (IMessage**)&msg);
+// TODO: Need IImsUtInterface
+            // (ImsPhoneCallTracker*)(((ImsPhone*)mPhone.Get())->mCT.Get())->GetUtInterface()->QueryCLIP(msg);
+            // } catch (ImsException e) {
+            //     Logger::D(LOGTAG, "Could not get UT handle for queryCLIP.");
+            // }
+        }
+        else if ((IsActivate(&b1), b1) || (IsDeactivate(&b2), b2)) {
+            // try {
+            AutoPtr<IMessage> msg;
+            ObtainMessage(EVENT_SET_COMPLETE, TO_IINTERFACE(this), (IMessage**)&msg);
+// TODO: Need IImsUtInterface
+            // (ImsPhoneCallTracker*)(((ImsPhone*)mPhone.Get())->mCT.Get())->GetUtInterface()->UpdateCLIP(b1, msg);
+            // } catch (ImsException e) {
+            //     Logger::D(LOGTAG, "Could not get UT handle for updateCLIP.");
+            // }
+        }
+        else {
+            // throw new RuntimeException ("Invalid or Unsupported MMI Code");
+            return E_RUNTIME_EXCEPTION;
+        }
+    }
+    else if (mSc != NULL && mSc.Equals(SC_COLP)) {
+        // NOTE: Refer to the note above.
+        Boolean b1, b2;
+        if (IsInterrogate(&b), b) {
+            // try {
+            AutoPtr<IMessage> msg;
+            ObtainMessage(EVENT_SUPP_SVC_QUERY_COMPLETE, TO_IINTERFACE(this), (IMessage**)&msg);
+// TODO: Need IImsUtInterface
+            // (ImsPhoneCallTracker*)(((ImsPhone*)mPhone.Get())->mCT.Get())->GetUtInterface()->QueryCOLP(msg);
+            // } catch (ImsException e) {
+            //     Logger::D(LOGTAG, "Could not get UT handle for queryCOLP.");
+            // }
+        }
+        else if ((IsActivate(&b1), b1) || (IsDeactivate(&b2), b2)) {
+            // try {
+            AutoPtr<IMessage> msg;
+            ObtainMessage(EVENT_SET_COMPLETE, TO_IINTERFACE(this), (IMessage**)&msg);
+// TODO: Need IImsUtInterface
+            // (ImsPhoneCallTracker*)(((ImsPhone*)mPhone.Get())->mCT.Get())->GetUtInterface()->UpdateCOLP(b1, msg);
+             // } catch (ImsException e) {
+             //     Logger::D(LOGTAG, "Could not get UT handle for updateCOLP.");
+             // }
+        }
+        else {
+            // throw new RuntimeException ("Invalid or Unsupported MMI Code");
+            return E_RUNTIME_EXCEPTION;
+        }
+    }
+    else if (mSc != NULL && mSc.Equals(SC_COLR)) {
+        // NOTE: Refer to the note above.
+        if (IsActivate(&b), b) {
+            // try {
+            AutoPtr<IMessage> msg;
+            ObtainMessage(EVENT_SET_COMPLETE, TO_IINTERFACE(this), (IMessage**)&msg);
+// TODO: Need IImsUtInterface
+            // (ImsPhoneCallTracker*)(((ImsPhone*)mPhone.Get())->mCT.Get())->GetUtInterface()->UpdateCOLR(NUM_PRESENTATION_RESTRICTED, msg);
+            // } catch (ImsException e) {
+            //     Logger::D(LOGTAG, "Could not get UT handle for updateCOLR.");
+            // }
+        }
+        else if (IsDeactivate(&b), b) {
+            // try {
+            AutoPtr<IMessage> msg;
+            ObtainMessage(EVENT_SET_COMPLETE, TO_IINTERFACE(this), (IMessage**)&msg);
+// TODO: Need IImsUtInterface
+            // (ImsPhoneCallTracker*)(((ImsPhone*)mPhone.Get())->mCT.Get())->GetUtInterface()->UpdateCOLR(NUM_PRESENTATION_ALLOWED, msg);
+            // } catch (ImsException e) {
+            //     Logger::D(LOGTAG, "Could not get UT handle for updateCOLR.");
+            // }
+        }
+        else if (IsInterrogate(&b), b) {
+            // try {
+            AutoPtr<IMessage> msg;
+            ObtainMessage(EVENT_SUPP_SVC_QUERY_COMPLETE, TO_IINTERFACE(this), (IMessage**)&msg);
+// TODO: Need IImsUtInterface
+            // (ImsPhoneCallTracker*)(((ImsPhone*)mPhone.Get())->mCT.Get())->GetUtInterface()->QueryCOLR(msg);
+            // } catch (ImsException e) {
+            //     Logger::D(LOGTAG, "Could not get UT handle for queryCOLR.");
+            // }
+        }
+        else {
+            // throw new RuntimeException ("Invalid or Unsupported MMI Code");
+            return E_RUNTIME_EXCEPTION;
+        }
+    }
+    else if (mSc != NULL && (mSc.Equals(SC_BS_MT))) {
+        // try {
+        if (IsInterrogate(&b), b) {
+            AutoPtr<IMessage> msg;
+            ObtainMessage(EVENT_QUERY_ICB_COMPLETE, TO_IINTERFACE(this), (IMessage**)&msg);
+// TODO: Need IImsUtInterface
+            // (ImsPhoneCallTracker*)(((ImsPhone*)mPhone.Get())->mCT.Get())->GetUtInterface()->QueryCallBarring(IImsUtInterface::CB_BS_MT, msg);
+        }
+        else {
+            ProcessIcbMmiCodeForUpdate();
+        }
+         // TODO: IsRegister() case needs to be handled.
+        // } catch (ImsException e) {
+        //     Logger::D(LOGTAG, "Could not get UT handle for ICB.");
+        // }
+    }
+    else if (mSc != NULL && mSc.Equals(SC_BAICa)) {
+        Int32 callAction = 0;
+        // TODO: Should we route through queryCallBarring() here?
+        // try {
+        if (IsInterrogate(&b), b) {
+            AutoPtr<IMessage> msg;
+            ObtainMessage(EVENT_SUPP_SVC_QUERY_COMPLETE, TO_IINTERFACE(this), (IMessage**)&msg);
+// TODO: Need IImsUtInterface
+            // (ImsPhoneCallTracker*)(((ImsPhone*)mPhone.Get())->mCT.Get())->GetUtInterface()->QueryCallBarring(IImsUtInterface::CB_BIC_ACR, msg);
+        }
+        else {
+            if (IsActivate(&b), b) {
+                callAction = ICommandsInterface::CF_ACTION_ENABLE;
+            }
+            else if (IsDeactivate(&b), b) {
+                callAction = ICommandsInterface::CF_ACTION_DISABLE;
+            }
+            AutoPtr<IMessage> msg;
+            ObtainMessage(EVENT_SET_COMPLETE, TO_IINTERFACE(this), (IMessage**)&msg);
+// TODO: Need IImsUtInterface
+            // (ImsPhoneCallTracker*)(((ImsPhone*)mPhone.Get())->mCT.Get())->GetUtInterface()->UpdateCallBarring(IImsUtInterface::CB_BIC_ACR, callAction, msg, NULL);
+        }
+        // } catch (ImsException e) {
+        //     Logger::D(LOGTAG, "Could not get UT handle for ICBa.");
+        // }
+    }
+    else if (mSc != NULL && mSc.Equals(SC_WAIT)) {
+        // sia = basic service group
+        // service group is not supported
+        Boolean b1, b2;
+        if ((IsActivate(&b1), b1) || (IsDeactivate(&b2), b2)) {
+            AutoPtr<IMessage> msg;
+            ObtainMessage(EVENT_SET_COMPLETE, TO_IINTERFACE(this), (IMessage**)&msg);
+            IPhone::Probe(mPhone)->SetCallWaiting(b1, msg);
+        }
+        else if (IsInterrogate(&b), b) {
+            AutoPtr<IMessage> msg;
+            ObtainMessage(EVENT_QUERY_COMPLETE, TO_IINTERFACE(this), (IMessage**)&msg);
+            IPhone::Probe(mPhone)->GetCallWaiting(msg);
+        }
+        else {
+            // throw new RuntimeException ("Invalid or Unsupported MMI Code");
+            return E_RUNTIME_EXCEPTION;
+        }
+    }
+    else if (mPoundString != NULL) {
+        Logger::D(LOGTAG, "Sending pound string '%s' over CS pipe.", mDialingNumber.string());
+        // throw new CallStateException(ImsPhone.CS_FALLBACK);
+        return E_CALL_STATE_EXCEPTION;
+    }
+    else {
+        // throw new RuntimeException ("Invalid or Unsupported MMI Code");
+        return E_RUNTIME_EXCEPTION;
+    }
     // } catch (RuntimeException exc) {
-    //     mState = State.FAILED;
-    //     mMessage = mContext.getText(com.android.internal.R.string.mmiError);
-    //     mPhone.onMMIDone(this);
+    //     mState = IMmiCodeState_FAILED;
+    //     mMessage = mContext->GetText(R::string::mmiError);
+    //     ((ImsPhone*)mPhone.Get())->OnMMIDone(IImsPhoneMmiCode::Probe(this));
     // }
-    assert(0);
     return NOERROR;
 }
 
@@ -865,146 +1006,148 @@ ECode ImsPhoneMmiCode::OnUssdFinished(
     /* [in] */ const String& ussdMessage,
     /* [in] */ Boolean isUssdRequest)
 {
-    // ==================before translated======================
-    // if (mState == State.PENDING) {
-    //     if (ussdMessage == null) {
-    //         mMessage = mContext.getText(com.android.internal.R.string.mmiComplete);
-    //     } else {
-    //         mMessage = ussdMessage;
-    //     }
-    //     mIsUssdRequest = isUssdRequest;
-    //     // If it's a request, leave it PENDING so that it's cancelable.
-    //     if (!isUssdRequest) {
-    //         mState = State.COMPLETE;
-    //     }
-    //
-    //     mPhone.onMMIDone(this);
-    // }
-    assert(0);
+    if (mState == IMmiCodeState_PENDING) {
+        if (ussdMessage == NULL) {
+            mContext->GetText(R::string::mmiComplete, (ICharSequence**)&mMessage);
+        }
+        else {
+            mMessage = CoreUtils::Convert(ussdMessage);
+        }
+        mIsUssdRequest = isUssdRequest;
+        // If it's a request, leave it PENDING so that it's cancelable.
+        if (!isUssdRequest) {
+            mState = IMmiCodeState_COMPLETE;
+        }
+
+        ((ImsPhone*)mPhone.Get())->OnMMIDone(IImsPhoneMmiCode::Probe(this));
+    }
     return NOERROR;
 }
 
 ECode ImsPhoneMmiCode::OnUssdFinishedError()
 {
-    // ==================before translated======================
-    // if (mState == State.PENDING) {
-    //     mState = State.FAILED;
-    //     mMessage = mContext.getText(com.android.internal.R.string.mmiError);
-    //
-    //     mPhone.onMMIDone(this);
-    // }
-    assert(0);
+    if (mState == IMmiCodeState_PENDING) {
+        mState = IMmiCodeState_FAILED;
+        mContext->GetText(R::string::mmiError, (ICharSequence**)&mMessage);
+
+        ((ImsPhone*)mPhone.Get())->OnMMIDone(IImsPhoneMmiCode::Probe(this));
+    }
     return NOERROR;
 }
 
 ECode ImsPhoneMmiCode::SendUssd(
     /* [in] */ const String& ussdMessage)
 {
-    // ==================before translated======================
-    // // Treat this as a USSD string
-    // mIsPendingUSSD = true;
-    //
-    // // Note that unlike most everything else, the USSD complete
-    // // response does not complete this MMI code...we wait for
-    // // an unsolicited USSD "Notify" or "Request".
-    // // The matching up of this is done in ImsPhone.
-    //
-    // mPhone.sendUSSD(ussdMessage,
-    //     obtainMessage(EVENT_USSD_COMPLETE, this));
-    assert(0);
+    // Treat this as a USSD string
+    mIsPendingUSSD = TRUE;
+
+    // Note that unlike most everything else, the USSD complete
+    // response does not complete this MMI code...we wait for
+    // an unsolicited USSD "Notify" or "Request".
+    // The matching up of this is done in ImsPhone.
+
+    AutoPtr<IMessage> msg;
+    ObtainMessage(EVENT_USSD_COMPLETE, TO_IINTERFACE(this), (IMessage**)&msg);
+    ((ImsPhone*)mPhone.Get())->SendUSSD(ussdMessage, msg);
     return NOERROR;
 }
 
 ECode ImsPhoneMmiCode::HandleMessage(
     /* [in] */ IMessage* msg)
 {
-    // ==================before translated======================
-    // AsyncResult ar;
-    //
-    // switch (msg.what) {
-    //     case EVENT_SET_COMPLETE:
-    //         ar = (AsyncResult) (msg.obj);
-    //
-    //         onSetComplete(msg, ar);
-    //         break;
-    //
-    //     case EVENT_SET_CFF_COMPLETE:
-    //         ar = (AsyncResult) (msg.obj);
-    //
-    //         /*
-    //         * msg.arg1 = 1 means to set unconditional voice call forwarding
-    //         * msg.arg2 = 1 means to enable voice call forwarding
-    //         */
-    //         if ((ar.exception == null) && (msg.arg1 == 1)) {
-    //             boolean cffEnabled = (msg.arg2 == 1);
-    //             if (mIccRecords != null) {
-    //                 mIccRecords.setVoiceCallForwardingFlag(1, cffEnabled, mDialingNumber);
-    //             }
-    //         }
-    //
-    //         onSetComplete(msg, ar);
-    //         break;
-    //
-    //     case EVENT_SET_CFF_TIMER_COMPLETE:
-    //         ar = (AsyncResult) (msg.obj);
-    //         onSetComplete(msg, ar);
-    //         break;
-    //
-    //     case EVENT_QUERY_CF_COMPLETE:
-    //         ar = (AsyncResult) (msg.obj);
-    //         onQueryCfComplete(ar);
-    //         break;
-    //
-    //     case EVENT_QUERY_CFUT_COMPLETE:
-    //         ar = (AsyncResult) (msg.obj);
-    //         onQueryUncondCfTimerComplete(ar);
-    //         break;
-    //
-    //     case EVENT_QUERY_COMPLETE:
-    //         ar = (AsyncResult) (msg.obj);
-    //         onQueryComplete(ar);
-    //         break;
-    //
-    //     case EVENT_USSD_COMPLETE:
-    //         ar = (AsyncResult) (msg.obj);
-    //
-    //         if (ar.exception != null) {
-    //             mState = State.FAILED;
-    //             mMessage = getErrorMessage(ar);
-    //
-    //             mPhone.onMMIDone(this);
-    //         }
-    //
-    //         // Note that unlike most everything else, the USSD complete
-    //         // response does not complete this MMI code...we wait for
-    //         // an unsolicited USSD "Notify" or "Request".
-    //         // The matching up of this is done in ImsPhone.
-    //
-    //         break;
-    //
-    //     case EVENT_USSD_CANCEL_COMPLETE:
-    //         mPhone.onMMIDone(this);
-    //         break;
-    //
-    //     case EVENT_SUPP_SVC_QUERY_COMPLETE:
-    //         ar = (AsyncResult) (msg.obj);
-    //         onSuppSvcQueryComplete(ar);
-    //         break;
-    //
-    //     case EVENT_QUERY_ICB_COMPLETE:
-    //         ar = (AsyncResult) (msg.obj);
-    //         onIcbQueryComplete(ar);
-    //         break;
-    //
-    //     case EVENT_GET_CLIR_COMPLETE:
-    //         ar = (AsyncResult) (msg.obj);
-    //         onQueryClirComplete(ar);
-    //         break;
-    //
-    //     default:
-    //         break;
-    // }
-    assert(0);
+    AutoPtr<AsyncResult> ar;
+
+    Int32 what;
+    msg->GetWhat(&what);
+    AutoPtr<IInterface> obj;
+    msg->GetObj((IInterface**)&obj);
+    switch (what) {
+        case EVENT_SET_COMPLETE:
+            ar = (AsyncResult*)(IObject*)obj.Get();
+
+            OnSetComplete(msg, ar);
+            break;
+
+        case EVENT_SET_CFF_COMPLETE:
+            ar = (AsyncResult*)(IObject*)obj.Get();
+
+            /*
+            * msg.arg1 = 1 means to set unconditional voice call forwarding
+            * msg.arg2 = 1 means to enable voice call forwarding
+            */
+            Int32 arg1;
+            msg->GetArg1(&arg1);
+            Int32 arg2;
+            msg->GetArg2(&arg2);
+            if ((ar->mException == NULL) && (arg1 == 1)) {
+                Boolean cffEnabled = (arg2 == 1);
+                if (mIccRecords != NULL) {
+                    mIccRecords->SetVoiceCallForwardingFlag(1, cffEnabled, mDialingNumber);
+                }
+            }
+
+            OnSetComplete(msg, ar);
+            break;
+
+        case EVENT_SET_CFF_TIMER_COMPLETE:
+            ar = (AsyncResult*)(IObject*)obj.Get();
+            OnSetComplete(msg, ar);
+            break;
+
+        case EVENT_QUERY_CF_COMPLETE:
+            ar = (AsyncResult*)(IObject*)obj.Get();
+            OnQueryCfComplete(ar);
+            break;
+
+        case EVENT_QUERY_CFUT_COMPLETE:
+            ar = (AsyncResult*)(IObject*)obj.Get();
+            OnQueryUncondCfTimerComplete(ar);
+            break;
+
+        case EVENT_QUERY_COMPLETE:
+            ar = (AsyncResult*)(IObject*)obj.Get();
+            OnQueryComplete(ar);
+            break;
+
+        case EVENT_USSD_COMPLETE:
+            ar = (AsyncResult*)(IObject*)obj.Get();
+
+            if (ar->mException != NULL) {
+                mState = IMmiCodeState_FAILED;
+                mMessage = GetErrorMessage(ar);
+
+                ((ImsPhone*)mPhone.Get())->OnMMIDone(IImsPhoneMmiCode::Probe(this));
+            }
+
+            // Note that unlike most everything else, the USSD complete
+            // response does not complete this MMI code...we wait for
+            // an unsolicited USSD "Notify" or "Request".
+            // The matching up of this is done in ImsPhone.
+
+            break;
+
+        case EVENT_USSD_CANCEL_COMPLETE:
+            ((ImsPhone*)mPhone.Get())->OnMMIDone(IImsPhoneMmiCode::Probe(this));
+            break;
+
+        case EVENT_SUPP_SVC_QUERY_COMPLETE:
+            ar = (AsyncResult*)(IObject*)obj.Get();
+            OnSuppSvcQueryComplete(ar);
+            break;
+
+        case EVENT_QUERY_ICB_COMPLETE:
+            ar = (AsyncResult*)(IObject*)obj.Get();
+            OnIcbQueryComplete(ar);
+            break;
+
+        case EVENT_GET_CLIR_COMPLETE:
+            ar = (AsyncResult*)(IObject*)obj.Get();
+            OnQueryClirComplete(ar);
+            break;
+
+        default:
+            break;
+    }
     return NOERROR;
 }
 
@@ -1012,146 +1155,184 @@ ECode ImsPhoneMmiCode::ToString(
     /* [out] */ String* result)
 {
     VALIDATE_NOT_NULL(result);
-    // ==================before translated======================
-    // StringBuilder sb = new StringBuilder("ImsPhoneMmiCode {");
-    //
-    // sb.append("State=" + getState());
-    // if (mAction != null) sb.append(" action=" + mAction);
-    // if (mSc != null) sb.append(" sc=" + mSc);
-    // if (mSia != null) sb.append(" sia=" + mSia);
-    // if (mSib != null) sb.append(" sib=" + mSib);
-    // if (mSic != null) sb.append(" sic=" + mSic);
-    // if (mPoundString != null) sb.append(" poundString=" + mPoundString);
-    // if (mDialingNumber != null) sb.append(" dialingNumber=" + mDialingNumber);
-    // if (mPwd != null) sb.append(" pwd=" + mPwd);
-    // sb.append("}");
-    // return sb.toString();
-    assert(0);
-    return NOERROR;
+    StringBuilder sb("ImsPhoneMmiCode {");
+
+    IMmiCodeState state;
+    GetState(&state);
+    sb.Append(String("State=") + StringUtils::ToString(state));
+    if (!mAction.IsNull()) sb.Append(String(" action=") + mAction);
+    if (!mSc.IsNull()) sb.Append(String(" sc=") + mSc);
+    if (!mSia.IsNull()) sb.Append(String(" sia=") + mSia);
+    if (!mSib.IsNull()) sb.Append(String(" sib=") + mSib);
+    if (!mSic.IsNull()) sb.Append(String(" sic=") + mSic);
+    if (!mPoundString.IsNull()) sb.Append(String(" poundString=") + mPoundString);
+    if (!mDialingNumber.IsNull()) sb.Append(String(" dialingNumber=") + mDialingNumber);
+    if (!mPwd.IsNull()) sb.Append(String(" pwd=") + mPwd);
+    sb.Append("}");
+    return sb.ToString(result);
 }
 
 String ImsPhoneMmiCode::MakeEmptyNull(
     /* [in] */ const String& s)
 {
-    // ==================before translated======================
-    // if (s != null && s.length() == 0) return null;
-    //
-    // return s;
-    assert(0);
-    return String("");
+    if (!s.IsNull() && s.GetLength() == 0) return String(NULL);
+
+    return s;
 }
 
 Boolean ImsPhoneMmiCode::IsEmptyOrNull(
     /* [in] */ ICharSequence* s)
 {
-    // ==================before translated======================
-    // return s == null || (s.length() == 0);
-    assert(0);
-    return FALSE;
+    Int32 len;
+    return s == NULL || ((s->GetLength(&len), len) == 0);
 }
 
-Int32 ImsPhoneMmiCode::ScToCallForwardReason(
-    /* [in] */ const String& sc)
+ECode ImsPhoneMmiCode::ScToCallForwardReason(
+    /* [in] */ const String& sc,
+    /* [out] */ Int32* result)
 {
-    // ==================before translated======================
-    // if (sc == null) {
-    //     throw new RuntimeException ("invalid call forward sc");
-    // }
-    //
-    // if (sc.equals(SC_CF_All)) {
-    //    return CommandsInterface.CF_REASON_ALL;
-    // } else if ((sc.equals(SC_CFU)) || (sc.equals(SC_CFUT))) {
-    //     return CommandsInterface.CF_REASON_UNCONDITIONAL;
-    // } else if (sc.equals(SC_CFB)) {
-    //     return CommandsInterface.CF_REASON_BUSY;
-    // } else if (sc.equals(SC_CFNR)) {
-    //     return CommandsInterface.CF_REASON_NOT_REACHABLE;
-    // } else if (sc.equals(SC_CFNRy)) {
-    //     return CommandsInterface.CF_REASON_NO_REPLY;
-    // } else if (sc.equals(SC_CF_All_Conditional)) {
-    //    return CommandsInterface.CF_REASON_ALL_CONDITIONAL;
-    // } else {
-    //     throw new RuntimeException ("invalid call forward sc");
-    // }
-    assert(0);
-    return 0;
+    VALIDATE_NOT_NULL(result)
+    *result = 0;
+
+    if (sc == NULL) {
+        // throw new RuntimeException ("invalid call forward sc");
+        return E_RUNTIME_EXCEPTION;
+    }
+
+    if (sc.Equals(SC_CF_All)) {
+       *result = ICommandsInterface::CF_REASON_ALL;
+       return NOERROR;
+    }
+    else if ((sc.Equals(SC_CFU)) || (sc.Equals(SC_CFUT))) {
+        *result = ICommandsInterface::CF_REASON_UNCONDITIONAL;
+        return NOERROR;
+    }
+    else if (sc.Equals(SC_CFB)) {
+        *result = ICommandsInterface::CF_REASON_BUSY;
+        return NOERROR;
+    }
+    else if (sc.Equals(SC_CFNR)) {
+        *result = ICommandsInterface::CF_REASON_NOT_REACHABLE;
+        return NOERROR;
+    }
+    else if (sc.Equals(SC_CFNRy)) {
+        *result = ICommandsInterface::CF_REASON_NO_REPLY;
+        return NOERROR;
+    }
+    else if (sc.Equals(SC_CF_All_Conditional)) {
+       *result = ICommandsInterface::CF_REASON_ALL_CONDITIONAL;
+       return NOERROR;
+    }
+    else {
+        // throw new RuntimeException ("invalid call forward sc");
+        return E_RUNTIME_EXCEPTION;
+    }
+    return NOERROR;
 }
 
-Int32 ImsPhoneMmiCode::SiToServiceClass(
-    /* [in] */ const String& si)
+ECode ImsPhoneMmiCode::SiToServiceClass(
+    /* [in] */ const String& si,
+    /* [out] */ Int32* result)
 {
-    // ==================before translated======================
-    // if (si == null || si.length() == 0) {
-    //         return  SERVICE_CLASS_NONE;
-    // } else {
-    //     // NumberFormatException should cause MMI fail
-    //     int serviceCode = Integer.parseInt(si, 10);
-    //
-    //     switch (serviceCode) {
-    //         case 10: return SERVICE_CLASS_SMS + SERVICE_CLASS_FAX  + SERVICE_CLASS_VOICE;
-    //         case 11: return SERVICE_CLASS_VOICE;
-    //         case 12: return SERVICE_CLASS_SMS + SERVICE_CLASS_FAX;
-    //         case 13: return SERVICE_CLASS_FAX;
-    //
-    //         case 16: return SERVICE_CLASS_SMS;
-    //
-    //         case 19: return SERVICE_CLASS_FAX + SERVICE_CLASS_VOICE;
-    //
-    //         case 20: return SERVICE_CLASS_DATA_ASYNC + SERVICE_CLASS_DATA_SYNC;
-    //
-    //         case 21: return SERVICE_CLASS_PAD + SERVICE_CLASS_DATA_ASYNC;
-    //         case 22: return SERVICE_CLASS_PACKET + SERVICE_CLASS_DATA_SYNC;
-    //         case 24: return SERVICE_CLASS_DATA_SYNC;
-    //         case 25: return SERVICE_CLASS_DATA_ASYNC;
-    //         case 26: return SERVICE_CLASS_DATA_SYNC + SERVICE_CLASS_VOICE;
-    //         case 99: return SERVICE_CLASS_PACKET;
-    //
-    //         default:
-    //             throw new RuntimeException("unsupported MMI service code " + si);
-    //     }
-    // }
-    assert(0);
-    return 0;
+    VALIDATE_NOT_NULL(result)
+    *result = 0;
+    if (si == NULL || si.GetLength() == 0) {
+            *result =  ICommandsInterface::SERVICE_CLASS_NONE;
+            return NOERROR;
+    }
+    else {
+        // NumberFormatException should cause MMI fail
+        Int32 serviceCode = StringUtils::ParseInt32(si, 10);
+
+        switch (serviceCode) {
+            case 10:
+                *result = ICommandsInterface::SERVICE_CLASS_SMS + ICommandsInterface::SERVICE_CLASS_FAX  + ICommandsInterface::SERVICE_CLASS_VOICE;
+                return NOERROR;
+            case 11:
+                *result = ICommandsInterface::SERVICE_CLASS_VOICE;
+                return NOERROR;
+            case 12:
+                *result = ICommandsInterface::SERVICE_CLASS_SMS + ICommandsInterface::SERVICE_CLASS_FAX;
+                return NOERROR;
+            case 13:
+                *result = ICommandsInterface::SERVICE_CLASS_FAX;
+                return NOERROR;
+
+            case 16:
+                *result = ICommandsInterface::SERVICE_CLASS_SMS;
+                return NOERROR;
+
+            case 19:
+                *result = ICommandsInterface::SERVICE_CLASS_FAX + ICommandsInterface::SERVICE_CLASS_VOICE;
+                return NOERROR;
+
+            case 20:
+                *result = ICommandsInterface::SERVICE_CLASS_DATA_ASYNC + ICommandsInterface::SERVICE_CLASS_DATA_SYNC;
+                return NOERROR;
+
+            case 21:
+                *result = ICommandsInterface::SERVICE_CLASS_PAD + ICommandsInterface::SERVICE_CLASS_DATA_ASYNC;
+                return NOERROR;
+            case 22:
+                *result = ICommandsInterface::SERVICE_CLASS_PACKET + ICommandsInterface::SERVICE_CLASS_DATA_SYNC;
+                return NOERROR;
+            case 24:
+                *result = ICommandsInterface::SERVICE_CLASS_DATA_SYNC;
+                return NOERROR;
+            case 25:
+                *result = ICommandsInterface::SERVICE_CLASS_DATA_ASYNC;
+                return NOERROR;
+            case 26:
+                *result = ICommandsInterface::SERVICE_CLASS_DATA_SYNC + ICommandsInterface::SERVICE_CLASS_VOICE;
+                return NOERROR;
+            case 99:
+                *result = ICommandsInterface::SERVICE_CLASS_PACKET;
+                return NOERROR;
+
+            default:
+                // throw new RuntimeException("unsupported MMI service code " + si);
+                return E_RUNTIME_EXCEPTION;
+        }
+    }
+    return NOERROR;
 }
 
 Int32 ImsPhoneMmiCode::SiToTime(
     /* [in] */ const String& si)
 {
-    // ==================before translated======================
-    // if (si == null || si.length() == 0) {
-    //     return 0;
-    // } else {
-    //     // NumberFormatException should cause MMI fail
-    //     return Integer.parseInt(si, 10);
-    // }
-    assert(0);
-    return 0;
+    if (si == NULL || si.GetLength() == 0) {
+        return 0;
+    }
+    else {
+        // NumberFormatException should cause MMI fail
+        return StringUtils::ParseInt32(si, 10);
+    }
 }
 
 Boolean ImsPhoneMmiCode::IsTwoDigitShortCode(
     /* [in] */ IContext* context,
     /* [in] */ const String& dialString)
 {
-    // ==================before translated======================
-    // Rlog.d(LOGTAG, "isTwoDigitShortCode");
-    //
-    // if (dialString == null || dialString.length() > 2) return false;
-    //
-    // if (sTwoDigitNumberPattern == null) {
-    //     sTwoDigitNumberPattern = context.getResources().getStringArray(
-    //             com.android.internal.R.array.config_twoDigitNumberPattern);
-    // }
-    //
-    // for (String dialnumber : sTwoDigitNumberPattern) {
-    //     Rlog.d(LOGTAG, "Two Digit Number Pattern " + dialnumber);
-    //     if (dialString.equals(dialnumber)) {
-    //         Rlog.d(LOGTAG, "Two Digit Number Pattern -true");
-    //         return true;
-    //     }
-    // }
-    // Rlog.d(LOGTAG, "Two Digit Number Pattern -false");
-    // return false;
-    assert(0);
+    Logger::D(LOGTAG, "isTwoDigitShortCode");
+
+    if (dialString.IsNull() || dialString.GetLength() > 2) return FALSE;
+
+    if (sTwoDigitNumberPattern == NULL) {
+        AutoPtr<IResources> res;
+        context->GetResources((IResources**)&res);
+        res->GetStringArray(R::array::config_twoDigitNumberPattern,
+                (ArrayOf<String>**)&sTwoDigitNumberPattern);
+    }
+
+    for (Int32 i = 0; i < sTwoDigitNumberPattern->GetLength(); i++) {
+        String dialnumber = (*sTwoDigitNumberPattern)[i];
+        Logger::D(LOGTAG, "Two Digit Number Pattern %s", dialnumber.string());
+        if (dialString.Equals(dialnumber)) {
+            Logger::D(LOGTAG, "Two Digit Number Pattern -TRUE");
+            return TRUE;
+        }
+    }
+    Logger::D(LOGTAG, "Two Digit Number Pattern -FALSE");
     return FALSE;
 }
 
@@ -1159,26 +1340,28 @@ Boolean ImsPhoneMmiCode::IsShortCode(
     /* [in] */ const String& dialString,
     /* [in] */ IImsPhone* phone)
 {
-    // ==================before translated======================
-    // // Refer to TS 22.030 Figure 3.5.3.2:
-    // if (dialString == null) {
-    //     return false;
-    // }
-    //
-    // // Illegal dial string characters will give a ZERO length.
-    // // At this point we do not want to crash as any application with
-    // // call privileges may send a non dial string.
-    // // It return false as when the dialString is equal to NULL.
-    // if (dialString.length() == 0) {
-    //     return false;
-    // }
-    //
-    // if (PhoneNumberUtils.isLocalEmergencyNumber(phone.getContext(), dialString)) {
-    //     return false;
-    // } else {
-    //     return isShortCodeUSSD(dialString, phone);
-    // }
-    assert(0);
+    // Refer to TS 22.030 Figure 3.5.3.2:
+    if (dialString.IsNull()) {
+        return FALSE;
+    }
+
+    // Illegal dial string characters will give a ZERO length.
+    // At this point we do not want to crash as any application with
+    // call privileges may send a non dial string.
+    // It return FALSE as when the dialString is equal to NULL.
+    if (dialString.GetLength() == 0) {
+        return FALSE;
+    }
+
+    AutoPtr<IContext> ctx;
+    IPhone::Probe(phone)->GetContext((IContext**)&ctx);
+    Boolean b;
+    if (PhoneNumberUtils::IsLocalEmergencyNumber(ctx, dialString, &b), b) {
+        return FALSE;
+    }
+    else {
+        return IsShortCodeUSSD(dialString, phone);
+    }
     return FALSE;
 }
 
@@ -1186,660 +1369,786 @@ Boolean ImsPhoneMmiCode::IsShortCodeUSSD(
     /* [in] */ const String& dialString,
     /* [in] */ IImsPhone* phone)
 {
-    // ==================before translated======================
-    // if (dialString != null && dialString.length() <= MAX_LENGTH_SHORT_CODE) {
-    //     if (phone.isInCall()) {
-    //         return true;
-    //     }
-    //
-    //     if (dialString.length() != MAX_LENGTH_SHORT_CODE ||
-    //             dialString.charAt(0) != '1') {
-    //         return true;
-    //     }
-    // }
-    // return false;
-    assert(0);
+    if (!dialString.IsNull() && dialString.GetLength() <= MAX_LENGTH_SHORT_CODE) {
+        Boolean b;
+        if (((ImsPhone*)phone)->IsInCall(&b), b) {
+            return TRUE;
+        }
+
+        if (dialString.GetLength() != MAX_LENGTH_SHORT_CODE ||
+                dialString.GetChar(0) != '1') {
+            return TRUE;
+        }
+    }
     return FALSE;
 }
 
 void ImsPhoneMmiCode::ProcessIcbMmiCodeForUpdate()
 {
-    // ==================before translated======================
-    // String dialingNumber = mSia;
-    // String[] icbNum = null;
-    // int callAction;
-    // if (dialingNumber != null) {
-    //     icbNum = dialingNumber.split("\\$");
-    // }
-    // callAction = callBarrAction(dialingNumber);
-    //
+    String dialingNumber = mSia;
+    AutoPtr<ArrayOf<String> > icbNum;
+    Int32 callAction;
+    if (!dialingNumber.IsNull()) {
+        StringUtils::Split(dialingNumber, String("\\$"), (ArrayOf<String>**)&icbNum);
+    }
+    CallBarrAction(dialingNumber, &callAction);
+
     // try {
-    //     mPhone.mCT.getUtInterface()
-    //     .updateCallBarring(ImsUtInterface.CB_BS_MT,
-    //                        callAction,
-    //                        obtainMessage(EVENT_SET_COMPLETE,this),
-    //                        icbNum);
+    AutoPtr<IMessage> msg;
+    ObtainMessage(EVENT_SET_COMPLETE, TO_IINTERFACE(this), (IMessage**)&msg);
+// TODO: Need IImsUtInterface
+    // (ImsPhoneCallTracker*)(((ImsPhone*)mPhone.Get())->mCT.Get())->GetUtInterface()->UpdateCallBarring(IImsUtInterface::CB_BS_MT, callAction, msg, icbNum);
     // } catch (ImsException e) {
-    //     Rlog.d(LOGTAG, "Could not get UT handle for updating ICB.");
+    //     Logger::D(LOGTAG, "Could not get UT handle for updating ICB.");
     // }
-    assert(0);
 }
 
 AutoPtr<ICharSequence> ImsPhoneMmiCode::GetErrorMessage(
     /* [in] */ AsyncResult* ar)
 {
-    // ==================before translated======================
-    // return mContext.getText(com.android.internal.R.string.mmiError);
-    assert(0);
-    AutoPtr<ICharSequence> empty;
-    return empty;
+    AutoPtr<ICharSequence> cs;
+    mContext->GetText(R::string::mmiError, (ICharSequence**)&cs);
+    return cs;
 }
 
 AutoPtr<ICharSequence> ImsPhoneMmiCode::GetScString()
 {
-    // ==================before translated======================
-    // if (mSc != null) {
-    //     if (isServiceCodeCallBarring(mSc)) {
-    //         return mContext.getText(com.android.internal.R.string.BaMmi);
-    //     } else if (isServiceCodeCallForwarding(mSc)) {
-    //         return mContext.getText(com.android.internal.R.string.CfMmi);
-    //     } else if (mSc.equals(SC_PWD)) {
-    //         return mContext.getText(com.android.internal.R.string.PwdMmi);
-    //     } else if (mSc.equals(SC_WAIT)) {
-    //         return mContext.getText(com.android.internal.R.string.CwMmi);
-    //     } else if (mSc.equals(SC_CLIP)) {
-    //         return mContext.getText(com.android.internal.R.string.ClipMmi);
-    //     } else if (mSc.equals(SC_CLIR)) {
-    //         return mContext.getText(com.android.internal.R.string.ClirMmi);
-    //     } else if (mSc.equals(SC_COLP)) {
-    //         return mContext.getText(com.android.internal.R.string.ColpMmi);
-    //     } else if (mSc.equals(SC_COLR)) {
-    //         return mContext.getText(com.android.internal.R.string.ColrMmi);
-    //     } else if (mSc.equals(SC_CFUT)) {
-    //         return CfuTimer;
-    //     } else if (mSc.equals(SC_BS_MT)) {
-    //         return IcbDnMmi;
-    //     } else if (mSc.equals(SC_BAICa)) {
-    //         return IcbAnonymousMmi;
-    //     }
-    // }
-    //
-    // return "";
-    assert(0);
-    AutoPtr<ICharSequence> empty;
-    return empty;
+    AutoPtr<ICharSequence> cs;
+    if (mSc != NULL) {
+        if (IsServiceCodeCallBarring(mSc)) {
+            mContext->GetText(R::string::BaMmi, (ICharSequence**)&cs);
+            return cs;
+        }
+        else if (IsServiceCodeCallForwarding(mSc)) {
+            mContext->GetText(R::string::CfMmi, (ICharSequence**)&cs);
+            return cs;
+        }
+        else if (mSc.Equals(SC_PWD)) {
+            mContext->GetText(R::string::PwdMmi, (ICharSequence**)&cs);
+            return cs;
+        }
+        else if (mSc.Equals(SC_WAIT)) {
+            mContext->GetText(R::string::CwMmi, (ICharSequence**)&cs);
+            return cs;
+        }
+        else if (mSc.Equals(SC_CLIP)) {
+            mContext->GetText(R::string::ClipMmi, (ICharSequence**)&cs);
+            return cs;
+        }
+        else if (mSc.Equals(SC_CLIR)) {
+            mContext->GetText(R::string::ClirMmi, (ICharSequence**)&cs);
+            return cs;
+        }
+        else if (mSc.Equals(SC_COLP)) {
+            mContext->GetText(R::string::ColpMmi, (ICharSequence**)&cs);
+            return cs;
+        }
+        else if (mSc.Equals(SC_COLR)) {
+            mContext->GetText(R::string::ColrMmi, (ICharSequence**)&cs);
+            return cs;
+        }
+        else if (mSc.Equals(SC_CFUT)) {
+            cs = CoreUtils::Convert(CfuTimer);
+            return cs;
+        }
+        else if (mSc.Equals(SC_BS_MT)) {
+            cs = CoreUtils::Convert(IcbDnMmi);
+            return cs;
+        }
+        else if (mSc.Equals(SC_BAICa)) {
+            cs = CoreUtils::Convert(IcbAnonymousMmi);
+            return cs;
+        }
+    }
+
+    cs = CoreUtils::Convert(String(""));
+    return cs;
 }
 
 void ImsPhoneMmiCode::OnSetComplete(
     /* [in] */ IMessage* msg,
     /* [in] */ AsyncResult* ar)
 {
-    // ==================before translated======================
-    // StringBuilder sb = new StringBuilder(getScString());
-    // sb.append("\n");
-    //
-    // if (ar.exception != null) {
-    //     mState = State.FAILED;
-    //
-    //     if (ar.exception instanceof CommandException) {
-    //         CommandException.Error err = ((CommandException)(ar.exception)).getCommandError();
-    //         if (err == CommandException.Error.PASSWORD_INCORRECT) {
-    //             sb.append(mContext.getText(
-    //                     com.android.internal.R.string.passwordIncorrect));
-    //         } else {
-    //             sb.append(mContext.getText(
-    //                     com.android.internal.R.string.mmiError));
-    //         }
-    //     } else {
-    //         ImsException error = (ImsException) ar.exception;
-    //         if (error.getMessage() != null) {
-    //             sb.append(error.getMessage());
-    //         } else {
-    //             sb.append(getErrorMessage(ar));
-    //         }
-    //     }
-    // } else if (isActivate()) {
-    //     mState = State.COMPLETE;
-    //     if (mIsCallFwdReg) {
-    //         sb.append(mContext.getText(
-    //                 com.android.internal.R.string.serviceRegistered));
-    //     } else {
-    //         sb.append(mContext.getText(
-    //                 com.android.internal.R.string.serviceEnabled));
-    //     }
-    // } else if (isDeactivate()) {
-    //     mState = State.COMPLETE;
-    //     sb.append(mContext.getText(
-    //             com.android.internal.R.string.serviceDisabled));
-    // } else if (isRegister()) {
-    //     mState = State.COMPLETE;
-    //     sb.append(mContext.getText(
-    //             com.android.internal.R.string.serviceRegistered));
-    // } else if (isErasure()) {
-    //     mState = State.COMPLETE;
-    //     sb.append(mContext.getText(
-    //             com.android.internal.R.string.serviceErased));
-    // } else {
-    //     mState = State.FAILED;
-    //     sb.append(mContext.getText(
-    //             com.android.internal.R.string.mmiError));
-    // }
-    //
-    // mMessage = sb;
-    // mPhone.onMMIDone(this);
-    assert(0);
+    AutoPtr<ICharSequence> cs = GetScString();
+    String str;
+    cs->ToString(&str);
+    StringBuilder sb(str);
+    sb.Append("\n");
+
+    Boolean b;
+    cs = NULL;
+    if (ar->mException != NULL) {
+        mState = IMmiCodeState_FAILED;
+
+        if (ICommandException::Probe(ar->mException) != NULL) {
+// TODO: Need ICommandException::Error
+            // CommandException.Error err = ((CommandException)(ar->mException)).getCommandError();
+            // if (err == CommandException.Error.PASSWORD_INCORRECT) {
+            //     sb.Append(mContext->GetText(R::string::passwordIncorrect));
+            // }
+            // else {
+            //     sb.Append(mContext->GetText(R::string::mmiError));
+            // }
+        }
+        else {
+// TODO: Need ImsException
+            // ImsException error = (ImsException) ar->mException;
+            // if (error.getMessage() != NULL) {
+            //     sb.Append(error.getMessage());
+            // }
+            // else {
+            //     sb.Append(getErrorMessage(ar));
+            // }
+        }
+    }
+    else if (IsActivate(&b), b) {
+        mState = IMmiCodeState_COMPLETE;
+        if (mIsCallFwdReg) {
+            cs = NULL;
+            sb.Append((mContext->GetText(R::string::serviceRegistered, (ICharSequence**)&cs), cs));
+        }
+        else {
+            cs = NULL;
+            sb.Append((mContext->GetText(R::string::serviceEnabled, (ICharSequence**)&cs), cs));
+        }
+    }
+    else if (IsDeactivate(&b), b) {
+        mState = IMmiCodeState_COMPLETE;
+        cs = NULL;
+        sb.Append((mContext->GetText(R::string::serviceDisabled, (ICharSequence**)&cs), cs));
+    }
+    else if (IsRegister(&b), b) {
+        mState = IMmiCodeState_COMPLETE;
+        cs = NULL;
+        sb.Append((mContext->GetText(R::string::serviceRegistered, (ICharSequence**)&cs), cs));
+    }
+    else if (IsErasure(&b), b) {
+        mState = IMmiCodeState_COMPLETE;
+        cs = NULL;
+        sb.Append((mContext->GetText(R::string::serviceErased, (ICharSequence**)&cs), cs));
+    }
+    else {
+        mState = IMmiCodeState_FAILED;
+        cs = NULL;
+        sb.Append((mContext->GetText(R::string::mmiError, (ICharSequence**)&cs), cs));
+    }
+
+    sb.ToString(&str);
+    mMessage = CoreUtils::Convert(str);
+    ((ImsPhone*)mPhone.Get())->OnMMIDone(IImsPhoneMmiCode::Probe(this));
 }
 
 AutoPtr<ICharSequence> ImsPhoneMmiCode::ServiceClassToCFString(
     /* [in] */ Int32 serviceClass)
 {
-    // ==================before translated======================
-    // switch (serviceClass) {
-    //     case SERVICE_CLASS_VOICE:
-    //         return mContext.getText(com.android.internal.R.string.serviceClassVoice);
-    //     case SERVICE_CLASS_DATA:
-    //         return mContext.getText(com.android.internal.R.string.serviceClassData);
-    //     case SERVICE_CLASS_FAX:
-    //         return mContext.getText(com.android.internal.R.string.serviceClassFAX);
-    //     case SERVICE_CLASS_SMS:
-    //         return mContext.getText(com.android.internal.R.string.serviceClassSMS);
-    //     case SERVICE_CLASS_DATA_SYNC:
-    //         return mContext.getText(com.android.internal.R.string.serviceClassDataSync);
-    //     case SERVICE_CLASS_DATA_ASYNC:
-    //         return mContext.getText(com.android.internal.R.string.serviceClassDataAsync);
-    //     case SERVICE_CLASS_PACKET:
-    //         return mContext.getText(com.android.internal.R.string.serviceClassPacket);
-    //     case SERVICE_CLASS_PAD:
-    //         return mContext.getText(com.android.internal.R.string.serviceClassPAD);
-    //     default:
-    //         return null;
-    // }
-    assert(0);
-    AutoPtr<ICharSequence> empty;
-    return empty;
+    AutoPtr<ICharSequence> cs;
+    switch (serviceClass) {
+        case ICommandsInterface::SERVICE_CLASS_VOICE:
+            mContext->GetText(R::string::serviceClassVoice, (ICharSequence**)&cs);
+            return cs;
+        case ICommandsInterface::SERVICE_CLASS_DATA:
+            mContext->GetText(R::string::serviceClassData, (ICharSequence**)&cs);
+            return cs;
+        case ICommandsInterface::SERVICE_CLASS_FAX:
+            mContext->GetText(R::string::serviceClassFAX, (ICharSequence**)&cs);
+            return cs;
+        case ICommandsInterface::SERVICE_CLASS_SMS:
+            mContext->GetText(R::string::serviceClassSMS, (ICharSequence**)&cs);
+            return cs;
+        case ICommandsInterface::SERVICE_CLASS_DATA_SYNC:
+            mContext->GetText(R::string::serviceClassDataSync, (ICharSequence**)&cs);
+            return cs;
+        case ICommandsInterface::SERVICE_CLASS_DATA_ASYNC:
+            mContext->GetText(R::string::serviceClassDataAsync, (ICharSequence**)&cs);
+            return cs;
+        case ICommandsInterface::SERVICE_CLASS_PACKET:
+            mContext->GetText(R::string::serviceClassPacket, (ICharSequence**)&cs);
+            return cs;
+        case ICommandsInterface::SERVICE_CLASS_PAD:
+            mContext->GetText(R::string::serviceClassPAD, (ICharSequence**)&cs);
+            return cs;
+        default:
+            return NULL;
+    }
 }
 
 AutoPtr<ICharSequence> ImsPhoneMmiCode::MakeCFQueryResultMessage(
-    /* [in] */ ICallForwardInfo* info,
+    /* [in] */ ICallForwardInfo* _info,
     /* [in] */ Int32 serviceClassMask)
 {
-    // ==================before translated======================
-    // CharSequence template;
-    // String sources[] = {"{0}", "{1}", "{2}"};
-    // CharSequence destinations[] = new CharSequence[3];
-    // boolean needTimeTemplate;
-    //
-    // // CF_REASON_NO_REPLY also has a time value associated with
-    // // it. All others don't.
-    //
-    // needTimeTemplate =
-    //     (info.reason == CommandsInterface.CF_REASON_NO_REPLY);
-    //
-    // if (info.status == 1) {
-    //     if (needTimeTemplate) {
-    //         template = mContext.getText(
-    //                 com.android.internal.R.string.cfTemplateForwardedTime);
-    //     } else {
-    //         template = mContext.getText(
-    //                 com.android.internal.R.string.cfTemplateForwarded);
-    //     }
-    // } else if (info.status == 0 && isEmptyOrNull(info.number)) {
-    //     template = mContext.getText(
-    //                 com.android.internal.R.string.cfTemplateNotForwarded);
-    // } else { /* (info.status == 0) && !isEmptyOrNull(info.number) */
-    //     // A call forward record that is not active but contains
-    //     // a phone number is considered "registered"
-    //
-    //     if (needTimeTemplate) {
-    //         template = mContext.getText(
-    //                 com.android.internal.R.string.cfTemplateRegisteredTime);
-    //     } else {
-    //         template = mContext.getText(
-    //                 com.android.internal.R.string.cfTemplateRegistered);
-    //     }
-    // }
-    //
-    // // In the template (from strings.xmls)
-    // //         {0} is one of "bearerServiceCode*"
-    // //        {1} is dialing number
-    // //      {2} is time in seconds
-    //
-    // destinations[0] = serviceClassToCFString(info.serviceClass & serviceClassMask);
-    // destinations[1] = PhoneNumberUtils.stringFromStringAndTOA(info.number, info.toa);
-    // destinations[2] = Integer.toString(info.timeSeconds);
-    //
-    // if (info.reason == CommandsInterface.CF_REASON_UNCONDITIONAL &&
-    //         (info.serviceClass & serviceClassMask)
-    //                 == CommandsInterface.SERVICE_CLASS_VOICE) {
-    //     boolean cffEnabled = (info.status == 1);
-    //     if (mIccRecords != null) {
-    //         mIccRecords.setVoiceCallForwardingFlag(1, cffEnabled, info.number);
-    //     }
-    // }
-    //
-    // return TextUtils.replace(template, sources, destinations);
-    assert(0);
-    AutoPtr<ICharSequence> empty;
-    return empty;
+    AutoPtr<ICharSequence> cs;
+    AutoPtr<ArrayOf<String> > sources = ArrayOf<String>::Alloc(3);
+    (*sources)[0] = String("{0}");
+    (*sources)[1] = String("{1}");
+    (*sources)[2] = String("{2}");
+
+    AutoPtr<ArrayOf<ICharSequence*> > destinations = ArrayOf<ICharSequence*>::Alloc(3);
+    Boolean needTimeTemplate;
+
+    // CF_REASON_NO_REPLY also has a time value associated with
+    // it. All others don't.
+
+    AutoPtr<CallForwardInfo> info = (CallForwardInfo*)_info;
+    needTimeTemplate =
+        (info->mReason == ICommandsInterface::CF_REASON_NO_REPLY);
+
+    if (info->mStatus == 1) {
+        if (needTimeTemplate) {
+            mContext->GetText(R::string::cfTemplateForwardedTime, (ICharSequence**)&cs);
+        }
+        else {
+            mContext->GetText(R::string::cfTemplateForwarded, (ICharSequence**)&cs);
+        }
+    }
+    else if (info->mStatus == 0 && IsEmptyOrNull(CoreUtils::Convert(info->mNumber))) {
+        mContext->GetText(R::string::cfTemplateNotForwarded, (ICharSequence**)&cs);
+    }
+    else { /* (info->mStatus == 0) && !IsEmptyOrNull(info->mNumber) */
+        // A call forward record that is not active but contains
+        // a phone number is considered "registered"
+
+        if (needTimeTemplate) {
+            mContext->GetText(R::string::cfTemplateRegisteredTime, (ICharSequence**)&cs);
+        }
+        else {
+            mContext->GetText(R::string::cfTemplateRegistered, (ICharSequence**)&cs);
+        }
+    }
+
+    // In the template (from strings.xmls)
+    //         {0} is one of "bearerServiceCode*"
+    //        {1} is dialing number
+    //      {2} is time in seconds
+
+    (*destinations)[0] = ServiceClassToCFString(info->mServiceClass & serviceClassMask);
+    String str;
+    PhoneNumberUtils::StringFromStringAndTOA(info->mNumber, info->mToa, &str);
+    (*destinations)[1] = CoreUtils::Convert(str);
+    (*destinations)[2] = CoreUtils::Convert(StringUtils::ToString(info->mTimeSeconds));
+
+    if (info->mReason == ICommandsInterface::CF_REASON_UNCONDITIONAL &&
+            (info->mServiceClass & serviceClassMask)
+                    == ICommandsInterface::SERVICE_CLASS_VOICE) {
+        Boolean cffEnabled = (info->mStatus == 1);
+        if (mIccRecords != NULL) {
+            mIccRecords->SetVoiceCallForwardingFlag(1, cffEnabled, info->mNumber);
+        }
+    }
+
+    return TextUtils::Replace(cs, sources, destinations);
 }
 
 void ImsPhoneMmiCode::OnQueryCfComplete(
     /* [in] */ AsyncResult* ar)
 {
-    // ==================before translated======================
-    // StringBuilder sb = new StringBuilder(getScString());
-    // sb.append("\n");
-    //
-    // if (ar.exception != null) {
-    //     mState = State.FAILED;
-    //
-    //     if (ar.exception instanceof ImsException) {
-    //         ImsException error = (ImsException) ar.exception;
-    //         if (error.getMessage() != null) {
-    //             sb.append(error.getMessage());
-    //         } else {
-    //             sb.append(getErrorMessage(ar));
-    //         }
-    //     }
-    //     else {
-    //         sb.append(getErrorMessage(ar));
-    //     }
-    // } else {
-    //     CallForwardInfo infos[];
-    //
-    //     infos = (CallForwardInfo[]) ar.result;
-    //
-    //     if (infos.length == 0) {
-    //         // Assume the default is not active
-    //         sb.append(mContext.getText(com.android.internal.R.string.serviceDisabled));
-    //
-    //         // Set unconditional CFF in SIM to false
-    //         if (mIccRecords != null) {
-    //             mIccRecords.setVoiceCallForwardingFlag(1, false, null);
-    //         }
-    //     } else {
-    //
-    //         SpannableStringBuilder tb = new SpannableStringBuilder();
-    //
-    //         // Each bit in the service class gets its own result line
-    //         // The service classes may be split up over multiple
-    //         // CallForwardInfos. So, for each service class, find out
-    //         // which CallForwardInfo represents it and then build
-    //         // the response text based on that
-    //
-    //         for (int serviceClassMask = 1
-    //                     ; serviceClassMask <= SERVICE_CLASS_MAX
-    //                     ; serviceClassMask <<= 1
-    //         ) {
-    //             for (int i = 0, s = infos.length; i < s ; i++) {
-    //                 if ((serviceClassMask & infos[i].serviceClass) != 0) {
-    //                     tb.append(makeCFQueryResultMessage(infos[i],
-    //                                     serviceClassMask));
-    //                     tb.append("\n");
-    //                 }
-    //             }
-    //         }
-    //         sb.append(tb);
-    //     }
-    //
-    //     mState = State.COMPLETE;
-    // }
-    //
-    // mMessage = sb;
-    // mPhone.onMMIDone(this);
-    assert(0);
+    AutoPtr<ICharSequence> cs = GetScString();
+    String str;
+    cs->ToString(&str);
+    StringBuilder sb(str);
+    sb.Append("\n");
+
+    if (ar->mException != NULL) {
+        mState = IMmiCodeState_FAILED;
+
+// TODO: Need ImsException
+        // if (ar->mException instanceof ImsException) {
+        //     ImsException error = (ImsException) ar->mException;
+        //     if (error.getMessage() != NULL) {
+        //         sb.Append(error.getMessage());
+        //     }
+        //     else {
+        //         sb.Append(getErrorMessage(ar));
+        //     }
+        // }
+        // else {
+        //     sb.Append(getErrorMessage(ar));
+        // }
+    }
+    else {
+        AutoPtr<IArrayOf> infos = IArrayOf::Probe(ar->mResult);     // CallForwardInfo infos[]
+
+        Int32 size;
+        infos->GetLength(&size);
+        if (size == 0) {
+            // Assume the default is not active
+            cs = NULL;
+            sb.Append(mContext->GetText(R::string::serviceDisabled, (ICharSequence**)&cs));
+
+            // Set unconditional CFF in SIM to FALSE
+            if (mIccRecords != NULL) {
+                mIccRecords->SetVoiceCallForwardingFlag(1, FALSE, String(NULL));
+            }
+        }
+        else {
+            AutoPtr<ISpannableStringBuilder> tb;
+            CSpannableStringBuilder::New((ISpannableStringBuilder**)&tb);
+
+            // Each bit in the service class gets its own result line
+            // The service classes may be split up over multiple
+            // CallForwardInfos. So, for each service class, find out
+            // which CallForwardInfo represents it and then build
+            // the response text based on that
+
+            for (Int32 serviceClassMask = 1
+                        ; serviceClassMask <= ICommandsInterface::SERVICE_CLASS_MAX
+                        ; serviceClassMask <<= 1
+            ) {
+                for (Int32 i = 0, s = size; i < s ; i++) {
+                    AutoPtr<IInterface> obj;
+                    infos->Get(i, (IInterface**)&obj);
+                    AutoPtr<ICallForwardInfo> info = ICallForwardInfo::Probe(obj);
+                    if ((serviceClassMask & ((CallForwardInfo*)info.Get())->mServiceClass) != 0) {
+                        IAppendable::Probe(tb)->Append(MakeCFQueryResultMessage(info,
+                                        serviceClassMask));
+                        IAppendable::Probe(tb)->Append(CoreUtils::Convert(String("\n")));
+                    }
+                }
+            }
+            sb.Append(tb);
+        }
+
+        mState = IMmiCodeState_COMPLETE;
+    }
+
+    sb.ToString(&str);
+    mMessage = CoreUtils::Convert(str);
+    ((ImsPhone*)mPhone.Get())->OnMMIDone(IImsPhoneMmiCode::Probe(this));
 }
 
 void ImsPhoneMmiCode::OnQueryUncondCfTimerComplete(
     /* [in] */ AsyncResult* ar)
 {
-    // ==================before translated======================
-    // StringBuilder sb = new StringBuilder(getScString());
-    // sb.append("\n");
-    //
-    // if (ar.exception != null) {
-    //     mState = State.FAILED;
-    //     sb.append(getErrorMessage(ar));
-    // } else {
-    //     CallForwardInfo infos[];
-    //     infos = (CallForwardInfo[]) ar.result;
-    //     if (infos.length == 0) {
-    //         // Assume the default is not active
-    //         Rlog.d(LOGTAG, "In infos.length == 0");
-    //         sb.append(mContext.getText(com.android.internal.R.string.serviceDisabled));
-    //     } else {
-    //         SpannableStringBuilder tb = new SpannableStringBuilder();
-    //         for (int serviceClassMask = 1
-    //                 ; serviceClassMask <= SERVICE_CLASS_MAX
-    //                 ; serviceClassMask <<= 1) {
-    //             for (int i = 0, s = infos.length; i < s ; i++) {
-    //                 if (( serviceClassMask & infos[i].serviceClass) ==
-    //                         CommandsInterface.SERVICE_CLASS_VOICE &&
-    //                         infos[i].status != 0) {
-    //                     sb.append("StartTime: " + infos[i].startHour + ":" +
-    //                             infos[i].startMinute + "\n");
-    //                     sb.append("EndTime: " + infos[i].endHour + ":" +
-    //                             infos[i].endMinute + "\n");
-    //                     sb.append("Service:" + mContext.getText(
-    //                             com.android.internal.R.string.serviceClassVoice));
-    //                 } else if ((serviceClassMask & infos[i].serviceClass) != 0) {
-    //                     tb.append(makeCFTQueryResultMessage(infos[i],
-    //                             serviceClassMask));
-    //                     tb.append("\n");
-    //                 }
-    //             }
-    //         }
-    //         sb.append(tb);
-    //     }
-    //   mState = State.COMPLETE;
-    // }
-    //
-    // mMessage = sb;
-    // mPhone.onMMIDone(this);
-    assert(0);
+    AutoPtr<ICharSequence> cs = GetScString();
+    String str;
+    cs->ToString(&str);
+    StringBuilder sb(str);
+    sb.Append("\n");
+
+    if (ar->mException != NULL) {
+        mState = IMmiCodeState_FAILED;
+        sb.Append(GetErrorMessage(ar));
+    }
+    else {
+        AutoPtr<IArrayOf> infos = IArrayOf::Probe(ar->mResult);     // CallForwardInfo infos[]
+
+        Int32 size;
+        infos->GetLength(&size);
+        if (size == 0) {
+            // Assume the default is not active
+            Logger::D(LOGTAG, "In infos.length == 0");
+            cs = NULL;
+            sb.Append(mContext->GetText(R::string::serviceDisabled, (ICharSequence**)&cs));
+        }
+        else {
+            AutoPtr<ISpannableStringBuilder> tb;
+            CSpannableStringBuilder::New((ISpannableStringBuilder**)&tb);
+
+            for (Int32 serviceClassMask = 1
+                    ; serviceClassMask <= ICommandsInterface::SERVICE_CLASS_MAX
+                    ; serviceClassMask <<= 1) {
+                for (Int32 i = 0, s = size; i < s ; i++) {
+                    AutoPtr<IInterface> obj;
+                    infos->Get(i, (IInterface**)&obj);
+                    AutoPtr<ICallForwardInfo> info = ICallForwardInfo::Probe(obj);
+                    AutoPtr<CallForwardInfo> cfi = (CallForwardInfo*)info.Get();
+                    if (( serviceClassMask & cfi->mServiceClass) ==
+                            ICommandsInterface::SERVICE_CLASS_VOICE &&
+                            cfi->mStatus != 0) {
+                        sb.Append(String("StartTime: ") + StringUtils::ToString(cfi->mStartHour)
+                            + String(":") + StringUtils::ToString(cfi->mStartMinute) + String("\n"));
+                        sb.Append(String("EndTime: ") + StringUtils::ToString(cfi->mEndHour)
+                             + String(":") + StringUtils::ToString(cfi->mEndMinute) + String("\n"));
+                        cs = NULL;
+                        mContext->GetText(R::string::serviceClassVoice, (ICharSequence**)&cs);
+                        sb.Append(String("Service:") + CoreUtils::Unbox(cs));
+                    }
+                    else if ((serviceClassMask & cfi->mServiceClass) != 0) {
+                        IAppendable::Probe(tb)->Append(MakeCFTQueryResultMessage(info,
+                                serviceClassMask));
+                        IAppendable::Probe(tb)->Append(CoreUtils::Convert(String("\n")));
+                    }
+                }
+            }
+            sb.Append(tb);
+        }
+      mState = IMmiCodeState_COMPLETE;
+    }
+
+    sb.ToString(&str);
+    mMessage = CoreUtils::Convert(str);
+    ((ImsPhone*)mPhone.Get())->OnMMIDone(IImsPhoneMmiCode::Probe(this));
 }
 
 AutoPtr<ICharSequence> ImsPhoneMmiCode::MakeCFTQueryResultMessage(
-    /* [in] */ ICallForwardInfo* info,
+    /* [in] */ ICallForwardInfo* _info,
     /* [in] */ Int32 serviceClassMask)
 {
-    // ==================before translated======================
-    // Rlog.d(LOGTAG, "makeCFTQueryResultMessage: ");
-    // CharSequence template;
-    // String sources[] = {"{0}", "{1}", "{2}"};
-    // CharSequence destinations[] = new CharSequence[3];
-    // boolean needTimeTemplate;
-    //
-    // if (info.status == 0 && isEmptyOrNull(info.number)) {
-    //     template = mContext.getText(
-    //                 com.android.internal.R.string.cfTemplateNotForwarded);
-    // } else {
-    //     template = mContext.getText(
-    //                 com.android.internal.R.string.cfTemplateRegistered);
-    // }
-    // destinations[0] = serviceClassToCFString(info.serviceClass & serviceClassMask);
-    // destinations[1] = PhoneNumberUtils.stringFromStringAndTOA(info.number, info.toa);
-    // destinations[2] = Integer.toString(info.timeSeconds);
-    //
-    // return TextUtils.replace(template, sources, destinations);
-    assert(0);
-    AutoPtr<ICharSequence> empty;
-    return empty;
+    Logger::D(LOGTAG, "makeCFTQueryResultMessage: ");
+    AutoPtr<ICharSequence> cs;
+    AutoPtr<ArrayOf<String> > sources = ArrayOf<String>::Alloc(3);
+    (*sources)[0] = String("{0}");
+    (*sources)[1] = String("{1}");
+    (*sources)[2] = String("{2}");
+
+    AutoPtr<ArrayOf<ICharSequence*> > destinations = ArrayOf<ICharSequence*>::Alloc(3);
+    Boolean needTimeTemplate;
+
+    AutoPtr<CallForwardInfo> info = (CallForwardInfo*)_info;
+    if (info->mStatus == 0 && IsEmptyOrNull(CoreUtils::Convert(info->mNumber))) {
+        mContext->GetText(R::string::cfTemplateNotForwarded, (ICharSequence**)&cs);
+    }
+    else {
+        mContext->GetText(R::string::cfTemplateRegistered, (ICharSequence**)&cs);
+    }
+    (*destinations)[0] = ServiceClassToCFString(info->mServiceClass & serviceClassMask);
+    String str;
+    PhoneNumberUtils::StringFromStringAndTOA(info->mNumber, info->mToa, &str);
+    (*destinations)[1] = CoreUtils::Convert(str);
+    (*destinations)[2] = CoreUtils::Convert(StringUtils::ToString(info->mTimeSeconds));
+
+    return TextUtils::Replace(cs, sources, destinations);
 }
 
 void ImsPhoneMmiCode::OnSuppSvcQueryComplete(
     /* [in] */ AsyncResult* ar)
 {
-    // ==================before translated======================
-    // StringBuilder sb = new StringBuilder(getScString());
-    // sb.append("\n");
-    //
-    // if (ar.exception != null) {
-    //     mState = State.FAILED;
-    //
-    //     if (ar.exception instanceof ImsException) {
-    //         ImsException error = (ImsException) ar.exception;
-    //         if (error.getMessage() != null) {
-    //             sb.append(error.getMessage());
-    //         } else {
-    //             sb.append(getErrorMessage(ar));
-    //         }
-    //     } else {
-    //         sb.append(getErrorMessage(ar));
-    //     }
-    // } else {
-    //     mState = State.FAILED;
-    //     ImsSsInfo ssInfo = null;
-    //     if (ar.result instanceof Bundle) {
-    //         Rlog.d(LOGTAG, "Received CLIP/COLP/COLR Response.");
-    //         // Response for CLIP, COLP and COLR queries.
-    //         Bundle ssInfoResp = (Bundle) ar.result;
-    //         ssInfo = (ImsSsInfo) ssInfoResp.getParcelable(UT_BUNDLE_KEY_SSINFO);
-    //         if (ssInfo != null) {
-    //             Rlog.d(LOGTAG, "ImsSsInfo mStatus = " + ssInfo.mStatus);
-    //             if (ssInfo.mStatus == ImsSsInfo.DISABLED) {
-    //                 sb.append(mContext.getText(com.android.internal.R.string.serviceDisabled));
-    //                 mState = State.COMPLETE;
-    //             } else if (ssInfo.mStatus == ImsSsInfo.ENABLED) {
-    //                 sb.append(mContext.getText(com.android.internal.R.string.serviceEnabled));
-    //                 mState = State.COMPLETE;
-    //             } else {
-    //                 sb.append(mContext.getText(com.android.internal.R.string.mmiError));
-    //             }
-    //         } else {
-    //             sb.append(mContext.getText(com.android.internal.R.string.mmiError));
-    //         }
-    //
-    //     } else {
-    //         Rlog.d(LOGTAG, "Received Call Barring Response.");
-    //         // Response for Call Barring queries.
-    //         ImsSsInfo[] arr = (ImsSsInfo[])ar.result;
-    //         // Check if ImsPhone has received call barring
-    //         // enabled for service class voice.
-    //         for (int i = 0, s = arr.length; i < s ; i++) {
-    //             if(arr[i].mStatus == 1) {
-    //                 sb.append(mContext.getText(com.android.internal
-    //                         .R.string.serviceEnabled));
-    //                 mState = State.COMPLETE;
-    //             } else {
-    //                 sb.append(mContext.getText(com.android.internal
-    //                         .R.string.serviceDisabled));
-    //                 mState = State.COMPLETE;
-    //             }
-    //         }
-    //     }
-    // }
-    //
-    // mMessage = sb;
-    // mPhone.onMMIDone(this);
-    assert(0);
+    AutoPtr<ICharSequence> cs = GetScString();
+    String str;
+    cs->ToString(&str);
+    StringBuilder sb(str);
+    sb.Append("\n");
+
+    if (ar->mException != NULL) {
+        mState = IMmiCodeState_FAILED;
+
+// TODO: Need ImsException
+        // if (ar->mException instanceof ImsException) {
+        //     ImsException error = (ImsException) ar->mException;
+        //     if (error.getMessage() != NULL) {
+        //         sb.Append(error.getMessage());
+        //     }
+        //     else {
+        //         sb.Append(getErrorMessage(ar));
+        //     }
+        // }
+        // else {
+        //     sb.Append(getErrorMessage(ar));
+        // }
+    }
+    else {
+        mState = IMmiCodeState_FAILED;
+        AutoPtr<CImsSsInfo> ssInfo;
+        if (IBundle::Probe(ar->mResult)) {
+            Logger::D(LOGTAG, "Received CLIP/COLP/COLR Response.");
+            // Response for CLIP, COLP and COLR queries.
+            AutoPtr<IBundle> ssInfoResp = IBundle::Probe(ar->mResult);
+            AutoPtr<IParcelable> p;
+            ssInfoResp->GetParcelable(UT_BUNDLE_KEY_SSINFO, (IParcelable**)&p);
+            ssInfo = (CImsSsInfo*)IImsSsInfo::Probe(p);
+
+            if (ssInfo != NULL) {
+                Logger::D(LOGTAG, "ImsSsInfo mStatus = " + ssInfo->mStatus);
+                if (ssInfo->mStatus == IImsSsInfo::DISABLED) {
+                    cs = NULL;
+                    sb.Append((mContext->GetText(R::string::serviceDisabled, (ICharSequence**)&cs), cs));
+                    mState = IMmiCodeState_COMPLETE;
+                }
+                else if (ssInfo->mStatus == IImsSsInfo::ENABLED) {
+                    cs = NULL;
+                    sb.Append((mContext->GetText(R::string::serviceEnabled, (ICharSequence**)&cs), cs));
+                    mState = IMmiCodeState_COMPLETE;
+                }
+                else {
+                    cs = NULL;
+                    sb.Append((mContext->GetText(R::string::mmiError, (ICharSequence**)&cs), cs));
+                }
+            }
+            else {
+                cs = NULL;
+                sb.Append((mContext->GetText(R::string::mmiError, (ICharSequence**)&cs), cs));
+            }
+
+        }
+        else {
+            Logger::D(LOGTAG, "Received Call Barring Response.");
+            // Response for Call Barring queries.
+            AutoPtr<IArrayOf> arr = IArrayOf::Probe(ar->mResult);     // ImsSsInfo[] arr
+            // Check if ImsPhone has received call barring
+            // enabled for service class voice.
+            Int32 size;
+            arr->GetLength(&size);
+            for (Int32 i = 0, s = size; i < s ; i++) {
+                AutoPtr<IInterface> obj;
+                arr->Get(i, (IInterface**)&obj);
+                AutoPtr<CImsSsInfo> info = (CImsSsInfo*)IImsSsInfo::Probe(obj);
+
+                if(info->mStatus == 1) {
+                    cs = NULL;
+                    sb.Append(mContext->GetText(R::string::serviceEnabled, (ICharSequence**)&cs));
+                    mState = IMmiCodeState_COMPLETE;
+                }
+                else {
+                    cs = NULL;
+                    sb.Append(mContext->GetText(R::string::serviceDisabled, (ICharSequence**)&cs));
+                    mState = IMmiCodeState_COMPLETE;
+                }
+            }
+        }
+    }
+
+    sb.ToString(&str);
+    mMessage = CoreUtils::Convert(str);
+    ((ImsPhone*)mPhone.Get())->OnMMIDone(IImsPhoneMmiCode::Probe(this));
 }
 
 void ImsPhoneMmiCode::OnIcbQueryComplete(
     /* [in] */ AsyncResult* ar)
 {
-    // ==================before translated======================
-    // Rlog.d(LOGTAG, "onIcbQueryComplete ");
-    // StringBuilder sb = new StringBuilder(getScString());
-    // sb.append("\n");
-    //
-    // if (ar.exception != null) {
-    //     mState = State.FAILED;
-    //
-    //     if (ar.exception instanceof ImsException) {
-    //         ImsException error = (ImsException) ar.exception;
-    //         if (error.getMessage() != null) {
-    //             sb.append(error.getMessage());
-    //         } else {
-    //             sb.append(getErrorMessage(ar));
-    //         }
-    //     } else {
-    //         sb.append(getErrorMessage(ar));
-    //     }
-    // } else {
-    //     mState = State.FAILED;
-    //     ImsSsInfo[] infos = (ImsSsInfo[])ar.result;
-    //     if (infos.length == 0) {
-    //         sb.append(mContext.getText(com.android.internal.R.string.serviceDisabled));
-    //         mState = State.COMPLETE;
-    //     } else {
-    //         for (int i = 0, s = infos.length; i < s ; i++) {
-    //             sb.append("Num: " + infos[i].mIcbNum + " status: "
-    //                     + infos[i].mStatus + "\n");
-    //         }
-    //         mState = State.COMPLETE;
-    //     }
-    // }
-    // mMessage = sb;
-    // mPhone.onMMIDone(this);
-    assert(0);
+    Logger::D(LOGTAG, "OnIcbQueryComplete ");
+    AutoPtr<ICharSequence> cs = GetScString();
+    String str;
+    cs->ToString(&str);
+    StringBuilder sb(str);
+    sb.Append("\n");
+
+    if (ar->mException != NULL) {
+        mState = IMmiCodeState_FAILED;
+// TODO: Need ImsException
+        // if (ar->mException instanceof ImsException) {
+        //     ImsException error = (ImsException) ar->mException;
+        //     if (error.getMessage() != NULL) {
+        //         sb.Append(error.getMessage());
+        //     }
+        //     else {
+        //         sb.Append(getErrorMessage(ar));
+        //     }
+        // }
+        // else {
+        //     sb.Append(getErrorMessage(ar));
+        // }
+    }
+    else {
+        mState = IMmiCodeState_FAILED;
+        AutoPtr<IArrayOf> infos = IArrayOf::Probe(ar->mResult);     // ImsSsInfo[] infos
+
+        Int32 size;
+        infos->GetLength(&size);
+        if (size == 0) {
+            cs = NULL;
+            sb.Append(mContext->GetText(R::string::serviceDisabled, (ICharSequence**)&cs));
+            mState = IMmiCodeState_COMPLETE;
+        }
+        else {
+            for (Int32 i = 0, s = size; i < s ; i++) {
+                AutoPtr<IInterface> obj;
+                infos->Get(i, (IInterface**)&obj);
+                AutoPtr<CImsSsInfo> info = (CImsSsInfo*)IImsSsInfo::Probe(obj);
+                sb.Append(String("Num: ") + info->mIcbNum + " status: "
+                        + StringUtils::ToString(info->mStatus) + String("\n"));
+            }
+            mState = IMmiCodeState_COMPLETE;
+        }
+    }
+
+    sb.ToString(&str);
+    mMessage = CoreUtils::Convert(str);
+    ((ImsPhone*)mPhone.Get())->OnMMIDone(IImsPhoneMmiCode::Probe(this));
 }
 
 void ImsPhoneMmiCode::OnQueryClirComplete(
     /* [in] */ AsyncResult* ar)
 {
-    // ==================before translated======================
-    // StringBuilder sb = new StringBuilder(getScString());
-    // sb.append("\n");
-    // mState = State.FAILED;
-    //
-    // if (ar.exception != null) {
-    //
-    //     if (ar.exception instanceof ImsException) {
-    //         ImsException error = (ImsException) ar.exception;
-    //         if (error.getMessage() != null) {
-    //             sb.append(error.getMessage());
-    //         } else {
-    //             sb.append(getErrorMessage(ar));
-    //         }
-    //     }
-    // } else {
-    //     Bundle ssInfo = (Bundle) ar.result;
-    //     int[] clirInfo = ssInfo.getIntArray(UT_BUNDLE_KEY_CLIR);
-    //     // clirInfo[0] = The 'n' parameter from TS 27.007 7.7
-    //     // clirInfo[1] = The 'm' parameter from TS 27.007 7.7
-    //     Rlog.d(LOGTAG, "CLIR param n=" + clirInfo[0]
-    //             + " m=" + clirInfo[1]);
-    //
-    //     // 'm' parameter.
-    //     switch (clirInfo[1]) {
-    //         case CLIR_NOT_PROVISIONED:
-    //             sb.append(mContext.getText(
-    //                     com.android.internal.R.string.serviceNotProvisioned));
-    //             mState = State.COMPLETE;
-    //             break;
-    //         case CLIR_PROVISIONED_PERMANENT:
-    //             sb.append(mContext.getText(
-    //                     com.android.internal.R.string.CLIRPermanent));
-    //             mState = State.COMPLETE;
-    //             break;
-    //         case CLIR_PRESENTATION_RESTRICTED_TEMPORARY:
-    //             // 'n' parameter.
-    //             switch (clirInfo[0]) {
-    //                 case CLIR_DEFAULT:
-    //                     sb.append(mContext.getText(
-    //                             com.android.internal.R.string.CLIRDefaultOnNextCallOn));
-    //                     mState = State.COMPLETE;
-    //                     break;
-    //                 case CLIR_INVOCATION:
-    //                     sb.append(mContext.getText(
-    //                             com.android.internal.R.string.CLIRDefaultOnNextCallOn));
-    //                     mState = State.COMPLETE;
-    //                     break;
-    //                 case CLIR_SUPPRESSION:
-    //                     sb.append(mContext.getText(
-    //                             com.android.internal.R.string.CLIRDefaultOnNextCallOff));
-    //                     mState = State.COMPLETE;
-    //                     break;
-    //                 default:
-    //                     sb.append(mContext.getText(
-    //                             com.android.internal.R.string.mmiError));
-    //                     mState = State.FAILED;
-    //             }
-    //             break;
-    //         case CLIR_PRESENTATION_ALLOWED_TEMPORARY:
-    //             // 'n' parameter.
-    //             switch (clirInfo[0]) {
-    //                 case CLIR_DEFAULT:
-    //                     sb.append(mContext.getText(
-    //                             com.android.internal.R.string.CLIRDefaultOffNextCallOff));
-    //                     mState = State.COMPLETE;
-    //                     break;
-    //                 case CLIR_INVOCATION:
-    //                     sb.append(mContext.getText(
-    //                             com.android.internal.R.string.CLIRDefaultOffNextCallOn));
-    //                     mState = State.COMPLETE;
-    //                     break;
-    //                 case CLIR_SUPPRESSION:
-    //                     sb.append(mContext.getText(
-    //                             com.android.internal.R.string.CLIRDefaultOffNextCallOff));
-    //                     mState = State.COMPLETE;
-    //                     break;
-    //                 default:
-    //                     sb.append(mContext.getText(
-    //                             com.android.internal.R.string.mmiError));
-    //                     mState = State.FAILED;
-    //             }
-    //             break;
-    //         default:
-    //             sb.append(mContext.getText(
-    //                     com.android.internal.R.string.mmiError));
-    //             mState = State.FAILED;
-    //     }
-    // }
-    //
-    // mMessage = sb;
-    // mPhone.onMMIDone(this);
-    assert(0);
+    AutoPtr<ICharSequence> cs = GetScString();
+    String str;
+    cs->ToString(&str);
+    StringBuilder sb(str);
+    sb.Append("\n");
+    mState = IMmiCodeState_FAILED;
+
+    if (ar->mException != NULL) {
+// TODO: Need ImsException
+        // if (ar->mException instanceof ImsException) {
+        //     ImsException error = (ImsException) ar->mException;
+        //     if (error.getMessage() != NULL) {
+        //         sb.Append(error.getMessage());
+        //     }
+        //     else {
+        //         sb.Append(getErrorMessage(ar));
+        //     }
+        // }
+    }
+    else {
+        AutoPtr<IBundle> ssInfo = IBundle::Probe(ar->mResult);
+        AutoPtr<ArrayOf<Int32> > clirInfo;
+        ssInfo->GetInt32Array(UT_BUNDLE_KEY_CLIR, (ArrayOf<Int32>**)&clirInfo);
+        // clirInfo[0] = The 'n' parameter from TS 27.007 7.7
+        // clirInfo[1] = The 'm' parameter from TS 27.007 7.7
+        Logger::D(LOGTAG, "CLIR param n=%d m=%d", (*clirInfo)[0], (*clirInfo)[1]);
+
+        // 'm' parameter.
+        switch ((*clirInfo)[1]) {
+            case CLIR_NOT_PROVISIONED:
+                cs = NULL;
+                sb.Append(mContext->GetText(R::string::serviceNotProvisioned, (ICharSequence**)&cs));
+                mState = IMmiCodeState_COMPLETE;
+                break;
+            case CLIR_PROVISIONED_PERMANENT:
+                cs = NULL;
+                sb.Append(mContext->GetText(R::string::CLIRPermanent, (ICharSequence**)&cs));
+                mState = IMmiCodeState_COMPLETE;
+                break;
+            case CLIR_PRESENTATION_RESTRICTED_TEMPORARY:
+                // 'n' parameter.
+                switch ((*clirInfo)[0]) {
+                    case CLIR_DEFAULT:
+                        cs = NULL;
+                        sb.Append(mContext->GetText(R::string::CLIRDefaultOnNextCallOn, (ICharSequence**)&cs));
+                        mState = IMmiCodeState_COMPLETE;
+                        break;
+                    case CLIR_INVOCATION:
+                        cs = NULL;
+                        sb.Append(mContext->GetText(R::string::CLIRDefaultOnNextCallOn, (ICharSequence**)&cs));
+                        mState = IMmiCodeState_COMPLETE;
+                        break;
+                    case CLIR_SUPPRESSION:
+                        cs = NULL;
+                        sb.Append(mContext->GetText(R::string::CLIRDefaultOnNextCallOff, (ICharSequence**)&cs));
+                        mState = IMmiCodeState_COMPLETE;
+                        break;
+                    default:
+                        cs = NULL;
+                        sb.Append(mContext->GetText(R::string::mmiError, (ICharSequence**)&cs));
+                        mState = IMmiCodeState_FAILED;
+                }
+                break;
+            case CLIR_PRESENTATION_ALLOWED_TEMPORARY:
+                // 'n' parameter.
+                switch ((*clirInfo)[0]) {
+                    case CLIR_DEFAULT:
+                        cs = NULL;
+                        sb.Append(mContext->GetText(R::string::CLIRDefaultOffNextCallOff, (ICharSequence**)&cs));
+                        mState = IMmiCodeState_COMPLETE;
+                        break;
+                    case CLIR_INVOCATION:
+                        cs = NULL;
+                        sb.Append(mContext->GetText(R::string::CLIRDefaultOffNextCallOn, (ICharSequence**)&cs));
+                        mState = IMmiCodeState_COMPLETE;
+                        break;
+                    case CLIR_SUPPRESSION:
+                        cs = NULL;
+                        sb.Append(mContext->GetText(R::string::CLIRDefaultOffNextCallOff, (ICharSequence**)&cs));
+                        mState = IMmiCodeState_COMPLETE;
+                        break;
+                    default:
+                        cs = NULL;
+                        sb.Append(mContext->GetText(R::string::mmiError, (ICharSequence**)&cs));
+                        mState = IMmiCodeState_FAILED;
+                }
+                break;
+            default:
+                cs = NULL;
+                sb.Append(mContext->GetText(R::string::mmiError, (ICharSequence**)&cs));
+                mState = IMmiCodeState_FAILED;
+        }
+    }
+
+    sb.ToString(&str);
+    mMessage = CoreUtils::Convert(str);
+    ((ImsPhone*)mPhone.Get())->OnMMIDone(IImsPhoneMmiCode::Probe(this));
 }
 
 void ImsPhoneMmiCode::OnQueryComplete(
     /* [in] */ AsyncResult* ar)
 {
-    // ==================before translated======================
-    // StringBuilder sb = new StringBuilder(getScString());
-    // sb.append("\n");
-    //
-    // if (ar.exception != null) {
-    //     mState = State.FAILED;
-    //
-    //     if (ar.exception instanceof ImsException) {
-    //         ImsException error = (ImsException) ar.exception;
-    //         if (error.getMessage() != null) {
-    //             sb.append(error.getMessage());
-    //         } else {
-    //             sb.append(getErrorMessage(ar));
-    //         }
-    //     } else {
-    //         sb.append(getErrorMessage(ar));
-    //     }
-    //
-    // } else {
-    //     int[] ints = (int[])ar.result;
-    //
-    //     if (ints.length != 0) {
-    //         if (ints[0] == 0) {
-    //             sb.append(mContext.getText(com.android.internal.R.string.serviceDisabled));
-    //         } else if (mSc.equals(SC_WAIT)) {
-    //             // Call Waiting includes additional data in the response.
-    //             sb.append(createQueryCallWaitingResultMessage(ints[1]));
-    //         } else if (ints[0] == 1) {
-    //             // for all other services, treat it as a boolean
-    //             sb.append(mContext.getText(com.android.internal.R.string.serviceEnabled));
-    //         } else {
-    //             sb.append(mContext.getText(com.android.internal.R.string.mmiError));
-    //         }
-    //     } else {
-    //         sb.append(mContext.getText(com.android.internal.R.string.mmiError));
-    //     }
-    //     mState = State.COMPLETE;
-    // }
-    //
-    // mMessage = sb;
-    // mPhone.onMMIDone(this);
-    assert(0);
+    AutoPtr<ICharSequence> cs = GetScString();
+    String str;
+    cs->ToString(&str);
+    StringBuilder sb(str);
+    sb.Append("\n");
+
+    if (ar->mException != NULL) {
+        mState = IMmiCodeState_FAILED;
+
+// TODO: Need ImsException
+        // if (ar->mException instanceof ImsException) {
+        //     ImsException error = (ImsException) ar->mException;
+        //     if (error.getMessage() != NULL) {
+        //         sb.Append(error.getMessage());
+        //     }
+        //     else {
+        //         sb.Append(getErrorMessage(ar));
+        //     }
+        // }
+        // else {
+        //     sb.Append(getErrorMessage(ar));
+        // }
+
+    }
+    else {
+        AutoPtr<IArrayOf> ints = IArrayOf::Probe(ar->mResult);
+
+        Int32 size;
+        ints->GetLength(&size);
+        if (size != 0) {
+            AutoPtr<IInterface> obj;
+            ints->Get(0, (IInterface**)&obj);
+            Int32 val;
+            IInteger32::Probe(obj)->GetValue(&val);
+
+            if (val == 0) {
+                cs = NULL;
+                sb.Append(mContext->GetText(R::string::serviceDisabled, (ICharSequence**)&cs));
+            }
+            else if (mSc.Equals(SC_WAIT)) {
+                // Call Waiting includes additional data in the response.
+                obj = NULL;
+                ints->Get(1, (IInterface**)&obj);
+                Int32 v;
+                IInteger32::Probe(obj)->GetValue(&v);
+                sb.Append(CreateQueryCallWaitingResultMessage(v));
+            }
+            else if (val == 1) {
+                // for all other services, treat it as a boolean
+                cs = NULL;
+                sb.Append(mContext->GetText(R::string::serviceEnabled, (ICharSequence**)&cs));
+            }
+            else {
+                cs = NULL;
+                sb.Append(mContext->GetText(R::string::mmiError, (ICharSequence**)&cs));
+            }
+        }
+        else {
+            cs = NULL;
+            sb.Append(mContext->GetText(R::string::mmiError, (ICharSequence**)&cs));
+        }
+        mState = IMmiCodeState_COMPLETE;
+    }
+
+    sb.ToString(&str);
+    mMessage = CoreUtils::Convert(str);
+    ((ImsPhone*)mPhone.Get())->OnMMIDone(IImsPhoneMmiCode::Probe(this));
 }
 
 AutoPtr<ICharSequence> ImsPhoneMmiCode::CreateQueryCallWaitingResultMessage(
     /* [in] */ Int32 serviceClass)
 {
-    // ==================before translated======================
-    // StringBuilder sb = new StringBuilder(
-    //         mContext.getText(com.android.internal.R.string.serviceEnabledFor));
-    //
-    // for (int classMask = 1
-    //             ; classMask <= SERVICE_CLASS_MAX
-    //             ; classMask <<= 1
-    // ) {
-    //     if ((classMask & serviceClass) != 0) {
-    //         sb.append("\n");
-    //         sb.append(serviceClassToCFString(classMask & serviceClass));
-    //     }
-    // }
-    // return sb;
-    assert(0);
-    AutoPtr<ICharSequence> empty;
-    return empty;
+    AutoPtr<ICharSequence> cs;
+    mContext->GetText(R::string::serviceEnabledFor, (ICharSequence**)&cs);
+    StringBuilder sb(CoreUtils::Unbox(cs));
+
+    for (Int32 classMask = 1
+                ; classMask <= ICommandsInterface::SERVICE_CLASS_MAX
+                ; classMask <<= 1
+    ) {
+        if ((classMask & serviceClass) != 0) {
+            sb.Append("\n");
+            sb.Append(ServiceClassToCFString(classMask & serviceClass));
+        }
+    }
+
+    String str;
+    sb.ToString(&str);
+    return CoreUtils::Convert(str);
 }
 
 } // namespace Imsphone

@@ -1,7 +1,53 @@
 
 #include "Elastos.Droid.App.h"
+#include "Elastos.Droid.Ims.h"
 #include "Elastos.Droid.Internal.h"
+#include "Elastos.Droid.Telephony.h"
+#include "elastos/droid/app/CPendingIntent.h"
+#include "elastos/droid/content/CIntent.h"
+#include "elastos/droid/content/CIntentFilter.h"
+#include "elastos/droid/ims/CImsCallProfile.h"
+#include "elastos/droid/internal/telephony/Call.h"
+#include "elastos/droid/internal/telephony/gsm/CSuppServiceNotification.h"
+#include "elastos/droid/internal/telephony/imsphone/ImsPhone.h"
+#include "elastos/droid/internal/telephony/imsphone/CImsPhoneCall.h"
+#include "elastos/droid/internal/telephony/imsphone/CImsPhoneConnection.h"
 #include "elastos/droid/internal/telephony/imsphone/ImsPhoneCallTracker.h"
+#include "elastos/droid/internal/telephony/imsphone/ImsPhoneConnection.h"
+#include "elastos/droid/os/AsyncResult.h"
+#include "elastos/droid/os/CRegistrant.h"
+#include "elastos/droid/os/SystemProperties.h"
+#include "elastos/droid/preference/PreferenceManager.h"
+#include "elastos/droid/provider/Settings.h"
+#include "elastos/droid/telephony/PhoneNumberUtils.h"
+#include <elastos/core/AutoLock.h>
+#include <elastos/core/StringUtils.h>
+#include <elastos/utility/logging/Logger.h>
+
+using Elastos::Droid::App::CPendingIntent;
+using Elastos::Droid::Content::CIntent;
+using Elastos::Droid::Content::CIntentFilter;
+using Elastos::Droid::Content::IIntentFilter;
+using Elastos::Droid::Content::ISharedPreferences;
+using Elastos::Droid::Ims::CImsCallProfile;
+using Elastos::Droid::Ims::IImsCallProfile;
+using Elastos::Droid::Internal::Telephony::Call;
+using Elastos::Droid::Internal::Telephony::Gsm::CSuppServiceNotification;
+using Elastos::Droid::Internal::Telephony::Gsm::ISuppServiceNotification;
+using Elastos::Droid::Os::AsyncResult;
+using Elastos::Droid::Os::CRegistrant;
+using Elastos::Droid::Os::SystemProperties;
+using Elastos::Droid::Preference::PreferenceManager;
+using Elastos::Droid::Provider::ISettingsSecure;
+using Elastos::Droid::Provider::Settings;
+using Elastos::Droid::Telephony::IDisconnectCause;
+using Elastos::Droid::Telephony::IPhoneNumberUtils;
+using Elastos::Droid::Telephony::IServiceState;
+using Elastos::Droid::Telephony::PhoneNumberUtils;
+using Elastos::Core::StringUtils;
+using Elastos::Utility::CArrayList;
+using Elastos::Utility::ICollection;
+using Elastos::Utility::Logging::Logger;
 
 namespace Elastos {
 namespace Droid {
@@ -16,64 +62,81 @@ ImsPhoneCallTracker::InnerBroadcastReceiver::InnerBroadcastReceiver(
     /* [in] */ ImsPhoneCallTracker* owner)
     : mOwner(owner)
 {
-    // ==================before translated======================
-    // mOwner = owner;
 }
 
 ECode ImsPhoneCallTracker::InnerBroadcastReceiver::OnReceive(
     /* [in] */ IContext* context,
     /* [in] */ IIntent* intent)
 {
-    // ==================before translated======================
-    // if (intent.getAction().equals(ImsManager.ACTION_IMS_INCOMING_CALL)) {
-    //     if (DBG) log("onReceive : incoming call intent");
-    //
-    //     if (mImsManager == null) return;
-    //
-    //     if (mServiceId < 0) return;
-    //
-    //     try {
-    //         // Network initiated USSD will be treated by mImsUssdListener
-    //         boolean isUssd = intent.getBooleanExtra(ImsManager.EXTRA_USSD, false);
-    //         if (isUssd) {
-    //             if (DBG) log("onReceive : USSD");
-    //             mUssdSession = mImsManager.takeCall(mServiceId, intent, mImsUssdListener);
-    //             if (mUssdSession != null) {
-    //                 mUssdSession.accept(ImsCallProfile.CALL_TYPE_VOICE);
-    //             }
-    //             return;
-    //         }
-    //
-    //         // Normal MT call
-    //         ImsCall imsCall = mImsManager.takeCall(mServiceId, intent, mImsCallListener);
-    //         ImsPhoneConnection conn = new ImsPhoneConnection(mPhone.getContext(), imsCall,
-    //                 ImsPhoneCallTracker.this, mRingingCall);
-    //         addConnection(conn);
-    //
-    //         IImsVideoCallProvider imsVideoCallProvider =
-    //                 imsCall.getCallSession().getVideoCallProvider();
-    //         if (imsVideoCallProvider != null) {
-    //             ImsVideoCallProviderWrapper imsVideoCallProviderWrapper =
-    //                     new ImsVideoCallProviderWrapper(imsVideoCallProvider);
-    //             conn.setVideoProvider(imsVideoCallProviderWrapper);
-    //         }
-    //
-    //         if ((mForegroundCall.getState() != ImsPhoneCall.State.IDLE) ||
-    //                 (mBackgroundCall.getState() != ImsPhoneCall.State.IDLE)) {
-    //             conn.update(imsCall, ImsPhoneCall.State.WAITING);
-    //         }
-    //
-    //         mPhone.notifyNewRingingConnection(conn);
-    //         mPhone.notifyIncomingRing();
-    //
-    //         updatePhoneState();
-    //         mPhone.notifyPreciseCallStateChanged();
-    //     } catch (ImsException e) {
-    //         loge("onReceive : exception " + e);
-    //     } catch (RemoteException e) {
-    //     }
-    // }
-    assert(0);
+    String action;
+    intent->GetAction(&action);
+    if (action.Equals(/*IImsManager::ACTION_IMS_INCOMING_CALL*/"com.android.ims.IMS_INCOMING_CALL")) {
+        if (DBG) mOwner->Log(String("onReceive : incoming call intent"));
+
+        if (mOwner->mImsManager == NULL) return NOERROR;
+
+        if (mOwner->mServiceId < 0) return NOERROR;
+
+        // try {
+        // Network initiated USSD will be treated by mImsUssdListener
+        Boolean isUssd;
+// TODO: Need IImsManager
+        // intent->GetBooleanExtra(IImsManager::EXTRA_USSD, FALSE, &isUssd);
+        if (isUssd) {
+            if (DBG) mOwner->Log(String("onReceive : USSD"));
+// TODO: Need IImsManager
+            // mOwner->mImsManager->TakeCall(mOwner->mServiceId, intent, mOwner->mImsUssdListener,
+            //         (/*TODO IImsCall*/IInterface**)&mOwner->mUssdSession);
+            if (mOwner->mUssdSession != NULL) {
+// TODO: Need IImsCall
+                // mOwner->mUssdSession->Accept(IImsCallProfile::CALL_TYPE_VOICE);
+            }
+            return NOERROR;
+        }
+
+        // Normal MT call
+        AutoPtr</*TODO IImsCall*/IInterface> imsCall;
+// TODO: Need IImsCall
+        // mImsManager->TakeCall(mServiceId, intent, mImsCallListener,
+        //         (/*TODO IImsCall*/IInterface**)&imsCall);
+        AutoPtr<IContext> ctx;
+        IPhone::Probe(mOwner->mPhone)->GetContext((IContext**)&ctx);
+        AutoPtr<IImsPhoneConnection> conn;
+        CImsPhoneConnection::New(ctx, imsCall,
+                mOwner, mOwner->mRingingCall, (IImsPhoneConnection**)&conn);
+        mOwner->AddConnection(conn);
+
+// TODO: Need IIImsVideoCallProvider
+        // AutoPtr<IIImsVideoCallProvider> imsVideoCallProvider =
+        //         imsCall.getCallSession().getVideoCallProvider();
+        // if (imsVideoCallProvider != NULL) {
+        //     ImsVideoCallProviderWrapper imsVideoCallProviderWrapper =
+        //             new ImsVideoCallProviderWrapper(imsVideoCallProvider);
+        //     conn->SetVideoProvider(imsVideoCallProviderWrapper);
+        // }
+
+        ICallState fgState;
+        ICall::Probe(mOwner->mForegroundCall)->GetState(&fgState);
+
+        ICallState bgState;
+        ICall::Probe(mOwner->mBackgroundCall)->GetState(&bgState);
+
+        if ((fgState != ICallState_IDLE) ||
+                (bgState != ICallState_IDLE)) {
+            Boolean b;
+            ((ImsPhoneConnection*)conn.Get())->Update(imsCall, ICallState_WAITING, &b);
+        }
+
+        ((ImsPhone*)mOwner->mPhone.Get())->NotifyNewRingingConnection(IConnection::Probe(conn));
+        ((ImsPhone*)mOwner->mPhone.Get())->NotifyIncomingRing();
+
+        mOwner->UpdatePhoneState();
+        ((ImsPhone*)mOwner->mPhone.Get())->NotifyPreciseCallStateChanged();
+        // } catch (ImsException e) {
+        //     Loge("onReceive : exception " + e);
+        // } catch (RemoteException e) {
+        // }
+    }
     return NOERROR;
 }
 
@@ -84,50 +147,44 @@ ImsPhoneCallTracker::InnerImsCallListener::InnerImsCallListener(
     /* [in] */ ImsPhoneCallTracker* owner)
     : mOwner(owner)
 {
-    // ==================before translated======================
-    // mOwner = owner;
 }
 
 ECode ImsPhoneCallTracker::InnerImsCallListener::OnCallProgressing(
     /* [in] */ /*TODO IImsCall*/IInterface* imsCall)
 {
-    // ==================before translated======================
-    // if (DBG) log("onCallProgressing");
-    //
-    // mPendingMO = null;
-    // processCallStateChange(imsCall, ImsPhoneCall.State.ALERTING,
-    //         DisconnectCause.NOT_DISCONNECTED);
-    assert(0);
+    if (DBG) mOwner->Log(String("onCallProgressing"));
+
+    mOwner->mPendingMO = NULL;
+    mOwner->ProcessCallStateChange(imsCall, ICallState_ALERTING,
+            IDisconnectCause::NOT_DISCONNECTED);
     return NOERROR;
 }
 
 ECode ImsPhoneCallTracker::InnerImsCallListener::OnCallStarted(
     /* [in] */ /*TODO IImsCall*/IInterface* imsCall)
 {
-    // ==================before translated======================
-    // if (DBG) log("onCallStarted");
-    //
-    // mPendingMO = null;
-    // processCallStateChange(imsCall, ImsPhoneCall.State.ACTIVE,
-    //         DisconnectCause.NOT_DISCONNECTED);
-    assert(0);
+    if (DBG) mOwner->Log(String("onCallStarted"));
+
+    mOwner->mPendingMO = NULL;
+    mOwner->ProcessCallStateChange(imsCall, ICallState_ACTIVE,
+            IDisconnectCause::NOT_DISCONNECTED);
     return NOERROR;
 }
 
 ECode ImsPhoneCallTracker::InnerImsCallListener::OnCallUpdated(
     /* [in] */ /*TODO IImsCall*/IInterface* imsCall)
 {
-    // ==================before translated======================
-    // if (DBG) log("onCallUpdated");
-    // if (imsCall == null) {
-    //     return;
-    // }
-    // ImsPhoneConnection conn = findConnection(imsCall);
-    // if (conn != null) {
-    //     processCallStateChange(imsCall, conn.getCall().mState,
-    //             DisconnectCause.NOT_DISCONNECTED);
-    // }
-    assert(0);
+    if (DBG) mOwner->Log(String("onCallUpdated"));
+    if (imsCall == NULL) {
+        return NOERROR;
+    }
+    AutoPtr<IImsPhoneConnection> conn = mOwner->FindConnection(imsCall);
+    if (conn != NULL) {
+        AutoPtr<ICall> call;
+        IConnection::Probe(conn)->GetCall((ICall**)&call);
+        mOwner->ProcessCallStateChange(imsCall, ((Call*)call.Get())->mState,
+                IDisconnectCause::NOT_DISCONNECTED);
+    }
     return NOERROR;
 }
 
@@ -135,25 +192,31 @@ ECode ImsPhoneCallTracker::InnerImsCallListener::OnCallStartFailed(
     /* [in] */ /*TODO IImsCall*/IInterface* imsCall,
     /* [in] */ IImsReasonInfo* reasonInfo)
 {
-    // ==================before translated======================
-    // if (DBG) log("onCallStartFailed reasonCode=" + reasonInfo.getCode());
-    //
-    // if (mPendingMO != null) {
-    //     // To initiate dialing circuit-switched call
-    //     if (reasonInfo.getCode() == ImsReasonInfo.CODE_LOCAL_CALL_CS_RETRY_REQUIRED
-    //             && mBackgroundCall.getState() == ImsPhoneCall.State.IDLE
-    //             && mRingingCall.getState() == ImsPhoneCall.State.IDLE) {
-    //         mForegroundCall.detach(mPendingMO);
-    //         removeConnection(mPendingMO);
-    //         mPendingMO.finalize();
-    //         mPendingMO = null;
-    //         mPhone.initiateSilentRedial();
-    //         return;
-    //     }
-    //     mPendingMO.setDisconnectCause(DisconnectCause.ERROR_UNSPECIFIED);
-    //     sendEmptyMessageDelayed(EVENT_HANGUP_PENDINGMO, TIMEOUT_HANGUP_PENDINGMO);
-    // }
-    assert(0);
+    Int32 code;
+    reasonInfo->GetCode(&code);
+    if (DBG) mOwner->Log(String("onCallStartFailed reasonCode=") + StringUtils::ToString(code));
+
+    if (mOwner->mPendingMO != NULL) {
+        // To initiate dialing circuit-switched call
+        ICallState backgroundCallState;
+        ICall::Probe(mOwner->mBackgroundCall)->GetState(&backgroundCallState);
+        ICallState ringingCallState;
+        ICall::Probe(mOwner->mRingingCall)->GetState(&ringingCallState);
+
+        if (code == IImsReasonInfo::CODE_LOCAL_CALL_CS_RETRY_REQUIRED
+                && backgroundCallState == ICallState_IDLE
+                && ringingCallState == ICallState_IDLE) {
+            ((ImsPhoneCall*)mOwner->mForegroundCall.Get())->Detach(mOwner->mPendingMO);
+            mOwner->RemoveConnection(mOwner->mPendingMO);
+            // mOwner->mPendingMO->Finalize();
+            mOwner->mPendingMO = NULL;
+            ((ImsPhone*)mOwner->mPhone.Get())->InitiateSilentRedial();
+            return NOERROR;
+        }
+        mOwner->mPendingMO->SetDisconnectCause(IDisconnectCause::ERROR_UNSPECIFIED);
+        Boolean b;
+        mOwner->SendEmptyMessageDelayed(EVENT_HANGUP_PENDINGMO, TIMEOUT_HANGUP_PENDINGMO, &b);
+    }
     return NOERROR;
 }
 
@@ -161,73 +224,89 @@ ECode ImsPhoneCallTracker::InnerImsCallListener::OnCallTerminated(
     /* [in] */ /*TODO IImsCall*/IInterface* imsCall,
     /* [in] */ IImsReasonInfo* reasonInfo)
 {
-    // ==================before translated======================
-    // if (DBG) log("onCallTerminated reasonCode=" + reasonInfo.getCode());
-    //
-    // ImsPhoneCall.State oldState = mForegroundCall.getState();
-    // int cause = getDisconnectCauseFromReasonInfo(reasonInfo);
-    // ImsPhoneConnection conn = findConnection(imsCall);
-    // if (DBG) log("cause = " + cause + " conn = " + conn);
-    //
-    // if (conn != null && conn.isIncoming() && conn.getConnectTime() == 0) {
-    //     // Missed or rejected call
-    //     if (cause == DisconnectCause.LOCAL) {
-    //         cause = DisconnectCause.INCOMING_REJECTED;
-    //     } else {
-    //         cause = DisconnectCause.INCOMING_MISSED;
-    //     }
-    // }
-    //
-    // if (cause == DisconnectCause.NORMAL && conn != null && conn.getImsCall().isMerged()) {
+    Int32 code;
+    reasonInfo->GetCode(&code);
+    if (DBG) mOwner->Log(String("onCallTerminated reasonCode=") + StringUtils::ToString(code));
+
+    ICallState oldState;
+    ICall::Probe(mOwner->mForegroundCall)->GetState(&oldState);
+    Int32 cause = mOwner->GetDisconnectCauseFromReasonInfo(reasonInfo);
+    AutoPtr<IImsPhoneConnection> conn = mOwner->FindConnection(imsCall);
+    // if (DBG) Log("cause = " + cause + " conn = " + conn);
+
+    Boolean b;
+    Int64 time;
+    if (conn != NULL && (IConnection::Probe(conn)->IsIncoming(&b), b)
+            && (IConnection::Probe(conn)->GetConnectTime(&time), time) == 0) {
+        // Missed or rejected call
+        if (cause == IDisconnectCause::LOCAL) {
+            cause = IDisconnectCause::INCOMING_REJECTED;
+        }
+        else {
+            cause = IDisconnectCause::INCOMING_MISSED;
+        }
+    }
+
+// TODO: Need IImsCall
+    // if (cause == IDisconnectCause::NORMAL && conn != NULL && conn->GetImsCall()->IsMerged()) {
     //     // Call was terminated while it is merged instead of a remote disconnect.
-    //     cause = DisconnectCause.IMS_MERGED_SUCCESSFULLY;
+    //     cause = IDisconnectCause::IMS_MERGED_SUCCESSFULLY;
     // }
-    //
-    // processCallStateChange(imsCall, ImsPhoneCall.State.DISCONNECTED, cause);
-    //
-    // if (reasonInfo.getCode() == ImsReasonInfo.CODE_USER_TERMINATED) {
-    //     if ((oldState == ImsPhoneCall.State.DISCONNECTING)
-    //             && (mForegroundCall.getState() == ImsPhoneCall.State.DISCONNECTED)
-    //             && (mBackgroundCall.getState() == ImsPhoneCall.State.HOLDING)) {
-    //         sendEmptyMessage(EVENT_RESUME_BACKGROUND);
-    //     }
-    // }
-    assert(0);
+
+    mOwner->ProcessCallStateChange(imsCall, ICallState_DISCONNECTED, cause);
+
+    if (code == IImsReasonInfo::CODE_USER_TERMINATED) {
+        ICallState foregroundCallState;
+        ICall::Probe(mOwner->mForegroundCall)->GetState(&foregroundCallState);
+        ICallState backgroundCallState;
+        ICall::Probe(mOwner->mBackgroundCall)->GetState(&backgroundCallState);
+        if ((oldState == ICallState_DISCONNECTING)
+                && (foregroundCallState == ICallState_DISCONNECTED)
+                && (backgroundCallState == ICallState_HOLDING)) {
+            mOwner->SendEmptyMessage(EVENT_RESUME_BACKGROUND, &b);
+        }
+    }
     return NOERROR;
 }
 
 ECode ImsPhoneCallTracker::InnerImsCallListener::OnCallHeld(
     /* [in] */ /*TODO IImsCall*/IInterface* imsCall)
 {
-    // ==================before translated======================
-    // if (DBG) log("onCallHeld");
-    //
-    // synchronized (mSyncHold) {
-    //     ImsPhoneCall.State oldState = mBackgroundCall.getState();
-    //     processCallStateChange(imsCall, ImsPhoneCall.State.HOLDING,
-    //             DisconnectCause.NOT_DISCONNECTED);
-    //     if (oldState == ImsPhoneCall.State.ACTIVE) {
-    //         if ((mForegroundCall.getState() == ImsPhoneCall.State.HOLDING)
-    //                 || (mRingingCall.getState() == ImsPhoneCall.State.WAITING)) {
-    //             boolean isOwner = true;
-    //             CallGroup callGroup =  imsCall.getCallGroup();
-    //             if (callGroup != null) {
-    //                 isOwner = callGroup.isOwner(imsCall);
-    //             }
-    //             if (isOwner) {
-    //                 sendEmptyMessage(EVENT_RESUME_BACKGROUND);
-    //             }
-    //         } else {
-    //             //when multiple connections belong to background call,
-    //             //only the first callback reaches here
-    //             //otherwise the oldState is already HOLDING
-    //             if (mPendingMO != null) {
-    //                 sendEmptyMessage(EVENT_DIAL_PENDINGMO);
-    //             }
-    //         }
-    //     }
-    // }
-    assert(0);
+    if (DBG) mOwner->Log(String("onCallHeld"));
+
+    AutoLock lock(mOwner->mSyncHold);
+    ICallState oldState;
+    ICall::Probe(mOwner->mBackgroundCall)->GetState(&oldState);
+    mOwner->ProcessCallStateChange(imsCall, ICallState_HOLDING,
+            IDisconnectCause::NOT_DISCONNECTED);
+    if (oldState == ICallState_ACTIVE) {
+        ICallState foregroundCallState;
+        ICall::Probe(mOwner->mForegroundCall)->GetState(&foregroundCallState);
+        ICallState ringingCallState;
+        ICall::Probe(mOwner->mRingingCall)->GetState(&ringingCallState);
+        if ((foregroundCallState == ICallState_HOLDING)
+                || (ringingCallState == ICallState_WAITING)) {
+            Boolean isOwner = TRUE;
+// TODO: Need CallGroup
+            // CallGroup callGroup =  imsCall.getCallGroup();
+            // if (callGroup != NULL) {
+            //     isOwner = callGroup.isOwner(imsCall);
+            // }
+            // if (isOwner) {
+            //     SendEmptyMessage(EVENT_RESUME_BACKGROUND);
+            // }
+        }
+        else {
+            //when multiple connections belong to background call,
+            //only the first callback reaches here
+            //otherwise the oldState is already HOLDING
+            if (mOwner->mPendingMO != NULL) {
+                Boolean b;
+                mOwner->SendEmptyMessage(EVENT_DIAL_PENDINGMO, &b);
+            }
+        }
+    }
+
     return NOERROR;
 }
 
@@ -235,38 +314,40 @@ ECode ImsPhoneCallTracker::InnerImsCallListener::OnCallHoldFailed(
     /* [in] */ /*TODO IImsCall*/IInterface* imsCall,
     /* [in] */ IImsReasonInfo* reasonInfo)
 {
-    // ==================before translated======================
-    // if (DBG) log("onCallHoldFailed reasonCode=" + reasonInfo.getCode());
-    //
-    // synchronized (mSyncHold) {
-    //     ImsPhoneCall.State bgState = mBackgroundCall.getState();
-    //     if (reasonInfo.getCode() == ImsReasonInfo.CODE_LOCAL_CALL_TERMINATED) {
-    //         // disconnected while processing hold
-    //         if (mPendingMO != null) {
-    //             sendEmptyMessage(EVENT_DIAL_PENDINGMO);
-    //         }
-    //     } else if (bgState == ImsPhoneCall.State.ACTIVE) {
-    //         mForegroundCall.switchWith(mBackgroundCall);
-    //
-    //         if (mPendingMO != null) {
-    //             mPendingMO.setDisconnectCause(DisconnectCause.ERROR_UNSPECIFIED);
-    //             sendEmptyMessageDelayed(EVENT_HANGUP_PENDINGMO, TIMEOUT_HANGUP_PENDINGMO);
-    //         }
-    //     }
-    // }
-    assert(0);
+    Int32 code;
+    reasonInfo->GetCode(&code);
+    if (DBG) mOwner->Log(String("onCallHoldFailed reasonCode=") + StringUtils::ToString(code));
+
+    AutoLock lock(mOwner->mSyncHold);
+    ICallState bgState;
+    ICall::Probe(mOwner->mBackgroundCall)->GetState(&bgState);
+if (code == IImsReasonInfo::CODE_LOCAL_CALL_TERMINATED) {
+        // disconnected while processing hold
+        if (mOwner->mPendingMO != NULL) {
+            Boolean b;
+            mOwner->SendEmptyMessage(EVENT_DIAL_PENDINGMO, &b);
+        }
+    }
+    else if (bgState == ICallState_ACTIVE) {
+        ((ImsPhoneCall*)mOwner->mForegroundCall.Get())->SwitchWith(mOwner->mBackgroundCall);
+
+        if (mOwner->mPendingMO != NULL) {
+            mOwner->mPendingMO->SetDisconnectCause(IDisconnectCause::ERROR_UNSPECIFIED);
+            Boolean b;
+            mOwner->SendEmptyMessageDelayed(EVENT_HANGUP_PENDINGMO, TIMEOUT_HANGUP_PENDINGMO, &b);
+        }
+    }
+
     return NOERROR;
 }
 
 ECode ImsPhoneCallTracker::InnerImsCallListener::OnCallResumed(
     /* [in] */ /*TODO IImsCall*/IInterface* imsCall)
 {
-    // ==================before translated======================
-    // if (DBG) log("onCallResumed");
-    //
-    // processCallStateChange(imsCall, ImsPhoneCall.State.ACTIVE,
-    //         DisconnectCause.NOT_DISCONNECTED);
-    assert(0);
+    if (DBG) mOwner->Log(String("onCallResumed"));
+
+    mOwner->ProcessCallStateChange(imsCall, ICallState_ACTIVE,
+            IDisconnectCause::NOT_DISCONNECTED);
     return NOERROR;
 }
 
@@ -274,67 +355,67 @@ ECode ImsPhoneCallTracker::InnerImsCallListener::OnCallResumeFailed(
     /* [in] */ /*TODO IImsCall*/IInterface* imsCall,
     /* [in] */ IImsReasonInfo* reasonInfo)
 {
-    // ==================before translated======================
-    // // TODO : What should be done?
-    assert(0);
+    // TODO : What should be done?
     return NOERROR;
 }
 
 ECode ImsPhoneCallTracker::InnerImsCallListener::OnCallResumeReceived(
     /* [in] */ /*TODO IImsCall*/IInterface* imsCall)
 {
-    // ==================before translated======================
-    // if (DBG) log("onCallResumeReceived");
-    //
-    // if (mOnHoldToneStarted) {
-    //     mPhone.stopOnHoldTone();
-    //     mOnHoldToneStarted = false;
-    // }
-    //
-    // SuppServiceNotification supp = new SuppServiceNotification();
-    // // Type of notification: 0 = MO; 1 = MT
-    // // Refer SuppServiceNotification class documentation.
-    // supp.notificationType = 1;
-    // supp.code = SuppServiceNotification.MT_CODE_CALL_RETRIEVED;
-    // mPhone.notifySuppSvcNotification(supp);
-    assert(0);
+    if (DBG) mOwner->Log(String("onCallResumeReceived"));
+
+    if (mOwner->mOnHoldToneStarted) {
+        ((ImsPhone*)mOwner->mPhone.Get())->StopOnHoldTone();
+        mOwner->mOnHoldToneStarted = FALSE;
+    }
+
+    AutoPtr<ISuppServiceNotification> supp;
+    CSuppServiceNotification::New((ISuppServiceNotification**)&supp);
+    // Type of notification: 0 = MO; 1 = MT
+    // Refer SuppServiceNotification class documentation.
+    ((CSuppServiceNotification*)supp.Get())->mNotificationType = 1;
+    ((CSuppServiceNotification*)supp.Get())->mCode = ISuppServiceNotification::MT_CODE_CALL_RETRIEVED;
+    mOwner->mPhone->NotifySuppSvcNotification(supp);
     return NOERROR;
 }
 
 ECode ImsPhoneCallTracker::InnerImsCallListener::OnCallHoldReceived(
     /* [in] */ /*TODO IImsCall*/IInterface* imsCall)
 {
-    // ==================before translated======================
-    // if (DBG) log("onCallHoldReceived");
-    //
-    // ImsPhoneConnection conn = findConnection(imsCall);
-    // if (conn != null && conn.getState() == ImsPhoneCall.State.ACTIVE) {
-    //     if (!mOnHoldToneStarted && ImsPhoneCall.isLocalTone(imsCall)) {
-    //         mPhone.startOnHoldTone();
-    //         mOnHoldToneStarted = true;
-    //     }
-    // }
-    //
-    // SuppServiceNotification supp = new SuppServiceNotification();
-    // // Type of notification: 0 = MO; 1 = MT
-    // // Refer SuppServiceNotification class documentation.
-    // supp.notificationType = 1;
-    // supp.code = SuppServiceNotification.MT_CODE_CALL_ON_HOLD;
-    // mPhone.notifySuppSvcNotification(supp);
-    assert(0);
+    if (DBG) mOwner->Log(String("onCallHoldReceived"));
+
+    AutoPtr<IImsPhoneConnection> conn = mOwner->FindConnection(imsCall);
+    ICallState state;
+    if (conn != NULL && (IConnection::Probe(conn)->GetState(&state), state) == ICallState_ACTIVE) {
+        Boolean b;
+// TODO: Need IImsCall
+        // ImsPhoneCall->IsLocalTone(imsCall, &b);
+        if (!mOwner->mOnHoldToneStarted && b) {
+            ((ImsPhone*)mOwner->mPhone.Get())->StartOnHoldTone();
+            mOwner->mOnHoldToneStarted = TRUE;
+        }
+    }
+
+    AutoPtr<ISuppServiceNotification> supp;
+    CSuppServiceNotification::New((ISuppServiceNotification**)&supp);
+    // Type of notification: 0 = MO; 1 = MT
+    // Refer SuppServiceNotification class documentation.
+    ((CSuppServiceNotification*)supp.Get())->mNotificationType = 1;
+    ((CSuppServiceNotification*)supp.Get())->mCode = ISuppServiceNotification::MT_CODE_CALL_ON_HOLD;
+    ((ImsPhone*)mOwner->mPhone.Get())->NotifySuppSvcNotification(supp);
     return NOERROR;
 }
 
 ECode ImsPhoneCallTracker::InnerImsCallListener::OnCallMerged(
     /* [in] */ /*TODO IImsCall*/IInterface* call)
 {
-    // ==================before translated======================
-    // if (DBG) log("onCallMerged");
-    //
-    // mForegroundCall.merge(mBackgroundCall, mForegroundCall.getState());
-    // updatePhoneState();
-    // mPhone.notifyPreciseCallStateChanged();
-    assert(0);
+    if (DBG) mOwner->Log(String("onCallMerged"));
+
+    ICallState state;
+    ICall::Probe(mOwner->mForegroundCall)->GetState(&state);
+    ((ImsPhoneCall*)mOwner->mForegroundCall.Get())->Merge(mOwner->mBackgroundCall, state);
+    mOwner->UpdatePhoneState();
+    ((ImsPhone*)mOwner->mPhone.Get())->NotifyPreciseCallStateChanged();
     return NOERROR;
 }
 
@@ -342,10 +423,11 @@ ECode ImsPhoneCallTracker::InnerImsCallListener::OnCallMergeFailed(
     /* [in] */ /*TODO IImsCall*/IInterface* call,
     /* [in] */ IImsReasonInfo* reasonInfo)
 {
-    // ==================before translated======================
-    // if (DBG) log("onCallMergeFailed reasonCode=" + reasonInfo.getCode());
-    // mPhone.notifySuppServiceFailed(Phone.SuppService.CONFERENCE);
-    assert(0);
+    Int32 code;
+    reasonInfo->GetCode(&code);
+
+    if (DBG) mOwner->Log(String("onCallMergeFailed reasonCode=") + StringUtils::ToString(code));
+    ((ImsPhone*)mOwner->mPhone.Get())->NotifySuppServiceFailed(IPhoneSuppService_CONFERENCE);
     return NOERROR;
 }
 
@@ -353,14 +435,12 @@ ECode ImsPhoneCallTracker::InnerImsCallListener::OnConferenceParticipantsStateCh
     /* [in] */ /*TODO IImsCall*/IInterface* call,
     /* [in] */ IList/*<IConferenceParticipant>*/* participants)
 {
-    // ==================before translated======================
-    // if (DBG) log("onConferenceParticipantsStateChanged");
-    //
-    // ImsPhoneConnection conn = findConnection(call);
-    // if (conn != null) {
-    //     conn.updateConferenceParticipants(participants);
-    // }
-    assert(0);
+    if (DBG) mOwner->Log(String("onConferenceParticipantsStateChanged"));
+
+    AutoPtr<IImsPhoneConnection> conn = mOwner->FindConnection(call);
+    if (conn != NULL) {
+        IConnection::Probe(conn)->UpdateConferenceParticipants(participants);
+    }
     return NOERROR;
 }
 
@@ -371,24 +451,20 @@ ImsPhoneCallTracker::InnerImsCallListener1::InnerImsCallListener1(
     /* [in] */ ImsPhoneCallTracker* owner)
     : mOwner(owner)
 {
-    // ==================before translated======================
-    // mOwner = owner;
 }
 
 ECode ImsPhoneCallTracker::InnerImsCallListener1::OnCallStarted(
     /* [in] */ /*TODO IImsCall*/IInterface* imsCall)
 {
-    // ==================before translated======================
-    // if (DBG) log("mImsUssdListener onCallStarted");
-    //
-    // if (imsCall == mUssdSession) {
-    //     if (mPendingUssd != null) {
-    //         AsyncResult.forMessage(mPendingUssd);
-    //         mPendingUssd.sendToTarget();
-    //         mPendingUssd = null;
-    //     }
-    // }
-    assert(0);
+    if (DBG) mOwner->Log(String("mImsUssdListener onCallStarted"));
+
+    if (imsCall == mOwner->mUssdSession) {
+        if (mOwner->mPendingUssd != NULL) {
+            AsyncResult::ForMessage(mOwner->mPendingUssd);
+            mOwner->mPendingUssd->SendToTarget();
+            mOwner->mPendingUssd = NULL;
+        }
+    }
     return NOERROR;
 }
 
@@ -396,11 +472,11 @@ ECode ImsPhoneCallTracker::InnerImsCallListener1::OnCallStartFailed(
     /* [in] */ /*TODO IImsCall*/IInterface* imsCall,
     /* [in] */ IImsReasonInfo* reasonInfo)
 {
-    // ==================before translated======================
-    // if (DBG) log("mImsUssdListener onCallStartFailed reasonCode=" + reasonInfo.getCode());
-    //
-    // onCallTerminated(imsCall, reasonInfo);
-    assert(0);
+    Int32 code;
+    reasonInfo->GetCode(&code);
+    if (DBG) mOwner->Log(String("mImsUssdListener onCallStartFailed reasonCode=") + StringUtils::ToString(code));
+
+    OnCallTerminated(imsCall, reasonInfo);
     return NOERROR;
 }
 
@@ -408,21 +484,23 @@ ECode ImsPhoneCallTracker::InnerImsCallListener1::OnCallTerminated(
     /* [in] */ /*TODO IImsCall*/IInterface* imsCall,
     /* [in] */ IImsReasonInfo* reasonInfo)
 {
-    // ==================before translated======================
-    // if (DBG) log("mImsUssdListener onCallTerminated reasonCode=" + reasonInfo.getCode());
-    //
-    // if (imsCall == mUssdSession) {
-    //     mUssdSession = null;
-    //     if (mPendingUssd != null) {
-    //         CommandException ex =
-    //                 new CommandException(CommandException.Error.GENERIC_FAILURE);
-    //         AsyncResult.forMessage(mPendingUssd, null, ex);
-    //         mPendingUssd.sendToTarget();
-    //         mPendingUssd = null;
-    //     }
-    // }
-    // imsCall.close();
-    assert(0);
+    Int32 code;
+    reasonInfo->GetCode(&code);
+    if (DBG) mOwner->Log(String("mImsUssdListener onCallTerminated reasonCode=") + StringUtils::ToString(code));
+
+    if (imsCall == mOwner->mUssdSession) {
+        mOwner->mUssdSession = NULL;
+        if (mOwner->mPendingUssd != NULL) {
+            AutoPtr<ICommandException> ex;
+// TODO: Need CommandException
+            // ex = new CommandException(CommandException.Error.GENERIC_FAILURE);
+            AsyncResult::ForMessage(mOwner->mPendingUssd, NULL, IThrowable::Probe(ex));
+            mOwner->mPendingUssd->SendToTarget();
+            mOwner->mPendingUssd = NULL;
+        }
+    }
+// TODO: Need IImsCall
+    // imsCall->Close();
     return NOERROR;
 }
 
@@ -431,23 +509,23 @@ ECode ImsPhoneCallTracker::InnerImsCallListener1::OnCallUssdMessageReceived(
     /* [in] */ Int32 mode,
     /* [in] */ const String& ussdMessage)
 {
-    // ==================before translated======================
-    // if (DBG) log("mImsUssdListener onCallUssdMessageReceived mode=" + mode);
-    //
-    // int ussdMode = -1;
-    //
+    if (DBG) mOwner->Log(String("mImsUssdListener onCallUssdMessageReceived mode=") +
+            StringUtils::ToString(mode));
+
+    Int32 ussdMode = -1;
+
+// TODO: Need IImsCall
     // switch(mode) {
-    //     case ImsCall.USSD_MODE_REQUEST:
-    //         ussdMode = CommandsInterface.USSD_MODE_REQUEST;
+    //     case IImsCall::USSD_MODE_REQUEST:
+    //         ussdMode = ICommandsInterface::USSD_MODE_REQUEST;
     //         break;
-    //
-    //     case ImsCall.USSD_MODE_NOTIFY:
-    //         ussdMode = CommandsInterface.USSD_MODE_NOTIFY;
+
+    //     case IImsCall::USSD_MODE_NOTIFY:
+    //         ussdMode = ICommandsInterface::USSD_MODE_NOTIFY;
     //         break;
     // }
-    //
-    // mPhone.onIncomingUSSD(ussdMode, ussdMessage);
-    assert(0);
+
+    ((ImsPhone*)mOwner->mPhone.Get())->OnIncomingUSSD(ussdMode, ussdMessage);
     return NOERROR;
 }
 
@@ -458,43 +536,33 @@ ImsPhoneCallTracker::InnerImsConnectionStateListener::InnerImsConnectionStateLis
     /* [in] */ ImsPhoneCallTracker* owner)
     : mOwner(owner)
 {
-    // ==================before translated======================
-    // mOwner = owner;
 }
 
 ECode ImsPhoneCallTracker::InnerImsConnectionStateListener::OnImsConnected()
 {
-    // ==================before translated======================
-    // if (DBG) log("onImsConnected");
-    // mPhone.setServiceState(ServiceState.STATE_IN_SERVICE);
-    assert(0);
+    if (DBG) mOwner->Log(String("onImsConnected"));
+    ((ImsPhone*)mOwner->mPhone.Get())->SetServiceState(IServiceState::STATE_IN_SERVICE);
     return NOERROR;
 }
 
 ECode ImsPhoneCallTracker::InnerImsConnectionStateListener::OnImsDisconnected()
 {
-    // ==================before translated======================
-    // if (DBG) log("onImsDisconnected");
-    // mPhone.setServiceState(ServiceState.STATE_OUT_OF_SERVICE);
-    assert(0);
+    if (DBG) mOwner->Log(String("onImsDisconnected"));
+    ((ImsPhone*)mOwner->mPhone.Get())->SetServiceState(IServiceState::STATE_OUT_OF_SERVICE);
     return NOERROR;
 }
 
 ECode ImsPhoneCallTracker::InnerImsConnectionStateListener::OnImsResumed()
 {
-    // ==================before translated======================
-    // if (DBG) log("onImsResumed");
-    // mPhone.setServiceState(ServiceState.STATE_IN_SERVICE);
-    assert(0);
+    if (DBG) mOwner->Log(String("onImsResumed"));
+    ((ImsPhone*)mOwner->mPhone.Get())->SetServiceState(IServiceState::STATE_IN_SERVICE);
     return NOERROR;
 }
 
 ECode ImsPhoneCallTracker::InnerImsConnectionStateListener::OnImsSuspended()
 {
-    // ==================before translated======================
-    // if (DBG) log("onImsSuspended");
-    // mPhone.setServiceState(ServiceState.STATE_OUT_OF_SERVICE);
-    assert(0);
+    if (DBG) mOwner->Log(String("onImsSuspended"));
+    ((ImsPhone*)mOwner->mPhone.Get())->SetServiceState(IServiceState::STATE_OUT_OF_SERVICE);
     return NOERROR;
 }
 
@@ -503,53 +571,58 @@ ECode ImsPhoneCallTracker::InnerImsConnectionStateListener::OnFeatureCapabilityC
     /* [in] */ ArrayOf<Int32>* enabledFeatures,
     /* [in] */ ArrayOf<Int32>* disabledFeatures)
 {
-    // ==================before translated======================
-    // if (serviceClass == ImsServiceClass.MMTEL) {
-    //     boolean tmpIsVtEnabled = mIsVtEnabled;
-    //
-    //     if (disabledFeatures[ImsConfig.FeatureConstants.FEATURE_TYPE_VOICE_OVER_LTE] ==
-    //             ImsConfig.FeatureConstants.FEATURE_TYPE_VOICE_OVER_LTE ||
-    //             disabledFeatures[ImsConfig.FeatureConstants.FEATURE_TYPE_VOICE_OVER_WIFI] ==
-    //             ImsConfig.FeatureConstants.FEATURE_TYPE_VOICE_OVER_WIFI) {
-    //         mIsVolteEnabled = false;
-    //     }
-    //     if (disabledFeatures[ImsConfig.FeatureConstants.FEATURE_TYPE_VIDEO_OVER_LTE] ==
-    //             ImsConfig.FeatureConstants.FEATURE_TYPE_VIDEO_OVER_LTE ||
-    //             disabledFeatures[ImsConfig.FeatureConstants.FEATURE_TYPE_VIDEO_OVER_WIFI] ==
-    //             ImsConfig.FeatureConstants.FEATURE_TYPE_VIDEO_OVER_WIFI) {
-    //         mIsVtEnabled = false;
-    //     }
-    //     if (enabledFeatures[ImsConfig.FeatureConstants.FEATURE_TYPE_VOICE_OVER_LTE] ==
-    //             ImsConfig.FeatureConstants.FEATURE_TYPE_VOICE_OVER_LTE ||
-    //             enabledFeatures[ImsConfig.FeatureConstants.FEATURE_TYPE_VOICE_OVER_WIFI] ==
-    //             ImsConfig.FeatureConstants.FEATURE_TYPE_VOICE_OVER_WIFI) {
-    //         mIsVolteEnabled = true;
-    //     }
-    //     if (enabledFeatures[ImsConfig.FeatureConstants.FEATURE_TYPE_VIDEO_OVER_LTE] ==
-    //             ImsConfig.FeatureConstants.FEATURE_TYPE_VIDEO_OVER_LTE ||
-    //             enabledFeatures[ImsConfig.FeatureConstants.FEATURE_TYPE_VIDEO_OVER_WIFI] ==
-    //             ImsConfig.FeatureConstants.FEATURE_TYPE_VIDEO_OVER_WIFI) {
-    //         mIsVtEnabled = true;
-    //     }
-    //
-    //     if (tmpIsVtEnabled != mIsVtEnabled) {
-    //         mPhone.notifyForVideoCapabilityChanged(mIsVtEnabled);
-    //     }
-    // }
-    //
-    // if (DBG) log("onFeatureCapabilityChanged, mIsVolteEnabled = " +  mIsVolteEnabled
-    //         + " mIsVtEnabled = " + mIsVtEnabled);
-    assert(0);
+// TODO: Need IImsServiceClass
+//     if (serviceClass == IImsServiceClass::MMTEL) {
+//         Boolean tmpIsVtEnabled = mOwner->mIsVtEnabled;
+
+// // TODO: Need ImsConfig
+//         // if ((*disabledFeatures)[ImsConfig.FeatureConstants.FEATURE_TYPE_VOICE_OVER_LTE] ==
+//         //         ImsConfig.FeatureConstants.FEATURE_TYPE_VOICE_OVER_LTE ||
+//         //         (*disabledFeatures)[ImsConfig.FeatureConstants.FEATURE_TYPE_VOICE_OVER_WIFI] ==
+//         //         ImsConfig.FeatureConstants.FEATURE_TYPE_VOICE_OVER_WIFI) {
+//         //     mIsVolteEnabled = FALSE;
+//         // }
+//         // if ((*disabledFeatures)[ImsConfig.FeatureConstants.FEATURE_TYPE_VIDEO_OVER_LTE] ==
+//         //         ImsConfig.FeatureConstants.FEATURE_TYPE_VIDEO_OVER_LTE ||
+//         //         (*disabledFeatures)[ImsConfig.FeatureConstants.FEATURE_TYPE_VIDEO_OVER_WIFI] ==
+//         //         ImsConfig.FeatureConstants.FEATURE_TYPE_VIDEO_OVER_WIFI) {
+//         //     mIsVtEnabled = FALSE;
+//         // }
+//         // if ((*enabledFeatures)[ImsConfig.FeatureConstants.FEATURE_TYPE_VOICE_OVER_LTE] ==
+//         //         ImsConfig.FeatureConstants.FEATURE_TYPE_VOICE_OVER_LTE ||
+//         //         (*enabledFeatures)[ImsConfig.FeatureConstants.FEATURE_TYPE_VOICE_OVER_WIFI] ==
+//         //         ImsConfig.FeatureConstants.FEATURE_TYPE_VOICE_OVER_WIFI) {
+//         //     mIsVolteEnabled = TRUE;
+//         // }
+//         // if ((*enabledFeatures)[ImsConfig.FeatureConstants.FEATURE_TYPE_VIDEO_OVER_LTE] ==
+//         //         ImsConfig.FeatureConstants.FEATURE_TYPE_VIDEO_OVER_LTE ||
+//         //         (*enabledFeatures)[ImsConfig.FeatureConstants.FEATURE_TYPE_VIDEO_OVER_WIFI] ==
+//         //         ImsConfig.FeatureConstants.FEATURE_TYPE_VIDEO_OVER_WIFI) {
+//         //     mIsVtEnabled = TRUE;
+//         // }
+
+//         if (tmpIsVtEnabled != mOwner->mIsVtEnabled) {
+//             mPhone->NotifyForVideoCapabilityChanged(mOwner->mIsVtEnabled);
+//         }
+//     }
+
+    if (DBG) mOwner->Log(String("onFeatureCapabilityChanged, mIsVolteEnabled = ") +
+            StringUtils::BooleanToString(mOwner->mIsVolteEnabled)
+            + " mIsVtEnabled = " + StringUtils::BooleanToString(mOwner->mIsVtEnabled));
     return NOERROR;
 }
 
 ECode ImsPhoneCallTracker::InnerImsConnectionStateListener::OnVoiceMessageCountChanged(
     /* [in] */ Int32 count)
 {
-    // ==================before translated======================
-    // if (DBG) log("onVoiceMessageCountChanged :: count=" + count);
-    // mPhone.mDefaultPhone.setVoiceMessageCount(count);
-    assert(0);
+    if (DBG) mOwner->Log(String("onVoiceMessageCountChanged :: count=") + StringUtils::ToString(count));
+    ((ImsPhone*)mOwner->mPhone.Get())->mDefaultPhone->SetVoiceMessageCount(count);
+    return NOERROR;
+}
+
+ECode ImsPhoneCallTracker::InnerThread::Run()
+{
+    mOwner->GetImsService();
     return NOERROR;
 }
 
@@ -567,37 +640,66 @@ const Int32 ImsPhoneCallTracker::EVENT_RESUME_BACKGROUND;
 const Int32 ImsPhoneCallTracker::EVENT_DIAL_PENDINGMO;
 const Int32 ImsPhoneCallTracker::TIMEOUT_HANGUP_PENDINGMO;
 
+ImsPhoneCallTracker::ImsPhoneCallTracker()
+    : mIsVolteEnabled(FALSE)
+    , mIsVtEnabled(FALSE)
+    , mClirMode(ICommandsInterface::CLIR_DEFAULT)
+    , mDesiredMute(FALSE)
+    , mOnHoldToneStarted(FALSE)
+    , mState(PhoneConstantsState_IDLE)
+    , mServiceId(-1)
+    , mSrvccState(ICallSrvccState_NONE)
+    , mIsInEmergencyCall(FALSE)
+    , pendingCallClirMode(0)
+    , mPendingCallVideoState(0)
+    , pendingCallInEcm(FALSE)
+{
+    mReceiver = new InnerBroadcastReceiver(this);
+    CArrayList::New((IArrayList**)&mConnections);
+    mVoiceCallEndedRegistrants = new RegistrantList();
+    mVoiceCallStartedRegistrants = new RegistrantList();
+    CImsPhoneCall::New((IImsPhoneCall**)&mRingingCall);
+    CImsPhoneCall::New((IImsPhoneCall**)&mForegroundCall);
+    CImsPhoneCall::New((IImsPhoneCall**)&mBackgroundCall);
+    CImsPhoneCall::New((IImsPhoneCall**)&mHandoverCall);
+}
+
+ImsPhoneCallTracker::~ImsPhoneCallTracker()
+{
+    Log(String("ImsPhoneCallTracker finalized"));
+}
+
 ECode ImsPhoneCallTracker::constructor(
     /* [in] */ IImsPhone* phone)
 {
-    // ==================before translated======================
-    // this.mPhone = phone;
-    //
-    // IntentFilter intentfilter = new IntentFilter();
-    // intentfilter.addAction(ImsManager.ACTION_IMS_INCOMING_CALL);
-    // mPhone.getContext().registerReceiver(mReceiver, intentfilter);
-    //
-    // Thread t = new Thread() {
-    //     public void run() {
-    //         getImsService();
-    //     }
-    // };
-    // t.start();
+    mPhone = phone;
+
+    AutoPtr<IIntentFilter> intentfilter;
+    CIntentFilter::New((IIntentFilter**)&intentfilter);
+// TODO: Need IImsManager
+    // intentfilter->AddAction(IImsManager::ACTION_IMS_INCOMING_CALL);
+    AutoPtr<IContext> ctx;
+    IPhone::Probe(mPhone)->GetContext((IContext**)&ctx);
+    AutoPtr<IIntent> tmp;
+    ctx->RegisterReceiver(mReceiver, intentfilter, (IIntent**)&tmp);
+
+    AutoPtr<InnerThread> t = new InnerThread(this);
+    t->Start();
     return NOERROR;
 }
 
 ECode ImsPhoneCallTracker::Dispose()
 {
-    // ==================before translated======================
-    // if (DBG) log("dispose");
-    // mRingingCall.dispose();
-    // mBackgroundCall.dispose();
-    // mForegroundCall.dispose();
-    // mHandoverCall.dispose();
-    //
-    // clearDisconnected();
-    // mPhone.getContext().unregisterReceiver(mReceiver);
-    assert(0);
+    if (DBG) Log(String("dispose"));
+    mRingingCall->Dispose();
+    mBackgroundCall->Dispose();
+    mForegroundCall->Dispose();
+    mHandoverCall->Dispose();
+
+    ClearDisconnected();
+    AutoPtr<IContext> ctx;
+    IPhone::Probe(mPhone)->GetContext((IContext**)&ctx);
+    ctx->UnregisterReceiver(mReceiver);
     return NOERROR;
 }
 
@@ -606,19 +708,16 @@ ECode ImsPhoneCallTracker::RegisterForVoiceCallStarted(
     /* [in] */ Int32 what,
     /* [in] */ IInterface* obj)
 {
-    // ==================before translated======================
-    // Registrant r = new Registrant(h, what, obj);
-    // mVoiceCallStartedRegistrants.add(r);
-    assert(0);
+    AutoPtr<IRegistrant> r;
+    CRegistrant::New(h, what, obj, (IRegistrant**)&r);
+    mVoiceCallStartedRegistrants->Add(r);
     return NOERROR;
 }
 
 ECode ImsPhoneCallTracker::UnregisterForVoiceCallStarted(
     /* [in] */ IHandler* h)
 {
-    // ==================before translated======================
-    // mVoiceCallStartedRegistrants.remove(h);
-    assert(0);
+    mVoiceCallStartedRegistrants->Remove(h);
     return NOERROR;
 }
 
@@ -627,19 +726,16 @@ ECode ImsPhoneCallTracker::RegisterForVoiceCallEnded(
     /* [in] */ Int32 what,
     /* [in] */ IInterface* obj)
 {
-    // ==================before translated======================
-    // Registrant r = new Registrant(h, what, obj);
-    // mVoiceCallEndedRegistrants.add(r);
-    assert(0);
+    AutoPtr<IRegistrant> r;
+    CRegistrant::New(h, what, obj, (IRegistrant**)&r);
+    mVoiceCallEndedRegistrants->Add(r);
     return NOERROR;
 }
 
 ECode ImsPhoneCallTracker::UnregisterForVoiceCallEnded(
     /* [in] */ IHandler* h)
 {
-    // ==================before translated======================
-    // mVoiceCallEndedRegistrants.remove(h);
-    assert(0);
+    mVoiceCallEndedRegistrants->Remove(h);
     return NOERROR;
 }
 
@@ -649,10 +745,7 @@ ECode ImsPhoneCallTracker::Dial(
     /* [out] */ IConnection** result)
 {
     VALIDATE_NOT_NULL(result);
-    // ==================before translated======================
-    // return dial(dialString, videoState, null);
-    assert(0);
-    return NOERROR;
+    return Dial(dialString, videoState, NULL, result);
 }
 
 ECode ImsPhoneCallTracker::Dial(
@@ -662,12 +755,13 @@ ECode ImsPhoneCallTracker::Dial(
     /* [out] */ IConnection** result)
 {
     VALIDATE_NOT_NULL(result);
-    // ==================before translated======================
-    // SharedPreferences sp = PreferenceManager.getDefaultSharedPreferences(mPhone.getContext());
-    // int oirMode = sp.getInt(PhoneBase.CLIR_KEY, CommandsInterface.CLIR_DEFAULT);
-    // return dial(dialString, oirMode, videoState, extras);
-    assert(0);
-    return NOERROR;
+    AutoPtr<IContext> ctx;
+    IPhone::Probe(mPhone)->GetContext((IContext**)&ctx);
+    AutoPtr<ISharedPreferences> sp;
+    PreferenceManager::GetDefaultSharedPreferences(ctx, (ISharedPreferences**)&sp);
+    Int32 oirMode;
+    sp->GetInt32(IPhoneBase::CLIR_KEY, ICommandsInterface::CLIR_DEFAULT, &oirMode);
+    return Dial(dialString, oirMode, videoState, extras, result);
 }
 
 // synchronized
@@ -679,271 +773,321 @@ ECode ImsPhoneCallTracker::Dial(
     /* [out] */ IConnection** result)
 {
     VALIDATE_NOT_NULL(result);
-    // ==================before translated======================
-    // boolean isPhoneInEcmMode = SystemProperties.getBoolean(
-    //         TelephonyProperties.PROPERTY_INECM_MODE, false);
-    // boolean isEmergencyNumber = PhoneNumberUtils.isEmergencyNumber(dialString);
-    //
-    // if (DBG) log("dial clirMode=" + clirMode);
-    //
-    // // note that this triggers call state changed notif
-    // clearDisconnected();
-    //
-    // if (mImsManager == null) {
-    //     throw new CallStateException("service not available");
-    // }
-    //
-    // if (!canDial()) {
-    //     throw new CallStateException("cannot dial in current state");
-    // }
-    //
-    // if (isPhoneInEcmMode && isEmergencyNumber) {
-    //     handleEcmTimer(ImsPhone.CANCEL_ECM_TIMER);
-    // }
-    //
-    // boolean holdBeforeDial = false;
-    //
-    // // The new call must be assigned to the foreground call.
-    // // That call must be idle, so place anything that's
-    // // there on hold
-    // if (mForegroundCall.getState() == ImsPhoneCall.State.ACTIVE) {
-    //     if (mBackgroundCall.getState() != ImsPhoneCall.State.IDLE) {
-    //         //we should have failed in !canDial() above before we get here
-    //         throw new CallStateException("cannot dial in current state");
-    //     }
-    //     // foreground call is empty for the newly dialed connection
-    //     holdBeforeDial = true;
-    //     // Cache the video state for pending MO call.
-    //     mPendingCallVideoState = videoState;
-    //     switchWaitingOrHoldingAndActive();
-    // }
-    //
-    // ImsPhoneCall.State fgState = ImsPhoneCall.State.IDLE;
-    // ImsPhoneCall.State bgState = ImsPhoneCall.State.IDLE;
-    //
-    // mClirMode = clirMode;
-    //
-    // synchronized (mSyncHold) {
-    //     if (holdBeforeDial) {
-    //         fgState = mForegroundCall.getState();
-    //         bgState = mBackgroundCall.getState();
-    //
-    //         //holding foreground call failed
-    //         if (fgState == ImsPhoneCall.State.ACTIVE) {
-    //             throw new CallStateException("cannot dial in current state");
-    //         }
-    //
-    //         //holding foreground call succeeded
-    //         if (bgState == ImsPhoneCall.State.HOLDING) {
-    //             holdBeforeDial = false;
-    //         }
-    //     }
-    //
-    //     mPendingMO = new ImsPhoneConnection(mPhone.getContext(),
-    //             checkForTestEmergencyNumber(dialString), this,
-    //             mForegroundCall, extras);
-    // }
-    // addConnection(mPendingMO);
-    //
-    // if (!holdBeforeDial) {
-    //     if ((!isPhoneInEcmMode) || (isPhoneInEcmMode && isEmergencyNumber)) {
-    //         dialInternal(mPendingMO, clirMode, videoState, extras);
-    //     } else {
-    //         try {
-    //             getEcbmInterface().exitEmergencyCallbackMode();
-    //         } catch (ImsException e) {
-    //             e.printStackTrace();
-    //             throw new CallStateException("service not available");
-    //         }
-    //         mPhone.setOnEcbModeExitResponse(this, EVENT_EXIT_ECM_RESPONSE_CDMA, null);
-    //         pendingCallClirMode = clirMode;
-    //         mPendingCallVideoState = videoState;
-    //         pendingCallInEcm = true;
-    //     }
-    // }
-    //
-    // updatePhoneState();
-    // mPhone.notifyPreciseCallStateChanged();
-    //
-    // return mPendingMO;
-    assert(0);
+    Boolean isPhoneInEcmMode;
+    SystemProperties::GetBoolean(
+            ITelephonyProperties::PROPERTY_INECM_MODE, FALSE, &isPhoneInEcmMode);
+    Boolean isEmergencyNumber;
+    PhoneNumberUtils::IsEmergencyNumber(dialString, &isEmergencyNumber);
+
+    if (DBG) Log(String("dial clirMode=") + StringUtils::ToString(clirMode));
+
+    // note that this triggers call state changed notif
+    ClearDisconnected();
+
+    if (mImsManager == NULL) {
+        // throw new CallStateException("service not available");
+        return E_CALL_STATE_EXCEPTION;
+    }
+
+    Boolean b;
+    if (CanDial(&b), !b) {
+        // throw new CallStateException("cannot dial in current state");
+        return E_CALL_STATE_EXCEPTION;
+    }
+
+    if (isPhoneInEcmMode && isEmergencyNumber) {
+        HandleEcmTimer(ImsPhone::CANCEL_ECM_TIMER);
+    }
+
+    Boolean holdBeforeDial = FALSE;
+
+    // The new call must be assigned to the foreground call.
+    // That call must be idle, so place anything that's
+    // there on hold
+    ICallState foregroundCallState;
+    ICall::Probe(mForegroundCall)->GetState(&foregroundCallState);
+    ICallState backgroundCallState;
+    ICall::Probe(mBackgroundCall)->GetState(&backgroundCallState);
+    if (foregroundCallState == ICallState_ACTIVE) {
+        if (backgroundCallState != ICallState_IDLE) {
+            //we should have failed in !canDial() above before we get here
+            // throw new CallStateException("cannot dial in current state");
+            return E_CALL_STATE_EXCEPTION;
+        }
+        // foreground call is empty for the newly dialed connection
+        holdBeforeDial = TRUE;
+        // Cache the video state for pending MO call.
+        mPendingCallVideoState = videoState;
+        SwitchWaitingOrHoldingAndActive();
+    }
+
+    ICallState fgState = ICallState_IDLE;
+    ICallState bgState = ICallState_IDLE;
+
+    mClirMode = clirMode;
+
+    {
+        AutoLock lock(mSyncHold);
+        if (holdBeforeDial) {
+            ICall::Probe(mForegroundCall)->GetState(&fgState);
+            ICall::Probe(mBackgroundCall)->GetState(&bgState);
+
+            //holding foreground call failed
+            if (fgState == ICallState_ACTIVE) {
+                // throw new CallStateException("cannot dial in current state");
+                return E_CALL_STATE_EXCEPTION;
+            }
+
+            //holding foreground call succeeded
+            if (bgState == ICallState_HOLDING) {
+                holdBeforeDial = FALSE;
+            }
+        }
+
+        AutoPtr<IContext> ctx;
+        IPhone::Probe(mPhone)->GetContext((IContext**)&ctx);
+        CImsPhoneConnection::New(ctx,
+                CheckForTestEmergencyNumber(dialString), this,
+                mForegroundCall, extras, (IImsPhoneConnection**)&mPendingMO);
+    }
+    AddConnection(mPendingMO);
+
+    if (!holdBeforeDial) {
+        if ((!isPhoneInEcmMode) || (isPhoneInEcmMode && isEmergencyNumber)) {
+            DialInternal(mPendingMO, clirMode, videoState, extras);
+        }
+        else {
+            // try {
+// TODO: Need IImsEcbm
+            // GetEcbmInterface()->ExitEmergencyCallbackMode();
+            // } catch (ImsException e) {
+            //     e.printStackTrace();
+            //     throw new CallStateException("service not available");
+            // }
+            mPhone->SetOnEcbModeExitResponse(this, EVENT_EXIT_ECM_RESPONSE_CDMA, NULL);
+            pendingCallClirMode = clirMode;
+            mPendingCallVideoState = videoState;
+            pendingCallInEcm = TRUE;
+        }
+    }
+
+    UpdatePhoneState();
+    ((ImsPhone*)mPhone.Get())->NotifyPreciseCallStateChanged();
+
+    *result = IConnection::Probe(mPendingMO);
+    REFCOUNT_ADD(*result)
     return NOERROR;
 }
 
 ECode ImsPhoneCallTracker::AddParticipant(
     /* [in] */ const String& dialString)
 {
-    // ==================before translated======================
-    // if (mForegroundCall != null) {
-    //     ImsCall imsCall = mForegroundCall.getImsCall();
-    //     if (imsCall == null) {
-    //         loge("addParticipant : No foreground ims call");
-    //     } else {
-    //         ImsCallSession imsCallSession = imsCall.getCallSession();
-    //         if (imsCallSession != null) {
-    //             String[] callees = new String[] { dialString };
-    //             imsCallSession.inviteParticipants(callees);
-    //         } else {
-    //             loge("addParticipant : ImsCallSession does not exist");
-    //         }
-    //     }
-    // } else {
-    //     loge("addParticipant : Foreground call does not exist");
-    // }
-    assert(0);
+    if (mForegroundCall != NULL) {
+// TODO: Need IImsCall
+        // AutoPtr<IImsCall> imsCall;
+        // mForegroundCall->GetImsCall((IImsCall**)&imsCall);
+        // if (imsCall == NULL) {
+        //     Loge(String("addParticipant : No foreground ims call"));
+        // }
+        // else {
+        //     AutoPtr<IImsCallSession> imsCallSession;
+        //     imsCall->GetCallSession((IImsCallSession**)&imsCallSession);
+        //     if (imsCallSession != NULL) {
+        //         String[] callees = new String[] { dialString };
+        //         imsCallSession->InviteParticipants(callees);
+        //     }
+        //     else {
+        //         Loge(String("addParticipant : ImsCallSession does not exist"));
+        //     }
+        // }
+    }
+    else {
+        Loge(String("addParticipant : Foreground call does not exist"));
+    }
     return NOERROR;
 }
 
 ECode ImsPhoneCallTracker::AcceptCall(
     /* [in] */ Int32 videoState)
 {
-    // ==================before translated======================
-    // if (DBG) log("acceptCall");
-    //
-    // if (mForegroundCall.getState().isAlive()
-    //         && mBackgroundCall.getState().isAlive()) {
-    //     throw new CallStateException("cannot accept call");
-    // }
-    //
-    // if ((mRingingCall.getState() == ImsPhoneCall.State.WAITING)
-    //         && mForegroundCall.getState().isAlive()) {
-    //     setMute(false);
-    //     // Cache video state for pending MT call.
-    //     mPendingCallVideoState = videoState;
-    //     switchWaitingOrHoldingAndActive();
-    // } else if (mRingingCall.getState().isRinging()) {
-    //     if (DBG) log("acceptCall: incoming...");
-    //     // Always unmute when answering a new call
-    //     setMute(false);
-    //     try {
-    //         ImsCall imsCall = mRingingCall.getImsCall();
-    //         if (imsCall != null) {
-    //             imsCall.accept(ImsCallProfile.getCallTypeFromVideoState(videoState));
-    //         } else {
-    //             throw new CallStateException("no valid ims call");
-    //         }
-    //     } catch (ImsException e) {
-    //         throw new CallStateException("cannot accept call");
-    //     }
-    // } else {
-    //     throw new CallStateException("phone not ringing");
-    // }
-    assert(0);
+    if (DBG) Log(String("acceptCall"));
+
+    ICallState foregroundCallState;
+    ICall::Probe(mForegroundCall)->GetState(&foregroundCallState);
+    ICallState backgroundCallState;
+    ICall::Probe(mBackgroundCall)->GetState(&backgroundCallState);
+    ICallState ringingCallState;
+    ICall::Probe(mRingingCall)->GetState(&ringingCallState);
+
+// TODO: Need ICallState::IsAlive
+//     if (foregroundCallState->IsAlive()
+//             && backgroundCallState->IsAlive()) {
+//         // throw new CallStateException("cannot accept call");
+//         return E_CALL_STATE_EXCEPTION;
+//     }
+
+//     if ((ringingCallState == ICallState_WAITING)
+//             && foregroundCallState->IsAlive()) {
+//         SetMute(FALSE);
+//         // Cache video state for pending MT call.
+//         mPendingCallVideoState = videoState;
+//         SwitchWaitingOrHoldingAndActive();
+//     }
+//     else if (ringingCallState.isRinging()) {
+//         if (DBG) Log(String("acceptCall: incoming..."));
+//         // Always unmute when answering a new call
+//         SetMute(FALSE);
+//         // try {
+// // TODO: Need IImsCall
+//         // ImsCall imsCall = mRingingCall.getImsCall();
+//         // if (imsCall != NULL) {
+//         //     imsCall.accept(ImsCallProfile.getCallTypeFromVideoState(videoState));
+//         // }
+//         // else {
+//         //     // throw new CallStateException("no valid ims call");
+//         //     return E_CALL_STATE_EXCEPTION;
+//         // }
+//         // } catch (ImsException e) {
+//         //     // throw new CallStateException("cannot accept call");
+//         //     return E_CALL_STATE_EXCEPTION;
+//         // }
+//     }
+//     else {
+//         // throw new CallStateException("phone not ringing");
+//         return E_CALL_STATE_EXCEPTION;
+//     }
     return NOERROR;
 }
 
 ECode ImsPhoneCallTracker::DeflectCall(
     /* [in] */ const String& number)
 {
-    // ==================before translated======================
-    // if (DBG) log("deflectCall");
-    //
-    // if (mRingingCall.getState().isRinging()) {
-    //     try {
-    //         ImsCall imsCall = mRingingCall.getImsCall();
-    //         if (imsCall != null) {
-    //             imsCall.deflect(number);
-    //         } else {
-    //             throw new CallStateException("no valid ims call to deflect");
-    //         }
-    //     } catch (ImsException e) {
-    //         throw new CallStateException("cannot deflect call");
-    //     }
-    // } else {
-    //     throw new CallStateException("phone not ringing");
-    // }
-    assert(0);
+    if (DBG) Log(String("deflectCall"));
+
+    ICallState ringingCallState;
+    ICall::Probe(mRingingCall)->GetState(&ringingCallState);
+
+// TODO: Need ICallState::IsRinging
+//     if (ringingCallState->IsRinging()) {
+//         // try {
+// // TODO: Need IImsCall
+//         // ImsCall imsCall = mRingingCall.getImsCall();
+//         // if (imsCall != NULL) {
+//         //     imsCall.deflect(number);
+//         // }
+//         // else {
+//         //     // throw new CallStateException("no valid ims call to deflect");
+//         //     return E_CALL_STATE_EXCEPTION;
+//         // }
+//         // } catch (ImsException e) {
+//         //     throw new CallStateException("cannot deflect call");
+//         // }
+//     }
+//     else {
+//         // throw new CallStateException("phone not ringing");
+//         return E_CALL_STATE_EXCEPTION;
+//     }
     return NOERROR;
 }
 
 ECode ImsPhoneCallTracker::RejectCall()
 {
-    // ==================before translated======================
-    // if (DBG) log("rejectCall");
-    //
-    // if (mRingingCall.getState().isRinging()) {
-    //     hangup(mRingingCall);
-    // } else {
-    //     throw new CallStateException("phone not ringing");
+    if (DBG) Log(String("rejectCall"));
+
+    ICallState ringingCallState;
+    ICall::Probe(mRingingCall)->GetState(&ringingCallState);
+
+// TODO: Need ICallState::IsRinging
+    // if (ringingCallState->IsRinging()) {
+    //     Hangup(mRingingCall);
     // }
-    assert(0);
+    // else {
+    //     // throw new CallStateException("phone not ringing");
+    //     return E_CALL_STATE_EXCEPTION;
+    // }
     return NOERROR;
 }
 
 ECode ImsPhoneCallTracker::SwitchWaitingOrHoldingAndActive()
 {
-    // ==================before translated======================
-    // if (DBG) log("switchWaitingOrHoldingAndActive");
-    //
-    // if (mRingingCall.getState() == ImsPhoneCall.State.INCOMING) {
-    //     throw new CallStateException("cannot be in the incoming state");
-    // }
-    //
-    // if (mForegroundCall.getState() == ImsPhoneCall.State.ACTIVE) {
-    //     ImsCall imsCall = mForegroundCall.getImsCall();
-    //     if (imsCall == null) {
-    //         throw new CallStateException("no ims call");
-    //     }
-    //
-    //     mForegroundCall.switchWith(mBackgroundCall);
-    //
-    //     try {
-    //         imsCall.hold();
-    //     } catch (ImsException e) {
-    //         mForegroundCall.switchWith(mBackgroundCall);
-    //         throw new CallStateException(e.getMessage());
-    //     }
-    // } else if (mBackgroundCall.getState() == ImsPhoneCall.State.HOLDING) {
-    //     resumeWaitingOrHolding();
-    // }
-    assert(0);
+    if (DBG) Log(String("switchWaitingOrHoldingAndActive"));
+
+    ICallState ringingCallState;
+    ICall::Probe(mRingingCall)->GetState(&ringingCallState);
+    if (ringingCallState == ICallState_INCOMING) {
+        // throw new CallStateException("cannot be in the incoming state");
+        return E_CALL_STATE_EXCEPTION;
+    }
+
+    ICallState foregroundCallState;
+    ICall::Probe(mForegroundCall)->GetState(&foregroundCallState);
+    ICallState backgroundCallState;
+    ICall::Probe(mBackgroundCall)->GetState(&backgroundCallState);
+
+    if (foregroundCallState == ICallState_ACTIVE) {
+// TODO: Need ImsCall
+        // ImsCall imsCall = mForegroundCall.getImsCall();
+        // if (imsCall == NULL) {
+        //     // throw new CallStateException("no ims call");
+        //     return E_CALL_STATE_EXCEPTION;
+        // }
+
+        ((ImsPhoneCall*)mForegroundCall.Get())->SwitchWith(mBackgroundCall);
+
+        // try {
+// TODO: Need ImsCall
+        // imsCall->Hold();
+        // } catch (ImsException e) {
+        //     mForegroundCall.switchWith(mBackgroundCall);
+        //     throw new CallStateException(e.getMessage());
+        // }
+    }
+    else if (backgroundCallState == ICallState_HOLDING) {
+        ResumeWaitingOrHolding();
+    }
     return NOERROR;
 }
 
 ECode ImsPhoneCallTracker::Conference()
 {
-    // ==================before translated======================
-    // if (DBG) log("conference");
-    //
+    if (DBG) Log(String("conference"));
+
+// TODO: Need ImsCall
     // ImsCall fgImsCall = mForegroundCall.getImsCall();
-    // if (fgImsCall == null) {
-    //     log("conference no foreground ims call");
-    //     return;
+    // if (fgImsCall == NULL) {
+    //     Log(String("conference no foreground ims call"));
+    //     return NOERROR;
     // }
-    //
+
     // ImsCall bgImsCall = mBackgroundCall.getImsCall();
-    // if (bgImsCall == null) {
-    //     log("conference no background ims call");
-    //     return;
+    // if (bgImsCall == NULL) {
+    //     Log(String("conference no background ims call"));
+    //     return NOERROR;
     // }
-    //
+
     // try {
-    //     fgImsCall.merge(bgImsCall);
+// TODO: Need ImsCall
+    // fgImsCall->Merge(bgImsCall);
     // } catch (ImsException e) {
-    //     log("conference " + e.getMessage());
+    //     Log("conference " + e.getMessage());
     // }
-    assert(0);
     return NOERROR;
 }
 
 ECode ImsPhoneCallTracker::ExplicitCallTransfer()
 {
-    // ==================before translated======================
-    // //TODO : implement
-    assert(0);
+    //TODO : implement
     return NOERROR;
 }
 
 ECode ImsPhoneCallTracker::ClearDisconnected()
 {
-    // ==================before translated======================
-    // if (DBG) log("clearDisconnected");
-    //
-    // internalClearDisconnected();
-    //
-    // updatePhoneState();
-    // mPhone.notifyPreciseCallStateChanged();
-    assert(0);
+    if (DBG) Log(String("clearDisconnected"));
+
+    InternalClearDisconnected();
+
+    UpdatePhoneState();
+    ((ImsPhone*)mPhone.Get())->NotifyPreciseCallStateChanged();
     return NOERROR;
 }
 
@@ -951,12 +1095,16 @@ ECode ImsPhoneCallTracker::CanConference(
     /* [out] */ Boolean* result)
 {
     VALIDATE_NOT_NULL(result);
-    // ==================before translated======================
-    // return mForegroundCall.getState() == ImsPhoneCall.State.ACTIVE
-    //     && mBackgroundCall.getState() == ImsPhoneCall.State.HOLDING
-    //     && !mBackgroundCall.isFull()
-    //     && !mForegroundCall.isFull();
-    assert(0);
+    ICallState foregroundCallState;
+    ICall::Probe(mForegroundCall)->GetState(&foregroundCallState);
+    ICallState backgroundCallState;
+    ICall::Probe(mBackgroundCall)->GetState(&backgroundCallState);
+
+    Boolean b1, b2;
+    *result = foregroundCallState == ICallState_ACTIVE
+        && backgroundCallState == ICallState_HOLDING
+        && (((ImsPhoneCall*)mBackgroundCall.Get())->IsFull(&b1), b1)
+        && (((ImsPhoneCall*)mForegroundCall.Get())->IsFull(&b2), b2);
     return NOERROR;
 }
 
@@ -964,29 +1112,38 @@ ECode ImsPhoneCallTracker::CanDial(
     /* [out] */ Boolean* result)
 {
     VALIDATE_NOT_NULL(result);
-    // ==================before translated======================
-    // boolean ret;
-    // int serviceState = mPhone.getServiceState().getState();
-    // String disableCall = SystemProperties.get(
-    //         TelephonyProperties.PROPERTY_DISABLE_CALL, "false");
-    //
-    // Rlog.d(LOGTAG, "canDial(): "
+    Boolean ret;
+    Int32 serviceState;
+    AutoPtr<IServiceState> ss;
+    IPhone::Probe(mPhone)->GetServiceState((IServiceState**)&ss);
+    Int32 state;
+    ss->GetState(&state);
+    String disableCall;
+    SystemProperties::Get(
+            ITelephonyProperties::PROPERTY_DISABLE_CALL, String("FALSE"), &disableCall);
+
+    // Log::D(LOGTAG, "canDial(): "
     //         + "\nserviceState = " + serviceState
-    //         + "\npendingMO == null::=" + String.valueOf(mPendingMO == null)
+    //         + "\npendingMO == NULL::=" + String.valueOf(mPendingMO == NULL)
     //         + "\nringingCall: " + mRingingCall.getState()
     //         + "\ndisableCall = " + disableCall
     //         + "\nforegndCall: " + mForegroundCall.getState()
     //         + "\nbackgndCall: " + mBackgroundCall.getState());
-    //
-    // ret = (serviceState != ServiceState.STATE_POWER_OFF)
-    //     && mPendingMO == null
+
+    ICallState foregroundCallState;
+    ICall::Probe(mForegroundCall)->GetState(&foregroundCallState);
+    ICallState backgroundCallState;
+    ICall::Probe(mBackgroundCall)->GetState(&backgroundCallState);
+
+// TODO: Need ICallState::isRinging,isAlive
+    // ret = (serviceState != IServiceState::STATE_POWER_OFF)
+    //     && mPendingMO == NULL
     //     && !mRingingCall.isRinging()
-    //     && !disableCall.equals("true")
-    //     && (!mForegroundCall.getState().isAlive()
-    //             || !mBackgroundCall.getState().isAlive());
-    //
-    // return ret;
-    assert(0);
+    //     && !disableCall.Equals("TRUE")
+    //     && (!foregroundCallState.isAlive()
+    //             || !backgroundCallState.isAlive());
+
+    *result = ret;
     return NOERROR;
 }
 
@@ -994,10 +1151,14 @@ ECode ImsPhoneCallTracker::CanTransfer(
     /* [out] */ Boolean* result)
 {
     VALIDATE_NOT_NULL(result);
-    // ==================before translated======================
-    // return mForegroundCall.getState() == ImsPhoneCall.State.ACTIVE
-    //     && mBackgroundCall.getState() == ImsPhoneCall.State.HOLDING;
-    assert(0);
+
+    ICallState foregroundCallState;
+    ICall::Probe(mForegroundCall)->GetState(&foregroundCallState);
+    ICallState backgroundCallState;
+
+    ICall::Probe(mBackgroundCall)->GetState(&backgroundCallState);
+    *result = foregroundCallState == ICallState_ACTIVE
+        && backgroundCallState == ICallState_HOLDING;
     return NOERROR;
 }
 
@@ -1005,24 +1166,21 @@ ECode ImsPhoneCallTracker::SetUiTTYMode(
     /* [in] */ Int32 uiTtyMode,
     /* [in] */ IMessage* onComplete)
 {
-    // ==================before translated======================
     // try {
-    //     mImsManager.setUiTTYMode(mServiceId, uiTtyMode, onComplete);
+// TODO: Need IImsManager
+    // mImsManager->SetUiTTYMode(mServiceId, uiTtyMode, onComplete);
     // } catch (ImsException e) {
-    //     loge("setTTYMode : " + e);
+    //     Loge("setTTYMode : " + e);
     //     mPhone.sendErrorResponse(onComplete, e);
     // }
-    assert(0);
     return NOERROR;
 }
 
 ECode ImsPhoneCallTracker::SetMute(
     /* [in] */ Boolean mute)
 {
-    // ==================before translated======================
-    // mDesiredMute = mute;
-    // mForegroundCall.setMute(mute);
-    assert(0);
+    mDesiredMute = mute;
+    ((ImsPhoneCall*)mForegroundCall.Get())->SetMute(mute);
     return NOERROR;
 }
 
@@ -1030,163 +1188,180 @@ ECode ImsPhoneCallTracker::GetMute(
     /* [out] */ Boolean* result)
 {
     VALIDATE_NOT_NULL(result);
-    // ==================before translated======================
-    // return mDesiredMute;
-    assert(0);
+    *result = mDesiredMute;
     return NOERROR;
 }
 
 ECode ImsPhoneCallTracker::SendDtmf(
     /* [in] */ Char16 c)
 {
-    // ==================before translated======================
-    // if (DBG) log("sendDtmf");
-    //
+    if (DBG) Log(String("sendDtmf"));
+
+// TODO: Need ImsCall
     // ImsCall imscall = mForegroundCall.getImsCall();
-    // if (imscall != null) {
+    // if (imscall != NULL) {
     //     imscall.sendDtmf(c);
     // }
-    assert(0);
     return NOERROR;
 }
 
 ECode ImsPhoneCallTracker::StartDtmf(
     /* [in] */ Char16 c)
 {
-    // ==================before translated======================
-    // if (DBG) log("startDtmf");
-    //
+    if (DBG) Log(String("startDtmf"));
+
+// TODO: Need ImsCall
     // ImsCall imscall = mForegroundCall.getImsCall();
-    // if (imscall != null) {
+    // if (imscall != NULL) {
     //     imscall.startDtmf(c);
-    // } else {
-    //     loge("startDtmf : no foreground call");
     // }
-    assert(0);
+    // else {
+    //     Loge(String("startDtmf : no foreground call"));
+    // }
     return NOERROR;
 }
 
 ECode ImsPhoneCallTracker::StopDtmf()
 {
-    // ==================before translated======================
-    // if (DBG) log("stopDtmf");
-    //
+    if (DBG) Log(String("stopDtmf"));
+
+// TODO: Need ImsCall
     // ImsCall imscall = mForegroundCall.getImsCall();
-    // if (imscall != null) {
+    // if (imscall != NULL) {
     //     imscall.stopDtmf();
-    // } else {
-    //     loge("stopDtmf : no foreground call");
     // }
-    assert(0);
+    // else {
+    //     Loge(String("stopDtmf : no foreground call"));
+    // }
     return NOERROR;
 }
 
 ECode ImsPhoneCallTracker::Hangup(
     /* [in] */ IImsPhoneConnection* conn)
 {
-    // ==================before translated======================
-    // if (DBG) log("hangup connection");
-    //
-    // if (conn.getOwner() != this) {
-    //     throw new CallStateException ("ImsPhoneConnection " + conn
-    //             + "does not belong to ImsPhoneCallTracker " + this);
-    // }
-    //
-    // hangup(conn.getCall());
-    assert(0);
+    if (DBG) Log(String("hangup connection"));
+
+    AutoPtr<IImsPhoneCallTracker> ct;
+    conn->GetOwner((IImsPhoneCallTracker**)&ct);
+    if (ct != IImsPhoneCallTracker::Probe(this)) {
+        // throw new CallStateException ("ImsPhoneConnection " + conn
+        //         + "does not belong to ImsPhoneCallTracker " + this);
+        return E_CALL_STATE_EXCEPTION;
+    }
+
+    AutoPtr<ICall> call;
+    IConnection::Probe(conn)->GetCall((ICall**)&call);
+    Hangup(IImsPhoneConnection::Probe(call));
     return NOERROR;
 }
 
 ECode ImsPhoneCallTracker::Hangup(
     /* [in] */ IImsPhoneCall* call)
 {
-    // ==================before translated======================
-    // if (DBG) log("hangup call");
-    //
-    // if (call.getConnections().size() == 0) {
-    //     throw new CallStateException("no connections");
-    // }
-    //
+    if (DBG) Log(String("hangup call"));
+
+    AutoPtr<IList> conns;
+    ICall::Probe(call)->GetConnections((IList**)&conns);
+    Int32 size;
+    conns->GetSize(&size);
+    if (size == 0) {
+        // throw new CallStateException("no connections");
+        return E_CALL_STATE_EXCEPTION;
+    }
+
+// TODO: Need IImsCall
     // ImsCall imsCall = call.getImsCall();
-    // boolean rejectCall = false;
-    //
-    // if (call == mRingingCall) {
-    //     if (Phone.DEBUG_PHONE) log("(ringing) hangup incoming");
-    //     rejectCall = true;
-    // } else if (call == mForegroundCall) {
-    //     if (call.isDialingOrAlerting()) {
-    //         if (Phone.DEBUG_PHONE) {
-    //             log("(foregnd) hangup dialing or alerting...");
-    //         }
-    //     } else {
-    //         if (Phone.DEBUG_PHONE) {
-    //             log("(foregnd) hangup foreground");
-    //         }
-    //         //held call will be resumed by onCallTerminated
-    //     }
-    // } else if (call == mBackgroundCall) {
-    //     if (Phone.DEBUG_PHONE) {
-    //         log("(backgnd) hangup waiting or background");
-    //     }
-    // } else {
-    //     throw new CallStateException ("ImsPhoneCall " + call +
-    //             "does not belong to ImsPhoneCallTracker " + this);
-    // }
-    //
-    // call.onHangupLocal();
-    //
+    Boolean rejectCall = FALSE;
+
+    if (call == mRingingCall) {
+        if (IPhone::DEBUG_PHONE) Log(String("(ringing) hangup incoming"));
+        rejectCall = TRUE;
+    }
+    else if (call == mForegroundCall) {
+        Boolean b;
+        if (ICall::Probe(call)->IsDialingOrAlerting(&b), b) {
+            if (IPhone::DEBUG_PHONE) {
+                Log(String("(foregnd) hangup dialing or alerting..."));
+            }
+        }
+        else {
+            if (IPhone::DEBUG_PHONE) {
+                Log(String("(foregnd) hangup foreground"));
+            }
+            //held call will be resumed by onCallTerminated
+        }
+    }
+    else if (call == mBackgroundCall) {
+        if (IPhone::DEBUG_PHONE) {
+            Log(String("(backgnd) hangup waiting or background"));
+        }
+    }
+    else {
+        // throw new CallStateException ("ImsPhoneCall " + call +
+        //         "does not belong to ImsPhoneCallTracker " + this);
+        return E_CALL_STATE_EXCEPTION;
+    }
+
+    ((ImsPhoneCall*)call)->OnHangupLocal();
+
     // try {
-    //     if (imsCall != null) {
-    //         if (rejectCall) imsCall.reject(ImsReasonInfo.CODE_USER_DECLINE);
-    //         else imsCall.terminate(ImsReasonInfo.CODE_USER_TERMINATED);
-    //     } else if (mPendingMO != null && call == mForegroundCall) {
-    //         // is holding a foreground call
-    //         mPendingMO.update(null, ImsPhoneCall.State.DISCONNECTED);
-    //         mPendingMO.onDisconnect();
-    //         removeConnection(mPendingMO);
-    //         mPendingMO = null;
-    //         updatePhoneState();
-    //         removeMessages(EVENT_DIAL_PENDINGMO);
-    //     }
+// TODO: Need IImsCall
+    // if (imsCall != NULL) {
+    //     if (rejectCall) imsCall.reject(IImsReasonInfo::CODE_USER_DECLINE);
+
+    //     else imsCall.terminate(IImsReasonInfo::CODE_USER_TERMINATED);
+    // }
+    // else if (mPendingMO != NULL && call == mForegroundCall) {
+    //     // is holding a foreground call
+    //     mPendingMO->Update(NULL, ICallState_DISCONNECTED);
+    //     mPendingMO->OnDisconnect();
+    //     RemoveConnection(mPendingMO);
+    //     mPendingMO = NULL;
+    //     UpdatePhoneState();
+    //     RemoveMessages(EVENT_DIAL_PENDINGMO);
+    // }
     // } catch (ImsException e) {
     //     throw new CallStateException(e.getMessage());
     // }
-    //
-    // mPhone.notifyPreciseCallStateChanged();
-    assert(0);
+
+    ((ImsPhone*)mPhone.Get())->NotifyPreciseCallStateChanged();
     return NOERROR;
 }
 
 ECode ImsPhoneCallTracker::ResumeWaitingOrHolding()
 {
-    // ==================before translated======================
-    // if (DBG) log("resumeWaitingOrHolding");
-    //
+    if (DBG) Log(String("resumeWaitingOrHolding"));
+
     // try {
-    //     if (mForegroundCall.getState().isAlive()) {
-    //         //resume foreground call after holding background call
-    //         //they were switched before holding
-    //         ImsCall imsCall = mForegroundCall.getImsCall();
-    //         if (imsCall != null) imsCall.resume();
-    //     } else if (mRingingCall.getState() == ImsPhoneCall.State.WAITING) {
-    //         //accept waiting call after holding background call
-    //         ImsCall imsCall = mRingingCall.getImsCall();
-    //         if (imsCall != null) {
-    //             imsCall.accept(
-    //                 ImsCallProfile.getCallTypeFromVideoState(mPendingCallVideoState));
-    //         }
-    //     } else {
-    //         //Just resume background call.
-    //         //To distinguish resuming call with swapping calls
-    //         //we do not switch calls.here
-    //         //ImsPhoneConnection.update will chnage the parent when completed
-    //         ImsCall imsCall = mBackgroundCall.getImsCall();
-    //         if (imsCall != null) imsCall.resume();
+    ICallState foregroundCallState;
+    ICall::Probe(mForegroundCall)->GetState(&foregroundCallState);
+    ICallState ringingCallState;
+    ICall::Probe(mRingingCall)->GetState(&ringingCallState);
+
+// TODO: Need IImsCall
+    // if (foregroundCallState.isAlive()) {
+    //     //resume foreground call after holding background call
+    //     //they were switched before holding
+    //     ImsCall imsCall = mForegroundCall.getImsCall();
+    //     if (imsCall != NULL) imsCall.resume();
+    // } else if (ringingCallState == ICallState_WAITING) {
+    //     //accept waiting call after holding background call
+    //     ImsCall imsCall = mRingingCall.getImsCall();
+    //     if (imsCall != NULL) {
+    //         imsCall.accept(
+    //             ImsCallProfile.getCallTypeFromVideoState(mPendingCallVideoState));
     //     }
+    // } else {
+    //     //Just resume background call.
+    //     //To distinguish resuming call with swapping calls
+    //     //we do not switch calls.here
+    //     //ImsPhoneConnection.update will chnage the parent when completed
+    //     ImsCall imsCall = mBackgroundCall.getImsCall();
+    //     if (imsCall != NULL) imsCall.resume();
+    // }
     // } catch (ImsException e) {
     //     throw new CallStateException(e.getMessage());
     // }
-    assert(0);
     return NOERROR;
 }
 
@@ -1194,43 +1369,46 @@ ECode ImsPhoneCallTracker::SendUSSD(
     /* [in] */ const String& ussdString,
     /* [in] */ IMessage* response)
 {
-    // ==================before translated======================
-    // if (DBG) log("sendUSSD");
-    //
+    if (DBG) Log(String("sendUSSD"));
+
     // try {
-    //     if (mUssdSession != null) {
-    //         mUssdSession.sendUssd(ussdString);
-    //         AsyncResult.forMessage(response, null, null);
-    //         response.sendToTarget();
-    //         return;
-    //     }
-    //
-    //     String[] callees = new String[] { ussdString };
-    //     ImsCallProfile profile = mImsManager.createCallProfile(mServiceId,
-    //             ImsCallProfile.SERVICE_TYPE_NORMAL, ImsCallProfile.CALL_TYPE_VOICE);
-    //     profile.setCallExtraInt(ImsCallProfile.EXTRA_DIALSTRING,
-    //             ImsCallProfile.DIALSTRING_USSD);
-    //
-    //     mUssdSession = mImsManager.makeCall(mServiceId, profile,
-    //             callees, mImsUssdListener);
+    if (mUssdSession != NULL) {
+// TODO: Need IImsCall
+        // mUssdSession->SendUssd(ussdString);
+        AsyncResult::ForMessage(response, NULL, NULL);
+        response->SendToTarget();
+        return NOERROR;
+    }
+
+    AutoPtr<ArrayOf<String> > callees = ArrayOf<String>::Alloc(1);
+    (*callees)[0] = ussdString;
+    AutoPtr<IImsCallProfile> profile;
+// TODO: Need IImsManager
+    // mImsManager->CreateCallProfile(mServiceId,
+    //         IImsCallProfile::SERVICE_TYPE_NORMAL, IImsCallProfile::CALL_TYPE_VOICE,
+    //         (IImsCallProfile**)&profile);
+    profile->SetCallExtraInt32(IImsCallProfile::EXTRA_DIALSTRING,
+            IImsCallProfile::DIALSTRING_USSD);
+
+// TODO: Need IImsManager
+    // mUssdSession = mImsManager->MakeCall(mServiceId, profile,
+    //         callees, mImsUssdListener);
     // } catch (ImsException e) {
-    //     loge("sendUSSD : " + e);
+    //     Loge("sendUSSD : " + e);
     //     mPhone.sendErrorResponse(response, e);
     // }
-    assert(0);
     return NOERROR;
 }
 
 ECode ImsPhoneCallTracker::CancelUSSD()
 {
-    // ==================before translated======================
-    // if (mUssdSession == null) return;
-    //
+    if (mUssdSession == NULL) return NOERROR;
+
     // try {
-    //     mUssdSession.terminate(ImsReasonInfo.CODE_USER_TERMINATED);
+// TODO: Need IImsCall
+    // mUssdSession->Terminate(IImsReasonInfo::CODE_USER_TERMINATED);
     // } catch (ImsException e) {
     // }
-    assert(0);
     return NOERROR;
 }
 
@@ -1238,82 +1416,86 @@ ECode ImsPhoneCallTracker::GetUtInterface(
     /* [out] */ /*TODO IImsUtInterface*/IInterface** result)
 {
     VALIDATE_NOT_NULL(result);
-    // ==================before translated======================
-    // if (mImsManager == null) {
-    //     throw new ImsException("no ims manager", ImsReasonInfo.CODE_UNSPECIFIED);
+// TODO: Need IImsManager
+    // if (mImsManager == NULL) {
+    //     throw new ImsException("no ims manager", IImsReasonInfo::CODE_UNSPECIFIED);
     // }
-    //
+
     // ImsUtInterface ut = mImsManager.getSupplementaryServiceConfiguration(mServiceId);
-    // return ut;
-    assert(0);
+    // *result = ut;
+    // REFCOUNT_ADD(*result)
     return NOERROR;
 }
 
 ECode ImsPhoneCallTracker::NotifySrvccState(
     /* [in] */ ICallSrvccState state)
 {
-    // ==================before translated======================
-    // if (DBG) log("notifySrvccState state=" + state);
-    //
-    // mSrvccState = state;
-    //
-    // if (mSrvccState == Call.SrvccState.COMPLETED) {
-    //     transferHandoverConnections(mForegroundCall);
-    //     transferHandoverConnections(mBackgroundCall);
-    //     transferHandoverConnections(mRingingCall);
-    //     // release wake lock hold
-    //     ImsPhoneConnection con = mHandoverCall.getHandoverConnection();
-    //     if (con != null) {
-    //         con.releaseWakeLock();
-    //     }
-    // }
-    assert(0);
+    if (DBG) Log(String("notifySrvccState state=") + StringUtils::ToString(state));
+
+    mSrvccState = state;
+
+    if (mSrvccState == ICallSrvccState_COMPLETED) {
+        TransferHandoverConnections(mForegroundCall);
+        TransferHandoverConnections(mBackgroundCall);
+        TransferHandoverConnections(mRingingCall);
+        // release wake lock hold
+        AutoPtr<IImsPhoneConnection> con;
+        ((ImsPhoneCall*)mHandoverCall.Get())->GetHandoverConnection((IImsPhoneConnection**)&con);
+        if (con != NULL) {
+            ((ImsPhoneConnection*)con.Get())->ReleaseWakeLock();
+        }
+    }
     return NOERROR;
 }
 
 ECode ImsPhoneCallTracker::HandleMessage(
     /* [in] */ IMessage* msg)
 {
-    // ==================before translated======================
-    // AsyncResult ar;
-    // if (DBG) log("handleMessage what=" + msg.what);
-    //
-    // switch (msg.what) {
-    //     case EVENT_HANGUP_PENDINGMO:
-    //         if (mPendingMO != null) {
-    //             mPendingMO.onDisconnect();
-    //             removeConnection(mPendingMO);
-    //             mPendingMO = null;
-    //         }
-    //
-    //         updatePhoneState();
-    //         mPhone.notifyPreciseCallStateChanged();
-    //         break;
-    //     case EVENT_RESUME_BACKGROUND:
-    //         try {
-    //             resumeWaitingOrHolding();
-    //         } catch (CallStateException e) {
-    //             if (Phone.DEBUG_PHONE) {
-    //                 loge("handleMessage EVENT_RESUME_BACKGROUND exception=" + e);
-    //             }
-    //         }
-    //         break;
-    //     case EVENT_DIAL_PENDINGMO:
-    //         dialInternal(mPendingMO, mClirMode, mPendingCallVideoState,
-    //             mPendingMO.getCallExtras());
-    //         break;
-    //
-    //     case EVENT_EXIT_ECM_RESPONSE_CDMA:
-    //         // no matter the result, we still do the same here
-    //         if (pendingCallInEcm) {
-    //             dialInternal(mPendingMO, pendingCallClirMode,
-    //                     mPendingCallVideoState, mPendingMO.getCallExtras());
-    //             pendingCallInEcm = false;
-    //         }
-    //         mPhone.unsetOnEcbModeExitResponse(this);
-    //         break;
-    // }
-    assert(0);
+    AutoPtr<AsyncResult> ar;
+    Int32 what;
+    msg->GetWhat(&what);
+    if (DBG) Log(String("handleMessage what=") + StringUtils::ToString(what));
+
+    switch (what) {
+        case EVENT_HANGUP_PENDINGMO:
+            if (mPendingMO != NULL) {
+                Boolean b;
+                ((ImsPhoneConnection*)mPendingMO.Get())->OnDisconnect(&b);
+                RemoveConnection(mPendingMO);
+                mPendingMO = NULL;
+            }
+
+            UpdatePhoneState();
+            ((ImsPhone*)mPhone.Get())->NotifyPreciseCallStateChanged();
+            break;
+        case EVENT_RESUME_BACKGROUND:
+            // try {
+            ResumeWaitingOrHolding();
+            // } catch (CallStateException e) {
+            //     if (IPhone::DEBUG_PHONE) {
+            //         Loge("handleMessage EVENT_RESUME_BACKGROUND exception=" + e);
+            //     }
+            // }
+            break;
+        case EVENT_DIAL_PENDINGMO: {
+            AutoPtr<IBundle> bundle;
+            mPendingMO->GetCallExtras((IBundle**)&bundle);
+            DialInternal(mPendingMO, mClirMode, mPendingCallVideoState, bundle);
+            break;
+        }
+        case EVENT_EXIT_ECM_RESPONSE_CDMA: {
+            // no matter the result, we still do the same here
+            if (pendingCallInEcm) {
+                AutoPtr<IBundle> bundle;
+                mPendingMO->GetCallExtras((IBundle**)&bundle);
+                DialInternal(mPendingMO, pendingCallClirMode,
+                        mPendingCallVideoState, bundle);
+                pendingCallInEcm = FALSE;
+            }
+            mPhone->UnsetOnEcbModeExitResponse(this);
+            break;
+        }
+    }
     return NOERROR;
 }
 
@@ -1322,21 +1504,19 @@ ECode ImsPhoneCallTracker::Dump(
     /* [in] */ IPrintWriter* pw,
     /* [in] */ ArrayOf<String>* args)
 {
-    // ==================before translated======================
-    // pw.println("ImsPhoneCallTracker extends:");
-    // super.dump(fd, pw, args);
-    // pw.println(" mVoiceCallEndedRegistrants=" + mVoiceCallEndedRegistrants);
-    // pw.println(" mVoiceCallStartedRegistrants=" + mVoiceCallStartedRegistrants);
-    // pw.println(" mRingingCall=" + mRingingCall);
-    // pw.println(" mForegroundCall=" + mForegroundCall);
-    // pw.println(" mBackgroundCall=" + mBackgroundCall);
-    // pw.println(" mHandoverCall=" + mHandoverCall);
-    // pw.println(" mPendingMO=" + mPendingMO);
-    // //pw.println(" mHangupPendingMO=" + mHangupPendingMO);
-    // pw.println(" mPhone=" + mPhone);
-    // pw.println(" mDesiredMute=" + mDesiredMute);
-    // pw.println(" mState=" + mState);
-    assert(0);
+    pw->Println(String("ImsPhoneCallTracker extends:"));
+    CallTracker::Dump(fd, pw, args);
+    // pw->Println(String(" mVoiceCallEndedRegistrants=") + mVoiceCallEndedRegistrants);
+    // pw->Println(String(" mVoiceCallStartedRegistrants=") + mVoiceCallStartedRegistrants);
+    // pw->Println(String(" mRingingCall=") + mRingingCall);
+    // pw->Println(String(" mForegroundCall=") + mForegroundCall);
+    // pw->Println(String(" mBackgroundCall=") + mBackgroundCall);
+    // pw->Println(String(" mHandoverCall=") + mHandoverCall);
+    // pw->Println(String(" mPendingMO=") + mPendingMO);
+    // //pw->Println(String(" mHangupPendingMO=") + mHangupPendingMO);
+    // pw->Println(String(" mPhone=") + mPhone);
+    // pw->Println(String(" mDesiredMute=") + mDesiredMute);
+    pw->Println(String(" mState=") + StringUtils::ToString(mState));
     return NOERROR;
 }
 
@@ -1344,14 +1524,14 @@ ECode ImsPhoneCallTracker::GetEcbmInterface(
     /* [out] */ /*TODO IImsEcbm*/IInterface** result)
 {
     VALIDATE_NOT_NULL(result);
-    // ==================before translated======================
-    // if (mImsManager == null) {
-    //     throw new ImsException("no ims manager", ImsReasonInfo.CODE_UNSPECIFIED);
+// TODO: Need IImsEcbm,ImsManager
+    // if (mImsManager == NULL) {
+    //     throw new ImsException("no ims manager", IImsReasonInfo::CODE_UNSPECIFIED);
     // }
-    //
-    // ImsEcbm ecbm = mImsManager.getEcbmInterface(mServiceId);
-    // return ecbm;
-    assert(0);
+
+    // AutoPtr<IImsEcbm> ecbm = mImsManager->GetEcbmInterface(mServiceId);
+    // *result = ecbm;
+    // REFCOUNT_ADD(*result)
     return NOERROR;
 }
 
@@ -1359,9 +1539,7 @@ ECode ImsPhoneCallTracker::IsInEmergencyCall(
     /* [out] */ Boolean* result)
 {
     VALIDATE_NOT_NULL(result);
-    // ==================before translated======================
-    // return mIsInEmergencyCall;
-    assert(0);
+    *result = mIsInEmergencyCall;
     return NOERROR;
 }
 
@@ -1369,9 +1547,7 @@ ECode ImsPhoneCallTracker::IsVolteEnabled(
     /* [out] */ Boolean* result)
 {
     VALIDATE_NOT_NULL(result);
-    // ==================before translated======================
-    // return mIsVolteEnabled;
-    assert(0);
+    *result = mIsVolteEnabled;
     return NOERROR;
 }
 
@@ -1379,98 +1555,97 @@ ECode ImsPhoneCallTracker::IsVtEnabled(
     /* [out] */ Boolean* result)
 {
     VALIDATE_NOT_NULL(result);
-    // ==================before translated======================
-    // return mIsVtEnabled;
-    assert(0);
-    return NOERROR;
-}
-
-ECode ImsPhoneCallTracker::Finalize()
-{
-    // ==================before translated======================
-    // log("ImsPhoneCallTracker finalized");
-    assert(0);
+    *result = mIsVtEnabled;
     return NOERROR;
 }
 
 void ImsPhoneCallTracker::Log(
     /* [in] */ const String& msg)
 {
-    // ==================before translated======================
-    // Rlog.d(LOGTAG, "[ImsPhoneCallTracker] " + msg);
-    assert(0);
+    Logger::D(LOGTAG, "[ImsPhoneCallTracker] %s", msg.string());
 }
 
 void ImsPhoneCallTracker::Loge(
     /* [in] */ const String& msg)
 {
-    // ==================before translated======================
-    // Rlog.e(LOGTAG, "[ImsPhoneCallTracker] " + msg);
-    assert(0);
+    Logger::E(LOGTAG, "[ImsPhoneCallTracker] %s", msg.string());
 }
 
 void ImsPhoneCallTracker::HandlePollCalls(
     /* [in] */ AsyncResult* ar)
 {
-    assert(0);
+    return;
 }
 
 AutoPtr<IPendingIntent> ImsPhoneCallTracker::CreateIncomingCallPendingIntent()
 {
-    // ==================before translated======================
-    // Intent intent = new Intent(ImsManager.ACTION_IMS_INCOMING_CALL);
-    // intent.addFlags(Intent.FLAG_RECEIVER_FOREGROUND);
-    // return PendingIntent.getBroadcast(mPhone.getContext(), 0, intent,
-    //         PendingIntent.FLAG_UPDATE_CURRENT);
-    assert(0);
-    AutoPtr<IPendingIntent> empty;
-    return empty;
+    AutoPtr<IIntent> intent;
+// TODO: Need IImsManager
+    // CIntent::New(IImsManager::ACTION_IMS_INCOMING_CALL, (IIntent**)&intent);
+    intent->AddFlags(IIntent::FLAG_RECEIVER_FOREGROUND);
+
+    AutoPtr<IContext> ctx;
+    IPhone::Probe(mPhone)->GetContext((IContext**)&ctx);
+
+    AutoPtr<IPendingIntent> pi;
+    CPendingIntent::GetBroadcast(ctx, 0, intent,
+            IPendingIntent::FLAG_UPDATE_CURRENT, (IPendingIntent**)&pi);
+    return pi;
 }
 
 void ImsPhoneCallTracker::GetImsService()
 {
-    // ==================before translated======================
-    // if (DBG) log("getImsService");
-    // mImsManager = ImsManager.getInstance(mPhone.getContext(), mPhone.getSubId());
+    if (DBG) Log(String("getImsService"));
+
+    AutoPtr<IContext> ctx;
+    IPhone::Probe(mPhone)->GetContext((IContext**)&ctx);
+    Int64 sid;
+    IPhone::Probe(mPhone)->GetSubId(&sid);
+// TODO: Need ImsManager
+    // mImsManager = ImsManager::GetInstance(ctx, sid);
+
     // try {
-    //     mServiceId = mImsManager.open(ImsServiceClass.MMTEL,
-    //             createIncomingCallPendingIntent(),
-    //             mImsConnectionStateListener);
-    //
-    //     // Get the ECBM interface and set IMSPhone's listener object for notifications
-    //     getEcbmInterface().setEcbmStateListener(mPhone.mImsEcbmStateListener);
-    //     if (mPhone.isInEcm()) {
-    //         // Call exit ECBM which will invoke onECBMExited
-    //         mPhone.exitEmergencyCallbackMode();
-    //     }
-    //     int mPreferredTtyMode = Settings.Secure.getInt(
-    //         mPhone.getContext().getContentResolver(),
-    //         Settings.Secure.PREFERRED_TTY_MODE,
-    //         Phone.TTY_MODE_OFF);
-    //    mImsManager.setUiTTYMode(mServiceId, mPreferredTtyMode, null);
-    //
+// TODO: Need ImsManager
+    // mServiceId = mImsManager->Open(IImsServiceClass::MMTEL,
+    //         CreateIncomingCallPendingIntent(),
+    //         mImsConnectionStateListener);
+
+    // Get the ECBM interface and set IMSPhone's listener object for notifications
+// TODO: Need IImsEcbm
+    // GetEcbmInterface().setEcbmStateListener(mPhone.mImsEcbmStateListener);
+    Boolean b;
+    if (mPhone->IsInEcm(&b), b) {
+        // Call exit ECBM which will invoke onECBMExited
+        IPhone::Probe(mPhone)->ExitEmergencyCallbackMode();
+    }
+    AutoPtr<IContentResolver> cr;
+    ctx->GetContentResolver((IContentResolver**)&cr);
+    Int32 mPreferredTtyMode;
+    Settings::Secure::GetInt32(
+        cr, ISettingsSecure::PREFERRED_TTY_MODE,
+        IPhone::TTY_MODE_OFF, &mPreferredTtyMode);
+// TODO: Need ImsManager
+   // mImsManager->SetUiTTYMode(mServiceId, mPreferredTtyMode, NULL);
+
     // } catch (ImsException e) {
-    //     loge("getImsService: " + e);
-    //     //Leave mImsManager as null, then CallStateException will be thrown when dialing
-    //     mImsManager = null;
+    //     Loge("getImsService: " + e);
+    //     //Leave mImsManager as NULL, then CallStateException will be thrown when dialing
+    //     mImsManager = NULL;
     // }
-    assert(0);
 }
 
 void ImsPhoneCallTracker::HandleEcmTimer(
     /* [in] */ Int32 action)
 {
-    // ==================before translated======================
-    // mPhone.handleTimerInEmergencyCallbackMode(action);
-    // switch (action) {
-    //     case ImsPhone.CANCEL_ECM_TIMER:
-    //         break;
-    //     case ImsPhone.RESTART_ECM_TIMER:
-    //         break;
-    //     default:
-    //         log("handleEcmTimer, unsupported action " + action);
-    // }
-    assert(0);
+    ((ImsPhone*)mPhone.Get())->HandleTimerInEmergencyCallbackMode(action);
+    switch (action) {
+        case ImsPhone::CANCEL_ECM_TIMER:
+            break;
+        case ImsPhone::RESTART_ECM_TIMER:
+            break;
+        default:
+            Log(String("handleEcmTimer, unsupported action ") + StringUtils::ToString(action));
+    }
 }
 
 void ImsPhoneCallTracker::DialInternal(
@@ -1479,164 +1654,188 @@ void ImsPhoneCallTracker::DialInternal(
     /* [in] */ Int32 videoState,
     /* [in] */ IBundle* extras)
 {
-    // ==================before translated======================
-    // if (conn == null) {
-    //     return;
-    // }
-    //
-    // boolean isConferenceUri = false;
-    // boolean isSkipSchemaParsing = false;
-    // if (extras != null) {
-    //     isConferenceUri = extras.getBoolean(TelephonyProperties.EXTRA_DIAL_CONFERENCE_URI,
-    //             false);
-    //     isSkipSchemaParsing = extras.getBoolean(TelephonyProperties.EXTRA_SKIP_SCHEMA_PARSING,
-    //             false);
-    // }
-    // if (!isConferenceUri && !isSkipSchemaParsing && (conn.getAddress()== null
-    //         || conn.getAddress().length() == 0
-    //         || conn.getAddress().indexOf(PhoneNumberUtils.WILD) >= 0)) {
-    //     // Phone number is invalid
-    //     conn.setDisconnectCause(DisconnectCause.INVALID_NUMBER);
-    //     sendEmptyMessageDelayed(EVENT_HANGUP_PENDINGMO, TIMEOUT_HANGUP_PENDINGMO);
-    //     return;
-    // }
-    //
-    // // Always unmute when initiating a new call
-    // setMute(false);
-    // int serviceType = PhoneNumberUtils.isEmergencyNumber(conn.getAddress()) ?
-    //         ImsCallProfile.SERVICE_TYPE_EMERGENCY : ImsCallProfile.SERVICE_TYPE_NORMAL;
-    // int callType = ImsCallProfile.getCallTypeFromVideoState(videoState);
-    // //TODO(vt): Is this sufficient?  At what point do we know the video state of the call?
-    // conn.setVideoState(videoState);
-    //
+    if (conn == NULL) {
+        return;
+    }
+
+    Boolean isConferenceUri = FALSE;
+    Boolean isSkipSchemaParsing = FALSE;
+
+    if (extras != NULL) {
+        extras->GetBoolean(ITelephonyProperties::EXTRA_DIAL_CONFERENCE_URI, FALSE, &isConferenceUri);
+        extras->GetBoolean(ITelephonyProperties::EXTRA_SKIP_SCHEMA_PARSING, FALSE, &isSkipSchemaParsing);
+    }
+
+    String addr;
+    IConnection::Probe(conn)->GetAddress(&addr);
+    if (!isConferenceUri && !isSkipSchemaParsing && (addr.IsNull()
+            || addr.GetLength() == 0
+            || addr.IndexOf(IPhoneNumberUtils::WILD) >= 0)) {
+        // Phone number is invalid
+        conn->SetDisconnectCause(IDisconnectCause::INVALID_NUMBER);
+        Boolean b;
+        SendEmptyMessageDelayed(EVENT_HANGUP_PENDINGMO, TIMEOUT_HANGUP_PENDINGMO, &b);
+        return;
+    }
+
+    // Always unmute when initiating a new call
+    SetMute(FALSE);
+    Boolean b;
+    PhoneNumberUtils::IsEmergencyNumber(addr, &b);
+    Int32 serviceType = b ?
+            IImsCallProfile::SERVICE_TYPE_EMERGENCY : IImsCallProfile::SERVICE_TYPE_NORMAL;
+    Int32 callType;
+    CImsCallProfile::GetCallTypeFromVideoState(videoState, &callType);
+    //TODO(vt): Is this sufficient?  At what point do we know the video state of the call?
+    IConnection::Probe(conn)->SetVideoState(videoState);
+
     // try {
-    //     String[] callees = new String[] { conn.getAddress() };
-    //     ImsCallProfile profile = mImsManager.createCallProfile(mServiceId,
-    //             serviceType, callType);
-    //     profile.setCallExtraInt(ImsCallProfile.EXTRA_OIR, clirMode);
-    //     profile.setCallExtraBoolean(TelephonyProperties.EXTRAS_IS_CONFERENCE_URI,
-    //             isConferenceUri);
-    //
-    //     if (extras != null) {
-    //         // Pack the OEM-specific call extras.
-    //         profile.mCallExtras.putBundle(ImsCallProfile.EXTRA_OEM_EXTRAS, extras);
-    //         log("Packing OEM extras bundle in call profile.");
-    //     } else {
-    //         log("No dial extras packed in call profile.");
-    //     }
-    //
-    //     ImsCall imsCall = mImsManager.makeCall(mServiceId, profile,
-    //             callees, mImsCallListener);
-    //     conn.setImsCall(imsCall);
-    //
-    //     IImsVideoCallProvider imsVideoCallProvider =
-    //             imsCall.getCallSession().getVideoCallProvider();
-    //     if (imsVideoCallProvider != null) {
-    //         ImsVideoCallProviderWrapper imsVideoCallProviderWrapper =
-    //                 new ImsVideoCallProviderWrapper(imsVideoCallProvider);
-    //         conn.setVideoProvider(imsVideoCallProviderWrapper);
-    //     }
+    AutoPtr<ArrayOf<String> > callees = ArrayOf<String>::Alloc(1);
+    (*callees)[0] = addr;
+    AutoPtr<IImsCallProfile> profile;
+// TODO: Need IImsManager
+    // mImsManager->CreateCallProfile(mServiceId, serviceType, callType, (IImsCallProfile**)&profile);
+    profile->SetCallExtraInt32(IImsCallProfile::EXTRA_OIR, clirMode);
+    profile->SetCallExtraBoolean(ITelephonyProperties::EXTRAS_IS_CONFERENCE_URI,
+            isConferenceUri);
+
+    if (extras != NULL) {
+        // Pack the OEM-specific call extras.
+        ((CImsCallProfile*)profile.Get())->mCallExtras->PutBundle(
+                IImsCallProfile::EXTRA_OEM_EXTRAS, extras);
+        Log(String("Packing OEM extras bundle in call profile."));
+    }
+    else {
+        Log(String("No dial extras packed in call profile."));
+    }
+
+// TODO: Need IImsCall
+    // ImsCall imsCall = mImsManager->MakeCall(mServiceId, profile,
+    //         callees, mImsCallListener);
+    // conn->SetImsCall(imsCall);
+
+    // IImsVideoCallProvider imsVideoCallProvider =
+    //         imsCall.getCallSession().getVideoCallProvider();
+    // if (imsVideoCallProvider != NULL) {
+    //     ImsVideoCallProviderWrapper imsVideoCallProviderWrapper =
+    //             new ImsVideoCallProviderWrapper(imsVideoCallProvider);
+    //     conn->SetVideoProvider(imsVideoCallProviderWrapper);
+    // }
     // } catch (ImsException e) {
-    //     loge("dialInternal : " + e);
-    //     conn.setDisconnectCause(DisconnectCause.ERROR_UNSPECIFIED);
-    //     sendEmptyMessageDelayed(EVENT_HANGUP_PENDINGMO, TIMEOUT_HANGUP_PENDINGMO);
+    //     Loge("dialInternal : " + e);
+    //     conn.setDisconnectCause(IDisconnectCause::ERROR_UNSPECIFIED);
+    //     SendEmptyMessageDelayed(EVENT_HANGUP_PENDINGMO, TIMEOUT_HANGUP_PENDINGMO);
     // } catch (RemoteException e) {
     // }
-    assert(0);
 }
 
 void ImsPhoneCallTracker::InternalClearDisconnected()
 {
-    // ==================before translated======================
-    // mRingingCall.clearDisconnected();
-    // mForegroundCall.clearDisconnected();
-    // mBackgroundCall.clearDisconnected();
-    // mHandoverCall.clearDisconnected();
-    assert(0);
+    ((ImsPhoneCall*)mRingingCall.Get())->ClearDisconnected();
+    ((ImsPhoneCall*)mForegroundCall.Get())->ClearDisconnected();
+    ((ImsPhoneCall*)mBackgroundCall.Get())->ClearDisconnected();
+    ((ImsPhoneCall*)mHandoverCall.Get())->ClearDisconnected();
 }
 
 void ImsPhoneCallTracker::UpdatePhoneState()
 {
-    // ==================before translated======================
-    // PhoneConstants.State oldState = mState;
-    //
+    PhoneConstantsState oldState = mState;
+
+// TODO: Need ICallState::isRinging,isIdle
     // if (mRingingCall.isRinging()) {
-    //     mState = PhoneConstants.State.RINGING;
-    // } else if (mPendingMO != null ||
+    //     mState = PhoneConstantsState_RINGING;
+    // }
+    // else if (mPendingMO != NULL ||
     //         !(mForegroundCall.isIdle() && mBackgroundCall.isIdle())) {
-    //     mState = PhoneConstants.State.OFFHOOK;
-    // } else {
-    //     mState = PhoneConstants.State.IDLE;
+    //     mState = PhoneConstantsState_OFFHOOK;
     // }
-    //
-    // if (mState == PhoneConstants.State.IDLE && oldState != mState) {
-    //     mVoiceCallEndedRegistrants.notifyRegistrants(
-    //             new AsyncResult(null, null, null));
-    // } else if (oldState == PhoneConstants.State.IDLE && oldState != mState) {
-    //     mVoiceCallStartedRegistrants.notifyRegistrants (
-    //             new AsyncResult(null, null, null));
+    // else {
+    //     mState = PhoneConstantsState_IDLE;
     // }
-    //
-    // if (DBG) log("updatePhoneState oldState=" + oldState + ", newState=" + mState);
-    //
-    // if (mState != oldState) {
-    //     mPhone.notifyPhoneStateChanged();
-    // }
-    assert(0);
+
+    if (mState == PhoneConstantsState_IDLE && oldState != mState) {
+        AutoPtr<AsyncResult> ar = new AsyncResult(NULL, NULL, NULL);
+        mVoiceCallEndedRegistrants->NotifyRegistrants(ar);
+    }
+    else if (oldState == PhoneConstantsState_IDLE && oldState != mState) {
+        AutoPtr<AsyncResult> ar = new AsyncResult(NULL, NULL, NULL);
+        mVoiceCallStartedRegistrants->NotifyRegistrants(ar);
+    }
+
+    if (DBG) Log(String("updatePhoneState oldState=") +
+            StringUtils::ToString(oldState) +
+            ", newState=" + StringUtils::ToString(mState));
+
+    if (mState != oldState) {
+        ((ImsPhone*)mPhone.Get())->NotifyPhoneStateChanged();
+    }
 }
 
 void ImsPhoneCallTracker::HandleRadioNotAvailable()
 {
-    // ==================before translated======================
-    // // handlePollCalls will clear out its
-    // // call list when it gets the CommandException
-    // // error result from this
-    // pollCallsWhenSafe();
-    assert(0);
+    // handlePollCalls will clear out its
+    // call list when it gets the CommandException
+    // error result from this
+    PollCallsWhenSafe();
 }
 
 void ImsPhoneCallTracker::DumpState()
 {
-    // ==================before translated======================
-    // List l;
-    //
-    // log("Phone State:" + mState);
-    //
-    // log("Ringing call: " + mRingingCall.toString());
-    //
-    // l = mRingingCall.getConnections();
-    // for (int i = 0, s = l.size(); i < s; i++) {
-    //     log(l.get(i).toString());
-    // }
-    //
-    // log("Foreground call: " + mForegroundCall.toString());
-    //
-    // l = mForegroundCall.getConnections();
-    // for (int i = 0, s = l.size(); i < s; i++) {
-    //     log(l.get(i).toString());
-    // }
-    //
-    // log("Background call: " + mBackgroundCall.toString());
-    //
-    // l = mBackgroundCall.getConnections();
-    // for (int i = 0, s = l.size(); i < s; i++) {
-    //     log(l.get(i).toString());
-    // }
-    assert(0);
+    AutoPtr<IList> l;
+
+    Log(String("Phone State:") + StringUtils::ToString(mState));
+
+    String str;
+    ((ImsPhoneCall*)mRingingCall.Get())->ToString(&str);
+    Log(String("Ringing call: ") + str);
+
+    ((ImsPhoneCall*)mRingingCall.Get())->GetConnections((IList**)&l);
+    Int32 size;
+    l->GetSize(&size);
+    for (Int32 i = 0; i < size; i++) {
+        AutoPtr<IInterface> obj;
+        l->Get(i, (IInterface**)&obj);
+        IObject::Probe(obj)->ToString(&str);
+        Log(str);
+    }
+
+    ((ImsPhoneCall*)mForegroundCall.Get())->ToString(&str);
+    Log(String("Foreground call: ") + str);
+
+    l = NULL;
+    ((ImsPhoneCall*)mForegroundCall.Get())->GetConnections((IList**)&l);
+    l->GetSize(&size);
+    for (Int32 i = 0; i < size; i++) {
+        AutoPtr<IInterface> obj;
+        l->Get(i, (IInterface**)&obj);
+        IObject::Probe(obj)->ToString(&str);
+        Log(str);
+    }
+
+    ((ImsPhoneCall*)mBackgroundCall.Get())->ToString(&str);
+    Log(String("Background call: ") + str);
+
+    l = NULL;
+    ((ImsPhoneCall*)mBackgroundCall.Get())->GetConnections((IList**)&l);
+    l->GetSize(&size);
+    for (Int32 i = 0; i < size; i++) {
+        AutoPtr<IInterface> obj;
+        l->Get(i, (IInterface**)&obj);
+        IObject::Probe(obj)->ToString(&str);
+        Log(str);
+    }
 }
 
 // synchronized
 AutoPtr<IImsPhoneConnection> ImsPhoneCallTracker::FindConnection(
     /* [in] */ /*TODO IImsCall*/IInterface* imsCall)
 {
-    // ==================before translated======================
     // for (ImsPhoneConnection conn : mConnections) {
     //     if (conn.getImsCall() == imsCall) {
     //         return conn;
     //     }
     // }
-    // return null;
-    assert(0);
+    // return NULL;
     AutoPtr<IImsPhoneConnection> empty;
     return empty;
 }
@@ -1645,18 +1844,14 @@ AutoPtr<IImsPhoneConnection> ImsPhoneCallTracker::FindConnection(
 void ImsPhoneCallTracker::RemoveConnection(
     /* [in] */ IImsPhoneConnection* conn)
 {
-    // ==================before translated======================
-    // mConnections.remove(conn);
-    assert(0);
+    mConnections->Remove(conn);
 }
 
 // synchronized
 void ImsPhoneCallTracker::AddConnection(
     /* [in] */ IImsPhoneConnection* conn)
 {
-    // ==================before translated======================
-    // mConnections.add(conn);
-    assert(0);
+    mConnections->Add(conn);
 }
 
 void ImsPhoneCallTracker::ProcessCallStateChange(
@@ -1664,127 +1859,156 @@ void ImsPhoneCallTracker::ProcessCallStateChange(
     /* [in] */ ICallState state,
     /* [in] */ Int32 cause)
 {
-    // ==================before translated======================
-    // if (DBG) log("processCallStateChange state=" + state + " cause=" + cause);
-    //
-    // if (imsCall == null) return;
-    //
-    // boolean changed = false;
-    // ImsPhoneConnection conn = findConnection(imsCall);
-    //
-    // if (conn == null) {
-    //     // TODO : what should be done?
-    //     return;
-    // }
-    //
-    // changed = conn.update(imsCall, state);
-    //
-    // if (state == ImsPhoneCall.State.DISCONNECTED) {
-    //     changed = conn.onDisconnect(cause) || changed;
-    //     removeConnection(conn);
-    // }
-    //
-    // if (changed) {
-    //     if (conn.getCall() == mHandoverCall) return;
-    //     updatePhoneState();
-    //     mPhone.notifyPreciseCallStateChanged();
-    // }
-    assert(0);
+    if (DBG) Log(String("processCallStateChange state=") +
+            StringUtils::ToString(state) +
+            " cause=" + StringUtils::ToString(cause));
+
+    if (imsCall == NULL) return;
+
+    Boolean changed = FALSE;
+    AutoPtr<IImsPhoneConnection> conn = FindConnection(imsCall);
+
+    if (conn == NULL) {
+        // TODO : what should be done?
+        return;
+    }
+
+    ((ImsPhoneConnection*)conn.Get())->Update(imsCall, state, &changed);
+
+    if (state == ICallState_DISCONNECTED) {
+        Boolean b;
+        changed = (((ImsPhoneConnection*)conn.Get())->OnDisconnect(cause, &b), b) || changed;
+        RemoveConnection(conn);
+    }
+
+    if (changed) {
+        AutoPtr<ICall> call;
+        IConnection::Probe(conn)->GetCall((ICall**)&call);
+        if (call == ICall::Probe(mHandoverCall)) return;
+        UpdatePhoneState();
+        ((ImsPhone*)mPhone.Get())->NotifyPreciseCallStateChanged();
+    }
 }
 
 Int32 ImsPhoneCallTracker::GetDisconnectCauseFromReasonInfo(
     /* [in] */ IImsReasonInfo* reasonInfo)
 {
-    // ==================before translated======================
-    // int cause = DisconnectCause.ERROR_UNSPECIFIED;
-    //
-    // //int type = reasonInfo.getReasonType();
-    // int code = reasonInfo.getCode();
-    // switch (code) {
-    //     case ImsReasonInfo.CODE_SIP_BAD_ADDRESS:
-    //     case ImsReasonInfo.CODE_SIP_NOT_REACHABLE:
-    //         return DisconnectCause.NUMBER_UNREACHABLE;
-    //
-    //     case ImsReasonInfo.CODE_SIP_BUSY:
-    //         return DisconnectCause.BUSY;
-    //
-    //     case ImsReasonInfo.CODE_USER_TERMINATED:
-    //         return DisconnectCause.LOCAL;
-    //
-    //     case ImsReasonInfo.CODE_USER_TERMINATED_BY_REMOTE:
-    //         return DisconnectCause.NORMAL;
-    //
-    //     case ImsReasonInfo.CODE_SIP_REDIRECTED:
-    //     case ImsReasonInfo.CODE_SIP_BAD_REQUEST:
-    //     case ImsReasonInfo.CODE_SIP_FORBIDDEN:
-    //     case ImsReasonInfo.CODE_SIP_NOT_ACCEPTABLE:
-    //     case ImsReasonInfo.CODE_SIP_USER_REJECTED:
-    //     case ImsReasonInfo.CODE_SIP_GLOBAL_ERROR:
-    //         return DisconnectCause.SERVER_ERROR;
-    //
-    //     case ImsReasonInfo.CODE_SIP_SERVICE_UNAVAILABLE:
-    //     case ImsReasonInfo.CODE_SIP_NOT_FOUND:
-    //     case ImsReasonInfo.CODE_SIP_SERVER_ERROR:
-    //         return DisconnectCause.SERVER_UNREACHABLE;
-    //
-    //     case ImsReasonInfo.CODE_LOCAL_NETWORK_ROAMING:
-    //     case ImsReasonInfo.CODE_LOCAL_NETWORK_IP_CHANGED:
-    //     case ImsReasonInfo.CODE_LOCAL_IMS_SERVICE_DOWN:
-    //     case ImsReasonInfo.CODE_LOCAL_SERVICE_UNAVAILABLE:
-    //     case ImsReasonInfo.CODE_LOCAL_NOT_REGISTERED:
-    //     case ImsReasonInfo.CODE_LOCAL_NETWORK_NO_LTE_COVERAGE:
-    //     case ImsReasonInfo.CODE_LOCAL_NETWORK_NO_SERVICE:
-    //     case ImsReasonInfo.CODE_LOCAL_CALL_VCC_ON_PROGRESSING:
-    //         return DisconnectCause.OUT_OF_SERVICE;
-    //
-    //     case ImsReasonInfo.CODE_SIP_REQUEST_TIMEOUT:
-    //     case ImsReasonInfo.CODE_TIMEOUT_1XX_WAITING:
-    //     case ImsReasonInfo.CODE_TIMEOUT_NO_ANSWER:
-    //     case ImsReasonInfo.CODE_TIMEOUT_NO_ANSWER_CALL_UPDATE:
-    //         return DisconnectCause.TIMED_OUT;
-    //
-    //     case ImsReasonInfo.CODE_LOCAL_LOW_BATTERY:
-    //     case ImsReasonInfo.CODE_LOCAL_POWER_OFF:
-    //         return DisconnectCause.POWER_OFF;
-    //
-    //     default:
-    // }
-    //
-    // return cause;
-    assert(0);
-    return 0;
+    Int32 cause = IDisconnectCause::ERROR_UNSPECIFIED;
+
+    //int type = reasonInfo.getReasonType();
+    Int32 code;
+    reasonInfo->GetCode(&code);
+
+    switch (code) {
+        case IImsReasonInfo::CODE_SIP_BAD_ADDRESS:
+        case IImsReasonInfo::CODE_SIP_NOT_REACHABLE:
+            return IDisconnectCause::NUMBER_UNREACHABLE;
+
+        case IImsReasonInfo::CODE_SIP_BUSY:
+            return IDisconnectCause::BUSY;
+
+        case IImsReasonInfo::CODE_USER_TERMINATED:
+            return IDisconnectCause::LOCAL;
+
+        case IImsReasonInfo::CODE_USER_TERMINATED_BY_REMOTE:
+            return IDisconnectCause::NORMAL;
+
+        case IImsReasonInfo::CODE_SIP_REDIRECTED:
+        case IImsReasonInfo::CODE_SIP_BAD_REQUEST:
+        case IImsReasonInfo::CODE_SIP_FORBIDDEN:
+        case IImsReasonInfo::CODE_SIP_NOT_ACCEPTABLE:
+        case IImsReasonInfo::CODE_SIP_USER_REJECTED:
+        case IImsReasonInfo::CODE_SIP_GLOBAL_ERROR:
+            return IDisconnectCause::SERVER_ERROR;
+
+        case IImsReasonInfo::CODE_SIP_SERVICE_UNAVAILABLE:
+        case IImsReasonInfo::CODE_SIP_NOT_FOUND:
+        case IImsReasonInfo::CODE_SIP_SERVER_ERROR:
+            return IDisconnectCause::SERVER_UNREACHABLE;
+
+        case IImsReasonInfo::CODE_LOCAL_NETWORK_ROAMING:
+        case IImsReasonInfo::CODE_LOCAL_NETWORK_IP_CHANGED:
+        case IImsReasonInfo::CODE_LOCAL_IMS_SERVICE_DOWN:
+        case IImsReasonInfo::CODE_LOCAL_SERVICE_UNAVAILABLE:
+        case IImsReasonInfo::CODE_LOCAL_NOT_REGISTERED:
+        case IImsReasonInfo::CODE_LOCAL_NETWORK_NO_LTE_COVERAGE:
+        case IImsReasonInfo::CODE_LOCAL_NETWORK_NO_SERVICE:
+        case IImsReasonInfo::CODE_LOCAL_CALL_VCC_ON_PROGRESSING:
+            return IDisconnectCause::OUT_OF_SERVICE;
+
+        case IImsReasonInfo::CODE_SIP_REQUEST_TIMEOUT:
+        case IImsReasonInfo::CODE_TIMEOUT_1XX_WAITING:
+        case IImsReasonInfo::CODE_TIMEOUT_NO_ANSWER:
+        case IImsReasonInfo::CODE_TIMEOUT_NO_ANSWER_CALL_UPDATE:
+            return IDisconnectCause::TIMED_OUT;
+
+        case IImsReasonInfo::CODE_LOCAL_LOW_BATTERY:
+        case IImsReasonInfo::CODE_LOCAL_POWER_OFF:
+            return IDisconnectCause::POWER_OFF;
+
+        default:
+            break;
+    }
+
+    return cause;
 }
 
 void ImsPhoneCallTracker::TransferHandoverConnections(
-    /* [in] */ IImsPhoneCall* call)
+    /* [in] */ IImsPhoneCall* _call)
 {
-    // ==================before translated======================
-    // if (call.mConnections != null) {
-    //     for (Connection c : call.mConnections) {
-    //         c.mPreHandoverState = call.mState;
-    //         log ("Connection state before handover is " + c.getStateBeforeHandover());
-    //     }
+    AutoPtr<ImsPhoneCall> call = (ImsPhoneCall*)_call;
+
+    if (call->mConnections != NULL) {
+        Int32 size;
+        call->mConnections->GetSize(&size);
+        for (Int32 i = 0; i < size; i++) {
+            AutoPtr<IInterface> obj;
+            call->mConnections->Get(i, (IInterface**)&obj);
+            AutoPtr<IConnection> c = IConnection::Probe(obj);
+
+            ((Connection*)c.Get())->mPreHandoverState = call->mState;
+            ICallState state;
+            c->GetStateBeforeHandover(&state);
+            Log(String("Connection state before handover is ") + StringUtils::ToString(state));
+        }
+    }
+
+    AutoPtr<ImsPhoneCall> hCall = (ImsPhoneCall*)mHandoverCall.Get();
+
+    if (hCall->mConnections == NULL ) {
+        hCall->mConnections = call->mConnections;
+    }
+    else { // Multi-call SRVCC
+        hCall->mConnections->AddAll(ICollection::Probe(call->mConnections));
+    }
+    if (hCall->mConnections != NULL) {
+        AutoPtr</*TODO IImsCall*/IInterface> imsCall;
+        call->GetImsCall((/*TODO IImsCall*/IInterface**)&imsCall);
+        if (imsCall != NULL) {
+// TODO: Need IImsCall
+            // imsCall->Close();
+        }
+
+        Int32 size;
+        hCall->mConnections->GetSize(&size);
+        for (Int32 i = 0; i < size; i++) {
+            AutoPtr<IInterface> obj;
+            hCall->mConnections->Get(i, (IInterface**)&obj);
+            AutoPtr<IConnection> c = IConnection::Probe(obj);
+
+            ((ImsPhoneConnection*)c.Get())->ChangeParent(mHandoverCall);
+        }
+    }
+
+    ICallState state;
+    call->GetState(&state);
+// TODO: Need ICallState::isAlive
+    // if (state->isAlive()) {
+    //     Log (String("Call is alive and state is ") + StringUtils::ToString(call->mState));
+    //     mHandoverCall->mState = call->mState;
     // }
-    // if (mHandoverCall.mConnections == null ) {
-    //     mHandoverCall.mConnections = call.mConnections;
-    // } else { // Multi-call SRVCC
-    //     mHandoverCall.mConnections.addAll(call.mConnections);
-    // }
-    // if (mHandoverCall.mConnections != null) {
-    //     if (call.getImsCall() != null) {
-    //         call.getImsCall().close();
-    //     }
-    //     for (Connection c : mHandoverCall.mConnections) {
-    //         ((ImsPhoneConnection)c).changeParent(mHandoverCall);
-    //     }
-    // }
-    // if (call.getState().isAlive()) {
-    //     log ("Call is alive and state is " + call.mState);
-    //     mHandoverCall.mState = call.mState;
-    // }
-    // call.mConnections.clear();
-    // call.mState = ImsPhoneCall.State.IDLE;
-    assert(0);
+    call->mConnections->Clear();
+    call->mState = ICallState_IDLE;
 }
 
 } // namespace Imsphone

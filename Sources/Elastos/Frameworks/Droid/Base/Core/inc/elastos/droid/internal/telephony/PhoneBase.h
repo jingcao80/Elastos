@@ -196,10 +196,10 @@ public:
         /* [in] */ Int32 phoneId);
 
     // @Override
-    CARAPI Dispose();
+    virtual CARAPI Dispose();
 
     // @Override
-    CARAPI RemoveReferences();
+    virtual CARAPI RemoveReferences();
 
     /**
      * When overridden the derived class needs to call
@@ -209,12 +209,12 @@ public:
      * @param msg
      */
     // @Override
-    CARAPI HandleMessage(
+    virtual CARAPI HandleMessage(
         /* [in] */ IMessage* msg);
 
     // Inherited documentation suffices.
     // @Override
-    CARAPI GetContext(
+    virtual CARAPI GetContext(
         /* [out] */ IContext** ctx);
 
     /**
@@ -223,36 +223,36 @@ public:
      * @param b TRUE disables the check, FALSE enables.
      */
     // @Override
-    CARAPI DisableDnsCheck(
+    virtual CARAPI DisableDnsCheck(
         /* [in] */ Boolean b);
 
     /**
      * Returns TRUE if the DNS check is currently disabled.
      */
     // @Override
-    CARAPI IsDnsCheckDisabled(
+    virtual CARAPI IsDnsCheckDisabled(
         /* [out] */ Boolean* result);
 
     // Inherited documentation suffices.
     // @Override
-    CARAPI RegisterForPreciseCallStateChanged(
+    virtual CARAPI RegisterForPreciseCallStateChanged(
         /* [in] */ IHandler* h,
         /* [in] */ Int32 what,
         /* [in] */ IInterface* obj);
 
     // Inherited documentation suffices.
     // @Override
-    CARAPI UnregisterForPreciseCallStateChanged(
+    virtual CARAPI UnregisterForPreciseCallStateChanged(
         /* [in] */ IHandler* h);
 
     // @Override
-    CARAPI RegisterForHandoverStateChanged(
+    virtual CARAPI RegisterForHandoverStateChanged(
         /* [in] */ IHandler* h,
         /* [in] */ Int32 what,
         /* [in] */ IInterface* obj);
 
     // @Override
-    CARAPI UnregisterForHandoverStateChanged(
+    virtual CARAPI UnregisterForHandoverStateChanged(
         /* [in] */ IHandler* h);
 
     /**
@@ -271,122 +271,122 @@ public:
 
     // Inherited documentation suffices.
     // @Override
-    CARAPI RegisterForUnknownConnection(
+    virtual CARAPI RegisterForUnknownConnection(
         /* [in] */ IHandler* h,
         /* [in] */ Int32 what,
         /* [in] */ IInterface* obj);
 
     // Inherited documentation suffices.
     // @Override
-    CARAPI UnregisterForUnknownConnection(
+    virtual CARAPI UnregisterForUnknownConnection(
         /* [in] */ IHandler* h);
 
     // Inherited documentation suffices.
     // @Override
-    CARAPI RegisterForNewRingingConnection(
+    virtual CARAPI RegisterForNewRingingConnection(
         /* [in] */ IHandler* h,
         /* [in] */ Int32 what,
         /* [in] */ IInterface* obj);
 
     // Inherited documentation suffices.
     // @Override
-    CARAPI UnregisterForNewRingingConnection(
+    virtual CARAPI UnregisterForNewRingingConnection(
         /* [in] */ IHandler* h);
 
     // Inherited documentation suffices.
     // @Override
-    CARAPI RegisterForVideoCapabilityChanged(
+    virtual CARAPI RegisterForVideoCapabilityChanged(
         /* [in] */ IHandler* h,
         /* [in] */ Int32 what,
         /* [in] */ IInterface* obj);
 
     // Inherited documentation suffices.
     // @Override
-    CARAPI UnregisterForVideoCapabilityChanged(
+    virtual CARAPI UnregisterForVideoCapabilityChanged(
         /* [in] */ IHandler* h);
 
     // Inherited documentation suffices.
     // @Override
-    CARAPI RegisterForInCallVoicePrivacyOn(
+    virtual CARAPI RegisterForInCallVoicePrivacyOn(
         /* [in] */ IHandler* h,
         /* [in] */ Int32 what,
         /* [in] */ IInterface* obj);
 
     // Inherited documentation suffices.
     // @Override
-    CARAPI UnregisterForInCallVoicePrivacyOn(
+    virtual CARAPI UnregisterForInCallVoicePrivacyOn(
         /* [in] */ IHandler* h);
 
     // Inherited documentation suffices.
     // @Override
-    CARAPI RegisterForInCallVoicePrivacyOff(
+    virtual CARAPI RegisterForInCallVoicePrivacyOff(
         /* [in] */ IHandler* h,
         /* [in] */ Int32 what,
         /* [in] */ IInterface* obj);
 
     // Inherited documentation suffices.
     // @Override
-    CARAPI UnregisterForInCallVoicePrivacyOff(
+    virtual CARAPI UnregisterForInCallVoicePrivacyOff(
         /* [in] */ IHandler* h);
 
     // Inherited documentation suffices.
     // @Override
-    CARAPI RegisterForIncomingRing(
+    virtual CARAPI RegisterForIncomingRing(
         /* [in] */ IHandler* h,
         /* [in] */ Int32 what,
         /* [in] */ IInterface* obj);
 
     // Inherited documentation suffices.
     // @Override
-    CARAPI UnregisterForIncomingRing(
+    virtual CARAPI UnregisterForIncomingRing(
         /* [in] */ IHandler* h);
 
     // Inherited documentation suffices.
     // @Override
-    CARAPI RegisterForDisconnect(
+    virtual CARAPI RegisterForDisconnect(
         /* [in] */ IHandler* h,
         /* [in] */ Int32 what,
         /* [in] */ IInterface* obj);
 
     // Inherited documentation suffices.
     // @Override
-    CARAPI UnregisterForDisconnect(
+    virtual CARAPI UnregisterForDisconnect(
         /* [in] */ IHandler* h);
 
     // Inherited documentation suffices.
     // @Override
-    CARAPI RegisterForSuppServiceFailed(
+    virtual CARAPI RegisterForSuppServiceFailed(
         /* [in] */ IHandler* h,
         /* [in] */ Int32 what,
         /* [in] */ IInterface* obj);
 
     // Inherited documentation suffices.
     // @Override
-    CARAPI UnregisterForSuppServiceFailed(
+    virtual CARAPI UnregisterForSuppServiceFailed(
         /* [in] */ IHandler* h);
 
     // Inherited documentation suffices.
     // @Override
-    CARAPI RegisterForMmiInitiate(
+    virtual CARAPI RegisterForMmiInitiate(
         /* [in] */ IHandler* h,
         /* [in] */ Int32 what,
         /* [in] */ IInterface* obj);
 
     // Inherited documentation suffices.
     // @Override
-    CARAPI UnregisterForMmiInitiate(
+    virtual CARAPI UnregisterForMmiInitiate(
         /* [in] */ IHandler* h);
 
     // Inherited documentation suffices.
     // @Override
-    CARAPI RegisterForMmiComplete(
+    virtual CARAPI RegisterForMmiComplete(
         /* [in] */ IHandler* h,
         /* [in] */ Int32 what,
         /* [in] */ IInterface* obj);
 
     // Inherited documentation suffices.
     // @Override
-    CARAPI UnregisterForMmiComplete(
+    virtual CARAPI UnregisterForMmiComplete(
         /* [in] */ IHandler* h);
 
     CARAPI RegisterForSimRecordsLoaded(
@@ -398,11 +398,11 @@ public:
         /* [in] */ IHandler* h);
 
     // @Override
-    CARAPI SetNetworkSelectionModeAutomatic(
+    virtual CARAPI SetNetworkSelectionModeAutomatic(
         /* [in] */ IMessage* response);
 
     // @Override
-    CARAPI SelectNetworkManually(
+    virtual CARAPI SelectNetworkManually(
         /* [in] */ IOperatorInfo* network,
         /* [in] */ IMessage* response);
 
@@ -416,64 +416,64 @@ public:
 
     // Inherited documentation suffices.
     // @Override
-    CARAPI SetUnitTestMode(
+    virtual CARAPI SetUnitTestMode(
         /* [in] */ Boolean f);
 
     // Inherited documentation suffices.
     // @Override
-    CARAPI GetUnitTestMode(
+    virtual CARAPI GetUnitTestMode(
         /* [out] */ Boolean* result);
 
     // Inherited documentation suffices.
     // @Override
-    CARAPI RegisterForServiceStateChanged(
+    virtual CARAPI RegisterForServiceStateChanged(
         /* [in] */ IHandler* h,
         /* [in] */ Int32 what,
         /* [in] */ IInterface* obj);
 
     // Inherited documentation suffices.
     // @Override
-    CARAPI UnregisterForServiceStateChanged(
+    virtual CARAPI UnregisterForServiceStateChanged(
         /* [in] */ IHandler* h);
 
     // Inherited documentation suffices.
     // @Override
-    CARAPI RegisterForRingbackTone(
+    virtual CARAPI RegisterForRingbackTone(
         /* [in] */ IHandler* h,
         /* [in] */ Int32 what,
         /* [in] */ IInterface* obj);
 
     // Inherited documentation suffices.
     // @Override
-    CARAPI UnregisterForRingbackTone(
+    virtual CARAPI UnregisterForRingbackTone(
         /* [in] */ IHandler* h);
 
     // Inherited documentation suffices.
     // @Override
-    CARAPI RegisterForOnHoldTone(
+    virtual CARAPI RegisterForOnHoldTone(
         /* [in] */ IHandler* h,
         /* [in] */ Int32 what,
         /* [in] */ IInterface* obj);
 
     // Inherited documentation suffices.
     // @Override
-    CARAPI UnregisterForOnHoldTone(
+    virtual CARAPI UnregisterForOnHoldTone(
         /* [in] */ IHandler* h);
 
     // Inherited documentation suffices.
     // @Override
-    CARAPI RegisterForResendIncallMute(
+    virtual CARAPI RegisterForResendIncallMute(
         /* [in] */ IHandler* h,
         /* [in] */ Int32 what,
         /* [in] */ IInterface* obj);
 
     // Inherited documentation suffices.
     // @Override
-    CARAPI UnregisterForResendIncallMute(
+    virtual CARAPI UnregisterForResendIncallMute(
         /* [in] */ IHandler* h);
 
     // @Override
-    CARAPI SetEchoSuppressionEnabled();
+    virtual CARAPI SetEchoSuppressionEnabled();
 
     // Inherited documentation suffices.
     // @Override
@@ -485,7 +485,7 @@ public:
      */
     // @Override
     virtual CARAPI GetState(
-        /* [out] */ PhoneConstantsState* resutl) = 0;
+        /* [out] */ PhoneConstantsState* result) = 0;
 
     /**
      * Retrieves the IccFileHandler of the Phone instance
@@ -506,7 +506,7 @@ public:
         /* [out] */ IHandler** result);
 
     // @Override
-    CARAPI UpdatePhoneObject(
+    virtual CARAPI UpdatePhoneObject(
         /* [in] */ Int32 voiceRadioTech);
 
     /**
@@ -525,42 +525,42 @@ public:
         /* [out] */ AppType* result);
 
     // @Override
-    CARAPI GetIccCard(
+    virtual CARAPI GetIccCard(
         /* [out] */ IIccCard** result);
 
     // @Override
-    CARAPI GetIccSerialNumber(
+    virtual CARAPI GetIccSerialNumber(
         /* [out] */ String* result);
 
     // @Override
-    CARAPI GetIccRecordsLoaded(
+    virtual CARAPI GetIccRecordsLoaded(
         /* [out] */ Boolean* result);
 
     /**
      * @return all available cell information or NULL if none.
      */
     // @Override
-    CARAPI GetAllCellInfo(
+    virtual CARAPI GetAllCellInfo(
         /* [out] */ IList** result);
 
     /**
      * {@inheritDoc}
      */
     // @Override
-    CARAPI SetCellInfoListRate(
+    virtual CARAPI SetCellInfoListRate(
         /* [in] */ Int32 rateInMillis);
 
     // @Override
     /** @return TRUE if there are messages waiting, FALSE otherwise. */
-    CARAPI GetMessageWaitingIndicator(
+    virtual CARAPI GetMessageWaitingIndicator(
         /* [out] */ Boolean* result);
 
     // @Override
-    CARAPI GetCallForwardingIndicator(
+    virtual CARAPI GetCallForwardingIndicator(
         /* [out] */ Boolean* result);
 
     // @Override
-    CARAPI SetCallForwardingUncondTimerOption(
+    virtual CARAPI SetCallForwardingUncondTimerOption(
         /* [in] */ Int32 startHour,
         /* [in] */ Int32 startMinute,
         /* [in] */ Int32 endHour,
@@ -571,7 +571,7 @@ public:
         /* [in] */ IMessage* onComplete);
 
     // @Override
-    CARAPI GetCallForwardingUncondTimerOption(
+    virtual CARAPI GetCallForwardingUncondTimerOption(
         /* [in] */ Int32 commandInterfaceCFReason,
         /* [in] */ IMessage* onComplete);
 
@@ -579,21 +579,21 @@ public:
      *  Query the status of the CDMA roaming preference
      */
     // @Override
-    CARAPI QueryCdmaRoamingPreference(
+    virtual CARAPI QueryCdmaRoamingPreference(
         /* [in] */ IMessage* response);
 
     /**
      * Get the signal strength
      */
     // @Override
-    CARAPI GetSignalStrength(
+    virtual CARAPI GetSignalStrength(
         /* [out] */ ISignalStrength** result);
 
     /**
      *  Set the status of the CDMA roaming preference
      */
     // @Override
-    CARAPI SetCdmaRoamingPreference(
+    virtual CARAPI SetCdmaRoamingPreference(
         /* [in] */ Int32 cdmaRoamingType,
         /* [in] */ IMessage* response);
 
@@ -601,7 +601,7 @@ public:
      *  Set the status of the CDMA subscription mode
      */
     // @Override
-    CARAPI SetCdmaSubscription(
+    virtual CARAPI SetCdmaSubscription(
         /* [in] */ Int32 cdmaSubscriptionType,
         /* [in] */ IMessage* response);
 
@@ -609,88 +609,88 @@ public:
      *  Set the preferred Network Type: Global, CDMA only or GSM/UMTS only
      */
     // @Override
-    CARAPI SetPreferredNetworkType(
+    virtual CARAPI SetPreferredNetworkType(
         /* [in] */ Int32 networkType,
         /* [in] */ IMessage* response);
 
     // @Override
-    CARAPI GetPreferredNetworkType(
+    virtual CARAPI GetPreferredNetworkType(
         /* [in] */ IMessage* response);
 
     // @Override
-    CARAPI GetSmscAddress(
+    virtual CARAPI GetSmscAddress(
         /* [in] */ IMessage* result);
 
     // @Override
-    CARAPI SetSmscAddress(
+    virtual CARAPI SetSmscAddress(
         /* [in] */ const String& address,
         /* [in] */ IMessage* result);
 
     // @Override
-    CARAPI SetTTYMode(
+    virtual CARAPI SetTTYMode(
         /* [in] */ Int32 ttyMode,
         /* [in] */ IMessage* onComplete);
 
     // @Override
-    CARAPI SetUiTTYMode(
+    virtual CARAPI SetUiTTYMode(
         /* [in] */ Int32 uiTtyMode,
         /* [in] */ IMessage* onComplete);
 
     // @Override
-    CARAPI QueryTTYMode(
+    virtual CARAPI QueryTTYMode(
         /* [in] */ IMessage* onComplete);
 
     // @Override
-    CARAPI EnableEnhancedVoicePrivacy(
+    virtual CARAPI EnableEnhancedVoicePrivacy(
         /* [in] */ Boolean enable,
         /* [in] */ IMessage* onComplete);
 
     // @Override
-    CARAPI GetEnhancedVoicePrivacy(
+    virtual CARAPI GetEnhancedVoicePrivacy(
         /* [in] */ IMessage* onComplete);
 
     // @Override
-    CARAPI SetBandMode(
+    virtual CARAPI SetBandMode(
         /* [in] */ Int32 bandMode,
         /* [in] */ IMessage* response);
 
     // @Override
-    CARAPI QueryAvailableBandMode(
+    virtual CARAPI QueryAvailableBandMode(
         /* [in] */ IMessage* response);
 
     // @Override
-    CARAPI InvokeOemRilRequestRaw(
+    virtual CARAPI InvokeOemRilRequestRaw(
         /* [in] */ ArrayOf<Byte>* data,
         /* [in] */ IMessage* response);
 
     // @Override
-    CARAPI InvokeOemRilRequestStrings(
+    virtual CARAPI InvokeOemRilRequestStrings(
         /* [in] */ ArrayOf<String>* strings,
         /* [in] */ IMessage* response);
 
     // @Override
-    CARAPI NvReadItem(
+    virtual CARAPI NvReadItem(
         /* [in] */ Int32 itemID,
         /* [in] */ IMessage* response);
 
     // @Override
-    CARAPI NvWriteItem(
+    virtual CARAPI NvWriteItem(
         /* [in] */ Int32 itemID,
         /* [in] */ const String& itemValue,
         /* [in] */ IMessage* response);
 
     // @Override
-    CARAPI NvWriteCdmaPrl(
+    virtual CARAPI NvWriteCdmaPrl(
         /* [in] */ ArrayOf<Byte>* preferredRoamingList,
         /* [in] */ IMessage* response);
 
     // @Override
-    CARAPI NvResetConfig(
+    virtual CARAPI NvResetConfig(
         /* [in] */ Int32 resetType,
         /* [in] */ IMessage* response);
 
     // @Override
-    CARAPI NotifyDataActivity();
+    virtual CARAPI NotifyDataActivity();
 
     CARAPI NotifyMessageWaitingIndicator();
 
@@ -741,13 +741,13 @@ public:
         /* [out] */ Boolean* result);
 
     // @Override
-    CARAPI GetPhoneType(
+    virtual CARAPI GetPhoneType(
         /* [out] */ Int32* result) = 0;
 
     /** @hide */
     /** @return number of voicemails */
     // @Override
-    CARAPI GetVoiceMessageCount(
+    virtual CARAPI GetVoiceMessageCount(
         /* [out] */ Int32* result);
 
     /** sets the voice mail count of the phone and notifies listeners. */
@@ -758,7 +758,7 @@ public:
      * Returns the CDMA ERI icon index to display
      */
     // @Override
-    CARAPI GetCdmaEriIconIndex(
+    virtual CARAPI GetCdmaEriIconIndex(
         /* [out] */ Int32* result);
 
     /**
@@ -767,56 +767,56 @@ public:
      * 1 - FLASHING
      */
     // @Override
-    CARAPI GetCdmaEriIconMode(
+    virtual CARAPI GetCdmaEriIconMode(
         /* [out] */ Int32* result);
 
     /**
      * Returns the CDMA ERI text,
      */
     // @Override
-    CARAPI GetCdmaEriText(
+    virtual CARAPI GetCdmaEriText(
         /* [out] */ String* result);
 
     // @Override
-    CARAPI GetCdmaMin(
+    virtual CARAPI GetCdmaMin(
         /* [out] */ String* result);
 
     // @Override
-    CARAPI IsMinInfoReady(
+    virtual CARAPI IsMinInfoReady(
         /* [out] */ Boolean* result);
 
     // @Override
-    CARAPI GetCdmaPrlVersion(
+    virtual CARAPI GetCdmaPrlVersion(
         /* [out] */ String* result);
 
     // @Override
-    CARAPI SendBurstDtmf(
+    virtual CARAPI SendBurstDtmf(
         /* [in] */ const String& dtmfString,
         /* [in] */ Int32 on,
         /* [in] */ Int32 off,
         /* [in] */ IMessage* onComplete);
 
     // @Override
-    CARAPI ExitEmergencyCallbackMode();
+    virtual CARAPI ExitEmergencyCallbackMode();
 
     // @Override
-    CARAPI RegisterForCdmaOtaStatusChange(
+    virtual CARAPI RegisterForCdmaOtaStatusChange(
         /* [in] */ IHandler* h,
         /* [in] */ Int32 what,
         /* [in] */ IInterface* obj);
 
     // @Override
-    CARAPI UnregisterForCdmaOtaStatusChange(
+    virtual CARAPI UnregisterForCdmaOtaStatusChange(
         /* [in] */ IHandler* h);
 
     // @Override
-    CARAPI RegisterForSubscriptionInfoReady(
+    virtual CARAPI RegisterForSubscriptionInfoReady(
         /* [in] */ IHandler* h,
         /* [in] */ Int32 what,
         /* [in] */ IInterface* obj);
 
     // @Override
-    CARAPI UnregisterForSubscriptionInfoReady(
+    virtual CARAPI UnregisterForSubscriptionInfoReady(
         /* [in] */ IHandler* h);
 
     /**
@@ -824,7 +824,7 @@ public:
      * If not overridden return FALSE.
      */
     // @Override
-    CARAPI NeedsOtaServiceProvisioning(
+    virtual CARAPI NeedsOtaServiceProvisioning(
         /* [out] */ Boolean* result);
 
     /**
@@ -832,140 +832,140 @@ public:
      * If not overridden return FALSE.
      */
     // @Override
-    CARAPI IsOtaSpNumber(
+    virtual CARAPI IsOtaSpNumber(
         /* [in] */ const String& dialStr,
         /* [out] */ Boolean* result);
 
     // @Override
-    CARAPI RegisterForCallWaiting(
+    virtual CARAPI RegisterForCallWaiting(
         /* [in] */ IHandler* h,
         /* [in] */ Int32 what,
         /* [in] */ IInterface* obj);
 
     // @Override
-    CARAPI UnregisterForCallWaiting(
+    virtual CARAPI UnregisterForCallWaiting(
         /* [in] */ IHandler* h);
 
     // @Override
-    CARAPI RegisterForEcmTimerReset(
+    virtual CARAPI RegisterForEcmTimerReset(
         /* [in] */ IHandler* h,
         /* [in] */ Int32 what,
         /* [in] */ IInterface* obj);
 
     // @Override
-    CARAPI UnregisterForEcmTimerReset(
+    virtual CARAPI UnregisterForEcmTimerReset(
         /* [in] */ IHandler* h);
 
     // @Override
-    CARAPI RegisterForSignalInfo(
+    virtual CARAPI RegisterForSignalInfo(
         /* [in] */ IHandler* h,
         /* [in] */ Int32 what,
         /* [in] */ IInterface* obj);
 
     // @Override
-    CARAPI UnregisterForSignalInfo(
+    virtual CARAPI UnregisterForSignalInfo(
         /* [in] */ IHandler* h);
 
     // @Override
-    CARAPI RegisterForDisplayInfo(
+    virtual CARAPI RegisterForDisplayInfo(
         /* [in] */ IHandler* h,
         /* [in] */ Int32 what,
         /* [in] */ IInterface* obj);
 
      // @Override
-    CARAPI UnregisterForDisplayInfo(
+    Cvirtual ARAPI UnregisterForDisplayInfo(
         /* [in] */ IHandler* h);
 
     // @Override
-    CARAPI RegisterForNumberInfo(
+    virtual CARAPI RegisterForNumberInfo(
         /* [in] */ IHandler* h,
         /* [in] */ Int32 what,
         /* [in] */ IInterface* obj);
 
     // @Override
-    CARAPI UnregisterForNumberInfo(
+    virtual CARAPI UnregisterForNumberInfo(
         /* [in] */ IHandler* h);
 
     // @Override
-    CARAPI RegisterForRedirectedNumberInfo(
+    virtual CARAPI RegisterForRedirectedNumberInfo(
         /* [in] */ IHandler* h,
         /* [in] */ Int32 what,
         /* [in] */ IInterface* obj);
 
     // @Override
-    CARAPI UnregisterForRedirectedNumberInfo(
+    virtual CARAPI UnregisterForRedirectedNumberInfo(
         /* [in] */ IHandler* h);
 
     // @Override
-    CARAPI RegisterForLineControlInfo(
+    virtual CARAPI RegisterForLineControlInfo(
         /* [in] */ IHandler* h,
         /* [in] */ Int32 what,
         /* [in] */ IInterface* obj);
 
     // @Override
-    CARAPI UnregisterForLineControlInfo(
+    virtual CARAPI UnregisterForLineControlInfo(
         /* [in] */ IHandler* h);
 
     // @Override
-    CARAPI RegisterFoT53ClirlInfo(
+    virtual CARAPI RegisterFoT53ClirlInfo(
         /* [in] */ IHandler* h,
         /* [in] */ Int32 what,
         /* [in] */ IInterface* obj);
 
     // @Override
-    CARAPI UnregisterForT53ClirInfo(
+    virtual CARAPI UnregisterForT53ClirInfo(
         /* [in] */ IHandler* h);
 
     // @Override
-    CARAPI RegisterForT53AudioControlInfo(
+    virtual CARAPI RegisterForT53AudioControlInfo(
         /* [in] */ IHandler* h,
         /* [in] */ Int32 what,
         /* [in] */ IInterface* obj);
 
     // @Override
-    CARAPI UnregisterForT53AudioControlInfo(
+    virtual CARAPI UnregisterForT53AudioControlInfo(
         /* [in] */ IHandler* h);
 
     // @Override
-    CARAPI SetOnEcbModeExitResponse(
+    virtual CARAPI SetOnEcbModeExitResponse(
         /* [in] */ IHandler* h,
         /* [in] */ Int32 what,
         /* [in] */ IInterface* obj);
 
     // @Override
-    CARAPI UnsetOnEcbModeExitResponse(
+    virtual CARAPI UnsetOnEcbModeExitResponse(
         /* [in] */ IHandler* h);
 
     // @Override
-    CARAPI GetActiveApnTypes(
+    virtual CARAPI GetActiveApnTypes(
         /* [out] */ ArrayOf<String>** types);
 
     // @Override
-    CARAPI GetActiveApnHost(
+    virtual CARAPI GetActiveApnHost(
         /* [in] */ const String& apnType,
         /* [out] */ String* result);
 
     // @Override
-    CARAPI GetLinkProperties(
+    virtual CARAPI GetLinkProperties(
         /* [in] */ const String& apnType,
         /* [out] */ ILinkProperties** result);
 
     // @Override
-    CARAPI GetNetworkCapabilities(
+    virtual CARAPI GetNetworkCapabilities(
         /* [in] */ const String& apnType,
         /* [out] */ INetworkCapabilities** result);
 
     // @Override
-    CARAPI IsDataConnectivityPossible(
+    virtual CARAPI IsDataConnectivityPossible(
         /* [out] */ Boolean* result);
 
     // @Override
-    CARAPI IsOnDemandDataPossible(
+    virtual CARAPI IsOnDemandDataPossible(
         /* [in] */ const String& apnType,
         /* [out] */ Boolean* result);
 
     // @Override
-    CARAPI IsDataConnectivityPossible(
+    virtual CARAPI IsDataConnectivityPossible(
         /* [in] */ const String& apnType,
         /* [out] */ Boolean* result);
 
@@ -988,15 +988,15 @@ public:
         /* [out] */ Boolean* result);
 
     // @Override
-    CARAPI IsCspPlmnEnabled(
+    virtual CARAPI IsCspPlmnEnabled(
         /* [out] */ Boolean* result);
 
     // @Override
-    CARAPI GetIsimRecords(
+    virtual CARAPI GetIsimRecords(
         /* [out] */ IIsimRecords** result);
 
     // @Override
-    CARAPI GetMsisdn(
+    virtual CARAPI GetMsisdn(
         /* [out] */ String* result);
 
     CARAPI GetDataConnectionState(
@@ -1004,7 +1004,7 @@ public:
         /* [out] */ PhoneConstantsDataState* result) = 0;
 
     // @Override
-    CARAPI GetDataConnectionState(
+    virtual CARAPI GetDataConnectionState(
         /* [out] */ PhoneConstantsDataState* result);
 
     // Called by SimRecords which is constructed with a PhoneBase instead of a GSMPhone.
@@ -1024,14 +1024,14 @@ public:
      * {@inheritDoc}
      */
     // @Override
-    CARAPI GetLteOnCdmaMode(
+    virtual CARAPI GetLteOnCdmaMode(
         /* [out] */ Int32* result);
 
     /**
      * {@hide}
      */
     // @Override
-    CARAPI GetLteOnGsmMode(
+    virtual CARAPI GetLteOnGsmMode(
         /* [out] */ Int32* result);
 
     /**
@@ -1042,7 +1042,7 @@ public:
      *                      messages are waiting
      */
     // @Override
-    CARAPI SetVoiceMessageWaiting(
+    virtual CARAPI SetVoiceMessageWaiting(
         /* [in] */ Int32 line,
         /* [in] */ Int32 countWaiting);
 
@@ -1051,7 +1051,7 @@ public:
      * @return an interface to the UsimServiceTable record, or NULL if not available
      */
     // @Override
-    CARAPI GetUsimServiceTable(
+    virtual CARAPI GetUsimServiceTable(
         /* [out] */ IUsimServiceTable** result);
 
     /**
@@ -1059,7 +1059,7 @@ public:
      * @return the UiccCard object corresponding to the phone ID.
      */
     // @Override
-    CARAPI GetUiccCard(
+    virtual CARAPI GetUiccCard(
         /* [out] */ IUiccCard** result);
 
     /**
@@ -1067,7 +1067,7 @@ public:
      * @param apnType the apnType, "ims" for IMS APN, "emergency" for EMERGENCY APN
      */
     // @Override
-    CARAPI GetPcscfAddress(
+    virtual CARAPI GetPcscfAddress(
         /* [in] */ const String& apnType,
         /* [out] */ ArrayOf<String>** result);
 
@@ -1075,22 +1075,22 @@ public:
      * Set IMS registration state
      */
     // @Override
-    CARAPI SetImsRegistrationState(
+    virtual CARAPI SetImsRegistrationState(
         /* [in] */ Boolean registered);
 
     /**
      * Return an instance of a IMS phone
      */
     // @Override
-    CARAPI GetImsPhone(
+    virtual CARAPI GetImsPhone(
         /* [out] */ IPhone** result);
 
     // @Override
-    CARAPI RelinquishOwnershipOfImsPhone(
+    virtual CARAPI RelinquishOwnershipOfImsPhone(
         /* [out] */ IImsPhone** result);
 
     // @Override
-    CARAPI AcquireOwnershipOfImsPhone(
+    virtual CARAPI AcquireOwnershipOfImsPhone(
         /* [in] */ IImsPhone* imsPhone);
 
     CARAPI Dump(
@@ -1119,20 +1119,20 @@ public:
      * otherwise return the current voice service state
      */
     // @Override
-    CARAPI GetVoicePhoneServiceState(
+    virtual CARAPI GetVoicePhoneServiceState(
         /* [out] */ Int32* result);
 
     // @Override
-    CARAPI SetOperatorBrandOverride(
+    virtual CARAPI SetOperatorBrandOverride(
         /* [in] */ const String& brand,
         /* [out] */ Boolean* result);
 
     // @Override
-    CARAPI IsRadioAvailable(
+    virtual CARAPI IsRadioAvailable(
         /* [out] */ Boolean* result);
 
     // @Override
-    CARAPI ShutdownRadio();
+    virtual CARAPI ShutdownRadio();
 
     CARAPI GetCallBarringOption(
         /* [in] */ const String& facility,
@@ -1152,16 +1152,21 @@ public:
         /* [in] */ IMessage* result);
 
     // @Override
-    CARAPI SetLocalCallHold(
+    virtual CARAPI SetLocalCallHold(
         /* [in] */ Int32 lchStatus);
 
     // @Override
-    CARAPI DeflectCall(
+    virtual CARAPI DeflectCall(
         /* [in] */ const String& number) /*throws CallStateException*/;
 
     // @Override
-    CARAPI AddParticipant(
+    virtual CARAPI AddParticipant(
         /* [in] */ const String& dialString) /*throws CallStateException*/;
+
+    virtual CARAPI Dial(
+        /* [in] */ const String& dialString,
+        /* [in] */ Int32 videoState,
+        /* [out] */ IConnection** result) = 0;
 
 protected:
     // Set the Card into the Phone Book.

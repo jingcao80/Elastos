@@ -29,6 +29,7 @@ ECode CImsSsInfo::ReadFromParcel(
     /* [in] */ IParcel* source)
 {
     source->ReadInt32(&mStatus);
+    source->ReadString(&mIcbNum);
     return NOERROR;
 }
 
@@ -36,6 +37,7 @@ ECode CImsSsInfo::WriteToParcel(
     /* [in] */ IParcel* dest)
 {
     dest->WriteInt32(mStatus);
+    dest->WriteString(mIcbNum);
     return NOERROR;
 }
 

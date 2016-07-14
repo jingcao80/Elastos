@@ -33,7 +33,7 @@ using Elastos::Droid::Os::ILooper;
 using Elastos::Droid::Os::IMessage;
 using Elastos::Droid::Os::IBundle;
 //TODO using Elastos::Droid::Ims::IImsCall;
-//TODO using Elastos::Droid::Ims::IImsStreamMediaProfile;
+using Elastos::Droid::Ims::IImsStreamMediaProfile;
 using Elastos::Droid::Internal::Telephony::IUUSInfo;
 using Elastos::Droid::Internal::Telephony::IConnection;
 using Elastos::Droid::Internal::Telephony::Connection;
@@ -60,15 +60,23 @@ public:
     {
     public:
         MyHandler(
-            /* [in] */ ILooper* l);
+            /* [in] */ ILooper* l,
+            /* [in] */ ImsPhoneConnection* host);
 
         // @Override
         CARAPI HandleMessage(
             /* [in] */ IMessage* msg);
+
+    private:
+        ImsPhoneConnection* mHost;
     };
 
 public:
     CAR_INTERFACE_DECL();
+
+    ImsPhoneConnection();
+
+    virtual ~ImsPhoneConnection();
 
     //***** Constructors
     /** This is probably an MT call */
@@ -238,10 +246,6 @@ public:
     CARAPI ToString(
         /* [out] */ String* result);
 
-protected:
-    // @Override
-    CARAPI Finalize();
-
 private:
     /**
       * Determines the {@link ImsPhoneConnection} audio quality based on an
@@ -251,7 +255,7 @@ private:
       * @return The audio quality.
       */
     CARAPI_(Int32) GetAudioQualityFromMediaProfile(
-        /* [in] */ /*TODO IImsStreamMediaProfile*/IInterface* mediaProfile);
+        /* [in] */ IImsStreamMediaProfile* mediaProfile);
 
     /**
       * Performs the appropriate action for a post-dial char, but does not

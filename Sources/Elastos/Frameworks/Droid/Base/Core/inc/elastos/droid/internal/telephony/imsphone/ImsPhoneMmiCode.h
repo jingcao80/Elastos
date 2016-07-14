@@ -92,7 +92,7 @@ public:
         /* [in] */ IImsPhone* phone);
 
     static CARAPI_(AutoPtr<IImsPhoneMmiCode>) NewFromUssdUserInput(
-        /* [in] */ const String& ussdMessge,
+        /* [in] */ const String& ussdMessage,
         /* [in] */ IImsPhone* phone);
 
     static CARAPI_(Boolean) IsScMatchesSuppServType(
@@ -107,8 +107,9 @@ public:
     static CARAPI_(Boolean) IsServiceCodeCallBarring(
         /* [in] */ const String& sc);
 
-    static CARAPI_(String) ScToBarringFacility(
-        /* [in] */ const String& sc);
+    static CARAPI ScToBarringFacility(
+        /* [in] */ const String& sc,
+        /* [out] */ String* result);
 
     //***** MmiCode implementation
     // @Override
@@ -262,11 +263,13 @@ private:
     static CARAPI_(Boolean) IsEmptyOrNull(
         /* [in] */ ICharSequence* s);
 
-    static CARAPI_(Int32) ScToCallForwardReason(
-        /* [in] */ const String& sc);
+    static CARAPI ScToCallForwardReason(
+        /* [in] */ const String& sc,
+        /* [out] */ Int32* result);
 
-    static CARAPI_(Int32) SiToServiceClass(
-        /* [in] */ const String& si);
+    static CARAPI SiToServiceClass(
+        /* [in] */ const String& si,
+        /* [out] */ Int32* result);
 
     static CARAPI_(Int32) SiToTime(
         /* [in] */ const String& si);

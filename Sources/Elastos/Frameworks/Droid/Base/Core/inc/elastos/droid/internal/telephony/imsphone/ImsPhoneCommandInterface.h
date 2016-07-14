@@ -29,9 +29,9 @@ class ImsPhoneCommandInterface
     : public BaseCommands
 {
 public:
-    //CAR_INTERFACE_DECL();
+    ImsPhoneCommandInterface();
 
-    ImsPhoneCommandInterface(
+    CARAPI constructor(
         /* [in] */ IContext* context);
 
     // @Override
@@ -221,12 +221,12 @@ public:
 
     // @Override
     CARAPI SendDtmf(
-        /* [in] */ Char16 c,
+        /* [in] */ Char32 c,
         /* [in] */ IMessage* result);
 
     // @Override
     CARAPI StartDtmf(
-        /* [in] */ Char16 c,
+        /* [in] */ Char32 c,
         /* [in] */ IMessage* result);
 
     // @Override

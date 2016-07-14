@@ -4,58 +4,8 @@
 #include "elastos/droid/ext/frameworkext.h"
 #include "elastos/core/Object.h"
 #include "elastos/droid/os/Runnable.h"
-#include "elastos/droid/os/Registrant.h"
 #include "elastos/droid/os/RegistrantList.h"
 #include "elastos/droid/internal/telephony/imsphone/ImsPhoneBase.h"
-
-// import android.app.ActivityManagerNative;
-// import android.content.Intent;
-// import android.os.AsyncResult;
-// import android.os.PowerManager;
-// import android.os.PowerManager.WakeLock;
-// import android.os.SystemProperties;
-// import android.os.UserHandle;
-// import android.telephony.PhoneNumberUtils;
-// import android.telephony.ServiceState;
-// import android.telephony.Rlog;
-// import android.telephony.SubscriptionManager;
-// import android.text.TextUtils;
-// import com.android.ims.ImsCallForwardInfo;
-// import com.android.ims.ImsCallProfile;
-// import com.android.ims.ImsEcbm;
-// import com.android.ims.ImsEcbmStateListener;
-// import com.android.ims.ImsException;
-// import com.android.ims.ImsReasonInfo;
-// import com.android.ims.ImsUtInterface;
-// import static com.android.internal.telephony.CommandsInterface.CB_FACILITY_BAOC;
-// import static com.android.internal.telephony.CommandsInterface.CB_FACILITY_BAOIC;
-// import static com.android.internal.telephony.CommandsInterface.CB_FACILITY_BAOICxH;
-// import static com.android.internal.telephony.CommandsInterface.CB_FACILITY_BAIC;
-// import static com.android.internal.telephony.CommandsInterface.CB_FACILITY_BAICr;
-// import static com.android.internal.telephony.CommandsInterface.CB_FACILITY_BA_ALL;
-// import static com.android.internal.telephony.CommandsInterface.CB_FACILITY_BA_MO;
-// import static com.android.internal.telephony.CommandsInterface.CB_FACILITY_BA_MT;
-// import static com.android.internal.telephony.CommandsInterface.CF_ACTION_DISABLE;
-// import static com.android.internal.telephony.CommandsInterface.CF_ACTION_ENABLE;
-// import static com.android.internal.telephony.CommandsInterface.CF_ACTION_ERASURE;
-// import static com.android.internal.telephony.CommandsInterface.CF_ACTION_REGISTRATION;
-// import static com.android.internal.telephony.CommandsInterface.CF_REASON_ALL;
-// import static com.android.internal.telephony.CommandsInterface.CF_REASON_ALL_CONDITIONAL;
-// import static com.android.internal.telephony.CommandsInterface.CF_REASON_NO_REPLY;
-// import static com.android.internal.telephony.CommandsInterface.CF_REASON_NOT_REACHABLE;
-// import static com.android.internal.telephony.CommandsInterface.CF_REASON_BUSY;
-// import static com.android.internal.telephony.CommandsInterface.CF_REASON_UNCONDITIONAL;
-// import static com.android.internal.telephony.CommandsInterface.SERVICE_CLASS_VOICE;
-// import static com.android.internal.telephony.CommandsInterface.SERVICE_CLASS_NONE;
-// import com.android.internal.telephony.Call;
-// import com.android.internal.telephony.CallStateException;
-// import com.android.internal.telephony.CommandException;
-// import com.android.internal.telephony.CommandsInterface;
-// import com.android.internal.telephony.PhoneNotifier;
-// import com.android.internal.telephony.TelephonyIntents;
-// import com.android.internal.telephony.TelephonyProperties;
-// import com.android.internal.telephony.cdma.CDMAPhone;
-// import com.android.internal.telephony.gsm.GSMPhone;
 
 using Elastos::Droid::Content::IContext;
 using Elastos::Droid::Internal::Telephony::ICallSrvccState;
@@ -78,9 +28,10 @@ using Elastos::Droid::Os::IMessage;
 using Elastos::Droid::Os::IBundle;
 using Elastos::Droid::Os::IHandler;
 using Elastos::Droid::Os::Runnable;
-using Elastos::Droid::Os::Registrant;
+using Elastos::Droid::Os::IRegistrant;
 using Elastos::Droid::Os::RegistrantList;
 using Elastos::Droid::Telephony::IServiceState;
+using Elastos::Core::IThrowable;
 using Elastos::Utility::IArrayList;
 using Elastos::Utility::IList;
 
@@ -365,9 +316,9 @@ public:
         /* [in] */ IMessage* onComplete);
 
     /* package */
-    //virtual CARAPI SendErrorResponse(
-    //    /* [in] */ IMessage* onComplete,
-    //    /* [in] */ Throwable* e);
+    virtual CARAPI SendErrorResponse(
+       /* [in] */ IMessage* onComplete,
+       /* [in] */ IThrowable* e);
 
     /* package */
     virtual CARAPI SendErrorResponse(
@@ -380,9 +331,9 @@ public:
         /* [out] */ ICommandException** result);
 
     /* package */
-    virtual CARAPI GetCommandException();
-        ///* [in] */ Throwable* e,
-        ///* [out] */ ICommandException** result);
+    virtual CARAPI GetCommandException(
+        /* [in] */ IThrowable* e,
+        /* [out] */ ICommandException** result);
 
     /* package */
     virtual CARAPI OnIncomingUSSD(
@@ -478,10 +429,11 @@ public:
         /* [out] */ Boolean* result);
 
 protected:
-    virtual CARAPI_(AutoPtr<IConnection>) DialInternal(
+    virtual CARAPI DialInternal(
         /* [in] */ const String& dialString,
         /* [in] */ Int32 videoState,
-        /* [in] */ IBundle* extras);
+        /* [in] */ IBundle* extras,
+        /* [out] */ IConnection** result);
 
 private:
     CARAPI_(Boolean) HandleCallDeflectionIncallSupplementaryService(
@@ -540,15 +492,14 @@ private:
 
     CARAPI_(void) SendResponse(
         /* [in] */ IMessage* onComplete,
-        /* [in] */ IInterface* result);
-        ///* [in] */ Throwable* e);
+        /* [in] */ IInterface* result,
+        /* [in] */ IThrowable* e);
 
     CARAPI_(void) HandleEnterEmergencyCallbackMode();
 
     CARAPI_(void) HandleExitEmergencyCallbackMode();
 
 public:
-    //static const String CS_FALLBACK;
     static const Int32 RESTART_ECM_TIMER = 0;
     // restart Ecm timer
     static const Int32 CANCEL_ECM_TIMER = 1;
@@ -556,7 +507,7 @@ public:
     AutoPtr<IPhoneBase> mDefaultPhone;
     AutoPtr<IImsPhoneCallTracker> mCT;
     AutoPtr<IArrayList/*<ImsPhoneMmiCode>*/> mPendingMMIs;
-    AutoPtr<Registrant> mPostDialHandler;
+    AutoPtr<IRegistrant> mPostDialHandler;
     AutoPtr<IServiceState> mSS;
     AutoPtr<IPowerManagerWakeLock> mWakeLock;
     // List of Registrants to send supplementary service notifications to.
@@ -585,13 +536,13 @@ private:
     String mLastDialString;
     // mEcmExitRespRegistrant is informed after the phone has been exited the emergency
     // callback mode keep track of if phone is in emergency callback mode
-    AutoPtr<Registrant> mEcmExitRespRegistrant;
+    AutoPtr<IRegistrant> mEcmExitRespRegistrant;
     AutoPtr<RegistrantList> mSilentRedialRegistrants;
     // Variable to cache the video capabilitity. In cases where we delete/re-create the phone
     // this information is getting lost.
     Boolean mIsVideoCapable;
     // A runnable which is used to automatically exit from Ecm after a period of time.
-    AutoPtr<Runnable> mExitEcmRunnable;
+    AutoPtr<InnerRunnable> mExitEcmRunnable;
 };
 
 } // namespace Imsphone

@@ -1,6 +1,7 @@
 
 #include "Elastos.Droid.Internal.h"
 #include "elastos/droid/internal/telephony/imsphone/ImsPhoneFactory.h"
+#include "elastos/droid/internal/telephony/imsphone/CImsPhone.h"
 
 namespace Elastos {
 namespace Droid {
@@ -16,17 +17,14 @@ AutoPtr<IImsPhone> ImsPhoneFactory::MakePhone(
     /* [in] */ IPhoneNotifier* phoneNotifier,
     /* [in] */ IPhone* defaultPhone)
 {
-    // ==================before translated======================
-    //
     // try {
-    //     return new ImsPhone(context, phoneNotifier, defaultPhone);
+    AutoPtr<IImsPhone> phone;
+    CImsPhone::New(context, phoneNotifier, defaultPhone, (IImsPhone**)&phone);
+    return phone;
     // } catch (Exception e) {
     //     Rlog.e("VoltePhoneFactory", "makePhone", e);
     //     return null;
     // }
-    assert(0);
-    AutoPtr<IImsPhone> empty;
-    return empty;
 }
 
 } // namespace Imsphone

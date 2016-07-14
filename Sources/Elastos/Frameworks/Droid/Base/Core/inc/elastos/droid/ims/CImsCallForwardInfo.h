@@ -46,6 +46,14 @@ public:
     String mNumber;
     // No reply timer for CF
     Int32 mTimeSeconds;
+    // CFU start hour
+    Int32 mStartHour;
+    //CFU start minute
+    Int32 mStartMinute;
+    // CFU end hour
+    Int32 mEndHour;
+    //CFU end minute
+    Int32 mEndMinute;
 };
 
 } // namespace Ims
