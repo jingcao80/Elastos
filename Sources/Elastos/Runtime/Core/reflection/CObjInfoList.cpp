@@ -278,7 +278,11 @@ ECode CObjInfoList::AcquireModuleInfo(
 
     ECode ec = NOERROR;
 
+#ifdef _DEBUG
     void* module = dlopen(name.string(), RTLD_NOW);
+#else
+    void* module = dlopen(name.string(), RTLD_LAZY);
+#endif
     if(NULL == module){
         return E_FILE_NOT_FOUND;
     }
