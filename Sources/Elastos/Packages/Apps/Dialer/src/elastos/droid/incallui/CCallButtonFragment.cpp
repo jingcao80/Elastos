@@ -228,6 +228,46 @@ ECode CCallButtonFragment::OnClick(
     return NOERROR;
 }
 
+ECode CCallButtonFragment::SetEnabled(
+    /* [in] */ Boolean isEnabled)
+{
+    mIsEnabled = isEnabled;
+    AutoPtr<IView> view;
+    GetView((IView**)&view);
+    Int32 visibility;
+    view->GetVisibility(&visibility);
+    if (visibility != IView::VISIBLE) {
+        view->SetVisibility(IView::VISIBLE);
+    }
+
+    IView::Probe(mAudioButton)->SetEnabled(isEnabled);
+    IView::Probe(mChangeToVoiceButton)->SetEnabled(isEnabled);
+    IView::Probe(mMuteButton)->SetEnabled(isEnabled);
+    IView::Probe(mShowDialpadButton)->SetEnabled(isEnabled);
+    IView::Probe(mHoldButton)->SetEnabled(isEnabled);
+    IView::Probe(mSwapButton)->SetEnabled(isEnabled);
+    IView::Probe(mChangeToVideoButton)->SetEnabled(isEnabled);
+    IView::Probe(mSwitchCameraButton)->SetEnabled(isEnabled);
+    IView::Probe(mAddCallButton)->SetEnabled(isEnabled);
+    IView::Probe(mMergeButton)->SetEnabled(isEnabled);
+    IView::Probe(mPauseVideoButton)->SetEnabled(isEnabled);
+    IView::Probe(mOverflowButton)->SetEnabled(isEnabled);
+    return NOERROR;
+}
+
+ECode CCallButtonFragment::SetMute(
+    /* [in] */ Boolean value)
+{
+    Boolean selected;
+    IView::Probe(mMuteButton)->IsSelected(&selected);
+    if (selected != value) {
+        IView::Probe(mMuteButton)->SetSelected(value);
+        MaybeSendAccessibilityEvent(mMuteButton, value ? R::string::accessibility_call_muted
+                : R::string::accessibility_call_unmuted);
+    }
+    return NOERROR;
+}
+
 } // namespace InCallUI
 } // namespace Droid
 } // namespace Elastos
