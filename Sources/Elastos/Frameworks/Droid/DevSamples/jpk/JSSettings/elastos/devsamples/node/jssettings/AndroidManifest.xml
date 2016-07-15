@@ -69,12 +69,6 @@
     <uses-permission android:name="android.permission.MANAGE_DEVICE_ADMINS" />
     <uses-permission android:name="android.permission.READ_SEARCH_INDEXABLES" />
     <uses-permission android:name="android.permission.OEM_UNLOCK_STATE" />
-    <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" />
-    <uses-permission android:name="android.permission.HARDWARE_ABSTRACTION_ACCESS" />
-
-    <permission
-        android:name="cyanogenmod.permission.PROTECTED_APP"
-        android:protectionLevel="signatureOrSystem" />
 
     <application android:label="@string/settings_label"
             android:icon="@mipmap/ic_launcher_settings"
@@ -87,8 +81,7 @@
 
         <!-- Settings -->
 
-        <activity
-            android:name="Elastos.DevSamples.Node.JSSettings.CSettings"
+        <activity android:name="Elastos.DevSamples.Node.JSSettings.CSettings"
                 android:taskAffinity="Elastos.DevSamples.Node.JSSettings"
                 android:label="@string/settings_label_launcher"
                 android:launchMode="singleTask">
@@ -101,8 +94,8 @@
         </activity>
 
         <!-- Alias for launcher activity only, as this belongs to each profile. -->
-        <activity-alias android:name="Elastos.Droid.Node.JSSettings.CSettings"
-                android:taskAffinity="Elastos.Droid.Node.JSSettings"
+        <activity-alias android:name="Elastos.DevSamples.Node.JSSettings.CSettings"
+                android:taskAffinity="Elastos.DevSamples.Node.JSSettings"
                 android:label="@string/settings_label_launcher"
                 android:launchMode="singleTask"
                 android:targetActivity="Elastos.DevSamples.Node.JSSettings.CSettings">
