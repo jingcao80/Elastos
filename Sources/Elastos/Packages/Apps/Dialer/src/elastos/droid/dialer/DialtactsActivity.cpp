@@ -1204,8 +1204,9 @@ ECode DialtactsActivity::OnDialpadQueryChanged(
     // if (mSmartDialSearchFragment != NULL) {
     //     mSmartDialSearchFragment->SetAddToContactNumber(query);
     // }
-    String normalizedQuery = SmartDialNameMatcher::NormalizeNumber(query,
-            SmartDialNameMatcher::LATIN_SMART_DIAL_MAP);
+    String normalizedQuery;
+    // String normalizedQuery = SmartDialNameMatcher::NormalizeNumber(query,
+    //         SmartDialNameMatcher::LATIN_SMART_DIAL_MAP);
 
     AutoPtr<ICharSequence> text;
     ITextView::Probe(mSearchView)->GetText((ICharSequence**)&text);

@@ -268,6 +268,184 @@ ECode CCallButtonFragment::SetMute(
     return NOERROR;
 }
 
+ECode CCallButtonFragment::ShowAudioButton(
+    /* [in] */ Boolean show)
+{
+    IView::Probe(mAudioButton)->SetVisibility(show ? IView::VISIBLE : IView::GONE);
+    return NOERROR;
+}
+
+ECode CCallButtonFragment::ShowChangeToVoiceButton(
+    /* [in] */ Boolean show)
+{
+    IView::Probe(mChangeToVoiceButton)->SetVisibility(show ? IView::VISIBLE : IView::GONE);
+    return NOERROR;
+}
+
+ECode CCallButtonFragment::EnableMute(
+    /* [in] */ Boolean enabled)
+{
+    IView::Probe(mMuteButton)->SetEnabled(enabled);
+    return NOERROR;
+}
+
+ECode CCallButtonFragment::ShowDialpadButton(
+    /* [in] */ Boolean show)
+{
+    IView::Probe(mShowDialpadButton)->SetVisibility(show ? IView::VISIBLE : IView::GONE);
+    return NOERROR;
+}
+
+ECode CCallButtonFragment::SetHold(
+    /* [in] */ Boolean value)
+{
+    IView* v = IView::Probe(mHoldButton);
+    Boolean selected;
+    if (v->IsSelected(&selected), selected != value) {
+        v->SetSelected(value);
+        MaybeSendAccessibilityEvent(v,
+                value ? R::string::accessibility_call_put_on_hold :
+                        R::string::accessibility_call_removed_from_hold);
+    }
+    return NOERROR;
+}
+
+ECode CCallButtonFragment::ShowHoldButton(
+    /* [in] */ Boolean show)
+{
+    IView::Probe(mHoldButton)->SetVisibility(show ? IView::VISIBLE : IView::GONE);
+    return NOERROR;
+}
+
+ECode CCallButtonFragment::EnableHold(
+    /* [in] */ Boolean enabled)
+{
+    IView::Probe(mHoldButton)->SetEnabled(enabled);
+    return NOERROR;
+}
+
+ECode CCallButtonFragment::ShowSwapButton(
+    /* [in] */ Boolean show)
+{
+    IView::Probe(mSwapButton)->SetVisibility(show ? IView::VISIBLE : IView::GONE);
+    return NOERROR;
+}
+
+ECode CCallButtonFragment::ShowChangeToVideoButton(
+    /* [in] */ Boolean show)
+{
+    IView::Probe(mChangeToVideoButton)->SetVisibility(show ? IView::VISIBLE : IView::GONE);
+    return NOERROR;
+}
+
+ECode CCallButtonFragment::ShowSwitchCameraButton(
+    /* [in] */ Boolean show)
+{
+    IView::Probe(mSwitchCameraButton)->SetVisibility(show ? IView::VISIBLE : IView::GONE);
+    return NOERROR;
+}
+
+ECode CCallButtonFragment::SetSwitchCameraButton(
+    /* [in] */ Boolean isBackFacingCamera)
+{
+    IView::Probe(mSwitchCameraButton)->SetSelected(isBackFacingCamera);
+    return NOERROR;
+}
+
+ECode CCallButtonFragment::ShowAddCallButton(
+    /* [in] */ Boolean show)
+{
+    Logger::D("CCallButtonFragment", "show Add call button: %d", show);
+    IView::Probe(mAddCallButton)->SetVisibility(show ? IView::VISIBLE : IView::GONE);
+    return NOERROR;
+}
+
+ECode CCallButtonFragment::ShowMergeButton(
+    /* [in] */ Boolean show)
+{
+    IView::Probe(mMergeButton)->SetVisibility(show ? IView::VISIBLE : IView::GONE);
+    return NOERROR;
+}
+
+ECode CCallButtonFragment::ShowPauseVideoButton(
+    /* [in] */ Boolean show)
+{
+    IView::Probe(mPauseVideoButton)->SetVisibility(show ? IView::VISIBLE : IView::GONE);
+    return NOERROR;
+}
+
+ECode CCallButtonFragment::SetPauseVideoButton(
+    /* [in] */ Boolean isPaused)
+{
+    IView::Probe(mPauseVideoButton)->SetSelected(isPaused);
+    return NOERROR;
+}
+
+ECode CCallButtonFragment::ShowOverflowButton(
+    /* [in] */ Boolean show)
+{
+    IView::Probe(mOverflowButton)->SetVisibility(show ? IView::VISIBLE : IView::GONE);
+    return NOERROR;
+}
+
+ECode CCallButtonFragment::ConfigureOverflowMenu(
+    /* [in] */ Boolean showMergeMenuOption,
+    /* [in] */ Boolean showAddMenuOption,
+    /* [in] */ Boolean showHoldMenuOption,
+    /* [in] */ Boolean showSwapMenuOption)
+{
+    if (mOverflowPopup == NULL) {
+        final ContextThemeWrapper contextWrapper = new ContextThemeWrapper(getActivity(),
+                R.style.InCallPopupMenuStyle);
+        mOverflowPopup = new PopupMenu(contextWrapper, mOverflowButton);
+        mOverflowPopup.getMenuInflater().inflate(R.menu.incall_overflow_menu,
+                mOverflowPopup.getMenu());
+        mOverflowPopup.setOnMenuItemClickListener(new OnMenuItemClickListener() {
+            @Override
+            public boolean onMenuItemClick(MenuItem item) {
+                switch (item.getItemId()) {
+                    case R.id.overflow_merge_menu_item:
+                        getPresenter().mergeClicked();
+                        break;
+                    case R.id.overflow_add_menu_item:
+                        getPresenter().addCallClicked();
+                        break;
+                    case R.id.overflow_hold_menu_item:
+                        getPresenter().holdClicked(true /* checked */);
+                        break;
+                    case R.id.overflow_resume_menu_item:
+                        getPresenter().holdClicked(false /* checked */);
+                        break;
+                    case R.id.overflow_swap_menu_item:
+                        getPresenter().addCallClicked();
+                        break;
+                    default:
+                        Log.wtf(this, "onMenuItemClick: unexpected overflow menu click");
+                        break;
+                }
+                return true;
+            }
+        });
+        mOverflowPopup.setOnDismissListener(new OnDismissListener() {
+            @Override
+            public void onDismiss(PopupMenu popupMenu) {
+                popupMenu.dismiss();
+            }
+        });
+    }
+
+    final Menu menu = mOverflowPopup.getMenu();
+    menu.findItem(R.id.overflow_merge_menu_item).setVisible(showMergeMenuOption);
+    menu.findItem(R.id.overflow_add_menu_item).setVisible(showAddMenuOption);
+    menu.findItem(R.id.overflow_hold_menu_item).setVisible(
+            showHoldMenuOption && !mHoldButton.isSelected());
+    menu.findItem(R.id.overflow_resume_menu_item).setVisible(
+            showHoldMenuOption && mHoldButton.isSelected());
+    menu.findItem(R.id.overflow_swap_menu_item).setVisible(showSwapMenuOption);
+
+    mOverflowButton.setEnabled(menu.hasVisibleItems());
+}
+
 } // namespace InCallUI
 } // namespace Droid
 } // namespace Elastos
