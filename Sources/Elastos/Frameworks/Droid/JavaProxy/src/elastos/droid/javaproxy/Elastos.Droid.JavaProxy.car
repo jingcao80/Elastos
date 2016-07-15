@@ -89,6 +89,7 @@ module
     using interface Elastos.Droid.View.IRotationWatcher;
     using interface Elastos.Droid.View.IIWindowSessionCallback;
     using interface Elastos.Droid.View.InputMethod.IInputMethodSession;
+    using interface Elastos.IO.ICloseable;
     using interface Elastos.IO.ISerializable;
 
     namespace Elastos {
@@ -195,6 +196,7 @@ module
             [in] Handle64 jInstance);
 
         interface ICursor;
+        interface ICloseable;
         interface IBinder;
     }
 

@@ -282,8 +282,7 @@ ECode MatrixCursor::GetInt16(
         INumber::Probe(_value)->Int16Value(value);
         return NOERROR;
     }
-    assert(0);
-    // return Short.parseShort(value.toString());
+    *value = StringUtils::ParseInt16(TO_STR(_value));
     return NOERROR;
 }
 
@@ -303,8 +302,7 @@ ECode MatrixCursor::GetInt32(
         INumber::Probe(_value)->Int32Value(value);
         return NOERROR;
     }
-    assert(0);
-    // return Integer.parseInt(value.toString());
+    *value = StringUtils::ParseInt32(TO_STR(_value));
     return NOERROR;
 }
 
@@ -324,8 +322,7 @@ ECode MatrixCursor::GetInt64(
         INumber::Probe(_value)->Int64Value(value);
         return NOERROR;
     }
-    assert(0);
-    // return Long.parseLong(value.toString());
+    *value = StringUtils::ParseInt64(TO_STR(_value));
     return NOERROR;
 }
 
@@ -345,8 +342,7 @@ ECode MatrixCursor::GetFloat(
         INumber::Probe(_value)->FloatValue(value);
         return NOERROR;
     }
-    assert(0);
-    // return Float.parseFloat(value.toString());
+    *value = StringUtils::ParseFloat(TO_STR(_value));
     return NOERROR;
 }
 
@@ -366,8 +362,7 @@ ECode MatrixCursor::GetDouble(
         INumber::Probe(_value)->DoubleValue(value);
         return NOERROR;
     }
-    assert(0);
-    // return Double.parseDouble(value.toString());
+    *value = StringUtils::ParseDouble(TO_STR(_value));
     return NOERROR;
 }
 
