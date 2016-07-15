@@ -358,7 +358,7 @@ ECode ListsFragment::OnPause()
 
 ECode ListsFragment::OnDestroy()
 {
-    assert(0 && "TODO");
+    // TODO:
     // mCallLogAdapter->StopRequestProcessing();
     return AnalyticsFragment::OnDestroy();
 }
