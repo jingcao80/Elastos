@@ -28,6 +28,7 @@ using Elastos::Droid::View::EIID_IMenu;
 using Elastos::Droid::View::IActionProvider;
 using Elastos::Core::CoreUtils;
 using Elastos::Utility::IHashMap;
+using Elastos::Utility::IIterator;
 using Elastos::Utility::CArrayList;
 using Elastos::Utility::ICollection;
 using Elastos::Utility::Concurrent::CCopyOnWriteArrayList;
@@ -119,11 +120,12 @@ ECode MenuBuilder::AddMenuPresenter(
 ECode MenuBuilder::RemoveMenuPresenter(
     /* [in] */ IMenuPresenter* presenter)
 {
-    Int32 size;
-    mPresenters->GetSize(&size);
-    for (Int32 i = size -1 ; i >= 0; i--) {
+    AutoPtr<IIterator> iterator;
+    mPresenters->GetIterator((IIterator**)&iterator);
+    Boolean hasNext;
+    while (iterator->HasNext(&hasNext), hasNext) {
         AutoPtr<IInterface> elem;
-        mPresenters->Get(i, (IInterface**)&elem);
+        iterator->GetNext((IInterface**)&elem);
         AutoPtr<IMenuPresenter> item;
         IWeakReference::Probe(elem)->Resolve(EIID_IMenuPresenter, (IInterface**)&item);
 
@@ -144,11 +146,12 @@ void MenuBuilder::DispatchPresenterUpdate(
 
     StopDispatchingItemsChanged();
 
-    Int32 size;
-    mPresenters->GetSize(&size);
-    for (Int32 i = 0; i < size;) {
+    AutoPtr<IIterator> iterator;
+    mPresenters->GetIterator((IIterator**)&iterator);
+    Boolean hasNext;
+    while (iterator->HasNext(&hasNext), hasNext) {
         AutoPtr<IInterface> elem;
-        mPresenters->Get(i, (IInterface**)&elem);
+        iterator->GetNext((IInterface**)&elem);
         AutoPtr<IMenuPresenter> presenter;
         IWeakReference::Probe(elem)->Resolve(EIID_IMenuPresenter, (IInterface**)&presenter);
         if (presenter == NULL) {
@@ -156,7 +159,6 @@ void MenuBuilder::DispatchPresenterUpdate(
         }
         else {
             presenter->UpdateMenuView(cleared);
-            i++;
         }
     }
 
@@ -178,11 +180,13 @@ Boolean MenuBuilder::DispatchSubMenuSelected(
         preferredPresenter->OnSubMenuSelected(subMenu, &result);
     }
 
-    Int32 size;
-    mPresenters->GetSize(&size);
-    for (Int32 i = 0; i < size;) {
+    AutoPtr<IIterator> iterator;
+    mPresenters->GetIterator((IIterator**)&iterator);
+    Boolean hasNext;
+    while (iterator->HasNext(&hasNext), hasNext) {
         AutoPtr<IInterface> elem;
-        mPresenters->Get(i, (IInterface**)&elem);
+        iterator->GetNext((IInterface**)&elem);
+
         AutoPtr<IMenuPresenter> presenter;
         IWeakReference::Probe(elem)->Resolve(EIID_IMenuPresenter, (IInterface**)&presenter);
         if (presenter == NULL) {
@@ -190,10 +194,6 @@ Boolean MenuBuilder::DispatchSubMenuSelected(
         }
         else if (!result) {
             presenter->OnSubMenuSelected(subMenu, &result);
-            i++;
-        }
-        else {
-            i++;
         }
     }
 
@@ -211,18 +211,19 @@ void MenuBuilder::DispatchSaveInstanceState(
     AutoPtr<ISparseArray> presenterStates;
     CSparseArray::New((ISparseArray**)&presenterStates);
 
-    Int32 size;
-    mPresenters->GetSize(&size);
-    for (Int32 i = 0; i < size;) {
+    AutoPtr<IIterator> iterator;
+    mPresenters->GetIterator((IIterator**)&iterator);
+    Boolean hasNext;
+    while (iterator->HasNext(&hasNext), hasNext) {
         AutoPtr<IInterface> elem;
-        mPresenters->Get(i, (IInterface**)&elem);
+        iterator->GetNext((IInterface**)&elem);
+
         AutoPtr<IMenuPresenter> presenter;
         IWeakReference::Probe(elem)->Resolve(EIID_IMenuPresenter, (IInterface**)&presenter);
         if (presenter == NULL) {
             mPresenters->Remove(elem);
         }
         else {
-            i++;
             Int32 id = 0;
             presenter->GetId(&id);
             if (id > 0) {
@@ -249,19 +250,19 @@ void MenuBuilder::DispatchRestoreInstanceState(
     if (presenterStates == NULL || (mPresenters->IsEmpty(&isEmpty), isEmpty))
         return;
 
-    Int32 size;
-    mPresenters->GetSize(&size);
-    for (Int32 i = 0; i < size;) {
+    AutoPtr<IIterator> iterator;
+    mPresenters->GetIterator((IIterator**)&iterator);
+    Boolean hasNext;
+    while (iterator->HasNext(&hasNext), hasNext) {
         AutoPtr<IInterface> elem;
-        mPresenters->Get(i, (IInterface**)&elem);
+        iterator->GetNext((IInterface**)&elem);
+
         AutoPtr<IMenuPresenter> presenter;
         IWeakReference::Probe(elem)->Resolve(EIID_IMenuPresenter, (IInterface**)&presenter);
         if (presenter == NULL) {
             mPresenters->Remove(elem);
         }
         else {
-            i++;
-
             Int32 id = 0;
             presenter->GetId(&id);
             if (id > 0) {
@@ -1236,11 +1237,13 @@ ECode MenuBuilder::Close(
 
     mIsClosing = TRUE;
 
-    Int32 size;
-    mPresenters->GetSize(&size);
-    for (Int32 i = size - 1; i >= 0; i--) {
+    AutoPtr<IIterator> iterator;
+    mPresenters->GetIterator((IIterator**)&iterator);
+    Boolean hasNext;
+    while (iterator->HasNext(&hasNext), hasNext) {
         AutoPtr<IInterface> elem;
-        mPresenters->Get(i, (IInterface**)&elem);
+        iterator->GetNext((IInterface**)&elem);
+
         AutoPtr<IMenuPresenter> presenter;
         IWeakReference::Probe(elem)->Resolve(EIID_IMenuPresenter, (IInterface**)&presenter);
         if (presenter == NULL) {
@@ -1362,11 +1365,13 @@ ECode MenuBuilder::FlagActionItems()
 
     // Presenters flag action items as needed.
     Boolean flagged = FALSE;
-    Int32 size;
-    mPresenters->GetSize(&size);
-    for (Int32 i = size - 1; i >= 0; i--) {
+    AutoPtr<IIterator> iterator;
+    mPresenters->GetIterator((IIterator**)&iterator);
+    Boolean hasNext;
+    while (iterator->HasNext(&hasNext), hasNext) {
         AutoPtr<IInterface> elem;
-        mPresenters->Get(i, (IInterface**)&elem);
+        iterator->GetNext((IInterface**)&elem);
+
         AutoPtr<IMenuPresenter> presenter;
         IWeakReference::Probe(elem)->Resolve(EIID_IMenuPresenter, (IInterface**)&presenter);
         if (presenter == NULL) {
@@ -1587,11 +1592,13 @@ ECode MenuBuilder::ExpandItemActionView(
 
     StopDispatchingItemsChanged();
 
-    Int32 size;
-    mPresenters->GetSize(&size);
-    for (Int32 i = 0; i < size;) {
+    AutoPtr<IIterator> iterator;
+    mPresenters->GetIterator((IIterator**)&iterator);
+    Boolean hasNext;
+    while (iterator->HasNext(&hasNext), hasNext) {
         AutoPtr<IInterface> elem;
-        mPresenters->Get(i, (IInterface**)&elem);
+        iterator->GetNext((IInterface**)&elem);
+
         AutoPtr<IMenuPresenter> presenter;
         IWeakReference::Probe(elem)->Resolve(EIID_IMenuPresenter, (IInterface**)&presenter);
         if (presenter == NULL) {
@@ -1600,9 +1607,6 @@ ECode MenuBuilder::ExpandItemActionView(
         else if ((presenter->ExpandItemActionView(
                 this, item, &expanded), expanded)) {
             break;
-        }
-        else {
-            ++i;
         }
     }
 
@@ -1632,11 +1636,13 @@ ECode MenuBuilder::CollapseItemActionView(
 
     StopDispatchingItemsChanged();
 
-    Int32 size;
-    mPresenters->GetSize(&size);
-    for (Int32 i = 0; i < size;) {
+    AutoPtr<IIterator> iterator;
+    mPresenters->GetIterator((IIterator**)&iterator);
+    Boolean hasNext;
+    while (iterator->HasNext(&hasNext), hasNext) {
         AutoPtr<IInterface> elem;
-        mPresenters->Get(i, (IInterface**)&elem);
+        iterator->GetNext((IInterface**)&elem);
+
         AutoPtr<IMenuPresenter> presenter;
         IWeakReference::Probe(elem)->Resolve(EIID_IMenuPresenter, (IInterface**)&presenter);
         if (presenter == NULL) {
@@ -1645,9 +1651,6 @@ ECode MenuBuilder::CollapseItemActionView(
         else if ((presenter->CollapseItemActionView(
                 this, item, &collapsed), collapsed)) {
             break;
-        }
-        else {
-            ++i;
         }
     }
 

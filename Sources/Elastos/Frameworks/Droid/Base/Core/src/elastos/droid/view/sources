@@ -69,7 +69,7 @@ SOURCES += HardwareCanvas.cpp
 
 SOURCES += NativeInputChannel.cpp
 
-#SOURCES += CInputDeviceHelper.cpp
+SOURCES += CInputDeviceHelper.cpp
 SOURCES += InputEventConsistencyVerifier.cpp
 SOURCES += InputEventReceiver.cpp
 SOURCES += InputFilter.cpp

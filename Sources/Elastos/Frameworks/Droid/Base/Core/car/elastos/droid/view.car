@@ -489,6 +489,10 @@ module
         interface IParcelable;
      }
 
+    singleton class CInputDeviceHelper {
+        interface IInputDeviceHelper;
+    }
+
     [local]
     class CTouchDelegate {
         constructor();
@@ -499,10 +503,6 @@ module
 
         interface ITouchDelegate;
     }
-
-    //     singleton class CInputDeviceHelper {
-    //         interface IInputDeviceHelper;
-    //     }
 
     /**
      * Describes the keys provided by a keyboard device and their associated labels.

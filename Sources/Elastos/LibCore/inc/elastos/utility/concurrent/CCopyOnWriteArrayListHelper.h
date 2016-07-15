@@ -22,21 +22,21 @@ public:
 
     CARAPI ContainsAll(
         /* [in] */ ICollection* collection,
-        /* [in] */ const ArrayOf<IInterface*>& snapshot,
+        /* [in] */ ArrayOf<IInterface*>* snapshot,
         /* [in] */ Int32 from,
         /* [in] */ Int32 to,
         /* [out] */ Boolean* value);
 
     CARAPI LastIndexOf(
         /* [in] */ IInterface* o,
-        /* [in] */ const ArrayOf<IInterface*>& data,
+        /* [in] */ ArrayOf<IInterface*>* data,
         /* [in] */ Int32 from,
         /* [in] */ Int32 to,
         /* [out] */ Int32* value);
 
     CARAPI IndexOf(
         /* [in] */ IInterface* o,
-        /* [in] */ const ArrayOf<IInterface*>& data,
+        /* [in] */ ArrayOf<IInterface*>* data,
         /* [in] */ Int32 from,
         /* [in] */ Int32 to,
         /* [out] */ Int32* value);

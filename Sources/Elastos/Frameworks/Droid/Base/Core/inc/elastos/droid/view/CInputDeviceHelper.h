@@ -3,17 +3,22 @@
 #define __ELASTOS_DROID_VIEW_CINPUTDEVICEHELPER_H__
 
 #include "_Elastos_Droid_View_CInputDeviceHelper.h"
+#include <elastos/core/Singleton.h>
+
+using Elastos::Core::Singleton;
 
 namespace Elastos {
 namespace Droid {
 namespace View {
 
 CarClass(CInputDeviceHelper)
+    , public Singleton
+    , public IInputDeviceHelper
 {
 public:
     CAR_INTERFACE_DECL()
 
-    CAR_OBJECT_DECL()
+    CAR_SINGLETON_DECL()
 
     /**
      * Gets information about the input device with the specified id.

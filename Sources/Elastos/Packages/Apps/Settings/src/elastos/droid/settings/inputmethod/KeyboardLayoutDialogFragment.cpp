@@ -150,13 +150,13 @@ AutoPtr<IView> KeyboardLayoutDialogFragment::KeyboardLayoutAdapter::InflateTwoLi
     }
     AutoPtr<IView> _view;
     view->FindViewById(Elastos::Droid::R::id::text1, (IView**)&_view);
-    ITextView* headline = ITextView::Probe(_view);
+    AutoPtr<ITextView> headline = ITextView::Probe(_view);
     _view = NULL;
     view->FindViewById(Elastos::Droid::R::id::text2, (IView**)&_view);
-    ITextView* subText = ITextView::Probe(_view);
+    AutoPtr<ITextView> subText = ITextView::Probe(_view);
     _view = NULL;
     view->FindViewById(Elastos::Droid::R::id::radio, (IView**)&_view);
-    IRadioButton* radioButton = IRadioButton::Probe(_view);
+    AutoPtr<IRadioButton> radioButton = IRadioButton::Probe(_view);
     headline->SetText(CoreUtils::Convert(label));
     subText->SetText(CoreUtils::Convert(collection));
     ICheckable::Probe(radioButton)->SetChecked(checked);
@@ -203,7 +203,7 @@ ECode KeyboardLayoutDialogFragment::KeyboardLayoutLoader::LoadInBackground(
     GetContext((IContext**)&context);
     AutoPtr<IInterface> obj;
     context->GetSystemService(IContext::INPUT_SERVICE, (IInterface**)&obj);
-    IInputManager* im = IInputManager::Probe(obj);
+    AutoPtr<IInputManager> im = IInputManager::Probe(obj);
     AutoPtr< ArrayOf<String> > keyboardLayoutDescriptors;
     im->GetKeyboardLayoutsForInputDevice(mInputDeviceIdentifier,
             (ArrayOf<String>**)&keyboardLayoutDescriptors);
@@ -230,7 +230,7 @@ ECode KeyboardLayoutDialogFragment::KeyboardLayoutLoader::LoadInBackground(
         for (Int32 i = 0; i < numKeyboardLayouts; i++) {
             obj = NULL;
             keyboards->mKeyboardLayouts->Get(i, (IInterface**)&obj);
-            IKeyboardLayout* kbl = IKeyboardLayout::Probe(obj);
+            AutoPtr<IKeyboardLayout> kbl = IKeyboardLayout::Probe(obj);
             String descriptor;
             kbl->GetDescriptor(&descriptor);
             if (descriptor.Equals(
@@ -431,9 +431,7 @@ void KeyboardLayoutDialogFragment::OnSetupLayoutsButtonClicked()
 {
     AutoPtr<IFragment> frag;
     GetTargetFragment((IFragment**)&frag);
-    IOnSetupKeyboardLayoutsListener* skl =
-            IOnSetupKeyboardLayoutsListener::Probe(frag);
-    skl->OnSetupKeyboardLayouts(mInputDeviceIdentifier);
+    IOnSetupKeyboardLayoutsListener::Probe(frag)->OnSetupKeyboardLayouts(mInputDeviceIdentifier);
 }
 
 ECode KeyboardLayoutDialogFragment::OnActivityResult(

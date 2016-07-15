@@ -244,6 +244,21 @@ module
         interface ILoaderManagerLoaderCallbacks;
     }
 
+    class CKeyboardLayoutPickerFragment {
+        constructor();
+
+        interface ISettingsPreferenceFragment;
+        interface IPreferenceFragment;
+        interface IFragment;
+        interface IPreferenceManagerOnPreferenceTreeClickListener;
+        interface IComponentCallbacks;
+        interface IComponentCallbacks2;
+        interface IViewOnCreateContextMenuListener;
+        interface IDialogCreatable;
+
+        interface IInputDeviceListener;
+    }
+
     class CUserDictionaryList {
         constructor();
 
@@ -646,6 +661,32 @@ module
         interface IComponentCallbacks;
         interface IComponentCallbacks2;
         interface IViewOnCreateContextMenuListener;
+    }
+
+    class CSettingsKeyboardLayoutPickerActivity {
+        constructor();
+
+        interface ISettingsActivity;
+
+        interface IActivity;
+        interface IContext;
+        interface IContextThemeWrapper;
+        interface ILayoutInflaterFactory;
+        interface ILayoutInflaterFactory2;
+        interface IWindowCallback;
+        interface IKeyEventCallback;
+        interface IViewOnCreateContextMenuListener;
+        interface IComponentCallbacks;
+        interface IComponentCallbacks2;
+        interface IOnWindowDismissedCallback;
+
+        interface IPreferenceManagerOnPreferenceTreeClickListener;
+        interface IPreferenceFragmentOnPreferenceStartFragmentCallback;
+        interface IButtonBarHandler;
+        interface IFragmentManagerOnBackStackChangedListener;
+        interface ISearchViewOnQueryTextListener;
+        interface ISearchViewOnCloseListener;
+        interface IOnActionExpandListener;
     }
 
     class CSubSettings {

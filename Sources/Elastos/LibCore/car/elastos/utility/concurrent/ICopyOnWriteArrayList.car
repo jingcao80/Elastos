@@ -89,24 +89,25 @@ module
             [out, callee] ArrayOf<IInterface*>* outarr);
     }
 
+    [deprecated]
     interface ICopyOnWriteArrayListHelper {
         ContainsAll(
             [in] ICollection* collection,
-            [in] ArrayOf<IInterface*> snapshot,
+            [in] ArrayOf<IInterface*>* snapshot,
             [in] Int32 from,
             [in] Int32 to,
             [out] Boolean* value);
 
         LastIndexOf(
             [in] IInterface* o,
-            [in] ArrayOf<IInterface*> data,
+            [in] ArrayOf<IInterface*>* data,
             [in] Int32 from,
             [in] Int32 to,
             [out] Int32* value);
 
         IndexOf(
             [in] IInterface* o,
-            [in] ArrayOf<IInterface*> data,
+            [in] ArrayOf<IInterface*>* data,
             [in] Int32 from,
             [in] Int32 to,
             [out] Int32* value);

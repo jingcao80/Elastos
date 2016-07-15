@@ -170,10 +170,10 @@ public:
         /* [in] */ IBundle* savedInstanceState,
         /* [out] */ IView** view);
 
-    CARAPI SetPinnedHeaderView(
+    virtual CARAPI SetPinnedHeaderView(
         /* [in] */ IView* pinnedHeader);
 
-    CARAPI ClearPinnedHeaderView();
+    virtual CARAPI ClearPinnedHeaderView();
 
     //@Override
     CARAPI OnSaveInstanceState(
@@ -189,11 +189,11 @@ public:
     //@Override
     CARAPI OnStop();
 
-    CARAPI RegisterObserverIfNeeded();
+    virtual CARAPI RegisterObserverIfNeeded();
 
-    CARAPI UnregisterObserverIfNeeded();
+    virtual CARAPI UnregisterObserverIfNeeded();
 
-    CARAPI HighlightPreferenceIfNeeded();
+    virtual CARAPI HighlightPreferenceIfNeeded();
 
     //@Override
     CARAPI OnCreateOptionsMenu(
@@ -204,20 +204,20 @@ public:
      * The name is intentionally made different from Activity#Finish(), so that
      * users won't misunderstand its meaning.
      */
-    CARAPI_(void) FinishFragment();
+    virtual CARAPI_(void) FinishFragment();
 
     //@Override
     CARAPI OnDetach();
 
-    CARAPI OnCreateDialog(
+    virtual CARAPI OnCreateDialog(
         /* [in] */ Int32 dialogId,
         /* [out] */ IDialog** dialog);
 
-    CARAPI OnDialogShowing();
+    virtual CARAPI OnDialogShowing();
 
-    CARAPI Finish();
+    virtual CARAPI Finish();
 
-    CARAPI_(Boolean) StartFragment(
+    virtual CARAPI_(Boolean) StartFragment(
         /* [in] */ IFragment* caller,
         /* [in] */ const String& fragmentClass,
         /* [in] */ Int32 titleRes,
@@ -231,38 +231,38 @@ protected:
     //@Override
     CARAPI OnUnbindPreferences();
 
-    CARAPI_(void) RemovePreference(
+    virtual CARAPI_(void) RemovePreference(
         /* [in] */ const String& key);
 
     /**
      * Override this if you want to show a help item in the menu, by returning the resource id.
      * @return the resource id for the help url
      */
-    CARAPI_(Int32) GetHelpResource();
+    virtual CARAPI_(Int32) GetHelpResource();
 
     // Some helpers for functions used by the settings fragments when they were activities
 
     /**
      * Returns the ContentResolver from the owning Activity.
      */
-    CARAPI_(AutoPtr<IContentResolver>) GetContentResolver();
+    virtual CARAPI_(AutoPtr<IContentResolver>) GetContentResolver();
 
     /**
      * Returns the specified system service from the owning Activity.
      */
-    CARAPI_(AutoPtr<IInterface>) GetSystemService(
+    virtual CARAPI_(AutoPtr<IInterface>) GetSystemService(
         /* [in] */ const String& name);
     /**
      * Returns the PackageManager from the owning Activity.
      */
-    CARAPI_(AutoPtr<IPackageManager>) GetPackageManager();
+    virtual CARAPI_(AutoPtr<IPackageManager>) GetPackageManager();
 
     // Dialog management
 
-    CARAPI_(void) ShowDialog(
+    virtual CARAPI_(void) ShowDialog(
         /* [in] */ Int32 dialogId);
 
-    CARAPI_(void) RemoveDialog(
+    virtual CARAPI_(void) RemoveDialog(
         /* [in] */ Int32 dialogId);
 
     /**
@@ -270,7 +270,7 @@ protected:
      * called after ShowDialog(Int32) and before RemoveDialog(Int32). The method
      * does nothing otherwise.
      */
-    CARAPI_(void) SetOnCancelListener(
+    virtual CARAPI_(void) SetOnCancelListener(
         /* [in] */ IDialogInterfaceOnCancelListener* listener);
 
     /**
@@ -278,12 +278,12 @@ protected:
      * called after ShowDialog(Int32) and before RemoveDialog(Int32). The method
      * does nothing otherwise.
      */
-    CARAPI_(void) SetOnDismissListener(
+    virtual CARAPI_(void) SetOnDismissListener(
         /* [in] */ IDialogInterfaceOnDismissListener* listener);
 
-    CARAPI_(Boolean) HasNextButton();
+    virtual CARAPI_(Boolean) HasNextButton();
 
-    CARAPI_(AutoPtr<IButton>) GetNextButton();
+    virtual CARAPI_(AutoPtr<IButton>) GetNextButton();
 
 private:
     CARAPI_(AutoPtr<IDrawable>) GetHighlightDrawable();

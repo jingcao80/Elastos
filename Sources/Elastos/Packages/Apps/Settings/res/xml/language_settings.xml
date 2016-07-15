@@ -28,15 +28,15 @@
     <!-- Spell checker preference title, summary and fragment will be set programmatically. -->
     <!-- Note: Mark this as persistent="false" to remove unnecessarily saved shared preference.
          See: InputMethodAndSubtypeUtil.removeUnnecessaryNonPersistentPreference. -->
-<!--     <Elastos.Droid.Preference.CPreferenceScreen
+    <Elastos.Droid.Preference.CPreferenceScreen
             android:key="spellcheckers_settings"
             android:title="@string/spellcheckers_settings_title"
             settings:keywords="@string/keywords_spell_checker"
             android:persistent="false"
-            /> -->
+            />
 
     <!-- User dictionary preference title and fragment will be set programmatically. -->
-<!--     <Elastos.Droid.Preference.CPreferenceScreen
+    <Elastos.Droid.Preference.CPreferenceScreen
             android:key="key_user_dictionary_settings"
             android:title="@string/user_dict_settings_title"
             />
@@ -49,17 +49,17 @@
         <Elastos.Droid.Preference.CPreferenceScreen
                 android:key="current_input_method"
                 android:title="@string/current_input_method"
-                /> -->
+                />
         <!-- Enabled input method list will be populated programmatically here. -->
-    <!-- </Elastos.Droid.Preference.CPreferenceCategory> -->
+    </Elastos.Droid.Preference.CPreferenceCategory>
 
-  <!--   <Elastos.Droid.Preference.CPreferenceCategory
+    <Elastos.Droid.Preference.CPreferenceCategory
             android:key="hard_keyboard"
             android:title="@string/builtin_keyboard_settings_title"
-            android:persistent="false"> -->
+            android:persistent="false">
         <!-- Additional preference screens are inserted here programmatically
              with low order values to set the key map of each attached keyboard. -->
-<!--     </Elastos.Droid.Preference.CPreferenceCategory>
+    </Elastos.Droid.Preference.CPreferenceCategory>
 
     <Elastos.Droid.Preference.CPreferenceCategory
             android:key="voice_category"
@@ -85,11 +85,11 @@
             android:key="pointer_settings_category"
             android:title="@string/pointer_settings_category">
 
-        <Elastos.Droid.Settings.CPointerSpeedPreference
+<!--         <Elastos.Droid.Settings.CPointerSpeedPreference
                 android:key="pointer_speed"
                 android:title="@string/pointer_speed"
                 android:dialogTitle="@string/pointer_speed"
-                />
+                /> -->
 
     </Elastos.Droid.Preference.CPreferenceCategory>
 
@@ -105,6 +105,6 @@
                 android:persistent="false"
                 />
 
-    </Elastos.Droid.Preference.CPreferenceCategory> -->
+    </Elastos.Droid.Preference.CPreferenceCategory>
 
 </Elastos.Droid.Preference.CPreferenceScreen>

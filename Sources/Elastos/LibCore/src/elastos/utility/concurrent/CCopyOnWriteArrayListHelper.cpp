@@ -12,7 +12,7 @@ CAR_SINGLETON_IMPL(CCopyOnWriteArrayListHelper)
 
 ECode CCopyOnWriteArrayListHelper::ContainsAll(
     /* [in] */ ICollection* collection,
-    /* [in] */ const ArrayOf<IInterface*>& snapshot,
+    /* [in] */ ArrayOf<IInterface*>* snapshot,
     /* [in] */ Int32 from,
     /* [in] */ Int32 to,
     /* [out] */ Boolean* value)
@@ -22,7 +22,7 @@ ECode CCopyOnWriteArrayListHelper::ContainsAll(
 
 ECode CCopyOnWriteArrayListHelper::LastIndexOf(
     /* [in] */ IInterface* o,
-    /* [in] */ const ArrayOf<IInterface*>& data,
+    /* [in] */ ArrayOf<IInterface*>* data,
     /* [in] */ Int32 from,
     /* [in] */ Int32 to,
     /* [out] */ Int32* value)
@@ -32,7 +32,7 @@ ECode CCopyOnWriteArrayListHelper::LastIndexOf(
 
 ECode CCopyOnWriteArrayListHelper::IndexOf(
     /* [in] */ IInterface* o,
-    /* [in] */ const ArrayOf<IInterface*>& data,
+    /* [in] */ ArrayOf<IInterface*>* data,
     /* [in] */ Int32 from,
     /* [in] */ Int32 to,
     /* [out] */ Int32* value)
