@@ -262,7 +262,7 @@ ECode CCallButtonFragment::SetMute(
     IView::Probe(mMuteButton)->IsSelected(&selected);
     if (selected != value) {
         IView::Probe(mMuteButton)->SetSelected(value);
-        MaybeSendAccessibilityEvent(mMuteButton, value ? R::string::accessibility_call_muted
+        MaybeSendAccessibilityEvent(IView::Probe(mMuteButton), value ? R::string::accessibility_call_muted
                 : R::string::accessibility_call_unmuted);
     }
     return NOERROR;
