@@ -1,0 +1,372 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Copyright (C) 2014 The Android Open Source Project
+
+     Licensed under the Apache License, Version 2.0 (the "License");
+     you may not use this file except in compliance with the License.
+     You may obtain a copy of the License at
+
+          http://www.apache.org/licenses/LICENSE-2.0
+
+     Unless required by applicable law or agreed to in writing, software
+     distributed under the License is distributed on an "AS IS" BASIS,
+     WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+     See the License for the specific language governing permissions and
+     limitations under the License.
+-->
+
+<dashboard-categories
+        xmlns:android="http://schemas.android.com/apk/res/android"
+        xmlns:settings="http://schemas.android.com/apk/res/Elastos.DevSamples.Node.JSSettings"
+        >
+
+    <!-- WIRELESS and NETWORKS -->
+    <dashboard-category
+            android:id="@+id/wireless_section"
+            android:title="@string/header_category_wireless_networks" >
+
+        <!-- Wifi -->
+        <dashboard-tile
+                android:id="@+id/wifi_settings"
+                android:title="@string/wifi_settings_title"
+                android:fragment="Elastos.DevSamples.Node.JSSettings.wifi.WifiSettings"
+                android:icon="@drawable/ic_settings_wireless"
+                settings:switchClass="Elastos.DevSamples.Node.JSSettings.wifi.WifiEnabler"
+                />
+
+        <!-- Bluetooth -->
+        <dashboard-tile
+                android:id="@+id/bluetooth_settings"
+                android:title="@string/bluetooth_settings_title"
+                android:fragment="Elastos.DevSamples.Node.JSSettings.bluetooth.BluetoothSettings"
+                android:icon="@drawable/ic_settings_bluetooth2"
+                settings:switchClass="Elastos.DevSamples.Node.JSSettings.bluetooth.BluetoothEnabler"
+                />
+
+        <!-- SIM Cards -->
+        <dashboard-tile
+                android:id="@+id/sim_settings"
+                android:title="@string/sim_settings_title"
+                android:fragment="Elastos.DevSamples.Node.JSSettings.sim.SimSettings"
+                android:icon="@drawable/ic_sim_sd"
+                />
+
+        <!-- Mobile networks -->
+        <dashboard-tile
+                android:id="@+id/mobile_networks"
+                android:title="@string/network_settings_title"
+                android:icon="@drawable/ic_settings_cellular"
+                settings:switchClass="Elastos.DevSamples.Node.JSSettings.dashboard.MobileNetworksEnabler"
+                >
+            <intent
+                    android:action="android.intent.action.MAIN"
+                    android:targetPackage="com.android.phone"
+                    android:targetClass="com.android.phone.MobileNetworkSettings" />
+        </dashboard-tile>
+
+        <!-- MSIM Mobile networks -->
+        <!-- TARGET_THEME is located in packages/services/Telephony -->
+        <dashboard-tile
+                android:id="@+id/msim_mobile_networks"
+                android:title="@string/network_settings_title"
+                android:icon="@drawable/ic_settings_cellular">
+            <intent
+                    android:action="android.intent.action.MAIN"
+                    android:targetPackage="com.android.phone"
+                    android:targetClass="com.android.phone.msim.SelectSubscription">
+                    <extra android:name="PACKAGE" android:value="com.android.phone" />
+                    <extra android:name="TARGET_CLASS" android:value="com.android.phone.MobileNetworkSettings" />
+                    <extra android:name="TARGET_THEME" android:value="Theme.Material.Settings" />
+            </intent>
+        </dashboard-tile>
+
+        <!-- Data Usage -->
+        <dashboard-tile
+                android:id="@+id/data_usage_settings"
+                android:title="@string/data_usage_summary_title"
+                android:fragment="Elastos.DevSamples.Node.JSSettings.DataUsageSummary"
+                android:icon="@drawable/ic_settings_data_usage"
+                />
+
+        <!-- Operator hook -->
+        <dashboard-tile
+                android:id="@+id/operator_settings"
+                android:fragment="Elastos.DevSamples.Node.JSSettings.WirelessSettings" >
+            <intent android:action="Elastos.DevSamples.Node.JSSettings.OPERATOR_APPLICATION_SETTING" />
+        </dashboard-tile>
+
+        <!-- Other wireless and network controls -->
+        <dashboard-tile
+                android:id="@+id/wireless_settings"
+                android:title="@string/radio_controls_title"
+                android:fragment="Elastos.DevSamples.Node.JSSettings.WirelessSettings"
+                android:icon="@drawable/ic_settings_more"
+                />
+
+        <!-- Manufacturer hook -->
+        <dashboard-tile
+                android:id="@+id/manufacturer_settings"
+                android:fragment="Elastos.DevSamples.Node.JSSettings.WirelessSettings">
+            <intent android:action="Elastos.DevSamples.Node.JSSettings.MANUFACTURER_APPLICATION_SETTING" />
+        </dashboard-tile>
+
+    </dashboard-category>
+
+    <!-- DEVICE -->
+    <dashboard-category
+            android:id="@+id/device_section"
+            android:title="@string/header_category_device" >
+
+        <!-- Sound -->
+        <dashboard-tile
+                android:id="@+id/sound_settings"
+                android:title="@string/category_sounds"
+                android:fragment="Elastos.DevSamples.Node.JSSettings.SoundSettings"
+                android:icon="@drawable/ic_settings_notifications"
+                />
+
+        <!-- Display & lights -->
+        <dashboard-tile
+                android:id="@+id/display_and_lights_settings"
+                android:title="@string/display_and_lights"
+                android:fragment="Elastos.DevSamples.Node.JSSettings.DisplaySettings"
+                android:icon="@drawable/ic_settings_display"
+                />
+
+        <!-- Themes -->
+        <!-- NOTE: Intent.parseIntent looks for "categories" tag and not "category" -->
+        <dashboard-tile
+                android:id="@+id/theme_settings"
+                android:title="@string/themes_settings_title"
+                android:icon="@drawable/ic_settings_themes">
+            <intent
+                    android:action="android.intent.action.MAIN" >
+                <categories android:name="cyanogenmod.intent.category.APP_THEMES" />
+            </intent>
+        </dashboard-tile>
+
+        <!-- Notification manager -->
+        <dashboard-tile
+                android:id="@+id/notification_manager"
+                android:title="@string/notification_manager"
+                android:fragment="Elastos.DevSamples.Node.JSSettings.notification.NotificationManagerSettings"
+                android:icon="@drawable/ic_settings_notifications"
+                />
+
+        <!-- Lock screen -->
+        <dashboard-tile
+                android:id="@+id/lockscreen_settings"
+                android:title="@string/lockscreen_settings"
+                android:fragment="Elastos.DevSamples.Node.JSSettings.lockscreen.LockScreenSettings"
+                android:icon="@drawable/ic_settings_security"
+                />
+
+        <!-- Buttons -->
+        <dashboard-tile
+                android:id="@+id/button_settings"
+                android:title="@string/button_pref_title"
+                android:fragment="Elastos.DevSamples.Node.JSSettings.ButtonSettings"
+                android:icon="@drawable/ic_settings_buttons"
+                />
+
+        <!-- O-Click -->
+        <dashboard-tile
+                android:id="@+id/oclick"
+                android:icon="@drawable/ic_settings_oclick">
+            <intent
+                    android:action="com.cyanogenmod.action.LAUNCH_BLUETOOTH_INPUT_SETTINGS"
+                    android:targetPackage="com.cyanogenmod.settings.device"
+                    android:targetClass="com.cyanogenmod.settings.device.BluetoothInputSettings" />
+        </dashboard-tile>
+
+        <!-- Gestures -->
+        <dashboard-tile
+                android:id="@+id/device_specific_gesture_settings"
+                android:title="@string/gesture_settings_title"
+                android:icon="@drawable/ic_settings_gestures">
+            <intent
+                    android:action="com.cyanogenmod.action.LAUNCH_TOUCHSCREEN_GESTURE_SETTINGS"
+                    android:targetPackage="com.cyanogenmod.settings.device"
+                    android:targetClass="com.cyanogenmod.settings.device.TouchscreenGestureSettings" />
+        </dashboard-tile>
+
+        <!-- Battery -->
+        <dashboard-tile
+                android:id="@+id/battery_settings"
+                android:title="@string/power_usage_summary_title"
+                android:fragment="Elastos.DevSamples.Node.JSSettings.fuelgauge.PowerUsageSummary"
+                android:icon="@drawable/ic_settings_battery"
+                />
+
+        <!-- Security -->
+        <dashboard-tile
+                android:id="@+id/security_settings"
+                android:title="@string/security_settings_title"
+                android:fragment="Elastos.DevSamples.Node.JSSettings.SecuritySettings"
+                android:icon="@drawable/ic_settings_security"
+                />
+
+        <!-- Manage users -->
+        <dashboard-tile
+                android:id="@+id/user_settings"
+                android:title="@string/user_settings_title"
+                android:fragment="Elastos.DevSamples.Node.JSSettings.users.UserSettings"
+                android:icon="@drawable/ic_settings_multiuser"
+                />
+
+    </dashboard-category>
+
+    <!-- Personalization -->
+    <dashboard-category
+            android:id="@+id/personal_section"
+            android:title="@string/header_category_personal" >
+
+        <!-- Home -->
+        <dashboard-tile
+                android:id="@+id/home_settings"
+                android:title="@string/home_settings"
+                android:fragment="Elastos.DevSamples.Node.JSSettings.HomeSettings"
+                android:icon="@drawable/ic_settings_home"
+                />
+
+        <!-- Profiles -->
+        <dashboard-tile
+                android:id="@+id/profile_settings"
+                android:fragment="Elastos.DevSamples.Node.JSSettings.profiles.ProfilesSettings"
+                android:title="@string/profiles_settings_title"
+                android:icon="@drawable/ic_settings_profiles"
+                />
+
+        <!-- Status bar -->
+        <dashboard-tile
+                android:id="@+id/status_bar_settings"
+                android:title="@string/status_bar_title"
+                android:fragment="Elastos.DevSamples.Node.JSSettings.cyanogenmod.StatusBarSettings"
+                android:icon="@drawable/ic_settings_extdesk_hidenavbar"
+                settings:advanced="true"
+                />
+
+        <!-- Notification drawer -->
+        <dashboard-tile
+                android:id="@+id/notification_drawer_settings"
+                android:title="@string/notification_drawer_title"
+                android:fragment="Elastos.DevSamples.Node.JSSettings.cyanogenmod.NotificationDrawerSettings"
+                android:icon="@drawable/ic_settings_notification_drawer"
+                settings:advanced="true"
+                />
+
+        <!-- Application Settings -->
+        <dashboard-tile
+                android:id="@+id/application_settings"
+                android:title="@string/applications_settings"
+                android:fragment="Elastos.DevSamples.Node.JSSettings.applications.ManageApplications"
+                android:icon="@drawable/ic_settings_applications"
+                />
+
+        <!-- Account -->
+        <dashboard-tile
+                android:id="@+id/account_settings"
+                android:title="@string/account_settings_title"
+                android:fragment="Elastos.DevSamples.Node.JSSettings.accounts.AccountSettings"
+                android:icon="@drawable/ic_settings_accounts"
+                />
+
+        <!-- CyanogenMod Privacy Settings -->
+        <!-- This is the 'real' Privacy items and includes Privacy Guard, Blacklist & WhisperPush -->
+        <dashboard-tile
+                android:id="@+id/privacy_settings_cyanogenmod"
+                android:title="@string/privacy_settings_cyanogenmod_title"
+                android:fragment="Elastos.DevSamples.Node.JSSettings.cyanogenmod.PrivacySettings"
+                android:icon="@drawable/ic_settings_privacy"
+                />
+
+        <!-- Location -->
+        <dashboard-tile
+                android:id="@+id/location_settings"
+                android:title="@string/location_settings_title"
+                android:fragment="Elastos.DevSamples.Node.JSSettings.location.LocationSettings"
+                android:icon="@drawable/ic_settings_location"
+                />
+
+    </dashboard-category>
+
+    <!-- SYSTEM -->
+    <dashboard-category
+        android:id="@+id/system_section"
+        android:title="@string/header_category_system" >
+
+        <!-- Date & Time -->
+        <dashboard-tile
+                android:id="@+id/date_time_settings"
+                android:title="@string/date_and_time_settings_title"
+                android:fragment="Elastos.DevSamples.Node.JSSettings.DateTimeSettings"
+                android:icon="@drawable/ic_settings_date_time"
+                />
+
+        <!-- Accessibility feedback -->
+        <dashboard-tile
+                android:id="@+id/accessibility_settings"
+                android:title="@string/accessibility_settings"
+                android:fragment="Elastos.DevSamples.Node.JSSettings.accessibility.AccessibilitySettings"
+                android:icon="@drawable/ic_settings_accessibility"
+                />
+
+        <!-- Storage -->
+        <dashboard-tile
+                android:id="@+id/storage_settings"
+                android:title="@string/storage_settings"
+                android:fragment="Elastos.DevSamples.Node.JSSettings.deviceinfo.Memory"
+                android:icon="@drawable/ic_settings_storage"
+                />
+
+        <!-- Language -->
+        <dashboard-tile
+                android:id="@+id/language_settings"
+                android:title="@string/language_settings"
+                android:fragment="Elastos.DevSamples.Node.JSSettings.inputmethod.InputMethodAndLanguageSettings"
+                android:icon="@drawable/ic_settings_language"
+                />
+
+        <!-- Backup and reset -->
+        <dashboard-tile
+                android:id="@+id/privacy_settings"
+                android:title="@string/privacy_settings"
+                android:fragment="Elastos.DevSamples.Node.JSSettings.PrivacySettings"
+                android:icon="@drawable/ic_settings_backup"
+                />
+
+        <!-- Print -->
+        <dashboard-tile
+                android:id="@+id/print_settings"
+                android:title="@string/print_settings"
+                android:fragment="Elastos.DevSamples.Node.JSSettings.print.PrintSettingsFragment"
+                android:icon="@drawable/ic_settings_print"
+                />
+
+        <!-- Performance -->
+        <dashboard-tile
+                android:id="@+id/performance_settings"
+                android:title="@string/performance_settings_title"
+                android:fragment="Elastos.DevSamples.Node.JSSettings.cyanogenmod.PerformanceSettings"
+                android:icon="@drawable/ic_settings_performance"
+                settings:advanced="true"
+                />
+
+        <!-- Development -->
+        <dashboard-tile
+                android:id="@+id/development_settings"
+                android:title="@string/development_settings_title"
+                android:fragment="Elastos.DevSamples.Node.JSSettings.DevelopmentSettings"
+                android:icon="@drawable/ic_settings_development"
+                />
+
+        <!-- About Device -->
+        <dashboard-tile
+                android:id="@+id/about_settings"
+                android:title="@string/about_settings"
+                android:fragment="Elastos.DevSamples.Node.JSSettings.DeviceInfoSettings"
+                android:icon="@drawable/ic_settings_about"
+                />
+
+    </dashboard-category>
+
+</dashboard-categories>
