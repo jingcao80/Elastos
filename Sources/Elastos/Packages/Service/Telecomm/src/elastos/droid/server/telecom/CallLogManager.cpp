@@ -78,8 +78,9 @@ ECode CallLogManager::LogCallAsyncTask::DoInBackground(
             AutoPtr<ICalls> helper;
             CCalls::AcquireSingleton((ICalls**)&helper);
             AutoPtr<IUri> uri;
-            Int64 i64DataUsage;
-            c->mDataUsage->GetValue(&i64DataUsage);
+            Int64 i64DataUsage = -1;
+            if (c->mDataUsage != NULL)
+                c->mDataUsage->GetValue(&i64DataUsage);
             ec = helper->AddCall(c->mCallerInfo, c->mContext, c->mNumber, c->mPresentation,
                     c->mCallType, c->mFeatures, c->mAccountHandle, c->mTimestamp, c->mDurationInSec,
                     i64DataUsage, TRUE /* addForAllUsers */, (IUri**)&uri);

@@ -116,17 +116,17 @@ PhoneAccountRegistrar::State::State()
 const String PhoneAccountRegistrar::XmlSerialization::LENGTH_ATTRIBUTE("length");
 const String PhoneAccountRegistrar::XmlSerialization::VALUE_TAG("value");
 
-ECode PhoneAccountRegistrar::XmlSerialization::ReadFromXml(
-    /* [in] */ IXmlPullParser* parser,
-    /* [in] */ Int32 version,
-    /* [in] */ IContext* context,
-    /* [out] */ IInterface** result)
-{
-    VALIDATE_NOT_NULL(result)
-    *result = NULL;
-
-    return NOERROR;
-}
+//ECode PhoneAccountRegistrar::XmlSerialization::ReadFromXml(
+//    /* [in] */ IXmlPullParser* parser,
+//    /* [in] */ Int32 version,
+//    /* [in] */ IContext* context,
+//    /* [out] */ IInterface** result)
+//{
+//    VALIDATE_NOT_NULL(result)
+//    *result = NULL;
+//
+//    return NOERROR;
+//}
 
 ECode PhoneAccountRegistrar::XmlSerialization::WriteTextSafely(
     /* [in] */ const String& tagName,
@@ -253,7 +253,7 @@ ECode PhoneAccountRegistrar::SubStateXmlSerialization::ReadFromXml(
     /* [in] */ IXmlPullParser* parser,
     /* [in] */ Int32 version,
     /* [in] */ IContext* context,
-    /* [out] */ State** result)
+    /* [out] */ IInterface** result)
 {
     VALIDATE_NOT_NULL(result)
 
@@ -268,6 +268,7 @@ ECode PhoneAccountRegistrar::SubStateXmlSerialization::ReadFromXml(
         Int32 outerDepth;
         parser->GetDepth(&outerDepth);
         while (XmlUtils::NextElementWithin(parser, outerDepth)) {
+            parser->GetName(&name);
             if (name.Equals(DEFAULT_OUTGOING)) {
                 Int32 nextTag;
                 parser->NextTag(&nextTag);
@@ -296,7 +297,7 @@ ECode PhoneAccountRegistrar::SubStateXmlSerialization::ReadFromXml(
                 }
             }
         }
-        *result = s;
+        *result = TO_IINTERFACE(s);
         REFCOUNT_ADD(*result)
         return NOERROR;
     }
@@ -367,7 +368,7 @@ ECode PhoneAccountRegistrar::SubPhoneAccountXmlSerialization::ReadFromXml(
     /* [in] */ IXmlPullParser* parser,
     /* [in] */ Int32 version,
     /* [in] */ IContext* context,
-    /* [out] */ IPhoneAccount** result)
+    /* [out] */ IInterface** result)// IPhoneAccount
 {
     VALIDATE_NOT_NULL(result)
 
@@ -385,6 +386,7 @@ ECode PhoneAccountRegistrar::SubPhoneAccountXmlSerialization::ReadFromXml(
         String shortDescription(NULL);
         AutoPtr<IList> supportedUriSchemes = NULL;
         while (XmlUtils::NextElementWithin(parser, outerDepth)) {
+            parser->GetName(&name);
             if (name.Equals(ACCOUNT_HANDLE)) {
                 Int32 nextTag;
                 parser->NextTag(&nextTag);
@@ -467,7 +469,10 @@ ECode PhoneAccountRegistrar::SubPhoneAccountXmlSerialization::ReadFromXml(
         builder->SetShortDescription(StringUtils::ParseCharSequence(shortDescription));
         builder->SetSupportedUriSchemes(supportedUriSchemes);
         AutoPtr<IPhoneAccount> phoneAccount;
-        return builder->Build(result);
+        builder->Build((IPhoneAccount**)&phoneAccount);
+        *result = phoneAccount;
+        REFCOUNT_ADD(*result);
+        return NOERROR;
     }
     *result = NULL;
     return NOERROR;
@@ -524,7 +529,7 @@ ECode PhoneAccountRegistrar::SubPhoneAccountHandleXmlSerialization::ReadFromXml(
     /* [in] */ IXmlPullParser* parser,
     /* [in] */ Int32 version,
     /* [in] */ IContext* context,
-    /* [out] */ IPhoneAccountHandle** result)
+    /* [out] */ IInterface** result)// IPhoneAccountHandle
 {
     VALIDATE_NOT_NULL(result)
 
@@ -536,6 +541,7 @@ ECode PhoneAccountRegistrar::SubPhoneAccountHandleXmlSerialization::ReadFromXml(
         Int32 outerDepth;
         parser->GetDepth(&outerDepth);
         while (XmlUtils::NextElementWithin(parser, outerDepth)) {
+            parser->GetName(&name);
             if (name.Equals(COMPONENT_NAME)) {
                 Int32 iNotUsed;
                 parser->Next(&iNotUsed);
@@ -551,9 +557,13 @@ ECode PhoneAccountRegistrar::SubPhoneAccountHandleXmlSerialization::ReadFromXml(
             CComponentNameHelper::AcquireSingleton((IComponentNameHelper**)&helper);
             AutoPtr<IComponentName> componentName;
             helper->UnflattenFromString(componentNameString, (IComponentName**)&componentName);
+            AutoPtr<IPhoneAccountHandle> pah;
             CPhoneAccountHandle::New(
                     componentName,
-                    idString, result);
+                    idString, (IPhoneAccountHandle**)&pah);
+            *result = pah;
+            REFCOUNT_ADD(*result);
+            return NOERROR;
         }
     }
     *result = NULL;
@@ -1202,6 +1212,11 @@ ECode PhoneAccountRegistrar::PhoneAccountHasPermission(
     /* [out] */ Boolean* result)
 {
     VALIDATE_NOT_NULL(result)
+    if (phoneAccountHandle == NULL) {
+        Log::E("PhoneAccountRegistrar", "phoneAccountHandle can not be null");
+        *result = FALSE;
+        return NOERROR;
+    }
 
     AutoPtr<IPackageManager> packageManager;
     mContext->GetPackageManager((IPackageManager**)&packageManager);
@@ -1381,6 +1396,7 @@ ECode PhoneAccountRegistrar::ReadFromXml(
     /* [in] */ IContext* context,
     /* [out] */ State** result)
 {
+
     VALIDATE_NOT_NULL(result)
 
     AutoPtr<IInterface> obj;

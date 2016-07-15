@@ -3,6 +3,7 @@
 #include "elastos/droid/teleservice/services/telephony/TelecomAccountRegistry.h"
 #include "Elastos.Droid.Internal.h"
 #include <elastos/core/AutoLock.h>
+#include "Elastos.Droid.Internal.h"
 #include <elastos/utility/logging/Logger.h>
 
 using Elastos::Droid::Internal::Telephony::CPhoneFactory;

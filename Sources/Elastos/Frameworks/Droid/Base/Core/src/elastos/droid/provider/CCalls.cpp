@@ -1,6 +1,7 @@
 
 #include "Elastos.Droid.Location.h"
 #include "Elastos.Droid.Database.h"
+#include "Elastos.Droid.Telecomm.h"
 #include "elastos/droid/content/CContentValues.h"
 #include "elastos/droid/content/ContentProvider.h"
 #include "elastos/droid/net/CUriHelper.h"
@@ -139,7 +140,7 @@ ECode CCalls::AddCall(
     /* [out] */ IUri** uri)
 {
     return AddCall(ci, context, number, presentation, callType, features, accountHandle,
-                    start, duration, dataUsage, FALSE, DURATION_TYPE_ACTIVE);
+                    start, duration, dataUsage, FALSE, DURATION_TYPE_ACTIVE, uri);
 }
 
 ECode CCalls::AddCall(
@@ -157,7 +158,7 @@ ECode CCalls::AddCall(
     /* [out] */ IUri** uri)
 {
     return AddCall(ci, context, number, presentation, callType, features, accountHandle,
-                    start, duration, dataUsage, addForAllUsers, DURATION_TYPE_ACTIVE);
+                    start, duration, dataUsage, addForAllUsers, DURATION_TYPE_ACTIVE, uri);
 }
 
 ECode CCalls::AddCall(
@@ -167,7 +168,7 @@ ECode CCalls::AddCall(
     /* [in] */ Int32 presentation,
     /* [in] */ Int32 callType,
     /* [in] */ Int32 features,
-    /* [in] */ IPhoneAccountHandle* handle,
+    /* [in] */ IPhoneAccountHandle* accountHandle,
     /* [in] */ Int64 start,
     /* [in] */ Int32 duration,
     /* [in] */ Int64 dataUsage,
@@ -204,13 +205,12 @@ ECode CCalls::AddCall(
     // accountHandle information
     String accountComponentString;
     String accountId;
-    assert(0 && "TODO"); // IPhoneAccountHandle
-    // if (accountHandle != NULL) {
-    //     AutoPtr<IComponentName> icn;
-    //     accountHandle->GetComponentName(&icn);
-    //     icn->FlattenToString(&accountComponentString);
-    //     accountHandle->GetId(&accountId);
-    // }
+    if (accountHandle != NULL) {
+        AutoPtr<IComponentName> icn;
+        accountHandle->GetComponentName((IComponentName**)&icn);
+        icn->FlattenToString(&accountComponentString);
+        accountHandle->GetId(&accountId);
+    }
 
     AutoPtr<IContentValues> values;
     CContentValues::New(6, (IContentValues**)&values);
@@ -221,7 +221,8 @@ ECode CCalls::AddCall(
     values->Put(DATE, StringUtils::ToString(start));
     values->Put(DURATION, StringUtils::ToString(duration));
     values->Put(DURATION_TYPE, StringUtils::ToString(durationType));
-    values->Put(DATA_USAGE, dataUsage);
+    if (dataUsage != -1 )
+        values->Put(DATA_USAGE, dataUsage);
     values->Put(PHONE_ACCOUNT_COMPONENT_NAME, accountComponentString);
     values->Put(PHONE_ACCOUNT_ID, accountId);
     values->Put(NEW, StringUtils::ToString(1));
@@ -245,7 +246,8 @@ ECode CCalls::AddCall(
     }
 
     Int64 pId;
-    ci->GetContactIdOrZero(&pId);
+    if (ci != NULL)
+        ci->GetContactIdOrZero(&pId);
     if ((ci != NULL) && (pId > 0)) {
         // Update usage information for the number associated with the contact ID.
         // We need to use both the number and the ID for obtaining a data ID since other
@@ -345,8 +347,7 @@ ECode CCalls::AddCall(
             userManager->IsUserRunning(userHandle, &flag);
 
             Boolean bHasUserRes = FALSE;
-            assert(0 && "TODO");
-            // userManager->HasUserRestriction(IUserManager::DISALLOW_OUTGOING_CALLS, userHandle.Get(), &bHasUserRes);
+            userManager->HasUserRestriction(IUserManager::DISALLOW_OUTGOING_CALLS, userHandle.Get(), &bHasUserRes);
 
             Boolean isManagedProfile = FALSE;
             user->IsManagedProfile(&isManagedProfile);

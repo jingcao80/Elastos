@@ -137,7 +137,7 @@ ECode CreateConnectionProcessor::Process()
     AutoPtr<IPhoneAccountHandle> phoneAccountHandle;
     ((Call*) mCall.Get())->GetTargetPhoneAccount((IPhoneAccountHandle**)&phoneAccountHandle);
     if (phoneAccountHandle != NULL) {
-        AutoPtr<CallAttemptRecord> record;
+        AutoPtr<CallAttemptRecord> record = new CallAttemptRecord();
         record->constructor(
                 phoneAccountHandle, phoneAccountHandle);
         mAttemptRecords->Add(TO_IINTERFACE(record));

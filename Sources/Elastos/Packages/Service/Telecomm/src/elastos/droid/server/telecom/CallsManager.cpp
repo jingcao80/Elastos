@@ -1237,7 +1237,8 @@ ECode CallsManager::MarkCallAsDisconnected(
     AutoPtr<IPhoneAccount> phAcc;
     phoneAccountRegistrar->GetPhoneAccount(phoneAccountHandle, (IPhoneAccount**)&phAcc);
     String id;
-    phoneAccountHandle->GetId(&id);
+    if (phoneAccountHandle != NULL)
+        phoneAccountHandle->GetId(&id);
     String conversationSub;
     GetConversationSub(&conversationSub);
     String activeSubscription;
@@ -2247,6 +2248,7 @@ ECode CallsManager::MakeRoomForOutgoingCall(
     telephonyManagerHelper->GetDefault((ITelephonyManager**)&tm);
     Elastos::Droid::Telephony::MultiSimVariants msc;
     tm->GetMultiSimConfiguration(&msc);
+
     if (msc == Elastos::Droid::Telephony::MultiSimVariants_DSDA) {
         return MakeRoomForOutgoingCallForDsda(call, isEmergency, result);
     }
@@ -2704,13 +2706,15 @@ ECode CallsManager::GetFirstCallWithStateUsingSubId(
         Int32 currentState = (*states)[i];
         // check the foreground first
         AutoPtr<IPhoneAccountHandle> phoneAccountHandle;
-        ((Call*) mForegroundCall.Get())->GetTargetPhoneAccount((IPhoneAccountHandle**)&phoneAccountHandle);
         String phoneAccountHandleId;
-        phoneAccountHandle->GetId(&phoneAccountHandleId);
-        Boolean isSameIdOrSipId;
-        IsSameIdOrSipId(phoneAccountHandleId, sub, &isSameIdOrSipId);
         Int32 foregroundCallState;
-        ((Call*) mForegroundCall.Get())->GetState(&foregroundCallState);
+        Boolean isSameIdOrSipId;
+        if (mForegroundCall != NULL) {
+            ((Call*) mForegroundCall.Get())->GetTargetPhoneAccount((IPhoneAccountHandle**)&phoneAccountHandle);
+            phoneAccountHandle->GetId(&phoneAccountHandleId);
+            IsSameIdOrSipId(phoneAccountHandleId, sub, &isSameIdOrSipId);
+            ((Call*) mForegroundCall.Get())->GetState(&foregroundCallState);
+        }
         if (mForegroundCall != NULL && foregroundCallState == currentState
                 && (phoneAccountHandle != NULL)
                 && isSameIdOrSipId) {

@@ -101,11 +101,11 @@ public:
          * object's writeToXml(). This object tries to fail early without modifying
          * 'parser' if it does not recognize the data it sees.
          */
-        CARAPI ReadFromXml(
+        virtual CARAPI ReadFromXml(
             /* [in] */ IXmlPullParser* parser,
             /* [in] */ Int32 version,
             /* [in] */ IContext* context,
-            /* [out] */ IInterface** result);
+            /* [out] */ IInterface** result) = 0;
 
         CARAPI WriteTextSafely(
             /* [in] */ const String& tagName,
@@ -158,7 +158,7 @@ private:
             /* [in] */ IXmlPullParser* parser,
             /* [in] */ Int32 version,
             /* [in] */ IContext* context,
-            /* [out] */ State** result);
+            /* [out] */ IInterface** result);
 
     private:
         static const String CLASS_STATE;
@@ -185,7 +185,7 @@ private:
             /* [in] */ IXmlPullParser* parser,
             /* [in] */ Int32 version,
             /* [in] */ IContext* context,
-            /* [out] */ IPhoneAccount** result);
+            /* [out] */ IInterface** result);//IPhoneAccount
 
     private:
         /**
@@ -235,7 +235,7 @@ private:
             /* [in] */ IXmlPullParser* parser,
             /* [in] */ Int32 version,
             /* [in] */ IContext* context,
-            /* [out] */ IPhoneAccountHandle** result);
+            /* [out] */ IInterface** result);// IPhoneAccountHandle
 
     private:
         static const String CLASS_PHONE_ACCOUNT_HANDLE;

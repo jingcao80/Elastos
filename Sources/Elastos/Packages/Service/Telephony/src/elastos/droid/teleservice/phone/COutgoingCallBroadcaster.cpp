@@ -457,6 +457,8 @@ ERROR:
         // If we were launched directly from the OutgoingCallBroadcaster,
         // not one of its more privileged aliases, then make sure that
         // only the non-privileged actions are allowed.
+        String action;
+        intent->GetAction(&action);
         if (!IIntent::ACTION_CALL.Equals(action)) {
             Logger::W(TAG, "Attempt to deliver non-CALL action; forcing to CALL");
             intent->SetAction(IIntent::ACTION_CALL);
@@ -649,7 +651,7 @@ ERROR:
         broadcastIntent->PutExtra(IIntent::EXTRA_PHONE_NUMBER, number);
     }
     CallGatewayManager::CheckAndCopyPhoneProviderExtras(intent, broadcastIntent);
-    broadcastIntent->PutExtra(EXTRA_ALREADY_CALLED, callNow);
+    broadcastIntent->PutBooleanExtra(EXTRA_ALREADY_CALLED, callNow);
     String str;
     IObject::Probe(uri)->ToString(&str);
     broadcastIntent->PutExtra(EXTRA_ORIGINAL_URI, str);

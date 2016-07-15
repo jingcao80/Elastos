@@ -2,11 +2,15 @@
 #include "elastos/droid/R.h"
 #include "elastos/droid/telephony/SubscriptionManager.h"
 #include "elastos/droid/telephony/CTelephonyManagerHelper.h"
+#include "elastos/droid/os/CServiceManager.h"
 #include <elastos/utility/logging/Logger.h>
 
 using Elastos::Droid::Internal::Telephony::IPhoneConstants;
 using Elastos::Droid::Net::CUriHelper;
 using Elastos::Droid::Net::IUriHelper;
+using Elastos::Droid::Internal::Telephony::IISub;
+using Elastos::Droid::Os::IServiceManager;
+using Elastos::Droid::Os::CServiceManager;
 using Elastos::Droid::R;
 using Elastos::Utility::CArrayList;
 using Elastos::Utility::IArrayList;
@@ -50,11 +54,15 @@ ECode SubscriptionManager::GetSubInfoForSubscriber(
     AutoPtr<ISubInfoRecord> subInfo;
 
     // try {
-// TODO: Need ISub
     // ISub iSub = ISub.Stub.asInterface(ServiceManager.getService("isub"));
-    // if (iSub != NULL) {
-    //     iSub->GetSubInfoForSubscriber(subId, (ISubInfoRecord**)&subInfo);
-    // }
+    AutoPtr<IServiceManager> sm;
+    CServiceManager::AcquireSingleton((IServiceManager**)&sm);
+    AutoPtr<IInterface> pServ;
+    sm->GetService(String("isub"), (IInterface**)&pServ);
+    AutoPtr<IISub>  iSub = IISub::Probe(pServ);
+    if (iSub != NULL) {
+        iSub->GetSubInfoForSubscriber(subId, (ISubInfoRecord**)&subInfo);
+    }
     // } catch (RemoteException ex) {
     //     // ignore it
     // }
@@ -79,11 +87,15 @@ ECode SubscriptionManager::GetSubInfoUsingIccId(
     AutoPtr<IList> list;
 
     // try {
-// TODO: Need ISub
     // ISub iSub = ISub.Stub.asInterface(ServiceManager.getService("isub"));
-    // if (iSub != NULL) {
-    //     iSub->GetSubInfoUsingIccId(iccId, (IList**)&list);
-    // }
+    AutoPtr<IServiceManager> sm;
+    CServiceManager::AcquireSingleton((IServiceManager**)&sm);
+    AutoPtr<IInterface> pServ;
+    sm->GetService(String("isub"), (IInterface**)&pServ);
+    AutoPtr<IISub>  iSub = IISub::Probe(pServ);
+    if (iSub != NULL) {
+        iSub->GetSubInfoUsingIccId(iccId, (IList**)&list);
+    }
     // } catch (RemoteException ex) {
     //     // ignore it
     // }
@@ -113,11 +125,15 @@ ECode SubscriptionManager::GetSubInfoUsingSlotId(
     AutoPtr<IList> list;
 
     // try {
-// TODO: Need ISub
     // ISub iSub = ISub.Stub.asInterface(ServiceManager.getService("isub"));
-    // if (iSub != NULL) {
-    //     iSub->GetSubInfoUsingSlotId(slotId, (IList**)&list);
-    // }
+    AutoPtr<IServiceManager> sm;
+    CServiceManager::AcquireSingleton((IServiceManager**)&sm);
+    AutoPtr<IInterface> pServ;
+    sm->GetService(String("isub"), (IInterface**)&pServ);
+    AutoPtr<IISub>  iSub = IISub::Probe(pServ);
+    if (iSub != NULL) {
+        iSub->GetSubInfoUsingSlotId(slotId, (IList**)&list);
+    }
     // } catch (RemoteException ex) {
     //     // ignore it
     // }
@@ -140,11 +156,15 @@ ECode SubscriptionManager::GetAllSubInfoList(
     AutoPtr<IList> list;
 
     // try {
-// TODO: Need ISub
     // ISub iSub = ISub.Stub.asInterface(ServiceManager.getService("isub"));
-    // if (iSub != NULL) {
-    //     iSub->GetAllSubInfoList((IList**)&list);
-    // }
+    AutoPtr<IServiceManager> sm;
+    CServiceManager::AcquireSingleton((IServiceManager**)&sm);
+    AutoPtr<IInterface> pServ;
+    sm->GetService(String("isub"), (IInterface**)&pServ);
+    AutoPtr<IISub>  iSub = IISub::Probe(pServ);
+    if (iSub != NULL) {
+        iSub->GetAllSubInfoList((IList**)&list);
+    }
     // } catch (RemoteException ex) {
     //     // ignore it
     // }
@@ -164,11 +184,15 @@ ECode SubscriptionManager::GetActiveSubInfoList(
     AutoPtr<IList> list;
 
     // try {
-// TODO: Need ISub
     // ISub iSub = ISub.Stub.asInterface(ServiceManager.getService("isub"));
-    // if (iSub != NULL) {
-    //     iSub->GetActiveSubInfoList((IList**)&list);
-    // }
+    AutoPtr<IServiceManager> sm;
+    CServiceManager::AcquireSingleton((IServiceManager**)&sm);
+    AutoPtr<IInterface> pServ;
+    sm->GetService(String("isub"), (IInterface**)&pServ);
+    AutoPtr<IISub>  iSub = IISub::Probe(pServ);
+    if (iSub != NULL) {
+        iSub->GetActiveSubInfoList((IList**)&list);
+    }
     // } catch (RemoteException ex) {
     //     // ignore it
     // }
@@ -189,11 +213,15 @@ ECode SubscriptionManager::GetAllSubInfoCount(
     if (VDBG) Logd(String("[getAllSubInfoCount]+"));
 
     // try {
-// TODO: Need ISub
     // ISub iSub = ISub.Stub.asInterface(ServiceManager.getService("isub"));
-    // if (iSub != NULL) {
-    //     iSub->GetAllSubInfoCount(&result);
-    // }
+    AutoPtr<IServiceManager> sm;
+    CServiceManager::AcquireSingleton((IServiceManager**)&sm);
+    AutoPtr<IInterface> pServ;
+    sm->GetService(String("isub"), (IInterface**)&pServ);
+    AutoPtr<IISub>  iSub = IISub::Probe(pServ);
+    if (iSub != NULL) {
+        iSub->GetAllSubInfoCount(result);
+    }
     // } catch (RemoteException ex) {
     //     // ignore it
     // }
@@ -208,11 +236,15 @@ ECode SubscriptionManager::GetActiveSubInfoCount(
     *result = 0;
 
     // try {
-// TODO: Need ISub
     // ISub iSub = ISub.Stub.asInterface(ServiceManager.getService("isub"));
-    // if (iSub != NULL) {
-    //     iSub->GetActiveSubInfoCount(&result);
-    // }
+    AutoPtr<IServiceManager> sm;
+    CServiceManager::AcquireSingleton((IServiceManager**)&sm);
+    AutoPtr<IInterface> pServ;
+    sm->GetService(String("isub"), (IInterface**)&pServ);
+    AutoPtr<IISub>  iSub = IISub::Probe(pServ);
+    if (iSub != NULL) {
+        iSub->GetActiveSubInfoCount(result);
+    }
     // } catch (RemoteException ex) {
     //     // ignore it
     // }
@@ -238,12 +270,17 @@ ECode SubscriptionManager::AddSubInfoRecord(
     }
 
     // try {
-// TODO: Need ISub
     // ISub iSub = ISub.Stub.asInterface(ServiceManager.getService("isub"));
-    // if (iSub != NULL) {
-    //     // FIXME: This returns 1 on success, 0 on error should should we return it?
-    //     iSub->AddSubInfoRecord(iccId, slotId);
-    // }
+    AutoPtr<IServiceManager> sm;
+    CServiceManager::AcquireSingleton((IServiceManager**)&sm);
+    AutoPtr<IInterface> pServ;
+    sm->GetService(String("isub"), (IInterface**)&pServ);
+    AutoPtr<IISub>  iSub = IISub::Probe(pServ);
+    if (iSub != NULL) {
+        // FIXME: This returns 1 on success, 0 on error should should we return it?
+        Int32 ret;
+        iSub->AddSubInfoRecord(iccId, slotId, &ret);
+    }
     // } catch (RemoteException ex) {
     //     // ignore it
     // }
@@ -271,11 +308,15 @@ ECode SubscriptionManager::SetColor(
     }
 
     // try {
-// TODO: Need ISub
     // ISub iSub = ISub.Stub.asInterface(ServiceManager.getService("isub"));
-    // if (iSub != NULL) {
-    //     iSub->SetColor(color, subId, result);
-    // }
+    AutoPtr<IServiceManager> sm;
+    CServiceManager::AcquireSingleton((IServiceManager**)&sm);
+    AutoPtr<IInterface> pServ;
+    sm->GetService(String("isub"), (IInterface**)&pServ);
+    AutoPtr<IISub>  iSub = IISub::Probe(pServ);
+    if (iSub != NULL) {
+        iSub->SetColor(color, subId, result);
+    }
     // } catch (RemoteException ex) {
     //     // ignore it
     // }
@@ -314,11 +355,15 @@ ECode SubscriptionManager::SetDisplayName(
     }
 
     // try {
-// TODO: Need ISub
     // ISub iSub = ISub.Stub.asInterface(ServiceManager.getService("isub"));
-    // if (iSub != NULL) {
-    //     iSub->SetDisplayNameUsingSrc(displayName, subId, nameSource, result);
-    // }
+    AutoPtr<IServiceManager> sm;
+    CServiceManager::AcquireSingleton((IServiceManager**)&sm);
+    AutoPtr<IInterface> pServ;
+    sm->GetService(String("isub"), (IInterface**)&pServ);
+    AutoPtr<IISub>  iSub = IISub::Probe(pServ);
+    if (iSub != NULL) {
+        iSub->SetDisplayNameUsingSrc(displayName, subId, nameSource, result);
+    }
     // } catch (RemoteException ex) {
     //     // ignore it
     // }
@@ -342,11 +387,15 @@ ECode SubscriptionManager::SetDisplayNumber(
     }
 
     // try {
-// TODO: Need ISub
     // ISub iSub = ISub.Stub.asInterface(ServiceManager.getService("isub"));
-    // if (iSub != NULL) {
-    //     iSub->SetDisplayNumber(number, subId, result);
-    // }
+    AutoPtr<IServiceManager> sm;
+    CServiceManager::AcquireSingleton((IServiceManager**)&sm);
+    AutoPtr<IInterface> pServ;
+    sm->GetService(String("isub"), (IInterface**)&pServ);
+    AutoPtr<IISub>  iSub = IISub::Probe(pServ);
+    if (iSub != NULL) {
+        iSub->SetDisplayNumber(number, subId, result);
+    }
     // } catch (RemoteException ex) {
     //     // ignore it
     // }
@@ -373,11 +422,15 @@ ECode SubscriptionManager::SetDisplayNumberFormat(
     }
 
     // try {
-// TODO: Need ISub
     // ISub iSub = ISub.Stub.asInterface(ServiceManager.getService("isub"));
-    // if (iSub != NULL) {
-    //     iSub->SetDisplayNumberFormat(format, subId, result);
-    // }
+    AutoPtr<IServiceManager> sm;
+    CServiceManager::AcquireSingleton((IServiceManager**)&sm);
+    AutoPtr<IInterface> pServ;
+    sm->GetService(String("isub"), (IInterface**)&pServ);
+    AutoPtr<IISub>  iSub = IISub::Probe(pServ);
+    if (iSub != NULL) {
+        iSub->SetDisplayNumberFormat(format, subId, result);
+    }
     // } catch (RemoteException ex) {
     //     // ignore it
     // }
@@ -404,11 +457,15 @@ ECode SubscriptionManager::SetDataRoaming(
     }
 
     // try {
-// TODO: Need ISub
     // ISub iSub = ISub.Stub.asInterface(ServiceManager.getService("isub"));
-    // if (iSub != NULL) {
-    //     iSub->SetDataRoaming(roaming, subId, result);
-    // }
+    AutoPtr<IServiceManager> sm;
+    CServiceManager::AcquireSingleton((IServiceManager**)&sm);
+    AutoPtr<IInterface> pServ;
+    sm->GetService(String("isub"), (IInterface**)&pServ);
+    AutoPtr<IISub>  iSub = IISub::Probe(pServ);
+    if (iSub != NULL) {
+        iSub->SetDataRoaming(roaming, subId, result);
+    }
     // } catch (RemoteException ex) {
     //     // ignore it
     // }
@@ -430,11 +487,15 @@ ECode SubscriptionManager::GetSlotId(
     *result = ISubscriptionManager::INVALID_SLOT_ID;
 
     // try {
-// TODO: Need ISub
     // ISub iSub = ISub.Stub.asInterface(ServiceManager.getService("isub"));
-    // if (iSub != NULL) {
-    //     iSub->GetSlotId(subId, result);
-    // }
+    AutoPtr<IServiceManager> sm;
+    CServiceManager::AcquireSingleton((IServiceManager**)&sm);
+    AutoPtr<IInterface> pServ;
+    sm->GetService(String("isub"), (IInterface**)&pServ);
+    AutoPtr<IISub>  iSub = IISub::Probe(pServ);
+    if (iSub != NULL) {
+        iSub->GetSlotId(subId, result);
+    }
     // } catch (RemoteException ex) {
     //     // ignore it
     // }
@@ -456,11 +517,15 @@ ECode SubscriptionManager::GetSubId(
     }
 
     // try {
-// TODO: Need ISub
     // ISub iSub = ISub.Stub.asInterface(ServiceManager.getService("isub"));
-    // if (iSub != NULL) {
-    //     iSub->GetSubId(slotId, result);
-    // }
+    AutoPtr<IServiceManager> sm;
+    CServiceManager::AcquireSingleton((IServiceManager**)&sm);
+    AutoPtr<IInterface> pServ;
+    sm->GetService(String("isub"), (IInterface**)&pServ);
+    AutoPtr<IISub>  iSub = IISub::Probe(pServ);
+    if (iSub != NULL) {
+        iSub->GetSubId(slotId, result);
+    }
     // } catch (RemoteException ex) {
     //     // ignore it
     // }
@@ -477,17 +542,21 @@ ECode SubscriptionManager::GetPhoneId(
 
     Boolean b;
     if (IsValidSubId(subId, &b), b) {
-        Logd(String("[getPhoneId]- fail"));
+        Logd(String("[getPhoneId]- fail, "));
         return NOERROR;
     }
 
 
     // try {
-// TODO: Need ISub
     // ISub iSub = ISub.Stub.asInterface(ServiceManager.getService("isub"));
-    // if (iSub != NULL) {
-    //     iSub->GetPhoneId(subId, result);
-    // }
+    AutoPtr<IServiceManager> sm;
+    CServiceManager::AcquireSingleton((IServiceManager**)&sm);
+    AutoPtr<IInterface> pServ;
+    sm->GetService(String("isub"), (IInterface**)&pServ);
+    AutoPtr<IISub>  iSub = IISub::Probe(pServ);
+    if (iSub != NULL) {
+        iSub->GetPhoneId(subId, result);
+    }
     // } catch (RemoteException ex) {
     //     // ignore it
     // }
@@ -503,11 +572,15 @@ ECode SubscriptionManager::GetDefaultSubId(
     *result = ISubscriptionManager::INVALID_SUB_ID;
 
     // try {
-// TODO: Need ISub
     // ISub iSub = ISub.Stub.asInterface(ServiceManager.getService("isub"));
-    // if (iSub != NULL) {
-    //     iSub->GetDefaultSubId(result);
-    // }
+    AutoPtr<IServiceManager> sm;
+    CServiceManager::AcquireSingleton((IServiceManager**)&sm);
+    AutoPtr<IInterface> pServ;
+    sm->GetService(String("isub"), (IInterface**)&pServ);
+    AutoPtr<IISub>  iSub = IISub::Probe(pServ);
+    if (iSub != NULL) {
+        iSub->GetDefaultSubId(result);
+    }
     // } catch (RemoteException ex) {
     //     // ignore it
     // }
@@ -523,11 +596,15 @@ ECode SubscriptionManager::GetDefaultVoiceSubId(
     *result = ISubscriptionManager::INVALID_SUB_ID;
 
     // try {
-// TODO: Need ISub
     // ISub iSub = ISub.Stub.asInterface(ServiceManager.getService("isub"));
-    // if (iSub != NULL) {
-    //     iSub->GetDefaultVoiceSubId(result);
-    // }
+    AutoPtr<IServiceManager> sm;
+    CServiceManager::AcquireSingleton((IServiceManager**)&sm);
+    AutoPtr<IInterface> pServ;
+    sm->GetService(String("isub"), (IInterface**)&pServ);
+    AutoPtr<IISub>  iSub = IISub::Probe(pServ);
+    if (iSub != NULL) {
+        iSub->GetDefaultVoiceSubId(result);
+    }
     // } catch (RemoteException ex) {
     //     // ignore it
     // }
@@ -541,11 +618,15 @@ ECode SubscriptionManager::SetDefaultVoiceSubId(
 {
     // if (VDBG) Logd(String("setDefaultVoiceSubId sub id = ") + subId);
     // try {
-// TODO: Need ISub
     // ISub iSub = ISub.Stub.asInterface(ServiceManager.getService("isub"));
-    // if (iSub != NULL) {
-    //     iSub->SetDefaultVoiceSubId(subId);
-    // }
+    AutoPtr<IServiceManager> sm;
+    CServiceManager::AcquireSingleton((IServiceManager**)&sm);
+    AutoPtr<IInterface> pServ;
+    sm->GetService(String("isub"), (IInterface**)&pServ);
+    AutoPtr<IISub>  iSub = IISub::Probe(pServ);
+    if (iSub != NULL) {
+        iSub->SetDefaultVoiceSubId(subId);
+    }
     // } catch (RemoteException ex) {
     //     // ignore it
     // }
@@ -575,11 +656,15 @@ ECode SubscriptionManager::GetDefaultSmsSubId(
     *result = ISubscriptionManager::INVALID_SUB_ID;
 
     // try {
-// TODO: Need ISub
     // ISub iSub = ISub.Stub.asInterface(ServiceManager.getService("isub"));
-    // if (iSub != NULL) {
-    //     iSub->GetDefaultSmsSubId(&result);
-    // }
+    AutoPtr<IServiceManager> sm;
+    CServiceManager::AcquireSingleton((IServiceManager**)&sm);
+    AutoPtr<IInterface> pServ;
+    sm->GetService(String("isub"), (IInterface**)&pServ);
+    AutoPtr<IISub>  iSub = IISub::Probe(pServ);
+    if (iSub != NULL) {
+        iSub->GetDefaultSmsSubId(result);
+    }
     // } catch (RemoteException ex) {
     //     // ignore it
     // }
@@ -593,11 +678,15 @@ ECode SubscriptionManager::SetDefaultSmsSubId(
 {
     // if (VDBG) Logd(String("setDefaultSmsSubId sub id = ") + subId);
     // try {
-// TODO: Need ISub
     // ISub iSub = ISub.Stub.asInterface(ServiceManager.getService("isub"));
-    // if (iSub != NULL) {
-    //     iSub->SetDefaultSmsSubId(subId);
-    // }
+    AutoPtr<IServiceManager> sm;
+    CServiceManager::AcquireSingleton((IServiceManager**)&sm);
+    AutoPtr<IInterface> pServ;
+    sm->GetService(String("isub"), (IInterface**)&pServ);
+    AutoPtr<IISub>  iSub = IISub::Probe(pServ);
+    if (iSub != NULL) {
+        iSub->SetDefaultSmsSubId(subId);
+    }
     // } catch (RemoteException ex) {
     //     // ignore it
     // }
@@ -629,11 +718,15 @@ ECode SubscriptionManager::GetDefaultDataSubId(
     *result = ISubscriptionManager::INVALID_SUB_ID;
 
     // try {
-// TODO: Need ISub
     // ISub iSub = ISub.Stub.asInterface(ServiceManager.getService("isub"));
-    // if (iSub != NULL) {
-    //    iSub->GetDefaultDataSubId(result);
-    // }
+    AutoPtr<IServiceManager> sm;
+    CServiceManager::AcquireSingleton((IServiceManager**)&sm);
+    AutoPtr<IInterface> pServ;
+    sm->GetService(String("isub"), (IInterface**)&pServ);
+    AutoPtr<IISub>  iSub = IISub::Probe(pServ);
+    if (iSub != NULL) {
+        iSub->GetDefaultDataSubId(result);
+    }
     // } catch (RemoteException ex) {
     //     // ignore it
     // }
@@ -647,11 +740,15 @@ ECode SubscriptionManager::SetDefaultDataSubId(
 {
     // if (VDBG) Logd(String("setDataSubscription sub id = ") + subId);
     // try {
-// TODO: Need ISub
+    AutoPtr<IServiceManager> sm;
+    CServiceManager::AcquireSingleton((IServiceManager**)&sm);
+    AutoPtr<IInterface> pServ;
+    sm->GetService(String("isub"), (IInterface**)&pServ);
+    AutoPtr<IISub>  iSub = IISub::Probe(pServ);
+    if (iSub != NULL) {
+        iSub->SetDefaultSmsSubId(subId);
+    }
     // ISub iSub = ISub.Stub.asInterface(ServiceManager.getService("isub"));
-    // if (iSub != NULL) {
-    //     iSub->SetDefaultDataSubId(subId);
-    // }
     // } catch (RemoteException ex) {
     //     // ignore it
     // }
@@ -679,11 +776,16 @@ ECode SubscriptionManager::GetDefaultDataPhoneId(
 ECode SubscriptionManager::ClearSubInfo()
 {
     // try {
-// TODO: Need ISub
     // ISub iSub = ISub.Stub.asInterface(ServiceManager.getService("isub"));
-    // if (iSub != NULL) {
-    //     iSub->ClearSubInfo();
-    // }
+    AutoPtr<IServiceManager> sm;
+    CServiceManager::AcquireSingleton((IServiceManager**)&sm);
+    AutoPtr<IInterface> pServ;
+    sm->GetService(String("isub"), (IInterface**)&pServ);
+    AutoPtr<IISub>  iSub = IISub::Probe(pServ);
+    if (iSub != NULL) {
+        Int32 ret;
+        iSub->ClearSubInfo(&ret);
+    }
     // } catch (RemoteException ex) {
     //     // ignore it
     // }
@@ -722,11 +824,15 @@ ECode SubscriptionManager::ClearDefaultsForInactiveSubIds()
 {
     if (VDBG) Logd(String("clearDefaultsForInactiveSubIds"));
     // try {
-// TODO: Need ISub
     // ISub iSub = ISub.Stub.asInterface(ServiceManager.getService("isub"));
-    // if (iSub != NULL) {
-    //     iSub->ClearDefaultsForInactiveSubIds();
-    // }
+    AutoPtr<IServiceManager> sm;
+    CServiceManager::AcquireSingleton((IServiceManager**)&sm);
+    AutoPtr<IInterface> pServ;
+    sm->GetService(String("isub"), (IInterface**)&pServ);
+    AutoPtr<IISub>  iSub = IISub::Probe(pServ);
+    if (iSub != NULL) {
+        iSub->ClearDefaultsForInactiveSubIds();
+    }
     // } catch (RemoteException ex) {
     //     // ignore it
     // }
@@ -816,11 +922,15 @@ ECode SubscriptionManager::GetActiveSubIdList(
     AutoPtr<ArrayOf<Int64> > subId;
 
     // try {
-// TODO: Need ISub
     // ISub iSub = ISub.Stub.asInterface(ServiceManager.getService("isub"));
-    // if (iSub != NULL) {
-    //     iSub->GetActiveSubIdList((ArrayOf<Int64>**)&subId);
-    // }
+    AutoPtr<IServiceManager> sm;
+    CServiceManager::AcquireSingleton((IServiceManager**)&sm);
+    AutoPtr<IInterface> pServ;
+    sm->GetService(String("isub"), (IInterface**)&pServ);
+    AutoPtr<IISub>  iSub = IISub::Probe(pServ);
+    if (iSub != NULL) {
+        iSub->GetActiveSubIdList(result);
+    }
     // } catch (RemoteException ex) {
     //     // ignore it
     // }
