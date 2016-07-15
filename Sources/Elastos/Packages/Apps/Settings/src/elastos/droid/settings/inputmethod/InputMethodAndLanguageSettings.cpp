@@ -63,7 +63,7 @@ using Elastos::Droid::Speech::Tts::CTtsEngines;
 using Elastos::Droid::Text::TextUtils;
 using Elastos::Droid::View::IInputDevice;
 using Elastos::Droid::View::IInputDeviceHelper;
-// using Elastos::Droid::View::CInputDeviceHelper;
+using Elastos::Droid::View::CInputDeviceHelper;
 using Elastos::Droid::View::InputMethod::IInputMethodSubtype;
 using Elastos::Droid::View::TextService::ISpellCheckerInfo;
 using Elastos::Droid::View::TextService::ITextServicesManager;
@@ -202,7 +202,7 @@ ECode InputMethodAndLanguageSettings::MyBaseSearchIndexProvider::GetRawDataToInd
     for (Int32 i = 0; i < inputMethodCount; ++i) {
         obj = NULL;
         inputMethods->Get(i, (IInterface**)&obj);
-        IInputMethodInfo* inputMethod = IInputMethodInfo::Probe(obj);
+        AutoPtr<IInputMethodInfo> inputMethod = IInputMethodInfo::Probe(obj);
 
         StringBuilder builder;
         AutoPtr<IList> subtypes;//List<InputMethodSubtype>
@@ -213,7 +213,7 @@ ECode InputMethodAndLanguageSettings::MyBaseSearchIndexProvider::GetRawDataToInd
         for (Int32 j = 0; j < subtypeCount; j++) {
             obj = NULL;
             subtypes->Get(j, (IInterface**)&obj);
-            IInputMethodSubtype* subtype = IInputMethodSubtype::Probe(obj);
+            AutoPtr<IInputMethodSubtype> subtype = IInputMethodSubtype::Probe(obj);
             if (builder.GetLength() > 0) {
                 builder.AppendChar(',');
             }
@@ -261,12 +261,11 @@ ECode InputMethodAndLanguageSettings::MyBaseSearchIndexProvider::GetRawDataToInd
     obj = NULL;
     context->GetSystemService(
             IContext::INPUT_SERVICE, (IInterface**)&obj);
-    IInputManager* inputManager = IInputManager::Probe(obj);
+    AutoPtr<IInputManager> inputManager = IInputManager::Probe(obj);
     Boolean hasHardKeyboards = FALSE;
 
     AutoPtr<IInputDeviceHelper> helper;
-    assert(0 && "TODO");
-    // CInputDeviceHelper::AcquireSingleton((IInputDeviceHelper**)&helper);
+    CInputDeviceHelper::AcquireSingleton((IInputDeviceHelper**)&helper);
 
     AutoPtr< ArrayOf<Int32> > devices;
     helper->GetDeviceIds((ArrayOf<Int32>**)&devices);
@@ -608,8 +607,10 @@ ECode InputMethodAndLanguageSettings::OnCreate(
         UpdateInputMethodSelectorSummary(LoadInputMethodSelectorVisibility());
     }
 
-    AutoPtr<VoiceInputOutputSettings> vios = new VoiceInputOutputSettings((ISettingsPreferenceFragment*)this);
-    vios->OnCreate();
+    // TODO: Voice is TODO
+    Slogger::I("InputMethodAndLanguageSettings", "Voice is TODO");
+    // AutoPtr<VoiceInputOutputSettings> vios = new VoiceInputOutputSettings((ISettingsPreferenceFragment*)this);
+    // vios->OnCreate();
 
     // Get references to dynamically constructed categories.
     AutoPtr<IPreference> pre;
@@ -972,13 +973,11 @@ void InputMethodAndLanguageSettings::UpdateInputMethodPreferenceViews()
 
         mInputMethodPreferenceList->Clear();
         AutoPtr<IList> permittedList;//List<String> permittedList
-        assert(0 && "TODO");
-        // mDpm->GetPermittedInputMethodsForCurrentUser((IList**)&permittedList);
+        mDpm->GetPermittedInputMethodsForCurrentUser((IList**)&permittedList);
         AutoPtr<IActivity> activity;
         GetActivity((IActivity**)&activity);
         IContext* context = IContext::Probe(activity);
 
-        //TODO
         AutoPtr<IList> imis;//List<InputMethodInfo>
         if (mShowsOnlyFullImeAndKeyboardList) {
             imis = mInputMethodSettingValues->GetInputMethodList();
@@ -987,11 +986,8 @@ void InputMethodAndLanguageSettings::UpdateInputMethodPreferenceViews()
             mImm->GetEnabledInputMethodList((IList**)&imis);
         }
 
-        Int32 N;
-        if (imis == NULL) {
-            N = 0;
-        }
-        else {
+        Int32 N = 0;;
+        if (imis != NULL) {
             imis->GetSize(&N);
         }
 
@@ -1131,11 +1127,10 @@ void InputMethodAndLanguageSettings::RestorePreviouslyEnabledSubtypesOf(
 {
     AutoPtr<IActivity> activity;
     GetActivity((IActivity**)&activity);
-    IContext* context = IContext::Probe(activity);
     AutoPtr<IPreferenceManagerHelper> helper;
     CPreferenceManagerHelper::AcquireSingleton((IPreferenceManagerHelper**)&helper);
     AutoPtr<ISharedPreferences> prefs;
-    helper->GetDefaultSharedPreferences(context, (ISharedPreferences**)&prefs);
+    helper->GetDefaultSharedPreferences(IContext::Probe(activity), (ISharedPreferences**)&prefs);
     String imesAndSubtypesString;
     prefs->GetString(KEY_PREVIOUSLY_ENABLED_SUBTYPES, String(NULL), &imesAndSubtypesString);
     return InputMethodAndSubtypeUtil::ParseInputMethodsAndSubtypesString(imesAndSubtypesString);
@@ -1146,11 +1141,10 @@ void InputMethodAndLanguageSettings::SavePreviouslyEnabledSubtypeIdsMap(
 {
     AutoPtr<IActivity> activity;
     GetActivity((IActivity**)&activity);
-    IContext* context = IContext::Probe(activity);
     AutoPtr<IPreferenceManagerHelper> helper;
     CPreferenceManagerHelper::AcquireSingleton((IPreferenceManagerHelper**)&helper);
     AutoPtr<ISharedPreferences> prefs;
-    helper->GetDefaultSharedPreferences(context, (ISharedPreferences**)&prefs);
+    helper->GetDefaultSharedPreferences(IContext::Probe(activity), (ISharedPreferences**)&prefs);
     String imesAndSubtypesString = InputMethodAndSubtypeUtil::BuildInputMethodsAndSubtypesString(subtypesMap);
     AutoPtr<ISharedPreferencesEditor> editor;
     prefs->Edit((ISharedPreferencesEditor**)&editor);
@@ -1192,8 +1186,7 @@ void InputMethodAndLanguageSettings::UpdateHardKeyboards()
 {
     mHardKeyboardPreferenceList->Clear();
     AutoPtr<IInputDeviceHelper> helper;
-    assert(0 && "TODO");
-    // CInputDeviceHelper::AcquireSingleton((IInputDeviceHelper**)&helper);
+    CInputDeviceHelper::AcquireSingleton((IInputDeviceHelper**)&helper);
     AutoPtr< ArrayOf<Int32> > devices;
     helper->GetDeviceIds((ArrayOf<Int32>**)&devices);
     for (Int32 i = 0; i < devices->GetLength(); i++) {
@@ -1296,8 +1289,7 @@ ECode InputMethodAndLanguageSettings::OnSetupKeyboardLayouts(
     CIntent::New(IIntent::ACTION_MAIN, (IIntent**)&intent);
     AutoPtr<IActivity> activity;
     GetActivity((IActivity**)&activity);
-    assert(0 && "TODO");
-    // intent->SetClass(IContext::Probe(activity), KeyboardLayoutPickerActivity.class);
+    intent->SetClass(IContext::Probe(activity), ECLSID_CSettingsKeyboardLayoutPickerActivity);
     intent->PutExtra(KeyboardLayoutPickerFragment::EXTRA_INPUT_DEVICE_IDENTIFIER,
             IParcelable::Probe(inputDeviceIdentifier));
     mIntentWaitingForResult = intent;
@@ -1354,8 +1346,7 @@ void InputMethodAndLanguageSettings::UpdateGameControllers()
 Boolean InputMethodAndLanguageSettings::HaveInputDeviceWithVibrator()
 {
     AutoPtr<IInputDeviceHelper> helper;
-    assert(0 && "TODO");
-    // CInputDeviceHelper::AcquireSingleton((IInputDeviceHelper**)&helper);
+    CInputDeviceHelper::AcquireSingleton((IInputDeviceHelper**)&helper);
     AutoPtr< ArrayOf<Int32> > devices;
     helper->GetDeviceIds((ArrayOf<Int32>**)&devices);
     for (Int32 i = 0; i < devices->GetLength(); i++) {

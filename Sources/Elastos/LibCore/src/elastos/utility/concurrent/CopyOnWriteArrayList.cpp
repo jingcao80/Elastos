@@ -98,7 +98,7 @@ ECode CopyOnWriteArrayList::ContainsAll(
     VALIDATE_NOT_NULL(result)
 
     AutoPtr< ArrayOf<IInterface*> > snapshot = mElements;
-    return ContainsAll(collection, *snapshot, 0, snapshot->GetLength(), result);
+    return ContainsAll(collection, snapshot, 0, snapshot->GetLength(), result);
 }
 
 ECode CopyOnWriteArrayList::Equals(
@@ -122,7 +122,7 @@ ECode CopyOnWriteArrayList::Equals(
         for (Int32 j = 0; j < snapshot->GetLength(); j++) {
             AutoPtr<IInterface> o = (*snapshot)[j];
             AutoPtr<IInterface> outface;
-            if (!(i->HasNext(&isflag), isflag) || !(Object::Equals(o, (i->GetNext((IInterface**)&outface), outface)))) {
+            if (!(i->HasNext(&isflag), isflag) || !(Object::Equals(TO_IINTERFACE(o), TO_IINTERFACE((i->GetNext((IInterface**)&outface), outface))))) {
                 *result = FALSE;
                 return NOERROR;
             }
@@ -340,7 +340,7 @@ ECode CopyOnWriteArrayList::IndexOf(
     VALIDATE_NOT_NULL(index)
 
     AutoPtr< ArrayOf<IInterface*> > snapshot = mElements;
-    return IndexOf(object, *snapshot, 0, snapshot->GetLength(), index);
+    return IndexOf(object, snapshot, 0, snapshot->GetLength(), index);
 }
 
 ECode CopyOnWriteArrayList::LastIndexOf(
@@ -350,7 +350,7 @@ ECode CopyOnWriteArrayList::LastIndexOf(
     VALIDATE_NOT_NULL(index)
 
     AutoPtr< ArrayOf<IInterface*> > snapshot = mElements;
-    return LastIndexOf(object, *snapshot, 0, snapshot->GetLength(), index);
+    return LastIndexOf(object, snapshot, 0, snapshot->GetLength(), index);
 }
 
 ECode CopyOnWriteArrayList::GetListIterator(
@@ -457,7 +457,7 @@ ECode CopyOnWriteArrayList::IndexOf(
     VALIDATE_NOT_NULL(value)
 
     AutoPtr< ArrayOf<IInterface*> > snapshot = mElements;
-    return IndexOf(object, *snapshot, from, snapshot->GetLength(), value);
+    return IndexOf(object, snapshot, from, snapshot->GetLength(), value);
 }
 
 ECode CopyOnWriteArrayList::LastIndexOf(
@@ -468,7 +468,7 @@ ECode CopyOnWriteArrayList::LastIndexOf(
     VALIDATE_NOT_NULL(value)
 
     AutoPtr< ArrayOf<IInterface*> > snapshot = mElements;
-    return LastIndexOf(object, *snapshot, 0, to, value);
+    return LastIndexOf(object, snapshot, 0, to, value);
 }
 
 ECode CopyOnWriteArrayList::AddAllAbsent(
@@ -486,7 +486,7 @@ ECode CopyOnWriteArrayList::AddAllAbsent(
     for (Int32 i = 0; i < toAdd->GetLength(); i++) {
         AutoPtr<IInterface> o = (*toAdd)[i];
         Int32 outvalue = 0;
-        if ((IndexOf(o, *newElements, 0, mElements->GetLength() + addedCount, &outvalue), outvalue) == -1) {
+        if ((IndexOf(o, newElements, 0, mElements->GetLength() + addedCount, &outvalue), outvalue) == -1) {
             newElements->Set(mElements->GetLength() + addedCount++, o);
         }
     }
@@ -536,7 +536,7 @@ ECode CopyOnWriteArrayList::Clone(
     AutoPtr<CCopyOnWriteArrayList> result;
     CCopyOnWriteArrayList::NewByFriend((CCopyOnWriteArrayList**)&result);
     result->mElements = mElements->Clone();
-    *object = result->Probe(EIID_IInterface);
+    *object = (ICopyOnWriteArrayList*)result.Get();
     REFCOUNT_ADD(*object)
     // } catch (CloneNotSupportedException e) {
     //     throw new AssertionError(e);
@@ -546,7 +546,7 @@ ECode CopyOnWriteArrayList::Clone(
 
 ECode CopyOnWriteArrayList::ContainsAll(
     /* [in] */ ICollection* collection,
-    /* [in] */ const ArrayOf<IInterface*>& snapshot,
+    /* [in] */ ArrayOf<IInterface*>* snapshot,
     /* [in] */ Int32 from,
     /* [in] */ Int32 to,
     /* [out] */ Boolean* value)
@@ -570,7 +570,7 @@ ECode CopyOnWriteArrayList::ContainsAll(
 
 ECode CopyOnWriteArrayList::LastIndexOf(
     /* [in] */ IInterface* o,
-    /* [in] */ const ArrayOf<IInterface*>& data,
+    /* [in] */ ArrayOf<IInterface*>* data,
     /* [in] */ Int32 from,
     /* [in] */ Int32 to,
     /* [out] */ Int32* value)
@@ -579,7 +579,7 @@ ECode CopyOnWriteArrayList::LastIndexOf(
 
     if (o == NULL) {
         for (Int32 i = to - 1; i >= from; i--) {
-            if (data[i] == NULL) {
+            if ((*data)[i] == NULL) {
                 *value = i;
                 return NOERROR;
             }
@@ -587,7 +587,7 @@ ECode CopyOnWriteArrayList::LastIndexOf(
     }
     else {
         for (Int32 i = to - 1; i >= from; i--) {
-            if (Object::Equals(o, data[i])) {
+            if (Object::Equals(TO_IINTERFACE(o), TO_IINTERFACE((*data)[i]))) {
                 *value = i;
                 return NOERROR;
             }
@@ -599,7 +599,7 @@ ECode CopyOnWriteArrayList::LastIndexOf(
 
 ECode CopyOnWriteArrayList::IndexOf(
     /* [in] */ IInterface* o,
-    /* [in] */ const ArrayOf<IInterface*>& data,
+    /* [in] */ ArrayOf<IInterface*>* data,
     /* [in] */ Int32 from,
     /* [in] */ Int32 to,
     /* [out] */ Int32* value)
@@ -608,7 +608,7 @@ ECode CopyOnWriteArrayList::IndexOf(
 
     if (o == NULL) {
         for (Int32 i = from; i < to; i++) {
-            if (data[i] == NULL) {
+            if ((*data)[i] == NULL) {
                 *value = i;
                 return NOERROR;
             }
@@ -616,7 +616,7 @@ ECode CopyOnWriteArrayList::IndexOf(
     }
     else {
         for (Int32 i = from; i < to; i++) {
-            if (Object::Equals(o, data[i])) {
+            if (Object::Equals(TO_IINTERFACE(o), TO_IINTERFACE((*data)[i]))) {
                 *value = i;
                 return NOERROR;
             }
@@ -929,7 +929,7 @@ ECode CopyOnWriteArrayList::CowSubList::ContainsAll(
     AutoPtr<Slice> slice = mSlice;
     AutoPtr< ArrayOf<IInterface*> > snapshot = mHost->mElements;
     FAIL_RETURN(slice->CheckConcurrentModification(snapshot));
-    return CopyOnWriteArrayList::ContainsAll(collection, *snapshot, slice->mFrom, slice->mTo, result);
+    return CopyOnWriteArrayList::ContainsAll(collection, snapshot, slice->mFrom, slice->mTo, result);
 }
 
 ECode CopyOnWriteArrayList::CowSubList::IsEmpty(
@@ -1071,7 +1071,7 @@ ECode CopyOnWriteArrayList::CowSubList::LastIndexOf(
     AutoPtr< ArrayOf<IInterface*> > snapshot = mHost->mElements;
     FAIL_RETURN(mSlice->CheckConcurrentModification(snapshot));
     Int32 result = 0;
-    CopyOnWriteArrayList::LastIndexOf(object, *snapshot, mSlice->mFrom, mSlice->mTo, &result);
+    CopyOnWriteArrayList::LastIndexOf(object, snapshot, mSlice->mFrom, mSlice->mTo, &result);
     *index = (result != -1) ? (result - mSlice->mFrom) : -1;
     return NOERROR;
 }

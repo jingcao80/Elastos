@@ -488,7 +488,7 @@
                 android:resource="@id/language_settings" />
         </activity>
 
-        <activity android:name="CSettings$KeyboardLayoutPickerActivity"
+        <activity android:name="CSettingsKeyboardLayoutPickerActivity"
                 android:label="@string/keyboard_layout_picker_title"
                 android:clearTaskOnLaunch="true">
             <intent-filter>
@@ -496,7 +496,7 @@
                 <category android:name="android.intent.category.DEFAULT" />
             </intent-filter>
             <meta-data android:name="com.android.settings.FRAGMENT_CLASS"
-                android:value="com.android.settings.inputmethod.KeyboardLayoutPickerFragment" />
+                android:value="Elastos.Droid.Settings.Inputmethod.CKeyboardLayoutPickerFragment" />
             <meta-data android:name="com.android.settings.TOP_LEVEL_HEADER_ID"
                 android:resource="@id/language_settings" />
         </activity>

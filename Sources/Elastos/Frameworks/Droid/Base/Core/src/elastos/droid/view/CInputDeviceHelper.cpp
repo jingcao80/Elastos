@@ -2,7 +2,13 @@
 #include "elastos/droid/view/CInputDeviceHelper.h"
 #include "elastos/droid/view/CInputDevice.h"
 
-using namespace Elastos::Droid::View;
+namespace Elastos {
+namespace Droid {
+namespace View {
+
+CAR_INTERFACE_IMPL(CInputDeviceHelper, Singleton, IInputDeviceHelper)
+
+CAR_SINGLETON_IMPL(CInputDeviceHelper)
 
 ECode CInputDeviceHelper::GetDevice(
     /* [in] */ Int32 id,
@@ -16,3 +22,7 @@ ECode CInputDeviceHelper::GetDeviceIds(
 {
     return CInputDevice::GetDeviceIds(deviceIds);
 }
+
+} // namespace View
+} // namespace Droid
+} // namespace Elastos

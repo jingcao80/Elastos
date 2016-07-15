@@ -248,7 +248,6 @@ TimePickerSpinnerDelegate::InnerViewAmPmDisplayOnClickListener::InnerViewAmPmDis
     /* [in] */ TimePickerSpinnerDelegate* owner)
     : mOwner(owner)
 {
-
     assert(mOwner);
 }
 
@@ -571,6 +570,7 @@ ECode TimePickerSpinnerDelegate::GetCurrentHour(
     mRadialTimePickerView->GetCurrentHour(&currentHour);
     if (mIs24HourView) {
         *result = currentHour;
+        return NOERROR;
     }
     else {
         Int32 intTmp = 0;
@@ -578,12 +578,13 @@ ECode TimePickerSpinnerDelegate::GetCurrentHour(
         switch(intTmp) {
             case PM:
                 *result = (currentHour % HOURS_IN_HALF_DAY) + HOURS_IN_HALF_DAY;
+                return NOERROR;
             case AM:
             default:
                 *result = currentHour % HOURS_IN_HALF_DAY;
+                return NOERROR;
         }
     }
-    return NOERROR;
 }
 
 ECode TimePickerSpinnerDelegate::SetCurrentMinute(
@@ -873,7 +874,6 @@ void TimePickerSpinnerDelegate::SetupListeners()
 void TimePickerSpinnerDelegate::UpdateUI(
     /* [in] */ Int32 index)
 {
-
     // Update RadialPicker values
     UpdateRadialPicker(index);
     // Enable or disable the AM/PM view.
@@ -1122,8 +1122,7 @@ void TimePickerSpinnerDelegate::UpdateHeaderSeparator()
         separatorText = "";
         separatorText.Append(bestDateTimePattern.GetChar(hIndex + 1));
     }
-
-    ITextView::Probe(mSeparatorView)->SetText(CoreUtils::Convert(separatorText));
+    mSeparatorView->SetText(CoreUtils::Convert(separatorText));
 }
 
 Int32 TimePickerSpinnerDelegate::LastIndexOfAny(
@@ -1406,16 +1405,14 @@ void TimePickerSpinnerDelegate::UpdateDisplay(
         if ((*values)[0] != -1) {
             args->Set(0, CoreUtils::Convert((*values)[0]));
             String formatStr = StringUtils::Format(hourFormat, args);
-            formatStr = formatStr.Replace(Char32(' '), mPlaceholderText);
-            hourStr = formatStr;
+            hourStr = formatStr.Replace(Char32(' '), mPlaceholderText);
         }
 
         String minuteStr = mDoublePlaceholderText;
         if ((*values)[1] != -1) {
             args->Set(0, CoreUtils::Convert((*values)[1]));
             String formatStr = StringUtils::Format(minuteFormat, args);
-            formatStr = formatStr.Replace(Char32(' '), mPlaceholderText);
-            minuteStr = formatStr;
+            minuteStr = formatStr.Replace(Char32(' '), mPlaceholderText);
         }
 
         mHourView->SetText(CoreUtils::Convert(hourStr));
@@ -1467,9 +1464,8 @@ AutoPtr< ArrayOf<Int32> > TimePickerSpinnerDelegate::GetEnteredTime(
     if (!mIs24HourView && IsTypedTimeFullyLegal()) {
         AutoPtr<IInterface> interfaceTmp;
         mTypedTimes->Get(typedTimesSize - 1, (IInterface**)&interfaceTmp);
-        IInteger32* intTmp = IInteger32::Probe(interfaceTmp);
         Int32 keyCode = 0;
-        intTmp->GetValue(&keyCode);
+        IInteger32::Probe(interfaceTmp)->GetValue(&keyCode);
         if (keyCode == GetAmOrPmKeyCode(AM)) {
             amOrPm = AM;
         }
@@ -1481,13 +1477,11 @@ AutoPtr< ArrayOf<Int32> > TimePickerSpinnerDelegate::GetEnteredTime(
 
     Int32 minute = -1;
     Int32 hour = -1;
-    IInteger32* intTmp = NULL;
     for (Int32 i = startIndex; i <= typedTimesSize; ++i) {
         AutoPtr<IInterface> interfaceTmp;
         mTypedTimes->Get(typedTimesSize - i, (IInterface**)&interfaceTmp);
-        intTmp = IInteger32::Probe(interfaceTmp);
         Int32 key = 0;
-        intTmp->GetValue(&key);
+        IInteger32::Probe(interfaceTmp)->GetValue(&key);
         Int32 val = GetValFromKeyCode(key);
 
         if (i == startIndex) {

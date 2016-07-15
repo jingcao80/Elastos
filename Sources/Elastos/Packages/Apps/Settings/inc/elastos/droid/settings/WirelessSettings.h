@@ -132,7 +132,7 @@ public:
 
 protected:
     //@Override
-    static CARAPI_(Int32) GetHelpResource();
+    CARAPI_(Int32) GetHelpResource();
 
 private:
     CARAPI_(void) InitSmsApplicationSetting();

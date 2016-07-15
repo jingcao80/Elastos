@@ -129,8 +129,6 @@ ECode DateTimeSettings::OnCreate(
 
 void DateTimeSettings::InitUI()
 {
-    Slogger::I(TAG, " >> enter DateTimeSettings::InitUI");
-
     Boolean autoTimeEnabled;
     GetAutoState(ISettingsGlobal::AUTO_TIME, &autoTimeEnabled);
     Boolean autoTimeZoneEnabled;
@@ -236,7 +234,6 @@ void DateTimeSettings::InitUI()
     mTimePref->SetEnabled(!autoTimeEnabled);
     mDatePref->SetEnabled(!autoTimeEnabled);
     mTimeZone->SetEnabled(!autoTimeZoneEnabled);
-    Slogger::I(TAG, " << leave DateTimeSettings::InitUI");
 }
 
 ECode DateTimeSettings::OnResume()
@@ -674,11 +671,14 @@ String DateTimeSettings::GetTimeZoneText(
     Boolean isRtl = TextUtils::GetLayoutDirectionFromLocale(l) == IView::LAYOUT_DIRECTION_RTL;
     AutoPtr<ITextDirectionHeuristics> tdh;
     CTextDirectionHeuristics::AcquireSingleton((ITextDirectionHeuristics**)&tdh);
-    AutoPtr<ITextDirectionHeuristic> rtl;
-    tdh->GetRTL((ITextDirectionHeuristic**)&rtl);
-    AutoPtr<ITextDirectionHeuristic> ltr;
-    tdh->GetLTR((ITextDirectionHeuristic**)&ltr);
-    bidiFormatter->UnicodeWrap(gmtString, isRtl ? rtl : ltr, &gmtString);
+    AutoPtr<ITextDirectionHeuristic> arg;
+    if (isRtl) {
+        tdh->GetRTL((ITextDirectionHeuristic**)&arg);
+    }
+    else {
+        tdh->GetLTR((ITextDirectionHeuristic**)&arg);
+    }
+    bidiFormatter->UnicodeWrap(gmtString, arg, &gmtString);
 
     if (!includeName) {
         return gmtString;
