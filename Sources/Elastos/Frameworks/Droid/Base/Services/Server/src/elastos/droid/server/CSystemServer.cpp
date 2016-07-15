@@ -1375,8 +1375,8 @@ ECode SystemServer::SystemReadyRunnable::Run()
     }
 
     if (mServiceBundle->mMountServiceF != NULL) {
-        mServiceBundle->mMountServiceF->SystemReady();
-        // if (FAILED(ec)) mHost->ReportWtf("making Mount Service ready", ec);
+        ec = mServiceBundle->mMountServiceF->SystemReady();
+        if (FAILED(ec)) mHost->ReportWtf("making Mount Service ready", ec);
     }
 
     // if (mServiceBundle->mNetworkScoreF != NULL) {

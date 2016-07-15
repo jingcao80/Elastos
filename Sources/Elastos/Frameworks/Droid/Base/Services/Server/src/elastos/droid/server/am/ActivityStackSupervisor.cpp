@@ -4826,7 +4826,7 @@ AutoPtr<IIStatusBarService> ActivityStackSupervisor::GetStatusBarService()
             AutoPtr<IServiceManager> sm;
             CServiceManager::AcquireSingleton((IServiceManager**)&sm);
             AutoPtr<IInterface> obj;
-            sm->CheckService(IContext::STATUS_BAR_SERVICE, (IInterface**)&obj);
+            sm->GetService(IContext::STATUS_BAR_SERVICE, (IInterface**)&obj);
             mStatusBarService = IIStatusBarService::Probe(obj);
             if (mStatusBarService == NULL) {
                 Slogger::W("StatusBarManager", "warning: no STATUS_BAR_SERVICE");
@@ -4844,7 +4844,7 @@ AutoPtr<IIDevicePolicyManager> ActivityStackSupervisor::GetDevicePolicyManager()
             AutoPtr<IServiceManager> sm;
             CServiceManager::AcquireSingleton((IServiceManager**)&sm);
             AutoPtr<IInterface> obj;
-            sm->CheckService(IContext::DEVICE_POLICY_SERVICE, (IInterface**)&obj);
+            sm->GetService(IContext::DEVICE_POLICY_SERVICE, (IInterface**)&obj);
 
             mDevicePolicyManager = IIDevicePolicyManager::Probe(obj);
             if (mDevicePolicyManager == NULL) {

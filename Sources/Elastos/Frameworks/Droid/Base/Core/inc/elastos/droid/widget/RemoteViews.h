@@ -471,9 +471,6 @@ public:
 
         BitmapCache();
 
-        BitmapCache(
-            /* [in] */ IParcel* parcel);
-
         CARAPI constructor();
 
         CARAPI constructor(
@@ -488,6 +485,9 @@ public:
             /* [out] */ IBitmap** bmp);
 
         CARAPI WriteBitmapsToParcel(
+            /* [in] */ IParcel* dest);
+
+        CARAPI ReadBitmapsFromParcel(
             /* [in] */ IParcel* dest);
 
         CARAPI Assimilate(

@@ -192,9 +192,12 @@ ECode CServiceManager::CheckService(
     /* [in] */ const String& name,
     /* [out] */ IInterface** service)
 {
+    VALIDATE_NOT_NULL(service)
+    *service = NULL;
     //TODO
-    //assert(0);
-    Slogger::E("CServiceManager", "line:%d, name:%s, not implemented\n", __LINE__, name.string());
+    Slogger::E("CServiceManager", "line:%d, name:%s, CheckService not implemented\nPlease use GetService.",
+        __LINE__, name.string());
+    assert(0);
     return NOERROR;
 }
 

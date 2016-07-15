@@ -19,8 +19,8 @@ namespace Droid {
 namespace App {
 
 const String NotificationManager::TAG("NotificationManager");
-const Boolean NotificationManager::DEBUG = TRUE;
-const Boolean NotificationManager::localLOGV = TRUE;
+const Boolean NotificationManager::DEBUG = FALSE;
+const Boolean NotificationManager::localLOGV = FALSE;
 
 AutoPtr<IINotificationManager> NotificationManager::sService;
 

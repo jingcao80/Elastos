@@ -876,6 +876,7 @@ module
             [in] IContext* ctx);
 
         interface IIMountService;
+        interface IBinder;
         interface INativeDaemonConnectorCallbacks;
         interface IWatchdogMonitor;
     }
@@ -885,13 +886,6 @@ module
 //             [in] IContext* ctx);
 //         interface IRecognitionManagerService;
 //         interface IBinder;
-//     }
-
-//     class CPrivacySettingsManagerService {
-//         constructor(
-//             [in] IContext* ctx);
-
-//             interface IIPrivacySettingsManager;
 //     }
 
     namespace Accounts {

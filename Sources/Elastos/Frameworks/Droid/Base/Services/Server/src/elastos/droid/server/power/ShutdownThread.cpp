@@ -63,6 +63,8 @@ using Elastos::Droid::Server::Pm::CPackageManagerService;
 using Elastos::Droid::View::IIWindowManager;
 using Elastos::Droid::View::IWindow;
 using Elastos::Droid::View::IWindowManagerLayoutParams;
+using Elastos::Core::ISystem;
+using Elastos::Core::CSystem;
 using Elastos::Core::AutoLock;
 using Elastos::Core::ICharSequence;
 using Elastos::Core::StringUtils;
@@ -79,7 +81,7 @@ namespace Droid {
 namespace Server {
 namespace Power {
 
-static const Boolean DBG = FALSE;
+static const Boolean DBG = TRUE;
 const String ShutdownThread::SHUTDOWN_ACTION_PROPERTY("sys.shutdown.requested");
 const String ShutdownThread::REBOOT_SAFEMODE_PROPERTY("persist.sys.safemode");
 const String ShutdownThread::TAG("ShutdownThread");
@@ -270,15 +272,15 @@ ECode ShutdownThread::ShutdownRadiosThread::Run()
     AutoPtr<IServiceManager> serviceManager;
     CServiceManager::AcquireSingleton((IServiceManager**)&serviceManager);
     AutoPtr<IInterface> obj;
-    serviceManager->CheckService(String("nfc"), (IInterface**)&obj);
+    serviceManager->GetService(String("nfc"), (IInterface**)&obj);
     AutoPtr<IINfcAdapter> nfc = IINfcAdapter::Probe(obj);
 
     obj = NULL;
-    serviceManager->CheckService(IContext::TELEPHONY_SERVICE, (IInterface**)&obj);
+    serviceManager->GetService(IContext::TELEPHONY_SERVICE, (IInterface**)&obj);
     AutoPtr<IITelephony> phone = IITelephony::Probe(obj);
 
     obj = NULL;
-    serviceManager->CheckService(IBluetoothAdapter::BLUETOOTH_MANAGER_SERVICE, (IInterface**)&obj);
+    serviceManager->GetService(IBluetoothAdapter::BLUETOOTH_MANAGER_SERVICE, (IInterface**)&obj);
     AutoPtr<IIBluetoothManager> bluetooth = IIBluetoothManager::Probe(obj);
 
     Boolean res;
@@ -615,7 +617,7 @@ void ShutdownThread::DoSoftReboot()
     AutoPtr<IServiceManager> serviceManager;
     CServiceManager::AcquireSingleton((IServiceManager**)&serviceManager);
     AutoPtr<IInterface> obj;
-    serviceManager->CheckService(String("activity"), (IInterface**)&obj);
+    serviceManager->GetService(String("activity"), (IInterface**)&obj);
     AutoPtr<IIActivityManager> am = IIActivityManager::Probe(obj);
     if (am != NULL) {
         if (FAILED(am->Restart())) {
@@ -794,6 +796,12 @@ void ShutdownThread::ActionDone()
 
 ECode ShutdownThread::Run()
 {
+    AutoPtr<ISystem> sys;
+    CSystem::AcquireSingleton((ISystem**)&sys);
+    Int64 startTime, prev, now, elapsed;
+    sys->GetCurrentTimeMillis(&startTime);
+    prev = startTime;
+
     AutoPtr<IBroadcastReceiver> br = (IBroadcastReceiver*)new ActionDoneBroadcastReceiver(this);
     AutoPtr<ISystemProperties> sysProp;
     CSystemProperties::AcquireSingleton((ISystemProperties**)&sysProp);
@@ -847,13 +855,18 @@ ECode ShutdownThread::Run()
         }
     }
 
+    if (DBG) {
+        sys->GetCurrentTimeMillis(&now);
+        elapsed = now - prev;
+        prev = now;
+        Logger::I(TAG, "> shutdown broadcast elapsed %lld ms", elapsed);
+    }
     if (DBG) Logger::I(TAG, "Shutting down activity manager...");
 
     AutoPtr<IServiceManager> serviceManager;
     CServiceManager::AcquireSingleton((IServiceManager**)&serviceManager);
     AutoPtr<IInterface> obj;
-
-    serviceManager->CheckService(String("activity"), (IInterface**)&obj);
+    serviceManager->GetService(String("activity"), (IInterface**)&obj);
     AutoPtr<IIActivityManager> am = IIActivityManager::Probe(obj);
     if (am != NULL) {
         // try {
@@ -863,7 +876,13 @@ ECode ShutdownThread::Run()
         // }
     }
 
-    if (DBG) Logger::I(TAG, "Shutting down package manager...");
+    if (DBG) {
+        sys->GetCurrentTimeMillis(&now);
+        elapsed = now - prev;
+        prev = now;
+        Logger::I(TAG, "> shutdown activity manager elapsed %lld ms", elapsed);
+    }
+    if (DBG) Logger::I(TAG, "Shutting down  manager...");
 
     obj = NULL;
     serviceManager->GetService(String("package"), (IInterface**)&obj);
@@ -872,14 +891,13 @@ ECode ShutdownThread::Run()
         pm->Shutdown();
     }
 
-    String shutDownFile;
-
     //showShutdownAnimation() is called from here to sync
     //music and animation properly
     if (CheckAnimationFileExist()) {
         LockDevice();
         ShowShutdownAnimation();
 
+        String shutDownFile;
         if (!IsSilentMode()
                 && !(shutDownFile = GetShutdownMusicFilePath()).IsNull()) {
             mIsShutdownMusicPlaying = TRUE;
@@ -912,8 +930,22 @@ ECode ShutdownThread::Run()
         }
     }
 
+    if (DBG) {
+        sys->GetCurrentTimeMillis(&now);
+        elapsed = now - prev;
+        prev = now;
+        Logger::I(TAG, "> shutdown animation and music elapsed %lld ms", elapsed);
+    }
+
     // Shutdown radios.
     ShutdownRadios(MAX_RADIO_WAIT_TIME);
+
+    if (DBG) {
+        sys->GetCurrentTimeMillis(&now);
+        elapsed = now - prev;
+        prev = now;
+        Logger::I(TAG, "> shutdown radios elapsed %lld ms", elapsed);
+    }
 
     // Shutdown MountService to ensure media is in a safe state
     AutoPtr<IIMountShutdownObserver> observer;
@@ -928,7 +960,7 @@ ECode ShutdownThread::Run()
         AutoLock syncLock(mActionDoneSync);
         // try {
         obj = NULL;
-        serviceManager->CheckService(String("mount"), (IInterface**)&obj);
+        serviceManager->GetService(String("mount"), (IInterface**)&obj);
         AutoPtr<IIMountService> mount = IIMountService::Probe(obj);
         if (mount != NULL) {
             if (FAILED(mount->Shutdown(observer))) {
@@ -952,6 +984,20 @@ ECode ShutdownThread::Run()
             // } catch (InterruptedException e) {
             // }
         }
+    }
+
+    if (DBG) {
+        sys->GetCurrentTimeMillis(&now);
+        elapsed = now - prev;
+        prev = now;
+        Logger::I(TAG, "> shutdown mount service elapsed %lld ms", elapsed);
+    }
+
+    if (DBG) {
+        sys->GetCurrentTimeMillis(&now);
+        elapsed = now - startTime;
+        prev = now;
+        Logger::I(TAG, "> shutdown total elapsed %lld ms", elapsed);
     }
 
     RebootOrShutdown(sReboot, sRebootReason);

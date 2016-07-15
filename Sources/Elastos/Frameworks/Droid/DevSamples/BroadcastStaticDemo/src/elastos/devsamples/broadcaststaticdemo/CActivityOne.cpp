@@ -11,6 +11,10 @@
 #include <elastos/core/CoreUtils.h>
 #include <elastos/utility/logging/Logger.h>
 
+using Elastos::Droid::Os::IServiceManager;
+using Elastos::Droid::Os::CServiceManager;
+using Elastos::Droid::Os::Storage::IStorageVolume;
+using Elastos::Droid::Os::Storage::IIMountService;
 using Elastos::Droid::Graphics::IPixelFormat;
 using Elastos::Droid::App::IDialog;
 using Elastos::Droid::App::CDialog;
@@ -68,6 +72,10 @@ ECode CActivityOne::MyListener::OnClick(
         Logger::I(TAG, "MyListener::OnClick Send");
         mHost->Send();
         break;
+    case R::id::TestMount:
+        Logger::I(TAG, "MyListener::OnClick Test Mount");
+        mHost->OtherTest();
+        break;
     }
 
     return NOERROR;
@@ -94,6 +102,9 @@ ECode CActivityOne::OnCreate(
 
     AutoPtr<MyListener> l = new MyListener(this);
     AutoPtr<IView> view = FindViewById(R::id::SendBroadcast);
+    view->SetOnClickListener(l.Get());
+
+    view = FindViewById(R::id::TestMount);
     view->SetOnClickListener(l.Get());
 
     return NOERROR;
@@ -140,18 +151,17 @@ ECode CActivityOne::OnActivityResult(
 
 ECode CActivityOne::Send()
 {
-    // AutoPtr<IIntent> intent;
-    // CIntent::New(RECEIVER_KEY, (IIntent**)&intent);
-    // intent->PutExtra(String("msg"), String("Hello Broadcast!"));
+    AutoPtr<IIntent> intent;
+    CIntent::New(RECEIVER_KEY, (IIntent**)&intent);
+    intent->PutExtra(String("msg"), String("Hello Broadcast!"));
 
-    // if (TEST_ORDERED_BROADCAST) {
-    //     return SendOrderedBroadcast(intent, String(NULL));
-    // }
-    // else {
-    //     return SendBroadcast(intent);
-    // }
+    if (TEST_ORDERED_BROADCAST) {
+        return SendOrderedBroadcast(intent, String(NULL));
+    }
+    else {
+        return SendBroadcast(intent);
+    }
 
-    CreateVolumeDialog();
     return NOERROR;
 }
 
@@ -235,7 +245,36 @@ ECode CActivityOne::CreateVolumeDialog()
 
     mDialog->Show();
     return NOERROR;
+}
 
+ECode CActivityOne::OtherTest()
+{
+    // CreateVolumeDialog();
+
+    AutoPtr<IServiceManager> serviceManager;
+    CServiceManager::AcquireSingleton((IServiceManager**)&serviceManager);
+
+    AutoPtr<IObject> obj;
+    serviceManager->GetService(String("mount"), (IInterface**)&obj);
+    AutoPtr<IIMountService> mount = IIMountService::Probe(obj);
+    if (mount != NULL) {
+        AutoPtr<ArrayOf<IStorageVolume*> > volumes;
+        ECode ec = mount->GetVolumeList((ArrayOf<IStorageVolume*>**)&volumes);
+        if (FAILED(ec)) {
+            Logger::E(TAG, "Exception during GetVolumeList");
+        }
+        else {
+            if (volumes != NULL) {
+                for (Int32 i = 0; i < volumes->GetLength(); ++i) {
+                    Logger::I(TAG, " volume %d : %s", i, TO_CSTR((*volumes)[i]));
+                }
+            }
+        }
+    }
+    else {
+        Logger::W(TAG, "MountService unavailable for shutdown");
+    }
+    return NOERROR;
 }
 
 } // namespace BroadcastStaticDemo
