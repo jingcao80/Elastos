@@ -367,10 +367,17 @@ ECode CompiledFunction::ExecWithoutCheck(
                 break;
             }
 
-            case VM::MUL: (*s)[--p] *= (*s)[p+1]; break;
-            case VM::DIV: (*s)[--p] /= (*s)[p+1]; break;
+            case VM::MUL:
+                --p;
+                (*s)[p] *= (*s)[p+1];
+                break;
+            case VM::DIV:
+                --p;
+                (*s)[p] /= (*s)[p+1];
+                break;
             case VM::MOD: {
-                Double temp = fmod((*s)[--p], (*s)[p+1]);
+                --p;
+                Double temp = fmod((*s)[p], (*s)[p+1]);
                 (*s)[p] = temp;
                 break;
             }

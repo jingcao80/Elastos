@@ -53,7 +53,6 @@ ECode CalculatorExpressionEvaluator::Evaluate(
 {
     String strexpr;
     mTokenizer->GetNormalizedExpression(expr, &strexpr);
-
     // remove any trailing operators
     while (strexpr.GetLength() > 0 && String("+-/*").IndexOf(strexpr.GetChar(strexpr.GetLength() - 1)) != -1) {
         strexpr = strexpr.Substring(0, strexpr.GetLength() - 1);
@@ -71,9 +70,7 @@ ECode CalculatorExpressionEvaluator::Evaluate(
 
     // try {
     Double result;
-    mSymbols->Eval(strexpr, &result);
-    Slogger::D("CalculatorExpressionEvaluator", "############### str: %s, result: %d ##############",
-                strexpr.string(), result);
+    FAIL_RETURN(mSymbols->Eval(strexpr, &result))
     Boolean flag = FALSE;
     if ((CoreUtils::Convert(result)->IsNaN(&flag), flag)) {
         ECode ec = callback->OnEvaluate(strexpr, String(NULL), R::string::error_nan);
@@ -89,8 +86,6 @@ ECode CalculatorExpressionEvaluator::Evaluate(
         String resultString;
         mTokenizer->GetLocalizedExpression(
                 Util::DoubleToString(result, MAX_DIGITS, ROUNDING_DIGITS), &resultString);
-        Slogger::D("CalculatorExpressionEvaluator", "############### str: %s, temp: %s, resultString: %s ##############",
-                strexpr.string(), temp.string(), resultString.string());
         ECode ec = callback->OnEvaluate(strexpr, resultString, ICalculator::INVALID_RES_ID);
         if (ec == (ECode)E_SYNTAX_EXCEPTION) {
             return callback->OnEvaluate(strexpr, String(NULL), R::string::error_syntax);

@@ -263,7 +263,7 @@ ECode Calculator::OnResultAnimatorListenerAdapter::OnAnimationEnd(
     IView::Probe(mHost->mFormulaEditText)->SetTranslationY(0.0f);
 
     // Finally update the formula to use the current result.
-    ITextView::Probe(mHost->mResultEditText)->SetText(StringUtils::ParseCharSequence(mResult));
+    ITextView::Probe(mHost->mFormulaEditText)->SetText(StringUtils::ParseCharSequence(mResult));
     mHost->SetState(RESULT);
 
     mHost->mCurrentAnimator = NULL;

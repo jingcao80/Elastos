@@ -78,9 +78,9 @@ ECode RPN::Push(
         case Lexer::NUMBER:
         case Lexer::_CONST:
             if (IsOperand(mPrevTokenId)) {
-                Push(Lexer::TOK_MUL);
+                FAIL_RETURN(Push(Lexer::TOK_MUL))
             }
-            mConsumer->Push(token);
+            FAIL_RETURN(mConsumer->Push(token))
             break;
 
         case Lexer::RPAREN: {
@@ -96,7 +96,7 @@ ECode RPN::Push(
             AutoPtr<Token> t = Top();
             if (t != NULL) {
                 if (t->mId == Lexer::CALL) {
-                    mConsumer->Push(t);
+                    FAIL_RETURN(mConsumer->Push(t))
                 }
                 else if (t != Lexer::TOK_LPAREN) {
                     Slogger::E("RPN", "expected LPAREN or CALL %d", token->mPosition);
@@ -128,7 +128,7 @@ ECode RPN::Push(
             AutoPtr<Token> t = Lexer::TOK_RPAREN;
             t->mPosition = token->mPosition;
             do {
-                Push(t);
+                FAIL_RETURN(Push(t))
             } while (Top() != NULL);
             break;
         }
@@ -136,7 +136,7 @@ ECode RPN::Push(
         default: //operators, CALL, LPAREN
             if (token->mAssoc == Token::PREFIX) {
                 if (IsOperand(mPrevTokenId)) {
-                    Push(Lexer::TOK_MUL);
+                    FAIL_RETURN(Push(Lexer::TOK_MUL))
                 }
                 mStack->Push((IObject*)token);
                 break;

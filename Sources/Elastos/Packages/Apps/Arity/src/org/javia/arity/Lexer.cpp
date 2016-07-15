@@ -84,7 +84,7 @@ ECode Lexer::Scan(
         AutoPtr<Token> temp;
         FAIL_RETURN(NextToken((Token**)&temp))
         temp->mPosition = savePos;
-        consumer->Push(temp);
+        FAIL_RETURN(consumer->Push(temp))
         token = temp;
     } while (token != TOK_END);
     return NOERROR;
@@ -112,7 +112,6 @@ ECode Lexer::NextToken(
 
     Char32 c = (*mInput)[mPos];
     Int32 begin = mPos++;
-Slogger::E("Lexer", "############## NextToken, char: %c", c);
     switch (c) {
         case '!': {
             *token = TOK_FACT;

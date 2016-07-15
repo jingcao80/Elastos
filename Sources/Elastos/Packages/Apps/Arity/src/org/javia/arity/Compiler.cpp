@@ -69,7 +69,7 @@ ECode Compiler::Compile(
         // try {
         mCodeGen->SetSymbols(symbols);
         mRpn->SetConsumer(mCodeGen);
-        mLexer->Scan(mDecl->mExpression, mRpn);
+        FAIL_RETURN(mLexer->Scan(mDecl->mExpression, mRpn))
         // } finally {
         //     symbols.popFrame();
         // }
