@@ -49,6 +49,9 @@ extern const char*  dlerror(void);
 extern void*        dlsym(void*  handle, const char*  symbol);
 extern int          dladdr(const void* addr, Dl_info *info);
 
+extern void         android_get_LD_LIBRARY_PATH(char* buffer, size_t buffer_size);
+extern void         android_update_LD_LIBRARY_PATH(const char* ld_library_path);
+
 enum {
 #if defined(__LP64__)
   RTLD_NOW  = 2,

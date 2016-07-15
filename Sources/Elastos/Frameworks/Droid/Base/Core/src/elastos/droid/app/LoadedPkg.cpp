@@ -23,6 +23,7 @@
 #include <elastos/core/StringBuffer.h>
 #include <elastos/core/ClassLoader.h>
 #include <elastos/utility/logging/Slogger.h>
+#include <dlfcn.h>
 
 using Elastos::Droid::DroidRuntime;
 using Elastos::Droid::Os::Process;
@@ -932,6 +933,7 @@ ECode LoadedPkg::GetClassLoader(
         // as this is early and necessary.
         // StrictMode.ThreadPolicy oldPolicy = StrictMode.allowThreadDiskReads();
         mClassLoader = ApplicationLoaders::GetDefault()->GetClassLoader(zip, lib, mBaseClassLoader);
+        android_update_LD_LIBRARY_PATH(lib.string());
     //     StrictMode.setThreadPolicy(oldPolicy);
     }
     else {
