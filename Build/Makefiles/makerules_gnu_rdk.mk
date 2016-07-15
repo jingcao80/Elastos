@@ -389,9 +389,6 @@ endif
 		fi \
 	fi
 	cd $(XDK_TARGETS)/$(TARGET_NAME);zip -r9D $(XDK_TARGETS)/$(TARGET_NAME).epk $@ $(BLACKHOLE)
-ifdef EXTRA_PACKAGE_ECO
-	$(foreach extra_eco, $(EXTRA_PACKAGE_ECO), cd $(XDK_TARGETS)/$(TARGET_NAME);$(CP) $(extra_eco) .;zip -r9D $(XDK_TARGETS)/$(TARGET_NAME).epk `basename $(extra_eco)` $(BLACKHOLE);)
-endif
 	if [ -d $(XDK_TARGETS)/$(TARGET_NAME)/lib ]; then cd $(XDK_TARGETS)/$(TARGET_NAME);zip -r9D $(XDK_TARGETS)/$(TARGET_NAME).epk lib $(BLACKHOLE); fi
 #	if [ -d $(XDK_TARGETS)/$(TARGET_NAME)/res ]; then rm -f $(MAKEDIR)/R.cpp; fi
 endif

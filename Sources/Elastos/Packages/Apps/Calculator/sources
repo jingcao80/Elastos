@@ -41,7 +41,8 @@ APPPACK = 1
 APP_PACKAGE_NAME = Elastos.Droid.Calculator2
 RES_NAMESPACE = Elastos.Droid.Calculator2
 DIRRESOURCES += $(MAKEDIR)/res;
-EXTRA_PACKAGE_ECO = $(XDK_TARGETS)/Org.Javia.Arity.eco
+TARGET_CPU_ABI = armeabi-v7a
+LIBRESOURCES = $(XDK_TARGETS)/Org.Javia.Arity.eco
 
 
 
