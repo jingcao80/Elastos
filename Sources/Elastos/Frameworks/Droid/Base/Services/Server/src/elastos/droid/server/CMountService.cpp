@@ -18,6 +18,7 @@
 #include "elastos/droid/R.h"
 #include "elastos/droid/Manifest.h"
 #include "elastos/utility/logging/Slogger.h"
+#include <elastos/core/AutoLock.h>
 #include "elastos/core/CoreUtils.h"
 #include "elastos/core/StringUtils.h"
 #include <Elastos.CoreLibrary.Text.h>
@@ -25,8 +26,6 @@
 #include <Elastos.Droid.Os.h>
 #include <unistd.h>
 
-#include <elastos/core/AutoLock.h>
-using Elastos::Core::AutoLock;
 using Elastos::Droid::App::ActivityManagerNative;
 using Elastos::Droid::Content::EIID_IServiceConnection;
 using Elastos::Droid::Content::CComponentName;
@@ -43,6 +42,7 @@ using Elastos::Droid::Net::IUri;
 using Elastos::Droid::Net::IUriHelper;
 using Elastos::Droid::Net::CUriHelper;
 using Elastos::Droid::Os::Binder;
+using Elastos::Droid::Os::EIID_IBinder;
 using Elastos::Droid::Os::IEnvironment;
 using Elastos::Droid::Os::Environment;
 using Elastos::Droid::Os::CEnvironment;
@@ -79,6 +79,7 @@ using Elastos::Droid::Internal::Utility::CIndentingPrintWriter;
 using Elastos::Droid::Internal::Utility::XmlUtils;
 using Elastos::Droid::Internal::App::EIID_IIMediaContainerService;
 using Elastos::Droid::Text::TextUtils;
+using Elastos::Core::AutoLock;
 using Elastos::Core::CoreUtils;
 using Elastos::Core::CString;
 using Elastos::Core::CInteger32;
@@ -170,6 +171,8 @@ const Int32 CMountService::OBB_MCS_UNBIND;
 const Int32 CMountService::OBB_MCS_RECONNECT;
 const Int32 CMountService::OBB_FLUSH_MOUNT_STATE;
 const String CMountService::LAST_FSTRIM_FILE("last-fstrim");
+
+AutoPtr<IIMountService> CMountService::sSelf;
 
 //=================================================================
 // CMountService::MountServiceHandler
@@ -418,13 +421,6 @@ ECode CMountService::DefaultContainerConnection::OnServiceDisconnected(
     return NOERROR;
 }
 
-ECode CMountService::DefaultContainerConnection::ToString(
-    /* [out] */ String* str)
-{
-    VALIDATE_NOT_NULL(str);
-    *str = "CMountService::DefaultContainerConnection";
-    return NOERROR;
-}
 
 //============================================================================
 // CMountService::UnmountCallBack
@@ -655,14 +651,6 @@ ECode CMountService::MountServiceBinderListener::ProxyDied()
     Boolean result;
     proxy->UnlinkToDeath(this, 0, &result);
     mHost->mListeners.Remove(this);
-    return NOERROR;
-}
-
-ECode CMountService::MountServiceBinderListener::ToString(
-    /* [out] */ String* str)
-{
-    VALIDATE_NOT_NULL(str);
-    *str = "CMountService::MountServiceBinderListener";
     return NOERROR;
 }
 
@@ -1256,15 +1244,6 @@ ECode CMountService::DecryptStorageRunnable::Run()
     return NOERROR;
 }
 
-
-ECode CMountService::DecryptStorageRunnable::ToString(
-    /* [out] */ String* str)
-{
-    VALIDATE_NOT_NULL(str);
-    *str = "CMountService::DecryptStorageRunnable";
-    return NOERROR;
-}
-
 //============================================================================
 // CMountService
 //============================================================================
@@ -1286,11 +1265,11 @@ const String CMountService::CRYPTO_TYPES[] = {
     String("pin")
 };
 
-const Boolean CMountService::LOCAL_LOGD = FALSE;
-const Boolean CMountService::DEBUG_UNMOUNT = FALSE;
-const Boolean CMountService::DEBUG_EVENTS = FALSE;
-const Boolean CMountService::DEBUG_OBB = FALSE;
-const Boolean CMountService::WATCHDOG_ENABLE = FALSE;
+const Boolean CMountService::LOCAL_LOGD = TRUE;
+const Boolean CMountService::DEBUG_UNMOUNT = TRUE;
+const Boolean CMountService::DEBUG_EVENTS = TRUE;
+const Boolean CMountService::DEBUG_OBB = TRUE;
+const Boolean CMountService::WATCHDOG_ENABLE = TRUE;
 const String CMountService::TAG("MountService");
 const String CMountService::VOLD_TAG("VoldConnector");
 const Int32 CMountService::MAX_CONTAINERS;
@@ -1302,7 +1281,8 @@ const Int32 CMountService::MAX_UNMOUNT_RETRIES;
 const String CMountService::TAG_STORAGE_LIST("StorageList");
 const String CMountService::TAG_STORAGE("storage");
 
-CAR_INTERFACE_IMPL_3(CMountService, Object, IIMountService, INativeDaemonConnectorCallbacks, IWatchdogMonitor);
+CAR_INTERFACE_IMPL_4(CMountService, Object, IIMountService, IBinder, \
+    INativeDaemonConnectorCallbacks, IWatchdogMonitor);
 
 CAR_OBJECT_IMPL(CMountService)
 
@@ -1314,18 +1294,6 @@ CMountService::CMountService()
     , mUpdatingStatus(FALSE)
     , mBound(FALSE)
 {
-    CHashMap::New((IHashMap**)&mVolumesByPath);
-    CHashMap::New((IHashMap**)&mVolumeStates);
-    ASSERT_SUCCEEDED(CCountDownLatch::New(1, (ICountDownLatch**)&mConnectedSignal));
-    ASSERT_SUCCEEDED(CCountDownLatch::New(1, (ICountDownLatch**)&mAsecsScanned));
-    CHashSet::New((IHashSet**)&mAsecMountSet);
-    CHashMap::New((IHashMap**)&mObbMounts);
-    CHashMap::New((IHashMap**)&mObbPathToStateMap);
-
-    mDefContainerConn = new DefaultContainerConnection(this);
-
-    mUserReceiver = new UserBroadcastReceiver(this);
-    mUsbReceiver = new UsbBroadcastReceiver(this);
 }
 
 CMountService::~CMountService()
@@ -1333,6 +1301,109 @@ CMountService::~CMountService()
     mListeners.Clear();
     mForceUnmounts.Clear();
     mActions.Clear();
+}
+
+ECode CMountService::constructor(
+    /* [in] */ IContext* context)
+{
+    sSelf = this;
+    mContext = context;
+
+    CHashMap::New((IHashMap**)&mVolumesByPath);
+    CHashMap::New((IHashMap**)&mVolumeStates);
+    CHashSet::New((IHashSet**)&mAsecMountSet);
+    CHashMap::New((IHashMap**)&mObbMounts);
+    CHashMap::New((IHashMap**)&mObbPathToStateMap);
+
+    CCountDownLatch::New(1, (ICountDownLatch**)&mConnectedSignal);
+    CCountDownLatch::New(1, (ICountDownLatch**)&mAsecsScanned);
+
+    mDefContainerConn = new DefaultContainerConnection(this);
+
+    mUserReceiver = new UserBroadcastReceiver(this);
+    mUsbReceiver = new UsbBroadcastReceiver(this);
+
+    {
+        AutoLock lock(mVolumesLock);
+        FAIL_RETURN(ReadStorageListLocked());
+    }
+
+    // XXX: This will go away soon in favor of IMountServiceObserver
+    mPms = (CPackageManagerService*)IIPackageManager::Probe(ServiceManager::GetService(String("package")));
+
+    CHandlerThread::New(String("MountService"), (IHandlerThread**)&mHandlerThread);
+    IThread::Probe(mHandlerThread)->Start();
+    AutoPtr<ILooper> looper;
+    mHandlerThread->GetLooper((ILooper**)&looper);
+    mHandler = new MountServiceHandler(looper, this);
+
+    // Watch for user changes
+    AutoPtr<IIntentFilter> userFilter;
+    FAIL_RETURN(CIntentFilter::New((IIntentFilter**)&userFilter));
+    userFilter->AddAction(IIntent::ACTION_USER_ADDED);
+    userFilter->AddAction(IIntent::ACTION_USER_REMOVED);
+    AutoPtr<IIntent> resIntent;
+    mContext->RegisterReceiver(
+            mUserReceiver, userFilter, String(NULL), mHandler, (IIntent**)&resIntent);
+
+    Boolean value;
+    AutoPtr<ISystemProperties> sysProp;
+    CSystemProperties::AcquireSingleton((ISystemProperties**)&sysProp);
+    sysProp->GetBoolean(String("persist.sys.ums"), TRUE, &value);
+    if (HasUmsVolume() || value) {
+        AutoPtr<IIntentFilter> filter;
+        CIntentFilter::New(IUsbManager::ACTION_USB_STATE, (IIntentFilter**)&filter);
+        resIntent = NULL;
+        mContext->RegisterReceiver(
+                mUsbReceiver, filter, String(NULL), mHandler, (IIntent**)&resIntent);
+    }
+
+    // Add OBB Action Handler to MountService thread.
+    mObbActionHandler = new ObbActionHandler(looper, this);
+
+    // Initialize the last-fstrim tracking if necessary
+    AutoPtr<IFile> dataDir = Environment::GetDataDirectory();
+    AutoPtr<IFile> systemDir;
+    CFile::New(dataDir, String("system"), (IFile**)&systemDir);
+    CFile::New(systemDir, LAST_FSTRIM_FILE, (IFile**)&mLastMaintenanceFile);
+    Boolean exist;
+    if (mLastMaintenanceFile->Exists(&exist), !exist) {
+        // Not setting mLastMaintenance here means that we will force an
+        // fstrim during reboot following the OTA that installs this code.
+        // try {
+        AutoPtr<IFileOutputStream> outs;
+        CFileOutputStream::New(mLastMaintenanceFile, (IFileOutputStream**)&outs);
+        ECode ec = ICloseable::Probe(outs)->Close();
+        if (ec == (ECode)E_IO_EXCEPTION) {
+            String path;
+            mLastMaintenanceFile->GetPath(&path);
+            Slogger::E(TAG, "Unable to create fstrim record %s", path.string());
+        }
+        // } catch (IOException e) {
+        //     Slog.e(TAG, "Unable to create fstrim record " + mLastMaintenanceFile.getPath());
+        // }
+    }
+    else {
+        mLastMaintenanceFile->GetLastModified(&mLastMaintenance);
+    }
+
+    /*
+     * Create the connection to vold with a maximum queue of twice the
+     * amount of containers we'd ever expect to have. This keeps an
+     * "asec list" from blocking a thread repeatedly.
+     */
+    mConnector = new NativeDaemonConnector((INativeDaemonConnectorCallbacks*)this,
+            String("vold"), MAX_CONTAINERS * 2, VOLD_TAG, 25, NULL);
+    AutoPtr<IThread> thread;
+    FAIL_RETURN(CThread::New(mConnector, VOLD_TAG, (IThread**)&thread));
+    thread->Start();
+
+    // Add ourself to the Watchdog monitors if enabled.
+    if (WATCHDOG_ENABLE) {
+        Watchdog::GetInstance()->AddMonitor(IWatchdogMonitor::Probe(this));
+    }
+
+    return NOERROR;
 }
 
 // for MountServiceHandler
@@ -1445,11 +1516,11 @@ void CMountService::WaitForReady()
 void CMountService::WaitForLatch(
     /* [in] */ ICountDownLatch* latch)
 {
+    AutoPtr<ITimeUnitHelper> helper;
+    CTimeUnitHelper::AcquireSingleton((ITimeUnitHelper**)&helper);
     for (;;) {
         // try {
         Boolean res = FALSE;
-        AutoPtr<ITimeUnitHelper> helper;
-        CTimeUnitHelper::AcquireSingleton((ITimeUnitHelper**)&helper);
         AutoPtr<ITimeUnit> MILLISECONDS;
         helper->GetMILLISECONDS((ITimeUnit**)&MILLISECONDS);
         latch->Await(5000, MILLISECONDS, &res);
@@ -1459,7 +1530,7 @@ void CMountService::WaitForLatch(
         else {
             String name;
             Thread::GetCurrentThread()->GetName(&name);
-            Slogger::W(TAG, "Thread %s still waiting for MountService ready...", (const char*)name);
+            Slogger::W(TAG, "Thread %s still waiting for MountService ready...", name.string());
         }
         // } catch (InterruptedException e) {
         //     Slog.w(TAG, "Interrupt while waiting for MountService to be ready.");
@@ -1508,8 +1579,8 @@ void CMountService::HandleSystemReady()
         AutoPtr<IInterface> k, v;
         entry->GetKey((IInterface**)&k);
         entry->GetValue((IInterface**)&v);
-        String path = CoreUtils::Unbox(ICharSequence::Probe(k));
-        String state = CoreUtils::Unbox(ICharSequence::Probe(v));
+        String path = TO_STR(k);
+        String state = TO_STR(v);
 
         if (state.Equals(IEnvironment::MEDIA_UNMOUNTED)) {
             Int32 rc = DoMountVolume(path);
@@ -1616,7 +1687,7 @@ void CMountService::UpdatePublicVolumeState(
         AutoPtr<IInterface> value;
         mVolumeStates->Put(CoreUtils::Convert(path),
                 CoreUtils::Convert(state), (IInterface**)&value);
-        oldState = CoreUtils::Unbox(ICharSequence::Probe(value));
+        oldState = TO_STR(value);
     }
 
     if (state.Equals(oldState)) {
@@ -2023,7 +2094,7 @@ Int32 CMountService::DoMountVolume(
     Int32 rc = StorageResultCode::OperationSucceeded;
 
     AutoPtr<IStorageVolume> volume;
-   {
+    {
         AutoLock lock(mVolumesLock);
         AutoPtr<IInterface> value;
         mVolumesByPath->Get(CoreUtils::Convert(path), (IInterface**)&value);
@@ -2346,7 +2417,7 @@ void CMountService::SendStorageIntent(
     ASSERT_SUCCEEDED(CIntent::New(action, uri, (IIntent**)&intent));
     intent->PutExtra(IStorageVolume::EXTRA_STORAGE_VOLUME, IParcelable::Probe(volume));
 
-    Slogger::D(TAG, "sendStorageIntent %p to %p", intent.Get(), user);
+    Slogger::D(TAG, "sendStorageIntent %s to %s", TO_CSTR(intent), TO_CSTR(user));
     mContext->SendBroadcastAsUser(intent, user);
 }
 
@@ -2432,25 +2503,21 @@ ECode CMountService::ReadStorageListLocked()
             a->GetResourceId(R::styleable::Storage_storageDescription, -1, &descriptionId);
             AutoPtr<ICharSequence> description;
             a->GetText(R::styleable::Storage_storageDescription, (ICharSequence**)&description);
-            Boolean primary;
+            Boolean primary, removable, emulated, allowMassStorage;
             a->GetBoolean(R::styleable::Storage_primary, FALSE, &primary);
-            Boolean removable;
             a->GetBoolean(R::styleable::Storage_removable, FALSE, &removable);
-            Boolean emulated;
             a->GetBoolean(R::styleable::Storage_emulated, FALSE, &emulated);
-            Int32 mtpReserve;
+            Int32 mtpReserve, maxFileSize32;
             a->GetInt32(R::styleable::Storage_mtpReserve, 0, &mtpReserve);
-            Boolean allowMassStorage;
             a->GetBoolean(R::styleable::Storage_allowMassStorage, FALSE, &allowMassStorage);
             // resource parser does not support longs, so XML value is in megabytes
-            Int32 maxFileSize32;
             a->GetInt32(R::styleable::Storage_maxFileSize, 0, &maxFileSize32);
             Int64 maxFileSize = maxFileSize32 * 1024LL * 1024LL;
 
             String descriptionStr;
             description->ToString(&descriptionStr);
             Slogger::D(TAG, "got storage path: %s description: %d primary: %d removable: %d emulated: %d mtpReserve: %d allowMassStorage: %d maxFileSize: %d",
-                    path.string(), descriptionStr.string(), primary, removable, emulated, mtpReserve, allowMassStorage, maxFileSize);
+                path.string(), descriptionStr.string(), primary, removable, emulated, mtpReserve, allowMassStorage, maxFileSize);
 
             if (emulated) {
                 // For devices with emulated storage, we create separate
@@ -2473,9 +2540,6 @@ ECode CMountService::ReadStorageListLocked()
                     IUserInfo::Probe(info)->GetUserHandle((IUserHandle**)&userHandle);
                     CreateEmulatedVolumeForUserLocked(userHandle);
                 }
-                //for (UserInfo user : userManager.getUsers(FALSE)) {
-                //    CreateEmulatedVolumeForUserLocked(user.getUserHandle());
-                //}
             }
             else {
                 if (path.IsNull() || description == NULL) {
@@ -2624,11 +2688,11 @@ Boolean CMountService::HasUmsVolume()
     return FALSE;
 }
 
-void CMountService::SystemReady()
+ECode CMountService::SystemReady()
 {
     mSystemReady = TRUE;
     Boolean result;
-    mHandler->SendEmptyMessage(H_SYSTEM_READY, &result);
+    return mHandler->SendEmptyMessage(H_SYSTEM_READY, &result);
 }
 
 ECode CMountService::RegisterListener(
@@ -4673,94 +4737,6 @@ ECode CMountService::Monitor()
     if (mConnector != NULL) {
         mConnector->Monitor();
     }
-    return NOERROR;
-}
-
-ECode CMountService::constructor(
-    /* [in] */ IContext* context)
-{
-    mContext = context;
-
-    {
-        AutoLock lock(mVolumesLock);
-        FAIL_RETURN(ReadStorageListLocked());
-    }
-
-    // XXX: This will go away soon in favor of IMountServiceObserver
-    mPms = (CPackageManagerService*)IIPackageManager::Probe(ServiceManager::GetService(String("package")));
-
-    CHandlerThread::New(String("MountService"), (IHandlerThread**)&mHandlerThread);
-    IThread::Probe(mHandlerThread)->Start();
-    AutoPtr<ILooper> looper;
-    mHandlerThread->GetLooper((ILooper**)&looper);
-    mHandler = new MountServiceHandler(looper, this);
-
-    // Watch for user changes
-    AutoPtr<IIntentFilter> userFilter;
-    FAIL_RETURN(CIntentFilter::New((IIntentFilter**)&userFilter));
-    userFilter->AddAction(IIntent::ACTION_USER_ADDED);
-    userFilter->AddAction(IIntent::ACTION_USER_REMOVED);
-    AutoPtr<IIntent> resIntent;
-    mContext->RegisterReceiver(
-            mUserReceiver, userFilter, String(NULL), mHandler, (IIntent**)&resIntent);
-
-    Boolean value;
-    AutoPtr<ISystemProperties> sysProp;
-    CSystemProperties::AcquireSingleton((ISystemProperties**)&sysProp);
-    sysProp->GetBoolean(String("persist.sys.ums"), TRUE, &value);
-    if (HasUmsVolume() || value) {
-        AutoPtr<IIntentFilter> filter;
-        CIntentFilter::New(IUsbManager::ACTION_USB_STATE, (IIntentFilter**)&filter);
-        resIntent = NULL;
-        mContext->RegisterReceiver(
-                mUsbReceiver, filter, String(NULL), mHandler, (IIntent**)&resIntent);
-    }
-
-    // Add OBB Action Handler to MountService thread.
-    mObbActionHandler = new ObbActionHandler(looper, this);
-
-    // Initialize the last-fstrim tracking if necessary
-    AutoPtr<IFile> dataDir = Environment::GetDataDirectory();
-    AutoPtr<IFile> systemDir;
-    CFile::New(dataDir, String("system"), (IFile**)&systemDir);
-    CFile::New(systemDir, LAST_FSTRIM_FILE, (IFile**)&mLastMaintenanceFile);
-    Boolean exist;
-    if (mLastMaintenanceFile->Exists(&exist), !exist) {
-        // Not setting mLastMaintenance here means that we will force an
-        // fstrim during reboot following the OTA that installs this code.
-        // try {
-        AutoPtr<IFileOutputStream> outs;
-        CFileOutputStream::New(mLastMaintenanceFile, (IFileOutputStream**)&outs);
-        ECode ec = ICloseable::Probe(outs)->Close();
-        if (ec == (ECode)E_IO_EXCEPTION) {
-            String path;
-            mLastMaintenanceFile->GetPath(&path);
-            Slogger::E(TAG, "Unable to create fstrim record %s", path.string());
-        }
-        // } catch (IOException e) {
-        //     Slog.e(TAG, "Unable to create fstrim record " + mLastMaintenanceFile.getPath());
-        // }
-    }
-    else {
-        mLastMaintenanceFile->GetLastModified(&mLastMaintenance);
-    }
-
-    /*
-     * Create the connection to vold with a maximum queue of twice the
-     * amount of containers we'd ever expect to have. This keeps an
-     * "asec list" from blocking a thread repeatedly.
-     */
-    mConnector = new NativeDaemonConnector((INativeDaemonConnectorCallbacks*)this,
-            String("vold"), MAX_CONTAINERS * 2, VOLD_TAG, 25, NULL);
-    AutoPtr<IThread> thread;
-    FAIL_RETURN(CThread::New(mConnector, VOLD_TAG, (IThread**)&thread));
-    thread->Start();
-
-    // Add ourself to the Watchdog monitors if enabled.
-    if (WATCHDOG_ENABLE) {
-        Watchdog::GetInstance()->AddMonitor(IWatchdogMonitor::Probe(this));
-    }
-
     return NOERROR;
 }
 

@@ -47,6 +47,7 @@ namespace Server {
 CarClass(CMountService)
     , public Object
     , public IIMountService
+    , public IBinder
     , public INativeDaemonConnectorCallbacks
     , public IWatchdogMonitor
 {
@@ -198,10 +199,12 @@ public:
         , public IServiceConnection
     {
     public:
+        CAR_INTERFACE_DECL()
+
+        TO_STRING_IMPL("CMountService::DefaultContainerConnection")
+
         DefaultContainerConnection(
             /* [in] */ CMountService* host);
-
-        CAR_INTERFACE_DECL()
 
         CARAPI OnServiceConnected(
             /* [in] */ IComponentName* name,
@@ -210,8 +213,6 @@ public:
         CARAPI OnServiceDisconnected(
             /* [in] */ IComponentName* name);
 
-        CARAPI ToString(
-            /* [out] */ String* str);
     private:
         CMountService* mHost;
     };
@@ -378,6 +379,8 @@ private:
         , public IProxyDeathRecipient
     {
     public:
+        TO_STRING_IMPL("CMountService::MountServiceBinderListener: ")
+
         MountServiceBinderListener(
             /* [in] */ IIMountServiceListener* listener,
             /* [in] */ CMountService* host);
@@ -386,8 +389,6 @@ private:
 
         CARAPI ProxyDied();
 
-        CARAPI ToString(
-            /* [out] */ String* str);
     public:
         AutoPtr<IIMountServiceListener> mListener;
         CMountService* mHost;
@@ -430,6 +431,8 @@ private:
         : public Thread
     {
     public:
+        TO_STRING_IMPL("CMountService::UsbMassStorageThread")
+
         UsbMassStorageThread(
             /* [in] */ IArrayList* volumes,
             /* [in] */ CMountService* host);
@@ -449,6 +452,7 @@ private:
         : public Thread
     {
     public:
+        TO_STRING_IMPL("CMountService::OnDaemonConnectedThread")
 
         OnDaemonConnectedThread(
             /* [in] */ const String& threadName,
@@ -464,6 +468,8 @@ private:
         : public Thread
     {
     public:
+        TO_STRING_IMPL("CMountService::OnEventThread")
+
         OnEventThread(
             /* [in] */ const String& path,
             /* [in] */ CMountService* host);
@@ -480,6 +486,8 @@ private:
         , public IRunnable
     {
     public:
+        TO_STRING_IMPL("CMountService::DecryptStorageRunnable")
+
         DecryptStorageRunnable(
             /* [in] */ CMountService* host);
 
@@ -487,8 +495,6 @@ private:
 
         CARAPI Run();
 
-        CARAPI ToString(
-            /* [out] */ String* str);
     private:
         CMountService* mHost;
     };
@@ -498,9 +504,14 @@ public:
 
     CAR_OBJECT_DECL()
 
+    TO_STRING_IMPL("CMountService")
+
     CMountService();
 
     ~CMountService();
+
+    CARAPI constructor(
+        /* [in] */ IContext* context);
 
     CARAPI_(void) WaitForAsecScan();
 
@@ -533,7 +544,7 @@ public:
         /* [in] */ ArrayOf<String>* cooked,
         /* [out] */ Boolean* result);
 
-    CARAPI_(void) SystemReady();
+    CARAPI SystemReady();
 
     CARAPI RegisterListener(
         /* [in] */ IIMountServiceListener* listener);
@@ -728,9 +739,6 @@ public:
 
     CARAPI Monitor();
 
-    CARAPI constructor(
-        /* [in] */ IContext* context);
-
     /**
      * Translate the given path from an app-visible path to a vold-visible path,
      * but only if it's under the given whitelisted paths.
@@ -895,6 +903,10 @@ public:
     static const String CRYPTO_TYPES[];
 
 private:
+
+    // Static direct instance pointer for the tightly-coupled idle service to use
+    static AutoPtr<IIMountService> sSelf;
+
     static const Boolean LOCAL_LOGD;
     static const Boolean DEBUG_UNMOUNT;
     static const Boolean DEBUG_EVENTS;

@@ -1282,7 +1282,7 @@ AutoPtr<ActiveServices::ServiceLookupResult> ActiveServices::RetrieveServiceLock
         }
         // assert(0 && "TODO");
         Logger::I(TAG, "TODO: mIntentFirewall not ready.");
-        // if (!mAm->mIntentFirewall->CheckService(r->mName, service, callingUid, callingPid,
+        // if (!mAm->mIntentFirewall->GetService(r->mName, service, callingUid, callingPid,
         //         resolvedType, r->mAppInfo)) {
         //     return NULL;
         // }

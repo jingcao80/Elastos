@@ -74,6 +74,8 @@ private:
     CARAPI AddButton(
         /* [in] */ ILinearLayout* zenButtons,
         /* [in] */ const char* text);
+
+    CARAPI OtherTest();
 };
 
 } // namespace BroadcastStaticDemo

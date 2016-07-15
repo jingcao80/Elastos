@@ -1073,12 +1073,6 @@ CAR_INTERFACE_IMPL(RemoteViews::BitmapCache, Object, IBitmapCache)
 RemoteViews::BitmapCache::BitmapCache()
 {}
 
-RemoteViews::BitmapCache::BitmapCache(
-    /* [in] */ IParcel* parcel)
-{
-    constructor(parcel);
-}
-
 ECode RemoteViews::BitmapCache::constructor()
 {
     return NOERROR;
@@ -1087,15 +1081,7 @@ ECode RemoteViews::BitmapCache::constructor()
 ECode RemoteViews::BitmapCache::constructor(
     /* [in] */ IParcel* parcel)
 {
-    Int32 count;
-    parcel->ReadInt32(&count);
-    for (Int32 i = 0; i< count; i++) {
-        AutoPtr<IBitmap> bmp;
-        CBitmap::New((IBitmap**)&bmp);
-        IParcelable::Probe(bmp)->ReadFromParcel(parcel);
-        mBitmaps.PushBack(bmp);
-    }
-    return NOERROR;
+    return ReadBitmapsFromParcel(parcel);
 }
 
 ECode RemoteViews::BitmapCache::GetBitmapId(
@@ -1139,6 +1125,20 @@ ECode RemoteViews::BitmapCache::GetBitmapForId(
     else {
         *bmp = mBitmaps[id];
         REFCOUNT_ADD(*bmp)
+    }
+    return NOERROR;
+}
+
+ECode RemoteViews::BitmapCache::ReadBitmapsFromParcel(
+    /* [in] */ IParcel* parcel)
+{
+    Int32 count;
+    parcel->ReadInt32(&count);
+    for (Int32 i = 0; i< count; i++) {
+        AutoPtr<IBitmap> bmp;
+        CBitmap::New((IBitmap**)&bmp);
+        IParcelable::Probe(bmp)->ReadFromParcel(parcel);
+        mBitmaps.PushBack(bmp);
     }
     return NOERROR;
 }
@@ -1913,10 +1913,9 @@ ECode RemoteViews::ViewGroupAction::ReadFromParcel(
     /* [in] */ IBitmapCache* bitmapCache)
 {
     source->ReadInt32(&mViewId);
-    Int32 res = 0;
-    source->ReadInt32(&res);
-    Boolean nestedViewsNull = res == 0;
-    if (!nestedViewsNull) {
+    Int32 ival = 0;
+    source->ReadInt32(&ival);
+    if (ival == 1) {
         CRemoteViews::New((IRemoteViews**)&mNestedViews);
         ((RemoteViews*)mNestedViews.Get())->constructor(source, bitmapCache);
     }
@@ -2532,8 +2531,15 @@ ECode RemoteViews::constructor(
     parcel->ReadInt32(&mode);
 
     // We only store a bitmap cache in the root of the RemoteViews.
+    Int32 ival;
+    parcel->ReadInt32(&ival);
+    AutoPtr<BitmapCache> bc = new BitmapCache();
+    if (ival == 1) {
+        bc->ReadBitmapsFromParcel(parcel);
+    }
+
     if (bitmapCache == NULL) {
-        mBitmapCache = new BitmapCache(parcel);
+        mBitmapCache = bc.Get();
     }
     else {
         SetBitmapCache(bitmapCache);
@@ -2545,18 +2551,16 @@ ECode RemoteViews::constructor(
         parcel->ReadInterfacePtr((Handle32*)&obj);
         mApplication = IApplicationInfo::Probe(obj);
         parcel->ReadInt32(&mLayoutId);
-        Int32 tmp;
-        parcel->ReadInt32(&tmp);
-        mIsWidgetCollectionChild = tmp == 1;
+        parcel->ReadInt32(&ival);
+        mIsWidgetCollectionChild = ival == 1;
 
         Int32 count;
         parcel->ReadInt32(&count);
         if (count > 0) {
             for (Int32 i=0; i<count; i++) {
-                Int32 tag;
-                parcel->ReadInt32(&tag);
+                parcel->ReadInt32(&ival);
                 AutoPtr<IRemoteViewsAction> actionImpl;
-                switch (tag) {
+                switch (ival) {
                     case _SetOnClickPendingIntent::TAG:
                         actionImpl = new _SetOnClickPendingIntent(this);
                         IParcelable::Probe(actionImpl)->ReadFromParcel(parcel);
@@ -2633,7 +2637,7 @@ ECode RemoteViews::constructor(
                         mActions.PushBack(actionImpl);
                         break;
                     default:
-                        Slogger::E(TAG, "tag not found: %d", tag);
+                        Slogger::E(TAG, "tag not found: %d", ival);
                         return E_RUNTIME_EXCEPTION;
                 }
             }
@@ -2669,8 +2673,13 @@ ECode RemoteViews::WriteToParcel(
         // We only write the bitmap cache if we are the root RemoteViews, as this cache
         // is shared by all children.
         if (mIsRoot) {
+            dest->WriteInt32(1);
             mBitmapCache->WriteBitmapsToParcel(dest);
         }
+        else {
+            dest->WriteInt32(0);
+        }
+
         dest->WriteInterfacePtr(mApplication);
         dest->WriteInt32(mLayoutId);
         dest->WriteInt32(mIsWidgetCollectionChild ? 1 : 0);
