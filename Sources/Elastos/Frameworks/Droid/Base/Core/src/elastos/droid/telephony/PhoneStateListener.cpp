@@ -218,9 +218,7 @@ ECode PhoneStateListener::PhoneStateListenerCallback::OnOemHookRawEvent(
 ECode PhoneStateListener::PhoneStateListenerCallback::ToString(
     /* [out] */ String* str)
 {
-    VALIDATE_NOT_NULL(str);
-    *str = "PhoneStateListenerCallback";
-    return NOERROR;
+    return Object::ToString(str);
 }
 
 //==============================================================================
@@ -314,7 +312,6 @@ ECode PhoneStateListener::MyHandler::HandleMessage(
 PhoneStateListener::PhoneStateListener()
     : mSubId(0)
 {
-    CPhoneStateListenerCallback::New(this, (IIPhoneStateListener**)&mCallback);
 }
 
 ECode PhoneStateListener::constructor()
@@ -338,6 +335,7 @@ ECode PhoneStateListener::constructor(
     /* [in] */ Int64 subId,
     /* [in] */ ILooper* looper)
 {
+    CPhoneStateListenerCallback::New(this, (IIPhoneStateListener**)&mCallback);
     mSubId = subId;
     mHandler = new MyHandler(this, looper);
     return NOERROR;

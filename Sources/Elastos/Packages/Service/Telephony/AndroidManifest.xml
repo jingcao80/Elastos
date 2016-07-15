@@ -465,13 +465,13 @@
         </activity>
 
         <!-- Start SIP -->
-        <service android:name=".Sip.CSipCallServiceProvider"
+        <service android:name=".Services.Telephony.Sip.CSipCallServiceProvider"
                  android:singleUser="true" >
             <intent-filter>
                 <action android:name="android.telecom.CallServiceProvider" />
             </intent-filter>
         </service>
-        <service android:name=".Sip.CSipConnectionService"
+        <service android:name=".Services.Telephony.Sip.CSipConnectionService"
                  android:label="@string/sip_connection_service_label"
                  android:singleUser="true"
                  android:permission="android.permission.BIND_CONNECTION_SERVICE" >
@@ -479,7 +479,7 @@
                 <action android:name="android.telecom.ConnectionService" />
             </intent-filter>
         </service>
-        <receiver android:name=".Sip.CSipBroadcastReceiver">
+        <receiver android:name=".Services.Telephony.Sip.CSipBroadcastReceiver">
             <intent-filter>
                 <action android:name="android.net.sip.SIP_SERVICE_UP" />
                 <action android:name="com.android.phone.SIP_INCOMING_CALL" />
@@ -489,7 +489,7 @@
         </receiver>
 
         <activity android:label="Sip Settings"
-                  android:name=".Sip.CSipSettings"
+                  android:name=".Services.Telephony.Sip.CSipSettings"
                   android:theme="@style/DialerSettingsLight"
                   android:launchMode="singleTop"
                   android:configChanges="orientation|screenSize|keyboardHidden"
@@ -500,7 +500,7 @@
                 <action android:name="android.net.sip.NOTIFY" />
             </intent-filter>
         </activity>
-        <activity android:name=".Sip.CSipEditor"
+        <activity android:name=".Services.Telephony.Sip.CSipEditor"
                 android:theme="@style/DialerSettingsLight"
                 android:configChanges="orientation|screenSize|keyboardHidden"
                 android:uiOptions="splitActionBarWhenNarrow">

@@ -227,7 +227,7 @@ CAR_INTERFACE_IMPL(InputConnectionWrapper, Object, IInputConnection)
 ECode InputConnectionWrapper::constructor(
     /* [in] */ IIInputContext* inputContext)
 {
-    assert(inputContext != NULL);
+    // assert(inputContext != NULL);
     mIInputContext = inputContext;
     return NOERROR;
 }

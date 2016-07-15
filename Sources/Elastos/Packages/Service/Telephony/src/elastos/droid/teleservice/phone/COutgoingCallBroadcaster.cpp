@@ -259,7 +259,7 @@ static Boolean initDBG()
 
 const Boolean COutgoingCallBroadcaster::DBG = initDBG();
 
-const Boolean COutgoingCallBroadcaster::VDBG = FALSE;
+const Boolean COutgoingCallBroadcaster::VDBG = TRUE;
 
 const String COutgoingCallBroadcaster::PERMISSION = Elastos::Droid::Manifest::permission::PROCESS_OUTGOING_CALLS;
 

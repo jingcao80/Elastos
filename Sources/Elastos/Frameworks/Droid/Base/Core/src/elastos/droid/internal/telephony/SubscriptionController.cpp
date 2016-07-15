@@ -2619,21 +2619,21 @@ ECode SubscriptionController::UpdateUserPrefs(
     AutoPtr<ISubInfoRecord> mNextActivatedSub;
 
     if (subInfoList == NULL) {
-        // String str("updateUserPrefs: subscription are not avaiable dds = ");
-        // Int64 dataSubId = 0;
-        // GetDefaultDataSubId(&dataSubId);
-        // str += dataSubId;
-        // str += " voice = ";
-        // Int64 voiceSubId = 0;
-        // GetDefaultVoiceSubId(&voiceSubId);
-        // str += voiceSubId;
-        // str += " sms = ";
-        // Int64 smsSubId = 0;
-        // GetDefaultSmsSubId(&smsSubId);
-        // str += smsSubId;
-        // str += " setDDs = ";
-        // str += setDds;
-        // Logd(str);
+        String str("updateUserPrefs: subscription are not avaiable dds = ");
+        Int64 dataSubId = 0;
+        GetDefaultDataSubId(&dataSubId);
+        str += StringUtils::ToString(dataSubId);
+        str += " voice = ";
+        Int64 voiceSubId = 0;
+        GetDefaultVoiceSubId(&voiceSubId);
+        str += StringUtils::ToString(voiceSubId);
+        str += " sms = ";
+        Int64 smsSubId = 0;
+        GetDefaultSmsSubId(&smsSubId);
+        str += StringUtils::ToString(smsSubId);
+        str += " setDDs = ";
+        str += StringUtils::ToString(setDds);
+        Logd(str);
         // if no SIM cards present on device, set dummy subId
         // as data/sms/voice preferred subId.
         SetDefaultSubId(DUMMY_SUB_ID);
@@ -2664,20 +2664,20 @@ ECode SubscriptionController::UpdateUserPrefs(
     Int64 smsSubId = 0;
     Int64 dataSubId = 0;
     Int64 voiceSubId = 0;
-    // String str("updateUserPrefs: active sub count = ");
-    // str += mActCount;
-    // str += " dds = ";
-    // GetDefaultDataSubId(&dataSubId);
-    // str += dataSubId;
-    // str += " voice = ";
-    // GetDefaultVoiceSubId(&voiceSubId);
-    // str += voiceSubId;
-    // str += " sms = ";
-    // GetDefaultSmsSubId(&smsSubId);
-    // str += smsSubId;
-    // str += " setDDs = ";
-    // str += setDds;
-    // Logd(str);
+    String str("updateUserPrefs: active sub count = ");
+    str += StringUtils::ToString(mActCount);
+    str += " dds = ";
+    GetDefaultDataSubId(&dataSubId);
+    str += StringUtils::ToString(dataSubId);
+    str += " voice = ";
+    GetDefaultVoiceSubId(&voiceSubId);
+    str += StringUtils::ToString(voiceSubId);
+    str += " sms = ";
+    GetDefaultSmsSubId(&smsSubId);
+    str += StringUtils::ToString(smsSubId);
+    str += " setDDs = ";
+    str += StringUtils::ToString(setDds);
+    Logd(str);
     //if activated sub count is less than 2, disable prompt.
     if (mActCount < 2) {
         SetSMSPromptEnabled(FALSE);
