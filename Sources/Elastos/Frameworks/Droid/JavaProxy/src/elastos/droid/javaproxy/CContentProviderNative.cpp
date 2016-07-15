@@ -780,8 +780,7 @@ ECode CContentProviderNative::CreateCancellationSignal(
     jclass c = env->FindClass("android/content/IContentProvider");
     Util::CheckErrorAndLog(env, TAG, "FindClass: IContentProvider %d", __LINE__);
 
-    jmethodID m = env->GetMethodID(c, "createCancellationSignal",
-        "()Landroid/os/ParcelFileDescriptor;");
+    jmethodID m = env->GetMethodID(c, "createCancellationSignal", "()Landroid/os/ICancellationSignal;");
     Util::CheckErrorAndLog(env, TAG, "GetMethodID: createCancellationSignal Line: %d", __LINE__);
 
     jobject jcancellationSignal = env->CallObjectMethod(mJInstance, m);

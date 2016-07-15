@@ -31,6 +31,9 @@
 #define LIB_SUFFIX ".so"
 #define LIB_SUFFIX_LEN (sizeof(LIB_SUFFIX) - 1)
 
+#define EL_LIB_SUFFIX ".eco"
+#define EL_LIB_SUFFIX_LEN (sizeof(EL_LIB_SUFFIX) - 1)
+
 #define RS_BITCODE_SUFFIX ".bc"
 #define RS_BITCODE_SUFFIX_LEN (sizeof(RS_BITCODE_SUFFIX) -1)
 
@@ -897,9 +900,10 @@ public:
                 break;
             }
 
-            // Make sure the filename starts with lib and ends with ".so".
-            if (strncmp(fileName + fileNameLen - LIB_SUFFIX_LEN, LIB_SUFFIX, LIB_SUFFIX_LEN)
-                || strncmp(lastSlash, LIB_PREFIX, LIB_PREFIX_LEN)) {
+            // Make sure the filename starts with lib and ends with ".so" or ends with ".eco".
+            if ((strncmp(fileName + fileNameLen - LIB_SUFFIX_LEN, LIB_SUFFIX, LIB_SUFFIX_LEN)
+                || strncmp(lastSlash, LIB_PREFIX, LIB_PREFIX_LEN))
+                && strncmp(fileName + fileNameLen - EL_LIB_SUFFIX_LEN, EL_LIB_SUFFIX, EL_LIB_SUFFIX_LEN)) {
                 continue;
             }
 

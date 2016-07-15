@@ -5645,13 +5645,15 @@ ECode Workspace::RemoveItemsByPackageName(
                 AutoPtr<ShortcutInfo> info = (ShortcutInfo*)IShortcutInfo::Probe(tag);
                 AutoPtr<IComponentName> cn;
                 info->mIntent->GetComponent((IComponentName**)&cn);
-                String pname;
-                cn->GetPackageName(&pname);
-                AutoPtr<ICharSequence> obj = CoreUtils::Convert(pname);
-                Boolean res1, res2;
-                if ((cn != NULL) && (packageNames->Contains(TO_IINTERFACE(obj), &res1), res1)
+                if (cn != NULL) {
+                    String pname;
+                    cn->GetPackageName(&pname);
+                    AutoPtr<ICharSequence> obj = CoreUtils::Convert(pname);
+                    Boolean res1, res2;
+                    if ((packageNames->Contains(TO_IINTERFACE(obj), &res1), res1)
                         && (info->mUser->Equals(user, &res2), res2)) {
-                    cns->Add(TO_IINTERFACE(cn));
+                        cns->Add(TO_IINTERFACE(cn));
+                    }
                 }
             }
             else if (IFolderInfo::Probe(tag) != NULL) {

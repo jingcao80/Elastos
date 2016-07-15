@@ -6,6 +6,7 @@
 
 using Elastos::Droid::Database::EIID_ICursor;
 using Elastos::Droid::Os::EIID_IBinder;
+using Elastos::IO::EIID_ICloseable;
 using Elastos::Utility::Logging::Logger;
 
 namespace Elastos {
@@ -17,7 +18,7 @@ const String CCursorNative::TAG("CCursorNative");
 HashMap<IContentObserver*, jobject> CCursorNative::mContentObserverMap;
 HashMap<IDataSetObserver*, jobject> CCursorNative::mDataSetObserverMap;
 
-CAR_INTERFACE_IMPL_2(CCursorNative, Object, ICursor, IBinder)
+CAR_INTERFACE_IMPL_3(CCursorNative, Object, ICursor, ICloseable, IBinder)
 
 CAR_OBJECT_IMPL(CCursorNative)
 

@@ -4,6 +4,7 @@
 
 #include "_Elastos_Droid_JavaProxy_CCursorNative.h"
 #include "Elastos.Droid.Database.h"
+#include "Elastos.CoreLibrary.IO.h"
 #include <elastos/core/Object.h>
 #include <elastos/utility/etl/HashMap.h>
 #include <jni.h>
@@ -16,6 +17,7 @@ using Elastos::Droid::Database::IDataSetObserver;
 using Elastos::Droid::Net::IUri;
 using Elastos::Droid::Os::IBinder;
 using Elastos::Droid::Os::IBundle;
+using Elastos::IO::ICloseable;
 using Elastos::Utility::Etl::HashMap;
 
 DEFINE_OBJECT_HASH_FUNC_FOR(Elastos::Droid::Database::IContentObserver)
@@ -28,6 +30,7 @@ namespace JavaProxy {
 CarClass(CCursorNative)
     , public Object
     , public ICursor
+    , public ICloseable
     , public IBinder
 {
 public:
