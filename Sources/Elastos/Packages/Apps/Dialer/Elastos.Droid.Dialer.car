@@ -1318,25 +1318,25 @@ module
 //    } //namespace Droid
 //    } //namespace Elastos
 
-    namespace Elastos {
-    namespace Droid {
-    namespace InCallUI {
-
-    class CCallButtonFragment {
-        constructor();
-
-        interface ICallButtonFragment;
-        interface IFragment;
-        interface IComponentCallbacks;
-        interface IComponentCallbacks2;
-        interface IViewOnCreateContextMenuListener;
-        interface ICallButtonUi;
-        interface IUi;
-        interface IPopupMenuOnMenuItemClickListener;
-        interface IPopupMenuOnDismissListener;
-        interface IViewOnClickListener;
-        interface ICompoundButtonOnCheckedChangeListener;
-    }
+//    namespace Elastos {
+//    namespace Droid {
+//    namespace InCallUI {
+//
+//    class CCallButtonFragment {
+//        constructor();
+//
+//        interface ICallButtonFragment;
+//        interface IFragment;
+//        interface IComponentCallbacks;
+//        interface IComponentCallbacks2;
+//        interface IViewOnCreateContextMenuListener;
+//        interface ICallButtonUi;
+//        interface IUi;
+//        interface IPopupMenuOnMenuItemClickListener;
+//        interface IPopupMenuOnDismissListener;
+//        interface IViewOnClickListener;
+//        interface ICompoundButtonOnCheckedChangeListener;
+//    }
 
 //    class CInCallActivity {
 //        constructor();
@@ -1355,15 +1355,15 @@ module
 //        interface IOnWindowDismissedCallback;
 //    }
 
-    class CInCallServiceImpl {
-        constructor();
-
-        interface IInCallService;
-    }
-
-    } //namespace InCallUI
-    } //namespace Droid
-    } //namespace Elastos
+//    class CInCallServiceImpl {
+//        constructor();
+//
+//        interface IInCallService;
+//    }
+//
+//    } //namespace InCallUI
+//    } //namespace Droid
+//    } //namespace Elastos
 
     namespace Elastos {
     namespace Droid {
