@@ -776,6 +776,8 @@ module.exports = function(aoElastos, aoActivity){
         result)
 // {
     {
+        try {
+
 //     // Logger::D(TAG, "MyViewBinder---SetViewValue");
         elog(TAG + "MyViewBinder---SetViewValue");
 //     VALIDATE_NOT_NULL(result)
@@ -825,6 +827,10 @@ module.exports = function(aoElastos, aoActivity){
         }
 //     return NOERROR;
         return;
+
+        } catch (e) {
+            elog(TAG + "MyViewBinder---SetViewValue Error:" + JSON.stringify(e));
+        }
 // }
     }
 

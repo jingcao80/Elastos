@@ -300,6 +300,7 @@ CObject.getMethodProtos = _getMethodProtos;
 //--------proto info end--------
 
 function classinfo__createObject(oModuleInfo,oClassInfo){
+try {
     var newObject;
 
 elog("classinfo__createObject======00======");
@@ -512,6 +513,9 @@ elog("classinfo__createObject======12======");
 elog("classinfo__createObject======13======");
 
     return newObject;
+} catch(e) {
+    elog("classinfo__createObject Error:====" + JSON.stringify(e));
+}   //try
 }   //classinfo__createObject
 
 return {

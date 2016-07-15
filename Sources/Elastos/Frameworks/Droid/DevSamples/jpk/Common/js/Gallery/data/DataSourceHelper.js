@@ -147,7 +147,7 @@ SortListByTime : function () {
 },
 
 //public:
-ROOT_PATH : "/data/temp/testdisk",
+ROOT_PATH : "/data/temp/node/disk/testdisk",
 PATH_SPLITE : "/",
 SOURCE_PATH : "source_path",
 SOURCE_DESC : "source_desc",

@@ -497,7 +497,7 @@ function _initProp(o){
 //static properties
 _extend(ImageCacheService, {
     TAG : "ImageCacheService",
-    CACHE_PATH : "/data/temp/diskcache/",
+    CACHE_PATH : "/data/temp/node/disk/diskcache/",
     //CACHE_PATH : "/mnt/sdcard/Android/data/JSGallery/cache/",
 });
 
