@@ -1,0 +1,26 @@
+
+module
+{
+    namespace Elastos {
+    namespace Droid {
+    namespace SystemUI {
+    namespace Keyguard {
+
+    /**
+     * This class implements a smart emergency button that updates itself based
+     * on telephony state.  When the phone is idle, it is an emergency call button.
+     * When there's a call in progress, it presents an appropriate message and
+     * allows the user to return to the call.
+     */
+    interface IEmergencyButton {
+        /**
+         * Shows the emergency dialer or returns the user to the existing call.
+         */
+        TakeEmergencyCallAction();
+    }
+
+    } // namespace Keyguard
+    } // namespace SystemUI
+    } // namespace Droid
+    } // namespace Elastos
+}

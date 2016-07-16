@@ -32,6 +32,16 @@ module
     //keyguard
     merge("car/elastos/droid/keyguard/KeyguardService.car");
     merge("car/elastos/droid/keyguard/KeyguardViewMediator.car");
+    //merge("car/elastos/droid/keyguard/AppearAnimationCreator.car");
+    //merge("car/elastos/droid/keyguard/BiometricSensorUnloc.car");
+    //merge("car/elastos/droid/keyguard/CameraWidgetFrame.car");
+    //merge("car/elastos/droid/keyguard/CarrierText.car");
+    //merge("car/elastos/droid/keyguard/ChallengeLayout.car");
+    //merge("car/elastos/droid/keyguard/EmergencyButton.car");
+    //merge("car/elastos/droid/keyguard/EmergencyCarrierArea.car");
+    //merge("car/elastos/droid/keyguard/KeyguardGlowStripView.car");
+    //merge("car/elastos/droid/keyguard/KeyguardSecurityCallback.car");
+    //merge("car/elastos/droid/keyguard/KeyguardSecurityView.car");
 
     //usb
     merge("car/elastos/droid/usb/StorageNotification.car");
@@ -798,6 +808,22 @@ module
             interface IAccessibilityEventSource;
         }
 
+        /*[local]
+        class CAlphaOptimizedRelativeLayout {
+            constructor(
+                [in] IContext* ctx,
+                [in] IAttributeSet* attrs);
+
+            interface IRelativeLayout;
+            interface IViewGroup;
+            interface IView;
+            interface IViewParent;
+            interface IViewManager;
+            interface IDrawableCallback;
+            interface IKeyEventCallback;
+            interface IAccessibilityEventSource;
+        }*/
+
         class CIKeyguardService {
             constructor(
                 [in] IKeyguardService* host);
@@ -805,6 +831,23 @@ module
             interface IIKeyguardService;
             interface IBinder;
         }
+
+        /*class CCarrierText {
+            constructor(
+                [in] IContext* ctx);
+
+            constructor(
+                [in] IContext* ctx,
+                [in] IAttributeSet* attrs);
+
+            interface ICarrierText;
+            interface ITextView;
+            interface IView;
+            interface IOnPreDrawListener;
+            interface IDrawableCallback;
+            interface IKeyEventCallback;
+            interface IAccessibilityEventSource;
+        }*/
 
     } // namespace Keyguard
 

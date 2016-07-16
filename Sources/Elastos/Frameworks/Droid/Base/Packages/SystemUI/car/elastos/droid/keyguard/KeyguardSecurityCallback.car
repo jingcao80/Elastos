@@ -1,0 +1,46 @@
+
+module
+{
+    namespace Elastos {
+    namespace Droid {
+    namespace SystemUI {
+    namespace Keyguard {
+
+    interface IKeyguardSecurityCallback {
+        /**
+         * Dismiss the given security screen.
+         * @param securityVerified true if the user correctly entered credentials for the given screen.
+         */
+        Dismiss(
+            [in] Boolean securityVerified);
+
+        /**
+         * Manually report user activity to keep the device awake.
+         */
+        UserActivity();
+
+        /**
+         * Checks if keyguard is in "verify credentials" mode.
+         * @return true if user has been asked to verify security.
+         */
+        IsVerifyUnlockOnly(
+            [out] Boolean* result);
+
+        /**
+         * Call to report an unlock attempt.
+         * @param success set to 'true' if user correctly entered security credentials.
+         */
+        ReportUnlockAttempt(
+            [in] Boolean success);
+
+        /**
+         * Shows the backup security for the current method.  If none available, this call is a no-op.
+         */
+        ShowBackupSecurity();
+    }
+
+    } // namespace Keyguard
+    } // namespace SystemUI
+    } // namespace Droid
+    } // namespace Elastos
+}
