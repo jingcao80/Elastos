@@ -1,0 +1,31 @@
+
+module
+{
+    using interface Elastos.Droid.View.Animation.IInterpolator;
+
+    using interface Elastos.Core.IRunnable;
+
+    namespace Elastos {
+    namespace Droid {
+    namespace SystemUI {
+    namespace Keyguard {
+
+    /**
+     * An interface which can create animations when starting an appear animation with
+     * {@link com.android.keyguard.AppearAnimationUtils}
+     */
+    interface IAppearAnimationCreator {
+        CreateAnimation(
+            [in] IInterface* animatedObject,
+            [in] Int64 delay,
+            [in] Int64 duration,
+            [in] Float startTranslationY,
+            [in] IInterpolator* interpolator,
+            [in] IRunnable* finishListener);
+    }
+
+    } // namespace Keyguard
+    } // namespace SystemUI
+    } // namespace Droid
+    } // namespace Elastos
+}

@@ -1,0 +1,69 @@
+
+module
+{
+    using interface Elastos.Droid.View.IView;
+
+    namespace Elastos {
+    namespace Droid {
+    namespace SystemUI {
+    namespace Keyguard {
+
+    interface IBiometricSensorUnlock {
+        /**
+         * Initializes the view provided for the biometric unlock UI to work within.  The provided area
+         * completely covers the backup unlock mechanism.
+         * @param biometricUnlockView View provided for the biometric unlock UI.
+         */
+        InitializeView(
+            [in] IView* biometricUnlockView);
+
+        /**
+         * Indicates whether the biometric unlock is running.  Before
+         * {@link BiometricSensorUnlock#start} is called, isRunning() returns false.  After a successful
+         * call to {@link BiometricSensorUnlock#start}, isRunning() returns true until the biometric
+         * unlock completes, {@link BiometricSensorUnlock#stop} has been called, or an error has
+         * forced the biometric unlock to stop.
+         * @return whether the biometric unlock is currently running.
+         */
+        IsRunning(
+            [out] Boolean* result);
+
+        /**
+         * Stops and removes the biometric unlock and shows the backup unlock
+         */
+        StopAndShowBackup();
+
+        /**
+         * Binds to the biometric unlock service and starts the unlock procedure.  Called on the UI
+         * thread.
+         * @return false if it can't be started or the backup should be used.
+         */
+        Start(
+            [out] Boolean* result);
+
+        /**
+         * Stops the biometric unlock procedure and unbinds from the service.  Called on the UI thread.
+         * @return whether the biometric unlock was running when called.
+         */
+        Stop(
+            [out] Boolean* result);
+
+        /**
+         * Cleans up any resources used by the biometric unlock.
+         */
+        CleanUp();
+
+        /**
+         * Gets the Device Policy Manager quality of the biometric unlock sensor
+         * (e.g., PASSWORD_QUALITY_BIOMETRIC_WEAK).
+         * @return biometric unlock sensor quality, as defined by Device Policy Manager.
+         */
+        GetQuality(
+            [out] Int32* quality);
+    }
+
+    } // namespace Keyguard
+    } // namespace SystemUI
+    } // namespace Droid
+    } // namespace Elastos
+}
