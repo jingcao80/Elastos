@@ -1,0 +1,34 @@
+
+module
+{
+    using interface Elastos.Droid.Telecomm.Telecom.IPhone;
+
+    namespace Elastos {
+    namespace Droid {
+    namespace InCallUI {
+
+    /**
+     * Interface implemented by In-Call components that maintain a reference to the Telecomm API
+     * {@code Phone} object. Clarifies the expectations associated with the relevant method calls.
+     */
+    interface IInCallPhoneListener {
+        /**
+         * Called once at {@code InCallService} startup time with a valid {@code Phone}. At
+         * that time, there will be no existing {@code Call}s.
+         *
+         * @param phone The {@code Phone} object.
+         */
+        SetPhone(
+            [in] IPhone* phone);
+
+        /**
+         * Called once at {@code InCallService} shutdown time. At that time, any {@code Call}s
+         * will have transitioned through the disconnected state and will no longer exist.
+         */
+        ClearPhone();
+    }
+
+    } // namespace InCallUI
+    } // namespace Droid
+    } // namespace Elastos
+}

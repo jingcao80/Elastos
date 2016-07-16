@@ -91,8 +91,12 @@ module
     merge("car/elastos/droid/incallui/Call.car");
     merge("car/elastos/droid/incallui/CallButtonFragment.car");
     merge("car/elastos/droid/incallui/CallButtonPresenter.car");
+    merge("car/elastos/droid/incallui/CallCardFragment.car");
+    merge("car/elastos/droid/incallui/CallCardPresenter.car");
     merge("car/elastos/droid/incallui/CallList.car");
+    merge("car/elastos/droid/incallui/ContactInfoCache.car");
     merge("car/elastos/droid/incallui/InCallActivity.car");
+    merge("car/elastos/droid/incallui/InCallPhoneListener.car");
     merge("car/elastos/droid/incallui/InCallPresenter.car");
     merge("car/elastos/droid/incallui/Presenter.car");
     merge("car/elastos/droid/incallui/Ui.car");
@@ -1337,7 +1341,19 @@ module
 //        interface IViewOnClickListener;
 //        interface ICompoundButtonOnCheckedChangeListener;
 //    }
-
+//
+//    class CCallCardFragment {
+//        constructor();
+//
+//        interface ICallCardFragment;
+//        interface IFragment;
+//        interface IComponentCallbacks;
+//        interface IComponentCallbacks2;
+//        interface IViewOnCreateContextMenuListener;
+//        interface ICallCardUi;
+//        interface IUi;
+//    }
+//
 //    class CInCallActivity {
 //        constructor();
 //
@@ -1354,7 +1370,7 @@ module
 //        interface IComponentCallbacks2;
 //        interface IOnWindowDismissedCallback;
 //    }
-
+//
 //    class CInCallServiceImpl {
 //        constructor();
 //

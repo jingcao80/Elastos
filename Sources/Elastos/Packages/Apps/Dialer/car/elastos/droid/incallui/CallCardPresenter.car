@@ -1,0 +1,90 @@
+
+module
+{
+    using interface Elastos.Droid.Graphics.Drawable.IDrawable;
+    using interface Elastos.Droid.Telecomm.Telecom.IDisconnectCause;
+
+    namespace Elastos {
+    namespace Droid {
+    namespace InCallUI {
+
+    /**
+     * Fragment for call card.
+     * @Involve
+     * interface IUi
+     */
+    interface ICallCardUi {
+        SetVisible(
+            [in] Boolean on);
+
+        SetCallCardVisible(
+            [in] Boolean visible);
+
+        SetPrimary(
+            [in] String number,
+            [in] String name,
+            [in] Boolean nameIsNumber,
+            [in] String label,
+            [in] IDrawable* photo,
+            [in] Boolean isConference,
+            [in] Boolean canManageConference,
+            [in] Boolean isSipCall);
+
+        SetSecondary(
+            [in] Boolean show,
+            [in] String name,
+            [in] Boolean nameIsNumber,
+            [in] String label,
+            [in] String providerLabel,
+            [in] IDrawable* providerIcon,
+            [in] Boolean isConference,
+            [in] Boolean canManageConference);
+
+        SetCallState(
+            [in] Int32 state,
+            [in] Int32 videoState,
+            [in] Int32 sessionModificationState,
+            [in] IDisconnectCause* disconnectCause,
+            [in] String connectionLabel,
+            [in] IDrawable* connectionIcon,
+            [in] String gatewayNumber);
+
+        SetPrimaryCallElapsedTime(
+            [in] Boolean show,
+            [in] String duration);
+
+        SetPrimaryName(
+            [in] String name,
+            [in] Boolean nameIsNumber);
+
+        SetPrimaryImage(
+            [in] IDrawable* image);
+
+        SetPrimaryPhoneNumber(
+            [in] String phoneNumber);
+
+        SetPrimaryLabel(
+            [in] String label);
+
+        SetEndCallButtonEnabled(
+            [in] Boolean enabled,
+            [in] Boolean animate);
+
+        SetCallbackNumber(
+            [in] String number,
+            [in] Boolean isEmergencyCalls);
+
+        SetPhotoVisible(
+            [in] Boolean isVisible);
+
+        SetProgressSpinnerVisible(
+            [in] Boolean visible);
+
+        ShowManageConferenceCallButton(
+            [in] Boolean visible);
+    }
+
+    } // namespace InCallUI
+    } // namespace Droid
+    } // namespace Elastos
+}
