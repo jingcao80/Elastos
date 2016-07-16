@@ -15943,7 +15943,7 @@ ECode View::Measure(
     }
 
     // Suppress sign extension for the low bytes
-    Int64 key = ((Int64) widthMeasureSpec << 32) | ((Int64) heightMeasureSpec & 0xffffffffL);
+    Int64 key = ((Int64) widthMeasureSpec << 32) | ((Int64) heightMeasureSpec & 0xffffffffLL);
 
     if ((mPrivateFlags & PFLAG_FORCE_LAYOUT) == PFLAG_FORCE_LAYOUT ||
             widthMeasureSpec != mOldWidthMeasureSpec ||
@@ -15979,7 +15979,7 @@ ECode View::Measure(
     mOldWidthMeasureSpec = widthMeasureSpec;
     mOldHeightMeasureSpec = heightMeasureSpec;
 
-    Int64 valueHeight = ((Int64)mMeasuredWidth) << 32 | ((Int64)mMeasuredHeight & 0xffffffffL);
+    Int64 valueHeight = ((Int64)mMeasuredWidth) << 32 | ((Int64)mMeasuredHeight & 0xffffffffLL);
     mMeasureCache.Insert(HashMap<Int64, Int64>::ValueType(key, valueHeight)); // suppress sign extension
 
     return NOERROR;
