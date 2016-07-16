@@ -4,6 +4,7 @@
 #include "elastos/droid/internal/telephony/PhoneSubInfoController.h"
 #include "elastos/droid/os/CServiceManager.h"
 #include "elastos/droid/telephony/CTelephonyManagerHelper.h"
+#include "elastos/droid/internal/telephony/CSubscriptionControllerHelper.h"
 
 using Elastos::Droid::Os::IServiceManager;
 using Elastos::Droid::Os::CServiceManager;
@@ -286,7 +287,7 @@ AutoPtr<IPhoneSubInfoProxy> PhoneSubInfoController::GetPhoneSubInfoProxy(
     /* [in] */ Int64 subId)
 {
     AutoPtr<ISubscriptionControllerHelper> hlp;
-    // CSubscriptionControllerHelper::AcquireSingleton((ISubscriptionControllerHelper**)&hlp);
+    CSubscriptionControllerHelper::AcquireSingleton((ISubscriptionControllerHelper**)&hlp);
     AutoPtr<ISubscriptionController> sc;
     hlp->GetInstance((ISubscriptionController**)&sc);
     Int32 phoneId = 0;

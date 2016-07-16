@@ -1,5 +1,6 @@
 
 #include "elastos/droid/internal/telephony/ModemBindingPolicyHandler.h"
+#include "elastos/droid/internal/telephony/SubscriptionController.h"
 #include "elastos/droid/telephony/CTelephonyManager.h"
 #include "elastos/droid/os/CMessage.h"
 #include "Elastos.Droid.Content.h"
@@ -15,6 +16,7 @@ using Elastos::Droid::Provider::ISettingsGlobal;
 using Elastos::Droid::Telephony::CTelephonyManager;
 using Elastos::Droid::Telephony::IServiceState;
 using Elastos::Droid::Telephony::ITelephonyManager;
+using Elastos::Droid::Telephony::ISubscriptionManager;
 using Elastos::Core::CInteger32;
 using Elastos::Core::IInteger32;
 using Elastos::Core::StringUtils;
@@ -279,8 +281,7 @@ ECode ModemBindingPolicyHandler::UpdatePrefNwTypeIfRequired()
     Boolean updateRequired = FALSE;
     SyncPreferredNwModeFromDB();
     AutoPtr<ISubscriptionController> subCtrlr;
-    assert(0 && "TODO");
-    // subCtrlr = SubscriptionController::GetInstance();
+    subCtrlr = SubscriptionController::GetInstance();
     for (Int32 i=0; i < mNumPhones; i++ ) {
         AutoPtr<ArrayOf<Int64> > subIdList;
         IISub::Probe(subCtrlr)->GetSubId(i, (ArrayOf<Int64>**)&subIdList);
@@ -288,11 +289,10 @@ ECode ModemBindingPolicyHandler::UpdatePrefNwTypeIfRequired()
             Int64 subId = (*subIdList)[0];
             subCtrlr->GetNwMode(subId, &(*mNwModeinSubIdTable)[i]);
 
-            assert(0 && "TODO");
-            // if ((*mNwModeinSubIdTable)[i] == SubscriptionManager.DEFAULT_NW_MODE){
-            //     updateRequired = FALSE;
-            //     break;
-            // }
+            if ((*mNwModeinSubIdTable)[i] == ISubscriptionManager::DEFAULT_NW_MODE){
+                updateRequired = FALSE;
+                break;
+            }
             if ((*mNwModeinSubIdTable)[i] != (*mPrefNwMode)[i]) {
                 updateRequired = TRUE;
             }

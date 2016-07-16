@@ -368,8 +368,10 @@ AutoPtr<IPhoneAccountHandle> TelecomAccountRegistry::MakePstnPhoneAccountHandleW
     AutoPtr<IComponentName> pstnConnectionServiceName;
     AutoPtr<IContext> context;
     phone->GetContext((IContext**)&context);
-    assert(0);
     //CComponentName::New(context, ECLSID_CTelephonyConnectionService, (IComponentName**)&pstnConnectionServiceName);
+    CComponentName::New(context,
+            String("Elastos.Droid.TeleService.Services.Telephony.CTelephonyConnectionService"),
+            (IComponentName**)&pstnConnectionServiceName);
     // TODO: Should use some sort of special hidden flag to decorate this account as
     // an emergency-only account
     String id;
@@ -413,8 +415,9 @@ Boolean TelecomAccountRegistry::HasAccountEntryForPhoneAccount(
 void TelecomAccountRegistry::CleanupPhoneAccounts()
 {
     AutoPtr<IComponentName> telephonyComponentName;
-    assert(0);
     //CComponentName::New(mContext, ECLSID_CTelephonyConnectionService, (IComponentName**)&telephonyComponentName);
+    CComponentName::New(mContext, String("Elastos.Droid.TeleService.Services.Telephony.CTelephonyConnectionService"),
+            (IComponentName**)&telephonyComponentName);
     AutoPtr<IList> accountHandles;
     mTelecomManager->GetAllPhoneAccountHandles((IList**)&accountHandles);
 

@@ -179,12 +179,18 @@ ECode CGsmConnection::CompareTo(
     //
     // We assume we know when MO calls are created (since we created them)
     // and therefore don't need to compare the phone number anyway.
-    if (! (mIsIncoming || ((DriverCall*)c)->mIsMT)) return true;
+    if (! (mIsIncoming || ((DriverCall*)c)->mIsMT)) {
+        *result = TRUE;
+        return NOERROR;
+    }
 
     // A new call appearing by SRVCC may have invalid number
     //  if IMS service is not tightly coupled with cellular modem stack.
     // Thus we prefer the preexisting handover connection instance.
-    if (mOrigConnection != NULL) return true;
+    if (mOrigConnection != NULL) {
+        *result = TRUE;
+        return NOERROR;
+    }
 
     // ... but we can compare phone numbers on MT calls, and we have
     // no control over when they begin, so we might as well

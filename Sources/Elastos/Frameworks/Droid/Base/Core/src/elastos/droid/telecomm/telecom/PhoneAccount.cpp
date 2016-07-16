@@ -4,6 +4,7 @@
 #include "elastos/droid/ext/frameworkext.h"
 #include "elastos/droid/telecomm/telecom/PhoneAccount.h"
 #include "elastos/droid/telecomm/telecom/CPhoneAccount.h"
+#include "elastos/droid/telecomm/telecom/CPhoneAccountHandle.h"
 #include "elastos/droid/text/TextUtils.h"
 #include <elastos/utility/logging/Logger.h>
 
@@ -370,31 +371,169 @@ AutoPtr<IDrawable> PhoneAccount::GetIcon(
 ECode PhoneAccount::WriteToParcel(
     /* [in] */ IParcel* out)
 {
-    IParcelable::Probe(mAccountHandle)->WriteToParcel(out);
-    IParcelable::Probe(mAddress)->WriteToParcel(out);
-    IParcelable::Probe(mSubscriptionAddress)->WriteToParcel(out);
+    if (mAccountHandle != NULL) {
+        out->WriteInt32(1);
+        IParcelable::Probe(mAccountHandle)->WriteToParcel(out);
+    }
+    else {
+        out->WriteInt32(0);
+    }
+
+    if (mAddress != NULL) {
+        out->WriteInt32(1);
+        //IParcelable::Probe(mAddress)->WriteToParcel(out);
+        out->WriteInterfacePtr(mAddress);
+    }
+    else {
+        out->WriteInt32(0);
+    }
+    if (mSubscriptionAddress != NULL) {
+        out->WriteInt32(1);
+        //IParcelable::Probe(mSubscriptionAddress)->WriteToParcel(out);
+        out->WriteInterfacePtr(mSubscriptionAddress);
+    }
+    else {
+        out->WriteInt32(0);
+    }
     out->WriteInt32(mCapabilities);
     out->WriteInt32(mIconResId);
-    IParcelable::Probe(mLabel)->WriteToParcel(out);
-    IParcelable::Probe(mShortDescription)->WriteToParcel(out);
-    IParcelable::Probe(mSupportedUriSchemes)->WriteToParcel(out);
+
+    if (mLabel != NULL) {
+        out->WriteInt32(1);
+        String label;
+        mLabel->ToString(&label);
+        out->WriteString(label);
+    }
+    else {
+        out->WriteInt32(0);
+    }
+
+    if (mShortDescription != NULL) {
+        out->WriteInt32(1);
+        String des;
+        mShortDescription->ToString(&des);
+        out->WriteString(des);
+    }
+    else {
+        out->WriteInt32(0);
+    }
+    if (mSupportedUriSchemes != NULL) {
+        out->WriteInt32(1);
+        Int32 size;
+        mSupportedUriSchemes->GetSize(&size);
+        out->WriteInt32(size);
+        for (Int32 i = 0; i < size; ++i) {
+            AutoPtr<IInterface> obj;
+            mSupportedUriSchemes->Get(i, (IInterface**)&obj);
+            ICharSequence* cs = ICharSequence::Probe(obj);
+            String str;
+            cs->ToString(&str);
+            out->WriteString(str);
+        }
+    }
+    else {
+        out->WriteInt32(0);
+    }
     return NOERROR;
 }
 
 ECode PhoneAccount::ReadFromParcel(
     /* [in] */ IParcel* in)
 {
-    IParcelable::Probe(mAccountHandle)->ReadFromParcel(in);
-    IParcelable::Probe(mAddress)->ReadFromParcel(in);
-    IParcelable::Probe(mSubscriptionAddress)->ReadFromParcel(in);
+    Int32 value = 0;
+    in->ReadInt32(&value);
+    if (value != 0) {
+        AutoPtr<IPhoneAccountHandle> pa;
+        CPhoneAccountHandle::New((IPhoneAccountHandle**)&pa);
+        IParcelable* parcel = IParcelable::Probe(pa);
+        parcel->ReadFromParcel(in);
+        mAccountHandle = pa;
+    }
+    else {
+        mAccountHandle = NULL;
+    }
+
+    in->ReadInt32(&value);
+    if (value != 0) {
+        //AutoPtr<IUri> address;
+        //AutoPtr<IUriHelper> helper;
+        //CUriHelper::AcquireSingleton((IUriHelper**)&helper);
+        //helper->GetEMPTY((IUri**)&address);
+        //IParcelable* parcel = IParcelable::Probe(address);
+        //parcel->ReadFromParcel(source);
+        //mAddress= address;
+        AutoPtr<IInterface> address;
+        in->ReadInterfacePtr((Handle32*)&address);
+        mAddress = IUri::Probe(address);
+    }
+    else {
+        mAddress = NULL;
+    }
+
+    in->ReadInt32(&value);
+    if (value != 0) {
+        //AutoPtr<IUri> address;
+        //AutoPtr<IUriHelper> helper;
+        //CUriHelper::AcquireSingleton((IUriHelper**)&helper);
+        //helper->GetEMPTY((IUri**)&address);
+        //IParcelable* parcel = IParcelable::Probe(address);
+        //parcel->ReadFromParcel(source);
+        //mAddress= address;
+        AutoPtr<IInterface> address;
+        in->ReadInterfacePtr((Handle32*)&address);
+        mSubscriptionAddress = IUri::Probe(address);
+    }
+    else {
+        mSubscriptionAddress = NULL;
+    }
+
     in->ReadInt32(&mCapabilities);
     in->ReadInt32(&mIconResId);
-    IParcelable::Probe(mLabel)->ReadFromParcel(in);
-    IParcelable::Probe(mShortDescription)->ReadFromParcel(in);
+
+    //IParcelable::Probe(mLabel)->ReadFromParcel(in);
+    in->ReadInt32(&value);
+    if (value != 0) {
+        String label;
+        in->ReadString(&label);
+        mLabel = NULL;
+        CString::New(label, (ICharSequence**)&mLabel);
+    }
+    else {
+        mLabel = NULL;
+    }
+    //IParcelable::Probe(mShortDescription)->ReadFromParcel(in);
+    in->ReadInt32(&value);
+    if (value != 0) {
+        String des;
+        in->ReadString(&des);
+        mShortDescription = NULL;
+        CString::New(des, (ICharSequence**)&mShortDescription);
+    }
+    else {
+        mShortDescription = NULL;
+    }
 
     AutoPtr<IList> supportedUriSchemes;
     CArrayList::New((IList**)&supportedUriSchemes);
-    IParcelable::Probe(supportedUriSchemes)->ReadFromParcel(in);
+    //IParcelable::Probe(supportedUriSchemes)->ReadFromParcel(in);
+    in->ReadInt32(&value);
+    if (value != 0) {
+        Int32 size;
+        in->ReadInt32(&size);
+        for (Int32 i = 0; i < size; ++i) {
+            String str;
+            in->ReadString(&str);
+            AutoPtr<ICharSequence> cs;
+            CString::New(str, (ICharSequence**)&cs);
+            supportedUriSchemes->Add(cs);
+        }
+    }
+    else {
+        //supportedUriSchemes = NULL;
+        //CArrayList::New((IList**)&supportedUriSchemes);
+    }
+
+    mSupportedUriSchemes = NULL;
     AutoPtr<ICollections> cls;
     CCollections::AcquireSingleton((ICollections**)&cls);
     cls->UnmodifiableList(supportedUriSchemes, (IList**)&mSupportedUriSchemes);

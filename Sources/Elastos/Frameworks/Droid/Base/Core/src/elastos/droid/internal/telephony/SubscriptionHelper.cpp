@@ -10,6 +10,9 @@
 #include "elastos/droid/os/AsyncResult.h"
 #include "elastos/droid/telephony/CTelephonyManagerHelper.h"
 #include "elastos/droid/telephony/CSubscriptionManager.h"
+#include "elastos/droid/internal/telephony/CSubscriptionControllerHelper.h"
+#include "elastos/droid/internal/telephony/ModemBindingPolicyHandler.h"
+#include "elastos/droid/internal/telephony/uicc/CUiccControllerHelper.h"
 #include "elastos/droid/R.h"
 #include <elastos/core/AutoLock.h>
 
@@ -37,7 +40,7 @@ using Elastos::Droid::Internal::Telephony::IPhoneConstants;
 using Elastos::Droid::Internal::Telephony::Uicc::AppType;
 using Elastos::Droid::Internal::Telephony::Uicc::IUiccController;
 using Elastos::Droid::Internal::Telephony::Uicc::IUiccControllerHelper;
-// using Elastos::Droid::Internal::Telephony::Uicc::CUiccControllerHelper;
+using Elastos::Droid::Internal::Telephony::Uicc::CUiccControllerHelper;
 using Elastos::Droid::Internal::Telephony::Uicc::IUiccCard;
 using Elastos::Droid::Internal::Telephony::Uicc::IUiccCardApplication;
 using Elastos::Droid::R;
@@ -180,10 +183,10 @@ ECode SubscriptionHelper::constructor(
 }
 
 void SubscriptionHelper::UpdateNwModesInSubIdTable(
-    /* [in] */ Boolean override)
+    /* [in] */ Boolean _override)
 {
     AutoPtr<ISubscriptionControllerHelper> schlp;
-    // CSubscriptionControllerHelper::AcquireSingleton((ISubscriptionControllerHelper**)&schlp);
+    CSubscriptionControllerHelper::AcquireSingleton((ISubscriptionControllerHelper**)&schlp);
     AutoPtr<ISubscriptionController> subCtrlr;
     schlp->GetInstance((ISubscriptionController**)&subCtrlr);
     for (Int32 i = 0; i < sNumPhones; i++ ) {
@@ -215,7 +218,7 @@ void SubscriptionHelper::UpdateNwModesInSubIdTable(
 
             //store Db value to table only if value in table is default
             //OR if override is set to True.
-            if (override || nwModeinSubIdTable == ISubscriptionManager::DEFAULT_NW_MODE) {
+            if (_override || nwModeinSubIdTable == ISubscriptionManager::DEFAULT_NW_MODE) {
                 subCtrlr->SetNwMode((*subIdList)[0], nwModeInDb);
             }
         }
@@ -267,7 +270,7 @@ ECode SubscriptionHelper::UpdateSubActivation(
     Boolean isPrimarySubFeatureEnable = FALSE;
     sp->GetBoolean(String("persist.radio.primarycard"), FALSE, &isPrimarySubFeatureEnable);
     AutoPtr<ISubscriptionControllerHelper> schlp;
-    // CSubscriptionControllerHelper::AcquireSingleton((ISubscriptionControllerHelper**)&schlp);
+    CSubscriptionControllerHelper::AcquireSingleton((ISubscriptionControllerHelper**)&schlp);
     AutoPtr<ISubscriptionController> subCtrlr;
     schlp->GetInstance((ISubscriptionController**)&subCtrlr);
     Boolean setUiccSent = FALSE;
@@ -325,10 +328,7 @@ ECode SubscriptionHelper::UpdateSubActivation(
 ECode SubscriptionHelper::UpdateNwMode()
 {
     UpdateNwModesInSubIdTable(FALSE);
-    AutoPtr<IModemBindingPolicyHandlerHelper> hlp;
-    // CModemBindingPolicyHandlerHelper::AcquireSingleton(&hlp);
-    AutoPtr<IModemBindingPolicyHandler> mbph;
-    hlp->GetInstance((IModemBindingPolicyHandler**)&mbph);
+    AutoPtr<ModemBindingPolicyHandler> mbph = ModemBindingPolicyHandler::GetInstance();
     mbph->UpdatePrefNwTypeIfRequired();
     mNwModeUpdated = TRUE;
     return NOERROR;
@@ -339,7 +339,7 @@ ECode SubscriptionHelper::SetUiccSubscription(
     /* [in] */ Int32 subStatus)
 {
     AutoPtr<IUiccControllerHelper> uchlp;
-    // CUiccControllerHelper::AcquireSingleton((IUiccControllerHelper**)&uchlp);
+    CUiccControllerHelper::AcquireSingleton((IUiccControllerHelper**)&uchlp);
     AutoPtr<IUiccController> uc;
     uchlp->GetInstance((IUiccController**)&uc);
     Boolean set3GPPDone = FALSE, set3GPP2Done = FALSE;
@@ -361,8 +361,7 @@ ECode SubscriptionHelper::SetUiccSubscription(
         uiccCard->GetApplicationIndex(i, (IUiccCardApplication**)&uca);
         AppType type;
         uca->GetType(&type);
-        assert(0 && "TODO");
-        Int32 appType = 0;// type.Ordinal();
+        Int32 appType = type;//TODO is this ok? type.Ordinal();
         AutoPtr<IMessageHelper> mhlp;
         CMessageHelper::AcquireSingleton((IMessageHelper**)&mhlp);
         if (set3GPPDone == FALSE && (appType == IPhoneConstants::APPTYPE_USIM ||
@@ -393,7 +392,7 @@ void SubscriptionHelper::ProcessSetUiccSubscriptionDone(
     /* [in] */ IMessage* msg)
 {
     AutoPtr<ISubscriptionControllerHelper> schlp;
-    // CSubscriptionControllerHelper::AcquireSingleton((ISubscriptionControllerHelper**)&schlp);
+    CSubscriptionControllerHelper::AcquireSingleton((ISubscriptionControllerHelper**)&schlp);
     AutoPtr<ISubscriptionController> subCtrlr;
     schlp->GetInstance((ISubscriptionController**)&subCtrlr);
     AutoPtr<IInterface> obj;
@@ -447,7 +446,7 @@ void SubscriptionHelper::BroadcastSetUiccResult(
     /* [in] */ Int32 result)
 {
     AutoPtr<ISubscriptionControllerHelper> schlp;
-    // CSubscriptionControllerHelper::AcquireSingleton((ISubscriptionControllerHelper**)&schlp);
+    CSubscriptionControllerHelper::AcquireSingleton((ISubscriptionControllerHelper**)&schlp);
     AutoPtr<ISubscriptionController> subCtrlr;
     schlp->GetInstance((ISubscriptionController**)&subCtrlr);
     AutoPtr<ArrayOf<Int64> > subId;
