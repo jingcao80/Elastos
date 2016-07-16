@@ -8021,9 +8021,8 @@ void TextView::CheckForRelayout()
     // If we have a fixed width, we can just swap in a new text layout
     // if the text height stays the same or if the view height is fixed.
 
-    Int32 lw, lh;
+    Int32 lw;
     mLayoutParams->GetWidth(&lw);
-    mLayoutParams->GetHeight(&lh);
     Int32 compoundPaddingLeft, compoundPaddingRight;
     if ((lw != IViewGroupLayoutParams::WRAP_CONTENT ||
         (mMaxWidthMode == mMinWidthMode && mMaxWidth == mMinWidth)) &&
@@ -8046,16 +8045,14 @@ void TextView::CheckForRelayout()
          * changing (unless we do the RequestLayout(), in which case it
          * will happen at measure).
          */
-        Int32 compoundPaddingLeft, compoundPaddingRight;
-        GetCompoundPaddingLeft(&compoundPaddingLeft);
-        GetCompoundPaddingRight(&compoundPaddingRight);
-        MakeNewLayout(
-            want, hintWant, UNKNOWN_BORING, UNKNOWN_BORING,
-            mRight - mLeft - compoundPaddingLeft - compoundPaddingRight,
-            FALSE);
+        MakeNewLayout(want, hintWant, UNKNOWN_BORING, UNKNOWN_BORING,
+                mRight - mLeft - compoundPaddingLeft - compoundPaddingRight,
+                FALSE);
 
         if (mEllipsize != TextUtilsTruncateAt_MARQUEE) {
             // In a fixed-height view, so use our new text layout.
+            Int32 lh;
+            mLayoutParams->GetHeight(&lh);
             if (lh != IViewGroupLayoutParams::WRAP_CONTENT
                     && lh != IViewGroupLayoutParams::MATCH_PARENT) {
                 Invalidate();
@@ -8066,11 +8063,8 @@ void TextView::CheckForRelayout()
             // so use our new text layout.
             Int32 ht1, ht2;
             mLayout->GetHeight(&ht1);
-            if (mHintLayout != NULL) {
-                mHintLayout->GetHeight(&ht2);
-            }
-
-            if (ht1 == oldht && (mHintLayout == NULL || ht2 == oldht)) {
+            if (ht1 == oldht &&
+                (mHintLayout == NULL || (mHintLayout->GetHeight(&ht2), ht2 == oldht))) {
                 Invalidate();
                 return;
             }
