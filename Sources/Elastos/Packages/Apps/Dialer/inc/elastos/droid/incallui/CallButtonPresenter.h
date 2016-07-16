@@ -25,32 +25,40 @@ public:
 
     CallButtonPresenter();
 
+    // @Override
     CARAPI OnUiReady(
         /* [in] */ IUi* ui);
 
+    // @Override
     CARAPI OnUiUnready(
         /* [in] */ IUi* ui);
 
+    // @Override
     CARAPI OnStateChange(
         /* [in] */ InCallState oldState,
         /* [in] */ InCallState newState,
         /* [in] */ ICallList* callList);
 
+    // @Override
     CARAPI OnDetailsChanged(
         /* [in] */ ICall* call,
         /* [in] */ ICallDetails* details);
 
+    // @Override
     CARAPI OnIncomingCall(
         /* [in] */ InCallState oldState,
         /* [in] */ InCallState newState,
         /* [in] */ ICall* call);
 
+    // @Override
     CARAPI OnAudioMode(
         /* [in] */ Int32 newMode);
 
+    // @Override
     CARAPI OnSupportedAudioMode(
         /* [in] */ Int32 modeMask);
 
+    // @Override
     CARAPI OnMute(
         /* [in] */ Boolean muted);
 

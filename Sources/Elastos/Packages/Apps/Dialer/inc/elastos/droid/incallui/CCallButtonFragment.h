@@ -37,6 +37,48 @@ CarClass(CCallButtonFragment)
     , public ICallButtonUi
     , public ICallButtonFragment
 {
+private:
+    class OverflowPopupOnMenuItemClickListener
+        : public Object
+        , public IPopupMenuOnMenuItemClickListener
+    {
+    public:
+        OverflowPopupOnMenuItemClickListener(
+            /* [in] */ CCallButtonFragment* host)
+            : mHost(host)
+        {}
+
+        CAR_INTERFACE_DECL();
+
+        // @Override
+        CARAPI OnMenuItemClick(
+            /* [in] */ IMenuItem* item,
+            /* [out] */ Boolean* result);
+
+    private:
+        CCallButtonFragment* mHost;
+    };
+
+    class OverflowPopupOnDismissListener
+        : public Object
+        , public IPopupMenuOnDismissListener
+    {
+    public:
+        OverflowPopupOnDismissListener(
+            /* [in] */ CCallButtonFragment* host)
+            : mHost(host)
+        {}
+
+        CAR_INTERFACE_DECL();
+
+        // @Override
+        CARAPI OnDismiss(
+            /* [in] */ IPopupMenu* popupMenu);
+
+    private:
+        CCallButtonFragment* mHost;
+    };
+
 public:
     CAR_INTERFACE_DECL();
 
