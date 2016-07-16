@@ -10714,6 +10714,8 @@ ECode View::ResolveRtlPropertiesIfNeeded(
     /* [out] */ Boolean* res)
 {
     VALIDATE_NOT_NULL(res)
+    *res = FALSE;
+    return NOERROR;
     if (!NeedRtlPropertiesResolution()) {
         *res = FALSE;
         return NOERROR;
