@@ -9,7 +9,6 @@
 #include <wtf/text/CString.h>
 #include <wtf/text/StringBuilder.h>
 
-//#include "elastos/HashSet.h"
 #include "etl/HashSet.h"
 #include "elastos.h"
 
@@ -75,32 +74,10 @@ void CarInstanceV8::invokeMethod(const CarMethod* method, CarValue* args, bool* 
     AutoPtr<IMethodInfo> aMethod;
     aMethod = method->methodInfo();
 
-    // bool bClass = true;
-    // ec = CObject::ReflectClassInfo(*(PInterface*)&object, (IClassInfo**)&classInfo);
-    // if (FAILED(ec)) {
-    //     bClass = false;
-    //     interfaceInfo = IInterfaceInfo::Probe(mInstance->getDataTypeInfo());
-    // }
-
-    // AutoPtr<IMethodInfo> aMethod;
-    // if (bClass) {
-    //     //ec = classInfo->GetMethodInfo(method->name().utf8().data(), (IMethodInfo**)&aMethod);
-    //     ec = classInfo->GetMethodInfo(Elastos::String(method->name().utf8().data()), Elastos::String("(I32)E"), (IMethodInfo**)&aMethod);
-    //  }
-    // else {
-    //     //ec = interfaceInfo->GetMethodInfo(method->name().utf8().data(), (IMethodInfo**)&aMethod);
-    //     ec = interfaceInfo->GetMethodInfo(Elastos::String(method->name().utf8().data()), Elastos::String("(I32)E"), (IMethodInfo**)&aMethod);
-    // }
-    // if (FAILED(ec)) {
-    //     LOG_ERROR("CarInstanceV8::invokeMethod unable to get methodInfo of \"%s\"", method->name().utf8().data());
-    //     return;
-    // }
-
     AutoPtr<IArgumentList> argumentList = NULL;
     if (numParams > 0) {
         ec = aMethod->CreateArgumentList((IArgumentList**)&argumentList);
         if (FAILED(ec)) {
-            //LOG_ERROR("CarInstanceV8::invokeMethod unable to create argumentList on method %p", method);
             ALOGD("CarInstanceV8::invokeMethod unable to create argumentList on method %p", method);
             *didRaiseUncaughtException = true;
             return;
@@ -270,14 +247,12 @@ void CarInstanceV8::invokeMethod(const CarMethod* method, CarValue* args, bool* 
 
                 default:
                 {
-                    //LOG_ERROR("CarInstanceV8::invokeMethod unknown ParamIOAttribute");
                     ALOGD("CarInstanceV8::invokeMethod unknown ParamIOAttribute");
                     *didRaiseUncaughtException = true;
                     break;
                 }
             }
 
-            //if (FAILED(ec)) {
             if ( FAILED(ec) || *didRaiseUncaughtException) {
                 Elastos::String nameBuf;
                 aParameter->GetName(&nameBuf);
@@ -288,31 +263,20 @@ void CarInstanceV8::invokeMethod(const CarMethod* method, CarValue* args, bool* 
 
             //aParameter->Release();
             //aParameter = NULL;
-
-            ALOGD("CarInstanceV8::invokeMethod SetArguments success! %d/%d",i,numParams);
         }
-        ALOGD("CarInstanceV8::invokeMethod paramInfos free begin!");
         //ArrayOf<IParamInfo*>::Free(paramInfos);
-        ALOGD("CarInstanceV8::invokeMethod paramInfos free end!");
     }
 
     if(method->isRunOnUiThread()) {
-        ALOGD("CarInstanceV8::invokeMethod invoke remote!");
         cbEnqueueUIMessage(object, aMethod, argumentList);
     }
     else {
-        ALOGD("CarInstanceV8::invokeMethod invoke local!");
         ec = aMethod->Invoke(object, argumentList);
         if (FAILED(ec)) {
-            //LOG_ERROR("CarInstanceV8::invokeMethod invoke failed!");
             Elastos::String methodNameBuf;
             aMethod->GetName(&methodNameBuf);
-            ALOGD("CarInstanceV8::invokeMethod invoke failed! Ecode:%x,methodName:%s", ec,methodNameBuf.string());
             *didRaiseUncaughtException = true;
             return;
-        }
-        else {
-            ALOGD("CarInstanceV8::invokeMethod invoke success!");
         }
     }
 

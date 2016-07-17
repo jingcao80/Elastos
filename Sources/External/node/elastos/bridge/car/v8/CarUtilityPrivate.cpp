@@ -851,17 +851,7 @@ void convertCarValueToNPVariant(CarValue& value, NPVariant* result)
             break;
         case CarDataType_Char32:
         {
-
-        // AutoPtr<ArrayOf<Char32> > buf = ArrayOf<Char32>::Alloc(size);
-        // for (Int32 i = 0; i < size; ++i) {
-        //     buf->Set(i, (Char32)(*(p + i)));
-        // }
-        // String str(*buf);
-
-
-            //ArrayOf_<Char32, 1> charArray;
             AutoPtr<ArrayOf<Char32> > charArray = ArrayOf<Char32>::Alloc(1);
-            //charArray[0] = value.mCharValue;
             charArray->Set(0, (Char32)value.mCharValue);
             const char* utf8String = strdup(Elastos::String(*charArray).string());
             STRINGZ_TO_NPVARIANT(utf8String, *result);
@@ -1035,9 +1025,7 @@ void convertCarValueToNPVariant(CarValue& value, NPVariant* result)
 
                     v8::Local<v8::Array> pV8Array(v8::Array::New(isolate,length));
                     for (Int32 i = 0; i < length; i++){
-                        //ArrayOf_<Char32, 1> charArray;
                         AutoPtr<ArrayOf<Char32> > charArray = ArrayOf<Char32>::Alloc(1);
-                        //charArray[0] = (*pArray)[i];
                         charArray->Set(0, (Char32)(*pArray)[i]);
                         const char* utf8String = strdup(Elastos::String(*charArray).string());
                         pV8Array->Set(i, v8::String::NewFromUtf8(isolate,utf8String));

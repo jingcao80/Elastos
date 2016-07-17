@@ -1102,16 +1102,7 @@ void CarCallbackInterfaceProxy::Callback::Call()
     ALOGD("====CarCallbackInterfaceProxy::Callback::Call============thread id:%x",pthread_self());
 
     v8::Isolate* isolate = mObject->mIsolate;
-    //v8::Isolate* isolate = v8::Isolate::GetCurrent();
-    //isolate->Enter();
-
-    //v8::Handle<v8::Context> context = v8::Isolate::GetCurrent()->GetCurrentContext();
     v8::Handle<v8::Context> context = isolate->GetCurrentContext();
-    //v8::Handle<v8::Context> context = mObject->mContext;
-
-    //v8::Isolate::Scope isolateScope(isolate);
-    //v8::Context::Scope contextScope(context);
-
     v8::HandleScope scope(isolate);
 
     NPObject* obj = mObject->mObject;
@@ -1128,25 +1119,21 @@ void CarCallbackInterfaceProxy::Callback::Call()
             v8::Local<v8::Object> jsObject;
             v8::Local<v8::Function> jsFunc;
             if (v8NPFuncObject->v8Object.IsWeak()) {
-                ALOGD("====CarCallbackInterfaceProxy::Callback::Call======weak======");
                 jsObject = v8::Local<v8::Object>::New(isolate,v8NPFuncObject->v8Object);
                 jsFunc = v8::Local<v8::Function>::Cast(jsObject);
             }
             else {
-                ALOGD("====CarCallbackInterfaceProxy::Callback::Call======strong======");
                 jsObject = *reinterpret_cast<v8::Local<v8::Object>*>(const_cast<v8::Persistent<v8::Object>*>(&v8NPFuncObject->v8Object));
                 jsFunc = v8::Local<v8::Function>::Cast(jsObject);
             }
 
-            v8::TryCatch try_catch;
-
             v8::Handle<v8::Value>* argv = ConvertParams();
-            jsFunc->Call(context->Global(), mParamCount, argv);
 
+            v8::TryCatch try_catch;
+            jsFunc->Call(context->Global(), mParamCount, argv);
             if (try_catch.HasCaught()) {
                 //FatalException(try_catch);
                 ReportException(isolate, &try_catch);
-                jsFunc->Call(context->Global(), mParamCount, argv);
             }
 
             //get out params
@@ -1411,13 +1398,8 @@ void CarCallbackInterfaceProxy::Callback::Call()
         }
     }
     else {
-        //LOG_ERROR("CarCallbackInterfaceProxy::Callback::Call object is not js object");
         ALOGD("CarCallbackInterfaceProxy::Callback::Call object is not js object");
     }
-
-    //isolate->Exit();
-
-    ALOGD("====CarCallbackInterfaceProxy::Callback::Call======end======");
 }
 
 v8::Handle<v8::Value>* CarCallbackInterfaceProxy::Callback::ConvertParams()

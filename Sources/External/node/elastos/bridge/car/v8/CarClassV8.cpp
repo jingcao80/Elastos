@@ -130,9 +130,7 @@ CarClassV8::CarClassV8(CobjectWrapper* objectWrapper, bool requireAnnotation)
         mIsView = true;
     }
 
-    ALOGD("CarClassV8::CarClassV8 Before Free");
     ArrayOf<IMethodInfo*>::Free(methodInfos);
-    ALOGD("CarClassV8::CarClassV8 After Free");
 }
 
 CarClassV8::~CarClassV8()

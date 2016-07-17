@@ -193,25 +193,8 @@ NodeMessage* NodeMessageQueue_Push(NodeMessageQueue* _this, void* obj, void (*se
     return msg;
 }
 
-//Run in remote thread
-void NodeMessageQueue_Enqueue_bak(NodeMessageQueue* _this, void* obj, void (*send)(void*), void (*proc)(void*), void* payload)
-{
-    NodeMessage* msg = NodeMessageQueue_Push(_this, obj, send, proc, payload);
-    NodeMessageQueue* mq = _NodeBridge_GetThreadMessageQueue(_this->mBridge);
-    msg->mFromIdx = mq->mIndex;
-    int top = mq->mTop;
-    while ( NodeMessage_IsLocking(msg) ) {
-        int _top = mq->mTop;
-        if (_top > top) {
-            NodeMessage* _msg = mq->mMessages[_top - 1];
-            NodeMessage_Invoke(_msg);
-        }
-        else {
-            sleep(1);
-        }
-    }
-    return;
-}
+int _ttt = 0;
+
 void NodeMessageQueue_Enqueue(NodeMessageQueue* _this, void* obj, void (*send)(void*), void (*proc)(void*), void* payload)
 {
     NodeMessage* msg = NodeMessageQueue_Push(_this, obj, send, proc, payload);
@@ -229,9 +212,8 @@ void NodeMessageQueue_Enqueue(NodeMessageQueue* _this, void* obj, void (*send)(v
             NodeMessage_Invoke(_msg);
         }
         else {
+            bool sendSignal = TRUE;
             if ( uv_waiting && tag_signal_uv ) {
-                ALOGD("NodeMessageQueue_Enqueue ======= uv condition waiting signal==========");
-
                 tag_signal_uv = false;
 
                 pthread_mutex_lock(&uv_mtx);
@@ -239,30 +221,32 @@ void NodeMessageQueue_Enqueue(NodeMessageQueue* _this, void* obj, void (*send)(v
                 pthread_mutex_unlock(&uv_mtx);
             }
             else {
-                if ( &_this->queue_waiting && tag_signal_queue ){
-                    ALOGD("NodeMessageQueue_Enqueue ======= _this condition waiting signal==========");
-
+                if ( _this->queue_waiting && tag_signal_queue ){
                     tag_signal_queue = false;
 
                     pthread_mutex_lock(&_this->queue_mtx);
                     pthread_cond_signal(&_this->queue_cond);
                     pthread_mutex_unlock(&_this->queue_mtx);
                 }
+                else {
+                    sendSignal = FALSE;
+                }
             }
-
-            if ( !&mq->queue_waiting ){
-                ALOGD("NodeMessageQueue_Enqueue ======= mq condition waiting ==========");
-
+            if ( NodeMessage_IsLocking(msg) && sendSignal) {
                 pthread_mutex_lock(&mq->queue_mtx);
+
                 mq->queue_waiting = TRUE;
                 pthread_cond_wait(&mq->queue_cond,&mq->queue_mtx);
                 mq->queue_waiting = FALSE;
-                pthread_mutex_unlock(&mq->queue_mtx);
 
-                ALOGD("NodeMessageQueue_Enqueue ======= mq condition waiting end==========");
+                tag_signal_uv = true;
+                tag_signal_queue = true;
+
+                pthread_mutex_unlock(&mq->queue_mtx);
             }
         }
     }
+
     return;
 }
 
@@ -376,6 +360,48 @@ TestCallbackBuf::~TestCallbackBuf()
     //
 }
 
+// const char* ToCString(const v8::String::Utf8Value& value) {
+//    return *value ? *value : "<string conversion failed>";
+// }
+extern const char* ToCString(const v8::String::Utf8Value& value);
+extern void ReportException(v8::Isolate* isolate, v8::TryCatch* try_catch);
+// void ReportException(v8::Isolate* isolate, v8::TryCatch* try_catch) {
+//   v8::HandleScope handle_scope(isolate);
+//   v8::String::Utf8Value exception(try_catch->Exception());
+//   const char* exception_string = ToCString(exception);
+//   v8::Handle<v8::Message> message = try_catch->Message();
+//   if (message.IsEmpty()) {
+//     // V8 didn't provide any extra information about this error; just
+//     // print the exception.
+//     ALOGD("js error====%s\n", exception_string);
+//   } else {
+//     // Print (filename):(line number): (message).
+//     v8::String::Utf8Value filename(message->GetScriptOrigin().ResourceName());
+//     const char* filename_string = ToCString(filename);
+//     int linenum = message->GetLineNumber();
+//     ALOGD("js error====%s:%i: %s\n", filename_string, linenum, exception_string);
+//     // Print line of source code.
+//     v8::String::Utf8Value sourceline(message->GetSourceLine());
+//     const char* sourceline_string = ToCString(sourceline);
+//     ALOGD("%s\n", sourceline_string);
+//     // Print wavy underline (GetUnderline is deprecated).
+//     int start = message->GetStartColumn();
+//     for (int i = 0; i < start; i++) {
+//       ALOGD(" ");
+//     }
+//     int end = message->GetEndColumn();
+//     for (int i = start; i < end; i++) {
+//       ALOGD("^");
+//     }
+//     ALOGD("\n");
+//     v8::String::Utf8Value stack_trace(try_catch->StackTrace());
+//     if (stack_trace.length() > 0) {
+//       const char* stack_trace_string = ToCString(stack_trace);
+//       ALOGD("%s\n", stack_trace_string);
+//     }
+//   }
+//}
+
 void Receive_(int input,Local<Function> callback);
 
 void Observe_bak(uv_work_t* r) {
@@ -386,26 +412,25 @@ void Observe_bak(uv_work_t* r) {
     }
 }
 void Observe(uv_work_t* r) {
+    ALOGD("Observe =======begin==========");
+
     async_req* req = reinterpret_cast<async_req*>(r->data);
 
-    NodeMessageQueue* mq = (NodeMessageQueue*)pNodeBridge->mQueues[pNodeBridge->mNODE];
+    NodeMessageQueue* mq_node = (NodeMessageQueue*)pNodeBridge->mQueues[pNodeBridge->mNODE];
     NodeMessageQueue* mq_epk = (NodeMessageQueue*)pNodeBridge->mQueues[pNodeBridge->mEPK];
 
     pthread_mutex_lock(&uv_mtx);
-    while( mq->mTop < 2 || mq->mMessages[1]->mStatus > NodeMessage_Status_Ready ) {
-        if ( &mq_epk->queue_waiting ){
-            ALOGD("NodeMessageQueue_Enqueue ======= mq_epk condition waiting signal==========");
-
+    while( mq_node->mTop < 2 || mq_node->mMessages[1]->mStatus > NodeMessage_Status_Ready ) {
+        if ( TRUE ){
+        //if ( mq_epk->queue_waiting ){
             pthread_mutex_lock(&mq_epk->queue_mtx);
             pthread_cond_signal(&mq_epk->queue_cond);
             pthread_mutex_unlock(&mq_epk->queue_mtx);
         }
 
-        ALOGD("Observe ======= condition waiting ==========");
         uv_waiting = TRUE;
         pthread_cond_wait(&uv_cond,&uv_mtx);
         uv_waiting = FALSE;
-        ALOGD("Observe ======= condition waiting end==========");
     }
     pthread_mutex_unlock(&uv_mtx);
 }
@@ -429,21 +454,20 @@ void Back(uv_work_t* r) {
         Integer::New(isolate, req->output)
     };
 
-    TryCatch try_catch;
-
     Local<Function> callback = Local<Function>::New(isolate, req->callback);
-    //callback->Call(isolate->GetCurrentContext()->Global(), 2, argv);
+
+    TryCatch try_catch;
     callback->Call(context->Global(), 2, argv);
+    if (try_catch.HasCaught()) {
+        //FatalException(try_catch);
+        ReportException(isolate, &try_catch);
+    }
 
     Receive_(req->input,callback);
 
     // cleanup
     req->callback.Reset();
     delete req;
-
-    if (try_catch.HasCaught()) {
-        //FatalException(try_catch);
-    }
 }
 
 void Receive_(int input,Local<Function> callback) {

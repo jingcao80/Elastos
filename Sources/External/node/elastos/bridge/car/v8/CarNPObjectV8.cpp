@@ -6,7 +6,6 @@
 
 #include "npruntime_impl.h"
 
-//#include "elastos/HashSet.h"
 #include "etl/HashSet.h"
 #include "elastos.h"
 
@@ -395,8 +394,6 @@ bool CarNPObjectInvoke(NPObject* npobj, NPIdentifier identifier, const NPVariant
         return false;
     }
 
-    ALOGD("CarNPObjectInvoke.1 method name: %s====",name);
-
     instance->begin();
 
     MethodList methodList = instance->getClass()->methodsNamed(name);
@@ -415,8 +412,6 @@ bool CarNPObjectInvoke(NPObject* npobj, NPIdentifier identifier, const NPVariant
     CarMethod* carMethod = 0;
     CarMethod* tmpCarMethod = 0;
 
-    ALOGD("CarNPObjectInvoke test========1========numMethods:%d",numMethods);
-
     //TODO: more than one out parameters and with default input parameters
     //bool result_0 = (methodList.size() > 0);
     if (numMethods == 0) {
@@ -431,9 +426,7 @@ bool CarNPObjectInvoke(NPObject* npobj, NPIdentifier identifier, const NPVariant
     //else if (numMethods > 1) {
     else {
         //overload
-        ALOGD("CarNPObjectInvoke test========2========numMethods:%d",numMethods);
         for (size_t methodIndex = 0; methodIndex < numMethods; methodIndex++) {
-            ALOGD("CarNPObjectInvoke test========3========methodIndex:%d",methodIndex);
             tmpCarMethod = methodList[methodIndex];
             //TODO: shuld compare with only input parameters count.
             //NOTE: different from callback output parms.
@@ -450,10 +443,7 @@ bool CarNPObjectInvoke(NPObject* npobj, NPIdentifier identifier, const NPVariant
 
             bool bSameInArg = true;
 
-            ALOGD("CarNPObjectInvoke test========4========numParams:%d",numParams);
             for (Int32 i = 0; i < numParams; i++) {
-                ALOGD("CarNPObjectInvoke test========5========i:%d",i);
-
                 AutoPtr<IParamInfo> paramInfo = (*paramInfos)[i];
                 ParamIOAttribute paramIOAttribute;
                 paramInfo->GetIOAttribute(&paramIOAttribute);
@@ -462,52 +452,33 @@ bool CarNPObjectInvoke(NPObject* npobj, NPIdentifier identifier, const NPVariant
                 CarDataType dataType;
                 dataTypeInfo->GetDataType(&dataType);
 
-                ALOGD("CarNPObjectInvoke test========6========paramIOAttribute:%d",paramIOAttribute);
                 if (paramIOAttribute == ParamIOAttribute_In) {
                     numIn++;
-                    ALOGD("CarNPObjectInvoke test========7========argCount:%d==numIn:%d",argCount,numIn);
                     if (static_cast<int>(argCount) < numIn) {
-                        ALOGD("CarNPObjectInvoke test========8========fail");
                         bSameInArg = false;
                         break;
                     }
 
-                    ALOGD("CarNPObjectInvoke test========9========NPType:%d====dataType:%d",args[numIn - 1].type,dataType);
                     if (_compatible(args[numIn - 1].type, dataType)) {
-                        //
-                        ALOGD("CarNPObjectInvoke test========10========");
+                        //same type
                     }
                     else {
-                        ALOGD("CarNPObjectInvoke test========11========fail");
                         bSameInArg = false;
                         break;
                     }
                 }
                 else {
-                    ALOGD("CarNPObjectInvoke test========12========");
                     numOut++;
                 }
-                ALOGD("CarNPObjectInvoke test========13========");
 
             }
-            ALOGD("CarNPObjectInvoke test========14========");
 
-            //if (tmpCarMethod->numParameters() == static_cast<int>(argCount)) {
-            //if (numIn == static_cast<int>(argCount)) {
             if (bSameInArg) {
-                ALOGD("CarNPObjectInvoke test========15========");
-                //TODO:compare the param type one by one
                 carMethod = tmpCarMethod;
                 break;
             }
-            else {
-                ALOGD("CarNPObjectInvoke test========16========");
-            }
-            ALOGD("CarNPObjectInvoke test========17========");
         }
-        ALOGD("CarNPObjectInvoke test========18========");
     }
-    ALOGD("CarNPObjectInvoke test========19========");
 
     if (!carMethod) {
         ALOGD("CarNPObjectInvoke : can't found carMethod name: %s====",name);
@@ -520,8 +491,6 @@ bool CarNPObjectInvoke(NPObject* npobj, NPIdentifier identifier, const NPVariant
         return false;
     }
 
-    ALOGD("CarNPObjectInvoke.2 method name: %s====",name);
-
     AutoPtr<IInterface> object = instance->carInstance();
 
     AutoPtr<IInterfaceInfo> interfaceInfo;
@@ -531,7 +500,6 @@ bool CarNPObjectInvoke(NPObject* npobj, NPIdentifier identifier, const NPVariant
 
     ec = CObject::ReflectClassInfo(object, (IClassInfo**)&classInfo);
     if (FAILED(ec)) {
-        ALOGD("CarNPObjectInvoke name: %s====CObject::ReflectClassInfo Failed",name);
         bClass = false;
         interfaceInfo = IInterfaceInfo::Probe(instance->getInstance()->getDataTypeInfo());
     }
@@ -542,27 +510,6 @@ bool CarNPObjectInvoke(NPObject* npobj, NPIdentifier identifier, const NPVariant
 
     Elastos::String temp_name;
     methodInfo->GetName(&temp_name);
-    ALOGD("CarNPObjectInvoke name: %s====name1: %s",name,temp_name.string());
-
-    // if (bClass) {
-    //     ALOGD("CarNPObjectInvoke method name: %s====GetMethodInfo By ClassInfo",carMethod->name().utf8().data() );
-    //     //ec = classInfo->GetMethodInfo(carMethod->name().utf8().data(), (IMethodInfo**)&methodInfo);
-    //     ec = classInfo->GetMethodInfo(Elastos::String(carMethod->name().utf8().data()), Elastos::String("(I32)E"), (IMethodInfo**)&methodInfo);
-    // }
-    // else {
-    //     ALOGD("CarNPObjectInvoke method name: %s====GetMethodInfo By InterfaceInfo",name);
-    //     //ec = interfaceInfo->GetMethodInfo(carMethod->name().utf8().data(), (IMethodInfo**)&methodInfo);
-    //     ec = classInfo->GetMethodInfo(Elastos::String(carMethod->name().utf8().data()), Elastos::String("(I32)E"), (IMethodInfo**)&methodInfo);
-    // }
-    // if (FAILED(ec)) {
-    //     ALOGD("CarNPObjectInvoke method name: %s====GetMethodInfo Failed!",name);
-    //     LOG_ERROR("CarNPObjectInvoke: get methodinfo failed, to invoke default!");
-    //     instance->end();
-    //     free(name);
-    //     return false;
-    // }
-
-    ALOGD("CarNPObjectInvoke method name: %s====GetMethodInfo Success!",name);
 
     //-----------------bRunOnUiThread begin-------------------
     bool bRunOnUiThread;
@@ -582,7 +529,7 @@ bool CarNPObjectInvoke(NPObject* npobj, NPIdentifier identifier, const NPVariant
         Elastos::String mMethodAnnotation;
         ec = methodInfo->GetAnnotation(&mMethodAnnotation);
         if (FAILED(ec)) {
-            printf("Get %s method annotation failed!\n", name);
+            ALOGD("Get %s method annotation failed!\n", name);
             free(name);
             return ec;
         }
@@ -592,11 +539,6 @@ bool CarNPObjectInvoke(NPObject* npobj, NPIdentifier identifier, const NPVariant
         }
     }
 
-    if(bRunOnUiThread) {
-        ALOGD("CarNPObjectInvoke.beRunOnUiThread method name: %s====",name);
-    }
-
-    //bRunOnUiThread = true;
     carMethod->setRunOnUiThread(bRunOnUiThread);
     //-----------------bRunOnUiThread end-------------------
 
@@ -698,8 +640,6 @@ bool CarNPObjectInvoke(NPObject* npobj, NPIdentifier identifier, const NPVariant
         return false;
     }
 
-    //ALOGD("CarNPObjectInvoke method name: %s====invoke Success!",name);
-
     convertCarValuesToNPVariant(carMethod, jArgs, outParamsPosBuf, result);
 
     free(name);
@@ -753,15 +693,15 @@ bool CarNPObjectHasProperty(NPObject* npobj, NPIdentifier identifier)
     bool retValue = false;
 
     CarInstance* instance = ExtractCarInstance(npobj);
-    if (!instance)
+    if (!instance) {
         return false;
+    }
     NPUTF8* name;
     name = _NPN_UTF8FromIdentifier(identifier);
 
-    if (!name)
+    if (!name) {
         return false;
-
-    //ALOGD("CarNPObjectHasProperty.begin========name: %s====",name);
+    }
 
     instance->begin();
     //Note: the return type of fieldNames is CarField,not Boolean.

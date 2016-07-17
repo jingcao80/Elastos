@@ -35,9 +35,6 @@ protected:
 
     typedef WTF::HashMap<WTF::String, CarValue> DynamicFieldMap;
     DynamicFieldMap mDynamicFields;
-
-    //pthread_mutex_t mMutex;
-    //pthread_mutex_t* pMutex;
 };
 
 } // namespace Bindings
