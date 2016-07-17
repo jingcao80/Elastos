@@ -7201,7 +7201,7 @@ void ViewGroup::ResolveDrawables()
         Boolean isLayoutDirectionInherited;
         child->IsLayoutDirectionInherited(&isLayoutDirectionInherited);
         if (isLayoutDirectionInherited) {
-            child->ResolvePadding();
+            child->ResolveDrawables();
         }
     }
 }

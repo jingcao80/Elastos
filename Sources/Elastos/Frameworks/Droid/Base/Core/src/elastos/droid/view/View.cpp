@@ -10714,8 +10714,6 @@ ECode View::ResolveRtlPropertiesIfNeeded(
     /* [out] */ Boolean* res)
 {
     VALIDATE_NOT_NULL(res)
-    *res = FALSE;
-    return NOERROR;
     if (!NeedRtlPropertiesResolution()) {
         *res = FALSE;
         return NOERROR;
@@ -10825,15 +10823,15 @@ ECode View::ResolveLayoutDirection(
                     // We cannot resolve yet. LTR is by default and let the resolution happen again
                     // later to get the correct resolved value
                     Boolean direction;
-                    ECode ec = CanResolveLayoutDirection(&direction);
+                    CanResolveLayoutDirection(&direction);
                     if (!direction) {
                         *res = FALSE;
-                        return ec;
+                        return NOERROR;
                     }
 
                     // Parent has not yet resolved, LTR is still the default
                     Boolean isLayoutDirectionResolved;
-                    IsLayoutDirectionResolved(&isLayoutDirectionResolved);
+                    mParent->IsLayoutDirectionResolved(&isLayoutDirectionResolved);
                     if (!isLayoutDirectionResolved)  {
                         *res = FALSE;
                         return NOERROR;
@@ -10855,7 +10853,7 @@ ECode View::ResolveLayoutDirection(
                     CLocaleHelper::AcquireSingleton((ILocaleHelper**)&helper);
                     AutoPtr<ILocale> locale;
                     helper->GetDefault((ILocale**)&locale);
-                    if(IView::LAYOUT_DIRECTION_RTL ==
+                    if (IView::LAYOUT_DIRECTION_RTL ==
                         TextUtils::GetLayoutDirectionFromLocale(locale)) {
                         mPrivateFlags2 |= PFLAG2_LAYOUT_DIRECTION_RESOLVED_RTL;
                     }
@@ -10884,7 +10882,7 @@ ECode View::CanResolveLayoutDirection(
             if (mParent != NULL) {
                 //try {
                 ECode ec = mParent->CanResolveLayoutDirection(res);
-                return ec;
+                if (SUCCEEDED(ec)) return NOERROR;
                 //} catch (AbstractMethodError e) {
                 //    Log.e(TAG, mParent.getClass().getSimpleName() +
                 //            " does not fully implement ViewParent", e);
@@ -13915,27 +13913,25 @@ void View::ResolveDrawables()
     // LAYOUT_DIRECTION_LOCALE, we can "cheat" and we don't need to wait for the layout
     // direction to be resolved as its resolved value will be the same as its raw value.
     Boolean isLayoutDirectionResolved;
-    IsLayoutDirectionResolved(&isLayoutDirectionResolved);
     Int32 rawLayoutDirection;
-    GetRawLayoutDirection(&rawLayoutDirection);
-    if (!isLayoutDirectionResolved && rawLayoutDirection == IView::LAYOUT_DIRECTION_INHERIT) {
+    if ((IsLayoutDirectionResolved(&isLayoutDirectionResolved), !isLayoutDirectionResolved) &&
+            (GetRawLayoutDirection(&rawLayoutDirection), rawLayoutDirection == IView::LAYOUT_DIRECTION_INHERIT)) {
         return;
     }
 
     Int32 layoutDirection;
     if (isLayoutDirectionResolved) {
         GetLayoutDirection(&layoutDirection);
-    } else {
+    }
+    else {
         GetRawLayoutDirection(&layoutDirection);
     }
 
-    Int32 direction;
-    GetLayoutDirection(&direction);
     if (mBackground != NULL) {
-        mBackground->SetLayoutDirection(direction);
+        mBackground->SetLayoutDirection(layoutDirection);
     }
     mPrivateFlags2 |= PFLAG2_DRAWABLE_RESOLVED;
-    OnResolveDrawables(direction);
+    OnResolveDrawables(layoutDirection);
 }
 
 ECode View::OnResolveDrawables(
