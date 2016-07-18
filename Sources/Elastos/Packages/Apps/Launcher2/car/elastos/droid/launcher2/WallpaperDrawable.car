@@ -1,0 +1,21 @@
+module
+{
+    using interface Elastos.Droid.Graphics.IBitmap;
+
+    namespace Elastos {
+    namespace Droid {
+    namespace Launcher2 {
+
+    /*
+    * @invoke
+    * interface IDrawable
+    */
+    interface IWallpaperDrawable {
+        SetBitmap(
+            [in] IBitmap* b);
+    }
+
+    } // namespace Launcher2
+    } // namespace Droid
+    } // namespace Elastos
+}
