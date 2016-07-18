@@ -50,7 +50,7 @@ DialogFragment::~DialogFragment()
 
 ECode DialogFragment::constructor()
 {
-    return NOERROR;
+    return Fragment::constructor();
 }
 
 ECode DialogFragment::SetStyle(

@@ -4,7 +4,7 @@
 #include "elastos/droid/launcher2/LauncherModel.h"
 #include "elastos/droid/launcher2/LauncherAnimUtils.h"
 #include "elastos/droid/launcher2/ItemInfo.h"
-#include "elastos/droid/launcher2/FastBitmapDrawable.h"
+#include "elastos/droid/launcher2/CFastBitmapDrawable.h"
 #include "elastos/droid/launcher2/Alarm.h"
 #include "elastos/droid/launcher2/DropTarget.h"
 #include "elastos/droid/launcher2/FocusHelper.h"
@@ -914,10 +914,9 @@ ECode Folder::CreateAndAddShortcut(
     AutoPtr<ITextView> textView = ITextView::Probe(view);
     AutoPtr<ShortcutInfo> _item = (ShortcutInfo*)item;
     AutoPtr<IBitmap> map = _item->GetIcon((IconCache*)mIconCache.Get());
-    AutoPtr<FastBitmapDrawable> drawable = new FastBitmapDrawable();
-    drawable->constructor(map);
-    textView->SetCompoundDrawablesWithIntrinsicBounds(NULL,
-            IDrawable::Probe(drawable), NULL, NULL);
+    AutoPtr<IDrawable> drawable;
+    CFastBitmapDrawable::New(map, (IDrawable**)&drawable);
+    textView->SetCompoundDrawablesWithIntrinsicBounds(NULL, drawable, NULL, NULL);
     textView->SetText(_item->mTitle);
     if (_item->mContentDescription != NULL) {
         IView::Probe(textView)->SetContentDescription(_item->mContentDescription);

@@ -255,7 +255,7 @@ private:
     static const Int32 TAP;
 
     AutoPtr<GestureHandler> mHandler;
-    IGestureDetectorOnGestureListener* mListener;
+    AutoPtr<IGestureDetectorOnGestureListener> mListener;
     AutoPtr<IGestureDetectorOnDoubleTapListener> mDoubleTapListener;
 
     Boolean mStillDown;

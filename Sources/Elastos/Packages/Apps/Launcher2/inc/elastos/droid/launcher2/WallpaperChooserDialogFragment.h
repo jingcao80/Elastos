@@ -51,6 +51,48 @@ class WallpaperChooserDialogFragment
     , public IAdapterViewOnItemSelectedListener
     , public IAdapterViewOnItemClickListener
 {
+public:
+    /**
+     * Custom drawable that centers the bitmap fed to it.
+     */
+    class WallpaperDrawable
+        : public Drawable
+        , public IWallpaperDrawable
+    {
+    public:
+        CAR_INTERFACE_DECL()
+
+        WallpaperDrawable();
+
+        CARAPI constructor();
+
+        /* package */
+        CARAPI SetBitmap(
+            /* [in] */ IBitmap* bitmap);
+
+        //@Override
+        CARAPI Draw(
+            /* [in] */ ICanvas* canvas);
+
+        //@Override
+        CARAPI GetOpacity(
+            /* [out] */ Int32* opacity);
+
+        //@Override
+        CARAPI SetAlpha(
+            /* [in] */ Int32 alpha);
+
+        //@Override
+        CARAPI SetColorFilter(
+            /* [in] */ IColorFilter* cf);
+
+    private:
+        AutoPtr<IBitmap> mBitmap;
+        Int32 mIntrinsicWidth;
+        Int32 mIntrinsicHeight;
+        AutoPtr<IMatrix> mMatrix;
+    };
+
 private:
     class MyOnClickListener
         : public Object
@@ -125,41 +167,6 @@ private:
         AutoPtr<WallpaperChooserDialogFragment> mHost;
     };
 
-    /**
-     * Custom drawable that centers the bitmap fed to it.
-     */
-    class WallpaperDrawable
-        : public Drawable
-    {
-    public:
-        WallpaperDrawable();
-
-        /* package */
-        CARAPI_(void) SetBitmap(
-            /* [in] */ IBitmap* bitmap);
-
-        //@Override
-        CARAPI Draw(
-            /* [in] */ ICanvas* canvas);
-
-        //@Override
-        CARAPI GetOpacity(
-            /* [out] */ Int32* opacity);
-
-        //@Override
-        CARAPI SetAlpha(
-            /* [in] */ Int32 alpha);
-
-        //@Override
-        CARAPI SetColorFilter(
-            /* [in] */ IColorFilter* cf);
-
-    private:
-        AutoPtr<IBitmap> mBitmap;
-        Int32 mIntrinsicWidth;
-        Int32 mIntrinsicHeight;
-        AutoPtr<IMatrix> mMatrix;
-    };
 
 public:
     CAR_INTERFACE_DECL();
@@ -168,6 +175,8 @@ public:
 
     static CARAPI NewInstance(
         /* [out] */ IWallpaperChooserDialogFragment** fragment);
+
+    CARAPI constructor();
 
     // @Override
     CARAPI OnCreate(
@@ -243,7 +252,7 @@ private:
     AutoPtr<IArrayList> mThumbs;
     AutoPtr<IArrayList> mImages;
     AutoPtr<WallpaperLoader> mLoader;
-    AutoPtr<WallpaperDrawable> mWallpaperDrawable;
+    AutoPtr<IWallpaperDrawable> mWallpaperDrawable;
 };
 
 } // namespace Launcher2

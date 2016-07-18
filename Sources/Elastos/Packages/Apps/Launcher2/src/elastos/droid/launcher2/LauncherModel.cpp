@@ -4,7 +4,7 @@
 #include "elastos/droid/launcher2/ShortcutInfo.h"
 #include "elastos/droid/launcher2/LauncherAppWidgetInfo.h"
 #include "elastos/droid/launcher2/InstallWidgetReceiver.h"
-#include "elastos/droid/launcher2/FastBitmapDrawable.h"
+#include "elastos/droid/launcher2/CFastBitmapDrawable.h"
 #include "elastos/droid/launcher2/Utilities.h"
 #include "elastos/droid/launcher2/Launcher.h"
 #include "elastos/droid/launcher2/WidgetPreviewLoader.h"
@@ -4041,12 +4041,10 @@ ECode LauncherModel::InfoFromShortcutIntent(
     AutoPtr<IBitmap> icon;
     Boolean customIcon = FALSE;
     AutoPtr<IIntentShortcutIconResource> iconResource;
-
-    if (bitmap != NULL && IBitmap::Probe(bitmap) != NULL) {
-        AutoPtr<FastBitmapDrawable> tmp = new FastBitmapDrawable();
-        tmp->constructor(IBitmap::Probe(bitmap));
-        AutoPtr<IDrawable> drawable = IDrawable::Probe(tmp);
-
+    IBitmap* bmp =  IBitmap::Probe(bitmap);
+    if (bmp != NULL) {
+        AutoPtr<IDrawable> drawable;
+        CFastBitmapDrawable::New(bmp, (IDrawable**)&drawable);
         icon = Utilities::CreateIconBitmap(drawable, context);
         customIcon = TRUE;
     }

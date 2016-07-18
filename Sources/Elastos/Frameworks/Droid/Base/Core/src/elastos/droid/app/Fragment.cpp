@@ -355,7 +355,6 @@ ECode Fragment::constructor()
     return NOERROR;
 }
 
-
 ECode Fragment::GetState(
     /* [out] */ Int32* state)
 {

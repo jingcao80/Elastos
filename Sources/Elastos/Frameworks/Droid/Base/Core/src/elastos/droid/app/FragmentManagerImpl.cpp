@@ -1312,6 +1312,7 @@ ECode FragmentManagerImpl::FindFragmentById(
     /* [out] */ IFragment** fragment)
 {
     VALIDATE_NOT_NULL(fragment);
+
     if (mAdded != NULL) {
         // First look through added fragments.
         Int32 N;
@@ -1319,6 +1320,7 @@ ECode FragmentManagerImpl::FindFragmentById(
         for (Int32 i = N - 1; i >= 0; i--) {
             AutoPtr<IInterface> obj;
             mAdded->Get(i, (IInterface**)&obj);
+            Logger::I(TAG, " >> mAdded %d: %s", i, TO_CSTR(obj));
             IFragment* f = IFragment::Probe(obj);
             Int32 fId;
             if (f != NULL && (f->GetFragmentId(&fId), fId == id)) {
@@ -1335,6 +1337,7 @@ ECode FragmentManagerImpl::FindFragmentById(
         for (Int32 i = N - 1; i >= 0; i--) {
             AutoPtr<IInterface> obj;
             mActive->Get(i, (IInterface**)&obj);
+            Logger::I(TAG, " >> mActive %d: %s", i, TO_CSTR(obj));
             IFragment* f = IFragment::Probe(obj);
             Int32 fId;
             if (f != NULL && (f->GetFragmentId(&fId), fId == id)) {
@@ -1345,6 +1348,7 @@ ECode FragmentManagerImpl::FindFragmentById(
         }
     }
     *fragment = NULL;
+    Logger::I(TAG, " >> FindFragmentById: %08x, null", id);
     return NOERROR;
 }
 
@@ -2532,8 +2536,9 @@ ECode FragmentManagerImpl::OnCreateView(
     // instantiated this fragment from the state and should use
     // that instance instead of making a new one.
     AutoPtr<IFragment> fragment;
-    if (id != IView::NO_ID)
+    if (id != IView::NO_ID) {
         FindFragmentById(id, (IFragment**)&fragment);
+    }
 
     if (fragment == NULL && tag != NULL) {
         FindFragmentByTag(tag, (IFragment**)&fragment);
@@ -2548,7 +2553,7 @@ ECode FragmentManagerImpl::OnCreateView(
             id, fname.string(), TO_CSTR(fragment));
     if (fragment == NULL) {
         Fragment::Instantiate(context, fname, (IFragment**)&fragment);
-        Fragment* f = (Fragment*)fragment.Get();
+        f = (Fragment*)fragment.Get();
         f->mFromLayout = true;
         f->mFragmentId = id != 0 ? id : containerId;
         f->mContainerId = containerId;

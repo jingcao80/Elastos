@@ -1,7 +1,7 @@
 
 #include "elastos/droid/launcher2/CPagedViewIcon.h"
 #include "elastos/droid/launcher2/ApplicationInfo.h"
-#include "elastos/droid/launcher2/FastBitmapDrawable.h"
+#include "elastos/droid/launcher2/CFastBitmapDrawable.h"
 #include "Elastos.Droid.App.h"
 #include "Elastos.Droid.Graphics.h"
 #include "Elastos.Droid.Service.h"
@@ -46,8 +46,8 @@ ECode CPagedViewIcon::ApplyFromApplicationInfo(
     ApplicationInfo* _info = (ApplicationInfo*)info;
     mIcon = _info->mIconBitmap;
     mPressedCallback = cb;
-    AutoPtr<FastBitmapDrawable> drawable = new FastBitmapDrawable();
-    drawable->constructor(mIcon);
+    AutoPtr<IDrawable> drawable;
+    CFastBitmapDrawable::New(mIcon, (IDrawable**)&drawable);
     SetCompoundDrawablesWithIntrinsicBounds(NULL, drawable.Get(), NULL, NULL);
     SetText(_info->mTitle);
     if (_info->mContentDescription != NULL) {

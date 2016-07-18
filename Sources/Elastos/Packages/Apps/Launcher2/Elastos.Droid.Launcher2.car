@@ -34,6 +34,7 @@ module
     merge("car/elastos/droid/launcher2/FolderEditText.car");
     merge("car/elastos/droid/launcher2/FocusOnlyTabWidget.car");
     merge("car/elastos/droid/launcher2/FastBitmapDrawable.car");
+    merge("car/elastos/droid/launcher2/WallpaperDrawable.car");
     merge("car/elastos/droid/launcher2/Launcher.car");
     merge("car/elastos/droid/launcher2/LauncherModel.car");
     merge("car/elastos/droid/launcher2/LauncherAppWidgetInfo.car");
@@ -76,6 +77,7 @@ module
     using interface Elastos.Droid.Database.IContentObserver;
     using interface Elastos.Droid.Os.IHandler;
     using interface Elastos.Droid.Utility.IAttributeSet;
+    using interface Elastos.Droid.Graphics.Drawable.IDrawable;
     using interface Elastos.Droid.View.IView;
     using interface Elastos.Droid.View.IViewGroup;
     using interface Elastos.Droid.View.IViewParent;
@@ -110,11 +112,27 @@ module
     using interface Elastos.Droid.Widget.IOnEditorActionListener;
     using interface Elastos.Droid.Widget.IAdapterViewOnItemSelectedListener;
     using interface Elastos.Droid.Widget.IAdapterViewOnItemClickListener;
+    using interface Elastos.Droid.Graphics.IBitmap;
     using interface Elastos.Droid.Graphics.Drawable.IDrawableCallback;
 
     namespace Elastos {
     namespace Droid {
     namespace Launcher2 {
+
+    class CFastBitmapDrawable {
+        constructor(
+            [in] IBitmap* bitmap);
+
+        interface IFastBitmapDrawable;
+        interface IDrawable;
+    }
+
+    class CWallpaperDrawable {
+        constructor();
+
+        interface IWallpaperDrawable;
+        interface IDrawable;
+    }
 
     [local]
     class CAccessibleTabView {
@@ -642,6 +660,8 @@ module
     }
 
     class CLauncherApplication {
+        constructor();
+        
         interface IContextWrapper;
         interface IContext;
         interface IComponentCallbacks2;
@@ -790,6 +810,8 @@ module
     }
 
     class CWallpaperChooserDialogFragment {
+        constructor();
+
         interface IFragment;
         interface IDialogInterfaceOnCancelListener;
         interface IDialogInterfaceOnDismissListener;

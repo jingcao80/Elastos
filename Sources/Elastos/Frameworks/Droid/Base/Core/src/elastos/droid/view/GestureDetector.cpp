@@ -224,6 +224,11 @@ ECode GestureDetector::constructor(
    /* [in] */ IGestureDetectorOnGestureListener* listener,
    /* [in] */ IHandler* handler)
 {
+    if (listener == NULL) {
+        Logger::E("GestureDetector", "OnGestureListener must not be null");
+        return E_NULL_POINTER_EXCEPTION;
+    }
+
     mInputEventConsistencyVerifier =
             InputEventConsistencyVerifier::IsInstrumentationEnabled() ?
                     new InputEventConsistencyVerifier(TO_IINTERFACE(this), 0) : NULL;
@@ -243,9 +248,6 @@ ECode GestureDetector::constructor(
         SetOnDoubleTapListener(IGestureDetectorOnDoubleTapListener::Probe(listener));
     }
 
-    if (mListener == NULL) {
-        return E_NULL_POINTER_EXCEPTION;
-    }
     mIsLongpressEnabled = TRUE;
 
     // Fallback to support pre-donuts releases

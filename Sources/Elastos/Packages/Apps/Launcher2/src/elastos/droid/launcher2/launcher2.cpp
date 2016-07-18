@@ -19,6 +19,8 @@
 #include "elastos/droid/launcher2/CLauncherAppWidgetResetObserver.h"
 #include "elastos/droid/launcher2/CLauncherApplicationContentObserver.h"
 #include "elastos/droid/launcher2/CShortcutAndWidgetContainer.h"
+#include "elastos/droid/launcher2/CFastBitmapDrawable.h"
+#include "elastos/droid/launcher2/CWallpaperDrawable.h"
 
 
 namespace Elastos {
@@ -45,6 +47,8 @@ CAR_OBJECT_IMPL(CLauncherCloseSystemDialogsIntentReceiver)
 CAR_OBJECT_IMPL(CLauncherAppWidgetResetObserver)
 CAR_OBJECT_IMPL(CLauncherApplicationContentObserver)
 CAR_OBJECT_IMPL(CShortcutAndWidgetContainer)
+CAR_OBJECT_IMPL(CFastBitmapDrawable)
+CAR_OBJECT_IMPL(CWallpaperDrawable)
 
 
 } // namespace Launcher2

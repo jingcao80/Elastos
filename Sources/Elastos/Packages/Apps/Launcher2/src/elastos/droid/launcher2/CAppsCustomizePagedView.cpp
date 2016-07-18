@@ -8,7 +8,7 @@
 #include "elastos/droid/launcher2/FocusHelper.h"
 #include "elastos/droid/launcher2/PagedViewWidget.h"
 #include "elastos/droid/launcher2/LauncherSettings.h"
-#include "elastos/droid/launcher2/FastBitmapDrawable.h"
+#include "elastos/droid/launcher2/CFastBitmapDrawable.h"
 #include "elastos/droid/launcher2/PagedViewGridLayout.h"
 #include "elastos/droid/launcher2/PendingAddItemInfo.h"
 #include "elastos/droid/launcher2/CDragLayerLayoutParams.h"
@@ -1976,9 +1976,8 @@ void CAppsCustomizePagedView::OnSyncWidgetPageItems(
             if (widget != NULL) {
                 AutoPtr<IInterface> obj;
                 ((AsyncTaskPageData*)data)->mGeneratedImages->Get(i, (IInterface**)&obj);
-                AutoPtr<IBitmap> preview = IBitmap::Probe(obj);
-                AutoPtr<IFastBitmapDrawable> drawable = new FastBitmapDrawable();
-                ((FastBitmapDrawable*)drawable.Get())->constructor(preview);
+                AutoPtr<IFastBitmapDrawable> drawable;
+                CFastBitmapDrawable::New( IBitmap::Probe(obj), (IFastBitmapDrawable**)&drawable);
                 FAIL_GOTO(widget->ApplyPreview(drawable, i), FINALLY)
             }
         }

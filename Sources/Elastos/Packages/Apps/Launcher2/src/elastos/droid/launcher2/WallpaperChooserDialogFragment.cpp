@@ -1,6 +1,7 @@
 
 #include "elastos/droid/launcher2/WallpaperChooserDialogFragment.h"
 #include "elastos/droid/launcher2/CWallpaperChooserDialogFragment.h"
+#include "elastos/droid/launcher2/CWallpaperDrawable.h"
 #include "Elastos.Droid.Service.h"
 #include "Elastos.CoreLibrary.Core.h"
 #include <elastos/core/Math.h>
@@ -221,22 +222,30 @@ void WallpaperChooserDialogFragment::WallpaperLoader::Cancel()
     AsyncTask::Cancel(TRUE);
 }
 
+CAR_INTERFACE_IMPL(WallpaperChooserDialogFragment::WallpaperDrawable, Drawable, IWallpaperDrawable)
+
 WallpaperChooserDialogFragment::WallpaperDrawable::WallpaperDrawable()
     : mIntrinsicWidth(0)
     , mIntrinsicHeight(0)
 {
 }
 
-void WallpaperChooserDialogFragment::WallpaperDrawable::SetBitmap(
+ECode WallpaperChooserDialogFragment::WallpaperDrawable::constructor()
+{
+    return NOERROR;
+}
+
+ECode WallpaperChooserDialogFragment::WallpaperDrawable::SetBitmap(
     /* [in] */ IBitmap* bitmap)
 {
     mBitmap = bitmap;
     if (mBitmap == NULL)
-        return;
+        return NOERROR;
+
     mBitmap->GetWidth(&mIntrinsicWidth);
     mBitmap->GetHeight(&mIntrinsicHeight);
     mMatrix = NULL;
-    return;
+    return NOERROR;
 }
 
 ECode WallpaperChooserDialogFragment::WallpaperDrawable::Draw(
@@ -305,15 +314,18 @@ CAR_INTERFACE_IMPL_2(WallpaperChooserDialogFragment, DialogFragment, IAdapterVie
 WallpaperChooserDialogFragment::WallpaperChooserDialogFragment()
     : mEmbedded(FALSE)
 {
-    mWallpaperDrawable = new WallpaperDrawable();
+}
+
+ECode WallpaperChooserDialogFragment::constructor()
+{
+    CWallpaperDrawable::New((IWallpaperDrawable**)&mWallpaperDrawable);
+    return DialogFragment::constructor();
 }
 
 ECode WallpaperChooserDialogFragment::NewInstance(
     /* [out] */ IWallpaperChooserDialogFragment** fragment)
 {
     VALIDATE_NOT_NULL(fragment);
-    *fragment = NULL;
-
     AutoPtr<IWallpaperChooserDialogFragment> _fragment;
     CWallpaperChooserDialogFragment::New((IWallpaperChooserDialogFragment**)&_fragment);
     IDialogFragment::Probe(_fragment)->SetCancelable(TRUE);
@@ -420,7 +432,7 @@ ECode WallpaperChooserDialogFragment::OnCreateView(
     if (mEmbedded) {
         AutoPtr<IView> view;
         inflater->Inflate(Elastos::Droid::Launcher2::R::layout::wallpaper_chooser, container, FALSE, (IView**)&view);
-        view->SetBackground(mWallpaperDrawable);
+        view->SetBackground(IDrawable::Probe(mWallpaperDrawable));
 
         AutoPtr<IView> tmp;
         view->FindViewById(Elastos::Droid::Launcher2::R::id::gallery, (IView**)&tmp);
@@ -463,7 +475,7 @@ ECode WallpaperChooserDialogFragment::SelectWallpaper(
     AutoPtr<IActivity> activity2;
     GetActivity((IActivity**)&activity2);
     activity2->SetResult(IActivity::RESULT_OK);
-    activity2->Finish();
+    ec = activity2->Finish();
     //} catch (IOException e) {
     if (ec == (ECode)E_IO_EXCEPTION) {
         Slogger::E(TAG, "Failed to set wallpaper: %d", ec);

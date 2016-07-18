@@ -1,6 +1,6 @@
 
 #include "elastos/droid/launcher2/HolographicViewHelper.h"
-#include "elastos/droid/launcher2/FastBitmapDrawable.h"
+#include "elastos/droid/launcher2/CFastBitmapDrawable.h"
 #include "Elastos.Droid.Service.h"
 #include "Elastos.Droid.View.h"
 #include "elastos/droid/R.h"
@@ -40,10 +40,9 @@ void HolographicViewHelper::GeneratePressedFocusedStates(
         mStatesUpdated = TRUE;
         AutoPtr<IBitmap> original = CreateOriginalImage(v, mTempCanvas);
         AutoPtr<IBitmap> outline = CreatePressImage(v, mTempCanvas);
-        AutoPtr<FastBitmapDrawable> originalD = new FastBitmapDrawable();
-        originalD->constructor(original);
-        AutoPtr<FastBitmapDrawable> outlineD = new FastBitmapDrawable();
-        outlineD->constructor(outline);
+        AutoPtr<IDrawable> originalD, outlineD;
+        CFastBitmapDrawable::New(original, (IDrawable**)&originalD);
+        CFastBitmapDrawable::New(outline, (IDrawable**)&outlineD);
 
         AutoPtr<IStateListDrawable> states;
         CStateListDrawable::New((IStateListDrawable**)&states);

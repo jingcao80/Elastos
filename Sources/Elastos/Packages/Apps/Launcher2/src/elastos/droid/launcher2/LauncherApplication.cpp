@@ -61,9 +61,15 @@ const String LauncherApplication::sSharedPreferencesKey("Elastos.Droid.Launcher2
 
 LauncherApplication::LauncherApplication()
 {
+}
+
+ECode LauncherApplication::constructor()
+{
     AutoPtr<IHandler> handler;
     CHandler::New((IHandler**)&handler);
     CLauncherApplicationContentObserver::New(handler, this, (IContentObserver**)&mFavoritesObserver);
+
+    return Application::constructor();
 }
 
 ECode LauncherApplication::OnCreate()

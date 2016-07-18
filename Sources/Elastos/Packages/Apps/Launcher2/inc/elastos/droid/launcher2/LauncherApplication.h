@@ -51,6 +51,8 @@ public:
 
     LauncherApplication();
 
+    CARAPI constructor();
+
     //@Override
     CARAPI OnCreate();
 

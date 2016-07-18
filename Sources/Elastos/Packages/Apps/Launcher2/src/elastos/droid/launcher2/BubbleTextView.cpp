@@ -1,7 +1,7 @@
 
 #include "elastos/droid/launcher2/BubbleTextView.h"
 #include "elastos/droid/launcher2/ShortcutInfo.h"
-#include "elastos/droid/launcher2/FastBitmapDrawable.h"
+#include "elastos/droid/launcher2/CFastBitmapDrawable.h"
 #include "elastos/droid/launcher2/LauncherModel.h"
 #include "Elastos.Droid.Service.h"
 #include "elastos/droid/R.h"
@@ -92,9 +92,9 @@ ECode BubbleTextView::ApplyFromShortcutInfo(
     IconCache* _iconCache = (IconCache*)iconCache;
     AutoPtr<IBitmap> b = _info->GetIcon(_iconCache);
 
-    AutoPtr<FastBitmapDrawable> fastBitmapDrawable = new FastBitmapDrawable();
-    fastBitmapDrawable->constructor(b);
-    SetCompoundDrawablesWithIntrinsicBounds(NULL, IDrawable::Probe(fastBitmapDrawable), NULL, NULL);
+    AutoPtr<IDrawable> fastBitmapDrawable;
+    CFastBitmapDrawable::New(b, (IDrawable**)&fastBitmapDrawable);
+    SetCompoundDrawablesWithIntrinsicBounds(NULL, fastBitmapDrawable, NULL, NULL);
     SetText(_info->mTitle);
     if (_info->mContentDescription != NULL) {
         SetContentDescription(_info->mContentDescription);
