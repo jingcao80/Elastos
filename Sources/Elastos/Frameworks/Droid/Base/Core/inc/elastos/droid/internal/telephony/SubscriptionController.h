@@ -22,6 +22,7 @@ using Elastos::Droid::Os::IAsyncResult;
 using Elastos::Droid::Os::IHandler;
 using Elastos::Droid::Os::Handler;
 using Elastos::Droid::Os::IMessage;
+using Elastos::Droid::Os::IBinder;
 using Elastos::Droid::Os::AsyncResult;
 using Elastos::Droid::Telephony::ISubInfoRecord;
 using Elastos::Droid::Text::Format::ITime;
@@ -42,6 +43,7 @@ class SubscriptionController
     : public Object
     , public ISubscriptionController
     , public IISub
+    , public IBinder
 {
 public:
     /**
@@ -553,6 +555,7 @@ public:
     static CARAPI_(void) PrintStackTrace(
         /* [in] */ String msg);
 
+    TO_STRING_IMPL("SubscriptionController");
 public:
     static const String LOGTAG;
     static const Boolean DBG;

@@ -3770,7 +3770,8 @@ AutoPtr<RILRequest> RIL::ProcessSolicited(
 
     Int32 dataAvail = 0;
     p->DataAvail(&dataAvail);
-    Logger::E("leliang", "RIL::ProcessSolicited, serial:%d,dataAvail:%d, error:%d", serial, dataAvail, error);
+    Logger::E("leliang", "RIL::ProcessSolicited, request:%d,serial:%d,dataAvail:%d, error:%d",
+            rr->mRequest, serial, dataAvail, error);
     if (error == 0 || dataAvail > 0) {
         // either command succeeds or command fails but with data payload
         // try {
@@ -4104,6 +4105,7 @@ void RIL::ProcessUnsolicited(
 
     p->ReadInt32(&response);
 
+    Logger::E("leliang", "line:%d, func:%s, response:%d\n", __LINE__, __func__, response);
     // try {
     switch(response) {
         /*
@@ -4158,6 +4160,7 @@ void RIL::ProcessUnsolicited(
 
         default:
             // throw new RuntimeException("Unrecognized unsol response: " + response);
+            Logger::E("RILJ", "Unrecognized unsol response:%d", response);
         break; // (implied)
     }
     // } catch (Throwable tr) {
@@ -4815,13 +4818,13 @@ AutoPtr<IInterface> RIL::ResponseInts(
     Int32 numInts = 0;
 
     p->ReadInt32(&numInts);
-    Logger::E("leliang", "line:%d, func:%s, numInts:%d\n", __LINE__, __func__, numInts);
 
     AutoPtr<ArrayOf<Int32> > response = ArrayOf<Int32>::Alloc(numInts);
 
     for (Int32 i = 0 ; i < numInts ; i++) {
         Int32 value;
         p->ReadInt32(&value);
+        Logger::E("leliang", "line:%d, func:%s, index:%d, value:%d\n", __LINE__, __func__, i, value);
         response->Set(i, value);
     }
 
@@ -5063,6 +5066,7 @@ ECode RIL::NeedsOldRilFeature(
 AutoPtr<IInterface> RIL::ResponseIccCardStatus(
     /* [in] */ RILParcel* p)
 {
+    Logger::E("leliang", "line:%d, func:%s\n", __LINE__, __func__);
     AutoPtr<IccCardApplicationStatus> appStatus;
 
     Boolean oldRil = FALSE;
@@ -5152,6 +5156,7 @@ AutoPtr<IInterface> RIL::ResponseCallList(
         // // str += mTestingEmergencyCall.Get();
         // RiljLog(str);
     }
+    Logger::E("leliang", "line:%d, func:%s, num:%d", __LINE__, __func__, num);
     for (Int32 i = 0; i < num; i++) {
         dc = new DriverCall();
 

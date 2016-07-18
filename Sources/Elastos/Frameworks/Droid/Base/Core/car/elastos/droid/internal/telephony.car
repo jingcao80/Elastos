@@ -310,6 +310,7 @@ module
     interface Elastos.Droid.Os.IMessage;
     interface Elastos.Droid.Os.ILooper;
     interface Elastos.Droid.Os.IBundle;
+    interface Elastos.Droid.Os.IBinder;
     interface Elastos.Droid.Telephony.ICellInfo;
     interface Elastos.Droid.Internal.Utility.IStateMachine;
 
@@ -567,13 +568,14 @@ module
         [local]
         class CSubscriptionController {
             constructor(
-                [in] IContext* c);
+                [in] IContext* ctx);
 
             constructor(
                 [in] IPhone* phone);
 
             interface ISubscriptionController;
             interface IISub;
+            interface IBinder;
         }
 
         [local, deprecated]

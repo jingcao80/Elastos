@@ -33,7 +33,11 @@ CAR_INTERFACE_IMPL(CallAudioManager, CallsManagerListenerBase, IWiredHeadsetMana
 const Int32 CallAudioManager::STREAM_NONE = -1;
 
 CallAudioManager::CallAudioManager()
-    : mMostRecentlyUsedMode(IAudioManager::MODE_IN_CALL)
+    : mAudioFocusStreamType(0)
+    , mIsRinging(FALSE)
+    , mIsTonePlaying(FALSE)
+    , mWasSpeakerOn(FALSE)
+    , mMostRecentlyUsedMode(IAudioManager::MODE_IN_CALL)
     , mSpeedUpAudioForMtCall(FALSE)
 {}
 

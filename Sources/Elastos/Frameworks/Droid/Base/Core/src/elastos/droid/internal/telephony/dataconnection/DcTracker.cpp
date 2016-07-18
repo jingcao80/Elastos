@@ -24,6 +24,7 @@
 #include "elastos/droid/internal/telephony/dataconnection/DataConnection.h"
 #include "elastos/droid/internal/telephony/dataconnection/DcFailCause.h"
 #include "elastos/droid/internal/telephony/dataconnection/DcTracker.h"
+#include "elastos/droid/internal/telephony/uicc/CUiccControllerHelper.h"
 #include "elastos/droid/internal/utility/ArrayUtils.h"
 #include "elastos/droid/internal/utility/State.h"
 #include "elastos/droid/net/CConnectivityManager.h"
@@ -96,6 +97,8 @@ using Elastos::Droid::Internal::Telephony::Cdma::ICDMAPhone;
 using Elastos::Droid::Internal::Telephony::Gsm::IGSMPhone;
 using Elastos::Droid::Internal::Telephony::Uicc::IRuimRecords;
 using Elastos::Droid::Internal::Telephony::Uicc::IUiccController;
+using Elastos::Droid::Internal::Telephony::Uicc::IUiccControllerHelper;
+using Elastos::Droid::Internal::Telephony::Uicc::CUiccControllerHelper;
 using Elastos::Droid::Internal::Utility::ArrayUtils;
 using Elastos::Droid::Internal::Utility::IAsyncChannel;
 using Elastos::Droid::Internal::Utility::IStateMachine;
@@ -4981,52 +4984,56 @@ ECode DcTracker::OnUpdateIcc(
     IPhone::Probe(mPhone)->GetServiceState((IServiceState**)&serviceState);
     Int32 dataRat;
     serviceState->GetRilDataRadioTechnology(&dataRat);
-    assert(0 && "TODO: UiccController");
-    // Int32 appFamily = UiccController::GetFamilyFromRadioTechnology(dataRat);
-    // AutoPtr<IIccRecords> newIccRecords;
-    // GetUiccRecords(appFamily, (IIccRecords**)&newIccRecords);
-    // AutoPtr<IClassInfo> clsInfo;
-    // CObject::ReflectClassInfo(newIccRecords, (IClassInfo**)&clsInfo);
-    // String name;
-    // clsInfo->GetName(&name);
-    // Log("onUpdateIcc: newIccRecords %s", ((newIccRecords != NULL) ?
-    //         name.string() : String(NULL).string()));
-    // if (dataRat == IServiceState::RIL_RADIO_TECHNOLOGY_UNKNOWN) {
-    //     // Ignore this. This could be due to data not registered
-    //     // We want to ignore RADIO_TECHNOLOGY_UNKNOWN so that we do not tear down data
-    //     // call in case we are out of service.
-    //     *_result = FALSE;
-    //     return NOERROR;
-    // }
-    // AutoPtr<IInterface> obj;
-    // mIccRecords->Get((IInterface**)&obj);
-    // AutoPtr<IIccRecords> r = IIccRecords::Probe(obj);
-    // if (r != newIccRecords) {
-    //     if (r != NULL) {
-    //         AutoPtr<IClassInfo> clsInfo;
-    //         CObject::ReflectClassInfo(r, (IClassInfo**)&clsInfo);
-    //         String name;
-    //         clsInfo->GetName(&name);
-    //         Log("Removing stale icc objects. %s", ((r != NULL) ?
-    //                 name.string() : String(NULL).string()));
-    //         r->UnregisterForRecordsLoaded(this);
-    //         mIccRecords->Set(NULL);
-    //     }
-    //     if (newIccRecords != NULL) {
-    //         AutoPtr<IClassInfo> clsInfo;
-    //         CObject::ReflectClassInfo(newIccRecords, (IClassInfo**)&clsInfo);
-    //         String name;
-    //         clsInfo->GetName(&name);
-    //         Log("New records found %s", ((newIccRecords != NULL) ?
-    //                 name.string() : String(NULL).string()));
-    //         mIccRecords->Set(newIccRecords);
-    //         newIccRecords->RegisterForRecordsLoaded(
-    //                 this, IDctConstants::EVENT_RECORDS_LOADED, NULL);
-    //     }
-    //     // Records changed -> return true
-    //     result = TRUE;
-    // }
-    // *_result = result;
+
+    AutoPtr<IUiccControllerHelper> ucHelper;
+    CUiccControllerHelper::AcquireSingleton((IUiccControllerHelper**)&ucHelper);
+    Int32 appFamily;
+    ucHelper->GetFamilyFromRadioTechnology(dataRat, &appFamily);
+
+    AutoPtr<IIccRecords> newIccRecords;
+    GetUiccRecords(appFamily, (IIccRecords**)&newIccRecords);
+    AutoPtr<IClassInfo> clsInfo;
+    CObject::ReflectClassInfo(newIccRecords, (IClassInfo**)&clsInfo);
+    String name;
+    if (clsInfo != NULL)
+        clsInfo->GetName(&name);
+    Log("onUpdateIcc: newIccRecords %s, dataRat:%d", name.string(), dataRat);
+    if (dataRat == IServiceState::RIL_RADIO_TECHNOLOGY_UNKNOWN) {
+        // Ignore this. This could be due to data not registered
+        // We want to ignore RADIO_TECHNOLOGY_UNKNOWN so that we do not tear down data
+        // call in case we are out of service.
+        *_result = FALSE;
+        return NOERROR;
+    }
+    AutoPtr<IInterface> obj;
+    mIccRecords->Get((IInterface**)&obj);
+    AutoPtr<IIccRecords> r = IIccRecords::Probe(obj);
+    if (r != newIccRecords) {
+        if (r != NULL) {
+            AutoPtr<IClassInfo> clsInfo;
+            CObject::ReflectClassInfo(r, (IClassInfo**)&clsInfo);
+            String name;
+            if (clsInfo != NULL)
+                clsInfo->GetName(&name);
+            Log("Removing stale icc objects. %s", name.string());
+            r->UnregisterForRecordsLoaded(this);
+            mIccRecords->Set(NULL);
+        }
+        if (newIccRecords != NULL) {
+            AutoPtr<IClassInfo> clsInfo;
+            CObject::ReflectClassInfo(newIccRecords, (IClassInfo**)&clsInfo);
+            String name;
+            if (clsInfo != NULL)
+                clsInfo->GetName(&name);
+            Log("New records found %s", name.string());
+            mIccRecords->Set(newIccRecords);
+            newIccRecords->RegisterForRecordsLoaded(
+                    this, IDctConstants::EVENT_RECORDS_LOADED, NULL);
+        }
+        // Records changed -> return true
+        result = TRUE;
+    }
+    *_result = result;
     return NOERROR;
 }
 

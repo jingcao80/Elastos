@@ -3,8 +3,10 @@
 #include "Elastos.Droid.Content.h"
 #include "Elastos.Droid.Internal.h"
 #include <elastos/core/AutoLock.h>
+#include <elastos/utility/logging/Logger.h>
 
 using Elastos::Droid::Content::EIID_IDialogInterfaceOnClickListener;
+using Elastos::Utility::Logging::Logger;
 
 namespace Elastos {
 namespace Droid {
@@ -321,7 +323,8 @@ ECode UiccCard::GetCardState(
     // synchronized (mLock) {
     //     return mCardState;
     // }
-    assert(0);
+    Logger::E("leliang", "TODO not implemented line:%d, func:%s\n", __LINE__, __func__);
+    *result = Uicc::CARDSTATE_PRESENT;
     return NOERROR;
 }
 
@@ -505,15 +508,13 @@ ECode UiccCard::GetNumApplications(
     /* [out] */ Int32* result)
 {
     VALIDATE_NOT_NULL(result);
-    // ==================before translated======================
-    // int count = 0;
-    // for (UiccCardApplication a : mUiccApplications) {
-    //     if (a != null) {
-    //         count++;
-    //     }
-    // }
-    // return count;
-    assert(0);
+    Int32 count = 0;
+    for (Int32 i = 0; i < mUiccApplications->GetLength(); ++i) {
+        if ((*mUiccApplications)[i] != NULL) {
+            count++;
+        }
+    }
+    *result = count;
     return NOERROR;
 }
 
@@ -621,7 +622,8 @@ ECode UiccCard::GetOperatorBrandOverride(
     // }
     // SharedPreferences sp = PreferenceManager.getDefaultSharedPreferences(mContext);
     // return sp.getString(OPERATOR_BRAND_OVERRIDE_PREFIX + iccId, null);
-    assert(0);
+    Logger::E("leliang", "TODO not implemented line:%d, func:%s\n", __LINE__, __func__);
+    *result = String("Unicom");
     return NOERROR;
 }
 
@@ -640,7 +642,8 @@ ECode UiccCard::GetIccId(
     //     }
     // }
     // return null;
-    assert(0);
+    Logger::E("leliang", "TODO not implemented line:%d, func:%s\n", __LINE__, __func__);
+    *result = String("89860115831000000001");// unicom code
     return NOERROR;
 }
 

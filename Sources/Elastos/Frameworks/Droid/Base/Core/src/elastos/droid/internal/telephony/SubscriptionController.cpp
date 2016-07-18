@@ -50,6 +50,7 @@ using Elastos::Droid::Os::IMessenger;
 using Elastos::Droid::Os::IUserHandleHelper;
 using Elastos::Droid::Os::CUserHandleHelper;
 using Elastos::Droid::Os::Process;
+using Elastos::Droid::Os::EIID_IBinder;
 using Elastos::Droid::Preference::IPreferenceManager;
 using Elastos::Droid::Provider::IBaseColumns;
 using Elastos::Droid::Provider::ISettings;
@@ -247,7 +248,7 @@ const Int32 SubscriptionController::EVENT_SET_DEFAULT_DATA_DONE = 1;
 const Int32 SubscriptionController::DUMMY_SUB_ID = -1;
 Object SubscriptionController::sLock;
 
-CAR_INTERFACE_IMPL_2(SubscriptionController, Object, ISubscriptionController, IISub)
+CAR_INTERFACE_IMPL_3(SubscriptionController, Object, ISubscriptionController, IISub, IBinder)
 
 SubscriptionController::SubscriptionController()
 {
@@ -308,10 +309,10 @@ ECode SubscriptionController::constructor(
     AutoPtr<IInterface> pServ;
     sm->GetService(String("isub"), (IInterface**)&pServ);
     if (pServ == NULL) {
-        sm->AddService(String("isub"), ISubscriptionController::Probe(this));
+        sm->AddService(String("isub"), IISub::Probe(this));
     }
 
-    Logdl(String("[SubscriptionController] init by Context"));
+    Logdl(String("[SubscriptionController] dl init by Context"));
     mDataConnectionHandler = new DataConnectionHandler(this);
 
     AutoPtr<IDdsSchedulerHelper> dshlp;
@@ -336,7 +337,7 @@ ECode SubscriptionController::constructor(
     AutoPtr<IInterface> pServ;
     sm->GetService(String("isub"), (IInterface**)&pServ);
     if (pServ == NULL) {
-        sm->AddService(String("isub"), ISubscriptionController::Probe(this));
+        sm->AddService(String("isub"), IISub::Probe(this));
     }
 
     Logdl(String("[SubscriptionController] init by Phone"));

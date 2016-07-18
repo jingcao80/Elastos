@@ -1057,7 +1057,7 @@ ECode ConnectionServiceWrapper::AddConnectionServiceAdapter(
     IsServiceValid(String("addConnectionServiceAdapter"), &isServiceValid);
     if (isServiceValid) {
         // try {
-        LogOutgoing("addConnectionServiceAdapter %s", adapter);
+        LogOutgoing("addConnectionServiceAdapter %p", adapter);
         ECode ec = mServiceInterface->AddConnectionServiceAdapter(adapter);
         // } catch (RemoteException e) {
         if ((ECode) E_REMOTE_EXCEPTION != ec) {

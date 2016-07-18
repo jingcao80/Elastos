@@ -594,9 +594,8 @@ ECode DcTrackerBase::constructor(
     context->GetContentResolver((IContentResolver**)&mResolver);
     AutoPtr<IUiccControllerHelper> ucHelper;
     CUiccControllerHelper::AcquireSingleton((IUiccControllerHelper**)&ucHelper);
-    Logger::E("DcTrackerBase", "TODO constructor uicccontroller is not ready");
-    //TODO ucHelper->GetInstance((IUiccController**)&mUiccController);
-    //TODO mUiccController->RegisterForIccChanged(this, IDctConstants::EVENT_ICC_CHANGED, NULL);
+    ucHelper->GetInstance((IUiccController**)&mUiccController);
+    mUiccController->RegisterForIccChanged(this, IDctConstants::EVENT_ICC_CHANGED, NULL);
     AutoPtr<IInterface> obj;
     context->GetSystemService(IContext::ALARM_SERVICE, (IInterface**)&obj);
     mAlarmManager = IAlarmManager::Probe(obj);

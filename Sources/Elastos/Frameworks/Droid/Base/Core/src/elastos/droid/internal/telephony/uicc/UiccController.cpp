@@ -156,6 +156,7 @@ ECode UiccController::GetUiccCard(
     if (IsValidCardIndex(slotId)) {
         *result = (*mUiccCards)[slotId];
         REFCOUNT_ADD(*result);
+        return NOERROR;
     }
     *result = NULL;
     return NOERROR;

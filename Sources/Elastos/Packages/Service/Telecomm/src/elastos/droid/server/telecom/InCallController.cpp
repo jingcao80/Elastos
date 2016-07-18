@@ -451,8 +451,8 @@ ECode InCallController::Bind()
                 CComponentName::New(packageName, name, (IComponentName**)&componentName);
                 Boolean isContainsKey;
                 mServiceConnections->ContainsKey(componentName, &isContainsKey);
-                Log::I("InCallController", "Attempting to bind to InCall %s, is dupe? %d ",
-                        packageName.string(),
+                Log::I("InCallController", "Attempting to bind to InCall %s %s, is dupe? %d ",
+                        packageName.string(), name.string(),
                         isContainsKey);
                 if (!isContainsKey) {
                     AutoPtr<IIntent> intent;

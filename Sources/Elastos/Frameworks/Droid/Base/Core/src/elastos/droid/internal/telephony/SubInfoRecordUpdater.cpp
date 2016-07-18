@@ -258,7 +258,6 @@ ECode SubInfoRecordUpdater::constructor(
     sCi = ci;
     SubscriptionHelper::Init(context, ci);
 
-    Logger::D("SubInfoRecordUpdater", "[TODO] ===========mUiccController");
     mUiccController = UiccController::GetInstance();
     mUiccController->RegisterForIccChanged(this, EVENT_ICC_CHANGED, NULL);
 
@@ -328,9 +327,9 @@ ECode SubInfoRecordUpdater::SetDisplayNameForNewSub(
 CARAPI SubInfoRecordUpdater::HandleMessage(
     /* [in] */ IMessage* msg)
 {
-    Logger::D(LOGTAG, "[TODO]  ======SubInfoRecordUpdater::HandleMessage=============");
     Int32 msgNum, arg1, arg2;
     msg->GetWhat(&msgNum);
+    Logger::D(LOGTAG, "[TODO]  ======SubInfoRecordUpdater::HandleMessage=what:%d====", msgNum);
     msg->GetArg1(&arg1);
     msg->GetArg2(&arg2);
     AutoPtr<IInterface> obj;
