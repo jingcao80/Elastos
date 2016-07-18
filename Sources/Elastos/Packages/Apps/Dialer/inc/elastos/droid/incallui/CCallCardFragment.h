@@ -19,6 +19,7 @@ using Elastos::Droid::Animation::IAnimatorSet;
 using Elastos::Droid::Graphics::IPoint;
 using Elastos::Droid::Graphics::Drawable::IDrawable;
 using Elastos::Droid::Telecomm::Telecom::IDisconnectCause;
+using Elastos::Droid::View::IOnGlobalLayoutListener;
 using Elastos::Droid::View::IOnPreDrawListener;
 using Elastos::Droid::View::IView;
 using Elastos::Droid::View::IViewGroup;
@@ -199,6 +200,112 @@ private:
         Boolean mVisible;
         AutoPtr<IView> mVideoView;
         Boolean mSpaceBesideCallCard;
+        CCallCardFragment* mHost;
+    };
+
+    class AnimatorListener2
+        : public AnimatorListenerAdapter
+    {
+    public:
+        AnimatorListener2(
+            /* [in] */ LayoutIgnoringListener* listener,
+            /* [in] */ CCallCardFragment* host)
+            : mListener(listener)
+            , mHost(host)
+        {}
+
+        // @Override
+        CARAPI OnAnimationEnd(
+            /* [in] */ IAnimator* animation);
+
+    private:
+        AutoPtr<LayoutIgnoringListener> mListener;
+        CCallCardFragment* mHost;
+    };
+
+    class ViewTreeGlobalLayoutListener
+        : public Object
+        , public IOnGlobalLayoutListener
+    {
+    public:
+        CAR_INTERFACE_DECL();
+
+        ViewTreeGlobalLayoutListener(
+            /* [in] */ IViewGroup* parent,
+            /* [in] */ IPoint* startPoint,
+            /* [in] */ CCallCardFragment* host)
+            : mParent(parent)
+            , mStartPoint(startPoint)
+            , mHost(host)
+        {}
+
+        // @Override
+        CARAPI OnGlobalLayout();
+
+    private:
+        AutoPtr<IViewGroup> mParent;
+        AutoPtr<IPoint> mStartPoint;
+        CCallCardFragment* mHost;
+    };
+
+    class ViewTreeGlobalLayoutListener2
+        : public Object
+        , public IOnGlobalLayoutListener
+    {
+    public:
+        CAR_INTERFACE_DECL();
+
+        ViewTreeGlobalLayoutListener2(
+            /* [in] */ IViewGroup* parent,
+            /* [in] */ IViewTreeObserver* observer,
+            /* [in] */ CCallCardFragment* host)
+            : mParent(parent)
+            , mObserver(observer)
+            , mHost(host)
+        {}
+
+        // @Override
+        CARAPI OnGlobalLayout();
+
+    private:
+        AutoPtr<IViewGroup> mParent;
+        IViewTreeObserver* mObserver;
+        CCallCardFragment* mHost;
+    };
+
+    class ViewTreeGlobalLayoutListener3
+        : public Object
+        , public IOnGlobalLayoutListener
+    {
+    public:
+        CAR_INTERFACE_DECL();
+
+        ViewTreeGlobalLayoutListener3(
+            /* [in] */ CCallCardFragment* host)
+            : mHost(host)
+        {}
+
+        // @Override
+        CARAPI OnGlobalLayout();
+
+    private:
+        CCallCardFragment* mHost;
+    };
+
+    class AnimatorListener3
+        : public AnimatorListenerAdapter
+    {
+    public:
+        AnimatorListener3(
+            /* [in] */ CCallCardFragment* host)
+            : mHost(host)
+        {}
+
+        // @Override
+        CARAPI OnAnimationStart(
+            /* [in] */ IAnimator* animation);
+
+    private:
         CCallCardFragment* mHost;
     };
 

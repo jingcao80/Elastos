@@ -15,6 +15,11 @@
 #include <elastos/core/CoreUtils.h>
 #include <elastos/utility/logging/Logger.h>
 
+using Elastos::Droid::Animation::CAnimatorSet;
+using Elastos::Droid::Animation::ILayoutTransition;
+using Elastos::Droid::Animation::IObjectAnimator;
+using Elastos::Droid::Animation::IObjectAnimatorHelper;
+using Elastos::Droid::Animation::CObjectAnimatorHelper;
 using Elastos::Droid::Animation::ITimeInterpolator;
 using Elastos::Droid::Telecomm::Telecom::IVideoProfileVideoStateHelper;
 using Elastos::Droid::Telecomm::Telecom::CVideoProfileVideoStateHelper;
@@ -22,7 +27,9 @@ using Elastos::Droid::Telephony::IPhoneNumberUtils;
 using Elastos::Droid::Telephony::CPhoneNumberUtils;
 using Elastos::Droid::Text::TextUtils;
 using Elastos::Droid::Utility::IDisplayMetrics;
+using Elastos::Droid::View::IViewParent;
 using Elastos::Droid::View::IViewPropertyAnimator;
+using Elastos::Droid::View::EIID_IOnGlobalLayoutListener;
 using Elastos::Droid::View::EIID_IOnPreDrawListener;
 using Elastos::Droid::View::EIID_IViewOnClickListener;
 using Elastos::Droid::View::EIID_IViewOnLayoutChangeListener;
@@ -225,6 +232,131 @@ ECode CCallCardFragment::ViewTreePreDrawListener::OnPreDraw(
     }
 
     *result = TRUE;
+    return NOERROR;
+}
+
+
+//==========================================================================
+// CCallCardFragment::AnimatorListener2
+//==========================================================================
+ECode CCallCardFragment::AnimatorListener2::OnAnimationEnd(
+    /* [in] */ IAnimator* animation)
+{
+    mHost->SetViewStatePostAnimation(mListener);
+    return NOERROR;
+}
+
+
+//==========================================================================
+// CCallCardFragment::ViewTreeGlobalLayoutListener
+//==========================================================================
+CAR_INTERFACE_IMPL(CCallCardFragment::ViewTreeGlobalLayoutListener, Object, IOnGlobalLayoutListener);
+
+ECode CCallCardFragment::ViewTreeGlobalLayoutListener::OnGlobalLayout()
+{
+    AutoPtr<IView> v;
+    mHost->GetView((IView**)&v);
+    AutoPtr<IViewTreeObserver> observer;
+    v->GetViewTreeObserver((IViewTreeObserver**)&observer);
+    Boolean isAlive;
+    if (observer->IsAlive(&isAlive), !isAlive) {
+        return NOERROR;
+    }
+    observer->RemoveOnGlobalLayoutListener(this);
+
+    AutoPtr<LayoutIgnoringListener> listener = new LayoutIgnoringListener();
+    mHost->mPrimaryCallCardContainer->AddOnLayoutChangeListener(listener);
+
+    // Prepare the state of views before the circular reveal animation
+    Int32 originalHeight;
+    mHost->mPrimaryCallCardContainer->GetHeight(&originalHeight);
+    Int32 parentHeight;
+    IView::Probe(mParent)->GetHeight(&parentHeight);
+    mHost->mPrimaryCallCardContainer->SetBottom(parentHeight);
+
+    // Set up FAB.
+    mHost->mFloatingActionButtonContainer->SetVisibility(IView::GONE);
+    Int32 parentWidth;
+    IView::Probe(mParent)->GetWidth(&parentWidth);
+    mHost->mFloatingActionButtonController->SetScreenWidth(parentWidth);
+    IView::Probe(mHost->mCallButtonsContainer)->SetAlpha(0);
+    IView::Probe(mHost->mCallStateLabel)->SetAlpha(0);
+    IView::Probe(mHost->mPrimaryName)->SetAlpha(0);
+    IView::Probe(mHost->mCallTypeLabel)->SetAlpha(0);
+    IView::Probe(mHost->mCallNumberAndLabel)->SetAlpha(0);
+
+    AutoPtr<IAnimator> revealAnimator = mHost->GetRevealAnimator(mStartPoint);
+    AutoPtr<IAnimator> shrinkAnimator =
+            mHost->GetShrinkAnimator(parentHeight, originalHeight);
+
+    mHost->mAnimatorSet = NULL;
+    CAnimatorSet::New((IAnimatorSet**)&mHost->mAnimatorSet);
+    AutoPtr< ArrayOf<IAnimator*> > items = ArrayOf<IAnimator*>::Alloc(2);
+    items->Set(0, revealAnimator);
+    items->Set(1, shrinkAnimator);
+    mHost->mAnimatorSet->PlaySequentially(items);
+    IAnimator::Probe(mHost->mAnimatorSet)->AddListener(new AnimatorListener2(listener, mHost));
+    IAnimator::Probe(mHost->mAnimatorSet)->Start();
+    return NOERROR;
+}
+
+
+//==========================================================================
+// CCallCardFragment::ViewTreeGlobalLayoutListener2
+//==========================================================================
+CAR_INTERFACE_IMPL(CCallCardFragment::ViewTreeGlobalLayoutListener2, Object, IOnGlobalLayoutListener);
+
+ECode CCallCardFragment::ViewTreeGlobalLayoutListener2::OnGlobalLayout()
+{
+    AutoPtr<IViewTreeObserver> viewTreeObserver = mObserver;
+    Boolean isAlive;
+    if (viewTreeObserver->IsAlive(&isAlive), !isAlive) {
+        viewTreeObserver = NULL;
+        IView::Probe(mParent)->GetViewTreeObserver((IViewTreeObserver**)&viewTreeObserver);
+    }
+    viewTreeObserver->RemoveOnGlobalLayoutListener(this);
+    Int32 width;
+    IView::Probe(mParent)->GetWidth(&width);
+    mHost->mFloatingActionButtonController->SetScreenWidth(width);
+    mHost->UpdateFabPosition();
+    return NOERROR;
+}
+
+
+//==========================================================================
+// CCallCardFragment::ViewTreeGlobalLayoutListener3
+//==========================================================================
+CAR_INTERFACE_IMPL(CCallCardFragment::ViewTreeGlobalLayoutListener3, Object, IOnGlobalLayoutListener);
+
+ECode CCallCardFragment::ViewTreeGlobalLayoutListener3::OnGlobalLayout()
+{
+    AutoPtr<IViewTreeObserver> observer;
+    mHost->mSecondaryCallInfo->GetViewTreeObserver((IViewTreeObserver**)&observer);
+    Boolean isAlive;
+    if (observer->IsAlive(&isAlive), !isAlive) {
+        return NOERROR;
+    }
+    observer->RemoveOnGlobalLayoutListener(this);
+
+    mHost->OnDialpadVisiblityChange(mHost->mIsDialpadShowing);
+    return NOERROR;
+}
+
+
+//==========================================================================
+// CCallCardFragment::AnimatorListener3
+//==========================================================================
+ECode CCallCardFragment::AnimatorListener3::OnAnimationStart(
+    /* [in] */ IAnimator* animation)
+{
+    mHost->AssignTranslateAnimation(IView::Probe(mHost->mCallStateLabel), 1);
+    mHost->AssignTranslateAnimation(IView::Probe(mHost->mCallStateIcon), 1);
+    mHost->AssignTranslateAnimation(IView::Probe(mHost->mPrimaryName), 2);
+    mHost->AssignTranslateAnimation(mHost->mCallNumberAndLabel, 3);
+    mHost->AssignTranslateAnimation(IView::Probe(mHost->mCallTypeLabel), 4);
+    mHost->AssignTranslateAnimation(mHost->mCallButtonsContainer, 5);
+
+    IView::Probe(mHost->mFloatingActionButton)->SetEnabled(TRUE);
     return NOERROR;
 }
 
@@ -1052,6 +1184,130 @@ void CCallCardFragment::DispatchPopulateAccessibilityEvent(
     if (eventText->GetSize(&size2), size == size2) {
         eventText->Add(NULL);
     }
+}
+
+void CCallCardFragment::AnimateForNewOutgoingCall(
+    /* [in] */ IPoint* touchPoint)
+{
+    AutoPtr<IViewParent> vp;
+    IView::Probe(mPrimaryCallCardContainer)->GetParent((IViewParent**)&vp);
+    AutoPtr<IViewGroup> parent = IViewGroup::Probe(vp);
+
+    AutoPtr<IView> v;
+    GetView((IView**)&v);
+    AutoPtr<IViewTreeObserver> observer;
+    v->GetViewTreeObserver((IViewTreeObserver**)&observer);
+
+    AutoPtr<ILayoutTransition> lt;
+    mPrimaryCallInfo->GetLayoutTransition((ILayoutTransition**)&lt);
+    lt->DisableTransitionType(ILayoutTransition::CHANGING);
+
+    observer->AddOnGlobalLayoutListener(new ViewTreeGlobalLayoutListener(parent, touchPoint, this));
+}
+
+void CCallCardFragment::OnDialpadVisiblityChange(
+    /* [in] */ Boolean isShown)
+{
+    mIsDialpadShowing = isShown;
+    UpdateFabPosition();
+}
+
+void CCallCardFragment::UpdateFabPosition()
+{
+    Int32 offsetY = 0;
+    if (!mIsDialpadShowing) {
+        offsetY = mFloatingActionButtonVerticalOffset;
+        Boolean isShown;
+        if (mSecondaryCallInfo->IsShown(&isShown), isShown) {
+            Int32 height;
+            mSecondaryCallInfo->GetHeight(&height);
+            offsetY -= height;
+        }
+    }
+
+    mFloatingActionButtonController->Align(
+            mIsLandscape ? FloatingActionButtonController::ALIGN_QUARTER_END
+                    : FloatingActionButtonController::ALIGN_MIDDLE,
+            0 /* offsetX */,
+            offsetY,
+            TRUE);
+
+    mFloatingActionButtonController->Resize(
+            mIsDialpadShowing ? mFabSmallDiameter : mFabNormalDiameter, TRUE);
+}
+
+ECode CCallCardFragment::OnResume()
+{
+    FAIL_RETURN(BaseFragment::OnResume());
+    // If the previous launch animation is still running, cancel it so that we don't get
+    // stuck in an intermediate animation state.
+    Boolean isRunning;
+    if (mAnimatorSet != NULL && (IAnimator::Probe(mAnimatorSet)->IsRunning(&isRunning), isRunning)) {
+        IAnimator::Probe(mAnimatorSet)->Cancel();
+    }
+
+    AutoPtr<IResources> res;
+    GetResources((IResources**)&res);
+    AutoPtr<IConfiguration> config;
+    res->GetConfiguration((IConfiguration**)&config);
+    Int32 orientation;
+    config->GetOrientation(&orientation);
+    mIsLandscape = orientation == IConfiguration::ORIENTATION_LANDSCAPE;
+
+    AutoPtr<IViewParent> vp;
+    IView::Probe(mPrimaryCallCardContainer)->GetParent((IViewParent**)&vp);
+    AutoPtr<IViewGroup> parent = IViewGroup::Probe(vp);
+    AutoPtr<IViewTreeObserver> observer;
+    IView::Probe(parent)->GetViewTreeObserver((IViewTreeObserver**)&observer);
+    observer->AddOnGlobalLayoutListener(new ViewTreeGlobalLayoutListener2(parent, observer, this));
+    return NOERROR;
+}
+
+void CCallCardFragment::UpdateFabPositionForSecondaryCallInfo()
+{
+    AutoPtr<IViewTreeObserver> observer;
+    mSecondaryCallInfo->GetViewTreeObserver((IViewTreeObserver**)&observer);
+    observer->AddOnGlobalLayoutListener(new ViewTreeGlobalLayoutListener3(this));
+}
+
+AutoPtr<IAnimator> CCallCardFragment::GetShrinkAnimator(
+    /* [in] */ Int32 startHeight,
+    /* [in] */ Int32 endHeight)
+{
+    AutoPtr<IObjectAnimatorHelper> helper;
+    CObjectAnimatorHelper::AcquireSingleton((IObjectAnimatorHelper**)&helper);
+    AutoPtr< ArrayOf<Int32> > values = ArrayOf<Int32>::Alloc(2);
+    (*values)[0] = startHeight;
+    (*values)[1] = endHeight;
+    AutoPtr<IObjectAnimator> shrinkAnimator;
+    helper->OfInt32(mPrimaryCallCardContainer, String("bottom"), values, (IObjectAnimator**)&shrinkAnimator);
+    IAnimator* animator = IAnimator::Probe(shrinkAnimator);
+    animator->SetDuration(mShrinkAnimationDuration);
+    animator->AddListener(new AnimatorListener3(this));
+    animator->SetInterpolator(ITimeInterpolator::Probe(AnimUtils::EASE_IN));
+    return animator;
+}
+
+AutoPtr<IAnimator> CCallCardFragment::GetRevealAnimator(
+    /* [in] */ IPoint* touchPoint)
+{
+    final Activity activity = getActivity();
+    final View view  = activity.getWindow().getDecorView();
+    final Display display = activity.getWindowManager().getDefaultDisplay();
+    final Point size = new Point();
+    display.getSize(size);
+
+    int startX = size.x / 2;
+    int startY = size.y / 2;
+    if (touchPoint != null) {
+        startX = touchPoint.x;
+        startY = touchPoint.y;
+    }
+
+    final Animator valueAnimator = ViewAnimationUtils.createCircularReveal(view,
+            startX, startY, 0, Math.max(size.x, size.y));
+    valueAnimator.setDuration(mRevealAnimationDuration);
+    return valueAnimator;
 }
 
 } // namespace InCallUI
