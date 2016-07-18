@@ -10,21 +10,28 @@
 #include "_Elastos_Droid_InCallUI_CCallCardFragment.h"
 #include "elastos/droid/contacts/common/widget/FloatingActionButtonController.h"
 #include "elastos/droid/incallui/BaseFragment.h"
+#include <elastos/droid/animation/AnimatorListenerAdapter.h>
+#include <elastos/core/Object.h>
 
+using Elastos::Droid::Animation::AnimatorListenerAdapter;
 using Elastos::Droid::Animation::IAnimator;
 using Elastos::Droid::Animation::IAnimatorSet;
 using Elastos::Droid::Graphics::IPoint;
 using Elastos::Droid::Graphics::Drawable::IDrawable;
 using Elastos::Droid::Telecomm::Telecom::IDisconnectCause;
+using Elastos::Droid::View::IOnPreDrawListener;
 using Elastos::Droid::View::IView;
 using Elastos::Droid::View::IViewGroup;
+using Elastos::Droid::View::IViewOnClickListener;
 using Elastos::Droid::View::IViewOnLayoutChangeListener;
+using Elastos::Droid::View::IViewTreeObserver;
 using Elastos::Droid::View::Accessibility::IAccessibilityEvent;
 using Elastos::Droid::View::Animation::IAnimation;
 using Elastos::Droid::Widget::ITextView;
 using Elastos::Droid::Widget::IImageView;
 using Elastos::Droid::Widget::IImageButton;
 using Elastos::Droid::Contacts::Common::Widget::FloatingActionButtonController;
+using Elastos::Core::Object;
 
 namespace Elastos {
 namespace Droid {
@@ -56,6 +63,145 @@ private:
             /* [in] */ Int32 oldBottom);
     };
 
+    class ActionButtonClickListener
+        : public Object
+        , public IViewOnClickListener
+    {
+    public:
+        CAR_INTERFACE_DECL();
+
+        ActionButtonClickListener(
+            /* [in] */ CCallCardFragment* host)
+            : mHost(host)
+        {}
+
+        // @Override
+        CARAPI OnClick(
+            /* [in] */ IView* v);
+
+    private:
+        CCallCardFragment* mHost;
+    };
+
+    class CallInfoClickListener
+        : public Object
+        , public IViewOnClickListener
+    {
+    public:
+        CAR_INTERFACE_DECL();
+
+        CallInfoClickListener(
+            /* [in] */ CCallCardFragment* host)
+            : mHost(host)
+        {}
+
+        // @Override
+        CARAPI OnClick(
+            /* [in] */ IView* v);
+
+    private:
+        CCallCardFragment* mHost;
+    };
+
+    class CallStateButtonClickListener
+        : public Object
+        , public IViewOnClickListener
+    {
+    public:
+        CAR_INTERFACE_DECL();
+
+        CallStateButtonClickListener(
+            /* [in] */ CCallCardFragment* host)
+            : mHost(host)
+        {}
+
+        // @Override
+        CARAPI OnClick(
+            /* [in] */ IView* v);
+
+    private:
+        CCallCardFragment* mHost;
+    };
+
+    class ManageConferenceCallButtonClickListener
+        : public Object
+        , public IViewOnClickListener
+    {
+    public:
+        CAR_INTERFACE_DECL();
+
+        ManageConferenceCallButtonClickListener(
+            /* [in] */ CCallCardFragment* host)
+            : mHost(host)
+        {}
+
+        // @Override
+        CARAPI OnClick(
+            /* [in] */ IView* v);
+
+    private:
+        CCallCardFragment* mHost;
+    };
+
+    class AnimatorListener
+        : public AnimatorListenerAdapter
+    {
+    public:
+        AnimatorListener(
+            /* [in] */ Boolean visible,
+            /* [in] */ CCallCardFragment* host)
+            : mVisible(visible)
+            , mHost(host)
+        {}
+
+        // @Override
+        CARAPI OnAnimationEnd(
+            /* [in] */ IAnimator* animation);
+
+        // @Override
+        CARAPI OnAnimationStart(
+            /* [in] */ IAnimator* animation);
+
+    private:
+        Boolean mVisible;
+        CCallCardFragment* mHost;
+    };
+
+    class ViewTreePreDrawListener
+        : public Object
+        , public IOnPreDrawListener
+    {
+    public:
+        CAR_INTERFACE_DECL();
+
+        ViewTreePreDrawListener(
+            /* [in] */ IViewTreeObserver* observer,
+            /* [in] */ Boolean isLayoutRtl,
+            /* [in] */ Boolean visible,
+            /* [in] */ IView* videoView,
+            /* [in] */ Float spaceBesideCallCard,
+            /* [in] */ CCallCardFragment* host)
+            : mObserver(observer)
+            , mIsLayoutRtl(isLayoutRtl)
+            , mVisible(visible)
+            , mVideoView(videoView)
+            , mSpaceBesideCallCard(spaceBesideCallCard)
+            , mHost(host)
+        {}
+
+        // @Override
+        CARAPI OnPreDraw(
+            /* [out] */ Boolean* result);
+
+    private:
+        IViewTreeObserver* mObserver;
+        Boolean mIsLayoutRtl;
+        Boolean mVisible;
+        AutoPtr<IView> mVideoView;
+        Boolean mSpaceBesideCallCard;
+        CCallCardFragment* mHost;
+    };
+
 public:
     CAR_INTERFACE_DECL();
 
@@ -85,6 +231,11 @@ public:
         /* [in] */ IViewGroup* container,
         /* [in] */ IBundle* savedInstanceState,
         /* [out] */ IView** view);
+
+    // @Override
+    CARAPI OnViewCreated(
+        /* [in] */ IView* view,
+        /* [in] */ IBundle* savedInstanceState);
 
     // @Override
     CARAPI SetVisible(
@@ -170,7 +321,7 @@ public:
     // @Override
     CARAPI SetCallbackNumber(
         /* [in] */ const String& number,
-        /* [in] */ Boolean isEmergencyCalls);
+        /* [in] */ Boolean isEmergencyCall);
 
     // @Override
     CARAPI SetPrimaryCallElapsedTime(
