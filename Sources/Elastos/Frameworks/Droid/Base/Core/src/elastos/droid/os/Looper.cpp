@@ -135,7 +135,7 @@ ECode Looper::Loop()
             msg->GetWhat(&what);
             AutoPtr<IRunnable> r;
             msg->GetCallback((IRunnable**)&r);
-            Slogger::D("Looper", " >>>>> Dispatching to %p, msg: %d, callback: %p", target.Get(), what, r.Get());
+            Slogger::D("Looper", " >>>>> Dispatching to %s, msg: %d, callback: %p", TO_CSTR(target), what, TO_CSTR(r));
 #endif
             target->DispatchMessage(msg);
         }

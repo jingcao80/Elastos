@@ -22,13 +22,16 @@ CAR_OBJECT_IMPL(CWallpaperChooser);
 
 CWallpaperChooser::CWallpaperChooser()
 {
-    Slogger::E("CWallpaperChooser", "============================CWallpaperChooser::CWallpaperChooser()");
+}
+
+ECode CWallpaperChooser::constructor()
+{
+    return Activity::constructor();
 }
 
 ECode CWallpaperChooser::OnCreate(
     /* [in] */ IBundle* icicle)
 {
-Slogger::E("CWallpaperChooser", "============================CWallpaperChooser::OnCreate 1");
     Activity::OnCreate(icicle);
     SetContentView(Elastos::Droid::Launcher2::R::layout::wallpaper_chooser_base);
 
@@ -47,11 +50,8 @@ Slogger::E("CWallpaperChooser", "============================CWallpaperChooser::
         AutoPtr<IWallpaperChooserDialogFragment> wfragment;
         WallpaperChooserDialogFragment::NewInstance((IWallpaperChooserDialogFragment**)&wfragment);
         AutoPtr<IDialogFragment> fragment = IDialogFragment::Probe(wfragment);
-        AutoPtr<IFragmentManager> _fmanager;
-        GetFragmentManager((IFragmentManager**)&_fmanager);
-        fragment->Show(_fmanager, String("dialog"));
+        fragment->Show(fmanager, String("dialog"));
     }
-Slogger::E("CWallpaperChooser", "============================CWallpaperChooser::OnCreate return");
     return NOERROR;
 }
 

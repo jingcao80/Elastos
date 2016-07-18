@@ -19,6 +19,8 @@ public:
 
     CWallpaperChooser();
 
+    CARAPI constructor();
+
     // @Override
     CARAPI OnCreate(
         /* [in] */ IBundle* icicle);

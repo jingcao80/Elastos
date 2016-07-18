@@ -10,6 +10,7 @@ using Elastos::Droid::Animation::CValueAnimator;
 using Elastos::Droid::Animation::CObjectAnimator;
 using Elastos::Droid::View::EIID_IOnDrawListener;
 using Elastos::Droid::View::IViewTreeObserver;
+using Elastos::Utility::IIterator;
 using Elastos::Utility::CHashSet;
 using Elastos::Utility::ICollection;
 using Elastos::Utility::Logging::Slogger;
@@ -131,18 +132,22 @@ void LauncherAnimUtils::OnDestroyActivity()
     AutoPtr<IHashSet> animators;
     CHashSet::New(ICollection::Probe(sAnimators), (IHashSet**)&animators);
 
-    AutoPtr<ArrayOf<IInterface*> > array;
-    animators->ToArray((ArrayOf<IInterface*>**)&array);
-    for (Int32 i = 0; i < array->GetLength(); i++) {
-        AutoPtr<IAnimator> a = IAnimator::Probe((*array)[i]);
+    AutoPtr<IIterator> it;
+    animators->GetIterator((IIterator**)&it);
+    Boolean hasNext;
+    IAnimator* animator;
+    while (it->HasNext(&hasNext), hasNext) {
+        AutoPtr<IInterface> obj;
+        it->GetNext((IInterface**)&obj);
+        animator = IAnimator::Probe(obj);
 
         Boolean res;
-        a->IsRunning(&res);
+        animator->IsRunning(&res);
         if (res) {
-            a->Cancel();
+            animator->Cancel();
         }
         else {
-            sAnimators->Remove(a);
+            sAnimators->Remove(obj);
         }
     }
 }

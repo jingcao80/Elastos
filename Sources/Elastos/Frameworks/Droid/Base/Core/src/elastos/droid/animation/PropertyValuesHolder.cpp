@@ -543,32 +543,30 @@ AutoPtr<IMethodInfo> PropertyValuesHolder::SetupSetterOrGetter(
     /* [in] */ const String& prefix,
     /* [in] */ const InterfaceID& valueType)
 {
-    AutoPtr<IMethodInfo> setterOrGetter;
-    {
-        AutoLock lock(mPropertyMapLock);
+    AutoLock lock(mPropertyMapLock);
 
-        AutoPtr<IClassInfo> key = targetClass;
-        AutoPtr< MethodMap > propertyMap;
-        typename ClassMethodMap::Iterator it = propertyMapMap.Find(key);
-        if (it != propertyMapMap.End()) {
-            propertyMap = it->mSecond;
-        }
-        if (propertyMap != NULL) {
-            typename MethodMap::Iterator it2 = propertyMap->Find(mPropertyName);
-            if (it2 != propertyMap->End()) {
-                setterOrGetter = it2->mSecond;
-            }
-        }
-        if (setterOrGetter == NULL) {
-            setterOrGetter = GetPropertyFunction(targetClass, prefix, valueType);
-            if (propertyMap == NULL) {
-                propertyMap = new MethodMap();
-                propertyMapMap[key] = propertyMap;
-            }
-            (*propertyMap)[mPropertyName] = setterOrGetter;
-        }
-        return setterOrGetter;
+    AutoPtr<IMethodInfo> setterOrGetter;
+    AutoPtr<IClassInfo> key = targetClass;
+    AutoPtr< MethodMap > propertyMap;
+    typename ClassMethodMap::Iterator it = propertyMapMap.Find(key);
+    if (it != propertyMapMap.End()) {
+        propertyMap = it->mSecond;
     }
+    if (propertyMap != NULL) {
+        typename MethodMap::Iterator it2 = propertyMap->Find(mPropertyName);
+        if (it2 != propertyMap->End()) {
+            setterOrGetter = it2->mSecond;
+        }
+    }
+    if (setterOrGetter == NULL) {
+        setterOrGetter = GetPropertyFunction(targetClass, prefix, valueType);
+        if (propertyMap == NULL) {
+            propertyMap = new MethodMap();
+            propertyMapMap[key] = propertyMap;
+        }
+        (*propertyMap)[mPropertyName] = setterOrGetter;
+    }
+    return setterOrGetter;
 }
 
 ECode PropertyValuesHolder::SetupSetter(
@@ -627,9 +625,11 @@ ECode PropertyValuesHolder::SetupSetterAndGetter(
         }
         return NOERROR;
     }
+
 NEXT:
+    AutoPtr<IClassInfo> clsInfo = GetClassInfo(target);
     if (mSetter == NULL) {
-        SetupSetter(GetClassInfo(target));
+        SetupSetter(clsInfo);
     }
     AutoPtr<ArrayOf<IKeyframe*> > frames;
     mKeyframes->GetKeyframes((ArrayOf<IKeyframe*>**)&frames);
@@ -640,7 +640,7 @@ NEXT:
         kf->HasValue(&has);
         if (!has || ((Keyframe*)kf)->ValueWasSetOnStart()) {
             if (mGetter == NULL) {
-                SetupGetter(GetClassInfo(target));
+                SetupGetter(clsInfo);
                 if (mGetter == NULL) {
                     // Already logged the error - just return to avoid NPE
                     return NOERROR;
@@ -1057,7 +1057,7 @@ AutoPtr<IMethodInfo> PropertyValuesHolder::GetMethodInfo(
     /* [in] */ const String& prefix,
     /* [in] */ ArrayOf<InterfaceID>* args)
 {
-    if (method.IsNullOrEmpty()) return NULL;
+    if (method.IsNullOrEmpty() || args == NULL || args->GetLength() < 1) return NULL;
 
     Int32 mtdCount;
     targetClass->GetMethodCount(&mtdCount);
@@ -1068,25 +1068,29 @@ AutoPtr<IMethodInfo> PropertyValuesHolder::GetMethodInfo(
         String methodName;
         methodInfo->GetName(&methodName);
         if (!method.Equals(methodName)) continue;
+
         Int32 paramCount;
         methodInfo->GetParamCount(&paramCount);
-        if (paramCount != args->GetLength()) continue;
+        if (paramCount != 1) continue;
         AutoPtr< ArrayOf<IParamInfo*> > paramInfos = ArrayOf<IParamInfo*>::Alloc(paramCount);
         methodInfo->GetAllParamInfos(paramInfos);
-        for (Int32 j = 0; j < paramCount; ++j) {
-            IParamInfo* paramInfo = (*paramInfos)[j];
-            ParamIOAttribute ioAttr;
-            paramInfo->GetIOAttribute(&ioAttr);
-            if (prefix.Equals(String("Set")) && (ioAttr != ParamIOAttribute_In)) break;
-            else if (ioAttr == ParamIOAttribute_In) break;
-            AutoPtr<IDataTypeInfo> dataTypeInfo;
-            paramInfo->GetTypeInfo((IDataTypeInfo**)&dataTypeInfo);
-            if (IInterfaceInfo::Probe(dataTypeInfo) == NULL) break;
-            InterfaceID id;
-            IInterfaceInfo::Probe(dataTypeInfo)->GetId(&id);
-            if ((*args)[j] != id) break;
+
+        IParamInfo* paramInfo = (*paramInfos)[0];
+        ParamIOAttribute ioAttr;
+        paramInfo->GetIOAttribute(&ioAttr);
+        if (prefix.Equals("Set") && (ioAttr != ParamIOAttribute_In)) break;
+        else if (ioAttr == ParamIOAttribute_In) break;
+
+        AutoPtr<IDataTypeInfo> dataTypeInfo;
+        paramInfo->GetTypeInfo((IDataTypeInfo**)&dataTypeInfo);
+        if (IInterfaceInfo::Probe(dataTypeInfo) == NULL) break;
+        InterfaceID id;
+        IInterfaceInfo::Probe(dataTypeInfo)->GetId(&id);
+        for (Int32 k = 0; k < args->GetLength(); ++k) {
+            if ((*args)[k] == id) {
+                return methodInfo;
+            }
         }
-        return methodInfo;
     }
     return NULL;
 }

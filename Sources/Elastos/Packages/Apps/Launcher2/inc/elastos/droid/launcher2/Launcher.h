@@ -411,16 +411,16 @@ private:
         AutoPtr<IFolderIcon> mFi;
     };
 
-    class MyAnimatorUpdateListener
+    class ShowAlphaAnimatorUpdateListener
         : public Object
         , public IAnimatorUpdateListener
     {
     public:
-        TO_STRING_IMPL("Launcher::MyAnimatorUpdateListener")
+        TO_STRING_IMPL("Launcher::ShowAlphaAnimatorUpdateListener")
 
         CAR_INTERFACE_DECL();
 
-        MyAnimatorUpdateListener(
+        ShowAlphaAnimatorUpdateListener(
             /* [in] */ Launcher* host,
             /* [in] */ IView* fromView,
             /* [in] */ IAppsCustomizeTabHost* toView);
@@ -434,13 +434,13 @@ private:
         AutoPtr<IAppsCustomizeTabHost> mToView;
     };
 
-    class MyAnimatorListenerAdapter2
+    class ShowAnimatorListenerAdapter
         : public AnimatorListenerAdapter
     {
     public:
-        TO_STRING_IMPL("Launcher::MyAnimatorListenerAdapter2")
+        TO_STRING_IMPL("Launcher::ShowAnimatorListenerAdapter")
 
-        MyAnimatorListenerAdapter2(
+        ShowAnimatorListenerAdapter(
             /* [in] */ Launcher* host,
             /* [in] */ IView* fromView,
             /* [in] */ IAppsCustomizeTabHost* toView,

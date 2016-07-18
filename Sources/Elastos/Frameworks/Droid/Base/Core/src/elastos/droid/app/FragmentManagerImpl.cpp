@@ -2504,7 +2504,7 @@ ECode FragmentManagerImpl::OnCreateView(
     attrs->GetAttributeValue(String(NULL), String("class"), &fname);
     AutoPtr<ArrayOf<Int32> > attrIds = TO_ATTRS_ARRAYOF(R::styleable::Fragment);
     AutoPtr<ITypedArray> a;
-    context->ObtainStyledAttributes(attrIds, (ITypedArray**)&a);
+    context->ObtainStyledAttributes(attrs, attrIds, (ITypedArray**)&a);
 
     if (fname.IsNull()) {
         a->GetString(R::styleable::Fragment_name, &fname);

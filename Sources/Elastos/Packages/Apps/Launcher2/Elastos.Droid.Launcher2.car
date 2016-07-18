@@ -594,8 +594,6 @@ module
 
     [local]
     class CLauncherBroadcastReceiver {
-        constructor();
-
         constructor(
             [in] ILauncher* host);
 
@@ -604,8 +602,6 @@ module
 
     [local]
     class CLauncherCloseSystemDialogsIntentReceiver {
-        constructor();
-
         constructor(
             [in] ILauncher* host);
 
@@ -614,8 +610,6 @@ module
 
     [local]
     class CLauncherAppWidgetResetObserver {
-        constructor();
-
         constructor(
             [in] ILauncher* host);
 
@@ -773,6 +767,8 @@ module
     }
 
     class CWallpaperChooser {
+        constructor();
+
         interface IActivity;
     }
 

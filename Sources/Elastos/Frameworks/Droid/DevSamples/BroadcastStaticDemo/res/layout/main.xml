@@ -14,4 +14,14 @@
         android:layout_height="wrap_content"
         android:text="Test Mount" />
 
+    <ImageView
+        android:id="@+id/WirelessIcon"
+        android:layout_width="24dp"
+        android:layout_height="24dp"
+        android:scaleType="centerInside"
+        android:layout_marginStart="16dp"
+        android:layout_marginEnd="32dp"
+        android:background="#ffe0e0e0"
+        android:src="@drawable/ic_settings_wireless" />
+
 </LinearLayout>

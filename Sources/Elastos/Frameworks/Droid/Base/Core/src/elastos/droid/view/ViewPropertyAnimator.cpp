@@ -145,12 +145,13 @@ ECode ViewPropertyAnimator::AnimatorEventListener::OnAnimationRepeat(
 ECode ViewPropertyAnimator::AnimatorEventListener::OnAnimationUpdate(
     /* [in] */ IValueAnimator* animation)
 {
+    IInterface* animator = TO_IINTERFACE(animation);
     AutoPtr<PropertyBundle> propertyBundle = NULL;
     Boolean containKey = FALSE;
-    mHost->mAnimatorMap->ContainsKey(TO_IINTERFACE(animation), &containKey);
+    mHost->mAnimatorMap->ContainsKey(animator, &containKey);
     if (containKey) {
         AutoPtr<IInterface> valueTmp;
-        mHost->mAnimatorMap->Get(TO_IINTERFACE(animation), (IInterface**)&valueTmp);
+        mHost->mAnimatorMap->Get(animator, (IInterface**)&valueTmp);
         propertyBundle = (PropertyBundle*)IObject::Probe(valueTmp);
     }
     if (propertyBundle == NULL) {

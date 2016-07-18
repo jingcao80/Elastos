@@ -320,25 +320,20 @@ ECode WallpaperChooserDialogFragment::NewInstance(
     *fragment = _fragment;
     REFCOUNT_ADD(*fragment);
     return NOERROR;
-
-    return WallpaperChooserDialogFragment::NewInstance(fragment);
 }
 
 ECode WallpaperChooserDialogFragment::OnCreate(
      /* [in] */ IBundle* savedInstanceState)
 {
-Slogger::E("WallpaperChooserDialogFragment", "=================WallpaperChooserDialogFragment::OnCreate()1");
     DialogFragment::OnCreate(savedInstanceState);
     if (savedInstanceState != NULL) {
         Boolean res;
         savedInstanceState->ContainsKey(EMBEDDED_KEY, &res);
         if (res) {
-Slogger::E("WallpaperChooserDialogFragment", "=================WallpaperChooserDialogFragment::OnCreate return");
             return savedInstanceState->GetBoolean(EMBEDDED_KEY, &mEmbedded);
         }
     }
     else {
-Slogger::E("WallpaperChooserDialogFragment", "=================WallpaperChooserDialogFragment::OnCreate return");
         return IsInLayout(&mEmbedded);
     }
 
@@ -424,8 +419,7 @@ ECode WallpaperChooserDialogFragment::OnCreateView(
      */
     if (mEmbedded) {
         AutoPtr<IView> view;
-        inflater->Inflate(Elastos::Droid::Launcher2::R::layout::wallpaper_chooser, container, FALSE);
-
+        inflater->Inflate(Elastos::Droid::Launcher2::R::layout::wallpaper_chooser, container, FALSE, (IView**)&view);
         view->SetBackground(mWallpaperDrawable);
 
         AutoPtr<IView> tmp;
@@ -445,9 +439,7 @@ ECode WallpaperChooserDialogFragment::OnCreateView(
         setButton->SetOnClickListener(IViewOnClickListener::Probe(listener));
         *outView = view;
         REFCOUNT_ADD(*outView);
-        return NOERROR;
     }
-    *outView = NULL;
     return NOERROR;
 }
 
@@ -516,6 +508,8 @@ ECode WallpaperChooserDialogFragment::OnNothingSelected(
 
 void WallpaperChooserDialogFragment::FindWallpapers()
 {
+    mThumbs = NULL;
+    mImages = NULL;
     CArrayList::New(24, (IArrayList**)&mThumbs);
     CArrayList::New(24, (IArrayList**)&mImages);
 
@@ -541,23 +535,26 @@ void WallpaperChooserDialogFragment::AddWallpapers(
     AutoPtr<ArrayOf<String> > extras;
     resources->GetStringArray(list, (ArrayOf<String>**)&extras);
 
-    for (Int32 i = 0; i < extras->GetLength(); i++) {
-        String extra = (*extras)[i];
-        Int32 res;
-        resources->GetIdentifier(extra, String("drawable"), packageName, &res);
-        if (res != 0) {
-            Int32 thumbRes;
-            resources->GetIdentifier(extra + String("_small"), String("drawable"), packageName, &thumbRes);
+    if (extras != NULL) {
+        for (Int32 i = 0; i < extras->GetLength(); i++) {
+            String extra = (*extras)[i];
+            Int32 res;
+            resources->GetIdentifier(extra, String("drawable"), packageName, &res);
+            if (res != 0) {
+                Int32 thumbRes;
+                resources->GetIdentifier(extra + String("_small"), String("drawable"), packageName, &thumbRes);
 
-            if (thumbRes != 0) {
-                AutoPtr<IInteger32> obj1 = CoreUtils::Convert(thumbRes);
-                mThumbs->Add(TO_IINTERFACE(obj1));
-                AutoPtr<IInteger32> obj2 = CoreUtils::Convert(res);
-                mImages->Add(TO_IINTERFACE(obj2));
-                // Log.d(TAG, "add: [" + packageName + "]: " + extra + " (" + res + ")");
+                if (thumbRes != 0) {
+                    AutoPtr<IInteger32> obj1 = CoreUtils::Convert(thumbRes);
+                    mThumbs->Add(TO_IINTERFACE(obj1));
+                    AutoPtr<IInteger32> obj2 = CoreUtils::Convert(res);
+                    mImages->Add(TO_IINTERFACE(obj2));
+                    // Log.d(TAG, "add: [" + packageName + "]: " + extra + " (" + res + ")");
+                }
             }
         }
     }
+
     return;
 }
 

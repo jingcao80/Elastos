@@ -507,9 +507,9 @@ ECode Launcher::MyAnimatorListenerAdapter::OnAnimationEnd(
     return NOERROR;
 }
 
-CAR_INTERFACE_IMPL(Launcher::MyAnimatorUpdateListener, Object, IAnimatorUpdateListener);
+CAR_INTERFACE_IMPL(Launcher::ShowAlphaAnimatorUpdateListener, Object, IAnimatorUpdateListener);
 
-Launcher::MyAnimatorUpdateListener::MyAnimatorUpdateListener(
+Launcher::ShowAlphaAnimatorUpdateListener::ShowAlphaAnimatorUpdateListener(
     /* [in] */ Launcher* host,
     /* [in] */ IView* fromView,
     /* [in] */ IAppsCustomizeTabHost* toView)
@@ -519,12 +519,12 @@ Launcher::MyAnimatorUpdateListener::MyAnimatorUpdateListener(
 {
 }
 
-ECode Launcher::MyAnimatorUpdateListener::OnAnimationUpdate(
+ECode Launcher::ShowAlphaAnimatorUpdateListener::OnAnimationUpdate(
     /* [in] */ IValueAnimator* animation)
 {
     if (animation == NULL) {
         //throw new RuntimeException("animation is null");
-        Slogger::E("Launcher::MyAnimatorUpdateListener", "animation is null");
+        Slogger::E("Launcher::ShowAlphaAnimatorUpdateListener", "animation is null");
         return E_RUNTIME_EXCEPTION;
     }
     AutoPtr<IInterface> value;
@@ -536,7 +536,7 @@ ECode Launcher::MyAnimatorUpdateListener::OnAnimationUpdate(
     return NOERROR;
 }
 
-Launcher::MyAnimatorListenerAdapter2::MyAnimatorListenerAdapter2(
+Launcher::ShowAnimatorListenerAdapter::ShowAnimatorListenerAdapter(
     /* [in] */ Launcher* host,
     /* [in] */ IView* fromView,
     /* [in] */ IAppsCustomizeTabHost* toView,
@@ -551,7 +551,7 @@ Launcher::MyAnimatorListenerAdapter2::MyAnimatorListenerAdapter2(
 {
 }
 
-ECode Launcher::MyAnimatorListenerAdapter2::OnAnimationStart(
+ECode Launcher::ShowAnimatorListenerAdapter::OnAnimationStart(
     /* [in] */ IAnimator* animation)
 {
     mHost->UpdateWallpaperVisibility(TRUE);
@@ -562,7 +562,7 @@ ECode Launcher::MyAnimatorListenerAdapter2::OnAnimationStart(
     return IView::Probe(mToView)->BringToFront();
 }
 
-ECode Launcher::MyAnimatorListenerAdapter2::OnAnimationEnd(
+ECode Launcher::ShowAnimatorListenerAdapter::OnAnimationEnd(
     /* [in] */ IAnimator* animation)
 {
     mHost->DispatchOnLauncherTransitionEnd(IView::Probe(mFromView), mAnimated, FALSE);
@@ -586,7 +586,7 @@ ECode Launcher::MyAnimatorListenerAdapter2::OnAnimationEnd(
     return NOERROR;
 }
 
-ECode Launcher::MyAnimatorListenerAdapter2::OnAnimationCancel(
+ECode Launcher::ShowAnimatorListenerAdapter::OnAnimationCancel(
     /* [in] */ IAnimator* animation)
 {
     mAnimationCancelled = TRUE;
@@ -3522,7 +3522,6 @@ ECode Launcher::StartActivity(
     /* [in] */ IIntent* intent,
     /* [in] */ IInterface* tag,
     /* [out] */ Boolean* result)
-
 {
     VALIDATE_NOT_NULL(result);
     intent->AddFlags(IIntent::FLAG_ACTIVITY_NEW_TASK);
@@ -4026,20 +4025,17 @@ ECode Launcher::OnLongClick(
     /* [in] */ IView* v,
     /* [out] */ Boolean* result)
 {
-    Slogger::I(TAG, " >> OnLongClick");
-    VALIDATE_NOT_NULL(result);
+    VALIDATE_NOT_NULL(result)
+    *result = FALSE;
 
     Boolean res;
     if (IsDraggingEnabled(&res), !res) {
-        *result = FALSE;
         return NOERROR;
     }
     if (IsWorkspaceLocked(&res), res) {
-        *result = FALSE;
         return NOERROR;
     }
     if (mState != Launcher_WORKSPACE) {
-        *result = FALSE;
         return NOERROR;
     }
 
@@ -4071,7 +4067,6 @@ ECode Launcher::OnLongClick(
     Boolean allowLongPress = tmp1 || tmp2;
     if (allowLongPress && (mDragController->IsDragging(&res), !res)) {
         if (itemUnderLongClick == NULL) {
-            Slogger::I(TAG, " >> StartWallpaper");
             // User long pressed on empty space
             Boolean res;
             IView::Probe(mWorkspace)->PerformHapticFeedback(IHapticFeedbackConstants::LONG_PRESS,
@@ -4209,8 +4204,7 @@ ECode Launcher::DisableWallpaperIfInAllApps()
 void Launcher::SetWorkspaceBackground(
     /* [in] */ Boolean workspace)
 {
-    mLauncherView->SetBackground(workspace ?
-            mWorkspaceBackgroundDrawable : NULL);
+    mLauncherView->SetBackground(workspace ? mWorkspaceBackgroundDrawable : NULL);
 }
 
 ECode Launcher::UpdateWallpaperVisibility(
@@ -4340,7 +4334,7 @@ void Launcher::ShowAppsCustomizeHelper(
         AutoPtr<ITimeInterpolator> value;
         CDecelerateInterpolator::New(1.5f, (ITimeInterpolator**)&value);
         IAnimator::Probe(alphaAnim)->SetInterpolator(value);
-        AutoPtr<IAnimatorUpdateListener> lis = new MyAnimatorUpdateListener(
+        AutoPtr<IAnimatorUpdateListener> lis = new ShowAlphaAnimatorUpdateListener(
                 this, fromView, IAppsCustomizeTabHost::Probe(toView));
         IValueAnimator::Probe(alphaAnim)->AddUpdateListener(lis);
 
@@ -4354,7 +4348,7 @@ void Launcher::ShowAppsCustomizeHelper(
         mStateAnimation->Play(IAnimator::Probe(alphaAnim), (IAnimatorSetBuilder**)&builder);
         builder->After(startDelay);
 
-        AutoPtr<IAnimatorListener> listener = new MyAnimatorListenerAdapter2(this,
+        AutoPtr<IAnimatorListener> listener = new ShowAnimatorListenerAdapter(this,
                 fromView, IAppsCustomizeTabHost::Probe(toView), animated, springLoaded);
         IAnimator::Probe(mStateAnimation)->AddListener(listener);
 

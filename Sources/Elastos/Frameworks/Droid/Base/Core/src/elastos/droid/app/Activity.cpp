@@ -3537,7 +3537,7 @@ ECode Activity::OnCreateView(
     *view = NULL;
     VALIDATE_NOT_NULL(attrs);
 
-    if (!name.Equals("Fragment")) {
+    if (!name.Equals("fragment")) {
         return OnCreateView(name, context, attrs, view);
     }
 

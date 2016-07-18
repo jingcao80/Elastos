@@ -37,6 +37,8 @@ namespace Elastos {
 namespace Droid {
 namespace App {
 
+static const String TAG("Fragment");
+
 //============================================================================
 // FragmentContainerLocal
 //============================================================================
@@ -877,7 +879,7 @@ ECode Fragment::RestoreViewState(
     mCalled = FALSE;
     OnViewStateRestored(savedInstanceState);
     if (!mCalled) {
-        Slogger::E("Fragment", "Fragment did not call through to super::OnViewStateRestored()");
+        Slogger::E(TAG, "Fragment did not call through to super::OnViewStateRestored()");
         return E_SUPER_NOT_CALLED_EXCEPTION;
     }
     return NOERROR;
@@ -979,7 +981,7 @@ ECode Fragment::SetArguments(
     /* [in] */ IBundle* args)
 {
     if (mIndex >= 0) {
-        Slogger::E("Fragment", "Fragment already active");
+        Slogger::E(TAG, "Fragment already active");
         return E_ILLEGAL_STATE_EXCEPTION;
     }
     mArguments = args;
@@ -1000,7 +1002,7 @@ ECode Fragment::SetInitialSavedState(
     /* [in] */ IFragmentSavedState* state)
 {
     if (mIndex >= 0) {
-        Slogger::E("Fragment", "Fragment already active");
+        Slogger::E(TAG, "Fragment already active");
         return E_ILLEGAL_STATE_EXCEPTION;
     }
     AutoPtr<IBundle> fState;
@@ -1293,7 +1295,7 @@ ECode Fragment::GetLoaderManager(
         REFCOUNT_ADD(*manager);
     }
     if (mActivity == NULL) {
-        Slogger::E("Fragment", "Fragment  not attached to Activity");
+        Slogger::E(TAG, "Fragment  not attached to Activity");
         return E_ILLEGAL_STATE_EXCEPTION;
     }
     mCheckedForLoaderManager = TRUE;
@@ -1321,7 +1323,7 @@ ECode Fragment::StartActivity(
     VALIDATE_NOT_NULL(options);
 
     if (mActivity == NULL) {
-        Slogger::E("Fragment", "Fragment  not attached to Activity");
+        Slogger::E(TAG, "Fragment  not attached to Activity");
         return E_ILLEGAL_STATE_EXCEPTION;
     }
     if (options != NULL) {
@@ -1347,7 +1349,7 @@ ECode Fragment::StartActivityForResult(
     /* [in] */ IBundle* options)
 {
     if (mActivity == NULL) {
-        Slogger::E("Fragment", "Fragment  not attached to Activity");
+        Slogger::E(TAG, "Fragment  not attached to Activity");
         return E_ILLEGAL_STATE_EXCEPTION;
     }
     if (options != NULL) {
@@ -1999,7 +2001,7 @@ ECode Fragment::PerformCreate(
     mCalled = FALSE;
     OnCreate(savedInstanceState);
     if (!mCalled) {
-        Slogger::E("Fragment", "Fragment  did not call through to super::OnCreate()");
+        Slogger::E(TAG, "Fragment  did not call through to super::OnCreate()");
         return E_SUPER_NOT_CALLED_EXCEPTION;
     }
     if (savedInstanceState != NULL) {
@@ -2042,7 +2044,7 @@ ECode Fragment::PerformActivityCreated(
     mCalled = FALSE;
     OnActivityCreated(savedInstanceState);
     if (!mCalled) {
-        Slogger::E("Fragment", "Fragment  did not call through to super::OnActivityCreated()");
+        Slogger::E(TAG, "Fragment  did not call through to super::OnActivityCreated()");
         return E_SUPER_NOT_CALLED_EXCEPTION;
     }
     if (mChildFragmentManager != NULL) {
@@ -2061,7 +2063,7 @@ ECode Fragment::PerformStart()
     mCalled = FALSE;
     OnStart();
     if (!mCalled) {
-        Slogger::E("Fragment", "Fragment  did not call through to super::OnStart()");
+        Slogger::E(TAG, "Fragment  did not call through to super::OnStart()");
         return E_SUPER_NOT_CALLED_EXCEPTION;
     }
     if (mChildFragmentManager != NULL) {
@@ -2084,7 +2086,7 @@ ECode Fragment::PerformResume()
     mCalled = FALSE;
     OnResume();
     if (!mCalled) {
-        Slogger::E("Fragment", "Fragment  did not call through to super::OnResume()");
+        Slogger::E(TAG, "Fragment  did not call through to super::OnResume()");
         return E_SUPER_NOT_CALLED_EXCEPTION;
     }
     if (mChildFragmentManager != NULL) {
@@ -2255,7 +2257,7 @@ ECode Fragment::PerformPause()
     mCalled = FALSE;
     OnPause();
     if (!mCalled) {
-        Slogger::E("Fragment", "Fragment did not call through to super::OnPause()");
+        Slogger::E(TAG, "Fragment did not call through to super::OnPause()");
         return E_SUPER_NOT_CALLED_EXCEPTION;
     }
     return NOERROR;
@@ -2269,7 +2271,7 @@ ECode Fragment::PerformStop()
     mCalled = FALSE;
     OnStop();
     if (!mCalled) {
-        Slogger::E("Fragment", "Fragment did not call through to super::OnStop()");
+        Slogger::E(TAG, "Fragment did not call through to super::OnStop()");
         return E_SUPER_NOT_CALLED_EXCEPTION;
     }
 
@@ -2301,7 +2303,7 @@ ECode Fragment::PerformDestroyView()
     mCalled = FALSE;
     OnDestroyView();
     if (!mCalled) {
-        Slogger::E("Fragment", "Fragment did not call through to super::OnDestroyView()");
+        Slogger::E(TAG, "Fragment did not call through to super::OnDestroyView()");
         return E_SUPER_NOT_CALLED_EXCEPTION;
     }
     if (mLoaderManager != NULL) {
@@ -2319,7 +2321,7 @@ ECode Fragment::PerformDestroy()
     mCalled = FALSE;
     OnDestroy();
     if (!mCalled) {
-        Slogger::E("Fragment", "Fragment did not call through to super::OnDestroy()");
+        Slogger::E(TAG, "Fragment did not call through to super::OnDestroy()");
         return E_SUPER_NOT_CALLED_EXCEPTION;
     }
     return NOERROR;

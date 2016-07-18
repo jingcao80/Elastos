@@ -986,7 +986,8 @@ void WifiSettings::UpdateAccessPoints()
             ICollection* accessPoints = ICollection::Probe(ap);
             AutoPtr<IPreferenceScreen> screen;
             GetPreferenceScreen((IPreferenceScreen**)&screen);
-            IPreferenceGroup::Probe(screen)->RemoveAll();
+            IPreferenceGroup* screenGroup = IPreferenceGroup::Probe(screen);
+            screenGroup->RemoveAll();
             Int32 size;
             if ((accessPoints->GetSize(&size), size) == 0) {
                 AddMessagePreference(R::string::wifi_empty_list_wifi_on);
@@ -1009,8 +1010,7 @@ void WifiSettings::UpdateAccessPoints()
                 IAccessPoint* accessPoint = IAccessPoint::Probe(obj);
                 // Ignore access points that are out of range.
                 if (((CAccessPoint*)accessPoint)->GetLevel() != -1) {
-                    Boolean res;
-                    IPreferenceGroup::Probe(screen)->AddPreference(IPreference::Probe(accessPoint), &res);
+                    screenGroup->AddPreference(IPreference::Probe(accessPoint), &res);
                 }
             }
             break;
@@ -1106,7 +1106,7 @@ void WifiSettings::PrepareWifiAssistantCard()
         AutoPtr<IListView> listView;
         GetListView((IListView**)&listView);
         AutoPtr<ILayoutInflater> inflater;
-        LayoutInflater::From(IContext::Probe(inflater), (ILayoutInflater**)&inflater);
+        LayoutInflater::From(IContext::Probe(activity), (ILayoutInflater**)&inflater);
         inflater->Inflate(R::layout::wifi_assistant_card,
                 IViewGroup::Probe(listView), FALSE, (IView**)&mWifiAssistantCard);
         AutoPtr<IView> view;

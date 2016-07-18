@@ -322,6 +322,7 @@ module
 //    }
 //
 //    class CCallLogActivity {
+//        constructor();
 //        interface IContext;
 //        interface IContextWrapper;
 //        interface IContextThemeWrapper;
@@ -974,6 +975,7 @@ module
 //    }
 //
 //    class CDialerSettingsActivity {
+//        constructor();
 //        interface IListActivity;
 //        interface IPreferenceManagerOnPreferenceTreeClickListener;
 //        interface IPreferenceFragmentOnPreferenceStartFragmentCallback;

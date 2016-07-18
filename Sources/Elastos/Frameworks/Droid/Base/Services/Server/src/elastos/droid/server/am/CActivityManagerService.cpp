@@ -9723,7 +9723,7 @@ CActivityManagerService::CheckGrantUriPermissionFromIntentLocked(
     /* [in] */ Int32 targetUserId)
 {
     if (DEBUG_URI_PERMISSION) {
-        StringBuilder sb("Checking URI perm to data");
+        StringBuilder sb("Checking URI perm to data ");
         AutoPtr<IUri> uri;
         AutoPtr<IClipData> clipData;
         Int32 flags;

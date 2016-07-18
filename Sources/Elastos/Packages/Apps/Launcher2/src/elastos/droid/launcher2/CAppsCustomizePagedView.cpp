@@ -766,9 +766,7 @@ void CAppsCustomizePagedView::OnMeasure(
         Int32 size;
         mApps->GetSize(&size);
         Boolean tmp;
-        mWidgets->IsEmpty(&tmp);
-Slogger::E("CAppsCustomizePagedView","==================TO DO /*&& !tmp*/=================???");
-        if (size > 0 /*&& !tmp*/) {
+        if (size > 0 && (mWidgets->IsEmpty(&tmp), !tmp)) {
             SetDataIsReady();
             SetMeasuredDimension(width, height);
             OnDataReady(width, height);
@@ -1372,7 +1370,7 @@ ECode CAppsCustomizePagedView::OnLauncherTransitionStart(
 
 ECode CAppsCustomizePagedView::OnLauncherTransitionStep(
     /* [in] */ ILauncher* l,
-    /* [in] */ float t)
+    /* [in] */ Float t)
 {
     return NOERROR;
 }

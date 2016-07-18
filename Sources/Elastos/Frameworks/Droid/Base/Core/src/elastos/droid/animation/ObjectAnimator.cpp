@@ -632,24 +632,27 @@ ECode ObjectAnimator::Start()
         for (it = handler->mAnimations.RBegin(); it != handler->mAnimations.REnd(); ++it) {
             AutoPtr<IObjectAnimator> anim = IObjectAnimator::Probe(*it);
             if (anim) {
-                if (((ObjectAnimator*)anim.Get())->mAutoCancel && HasSameTargetAndProperties(IAnimator::Probe(anim))) {
-                    IAnimator::Probe(anim)->Cancel();
+                IAnimator* animator = IAnimator::Probe(anim);
+                if (((ObjectAnimator*)anim.Get())->mAutoCancel && HasSameTargetAndProperties(animator)) {
+                    animator->Cancel();
                 }
             }
         }
         for (it = handler->mPendingAnimations.RBegin(); it != handler->mPendingAnimations.REnd(); ++it) {
             AutoPtr<IObjectAnimator> anim = IObjectAnimator::Probe(*it);
             if (anim) {
-                if (((ObjectAnimator*)anim.Get())->mAutoCancel && HasSameTargetAndProperties(IAnimator::Probe(anim))) {
-                    IAnimator::Probe(anim)->Cancel();
+                IAnimator* animator = IAnimator::Probe(anim);
+                if (((ObjectAnimator*)anim.Get())->mAutoCancel && HasSameTargetAndProperties(animator)) {
+                    animator->Cancel();
                 }
             }
         }
         for (it = handler->mDelayedAnims.RBegin(); it != handler->mDelayedAnims.REnd(); ++it) {
             AutoPtr<IObjectAnimator> anim = IObjectAnimator::Probe(*it);
             if (anim) {
-                if (((ObjectAnimator*)anim.Get())->mAutoCancel && HasSameTargetAndProperties(IAnimator::Probe(anim))) {
-                    IAnimator::Probe(anim)->Cancel();
+                IAnimator* animator = IAnimator::Probe(anim);
+                if (((ObjectAnimator*)anim.Get())->mAutoCancel && HasSameTargetAndProperties(animator)) {
+                    animator->Cancel();
                 }
             }
         }
