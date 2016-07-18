@@ -24,6 +24,8 @@ public:
 
     CARAPI_(Boolean) IsDialpadVisible();
 
+    CARAPI_(void) ShowConferenceCallManager();
+
 public:
     static const String SHOW_DIALPAD_EXTRA;
     static const String DIALPAD_TEXT_EXTRA;

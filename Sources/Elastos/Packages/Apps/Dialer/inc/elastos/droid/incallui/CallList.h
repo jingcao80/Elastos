@@ -18,6 +18,13 @@ class CallList
 {
 public:
     CAR_INTERFACE_DECL();
+
+    /**
+     * Static singleton accessor method.
+     */
+    static CARAPI_(AutoPtr<CallList>) GetInstance();
+
+    CARAPI_(AutoPtr<Call>) GetFirstCall();
 };
 
 } // namespace InCallUI
