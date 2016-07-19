@@ -274,12 +274,16 @@ ECode KeyguardServiceWrapper::LaunchCamera()
     return NOERROR;
 }
 
-/*
-//@Override
-public IBinder asBinder() {
-    return mService.asBinder();
+
+ECode KeyguardServiceWrapper::AsBinder(
+    /* [out] */ IBinder** binder)
+{
+    VALIDATE_NOT_NULL(binder)
+    *binder = IBinder::Probe(mService);
+    REFCOUNT_ADD(*binder)
+    return NOERROR;
 }
-*/
+
 
 } // namespace Keyguard
 } // namespace Impl

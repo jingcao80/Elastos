@@ -3,14 +3,15 @@
 #define __ELASTOS_DROID_SYSTEMUI_KEYGUARD_KEYGUARDUPDATEMONITORCALLBACK_H__
 
 #include "_Elastos.Droid.SystemUI.h"
-#include "Elastos.Droid.App.h"
-#include "Elastos.Droid.Content.h"
-#include "Elastos.Droid.Os.h"
-#include "elastos/droid/app/Service.h"
+#include "Elastos.Droid.Graphics.h"
+#include "Elastos.Droid.Internal.h"
+#include <elastos/core/Object.h>
+#include <elastos/droid/ext/frameworkext.h>
 
-using Elastos::Droid::App::Service;
-using Elastos::Droid::Content::IIntent;
-using Elastos::Droid::Os::IBinder;
+using Elastos::Droid::Graphics::IBitmap;
+using Elastos::Droid::Internal::Telephony::IccCardConstantsState;
+using Elastos::Core::Object;
+using Elastos::Core::ICharSequence;
 
 namespace Elastos {
 namespace Droid {
@@ -22,9 +23,10 @@ namespace Keyguard {
  */
 class KeyguardUpdateMonitorCallback
     : public Object
+    , public IKeyguardUpdateMonitorCallback
 {
 public:
-    TO_STRING_IMPL("KeyguardUpdateMonitorCallback")
+    CAR_INTERFACE_DECL()
 
     KeyguardUpdateMonitorCallback();
 
@@ -48,10 +50,20 @@ public:
      * @param plmn The operator name of the registered network.  May be null if it shouldn't
      *   be displayed.
      * @param spn The service provider name.  May be null if it shouldn't be displayed.
+     * @param subId The subscription id which PLMN or SPN changed.
      */
     CARAPI OnRefreshCarrierInfo(
+        /* [in] */ Int64 subId,
         /* [in] */ ICharSequence* plmn,
         /* [in] */ ICharSequence* spn);
+
+    /**
+     * Called when the airplane mode changes.
+     *
+     * @param on Indicates if the airplane mode is now enable.
+     */
+    CARAPI OnAirplaneModeChanged(
+        /* [in] */ Boolean on);
 
     /**
      * Called when the ringer mode changes.
@@ -117,11 +129,13 @@ public:
         /* [in] */ Int32 userId);
 
     /**
-     * Called when the SIM state changes.
+     * Called when the SIM state of a subscription changes.
      * @param simState
+     * @param subId The subscription id which SIM state changed.
      */
     CARAPI OnSimStateChanged(
-        /* [in] */ IIccCardConstantsState simState);
+        /* [in] */ Int64 subId,
+        /* [in] */ IccCardConstantsState simState);
 
     /**
      * Called when a user is removed.
@@ -205,7 +219,29 @@ public:
      */
     CARAPI OnFaceUnlockStateChanged(
         /* [in] */ Boolean running,
-        /* [in] */ Int32 userId);
+        /* [in] */ Int32 userid);
+
+    /**
+     * Called when a subId for the slot is changed.
+     * @param oldSubId.
+     * @param newSubId.
+     */
+    CARAPI OnSubIdUpdated(
+        /* [in] */ Int64 oldSubId,
+        /* [in] */ Int64 newSubId);
+
+    /**
+     * Called when the SubInfo content changed
+     * @param subId The subscription id which subscription info record is updated
+     * @param column The column name which is updated
+     * @param sValue The new string if the colum value is string
+     * @param iValue The new integer value if the colum value is integer
+     */
+    CARAPI OnSubInfoContentChanged(
+        /* [in] */ Int64 subId,
+        /* [in] */ const String& column,
+        /* [in] */ const String& sValue,
+        /* [in] */ Int32 iValue);
 
 private:
     static const Int64 VISIBILITY_CHANGED_COLLAPSE_MS;

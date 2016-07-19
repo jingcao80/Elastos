@@ -14,7 +14,7 @@ namespace Keyguard {
 
 CAR_INTERFACE_IMPL_2(KeyguardExitDelegate, Object, IBinder, IIKeyguardExitCallback)
 
-const Boolean KeyguardExitDelegate::DEBUG = FALSE;
+const Boolean KeyguardExitDelegate::DEBUG = TRUE;
 
 KeyguardExitDelegate::KeyguardExitDelegate()
 {
@@ -35,9 +35,7 @@ ECode KeyguardExitDelegate::OnKeyguardExitResult(
 {
     if (DEBUG) Logger::V("KeyguardExitDelegate", "**** onKeyguardExitResult(%d) CALLED ****", success);
     if (mOnKeyguardExitResult != NULL) {
-        ECode ecode = mOnKeyguardExitResult->OnKeyguardExitResult(success);
-        if (FAILED(ecode))
-            return ecode;
+        return mOnKeyguardExitResult->OnKeyguardExitResult(success);
     }
     return NOERROR;
 }
@@ -45,7 +43,6 @@ ECode KeyguardExitDelegate::OnKeyguardExitResult(
 ECode KeyguardExitDelegate::ToString(
     /* [out] */ String* info)
 {
-    VALIDATE_NOT_NULL(info)
     return Object::ToString(info);
 }
 

@@ -4,6 +4,10 @@
 #include <elastos/droid/view/LayoutInflater.h>
 #include <elastos/utility/logging/Logger.h>
 
+using Elastos::Droid::SystemUI::Keyguard::SecurityMode;
+using Elastos::Droid::SystemUI::Keyguard::SecurityMode_SimPuk;
+using Elastos::Droid::SystemUI::Keyguard::SecurityMode_SimPin;
+using Elastos::Droid::SystemUI::Keyguard::SecurityMode_None;
 using Elastos::Droid::SystemUI::Keyguard::IKeyguardViewMediator;
 using Elastos::Droid::View::CChoreographerHelper;
 using Elastos::Droid::View::IChoreographerHelper;
@@ -27,20 +31,24 @@ KeyguardBouncer::ShowRunnable::ShowRunnable(
 ECode KeyguardBouncer::ShowRunnable::Run()
 {
     IView::Probe(mHost->mRoot)->SetVisibility(IView::VISIBLE);
-    assert(0 && "TODO: need the app Keyguard.");
-    // mHost->mKeyguardView->OnResume();
-    // mHost->mKeyguardView->StartAppearAnimation();
+    mHost->mKeyguardView->OnResume();
+    mHost->mKeyguardView->StartAppearAnimation();
     mHost->mShowingSoon = FALSE;
     return NOERROR;
 }
 
-KeyguardBouncer::KeyguardBouncer(
+CAR_INTERFACE_IMPL(KeyguardBouncer, Object, IKeyguardBouncer)
+
+KeyguardBouncer::KeyguardBouncer()
+    : mShowingSoon(FALSE)
+{}
+
+ECode KeyguardBouncer::constructor(
     /* [in] */ IContext* context,
     /* [in] */ IViewMediatorCallback* callback,
     /* [in] */ ILockPatternUtils* lockPatternUtils,
     /* [in] */ IStatusBarWindowManager* windowManager,
     /* [in] */ IViewGroup* container)
-    : mShowingSoon(FALSE)
 {
     mShowRunnable = new ShowRunnable(this);
     AutoPtr<IChoreographerHelper> helper;
@@ -51,121 +59,135 @@ KeyguardBouncer::KeyguardBouncer(
     mLockPatternUtils = lockPatternUtils;
     mContainer = container;
     mWindowManager = windowManager;
+    return NOERROR;
 }
 
-void KeyguardBouncer::Show()
+ECode KeyguardBouncer::Show()
 {
     EnsureView();
     Int32 v = 0;
     if ((IView::Probe(mRoot)->GetVisibility(&v), v) == IView::VISIBLE || mShowingSoon) {
         // show() updates the current security method. This is needed in case we are already
         // showing and the current security method changed.
-        assert(0 && "TODO: need the app Keyguard.");
-        // mKeyguardView->Show();
-        return;
+        return mKeyguardView->Show();
     }
 
     // Try to dismiss the Keyguard. If no security pattern is set, this will dismiss the whole
     // Keyguard. If we need to authenticate, show the bouncer.
-    assert(0 && "TODO: need the app Keyguard.");
-    // if (!mKeyguardView->Dismiss()) {
-    //     mShowingSoon = TRUE;
+    Boolean bval;
+    mKeyguardView->Dismiss(&bval);
+    if (!bval) {
+        mShowingSoon = TRUE;
 
-    //     // Split up the work over multiple frames.
-    //     mChoreographer.postCallbackDelayed(Choreographer.CALLBACK_ANIMATION, mShowRunnable,
-    //             NULL, 48);
-    // }
+        // Split up the work over multiple frames.
+        return mChoreographer->PostCallbackDelayed(
+            IChoreographer::CALLBACK_ANIMATION, mShowRunnable, NULL, 48);
+    }
+    return NOERROR;
 }
 
-void KeyguardBouncer::CancelShowRunnable()
+ECode KeyguardBouncer::CancelShowRunnable()
 {
     mChoreographer->RemoveCallbacks(IChoreographer::CALLBACK_ANIMATION, mShowRunnable, NULL);
     mShowingSoon = FALSE;
+    return NOERROR;
 }
 
-void KeyguardBouncer::ShowWithDismissAction(
+ECode KeyguardBouncer::ShowWithDismissAction(
     /* [in] */ IKeyguardHostViewOnDismissAction* r)
 {
     EnsureView();
-    assert(0 && "TODO: need the app Keyguard.");
-    // mKeyguardView->SetOnDismissAction(r);
-    Show();
+    mKeyguardView->SetOnDismissAction(r);
+    return Show();
 }
 
-void KeyguardBouncer::Hide(
+ECode KeyguardBouncer::Hide(
     /* [in] */ Boolean destroyView)
 {
     CancelShowRunnable();
-    assert(0 && "TODO: need the app Keyguard.");
-    // if (mKeyguardView != NULL) {
-    //     mKeyguardView->SetOnDismissAction(NULL);
-    //     mKeyguardView->CleanUp();
-    // }
+    if (mKeyguardView != NULL) {
+        mKeyguardView->SetOnDismissAction(NULL);
+        mKeyguardView->CleanUp();
+    }
     if (destroyView) {
         RemoveView();
     }
     else if (mRoot != NULL) {
         IView::Probe(mRoot)->SetVisibility(IView::INVISIBLE);
     }
+    return NOERROR;
 }
 
-void KeyguardBouncer::StartPreHideAnimation(
+ECode KeyguardBouncer::StartPreHideAnimation(
     /* [in] */ IRunnable* runnable)
 {
-    assert(0 && "TODO: need the app Keyguard.");
-    // if (mKeyguardView != NULL) {
-    //     mKeyguardView->StartDisappearAnimation(runnable);
-    // }
-    // else if (runnable != NULL) {
-    //     runnable->Run();
-    // }
+    if (mKeyguardView != NULL) {
+        mKeyguardView->StartDisappearAnimation(runnable);
+    }
+    else if (runnable != NULL) {
+        runnable->Run();
+    }
+    return NOERROR;
 }
 
-void KeyguardBouncer::Reset()
+ECode KeyguardBouncer::Reset()
 {
     CancelShowRunnable();
-    InflateView();
+    return InflateView();
 }
 
-void KeyguardBouncer::OnScreenTurnedOff()
+ECode KeyguardBouncer::OnScreenTurnedOff()
 {
-    assert(0 && "TODO: need the app Keyguard.");
-    // if (mKeyguardView != NULL && mRoot != NULL && mRoot->GetVisibility() == IView::VISIBLE) {
-    //     mKeyguardView->OnPause();
-    // }
+    Int32 vis;
+    if (mKeyguardView != NULL && mRoot != NULL) {
+        if ((IView::Probe(mRoot)->GetVisibility(&vis), vis) == IView::VISIBLE) {
+            mKeyguardView->OnPause();
+        }
+    }
+    return NOERROR;
 }
 
-Int64 KeyguardBouncer::GetUserActivityTimeout()
+ECode KeyguardBouncer::GetUserActivityTimeout(
+    /* [out] */ Int64* result)
 {
-    assert(0 && "TODO: need the app Keyguard.");
-    // if (mKeyguardView != NULL) {
-    //     Int64 timeout = mKeyguardView->GetUserActivityTimeout();
-    //     if (timeout >= 0) {
-    //         return timeout;
-    //     }
-    // }
-    return IKeyguardViewMediator::AWAKE_INTERVAL_DEFAULT_MS;
+    VALIDATE_NOT_NULL(result)
+    if (mKeyguardView != NULL) {
+        Int64 timeout;
+        mKeyguardView->GetUserActivityTimeout(&timeout);
+        if (timeout >= 0) {
+            *result = timeout;
+            return NOERROR;
+        }
+    }
+    *result = IKeyguardViewMediator::AWAKE_INTERVAL_DEFAULT_MS;
+    return NOERROR;
 }
 
-Boolean KeyguardBouncer::IsShowing()
+ECode KeyguardBouncer::IsShowing(
+    /* [out] */ Boolean* result)
 {
+    VALIDATE_NOT_NULL(result)
     Int32 v = 0;
-    return mShowingSoon || (mRoot != NULL && (IView::Probe(mRoot)->GetVisibility(&v), v) == IView::VISIBLE);
+    *result = mShowingSoon
+        || (mRoot != NULL
+            && (IView::Probe(mRoot)->GetVisibility(&v), v) == IView::VISIBLE);
+    return NOERROR;
 }
 
-void KeyguardBouncer::Prepare()
+ECode KeyguardBouncer::Prepare()
 {
-    EnsureView();
+    return EnsureView();
 }
 
-void KeyguardBouncer::EnsureView()
+ECode KeyguardBouncer::EnsureView()
 {
     if (mRoot == NULL) {
-        InflateView();
+        return InflateView();
     }
+    return NOERROR;
 }
 
-void KeyguardBouncer::InflateView()
+ECode KeyguardBouncer::InflateView()
 {
     RemoveView();
     AutoPtr<ILayoutInflater> inflater;
@@ -173,18 +195,20 @@ void KeyguardBouncer::InflateView()
     AutoPtr<IView> view;
     inflater->Inflate(R::layout::keyguard_bouncer, NULL, (IView**)&view);
     mRoot = IViewGroup::Probe(view);
-    assert(0 && "TODO: need the app Keyguard.");
-    // mKeyguardView = (KeyguardViewBase) mRoot.findViewById(R.id.keyguard_host_view);
-    // mKeyguardView->SetLockPatternUtils(mLockPatternUtils);
-    // mKeyguardView->SetViewMediatorCallback(mCallback);
+
+    AutoPtr<IView> kv;
+    view->FindViewById(R::id::keyguard_host_view, (IView**)&kv);
+    mKeyguardView = IKeyguardViewBase::Probe(kv);
+    mKeyguardView->SetLockPatternUtils(mLockPatternUtils);
+    mKeyguardView->SetViewMediatorCallback(mCallback);
     Int32 count = 0;
     mContainer->GetChildCount(&count);
-    mContainer->AddView(IView::Probe(mRoot), count);
-    IView::Probe(mRoot)->SetVisibility(IView::INVISIBLE);
-    IView::Probe(mRoot)->SetSystemUiVisibility(IView::STATUS_BAR_DISABLE_HOME);
+    mContainer->AddView(view, count);
+    view->SetVisibility(IView::INVISIBLE);
+    return view->SetSystemUiVisibility(IView::STATUS_BAR_DISABLE_HOME);
 }
 
-void KeyguardBouncer::RemoveView()
+ECode KeyguardBouncer::RemoveView()
 {
     AutoPtr<IViewParent> vp;
     if (mRoot != NULL &&
@@ -192,54 +216,69 @@ void KeyguardBouncer::RemoveView()
         mContainer->RemoveView(IView::Probe(mRoot));
         mRoot = NULL;
     }
+    return NOERROR;
 }
 
-Boolean KeyguardBouncer::OnBackPressed()
+ECode KeyguardBouncer::OnBackPressed(
+    /* [out] */ Boolean* result)
 {
-    assert(0 && "TODO: need the app Keyguard.");
-    // return mKeyguardView != NULL && mKeyguardView->HandleBackKey();
-    return FALSE;
+    VALIDATE_NOT_NULL(result)
+    *result = FALSE;
+    if (mKeyguardView != NULL) {
+        return mKeyguardView->HandleBackKey(result);
+    }
+    return NOERROR;
 }
 
-Boolean KeyguardBouncer::NeedsFullscreenBouncer()
+ECode KeyguardBouncer::NeedsFullscreenBouncer(
+    /* [out] */ Boolean* result)
 {
-    Logger::D("KeyguardBouncer", "TODO [NeedsFullscreenBouncer] : need the app Keyguard.");
-    // if (mKeyguardView != NULL) {
-    //     SecurityMode mode = mKeyguardView.getSecurityMode();
-    //     return mode == SecurityMode.SimPin
-    //             || mode == SecurityMode.SimPuk;
-    // }
-    return TRUE;
+    VALIDATE_NOT_NULL(result)
+    *result = FALSE;
+    if (mKeyguardView != NULL) {
+        SecurityMode mode;
+        mKeyguardView->GetSecurityMode(&mode);
+        *result = mode == SecurityMode_SimPin || mode == SecurityMode_SimPuk;
+    }
+    return NOERROR;
 }
 
-Boolean KeyguardBouncer::IsSecure()
+ECode KeyguardBouncer::IsSecure(
+    /* [out] */ Boolean* result)
 {
-    Logger::D("KeyguardBouncer", "TODO [IsSecure] : need the app Keyguard.");
-    // return mKeyguardView == NULL || mKeyguardView.getSecurityMode() != SecurityMode.None;
-    return TRUE;
+    VALIDATE_NOT_NULL(result)
+    SecurityMode mode;
+    *result = mKeyguardView == NULL
+        || (mKeyguardView->GetSecurityMode(&mode), mode) != SecurityMode_None;
+    return NOERROR;
 }
 
-Boolean KeyguardBouncer::OnMenuPressed()
+ECode KeyguardBouncer::OnMenuPressed(
+    /* [out] */ Boolean* result)
 {
+    VALIDATE_NOT_NULL(result)
+    *result = FALSE;
     EnsureView();
-    assert(0 && "TODO: need the app Keyguard.");
-    // if (mKeyguardView->HandleMenuKey()) {
-    //     // We need to show it in case it is secure. If not, it will get dismissed in any case.
-    //     IView::Probe(mRoot)->SetVisibility(IView::VISIBLE);
-    //     mKeyguardView->RequestFocus();
-    //     mKeyguardView->OnResume();
-    //     return TRUE;
-    // }
-    return FALSE;
+
+    Boolean bval;
+    if (mKeyguardView->HandleMenuKey(&bval), bval) {
+        // We need to show it in case it is secure. If not, it will get dismissed in any case.
+        IView::Probe(mRoot)->SetVisibility(IView::VISIBLE);
+        IView::Probe(mKeyguardView)->RequestFocus(&bval);
+        mKeyguardView->OnResume();
+        *result = TRUE;
+    }
+    return NOERROR;
 }
 
-Boolean KeyguardBouncer::InterceptMediaKey(
-    /* [in] */ IKeyEvent* event)
+ECode KeyguardBouncer::InterceptMediaKey(
+    /* [in] */ IKeyEvent* event,
+    /* [out] */ Boolean* result)
 {
+    VALIDATE_NOT_NULL(result)
+    *result = FALSE;
     EnsureView();
-    assert(0 && "TODO: need the app Keyguard.");
-    // return mKeyguardView->InterceptMediaKey(event);
-    return FALSE;
+    return mKeyguardView->InterceptMediaKey(event, result);
 }
 
 } // namespace Phone

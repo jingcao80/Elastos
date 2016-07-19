@@ -3,14 +3,17 @@
 #define __ELASTOS_DROID_SYSTEMUI_KEYGUARD_KEYGUARDVIEWBASE_H__
 
 #include "_Elastos.Droid.SystemUI.h"
-#include "Elastos.Droid.App.h"
-#include "Elastos.Droid.Content.h"
-#include "Elastos.Droid.Os.h"
-#include "elastos/droid/app/Service.h"
+#include "Elastos.Droid.Media.h"
+#include "Elastos.Droid.Telephony.h"
+#include <elastos/droid/widget/FrameLayout.h>
+#include "elastos/droid/systemui/keyguard/KeyguardActivityLauncher.h"
 
-using Elastos::Droid::App::Service;
-using Elastos::Droid::Content::IIntent;
-using Elastos::Droid::Os::IBinder;
+using Elastos::Droid::Media::IAudioManager;
+using Elastos::Droid::Telephony::ITelephonyManager;
+using Elastos::Droid::Graphics::ICanvas;
+using Elastos::Droid::View::IKeyEvent;
+using Elastos::Droid::View::IMotionEvent;
+using Elastos::Droid::Widget::FrameLayout;
 
 namespace Elastos {
 namespace Droid {
@@ -28,6 +31,7 @@ namespace Keyguard {
  */
 class KeyguardViewBase
     : public FrameLayout
+    , public IKeyguardViewBase
     , public IKeyguardSecurityContainerSecurityCallback
 {
 private:
@@ -113,7 +117,7 @@ public:
 
     //@Override
     CARAPI OnSecurityModeChanged(
-        /* [in] */ ISecurityMode* securityMode,
+        /* [in] */ SecurityMode securityMode,
         /* [in] */ Boolean needsInput);
 
     CARAPI UserActivity();
@@ -134,7 +138,7 @@ public:
     CARAPI StartAppearAnimation();
 
     CARAPI StartDisappearAnimation(
-        /* [in] */ I IRunnable** finishRunnable);
+        /* [in] */ IRunnable* finishRunnable);
 
     /**
      * Verify that the user can get past the keyguard securely.  This is called,
@@ -191,12 +195,12 @@ public:
         /* [in] */ ILockPatternUtils* utils);
 
     CARAPI GetSecurityMode(
-        /* [out] */ iSecurityMode** mose);
+        /* [out] */ SecurityMode* mose);
 
 protected:
     //@Override
     CARAPI DispatchDraw(
-        /* [in] */ ICanvas canvas);
+        /* [in] */ ICanvas* canvas);
 
     //@Override
     CARAPI OnFinishInflate();
@@ -246,7 +250,6 @@ private:
     // they will be handled here for specific media types such as music, otherwise
     // the audio service will bring up the volume dialog.
     static const Boolean KEYGUARD_MANAGES_VOLUME;
-    static const String TAG;
 
     AutoPtr<IKeyguardSecurityContainer> mSecurityContainer;
 

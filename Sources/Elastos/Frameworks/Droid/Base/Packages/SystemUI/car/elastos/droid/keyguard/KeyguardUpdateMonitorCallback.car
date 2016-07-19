@@ -1,0 +1,238 @@
+
+module
+{
+    using interface Elastos.Droid.Graphics.IBitmap;
+    using interface Elastos.Droid.Internal.Telephony.IccCardConstantsState;
+    using interface Elastos.Core.ICharSequence;
+    
+    interface Elastos.Droid.SystemUI.Keyguard.IKeyguardUpdateMonitorBatteryStatus;
+
+    namespace Elastos {
+    namespace Droid {
+    namespace SystemUI {
+    namespace Keyguard {
+
+    /**
+     * Callback for general information relevant to lock screen.
+     */
+    interface IKeyguardUpdateMonitorCallback {
+        /**
+         * Called when the battery status changes, e.g. when plugged in or unplugged, charge
+         * level, etc. changes.
+         *
+         * @param status current battery status
+         */
+        OnRefreshBatteryInfo(
+            [in] IKeyguardUpdateMonitorBatteryStatus* status);
+
+        /**
+         * Called once per minute or when the time changes.
+         */
+        OnTimeChanged();
+
+        /**
+         * Called when the carrier PLMN or SPN changes.
+         *
+         * @param plmn The operator name of the registered network.  May be null if it shouldn't
+         *   be displayed.
+         * @param spn The service provider name.  May be null if it shouldn't be displayed.
+         * @param subId The subscription id which PLMN or SPN changed.
+         */
+        OnRefreshCarrierInfo(
+            [in] Int64 subId, 
+            [in] ICharSequence* plmn, 
+            [in] ICharSequence* spn);
+
+        /**
+         * Called when the airplane mode changes.
+         *
+         * @param on Indicates if the airplane mode is now enable.
+         */
+        OnAirplaneModeChanged(
+            [in] Boolean on);
+
+        /**
+         * Called when the ringer mode changes.
+         * @param state the current ringer state, as defined in
+         * {@link AudioManager#RINGER_MODE_CHANGED_ACTION}
+         */
+        OnRingerModeChanged(
+            [in] Int32 state);
+
+        /**
+         * Called when the phone state changes. String will be one of:
+         * {@link TelephonyManager#EXTRA_STATE_IDLE}
+         * {@link TelephonyManager@EXTRA_STATE_RINGING}
+         * {@link TelephonyManager#EXTRA_STATE_OFFHOOK
+         */
+        OnPhoneStateChanged(
+            [in] Int32 phoneState);
+
+        /**
+         * Called when the visibility of the keyguard changes.
+         * @param showing Indicates if the keyguard is now visible.
+         */
+        OnKeyguardVisibilityChanged(
+            [in] Boolean showing);
+
+        OnKeyguardVisibilityChangedRaw(
+            [in] Boolean showing);
+
+        /**
+         * Called when the keyguard enters or leaves bouncer mode.
+         * @param bouncer if true, keyguard is now in bouncer mode.
+         */
+        OnKeyguardBouncerChanged(
+            [in] Boolean bouncer);
+
+        /**
+         * Called when visibility of lockscreen clock changes, such as when
+         * obscured by a widget.
+         */
+        OnClockVisibilityChanged();
+
+        /**
+         * Called when the device becomes provisioned
+         */
+        OnDeviceProvisioned();
+
+        /**
+         * Called when the device policy changes.
+         * See {@link DevicePolicyManager#ACTION_DEVICE_POLICY_MANAGER_STATE_CHANGED}
+         */
+        OnDevicePolicyManagerStateChanged();
+
+        /**
+         * Called when the user change begins.
+         */
+        OnUserSwitching(
+            [in] Int32 userId);
+
+        /**
+         * Called when the user change is complete.
+         */
+        OnUserSwitchComplete(
+            [in] Int32 userId);
+
+        /**
+         * Called when the SIM state of a subscription changes.
+         * @param simState
+         * @param subId The subscription id which SIM state changed.
+         */
+        OnSimStateChanged(
+            [in] Int64 subId, 
+            [in] IccCardConstantsState simState);
+
+        /**
+         * Called when a user is removed.
+         */
+        OnUserRemoved(
+            [in] Int32 userId);
+
+        /**
+         * Called when the user's info changed.
+         */
+        OnUserInfoChanged(
+            [in] Int32 userId);
+
+        /**
+         * Called when boot completed.
+         *
+         * Note, this callback will only be received if boot complete occurs after registering with
+         * KeyguardUpdateMonitor.
+         */
+        OnBootCompleted();
+
+        /**
+         * Called when the emergency call button is pressed.
+         */
+        OnEmergencyCallAction();
+
+        /**
+         * Called when the transport background changes.
+         * @param bitmap
+         */
+        OnSetBackground(
+            [in] IBitmap* bitmap);
+
+        /**
+         * Called when the screen turns on
+         */
+        OnScreenTurnedOn();
+
+        /**
+         * Called when the screen turns off
+         * @param why either {@link WindowManagerPolicy#OFF_BECAUSE_OF_ADMIN},
+         * {@link WindowManagerPolicy#OFF_BECAUSE_OF_USER}, or
+         * {@link WindowManagerPolicy#OFF_BECAUSE_OF_TIMEOUT}.
+         */
+        OnScreenTurnedOff(
+            [in] Int32 why);
+
+        /**
+         * Called when trust changes for a user.
+         */
+        OnTrustChanged(
+            [in] Int32 userId);
+
+        /**
+         * Called when trust being managed changes for a user.
+         */
+        OnTrustManagedChanged(
+            [in] Int32 userId);
+
+        /**
+         * Called when the user has proved to a trust agent that they want to use the device.
+         */
+        OnTrustInitiatedByUser(
+            [in] Int32 userId);
+
+        /**
+         * Called when a fingerprint is recognized.
+         * @param userId
+         */
+        OnFingerprintRecognized(
+            [in] Int32 userId);
+
+        /**
+         * Called when fingerprint is acquired but not yet recognized
+         */
+        OnFingerprintAcquired(
+            [in] Int32 info);
+
+        /**
+         * Called when the state of face unlock changed.
+         */
+        OnFaceUnlockStateChanged(
+            [in] Boolean running, 
+            [in] Int32 userid);
+
+        /**
+         * Called when a subId for the slot is changed.
+         * @param oldSubId.
+         * @param newSubId.
+         */
+        OnSubIdUpdated(
+            [in] Int64 oldSubId, 
+            [in] Int64 newSubId);
+
+        /**
+         * Called when the SubInfo content changed
+         * @param subId The subscription id which subscription info record is updated
+         * @param column The column name which is updated
+         * @param sValue The new string if the colum value is string
+         * @param iValue The new integer value if the colum value is integer
+         */
+        OnSubInfoContentChanged(
+            [in] Int64 subId, 
+            [in] String column,
+            [in] String sValue, 
+            [in] Int32 iValue);
+
+    }
+
+    } // namespace Keyguard
+    } // namespace SystemUI
+    } // namespace Droid
+    } // namespace Elastos
+}

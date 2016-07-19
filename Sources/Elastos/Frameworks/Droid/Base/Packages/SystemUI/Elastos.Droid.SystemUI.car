@@ -30,9 +30,21 @@ module
     merge("car/elastos/droid/egg/LLandActivity.car");
 
     //keyguard
+    merge("car/elastos/droid/keyguard/AppearAnimationCreator.car");
+    merge("car/elastos/droid/keyguard/KeyguardActivityLauncher.car");
+    merge("car/elastos/droid/keyguard/KeyguardDisplayManager.car");
+    merge("car/elastos/droid/keyguard/KeyguardHostView.car");
+    merge("car/elastos/droid/keyguard/KeyguardSecurityModel.car");
+    merge("car/elastos/droid/keyguard/KeyguardSecurityContainer.car");
+    merge("car/elastos/droid/keyguard/KeyguardSecurityCallback.car");
+    merge("car/elastos/droid/keyguard/KeyguardSecurityView.car");
     merge("car/elastos/droid/keyguard/KeyguardService.car");
+    merge("car/elastos/droid/keyguard/KeyguardUpdateMonitor.car");
+    merge("car/elastos/droid/keyguard/KeyguardUpdateMonitorCallback.car");
+    merge("car/elastos/droid/keyguard/KeyguardViewBase.car");
     merge("car/elastos/droid/keyguard/KeyguardViewMediator.car");
-    //merge("car/elastos/droid/keyguard/AppearAnimationCreator.car");
+    merge("car/elastos/droid/keyguard/ViewMediatorCallback.car");
+
     //merge("car/elastos/droid/keyguard/BiometricSensorUnloc.car");
     //merge("car/elastos/droid/keyguard/CameraWidgetFrame.car");
     //merge("car/elastos/droid/keyguard/CarrierText.car");
@@ -40,8 +52,8 @@ module
     //merge("car/elastos/droid/keyguard/EmergencyButton.car");
     //merge("car/elastos/droid/keyguard/EmergencyCarrierArea.car");
     //merge("car/elastos/droid/keyguard/KeyguardGlowStripView.car");
-    //merge("car/elastos/droid/keyguard/KeyguardSecurityCallback.car");
-    //merge("car/elastos/droid/keyguard/KeyguardSecurityView.car");
+    //
+    //
 
     //usb
     merge("car/elastos/droid/usb/StorageNotification.car");
@@ -2979,6 +2991,29 @@ module
         }
 
     } // namespace Settings
+
+    namespace Keyguard
+    {   
+        [local]
+        class CKeyguardSimpleHostView {
+            constructor(
+                [in] IContext* ctx, 
+                [in] IAttributeSet* attrs);
+
+            interface IKeyguardViewBase;
+            interface IFrameLayout;
+            interface IViewGroup;
+            interface IView;
+            interface IViewParent;
+            interface IViewManager;
+            interface IDrawableCallback;
+            interface IKeyEventCallback;
+            interface IAccessibilityEventSource;
+        }
+
+
+
+    } // namespace Keyguard
 
     } // namespace SystemUI
     } // namespace Droid

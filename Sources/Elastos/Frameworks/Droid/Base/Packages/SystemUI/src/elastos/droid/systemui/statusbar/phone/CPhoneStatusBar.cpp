@@ -88,7 +88,7 @@ using Elastos::Droid::View::Animation::EIID_IAnimationAnimationListener;
 using Elastos::Droid::Widget::IFrameLayoutLayoutParams;
 using Elastos::Droid::Widget::ILinearLayoutLayoutParams;
 using Elastos::Droid::Widget::CLinearLayoutLayoutParams;
-using Elastos::Droid::Keyguard::EIID_IKeyguardHostViewOnDismissAction;
+using Elastos::Droid::SystemUI::Keyguard::EIID_IKeyguardHostViewOnDismissAction;
 using Elastos::Droid::SystemUI::FontSizeUtils;
 using Elastos::Droid::SystemUI::Doze::DozeLog;
 using Elastos::Droid::SystemUI::Doze::EIID_IDozeHost;

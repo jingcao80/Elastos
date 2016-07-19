@@ -3,9 +3,8 @@
 #define __ELASTOS_DROID_SYSTEMUI_KEYGUARD_CKEYGUARDSIMPLEHOSTVIEW_H__
 
 #include "_Elastos_Droid_SystemUI_Keyguard_CKeyguardSimpleHostView.h"
-#include <elastos/droid/widget/ImageButton.h>
-
-using Elastos::Droid::Widget::ImageButton;
+#include "elastos/droid/systemui/keyguard/KeyguardViewBase.h"
+#include "elastos/droid/systemui/keyguard/KeyguardUpdateMonitorCallback.h"
 
 namespace Elastos {
 namespace Droid {
@@ -74,7 +73,6 @@ protected:
 
 private:
     AutoPtr<IKeyguardUpdateMonitorCallback> mUpdateCallback;
-
 };
 
 } // namespace Keyguard

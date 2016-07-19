@@ -1,0 +1,24 @@
+
+module
+{
+    using interface Elastos.Droid.Graphics.IBitmap;
+    
+    interface Elastos.Droid.SystemUI.Keyguard.IKeyguardUpdateMonitorBatteryStatus;
+
+    namespace Elastos {
+    namespace Droid {
+    namespace SystemUI {
+    namespace Keyguard {
+
+    interface IKeyguardDisplayManager {
+    
+        Show();
+
+        Hide();
+    }
+
+    } // namespace Keyguard
+    } // namespace SystemUI
+    } // namespace Droid
+    } // namespace Elastos
+}

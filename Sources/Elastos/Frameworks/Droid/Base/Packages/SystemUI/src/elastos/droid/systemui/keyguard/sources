@@ -7,8 +7,12 @@ INCLUDES += $(MAKEDIR)/../../../../../
 INCLUDES += $(MAKEDIR)/../../../../../inc/
 
 SOURCES = keyguard.cpp
-SOURCES += CKeyguardViewMediator.cpp
-SOURCES += KeyguardService.cpp
 SOURCES += CAlphaOptimizedLinearLayout.cpp
 SOURCES += CAlphaOptimizedImageButton.cpp
+SOURCES += KeyguardActivityLauncher.cpp
+SOURCES += KeyguardUpdateMonitorCallback.cpp
+SOURCES += KeyguardViewBase.cpp
+SOURCES += CKeyguardViewMediator.cpp
+SOURCES += KeyguardService.cpp
 SOURCES += CKeyguardStatusView.cpp
+SOURCES += CKeyguardSimpleHostView.cpp

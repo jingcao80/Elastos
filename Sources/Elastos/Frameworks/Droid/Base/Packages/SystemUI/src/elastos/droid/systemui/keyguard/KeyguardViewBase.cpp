@@ -1,17 +1,41 @@
 
 #include "elastos/droid/systemui/keyguard/KeyguardViewBase.h"
-#include "Elastos.Droid.View.h"
+#include "Elastos.Droid.App.h"
+#include "Elastos.Droid.Internal.h"
+#include "Elastos.CoreLibrary.IO.h"
+#include "../R.h"
+#include <elastos/droid/os/SystemClock.h>
+
+using Elastos::Droid::Os::IBundle;
+using Elastos::Droid::Os::IHandler;
+using Elastos::Droid::Os::SystemClock;
+using Elastos::Droid::Content::IContext;
+using Elastos::Droid::App::ISearchManager;
+using Elastos::Droid::App::IActivity;
+using Elastos::Droid::App::IActivityManagerHelper;
+using Elastos::Droid::App::CActivityManagerHelper;
+using Elastos::Droid::App::IActivityOptions;
+using Elastos::Droid::App::IActivityOptionsHelper;
+using Elastos::Droid::App::CActivityOptionsHelper;
+using Elastos::Droid::Internal::Widget::CLockPatternUtils;
+using Elastos::IO::IFile;
+using Elastos::IO::CFile;
 
 namespace Elastos {
 namespace Droid {
 namespace SystemUI {
 namespace Keyguard {
 
+static const String TAG("KeyguardViewBase");
+
+//=======================================================================
+// KeyguardViewBase::MyKeyguardActivityLauncher
+//=======================================================================
+
 ECode KeyguardViewBase::MyKeyguardActivityLauncher::GetContext(
     /* [out] */ IContext** context)
 {
     VALIDATE_NOT_NULL(context)
-
     *context = mHost->mContext;
     REFCOUNT_ADD(*context)
     return NOERROR;
@@ -38,18 +62,18 @@ ECode KeyguardViewBase::MyKeyguardActivityLauncher::RequestDismissKeyguard()
     return mHost->Dismiss(FALSE);
 }
 
-static const Boolean KeyguardViewBase::DEBUG = IKeyguardConstants::DEBUG;
-
-static const Boolean KeyguardViewBase::KEYGUARD_MANAGES_VOLUME = FALSE;
-static const String KeyguardViewBase::TAG("KeyguardViewBase");
+//=======================================================================
+// KeyguardViewBase
+//=======================================================================
+const Boolean KeyguardViewBase::DEBUG = TRUE;
+const Boolean KeyguardViewBase::KEYGUARD_MANAGES_VOLUME = FALSE;
 
 const String KeyguardViewBase::ENABLE_MENU_KEY_FILE("/data/local/enable_menu_key");
 
-CAR_INTERFACE_IMPL(KeyguardViewBase, FrameLayout, IKeyguardSecurityContainerSecurityCallback)
+CAR_INTERFACE_IMPL_2(KeyguardViewBase, FrameLayout, IKeyguardViewBase, IKeyguardSecurityContainerSecurityCallback)
 
 KeyguardViewBase::KeyguardViewBase()
 {
-    mActivityLauncher = new MyKeyguardActivityLauncher(this);
 }
 
 ECode KeyguardViewBase::constructor(
@@ -62,11 +86,12 @@ ECode KeyguardViewBase::constructor(
     /* [in] */ IContext* context,
     /* [in] */ IAttributeSet* attrs)
 {
+    mActivityLauncher = new MyKeyguardActivityLauncher(this);
     return FrameLayout::constructor(context, attrs);
 }
 
 ECode KeyguardViewBase::DispatchDraw(
-    /* [in] */ ICanvas canvas)
+    /* [in] */ ICanvas* canvas)
 {
     FrameLayout::DispatchDraw(canvas);
     if (mViewMediatorCallback != NULL) {
@@ -87,7 +112,7 @@ ECode KeyguardViewBase::OnFinishInflate()
     AutoPtr<IView> view;
     FindViewById(R::id::keyguard_security_container, (IView**)&view);
     mSecurityContainer = IKeyguardSecurityContainer::Probe(view);
-    CLockPatternUtils::New(mContext, )&mLockPatternUtils);
+    CLockPatternUtils::New(mContext, (ILockPatternUtils**)&mLockPatternUtils);
     mSecurityContainer->SetLockPatternUtils(mLockPatternUtils);
     mSecurityContainer->SetSecurityCallback(this);
     return mSecurityContainer->ShowPrimarySecurityScreen(FALSE);
@@ -130,14 +155,14 @@ ECode KeyguardViewBase::HandleBackKey(
 
     Int32 selection;
     mSecurityContainer->GetCurrentSecuritySelection(&selection);
-    if (selection == ISecurityMode::Account) {
+    if (selection == SecurityMode_Account) {
         // go back to primary screen
         mSecurityContainer->ShowPrimarySecurityScreen(FALSE /*turningOff*/);
         *result = TRUE;
         return NOERROR;
     }
     mSecurityContainer->GetCurrentSecuritySelection(&selection);
-    if (selection != ISecurityMode::None) {
+    if (selection != SecurityMode_None) {
         mSecurityContainer->Dismiss(FALSE);
         *result = TRUE;
         return NOERROR;
@@ -174,7 +199,9 @@ ECode KeyguardViewBase::Finish()
 {
     // If the alternate unlock was suppressed, it can now be safely
     // enabled because the user has left keyguard.
-    KeyguardUpdateMonitor::GetInstance(mContext)->SetAlternateUnlockEnabled(TRUE);
+    AutoPtr<IKeyguardUpdateMonitor> monitor;
+    // KeyguardUpdateMonitor::GetInstance(mContext)
+    monitor->SetAlternateUnlockEnabled(TRUE);
 
     // If there's a pending runnable because the user interacted with a widget
     // and we're leaving keyguard, then run it.
@@ -195,7 +222,7 @@ ECode KeyguardViewBase::Finish()
 }
 
 ECode KeyguardViewBase::OnSecurityModeChanged(
-    /* [in] */ ISecurityMode* securityMode,
+    /* [in] */ SecurityMode securityMode,
     /* [in] */ Boolean needsInput)
 {
     if (mViewMediatorCallback != NULL) {
@@ -222,22 +249,25 @@ ECode KeyguardViewBase::OnUserActivityTimeoutChanged()
 
 ECode KeyguardViewBase::OnPause()
 {
-    if (DEBUG) Logger::D(TAG, String.format("screen off, instance %s at %s",
-            Integer.toHexString(hashCode()), SystemClock.uptimeMillis()));
+    if (DEBUG) Logger::D(TAG, "screen off, instance %08x at %lld",
+            Object::GetHashCode(this), SystemClock::GetUptimeMillis());
     // Once the screen turns off, we no longer consider this to be first boot and we want the
     // biometric unlock to start next time keyguard is shown.
-    KeyguardUpdateMonitor::GetInstance(mContext)->SetAlternateUnlockEnabled(TRUE);
+    AutoPtr<IKeyguardUpdateMonitor> monitor;
+    // KeyguardUpdateMonitor::GetInstance(mContext)
+    monitor->SetAlternateUnlockEnabled(TRUE);
     mSecurityContainer->ShowPrimarySecurityScreen(TRUE);
-    mSecurityContainer->OnPause();
+    IKeyguardSecurityView::Probe(mSecurityContainer)->OnPause();
     return ClearFocus();
 }
 
 ECode KeyguardViewBase::OnResume()
 {
-    if (DEBUG) Logger::D(TAG, "screen on, instance " + Integer.toHexString(hashCode()));
+    if (DEBUG) Logger::D(TAG, "screen on, instance %08x", Object::GetHashCode(this));
     mSecurityContainer->ShowPrimarySecurityScreen(FALSE);
-    mSecurityContainer->OnResume(IKeyguardSecurityView::SCREEN_ON);
-    return RequestFocus();
+    IKeyguardSecurityView::Probe(mSecurityContainer)->OnResume(IKeyguardSecurityView::SCREEN_ON);
+    Boolean bval;
+    return RequestFocus(&bval);
 }
 
 ECode KeyguardViewBase::StartAppearAnimation()
@@ -246,7 +276,7 @@ ECode KeyguardViewBase::StartAppearAnimation()
 }
 
 ECode KeyguardViewBase::StartDisappearAnimation(
-    /* [in] */ I IRunnable** finishRunnable)
+    /* [in] */ IRunnable* finishRunnable)
 {
     Boolean res;
     mSecurityContainer->StartDisappearAnimation(finishRunnable, &res);
@@ -258,16 +288,16 @@ ECode KeyguardViewBase::StartDisappearAnimation(
 
 ECode KeyguardViewBase::VerifyUnlock()
 {
-    KeyguardSecurityModel::SecurityMode securityMode;
+    SecurityMode securityMode;
     mSecurityContainer->GetSecurityMode(&securityMode);
-    if (securityMode == KeyguardSecurityModel::None) {
+    if (securityMode == SecurityMode_None) {
         if (mViewMediatorCallback != NULL) {
             mViewMediatorCallback->KeyguardDone(TRUE);
         }
     }
-    else if (securityMode != KeyguardSecurityModel::Pattern
-            && securityMode != KeyguardSecurityModel::PIN
-            && securityMode != KeyguardSecurityModel::Password) {
+    else if (securityMode != SecurityMode_Pattern
+            && securityMode != SecurityMode_PIN
+            && securityMode != SecurityMode_Password) {
         // can only verify unlock when in pattern/password mode
         if (mViewMediatorCallback != NULL) {
             mViewMediatorCallback->KeyguardDone(FALSE);
@@ -286,7 +316,8 @@ ECode KeyguardViewBase::DispatchKeyEvent(
 {
     VALIDATE_NOT_NULL(result)
 
-    if (InterceptMediaKey(event)) {
+    Boolean bval;
+    if (InterceptMediaKey(event, &bval), bval) {
         *result = TRUE;
         return NOERROR;
     }
@@ -318,12 +349,16 @@ ECode KeyguardViewBase::InterceptMediaKey(
                     context->GetSystemService(IContext::TELEPHONY_SERVICE, (IInterface**)&obj);
                     mTelephonyManager = ITelephonyManager::Probe(obj);
                 }
-                Int32 state;
-                mTelephonyManager->GetCallState(&state);
-                if (mTelephonyManager != NULL && state != ITelephonyManager::CALL_STATE_IDLE) {
-                    *result = TRUE;  // suppress key event
-                    return NOERROR;
+
+                if (mTelephonyManager != NULL) {
+                    Int32 state;
+                    mTelephonyManager->GetCallState(&state);
+                    if (mTelephonyManager != NULL && state != ITelephonyManager::CALL_STATE_IDLE) {
+                        *result = TRUE;  // suppress key event
+                        return NOERROR;
+                    }
                 }
+
             case IKeyEvent::KEYCODE_MUTE:
             case IKeyEvent::KEYCODE_HEADSETHOOK:
             case IKeyEvent::KEYCODE_MEDIA_STOP:
@@ -429,7 +464,9 @@ Boolean KeyguardViewBase::ShouldEnableMenuKey()
     res->GetBoolean(R::bool_::config_disableMenuKeyInLockScreen, &configDisabled);
 
     Boolean isTestHarness;
-    ActivityManager::IsRunningInTestHarness(&isTestHarness);
+    AutoPtr<IActivityManagerHelper> helper;
+    CActivityManagerHelper::AcquireSingleton((IActivityManagerHelper**)&helper);
+    helper->IsRunningInTestHarness(&isTestHarness);
 
     AutoPtr<IFile> file;
     CFile::New(ENABLE_MENU_KEY_FILE, (IFile**)&file);
@@ -446,7 +483,8 @@ ECode KeyguardViewBase::HandleMenuKey(
 
     // The following enables the MENU key to work for testing automation
     if (ShouldEnableMenuKey()) {
-        Dismiss();
+        Boolean bval;
+        Dismiss(&bval);
         *result = TRUE;
         return NOERROR;
     }
@@ -459,7 +497,9 @@ ECode KeyguardViewBase::SetViewMediatorCallback(
 {
     mViewMediatorCallback = viewMediatorCallback;
     // Update ViewMediator with the current input method requirements
-    return mViewMediatorCallback->SetNeedsInput(mSecurityContainer.needsInput());
+    Boolean bval;
+    mSecurityContainer->NeedsInput(&bval);
+    return mViewMediatorCallback->SetNeedsInput(bval);
 }
 
 ECode KeyguardViewBase::GetActivityLauncher(
@@ -476,8 +516,11 @@ ECode KeyguardViewBase::ShowAssistant()
 {
     AutoPtr<IInterface> obj;
     mContext->GetSystemService(IContext::SEARCH_SERVICE, (IInterface**)&obj);
+    ISearchManager* sm = ISearchManager::Probe(obj);
     AutoPtr<IIntent> intent;
-    ISearchManager::Probe(obj)->GetAssistIntent(mContext, TRUE, IUserHandle::USER_CURRENT, (IIntent**)&intent);
+    if (sm != NULL) {
+        sm->GetAssistIntent(mContext, TRUE, IUserHandle::USER_CURRENT, (IIntent**)&intent);
+    }
 
     if (intent == NULL) return NOERROR;
 
@@ -511,10 +554,8 @@ ECode KeyguardViewBase::SetLockPatternUtils(
 }
 
 ECode KeyguardViewBase::GetSecurityMode(
-    /* [out] */ iSecurityMode** mose)
+    /* [out] */ SecurityMode* mose)
 {
-    VALIDATE_NOT_NULL(mose);
-
     return mSecurityContainer->GetSecurityMode(mose);
 }
 

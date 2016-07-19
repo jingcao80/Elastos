@@ -761,13 +761,13 @@ ECode SystemServer::StartOtherServices()
             Slogger::I(TAG, "Network Score Service");
             ec = CNetworkScoreService::NewByFriend(context, (CNetworkScoreService**)&networkScore);
             if (FAILED(ec)) ReportWtf("starting Network Score Service", ec);
-            ec = ServiceManager::AddService(IContext::NETWORK_SCORE_SERVICE, TO_IINTERFACE(networkScore));
+            ec = ServiceManager::AddService(IContext::NETWORK_SCORE_SERVICE, (IINetworkScoreService*)networkScore.Get());
             if (FAILED(ec)) ReportWtf("Add Network Score Service", ec);
 
             Slogger::I(TAG, "Network Stats Service");
             ec = CNetworkStatsService::NewByFriend(context, networkManagement, alarm, (CNetworkStatsService**)&networkStats);
             if (FAILED(ec)) ReportWtf("starting NetworkStatsService Service", ec);
-            ec = ServiceManager::AddService(IContext::NETWORK_STATS_SERVICE, TO_IINTERFACE(networkStats));
+            ec = ServiceManager::AddService(IContext::NETWORK_STATS_SERVICE, (IINetworkStatsService*)networkStats.Get());
             if (FAILED(ec)) ReportWtf("Add NetworkStatsService Service", ec);
 
             Slogger::I(TAG, "Network Policy Manager Service");
@@ -777,7 +777,7 @@ ECode SystemServer::StartOtherServices()
                 networkStats, networkManagement,
                 (CNetworkPolicyManagerService**)&networkPolicy);
             if (FAILED(ec)) ReportWtf("starting NetworkPolicy Service", ec);
-            ec = ServiceManager::AddService(IContext::NETWORK_POLICY_SERVICE, TO_IINTERFACE(networkPolicy));
+            ec = ServiceManager::AddService(IContext::NETWORK_POLICY_SERVICE, (IINetworkPolicyManager*)networkPolicy.Get());
             if (FAILED(ec)) ReportWtf("Add NetworkPolicy Service", ec);
 
 
@@ -811,7 +811,7 @@ ECode SystemServer::StartOtherServices()
             ec = CConnectivityService::NewByFriend(context, networkManagement, networkStats, networkPolicy,
                     (CConnectivityService**)&connectivity);
             if (FAILED(ec)) ReportWtf("starting Connectivity Service", ec);
-            ec = ServiceManager::AddService(IContext::CONNECTIVITY_SERVICE, TO_IINTERFACE(connectivity));
+            ec = ServiceManager::AddService(IContext::CONNECTIVITY_SERVICE, (IIConnectivityManager*)connectivity.Get());
             if (FAILED(ec)) ReportWtf("Add Connectivity Service", ec);
             networkStats->BindConnectivityManager(connectivity);
             networkPolicy->BindConnectivityManager(connectivity);
@@ -819,7 +819,7 @@ ECode SystemServer::StartOtherServices()
             Slogger::I(TAG, "Network Service Discovery Service");
             ec = CNsdService::Create(context, (CNsdService**)&serviceDiscovery);
             if (FAILED(ec)) ReportWtf("starting Service Discovery Service", ec);
-            ec = ServiceManager::AddService(IContext::NSD_SERVICE, TO_IINTERFACE(serviceDiscovery));
+            ec = ServiceManager::AddService(IContext::NSD_SERVICE, (IINsdManager*)serviceDiscovery.Get());
             if (FAILED(ec)) ReportWtf("Add Service Discovery Service", ec);
 
             // try {
@@ -912,9 +912,10 @@ ECode SystemServer::StartOtherServices()
 
         if (!disableNonCoreServices
             && (res->GetBoolean(R::bool_::config_enableWallpaperService, &bval), bval)) {
+            Slogger::I(TAG, "Wallpaper Service");
             ec = CWallpaperManagerService::NewByFriend(context, (CWallpaperManagerService**)&wallpaper);
             if (FAILED(ec)) ReportWtf("starting Wallpaper Service", ec);
-            ServiceManager::AddService(IContext::WALLPAPER_SERVICE, TO_IINTERFACE(wallpaper));
+            ServiceManager::AddService(IContext::WALLPAPER_SERVICE, (IIWallpaperManager*)wallpaper.Get());
         }
 
         if (!disableNonCoreServices) {

@@ -11,8 +11,6 @@
 #include <elastos/utility/logging/Logger.h>
 #include <elastos/core/AutoLock.h>
 
-#include <elastos/core/AutoLock.h>
-using Elastos::Core::AutoLock;
 using Elastos::Droid::Os::EIID_IBinder;
 using Elastos::Droid::Os::IBundle;
 using Elastos::Droid::Os::IParcelFileDescriptor;
@@ -22,6 +20,7 @@ using Elastos::Droid::Graphics::CBitmapFactoryOptions;
 using Elastos::Droid::Graphics::IBitmapFactory;
 using Elastos::Droid::Graphics::BitmapFactory;
 using Elastos::Utility::Logging::Logger;
+using Elastos::Core::AutoLock;
 using Elastos::IO::ICloseable;
 using Elastos::IO::IFileDescriptor;
 using Elastos::IO::IInputStream;
@@ -54,7 +53,9 @@ CAR_OBJECT_IMPL(CGlobalsWallpaperManagerCallback)
 ECode CGlobalsWallpaperManagerCallback::constructor(
     /* [in] */ ILooper* looper)
 {
-    mService = IIWallpaperManager::Probe(ServiceManager::GetService(IContext::WALLPAPER_SERVICE));
+    AutoPtr<IInterface> obj = ServiceManager::GetService(IContext::WALLPAPER_SERVICE);
+    mService = IIWallpaperManager::Probe(obj);
+    assert(mService != NULL);
     return NOERROR;
 }
 
@@ -65,18 +66,16 @@ ECode CGlobalsWallpaperManagerCallback::OnWallpaperChanged()
      * to null so if the user requests the wallpaper again then we'll
      * fetch it.
      */
-    {    AutoLock syncLock(this);
-        mWallpaper = NULL;
-        mDefaultWallpaper = NULL;
-    }
+    AutoLock syncLock(this);
+    mWallpaper = NULL;
+    mDefaultWallpaper = NULL;
     return NOERROR;
 }
 
 ECode CGlobalsWallpaperManagerCallback::OnKeyguardWallpaperChanged()
 {
-    {    AutoLock syncLock(this);
-        mKeyguardWallpaper = NULL;
-    }
+    AutoLock syncLock(this);
+    mKeyguardWallpaper = NULL;
     return NOERROR;
 }
 
@@ -91,7 +90,7 @@ AutoPtr<IBitmap> CGlobalsWallpaperManagerCallback::PeekWallpaperBitmap(
     if (mDefaultWallpaper != NULL) {
         return mDefaultWallpaper;
     }
-    mWallpaper = NULL;
+
     // try {
     mWallpaper = GetCurrentWallpaperLocked(context);
     // } catch (OutOfMemoryError e) {
@@ -112,18 +111,16 @@ AutoPtr<IBitmap> CGlobalsWallpaperManagerCallback::PeekWallpaperBitmap(
 AutoPtr<IBitmap> CGlobalsWallpaperManagerCallback::PeekKeyguardWallpaperBitmap(
     /* [in] */ IContext* context)
 {
-    {    AutoLock syncLock(this);
-        if (mKeyguardWallpaper != NULL) {
-            return mKeyguardWallpaper;
-        }
-        // try {
-        mKeyguardWallpaper = GetCurrentKeyguardWallpaperLocked(context);
-        // } catch (OutOfMemoryError e) {
-        //     Log.w(TAG, "No memory load current keyguard wallpaper", e);
-        // }
+    AutoLock syncLock(this);
+    if (mKeyguardWallpaper != NULL) {
         return mKeyguardWallpaper;
     }
-    return NULL;
+    // try {
+    mKeyguardWallpaper = GetCurrentKeyguardWallpaperLocked(context);
+    // } catch (OutOfMemoryError e) {
+    //     Log.w(TAG, "No memory load current keyguard wallpaper", e);
+    // }
+    return mKeyguardWallpaper;
 }
 
 void CGlobalsWallpaperManagerCallback::ForgetLoadedWallpaper()
@@ -135,9 +132,8 @@ void CGlobalsWallpaperManagerCallback::ForgetLoadedWallpaper()
 
 void CGlobalsWallpaperManagerCallback::ForgetLoadedKeyguardWallpaper()
 {
-    {    AutoLock syncLock(this);
-        mKeyguardWallpaper = NULL;
-    }
+    AutoLock syncLock(this);
+    mKeyguardWallpaper = NULL;
 }
 
 AutoPtr<IBitmap> CGlobalsWallpaperManagerCallback::GetCurrentWallpaperLocked(
@@ -255,14 +251,13 @@ ECode CGlobalsWallpaperManagerCallback::ToString(
 
 void CGlobalsWallpaperManagerCallback::ClearKeyguardWallpaper()
 {
-    {    AutoLock syncLock(this);
-        // try {
-        mService->ClearKeyguardWallpaper();
-        // } catch (RemoteException e) {
-        //     // ignore
-        // }
-        mKeyguardWallpaper = NULL;
-    }
+    AutoLock syncLock(this);
+    // try {
+    mService->ClearKeyguardWallpaper();
+    // } catch (RemoteException e) {
+    //     // ignore
+    // }
+    mKeyguardWallpaper = NULL;
 }
 
 } // namespace App

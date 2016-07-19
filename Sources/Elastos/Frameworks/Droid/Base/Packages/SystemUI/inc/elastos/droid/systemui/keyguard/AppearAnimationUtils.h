@@ -3,15 +3,16 @@
 #define __ELASTOS_DROID_SYSTEMUI_KEYGUARD_APPEARANIMATIONUTILS_H__
 
 #include "_Elastos.Droid.SystemUI.h"
-#include "Elastos.Droid.App.h"
 #include "Elastos.Droid.Content.h"
-#include "Elastos.Droid.Os.h"
-#include "elastos/droid/app/Service.h"
-#include "elastos/droid/systemui/keyguard/CKeyguardViewMediator.h"
+#include "Elastos.Droid.View.h"
+#include <elastos/core/Object.h>
 
-using Elastos::Droid::App::Service;
-using Elastos::Droid::Content::IIntent;
+using Elastos::Droid::Content::IContext;
 using Elastos::Droid::Os::IBinder;
+using Elastos::Droid::View::IView;
+using Elastos::Droid::View::Animation::IInterpolator;
+using Elastos::Core::Object;
+using Elastos::Core::IRunnable;
 
 namespace Elastos {
 namespace Droid {
@@ -28,6 +29,8 @@ public:
     {
     public:
         TO_STRING_IMPL("AppearAnimationUtils::AppearAnimationProperties")
+
+        AppearAnimationProperties();
 
     public:
         AutoPtr<ArrayOf<ArrayOf<Int64>*> > mDelays;
@@ -76,7 +79,7 @@ public:
 
     //@Override
     CARAPI CreateAnimation(
-        /* [in] */ IView* view,
+        /* [in] */ IInterface* view,
         /* [in] */ Int64 delay,
         /* [in] */ Int64 duration,
         /* [in] */ Float startTranslationY,
@@ -88,13 +91,13 @@ private:
         /* [in] */ AppearAnimationProperties* properties,
         /* [in] */ ArrayOf<IInterface*>* objects,
         /* [in] */ IRunnable* finishListener,
-        /* [in] */ AppearAnimationCreator<T> creator);
+        /* [in] */ IAppearAnimationCreator* creator);
 
     CARAPI_(void) StartAnimations(
         /* [in] */ AppearAnimationProperties* properties,
         /* [in] */ ArrayOf<ArrayOf<IInterface*>* >* objects,
         /* [in] */ IRunnable* finishListener,
-        /* [in] */ AppearAnimationCreator<T> creator);
+        /* [in] */ IAppearAnimationCreator* creator);
 
     CARAPI_(AutoPtr<AppearAnimationProperties>) GetDelays(
         /* [in] */ ArrayOf<IInterface*>* items);

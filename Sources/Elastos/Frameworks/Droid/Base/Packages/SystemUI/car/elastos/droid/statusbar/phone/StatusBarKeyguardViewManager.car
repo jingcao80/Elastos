@@ -2,11 +2,12 @@
 module
 {
     using interface Elastos.Droid.Internal.Policy.IIKeyguardShowCallback;
-    using interface Elastos.Droid.Keyguard.IKeyguardHostViewOnDismissAction;
     using interface Elastos.Droid.Os.IBundle;
     using interface Elastos.Droid.View.IViewGroup;
     using interface Elastos.Droid.View.IKeyEvent;
     using interface Elastos.Core.IRunnable;
+
+    interface Elastos.Droid.SystemUI.Keyguard.IKeyguardHostViewOnDismissAction;
 
     namespace Elastos {
     namespace Droid {
@@ -36,7 +37,7 @@ module
             [in] IBundle* options);
 
         DismissWithAction(
-            [in] IKeyguardHostViewOnDismissAction* r,
+            [in] IKeyguardHostViewOnDismissAction* action,
             [in] Boolean afterKeyguardGone);
 
         /**

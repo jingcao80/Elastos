@@ -9,6 +9,7 @@ using Elastos::Droid::Os::IBinder;
 using Elastos::Droid::Os::SystemClock;
 using Elastos::Droid::View::IView;
 using Elastos::Droid::View::IViewGroup;
+using Elastos::Droid::SystemUI::Keyguard::IKeyguardUpdateMonitor;
 using Elastos::Utility::Logging::Slogger;
 
 namespace Elastos {
@@ -149,7 +150,8 @@ ECode StatusBarKeyguardViewManager::RegisterStatusBar(
     mContainer = container;
     mStatusBarWindowManager = statusBarWindowManager;
     mScrimController = scrimController;
-    mBouncer = new KeyguardBouncer(mContext, mViewMediatorCallback, mLockPatternUtils,
+    mBouncer = new KeyguardBouncer();
+    mBouncer->constructor(mContext, mViewMediatorCallback, mLockPatternUtils,
             mStatusBarWindowManager, container);
     return NOERROR;
 }
@@ -165,7 +167,8 @@ ECode StatusBarKeyguardViewManager::Show(
 
 void StatusBarKeyguardViewManager::ShowBouncerOrKeyguard()
 {
-    if (mBouncer->NeedsFullscreenBouncer()) {
+    Boolean bval;
+    if (mBouncer->NeedsFullscreenBouncer(&bval), bval) {
         // The keyguard might be showing (already). So we need to hide it.
         Boolean tmp = FALSE;
         mPhoneStatusBar->HideKeyguard(&tmp);
@@ -261,7 +264,9 @@ ECode StatusBarKeyguardViewManager::SetNeedsInput(
 
 ECode StatusBarKeyguardViewManager::UpdateUserActivityTimeout()
 {
-    mStatusBarWindowManager->SetKeyguardUserActivityTimeout(mBouncer->GetUserActivityTimeout());
+    Int64 timeout;
+    mBouncer->GetUserActivityTimeout(&timeout);
+    mStatusBarWindowManager->SetKeyguardUserActivityTimeout(timeout);
     return NOERROR;
 }
 
@@ -294,7 +299,8 @@ ECode StatusBarKeyguardViewManager::IsOccluded(
 ECode StatusBarKeyguardViewManager::StartPreHideAnimation(
     /* [in] */ IRunnable* finishRunnable)
 {
-    if (mBouncer->IsShowing()) {
+    Boolean bval;
+    if (mBouncer->IsShowing(&bval), bval) {
         mBouncer->StartPreHideAnimation(finishRunnable);
     }
     else if (finishRunnable != NULL) {
@@ -360,9 +366,7 @@ ECode StatusBarKeyguardViewManager::Dismiss()
 ECode StatusBarKeyguardViewManager::IsSecure(
     /* [out] */ Boolean* result)
 {
-    VALIDATE_NOT_NULL(result);
-    *result = mBouncer->IsSecure();
-    return NOERROR;
+    return mBouncer->IsSecure(result);
 }
 
 ECode StatusBarKeyguardViewManager::IsShowing(
@@ -377,7 +381,8 @@ ECode StatusBarKeyguardViewManager::OnBackPressed(
     /* [out] */ Boolean* result)
 {
     VALIDATE_NOT_NULL(result);
-    if (mBouncer->IsShowing()) {
+    Boolean bval;
+    if (mBouncer->IsShowing(&bval), bval) {
         Reset();
         *result = TRUE;
         return NOERROR;
@@ -389,9 +394,7 @@ ECode StatusBarKeyguardViewManager::OnBackPressed(
 ECode StatusBarKeyguardViewManager::IsBouncerShowing(
     /* [out] */ Boolean* result)
 {
-    VALIDATE_NOT_NULL(result);
-    *result = mBouncer->IsShowing();
-    return NOERROR;
+    return mBouncer->IsShowing(result);
 }
 
 Int64 StatusBarKeyguardViewManager::GetNavBarShowDelay()
@@ -414,8 +417,10 @@ void StatusBarKeyguardViewManager::UpdateStates()
     IView::Probe(mContainer)->GetSystemUiVisibility(&vis);
     Boolean showing = mShowing;
     Boolean occluded = mOccluded;
-    Boolean bouncerShowing = mBouncer->IsShowing();
-    Boolean bouncerDismissible = !mBouncer->NeedsFullscreenBouncer();
+    Boolean bouncerShowing, bouncerDismissible;
+    mBouncer->IsShowing(&bouncerShowing);
+    mBouncer->NeedsFullscreenBouncer(&bouncerDismissible);
+    bouncerDismissible = !bouncerDismissible;
 
     if ((bouncerDismissible || !showing) != (mLastBouncerDismissible || !mLastShowing)
             || mFirstUpdate) {
@@ -450,13 +455,16 @@ void StatusBarKeyguardViewManager::UpdateStates()
     }
 
     Slogger::D(TAG, "TODO [UpdateStates] : Need the app Keyguard.");
+    AutoPtr<IKeyguardUpdateMonitor> updateMonitor;
     // KeyguardUpdateMonitor updateMonitor = KeyguardUpdateMonitor.getInstance(mContext);
-    // if ((showing && !occluded) != (mLastShowing && !mLastOccluded) || mFirstUpdate) {
-    //     updateMonitor->SendKeyguardVisibilityChanged(showing && !occluded);
-    // }
-    // if (bouncerShowing != mLastBouncerShowing || mFirstUpdate) {
-    //     updateMonitor->SendKeyguardBouncerChanged(bouncerShowing);
-    // }
+    if (updateMonitor != NULL) {
+        if ((showing && !occluded) != (mLastShowing && !mLastOccluded) || mFirstUpdate) {
+            updateMonitor->SendKeyguardVisibilityChanged(showing && !occluded);
+        }
+        if (bouncerShowing != mLastBouncerShowing || mFirstUpdate) {
+            updateMonitor->SendKeyguardBouncerChanged(bouncerShowing);
+        }
+    }
 
     mFirstUpdate = FALSE;
     mLastShowing = showing;
@@ -468,18 +476,14 @@ void StatusBarKeyguardViewManager::UpdateStates()
 ECode StatusBarKeyguardViewManager::OnMenuPressed(
     /* [out] */ Boolean* result)
 {
-    VALIDATE_NOT_NULL(result);
-    *result = mBouncer->OnMenuPressed();
-    return NOERROR;
+    return mBouncer->OnMenuPressed(result);
 }
 
 ECode StatusBarKeyguardViewManager::InterceptMediaKey(
     /* [in] */ IKeyEvent* event,
     /* [out] */ Boolean* result)
 {
-    VALIDATE_NOT_NULL(result);
-    *result = mBouncer->InterceptMediaKey(event);
-    return NOERROR;
+    return mBouncer->InterceptMediaKey(event, result);
 }
 
 ECode StatusBarKeyguardViewManager::OnActivityDrawn()
@@ -498,14 +502,12 @@ ECode StatusBarKeyguardViewManager::OnActivityDrawn()
 ECode StatusBarKeyguardViewManager::ShouldDisableWindowAnimationsForUnlock(
     /* [out] */ Boolean* result)
 {
-    VALIDATE_NOT_NULL(result);
     return mPhoneStatusBar->IsInLaunchTransition(result);
 }
 
 ECode StatusBarKeyguardViewManager::IsGoingToNotificationShade(
     /* [out] */ Boolean* result)
 {
-    VALIDATE_NOT_NULL(result);
     return mPhoneStatusBar->IsGoingToNotificationShade(result);
 }
 

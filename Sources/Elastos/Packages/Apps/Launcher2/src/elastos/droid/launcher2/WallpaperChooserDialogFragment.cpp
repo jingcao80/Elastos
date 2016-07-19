@@ -458,6 +458,7 @@ ECode WallpaperChooserDialogFragment::OnCreateView(
 ECode WallpaperChooserDialogFragment::SelectWallpaper(
     /* [in] */ Int32 position)
 {
+    Slogger::I(TAG, " >> SelectWallpaper: %d", position);
     //try {
     AutoPtr<IActivity> activity;
     GetActivity((IActivity**)&activity);
@@ -472,10 +473,8 @@ ECode WallpaperChooserDialogFragment::SelectWallpaper(
     intObj->GetValue(&value);
     ECode ec = wpm->SetResource(value);
 
-    AutoPtr<IActivity> activity2;
-    GetActivity((IActivity**)&activity2);
-    activity2->SetResult(IActivity::RESULT_OK);
-    ec = activity2->Finish();
+    activity->SetResult(IActivity::RESULT_OK);
+    ec = activity->Finish();
     //} catch (IOException e) {
     if (ec == (ECode)E_IO_EXCEPTION) {
         Slogger::E(TAG, "Failed to set wallpaper: %d", ec);

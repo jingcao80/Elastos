@@ -10,6 +10,11 @@ namespace Droid {
 namespace SystemUI {
 namespace Keyguard {
 
+AppearAnimationUtils::AppearAnimationProperties::AppearAnimationProperties()
+    : mMaxDelayRowIndex(0)
+    , mMaxDelayColIndex(0)
+{}
+
 const Int64 AppearAnimationUtils::DEFAULT_APPEAR_DURATION = 220;
 
 CAR_INTERFACE_IMPL(AppearAnimationUtils, Object, IAppearAnimationCreator)
@@ -109,7 +114,7 @@ void AppearAnimationUtils::StartAnimations(
     /* [in] */ AppearAnimationProperties* properties,
     /* [in] */ ArrayOf<ArrayOf<IInterface*>* >* objects,
     /* [in] */ IRunnable* finishListener,
-    /* [in] */ AppearAnimationCreator<T> creator)
+    /* [in] */ IAppearAnimationCreator* creator)
 {
     if (properties->mMaxDelayRowIndex == -1 || properties->mMaxDelayColIndex == -1) {
         finishListener->Run();
@@ -204,13 +209,14 @@ ECode AppearAnimationUtils::GetStartTranslation(
 }
 
 ECode AppearAnimationUtils::CreateAnimation(
-    /* [in] */ IView* view,
+    /* [in] */ IInterface* obj,
     /* [in] */ Int64 delay,
     /* [in] */ Int64 duration,
     /* [in] */ Float startTranslationY,
     /* [in] */ IInterpolator* interpolator,
     /* [in] */ IRunnable* endRunnable)
 {
+    IView* view = IView::Probe(obj);
     if (view != NULL) {
         view->SetAlpha(0f);
         view->SetTranslationY(startTranslationY);

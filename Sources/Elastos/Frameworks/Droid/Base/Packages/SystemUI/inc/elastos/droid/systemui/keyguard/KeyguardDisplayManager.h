@@ -69,7 +69,7 @@ private:
             /* [in] */ IDialogInterface* dialog);
 
     private:
-            KeyguardDisplayManager* mHost;
+        KeyguardDisplayManager* mHost;
     };
 
     class KeyguardPresentation
@@ -97,7 +97,9 @@ private:
     public:
         TO_STRING_IMPL("KeyguardDisplayManager::KeyguardPresentation")
 
-        KeyguardPresentation(
+        KeyguardPresentation()
+
+        CARAPI constructor(
             /* [in] */ IContext* context,
             /* [in] */ IDisplay* display);
 
@@ -114,6 +116,7 @@ private:
     private:
         static const Int32 VIDEO_SAFE_REGION; // Percentage of display width & height
         static const Int32 MOVE_CLOCK_TIMEOUT; // 10s
+
         AutoPtr<IView> mClock;
         Int32 mUsableWidth;
         Int32 mUsableHeight;
@@ -122,7 +125,9 @@ private:
     };
 
 public:
-    KeyguardDisplayManager(
+    KeyguardDisplayManager()
+
+    CARAPI constructor(
         /* [in] */ IContext* context);
 
     CARAPI Show();
@@ -146,7 +151,6 @@ private:
     Boolean mShowing;
 
     AutoPtr<IMediaRouterSimpleCallback> mMediaRouterCallback;
-
     AutoPtr<IDialogInterfaceOnDismissListener> mOnDismissListener;
 };
 

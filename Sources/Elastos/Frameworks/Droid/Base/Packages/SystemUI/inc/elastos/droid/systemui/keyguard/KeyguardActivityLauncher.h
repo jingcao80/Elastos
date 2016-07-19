@@ -3,14 +3,24 @@
 #define __ELASTOS_DROID_SYSTEMUI_KEYGUARD_KEYGUARDACTIVITYLAUNCHER_H__
 
 #include "_Elastos.Droid.SystemUI.h"
-#include "Elastos.Droid.App.h"
+#include "Elastos.Droid.Internal.h"
 #include "Elastos.Droid.Content.h"
 #include "Elastos.Droid.Os.h"
-#include "elastos/droid/app/Service.h"
+#include "Elastos.CoreLibrary.Utility.h"
+#include <elastos/core/Object.h>
+#include <elastos/droid/os/Runnable.h>
 
-using Elastos::Droid::App::Service;
 using Elastos::Droid::Content::IIntent;
-using Elastos::Droid::Os::IBinder;
+using Elastos::Droid::Content::IContext;
+using Elastos::Droid::Content::Pm::IResolveInfo;
+using Elastos::Droid::Os::IHandler;
+using Elastos::Droid::Os::IBundle;
+using Elastos::Droid::Os::IUserHandle;
+using Elastos::Droid::Os::Runnable;
+using Elastos::Droid::Internal::Widget::ILockPatternUtils;
+using Elastos::Core::Object;
+using Elastos::Core::IRunnable;
+using Elastos::Utility::IList;
 
 namespace Elastos {
 namespace Droid {
@@ -19,17 +29,35 @@ namespace Keyguard {
 
 class KeyguardActivityLauncher
     : public Object
+    , public IKeyguardActivityLauncher
 {
 public:
     class CameraWidgetInfo
         : public Object
+        , public IKeyguardActivityLauncherCameraWidgetInfo
     {
     public:
+        CAR_INTERFACE_DECL()
+
         TO_STRING_IMPL("KeyguardActivityLauncher::CameraWidgetInfo")
 
+        CameraWidgetInfo();
+
+        CARAPI SetContextPackage(
+            /* [in] */ const String& str);
+
+        CARAPI GetContextPackage(
+            /* [out] */ String* str);
+
+        CARAPI SetLayoutId(
+            /* [in] */ Int32 id);
+
+        CARAPI GetLayoutId(
+            /* [out] */ Int32* id);
+
     public:
-        String contextPackage;
-        Int32 layoutId;
+        String mContextPackage;
+        Int32 mLayoutId;
     };
 
 private:
@@ -43,9 +71,11 @@ private:
         CAR_INTERFACE_DECL()
 
         MyOnDismissAction(
-            /* [in] */ KeyguardActivityLauncher* host)
-            : mHost(host)
-        {}
+            /* [in] */ KeyguardActivityLauncher* host,
+            /* [in] */ IIntent* intent,
+            /* [in] */ IBundle* animation,
+            /* [in] */ IHandler* worker,
+            /* [in] */ IRunnable* onStarted);
 
         //@Override
         CARAPI OnDismiss(
@@ -53,6 +83,10 @@ private:
 
     private:
         KeyguardActivityLauncher* mHost;
+        AutoPtr<IIntent> mIntent;
+        AutoPtr<IBundle> mAnimation;
+        AutoPtr<IHandler> mWorker;
+        AutoPtr<IRunnable> mOnStarted;
     };
 
     class MyRunnable
@@ -63,16 +97,19 @@ private:
 
         MyRunnable(
             /* [in] */ KeyguardActivityLauncher* host,
-            /* [in] */ IUserHandle* user)
-            : mHost(host)
-            , mUser(user)
-        {}
+            /* [in] */ IIntent* intent,
+            /* [in] */ IBundle* options,
+            /* [in] */ IRunnable* onStarted,
+            /* [in] */ IUserHandle* user);
 
         //@Override
         CARAPI Run();
 
     private:
         KeyguardActivityLauncher* mHost;
+        AutoPtr<IIntent> mIntent;
+        AutoPtr<IBundle> mOptions;
+        AutoPtr<IRunnable> mOnStarted;
         AutoPtr<IUserHandle> mUser;
     };
 
@@ -86,11 +123,12 @@ public:
         /* [out] */ ILockPatternUtils** utils) = 0;
 
     virtual CARAPI SetOnDismissAction(
-        /* [in] */ IKeyguardHostViewOnDismissAction action) = 0;
+        /* [in] */ IKeyguardHostViewOnDismissAction* action) = 0;
 
     virtual CARAPI RequestDismissKeyguard() = 0;
 
-    CARAPI_(AutoPtr<CameraWidgetInfo>) GetCameraWidgetInfo();
+    CARAPI GetCameraWidgetInfo(
+        /* [out] */ IKeyguardActivityLauncherCameraWidgetInfo** info);
 
     CARAPI LaunchCamera(
         /* [in] */ IHandler* worker,
@@ -144,7 +182,6 @@ private:
         /* [in] */ IList* appList);
 
 private:
-    static const String TAG;
     static const Boolean DEBUG;
     static const String META_DATA_KEYGUARD_LAYOUT;
     static AutoPtr<IIntent> SECURE_CAMERA_INTENT;

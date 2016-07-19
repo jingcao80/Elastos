@@ -29,7 +29,18 @@ module
             [out] Boolean* result);
     }
 
+    /**
+     * @Involve
+     * interface IKeyguardViewBase
+     */
     interface IKeyguardHostView {
+        ClearAppWidgetToShow();
+
+        checkAppWidgetConsistency();
+
+        GoToWidget(
+            [in] Int32 appWidgetId);
+
     }
 
     } // namespace Keyguard

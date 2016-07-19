@@ -1,6 +1,9 @@
 
 module
 {
+    using interface Elastos.Droid.Internal.Widget.ILockPatternUtils;
+    using interface Elastos.Core.IRunnable;
+
     namespace Elastos {
     namespace Droid {
     namespace SystemUI {
@@ -15,13 +18,59 @@ module
         UserActivity();
 
         OnSecurityModeChanged(
-            [in] ISecurityMode* securityMode,
+            [in] SecurityMode securityMode,
             [in] Boolean needsInput);
 
         Finish();
     }
 
+    /**
+     * @Involve
+     * interface IFrameLayout
+     * interfasce IKeyguardSecurityView
+     */
+    [local]
     interface IKeyguardSecurityContainer {
+        SetSecurityCallback(
+            [in] IKeyguardSecurityContainerSecurityCallback* cb);
+
+        StartAppearAnimation();
+
+        StartDisappearAnimation(
+            [in] IRunnable* onFinishRunnable,
+            [out] Boolean* result);
+
+        AnnounceCurrentSecurityMethod();
+
+        SetLockPatternUtils(
+            [in] ILockPatternUtils* utils);
+
+        ShowBouncer(
+            [in] Int32 duration);
+
+        HideBouncer(
+            [in] Int32 duration);
+
+        GetSecurityMode(
+            [out] SecurityMode* mode);
+
+        VerifyUnlock();
+
+        GetCurrentSecuritySelection(
+            [out] SecurityMode* mode);
+
+        ShowPrimarySecurityScreen(
+            [in] Boolean turningOff);
+
+        ShowNextSecurityScreenOrFinish(
+            [in] Boolean turningOff,
+            [out] Boolean* result);
+
+        Dismiss(
+            [in] Boolean authenticated);
+
+        NeedsInput(
+            [out] Boolean* result);
     }
 
     } // namespace Keyguard

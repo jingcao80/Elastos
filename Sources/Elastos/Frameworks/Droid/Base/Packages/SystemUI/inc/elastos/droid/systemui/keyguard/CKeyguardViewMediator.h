@@ -14,6 +14,7 @@
 #include "elastos/droid/os/Handler.h"
 #include "elastos/droid/os/Runnable.h"
 #include "elastos/droid/systemui/SystemUI.h"
+#include "elastos/droid/systemui/keyguard/KeyguardUpdateMonitorCallback.h"
 
 using Elastos::Droid::App::IAlarmManager;
 using Elastos::Droid::App::ISearchManager;
@@ -25,10 +26,6 @@ using Elastos::Droid::Internal::Policy::IIKeyguardExitCallback;
 using Elastos::Droid::Internal::Policy::IIKeyguardShowCallback;
 using Elastos::Droid::Internal::Telephony::IccCardConstantsState;
 using Elastos::Droid::Internal::Widget::ILockPatternUtils;
-using Elastos::Droid::Keyguard::IKeyguardDisplayManager;
-using Elastos::Droid::Keyguard::IKeyguardUpdateMonitor;
-using Elastos::Droid::Keyguard::IKeyguardUpdateMonitorCallback;
-using Elastos::Droid::Keyguard::IViewMediatorCallback;
 using Elastos::Droid::Media::IAudioManager;
 using Elastos::Droid::Media::ISoundPool;
 using Elastos::Droid::Os::Handler;
@@ -37,14 +34,18 @@ using Elastos::Droid::Os::IPowerManager;
 using Elastos::Droid::Os::IPowerManagerWakeLock;
 using Elastos::Droid::Os::IUserManager;
 using Elastos::Droid::Os::Runnable;
+using Elastos::Droid::View::IViewGroup;
+using Elastos::Droid::View::Animation::IAnimation;
+using Elastos::Droid::View::IIWindowManager;
 using Elastos::Droid::SystemUI::SystemUI;
 using Elastos::Droid::SystemUI::StatusBar::Phone::IPhoneStatusBar;
 using Elastos::Droid::SystemUI::StatusBar::Phone::IScrimController;
 using Elastos::Droid::SystemUI::StatusBar::Phone::IStatusBarKeyguardViewManager;
 using Elastos::Droid::SystemUI::StatusBar::Phone::IStatusBarWindowManager;
-using Elastos::Droid::View::IIWindowManager;
-using Elastos::Droid::View::IViewGroup;
-using Elastos::Droid::View::Animation::IAnimation;
+using Elastos::Droid::SystemUI::Keyguard::IKeyguardDisplayManager;
+using Elastos::Droid::SystemUI::Keyguard::IKeyguardUpdateMonitor;
+using Elastos::Droid::SystemUI::Keyguard::KeyguardUpdateMonitorCallback;
+using Elastos::Droid::SystemUI::Keyguard::IViewMediatorCallback;
 
 namespace Elastos {
 namespace Droid {
@@ -98,12 +99,9 @@ CarClass(CKeyguardViewMediator)
 {
 private:
     class MyKeyguardUpdateMonitorCallback
-        : public Object
-        , public IKeyguardUpdateMonitorCallback
+        : public KeyguardUpdateMonitorCallback
     {
     public:
-        CAR_INTERFACE_DECL()
-
         MyKeyguardUpdateMonitorCallback(
             /* [in] */ CKeyguardViewMediator* host);
 

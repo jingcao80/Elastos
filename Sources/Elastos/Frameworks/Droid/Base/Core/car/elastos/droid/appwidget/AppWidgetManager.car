@@ -61,6 +61,12 @@ module
         const String ACTION_APPWIDGET_PICK = "android.appwidget.action.APPWIDGET_PICK";
 
         /**
+         * Similar to ACTION_APPWIDGET_PICK, but used from keyguard
+         * @hide
+         */
+        const String ACTION_KEYGUARD_APPWIDGET_PICK = "android.appwidget.action.KEYGUARD_APPWIDGET_PICK";
+
+        /**
          * Activity action to launch from your {@link AppWidgetHost} activity when you want to bind
          * an AppWidget to display and bindAppWidgetIdIfAllowed returns false.
          * <p>

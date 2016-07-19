@@ -1,0 +1,68 @@
+
+module
+{
+    using interface Elastos.Droid.Content.IIntent;
+    using interface Elastos.Droid.Os.IHandler;
+    using interface Elastos.Droid.Os.IBundle;
+    using interface Elastos.Core.IRunnable;
+
+    namespace Elastos {
+    namespace Droid {
+    namespace SystemUI {
+    namespace Keyguard {
+
+    interface IKeyguardActivityLauncherCameraWidgetInfo {
+        SetContextPackage(
+            [in] String str);
+
+        GetContextPackage(
+            [out] String* str);
+
+        SetLayoutId(
+            [in] Int32 id);
+
+        GetLayoutId(
+            [out] Int32* id);
+    }
+
+    interface IKeyguardActivityLauncher {
+        GetCameraWidgetInfo(
+            [out] IKeyguardActivityLauncherCameraWidgetInfo** info);
+
+        LaunchCamera(
+            [in] IHandler* worker, 
+            [in] IRunnable* onSecureCameraStarted);
+
+        LaunchWidgetPicker(
+            [in] Int32 appWidgetId);
+
+        /**
+         * Launches the said intent for the current foreground user.
+         *
+         * @param intent
+         * @param showsWhileLocked true if the activity can be run on top of keyguard.
+         *   See {@link WindowManager#FLAG_SHOW_WHEN_LOCKED}
+         * @param useDefaultAnimations true if default transitions should be used, else suppressed.
+         * @param worker if supplied along with onStarted, used to launch the blocking activity call.
+         * @param onStarted if supplied along with worker, called after activity is started.
+         */
+        LaunchActivity(
+            [in] IIntent* intent,
+            [in] Boolean showsWhileLocked,
+            [in] Boolean useDefaultAnimations,
+            [in] IHandler* worker,
+            [in] IRunnable* onStarted);
+
+        LaunchActivityWithAnimation(
+            [in] IIntent* intent,
+            [in] Boolean showsWhileLocked,
+            [in] IBundle* animation,
+            [in] IHandler* worker,
+            [in] IRunnable* onStarted);
+    }
+
+    } // namespace Keyguard
+    } // namespace SystemUI
+    } // namespace Droid
+    } // namespace Elastos
+}

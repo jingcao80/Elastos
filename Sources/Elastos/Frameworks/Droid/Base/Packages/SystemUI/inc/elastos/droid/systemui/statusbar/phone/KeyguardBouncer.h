@@ -11,13 +11,14 @@
 #include <elastos/core/Object.h>
 
 using Elastos::Droid::Content::IContext;
-using Elastos::Droid::Keyguard::IViewMediatorCallback;
-using Elastos::Droid::Keyguard::IKeyguardHostViewOnDismissAction;
 using Elastos::Droid::Internal::Widget::ILockPatternUtils;
 using Elastos::Droid::Os::Runnable;
 using Elastos::Droid::View::IChoreographer;
 using Elastos::Droid::View::IKeyEvent;
 using Elastos::Droid::View::IViewGroup;
+using Elastos::Droid::SystemUI::Keyguard::IViewMediatorCallback;
+using Elastos::Droid::SystemUI::Keyguard::IKeyguardViewBase;
+using Elastos::Droid::SystemUI::Keyguard::IKeyguardHostViewOnDismissAction;
 using Elastos::Core::IRunnable;
 using Elastos::Core::Object;
 
@@ -30,10 +31,13 @@ namespace Phone {
 /**
  * A class which manages the bouncer on the lockscreen.
  */
-class KeyguardBouncer: public Object
+class KeyguardBouncer
+    : public Object
+    , public IKeyguardBouncer
 {
 private:
-    class ShowRunnable: public Runnable
+    class ShowRunnable
+        : public Runnable
     {
     public:
         ShowRunnable(
@@ -47,63 +51,74 @@ private:
     };
 
 public:
-    KeyguardBouncer(
+    CAR_INTERFACE_DECL()
+
+    KeyguardBouncer();
+
+    CARAPI constructor(
         /* [in] */ IContext* context,
         /* [in] */ IViewMediatorCallback* callback,
         /* [in] */ ILockPatternUtils* lockPatternUtils,
         /* [in] */ IStatusBarWindowManager* windowManager,
         /* [in] */ IViewGroup* container);
 
-    CARAPI_(void) Show();
+    CARAPI Show();
 
-    CARAPI_(void) ShowWithDismissAction(
+    CARAPI ShowWithDismissAction(
         /* [in] */ IKeyguardHostViewOnDismissAction* r);
 
-    CARAPI_(void) Hide(
+    CARAPI Hide(
         /* [in] */ Boolean destroyView);
 
     /**
      * See {@link StatusBarKeyguardViewManager#startPreHideAnimation}.
      */
-    CARAPI_(void) StartPreHideAnimation(
+    CARAPI StartPreHideAnimation(
         /* [in] */ IRunnable* runnable);
 
     /**
      * Reset the state of the view.
      */
-    CARAPI_(void) Reset();
+    CARAPI Reset();
 
-    CARAPI_(void) OnScreenTurnedOff();
+    CARAPI OnScreenTurnedOff();
 
-    CARAPI_(Int64) GetUserActivityTimeout();
+    CARAPI GetUserActivityTimeout(
+        /* [out] */ Int64* result);
 
-    CARAPI_(Boolean) IsShowing();
+    CARAPI IsShowing(
+        /* [out] */ Boolean* value);
 
-    CARAPI_(void) Prepare();
+    CARAPI Prepare();
 
-    CARAPI_(Boolean) OnBackPressed();
+    CARAPI OnBackPressed(
+        /* [out] */ Boolean* value);
 
     /**
      * @return True if and only if the current security method should be shown before showing
      *         the notifications on Keyguard, like SIM PIN/PUK.
      */
-    CARAPI_(Boolean) NeedsFullscreenBouncer();
+    CARAPI NeedsFullscreenBouncer(
+        /* [out] */ Boolean* value);
 
-    CARAPI_(Boolean) IsSecure();
+    CARAPI IsSecure(
+        /* [out] */ Boolean* value);
 
-    CARAPI_(Boolean) OnMenuPressed();
+    CARAPI OnMenuPressed(
+        /* [out] */ Boolean* value);
 
-    CARAPI_(Boolean) InterceptMediaKey(
-        /* [in] */ IKeyEvent* event);
+    CARAPI InterceptMediaKey(
+        /* [in] */ IKeyEvent* event,
+        /* [out] */ Boolean* value);
 
 private:
-    CARAPI_(void) CancelShowRunnable();
+    CARAPI CancelShowRunnable();
 
-    CARAPI_(void) EnsureView();
+    CARAPI EnsureView();
 
-    CARAPI_(void) InflateView();
+    CARAPI InflateView();
 
-    CARAPI_(void) RemoveView();
+    CARAPI RemoveView();
 
 private:
     AutoPtr<IContext> mContext;
@@ -111,7 +126,7 @@ private:
     AutoPtr<ILockPatternUtils> mLockPatternUtils;
     AutoPtr<IViewGroup> mContainer;
     AutoPtr<IStatusBarWindowManager> mWindowManager;
-    // AutoPtr<IKeyguardViewBase> mKeyguardView;
+    AutoPtr<IKeyguardViewBase> mKeyguardView;
     AutoPtr<IViewGroup> mRoot;
     Boolean mShowingSoon;
     AutoPtr<IChoreographer> mChoreographer;

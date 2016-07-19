@@ -1,6 +1,8 @@
 
 #include "elastos/droid/systemui/keyguard/KeyguardUpdateMonitorCallback.h"
-#include "Elastos.Droid.View.h"
+#include "elastos/droid/os/SystemClock.h"
+
+using Elastos::Droid::Os::SystemClock;
 
 namespace Elastos {
 namespace Droid {
@@ -8,6 +10,8 @@ namespace SystemUI {
 namespace Keyguard {
 
 const Int64 KeyguardUpdateMonitorCallback::VISIBILITY_CHANGED_COLLAPSE_MS = 1000;
+
+CAR_INTERFACE_IMPL(KeyguardUpdateMonitorCallback, Object, IKeyguardUpdateMonitorCallback)
 
 KeyguardUpdateMonitorCallback::KeyguardUpdateMonitorCallback()
     : mVisibilityChangedCalled(0)
@@ -27,8 +31,15 @@ ECode KeyguardUpdateMonitorCallback::OnTimeChanged()
 }
 
 ECode KeyguardUpdateMonitorCallback::OnRefreshCarrierInfo(
+    /* [in] */ Int64 subId,
     /* [in] */ ICharSequence* plmn,
     /* [in] */ ICharSequence* spn)
+{
+    return NOERROR;
+}
+
+ECode KeyguardUpdateMonitorCallback::OnAirplaneModeChanged(
+    /* [in] */ Boolean on)
 {
     return NOERROR;
 }
@@ -97,7 +108,8 @@ ECode KeyguardUpdateMonitorCallback::OnUserSwitchComplete(
 }
 
 ECode KeyguardUpdateMonitorCallback::OnSimStateChanged(
-    /* [in] */ IIccCardConstantsState simState)
+    /* [in] */ Int64 subId,
+    /* [in] */ IccCardConstantsState simState)
 {
     return NOERROR;
 }
@@ -174,6 +186,22 @@ ECode KeyguardUpdateMonitorCallback::OnFingerprintAcquired(
 ECode KeyguardUpdateMonitorCallback::OnFaceUnlockStateChanged(
     /* [in] */ Boolean running,
     /* [in] */ Int32 userId)
+{
+    return NOERROR;
+}
+
+ECode KeyguardUpdateMonitorCallback::OnSubIdUpdated(
+    /* [in] */ Int64 oldSubId,
+    /* [in] */ Int64 newSubId)
+{
+    return NOERROR;
+}
+
+ECode KeyguardUpdateMonitorCallback::OnSubInfoContentChanged(
+    /* [in] */ Int64 subId,
+    /* [in] */ const String& column,
+    /* [in] */ const String& sValue,
+    /* [in] */ Int32 iValue)
 {
     return NOERROR;
 }

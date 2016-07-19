@@ -50,9 +50,6 @@ public:
         /* [in] */ IContext* context,
         /* [in] */ IHandler* handler);
 
-    static CARAPI_(void) InitGlobals(
-        /* [in] */ ILooper* looper);
-
     /**
      * Retrieve a WallpaperManager associated with the given Context.
      */
@@ -477,6 +474,9 @@ private:
     CARAPI_(void) SetWallpaper(
         /* [in] */ IInputStream* data,
         /* [in] */ IFileOutputStream* fos);
+
+    static CARAPI InitGlobals(
+        /* [in] */ ILooper* looper);
 
 private:
     static const String TAG;

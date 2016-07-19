@@ -3,13 +3,14 @@ module
 {
     using interface Elastos.Droid.Internal.Policy.IIKeyguardShowCallback;
     using interface Elastos.Droid.Internal.Policy.IIKeyguardExitCallback;
-    using interface Elastos.Droid.Keyguard.IViewMediatorCallback;
     using interface Elastos.Droid.Os.IBundle;
     using interface Elastos.Droid.View.IViewGroup;
+
     interface Elastos.Droid.SystemUI.StatusBar.Phone.IPhoneStatusBar;
     interface Elastos.Droid.SystemUI.StatusBar.Phone.IScrimController;
     interface Elastos.Droid.SystemUI.StatusBar.Phone.IStatusBarWindowManager;
     interface Elastos.Droid.SystemUI.StatusBar.Phone.IStatusBarKeyguardViewManager;
+    interface Elastos.Droid.SystemUI.Keyguard.IViewMediatorCallback;
 
     namespace Elastos {
     namespace Droid {

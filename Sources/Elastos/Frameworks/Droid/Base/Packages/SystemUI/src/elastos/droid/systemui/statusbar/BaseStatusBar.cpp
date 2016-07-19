@@ -81,7 +81,7 @@ using Elastos::Droid::Provider::ISettingsGlobal;
 using Elastos::Droid::Provider::ISettingsSecure;
 using Elastos::Droid::R;
 using Elastos::Droid::Service::Dreams::IDreamService;
-using Elastos::Droid::Keyguard::EIID_IKeyguardHostViewOnDismissAction;
+using Elastos::Droid::SystemUI::Keyguard::EIID_IKeyguardHostViewOnDismissAction;
 using Elastos::Droid::Text::TextUtils;
 using Elastos::Droid::Utility::CDisplayMetrics;
 using Elastos::Droid::Utility::CParcelableList;

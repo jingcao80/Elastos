@@ -23,7 +23,7 @@ using Elastos::Droid::Content::BroadcastReceiver;
 using Elastos::Droid::Content::IContext;
 using Elastos::Droid::Content::IIntent;
 using Elastos::Droid::Database::ContentObserver;
-using Elastos::Droid::Keyguard::IKeyguardHostViewOnDismissAction;
+using Elastos::Droid::SystemUI::Keyguard::IKeyguardHostViewOnDismissAction;
 using Elastos::Droid::Internal::StatusBar::IIStatusBarService;
 using Elastos::Droid::Internal::StatusBar::IStatusBarIcon;
 using Elastos::Droid::Internal::Utility::INotificationColorUtil;

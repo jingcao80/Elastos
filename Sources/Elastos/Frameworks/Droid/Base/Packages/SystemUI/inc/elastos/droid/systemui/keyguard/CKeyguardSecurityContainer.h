@@ -14,6 +14,7 @@ namespace Keyguard {
 
 CarClass(CKeyguardSecurityContainer)
     , public FrameLayout
+    , public IKeyguardSecurityContainer
     , public IKeyguardSecurityView
 {
 private:
@@ -49,16 +50,16 @@ private:
         CKeyguardSecurityContainer* mHost;
     };
 
-    class MyKeyguardSecurityCallback2
+    class NullKeyguardSecurityCallback
         : public Object
         , public IKeyguardSecurityCallback
     {
     public:
-        TO_STRING_IMPL("CKeyguardSecurityContainer::MyKeyguardSecurityCallback2")
+        TO_STRING_IMPL("CKeyguardSecurityContainer::NullKeyguardSecurityCallback")
 
         CAR_INTERFACE_DECL()
 
-        MyKeyguardSecurityCallback2(
+        NullKeyguardSecurityCallback(
             /* [in] */ CKeyguardSecurityContainer* host)
             : mHost(host)
         {}
@@ -243,12 +244,12 @@ private:
 
     AutoPtr<IKeyguardUpdateMonitor> mUpdateMonitor;
 
-    AutoPtr<IKeyguardSecurityCallback> mCallback = new MyKeyguardSecurityCallback(this);
+    AutoPtr<IKeyguardSecurityCallback> mCallback;
 
     // The following is used to ignore callbacks from SecurityViews that are no longer current
     // (e.g. face unlock). This avoids unwanted asynchronous events from messing with the
     // state for the current security method.
-    AutoPtr<IKeyguardSecurityCallback> mNullCallback = new KeyguardSecurityCallback2(this);
+    AutoPtr<IKeyguardSecurityCallback> mNullCallback;
 };
 
 } // namespace Keyguard

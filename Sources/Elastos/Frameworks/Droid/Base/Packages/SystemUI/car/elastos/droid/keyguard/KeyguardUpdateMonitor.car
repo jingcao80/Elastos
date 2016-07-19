@@ -1,0 +1,262 @@
+
+module
+{
+    using interface Elastos.Droid.Graphics.IBitmap;
+    using interface Elastos.Droid.Internal.Telephony.IccCardConstantsState;
+    using interface Elastos.Core.ICharSequence;
+
+    interface Elastos.Droid.SystemUI.Keyguard.IKeyguardUpdateMonitorCallback;
+
+    namespace Elastos {
+    namespace Droid {
+    namespace SystemUI {
+    namespace Keyguard {
+    
+    interface IKeyguardUpdateMonitorBatteryStatus {
+
+        SetStatus(
+            [in] Int32 value);
+
+        GetStatus(
+            [out] Int32* value);
+
+        SetLevel(
+            [in] Int32 value);
+
+        GetLevel(
+            [out] Int32* value);
+
+        SetPlugged(
+            [in] Int32 value);
+
+        GetPlugged(
+            [out] Int32* value);
+
+        SetHealth(
+            [in] Int32 value);
+
+        GetHealth(
+            [out] Int32* value);
+
+        /**
+         * Determine whether the device is plugged in (USB, power, or wireless).
+         * @return true if the device is plugged in.
+         */
+        IsPluggedIn(
+            [out] Boolean* value);
+
+        /**
+         * Whether or not the device is charged. Note that some devices never return 100% for
+         * battery level, so this allows either battery level or status to determine if the
+         * battery is charged.
+         * @return true if the device is charged
+         */
+        IsCharged(
+            [out] Boolean* value);
+
+        /**
+         * Whether battery is low and needs to be charged.
+         * @return true if battery is low
+         */
+        IsBatteryLow(
+            [out] Boolean* value);
+    }
+
+    interface IKeyguardUpdateMonitorDisplayClientState {
+    }
+
+
+    /**
+     * Watches for updates that may be interesting to the keyguard, and provides
+     * the up to date information as well as a registration for callbacks that care
+     * to be updated.
+     *
+     * Note: under time crunch, this has been extended to include some stuff that
+     * doesn't really belong here.  see {@link #handleBatteryUpdate} where it shutdowns
+     * the device, and {@link #getFailedUnlockAttempts()}, {@link #reportFailedAttempt()}
+     * and {@link #clearFailedUnlockAttempts()}.  Maybe we should rename this 'KeyguardContext'...
+     */
+    interface IKeyguardUpdateMonitor {
+        IsFaceUnlockRunning(
+            [in] Int32 userId,
+            [out] Boolean* value);
+
+        GetUserHasTrust(
+            [in] Int32 userId,
+            [out] Boolean* value);
+
+        GetUserTrustIsManaged(
+            [in] Int32 userId,
+            [out] Boolean* value);
+
+        /**
+         * IMPORTANT: Must be called from UI thread.
+         */
+        DispatchSetBackground(
+            [in] IBitmap* bmp);
+
+        /**
+         * This is exposed since {@link Intent#ACTION_BOOT_COMPLETED} is not sticky. If
+         * keyguard crashes sometime after boot, then it will never receive this
+         * broadcast and hence not handle the event. This method is ultimately called by
+         * PhoneWindowManager in this case.
+         */
+        DispatchBootCompleted();
+
+        /**
+         * We need to store this state in the KeyguardUpdateMonitor since this class will not be
+         * destroyed.
+         */
+        HasBootCompleted(
+            [out] Boolean* value);
+
+        IsKeyguardVisible(
+            [out] Boolean* value);
+
+        /**
+         * @return if the keyguard is currently in bouncer mode.
+         */
+        IsKeyguardBouncer(
+            [out] Boolean* value);
+
+        IsSwitchingUser(
+            [out] Boolean* value);
+
+        RemoveCallback(
+            [in] IKeyguardUpdateMonitorCallback* cb);
+
+        /**
+         * Register to receive notifications about general keyguard information
+         * (see {@link InfoCallback}.
+         * @param callback The callback to register
+         */
+        RegisterCallback(
+            [in] IKeyguardUpdateMonitorCallback* cb);
+
+        SendKeyguardVisibilityChanged(
+            [in] Boolean showing);
+
+        /**
+         * @see #handleKeyguardBouncerChanged(Int32)
+         */
+        SendKeyguardBouncerChanged(
+            [in] Boolean showingBouncer);
+
+        ReportClockVisible(
+            [in] Boolean visible);
+
+        GetSimState(
+            [in] Int64 subId,
+            [out] IccCardConstantsState* state);
+
+        /**
+         * Report that the user successfully entered the SIM PIN or PUK/SIM PIN so we
+         * have the information earlier than waiting for the intent
+         * broadcast from the telephony code.
+         *
+         * NOTE: Because handleSimStateChange() invokes callbacks immediately without going
+         * through mHandler, this *must* be called from the UI thread.
+         */
+        ReportSimUnlocked(
+            [in] Int64 subId);
+
+        /**
+         * Report that the emergency call button has been pressed and the emergency dialer is
+         * about to be displayed.
+         *
+         * @param bypassHandler runs immediately.
+         *
+         * NOTE: Must be called from UI thread if bypassHandler == true.
+         */
+        ReportEmergencyCallAction(
+            [in] Boolean bypassHandler);
+
+        GetTelephonyPlmn(
+            [in] Int64 subId,
+            [out] ICharSequence** cs);
+
+        GetTelephonySpn(
+            [in] Int64 subId,
+            [out] ICharSequence** cs);
+
+        /**
+         * @return Whether the device is provisioned (whether they have gone through
+         *   the setup wizard)
+         */
+        IsDeviceProvisioned(
+            [out] Boolean* value);
+
+        GetFailedUnlockAttempts(
+            [out] Int32* value);
+
+        ClearFailedUnlockAttempts();
+
+        ClearFingerprintRecognized();
+
+        ReportFailedUnlockAttempt();
+
+        IsClockVisible(
+            [out] Boolean* value);
+
+        GetPhoneState(
+            [out] Int32* value);
+
+        ReportFailedBiometricUnlockAttempt();
+
+        GetMaxBiometricUnlockAttemptsReached(
+            [out] Boolean* value);
+
+        IsAlternateUnlockEnabled(
+            [out] Boolean* value);
+
+        SetAlternateUnlockEnabled(
+            [in] Boolean enabled);
+
+        IsSimLocked(
+            [out] Boolean* value);
+
+        IsSimPinSecure(
+            [out] Boolean* value);
+
+        GetCachedDisplayClientState(
+            [out] IKeyguardUpdateMonitorDisplayClientState** state);
+
+        // TODO: use these callbacks elsewhere in place of the existing notifyScreen*()
+        // (KeyguardViewMediator, KeyguardHostView)
+        DispatchScreenTurnedOn();
+
+        DispatchScreenTurndOff(
+            [in] Int32 why);
+
+        IsScreenOn(
+            [out] Boolean* value);
+
+        //return subId of first SIM that is PIN locked.
+        GetSimPinLockSubId(
+            [out] Int64* value);
+
+        //return subId of first SIM that is PUK locked.
+        GetSimPukLockSubId(
+            [out] Int64* value);
+
+        GetNumPhones(
+            [out] Int32* value);
+
+        IsValidPhoneId(
+            [in] Int32 phoneId,
+            [out] Boolean* value);
+
+        GetPhoneIdBySubId(
+            [in] Int64 subId,
+            [out] Int32* value);
+
+        GetSubIdByPhoneId(
+            [in] Int32 phoneId,
+            [out] Int64* value);
+    }
+
+    } // namespace Keyguard
+    } // namespace SystemUI
+    } // namespace Droid
+    } // namespace Elastos
+}

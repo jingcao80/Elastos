@@ -6,6 +6,11 @@ namespace Droid {
 namespace SystemUI {
 namespace Keyguard {
 
+static const String TAG("KeyguardSecurityView");
+
+//===========================================================================
+// CKeyguardSecurityContainer::MyKeyguardSecurityCallback
+//===========================================================================
 CAR_INTERFACE_IMPL(CKeyguardSecurityContainer::MyKeyguardSecurityCallback, Object, IKeyguardSecurityCallback)
 
 ECode CKeyguardSecurityContainer::MyKeyguardSecurityCallback::UserActivity()
@@ -55,20 +60,23 @@ ECode CKeyguardSecurityContainer::MyKeyguardSecurityCallback::ShowBackupSecurity
     return mHost->ShowBackupSecurityScreen();
 }
 
-CAR_INTERFACE_IMPL(CKeyguardSecurityContainer::MyKeyguardSecurityCallback2, Object, IKeyguardSecurityCallback)
+//===========================================================================
+// CKeyguardSecurityContainer::NullKeyguardSecurityCallback
+//===========================================================================
+CAR_INTERFACE_IMPL(CKeyguardSecurityContainer::NullKeyguardSecurityCallback, Object, IKeyguardSecurityCallback)
 
-ECode CKeyguardSecurityContainer::MyKeyguardSecurityCallback2::UserActivity()
+ECode CKeyguardSecurityContainer::NullKeyguardSecurityCallback::UserActivity()
 {
     return NOERROR;
 }
 
-ECode CKeyguardSecurityContainer::MyKeyguardSecurityCallback2::Dismiss(
+ECode CKeyguardSecurityContainer::NullKeyguardSecurityCallback::Dismiss(
     /* [in] */ Boolean authenticated)
 {
     return NOERROR;
 }
 
-ECode CKeyguardSecurityContainer::MyKeyguardSecurityCallback2::IsVerifyUnlockOnly(
+ECode CKeyguardSecurityContainer::NullKeyguardSecurityCallback::IsVerifyUnlockOnly(
     /* [out] */ Boolean* result)
 {
     VALIDATE_NOT_NULL(result)
@@ -77,23 +85,25 @@ ECode CKeyguardSecurityContainer::MyKeyguardSecurityCallback2::IsVerifyUnlockOnl
     return NOERROR;
 }
 
-ECode CKeyguardSecurityContainer::MyKeyguardSecurityCallback2::ReportUnlockAttempt(
+ECode CKeyguardSecurityContainer::NullKeyguardSecurityCallback::ReportUnlockAttempt(
     /* [in] */ Boolean success)
 {
     return NOERROR;
 }
 
-ECode CKeyguardSecurityContainer::MyKeyguardSecurityCallback2::ShowBackupSecurity()
+ECode CKeyguardSecurityContainer::NullKeyguardSecurityCallback::ShowBackupSecurity()
 {
     return NOERROR;
 }
 
-const Boolean CKeyguardSecurityContainer::DEBUG = IKeyguardConstants::DEBUG;
-const String CKeyguardSecurityContainer::TAG("KeyguardSecurityView");
+//===========================================================================
+// CKeyguardSecurityContainer
+//===========================================================================
+const Boolean CKeyguardSecurityContainer::DEBUG = TRUE;
 
 CAR_OBJECT_IMPL(CKeyguardSecurityContainer)
 
-CAR_INTERFACE_IMPL(CKeyguardSecurityContainer, FrameLayout, IKeyguardSecurityView)
+CAR_INTERFACE_IMPL_2(CKeyguardSecurityContainer, FrameLayout, IKeyguardSecurityContainer, IKeyguardSecurityView)
 
 CKeyguardSecurityContainer::CKeyguardSecurityContainer()
     : mEnableFallback(FALSE)
@@ -125,6 +135,9 @@ ECode CKeyguardSecurityContainer::constructor(
     mSecurityModel = new KeyguardSecurityModel(context);
     CLockPatternUtils::New(context, (ILockPatternUtils**)&mLockPatternUtils);
     mUpdateMonitor = KeyguardUpdateMonitor::GetInstance(mContext);
+    mCallback = new MyKeyguardSecurityCallback(this);
+    mNullCallback = new NullKeyguardSecurityCallback(this);
+    return NOERROR;
 }
 
 ECode CKeyguardSecurityContainer::SetSecurityCallback(

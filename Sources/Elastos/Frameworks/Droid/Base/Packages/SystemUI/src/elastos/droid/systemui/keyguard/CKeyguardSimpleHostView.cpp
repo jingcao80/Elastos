@@ -18,15 +18,16 @@ ECode CKeyguardSimpleHostView::MyKeyguardUpdateMonitorCallback::OnTrustInitiated
     /* [in] */ Int32 userId)
 {
     Int32 user;
-    mLockPatternUtils->GetCurrentUser(&user);
+    mHost->mLockPatternUtils->GetCurrentUser(&user);
     if (userId != user) return NOERROR;
-    if (!IsAttachedToWindow()) return NOERROR;
+    Boolean bval;
+    if (mHost->IsAttachedToWindow(&bval), !bval) return NOERROR;
 
-    if (IsVisibleToUser()) {
-        Dismiss(FALSE /* authenticated */);
+    if (mHost->IsVisibleToUser()) {
+        mHost->Dismiss(FALSE /* authenticated */);
     }
     else {
-        mViewMediatorCallback->PlayTrustedSound();
+        mHost->mViewMediatorCallback->PlayTrustedSound();
     }
     return NOERROR;
 }
@@ -35,15 +36,18 @@ CAR_OBJECT_IMPL(CKeyguardSimpleHostView)
 
 CKeyguardSimpleHostView::CKeyguardSimpleHostView()
 {
-    mUpdateCallback = new MyKeyguardUpdateMonitorCallback(this);
 }
 
 ECode CKeyguardSimpleHostView::constructor(
     /* [in] */ IContext* context,
     /* [in] */ IAttributeSet* attrs)
 {
+
+    mUpdateCallback = new MyKeyguardUpdateMonitorCallback(this);
     KeyguardViewBase::constructor(context, attrs);
-    return KeyguardUpdateMonitor:GetInstance(context)->RegisterCallback(mUpdateCallback);
+    AutoPtr<IKeyguardUpdateMonitor> monitor;
+    // monitor = KeyguardUpdateMonitor:GetInstance(context);
+    return monitor->RegisterCallback(mUpdateCallback);
 }
 
 ECode CKeyguardSimpleHostView::ShowBouncer(
@@ -67,7 +71,7 @@ ECode CKeyguardSimpleHostView::CleanUp()
 {
     AutoPtr<IKeyguardSecurityContainer> c;
     GetSecurityContainer((IKeyguardSecurityContainer**)&c);
-    c->OnPause();
+    return IKeyguardSecurityView::Probe(c)->OnPause();
 }
 
 ECode CKeyguardSimpleHostView::GetUserActivityTimeout(

@@ -11,10 +11,7 @@
 #include <elastos/core/StringUtils.h>
 #include <elastos/core/Thread.h>
 #include <elastos/utility/logging/Logger.h>
-#include <elastos/utility/logging/Slogger.h>
 
-#include <elastos/core/AutoLock.h>
-using Elastos::Core::AutoLock;
 using Elastos::Droid::App::ActivityManagerNative;
 using Elastos::Droid::App::CActivityManagerHelper;
 using Elastos::Droid::App::CPendingIntentHelper;
@@ -37,8 +34,8 @@ using Elastos::Droid::Internal::Telephony::IccCardConstantsState_PIN_REQUIRED;
 using Elastos::Droid::Internal::Telephony::IccCardConstantsState_PUK_REQUIRED;
 using Elastos::Droid::Internal::Telephony::IccCardConstantsState_READY;
 using Elastos::Droid::Internal::Widget::CLockPatternUtils;
-using Elastos::Droid::Keyguard::EIID_IKeyguardUpdateMonitorCallback;
-using Elastos::Droid::Keyguard::EIID_IViewMediatorCallback;
+using Elastos::Droid::SystemUI::Keyguard::EIID_IKeyguardUpdateMonitorCallback;
+using Elastos::Droid::SystemUI::Keyguard::EIID_IViewMediatorCallback;
 using Elastos::Droid::Media::CSoundPool;
 using Elastos::Droid::Os::CSystemProperties;
 using Elastos::Droid::Os::CUserHandle;
@@ -70,17 +67,15 @@ using Elastos::Core::Math;
 using Elastos::Core::StringUtils;
 using Elastos::Core::Thread;
 using Elastos::Utility::Logging::Logger;
-using Elastos::Utility::Logging::Slogger;
 
 namespace Elastos {
 namespace Droid {
 namespace SystemUI {
 namespace Keyguard {
 
-//-----------------------------------------------------------------------------------------
+//=================================================
 // CKeyguardViewMediator::MyKeyguardUpdateMonitorCallback
-//-----------------------------------------------------------------------------------------
-CAR_INTERFACE_IMPL(CKeyguardViewMediator::MyKeyguardUpdateMonitorCallback, Object, IKeyguardUpdateMonitorCallback)
+//=================================================
 CKeyguardViewMediator::MyKeyguardUpdateMonitorCallback::MyKeyguardUpdateMonitorCallback(
     /* [in] */ CKeyguardViewMediator* host)
     : mHost(host)
@@ -92,7 +87,8 @@ ECode CKeyguardViewMediator::MyKeyguardUpdateMonitorCallback::OnUserSwitching(
     // Note that the mLockPatternUtils user has already been updated from setCurrentUser.
     // We need to force a reset of the views, since lockNow (called by
     // ActivityManagerService) will not reconstruct the keyguard if it is already showing.
-    {    AutoLock syncLock(mHost);
+    {
+        AutoLock syncLock(mHost);
         mHost->mSwitchingUser = TRUE;
         mHost->mKeyguardDonePending = FALSE;
         mHost->ResetStateLocked();
@@ -161,7 +157,8 @@ ECode CKeyguardViewMediator::MyKeyguardUpdateMonitorCallback::OnUserInfoChanged(
 ECode CKeyguardViewMediator::MyKeyguardUpdateMonitorCallback::OnPhoneStateChanged(
     /* [in] */ Int32 phoneState)
 {
-    {    AutoLock syncLock(mHost);
+    {
+        AutoLock syncLock(mHost);
         if (ITelephonyManager::CALL_STATE_IDLE == phoneState  // call ending
                 && !mHost->mScreenOn                           // screen off
                 && mHost->mExternallyEnabled) {                // not disabled by any app
@@ -203,7 +200,7 @@ ECode CKeyguardViewMediator::MyKeyguardUpdateMonitorCallback::OnSimStateChanged(
             // only force lock screen in case of missing sim if user hasn't
             // gone through setup wizard
             {
-        AutoLock syncLock(this);
+                AutoLock syncLock(this);
                 Boolean isDeviceProvisioned = FALSE;
                 //TODO
                 // mHost->mUpdateMonitor->IsDeviceProvisioned(&isDeviceProvisioned);
@@ -224,7 +221,7 @@ ECode CKeyguardViewMediator::MyKeyguardUpdateMonitorCallback::OnSimStateChanged(
         case IccCardConstantsState_PIN_REQUIRED:
         case IccCardConstantsState_PUK_REQUIRED:
             {
-        AutoLock syncLock(this);
+                AutoLock syncLock(this);
                 Boolean isShowing;
                 mHost->IsShowing(&isShowing);
                 if (!isShowing) {
@@ -239,7 +236,7 @@ ECode CKeyguardViewMediator::MyKeyguardUpdateMonitorCallback::OnSimStateChanged(
             break;
         case IccCardConstantsState_PERM_DISABLED:
             {
-        AutoLock syncLock(this);
+                AutoLock syncLock(this);
                 Boolean isShowing;
                 mHost->IsShowing(&isShowing);
                 if (!isShowing) {
@@ -255,7 +252,7 @@ ECode CKeyguardViewMediator::MyKeyguardUpdateMonitorCallback::OnSimStateChanged(
             break;
         case IccCardConstantsState_READY:
             {
-        AutoLock syncLock(this);
+                AutoLock syncLock(this);
                 Boolean isShowing;
                 mHost->IsShowing(&isShowing);
                 if (!isShowing) {
@@ -278,9 +275,9 @@ ECode CKeyguardViewMediator::MyKeyguardUpdateMonitorCallback::OnFingerprintRecog
     return NOERROR;
 }
 
-//-----------------------------------------------------------------------------------------
+//=================================================
 // CKeyguardViewMediator::MyViewMediatorCallback
-//-----------------------------------------------------------------------------------------
+//=================================================
 
 CAR_INTERFACE_IMPL(CKeyguardViewMediator::MyViewMediatorCallback, Object, IViewMediatorCallback)
 
@@ -350,9 +347,9 @@ ECode CKeyguardViewMediator::MyViewMediatorCallback::PlayTrustedSound()
     return NOERROR;
 }
 
-//-----------------------------------------------------------------------------------------
+//=================================================
 // CKeyguardViewMediator::MyBroadcastReceiver
-//-----------------------------------------------------------------------------------------
+//=================================================
 
 CKeyguardViewMediator::MyBroadcastReceiver::MyBroadcastReceiver(
     /* [in] */ CKeyguardViewMediator* host)
@@ -369,9 +366,13 @@ ECode CKeyguardViewMediator::MyBroadcastReceiver::OnReceive(
         Int32 value;
         intent->GetInt32Extra(String("seq"), 0, &value);
         const Int32 sequence = value;
-        if (DEBUG) Logger::D(TAG, "received DELAYED_KEYGUARD_ACTION with seq = %d, mDelayedShowingSequence = %d",
+        if (DEBUG) {
+            Logger::D(TAG, "received DELAYED_KEYGUARD_ACTION with seq = %d, mDelayedShowingSequence = %d",
             sequence, mHost->mDelayedShowingSequence);
-        {    AutoLock syncLock(mHost);
+        }
+
+        {
+            AutoLock syncLock(mHost);
             if (mHost->mDelayedShowingSequence == sequence) {
                 // Don't play lockscreen SFX if the screen went off due to timeout.
                 mHost->mSuppressNextLockSound = TRUE;
@@ -382,9 +383,9 @@ ECode CKeyguardViewMediator::MyBroadcastReceiver::OnReceive(
     return NOERROR;
 }
 
-//-----------------------------------------------------------------------------------------
+//=================================================
 // CKeyguardViewMediator::StartKeyguardExitAnimParams
-//-----------------------------------------------------------------------------------------
+//=================================================
 
 CKeyguardViewMediator::StartKeyguardExitAnimParams::StartKeyguardExitAnimParams(
     /* [in] */ Int64 startTime,
@@ -393,9 +394,9 @@ CKeyguardViewMediator::StartKeyguardExitAnimParams::StartKeyguardExitAnimParams(
     , mFadeoutDuration(fadeoutDuration)
 {}
 
-//-----------------------------------------------------------------------------------------
+//=================================================
 // CKeyguardViewMediator::MyHandler
-//-----------------------------------------------------------------------------------------
+//=================================================
 
 CKeyguardViewMediator::MyHandler::MyHandler(
     /* [in] */ CKeyguardViewMediator* host)
@@ -479,9 +480,9 @@ ECode CKeyguardViewMediator::MyHandler::HandleMessage(
     return NOERROR;
 }
 
-//-----------------------------------------------------------------------------------------
+//=================================================
 // CKeyguardViewMediator::MyRunnable
-//-----------------------------------------------------------------------------------------
+//=================================================
 
 CKeyguardViewMediator::MyRunnable::MyRunnable(
     /* [in] */ CKeyguardViewMediator* host)
@@ -504,20 +505,19 @@ ECode CKeyguardViewMediator::MyRunnable::Run()
     return NOERROR;
 }
 
-//-----------------------------------------------------------------------------------------
+//=================================================
 // CKeyguardViewMediator
-//-----------------------------------------------------------------------------------------
+//=================================================
 
 CAR_INTERFACE_IMPL(CKeyguardViewMediator, SystemUI, IKeyguardViewMediator)
 
 CAR_OBJECT_IMPL(CKeyguardViewMediator)
 
 const Int32 CKeyguardViewMediator::KEYGUARD_DISPLAY_TIMEOUT_DELAY_DEFAULT;
-const Boolean CKeyguardViewMediator::DEBUG = FALSE;
-const Boolean CKeyguardViewMediator::DBG_WAKE = FALSE;
+const Boolean CKeyguardViewMediator::DEBUG = TRUE;
+const Boolean CKeyguardViewMediator::DBG_WAKE = TRUE;
 
 const String CKeyguardViewMediator::TAG("CKeyguardViewMediator");
-
 const String CKeyguardViewMediator::DELAYED_KEYGUARD_ACTION("com.android.internal.policy.impl.PhoneWindowManager.DELAYED_KEYGUARD");
 
 const Int32 CKeyguardViewMediator::SHOW;
@@ -576,7 +576,7 @@ CKeyguardViewMediator::CKeyguardViewMediator()
     , mLockSoundStreamId(0)
     , mLockSoundVolume(0.0f)
 {
-    Slogger::E(TAG, "TODO restore mExternallyEnabled to TRUE when keyguard ready.");
+    Logger::E(TAG, "TODO restore mExternallyEnabled to TRUE when keyguard ready.");
 }
 
 ECode CKeyguardViewMediator::constructor()
@@ -765,7 +765,7 @@ ECode CKeyguardViewMediator::OnScreenTurnedOff(
 
             ECode ec = mExitSecureCallback->OnKeyguardExitResult(FALSE);
             if (FAILED(ec)) {
-                Slogger::W(TAG, "Failed to call onKeyguardExitResult(false)%08x", ec);
+                Logger::W(TAG, "Failed to call onKeyguardExitResult(false)%08x", ec);
                 return E_REMOTE_EXCEPTION;
             }
             mExitSecureCallback = NULL;
@@ -959,7 +959,7 @@ ECode CKeyguardViewMediator::SetKeyguardEnabled(
 
                 ECode ec = mExitSecureCallback->OnKeyguardExitResult(FALSE);
                 if (FAILED(ec)) {
-                    Slogger::W(TAG, "Failed to call onKeyguardExitResult(false)%08x", ec);
+                    Logger::W(TAG, "Failed to call onKeyguardExitResult(false)%08x", ec);
                     return E_REMOTE_EXCEPTION;
                 }
                 mExitSecureCallback = NULL;
@@ -1002,7 +1002,7 @@ ECode CKeyguardViewMediator::VerifyUnlock(
             if (DEBUG) Logger::D(TAG, "ignoring because device isn't provisioned");
             ECode ec = callback->OnKeyguardExitResult(FALSE);
             if (FAILED(ec)) {
-                Slogger::W(TAG, "Failed to call onKeyguardExitResult(false)%08x", ec);
+                Logger::W(TAG, "Failed to call onKeyguardExitResult(false)%08x", ec);
                 return E_REMOTE_EXCEPTION;
             }
         }
@@ -1013,7 +1013,7 @@ ECode CKeyguardViewMediator::VerifyUnlock(
             if (DEBUG) Logger::W(TAG, "verifyUnlock called when not externally disabled");
             ECode ec = callback->OnKeyguardExitResult(FALSE);
             if (FAILED(ec)) {
-                Slogger::W(TAG, "Failed to call onKeyguardExitResult(false)%08x", ec);
+                Logger::W(TAG, "Failed to call onKeyguardExitResult(false)%08x", ec);
                 return E_REMOTE_EXCEPTION;
             }
         }
@@ -1025,7 +1025,7 @@ ECode CKeyguardViewMediator::VerifyUnlock(
             // already in progress with someone else
             ECode ec = callback->OnKeyguardExitResult(FALSE);
             if (FAILED(ec)) {
-                Slogger::W(TAG, "Failed to call onKeyguardExitResult(false)%08x", ec);
+                Logger::W(TAG, "Failed to call onKeyguardExitResult(false)%08x", ec);
                 return E_REMOTE_EXCEPTION;
             }
         }
@@ -1310,7 +1310,7 @@ void CKeyguardViewMediator::HandleKeyguardDone(
     if (mExitSecureCallback != NULL) {
         ECode ec = mExitSecureCallback->OnKeyguardExitResult(authenticated);
         if (FAILED(ec)) {
-            Slogger::W(TAG, "Failed to call onKeyguardExitResult(%s)%08x", authenticated ? "TRUE" : "FALSE", ec);
+            Logger::W(TAG, "Failed to call onKeyguardExitResult(%s)%08x", authenticated ? "TRUE" : "FALSE", ec);
             // return E_REMOTE_EXCEPTION;
         }
 

@@ -2,6 +2,7 @@
 #define __ELASTOS_DROID_INTERNAL_POLICY_IMPL_KEYGUARD_KEYGUARDSERVICEWRAPPER_H__
 
 #include "Elastos.Droid.Internal.h"
+#include "Elastos.Droid.Os.h"
 #include "elastos/droid/ext/frameworkdef.h"
 #include <elastos/core/Object.h>
 
@@ -9,6 +10,7 @@ using Elastos::Droid::Internal::Policy::IIKeyguardExitCallback;
 using Elastos::Droid::Internal::Policy::IIKeyguardService;
 using Elastos::Droid::Internal::Policy::IIKeyguardShowCallback;
 using Elastos::Droid::Os::IBundle;
+using Elastos::Droid::Os::IBinder;
 using Elastos::Droid::View::IMotionEvent;
 
 namespace Elastos {
@@ -93,6 +95,10 @@ public:
         /* [in] */ Int64 fadeoutDuration);
 
     CARAPI OnActivityDrawn();
+
+    CARAPI AsBinder(
+        /* [out] */ IBinder** binder);
+
 private:
     AutoPtr<IIKeyguardService> mService;
     static String TAG;

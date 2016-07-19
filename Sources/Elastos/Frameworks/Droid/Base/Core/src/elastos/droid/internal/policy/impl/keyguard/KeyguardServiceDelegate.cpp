@@ -7,8 +7,9 @@
 #include "elastos/droid/view/CView.h"
 #include "elastos/droid/view/CWindowManagerLayoutParams.h"
 #include "elastos/droid/internal/policy/impl/keyguard/CKeyguardServiceWrapper.h"
-#include "elastos/droid/os/CUserHandleHelper.h"
-#include <elastos/utility/logging/Slogger.h>
+#include "elastos/droid/os/UserHandle.h"
+#include "elastos/droid/Manifest.h"
+#include "elastos/core/CoreUtils.h"
 #include <elastos/utility/logging/Logger.h>
 
 using Elastos::Droid::Content::CIntent;
@@ -20,20 +21,18 @@ using Elastos::Droid::Graphics::IPixelFormat;
 using Elastos::Droid::Internal::Policy::IIKeyguardExitCallback;
 using Elastos::Droid::Internal::Policy::IIKeyguardShowCallback;
 using Elastos::Droid::Os::IUserHandle;
-using Elastos::Droid::Os::IUserHandleHelper;
-using Elastos::Droid::Os::CUserHandleHelper;
+using Elastos::Droid::Os::UserHandle;
 using Elastos::Droid::View::IWindowManager;
 using Elastos::Droid::View::IWindowManagerLayoutParams;
 using Elastos::Droid::View::CView;
 using Elastos::Droid::View::IViewGroupLayoutParams;
 using Elastos::Droid::View::IViewManager;
 using Elastos::Droid::View::CWindowManagerLayoutParams;
-
+using Elastos::Core::CoreUtils;
 using Elastos::Core::CString;
 using Elastos::Core::EIID_IRunnable;
 using Elastos::Core::ICharSequence;
 using Elastos::Utility::Logging::Logger;
-using Elastos::Utility::Logging::Slogger;
 
 namespace Elastos {
 namespace Droid {
@@ -42,22 +41,39 @@ namespace Policy {
 namespace Impl {
 namespace Keyguard {
 
+static const String TAG("KeyguardServiceDelegate");
+
 //===========================================
 // InnerKeyguardState
 //===========================================
 KeyguardServiceDelegate::InnerKeyguardState::InnerKeyguardState()
+    : enabled(FALSE)
+    , dismissable(FALSE)
+    , offReason(0)
+    , currentUser(0)
+    , screenIsOn(FALSE)
+    , bootCompleted(FALSE)
+    , showing(TRUE)
+    , showingAndNotOccluded(TRUE)
+    , inputRestricted(FALSE)
+    , occluded(FALSE)
+    , secure(TRUE)
+    , dreaming(FALSE)
+    , systemIsReady(FALSE)
 {
     // Assume keyguard is showing and secure until we know for sure. This is here in
     // the event something checks before the service is actually started.
     // KeyguardService itself should default to this state until the real state is known.
-    showing = TRUE;
-    showingAndNotOccluded = TRUE;
-    secure = TRUE;
+    // showing = TRUE;
+    // showingAndNotOccluded = TRUE;
+    // secure = TRUE;
 }
+
 //=================================
 //InnerServiceConnection
 //===================================
 CAR_INTERFACE_IMPL(KeyguardServiceDelegate::InnerServiceConnection, Object, IServiceConnection)
+
 KeyguardServiceDelegate::InnerServiceConnection::InnerServiceConnection(
     /* [in] */ KeyguardServiceDelegate* host)
     :mHost(host)
@@ -69,20 +85,9 @@ ECode KeyguardServiceDelegate::InnerServiceConnection::OnServiceConnected(
     /* [in] */ IComponentName* name,
     /* [in] */ IBinder* service)
 {
-    /* Remove_Java
-    if (KeyguardServiceDelegate::DEBUG) Logger::V(KeyguardServiceDelegate::TAG, "*** Keyguard connected (yay!)");
-    mKeyguardService = new KeyguardServiceWrapper(IKeyguardService.Stub.asInterface(service));
-    if (mHost->mKeyguardState->SystemIsReady) {
-        // If the system is ready, it means keyguard crashed and restarted.
-        mKeyguardService->OnSystemReady();
-        // This is used to hide the scrim once keyguard displays.
-        mKeyguardService->OnScreenTurnedOn(new KeyguardShowDelegate(NULL));
+    if (KeyguardServiceDelegate::DEBUG) {
+        Logger::V(TAG, "*** Keyguard connected (yay!)");
     }
-    if (mHost->mKeyguardState->BootCompleted) {
-        mKeyguardService->OnBootCompleted();
-    }
-    */
-    if (KeyguardServiceDelegate::DEBUG) Logger::V(KeyguardServiceDelegate::TAG, "*** Keyguard connected (yay!)");
     mHost->mKeyguardService = NULL;
     IIKeyguardService* keyguardService = IIKeyguardService::Probe(service);
     CKeyguardServiceWrapper::New(keyguardService, (IIKeyguardService**)&(mHost->mKeyguardService));
@@ -96,6 +101,7 @@ ECode KeyguardServiceDelegate::InnerServiceConnection::OnServiceConnected(
     }
     if (mHost->mKeyguardState->bootCompleted) {
         mHost->mKeyguardService->OnBootCompleted();
+        mHost->SendStateChangeBroadcast(TRUE);
     }
     return NOERROR;
 }
@@ -104,39 +110,37 @@ ECode KeyguardServiceDelegate::InnerServiceConnection::OnServiceConnected(
 ECode KeyguardServiceDelegate::InnerServiceConnection::OnServiceDisconnected(
    /* [in] */ IComponentName* name)
 {
-    if (KeyguardServiceDelegate::DEBUG) Logger::V(KeyguardServiceDelegate::TAG, "*** Keyguard disconnected (boo!)");
+    if (KeyguardServiceDelegate::DEBUG) Logger::V(TAG, "*** Keyguard disconnected (boo!)");
     mHost->mKeyguardService = NULL;
+    mHost->SendStateChangeBroadcast(FALSE);
     return NOERROR;
 }
-//==============================
-// InnerRunnable1
-//=============================
-CAR_INTERFACE_IMPL(KeyguardServiceDelegate::InnerRunnable1, Object, IRunnable)
 
-KeyguardServiceDelegate::InnerRunnable1::InnerRunnable1(
+//==============================
+// ShowScrimRunnable
+//=============================
+KeyguardServiceDelegate::ShowScrimRunnable::ShowScrimRunnable(
    /* [in] */ KeyguardServiceDelegate* host)
     :mHost(host)
 {
 }
 
-ECode KeyguardServiceDelegate::InnerRunnable1::Run()
+ECode KeyguardServiceDelegate::ShowScrimRunnable::Run()
 {
     mHost->mScrim->SetVisibility(IView::VISIBLE);
     return NOERROR;
 }
 
 //==============================
-// InnerRunnable2
+// HideScrimRunnable
 //=============================
-CAR_INTERFACE_IMPL(KeyguardServiceDelegate::InnerRunnable2, Object, IRunnable)
-
-KeyguardServiceDelegate::InnerRunnable2::InnerRunnable2(
+KeyguardServiceDelegate::HideScrimRunnable::HideScrimRunnable(
    /* [in] */ KeyguardServiceDelegate* host)
     :mHost(host)
 {
 }
 
-ECode KeyguardServiceDelegate::InnerRunnable2::Run()
+ECode KeyguardServiceDelegate::HideScrimRunnable::Run()
 {
     mHost->mScrim->SetVisibility(IView::GONE);
     return NOERROR;
@@ -151,19 +155,22 @@ CAR_INTERFACE_IMPL(KeyguardServiceDelegate, Object, IKeyguardServiceDelegate)
 const String KeyguardServiceDelegate::KEYGUARD_PACKAGE("Elastos.Droid.SystemUI");
 const String KeyguardServiceDelegate::KEYGUARD_CLASS("Elastos.Droid.SystemUI.Keyguard.CKeyguardService");
 
-const String KeyguardServiceDelegate::TAG("KeyguardServiceDelegate");
+const String KeyguardServiceDelegate::ACTION_STATE_CHANGE("com.android.internal.action.KEYGUARD_SERVICE_STATE_CHANGED");
+const String KeyguardServiceDelegate::EXTRA_ACTIVE("active");
+
 const Boolean KeyguardServiceDelegate::DEBUG = TRUE;
 
 KeyguardServiceDelegate::KeyguardServiceDelegate()
 {
-    mKeyguardState = new InnerKeyguardState();
-    mKeyguardConnection = new InnerServiceConnection(this);
 }
 
 ECode KeyguardServiceDelegate::constructor(
     /* [in] */ IContext* ctx,
     /* [in] */ ILockPatternUtils* lockPatternUtils)
 {
+    mKeyguardState = new InnerKeyguardState();
+    mKeyguardConnection = new InnerServiceConnection(this);
+
     mScrim = CreateScrim(ctx);
     return NOERROR;
 }
@@ -171,18 +178,13 @@ ECode KeyguardServiceDelegate::constructor(
 ECode KeyguardServiceDelegate::BindService(
     /* [in] */ IContext* context)
 {
-
     if (DEBUG) Logger::I(TAG, "BindService: %s, %s", KEYGUARD_PACKAGE.string(), KEYGUARD_CLASS.string());
     AutoPtr<IIntent> intent;
     FAIL_RETURN(CIntent::New((IIntent**)&intent));
     intent->SetClassName(KEYGUARD_PACKAGE, KEYGUARD_CLASS);
-    AutoPtr<IUserHandleHelper> userHandleHelper;
-    CUserHandleHelper::AcquireSingleton((IUserHandleHelper**)&userHandleHelper);
-    AutoPtr<IUserHandle> userHandle;
-    userHandleHelper->GetOWNER((IUserHandle**)&userHandle);
     Boolean result = FALSE;
     ECode ec = context->BindServiceAsUser(
-        intent, mKeyguardConnection, IContext::BIND_AUTO_CREATE, userHandle, &result);
+        intent, mKeyguardConnection, IContext::BIND_AUTO_CREATE, UserHandle::OWNER, &result);
     if (FAILED(ec) || !result) {
         if (DEBUG) Logger::V(TAG, "*** Keyguard: can't bind to %s, ec=%08x",
             KEYGUARD_CLASS.string(), ec);
@@ -196,6 +198,17 @@ ECode KeyguardServiceDelegate::BindService(
     return NOERROR;
 }
 
+ECode KeyguardServiceDelegate::SendStateChangeBroadcast(
+    /* [in] */ Boolean bound)
+{
+    AutoPtr<IIntent> i;
+    CIntent::New(ACTION_STATE_CHANGE, (IIntent**)&i);
+    i->PutBooleanExtra(EXTRA_ACTIVE, bound);
+    AutoPtr<IContext> ctx;
+    mScrim->GetContext((IContext**)&ctx);
+    return ctx->SendBroadcastAsUser(i, UserHandle::ALL,
+            Elastos::Droid::Manifest::permission::CONTROL_KEYGUARD);
+}
 
 ECode KeyguardServiceDelegate::IsShowing(
     /* [out] */ Boolean* result)
@@ -311,14 +324,14 @@ ECode KeyguardServiceDelegate::OnScreenTurnedOn(
     /* [in] */ IKeyguardServiceDelegateShowListener* showListener)
 {
     if (mKeyguardService != NULL) {
-        if (DEBUG) Logger::V(TAG, "onScreenTurnedOn(showListener = %p )", showListener);
+        if (DEBUG) Logger::V(TAG, "onScreenTurnedOn(showListener = %s )", TO_CSTR(showListener));
         AutoPtr<IIKeyguardShowCallback> keyguardShowCallback;
         CKeyguardShowDelegate::New(this, showListener, (IIKeyguardShowCallback**)&keyguardShowCallback);
         mKeyguardService->OnScreenTurnedOn(keyguardShowCallback);
     } else {
         // try again when we establish a connection
         //Slog.w(TAG, "onScreenTurnedOn(): no keyguard service!");
-        Slogger::W(TAG, "onScreenTurnedOn(): no keyguard service!");
+        Logger::W(TAG, "onScreenTurnedOn(): no keyguard service!");
         // This shouldn't happen, but if it does, invoke the listener immediately
         // to avoid a dark screen...
         showListener->OnShown(NULL);
@@ -362,7 +375,8 @@ ECode KeyguardServiceDelegate::OnSystemReady()
 {
     if (mKeyguardService != NULL) {
         mKeyguardService->OnSystemReady();
-    } else {
+    }
+    else {
         mKeyguardState->systemIsReady = TRUE;
     }
     return NOERROR;
@@ -422,17 +436,14 @@ AutoPtr<IView> KeyguardServiceDelegate::CreateScrim(
     //WindowManager.LayoutParams lp = new WindowManager.LayoutParams( stretch, stretch, type, flags, PixelFormat.TRANSLUCENT);
     AutoPtr<IWindowManagerLayoutParams> lp;
     CWindowManagerLayoutParams::New(stretch, stretch, type, flags, IPixelFormat::TRANSLUCENT, (IWindowManagerLayoutParams**)&lp);
-    //lp->mSoftInputMode = IWindowManagerLayoutParams::SOFT_INPUT_ADJUST_RESIZE;
     lp->SetSoftInputMode(IWindowManagerLayoutParams::SOFT_INPUT_ADJUST_RESIZE);
-    //lp->mScreenOrientation = IActivityInfo::SCREEN_ORIENTATION_NOSENSOR;
     lp->SetScreenOrientation(IActivityInfo::SCREEN_ORIENTATION_NOSENSOR);
-    //lp->mPrivateFlags |= IWindowManagerLayoutParams::PRIVATE_FLAG_FAKE_HARDWARE_ACCELERATED;
     Int32 privateFlags = 0;
     lp->GetPrivateFlags(&privateFlags);
     lp->SetPrivateFlags(privateFlags | IWindowManagerLayoutParams::PRIVATE_FLAG_FAKE_HARDWARE_ACCELERATED);
-    AutoPtr<ICharSequence> title;
-    CString::New(String("KeyguardScrim"), (ICharSequence**)&title);
+    AutoPtr<ICharSequence> title = CoreUtils::Convert("KeyguardScrim");
     lp->SetTitle(title);
+
     AutoPtr<IInterface> wm;
     context->GetSystemService(IContext::WINDOW_SERVICE, (IInterface**)&wm);
     AutoPtr<IViewManager> viewManager = IViewManager::Probe(wm);
@@ -451,7 +462,7 @@ AutoPtr<IView> KeyguardServiceDelegate::CreateScrim(
 
 ECode KeyguardServiceDelegate::ShowScrim()
 {
-    AutoPtr<IRunnable> run = new InnerRunnable1(this);
+    AutoPtr<IRunnable> run = new ShowScrimRunnable(this);
     Boolean result;
     mScrim->Post(run, &result);
     return NOERROR;
@@ -459,7 +470,7 @@ ECode KeyguardServiceDelegate::ShowScrim()
 
 ECode KeyguardServiceDelegate::HideScrim()
 {
-    AutoPtr<IRunnable> run = new InnerRunnable2(this);
+    AutoPtr<IRunnable> run = new HideScrimRunnable(this);
     Boolean result;
     mScrim->Post(run, &result);
     return NOERROR;
@@ -469,6 +480,7 @@ ECode KeyguardServiceDelegate::OnBootCompleted()
 {
     if (mKeyguardService != NULL) {
         mKeyguardService->OnBootCompleted();
+        SendStateChangeBroadcast(true);
     }
     mKeyguardState->bootCompleted = TRUE;
     return NOERROR;

@@ -8,12 +8,9 @@ INCLUDES += $(MAKEDIR)/../../../../../../../inc/
 
 C_DEFINES += -DDROID_CORE
 
-SOURCES = KeyguardExitDelegate.cpp
-SOURCES += CKeyguardExitDelegate.cpp
+SOURCES = keyguard.cpp
+SOURCES += KeyguardExitDelegate.cpp
 SOURCES += KeyguardShowDelegate.cpp
-SOURCES += CKeyguardShowDelegate.cpp
 SOURCES += KeyguardServiceWrapper.cpp
-SOURCES += CKeyguardServiceWrapper.cpp
 SOURCES += KeyguardServiceDelegate.cpp
-SOURCES += CKeyguardServiceDelegate.cpp
 

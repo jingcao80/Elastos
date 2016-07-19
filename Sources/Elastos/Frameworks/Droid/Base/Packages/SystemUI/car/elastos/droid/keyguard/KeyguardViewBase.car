@@ -1,0 +1,129 @@
+
+module
+{
+    using interface Elastos.Core.IRunnable;
+    using interface Elastos.Droid.View.IKeyEvent;
+    using interface Elastos.Droid.Internal.Widget.ILockPatternUtils;
+
+    interface Elastos.Droid.SystemUI.Keyguard.IViewMediatorCallback;
+
+    namespace Elastos {
+    namespace Droid {
+    namespace SystemUI {
+    namespace Keyguard {
+
+    /**
+     * Base class for keyguard view.  {@link #reset} is where you should
+     * reset the state of your view.  Use the {@link KeyguardViewCallback} via
+     * {@link #getCallback()} to send information back (such as poking the wake lock,
+     * or finishing the keyguard).
+     *
+     * Handles intercepting of media keys that still work when the keyguard is
+     * showing.
+     */
+    /**
+     * @Involve
+     * interface IFrameLayout
+     * interface IKeyguardSecurityContainerSecurityCallback
+     */
+    [local]
+    interface IKeyguardViewBase {
+        /**
+         * Sets an action to run when keyguard finishes.
+         *
+         * @param action
+         */
+        SetOnDismissAction(
+            [in] IKeyguardHostViewOnDismissAction* action);
+
+        /**
+         * Called when the view needs to be shown.
+         */
+        Show();
+
+        /**
+         *  Dismisses the keyguard by going to the next screen or making it gone.
+         *
+         *  @return True if the keyguard is done.
+         */
+        Dismiss(
+            [out] Boolean* value);
+
+        HandleBackKey(
+            [out] Boolean* value);
+
+        UserActivity();
+
+        /**
+         * Called when the Keyguard is not actively shown anymore on the screen.
+         */
+        OnPause();
+
+        /**
+         * Called when the Keyguard is actively shown on the screen.
+         */
+        OnResume();
+
+        /**
+         * Starts the animation when the Keyguard gets shown.
+         */
+        StartAppearAnimation();
+
+        StartDisappearAnimation(
+            [in] IRunnable* runnable);
+
+        /**
+         * Verify that the user can get past the keyguard securely.  This is called,
+         * for example, when the phone disables the keyguard but then wants to launch
+         * something else that requires secure access.
+         *
+         * The result will be propogated back via {@link KeyguardViewCallback#keyguardDone(boolean)}
+         */
+        VerifyUnlock();
+
+        /**
+         * Called before this view is being removed.
+         */
+        CleanUp();
+
+        /**
+         * Gets the desired user activity timeout in milliseconds, or -1 if the
+         * default should be used.
+         */
+        GetUserActivityTimeout(
+            [out] Int64* timeout);
+
+        /**
+         * Allows the media keys to work when the keyguard is showing.
+         * The media keys should be of no interest to the actual keyguard view(s),
+         * so intercepting them here should not be of any harm.
+         * @param event The key event
+         * @return whether the event was consumed as a media key.
+         */
+        InterceptMediaKey(
+            [in] IKeyEvent* event,
+            [out] Boolean* handled);
+
+        HandleMenuKey(
+            [out] Boolean* handled);
+
+        SetViewMediatorCallback(
+            [in] IViewMediatorCallback* cb);
+
+        ShowAssistant();
+
+        LaunchCamera();
+
+        SetLockPatternUtils(
+            [in] ILockPatternUtils* utils);
+
+        GetSecurityMode(
+            [out] SecurityMode* mode);
+    }
+
+
+    } // namespace Keyguard
+    } // namespace SystemUI
+    } // namespace Droid
+    } // namespace Elastos
+}

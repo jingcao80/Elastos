@@ -39,7 +39,7 @@ using Elastos::Droid::Graphics::ICanvas;
 using Elastos::Droid::Graphics::IColorFilter;
 using Elastos::Droid::Graphics::IPoint;
 using Elastos::Droid::Graphics::IPorterDuffXfermode;
-using Elastos::Droid::Keyguard::IViewMediatorCallback;
+using Elastos::Droid::SystemUI::Keyguard::IViewMediatorCallback;
 using Elastos::Droid::Media::IAudioAttributes;
 using Elastos::Droid::Media::IMediaMetadata;
 using Elastos::Droid::Media::Session::IMediaController;

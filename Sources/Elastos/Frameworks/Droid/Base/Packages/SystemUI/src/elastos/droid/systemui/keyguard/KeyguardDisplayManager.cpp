@@ -7,6 +7,10 @@ namespace Droid {
 namespace SystemUI {
 namespace Keyguard {
 
+//==========================================================
+// KeyguardDisplayManager::MyMediaRouterSimpleCallback
+//==========================================================
+
 ECode KeyguardDisplayManager::MyMediaRouterSimpleCallback::OnRouteSelected(
     /* [in] */ IMediaRouter* router,
     /* [in] */ Int32 type,
@@ -33,6 +37,9 @@ ECode KeyguardDisplayManager::MyMediaRouterSimpleCallback::OnRoutePresentationDi
     return mHost->UpdateDisplays(mShowing);
 }
 
+//==========================================================
+// KeyguardDisplayManager::MyDialogInterfaceOnDismissListener
+//==========================================================
 CAR_INTERFACE_IMPL(KeyguardDisplayManager::MyDialogInterfaceOnDismissListener, Object, IDialogInterfaceOnDismissListener)
 
 ECode KeyguardDisplayManager::MyDialogInterfaceOnDismissListener::OnDismiss(
@@ -42,37 +49,45 @@ ECode KeyguardDisplayManager::MyDialogInterfaceOnDismissListener::OnDismiss(
     return NOERROR;
 }
 
+//==========================================================
+// KeyguardDisplayManager::KeyguardPresentation::MyRunnable
+//==========================================================
 ECode KeyguardDisplayManager::KeyguardPresentation::MyRunnable::Run()
 {
-    Int32 width;
+    Int32 width, height;
     mClock->GetWidth(&width);
-    Int32 x = mMarginLeft + (Int32) (Math::Random() * (mUsableWidth - width));
-
-    Int32 height;
     mClock->GetHeight(&height);
+    Int32 x = mMarginLeft + (Int32) (Math::Random() * (mUsableWidth - width));
     Int32 y = mMarginTop + (Int32) (Math::Random() * (mUsableHeight - height));
     mClock->SetTranslationX(x);
     mClock->SetTranslationY(y);
     return mClock->PostDelayed(mMoveTextRunnable, MOVE_CLOCK_TIMEOUT);
 }
 
+//==========================================================
+// KeyguardDisplayManager::KeyguardPresentation
+//==========================================================
 const Int32 KeyguardDisplayManager::KeyguardPresentation::VIDEO_SAFE_REGION = 80; // Percentage of display width & height
 const Int32 KeyguardDisplayManager::KeyguardPresentation::MOVE_CLOCK_TIMEOUT = 10000; // 10s
 
-KeyguardDisplayManager::KeyguardPresentation::KeyguardPresentation(
-    /* [in] */ IContext* context,
-    /* [in] */ IDisplay* display)
+KeyguardDisplayManager::KeyguardPresentation::KeyguardPresentation()
     : mUsableWidth(0)
     , mUsableHeight(0)
     , mMarginTop(0)
     , mMarginLeft(0)
 {
-    mMoveTextRunnable = new MyRunnable(this);
+}
 
+ECode KeyguardDisplayManager::KeyguardPresentation::constructor(
+    /* [in] */ IContext* context,
+    /* [in] */ IDisplay* display)
+{
     Presentation::constructor(context, display);
+
+    mMoveTextRunnable = new MyRunnable(this);
     AutoPtr<IWindow> window;
-    getWindow((IWindow**)&window);
-    window->SetType(IWindowManagerLayoutParams::TYPE_KEYGUARD_DIALOG);
+    GetWindow((IWindow**)&window);
+    return window->SetType(IWindowManagerLayoutParams::TYPE_KEYGUARD_DIALOG);
 }
 
 ECode KeyguardDisplayManager::KeyguardPresentation::OnDetachedFromWindow()
@@ -91,9 +106,8 @@ ECode KeyguardDisplayManager::KeyguardPresentation::OnCreate(
     GetDisplay((IDisplay**)&display);
     display->GetSize(p);
 
-    Int32 x;
+    Int32 x, y;
     p->GetX(&x);
-    Int32 y;
     p->GetY(&y);
 
     mUsableWidth = VIDEO_SAFE_REGION * x/100;
@@ -109,22 +123,29 @@ ECode KeyguardDisplayManager::KeyguardPresentation::OnCreate(
     return mClock->Post(mMoveTextRunnable);
 }
 
+//==========================================================
+// KeyguardDisplayManager
+//==========================================================
 const String KeyguardDisplayManager::TAG("KeyguardDisplayManager");
 
-Boolean KeyguardDisplayManager::DEBUG = IKeyguardConstants::DEBUG;
+Boolean KeyguardDisplayManager::DEBUG = TRUE;
 
-KeyguardDisplayManager::KeyguardDisplayManager(
-    /* [in] */ IContext* context)
+KeyguardDisplayManager::KeyguardDisplayManager()
     : mShowing(FALSE)
+{}
+
+ECode KeyguardDisplayManager::constructor(
+    /* [in] */ IContext* context)
 {
-    mMediaRouterCallback = new MyMediaRouterSimpleCallback(this);
-
-    new MyDialogInterfaceOnDismissListener(this);
-
     mContext = context;
+
+    mMediaRouterCallback = new MyMediaRouterSimpleCallback(this);
+    mOnDismissListener = new MyDialogInterfaceOnDismissListener(this);
+
     AutoPtr<IInterface> obj;
     mContext->GetSystemService(IContext::MEDIA_ROUTER_SERVICE, (IInterface**)&obj);
     mMediaRouter = IMediaRouter:Probe(obj);
+    return NOERROR;
 }
 
 ECode KeyguardDisplayManager::Show()
@@ -169,7 +190,7 @@ ECode KeyguardDisplayManager::UpdateDisplays(
         if (mPresentation != NULL)
             AutoPtr<IDisplay> display;
             mPresentation->GetDisplay((IDisplay**)&display);
-            if (TO_IINTRTFACE(display) != TO_IINTRTFACE(presentationDisplay)) {
+            if (display.Get() != presentationDisplay.Get()) {
                 if (DEBUG) Slogger::V(TAG, "Display gone: %s", TO_CSTR(display));
                 mPresentation->Dismiss();
                 mPresentation = NULL;
@@ -182,7 +203,7 @@ ECode KeyguardDisplayManager::UpdateDisplays(
             //try {
             ECode ec = mPresentation->Show();
             //} catch (WindowManager.InvalidDisplayException ex) {
-            if (ec == (ECode)InvalidDisplayException) {
+            if (ec == (ECode)E_INVALID_DISPLAY_EXCEPTION) {
                 Slogger::W(TAG, "Invalid display:%d", ec);
                 mPresentation = NULL;
             }

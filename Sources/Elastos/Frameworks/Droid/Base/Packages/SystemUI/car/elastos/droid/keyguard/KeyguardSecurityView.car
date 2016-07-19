@@ -1,11 +1,17 @@
 
 module
 {
+    using interface Elastos.Droid.Internal.Widget.ILockPatternUtils;
+    using interface Elastos.Core.IRunnable;
+    
+    interface Elastos.Droid.SystemUI.Keyguard.IKeyguardSecurityCallback;
+
     namespace Elastos {
     namespace Droid {
     namespace SystemUI {
     namespace Keyguard {
 
+    [local]
     interface IKeyguardSecurityView {
         const Int32 SCREEN_ON = 1;
         const Int32 VIEW_REVEALED = 2;
@@ -15,7 +21,7 @@ module
          * @param callback
          */
         SetKeyguardCallback(
-            [in] IKeyguardSecurityCallback* callback);
+            [in] IKeyguardSecurityCallback* cb);
 
         /**
          * Set {@link LockPatternUtils} object. Useful for providing a mock interface.
@@ -57,7 +63,7 @@ module
          * @return KeyguardSecurityCallback
          */
         GetCallback(
-            [out] IKeyguardSecurityCallback** callback);
+            [out] IKeyguardSecurityCallback** cb);
 
         /**
          * Instruct the view to show usability hints, if any.

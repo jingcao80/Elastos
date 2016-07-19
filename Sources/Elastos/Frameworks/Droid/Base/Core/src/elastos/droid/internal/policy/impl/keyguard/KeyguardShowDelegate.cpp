@@ -14,7 +14,7 @@ namespace Keyguard {
 
 CAR_INTERFACE_IMPL_2(KeyguardShowDelegate, Object, IBinder, IIKeyguardShowCallback)
 
-const Boolean KeyguardShowDelegate::DEBUG = FALSE;
+const Boolean KeyguardShowDelegate::DEBUG = TRUE;
 
 KeyguardShowDelegate::KeyguardShowDelegate()
 {
@@ -44,7 +44,6 @@ ECode KeyguardShowDelegate::OnShown(
 ECode KeyguardShowDelegate::ToString(
     /* [out] */ String* info)
 {
-    VALIDATE_NOT_NULL(info)
     return Object::ToString(info);
 }
 

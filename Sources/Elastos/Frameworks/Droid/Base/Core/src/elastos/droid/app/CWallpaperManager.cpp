@@ -103,14 +103,25 @@ CWallpaperManager::CWallpaperManager()
     , mWallpaperYStep(-1)
 {}
 
-void CWallpaperManager::InitGlobals(
+ECode CWallpaperManager::constructor(
+    /* [in] */ IContext *context,
+    /* [in] */ IHandler *handler)
+{
+    mContext = context;
+    AutoPtr<ILooper> looper;
+    FAIL_RETURN(context->GetMainLooper((ILooper**)&looper));
+    return InitGlobals(looper);
+}
+
+ECode CWallpaperManager::InitGlobals(
     /* [in] */ ILooper* looper)
 {
     AutoLock lock(sSync);
     if (sGlobals == NULL) {
-        ASSERT_SUCCEEDED(CGlobalsWallpaperManagerCallback::NewByFriend(
-                looper, (CGlobalsWallpaperManagerCallback**)&sGlobals));
+        return CGlobalsWallpaperManagerCallback::NewByFriend(
+            looper, (CGlobalsWallpaperManagerCallback**)&sGlobals);
     }
+    return NOERROR;
 }
 
 ECode CWallpaperManager::GetInstance(
@@ -1011,16 +1022,6 @@ AutoPtr<IComponentName> CWallpaperManager::GetDefaultWallpaperComponent(
     return NULL;
 }
 
-ECode CWallpaperManager::constructor(
-    /* [in] */ IContext *context,
-    /* [in] */ IHandler *handler)
-{
-    mContext = context;
-    AutoPtr<ILooper> looper;
-    FAIL_RETURN(context->GetMainLooper((ILooper**)&looper));
-    InitGlobals(looper);
-    return NOERROR;
-}
 
 } // namespace App
 } // namespace Droid

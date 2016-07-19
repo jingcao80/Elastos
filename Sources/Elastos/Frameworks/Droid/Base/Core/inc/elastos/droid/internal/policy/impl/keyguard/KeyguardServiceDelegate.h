@@ -5,7 +5,7 @@
 #include "Elastos.Droid.Internal.h"
 #include "Elastos.Droid.View.h"
 #include "elastos/droid/ext/frameworkdef.h"
-#include <elastos/core/Object.h>
+#include <elastos/droid/os/Runnable.h>
 
 using Elastos::Droid::Content::IComponentName;
 using Elastos::Droid::Content::IContext;
@@ -14,6 +14,7 @@ using Elastos::Droid::Internal::Policy::IIKeyguardService;
 using Elastos::Droid::Internal::Widget::ILockPatternUtils;
 using Elastos::Droid::Os::IBinder;
 using Elastos::Droid::Os::IBundle;
+using Elastos::Droid::Os::Runnable;
 using Elastos::Droid::View::IOnKeyguardExitResult;
 using Elastos::Droid::View::IView;
 
@@ -78,14 +79,11 @@ private:
         KeyguardServiceDelegate* mHost;
     };
 
-    class InnerRunnable1
-        : public Object
-        , public IRunnable
+    class ShowScrimRunnable
+        : public Runnable
     {
     public:
-        CAR_INTERFACE_DECL()
-
-        InnerRunnable1(
+        ShowScrimRunnable(
              /* [in] */ KeyguardServiceDelegate* host);
 
         CARAPI Run();
@@ -94,14 +92,11 @@ private:
         KeyguardServiceDelegate* mHost;
     };
 
-    class InnerRunnable2
-        : public Object
-        , public IRunnable
+    class HideScrimRunnable
+        : public Runnable
     {
     public:
-        CAR_INTERFACE_DECL()
-
-        InnerRunnable2(
+        HideScrimRunnable(
              /* [in] */ KeyguardServiceDelegate* host);
 
         CARAPI Run();
@@ -189,6 +184,9 @@ private:
     static CARAPI_(AutoPtr<IView>) CreateScrim(
         /* [in] */ IContext* context);
 
+    CARAPI SendStateChangeBroadcast(
+        /* [in] */ Boolean bound);
+
 public:
     // TODO: propagate changes to these to {@link KeyguardTouchDelegate}
     static const String KEYGUARD_PACKAGE;// = "com.android.systemui";
@@ -198,9 +196,10 @@ protected:
     AutoPtr<IIKeyguardService> mKeyguardService;
 
 private:
-    static const String TAG;
-
     static const Boolean DEBUG;
+
+    static const String ACTION_STATE_CHANGE;
+    static const String EXTRA_ACTIVE;
 
     AutoPtr<IView> mScrim; // shown if keyguard crashes
 
