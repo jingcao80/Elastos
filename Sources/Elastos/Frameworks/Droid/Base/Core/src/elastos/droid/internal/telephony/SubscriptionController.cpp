@@ -824,11 +824,12 @@ ECode SubscriptionController::AddSubInfoRecord(
     /* [out] */ Int32* result)
 {
     VALIDATE_NOT_NULL(result)
-    String str("[addSubInfoRecord]+ iccId:");
-    // str += iccId;
-    // str += " slotId:";
-    // str += slotId;
-    // Logdl(str);
+    String str;
+    StringBuilder sb1("[addSubInfoRecord]+ iccId:");
+    sb1 += iccId;
+    sb1 += " slotId:";
+    sb1 += StringUtils::ToString(slotId);
+    Logdl(sb1.ToString());
     EnforceSubscriptionPermission();
 
     if (iccId == NULL) {
@@ -893,7 +894,7 @@ ECode SubscriptionController::AddSubInfoRecord(
         tmhlp->GetDefault((ITelephonyManager**)&tm);
         String Carrier;
         tm->GetSimOperator((*subIds)[subIdsIndex], &Carrier);
-        str = "[addSubInfoRecord] Carrier = ";
+        str = String("[addSubInfoRecord] Carrier = ");
         str += Carrier;
         Logdl(str);
         String CarrierName;
@@ -967,8 +968,9 @@ ECode SubscriptionController::AddSubInfoRecord(
         AutoPtr<IUri> uri;
         resolver->Insert(content_uri, value, (IUri**)&uri);
         str = "[addSubInfoRecord]- New record created: ";
-        assert(0 && "TODO");
-        // str += uri;
+        String uriStr;
+        IObject::Probe(uri)->ToString(&uriStr);
+        str += uriStr;
         Logdl(str);
     }
     else {

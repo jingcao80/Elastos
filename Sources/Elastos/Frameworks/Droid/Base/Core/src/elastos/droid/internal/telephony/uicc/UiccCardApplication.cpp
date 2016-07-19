@@ -1,7 +1,27 @@
 
 #include "Elastos.Droid.Content.h"
 #include "Elastos.Droid.Internal.h"
+#include "elastos/droid/os/RegistrantList.h"
+#include "elastos/droid/os/CRegistrant.h"
 #include "elastos/droid/internal/telephony/uicc/UiccCardApplication.h"
+#include "elastos/droid/internal/telephony/uicc/CSIMFileHandler.h"
+#include "elastos/droid/internal/telephony/uicc/CRuimFileHandler.h"
+#include "elastos/droid/internal/telephony/uicc/CUsimFileHandler.h"
+#include "elastos/droid/internal/telephony/uicc/CCsimFileHandler.h"
+#include "elastos/droid/internal/telephony/uicc/CIsimFileHandler.h"
+#include "elastos/droid/internal/telephony/uicc/CSIMRecords.h"
+#include "elastos/droid/internal/telephony/uicc/CRuimRecords.h"
+#include "elastos/droid/internal/telephony/uicc/CIsimUiccRecords.h"
+#include "elastos/droid/internal/telephony/uicc/IccCardApplicationStatus.h"
+#include "elastos/core/AutoLock.h"
+#include <elastos/utility/logging/Logger.h>
+
+using Elastos::Droid::Os::Registrant;
+using Elastos::Droid::Os::IRegistrant;
+using Elastos::Droid::Os::CRegistrant;
+using Elastos::Droid::Os::RegistrantList;
+using Elastos::Core::AutoLock;
+using Elastos::Utility::Logging::Logger;
 
 namespace Elastos {
 namespace Droid {
@@ -16,13 +36,15 @@ UiccCardApplication::InnerHandler::InnerHandler(
     /* [in] */ UiccCardApplication* owner)
     : mOwner(owner)
 {
-    // ==================before translated======================
-    // mOwner = owner;
+    Handler::constructor();
 }
 
 ECode UiccCardApplication::InnerHandler::HandleMessage(
     /* [in] */ IMessage* msg)
 {
+    Int32 what;
+    msg->GetWhat(&what);
+    Logger::E("UiccCardApplication", "TODO InnerHandler::HandleMessage, msg:%d", what);
     // ==================before translated======================
     // AsyncResult ar;
     //
@@ -90,6 +112,18 @@ const Int32 UiccCardApplication::EVENT_PIN2_PUK2_DONE;
 
 UiccCardApplication::UiccCardApplication()
 {
+    mIccFdnEnabled = FALSE;
+    mDesiredFdnEnabled = FALSE;
+    mIccLockEnabled = FALSE;
+    mDesiredPinLocked = FALSE;
+    mIccFdnAvailable = TRUE;
+    mDestroyed = FALSE;
+
+    mReadyRegistrants = new RegistrantList();
+    mPinLockedRegistrants = new RegistrantList();
+    mPersoLockedRegistrants = new RegistrantList();
+
+    mHandler = new InnerHandler(this);
 }
 
 ECode UiccCardApplication::constructor(
@@ -98,28 +132,30 @@ ECode UiccCardApplication::constructor(
     /* [in] */ IContext* c,
     /* [in] */ ICommandsInterface* ci)
 {
-    // ==================before translated======================
-    // if (DBG) log("Creating UiccApp: " + as);
-    // mUiccCard = uiccCard;
-    // mAppState = as.app_state;
-    // mAppType = as.app_type;
-    // mAuthContext = getAuthContext(mAppType);
-    // mPersoSubState = as.perso_substate;
-    // mAid = as.aid;
-    // mAppLabel = as.app_label;
-    // mPin1Replaced = (as.pin1_replaced != 0);
-    // mPin1State = as.pin1;
-    // mPin2State = as.pin2;
-    //
-    // mContext = c;
-    // mCi = ci;
-    //
-    // mIccFh = createIccFileHandler(as.app_type);
-    // mIccRecords = createIccRecords(as.app_type, mContext, mCi);
-    // if (mAppState == AppState.APPSTATE_READY) {
-    //     queryFdn();
-    //     queryPin1State();
-    // }
+    if (DBG) Log(String("Creating UiccCardApplication: "));// + as);
+    IccCardApplicationStatus* cas = (IccCardApplicationStatus*)as;
+    mUiccCard = uiccCard;
+    mAppState = cas->mApp_state;
+    mAppType = cas->mApp_type;
+    mAuthContext = GetAuthContext(mAppType);
+    mPersoSubState = cas->mPerso_substate;
+    mAid = cas->mAid;
+    mAppLabel = cas->mApp_label;
+    mPin1Replaced = (cas->mPin1_replaced != 0);
+    mPin1State = cas->mPin1;
+    mPin2State = cas->mPin2;
+
+    mContext = c;
+    mCi = ci;
+
+    Logger::E("leliang", "line:%d, func:%s, type:%d\n", __LINE__, __func__, cas->mApp_type);
+    mIccFh = CreateIccFileHandler(cas->mApp_type);
+    mIccRecords = CreateIccRecords(cas->mApp_type, mContext, mCi);
+
+    if (mAppState == APPSTATE_READY) {
+        QueryFdn();
+        QueryPin1State();
+    }
     return NOERROR;
 }
 
@@ -196,6 +232,7 @@ ECode UiccCardApplication::Dispose()
 
 ECode UiccCardApplication::QueryFdn()
 {
+    Logger::E("UiccCardApplication", "TODO QueryFdn is not implemented");
     // ==================before translated======================
     // //This shouldn't change run-time. So needs to be called only once.
     // int serviceClassX;
@@ -206,7 +243,6 @@ ECode UiccCardApplication::QueryFdn()
     // mCi.queryFacilityLockForApp (
     //         CommandsInterface.CB_FACILITY_BA_FD, "", serviceClassX,
     //         mAid, mHandler.obtainMessage(EVENT_QUERY_FACILITY_FDN_DONE));
-    assert(0);
     return NOERROR;
 }
 
@@ -245,32 +281,34 @@ ECode UiccCardApplication::RegisterForReady(
     /* [in] */ Int32 what,
     /* [in] */ IInterface* obj)
 {
-    // ==================before translated======================
-    // synchronized (mLock) {
-    //     for (int i = mReadyRegistrants.size() - 1; i >= 0 ; i--) {
-    //         Registrant  r = (Registrant) mReadyRegistrants.get(i);
-    //         Handler rH = r.getHandler();
-    //
-    //         if (rH != null && rH == h) {
-    //             return;
-    //         }
-    //     }
-    //     Registrant r = new Registrant (h, what, obj);
-    //     mReadyRegistrants.add(r);
-    //     notifyReadyRegistrantsIfNeeded(r);
-    // }
-    assert(0);
+    {
+        AutoLock lock(mLock);
+        for (Int32 i = mReadyRegistrants->GetSize() - 1; i >= 0 ; i--) {
+            AutoPtr<IInterface> obj = mReadyRegistrants->Get(i);
+            Registrant*  r = (Registrant*)IRegistrant::Probe(obj);
+            AutoPtr<IHandler> rH;
+            r->GetHandler((IHandler**)&rH);
+
+            if (rH != NULL && rH.Get() == h) { //TODO  is == this right??
+                return NOERROR;
+            }
+        }
+        AutoPtr<IRegistrant> r;
+        CRegistrant::New(h, what, obj, (IRegistrant**)&r);
+
+        mReadyRegistrants->Add(r);
+        NotifyReadyRegistrantsIfNeeded((Registrant*)r.Get());
+    }
     return NOERROR;
 }
 
 ECode UiccCardApplication::UnregisterForReady(
     /* [in] */ IHandler* h)
 {
-    // ==================before translated======================
-    // synchronized (mLock) {
-    //     mReadyRegistrants.remove(h);
-    // }
-    assert(0);
+    {
+        AutoLock lock(mLock);
+        mReadyRegistrants->Remove(h);
+    }
     return NOERROR;
 }
 
@@ -342,11 +380,10 @@ ECode UiccCardApplication::GetType(
     /* [out] */ AppType* result)
 {
     VALIDATE_NOT_NULL(result);
-    // ==================before translated======================
-    // synchronized (mLock) {
-    //     return mAppType;
-    // }
-    assert(0);
+    {
+        AutoLock lock(mLock);
+        *result = mAppType;
+    }
     return NOERROR;
 }
 
@@ -415,11 +452,11 @@ ECode UiccCardApplication::GetIccFileHandler(
     /* [out] */ IIccFileHandler** result)
 {
     VALIDATE_NOT_NULL(result);
-    // ==================before translated======================
-    // synchronized (mLock) {
-    //     return mIccFh;
-    // }
-    assert(0);
+    {
+        AutoLock lock(mLock);
+        *result = mIccFh;
+        REFCOUNT_ADD(*result);
+    }
     return NOERROR;
 }
 
@@ -427,11 +464,11 @@ ECode UiccCardApplication::GetIccRecords(
     /* [out] */ IIccRecords** result)
 {
     VALIDATE_NOT_NULL(result);
-    // ==================before translated======================
-    // synchronized (mLock) {
-    //     return mIccRecords;
-    // }
-    assert(0);
+    {
+        AutoLock lock(mLock);
+        *result = mIccRecords;
+        REFCOUNT_ADD(*result);
+    }
     return NOERROR;
 }
 
@@ -727,43 +764,39 @@ AutoPtr<IIccRecords> UiccCardApplication::CreateIccRecords(
     /* [in] */ IContext* c,
     /* [in] */ ICommandsInterface* ci)
 {
-    // ==================before translated======================
-    // if (type == AppType.APPTYPE_USIM || type == AppType.APPTYPE_SIM) {
-    //     return new SIMRecords(this, c, ci);
-    // } else if (type == AppType.APPTYPE_RUIM || type == AppType.APPTYPE_CSIM){
-    //     return new RuimRecords(this, c, ci);
-    // } else if (type == AppType.APPTYPE_ISIM) {
-    //     return new IsimUiccRecords(this, c, ci);
-    // } else {
-    //     // Unknown app type (maybe detection is still in progress)
-    //     return null;
-    // }
-    assert(0);
-    AutoPtr<IIccRecords> empty;
-    return empty;
+    AutoPtr<IIccRecords> ir;
+    if (type == APPTYPE_USIM || type == APPTYPE_SIM) {
+        CSIMRecords::New(this, c, ci, (IIccRecords**)&ir);
+    } else if (type == APPTYPE_RUIM || type == APPTYPE_CSIM){
+        CRuimRecords::New(this, c, ci, (IIccRecords**)&ir);
+    } else if (type == APPTYPE_ISIM) {
+        CIsimUiccRecords::New(this, c, ci, (IIccRecords**)&ir);
+    } else {
+        // Unknown app type (maybe detection is still in progress)
+        ir = NULL;
+    }
+    return ir;
 }
 
 AutoPtr<IIccFileHandler> UiccCardApplication::CreateIccFileHandler(
     /* [in] */ AppType type)
 {
-    // ==================before translated======================
-    // switch (type) {
-    //     case APPTYPE_SIM:
-    //         return new SIMFileHandler(this, mAid, mCi);
-    //     case APPTYPE_RUIM:
-    //         return new RuimFileHandler(this, mAid, mCi);
-    //     case APPTYPE_USIM:
-    //         return new UsimFileHandler(this, mAid, mCi);
-    //     case APPTYPE_CSIM:
-    //         return new CsimFileHandler(this, mAid, mCi);
-    //     case APPTYPE_ISIM:
-    //         return new IsimFileHandler(this, mAid, mCi);
-    //     default:
-    //         return null;
-    // }
-    assert(0);
-    AutoPtr<IIccFileHandler> empty;
-    return empty;
+    AutoPtr<IIccFileHandler> fh;
+    switch (type) {
+        case APPTYPE_SIM:
+            CSIMFileHandler::New(this, mAid, mCi, (IIccFileHandler**)&fh);
+        case APPTYPE_RUIM:
+            CRuimFileHandler::New(this, mAid, mCi, (IIccFileHandler**)&fh);
+        case APPTYPE_USIM:// leliang this type
+            CUsimFileHandler::New(this, mAid, mCi, (IIccFileHandler**)&fh);
+        case APPTYPE_CSIM:
+            CCsimFileHandler::New(this, mAid, mCi, (IIccFileHandler**)&fh);
+        case APPTYPE_ISIM:
+            CIsimFileHandler::New(this, mAid, mCi, (IIccFileHandler**)&fh);
+        default:
+            fh = NULL;
+    }
+    return fh;
 }
 
 void UiccCardApplication::OnQueryFdnEnabled(
@@ -820,6 +853,7 @@ void UiccCardApplication::OnChangeFdnDone(
 
 void UiccCardApplication::QueryPin1State()
 {
+    Logger::E("UiccCardApplication", "TODO QueryPin1State is not implemented");
     // ==================before translated======================
     // int serviceClassX = CommandsInterface.SERVICE_CLASS_VOICE +
     //         CommandsInterface.SERVICE_CLASS_DATA +
@@ -827,7 +861,6 @@ void UiccCardApplication::QueryPin1State()
     // mCi.queryFacilityLockForApp (
     //     CommandsInterface.CB_FACILITY_BA_SIM, "", serviceClassX,
     //     mAid, mHandler.obtainMessage(EVENT_QUERY_FACILITY_LOCK_DONE));
-    assert(0);
 }
 
 void UiccCardApplication::OnQueryFacilityLock(
@@ -929,6 +962,7 @@ Int32 UiccCardApplication::ParsePinPukErrorResult(
 void UiccCardApplication::NotifyReadyRegistrantsIfNeeded(
     /* [in] */ Registrant* r)
 {
+    Logger::E("UiccCardApplication", "TODO NotifyReadyRegistrantsIfNeeded");
     // ==================before translated======================
     // if (mDestroyed) {
     //     return;
@@ -949,7 +983,6 @@ void UiccCardApplication::NotifyReadyRegistrantsIfNeeded(
     //         r.notifyRegistrant(new AsyncResult(null, null, null));
     //     }
     // }
-    assert(0);
 }
 
 void UiccCardApplication::NotifyPinLockedRegistrantsIfNeeded(
@@ -1004,26 +1037,23 @@ void UiccCardApplication::NotifyPersoLockedRegistrantsIfNeeded(
 Int32 UiccCardApplication::GetAuthContext(
     /* [in] */ AppType appType)
 {
-    // ==================before translated======================
-    // int authContext;
-    //
-    // switch (appType) {
-    //     case APPTYPE_SIM:
-    //         authContext = AUTH_CONTEXT_EAP_SIM;
-    //         break;
-    //
-    //     case APPTYPE_USIM:
-    //         authContext = AUTH_CONTEXT_EAP_AKA;
-    //         break;
-    //
-    //     default:
-    //         authContext = AUTH_CONTEXT_UNDEFINED;
-    //         break;
-    // }
-    //
-    // return authContext;
-    assert(0);
-    return 0;
+    Int32 authContext;
+
+    switch (appType) {
+        case APPTYPE_SIM:
+            authContext = AUTH_CONTEXT_EAP_SIM;
+            break;
+
+        case APPTYPE_USIM:
+            authContext = AUTH_CONTEXT_EAP_AKA;
+            break;
+
+        default:
+            authContext = AUTH_CONTEXT_UNDEFINED;
+            break;
+    }
+
+    return authContext;
 }
 
 void UiccCardApplication::Log(
@@ -1031,7 +1061,7 @@ void UiccCardApplication::Log(
 {
     // ==================before translated======================
     // Rlog.d(LOGTAG, msg);
-    assert(0);
+    Logger::E("UiccCardApplication", "TODO Log, msg:%s", msg.string());
 }
 
 void UiccCardApplication::Loge(
@@ -1039,7 +1069,7 @@ void UiccCardApplication::Loge(
 {
     // ==================before translated======================
     // Rlog.e(LOGTAG, msg);
-    assert(0);
+    Logger::E("UiccCardApplication", "TODO Loge, msg:%s", msg.string());
 }
 
 } // namespace Uicc

@@ -23,6 +23,8 @@
 #include <elastos/droid/text/TextUtils.h>
 #include <elastos/droid/utility/Xml.h>
 #include <elastos/utility/Objects.h>
+#include <elastos/utility/logging/Logger.h>
+using Elastos::Utility::Logging::Logger;
 
 using Elastos::Droid::Provider::Settings;
 using Elastos::Droid::Content::CComponentName;
@@ -1055,6 +1057,7 @@ ECode PhoneAccountRegistrar::GetPhoneAccount(
 ECode PhoneAccountRegistrar::RegisterPhoneAccount(
     /* [in] */ IPhoneAccount* account)
 {
+    Logger::E("leliang", "line:%d, func:%s\n", __LINE__, __func__);
     // Enforce the requirement that a connection service for a phone account has the correct
     // permission.
     AutoPtr<IPhoneAccountHandle> phoneAccountHandle;
