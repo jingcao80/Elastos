@@ -1,0 +1,9 @@
+TARGET_NAME= list
+TARGET_TYPE= lib
+
+INCLUDES += $(MAKEDIR)/../../../../../../inc
+INCLUDES += $(MAKEDIR)/../../../../../../
+INCLUDES += ../../../../../../
+
+SOURCES += ContactEntryListFragment.cpp
+SOURCES += DirectoryListLoader.cpp

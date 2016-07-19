@@ -2,8 +2,13 @@ module
 {
     importlib("Elastos.Droid.Core.eco");
 
+    merge("car/elastos/droid/contacts/common/ContactPhotoManager.car");
     merge("car/elastos/droid/contacts/common/interactions/TouchPointManager.car");
     merge("car/elastos/droid/contacts/common/list/OnPhoneNumberPickerActionListener.car");
+    merge("car/elastos/droid/contacts/common/list/ContactEntryListAdapter.car");
+    merge("car/elastos/droid/contacts/common/list/ContactEntryListFragment.car");
+    merge("car/elastos/droid/contacts/common/list/DirectoryPartition.car");
+    merge("car/elastos/droid/contacts/common/list/ContactListFilter.car");
     merge("car/elastos/droid/contacts/common/widget/FloatingActionButtonController.car");
     merge("car/elastos/droid/dialer/activity/TransactionSafeActivity.car");
 //    merge("car/elastos/droid/dialer/calllog/CallDetailHistoryAdapter.car");

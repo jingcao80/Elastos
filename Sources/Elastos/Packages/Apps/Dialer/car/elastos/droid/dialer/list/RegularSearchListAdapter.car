@@ -10,10 +10,10 @@ module
 
     /**
      * @Involve
-     * interface Elastos.Apps.Contacts.Common.List.IPinnedHeaderListAdapter
-     * interface Elastos.Apps.Contacts.Common.List.IIndexerListAdapter
-     * interface Elastos.Apps.Contacts.Common.List.IContactEntryListAdapter
-     * interface Elastos.Apps.Contacts.Common.List.IPhoneNumberListAdapter
+     * interface Elastos.Droid.Contacts.Common.List.IPinnedHeaderListAdapter
+     * interface Elastos.Droid.Contacts.Common.List.IIndexerListAdapter
+     * interface Elastos.Droid.Contacts.Common.List.IContactEntryListAdapter
+     * interface Elastos.Droid.Contacts.Common.List.IPhoneNumberListAdapter
      * interface Elastos.Droid.Dialer.List.IDialerPhoneNumberListAdapter
      */
     interface IRegularSearchListAdapter {

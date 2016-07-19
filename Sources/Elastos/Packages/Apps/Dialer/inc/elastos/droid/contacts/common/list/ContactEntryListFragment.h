@@ -1,28 +1,36 @@
 
-#ifndef __ELASTOS_DROID_CONTACTS_COMMON_UTIL_CONTACTENTRYLISTFRAGMENT_H__
-#define __ELASTOS_DROID_CONTACTS_COMMON_UTIL_CONTACTENTRYLISTFRAGMENT_H__
+#ifndef __ELASTOS_DROID_CONTACTS_COMMON_LIST_CONTACTENTRYLISTFRAGMENT_H__
+#define __ELASTOS_DROID_CONTACTS_COMMON_LIST_CONTACTENTRYLISTFRAGMENT_H__
 
 // #include "elastos/droid/contacts/common/list/ContactsPreferences.h"
 // #include "elastos/droid/contacts/common/list/ContactPhotoManager.h"
 #include "elastos/droid/content/BroadcastReceiver.h"
 #include "elastos/droid/os/Handler.h"
 #include "elastos/droid/dialerbind/analytics/AnalyticsFragment.h"
+#include "Elastos.Droid.App.h"
+#include "Elastos.Droid.Widget.h"
 
+using Elastos::Droid::App::ILoaderManager;
 using Elastos::Droid::App::ILoaderManagerLoaderCallbacks;
+using Elastos::Droid::App::IActivity;
 // using Elastos::Droid::Contacts::Common::Preference::IContactsPreferencesChangeListener;
 using Elastos::Droid::Content::ICursorLoader;
 using Elastos::Droid::Content::BroadcastReceiver;
 using Elastos::Droid::Content::ILoader;
 using Elastos::Droid::Content::IIntent;
-using Elastos::Droid::Dialerbind::Analytics::AnalyticsFragment;
+using Elastos::Droid::Database::ICursor;
+using Elastos::Droid::DialerBind::Analytics::AnalyticsFragment;
 using Elastos::Droid::Os::Handler;
 using Elastos::Droid::Os::IBundle;
 using Elastos::Droid::Widget::IAdapterViewOnItemClickListener;
 using Elastos::Droid::Widget::IAbsListViewOnScrollListener;
 using Elastos::Droid::Widget::IListView;
+using Elastos::Droid::Widget::IAbsListView;
+using Elastos::Droid::Widget::IAdapterView;
 using Elastos::Droid::View::IViewOnFocusChangeListener;
 using Elastos::Droid::View::IViewOnTouchListener;
 using Elastos::Droid::View::IViewGroup;
+using Elastos::Droid::View::IMotionEvent;
 using Elastos::Droid::View::ILayoutInflater;
 
 namespace Elastos {
@@ -185,6 +193,12 @@ public:
 
     CARAPI SetVisibleScrollbarEnabled(
         /* [in] */ Boolean flag);
+
+    CARAPI IsVisibleScrollbarEnabled(
+        /* [out] */ Boolean* result);
+
+    CARAPI SetVerticalScrollbarPosition(
+        /* [in] */ Int32 position);
 
     CARAPI SetPhotoLoaderEnabled(
         /* [in] */ Boolean flag);
@@ -437,6 +451,7 @@ private:
     static const Int32 STATUS_LOADING = 1;
     static const Int32 STATUS_LOADED = 2;
 
+    Boolean mSectionHeaderDisplayEnabled;
     Boolean mPhotoLoaderEnabled;
     Boolean mQuickContactEnabled;
     Boolean mAdjustSelectionBoundsEnabled;
@@ -483,7 +498,7 @@ private:
 
     AutoPtr<IContext> mContext;
 
-    AutoPtr<ILoaderManagerLoaderCallbacks> mLoaderManager;
+    AutoPtr<ILoaderManager> mLoaderManager;
 
     AutoPtr<IBroadcastReceiver> mSIMStateReceiver;
 
@@ -502,4 +517,4 @@ private:
 } // Apps
 } // Elastos
 
-#endif //__ELASTOS_DROID_CONTACTS_COMMON_UTIL_CONTACTENTRYLISTFRAGMENT_H__
+#endif //__ELASTOS_DROID_CONTACTS_COMMON_LIST_CONTACTENTRYLISTFRAGMENT_H__

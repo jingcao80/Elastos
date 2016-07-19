@@ -1,0 +1,219 @@
+
+module
+{
+
+    using interface Elastos.Droid.Content.ICursorLoader;
+    using interface Elastos.Droid.Database.ICursor;
+
+    interface Elastos.Droid.Contacts.Common.IContactPhotoManager;
+    interface Elastos.Droid.Contacts.Common.IContactPhotoManagerDefaultImageRequest;
+    interface Elastos.Droid.Contacts.Common.List.IDirectoryPartition;
+    interface Elastos.Droid.Contacts.Common.List.IContactListFilter;
+
+    namespace Elastos{
+    namespace Droid {
+    namespace Contacts {
+    namespace Common {
+    namespace List {
+
+    /**
+     * @Involve
+     * interface Elastos.Droid.Contacts.Common.List.IPinnedHeaderListAdapter
+     * interface Elastos.Droid.Common.Widget.ICompositeCursorAdapter;
+     * interface Elastos.Droid.Contacts.Common.List.IIndexerListAdapter
+     */
+    interface IContactEntryListAdapter {
+        /**
+         * Indicates whether the {@link Directory#LOCAL_INVISIBLE} directory should
+         * be included in the search.
+         */
+        const Boolean LOCAL_INVISIBLE_DIRECTORY_ENABLED = FALSE;
+
+        /**
+         * Remove all directories after the default directory. This is typically used when contacts
+         * list screens are asked to exit the search mode and thus need to remove all remote directory
+         * results for the search.
+         *
+         * This code assumes that the default directory and directories before that should not be
+         * deleted (e.g. Join screen has "suggested contacts" directory before the default director,
+         * and we should not remove the directory).
+         */
+        RemoveDirectoriesAfterDefault();
+
+        GetContactDisplayName(
+            [in] Int32 position,
+            [out] String* displayName);
+
+        ConfigureLoader(
+            [in] ICursorLoader* loader,
+            [in] Int64 directoryId);
+
+        /**
+         * Marks all partitions as "loading"
+         */
+        OnDataReload();
+
+        IsSearchMode(
+            [out] Boolean* flag);
+
+        SetSearchMode(
+            [in] Boolean flag);
+
+        GetQueryString(
+            [out] String* queryString);
+
+        SetQueryString(
+            [in] String queryString);
+
+        GetUpperCaseQueryString(
+            [out] String* result);
+
+        GetDirectorySearchMode(
+            [out] Int32* mode);
+
+        SetDirectorySearchMode(
+            [in] Int32 mode);
+
+        GetDirectoryResultLimit(
+            [out] Int32* limit);
+
+        GetDirectoryResultLimit(
+            [in] IDirectoryPartition* directoryPartition,
+            [out] Int32* limit);
+
+        SetDirectoryResultLimit(
+            [in] Int32 limit);
+
+        GetContactNameDisplayOrder(
+            [out] Int32* displayOrder);
+
+        SetContactNameDisplayOrder(
+            [in] Int32 displayOrder);
+
+        GetSortOrder(
+            [out] Int32* sortOrder);
+
+        SetSortOrder(
+            [in] Int32 sortOrder);
+
+        SetPhotoLoader(
+            [in] IContactPhotoManager* photoLoader);
+
+        GetDisplayPhotos(
+            [out] Boolean* displayPhotos);
+
+        SetDisplayPhotos(
+            [in] Boolean displayPhotos);
+
+        GetCircularPhotos(
+            [out] Boolean* circularPhotos);
+
+        SetCircularPhotos(
+            [in] Boolean circularPhotos);
+
+        IsEmptyListEnabled(
+            [out] Boolean* flag);
+
+        SetEmptyListEnabled(
+            [in] Boolean flag);
+
+        IsSelectionVisible(
+            [out] Boolean* flag);
+
+        SetSelectionVisible(
+            [in] Boolean flag);
+
+        IsQuickContactEnabled(
+            [out] Boolean* quickContactEnabled);
+
+        SetQuickContactEnabled(
+            [in] Boolean quickContactEnabled);
+
+        IsAdjustSelectionBoundsEnabled(
+            [out] Boolean* enabled);
+
+        SetAdjustSelectionBoundsEnabled(
+            [in] Boolean enabled);
+
+        ShouldIncludeProfile(
+            [out] Boolean* includeProfile);
+
+        SetIncludeProfile(
+            [in] Boolean includeProfile);
+
+        SetProfileExists(
+            [in] Boolean exists);
+
+        HasProfile(
+            [out] Boolean* hasProfile);
+
+        SetDarkTheme(
+            [in] Boolean value);
+
+        /**
+         * Updates partitions according to the directory meta-data contained in the supplied
+         * cursor.
+         */
+        ChangeDirectories(
+            [in] ICursor* cursor);
+
+        ChangeCursor(
+            [in] ICursor* cursor);
+
+        IsLoading(
+            [out] Boolean* isLoading);
+
+        AreAllPartitionsEmpty(
+            [out] Boolean* empty);
+
+        /**
+         * Changes visibility parameters for the default directory partition.
+         */
+        ConfigureDefaultPartition(
+            [in] Boolean showIfEmpty,
+            [in] Boolean hasHeader);
+
+        // TODO: fix PluralRules to handle zero correctly and use Resources.getQuantityText directly
+        GetQuantityText(
+            [in] Int32 count,
+            [in] Int32 zeroResourceId,
+            [in] Int32 pluralResourceId,
+            [out] String* text);
+
+        IsPhotoSupported(
+            [in] Int32 partitionIndex,
+            [out] Boolean* supported);
+
+        /**
+         * Returns the currently selected filter.
+         */
+        GetFilter(
+            [out] IContactListFilter** filter);
+
+        SetFilter(
+            [in] IContactListFilter* filter);
+
+        /**
+         * Retrieves the lookup key and display name from a cursor, and returns a
+         * {@link DefaultImageRequest} containing these contact details
+         *
+         * @param cursor Contacts cursor positioned at the current row to retrieve contact details for
+         * @param displayNameColumn Column index of the display name
+         * @param lookupKeyColumn Column index of the lookup key
+         * @return {@link DefaultImageRequest} with the displayName and identifier fields set to the
+         * display name and lookup key of the contact.
+         */
+        GetDefaultImageRequestFromCursor(
+            [in] ICursor* cursor,
+            [in] Int32 displayNameColumn,
+            [in] Int32 lookupKeyColumn,
+            [out] IContactPhotoManagerDefaultImageRequest** imageRequest);
+    }
+
+    } // List
+    } // Common
+    } // Contacts
+    } // Droid
+    } // Elastos
+
+}

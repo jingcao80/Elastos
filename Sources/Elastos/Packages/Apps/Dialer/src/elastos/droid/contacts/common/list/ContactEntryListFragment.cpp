@@ -1,12 +1,13 @@
 
 #include "elastos/droid/contacts/common/list/ContactEntryListFragment.h"
-#include "elastos/droid/contacts/common/list/DirectoryPartition.h"
+// #include "elastos/droid/contacts/common/list/DirectoryPartition.h"
 #include "elastos/droid/contacts/common/list/DirectoryListLoader.h"
 #include "elastos/droid/contacts/common/util/ContactListViewUtils.h"
 #include "elastos/droid/text/TextUtils.h"
 #include "elastos/droid/widget/ListView.h"
 #include "elastos/droid/R.h"
 #include <elastos/utility/logging/Logger.h>
+#include "Elastos.Droid.Provider.h"
 
 using Elastos::Droid::App::EIID_ILoaderManagerLoaderCallbacks;
 using Elastos::Droid::Contacts::Common::List::EIID_IContactEntryListFragment;
@@ -26,6 +27,7 @@ using Elastos::Droid::View::InputMethod::IInputMethodManager;
 using Elastos::Droid::Widget::EIID_IAdapterViewOnItemClickListener;
 using Elastos::Droid::Widget::EIID_IAbsListViewOnScrollListener;
 using Elastos::Droid::Widget::ListView;
+using Elastos::Droid::Widget::IAdapter;
 using Elastos::Utility::ILocaleHelper;
 using Elastos::Utility::CLocaleHelper;
 using Elastos::Utility::Logging::Logger;
@@ -64,7 +66,7 @@ ContactEntryListFragment::DelayedDirectorySearchHandler::HandleMessage(
         msg->GetArg1(&arg1);
         AutoPtr<IInterface> obj;
         msg->GetObj((IInterface**)&obj);
-        AutoPtr<DirectoryPartition> partition = (DirectoryPartition*)(IObject*)obj.Get();
+        AutoPtr<IDirectoryPartition> partition = IDirectoryPartition::Probe(obj);
         mHost->LoadDirectoryPartition(arg1, partition);
     }
     return NOERROR;
@@ -118,6 +120,7 @@ const Int32 ContactEntryListFragment::STATUS_LOADED;
 
 ContactEntryListFragment::ContactEntryListFragment()
     : mUserProfileExists(FALSE)
+    , mSectionHeaderDisplayEnabled(FALSE)
     , mPhotoLoaderEnabled(FALSE)
     , mQuickContactEnabled(TRUE)
     , mAdjustSelectionBoundsEnabled(TRUE)
@@ -158,7 +161,7 @@ ECode ContactEntryListFragment::OnAttach(
     /* [in] */ IActivity* activity)
 {
     AnalyticsFragment::OnAttach(activity);
-    SetContext(activity);
+    SetContext(IContext::Probe(activity));
     AutoPtr<ILoaderManager> manager;
     AnalyticsFragment::GetLoaderManager((ILoaderManager**)&manager);
     SetLoaderManager(manager);
@@ -192,7 +195,8 @@ ECode ContactEntryListFragment::SetEnabled(
                 ReloadData();
             }
             else {
-                mAdapter->ClearPartitions();
+                assert(0);
+                // mAdapter->ClearPartitions();
             }
         }
     }
@@ -260,7 +264,7 @@ ECode ContactEntryListFragment::OnSaveInstanceState(
 }
 
 ECode ContactEntryListFragment::OnCreate(
-    /* [in] */ IBundle* savedInstanceState)
+    /* [in] */ IBundle* savedState)
 {
     AnalyticsFragment::OnCreate(savedState);
     RestoreSavedState(savedState);
@@ -274,7 +278,8 @@ ECode ContactEntryListFragment::OnCreate(
     filter->AddAction(IIntent::ACTION_AIRPLANE_MODE_CHANGED);
     filter->AddAction(ITelephonyIntents::ACTION_SIM_STATE_CHANGED);
     if (mContext != NULL) {
-        mContext->RegisterReceiver(mSIMStateReceiver, filter);
+        AutoPtr<IIntent> intent;
+        mContext->RegisterReceiver(mSIMStateReceiver, filter, (IIntent**)&intent);
     }
     return NOERROR;
 }
@@ -312,7 +317,8 @@ ECode ContactEntryListFragment::OnStart()
 {
     AnalyticsFragment::OnStart();
 
-    mContactsPrefs->RegisterChangeListener(mPreferencesChangeListener);
+    // TODO: no ContactsPreferences
+    // mContactsPrefs->RegisterChangeListener(mPreferencesChangeListener);
 
     mForceLoad = LoadPreferences();
 
@@ -331,8 +337,9 @@ void ContactEntryListFragment::StartLoading()
     }
 
     ConfigureAdapter();
+    assert(0);
     Int32 partitionCount;
-    mAdapter->GetPartitionCount(&partitionCount);
+    // mAdapter->GetPartitionCount(&partitionCount);
     for (Int32 i = 0; i < partitionCount; i++) {
         // TODO: no com.android.common.widget.CompositeCursorAdapter;
         // Partition partition = mAdapter.getPartition(i);
@@ -353,7 +360,8 @@ void ContactEntryListFragment::StartLoading()
 
     // Next time this method is called, we should start loading non-priority directories
     mLoadPriorityDirectoriesOnly = FALSE;
-    mAdapter->NotifyDataSetChanged();
+    // TODO: no com.android.common.widget.CompositeCursorAdapter;
+    // mAdapter->NotifyDataSetChanged();
 }
 
 ECode ContactEntryListFragment::OnCreateLoader(
@@ -364,7 +372,9 @@ ECode ContactEntryListFragment::OnCreateLoader(
     VALIDATE_NOT_NULL(_loader)
     if (id == DIRECTORY_LOADER_ID) {
         AutoPtr<DirectoryListLoader> loader = new DirectoryListLoader(mContext);
-        loader->SetDirectorySearchMode(mAdapter.getDirectorySearchMode());
+        Int32 mode;
+        mAdapter->GetDirectorySearchMode(&mode);
+        loader->SetDirectorySearchMode(mode);
         loader->SetLocalInvisibleDirectoryEnabled(
                 IContactEntryListAdapter::LOCAL_INVISIBLE_DIRECTORY_ENABLED);
         *_loader = ILoader::Probe(loader);
@@ -374,8 +384,8 @@ ECode ContactEntryListFragment::OnCreateLoader(
         CreateCursorLoader(mContext, (ICursorLoader**)&loader);
         Int64 directoryId = IContactsContractDirectory::DEFAULT;
         Boolean contains;
-        if (args != NULL, && (args->ContainsKey(DIRECTORY_ID_ARG_KEY, &contains), contains)) {
-            args->GetInt64(DIRECTORY_ID_ARG_KEY, &directoryId);
+        if (args != NULL && (args->ContainsKey(DIRECTORY_ID_ARG_KEY, &contains), contains)) {
+            args->GetInt64(DIRECTORY_ID_ARG_KEY, IContactsContractDirectory::DEFAULT, &directoryId);
         }
         mAdapter->ConfigureLoader(loader, directoryId);
         *_loader = ILoader::Probe(loader);
@@ -440,13 +450,13 @@ void ContactEntryListFragment::LoadDirectoryPartition(
 {
     AutoPtr<IBundle> args;
     CBundle::New((IBundle**)&args);
-    Int32 directoryId;
+    Int64 directoryId;
     partition->GetDirectoryId(&directoryId);
     args->PutInt64(DIRECTORY_ID_ARG_KEY, directoryId);
     AutoPtr<ILoaderManager> lm;
     GetLoaderManager((ILoaderManager**)&lm);
     AutoPtr<ILoader> l;
-    if (lm->GetLoader((ILoader**)&l), l != NULL) {
+    if (lm->GetLoader(partitionIndex, (ILoader**)&l), l != NULL) {
         lm->DestroyLoader(partitionIndex);
     }
     AutoPtr<ILoader> loader;
@@ -470,11 +480,11 @@ ECode ContactEntryListFragment::OnLoadFinished(
     loader->GetId(&loaderId);
     if (loaderId == DIRECTORY_LOADER_ID) {
         mDirectoryListStatus = STATUS_LOADED;
-        mAdapter->ChangeDirectories(data);
+        mAdapter->ChangeDirectories(ICursor::Probe(data));
         StartLoading();
     }
     else {
-        OnPartitionLoaded(loaderId, data);
+        OnPartitionLoaded(loaderId, ICursor::Probe(data));
         Boolean isSearchMode;
         if (IsSearchMode(&isSearchMode), isSearchMode) {
             Int32 directorySearchMode;
@@ -500,6 +510,7 @@ ECode ContactEntryListFragment::OnLoadFinished(
             lm->DestroyLoader(DIRECTORY_LOADER_ID);
         }
     }
+    return NOERROR;
 }
 
 ECode ContactEntryListFragment::OnLoaderReset(
@@ -507,11 +518,14 @@ ECode ContactEntryListFragment::OnLoaderReset(
 {
     Int32 id;
     if (loader->GetId(&id), id >= 0) {
-        mAdapter->ChangeCursor(id, NULL);
+        // TODO: no CompositeCursorAdapter and then no function ChangeCursor
+        assert(0);
+        // mAdapter->ChangeCursor(id, NULL);
     }
     else {
         mAdapter->ChangeCursor(NULL);
     }
+    return NOERROR;
 }
 
 void ContactEntryListFragment::OnPartitionLoaded(
@@ -519,13 +533,16 @@ void ContactEntryListFragment::OnPartitionLoaded(
     /* [in] */ ICursor* data)
 {
     Int32 count;
-    if (mAdapter->GetPartitionCount(&count), partitionIndex >= count) {
-        // When we get unsolicited data, ignore it.  This could happen
-        // when we are switching from search mode to the default mode.
-        return;
-    }
+    assert(0);
+    // TODO: no CompositeCursorAdapter and then no function GetPartitionCount
+    // if (mAdapter->GetPartitionCount(&count), partitionIndex >= count) {
+    //     // When we get unsolicited data, ignore it.  This could happen
+    //     // when we are switching from search mode to the default mode.
+    //     return;
+    // }
 
-    mAdapter->ChangeCursor(partitionIndex, data);
+    // TODO: no CompositeCursorAdapter and then no function ChangeCursor
+    // mAdapter->ChangeCursor(partitionIndex, data);
     SetProfileHeader();
 
     Boolean isLoading;
@@ -538,7 +555,7 @@ ECode ContactEntryListFragment::IsLoading(
     /* [out] */ Boolean* result)
 {
     VALIDATE_NOT_NULL(result)
-    Boolean isLoading
+    Boolean isLoading;
     if (mAdapter != NULL && (mAdapter->IsLoading(&isLoading), isLoading)) {
         *result = TRUE;
         return NOERROR;
@@ -569,8 +586,9 @@ ECode ContactEntryListFragment::IsLoadingDirectoryList(
 ECode ContactEntryListFragment::OnStop()
 {
     AnalyticsFragment::OnStop();
-    mContactsPrefs->UnregisterChangeListener();
-    mAdapter->ClearPartitions();
+    // TODO: no ContactsPreferences
+    // mContactsPrefs->UnregisterChangeListener();
+    // mAdapter->ClearPartitions();
     return NOERROR;
 }
 
@@ -606,7 +624,8 @@ ECode ContactEntryListFragment::SetSectionHeaderDisplayEnabled(
     if (mSectionHeaderDisplayEnabled != flag) {
         mSectionHeaderDisplayEnabled = flag;
         if (mAdapter != NULL) {
-            mAdapter->SetSectionHeaderDisplayEnabled(flag);
+            assert(0);
+            // mAdapter->SetSectionHeaderDisplayEnabled(flag);
         }
         ConfigureVerticalScrollbar();
     }
@@ -631,6 +650,24 @@ ECode ContactEntryListFragment::SetVisibleScrollbarEnabled(
     return NOERROR;
 }
 
+ECode ContactEntryListFragment::IsVisibleScrollbarEnabled(
+    /* [out] */ Boolean* result)
+{
+    VALIDATE_NOT_NULL(result)
+    *result = mVisibleScrollbarEnabled;
+    return NOERROR;
+}
+
+ECode ContactEntryListFragment::SetVerticalScrollbarPosition(
+    /* [in] */ Int32 position)
+{
+    if (mVerticalScrollbarPosition != position) {
+        mVerticalScrollbarPosition = position;
+        ConfigureVerticalScrollbar();
+    }
+    return NOERROR;
+}
+
 void ContactEntryListFragment::ConfigureVerticalScrollbar()
 {
     Boolean isVisibleEnabled, isSectionEnabled;
@@ -638,10 +675,12 @@ void ContactEntryListFragment::ConfigureVerticalScrollbar()
             && (IsSectionHeaderDisplayEnabled(&isSectionEnabled), isSectionEnabled);
 
     if (mListView != NULL) {
-        mListView->SetFastScrollEnabled(hasScrollbar);
-        mListView->SetFastScrollAlwaysVisible(hasScrollbar);
-        mListView->SetVerticalScrollbarPosition(mVerticalScrollbarPosition);
-        mListView->SetScrollBarStyle(IListView::SCROLLBARS_OUTSIDE_OVERLAY);
+        AutoPtr<IAbsListView> absListView  = IAbsListView::Probe(mListView);
+        absListView->SetFastScrollEnabled(hasScrollbar);
+        absListView->SetFastScrollAlwaysVisible(hasScrollbar);
+        AutoPtr<IView> view = IView::Probe(mListView);
+        view->SetVerticalScrollbarPosition(mVerticalScrollbarPosition);
+        view->SetScrollBarStyle(IView::SCROLLBARS_OUTSIDE_OVERLAY);
     }
 }
 
@@ -724,7 +763,8 @@ void ContactEntryListFragment::SetSearchMode(
         if (mAdapter != NULL) {
             mAdapter->SetSearchMode(flag);
 
-            mAdapter->ClearPartitions();
+            // TODO: ContactEntryListAdapter
+            // mAdapter->ClearPartitions();
             if (!flag) {
                 // If we are switching from search to regular display, remove all directory
                 // partitions after default one, assuming they are remote directories which
@@ -735,10 +775,9 @@ void ContactEntryListFragment::SetSearchMode(
         }
 
         if (mListView != NULL) {
-            mListView->SetFastScrollEnabled(!flag);
+            IAbsListView::Probe(mListView)->SetFastScrollEnabled(!flag);
         }
     }
-    return NOERROR;
 }
 
 ECode ContactEntryListFragment::IsSearchMode(
@@ -765,11 +804,11 @@ ECode ContactEntryListFragment::SetQueryString(
         if (mShowEmptyListForEmptyQuery && mAdapter != NULL && mListView != NULL) {
             if (TextUtils::IsEmpty(mQueryString)) {
                 // Restore the adapter if the query used to be empty.
-                mListView->SetAdapter(mAdapter);
+                IAdapterView::Probe(mListView)->SetAdapter(IAdapter::Probe(mAdapter));
             }
             else if (TextUtils::IsEmpty(queryString)) {
                 // Instantly clear the list view if the new query is empty.
-                mListView->SetAdapter(NULL);
+                IAdapterView::Probe(mListView)->SetAdapter(NULL);
             }
         }
 
@@ -871,16 +910,17 @@ ECode ContactEntryListFragment::SetDirectoryResultLimit(
 Boolean ContactEntryListFragment::LoadPreferences()
 {
     Boolean changed = FALSE;
-    if (GetContactNameDisplayOrder() != mContactsPrefs->GetDisplayOrder()) {
-        SetContactNameDisplayOrder(mContactsPrefs->GetDisplayOrder());
-        changed = TRUE;
-    }
+    // TODO: no ContactsPreferences
+    // if (GetContactNameDisplayOrder() != mContactsPrefs->GetDisplayOrder()) {
+    //     SetContactNameDisplayOrder(mContactsPrefs->GetDisplayOrder());
+    //     changed = TRUE;
+    // }
 
-    Int32 sort;
-    if (GetSortOrder(&sort), sort != mContactsPrefs->GetSortOrder()) {
-        SetSortOrder(mContactsPrefs->GetSortOrder());
-        changed = TRUE;
-    }
+    // Int32 sort;
+    // if (GetSortOrder(&sort), sort != mContactsPrefs->GetSortOrder()) {
+    //     SetSortOrder(mContactsPrefs->GetSortOrder());
+    //     changed = TRUE;
+    // }
 
     return changed;
 }
@@ -898,12 +938,15 @@ ECode ContactEntryListFragment::OnCreateView(
     IsSearchMode(&searchMode);
     mAdapter->SetSearchMode(searchMode);
     mAdapter->ConfigureDefaultPartition(FALSE, searchMode);
-    mAdapter->SetPhotoLoader(mPhotoManager);
-    mListView->SetAdapter(IAdapter::Probe(mAdapter));
+    // TODO: no contactphotomanager
+    // mAdapter->SetPhotoLoader(mPhotoManager);
+    IAdapterView::Probe(mListView)->SetAdapter(IAdapter::Probe(mAdapter));
 
     if (IsSearchMode(&searchMode), !searchMode) {
-        mListView->SetFocusableInTouchMode(TRUE);
-        mListView->RequestFocus();
+        AutoPtr<IView> v = IView::Probe(mListView);
+        v->SetFocusableInTouchMode(TRUE);
+        Boolean result;
+        v->RequestFocus(&result);
     }
 
     *view = mView;
@@ -927,15 +970,16 @@ ECode ContactEntryListFragment::OnCreateView(
 
     AutoPtr<IView> emptyView;
     mView->FindViewById(Elastos::Droid::R::id::empty, (IView**)&emptyView);
+    AutoPtr<IAdapterView> adapterV = IAdapterView::Probe(mListView);
     if (emptyView != NULL) {
-        mListView->SetEmptyView(emptyView);
+        adapterV->SetEmptyView(emptyView);
     }
 
-    mListView->SetOnItemClickListener(IAdapterViewOnItemClickListener::Probe(this));
-    mListView->SetOnFocusChangeListener(IViewOnFocusChangeListener::Probe(this));
-    mListView->SetOnTouchListener(IViewOnTouchListener::Probe(this));
+    adapterV->SetOnItemClickListener(IAdapterViewOnItemClickListener::Probe(this));
+    IView::Probe(mListView)->SetOnFocusChangeListener(IViewOnFocusChangeListener::Probe(this));
+    adapterV->SetOnTouchListener(IViewOnTouchListener::Probe(this));
     Boolean isSearchMode;
-    isSearchMode(&isSearchMode);
+    IsSearchMode(&isSearchMode);
     mListView->SetFastScrollEnabled(!isSearchMode);
 
     // Tell list view to not show dividers. We'll do it ourself so that we can *not* show
@@ -943,7 +987,7 @@ ECode ContactEntryListFragment::OnCreateView(
     mListView->SetDividerHeight(0);
 
     // We manually save/restore the listview state
-    mListView->SetSaveEnabled(FALSE);
+    IView::Probe(mListView)->SetSaveEnabled(FALSE);
 
     ConfigureVerticalScrollbar();
     ConfigurePhotoLoader();
@@ -956,181 +1000,182 @@ ECode ContactEntryListFragment::OnCreateView(
 
     AutoPtr<IResources> res;
     GetResources((IResources**)&res);
+    // begin from this
     return ContactListViewUtils::ApplyCardPaddingToView(res, mListView, mView);
 }
 
-ECode ContactEntryListFragment::OnHiddenChanged(
-    /* [in] */ Boolean hidden)
-{
-    AnalyticsFragment::OnHiddenChanged(hidden);
-    AutoPtr<IActivity> a;
-    AutoPtr<IView> v;
-    if ((GetActivity((IActivity**)&a), a != NULL) && (GetView((IView**)&v), v != NULL) && !hidden) {
-        // If the padding was last applied when in a hidden state, it may have been applied
-        // incorrectly. Therefore we need to reapply it.
-        AutoPtr<IResources> res;
-        GetResources((IResources**)&res);
-        return ContactListViewUtils::ApplyCardPaddingToView(res, mListView, v);
-    }
-    return NOERROR;
-}
+// ECode ContactEntryListFragment::OnHiddenChanged(
+//     /* [in] */ Boolean hidden)
+// {
+//     AnalyticsFragment::OnHiddenChanged(hidden);
+//     AutoPtr<IActivity> a;
+//     AutoPtr<IView> v;
+//     if ((GetActivity((IActivity**)&a), a != NULL) && (GetView((IView**)&v), v != NULL) && !hidden) {
+//         // If the padding was last applied when in a hidden state, it may have been applied
+//         // incorrectly. Therefore we need to reapply it.
+//         AutoPtr<IResources> res;
+//         GetResources((IResources**)&res);
+//         return ContactListViewUtils::ApplyCardPaddingToView(res, mListView, v);
+//     }
+//     return NOERROR;
+// }
 
-void ContactEntryListFragment::ConfigurePhotoLoader()
-{
-    Boolean isEnabled;
-    if ((IsPhotoLoaderEnabled(&isEnabled), isEnabled) && mContext != NULL) {
-        if (mPhotoManager == NULL) {
-            mPhotoManager = ContactPhotoManager::GetInstance(mContext);
-        }
-        if (mListView != NULL) {
-            mListView->SetOnScrollListener(IAbsListViewOnScrollListener::Probe(this));
-        }
-        if (mAdapter != NULL) {
-            mAdapter->SetPhotoLoader(mPhotoManager);
-        }
-    }
-}
+// void ContactEntryListFragment::ConfigurePhotoLoader()
+// {
+//     Boolean isEnabled;
+//     if ((IsPhotoLoaderEnabled(&isEnabled), isEnabled) && mContext != NULL) {
+//         if (mPhotoManager == NULL) {
+//             mPhotoManager = ContactPhotoManager::GetInstance(mContext);
+//         }
+//         if (mListView != NULL) {
+//             mListView->SetOnScrollListener(IAbsListViewOnScrollListener::Probe(this));
+//         }
+//         if (mAdapter != NULL) {
+//             mAdapter->SetPhotoLoader(mPhotoManager);
+//         }
+//     }
+// }
 
-void ContactEntryListFragment::ConfigureAdapter()
-{
-    if (mAdapter == NULL) {
-        return;
-    }
+// void ContactEntryListFragment::ConfigureAdapter()
+// {
+//     if (mAdapter == NULL) {
+//         return;
+//     }
 
-    mAdapter->SetQuickContactEnabled(mQuickContactEnabled);
-    mAdapter->SetAdjustSelectionBoundsEnabled(mAdjustSelectionBoundsEnabled);
-    mAdapter->SetQuickCallButtonEnabled(mQuickCallButtonEnabled);
-    mAdapter->SetIncludeProfile(mIncludeProfile);
-    mAdapter->SetQueryString(mQueryString);
-    mAdapter->SetDirectorySearchMode(mDirectorySearchMode);
-    mAdapter->SetPinnedPartitionHeadersEnabled(FALSE);
-    mAdapter->SetContactNameDisplayOrder(mDisplayOrder);
-    mAdapter->SetSortOrder(mSortOrder);
-    mAdapter->SetSectionHeaderDisplayEnabled(mSectionHeaderDisplayEnabled);
-    mAdapter->SetSelectionVisible(mSelectionVisible);
-    mAdapter->SetDirectoryResultLimit(mDirectoryResultLimit);
-    mAdapter->SetDarkTheme(mDarkTheme);
-}
+//     mAdapter->SetQuickContactEnabled(mQuickContactEnabled);
+//     mAdapter->SetAdjustSelectionBoundsEnabled(mAdjustSelectionBoundsEnabled);
+//     mAdapter->SetQuickCallButtonEnabled(mQuickCallButtonEnabled);
+//     mAdapter->SetIncludeProfile(mIncludeProfile);
+//     mAdapter->SetQueryString(mQueryString);
+//     mAdapter->SetDirectorySearchMode(mDirectorySearchMode);
+//     mAdapter->SetPinnedPartitionHeadersEnabled(FALSE);
+//     mAdapter->SetContactNameDisplayOrder(mDisplayOrder);
+//     mAdapter->SetSortOrder(mSortOrder);
+//     mAdapter->SetSectionHeaderDisplayEnabled(mSectionHeaderDisplayEnabled);
+//     mAdapter->SetSelectionVisible(mSelectionVisible);
+//     mAdapter->SetDirectoryResultLimit(mDirectoryResultLimit);
+//     mAdapter->SetDarkTheme(mDarkTheme);
+// }
 
-ECode ContactEntryListFragment::OnScroll(
-    /* [in] */ IAbsListView* view,
-    /* [in] */ Int32 firstVisibleItem,
-    /* [in] */ Int32 visibleItemCount,
-    /* [in] */ Int32 totalItemCount)
-{
-    return NOERROR;
-}
+// ECode ContactEntryListFragment::OnScroll(
+//     /* [in] */ IAbsListView* view,
+//     /* [in] */ Int32 firstVisibleItem,
+//     /* [in] */ Int32 visibleItemCount,
+//     /* [in] */ Int32 totalItemCount)
+// {
+//     return NOERROR;
+// }
 
-ECode ContactEntryListFragment::OnScrollStateChanged(
-    /* [in] */ IAbsListView* view,
-    /* [in] */ Int32 scrollState)
-{
-    Boolean isEnabled;
-    if (scrollState == IAbsListViewOnScrollListener::SCROLL_STATE_FLING) {
-        mPhotoManager->Pause();
-    }
-    else if (IsPhotoLoaderEnabled(&isEnabled), isEnabled) {
-        mPhotoManager->Resume();
-    }
-    return NOERROR;
-}
+// ECode ContactEntryListFragment::OnScrollStateChanged(
+//     /* [in] */ IAbsListView* view,
+//     /* [in] */ Int32 scrollState)
+// {
+//     Boolean isEnabled;
+//     if (scrollState == IAbsListViewOnScrollListener::SCROLL_STATE_FLING) {
+//         mPhotoManager->Pause();
+//     }
+//     else if (IsPhotoLoaderEnabled(&isEnabled), isEnabled) {
+//         mPhotoManager->Resume();
+//     }
+//     return NOERROR;
+// }
 
-ECode ContactEntryListFragment::OnItemClick(
-    /* [in] */ IAdapterView* parent,
-    /* [in] */ IView* view,
-    /* [in] */ Int32 position,
-    /* [in] */ Int64 id)
-{
-    HideSoftKeyboard();
+// ECode ContactEntryListFragment::OnItemClick(
+//     /* [in] */ IAdapterView* parent,
+//     /* [in] */ IView* view,
+//     /* [in] */ Int32 position,
+//     /* [in] */ Int64 id)
+// {
+//     HideSoftKeyboard();
 
-    Int32 count;
-    mListView->GetHeaderViewsCount(&count);
-    Int32 adjPosition = position - count;
-    if (adjPosition >= 0) {
-        OnItemClick(adjPosition, id);
-    }
-    return NOERROR;
-}
+//     Int32 count;
+//     mListView->GetHeaderViewsCount(&count);
+//     Int32 adjPosition = position - count;
+//     if (adjPosition >= 0) {
+//         OnItemClick(adjPosition, id);
+//     }
+//     return NOERROR;
+// }
 
-void ContactEntryListFragment::HideSoftKeyboard()
-{
-    // Hide soft keyboard, if visible
-    AutoPtr<IInterface> service;
-    mContext->GetSystemService(IContext::INPUT_METHOD_SERVICE, (IInterface**)&service);
-    AutoPtr<IInputMethodManager> inputMethodManager = IInputMethodManager::Probe(service);
-    AutoPtr<IBinder> token;
-    mListView->GetWindowToken((IBinder**)&token);
-    inputMethodManager->HideSoftInputFromWindow(token, 0);
-}
+// void ContactEntryListFragment::HideSoftKeyboard()
+// {
+//     // Hide soft keyboard, if visible
+//     AutoPtr<IInterface> service;
+//     mContext->GetSystemService(IContext::INPUT_METHOD_SERVICE, (IInterface**)&service);
+//     AutoPtr<IInputMethodManager> inputMethodManager = IInputMethodManager::Probe(service);
+//     AutoPtr<IBinder> token;
+//     mListView->GetWindowToken((IBinder**)&token);
+//     inputMethodManager->HideSoftInputFromWindow(token, 0);
+// }
 
-ECode ContactEntryListFragment::OnFocusChange(
-    /* [in] */ IView* v,
-    /* [in] */ Boolean hasFocus)
-{
-    if (view == IView::Probe(mListView) && hasFocus) {
-        HideSoftKeyboard();
-    }
-    return NOERROR;
-}
+// ECode ContactEntryListFragment::OnFocusChange(
+//     /* [in] */ IView* v,
+//     /* [in] */ Boolean hasFocus)
+// {
+//     if (view == IView::Probe(mListView) && hasFocus) {
+//         HideSoftKeyboard();
+//     }
+//     return NOERROR;
+// }
 
-ECode ContactEntryListFragment::OnTouch(
-    /* [in] */ IView* view,
-    /* [in] */ IMotionEvent* event,
-    /* [out] */ Boolean* result)
-{
-    VALIDATE_NOT_NULL(result)
-    if (view == IView::Probe(mListView)) {
-        HideSoftKeyboard();
-    }
-    *result = FALSE;
-    return NOERROR;
-}
+// ECode ContactEntryListFragment::OnTouch(
+//     /* [in] */ IView* view,
+//     /* [in] */ IMotionEvent* event,
+//     /* [out] */ Boolean* result)
+// {
+//     VALIDATE_NOT_NULL(result)
+//     if (view == IView::Probe(mListView)) {
+//         HideSoftKeyboard();
+//     }
+//     *result = FALSE;
+//     return NOERROR;
+// }
 
-ECode ContactEntryListFragment::OnPause()
-{
-    AnalyticsFragment::OnPause();
-    RemovePendingDirectorySearchRequests();
-    return NOERROR;
-}
+// ECode ContactEntryListFragment::OnPause()
+// {
+//     AnalyticsFragment::OnPause();
+//     RemovePendingDirectorySearchRequests();
+//     return NOERROR;
+// }
 
-void ContactEntryListFragment::CompleteRestoreInstanceState()
-{
-    if (mListState != NULL) {
-        mListView->OnRestoreInstanceState(mListState);
-        mListState = NULL;
-    }
-}
+// void ContactEntryListFragment::CompleteRestoreInstanceState()
+// {
+//     if (mListState != NULL) {
+//         mListView->OnRestoreInstanceState(mListState);
+//         mListState = NULL;
+//     }
+// }
 
-ECode ContactEntryListFragment::SetDarkTheme(
-    /* [in] */ Boolean value)
-{
-    mDarkTheme = value;
-    if (mAdapter != NULL) mAdapter->SetDarkTheme(value);
-    return NOERROR;
-}
+// ECode ContactEntryListFragment::SetDarkTheme(
+//     /* [in] */ Boolean value)
+// {
+//     mDarkTheme = value;
+//     if (mAdapter != NULL) mAdapter->SetDarkTheme(value);
+//     return NOERROR;
+// }
 
-ECode ContactEntryListFragment::OnPickerResult(
-    /* [in] */ IIntent* data)
-{
-    Logger::E("ContactEntryListFragment", "Picker result handler is not implemented.");
-    return E_UNSUPPORTED_OPERATION_EXCEPTION;
-}
+// ECode ContactEntryListFragment::OnPickerResult(
+//     /* [in] */ IIntent* data)
+// {
+//     Logger::E("ContactEntryListFragment", "Picker result handler is not implemented.");
+//     return E_UNSUPPORTED_OPERATION_EXCEPTION;
+// }
 
-Int32 ContactEntryListFragment::GetDefaultVerticalScrollbarPosition()
-{
-    AutoPtr<ILocaleHelper> helper;
-    CLocaleHelper::AcquireSingleton((ILocaleHelper**)&helper);
-    AutoPtr<ILocale> locale;
-    helper->GetDefault((ILocale**)&locale);
-    Int32 layoutDirection = TextUtils::GetLayoutDirectionFromLocale(locale);
-    switch (layoutDirection) {
-        case IView::LAYOUT_DIRECTION_RTL:
-            return IView::SCROLLBAR_POSITION_LEFT;
-        case IView::LAYOUT_DIRECTION_LTR:
-        default:
-            return IView::SCROLLBAR_POSITION_RIGHT;
-    }
-}
+// Int32 ContactEntryListFragment::GetDefaultVerticalScrollbarPosition()
+// {
+//     AutoPtr<ILocaleHelper> helper;
+//     CLocaleHelper::AcquireSingleton((ILocaleHelper**)&helper);
+//     AutoPtr<ILocale> locale;
+//     helper->GetDefault((ILocale**)&locale);
+//     Int32 layoutDirection = TextUtils::GetLayoutDirectionFromLocale(locale);
+//     switch (layoutDirection) {
+//         case IView::LAYOUT_DIRECTION_RTL:
+//             return IView::SCROLLBAR_POSITION_LEFT;
+//         case IView::LAYOUT_DIRECTION_LTR:
+//         default:
+//             return IView::SCROLLBAR_POSITION_RIGHT;
+//     }
+// }
 
 } // List
 } // Common

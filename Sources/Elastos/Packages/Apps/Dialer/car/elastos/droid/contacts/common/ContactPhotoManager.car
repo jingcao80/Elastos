@@ -1,0 +1,21 @@
+
+module
+{
+
+    namespace Elastos{
+    namespace Droid {
+    namespace Contacts {
+    namespace Common {
+
+    interface IContactPhotoManagerDefaultImageRequest{
+    }
+
+    interface IContactPhotoManager {
+    }
+
+    } // Common
+    } // Contacts
+    } // Droid
+    } // Elastos
+
+}
