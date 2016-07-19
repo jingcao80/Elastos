@@ -1,7 +1,21 @@
 #include "Elastos.CoreLibrary.Utility.Concurrent.h"
 #include "Elastos.Droid.Content.h"
 #include "Elastos.Droid.Internal.h"
+#include "elastos/droid/os/AsyncResult.h"
+#include "elastos/droid/os/CRegistrant.h"
+#include "elastos/droid/os/RegistrantList.h"
 #include "elastos/droid/internal/telephony/uicc/IccRecords.h"
+#include "elastos/core/CoreUtils.h"
+#include <elastos/utility/logging/Logger.h>
+
+using Elastos::Droid::Os::AsyncResult;
+using Elastos::Droid::Os::Registrant;
+using Elastos::Droid::Os::CRegistrant;
+using Elastos::Droid::Os::IRegistrant;
+using Elastos::Droid::Os::RegistrantList;
+using Elastos::Core::CoreUtils;
+using Elastos::Utility::Concurrent::Atomic::CAtomicBoolean;
+using Elastos::Utility::Logging::Logger;
 
 namespace Elastos {
 namespace Droid {
@@ -24,6 +38,24 @@ const Int32 IccRecords::EVENT_AKA_AUTHENTICATE_DONE;
 
 IccRecords::IccRecords()
 {
+    CAtomicBoolean::New(FALSE, (IAtomicBoolean**)&mDestroyed);
+
+    mRecordsLoadedRegistrants = new RegistrantList();
+    mImsiReadyRegistrants = new RegistrantList();
+    mRecordsEventsRegistrants = new RegistrantList();
+    mNewSmsRegistrants = new RegistrantList();
+    mNetworkSelectionModeAutomaticRegistrants = new RegistrantList();
+
+    mRecordsToLoad = 0;
+
+    mRecordsRequested = FALSE;
+    mIsVoiceMailFixed = FALSE;
+
+    mMncLength = UNINITIALIZED;
+    mMailboxIndex = 0; // 0 is no mailbox dailing number associated
+    mSmsCountOnIcc = -1;
+
+    mOEMHookSimRefresh = FALSE;
 }
 
 ECode IccRecords::constructor(
@@ -100,9 +132,7 @@ ECode IccRecords::Dispose()
 
 ECode IccRecords::RecordsRequired()
 {
-    // ==================before translated======================
     // return;
-    assert(0);
     return NOERROR;
 }
 
@@ -110,9 +140,8 @@ ECode IccRecords::GetAdnCache(
     /* [out] */ IAdnRecordCache** result)
 {
     VALIDATE_NOT_NULL(result);
-    // ==================before translated======================
-    // return mAdnCache;
-    assert(0);
+    *result = mAdnCache;
+    REFCOUNT_ADD(*result);
     return NOERROR;
 }
 
@@ -120,9 +149,7 @@ ECode IccRecords::GetIccId(
     /* [out] */ String* result)
 {
     VALIDATE_NOT_NULL(result);
-    // ==================before translated======================
-    // return mIccId;
-    assert(0);
+    *result = mIccId;
     return NOERROR;
 }
 
@@ -131,35 +158,35 @@ ECode IccRecords::RegisterForRecordsLoaded(
     /* [in] */ Int32 what,
     /* [in] */ IInterface* obj)
 {
-    // ==================before translated======================
-    // if (mDestroyed.get()) {
-    //     return;
-    // }
-    //
-    // for (int i = mRecordsLoadedRegistrants.size() - 1; i >= 0 ; i--) {
-    //     Registrant  r = (Registrant) mRecordsLoadedRegistrants.get(i);
-    //     Handler rH = r.getHandler();
-    //
-    //     if (rH != null && rH == h) {
-    //         return;
-    //     }
-    // }
-    // Registrant r = new Registrant(h, what, obj);
-    // mRecordsLoadedRegistrants.add(r);
-    //
-    // if (mRecordsToLoad == 0 && mRecordsRequested == true) {
-    //     r.notifyRegistrant(new AsyncResult(null, null, null));
-    // }
-    assert(0);
+    Boolean bv;
+    if (mDestroyed->Get(&bv), bv) {
+        return NOERROR;
+    }
+
+    for (Int32 i = mRecordsLoadedRegistrants->GetSize() - 1; i >= 0 ; i--) {
+        AutoPtr<IInterface> obj = mRecordsLoadedRegistrants->Get(i);
+        Registrant*  r = (Registrant*) IRegistrant::Probe(obj);
+        AutoPtr<IHandler> rH;
+        r->GetHandler((IHandler**)&rH);
+
+        if (rH != NULL && rH.Get() == h) {//TODO is the == right??
+            return NOERROR;
+        }
+    }
+    AutoPtr<IRegistrant> r;
+    CRegistrant::New(h, what, obj, (IRegistrant**)&r);
+    mRecordsLoadedRegistrants->Add(r);
+
+    if (mRecordsToLoad == 0 && mRecordsRequested == TRUE) {
+        r->NotifyRegistrant(new AsyncResult(NULL, NULL, NULL));
+    }
     return NOERROR;
 }
 
 ECode IccRecords::UnregisterForRecordsLoaded(
     /* [in] */ IHandler* h)
 {
-    // ==================before translated======================
-    // mRecordsLoadedRegistrants.remove(h);
-    assert(0);
+    mRecordsLoadedRegistrants->Remove(h);
     return NOERROR;
 }
 
@@ -168,27 +195,25 @@ ECode IccRecords::RegisterForImsiReady(
     /* [in] */ Int32 what,
     /* [in] */ IInterface* obj)
 {
-    // ==================before translated======================
-    // if (mDestroyed.get()) {
-    //     return;
-    // }
-    //
-    // Registrant r = new Registrant(h, what, obj);
-    // mImsiReadyRegistrants.add(r);
-    //
-    // if (mImsi != null) {
-    //     r.notifyRegistrant(new AsyncResult(null, null, null));
-    // }
-    assert(0);
+    Boolean bv;
+    if (mDestroyed->Get(&bv), bv) {
+        return NOERROR;
+    }
+
+    AutoPtr<IRegistrant> r;
+    CRegistrant::New(h, what, obj, (IRegistrant**)&r);
+    mImsiReadyRegistrants->Add(r);
+
+    if (mImsi != NULL) {
+        r->NotifyRegistrant(new AsyncResult(NULL, NULL, NULL));
+    }
     return NOERROR;
 }
 
 ECode IccRecords::UnregisterForImsiReady(
     /* [in] */ IHandler* h)
 {
-    // ==================before translated======================
-    // mImsiReadyRegistrants.remove(h);
-    assert(0);
+    mImsiReadyRegistrants->Remove(h);
     return NOERROR;
 }
 
@@ -197,24 +222,21 @@ ECode IccRecords::RegisterForRecordsEvents(
     /* [in] */ Int32 what,
     /* [in] */ IInterface* obj)
 {
-    // ==================before translated======================
-    // Registrant r = new Registrant (h, what, obj);
-    // mRecordsEventsRegistrants.add(r);
-    //
+    AutoPtr<IRegistrant> r;
+    CRegistrant::New(h, what, obj, (IRegistrant**)&r);
+    mRecordsEventsRegistrants->Add(r);
+
     // /* Notify registrant of all the possible events. This is to make sure registrant is
     // notified even if event occurred in the past. */
-    // r.notifyResult(EVENT_MWI);
-    // r.notifyResult(EVENT_CFI);
-    assert(0);
+    r->NotifyResult(CoreUtils::Convert(EVENT_MWI));
+    r->NotifyResult(CoreUtils::Convert(EVENT_CFI));
     return NOERROR;
 }
 
 ECode IccRecords::UnregisterForRecordsEvents(
     /* [in] */ IHandler* h)
 {
-    // ==================before translated======================
-    // mRecordsEventsRegistrants.remove(h);
-    assert(0);
+    mRecordsEventsRegistrants->Remove(h);
     return NOERROR;
 }
 
@@ -223,19 +245,16 @@ ECode IccRecords::RegisterForNewSms(
     /* [in] */ Int32 what,
     /* [in] */ IInterface* obj)
 {
-    // ==================before translated======================
-    // Registrant r = new Registrant (h, what, obj);
-    // mNewSmsRegistrants.add(r);
-    assert(0);
+    AutoPtr<IRegistrant> r;
+    CRegistrant::New(h, what, obj, (IRegistrant**)&r);
+    mNewSmsRegistrants->Add(r);
     return NOERROR;
 }
 
 ECode IccRecords::UnregisterForNewSms(
     /* [in] */ IHandler* h)
 {
-    // ==================before translated======================
-    // mNewSmsRegistrants.remove(h);
-    assert(0);
+    mNewSmsRegistrants->Remove(h);
     return NOERROR;
 }
 
@@ -244,19 +263,16 @@ ECode IccRecords::RegisterForNetworkSelectionModeAutomatic(
     /* [in] */ Int32 what,
     /* [in] */ IInterface* obj)
 {
-    // ==================before translated======================
-    // Registrant r = new Registrant (h, what, obj);
-    // mNetworkSelectionModeAutomaticRegistrants.add(r);
-    assert(0);
+    AutoPtr<IRegistrant> r;
+    CRegistrant::New(h, what, obj, (IRegistrant**)&r);
+    mNetworkSelectionModeAutomaticRegistrants->Add(r);
     return NOERROR;
 }
 
 ECode IccRecords::UnregisterForNetworkSelectionModeAutomatic(
     /* [in] */ IHandler* h)
 {
-    // ==================before translated======================
-    // mNetworkSelectionModeAutomaticRegistrants.remove(h);
-    assert(0);
+    mNetworkSelectionModeAutomaticRegistrants->Remove(h);
     return NOERROR;
 }
 
@@ -264,19 +280,15 @@ ECode IccRecords::GetIMSI(
     /* [out] */ String* result)
 {
     VALIDATE_NOT_NULL(result);
-    // ==================before translated======================
-    // return null;
-    assert(0);
+    *result = String(NULL);
     return NOERROR;
 }
 
 ECode IccRecords::SetImsi(
     /* [in] */ const String& imsi)
 {
-    // ==================before translated======================
-    // mImsi = imsi;
-    // mImsiReadyRegistrants.notifyRegistrants();
-    assert(0);
+    mImsi = imsi;
+    mImsiReadyRegistrants->NotifyRegistrants();
     return NOERROR;
 }
 
@@ -284,9 +296,7 @@ ECode IccRecords::GetMsisdnNumber(
     /* [out] */ String* result)
 {
     VALIDATE_NOT_NULL(result);
-    // ==================before translated======================
-    // return mMsisdn;
-    assert(0);
+    *result = mMsisdn;
     return NOERROR;
 }
 
@@ -294,9 +304,7 @@ ECode IccRecords::GetGid1(
     /* [out] */ String* result)
 {
     VALIDATE_NOT_NULL(result);
-    // ==================before translated======================
-    // return null;
-    assert(0);
+    *result = String(NULL);
     return NOERROR;
 }
 
@@ -344,7 +352,9 @@ ECode IccRecords::GetVoiceMailNumber(
 ECode IccRecords::GetServiceProviderName(
     /* [out] */ String* result)
 {
+    Logger::E("IccRecords", "TODO GetServiceProviderName ");
     VALIDATE_NOT_NULL(result);
+    *result = String("leliangTest");
     // ==================before translated======================
     // String providerName = mSpn;
     //
@@ -369,7 +379,6 @@ ECode IccRecords::GetServiceProviderName(
     // }
     // log("getServiceProviderName: providerName=" + providerName);
     // return providerName;
-    assert(0);
     return NOERROR;
 }
 

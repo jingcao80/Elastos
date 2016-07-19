@@ -434,6 +434,7 @@ void SubInfoRecordUpdater::UpdateIccAvailability(
         newCard->GetCardState(&newState);
     }
     CardState oldState = (*sCardState)[slotId];
+    Logger::E("SubInfoRecordUpdater", "TODO UpdateIccAvailability does the oldState is right???");
     (*sCardState)[slotId] = newState;
     Logd(String("Slot[") + IntegralToString::ToString(slotId) + String("]: New Card State = ")
             + IntegralToString::ToString(newState) + String(" ") + String("Old Card State = ") + IntegralToString::ToString(oldState));

@@ -2,6 +2,9 @@
 #include "Elastos.Droid.Content.h"
 #include "Elastos.Droid.Internal.h"
 #include "elastos/droid/internal/telephony/uicc/SIMRecords.h"
+#include <elastos/utility/logging/Logger.h>
+
+using Elastos::Utility::Logging::Logger;
 
 namespace Elastos {
 namespace Droid {
@@ -391,9 +394,7 @@ ECode SIMRecords::IsCallForwardStatusStored(
     /* [out] */ Boolean* result)
 {
     VALIDATE_NOT_NULL(result);
-    // ==================before translated======================
-    // return (mEfCfis != null) || (mEfCff != null);
-    assert(0);
+    *result = (mEfCfis != NULL) || (mEfCff != NULL);
     return NOERROR;
 }
 
@@ -1151,6 +1152,8 @@ ECode SIMRecords::GetDisplayRule(
     /* [out] */ Int32* result)
 {
     VALIDATE_NOT_NULL(result);
+    Logger::E("SIMRecords", "TODO GetDisplayRule");
+    *result = SPN_RULE_SHOW_SPN;//TODO
     // ==================before translated======================
     // int rule;
     // if ((mContext != null) && mContext.getResources().getBoolean(
@@ -1180,7 +1183,6 @@ ECode SIMRecords::GetDisplayRule(
     //     }
     // }
     // return rule;
-    assert(0);
     return NOERROR;
 }
 
