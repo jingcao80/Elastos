@@ -6,6 +6,7 @@ INCLUDES += $(MAKEDIR)/../../../../
 INCLUDES += ../../../../
 
 SOURCES += BaseFragment.cpp
+SOURCES += CAnswerFragment.cpp
 SOURCES += Call.cpp
 SOURCES += CCallButtonFragment.cpp
 SOURCES += CCallCardFragment.cpp

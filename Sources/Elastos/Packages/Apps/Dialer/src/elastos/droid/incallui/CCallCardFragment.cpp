@@ -13,6 +13,7 @@
 #include <elastos/droid/text/TextUtils.h>
 #include <elastos/droid/view/animation/AnimationUtils.h>
 #include <elastos/core/CoreUtils.h>
+#include <elastos/core/Math.h>
 #include <elastos/utility/logging/Logger.h>
 
 using Elastos::Droid::Animation::CAnimatorSet;
@@ -21,6 +22,7 @@ using Elastos::Droid::Animation::IObjectAnimator;
 using Elastos::Droid::Animation::IObjectAnimatorHelper;
 using Elastos::Droid::Animation::CObjectAnimatorHelper;
 using Elastos::Droid::Animation::ITimeInterpolator;
+using Elastos::Droid::Graphics::CPoint;
 using Elastos::Droid::Telecomm::Telecom::IVideoProfileVideoStateHelper;
 using Elastos::Droid::Telecomm::Telecom::CVideoProfileVideoStateHelper;
 using Elastos::Droid::Telephony::IPhoneNumberUtils;
@@ -29,6 +31,8 @@ using Elastos::Droid::Text::TextUtils;
 using Elastos::Droid::Utility::IDisplayMetrics;
 using Elastos::Droid::View::IViewParent;
 using Elastos::Droid::View::IViewPropertyAnimator;
+using Elastos::Droid::View::IViewAnimationUtilsHelper;
+using Elastos::Droid::View::CViewAnimationUtilsHelper;
 using Elastos::Droid::View::EIID_IOnGlobalLayoutListener;
 using Elastos::Droid::View::EIID_IOnPreDrawListener;
 using Elastos::Droid::View::EIID_IViewOnClickListener;
@@ -1291,23 +1295,73 @@ AutoPtr<IAnimator> CCallCardFragment::GetShrinkAnimator(
 AutoPtr<IAnimator> CCallCardFragment::GetRevealAnimator(
     /* [in] */ IPoint* touchPoint)
 {
-    final Activity activity = getActivity();
-    final View view  = activity.getWindow().getDecorView();
-    final Display display = activity.getWindowManager().getDefaultDisplay();
-    final Point size = new Point();
-    display.getSize(size);
+    AutoPtr<IActivity> activity;
+    GetActivity((IActivity**)&activity);
+    AutoPtr<IWindow> window;
+    activity->GetWindow((IWindow**)&window);
+    AutoPtr<IView> view;
+    window->GetDecorView((IView**)&view);
+    AutoPtr<IWindowManager> wm;
+    activity->GetWindowManager((IWindowManager**)&wm);
+    AutoPtr<IDisplay> display;
+    wm->GetDefaultDisplay((IDisplay**)&display);
+    AutoPtr<IPoint> size;
+    CPoint::New((IPoint**)&size);
+    display->GetSize(size);
 
-    int startX = size.x / 2;
-    int startY = size.y / 2;
-    if (touchPoint != null) {
-        startX = touchPoint.x;
-        startY = touchPoint.y;
+    Int32 sx, sy;
+    size->Get(&sx, &sy);
+    Int32 startX = sx / 2;
+    Int32 startY = sy / 2;
+    if (touchPoint != NULL) {
+        touchPoint->Get(&startX, &startY);
     }
 
-    final Animator valueAnimator = ViewAnimationUtils.createCircularReveal(view,
-            startX, startY, 0, Math.max(size.x, size.y));
-    valueAnimator.setDuration(mRevealAnimationDuration);
+    AutoPtr<IViewAnimationUtilsHelper> helper;
+    CViewAnimationUtilsHelper::AcquireSingleton((IViewAnimationUtilsHelper**)&helper);
+    AutoPtr<IAnimator> valueAnimator;
+    helper->CreateCircularReveal(view,
+            startX, startY, 0, Elastos::Core::Math::Max(sx, sy), (IAnimator**)&valueAnimator);
+    valueAnimator->SetDuration(mRevealAnimationDuration);
     return valueAnimator;
+}
+
+void CCallCardFragment::AssignTranslateAnimation(
+    /* [in] */ IView* view,
+    /* [in] */ Int32 offset)
+{
+    view->SetTranslationY(mTranslationOffset * offset);
+    AutoPtr<IViewPropertyAnimator> vpAnimator;
+    view->Animate((IViewPropertyAnimator**)&vpAnimator);
+    vpAnimator->TranslationY(0);
+    vpAnimator->Alpha(1);
+    vpAnimator->WithLayer();
+    vpAnimator->SetDuration(mShrinkAnimationDuration);
+    vpAnimator->SetInterpolator(ITimeInterpolator::Probe(AnimUtils::EASE_IN));
+}
+
+void CCallCardFragment::SetViewStatePostAnimation(
+    /* [in] */ IView* view)
+{
+    view->SetTranslationY(0);
+    view->SetAlpha(1);
+}
+
+void CCallCardFragment::SetViewStatePostAnimation(
+    /* [in] */ IViewOnLayoutChangeListener* layoutChangeListener)
+{
+    SetViewStatePostAnimation(mCallButtonsContainer);
+    SetViewStatePostAnimation(IView::Probe(mCallStateLabel));
+    SetViewStatePostAnimation(IView::Probe(mPrimaryName));
+    SetViewStatePostAnimation(IView::Probe(mCallTypeLabel));
+    SetViewStatePostAnimation(mCallNumberAndLabel);
+    SetViewStatePostAnimation(IView::Probe(mCallStateIcon));
+
+    mPrimaryCallCardContainer->RemoveOnLayoutChangeListener(layoutChangeListener);
+    AutoPtr<ILayoutTransition> lt;
+    mPrimaryCallInfo->GetLayoutTransition((ILayoutTransition**)&lt);
+    lt->EnableTransitionType(ILayoutTransition::CHANGING);
+    mFloatingActionButtonController->ScaleIn(AnimUtils::NO_DELAY);
 }
 
 } // namespace InCallUI

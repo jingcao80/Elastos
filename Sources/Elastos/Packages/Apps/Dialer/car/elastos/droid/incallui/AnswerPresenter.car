@@ -1,0 +1,35 @@
+
+module
+{
+    using interface Elastos.Droid.Content.IContext;
+    using interface Elastos.Utility.IList;
+
+    namespace Elastos {
+    namespace Droid {
+    namespace InCallUI {
+
+    /**
+     * @Involve
+     * interface IUi
+     */
+    [local]
+    interface IAnswerUi {
+        ShowAnswerUi(
+            [in] Boolean show);
+
+        ShowTargets(
+            [in] Int32 targetSet);
+
+        ShowMessageDialog();
+
+        ConfigureMessageDialog(
+            [in] IList* textResponses);
+
+        GetContext(
+            [out] IContext** ctx);
+    }
+
+    } // namespace InCallUI
+    } // namespace Droid
+    } // namespace Elastos
+}

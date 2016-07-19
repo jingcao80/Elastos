@@ -1,0 +1,24 @@
+
+module
+{
+    using interface Elastos.Droid.Content.IContext;
+
+    namespace Elastos {
+    namespace Droid {
+    namespace InCallUI {
+
+    [local]
+    interface IAnswerListener {
+        OnAnswer(
+            [in] Int32 videoState,
+            [in] IContext* context);
+
+        OnDecline();
+
+        OnText();
+    }
+
+    } // namespace InCallUI
+    } // namespace Droid
+    } // namespace Elastos
+}

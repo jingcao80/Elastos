@@ -3,6 +3,7 @@
 #define __ELASTOS_DROID_INCALLUI_CINCALLACTIVITY_H__
 
 #include "_Elastos_Droid_InCallUI_CInCallActivity.h"
+#include "elastos/droid/incallui/CAnswerFragment.h"
 #include "elastos/droid/incallui/CCallButtonFragment.h"
 #include "elastos/droid/incallui/CCallCardFragment.h"
 #include <elastos/droid/app/Activity.h>
@@ -32,9 +33,9 @@ public:
     static const String NEW_OUTGOING_CALL;
 
 private:
-   AutoPtr<CCallButtonFragment> mCallButtonFragment;
-   AutoPtr<CCallCardFragment> mCallCardFragment;
-//    private AnswerFragment mAnswerFragment;
+    AutoPtr<CCallButtonFragment> mCallButtonFragment;
+    AutoPtr<CCallCardFragment> mCallCardFragment;
+    AutoPtr<CAnswerFragment> mAnswerFragment;
 //    private DialpadFragment mDialpadFragment;
 //    private ConferenceManagerFragment mConferenceManagerFragment;
 //    private FragmentManager mChildFragmentManager;

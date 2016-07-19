@@ -1,6 +1,8 @@
 
 module
 {
+    interface Elastos.Droid.InCallUI.ICall;
+
     namespace Elastos {
     namespace Droid {
     namespace InCallUI {
@@ -13,6 +15,44 @@ module
      * interface IInCallPhoneListener
      */
     interface ICallList {
+    }
+
+    /**
+     * Listener interface for any class that wants to be notified of changes
+     * to the call list.
+     */
+    interface ICallListListener {
+        /**
+         * Called when a new incoming call comes in.
+         * This is the only method that gets called for incoming calls. Listeners
+         * that want to perform an action on incoming call should respond in this method
+         * because {@link #onCallListChange} does not automatically get called for
+         * incoming calls.
+         */
+        OnIncomingCall(
+            [in] ICall* call);
+
+        /**
+         * Called anytime there are changes to the call list.  The change can be switching call
+         * states, updating information, etc. This method will NOT be called for new incoming
+         * calls and for calls that switch to disconnected state. Listeners must add actions
+         * to those method implementations if they want to deal with those actions.
+         */
+        OnCallListChange(
+            [in] ICallList* callList);
+
+        /**
+         * Called when a call switches to the disconnected state.  This is the only method
+         * that will get called upon disconnection.
+         */
+        OnDisconnect(
+            [in] ICall* call);
+    }
+
+    interface ICallUpdateListener {
+        // TODO: refactor and limit arg to be call state.  Caller info is not needed.
+        OnCallChanged(
+            [in] ICall* call);
     }
 
     } // namespace InCallUI
