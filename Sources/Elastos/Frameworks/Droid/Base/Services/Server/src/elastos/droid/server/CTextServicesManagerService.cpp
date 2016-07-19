@@ -1,5 +1,9 @@
 
+#include <Elastos.Droid.Provider.h>
+#include <Elastos.CoreLibrary.IO.h>
+#include <Elastos.CoreLibrary.Utility.h>
 #include "elastos/droid/server/CTextServicesManagerService.h"
+#include "elastos/droid/server/CTSMSUserSwitchObserver.h"
 #include "elastos/droid/app/ActivityManagerNative.h"
 #include "elastos/droid/app/AppGlobals.h"
 #include "elastos/droid/os/Binder.h"
@@ -10,9 +14,6 @@
 #include <elastos/utility/logging/Slogger.h>
 #include <elastos/core/StringUtils.h>
 #include <elastos/core/AutoLock.h>
-#include <Elastos.Droid.Provider.h>
-#include <Elastos.CoreLibrary.IO.h>
-#include <Elastos.CoreLibrary.Utility.h>
 
 using Elastos::Droid::Manifest;
 using Elastos::Droid::Os::IProcess;
@@ -57,17 +58,26 @@ namespace Server {
 const String CTextServicesManagerService::TAG("CTextServicesManagerService");
 const Boolean CTextServicesManagerService::DBG = FALSE;
 
-CTextServicesManagerService::CTSMSUserSwitchObserver::CTSMSUserSwitchObserver(
-    /* [in] */ CTextServicesManagerService* owner)
-    : mHost(owner)
+//===============================================================================
+//                  CTextServicesManagerService::TSMSUserSwitchObserver
+//===============================================================================
+
+CAR_INTERFACE_IMPL_2(CTextServicesManagerService::TSMSUserSwitchObserver, Object, IIUserSwitchObserver, IBinder);
+
+CTextServicesManagerService::TSMSUserSwitchObserver::TSMSUserSwitchObserver()
 {}
 
-CTextServicesManagerService::CTSMSUserSwitchObserver::~CTSMSUserSwitchObserver()
+CTextServicesManagerService::TSMSUserSwitchObserver::~TSMSUserSwitchObserver()
 {}
 
-CAR_INTERFACE_IMPL(CTextServicesManagerService::CTSMSUserSwitchObserver, Object, IIUserSwitchObserver);
+ECode CTextServicesManagerService::TSMSUserSwitchObserver::constructor(
+    /* [in] */ IITextServicesManager* tsm)
+{
+    mHost = (CTextServicesManagerService*)tsm;
+    return NOERROR;
+}
 
-ECode CTextServicesManagerService::CTSMSUserSwitchObserver::OnUserSwitching(
+ECode CTextServicesManagerService::TSMSUserSwitchObserver::OnUserSwitching(
     /* [in] */ Int32 newUserId,
     /* [in] */ IIRemoteCallback* reply)
 {
@@ -85,13 +95,24 @@ ECode CTextServicesManagerService::CTSMSUserSwitchObserver::OnUserSwitching(
     return NOERROR;
 }
 
-ECode CTextServicesManagerService::CTSMSUserSwitchObserver::OnUserSwitchComplete(
+ECode CTextServicesManagerService::TSMSUserSwitchObserver::OnUserSwitchComplete(
     /* [in] */ Int32 newUserId)
 {
     Slogger::I("CTextServicesManagerService::CTSMSUserSwitchObserver", "onUserSwitchComplete");
     return NOERROR;
 }
 
+ECode CTextServicesManagerService::TSMSUserSwitchObserver::ToString(
+    /* [out] */ String* str)
+{
+    VALIDATE_NOT_NULL(str)
+    *str = "CTextServicesManagerService::TSMSUserSwitchObserver";
+    return NOERROR;
+}
+
+//===============================================================================
+//                  CTextServicesManagerService::TextServicesMonitor
+//===============================================================================
 
 CTextServicesManagerService::TextServicesMonitor::TextServicesMonitor(
     /* [in] */ CTextServicesManagerService* owner)
@@ -152,6 +173,10 @@ Boolean CTextServicesManagerService::TextServicesMonitor::IsChangingPackagesOfCu
 
     return result;
 }
+
+//===============================================================================
+//                  CTextServicesManagerService::InternalServiceConnection
+//===============================================================================
 
 CTextServicesManagerService::InternalServiceConnection::InternalServiceConnection(
     /* [in] */ const String& id,
@@ -226,6 +251,10 @@ ECode CTextServicesManagerService::InternalServiceConnection::ToString(
     *str = "InternalServiceConnection";
     return NOERROR;
 }
+
+//===============================================================================
+//                  CTextServicesManagerService::TextServicesSettings
+//===============================================================================
 
 CTextServicesManagerService::TextServicesSettings::TextServicesSettings(
     /* [in] */ IContentResolver* resolver,
@@ -323,6 +352,10 @@ ECode CTextServicesManagerService::TextServicesSettings::IsSpellCheckerEnabled(
     *enabled = (value == 1);
     return NOERROR;
 }
+
+//===============================================================================
+//                  CTextServicesManagerService::SpellCheckerBindGroup
+//===============================================================================
 
 CTextServicesManagerService::SpellCheckerBindGroup::SpellCheckerBindGroup(
     /* [in] */ InternalServiceConnection* connection,
@@ -523,6 +556,10 @@ ECode CTextServicesManagerService::SpellCheckerBindGroup::CleanLocked()
     return ec;
 }
 
+//===============================================================================
+//                  CTextServicesManagerService::InternalDeathRecipient
+//===============================================================================
+
 CAR_INTERFACE_IMPL(CTextServicesManagerService::InternalDeathRecipient, Object, IProxyDeathRecipient)
 
 CTextServicesManagerService::InternalDeathRecipient::InternalDeathRecipient(
@@ -557,6 +594,10 @@ ECode CTextServicesManagerService::InternalDeathRecipient::ProxyDied()
     return mGroup->RemoveListener(mScListener);
 }
 
+//===============================================================================
+//                  CTextServicesManagerService
+//===============================================================================
+
 CAR_INTERFACE_IMPL_2(CTextServicesManagerService, Object, IITextServicesManager, IBinder)
 
 CAR_OBJECT_IMPL(CTextServicesManagerService)
@@ -568,8 +609,9 @@ ECode CTextServicesManagerService::constructor(
     mContext = context;
     Int32 userId = IUserHandle::USER_OWNER;
     //try {
-    AutoPtr<CTSMSUserSwitchObserver> userSwithchObserver = new CTSMSUserSwitchObserver(this);
-    ActivityManagerNative::GetDefault()->RegisterUserSwitchObserver((IIUserSwitchObserver*)userSwithchObserver);
+    AutoPtr<IIUserSwitchObserver> userSwithchObserver;
+    CTSMSUserSwitchObserver::New((IITextServicesManager*)this, (IIUserSwitchObserver**)&userSwithchObserver);
+    ActivityManagerNative::GetDefault()->RegisterUserSwitchObserver(userSwithchObserver);
 
     AutoPtr<IUserInfo> userInfo;
     ActivityManagerNative::GetDefault()->GetCurrentUser((IUserInfo**)&userInfo);
@@ -584,6 +626,7 @@ ECode CTextServicesManagerService::constructor(
     AutoPtr<IContentResolver> contentResolver;
     context->GetContentResolver((IContentResolver**)&contentResolver);
     mSettings = new TextServicesSettings(contentResolver, userId, this);
+
     // "switchUserLocked" initializes the states for the foreground user
     return SwitchUserLocked(userId);
 }
@@ -978,7 +1021,7 @@ ECode CTextServicesManagerService::SystemRunning()
 }
 
 ECode CTextServicesManagerService::ToString(
-        /* [out] */ String* str)
+    /* [out] */ String* str)
 {
     VALIDATE_NOT_NULL(str);
     *str = String("CTextServicesManagerService");
@@ -1415,4 +1458,3 @@ ECode CTextServicesManagerService::Dump(
 } // namespace Server
 } // namespace Droid
 } // namespace Elastos
-

@@ -3,6 +3,7 @@
 #include "elastos/droid/settings/inputmethod/CInputMethodPreference.h"
 #include "elastos/droid/settings/inputmethod/CKeyboardLayoutDialogFragment.h"
 #include "elastos/droid/settings/inputmethod/CKeyboardLayoutPickerFragment.h"
+#include "elastos/droid/settings/inputmethod/CSpellCheckersSettings.h"
 #include "elastos/droid/settings/inputmethod/CUserDictionaryList.h"
 
 namespace Elastos {
@@ -14,6 +15,7 @@ CAR_OBJECT_IMPL(CInputMethodAndLanguageSettings);
 CAR_OBJECT_IMPL(CInputMethodPreference);
 CAR_OBJECT_IMPL(CKeyboardLayoutDialogFragment);
 CAR_OBJECT_IMPL(CKeyboardLayoutPickerFragment);
+CAR_OBJECT_IMPL(CSpellCheckersSettings);
 CAR_OBJECT_IMPL(CUserDictionaryList);
 
 } // namespace Inputmethod

@@ -1,0 +1,42 @@
+module
+{
+    using interface Elastos.Droid.View.TextService.ISpellCheckerInfo;
+
+    namespace Elastos {
+    namespace Droid {
+    namespace Settings {
+    namespace Inputmethod {
+
+    /**
+     * @Involve
+     * interface Elastos.Droid.Preference.IPreference
+     * interface Elastos.Droid.Preference.IComparable
+     * interface Elastos.Droid.View.IViewOnClickListener
+     */
+    interface ISpellCheckerPreference {
+        GetSpellCheckerInfo(
+            [out] ISpellCheckerInfo** info);
+
+        SetSelected(
+            [in] Boolean selected);
+    }
+
+    interface ISpellCheckerPreferenceOnRadioButtonPreferenceListener {
+        /**
+         * Called when this preference needs to be saved its state.
+         *
+         * Note that this preference is non-persistent and needs explicitly to be saved its state.
+         * Because changing one IME state may change other IMEs' state, this is a place to update
+         * other IMEs' state as well.
+         *
+         * @param pref This preference.
+         */
+        OnRadioButtonClicked(
+            [in] ISpellCheckerPreference* pref);
+    }
+
+    } // namespace Inputmethod
+    } // namespace Settings
+    } // namespace Droid
+    } // namespace Elastos
+}

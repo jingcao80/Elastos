@@ -21,40 +21,40 @@
 
 -->
 
-<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android"
+<Elastos.Droid.Preference.CPreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android"
         android:title="@string/applications_settings"
         android:summary="@string/applications_settings_summary"
         android:key="applications_settings">
 
-    <PreferenceScreen
+    <Elastos.Droid.Preference.CPreferenceScreen
             android:fragment="Elastos.Droid.Settings.applications.ManageApplications"
             android:title="@string/manageapplications_settings_title"
             android:summary="@string/manageapplications_settings_summary">
-    </PreferenceScreen>
+    </Elastos.Droid.Preference.CPreferenceScreen>
 
-    <PreferenceScreen
+    <Elastos.Droid.Preference.CPreferenceScreen
             android:fragment="Elastos.Droid.Settings.applications.ManageApplications"
             android:title="@string/runningservices_settings_title"
             android:summary="@string/runningservices_settings_summary">
         <extra android:name="classname" android:value="Elastos.Droid.Settings.Settings$RunningServicesActivity" />
-    </PreferenceScreen>
+    </Elastos.Droid.Preference.CPreferenceScreen>
 
-    <PreferenceScreen
+    <Elastos.Droid.Preference.CPreferenceScreen
             android:fragment="Elastos.Droid.Settings.applications.ManageApplications"
             android:title="@string/storageuse_settings_title"
             android:summary="@string/storageuse_settings_summary">
         <extra android:name="classname"
                 android:value="Elastos.Droid.Settings.Settings$StorageUseActivity" />
-    </PreferenceScreen>
+    </Elastos.Droid.Preference.CPreferenceScreen>
 
-    <CheckBoxPreference
+    <Elastos.Droid.Preference.CCheckBoxPreference
             android:key="toggle_advanced_settings"
             android:title="@string/advanced_settings"
             android:summaryOff="@string/advanced_settings_summary"
             android:summaryOn="@string/advanced_settings_summary"
             android:persistent="false" />
 
-    <ListPreference
+    <Elastos.Droid.Preference.CListPreference
         android:key="app_install_location"
         android:title="@string/app_install_location_title"
         android:summary="@string/app_install_location_summary"
@@ -73,5 +73,5 @@
     </PreferenceScreen>
     -->
 
-</PreferenceScreen>
+</Elastos.Droid.Preference.CPreferenceScreen>
 

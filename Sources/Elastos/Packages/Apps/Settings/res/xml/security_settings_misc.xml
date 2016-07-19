@@ -14,14 +14,14 @@
      limitations under the License.
 -->
 
-<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android"
+<Elastos.Droid.Preference.CPreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android"
                   android:title="@string/security_settings_title">
 
-    <PreferenceCategory android:key="sim_lock"
+    <Elastos.Droid.Preference.CPreferenceCategory android:key="sim_lock"
             android:title="@string/sim_lock_settings_title"
             android:persistent="false">
 
-        <Preference android:key="sim_lock_settings"
+        <Elastos.Droid.Preference.CPreference android:key="sim_lock_settings"
                 android:title="@string/sim_lock_settings_category"
                 android:persistent="false">
 
@@ -29,53 +29,53 @@
                     android:targetPackage="Elastos.Droid.Settings"
                     android:targetClass="Elastos.Droid.Settings.IccLockSettings"/>
 
-        </Preference>
+        </Elastos.Droid.Preference.CPreference>
 
-    </PreferenceCategory>
+    </Elastos.Droid.Preference.CPreferenceCategory>
 
-    <PreferenceCategory android:title="@string/security_passwords_title"
+    <Elastos.Droid.Preference.CPreferenceCategory android:title="@string/security_passwords_title"
             android:persistent="false">
 
-        <SwitchPreference android:key="show_password"
+        <Elastos.Droid.Preference.CSwitchPreference android:key="show_password"
                 android:title="@string/show_password"
                 android:persistent="false"/>
 
-    </PreferenceCategory>
+    </Elastos.Droid.Preference.CPreferenceCategory>
 
-    <PreferenceCategory android:key="device_admin_category"
+    <Elastos.Droid.Preference.CPreferenceCategory android:key="device_admin_category"
             android:title="@string/device_admin_title"
             android:persistent="false">
 
-        <Preference android:key="manage_device_admin"
+        <Elastos.Droid.Preference.CPreference android:key="manage_device_admin"
                 android:title="@string/manage_device_admin"
                 android:summary="@string/manage_device_admin_summary"
                 android:persistent="false"
                 android:fragment="Elastos.Droid.Settings.DeviceAdminSettings"/>
 
-        <SwitchPreference android:key="toggle_install_applications"
+        <Elastos.Droid.Preference.CSwitchPreference android:key="toggle_install_applications"
                 android:title="@string/install_applications"
                 android:summaryOff="@string/install_unknown_applications"
                 android:summaryOn="@string/install_unknown_applications"
                 android:persistent="false" />
 
-    </PreferenceCategory>
+    </Elastos.Droid.Preference.CPreferenceCategory>
 
-    <PreferenceCategory android:key="credentials_management"
+    <Elastos.Droid.Preference.CPreferenceCategory android:key="credentials_management"
             android:title="@string/credentials_title"
             android:persistent="false">
 
-        <Preference android:key="credential_storage_type"
+        <Elastos.Droid.Preference.CPreference android:key="credential_storage_type"
                 android:title="@string/credential_storage_type"
                 style="?android:attr/preferenceInformationStyle"
                 android:persistent="false" />
 
-        <Preference android:key="trusted_credentials"
+        <Elastos.Droid.Preference.CPreference android:key="trusted_credentials"
                 android:title="@string/trusted_credentials"
                 android:summary="@string/trusted_credentials_summary"
                 android:persistent="false"
                 android:fragment="Elastos.Droid.Settings.TrustedCredentialsSettings"/>
 
-        <Preference android:key="credentials_install"
+        <Elastos.Droid.Preference.CPreference android:key="credentials_install"
                 android:title="@string/credentials_install"
                 android:summary="@string/credentials_install_summary"
                 android:persistent="false">
@@ -84,9 +84,9 @@
                     android:targetPackage="com.android.certinstaller"
                     android:targetClass="com.android.certinstaller.CertInstallerMain"/>
 
-        </Preference>
+        </Elastos.Droid.Preference.CPreference>
 
-        <Preference android:key="credentials_reset"
+        <Elastos.Droid.Preference.CPreference android:key="credentials_reset"
                 android:title="@string/credentials_reset"
                 android:summary="@string/credentials_reset_summary"
                 android:persistent="false">
@@ -95,30 +95,30 @@
                     android:targetPackage="Elastos.Droid.Settings"
                     android:targetClass="Elastos.Droid.Settings.CredentialStorage"/>
 
-        </Preference>
+        </Elastos.Droid.Preference.CPreference>
 
-    </PreferenceCategory>
+    </Elastos.Droid.Preference.CPreferenceCategory>
 
-    <PreferenceCategory android:key="advanced_security"
+    <Elastos.Droid.Preference.CPreferenceCategory android:key="advanced_security"
             android:title="@string/advanced_security_title"
             android:persistent="false">
 
-        <Preference android:key="manage_trust_agents"
+        <Elastos.Droid.Preference.CPreference android:key="manage_trust_agents"
                 android:title="@string/manage_trust_agents"
                 android:summary="@string/manage_trust_agents_summary"
                 android:persistent="false"
                 android:fragment="Elastos.Droid.Settings.TrustAgentSettings"/>
 
-        <PreferenceScreen
+        <Elastos.Droid.Preference.CPreferenceScreen
                 android:key="screen_pinning_settings"
                 android:title="@string/screen_pinning_title"
                 android:summary="@string/switch_off_text"
                 android:fragment="Elastos.Droid.Settings.ScreenPinningSettings"/>
 
-        <Preference android:key="usage_access"
+        <Elastos.Droid.Preference.CPreference android:key="usage_access"
                     android:title="@string/usage_access_title"
                     android:fragment="Elastos.Droid.Settings.UsageAccessSettings"/>
 
-    </PreferenceCategory>
+    </Elastos.Droid.Preference.CPreferenceCategory>
 
-</PreferenceScreen>
+</Elastos.Droid.Preference.CPreferenceScreen>

@@ -14,11 +14,11 @@
      limitations under the License.
 -->
 
-<PreferenceScreen
+<Elastos.Droid.Preference.CPreferenceScreen
     xmlns:android="http://schemas.android.com/apk/res/android"
     android:title="@string/spellcheckers_settings_title">
-    <Preference
+    <Elastos.Droid.Preference.CPreference
         android:key="spellchecker_language"
         android:title="@string/phone_language"
         android:persistent="false" />
-</PreferenceScreen>
+</Elastos.Droid.Preference.CPreferenceScreen>

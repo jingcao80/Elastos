@@ -11,5 +11,7 @@ SOURCES += InputMethodPreference.cpp
 SOURCES += InputMethodSettingValuesWrapper.cpp
 SOURCES += KeyboardLayoutDialogFragment.cpp
 SOURCES += KeyboardLayoutPickerFragment.cpp
+SOURCES += CSpellCheckerPreference.cpp
+SOURCES += SpellCheckersSettings.cpp
 SOURCES += UserDictionaryList.cpp
 SOURCES += inputmethod.cpp

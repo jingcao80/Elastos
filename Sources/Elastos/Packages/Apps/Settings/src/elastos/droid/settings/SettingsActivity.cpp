@@ -136,7 +136,7 @@ static AutoPtr< ArrayOf<String> > InitENTRY_FRAGMENTS()
     (*args)[10] = "Elastos.Droid.Settings.CLocalePicker";
     (*args)[11] = "Elastos.Droid.Settings.Inputmethod.CInputMethodAndLanguageSettings";
     (*args)[12] = "Elastos.Droid.Settings.Voice.VoiceInputSettings";
-    (*args)[13] = "Elastos.Droid.Settings.Inputmethod.SpellCheckersSettings";
+    (*args)[13] = "Elastos.Droid.Settings.Inputmethod.CSpellCheckersSettings";
     (*args)[14] = "Elastos.Droid.Settings.Inputmethod.CUserDictionaryList";
     (*args)[15] = "Elastos.Droid.Settings.UserDictionarySettings";
     (*args)[16] = "Elastos.Droid.Settings.HomeSettings";

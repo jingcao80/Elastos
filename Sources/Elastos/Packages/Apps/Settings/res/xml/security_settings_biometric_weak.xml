@@ -14,33 +14,33 @@
      limitations under the License.
 -->
 
-<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android"
+<Elastos.Droid.Preference.CPreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android"
                   android:title="@string/security_settings_title">
 
-    <PreferenceCategory
+    <Elastos.Droid.Preference.CPreferenceCategory
         android:key="security_category"
         android:title="@string/lock_settings_title">
 
-        <PreferenceScreen
+        <Elastos.Droid.Preference.CPreferenceScreen
             android:key="unlock_set_or_change"
             android:title="@string/unlock_set_unlock_launch_picker_title"
             android:summary="@string/unlock_set_unlock_mode_biometric_weak"
             android:persistent="false"/>
 
-        <PreferenceScreen
+        <Elastos.Droid.Preference.CPreferenceScreen
             android:key="biometric_weak_improve_matching"
             android:title="@string/biometric_weak_improve_matching_title"/>
 
-        <SwitchPreference
+        <Elastos.Droid.Preference.CSwitchPreference
            android:key="biometric_weak_liveliness"
            android:title="@string/biometric_weak_liveliness_title"
            android:summary="@string/biometric_weak_liveliness_summary"/>
 
-        <SwitchPreference
+        <Elastos.Droid.Preference.CSwitchPreference
             android:key="visiblepattern"
             android:title="@string/lockpattern_settings_enable_visible_pattern_title"/>
 
-        <ListPreference
+        <Elastos.Droid.Preference.CListPreference
             android:key="lock_after_timeout"
             android:title="@string/lock_after_timeout"
             android:summary="@string/lock_after_timeout_summary"
@@ -48,16 +48,16 @@
             android:entryValues="@array/lock_after_timeout_values"
             android:persistent="false"/>
 
-        <SwitchPreference
+        <Elastos.Droid.Preference.CSwitchPreference
             android:key="power_button_instantly_locks"
             android:title="@string/lockpattern_settings_enable_power_button_instantly_locks"/>
 
-        <PreferenceScreen
+        <Elastos.Droid.Preference.CPreferenceScreen
             android:key="owner_info_settings"
             android:fragment="Elastos.Droid.Settings.OwnerInfoSettings"
             android:title="@string/owner_info_settings_title"
             android:summary="@string/owner_info_settings_summary"/>
 
-    </PreferenceCategory>
+    </Elastos.Droid.Preference.CPreferenceCategory>
 
-</PreferenceScreen>
+</Elastos.Droid.Preference.CPreferenceScreen>

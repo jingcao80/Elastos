@@ -44,25 +44,21 @@ CarClass(CTextServicesManagerService)
     , public IITextServicesManager
     , public IBinder
 {
-private:
-    class CTSMSUserSwitchObserver;
-    class TextServicesMonitor;
-    class InternalServiceConnection;
-    class SpellCheckerBindGroup;
-    class InternalDeathRecipient;
-    class TextServicesSettings;
-
-    class CTSMSUserSwitchObserver
+public:
+    class TSMSUserSwitchObserver
         : public Object
         , public IIUserSwitchObserver
+        , public IBinder
     {
     public:
         CAR_INTERFACE_DECL()
 
-        CTSMSUserSwitchObserver(
-            /* [in] */ CTextServicesManagerService* owner);
+        TSMSUserSwitchObserver();
 
-        ~CTSMSUserSwitchObserver();
+        ~TSMSUserSwitchObserver();
+
+        CARAPI constructor(
+            /* [in] */ IITextServicesManager* tsm);
 
         CARAPI OnUserSwitching(
             /* [in] */ Int32 newUserId,
@@ -71,9 +67,19 @@ private:
         CARAPI OnUserSwitchComplete(
             /* [in] */ Int32 newUserId);
 
+        CARAPI ToString(
+            /* [out] */ String* str);
+
     private:
         CTextServicesManagerService* mHost;
     };
+
+private:
+    class TextServicesMonitor;
+    class InternalServiceConnection;
+    class SpellCheckerBindGroup;
+    class InternalDeathRecipient;
+    class TextServicesSettings;
 
     class TextServicesMonitor
         : public PackageMonitor

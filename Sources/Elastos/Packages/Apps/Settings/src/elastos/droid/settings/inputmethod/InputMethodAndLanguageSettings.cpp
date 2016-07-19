@@ -665,7 +665,7 @@ ECode InputMethodAndLanguageSettings::OnCreate(
         CIntent::New(IIntent::ACTION_MAIN, (IIntent**)&intent);
         intent->SetClass(IContext::Probe(activity), ECLSID_CSubSettings);
         intent->PutExtra(SettingsActivity::EXTRA_SHOW_FRAGMENT,
-                String("Elastos.Droid.Settings.Inputmethod.SpellCheckersSettings"));
+                String("Elastos.Droid.Settings.Inputmethod.CSpellCheckersSettings"));
         intent->PutExtra(SettingsActivity::EXTRA_SHOW_FRAGMENT_TITLE_RESID,
                 R::string::spellcheckers_settings_title);
         spellChecker->SetIntent(intent);

@@ -10,6 +10,7 @@
 #include "elastos/droid/server/CPersistentDataBlockBinderService.h"
 #include "elastos/droid/server/CProfileManagerService.h"
 #include "elastos/droid/server/CThemeServiceSettingsObserver.h"
+#include "elastos/droid/server/CTSMSUserSwitchObserver.h"
 #include "elastos/droid/server/CUiModeManagerBinderService.h"
 #include "elastos/droid/server/CUiModeManagerService.h"
 
@@ -29,6 +30,7 @@ CAR_OBJECT_IMPL(CMasterClearReceiver)
 CAR_OBJECT_IMPL(CPersistentDataBlockService)
 CAR_OBJECT_IMPL(CPersistentDataBlockBinderService)
 CAR_OBJECT_IMPL(CThemeServiceSettingsObserver)
+CAR_OBJECT_IMPL(CTSMSUserSwitchObserver)
 CAR_OBJECT_IMPL(CUiModeManagerService)
 CAR_OBJECT_IMPL(CUiModeManagerBinderService)
 CAR_OBJECT_IMPL(CProfileManagerService)

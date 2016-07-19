@@ -1,222 +1,135 @@
+#ifndef __ELASTOS_DROID_SETTINGS_INPUTMETHOD_SPELLCHECKERSSETTINGS_H__
+#define __ELASTOS_DROID_SETTINGS_INPUTMETHOD_SPELLCHECKERSSETTINGS_H__
 
+#include "elastos/droid/settings/SettingsPreferenceFragment.h"
+#include "_Elastos.Droid.Settings.h"
 
-package com.android.settings.inputmethod;
+using Elastos::Droid::Settings::SettingsPreferenceFragment;
+using Elastos::Droid::Settings::Widget::ISwitchBar;
+using Elastos::Droid::Settings::Widget::ISwitchBarOnSwitchChangeListener;
 
 using Elastos::Droid::App::IAlertDialog;
-using Elastos::Droid::Content::IContext;
 using Elastos::Droid::Content::IDialogInterface;
-using Elastos::Droid::Content::Pm::IApplicationInfo;
+using Elastos::Droid::Content::IDialogInterfaceOnClickListener;
 using Elastos::Droid::Os::IBundle;
 using Elastos::Droid::Preference::IPreference;
-using Elastos::Droid::Preference::Preference::IOnPreferenceClickListener;
-using Elastos::Droid::Preference::IPreferenceScreen;
-using Elastos::Droid::Utility::ILog;
-using Elastos::Droid::View::Textservice::ISpellCheckerInfo;
-using Elastos::Droid::View::Textservice::ISpellCheckerSubtype;
-using Elastos::Droid::View::Textservice::ITextServicesManager;
+using Elastos::Droid::Preference::IPreferenceOnPreferenceClickListener;
+using Elastos::Droid::View::TextService::ISpellCheckerInfo;
+using Elastos::Droid::View::TextService::ISpellCheckerSubtype;
+using Elastos::Droid::View::TextService::ITextServicesManager;
 using Elastos::Droid::Widget::ISwitch;
 
-using Elastos::Droid::Settings::IR;
-using Elastos::Droid::Settings::ISettingsActivity;
-using Elastos::Droid::Settings::ISettingsPreferenceFragment;
-using Elastos::Droid::Settings::Inputmethod::SpellCheckerPreference::IOnRadioButtonPreferenceListener;
-using Elastos::Droid::Settings::Widget::ISwitchBar;
-using Elastos::Droid::Settings::Widget::SwitchBar::IOnSwitchChangeListener;
+namespace Elastos {
+namespace Droid {
+namespace Settings {
+namespace Inputmethod {
 
-public class SpellCheckersSettings extends SettingsPreferenceFragment
-        implements OnSwitchChangeListener, OnPreferenceClickListener,
-        OnRadioButtonPreferenceListener {
-    private static const String TAG = SpellCheckersSettings.class->GetSimpleName();
-    private static const Boolean DBG = FALSE;
+class SpellCheckersSettings
+    : public SettingsPreferenceFragment
+    , public ISwitchBarOnSwitchChangeListener
+    , public IPreferenceOnPreferenceClickListener
+    , public ISpellCheckerPreferenceOnRadioButtonPreferenceListener
+{
+private:
+    class AlertDialogOnClickListener
+        : public Object
+        , public IDialogInterfaceOnClickListener
+    {
+    public:
+        CAR_INTERFACE_DECL()
 
-    private static const String KEY_SPELL_CHECKER_LANGUAGE = "spellchecker_language";
-    private static const Int32 ITEM_ID_USE_SYSTEM_LANGUAGE = 0;
+        AlertDialogOnClickListener(
+            /* [in] */ SpellCheckersSettings* host,
+            /* [in] */ Int32 id,
+            /* [in] */ ISpellCheckerInfo* info);
 
-    private SwitchBar mSwitchBar;
-    private Preference mSpellCheckerLanaguagePref;
-    private AlertDialog mDialog = NULL;
-    private SpellCheckerInfo mCurrentSci;
-    private SpellCheckerInfo[] mEnabledScis;
-    private TextServicesManager mTsm;
+        ~AlertDialogOnClickListener();
 
-    //@Override
-    CARAPI OnCreate(final Bundle icicle) {
-        super->OnCreate(icicle);
+        //@Override
+        CARAPI OnClick(
+            /* [in] */ IDialogInterface* dialog,
+            /* [in] */ Int32 item);
 
-        AddPreferencesFromResource(R.xml.spellchecker_prefs);
-        mSpellCheckerLanaguagePref = FindPreference(KEY_SPELL_CHECKER_LANGUAGE);
-        mSpellCheckerLanaguagePref->SetOnPreferenceClickListener(this);
+    private:
+        SpellCheckersSettings* mHost;
+        Int32 mId;
+        AutoPtr<ISpellCheckerInfo> mSci;
+    };
 
-        mTsm = (TextServicesManager) GetSystemService(Context.TEXT_SERVICES_MANAGER_SERVICE);
-        mCurrentSci = mTsm->GetCurrentSpellChecker();
-        mEnabledScis = mTsm->GetEnabledSpellCheckers();
-        PopulatePreferenceScreen();
-    }
+public:
+    CAR_INTERFACE_DECL();
 
-    private void PopulatePreferenceScreen() {
-        final PreferenceScreen screen = GetPreferenceScreen();
-        final Context context = GetActivity();
-        final Int32 count = (mEnabledScis == NULL) ? 0 : mEnabledScis.length;
-        for (Int32 index = 0; index < count; ++index) {
-            final SpellCheckerInfo sci = mEnabledScis[index];
-            final SpellCheckerPreference pref = new SpellCheckerPreference(context, sci, this);
-            screen->AddPreference(pref);
-            InputMethodAndSubtypeUtil->RemoveUnnecessaryNonPersistentPreference(pref);
-        }
-    }
+    SpellCheckersSettings();
+
+    ~SpellCheckersSettings();
+
+    CARAPI constructor();
 
     //@Override
-    CARAPI OnResume() {
-        super->OnResume();
-        mSwitchBar = ((SettingsActivity)GetActivity()).GetSwitchBar();
-        mSwitchBar->Show();
-        mSwitchBar->AddOnSwitchChangeListener(this);
-        UpdatePreferenceScreen();
-    }
+    CARAPI OnCreate(
+        /* [in] */ IBundle* icicle);
 
     //@Override
-    CARAPI OnPause() {
-        super->OnPause();
-        mSwitchBar->RemoveOnSwitchChangeListener(this);
-    }
+    CARAPI OnResume();
 
     //@Override
-    CARAPI OnSwitchChanged(final Switch switchView, final Boolean isChecked) {
-        mTsm->SetSpellCheckerEnabled(isChecked);
-        UpdatePreferenceScreen();
-    }
-
-    private void UpdatePreferenceScreen() {
-        mCurrentSci = mTsm->GetCurrentSpellChecker();
-        final Boolean isSpellCheckerEnabled = mTsm->IsSpellCheckerEnabled();
-        mSwitchBar->SetChecked(isSpellCheckerEnabled);
-
-        final SpellCheckerSubtype currentScs = mTsm->GetCurrentSpellCheckerSubtype(
-                FALSE /* allowImplicitlySelectedSubtype */);
-        mSpellCheckerLanaguagePref->SetSummary(GetSpellCheckerSubtypeLabel(mCurrentSci, currentScs));
-
-        final PreferenceScreen screen = GetPreferenceScreen();
-        final Int32 count = screen->GetPreferenceCount();
-        for (Int32 index = 0; index < count; index++) {
-            final Preference preference = screen->GetPreference(index);
-            preference->SetEnabled(isSpellCheckerEnabled);
-            if (preference instanceof SpellCheckerPreference) {
-                final SpellCheckerPreference pref = (SpellCheckerPreference)preference;
-                final SpellCheckerInfo sci = pref->GetSpellCheckerInfo();
-                pref->SetSelected(mCurrentSci != NULL && mCurrentSci->GetId()->Equals(sci->GetId()));
-            }
-        }
-    }
-
-    private CharSequence GetSpellCheckerSubtypeLabel(final SpellCheckerInfo sci,
-            final SpellCheckerSubtype subtype) {
-        if (sci == NULL) {
-            return NULL;
-        }
-        if (subtype == NULL) {
-            return GetString(R::string::use_system_language_to_select_input_method_subtypes);
-        }
-        return subtype->GetDisplayName(
-                GetActivity(), sci->GetPackageName(), sci->GetServiceInfo().applicationInfo);
-    }
+    CARAPI OnPause();
 
     //@Override
-    public Boolean OnPreferenceClick(final Preference pref) {
-        if (pref == mSpellCheckerLanaguagePref) {
-            ShowChooseLanguageDialog();
-            return TRUE;
-        }
-        return FALSE;
-    }
+    CARAPI OnSwitchChanged(
+        /* [in] */ ISwitch* switchView,
+        /* [in] */ Boolean isChecked);
 
     //@Override
-    CARAPI OnRadioButtonClicked(final SpellCheckerPreference pref) {
-        final SpellCheckerInfo sci = pref->GetSpellCheckerInfo();
-        final Boolean isSystemApp =
-                (sci->GetServiceInfo().applicationInfo.flags & ApplicationInfo.FLAG_SYSTEM) != 0;
-        if (isSystemApp) {
-            ChangeCurrentSpellChecker(sci);
-        } else {
-            ShowSecurityWarnDialog(pref);
-        }
-    }
+    CARAPI OnPreferenceClick(
+        /* [in] */ IPreference* pref,
+        /* [out] */ Boolean* result);
 
-    private static Int32 ConvertSubtypeIndexToDialogItemId(final Int32 index) { return index + 1; }
-    private static Int32 ConvertDialogItemIdToSubtypeIndex(final Int32 item) { return item - 1; }
+    //@Override
+    CARAPI OnRadioButtonClicked(
+        /* [in] */ ISpellCheckerPreference* pref);
 
-    private void ShowChooseLanguageDialog() {
-        if (mDialog != NULL && mDialog->IsShowing()) {
-            mDialog->Dismiss();
-        }
-        final SpellCheckerInfo currentSci = mTsm->GetCurrentSpellChecker();
-        final SpellCheckerSubtype currentScs = mTsm->GetCurrentSpellCheckerSubtype(
-                FALSE /* allowImplicitlySelectedSubtype */);
-        final AlertDialog.Builder builder = new AlertDialog->Builder(GetActivity());
-        builder->SetTitle(R::string::phone_language);
-        final Int32 subtypeCount = currentSci->GetSubtypeCount();
-        final CharSequence[] items = new CharSequence[subtypeCount + 1 /* default */ ];
-        items[ITEM_ID_USE_SYSTEM_LANGUAGE] = GetSpellCheckerSubtypeLabel(currentSci, NULL);
-        Int32 checkedItemId = ITEM_ID_USE_SYSTEM_LANGUAGE;
-        for (Int32 index = 0; index < subtypeCount; ++index) {
-            final SpellCheckerSubtype subtype = currentSci->GetSubtypeAt(index);
-            final Int32 itemId = ConvertSubtypeIndexToDialogItemId(index);
-            items[itemId] = GetSpellCheckerSubtypeLabel(currentSci, subtype);
-            if (subtype->Equals(currentScs)) {
-                checkedItemId = itemId;
-            }
-        }
-        builder->SetSingleChoiceItems(items, checkedItemId, new AlertDialog->OnClickListener() {
-            //@Override
-            CARAPI OnClick(final DialogInterface dialog, final Int32 item) {
-                if (item == ITEM_ID_USE_SYSTEM_LANGUAGE) {
-                    mTsm->SetSpellCheckerSubtype(NULL);
-                } else {
-                    final Int32 index = ConvertDialogItemIdToSubtypeIndex(item);
-                    mTsm->SetSpellCheckerSubtype(currentSci->GetSubtypeAt(index));
-                }
-                if (DBG) {
-                    final SpellCheckerSubtype subtype = mTsm->GetCurrentSpellCheckerSubtype(
-                            TRUE /* allowImplicitlySelectedSubtype */);
-                    Logger::D(TAG, "Current spell check locale is "
-                            + subtype == NULL ? "NULL" : subtype->GetLocale());
-                }
-                dialog->Dismiss();
-                UpdatePreferenceScreen();
-            }
-        });
-        mDialog = builder->Create();
-        mDialog->Show();
-    }
+private:
+    CARAPI_(void) PopulatePreferenceScreen();
 
-    private void ShowSecurityWarnDialog(final SpellCheckerPreference pref) {
-        if (mDialog != NULL && mDialog->IsShowing()) {
-            mDialog->Dismiss();
-        }
-        final SpellCheckerInfo sci = pref->GetSpellCheckerInfo();
-        final AlertDialog.Builder builder = new AlertDialog->Builder(GetActivity());
-        builder->SetTitle(android.R::string::dialog_alert_title);
-        builder->SetMessage(GetString(R::string::spellchecker_security_warning, pref->GetTitle()));
-        builder->SetCancelable(TRUE);
-        builder->SetPositiveButton(android.R::string::ok, new DialogInterface->OnClickListener() {
-            //@Override
-            CARAPI OnClick(final DialogInterface dialog, final Int32 which) {
-                ChangeCurrentSpellChecker(sci);
-            }
-        });
-        builder->SetNegativeButton(android.R::string::cancel, new DialogInterface->OnClickListener() {
-            //@Override
-            CARAPI OnClick(final DialogInterface dialog, final Int32 which) {
-            }
-        });
-        mDialog = builder->Create();
-        mDialog->Show();
-    }
+    CARAPI_(void) UpdatePreferenceScreen();
 
-    private void ChangeCurrentSpellChecker(final SpellCheckerInfo sci) {
-        mTsm->SetCurrentSpellChecker(sci);
-        if (DBG) {
-            Logger::D(TAG, "Current spell check is " + mTsm->GetCurrentSpellChecker()->GetId());
-        }
-        UpdatePreferenceScreen();
-    }
-}
+    CARAPI_(AutoPtr<ICharSequence>) GetSpellCheckerSubtypeLabel(
+        /* [in] */ ISpellCheckerInfo* sci,
+        /* [in] */ ISpellCheckerSubtype* subtype);
+
+    static CARAPI_(Int32) ConvertSubtypeIndexToDialogItemId(
+        /* [in] */ Int32 index);
+
+    static CARAPI_(Int32) ConvertDialogItemIdToSubtypeIndex(
+        /* [in] */ Int32 item);
+
+    CARAPI_(void) ShowChooseLanguageDialog();
+
+    CARAPI_(void) ShowSecurityWarnDialog(
+        /* [in] */ ISpellCheckerPreference* pref);
+
+    CARAPI_(void) ChangeCurrentSpellChecker(
+        /* [in] */ ISpellCheckerInfo* sci);
+
+private:
+    static const String TAG;
+    static const Boolean DBG;
+
+    static const String KEY_SPELL_CHECKER_LANGUAGE;
+    static const Int32 ITEM_ID_USE_SYSTEM_LANGUAGE;
+
+    AutoPtr<ISwitchBar> mSwitchBar;
+    AutoPtr<IPreference> mSpellCheckerLanaguagePref;
+    AutoPtr<IAlertDialog> mDialog;
+    AutoPtr<ISpellCheckerInfo> mCurrentSci;
+    AutoPtr< ArrayOf<ISpellCheckerInfo*> > mEnabledScis;
+    AutoPtr<ITextServicesManager> mTsm;
+};
+
+} // namespace Inputmethod
+} // namespace Settings
+} // namespace Droid
+} // namespace Elastos
+
+#endif //__ELASTOS_DROID_SETTINGS_INPUTMETHOD_SPELLCHECKERSSETTINGS_H__

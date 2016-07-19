@@ -14,18 +14,18 @@
      limitations under the License.
 -->
 
-<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android"
+<Elastos.Droid.Preference.CPreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android"
                   android:title="@string/crypt_keeper_settings_title">
 
-    <PreferenceCategory
+    <Elastos.Droid.Preference.CPreferenceCategory
         android:key="security_category"
         android:title="@string/crypt_keeper_settings_title">
 
-        <PreferenceScreen
+        <Elastos.Droid.Preference.CPreferenceScreen
             android:key="encryption"
             android:title="@string/crypt_keeper_encrypt_title"
             android:fragment="Elastos.Droid.Settings.CryptKeeperSettings" />
 
-    </PreferenceCategory>
+    </Elastos.Droid.Preference.CPreferenceCategory>
 
-</PreferenceScreen>
+</Elastos.Droid.Preference.CPreferenceScreen>

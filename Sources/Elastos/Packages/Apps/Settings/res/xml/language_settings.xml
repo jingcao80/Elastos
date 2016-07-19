@@ -15,7 +15,7 @@
 -->
 
 <Elastos.Droid.Preference.CPreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android"
-                  xmlns:settings="http://schemas.android.com/apk/res/Elastos.Droid.Settings"
+                xmlns:settings="http://schemas.android.com/apk/res/Elastos.Droid.Settings"
         android:key="language_keyboard_settings"
         android:title="@string/language_keyboard_settings_title">
 

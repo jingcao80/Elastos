@@ -245,8 +245,7 @@ void InputMethodPreference::UpdatePreferenceViews()
 {
     AutoPtr<IContext> context;
     GetContext((IContext**)&context);
-    Boolean isAlwaysChecked = mInputMethodSettingValues->IsAlwaysCheckedIme(
-            mImi, context);
+    Boolean isAlwaysChecked = mInputMethodSettingValues->IsAlwaysCheckedIme(mImi, context);
     // Only when this preference has a switch and an input method should be always enabled,
     // this preference should be disabled to prevent accidentally disabling an input method.
     SetEnabled(!((isAlwaysChecked && IsImeEnabler()) || (!mIsAllowedByOrganization)));
@@ -292,7 +291,7 @@ String InputMethodPreference::GetSummaryString()
         IComponentInfo::Probe(info)->GetApplicationInfo((IApplicationInfo**)&applicationInfo);
         AutoPtr<ICharSequence> label;
         subtype->GetDisplayName(
-              context, name, applicationInfo, (ICharSequence**)&label);
+                context, name, applicationInfo, (ICharSequence**)&label);
         subtypeLabels->Add(label);
     }
     // TODO: A delimiter of subtype labels should be localized.

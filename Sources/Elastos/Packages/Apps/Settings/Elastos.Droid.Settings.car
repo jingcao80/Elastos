@@ -10,6 +10,7 @@ module
     merge("car/elastos/droid/dashboard/SearchResultsSummary.car");
     merge("car/elastos/droid/inputmethod/InputMethodPreference.car");
     merge("car/elastos/droid/inputmethod/KeyboardLayoutDialogFragment.car");
+    merge("car/elastos/droid/inputmethod/SpellCheckerPreference.car");
     merge("car/elastos/droid/search/Indexable.car");
     merge("car/elastos/droid/search/IndexDatabaseHelper.car");
     merge("car/elastos/droid/search/SearchIndexableRaw.car");
@@ -64,6 +65,7 @@ module
     using interface Elastos.Droid.Settings.IDialogCreatable;
     using interface Elastos.Droid.Settings.Search.IIndexable;
     using interface Elastos.Droid.Settings.ISettingsPreferenceFragment;
+    using interface Elastos.Droid.Settings.Widget.ISwitchBarOnSwitchChangeListener;
     using interface Elastos.Droid.Utility.IAttributeSet;
     using interface Elastos.Droid.View.Accessibility.IAccessibilityEventSource;
     using interface Elastos.Droid.View.InputMethod.IInputMethodInfo;
@@ -83,6 +85,7 @@ module
     using interface Elastos.Droid.View.IWindowCallback;
     using interface Elastos.Droid.View.IViewOnCreateContextMenuListener;
     using interface Elastos.Droid.View.IOnWindowDismissedCallback;
+    using interface Elastos.Droid.View.TextService.ISpellCheckerInfo;
     using interface Elastos.Droid.Widget.IAdapter;
     using interface Elastos.Droid.Widget.ISwitch;
     using interface Elastos.Droid.Widget.IButton;
@@ -257,6 +260,38 @@ module
         interface IDialogCreatable;
 
         interface IInputDeviceListener;
+    }
+
+    [local]
+    class CSpellCheckerPreference {
+        constructor(
+            [in] IContext* context,
+            [in] ISpellCheckerInfo* sci,
+            [in] ISpellCheckerPreferenceOnRadioButtonPreferenceListener* onRadioButtonListener);
+
+        interface ISpellCheckerPreference;
+
+        interface IPreference;
+        interface IComparable;
+
+        interface IViewOnClickListener;
+    }
+
+    class CSpellCheckersSettings {
+        constructor();
+
+        interface ISettingsPreferenceFragment;
+        interface IPreferenceFragment;
+        interface IFragment;
+        interface IPreferenceManagerOnPreferenceTreeClickListener;
+        interface IComponentCallbacks;
+        interface IComponentCallbacks2;
+        interface IViewOnCreateContextMenuListener;
+        interface IDialogCreatable;
+
+        interface ISwitchBarOnSwitchChangeListener;
+        interface IPreferenceOnPreferenceClickListener;
+        interface ISpellCheckerPreferenceOnRadioButtonPreferenceListener;
     }
 
     class CUserDictionaryList {
@@ -539,6 +574,19 @@ module
     namespace Elastos {
     namespace Droid {
     namespace Settings {
+
+    class CApplicationSettings {
+        constructor();
+
+        interface ISettingsPreferenceFragment;
+        interface IPreferenceFragment;
+        interface IFragment;
+        interface IPreferenceManagerOnPreferenceTreeClickListener;
+        interface IComponentCallbacks;
+        interface IComponentCallbacks2;
+        interface IViewOnCreateContextMenuListener;
+        interface IDialogCreatable;
+    }
 
     class CDateTimeSettings {
         constructor();

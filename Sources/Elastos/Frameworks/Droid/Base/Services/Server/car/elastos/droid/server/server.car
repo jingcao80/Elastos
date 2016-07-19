@@ -574,6 +574,15 @@ module
     }
 
     [local]
+    class CTSMSUserSwitchObserver {
+        constructor(
+            [in] IITextServicesManager* tsm);
+
+        interface IIUserSwitchObserver;
+        interface IBinder;
+    }
+
+    [local]
     class CUiModeManagerService {
         constructor(
             [in] IContext* ctx);

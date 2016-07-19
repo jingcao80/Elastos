@@ -90,10 +90,12 @@ ECode CTextServicesManager::NewSpellCheckerSession(
     VALIDATE_NOT_NULL(session);
 
     if (listener == NULL) {
+        *session = NULL;
        return E_NULL_POINTER_EXCEPTION;
     }
 
     if (!referToSpellCheckerLanguageSettings && locale == NULL) {
+        *session = NULL;
         return E_ILLEGAL_ARGUMENT_EXCEPTION;
     }
 
@@ -104,8 +106,11 @@ ECode CTextServicesManager::NewSpellCheckerSession(
     }
 
     AutoPtr<ISpellCheckerInfo> sci;
-    sService->GetCurrentSpellChecker(String(NULL), (ISpellCheckerInfo**)&sci);
-
+    ECode ec = sService->GetCurrentSpellChecker(String(NULL), (ISpellCheckerInfo**)&sci);
+    if (FAILED(ec)) {
+        *session = NULL;
+        return NOERROR;
+    }
     if (sci == NULL) {
         *session = NULL;
         return NOERROR;
@@ -121,12 +126,11 @@ ECode CTextServicesManager::NewSpellCheckerSession(
         if (locale != NULL) {
 
             String subtypeLocale;
-            String inputLocale;
-
             subtypeInUse->GetLocale(&subtypeLocale);
-            locale->ToString(&inputLocale);
-            if (subtypeLocale.GetLength() < 2 || inputLocale.GetLength() < 2
-                    || !subtypeLocale.Substring(0, 2).Equals(inputLocale.Substring(0, 2))) {
+            String subtypeLanguage = ParseLanguageFromLocaleString(subtypeLocale);
+            String language;
+            if (subtypeLanguage.GetLength() < 2 ||
+                    !(locale->GetLanguage(&language), language).Equals(subtypeLanguage)) {
                 *session = NULL;
                 return NOERROR;
             }
@@ -141,17 +145,18 @@ ECode CTextServicesManager::NewSpellCheckerSession(
 
         for (Int32 i = 0; i < count; ++i) {
             AutoPtr<ISpellCheckerSubtype> subtype;
-            String tempSubtypeLocale;
-
             sci->GetSubtypeAt(i, (ISpellCheckerSubtype**)&subtype);
+            String tempSubtypeLocale;
             subtype->GetLocale(&tempSubtypeLocale);
+            String tempSubtypeLanguage = ParseLanguageFromLocaleString(tempSubtypeLocale);
 
+            String language;
             if (tempSubtypeLocale.Equals(localeStr)) {
                 subtypeInUse = subtype;
                 break;
             }
-            else if (localeStr.GetLength() >= 2 && tempSubtypeLocale.GetLength() >= 2
-                    && localeStr.StartWith(tempSubtypeLocale)) {
+            else if (tempSubtypeLanguage.GetLength() >= 2 &&
+                    (locale->GetLanguage(&language), language).Equals(tempSubtypeLanguage)) {
                 subtypeInUse = subtype;
             }
         }
@@ -175,8 +180,12 @@ ECode CTextServicesManager::NewSpellCheckerSession(
     ((CSpellCheckerSession*)_session.Get())->GetTextServicesSessionListener((IITextServicesSessionListener**)&textListener);
     ((CSpellCheckerSession*)_session.Get())->GetSpellCheckerSessionListener((IISpellCheckerSessionListener**)&spellListener);
 
-    sService->GetSpellCheckerService(id, localeString,
+    ec = sService->GetSpellCheckerService(id, localeString,
             textListener, spellListener, bundle);
+    if (FAILED(ec)) {
+        *session = NULL;
+        return NOERROR;
+    }
 
     *session = _session;
     REFCOUNT_ADD(*session);

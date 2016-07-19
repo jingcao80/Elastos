@@ -122,7 +122,7 @@ ECode CopyOnWriteArrayList::Equals(
         for (Int32 j = 0; j < snapshot->GetLength(); j++) {
             AutoPtr<IInterface> o = (*snapshot)[j];
             AutoPtr<IInterface> outface;
-            if (!(i->HasNext(&isflag), isflag) || !(Object::Equals(TO_IINTERFACE(o), TO_IINTERFACE((i->GetNext((IInterface**)&outface), outface))))) {
+            if (!(i->HasNext(&isflag), isflag) || !(Object::Equals(o, (i->GetNext((IInterface**)&outface), outface)))) {
                 *result = FALSE;
                 return NOERROR;
             }
@@ -587,7 +587,7 @@ ECode CopyOnWriteArrayList::LastIndexOf(
     }
     else {
         for (Int32 i = to - 1; i >= from; i--) {
-            if (Object::Equals(TO_IINTERFACE(o), TO_IINTERFACE((*data)[i]))) {
+            if (Object::Equals(o, (*data)[i])) {
                 *value = i;
                 return NOERROR;
             }
@@ -616,7 +616,7 @@ ECode CopyOnWriteArrayList::IndexOf(
     }
     else {
         for (Int32 i = from; i < to; i++) {
-            if (Object::Equals(TO_IINTERFACE(o), TO_IINTERFACE((*data)[i]))) {
+            if (Object::Equals(o, (*data)[i])) {
                 *value = i;
                 return NOERROR;
             }
