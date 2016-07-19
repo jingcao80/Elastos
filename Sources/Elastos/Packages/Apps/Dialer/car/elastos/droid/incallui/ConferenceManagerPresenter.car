@@ -1,0 +1,45 @@
+
+module
+{
+    using interface Elastos.Droid.Net.IUri;
+
+    namespace Elastos {
+    namespace Droid {
+    namespace InCallUI {
+
+    /**
+     * @Involve
+     * interface IUi
+     */
+    interface IConferenceManagerUi {
+        SetVisible(
+            [in] Boolean on);
+
+        IsFragmentVisible(
+            [out] Boolean* isVisible);
+
+        SetRowVisible(
+            [in] Int32 rowId,
+            [in] Boolean on);
+
+        DisplayCallerInfoForConferenceRow(
+            [in] Int32 rowId,
+            [in] String callerName,
+            [in] String callerNumber,
+            [in] String callerNumberType,
+            [in] String lookupKey,
+            [in] IUri* photoUri);
+
+        SetupSeparateButtonForRow(
+            [in] Int32 rowId,
+            [in] Boolean canSeparate);
+
+        SetupEndButtonForRow(
+            [in] Int32 rowId,
+            [in] Boolean canDisconnect);
+    }
+
+    } // namespace InCallUI
+    } // namespace Droid
+    } // namespace Elastos
+}

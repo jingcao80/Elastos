@@ -1373,7 +1373,6 @@ module
         interface IRegisteredServicesCacheServiceInfo;
     }
 
-    [local]
     class CResolveInfo {
         constructor();
 

@@ -3,12 +3,14 @@
 #define __ELASTOS_DROID_INCALLUI_CINCALLACTIVITY_H__
 
 #include "_Elastos_Droid_InCallUI_CInCallActivity.h"
+#include "elastos/droid/dialer/dialpad/CDialpadFragment.h"
 #include "elastos/droid/incallui/CAnswerFragment.h"
 #include "elastos/droid/incallui/CCallButtonFragment.h"
 #include "elastos/droid/incallui/CCallCardFragment.h"
 #include <elastos/droid/app/Activity.h>
 
 using Elastos::Droid::App::Activity;
+using Elastos::Droid::Dialer::Dialpad::CDialpadFragment;
 
 namespace Elastos {
 namespace Droid {
@@ -36,7 +38,7 @@ private:
     AutoPtr<CCallButtonFragment> mCallButtonFragment;
     AutoPtr<CCallCardFragment> mCallCardFragment;
     AutoPtr<CAnswerFragment> mAnswerFragment;
-//    private DialpadFragment mDialpadFragment;
+    AutoPtr<CDialpadFragment> mDialpadFragment;
 //    private ConferenceManagerFragment mConferenceManagerFragment;
 //    private FragmentManager mChildFragmentManager;
 //

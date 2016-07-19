@@ -10,6 +10,7 @@ SOURCES += CAnswerFragment.cpp
 SOURCES += Call.cpp
 SOURCES += CCallButtonFragment.cpp
 SOURCES += CCallCardFragment.cpp
+SOURCES += CConferenceManagerFragment.cpp
 #SOURCES += CInCallActivity.cpp
 SOURCES += CInCallServiceImpl.cpp
 SOURCES += Presenter.cpp

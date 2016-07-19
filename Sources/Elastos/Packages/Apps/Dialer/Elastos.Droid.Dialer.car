@@ -101,6 +101,8 @@ module
     merge("car/elastos/droid/incallui/CallCardFragment.car");
     merge("car/elastos/droid/incallui/CallCardPresenter.car");
     merge("car/elastos/droid/incallui/CallList.car");
+    merge("car/elastos/droid/incallui/ConferenceManagerFragment.car");
+    merge("car/elastos/droid/incallui/ConferenceManagerPresenter.car");
     merge("car/elastos/droid/incallui/ContactInfoCache.car");
     merge("car/elastos/droid/incallui/GlowPadWrapper.car");
     merge("car/elastos/droid/incallui/InCallActivity.car");
@@ -1374,6 +1376,18 @@ module
 //        interface IComponentCallbacks2;
 //        interface IViewOnCreateContextMenuListener;
 //        interface ICallCardUi;
+//        interface IUi;
+//    }
+//
+//    class CConferenceManagerFragment {
+//        constructor();
+//
+//        interface IConferenceManagerFragment;
+//        interface IFragment;
+//        interface IComponentCallbacks;
+//        interface IComponentCallbacks2;
+//        interface IViewOnCreateContextMenuListener;
+//        interface IConferenceManagerUi;
 //        interface IUi;
 //    }
 //
