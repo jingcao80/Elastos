@@ -79,10 +79,10 @@ private:
 public:
     CAR_INTERFACE_DECL()
 
-    virtual GetContext(
+    virtual CARAPI GetContext(
         /* [out] */ IContext** context) = 0;
 
-    virtual GetLockPatternUtils(
+    virtual CARAPI GetLockPatternUtils(
         /* [out] */ ILockPatternUtils** utils) = 0;
 
     virtual CARAPI SetOnDismissAction(
