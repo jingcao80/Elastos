@@ -249,6 +249,7 @@ private:
     static AutoPtr<IUiccController> mInstance;
     AutoPtr<IContext> mContext;
     Boolean mOEMHookSimRefresh;
+    static Object THIS;
 };
 
 } // namespace Uicc

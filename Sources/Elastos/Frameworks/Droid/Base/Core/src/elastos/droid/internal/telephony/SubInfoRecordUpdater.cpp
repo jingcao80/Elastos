@@ -6,11 +6,15 @@
 #include "elastos/droid/os/AsyncResult.h"
 #include "elastos/droid/R.h"
 #include "elastos/droid/Manifest.h"
-#include "elastos/droid/internal/telephony/SubscriptionController.h"
+#include "Elastos.Droid.Provider.h"
+#include "elastos/droid/internal/telephony/IccUtils.h"
 #include "elastos/droid/internal/telephony/ModemStackController.h"
 #include "elastos/droid/internal/telephony/SubInfoRecordUpdater.h"
+#include "elastos/droid/internal/telephony/SubscriptionController.h"
 #include "elastos/droid/internal/telephony/SubscriptionHelper.h"
 #include "elastos/droid/internal/telephony/uicc/UiccController.h"
+#include "elastos/droid/telephony/CSubInfoRecord.h"
+#include "elastos/droid/telephony/CTelephonyManager.h"
 #include "elastos/droid/telephony/CTelephonyManagerHelper.h"
 #include "elastos/droid/telephony/CSubInfoRecord.h"
 #include "elastos/droid/telephony/SubscriptionManager.h"
@@ -57,7 +61,10 @@ using Elastos::Droid::Telephony::SubscriptionManager;
 using Elastos::Droid::Telephony::ISubscriptionManager;
 using Elastos::Droid::Telephony::ISubInfoRecord;
 using Elastos::Droid::Telephony::CSubInfoRecord;
+using Elastos::Droid::Telephony::CTelephonyManager;
 using Elastos::Droid::Telephony::CTelephonyManagerHelper;
+using Elastos::Core::CInteger32;
+using Elastos::Core::IInteger32;
 using Elastos::Core::IntegralToString;
 using Elastos::Core::IInteger32;
 using Elastos::Core::CInteger32;
@@ -70,9 +77,48 @@ namespace Droid {
 namespace Internal {
 namespace Telephony {
 
+static Int32 InitPhoneCount()
+{
+    AutoPtr<ITelephonyManager> telephonyMgr;
+    CTelephonyManager::GetDefault((ITelephonyManager**)&telephonyMgr);
+
+    Int32 count;
+    telephonyMgr->GetPhoneCount(&count);
+    return count;
+}
+
+static AutoPtr<ArrayOf<CardState> > InitCardState()
+{
+    AutoPtr<ArrayOf<CardState> > sArray = ArrayOf<CardState>::Alloc(InitPhoneCount());
+    return sArray;
+}
+
+static AutoPtr<ArrayOf<IIccFileHandler*> > InitIccFileHandler()
+{
+    AutoPtr<ArrayOf<IIccFileHandler*> > sArray = ArrayOf<IIccFileHandler*>::Alloc(InitPhoneCount());
+    return sArray;
+}
+
+static AutoPtr<ArrayOf<String> > InitIccId()
+{
+    AutoPtr<ArrayOf<String> > sArray = ArrayOf<String>::Alloc(InitPhoneCount());
+    return sArray;
+}
+
+static AutoPtr<ArrayOf<Int32> > InitInsertSimState()
+{
+    AutoPtr<ArrayOf<Int32> > sArray = ArrayOf<Int32>::Alloc(InitPhoneCount());
+    return sArray;
+}
+
+static Boolean IsCardPresent(
+    /* [in] */ CardState state)
+{
+    return state == Elastos::Droid::Internal::Telephony::Uicc::CARDSTATE_PRESENT;
+}
+
 const String SubInfoRecordUpdater::LOGTAG("SUB");
-// TODO:
-const Int32 SubInfoRecordUpdater::PROJECT_SIM_NUM = 1;//InitPhoneCount();
+const Int32 SubInfoRecordUpdater::PROJECT_SIM_NUM = InitPhoneCount();
 const Int32 SubInfoRecordUpdater::EVENT_OFFSET = 8;
 const Int32 SubInfoRecordUpdater::EVENT_QUERY_ICCID_DONE = 1;
 const Int32 SubInfoRecordUpdater::EVENT_ICC_CHANGED = 2;
@@ -208,43 +254,6 @@ ECode SubInfoRecordUpdater::MyBroadcastReceiver::ToString(
  *@hide
  */
 CAR_INTERFACE_IMPL(SubInfoRecordUpdater, Handler, ISubInfoRecordUpdater)
-
-Int32 SubInfoRecordUpdater::InitPhoneCount()
-{
-    AutoPtr<ITelephonyManager> telephonyMgr;
-    AutoPtr<ITelephonyManagerHelper> telephonyManagerHelper;
-    CTelephonyManagerHelper::AcquireSingleton((ITelephonyManagerHelper**)&telephonyManagerHelper);
-    telephonyManagerHelper->GetDefault((ITelephonyManager**)&telephonyMgr);
-
-    Int32 count;
-    telephonyMgr->GetPhoneCount(&count);
-    return count;
-}
-
-AutoPtr<ArrayOf<CardState> > SubInfoRecordUpdater::InitCardState()
-{
-    AutoPtr<ArrayOf<CardState> > sArray = ArrayOf<CardState>::Alloc(PROJECT_SIM_NUM);
-    return sArray;
-}
-
-AutoPtr<ArrayOf<IIccFileHandler*> > SubInfoRecordUpdater::InitIccFileHandler()
-{
-    AutoPtr<ArrayOf<IIccFileHandler*> > sArray = ArrayOf<IIccFileHandler*>::Alloc(PROJECT_SIM_NUM);
-    return sArray;
-}
-
-AutoPtr<ArrayOf<String> > SubInfoRecordUpdater::InitIccId()
-{
-    AutoPtr<ArrayOf<String> > sArray = ArrayOf<String>::Alloc(PROJECT_SIM_NUM);
-    return sArray;
-}
-
-AutoPtr<ArrayOf<Int32> > SubInfoRecordUpdater::InitInsertSimState()
-{
-    AutoPtr<ArrayOf<Int32> > sArray = ArrayOf<Int32>::Alloc(PROJECT_SIM_NUM);
-    return sArray;
-}
-
 ECode SubInfoRecordUpdater::constructor(
     /* [in] */ IContext* context,
     /* [in] */ ArrayOf<IPhone*>* phoneProxy,
@@ -253,6 +262,7 @@ ECode SubInfoRecordUpdater::constructor(
     Handler::constructor();
     Logd(String("Constructor invoked"));
 
+    sReceiver = new MyBroadcastReceiver(this);
     sContext = context;
     sPhone = phoneProxy;
     sCi = ci;
@@ -270,7 +280,6 @@ ECode SubInfoRecordUpdater::constructor(
     CIntentFilter::New(ITelephonyIntents::ACTION_SIM_STATE_CHANGED, (IIntentFilter**)&intentFilter);
     sContext->RegisterReceiver(sReceiver, intentFilter, (IIntent**)&intent);
 
-    sReceiver = new MyBroadcastReceiver(this);
     CTelephonyManagerHelper::AcquireSingleton((ITelephonyManagerHelper**)&sTelephonyManagerHelper);
     isNVSubAvailable = FALSE;
     return NOERROR;
@@ -438,7 +447,8 @@ void SubInfoRecordUpdater::UpdateIccAvailability(
     (*sCardState)[slotId] = newState;
     Logd(String("Slot[") + IntegralToString::ToString(slotId) + String("]: New Card State = ")
             + IntegralToString::ToString(newState) + String(" ") + String("Old Card State = ") + IntegralToString::ToString(oldState));
-    if (newState != Uicc::CARDSTATE_PRESENT/*!newState->IsCardPresent()*/) {
+
+    if (!IsCardPresent(newState)) {
         //Card moved to ABSENT State
         if ((*sIccId)[slotId] != NULL && !(*sIccId)[slotId].Equals(ICCID_STRING_FOR_NO_SIM)) {
             Logd(String("SIM") + IntegralToString::ToString(slotId + 1) + String(" hot plug out"));
@@ -449,8 +459,8 @@ void SubInfoRecordUpdater::UpdateIccAvailability(
         if (IsAllIccIdQueryDone() && sNeedUpdate) {
             UpdateSimInfoByIccId();
         }
-    } else if (oldState != Uicc::CARDSTATE_PRESENT/*!oldState->IsCardPresent()*/
-            && newState == Uicc::CARDSTATE_PRESENT/*newState->IsCardPresent()*/) {
+    }
+    else if (!IsCardPresent(oldState) && IsCardPresent(newState)) {
         // Card moved to PRESENT State.
         if ((*sIccId)[slotId] != NULL && (*sIccId)[slotId].Equals(ICCID_STRING_FOR_NO_SIM)) {
             Logd(String("SIM") + IntegralToString::ToString(slotId + 1) + String(" hot plug in"));
@@ -458,8 +468,8 @@ void SubInfoRecordUpdater::UpdateIccAvailability(
             sNeedUpdate = TRUE;
         }
         QueryIccId(slotId);
-    } else if (oldState == Uicc::CARDSTATE_PRESENT /* oldState->IsCardPresent() */
-            && newState == Uicc::CARDSTATE_PRESENT /* newState->IsCardPresent() */ &&
+    }
+    else if (IsCardPresent(oldState) && IsCardPresent(newState) &&
             (!(subHelper->IsApmSIMNotPwdn(&bTmp), bTmp)) && ((*sIccId)[slotId] == NULL)) {
         Logd(String("SIM") + IntegralToString::ToString(slotId + 1) + String(" powered up from APM "));
         (*sFh)[slotId] = NULL;
@@ -502,7 +512,8 @@ void SubInfoRecordUpdater::QueryIccId(
         } else {
             Logd(String("NOT Querying IccId its already set (*sIccId)[") + IntegralToString::ToString(slotId) + String("]=") + iccId);
         }
-    } else {
+    }
+    else {
         //Reset to CardState to ABSENT so that on next EVENT_ICC_CHANGED, ICCID can be read.
         (*sCardState)[slotId] = Elastos::Droid::Internal::Telephony::Uicc::CARDSTATE_ABSENT;
         Logd(String("sFh[") + IntegralToString::ToString(slotId) + String("] is NULL, SIM not inserted"));

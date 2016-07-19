@@ -60,9 +60,9 @@ namespace Droid {
 namespace Server {
 
 const String CTelephonyRegistry::TAG("TelephonyRegistry");
-const Boolean CTelephonyRegistry::DBG = FALSE; // STOPSHIP if TRUE
-const Boolean CTelephonyRegistry::DBG_LOC = FALSE; // STOPSHIP if TRUE
-const Boolean CTelephonyRegistry::VDBG = FALSE; // STOPSHIP if TRUE
+const Boolean CTelephonyRegistry::DBG = TRUE; // STOPSHIP if TRUE
+const Boolean CTelephonyRegistry::DBG_LOC = TRUE; // STOPSHIP if TRUE
+const Boolean CTelephonyRegistry::VDBG = TRUE; // STOPSHIP if TRUE
 
 const Int32 CTelephonyRegistry::PHONE_STATE_PERMISSION_MASK =
             IPhoneStateListener::LISTEN_CALL_FORWARDING_INDICATOR |
@@ -365,7 +365,8 @@ ECode CTelephonyRegistry::Listen(
         /* Checks permission and throws Security exception */
         FAIL_RETURN(CheckListenerPermission(events))
 
-        {    AutoLock syncLock(mRecordsLock);
+        {
+            AutoLock syncLock(mRecordsLock);
             // register
             AutoPtr<Record> r;
             AutoPtr<ISubscriptionManager> smHelper;

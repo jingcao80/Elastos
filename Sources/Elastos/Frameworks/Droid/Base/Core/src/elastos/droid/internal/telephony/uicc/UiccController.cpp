@@ -58,6 +58,7 @@ const Int32 UiccController::EVENT_RADIO_UNAVAILABLE;
 const Int32 UiccController::EVENT_REFRESH;
 const Int32 UiccController::EVENT_REFRESH_OEM;
 Object UiccController::mLock;
+Object UiccController::THIS;
 AutoPtr<IUiccController> UiccController::mInstance;
 
 UiccController::UiccController()
@@ -491,6 +492,7 @@ void UiccController::OnGetIccCardStatusDone(
     /* [in] */ AsyncResult* ar,
     /* [in] */ IInteger32* _index)
 {
+    AutoLock lock(THIS);
     Int32 index = 0;
     _index->GetValue(&index);
     if (ar->mException != NULL) {

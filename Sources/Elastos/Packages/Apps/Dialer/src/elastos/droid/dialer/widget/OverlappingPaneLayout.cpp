@@ -2,6 +2,7 @@
 #include "Elastos.Droid.Graphics.h"
 #include "elastos/droid/os/Build.h"
 #include "elastos/droid/dialer/widget/OverlappingPaneLayout.h"
+#include "elastos/droid/dialer/widget/COverlappingPaneLayoutSavedState.h"
 #include <elastos/droid/R.h>
 #include <elastos/core/Math.h>
 #include <elastos/utility/logging/Logger.h>
@@ -377,6 +378,11 @@ AutoPtr< ArrayOf<Int32> > OverlappingPaneLayout::LayoutParams::Init_ATTRS()
 OverlappingPaneLayout::SavedState::SavedState()
     : mIsOpen(FALSE)
 {}
+
+ECode OverlappingPaneLayout::SavedState::constructor()
+{
+    return BaseSavedState::constructor();
+}
 
 ECode OverlappingPaneLayout::SavedState::constructor(
     /* [in] */ IParcelable* superState)
@@ -1407,14 +1413,14 @@ AutoPtr<IParcelable> OverlappingPaneLayout::OnSaveInstanceState()
 {
     AutoPtr<IParcelable> superState = ViewGroup::OnSaveInstanceState();
 
-    AutoPtr<SavedState> ss = new SavedState();
-    ss->constructor(superState);
+    AutoPtr<IParcelable> ss;
+    COverlappingPaneLayoutSavedState::New(superState, (IParcelable**)&ss);
     Boolean isSlideable;
     IsSlideable(&isSlideable);
     Boolean isOpen;
-    ss->mIsOpen = isSlideable ? (IsOpen(&isOpen), isOpen) : mPreservedOpenState;
+    ((SavedState*)ss.Get())->mIsOpen = isSlideable ? (IsOpen(&isOpen), isOpen) : mPreservedOpenState;
 
-    return (IParcelable*)ss;
+    return ss;
 }
 
 void OverlappingPaneLayout::OnRestoreInstanceState(

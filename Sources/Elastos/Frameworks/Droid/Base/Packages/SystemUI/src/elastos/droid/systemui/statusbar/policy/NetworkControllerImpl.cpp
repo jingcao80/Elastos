@@ -333,12 +333,12 @@ NetworkControllerImpl::NetworkControllerImpl(
     context->GetSystemService(IContext::TELEPHONY_SERVICE, (IInterface**)&obj);
     mPhone = ITelephonyManager::Probe(obj);
     Logger::D(TAG, "TODO: TELEPHONY_SERVICE not ready.");
-    // mPhone->Listen(mPhoneStateListener,
-    //                   IPhoneStateListener::LISTEN_SERVICE_STATE
-    //                 | IPhoneStateListener::LISTEN_SIGNAL_STRENGTHS
-    //                 | IPhoneStateListener::LISTEN_CALL_STATE
-    //                 | IPhoneStateListener::LISTEN_DATA_CONNECTION_STATE
-    //                 | IPhoneStateListener::LISTEN_DATA_ACTIVITY);
+    mPhone->Listen(mPhoneStateListener,
+                      IPhoneStateListener::LISTEN_SERVICE_STATE
+                    | IPhoneStateListener::LISTEN_SIGNAL_STRENGTHS
+                    | IPhoneStateListener::LISTEN_CALL_STATE
+                    | IPhoneStateListener::LISTEN_DATA_CONNECTION_STATE
+                    | IPhoneStateListener::LISTEN_DATA_ACTIVITY);
 
     res->GetBoolean(R::bool_::config_hspa_data_distinguishable, &mHspaDataDistinguishable);
     mContext->GetString(R::string::status_bar_network_name_separator, &mNetworkNameSeparator);

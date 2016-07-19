@@ -788,6 +788,7 @@ ECode ConnectionServiceWrapper::SubHandler::HandleMessage(
                 mHost->mCallsManager->MarkCallAsRemoved(call);
             }
         }
+        mHost = NULL;
     }
     else if (msgWhat == MSG_ON_POST_DIAL_WAIT) {
         AutoPtr<SomeArgs> args = (SomeArgs*) ISomeArgs::Probe(msgObj);
@@ -1606,7 +1607,6 @@ ECode ConnectionServiceWrapper::HandleConnectionServiceDeath()
         }
     }
     ((CallIdMapper*) mCallIdMapper.Get())->Clear();
-    mHandler = NULL;//need more check avoid cross-reference
     return NOERROR;
 }
 

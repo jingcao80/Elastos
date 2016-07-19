@@ -1127,6 +1127,17 @@ module
         interface IOverlappingPaneLayout;
     }
 
+    class COverlappingPaneLayoutSavedState {
+        constructor();
+
+        constructor(
+            [in] IParcelable* superState);
+
+        interface IViewBaseSavedState;
+        interface IAbsSavedState;
+        interface IParcelable;
+    }
+
     [local]
     class CSearchEditTextLayout {
         constructor(

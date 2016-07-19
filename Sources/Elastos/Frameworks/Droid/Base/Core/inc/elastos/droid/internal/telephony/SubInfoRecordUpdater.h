@@ -93,13 +93,6 @@ private:
     static void Logd(
         /* [in] */ const String& message);
 
-    static Int32 InitPhoneCount();
-
-    static CARAPI_(AutoPtr<ArrayOf<CardState> >) InitCardState();
-    static CARAPI_(AutoPtr<ArrayOf<IIccFileHandler*> >) InitIccFileHandler();
-    static CARAPI_(AutoPtr<ArrayOf<String> >) InitIccId();
-    static CARAPI_(AutoPtr<ArrayOf<Int32> >) InitInsertSimState();
-
 private:
     static const String LOGTAG;
     static const Int32 PROJECT_SIM_NUM;

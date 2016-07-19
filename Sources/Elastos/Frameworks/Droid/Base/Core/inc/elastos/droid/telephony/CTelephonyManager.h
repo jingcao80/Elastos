@@ -1304,8 +1304,6 @@ private:
 
     static CARAPI_(Int64) GetDefaultSubscription();
 
-    static CARAPI_(Boolean) InitStatic();
-
 private:
     static const String TAG;
 
@@ -1325,8 +1323,6 @@ private:
 
     /** The ProductType used for LTE on CDMA devices */
     static String sLteOnCdmaProductType;
-
-    static Boolean Init;
 };
 
 } // namespace Telephony

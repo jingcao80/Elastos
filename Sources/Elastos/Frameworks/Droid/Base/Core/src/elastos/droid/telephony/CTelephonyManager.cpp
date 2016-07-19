@@ -33,6 +33,37 @@ namespace Elastos {
 namespace Droid {
 namespace Telephony {
 
+static String InitMultiSimConfig()
+{
+    String str;
+    SystemProperties::Get(ITelephonyProperties::PROPERTY_MULTI_SIM_CONFIG, &str);
+    return str;
+}
+
+static String InitLteOnCdmaProductType()
+{
+    String str;
+    SystemProperties::Get(ITelephonyProperties::PROPERTY_LTE_ON_CDMA_PRODUCT_TYPE, String(""), &str);
+    return str;
+}
+
+static AutoPtr<IPattern> InitProductTypePattern()
+{
+    AutoPtr<IPatternHelper> helper;
+    CPatternHelper::AcquireSingleton((IPatternHelper**)&helper);
+    AutoPtr<IPattern> pattern;
+    helper->Compile(String("\\sproduct_type\\s*=\\s*(\\w+)"), (IPattern**)&pattern);
+
+    return pattern;
+}
+
+static AutoPtr<ITelephonyManager> InitInstance()
+{
+    AutoPtr<ITelephonyManager> tm;
+    CTelephonyManager::New((ITelephonyManager**)&tm);
+    return tm;
+}
+
 CAR_INTERFACE_IMPL(CTelephonyManager, Object, ITelephonyManager)
 
 CAR_OBJECT_IMPL(CTelephonyManager)
@@ -41,37 +72,18 @@ const String CTelephonyManager::TAG("CTelephonyManager");
 
 AutoPtr<IITelephonyRegistry> CTelephonyManager::sRegistry;
 
-String CTelephonyManager::sMultiSimConfig;
+String CTelephonyManager::sMultiSimConfig = InitMultiSimConfig();
 
-AutoPtr<ITelephonyManager> CTelephonyManager::sInstance;
+INIT_PROI_3 AutoPtr<ITelephonyManager> CTelephonyManager::sInstance = InitInstance();
 
 /** Kernel command line */
-String CTelephonyManager::sKernelCmdLine;
+String CTelephonyManager::sKernelCmdLine = GetProcCmdLine();
 
 /** Pattern for selecting the product type from the kernel command line */
-AutoPtr<IPattern> CTelephonyManager::sProductTypePattern;
+AutoPtr<IPattern> CTelephonyManager::sProductTypePattern = InitProductTypePattern();
 
 /** The ProductType used for LTE on CDMA devices */
-String CTelephonyManager::sLteOnCdmaProductType;
-
-Boolean CTelephonyManager::Init = InitStatic();
-
-Boolean CTelephonyManager::InitStatic()
-{
-    SystemProperties::Get(ITelephonyProperties::PROPERTY_MULTI_SIM_CONFIG, &sMultiSimConfig);
-
-    CTelephonyManager::New((ITelephonyManager**)&sInstance);
-
-    sKernelCmdLine = GetProcCmdLine();
-
-    SystemProperties::Get(ITelephonyProperties::PROPERTY_LTE_ON_CDMA_PRODUCT_TYPE, String(""), &sLteOnCdmaProductType);
-
-    AutoPtr<IPatternHelper> helper;
-    CPatternHelper::AcquireSingleton((IPatternHelper**)&helper);
-    helper->Compile(String("\\sproduct_type\\s*=\\s*(\\w+)"), (IPattern**)&sProductTypePattern);
-
-    return TRUE;
-}
+String CTelephonyManager::sLteOnCdmaProductType = InitLteOnCdmaProductType();
 
 CTelephonyManager::CTelephonyManager()
 {
