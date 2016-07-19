@@ -514,18 +514,22 @@ ECode WindowState::ComputeFrameLw(
     mContentFrame->Set(
         Elastos::Core::Math::Max(cfL, fL), Elastos::Core::Math::Max(cfT, fT),
         Elastos::Core::Math::Min(cfR, fR), Elastos::Core::Math::Min(cfB, fB));
+    mContentFrame->Get(&cfL, &cfT, &cfR, &cfB);
 
     Int32 vfL, vfT, vfR, vfB;
     mVisibleFrame->Get(&vfL, &vfT, &vfR, &vfB);
     mVisibleFrame->Set(
         Elastos::Core::Math::Max(vfL, fL), Elastos::Core::Math::Max(vfT, fT),
         Elastos::Core::Math::Min(vfR, fR), Elastos::Core::Math::Min(vfB, fB));
+    mVisibleFrame->Get(&vfL, &vfT, &vfR, &vfB);
+
 
     Int32 sfL, sfT, sfR, sfB;
     mStableFrame->Get(&sfL, &sfT, &sfR, &sfB);
     mStableFrame->Set(
         Elastos::Core::Math::Max(sfL, fL), Elastos::Core::Math::Max(sfT, fT),
         Elastos::Core::Math::Min(sfR, fR), Elastos::Core::Math::Min(sfB, fB));
+    mStableFrame->Get(&sfL, &sfT, &sfR, &sfB);
 
     Int32 ofL, ofT, ofR, ofB;
     mOverscanFrame->Get(&ofL, &ofT, &ofR, &ofB);

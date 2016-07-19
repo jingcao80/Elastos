@@ -15571,11 +15571,12 @@ void CPackageManagerService::InstallPackageLI(
 //                     + parsedManifest);
 //         }
 
-        Boolean isEqual;
-        if (args->mManifestDigest->Equals(pkg->mManifestDigest, &isEqual), !isEqual) {
-            res->SetError(IPackageManager::INSTALL_FAILED_PACKAGE_CHANGED, String("Manifest digest changed"));
-            return;
-        }
+        Logger::D(TAG, "TODO: pkg->mManifestDigest is null");
+        // Boolean isEqual;
+        // if (args->mManifestDigest->Equals(pkg->mManifestDigest, &isEqual), !isEqual) {
+        //     res->SetError(IPackageManager::INSTALL_FAILED_PACKAGE_CHANGED, String("Manifest digest changed"));
+        //     return;
+        // }
     }
 //        else if (DEBUG_INSTALL) {
 //         final String parsedManifest = pkg.manifestDigest == null
@@ -15866,6 +15867,7 @@ ECode CPackageManagerService::DeletePackageAsUser(
 {
     AutoPtr<IPackageDeleteObserver> deleteObserver;
     CLegacyPackageDeleteObserver::New(observer, (IPackageDeleteObserver**)&deleteObserver);
+    deleteObserver->AddRef();
     AutoPtr<IIPackageDeleteObserver2> b;
     deleteObserver->GetBinder((IIPackageDeleteObserver2**)&b);
     return DeletePackage(packageName, b, userId, flags);

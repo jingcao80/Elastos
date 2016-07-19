@@ -560,11 +560,13 @@ ECode CMediaMetadataRetriever::GetEmbeddedPicture(
 
 ECode CMediaMetadataRetriever::ReleaseResources()
 {
-    {    AutoLock syncLock(sLock);
+    {
+        AutoLock syncLock(sLock);
         android::MediaMetadataRetriever* retriever = GetRetriever();
-        assert(retriever != NULL);
-        delete retriever;
-        SetRetriever(NULL);
+        if (retriever != NULL) {
+            delete retriever;
+            SetRetriever(NULL);
+        }
     }
     return NOERROR;
 }

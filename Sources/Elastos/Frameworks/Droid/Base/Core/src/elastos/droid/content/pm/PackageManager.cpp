@@ -47,9 +47,11 @@ ECode PackageManager::LegacyPackageDeleteObserver::OnPackageDeleted(
 {
     if (mLegacy == NULL) return NOERROR;
     // try {
-    return mLegacy->PackageDeleted(basePackageName, returnCode);
+    mLegacy->PackageDeleted(basePackageName, returnCode);
+    Release();
     // } catch (RemoteException ignored) {
     // }
+    return NOERROR;
 }
 
 

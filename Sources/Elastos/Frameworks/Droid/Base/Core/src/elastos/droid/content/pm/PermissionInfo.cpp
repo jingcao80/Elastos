@@ -111,11 +111,9 @@ ECode PermissionInfo::ToString(
     /* [out] */ String* str)
 {
     VALIDATE_NOT_NULL(str)
-    // return "PermissionInfo{"
-    //         + Integer.toHexString(System.identityHashCode(this))
-    //         + " " + name + "}";
-    assert(0);
-    return E_NOT_IMPLEMENTED;
+    *str = NULL;
+    str->AppendFormat("PermissionInfo{%p %s}", this, mName.string());
+    return NOERROR;
 }
 
 ECode PermissionInfo::ReadFromParcel(

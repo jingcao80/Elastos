@@ -1328,7 +1328,6 @@ module
         interface IParcelable;
     }
 
-    [local]
     class CPermissionGroupInfo {
         constructor();
 
@@ -1340,7 +1339,6 @@ module
         interface IParcelable;
     }
 
-    [local]
     class CPermissionInfo {
         constructor();
 

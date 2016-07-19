@@ -311,7 +311,7 @@ ECode MediaThumbRequest::Execute()
         UpdateDatabase(bitmap.Get(), (IUri**)&uri);
         if (uri != NULL) {
             AutoPtr<IOutputStream> thumbOut;
-            mCr->OpenOutputStream(uri.Get(), (IOutputStream**)&thumbOut);
+            FAIL_RETURN(mCr->OpenOutputStream(uri.Get(), (IOutputStream**)&thumbOut));
             bitmap->Compress(BitmapCompressFormat_JPEG, 85, thumbOut, &flag);
             ICloseable::Probe(thumbOut)->Close();
         }

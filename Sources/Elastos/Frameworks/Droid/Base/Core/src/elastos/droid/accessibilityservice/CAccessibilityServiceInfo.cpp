@@ -158,11 +158,7 @@ ECode CAccessibilityServiceInfo::constructor(
         packageManager->GetResourcesForApplication(appInfo, (IResources**)&resources);
 
         AutoPtr<ITypedArray> asAttributes;
-        AutoPtr<ArrayOf<Int32> > vals = ArrayOf<Int32>::Alloc(8);
-        for (Int32 i = 0; i < 8; i++) {
-            (*vals)[i] = R::styleable::AccessibilityService[i];
-        }
-
+        AutoPtr<ArrayOf<Int32> > vals = TO_ATTRS_ARRAYOF(R::styleable::AccessibilityService);
         resources->ObtainAttributes(allAttributes,
                 vals, (ITypedArray**)&asAttributes);
         asAttributes->GetInt32(

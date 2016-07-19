@@ -1159,7 +1159,7 @@ void WindowStateAnimator::ApplyDecorRect(
         Int32 l, t, r, b;
         w->mSystemDecorRect->Get(&l, &t, &r, &b);
         w->mSystemDecorRect->Set((Int32) (l * scale - 0.5f), (Int32) (t * scale - 0.5f),
-            (Int32) ((r + 1) * scale - 0.5f), (Int32) ((+1) * scale - 0.5f));
+            (Int32) ((r + 1) * scale - 0.5f), (Int32) ((b + 1) * scale - 0.5f));
     }
 }
 

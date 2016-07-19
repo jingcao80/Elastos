@@ -22,8 +22,9 @@ module
     /**
      * @Involve
      * interface Elastos.Droid.Content.Pm.IPackageItemInfo
+     * interface IParcelable
      */
-    [local]
+    [local, parcelable]
     interface IPermissionInfo {
         /**
          * A normal application value for #protectionLevel corresponding

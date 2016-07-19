@@ -1,6 +1,9 @@
 
 #include "elastos/droid/ext/frameworkext.h"
 #include "elastos/droid/content/pm/PermissionGroupInfo.h"
+#include "elastos/droid/text/TextUtils.h"
+
+using Elastos::Droid::Text::TextUtils;
 
 namespace Elastos {
 namespace Droid {
@@ -58,11 +61,10 @@ ECode PermissionGroupInfo::LoadDescription(
 ECode PermissionGroupInfo::ToString(
     /* [out] */ String* str)
 {
-    // return "PermissionGroupInfo{"
-    //         + Integer.toHexString(System.identityHashCode(this))
-    //         + " " + name + " flgs=0x" + Integer.toHexString(flags) + "}";
-    assert(0);
-    return E_NOT_IMPLEMENTED;
+    VALIDATE_NOT_NULL(str)
+    *str = NULL;
+    str->AppendFormat("PermissionGroupInfo{%p %s flgs = 0x%x}", this, mName.string(), mFlags);
+    return NOERROR;
 }
 
 ECode PermissionGroupInfo::ReadFromParcel(
@@ -70,7 +72,7 @@ ECode PermissionGroupInfo::ReadFromParcel(
 {
     PackageItemInfo::ReadFromParcel(source);
     source->ReadInt32(&mDescriptionRes);
-    // mNonLocalizedDescription = TextUtils.CHAR_SEQUENCE_CREATOR.createFromParcel(source);
+    TextUtils::CHAR_SEQUENCE_CREATOR::CreateFromParcel(source, (ICharSequence**)&mNonLocalizedDescription);
     source->ReadInt32(&mFlags);
     source->ReadInt32(&mPriority);
     return NOERROR;
@@ -81,7 +83,7 @@ ECode PermissionGroupInfo::WriteToParcel(
 {
     PackageItemInfo::WriteToParcel(dest);
     dest->WriteInt32(mDescriptionRes);
-    // TextUtils.writeToParcel(nonLocalizedDescription, dest, parcelableFlags);
+    TextUtils::WriteToParcel(mNonLocalizedDescription, dest);
     dest->WriteInt32(mFlags);
     dest->WriteInt32(mPriority);
     return NOERROR;

@@ -265,7 +265,7 @@ ECode CMiniThumbFile::Instance(
     cs->ToString(&type);
 
     HashMap< String, AutoPtr<IMiniThumbFile> >::Iterator it = sThumbFiles.Find(type);
-    AutoPtr<IMiniThumbFile> file = it->mSecond;
+    AutoPtr<IMiniThumbFile> file = it != sThumbFiles.End() ? it->mSecond : NULL;
     // Logger::V(TAG, String("get minithumbfile for type: ") + type);
     if (file == NULL) {
         AutoPtr<IUriHelper> uriHelper;

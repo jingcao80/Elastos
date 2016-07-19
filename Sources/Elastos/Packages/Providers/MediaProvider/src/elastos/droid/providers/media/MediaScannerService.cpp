@@ -371,7 +371,9 @@ ECode MediaScannerService::MyMediaScannerService::ToString(
 MediaScannerService::ServiceHandler::ServiceHandler(
     /* [in] */ MediaScannerService* owner)
     : mOwner(owner)
-{}
+{
+    Handler::constructor();
+}
 
 ECode MediaScannerService::ServiceHandler::HandleMessage(
     /* [in] */ IMessage* msg)

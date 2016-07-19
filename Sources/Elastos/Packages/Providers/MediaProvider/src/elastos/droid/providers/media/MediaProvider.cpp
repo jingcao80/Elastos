@@ -871,11 +871,11 @@ MediaProvider::MyHandler::MyHandler(
     /* [in] */ MediaProvider* host,
     /* [in] */ ILooper* looper,
     /* [in] */ IMessage* msg)
-    : mHost(host)
+    : Handler(looper, FALSE)
+    , mHost(host)
     , mLooper(looper)
     , mMsg(msg)
 {
-    Handler(looper, FALSE);
 }
 
 ECode MediaProvider::MyHandler::HandleMessage(
@@ -5628,11 +5628,13 @@ ECode MediaProvider::CheckWorldReadAccess(
 {
     AutoPtr<IStructStat> stat;
     Elastos::Droid::System::Os::Stat(path, (IStructStat**)&stat);
-    Int32 accessBits = OsConstants::_S_IROTH;
-    Int32 mode;
-    stat->GetMode(&mode);
-    if (OsConstants::S_IsREG(mode) && ((mode & accessBits) == accessBits)) {
-       return CheckLeadingPathComponentsWorldExecutable(path);
+    if (stat != NULL) {
+        Int32 accessBits = OsConstants::_S_IROTH;
+        Int32 mode;
+        stat->GetMode(&mode);
+        if (OsConstants::S_IsREG(mode) && ((mode & accessBits) == accessBits)) {
+           return CheckLeadingPathComponentsWorldExecutable(path);
+        }
     }
 
     // couldn't stat the file, either it doesn't exist or isn't

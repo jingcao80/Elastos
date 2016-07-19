@@ -20,8 +20,9 @@ module
     /**
      * @Involve
      * interface Elastos.Droid.Content.Pm.IPackageItemInfo
+     * interface IParcelable
      */
-    [local]
+    [local, parcelable]
     interface IPermissionGroupInfo {
         /**
          * Flag for #flags, corresponding to <code>personalInfo</code>

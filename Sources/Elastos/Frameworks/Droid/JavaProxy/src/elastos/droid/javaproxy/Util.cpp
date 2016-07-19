@@ -5037,7 +5037,7 @@ jobject Util::ToJavaCompatibilityInfo(
         tempInt |= SCALING_REQUIRED;
     }
     cInfo->SupportsScreen(&support);
-    if (support) {
+    if (!support) {
         tempInt |= NEEDS_SCREEN_COMPAT;
     }
     cInfo->NeverSupportsScreen(&support);
