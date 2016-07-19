@@ -13,7 +13,7 @@ namespace Droid {
 namespace Service {
 namespace Fingerprint {
 
-class FingerprintManagerReceiver
+class ECO_PUBLIC FingerprintManagerReceiver
     : public Object
     , public IFingerprintManagerReceiver
 {

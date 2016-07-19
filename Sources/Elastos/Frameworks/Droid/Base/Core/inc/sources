@@ -149,6 +149,7 @@ EXPORT_HEADERS += elastos/droid/preference/SeekBarDialogPreference.h
 EXPORT_HEADERS += elastos/droid/server/LocalServices.h
 EXPORT_HEADERS += elastos/droid/server/net/BaseNetworkObserver.h
 EXPORT_HEADERS += elastos/droid/service/dreams/DreamService.h
+EXPORT_HEADERS += elastos/droid/service/fingerprint/FingerprintManagerReceiver.h
 EXPORT_HEADERS += elastos/droid/service/wallpaper/WallpaperService.h
 EXPORT_HEADERS += elastos/droid/service/notification/ConditionProviderService.h
 EXPORT_HEADERS += elastos/droid/service/notification/NotificationListenerService.h
