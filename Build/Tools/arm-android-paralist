@@ -495,12 +495,12 @@
 
 # ==== buid Packages/Apps/Arity ====
   Elastos/Packages/Apps/Arity Org.Javia.Arity.car
-< Elastos/Packages/Apps/Arity
+> Elastos/Packages/Apps/Arity
 
 # ==== buid Packages/Apps/Calculator ====
-#  Elastos/Packages/Apps/Calculator Elastos.Droid.Calculator2.car
-#  Elastos/Packages/Apps/Calculator R.cpp
-#< Elastos/Packages/Apps/Calculator
+- Elastos/Packages/Apps/Calculator Elastos.Droid.Calculator2.car
+- Elastos/Packages/Apps/Calculator R.cpp
+> Elastos/Packages/Apps/Calculator
 
 # ==== build DevSamples ====
  Elastos/Frameworks/Droid/DevSamples/ImageDemo Elastos.DevSamples.ImageDemo.car
