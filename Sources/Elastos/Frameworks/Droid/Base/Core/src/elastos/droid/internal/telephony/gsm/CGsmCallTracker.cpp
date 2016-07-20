@@ -36,6 +36,12 @@ namespace Internal {
 namespace Telephony {
 namespace Gsm {
 
+static Boolean IsAlive(
+    /* [in] */ ICallState s)
+{
+    return !(s == ICallState_IDLE || s == ICallState_DISCONNECTED || s == ICallState_DISCONNECTING);
+}
+
 const Int32 CGsmCallTracker::MAX_CONNECTIONS;   // only 7 connections allowed in GSM
 const Int32 CGsmCallTracker::MAX_CONNECTIONS_PER_CALL; // only 5 connections allowed per call
 
@@ -353,14 +359,13 @@ ECode CGsmCallTracker::CanDial(
     ICall::Probe(mForegroundCall)->GetState(&fgState);
     ICallState bgState;
     ICall::Probe(mBackgroundCall)->GetState(&bgState);
-    Boolean b1, b2, b3;
+    Boolean b1;
     ret = (serviceState != IServiceState::STATE_POWER_OFF)
             && mPendingMO == NULL
             && (ICall::Probe(mRingingCall)->IsRinging(&b1), !b1)
-            && !disableCall.Equals("true");
-// TODO: Need ICallState::IsAlive
-            // && ((fgState->IsAlive(&b2), b2)
-            //     || (bgState->IsAlive(&b3), b3));
+            && !disableCall.Equals("true")
+            && (!IsAlive(fgState)
+                    || !IsAlive(bgState));
 
     *result = ret;
     return NOERROR;
@@ -782,8 +787,7 @@ void CGsmCallTracker::HandlePollCalls(
         Boolean b;
         if (conn == NULL && dc != NULL) {
             // Connection appeared in CLCC response that we don't know about
-            ((CGsmConnection*)mPendingMO.Get())->CompareTo(dc, &b);
-            if (mPendingMO != NULL && b) {
+            if (mPendingMO != NULL && (((CGsmConnection*)mPendingMO.Get())->CompareTo(dc, &b), b)) {
 
                 // if (DBG_POLL) Log(String("poll: pendingMO=") + mPendingMO);
 

@@ -4281,12 +4281,13 @@ void RIL::ProcessUnsolicited(
             Int64 nitzReceiveTime = 0;
             p->ReadInt64(&nitzReceiveTime);
 
-            AutoPtr<ArrayOf<IInterface*> > result = ArrayOf<IInterface*>::Alloc(2);
+            AutoPtr<IArrayOf> result;
+            CArrayOf::New(EIID_IInterface, 2, (IArrayOf**)&result);
 
-            (*result)[0] = ret;
+            result->Set(0, ret);
             AutoPtr<IInteger64> pTime;
             CInteger64::New(nitzReceiveTime, (IInteger64**)&pTime);
-            (*result)[1] = pTime;
+            result->Set(1, pTime);
 
             AutoPtr<ISystemProperties> sp;
             CSystemProperties::AcquireSingleton((ISystemProperties**)&sp);
@@ -4299,12 +4300,12 @@ void RIL::ProcessUnsolicited(
             }
             else {
                 if (mNITZTimeRegistrant != NULL) {
-                    AutoPtr<AsyncResult> arResult = new AsyncResult(NULL, CoreUtils::Convert(result.Get()), NULL);
+                    AutoPtr<AsyncResult> arResult = new AsyncResult(NULL, result, NULL);
                     mNITZTimeRegistrant->NotifyRegistrant(arResult);
                 }
                 else {
                     // in case NITZ time registrant isnt registered yet
-                    mLastNITZTimeInfo = CoreUtils::Convert(result.Get());
+                    mLastNITZTimeInfo = result;
                 }
             }
         break;

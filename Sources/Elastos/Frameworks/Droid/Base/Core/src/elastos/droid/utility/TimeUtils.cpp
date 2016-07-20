@@ -19,8 +19,8 @@
 #include <elastos/core/StringUtils.h>
 #include "elastos/droid/internal/utility/XmlUtils.h"
 #include "elastos/droid/os/SystemClock.h"
-// #include "elastos/droid/content/res/CResourcesHelper.h"
-// #include "elastos/droid/R.h"
+#include "elastos/droid/content/res/CResources.h"
+#include "elastos/droid/R.h"
 
 #include <elastos/core/AutoLock.h>
 using Elastos::Core::AutoLock;
@@ -39,12 +39,11 @@ using Elastos::Utility::Logging::Logger;
 using Elastos::Core::StringUtils;
 using Elastos::IO::ICloseable;
 using Org::Xmlpull::V1::IXmlPullParser;
-//using Elastos::Droid::R;
+using Elastos::Droid::R;
 using Elastos::Droid::Os::SystemClock;
 using Elastos::Droid::Text::Format::IDateUtils;
+using Elastos::Droid::Content::Res::CResources;
 using Elastos::Droid::Content::Res::IResources;
-using Elastos::Droid::Content::Res::IResourcesHelper;
-//using Elastos::Droid::Content::Res::CResourcesHelper;
 using Elastos::Droid::Content::Res::IXmlResourceParser;
 using Elastos::Droid::Internal::Utility::XmlUtils;
 
@@ -216,12 +215,9 @@ AutoPtr<ArrayOf<ITimeZone *> > TimeUtils::GetTimeZones(
         return NULL;
     }
 
-    // AutoPtr<IResourcesHelper> helper;
-    // CResourcesHelper::AcquireSingleton((IResourcesHelper**)&helper);
-    // AutoPtr<IResources> r;
-    // helper->GetSystem((IResources**)&r);
+    AutoPtr<IResources> r = CResources::GetSystem();
     AutoPtr<IXmlResourceParser> xrp;
-    //TODO r->GetXml(R::xml::time_zones_by_country, (IXmlResourceParser**)&xrp);
+    r->GetXml(R::xml::time_zones_by_country, (IXmlResourceParser**)&xrp);
     IXmlPullParser* parser = IXmlPullParser::Probe(xrp);
 
     const String strTimeZones("timezones");

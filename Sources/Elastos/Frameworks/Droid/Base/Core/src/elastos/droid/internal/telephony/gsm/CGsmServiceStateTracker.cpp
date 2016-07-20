@@ -24,6 +24,7 @@
 #include "elastos/droid/telephony/CServiceState.h"
 #include "elastos/droid/telephony/gsm/CGsmCellLocation.h"
 #include "elastos/droid/telephony/SubscriptionManager.h"
+#include "elastos/droid/text/TextUtils.h"
 #include "elastos/droid/utility/TimeUtils.h"
 #include <elastos/core/AutoLock.h>
 #include <elastos/core/CoreUtils.h>
@@ -68,6 +69,7 @@ using Elastos::Droid::Telephony::ICellInfoLte;
 using Elastos::Droid::Telephony::ICellInfoWcdma;
 using Elastos::Droid::Telephony::IServiceState;
 using Elastos::Droid::Telephony::SubscriptionManager;
+using Elastos::Droid::Text::TextUtils;
 using Elastos::Droid::Internal::Telephony::CPhoneFactory;
 using Elastos::Droid::Internal::Telephony::Uicc::AppState;
 using Elastos::Droid::Internal::Telephony::Uicc::IUiccCard;
@@ -355,12 +357,10 @@ ECode CGsmServiceStateTracker::HandleMessage(
 
             ICommandsInterfaceRadioState state;
             mCi->GetRadioState(&state);
-            Boolean b;
-// TODO: Need ICommandsInterfaceRadioState::IsOn
-            // if (state->IsOn(&b), !b) {
-            //     // Polling will continue when radio turns back on
-            //     return NOERROR;
-            // }
+            if (state != RADIO_ON) {
+                // Polling will continue when radio turns back on
+                return NOERROR;
+            }
             ar = (AsyncResult*)(IObject::Probe(obj));
             OnSignalStrengthResult(ar, TRUE);
             QueueNextSignalStrengthPoll();
@@ -424,14 +424,14 @@ ECode CGsmServiceStateTracker::HandleMessage(
             ar = (AsyncResult*)(IObject::Probe(obj));
 
             AutoPtr<IArrayOf> iarray = IArrayOf::Probe(ar->mResult);
-            AutoPtr<IInterface> obj;
-            iarray->Get(0, (IInterface**)&obj);
+            AutoPtr<IInterface> o;
+            iarray->Get(0, (IInterface**)&o);
             String nitzString;
-            ICharSequence::Probe(obj)->ToString(&nitzString);
-            obj = NULL;
-            iarray->Get(1, (IInterface**)&obj);
+            ICharSequence::Probe(o)->ToString(&nitzString);
+            o = NULL;
+            iarray->Get(1, (IInterface**)&o);
             Int64 nitzReceiveTime;
-            IInteger64::Probe(obj)->GetValue(&nitzReceiveTime);
+            IInteger64::Probe(o)->GetValue(&nitzReceiveTime);
 
             SetTimeFromNITZString(nitzString, nitzReceiveTime);
             break;
@@ -1029,7 +1029,7 @@ ECode CGsmServiceStateTracker::UpdateSpnDisplay()
     else if (combinedRegState == IServiceState::STATE_IN_SERVICE) {
         // In either home or roaming service
         mSS->GetOperatorAlphaLong(&plmn);
-        showPlmn = !plmn.IsEmpty() &&
+        showPlmn = !TextUtils::IsEmpty(plmn) &&
                 ((rule & IIccRecords::SPN_RULE_SHOW_PLMN)
                         == IIccRecords::SPN_RULE_SHOW_PLMN);
     }
@@ -1051,7 +1051,7 @@ ECode CGsmServiceStateTracker::UpdateSpnDisplay()
     else {
         spn = String("");
     }
-    Boolean showSpn = !spn.IsEmpty()
+    Boolean showSpn = !TextUtils::IsEmpty(spn)
             && ((rule & IIccRecords::SPN_RULE_SHOW_SPN)
                     == IIccRecords::SPN_RULE_SHOW_SPN);
 
@@ -1629,7 +1629,7 @@ void CGsmServiceStateTracker::PollStateDone()
 
             AutoPtr<ITimeZone> zone;
 
-            if (!mNitzUpdatedTime && !mcc.Equals("000") && !iso.IsEmpty() &&
+            if (!mNitzUpdatedTime && !mcc.Equals("000") && !TextUtils::IsEmpty(iso) &&
                     GetAutoTimeZone()) {
 
                 // Test both paths if ignore nitz is TRUE

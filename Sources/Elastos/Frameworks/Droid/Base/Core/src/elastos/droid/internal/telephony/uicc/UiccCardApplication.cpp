@@ -368,11 +368,8 @@ ECode UiccCardApplication::GetState(
     /* [out] */ AppState* result)
 {
     VALIDATE_NOT_NULL(result);
-    // ==================before translated======================
-    // synchronized (mLock) {
-    //     return mAppState;
-    // }
-    assert(0);
+    AutoLock lock(mLock);
+    *result = mAppState;
     return NOERROR;
 }
 
