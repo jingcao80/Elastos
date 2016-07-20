@@ -630,8 +630,7 @@ ECode PagedView::OnMeasure(
     /* [in] */ Int32 heightMeasureSpec)
 {
     if (!mIsDataReady) {
-        ViewGroup::OnMeasure(widthMeasureSpec, heightMeasureSpec);
-        return;
+        return ViewGroup::OnMeasure(widthMeasureSpec, heightMeasureSpec);
     }
 
     Int32 widthMode = MeasureSpec::GetMode(widthMeasureSpec);
@@ -639,15 +638,14 @@ ECode PagedView::OnMeasure(
     Int32 heightMode = MeasureSpec::GetMode(heightMeasureSpec);
     Int32 heightSize = MeasureSpec::GetSize(heightMeasureSpec);
     if (widthMode != MeasureSpec::EXACTLY) {
-        // throw new IllegalStateException("Workspace can only be used in EXACTLY mode.");
         Logger::E(TAG, "Workspace can only be used in EXACTLY mode.");
-        return;
+        return E_ILLEGAL_STATE_EXCEPTION;
     }
 
     // Return early if we aren't given a proper dimension
     if (widthSize <= 0 || heightSize <= 0) {
         ViewGroup::OnMeasure(widthMeasureSpec, heightMeasureSpec);
-        return;
+        return E_ILLEGAL_STATE_EXCEPTION;
     }
 
     /* Allow the height to be set as WRAP_CONTENT. This allows the particular case

@@ -369,10 +369,8 @@ ECode PagedViewCellLayout::OnMeasure(
 
     if (widthSpecMode == View::MeasureSpec::UNSPECIFIED ||
             heightSpecMode == View::MeasureSpec::UNSPECIFIED) {
-        //throw new RuntimeException("CellLayout cannot have UNSPECIFIED dimensions");
-        //return E_RUNTIME_EXCEPTION;
         Slogger::E(TAG, "CellLayout cannot have UNSPECIFIED dimensions");
-        return;
+        return E_RUNTIME_EXCEPTION;
     }
 
     Int32 numWidthGaps = mCellCountX - 1;

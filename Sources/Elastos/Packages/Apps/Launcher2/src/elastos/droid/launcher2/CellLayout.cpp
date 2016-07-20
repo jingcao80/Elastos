@@ -2032,9 +2032,8 @@ ECode CellLayout::OnMeasure(
     Int32 heightSpecSize =  MeasureSpec::GetSize(heightMeasureSpec);
 
     if (widthSpecMode == MeasureSpec::UNSPECIFIED || heightSpecMode == MeasureSpec::UNSPECIFIED) {
-        // throw new RuntimeException("CellLayout cannot have UNSPECIFIED dimensions");
         Logger::E(TAG, "CellLayout cannot have UNSPECIFIED dimensions");
-        return;
+        return E_RUNTIME_EXCEPTION;
     }
 
     Int32 numWidthGaps = mCountX - 1;

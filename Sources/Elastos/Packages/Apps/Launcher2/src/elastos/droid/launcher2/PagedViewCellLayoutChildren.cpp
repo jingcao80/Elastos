@@ -89,9 +89,8 @@ ECode PagedViewCellLayoutChildren::OnMeasure(
     Int32 heightSpecSize = View::MeasureSpec::GetSize(heightMeasureSpec);
 
     if (widthSpecMode == View::MeasureSpec::UNSPECIFIED || heightSpecMode == View::MeasureSpec::UNSPECIFIED) {
-        //throw new RuntimeException("CellLayout cannot have UNSPECIFIED dimensions");
         Slogger::E(TAG, "CellLayout cannot have UNSPECIFIED dimensions");
-        return;
+        return E_RUNTIME_EXCEPTION;
     }
 
     Int32 count;

@@ -66,7 +66,7 @@ ECode CBalloonView::OnMeasure(
 
     if (widthMode == MeasureSpec::EXACTLY) {
         SetMeasuredDimension(widthSize, heightSize);
-        return;
+        return NOERROR;
     }
 
     Int32 measuredWidth = mPaddingLeft + mPaddingRight;
