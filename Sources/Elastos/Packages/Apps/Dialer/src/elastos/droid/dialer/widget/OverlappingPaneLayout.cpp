@@ -715,7 +715,7 @@ ECode OverlappingPaneLayout::OnMeasure(
         }
         else {
             // throw new IllegalStateException("Width must have an exact value or MATCH_PARENT");
-            return;
+            return NOERROR;
         }
     }
     else if (heightMode == View::MeasureSpec::UNSPECIFIED) {
@@ -732,7 +732,7 @@ ECode OverlappingPaneLayout::OnMeasure(
         else {
             // throw new IllegalStateException("Height must not be UNSPECIFIED");
             assert(0 && "TODO");
-            return;
+            return NOERROR;
         }
     }
 

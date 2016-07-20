@@ -11,6 +11,7 @@
 #include "elastos/droid/telephony/CSignalStrength.h"
 #include "elastos/droid/internal/telephony/CallForwardInfo.h"
 #include "elastos/droid/internal/telephony/IccUtils.h"
+#include "elastos/droid/internal/telephony/gsm/CSuppServiceNotification.h"
 #include "elastos/droid/internal/telephony/uicc/CIccIoResult.h"
 #include "elastos/droid/internal/telephony/uicc/CIccCardStatus.h"
 #include "elastos/droid/internal/telephony/uicc/IccCardApplicationStatus.h"
@@ -54,6 +55,7 @@ using Elastos::Droid::Internal::Telephony::Cdma::ICdmaInformationRecordsCdmaT53C
 using Elastos::Droid::Internal::Telephony::Cdma::ICdmaInformationRecordsCdmaT53AudioControlInfoRec;
 using Elastos::Droid::Internal::Telephony::DataConnection::IApnProfileOmh;
 using Elastos::Droid::Internal::Telephony::DataConnection::IApnSetting;
+using Elastos::Droid::Internal::Telephony::Gsm::CSuppServiceNotification;
 using Elastos::Droid::Internal::Telephony::Gsm::ISsData;
 using Elastos::Droid::Internal::Telephony::Gsm::ISuppServiceNotification;
 using Elastos::Droid::Internal::Telephony::Uicc::CIccIoResult;
@@ -4883,31 +4885,30 @@ AutoPtr<IInterface> RIL::ResponseCallForward(
 AutoPtr<IInterface> RIL::ResponseSuppServiceNotification(
     /* [in] */ RILParcel* p)
 {
-    AutoPtr<ISuppServiceNotification> notification;
-    assert(0 && "TODO");
-    // CSuppServiceNotification::New((ISuppServiceNotification**)&notification);
+    AutoPtr<CSuppServiceNotification> notification;
+    CSuppServiceNotification::NewByFriend((CSuppServiceNotification**)&notification);
 
     Int32 notificationType = 0;
     p->ReadInt32(&notificationType);
-    // notification->mNotificationType = notificationType;
+    notification->mNotificationType = notificationType;
 
     Int32 code = 0;
     p->ReadInt32(&code);
-    // notification->mCode = code;
+    notification->mCode = code;
 
     Int32 index = 0;
     p->ReadInt32(&index);
-    // notification->mIndex = index;
+    notification->mIndex = index;
 
     Int32 type = 0;
     p->ReadInt32(&type);
-    // notification->mType = type;
+    notification->mType = type;
 
     String number;
     p->ReadString(&number);
-    // notification->mNumber = number;
+    notification->mNumber = number;
 
-    return notification;
+    return notification->Probe(EIID_IInterface);
 }
 
 AutoPtr<IInterface> RIL::ResponseCdmaSms(

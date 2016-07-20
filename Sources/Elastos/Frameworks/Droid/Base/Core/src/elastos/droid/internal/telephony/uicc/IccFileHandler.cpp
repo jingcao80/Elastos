@@ -270,13 +270,12 @@ ECode IccFileHandler::LoadEFTransparent(
     /* [in] */ Int32 fileid,
     /* [in] */ IMessage* onLoaded)
 {
-    Logger::E("IccFileHandler", "TODO LoadEFTransparent 2 no impl");
-    // ==================before translated======================
-    // Message response = obtainMessage(EVENT_GET_BINARY_SIZE_DONE,
-    //                 fileid, 0, onLoaded);
-    //
-    // mCi.iccIOForApp(COMMAND_GET_RESPONSE, fileid, getEFPath(fileid),
-    //                 0, 0, 0, null, null, mAid, response);
+    AutoPtr<IMessage> response;
+    ObtainMessage(EVENT_GET_BINARY_SIZE_DONE,
+                    fileid, 0, onLoaded, (IMessage**)&response);
+
+    mCi->IccIOForApp(COMMAND_GET_RESPONSE, fileid, GetEFPath(fileid),
+                    0, 0, 0, String(NULL), String(NULL), mAid, response);
     return NOERROR;
 }
 
@@ -369,6 +368,9 @@ ECode IccFileHandler::UpdateEFTransparent(
 ECode IccFileHandler::HandleMessage(
     /* [in] */ IMessage* msg)
 {
+    Int32 what = 0;
+    msg->GetWhat(&what);
+    Logger::D("IccFileHandler", "[TODO] HandleMessage ====================what=[%d]", what);
     // ==================before translated======================
     // AsyncResult ar;
     // IccIoResult result;
@@ -601,7 +603,7 @@ ECode IccFileHandler::HandleMessage(
     //         loge("uncaught exception" + exc);
     //     }
     // }
-    assert(0);
+    // assert(0);
     return NOERROR;
 }
 
@@ -610,40 +612,36 @@ ECode IccFileHandler::constructor(
     /* [in] */ const String& aid,
     /* [in] */ ICommandsInterface* ci)
 {
-    // ==================before translated======================
-    // mParentApp = app;
-    // mAid = aid;
-    // mCi = ci;
-    return NOERROR;
+    mParentApp = app;
+    mAid = aid;
+    mCi = ci;
+    return Handler::constructor();
 }
 
 String IccFileHandler::GetCommonIccEFPath(
     /* [in] */ Int32 efid)
 {
-    // ==================before translated======================
-    // switch(efid) {
-    // case EF_ADN:
-    // case EF_FDN:
-    // case EF_MSISDN:
-    // case EF_SDN:
-    // case EF_EXT1:
-    // case EF_EXT2:
-    // case EF_EXT3:
-    // case EF_PSI:
-    //     return MF_SIM + DF_TELECOM;
-    //
-    // case EF_ICCID:
-    // case EF_PL:
-    //     return MF_SIM;
-    // case EF_PBR:
-    //     // we only support global phonebook.
-    //     return MF_SIM + DF_TELECOM + DF_PHONEBOOK;
-    // case EF_IMG:
-    //     return MF_SIM + DF_TELECOM + DF_GRAPHICS;
-    // }
-    // return null;
-    assert(0);
-    return String("");
+    switch(efid) {
+        case EF_ADN:
+        case EF_FDN:
+        case EF_MSISDN:
+        case EF_SDN:
+        case EF_EXT1:
+        case EF_EXT2:
+        case EF_EXT3:
+        case EF_PSI:
+            return MF_SIM + DF_TELECOM;
+
+        case EF_ICCID:
+        case EF_PL:
+            return MF_SIM;
+        case EF_PBR:
+            // we only support global phonebook.
+            return MF_SIM + DF_TELECOM + DF_PHONEBOOK;
+        case EF_IMG:
+            return MF_SIM + DF_TELECOM + DF_GRAPHICS;
+    }
+    return String(NULL);
 }
 
 void IccFileHandler::SendResult(

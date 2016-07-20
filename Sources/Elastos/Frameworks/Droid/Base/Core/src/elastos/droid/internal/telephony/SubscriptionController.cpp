@@ -1010,7 +1010,8 @@ ECode SubscriptionController::AddSubInfoRecord(
         ICloseable::Probe(cursor)->Close();
     }
 
-    StringBuilder sb(ISubscriptionManager::SIM_ID); sb += "=?";
+    StringBuilder sb(ISubscriptionManager::SIM_ID);
+    sb += "=?";
     AutoPtr<ArrayOf<String> > arrVal = ArrayOf<String>::Alloc(1);
     (*arrVal)[0] = StringUtils::ToString(slotId);
     resolver->Query(content_uri, NULL,

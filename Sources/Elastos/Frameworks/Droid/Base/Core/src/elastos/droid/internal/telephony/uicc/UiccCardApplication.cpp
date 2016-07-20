@@ -14,13 +14,16 @@
 #include "elastos/droid/internal/telephony/uicc/CIsimUiccRecords.h"
 #include "elastos/droid/internal/telephony/uicc/IccCardApplicationStatus.h"
 #include "elastos/core/AutoLock.h"
+#include <elastos/core/StringUtils.h>
 #include <elastos/utility/logging/Logger.h>
 
+using Elastos::Droid::Internal::Telephony::Uicc::AppState;
 using Elastos::Droid::Os::Registrant;
 using Elastos::Droid::Os::IRegistrant;
 using Elastos::Droid::Os::CRegistrant;
 using Elastos::Droid::Os::RegistrantList;
 using Elastos::Core::AutoLock;
+using Elastos::Core::StringUtils;
 using Elastos::Utility::Logging::Logger;
 
 namespace Elastos {
@@ -63,7 +66,7 @@ ECode UiccCardApplication::InnerHandler::HandleMessage(
     //         // request has completed. ar.userObj is the response Message
     //         int attemptsRemaining = -1;
     //         ar = (AsyncResult)msg.obj;
-    //         if (ar.result != null) {
+    //         if (ar.result != NULL) {
     //             attemptsRemaining = parsePinPukErrorResult(ar);
     //         }
     //         Message response = (Message)ar.userObj;
@@ -161,58 +164,62 @@ ECode UiccCardApplication::constructor(
 }
 
 ECode UiccCardApplication::Update(
-    /* [in] */ IIccCardApplicationStatus* as,
+    /* [in] */ IIccCardApplicationStatus* _as,
     /* [in] */ IContext* c,
     /* [in] */ ICommandsInterface* ci)
 {
-    // ==================before translated======================
-    // synchronized (mLock) {
-    //     if (mDestroyed) {
-    //         loge("Application updated after destroyed! Fix me!");
-    //         return;
-    //     }
-    //
-    //     if (DBG) log(mAppType + " update. New " + as);
-    //     mContext = c;
-    //     mCi = ci;
-    //     AppType oldAppType = mAppType;
-    //     AppState oldAppState = mAppState;
-    //     PersoSubState oldPersoSubState = mPersoSubState;
-    //     mAppType = as.app_type;
-    //     mAuthContext = getAuthContext(mAppType);
-    //     mAppState = as.app_state;
-    //     mPersoSubState = as.perso_substate;
-    //     mAid = as.aid;
-    //     mAppLabel = as.app_label;
-    //     mPin1Replaced = (as.pin1_replaced != 0);
-    //     mPin1State = as.pin1;
-    //     mPin2State = as.pin2;
-    //
-    //     if (mAppType != oldAppType) {
-    //         if (mIccFh != null) { mIccFh.dispose();}
-    //         if (mIccRecords != null) { mIccRecords.dispose();}
-    //         mIccFh = createIccFileHandler(as.app_type);
-    //         mIccRecords = createIccRecords(as.app_type, c, ci);
-    //     }
-    //
-    //     if (mPersoSubState != oldPersoSubState &&
-    //             isPersoLocked()) {
-    //         notifyPersoLockedRegistrantsIfNeeded(null);
-    //     }
-    //
-    //     if (mAppState != oldAppState) {
-    //         if (DBG) log(oldAppType + " changed state: " + oldAppState + " -> " + mAppState);
-    //         // If the app state turns to APPSTATE_READY, then query FDN status,
-    //         //as it might have failed in earlier attempt.
-    //         if (mAppState == AppState.APPSTATE_READY) {
-    //             queryFdn();
-    //             queryPin1State();
-    //         }
-    //         notifyPinLockedRegistrantsIfNeeded(null);
-    //         notifyReadyRegistrantsIfNeeded(null);
-    //     }
-    // }
-    assert(0);
+    AutoLock lock(mLock);
+    if (mDestroyed) {
+        Loge(String("Application updated after destroyed! Fix me!"));
+        return NOERROR;
+    }
+
+    if (DBG) Log(StringUtils::ToString(mAppType) + " update. New " + TO_CSTR(_as));
+    mContext = c;
+    mCi = ci;
+    AppType oldAppType = mAppType;
+    AppState oldAppState = mAppState;
+    PersoSubState oldPersoSubState = mPersoSubState;
+    IccCardApplicationStatus* as = (IccCardApplicationStatus*)_as;
+    mAppType = as->mApp_type;
+    mAuthContext = GetAuthContext(mAppType);
+    mAppState = as->mApp_state;
+    mPersoSubState = as->mPerso_substate;
+    mAid = as->mAid;
+    mAppLabel = as->mApp_label;
+    mPin1Replaced = (as->mPin1_replaced != 0);
+    mPin1State = as->mPin1;
+    mPin2State = as->mPin2;
+
+    if (mAppType != oldAppType) {
+        if (mIccFh != NULL) {
+            mIccFh->Dispose();
+        }
+        if (mIccRecords != NULL) {
+            mIccRecords->Dispose();
+        }
+        mIccFh = CreateIccFileHandler(as->mApp_type);
+        mIccRecords = CreateIccRecords(as->mApp_type, c, ci);
+    }
+
+    Boolean tmp = FALSE;
+    if (mPersoSubState != oldPersoSubState &&
+            (IsPersoLocked(&tmp), tmp)) {
+        NotifyPersoLockedRegistrantsIfNeeded(NULL);
+    }
+
+    if (mAppState != oldAppState) {
+        if (DBG) Log(StringUtils::ToString(oldAppType) + " changed state: "
+            + StringUtils::ToString(oldAppState) + " -> " + StringUtils::ToString(mAppState));
+        // If the app state turns to APPSTATE_READY, then query FDN status,
+        //as it might have failed in earlier attempt.
+        if (mAppState == APPSTATE_READY) {
+            QueryFdn();
+            QueryPin1State();
+        }
+        NotifyPinLockedRegistrantsIfNeeded(NULL);
+        NotifyReadyRegistrantsIfNeeded(NULL);
+    }
     return NOERROR;
 }
 
@@ -222,10 +229,10 @@ ECode UiccCardApplication::Dispose()
     // synchronized (mLock) {
     //     if (DBG) log(mAppType + " being Disposed");
     //     mDestroyed = true;
-    //     if (mIccRecords != null) { mIccRecords.dispose();}
-    //     if (mIccFh != null) { mIccFh.dispose();}
-    //     mIccRecords = null;
-    //     mIccFh = null;
+    //     if (mIccRecords != NULL) { mIccRecords.dispose();}
+    //     if (mIccFh != NULL) { mIccFh.dispose();}
+    //     mIccRecords = NULL;
+    //     mIccFh = NULL;
     // }
     assert(0);
     return NOERROR;
@@ -251,12 +258,12 @@ ECode UiccCardApplication::OnRefresh(
     /* [in] */ IIccRefreshResponse* refreshResponse)
 {
     // ==================before translated======================
-    // if (refreshResponse == null) {
+    // if (refreshResponse == NULL) {
     //     loge("onRefresh received without input");
     //     return;
     // }
     //
-    // if (refreshResponse.aid == null ||
+    // if (refreshResponse.aid == NULL ||
     //         refreshResponse.aid.equals(mAid)) {
     //     log("refresh for app " + refreshResponse.aid);
     // } else {
@@ -476,16 +483,19 @@ ECode UiccCardApplication::IsPersoLocked(
     /* [out] */ Boolean* result)
 {
     VALIDATE_NOT_NULL(result);
-    // ==================before translated======================
-    // switch (mPersoSubState) {
-    //     case PERSOSUBSTATE_UNKNOWN:
-    //     case PERSOSUBSTATE_IN_PROGRESS:
-    //     case PERSOSUBSTATE_READY:
-    //         return false;
-    //     default:
-    //         return true;
-    // }
-    assert(0);
+    switch (mPersoSubState) {
+        case PERSOSUBSTATE_UNKNOWN:
+        case PERSOSUBSTATE_IN_PROGRESS:
+        case PERSOSUBSTATE_READY: {
+            *result = FALSE;
+            return NOERROR;
+        }
+        default:{
+            *result = TRUE;
+            return NOERROR;
+        }
+    }
+    assert(0 && "Has error.");
     return NOERROR;
 }
 
@@ -806,7 +816,7 @@ void UiccCardApplication::OnQueryFdnEnabled(
 {
     // ==================before translated======================
     // synchronized (mLock) {
-    //     if (ar.exception != null) {
+    //     if (ar.exception != NULL) {
     //         if (DBG) log("Error in querying facility lock:" + ar.exception);
     //         return;
     //     }
@@ -837,7 +847,7 @@ void UiccCardApplication::OnChangeFdnDone(
     // synchronized (mLock) {
     //     int attemptsRemaining = -1;
     //
-    //     if (ar.exception == null) {
+    //     if (ar.exception == NULL) {
     //         mIccFdnEnabled = mDesiredFdnEnabled;
     //         if (DBG) log("EVENT_CHANGE_FACILITY_FDN_DONE: " +
     //                 "mIccFdnEnabled=" + mIccFdnEnabled);
@@ -870,7 +880,7 @@ void UiccCardApplication::OnQueryFacilityLock(
 {
     // ==================before translated======================
     // synchronized (mLock) {
-    //     if(ar.exception != null) {
+    //     if(ar.exception != NULL) {
     //         if (DBG) log("Error in querying facility lock:" + ar.exception);
     //         return;
     //     }
@@ -925,7 +935,7 @@ void UiccCardApplication::OnChangeFacilityLock(
     // synchronized (mLock) {
     //     int attemptsRemaining = -1;
     //
-    //     if (ar.exception == null) {
+    //     if (ar.exception == NULL) {
     //         mIccLockEnabled = mDesiredPinLocked;
     //         if (DBG) log( "EVENT_CHANGE_FACILITY_LOCK_DONE: mIccLockEnabled= "
     //                 + mIccLockEnabled);
@@ -946,7 +956,7 @@ Int32 UiccCardApplication::ParsePinPukErrorResult(
 {
     // ==================before translated======================
     // int[] result = (int[]) ar.result;
-    // if (result == null) {
+    // if (result == NULL) {
     //     return -1;
     // } else {
     //     int length = result.length;
@@ -977,12 +987,12 @@ void UiccCardApplication::NotifyReadyRegistrantsIfNeeded(
     //         // Don't notify if application is in insane state
     //         return;
     //     }
-    //     if (r == null) {
+    //     if (r == NULL) {
     //         if (DBG) log("Notifying registrants: READY");
     //         mReadyRegistrants.notifyRegistrants();
     //     } else {
     //         if (DBG) log("Notifying 1 registrant: READY");
-    //         r.notifyRegistrant(new AsyncResult(null, null, null));
+    //         r.notifyRegistrant(new AsyncResult(NULL, NULL, NULL));
     //     }
     // }
 }
@@ -1003,12 +1013,12 @@ void UiccCardApplication::NotifyPinLockedRegistrantsIfNeeded(
     //         //Don't notify if application is in insane state
     //         return;
     //     }
-    //     if (r == null) {
+    //     if (r == NULL) {
     //         if (DBG) log("Notifying registrants: LOCKED");
     //         mPinLockedRegistrants.notifyRegistrants();
     //     } else {
     //         if (DBG) log("Notifying 1 registrant: LOCKED");
-    //         r.notifyRegistrant(new AsyncResult(null, null, null));
+    //         r.notifyRegistrant(new AsyncResult(NULL, NULL, NULL));
     //     }
     // }
     assert(0);
@@ -1024,8 +1034,8 @@ void UiccCardApplication::NotifyPersoLockedRegistrantsIfNeeded(
     //
     // if (mAppState == AppState.APPSTATE_SUBSCRIPTION_PERSO &&
     //         isPersoLocked()) {
-    //     AsyncResult ar = new AsyncResult(null, mPersoSubState.ordinal(), null);
-    //     if (r == null) {
+    //     AsyncResult ar = new AsyncResult(NULL, mPersoSubState.ordinal(), NULL);
+    //     if (r == NULL) {
     //         if (DBG) log("Notifying registrants: PERSO_LOCKED");
     //         mPersoLockedRegistrants.notifyRegistrants(ar);
     //     } else {
