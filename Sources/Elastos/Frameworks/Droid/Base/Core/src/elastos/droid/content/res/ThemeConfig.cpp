@@ -7,6 +7,8 @@
 #include "elastos/droid/content/res/CThemeConfigBuilder.h"
 #include "elastos/droid/provider/CSettingsSecure.h"
 #include "elastos/droid/text/TextUtils.h"
+#include "elastos/droid/utility/CJsonReader.h"
+#include "elastos/droid/utility/CJsonWriter.h"
 #include <elastos/core/StringBuilder.h>
 #include <elastos/core/StringUtils.h>
 #include <elastos/utility/logging/Slogger.h>
@@ -14,6 +16,8 @@
 using Elastos::Droid::Os::IUserHandle;
 using Elastos::Droid::Provider::ISettingsSecure;
 using Elastos::Droid::Provider::CSettingsSecure;
+using Elastos::Droid::Utility::CJsonReader;
+using Elastos::Droid::Utility::CJsonWriter;
 using Elastos::Droid::Utility::JsonToken;
 using Elastos::Droid::Utility::JsonToken_NULL;
 using Elastos::Droid::Text::TextUtils;
@@ -203,8 +207,7 @@ String ThemeConfig::JsonSerializer::ToJson(
     AutoPtr<IJsonWriter> jsonWriter;
     // try {
     CStringWriter::New((IWriter**)&writer);
-    assert(0);
-    // jsonWriter = new JsonWriter(writer);
+    CJsonWriter::New(writer, (IJsonWriter**)&jsonWriter);
     WriteTheme(jsonWriter, theme);
     IObject::Probe(writer)->ToString(&json);
     // } catch(IOException e) {
@@ -241,8 +244,7 @@ ECode ThemeConfig::JsonSerializer::WriteTheme(
         AutoPtr<IInterface> value;
         entry->GetValue((IInterface**)&value);
         AutoPtr<IAppTheme> appTheme = IAppTheme::Probe(value);
-        AutoPtr<IJsonWriter> jw;
-        writer->Name(appPkgName, (IJsonWriter**)&jw);
+        writer->Name(appPkgName);
         WriteAppTheme(writer, appTheme);
     }
     writer->EndObject();
@@ -254,21 +256,18 @@ ECode ThemeConfig::JsonSerializer::WriteAppTheme(
     /* [in] */ IAppTheme* appTheme)
 {
     writer->BeginObject();
-    AutoPtr<IJsonWriter> jsonW;
-    writer->Name(NAME_OVERLAY_PKG, (IJsonWriter**)&jsonW);
+    writer->Name(NAME_OVERLAY_PKG);
     String overlayPkgName;
     appTheme->GetOverlayPkgName(&overlayPkgName);
-    jsonW->Value(overlayPkgName);
-    jsonW = NULL;
-    writer->Name(NAME_ICON_PKG, (IJsonWriter**)&jsonW);
+    writer->Value(overlayPkgName);
+    writer->Name(NAME_ICON_PKG);
     String iconPkgName;
     appTheme->GetIconPackPkgName(&iconPkgName);
-    jsonW->Value(iconPkgName);
-    jsonW = NULL;
-    writer->Name(NAME_FONT_PKG, (IJsonWriter**)&jsonW);
+    writer->Value(iconPkgName);
+    writer->Name(NAME_FONT_PKG);
     String fontPkgName;
     appTheme->GetFontPackPkgName(&fontPkgName);
-    jsonW->Value(fontPkgName);
+    writer->Value(fontPkgName);
     writer->EndObject();
     return NOERROR;
 }
@@ -283,8 +282,7 @@ AutoPtr<IThemeConfig> ThemeConfig::JsonSerializer::FromJson(
     AutoPtr<IJsonReader> jsonReader;
     // try {
     CStringReader::New(json, (IStringReader**)&reader);
-    assert(0);
-    // jsonReader = new JsonReader(reader);
+    CJsonReader::New(IReader::Probe(reader), (IJsonReader**)&jsonReader);
     jsonReader->BeginObject();
     Boolean hasNext;
     while (jsonReader->HasNext(&hasNext), hasNext) {
@@ -671,8 +669,7 @@ ECode ThemeConfig::ReadFromParcel(
     AutoPtr<IJsonReader> jsonReader;
     // try {
     CStringReader::New(json, (IStringReader**)&reader);
-    assert(0);
-    // jsonReader = new JsonReader(reader);
+    CJsonReader::New(IReader::Probe(reader), (IJsonReader**)&jsonReader);
     jsonReader->BeginObject();
     Boolean hasNext;
     while (jsonReader->HasNext(&hasNext), hasNext) {

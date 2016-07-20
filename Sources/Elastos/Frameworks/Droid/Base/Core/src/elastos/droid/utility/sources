@@ -23,6 +23,8 @@ SOURCES += FastImmutableArraySet.cpp
 SOURCES += FloatMath.cpp
 SOURCES += FloatProperty.cpp
 SOURCES += Int32Property.cpp
+SOURCES += CJsonWriter.cpp
+SOURCES += CJsonReader.cpp
 
 SOURCES += MapCollections.cpp
 SOURCES += MathUtils.cpp

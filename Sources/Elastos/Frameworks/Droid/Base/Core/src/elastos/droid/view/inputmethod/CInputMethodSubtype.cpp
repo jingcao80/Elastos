@@ -478,10 +478,8 @@ AutoPtr<ILocale> CInputMethodSubtype::ConstructLocaleFromString(
 {
     if (localeStr.IsNullOrEmpty()) return NULL;
 
-    assert(0);
-    //TODO
-    //String[] localeParams = localeStr.Split("_", 3);
-    AutoPtr<ArrayOf<String> > localeParams;
+    AutoPtr< ArrayOf<String> > localeParams;
+    StringUtils::Split(localeStr, "_", 3, ( ArrayOf<String>**)&localeParams);
 
     AutoPtr<ILocale> locale;
     // The length of localeStr is guaranteed to always return a 1 <= value <= 3

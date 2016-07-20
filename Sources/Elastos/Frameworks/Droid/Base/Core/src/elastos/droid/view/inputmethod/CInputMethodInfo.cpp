@@ -21,6 +21,7 @@ using Elastos::Droid::R;
 using Elastos::Droid::Content::CComponentName;
 using Elastos::Droid::Content::Pm::CServiceInfo;
 using Elastos::Droid::Content::Pm::CApplicationInfo;
+using Elastos::Droid::Content::Pm::IPackageItemInfo;
 using Elastos::Droid::Content::Res::ITypedArray;
 using Elastos::Droid::Content::Res::IResources;
 using Elastos::Droid::View::InputMethod::CInputMethodSubtype;
@@ -310,10 +311,9 @@ ECode CInputMethodInfo::ReadFromParcel(
     source->ReadString(&mSettingsActivityName);
     source->ReadInt32(&mIsDefaultResId);
     source->ReadBoolean(&mIsAuxIme);
-    Int32 i = 0;
-    source->ReadInt32(&i);
-    mSupportsSwitchingToNextInputMethod = i == 1;
-    source->ReadInterfacePtr((Handle32*)&mService);
+    source->ReadBoolean(&mSupportsSwitchingToNextInputMethod);
+    CResolveInfo::NewByFriend((CResolveInfo**)&mService);
+    IParcelable::Probe(mService)->ReadFromParcel(source);
 
     CInputMethodSubtypeArray::New((IInputMethodSubtypeArray**)&mSubtypes);
     IParcelable::Probe(mSubtypes)->ReadFromParcel(source);
@@ -329,9 +329,8 @@ ECode CInputMethodInfo::WriteToParcel(
     dest->WriteString(mSettingsActivityName);
     dest->WriteInt32(mIsDefaultResId);
     dest->WriteBoolean(mIsAuxIme);
-    dest->WriteInt32(mSupportsSwitchingToNextInputMethod ? 1 : 0);
-    dest->WriteInterfacePtr((IInterface*)(IResolveInfo*)mService.Get());
-
+    dest->WriteBoolean(mSupportsSwitchingToNextInputMethod);
+    IParcelable::Probe(mService)->WriteToParcel(dest);
     IParcelable::Probe(mSubtypes)->WriteToParcel(dest);
 
     return NOERROR;
@@ -349,16 +348,14 @@ ECode CInputMethodInfo::GetPackageName(
     /* [out] */ String* name)
 {
     VALIDATE_NOT_NULL(name);
-    *name = ((CServiceInfo*)mService->mServiceInfo.Get())->mPackageName;
-    return NOERROR;
+    return IPackageItemInfo::Probe(mService->mServiceInfo)->GetPackageName(name);
 }
 
 ECode CInputMethodInfo::GetServiceName(
     /* [out] */ String* name)
 {
     VALIDATE_NOT_NULL(name);
-    *name = ((CServiceInfo*)mService->mServiceInfo.Get())->mName;
-    return NOERROR;
+    return IPackageItemInfo::Probe(mService->mServiceInfo)->GetName(name);
 }
 
 ECode CInputMethodInfo::GetServiceInfo(
@@ -374,8 +371,11 @@ ECode CInputMethodInfo::GetComponent(
     /* [out] */ IComponentName** name)
 {
     VALIDATE_NOT_NULL(name);
-    return CComponentName::New(((CServiceInfo*)mService->mServiceInfo.Get())->mPackageName,
-            ((CServiceInfo*)mService->mServiceInfo.Get())->mName, name);
+    String packageName, serviceName;
+    AutoPtr<IPackageItemInfo> pii = IPackageItemInfo::Probe(mService->mServiceInfo);
+    pii->GetPackageName(&packageName);
+    pii->GetName(&serviceName);
+    return CComponentName::New(packageName, serviceName, name);
 }
 
 ECode CInputMethodInfo::LoadLabel(

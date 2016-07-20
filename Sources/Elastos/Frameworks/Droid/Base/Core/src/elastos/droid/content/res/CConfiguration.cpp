@@ -3,6 +3,7 @@
 #include <Elastos.CoreLibrary.Utility.h>
 #include "Elastos.Droid.View.h"
 #include "elastos/droid/content/res/CConfiguration.h"
+#include "elastos/droid/content/res/CThemeConfig.h"
 #include "elastos/droid/os/Build.h"
 #include "elastos/droid/text/TextUtils.h"
 #include <elastos/core/StringBuilder.h>
@@ -10,9 +11,10 @@
 #include <elastos/utility/logging/Logger.h>
 #include <elastos/utility/etl/List.h>
 
+using Elastos::Droid::Content::Pm::IActivityInfo;
+using Elastos::Droid::Content::Res::CThemeConfig;
 using Elastos::Droid::Os::Build;
 using Elastos::Droid::View::IView;
-using Elastos::Droid::Content::Pm::IActivityInfo;
 using Elastos::Droid::Text::TextUtils;
 using Elastos::Core::StringBuilder;
 using Elastos::Core::StringUtils;
@@ -669,7 +671,12 @@ ECode CConfiguration::WriteToParcel(
     dest->WriteInt32(mCompatScreenHeightDp);
     dest->WriteInt32(mCompatSmallestScreenWidthDp);
     dest->WriteInt32(mSeq);
-    dest->WriteInterfacePtr(mThemeConfig);
+    if (mThemeConfig == NULL) {
+        dest->WriteInt32(0);
+    }
+    else {
+        IParcelable::Probe(mThemeConfig)->WriteToParcel(dest);
+    }
 
     return NOERROR;
 }
@@ -713,9 +720,11 @@ ECode CConfiguration::ReadFromParcel(
     source->ReadInt32(&mCompatScreenHeightDp);
     source->ReadInt32(&mCompatSmallestScreenWidthDp);
     source->ReadInt32(&mSeq);
-    AutoPtr<IInterface> value;
-    source->ReadInterfacePtr((Handle32*)(IInterface**)&value);
-    mThemeConfig = IThemeConfig::Probe(value);
+    source->ReadInt32(&val);
+    if (val != 0) {
+        CThemeConfig::New((IThemeConfig**)&mThemeConfig);
+        IParcelable::Probe(mThemeConfig)->ReadFromParcel(source);
+    }
     return NOERROR;
 }
 
@@ -735,8 +744,9 @@ ECode CConfiguration::CompareTo(
         return NOERROR;
     }
 
-    if (iconfig == (IConfiguration*)this) {
-        return 0;
+    if (iconfig.Get() == (IConfiguration*)this) {
+        *result = 0;
+        return NOERROR;
     }
 
     AutoPtr<CConfiguration> config = (CConfiguration*)iconfig.Get();

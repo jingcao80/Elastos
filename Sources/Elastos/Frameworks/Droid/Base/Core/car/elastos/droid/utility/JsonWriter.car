@@ -171,8 +171,7 @@ module
          * @return this writer.
          */
         Name(
-            [in] String name,
-            [out] IJsonWriter** writer);
+            [in] String name);
 
         /**
          * Encodes {@code value}.

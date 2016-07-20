@@ -8,12 +8,11 @@
 #include "elastos/droid/app/AppGlobals.h"
 #include "elastos/droid/os/Binder.h"
 #include "elastos/droid/os/UserHandle.h"
-#include "elastos/droid/app/AppGlobals.h"
 #include "elastos/droid/Manifest.h"
+#include <elastos/core/AutoLock.h>
+#include <elastos/core/StringUtils.h>
 #include <elastos/utility/etl/Algorithm.h>
 #include <elastos/utility/logging/Slogger.h>
-#include <elastos/core/StringUtils.h>
-#include <elastos/core/AutoLock.h>
 
 using Elastos::Droid::Manifest;
 using Elastos::Droid::Os::IProcess;
@@ -348,7 +347,7 @@ ECode CTextServicesManagerService::TextServicesSettings::IsSpellCheckerEnabled(
     AutoPtr<ISettingsSecure> settingsSecure;
     CSettingsSecure::AcquireSingleton((ISettingsSecure**)&settingsSecure);
     settingsSecure->GetInt32ForUser(mResolver,
-            ISettingsSecure::SPELL_CHECKER_ENABLED, 1, mCurrentUserId, &value);
+            ISettingsSecure::SPELL_CHECKER_ENABLED, 0, mCurrentUserId, &value);
     *enabled = (value == 1);
     return NOERROR;
 }
@@ -1211,8 +1210,9 @@ ECode CTextServicesManagerService::SetCurrentSpellCheckerLocked(
     mSettings->PutSelectedSpellChecker(sciId);
     SetCurrentSpellCheckerSubtypeLocked(0);
     //} finally {
+    Binder::RestoreCallingIdentity(ident);
     //}
-    return Binder::RestoreCallingIdentity(ident);
+    return NOERROR;
 }
 
 ECode CTextServicesManagerService::SetCurrentSpellCheckerSubtypeLocked(
@@ -1243,8 +1243,9 @@ ECode CTextServicesManagerService::SetCurrentSpellCheckerSubtypeLocked(
     //try {
     mSettings->PutSelectedSpellCheckerSubtype(tempHashCode);
     //} finally {
+    Binder::RestoreCallingIdentity(ident);
     //}
-    return Binder::RestoreCallingIdentity(ident);
+    return NOERROR;
 }
 
 ECode CTextServicesManagerService::SetSpellCheckerEnabledLocked(
@@ -1257,8 +1258,9 @@ ECode CTextServicesManagerService::SetSpellCheckerEnabledLocked(
     //try {
     mSettings->SetSpellCheckerEnabled(enabled);
     //} finally {
+    Binder::RestoreCallingIdentity(ident);
     //}
-    return Binder::RestoreCallingIdentity(ident);
+    return NOERROR;
 }
 
 ECode CTextServicesManagerService::IsSpellCheckerEnabledLocked(
@@ -1276,8 +1278,9 @@ ECode CTextServicesManagerService::IsSpellCheckerEnabledLocked(
     }
     *result = retval;
     //} finally {
+    Binder::RestoreCallingIdentity(ident);
     //}
-    return Binder::RestoreCallingIdentity(ident);
+    return NOERROR;
 }
 
 ECode CTextServicesManagerService::BuildSpellCheckerMapLocked(

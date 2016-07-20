@@ -726,9 +726,8 @@ private:
         /* [in] */ const String& newDefaultIme);
 
     // If there are no selected shortcuts, tries finding the most applicable ones.
-    AutoPtr<IPair> /* Pair<InputMethodInfo, InputMethodSubtype> */
-    FindLastResortApplicableShortcutInputMethodAndSubtypeLocked(
-        /* [in] */ const String& mode);
+    CARAPI_(AutoPtr<IPair>) FindLastResortApplicableShortcutInputMethodAndSubtypeLocked(
+        /* [in] */ const String& mode); /* Pair<InputMethodInfo, InputMethodSubtype> */
 
     CARAPI_(AutoPtr<IInputMethodSubtype>) GetCurrentInputMethodSubtypeLocked();
 
@@ -740,7 +739,7 @@ private:
         /* [in] */ IMessage* msg,
         /* [out] */ Boolean* result);
 
-    AutoPtr<IInputMethodInfo> GetMethodInfoFromMethodMap(
+    CARAPI_(AutoPtr<IInputMethodInfo>) GetMethodInfoFromMethodMap(
         /* [in] */ const String& inputMethodId);
 
 public:

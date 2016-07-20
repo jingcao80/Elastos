@@ -22,6 +22,7 @@ module
     merge("utility/DebugUtils.car");
     merge("utility/FastImmutableArraySet.car");
     merge("utility/JsonReader.car");
+    merge("utility/JsonScope.car");
     merge("utility/JsonWriter.car");
     merge("utility/LayoutDirection.car");
     merge("utility/LocalLog.car");
@@ -51,6 +52,7 @@ module
     using interface Elastos.Core.ICloneable;
     using interface Elastos.IO.IFile;
     using interface Elastos.IO.IWriter;
+    using interface Elastos.IO.IReader;
     using interface Elastos.IO.ICloseable;
     using interface Elastos.IO.IFlushable;
     using interface Elastos.IO.IInputStream;
@@ -388,6 +390,22 @@ module
         interface ICloneable;
         interface ISerializable;
         interface IParcelable;
+    }
+
+    class CJsonWriter {
+        constructor(
+            [in] IWriter* wout);
+
+        interface IJsonWriter;
+        interface ICloseable;
+    }
+
+    class CJsonReader {
+        constructor(
+            [in] IReader* rin);
+
+        interface IJsonReader;
+        interface ICloseable;
     }
 
     } // namespace Utility

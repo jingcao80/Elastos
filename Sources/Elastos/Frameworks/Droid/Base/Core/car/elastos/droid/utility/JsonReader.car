@@ -8,7 +8,6 @@ module
      * A structure, name or value type in a JSON-encoded string.
      */
     enum JsonToken {
-
         /**
          * The opening of a JSON array. Written using {@link JsonWriter#beginObject}
          * and read using {@link JsonReader#beginObject}.
@@ -213,19 +212,11 @@ module
             [out] Int32* value);
 
         /**
-         * Closes this JSON reader and the underlying {@link Reader}.
-         */
-        Close();
-
-        /**
          * Skips the next value recursively. If it is an object or array, all nested
          * elements are skipped. This method is intended for use when the JSON token
          * stream contains unrecognized or unhandled values.
          */
         SkipValue();
-
-        ToString(
-            [out] String* str);
     }
 
     } // namespace Utility

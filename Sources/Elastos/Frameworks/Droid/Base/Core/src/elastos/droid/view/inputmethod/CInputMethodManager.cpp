@@ -310,17 +310,11 @@ ECode CInputMethodManager::GetEnabledInputMethodSubtypeList(
 {
     VALIDATE_NOT_NULL(infos);
     // try {
-    AutoPtr<IInterface> p;
+    String id = String(NULL);
     if (imi != NULL) {
-        String id;
         imi->GetId(&id);
-        AutoPtr<ICharSequence> cs;
-        CString::New(id, (ICharSequence**)&cs);
-        p = cs;
     }
-    assert(0 && "TODO"); // internal IIInputMethodManager method define wrong.
-//    return mService->GetEnabledInputMethodSubtypeList(p, allowsImplicitlySelectedSubtypes, infos);
-    return NOERROR;
+   return mService->GetEnabledInputMethodSubtypeList(id, allowsImplicitlySelectedSubtypes, infos);
     // } catch (RemoteException e) {
     //     throw new RuntimeException(e);
     // }

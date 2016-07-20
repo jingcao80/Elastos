@@ -1,10 +1,15 @@
-#ifndef __ELASTOS_DROID_UTILITY_CJSON_READER_H__
-#define __ELASTOS_DROID_UTILITY_CJSON_READER_H__
+#ifndef __ELASTOS_DROID_UTILITY_CJSONREADER_H__
+#define __ELASTOS_DROID_UTILITY_CJSONREADER_H__
 
+#include "Elastos.CoreLibrary.Utility.h"
 #include "_Elastos_Droid_Utility_CJsonReader.h"
 #include "elastos/core/Object.h"
+#include <elastos/utility/StringPool.h>
 
 using Elastos::IO::ICloseable;
+using Elastos::IO::IReader;
+using Elastos::Utility::IList;
+using Elastos::Utility::StringPool;
 
 namespace Elastos {
 namespace Droid {
@@ -171,19 +176,317 @@ public:
 
     CJsonReader();
 
+    ~CJsonReader();
+
     /**
      * Creates a new instance that reads a JSON-encoded stream from {@code in}.
      */
     CARAPI constructor(
         /* [in] */ IReader* in);
 
-private:
+    /**
+     * Configure this parser to be  be liberal in what it accepts. By default,
+     * this parser is strict and only accepts JSON as specified by <a
+     * href="http://www.ietf.org/rfc/rfc4627.txt">RFC 4627</a>. Setting the
+     * parser to lenient causes it to ignore the following syntax errors:
+     *
+     * <ul>
+     *   <li>End of line comments starting with {@code //} or {@code #} and
+     *       ending with a newline character.
+     *   <li>C-style comments starting with {@code /*} and ending with
+     *       {@code *}{@code /}. Such comments may not be nested.
+     *   <li>Names that are unquoted or {@code 'single quoted'}.
+     *   <li>Strings that are unquoted or {@code 'single quoted'}.
+     *   <li>Array elements separated by {@code ;} instead of {@code ,}.
+     *   <li>Unnecessary array separators. These are interpreted as if null
+     *       was the omitted value.
+     *   <li>Names and values separated by {@code =} or {@code =>} instead of
+     *       {@code :}.
+     *   <li>Name/value pairs separated by {@code ;} instead of {@code ,}.
+     * </ul>
+     */
+    CARAPI SetLenient(
+        /* [in] */ Boolean lenient);
 
+    /**
+     * Returns true if this parser is liberal in what it accepts.
+     */
+    CARAPI IsLenient(
+        /* [out] */ Boolean* res);
+
+    /**
+     * Consumes the next token from the JSON stream and asserts that it is the
+     * beginning of a new array.
+     */
+    CARAPI BeginArray();
+
+    /**
+     * Consumes the next token from the JSON stream and asserts that it is the
+     * end of the current array.
+     */
+    CARAPI EndArray();
+
+    /**
+     * Consumes the next token from the JSON stream and asserts that it is the
+     * beginning of a new object.
+     */
+    CARAPI BeginObject();
+
+    /**
+     * Consumes the next token from the JSON stream and asserts that it is the
+     * end of the current array.
+     */
+    CARAPI EndObject();
+
+    /**
+     * Returns true if the current array or object has another element.
+     */
+    CARAPI HasNext(
+        /* [out] */ Boolean* res);
+
+    /**
+     * Returns the type of the next token without consuming it.
+     */
+    CARAPI Peek(
+        /* [out] */ JsonToken* result);
+
+    /**
+     * Returns the next token, a {@link JsonToken#NAME property name}, and
+     * consumes it.
+     *
+     * @throws IOException if the next token in the stream is not a property
+     *     name.
+     */
+    CARAPI NextName(
+        /* [out] */ String* str);
+
+    /**
+     * Returns the {@link JsonToken#STRING string} value of the next token,
+     * consuming it. If the next token is a number, this method will return its
+     * string form.
+     *
+     * @throws IllegalStateException if the next token is not a string or if
+     *     this reader is closed.
+     */
+    CARAPI NextString(
+        /* [out] */ String* str);
+
+    /**
+     * Returns the {@link JsonToken#BOOLEAN boolean} value of the next token,
+     * consuming it.
+     *
+     * @throws IllegalStateException if the next token is not a boolean or if
+     *     this reader is closed.
+     */
+    CARAPI NextBoolean(
+        /* [out] */ Boolean* res);
+
+    /**
+     * Consumes the next token from the JSON stream and asserts that it is a
+     * literal null.
+     *
+     * @throws IllegalStateException if the next token is not null or if this
+     *     reader is closed.
+     */
+    CARAPI NextNull();
+
+    /**
+     * Returns the {@link JsonToken#NUMBER double} value of the next token,
+     * consuming it. If the next token is a string, this method will attempt to
+     * parse it as a double using {@link Double#parseDouble(String)}.
+     *
+     * @throws IllegalStateException if the next token is not a literal value.
+     */
+    CARAPI NextDouble(
+        /* [out] */ Double* data);
+
+    /**
+     * Returns the {@link JsonToken#NUMBER long} value of the next token,
+     * consuming it. If the next token is a string, this method will attempt to
+     * parse it as a long. If the next token's numeric value cannot be exactly
+     * represented by a Java {@code long}, this method throws.
+     *
+     * @throws IllegalStateException if the next token is not a literal value.
+     * @throws NumberFormatException if the next literal value cannot be parsed
+     *     as a number, or exactly represented as a long.
+     */
+    CARAPI NextLong(
+        /* [out] */ Int64* data);
+
+    /**
+     * Returns the {@link JsonToken#NUMBER int} value of the next token,
+     * consuming it. If the next token is a string, this method will attempt to
+     * parse it as an int. If the next token's numeric value cannot be exactly
+     * represented by a Java {@code int}, this method throws.
+     *
+     * @throws IllegalStateException if the next token is not a literal value.
+     * @throws NumberFormatException if the next literal value cannot be parsed
+     *     as a number, or exactly represented as an int.
+     */
+    CARAPI NextInt(
+        /* [out] */ Int32* data);
+
+    /**
+     * Closes this JSON reader and the underlying {@link Reader}.
+     */
+    CARAPI Close();
+
+    /**
+     * Skips the next value recursively. If it is an object or array, all nested
+     * elements are skipped. This method is intended for use when the JSON token
+     * stream contains unrecognized or unhandled values.
+     */
+    CARAPI SkipValue();
+
+    //@Override
+    CARAPI ToString(
+        /* [out] */ String* str);
+
+private:
+    /**
+     * Consumes {@code expected}.
+     */
+    CARAPI Expect(
+        /* [in] */ JsonToken expected);
+
+    /**
+     * Advances the cursor in the JSON stream to the next token.
+     */
+    CARAPI Advance(
+        /* [out] */ JsonToken* result);
+
+    CARAPI_(JsonScope) PeekStack();
+
+    CARAPI_(JsonScope) Pop();
+
+    CARAPI_(void) Push(
+        /* [in] */ JsonScope newTop);
+
+    /**
+     * Replace the value on the top of the stack with the given value.
+     */
+    CARAPI_(void) ReplaceTop(
+        /* [in] */ JsonScope newTop);
+
+    CARAPI NextInArray(
+        /* [in] */ Boolean firstElement,
+        /* [out] */ JsonToken* result);
+
+    CARAPI NextInObject(
+        /* [in] */ Boolean firstElement,
+        /* [out] */ JsonToken* result);
+
+    CARAPI ObjectValue(
+        /* [out] */ JsonToken* result);
+
+    CARAPI NextValue(
+        /* [out] */ JsonToken* result);
+
+    /**
+     * Returns true once {@code limit - pos >= minimum}. If the data is
+     * exhausted before that many characters are available, this returns
+     * false.
+     */
+    CARAPI FillBuffer(
+        /* [in] */ Int32 minimum,
+        /* [out] */ Boolean* res);
+
+    CARAPI_(Int32) GetLineNumber();
+
+    CARAPI_(Int32) GetColumnNumber();
+
+    CARAPI NextNonWhitespace(
+        /* [out] */ Int32* result);
+
+    CARAPI CheckLenient();
+
+    /**
+     * Advances the position until after the next newline character. If the line
+     * is terminated by "\r\n", the '\n' must be consumed as whitespace by the
+     * caller.
+     */
+    CARAPI SkipToEndOfLine();
+
+    CARAPI SkipTo(
+        /* [in] */ const String& toFind,
+        /* [out] */ Boolean* result);
+
+    /**
+     * Returns the string up to but not including {@code quote}, unescaping any
+     * character escape sequences encountered along the way. The opening quote
+     * should have already been read. This consumes the closing quote, but does
+     * not include it in the returned string.
+     *
+     * @param quote either ' or ".
+     * @throws NumberFormatException if any unicode escape sequences are
+     *     malformed.
+     */
+    CARAPI NextString(
+        /* [in] */ Char32 quote,
+        /* [out] */ String* str);
+
+    /**
+     * Reads the value up to but not including any delimiter characters. This
+     * does not consume the delimiter character.
+     *
+     * @param assignOffsetsOnly true for this method to only set the valuePos
+     *     and valueLength fields and return a null result. This only works if
+     *     the literal is short; a string is returned otherwise.
+     */
+    CARAPI NextLiteral(
+        /* [in] */ Boolean assignOffsetsOnly,
+        /* [out] */ String* str);
+
+    /**
+     * Unescapes the character identified by the character or characters that
+     * immediately follow a backslash. The backslash '\' should have already
+     * been read. This supports both unicode escapes "u000A" and two-character
+     * escapes "\n".
+     *
+     * @throws NumberFormatException if any unicode escape sequences are
+     *     malformed.
+     */
+    CARAPI ReadEscapeCharacter(
+        /* [out] */ Char32* ch);
+
+    /**
+     * Reads a null, boolean, numeric or unquoted string literal value.
+     */
+    CARAPI ReadLiteral(
+        /* [out] */ JsonToken* result);
+
+    /**
+     * Assigns {@code nextToken} based on the value of {@code NextValue}.
+     */
+    CARAPI DecodeLiteral(
+        /* [out] */ JsonToken* result);
+
+    /**
+     * Determine whether the characters is a JSON number. Numbers are of the
+     * form -12.34e+56. Fractional and exponential parts are optional. Leading
+     * zeroes are not allowed in the value or exponential part, but are allowed
+     * in the fraction.
+     */
+    CARAPI_(JsonToken) DecodeNumber(
+        /* [in] */ ArrayOf<Char32>* chars,
+        /* [in] */ Int32 offset,
+        /* [in] */ Int32 length);
+
+    /**
+     * Throws a new IO exception with the given message and a context snippet
+     * with this reader's content.
+     */
+    CARAPI SyntaxError(
+        /* [in] */ const String& message);
+
+    CARAPI_(AutoPtr<ICharSequence>) GetSnippet();
+
+private:
     static const String sTRUE;// = "true";
     static const String sFALSE;// = "false";
 
 private:
-    StringPool mStringPool;
+    AutoPtr<StringPool> mStringPool;
 
     /** The input JSON. */
     AutoPtr<IReader> mIn;
@@ -213,7 +516,7 @@ private:
      * The type of the next token to be returned by {@link #peek} and {@link
      * #advance}. If null, peek() will assign a value.
      */
-    AutoPtr<IJsonToken> mToken;
+    JsonToken mToken;
 
     /** The text of the next name. */
     String mName;
@@ -234,4 +537,4 @@ private:
 } // Droid
 } // Elastos
 
-#endif // __ELASTOS_DROID_UTILITY_CJSON_READER_H__
+#endif // __ELASTOS_DROID_UTILITY_CJSONREADER_H__
