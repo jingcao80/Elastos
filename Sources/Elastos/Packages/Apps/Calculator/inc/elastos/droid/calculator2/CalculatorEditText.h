@@ -98,7 +98,7 @@ public:
         /* [out] */ Int32* result);
 
 protected:
-    CARAPI_(void) OnMeasure(
+    CARAPI OnMeasure(
         /* [in] */ Int32 widthMeasureSpec,
         /* [in] */ Int32 heightMeasureSpec);
 

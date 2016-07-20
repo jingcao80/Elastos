@@ -62,7 +62,7 @@ public:
                 /* [in] */ ICaptioningManagerCaptionStyle* captionStyle);
 
         protected:
-            CARAPI_(void) OnMeasure(
+            CARAPI OnMeasure(
                 /* [in] */ Int32 widthMeasureSpec,
                 /* [in] */ Int32 heightMeasureSpec);
 
@@ -107,7 +107,7 @@ public:
                 /* [in] */ ArrayOf<ISpannableStringBuilder*>* textBuffer);
 
         protected:
-            CARAPI_(void) OnMeasure(
+            CARAPI OnMeasure(
                 /* [in] */ Int32 widthMeasureSpec,
                 /* [in] */ Int32 heightMeasureSpec);
 
@@ -192,7 +192,7 @@ public:
             /* [in] */ ICanvas* c);
 
     protected:
-        CARAPI_(void) OnMeasure(
+        CARAPI OnMeasure(
             /* [in] */ Int32 widthMeasureSpec,
             /* [in] */ Int32 heightMeasureSpec);
 

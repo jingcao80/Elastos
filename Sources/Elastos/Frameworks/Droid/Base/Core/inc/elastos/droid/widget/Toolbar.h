@@ -412,7 +412,7 @@ protected:
 
     CARAPI OnDetachedFromWindow();
 
-    CARAPI_(void) OnMeasure(
+    CARAPI OnMeasure(
         /* [in] */ Int32 widthMeasureSpec,
         /* [in] */ Int32 heightMeasureSpec);
 

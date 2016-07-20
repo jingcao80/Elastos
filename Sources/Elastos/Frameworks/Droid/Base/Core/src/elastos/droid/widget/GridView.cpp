@@ -1080,7 +1080,7 @@ Boolean GridView::DetermineColumns(
     return didNotInitiallyFit;
 }
 
-void GridView::OnMeasure(
+ECode GridView::OnMeasure(
     /* [in] */ Int32 widthMeasureSpec,
     /* [in] */ Int32 heightMeasureSpec)
 {
@@ -1171,6 +1171,7 @@ void GridView::OnMeasure(
 
     SetMeasuredDimension(widthSize, heightSize);
     mWidthMeasureSpec = widthMeasureSpec;
+    return NOERROR;
 }
 
 ECode GridView::AttachLayoutAnimationParameters(

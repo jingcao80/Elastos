@@ -1048,14 +1048,14 @@ Boolean SearchView::IsLandscapeMode(
     return orientation == IConfiguration::ORIENTATION_LANDSCAPE;
 }
 
-void SearchView::OnMeasure(
+ECode SearchView::OnMeasure(
     /* [in] */ Int32 widthMeasureSpec,
     /* [in] */ Int32 heightMeasureSpec)
 {
     Boolean tmp = FALSE;
     if (IsIconified(&tmp), tmp) {
         LinearLayout::OnMeasure(widthMeasureSpec, heightMeasureSpec);
-        return;
+        return NOERROR;
     }
 
     Int32 widthMode = View::MeasureSpec::GetMode(widthMeasureSpec);
@@ -1081,7 +1081,7 @@ void SearchView::OnMeasure(
             break;
     }
     widthMode = View::MeasureSpec::EXACTLY;
-    LinearLayout::OnMeasure(View::MeasureSpec::MakeMeasureSpec(width, widthMode), heightMeasureSpec);
+    return LinearLayout::OnMeasure(View::MeasureSpec::MakeMeasureSpec(width, widthMode), heightMeasureSpec);
 }
 
 ECode SearchView::OnDetachedFromWindow()

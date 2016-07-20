@@ -1348,7 +1348,7 @@ ECode ActivityChooserView::OnDetachedFromWindow()
     return NOERROR;
 }
 
-void ActivityChooserView::OnMeasure(
+ECode ActivityChooserView::OnMeasure(
     /* [in] */ Int32 widthMeasureSpec,
     /* [in] */ Int32 heightMeasureSpec)
 {
@@ -1377,6 +1377,7 @@ void ActivityChooserView::OnMeasure(
     child->GetMeasuredWidth(&measuredWidth);
     child->GetMeasuredHeight(&measuredHeight);
     SetMeasuredDimension(measuredWidth, measuredHeight);
+    return NOERROR;
 }
 
 ECode ActivityChooserView::OnLayout(

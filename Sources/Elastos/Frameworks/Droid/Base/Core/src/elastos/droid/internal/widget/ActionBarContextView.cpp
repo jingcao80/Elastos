@@ -535,22 +535,22 @@ ECode ActionBarContextView::GenerateDefaultLayoutParams(
             IViewGroupLayoutParams::WRAP_CONTENT, result);
 }
 
-void ActionBarContextView::OnMeasure(
+ECode ActionBarContextView::OnMeasure(
     /* [in] */ Int32 widthMeasureSpec,
     /* [in] */ Int32 heightMeasureSpec)
 {
     Int32 widthMode = View::MeasureSpec::GetMode(widthMeasureSpec);
     if (widthMode != View::MeasureSpec::EXACTLY) {
-        /*throw new IllegalStateException(getClass().getSimpleName() + " can only be used " +
-                "with android:layout_width=\"match_parent\" (or fill_parent)");*/
-        return ;
+        ALOGE("IllegalStateException %s  can only be used with "
+            "android:layout_width=\"match_parent\" (or fill_parent)", TO_CSTR(this));
+        return E_ILLEGAL_STATE_EXCEPTION;
     }
 
     Int32 heightMode = View::MeasureSpec::GetMode(heightMeasureSpec);
     if (heightMode == View::MeasureSpec::UNSPECIFIED) {
-        /*throw new IllegalStateException(getClass().getSimpleName() + " can only be used " +
-                "with android:layout_height=\"wrap_content\"");*/
-        return ;
+        ALOGE("IllegalStateException %s  can only be used with "
+            "android:layout_height=\"wrap_content\"", TO_CSTR(this));
+        return E_ILLEGAL_STATE_EXCEPTION;
     }
 
     Int32 contentWidth = View::MeasureSpec::GetSize(widthMeasureSpec);
@@ -645,6 +645,7 @@ void ActionBarContextView::OnMeasure(
     else {
         SetMeasuredDimension(contentWidth, maxHeight);
     }
+    return NOERROR;
 }
 
 ECode ActionBarContextView::OnLayout(

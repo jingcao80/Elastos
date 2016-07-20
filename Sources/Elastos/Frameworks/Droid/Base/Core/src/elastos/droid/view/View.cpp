@@ -16029,12 +16029,13 @@ ECode View::Measure(
  * @see android.view.View.MeasureSpec#getMode(int)
  * @see android.view.View.MeasureSpec#getSize(int)
  */
-void View::OnMeasure(
+ECode View::OnMeasure(
     /* [in] */ Int32 widthMeasureSpec,
     /* [in] */ Int32 heightMeasureSpec)
 {
     SetMeasuredDimension(GetDefaultSize(GetSuggestedMinimumWidth(), widthMeasureSpec),
         GetDefaultSize(GetSuggestedMinimumHeight(), heightMeasureSpec));
+    return NOERROR;
 }
 
 /**

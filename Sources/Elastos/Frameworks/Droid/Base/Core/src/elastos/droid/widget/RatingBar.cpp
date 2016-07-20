@@ -239,7 +239,7 @@ void RatingBar::UpdateSecondaryProgress(
     }
 }
 
-void RatingBar::OnMeasure(
+ECode RatingBar::OnMeasure(
     /* [in] */ Int32 widthMeasureSpec,
     /* [in] */ Int32 heightMeasureSpec)
 {
@@ -255,6 +255,7 @@ void RatingBar::OnMeasure(
             SetMeasuredDimension(ResolveSizeAndState(width, widthMeasureSpec, 0), height);
         }
     }
+    return NOERROR;
 }
 
 void RatingBar::OnStartTrackingTouch()

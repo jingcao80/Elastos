@@ -366,7 +366,7 @@ ECode CAppsCustomizeTabHost::OnFinishInflate()
     return IView::Probe(mTabsContainer)->SetAlpha(0.0f);
 }
 
-void CAppsCustomizeTabHost::OnMeasure(
+ECode CAppsCustomizeTabHost::OnMeasure(
     /* [in] */ Int32 widthMeasureSpec,
     /* [in] */ Int32 heightMeasureSpec)
 {
@@ -389,6 +389,7 @@ void CAppsCustomizeTabHost::OnMeasure(
 
         TabHost::OnMeasure(widthMeasureSpec, heightMeasureSpec);
     }
+    return NOERROR;
 }
 
 ECode CAppsCustomizeTabHost::OnInterceptTouchEvent(

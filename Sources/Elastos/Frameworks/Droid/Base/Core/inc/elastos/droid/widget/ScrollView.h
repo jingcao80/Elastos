@@ -233,7 +233,7 @@ protected:
 
     virtual CARAPI_(Float) GetBottomFadingEdgeStrength();
 
-    virtual CARAPI_(void) OnMeasure(
+    virtual CARAPI OnMeasure(
         /* [in] */ Int32 widthMeasureSpec,
         /* [in] */ Int32 heightMeasureSpec);
 

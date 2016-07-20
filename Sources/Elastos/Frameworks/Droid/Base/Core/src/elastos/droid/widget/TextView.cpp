@@ -7694,7 +7694,7 @@ ECode TextView::GetIncludeFontPadding(
     return NOERROR;
 }
 
-void TextView::OnMeasure(
+ECode TextView::OnMeasure(
     /* [in] */ Int32 widthMeasureSpec,
     /* [in] */ Int32 heightMeasureSpec)
 {
@@ -7902,6 +7902,7 @@ void TextView::OnMeasure(
         }
     }
     SetMeasuredDimension(width, height);
+    return NOERROR;
 }
 
 Int32 TextView::GetDesiredHeight()

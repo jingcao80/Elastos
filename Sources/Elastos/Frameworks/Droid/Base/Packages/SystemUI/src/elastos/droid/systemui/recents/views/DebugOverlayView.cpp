@@ -185,7 +185,7 @@ void DebugOverlayView::SetText(
 }
 
 // @Override
-void DebugOverlayView::OnMeasure(
+ECode DebugOverlayView::OnMeasure(
     /* [in] */ Int32 widthMeasureSpec,
     /* [in] */ Int32 heightMeasureSpec)
 {
@@ -199,6 +199,7 @@ void DebugOverlayView::OnMeasure(
     r = NULL;
     CRect::New(w - sCornerRectSize, h - sCornerRectSize, w, h, (IRect**)&r);
     AddRect(r, 0xFFff0000);
+    return NOERROR;
 }
 
 // @Override

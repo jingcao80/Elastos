@@ -43,7 +43,7 @@ ECode WeightedLinearLayout::constructor(
     return NOERROR;
 }
 
-void WeightedLinearLayout::OnMeasure(
+ECode WeightedLinearLayout::OnMeasure(
     /* [in] */ Int32 widthMeasureSpec,
     /* [in] */ Int32 heightMeasureSpec)
 {
@@ -85,6 +85,7 @@ void WeightedLinearLayout::OnMeasure(
     if (measure) {
         LinearLayout::OnMeasure(widthMeasureSpec, heightMeasureSpec);
     }
+    return NOERROR;
 }
 
 } // namespace Widget

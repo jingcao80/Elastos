@@ -151,7 +151,7 @@ public class BatteryHistoryChart extends View {
     final Path mWifiRunningPath = new Path();
     final Path mCpuRunningPath = new Path();
     final Path mDateLinePath = new Path();
-    
+
     BatteryStats mStats;
     Intent mBatteryBroadcast;
     Int64 mStatsPeriod;
@@ -390,7 +390,7 @@ public class BatteryHistoryChart extends View {
 
         Int32 shadowcolor = 0;
         Float dx=0, dy=0, r=0;
-        
+
         Int32 n = a->GetIndexCount();
         for (Int32 i = 0; i < n; i++) {
             Int32 attr = a->GetIndex(i);
@@ -450,9 +450,9 @@ public class BatteryHistoryChart extends View {
                     break;
             }
         }
-        
+
         a->Recycle();
-        
+
         mainTextAttrs->Apply(context, mTextPaint);
         headTextAttrs->Apply(context, mHeaderTextPaint);
 
@@ -610,7 +610,7 @@ public class BatteryHistoryChart extends View {
     }
 
     //@Override
-    protected void OnMeasure(Int32 widthMeasureSpec, Int32 heightMeasureSpec) {
+    protected CARAPI OnMeasure(Int32 widthMeasureSpec, Int32 heightMeasureSpec) {
         mMaxPercentLabelStringWidth = (Int32)mTextPaint->MeasureText(mMaxPercentLabelString);
         mMinPercentLabelStringWidth = (Int32)mTextPaint->MeasureText(mMinPercentLabelString);
         mDrainStringWidth = (Int32)mHeaderTextPaint->MeasureText(mDrainString);
@@ -640,7 +640,7 @@ public class BatteryHistoryChart extends View {
             curLevelPath->LineTo(startX, mLevelTop+levelh);
             curLevelPath->Close();
         }
-        
+
         if (lastCharging) {
             mChargingPath->LineTo(w, h-mChargingOffset);
         }
@@ -983,7 +983,7 @@ public class BatteryHistoryChart extends View {
                         }
                     }
                 }
-                
+
                 i++;
             }
             mStats->FinishIteratingHistoryLocked();

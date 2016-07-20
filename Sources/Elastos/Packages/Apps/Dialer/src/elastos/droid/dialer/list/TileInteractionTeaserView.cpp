@@ -241,7 +241,7 @@ void TileInteractionTeaserView::SetDismissed()
     editor->Apply();
 }
 
-void TileInteractionTeaserView::OnMeasure(
+ECode TileInteractionTeaserView::OnMeasure(
     /* [in] */ Int32 widthMeasureSpec,
     /* [in] */ Int32 heightMeasureSpec)
 {
@@ -251,6 +251,7 @@ void TileInteractionTeaserView::OnMeasure(
     else {
         SetMeasuredDimension(View::MeasureSpec::GetSize(widthMeasureSpec), mAnimatedHeight);
     }
+    return NOERROR;
 }
 
 } // List

@@ -689,7 +689,7 @@ void CQSPanel::SetGridContentVisibility(
     mGridContentVisible = visible;
 }
 
-void CQSPanel::OnMeasure(
+ECode CQSPanel::OnMeasure(
     /* [in] */ Int32 widthMeasureSpec,
     /* [in] */ Int32 heightMeasureSpec)
 {
@@ -751,6 +751,7 @@ void CQSPanel::OnMeasure(
         mDetail->Measure(Exactly(width), Exactly(h));
     }
     SetMeasuredDimension(width, Elastos::Core::Math::Max(h, (mDetail->GetMeasuredHeight(&v), v)));
+    return NOERROR;
 }
 
 Int32 CQSPanel::Exactly(

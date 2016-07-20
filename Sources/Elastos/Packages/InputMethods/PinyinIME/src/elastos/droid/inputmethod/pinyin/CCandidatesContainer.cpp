@@ -124,7 +124,7 @@ ECode CCandidatesContainer::EnableActiveHighlight(
     return Invalidate();
 }
 
-void CCandidatesContainer::OnMeasure(
+ECode CCandidatesContainer::OnMeasure(
     /* [in] */ Int32 widthMeasureSpec,
     /* [in] */ Int32 heightMeasureSpec)
 {
@@ -141,6 +141,7 @@ void CCandidatesContainer::OnMeasure(
     if (NULL != mLeftArrowBtn) {
         IView::Probe(mLeftArrowBtn)->GetMeasuredWidth(&mXOffsetForFlipper);
     }
+    return NOERROR;
 }
 
 Boolean CCandidatesContainer::ActiveCurseBackward()

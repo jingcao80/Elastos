@@ -854,7 +854,7 @@ ECode ResolverDrawerLayout::OnNestedFling(
     return NOERROR;
 }
 
-void ResolverDrawerLayout::OnMeasure(
+ECode ResolverDrawerLayout::OnMeasure(
     /* [in] */ Int32 widthMeasureSpec,
     /* [in] */ Int32 heightMeasureSpec)
 {
@@ -933,6 +933,7 @@ void ResolverDrawerLayout::OnMeasure(
     mTopOffset = Elastos::Core::Math::Max(0, heightSize - heightUsed) + (Int32) mCollapseOffset;
 
     SetMeasuredDimension(sourceWidth, heightSize);
+    return NOERROR;
 }
 
 ECode ResolverDrawerLayout::OnLayout(

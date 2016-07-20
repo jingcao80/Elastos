@@ -91,7 +91,7 @@ void CSoftKeyboardView::SetOffsetToSkbContainer(
     (*mOffsetToSkbContainer)[1] = (*offsetToSkbContainer)[1];
 }
 
-void CSoftKeyboardView::OnMeasure(
+ECode CSoftKeyboardView::OnMeasure(
     /* [in] */ Int32 widthMeasureSpec,
     /* [in] */ Int32 heightMeasureSpec)
 {
@@ -104,6 +104,7 @@ void CSoftKeyboardView::OnMeasure(
         measuredHeight += mPaddingTop + mPaddingBottom;
     }
     SetMeasuredDimension(measuredWidth, measuredHeight);
+    return NOERROR;
 }
 
 void CSoftKeyboardView::ShowBalloon(

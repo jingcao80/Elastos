@@ -349,8 +349,8 @@ ECode StatusBarKeyguardViewManager::Hide(
 void StatusBarKeyguardViewManager::ExecuteAfterKeyguardGoneAction()
 {
     if (mAfterKeyguardGoneAction != NULL) {
-        assert(0 && "TODO: Need the app Keyguard.");
-        // mAfterKeyguardGoneAction->OnDismiss();
+        Boolean bval;
+        mAfterKeyguardGoneAction->OnDismiss(&bval);
         mAfterKeyguardGoneAction = NULL;
     }
 }

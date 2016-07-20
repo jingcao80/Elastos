@@ -515,7 +515,7 @@ void VideoView::InitVideoView()
     mTargetState  = STATE_IDLE;
 }
 
-void VideoView::OnMeasure(
+ECode VideoView::OnMeasure(
     /* [in] */ Int32 widthMeasureSpec,
     /* [in] */ Int32 heightMeasureSpec)
 {
@@ -583,6 +583,7 @@ void VideoView::OnMeasure(
         // no size yet, just adopt the given spec sizes
     }
     SetMeasuredDimension(width, height);
+    return NOERROR;
 }
 
 ECode VideoView::OnInitializeAccessibilityEvent(

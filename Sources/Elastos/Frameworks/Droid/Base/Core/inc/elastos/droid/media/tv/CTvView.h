@@ -548,7 +548,7 @@ protected:
         /* [in] */ Int32 r,
         /* [in] */ Int32 b);
 
-    virtual CARAPI_(void) OnMeasure(
+    virtual CARAPI OnMeasure(
         /* [in] */ Int32 widthMeasureSpec,
         /* [in] */ Int32 heightMeasureSpec);
 

@@ -163,7 +163,7 @@ ECode CalculatorEditText::OnTouchEvent(
     return EditText::OnTouchEvent(event, result);
 }
 
-void CalculatorEditText::OnMeasure(
+ECode CalculatorEditText::OnMeasure(
     /* [in] */ Int32 widthMeasureSpec,
     /* [in] */ Int32 heightMeasureSpec)
 {
@@ -182,6 +182,7 @@ void CalculatorEditText::OnMeasure(
     Float vol;
     GetVariableTextSize(str, &vol);
     SetTextSize(ITypedValue::COMPLEX_UNIT_PX, vol);
+    return NOERROR;
 }
 
 ECode CalculatorEditText::OnSaveInstanceState(

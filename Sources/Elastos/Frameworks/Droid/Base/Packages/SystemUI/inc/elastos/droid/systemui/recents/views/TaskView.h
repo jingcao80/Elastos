@@ -449,7 +449,7 @@ protected:
     CARAPI OnFinishInflate();
 
     // @Override
-    CARAPI_(void) OnMeasure(
+    CARAPI OnMeasure(
         /* [in] */ Int32 widthMeasureSpec,
         /* [in] */ Int32 heightMeasureSpec);
 

@@ -572,7 +572,7 @@ ECode RadialTimePickerView::constructor(
     return NOERROR;
 }
 
-void RadialTimePickerView::OnMeasure(
+ECode RadialTimePickerView::OnMeasure(
     /* [in] */ Int32 widthMeasureSpec,
     /* [in] */ Int32 heightMeasureSpec)
 {
@@ -584,6 +584,7 @@ void RadialTimePickerView::OnMeasure(
 
     View::OnMeasure(View::MeasureSpec::MakeMeasureSpec(minDimension, widthMode),
             View::MeasureSpec::MakeMeasureSpec(minDimension, heightMode));
+    return NOERROR;
 }
 
 ECode RadialTimePickerView::Initialize(

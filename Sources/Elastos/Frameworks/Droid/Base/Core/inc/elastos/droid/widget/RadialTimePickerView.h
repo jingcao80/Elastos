@@ -112,7 +112,7 @@ public:
      * Measure the view to end up as a square, based on the minimum of the height and width.
      */
     // @Override
-    CARAPI_(void) OnMeasure(
+    CARAPI OnMeasure(
         /* [in] */ Int32 widthMeasureSpec,
         /* [in] */ Int32 heightMeasureSpec);
 

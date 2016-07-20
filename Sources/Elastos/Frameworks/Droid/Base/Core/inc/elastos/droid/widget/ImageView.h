@@ -247,7 +247,7 @@ protected:
         /* [in] */ Int32 extraSpace,
         /* [out] */ ArrayOf<Int32>** drawableState);
 
-    CARAPI_(void) OnMeasure(
+    CARAPI OnMeasure(
         /* [in] */ Int32 widthMeasureSpec,
         /* [in] */ Int32 heightMeasureSpec);
 

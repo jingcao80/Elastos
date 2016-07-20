@@ -619,7 +619,7 @@ ECode LinearLayout::SetWeightSum(
     return NOERROR;
 }
 
-void LinearLayout::OnMeasure(
+ECode LinearLayout::OnMeasure(
     /* [in] */ Int32 widthMeasureSpec,
     /* [in] */ Int32 heightMeasureSpec)
 {
@@ -629,6 +629,7 @@ void LinearLayout::OnMeasure(
     else {
         MeasureHorizontal(widthMeasureSpec, heightMeasureSpec);
     }
+    return NOERROR;
 }
 
 Boolean LinearLayout::HasDividerBeforeChildAt(

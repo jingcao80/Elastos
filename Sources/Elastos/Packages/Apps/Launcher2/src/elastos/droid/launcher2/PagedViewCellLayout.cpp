@@ -357,7 +357,7 @@ ECode PagedViewCellLayout::GetCellCountY(
     return NOERROR;
 }
 
-void PagedViewCellLayout::OnMeasure(
+ECode PagedViewCellLayout::OnMeasure(
     /* [in] */ Int32 widthMeasureSpec,
     /* [in] */ Int32 heightMeasureSpec)
 {
@@ -443,6 +443,7 @@ void PagedViewCellLayout::OnMeasure(
     }
 
     SetMeasuredDimension(newWidth, newHeight);
+    return NOERROR;
 }
 
 ECode PagedViewCellLayout::GetContentWidth(

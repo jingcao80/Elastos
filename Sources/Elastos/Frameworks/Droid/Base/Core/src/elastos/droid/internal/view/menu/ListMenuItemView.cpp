@@ -299,7 +299,7 @@ ECode ListMenuItemView::SetIcon(
     return NOERROR;
 }
 
-void ListMenuItemView::OnMeasure(
+ECode ListMenuItemView::OnMeasure(
     /* [in] */ Int32 widthMeasureSpec,
     /* [in] */ Int32 heightMeasureSpec)
 {
@@ -319,6 +319,7 @@ void ListMenuItemView::OnMeasure(
     }
 
     LinearLayout::OnMeasure(widthMeasureSpec, heightMeasureSpec);
+    return NOERROR;
 }
 
 void ListMenuItemView::InsertIconView()

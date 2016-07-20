@@ -175,7 +175,7 @@ ECode AnalogClock::OnDetachedFromWindow()
     return NOERROR;
 }
 
-void AnalogClock::OnMeasure(
+ECode AnalogClock::OnMeasure(
     /* [in] */ Int32 widthMeasureSpec,
     /* [in] */ Int32 heightMeasureSpec)
 {
@@ -199,6 +199,7 @@ void AnalogClock::OnMeasure(
 
     SetMeasuredDimension(ResolveSizeAndState((Int32) (mDialWidth * scale), widthMeasureSpec, 0),
         ResolveSizeAndState((Int32) (mDialHeight * scale), heightMeasureSpec, 0));
+    return NOERROR;
 }
 
 void AnalogClock::OnSizeChanged(

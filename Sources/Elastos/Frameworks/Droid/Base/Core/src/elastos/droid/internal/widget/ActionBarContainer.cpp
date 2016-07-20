@@ -369,7 +369,7 @@ ECode ActionBarContainer::StartActionModeForChild(
     return NOERROR;
 }
 
-void ActionBarContainer::OnMeasure(
+ECode ActionBarContainer::OnMeasure(
     /* [in] */ Int32 widthMeasureSpec,
     /* [in] */ Int32 heightMeasureSpec)
 {
@@ -381,7 +381,7 @@ void ActionBarContainer::OnMeasure(
     }
     FrameLayout::OnMeasure(widthMeasureSpec, heightMeasureSpec);
 
-    if (mActionBarView == NULL) return;
+    if (mActionBarView == NULL) return NOERROR;
 
     Int32 visible = 0;
     if (mTabContainer != NULL && (mTabContainer->GetVisibility(&visible), visible != IView::GONE)) {
@@ -406,6 +406,7 @@ void ActionBarContainer::OnMeasure(
                 Math::Min(nonTabMaxHeight + GetMeasuredHeightWithMargins(mTabContainer),
                         maxHeight));
     }
+    return NOERROR;
 }
 
 ECode ActionBarContainer::OnLayout(

@@ -274,7 +274,7 @@ ECode DragView::UpdateInitialScaleToCurrentScale()
     return GetScaleX(&mInitialScale);
 }
 
-void DragView::OnMeasure(
+ECode DragView::OnMeasure(
     /* [in] */ Int32 widthMeasureSpec,
     /* [in] */ Int32 heightMeasureSpec)
 {
@@ -283,6 +283,7 @@ void DragView::OnMeasure(
     Int32 height;
     mBitmap->GetHeight(&height);
     SetMeasuredDimension(width, height);
+    return NOERROR;
 }
 
 void DragView::OnDraw(

@@ -1494,7 +1494,7 @@ protected:
         /* [in] */ Int32 newVisibility);
 
     /* @Override */
-    CARAPI_(void) OnMeasure(
+    CARAPI OnMeasure(
         /* [in] */ Int32 widthSpec,
         /* [in] */ Int32 heightSpec);
 

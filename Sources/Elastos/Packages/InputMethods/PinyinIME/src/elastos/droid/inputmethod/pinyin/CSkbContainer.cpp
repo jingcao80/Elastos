@@ -399,7 +399,7 @@ void CSkbContainer::DismissPopups()
     ResetKeyPress(0);
 }
 
-void CSkbContainer::OnMeasure(
+ECode CSkbContainer::OnMeasure(
     /* [in] */ Int32 widthMeasureSpec,
     /* [in] */ Int32 heightMeasureSpec)
 {
@@ -413,6 +413,7 @@ void CSkbContainer::OnMeasure(
     heightMeasureSpec = MeasureSpec::MakeMeasureSpec(measuredHeight,
             MeasureSpec::EXACTLY);
     RelativeLayout::OnMeasure(widthMeasureSpec, heightMeasureSpec);
+    return NOERROR;
 }
 
 ECode CSkbContainer::OnTouchEvent(

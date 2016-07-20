@@ -323,7 +323,7 @@ ECode SizeAdaptiveLayout::OnAttachedToWindow()
     return NOERROR;
 }
 
-void SizeAdaptiveLayout::OnMeasure(
+ECode SizeAdaptiveLayout::OnMeasure(
     /* [in] */ Int32 widthMeasureSpec,
     /* [in] */ Int32 heightMeasureSpec)
 {
@@ -332,7 +332,7 @@ void SizeAdaptiveLayout::OnMeasure(
     AutoPtr<IView> model = SelectActiveChild(heightMeasureSpec);
     if (model == NULL) {
         SetMeasuredDimension(0, 0);
-        return;
+        return NOERROR;
     }
 
     AutoPtr<IViewGroupLayoutParams> vglp;
@@ -365,6 +365,7 @@ void SizeAdaptiveLayout::OnMeasure(
     Int32 boundedHeight = ClampSizeToBounds(resolvedHeight, model);
     if (DEBUG) Slogger::D(TAG, "bounded to: %d", boundedHeight);
     SetMeasuredDimension(resolvedWidth, boundedHeight);
+    return NOERROR;
 }
 
 Int32 SizeAdaptiveLayout::ClampSizeToBounds(

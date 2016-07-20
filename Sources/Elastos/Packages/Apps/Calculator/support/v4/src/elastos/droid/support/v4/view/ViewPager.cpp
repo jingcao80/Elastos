@@ -1611,7 +1611,7 @@ ECode ViewPager::OnAttachedToWindow()
     return NOERROR;
 }
 
-void ViewPager::OnMeasure(
+ECode ViewPager::OnMeasure(
     /* [in] */ Int32 widthMeasureSpec,
     /* [in] */ Int32 heightMeasureSpec)
 {
@@ -1729,6 +1729,7 @@ void ViewPager::OnMeasure(
             }
         }
     }
+    return NOERROR;
 }
 
 void ViewPager::OnSizeChanged(

@@ -107,7 +107,7 @@ ECode ShortcutAndWidgetContainer::DispatchDraw(
     return ViewGroup::DispatchDraw(canvas);
 }
 
-void ShortcutAndWidgetContainer::OnMeasure(
+ECode ShortcutAndWidgetContainer::OnMeasure(
     /* [in] */ Int32 widthMeasureSpec,
     /* [in] */ Int32 heightMeasureSpec)
 {
@@ -121,6 +121,7 @@ void ShortcutAndWidgetContainer::OnMeasure(
     Int32 widthSpecSize = View::MeasureSpec::GetSize(widthMeasureSpec);
     Int32 heightSpecSize = View::MeasureSpec::GetSize(heightMeasureSpec);
     SetMeasuredDimension(widthSpecSize, heightSpecSize);
+    return NOERROR;
 }
 
 ECode ShortcutAndWidgetContainer::SetupLp(

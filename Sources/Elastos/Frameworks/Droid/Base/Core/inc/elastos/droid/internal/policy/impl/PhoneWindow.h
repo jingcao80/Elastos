@@ -480,7 +480,7 @@ private:
             /* [in] */ Int32 r,
             /* [in] */ Int32 b);
 
-        CARAPI_(void) OnMeasure(
+        CARAPI OnMeasure(
             /* [in] */ Int32 widthMeasureSpec,
             /* [in] */ Int32 heightMeasureSpec);
 

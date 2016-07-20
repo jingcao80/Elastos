@@ -41,7 +41,7 @@ ECode CDashboardContainerView::constructor(
 }
 
 
-void CDashboardContainerView::OnMeasure(
+ECode CDashboardContainerView::OnMeasure(
     /* [in] */ Int32 widthMeasureSpec,
     /* [in] */ Int32 heightMeasureSpec)
 {
@@ -99,6 +99,7 @@ void CDashboardContainerView::OnMeasure(
     Int32 newHeight = (Int32) ((mNumRows * cellHeight) + ((mNumRows - 1) * mCellGapY)) + top + bottom;
 
     SetMeasuredDimension(width, newHeight);
+    return NOERROR;
 }
 
 

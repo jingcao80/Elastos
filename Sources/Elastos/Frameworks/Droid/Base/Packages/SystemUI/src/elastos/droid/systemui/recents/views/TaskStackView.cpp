@@ -863,7 +863,7 @@ void TaskStackView::UpdateMinMaxScrollForStack(
  * This is called with the full window width and height to allow stack view children to
  * perform the full screen transition down.
  */
-void TaskStackView::OnMeasure(
+ECode TaskStackView::OnMeasure(
     /* [in] */ Int32 widthMeasureSpec,
     /* [in] */ Int32 heightMeasureSpec)
 {
@@ -924,6 +924,7 @@ void TaskStackView::OnMeasure(
     }
 
     SetMeasuredDimension(width, height);
+    return NOERROR;
 }
 
 /**

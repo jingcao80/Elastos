@@ -2675,7 +2675,7 @@ Boolean WebView::RequestFocus(
     return result;
 }
 
-void WebView::OnMeasure(
+ECode WebView::OnMeasure(
     /* [in] */ Int32 widthMeasureSpec,
     /* [in] */ Int32 heightMeasureSpec)
 {
@@ -2683,6 +2683,7 @@ void WebView::OnMeasure(
     AutoPtr<IWebViewProviderViewDelegate> viewDelegate;
     mProvider->GetViewDelegate((IWebViewProviderViewDelegate**)&viewDelegate);
     viewDelegate->OnMeasure(widthMeasureSpec, heightMeasureSpec);
+    return NOERROR;
 }
 
 ECode WebView::DispatchDraw(

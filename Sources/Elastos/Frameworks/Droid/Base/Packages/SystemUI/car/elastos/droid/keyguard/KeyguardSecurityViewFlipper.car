@@ -1,0 +1,43 @@
+
+module
+{
+    interface Elastos.Droid.SystemUI.Keyguard.IKeyguardSecurityView;
+
+    namespace Elastos {
+    namespace Droid {
+    namespace SystemUI {
+    namespace Keyguard {
+
+    /**
+     * @Involve
+     * interface IFrameLayoutLayoutParams
+     */
+    interface IKeyguardSecurityViewFlipperLayoutParams {
+        SetMaxWidth(
+            [in] Int32 value);
+
+        GetMaxWidth(
+            [out] Int32* value);
+
+        SetMaxHeight(
+            [in] Int32 value);
+
+        GetMaxHeight(
+            [out] Int32* value);
+    }
+
+    /**
+     * @Involve
+     * interface IViewFlipper
+     * interface IKeyguardSecurityView
+     */
+    interface IKeyguardSecurityViewFlipper {
+        GetSecurityView(
+            [out] IKeyguardSecurityView** view);
+    }
+
+    } // namespace Keyguard
+    } // namespace SystemUI
+    } // namespace Droid
+    } // namespace Elastos
+}

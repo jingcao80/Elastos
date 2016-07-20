@@ -510,7 +510,7 @@ void IconMenuView::PositionChildren(
     }
 }
 
-void IconMenuView::OnMeasure(
+ECode IconMenuView::OnMeasure(
     /* [in] */ Int32 widthMeasureSpec,
     /* [in] */ Int32 heightMeasureSpec)
 {
@@ -535,6 +535,7 @@ void IconMenuView::OnMeasure(
         GetMeasuredHeight(&h);
         PositionChildren(w, h);
     }
+    return NOERROR;
 }
 
 ECode IconMenuView::OnLayout(

@@ -300,12 +300,13 @@ ECode TableRow::SetColumnCollapsed(
 /**
  * {@inheritDoc}
  */
-void TableRow::OnMeasure(
+ECode TableRow::OnMeasure(
     /* [in] */ Int32 widthMeasureSpec,
     /* [in] */ Int32 heightMeasureSpec)
 {
     // enforce horizontal layout
     MeasureHorizontal(widthMeasureSpec, heightMeasureSpec);
+    return NOERROR;
 }
 
 /**

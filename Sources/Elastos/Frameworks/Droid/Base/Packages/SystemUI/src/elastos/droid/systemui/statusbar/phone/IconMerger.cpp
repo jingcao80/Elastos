@@ -51,7 +51,7 @@ ECode IconMerger::SetOverflowIndicator(
     return NOERROR;
 }
 
-void IconMerger::OnMeasure(
+ECode IconMerger::OnMeasure(
     /* [in] */ Int32 widthMeasureSpec,
     /* [in] */ Int32 heightMeasureSpec)
 {
@@ -60,6 +60,7 @@ void IconMerger::OnMeasure(
     Int32 width = 0, height = 0;
     GetMeasuredWidth(&width);
     SetMeasuredDimension(width - (width % mIconSize), (GetMeasuredHeight(&height), height));
+    return NOERROR;
 }
 
 ECode IconMerger::OnLayout(

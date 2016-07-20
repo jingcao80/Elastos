@@ -125,7 +125,7 @@ void AwLayoutSizer::DoUpdate(
  * Calculate the size of the view.
  * This is designed to be used to implement the android.view.View#onMeasure() method.
  */
-void AwLayoutSizer::OnMeasure(
+ECode AwLayoutSizer::OnMeasure(
     /* [in] */ Int32 widthMeasureSpec,
     /* [in] */ Int32 heightMeasureSpec)
 {
@@ -164,6 +164,7 @@ void AwLayoutSizer::OnMeasure(
     }
 
     mDelegate->SetMeasuredDimension(measuredWidth, measuredHeight);
+    return NOERROR;
 }
 
 /**

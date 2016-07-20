@@ -2147,13 +2147,13 @@ ECode NumberPicker::OnLayout(
     return NOERROR;
 }
 
-void NumberPicker::OnMeasure(
+ECode NumberPicker::OnMeasure(
     /* [in] */ Int32 widthMeasureSpec,
     /* [in] */ Int32 heightMeasureSpec)
 {
     if (!mHasSelectorWheel) {
         LinearLayout::OnMeasure(widthMeasureSpec, heightMeasureSpec);
-        return;
+        return NOERROR;
     }
     Int32 newWihthMeasureSpec = MakeMeasureSpec(widthMeasureSpec, mMaxWidth);
     Int32 newHeightMeasureSpec = MakeMeasureSpec(heightMeasureSpec, mMaxHeight);
@@ -2164,6 +2164,7 @@ void NumberPicker::OnMeasure(
     Int32 widthSize = ResolveSizeAndStateRespectingMinSize(mMinWidth, width, widthMeasureSpec);
     Int32 heightSize = ResolveSizeAndStateRespectingMinSize(mMinHeight, height, heightMeasureSpec);
     SetMeasuredDimension(widthSize, heightSize);
+    return NOERROR;
 }
 
 Float NumberPicker::GetTopFadingEdgeStrength()

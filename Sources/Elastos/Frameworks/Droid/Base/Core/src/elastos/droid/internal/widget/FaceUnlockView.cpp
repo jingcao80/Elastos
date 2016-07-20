@@ -47,7 +47,7 @@ Int32 FaceUnlockView::ResolveMeasured(
     return result;
 }
 
-void FaceUnlockView::OnMeasure(
+ECode FaceUnlockView::OnMeasure(
     /* [in] */ Int32 widthMeasureSpec,
     /* [in] */ Int32 heightMeasureSpec)
 {
@@ -63,6 +63,7 @@ void FaceUnlockView::OnMeasure(
         MeasureSpec::MakeMeasureSpec(chosenSize, MeasureSpec::AT_MOST);
 
     RelativeLayout::OnMeasure(newWidthMeasureSpec, newHeightMeasureSpec);
+    return NOERROR;
 }
 
 } // namespace Widget

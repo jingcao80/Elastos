@@ -27,7 +27,7 @@ void NullAwViewMethods::OnDraw(
 }
 
 //@Override
-void NullAwViewMethods::OnMeasure(
+ECode NullAwViewMethods::OnMeasure(
     /* [in] */ Int32 widthMeasureSpec,
     /* [in] */ Int32 heightMeasureSpec)
 {
@@ -38,6 +38,7 @@ void NullAwViewMethods::OnMeasure(
     mContainerView->GetMeasuredWidth(&measuredWidth);
     mContainerView->GetMeasuredHeight(&measuredHeight);
     mInternalAccessAdapter->SetMeasuredDimension(measuredWidth, measuredHeight);
+    return NOERROR;
 }
 
 //@Override

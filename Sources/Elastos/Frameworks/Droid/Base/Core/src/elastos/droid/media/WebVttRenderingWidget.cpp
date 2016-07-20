@@ -296,11 +296,12 @@ ECode WebVttRenderingWidget::CueLayout::Update()
     return NOERROR;
 }
 
-void WebVttRenderingWidget::CueLayout::OnMeasure(
+ECode WebVttRenderingWidget::CueLayout::OnMeasure(
     /* [in] */ Int32 widthMeasureSpec,
     /* [in] */ Int32 heightMeasureSpec)
 {
     mHost->OnMeasure(widthMeasureSpec, heightMeasureSpec);
+    return NOERROR;
 }
 
 ECode WebVttRenderingWidget::CueLayout::MeasureForParent(
@@ -604,7 +605,7 @@ ECode WebVttRenderingWidget::SetActiveCues(
     return NOERROR;
 }
 
-void WebVttRenderingWidget::OnMeasure(
+ECode WebVttRenderingWidget::OnMeasure(
     /* [in] */ Int32 widthMeasureSpec,
     /* [in] */ Int32 heightMeasureSpec)
 {
@@ -627,6 +628,7 @@ void WebVttRenderingWidget::OnMeasure(
         AutoPtr<CueLayout> cueBox = (CueLayout*)ILinearLayout::Probe(obj);
         cueBox->MeasureForParent(widthMeasureSpec, heightMeasureSpec);
     }
+    return NOERROR;
 }
 
 ECode WebVttRenderingWidget::OnLayout(

@@ -78,7 +78,7 @@ ECode PagedViewCellLayoutChildren::RequestChildFocus(
     return NOERROR;
 }
 
-void PagedViewCellLayoutChildren::OnMeasure(
+ECode PagedViewCellLayoutChildren::OnMeasure(
     /* [in] */ Int32 widthMeasureSpec,
     /* [in] */ Int32 heightMeasureSpec)
 {
@@ -117,6 +117,7 @@ void PagedViewCellLayoutChildren::OnMeasure(
     }
 
     SetMeasuredDimension(widthSpecSize, heightSpecSize);
+    return NOERROR;
 }
 
 ECode PagedViewCellLayoutChildren::OnLayout(

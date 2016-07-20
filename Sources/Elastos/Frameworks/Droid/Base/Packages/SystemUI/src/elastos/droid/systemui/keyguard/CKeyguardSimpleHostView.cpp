@@ -6,6 +6,9 @@ namespace Droid {
 namespace SystemUI {
 namespace Keyguard {
 
+//======================================================================
+// CKeyguardSimpleHostView::MyKeyguardUpdateMonitorCallback
+//======================================================================
 ECode CKeyguardSimpleHostView::MyKeyguardUpdateMonitorCallback::OnUserSwitchComplete(
     /* [in] */ Int32 userId)
 {
@@ -32,6 +35,9 @@ ECode CKeyguardSimpleHostView::MyKeyguardUpdateMonitorCallback::OnTrustInitiated
     return NOERROR;
 }
 
+//======================================================================
+// CKeyguardSimpleHostView
+//======================================================================
 CAR_OBJECT_IMPL(CKeyguardSimpleHostView)
 
 CKeyguardSimpleHostView::CKeyguardSimpleHostView()
@@ -42,7 +48,6 @@ ECode CKeyguardSimpleHostView::constructor(
     /* [in] */ IContext* context,
     /* [in] */ IAttributeSet* attrs)
 {
-
     mUpdateCallback = new MyKeyguardUpdateMonitorCallback(this);
     KeyguardViewBase::constructor(context, attrs);
     AutoPtr<IKeyguardUpdateMonitor> monitor;

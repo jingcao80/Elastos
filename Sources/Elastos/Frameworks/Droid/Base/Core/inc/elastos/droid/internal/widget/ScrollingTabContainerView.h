@@ -82,7 +82,7 @@ public:
         CARAPI GetTab(
             /* [out] */ IActionBarTab** tab);
 
-        virtual CARAPI_(void) OnMeasure(
+        virtual CARAPI OnMeasure(
             /* [in] */ Int32 widthMeasureSpec,
             /* [in] */ Int32 heightMeasureSpec);
 
@@ -192,7 +192,7 @@ public:
     CARAPI constructor(
         /* [in] */ IContext* context);
 
-    virtual CARAPI_(void) OnMeasure(
+    virtual CARAPI OnMeasure(
         /* [in] */ Int32 widthMeasureSpec,
         /* [in] */ Int32 heightMeasureSpec);
 

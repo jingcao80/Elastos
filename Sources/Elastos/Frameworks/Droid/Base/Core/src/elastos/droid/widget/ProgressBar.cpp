@@ -1571,7 +1571,7 @@ void ProgressBar::DrawTrack(
     }
 }
 
-void ProgressBar::OnMeasure(
+ECode ProgressBar::OnMeasure(
     /* [in] */ Int32 widthMeasureSpec,
     /* [in] */ Int32 heightMeasureSpec)
 {
@@ -1593,6 +1593,7 @@ void ProgressBar::OnMeasure(
 
     SetMeasuredDimension(ResolveSizeAndState(dw, widthMeasureSpec, 0),
             ResolveSizeAndState(dh, heightMeasureSpec, 0));
+    return NOERROR;
 }
 
 ECode ProgressBar::DrawableStateChanged()

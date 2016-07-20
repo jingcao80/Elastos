@@ -67,7 +67,7 @@ public class ChartView extends FrameLayout {
     }
 
     //@Override
-    protected void OnMeasure(Int32 widthMeasureSpec, Int32 heightMeasureSpec) {
+    protected CARAPI OnMeasure(Int32 widthMeasureSpec, Int32 heightMeasureSpec) {
         super->OnMeasure(widthMeasureSpec, heightMeasureSpec);
 
         final Int32 slack = GetMeasuredWidth() - mOptimalWidth;

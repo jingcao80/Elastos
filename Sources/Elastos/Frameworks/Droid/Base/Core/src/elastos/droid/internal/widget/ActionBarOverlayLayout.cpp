@@ -874,7 +874,7 @@ Boolean ActionBarOverlayLayout::CheckLayoutParams(
     return IActionBarOverlayLayoutLayoutParams::Probe(p) != NULL;
 }
 
-void ActionBarOverlayLayout::OnMeasure(
+ECode ActionBarOverlayLayout::OnMeasure(
     /* [in] */ Int32 widthMeasureSpec,
     /* [in] */ Int32 heightMeasureSpec)
 {
@@ -1030,6 +1030,7 @@ void ActionBarOverlayLayout::OnMeasure(
 
     SetMeasuredDimension(ResolveSizeAndState(maxWidth, widthMeasureSpec, childState),
             ResolveSizeAndState(maxHeight, heightMeasureSpec, childState << MEASURED_HEIGHT_STATE_SHIFT));
+    return NOERROR;
 }
 
 ECode ActionBarOverlayLayout::OnLayout(

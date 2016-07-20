@@ -18,6 +18,7 @@ using Elastos::Droid::View::IViewTreeObserver;
 using Elastos::Droid::View::SoundEffectConstants;
 using Elastos::Droid::View::EIID_IViewOnClickListener;
 using Elastos::Droid::View::Accessibility::IAccessibilityRecord;
+using Elastos::Utility::Logging::Slogger;
 
 namespace Elastos {
 namespace Droid {
@@ -197,7 +198,7 @@ ECode SlidingDrawer::OnFinishInflate()
     return NOERROR;
 }
 
-void SlidingDrawer::OnMeasure(
+ECode SlidingDrawer::OnMeasure(
     /* [in] */ Int32 widthMeasureSpec,
     /* [in] */ Int32 heightMeasureSpec)
 {
@@ -208,8 +209,8 @@ void SlidingDrawer::OnMeasure(
     Int32 heightSpecSize =  MeasureSpec::GetSize(heightMeasureSpec);
 
     if (widthSpecMode == MeasureSpec::UNSPECIFIED || heightSpecMode == MeasureSpec::UNSPECIFIED) {
-        SLOGGERD(TAG, String("SlidingDrawer cannot have UNSPECIFIED dimensions"));
-        return;
+        Slogger::D(TAG, "SlidingDrawer cannot have UNSPECIFIED dimensions");
+        return NOERROR;
     }
 
     AutoPtr<IView> handle = mHandle;
@@ -230,6 +231,7 @@ void SlidingDrawer::OnMeasure(
     }
 
     SetMeasuredDimension(widthSpecSize, heightSpecSize);
+    return NOERROR;
 }
 
 

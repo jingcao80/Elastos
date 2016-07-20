@@ -1,11 +1,22 @@
 
 #include "elastos/droid/systemui/keyguard/CKeyguardSecurityViewFlipper.h"
+#include "elastos/droid/systemui/keyguard/CKeyguardSecurityViewFlipperLayoutParams.h"
+#include "../R.h"
+#include <Elastos.Droid.Graphics.h>
+#include <elastos/core/Math.h>
+
+using Elastos::Droid::Graphics::CRect;
 
 namespace Elastos {
 namespace Droid {
 namespace SystemUI {
 namespace Keyguard {
 
+static const String TAG("KeyguardSecurityViewFlipper");
+
+//============================================================================================
+// CKeyguardSecurityViewFlipper::LayoutParams
+//============================================================================================
 CAR_INTERFACE_IMPL(CKeyguardSecurityViewFlipper::LayoutParams, FrameLayout::FrameLayoutLayoutParams,
         IKeyguardSecurityViewFlipperLayoutParams)
 
@@ -15,44 +26,77 @@ CKeyguardSecurityViewFlipper::LayoutParams::LayoutParams()
 {
 }
 
-CARAPI CKeyguardSecurityViewFlipper::LayoutParams::constructor(
+ECode CKeyguardSecurityViewFlipper::LayoutParams::constructor(
     /* [in] */ IViewGroupLayoutParams* other)
 {
     return FrameLayout::FrameLayoutLayoutParams::constructor(other);
 }
 
-CARAPI CKeyguardSecurityViewFlipper::LayoutParams::constructor(
+ECode CKeyguardSecurityViewFlipper::LayoutParams::constructor(
     /* [in] */ IKeyguardSecurityViewFlipperLayoutParams* other)
 {
     FrameLayout::FrameLayoutLayoutParams::constructor(IFrameLayoutLayoutParams::Probe(other));
 
-    maxWidth = ((LayoutParams*)other)->mMaxWidth;
-    maxHeight = ((LayoutParams*)other)->mMaxHeight;
+    other->GetMaxWidth(&mMaxWidth);
+    other->GetMaxHeight(&mMaxHeight);
     return NOERROR;
 }
 
-CARAPI CKeyguardSecurityViewFlipper::LayoutParams::constructor(
+ECode CKeyguardSecurityViewFlipper::LayoutParams::constructor(
     /* [in] */ IContext* c,
     /* [in] */ IAttributeSet* attrs)
 {
     FrameLayout::FrameLayoutLayoutParams::constructor(c, attrs);
 
+    AutoPtr<ArrayOf<Int32> > attrIds = TO_ATTRS_ARRAYOF(R::styleable::KeyguardSecurityViewFlipper_Layout);
     AutoPtr<ITypedArray> a;
-    c->ObtainStyledAttributes(attrs,
-            R::styleable::KeyguardSecurityViewFlipper_Layout, 0, 0, (ITypedArray**)&a);
+    c->ObtainStyledAttributes(attrs, attrIds, 0, 0, (ITypedArray**)&a);
     a->GetDimensionPixelSize(
-            R::styleable::KeyguardSecurityViewFlipper_Layout_layout_maxWidth, 0, &maxWidth);
+        R::styleable::KeyguardSecurityViewFlipper_Layout_layout_maxWidth, 0, &mMaxWidth);
     a->GetDimensionPixelSize(
-            R::styleable::KeyguardSecurityViewFlipper_Layout_layout_maxHeight, 0, &maxHeight);
+        R::styleable::KeyguardSecurityViewFlipper_Layout_layout_maxHeight, 0, &mMaxHeight);
     return a->Recycle();
 }
 
-const String CKeyguardSecurityViewFlipper::TAG("KeyguardSecurityViewFlipper");
-const Boolean CKeyguardSecurityViewFlipper::DEBUG = IKeyguardConstants::DEBUG;
+ECode CKeyguardSecurityViewFlipper::LayoutParams::SetMaxWidth(
+    /* [in] */ Int32 value)
+{
+    mMaxWidth = value;
+    return NOERROR;
+}
+
+ECode CKeyguardSecurityViewFlipper::LayoutParams::GetMaxWidth(
+    /* [out] */ Int32* value)
+{
+    VALIDATE_NOT_NULL(value)
+    *value = mMaxWidth;
+    return NOERROR;
+}
+
+ECode CKeyguardSecurityViewFlipper::LayoutParams::SetMaxHeight(
+    /* [in] */ Int32 value)
+{
+    mMaxHeight = value;
+    return NOERROR;
+}
+
+ECode CKeyguardSecurityViewFlipper::LayoutParams::GetMaxHeight(
+    /* [out] */ Int32* value)
+{
+    VALIDATE_NOT_NULL(value)
+    *value = mMaxHeight;
+    return NOERROR;
+}
+
+//================================================================================
+// CKeyguardSecurityViewFlipper
+//================================================================================
+
+const Boolean CKeyguardSecurityViewFlipper::DEBUG = TRUE;
 
 CAR_OBJECT_IMPL(CKeyguardSecurityViewFlipper)
 
-CAR_INTERFACE_IMPL(CKeyguardSecurityViewFlipper, ViewFlipper, IKeyguardSecurityView)
+CAR_INTERFACE_IMPL_2(CKeyguardSecurityViewFlipper, ViewFlipper, IKeyguardSecurityViewFlipper, IKeyguardSecurityView)
 
 CKeyguardSecurityViewFlipper::CKeyguardSecurityViewFlipper()
 {
@@ -69,7 +113,7 @@ ECode CKeyguardSecurityViewFlipper::constructor(
     /* [in] */ IContext* context,
     /* [in] */ IAttributeSet* attrs)
 {
-    return ViewFlipper::constructor(context, attr);
+    return ViewFlipper::constructor(context, attrs);
 }
 
 ECode CKeyguardSecurityViewFlipper::OnTouchEvent(
@@ -78,8 +122,8 @@ ECode CKeyguardSecurityViewFlipper::OnTouchEvent(
 {
     VALIDATE_NOT_NULL(result)
 
-    Boolean _result;
-    ViewFlipper::OnTouchEvent(ev, &_result);
+    Boolean bval;
+    ViewFlipper::OnTouchEvent(ev, &bval);
     mTempRect->Set(0, 0, 0, 0);
 
     Int32 count;
@@ -92,19 +136,18 @@ ECode CKeyguardSecurityViewFlipper::OnTouchEvent(
         if (visiable == IView::VISIBLE) {
             OffsetRectIntoDescendantCoords(child, mTempRect);
 
-            Int32 left;
+            Int32 left, top;
             mTempRect->GetLeft(&left);
-            Int32 top;
             mTempRect->GetTop(&top);
             ev->OffsetLocation(left, top);
 
             Boolean res;
             child->DispatchTouchEvent(ev, &res);
-            _result = res || _result;
+            bval = res || bval;
             ev->OffsetLocation(-left, -top);
         }
     }
-    *result = _result;
+    *result = bval;
     return NOERROR;
 }
 
@@ -187,7 +230,7 @@ ECode CKeyguardSecurityViewFlipper::NeedsInput(
     AutoPtr<IKeyguardSecurityView> ksv;
     GetSecurityView((IKeyguardSecurityView**)&ksv);
     if (ksv != NULL) {
-        ksv->NeedsInput(result)
+        ksv->NeedsInput(result);
     }
     else {
         *result = FALSE;
@@ -232,9 +275,9 @@ ECode CKeyguardSecurityViewFlipper::ShowBouncer(
     for (Int32 i = 0; i < count; i++) {
         AutoPtr<IView> child;
         GetChildAt(i, (IView**)&child);
-        if (IKeyguardSecurityView::Probe(child) != NULL) {
-            AutoPtr<IKeyguardSecurityView> ksv = IKeyguardSecurityView::Probe(child);
-            ksv->ShowBouncer(TO_IINTERFACE(ksv) == TO_IINTERFACE(active) ? duration : 0);
+        AutoPtr<IKeyguardSecurityView> ksv = IKeyguardSecurityView::Probe(child);
+        if (ksv != NULL) {
+            ksv->ShowBouncer(ksv.Get() == active.Get() ? duration : 0);
         }
     }
     return NOERROR;
@@ -251,9 +294,9 @@ ECode CKeyguardSecurityViewFlipper::HideBouncer(
     for (Int32 i = 0; i < count; i++) {
         AutoPtr<IView> child;
         GetChildAt(i, (IView**)&child);
-        if (IKeyguardSecurityView::Probe(child) != NULL) {
-            AutoPtr<IKeyguardSecurityView> ksv = IKeyguardSecurityView::Probe(child);
-            ksv->HideBouncer(TO_IINTERFACE(ksv) == TO_IINTERFACE(active) ? duration : 0);
+        AutoPtr<IKeyguardSecurityView> ksv = IKeyguardSecurityView::Probe(child);
+        if (ksv != NULL) {
+            ksv->HideBouncer(ksv.Get() == active.Get() ? duration : 0);
         }
     }
     return NOERROR;
@@ -280,10 +323,9 @@ ECode CKeyguardSecurityViewFlipper::StartDisappearAnimation(
     if (ksv != NULL) {
         return ksv->StartDisappearAnimation(finishRunnable, result);
     }
-    else {
-        *result = FALSE;
-        return NOERROR;
-    }
+
+    *result = FALSE;
+    return NOERROR;
 }
 
 ECode CKeyguardSecurityViewFlipper::CheckLayoutParams(
@@ -293,40 +335,35 @@ ECode CKeyguardSecurityViewFlipper::CheckLayoutParams(
     VALIDATE_NOT_NULL(result)
 
     *result = IKeyguardSecurityViewFlipperLayoutParams::Probe(p) != NULL;
+    return NOERROR;
 }
 
 ECode CKeyguardSecurityViewFlipper::GenerateLayoutParams(
     /* [in] */ IViewGroupLayoutParams* p,
-    /* [out] */ IViewGroupLayoutParams** params)
+    /* [out] */ IViewGroupLayoutParams** result)
 {
-    VALIDATE_NOT_NULL(params)
+    VALIDATE_NOT_NULL(result)
 
-    AutoPtr<IViewGroupLayoutParams> _params;
-    if (IKeyguardSecurityViewFlipperLayoutParams::Probe(p) != NULL) {
-        _params = new LayoutParams(IKeyguardSecurityViewFlipperLayoutParams::Probe(p))
-        *params = _params;
-        REFCOUNT_ADD(*params)
-        return NOERROR;
+    IKeyguardSecurityViewFlipperLayoutParams* ksvflp = IKeyguardSecurityViewFlipperLayoutParams::Probe(p);
+    if (ksvflp != NULL) {
+        return CKeyguardSecurityViewFlipperLayoutParams::New(ksvflp, result);
     }
-    else {
-        _params = new LayoutParams(p);
-        *params = _params;
-        REFCOUNT_ADD(*params)
-        return NOERROR;
-    }
+
+    return CKeyguardSecurityViewFlipperLayoutParams::New(p, result);
 }
 
 ECode CKeyguardSecurityViewFlipper::GenerateLayoutParams(
     /* [in] */ IAttributeSet* attrs,
-    /* [out] */ IKeyguardSecurityViewFlipperLayoutParams** params)
+    /* [out] */ IKeyguardSecurityViewFlipperLayoutParams** result)
 {
-    VALIDATE_NOT_NULL(params)
+    VALIDATE_NOT_NULL(result)
 
     AutoPtr<IContext> context;
     GetContext((IContext**)&context);
-    AutoPtr<IKeyguardSecurityViewFlipperLayoutParams> _params = new LayoutParams(context, attrs);
-    *params = _params;
-    REFCOUNT_ADD(*params);
+    AutoPtr<IKeyguardSecurityViewFlipperLayoutParams> params;
+    CKeyguardSecurityViewFlipperLayoutParams::New(context, attrs, (IKeyguardSecurityViewFlipperLayoutParams**)&params);
+    *result = params;
+    REFCOUNT_ADD(*result);
     return NOERROR;
 }
 
@@ -334,15 +371,15 @@ ECode CKeyguardSecurityViewFlipper::OnMeasure(
     /* [in] */ Int32 widthSpec,
     /* [in] */ Int32 heightSpec)
 {
+    using Elastos::Core::Math;
+
     Int32 widthMode = MeasureSpec::GetMode(widthSpec);
     Int32 heightMode = MeasureSpec::GetMode(heightSpec);
-    if (DEBUG && widthMode != IMeasureSpec::AT_MOST) {
-        Logger::W(TAG, "onMeasure: widthSpec " + MeasureSpec.toString(widthSpec) +
-                " should be AT_MOST");
+    if (DEBUG && widthMode != Elastos::Droid::View::View::MeasureSpec::AT_MOST) {
+        Logger::W(TAG, "onMeasure: widthSpec %08x should be AT_MOST", widthMode);
     }
-    if (DEBUG && heightMode != IMeasureSpec::AT_MOST) {
-        Logger::W(TAG, "onMeasure: heightSpec " + MeasureSpec.toString(heightSpec) +
-                " should be AT_MOST");
+    if (DEBUG && heightMode != Elastos::Droid::View::View::MeasureSpec::AT_MOST) {
+        Logger::W(TAG, "onMeasure: heightSpec %08x should be AT_MOST", widthMode);
     }
 
     Int32 widthSize = MeasureSpec::GetSize(widthSpec);
@@ -351,12 +388,14 @@ ECode CKeyguardSecurityViewFlipper::OnMeasure(
     Int32 maxHeight = heightSize;
     Int32 count;
     GetChildCount(&count);
+    IKeyguardSecurityViewFlipperLayoutParams* ksvflp;
     for (Int32 i = 0; i < count; i++) {
         AutoPtr<IView> child;
         GetChildAt(i, (IView**)&child);
         AutoPtr<IViewGroupLayoutParams> params;
         child->GetLayoutParams((IViewGroupLayoutParams**)&params);
-        AutoPtr<LayoutParams> lp = (LayoutParams*)IKeyguardSecurityViewFlipperLayoutParams::Proeb(params);
+        ksvflp = IKeyguardSecurityViewFlipperLayoutParams::Probe(params);
+        LayoutParams* lp = (LayoutParams*)ksvflp;
 
         if (lp->mMaxWidth > 0 && lp->mMaxWidth < maxWidth) {
             maxWidth = lp->mMaxWidth;
@@ -366,33 +405,25 @@ ECode CKeyguardSecurityViewFlipper::OnMeasure(
         }
     }
 
-    Int32 left;
-    GetPaddingLeft(&left);
-    Int32 right;
-    GetPaddingRight(&right);
+    Int32 left, right, top, bottom;
+    GetPadding(&left, &top, &right, &bottom);
     Int32 wPadding = left + right;
-
-    Int32 top;
-    GetPaddingTop(&top);
-    Int32 bottom;
-    GetPaddingBottom(&bottom);
     Int32 hPadding = top + bottom;
     maxWidth -= wPadding;
     maxHeight -= hPadding;
 
-    Int32 width = widthMode == IMeasureSpec::EXACTLY ? widthSize : 0;
-    Int32 height = heightMode == IMeasureSpec::EXACTLY ? heightSize : 0;
+    Int32 width = widthMode == Elastos::Droid::View::View::MeasureSpec::EXACTLY ? widthSize : 0;
+    Int32 height = heightMode == Elastos::Droid::View::View::MeasureSpec::EXACTLY ? heightSize : 0;
     for (Int32 i = 0; i < count; i++) {
         AutoPtr<IView> child;
         GetChildAt(i, (IView**)&child);
         AutoPtr<IViewGroupLayoutParams> params;
         child->GetLayoutParams((IViewGroupLayoutParams**)&params);
-        AutoPtr<LayoutParams> lp = (LayoutParams*)IKeyguardSecurityViewFlipperLayoutParams::Proeb(params);
+        ksvflp = IKeyguardSecurityViewFlipperLayoutParams::Probe(params);
+        LayoutParams* lp = (LayoutParams*)ksvflp;
 
-        Int32 childWidthSpec;
-        MakeChildMeasureSpec(maxWidth, lp->mWidth, &childWidthSpec);
-        Int32 childHeightSpec;
-        MakeChildMeasureSpec(maxHeight, lp->mHeight, &childHeightSpec);
+        Int32 childWidthSpec = MakeChildMeasureSpec(maxWidth, lp->mWidth);
+        Int32 childHeightSpec = MakeChildMeasureSpec(maxHeight, lp->mHeight);
 
         child->Measure(childWidthSpec, childHeightSpec);
 
@@ -404,26 +435,29 @@ ECode CKeyguardSecurityViewFlipper::OnMeasure(
         child->GetMeasuredHeight(&_height);
         height = Math::Max(height, Math::Min(_height, heightSize - hPadding));
     }
-    return SetMeasuredDimension(width + wPadding, height + hPadding);
+    SetMeasuredDimension(width + wPadding, height + hPadding);
+    return NOERROR;
 }
 
 Int32 CKeyguardSecurityViewFlipper::MakeChildMeasureSpec(
     /* [in] */ Int32 maxSize,
     /* [in] */ Int32 childDimen)
 {
+    using Elastos::Core::Math;
+
     Int32 mode;
     Int32 size;
     switch (childDimen) {
         case IViewGroupLayoutParams::WRAP_CONTENT:
-            mode = IMeasureSpec::AT_MOST;
+            mode = Elastos::Droid::View::View::MeasureSpec::AT_MOST;
             size = maxSize;
             break;
         case IViewGroupLayoutParams::MATCH_PARENT:
-            mode = IMeasureSpec::EXACTLY;
+            mode = Elastos::Droid::View::View::MeasureSpec::EXACTLY;
             size = maxSize;
             break;
         default:
-            mode = IMeasureSpec::EXACTLY;
+            mode = Elastos::Droid::View::View::MeasureSpec::EXACTLY;
             size = Math::Min(maxSize, childDimen);
             break;
     }

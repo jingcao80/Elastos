@@ -97,7 +97,7 @@ ECode ScrollingTabContainerView::TabView::constructor(
     return NOERROR;
 }
 
-void ScrollingTabContainerView::TabView::OnMeasure(
+ECode ScrollingTabContainerView::TabView::OnMeasure(
     /* [in] */ Int32 widthMeasureSpec,
     /* [in] */ Int32 heightMeasureSpec)
 {
@@ -109,6 +109,7 @@ void ScrollingTabContainerView::TabView::OnMeasure(
         LinearLayout::OnMeasure(MeasureSpec::MakeMeasureSpec(mHost->mMaxTabWidth, MeasureSpec::EXACTLY),
                 heightMeasureSpec);
     }
+    return NOERROR;
 }
 
 ECode ScrollingTabContainerView::TabView::BindTab(
@@ -464,7 +465,7 @@ ECode ScrollingTabContainerView::constructor(
     return NOERROR;
 }
 
-void ScrollingTabContainerView::OnMeasure(
+ECode ScrollingTabContainerView::OnMeasure(
     /* [in] */ Int32 widthMeasureSpec,
     /* [in] */ Int32 heightMeasureSpec)
 {
@@ -519,6 +520,7 @@ void ScrollingTabContainerView::OnMeasure(
         // Recenter the tab display if we're at a new (scrollable) size.
         SetTabSelected(mSelectedTabIndex);
     }
+    return NOERROR;
 }
 
 Boolean ScrollingTabContainerView::IsCollapsed()

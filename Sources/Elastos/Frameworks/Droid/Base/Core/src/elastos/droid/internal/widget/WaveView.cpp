@@ -223,7 +223,7 @@ Int32 WaveView::GetSuggestedMinimumHeight()
     return h1 + h2;
 }
 
-void WaveView::OnMeasure(
+ECode WaveView::OnMeasure(
     /* [in] */ Int32 widthMeasureSpec,
     /* [in] */ Int32 heightMeasureSpec)
 {
@@ -255,6 +255,7 @@ void WaveView::OnMeasure(
     }
 
     SetMeasuredDimension(width, height);
+    return NOERROR;
 }
 
 void WaveView::InitDrawables()

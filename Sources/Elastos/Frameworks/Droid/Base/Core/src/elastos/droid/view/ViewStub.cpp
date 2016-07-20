@@ -136,11 +136,12 @@ ECode ViewStub::GetLayoutInflater(
     return NOERROR;
 }
 
-void ViewStub::OnMeasure(
+ECode ViewStub::OnMeasure(
     /* [in] */ Int32 widthMeasureSpec,
     /* [in] */ Int32 heightMeasureSpec)
 {
     SetMeasuredDimension(0, 0);
+    return NOERROR;
 }
 
 ECode ViewStub::Draw(

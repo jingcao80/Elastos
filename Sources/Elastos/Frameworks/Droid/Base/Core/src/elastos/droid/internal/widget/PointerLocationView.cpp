@@ -315,7 +315,7 @@ ECode PointerLocationView::SetPrintCoords(
     return NOERROR;
 }
 
-void PointerLocationView::OnMeasure(
+ECode PointerLocationView::OnMeasure(
     /* [in] */ Int32 widthMeasureSpec,
     /* [in] */ Int32 heightMeasureSpec)
 {
@@ -334,6 +334,7 @@ void PointerLocationView::OnMeasure(
         Logger::I(String("PointerLocationView::foo"), "Metrics: ascent=%d descent=%d leading=%d top=%d bottom=%d",
                 ascent, descent, leading, top, bottom);
     }
+    return NOERROR;
 }
 
 void PointerLocationView::DrawOval(

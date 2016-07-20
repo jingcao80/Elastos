@@ -64,7 +64,7 @@ AutoPtr<IView> SignalTileView::CreateIcon()
     return IView::Probe(mIconFrame);
 }
 
-void SignalTileView::OnMeasure(
+ECode SignalTileView::OnMeasure(
     /* [in] */ Int32 widthMeasureSpec,
     /* [in] */ Int32 heightMeasureSpec)
 {
@@ -74,6 +74,7 @@ void SignalTileView::OnMeasure(
     Int32 ws = MeasureSpec::MakeMeasureSpec((IView::Probe(mIconFrame)->GetMeasuredHeight(&v), v), MeasureSpec::AT_MOST);
     IView::Probe(mIn)->Measure(ws, hs);
     IView::Probe(mOut)->Measure(ws, hs);
+    return NOERROR;
 }
 
 ECode SignalTileView::OnLayout(

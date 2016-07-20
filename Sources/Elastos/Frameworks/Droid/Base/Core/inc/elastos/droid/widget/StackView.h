@@ -290,7 +290,7 @@ protected:
         /* [in] */ Int32 right,
         /* [in] */ Int32 bottom);
 
-    CARAPI_(void) OnMeasure(
+    CARAPI OnMeasure(
         /* [in] */ Int32 widthMeasureSpec,
         /* [in] */ Int32 heightMeasureSpec);
 

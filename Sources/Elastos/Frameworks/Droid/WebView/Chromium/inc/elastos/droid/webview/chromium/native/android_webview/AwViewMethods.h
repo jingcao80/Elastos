@@ -39,7 +39,7 @@ public:
     /**
      * @see android.view.View#onMeasure
      */
-    virtual CARAPI_(void) OnMeasure(
+    virtual CARAPI OnMeasure(
         /* [in] */ Int32 widthMeasureSpec,
         /* [in] */ Int32 heightMeasureSpec) = 0;
 

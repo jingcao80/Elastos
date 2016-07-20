@@ -1,11 +1,28 @@
 
 #include "elastos/droid/systemui/keyguard/KeyguardSecurityModel.h"
-#include "Elastos.Droid.View.h"
+#include <Elastos.Droid.App.h>
+#include <Elastos.Droid.Telephony.h>
+#include <Elastos.Droid.Internal.h>
+#include <elastos/utility/logging/Logger.h>
+#include <elastos/droid/ext/frameworkext.h>
+
+using Elastos::Droid::App::Admin::IDevicePolicyManager;
+using Elastos::Droid::Telephony::ITelephonyManager;
+using Elastos::Droid::Internal::Widget::CLockPatternUtils;
+using Elastos::Droid::Internal::Telephony::IccCardConstantsState;
+using Elastos::Droid::Internal::Telephony::IccCardConstantsState_UNKNOWN;
+using Elastos::Droid::Internal::Telephony::IccCardConstantsState_PIN_REQUIRED;
+using Elastos::Droid::Internal::Telephony::IccCardConstantsState_PUK_REQUIRED;
+using Elastos::Utility::Logging::Logger;
 
 namespace Elastos {
 namespace Droid {
 namespace SystemUI {
 namespace Keyguard {
+
+static const String TAG("KeyguardSecurityModel");
+
+CAR_INTERFACE_IMPL(KeyguardSecurityModel, Object, IKeyguardSecurityModel)
 
 KeyguardSecurityModel::KeyguardSecurityModel(
     /* [in] */ IContext* context)
@@ -35,8 +52,9 @@ ECode KeyguardSecurityModel::IsBiometricUnlockEnabled(
 
 Boolean KeyguardSecurityModel::IsBiometricUnlockSuppressed()
 {
-    AutoPtr<KeyguardUpdateMonitor> monitor = KeyguardUpdateMonitor::GetInstance(mContext);
-    Boolean res;
+    AutoPtr<IKeyguardUpdateMonitor> monitor;
+    // = KeyguardUpdateMonitor::GetInstance(mContext);
+    Int32 res;
     Boolean backupIsTimedOut = (monitor->GetFailedUnlockAttempts(&res), res) >=
             ILockPatternUtils::FAILED_ATTEMPTS_BEFORE_TIMEOUT;
 
@@ -51,20 +69,33 @@ Boolean KeyguardSecurityModel::IsBiometricUnlockSuppressed()
 ECode KeyguardSecurityModel::GetSecurityMode(
     /* [out] */ SecurityMode* outmode)
 {
-    VALIDATE_NOT_NULL(outmode);
+    VALIDATE_NOT_NULL(outmode)
+    *outmode = SecurityMode_None;
 
-    AutoPtr<KeyguardUpdateMonitor> updateMonitor = KeyguardUpdateMonitor::GetInstance(mContext);
-    IccCardConstantsState simState;
-    updateMonitor->GetSimState(&simState);
-    SecurityMode mode = None;
+    SecurityMode mode = SecurityMode_None;
+
+    AutoPtr<IKeyguardUpdateMonitor> updateMonitor;
+    // = KeyguardUpdateMonitor::GetInstance(mContext);
+    IccCardConstantsState simState = IccCardConstantsState_UNKNOWN;
+    Int32 num;
+    updateMonitor->GetNumPhones(&num);
+    for (Int32 i = 0; i < num; i++) {
+        Int64 subId;
+        updateMonitor->GetSubIdByPhoneId(i, &subId);
+        updateMonitor->GetSimState(subId, &simState);
+        if (simState == IccCardConstantsState_PIN_REQUIRED
+            || simState == IccCardConstantsState_PUK_REQUIRED) {
+            break;
+        }
+    }
 
     Boolean res;
     if (simState == IccCardConstantsState_PIN_REQUIRED) {
-        mode = SimPin;
+        mode = SecurityMode_SimPin;
     }
     else if (simState == IccCardConstantsState_PUK_REQUIRED
             && (mLockPatternUtils->IsPukUnlockScreenEnable(&res), res)) {
-        mode = SimPuk;
+        mode = SecurityMode_SimPuk;
     }
     else {
         Int32 security;
@@ -75,7 +106,7 @@ ECode KeyguardSecurityModel::GetSecurityMode(
             {
                 Boolean res;
                 mode = (mLockPatternUtils->IsLockPasswordEnabled(&res), res) ?
-                        PIN : None;
+                        SecurityMode_PIN : SecurityMode_None;
                 break;
             }
             case IDevicePolicyManager::PASSWORD_QUALITY_ALPHABETIC:
@@ -84,7 +115,7 @@ ECode KeyguardSecurityModel::GetSecurityMode(
             {
                 Boolean res;
                 mode = (mLockPatternUtils->IsLockPasswordEnabled(&res), res) ?
-                        Password : None;
+                        SecurityMode_Password : SecurityMode_None;
                 break;
             }
             case IDevicePolicyManager::PASSWORD_QUALITY_SOMETHING:
@@ -93,15 +124,16 @@ ECode KeyguardSecurityModel::GetSecurityMode(
                 Boolean res;
                 if (mLockPatternUtils->IsLockPatternEnabled(&res), res) {
                     mode = (mLockPatternUtils->IsPermanentlyLocked(&res), res) ?
-                        Account : Pattern;
+                        SecurityMode_Account : SecurityMode_Pattern;
                 }
                 break;
             }
             default:
-                //throw new IllegalStateException("Unknown security quality:" + security);
-                return IllegalStateException;
+                Logger::E(TAG, "Unknown security quality:%d", security);
+                return E_ILLEGAL_STATE_EXCEPTION;
         }
     }
+
     *outmode = mode;
     return NOERROR;
 }
@@ -110,12 +142,13 @@ ECode KeyguardSecurityModel::GetAlternateFor(
     /* [in] */ SecurityMode mode,
     /* [out] */ SecurityMode* outmode)
 {
+    VALIDATE_NOT_NULL(outmode)
     Boolean res;
     if ((IsBiometricUnlockEnabled(&res), res) && !IsBiometricUnlockSuppressed()
-            && (mode == Password
-                    || mode == PIN
-                    || mode == Pattern)) {
-        *outmode = Biometric;
+            && (mode == SecurityMode_Password
+                    || mode == SecurityMode_PIN
+                    || mode == SecurityMode_Pattern)) {
+        *outmode = SecurityMode_Biometric;
         return NOERROR;
     }
     *outmode = mode; // no alternate, return what was given
@@ -123,16 +156,16 @@ ECode KeyguardSecurityModel::GetAlternateFor(
 }
 
 ECode KeyguardSecurityModel::GetBackupSecurityMode(
-    /* [in] */ SecurityMode* mode,
+    /* [in] */ SecurityMode mode,
     /* [out] */ SecurityMode* outmode)
 {
     VALIDATE_NOT_NULL(outmode)
 
     switch(mode) {
-        case Biometric:
+        case SecurityMode_Biometric:
             return GetSecurityMode(outmode);
-        case Pattern:
-            *outmode = Account;
+        case SecurityMode_Pattern:
+            *outmode = SecurityMode_Account;
             return NOERROR;
     }
     *outmode = mode; // no backup, return current security mode

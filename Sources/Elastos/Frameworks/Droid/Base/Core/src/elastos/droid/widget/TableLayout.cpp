@@ -609,12 +609,13 @@ ECode TableLayout::AddView(
 /**
  * {@inheritDoc}
  */
-void TableLayout::OnMeasure(
+ECode TableLayout::OnMeasure(
     /* [in] */ Int32 widthMeasureSpec,
     /* [in] */ Int32 heightMeasureSpec)
 {
     // enforce vertical layout
     MeasureVertical(widthMeasureSpec, heightMeasureSpec);
+    return NOERROR;
 }
 
 /**

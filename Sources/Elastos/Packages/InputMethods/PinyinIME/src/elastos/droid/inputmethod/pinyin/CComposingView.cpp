@@ -116,7 +116,7 @@ CComposingView::ComposingStatus CComposingView::GetComposingStatus()
     return mComposingStatus;
 }
 
-void CComposingView::OnMeasure(
+ECode CComposingView::OnMeasure(
     /* [in] */ Int32 widthMeasureSpec,
     /* [in] */ Int32 heightMeasureSpec)
 {
@@ -142,6 +142,7 @@ void CComposingView::OnMeasure(
         width += value;
     }
     SetMeasuredDimension((Int32) (width + 0.5f), height);
+    return NOERROR;
 }
 
 void CComposingView::OnDraw(

@@ -616,7 +616,7 @@ public class ChartSweepView extends View {
     }
 
     //@Override
-    protected void OnMeasure(Int32 widthMeasureSpec, Int32 heightMeasureSpec) {
+    protected CARAPI OnMeasure(Int32 widthMeasureSpec, Int32 heightMeasureSpec) {
 
         // TODO: handle vertical labels
         if (IsEnabled() && mLabelLayout != NULL) {

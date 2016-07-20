@@ -636,7 +636,7 @@ void StackView::OnLayout(
     OnLayout();
 }
 
-void StackView::OnMeasure(
+ECode StackView::OnMeasure(
     /* [in] */ Int32 widthMeasureSpec,
     /* [in] */ Int32 heightMeasureSpec)
 {
@@ -683,6 +683,7 @@ void StackView::OnMeasure(
     }
     SetMeasuredDimension(widthSpecSize, heightSpecSize);
     MeasureChildren();
+    return NOERROR;
 }
 
 void StackView::InitStackView()

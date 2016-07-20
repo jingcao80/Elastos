@@ -49,7 +49,7 @@ ECode DialogTitle::constructor(
     return TextView::constructor(context, attrs, defStyleAttr, defStyleRes);
 }
 
-void DialogTitle::OnMeasure(
+ECode DialogTitle::OnMeasure(
     /* [in] */ Int32 widthMeasureSpec,
     /* [in] */ Int32 heightMeasureSpec)
 {
@@ -89,6 +89,8 @@ void DialogTitle::OnMeasure(
             }
         }
     }
+
+    return NOERROR;
 }
 
 }// namespace Widget

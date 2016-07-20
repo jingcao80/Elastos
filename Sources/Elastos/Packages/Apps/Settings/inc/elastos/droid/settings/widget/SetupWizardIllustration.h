@@ -86,7 +86,7 @@ public class SetupWizardIllustration extends FrameLayout {
     }
 
     //@Override
-    protected void OnMeasure(Int32 widthMeasureSpec, Int32 heightMeasureSpec) {
+    protected CARAPI OnMeasure(Int32 widthMeasureSpec, Int32 heightMeasureSpec) {
         if (mAspectRatio != 0.0f) {
             Int32 parentWidth = MeasureSpec->GetSize(widthMeasureSpec);
             Int32 illustrationHeight = (Int32) (parentWidth / mAspectRatio);

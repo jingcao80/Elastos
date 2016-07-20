@@ -34,6 +34,7 @@ module
     merge("car/elastos/droid/keyguard/KeyguardActivityLauncher.car");
     merge("car/elastos/droid/keyguard/KeyguardDisplayManager.car");
     merge("car/elastos/droid/keyguard/KeyguardHostView.car");
+    merge("car/elastos/droid/keyguard/KeyguardSecurityViewFlipper.car");
     merge("car/elastos/droid/keyguard/KeyguardSecurityModel.car");
     merge("car/elastos/droid/keyguard/KeyguardSecurityContainer.car");
     merge("car/elastos/droid/keyguard/KeyguardSecurityCallback.car");
@@ -315,6 +316,8 @@ module
     using interface Elastos.Droid.View.IOnComputeInternalInsetsListener;
     using interface Elastos.Droid.View.IOnPreDrawListener;
     using interface Elastos.Droid.View.IOnWindowDismissedCallback;
+    using interface Elastos.Droid.View.IViewGroupMarginLayoutParams;
+    using interface Elastos.Droid.View.IViewGroupLayoutParams;
     using interface Elastos.Droid.View.IViewGroup;
     using interface Elastos.Droid.View.IViewManager;
     using interface Elastos.Droid.View.IViewParent;
@@ -339,6 +342,8 @@ module
     using interface Elastos.Droid.Widget.ITextSwitcher;
     using interface Elastos.Droid.Widget.IViewAnimator;
     using interface Elastos.Droid.Widget.IViewSwitcher;
+    using interface Elastos.Droid.Widget.IViewFlipper;
+    using interface Elastos.Droid.Widget.IFrameLayoutLayoutParams;
     using interface Elastos.Core.ICharSequence;
 
     interface Elastos.Droid.SystemUI.IDemoMode;
@@ -2993,11 +2998,11 @@ module
     } // namespace Settings
 
     namespace Keyguard
-    {   
+    {
         [local]
         class CKeyguardSimpleHostView {
             constructor(
-                [in] IContext* ctx, 
+                [in] IContext* ctx,
                 [in] IAttributeSet* attrs);
 
             interface IKeyguardViewBase;
@@ -3011,7 +3016,71 @@ module
             interface IAccessibilityEventSource;
         }
 
+        [local]
+        class CKeyguardSecurityContainer {
+            constructor(
+                [in] IContext* ctx);
 
+            constructor(
+                [in] IContext* ctx, 
+                [in] IAttributeSet* attrs);
+
+            constructor(
+                [in] IContext* ctx, 
+                [in] IAttributeSet* attrs,
+                [in] Int32 defStyleAttr);
+
+            interface IKeyguardSecurityContainer;
+            interface IKeyguardSecurityView;
+            interface IFrameLayout;
+            interface IViewGroup;
+            interface IView;
+            interface IViewParent;
+            interface IViewManager;
+            interface IDrawableCallback;
+            interface IKeyEventCallback;
+            interface IAccessibilityEventSource;
+        }
+
+        [local]
+        class CKeyguardSecurityViewFlipper {
+            constructor(
+                [in] IContext* ctx);
+
+            constructor(
+                [in] IContext* ctx,
+                [in] IAttributeSet* attrs);
+
+            interface IKeyguardSecurityView;
+            interface IViewFlipper;
+            interface IViewAnimator;
+            interface IFrameLayout;
+            interface IViewGroup;
+            interface IView;
+            interface IViewParent;
+            interface IViewManager;
+            interface IDrawableCallback;
+            interface IKeyEventCallback;
+            interface IAccessibilityEventSource;
+        }
+
+        [local]
+        class CKeyguardSecurityViewFlipperLayoutParams {
+            constructor(
+                [in] IContext* ctx,
+                [in] IAttributeSet* attrs);
+
+            constructor(
+                [in] IViewGroupLayoutParams* source);
+
+            constructor(
+                [in] IKeyguardSecurityViewFlipperLayoutParams* ksvfSource);
+
+            interface IKeyguardSecurityViewFlipperLayoutParams;
+            interface IFrameLayoutLayoutParams;
+            interface IViewGroupMarginLayoutParams;
+            interface IViewGroupLayoutParams;
+        }
 
     } // namespace Keyguard
 

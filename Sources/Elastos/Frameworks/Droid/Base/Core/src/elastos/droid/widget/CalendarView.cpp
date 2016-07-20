@@ -1656,7 +1656,7 @@ void CalendarView::LegacyCalendarViewDelegate::WeekView::UpdateSelectionPosition
     }
 }
 
-void CalendarView::LegacyCalendarViewDelegate::WeekView::OnMeasure(
+ECode CalendarView::LegacyCalendarViewDelegate::WeekView::OnMeasure(
     /* [in] */ Int32 widthMeasureSpec,
     /* [in] */ Int32 heightMeasureSpec)
 {
@@ -1667,6 +1667,7 @@ void CalendarView::LegacyCalendarViewDelegate::WeekView::OnMeasure(
     view->GetPaddingBottom(&b);
     mHeight = (h - t - b) / mHost->mShownWeekCount;
     SetMeasuredDimension(MeasureSpec::GetSize(widthMeasureSpec), mHeight);
+    return NOERROR;
 }
 
 //========================================================================================

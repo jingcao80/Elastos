@@ -521,7 +521,7 @@ ECode SlidingTab::constructor(
     return NOERROR;
 }
 
-void SlidingTab::OnMeasure(
+ECode SlidingTab::OnMeasure(
     /* [in] */ Int32 widthMeasureSpec,
     /* [in] */ Int32 heightMeasureSpec)
 {
@@ -557,6 +557,7 @@ void SlidingTab::OnMeasure(
         height = Elastos::Core::Math::Max(heightSpecSize, leftTabHeight + rightTabHeight);
     }
     SetMeasuredDimension(width, height);
+    return NOERROR;
 }
 
 ECode SlidingTab::OnInterceptTouchEvent(

@@ -32,7 +32,7 @@ ECode ExpandableView::constructor(
     return NOERROR;
 }
 
-void ExpandableView::OnMeasure(
+ECode ExpandableView::OnMeasure(
     /* [in] */ Int32 widthMeasureSpec,
     /* [in] */ Int32 heightMeasureSpec)
 {
@@ -94,6 +94,7 @@ void ExpandableView::OnMeasure(
     mMatchParentViews->Clear();
     Int32 width = MeasureSpec::GetSize(widthMeasureSpec);
     SetMeasuredDimension(width, ownHeight);
+    return NOERROR;
 }
 
 ECode ExpandableView::OnLayout(

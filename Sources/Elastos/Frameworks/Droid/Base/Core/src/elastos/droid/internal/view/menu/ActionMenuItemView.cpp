@@ -497,7 +497,7 @@ ECode ActionMenuItemView::OnLongClick(
     return NOERROR;
 }
 
-void ActionMenuItemView::OnMeasure(
+ECode ActionMenuItemView::OnMeasure(
     /* [in] */ Int32 widthMeasureSpec,
     /* [in] */ Int32 heightMeasureSpec)
 {
@@ -544,6 +544,7 @@ void ActionMenuItemView::OnMeasure(
         GetPaddingBottom(&b);
         TextView::SetPadding((w - dw) / 2, t, r, b);
     }
+    return NOERROR;
 }
 
 ECode ActionMenuItemView::SetEnabled(

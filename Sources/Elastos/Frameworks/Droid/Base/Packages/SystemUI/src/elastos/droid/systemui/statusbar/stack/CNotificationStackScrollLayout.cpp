@@ -573,7 +573,7 @@ void CNotificationStackScrollLayout::NotifyHeightChangeListener(
     }
 }
 
-void CNotificationStackScrollLayout::OnMeasure(
+ECode CNotificationStackScrollLayout::OnMeasure(
     /* [in] */ Int32 widthMeasureSpec,
     /* [in] */ Int32 heightMeasureSpec)
 {
@@ -582,6 +582,7 @@ void CNotificationStackScrollLayout::OnMeasure(
     Int32 size = View::MeasureSpec::GetSize(widthMeasureSpec);
     Int32 childMeasureSpec = View::MeasureSpec::MakeMeasureSpec(size - 2 * mSidePaddings, mode);
     MeasureChildren(childMeasureSpec, heightMeasureSpec);
+    return NOERROR;
 }
 
 ECode CNotificationStackScrollLayout::OnLayout(

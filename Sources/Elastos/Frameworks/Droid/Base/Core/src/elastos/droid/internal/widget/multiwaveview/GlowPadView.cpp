@@ -1738,7 +1738,7 @@ Float GlowPadView::ComputeScaleFactor(
     return Elastos::Core::Math::Min(scaleX, scaleY);
 }
 
-void GlowPadView::OnMeasure(
+ECode GlowPadView::OnMeasure(
     /* [in] */ Int32 widthMeasureSpec,
     /* [in] */ Int32 heightMeasureSpec)
 {
@@ -1755,6 +1755,7 @@ void GlowPadView::OnMeasure(
 
     ComputeInsets(computedWidth - scaledWidth, computedHeight - scaledHeight);
     SetMeasuredDimension(computedWidth, computedHeight);
+    return NOERROR;
 }
 
 Float GlowPadView::GetRingWidth()

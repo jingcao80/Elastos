@@ -831,7 +831,7 @@ ECode CTvView::OnLayout(
     }
 }
 
-void CTvView::OnMeasure(
+ECode CTvView::OnMeasure(
     /* [in] */ Int32 widthMeasureSpec,
     /* [in] */ Int32 heightMeasureSpec)
 {
@@ -845,6 +845,7 @@ void CTvView::OnMeasure(
     SetMeasuredDimension(ResolveSizeAndState(width, widthMeasureSpec, childState),
             ResolveSizeAndState(height, heightMeasureSpec,
                     childState << MEASURED_HEIGHT_STATE_SHIFT));
+    return NOERROR;
 }
 
 ECode CTvView::OnVisibilityChanged(

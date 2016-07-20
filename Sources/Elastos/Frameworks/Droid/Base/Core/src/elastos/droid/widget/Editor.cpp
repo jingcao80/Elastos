@@ -1721,11 +1721,12 @@ Boolean HandleView::OffsetHasBeenChanged()
     return mNumberPreviousOffsets > 1;
 }
 
-void HandleView::OnMeasure(
+ECode HandleView::OnMeasure(
     /* [in] */ Int32 widthMeasureSpec,
     /* [in] */ Int32 heightMeasureSpec)
 {
     SetMeasuredDimension(GetPreferredWidth(), GetPreferredHeight());
+    return NOERROR;
 }
 
 Int32 HandleView::GetPreferredWidth()

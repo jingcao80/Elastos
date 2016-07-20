@@ -129,7 +129,7 @@ ECode CCandidateView::ComputeHorizontalScrollRange(
     return NOERROR;
 }
 
-void CCandidateView::OnMeasure(
+ECode CCandidateView::OnMeasure(
     /* [in] */ Int32 widthMeasureSpec,
     /* [in] */ Int32 heightMeasureSpec)
 {
@@ -151,6 +151,7 @@ void CCandidateView::OnMeasure(
     // Maximum possible width and desired height
     SetMeasuredDimension(measuredWidth,
             ResolveSize(desiredHeight, heightMeasureSpec));
+    return NOERROR;
 }
 
 void CCandidateView::OnDraw(

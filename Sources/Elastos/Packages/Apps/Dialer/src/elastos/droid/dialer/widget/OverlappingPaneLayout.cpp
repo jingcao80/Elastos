@@ -689,7 +689,7 @@ ECode OverlappingPaneLayout::OnDetachedFromWindow()
     return NOERROR;
 }
 
-void OverlappingPaneLayout::OnMeasure(
+ECode OverlappingPaneLayout::OnMeasure(
     /* [in] */ Int32 widthMeasureSpec,
     /* [in] */ Int32 heightMeasureSpec)
 {
@@ -955,6 +955,7 @@ void OverlappingPaneLayout::OnMeasure(
         // Cancel scrolling in progress, it's no longer relevant.
         mDragHelper->Abort();
     }
+    return NOERROR;
 }
 
 ECode OverlappingPaneLayout::OnLayout(

@@ -1108,7 +1108,7 @@ void ListView::OnSizeChanged(
     AbsListView::OnSizeChanged(w, h, oldw, oldh);
 }
 
-void ListView::OnMeasure(
+ECode ListView::OnMeasure(
     /* [in] */ Int32 widthMeasureSpec,
     /* [in] */ Int32 heightMeasureSpec)
 {
@@ -1174,6 +1174,7 @@ void ListView::OnMeasure(
 
     SetMeasuredDimension(widthSize, heightSize);
     mWidthMeasureSpec = widthMeasureSpec;
+    return NOERROR;
 }
 
 void ListView::MeasureScrapChild(

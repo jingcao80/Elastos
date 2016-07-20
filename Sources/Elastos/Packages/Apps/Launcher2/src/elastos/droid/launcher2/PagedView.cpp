@@ -625,7 +625,7 @@ ECode PagedView::ComputeScroll()
     return NOERROR;
 }
 
-void PagedView::OnMeasure(
+ECode PagedView::OnMeasure(
     /* [in] */ Int32 widthMeasureSpec,
     /* [in] */ Int32 heightMeasureSpec)
 {
@@ -749,6 +749,7 @@ void PagedView::OnMeasure(
     else {
         mMaxScrollX = 0;
     }
+    return NOERROR;
 }
 
 ECode PagedView::ScrollToNewPageWithoutMovingPages(

@@ -177,12 +177,13 @@ ECode CLoadAverageService::LoadView::OnDetachedFromWindow()
     return NOERROR;
 }
 
-void CLoadAverageService::LoadView::OnMeasure(
+ECode CLoadAverageService::LoadView::OnMeasure(
     /* [in] */ Int32 widthMeasureSpec,
     /* [in] */ Int32 heightMeasureSpec)
 {
     SetMeasuredDimension(ResolveSize(mNeededWidth, widthMeasureSpec),
             ResolveSize(mNeededHeight, heightMeasureSpec));
+    return NOERROR;
 }
 
 void CLoadAverageService::LoadView::OnDraw(

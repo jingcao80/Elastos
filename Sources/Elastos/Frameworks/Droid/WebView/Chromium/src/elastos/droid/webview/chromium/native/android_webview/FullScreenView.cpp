@@ -171,11 +171,12 @@ void FullScreenView::OnDraw(
 }
 
 //@Override
-void FullScreenView::OnMeasure(
+ECode FullScreenView::OnMeasure(
     /* [in] */ Int32 widthMeasureSpec,
     /* [in] */ Int32 heightMeasureSpec)
 {
     mAwViewMethods->OnMeasure(widthMeasureSpec, heightMeasureSpec);
+    return NOERROR;
 }
 
 //@Override

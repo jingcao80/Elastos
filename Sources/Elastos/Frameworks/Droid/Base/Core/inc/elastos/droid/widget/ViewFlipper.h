@@ -14,7 +14,7 @@ namespace Elastos {
 namespace Droid {
 namespace Widget {
 
-class ViewFlipper
+class ECO_PUBLIC ViewFlipper
     : public ViewAnimator
     , public IViewFlipper
 {

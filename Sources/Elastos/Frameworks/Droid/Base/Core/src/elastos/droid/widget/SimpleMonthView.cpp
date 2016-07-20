@@ -537,11 +537,12 @@ void SimpleMonthView::OnDraw(
     DrawDays(canvas);
 }
 
-void SimpleMonthView::OnMeasure(
+ECode SimpleMonthView::OnMeasure(
     /* [in] */ Int32 widthMeasureSpec,
     /* [in] */ Int32 heightMeasureSpec)
 {
     SetMeasuredDimension(MeasureSpec::GetSize(widthMeasureSpec), mRowHeight * mNumRows + mMonthHeaderSize);
+    return NOERROR;
 }
 
 void SimpleMonthView::OnSizeChanged(

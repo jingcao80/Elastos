@@ -3,14 +3,13 @@
 #define __ELASTOS_DROID_SYSTEMUI_KEYGUARD_KEYGUARDSECURITYMODE_H__
 
 #include "_Elastos.Droid.SystemUI.h"
-#include "Elastos.Droid.App.h"
 #include "Elastos.Droid.Content.h"
-#include "Elastos.Droid.Os.h"
-#include "elastos/droid/app/Service.h"
+#include "Elastos.Droid.Internal.h"
+#include <elastos/core/Object.h>
 
-using Elastos::Droid::App::Service;
-using Elastos::Droid::Content::IIntent;
-using Elastos::Droid::Os::IBinder;
+using Elastos::Droid::Content::IContext;
+using Elastos::Droid::Internal::Widget::ILockPatternUtils;
+using Elastos::Core::Object;
 
 namespace Elastos {
 namespace Droid {
@@ -19,26 +18,12 @@ namespace Keyguard {
 
 class KeyguardSecurityModel
     : public Object
+    , public IKeyguardSecurityModel
 {
 public:
-    /**
-     * The different types of security available for {@link Mode#UnlockScreen}.
-     * @see com.android.internal.policy.impl.LockPatternKeyguardView#getUnlockMode()
-     */
-    enum SecurityMode {
-        Invalid, // NULL state
-        None, // No security enabled
-        Pattern, // Unlock by drawing a pattern.
-        Password, // Unlock by entering an alphanumeric password
-        PIN, // Strictly numeric password
-        Biometric, // Unlock with a biometric key (e.g. finger print or face unlock)
-        Account, // Unlock by entering an account's login and password.
-        SimPin, // Unlock by entering a sim pin.
-        SimPuk // Unlock by entering a sim puk
-    };
-
-public:
     TO_STRING_IMPL("CKeyguardAccountView::MyRunnable")
+
+    CAR_INTERFACE_DECL()
 
     KeyguardSecurityModel(
         /* [in] */ IContext* context);
@@ -75,7 +60,7 @@ public:
      * @return backup method or current security mode
      */
     CARAPI GetBackupSecurityMode(
-        /* [in] */ SecurityMode* mode,
+        /* [in] */ SecurityMode mode,
         /* [out] */ SecurityMode* outmode);
 
 private:

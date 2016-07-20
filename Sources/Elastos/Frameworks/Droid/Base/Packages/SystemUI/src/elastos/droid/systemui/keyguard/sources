@@ -16,3 +16,6 @@ SOURCES += CKeyguardViewMediator.cpp
 SOURCES += KeyguardService.cpp
 SOURCES += CKeyguardStatusView.cpp
 SOURCES += CKeyguardSimpleHostView.cpp
+SOURCES += CKeyguardSecurityContainer.cpp
+SOURCES += CKeyguardSecurityViewFlipper.cpp
+SOURCES += KeyguardSecurityModel.cpp

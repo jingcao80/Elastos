@@ -332,7 +332,7 @@ public:
 protected:
     //TODO: we need to find another way to implement RelativeLayout
     // This implementation cannot handle every case
-    virtual CARAPI_(void) OnMeasure(
+    virtual CARAPI OnMeasure(
         /* [in] */ Int32 widthMeasureSpec,
         /* [in] */ Int32 heightMeasureSpec);
 

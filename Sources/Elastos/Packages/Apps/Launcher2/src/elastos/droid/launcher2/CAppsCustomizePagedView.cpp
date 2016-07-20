@@ -756,7 +756,7 @@ ECode CAppsCustomizePagedView::ShowAllAppsCling()
     return NOERROR;
 }
 
-void CAppsCustomizePagedView::OnMeasure(
+ECode CAppsCustomizePagedView::OnMeasure(
     /* [in] */ Int32 widthMeasureSpec,
     /* [in] */ Int32 heightMeasureSpec)
 {
@@ -774,6 +774,7 @@ void CAppsCustomizePagedView::OnMeasure(
     }
 
     PagedViewWithDraggableItems::OnMeasure(widthMeasureSpec, heightMeasureSpec);
+    return NOERROR;
 }
 
 ECode CAppsCustomizePagedView::OnPackagesUpdated(

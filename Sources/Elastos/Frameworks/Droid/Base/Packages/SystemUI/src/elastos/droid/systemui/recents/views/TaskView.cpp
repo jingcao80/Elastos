@@ -404,7 +404,7 @@ ECode TaskView::OnFinishInflate()
 }
 
 // @Override
-void TaskView::OnMeasure(
+ECode TaskView::OnMeasure(
     /* [in] */ Int32 widthMeasureSpec,
     /* [in] */ Int32 heightMeasureSpec)
 {
@@ -445,6 +445,7 @@ void TaskView::OnMeasure(
     }
     SetMeasuredDimension(width, height);
     InvalidateOutline();
+    return NOERROR;
 }
 
 /** Synchronizes this view's properties with the task's transform */

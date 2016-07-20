@@ -1,6 +1,8 @@
 
 module
 {
+    using interface Elastos.Droid.Internal.Widget.ILockPatternUtils;
+    
     namespace Elastos {
     namespace Droid {
     namespace SystemUI {
@@ -22,7 +24,43 @@ module
         SecurityMode_SimPuk // Unlock by entering a sim puk
     }
 
+    [local]
     interface IKeyguardSecurityModel {
+
+        SetLockPatternUtils(
+            [in] ILockPatternUtils* utils);
+
+        /**
+         * Returns true if biometric unlock is installed and selected.  If this returns false there is
+         * no need to even construct the biometric unlock.
+         */
+        IsBiometricUnlockEnabled(
+            [out] Boolean* result);
+
+        GetSecurityMode(
+            [out] SecurityMode* mode);
+
+        /**
+         * Some unlock methods can have an alternate, such as biometric unlocks (e.g. face unlock).
+         * This function decides if an alternate unlock is available and returns it. Otherwise,
+         * returns @param mode.
+         *
+         * @param mode the mode we want the alternate for
+         * @return alternate or the given mode
+         */
+        GetAlternateFor(
+            [in] SecurityMode mode,
+            [out] SecurityMode* result);
+
+        /**
+         * Some unlock methods can have a backup which gives the user another way to get into
+         * the device. This is currently only supported for Biometric and Pattern unlock.
+         *
+         * @return backup method or current security mode
+         */
+        GetBackupSecurityMode(
+            [in] SecurityMode mode,
+            [out] SecurityMode* result);
 
     }
 

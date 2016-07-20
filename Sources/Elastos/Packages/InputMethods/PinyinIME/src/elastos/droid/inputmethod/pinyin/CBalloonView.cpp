@@ -55,7 +55,7 @@ void CBalloonView::SetTextConfig(
     mPaintLabel->MeasureText(SUSPENSION_POINTS, &mSuspensionPointsWidth);
 }
 
-void CBalloonView::OnMeasure(
+ECode CBalloonView::OnMeasure(
     /* [in] */ Int32 widthMeasureSpec,
     /* [in] */ Int32 heightMeasureSpec)
 {
@@ -100,6 +100,7 @@ void CBalloonView::OnMeasure(
         measuredWidth = maxWidth;
     }
     SetMeasuredDimension(measuredWidth, measuredHeight);
+    return NOERROR;
 }
 
 void CBalloonView::OnDraw(

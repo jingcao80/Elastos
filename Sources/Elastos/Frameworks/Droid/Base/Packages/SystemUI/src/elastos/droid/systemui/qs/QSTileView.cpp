@@ -291,7 +291,7 @@ AutoPtr<IView> QSTileView::LabelView()
     return mDual ? IView::Probe(mDualLabel) : IView::Probe(mLabel);
 }
 
-void QSTileView::OnMeasure(
+ECode QSTileView::OnMeasure(
     /* [in] */ Int32 widthMeasureSpec,
     /* [in] */ Int32 heightMeasureSpec)
 {
@@ -311,6 +311,7 @@ void QSTileView::OnMeasure(
             mIconSizePx + mTilePaddingBelowIconPx + mTilePaddingTopPx);
     mTopBackgroundView->Measure(widthMeasureSpec, heightSpec);
     SetMeasuredDimension(w, h);
+    return NOERROR;
 }
 
 Int32 QSTileView::Exactly(

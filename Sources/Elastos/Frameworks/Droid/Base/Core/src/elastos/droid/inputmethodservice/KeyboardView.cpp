@@ -843,7 +843,7 @@ AutoPtr<ICharSequence> KeyboardView::AdjustCase(
     return label;
 }
 
-void KeyboardView::OnMeasure(
+ECode KeyboardView::OnMeasure(
     /* [in] */ Int32 widthMeasureSpec,
     /* [in] */ Int32 heightMeasureSpec)
 {
@@ -863,6 +863,7 @@ void KeyboardView::OnMeasure(
         mKeyboard->GetHeight(&th);
         SetMeasuredDimension(width, th + mPaddingTop + mPaddingBottom);
     }
+    return NOERROR;
 }
 
 void KeyboardView::ComputeProximityThreshold(

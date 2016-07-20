@@ -570,7 +570,7 @@ void AbsSeekBar::DrawThumb(
     }
 }
 
-void AbsSeekBar::OnMeasure(
+ECode AbsSeekBar::OnMeasure(
     /* [in] */ Int32 widthMeasureSpec,
     /* [in] */ Int32 heightMeasureSpec)
 {
@@ -593,6 +593,7 @@ void AbsSeekBar::OnMeasure(
         SetMeasuredDimension(ResolveSizeAndState(dw, widthMeasureSpec, 0),
                 ResolveSizeAndState(dh, heightMeasureSpec, 0));
     }
+    return NOERROR;
 }
 
 ECode AbsSeekBar::OnTouchEvent(

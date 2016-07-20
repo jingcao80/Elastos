@@ -2757,7 +2757,7 @@ Int32 GridLayout::Adjust(
             MeasureSpec::GetSize(measureSpec + delta),  MeasureSpec::GetMode(measureSpec));
 }
 
-void GridLayout::OnMeasure(
+ECode GridLayout::OnMeasure(
     /* [in] */ Int32 widthSpec,
     /* [in] */ Int32 heightSpec)
 {
@@ -2798,6 +2798,7 @@ void GridLayout::OnMeasure(
     SetMeasuredDimension(
             ResolveSizeAndState(measuredWidth, widthSpec, 0),
             ResolveSizeAndState(measuredHeight, heightSpec, 0));
+    return NOERROR;
 }
 
 Int32 GridLayout::GetMeasurement(

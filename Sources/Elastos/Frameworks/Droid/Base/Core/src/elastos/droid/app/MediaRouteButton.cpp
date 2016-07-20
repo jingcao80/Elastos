@@ -473,7 +473,7 @@ ECode MediaRouteButton::OnDetachedFromWindow()
     return Elastos::Droid::View::View::OnDetachedFromWindow();
 }
 
-void MediaRouteButton::OnMeasure(
+ECode MediaRouteButton::OnMeasure(
     /* [in] */ Int32 widthMeasureSpec,
     /* [in] */ Int32 heightMeasureSpec)
 {
@@ -526,6 +526,7 @@ void MediaRouteButton::OnMeasure(
     }
 
     SetMeasuredDimension(width, height);
+    return NOERROR;
 }
 
 void MediaRouteButton::OnDraw(

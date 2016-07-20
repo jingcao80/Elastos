@@ -150,7 +150,7 @@ ECode CCandidateView::constructor(
     return NOERROR;
 }
 
-void CCandidateView::OnMeasure(
+ECode CCandidateView::OnMeasure(
     /* [in] */ Int32 widthMeasureSpec,
     /* [in] */ Int32 heightMeasureSpec)
 {
@@ -167,6 +167,7 @@ void CCandidateView::OnMeasure(
         (GetMeasuredHeight(&height), oldHeight != height)) {
         OnSizeChanged();
     }
+    return NOERROR;
 }
 
 ECode CCandidateView::Initialize(

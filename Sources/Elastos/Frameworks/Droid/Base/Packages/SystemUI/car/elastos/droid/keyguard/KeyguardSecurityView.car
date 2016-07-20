@@ -11,6 +11,7 @@ module
     namespace SystemUI {
     namespace Keyguard {
 
+
     [local]
     interface IKeyguardSecurityView {
         const Int32 SCREEN_ON = 1;

@@ -323,7 +323,7 @@ ECode ActionMenuView::SetOnMenuItemClickListener(
     return NOERROR;
 }
 
-void ActionMenuView::OnMeasure(
+ECode ActionMenuView::OnMeasure(
     /* [in] */ Int32 widthMeasureSpec,
     /* [in] */ Int32 heightMeasureSpec)
 {
@@ -365,6 +365,7 @@ void ActionMenuView::OnMeasure(
 
         LinearLayout::OnMeasure(widthMeasureSpec, heightMeasureSpec);
     }
+    return NOERROR;
 }
 
 void ActionMenuView::OnMeasureExactFormat(

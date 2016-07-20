@@ -305,7 +305,7 @@ ECode ActionBarView::HomeView::OnFinishInflate()
     return NOERROR;
 }
 
-void ActionBarView::HomeView::OnMeasure(
+ECode ActionBarView::HomeView::OnMeasure(
     /* [in] */ Int32 widthMeasureSpec,
     /* [in] */ Int32 heightMeasureSpec)
 {
@@ -384,6 +384,7 @@ void ActionBarView::HomeView::OnMeasure(
             break;
     }
     SetMeasuredDimension(width, height);
+    return NOERROR;
 }
 
 ECode ActionBarView::HomeView::OnLayout(
@@ -1679,7 +1680,7 @@ ECode ActionBarView::OnFinishInflate()
     return NOERROR;
 }
 
-void ActionBarView::OnMeasure(
+ECode ActionBarView::OnMeasure(
     /* [in] */ Int32 widthMeasureSpec,
     /* [in] */ Int32 heightMeasureSpec)
 {
@@ -1714,7 +1715,7 @@ void ActionBarView::OnMeasure(
 
         if (visibleChildren == 0) {
             SetMeasuredDimension(0, 0);
-            return ;
+            return NOERROR;
         }
     }
 
@@ -1722,14 +1723,14 @@ void ActionBarView::OnMeasure(
     if (widthMode != MeasureSpec::EXACTLY) {
         //throw new IllegalStateException(getClass().getSimpleName() + " can only be used " +
         //        "with android:layout_width=\"match_parent\" (or fill_parent)");
-        return ;
+        return E_ILLEGAL_STATE_EXCEPTION;
     }
 
     Int32 heightMode = View::MeasureSpec::GetMode(heightMeasureSpec);
     if (heightMode != View::MeasureSpec::AT_MOST) {
         //throw new IllegalStateException(getClass().getSimpleName() + " can only be used " +
         //       "with android:layout_height=\"wrap_content\"");
-        return ;
+        return E_ILLEGAL_STATE_EXCEPTION;
     }
 
     Int32 contentWidth = View::MeasureSpec::GetSize(widthMeasureSpec);
@@ -1950,6 +1951,7 @@ void ActionBarView::OnMeasure(
                     View::MeasureSpec::MakeMeasureSpec(measureHeight, View::MeasureSpec::AT_MOST));
         }
     }
+    return NOERROR;
 }
 
 ECode ActionBarView::OnLayout(

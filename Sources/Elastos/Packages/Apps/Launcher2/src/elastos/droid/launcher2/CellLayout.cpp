@@ -2021,7 +2021,7 @@ ECode CellLayout::GetMetrics(
     return metrics->Set(cellWidth, cellHeight, widthGap, heightGap);
 }
 
-void CellLayout::OnMeasure(
+ECode CellLayout::OnMeasure(
     /* [in] */ Int32 widthMeasureSpec,
     /* [in] */ Int32 heightMeasureSpec)
 {
@@ -2079,6 +2079,7 @@ void CellLayout::OnMeasure(
         child->Measure(childWidthMeasureSpec, childheightMeasureSpec);
     }
     SetMeasuredDimension(newWidth, newHeight);
+    return NOERROR;
 }
 
 ECode CellLayout::OnLayout(

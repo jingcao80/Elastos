@@ -466,7 +466,7 @@ ECode SubtitleView::SetStyle(
     return NOERROR;
 }
 
-void SubtitleView::OnMeasure(
+ECode SubtitleView::OnMeasure(
     /* [in] */ Int32 widthMeasureSpec,
     /* [in] */ Int32 heightMeasureSpec)
 {
@@ -500,6 +500,7 @@ void SubtitleView::OnMeasure(
     else {
         SetMeasuredDimension(MEASURED_STATE_TOO_SMALL, MEASURED_STATE_TOO_SMALL);
     }
+    return NOERROR;
 }
 
 void SubtitleView::OnDraw(

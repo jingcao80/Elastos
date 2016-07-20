@@ -1684,7 +1684,7 @@ Boolean PhoneWindow::_DecorView::SetFrame(
     return changed;
 }
 
-void PhoneWindow::_DecorView::OnMeasure(
+ECode PhoneWindow::_DecorView::OnMeasure(
     /* [in] */ Int32 widthMeasureSpec,
     /* [in] */ Int32 heightMeasureSpec)
 {
@@ -1810,6 +1810,7 @@ void PhoneWindow::_DecorView::OnMeasure(
     if (measure) {
         FrameLayout::OnMeasure(widthMeasureSpec, heightMeasureSpec);
     }
+    return NOERROR;
 }
 
 void PhoneWindow::_DecorView::DrawableChanged()

@@ -5091,7 +5091,7 @@ protected:
     static CARAPI_(String) DebugIndent(
         /* [in] */ Int32 depth);
 
-    virtual CARAPI_(void) OnMeasure(
+    virtual CARAPI OnMeasure(
         /* [in] */ Int32 widthMeasureSpec,
         /* [in] */ Int32 heightMeasureSpec);
 

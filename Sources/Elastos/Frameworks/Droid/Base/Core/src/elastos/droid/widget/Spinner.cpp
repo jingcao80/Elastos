@@ -1178,7 +1178,7 @@ ECode Spinner::OnDetachedFromWindow()
     return NOERROR;
 }
 
-void Spinner::OnMeasure(
+ECode Spinner::OnMeasure(
     /* [in] */ Int32 widthMeasureSpec,
     /* [in] */ Int32 heightMeasureSpec)
 {
@@ -1197,6 +1197,7 @@ void Spinner::OnMeasure(
             measuredWidth, MeasureContentWidth(adapter, drawable)),
             MeasureSpec::GetSize(widthMeasureSpec)), measuredHeight);
     }
+    return NOERROR;
 }
 
 ECode Spinner::OnLayout(

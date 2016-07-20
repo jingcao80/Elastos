@@ -53,7 +53,7 @@ ContentVideoView::VideoSurfaceView::VideoSurfaceView(
 //CAR_INTERFACE_IMPL(ContentVideoView::VideoSurfaceView, Object, ISurfaceView);
 
 //@Override
-void ContentVideoView::VideoSurfaceView::OnMeasure(
+ECode ContentVideoView::VideoSurfaceView::OnMeasure(
     /* [in] */ Int32 widthMeasureSpec,
     /* [in] */ Int32 heightMeasureSpec)
 {
@@ -73,6 +73,7 @@ void ContentVideoView::VideoSurfaceView::OnMeasure(
     }
 
     SetMeasuredDimension(width, height);
+    return NOERROR;
 }
 
 //===============================================================

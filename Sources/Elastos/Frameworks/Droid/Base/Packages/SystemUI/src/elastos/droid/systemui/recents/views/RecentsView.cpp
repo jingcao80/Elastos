@@ -388,7 +388,7 @@ ECode RecentsView::SetSearchBarVisibility(
  * This is called with the full size of the window since we are handling our own insets.
  */
 // @Override
-void RecentsView::OnMeasure(
+ECode RecentsView::OnMeasure(
     /* [in] */ Int32 widthMeasureSpec,
     /* [in] */ Int32 heightMeasureSpec)
 {
@@ -433,6 +433,7 @@ void RecentsView::OnMeasure(
     }
 
     SetMeasuredDimension(width, height);
+    return NOERROR;
 }
 
 /**

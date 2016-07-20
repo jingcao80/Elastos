@@ -993,7 +993,7 @@ void AdapterViewAnimator::CancelHandleClick()
     mTouchMode = TOUCH_MODE_NONE;
 }
 
-void AdapterViewAnimator::OnMeasure(
+ECode AdapterViewAnimator::OnMeasure(
     /* [in] */ Int32 widthMeasureSpec,
     /* [in] */ Int32 heightMeasureSpec)
 {
@@ -1035,6 +1035,7 @@ void AdapterViewAnimator::OnMeasure(
     }
     SetMeasuredDimension(widthSpecSize, heightSpecSize);
     MeasureChildren();
+    return NOERROR;
 }
 
 void AdapterViewAnimator::CheckForAndHandleDataChanged()

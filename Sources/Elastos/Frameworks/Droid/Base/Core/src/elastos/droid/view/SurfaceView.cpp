@@ -498,7 +498,7 @@ ECode SurfaceView::OnDetachedFromWindow()
     return View::OnDetachedFromWindow();
 }
 
-void SurfaceView::OnMeasure(
+ECode SurfaceView::OnMeasure(
     /* [in] */ Int32 widthMeasureSpec,
     /* [in] */ Int32 heightMeasureSpec)
 {
@@ -510,6 +510,7 @@ void SurfaceView::OnMeasure(
             : GetDefaultSize(0, heightMeasureSpec);
 
     SetMeasuredDimension(width, height);
+    return NOERROR;
 }
 
 /** @hide */

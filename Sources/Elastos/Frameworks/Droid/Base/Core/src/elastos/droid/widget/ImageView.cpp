@@ -762,7 +762,7 @@ MatrixScaleToFit ImageView::ScaleTypeToScaleToFit(
     return sS2FArray[st - 1];
 }
 
-void ImageView::OnMeasure(
+ECode ImageView::OnMeasure(
     /* [in] */ Int32 widthMeasureSpec,
     /* [in] */ Int32 heightMeasureSpec)
 {
@@ -884,6 +884,7 @@ void ImageView::OnMeasure(
     }
 
     SetMeasuredDimension(widthSize, heightSize);
+    return NOERROR;
 }
 
 Int32 ImageView::ResolveAdjustedSize(

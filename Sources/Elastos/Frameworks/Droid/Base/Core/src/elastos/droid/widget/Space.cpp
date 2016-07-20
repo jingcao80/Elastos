@@ -62,13 +62,14 @@ ECode Space::Draw(
     return NOERROR;
 }
 
-void Space::OnMeasure(
+ECode Space::OnMeasure(
     /* [in] */ Int32 widthMeasureSpec,
     /* [in] */ Int32 heightMeasureSpec)
 {
     SetMeasuredDimension(
         GetDefaultSize2(GetSuggestedMinimumWidth(), widthMeasureSpec),
         GetDefaultSize2(GetSuggestedMinimumHeight(), heightMeasureSpec));
+    return NOERROR;
 }
 
 /**

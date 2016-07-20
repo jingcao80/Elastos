@@ -826,7 +826,7 @@ void AwContents::AwViewMethodsImpl::OnDraw(
 }
 
 //@Override
-void AwContents::AwViewMethodsImpl::OnMeasure(
+ECode AwContents::AwViewMethodsImpl::OnMeasure(
     /* [in] */ Int32 widthMeasureSpec,
     /* [in] */ Int32 heightMeasureSpec)
 {
@@ -1659,11 +1659,12 @@ void AwContents::OnDraw(
     mAwViewMethods->OnDraw(canvas);
 }
 
-void AwContents::OnMeasure(
+ECode AwContents::OnMeasure(
     /* [in] */ Int32 widthMeasureSpec,
     /* [in] */ Int32 heightMeasureSpec)
 {
     mAwViewMethods->OnMeasure(widthMeasureSpec, heightMeasureSpec);
+    return NOERROR;
 }
 
 Int32 AwContents::GetContentHeightCss()

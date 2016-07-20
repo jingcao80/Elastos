@@ -61,7 +61,7 @@ ECode PreferenceImageView::constructor(
     return ImageView::constructor(context, attrs, defStyleAttr, defStyleRes);
 }
 
-void PreferenceImageView::OnMeasure(
+ECode PreferenceImageView::OnMeasure(
     /* [in] */ Int32 widthMeasureSpec,
     /* [in] */ Int32 heightMeasureSpec)
 {
@@ -112,6 +112,7 @@ void PreferenceImageView::OnMeasure(
     }
 
     ImageView::OnMeasure(widthMeasureSpec, heightMeasureSpec);
+    return NOERROR;
 }
 
 } // namespace Widget

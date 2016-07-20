@@ -206,11 +206,12 @@ AutoPtr<IDrawable> CCallTypeIconsView::GetCallTypeDrawable(
     }
 }
 
-void CCallTypeIconsView::OnMeasure(
+ECode CCallTypeIconsView::OnMeasure(
     /* [in] */ Int32 widthMeasureSpec,
     /* [in] */ Int32 heightMeasureSpec)
 {
     SetMeasuredDimension(mWidth, mHeight);
+    return NOERROR;
 }
 
 void CCallTypeIconsView::OnDraw(

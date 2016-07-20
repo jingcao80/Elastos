@@ -85,7 +85,7 @@ public:
      * Calculate the size of the view.
      * This is designed to be used to implement the android.view.View#onMeasure() method.
      */
-    CARAPI_(void) OnMeasure(
+    CARAPI OnMeasure(
         /* [in] */ Int32 widthMeasureSpec,
         /* [in] */ Int32 heightMeasureSpec);
 

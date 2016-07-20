@@ -222,7 +222,7 @@ ECode RotarySelector::SetRightHandleResource(
     return NOERROR;
 }
 
-void RotarySelector::OnMeasure(
+ECode RotarySelector::OnMeasure(
     /* [in] */ Int32 widthMeasureSpec,
     /* [in] */ Int32 heightMeasureSpec)
 {
@@ -245,6 +245,7 @@ void RotarySelector::OnMeasure(
     else {
         SetMeasuredDimension(height, length);
     }
+    return NOERROR;
 }
 
 void RotarySelector::OnDraw(

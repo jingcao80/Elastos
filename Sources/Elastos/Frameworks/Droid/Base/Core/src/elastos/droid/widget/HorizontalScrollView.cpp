@@ -337,19 +337,19 @@ ECode HorizontalScrollView::SetSmoothScrollingEnabled(
     return NOERROR;
 }
 
-void HorizontalScrollView::OnMeasure(
+ECode HorizontalScrollView::OnMeasure(
     /* [in] */ Int32 widthMeasureSpec,
     /* [in] */ Int32 heightMeasureSpec)
 {
     FrameLayout::OnMeasure(widthMeasureSpec, heightMeasureSpec);
 
     if (!mFillViewport) {
-        return;
+        return NOERROR;
     }
 
     Int32 widthMode = MeasureSpec::GetMode(widthMeasureSpec);
     if (widthMode == MeasureSpec::UNSPECIFIED) {
-        return;
+        return NOERROR;
     }
 
     Int32 count = 0;
@@ -378,6 +378,7 @@ void HorizontalScrollView::OnMeasure(
             child->Measure(childWidthMeasureSpec, childHeightMeasureSpec);
         }
     }
+    return NOERROR;
 }
 
 ECode HorizontalScrollView::DispatchKeyEvent(

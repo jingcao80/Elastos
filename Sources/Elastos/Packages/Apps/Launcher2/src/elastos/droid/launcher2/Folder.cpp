@@ -1445,7 +1445,7 @@ void Folder::SetupContentForNumItems(
     CenterAboutIcon();
 }
 
-void Folder::OnMeasure(
+ECode Folder::OnMeasure(
     /* [in] */ Int32 widthMeasureSpec,
     /* [in] */ Int32 heightMeasureSpec)
 {
@@ -1474,6 +1474,7 @@ void Folder::OnMeasure(
     IView::Probe(mFolderName)->Measure(contentWidthSpec,
             MeasureSpec::MakeMeasureSpec(mFolderNameHeight, View::MeasureSpec::EXACTLY));
     SetMeasuredDimension(width, height);
+    return NOERROR;
 }
 
 void Folder::ArrangeChildren(

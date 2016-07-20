@@ -3,9 +3,12 @@
 #define __ELASTOS_DROID_SYSTEMUI_KEYGUARD_CKEYGUARDSECURITYCONTAINER_H__
 
 #include "_Elastos_Droid_SystemUI_Keyguard_CKeyguardSecurityContainer.h"
+#include <Elastos.Droid.Internal.h>
 #include <elastos/droid/widget/FrameLayout.h>
+#include "elastos/droid/systemui/keyguard/KeyguardUpdateMonitorCallback.h"
 
 using Elastos::Droid::Widget::FrameLayout;
+using Elastos::Droid::Internal::Widget::ILockPatternUtils;
 
 namespace Elastos {
 namespace Droid {
@@ -18,6 +21,23 @@ CarClass(CKeyguardSecurityContainer)
     , public IKeyguardSecurityView
 {
 private:
+    class MyKeyguardUpdateMonitorCallback
+        : public KeyguardUpdateMonitorCallback
+    {
+    public:
+        TO_STRING_IMPL("CKeyguardSecurityContainer::KeyguardUpdateMonitorCallback")
+
+        MyKeyguardUpdateMonitorCallback(
+            /* [in] */ CKeyguardSecurityContainer* host)
+            : mHost(host)
+        {}
+
+        CARAPI OnUserSwitchComplete(
+            /* [in] */ Int32 userId);
+    private:
+        CKeyguardSecurityContainer* mHost;
+    };
+
     class MyKeyguardSecurityCallback
         : public Object
         , public IKeyguardSecurityCallback
@@ -104,6 +124,10 @@ public:
     CARAPI SetSecurityCallback(
         /* [in] */ IKeyguardSecurityContainerSecurityCallback* callback);
 
+    CARAPI OnAttachedToWindow();
+
+    CARAPI OnDetachedFromWindow();
+
     //@Override
     CARAPI OnResume(
         /* [in] */ Int32 reason);
@@ -150,12 +174,12 @@ public:
         /* [in] */ Int32 duration);
 
     CARAPI GetSecurityMode(
-        /* [out] */ KeyguardSecurityModel::SecurityMode* mode);
+        /* [out] */ SecurityMode* mode);
 
     CARAPI VerifyUnlock();
 
-    public GetCurrentSecuritySelection(
-        /* [out] */ KeyguardSecurityModel::SecurityMode* mode);
+    CARAPI GetCurrentSecuritySelection(
+        /* [out] */ SecurityMode* mode);
 
     CARAPI Dismiss(
         /* [in] */ Boolean authenticated);
@@ -181,8 +205,9 @@ protected:
     CARAPI OnFinishInflate();
 
 private:
-    CARAPI_(AutoPtr<IKeyguardSecurityView>) GetSecurityView(
-        /* [in] */ KeyguardSecurityModel::SecurityMode securityMode);
+    CARAPI GetSecurityView(
+        /* [in] */ SecurityMode securityMode,
+        /* [out] */ IKeyguardSecurityView** view);
 
     CARAPI_(void) UpdateSecurityView(
         /* [in] */ IView* view,
@@ -210,7 +235,7 @@ private:
      * password recovery screens but is currently only used for pattern unlock to show the
      * account unlock screen and biometric unlock to show the user's normal unlock.
      */
-    CARAPI_(void) ShowBackupSecurityScreen();
+    CARAPI ShowBackupSecurityScreen();
 
     /**
      * Switches to the given security view unless it's already being shown, in which case
@@ -218,31 +243,32 @@ private:
      *
      * @param securityMode
      */
-    CARAPI_(void) ShowSecurityScreen(
-        /* [in] */ KeyguardSecurityModel::SecurityMode securityMode);
+    CARAPI ShowSecurityScreen(
+        /* [in] */ SecurityMode securityMode);
 
     CARAPI_(AutoPtr<IKeyguardSecurityViewFlipper>) GetFlipper();
 
     CARAPI_(Int32) GetSecurityViewIdForMode(
-        /* [in] */ KeyguardSecurityModel::SecurityMode securityMode);
+        /* [in] */ SecurityMode securityMode);
 
     CARAPI_(Int32) GetLayoutIdFor(
-        /* [in] */ KeyguardSecurityModel::SecurityMode securityMode);
+        /* [in] */ SecurityMode securityMode);
 
 private:
     static const Boolean DEBUG;
-    static const String TAG;
+
     AutoPtr<IKeyguardSecurityModel> mSecurityModel;
     Boolean mEnableFallback; // TODO: This should get the value from KeyguardPatternView
     AutoPtr<ILockPatternUtils> mLockPatternUtils;
 
     AutoPtr<IKeyguardSecurityViewFlipper> mSecurityViewFlipper;
     Boolean mIsVerifyUnlockOnly;
-    KeyguardSecurityModel::SecurityMode mCurrentSecuritySelection;
+    SecurityMode mCurrentSecuritySelection;
     Boolean mIsBouncing;
-    AutoPtr<ISecurityCallback> mSecurityCallback;
+    AutoPtr<IKeyguardSecurityContainerSecurityCallback> mSecurityCallback;
 
     AutoPtr<IKeyguardUpdateMonitor> mUpdateMonitor;
+    AutoPtr<IKeyguardUpdateMonitorCallback> mUpdateMonitorCallbacks;
 
     AutoPtr<IKeyguardSecurityCallback> mCallback;
 

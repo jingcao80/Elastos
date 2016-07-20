@@ -274,7 +274,7 @@ protected:
      */
     CARAPI_(Int32) GetScaledSuggestedMinimumHeight();
 
-    CARAPI_(void) OnMeasure(
+    CARAPI OnMeasure(
         /* [in] */ Int32 widthMeasureSpec,
         /* [in] */ Int32 heightMeasureSpec);
 

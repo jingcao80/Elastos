@@ -1381,7 +1381,7 @@ void LockPatternView::DrawCircle(
     canvas->DrawCircle(centerX, centerY, size / 2, mPaint);
 }
 
-void LockPatternView::OnMeasure(
+ECode LockPatternView::OnMeasure(
     /* [in] */ Int32 widthMeasureSpec,
     /* [in] */ Int32 heightMeasureSpec)
 {
@@ -1401,6 +1401,7 @@ void LockPatternView::OnMeasure(
             viewWidth = Elastos::Core::Math::Min(viewWidth, viewHeight);
             break;
     }
+    return NOERROR;
 }
 
 void LockPatternView::OnDraw(

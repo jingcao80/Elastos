@@ -164,7 +164,7 @@ void HandleView::SetOrientation(
 }
 
 //@Override
-void HandleView::OnMeasure(
+ECode HandleView::OnMeasure(
     /* [in] */ Int32 widthMeasureSpec,
     /* [in] */ Int32 heightMeasureSpec)
 {
@@ -172,6 +172,7 @@ void HandleView::OnMeasure(
     mDrawable->GetIntrinsicWidth(&width);
     mDrawable->GetIntrinsicHeight(&height);
     SetMeasuredDimension(width, height);
+    return NOERROR;
 }
 
 void HandleView::UpdateParentPosition(

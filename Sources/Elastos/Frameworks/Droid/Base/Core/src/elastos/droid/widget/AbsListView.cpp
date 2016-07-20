@@ -4199,7 +4199,7 @@ Float AbsListView::GetBottomFadingEdgeStrength()
     }
 }
 
-void AbsListView::OnMeasure(
+ECode AbsListView::OnMeasure(
     /* [in] */ Int32 widthMeasureSpec,
     /* [in] */ Int32 heightMeasureSpec)
 {
@@ -4233,6 +4233,7 @@ void AbsListView::OnMeasure(
         mForceTranscriptScroll = mFirstPosition + childCount >= mLastHandledItemCount &&
                 lastChildBottom <= listBottom;
     }
+    return NOERROR;
 }
 
 ECode AbsListView::OnLayout(

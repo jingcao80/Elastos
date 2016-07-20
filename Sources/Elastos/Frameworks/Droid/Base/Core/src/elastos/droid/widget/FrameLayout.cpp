@@ -436,7 +436,7 @@ Int32 FrameLayout::GetPaddingBottomWithForeground()
         mPaddingBottom + mForegroundPaddingBottom;
 }
 
-void FrameLayout::OnMeasure(
+ECode FrameLayout::OnMeasure(
     /* [in] */ Int32 widthMeasureSpec,
     /* [in] */ Int32 heightMeasureSpec)
 {
@@ -561,6 +561,7 @@ void FrameLayout::OnMeasure(
             child->Measure(childWidthMeasureSpec, childHeightMeasureSpec);
         }
     }
+    return NOERROR;
 }
 
 ECode FrameLayout::OnLayout(

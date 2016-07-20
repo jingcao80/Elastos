@@ -868,7 +868,7 @@ void RelativeLayout::SortChildren()
     graph->GetSortedViews(mSortedHorizontalChildren, RULES_HORIZONTAL);
 }
 
-void RelativeLayout::OnMeasure(
+ECode RelativeLayout::OnMeasure(
     /* [in] */ Int32 widthMeasureSpec,
     /* [in] */ Int32 heightMeasureSpec)
 {
@@ -1199,6 +1199,7 @@ void RelativeLayout::OnMeasure(
     }
 
     SetMeasuredDimension(width, height);
+    return NOERROR;
 }
 
 void RelativeLayout::AlignBaseline(

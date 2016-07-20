@@ -270,7 +270,7 @@ ECode FragmentBreadCrumbs::OnLayout(
     return NOERROR;
 }
 
-void FragmentBreadCrumbs::OnMeasure(
+ECode FragmentBreadCrumbs::OnMeasure(
     /* [in] */ Int32 widthMeasureSpec,
     /* [in] */ Int32 heightMeasureSpec)
 {
@@ -313,6 +313,7 @@ void FragmentBreadCrumbs::OnMeasure(
         ResolveSizeAndState(maxWidth, widthMeasureSpec, measuredChildState),
         ResolveSizeAndState(maxHeight, heightMeasureSpec,
             measuredChildState << IView::MEASURED_HEIGHT_STATE_SHIFT));
+    return NOERROR;
 }
 
 ECode FragmentBreadCrumbs::OnBackStackChanged()

@@ -207,7 +207,7 @@ void AbsSpinner::ResetList()
     Invalidate();
 }
 
-void AbsSpinner::OnMeasure(
+ECode AbsSpinner::OnMeasure(
     /* [in] */ Int32 widthMeasureSpec,
     /* [in] */ Int32 heightMeasureSpec)
 {
@@ -284,6 +284,7 @@ void AbsSpinner::OnMeasure(
     SetMeasuredDimension(widthSize, heightSize);
     mHeightMeasureSpec = heightMeasureSpec;
     mWidthMeasureSpec = widthMeasureSpec;
+    return NOERROR;
 }
 
 Int32 AbsSpinner::GetChildHeight(

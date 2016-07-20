@@ -3,9 +3,12 @@
 #define __ELASTOS_DROID_SYSTEMUI_KEYGUARD_CKEYGUARDSECURITYVIEWFLIPPER_H__
 
 #include "_Elastos_Droid_SystemUI_Keyguard_CKeyguardSecurityViewFlipper.h"
+#include <Elastos.Droid.Internal.h>
 #include <elastos/droid/widget/ViewFlipper.h>
 
+using Elastos::Droid::View::IMotionEvent;
 using Elastos::Droid::Widget::ViewFlipper;
+using Elastos::Droid::Internal::Widget::ILockPatternUtils;
 
 namespace Elastos {
 namespace Droid {
@@ -19,15 +22,16 @@ namespace Keyguard {
  */
 CarClass(CKeyguardSecurityViewFlipper)
     , public ViewFlipper
+    , public IKeyguardSecurityViewFlipper
     , public IKeyguardSecurityView
 {
-private:
+public:
     class LayoutParams
         : public FrameLayout::FrameLayoutLayoutParams
         , public IKeyguardSecurityViewFlipperLayoutParams
     {
     public:
-        TO_STRING_IMPL("CKeyguardSecurityViewFlipper::LayoutParams")
+        CAR_INTERFACE_DECL()
 
         LayoutParams();
 
@@ -35,11 +39,23 @@ private:
             /* [in] */ IViewGroupLayoutParams* other);
 
         CARAPI constructor(
-            /* [in] */ IFrameLayoutLayoutParams* other);
+            /* [in] */ IKeyguardSecurityViewFlipperLayoutParams* other);
 
         CARAPI constructor(
             /* [in] */ IContext* c,
             /* [in] */ IAttributeSet* attrs);
+
+        CARAPI SetMaxWidth(
+            /* [in] */ Int32 value);
+
+        CARAPI GetMaxWidth(
+            /* [out] */ Int32* value);
+
+        CARAPI SetMaxHeight(
+            /* [in] */ Int32 value);
+
+        CARAPI GetMaxHeight(
+            /* [out] */ Int32* value);
 
     public:
         //@ViewDebug.ExportedProperty(category = "layout")
@@ -143,7 +159,6 @@ private:
         /* [in] */ Int32 childDimen);
 
 private:
-    static const String TAG;
     static const Boolean DEBUG;
 
     AutoPtr<IRect> mTempRect;

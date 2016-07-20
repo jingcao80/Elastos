@@ -525,7 +525,7 @@ ECode Switch::GetShowText(
     return NOERROR;
 }
 
-void Switch::OnMeasure(
+ECode Switch::OnMeasure(
     /* [in] */ Int32 widthMeasureSpec,
     /* [in] */ Int32 heightMeasureSpec)
 {
@@ -602,6 +602,7 @@ void Switch::OnMeasure(
         GetMeasuredWidthAndState(&state);
         SetMeasuredDimension(state, switchHeight);
     }
+    return NOERROR;
 }
 
 ECode Switch::OnPopulateAccessibilityEvent(

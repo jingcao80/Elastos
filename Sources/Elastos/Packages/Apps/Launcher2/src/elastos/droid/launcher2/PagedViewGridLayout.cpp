@@ -58,7 +58,7 @@ ECode PagedViewGridLayout::ResetChildrenOnKeyListeners()
     return NOERROR;
 }
 
-void PagedViewGridLayout::OnMeasure(
+ECode PagedViewGridLayout::OnMeasure(
     /* [in] */ Int32 widthMeasureSpec,
     /* [in] */ Int32 heightMeasureSpec)
 {
@@ -72,6 +72,7 @@ void PagedViewGridLayout::OnMeasure(
     Int32 widthSpecMode = View::MeasureSpec::EXACTLY;
     GridLayout::OnMeasure(View::MeasureSpec::MakeMeasureSpec(widthSpecSize, widthSpecMode),
             heightMeasureSpec);
+    return NOERROR;
 }
 
 ECode PagedViewGridLayout::OnDetachedFromWindow()

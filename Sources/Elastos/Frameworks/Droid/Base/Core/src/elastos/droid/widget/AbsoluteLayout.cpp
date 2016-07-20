@@ -97,7 +97,7 @@ CAR_INTERFACE_IMPL(AbsoluteLayout, ViewGroup, IAbsoluteLayout)
 AbsoluteLayout::AbsoluteLayout()
 {}
 
-void AbsoluteLayout::OnMeasure(
+ECode AbsoluteLayout::OnMeasure(
     /* [in] */ Int32 widthMeasureSpec,
     /* [in] */ Int32 heightMeasureSpec)
 {
@@ -149,6 +149,7 @@ void AbsoluteLayout::OnMeasure(
 
     SetMeasuredDimension(ResolveSizeAndState(maxWidth, widthMeasureSpec, 0),
             ResolveSizeAndState(maxHeight, heightMeasureSpec, 0));
+    return NOERROR;
 }
 
 /**

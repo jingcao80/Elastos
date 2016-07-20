@@ -42,7 +42,7 @@ ECode DialpadTextView::Draw(
     return NOERROR;
 }
 
-void DialpadTextView::OnMeasure(
+ECode DialpadTextView::OnMeasure(
     /* [in] */ Int32 widthMeasureSpec,
     /* [in] */ Int32 heightMeasureSpec)
 {
@@ -60,6 +60,7 @@ void DialpadTextView::OnMeasure(
     width = ResolveSize(width, widthMeasureSpec);
     height = ResolveSize(height, heightMeasureSpec);
     SetMeasuredDimension(width, height);
+    return NOERROR;
 }
 
 } // namespace Dialpad

@@ -161,7 +161,7 @@ ECode PseudoGridView::constructor(
     return NOERROR;
 }
 
-void PseudoGridView::OnMeasure(
+ECode PseudoGridView::OnMeasure(
     /* [in] */ Int32 widthMeasureSpec,
     /* [in] */ Int32 heightMeasureSpec)
 {
@@ -205,6 +205,7 @@ void PseudoGridView::OnMeasure(
 
     GetDefaultSize(totalHeight, heightMeasureSpec);
     SetMeasuredDimension(width, tmp);
+    return NOERROR;
 }
 
 ECode PseudoGridView::OnLayout(

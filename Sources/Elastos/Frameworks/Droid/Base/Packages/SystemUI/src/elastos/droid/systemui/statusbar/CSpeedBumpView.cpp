@@ -78,13 +78,14 @@ ECode CSpeedBumpView::OnLayout(
     return NOERROR;
 }
 
-void CSpeedBumpView::OnMeasure(
+ECode CSpeedBumpView::OnMeasure(
     /* [in] */ Int32 widthMeasureSpec,
     /* [in] */ Int32 heightMeasureSpec)
 {
     MeasureChildren(widthMeasureSpec, heightMeasureSpec);
     Int32 height = mSpeedBumpHeight;
     SetMeasuredDimension(MeasureSpec::GetSize(widthMeasureSpec), height);
+    return NOERROR;
 }
 
 ECode CSpeedBumpView::IsTransparent(

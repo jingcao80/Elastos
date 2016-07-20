@@ -209,7 +209,7 @@ protected:
      * This is called with the full size of the window since we are handling our own insets.
      */
     // @Override
-    CARAPI_(void) OnMeasure(
+    CARAPI OnMeasure(
         /* [in] */ Int32 widthMeasureSpec,
         /* [in] */ Int32 heightMeasureSpec);
 

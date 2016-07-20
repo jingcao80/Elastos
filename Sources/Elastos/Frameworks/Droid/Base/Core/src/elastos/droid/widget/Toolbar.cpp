@@ -1282,7 +1282,7 @@ ECode Toolbar::OnDetachedFromWindow()
     return NOERROR;
 }
 
-void Toolbar::OnMeasure(
+ECode Toolbar::OnMeasure(
     /* [in] */ Int32 widthMeasureSpec,
     /* [in] */ Int32 heightMeasureSpec)
 {
@@ -1453,6 +1453,7 @@ void Toolbar::OnMeasure(
             heightMeasureSpec, childState << MEASURED_HEIGHT_STATE_SHIFT);
 
     SetMeasuredDimension(measuredWidth, ShouldCollapse() ? 0 : measuredHeight);
+    return NOERROR;
 }
 
 ECode Toolbar::OnLayout(

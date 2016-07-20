@@ -125,7 +125,7 @@ ECode CClosedCaptionRenderer::ClosedCaptionWidget::CCLayout::Update(
     return NOERROR;
 }
 
-void CClosedCaptionRenderer::ClosedCaptionWidget::CCLayout::OnMeasure(
+ECode CClosedCaptionRenderer::ClosedCaptionWidget::CCLayout::OnMeasure(
     /* [in] */ Int32 widthMeasureSpec,
     /* [in] */ Int32 heightMeasureSpec)
 {
@@ -155,6 +155,7 @@ void CClosedCaptionRenderer::ClosedCaptionWidget::CCLayout::OnMeasure(
     for (Int32 i = 0; i < MAX_ROWS; i++) {
         (*mLineBoxes)[i]->Measure(lineWidthMeasureSpec, lineHeightMeasureSpec);
     }
+    return NOERROR;
 }
 
 ECode CClosedCaptionRenderer::ClosedCaptionWidget::CCLayout::OnLayout(
@@ -251,7 +252,7 @@ ECode CClosedCaptionRenderer::ClosedCaptionWidget::CCLineBox::SetCaptionStyle(
     return NOERROR;
 }
 
-void CClosedCaptionRenderer::ClosedCaptionWidget::CCLineBox::OnMeasure(
+ECode CClosedCaptionRenderer::ClosedCaptionWidget::CCLineBox::OnMeasure(
     /* [in] */ Int32 widthMeasureSpec,
     /* [in] */ Int32 heightMeasureSpec)
 {
@@ -274,6 +275,7 @@ void CClosedCaptionRenderer::ClosedCaptionWidget::CCLineBox::OnMeasure(
     SetScaleX(requiredTextWidth / actualTextWidth);
 
     TextView::OnMeasure(widthMeasureSpec, heightMeasureSpec);
+    return NOERROR;
 }
 
 void CClosedCaptionRenderer::ClosedCaptionWidget::CCLineBox::OnDraw(
@@ -524,12 +526,13 @@ ECode CClosedCaptionRenderer::ClosedCaptionWidget::Draw(
     return ViewGroup::Draw(c);
 }
 
-void CClosedCaptionRenderer::ClosedCaptionWidget::OnMeasure(
+ECode CClosedCaptionRenderer::ClosedCaptionWidget::OnMeasure(
     /* [in] */ Int32 widthMeasureSpec,
     /* [in] */ Int32 heightMeasureSpec)
 {
     ViewGroup::OnMeasure(widthMeasureSpec, heightMeasureSpec);
     mClosedCaptionLayout->Measure(widthMeasureSpec, heightMeasureSpec);
+    return NOERROR;
 }
 
 ECode CClosedCaptionRenderer::ClosedCaptionWidget::OnLayout(
