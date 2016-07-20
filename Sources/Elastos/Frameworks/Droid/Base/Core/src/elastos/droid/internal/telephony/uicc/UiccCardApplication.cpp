@@ -148,7 +148,8 @@ ECode UiccCardApplication::constructor(
     mContext = c;
     mCi = ci;
 
-    Logger::E("leliang", "line:%d, func:%s, type:%d\n", __LINE__, __func__, cas->mApp_type);
+    Logger::E("leliang", "line:%d, func:%s, type:%d, state:%d\n", __LINE__, __func__, cas->mApp_type, mAppState);
+    //test leliang type:2, state: 5
     mIccFh = CreateIccFileHandler(cas->mApp_type);
     mIccRecords = CreateIccRecords(cas->mApp_type, mContext, mCi);
 
@@ -368,8 +369,10 @@ ECode UiccCardApplication::GetState(
     /* [out] */ AppState* result)
 {
     VALIDATE_NOT_NULL(result);
-    AutoLock lock(mLock);
-    *result = mAppState;
+    {
+        AutoLock lock(mLock);
+        *result = mAppState;
+    }
     return NOERROR;
 }
 
@@ -781,15 +784,17 @@ AutoPtr<IIccFileHandler> UiccCardApplication::CreateIccFileHandler(
     AutoPtr<IIccFileHandler> fh;
     switch (type) {
         case APPTYPE_SIM:
-            CSIMFileHandler::New(this, mAid, mCi, (IIccFileHandler**)&fh);
+            CSIMFileHandler::New(this, mAid, mCi, (IIccFileHandler**)&fh);break;
         case APPTYPE_RUIM:
-            CRuimFileHandler::New(this, mAid, mCi, (IIccFileHandler**)&fh);
-        case APPTYPE_USIM:// leliang this type
+            CRuimFileHandler::New(this, mAid, mCi, (IIccFileHandler**)&fh);break;
+        case APPTYPE_USIM: {// leliang this type
             CUsimFileHandler::New(this, mAid, mCi, (IIccFileHandler**)&fh);
+            break;
+        }
         case APPTYPE_CSIM:
-            CCsimFileHandler::New(this, mAid, mCi, (IIccFileHandler**)&fh);
+            CCsimFileHandler::New(this, mAid, mCi, (IIccFileHandler**)&fh);break;
         case APPTYPE_ISIM:
-            CIsimFileHandler::New(this, mAid, mCi, (IIccFileHandler**)&fh);
+            CIsimFileHandler::New(this, mAid, mCi, (IIccFileHandler**)&fh);break;
         default:
             fh = NULL;
     }

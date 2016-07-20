@@ -198,7 +198,7 @@ ECode SubscriptionManager::AddSubInfoRecord(
     VALIDATE_NOT_NULL(result)
     *result = NULL;
 
-    // if (VDBG) Logd(String("[addSubInfoRecord]+ iccId:") + iccId + " slotId:" + slotId);
+    if (VDBG) Logd(String("[addSubInfoRecord]+ iccId:") + iccId + String(" slotId:") + StringUtils::ToString(slotId));
     if (iccId == NULL) {
         Logd(String("[addSubInfoRecord]- null iccId"));
     }
@@ -681,7 +681,8 @@ ECode SubscriptionManager::PutPhoneIdAndSubIdExtra(
     /* [in] */ Int32 phoneId,
     /* [in] */ Int64 subId)
 {
-    // if (VDBG) Logd(String("putPhoneIdAndSubIdExtra: phoneId=") + phoneId + " subId=" + subId);
+    if (VDBG) Logd(String("putPhoneIdAndSubIdExtra: phoneId=") + StringUtils::ToString(phoneId) +
+            String(" subId=") + StringUtils::ToString(subId));
     intent->PutExtra(IPhoneConstants::SUBSCRIPTION_KEY, subId);
     intent->PutExtra(IPhoneConstants::PHONE_KEY, phoneId);
     //FIXME this is using phoneId and slotId interchangeably

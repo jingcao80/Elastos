@@ -24,6 +24,7 @@ namespace Uicc {
   */
 class IccFileHandler
     : public Handler
+    , public IIccFileHandler
     , public IIccConstants
 {
 public:

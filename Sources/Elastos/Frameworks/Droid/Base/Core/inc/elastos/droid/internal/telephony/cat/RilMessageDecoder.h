@@ -40,6 +40,7 @@ private:
             /* [in] */ IMessage* msg,
             /* [out] */ Boolean* result);
 
+        CARAPI_(String) GetName();
     public:
         RilMessageDecoder* mHost;
     };
@@ -56,6 +57,7 @@ private:
             /* [in] */ IMessage* msg,
             /* [out] */ Boolean* result);
 
+        CARAPI_(String) GetName();
     public:
         RilMessageDecoder* mHost;
     };
@@ -130,5 +132,6 @@ private:
 } // namespace Droid
 } // namespace Elastos
 
+DEFINE_CONVERSION_FOR(Elastos::Droid::Internal::Telephony::Cat::RilMessageDecoder, IInterface);
 #endif // __ELASTOS_DROID_INTERNAL_TELEPHONY_CAT_RILMESSAGEDECODER_H__
 

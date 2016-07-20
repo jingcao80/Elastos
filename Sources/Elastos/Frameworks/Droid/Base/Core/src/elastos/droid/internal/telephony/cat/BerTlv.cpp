@@ -3,10 +3,11 @@
 #include "Elastos.CoreLibrary.Utility.h"
 #include "elastos/droid/internal/telephony/cat/BerTlv.h"
 #include "elastos/droid/internal/telephony/cat/ComprehensionTlv.h"
+#include <elastos/utility/logging/Logger.h>
 
 using Elastos::Droid::Internal::Telephony::Cat::ComprehensionTlv;
-
 using Elastos::Utility::IIterator;
+using Elastos::Utility::Logging::Logger;
 
 namespace Elastos {
 namespace Droid {
@@ -60,6 +61,10 @@ ECode BerTlv::IsLengthValid(
 AutoPtr<BerTlv> BerTlv::Decode(
     /* [in] */ ArrayOf<Byte>* data)
 {
+    if (data == NULL) {
+        Logger::E("BerTlv", "Decode data should not be NULL");
+        return NULL;
+    }
     Int32 curIndex = 0;
     Int32 endIndex = data->GetLength();
     Int32 tag = 0, length = 0;

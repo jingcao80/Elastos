@@ -24,8 +24,7 @@ ECode UsimFileHandler::constructor(
     /* [in] */ const String& aid,
     /* [in] */ ICommandsInterface* ci)
 {
-    // ==================before translated======================
-    // super(app, aid, ci);
+    IccFileHandler::constructor(app, aid, ci);
     return NOERROR;
 }
 

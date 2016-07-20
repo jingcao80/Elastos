@@ -2,6 +2,9 @@
 #include "Elastos.CoreLibrary.Utility.h"
 #include "Elastos.Droid.Internal.h"
 #include "elastos/droid/internal/telephony/uicc/IccFileHandler.h"
+#include <elastos/utility/logging/Logger.h>
+
+using Elastos::Utility::Logging::Logger;
 
 namespace Elastos {
 namespace Droid {
@@ -105,7 +108,7 @@ void IccFileHandler::LoadLinearFixedContext::InitLCResults(
 //=====================================================================
 //                            IccFileHandler
 //=====================================================================
-CAR_INTERFACE_IMPL(IccFileHandler, Handler, IIccConstants);
+CAR_INTERFACE_IMPL_2(IccFileHandler, Handler, IIccFileHandler, IIccConstants);
 
 const Int32 IccFileHandler::COMMAND_READ_BINARY;
 const Int32 IccFileHandler::COMMAND_UPDATE_BINARY;
@@ -267,13 +270,13 @@ ECode IccFileHandler::LoadEFTransparent(
     /* [in] */ Int32 fileid,
     /* [in] */ IMessage* onLoaded)
 {
+    Logger::E("IccFileHandler", "TODO LoadEFTransparent 2 no impl");
     // ==================before translated======================
     // Message response = obtainMessage(EVENT_GET_BINARY_SIZE_DONE,
     //                 fileid, 0, onLoaded);
     //
     // mCi.iccIOForApp(COMMAND_GET_RESPONSE, fileid, getEFPath(fileid),
     //                 0, 0, 0, null, null, mAid, response);
-    assert(0);
     return NOERROR;
 }
 
@@ -282,13 +285,13 @@ ECode IccFileHandler::LoadEFTransparent(
     /* [in] */ Int32 size,
     /* [in] */ IMessage* onLoaded)
 {
+    Logger::E("IccFileHandler", "TODO LoadEFTransparent 3 no impl");
     // ==================before translated======================
     // Message response = obtainMessage(EVENT_READ_BINARY_DONE,
     //                 fileid, 0, onLoaded);
     //
     // mCi.iccIOForApp(COMMAND_READ_BINARY, fileid, getEFPath(fileid),
     //                 0, 0, size, null, null, mAid, response);
-    assert(0);
     return NOERROR;
 }
 

@@ -25,10 +25,11 @@ ECode CatLog::D(
         return NOERROR;
     }
 
-    assert(0 && "TODO");
-    String className; // = caller.getClass().getName();
-    Logger::D("CAT", className.Substring(className.LastIndexOf('.') + 1) + ": "
-            + msg);
+    //assert(0 && "TODO");
+    //TODO String className; // = caller.getClass().getName();
+    //TODO Logger::D("CAT", className.Substring(className.LastIndexOf('.') + 1) + ": "
+    //        + msg);
+    Logger::D("CAT", "TODO %s", msg.string());
     return NOERROR;
 }
 
@@ -48,10 +49,10 @@ ECode CatLog::E(
     /* [in] */ IInterface* caller,
     /* [in] */ const String& msg)
 {
-    assert(0 && "TODO");
-    String className;// = caller.getClass().getName();
-    Logger::E("CAT", className.Substring(className.LastIndexOf('.') + 1) + ": "
-            + msg);
+    //String className;// = caller.getClass().getName();
+    //Logger::E("CAT", className.Substring(className.LastIndexOf('.') + 1) + ": "
+    //        + msg);
+    Logger::E("CAT", "TODO %s", msg.string());
     return NOERROR;
 }
 

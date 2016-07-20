@@ -20,6 +20,7 @@
 #include "elastos/droid/R.h"
 
 #include <elastos/core/StringUtils.h>
+#include <elastos/utility/logging/Logger.h>
 
 using Elastos::Droid::Content::IIntent;
 using Elastos::Droid::Content::CIntent;
@@ -50,6 +51,7 @@ using Elastos::Core::StringUtils;
 using Elastos::Core::IThread;
 using Elastos::IO::IOutputStream;
 using Elastos::IO::CByteArrayOutputStream;
+using Elastos::Utility::Logging::Logger;
 
 namespace Elastos {
 namespace Droid {
@@ -112,6 +114,7 @@ CatService::CatService()
     : mStkAppInstalled(FALSE)
     , mCardState(CARDSTATE_ABSENT)
 {
+    Handler::constructor();
 }
 
 ECode CatService::constructor(
@@ -213,7 +216,7 @@ ECode CatService::HandleMessage(
                 + StringUtils::ToString(mSlotId));
         String data;
         if (obj != NULL) {
-            AutoPtr<AsyncResult> ar = (AsyncResult*)(IObject*)obj.Get();
+            AutoPtr<AsyncResult> ar = (AsyncResult*)(IObject::Probe(obj));
             if (ar != NULL && ar->mResult != NULL) {
                 // try {
                 ICharSequence::Probe(ar->mResult)->ToString(&data);

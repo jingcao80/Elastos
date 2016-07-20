@@ -218,9 +218,9 @@ ECode SubscriptionController::MyHandler::HandleMessage(
 //==============================================================
 //  SubscriptionController::
 //==============================================================
-const String SubscriptionController::LOGTAG("SubController");
+const String SubscriptionController::LOGTAG("SubscriptionController");
 const Boolean SubscriptionController::DBG = TRUE;
-const Boolean SubscriptionController::VDBG = FALSE;
+const Boolean SubscriptionController::VDBG = TRUE;
 const Int32 SubscriptionController::MAX_LOCAL_LOG_LINES = 500; // TODO: Reduce to 100 when 17678050 is fixed
 
 AutoPtr<ISubscriptionController> SubscriptionController::sInstance = NULL;
@@ -1430,9 +1430,10 @@ ECode SubscriptionController::GetSlotId(
 {
     VALIDATE_NOT_NULL(result)
     if (VDBG) {
-        // String str("[getSlotId] subId=");
-        // str += subId;
+        String str("[GetSlotId] subId=");
+        str += StringUtils::ToString(subId);
         // PrintStackTrace(str);
+        Logger::E("SubscriptionController", "%s", str.string());
     }
 
     if (subId == ISubscriptionManager::DEFAULT_SUB_ID) {
@@ -1497,9 +1498,10 @@ ECode SubscriptionController::GetSubId(
 {
     VALIDATE_NOT_NULL(result)
     if (VDBG) {
-        // String str("[getSubId] slotId=");
-        // str += slotId;
+        //String str("[getSubId] slotId=");
+        //str += StringUtils::ToString(slotId);
         // PrintStackTrace(str);
+        Logger::E("SubscriptionController", "[getSubId] slotId=%d", slotId);
     }
 
     if (slotId == ISubscriptionManager::DEFAULT_SLOT_ID) {
