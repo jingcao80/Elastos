@@ -2,6 +2,9 @@
 #include "Elastos.Droid.Graphics.h"
 #include "Elastos.Droid.Internal.h"
 #include "elastos/droid/internal/telephony/uicc/UiccIccUtils.h"
+#include <elastos/utility/logging/Logger.h>
+
+using Elastos::Utility::Logging::Logger;
 
 namespace Elastos {
 namespace Droid {
@@ -224,6 +227,7 @@ Int32 UiccIccUtils::HexCharToInt(
 AutoPtr< ArrayOf<Byte> > UiccIccUtils::HexStringToBytes(
     /* [in] */ const String& s)
 {
+    Logger::E("UiccIccUtils", "TODO HexStringToBytes no impl, s:%s", s.string());
     // ==================before translated======================
     // byte[] ret;
     //
@@ -239,7 +243,6 @@ AutoPtr< ArrayOf<Byte> > UiccIccUtils::HexStringToBytes(
     // }
     //
     // return ret;
-    assert(0);
     AutoPtr< ArrayOf<Byte> > empty;
     return empty;
 }

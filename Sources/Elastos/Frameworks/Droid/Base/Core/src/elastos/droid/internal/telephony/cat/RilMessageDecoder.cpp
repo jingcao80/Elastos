@@ -7,6 +7,7 @@
 #include "elastos/droid/telephony/CTelephonyManagerHelper.h"
 
 #include <elastos/core/StringUtils.h>
+#include <elastos/utility/logging/Logger.h>
 
 using Elastos::Droid::Telephony::ITelephonyManager;
 using Elastos::Droid::Telephony::ISubscriptionManager;
@@ -16,6 +17,7 @@ using Elastos::Droid::Internal::Telephony::Uicc::IIccUtils;
 using Elastos::Droid::Internal::Telephony::Uicc::CIccUtils;
 
 using Elastos::Core::StringUtils;
+using Elastos::Utility::Logging::Logger;
 
 namespace Elastos {
 namespace Droid {
@@ -30,6 +32,11 @@ RilMessageDecoder::StateStart::StateStart(
     /* [in] */ RilMessageDecoder* host)
     : mHost(host)
 {
+}
+
+String RilMessageDecoder::StateStart::GetName()
+{
+    return String("RilMessageDecoder::StateStart");
 }
 
 ECode RilMessageDecoder::StateStart::ProcessMessage(
@@ -61,6 +68,11 @@ RilMessageDecoder::StateCmdParamsReady::StateCmdParamsReady(
     /* [in] */ RilMessageDecoder* host)
     : mHost(host)
 {
+}
+
+String RilMessageDecoder::StateCmdParamsReady::GetName()
+{
+    return String("RilMessageDecoder::StateCmdParamsReady");
 }
 
 ECode RilMessageDecoder::StateCmdParamsReady::ProcessMessage(
@@ -109,16 +121,15 @@ AutoPtr<RilMessageDecoder> RilMessageDecoder::GetInstance(
         AutoPtr<ITelephonyManager> tm;
         hlp->GetDefault((ITelephonyManager**)&tm);
         tm->GetSimCount(&mSimCount);
-        assert(0 && "TODO");
-        // mInstance = ArrayOf<RilMessageDecoder*>::Alloc(mSimCount);
+        mInstance = ArrayOf<RilMessageDecoder*>::Alloc(mSimCount);
         for (Int32 i = 0; i < mSimCount; i++) {
-            (*mInstance)[i] = NULL;
+            mInstance->Set(i, NULL);
         }
     }
 
     if (slotId != ISubscriptionManager::INVALID_SLOT_ID && slotId < mSimCount) {
         if (NULL == (*mInstance)[slotId]) {
-            (*mInstance)[slotId] = new RilMessageDecoder(caller, fh);
+            mInstance->Set(slotId, new RilMessageDecoder(caller, fh));
         }
     }
     else {
@@ -170,6 +181,8 @@ RilMessageDecoder::RilMessageDecoder(
     /* [in] */ IIccFileHandler* fh)
 {
     StateMachine::constructor(String("RilMessageDecoder"));
+    mStateStart = new  StateStart(this);
+    mStateCmdParamsReady = new StateCmdParamsReady(this);
     AddState(mStateStart);
     AddState(mStateCmdParamsReady);
     SetInitialState(mStateStart);

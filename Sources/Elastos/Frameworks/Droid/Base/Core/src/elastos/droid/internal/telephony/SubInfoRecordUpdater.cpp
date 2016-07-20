@@ -338,7 +338,6 @@ CARAPI SubInfoRecordUpdater::HandleMessage(
 {
     Int32 msgNum, arg1, arg2;
     msg->GetWhat(&msgNum);
-    Logger::D(LOGTAG, "[TODO]  ======SubInfoRecordUpdater::HandleMessage=what:%d====", msgNum);
     msg->GetArg1(&arg1);
     msg->GetArg2(&arg2);
     AutoPtr<IInterface> obj;
@@ -355,6 +354,7 @@ CARAPI SubInfoRecordUpdater::HandleMessage(
         }
     }
     slotId--;
+    Logger::D(LOGTAG, "[TODO]  ======SubInfoRecordUpdater::HandleMessage=what:%d, slotId:%d====", msgNum, slotId);
     Int32 event = msgNum >> (slotId * EVENT_OFFSET);
     switch (event) {
         case EVENT_QUERY_ICCID_DONE:
@@ -499,7 +499,11 @@ void SubInfoRecordUpdater::QueryIccId(
                 break;
             }
         }
-        if (validApp != NULL) validApp->GetIccFileHandler((IIccFileHandler**)&(*sFh)[slotId]);
+        if (validApp != NULL) {
+            AutoPtr<IIccFileHandler> ifh;
+            validApp->GetIccFileHandler((IIccFileHandler**)&ifh);
+            sFh->Set(slotId, ifh);
+        }
     }
 
     if ((*sFh)[slotId] != NULL) {
