@@ -36,9 +36,13 @@
                 "../../../Elastos/Runtime/Library/inc/eltypes",
                 "../../../Elastos/LibCore/inc/common",
                 "../../../Elastos/LibCore/inc/elastos/utility",
+
                 "../../../Elastos/Frameworks/Droid/Base/Core/inc/elastos/droid",
                 "../../../../Targets/obj/rdk/arm.gnu.android.dbg/inc",
                 "../../../../Targets/obj/rdk/arm.gnu.android.dbg/mirror/Elastos/Frameworks/Droid/Base/Core/src/elastos/droid",
+
+                "../../../../Targets/obj/rdk/arm.gnu.android.dbg/mirror/Elastos/LibCore/src/corelibrary",
+
                 "bridge",
                 "bridge/car",
                 "bridge/car/v8",
@@ -66,7 +70,7 @@
                 "bindings_node/v8/npruntime.cpp",
                 "bindings_node/v8/npapi.cpp",
 
-                "bridge/car/inc/Elastos.CoreLibrary.cpp",
+                "bridge/car/libcore/Elastos.CoreLibrary.cpp",
 
                 "bridge/car/CarUtility.cpp",
                 "bridge/car/CobjectWrapper.cpp",
