@@ -18,6 +18,7 @@ module
     interface Elastos.Droid.Content.Res.IResources;
     interface Elastos.Droid.Graphics.IRect;
     interface Elastos.Droid.Net.IUri;
+    interface Elastos.Droid.Os.IBinder;
     interface Elastos.Droid.Os.IBundle;
     interface Elastos.Droid.Utility.IAttributeSet;
 
@@ -3956,8 +3957,9 @@ module
          * @deprecated
          * @hide
          */
-        // TODO
-        // public IBinder getIBinderExtra(String name);
+        GetIBinderExtra(
+            [in] String name,
+            [out] IBinder** value);
 
         /**
          * Retrieve extended data from the intent.
@@ -4953,8 +4955,9 @@ module
          * @hide
          */
         // @Deprecated
-        // TODO
-        // public Intent putExtra(String name, IBinder value);
+        PutExtra(
+            [in] String name,
+            [in] IBinder* value);
 
         /**
          * Copy all extras in 'src' in to this intent.

@@ -24,6 +24,10 @@ module
      */
     [local]
     interface IAppSecurityPermissions {
+        const Int32 WHICH_PERSONAL = 1 << 0;
+        const Int32 WHICH_DEVICE = 1 << 1;
+        const Int32 WHICH_NEW = 1 << 2;
+        const Int32 WHICH_ALL = 0xffff;
 
         GetInstalledPackageInfo(
             [out] IPackageInfo** info);

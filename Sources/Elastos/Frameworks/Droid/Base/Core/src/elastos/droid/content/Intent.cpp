@@ -1344,6 +1344,20 @@ ECode Intent::GetBundleExtra(
     }
 }
 
+ECode Intent::GetIBinderExtra(
+    /* [in] */ const String& name,
+    /* [out] */ IBinder** value)
+{
+    VALIDATE_NOT_NULL(value)
+    if (mExtras == NULL) {
+        *value = NULL;
+        return NOERROR;
+    }
+    else {
+        return mExtras->GetIBinder(name, value);
+    }
+}
+
 ECode Intent::GetExtra(
     /* [in] */ const String& name,
     /* [in] */ IInterface* defaultValue,
@@ -1931,6 +1945,16 @@ ECode Intent::PutExtra(
         ASSERT_SUCCEEDED(CBundle::New((IBundle**)&mExtras));
     }
     return mExtras->PutBundle(name, value);
+}
+
+ECode Intent::PutExtra(
+    /* [in] */ const String& name,
+    /* [in] */ IBinder* value)
+{
+    if (mExtras == NULL) {
+        ASSERT_SUCCEEDED(CBundle::New((IBundle**)&mExtras));
+    }
+    return mExtras->PutIBinder(name, value);
 }
 
 ECode Intent::PutExtras(

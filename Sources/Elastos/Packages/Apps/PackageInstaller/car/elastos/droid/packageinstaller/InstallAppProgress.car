@@ -1,0 +1,28 @@
+
+module
+{
+    interface Elastos.Droid.View.IView;
+    interface Elastos.Droid.Content.IDialogInterface;
+
+    namespace Elastos {
+    namespace Droid {
+    namespace PackageInstaller {
+
+    interface IInstallAppProgress {
+        const String EXTRA_MANIFEST_DIGEST = "com.android.packageinstaller.extras.manifest_digest";
+        const String EXTRA_INSTALL_FLOW_ANALYTICS = "com.android.packageinstaller.extras.install_flow_analytics";
+
+        InitView();
+
+        OnClick(
+            [in] IView* view);
+
+        OnCancel(
+            [in] IDialogInterface* dialog);
+    }
+
+    } // namespace PackageInstaller
+    } // namespace Droid
+    } // namespace Elastos
+}
+

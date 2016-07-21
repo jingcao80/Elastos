@@ -1,0 +1,192 @@
+
+module
+{
+    importlib("Elastos.CoreLibrary.eco");
+    importlib("Elastos.Droid.Core.eco");
+
+    merge("car/elastos/droid/packageinstaller/CaffeinatedScrollView.car");
+    merge("car/elastos/droid/packageinstaller/GrantActivity.car");
+    merge("car/elastos/droid/packageinstaller/InstallAppProgress.car");
+    merge("car/elastos/droid/packageinstaller/PackageInstallerActivity.car");
+    merge("car/elastos/droid/packageinstaller/UninstallAppProgress.car");
+    merge("car/elastos/droid/packageinstaller/UninstallerActivity.car");
+
+    submodule Elastos.Droid.Support.V4.View {
+        merge("car/elastos/droid/support/v4/view.car");
+    }
+
+    using interface Elastos.Droid.App.IActivity;
+    using interface Elastos.Droid.Content.IContext;
+    using interface Elastos.Droid.Content.IContextWrapper;
+    using interface Elastos.Droid.Content.IComponentCallbacks;
+    using interface Elastos.Droid.Content.IComponentCallbacks2;
+    using interface Elastos.Droid.Content.Pm.IIPackageDeleteObserver;
+    using interface Elastos.Droid.Content.Pm.IIPackageInstallObserver;
+    using interface Elastos.Droid.Content.IDialogInterfaceOnCancelListener;
+    using interface Elastos.Droid.Graphics.Drawable.IDrawableCallback;
+    using interface Elastos.Droid.Os.IBinder;
+    using interface Elastos.Droid.View.IContextThemeWrapper;
+    using interface Elastos.Droid.View.ILayoutInflaterFactory;
+    using interface Elastos.Droid.View.ILayoutInflaterFactory2;
+    using interface Elastos.Droid.View.IWindowCallback;
+    using interface Elastos.Droid.View.IKeyEventCallback;
+    using interface Elastos.Droid.View.IViewOnCreateContextMenuListener;
+    using interface Elastos.Droid.View.IViewOnClickListener;
+    using interface Elastos.Droid.View.IOnWindowDismissedCallback;
+    using interface Elastos.Droid.View.IView;
+    using interface Elastos.Droid.View.IViewGroup;
+    using interface Elastos.Droid.View.IViewParent;
+    using interface Elastos.Droid.View.IViewManager;
+    using interface Elastos.Droid.View.IKeyEventCallback;
+    using interface Elastos.Droid.View.Accessibility.IAccessibilityEventSource;
+    using interface Elastos.Droid.Utility.IAttributeSet;
+    using interface Elastos.Droid.Widget.IFrameLayout;
+    using interface Elastos.Droid.Widget.IScrollView;
+
+    namespace Elastos {
+    namespace Droid {
+    namespace PackageInstaller {
+
+    [local]
+    class CCaffeinatedScrollView {
+        constructor(
+            [in] IContext* context);
+
+        constructor(
+            [in] IContext* context,
+            [in] IAttributeSet* attrs);
+
+        interface ICaffeinatedScrollView;
+        interface IScrollView;
+        interface IView;
+        interface IViewGroup;
+        interface IFrameLayout;
+        interface IViewParent;
+        interface IViewManager;
+        interface IKeyEventCallback;
+        interface IAccessibilityEventSource;
+        interface IDrawableCallback;
+    }
+
+    class CGrantActivity {
+        constructor();
+
+        interface IGrantActivity;
+        interface IActivity;
+        interface Elastos.Droid.Content.IContext;
+        interface Elastos.Droid.Content.IContextWrapper;
+        interface Elastos.Droid.View.IContextThemeWrapper;
+        interface ILayoutInflaterFactory;
+        interface ILayoutInflaterFactory2;
+        interface IWindowCallback;
+        interface IKeyEventCallback;
+        interface IViewOnCreateContextMenuListener;
+        interface IComponentCallbacks;
+        interface IComponentCallbacks2;
+        interface IOnWindowDismissedCallback;
+        interface IViewOnClickListener;
+    }
+
+    class CPackageInstallObserver {
+        constructor(
+            [in] IInstallAppProgress* owner);
+
+        interface IIPackageInstallObserver;
+        interface IBinder;
+    }
+
+    class CInstallAppProgress {
+        constructor();
+
+        interface IInstallAppProgress;
+        interface IActivity;
+        interface Elastos.Droid.Content.IContext;
+        interface Elastos.Droid.Content.IContextWrapper;
+        interface Elastos.Droid.View.IContextThemeWrapper;
+        interface ILayoutInflaterFactory;
+        interface ILayoutInflaterFactory2;
+        interface IWindowCallback;
+        interface IKeyEventCallback;
+        interface IViewOnCreateContextMenuListener;
+        interface IComponentCallbacks;
+        interface IComponentCallbacks2;
+        interface IOnWindowDismissedCallback;
+        interface IViewOnClickListener;
+        interface IDialogInterfaceOnCancelListener;
+    }
+
+    class CPackageInstallerActivity {
+        constructor();
+
+        interface IPackageInstallerActivity;
+        interface IActivity;
+        interface Elastos.Droid.Content.IContext;
+        interface Elastos.Droid.Content.IContextWrapper;
+        interface Elastos.Droid.View.IContextThemeWrapper;
+        interface ILayoutInflaterFactory;
+        interface ILayoutInflaterFactory2;
+        interface IWindowCallback;
+        interface IKeyEventCallback;
+        interface IViewOnCreateContextMenuListener;
+        interface IComponentCallbacks;
+        interface IComponentCallbacks2;
+        interface IOnWindowDismissedCallback;
+        interface IDialogInterfaceOnCancelListener;
+        interface IViewOnClickListener;
+    }
+
+    class CPackageDeleteObserver {
+        constructor(
+            [in] IUninstallAppProgress* owner);
+
+        interface IIPackageDeleteObserver;
+        interface IBinder;
+    }
+
+    class CUninstallAppProgress {
+        constructor();
+
+        interface IUninstallAppProgress;
+        interface IActivity;
+        interface Elastos.Droid.Content.IContext;
+        interface Elastos.Droid.Content.IContextWrapper;
+        interface Elastos.Droid.View.IContextThemeWrapper;
+        interface ILayoutInflaterFactory;
+        interface ILayoutInflaterFactory2;
+        interface IWindowCallback;
+        interface IKeyEventCallback;
+        interface IViewOnCreateContextMenuListener;
+        interface IComponentCallbacks;
+        interface IComponentCallbacks2;
+        interface IOnWindowDismissedCallback;
+        interface IViewOnClickListener;
+    }
+
+    class CUninstallerActivity {
+        constructor();
+
+        interface IUninstallerActivity;
+        interface IActivity;
+        interface Elastos.Droid.Content.IContext;
+        interface Elastos.Droid.Content.IContextWrapper;
+        interface Elastos.Droid.View.IContextThemeWrapper;
+        interface ILayoutInflaterFactory;
+        interface ILayoutInflaterFactory2;
+        interface IWindowCallback;
+        interface IKeyEventCallback;
+        interface IViewOnCreateContextMenuListener;
+        interface IComponentCallbacks;
+        interface IComponentCallbacks2;
+        interface IOnWindowDismissedCallback;
+    }
+
+    class CInstallFlowAnalytics {
+        constructor();
+
+        interface IParcelable;
+    }
+
+    } // namespace PackageInstaller
+    } // namespace Droid
+    } // namespace Elastos
+}

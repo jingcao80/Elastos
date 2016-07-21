@@ -7,6 +7,7 @@
 #include <elastos/utility/etl/HashSet.h>
 
 using Elastos::Droid::Net::IUri;
+using Elastos::Droid::Os::IBinder;
 using Elastos::Droid::Os::IBundle;
 using Elastos::Droid::Graphics::IRect;
 using Elastos::Droid::Content::IIntent;
@@ -382,6 +383,10 @@ public:
         /* [in] */ const String& name,
         /* [out] */ IBundle** value);
 
+    CARAPI GetIBinderExtra(
+        /* [in] */ const String& name,
+        /* [out] */ IBinder** value);
+
     CARAPI GetExtra(
         /* [in] */ const String& name,
         /* [in] */ IInterface* defaultValue,
@@ -581,6 +586,10 @@ public:
     CARAPI PutExtra(
         /* [in] */ const String& name,
         /* [in] */ IBundle* value);
+
+    CARAPI PutExtra(
+        /* [in] */ const String& name,
+        /* [in] */ IBinder* value);
 
     CARAPI PutExtras(
         /* [in] */ IIntent* src);

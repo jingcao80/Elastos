@@ -1,5 +1,5 @@
 
-TARGET_NAME = PackageInstaller
+TARGET_NAME = Elastos.Droid.PackageInstaller
 TARGET_TYPE = eco
 
 CAR_FLAGS += -n -u
@@ -9,31 +9,34 @@ INCLUDES += $(MAKEDIR)/inc
 INCLUDES += $(MAKEDIR)/src
 
 VPATH += $(MAKEDIR)/src/elastos/droid/packageinstaller
+VPATH += $(MAKEDIR)/src/elastos/droid/support/v4/view
 
+SOURCES = Elastos.Droid.PackageInstaller.car
+SOURCES += R.cpp
 SOURCES += Elastos.CoreLibrary.cpp
 SOURCES += Elastos.Droid.Core.cpp
-SOURCES += PackageInstaller.car
 
-SOURCES += CaffeinatedScrollView.cpp
+SOURCES += CCaffeinatedScrollView.cpp
 SOURCES += CGrantActivity.cpp
 SOURCES += CInstallAppProgress.cpp
-SOURCES += InstallFlowAnalytics.cpp
+SOURCES += CInstallFlowAnalytics.cpp
 SOURCES += CPackageInstallerActivity.cpp
 SOURCES += PackageUtil.cpp
 SOURCES += RemoveReceiver.cpp
 SOURCES += TabsAdapter.cpp
 SOURCES += CUninstallAppProgress.cpp
 SOURCES += CUninstallerActivity.cpp
+SOURCES += ViewPager.cpp
+SOURCES += PagerAdapter.cpp
+SOURCES += view.cpp
 
 LIBRARIES = $(XDK_USER_LIB)/Elastos.Runtime.lib
 LIBRARIES += $(XDK_TARGETS)/Elastos.Runtime.eco
 LIBRARIES += $(XDK_TARGETS)/Elastos.CoreLibrary.eco
 LIBRARIES += $(XDK_TARGETS)/Elastos.Droid.Core.eco
-LIBRARIES += -lm -lcutils -licuuc -llog -lutils -landroidfw
+LIBRARIES += -llog
 
 APPPACK = 1
-
-
-
-
-
+APP_PACKAGE_NAME = Elastos.Droid.PackageInstaller
+RES_NAMESPACE = Elastos.Droid.PackageInstaller
+DIRRESOURCES += $(MAKEDIR)/res;
