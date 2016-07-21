@@ -739,7 +739,7 @@ AutoPtr<ArrayOf<Int32> > SubscriptionManager::SetSimResource(
 void SubscriptionManager::Logd(
     /* [in] */ const String& msg)
 {
-    Logger::D(TAG, "[SubManager] %s", msg.string());
+    Logger::D(TAG, "[SubscriptionManager] %s", msg.string());
 }
 
 } // namespace Telephony

@@ -344,7 +344,7 @@ private:
 
 public:
     static const String TAG; // = "GsmSST";
-    static const Boolean VDBG = FALSE;
+    static const Boolean VDBG;
     AutoPtr<IGsmCellLocation> mCellLoc;
     AutoPtr<IGsmCellLocation> mNewCellLoc;
     Int32 mPreferredNetworkType;

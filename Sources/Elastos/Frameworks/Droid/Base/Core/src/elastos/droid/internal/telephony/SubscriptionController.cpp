@@ -2100,7 +2100,9 @@ void SubscriptionController::BroadcastDefaultDataSubIdChanged(
 ECode SubscriptionController::SetDefaultSubId(
     /* [in] */ Int64 subId)
 {
+    Logger::E("SubscriptionController", "TODO this should be called to update mDefaultVoiceSubId");
     if (subId == ISubscriptionManager::DEFAULT_SUB_ID) {
+        Logger::E("SubscriptionController", "TODO setDefaultSubId called with DEFAULT_SUB_ID");
         // throw new RuntimeException("setDefaultSubId called with DEFAULT_SUB_ID");
         return E_RUNTIME_EXCEPTION;
     }

@@ -142,7 +142,7 @@ ECode DtmfLocalTonePlayer::EndDtmfSession(
         StopTone(call);
         mCall = NULL;
         if (mToneGenerator != NULL) {
-            mToneGenerator->Release();
+            mToneGenerator->ReleaseResources();
             mToneGenerator = NULL;
         }
     }
