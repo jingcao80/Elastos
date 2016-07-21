@@ -688,7 +688,8 @@ ECode CallAudioManager::UpdateAudioForForegroundCall()
     AutoPtr<ICall> call;
     CallsManager::GetInstance()->GetForegroundCall((ICall**)&call);
     AutoPtr<IConnectionServiceWrapper> connectionService;
-    ((Call*) call.Get())->GetConnectionService((IConnectionServiceWrapper**)&connectionService);
+    if (call != NULL)
+        ((Call*) call.Get())->GetConnectionService((IConnectionServiceWrapper**)&connectionService);
     if (call != NULL && connectionService != NULL) {
         ((ConnectionServiceWrapper*) connectionService.Get())->OnAudioStateChanged(call, mAudioState);
     }

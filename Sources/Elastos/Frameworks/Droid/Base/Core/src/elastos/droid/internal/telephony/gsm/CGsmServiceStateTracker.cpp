@@ -103,7 +103,7 @@ namespace Telephony {
 namespace Gsm {
 
 const String CGsmServiceStateTracker::TAG("GsmSST");
-const Boolean CGsmServiceStateTracker::VDBG;
+const Boolean CGsmServiceStateTracker::VDBG = TRUE;
 const Int32 CGsmServiceStateTracker::PS_ENABLED;            // Access Control blocks data service
 const Int32 CGsmServiceStateTracker::PS_DISABLED;           // Access Control enables data service
 const Int32 CGsmServiceStateTracker::CS_ENABLED;            // Access Control blocks all voice/sms service
@@ -306,6 +306,10 @@ ECode CGsmServiceStateTracker::HandleMessage(
     msg->GetWhat(&what);
     AutoPtr<IInterface> obj;
     msg->GetObj((IInterface**)&obj);
+    if (VDBG) {
+        Logger::E("CGsmServiceStateTracker", "HandleMessage, what:%d", what);
+    }
+
     switch (what) {
         case EVENT_RADIO_AVAILABLE:
             //this is unnecessary

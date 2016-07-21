@@ -230,7 +230,7 @@ private:
 
     static const Boolean REPEAT_POLLING = FALSE;
 
-    static const Boolean DBG_POLL = FALSE;
+    static const Boolean DBG_POLL;
 };
 
 } // namespace Gem

@@ -40,7 +40,7 @@ ECode InCallTonePlayer::Factory::CreatePlayer(
     AutoPtr<IInterface> ws;
     mCallAudioManager->Resolve(EIID_IInterface, (IInterface**)&ws);
     if (ws != NULL) {
-        *result = new InCallTonePlayer(tone, (CallAudioManager*) IObject::Probe(mCallAudioManager));
+        *result = new InCallTonePlayer(tone, (CallAudioManager*) IObject::Probe(ws));
         REFCOUNT_ADD(*result)
     } else {
         Log::E("InCallTonePlayer", "mCallAudioManager is NULL");
@@ -110,6 +110,7 @@ InCallTonePlayer::InCallTonePlayer(
     /* [in] */ CallAudioManager* callAudioManager)
     : mToneId(toneId)
 {
+    Thread::constructor();
     mState = STATE_OFF;
 
     IWeakReferenceSource* source = IWeakReferenceSource::Probe(TO_IINTERFACE(callAudioManager));

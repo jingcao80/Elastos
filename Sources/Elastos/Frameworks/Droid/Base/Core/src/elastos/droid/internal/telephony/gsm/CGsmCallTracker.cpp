@@ -49,7 +49,7 @@ const String CGsmCallTracker::TAG("GsmCallTracker");
 
 const Boolean CGsmCallTracker::REPEAT_POLLING;
 
-const Boolean CGsmCallTracker::DBG_POLL;
+const Boolean CGsmCallTracker::DBG_POLL = TRUE;
 
 CAR_INTERFACE_IMPL(CGsmCallTracker, CallTracker, IGsmCallTracker)
 
@@ -607,6 +607,9 @@ ECode CGsmCallTracker::HandleMessage(
     msg->GetWhat(&what);
     AutoPtr<IInterface> obj;
     msg->GetObj((IInterface**)&obj);
+    if (DBG_POLL) {
+        Logger::E("CGsmCallTracker", "HandleMessage what:%d", what);
+    }
     switch (what) {
         case EVENT_POLL_CALLS_RESULT:
             ar = (AsyncResult*)(IObject::Probe(obj));
@@ -762,6 +765,7 @@ void CGsmCallTracker::HandlePollCalls(
 
     Int32 size;
     polledCalls->GetSize(&size);
+    //Logger::E("leliang", "line:%d, func:%s, size:%d, length:%d,this:%p\n", __LINE__, __func__, size, mConnections->GetLength(), this);
     for (Int32 i = 0, curDC = 0, dcSize = size
             ; i < mConnections->GetLength(); i++) {
         AutoPtr<IGsmConnection> conn = (*mConnections)[i];
@@ -784,6 +788,7 @@ void CGsmCallTracker::HandlePollCalls(
         // if (DBG_POLL) Log(String("poll: conn[i=") + i + "]=" +
         //         conn+", dc=" + dc);
 
+        //Logger::E("leliang", "line:%d, func:%s, conn:%p, dc:%p\n", __LINE__, __func__, conn.Get(), dc.Get());
         Boolean b;
         if (conn == NULL && dc != NULL) {
             // Connection appeared in CLCC response that we don't know about
@@ -873,7 +878,7 @@ void CGsmCallTracker::HandlePollCalls(
             // list but kept in the GsmCall list
             mConnections->Set(i, NULL);
         }
-        else if (conn != NULL && dc != NULL && (((CGsmConnection*)conn.Get())->CompareTo(dc, &b), b)) {
+        else if (conn != NULL && dc != NULL && !(((CGsmConnection*)conn.Get())->CompareTo(dc, &b), b)) {
             // Connection in CLCC response does not match what
             // we were tracking. Assume dropped call and new call
 

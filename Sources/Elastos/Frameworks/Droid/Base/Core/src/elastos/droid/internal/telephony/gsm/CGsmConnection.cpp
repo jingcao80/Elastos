@@ -719,6 +719,7 @@ ECode CGsmConnection::IsMultiparty(
     return NOERROR;
 }
 
+//TODO maybe code here should be in the destructor
 void CGsmConnection::Finalize()
 {
     /**
@@ -842,22 +843,20 @@ AutoPtr<IGsmCall> CGsmConnection::ParentFromDCState (
     /* [in] */ IDriverCallState state)
 {
     switch (state) {
-        case ICallState_ACTIVE:
-        case ICallState_DIALING:
-        case ICallState_ALERTING:
+        case DriverCallState_ACTIVE:
+        case DriverCallState_DIALING:
+        case DriverCallState_ALERTING:
             return ((CGsmCallTracker*)mOwner.Get())->mForegroundCall;
-        //break;
 
-        case ICallState_HOLDING:
+        case DriverCallState_HOLDING:
             return ((CGsmCallTracker*)mOwner.Get())->mBackgroundCall;
-        //break;
 
-        case ICallState_INCOMING:
-        case ICallState_WAITING:
+        case DriverCallState_INCOMING:
+        case DriverCallState_WAITING:
             return ((CGsmCallTracker*)mOwner.Get())->mRingingCall;
-        //break;
 
         default:
+            Logger::E("CGsmConnection", "ParentFromDCState illegal call state: %d", state);
             // throw new RuntimeException("illegal call state: " + state);
             return NULL;
     }
@@ -900,11 +899,11 @@ void CGsmConnection::AcquireWakeLock()
 
 void CGsmConnection::ReleaseWakeLock()
 {
-    AutoLock lock(mPartialWakeLock);
+    AutoLock lock(TO_IINTERFACE(mPartialWakeLock));
     Boolean b;
     if (mPartialWakeLock->IsHeld(&b), b) {
         Log(String("ReleaseWakeLock"));
-        mPartialWakeLock->Release();
+        mPartialWakeLock->ReleaseLock();
     }
 }
 

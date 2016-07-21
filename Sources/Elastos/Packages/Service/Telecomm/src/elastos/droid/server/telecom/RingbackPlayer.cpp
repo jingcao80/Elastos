@@ -121,9 +121,11 @@ ECode RingbackPlayer::ShouldStartRinging(
     VALIDATE_NOT_NULL(result)
 
     Boolean isRingbackRequested;
-    ((Call*) call)->IsRingbackRequested(&isRingbackRequested);
+    if (call != NULL)
+        ((Call*) call)->IsRingbackRequested(&isRingbackRequested);
     Int32 callState;
-    ((Call*) call)->GetState(&callState);
+    if (call != NULL)
+        ((Call*) call)->GetState(&callState);
     AutoPtr<ICall> foregroundCall;
     mCallsManager->GetForegroundCall((ICall**)&foregroundCall);
     *result = call != NULL

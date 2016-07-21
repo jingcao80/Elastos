@@ -19,6 +19,8 @@
 #include <Elastos.Droid.Telephony.h>
 #include <elastos/droid/Manifest.h>
 #include <elastos/utility/Objects.h>
+//#include <elastos/utility/logging/Logger.h>
+//using Elastos::Utility::Logging::Logger;
 
 using Elastos::Droid::Content::CIntent;
 using Elastos::Droid::Content::IIntent;
@@ -1340,7 +1342,8 @@ ECode CallsManager::HasActiveOrHoldingCall(
     (*states)[1] = ICallState::ON_HOLD;
     AutoPtr<ICall> call;
     GetFirstCallWithState(states, (ICall**)&call);
-    return call != NULL;
+    *result = call != NULL;
+    return NOERROR;
 }
 
 ECode CallsManager::HasActiveOrHoldingCall(
@@ -2657,13 +2660,14 @@ ECode CallsManager::GetConversationSub(
 ECode CallsManager::ManageMSimInCallTones(
     /* [in] */ Boolean isSubSwitch)
 {
-    Log::I(TAG, " entered manageMSimInCallTones ");
+    Log::I(TAG, " entered manageMSimInCallTones isSubSwitch:%d", isSubSwitch);
     // If there is no background active subscription available, stop playing the tones.
     // Do not start/stop LCH/SCH tones when phone is in RINGING state.
     Boolean hasRingingCall;
     HasRingingCall(&hasRingingCall);
     String lchSub;
     GetLchSub(&lchSub);
+    //Logger::E("leliang", "line:%d, func:%s, lchSub:%s, hasRingingCall:%d\n", __LINE__, __func__, lchSub.string(), hasRingingCall);
     if (lchSub != NULL && !hasRingingCall) {
         //If sub switch happens re-start the tones with a delay of 100msec.
         if (isSubSwitch) {
@@ -2675,6 +2679,7 @@ ECode CallsManager::ManageMSimInCallTones(
         }
     } else if (lchSub.IsNull()) {
         // if there is no sub in Lch state, then stop playing the tones
+        Log::I(TAG, " manageMSimInCallTones -> StopMSimInCallTones");
         StopMSimInCallTones();
     }
     return NOERROR;
@@ -2763,6 +2768,7 @@ ECode CallsManager::GetLchSub(
     callCapablePhoneAccounts->GetIterator((IIterator**)&it);
     Boolean hasNext;
     while (it->HasNext(&hasNext), hasNext) {
+        //Logger::E("leliang", "line:%d, func:%s\n", __LINE__, __func__);
         AutoPtr<IInterface> obj;
         it->GetNext((IInterface**)&obj);
         AutoPtr<IPhoneAccountHandle> ph = IPhoneAccountHandle::Probe(obj);
