@@ -2380,6 +2380,38 @@ ECode CTelephonyManager::GetTelephonyProperty(
     return NOERROR;
 }
 
+ECode CTelephonyManager::NetworkTypeToString(
+    /* [in] */ Int32 type,
+    /* [out] */ String* str)
+{
+    VALIDATE_NOT_NULL(str)
+    *str = String(NULL);
+
+    String ratClassName("");
+    Int32 networkClass;
+    GetNetworkClass(mNetworkType, &networkClass);
+    if (mContext == NULL) return NOERROR;
+
+    AutoPtr<IResources> res;
+    mContext->GetResources((IResources**)&res);
+    switch (networkClass) {
+        case ITelephonyManager::NETWORK_CLASS_2_G:
+            res->GetString(R::string::config_rat_2g, &ratClassName);
+            break;
+        case ITelephonyManager::NETWORK_CLASS_3_G:
+            res->GetString(R::string::config_rat_3g, &ratClassName);
+             break;
+        case ITelephonyManager::NETWORK_CLASS_4_G:
+            res->GetString(R::string::config_rat_4g, &ratClassName);
+            break;
+        default:
+            ratClassName = "";
+            break;
+    }
+    *str = ratClassName;
+    return NOERROR;
+}
+
 Int32 CTelephonyManager::GetPhoneTypeFromProperty()
 {
     return GetPhoneTypeFromProperty(GetDefaultSubscription());

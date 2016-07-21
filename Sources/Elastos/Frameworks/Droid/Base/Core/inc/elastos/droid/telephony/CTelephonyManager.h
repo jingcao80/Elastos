@@ -1283,6 +1283,17 @@ public:
         /* [in] */ const String& defaultVal,
         /* [out] */ String* result);
 
+    /**
+     * Convert network type to String
+     *
+     * @param networkType
+     * @return String representation of the networkClass
+     * @hide
+     */
+    CARAPI NetworkTypeToString(
+        /* [in] */ Int32 type,
+        /* [out] */ String* str);
+
 private:
     CARAPI_(Int32) GetPhoneTypeFromProperty();
 

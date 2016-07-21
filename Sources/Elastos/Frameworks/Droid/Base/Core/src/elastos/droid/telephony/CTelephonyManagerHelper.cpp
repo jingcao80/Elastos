@@ -86,6 +86,13 @@ ECode CTelephonyManagerHelper::GetTelephonyProperty(
     return CTelephonyManager::GetTelephonyProperty(property, subId, defaultVal, res);
 }
 
+ECode CTelephonyManagerHelper::NetworkTypeToString(
+    /* [in] */ Int32 type,
+    /* [out] */ String* str)
+{
+    return CTelephonyManager::NetworkTypeToString(type, str);
+}
+
 }
 }
 }
