@@ -1,0 +1,500 @@
+.
+|-- display
+|   `-- IPPService.aidl
+|-- location
+|   `-- XT
+|       |-- IXTSrv.aidl
+|       `-- IXTSrvCb.aidl
+`-- settings
+    |-- AccountPreference.java
+    |-- ActiveNetworkScorerDialog.java
+    |-- ActivityPicker.java
+    |-- AirplaneModeEnabler.java
+    |-- AirplaneModeVoiceActivity.java
+    |-- AllowBindAppWidgetActivity.java
+    |-- ApnEditor.java
+    |-- ApnPreference.java
+    |-- ApnSettings.java
+    |-- AppListPreference.java
+    |-- AppPicker.java
+    |-- AppWidgetLoader.java
+    |-- AppWidgetPickActivity.java
+    |-- ApplicationSettings.java
+    |-- BandMode.java
+    |-- BatteryInfo.java
+    |-- BrightnessPreference.java
+    |-- BugreportPreference.java
+    |-- ButtonBarHandler.java
+    |-- ButtonSettings.java
+    |-- ChooseLockGeneric.java
+    |-- ChooseLockPassword.java
+    |-- ChooseLockPattern.java
+    |-- ChooseLockPatternSize.java
+    |-- ChooseLockSettingsHelper.java
+    |-- ConfirmDeviceCredentialActivity.java
+    |-- ConfirmLockPassword.java
+    |-- ConfirmLockPattern.java
+    |-- CreateShortcut.java
+    |-- CredentialStorage.java
+    |-- CryptKeeper.java
+    |-- CryptKeeperConfirm.java
+    |-- CryptKeeperSettings.java
+    |-- CustomScreenColor.java
+    |-- DataUsageSummary.java
+    |-- DateTimeSettings.java
+    |-- DateTimeSettingsSetupWizard.java
+    |-- DefaultRingtonePreference.java
+    |-- DevelopmentSettings.java
+    |-- DeviceAdminAdd.java
+    |-- DeviceAdminSettings.java
+    |-- DeviceInfoSettings.java
+    |-- DialogCreatable.java
+    |-- DisplaySettings.java
+    |-- DreamBackend.java
+    |-- DreamSettings.java
+    |-- EditPinPreference.java
+    |-- EncryptionInterstitial.java
+    |-- EventLogTags.logtags
+    |-- FontDialogPreference.java
+    |-- HelpUtils.java
+    |-- HighlightingFragment.java
+    |-- HomeSettings.java
+    |-- HostnamePreference.java
+    |-- IccLockSettings.java
+    |-- IconPreferenceScreen.java
+    |-- IntervalSeekBar.java
+    |-- LocalePicker.java
+    |-- ManagedProfileSetup.java
+    |-- MasterClear.java
+    |-- MasterClearConfirm.java
+    |-- MediaFormat.java
+    |-- MonitoringCertInfoActivity.java
+    |-- NsdEnabler.java
+    |-- OwnerInfoSettings.java
+    |-- PinnedHeaderListFragment.java
+    |-- PointerSpeedPreference.java
+    |-- PrivacySettings.java
+    |-- ProgressCategory.java
+    |-- ProgressCategoryBase.java
+    |-- ProxySelector.java
+    |-- RadioInfo.java
+    |-- RegulatoryInfoDisplayActivity.java
+    |-- RestrictedSettingsFragment.java
+    |-- ScreenColorSettings.java
+    |-- ScreenPinningSettings.java
+    |-- SecuritySettings.java
+    |-- SelectSubscription.java
+    |-- SelectableEditTextPreference.java
+    |-- SetFullBackupPassword.java
+    |-- Settings.java
+    |-- SettingsActivity.java
+    |-- SettingsCMLicenseActivity.java
+    |-- SettingsLicenseActivity.java
+    |-- SettingsPreferenceFragment.java
+    |-- SettingsSafetyLegalActivity.java
+    |-- SmsDefaultDialog.java
+    |-- SoundSettings.java
+    |-- SubSettings.java
+    |-- TestingSettings.java
+    |-- TestingSettingsBroadcastReceiver.java
+    |-- TetherSettings.java
+    |-- TrustAgentSettings.java
+    |-- TrustAgentUtils.java
+    |-- TrustedCredentialsSettings.java
+    |-- UsageAccessSettings.java
+    |-- UsageStatsActivity.java
+    |-- UserDictionarySettings.java
+    |-- UserSpinnerAdapter.java
+    |-- Utils.java
+    |-- VoiceInputOutputSettings.java
+    |-- VoiceSettingsActivity.java
+    |-- WarnedListPreference.java
+    |-- WirelessSettings.java
+    |-- ZonePicker.java
+    |-- accessibility
+    |   |-- AccessibilitySettings.java
+    |   |-- AccessibilityUtils.java
+    |   |-- CaptionPropertiesFragment.java
+    |   |-- ColorPreference.java
+    |   |-- EdgeTypePreference.java
+    |   |-- ListDialogPreference.java
+    |   |-- LocalePreference.java
+    |   |-- PresetPreference.java
+    |   |-- SettingsContentObserver.java
+    |   |-- ToggleAccessibilityServicePreferenceFragment.java
+    |   |-- ToggleDaltonizerPreferenceFragment.java
+    |   |-- ToggleFeaturePreferenceFragment.java
+    |   |-- ToggleGlobalGesturePreferenceFragment.java
+    |   `-- ToggleScreenMagnificationPreferenceFragment.java
+    |-- accounts
+    |   |-- AccountPreferenceBase.java
+    |   |-- AccountSettings.java
+    |   |-- AccountSyncSettings.java
+    |   |-- AddAccountSettings.java
+    |   |-- AuthenticatorHelper.java
+    |   |-- ChooseAccountActivity.java
+    |   |-- ManageAccountsSettings.java
+    |   |-- ProviderPreference.java
+    |   `-- SyncStateCheckBoxPreference.java
+    |-- applications
+    |   |-- AppOpsCategory.java
+    |   |-- AppOpsDetails.java
+    |   |-- AppOpsState.java
+    |   |-- AppOpsSummary.java
+    |   |-- AppViewHolder.java
+    |   |-- ApplicationsState.java
+    |   |-- ExpandedDesktopExtraPrefs.java
+    |   |-- ExpandedDesktopPreferenceFragment.java
+    |   |-- InstalledAppDetails.java
+    |   |-- InstalledAppDetailsTop.java
+    |   |-- InterestingConfigChanges.java
+    |   |-- LinearColorBar.java
+    |   |-- LinearColorPreference.java
+    |   |-- LockPatternActivity.java
+    |   |-- ManageApplications.java
+    |   |-- ProcStatsEntry.java
+    |   |-- ProcessStatsDetail.java
+    |   |-- ProcessStatsMemDetail.java
+    |   |-- ProcessStatsPreference.java
+    |   |-- ProcessStatsUi.java
+    |   |-- ProtectedAppsActivity.java
+    |   |-- RunningProcessesView.java
+    |   |-- RunningServiceDetails.java
+    |   `-- RunningState.java
+    |-- blacklist
+    |   |-- BlacklistPreferences.java
+    |   |-- BlacklistSettings.java
+    |   |-- EntryEditDialogFragment.java
+    |   `-- ToggleImageView.java
+    |-- bluetooth
+    |   |-- A2dpProfile.java
+    |   |-- A2dpSinkProfile.java
+    |   |-- BluetoothCallback.java
+    |   |-- BluetoothDeviceFilter.java
+    |   |-- BluetoothDevicePreference.java
+    |   |-- BluetoothDiscoverableEnabler.java
+    |   |-- BluetoothDiscoverableTimeoutReceiver.java
+    |   |-- BluetoothDiscoveryReceiver.java
+    |   |-- BluetoothEnabler.java
+    |   |-- BluetoothEventManager.java
+    |   |-- BluetoothNameDialogFragment.java
+    |   |-- BluetoothPairingDialog.java
+    |   |-- BluetoothPairingRequest.java
+    |   |-- BluetoothPermissionActivity.java
+    |   |-- BluetoothPermissionRequest.java
+    |   |-- BluetoothProgressCategory.java
+    |   |-- BluetoothSettings.java
+    |   |-- BluetoothVisibilityTimeoutFragment.java
+    |   |-- CachedBluetoothDevice.java
+    |   |-- CachedBluetoothDeviceManager.java
+    |   |-- DeviceListPreferenceFragment.java
+    |   |-- DevicePickerActivity.java
+    |   |-- DevicePickerFragment.java
+    |   |-- DeviceProfilesSettings.java
+    |   |-- DockEventReceiver.java
+    |   |-- DockService.java
+    |   |-- DunServerProfile.java
+    |   |-- HeadsetProfile.java
+    |   |-- HidProfile.java
+    |   |-- LocalBluetoothAdapter.java
+    |   |-- LocalBluetoothManager.java
+    |   |-- LocalBluetoothPreferences.java
+    |   |-- LocalBluetoothProfile.java
+    |   |-- LocalBluetoothProfileManager.java
+    |   |-- MapProfile.java
+    |   |-- OppProfile.java
+    |   |-- PanProfile.java
+    |   |-- PbapServerProfile.java
+    |   |-- RequestPermissionActivity.java
+    |   |-- RequestPermissionHelperActivity.java
+    |   |-- SapServerProfile.java
+    |   |-- Utf8ByteLengthFilter.java
+    |   `-- Utils.java
+    |-- cmstats
+    |   |-- AnonymousStats.java
+    |   |-- PreviewData.java
+    |   |-- ReportingService.java
+    |   |-- ReportingServiceManager.java
+    |   `-- Utilities.java
+    |-- cyanogenmod
+    |   |-- BacklightTimeoutSeekBar.java
+    |   |-- BaseSystemSettingSwitchBar.java
+    |   |-- BootReceiver.java
+    |   |-- ButtonBacklightBrightness.java
+    |   |-- ContributorsCloud.java
+    |   |-- DeviceUtils.java
+    |   |-- DisplayRotation.java
+    |   |-- GlobalSettingSwitchPreference.java
+    |   |-- GlowBackground.java
+    |   |-- IOScheduler.java
+    |   |-- LockscreenShortcuts.java
+    |   |-- NavBar.java
+    |   |-- NavRing.java
+    |   |-- NotificationDrawerSettings.java
+    |   |-- PackageListAdapter.java
+    |   |-- PerformanceSettings.java
+    |   |-- PowerMenuActions.java
+    |   |-- PrivacySettings.java
+    |   |-- Processor.java
+    |   |-- ProtectedAccountView.java
+    |   |-- ProtectedAppsReceiver.java
+    |   |-- SecureSettingSwitchPreference.java
+    |   |-- ShortcutPickHelper.java
+    |   |-- SpamList.java
+    |   |-- StatusBarSettings.java
+    |   |-- SystemSettingSwitchPreference.java
+    |   |-- UserChangedReceiver.java
+    |   `-- qs
+    |       |-- ColoringCardView.java
+    |       |-- DraggableGridView.java
+    |       |-- QSListAdapter.java
+    |       |-- QSTileHolder.java
+    |       `-- QSTiles.java
+    |-- dashboard
+    |   |-- DashboardCategory.java
+    |   |-- DashboardContainerView.java
+    |   |-- DashboardSummary.java
+    |   |-- DashboardTile.java
+    |   |-- DashboardTileView.java
+    |   |-- GenericSwitchToggle.java
+    |   |-- MobileNetworksEnabler.java
+    |   |-- NoHomeDialogFragment.java
+    |   `-- SearchResultsSummary.java
+    |-- deviceinfo
+    |   |-- FileItemInfoLayout.java
+    |   |-- Memory.java
+    |   |-- MiscFilesHandler.java
+    |   |-- PercentageBarChart.java
+    |   |-- Status.java
+    |   |-- StorageItemPreference.java
+    |   |-- StorageMeasurement.java
+    |   |-- StorageVolumePreferenceCategory.java
+    |   |-- UsageBarPreference.java
+    |   |-- UsbSettings.java
+    |   `-- msim
+    |       `-- MSimSubscriptionStatus.java
+    |-- drawable
+    |   |-- CircleFramedDrawable.java
+    |   |-- DrawableWrapper.java
+    |   `-- InsetBoundsDrawable.java
+    |-- fuelgauge
+    |   |-- BatteryEntry.java
+    |   |-- BatteryHistoryChart.java
+    |   |-- BatteryHistoryDetail.java
+    |   |-- BatteryHistoryPreference.java
+    |   |-- PowerGaugePreference.java
+    |   |-- PowerUsageDetail.java
+    |   `-- PowerUsageSummary.java
+    |-- hardware
+    |   `-- VibratorIntensity.java
+    |-- inputmethod
+    |   |-- InputMethodAndLanguageSettings.java
+    |   |-- InputMethodAndSubtypeEnabler.java
+    |   |-- InputMethodAndSubtypeEnablerActivity.java
+    |   |-- InputMethodAndSubtypeUtil.java
+    |   |-- InputMethodDialogReceiver.java
+    |   |-- InputMethodPreference.java
+    |   |-- InputMethodSettingValuesWrapper.java
+    |   |-- InputMethodSubtypePreference.java
+    |   |-- KeyboardLayoutDialogFragment.java
+    |   |-- KeyboardLayoutPickerFragment.java
+    |   |-- SpellCheckerPreference.java
+    |   |-- SpellCheckersSettings.java
+    |   |-- StylusGestures.java
+    |   |-- SwitchWithNoTextPreference.java
+    |   |-- UserDictionaryAddWordActivity.java
+    |   |-- UserDictionaryAddWordContents.java
+    |   |-- UserDictionaryAddWordFragment.java
+    |   |-- UserDictionaryList.java
+    |   |-- UserDictionaryLocalePicker.java
+    |   `-- UserDictionarySettingsUtils.java
+    |-- livedisplay
+    |   |-- DisplayColor.java
+    |   |-- DisplayGamma.java
+    |   |-- DisplayTemperature.java
+    |   `-- LiveDisplay.java
+    |-- location
+    |   |-- DimmableIconPreference.java
+    |   |-- InjectedSetting.java
+    |   |-- LocationMode.java
+    |   |-- LocationSettings.java
+    |   |-- LocationSettingsBase.java
+    |   |-- RadioButtonPreference.java
+    |   |-- RecentLocationApps.java
+    |   `-- SettingsInjector.java
+    |-- lockscreen
+    |   `-- LockScreenSettings.java
+    |-- net
+    |   |-- ChartData.java
+    |   |-- ChartDataLoader.java
+    |   |-- DataUsageMeteredSettings.java
+    |   |-- NetworkPolicyEditor.java
+    |   |-- SummaryForAllUidLoader.java
+    |   |-- UidDetail.java
+    |   `-- UidDetailProvider.java
+    |-- nfc
+    |   |-- AndroidBeam.java
+    |   |-- NfcEnabler.java
+    |   |-- PaymentBackend.java
+    |   |-- PaymentDefaultDialog.java
+    |   `-- PaymentSettings.java
+    |-- notification
+    |   |-- AppNotificationSettings.java
+    |   |-- ConditionProviderSettings.java
+    |   |-- DropDownPreference.java
+    |   |-- IncreasingRingVolumePreference.java
+    |   |-- ManagedServiceSettings.java
+    |   |-- NotificationAccessSettings.java
+    |   |-- NotificationAppList.java
+    |   |-- NotificationManagerSettings.java
+    |   |-- NotificationStation.java
+    |   |-- OtherSoundSettings.java
+    |   |-- RedactionInterstitial.java
+    |   |-- RedactionSettingsStandalone.java
+    |   |-- SettingPref.java
+    |   |-- VolumeSeekBarPreference.java
+    |   |-- ZenModeAutomaticConditionSelection.java
+    |   |-- ZenModeConditionSelection.java
+    |   |-- ZenModeDowntimeDaysSelection.java
+    |   `-- ZenModeSettings.java
+    |-- notificationlight
+    |   |-- AlphaPatternDrawable.java
+    |   |-- ApplicationLightPreference.java
+    |   |-- BatteryLightSettings.java
+    |   |-- ColorPanelView.java
+    |   |-- ColorPickerView.java
+    |   |-- LightSettingsDialog.java
+    |   `-- NotificationLightSettings.java
+    |-- print
+    |   |-- PrintJobSettingsFragment.java
+    |   |-- PrintServiceSettingsFragment.java
+    |   |-- PrintSettingsFragment.java
+    |   `-- PrintSettingsUtils.java
+    |-- privacyguard
+    |   |-- AppInfoLoader.java
+    |   |-- PrivacyGuardAppListAdapter.java
+    |   |-- PrivacyGuardManager.java
+    |   `-- PrivacyGuardPrefs.java
+    |-- profiles
+    |   |-- AppGroupConfig.java
+    |   |-- AppGroupList.java
+    |   |-- NFCProfile.java
+    |   |-- NFCProfileSelect.java
+    |   |-- NFCProfileTagCallback.java
+    |   |-- NFCProfileUtils.java
+    |   |-- NFCProfileWriter.java
+    |   |-- NamePreference.java
+    |   |-- ProfileGroupConfig.java
+    |   |-- ProfileRingtonePreference.java
+    |   |-- ProfilesPreference.java
+    |   |-- ProfilesSettings.java
+    |   |-- SetupActionsFragment.java
+    |   |-- SetupTriggersFragment.java
+    |   |-- TriggerPagerAdapter.java
+    |   |-- actions
+    |   |   |-- ItemListAdapter.java
+    |   |   `-- item
+    |   |       |-- AirplaneModeItem.java
+    |   |       |-- AppGroupItem.java
+    |   |       |-- BrightnessItem.java
+    |   |       |-- ConnectionOverrideItem.java
+    |   |       |-- Header.java
+    |   |       |-- Item.java
+    |   |       |-- LockModeItem.java
+    |   |       |-- ProfileNameItem.java
+    |   |       |-- RingModeItem.java
+    |   |       |-- TriggerItem.java
+    |   |       `-- VolumeStreamItem.java
+    |   `-- triggers
+    |       |-- AbstractTriggerItem.java
+    |       |-- BluetoothTriggerFragment.java
+    |       |-- NfcTriggerFragment.java
+    |       `-- WifiTriggerFragment.java
+    |-- quicklaunch
+    |   |-- BookmarkPicker.java
+    |   |-- QuickLaunchSettings.java
+    |   `-- ShortcutPreference.java
+    |-- search
+    |   |-- BaseSearchIndexProvider.java
+    |   |-- DynamicIndexableContentMonitor.java
+    |   |-- Index.java
+    |   |-- IndexDatabaseHelper.java
+    |   |-- Indexable.java
+    |   |-- Ranking.java
+    |   |-- SearchIndexableRaw.java
+    |   |-- SearchIndexableResources.java
+    |   `-- SettingsSearchIndexablesProvider.java
+    |-- sim
+    |   |-- MultiSimEnablerPreference.java
+    |   `-- SimSettings.java
+    |-- tts
+    |   |-- TextToSpeechSettings.java
+    |   |-- TtsEnginePreference.java
+    |   `-- TtsEngineSettingsFragment.java
+    |-- users
+    |   |-- AppRestrictionsFragment.java
+    |   |-- EditUserInfoController.java
+    |   |-- EditUserPhotoController.java
+    |   |-- ProfileUpdateReceiver.java
+    |   |-- RestrictedProfileSettings.java
+    |   |-- RestrictionUtils.java
+    |   |-- UserDetailsSettings.java
+    |   |-- UserPreference.java
+    |   `-- UserSettings.java
+    |-- voice
+    |   |-- VoiceInputHelper.java
+    |   |-- VoiceInputPreference.java
+    |   `-- VoiceInputSettings.java
+    |-- voicewakeup
+    |   `-- VoiceWakeupSettings.java
+    |-- vpn2
+    |   |-- VpnDialog.java
+    |   `-- VpnSettings.java
+    |-- wfd
+    |   `-- WifiDisplaySettings.java
+    |-- widget
+    |   |-- AnimatedImageView.java
+    |   |-- ChartAxis.java
+    |   |-- ChartDataUsageView.java
+    |   |-- ChartGridView.java
+    |   |-- ChartNetworkSeriesView.java
+    |   |-- ChartSweepView.java
+    |   |-- ChartView.java
+    |   |-- CheckableLinearLayout.java
+    |   |-- InertCheckBox.java
+    |   |-- InvertedChartAxis.java
+    |   |-- SettingsAppWidgetProvider.java
+    |   |-- SetupWizardIllustration.java
+    |   |-- StickyHeaderListView.java
+    |   |-- SwitchBar.java
+    |   `-- ToggleSwitch.java
+    `-- wifi
+        |-- AccessPoint.java
+        |-- AdvancedWifiSettings.java
+        |-- SavedAccessPointsWifiSettings.java
+        |-- Summary.java
+        |-- WifiAPITest.java
+        |-- WifiApDialog.java
+        |-- WifiApEnabler.java
+        |-- WifiConfigController.java
+        |-- WifiConfigInfo.java
+        |-- WifiConfigUiBase.java
+        |-- WifiConfigUiForSetupWizardXL.java
+        |-- WifiDialog.java
+        |-- WifiEnabler.java
+        |-- WifiInfo.java
+        |-- WifiPickerActivity.java
+        |-- WifiScanModeActivity.java
+        |-- WifiSettings.java
+        |-- WifiSettingsForSetupWizard.java
+        |-- WifiSettingsForSetupWizardXL.java
+        |-- WifiSetupActivity.java
+        |-- WifiStatusTest.java
+        |-- WpsDialog.java
+        |-- WriteWifiConfigToNfcDialog.java
+        `-- p2p
+            |-- WifiP2pPeer.java
+            |-- WifiP2pPersistentGroup.java
+            `-- WifiP2pSettings.java
+
+44 directories, 453 files

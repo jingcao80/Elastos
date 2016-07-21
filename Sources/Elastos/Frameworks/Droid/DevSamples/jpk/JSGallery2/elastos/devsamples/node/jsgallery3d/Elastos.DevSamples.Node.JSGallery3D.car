@@ -1,0 +1,202 @@
+module
+{
+    importlib("Elastos.Droid.Core.eco");
+
+    interface Elastos.Droid.Os.IMessage;
+    interface Elastos.Droid.Os.IHandler;
+    interface Elastos.Droid.Os.IBundle;
+
+    interface Elastos.Droid.Content.IContext;
+    interface Elastos.Droid.Content.IIntent;
+
+    interface Elastos.Droid.View.IView;
+    interface Elastos.Droid.View.IContextMenu;
+    interface Elastos.Droid.View.IContextMenuInfo;
+
+    using interface Elastos.Droid.App.IActivity;
+    using interface Elastos.Droid.App.IApplication;
+    using interface Elastos.Droid.Content.IContextWrapper;
+    using interface Elastos.Droid.Content.IComponentCallbacks;
+    using interface Elastos.Droid.Content.IComponentCallbacks2;
+    using interface Elastos.Droid.View.IContextThemeWrapper;
+    using interface Elastos.Droid.View.ILayoutInflaterFactory;
+    using interface Elastos.Droid.View.ILayoutInflaterFactory2;
+    using interface Elastos.Droid.View.IWindowCallback;
+    using interface Elastos.Droid.View.IKeyEventCallback;
+    using interface Elastos.Droid.View.IViewOnCreateContextMenuListener;
+    using interface Elastos.Droid.View.IOnWindowDismissedCallback;
+
+    namespace Elastos {
+    namespace DevSamples {
+    namespace Node {
+    namespace JSGallery3D {
+
+    [deprecated]
+    interface IMessageListener {
+        OnHandleMessage(
+            [in] IContext* ctx,
+            [in] IMessage* msg);
+    }
+
+    [deprecated]
+    interface IActivityListener {
+        OnCreate(
+            [in] IContext* ctx,
+            [in] IBundle* savedInstanceState);
+        OnStart(
+            [in] IContext* context);
+        OnResume(
+            [in] IContext* context);
+        OnPause(
+            [in] IContext* context);
+        OnStop(
+            [in] IContext* context);
+        OnDestroy(
+            [in] IContext* context);
+
+        OnBackPressed(
+            [in] IContext* context);
+
+        OnNewIntent(
+            [in] IContext* ctx,
+            [in] IIntent *intent);
+
+        OnCreateDialog(
+            [in] IContext* ctx,
+            [in] Int32 id,
+            [out] IInterface** dlg);
+
+        OnActivityResult(
+            [in] IContext* ctx,
+            [in] Int32 requestCode,
+            [in] Int32 resultCode,
+            [in] IIntent *data);
+
+        OnCreateContextMenu(
+            [in] IContext* ctx,
+            [in] IContextMenu* menu,
+            [in] IView* v,
+            [in] IContextMenuInfo* menuInfo);
+
+        OnHandleMessage(
+            [in] IContext* context,
+            [in] IMessage* msg);
+    }
+
+    [deprecated]
+    interface IApplicationListener {
+        OnCreate(
+            [in] IContext* ctx);
+
+        OnHandleMessage(
+            [in] IContext* context,
+            [in] IMessage* msg);
+    }
+
+    [deprecated]
+    interface INodeBridgeListener {
+        OnRegistActivity(
+            [in] String packageName,
+            [in] String activityName,
+            [in] IInterface* activityInstance,
+            [in] Int32 activityListener,    //IActivityListener**
+            [in] IHandler* activityHandler,
+            [out] Boolean* result);
+    }
+
+    [deprecated]
+    interface INodeListener {
+        OnNodeEvent(
+            [in] Int32 eventId);
+
+        GetEnqueueUIMessagePtr(
+            [out] Int32* outPtr);
+
+        Sleep(
+            [in] Int32 interval);
+
+        Lock();
+
+        Unlock();
+
+        SetActivityListener(
+            [in] Int32 activityListener,    //IActivityListener**
+            [in] IActivityListener* jsActivityListener);
+
+        SetNodeBridgeListener(
+            [in] INodeBridgeListener* nodeBridgeListener);
+
+        SetNodeBridge(
+            [in] Int32 from,
+            [in] Int32 threadIndex);
+    }
+
+    [local]
+    interface ICallbackRunnable {
+        GetInstance(
+            [out] IInterface** instance);
+    }
+
+    [local]
+    interface IActivityOne {
+        OnClickPopupWindow(
+            [in] IView* v);
+    }
+
+    [local]
+    interface IApplicationOne {
+        OnTest();
+    }
+
+    class CNodeListener {
+        constructor();
+
+        interface INodeListener;
+    }
+
+    class CAppGalleryAppImpl {
+        constructor();
+
+        interface IApplication;
+        interface IApplicationOne;
+    }
+
+    class CAppMovieActivity {
+        constructor();
+
+        interface IActivity;
+        interface IContext;
+        interface IContextThemeWrapper;
+        interface ILayoutInflaterFactory;
+        interface ILayoutInflaterFactory2;
+        interface IWindowCallback;
+        interface IKeyEventCallback;
+        interface IViewOnCreateContextMenuListener;
+        interface IComponentCallbacks;
+        interface IComponentCallbacks2;
+        interface IOnWindowDismissedCallback;
+        interface IActivityOne;
+    }
+
+    class CAppGalleryActivity {
+        constructor();
+
+        interface IActivity;
+        interface IContext;
+        interface IContextThemeWrapper;
+        interface ILayoutInflaterFactory;
+        interface ILayoutInflaterFactory2;
+        interface IWindowCallback;
+        interface IKeyEventCallback;
+        interface IViewOnCreateContextMenuListener;
+        interface IComponentCallbacks;
+        interface IComponentCallbacks2;
+        interface IOnWindowDismissedCallback;
+        interface IActivityOne;
+    }
+
+    } // namespace JSGallery3D
+    } // namespace Node
+    } // namespace DevSamples
+    } // namespace Elastos
+}

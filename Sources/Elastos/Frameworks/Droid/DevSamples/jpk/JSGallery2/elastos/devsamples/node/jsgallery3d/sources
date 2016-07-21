@@ -1,0 +1,33 @@
+TARGET_NAME= Elastos.DevSamples.Node.JSGallery3D
+TARGET_TYPE= eco
+
+EXPORT_ALL_SYMBOLS = 1
+
+include $(MAKEDIR)/../../../../../../../sources.inc
+INCLUDES += $(MAKEDIR)
+INCLUDES += $(MAKEDIR)/../../../../
+INCLUDES += $(MAKEDIR)/../../../../../Common/inc
+
+CAR_FLAGS += -n -u
+LUBE_FLAGS += -n -u
+
+SOURCES = Elastos.DevSamples.Node.JSGallery3D.car
+SOURCES += R.cpp
+SOURCES += Elastos.Droid.Core.cpp
+SOURCES += Elastos.CoreLibrary.cpp
+SOURCES += CNodeListener.cpp
+SOURCES += CNodeApp.cpp
+
+LIBRARIES  = $(XDK_USER_LIB)/Elastos.Runtime.lib
+LIBRARIES += $(XDK_TARGETS)/Elastos.Runtime.eco
+LIBRARIES += $(XDK_TARGETS)/Elastos.CoreLibrary.eco
+LIBRARIES += $(XDK_TARGETS)/Elastos.Droid.Core.eco
+LIBRARIES += $(XDK_USER_LIB)/crt0.lib
+LIBRARIES += -lm -licuuc -llog -lutils -lcutils -landroidfw
+LIBRARIES += -ldl
+LIBRARIES += -lnode
+
+APP_PACKAGE_NAME = Elastos.DevSamples.Node.JSGallery3D
+RES_NAMESPACE = Elastos.DevSamples.Node.JSGallery3D
+APPPACK = 1
+DIRRESOURCES += $(MAKEDIR)/res;

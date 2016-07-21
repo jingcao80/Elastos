@@ -1,0 +1,42 @@
+        <activity android:name="com.android.gallery3d.app.MovieActivity"
+        <activity android:name="com.android.gallery3d.app.GalleryActivity"
+        <activity android:name="com.android.gallery3d.app.Gallery">
+        <activity-alias android:name="com.cooliris.media.Gallery"
+        <activity android:name="com.android.camera.CameraActivity"
+        <activity-alias android:name="com.android.camera.CameraLauncher"
+        <activity android:name="com.android.gallery3d.ingest.IngestActivity"
+        <activity android:name="com.android.gallery3d.app.Wallpaper"
+        <activity android:name="com.android.gallery3d.app.TrimVideo"
+        <activity
+            android:name="com.android.gallery3d.filtershow.FilterShowActivity"
+        <activity
+            android:name="com.android.gallery3d.filtershow.crop.CropActivity"
+        <activity android:name="com.android.gallery3d.settings.GallerySettings"
+        <activity android:name="com.android.gallery3d.util.ViewGifImage"
+        <activity android:name="com.android.gallery3d.gadget.WidgetClickHandler" />
+        <activity android:name="com.android.gallery3d.app.DialogPicker"
+        <activity android:name="com.android.gallery3d.app.AlbumPicker"
+        <activity android:name="com.android.gallery3d.gadget.WidgetTypeChooser"
+        <activity android:name="com.android.gallery3d.gadget.WidgetConfigure"
+        <activity android:name="org.codeaurora.gallery3d.video.SettingsActivity"
+        <activity android:name="org.codeaurora.gallery3d.video.BookmarkActivity"
+        <activity android:name="org.codeaurora.gallery3d.video.VideoSettingsActivity"
+
+        <service android:name="com.android.gallery3d.ingest.IngestService"
+        <service
+                android:name=".filtershow.pipeline.ProcessingService"
+        <service android:name="com.android.gallery3d.app.PackagesMonitor$AsyncService"/>
+        <service android:name="com.android.gallery3d.gadget.WidgetService"
+        <service android:name="com.android.gallery3d.app.BatchService" />
+        <service android:name="com.android.camera.MediaSaveService" />
+
+        <receiver android:name="com.android.gallery3d.gadget.PhotoAppWidgetProvider"
+        <receiver android:name="com.android.gallery3d.app.PackagesMonitor"
+        <receiver android:name="com.android.camera.DisableCameraReceiver">
+        <receiver android:name="org.codeaurora.gallery3d.video.DmReceiver"
+
+        <provider
+            android:name="com.android.gallery3d.filtershow.provider.SharedImageProvider"
+        <provider android:name="com.android.gallery3d.provider.GalleryProvider"
+        <provider
+                android:name="com.android.photos.data.PhotoProvider"
