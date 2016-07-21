@@ -4,6 +4,7 @@ module
 
     using interface Elastos.Droid.Content.ICursorLoader;
     using interface Elastos.Droid.Database.ICursor;
+    using interface Elastos.Droid.View.IView;
 
     interface Elastos.Droid.Contacts.Common.IContactPhotoManager;
     interface Elastos.Droid.Contacts.Common.IContactPhotoManagerDefaultImageRequest;
@@ -22,12 +23,21 @@ module
      * interface Elastos.Droid.Common.Widget.ICompositeCursorAdapter;
      * interface Elastos.Droid.Contacts.Common.List.IIndexerListAdapter
      */
+    [local]
     interface IContactEntryListAdapter {
         /**
          * Indicates whether the {@link Directory#LOCAL_INVISIBLE} directory should
          * be included in the search.
          */
         const Boolean LOCAL_INVISIBLE_DIRECTORY_ENABLED = FALSE;
+
+        SetFragmentRootView(
+            [in] IView* fragmentRootView);
+
+        SetDefaultFilterHeaderText(
+            [in] Int32 resourceId);
+
+        AddPartitions();
 
         /**
          * Remove all directories after the default directory. This is typically used when contacts
@@ -134,6 +144,9 @@ module
 
         SetAdjustSelectionBoundsEnabled(
             [in] Boolean enabled);
+
+        SetQuickCallButtonEnabled(
+            [in] Boolean quickCallButtonEnabled);
 
         ShouldIncludeProfile(
             [out] Boolean* includeProfile);

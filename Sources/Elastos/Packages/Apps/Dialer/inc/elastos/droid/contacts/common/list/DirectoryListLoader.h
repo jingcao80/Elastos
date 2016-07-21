@@ -5,7 +5,9 @@
 #include "elastos/droid/content/AsyncTaskLoader.h"
 #include "elastos/droid/database/ContentObserver.h"
 
+using Elastos::Droid::Content::IContext;
 using Elastos::Droid::Content::AsyncTaskLoader;
+using Elastos::Droid::Database::ICursor;
 using Elastos::Droid::Database::ContentObserver;
 using Elastos::Droid::Database::IMatrixCursor;
 using Elastos::Droid::Net::IUri;

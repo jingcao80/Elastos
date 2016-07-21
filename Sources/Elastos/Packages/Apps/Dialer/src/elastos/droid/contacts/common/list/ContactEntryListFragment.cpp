@@ -11,6 +11,7 @@
 
 using Elastos::Droid::App::EIID_ILoaderManagerLoaderCallbacks;
 using Elastos::Droid::Contacts::Common::List::EIID_IContactEntryListFragment;
+using Elastos::Droid::Contacts::Common::Util::ContactListViewUtils;
 // using Elastos::Droid::Contacts::Common::Preference::EIID_IContactsPreferencesChangeListener;
 using Elastos::Droid::Content::IIntentFilter;
 using Elastos::Droid::Content::CIntentFilter;
@@ -532,7 +533,7 @@ void ContactEntryListFragment::OnPartitionLoaded(
     /* [in] */ Int32 partitionIndex,
     /* [in] */ ICursor* data)
 {
-    Int32 count;
+    // Int32 count;
     assert(0);
     // TODO: no CompositeCursorAdapter and then no function GetPartitionCount
     // if (mAdapter->GetPartitionCount(&count), partitionIndex >= count) {
@@ -976,206 +977,212 @@ ECode ContactEntryListFragment::OnCreateView(
     }
 
     adapterV->SetOnItemClickListener(IAdapterViewOnItemClickListener::Probe(this));
-    IView::Probe(mListView)->SetOnFocusChangeListener(IViewOnFocusChangeListener::Probe(this));
-    adapterV->SetOnTouchListener(IViewOnTouchListener::Probe(this));
+    AutoPtr<IView> v = IView::Probe(mListView);
+    v->SetOnFocusChangeListener(IViewOnFocusChangeListener::Probe(this));
+    v->SetOnTouchListener(IViewOnTouchListener::Probe(this));
     Boolean isSearchMode;
     IsSearchMode(&isSearchMode);
-    mListView->SetFastScrollEnabled(!isSearchMode);
+    IAbsListView::Probe(mListView)->SetFastScrollEnabled(!isSearchMode);
 
     // Tell list view to not show dividers. We'll do it ourself so that we can *not* show
     // them when an A-Z headers is visible.
     mListView->SetDividerHeight(0);
 
     // We manually save/restore the listview state
-    IView::Probe(mListView)->SetSaveEnabled(FALSE);
+    v->SetSaveEnabled(FALSE);
 
     ConfigureVerticalScrollbar();
     ConfigurePhotoLoader();
 
     AutoPtr<IInterface> adapter;
     GetAdapter((IInterface**)&adapter);
-    AutoPtr<IView> v;
-    GetView((IView**)&v);
-    IContactEntryListAdapter::Probe(adapter)->SetFragmentRootView(v);
+    AutoPtr<IView> view;
+    GetView((IView**)&view);
+    IContactEntryListAdapter::Probe(adapter)->SetFragmentRootView(view);
 
     AutoPtr<IResources> res;
     GetResources((IResources**)&res);
-    // begin from this
     return ContactListViewUtils::ApplyCardPaddingToView(res, mListView, mView);
 }
 
-// ECode ContactEntryListFragment::OnHiddenChanged(
-//     /* [in] */ Boolean hidden)
-// {
-//     AnalyticsFragment::OnHiddenChanged(hidden);
-//     AutoPtr<IActivity> a;
-//     AutoPtr<IView> v;
-//     if ((GetActivity((IActivity**)&a), a != NULL) && (GetView((IView**)&v), v != NULL) && !hidden) {
-//         // If the padding was last applied when in a hidden state, it may have been applied
-//         // incorrectly. Therefore we need to reapply it.
-//         AutoPtr<IResources> res;
-//         GetResources((IResources**)&res);
-//         return ContactListViewUtils::ApplyCardPaddingToView(res, mListView, v);
-//     }
-//     return NOERROR;
-// }
+ECode ContactEntryListFragment::OnHiddenChanged(
+    /* [in] */ Boolean hidden)
+{
+    AnalyticsFragment::OnHiddenChanged(hidden);
+    AutoPtr<IActivity> a;
+    AutoPtr<IView> v;
+    if ((GetActivity((IActivity**)&a), a != NULL) && (GetView((IView**)&v), v != NULL) && !hidden) {
+        // If the padding was last applied when in a hidden state, it may have been applied
+        // incorrectly. Therefore we need to reapply it.
+        AutoPtr<IResources> res;
+        GetResources((IResources**)&res);
+        return ContactListViewUtils::ApplyCardPaddingToView(res, mListView, v);
+    }
+    return NOERROR;
+}
 
-// void ContactEntryListFragment::ConfigurePhotoLoader()
-// {
-//     Boolean isEnabled;
-//     if ((IsPhotoLoaderEnabled(&isEnabled), isEnabled) && mContext != NULL) {
-//         if (mPhotoManager == NULL) {
-//             mPhotoManager = ContactPhotoManager::GetInstance(mContext);
-//         }
-//         if (mListView != NULL) {
-//             mListView->SetOnScrollListener(IAbsListViewOnScrollListener::Probe(this));
-//         }
-//         if (mAdapter != NULL) {
-//             mAdapter->SetPhotoLoader(mPhotoManager);
-//         }
-//     }
-// }
+void ContactEntryListFragment::ConfigurePhotoLoader()
+{
+    Boolean isEnabled;
+    if ((IsPhotoLoaderEnabled(&isEnabled), isEnabled) && mContext != NULL) {
+        // TODO: no ContactPhotoManager
+        // if (mPhotoManager == NULL) {
+        //     mPhotoManager = ContactPhotoManager::GetInstance(mContext);
+        // }
+        if (mListView != NULL) {
+            IAbsListView::Probe(mListView)->SetOnScrollListener(IAbsListViewOnScrollListener::Probe(this));
+        }
+        if (mAdapter != NULL) {
+            // TODO: no ContactPhotoManager
+            // mAdapter->SetPhotoLoader(mPhotoManager);
+        }
+    }
+}
 
-// void ContactEntryListFragment::ConfigureAdapter()
-// {
-//     if (mAdapter == NULL) {
-//         return;
-//     }
+void ContactEntryListFragment::ConfigureAdapter()
+{
+    if (mAdapter == NULL) {
+        return;
+    }
 
-//     mAdapter->SetQuickContactEnabled(mQuickContactEnabled);
-//     mAdapter->SetAdjustSelectionBoundsEnabled(mAdjustSelectionBoundsEnabled);
-//     mAdapter->SetQuickCallButtonEnabled(mQuickCallButtonEnabled);
-//     mAdapter->SetIncludeProfile(mIncludeProfile);
-//     mAdapter->SetQueryString(mQueryString);
-//     mAdapter->SetDirectorySearchMode(mDirectorySearchMode);
-//     mAdapter->SetPinnedPartitionHeadersEnabled(FALSE);
-//     mAdapter->SetContactNameDisplayOrder(mDisplayOrder);
-//     mAdapter->SetSortOrder(mSortOrder);
-//     mAdapter->SetSectionHeaderDisplayEnabled(mSectionHeaderDisplayEnabled);
-//     mAdapter->SetSelectionVisible(mSelectionVisible);
-//     mAdapter->SetDirectoryResultLimit(mDirectoryResultLimit);
-//     mAdapter->SetDarkTheme(mDarkTheme);
-// }
+    mAdapter->SetQuickContactEnabled(mQuickContactEnabled);
+    mAdapter->SetAdjustSelectionBoundsEnabled(mAdjustSelectionBoundsEnabled);
+    mAdapter->SetQuickCallButtonEnabled(mQuickCallButtonEnabled);
+    mAdapter->SetIncludeProfile(mIncludeProfile);
+    mAdapter->SetQueryString(mQueryString);
+    mAdapter->SetDirectorySearchMode(mDirectorySearchMode);
+    // TODO: adapter has no function SetPinnedPartitionHeadersEnabled;
+    // mAdapter->SetPinnedPartitionHeadersEnabled(FALSE);
+    mAdapter->SetContactNameDisplayOrder(mDisplayOrder);
+    mAdapter->SetSortOrder(mSortOrder);
+    // TODO: adapter has no function SetSectionHeaderDisplayEnabled;
+    // mAdapter->SetSectionHeaderDisplayEnabled(mSectionHeaderDisplayEnabled);
+    mAdapter->SetSelectionVisible(mSelectionVisible);
+    mAdapter->SetDirectoryResultLimit(mDirectoryResultLimit);
+    mAdapter->SetDarkTheme(mDarkTheme);
+}
 
-// ECode ContactEntryListFragment::OnScroll(
-//     /* [in] */ IAbsListView* view,
-//     /* [in] */ Int32 firstVisibleItem,
-//     /* [in] */ Int32 visibleItemCount,
-//     /* [in] */ Int32 totalItemCount)
-// {
-//     return NOERROR;
-// }
+ECode ContactEntryListFragment::OnScroll(
+    /* [in] */ IAbsListView* view,
+    /* [in] */ Int32 firstVisibleItem,
+    /* [in] */ Int32 visibleItemCount,
+    /* [in] */ Int32 totalItemCount)
+{
+    return NOERROR;
+}
 
-// ECode ContactEntryListFragment::OnScrollStateChanged(
-//     /* [in] */ IAbsListView* view,
-//     /* [in] */ Int32 scrollState)
-// {
-//     Boolean isEnabled;
-//     if (scrollState == IAbsListViewOnScrollListener::SCROLL_STATE_FLING) {
-//         mPhotoManager->Pause();
-//     }
-//     else if (IsPhotoLoaderEnabled(&isEnabled), isEnabled) {
-//         mPhotoManager->Resume();
-//     }
-//     return NOERROR;
-// }
+ECode ContactEntryListFragment::OnScrollStateChanged(
+    /* [in] */ IAbsListView* view,
+    /* [in] */ Int32 scrollState)
+{
+    Boolean isEnabled;
+    if (scrollState == IAbsListViewOnScrollListener::SCROLL_STATE_FLING) {
+        assert(0);
+        // mPhotoManager->Pause();
+    }
+    else if (IsPhotoLoaderEnabled(&isEnabled), isEnabled) {
+        assert(0);
+        // mPhotoManager->Resume();
+    }
+    return NOERROR;
+}
 
-// ECode ContactEntryListFragment::OnItemClick(
-//     /* [in] */ IAdapterView* parent,
-//     /* [in] */ IView* view,
-//     /* [in] */ Int32 position,
-//     /* [in] */ Int64 id)
-// {
-//     HideSoftKeyboard();
+ECode ContactEntryListFragment::OnItemClick(
+    /* [in] */ IAdapterView* parent,
+    /* [in] */ IView* view,
+    /* [in] */ Int32 position,
+    /* [in] */ Int64 id)
+{
+    HideSoftKeyboard();
 
-//     Int32 count;
-//     mListView->GetHeaderViewsCount(&count);
-//     Int32 adjPosition = position - count;
-//     if (adjPosition >= 0) {
-//         OnItemClick(adjPosition, id);
-//     }
-//     return NOERROR;
-// }
+    Int32 count = ((ListView*)mListView.Get())->GetHeaderViewsCount();
+    Int32 adjPosition = position - count;
+    if (adjPosition >= 0) {
+        OnItemClick(adjPosition, id);
+    }
+    return NOERROR;
+}
 
-// void ContactEntryListFragment::HideSoftKeyboard()
-// {
-//     // Hide soft keyboard, if visible
-//     AutoPtr<IInterface> service;
-//     mContext->GetSystemService(IContext::INPUT_METHOD_SERVICE, (IInterface**)&service);
-//     AutoPtr<IInputMethodManager> inputMethodManager = IInputMethodManager::Probe(service);
-//     AutoPtr<IBinder> token;
-//     mListView->GetWindowToken((IBinder**)&token);
-//     inputMethodManager->HideSoftInputFromWindow(token, 0);
-// }
+void ContactEntryListFragment::HideSoftKeyboard()
+{
+    // Hide soft keyboard, if visible
+    AutoPtr<IInterface> service;
+    mContext->GetSystemService(IContext::INPUT_METHOD_SERVICE, (IInterface**)&service);
+    AutoPtr<IInputMethodManager> inputMethodManager = IInputMethodManager::Probe(service);
+    AutoPtr<IBinder> token;
+    IView::Probe(mListView)->GetWindowToken((IBinder**)&token);
+    Boolean result;
+    inputMethodManager->HideSoftInputFromWindow(token, 0, &result);
+}
 
-// ECode ContactEntryListFragment::OnFocusChange(
-//     /* [in] */ IView* v,
-//     /* [in] */ Boolean hasFocus)
-// {
-//     if (view == IView::Probe(mListView) && hasFocus) {
-//         HideSoftKeyboard();
-//     }
-//     return NOERROR;
-// }
+ECode ContactEntryListFragment::OnFocusChange(
+    /* [in] */ IView* view,
+    /* [in] */ Boolean hasFocus)
+{
+    if (view == IView::Probe(mListView) && hasFocus) {
+        HideSoftKeyboard();
+    }
+    return NOERROR;
+}
 
-// ECode ContactEntryListFragment::OnTouch(
-//     /* [in] */ IView* view,
-//     /* [in] */ IMotionEvent* event,
-//     /* [out] */ Boolean* result)
-// {
-//     VALIDATE_NOT_NULL(result)
-//     if (view == IView::Probe(mListView)) {
-//         HideSoftKeyboard();
-//     }
-//     *result = FALSE;
-//     return NOERROR;
-// }
+ECode ContactEntryListFragment::OnTouch(
+    /* [in] */ IView* view,
+    /* [in] */ IMotionEvent* event,
+    /* [out] */ Boolean* result)
+{
+    VALIDATE_NOT_NULL(result)
+    if (view == IView::Probe(mListView)) {
+        HideSoftKeyboard();
+    }
+    *result = FALSE;
+    return NOERROR;
+}
 
-// ECode ContactEntryListFragment::OnPause()
-// {
-//     AnalyticsFragment::OnPause();
-//     RemovePendingDirectorySearchRequests();
-//     return NOERROR;
-// }
+ECode ContactEntryListFragment::OnPause()
+{
+    AnalyticsFragment::OnPause();
+    RemovePendingDirectorySearchRequests();
+    return NOERROR;
+}
 
-// void ContactEntryListFragment::CompleteRestoreInstanceState()
-// {
-//     if (mListState != NULL) {
-//         mListView->OnRestoreInstanceState(mListState);
-//         mListState = NULL;
-//     }
-// }
+void ContactEntryListFragment::CompleteRestoreInstanceState()
+{
+    if (mListState != NULL) {
+        ((ListView*)mListView.Get())->OnRestoreInstanceState(mListState);
+        mListState = NULL;
+    }
+}
 
-// ECode ContactEntryListFragment::SetDarkTheme(
-//     /* [in] */ Boolean value)
-// {
-//     mDarkTheme = value;
-//     if (mAdapter != NULL) mAdapter->SetDarkTheme(value);
-//     return NOERROR;
-// }
+ECode ContactEntryListFragment::SetDarkTheme(
+    /* [in] */ Boolean value)
+{
+    mDarkTheme = value;
+    if (mAdapter != NULL) mAdapter->SetDarkTheme(value);
+    return NOERROR;
+}
 
-// ECode ContactEntryListFragment::OnPickerResult(
-//     /* [in] */ IIntent* data)
-// {
-//     Logger::E("ContactEntryListFragment", "Picker result handler is not implemented.");
-//     return E_UNSUPPORTED_OPERATION_EXCEPTION;
-// }
+ECode ContactEntryListFragment::OnPickerResult(
+    /* [in] */ IIntent* data)
+{
+    Logger::E("ContactEntryListFragment", "Picker result handler is not implemented.");
+    return E_UNSUPPORTED_OPERATION_EXCEPTION;
+}
 
-// Int32 ContactEntryListFragment::GetDefaultVerticalScrollbarPosition()
-// {
-//     AutoPtr<ILocaleHelper> helper;
-//     CLocaleHelper::AcquireSingleton((ILocaleHelper**)&helper);
-//     AutoPtr<ILocale> locale;
-//     helper->GetDefault((ILocale**)&locale);
-//     Int32 layoutDirection = TextUtils::GetLayoutDirectionFromLocale(locale);
-//     switch (layoutDirection) {
-//         case IView::LAYOUT_DIRECTION_RTL:
-//             return IView::SCROLLBAR_POSITION_LEFT;
-//         case IView::LAYOUT_DIRECTION_LTR:
-//         default:
-//             return IView::SCROLLBAR_POSITION_RIGHT;
-//     }
-// }
+Int32 ContactEntryListFragment::GetDefaultVerticalScrollbarPosition()
+{
+    AutoPtr<ILocaleHelper> helper;
+    CLocaleHelper::AcquireSingleton((ILocaleHelper**)&helper);
+    AutoPtr<ILocale> locale;
+    helper->GetDefault((ILocale**)&locale);
+    Int32 layoutDirection = TextUtils::GetLayoutDirectionFromLocale(locale);
+    switch (layoutDirection) {
+        case IView::LAYOUT_DIRECTION_RTL:
+            return IView::SCROLLBAR_POSITION_LEFT;
+        case IView::LAYOUT_DIRECTION_LTR:
+        default:
+            return IView::SCROLLBAR_POSITION_RIGHT;
+    }
+}
 
 } // List
 } // Common

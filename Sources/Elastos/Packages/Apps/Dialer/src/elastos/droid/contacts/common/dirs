@@ -2,3 +2,4 @@
 DIRS += interactions
 DIRS += util
 DIRS += widget
+DIRS += list

@@ -4,8 +4,10 @@
 
 #include "Elastos.Droid.Widget.h"
 #include "Elastos.Droid.View.h"
+#include "elastos/droid/os/Runnable.h"
 
 using Elastos::Droid::Content::Res::IResources;
+using Elastos::Droid::Os::Runnable;
 using Elastos::Droid::Widget::IListView;
 using Elastos::Droid::View::IView;
 
@@ -17,6 +19,30 @@ namespace Util {
 
 class ContactListViewUtils
 {
+private:
+    class ApplyCardPaddingToViewRunnable : public Runnable
+    {
+    public:
+        ApplyCardPaddingToViewRunnable(
+            /* [in] */ IListView* listView,
+            /* [in] */ IView* rootLayout,
+            /* [in] */ Int32 listSpaceWeight,
+            /* [in] */ Int32 listViewWeight)
+            : mListView(listView)
+            , mRootLayout(rootLayout)
+            , mSpaceWeight(listViewWeight)
+            , mWeight(listViewWeight)
+        {}
+
+        CARAPI Run();
+
+    private:
+        AutoPtr<IListView> mListView;
+        AutoPtr<IView> mRootLayout;
+        Int32 mSpaceWeight;
+        Int32 mWeight;
+    };
+
 public:
     /**
      * Add padding to {@param listView} if this configuration has set both space weight and
@@ -34,14 +60,17 @@ public:
         /* [in] */ IView* rootLayout);
 
 private:
-    // These two constants will help add more padding for the text inside the card.
-    static const Double TEXT_LEFT_PADDING_TO_CARD_PADDING_RATIO = 1.1;
-
     static CARAPI_(void) AddPaddingToView(
         /* [in] */ IListView* listView,
         /* [in] */ Int32 parentWidth,
         /* [in] */ Int32 listSpaceWeight,
         /* [in] */ Int32 listViewWeight);
+
+private:
+    // These two constants will help add more padding for the text inside the card.
+    static const Double TEXT_LEFT_PADDING_TO_CARD_PADDING_RATIO = 1.1;
+
+    friend class ApplyCardPaddingToViewRunnable;
 };
 
 } // namespace Util

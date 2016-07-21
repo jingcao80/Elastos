@@ -1,10 +1,15 @@
 
 #include "elastos/droid/contacts/common/list/DirectoryListLoader.h"
 #include "elastos/droid/text/TextUtils.h"
+#include <elastos/core/StringUtils.h>
 #include <elastos/utility/logging/Logger.h>
+#include "Elastos.Droid.Provider.h"
+#include "Elastos.CoreLibrary.IO.h"
 #include "R.h"
 
+using Elastos::Droid::Content::IContentResolver;
 using Elastos::Droid::Content::Pm::IPackageManager;
+using Elastos::Droid::Content::Res::IResources;
 using Elastos::Droid::Database::CMatrixCursor;
 using Elastos::Droid::Provider::IContactsContractDirectory;
 using Elastos::Droid::Provider::CContactsContractDirectory;
@@ -16,6 +21,8 @@ using Elastos::Core::IInteger32;
 using Elastos::Core::CInteger32;
 using Elastos::Core::ICharSequence;
 using Elastos::Core::CString;
+using Elastos::Core::StringUtils;
+using Elastos::IO::ICloseable;
 using Elastos::Utility::Logging::Logger;
 
 namespace Elastos {
@@ -47,8 +54,9 @@ AutoPtr<ArrayOf<String> > InitProjection()
     (*projections)[2] = IContactsContractDirectory::TYPE_RESOURCE_ID;
     (*projections)[3] = IContactsContractDirectory::DISPLAY_NAME;
     (*projections)[4] = IContactsContractDirectory::PHOTO_SUPPORT;
+    return projections;
 }
-const AutoPtr<ArrayOf<String> > DirectoryListLoader::DirectoryQuery::PROJECTION = InitProjection;
+const AutoPtr<ArrayOf<String> > DirectoryListLoader::DirectoryQuery::PROJECTION = InitProjection();
 const Int32 DirectoryListLoader::DirectoryQuery::ID;
 const Int32 DirectoryListLoader::DirectoryQuery::PACKAGE_NAME;
 const Int32 DirectoryListLoader::DirectoryQuery::TYPE_RESOURCE_ID;
@@ -83,18 +91,19 @@ static AutoPtr<ArrayOf<String> > InitResultProjection()
 {
     AutoPtr<ArrayOf<String> > projections = ArrayOf<String>::Alloc(4);
     (*projections)[0] = IBaseColumns::ID;
-    (*projections)[1] = IContactsContractDirectory::DIRECTORY_TYPE;
+    (*projections)[1] = DirectoryListLoader::DIRECTORY_TYPE;
     (*projections)[2] = IContactsContractDirectory::DISPLAY_NAME;
     (*projections)[3] = IContactsContractDirectory::PHOTO_SUPPORT;
+    return projections;
 }
 const AutoPtr<ArrayOf<String> > RESULT_PROJECTION = InitResultProjection();
 
 DirectoryListLoader::DirectoryListLoader(
     /* [in] */ IContext* ctx)
-    : AsyncTaskLoader(ctx)
-    , mDirectorySearchMode(0)
+    : mDirectorySearchMode(0)
     , mLocalInvisibleDirectoryEnabled(FALSE)
 {
+    AsyncTaskLoader::constructor(ctx);
     mObserver = new MyObserver(this);
 }
 
@@ -155,22 +164,24 @@ ECode DirectoryListLoader::LoadInBackground(
     switch (mDirectorySearchMode) {
         case SEARCH_MODE_DEFAULT:
             selection = mLocalInvisibleDirectoryEnabled ?
-                    String(NULL) : (IBaseColumns::ID + "!=" + IContactsContractDirectory::LOCAL_INVISIBLE);
+                    String(NULL) : (IBaseColumns::ID + "!=" + StringUtils::ToString(IContactsContractDirectory::LOCAL_INVISIBLE));
             break;
 
         case SEARCH_MODE_CONTACT_SHORTCUT:
             selection = IContactsContractDirectory::SHORTCUT_SUPPORT + "="
-                    + IContactsContractDirectory::SHORTCUT_SUPPORT_FULL
+                    + StringUtils::ToString(IContactsContractDirectory::SHORTCUT_SUPPORT_FULL)
                     + (mLocalInvisibleDirectoryEnabled ?
-                            "" : (String(" AND ") + IBaseColumns::ID + "!=" + IContactsContractDirectory::LOCAL_INVISIBLE));
+                            String("") : (String(" AND ") + IBaseColumns::ID + "!=" +
+                                    StringUtils::ToString(IContactsContractDirectory::LOCAL_INVISIBLE)));
             break;
 
         case SEARCH_MODE_DATA_SHORTCUT:
             selection = IContactsContractDirectory::SHORTCUT_SUPPORT + " IN ("
-                    + IContactsContractDirectory::SHORTCUT_SUPPORT_FULL + ", "
-                    + IContactsContractDirectory::SHORTCUT_SUPPORT_DATA_ITEMS_ONLY + ")"
+                    + StringUtils::ToString(IContactsContractDirectory::SHORTCUT_SUPPORT_FULL) + ", "
+                    + StringUtils::ToString(IContactsContractDirectory::SHORTCUT_SUPPORT_DATA_ITEMS_ONLY) + ")"
                     + (mLocalInvisibleDirectoryEnabled ?
-                            "" : (String(" AND ") + IBaseColumns::ID + "!=" + IContactsContractDirectory::LOCAL_INVISIBLE));
+                            String("") : (String(" AND ") + IBaseColumns::ID + String("!=") +
+                                    StringUtils::ToString(IContactsContractDirectory::LOCAL_INVISIBLE)));
             break;
 
         default:
@@ -229,12 +240,12 @@ ECode DirectoryListLoader::LoadInBackground(
         AutoPtr<IInteger32> supprot;
         CInteger32::New(photoSupport, (IInteger32**)&supprot);
         attrs->Set(3, supprot);
-        result->AddRow(attrs);
+        result->AddRow(*attrs);
     }
     // } finally {
     //     cursor.close();
     // }
-    cursor->Close();
+    ICloseable::Probe(cursor)->Close();
 
     *_cursor = IInterface::Probe(result);
     REFCOUNT_ADD(*_cursor)
@@ -252,26 +263,26 @@ AutoPtr<ICursor> DirectoryListLoader::GetDefaultDirectories()
         AutoPtr<IContext> context;
         GetContext((IContext**)&context);
         String str;
-        context->GetString(R::string::contactsList, &str);
+        context->GetString(Elastos::Droid::Dialer::R::string::contactsList, &str);
         AutoPtr<ICharSequence> cs;
         CString::New(str, (ICharSequence**)&cs);
         attrs->Set(1, cs);
         attrs->Set(2, NULL);
-        mDefaultDirectoryList->AddRow(attrs);
+        mDefaultDirectoryList->AddRow(*attrs);
 
         AutoPtr<ArrayOf<IInterface*> > attrs1 = ArrayOf<IInterface*>::Alloc(3);
         AutoPtr<IInteger64> v;
         CInteger64::New(IContactsContractDirectory::LOCAL_INVISIBLE, (IInteger64**)&v);
         attrs1->Set(0, v);
         String directory;
-        context->GetString(R::string::local_invisible_directory, &directory);
+        context->GetString(Elastos::Droid::Dialer::R::string::local_invisible_directory, &directory);
         AutoPtr<ICharSequence> cs1;
         CString::New(directory, (ICharSequence**)&cs1);
         attrs1->Set(1, cs1);
         attrs1->Set(2, NULL);
-        mDefaultDirectoryList->AddRow(attrs1);
+        mDefaultDirectoryList->AddRow(*attrs1);
     }
-    return mDefaultDirectoryList;
+    return ICursor::Probe(mDefaultDirectoryList);
 }
 
 ECode DirectoryListLoader::OnReset()
