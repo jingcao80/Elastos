@@ -1115,13 +1115,16 @@ ECode KeyguardUpdateMonitor::constructor(
     AutoPtr<IInterface> obj;
     context->GetSystemService(IContext::TRUST_SERVICE, (IInterface**)&obj);
     AutoPtr<ITrustManager> trustManager = ITrustManager::Probe(obj);
-    trustManager->RegisterTrustListener(listener);
+    // TODO:
+    // trustManager->RegisterTrustListener(listener);
 
     mFingerprintManagerReceiver = new MyFingerprintManagerReceiver(this);
     obj = NULL;
-    context->GetSystemService(IContext::FINGERPRINT_SERVICE, (IInterface**)&obj);
-    AutoPtr<IFingerprintManager> fpm = IFingerprintManager::Probe(obj);
-    return fpm->StartListening(mFingerprintManagerReceiver);
+    // TODO:
+    // context->GetSystemService(IContext::FINGERPRINT_SERVICE, (IInterface**)&obj);
+    // AutoPtr<IFingerprintManager> fpm = IFingerprintManager::Probe(obj);
+    // return fpm->StartListening(mFingerprintManagerReceiver);
+    return NOERROR;
 }
 
 Boolean KeyguardUpdateMonitor::IsDeviceProvisionedInSettingsDb()
