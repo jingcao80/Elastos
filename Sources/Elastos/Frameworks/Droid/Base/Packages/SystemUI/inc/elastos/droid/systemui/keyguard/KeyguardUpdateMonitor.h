@@ -4,13 +4,34 @@
 
 #include "_Elastos.Droid.SystemUI.h"
 #include "Elastos.Droid.App.h"
-#include "Elastos.Droid.Content.h"
-#include "Elastos.Droid.Os.h"
-#include "elastos/droid/app/Service.h"
+#include "Elastos.Droid.Utility.h"
+#include "Elastos.Droid.Telephony.h"
+#include "Elastos.Droid.Service.h"
+#include "elastos/droid/content/BroadcastReceiver.h"
+#include "elastos/droid/database/ContentObserver.h"
+#include "elastos/droid/service/fingerprint/FingerprintManagerReceiver.h"
+#include <elastos/droid/ext/frameworkext.h>
+#include <elastos/droid/os/Handler.h>
+#include <Elastos.CoreLibrary.Utility.h>
+#include <elastos/utility/etl/HashMap.h>
 
-using Elastos::Droid::App::Service;
+using Elastos::Droid::App::IIUserSwitchObserver;
+using Elastos::Droid::App::IPendingIntent;
+using Elastos::Droid::App::Trust::ITrustListener;
+using Elastos::Droid::Database::ContentObserver;
+using Elastos::Droid::Content::BroadcastReceiver;
 using Elastos::Droid::Content::IIntent;
+using Elastos::Droid::Graphics::IBitmap;
+using Elastos::Droid::Utility::ISparseBooleanArray;
+using Elastos::Droid::Telephony::IServiceState;
+using Elastos::Droid::Internal::Telephony::IccCardConstantsState;
+using Elastos::Droid::Service::Fingerprint::FingerprintManagerReceiver;
+using Elastos::Droid::Service::Fingerprint::IFingerprintManagerReceiver;
+using Elastos::Droid::Os::IIRemoteCallback;
 using Elastos::Droid::Os::IBinder;
+using Elastos::Droid::Os::Handler;
+using Elastos::Utility::IList;
+using Elastos::Utility::Etl::HashMap;
 
 namespace Elastos {
 namespace Droid {
@@ -29,12 +50,46 @@ namespace Keyguard {
  */
 class KeyguardUpdateMonitor
     : public Object
-    , public ITrustListener
+    , public IKeyguardUpdateMonitor
 {
 public:
-    class BatteryStatus
+    class TrustListener
+        : public Object
+        , public ITrustListener
     {
     public:
+        CAR_INTERFACE_DECL()
+
+        TO_STRING_IMPL("KeyguardUpdateMonitor::TrustListener")
+
+        TrustListener(
+            /* [in] */ KeyguardUpdateMonitor* host)
+            : mHost(host)
+        {}
+
+        //@Override
+        CARAPI OnTrustChanged(
+            /* [in] */ Boolean enabled,
+            /* [in] */ Int32 userId,
+            /* [in] */ Boolean initiatedByUser);
+
+        //@Override
+        CARAPI OnTrustManagedChanged(
+            /* [in] */ Boolean managed,
+            /* [in] */ Int32 userId);
+
+    private:
+        KeyguardUpdateMonitor* mHost;
+
+    };
+
+    class BatteryStatus
+        : public Object
+        , public IKeyguardUpdateMonitorBatteryStatus
+    {
+    public:
+        CAR_INTERFACE_DECL()
+
         TO_STRING_IMPL("KeyguardUpdateMonitor::BatteryStatus")
 
         BatteryStatus(
@@ -47,6 +102,30 @@ public:
             , mPlugged(plugged)
             , mHealth(health)
         {}
+
+        CARAPI SetStatus(
+            /* [in] */ Int32 value);
+
+        CARAPI GetStatus(
+            /* [out] */ Int32* value);
+
+        CARAPI SetLevel(
+            /* [in] */ Int32 value);
+
+        CARAPI GetLevel(
+            /* [out] */ Int32* value);
+
+        CARAPI SetPlugged(
+            /* [in] */ Int32 value);
+
+        CARAPI GetPlugged(
+            /* [out] */ Int32* value);
+
+        CARAPI SetHealth(
+            /* [in] */ Int32 value);
+
+        CARAPI GetHealth(
+            /* [out] */ Int32* value);
 
         /**
          * Determine whether the device is plugged in (USB, power, or wireless).
@@ -61,7 +140,7 @@ public:
          * battery is charged.
          * @return true if the device is charged
          */
-        CARAPI isCharged(
+        CARAPI IsCharged(
             /* [out] */ Boolean* result);
         /**
          * Whether battery is low and needs to be charged.
@@ -83,10 +162,8 @@ public:
     public:
         TO_STRING_IMPL("KeyguardUpdateMonitor::MyBroadcastReceiver")
 
-        MyBroadcastReceiver(
-            /* [in] */ KeyguardUpdateMonitor* host)
-            : mHost(host)
-        {}
+        CARAPI constructor(
+            /* [in] */ IKeyguardUpdateMonitor* host);
 
         CARAPI OnReceive(
             /* [in] */ IContext* context,
@@ -102,10 +179,8 @@ public:
     public:
         TO_STRING_IMPL("KeyguardUpdateMonitor::MyBroadcastReceiver2")
 
-        MyBroadcastReceiver2(
-            /* [in] */ KeyguardUpdateMonitor* host)
-            : mHost(host)
-        {}
+        CARAPI constructor(
+            /* [in] */ IKeyguardUpdateMonitor* host);
 
         CARAPI OnReceive(
             /* [in] */ IContext* context,
@@ -121,10 +196,8 @@ public:
     public:
         TO_STRING_IMPL("KeyguardUpdateMonitor::MyContentObserver")
 
-        MyContentObserver(
-            /* [in] */ KeyguardUpdateMonitor* host)
-            : mHost(host)
-        {}
+        CARAPI constructor(
+            /* [in] */ IKeyguardUpdateMonitor* host);
 
         //@Override
         CARAPI OnChange(
@@ -132,7 +205,32 @@ public:
 
     private:
         KeyguardUpdateMonitor* mHost;
-    }
+    };
+
+    class UserSwitchObserver
+        : public Object
+        , public IIUserSwitchObserver
+        , public IBinder
+    {
+    public:
+        CAR_INTERFACE_DECL()
+
+        CARAPI constructor(
+            /* [in] */ IKeyguardUpdateMonitor* monitor);
+
+        CARAPI OnUserSwitching(
+            /* [in] */ Int32 newUserId,
+            /* [in] */ IIRemoteCallback* reply);
+
+        CARAPI OnUserSwitchComplete(
+            /* [in] */ Int32 newUserId);
+
+        CARAPI ToString(
+            /* [out] */ String* str);
+
+    private:
+        KeyguardUpdateMonitor* mHost;
+    };
 
 private:
     class MyHandler
@@ -154,9 +252,14 @@ private:
 
     class DisplayClientState
         : public Object
+        , public IKeyguardUpdateMonitorDisplayClientState
     {
     public:
         TO_STRING_IMPL("KeyguardUpdateMonitor::DisplayClientState")
+
+        CAR_INTERFACE_DECL();
+
+        DisplayClientState();
 
     public:
         Int32 mClientGeneration;
@@ -177,12 +280,8 @@ private:
         : public Object
     {
     public:
-        TO_STRING_IMPL("KeyguardUpdateMonitor::SimArgs")
-
         SimArgs(
-            /* [in] */ IccCardConstantsState state)
-            : mSimState(state)
-        {}
+            /* [in] */ IccCardConstantsState state);
 
         static CARAPI FromIntent(
             /* [in] */ IIntent* intent,
@@ -227,17 +326,6 @@ public:
 
     KeyguardUpdateMonitor();
 
-    //@Override
-    CARAPI OnTrustChanged(
-        /* [in] */ Boolean enabled,
-        /* [in] */ Int32 userId,
-        /* [in] */ Boolean initiatedByUser);
-
-    //@Override
-    CARAPI OnTrustManagedChanged(
-        /* [in] */ Boolean managed,
-        /* [in] */ Int32 userId);
-
     CARAPI IsFaceUnlockRunning(
         /* [in] */ Int32 userId,
         /* [out] */ Boolean* result);
@@ -250,7 +338,7 @@ public:
         /* [in] */ Int32 userId,
         /* [out] */ Boolean* result);
 
-    static CARAPI_(AutoPtr<KeyguardUpdateMonitor>) GetInstance(
+    static CARAPI_(AutoPtr<IKeyguardUpdateMonitor>) GetInstance(
         /* [in] */ IContext* context);
 
     /**
@@ -392,14 +480,14 @@ public:
         /* [out] */ Boolean* result);
 
     CARAPI GetCachedDisplayClientState(
-        /* [out] */ DisplayClientState** state);
+        /* [out] */ IKeyguardUpdateMonitorDisplayClientState** state);
 
     // TODO: use these callbacks elsewhere in place of the existing notifyScreen*()
     // (KeyguardViewMediator, KeyguardHostView)
     CARAPI DispatchScreenTurnedOn();
 
     CARAPI DispatchScreenTurndOff(
-        /* [in] */ Int3 why);
+        /* [in] */ Int32 why);
 
     CARAPI IsScreenOn(
         /* [out] */ Boolean* result);
@@ -476,8 +564,6 @@ private:
     CARAPI_(Boolean) IsFingerprintDisabled(
         /* [in] */ Int32 userId);
 
-    CARAPI_(void) HandleUserInfoChanged(int userId);
-
     CARAPI constructor(
         /* [in] */ IContext* context);
 
@@ -494,7 +580,7 @@ private:
      * Handle {@link #MSG_BATTERY_UPDATE}
      */
     CARAPI_(void) HandleBatteryUpdate(
-        /* [in] */ BatteryStatus* status);
+        /* [in] */ IKeyguardUpdateMonitorBatteryStatus* status);
 
     /**
      * Handle {@link #MSG_CARRIER_INFO_UPDATE}
@@ -518,6 +604,9 @@ private:
     CARAPI_(void) HandleKeyguardVisibilityChanged(
         /* [in] */ Int32 showing);
 
+    CARAPI_(void) HandleUserInfoChanged(
+        /* [in] */ Int32 userId);
+
     /**
      * Handle {@link #MSG_KEYGUARD_BOUNCER_CHANGED}
      * @see #sendKeyguardBouncerChanged(boolean)
@@ -531,8 +620,8 @@ private:
     CARAPI_(void) HandleReportEmergencyCallAction();
 
     static CARAPI_(Boolean) IsBatteryUpdateInteresting(
-        /* [in] */ BatteryStatus* old,
-        /* [in] */ BatteryStatus* current);
+        /* [in] */ IKeyguardUpdateMonitorBatteryStatus* old,
+        /* [in] */ IKeyguardUpdateMonitorBatteryStatus* current);
 
     /**
      * @param intent The intent with action {@link TelephonyIntents#SPN_STRINGS_UPDATED_ACTION}
@@ -553,10 +642,12 @@ private:
     CARAPI_(AutoPtr<ICharSequence>) GetTelephonySpnFrom(
         /* [in] */ IIntent* intent);
 
-    CARAPI_(void) SendUpdates(
+    CARAPI SendUpdates(
         /* [in] */ IKeyguardUpdateMonitorCallback* callback);
 
 private:
+    friend class MyHandler;
+
     static const String TAG;
     static const Boolean DEBUG;
     static const Boolean DEBUG_SIM_STATES;
@@ -592,7 +683,9 @@ private:
     static const Int32 MSG_FINGERPRINT_ACQUIRED;
     static const Int32 MSG_FACE_UNLOCK_STATE_CHANGED;
 
-    static AutoPtr<KeyguardUpdateMonitor> sInstance;
+    static const Int64 INVALID_SUBID;
+
+    static AutoPtr<IKeyguardUpdateMonitor> sInstance;
 
     AutoPtr<IContext> mContext;
 
@@ -600,6 +693,7 @@ private:
     IccCardConstantsState mSimState;
     AutoPtr<ICharSequence> mTelephonyPlmn;
     AutoPtr<ICharSequence> mTelephonySpn;
+
     Int32 mRingMode;
     Int32 mPhoneState;
     Boolean mKeyguardIsVisible;
@@ -610,7 +704,7 @@ private:
     Boolean mDeviceProvisioned;
 
     // Battery status
-    AutoPtr<IBatteryStatus> mBatteryStatus;
+    AutoPtr<IKeyguardUpdateMonitorBatteryStatus> mBatteryStatus;
 
     // Password attempts
     Int32 mFailedAttempts;
@@ -640,7 +734,7 @@ private:
 
     AutoPtr<IBroadcastReceiver> mBroadcastAllReceiver;
 
-    private FingerprintManagerReceiver mFingerprintManagerReceiver = new FingerprintManagerReceiver()
+    AutoPtr<IFingerprintManagerReceiver> mFingerprintManagerReceiver;
 };
 
 } // namespace Keyguard

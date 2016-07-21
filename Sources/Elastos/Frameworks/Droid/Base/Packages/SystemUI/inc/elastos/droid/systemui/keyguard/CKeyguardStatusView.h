@@ -6,6 +6,7 @@
 #include "Elastos.Droid.Internal.h"
 #include "Elastos.Droid.Widget.h"
 #include <elastos/droid/widget/GridLayout.h>
+#include "elastos/droid/systemui/keyguard/KeyguardUpdateMonitorCallback.h"
 
 using Elastos::Droid::App::IAlarmClockInfo;
 using Elastos::Droid::Internal::Widget::ILockPatternUtils;
@@ -38,39 +39,28 @@ private:
         static String mCacheKey;
     };
 
-    //TODO
+    class MyKeyguardUpdateMonitorCallback
+        : public KeyguardUpdateMonitorCallback
+    {
+    public:
+        MyKeyguardUpdateMonitorCallback(
+            /* [in] */ CKeyguardStatusView* host);
 
-    // private KeyguardUpdateMonitorCallback mInfoCallback = new KeyguardUpdateMonitorCallback() {
-    //     @Override
-    //     public void onTimeChanged() {
-    //         refresh();
-    //     }
+        CARAPI OnTimeChanged();
 
-    //     @Override
-    //     public void onKeyguardVisibilityChanged(Boolean showing) {
-    //         if (showing) {
-    //             if (DEBUG) Slog.v(TAG, "refresh statusview showing:" + showing);
-    //             refresh();
-    //             updateOwnerInfo();
-    //         }
-    //     }
+        CARAPI OnKeyguardVisibilityChanged(
+            /* [in] */ Boolean showing);
 
-    //     @Override
-    //     public void onScreenTurnedOn() {
-    //         setEnableMarquee(true);
-    //     }
+        CARAPI OnScreenTurnedOn();
 
-    //     @Override
-    //     public void onScreenTurnedOff(Int32 why) {
-    //         setEnableMarquee(false);
-    //     }
+        CARAPI OnScreenTurnedOff(
+            /* [in] */ Int32 why);
 
-    //     @Override
-    //     public void onUserSwitchComplete(Int32 userId) {
-    //         refresh();
-    //         updateOwnerInfo();
-    //     }
-    // };
+        CARAPI OnUserSwitchComplete(
+            /* [in] */ Int32 userId);
+    private:
+        CKeyguardStatusView* mHost;
+    };
 
 public:
     CAR_OBJECT_DECL()
@@ -129,7 +119,6 @@ private:
 
 private:
     static const Boolean DEBUG;
-    static const String TAG;
 
     AutoPtr<ILockPatternUtils> mLockPatternUtils;
 
@@ -137,7 +126,7 @@ private:
     AutoPtr<ITextClock> mDateView;
     AutoPtr<ITextClock> mClockView;
     AutoPtr<ITextView> mOwnerInfo;
-    // AutoPtr<IKeyguardUpdateMonitorCallback> mInfoCallback;
+    AutoPtr<IKeyguardUpdateMonitorCallback> mInfoCallback;
 };
 
 } // namespace Keyguard

@@ -1,5 +1,6 @@
 
 #include "elastos/droid/systemui/keyguard/KeyguardSecurityModel.h"
+#include "elastos/droid/systemui/keyguard/KeyguardUpdateMonitor.h"
 #include <Elastos.Droid.App.h>
 #include <Elastos.Droid.Telephony.h>
 #include <Elastos.Droid.Internal.h>
@@ -52,8 +53,7 @@ ECode KeyguardSecurityModel::IsBiometricUnlockEnabled(
 
 Boolean KeyguardSecurityModel::IsBiometricUnlockSuppressed()
 {
-    AutoPtr<IKeyguardUpdateMonitor> monitor;
-    // = KeyguardUpdateMonitor::GetInstance(mContext);
+    AutoPtr<IKeyguardUpdateMonitor> monitor = KeyguardUpdateMonitor::GetInstance(mContext);
     Int32 res;
     Boolean backupIsTimedOut = (monitor->GetFailedUnlockAttempts(&res), res) >=
             ILockPatternUtils::FAILED_ATTEMPTS_BEFORE_TIMEOUT;
@@ -74,20 +74,9 @@ ECode KeyguardSecurityModel::GetSecurityMode(
 
     SecurityMode mode = SecurityMode_None;
 
-    AutoPtr<IKeyguardUpdateMonitor> updateMonitor;
-    // = KeyguardUpdateMonitor::GetInstance(mContext);
-    IccCardConstantsState simState = IccCardConstantsState_UNKNOWN;
-    Int32 num;
-    updateMonitor->GetNumPhones(&num);
-    for (Int32 i = 0; i < num; i++) {
-        Int64 subId;
-        updateMonitor->GetSubIdByPhoneId(i, &subId);
-        updateMonitor->GetSimState(subId, &simState);
-        if (simState == IccCardConstantsState_PIN_REQUIRED
-            || simState == IccCardConstantsState_PUK_REQUIRED) {
-            break;
-        }
-    }
+    AutoPtr<IKeyguardUpdateMonitor> updateMonitor = KeyguardUpdateMonitor::GetInstance(mContext);
+    IccCardConstantsState simState =
+    updateMonitor->GetSimState(&simState);
 
     Boolean res;
     if (simState == IccCardConstantsState_PIN_REQUIRED) {

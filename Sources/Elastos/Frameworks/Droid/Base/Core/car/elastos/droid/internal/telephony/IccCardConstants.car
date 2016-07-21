@@ -46,7 +46,7 @@ module
         /* PUK means ICC is locked on PUK1 */
         const String INTENT_VALUE_LOCKED_ON_PUK = "PUK";
         /* NETWORK means ICC is locked on NETWORK PERSONALIZATION */
-        const String INTENT_VALUE_LOCKED_NETWORK = "NETWORK";
+        const String INTENT_VALUE_LOCKED_PERSO = "PERSO";
         /* PERM_DISABLED means ICC is permanently disabled due to puk fails */
         const String INTENT_VALUE_ABSENT_ON_PERM_DISABLED = "PERM_DISABLED";
 

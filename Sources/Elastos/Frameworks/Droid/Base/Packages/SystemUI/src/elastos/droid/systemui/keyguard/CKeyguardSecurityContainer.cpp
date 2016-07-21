@@ -1,6 +1,7 @@
 
 #include "elastos/droid/systemui/keyguard/CKeyguardSecurityContainer.h"
 #include "elastos/droid/systemui/keyguard/KeyguardSecurityModel.h"
+#include "elastos/droid/systemui/keyguard/KeyguardUpdateMonitor.h"
 #include "../R.h"
 #include <Elastos.Droid.App.h>
 #include <Elastos.Droid.View.h>
@@ -76,8 +77,7 @@ ECode CKeyguardSecurityContainer::MyKeyguardSecurityCallback::IsVerifyUnlockOnly
 ECode CKeyguardSecurityContainer::MyKeyguardSecurityCallback::ReportUnlockAttempt(
     /* [in] */ Boolean success)
 {
-    AutoPtr<IKeyguardUpdateMonitor> monitor;
-    // = KeyguardUpdateMonitor::GetInstance(mHost->mContext);
+    AutoPtr<IKeyguardUpdateMonitor> monitor = KeyguardUpdateMonitor::GetInstance(mHost->mContext);
     if (success) {
         monitor->ClearFailedUnlockAttempts();
         mHost->mLockPatternUtils->ReportSuccessfulPasswordAttempt();
@@ -171,8 +171,7 @@ ECode CKeyguardSecurityContainer::constructor(
     FrameLayout::constructor(context, attrs, defStyleAttr);
     CLockPatternUtils::New(context, (ILockPatternUtils**)&mLockPatternUtils);
     mSecurityModel = new KeyguardSecurityModel(context);
-    Logger::I(TAG, " >> TODO KeyguardUpdateMonitor");
-    // mUpdateMonitor = KeyguardUpdateMonitor::GetInstance(mContext);
+    mUpdateMonitor = KeyguardUpdateMonitor::GetInstance(mContext);
     mUpdateMonitorCallbacks = new MyKeyguardUpdateMonitorCallback(this);
     mCallback = new MyKeyguardSecurityCallback(this);
     mNullCallback = new NullKeyguardSecurityCallback(this);
@@ -396,13 +395,12 @@ void CKeyguardSecurityContainer::ShowTimeoutDialog()
     }
 
     if (messageId != 0) {
-        AutoPtr<IKeyguardUpdateMonitor> moniter;
-        //KeyguardUpdateMonitor::GetInstance(mContext)
+        AutoPtr<IKeyguardUpdateMonitor> monitor = KeyguardUpdateMonitor::GetInstance(mContext);
         Int32 times;
-        moniter->GetFailedUnlockAttempts(&times);
-    AutoPtr<ArrayOf<IInterface*> > args = ArrayOf<IInterface*>::Alloc(2);
-    args->Set(0, CoreUtils::Convert(times));
-    args->Set(1, CoreUtils::Convert(timeoutInSeconds));
+        monitor->GetFailedUnlockAttempts(&times);
+        AutoPtr<ArrayOf<IInterface*> > args = ArrayOf<IInterface*>::Alloc(2);
+        args->Set(0, CoreUtils::Convert(times));
+        args->Set(1, CoreUtils::Convert(timeoutInSeconds));
         String message;
         mContext->GetString(messageId, args, &message);
         ShowDialog(String(NULL), message);
@@ -447,9 +445,7 @@ void CKeyguardSecurityContainer::ShowAlmostAtAccountLoginDialog()
 
 void CKeyguardSecurityContainer::ReportFailedUnlockAttempt()
 {
-    AutoPtr<IKeyguardUpdateMonitor> monitor;
-    // = KeyguardUpdateMonitor::GetInstance(mContext);
-
+    AutoPtr<IKeyguardUpdateMonitor> monitor = KeyguardUpdateMonitor::GetInstance(mContext);
     Int32 tmp;
     monitor->GetFailedUnlockAttempts(&tmp);
     Int32 failedAttempts = tmp + 1; // +1 for this time
@@ -520,8 +516,7 @@ ECode CKeyguardSecurityContainer::ShowPrimarySecurityScreen(
     SecurityMode securityMode;
     mSecurityModel->GetSecurityMode(&securityMode);
     if (DEBUG) Logger::V(TAG, "showPrimarySecurityScreen(turningOff=%d)", turningOff);
-    AutoPtr<IKeyguardUpdateMonitor> monitor;
-    // = KeyguardUpdateMonitor::GetInstance(mContext);
+    AutoPtr<IKeyguardUpdateMonitor> monitor = KeyguardUpdateMonitor::GetInstance(mContext);
     Boolean res;
     if (!turningOff && (monitor->IsAlternateUnlockEnabled(&res), res)) {
         // If we're not turning off, then allow biometric alternate.

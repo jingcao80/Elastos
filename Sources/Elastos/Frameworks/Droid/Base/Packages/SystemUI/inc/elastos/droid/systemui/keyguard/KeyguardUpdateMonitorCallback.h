@@ -53,7 +53,6 @@ public:
      * @param subId The subscription id which PLMN or SPN changed.
      */
     CARAPI OnRefreshCarrierInfo(
-        /* [in] */ Int64 subId,
         /* [in] */ ICharSequence* plmn,
         /* [in] */ ICharSequence* spn);
 
@@ -134,7 +133,6 @@ public:
      * @param subId The subscription id which SIM state changed.
      */
     CARAPI OnSimStateChanged(
-        /* [in] */ Int64 subId,
         /* [in] */ IccCardConstantsState simState);
 
     /**

@@ -1,11 +1,230 @@
 
 #include "elastos/droid/systemui/keyguard/KeyguardUpdateMonitor.h"
+#include "elastos/droid/systemui/keyguard/CKeyguardUpdateMonitorContentObserver.h"
+#include "elastos/droid/systemui/keyguard/CKeyguardUpdateMonitorBroadcastReceiver1.h"
+#include "elastos/droid/systemui/keyguard/CKeyguardUpdateMonitorBroadcastReceiver2.h"
+#include "elastos/droid/systemui/keyguard/CKeyguardUpdateMonitorUserSwitchObserver.h"
 #include "Elastos.Droid.View.h"
+#include "Elastos.Droid.App.h"
+#include "Elastos.Droid.Internal.h"
+#include "Elastos.Droid.Media.h"
+#include "Elastos.Droid.Provider.h"
+#include "Elastos.Droid.Telephony.h"
+#include <elastos/droid/os/UserHandle.h>
+#include <elastos/droid/provider/Settings.h>
+#include <elastos/droid/text/TextUtils.h>
+#include <elastos/droid/app/ActivityManagerNative.h>
+#include "../R.h"
+#include <elastos/droid/R.h>
+#include <elastos/core/AutoLock.h>
+#include <elastos/core/CoreUtils.h>
+#include <elastos/core/StringUtils.h>
+#include <elastos/core/StringBuilder.h>
+#include <elastos/utility/logging/Logger.h>
+
+using Elastos::Droid::App::IIUserSwitchObserver;
+using Elastos::Droid::App::ActivityManagerNative;
+using Elastos::Droid::App::IIActivityManager;
+using Elastos::Droid::App::IAlarmManager;
+using Elastos::Droid::App::EIID_IIUserSwitchObserver;;
+using Elastos::Droid::App::Trust::EIID_ITrustListener;
+using Elastos::Droid::App::Trust::ITrustManager;
+using Elastos::Droid::App::Admin::IDevicePolicyManager;
+using Elastos::Droid::Os::UserHandle;
+using Elastos::Droid::Os::IMessage;
+using Elastos::Droid::Os::CMessage;
+using Elastos::Droid::Os::EIID_IBinder;
+using Elastos::Droid::Os::IBatteryManager;
+using Elastos::Droid::Content::IIntent;
+using Elastos::Droid::Content::IIntentFilter;
+using Elastos::Droid::Content::CIntentFilter;
+using Elastos::Droid::Content::IContentResolver;
+using Elastos::Droid::Content::Pm::IUserInfo;
+using Elastos::Droid::Provider::Settings;
+using Elastos::Droid::Provider::ISettingsGlobal;
+using Elastos::Droid::Provider::ISettingsSystem;
+using Elastos::Droid::Media::IAudioManager;
+using Elastos::Droid::Service::Fingerprint::CFingerprintUtils;
+using Elastos::Droid::Service::Fingerprint::IFingerprintManager;
+using Elastos::Droid::Text::TextUtils;
+using Elastos::Droid::Utility::INativeTextHelper;
+using Elastos::Droid::Utility::CNativeTextHelper;
+using Elastos::Droid::Utility::CSparseBooleanArray;
+using Elastos::Droid::Telephony::ITelephonyManager;
+using Elastos::Droid::Telephony::ITelephonyManagerHelper;
+using Elastos::Droid::Telephony::CTelephonyManagerHelper;
+using Elastos::Droid::Telephony::ISubscriptionManager;
+using Elastos::Droid::Telephony::CSubscriptionManager;
+using Elastos::Droid::Internal::Telephony::IPhoneConstants;
+using Elastos::Droid::Internal::Telephony::IIccCardConstants;
+using Elastos::Droid::Internal::Telephony::IccCardConstantsState_UNKNOWN;
+using Elastos::Droid::Internal::Telephony::IccCardConstantsState_ABSENT;
+using Elastos::Droid::Internal::Telephony::IccCardConstantsState_PIN_REQUIRED;
+using Elastos::Droid::Internal::Telephony::IccCardConstantsState_PUK_REQUIRED;
+using Elastos::Droid::Internal::Telephony::IccCardConstantsState_PERSO_LOCKED;
+using Elastos::Droid::Internal::Telephony::IccCardConstantsState_READY;
+using Elastos::Droid::Internal::Telephony::IccCardConstantsState_NOT_READY;
+using Elastos::Droid::Internal::Telephony::IccCardConstantsState_PERM_DISABLED;
+using Elastos::Droid::Internal::Telephony::IccCardConstantsState_CARD_IO_ERROR;
+using Elastos::Droid::Internal::Telephony::ITelephonyIntents;
+using Elastos::Droid::Service::Fingerprint::IFingerprintUtils;
+using Elastos::Core::AutoLock;
+using Elastos::Core::StringUtils;
+using Elastos::Core::StringBuilder;
+using Elastos::Core::CoreUtils;
+using Elastos::Utility::CArrayList;
+using Elastos::Utility::Logging::Logger;
 
 namespace Elastos {
 namespace Droid {
 namespace SystemUI {
 namespace Keyguard {
+
+// Callback messages
+const Int32 KeyguardUpdateMonitor::MSG_TIME_UPDATE = 301;
+const Int32 KeyguardUpdateMonitor::MSG_BATTERY_UPDATE = 302;
+const Int32 KeyguardUpdateMonitor::MSG_CARRIER_INFO_UPDATE = 303;
+const Int32 KeyguardUpdateMonitor::MSG_SIM_STATE_CHANGE = 304;
+const Int32 KeyguardUpdateMonitor::MSG_RINGER_MODE_CHANGED = 305;
+const Int32 KeyguardUpdateMonitor::MSG_PHONE_STATE_CHANGED = 306;
+const Int32 KeyguardUpdateMonitor::MSG_CLOCK_VISIBILITY_CHANGED = 307;
+const Int32 KeyguardUpdateMonitor::MSG_DEVICE_PROVISIONED = 308;
+const Int32 KeyguardUpdateMonitor::MSG_DPM_STATE_CHANGED = 309;
+const Int32 KeyguardUpdateMonitor::MSG_USER_SWITCHING = 310;
+const Int32 KeyguardUpdateMonitor::MSG_USER_REMOVED = 311;
+const Int32 KeyguardUpdateMonitor::MSG_KEYGUARD_VISIBILITY_CHANGED = 312;
+const Int32 KeyguardUpdateMonitor::MSG_BOOT_COMPLETED = 313;
+const Int32 KeyguardUpdateMonitor::MSG_USER_SWITCH_COMPLETE = 314;
+const Int32 KeyguardUpdateMonitor::MSG_SET_CURRENT_CLIENT_ID = 315;
+const Int32 KeyguardUpdateMonitor::MSG_SET_PLAYBACK_STATE = 316;
+const Int32 KeyguardUpdateMonitor::MSG_USER_INFO_CHANGED = 317;
+const Int32 KeyguardUpdateMonitor::MSG_REPORT_EMERGENCY_CALL_ACTION = 318;
+const Int32 KeyguardUpdateMonitor::MSG_SCREEN_TURNED_ON = 319;
+const Int32 KeyguardUpdateMonitor::MSG_SCREEN_TURNED_OFF = 320;
+const Int32 KeyguardUpdateMonitor::MSG_KEYGUARD_BOUNCER_CHANGED = 322;
+const Int32 KeyguardUpdateMonitor::MSG_FINGERPRINT_PROCESSED = 323;
+const Int32 KeyguardUpdateMonitor::MSG_FINGERPRINT_ACQUIRED = 324;
+const Int32 KeyguardUpdateMonitor::MSG_FACE_UNLOCK_STATE_CHANGED = 325;
+
+
+//========================================================================
+// KeyguardUpdateMonitor::UserSwitchObserver
+//========================================================================
+
+CAR_INTERFACE_IMPL_2(KeyguardUpdateMonitor::UserSwitchObserver, Object, IIUserSwitchObserver, IBinder)
+
+ECode KeyguardUpdateMonitor::UserSwitchObserver::constructor(
+    /* [in] */ IKeyguardUpdateMonitor* monitor)
+{
+    mHost = (KeyguardUpdateMonitor*)monitor;
+    return NOERROR;
+}
+
+ECode KeyguardUpdateMonitor::UserSwitchObserver::OnUserSwitching(
+    /* [in] */ Int32 newUserId,
+    /* [in] */ IIRemoteCallback* reply)
+{
+    Boolean bval;
+    AutoPtr<IMessage> m;
+    mHost->mHandler->ObtainMessage(KeyguardUpdateMonitor::MSG_USER_SWITCHING, newUserId, 0, reply, (IMessage**)&m);
+    mHost->mHandler->SendMessage(m, &bval);
+    mHost->mSwitchingUser = TRUE;
+    return NOERROR;
+}
+
+ECode KeyguardUpdateMonitor::UserSwitchObserver::OnUserSwitchComplete(
+    /* [in] */ Int32 newUserId)
+{
+    Boolean bval;
+    AutoPtr<IMessage> m;
+    mHost->mHandler->ObtainMessage(KeyguardUpdateMonitor::MSG_USER_SWITCH_COMPLETE, newUserId, 0, (IMessage**)&m);
+    mHost->mHandler->SendMessage(m, &bval);
+    mHost->mSwitchingUser = FALSE;
+    return NOERROR;
+}
+
+ECode KeyguardUpdateMonitor::UserSwitchObserver::ToString(
+    /* [out] */ String* str)
+{
+    return Object::ToString(str);
+}
+
+//========================================================================
+// KeyguardUpdateMonitor::DisplayClientState
+//========================================================================
+CAR_INTERFACE_IMPL(KeyguardUpdateMonitor::DisplayClientState, Object, IKeyguardUpdateMonitorDisplayClientState)
+
+KeyguardUpdateMonitor::DisplayClientState::DisplayClientState()
+    : mClientGeneration(0)
+    , mClearing(FALSE)
+    , mPlaybackState(0)
+    , mPlaybackEventTime(0)
+{}
+
+//========================================================================
+// KeyguardUpdateMonitor::BatteryStatus
+//========================================================================
+CAR_INTERFACE_IMPL(KeyguardUpdateMonitor::BatteryStatus, Object, IKeyguardUpdateMonitorBatteryStatus)
+
+ECode KeyguardUpdateMonitor::BatteryStatus::SetStatus(
+    /* [in] */ Int32 value)
+{
+    mStatus = value;
+    return NOERROR;
+}
+
+ECode KeyguardUpdateMonitor::BatteryStatus::GetStatus(
+    /* [out] */ Int32* value)
+{
+    VALIDATE_NOT_NULL(value)
+    *value = mStatus;
+    return NOERROR;
+}
+
+ECode KeyguardUpdateMonitor::BatteryStatus::SetLevel(
+    /* [in] */ Int32 value)
+{
+    mLevel = value;
+    return NOERROR;
+}
+
+ECode KeyguardUpdateMonitor::BatteryStatus::GetLevel(
+    /* [out] */ Int32* value)
+{
+    VALIDATE_NOT_NULL(value)
+    *value = mLevel;
+    return NOERROR;
+}
+
+ECode KeyguardUpdateMonitor::BatteryStatus::SetPlugged(
+    /* [in] */ Int32 value)
+{
+    mPlugged = value;
+    return NOERROR;
+}
+
+ECode KeyguardUpdateMonitor::BatteryStatus::GetPlugged(
+    /* [out] */ Int32* value)
+{
+    VALIDATE_NOT_NULL(value)
+    *value = mPlugged;
+    return NOERROR;
+}
+
+ECode KeyguardUpdateMonitor::BatteryStatus::SetHealth(
+    /* [in] */ Int32 value)
+{
+    mHealth = value;
+    return NOERROR;
+}
+
+ECode KeyguardUpdateMonitor::BatteryStatus::GetHealth(
+    /* [out] */ Int32* value)
+{
+    VALIDATE_NOT_NULL(value)
+    *value = mHealth;
+    return NOERROR;
+}
 
 ECode KeyguardUpdateMonitor::BatteryStatus::IsPluggedIn(
     /* [out] */ Boolean* result)
@@ -18,12 +237,12 @@ ECode KeyguardUpdateMonitor::BatteryStatus::IsPluggedIn(
     return NOERROR;
 }
 
-ECode KeyguardUpdateMonitor::BatteryStatus::isCharged(
+ECode KeyguardUpdateMonitor::BatteryStatus::IsCharged(
     /* [out] */ Boolean* result)
 {
     VALIDATE_NOT_NULL(result)
 
-    *result = mStatus == BATTERY_STATUS_FULL || mLevel >= 100;
+    *result = mStatus == IBatteryManager::BATTERY_STATUS_FULL || mLevel >= 100;
     return NOERROR;
 }
 
@@ -36,17 +255,21 @@ ECode KeyguardUpdateMonitor::BatteryStatus::IsBatteryLow(
     return NOERROR;
 }
 
-KeyguardUpdateMonitor::MyBroadcastReceiver::MyBroadcastReceiver(
-    /* [in] */ KeyguardUpdateMonitor* host)
-    : mHost(host)
+//========================================================================
+// KeyguardUpdateMonitor::MyBroadcastReceiver
+//========================================================================
+ECode KeyguardUpdateMonitor::MyBroadcastReceiver::constructor(
+    /* [in] */ IKeyguardUpdateMonitor* host)
 {
-    BroadcastReceiver::constructor();
+    mHost = (KeyguardUpdateMonitor*)host;
+    return BroadcastReceiver::constructor();
 }
 
 ECode KeyguardUpdateMonitor::MyBroadcastReceiver::OnReceive(
     /* [in] */ IContext* context,
     /* [in] */ IIntent* intent)
 {
+    Boolean bval;
     String action;
     intent->GetAction(&action);
     if (DEBUG) Logger::D(TAG, "received broadcast %s", action.string());
@@ -54,56 +277,56 @@ ECode KeyguardUpdateMonitor::MyBroadcastReceiver::OnReceive(
     if (IIntent::ACTION_TIME_TICK.Equals(action)
             || IIntent::ACTION_TIME_CHANGED.Equals(action)
             || IIntent::ACTION_TIMEZONE_CHANGED.Equals(action)) {
-        mHost->mHandler->SendEmptyMessage(MSG_TIME_UPDATE);
+        mHost->mHandler->SendEmptyMessage(MSG_TIME_UPDATE, &bval);
     }
     else if (ITelephonyIntents::SPN_STRINGS_UPDATED_ACTION.Equals(action)) {
         mHost->mTelephonyPlmn = mHost->GetTelephonyPlmnFrom(intent);
         mHost->mTelephonySpn = mHost->GetTelephonySpnFrom(intent);
-        mHost->mHandler->SendEmptyMessage(MSG_CARRIER_INFO_UPDATE);
+        mHost->mHandler->SendEmptyMessage(MSG_CARRIER_INFO_UPDATE, &bval);
     }
-    else if (IIntent::ACTION_BATTERY_CHANGED.equals(action)) {
-        Int32 status;
-        intent->GetInt32Extra(EXTRA_STATUS, BATTERY_STATUS_UNKNOWN, &status);
-        Int32 plugged;
-        intent->GetInt32Extra(EXTRA_PLUGGED, 0, &plugged);
-        Int32 level;
-        intent->GetInt32Extra(EXTRA_LEVEL, 0, &level);
-        Int32 health;
-        intent->GetInt32Extra(EXTRA_HEALTH, BATTERY_HEALTH_UNKNOWN, &health);
-        AutoPtr<BatteryStatus> status = new BatteryStatus(status, level, plugged, health);
+    else if (IIntent::ACTION_BATTERY_CHANGED.Equals(action)) {
+        Int32 status, plugged, level, health;
+        intent->GetInt32Extra(IBatteryManager::EXTRA_STATUS, IBatteryManager::BATTERY_STATUS_UNKNOWN, &status);
+        intent->GetInt32Extra(IBatteryManager::EXTRA_PLUGGED, 0, &plugged);
+        intent->GetInt32Extra(IBatteryManager::EXTRA_LEVEL, 0, &level);
+        intent->GetInt32Extra(IBatteryManager::EXTRA_HEALTH, IBatteryManager::BATTERY_HEALTH_UNKNOWN, &health);
+        AutoPtr<BatteryStatus> bsStatus = new BatteryStatus(status, level, plugged, health);
         AutoPtr<IMessage> msg;
-        mHost->mHandler->ObtainMessage(MSG_BATTERY_UPDATE, status, (IMessage**)&msg);
-        mHost->mHandler->SendMessage(msg);
+        mHost->mHandler->ObtainMessage(MSG_BATTERY_UPDATE,
+            (IKeyguardUpdateMonitorBatteryStatus*)bsStatus.Get(), (IMessage**)&msg);
+        mHost->mHandler->SendMessage(msg, &bval);
     }
     else if (ITelephonyIntents::ACTION_SIM_STATE_CHANGED.Equals(action)) {
         // if (DEBUG_SIM_STATES) {
         //     Log.v(TAG, "action " + action + " state" +
         //         intent.getStringExtra(IccCardConstants.INTENT_KEY_ICC_STATE));
         // }
+        AutoPtr<SimArgs> args;
+        SimArgs::FromIntent(intent, (SimArgs**)&args);
         AutoPtr<IMessage> msg;
-        mHost->mHandler->ObtainMessage(MSG_SIM_STATE_CHANGE, SimArgs::FromIntent(intent), (IMessage**)&msg);
-        mHost->mHandler->SendMessage(msg);
+        mHost->mHandler->ObtainMessage(MSG_SIM_STATE_CHANGE, (IObject*)args.Get(), (IMessage**)&msg);
+        mHost->mHandler->SendMessage(msg, &bval);
     }
     else if (IAudioManager::RINGER_MODE_CHANGED_ACTION.Equals(action)) {
         Int32 extra;
         intent->GetInt32Extra(IAudioManager::EXTRA_RINGER_MODE, -1, &extra);
         AutoPtr<IMessage> msg;
         mHost->mHandler->ObtainMessage(MSG_RINGER_MODE_CHANGED, extra, 0, (IMessage**)&msg);
-        mHost->mHandler->SendMessage(msg);
+        mHost->mHandler->SendMessage(msg, &bval);
     }
     else if (ITelephonyManager::ACTION_PHONE_STATE_CHANGED.Equals(action)) {
         String state;
         intent->GetStringExtra(ITelephonyManager::EXTRA_STATE, &state);
         AutoPtr<IMessage> msg;
-        mHost->mHandler->ObtainMessage(MSG_PHONE_STATE_CHANGED, state, (IMessage**)&msg);
-        mHost->mHandler->SendMessage(msg);
+        mHost->mHandler->ObtainMessage(MSG_PHONE_STATE_CHANGED, CoreUtils::Convert(state), (IMessage**)&msg);
+        mHost->mHandler->SendMessage(msg, &bval);
     }
     else if (IIntent::ACTION_USER_REMOVED.Equals(action)) {
         Int32 extra;
         intent->GetInt32Extra(IIntent::EXTRA_USER_HANDLE, 0, &extra);
         AutoPtr<IMessage> msg;
         mHost->mHandler->ObtainMessage(MSG_USER_REMOVED, extra, 0, (IMessage**)&msg);
-        mHost->mHandler->SendMessage(msg);
+        mHost->mHandler->SendMessage(msg, &bval);
     }
     else if (IIntent::ACTION_BOOT_COMPLETED.Equals(action)) {
         mHost->DispatchBootCompleted();
@@ -111,21 +334,26 @@ ECode KeyguardUpdateMonitor::MyBroadcastReceiver::OnReceive(
     return NOERROR;
 }
 
-KeyguardUpdateMonitor::MyBroadcastReceiver2::MyBroadcastReceiver(
-    /* [in] */ KeyguardUpdateMonitor* host)
-    : mHost(host)
+//========================================================================
+// KeyguardUpdateMonitor::MyBroadcastReceiver2
+//========================================================================
+
+ECode KeyguardUpdateMonitor::MyBroadcastReceiver2::constructor(
+    /* [in] */ IKeyguardUpdateMonitor* host)
 {
-    BroadcastReceiver::constructor();
+    mHost = (KeyguardUpdateMonitor*)host;
+    return BroadcastReceiver::constructor();
 }
 
 ECode KeyguardUpdateMonitor::MyBroadcastReceiver2::OnReceive(
     /* [in] */ IContext* context,
     /* [in] */ IIntent* intent)
 {
+    Boolean bval;
     String action;
     intent->GetAction(&action);
     if (IAlarmManager::ACTION_NEXT_ALARM_CLOCK_CHANGED.Equals(action)) {
-        mHost->mHandler->SendEmptyMessage(MSG_TIME_UPDATE);
+        mHost->mHandler->SendEmptyMessage(MSG_TIME_UPDATE, &bval);
     }
     else if (IIntent::ACTION_USER_INFO_CHANGED.Equals(action)) {
         Int32 id;
@@ -134,48 +362,58 @@ ECode KeyguardUpdateMonitor::MyBroadcastReceiver2::OnReceive(
         intent->GetInt32Extra(IIntent::EXTRA_USER_HANDLE, id, &extra);
         AutoPtr<IMessage> massage;
         mHost->mHandler->ObtainMessage(MSG_USER_INFO_CHANGED, extra, 0, (IMessage**)&massage);
-        massage->SendMessage(massage);
+        mHost->mHandler->SendMessage(massage, &bval);
     }
     else if (ACTION_FACE_UNLOCK_STARTED.Equals(action)) {
         Int32 id;
         GetSendingUserId(&id);
         AutoPtr<IMessage> massage;
-        mHost->mHandler->ObtainMessage(MSG_FACE_UNLOCK_STATE_CHANGED, 1, id, (IMessage**)&massage);
-        mHost->mHandler->SendMessage(massage);
+        mHost->mHandler->ObtainMessage(KeyguardUpdateMonitor::MSG_FACE_UNLOCK_STATE_CHANGED,
+            1, id, (IMessage**)&massage);
+        mHost->mHandler->SendMessage(massage, &bval);
     }
     else if (ACTION_FACE_UNLOCK_STOPPED.Equals(action)) {
         Int32 id;
         GetSendingUserId(&id);
         AutoPtr<IMessage> massage;
-        mHost->mHandler->ObtainMessage(MSG_FACE_UNLOCK_STATE_CHANGED, 0, id, (IMessage**)&massage);
-        mHost->mHandler->SendMessage(massage);
+        mHost->mHandler->ObtainMessage(KeyguardUpdateMonitor::MSG_FACE_UNLOCK_STATE_CHANGED,
+            0, id, (IMessage**)&massage);
+        mHost->mHandler->SendMessage(massage, &bval);
     }
     else if (IDevicePolicyManager::ACTION_DEVICE_POLICY_MANAGER_STATE_CHANGED
             .Equals(action)) {
-        mHost->mHandler->SendEmptyMessage(MSG_DPM_STATE_CHANGED);
+        mHost->mHandler->SendEmptyMessage(MSG_DPM_STATE_CHANGED, &bval);
     }
     return NOERROR;
 }
 
-KeyguardUpdateMonitor::MyContentObserver::MyContentObserver(
-    /* [in] */ KeyguardUpdateMonitor* host)
-    : mHost(host)
+//========================================================================
+// KeyguardUpdateMonitor::MyContentObserver
+//========================================================================
+
+ECode KeyguardUpdateMonitor::MyContentObserver::constructor(
+    /* [in] */ IKeyguardUpdateMonitor* host)
 {
-    ContentObserver::constructor();
+    mHost = (KeyguardUpdateMonitor*)host;
+    return ContentObserver::constructor();
 }
 
 ECode KeyguardUpdateMonitor::MyContentObserver::OnChange(
     /* [in] */ Boolean selfChange)
 {
     ContentObserver::OnChange(selfChange);
-    mHost->mDeviceProvisioned = IsDeviceProvisionedInSettingsDb();
-    if (mDeviceProvisioned) {
-        mHost->mHandler->SendEmptyMessage(MSG_DEVICE_PROVISIONED);
+    mHost->mDeviceProvisioned = mHost->IsDeviceProvisionedInSettingsDb();
+    if (mHost->mDeviceProvisioned) {
+        Boolean bval;
+        mHost->mHandler->SendEmptyMessage(MSG_DEVICE_PROVISIONED, &bval);
     }
     if (DEBUG) Logger::D(TAG, "DEVICE_PROVISIONED state = %d", mHost->mDeviceProvisioned);
     return NOERROR;
 }
 
+//========================================================================
+// KeyguardUpdateMonitor::MyHandler
+//========================================================================
 KeyguardUpdateMonitor::MyHandler::MyHandler(
     /* [in] */ KeyguardUpdateMonitor* host)
     : mHost(host)
@@ -189,34 +427,34 @@ ECode KeyguardUpdateMonitor::MyHandler::HandleMessage(
     Int32 what;
     msg->GetWhat(&what);
     switch (what) {
-        case MSG_TIME_UPDATE:
+        case KeyguardUpdateMonitor::MSG_TIME_UPDATE:
             mHost->HandleTimeUpdate();
             break;
-        case MSG_BATTERY_UPDATE:
+        case KeyguardUpdateMonitor::MSG_BATTERY_UPDATE:
         {
             AutoPtr<IInterface> obj;
             msg->GetObj((IInterface**)&obj);
-            mHost->HandleBatteryUpdate(IBatteryStatus::Probe(obj));
+            mHost->HandleBatteryUpdate(IKeyguardUpdateMonitorBatteryStatus::Probe(obj));
             break;
         }
-        case MSG_CARRIER_INFO_UPDATE:
+        case KeyguardUpdateMonitor::MSG_CARRIER_INFO_UPDATE:
             mHost->HandleCarrierInfoUpdate();
             break;
-        case MSG_SIM_STATE_CHANGE:
+        case KeyguardUpdateMonitor::MSG_SIM_STATE_CHANGE:
         {
             AutoPtr<IInterface> obj;
             msg->GetObj((IInterface**)&obj);
             mHost->HandleSimStateChange((SimArgs*)IObject::Probe(obj));
             break;
         }
-        case MSG_RINGER_MODE_CHANGED:
+        case KeyguardUpdateMonitor::MSG_RINGER_MODE_CHANGED:
         {
             Int32 arg1;
             msg->GetArg1(&arg1);
             mHost->HandleRingerModeChange(arg1);
             break;
         }
-        case MSG_PHONE_STATE_CHANGED:
+        case KeyguardUpdateMonitor::MSG_PHONE_STATE_CHANGED:
         {
             AutoPtr<IInterface> obj;
             msg->GetObj((IInterface**)&obj);
@@ -226,16 +464,16 @@ ECode KeyguardUpdateMonitor::MyHandler::HandleMessage(
             mHost->HandlePhoneStateChanged(str);
             break;
         }
-        case MSG_CLOCK_VISIBILITY_CHANGED:
+        case KeyguardUpdateMonitor::MSG_CLOCK_VISIBILITY_CHANGED:
             mHost->HandleClockVisibilityChanged();
             break;
-        case MSG_DEVICE_PROVISIONED:
+        case KeyguardUpdateMonitor::MSG_DEVICE_PROVISIONED:
             mHost->HandleDeviceProvisioned();
             break;
-        case MSG_DPM_STATE_CHANGED:
+        case KeyguardUpdateMonitor::MSG_DPM_STATE_CHANGED:
             mHost->HandleDevicePolicyManagerStateChanged();
             break;
-        case MSG_USER_SWITCHING:
+        case KeyguardUpdateMonitor::MSG_USER_SWITCHING:
         {
             Int32 arg1;
             msg->GetArg1(&arg1);
@@ -244,72 +482,72 @@ ECode KeyguardUpdateMonitor::MyHandler::HandleMessage(
             mHost->HandleUserSwitching(arg1, IIRemoteCallback::Probe(obj));
             break;
         }
-        case MSG_USER_SWITCH_COMPLETE:
+        case KeyguardUpdateMonitor::MSG_USER_SWITCH_COMPLETE:
         {
             Int32 arg1;
             msg->GetArg1(&arg1);
             mHost->HandleUserSwitchComplete(arg1);
             break;
         }
-        case MSG_USER_REMOVED:
+        case KeyguardUpdateMonitor::MSG_USER_REMOVED:
         {
             Int32 arg1;
             msg->GetArg1(&arg1);
             mHost->HandleUserRemoved(arg1);
             break;
         }
-        case MSG_KEYGUARD_VISIBILITY_CHANGED:
+        case KeyguardUpdateMonitor::MSG_KEYGUARD_VISIBILITY_CHANGED:
         {
             Int32 arg1;
             msg->GetArg1(&arg1);
             mHost->HandleKeyguardVisibilityChanged(arg1);
             break;
         }
-        case MSG_KEYGUARD_BOUNCER_CHANGED:
+        case KeyguardUpdateMonitor::MSG_KEYGUARD_BOUNCER_CHANGED:
         {
             Int32 arg1;
             msg->GetArg1(&arg1);
             mHost->HandleKeyguardBouncerChanged(arg1);
             break;
         }
-        case MSG_BOOT_COMPLETED:
+        case KeyguardUpdateMonitor::MSG_BOOT_COMPLETED:
             mHost->HandleBootCompleted();
             break;
-        case MSG_USER_INFO_CHANGED:
+        case KeyguardUpdateMonitor::MSG_USER_INFO_CHANGED:
         {
             Int32 arg1;
             msg->GetArg1(&arg1);
             mHost->HandleUserInfoChanged(arg1);
             break;
         }
-        case MSG_REPORT_EMERGENCY_CALL_ACTION:
+        case KeyguardUpdateMonitor::MSG_REPORT_EMERGENCY_CALL_ACTION:
             mHost->HandleReportEmergencyCallAction();
             break;
-        case MSG_SCREEN_TURNED_OFF:
+        case KeyguardUpdateMonitor::MSG_SCREEN_TURNED_OFF:
         {
             Int32 arg1;
             msg->GetArg1(&arg1);
             mHost->HandleScreenTurnedOff(arg1);
             break;
         }
-        case MSG_SCREEN_TURNED_ON:
+        case KeyguardUpdateMonitor::MSG_SCREEN_TURNED_ON:
             mHost->HandleScreenTurnedOn();
             break;
-        case MSG_FINGERPRINT_ACQUIRED:
+        case KeyguardUpdateMonitor::MSG_FINGERPRINT_ACQUIRED:
         {
             Int32 arg1;
             msg->GetArg1(&arg1);
             mHost->HandleFingerprintAcquired(arg1);
             break;
         }
-        case MSG_FINGERPRINT_PROCESSED:
+        case KeyguardUpdateMonitor::MSG_FINGERPRINT_PROCESSED:
         {
             Int32 arg1;
             msg->GetArg1(&arg1);
             mHost->HandleFingerprintProcessed(arg1);
             break;
         }
-        case MSG_FACE_UNLOCK_STATE_CHANGED:
+        case KeyguardUpdateMonitor::MSG_FACE_UNLOCK_STATE_CHANGED:
         {
             Int32 arg1;
             msg->GetArg1(&arg1);
@@ -322,18 +560,27 @@ ECode KeyguardUpdateMonitor::MyHandler::HandleMessage(
     return NOERROR;
 }
 
+//========================================================================
+// KeyguardUpdateMonitor::SimArgs
+//========================================================================
+KeyguardUpdateMonitor::SimArgs::SimArgs(
+    /* [in] */ IccCardConstantsState state)
+    : mSimState(state)
+{}
+
 ECode KeyguardUpdateMonitor::SimArgs::FromIntent(
     /* [in] */ IIntent* intent,
     /* [out] */ SimArgs** args)
 {
     VALIDATE_NOT_NULL(args)
+    *args = NULL;
 
     IccCardConstantsState state;
-    Int32 action;
+    String action;
     intent->GetAction(&action);
     if (!ITelephonyIntents::ACTION_SIM_STATE_CHANGED.Equals(action)) {
-        //throw new IllegalArgumentException("only handles intent ACTION_SIM_STATE_CHANGED");
-        return IllegalArgumentException;
+        Logger::E(TAG, "only handles intent ACTION_SIM_STATE_CHANGED");
+        return E_ILLEGAL_ARGUMENT_EXCEPTION;
     }
     String stateExtra;
     intent->GetStringExtra(IIccCardConstants::INTENT_KEY_ICC_STATE, &stateExtra);
@@ -341,8 +588,7 @@ ECode KeyguardUpdateMonitor::SimArgs::FromIntent(
         String absentReason;
         intent->GetStringExtra(IIccCardConstants::INTENT_KEY_LOCKED_REASON, &absentReason);
 
-        if (IIccCardConstants::INTENT_VALUE_ABSENT_ON_PERM_DISABLED.Equals(
-                absentReason)) {
+        if (IIccCardConstants::INTENT_VALUE_ABSENT_ON_PERM_DISABLED.Equals(absentReason)) {
             state = IccCardConstantsState_PERM_DISABLED;
         }
         else {
@@ -365,11 +611,11 @@ ECode KeyguardUpdateMonitor::SimArgs::FromIntent(
             state = IccCardConstantsState_UNKNOWN;
         }
     }
-    else if (IIccCardConstants::INTENT_VALUE_LOCKED_NETWORK.Equals(stateExtra)) {
-        state = IccCardConstantsState_NETWORK_LOCKED;
+    else if (IIccCardConstants::INTENT_VALUE_LOCKED_PERSO.Equals(stateExtra)) {
+        state = IccCardConstantsState_PERSO_LOCKED;
     }
     else if (IIccCardConstants::INTENT_VALUE_ICC_LOADED.Equals(stateExtra)
-                || IccCardConstants.INTENT_VALUE_ICC_IMSI.Equals(stateExtra)) {
+                || IIccCardConstants::INTENT_VALUE_ICC_IMSI.Equals(stateExtra)) {
         // This is required because telephony doesn't return to "READY" after
         // these state transitions. See bug 7197471.
         state = IccCardConstantsState_READY;
@@ -377,22 +623,50 @@ ECode KeyguardUpdateMonitor::SimArgs::FromIntent(
     else {
         state = IccCardConstantsState_UNKNOWN;
     }
-    AutoPtr<SimArgs> _args new SimArgs(state);
-    *args = _args;
+    AutoPtr<SimArgs> result  = new SimArgs(state);
+    *args = result;
     REFCOUNT_ADD(*args);
     return NOERROR;
+}
+
+static const String StateToString(
+    /* [in] */ IccCardConstantsState state)
+{
+    switch (state) {
+        case IccCardConstantsState_ABSENT:
+            return String("ABSENT");
+        case IccCardConstantsState_PIN_REQUIRED:
+            return String("PIN_REQUIRED");
+        case IccCardConstantsState_PUK_REQUIRED:
+            return String("PUK_REQUIRED");
+        case IccCardConstantsState_PERSO_LOCKED:
+            return String("PERSO_LOCKED");
+        case IccCardConstantsState_READY:
+            return String("READY");
+        case IccCardConstantsState_NOT_READY:
+            return String("NOT_READY");
+        case IccCardConstantsState_PERM_DISABLED:
+            return String("PERM_DISABLED");
+        case IccCardConstantsState_CARD_IO_ERROR:
+            return String("CARD_IO_ERROR");
+        case IccCardConstantsState_UNKNOWN:
+        default:
+            return String("UNKNOWN");
+    }
+    return String("UNKNOWN");
 }
 
 ECode KeyguardUpdateMonitor::SimArgs::ToString(
     /* [out] */ String* str)
 {
     VALIDATE_NOT_NULL(str)
-
-    assert(0);
-    //return mSimState.toString();
+    *str = StateToString(mSimState);
     return NOERROR;
 }
 
+//========================================================================
+// KeyguardUpdateMonitor::MyFingerprintManagerReceiver
+//========================================================================
 KeyguardUpdateMonitor::MyFingerprintManagerReceiver::MyFingerprintManagerReceiver(
     /* [in] */ KeyguardUpdateMonitor* host)
     : mHost(host)
@@ -423,8 +697,64 @@ ECode KeyguardUpdateMonitor::MyFingerprintManagerReceiver::OnError(
     return NOERROR;
 }
 
+//========================================================================
+// KeyguardUpdateMonitor::TrustListener
+//========================================================================
+CAR_INTERFACE_IMPL(KeyguardUpdateMonitor::TrustListener, Object, ITrustListener)
+
+ECode KeyguardUpdateMonitor::TrustListener::OnTrustChanged(
+    /* [in] */ Boolean enabled,
+    /* [in] */ Int32 userId,
+    /* [in] */ Boolean initiatedByUser)
+{
+    mHost->mUserHasTrust->Put(userId, enabled);
+
+    Int32 size;
+    mHost->mCallbacks->GetSize(&size);
+    for (Int32 i = 0; i < size; i++) {
+        AutoPtr<IInterface> obj;
+        mHost->mCallbacks->Get(i, (IInterface**)&obj);
+        AutoPtr<IWeakReference> w = IWeakReference::Probe(obj);
+        AutoPtr<IInterface> callbackObj;
+        w->Resolve(EIID_IInterface, (IInterface**)&callbackObj);
+        AutoPtr<IKeyguardUpdateMonitorCallback> cb = IKeyguardUpdateMonitorCallback::Probe(callbackObj);
+        if (cb != NULL) {
+            cb->OnTrustChanged(userId);
+            if (enabled && initiatedByUser) {
+                cb->OnTrustInitiatedByUser(userId);
+            }
+        }
+    }
+    return NOERROR;
+}
+
+ECode KeyguardUpdateMonitor::TrustListener::OnTrustManagedChanged(
+    /* [in] */ Boolean managed,
+    /* [in] */ Int32 userId)
+{
+    mHost->mUserTrustIsManaged->Put(userId, managed);
+
+    Int32 size;
+    mHost->mCallbacks->GetSize(&size);
+    for (Int32 i = 0; i < size; i++) {
+        AutoPtr<IInterface> obj;
+        mHost->mCallbacks->Get(i, (IInterface**)&obj);
+        AutoPtr<IWeakReference> w = IWeakReference::Probe(obj);
+        AutoPtr<IInterface> callbackObj;
+        w->Resolve(EIID_IInterface, (IInterface**)&callbackObj);
+        AutoPtr<IKeyguardUpdateMonitorCallback> cb = IKeyguardUpdateMonitorCallback::Probe(callbackObj);
+        if (cb != NULL) {
+            cb->OnTrustManagedChanged(userId);
+        }
+    }
+    return NOERROR;
+}
+
+//========================================================================
+// KeyguardUpdateMonitor::KeyguardUpdateMonitor
+//========================================================================
 const String KeyguardUpdateMonitor::TAG("KeyguardUpdateMonitor");
-const Boolean KeyguardUpdateMonitor::DEBUG = IKeyguardConstants::DEBUG;
+const Boolean KeyguardUpdateMonitor::DEBUG = TRUE;
 const Boolean KeyguardUpdateMonitor::DEBUG_SIM_STATES = DEBUG || FALSE;
 const Int32 KeyguardUpdateMonitor::FAILED_BIOMETRIC_UNLOCK_ATTEMPTS_BEFORE_BACKUP = 3;
 const Int32 KeyguardUpdateMonitor::LOW_BATTERY_THRESHOLD = 20;
@@ -432,33 +762,9 @@ const Int32 KeyguardUpdateMonitor::LOW_BATTERY_THRESHOLD = 20;
 const String KeyguardUpdateMonitor::ACTION_FACE_UNLOCK_STARTED("com.android.facelock.FACE_UNLOCK_STARTED");
 const String KeyguardUpdateMonitor::ACTION_FACE_UNLOCK_STOPPED("com.android.facelock.FACE_UNLOCK_STOPPED");
 
-// Callback messages
-const Int32 KeyguardUpdateMonitor::MSG_TIME_UPDATE = 301;
-const Int32 KeyguardUpdateMonitor::MSG_BATTERY_UPDATE = 302;
-const Int32 KeyguardUpdateMonitor::MSG_CARRIER_INFO_UPDATE = 303;
-const Int32 KeyguardUpdateMonitor::MSG_SIM_STATE_CHANGE = 304;
-const Int32 KeyguardUpdateMonitor::MSG_RINGER_MODE_CHANGED = 305;
-const Int32 KeyguardUpdateMonitor::MSG_PHONE_STATE_CHANGED = 306;
-const Int32 KeyguardUpdateMonitor::MSG_CLOCK_VISIBILITY_CHANGED = 307;
-const Int32 KeyguardUpdateMonitor::MSG_DEVICE_PROVISIONED = 308;
-const Int32 KeyguardUpdateMonitor::MSG_DPM_STATE_CHANGED = 309;
-const Int32 KeyguardUpdateMonitor::MSG_USER_SWITCHING = 310;
-const Int32 KeyguardUpdateMonitor::MSG_USER_REMOVED = 311;
-const Int32 KeyguardUpdateMonitor::MSG_KEYGUARD_VISIBILITY_CHANGED = 312;
-const Int32 KeyguardUpdateMonitor::MSG_BOOT_COMPLETED = 313;
-const Int32 KeyguardUpdateMonitor::MSG_USER_SWITCH_COMPLETE = 314;
-const Int32 KeyguardUpdateMonitor::MSG_SET_CURRENT_CLIENT_ID = 315;
-const Int32 KeyguardUpdateMonitor::MSG_SET_PLAYBACK_STATE = 316;
-const Int32 KeyguardUpdateMonitor::MSG_USER_INFO_CHANGED = 317;
-const Int32 KeyguardUpdateMonitor::MSG_REPORT_EMERGENCY_CALL_ACTION = 318;
-const Int32 KeyguardUpdateMonitor::MSG_SCREEN_TURNED_ON = 319;
-const Int32 KeyguardUpdateMonitor::MSG_SCREEN_TURNED_OFF = 320;
-const Int32 KeyguardUpdateMonitor::MSG_KEYGUARD_BOUNCER_CHANGED = 322;
-const Int32 KeyguardUpdateMonitor::MSG_FINGERPRINT_PROCESSED = 323;
-const Int32 KeyguardUpdateMonitor::MSG_FINGERPRINT_ACQUIRED = 324;
-const Int32 KeyguardUpdateMonitor::MSG_FACE_UNLOCK_STATE_CHANGED = 325;
+const Int64 KeyguardUpdateMonitor::INVALID_SUBID = ISubscriptionManager::INVALID_SUB_ID;
 
-AutoPtr<KeyguardUpdateMonitor> KeyguardUpdateMonitor::sInstance;
+AutoPtr<IKeyguardUpdateMonitor> KeyguardUpdateMonitor::sInstance;
 
 CAR_INTERFACE_IMPL(KeyguardUpdateMonitor, Object, ITrustListener)
 
@@ -477,68 +783,6 @@ KeyguardUpdateMonitor::KeyguardUpdateMonitor()
     , mSwitchingUser(FALSE)
     , mScreenOn(FALSE)
 {
-    CArrayList::New((IList**)&mCallbacks);
-
-    mHandler = new MyHandler(this);
-
-    CSparseBooleanArray::New((ISparseBooleanArray**)&mUserHasTrust);
-    CSparseBooleanArray::New((ISparseBooleanArray**)&mUserTrustIsManaged);
-    CSparseBooleanArray::New((ISparseBooleanArray**)&mUserFingerprintRecognized);
-    CSparseBooleanArray::New((ISparseBooleanArray**)&mUserFaceUnlockRunning);
-
-    mDisplayClientState = new DisplayClientState();
-
-    CKeyguardUpdateMonitorBroadcastReceiver1::New((IBroadcastReceiver**)&mBroadcastReceiver);
-
-    CKeyguardUpdateMonitorBroadcastReceiver2::New((IBroadcastReceiver**)&mBroadcastAllReceiver);
-}
-
-ECode KeyguardUpdateMonitor::OnTrustChanged(
-    /* [in] */ Boolean enabled,
-    /* [in] */ Int32 userId,
-    /* [in] */ Boolean initiatedByUser)
-{
-    mUserHasTrust->Put(userId, enabled);
-
-    Int32 size;
-    mCallbacks->GetSize(&size);
-    for (Int32 i = 0; i < size; i++) {
-        AutoPtr<IInterface> obj;
-        mCallbacks->Get(i, (IInterface**)&obj);
-        AutoPtr<IWeakReference> w = IWeakReference::Probe(obj);
-        AutoPtr<IInterface> callbackObj;
-        w->Resolve(EIID_IInterface, (IInterface**)&callbackObj);
-        AutoPtr<IKeyguardUpdateMonitorCallback> cb = IKeyguardUpdateMonitorCallback::Probe(callbackObj);
-        if (cb != NULL) {
-            cb->OnTrustChanged(userId);
-            if (enabled && initiatedByUser) {
-                cb->OnTrustInitiatedByUser(userId);
-            }
-        }
-    }
-    return NOERROR;
-}
-
-ECode KeyguardUpdateMonitor::OnTrustManagedChanged(
-    /* [in] */ Boolean managed,
-    /* [in] */ Int32 userId)
-{
-    mUserTrustIsManaged->Put(userId, managed);
-
-    Int32 size;
-    mCallbacks->GetSize(&size);
-    for (Int32 i = 0; i < size; i++) {
-        AutoPtr<IInterface> obj;
-        mCallbacks->Get(i, (IInterface**)&obj);
-        AutoPtr<IWeakReference> w = IWeakReference::Probe(obj);
-        AutoPtr<IInterface> callbackObj;
-        w->Resolve(EIID_IInterface, (IInterface**)&callbackObj);
-        AutoPtr<IKeyguardUpdateMonitorCallback> cb = IKeyguardUpdateMonitorCallback::Probe(callbackObj);
-        if (cb != NULL) {
-            cb->OnTrustManagedChanged(userId);
-        }
-    }
-    return NOERROR;
 }
 
 void KeyguardUpdateMonitor::OnFingerprintRecognized(
@@ -562,7 +806,7 @@ void KeyguardUpdateMonitor::OnFingerprintRecognized(
 }
 
 void KeyguardUpdateMonitor::HandleFingerprintProcessed(
-    /* [in] */ Int32 fingerprintId);
+    /* [in] */ Int32 fingerprintId)
 {
     if (fingerprintId == 0) return; // not a valid fingerprint
 
@@ -575,7 +819,7 @@ void KeyguardUpdateMonitor::HandleFingerprintProcessed(
     FAIL_GOTO(ec = user->GetId(&userId), ERROR)
     //} catch (RemoteException e) {
 ERROR:
-    if (ec == (ECode)RemoteException) {
+    if (ec == (ECode)E_REMOTE_EXCEPTION) {
         Logger::E(TAG, "Failed to get current user id: %d", ec);
         return;
     }
@@ -658,7 +902,8 @@ Boolean KeyguardUpdateMonitor::IsTrustDisabled(
             // Don't allow trust agent if device is secured with a SIM PIN. This is here
             // mainly because there's no other way to prompt the user to enter their SIM PIN
             // once they get past the keyguard screen.
-            Boolean disabledBySimPin = IsSimPinSecure();
+            Boolean disabledBySimPin;
+            IsSimPinSecure(&disabledBySimPin);
 
             Int32 which;
             dpm->GetKeyguardDisabledFeatures(NULL, userId, &which);
@@ -687,8 +932,9 @@ ECode KeyguardUpdateMonitor::GetUserHasTrust(
 {
     VALIDATE_NOT_NULL(result)
 
-    *result = !IsTrustDisabled(userId) && mUserHasTrust->Get(userId)
-                || mUserFingerprintRecognized->Get(userId);
+    Boolean bval, bval2;
+    *result = (!IsTrustDisabled(userId) && (mUserHasTrust->Get(userId, &bval), bval))
+        || (mUserFingerprintRecognized->Get(userId, &bval2), bval2);
     return NOERROR;
 }
 
@@ -698,15 +944,19 @@ ECode KeyguardUpdateMonitor::GetUserTrustIsManaged(
 {
     VALIDATE_NOT_NULL(result)
 
-    *result = mUserTrustIsManaged->Get(userId) && !IsTrustDisabled(userId);
+    Boolean bval;
+    mUserTrustIsManaged->Get(userId, &bval);
+    *result = bval && !IsTrustDisabled(userId);
     return NOERROR;
 }
 
-AutoPtr<KeyguardUpdateMonitor> KeyguardUpdateMonitor::GetInstance(
+AutoPtr<IKeyguardUpdateMonitor> KeyguardUpdateMonitor::GetInstance(
     /* [in] */ IContext* context)
 {
     if (sInstance == NULL) {
-        sInstance = new KeyguardUpdateMonitor(context);
+        AutoPtr<KeyguardUpdateMonitor> monitor = new KeyguardUpdateMonitor();
+        monitor->constructor(context);
+        sInstance = (IKeyguardUpdateMonitor*)monitor.Get();
     }
     return sInstance;
 }
@@ -714,7 +964,7 @@ AutoPtr<KeyguardUpdateMonitor> KeyguardUpdateMonitor::GetInstance(
 ECode KeyguardUpdateMonitor::HandleScreenTurnedOn()
 {
     Int32 count;
-    mCallbacks->GetSize(&size);
+    mCallbacks->GetSize(&count);
     for (Int32 i = 0; i < count; i++) {
         AutoPtr<IInterface> obj;
         mCallbacks->Get(i, (IInterface**)&obj);
@@ -769,11 +1019,42 @@ ECode KeyguardUpdateMonitor::DispatchSetBackground(
     return NOERROR;
 }
 
+void KeyguardUpdateMonitor::HandleUserInfoChanged(
+    /* [in] */ Int32 userId)
+{
+    Int32 count;
+    mCallbacks->GetSize(&count);
+    for (Int32 i = 0; i < count; i++) {
+        AutoPtr<IInterface> obj;
+        mCallbacks->Get(i, (IInterface**)&obj);
+        AutoPtr<IWeakReference> w = IWeakReference::Probe(obj);
+        AutoPtr<IInterface> callbackObj;
+        w->Resolve(EIID_IInterface, (IInterface**)&callbackObj);
+        AutoPtr<IKeyguardUpdateMonitorCallback> cb = IKeyguardUpdateMonitorCallback::Probe(callbackObj);
+        if (cb != NULL) {
+            cb->OnUserInfoChanged(userId);
+        }
+    }
+}
+
 ECode KeyguardUpdateMonitor::constructor(
     /* [in] */ IContext* context)
 {
     mContext = context;
-    IsDeviceProvisionedInSettingsDb(&mDeviceProvisioned);
+
+    mHandler = new MyHandler(this);
+    mDisplayClientState = new DisplayClientState();
+
+    CArrayList::New((IList**)&mCallbacks);
+    CSparseBooleanArray::New((ISparseBooleanArray**)&mUserHasTrust);
+    CSparseBooleanArray::New((ISparseBooleanArray**)&mUserTrustIsManaged);
+    CSparseBooleanArray::New((ISparseBooleanArray**)&mUserFingerprintRecognized);
+    CSparseBooleanArray::New((ISparseBooleanArray**)&mUserFaceUnlockRunning);
+
+    CKeyguardUpdateMonitorBroadcastReceiver1::New(this, (IBroadcastReceiver**)&mBroadcastReceiver);
+    CKeyguardUpdateMonitorBroadcastReceiver2::New(this, (IBroadcastReceiver**)&mBroadcastAllReceiver);
+
+    mDeviceProvisioned = IsDeviceProvisionedInSettingsDb();
     // Since device can't be un-provisioned, we only need to register a content observer
     // to update mDeviceProvisioned when we are...
     if (!mDeviceProvisioned) {
@@ -782,9 +1063,12 @@ ECode KeyguardUpdateMonitor::constructor(
 
     // Take a guess at initial SIM state, battery status and PLMN until we get an update
     mSimState = IccCardConstantsState_NOT_READY;
-    mBatteryStatus = new BatteryStatus(BATTERY_STATUS_UNKNOWN, 100, 0, 0);
     mTelephonyPlmn = GetDefaultPlmn();
 
+    // Take a guess at initial SIM state, battery status and PLMN until we get an update
+    mBatteryStatus = new BatteryStatus(IBatteryManager::BATTERY_STATUS_UNKNOWN, 100, 0, 0);
+
+    AutoPtr<IIntent> stickyIntent;
     // Watch for interesting updates
     AutoPtr<IIntentFilter> filter;
     CIntentFilter::New((IIntentFilter**)&filter);
@@ -797,13 +1081,14 @@ ECode KeyguardUpdateMonitor::constructor(
     filter->AddAction(ITelephonyIntents::SPN_STRINGS_UPDATED_ACTION);
     filter->AddAction(IAudioManager::RINGER_MODE_CHANGED_ACTION);
     filter->AddAction(IIntent::ACTION_USER_REMOVED);
-    context->RegisterReceiver(mBroadcastReceiver, filter);
+    context->RegisterReceiver(mBroadcastReceiver, filter, (IIntent**)&stickyIntent);
 
     AutoPtr<IIntentFilter> bootCompleteFilter;
     CIntentFilter::New((IIntentFilter**)&bootCompleteFilter);
     bootCompleteFilter->SetPriority(IIntentFilter::SYSTEM_HIGH_PRIORITY);
     bootCompleteFilter->AddAction(IIntent::ACTION_BOOT_COMPLETED);
-    context->RegisterReceiver(mBroadcastReceiver, bootCompleteFilter);
+    stickyIntent = NULL;
+    context->RegisterReceiver(mBroadcastReceiver, bootCompleteFilter, (IIntent**)&stickyIntent);
 
     AutoPtr<IIntentFilter> allUserFilter;
     CIntentFilter::New((IIntentFilter**)&allUserFilter);
@@ -812,12 +1097,9 @@ ECode KeyguardUpdateMonitor::constructor(
     allUserFilter->AddAction(ACTION_FACE_UNLOCK_STARTED);
     allUserFilter->AddAction(ACTION_FACE_UNLOCK_STOPPED);
     allUserFilter->AddAction(IDevicePolicyManager::ACTION_DEVICE_POLICY_MANAGER_STATE_CHANGED);
-    AutoPtr<IUserHandleHelper> helper;
-    CUserHandleHelper::AcquireSingleton((IUserHandleHelper**)&helper);
-    AutoPtr<IUserHandle> all;
-    helper->GetALL((IUserHandle**)&all);
-    context->RegisterReceiverAsUser(mBroadcastAllReceiver, all, allUserFilter,
-            NULL, NULL);
+    stickyIntent = NULL;
+    context->RegisterReceiverAsUser(mBroadcastAllReceiver, UserHandle::ALL, allUserFilter,
+            String(NULL), NULL, (IIntent**)&stickyIntent);
 
     //try {
     AutoPtr<IIUserSwitchObserver> observer;
@@ -829,15 +1111,16 @@ ECode KeyguardUpdateMonitor::constructor(
     //     e.printStackTrace();
     // }
 
+    AutoPtr<ITrustListener> listener = new TrustListener(this);
     AutoPtr<IInterface> obj;
     context->GetSystemService(IContext::TRUST_SERVICE, (IInterface**)&obj);
     AutoPtr<ITrustManager> trustManager = ITrustManager::Probe(obj);
-    trustManager->RegisterTrustListener(this);
+    trustManager->RegisterTrustListener(listener);
 
-    AutoPtr<IFingerprintManager> fpm;
-    AutoPtr<IInterface> obj2;
-    context->GetSystemService(IContext::FINGERPRINT_SERVICE, (IInterface**)&obj2);
-    fpm = IFingerprintManager::Probe(obj2);
+    mFingerprintManagerReceiver = new MyFingerprintManagerReceiver(this);
+    obj = NULL;
+    context->GetSystemService(IContext::FINGERPRINT_SERVICE, (IInterface**)&obj);
+    AutoPtr<IFingerprintManager> fpm = IFingerprintManager::Probe(obj);
     return fpm->StartListening(mFingerprintManagerReceiver);
 }
 
@@ -845,24 +1128,20 @@ Boolean KeyguardUpdateMonitor::IsDeviceProvisionedInSettingsDb()
 {
     AutoPtr<IContentResolver> cr;
     mContext->GetContentResolver((IContentResolver**)&cr);
-
-    AutoPtr<ISettingsGlobal> helper;
-    CSettingsGlobal::AcquireSingleton((ISettingsGlobal**)&helper);
     Int32 num;
-    helper->GetInt32(cr, ISettingsGlobal::DEVICE_PROVISIONED, 0, &num);
+    Elastos::Droid::Provider::Settings::Global::GetInt32(cr, ISettingsGlobal::DEVICE_PROVISIONED, 0, &num);
     return num != 0;
 }
 
 void KeyguardUpdateMonitor::WatchForDeviceProvisioning()
 {
-    CKeyguardUpdateMonitorContentObserver::New((IContentObserver**)&mDeviceProvisionedObserver);
+    mDeviceProvisionedObserver = NULL;
+    CKeyguardUpdateMonitorContentObserver::New(this, (IContentObserver**)&mDeviceProvisionedObserver);
 
     AutoPtr<IContentResolver> cr;
     mContext->GetContentResolver((IContentResolver**)&cr);
-    AutoPtr<ISettingsGlobal> helper;
-    CSettingsGlobal::AcquireSingleton((ISettingsGlobal**)&helper);
     AutoPtr<IUri> value;
-    helper->GetUriFor(ISettingsGlobal::DEVICE_PROVISIONED, (IUri**)&value);
+    Elastos::Droid::Provider::Settings::Global::GetUriFor(ISettingsGlobal::DEVICE_PROVISIONED, (IUri**)&value);
     cr->RegisterContentObserver(value, FALSE, mDeviceProvisionedObserver);
 
     // prevent a race condition between where we check the flag and where we register the
@@ -871,7 +1150,8 @@ void KeyguardUpdateMonitor::WatchForDeviceProvisioning()
     if (provisioned != mDeviceProvisioned) {
         mDeviceProvisioned = provisioned;
         if (mDeviceProvisioned) {
-            mHandler->SendEmptyMessage(MSG_DEVICE_PROVISIONED);
+            Boolean bval;
+            mHandler->SendEmptyMessage(MSG_DEVICE_PROVISIONED, &bval);
         }
     }
 }
@@ -939,7 +1219,8 @@ ECode KeyguardUpdateMonitor::HandleUserSwitchComplete(
 
 ECode KeyguardUpdateMonitor::DispatchBootCompleted()
 {
-    return mHandler->SendEmptyMessage(MSG_BOOT_COMPLETED);
+    Boolean bval;
+    return mHandler->SendEmptyMessage(MSG_BOOT_COMPLETED, &bval);
 }
 
 ECode KeyguardUpdateMonitor::HandleBootCompleted()
@@ -1088,7 +1369,7 @@ void KeyguardUpdateMonitor::HandleTimeUpdate()
 }
 
 void KeyguardUpdateMonitor::HandleBatteryUpdate(
-    /* [in] */ BatteryStatus* status)
+    /* [in] */ IKeyguardUpdateMonitorBatteryStatus* status)
 {
     if (DEBUG) Logger::D(TAG, "handleBatteryUpdate");
     Boolean batteryUpdateInteresting = IsBatteryUpdateInteresting(mBatteryStatus, status);
@@ -1112,8 +1393,8 @@ void KeyguardUpdateMonitor::HandleBatteryUpdate(
 
 void KeyguardUpdateMonitor::HandleCarrierInfoUpdate()
 {
-    if (DEBUG) Logger::D(TAG, "handleCarrierInfoUpdate: plmn = %s, spn = %s",
-            TO_CSTR(mTelephonyPlmn), TO_CSTR(mTelephonySpn));
+    // if (DEBUG) Log.d(TAG, "handleCarrierInfoUpdate: plmn = " + mPlmn
+    //     + ", spn = " + mSpn + ", subId = " + subId);
 
     Int32 size;
     mCallbacks->GetSize(&size);
@@ -1128,19 +1409,20 @@ void KeyguardUpdateMonitor::HandleCarrierInfoUpdate()
             cb->OnRefreshCarrierInfo(mTelephonyPlmn, mTelephonySpn);
         }
     }
-}voi KeyguardUpdateMonitor::::HandleSimStateChange(
+}
+
+void KeyguardUpdateMonitor::HandleSimStateChange(
     /* [in] */ SimArgs* simArgs)
 {
     IccCardConstantsState state = simArgs->mSimState;
 
     if (DEBUG) {
-        // Logger::D(TAG, "handleSimStateChange: intentValue = " + simArgs + " "
-        //         + "state resolved to " + state.toString());
+        Logger::D(TAG, "handleSimStateChange: intentValue = %s "
+            "state resolved to %s", TO_CSTR(simArgs), StateToString(state).string());
     }
 
     if (state != IccCardConstantsState_UNKNOWN && state != mSimState) {
         mSimState = state;
-
         Int32 size;
         mCallbacks->GetSize(&size);
         for (Int32 i = 0; i < size; i++) {
@@ -1264,9 +1546,11 @@ ECode KeyguardUpdateMonitor::IsSwitchingUser(
 }
 
 Boolean KeyguardUpdateMonitor::IsBatteryUpdateInteresting(
-    /* [in] */ BatteryStatus* old,
-    /* [in] */ BatteryStatus* current)
+    /* [in] */ IKeyguardUpdateMonitorBatteryStatus* oldObj,
+    /* [in] */ IKeyguardUpdateMonitorBatteryStatus* currentObj)
 {
+    BatteryStatus* old = (BatteryStatus*)oldObj;
+    BatteryStatus* current = (BatteryStatus*)currentObj;
     Boolean nowPluggedIn;
     current->IsPluggedIn(&nowPluggedIn);
     Boolean wasPluggedIn;
@@ -1343,8 +1627,7 @@ ECode KeyguardUpdateMonitor::RemoveCallback(
         AutoPtr<IWeakReference> w = IWeakReference::Probe(obj);
         AutoPtr<IInterface> callbackObj;
         w->Resolve(EIID_IInterface, (IInterface**)&callbackObj);
-        AutoPtr<IKeyguardUpdateMonitorCallback> cb = IKeyguardUpdateMonitorCallback::Probe(callbackObj);
-        if (TO_IINTERFACE(cb) == TO_IINTERFACE(callback)) {
+        if (callback == IKeyguardUpdateMonitorCallback::Probe(callbackObj)) {
             mCallbacks->Remove(i);
         }
     }
@@ -1364,10 +1647,10 @@ ECode KeyguardUpdateMonitor::RegisterCallback(
         AutoPtr<IWeakReference> w = IWeakReference::Probe(obj);
         AutoPtr<IInterface> callbackObj;
         w->Resolve(EIID_IInterface, (IInterface**)&callbackObj);
-        AutoPtr<IKeyguardUpdateMonitorCallback> cb = IKeyguardUpdateMonitorCallback::Probe(callbackObj);
-        if (TO_IINTERFACE(cb) == TO_IINTERFACE(callback)) {
-            // if (DEBUG) Logger::E(TAG, "Object tried to add another callback",
-            //         new Exception("Called by"));
+        if (callback == IKeyguardUpdateMonitorCallback::Probe(callbackObj)) {
+            if (DEBUG)  {
+                Logger::E(TAG, "Object tried to add another callback");
+            }
             return NOERROR;
         }
     }
@@ -1379,7 +1662,7 @@ ECode KeyguardUpdateMonitor::RegisterCallback(
     return SendUpdates(callback);
 }
 
-void KeyguardUpdateMonitor::SendUpdates(
+ECode KeyguardUpdateMonitor::SendUpdates(
     /* [in] */ IKeyguardUpdateMonitorCallback* callback)
 {
     // Notify listener of the current state
@@ -1390,6 +1673,7 @@ void KeyguardUpdateMonitor::SendUpdates(
     callback->OnRefreshCarrierInfo(mTelephonyPlmn, mTelephonySpn);
     callback->OnClockVisibilityChanged();
     callback->OnSimStateChanged(mSimState);
+    return NOERROR;
 }
 
 ECode KeyguardUpdateMonitor::SendKeyguardVisibilityChanged(
@@ -1425,7 +1709,6 @@ ECode KeyguardUpdateMonitor::GetSimState(
     /* [out] */ IccCardConstantsState* state)
 {
     VALIDATE_NOT_NULL(state)
-
     *state = mSimState;
     return NOERROR;
 }
@@ -1455,7 +1738,6 @@ ECode KeyguardUpdateMonitor::GetTelephonyPlmn(
     /* [out] */ ICharSequence** cchar)
 {
     VALIDATE_NOT_NULL(cchar)
-
     *cchar = mTelephonyPlmn;
     REFCOUNT_ADD(*cchar)
     return NOERROR;
@@ -1465,7 +1747,6 @@ ECode KeyguardUpdateMonitor::GetTelephonySpn(
     /* [out] */ ICharSequence** cchar)
 {
     VALIDATE_NOT_NULL(cchar)
-
     *cchar = mTelephonySpn;
     REFCOUNT_ADD(*cchar)
     return NOERROR;
@@ -1474,7 +1755,7 @@ ECode KeyguardUpdateMonitor::GetTelephonySpn(
 ECode KeyguardUpdateMonitor::IsDeviceProvisioned(
     /* [out] */ Boolean* result)
 {
-    VALIDATE_NOT_NULL()
+    VALIDATE_NOT_NULL(result)
 
     *result = mDeviceProvisioned;
     return NOERROR;
@@ -1559,8 +1840,6 @@ ECode KeyguardUpdateMonitor::SetAlternateUnlockEnabled(
 ECode KeyguardUpdateMonitor::IsSimLocked(
     /* [out] */ Boolean* result)
 {
-    VALIDATE_NOT_NULL(result)
-
     return IsSimLocked(mSimState, result);
 }
 
@@ -1579,8 +1858,6 @@ ECode KeyguardUpdateMonitor::IsSimLocked(
 ECode KeyguardUpdateMonitor::IsSimPinSecure(
     /* [out] */ Boolean* result)
 {
-    VALIDATE_NOT_NULL(result)
-
     return IsSimPinSecure(mSimState, result);
 }
 
@@ -1598,11 +1875,11 @@ ECode KeyguardUpdateMonitor::IsSimPinSecure(
 }
 
 ECode KeyguardUpdateMonitor::GetCachedDisplayClientState(
-    /* [out] */ DisplayClientState** state)
+    /* [out] */ IKeyguardUpdateMonitorDisplayClientState** state)
 {
     VALIDATE_NOT_NULL(state)
-
-    *state = mDisplayClientState;
+    *state = (IKeyguardUpdateMonitorDisplayClientState*)mDisplayClientState.Get();
+    REFCOUNT_ADD(*state)
     return NOERROR;
 }
 
@@ -1612,11 +1889,12 @@ ECode KeyguardUpdateMonitor::DispatchScreenTurnedOn()
         AutoLock syncLock(this);
         mScreenOn = TRUE;
     }
-    return mHandler->SendEmptyMessage(MSG_SCREEN_TURNED_ON);
+    Boolean bval;
+    return mHandler->SendEmptyMessage(MSG_SCREEN_TURNED_ON, &bval);
 }
 
 ECode KeyguardUpdateMonitor::DispatchScreenTurndOff(
-    /* [in] */ Int3 why)
+    /* [in] */ Int32 why)
 {
     {
         AutoLock syncLock(this);
@@ -1624,14 +1902,14 @@ ECode KeyguardUpdateMonitor::DispatchScreenTurndOff(
     }
     AutoPtr<IMessage> message;
     mHandler->ObtainMessage(MSG_SCREEN_TURNED_OFF, why, 0, (IMessage**)&message);
-    return mHandler->SendMessage(message);
+    Boolean bval;
+    return mHandler->SendMessage(message, &bval);
 }
 
 ECode KeyguardUpdateMonitor::IsScreenOn(
     /* [out] */ Boolean* result)
 {
     VALIDATE_NOT_NULL(result)
-
     *result = mScreenOn;
     return NOERROR;
 }

@@ -39,17 +39,8 @@ module
          * @param subId The subscription id which PLMN or SPN changed.
          */
         OnRefreshCarrierInfo(
-            [in] Int64 subId, 
             [in] ICharSequence* plmn, 
             [in] ICharSequence* spn);
-
-        /**
-         * Called when the airplane mode changes.
-         *
-         * @param on Indicates if the airplane mode is now enable.
-         */
-        OnAirplaneModeChanged(
-            [in] Boolean on);
 
         /**
          * Called when the ringer mode changes.
@@ -120,7 +111,6 @@ module
          * @param subId The subscription id which SIM state changed.
          */
         OnSimStateChanged(
-            [in] Int64 subId, 
             [in] IccCardConstantsState simState);
 
         /**
@@ -206,29 +196,6 @@ module
         OnFaceUnlockStateChanged(
             [in] Boolean running, 
             [in] Int32 userid);
-
-        /**
-         * Called when a subId for the slot is changed.
-         * @param oldSubId.
-         * @param newSubId.
-         */
-        OnSubIdUpdated(
-            [in] Int64 oldSubId, 
-            [in] Int64 newSubId);
-
-        /**
-         * Called when the SubInfo content changed
-         * @param subId The subscription id which subscription info record is updated
-         * @param column The column name which is updated
-         * @param sValue The new string if the colum value is string
-         * @param iValue The new integer value if the colum value is integer
-         */
-        OnSubInfoContentChanged(
-            [in] Int64 subId, 
-            [in] String column,
-            [in] String sValue, 
-            [in] Int32 iValue);
-
     }
 
     } // namespace Keyguard

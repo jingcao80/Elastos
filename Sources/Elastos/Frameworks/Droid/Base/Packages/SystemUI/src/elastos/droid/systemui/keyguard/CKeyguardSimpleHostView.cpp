@@ -1,5 +1,6 @@
 
 #include "elastos/droid/systemui/keyguard/CKeyguardSimpleHostView.h"
+#include "elastos/droid/systemui/keyguard/KeyguardUpdateMonitor.h"
 
 namespace Elastos {
 namespace Droid {
@@ -50,8 +51,7 @@ ECode CKeyguardSimpleHostView::constructor(
 {
     mUpdateCallback = new MyKeyguardUpdateMonitorCallback(this);
     KeyguardViewBase::constructor(context, attrs);
-    AutoPtr<IKeyguardUpdateMonitor> monitor;
-    // monitor = KeyguardUpdateMonitor:GetInstance(context);
+    AutoPtr<IKeyguardUpdateMonitor> monitor = KeyguardUpdateMonitor::GetInstance(context);
     return monitor->RegisterCallback(mUpdateCallback);
 }
 

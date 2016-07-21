@@ -31,7 +31,6 @@ ECode KeyguardUpdateMonitorCallback::OnTimeChanged()
 }
 
 ECode KeyguardUpdateMonitorCallback::OnRefreshCarrierInfo(
-    /* [in] */ Int64 subId,
     /* [in] */ ICharSequence* plmn,
     /* [in] */ ICharSequence* spn)
 {
@@ -108,7 +107,6 @@ ECode KeyguardUpdateMonitorCallback::OnUserSwitchComplete(
 }
 
 ECode KeyguardUpdateMonitorCallback::OnSimStateChanged(
-    /* [in] */ Int64 subId,
     /* [in] */ IccCardConstantsState simState)
 {
     return NOERROR;

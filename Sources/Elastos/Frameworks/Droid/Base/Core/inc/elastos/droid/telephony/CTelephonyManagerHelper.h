@@ -121,10 +121,6 @@ public:
         /* [in] */ Int64 subId,
         /* [in] */ const String& defaultVal,
         /* [out] */ String* result);
-
-    CARAPI NetworkTypeToString(
-        /* [in] */ Int32 type,
-        /* [out] */ String* str);
 };
 
 }

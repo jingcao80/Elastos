@@ -146,7 +146,6 @@ module
             [in] Boolean visible);
 
         GetSimState(
-            [in] Int64 subId,
             [out] IccCardConstantsState* state);
 
         /**
@@ -157,8 +156,7 @@ module
          * NOTE: Because handleSimStateChange() invokes callbacks immediately without going
          * through mHandler, this *must* be called from the UI thread.
          */
-        ReportSimUnlocked(
-            [in] Int64 subId);
+        ReportSimUnlocked();
 
         /**
          * Report that the emergency call button has been pressed and the emergency dialer is
@@ -172,11 +170,9 @@ module
             [in] Boolean bypassHandler);
 
         GetTelephonyPlmn(
-            [in] Int64 subId,
             [out] ICharSequence** cs);
 
         GetTelephonySpn(
-            [in] Int64 subId,
             [out] ICharSequence** cs);
 
         /**
@@ -230,29 +226,6 @@ module
 
         IsScreenOn(
             [out] Boolean* value);
-
-        //return subId of first SIM that is PIN locked.
-        GetSimPinLockSubId(
-            [out] Int64* value);
-
-        //return subId of first SIM that is PUK locked.
-        GetSimPukLockSubId(
-            [out] Int64* value);
-
-        GetNumPhones(
-            [out] Int32* value);
-
-        IsValidPhoneId(
-            [in] Int32 phoneId,
-            [out] Boolean* value);
-
-        GetPhoneIdBySubId(
-            [in] Int64 subId,
-            [out] Int32* value);
-
-        GetSubIdByPhoneId(
-            [in] Int32 phoneId,
-            [out] Int64* value);
     }
 
     } // namespace Keyguard

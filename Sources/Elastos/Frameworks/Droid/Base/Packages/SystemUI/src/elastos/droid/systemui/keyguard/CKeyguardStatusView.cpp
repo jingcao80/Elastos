@@ -1,11 +1,13 @@
 
 #include "elastos/droid/systemui/keyguard/CKeyguardStatusView.h"
+#include "elastos/droid/systemui/keyguard/KeyguardUpdateMonitor.h"
 #include "R.h"
 #include "Elastos.Droid.App.h"
 #include "Elastos.Droid.Content.h"
 #include <elastos/droid/text/format/DateFormat.h>
 #include <elastos/droid/text/TextUtils.h>
 #include <elastos/core/StringUtils.h>
+#include <elastos/utility/logging/Logger.h>
 
 using Elastos::Droid::Content::IContentResolver;
 using Elastos::Droid::Internal::Widget::CLockPatternUtils;
@@ -17,16 +19,64 @@ using Elastos::Core::ICharSequence;
 using Elastos::Core::StringUtils;
 using Elastos::Utility::CLocaleHelper;
 using Elastos::Utility::ILocaleHelper;
+using Elastos::Utility::Logging::Logger;
 
 namespace Elastos {
 namespace Droid {
 namespace SystemUI {
 namespace Keyguard {
 
+static const String DTAG("KeyguardStatusView");
+const Boolean CKeyguardStatusView::DEBUG = TRUE;
+
+CKeyguardStatusView::MyKeyguardUpdateMonitorCallback::MyKeyguardUpdateMonitorCallback(
+    /* [in] */ CKeyguardStatusView* host)
+    : mHost(host)
+{}
+
+ECode CKeyguardStatusView::MyKeyguardUpdateMonitorCallback::OnTimeChanged()
+{
+    mHost->Refresh();
+    return NOERROR;
+}
+
+ECode CKeyguardStatusView::MyKeyguardUpdateMonitorCallback::OnKeyguardVisibilityChanged(
+    /* [in] */ Boolean showing)
+{
+    if (showing) {
+        if (DEBUG) Logger::V(DTAG, "refresh statusview showing: %d", showing);
+        mHost->Refresh();
+        mHost->UpdateOwnerInfo();
+    }
+    return NOERROR;
+}
+
+ECode CKeyguardStatusView::MyKeyguardUpdateMonitorCallback::OnScreenTurnedOn()
+{
+    mHost->SetEnableMarquee(TRUE);
+    return NOERROR;
+}
+
+ECode CKeyguardStatusView::MyKeyguardUpdateMonitorCallback::OnScreenTurnedOff(
+    /* [in] */ Int32 why)
+{
+    mHost->SetEnableMarquee(FALSE);
+    return NOERROR;
+}
+
+ECode CKeyguardStatusView::MyKeyguardUpdateMonitorCallback::OnUserSwitchComplete(
+    /* [in] */ Int32 userId)
+{
+    mHost->Refresh();
+    mHost->UpdateOwnerInfo();
+    return NOERROR;
+}
+
 String CKeyguardStatusView::Patterns::mDateView;
 String CKeyguardStatusView::Patterns::mClockView12;
 String CKeyguardStatusView::Patterns::mClockView24;
 String CKeyguardStatusView::Patterns::mCacheKey;
+
 void CKeyguardStatusView::Patterns::Update(
     /* [in] */ IContext* context,
     /* [in] */ Boolean hasAlarm)
@@ -71,9 +121,8 @@ void CKeyguardStatusView::Patterns::Update(
     mCacheKey = key;
 }
 
-const Boolean CKeyguardStatusView::DEBUG = /*KeyguardConstants.DEBUG*/TRUE;
-const String CKeyguardStatusView::TAG("KeyguardStatusView");
 CAR_OBJECT_IMPL(CKeyguardStatusView)
+
 ECode CKeyguardStatusView::constructor(
     /* [in] */ IContext* context)
 {
@@ -92,13 +141,14 @@ ECode CKeyguardStatusView::constructor(
     /* [in] */ IAttributeSet* attrs,
     /* [in] */ Int32 defStyle)
 {
+    mInfoCallback = new MyKeyguardUpdateMonitorCallback(this);
     return GridLayout::constructor(context, attrs, defStyle);
 }
 
 void CKeyguardStatusView::SetEnableMarquee(
     /* [in] */ Boolean enabled)
 {
-    if (DEBUG) Logger::V(TAG, "%s transport text marquee", (enabled ? "Enable" : "Disable"));
+    if (DEBUG) Logger::V(DTAG, "%s transport text marquee", (enabled ? "Enable" : "Disable"));
     if (mAlarmStatusView != NULL) IView::Probe(mAlarmStatusView)->SetSelected(enabled);
     if (mOwnerInfo != NULL) IView::Probe(mOwnerInfo)->SetSelected(enabled);
 }
@@ -125,9 +175,7 @@ ECode CKeyguardStatusView::OnFinishInflate()
     GetContext((IContext**)&ctx);
     CLockPatternUtils::New(ctx, (ILockPatternUtils**)&mLockPatternUtils);
     Boolean screenOn = TRUE;
-
-    Logger::D(TAG, "TODO : Not implement the class KeyguardUpdateMonitor");
-    // KeyguardUpdateMonitor.getInstance(mContext).isScreenOn();
+    KeyguardUpdateMonitor::GetInstance(mContext)->IsScreenOn(&screenOn);
     SetEnableMarquee(screenOn);
     Refresh();
     UpdateOwnerInfo();
@@ -238,11 +286,11 @@ void CKeyguardStatusView::UpdateOwnerInfo()
     if (mOwnerInfo == NULL) return;
     String ownerInfo = GetOwnerInfo();
     if (ownerInfo.IsNull()) {
-        Logger::D(TAG, "TODO [UpdateOwnerInfo] : ======delete======== Use the temporary name.");
+        Logger::D(DTAG, "TODO [UpdateOwnerInfo] : ======delete======== Use the temporary name.");
         ownerInfo = String("User");
     }
     if (!TextUtils::IsEmpty(ownerInfo)) {
-        Logger::D(TAG, "TODO [UpdateOwnerInfo] : =======ownerInfo==[%s].", ownerInfo.string());
+        Logger::D(DTAG, "TODO [UpdateOwnerInfo] : =======ownerInfo==[%s].", ownerInfo.string());
         IView::Probe(mOwnerInfo)->SetVisibility(IView::VISIBLE);
         AutoPtr<ICharSequence> cs;
         CString::New(ownerInfo, (ICharSequence**)&cs);
@@ -256,16 +304,14 @@ void CKeyguardStatusView::UpdateOwnerInfo()
 ECode CKeyguardStatusView::OnAttachedToWindow()
 {
     GridLayout::OnAttachedToWindow();
-    Logger::D(TAG, "TODO [OnAttachedToWindow] : Not implement the class KeyguardUpdateMonitor");
-    // KeyguardUpdateMonitor.getInstance(mContext).registerCallback(mInfoCallback);
+    KeyguardUpdateMonitor::GetInstance(mContext)->RegisterCallback(mInfoCallback);
     return NOERROR;
 }
 
 ECode CKeyguardStatusView::OnDetachedFromWindow()
 {
     GridLayout::OnDetachedFromWindow();
-    Logger::D(TAG, "TODO [OnDetachedFromWindow] : Not implement the class KeyguardUpdateMonitor");
-    // KeyguardUpdateMonitor.getInstance(mContext).removeCallback(mInfoCallback);
+    KeyguardUpdateMonitor::GetInstance(mContext)->RemoveCallback(mInfoCallback);
     return NOERROR;
 }
 

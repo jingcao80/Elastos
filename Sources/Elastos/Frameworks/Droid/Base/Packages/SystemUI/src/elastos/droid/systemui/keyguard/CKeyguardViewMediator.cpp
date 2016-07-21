@@ -1,4 +1,5 @@
 #include "elastos/droid/systemui/keyguard/CKeyguardViewMediator.h"
+#include "elastos/droid/systemui/keyguard/KeyguardUpdateMonitor.h"
 #include "elastos/droid/systemui/statusbar/phone/StatusBarKeyguardViewManager.h"
 #include "Elastos.Droid.Provider.h"
 #include "Elastos.Droid.Telephony.h"
@@ -95,6 +96,7 @@ ECode CKeyguardViewMediator::MyKeyguardUpdateMonitorCallback::OnUserSwitching(
         mHost->AdjustStatusBarLocked();
         // When we switch users we want to bring the new user to the biometric unlock even
         // if the current user has gone to the backup.
+        assert(0);
 #if 0 //TODO
         AutoPtr<IKeyguardUpdateMonitorHelper> kumh;
         CKeyguardUpdateMonitorHelper::AcquireSingleton((IKeyguardUpdateMonitorHelper**)&kumh);
@@ -202,8 +204,7 @@ ECode CKeyguardViewMediator::MyKeyguardUpdateMonitorCallback::OnSimStateChanged(
             {
                 AutoLock syncLock(this);
                 Boolean isDeviceProvisioned = FALSE;
-                //TODO
-                // mHost->mUpdateMonitor->IsDeviceProvisioned(&isDeviceProvisioned);
+                mHost->mUpdateMonitor->IsDeviceProvisioned(&isDeviceProvisioned);
                 if (!isDeviceProvisioned) {
                     Boolean isShowing;
                     mHost->IsShowing(&isShowing);
@@ -624,10 +625,7 @@ void CKeyguardViewMediator::Setup()
     mContext->GetSystemService(IContext::ALARM_SERVICE, (IInterface**)&obj);
     mAlarmManager = IAlarmManager::Probe(obj);
 
-    //TODO
-    // AutoPtr<IKeyguardUpdateMonitorHelper> kumh;
-    // CKeyguardUpdateMonitorHelper::AcquireSingleton((IKeyguardUpdateMonitorHelper**)&kumh);
-    // kumh->GetInstance(mContext, (IKeyguardUpdateMonitor**)&mUpdateMonitor);
+    mUpdateMonitor = KeyguardUpdateMonitor::GetInstance(mContext);
 
     CLockPatternUtils::New(mContext, (ILockPatternUtils**)&mLockPatternUtils);
 
@@ -638,12 +636,11 @@ void CKeyguardViewMediator::Setup()
     mLockPatternUtils->SetCurrentUser(currentUser);
 
     // Assume keyguard is showing (unless it's disabled) until we know for sure...
-    //TODO
-    // Boolean isDeviceProvisioned, isSecure, isLockScreenDisabled;
-    // mUpdateMonitor->IsDeviceProvisioned(&isDeviceProvisioned);
-    // mLockPatternUtils->IsSecure(&isSecure);
-    // mLockPatternUtils->IsLockScreenDisabled(&isLockScreenDisabled);
-    // mShowing = isDeviceProvisioned || isSecure && (!isLockScreenDisabled);
+    Boolean isDeviceProvisioned, isSecure, isLockScreenDisabled;
+    mUpdateMonitor->IsDeviceProvisioned(&isDeviceProvisioned);
+    mLockPatternUtils->IsSecure(&isSecure);
+    mLockPatternUtils->IsLockScreenDisabled(&isLockScreenDisabled);
+    mShowing = isDeviceProvisioned || isSecure && (!isLockScreenDisabled);
 
     mStatusBarKeyguardViewManager = new StatusBarKeyguardViewManager(mContext,
             mViewMediatorCallback, mLockPatternUtils);
@@ -707,8 +704,7 @@ ECode CKeyguardViewMediator::OnSystemReady()
         AutoLock syncLock(this);
         if (DEBUG) Logger::D(TAG, "onSystemReady");
         mSystemReady = TRUE;
-        //TODO
-        // mUpdateMonitor->RegisterCallback(mUpdateCallback);
+        mUpdateMonitor->RegisterCallback(mUpdateCallback);
 
         // Suppress biometric unlock right after boot until things have settled if it is the
         // selected security method, otherwise unsuppress it.  It must be unsuppressed if it is
@@ -724,11 +720,10 @@ ECode CKeyguardViewMediator::OnSystemReady()
         mLockPatternUtils->IsBiometricWeakInstalled(&bwi);
         if (ubw && bwi) {
             if (DEBUG) Logger::D(TAG, "suppressing biometric unlock during boot");
-            //TODO
-            // mUpdateMonitor->SetAlternateUnlockEnabled(FALSE);
-        } else {
-            //TODO
-            // mUpdateMonitor->SetAlternateUnlockEnabled(TRUE);
+            mUpdateMonitor->SetAlternateUnlockEnabled(FALSE);
+        }
+        else {
+            mUpdateMonitor->SetAlternateUnlockEnabled(TRUE);
         }
 
         DoKeyguardLocked(NULL);
@@ -996,7 +991,7 @@ ECode CKeyguardViewMediator::VerifyUnlock(
     {
         AutoLock syncLock(this);
         Boolean isDeviceProvisioned = TRUE;
-        // mUpdateMonitor->IsDeviceProvisioned(&isDeviceProvisioned);
+        mUpdateMonitor->IsDeviceProvisioned(&isDeviceProvisioned);
         if (!isDeviceProvisioned) {
             // don't allow this api when the device isn't provisioned
             if (DEBUG) Logger::D(TAG, "ignoring because device isn't provisioned");
@@ -1103,7 +1098,7 @@ ECode CKeyguardViewMediator::IsInputRestricted(
 {
     VALIDATE_NOT_NULL(isInputRestricted)
     Boolean isDeviceProvisioned = TRUE;
-    // mUpdateMonitor->IsDeviceProvisioned(&isDeviceProvisioned);
+    mUpdateMonitor->IsDeviceProvisioned(&isDeviceProvisioned);
     *isInputRestricted = mShowing || mNeedToReshowWhenReenabled || !isDeviceProvisioned;
     return NOERROR;
 }
@@ -1139,22 +1134,22 @@ void CKeyguardViewMediator::DoKeyguardLocked(
     // if the setup wizard hasn't run yet, don't show
     AutoPtr<ISystemProperties> sp;
     CSystemProperties::AcquireSingleton((ISystemProperties**)&sp);
-    //TODO
-    // Boolean b1 = FALSE;
+    Boolean b1 = FALSE;
     Boolean b2 = FALSE;
-    // sp->GetBoolean(String("keyguard.no_require_sim"), FALSE, &b1);
-    // mUpdateMonitor->IsDeviceProvisioned(&b2);
-    // const Boolean requireSim = !b1;
+    sp->GetBoolean(String("keyguard.no_require_sim"), FALSE, &b1);
+    mUpdateMonitor->IsDeviceProvisioned(&b2);
+    const Boolean requireSim = !b1;
     const Boolean provisioned = b2;
 
-    //TODO
-    // IccCardConstantsState state;
-    // mUpdateMonitor->GetSimState(&state);
-    // const Boolean lockedOrMissing = state.isPinLocked()
-    //         || ((state == IccCardConstantsState_ABSENT
-    //         || state == IccCardConstantsState_PERM_DISABLED)
-    //         && requireSim);
-    Boolean lockedOrMissing = FALSE;//TODO
+    IccCardConstantsState state;
+    mUpdateMonitor->GetSimState(&state);
+    Boolean lockedOrMissing =
+        ((state == IccCardConstantsState_PIN_REQUIRED)
+            || (state == IccCardConstantsState_PUK_REQUIRED))
+        || ((state == IccCardConstantsState_ABSENT
+        || state == IccCardConstantsState_PERM_DISABLED)
+        && requireSim);
+
     if (!lockedOrMissing && !provisioned) {
         if (DEBUG) Logger::D(TAG, "doKeyguard: not showing because device isn't provisioned%s",
             " and the sim is not locked or missing");
@@ -1301,11 +1296,9 @@ void CKeyguardViewMediator::HandleKeyguardDone(
     if (DEBUG) Logger::D(TAG, "handleKeyguardDone");
 
     if (authenticated) {
-        //TODO
-        // mUpdateMonitor->ClearFailedUnlockAttempts();
+        mUpdateMonitor->ClearFailedUnlockAttempts();
     }
-    //TODO
-    // mUpdateMonitor->ClearFingerprintRecognized();
+    mUpdateMonitor->ClearFingerprintRecognized();
 
     if (mExitSecureCallback != NULL) {
         ECode ec = mExitSecureCallback->OnKeyguardExitResult(authenticated);
@@ -1622,8 +1615,7 @@ Boolean CKeyguardViewMediator::IsAssistantAvailable()
 
 ECode CKeyguardViewMediator::OnBootCompleted()
 {
-    //TODO
-    // mUpdateMonitor->DispatchBootCompleted();
+    mUpdateMonitor->DispatchBootCompleted();
     {
         AutoLock syncLock(this);
         mBootCompleted = TRUE;

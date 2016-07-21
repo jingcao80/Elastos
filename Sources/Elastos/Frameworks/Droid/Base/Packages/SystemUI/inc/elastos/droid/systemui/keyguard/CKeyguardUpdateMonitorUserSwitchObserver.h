@@ -3,35 +3,20 @@
 #define __ELASTOS_DROID_SYSTEMUI_KEYGUARD_CKEYGUARDUPDATEMONITORUSERSWITCHOBSERVER_H__
 
 #include "_Elastos_Droid_SystemUI_Keyguard_CKeyguardUpdateMonitorUserSwitchObserver.h"
+#include "elastos/droid/systemui/keyguard/KeyguardUpdateMonitor.h"
 
 namespace Elastos {
 namespace Droid {
 namespace SystemUI {
 namespace Keyguard {
 
+class KeyguardUpdateMonitor;
+
 CarClass(CKeyguardUpdateMonitorUserSwitchObserver)
-    , public Object
-    , public IIUserSwitchObserver
-    , public IBinder
+    , public KeyguardUpdateMonitor::UserSwitchObserver
 {
 public:
     CAR_OBJECT_DECL()
-
-    CARAPI constructor(
-        /* [in] */ IKeyguardUpdateMonitorUser* monitor);
-
-    CARAPI OnUserSwitching(
-        /* [in] */ Int32 newUserId,
-        /* [in] */ IIRemoteCallback* reply);
-
-    CARAPI OnUserSwitchComplete(
-        /* [in] */ Int32 newUserId);
-
-    CARAPI ToString(
-        /* [out] */ String* str);
-
-private:
-    KeyguardUpdateMonitorUser* mHost;
 };
 
 } // namespace Keyguard

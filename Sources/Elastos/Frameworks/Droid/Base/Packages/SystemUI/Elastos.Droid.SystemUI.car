@@ -271,6 +271,7 @@ module
     using interface Elastos.Droid.App.INotification;
     using interface Elastos.Droid.App.IService;
     using interface Elastos.Droid.App.IActivity;
+    using interface Elastos.Droid.App.IIUserSwitchObserver;
     using interface Elastos.Droid.Animation.IAnimatorListener;
     using interface Elastos.Droid.Content.IBroadcastReceiver;
     using interface Elastos.Droid.Content.IContext;
@@ -3081,6 +3082,36 @@ module
             interface IViewGroupMarginLayoutParams;
             interface IViewGroupLayoutParams;
         }
+
+        class CKeyguardUpdateMonitorContentObserver {
+            constructor(
+                [in] IKeyguardUpdateMonitor* host);
+
+            interface IContentObserver;
+        }
+
+        class CKeyguardUpdateMonitorBroadcastReceiver1 {
+            constructor(
+                [in] IKeyguardUpdateMonitor* host);
+
+            interface IBroadcastReceiver;
+        }
+
+        class CKeyguardUpdateMonitorBroadcastReceiver2 {
+            constructor(
+                [in] IKeyguardUpdateMonitor* host);
+
+            interface IBroadcastReceiver;
+        }
+
+        class CKeyguardUpdateMonitorUserSwitchObserver {
+            constructor(
+                [in] IKeyguardUpdateMonitor* host);
+
+            interface IIUserSwitchObserver;
+            interface IBinder;
+        }
+
 
     } // namespace Keyguard
 

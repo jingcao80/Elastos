@@ -1272,6 +1272,10 @@ module
             [in] ArrayOf<Byte>* oemReq,
             [out, callee] ArrayOf<Byte>* oemResp,
             [out] Int32* result);
+
+        NetworkTypeToString(
+            [in] Int32 networkType,
+            [out] String* str);
     }
 
     [deprecated, local]

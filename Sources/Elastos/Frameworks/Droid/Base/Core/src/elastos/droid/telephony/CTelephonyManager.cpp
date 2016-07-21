@@ -2381,7 +2381,7 @@ ECode CTelephonyManager::GetTelephonyProperty(
 }
 
 ECode CTelephonyManager::NetworkTypeToString(
-    /* [in] */ Int32 type,
+    /* [in] */ Int32 networkType,
     /* [out] */ String* str)
 {
     VALIDATE_NOT_NULL(str)
@@ -2389,7 +2389,7 @@ ECode CTelephonyManager::NetworkTypeToString(
 
     String ratClassName("");
     Int32 networkClass;
-    GetNetworkClass(mNetworkType, &networkClass);
+    GetNetworkClass(networkType, &networkClass);
     if (mContext == NULL) return NOERROR;
 
     AutoPtr<IResources> res;
