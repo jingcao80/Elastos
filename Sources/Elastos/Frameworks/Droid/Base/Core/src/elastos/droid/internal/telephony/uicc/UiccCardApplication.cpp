@@ -760,13 +760,13 @@ ECode UiccCardApplication::Dump(
     return NOERROR;
 }
 
-AutoPtr<IUiccCard> UiccCardApplication::GetUiccCard()
+ECode UiccCardApplication::GetUiccCard(
+    /* [out] */ IUiccCard** result)
 {
+    VALIDATE_NOT_NULL(result)
     // ==================before translated======================
     // return mUiccCard;
-    assert(0);
-    AutoPtr<IUiccCard> empty;
-    return empty;
+    return NOERROR;
 }
 
 AutoPtr<IIccRecords> UiccCardApplication::CreateIccRecords(

@@ -5,43 +5,6 @@
 #include "elastos/droid/os/RegistrantList.h"
 #include "elastos/droid/os/Handler.h"
 
-// import static android.Manifest.permission.READ_PHONE_STATE;
-// import android.app.ActivityManagerNative;
-// import android.content.Intent;
-// import android.os.AsyncResult;
-// import android.os.Registrant;
-// import android.os.RegistrantList;
-// import android.os.SystemProperties;
-// import android.os.UserHandle;
-// import android.telephony.Rlog;
-// import android.telephony.ServiceState;
-// import android.telephony.SubscriptionManager;
-// import android.telephony.TelephonyManager;
-// import com.android.internal.telephony.IccCard;
-// import com.android.internal.telephony.IccCardConstants;
-// import com.android.internal.telephony.PhoneConstants;
-// import com.android.internal.telephony.MccTable;
-// import com.android.internal.telephony.RILConstants;
-// import com.android.internal.telephony.TelephonyIntents;
-// import com.android.internal.telephony.IccCardConstants.State;
-// import com.android.internal.telephony.cdma.CdmaSubscriptionSourceManager;
-// import com.android.internal.telephony.Phone;
-// import com.android.internal.telephony.PhoneFactory;
-// import com.android.internal.telephony.Subscription;
-// import com.android.internal.telephony.SubscriptionController;
-// import com.android.internal.telephony.uicc.IccCardApplicationStatus.AppState;
-// import com.android.internal.telephony.uicc.IccCardApplicationStatus.PersoSubState;
-// import com.android.internal.telephony.uicc.IccCardStatus.CardState;
-// import com.android.internal.telephony.uicc.IccCardStatus.PinState;
-// import com.android.internal.telephony.uicc.UiccController;
-// import com.android.internal.telephony.uicc.RuimRecords;
-// import static com.android.internal.telephony.TelephonyProperties.PROPERTY_APN_RUIM_OPERATOR_NUMERIC;
-// import static com.android.internal.telephony.TelephonyProperties.PROPERTY_APN_SIM_OPERATOR_NUMERIC;
-// import static com.android.internal.telephony.TelephonyProperties.PROPERTY_ICC_OPERATOR_ALPHA;
-// import static com.android.internal.telephony.TelephonyProperties.PROPERTY_ICC_OPERATOR_NUMERIC;
-// import static com.android.internal.telephony.TelephonyProperties.PROPERTY_ICC_OPERATOR_ISO_COUNTRY;
-// import static com.android.internal.telephony.TelephonyProperties.PROPERTY_SIM_STATE;
-
 using Elastos::Droid::Content::IContext;
 using Elastos::Droid::Internal::Telephony::Cdma::ICdmaSubscriptionSourceManager;
 using Elastos::Droid::Internal::Telephony::ICommandsInterface;
@@ -51,9 +14,9 @@ using Elastos::Droid::Os::IMessage;
 using Elastos::Droid::Os::IHandler;
 using Elastos::Droid::Os::Handler;
 using Elastos::Droid::Os::RegistrantList;
+
 using Elastos::IO::IFileDescriptor;
 using Elastos::IO::IPrintWriter;
-using Elastos::Core::IInteger32;
 
 namespace Elastos {
 namespace Droid {
@@ -338,7 +301,7 @@ private:
     static const Int32 EVENT_SUBSCRIPTION_DEACTIVATED = 502;
     static const Int32 EVENT_CARRIER_PRIVILIGES_LOADED = 503;
     // FIXME Rename mCardIndex to mSlotId.
-    AutoPtr<IInteger32> mCardIndex;
+    Int32 mCardIndex;
     AutoPtr<ISubscription> mSubscriptionData;
     Object mLock;
     AutoPtr<IContext> mContext;

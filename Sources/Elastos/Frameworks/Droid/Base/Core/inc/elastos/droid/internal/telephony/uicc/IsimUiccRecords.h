@@ -5,28 +5,6 @@
 #include "elastos/droid/os/AsyncResult.h"
 #include "elastos/droid/internal/telephony/uicc/IccRecords.h"
 
-// package com.android.internal.telephony.uicc;
-// import android.content.Context;
-// import android.os.AsyncResult;
-// import android.os.Handler;
-// import android.os.Message;
-// import android.telephony.Rlog;
-// import android.content.Intent;
-// import com.android.internal.telephony.CommandsInterface;
-// import com.android.internal.telephony.gsm.SimTlv;
-////import com.android.internal.telephony.gsm.VoiceMailConstants;
-
-// import java.io.FileDescriptor;
-// import java.io.PrintWriter;
-// import java.nio.charset.Charset;
-// import java.util.ArrayList;
-// import java.util.Arrays;
-// import static com.android.internal.telephony.uicc.IccConstants.EF_DOMAIN;
-// import static com.android.internal.telephony.uicc.IccConstants.EF_IMPI;
-// import static com.android.internal.telephony.uicc.IccConstants.EF_IMPU;
-// import static com.android.internal.telephony.uicc.IccConstants.EF_IST;
-// import static com.android.internal.telephony.uicc.IccConstants.EF_PCSCF;
-
 using Elastos::Droid::Content::IContext;
 using Elastos::Droid::Internal::Telephony::ICommandsInterface;
 using Elastos::Droid::Os::AsyncResult;
@@ -55,10 +33,17 @@ private:
     public:
         CAR_INTERFACE_DECL();
 
-        virtual CARAPI_(String) GetEfName();
+        EfIsimImpiLoaded(
+            /* [in] */ IsimUiccRecords* host);
+
+        CARAPI GetEfName(
+            /* [out] */ String* name);
 
         virtual CARAPI OnRecordLoaded(
             /* [in] */ AsyncResult* ar);
+
+    public:
+        IsimUiccRecords* mHost;
     };
 
     class EfIsimImpuLoaded
@@ -68,10 +53,17 @@ private:
     public:
         CAR_INTERFACE_DECL();
 
-        virtual CARAPI_(String) GetEfName();
+        EfIsimImpuLoaded(
+            /* [in] */ IsimUiccRecords* host);
+
+        CARAPI GetEfName(
+            /* [out] */ String* name);
 
         virtual CARAPI OnRecordLoaded(
             /* [in] */ AsyncResult* ar);
+
+    public:
+        IsimUiccRecords* mHost;
     };
 
     class EfIsimDomainLoaded
@@ -81,10 +73,17 @@ private:
     public:
         CAR_INTERFACE_DECL();
 
-        virtual CARAPI_(String) GetEfName();
+        EfIsimDomainLoaded(
+            /* [in] */ IsimUiccRecords* host);
+
+        CARAPI GetEfName(
+            /* [out] */ String* name);
 
         virtual CARAPI OnRecordLoaded(
             /* [in] */ AsyncResult* ar);
+
+    public:
+        IsimUiccRecords* mHost;
     };
 
     class EfIsimIstLoaded
@@ -94,10 +93,17 @@ private:
     public:
         CAR_INTERFACE_DECL();
 
-        virtual CARAPI_(String) GetEfName();
+        EfIsimIstLoaded(
+            /* [in] */ IsimUiccRecords* host);
+
+        CARAPI GetEfName(
+            /* [out] */ String* name);
 
         virtual CARAPI OnRecordLoaded(
             /* [in] */ AsyncResult* ar);
+
+    public:
+        IsimUiccRecords* mHost;
     };
 
     class EfIsimPcscfLoaded
@@ -107,10 +113,17 @@ private:
     public:
         CAR_INTERFACE_DECL();
 
-        virtual CARAPI_(String) GetEfName();
+        EfIsimPcscfLoaded(
+            /* [in] */ IsimUiccRecords* host);
+
+        CARAPI GetEfName(
+            /* [out] */ String* name);
 
         virtual CARAPI OnRecordLoaded(
             /* [in] */ AsyncResult* ar);
+
+    public:
+        IsimUiccRecords* mHost;
     };
 
 public:
@@ -249,7 +262,6 @@ protected:
     CARAPI Loge(
         /* [in] */ const String& s);
 
-private:
     /**
       * ISIM records for IMS are stored inside a Tag-Length-Value record as a UTF-8 string
       * with tag value 0x80.
@@ -278,7 +290,7 @@ private:
     // IMS Service Table
     AutoPtr<ArrayOf<String> > mIsimPcscf;
     // IMS Proxy Call Session Control Function
-    String auth_rsp;
+    String mAuth_rsp;
     Object mLock;
     static const Int32 TAG_ISIM_VALUE = 0x80;
 };

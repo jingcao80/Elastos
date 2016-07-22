@@ -7,31 +7,6 @@
 #include "elastos/droid/internal/telephony/uicc/VoiceMailConstants.h"
 #include "elastos/droid/internal/telephony/uicc/SpnOverride.h"
 
-// import static com.android.internal.telephony.TelephonyProperties.PROPERTY_ICC_OPERATOR_ALPHA;
-// import static com.android.internal.telephony.TelephonyProperties.PROPERTY_ICC_OPERATOR_ISO_COUNTRY;
-// import static com.android.internal.telephony.TelephonyProperties.PROPERTY_ICC_OPERATOR_NUMERIC;
-// import android.content.Context;
-// import android.os.Message;
-// import android.os.SystemProperties;
-// import android.telephony.TelephonyManager;
-// import android.telephony.PhoneNumberUtils;
-// import android.telephony.SmsMessage;
-// import android.text.TextUtils;
-// import android.telephony.Rlog;
-// import android.content.res.Resources;
-// import com.android.internal.telephony.CommandsInterface;
-// import com.android.internal.telephony.MccTable;
-// import com.android.internal.telephony.SmsConstants;
-// import com.android.internal.telephony.SubscriptionController;
-// import com.android.internal.telephony.gsm.SimTlv;
-// import com.android.internal.telephony.uicc.IccCardApplicationStatus.AppState;
-// import com.android.internal.telephony.uicc.IccCardApplicationStatus.AppType;
-// import com.android.internal.telephony.uicc.UICCConfig;
-// import java.io.FileDescriptor;
-// import java.io.PrintWriter;
-// import java.util.ArrayList;
-// import java.util.Arrays;
-
 using Elastos::Droid::Os::AsyncResult;
 using Elastos::Droid::Os::IMessage;
 using Elastos::Droid::Content::IContext;
@@ -61,11 +36,17 @@ private:
     public:
         CAR_INTERFACE_DECL();
 
+        EfPlLoaded(
+            /* [in] */ SIMRecords* host);
+
         virtual CARAPI GetEfName(
             /* [out] */ String* result);
 
         virtual CARAPI OnRecordLoaded(
             /* [in] */ AsyncResult* ar);
+
+    public:
+        SIMRecords* mHost;
     };
 
     class EfUsimLiLoaded
@@ -75,11 +56,17 @@ private:
     public:
         CAR_INTERFACE_DECL();
 
+        EfUsimLiLoaded(
+            /* [in] */ SIMRecords* host);
+
         virtual CARAPI GetEfName(
             /* [out] */ String* result);
 
         virtual CARAPI OnRecordLoaded(
             /* [in] */ AsyncResult* ar);
+
+    public:
+        SIMRecords* mHost;
     };
 
     enum GetSpnFsmState {

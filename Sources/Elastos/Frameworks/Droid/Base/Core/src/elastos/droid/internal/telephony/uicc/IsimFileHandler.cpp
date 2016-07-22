@@ -2,6 +2,10 @@
 #include "Elastos.Droid.Internal.h"
 #include "elastos/droid/internal/telephony/uicc/IsimFileHandler.h"
 
+#include <elastos/utility/logging/Logger.h>
+
+using Elastos::Utility::Logging::Logger;
+
 namespace Elastos {
 namespace Droid {
 namespace Internal {
@@ -24,44 +28,35 @@ ECode IsimFileHandler::constructor(
     /* [in] */ const String& aid,
     /* [in] */ ICommandsInterface* ci)
 {
-    // ==================before translated======================
-    // super(app, aid, ci);
-    return NOERROR;
+    return constructor(app, aid, ci);
 }
 
 String IsimFileHandler::GetEFPath(
     /* [in] */ Int32 efid)
 {
-    // ==================before translated======================
-    // switch(efid) {
-    // case EF_IMPI:
-    // case EF_IMPU:
-    // case EF_DOMAIN:
-    // case EF_IST:
-    // case EF_PCSCF:
-    //     return MF_SIM + DF_ADF;
-    // }
-    // String path = getCommonIccEFPath(efid);
-    // return path;
-    assert(0);
-    return String(NULL);
+    switch(efid) {
+    case EF_IMPI:
+    case EF_IMPU:
+    case EF_DOMAIN:
+    case EF_IST:
+    case EF_PCSCF:
+        return MF_SIM + DF_ADF;
+    }
+    String path = GetCommonIccEFPath(efid);
+    return path;
 }
 
 ECode IsimFileHandler::Logd(
     /* [in] */ const String& msg)
 {
-    // ==================before translated======================
-    // Rlog.d(LOGTAG, msg);
-    assert(0);
+    Logger::D(LOGTAG, msg);
     return NOERROR;
 }
 
 ECode IsimFileHandler::Loge(
     /* [in] */ const String& msg)
 {
-    // ==================before translated======================
-    // Rlog.e(LOGTAG, msg);
-    assert(0);
+    Logger::E(LOGTAG, msg);
     return NOERROR;
 }
 

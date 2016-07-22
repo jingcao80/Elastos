@@ -2,9 +2,17 @@
 #include "Elastos.CoreLibrary.Utility.h"
 #include "Elastos.Droid.Internal.h"
 #include "elastos/droid/internal/telephony/uicc/IccFileHandler.h"
-#include <elastos/utility/logging/Logger.h>
+#include "elastos/droid/internal/telephony/uicc/CIccUtils.h"
+#include "elastos/droid/internal/telephony/uicc/IccIoResult.h"
+#include "elastos/droid/internal/telephony/uicc/UiccTlvData.h"
+#include "elastos/droid/internal/telephony/uicc/CUiccTlvDataHelper.h"
 
-using Elastos::Utility::Logging::Logger;
+#include <elastos/core/StringUtils.h>
+
+using Elastos::Core::IInteger32;
+using Elastos::Core::StringUtils;
+using Elastos::Utility::CArrayList;
+using Elastos::Utility::ICollection;
 
 namespace Elastos {
 namespace Droid {
@@ -20,13 +28,12 @@ IccFileHandler::LoadLinearFixedContext::LoadLinearFixedContext(
     /* [in] */ Int32 recordNum,
     /* [in] */ IMessage* onLoaded)
 {
-    // ==================before translated======================
-    // mEfid = efid;
-    // mRecordNum = recordNum;
-    // mOnLoaded = onLoaded;
-    // mLoadAll = false;
-    // mLoadPart = false;
-    // mPath = null;
+    mEfid = efid;
+    mRecordNum = recordNum;
+    mOnLoaded = onLoaded;
+    mLoadAll = FALSE;
+    mLoadPart = FALSE;
+    mPath = NULL;
 }
 
 IccFileHandler::LoadLinearFixedContext::LoadLinearFixedContext(
@@ -35,13 +42,12 @@ IccFileHandler::LoadLinearFixedContext::LoadLinearFixedContext(
     /* [in] */ const String& path,
     /* [in] */ IMessage* onLoaded)
 {
-    // ==================before translated======================
-    // mEfid = efid;
-    // mRecordNum = recordNum;
-    // mOnLoaded = onLoaded;
-    // mLoadAll = false;
-    // mLoadPart = false;
-    // mPath = path;
+    mEfid = efid;
+    mRecordNum = recordNum;
+    mOnLoaded = onLoaded;
+    mLoadAll = FALSE;
+    mLoadPart = FALSE;
+    mPath = path;
 }
 
 IccFileHandler::LoadLinearFixedContext::LoadLinearFixedContext(
@@ -49,26 +55,24 @@ IccFileHandler::LoadLinearFixedContext::LoadLinearFixedContext(
     /* [in] */ const String& path,
     /* [in] */ IMessage* onLoaded)
 {
-    // ==================before translated======================
-    // mEfid = efid;
-    // mRecordNum = 1;
-    // mLoadAll = true;
-    // mLoadPart = false;
-    // mOnLoaded = onLoaded;
-    // mPath = path;
+    mEfid = efid;
+    mRecordNum = 1;
+    mLoadAll = TRUE;
+    mLoadPart = FALSE;
+    mOnLoaded = onLoaded;
+    mPath = path;
 }
 
 IccFileHandler::LoadLinearFixedContext::LoadLinearFixedContext(
     /* [in] */ Int32 efid,
     /* [in] */ IMessage* onLoaded)
 {
-    // ==================before translated======================
-    // mEfid = efid;
-    // mRecordNum = 1;
-    // mLoadAll = true;
-    // mLoadPart = false;
-    // mOnLoaded = onLoaded;
-    // mPath = null;
+    mEfid = efid;
+    mRecordNum = 1;
+    mLoadAll = TRUE;
+    mLoadPart = FALSE;
+    mOnLoaded = onLoaded;
+    mPath = NULL;
 }
 
 IccFileHandler::LoadLinearFixedContext::LoadLinearFixedContext(
@@ -77,32 +81,32 @@ IccFileHandler::LoadLinearFixedContext::LoadLinearFixedContext(
     /* [in] */ const String& path,
     /* [in] */ IMessage* onLoaded)
 {
-    // ==================before translated======================
-    // mEfid = efid;
-    // mRecordNum = recordNums.get(0);
-    // mLoadAll = false;
-    // mLoadPart = true;
-    // mRecordNums = new ArrayList<Integer>();
-    // mRecordNums.addAll(recordNums);
-    // mCount = 0;
-    // mCountLoadrecords = recordNums.size();
-    // mOnLoaded = onLoaded;
-    // mPath = path;
+    mEfid = efid;
+    AutoPtr<IInterface> p;
+    recordNums->Get(0, (IInterface**)&p);
+    IInteger32::Probe(p)->GetValue(&mRecordNum);
+    mLoadAll = FALSE;
+    mLoadPart = TRUE;
+    CArrayList::New((IArrayList**)&mRecordNums);
+    mRecordNums->AddAll(ICollection::Probe(recordNums));
+    mCount = 0;
+    recordNums->GetSize(&mCountLoadrecords);
+    mOnLoaded = onLoaded;
+    mPath = path;
 }
 
 void IccFileHandler::LoadLinearFixedContext::InitLCResults(
     /* [in] */ Int32 size)
 {
-    // ==================before translated======================
-    // this.results = new ArrayList<byte[]>(size);
-    // byte[] data = new byte[this.mRecordSize];
-    // for (int i = 0; i < this.mRecordSize; i++) {
-    //     data[i] = (byte) 0xff;
-    // }
-    // for (int i = 0; i < size; i++) {
-    //     this.results.add(data);
-    // }
-    assert(0);
+    CArrayList::New(size, (IArrayList**)&mResults);
+    AutoPtr<ArrayOf<Byte> > data = ArrayOf<Byte>::Alloc(mRecordSize);
+    for (Int32 i = 0; i < mRecordSize; i++) {
+        (*data)[i] = (Byte) 0xff;
+    }
+    for (Int32 i = 0; i < size; i++) {
+        assert(0 && "TODO");
+        // mResults->Add(data);
+    }
 }
 
 //=====================================================================
@@ -162,14 +166,13 @@ ECode IccFileHandler::LoadEFLinearFixed(
     /* [in] */ Int32 recordNum,
     /* [in] */ IMessage* onLoaded)
 {
-    // ==================before translated======================
-    // Message response
-    //         = obtainMessage(EVENT_GET_RECORD_SIZE_DONE,
-    //                 new LoadLinearFixedContext(fileid, recordNum, path, onLoaded));
-    //
-    // mCi.iccIOForApp(COMMAND_GET_RESPONSE, fileid, path,
-    //                 0, 0, GET_RESPONSE_EF_SIZE_BYTES, null, null, mAid, response);
-    assert(0);
+    AutoPtr<LoadLinearFixedContext> p = new LoadLinearFixedContext(fileid, recordNum, path, onLoaded);
+    AutoPtr<IMessage> response;
+    ObtainMessage(EVENT_GET_RECORD_SIZE_DONE,
+                (IObject*)p.Get(), (IMessage**)&response);
+
+    mCi->IccIOForApp(COMMAND_GET_RESPONSE, fileid, path,
+                    0, 0, GET_RESPONSE_EF_SIZE_BYTES, String(NULL), String(NULL), mAid, response);
     return NOERROR;
 }
 
@@ -178,9 +181,7 @@ ECode IccFileHandler::LoadEFLinearFixed(
     /* [in] */ Int32 recordNum,
     /* [in] */ IMessage* onLoaded)
 {
-    // ==================before translated======================
-    // loadEFLinearFixed(fileid, getEFPath(fileid), recordNum, onLoaded);
-    assert(0);
+    LoadEFLinearFixed(fileid, GetEFPath(fileid), recordNum, onLoaded);
     return NOERROR;
 }
 
@@ -188,16 +189,17 @@ ECode IccFileHandler::LoadEFImgLinearFixed(
     /* [in] */ Int32 recordNum,
     /* [in] */ IMessage* onLoaded)
 {
-    // ==================before translated======================
-    // Message response = obtainMessage(EVENT_GET_RECORD_SIZE_IMG_DONE,
-    //         new LoadLinearFixedContext(IccConstants.EF_IMG, recordNum,
-    //                 onLoaded));
-    //
-    // mCi.iccIOForApp(COMMAND_GET_RESPONSE, IccConstants.EF_IMG,
-    //             getEFPath(IccConstants.EF_IMG), recordNum,
-    //             READ_RECORD_MODE_ABSOLUTE, GET_RESPONSE_EF_IMG_SIZE_BYTES,
-    //             null, null, mAid, response);
-    assert(0);
+    AutoPtr<LoadLinearFixedContext> p = new LoadLinearFixedContext(
+                    IIccConstants::EF_IMG, recordNum,
+                    onLoaded);
+    AutoPtr<IMessage> response;
+    ObtainMessage(EVENT_GET_RECORD_SIZE_IMG_DONE,
+            (IObject*)p.Get(), (IMessage**)&response);
+
+    mCi->IccIOForApp(COMMAND_GET_RESPONSE, IIccConstants::EF_IMG,
+                GetEFPath(IIccConstants::EF_IMG), recordNum,
+                READ_RECORD_MODE_ABSOLUTE, GET_RESPONSE_EF_IMG_SIZE_BYTES,
+                String(NULL), String(NULL), mAid, response);
     return NOERROR;
 }
 
@@ -206,13 +208,12 @@ ECode IccFileHandler::GetEFLinearRecordSize(
     /* [in] */ const String& path,
     /* [in] */ IMessage* onLoaded)
 {
-    // ==================before translated======================
-    // Message response
-    //         = obtainMessage(EVENT_GET_EF_LINEAR_RECORD_SIZE_DONE,
-    //                 new LoadLinearFixedContext(fileid, path, onLoaded));
-    // mCi.iccIOForApp(COMMAND_GET_RESPONSE, fileid, path,
-    //             0, 0, GET_RESPONSE_EF_SIZE_BYTES, null, null, mAid, response);
-    assert(0);
+    AutoPtr<LoadLinearFixedContext> p = new LoadLinearFixedContext(fileid, path, onLoaded);
+    AutoPtr<IMessage> response;
+    ObtainMessage(EVENT_GET_EF_LINEAR_RECORD_SIZE_DONE,
+                (IObject*)p.Get(), (IMessage**)&response);
+    mCi->IccIOForApp(COMMAND_GET_RESPONSE, fileid, path,
+                0, 0, GET_RESPONSE_EF_SIZE_BYTES, String(NULL), String(NULL), mAid, response);
     return NOERROR;
 }
 
@@ -220,9 +221,7 @@ ECode IccFileHandler::GetEFLinearRecordSize(
     /* [in] */ Int32 fileid,
     /* [in] */ IMessage* onLoaded)
 {
-    // ==================before translated======================
-    // getEFLinearRecordSize(fileid, getEFPath(fileid), onLoaded);
-    assert(0);
+    GetEFLinearRecordSize(fileid, GetEFPath(fileid), onLoaded);
     return NOERROR;
 }
 
@@ -230,9 +229,7 @@ ECode IccFileHandler::LoadEFLinearFixedAll(
     /* [in] */ Int32 fileid,
     /* [in] */ IMessage* onLoaded)
 {
-    // ==================before translated======================
-    // loadEFLinearFixedAll(fileid, getEFPath(fileid), onLoaded);
-    assert(0);
+    LoadEFLinearFixedAll(fileid, GetEFPath(fileid), onLoaded);
     return NOERROR;
 }
 
@@ -241,13 +238,13 @@ ECode IccFileHandler::LoadEFLinearFixedAll(
     /* [in] */ const String& path,
     /* [in] */ IMessage* onLoaded)
 {
-    // ==================before translated======================
-    // Message response = obtainMessage(EVENT_GET_RECORD_SIZE_DONE,
-    //                 new LoadLinearFixedContext(fileid, path, onLoaded));
-    //
-    // mCi.iccIOForApp(COMMAND_GET_RESPONSE, fileid, path,
-    //                 0, 0, GET_RESPONSE_EF_SIZE_BYTES, null, null, mAid, response);
-    assert(0);
+    AutoPtr<LoadLinearFixedContext> p = new LoadLinearFixedContext(fileid, path, onLoaded);
+    AutoPtr<IMessage> response;
+    ObtainMessage(EVENT_GET_RECORD_SIZE_DONE,
+                (IObject*)p.Get(), (IMessage**)&response);
+
+    mCi->IccIOForApp(COMMAND_GET_RESPONSE, fileid, path,
+                    0, 0, GET_RESPONSE_EF_SIZE_BYTES, String(NULL), String(NULL), mAid, response);
     return NOERROR;
 }
 
@@ -256,13 +253,13 @@ ECode IccFileHandler::LoadEFLinearFixedPart(
     /* [in] */ IArrayList/*<Integer*>*/* recordNums,
     /* [in] */ IMessage* onLoaded)
 {
-    // ==================before translated======================
-    // Message response = obtainMessage(EVENT_GET_RECORD_SIZE_DONE, new LoadLinearFixedContext(
-    //         fileid, recordNums, getEFPath(fileid), onLoaded));
-    //
-    // mCi.iccIOForApp(COMMAND_GET_RESPONSE, fileid, getEFPath(fileid), 0, 0,
-    //         GET_RESPONSE_EF_SIZE_BYTES, null, null, mAid, response);
-    assert(0);
+    AutoPtr<LoadLinearFixedContext> p = new LoadLinearFixedContext(
+            fileid, recordNums, GetEFPath(fileid), onLoaded);
+    AutoPtr<IMessage> response;
+    ObtainMessage(EVENT_GET_RECORD_SIZE_DONE, (IObject*)p.Get(), (IMessage**)&response);
+
+    mCi->IccIOForApp(COMMAND_GET_RESPONSE, fileid, GetEFPath(fileid), 0, 0,
+            GET_RESPONSE_EF_SIZE_BYTES, String(NULL), String(NULL), mAid, response);
     return NOERROR;
 }
 
@@ -284,13 +281,13 @@ ECode IccFileHandler::LoadEFTransparent(
     /* [in] */ Int32 size,
     /* [in] */ IMessage* onLoaded)
 {
-    Logger::E("IccFileHandler", "TODO LoadEFTransparent 3 no impl");
-    // ==================before translated======================
-    // Message response = obtainMessage(EVENT_READ_BINARY_DONE,
-    //                 fileid, 0, onLoaded);
-    //
-    // mCi.iccIOForApp(COMMAND_READ_BINARY, fileid, getEFPath(fileid),
-    //                 0, 0, size, null, null, mAid, response);
+    AutoPtr<IMessage> response;
+    ObtainMessage(EVENT_READ_BINARY_DONE,
+                    fileid, 0, onLoaded,
+                    (IMessage**)&response);
+
+    mCi->IccIOForApp(COMMAND_READ_BINARY, fileid, GetEFPath(fileid),
+                    0, 0, size, String(NULL), String(NULL), mAid, response);
     return NOERROR;
 }
 
@@ -301,23 +298,24 @@ ECode IccFileHandler::LoadEFImgTransparent(
     /* [in] */ Int32 length,
     /* [in] */ IMessage* onLoaded)
 {
-    // ==================before translated======================
-    // Message response = obtainMessage(EVENT_READ_ICON_DONE, fileid, 0,
-    //         onLoaded);
-    //
-    // logd("IccFileHandler: loadEFImgTransparent fileid = " + fileid
-    //         + " filePath = " + getEFPath(EF_IMG) + " highOffset = " + highOffset
-    //         + " lowOffset = " + lowOffset + " length = " + length);
-    //
-    // /* Per TS 31.102, for displaying of Icon, under
-    //  * DF Telecom and DF Graphics , EF instance(s) (4FXX,transparent files)
-    //  * are present. The possible image file identifiers (EF instance) for
-    //  * EF img ( 4F20, linear fixed file) are : 4F01 ... 4F05.
-    //  * It should be MF_SIM + DF_TELECOM + DF_GRAPHICS, same path as EF IMG
-    //  */
-    // mCi.iccIOForApp(COMMAND_READ_BINARY, fileid, getEFPath(EF_IMG),
-    //         highOffset, lowOffset, length, null, null, mAid, response);
-    assert(0);
+    AutoPtr<IMessage> response;
+    ObtainMessage(EVENT_READ_ICON_DONE, fileid, 0,
+            onLoaded, (IMessage**)&response);
+
+    Logd(String("IccFileHandler: loadEFImgTransparent fileid = ") + StringUtils::ToString(fileid)
+        + String(" filePath = ") + GetEFPath(EF_IMG)
+        + String(" highOffset = ") + StringUtils::ToString(highOffset)
+        + String(" lowOffset = ") + StringUtils::ToString(lowOffset)
+        + String(" length = ") + StringUtils::ToString(length));
+
+    /* Per TS 31.102, for displaying of Icon, under
+     * DF Telecom and DF Graphics , EF instance(s) (4FXX,transparent files)
+     * are present. The possible image file identifiers (EF instance) for
+     * EF img ( 4F20, linear fixed file) are : 4F01 ... 4F05.
+     * It should be MF_SIM + DF_TELECOM + DF_GRAPHICS, same path as EF IMG
+     */
+    mCi->IccIOForApp(COMMAND_READ_BINARY, fileid, GetEFPath(EF_IMG),
+            highOffset, lowOffset, length, String(NULL), String(NULL), mAid, response);
     return NOERROR;
 }
 
@@ -329,11 +327,13 @@ ECode IccFileHandler::UpdateEFLinearFixed(
     /* [in] */ const String& pin2,
     /* [in] */ IMessage* onComplete)
 {
-    // ==================before translated======================
-    // mCi.iccIOForApp(COMMAND_UPDATE_RECORD, fileid, path,
-    //                 recordNum, READ_RECORD_MODE_ABSOLUTE, data.length,
-    //                 IccUtils.bytesToHexString(data), pin2, mAid, onComplete);
-    assert(0);
+    AutoPtr<IIccUtils> iccu;
+    CIccUtils::AcquireSingleton((IIccUtils**)&iccu);
+    String strData;
+    iccu->BytesToHexString(data, &strData);
+    mCi->IccIOForApp(COMMAND_UPDATE_RECORD, fileid, path,
+                    recordNum, READ_RECORD_MODE_ABSOLUTE, data->GetLength(),
+                    strData, pin2, mAid, onComplete);
     return NOERROR;
 }
 
@@ -344,11 +344,13 @@ ECode IccFileHandler::UpdateEFLinearFixed(
     /* [in] */ const String& pin2,
     /* [in] */ IMessage* onComplete)
 {
-    // ==================before translated======================
-    // mCi.iccIOForApp(COMMAND_UPDATE_RECORD, fileid, getEFPath(fileid),
-    //                 recordNum, READ_RECORD_MODE_ABSOLUTE, data.length,
-    //                 IccUtils.bytesToHexString(data), pin2, mAid, onComplete);
-    assert(0);
+    AutoPtr<IIccUtils> iccu;
+    CIccUtils::AcquireSingleton((IIccUtils**)&iccu);
+    String strData;
+    iccu->BytesToHexString(data, &strData);
+    mCi->IccIOForApp(COMMAND_UPDATE_RECORD, fileid, GetEFPath(fileid),
+                    recordNum, READ_RECORD_MODE_ABSOLUTE, data->GetLength(),
+                    strData, pin2, mAid, onComplete);
     return NOERROR;
 }
 
@@ -357,253 +359,304 @@ ECode IccFileHandler::UpdateEFTransparent(
     /* [in] */ ArrayOf<Byte>* data,
     /* [in] */ IMessage* onComplete)
 {
-    // ==================before translated======================
-    // mCi.iccIOForApp(COMMAND_UPDATE_BINARY, fileid, getEFPath(fileid),
-    //                 0, 0, data.length,
-    //                 IccUtils.bytesToHexString(data), null, mAid, onComplete);
-    assert(0);
+    AutoPtr<IIccUtils> iccu;
+    CIccUtils::AcquireSingleton((IIccUtils**)&iccu);
+    String strData;
+    iccu->BytesToHexString(data, &strData);
+    mCi->IccIOForApp(COMMAND_UPDATE_BINARY, fileid, GetEFPath(fileid),
+                    0, 0, data->GetLength(),
+                    strData, String(NULL), mAid, onComplete);
     return NOERROR;
 }
 
 ECode IccFileHandler::HandleMessage(
     /* [in] */ IMessage* msg)
 {
+    AutoPtr<AsyncResult> ar;
+    AutoPtr<IccIoResult> result;
+    AutoPtr<IMessage> response;
+    String str;
+    AutoPtr<LoadLinearFixedContext> lc;
+
+    AutoPtr<ArrayOf<Byte> > data;
+    Int32 size;
+    Int32 fileid;
+    AutoPtr<ArrayOf<Int32> > recordSize;
+    String path(NULL);
     Int32 what = 0;
     msg->GetWhat(&what);
-    Logger::D("IccFileHandler", "[TODO] HandleMessage ====================what=[%d]", what);
-    // ==================before translated======================
-    // AsyncResult ar;
-    // IccIoResult result;
-    // Message response = null;
-    // String str;
-    // LoadLinearFixedContext lc;
-    //
-    // byte data[];
-    // int size;
-    // int fileid;
-    // int recordSize[];
-    // String path = null;
-    //
+    AutoPtr<IInterface> obj;
+    msg->GetObj((IInterface**)&obj);
+    Int32 arg1 = 0;
+    msg->GetArg1(&arg1);
+
+    AutoPtr<IUiccTlvDataHelper> hlp;
+    CUiccTlvDataHelper::AcquireSingleton((IUiccTlvDataHelper**)&hlp);
+    Boolean bTlvData = FALSE;
     // try {
-    //     switch (msg.what) {
-    //     case EVENT_GET_EF_LINEAR_RECORD_SIZE_DONE:
-    //         ar = (AsyncResult)msg.obj;
-    //         lc = (LoadLinearFixedContext) ar.userObj;
-    //         result = (IccIoResult) ar.result;
-    //         response = lc.mOnLoaded;
-    //
-    //         if (processException(response, (AsyncResult) msg.obj)) {
-    //             break;
-    //         }
-    //
-    //         data = result.payload;
-    //
-    //         if (UiccTlvData.isUiccTlvData(data)) {
-    //
-    //             UiccTlvData tlvData = UiccTlvData.parse(data);
-    //
-    //             if (tlvData.isIncomplete()) {
-    //                 throw new IccFileTypeMismatch();
-    //             }
-    //
-    //             recordSize = new int[3];
-    //             recordSize[0] = tlvData.mRecordSize;
-    //             recordSize[1] = tlvData.mFileSize;
-    //             recordSize[2] = tlvData.mNumRecords;
-    //
-    //         } else if (TYPE_EF == data[RESPONSE_DATA_FILE_TYPE] &&
-    //             EF_TYPE_LINEAR_FIXED == data[RESPONSE_DATA_STRUCTURE]) {
-    //
-    //             recordSize = new int[3];
-    //             recordSize[0] = data[RESPONSE_DATA_RECORD_LENGTH] & 0xFF;
-    //             recordSize[1] = ((data[RESPONSE_DATA_FILE_SIZE_1] & 0xff) << 8)
-    //                     + (data[RESPONSE_DATA_FILE_SIZE_2] & 0xff);
-    //             recordSize[2] = recordSize[1] / recordSize[0];
-    //
-    //         } else {
-    //             throw new IccFileTypeMismatch();
-    //         }
-    //
-    //         sendResult(response, recordSize, null);
-    //         break;
-    //
-    //      case EVENT_GET_RECORD_SIZE_IMG_DONE:
-    //      case EVENT_GET_RECORD_SIZE_DONE:
-    //         ar = (AsyncResult)msg.obj;
-    //         lc = (LoadLinearFixedContext) ar.userObj;
-    //         result = (IccIoResult) ar.result;
-    //         response = lc.mOnLoaded;
-    //
-    //         if (processException(response, (AsyncResult) msg.obj)) {
-    //             break;
-    //         }
-    //
-    //         data = result.payload;
-    //         path = lc.mPath;
-    //
-    //         if (UiccTlvData.isUiccTlvData(data)) {
-    //
-    //             UiccTlvData tlvData = UiccTlvData.parse(data);
-    //
-    //             if (tlvData.isIncomplete()) {
-    //                 throw new IccFileTypeMismatch();
-    //             }
-    //
-    //             lc.mRecordSize = tlvData.mRecordSize;
-    //             lc.mCountRecords = tlvData.mNumRecords;
-    //             size = tlvData.mFileSize;
-    //
-    //         } else if (TYPE_EF == data[RESPONSE_DATA_FILE_TYPE]) {
-    //
-    //             if (EF_TYPE_LINEAR_FIXED != data[RESPONSE_DATA_STRUCTURE]) {
-    //                 throw new IccFileTypeMismatch();
-    //             }
-    //
-    //             lc.mRecordSize = data[RESPONSE_DATA_RECORD_LENGTH] & 0xFF;
-    //
-    //             size = ((data[RESPONSE_DATA_FILE_SIZE_1] & 0xff) << 8)
-    //                     + (data[RESPONSE_DATA_FILE_SIZE_2] & 0xff);
-    //
-    //             lc.mCountRecords = size / lc.mRecordSize;
-    //         } else {
-    //             throw new IccFileTypeMismatch();
-    //         }
-    //
-    //          if (lc.mLoadAll) {
-    //              lc.results = new ArrayList<byte[]>(lc.mCountRecords);
-    //          } else if (lc.mLoadPart) {
-    //              lc.initLCResults(lc.mCountRecords);
-    //          }
-    //
-    //          if (path == null) {
-    //              path = getEFPath(lc.mEfid);
-    //          }
-    //          mCi.iccIOForApp(COMMAND_READ_RECORD, lc.mEfid, path,
-    //                  lc.mRecordNum,
-    //                  READ_RECORD_MODE_ABSOLUTE,
-    //                  lc.mRecordSize, null, null, mAid,
-    //                  obtainMessage(EVENT_READ_RECORD_DONE, lc));
-    //          break;
-    //     case EVENT_GET_BINARY_SIZE_DONE:
-    //         ar = (AsyncResult)msg.obj;
-    //         response = (Message) ar.userObj;
-    //         result = (IccIoResult) ar.result;
-    //
-    //         if (processException(response, (AsyncResult) msg.obj)) {
-    //             break;
-    //         }
-    //
-    //         data = result.payload;
-    //
-    //         fileid = msg.arg1;
-    //
-    //         if (UiccTlvData.isUiccTlvData(data)) {
-    //
-    //
-    //             UiccTlvData tlvData = UiccTlvData.parse(data);
-    //
-    //             if (tlvData.mFileSize < 0) {
-    //                 throw new IccFileTypeMismatch();
-    //             }
-    //
-    //             size = tlvData.mFileSize;
-    //
-    //
-    //         } else if (TYPE_EF == data[RESPONSE_DATA_FILE_TYPE]) {
-    //
-    //             if (EF_TYPE_TRANSPARENT != data[RESPONSE_DATA_STRUCTURE]) {
-    //                 throw new IccFileTypeMismatch();
-    //             }
-    //
-    //             size = ((data[RESPONSE_DATA_FILE_SIZE_1] & 0xff) << 8)
-    //                     + (data[RESPONSE_DATA_FILE_SIZE_2] & 0xff);
-    //         } else {
-    //             throw new IccFileTypeMismatch();
-    //         }
-    //
-    //         mCi.iccIOForApp(COMMAND_READ_BINARY, fileid, getEFPath(fileid),
-    //                         0, 0, size, null, null, mAid,
-    //                         obtainMessage(EVENT_READ_BINARY_DONE,
-    //                                       fileid, 0, response));
-    //     break;
-    //
-    //     case EVENT_READ_IMG_DONE:
-    //     case EVENT_READ_RECORD_DONE:
-    //
-    //         ar = (AsyncResult)msg.obj;
-    //         lc = (LoadLinearFixedContext) ar.userObj;
-    //         result = (IccIoResult) ar.result;
-    //         response = lc.mOnLoaded;
-    //         path = lc.mPath;
-    //
-    //         if (processException(response, (AsyncResult) msg.obj)) {
-    //             break;
-    //         }
-    //
-    //         if (lc.mLoadAll) {
-    //             lc.results.add(result.payload);
-    //
-    //             lc.mRecordNum++;
-    //
-    //             if (lc.mRecordNum > lc.mCountRecords) {
-    //                 sendResult(response, lc.results, null);
-    //             } else {
-    //                 if (path == null) {
-    //                     path = getEFPath(lc.mEfid);
-    //                 }
-    //
-    //                 mCi.iccIOForApp(COMMAND_READ_RECORD, lc.mEfid, path,
-    //                             lc.mRecordNum,
-    //                             READ_RECORD_MODE_ABSOLUTE,
-    //                             lc.mRecordSize, null, null, mAid,
-    //                             obtainMessage(EVENT_READ_RECORD_DONE, lc));
-    //             }
-    //         } else if (lc.mLoadPart) {
-    //             lc.results.set(lc.mRecordNum - 1, result.payload);
-    //             lc.mCount++;
-    //             if (lc.mCount < lc.mCountLoadrecords) {
-    //                 lc.mRecordNum = lc.mRecordNums.get(lc.mCount);
-    //                 if (lc.mRecordNum <= lc.mCountRecords) {
-    //                     if (path == null) {
-    //                         path = getEFPath(lc.mEfid);
-    //                     }
-    //                     mCi.iccIOForApp(COMMAND_READ_RECORD, lc.mEfid, path, lc.mRecordNum,
-    //                             READ_RECORD_MODE_ABSOLUTE, lc.mRecordSize, null, null, mAid,
-    //                             obtainMessage(EVENT_READ_RECORD_DONE, lc));
-    //                 } else {
-    //                     sendResult(response, lc.results, null);
-    //                 }
-    //             } else {
-    //                 sendResult(response, lc.results, null);
-    //             }
-    //         }
-    //     else{
-    //         sendResult(response, result.payload, null);
-    //         }
-    //
-    //     break;
-    //
-    //     case EVENT_READ_BINARY_DONE:
-    //     case EVENT_READ_ICON_DONE:
-    //         ar = (AsyncResult)msg.obj;
-    //         response = (Message) ar.userObj;
-    //         result = (IccIoResult) ar.result;
-    //
-    //         if (processException(response, (AsyncResult) msg.obj)) {
-    //             break;
-    //         }
-    //
-    //         sendResult(response, result.payload, null);
-    //     break;
-    //
+    switch (what) {
+        case EVENT_GET_EF_LINEAR_RECORD_SIZE_DONE: {
+            ar = (AsyncResult*)(IObject*)obj.Get();
+            lc = (LoadLinearFixedContext*)(IObject*)((ar->mUserObj).Get());
+            result = (IccIoResult*)IIccIoResult::Probe(ar->mResult);
+            response = lc->mOnLoaded;
+
+            if (ProcessException(response, (AsyncResult*)(IObject*)obj.Get())) {
+                break;
+            }
+
+            data = result->mPayload;
+
+            hlp->IsUiccTlvData(data, &bTlvData);
+            if (bTlvData) {
+
+                AutoPtr<IUiccTlvData> tlvData;
+                hlp->Parse(data, (IUiccTlvData**)&tlvData);
+
+                Boolean bComplete = FALSE;
+                tlvData->IsIncomplete(&bComplete);
+                if (bComplete) {
+                    // throw new IccFileTypeMismatch();
+                    return E_ILLEGAL_ARGUMENT_EXCEPTION;
+                }
+
+                recordSize = ArrayOf<Int32>::Alloc(3);
+                AutoPtr<UiccTlvData> _tlvData = (UiccTlvData*)tlvData.Get();
+                (*recordSize)[0] = _tlvData->mRecordSize;
+                (*recordSize)[1] = _tlvData->mFileSize;
+                (*recordSize)[2] = _tlvData->mNumRecords;
+
+            }
+            else if (TYPE_EF == (*data)[RESPONSE_DATA_FILE_TYPE] &&
+                EF_TYPE_LINEAR_FIXED == (*data)[RESPONSE_DATA_STRUCTURE]) {
+
+                recordSize = ArrayOf<Int32>::Alloc(3);
+                (*recordSize)[0] = (*data)[RESPONSE_DATA_RECORD_LENGTH] & 0xFF;
+                (*recordSize)[1] = (((*data)[RESPONSE_DATA_FILE_SIZE_1] & 0xff) << 8)
+                        + ((*data)[RESPONSE_DATA_FILE_SIZE_2] & 0xff);
+                (*recordSize)[2] = (*recordSize)[1] / (*recordSize)[0];
+
+            }
+            else {
+                // throw new IccFileTypeMismatch();
+                return E_ILLEGAL_ARGUMENT_EXCEPTION;
+            }
+
+            assert(0 && "TODO");
+            // SendResult(response, recordSize);
+            break;
+        }
+        case EVENT_GET_RECORD_SIZE_IMG_DONE:
+        case EVENT_GET_RECORD_SIZE_DONE: {
+            ar = (AsyncResult*)(IObject*)obj.Get();
+            lc = (LoadLinearFixedContext*)(IObject*)((ar->mUserObj).Get());
+            result = (IccIoResult*)IIccIoResult::Probe(ar->mResult);
+            response = lc->mOnLoaded;
+
+            if (ProcessException(response, (AsyncResult*)(IObject*)obj.Get())) {
+                break;
+            }
+
+            data = result->mPayload;
+            path = lc->mPath;
+
+            hlp->IsUiccTlvData(data, &bTlvData);
+            if (bTlvData) {
+
+                AutoPtr<IUiccTlvData> tlvData;
+                hlp->Parse(data, (IUiccTlvData**)&tlvData);
+
+                Boolean bComplete = FALSE;
+                tlvData->IsIncomplete(&bComplete);
+                if (bComplete) {
+                    // throw new IccFileTypeMismatch();
+                    return E_ILLEGAL_ARGUMENT_EXCEPTION;
+                }
+
+                AutoPtr<UiccTlvData> _tlvData = (UiccTlvData*)tlvData.Get();
+                lc->mRecordSize = _tlvData->mRecordSize;
+                lc->mCountRecords = _tlvData->mNumRecords;
+                size = _tlvData->mFileSize;
+
+            }
+            else if (TYPE_EF == (*data)[RESPONSE_DATA_FILE_TYPE]) {
+
+                if (EF_TYPE_LINEAR_FIXED != (*data)[RESPONSE_DATA_STRUCTURE]) {
+                    // throw new IccFileTypeMismatch();
+                    return E_ILLEGAL_ARGUMENT_EXCEPTION;
+                }
+
+                lc->mRecordSize = (*data)[RESPONSE_DATA_RECORD_LENGTH] & 0xFF;
+
+                size = (((*data)[RESPONSE_DATA_FILE_SIZE_1] & 0xff) << 8)
+                        + ((*data)[RESPONSE_DATA_FILE_SIZE_2] & 0xff);
+
+                lc->mCountRecords = size / lc->mRecordSize;
+            }
+            else {
+                // throw new IccFileTypeMismatch();
+                return E_ILLEGAL_ARGUMENT_EXCEPTION;
+            }
+
+            if (lc->mLoadAll) {
+                CArrayList::New(lc->mCountRecords, (IArrayList**)&(lc->mResults));
+            }
+            else if (lc->mLoadPart) {
+                lc->InitLCResults(lc->mCountRecords);
+            }
+
+            if (path == NULL) {
+                path = GetEFPath(lc->mEfid);
+            }
+            AutoPtr<IMessage> msg;
+            ObtainMessage(EVENT_READ_RECORD_DONE, (IObject*)lc.Get(), (IMessage**)&msg);
+            mCi->IccIOForApp(COMMAND_READ_RECORD, lc->mEfid, path,
+                    lc->mRecordNum,
+                    READ_RECORD_MODE_ABSOLUTE,
+                    lc->mRecordSize, String(NULL), String(NULL), mAid,
+                    msg);
+            break;
+        }
+        case EVENT_GET_BINARY_SIZE_DONE: {
+            ar = (AsyncResult*)(IObject*)obj.Get();
+            response = IMessage::Probe(ar->mUserObj);
+            result = (IccIoResult*)IIccIoResult::Probe(ar->mResult);
+
+            if (ProcessException(response, ar)) {
+                break;
+            }
+
+            data = result->mPayload;
+
+            fileid = arg1;
+
+            hlp->IsUiccTlvData(data, &bTlvData);
+            if (bTlvData) {
+                AutoPtr<IUiccTlvData> tlvData;
+                hlp->Parse(data, (IUiccTlvData**)&tlvData);
+
+                AutoPtr<UiccTlvData> _tlvData = (UiccTlvData*)tlvData.Get();
+                if (_tlvData->mFileSize < 0) {
+                    // throw new IccFileTypeMismatch();
+                    return E_ILLEGAL_ARGUMENT_EXCEPTION;
+                }
+
+                size = _tlvData->mFileSize;
+
+            }
+            else if (TYPE_EF == (*data)[RESPONSE_DATA_FILE_TYPE]) {
+
+                if (EF_TYPE_TRANSPARENT != (*data)[RESPONSE_DATA_STRUCTURE]) {
+                    // throw new IccFileTypeMismatch();
+                    return E_ILLEGAL_ARGUMENT_EXCEPTION;
+                }
+
+                size = (((*data)[RESPONSE_DATA_FILE_SIZE_1] & 0xff) << 8)
+                        + ((*data)[RESPONSE_DATA_FILE_SIZE_2] & 0xff);
+            }
+            else {
+                // throw new IccFileTypeMismatch();
+                return E_ILLEGAL_ARGUMENT_EXCEPTION;
+            }
+
+            AutoPtr<IMessage> msg;
+            ObtainMessage(EVENT_READ_BINARY_DONE,
+                        fileid, 0, response,
+                        (IMessage**)&msg);
+            mCi->IccIOForApp(COMMAND_READ_BINARY, fileid, GetEFPath(fileid),
+                            0, 0, size, String(NULL), String(NULL), mAid,
+                            msg);
+        break;
+        }
+        case EVENT_READ_IMG_DONE:
+        case EVENT_READ_RECORD_DONE: {
+            ar = (AsyncResult*)(IObject*)obj.Get();
+            lc = (LoadLinearFixedContext*)(IObject*)(ar->mUserObj.Get());
+            result = (IccIoResult*)IIccIoResult::Probe(ar->mResult);
+            response = lc->mOnLoaded;
+            path = lc->mPath;
+
+            if (ProcessException(response, ar)) {
+                break;
+            }
+
+            if (lc->mLoadAll) {
+                assert(0 && "TODO");
+                // lc->mResults->Add(result->mPayload);
+
+                lc->mRecordNum++;
+
+                if (lc->mRecordNum > lc->mCountRecords) {
+                    SendResult(response, lc->mResults);
+                }
+                else {
+                    if (path == NULL) {
+                        path = GetEFPath(lc->mEfid);
+                    }
+
+                    AutoPtr<IMessage> msg;
+                    ObtainMessage(EVENT_READ_RECORD_DONE, (IObject*)lc.Get(), (IMessage**)&msg);
+                    mCi->IccIOForApp(COMMAND_READ_RECORD, lc->mEfid, path,
+                                lc->mRecordNum,
+                                READ_RECORD_MODE_ABSOLUTE,
+                                lc->mRecordSize, String(NULL), String(NULL), mAid,
+                                msg);
+                }
+            }
+            else if (lc->mLoadPart) {
+                assert(0 && "TODO");
+                // lc->mResults->Set(lc->mRecordNum - 1, result->mPayload);
+                lc->mCount++;
+                if (lc->mCount < lc->mCountLoadrecords) {
+                    AutoPtr<IInterface> p;
+                    lc->mRecordNums->Get(lc->mCount, (IInterface**)&p);
+                    IInteger32::Probe(p)->GetValue(&(lc->mRecordNum));
+                    if (lc->mRecordNum <= lc->mCountRecords) {
+                        if (path == NULL) {
+                            path = GetEFPath(lc->mEfid);
+                        }
+                        AutoPtr<IMessage> msg;
+                        ObtainMessage(EVENT_READ_RECORD_DONE, (IObject*)lc.Get(), (IMessage**)&msg);
+                        mCi->IccIOForApp(COMMAND_READ_RECORD, lc->mEfid, path, lc->mRecordNum,
+                                READ_RECORD_MODE_ABSOLUTE, lc->mRecordSize, String(NULL), String(NULL),
+                                mAid, msg);
+                    }
+                    else {
+                        SendResult(response, lc->mResults);
+                    }
+                }
+                else {
+                    SendResult(response, lc->mResults);
+                }
+            }
+            else {
+                assert(0 && "TODO");
+                // SendResult(response, result->mPayload);
+            }
+        }
+        break;
+        case EVENT_READ_BINARY_DONE:
+        case EVENT_READ_ICON_DONE: {
+            ar = (AsyncResult*)(IObject*)obj.Get();
+            response = IMessage::Probe(ar->mUserObj);
+            result = (IccIoResult*)IIccIoResult::Probe(ar->mResult);
+
+            if (ProcessException(response, ar)) {
+                break;
+            }
+
+            assert(0 && "TODO");
+            // SendResult(response, result->mPayload);
+        break;
+        }
+    }
     // }} catch (Exception exc) {
-    //     if (response != null) {
-    //         sendResult(response, null, exc);
+    //     if (response != NULL) {
+    //         sendResult(response, NULL, exc);
     //     } else {
     //         loge("uncaught exception" + exc);
     //     }
     // }
-    // assert(0);
     return NOERROR;
 }
 
@@ -647,40 +700,38 @@ String IccFileHandler::GetCommonIccEFPath(
 void IccFileHandler::SendResult(
     /* [in] */ IMessage* response,
     /* [in] */ IInterface* result)
-    ///* [in] */ Throwable* ex)
 {
-    // ==================before translated======================
-    // if (response == null) {
-    //     return;
-    // }
-    //
-    // AsyncResult.forMessage(response, result, ex);
-    //
-    // response.sendToTarget();
-    assert(0);
+    if (response == NULL) {
+        return;
+    }
+
+    assert(0 && "TODO");
+    // AsyncResult::ForMessage(response, result, ex);
+
+    response->SendToTarget();
 }
 
 Boolean IccFileHandler::ProcessException(
     /* [in] */ IMessage* response,
     /* [in] */ AsyncResult* ar)
 {
-    // ==================before translated======================
-    // IccException iccException;
-    // boolean flag = false;
-    // IccIoResult result = (IccIoResult) ar.result;
-    // if (ar.exception != null) {
-    //     sendResult(response, null, ar.exception);
-    //     flag = true;
-    // } else {
-    //     iccException = result.getException();
-    //     if (iccException != null) {
-    //         sendResult(response, null, iccException);
-    //         flag = true;
-    //     }
-    // }
-    // return flag;
-    assert(0);
-    return FALSE;
+    AutoPtr<IIccException> iccException;
+    Boolean flag = FALSE;
+    AutoPtr<IIccIoResult> result = IIccIoResult::Probe(ar->mResult);
+    if (ar->mException != NULL) {
+        // SendResult(response, NULL, ar->mException);
+        SendResult(response, NULL);
+        flag = TRUE;
+    }
+    else {
+        result->GetException((IIccException**)&iccException);
+        if (iccException != NULL) {
+            // SendResult(response, NULL, iccException);
+            SendResult(response, NULL);
+            flag = TRUE;
+        }
+    }
+    return flag;
 }
 
 } // namespace Uicc

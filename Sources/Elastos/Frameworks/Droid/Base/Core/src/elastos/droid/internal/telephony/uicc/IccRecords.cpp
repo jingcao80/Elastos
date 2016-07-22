@@ -1,21 +1,45 @@
 #include "Elastos.CoreLibrary.Utility.Concurrent.h"
+#include "Elastos.CoreLibrary.IO.h"
 #include "Elastos.Droid.Content.h"
 #include "Elastos.Droid.Internal.h"
 #include "elastos/droid/os/AsyncResult.h"
 #include "elastos/droid/os/CRegistrant.h"
 #include "elastos/droid/os/RegistrantList.h"
 #include "elastos/droid/internal/telephony/uicc/IccRecords.h"
-#include "elastos/core/CoreUtils.h"
-#include <elastos/utility/logging/Logger.h>
+#include "elastos/droid/content/CIntent.h"
+#include "elastos/droid/internal/telephony/uicc/CAdnRecord.h"
+#include "elastos/droid/internal/telephony/uicc/CAdnRecordLoader.h"
+#include "elastos/droid/internal/telephony/uicc/CIccRefreshResponse.h"
+#include "elastos/droid/internal/telephony/uicc/CIccCardApplicationStatus.h"
+#include "elastos/droid/internal/telephony/uicc/CUiccControllerHelper.h"
+#include "elastos/droid/internal/telephony/uicc/CIccRefreshResponse.h"
+#include "elastos/droid/internal/telephony/CSubscriptionControllerHelper.h"
+#include "elastos/droid/telephony/CTelephonyManagerHelper.h"
+#include "elastos/droid/os/CRegistrant.h"
+#include "elastos/droid/R.h"
 
-using Elastos::Droid::Os::AsyncResult;
-using Elastos::Droid::Os::Registrant;
-using Elastos::Droid::Os::CRegistrant;
+#include <elastos/core/CoreUtils.h>
+#include <elastos/core/StringUtils.h>
+#include <elastos/core/AutoLock.h>
+
+using Elastos::Droid::Content::CIntent;
+using Elastos::Droid::Content::IIntent;
+using Elastos::Droid::Content::Res::IResources;
 using Elastos::Droid::Os::IRegistrant;
-using Elastos::Droid::Os::RegistrantList;
+using Elastos::Droid::Os::CRegistrant;
+using Elastos::Droid::Internal::Telephony::CSubscriptionControllerHelper;
+using Elastos::Droid::Telephony::ITelephonyManager;
+using Elastos::Droid::Telephony::ITelephonyManagerHelper;
+using Elastos::Droid::Telephony::CTelephonyManagerHelper;
+using Elastos::Droid::R;
+
 using Elastos::Core::CoreUtils;
-using Elastos::Utility::Concurrent::Atomic::CAtomicBoolean;
-using Elastos::Utility::Logging::Logger;
+using Elastos::Core::StringUtils;
+using Elastos::Core::AutoLock;
+using Elastos::IO::IFlushable;
+using Elastos::IO::IByteBuffer;
+using Elastos::IO::IByteBufferHelper;
+using Elastos::IO::CByteBufferHelper;
 
 namespace Elastos {
 namespace Droid {
@@ -63,18 +87,20 @@ ECode IccRecords::constructor(
     /* [in] */ IContext* c,
     /* [in] */ ICommandsInterface* ci)
 {
-    // ==================before translated======================
-    // mContext = c;
-    // mCi = ci;
-    // mFh = app.getIccFileHandler();
-    // mParentApp = app;
-    // mOEMHookSimRefresh = mContext.getResources().getBoolean(
-    //         com.android.internal.R.bool.config_sim_refresh_for_dual_mode_card);
-    // if (mOEMHookSimRefresh) {
-    //     mCi.registerForSimRefreshEvent(this, EVENT_REFRESH_OEM, null);
-    // } else {
-    //     mCi.registerForIccRefresh(this, EVENT_REFRESH, null);
-    // }
+    mContext = c;
+    mCi = ci;
+    app->GetIccFileHandler((IIccFileHandler**)&mFh);
+    mParentApp = app;
+    AutoPtr<IResources> res;
+    mContext->GetResources((IResources**)&res);
+    res->GetBoolean(
+            R::bool_::config_sim_refresh_for_dual_mode_card, &mOEMHookSimRefresh);
+    if (mOEMHookSimRefresh) {
+        mCi->RegisterForSimRefreshEvent(this, EVENT_REFRESH_OEM, NULL);
+    }
+    else {
+        mCi->RegisterForIccRefresh(this, EVENT_REFRESH, NULL);
+    }
     return NOERROR;
 }
 
@@ -82,57 +108,54 @@ ECode IccRecords::ToString(
     /* [out] */ String* result)
 {
     VALIDATE_NOT_NULL(result);
-    // ==================before translated======================
-    // return "mDestroyed=" + mDestroyed
-    //         + " mContext=" + mContext
-    //         + " mCi=" + mCi
-    //         + " mFh=" + mFh
-    //         + " mParentApp=" + mParentApp
-    //         + " recordsLoadedRegistrants=" + mRecordsLoadedRegistrants
-    //         + " mImsiReadyRegistrants=" + mImsiReadyRegistrants
-    //         + " mRecordsEventsRegistrants=" + mRecordsEventsRegistrants
-    //         + " mNewSmsRegistrants=" + mNewSmsRegistrants
-    //         + " mNetworkSelectionModeAutomaticRegistrants="
+    assert(0 && "TODO");
+    // *result = String("mDestroyed=") + mDestroyed
+    //         + String(" mContext=") + mContext
+    //         + String(" mCi=") + mCi
+    //         + String(" mFh=") + mFh
+    //         + String(" mParentApp=") + mParentApp
+    //         + String(" recordsLoadedRegistrants=") + mRecordsLoadedRegistrants
+    //         + String(" mImsiReadyRegistrants=") + mImsiReadyRegistrants
+    //         + String(" mRecordsEventsRegistrants=") + mRecordsEventsRegistrants
+    //         + String(" mNewSmsRegistrants=") + mNewSmsRegistrants
+    //         + String(" mNetworkSelectionModeAutomaticRegistrants=")
     //                 + mNetworkSelectionModeAutomaticRegistrants
-    //         + " recordsToLoad=" + mRecordsToLoad
-    //         + " adnCache=" + mAdnCache
-    //         + " recordsRequested=" + mRecordsRequested
-    //         + " iccid=" + mIccId
-    //         + " msisdn=" + mMsisdn
-    //         + " msisdnTag=" + mMsisdnTag
-    //         + " voiceMailNum=" + mVoiceMailNum
-    //         + " voiceMailTag=" + mVoiceMailTag
-    //         + " newVoiceMailNum=" + mNewVoiceMailNum
-    //         + " newVoiceMailTag=" + mNewVoiceMailTag
-    //         + " isVoiceMailFixed=" + mIsVoiceMailFixed
-    //         + " mImsi=" + mImsi
-    //         + " mncLength=" + mMncLength
-    //         + " mailboxIndex=" + mMailboxIndex
-    //         + " spn=" + mSpn;
-    assert(0);
+    //         + String(" recordsToLoad=") + StringUtils::ToString(mRecordsToLoad)
+    //         + String(" adnCache=") + mAdnCache
+    //         + String(" recordsRequested=") + StringUtils::ToString(mRecordsRequested)
+    //         + String(" iccid=") + mIccId
+    //         + String(" msisdn=") + mMsisdn
+    //         + String(" msisdnTag=") + mMsisdnTag
+    //         + String(" voiceMailNum=") + mVoiceMailNum
+    //         + String(" voiceMailTag=") + mVoiceMailTag
+    //         + String(" newVoiceMailNum=") + mNewVoiceMailNum
+    //         + String(" newVoiceMailTag=") + mNewVoiceMailTag
+    //         + String(" isVoiceMailFixed=") + StringUtils::ToString(mIsVoiceMailFixed)
+    //         + String(" mImsi=") + mImsi
+    //         + String(" mncLength=") + StringUtils::ToString(mMncLength)
+    //         + String(" mailboxIndex=") + StringUtils::ToString(mMailboxIndex)
+    //         + String(" spn=") + mSpn;
     return NOERROR;
 }
 
 ECode IccRecords::Dispose()
 {
-    // ==================before translated======================
-    // mDestroyed.set(true);
-    // if (mOEMHookSimRefresh) {
-    //     mCi.unregisterForSimRefreshEvent(this);
-    // } else {
-    //     mCi.unregisterForIccRefresh(this);
-    // }
-    // mParentApp = null;
-    // mFh = null;
-    // mCi = null;
-    // mContext = null;
-    assert(0);
+    mDestroyed->Set(TRUE);
+    if (mOEMHookSimRefresh) {
+        mCi->UnregisterForSimRefreshEvent(this);
+    }
+    else {
+        mCi->UnregisterForIccRefresh(this);
+    }
+    mParentApp = NULL;
+    mFh = NULL;
+    mCi = NULL;
+    mContext = NULL;
     return NOERROR;
 }
 
 ECode IccRecords::RecordsRequired()
 {
-    // return;
     return NOERROR;
 }
 
@@ -158,18 +181,18 @@ ECode IccRecords::RegisterForRecordsLoaded(
     /* [in] */ Int32 what,
     /* [in] */ IInterface* obj)
 {
-    Boolean bv;
-    if (mDestroyed->Get(&bv), bv) {
+    Boolean bDestroyed = FALSE;
+    mDestroyed->Get(&bDestroyed);
+    if (bDestroyed) {
         return NOERROR;
     }
 
     for (Int32 i = mRecordsLoadedRegistrants->GetSize() - 1; i >= 0 ; i--) {
-        AutoPtr<IInterface> obj = mRecordsLoadedRegistrants->Get(i);
-        Registrant*  r = (Registrant*) IRegistrant::Probe(obj);
+        AutoPtr<IRegistrant> r = IRegistrant::Probe(mRecordsLoadedRegistrants->Get(i));
         AutoPtr<IHandler> rH;
         r->GetHandler((IHandler**)&rH);
 
-        if (rH != NULL && rH.Get() == h) {//TODO is the == right??
+        if (rH != NULL && Object::Equals(rH, h)) {
             return NOERROR;
         }
     }
@@ -178,7 +201,8 @@ ECode IccRecords::RegisterForRecordsLoaded(
     mRecordsLoadedRegistrants->Add(r);
 
     if (mRecordsToLoad == 0 && mRecordsRequested == TRUE) {
-        r->NotifyRegistrant(new AsyncResult(NULL, NULL, NULL));
+        AutoPtr<AsyncResult> p = new AsyncResult(NULL, NULL, NULL);
+        r->NotifyRegistrant(p);
     }
     return NOERROR;
 }
@@ -195,8 +219,9 @@ ECode IccRecords::RegisterForImsiReady(
     /* [in] */ Int32 what,
     /* [in] */ IInterface* obj)
 {
-    Boolean bv;
-    if (mDestroyed->Get(&bv), bv) {
+    Boolean bDestroyed = FALSE;
+    mDestroyed->Get(&bDestroyed);
+    if (bDestroyed) {
         return NOERROR;
     }
 
@@ -205,7 +230,8 @@ ECode IccRecords::RegisterForImsiReady(
     mImsiReadyRegistrants->Add(r);
 
     if (mImsi != NULL) {
-        r->NotifyRegistrant(new AsyncResult(NULL, NULL, NULL));
+        AutoPtr<AsyncResult> p = new AsyncResult(NULL, NULL, NULL);
+        r->NotifyRegistrant(p);
     }
     return NOERROR;
 }
@@ -226,8 +252,8 @@ ECode IccRecords::RegisterForRecordsEvents(
     CRegistrant::New(h, what, obj, (IRegistrant**)&r);
     mRecordsEventsRegistrants->Add(r);
 
-    // /* Notify registrant of all the possible events. This is to make sure registrant is
-    // notified even if event occurred in the past. */
+    /* Notify registrant of all the possible events. This is to make sure registrant is
+    notified even if event occurred in the past. */
     r->NotifyResult(CoreUtils::Convert(EVENT_MWI));
     r->NotifyResult(CoreUtils::Convert(EVENT_CFI));
     return NOERROR;
@@ -313,19 +339,19 @@ ECode IccRecords::SetMsisdnNumber(
     /* [in] */ const String& number,
     /* [in] */ IMessage* onComplete)
 {
-    // ==================before translated======================
-    //
-    // mMsisdn = number;
-    // mMsisdnTag = alphaTag;
-    //
-    // if (DBG) log("Set MSISDN: " + mMsisdnTag +" " + mMsisdn);
-    //
-    //
-    // AdnRecord adn = new AdnRecord(mMsisdnTag, mMsisdn);
-    //
-    // new AdnRecordLoader(mFh).updateEF(adn, EF_MSISDN, EF_EXT1, 1, null,
-    //         obtainMessage(EVENT_SET_MSISDN_DONE, onComplete));
-    assert(0);
+    mMsisdn = number;
+    mMsisdnTag = alphaTag;
+
+    if (DBG) Log(String("Set MSISDN: ") + mMsisdnTag + String(" ") + mMsisdn);
+
+    AutoPtr<IAdnRecord> adn;
+    CAdnRecord::New(mMsisdnTag, mMsisdn, (IAdnRecord**)&adn);
+
+    AutoPtr<IAdnRecordLoader> p;
+    CAdnRecordLoader::New(mFh, (IAdnRecordLoader**)&p);
+    AutoPtr<IMessage> msg;
+    ObtainMessage(EVENT_SET_MSISDN_DONE, onComplete, (IMessage**)&msg);
+    p->UpdateEF(adn, EF_MSISDN, EF_EXT1, 1, String(NULL), msg);
     return NOERROR;
 }
 
@@ -333,9 +359,7 @@ ECode IccRecords::GetMsisdnAlphaTag(
     /* [out] */ String* result)
 {
     VALIDATE_NOT_NULL(result);
-    // ==================before translated======================
-    // return mMsisdnTag;
-    assert(0);
+    *result = mMsisdnTag;
     return NOERROR;
 }
 
@@ -343,9 +367,7 @@ ECode IccRecords::GetVoiceMailNumber(
     /* [out] */ String* result)
 {
     VALIDATE_NOT_NULL(result);
-    // ==================before translated======================
-    // return mVoiceMailNum;
-    assert(0);
+    *result = mVoiceMailNum;
     return NOERROR;
 }
 
@@ -354,31 +376,35 @@ ECode IccRecords::GetServiceProviderName(
 {
     Logger::E("IccRecords", "TODO GetServiceProviderName ");
     VALIDATE_NOT_NULL(result);
-    *result = String("leliangTest");
-    // ==================before translated======================
-    // String providerName = mSpn;
-    //
-    // // Check for null pointers, mParentApp can be null after dispose,
-    // // which did occur after removing a SIM.
-    // UiccCardApplication parentApp = mParentApp;
-    // if (parentApp != null) {
-    //     UiccCard card = parentApp.getUiccCard();
-    //     if (card != null) {
-    //         String brandOverride = card.getOperatorBrandOverride();
-    //         if (brandOverride != null) {
-    //             log("getServiceProviderName: override");
-    //             providerName = brandOverride;
-    //         } else {
-    //             log("getServiceProviderName: no brandOverride");
-    //         }
-    //     } else {
-    //         log("getServiceProviderName: card is null");
-    //     }
-    // } else {
-    //     log("getServiceProviderName: mParentApp is null");
-    // }
-    // log("getServiceProviderName: providerName=" + providerName);
-    // return providerName;
+    String providerName = mSpn;
+
+    // Check for NULL pointers, mParentApp can be NULL after dispose,
+    // which did occur after removing a SIM.
+    AutoPtr<IUiccCardApplication> parentApp = mParentApp;
+    if (parentApp != NULL) {
+        AutoPtr<IUiccCard> card;
+        assert(0 && "TODO");
+        // parentApp->GetUiccCard((IUiccCard**)&card);
+        if (card != NULL) {
+            String brandOverride;
+            card->GetOperatorBrandOverride(&brandOverride);
+            if (brandOverride != NULL) {
+                Log(String("getServiceProviderName: override"));
+                providerName = brandOverride;
+            }
+            else {
+                Log(String("getServiceProviderName: no brandOverride"));
+            }
+        }
+        else {
+            Log(String("getServiceProviderName: card is NULL"));
+        }
+    }
+    else {
+        Log(String("getServiceProviderName: mParentApp is NULL"));
+    }
+    Log(String("getServiceProviderName: providerName=") + providerName);
+    *result = providerName;
     return NOERROR;
 }
 
@@ -386,9 +412,7 @@ ECode IccRecords::GetVoiceMailAlphaTag(
     /* [out] */ String* result)
 {
     VALIDATE_NOT_NULL(result);
-    // ==================before translated======================
-    // return mVoiceMailTag;
-    assert(0);
+    *result = mVoiceMailTag;
     return NOERROR;
 }
 
@@ -396,107 +420,129 @@ ECode IccRecords::GetRecordsLoaded(
     /* [out] */ Boolean* result)
 {
     VALIDATE_NOT_NULL(result);
-    // ==================before translated======================
-    // if (mRecordsToLoad == 0 && mRecordsRequested == true) {
-    //     return true;
-    // } else {
-    //     return false;
-    // }
-    assert(0);
+    if (mRecordsToLoad == 0 && mRecordsRequested == TRUE) {
+        *result = TRUE;
+    }
+    else {
+        *result = FALSE;
+    }
     return NOERROR;
 }
 
 ECode IccRecords::HandleMessage(
     /* [in] */ IMessage* msg)
 {
-    // ==================before translated======================
-    // AsyncResult ar;
-    // switch (msg.what) {
-    //     case EVENT_GET_ICC_RECORD_DONE:
-    //         try {
-    //             ar = (AsyncResult) msg.obj;
-    //             IccRecordLoaded recordLoaded = (IccRecordLoaded) ar.userObj;
-    //             if (DBG) log(recordLoaded.getEfName() + " LOADED");
-    //
-    //             if (ar.exception != null) {
-    //                 loge("Record Load Exception: " + ar.exception);
-    //             } else {
-    //                 recordLoaded.onRecordLoaded(ar);
-    //             }
-    //         }catch (RuntimeException exc) {
-    //             // I don't want these exceptions to be fatal
-    //             loge("Exception parsing SIM record: " + exc);
-    //         } finally {
-    //             // Count up record load responses even if they are fails
-    //             onRecordLoaded();
-    //         }
-    //         break;
-    //     case EVENT_REFRESH:
-    //         ar = (AsyncResult)msg.obj;
-    //         if (DBG) log("Card REFRESH occurred: ");
-    //         if (ar.exception == null) {
-    //              broadcastRefresh();
-    //              handleRefresh((IccRefreshResponse)ar.result);
-    //         } else {
-    //             loge("Icc refresh Exception: " + ar.exception);
-    //         }
-    //         break;
-    //     case EVENT_REFRESH_OEM:
-    //         ar = (AsyncResult)msg.obj;
-    //         if (DBG) log("Card REFRESH OEM occurred: ");
-    //         if (ar.exception == null) {
-    //             handleRefreshOem((byte[])ar.result);
-    //         } else {
-    //             loge("Icc refresh OEM Exception: " + ar.exception);
-    //         }
-    //         break;
-    //
-    //     case EVENT_AKA_AUTHENTICATE_DONE:
-    //         ar = (AsyncResult)msg.obj;
-    //         auth_rsp = null;
-    //         if (DBG) log("EVENT_AKA_AUTHENTICATE_DONE");
-    //         if (ar.exception != null) {
-    //             loge("Exception ICC SIM AKA: " + ar.exception);
-    //         } else {
-    //             try {
-    //                 auth_rsp = (IccIoResult)ar.result;
-    //                 if (DBG) log("ICC SIM AKA: auth_rsp = " + auth_rsp);
-    //             } catch (Exception e) {
-    //                 loge("Failed to parse ICC SIM AKA contents: " + e);
-    //             }
-    //         }
-    //         synchronized (mLock) {
-    //             mLock.notifyAll();
-    //         }
-    //
-    //         break;
-    //     case EVENT_GET_SMS_RECORD_SIZE_DONE:
-    //         ar = (AsyncResult) msg.obj;
-    //
-    //         if (ar.exception != null) {
-    //             loge("Exception in EVENT_GET_SMS_RECORD_SIZE_DONE " + ar.exception);
-    //             break;
-    //         }
-    //
-    //         int[] recordSize = (int[])ar.result;
-    //         try {
-    //             // recordSize[0]  is the record length
-    //             // recordSize[1]  is the total length of the EF file
-    //             // recordSize[2]  is the number of records in the EF file
-    //             mSmsCountOnIcc = recordSize[2];
-    //             log("EVENT_GET_SMS_RECORD_SIZE_DONE Size " + recordSize[0]
-    //                     + " total " + recordSize[1]
-    //                             + " record " + recordSize[2]);
-    //         } catch (ArrayIndexOutOfBoundsException exc) {
-    //             loge("ArrayIndexOutOfBoundsException in EVENT_GET_SMS_RECORD_SIZE_DONE: "
-    //                     + exc.toString());
-    //         }
-    //         break;
-    //
-    //     default:
-    //         super.handleMessage(msg);
-    // }
-    assert(0);
+    Int32 what = 0;
+    msg->GetWhat(&what);
+    AutoPtr<IInterface> obj;
+    msg->GetObj((IInterface**)&obj);
+
+    AutoPtr<AsyncResult> ar;
+    switch (what) {
+        case EVENT_GET_ICC_RECORD_DONE: {
+            // try {
+                ar = (AsyncResult*)(IObject*)obj.Get();
+                AutoPtr<IIccRecordLoaded> recordLoaded = IIccRecordLoaded::Probe(ar->mUserObj);
+                if (DBG) {
+                    String name;
+                    recordLoaded->GetEfName(&name);
+                    Log(name + String(" LOADED"));
+                }
+
+                if (ar->mException != NULL) {
+                    assert(0 && "TODO");
+                    // Loge(String("Record Load Exception: ") + ar->mException);
+                }
+                else {
+                    assert(0 && "TODO");
+                    // recordLoaded->OnRecordLoaded(ar);
+                }
+            // }catch (RuntimeException exc) {
+            //     // I don't want these exceptions to be fatal
+            //     loge("Exception parsing SIM record: " + exc);
+            // } finally {
+                // Count up record load responses even if they are fails
+                OnRecordLoaded();
+            // }
+            break;
+        }
+        case EVENT_REFRESH: {
+            ar = (AsyncResult*)(IObject*)obj.Get();
+            if (DBG) Log(String("Card REFRESH occurred: "));
+            if (ar->mException == NULL) {
+                BroadcastRefresh();
+                HandleRefresh(IIccRefreshResponse::Probe(ar->mResult));
+            }
+            else {
+                assert(0 && "TODO");
+                // Loge(String("Icc refresh Exception: ") + ar->mException);
+            }
+            break;
+        }
+        case EVENT_REFRESH_OEM: {
+            ar = (AsyncResult*)(IObject*)obj.Get();
+            if (DBG) Log(String("Card REFRESH OEM occurred: "));
+            if (ar->mException == NULL) {
+                assert(0 && "TODO");
+                // HandleRefreshOem((byte[])ar->mResult);
+            }
+            else {
+                assert(0 && "TODO");
+                // Loge(String("Icc refresh OEM Exception: ") + ar->mException);
+            }
+            break;
+        }
+        case EVENT_AKA_AUTHENTICATE_DONE: {
+            ar = (AsyncResult*)(IObject*)obj.Get();
+            auth_rsp = NULL;
+            if (DBG) Log(String("EVENT_AKA_AUTHENTICATE_DONE"));
+            if (ar->mException != NULL) {
+                assert(0 && "TODO");
+                // Loge(String("Exception ICC SIM AKA: ") + ar->mException);
+            }
+            else {
+                // try {
+                    auth_rsp = IIccIoResult::Probe(ar->mResult);
+                    assert(0 && "TODO");
+                    // if (DBG) Log(String("ICC SIM AKA: auth_rsp = ") + auth_rsp);
+                // } catch (Exception e) {
+                //     loge("Failed to parse ICC SIM AKA contents: " + e);
+                // }
+            }
+            {
+                AutoLock lock(mLock);
+                mLock.NotifyAll();
+            }
+
+            break;
+        }
+        case EVENT_GET_SMS_RECORD_SIZE_DONE: {
+            ar = (AsyncResult*)(IObject*)obj.Get();
+            if (ar->mException != NULL) {
+                assert(0 && "TODO");
+                // Loge(String("Exception in EVENT_GET_SMS_RECORD_SIZE_DONE ") + ar->mException);
+                break;
+            }
+
+            assert(0 && "TODO");
+            AutoPtr<ArrayOf<Int32> > recordSize; // = (Int32[])ar->mResult;
+            // try {
+                // recordSize[0]  is the record length
+                // recordSize[1]  is the total length of the EF file
+                // recordSize[2]  is the number of records in the EF file
+                mSmsCountOnIcc = (*recordSize)[2];
+                Log(String("EVENT_GET_SMS_RECORD_SIZE_DONE Size ") + StringUtils::ToString((*recordSize)[0])
+                        + String(" total ") + StringUtils::ToString((*recordSize)[1])
+                        + String(" record ") + StringUtils::ToString((*recordSize)[2]));
+            // } catch (ArrayIndexOutOfBoundsException exc) {
+            //     loge("ArrayIndexOutOfBoundsException in EVENT_GET_SMS_RECORD_SIZE_DONE: "
+            //             + exc.toString());
+            // }
+            break;
+        }
+        default:
+            Handler::HandleMessage(msg);
+    }
     return NOERROR;
 }
 
@@ -504,9 +550,7 @@ ECode IccRecords::IsCspPlmnEnabled(
     /* [out] */ Boolean* result)
 {
     VALIDATE_NOT_NULL(result);
-    // ==================before translated======================
-    // return false;
-    assert(0);
+    *result = FALSE;
     return NOERROR;
 }
 
@@ -514,9 +558,7 @@ ECode IccRecords::GetOperatorNumeric(
     /* [out] */ String* result)
 {
     VALIDATE_NOT_NULL(result);
-    // ==================before translated======================
-    // return null;
-    assert(0);
+    *result = String(NULL);
     return NOERROR;
 }
 
@@ -524,9 +566,7 @@ ECode IccRecords::IsCallForwardStatusStored(
     /* [out] */ Boolean* result)
 {
     VALIDATE_NOT_NULL(result);
-    // ==================before translated======================
-    // return false;
-    assert(0);
+    *result = FALSE;
     return NOERROR;
 }
 
@@ -534,9 +574,7 @@ ECode IccRecords::GetVoiceCallForwardingFlag(
     /* [out] */ Boolean* result)
 {
     VALIDATE_NOT_NULL(result);
-    // ==================before translated======================
-    // return false;
-    assert(0);
+    *result = FALSE;
     return NOERROR;
 }
 
@@ -545,7 +583,6 @@ ECode IccRecords::SetVoiceCallForwardingFlag(
     /* [in] */ Boolean enable,
     /* [in] */ const String& number)
 {
-    assert(0);
     return NOERROR;
 }
 
@@ -553,9 +590,7 @@ ECode IccRecords::IsProvisioned(
     /* [out] */ Boolean* result)
 {
     VALIDATE_NOT_NULL(result);
-    // ==================before translated======================
-    // return true;
-    assert(0);
+    *result = TRUE;
     return NOERROR;
 }
 
@@ -563,9 +598,7 @@ ECode IccRecords::GetIsimRecords(
     /* [out] */ IIsimRecords** result)
 {
     VALIDATE_NOT_NULL(result);
-    // ==================before translated======================
-    // return null;
-    assert(0);
+    *result = NULL;
     return NOERROR;
 }
 
@@ -573,9 +606,7 @@ ECode IccRecords::GetUsimServiceTable(
     /* [out] */ IUsimServiceTable** result)
 {
     VALIDATE_NOT_NULL(result);
-    // ==================before translated======================
-    // return null;
-    assert(0);
+    *result = NULL;
     return NOERROR;
 }
 
@@ -585,40 +616,46 @@ ECode IccRecords::GetIccSimChallengeResponse(
     /* [out] */ String* result)
 {
     VALIDATE_NOT_NULL(result);
-    // ==================before translated======================
-    // if (DBG) log("getIccSimChallengeResponse:");
-    //
+    if (DBG) Log(String("getIccSimChallengeResponse:"));
+
     // try {
-    //     synchronized(mLock) {
-    //         CommandsInterface ci = mCi;
-    //         UiccCardApplication parentApp = mParentApp;
-    //         if (ci != null && parentApp != null) {
-    //             ci.requestIccSimAuthentication(authContext, data,
-    //                     parentApp.getAid(),
-    //                     obtainMessage(EVENT_AKA_AUTHENTICATE_DONE));
-    //             try {
-    //                 mLock.wait();
-    //             } catch (InterruptedException e) {
-    //                 loge("getIccSimChallengeResponse: Fail, interrupted"
-    //                         + " while trying to request Icc Sim Auth");
-    //                 return null;
-    //             }
-    //         } else {
-    //             loge( "getIccSimChallengeResponse: "
-    //                     + "Fail, ci or parentApp is null");
-    //             return null;
-    //         }
-    //     }
+        {
+            AutoLock lock(mLock);
+            AutoPtr<ICommandsInterface> ci = mCi;
+            AutoPtr<IUiccCardApplication> parentApp = mParentApp;
+            if (ci != NULL && parentApp != NULL) {
+                AutoPtr<IMessage> msg;
+                ObtainMessage(EVENT_AKA_AUTHENTICATE_DONE, (IMessage**)&msg);
+                String aid;
+                parentApp->GetAid(&aid);
+                ci->RequestIccSimAuthentication(authContext, data,
+                        aid,
+                        msg);
+                // try {
+                mLock.Wait();
+                // } catch (InterruptedException e) {
+                //     loge("getIccSimChallengeResponse: Fail, interrupted"
+                //             + " while trying to request Icc Sim Auth");
+                //     return NULL;
+                // }
+            }
+            else {
+                Loge(String("getIccSimChallengeResponse: ")
+                        + String("Fail, ci or parentApp is NULL"));
+                *result = String(NULL);
+                return NOERROR;
+            }
+        }
     // } catch(Exception e) {
     //     loge( "getIccSimChallengeResponse: "
     //             + "Fail while trying to request Icc Sim Auth");
-    //     return null;
+    //     return NULL;
     // }
-    //
-    // if (DBG) log("getIccSimChallengeResponse: return auth_rsp");
-    //
-    // return android.util.Base64.encodeToString(auth_rsp.payload, android.util.Base64.NO_WRAP);
-    assert(0);
+
+    if (DBG) Log(String("getIccSimChallengeResponse: return auth_rsp"));
+
+    assert(0 && "TODO");
+    // *result = android.util.Base64.encodeToString(auth_rsp.payload, android.util.Base64.NO_WRAP);
     return NOERROR;
 }
 
@@ -626,10 +663,8 @@ ECode IccRecords::GetSmsCapacityOnIcc(
     /* [out] */ Int32* result)
 {
     VALIDATE_NOT_NULL(result);
-    // ==================before translated======================
-    // if (DBG) log("getSmsCapacityOnIcc: " + mSmsCountOnIcc);
-    // return mSmsCountOnIcc;
-    assert(0);
+    if (DBG) Log(String("getSmsCapacityOnIcc: ") + StringUtils::ToString(mSmsCountOnIcc));
+    *result = mSmsCountOnIcc;
     return NOERROR;
 }
 
@@ -638,206 +673,267 @@ ECode IccRecords::Dump(
     /* [in] */ IPrintWriter* pw,
     /* [in] */ ArrayOf<String>* args)
 {
-    // ==================before translated======================
-    // pw.println("IccRecords: " + this);
-    // pw.println(" mDestroyed=" + mDestroyed);
-    // pw.println(" mCi=" + mCi);
-    // pw.println(" mFh=" + mFh);
-    // pw.println(" mParentApp=" + mParentApp);
-    // pw.println(" recordsLoadedRegistrants: size=" + mRecordsLoadedRegistrants.size());
-    // for (int i = 0; i < mRecordsLoadedRegistrants.size(); i++) {
-    //     pw.println("  recordsLoadedRegistrants[" + i + "]="
-    //             + ((Registrant)mRecordsLoadedRegistrants.get(i)).getHandler());
-    // }
-    // pw.println(" mImsiReadyRegistrants: size=" + mImsiReadyRegistrants.size());
-    // for (int i = 0; i < mImsiReadyRegistrants.size(); i++) {
-    //     pw.println("  mImsiReadyRegistrants[" + i + "]="
-    //             + ((Registrant)mImsiReadyRegistrants.get(i)).getHandler());
-    // }
-    // pw.println(" mRecordsEventsRegistrants: size=" + mRecordsEventsRegistrants.size());
-    // for (int i = 0; i < mRecordsEventsRegistrants.size(); i++) {
-    //     pw.println("  mRecordsEventsRegistrants[" + i + "]="
-    //             + ((Registrant)mRecordsEventsRegistrants.get(i)).getHandler());
-    // }
-    // pw.println(" mNewSmsRegistrants: size=" + mNewSmsRegistrants.size());
-    // for (int i = 0; i < mNewSmsRegistrants.size(); i++) {
-    //     pw.println("  mNewSmsRegistrants[" + i + "]="
-    //             + ((Registrant)mNewSmsRegistrants.get(i)).getHandler());
-    // }
-    // pw.println(" mNetworkSelectionModeAutomaticRegistrants: size="
-    //         + mNetworkSelectionModeAutomaticRegistrants.size());
-    // for (int i = 0; i < mNetworkSelectionModeAutomaticRegistrants.size(); i++) {
-    //     pw.println("  mNetworkSelectionModeAutomaticRegistrants[" + i + "]="
-    //             + ((Registrant)mNetworkSelectionModeAutomaticRegistrants.get(i)).getHandler());
-    // }
-    // pw.println(" mRecordsRequested=" + mRecordsRequested);
-    // pw.println(" mRecordsToLoad=" + mRecordsToLoad);
-    // pw.println(" mRdnCache=" + mAdnCache);
-    // pw.println(" iccid=" + mIccId);
-    // pw.println(" mMsisdn=" + mMsisdn);
-    // pw.println(" mMsisdnTag=" + mMsisdnTag);
-    // pw.println(" mVoiceMailNum=" + mVoiceMailNum);
-    // pw.println(" mVoiceMailTag=" + mVoiceMailTag);
-    // pw.println(" mNewVoiceMailNum=" + mNewVoiceMailNum);
-    // pw.println(" mNewVoiceMailTag=" + mNewVoiceMailTag);
-    // pw.println(" mIsVoiceMailFixed=" + mIsVoiceMailFixed);
-    // pw.println(" mImsi=" + mImsi);
-    // pw.println(" mMncLength=" + mMncLength);
-    // pw.println(" mMailboxIndex=" + mMailboxIndex);
-    // pw.println(" mSpn=" + mSpn);
-    // pw.flush();
-    assert(0);
+    assert(0 && "TODO");
+    // pw->Println(String("IccRecords: ") + this);
+    // pw->Println(String(" mDestroyed=") + mDestroyed);
+    // pw->Println(String(" mCi=") + mCi);
+    // pw->Println(String(" mFh=") + mFh);
+    // pw->Println(String(" mParentApp=") + mParentApp);
+    pw->Println(String(" recordsLoadedRegistrants: size=")
+                + StringUtils::ToString(mRecordsLoadedRegistrants->GetSize()));
+    for (Int32 i = 0; i < mRecordsLoadedRegistrants->GetSize(); i++) {
+        AutoPtr<IInterface> p = mRecordsLoadedRegistrants->Get(i);
+        AutoPtr<IRegistrant> _p = IRegistrant::Probe(p);
+        AutoPtr<IHandler> hdl;
+        _p->GetHandler((IHandler**)&hdl);
+        assert(0 && "TODO");
+        // pw->Println(String("  recordsLoadedRegistrants[") + StringUtils::ToString(i) + String("]=")
+        //         + hdl);
+    }
+    pw->Println(String(" mImsiReadyRegistrants: size=")
+                + StringUtils::ToString(mImsiReadyRegistrants->GetSize()));
+    for (Int32 i = 0; i < mImsiReadyRegistrants->GetSize(); i++) {
+        AutoPtr<IInterface> p = mImsiReadyRegistrants->Get(i);
+        AutoPtr<IRegistrant> _p = IRegistrant::Probe(p);
+        AutoPtr<IHandler> hdl;
+        _p->GetHandler((IHandler**)&hdl);
+        assert(0 && "TODO");
+        // pw->Println(String("  mImsiReadyRegistrants[") + StringUtils::ToString(i) + String("]=")
+        //         + hdl);
+    }
+    pw->Println(String(" mRecordsEventsRegistrants: size=")
+                + StringUtils::ToString(mRecordsEventsRegistrants->GetSize()));
+    for (Int32 i = 0; i < mRecordsEventsRegistrants->GetSize(); i++) {
+        AutoPtr<IInterface> p = mNewSmsRegistrants->Get(i);
+        AutoPtr<IRegistrant> _p = IRegistrant::Probe(p);
+        AutoPtr<IHandler> hdl;
+        _p->GetHandler((IHandler**)&hdl);
+        assert(0 && "TODO");
+        // pw->Println(String("  mRecordsEventsRegistrants[") + StringUtils::ToString(i) + String("]=")
+        //         + hdl);
+    }
+    pw->Println(String(" mNewSmsRegistrants: size=")
+                + StringUtils::ToString(mNewSmsRegistrants->GetSize()));
+    for (Int32 i = 0; i < mNewSmsRegistrants->GetSize(); i++) {
+        AutoPtr<IInterface> p = mNewSmsRegistrants->Get(i);
+        AutoPtr<IRegistrant> _p = IRegistrant::Probe(p);
+        AutoPtr<IHandler> hdl;
+        _p->GetHandler((IHandler**)&hdl);
+        assert(0 && "TODO");
+        // pw->Println(String(("  mNewSmsRegistrants[") + StringUtils::ToString(i) + String("]=")
+        //         + hdl);
+    }
+    pw->Println(String(" mNetworkSelectionModeAutomaticRegistrants: size=")
+            + StringUtils::ToString(mNetworkSelectionModeAutomaticRegistrants->GetSize()));
+    for (Int32 i = 0; i < mNetworkSelectionModeAutomaticRegistrants->GetSize(); i++) {
+        AutoPtr<IInterface> p = mNetworkSelectionModeAutomaticRegistrants->Get(i);
+        AutoPtr<IRegistrant> _p = IRegistrant::Probe(p);
+        AutoPtr<IHandler> hdl;
+        _p->GetHandler((IHandler**)&hdl);
+        assert(0 && "TODO");
+        // pw->Println(String("  mNetworkSelectionModeAutomaticRegistrants[")
+        //         + StringUtils::ToString(i) + String("]=") + hdl);
+    }
+    pw->Println(String(" mRecordsRequested=") + StringUtils::ToString(mRecordsRequested));
+    pw->Println(String(" mRecordsToLoad=") + StringUtils::ToString(mRecordsToLoad));
+    // pw->Println(String(" mRdnCache=") + mAdnCache);
+    pw->Println(String(" iccid=") + mIccId);
+    pw->Println(String(" mMsisdn=") + mMsisdn);
+    pw->Println(String(" mMsisdnTag=") + mMsisdnTag);
+    pw->Println(String(" mVoiceMailNum=") + mVoiceMailNum);
+    pw->Println(String(" mVoiceMailTag=") + mVoiceMailTag);
+    pw->Println(String(" mNewVoiceMailNum=") + mNewVoiceMailNum);
+    pw->Println(String(" mNewVoiceMailTag=") + mNewVoiceMailTag);
+    pw->Println(String(" mIsVoiceMailFixed=") + StringUtils::ToString(mIsVoiceMailFixed));
+    pw->Println(String(" mImsi=") + mImsi);
+    pw->Println(String(" mMncLength=") + StringUtils::ToString(mMncLength));
+    pw->Println(String(" mMailboxIndex=") + StringUtils::ToString(mMailboxIndex));
+    pw->Println(String(" mSpn=") + mSpn);
+    IFlushable::Probe(pw)->Flush();
     return NOERROR;
 }
 
 void IccRecords::SetServiceProviderName(
     /* [in] */ const String& spn)
 {
-    // ==================before translated======================
-    // mSpn = spn;
-    assert(0);
+    mSpn = spn;
 }
 
 void IccRecords::OnIccRefreshInit()
 {
-    // ==================before translated======================
-    // mAdnCache.reset();
-    // UiccCardApplication parentApp = mParentApp;
-    // if ((parentApp != null) &&
-    //         (parentApp.getState() == AppState.APPSTATE_READY)) {
-    //     // This will cause files to be reread
-    //     sendMessage(obtainMessage(EVENT_APP_READY));
-    // }
-    assert(0);
+    mAdnCache->Reset();
+    AutoPtr<IUiccCardApplication> parentApp = mParentApp;
+
+    if (parentApp != NULL) {
+        AppState state;
+        parentApp->GetState(&state);
+        if (state == APPSTATE_READY) {
+            // This will cause files to be reread
+            AutoPtr<IMessage> msg;
+            ObtainMessage(EVENT_APP_READY, (IMessage**)&msg);
+            Boolean b = FALSE;
+            SendMessage(msg, &b);
+        }
+    }
 }
 
 ECode IccRecords::BroadcastRefresh()
 {
-    assert(0);
     return NOERROR;
 }
 
 void IccRecords::HandleRefresh(
     /* [in] */ IIccRefreshResponse* refreshResponse)
 {
-    // ==================before translated======================
-    // if (refreshResponse == null) {
-    //     if (DBG) log("handleRefresh received without input");
-    //     return;
-    // }
-    //
-    // if (refreshResponse.aid != null &&
-    //         !refreshResponse.aid.equals(mParentApp.getAid())) {
-    //     // This is for different app. Ignore.
-    //     return;
-    // }
-    //
-    // switch (refreshResponse.refreshResult) {
-    //     case IccRefreshResponse.REFRESH_RESULT_FILE_UPDATE:
-    //         if (DBG) log("handleRefresh with SIM_FILE_UPDATED");
-    //         handleFileUpdate(refreshResponse.efId);
-    //         break;
-    //     case IccRefreshResponse.REFRESH_RESULT_INIT:
-    //         if (DBG) log("handleRefresh with SIM_REFRESH_INIT");
-    //         // need to reload all files (that we care about)
-    //         if (mAdnCache != null) {
-    //             mAdnCache.reset();
-    //             //We will re-fetch the records when the app
-    //             // goes back to the ready state. Nothing to do here.
-    //         }
-    //         break;
-    //     case IccRefreshResponse.REFRESH_RESULT_RESET:
-    //         if (DBG) log("handleRefresh with SIM_REFRESH_RESET");
-    //         if (powerOffOnSimReset()) {
-    //             mCi.setRadioPower(false, null);
-    //             /* Note: no need to call setRadioPower(true).  Assuming the desired
-    //             * radio power state is still ON (as tracked by ServiceStateTracker),
-    //             * ServiceStateTracker will call setRadioPower when it receives the
-    //             * RADIO_STATE_CHANGED notification for the power off.  And if the
-    //             * desired power state has changed in the interim, we don't want to
-    //             * override it with an unconditional power on.
-    //             */
-    //         } else {
-    //             if(mAdnCache != null) {
-    //                 mAdnCache.reset();
-    //             }
-    //             mRecordsRequested = false;
-    //             mImsi = null;
-    //         }
-    //         //We will re-fetch the records when the app
-    //         // goes back to the ready state. Nothing to do here.
-    //         break;
-    //     default:
-    //         // unknown refresh operation
-    //         if (DBG) log("handleRefresh with unknown operation");
-    //         break;
-    // }
-    assert(0);
+    if (refreshResponse == NULL) {
+        if (DBG) Log(String("handleRefresh received without input"));
+        return;
+    }
+
+    String aid;
+    mParentApp->GetAid(&aid);
+    AutoPtr<CIccRefreshResponse> _refreshResponse = (CIccRefreshResponse*)refreshResponse;
+    if (_refreshResponse->mAid != NULL &&
+            !_refreshResponse->mAid.Equals(aid)) {
+        // This is for different app. Ignore.
+        return;
+    }
+
+    switch (_refreshResponse->mRefreshResult) {
+        case IIccRefreshResponse::REFRESH_RESULT_FILE_UPDATE:
+            if (DBG) Log(String("handleRefresh with SIM_FILE_UPDATED"));
+            HandleFileUpdate(_refreshResponse->mEfId);
+            break;
+        case IIccRefreshResponse::REFRESH_RESULT_INIT:
+            if (DBG) Log(String("handleRefresh with SIM_REFRESH_INIT"));
+            // need to reload all files (that we care about)
+            if (mAdnCache != NULL) {
+                mAdnCache->Reset();
+                //We will re-fetch the records when the app
+                // goes back to the ready state. Nothing to do here.
+            }
+            break;
+        case IIccRefreshResponse::REFRESH_RESULT_RESET:
+            if (DBG) Log(String("handleRefresh with SIM_REFRESH_RESET"));
+            if (PowerOffOnSimReset()) {
+                mCi->SetRadioPower(FALSE, NULL);
+                /* Note: no need to call setRadioPower(true).  Assuming the desired
+                * radio power state is still ON (as tracked by ServiceStateTracker),
+                * ServiceStateTracker will call setRadioPower when it receives the
+                * RADIO_STATE_CHANGED notification for the power off.  And if the
+                * desired power state has changed in the interim, we don't want to
+                * override it with an unconditional power on.
+                */
+            }
+            else {
+                if (mAdnCache != NULL) {
+                    mAdnCache->Reset();
+                }
+                mRecordsRequested = FALSE;
+                mImsi = NULL;
+            }
+            //We will re-fetch the records when the app
+            // goes back to the ready state. Nothing to do here.
+            break;
+        default:
+            // unknown refresh operation
+            if (DBG) Log(String("handleRefresh with unknown operation"));
+            break;
+    }
 }
 
 Boolean IccRecords::RequirePowerOffOnSimRefreshReset()
 {
-    // ==================before translated======================
-    // return mContext.getResources().getBoolean(
-    //     com.android.internal.R.bool.config_requireRadioPowerOffOnSimRefreshReset);
-    assert(0);
-    return FALSE;
+    AutoPtr<IResources> res;
+    mContext->GetResources((IResources**)&res);
+    Boolean b = FALSE;
+    res->GetBoolean(R::bool_::config_requireRadioPowerOffOnSimRefreshReset, &b);
+    return b;
 }
 
 Boolean IccRecords::PowerOffOnSimReset()
 {
-    // ==================before translated======================
-    // return !mContext.getResources().getBoolean(
-    //         com.android.internal.R.bool.skip_radio_power_off_on_sim_refresh_reset);
-    assert(0);
-    return FALSE;
+    AutoPtr<IResources> res;
+    mContext->GetResources((IResources**)&res);
+    Boolean b = FALSE;
+    res->GetBoolean(
+            R::bool_::skip_radio_power_off_on_sim_refresh_reset, &b);
+    return !b;
 }
 
 void IccRecords::SetSystemProperty(
     /* [in] */ const String& property,
     /* [in] */ const String& value)
 {
-    // ==================before translated======================
-    // if (mParentApp == null) return;
-    // int slotId = mParentApp.getUiccCard().getSlotId();
-    //
-    // SubscriptionController subController = SubscriptionController.getInstance();
-    // long subId = subController.getSubIdUsingSlotId(slotId)[0];
-    //
-    // TelephonyManager.setTelephonyProperty(property, subId, value);
-    assert(0);
+    if (mParentApp == NULL) return;
+    AutoPtr<IUiccCard> uicc;
+    assert(0 && "TODO");
+    // mParentApp->GetUiccCard((IUiccCard**)&uicc);
+    Int32 slotId = 0;
+    uicc->GetSlotId(&slotId);
+
+    AutoPtr<ISubscriptionControllerHelper> hlp;
+    CSubscriptionControllerHelper::AcquireSingleton((ISubscriptionControllerHelper**)&hlp);
+    AutoPtr<ISubscriptionController> subController;
+    hlp->GetInstance((ISubscriptionController**)&subController);
+    AutoPtr<ArrayOf<Int64> > arr;
+    subController->GetSubIdUsingSlotId(slotId, (ArrayOf<Int64>**)&arr);
+    Int64 subId = (*arr)[0];
+
+    AutoPtr<ITelephonyManagerHelper> tmhlp;
+    CTelephonyManagerHelper::AcquireSingleton((ITelephonyManagerHelper**)&tmhlp);
+    tmhlp->SetTelephonyProperty(property, subId, value);
 }
 
 void IccRecords::HandleRefreshOem(
     /* [in] */ ArrayOf<Byte>* data)
 {
-    // ==================before translated======================
-    // ByteBuffer payload = ByteBuffer.wrap(data);
-    // IccRefreshResponse response = UiccController.parseOemSimRefresh(payload);
-    //
-    // IccCardApplicationStatus appStatus = new IccCardApplicationStatus();
-    // AppType appType = appStatus.AppTypeFromRILInt(payload.getInt());
-    // int slotId = (int)payload.get();
-    // if ((appType != AppType.APPTYPE_UNKNOWN)
-    //     && (appType != mParentApp.getType())) {
-    //     // This is for different app. Ignore.
-    //     return;
-    // }
-    //
-    // broadcastRefresh();
-    // handleRefresh(response);
-    //
-    // if (response.refreshResult == IccRefreshResponse.REFRESH_RESULT_FILE_UPDATE ||
-    //     response.refreshResult == IccRefreshResponse.REFRESH_RESULT_INIT) {
-    //     log("send broadcast org.codeaurora.intent.action.ACTION_SIM_REFRESH_UPDATE");
-    //     Intent sendIntent = new Intent(
-    //             "org.codeaurora.intent.action.ACTION_SIM_REFRESH_UPDATE");
-    //     if (TelephonyManager.getDefault().isMultiSimEnabled()){
-    //         sendIntent.putExtra(PhoneConstants.SLOT_KEY, slotId);
-    //     }
-    //     mContext.sendBroadcast(sendIntent, null);
-    // }
-    assert(0);
+    AutoPtr<IByteBufferHelper> bbhlp;
+    CByteBufferHelper::AcquireSingleton((IByteBufferHelper**)&bbhlp);
+    AutoPtr<IByteBuffer> payload;
+    bbhlp->Wrap(data, (IByteBuffer**)&payload);
+    AutoPtr<IUiccControllerHelper> uchlp;
+    CUiccControllerHelper::AcquireSingleton((IUiccControllerHelper**)&uchlp);
+    AutoPtr<IIccRefreshResponse> response;
+    uchlp->ParseOemSimRefresh(payload, (IIccRefreshResponse**)&response);
+
+    AutoPtr<IIccCardApplicationStatus> appStatus;
+    CIccCardApplicationStatus::New((IIccCardApplicationStatus**)&appStatus);
+    Int32 num = 0;
+    payload->GetInt32(&num);
+    AppType appType;
+    appStatus->AppTypeFromRILInt(num, &appType);
+    Int32 slotId = 0;
+    payload->GetInt32(&slotId);
+    AppType type;
+    mParentApp->GetType(&type);
+    if ((appType != APPTYPE_UNKNOWN)
+        && (appType != type)) {
+        // This is for different app. Ignore.
+        return;
+    }
+
+    BroadcastRefresh();
+    HandleRefresh(response);
+
+    AutoPtr<CIccRefreshResponse> cresponse = (CIccRefreshResponse*)response.Get();
+    if (cresponse->mRefreshResult == IIccRefreshResponse::REFRESH_RESULT_FILE_UPDATE ||
+        cresponse->mRefreshResult == IIccRefreshResponse::REFRESH_RESULT_INIT) {
+        Log(String("send broadcast org.codeaurora.intent.action.ACTION_SIM_REFRESH_UPDATE"));
+        AutoPtr<IIntent> sendIntent;
+        CIntent::New(
+                String("org.codeaurora.intent.action.ACTION_SIM_REFRESH_UPDATE"), (IIntent**)&sendIntent);
+        AutoPtr<ITelephonyManagerHelper> hlp;
+        CTelephonyManagerHelper::AcquireSingleton((ITelephonyManagerHelper**)&hlp);
+        AutoPtr<ITelephonyManager> tm;
+        hlp->GetDefault((ITelephonyManager**)&tm);
+        Boolean bEnabled = FALSE;
+        tm->IsMultiSimEnabled(&bEnabled);
+        if (bEnabled){
+            sendIntent->PutExtra(IPhoneConstants::SLOT_KEY, slotId);
+        }
+        mContext->SendBroadcast(sendIntent, String(NULL));
+    }
 }
 
 } // namespace Uicc

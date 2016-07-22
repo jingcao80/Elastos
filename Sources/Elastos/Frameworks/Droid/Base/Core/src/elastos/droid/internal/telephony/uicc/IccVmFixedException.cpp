@@ -19,9 +19,8 @@ IccVmFixedException::IccVmFixedException()
 
 IccVmFixedException::IccVmFixedException(
     /* [in] */ const String& s)
+    : IccException(s)
 {
-    // ==================before translated======================
-    // super(s);
 }
 
 } // namespace Uicc

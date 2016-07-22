@@ -5131,9 +5131,9 @@ AutoPtr<IInterface> RIL::ResponseSimRefresh(
 {
     AutoPtr<IccRefreshResponse> response = new IccRefreshResponse();
 
-    p->ReadInt32(&(response->refreshResult));
-    p->ReadInt32(&(response->efId));
-    p->ReadString(&(response->aid));
+    p->ReadInt32(&(response->mRefreshResult));
+    p->ReadInt32(&(response->mEfId));
+    p->ReadString(&(response->mAid));
     return TO_IINTERFACE(response);
 }
 

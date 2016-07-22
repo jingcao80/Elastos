@@ -6,7 +6,6 @@
 #include "elastos/droid/os/AsyncResult.h"
 #include "elastos/droid/os/Handler.h"
 
-// import android.os.*;
 using Elastos::Droid::Internal::Telephony::ICommandsInterface;
 using Elastos::Droid::Os::IMessage;
 using Elastos::Droid::Os::Handler;
@@ -58,7 +57,6 @@ public:
             /* [in] */ const String& path,
             /* [in] */ IMessage* onLoaded);
 
-    private:
         CARAPI_(void) InitLCResults(
             /* [in] */ Int32 size);
 
@@ -75,7 +73,7 @@ public:
         Int32 mCountLoadrecords;
         Int32 mCount;
         AutoPtr<IMessage> mOnLoaded;
-        AutoPtr<IArrayList/*< AutoPtr< ArrayOf<Byte> > >*/> results;
+        AutoPtr<IArrayList/*< AutoPtr< ArrayOf<Byte> > >*/> mResults;
     };
 
 public:

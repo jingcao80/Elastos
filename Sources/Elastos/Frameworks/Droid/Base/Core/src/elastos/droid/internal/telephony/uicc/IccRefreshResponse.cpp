@@ -2,6 +2,10 @@
 #include "Elastos.Droid.Internal.h"
 #include "elastos/droid/internal/telephony/uicc/IccRefreshResponse.h"
 
+#include <elastos/core/StringUtils.h>
+
+using Elastos::Core::StringUtils;
+
 namespace Elastos {
 namespace Droid {
 namespace Internal {
@@ -17,9 +21,9 @@ ECode IccRefreshResponse::ToString(
     /* [out] */ String* result)
 {
     VALIDATE_NOT_NULL(result);
-    // ==================before translated======================
-    // return "{" + refreshResult + ", " + aid +", " + efId + "}";
-    assert(0);
+    *result = String("{") + StringUtils::ToString(mRefreshResult)
+            + String(", ") + mAid + String(", ")
+            + StringUtils::ToString(mEfId) + String("}");
     return NOERROR;
 }
 

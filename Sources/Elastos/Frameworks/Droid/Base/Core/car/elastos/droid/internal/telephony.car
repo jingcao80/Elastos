@@ -1130,6 +1130,7 @@ module
             interface IAdnRecordLoader;
         }
 
+        [local]
         class CCsimFileHandler {
 
             constructor(
@@ -1213,6 +1214,7 @@ module
             interface IIccUtils;
         }
 
+        [local]
         class CIsimFileHandler {
             constructor(
                 [in] IUiccCardApplication* app,
@@ -1238,6 +1240,7 @@ module
             interface IIsimRecords;
         }
 
+        [local]
         class CRuimFileHandler {
             constructor(
                 [in] IUiccCardApplication* app,
@@ -1259,6 +1262,7 @@ module
             interface IRuimRecords;
         }
 
+        [local]
         class CSIMFileHandler {
             constructor(
                 [in] IUiccCardApplication* app,
@@ -1345,6 +1349,7 @@ module
             interface IUiccTlvDataHelper;
         }
 
+        [local]
         class CUsimFileHandler {
             constructor(
                 [in] IUiccCardApplication* app,
@@ -1674,6 +1679,7 @@ module
             interface ICdmaLteServiceStateTracker;
         }
 
+        [local]
         class CCdmaMmiCode {
             constructor(
                 [in] ICDMAPhone* phone,
@@ -1903,6 +1909,7 @@ module
             interface IGsmInboundSmsHandlerHelper;
         }
 
+        [local]
         class CGsmMmiCode {
             constructor();
 

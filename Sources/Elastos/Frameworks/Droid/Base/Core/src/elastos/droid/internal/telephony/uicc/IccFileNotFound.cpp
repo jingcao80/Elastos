@@ -1,6 +1,9 @@
 
 #include "Elastos.Droid.Internal.h"
 #include "elastos/droid/internal/telephony/uicc/IccFileNotFound.h"
+#include <elastos/core/StringUtils.h>
+
+using Elastos::Core::StringUtils;
 
 namespace Elastos {
 namespace Droid {
@@ -19,16 +22,14 @@ IccFileNotFound::IccFileNotFound()
 
 IccFileNotFound::IccFileNotFound(
     /* [in] */ const String& s)
+    : IccException(s)
 {
-    // ==================before translated======================
-    // super(s);
 }
 
 IccFileNotFound::IccFileNotFound(
     /* [in] */ Int32 ef)
+    : IccException(String("ICC EF Not Found 0x") + StringUtils::ToString(ef))
 {
-    // ==================before translated======================
-    // super("ICC EF Not Found 0x" + Integer.toHexString(ef));
 }
 
 } // namespace Uicc

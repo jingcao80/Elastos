@@ -31,12 +31,11 @@ public:
         /* [out] */ String* result);
 
 public:
-
-    Int32 refreshResult;
+    Int32 mRefreshResult;
     /* Sim Refresh result */
-    Int32 efId;
+    Int32 mEfId;
     /* EFID */
-    String aid;
+    String mAid;
 };
 
 } // namespace Uicc

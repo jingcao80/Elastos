@@ -4,13 +4,6 @@
 #include "elastos/droid/ext/frameworkext.h"
 #include "elastos/droid/os/Handler.h"
 
-// import java.util.ArrayList;
-// import android.os.AsyncResult;
-// import android.os.Handler;
-// import android.os.Looper;
-// import android.telephony.Rlog;
-// import com.android.internal.telephony.uicc.IccConstants;
-
 using Elastos::Droid::Os::IMessage;
 using Elastos::Droid::Os::Handler;
 using Elastos::Utility::IArrayList;

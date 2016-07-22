@@ -6,44 +6,6 @@
 #include "elastos/droid/os/Handler.h"
 #include "elastos/droid/os/RegistrantList.h"
 
-// import static android.Manifest.permission.READ_PHONE_STATE;
-// import android.app.ActivityManagerNative;
-// import android.app.AlertDialog;
-// import android.content.Context;
-// import android.content.DialogInterface;
-// import android.content.Intent;
-// import android.content.SharedPreferences;
-// import android.content.pm.PackageManager;
-// import android.content.pm.Signature;
-// import android.content.res.Resources;
-// import android.os.AsyncResult;
-// import android.os.Message;
-// import android.os.PowerManager;
-// import android.os.Registrant;
-// import android.os.RegistrantList;
-// import android.preference.PreferenceManager;
-// import android.telephony.Rlog;
-// import android.telephony.TelephonyManager;
-// import android.text.TextUtils;
-// import android.view.WindowManager;
-// import com.android.internal.telephony.CommandsInterface;
-// import com.android.internal.telephony.PhoneBase;
-// import com.android.internal.telephony.CommandsInterface.RadioState;
-// import com.android.internal.telephony.IccCardConstants.State;
-// import com.android.internal.telephony.gsm.GSMPhone;
-// import com.android.internal.telephony.uicc.IccCardApplicationStatus.AppType;
-// import com.android.internal.telephony.uicc.IccCardStatus.PinState;
-// import com.android.internal.telephony.cat.CatService;
-// import com.android.internal.telephony.cat.CatServiceFactory;
-// import com.android.internal.telephony.cdma.CDMALTEPhone;
-// import com.android.internal.telephony.cdma.CDMAPhone;
-// import com.android.internal.telephony.cdma.CdmaSubscriptionSourceManager;
-// import android.os.SystemProperties;
-// import com.android.internal.R;
-// import java.io.FileDescriptor;
-// import java.io.PrintWriter;
-// import java.util.List;
-
 using Elastos::Droid::Content::IDialogInterface;
 using Elastos::Droid::Content::IDialogInterfaceOnClickListener;
 using Elastos::Droid::Content::IContext;

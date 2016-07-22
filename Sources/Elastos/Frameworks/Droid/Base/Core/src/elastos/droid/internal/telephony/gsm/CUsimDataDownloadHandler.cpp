@@ -258,8 +258,8 @@ void CUsimDataDownloadHandler::SendSmsAckForEnvelopeResponse(
     /* [in] */ Int32 dcs,
     /* [in] */ Int32 pid)
 {
-    Int32 sw1 = ((IccIoResult*)response)->sw1;
-    Int32 sw2 = ((IccIoResult*)response)->sw2;
+    Int32 sw1 = ((IccIoResult*)response)->mSw1;
+    Int32 sw2 = ((IccIoResult*)response)->mSw2;
 
     Boolean success;
     String str;
@@ -284,7 +284,7 @@ void CUsimDataDownloadHandler::SendSmsAckForEnvelopeResponse(
         success = FALSE;
     }
 
-    AutoPtr<ArrayOf<Byte> > responseBytes = ((IccIoResult*)response)->payload;
+    AutoPtr<ArrayOf<Byte> > responseBytes = ((IccIoResult*)response)->mPayload;
     if (responseBytes == NULL || responseBytes->GetLength() == 0) {
         if (success) {
             mCi->AcknowledgeLastIncomingGsmSms(TRUE, 0, NULL);

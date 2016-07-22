@@ -12,6 +12,7 @@ module
     namespace Telephony {
     namespace Uicc {
 
+    [local]
     interface IUiccCardApplication {
         /**
          * These values are for authContext (parameter P2) per 3GPP TS 31.102 (Section 7.1.2)
@@ -251,6 +252,9 @@ module
 
         GetUICCConfig(
             [out] IUICCConfig** result);
+
+        GetUiccCard(
+            [out] IUiccCard** result);
 
     }
 

@@ -320,8 +320,8 @@ public:
         /* [in] */ IPrintWriter* pw,
         /* [in] */ ArrayOf<String>* args);
 
-protected:
-    virtual CARAPI_(AutoPtr<IUiccCard>) GetUiccCard();
+    virtual CARAPI GetUiccCard(
+        /* [out] */ IUiccCard** result);
 
 private:
     CARAPI_(AutoPtr<IIccRecords>) CreateIccRecords(

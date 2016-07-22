@@ -1,6 +1,28 @@
 #include "Elastos.CoreLibrary.Utility.h"
+#include "Elastos.CoreLibrary.IO.h"
 #include "Elastos.Droid.Internal.h"
 #include "elastos/droid/internal/telephony/uicc/SpnOverride.h"
+#include "elastos/droid/utility/Xml.h"
+#include "elastos/droid/internal/utility/XmlUtils.h"
+#include "elastos/droid/os/CEnvironment.h"
+
+#include <elastos/core/CoreUtils.h>
+
+using Elastos::Droid::Utility::Xml;
+using Elastos::Droid::Internal::Utility::XmlUtils;
+using Elastos::Droid::Os::IEnvironment;
+using Elastos::Droid::Os::CEnvironment;
+
+using Elastos::Core::CoreUtils;
+using Elastos::Core::ICharSequence;
+using Elastos::IO::IReader;
+using Elastos::IO::IFileReader;
+using Elastos::IO::CFileReader;
+using Elastos::IO::IFile;
+using Elastos::IO::CFile;
+using Elastos::IO::ICloseable;
+using Elastos::Utility::CHashMap;
+using Org::Xmlpull::V1::IXmlPullParser;
 
 namespace Elastos {
 namespace Droid {
@@ -18,9 +40,8 @@ const String SpnOverride::PARTNER_SPN_OVERRIDE_PATH("etc/spn-conf.xml");
 
 SpnOverride::SpnOverride()
 {
-    // ==================before translated======================
-    // mCarrierSpnMap = new HashMap<String, String>();
-    // loadSpnOverrides();
+    CHashMap::New((IHashMap**)&mCarrierSpnMap);
+    LoadSpnOverrides();
 }
 
 ECode SpnOverride::ContainsCarrier(
@@ -28,10 +49,7 @@ ECode SpnOverride::ContainsCarrier(
     /* [out] */ Boolean* result)
 {
     VALIDATE_NOT_NULL(result);
-    // ==================before translated======================
-    // return mCarrierSpnMap.containsKey(carrier);
-    assert(0);
-    return NOERROR;
+    return mCarrierSpnMap->ContainsKey(CoreUtils::Convert(carrier), result);
 }
 
 ECode SpnOverride::GetSpn(
@@ -39,54 +57,61 @@ ECode SpnOverride::GetSpn(
     /* [out] */ String* result)
 {
     VALIDATE_NOT_NULL(result);
-    // ==================before translated======================
-    // return mCarrierSpnMap.get(carrier);
-    assert(0);
-    return NOERROR;
+    AutoPtr<IInterface> p;
+    mCarrierSpnMap->Get(CoreUtils::Convert(carrier), (IInterface**)&p);
+    return ICharSequence::Probe(p)->ToString(result);
 }
 
 void SpnOverride::LoadSpnOverrides()
 {
-    // ==================before translated======================
-    // FileReader spnReader;
-    //
-    // final File spnFile = new File(Environment.getRootDirectory(),
-    //         PARTNER_SPN_OVERRIDE_PATH);
-    //
+    AutoPtr<IFileReader> spnReader;
+
+    AutoPtr<IEnvironment> env;
+    CEnvironment::AcquireSingleton((IEnvironment**)&env);
+    AutoPtr<IFile> f;
+    env->GetRootDirectory((IFile**)&f);
+    AutoPtr<IFile> spnFile;
+    CFile::New(f,
+            PARTNER_SPN_OVERRIDE_PATH,
+            (IFile**)&spnFile);
+
     // try {
-    //     spnReader = new FileReader(spnFile);
+        CFileReader::New(spnFile, (IFileReader**)&spnReader);
     // } catch (FileNotFoundException e) {
     //     Rlog.w(LOGTAG, "Can not open " +
     //             Environment.getRootDirectory() + "/" + PARTNER_SPN_OVERRIDE_PATH);
     //     return;
     // }
-    //
+
     // try {
-    //     XmlPullParser parser = Xml.newPullParser();
-    //     parser.setInput(spnReader);
-    //
-    //     XmlUtils.beginDocument(parser, "spnOverrides");
-    //
-    //     while (true) {
-    //         XmlUtils.nextElement(parser);
-    //
-    //         String name = parser.getName();
-    //         if (!"spnOverride".equals(name)) {
-    //             break;
-    //         }
-    //
-    //         String numeric = parser.getAttributeValue(null, "numeric");
-    //         String data    = parser.getAttributeValue(null, "spn");
-    //
-    //         mCarrierSpnMap.put(numeric, data);
-    //     }
-    //     spnReader.close();
+        AutoPtr<IXmlPullParser> parser;
+        Xml::NewPullParser((IXmlPullParser**)&parser);
+        parser->SetInput(IReader::Probe(spnReader));
+
+        XmlUtils::BeginDocument(parser, String("spnOverrides"));
+
+        while (TRUE) {
+            XmlUtils::NextElement(parser);
+
+            String name;
+            parser->GetName(&name);
+            if (!name.Equals("spnOverride")) {
+                break;
+            }
+
+            String numeric;
+            parser->GetAttributeValue(String(NULL), String("numeric"), &numeric);
+            String data;
+            parser->GetAttributeValue(String(NULL), String("spn"), &data);
+
+            mCarrierSpnMap->Put(CoreUtils::Convert(numeric), CoreUtils::Convert(data));
+        }
+        ICloseable::Probe(spnReader)->Close();
     // } catch (XmlPullParserException e) {
     //     Rlog.w(LOGTAG, "Exception in spn-conf parser " + e);
     // } catch (IOException e) {
     //     Rlog.w(LOGTAG, "Exception in spn-conf parser " + e);
     // }
-    assert(0);
 }
 
 } // namespace Uicc

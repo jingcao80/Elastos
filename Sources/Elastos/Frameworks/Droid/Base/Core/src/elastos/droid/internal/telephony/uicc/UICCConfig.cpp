@@ -2,6 +2,12 @@
 #include "Elastos.Droid.Internal.h"
 #include "elastos/droid/internal/telephony/uicc/UICCConfig.h"
 
+#include <elastos/core/StringUtils.h>
+#include <elastos/utility/logging/Logger.h>
+
+using Elastos::Core::StringUtils;
+using Elastos::Utility::Logging::Logger;
+
 namespace Elastos {
 namespace Droid {
 namespace Internal {
@@ -17,24 +23,21 @@ ECode UICCConfig::GetImsi(
     /* [out] */ String* result)
 {
     VALIDATE_NOT_NULL(result);
-    // ==================before translated======================
-    // if (mImsi == null) {
-    //     logd("Getting IMSI: null");
-    // } else {
-    //     logd("Getting IMSI: " + mImsi);
-    // }
-    // return mImsi;
-    assert(0);
+    if (mImsi.IsNull()) {
+        Logd(String("Getting IMSI: null"));
+    }
+    else {
+        Logd(String("Getting IMSI: ") + mImsi);
+    }
+    *result = mImsi;
     return NOERROR;
 }
 
 ECode UICCConfig::SetImsi(
     /* [in] */ const String& lImsi)
 {
-    // ==================before translated======================
-    // logd("Setting IMSI: " + lImsi);
-    // mImsi = lImsi;
-    assert(0);
+    Logd(String("Setting IMSI: ") + lImsi);
+    mImsi = lImsi;
     return NOERROR;
 }
 
@@ -42,39 +45,31 @@ ECode UICCConfig::GetMncLength(
     /* [out] */ Int32* result)
 {
     VALIDATE_NOT_NULL(result);
-    // ==================before translated======================
-    // logd("Getting MncLength: " + Integer.toString(mMncLength));
-    // return mMncLength;
-    assert(0);
+    Logd(String("Getting MncLength: ") + StringUtils::ToString(mMncLength));
+    *result = mMncLength;
     return NOERROR;
 }
 
 ECode UICCConfig::SetMncLength(
     /* [in] */ Int32 lMncLength)
 {
-    // ==================before translated======================
-    // logd("Setting MncLength: " + Integer.toString(lMncLength));
-    // mMncLength = lMncLength;
-    assert(0);
+    Logd(String("Setting MncLength: ") + StringUtils::ToString(lMncLength));
+    mMncLength = lMncLength;
     return NOERROR;
 }
 
 void UICCConfig::Logd(
     /* [in] */ const String& sLog)
 {
-    // ==================before translated======================
-    // if (LOG_DEBUG) {
-    //     Rlog.d(TAG, sLog);
-    // }
-    assert(0);
+    if (LOG_DEBUG) {
+        Logger::D(TAG, sLog);
+    }
 }
 
 void UICCConfig::Loge(
     /* [in] */ const String& sLog)
 {
-    // ==================before translated======================
-    // Rlog.e(TAG, sLog);
-    assert(0);
+    Logger::E(TAG, sLog);
 }
 
 } // namespace Uicc

@@ -1,6 +1,25 @@
 
 #include "Elastos.Droid.Internal.h"
+#include "Elastos.Droid.Telephony.h"
 #include "elastos/droid/internal/telephony/uicc/AdnRecord.h"
+#include "elastos/droid/internal/telephony/uicc/CIccUtils.h"
+#include "elastos/droid/telephony/CPhoneNumberUtils.h"
+#include "elastos/droid/text/TextUtils.h"
+
+#include <elastos/core/CoreUtils.h>
+#include <elastos/core/StringUtils.h>
+#include <elastos/utility/Arrays.h>
+#include <elastos/utility/logging/Logger.h>
+
+using Elastos::Droid::Text::TextUtils;
+using Elastos::Droid::Telephony::IPhoneNumberUtils;
+using Elastos::Droid::Telephony::CPhoneNumberUtils;
+
+using Elastos::Core::CoreUtils;
+using Elastos::Core::StringUtils;
+using Elastos::Utility::Arrays;
+using Elastos::Utility::IList;
+using Elastos::Utility::Logging::Logger;
 
 namespace Elastos {
 namespace Droid {
@@ -86,9 +105,7 @@ ECode AdnRecord::constructor()
 ECode AdnRecord::constructor(
     /* [in] */ ArrayOf<Byte>* record)
 {
-    // ==================before translated======================
-    // this(0, 0, record);
-    return NOERROR;
+    return constructor(0, 0, record);
 }
 
 ECode AdnRecord::constructor(
@@ -96,10 +113,9 @@ ECode AdnRecord::constructor(
     /* [in] */ Int32 recordNumber,
     /* [in] */ ArrayOf<Byte>* record)
 {
-    // ==================before translated======================
-    // this.mEfid = efid;
-    // this.mRecordNumber = recordNumber;
-    // parseRecord(record);
+    mEfid = efid;
+    mRecordNumber = recordNumber;
+    ParseRecord(record);
     return NOERROR;
 }
 
@@ -107,9 +123,7 @@ ECode AdnRecord::constructor(
     /* [in] */ const String& alphaTag,
     /* [in] */ const String& number)
 {
-    // ==================before translated======================
-    // this(0, 0, alphaTag, number);
-    return NOERROR;
+    return constructor(0, 0, alphaTag, number);
 }
 
 ECode AdnRecord::constructor(
@@ -117,9 +131,7 @@ ECode AdnRecord::constructor(
     /* [in] */ const String& number,
     /* [in] */ ArrayOf<String>* emails)
 {
-    // ==================before translated======================
-    // this(0, 0, alphaTag, number, emails);
-    return NOERROR;
+    return constructor(0, 0, alphaTag, number, emails);
 }
 
 ECode AdnRecord::constructor(
@@ -128,9 +140,7 @@ ECode AdnRecord::constructor(
     /* [in] */ ArrayOf<String>* emails,
     /* [in] */ ArrayOf<String>* additionalNumbers)
 {
-    // ==================before translated======================
-    // this(0, 0, alphaTag, number, emails, additionalNumbers);
-    return NOERROR;
+    return constructor(0, 0, alphaTag, number, emails, additionalNumbers);
 }
 
 ECode AdnRecord::constructor(
@@ -140,13 +150,12 @@ ECode AdnRecord::constructor(
     /* [in] */ const String& number,
     /* [in] */ ArrayOf<String>* emails)
 {
-    // ==================before translated======================
-    // this.mEfid = efid;
-    // this.mRecordNumber = recordNumber;
-    // this.mAlphaTag = alphaTag;
-    // this.mNumber = number;
-    // this.mEmails = emails;
-    // this.mAdditionalNumbers = null;
+    mEfid = efid;
+    mRecordNumber = recordNumber;
+    mAlphaTag = alphaTag;
+    mNumber = number;
+    mEmails = emails;
+    mAdditionalNumbers = NULL;
     return NOERROR;
 }
 
@@ -158,13 +167,12 @@ ECode AdnRecord::constructor(
     /* [in] */ ArrayOf<String>* emails,
     /* [in] */ ArrayOf<String>* additionalNumbers)
 {
-    // ==================before translated======================
-    // this.mEfid = efid;
-    // this.mRecordNumber = recordNumber;
-    // this.mAlphaTag = alphaTag;
-    // this.mNumber = number;
-    // this.mEmails = emails;
-    // this.mAdditionalNumbers = additionalNumbers;
+    mEfid = efid;
+    mRecordNumber = recordNumber;
+    mAlphaTag = alphaTag;
+    mNumber = number;
+    mEmails = emails;
+    mAdditionalNumbers = additionalNumbers;
     return NOERROR;
 }
 
@@ -174,13 +182,12 @@ ECode AdnRecord::constructor(
     /* [in] */ const String& alphaTag,
     /* [in] */ const String& number)
 {
-    // ==================before translated======================
-    // this.mEfid = efid;
-    // this.mRecordNumber = recordNumber;
-    // this.mAlphaTag = alphaTag;
-    // this.mNumber = number;
-    // this.mEmails = null;
-    // this.mAdditionalNumbers = null;
+    mEfid = efid;
+    mRecordNumber = recordNumber;
+    mAlphaTag = alphaTag;
+    mNumber = number;
+    mEmails = NULL;
+    mAdditionalNumbers = NULL;
     return NOERROR;
 }
 
@@ -188,9 +195,7 @@ ECode AdnRecord::GetAlphaTag(
     /* [out] */ String* result)
 {
     VALIDATE_NOT_NULL(result);
-    // ==================before translated======================
-    // return mAlphaTag;
-    assert(0);
+    *result = mAlphaTag;
     return NOERROR;
 }
 
@@ -198,9 +203,7 @@ ECode AdnRecord::GetNumber(
     /* [out] */ String* result)
 {
     VALIDATE_NOT_NULL(result);
-    // ==================before translated======================
-    // return mNumber;
-    assert(0);
+    *result = mNumber;
     return NOERROR;
 }
 
@@ -208,18 +211,14 @@ ECode AdnRecord::GetEmails(
     /* [out] */ ArrayOf<String>** result)
 {
     VALIDATE_NOT_NULL(result);
-    // ==================before translated======================
-    // return mEmails;
-    assert(0);
+    *result = mEmails;
     return NOERROR;
 }
 
 ECode AdnRecord::SetEmails(
     /* [in] */ ArrayOf<String>* emails)
 {
-    // ==================before translated======================
-    // this.mEmails = emails;
-    assert(0);
+    mEmails = emails;
     return NOERROR;
 }
 
@@ -227,18 +226,14 @@ ECode AdnRecord::GetAdditionalNumbers(
     /* [out] */ ArrayOf<String>** result)
 {
     VALIDATE_NOT_NULL(result);
-    // ==================before translated======================
-    // return mAdditionalNumbers;
-    assert(0);
+    *result = mAdditionalNumbers;
     return NOERROR;
 }
 
 ECode AdnRecord::SetAdditionalNumbers(
     /* [in] */ ArrayOf<String>* additionalNumbers)
 {
-    // ==================before translated======================
-    // this.mAdditionalNumbers = additionalNumbers;
-    assert(0);
+    mAdditionalNumbers = additionalNumbers;
     return NOERROR;
 }
 
@@ -246,10 +241,11 @@ ECode AdnRecord::ToString(
     /* [out] */ String* result)
 {
     VALIDATE_NOT_NULL(result);
-    // ==================before translated======================
-    // return "ADN Record '" + mAlphaTag + "' '" + mNumber + " " + mEmails + " "
-    //         + mAdditionalNumbers + "'";
-    assert(0);
+    assert(0 && "TODO");
+    // *result = String("ADN Record '") + mAlphaTag
+    //         + String("' '") + mNumber
+    //         + String(" ") + mEmails + String(" ")
+    //         + mAdditionalNumbers + String("'");
     return NOERROR;
 }
 
@@ -257,10 +253,8 @@ ECode AdnRecord::IsEmpty(
     /* [out] */ Boolean* result)
 {
     VALIDATE_NOT_NULL(result);
-    // ==================before translated======================
-    // return TextUtils.isEmpty(mAlphaTag) && TextUtils.isEmpty(mNumber) && mEmails == null
-    //         && mAdditionalNumbers == null;
-    assert(0);
+    *result = TextUtils::IsEmpty(mAlphaTag) && TextUtils::IsEmpty(mNumber) && mEmails == NULL
+            && mAdditionalNumbers == NULL;
     return NOERROR;
 }
 
@@ -268,23 +262,20 @@ ECode AdnRecord::HasExtendedRecord(
     /* [out] */ Boolean* result)
 {
     VALIDATE_NOT_NULL(result);
-    // ==================before translated======================
-    // return mExtRecord != 0 && mExtRecord != 0xff;
-    assert(0);
+    *result = mExtRecord != 0 && mExtRecord != 0xff;
     return NOERROR;
 }
 
 ECode AdnRecord::IsEqual(
-    /* [in] */ IAdnRecord* adn,
+    /* [in] */ IAdnRecord* _adn,
     /* [out] */ Boolean* result)
 {
     VALIDATE_NOT_NULL(result);
-    // ==================before translated======================
-    // return ( stringCompareNullEqualsEmpty(mAlphaTag, adn.mAlphaTag) &&
-    //         stringCompareNullEqualsEmpty(mNumber, adn.mNumber) &&
-    //         arrayCompareNullEqualsEmpty(mEmails, adn.mEmails)
-    //         && arrayCompareNullEqualsEmpty(mAdditionalNumbers, adn.mAdditionalNumbers));
-    assert(0);
+    AutoPtr<AdnRecord> adn = (AdnRecord*)_adn;
+    *result = ( StringCompareNullEqualsEmpty(mAlphaTag, adn->mAlphaTag) &&
+            StringCompareNullEqualsEmpty(mNumber, adn->mNumber) &&
+            ArrayCompareNullEqualsEmpty(mEmails, adn->mEmails)
+            && ArrayCompareNullEqualsEmpty(mAdditionalNumbers, adn->mAdditionalNumbers));
     return NOERROR;
 }
 
@@ -295,63 +286,67 @@ ECode AdnRecord::UpdateAnrEmailArrayHelper(
     /* [out] */ ArrayOf<String>** result)
 {
     VALIDATE_NOT_NULL(result);
-    // ==================before translated======================
-    // if (fileCount == 0) {
-    //     return null;
-    // }
-    //
-    // // delete insert scenario
-    // if (dest == null || src == null) {
-    //     return dest;
-    // }
-    //
-    // String[] ref = new String[fileCount];
-    // for (int i = 0; i < fileCount; i++) {
-    //     ref[i] = "";
-    // }
-    //
-    // // Find common elements and put in the ref
-    // // To save SIM_IO
-    // for (int i = 0; i < src.length; i++) {
-    //     if (TextUtils.isEmpty(src[i])) {
-    //         continue;
-    //     }
-    //     for (int j = 0; j < dest.length; j++) {
-    //         if (src[i].equals(dest[j])) {
-    //             ref[i] = src[i];
-    //             break;
-    //         }
-    //     }
-    // }
-    //
-    // // fill out none common element into the ""
-    // for (int i = 0; i < dest.length; i++) {
-    //     if (Arrays.asList(ref).contains(dest[i])) {
-    //         continue;
-    //     } else {
-    //         for (int j = 0; j < ref.length; j++) {
-    //             if (TextUtils.isEmpty(ref[j])) {
-    //                 ref[j] = dest[i];
-    //                 break;
-    //             }
-    //         }
-    //     }
-    // }
-    // return ref;
-    assert(0);
+    if (fileCount == 0) {
+        *result = NULL;
+        return NOERROR;
+    }
+
+    // delete insert scenario
+    if (dest == NULL || src == NULL) {
+        *result = dest;
+        return NOERROR;
+    }
+
+    AutoPtr<ArrayOf<String> > ref = ArrayOf<String>::Alloc(fileCount);
+    for (Int32 i = 0; i < fileCount; i++) {
+        (*ref)[i] = "";
+    }
+
+    // Find common elements and put in the ref
+    // To save SIM_IO
+    for (Int32 i = 0; i < src->GetLength(); i++) {
+        if (TextUtils::IsEmpty((*src)[i])) {
+            continue;
+        }
+        for (Int32 j = 0; j < dest->GetLength(); j++) {
+            if ((*src)[i].Equals((*dest)[j])) {
+                (*ref)[i] = (*src)[i];
+                break;
+            }
+        }
+    }
+
+    // fill out none common element into the ""
+    for (Int32 i = 0; i < dest->GetLength(); i++) {
+        AutoPtr<IList> l;
+        Arrays::AsList(ref, (IList**)&l);
+        Boolean bContain = FALSE;
+        l->Contains(CoreUtils::Convert((*dest)[i]), &bContain);
+        if (bContain) {
+            continue;
+        }
+        else {
+            for (Int32 j = 0; j < ref->GetLength(); j++) {
+                if (TextUtils::IsEmpty((*ref)[j])) {
+                    (*ref)[j] = (*dest)[i];
+                    break;
+                }
+            }
+        }
+    }
+    *result = ref;
     return NOERROR;
 }
 
 ECode AdnRecord::UpdateAnrEmailArray(
-    /* [in] */ IAdnRecord* adn,
+    /* [in] */ IAdnRecord* _adn,
     /* [in] */ Int32 emailFileNum,
     /* [in] */ Int32 anrFileNum)
 {
-    // ==================before translated======================
-    // mEmails = updateAnrEmailArrayHelper(mEmails, adn.mEmails, emailFileNum);
-    // mAdditionalNumbers = updateAnrEmailArrayHelper(mAdditionalNumbers,
-    //             adn.mAdditionalNumbers, anrFileNum);
-    assert(0);
+    AutoPtr<AdnRecord> adn = (AdnRecord*)_adn;
+    UpdateAnrEmailArrayHelper(mEmails, adn->mEmails, emailFileNum, (ArrayOf<String>**)&mEmails);
+    UpdateAnrEmailArrayHelper(mAdditionalNumbers,
+                adn->mAdditionalNumbers, anrFileNum, (ArrayOf<String>**)&mAdditionalNumbers);
     return NOERROR;
 }
 
@@ -369,23 +364,21 @@ ECode AdnRecord::WriteToParcel(
     /* [in] */ IParcel* dest)
     ///* [in] */ Int32 flags)
 {
-    // ==================before translated======================
-    // dest.writeInt(mEfid);
-    // dest.writeInt(mRecordNumber);
-    // dest.writeString(mAlphaTag);
-    // dest.writeString(mNumber);
-    // dest.writeStringArray(mEmails);
-    // dest.writeStringArray(mAdditionalNumbers);
-    assert(0);
+    dest->WriteInt32(mEfid);
+    dest->WriteInt32(mRecordNumber);
+    dest->WriteString(mAlphaTag);
+    dest->WriteString(mNumber);
+    assert(0 && "TODO");
+    // dest->WriteStringArray(mEmails);
+    // dest->WriteStringArray(mAdditionalNumbers);
     return NOERROR;
 }
 
 ECode AdnRecord::ReadFromParcel(
     /* [in] */ IParcel* source)
 {
-    // ==================before translated======================
-    // int efid;
-    // int recordNumber;
+    // Int32 efid;
+    // Int32 recordNumber;
     // String alphaTag;
     // String number;
     // String[] emails;
@@ -396,7 +389,7 @@ ECode AdnRecord::ReadFromParcel(
     // number = source.readString();
     // emails = source.readStringArray();
     // additionalNumbers = source.readStringArray();
-    //
+
     // return new AdnRecord(efid, recordNumber, alphaTag, number, emails, additionalNumbers);
 
     return NOERROR;
@@ -407,84 +400,94 @@ ECode AdnRecord::BuildAdnString(
     /* [out] */ ArrayOf<Byte>** result)
 {
     VALIDATE_NOT_NULL(result);
-    // ==================before translated======================
-    // byte[] bcdNumber;
-    // byte[] byteTag;
-    // byte[] adnString;
-    // int footerOffset = recordSize - FOOTER_SIZE_BYTES;
-    //
-    // // create an empty record
-    // adnString = new byte[recordSize];
-    // for (int i = 0; i < recordSize; i++) {
-    //     adnString[i] = (byte) 0xFF;
-    // }
-    //
-    // if ((TextUtils.isEmpty(mNumber)) && (TextUtils.isEmpty(mAlphaTag))) {
-    //     Rlog.w(LOGTAG, "[buildAdnString] Empty dialing number");
-    //     return adnString;   // return the empty record (for delete)
-    // } else if ((mNumber != null) && (mNumber.length()
-    //         > (ADN_DIALING_NUMBER_END - ADN_DIALING_NUMBER_START + 1) * 2)) {
-    //     Rlog.w(LOGTAG,
-    //             "[buildAdnString] Max length of dialing number is 20");
-    //     return null;
-    // } else if (mAlphaTag != null && mAlphaTag.length() > footerOffset) {
-    //     Rlog.w(LOGTAG,
-    //             "[buildAdnString] Max length of tag is " + footerOffset);
-    //     return null;
-    // } else {
-    //     if (!(TextUtils.isEmpty(mNumber))) {
-    //         bcdNumber = PhoneNumberUtils.numberToCalledPartyBCD(mNumber);
-    //
-    //     System.arraycopy(bcdNumber, 0, adnString,
-    //             footerOffset + ADN_TON_AND_NPI, bcdNumber.length);
-    //
-    //         adnString[footerOffset + ADN_BCD_NUMBER_LENGTH]
-    //                 = (byte) (bcdNumber.length);
-    //     }
-    //     adnString[footerOffset + ADN_CAPABILITY_ID]
-    //             = (byte) 0xFF; // Capability Id
-    //     adnString[footerOffset + ADN_EXTENSION_ID]
-    //             = (byte) 0xFF; // Extension Record Id
-    //
-    //     if (!TextUtils.isEmpty(mAlphaTag)) {
-    //         byteTag = IccUtils.stringToAdnStringField(mAlphaTag);
-    //         System.arraycopy(byteTag, 0, adnString, 0, byteTag.length);
-    //     }
-    //
-    //     return adnString;
-    // }
-    assert(0);
+    AutoPtr<ArrayOf<Byte> > bcdNumber;
+    AutoPtr<ArrayOf<Byte> > byteTag;
+    AutoPtr<ArrayOf<Byte> > adnString;
+    Int32 footerOffset = recordSize - FOOTER_SIZE_BYTES;
+
+    // create an empty record
+    adnString = ArrayOf<Byte>::Alloc(recordSize);
+    for (Int32 i = 0; i < recordSize; i++) {
+        (*adnString)[i] = (Byte) 0xFF;
+    }
+
+    if ((TextUtils::IsEmpty(mNumber)) && (TextUtils::IsEmpty(mAlphaTag))) {
+        Logger::W(LOGTAG, String("[buildAdnString] Empty dialing number"));
+        *result = adnString;   // return the empty record (for delete)
+        return NOERROR;
+    }
+    else if ((!mNumber.IsNull()) && (mNumber.GetLength()
+            > (ADN_DIALING_NUMBER_END - ADN_DIALING_NUMBER_START + 1) * 2)) {
+        Logger::W(LOGTAG,
+                String("[buildAdnString] Max length of dialing number is 20"));
+        *result = NULL;
+        return NOERROR;
+    }
+    else if (!mAlphaTag.IsNull() && mAlphaTag.GetLength() > footerOffset) {
+        Logger::W(LOGTAG,
+                String("[buildAdnString] Max length of tag is ")
+                + StringUtils::ToString(footerOffset));
+        *result = NULL;
+        return NOERROR;
+    }
+    else {
+        if (!(TextUtils::IsEmpty(mNumber))) {
+            AutoPtr<IPhoneNumberUtils> pn;
+            CPhoneNumberUtils::AcquireSingleton((IPhoneNumberUtils**)&pn);
+            pn->NumberToCalledPartyBCD(mNumber, (ArrayOf<Byte>**)&bcdNumber);
+
+            adnString->Copy(footerOffset + ADN_TON_AND_NPI, bcdNumber, 0, bcdNumber->GetLength());
+
+            (*adnString)[footerOffset + ADN_BCD_NUMBER_LENGTH]
+                    = (Byte) (bcdNumber->GetLength());
+        }
+        (*adnString)[footerOffset + ADN_CAPABILITY_ID]
+                = (Byte) 0xFF; // Capability Id
+        (*adnString)[footerOffset + ADN_EXTENSION_ID]
+                = (Byte) 0xFF; // Extension Record Id
+
+        if (!TextUtils::IsEmpty(mAlphaTag)) {
+            AutoPtr<IIccUtils> iccu;
+            CIccUtils::AcquireSingleton((IIccUtils**)&iccu);
+            iccu->StringToAdnStringField(mAlphaTag, (ArrayOf<Byte>**)&byteTag);
+            adnString->Copy(0, byteTag, 0, byteTag->GetLength());
+        }
+
+        *result = adnString;
+    }
     return NOERROR;
 }
 
 ECode AdnRecord::AppendExtRecord(
     /* [in] */ ArrayOf<Byte>* extRecord)
 {
-    // ==================before translated======================
     // try {
-    //     if (extRecord.length != EXT_RECORD_LENGTH_BYTES) {
-    //         return;
-    //     }
-    //
-    //     if ((extRecord[0] & EXT_RECORD_TYPE_MASK)
-    //             != EXT_RECORD_TYPE_ADDITIONAL_DATA) {
-    //         return;
-    //     }
-    //
-    //     if ((0xff & extRecord[1]) > MAX_EXT_CALLED_PARTY_LENGTH) {
-    //         // invalid or empty record
-    //         return;
-    //     }
-    //
-    //     mNumber += PhoneNumberUtils.calledPartyBCDFragmentToString(
-    //                                 extRecord, 2, 0xff & extRecord[1]);
-    //
-    //     // We don't support ext record chaining.
-    //
+        if (extRecord->GetLength() != EXT_RECORD_LENGTH_BYTES) {
+            return NOERROR;
+        }
+
+        if (((*extRecord)[0] & EXT_RECORD_TYPE_MASK)
+                != EXT_RECORD_TYPE_ADDITIONAL_DATA) {
+            return NOERROR;
+        }
+
+        if ((0xff & (*extRecord)[1]) > MAX_EXT_CALLED_PARTY_LENGTH) {
+            // invalid or empty record
+            return NOERROR;
+        }
+
+        AutoPtr<IPhoneNumberUtils> pn;
+        CPhoneNumberUtils::AcquireSingleton((IPhoneNumberUtils**)&pn);
+        String num;
+        pn->CalledPartyBCDFragmentToString(
+                        extRecord, 2, 0xff & (*extRecord)[1], &num);
+        mNumber += num;
+
+        // We don't support ext record chaining.
+
     // } catch (RuntimeException ex) {
-    //     Rlog.w(LOGTAG, "Error parsing AdnRecord ext record", ex);
+    //     Logger.w(LOGTAG, "Error parsing AdnRecord ext record", ex);
     // }
-    assert(0);
     return NOERROR;
 }
 
@@ -492,121 +495,129 @@ ECode AdnRecord::GetAnrNumbers(
     /* [out] */ ArrayOf<String>** result)
 {
     VALIDATE_NOT_NULL(result);
-    // ==================before translated======================
-    // return getAdditionalNumbers();
-    assert(0);
-    return NOERROR;
+    return GetAdditionalNumbers(result);
 }
 
 Boolean AdnRecord::StringCompareNullEqualsEmpty(
     /* [in] */ const String& s1,
     /* [in] */ const String& s2)
 {
-    // ==================before translated======================
+    String _s1 = s1;
+    String _s2 = s2;
     // if (s1 == s2) {
-    //     return true;
+    //     return TRUE;
     // }
-    // if (s1 == null) {
-    //     s1 = "";
-    // }
-    // if (s2 == null) {
-    //     s2 = "";
-    // }
-    // return (s1.equals(s2));
-    assert(0);
-    return FALSE;
+    if (_s1.IsNull()) {
+        _s1 = "";
+    }
+    if (_s2.IsNull()) {
+        _s2 = "";
+    }
+    return (_s1.Equals(_s2));
 }
 
 Boolean AdnRecord::ArrayCompareNullEqualsEmpty(
     /* [in] */ ArrayOf<String>* s1,
     /* [in] */ ArrayOf<String>* s2)
 {
-    // ==================before translated======================
-    // if (s1 == s2) {
-    //     return true;
-    // }
-    //
-    // if (s1 == null) {
-    //     s1 = new String[1];
-    //     s1[0] = "";
-    // }
-    //
-    // if (s2 == null) {
-    //     s2 = new String[1];
-    //     s2[0] = "";
-    // }
-    //
-    // for (String str:s1) {
-    //     if (TextUtils.isEmpty(str)) {
-    //         continue;
-    //     } else {
-    //         if (Arrays.asList(s2).contains(str)) {
-    //             continue;
-    //         } else {
-    //             return false;
-    //         }
-    //     }
-    // }
-    //
-    // for (String str:s2) {
-    //     if (TextUtils.isEmpty(str)) {
-    //         continue;
-    //     } else {
-    //         if (Arrays.asList(s1).contains(str)) {
-    //             continue;
-    //         } else {
-    //             return false;
-    //         }
-    //     }
-    // }
-    //
-    // return true;
-    assert(0);
-    return FALSE;
+    if (s1 == s2) {
+        return TRUE;
+    }
+
+    if (s1 == NULL) {
+        s1 = ArrayOf<String>::Alloc(1);
+        (*s1)[0] = "";
+    }
+
+    if (s2 == NULL) {
+        s2 = ArrayOf<String>::Alloc(1);
+        (*s2)[0] = "";
+    }
+
+    for (Int32 i = 0; i < s1->GetLength(); i++) {
+        String str = (*s1)[i];
+        if (TextUtils::IsEmpty(str)) {
+            continue;
+        }
+        else {
+            AutoPtr<IList> l2;
+            Arrays::AsList(s2, (IList**)&l2);
+            Boolean bContain = FALSE;
+            l2->Contains(CoreUtils::Convert(str), &bContain);
+            if (bContain) {
+                continue;
+            }
+            else {
+                return FALSE;
+            }
+        }
+    }
+
+    for (Int32 i = 0; i < s2->GetLength(); i++) {
+        String str = (*s2)[i];
+        if (TextUtils::IsEmpty(str)) {
+            continue;
+        }
+        else {
+            AutoPtr<IList> l1;
+            Arrays::AsList(s1, (IList**)&l1);
+            Boolean bContain = FALSE;
+            l1->Contains(CoreUtils::Convert(str), &bContain);
+            if (bContain) {
+                continue;
+            }
+            else {
+                return FALSE;
+            }
+        }
+    }
+
+    return TRUE;
 }
 
 void AdnRecord::ParseRecord(
     /* [in] */ ArrayOf<Byte>* record)
 {
-    // ==================before translated======================
     // try {
-    //     mAlphaTag = IccUtils.adnStringFieldToString(
-    //                     record, 0, record.length - FOOTER_SIZE_BYTES);
-    //
-    //     int footerOffset = record.length - FOOTER_SIZE_BYTES;
-    //
-    //     int numberLength = 0xff & record[footerOffset];
-    //
-    //     if (numberLength > MAX_NUMBER_SIZE_BYTES) {
-    //         // Invalid number length
-    //         mNumber = "";
-    //         return;
-    //     }
-    //
-    //     // Please note 51.011 10.5.1:
-    //     //
-    //     // "If the Dialling Number/SSC String does not contain
-    //     // a dialling number, e.g. a control string deactivating
-    //     // a service, the TON/NPI byte shall be set to 'FF' by
-    //     // the ME (see note 2)."
-    //
-    //     mNumber = PhoneNumberUtils.calledPartyBCDToString(
-    //                     record, footerOffset + 1, numberLength);
-    //
-    //
-    //     mExtRecord = 0xff & record[record.length - 1];
-    //
-    //     mEmails = null;
-    //     mAdditionalNumbers = null;
-    //
+        AutoPtr<IIccUtils> iccu;
+        CIccUtils::AcquireSingleton((IIccUtils**)&iccu);
+        iccu->AdnStringFieldToString(
+                        record, 0, record->GetLength() - FOOTER_SIZE_BYTES,
+                        &mAlphaTag);
+
+        Int32 footerOffset = record->GetLength() - FOOTER_SIZE_BYTES;
+
+        Int32 numberLength = 0xff & (*record)[footerOffset];
+
+        if (numberLength > MAX_NUMBER_SIZE_BYTES) {
+            // Invalid number length
+            mNumber = "";
+            return;
+        }
+
+        // Please note 51.011 10.5.1:
+        //
+        // "If the Dialling Number/SSC String does not contain
+        // a dialling number, e.g. a control string deactivating
+        // a service, the TON/NPI byte shall be set to 'FF' by
+        // the ME (see note 2)."
+        AutoPtr<IPhoneNumberUtils> pn;
+        CPhoneNumberUtils::AcquireSingleton((IPhoneNumberUtils**)&pn);
+        pn->CalledPartyBCDToString(
+                    record, footerOffset + 1, numberLength, &mNumber);
+
+        mExtRecord = 0xff & (*record)[record->GetLength() - 1];
+
+        mEmails = NULL;
+        mAdditionalNumbers = NULL;
+
     // } catch (RuntimeException ex) {
-    //     Rlog.w(LOGTAG, "Error parsing AdnRecord", ex);
+    //     Logger.w(LOGTAG, "Error parsing AdnRecord", ex);
     //     mNumber = "";
     //     mAlphaTag = "";
-    //     mEmails = null;
-    //     mAdditionalNumbers = null;
+    //     mEmails = NULL;
+    //     mAdditionalNumbers = NULL;
     // }
-    assert(0);
 }
 
 } // namespace Uicc

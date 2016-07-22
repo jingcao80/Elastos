@@ -2,9 +2,8 @@
 #define __ELASTOS_DROID_INTERNAL_TELEPHONY_UICC_ICCIORESULT_H__
 
 #include "elastos/droid/ext/frameworkext.h"
-#include "elastos/core/Object.h"
 
-// package com.android.internal.telephony.uicc;
+#include <elastos/core/Object.h>
 
 namespace Elastos {
 namespace Droid {
@@ -53,9 +52,9 @@ public:
         /* [out] */ IIccException** result);
 
 public:
-    Int32 sw1;
-    Int32 sw2;
-    AutoPtr<ArrayOf<Byte> > payload;
+    Int32 mSw1;
+    Int32 mSw2;
+    AutoPtr<ArrayOf<Byte> > mPayload;
 };
 
 } // namespace Uicc

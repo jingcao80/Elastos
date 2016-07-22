@@ -370,8 +370,8 @@ AutoPtr<IIccRefreshResponse> UiccController::ParseOemSimRefresh(
     helper->GetNativeOrder(&bo);
     payload->SetOrder(bo);
 
-    payload->GetInt32(&response->refreshResult);
-    payload->GetInt32(&response->efId);
+    payload->GetInt32(&response->mRefreshResult);
+    payload->GetInt32(&response->mEfId);
     Int32 aidLen = 0;
     payload->GetInt32(&aidLen);
     AutoPtr<ArrayOf<Byte> > aid = ArrayOf<Byte>::Alloc(QHOOK_MAX_AID_SIZE);
@@ -379,11 +379,11 @@ AutoPtr<IIccRefreshResponse> UiccController::ParseOemSimRefresh(
     //Read the aid string with QHOOK_MAX_AID_SIZE from payload at first because need
     //corresponding to the aid array length sent from qcril and need parse the payload
     //to get app type and sub id in IccRecords.java after called this method.
-    response->aid = (aidLen == 0) ? String(NULL) : String(*aid).Substring(0, aidLen);
+    response->mAid = (aidLen == 0) ? String(NULL) : String(*aid).Substring(0, aidLen);
 
     if (DBG){
         Logger::D(LOGTAG, "refresh SIM card , refresh result:%d, ef Id:%d, aid:%s"
-                , response->refreshResult, response->efId, response->aid.string());
+                , response->mRefreshResult, response->mEfId, response->mAid.string());
     }
     return response;
 }

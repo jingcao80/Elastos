@@ -22,10 +22,10 @@ class IccCardStatus
 public:
     CAR_INTERFACE_DECL();
 
-    virtual CARAPI SetCardState(
+    CARAPI SetCardState(
         /* [in] */ Int32 state);
 
-    virtual CARAPI SetUniversalPinState(
+    CARAPI SetUniversalPinState(
         /* [in] */ Int32 state);
 
     // @Override

@@ -1,6 +1,14 @@
 
 #include "Elastos.Droid.Internal.h"
 #include "elastos/droid/internal/telephony/uicc/IccIoResult.h"
+#include "elastos/droid/internal/telephony/uicc/CIccUtils.h"
+#include "elastos/droid/internal/telephony/uicc/IccException.h"
+#include "elastos/droid/internal/telephony/uicc/IccFileTypeMismatch.h"
+#include "elastos/droid/internal/telephony/uicc/IccFileNotFound.h"
+
+#include <elastos/core/StringUtils.h>
+
+using Elastos::Core::StringUtils;
 
 namespace Elastos {
 namespace Droid {
@@ -22,10 +30,9 @@ ECode IccIoResult::constructor(
     /* [in] */ Int32 sw2,
     /* [in] */ ArrayOf<Byte>* payload)
 {
-    // ==================before translated======================
-    // this.sw1 = sw1;
-    // this.sw2 = sw2;
-    // this.payload = payload;
+    mSw1 = sw1;
+    mSw2 = sw2;
+    mPayload = payload;
     return NOERROR;
 }
 
@@ -34,8 +41,11 @@ ECode IccIoResult::constructor(
     /* [in] */ Int32 sw2,
     /* [in] */ const String& hexString)
 {
-    // ==================before translated======================
-    // this(sw1, sw2, IccUtils.hexStringToBytes(hexString));
+    AutoPtr<IIccUtils> iccu;
+    CIccUtils::AcquireSingleton((IIccUtils**)&iccu);
+    AutoPtr<ArrayOf<Byte> > res;
+    iccu->HexStringToBytes(hexString, (ArrayOf<Byte>**)&res);
+    constructor(sw1, sw2, res);
     return NOERROR;
 }
 
@@ -43,10 +53,8 @@ ECode IccIoResult::ToString(
     /* [out] */ String* result)
 {
     VALIDATE_NOT_NULL(result);
-    // ==================before translated======================
-    // return "IccIoResponse sw1:0x" + Integer.toHexString(sw1) + " sw2:0x"
-    //         + Integer.toHexString(sw2);
-    assert(0);
+    *result = String("IccIoResponse sw1:0x") + StringUtils::ToString(mSw1)
+            + String(" sw2:0x") + StringUtils::ToString(mSw2);
     return NOERROR;
 }
 
@@ -54,9 +62,7 @@ ECode IccIoResult::Success(
     /* [out] */ Boolean* result)
 {
     VALIDATE_NOT_NULL(result);
-    // ==================before translated======================
-    // return sw1 == 0x90 || sw1 == 0x91 || sw1 == 0x9e || sw1 == 0x9f;
-    assert(0);
+    *result = mSw1 == 0x90 || mSw1 == 0x91 || mSw1 == 0x9e || mSw1 == 0x9f;
     return NOERROR;
 }
 
@@ -64,20 +70,35 @@ ECode IccIoResult::GetException(
     /* [out] */ IIccException** result)
 {
     VALIDATE_NOT_NULL(result);
-    // ==================before translated======================
-    // if (success()) return null;
-    //
-    // switch (sw1) {
-    //     case 0x94:
-    //         if (sw2 == 0x08) {
-    //             return new IccFileTypeMismatch();
-    //         } else {
-    //             return new IccFileNotFound();
-    //         }
-    //     default:
-    //         return new IccException("sw1:" + sw1 + " sw2:" + sw2);
-    // }
-    assert(0);
+    Boolean b = FALSE;
+    Success(&b);
+    if (b) {
+        *result = NULL;
+        return NOERROR;
+    }
+
+    switch (mSw1) {
+        case 0x94:
+            if (mSw2 == 0x08) {
+                AutoPtr<IccFileTypeMismatch> p = new IccFileTypeMismatch();
+                *result = IIccException::Probe(p);
+                REFCOUNT_ADD(*result)
+                return NOERROR;
+            }
+            else {
+                AutoPtr<IccFileNotFound> p = new IccFileNotFound();
+                *result = IIccException::Probe(p);
+                REFCOUNT_ADD(*result)
+                return NOERROR;
+            }
+        default: {
+            AutoPtr<IccException> p = new IccException(String("sw1:") + StringUtils::ToString(mSw1)
+                                        + String(" sw2:") + StringUtils::ToString(mSw2));
+            *result = p;
+            REFCOUNT_ADD(*result)
+            return NOERROR;
+        }
+    }
     return NOERROR;
 }
 

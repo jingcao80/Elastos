@@ -4,14 +4,6 @@
 #include "elastos/droid/ext/frameworkext.h"
 #include "elastos/core/Object.h"
 
-// package com.android.internal.telephony.uicc;
-// import android.os.Parcel;
-// import android.os.Parcelable;
-// import android.telephony.PhoneNumberUtils;
-// import android.text.TextUtils;
-// import android.telephony.Rlog;
-// import java.util.Arrays;
-
 namespace Elastos {
 namespace Droid {
 namespace Internal {

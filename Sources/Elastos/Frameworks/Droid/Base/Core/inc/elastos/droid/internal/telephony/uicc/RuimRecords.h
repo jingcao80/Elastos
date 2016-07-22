@@ -5,35 +5,6 @@
 #include "elastos/droid/os/AsyncResult.h"
 #include "elastos/droid/internal/telephony/uicc/IccRecords.h"
 
-// package com.android.internal.telephony.uicc;
-// import static com.android.internal.telephony.TelephonyProperties.PROPERTY_ICC_OPERATOR_ISO_COUNTRY;
-// import static com.android.internal.telephony.TelephonyProperties.PROPERTY_ICC_OPERATOR_NUMERIC;
-// import static com.android.internal.telephony.TelephonyProperties.PROPERTY_APN_RUIM_OPERATOR_NUMERIC;
-// import static com.android.internal.telephony.TelephonyProperties.PROPERTY_ICC_OPERATOR_ALPHA;
-// import static com.android.internal.telephony.TelephonyProperties.PROPERTY_TEST_CSIM;
-// import java.io.UnsupportedEncodingException;
-// import java.io.FileDescriptor;
-// import java.io.PrintWriter;
-// import java.util.ArrayList;
-// import java.util.Arrays;
-// import java.util.Locale;
-// import android.content.Context;
-// import android.os.AsyncResult;
-// import android.os.Build;
-// import android.os.Message;
-// import android.os.SystemProperties;
-// import android.telephony.TelephonyManager;
-// import android.telephony.Rlog;
-// import android.text.TextUtils;
-// import com.android.internal.telephony.TelephonyProperties;
-// import com.android.internal.telephony.CommandsInterface;
-// import com.android.internal.telephony.GsmAlphabet;
-// import com.android.internal.telephony.MccTable;
-// import com.android.internal.telephony.cdma.sms.UserData;
-// import com.android.internal.telephony.uicc.IccCardApplicationStatus.AppType;
-// import com.android.internal.telephony.uicc.IccCardApplicationStatus.AppState;
-// import com.android.internal.telephony.uicc.UICCConfig;
-
 using Elastos::Droid::Os::AsyncResult;
 using Elastos::Droid::Os::IMessage;
 using Elastos::Droid::Content::IContext;
@@ -63,6 +34,9 @@ private:
     public:
         CAR_INTERFACE_DECL();
 
+        EfPlLoaded(
+            /* [in] */ RuimRecords* host);
+
         // @Override
         CARAPI GetEfName(
             /* [out] */ String* result);
@@ -70,6 +44,9 @@ private:
         // @Override
         CARAPI OnRecordLoaded(
             /* [in] */ AsyncResult* ar);
+
+    public:
+        RuimRecords* mHost;
     };
 
     // Refer to C.S0065 5.2.26
@@ -80,6 +57,9 @@ private:
     public:
         CAR_INTERFACE_DECL();
 
+        EfCsimLiLoaded(
+            /* [in] */ RuimRecords* host);
+
         // @Override
         CARAPI GetEfName(
             /* [out] */ String* result);
@@ -87,6 +67,9 @@ private:
         // @Override
         CARAPI OnRecordLoaded(
             /* [in] */ AsyncResult* ar);
+
+    public:
+        RuimRecords* mHost;
     };
 
     // Refer to C.S0065 5.2.32
@@ -97,6 +80,9 @@ private:
     public:
         CAR_INTERFACE_DECL();
 
+        EfCsimSpnLoaded(
+            /* [in] */ RuimRecords* host);
+
         // @Override
         CARAPI GetEfName(
             /* [out] */ String* result);
@@ -104,6 +90,9 @@ private:
         // @Override
         CARAPI OnRecordLoaded(
             /* [in] */ AsyncResult* ar);
+
+    public:
+        RuimRecords* mHost;
     };
 
     class EfCsimMdnLoaded
@@ -113,6 +102,9 @@ private:
     public:
         CAR_INTERFACE_DECL();
 
+        EfCsimMdnLoaded(
+            /* [in] */ RuimRecords* host);
+
         // @Override
         CARAPI GetEfName(
             /* [out] */ String* result);
@@ -120,6 +112,9 @@ private:
         // @Override
         CARAPI OnRecordLoaded(
             /* [in] */ AsyncResult* ar);
+
+    public:
+        RuimRecords* mHost;
     };
 
     class EfCsimImsimLoaded
@@ -129,6 +124,9 @@ private:
     public:
         CAR_INTERFACE_DECL();
 
+        EfCsimImsimLoaded(
+            /* [in] */ RuimRecords* host);
+
         // @Override
         CARAPI GetEfName(
             /* [out] */ String* result);
@@ -136,6 +134,9 @@ private:
         // @Override
         CARAPI OnRecordLoaded(
             /* [in] */ AsyncResult* ar);
+
+    public:
+        RuimRecords* mHost;
     };
 
     class EfCsimCdmaHomeLoaded
@@ -145,6 +146,9 @@ private:
     public:
         CAR_INTERFACE_DECL();
 
+        EfCsimCdmaHomeLoaded(
+            /* [in] */ RuimRecords* host);
+
         // @Override
         CARAPI GetEfName(
             /* [out] */ String* result);
@@ -152,6 +156,9 @@ private:
         // @Override
         CARAPI OnRecordLoaded(
             /* [in] */ AsyncResult* ar);
+
+    public:
+        RuimRecords* mHost;
     };
 
     class EfCsimEprlLoaded
@@ -161,6 +168,9 @@ private:
     public:
         CAR_INTERFACE_DECL();
 
+        EfCsimEprlLoaded(
+            /* [in] */ RuimRecords* host);
+
         // @Override
         CARAPI GetEfName(
             /* [out] */ String* result);
@@ -168,6 +178,9 @@ private:
         // @Override
         CARAPI OnRecordLoaded(
             /* [in] */ AsyncResult* ar);
+
+    public:
+        RuimRecords* mHost;
     };
 
     class EfCsimModelLoaded
@@ -177,11 +190,17 @@ private:
     public:
         CAR_INTERFACE_DECL();
 
+        EfCsimModelLoaded(
+            /* [in] */ RuimRecords* host);
+
         virtual CARAPI GetEfName(
             /* [out] */ String* result);
 
         virtual CARAPI OnRecordLoaded(
             /* [in] */ AsyncResult* ar);
+
+    public:
+        RuimRecords* mHost;
     };
 
     class EfRuimModelLoaded
@@ -191,11 +210,17 @@ private:
     public:
         CAR_INTERFACE_DECL();
 
+        EfRuimModelLoaded(
+            /* [in] */ RuimRecords* host);
+
         virtual CARAPI GetEfName(
             /* [out] */ String* result);
 
         virtual CARAPI OnRecordLoaded(
             /* [in] */ AsyncResult* ar);
+
+    public:
+        RuimRecords* mHost;
     };
 
     class EfRuimIdLoaded
@@ -205,11 +230,17 @@ private:
     public:
         CAR_INTERFACE_DECL();
 
+        EfRuimIdLoaded(
+            /* [in] */ RuimRecords* host);
+
         virtual CARAPI GetEfName(
             /* [out] */ String* result);
 
         virtual CARAPI OnRecordLoaded(
             /* [in] */ AsyncResult* ar);
+
+    public:
+        RuimRecords* mHost;
     };
 
 public:

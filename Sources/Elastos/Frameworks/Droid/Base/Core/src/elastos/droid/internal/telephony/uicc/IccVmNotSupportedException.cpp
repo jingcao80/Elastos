@@ -19,9 +19,8 @@ IccVmNotSupportedException::IccVmNotSupportedException()
 
 IccVmNotSupportedException::IccVmNotSupportedException(
     /* [in] */ const String& s)
+    : IccException(s)
 {
-    // ==================before translated======================
-    // super(s);
 }
 
 } // namespace Uicc

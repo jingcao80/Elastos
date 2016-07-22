@@ -1,7 +1,31 @@
+#include "Elastos.CoreLibrary.h"
 #include "Elastos.CoreLibrary.Utility.Concurrent.h"
+#include "Elastos.CoreLibrary.IO.h"
 #include "Elastos.Droid.Content.h"
 #include "Elastos.Droid.Internal.h"
 #include "elastos/droid/internal/telephony/uicc/IsimUiccRecords.h"
+#include "elastos/droid/content/CIntent.h"
+#include "elastos/droid/internal/telephony/uicc/CIccUtils.h"
+#include "elastos/droid/internal/telephony/uicc/CAdnRecordCache.h"
+#include "elastos/droid/internal/telephony/gsm/CSimTlv.h"
+
+#include <elastos/core/AutoLock.h>
+#include <elastos/core/StringUtils.h>
+#include <elastos/utility/Arrays.h>
+#include <elastos/utility/logging/Logger.h>
+
+using Elastos::Droid::Content::IIntent;
+using Elastos::Droid::Content::CIntent;
+using Elastos::Droid::Internal::Telephony::Gsm::ISimTlv;
+using Elastos::Droid::Internal::Telephony::Gsm::CSimTlv;
+
+using Elastos::Core::AutoLock;
+using Elastos::Core::StringUtils;
+using Elastos::IO::IFlushable;
+using Elastos::IO::Charset::ICharset;
+using Elastos::Utility::Arrays;
+using Elastos::Utility::IIterator;
+using Elastos::Utility::Logging::Logger;
 
 namespace Elastos {
 namespace Droid {
@@ -14,22 +38,27 @@ namespace Uicc {
 //=====================================================================
 CAR_INTERFACE_IMPL(IsimUiccRecords::EfIsimImpiLoaded, Object, IIccRecordLoaded);
 
-String IsimUiccRecords::EfIsimImpiLoaded::GetEfName()
+IsimUiccRecords::EfIsimImpiLoaded::EfIsimImpiLoaded(
+    /* [in] */ IsimUiccRecords* host)
+    : mHost(host)
 {
-    // ==================before translated======================
-    // return "EF_ISIM_IMPI";
-    assert(0);
-    return String("");
+}
+
+ECode IsimUiccRecords::EfIsimImpiLoaded::GetEfName(
+    /* [out] */ String* name)
+{
+    VALIDATE_NOT_NULL(name)
+    *name = String("EF_ISIM_IMPI");
+    return NOERROR;
 }
 
 ECode IsimUiccRecords::EfIsimImpiLoaded::OnRecordLoaded(
     /* [in] */ AsyncResult* ar)
 {
-    // ==================before translated======================
-    // byte[] data = (byte[]) ar.result;
-    // mIsimImpi = isimTlvToString(data);
-    // if (DUMP_RECORDS) log("EF_IMPI=" + mIsimImpi);
-    assert(0);
+    assert(0 && "TODO");
+    AutoPtr<ArrayOf<Byte> > data;// = (ArrayOf<Byte>*)ar->mResult;
+    mHost->mIsimImpi = mHost->IsimTlvToString(data);
+    if (DUMP_RECORDS) mHost->Log(String("EF_IMPI=") + mHost->mIsimImpi);
     return NOERROR;
 }
 
@@ -38,28 +67,45 @@ ECode IsimUiccRecords::EfIsimImpiLoaded::OnRecordLoaded(
 //=====================================================================
 CAR_INTERFACE_IMPL(IsimUiccRecords::EfIsimImpuLoaded, Object, IIccRecordLoaded);
 
-String IsimUiccRecords::EfIsimImpuLoaded::GetEfName()
+IsimUiccRecords::EfIsimImpuLoaded::EfIsimImpuLoaded(
+    /* [in] */ IsimUiccRecords* host)
+    : mHost(host)
 {
-    // ==================before translated======================
-    // return "EF_ISIM_IMPU";
-    assert(0);
-    return String("");
+}
+
+ECode IsimUiccRecords::EfIsimImpuLoaded::GetEfName(
+    /* [out] */ String* name)
+{
+    VALIDATE_NOT_NULL(name)
+    *name = String("EF_ISIM_IMPU");
+    return NOERROR;
 }
 
 ECode IsimUiccRecords::EfIsimImpuLoaded::OnRecordLoaded(
     /* [in] */ AsyncResult* ar)
 {
-    // ==================before translated======================
-    // ArrayList<byte[]> impuList = (ArrayList<byte[]>) ar.result;
-    // if (DBG) log("EF_IMPU record count: " + impuList.size());
-    // mIsimImpu = new String[impuList.size()];
-    // int i = 0;
-    // for (byte[] identity : impuList) {
-    //     String impu = isimTlvToString(identity);
-    //     if (DUMP_RECORDS) log("EF_IMPU[" + i + "]=" + impu);
-    //     mIsimImpu[i++] = impu;
-    // }
-    assert(0);
+    AutoPtr<IArrayList> impuList = IArrayList::Probe(ar->mResult);
+    Int32 size = 0;
+    impuList->GetSize(&size);
+    if (DBG) {
+        mHost->Log(String("EF_IMPU record count: ") + StringUtils::ToString(size));
+    }
+    mHost->mIsimImpu = ArrayOf<String>::Alloc(size);
+    Int32 i = 0;
+    AutoPtr<IIterator> it;
+    impuList->GetIterator((IIterator**)&it);
+    Boolean bHasNext = FALSE;
+    while ((it->HasNext(&bHasNext), bHasNext)) {
+        AutoPtr<IInterface> p;
+        it->GetNext((IInterface**)&p);
+        assert(0 && "TODO");
+        AutoPtr<ArrayOf<Byte> > identity;// = (ArrayOf<Byte>*)p;
+        String impu = IsimTlvToString(identity);
+        if (DUMP_RECORDS) {
+            mHost->Log(String("EF_IMPU[") + StringUtils::ToString(i) + String("]=") + impu);
+        }
+        (*(mHost->mIsimImpu))[i++] = impu;
+    }
     return NOERROR;
 }
 
@@ -68,22 +114,29 @@ ECode IsimUiccRecords::EfIsimImpuLoaded::OnRecordLoaded(
 //=====================================================================
 CAR_INTERFACE_IMPL(IsimUiccRecords::EfIsimDomainLoaded, Object, IIccRecordLoaded);
 
-String IsimUiccRecords::EfIsimDomainLoaded::GetEfName()
+IsimUiccRecords::EfIsimDomainLoaded::EfIsimDomainLoaded(
+    /* [in] */ IsimUiccRecords* host)
+    : mHost(host)
 {
-    // ==================before translated======================
-    // return "EF_ISIM_DOMAIN";
-    assert(0);
-    return String("");
+}
+
+ECode IsimUiccRecords::EfIsimDomainLoaded::GetEfName(
+    /* [out] */ String* name)
+{
+    VALIDATE_NOT_NULL(name)
+    *name = String("EF_ISIM_DOMAIN");
+    return NOERROR;
 }
 
 ECode IsimUiccRecords::EfIsimDomainLoaded::OnRecordLoaded(
     /* [in] */ AsyncResult* ar)
 {
-    // ==================before translated======================
-    // byte[] data = (byte[]) ar.result;
-    // mIsimDomain = isimTlvToString(data);
-    // if (DUMP_RECORDS) log("EF_DOMAIN=" + mIsimDomain);
-    assert(0);
+    assert(0 && "TODO");
+    AutoPtr<ArrayOf<Byte> > data;// = (byte[]) ar->mResult;
+    mHost->mIsimDomain = IsimTlvToString(data);
+    if (DUMP_RECORDS) {
+        mHost->Log(String("EF_DOMAIN=") + mHost->mIsimDomain);
+    }
     return NOERROR;
 }
 
@@ -92,22 +145,29 @@ ECode IsimUiccRecords::EfIsimDomainLoaded::OnRecordLoaded(
 //=====================================================================
 CAR_INTERFACE_IMPL(IsimUiccRecords::EfIsimIstLoaded, Object, IIccRecordLoaded);
 
-String IsimUiccRecords::EfIsimIstLoaded::GetEfName()
+IsimUiccRecords::EfIsimIstLoaded::EfIsimIstLoaded(
+    /* [in] */ IsimUiccRecords* host)
+    : mHost(host)
 {
-    // ==================before translated======================
-    // return "EF_ISIM_IST";
-    assert(0);
-    return String("");
+}
+
+ECode IsimUiccRecords::EfIsimIstLoaded::GetEfName(
+    /* [out] */ String* name)
+{
+    VALIDATE_NOT_NULL(name)
+    *name = String("EF_ISIM_IST");
+    return NOERROR;
 }
 
 ECode IsimUiccRecords::EfIsimIstLoaded::OnRecordLoaded(
     /* [in] */ AsyncResult* ar)
 {
-    // ==================before translated======================
-    // byte[] data = (byte[]) ar.result;
-    // mIsimIst = IccUtils.bytesToHexString(data);
-    // if (DUMP_RECORDS) log("EF_IST=" + mIsimIst);
-    assert(0);
+    assert(0 && "TODO");
+    AutoPtr<ArrayOf<Byte> > data;// = (ArrayOf<Byte>*) ar->mResult;
+    AutoPtr<IIccUtils> iccu;
+    CIccUtils::AcquireSingleton((IIccUtils**)&iccu);
+    iccu->BytesToHexString(data, &(mHost->mIsimIst));
+    if (DUMP_RECORDS) mHost->Log(String("EF_IST=") + mHost->mIsimIst);
     return NOERROR;
 }
 
@@ -116,28 +176,42 @@ ECode IsimUiccRecords::EfIsimIstLoaded::OnRecordLoaded(
 //=====================================================================
 CAR_INTERFACE_IMPL(IsimUiccRecords::EfIsimPcscfLoaded, Object, IIccRecordLoaded);
 
-String IsimUiccRecords::EfIsimPcscfLoaded::GetEfName()
+IsimUiccRecords::EfIsimPcscfLoaded::EfIsimPcscfLoaded(
+    /* [in] */ IsimUiccRecords* host)
+    : mHost(host)
 {
-    // ==================before translated======================
-    // return "EF_ISIM_PCSCF";
-    assert(0);
-    return String("");
+}
+
+ECode IsimUiccRecords::EfIsimPcscfLoaded::GetEfName(
+    /* [out] */ String* name)
+{
+    VALIDATE_NOT_NULL(name)
+    *name = String("EF_ISIM_PCSCF");
+    return NOERROR;
 }
 
 ECode IsimUiccRecords::EfIsimPcscfLoaded::OnRecordLoaded(
     /* [in] */ AsyncResult* ar)
 {
-    // ==================before translated======================
-    // ArrayList<byte[]> pcscflist = (ArrayList<byte[]>) ar.result;
-    // if (DBG) log("EF_PCSCF record count: " + pcscflist.size());
-    // mIsimPcscf = new String[pcscflist.size()];
-    // int i = 0;
-    // for (byte[] identity : pcscflist) {
-    //     String pcscf = isimTlvToString(identity);
-    //     if (DUMP_RECORDS) log("EF_PCSCF[" + i + "]=" + pcscf);
-    //     mIsimPcscf[i++] = pcscf;
-    // }
-    assert(0);
+    assert(0 && "TODO");
+    AutoPtr<IArrayList> pcscflist;// = IArrayList::Probe(ar->mResult);
+    Int32 size = 0;
+    pcscflist->GetSize(&size);
+    if (DBG) mHost->Log(String("EF_PCSCF record count: ") + StringUtils::ToString(size));
+    mHost->mIsimPcscf = ArrayOf<String>::Alloc(size);
+    Int32 i = 0;
+    AutoPtr<IIterator> it;
+    pcscflist->GetIterator((IIterator**)&it);
+    Boolean bHasNext = FALSE;
+    while ((it->HasNext(&bHasNext), bHasNext)) {
+        AutoPtr<IInterface> p;
+        it->GetNext((IInterface**)&p);
+        assert(0 && "TODO");
+        AutoPtr<ArrayOf<Byte> > identity;// = (ArrayOf<Byte>*)p;
+        String pcscf = IsimTlvToString(identity);
+        if (DUMP_RECORDS) mHost->Log(String("EF_PCSCF[") + StringUtils::ToString(i) + String("]=") + pcscf);
+        (*(mHost->mIsimPcscf))[i++] = pcscf;
+    }
     return NOERROR;
 }
 
@@ -162,20 +236,22 @@ ECode IsimUiccRecords::constructor(
     /* [in] */ IContext* c,
     /* [in] */ ICommandsInterface* ci)
 {
-    // ==================before translated======================
-    // super(app, c, ci);
-    //
-    // mAdnCache = new AdnRecordCache(mFh);
-    //
-    // mRecordsRequested = false;  // No load request is made till SIM ready
-    //
-    // // recordsToLoad is set to 0 because no requests are made yet
-    // mRecordsToLoad = 0;
-    // // Start off by setting empty state
-    // resetRecords();
-    //
-    // mParentApp.registerForReady(this, EVENT_APP_READY, null);
-    // if (DBG) log("IsimUiccRecords X ctor this=" + this);
+    IccRecords::constructor(app, c, ci);
+
+    CAdnRecordCache::New(mFh, (IAdnRecordCache**)&mAdnCache);
+
+    mRecordsRequested = FALSE;  // No load request is made till SIM ready
+
+    // recordsToLoad is set to 0 because no requests are made yet
+    mRecordsToLoad = 0;
+    // Start off by setting empty state
+    ResetRecords();
+
+    mParentApp->RegisterForReady(this, EVENT_APP_READY, NULL);
+    if (DBG) {
+        assert(0 && "TODO");
+        // Log(String("IsimUiccRecords X ctor this=") + this);
+    }
     return NOERROR;
 }
 
@@ -183,76 +259,85 @@ ECode IsimUiccRecords::ToString(
     /* [out] */ String* result)
 {
     VALIDATE_NOT_NULL(result);
-    // ==================before translated======================
-    // return "IsimUiccRecords: " + super.toString()
-    //         + " mIsimImpi=" + mIsimImpi
-    //         + " mIsimDomain=" + mIsimDomain
-    //         + " mIsimImpu=" + mIsimImpu
-    //         + " mIsimIst=" + mIsimIst
-    //         + " mIsimPcscf=" + mIsimPcscf;
-    assert(0);
+    String str;
+    IccRecords::ToString(&str);
+    assert(0 && "TODO");
+    // *result = String("IsimUiccRecords: ") + str
+    //         + String(" mIsimImpi=") + mIsimImpi
+    //         + String(" mIsimDomain=") + mIsimDomain
+    //         + String(" mIsimImpu=") + mIsimImpu
+    //         + String(" mIsimIst=") + mIsimIst
+    //         + String(" mIsimPcscf=") + mIsimPcscf;
     return NOERROR;
 }
 
 ECode IsimUiccRecords::Dispose()
 {
-    // ==================before translated======================
-    // log("Disposing " + this);
-    // //Unregister for all events
-    // mParentApp.unregisterForReady(this);
-    // resetRecords();
-    // super.dispose();
-    assert(0);
+    assert(0 && "TODO");
+    // Log(String("Disposing ") + this);
+    //Unregister for all events
+    mParentApp->UnregisterForReady(this);
+    ResetRecords();
+    IccRecords::Dispose();
     return NOERROR;
 }
 
 ECode IsimUiccRecords::HandleMessage(
     /* [in] */ IMessage* msg)
 {
-    // ==================before translated======================
-    // AsyncResult ar;
-    //
-    // if (mDestroyed.get()) {
-    //     Rlog.e(LOGTAG, "Received message " + msg +
-    //             "[" + msg.what + "] while being destroyed. Ignoring.");
-    //     return;
-    // }
-    // loge("IsimUiccRecords: handleMessage " + msg + "[" + msg.what + "] ");
-    //
+    AutoPtr<AsyncResult> ar;
+
+    Int32 what = 0;
+    msg->GetWhat(&what);
+    AutoPtr<IInterface> obj;
+    msg->GetObj((IInterface**)&obj);
+    Boolean b = FALSE;
+    mDestroyed->Get(&b);
+    if (b) {
+        assert(0 && "TODO");
+        // Logger::E(LOGTAG, String("Received message ") + msg +
+        //         String("[") + StringUtils::ToString(what) +
+        //         String("] while being destroyed. Ignoring."));
+        return NOERROR;
+    }
+    assert(0 && "TODO");
+    // Loge(String("IsimUiccRecords: handleMessage ") + msg
+    //     + String("[") + StringUtils::ToString(what) + String("] "));
+
     // try {
-    //     switch (msg.what) {
-    //         case EVENT_APP_READY:
-    //             onReady();
-    //             break;
-    //
-    //         case EVENT_AKA_AUTHENTICATE_DONE:
-    //             ar = (AsyncResult)msg.obj;
-    //             log("EVENT_AKA_AUTHENTICATE_DONE");
-    //             if (ar.exception != null) {
-    //                 log("Exception ISIM AKA: " + ar.exception);
-    //             } else {
-    //                 try {
-    //                     auth_rsp = (String)ar.result;
-    //                     log("ISIM AKA: auth_rsp = " + auth_rsp);
-    //                 } catch (Exception e) {
-    //                     log("Failed to parse ISIM AKA contents: " + e);
-    //                 }
-    //             }
-    //             synchronized (mLock) {
-    //                 mLock.notifyAll();
-    //             }
-    //
-    //             break;
-    //
-    //         default:
-    //             super.handleMessage(msg);   // IccRecords handles generic record load responses
-    //
-    //     }
+        switch (what) {
+            case EVENT_APP_READY:
+                OnReady();
+                break;
+
+            case EVENT_AKA_AUTHENTICATE_DONE:
+                ar = (AsyncResult*)(IObject*)obj.Get();
+                Log(String("EVENT_AKA_AUTHENTICATE_DONE"));
+                if (ar->mException != NULL) {
+                    assert(0 && "TODO");
+                    // Log(String("Exception ISIM AKA: ") + ar->mException);
+                }
+                else {
+                    // try {
+                        ICharSequence::Probe(ar->mResult)->ToString(&mAuth_rsp);
+                        Log(String("ISIM AKA: auth_rsp = ") + mAuth_rsp);
+                    // } catch (Exception e) {
+                    //     log("Failed to parse ISIM AKA contents: " + e);
+                    // }
+                }
+                {
+                    AutoLock lock(mLock);
+                    mLock.NotifyAll();
+                }
+                break;
+
+            default:
+                IccRecords::HandleMessage(msg);   // IccRecords handles generic record load responses
+        }
     // } catch (RuntimeException exc) {
     //     // I don't want these exceptions to be fatal
-    //     Rlog.w(LOGTAG, "Exception parsing SIM record", exc);
+    //     Logger.w(LOGTAG, "Exception parsing SIM record", exc);
     // }
-    assert(0);
     return NOERROR;
 }
 
@@ -260,9 +345,7 @@ ECode IsimUiccRecords::GetIsimImpi(
     /* [out] */ String* result)
 {
     VALIDATE_NOT_NULL(result);
-    // ==================before translated======================
-    // return mIsimImpi;
-    assert(0);
+    *result = mIsimImpi;
     return NOERROR;
 }
 
@@ -270,9 +353,7 @@ ECode IsimUiccRecords::GetIsimDomain(
     /* [out] */ String* result)
 {
     VALIDATE_NOT_NULL(result);
-    // ==================before translated======================
-    // return mIsimDomain;
-    assert(0);
+    *result = mIsimDomain;
     return NOERROR;
 }
 
@@ -280,9 +361,7 @@ ECode IsimUiccRecords::GetIsimImpu(
     /* [out] */ ArrayOf<String>** result)
 {
     VALIDATE_NOT_NULL(result);
-    // ==================before translated======================
-    // return (mIsimImpu != null) ? mIsimImpu.clone() : null;
-    assert(0);
+    *result = (mIsimImpu != NULL) ? mIsimImpu->Clone() : NULL;
     return NOERROR;
 }
 
@@ -290,9 +369,7 @@ ECode IsimUiccRecords::GetIsimIst(
     /* [out] */ String* result)
 {
     VALIDATE_NOT_NULL(result);
-    // ==================before translated======================
-    // return mIsimIst;
-    assert(0);
+    *result = mIsimIst;
     return NOERROR;
 }
 
@@ -300,9 +377,7 @@ ECode IsimUiccRecords::GetIsimPcscf(
     /* [out] */ ArrayOf<String>** result)
 {
     VALIDATE_NOT_NULL(result);
-    // ==================before translated======================
-    // return (mIsimPcscf != null) ? mIsimPcscf.clone() : null;
-    assert(0);
+    *result = (mIsimPcscf != NULL) ? mIsimPcscf->Clone() : NULL;
     return NOERROR;
 }
 
@@ -311,26 +386,29 @@ ECode IsimUiccRecords::GetIsimChallengeResponse(
     /* [out] */ String* result)
 {
     VALIDATE_NOT_NULL(result);
-    // ==================before translated======================
-    // if (DBG) log("getIsimChallengeResponse-nonce:"+nonce);
+    if (DBG) {
+        Log(String("getIsimChallengeResponse-nonce:") + nonce);
+    }
     // try {
-    //     synchronized(mLock) {
-    //         mCi.requestIsimAuthentication(nonce,obtainMessage(EVENT_AKA_AUTHENTICATE_DONE));
-    //         try {
-    //             mLock.wait();
-    //         } catch (InterruptedException e) {
-    //             log("interrupted while trying to request Isim Auth");
-    //         }
-    //     }
+        {
+            AutoLock lock(mLock);
+            AutoPtr<IMessage> msg;
+            ObtainMessage(EVENT_AKA_AUTHENTICATE_DONE, (IMessage**)&msg);
+            mCi->RequestIsimAuthentication(nonce, msg);
+            // try {
+                mLock.Wait();
+            // } catch (InterruptedException e) {
+            //     log("interrupted while trying to request Isim Auth");
+            // }
+        }
     // } catch(Exception e) {
     //     if (DBG) log( "Fail while trying to request Isim Auth");
     //     return null;
     // }
-    //
-    // if (DBG) log("getIsimChallengeResponse-auth_rsp"+auth_rsp);
-    //
-    // return auth_rsp;
-    assert(0);
+
+    if (DBG) Log(String("getIsimChallengeResponse-auth_rsp") + mAuth_rsp);
+
+    *result = mAuth_rsp;
     return NOERROR;
 }
 
@@ -339,18 +417,14 @@ ECode IsimUiccRecords::GetDisplayRule(
     /* [out] */ Int32* result)
 {
     VALIDATE_NOT_NULL(result);
-    // ==================before translated======================
-    // // Not applicable to Isim
-    // return 0;
-    assert(0);
+    // Not applicable to Isim
+    *result = 0;
     return NOERROR;
 }
 
 ECode IsimUiccRecords::OnReady()
 {
-    // ==================before translated======================
-    // fetchIsimRecords();
-    assert(0);
+    FetchIsimRecords();
     return NOERROR;
 }
 
@@ -358,14 +432,12 @@ ECode IsimUiccRecords::OnRefresh(
     /* [in] */ Boolean fileChanged,
     /* [in] */ ArrayOf<Int32>* fileList)
 {
-    // ==================before translated======================
-    // if (fileChanged) {
-    //     // A future optimization would be to inspect fileList and
-    //     // only reload those files that we care about.  For now,
-    //     // just re-fetch all SIM records that we cache.
-    //     fetchIsimRecords();
-    // }
-    assert(0);
+    if (fileChanged) {
+        // A future optimization would be to inspect fileList and
+        // only reload those files that we care about.  For now,
+        // just re-fetch all SIM records that we cache.
+        FetchIsimRecords();
+    }
     return NOERROR;
 }
 
@@ -374,9 +446,7 @@ ECode IsimUiccRecords::SetVoiceMailNumber(
     /* [in] */ const String& voiceNumber,
     /* [in] */ IMessage* onComplete)
 {
-    // ==================before translated======================
-    // // Not applicable to Isim
-    assert(0);
+    // Not applicable to Isim
     return NOERROR;
 }
 
@@ -384,9 +454,7 @@ ECode IsimUiccRecords::SetVoiceMessageWaiting(
     /* [in] */ Int32 line,
     /* [in] */ Int32 countWaiting)
 {
-    // ==================before translated======================
-    // // Not applicable to Isim
-    assert(0);
+    // Not applicable to Isim
     return NOERROR;
 }
 
@@ -395,17 +463,16 @@ ECode IsimUiccRecords::Dump(
     /* [in] */ IPrintWriter* pw,
     /* [in] */ ArrayOf<String>* args)
 {
-    // ==================before translated======================
-    // pw.println("IsimRecords: " + this);
-    // pw.println(" extends:");
-    // super.dump(fd, pw, args);
-    // pw.println(" mIsimImpi=" + mIsimImpi);
-    // pw.println(" mIsimDomain=" + mIsimDomain);
-    // pw.println(" mIsimImpu[]=" + Arrays.toString(mIsimImpu));
-    // pw.println(" mIsimIst" + mIsimIst);
-    // pw.println(" mIsimPcscf"+mIsimPcscf);
-    // pw.flush();
-    assert(0);
+    assert(0 && "TODO");
+    // pw->Println(String("IsimRecords: ") + this);
+    pw->Println(String(" extends:"));
+    IccRecords::Dump(fd, pw, args);
+    pw->Println(String(" mIsimImpi=") + mIsimImpi);
+    pw->Println(String(" mIsimDomain=") + mIsimDomain);
+    pw->Println(String(" mIsimImpu[]=") + Arrays::ToString(mIsimImpu));
+    pw->Println(String(" mIsimIst") + mIsimIst);
+    pw->Println(String(" mIsimPcscf") + Arrays::ToString(mIsimPcscf));
+    IFlushable::Probe(pw)->Flush();
     return NOERROR;
 }
 
@@ -413,169 +480,194 @@ ECode IsimUiccRecords::GetVoiceMessageCount(
     /* [out] */ Int32* result)
 {
     VALIDATE_NOT_NULL(result);
-    // ==================before translated======================
-    // return 0; // Not applicable to Isim
-    assert(0);
+    *result = 0; // Not applicable to Isim
     return NOERROR;
 }
 
 void IsimUiccRecords::FetchIsimRecords()
 {
-    // ==================before translated======================
-    // mRecordsRequested = true;
-    //
-    // mFh.loadEFTransparent(EF_IMPI, obtainMessage(
-    //         IccRecords.EVENT_GET_ICC_RECORD_DONE, new EfIsimImpiLoaded()));
-    // mRecordsToLoad++;
-    //
-    // mFh.loadEFLinearFixedAll(EF_IMPU, obtainMessage(
-    //         IccRecords.EVENT_GET_ICC_RECORD_DONE, new EfIsimImpuLoaded()));
-    // mRecordsToLoad++;
-    //
-    // mFh.loadEFTransparent(EF_DOMAIN, obtainMessage(
-    //         IccRecords.EVENT_GET_ICC_RECORD_DONE, new EfIsimDomainLoaded()));
-    // mRecordsToLoad++;
-    // mFh.loadEFTransparent(EF_IST, obtainMessage(
-    //             IccRecords.EVENT_GET_ICC_RECORD_DONE, new EfIsimIstLoaded()));
-    // mRecordsToLoad++;
-    // mFh.loadEFLinearFixedAll(EF_PCSCF, obtainMessage(
-    //             IccRecords.EVENT_GET_ICC_RECORD_DONE, new EfIsimPcscfLoaded()));
-    // mRecordsToLoad++;
-    //
-    // if (DBG) log("fetchIsimRecords " + mRecordsToLoad + " requested: " + mRecordsRequested);
-    assert(0);
+    mRecordsRequested = TRUE;
+
+    AutoPtr<EfIsimImpiLoaded> pImpi = new EfIsimImpiLoaded(this);
+    AutoPtr<IMessage> msg1;
+    ObtainMessage(
+            IIccRecords::EVENT_GET_ICC_RECORD_DONE, IIccRecordLoaded::Probe(pImpi), (IMessage**)&msg1);
+    mFh->LoadEFTransparent(EF_IMPI, msg1);
+    mRecordsToLoad++;
+
+    AutoPtr<EfIsimImpuLoaded> pImpu = new EfIsimImpuLoaded(this);
+    AutoPtr<IMessage> msg2;
+    ObtainMessage(
+            IIccRecords::EVENT_GET_ICC_RECORD_DONE, IIccRecordLoaded::Probe(pImpu), (IMessage**)&msg2);
+    mFh->LoadEFLinearFixedAll(EF_IMPU, msg2);
+    mRecordsToLoad++;
+
+    AutoPtr<EfIsimDomainLoaded> pDomain = new EfIsimDomainLoaded(this);
+    AutoPtr<IMessage> msg3;
+    ObtainMessage(
+            IIccRecords::EVENT_GET_ICC_RECORD_DONE, IIccRecordLoaded::Probe(pDomain), (IMessage**)&msg3);
+    mFh->LoadEFTransparent(EF_DOMAIN, msg3);
+    mRecordsToLoad++;
+
+    AutoPtr<EfIsimIstLoaded> pIst = new EfIsimIstLoaded(this);
+    AutoPtr<IMessage> msg4;
+    ObtainMessage(
+            IIccRecords::EVENT_GET_ICC_RECORD_DONE, IIccRecordLoaded::Probe(pIst), (IMessage**)&msg4);
+    mFh->LoadEFTransparent(EF_IST, msg4);
+    mRecordsToLoad++;
+
+    AutoPtr<EfIsimPcscfLoaded> pPcscf = new EfIsimPcscfLoaded(this);
+    AutoPtr<IMessage> msg5;
+    ObtainMessage(
+            IIccRecords::EVENT_GET_ICC_RECORD_DONE, IIccRecordLoaded::Probe(pPcscf), (IMessage**)&msg5);
+    mFh->LoadEFLinearFixedAll(EF_PCSCF, msg5);
+    mRecordsToLoad++;
+
+    if (DBG) Log(String("fetchIsimRecords ") + StringUtils::ToString(mRecordsToLoad)
+                + String(" requested: ") + StringUtils::ToString(mRecordsRequested));
 }
 
 void IsimUiccRecords::ResetRecords()
 {
-    // ==================before translated======================
-    // // recordsRequested is set to false indicating that the SIM
-    // // read requests made so far are not valid. This is set to
-    // // true only when fresh set of read requests are made.
-    // mIsimImpi = null;
-    // mIsimDomain = null;
-    // mIsimImpu = null;
-    // mIsimIst = null;
-    // mIsimPcscf = null;
-    // auth_rsp = null;
-    //
-    // mRecordsRequested = false;
-    assert(0);
+    // recordsRequested is set to false indicating that the SIM
+    // read requests made so far are not valid. This is set to
+    // true only when fresh set of read requests are made.
+    mIsimImpi = NULL;
+    mIsimDomain = NULL;
+    mIsimImpu = NULL;
+    mIsimIst = NULL;
+    mIsimPcscf = NULL;
+    auth_rsp = NULL;
+
+    mRecordsRequested = FALSE;
 }
 
 ECode IsimUiccRecords::OnRecordLoaded()
 {
-    // ==================before translated======================
-    // // One record loaded successfully or failed, In either case
-    // // we need to update the recordsToLoad count
-    // mRecordsToLoad -= 1;
-    // if (DBG) log("onRecordLoaded " + mRecordsToLoad + " requested: " + mRecordsRequested);
-    //
-    // if (mRecordsToLoad == 0 && mRecordsRequested == true) {
-    //     onAllRecordsLoaded();
-    // } else if (mRecordsToLoad < 0) {
-    //     loge("recordsToLoad <0, programmer error suspected");
-    //     mRecordsToLoad = 0;
-    // }
-    assert(0);
+    // One record loaded successfully or failed, In either case
+    // we need to update the recordsToLoad count
+    mRecordsToLoad -= 1;
+    if (DBG) Log(String("onRecordLoaded ") + StringUtils::ToString(mRecordsToLoad)
+                + String(" requested: ") + StringUtils::ToString(mRecordsRequested));
+
+    if (mRecordsToLoad == 0 && mRecordsRequested == TRUE) {
+        OnAllRecordsLoaded();
+    }
+    else if (mRecordsToLoad < 0) {
+        Loge(String("recordsToLoad <0, programmer error suspected"));
+        mRecordsToLoad = 0;
+    }
     return NOERROR;
 }
 
 ECode IsimUiccRecords::OnAllRecordsLoaded()
 {
-    // ==================before translated======================
-    // if (DBG) log("record load complete");
-    //  mRecordsLoadedRegistrants.notifyRegistrants(
-    //          new AsyncResult(null, null, null));
-    assert(0);
+    if (DBG) Log(String("record load complete"));
+    AutoPtr<AsyncResult> p = new AsyncResult(NULL, NULL, NULL);
+    mRecordsLoadedRegistrants->NotifyRegistrants(p);
     return NOERROR;
 }
 
 ECode IsimUiccRecords::HandleFileUpdate(
     /* [in] */ Int32 efid)
 {
-    // ==================before translated======================
-    // switch (efid) {
-    //     case EF_IMPI:
-    //         mFh.loadEFTransparent(EF_IMPI, obtainMessage(
-    //                     IccRecords.EVENT_GET_ICC_RECORD_DONE, new EfIsimImpiLoaded()));
-    //         mRecordsToLoad++;
-    //         break;
-    //
-    //     case EF_IMPU:
-    //         mFh.loadEFLinearFixedAll(EF_IMPU, obtainMessage(
-    //                     IccRecords.EVENT_GET_ICC_RECORD_DONE, new EfIsimImpuLoaded()));
-    //         mRecordsToLoad++;
-    //     break;
-    //
-    //     case EF_DOMAIN:
-    //         mFh.loadEFTransparent(EF_DOMAIN, obtainMessage(
-    //                     IccRecords.EVENT_GET_ICC_RECORD_DONE, new EfIsimDomainLoaded()));
-    //         mRecordsToLoad++;
-    //     break;
-    //
-    //     case EF_IST:
-    //         mFh.loadEFTransparent(EF_IST, obtainMessage(
-    //                     IccRecords.EVENT_GET_ICC_RECORD_DONE, new EfIsimIstLoaded()));
-    //         mRecordsToLoad++;
-    //     break;
-    //
-    //     case EF_PCSCF:
-    //         mFh.loadEFLinearFixedAll(EF_PCSCF, obtainMessage(
-    //                     IccRecords.EVENT_GET_ICC_RECORD_DONE, new EfIsimPcscfLoaded()));
-    //         mRecordsToLoad++;
-    //
-    //     default:
-    //         fetchIsimRecords();
-    //         break;
-    // }
-    assert(0);
+    switch (efid) {
+        case EF_IMPI: {
+            AutoPtr<EfIsimImpiLoaded> p = new EfIsimImpiLoaded(this);
+            AutoPtr<IMessage> msg;
+            ObtainMessage(
+                    IIccRecords::EVENT_GET_ICC_RECORD_DONE, IIccRecordLoaded::Probe(p), (IMessage**)&msg);
+            mFh->LoadEFTransparent(EF_IMPI, msg);
+            mRecordsToLoad++;
+            break;
+        }
+        case EF_IMPU: {
+            AutoPtr<EfIsimImpuLoaded> p = new EfIsimImpuLoaded(this);
+            AutoPtr<IMessage> msg;
+            ObtainMessage(
+                    IIccRecords::EVENT_GET_ICC_RECORD_DONE, IIccRecordLoaded::Probe(p), (IMessage**)&msg);
+            mFh->LoadEFLinearFixedAll(EF_IMPU, msg);
+            mRecordsToLoad++;
+        break;
+        }
+        case EF_DOMAIN: {
+            AutoPtr<EfIsimDomainLoaded> p = new EfIsimDomainLoaded(this);
+            AutoPtr<IMessage> msg;
+            ObtainMessage(
+                    IIccRecords::EVENT_GET_ICC_RECORD_DONE, IIccRecordLoaded::Probe(p), (IMessage**)&msg);
+            mFh->LoadEFTransparent(EF_DOMAIN, msg);
+            mRecordsToLoad++;
+        break;
+        }
+        case EF_IST: {
+            AutoPtr<EfIsimIstLoaded> p = new EfIsimIstLoaded(this);
+            AutoPtr<IMessage> msg;
+            ObtainMessage(
+                        IIccRecords::EVENT_GET_ICC_RECORD_DONE, IIccRecordLoaded::Probe(p), (IMessage**)&msg);
+            mFh->LoadEFTransparent(EF_IST, msg);
+            mRecordsToLoad++;
+        break;
+        }
+        case EF_PCSCF: {
+            AutoPtr<EfIsimPcscfLoaded> p = new EfIsimPcscfLoaded(this);
+            AutoPtr<IMessage> msg;
+            ObtainMessage(
+                        IIccRecords::EVENT_GET_ICC_RECORD_DONE, IIccRecordLoaded::Probe(p), (IMessage**)&msg);
+            mFh->LoadEFLinearFixedAll(EF_PCSCF, msg);
+            mRecordsToLoad++;
+        }
+        default:
+            FetchIsimRecords();
+            break;
+    }
     return NOERROR;
 }
 
 ECode IsimUiccRecords::BroadcastRefresh()
 {
-    // ==================before translated======================
-    // Intent intent = new Intent(INTENT_ISIM_REFRESH);
-    // log("send ISim REFRESH: " + INTENT_ISIM_REFRESH);
-    // mContext.sendBroadcast(intent);
-    assert(0);
+    AutoPtr<IIntent> intent;
+    CIntent::New(IIsimUiccRecords::INTENT_ISIM_REFRESH, (IIntent**)&intent);
+    Log(String("send ISim REFRESH: ") + IIsimUiccRecords::INTENT_ISIM_REFRESH);
+    mContext->SendBroadcast(intent);
     return NOERROR;
 }
 
 ECode IsimUiccRecords::Log(
     /* [in] */ const String& s)
 {
-    // ==================before translated======================
-    // if (DBG) Rlog.d(LOGTAG, "[ISIM] " + s);
-    assert(0);
+    if (DBG) Logger::D(LOGTAG, String("[ISIM] ") + s);
     return NOERROR;
 }
 
 ECode IsimUiccRecords::Loge(
     /* [in] */ const String& s)
 {
-    // ==================before translated======================
-    // if (DBG) Rlog.e(LOGTAG, "[ISIM] " + s);
-    assert(0);
+    if (DBG) Logger::E(LOGTAG, String("[ISIM] ") + s);
     return NOERROR;
 }
 
 String IsimUiccRecords::IsimTlvToString(
     /* [in] */ ArrayOf<Byte>* record)
 {
-    // ==================before translated======================
-    // SimTlv tlv = new SimTlv(record, 0, record.length);
-    // do {
-    //     if (tlv.getTag() == TAG_ISIM_VALUE) {
-    //         return new String(tlv.getData(), Charset.forName("UTF-8"));
-    //     }
-    // } while (tlv.nextObject());
-    //
-    // Rlog.e(LOGTAG, "[ISIM] can't find TLV tag in ISIM record, returning null");
-    // return null;
-    assert(0);
-    return String("");
+    AutoPtr<ISimTlv> tlv;
+    CSimTlv::New(record, 0, record->GetLength(), (ISimTlv**)&tlv);
+    Boolean bHasNext = FALSE;
+    do {
+        Int32 tag = 0;
+        tlv->GetTag(&tag);
+        if (tag == TAG_ISIM_VALUE) {
+            AutoPtr<ArrayOf<Byte> > data;
+            tlv->GetData((ArrayOf<Byte>**)&data);
+            AutoPtr<ICharset> cs;
+            assert(0 && "TODO");
+            // Elastos::IO::Charset::Charset::ForName(String("UTF-8"), (ICharset**)&cs);
+            // return String(data, cs);
+            return String(*data);
+        }
+    } while ((tlv->NextObject(&bHasNext), bHasNext));
+
+    Logger::E(LOGTAG, String("[ISIM] can't find TLV tag in ISIM record, returning null"));
+    return String(NULL);
 }
 
 } // namespace Uicc

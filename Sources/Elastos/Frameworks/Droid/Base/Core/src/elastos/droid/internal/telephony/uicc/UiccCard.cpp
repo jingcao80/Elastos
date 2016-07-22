@@ -1,21 +1,38 @@
 
-#include "elastos/droid/internal/telephony/uicc/UiccCard.h"
-#include "elastos/droid/internal/telephony/uicc/IccCardStatus.h"
-#include "elastos/droid/internal/telephony/uicc/CUICCConfig.h"
-#include "elastos/droid/internal/telephony/uicc/CUiccCardApplication.h"
-#include "elastos/droid/internal/telephony/uicc/CUiccCarrierPrivilegeRules.h"
-#include "elastos/droid/internal/telephony/cat/CatServiceFactory.h"
 #include "Elastos.Droid.Content.h"
 #include "Elastos.Droid.Internal.h"
+#include "Elastos.Droid.Telephony.h"
+#include "elastos/droid/internal/telephony/uicc/UiccCard.h"
+#include "elastos/droid/internal/telephony/cat/CCatServiceFactory.h"
+#include "elastos/droid/internal/telephony/uicc/IccCardStatus.h"
+#include "elastos/droid/internal/telephony/uicc/CUICCConfig.h"
+#include "elastos/droid/internal/telephony/uicc/UiccCardApplication.h"
+#include "elastos/droid/internal/telephony/uicc/CUiccCardApplication.h"
+#include "elastos/droid/internal/telephony/uicc/CUiccCarrierPrivilegeRules.h"
+#include "elastos/droid/os/AsyncResult.h"
+#include "elastos/droid/os/CRegistrant.h"
+#include "elastos/droid/preference/CPreferenceManagerHelper.h"
+#include "elastos/droid/text/TextUtils.h"
+
 #include <elastos/core/AutoLock.h>
-#include "elastos/core/StringUtils.h"
+#include <elastos/core/StringUtils.h>
 #include <elastos/utility/logging/Logger.h>
 
 using Elastos::Droid::Content::EIID_IDialogInterfaceOnClickListener;
+using Elastos::Droid::Content::ISharedPreferences;
+using Elastos::Droid::Content::ISharedPreferencesEditor;
+using Elastos::Droid::Os::IPowerManager;
+using Elastos::Droid::Os::AsyncResult;
+using Elastos::Droid::Os::IRegistrant;
+using Elastos::Droid::Os::CRegistrant;
+using Elastos::Droid::Preference::IPreferenceManagerHelper;
+using Elastos::Droid::Preference::CPreferenceManagerHelper;
+using Elastos::Droid::Internal::Telephony::Cat::ICatServiceFactory;
+using Elastos::Droid::Internal::Telephony::Cat::CCatServiceFactory;
 using Elastos::Droid::Internal::Telephony::ICommandsInterfaceRadioState;
-using Elastos::Droid::Internal::Telephony::RADIO_ON;
-using Elastos::Droid::Internal::Telephony::Cat::CatServiceFactory;
-using Elastos::Core::AutoLock;
+using Elastos::Droid::Telephony::ITelephonyManager;
+using Elastos::Droid::Text::TextUtils;
+
 using Elastos::Core::StringUtils;
 using Elastos::Utility::Logging::Logger;
 
@@ -34,24 +51,23 @@ UiccCard::InnerDialogInterfaceOnClickListener1::InnerDialogInterfaceOnClickListe
     /* [in] */ UiccCard* owner)
     : mOwner(owner)
 {
-    // ==================before translated======================
-    // mOwner = owner;
 }
 
 ECode UiccCard::InnerDialogInterfaceOnClickListener1::OnClick(
     /* [in] */ IDialogInterface* dialog,
     /* [in] */ Int32 which)
 {
-    // ==================before translated======================
-    // synchronized (mLock) {
-    //     if (which == DialogInterface.BUTTON_POSITIVE) {
-    //         if (DBG) log("Reboot due to SIM swap");
-    //         PowerManager pm = (PowerManager) mContext
-    //                 .getSystemService(Context.POWER_SERVICE);
-    //         pm.reboot("SIM is added.");
-    //     }
-    // }
-    assert(0);
+    {
+        AutoLock lock(mOwner->mLock);
+        if (which == IDialogInterface::BUTTON_POSITIVE) {
+            if (DBG) mOwner->Log(String("Reboot due to SIM swap"));
+            AutoPtr<IInterface> p;
+            mOwner->mContext->GetSystemService(IContext::POWER_SERVICE,
+                                    (IInterface**)&p);
+            AutoPtr<IPowerManager> pm = IPowerManager::Probe(p);
+            pm->Reboot(String("SIM is added."));
+        }
+    }
     return NOERROR;
 }
 
@@ -68,43 +84,48 @@ UiccCard::InnerHandler::InnerHandler(
 ECode UiccCard::InnerHandler::HandleMessage(
     /* [in] */ IMessage* msg)
 {
-    Int32 what = -1;
+    Int32 what = 0;
     msg->GetWhat(&what);
-    Logger::E("UiccCard", "TODO InnerHandler::HandleMessage msg:%d", what);
-    // ==================before translated======================
-    // if (mDestroyed) {
-    //     loge("Received message " + msg + "[" + msg.what
-    //             + "] while being destroyed. Ignoring.");
-    //     return;
-    // }
-    //
-    // switch (msg.what) {
-    //     case EVENT_CARD_REMOVED:
-    //         onIccSwap(false);
-    //         break;
-    //     case EVENT_CARD_ADDED:
-    //         onIccSwap(true);
-    //         break;
-    //     case EVENT_OPEN_LOGICAL_CHANNEL_DONE:
-    //     case EVENT_CLOSE_LOGICAL_CHANNEL_DONE:
-    //     case EVENT_TRANSMIT_APDU_LOGICAL_CHANNEL_DONE:
-    //     case EVENT_TRANSMIT_APDU_BASIC_CHANNEL_DONE:
-    //     case EVENT_SIM_IO_DONE:
-    //     case EVENT_SIM_GET_ATR_DONE:
-    //         AsyncResult ar = (AsyncResult)msg.obj;
-    //         if (ar.exception != null) {
-    //            if (DBG)
-    //              log("Error in SIM access with exception" + ar.exception);
-    //         }
-    //         AsyncResult.forMessage((Message)ar.userObj, ar.result, ar.exception);
-    //         ((Message)ar.userObj).sendToTarget();
-    //         break;
-    //     case EVENT_CARRIER_PRIVILIGES_LOADED:
-    //         onCarrierPriviligesLoadedMessage();
-    //         break;
-    //     default:
-    //         loge("Unknown Event " + msg.what);
-    // }
+    AutoPtr<IInterface> obj;
+    msg->GetObj((IInterface**)&obj);
+    if (mOwner->mDestroyed) {
+        assert(0 && "TODO");
+        // mOwner->Loge(String("Received message ") + msg +
+        //     String("[") + StringUtils::ToString(what)
+        //     + String("] while being destroyed. Ignoring."));
+        return NOERROR;
+    }
+
+    switch (what) {
+        case EVENT_CARD_REMOVED:
+            mOwner->OnIccSwap(FALSE);
+            break;
+        case EVENT_CARD_ADDED:
+            mOwner->OnIccSwap(TRUE);
+            break;
+        case EVENT_OPEN_LOGICAL_CHANNEL_DONE:
+        case EVENT_CLOSE_LOGICAL_CHANNEL_DONE:
+        case EVENT_TRANSMIT_APDU_LOGICAL_CHANNEL_DONE:
+        case EVENT_TRANSMIT_APDU_BASIC_CHANNEL_DONE:
+        case EVENT_SIM_IO_DONE:
+        case EVENT_SIM_GET_ATR_DONE: {
+            AutoPtr<AsyncResult> ar = (AsyncResult*)(IObject*)obj.Get();
+            if (ar->mException != NULL) {
+                if (DBG) {
+                    assert(0 && "TODO");
+                    // Log(String("Error in SIM access with exception") + ar->mException);
+                }
+            }
+            AsyncResult::ForMessage(IMessage::Probe(ar->mUserObj), ar->mResult, ar->mException);
+            IMessage::Probe(ar->mUserObj)->SendToTarget();
+            break;
+        }
+        case EVENT_CARRIER_PRIVILIGES_LOADED:
+            mOwner->OnCarrierPriviligesLoadedMessage();
+            break;
+        default:
+            mOwner->Loge(String("Unknown Event ") + StringUtils::ToString(what));
+    }
     return NOERROR;
 }
 
@@ -150,21 +171,25 @@ ECode UiccCard::constructor(
 
 ECode UiccCard::Dispose()
 {
-    // ==================before translated======================
-    // synchronized (mLock) {
-    //     if (DBG) log("Disposing card");
-    //     if (mCatService != null) CatServiceFactory.disposeCatService(mSlotId);
-    //     for (UiccCardApplication app : mUiccApplications) {
-    //         if (app != null) {
-    //             app.dispose();
-    //         }
-    //     }
-    //     mCatService = null;
-    //     mUiccApplications = null;
-    //     mCarrierPrivilegeRules = null;
-    //     mUICCConfig = null;
-    // }
-    assert(0);
+    {
+        AutoLock lock(mLock);
+        if (DBG) Log(String("Disposing card"));
+        if (mCatService != NULL) {
+            AutoPtr<ICatServiceFactory> cf;
+            CCatServiceFactory::AcquireSingleton((ICatServiceFactory**)&cf);
+            cf->DisposeCatService(mSlotId);
+        }
+        for (Int32 i = 0; i < mUiccApplications->GetLength(); i++) {
+            AutoPtr<UiccCardApplication> app = (UiccCardApplication*)((*mUiccApplications)[i]);
+            if (app != NULL) {
+                app->Dispose();
+            }
+        }
+        mCatService = NULL;
+        mUiccApplications = NULL;
+        mCarrierPrivilegeRules = NULL;
+        mUICCConfig = NULL;
+    }
     return NOERROR;
 }
 
@@ -180,35 +205,39 @@ ECode UiccCard::Update(
             return NOERROR;
         }
         CardState oldState = mCardState;
-        mCardState = ((IccCardStatus*)ics)->mCardState;
-        mUniversalPinState = ((IccCardStatus*)ics)->mUniversalPinState;
-        mGsmUmtsSubscriptionAppIndex = ((IccCardStatus*)ics)->mGsmUmtsSubscriptionAppIndex;
-        mCdmaSubscriptionAppIndex = ((IccCardStatus*)ics)->mCdmaSubscriptionAppIndex;
-        mImsSubscriptionAppIndex = ((IccCardStatus*)ics)->mImsSubscriptionAppIndex;
+        AutoPtr<IccCardStatus> _ics = (IccCardStatus*)ics;
+        mCardState = _ics->mCardState;
+        mUniversalPinState = _ics->mUniversalPinState;
+        mGsmUmtsSubscriptionAppIndex = _ics->mGsmUmtsSubscriptionAppIndex;
+        mCdmaSubscriptionAppIndex = _ics->mCdmaSubscriptionAppIndex;
+        mImsSubscriptionAppIndex = _ics->mImsSubscriptionAppIndex;
         mContext = c;
         mCi = ci;
         //update applications
-        if (mUICCConfig == NULL)
+        if (mUICCConfig == NULL) {
             CUICCConfig::New((IUICCConfig**)&mUICCConfig);
-        AutoPtr<ArrayOf<IIccCardApplicationStatus*> > applications = ((IccCardStatus*)ics)->mApplications;
-        Int32 appLength = applications->GetLength();
-        if (DBG) Log(StringUtils::ToString(appLength) + String(" applications"));
-        for ( Int32 i = 0; i < mUiccApplications->GetLength(); ++i) {
+        }
+        if (DBG) {
+            Int32 length = _ics->mApplications->GetLength();
+            Log(StringUtils::ToString(length) + String(" applications"));
+        }
+        for (Int32 i = 0; i < mUiccApplications->GetLength(); i++) {
             if ((*mUiccApplications)[i] == NULL) {
                 //Create newly added Applications
-                if (i < appLength) {
-                    AutoPtr<IUiccCardApplication> uca;
-                    CUiccCardApplication::New(this, (*applications)[i], mContext, mCi, (IUiccCardApplication**)&uca);
-                    Logger::E("leliang", "line:%d, func:%s, uca:%p\n", __LINE__, __func__, uca.Get());
-                    mUiccApplications->Set(i, uca);
+                if (i < _ics->mApplications->GetLength()) {
+                    CUiccCardApplication::New(this,
+                            (*(_ics->mApplications))[i], mContext, mCi,
+                            (IUiccCardApplication**)&((*mUiccApplications)[i]));
                 }
-            } else if (i >= appLength) {
+            }
+            else if (i >= _ics->mApplications->GetLength()) {
                 //Delete removed applications
                 ((UiccCardApplication*)((*mUiccApplications)[i]))->Dispose();
                 (*mUiccApplications)[i] = NULL;
-            } else {
+            }
+            else {
                 //Update the rest
-                ((UiccCardApplication*)((*mUiccApplications)[i]))->Update((*applications)[i], mContext, mCi);
+                ((UiccCardApplication*)((*mUiccApplications)[i]))->Update((*(_ics->mApplications))[i], mContext, mCi);
             }
         }
 
@@ -216,11 +245,12 @@ ECode UiccCard::Update(
 
         // Reload the carrier privilege rules if necessary.
         Log(String("Before privilege rules: ") /*+ mCarrierPrivilegeRules*/ + String(" : ") + StringUtils::ToString(mCardState));
-        if (mCarrierPrivilegeRules == NULL && mCardState == Uicc::CARDSTATE_PRESENT) {
-            AutoPtr<IMessage> message;
-            mHandler->ObtainMessage(EVENT_CARRIER_PRIVILIGES_LOADED, (IMessage**)&message);
-            CUiccCarrierPrivilegeRules::New(this, message, (IUiccCarrierPrivilegeRules**)&mCarrierPrivilegeRules);
-        } else if (mCarrierPrivilegeRules != NULL && mCardState != Uicc::CARDSTATE_PRESENT) {
+        if (mCarrierPrivilegeRules == NULL && mCardState == CARDSTATE_PRESENT) {
+            AutoPtr<IMessage> msg;
+            mHandler->ObtainMessage(EVENT_CARRIER_PRIVILIGES_LOADED, (IMessage**)&msg);
+            CUiccCarrierPrivilegeRules::New(this, msg, (IUiccCarrierPrivilegeRules**)&mCarrierPrivilegeRules);
+        }
+        else if (mCarrierPrivilegeRules != NULL && mCardState != CARDSTATE_PRESENT) {
             mCarrierPrivilegeRules = NULL;
         }
 
@@ -228,25 +258,32 @@ ECode UiccCard::Update(
 
         ICommandsInterfaceRadioState radioState;
         mCi->GetRadioState(&radioState);
-        if (DBG) Log(String("update: radioState=") + StringUtils::ToString(radioState)
-                + String(" mLastRadioState=") + StringUtils::ToString(mLastRadioState));
+        if (DBG) {
+            Log(String("update: radioState=") + StringUtils::ToString(radioState) +
+                String(" mLastRadioState=") + StringUtils::ToString(mLastRadioState));
+        }
         // No notifications while radio is off or we just powering up
         if (radioState == RADIO_ON && mLastRadioState == RADIO_ON) {
-            if (oldState != Uicc::CARDSTATE_ABSENT &&
-                    mCardState == Uicc::CARDSTATE_ABSENT) {
-                if (DBG) Log(String("update: notify card removed"));
+            if (oldState != CARDSTATE_ABSENT &&
+                    mCardState == CARDSTATE_ABSENT) {
+                if (DBG) {
+                    Log(String("update: notify card removed"));
+                }
                 mAbsentRegistrants->NotifyRegistrants();
-                AutoPtr<IMessage> message;
-                mHandler->ObtainMessage(EVENT_CARD_REMOVED, NULL, (IMessage**)&message);
-                Boolean bRes;
-                mHandler->SendMessage(message, &bRes);
-            } else if (oldState == Uicc::CARDSTATE_ABSENT &&
-                    mCardState != Uicc::CARDSTATE_ABSENT) {
-                if (DBG) Log(String("update: notify card added"));
-                AutoPtr<IMessage> message;
-                mHandler->ObtainMessage(EVENT_CARD_ADDED, NULL, (IMessage**)&message);
-                Boolean bRes;
-                mHandler->SendMessage(message, &bRes);
+                AutoPtr<IMessage> msg;
+                mHandler->ObtainMessage(EVENT_CARD_REMOVED, NULL, (IMessage**)&msg);
+                Boolean b = FALSE;
+                mHandler->SendMessage(msg, &b);
+            }
+            else if (oldState == CARDSTATE_ABSENT &&
+                    mCardState != CARDSTATE_ABSENT) {
+                if (DBG) {
+                    Log(String("update: notify card added"));
+                }
+                AutoPtr<IMessage> msg;
+                mHandler->ObtainMessage(EVENT_CARD_ADDED, NULL, (IMessage**)&msg);
+                Boolean b = FALSE;
+                mHandler->SendMessage(msg, &b);
             }
         }
         mLastRadioState = radioState;
@@ -258,9 +295,8 @@ ECode UiccCard::GetCatService(
     /* [out] */ ICatService** result)
 {
     VALIDATE_NOT_NULL(result);
-    // ==================before translated======================
-    // return mCatService;
-    assert(0);
+    *result = mCatService;
+    REFCOUNT_ADD(*result)
     return NOERROR;
 }
 
@@ -269,28 +305,27 @@ ECode UiccCard::RegisterForAbsent(
     /* [in] */ Int32 what,
     /* [in] */ IInterface* obj)
 {
-    // ==================before translated======================
-    // synchronized (mLock) {
-    //     Registrant r = new Registrant (h, what, obj);
-    //
-    //     mAbsentRegistrants.add(r);
-    //
-    //     if (mCardState == CardState.CARDSTATE_ABSENT) {
-    //         r.notifyRegistrant();
-    //     }
-    // }
-    assert(0);
+    {
+        AutoLock lock(mLock);
+        AutoPtr<IRegistrant> r;
+        CRegistrant::New(h, what, obj, (IRegistrant**)&r);
+
+        mAbsentRegistrants->Add(r);
+
+        if (mCardState == CARDSTATE_ABSENT) {
+            r->NotifyRegistrant();
+        }
+    }
     return NOERROR;
 }
 
 ECode UiccCard::UnregisterForAbsent(
     /* [in] */ IHandler* h)
 {
-    // ==================before translated======================
-    // synchronized (mLock) {
-    //     mAbsentRegistrants.remove(h);
-    // }
-    assert(0);
+    {
+        AutoLock lock(mLock);
+        mAbsentRegistrants->Remove(h);
+    }
     return NOERROR;
 }
 
@@ -299,28 +334,29 @@ ECode UiccCard::RegisterForCarrierPrivilegeRulesLoaded(
     /* [in] */ Int32 what,
     /* [in] */ IInterface* obj)
 {
-    // ==================before translated======================
-    // synchronized (mLock) {
-    //     Registrant r = new Registrant (h, what, obj);
-    //
-    //     mCarrierPrivilegeRegistrants.add(r);
-    //
-    //     if (areCarrierPriviligeRulesLoaded()) {
-    //         r.notifyRegistrant();
-    //     }
-    // }
-    assert(0);
+    {
+        AutoLock lock(mLock);
+        AutoPtr<IRegistrant> r;
+        CRegistrant::New(h, what, obj, (IRegistrant**)&r);
+
+        mCarrierPrivilegeRegistrants->Add(r);
+
+        Boolean b = FALSE;
+        AreCarrierPriviligeRulesLoaded(&b);
+        if (b) {
+            r->NotifyRegistrant();
+        }
+    }
     return NOERROR;
 }
 
 ECode UiccCard::UnregisterForCarrierPrivilegeRulesLoaded(
     /* [in] */ IHandler* h)
 {
-    // ==================before translated======================
-    // synchronized (mLock) {
-    //     mCarrierPrivilegeRegistrants.remove(h);
-    // }
-    assert(0);
+    {
+        AutoLock lock(mLock);
+        mCarrierPrivilegeRegistrants->Remove(h);
+    }
     return NOERROR;
 }
 
@@ -329,16 +365,21 @@ ECode UiccCard::IsApplicationOnIcc(
     /* [out] */ Boolean* result)
 {
     VALIDATE_NOT_NULL(result);
-    // ==================before translated======================
-    // synchronized (mLock) {
-    //     for (int i = 0 ; i < mUiccApplications.length; i++) {
-    //         if (mUiccApplications[i] != null && mUiccApplications[i].getType() == type) {
-    //             return true;
-    //         }
-    //     }
-    //     return false;
-    // }
-    assert(0);
+    {
+        AutoLock lock(mLock);
+        for (Int32 i = 0 ; i < mUiccApplications->GetLength(); i++) {
+            if ((*mUiccApplications)[i] != NULL) {
+                AppType iType;
+                (*mUiccApplications)[i]->GetType(&iType);
+                if (iType == type) {
+                    *result = TRUE;
+                    return NOERROR;
+                }
+            }
+        }
+        *result = FALSE;
+        return NOERROR;
+    }
     return NOERROR;
 }
 
@@ -346,12 +387,11 @@ ECode UiccCard::GetCardState(
     /* [out] */ CardState* result)
 {
     VALIDATE_NOT_NULL(result);
-    // ==================before translated======================
-    // synchronized (mLock) {
-    //     return mCardState;
-    // }
-    Logger::E("leliang", "TODO not implemented line:%d, func:%s\n", __LINE__, __func__);
-    *result = Uicc::CARDSTATE_PRESENT;
+    {
+        AutoLock lock(mLock);
+        *result = mCardState;
+        return NOERROR;
+    }
     return NOERROR;
 }
 
@@ -359,11 +399,10 @@ ECode UiccCard::GetUniversalPinState(
     /* [out] */ PinState* result)
 {
     VALIDATE_NOT_NULL(result);
-    // ==================before translated======================
-    // synchronized (mLock) {
-    //     return mUniversalPinState;
-    // }
-    assert(0);
+    {
+        AutoLock lock(mLock);
+        *result = mUniversalPinState;
+    }
     return NOERROR;
 }
 
@@ -371,11 +410,10 @@ ECode UiccCard::GetSlotId(
     /* [out] */ Int32* result)
 {
     VALIDATE_NOT_NULL(result);
-    // ==================before translated======================
-    // synchronized (mLock) {
-    //     return mSlotId;
-    // }
-    assert(0);
+    {
+        AutoLock lock(mLock);
+        *result = mSlotId;
+    }
     return NOERROR;
 }
 
@@ -428,17 +466,21 @@ ECode UiccCard::GetApplicationByType(
     /* [out] */ IUiccCardApplication** result)
 {
     VALIDATE_NOT_NULL(result);
-    // ==================before translated======================
-    // synchronized (mLock) {
-    //     for (int i = 0 ; i < mUiccApplications.length; i++) {
-    //         if (mUiccApplications[i] != null &&
-    //                 mUiccApplications[i].getType().ordinal() == type) {
-    //             return mUiccApplications[i];
-    //         }
-    //     }
-    //     return null;
-    // }
-    assert(0);
+    {
+        AutoLock lock(mLock);
+        for (Int32 i = 0 ; i < mUiccApplications->GetLength(); i++) {
+            if ((*mUiccApplications)[i] != NULL) {
+                AppType iType;
+                (*mUiccApplications)[i]->GetType(&iType);
+                if (iType == type) {
+                    *result = (*mUiccApplications)[i];
+                    REFCOUNT_ADD(*result)
+                    return NOERROR;
+                }
+            }
+        }
+        *result = NULL;
+    }
     return NOERROR;
 }
 
@@ -446,10 +488,9 @@ ECode UiccCard::IccOpenLogicalChannel(
     /* [in] */ const String& AID,
     /* [in] */ IMessage* response)
 {
-    // ==================before translated======================
-    // mCi.iccOpenLogicalChannel(AID,
-    //         mHandler.obtainMessage(EVENT_OPEN_LOGICAL_CHANNEL_DONE, response));
-    assert(0);
+    AutoPtr<IMessage> msg;
+    mHandler->ObtainMessage(EVENT_OPEN_LOGICAL_CHANNEL_DONE, response, (IMessage**)&msg);
+    mCi->IccOpenLogicalChannel(AID, msg);
     return NOERROR;
 }
 
@@ -457,10 +498,9 @@ ECode UiccCard::IccCloseLogicalChannel(
     /* [in] */ Int32 channel,
     /* [in] */ IMessage* response)
 {
-    // ==================before translated======================
-    // mCi.iccCloseLogicalChannel(channel,
-    //         mHandler.obtainMessage(EVENT_CLOSE_LOGICAL_CHANNEL_DONE, response));
-    assert(0);
+    AutoPtr<IMessage> msg;
+    mHandler->ObtainMessage(EVENT_CLOSE_LOGICAL_CHANNEL_DONE, response, (IMessage**)&msg);
+    mCi->IccCloseLogicalChannel(channel, msg);
     return NOERROR;
 }
 
@@ -474,10 +514,10 @@ ECode UiccCard::IccTransmitApduLogicalChannel(
     /* [in] */ const String& data,
     /* [in] */ IMessage* response)
 {
-    // ==================before translated======================
-    // mCi.iccTransmitApduLogicalChannel(channel, cla, command, p1, p2, p3,
-    //         data, mHandler.obtainMessage(EVENT_TRANSMIT_APDU_LOGICAL_CHANNEL_DONE, response));
-    assert(0);
+    AutoPtr<IMessage> msg;
+    mHandler->ObtainMessage(EVENT_TRANSMIT_APDU_LOGICAL_CHANNEL_DONE, response, (IMessage**)&msg);
+    mCi->IccTransmitApduLogicalChannel(channel, cla, command, p1, p2, p3,
+            data, msg);
     return NOERROR;
 }
 
@@ -490,10 +530,10 @@ ECode UiccCard::IccTransmitApduBasicChannel(
     /* [in] */ const String& data,
     /* [in] */ IMessage* response)
 {
-    // ==================before translated======================
-    // mCi.iccTransmitApduBasicChannel(cla, command, p1, p2, p3,
-    //         data, mHandler.obtainMessage(EVENT_TRANSMIT_APDU_BASIC_CHANNEL_DONE, response));
-    assert(0);
+    AutoPtr<IMessage> msg;
+    mHandler->ObtainMessage(EVENT_TRANSMIT_APDU_BASIC_CHANNEL_DONE, response, (IMessage**)&msg);
+    mCi->IccTransmitApduBasicChannel(cla, command, p1, p2, p3,
+            data, msg);
     return NOERROR;
 }
 
@@ -506,19 +546,18 @@ ECode UiccCard::IccExchangeSimIO(
     /* [in] */ const String& pathID,
     /* [in] */ IMessage* response)
 {
-    // ==================before translated======================
-    // mCi.iccIO(command, fileID, pathID, p1, p2, p3, null, null,
-    //         mHandler.obtainMessage(EVENT_SIM_IO_DONE, response));
-    assert(0);
+    AutoPtr<IMessage> msg;
+    mHandler->ObtainMessage(EVENT_SIM_IO_DONE, response, (IMessage**)&msg);
+    mCi->IccIO(command, fileID, pathID, p1, p2, p3, String(NULL), String(NULL), msg);
     return NOERROR;
 }
 
 ECode UiccCard::GetAtr(
     /* [in] */ IMessage* response)
 {
-    // ==================before translated======================
-    // mCi.getAtr(mHandler.obtainMessage(EVENT_SIM_GET_ATR_DONE, response));
-    assert(0);
+    AutoPtr<IMessage> msg;
+    mHandler->ObtainMessage(EVENT_SIM_GET_ATR_DONE, response, (IMessage**)&msg);
+    mCi->GetAtr(msg);
     return NOERROR;
 }
 
@@ -526,9 +565,7 @@ ECode UiccCard::SendEnvelopeWithStatus(
     /* [in] */ const String& contents,
     /* [in] */ IMessage* response)
 {
-    // ==================before translated======================
-    // mCi.sendEnvelopeWithStatus(contents, response);
-    assert(0);
+    mCi->SendEnvelopeWithStatus(contents, response);
     return NOERROR;
 }
 
@@ -550,10 +587,9 @@ ECode UiccCard::AreCarrierPriviligeRulesLoaded(
     /* [out] */ Boolean* result)
 {
     VALIDATE_NOT_NULL(result);
-    // ==================before translated======================
-    // return mCarrierPrivilegeRules != null
-    //     && mCarrierPrivilegeRules.areCarrierPriviligeRulesLoaded();
-    assert(0);
+    Boolean b = FALSE;
+    *result = mCarrierPrivilegeRules != NULL
+        && (mCarrierPrivilegeRules->AreCarrierPriviligeRulesLoaded(&b), b);
     return NOERROR;
 }
 
@@ -563,11 +599,11 @@ ECode UiccCard::GetCarrierPrivilegeStatus(
     /* [out] */ Int32* result)
 {
     VALIDATE_NOT_NULL(result);
-    // ==================before translated======================
-    // return mCarrierPrivilegeRules == null ?
-    //     TelephonyManager.CARRIER_PRIVILEGE_STATUS_RULES_NOT_LOADED :
-    //     mCarrierPrivilegeRules.getCarrierPrivilegeStatus(signature, packageName);
-    assert(0);
+    Int32 res = ITelephonyManager::CARRIER_PRIVILEGE_STATUS_RULES_NOT_LOADED;
+    if (mCarrierPrivilegeRules != NULL) {
+        mCarrierPrivilegeRules->GetCarrierPrivilegeStatus(signature, packageName, &res);
+    }
+    *result = res;
     return NOERROR;
 }
 
@@ -577,11 +613,11 @@ ECode UiccCard::GetCarrierPrivilegeStatus(
     /* [out] */ Int32* result)
 {
     VALIDATE_NOT_NULL(result);
-    // ==================before translated======================
-    // return mCarrierPrivilegeRules == null ?
-    //     TelephonyManager.CARRIER_PRIVILEGE_STATUS_RULES_NOT_LOADED :
-    //     mCarrierPrivilegeRules.getCarrierPrivilegeStatus(packageManager, packageName);
-    assert(0);
+    Int32 res = ITelephonyManager::CARRIER_PRIVILEGE_STATUS_RULES_NOT_LOADED;
+    if (mCarrierPrivilegeRules != NULL) {
+        mCarrierPrivilegeRules->GetCarrierPrivilegeStatus(packageManager, packageName, &res);
+    }
+    *result = res;
     return NOERROR;
 }
 
@@ -590,11 +626,11 @@ ECode UiccCard::GetCarrierPrivilegeStatusForCurrentTransaction(
     /* [out] */ Int32* result)
 {
     VALIDATE_NOT_NULL(result);
-    // ==================before translated======================
-    // return mCarrierPrivilegeRules == null ?
-    //     TelephonyManager.CARRIER_PRIVILEGE_STATUS_RULES_NOT_LOADED :
-    //     mCarrierPrivilegeRules.getCarrierPrivilegeStatusForCurrentTransaction(packageManager);
-    assert(0);
+    Int32 res = ITelephonyManager::CARRIER_PRIVILEGE_STATUS_RULES_NOT_LOADED;
+    if (mCarrierPrivilegeRules != NULL) {
+        mCarrierPrivilegeRules->GetCarrierPrivilegeStatusForCurrentTransaction(packageManager, &res);
+    }
+    *result = res;
     return NOERROR;
 }
 
@@ -604,11 +640,13 @@ ECode UiccCard::GetCarrierPackageNamesForIntent(
     /* [out] */ IList/*<String>*/** result)
 {
     VALIDATE_NOT_NULL(result);
-    // ==================before translated======================
-    // return mCarrierPrivilegeRules == null ? null :
-    //     mCarrierPrivilegeRules.getCarrierPackageNamesForIntent(
-    //             packageManager, intent);
-    assert(0);
+    AutoPtr<IList> res;
+    if (mCarrierPrivilegeRules != NULL) {
+        mCarrierPrivilegeRules->GetCarrierPackageNamesForIntent(
+                packageManager, intent, (IList**)&res);
+    }
+    *result = res;
+    REFCOUNT_ADD(*result)
     return NOERROR;
 }
 
@@ -617,25 +655,34 @@ ECode UiccCard::SetOperatorBrandOverride(
     /* [out] */ Boolean* result)
 {
     VALIDATE_NOT_NULL(result);
-    // ==================before translated======================
-    // log("setOperatorBrandOverride: " + brand);
-    // log("current iccId: " + getIccId());
-    //
-    // String iccId = getIccId();
-    // if (TextUtils.isEmpty(iccId)) {
-    //     return false;
-    // }
-    //
-    // SharedPreferences.Editor spEditor =
-    //         PreferenceManager.getDefaultSharedPreferences(mContext).edit();
-    // String key = OPERATOR_BRAND_OVERRIDE_PREFIX + iccId;
-    // if (brand == null) {
-    //     spEditor.remove(key).commit();
-    // } else {
-    //     spEditor.putString(key, brand).commit();
-    // }
-    // return true;
-    assert(0);
+    Log(String("setOperatorBrandOverride: ") + brand);
+    String iccId;
+    GetIccId(&iccId);
+    Log(String("current iccId: ") + iccId);
+
+    if (TextUtils::IsEmpty(iccId)) {
+        *result = FALSE;
+        return NOERROR;
+    }
+
+    AutoPtr<IPreferenceManagerHelper> hlp;
+    CPreferenceManagerHelper::AcquireSingleton((IPreferenceManagerHelper**)&hlp);
+    AutoPtr<ISharedPreferences> sp;
+    hlp->GetDefaultSharedPreferences(mContext, (ISharedPreferences**)&sp);
+    AutoPtr<ISharedPreferencesEditor> spEditor;
+    sp->Edit((ISharedPreferencesEditor**)&spEditor);
+    String key = OPERATOR_BRAND_OVERRIDE_PREFIX + iccId;
+    if (brand == NULL) {
+        spEditor->Remove(key);
+        Boolean b = FALSE;
+        spEditor->Commit(&b);
+    }
+    else {
+        spEditor->PutString(key, brand);
+        Boolean b = FALSE;
+        spEditor->Commit(&b);
+    }
+    *result = TRUE;
     return NOERROR;
 }
 
@@ -643,15 +690,17 @@ ECode UiccCard::GetOperatorBrandOverride(
     /* [out] */ String* result)
 {
     VALIDATE_NOT_NULL(result);
-    // ==================before translated======================
-    // String iccId = getIccId();
-    // if (TextUtils.isEmpty(iccId)) {
-    //     return null;
-    // }
-    // SharedPreferences sp = PreferenceManager.getDefaultSharedPreferences(mContext);
-    // return sp.getString(OPERATOR_BRAND_OVERRIDE_PREFIX + iccId, null);
-    Logger::E("leliang", "TODO not implemented line:%d, func:%s\n", __LINE__, __func__);
-    *result = String("Unicom");
+    String iccId;
+    GetIccId(&iccId);
+    if (TextUtils::IsEmpty(iccId)) {
+        *result = String(NULL);
+        return NOERROR;
+    }
+    AutoPtr<IPreferenceManagerHelper> hlp;
+    CPreferenceManagerHelper::AcquireSingleton((IPreferenceManagerHelper**)&hlp);
+    AutoPtr<ISharedPreferences> sp;
+    hlp->GetDefaultSharedPreferences(mContext, (ISharedPreferences**)&sp);
+    sp->GetString(OPERATOR_BRAND_OVERRIDE_PREFIX + iccId, String(NULL), result);
     return NOERROR;
 }
 
@@ -662,9 +711,9 @@ ECode UiccCard::GetIccId(
     // ==================before translated======================
     // // ICCID should be same across all the apps.
     // for (UiccCardApplication app : mUiccApplications) {
-    //     if (app != null) {
+    //     if (app != NULL) {
     //         IccRecords ir = app.getIccRecords();
-    //         if (ir != null && ir.getIccId() != null) {
+    //         if (ir != NULL && ir.getIccId() != NULL) {
     //             return ir.getIccId();
     //         }
     //     }
@@ -690,7 +739,7 @@ ECode UiccCard::OnRefresh(
 {
     // ==================before translated======================
     // for ( int i = 0; i < mUiccApplications.length; i++) {
-    //     if (mUiccApplications[i] != null) {
+    //     if (mUiccApplications[i] != NULL) {
     //         // Let the app know that the refresh occurred
     //         mUiccApplications[i].onRefresh(refreshResponse);
     //     }
@@ -727,8 +776,8 @@ ECode UiccCard::Dump(
     // pw.println(" mImsSubscriptionAppIndex=" + mImsSubscriptionAppIndex);
     // pw.println(" mUiccApplications: length=" + mUiccApplications.length);
     // for (int i = 0; i < mUiccApplications.length; i++) {
-    //     if (mUiccApplications[i] == null) {
-    //         pw.println("  mUiccApplications[" + i + "]=" + null);
+    //     if (mUiccApplications[i] == NULL) {
+    //         pw.println("  mUiccApplications[" + i + "]=" + NULL);
     //     } else {
     //         pw.println("  mUiccApplications[" + i + "]="
     //                 + mUiccApplications[i].getType() + " " + mUiccApplications[i]);
@@ -737,16 +786,16 @@ ECode UiccCard::Dump(
     // pw.println();
     // // Print details of all applications
     // for (UiccCardApplication app : mUiccApplications) {
-    //     if (app != null) {
+    //     if (app != NULL) {
     //         app.dump(fd, pw, args);
     //         pw.println();
     //     }
     // }
     // // Print details of all IccRecords
     // for (UiccCardApplication app : mUiccApplications) {
-    //     if (app != null) {
+    //     if (app != NULL) {
     //         IccRecords ir = app.getIccRecords();
-    //         if (ir != null) {
+    //         if (ir != NULL) {
     //             ir.dump(fd, pw, args);
     //             pw.println();
     //         }
@@ -858,7 +907,7 @@ void UiccCard::OnIccSwap(
     //     //      and has to reboot. We may want to add a property,
     //     //      e.g. REBOOT_ON_SIM_SWAP, to indicate if modem support
     //     //      hot-swap.
-    //     DialogInterface.OnClickListener listener = null;
+    //     DialogInterface.OnClickListener listener = NULL;
     //
     //
     //     // TODO: SimRecords is not reset while SIM ABSENT (only reset while

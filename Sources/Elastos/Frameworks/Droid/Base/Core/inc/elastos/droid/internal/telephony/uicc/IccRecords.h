@@ -6,22 +6,6 @@
 #include "elastos/droid/os/Handler.h"
 #include "elastos/droid/os/RegistrantList.h"
 
-// package com.android.internal.telephony.uicc;
-// import android.content.Context;
-// import android.content.Intent;
-// import android.telephony.TelephonyManager;
-// import android.os.Registrant;
-// import android.telephony.TelephonyManager;
-// import com.android.internal.telephony.CommandsInterface;
-// import com.android.internal.telephony.uicc.IccCardApplicationStatus.AppState;
-// import com.android.internal.telephony.uicc.IccCardApplicationStatus.AppType;
-// import com.android.internal.telephony.PhoneConstants;
-// import com.android.internal.telephony.SubscriptionController;
-// import java.io.FileDescriptor;
-// import java.io.PrintWriter;
-// import java.nio.ByteBuffer;
-// import java.util.concurrent.atomic.AtomicBoolean;
-
 using Elastos::Droid::Content::IContext;
 using Elastos::Droid::Os::AsyncResult;
 using Elastos::Droid::Os::IHandler;
@@ -470,7 +454,7 @@ protected:
     static const Int32 EVENT_GET_SMS_RECORD_SIZE_DONE = 28;
     static const Int32 EVENT_APP_READY = 1;
 
-private:
+protected:
     AutoPtr<IIccIoResult> auth_rsp;
     Object mLock;
     static const Int32 EVENT_AKA_AUTHENTICATE_DONE = 90;

@@ -1036,9 +1036,9 @@ void CatService::BroadcastCardStateAndIccRefreshResp(
     if (iccRefreshState != NULL) {
         //This case is when MSG_ID_ICC_REFRESH is received.
         AutoPtr<IccRefreshResponse> cState = (IccRefreshResponse*)iccRefreshState;
-        intent->PutExtra(IAppInterface::REFRESH_RESULT, cState->refreshResult);
+        intent->PutExtra(IAppInterface::REFRESH_RESULT, cState->mRefreshResult);
         CatLog::D(ICatService::Probe(this), String("Sending IccResult with Result: ")
-                + StringUtils::ToString(cState->refreshResult));
+                + StringUtils::ToString(cState->mRefreshResult));
     }
 
     // This sends an intent with CARD_ABSENT (0 - FALSE) /CARD_PRESENT (1 - TRUE).

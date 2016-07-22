@@ -32,7 +32,6 @@ public:
         /* [out] */ String* result);
 
 protected:
-
     // Get the class name to use for log strings
     virtual CARAPI_(String) GetTag() = 0;
 

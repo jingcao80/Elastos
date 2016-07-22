@@ -1,9 +1,57 @@
 #include "Elastos.CoreLibrary.Utility.Concurrent.h"
+#include "Elastos.CoreLibrary.IO.h"
 #include "Elastos.Droid.Content.h"
 #include "Elastos.Droid.Internal.h"
 #include "elastos/droid/internal/telephony/uicc/SIMRecords.h"
+#include "elastos/droid/content/res/CResourcesHelper.h"
+#include "elastos/droid/internal/telephony/uicc/CIccUtils.h"
+#include "elastos/droid/internal/telephony/uicc/CAdnRecordLoader.h"
+#include "elastos/droid/internal/telephony/uicc/CAdnRecordCache.h"
+#include "elastos/droid/internal/telephony/uicc/VoiceMailConstants.h"
+#include "elastos/droid/internal/telephony/uicc/CSpnOverride.h"
+#include "elastos/droid/internal/telephony/uicc/CAdnRecord.h"
+#include "elastos/droid/internal/telephony/uicc/IccVmFixedException.h"
+#include "elastos/droid/internal/telephony/uicc/IccVmNotSupportedException.h"
+#include "elastos/droid/internal/telephony/uicc/CUsimServiceTable.h"
+#include "elastos/droid/internal/telephony/gsm/CSimTlv.h"
+#include "elastos/droid/internal/telephony/MccTable.h"
+#include "elastos/droid/internal/telephony/CSubscriptionControllerHelper.h"
+#include "elastos/droid/telephony/CPhoneNumberUtils.h"
+#include "elastos/droid/telephony/CSmsMessageHelper.h"
+#include "elastos/droid/text/TextUtils.h"
+#include "elastos/droid/os/CSystemProperties.h"
+#include "elastos/droid/R.h"
+
+#include <elastos/core/CoreUtils.h>
+#include <elastos/core/StringUtils.h>
+#include <elastos/utility/Arrays.h>
 #include <elastos/utility/logging/Logger.h>
 
+using Elastos::Droid::Content::Res::IResources;
+using Elastos::Droid::Content::Res::IResourcesHelper;
+using Elastos::Droid::Content::Res::CResourcesHelper;
+using Elastos::Droid::Content::Res::IAssetManager;
+using Elastos::Droid::Text::TextUtils;
+using Elastos::Droid::Internal::Telephony::MccTable;
+using Elastos::Droid::Internal::Telephony::ISubscriptionControllerHelper;
+using Elastos::Droid::Internal::Telephony::CSubscriptionControllerHelper;
+using Elastos::Droid::Internal::Telephony::Gsm::ISimTlv;
+using Elastos::Droid::Internal::Telephony::Gsm::CSimTlv;
+using Elastos::Droid::Telephony::CPhoneNumberUtils;
+using Elastos::Droid::Telephony::IPhoneNumberUtils;
+using Elastos::Droid::Telephony::ISmsMessageHelper;
+using Elastos::Droid::Telephony::CSmsMessageHelper;
+using Elastos::Droid::Os::ISystemProperties;
+using Elastos::Droid::Os::CSystemProperties;
+using Elastos::Droid::R;
+
+using Elastos::Core::CoreUtils;
+using Elastos::Core::StringUtils;
+using Elastos::Core::IThrowable;
+using Elastos::IO::IFlushable;
+using Elastos::Utility::Arrays;
+using Elastos::Utility::IIterator;
+using Elastos::Utility::CArrayList;
 using Elastos::Utility::Logging::Logger;
 
 namespace Elastos {
@@ -17,24 +65,31 @@ namespace Uicc {
 //=====================================================================
 CAR_INTERFACE_IMPL(SIMRecords::EfPlLoaded, Object, IIccRecordLoaded);
 
+SIMRecords::EfPlLoaded::EfPlLoaded(
+    /* [in] */ SIMRecords* host)
+    : mHost(host)
+{}
+
 ECode SIMRecords::EfPlLoaded::GetEfName(
     /* [out] */ String* result)
 {
     VALIDATE_NOT_NULL(result);
-    *result = String(NULL);
-    // ==================before translated======================
-    // return "EF_PL";
-    assert(0);
+    *result = String("EF_PL");
     return NOERROR;
 }
 
 ECode SIMRecords::EfPlLoaded::OnRecordLoaded(
     /* [in] */ AsyncResult* ar)
 {
-    // ==================before translated======================
-    // mEfPl = (byte[]) ar.result;
-    // if (DBG) log("EF_PL=" + IccUtils.bytesToHexString(mEfPl));
-    assert(0);
+    assert(0 && "TODO");
+    // mEfPl = (ArrayOf<Byte>*) ar->mResult;
+    if (DBG) {
+        AutoPtr<IIccUtils> iccu;
+        CIccUtils::AcquireSingleton((IIccUtils**)&iccu);
+        String str;
+        iccu->BytesToHexString(mHost->mEfPl, &str);
+        mHost->Log(String("EF_PL=") + str);
+    }
     return NOERROR;
 }
 
@@ -43,24 +98,31 @@ ECode SIMRecords::EfPlLoaded::OnRecordLoaded(
 //=====================================================================
 CAR_INTERFACE_IMPL(SIMRecords::EfUsimLiLoaded, Object, IIccRecordLoaded);
 
+SIMRecords::EfUsimLiLoaded::EfUsimLiLoaded(
+    /* [in] */ SIMRecords* host)
+    : mHost(host)
+{}
+
 ECode SIMRecords::EfUsimLiLoaded::GetEfName(
     /* [out] */ String* result)
 {
     VALIDATE_NOT_NULL(result);
-    *result = String(NULL);
-    // ==================before translated======================
-    // return "EF_LI";
-    assert(0);
+    *result = String("EF_LI");
     return NOERROR;
 }
 
 ECode SIMRecords::EfUsimLiLoaded::OnRecordLoaded(
     /* [in] */ AsyncResult* ar)
 {
-    // ==================before translated======================
-    // mEfLi = (byte[]) ar.result;
-    // if (DBG) log("EF_LI=" + IccUtils.bytesToHexString(mEfLi));
-    assert(0);
+    assert(0 && "TODO");
+    // mEfLi = (ArrayOf<Byte>*) ar->mResult;
+    if (DBG) {
+        AutoPtr<IIccUtils> iccu;
+        CIccUtils::AcquireSingleton((IIccUtils**)&iccu);
+        String str;
+        iccu->BytesToHexString(mHost->mEfLi, &str);
+        mHost->Log(String("EF_LI=") + str);
+    }
     return NOERROR;
 }
 
@@ -112,7 +174,7 @@ const Int32 SIMRecords::EVENT_GET_GID1_DONE;
 const Int32 SIMRecords::EVENT_APP_LOCKED;
 // TODO:
 // AutoPtr<ArrayOf<String> > SIMRecords::MCCMNC_CODES_HAVING_3DIGITS_MNC = SIMRecords::MiddleInitMccmncCodesHaving3digitsMnc();
-
+AutoPtr<ArrayOf<String> > SIMRecords::MCCMNC_CODES_HAVING_3DIGITS_MNC;
 SIMRecords::SIMRecords()
 {
 }
@@ -122,24 +184,26 @@ ECode SIMRecords::constructor(
     /* [in] */ IContext* c,
     /* [in] */ ICommandsInterface* ci)
 {
-    // ==================before translated======================
-    // super(app, c, ci);
-    //
-    // mAdnCache = new AdnRecordCache(mFh);
-    //
-    // mVmConfig = new VoiceMailConstants();
-    // mSpnOverride = new SpnOverride();
-    //
-    // mRecordsRequested = false;  // No load request is made till SIM ready
-    //
-    // // recordsToLoad is set to 0 because no requests are made yet
-    // mRecordsToLoad = 0;
-    //
-    // // Start off by setting empty state
-    // resetRecords();
-    // mParentApp.registerForReady(this, EVENT_APP_READY, null);
-    // mParentApp.registerForLocked(this, EVENT_APP_LOCKED, null);
-    // if (DBG) log("SIMRecords X ctor this=" + this);
+    IccRecords::constructor(app, c, ci);
+
+    CAdnRecordCache::New(mFh, (IAdnRecordCache**)&mAdnCache);
+
+    mVmConfig = new VoiceMailConstants();
+    CSpnOverride::New((ISpnOverride**)&mSpnOverride);
+
+    mRecordsRequested = FALSE;  // No load request is made till SIM ready
+
+    // recordsToLoad is set to 0 because no requests are made yet
+    mRecordsToLoad = 0;
+
+    // Start off by setting empty state
+    ResetRecords();
+    mParentApp->RegisterForReady(this, EVENT_APP_READY, NULL);
+    mParentApp->RegisterForLocked(this, EVENT_APP_LOCKED, NULL);
+    if (DBG) {
+        assert(0 && "TODO");
+        // Log(String("SIMRecords X ctor this=") + this);
+    }
     return NOERROR;
 }
 
@@ -147,33 +211,36 @@ ECode SIMRecords::ToString(
     /* [out] */ String* result)
 {
     VALIDATE_NOT_NULL(result);
-    // ==================before translated======================
-    // return "SimRecords: " + super.toString()
-    //         + " mVmConfig" + mVmConfig
-    //         + " mSpnOverride=" + "mSpnOverride"
-    //         + " callForwardingEnabled=" + mCallForwardingEnabled
-    //         + " spnState=" + mSpnState
-    //         + " mCphsInfo=" + mCphsInfo
-    //         + " mCspPlmnEnabled=" + mCspPlmnEnabled
-    //         + " efMWIS=" + mEfMWIS
-    //         + " efCPHS_MWI=" + mEfCPHS_MWI
-    //         + " mEfCff=" + mEfCff
-    //         + " mEfCfis=" + mEfCfis
-    //         + " getOperatorNumeric=" + getOperatorNumeric();
-    assert(0);
+    String str, strSuper;
+    IccRecords::ToString(&strSuper);
+    GetOperatorNumeric(&str);
+    assert(0 && "TODO");
+    // *result = String("SimRecords: ") + strSuper
+    //         + String(" mVmConfig") + mVmConfig
+    //         + String(" mSpnOverride=") + String("mSpnOverride")
+    //         + String(" callForwardingEnabled=") + StringUtils::ToString(mCallForwardingEnabled)
+    //         + String(" spnState=") + mSpnState
+    //         + String(" mCphsInfo=") + Arrays::ToString(mCphsInfo)
+    //         + String(" mCspPlmnEnabled=") + StringUtils::ToString(mCspPlmnEnabled)
+    //         + String(" efMWIS=") + Arrays::ToString(mEfMWIS)
+    //         + String(" efCPHS_MWI=") + Arrays::ToString(mEfCPHS_MWI)
+    //         + String(" mEfCff=") + Arrays::ToString(mEfCff)
+    //         + String(" mEfCfis=") + Arrays::ToString(mEfCfis)
+    //         + String(" getOperatorNumeric=") + str;
     return NOERROR;
 }
 
 ECode SIMRecords::Dispose()
 {
-    // ==================before translated======================
-    // if (DBG) log("Disposing SIMRecords this=" + this);
-    // //Unregister for all events
-    // mParentApp.unregisterForReady(this);
-    // mParentApp.unregisterForLocked(this);
-    // resetRecords();
-    // super.dispose();
-    assert(0);
+    if (DBG) {
+        assert(0 && "TODO");
+        // Log(String("Disposing SIMRecords this=") + this);
+    }
+    //Unregister for all events
+    mParentApp->UnregisterForReady(this);
+    mParentApp->UnregisterForLocked(this);
+    ResetRecords();
+    IccRecords::Dispose();
     return NOERROR;
 }
 
@@ -181,9 +248,7 @@ ECode SIMRecords::GetIMSI(
     /* [out] */ String* result)
 {
     VALIDATE_NOT_NULL(result);
-    // ==================before translated======================
-    // return mImsi;
-    assert(0);
+    *result = mImsi;
     return NOERROR;
 }
 
@@ -191,9 +256,7 @@ ECode SIMRecords::GetMsisdnNumber(
     /* [out] */ String* result)
 {
     VALIDATE_NOT_NULL(result);
-    // ==================before translated======================
-    // return mMsisdn;
-    assert(0);
+    *result = mMsisdn;
     return NOERROR;
 }
 
@@ -201,9 +264,7 @@ ECode SIMRecords::GetGid1(
     /* [out] */ String* result)
 {
     VALIDATE_NOT_NULL(result);
-    // ==================before translated======================
-    // return mGid1;
-    assert(0);
+    *result = mGid1;
     return NOERROR;
 }
 
@@ -211,9 +272,8 @@ ECode SIMRecords::GetUsimServiceTable(
     /* [out] */ IUsimServiceTable** result)
 {
     VALIDATE_NOT_NULL(result);
-    // ==================before translated======================
-    // return mUsimServiceTable;
-    assert(0);
+    *result = mUsimServiceTable;
+    REFCOUNT_ADD(*result)
     return NOERROR;
 }
 
@@ -222,18 +282,23 @@ ECode SIMRecords::SetMsisdnNumber(
     /* [in] */ const String& number,
     /* [in] */ IMessage* onComplete)
 {
-    // ==================before translated======================
-    //
-    // mMsisdn = number;
-    // mMsisdnTag = alphaTag;
-    //
-    // if(DBG) log("Set MSISDN: " + mMsisdnTag + " " + /*mMsisdn*/ "xxxxxxx");
-    //
-    // AdnRecord adn = new AdnRecord(mMsisdnTag, mMsisdn);
-    //
-    // new AdnRecordLoader(mFh).updateEF(adn, EF_MSISDN, getExtFromEf(EF_MSISDN), 1, null,
-    //         obtainMessage(EVENT_SET_MSISDN_DONE, onComplete));
-    assert(0);
+    mMsisdn = number;
+    mMsisdnTag = alphaTag;
+
+    if(DBG) {
+        Log(String("Set MSISDN: ") + mMsisdnTag
+            + String(" ") + /*mMsisdn*/ String("xxxxxxx"));
+    }
+
+    AutoPtr<IAdnRecord> adn;
+    CAdnRecord::New(mMsisdnTag, mMsisdn, (IAdnRecord**)&adn);
+
+    AutoPtr<IAdnRecordLoader> loader;
+    CAdnRecordLoader::New(mFh, (IAdnRecordLoader**)&loader);
+    AutoPtr<IMessage> msg;
+    ObtainMessage(EVENT_SET_MSISDN_DONE, onComplete, (IMessage**)&msg);
+    loader->UpdateEF(adn, EF_MSISDN, GetExtFromEf(EF_MSISDN), 1, String(NULL),
+            msg);
     return NOERROR;
 }
 
@@ -241,9 +306,7 @@ ECode SIMRecords::GetMsisdnAlphaTag(
     /* [out] */ String* result)
 {
     VALIDATE_NOT_NULL(result);
-    // ==================before translated======================
-    // return mMsisdnTag;
-    assert(0);
+    *result = mMsisdnTag;
     return NOERROR;
 }
 
@@ -251,9 +314,7 @@ ECode SIMRecords::GetVoiceMailNumber(
     /* [out] */ String* result)
 {
     VALIDATE_NOT_NULL(result);
-    // ==================before translated======================
-    // return mVoiceMailNum;
-    assert(0);
+    *result = mVoiceMailNum;
     return NOERROR;
 }
 
@@ -262,37 +323,51 @@ ECode SIMRecords::SetVoiceMailNumber(
     /* [in] */ const String& voiceNumber,
     /* [in] */ IMessage* onComplete)
 {
-    // ==================before translated======================
-    // if (mIsVoiceMailFixed) {
-    //     AsyncResult.forMessage((onComplete)).exception =
-    //             new IccVmFixedException("Voicemail number is fixed by operator");
-    //     onComplete.sendToTarget();
-    //     return;
-    // }
-    //
-    // mNewVoiceMailNum = voiceNumber;
-    // mNewVoiceMailTag = alphaTag;
-    //
-    // AdnRecord adn = new AdnRecord(mNewVoiceMailTag, mNewVoiceMailNum);
-    //
-    // if (mMailboxIndex != 0 && mMailboxIndex != 0xff) {
-    //
-    //     new AdnRecordLoader(mFh).updateEF(adn, EF_MBDN, EF_EXT6,
-    //             mMailboxIndex, null,
-    //             obtainMessage(EVENT_SET_MBDN_DONE, onComplete));
-    //
-    // } else if (isCphsMailboxEnabled()) {
-    //
-    //     new AdnRecordLoader(mFh).updateEF(adn, EF_MAILBOX_CPHS,
-    //             EF_EXT1, 1, null,
-    //             obtainMessage(EVENT_SET_CPHS_MAILBOX_DONE, onComplete));
-    //
-    // } else {
-    //     AsyncResult.forMessage((onComplete)).exception =
-    //             new IccVmNotSupportedException("Update SIM voice mailbox error");
-    //     onComplete.sendToTarget();
-    // }
-    assert(0);
+    if (mIsVoiceMailFixed) {
+        AutoPtr<IccVmFixedException> p =
+            new IccVmFixedException(
+                String("Voicemail number is fixed by operator"));
+        AsyncResult::ForMessage((onComplete))->mException =
+            IThrowable::Probe(p);
+        onComplete->SendToTarget();
+        return NOERROR;
+    }
+
+    mNewVoiceMailNum = voiceNumber;
+    mNewVoiceMailTag = alphaTag;
+
+    AutoPtr<IAdnRecord> adn;
+    CAdnRecord::New(mNewVoiceMailTag, mNewVoiceMailNum, (IAdnRecord**)&adn);
+
+    if (mMailboxIndex != 0 && mMailboxIndex != 0xff) {
+        AutoPtr<IAdnRecordLoader> loader;
+        CAdnRecordLoader::New(mFh, (IAdnRecordLoader**)&loader);
+        AutoPtr<IMessage> msg;
+        ObtainMessage(EVENT_SET_MBDN_DONE, onComplete, (IMessage**)&msg);
+        loader->UpdateEF(adn, EF_MBDN, EF_EXT6,
+                mMailboxIndex, String(NULL),
+                msg);
+
+    }
+    else if (IsCphsMailboxEnabled()) {
+        AutoPtr<IAdnRecordLoader> loader;
+        CAdnRecordLoader::New(mFh, (IAdnRecordLoader**)&loader);
+        AutoPtr<IMessage> msg;
+        ObtainMessage(EVENT_SET_CPHS_MAILBOX_DONE, onComplete, (IMessage**)&msg);
+        loader->UpdateEF(adn, EF_MAILBOX_CPHS,
+                EF_EXT1, 1, String(NULL),
+                msg);
+
+    }
+    else {
+        AutoPtr<IccVmNotSupportedException> p =
+            new IccVmNotSupportedException(
+                String("Update SIM voice mailbox error"));
+        AsyncResult::ForMessage((onComplete))->mException =
+            IThrowable::Probe(p);
+
+        onComplete->SendToTarget();
+    }
     return NOERROR;
 }
 
@@ -300,9 +375,7 @@ ECode SIMRecords::GetVoiceMailAlphaTag(
     /* [out] */ String* result)
 {
     VALIDATE_NOT_NULL(result);
-    // ==================before translated======================
-    // return mVoiceMailTag;
-    assert(0);
+    *result = mVoiceMailTag;
     return NOERROR;
 }
 
@@ -310,46 +383,49 @@ ECode SIMRecords::SetVoiceMessageWaiting(
     /* [in] */ Int32 line,
     /* [in] */ Int32 countWaiting)
 {
-    // ==================before translated======================
-    // if (line != 1) {
-    //     // only profile 1 is supported
-    //     return;
-    // }
-    //
+    if (line != 1) {
+        // only profile 1 is supported
+        return NOERROR;
+    }
+
     // try {
-    //     if (mEfMWIS != null) {
-    //         // TS 51.011 10.3.45
-    //
-    //         // lsb of byte 0 is 'voicemail' status
-    //         mEfMWIS[0] = (byte)((mEfMWIS[0] & 0xfe)
-    //                             | (countWaiting == 0 ? 0 : 1));
-    //
-    //         // byte 1 is the number of voice messages waiting
-    //         if (countWaiting < 0) {
-    //             // The spec does not define what this should be
-    //             // if we don't know the count
-    //             mEfMWIS[1] = 0;
-    //         } else {
-    //             mEfMWIS[1] = (byte) countWaiting;
-    //         }
-    //
-    //         mFh.updateEFLinearFixed(
-    //             EF_MWIS, 1, mEfMWIS, null,
-    //             obtainMessage (EVENT_UPDATE_DONE, EF_MWIS, 0));
-    //     }
-    //
-    //     if (mEfCPHS_MWI != null) {
-    //             // Refer CPHS4_2.WW6 B4.2.3
-    //         mEfCPHS_MWI[0] = (byte)((mEfCPHS_MWI[0] & 0xf0)
-    //                     | (countWaiting == 0 ? 0x5 : 0xa));
-    //         mFh.updateEFTransparent(
-    //             EF_VOICE_MAIL_INDICATOR_CPHS, mEfCPHS_MWI,
-    //             obtainMessage (EVENT_UPDATE_DONE, EF_VOICE_MAIL_INDICATOR_CPHS));
-    //     }
+        if (mEfMWIS != NULL) {
+            // TS 51.011 10.3.45
+
+            // lsb of byte 0 is 'voicemail' status
+            (*mEfMWIS)[0] = (Byte)(((*mEfMWIS)[0] & 0xfe)
+                                | (countWaiting == 0 ? 0 : 1));
+
+            // byte 1 is the number of voice messages waiting
+            if (countWaiting < 0) {
+                // The spec does not define what this should be
+                // if we don't know the count
+                (*mEfMWIS)[1] = 0;
+            }
+            else {
+                (*mEfMWIS)[1] = (Byte) countWaiting;
+            }
+
+            AutoPtr<IMessage> msg;
+            ObtainMessage(EVENT_UPDATE_DONE, EF_MWIS, 0, (IMessage**)&msg);
+            mFh->UpdateEFLinearFixed(
+                EF_MWIS, 1, mEfMWIS, String(NULL),
+                msg);
+        }
+
+        if (mEfCPHS_MWI != NULL) {
+                // Refer CPHS4_2.WW6 B4.2.3
+            (*mEfCPHS_MWI)[0] = (Byte)(((*mEfCPHS_MWI)[0] & 0xf0)
+                        | (countWaiting == 0 ? 0x5 : 0xa));
+            AutoPtr<IMessage> msg;
+            ObtainMessage(EVENT_UPDATE_DONE, CoreUtils::Convert(EF_VOICE_MAIL_INDICATOR_CPHS), (IMessage**)&msg);
+            mFh->UpdateEFTransparent(
+                EF_VOICE_MAIL_INDICATOR_CPHS, mEfCPHS_MWI,
+                msg);
+        }
     // } catch (ArrayIndexOutOfBoundsException ex) {
     //     logw("Error saving voice mail state to SIM. Probably malformed SIM record", ex);
     // }
-    assert(0);
     return NOERROR;
 }
 
@@ -357,36 +433,36 @@ ECode SIMRecords::GetVoiceMessageCount(
     /* [out] */ Int32* result)
 {
     VALIDATE_NOT_NULL(result);
-    // ==================before translated======================
-    // boolean voiceMailWaiting = false;
-    // int countVoiceMessages = -1;
-    // if (mEfMWIS != null) {
-    //     // Use this data if the EF[MWIS] exists and
-    //     // has been loaded
-    //     // Refer TS 51.011 Section 10.3.45 for the content description
-    //     voiceMailWaiting = ((mEfMWIS[0] & 0x01) != 0);
-    //     countVoiceMessages = mEfMWIS[1] & 0xff;
-    //
-    //     if (voiceMailWaiting && countVoiceMessages == 0) {
-    //         // Unknown count = -1
-    //         countVoiceMessages = -1;
-    //     }
-    //     if(DBG) log(" VoiceMessageCount from SIM MWIS = " + countVoiceMessages);
-    // } else if (mEfCPHS_MWI != null) {
-    //     // use voice mail count from CPHS
-    //     int indicator = (int) (mEfCPHS_MWI[0] & 0xf);
-    //
-    //     // Refer CPHS4_2.WW6 B4.2.3
-    //     if (indicator == 0xA) {
-    //         // Unknown count = -1
-    //         countVoiceMessages = -1;
-    //     } else if (indicator == 0x5) {
-    //         countVoiceMessages = 0;
-    //     }
-    //     if(DBG) log(" VoiceMessageCount from SIM CPHS = " + countVoiceMessages);
-    // }
-    // return countVoiceMessages;
-    assert(0);
+    Boolean voiceMailWaiting = FALSE;
+    Int32 countVoiceMessages = -1;
+    if (mEfMWIS != NULL) {
+        // Use this data if the EF[MWIS] exists and
+        // has been loaded
+        // Refer TS 51.011 Section 10.3.45 for the content description
+        voiceMailWaiting = (((*mEfMWIS)[0] & 0x01) != 0);
+        countVoiceMessages = (*mEfMWIS)[1] & 0xff;
+
+        if (voiceMailWaiting && countVoiceMessages == 0) {
+            // Unknown count = -1
+            countVoiceMessages = -1;
+        }
+        if(DBG) Log(String(" VoiceMessageCount from SIM MWIS = ") + StringUtils::ToString(countVoiceMessages));
+    }
+    else if (mEfCPHS_MWI != NULL) {
+        // use voice mail count from CPHS
+        Int32 indicator = (Int32) ((*mEfCPHS_MWI)[0] & 0xf);
+
+        // Refer CPHS4_2.WW6 B4.2.3
+        if (indicator == 0xA) {
+            // Unknown count = -1
+            countVoiceMessages = -1;
+        }
+        else if (indicator == 0x5) {
+            countVoiceMessages = 0;
+        }
+        if(DBG) Log(String(" VoiceMessageCount from SIM CPHS = ") + StringUtils::ToString(countVoiceMessages));
+    }
+    *result = countVoiceMessages;
     return NOERROR;
 }
 
@@ -402,9 +478,7 @@ ECode SIMRecords::GetVoiceCallForwardingFlag(
     /* [out] */ Boolean* result)
 {
     VALIDATE_NOT_NULL(result);
-    // ==================before translated======================
-    // return mCallForwardingEnabled;
-    assert(0);
+    *result = mCallForwardingEnabled;
     return NOERROR;
 }
 
@@ -413,66 +487,80 @@ ECode SIMRecords::SetVoiceCallForwardingFlag(
     /* [in] */ Boolean enable,
     /* [in] */ const String& dialNumber)
 {
-    // ==================before translated======================
-    //
-    // if (line != 1) return; // only line 1 is supported
-    //
-    // mCallForwardingEnabled = enable;
-    //
-    // mRecordsEventsRegistrants.notifyResult(EVENT_CFI);
-    //
+    if (line != 1) return NOERROR; // only line 1 is supported
+
+    mCallForwardingEnabled = enable;
+
+    mRecordsEventsRegistrants->NotifyResult(CoreUtils::Convert(EVENT_CFI));
+
+    AutoPtr<IIccUtils> iccu;
+    CIccUtils::AcquireSingleton((IIccUtils**)&iccu);
     // try {
-    //     if (validEfCfis(mEfCfis)) {
-    //         // lsb is of byte 1 is voice status
-    //         if (enable) {
-    //             mEfCfis[1] |= 1;
-    //         } else {
-    //             mEfCfis[1] &= 0xfe;
-    //         }
-    //
-    //         log("setVoiceCallForwardingFlag: enable=" + enable
-    //                 + " mEfCfis=" + IccUtils.bytesToHexString(mEfCfis));
-    //
-    //         // Update dialNumber if not empty and CFU is enabled.
-    //         // Spec reference for EF_CFIS contents, TS 51.011 section 10.3.46.
-    //         if (enable && !TextUtils.isEmpty(dialNumber)) {
-    //             log("EF_CFIS: updating cf number, " + dialNumber);
-    //             byte[] bcdNumber = PhoneNumberUtils.numberToCalledPartyBCD(dialNumber);
-    //
-    //             System.arraycopy(bcdNumber, 0, mEfCfis, CFIS_TON_NPI_OFFSET, bcdNumber.length);
-    //
-    //             mEfCfis[CFIS_BCD_NUMBER_LENGTH_OFFSET] = (byte) (bcdNumber.length);
-    //             mEfCfis[CFIS_ADN_CAPABILITY_ID_OFFSET] = (byte) 0xFF;
-    //             mEfCfis[CFIS_ADN_EXTENSION_ID_OFFSET] = (byte) 0xFF;
-    //         }
-    //
-    //         mFh.updateEFLinearFixed(
-    //                 EF_CFIS, 1, mEfCfis, null,
-    //                 obtainMessage (EVENT_UPDATE_DONE, EF_CFIS));
-    //     } else {
-    //         log("setVoiceCallForwardingFlag: ignoring enable=" + enable
-    //                 + " invalid mEfCfis=" + IccUtils.bytesToHexString(mEfCfis));
-    //     }
-    //
-    //     if (mEfCff != null) {
-    //         if (enable) {
-    //             mEfCff[0] = (byte) ((mEfCff[0] & CFF_LINE1_RESET)
-    //                     | CFF_UNCONDITIONAL_ACTIVE);
-    //         } else {
-    //             mEfCff[0] = (byte) ((mEfCff[0] & CFF_LINE1_RESET)
-    //                     | CFF_UNCONDITIONAL_DEACTIVE);
-    //         }
-    //
-    //         mFh.updateEFTransparent(
-    //                 EF_CFF_CPHS, mEfCff,
-    //                 obtainMessage (EVENT_UPDATE_DONE, EF_CFF_CPHS));
-    //     }
+        if (ValidEfCfis(mEfCfis)) {
+            // lsb is of byte 1 is voice status
+            if (enable) {
+                (*mEfCfis)[1] |= 1;
+            }
+            else {
+                (*mEfCfis)[1] &= 0xfe;
+            }
+
+            String str;
+            iccu->BytesToHexString(mEfCfis, &str);
+            Log(String("setVoiceCallForwardingFlag: enable=") + StringUtils::ToString(enable)
+                    + String(" mEfCfis=") + str);
+
+            // Update dialNumber if not empty and CFU is enabled.
+            // Spec reference for EF_CFIS contents, TS 51.011 section 10.3.46.
+            if (enable && !TextUtils::IsEmpty(dialNumber)) {
+                Log(String("EF_CFIS: updating cf number, ") + dialNumber);
+                AutoPtr<IPhoneNumberUtils> pn;
+                CPhoneNumberUtils::AcquireSingleton((IPhoneNumberUtils**)&pn);
+                AutoPtr<ArrayOf<Byte> > bcdNumber;
+                pn->NumberToCalledPartyBCD(dialNumber, (ArrayOf<Byte>**)&bcdNumber);
+
+                // System::Arraycopy(bcdNumber, 0, mEfCfis, CFIS_TON_NPI_OFFSET, bcdNumber->GetLength());
+                mEfCfis->Copy(CFIS_TON_NPI_OFFSET, bcdNumber, 0, bcdNumber->GetLength());
+
+                (*mEfCfis)[CFIS_BCD_NUMBER_LENGTH_OFFSET] = (Byte) (bcdNumber->GetLength());
+                (*mEfCfis)[CFIS_ADN_CAPABILITY_ID_OFFSET] = (Byte) 0xFF;
+                (*mEfCfis)[CFIS_ADN_EXTENSION_ID_OFFSET] = (Byte) 0xFF;
+            }
+
+            AutoPtr<IMessage> msg;
+            ObtainMessage(EVENT_UPDATE_DONE, CoreUtils::Convert(EF_CFIS), (IMessage**)&msg);
+            mFh->UpdateEFLinearFixed(
+                    EF_CFIS, 1, mEfCfis, String(NULL),
+                    msg);
+        }
+        else {
+            String str;
+            iccu->BytesToHexString(mEfCfis, &str);
+            Log(String("setVoiceCallForwardingFlag: ignoring enable=") + StringUtils::ToString(enable)
+                    + String(" invalid mEfCfis=") + str);
+        }
+
+        if (mEfCff != NULL) {
+            if (enable) {
+                (*mEfCff)[0] = (Byte) (((*mEfCff)[0] & CFF_LINE1_RESET)
+                        | CFF_UNCONDITIONAL_ACTIVE);
+            }
+            else {
+                (*mEfCff)[0] = (Byte) (((*mEfCff)[0] & CFF_LINE1_RESET)
+                        | CFF_UNCONDITIONAL_DEACTIVE);
+            }
+
+            AutoPtr<IMessage> msg;
+            ObtainMessage(EVENT_UPDATE_DONE, CoreUtils::Convert(EF_CFF_CPHS), (IMessage**)&msg);
+            mFh->UpdateEFTransparent(
+                    EF_CFF_CPHS, mEfCff,
+                    msg);
+        }
     // } catch (ArrayIndexOutOfBoundsException ex) {
     //     logw("Error saving call forwarding flag to SIM. "
     //                     + "Probably malformed SIM record", ex);
-    //
+
     // }
-    assert(0);
     return NOERROR;
 }
 
@@ -480,14 +568,12 @@ ECode SIMRecords::OnRefresh(
     /* [in] */ Boolean fileChanged,
     /* [in] */ ArrayOf<Int32>* fileList)
 {
-    // ==================before translated======================
-    // if (fileChanged) {
-    //     // A future optimization would be to inspect fileList and
-    //     // only reload those files that we care about.  For now,
-    //     // just re-fetch all SIM records that we cache.
-    //     fetchSimRecords();
-    // }
-    assert(0);
+    if (fileChanged) {
+        // A future optimization would be to inspect fileList and
+        // only reload those files that we care about.  For now,
+        // just re-fetch all SIM records that we cache.
+        FetchSimRecords();
+    }
     return NOERROR;
 }
 
@@ -495,655 +581,784 @@ ECode SIMRecords::GetOperatorNumeric(
     /* [out] */ String* result)
 {
     VALIDATE_NOT_NULL(result);
-    // ==================before translated======================
-    // if (mImsi == null) {
-    //     log("getOperatorNumeric: IMSI == null");
-    //     return null;
-    // }
-    // if (mMncLength == UNINITIALIZED || mMncLength == UNKNOWN) {
-    //     log("getSIMOperatorNumeric: bad mncLength");
-    //     return null;
-    // }
-    //
-    // // Length = length of MCC + length of MNC
-    // // length of mcc = 3 (TS 23.003 Section 2.2)
-    // return mImsi.substring(0, 3 + mMncLength);
-    assert(0);
+    if (mImsi == NULL) {
+        Log(String("getOperatorNumeric: IMSI == NULL"));
+        *result = String(NULL);
+        return NOERROR;
+    }
+    if (mMncLength == UNINITIALIZED || mMncLength == UNKNOWN) {
+        Log(String("getSIMOperatorNumeric: bad mncLength"));
+        *result = String(NULL);
+        return NOERROR;
+    }
+
+    // Length = length of MCC + length of MNC
+    // length of mcc = 3 (TS 23.003 Section 2.2)
+    *result = mImsi.Substring(0, 3 + mMncLength);
     return NOERROR;
 }
 
 ECode SIMRecords::HandleMessage(
     /* [in] */ IMessage* msg)
 {
-    // ==================before translated======================
-    // AsyncResult ar;
-    // AdnRecord adn;
-    //
-    // byte data[];
-    //
-    // boolean isRecordLoadResponse = false;
-    //
-    // if (mDestroyed.get()) {
-    //     loge("Received message " + msg + "[" + msg.what + "] " +
-    //             " while being destroyed. Ignoring.");
-    //     return;
-    // }
-    //
-    // try { switch (msg.what) {
-    //     case EVENT_APP_READY:
-    //         onReady();
-    //         break;
-    //
-    //     case EVENT_APP_LOCKED:
-    //         onLocked();
-    //         break;
-    //
-    //     /* IO events */
-    //     case EVENT_GET_IMSI_DONE:
-    //         isRecordLoadResponse = true;
-    //
-    //         ar = (AsyncResult)msg.obj;
-    //
-    //         if (ar.exception != null) {
-    //             loge("Exception querying IMSI, Exception:" + ar.exception);
-    //             break;
-    //         }
-    //
-    //         mImsi = (String) ar.result;
-    //
-    //         // IMSI (MCC+MNC+MSIN) is at least 6 digits, but not more
-    //         // than 15 (and usually 15).
-    //         if (mImsi != null && (mImsi.length() < 6 || mImsi.length() > 15)) {
-    //             loge("invalid IMSI " + mImsi);
-    //             mImsi = null;
-    //         }
-    //
-    //         log("IMSI: mMncLength=" + mMncLength);
-    //         log("IMSI: " + mImsi.substring(0, 6) + "xxxxxxx");
-    //
-    //         if (((mMncLength == UNKNOWN) || (mMncLength == 2)) &&
-    //                 ((mImsi != null) && (mImsi.length() >= 6))) {
-    //             String mccmncCode = mImsi.substring(0, 6);
-    //             for (String mccmnc : MCCMNC_CODES_HAVING_3DIGITS_MNC) {
-    //                 if (mccmnc.equals(mccmncCode)) {
-    //                     mMncLength = 3;
-    //                     log("IMSI: setting1 mMncLength=" + mMncLength);
-    //                     break;
-    //                 }
-    //             }
-    //         }
-    //
-    //         if (mMncLength == UNKNOWN) {
-    //             // the SIM has told us all it knows, but it didn't know the mnc length.
-    //             // guess using the mcc
-    //             try {
-    //                 int mcc = Integer.parseInt(mImsi.substring(0,3));
-    //                 mMncLength = MccTable.smallestDigitsMccForMnc(mcc);
-    //                 log("setting2 mMncLength=" + mMncLength);
-    //             } catch (NumberFormatException e) {
-    //                 mMncLength = UNKNOWN;
-    //                 loge("Corrupt IMSI! setting3 mMncLength=" + mMncLength);
-    //             }
-    //         }
-    //
-    //         mParentApp.getUICCConfig().setImsi(mImsi);
-    //         if (mMncLength == UNKNOWN || mMncLength == UNINITIALIZED) {
-    //             // We need to default to something that seems common
-    //             mParentApp.getUICCConfig().setMncLength(3);
-    //         } else {
-    //             mParentApp.getUICCConfig().setMncLength(mMncLength);
-    //         }
-    //
-    //         if (mMncLength != UNKNOWN && mMncLength != UNINITIALIZED) {
-    //             log("update mccmnc=" + mImsi.substring(0, 3 + mMncLength));
-    //             // finally have both the imsi and the mncLength and can parse the imsi properly
-    //             MccTable.updateMccMncConfiguration(mContext,
-    //                     mImsi.substring(0, 3 + mMncLength), false);
-    //         }
-    //         mImsiReadyRegistrants.notifyRegistrants();
-    //     break;
-    //
-    //     case EVENT_GET_MBI_DONE:
-    //         boolean isValidMbdn;
-    //         isRecordLoadResponse = true;
-    //
-    //         ar = (AsyncResult)msg.obj;
-    //         data = (byte[]) ar.result;
-    //
-    //         isValidMbdn = false;
-    //         if (ar.exception == null) {
-    //             // Refer TS 51.011 Section 10.3.44 for content details
-    //             log("EF_MBI: " + IccUtils.bytesToHexString(data));
-    //
-    //             // Voice mail record number stored first
-    //             mMailboxIndex = data[0] & 0xff;
-    //
-    //             // check if dailing numbe id valid
-    //             if (mMailboxIndex != 0 && mMailboxIndex != 0xff) {
-    //                 log("Got valid mailbox number for MBDN");
-    //                 isValidMbdn = true;
-    //             }
-    //         }
-    //
-    //         // one more record to load
-    //         mRecordsToLoad += 1;
-    //
-    //         if (isValidMbdn) {
-    //             // Note: MBDN was not included in NUM_OF_SIM_RECORDS_LOADED
-    //             new AdnRecordLoader(mFh).loadFromEF(EF_MBDN, EF_EXT6,
-    //                     mMailboxIndex, obtainMessage(EVENT_GET_MBDN_DONE));
-    //         } else {
-    //             // If this EF not present, try mailbox as in CPHS standard
-    //             // CPHS (CPHS4_2.WW6) is a european standard.
-    //             new AdnRecordLoader(mFh).loadFromEF(EF_MAILBOX_CPHS,
-    //                     EF_EXT1, 1,
-    //                     obtainMessage(EVENT_GET_CPHS_MAILBOX_DONE));
-    //         }
-    //
-    //         break;
-    //     case EVENT_GET_CPHS_MAILBOX_DONE:
-    //     case EVENT_GET_MBDN_DONE:
-    //         //Resetting the voice mail number and voice mail tag to null
-    //         //as these should be updated from the data read from EF_MBDN.
-    //         //If they are not reset, incase of invalid data/exception these
-    //         //variables are retaining their previous values and are
-    //         //causing invalid voice mailbox info display to user.
-    //         mVoiceMailNum = null;
-    //         mVoiceMailTag = null;
-    //         isRecordLoadResponse = true;
-    //
-    //         ar = (AsyncResult)msg.obj;
-    //
-    //         if (ar.exception != null) {
-    //
-    //             log("Invalid or missing EF"
-    //                 + ((msg.what == EVENT_GET_CPHS_MAILBOX_DONE) ? "[MAILBOX]" : "[MBDN]"));
-    //
-    //             // Bug #645770 fall back to CPHS
-    //             // FIXME should use SST to decide
-    //
-    //             if (msg.what == EVENT_GET_MBDN_DONE) {
-    //                 //load CPHS on fail...
-    //                 // FIXME right now, only load line1's CPHS voice mail entry
-    //
-    //                 mRecordsToLoad += 1;
-    //                 new AdnRecordLoader(mFh).loadFromEF(
-    //                         EF_MAILBOX_CPHS, EF_EXT1, 1,
-    //                         obtainMessage(EVENT_GET_CPHS_MAILBOX_DONE));
-    //             }
-    //             break;
-    //         }
-    //
-    //         adn = (AdnRecord)ar.result;
-    //
-    //         log("VM: " + adn +
-    //                 ((msg.what == EVENT_GET_CPHS_MAILBOX_DONE) ? " EF[MAILBOX]" : " EF[MBDN]"));
-    //
-    //         if (adn.isEmpty() && msg.what == EVENT_GET_MBDN_DONE) {
-    //             // Bug #645770 fall back to CPHS
-    //             // FIXME should use SST to decide
-    //             // FIXME right now, only load line1's CPHS voice mail entry
-    //             mRecordsToLoad += 1;
-    //             new AdnRecordLoader(mFh).loadFromEF(
-    //                     EF_MAILBOX_CPHS, EF_EXT1, 1,
-    //                     obtainMessage(EVENT_GET_CPHS_MAILBOX_DONE));
-    //
-    //             break;
-    //         }
-    //
-    //         mVoiceMailNum = adn.getNumber();
-    //         mVoiceMailTag = adn.getAlphaTag();
-    //     break;
-    //
-    //     case EVENT_GET_MSISDN_DONE:
-    //         isRecordLoadResponse = true;
-    //
-    //         ar = (AsyncResult)msg.obj;
-    //
-    //         if (ar.exception != null) {
-    //             log("Invalid or missing EF[MSISDN]");
-    //             break;
-    //         }
-    //
-    //         adn = (AdnRecord)ar.result;
-    //
-    //         mMsisdn = adn.getNumber();
-    //         mMsisdnTag = adn.getAlphaTag();
-    //
-    //         log("MSISDN: " + /*mMsisdn*/ "xxxxxxx");
-    //     break;
-    //
-    //     case EVENT_SET_MSISDN_DONE:
-    //         isRecordLoadResponse = false;
-    //         ar = (AsyncResult)msg.obj;
-    //
-    //         if (ar.userObj != null) {
-    //             AsyncResult.forMessage(((Message) ar.userObj)).exception
-    //                     = ar.exception;
-    //             ((Message) ar.userObj).sendToTarget();
-    //         }
-    //         break;
-    //
-    //     case EVENT_GET_MWIS_DONE:
-    //         isRecordLoadResponse = true;
-    //
-    //         ar = (AsyncResult)msg.obj;
-    //         data = (byte[])ar.result;
-    //
-    //         if(DBG) log("EF_MWIS : " + IccUtils.bytesToHexString(data));
-    //
-    //         if (ar.exception != null) {
-    //             if(DBG) log("EVENT_GET_MWIS_DONE exception = "
-    //                     + ar.exception);
-    //             break;
-    //         }
-    //
-    //         if ((data[0] & 0xff) == 0xff) {
-    //             if(DBG) log("SIMRecords: Uninitialized record MWIS");
-    //             break;
-    //         }
-    //
-    //         mEfMWIS = data;
-    //         break;
-    //
-    //     case EVENT_GET_VOICE_MAIL_INDICATOR_CPHS_DONE:
-    //         isRecordLoadResponse = true;
-    //
-    //         ar = (AsyncResult)msg.obj;
-    //         data = (byte[])ar.result;
-    //
-    //         if(DBG) log("EF_CPHS_MWI: " + IccUtils.bytesToHexString(data));
-    //
-    //         if (ar.exception != null) {
-    //             if(DBG) log("EVENT_GET_VOICE_MAIL_INDICATOR_CPHS_DONE exception = "
-    //                     + ar.exception);
-    //             break;
-    //         }
-    //
-    //         mEfCPHS_MWI = data;
-    //         break;
-    //
-    //     case EVENT_GET_ICCID_DONE:
-    //         isRecordLoadResponse = true;
-    //
-    //         ar = (AsyncResult)msg.obj;
-    //         data = (byte[])ar.result;
-    //
-    //         if (ar.exception != null) {
-    //             break;
-    //         }
-    //
-    //         mIccId = IccUtils.bcdToString(data, 0, data.length);
-    //
-    //         log("iccid: " + mIccId);
-    //
-    //     break;
-    //
-    //
-    //     case EVENT_GET_AD_DONE:
-    //         try {
-    //             isRecordLoadResponse = true;
-    //
-    //             ar = (AsyncResult)msg.obj;
-    //             data = (byte[])ar.result;
-    //
-    //             if (ar.exception != null) {
-    //                 break;
-    //             }
-    //
-    //             log("EF_AD: " + IccUtils.bytesToHexString(data));
-    //
-    //             if (data.length < 3) {
-    //                 log("Corrupt AD data on SIM");
-    //                 break;
-    //             }
-    //
-    //             if (data.length == 3) {
-    //                 log("MNC length not present in EF_AD");
-    //                 break;
-    //             }
-    //
-    //             mMncLength = data[3] & 0xf;
-    //             log("setting4 mMncLength=" + mMncLength);
-    //
-    //             if (mMncLength == 0xf) {
-    //                 mMncLength = UNKNOWN;
-    //                 log("setting5 mMncLength=" + mMncLength);
-    //             } else {
-    //                 mParentApp.getUICCConfig().setMncLength(mMncLength);
-    //             }
-    //
-    //         } finally {
-    //             if (((mMncLength == UNINITIALIZED) || (mMncLength == UNKNOWN) ||
-    //                     (mMncLength == 2)) && ((mImsi != null) && (mImsi.length() >= 6))) {
-    //                 String mccmncCode = mImsi.substring(0, 6);
-    //                 log("mccmncCode=" + mccmncCode);
-    //                 for (String mccmnc : MCCMNC_CODES_HAVING_3DIGITS_MNC) {
-    //                     if (mccmnc.equals(mccmncCode)) {
-    //                         mMncLength = 3;
-    //                         log("setting6 mMncLength=" + mMncLength);
-    //                         break;
-    //                     }
-    //                 }
-    //             }
-    //
-    //             if (mMncLength == UNKNOWN || mMncLength == UNINITIALIZED) {
-    //                 if (mImsi != null) {
-    //                     try {
-    //                         int mcc = Integer.parseInt(mImsi.substring(0,3));
-    //
-    //                         mMncLength = MccTable.smallestDigitsMccForMnc(mcc);
-    //                         log("setting7 mMncLength=" + mMncLength);
-    //                     } catch (NumberFormatException e) {
-    //                         mMncLength = UNKNOWN;
-    //                         loge("Corrupt IMSI! setting8 mMncLength=" + mMncLength);
-    //                     }
-    //                 } else {
-    //                     // Indicate we got this info, but it didn't contain the length.
-    //                     mMncLength = UNKNOWN;
-    //                     log("MNC length not present in EF_AD setting9 mMncLength=" + mMncLength);
-    //                 }
-    //             }
-    //             if (mImsi != null && mMncLength != UNKNOWN) {
-    //                 // finally have both imsi and the length of the mnc and can parse
-    //                 // the imsi properly
-    //                 log("update mccmnc=" + mImsi.substring(0, 3 + mMncLength));
-    //                 MccTable.updateMccMncConfiguration(mContext,
-    //                         mImsi.substring(0, 3 + mMncLength), false);
-    //             }
-    //         }
-    //     break;
-    //
-    //     case EVENT_GET_SPN_DONE:
-    //         isRecordLoadResponse = true;
-    //         ar = (AsyncResult) msg.obj;
-    //         getSpnFsm(false, ar);
-    //     break;
-    //
-    //     case EVENT_GET_CFF_DONE:
-    //         isRecordLoadResponse = true;
-    //
-    //         ar = (AsyncResult) msg.obj;
-    //         data = (byte[]) ar.result;
-    //
-    //         if (ar.exception != null) {
-    //             break;
-    //         }
-    //
-    //         log("EF_CFF_CPHS: " + IccUtils.bytesToHexString(data));
-    //         mEfCff = data;
-    //
-    //         // if EF_CFIS is valid, prefer it to EF_CFF_CPHS
-    //         if (!validEfCfis(mEfCfis)) {
-    //             mCallForwardingEnabled =
-    //                 ((data[0] & CFF_LINE1_MASK) == CFF_UNCONDITIONAL_ACTIVE);
-    //
-    //             mRecordsEventsRegistrants.notifyResult(EVENT_CFI);
-    //         } else {
-    //             log("EVENT_GET_CFF_DONE: EF_CFIS is valid, ignoring EF_CFF_CPHS");
-    //         }
-    //         break;
-    //
-    //     case EVENT_GET_SPDI_DONE:
-    //         isRecordLoadResponse = true;
-    //
-    //         ar = (AsyncResult)msg.obj;
-    //         data = (byte[])ar.result;
-    //
-    //         if (ar.exception != null) {
-    //             break;
-    //         }
-    //
-    //         parseEfSpdi(data);
-    //     break;
-    //
-    //     case EVENT_UPDATE_DONE:
-    //         ar = (AsyncResult)msg.obj;
-    //         if (ar.exception != null) {
-    //             logw("update failed. ", ar.exception);
-    //         }
-    //     break;
-    //
-    //     case EVENT_GET_PNN_DONE:
-    //         isRecordLoadResponse = true;
-    //
-    //         ar = (AsyncResult)msg.obj;
-    //         data = (byte[])ar.result;
-    //
-    //         if (ar.exception != null) {
-    //             break;
-    //         }
-    //
-    //         SimTlv tlv = new SimTlv(data, 0, data.length);
-    //
-    //         for ( ; tlv.isValidObject() ; tlv.nextObject()) {
-    //             if (tlv.getTag() == TAG_FULL_NETWORK_NAME) {
-    //                 mPnnHomeName
-    //                     = IccUtils.networkNameToString(
-    //                         tlv.getData(), 0, tlv.getData().length);
-    //                 break;
-    //             }
-    //         }
-    //     break;
-    //
-    //     case EVENT_GET_ALL_SMS_DONE:
-    //         isRecordLoadResponse = true;
-    //
-    //         ar = (AsyncResult)msg.obj;
-    //         if (ar.exception != null)
-    //             break;
-    //
-    //         handleSmses((ArrayList<byte []>) ar.result);
-    //         break;
-    //
-    //     case EVENT_MARK_SMS_READ_DONE:
-    //         Rlog.i("ENF", "marked read: sms " + msg.arg1);
-    //         break;
-    //
-    //     case EVENT_GET_SMS_DONE:
-    //         isRecordLoadResponse = false;
-    //         ar = (AsyncResult)msg.obj;
-    //         if (ar.exception == null) {
-    //             handleSms((byte[])ar.result);
-    //         } else {
-    //             loge("Error on GET_SMS with exp " + ar.exception);
-    //         }
-    //         break;
-    //     case EVENT_GET_SST_DONE:
-    //         isRecordLoadResponse = true;
-    //
-    //         ar = (AsyncResult)msg.obj;
-    //         data = (byte[])ar.result;
-    //
-    //         if (ar.exception != null) {
-    //             break;
-    //         }
-    //
-    //         mUsimServiceTable = new UsimServiceTable(data);
-    //         if (DBG) log("SST: " + mUsimServiceTable);
-    //         break;
-    //
-    //     case EVENT_GET_INFO_CPHS_DONE:
-    //         isRecordLoadResponse = true;
-    //
-    //         ar = (AsyncResult)msg.obj;
-    //
-    //         if (ar.exception != null) {
-    //             break;
-    //         }
-    //
-    //         mCphsInfo = (byte[])ar.result;
-    //
-    //         if (DBG) log("iCPHS: " + IccUtils.bytesToHexString(mCphsInfo));
-    //     break;
-    //
-    //     case EVENT_SET_MBDN_DONE:
-    //         isRecordLoadResponse = false;
-    //         ar = (AsyncResult)msg.obj;
-    //
-    //         if (DBG) log("EVENT_SET_MBDN_DONE ex:" + ar.exception);
-    //         if (ar.exception == null) {
-    //             mVoiceMailNum = mNewVoiceMailNum;
-    //             mVoiceMailTag = mNewVoiceMailTag;
-    //         }
-    //
-    //         if (isCphsMailboxEnabled()) {
-    //             adn = new AdnRecord(mVoiceMailTag, mVoiceMailNum);
-    //             Message onCphsCompleted = (Message) ar.userObj;
-    //
-    //             /* write to cphs mailbox whenever it is available but
-    //             * we only need notify caller once if both updating are
-    //             * successful.
-    //             *
-    //             * so if set_mbdn successful, notify caller here and set
-    //             * onCphsCompleted to null
-    //             */
-    //             if (ar.exception == null && ar.userObj != null) {
-    //                 AsyncResult.forMessage(((Message) ar.userObj)).exception
-    //                         = null;
-    //                 ((Message) ar.userObj).sendToTarget();
-    //
-    //                 if (DBG) log("Callback with MBDN successful.");
-    //
-    //                 onCphsCompleted = null;
-    //             }
-    //
-    //             new AdnRecordLoader(mFh).
-    //                     updateEF(adn, EF_MAILBOX_CPHS, EF_EXT1, 1, null,
-    //                     obtainMessage(EVENT_SET_CPHS_MAILBOX_DONE,
-    //                             onCphsCompleted));
-    //         } else {
-    //             if (ar.userObj != null) {
-    //                 Resources resource = Resources.getSystem();
-    //                 if (ar.exception != null && resource.getBoolean(com.android.internal.
-    //                             R.bool.editable_voicemailnumber)) {
-    //                     // GSMPhone will store vm number on device
-    //                     // when IccVmNotSupportedException occurred
-    //                     AsyncResult.forMessage(((Message) ar.userObj)).exception
-    //                         = new IccVmNotSupportedException(
-    //                                 "Update SIM voice mailbox error");
-    //                 } else {
-    //                     AsyncResult.forMessage(((Message) ar.userObj)).exception
-    //                         = ar.exception;
-    //                 }
-    //                 ((Message) ar.userObj).sendToTarget();
-    //             }
-    //         }
-    //         break;
-    //     case EVENT_SET_CPHS_MAILBOX_DONE:
-    //         isRecordLoadResponse = false;
-    //         ar = (AsyncResult)msg.obj;
-    //         if(ar.exception == null) {
-    //             mVoiceMailNum = mNewVoiceMailNum;
-    //             mVoiceMailTag = mNewVoiceMailTag;
-    //         } else {
-    //             if (DBG) log("Set CPHS MailBox with exception: "
-    //                     + ar.exception);
-    //         }
-    //         if (ar.userObj != null) {
-    //             if (DBG) log("Callback with CPHS MB successful.");
-    //             AsyncResult.forMessage(((Message) ar.userObj)).exception
-    //                     = ar.exception;
-    //             ((Message) ar.userObj).sendToTarget();
-    //         }
-    //         break;
-    //     case EVENT_GET_CFIS_DONE:
-    //         isRecordLoadResponse = true;
-    //
-    //         ar = (AsyncResult)msg.obj;
-    //         data = (byte[])ar.result;
-    //
-    //         if (ar.exception != null) {
-    //             break;
-    //         }
-    //
-    //         log("EF_CFIS: " + IccUtils.bytesToHexString(data));
-    //
-    //         if (validEfCfis(data)) {
-    //             mEfCfis = data;
-    //
-    //             // Refer TS 51.011 Section 10.3.46 for the content description
-    //             mCallForwardingEnabled = ((data[1] & 0x01) != 0);
-    //             log("EF_CFIS: callForwardingEnabled=" + mCallForwardingEnabled);
-    //
-    //             mRecordsEventsRegistrants.notifyResult(EVENT_CFI);
-    //         } else {
-    //             log("EF_CFIS: invalid data=" + IccUtils.bytesToHexString(data));
-    //         }
-    //         break;
-    //
-    //     case EVENT_GET_CSP_CPHS_DONE:
-    //         isRecordLoadResponse = true;
-    //
-    //         ar = (AsyncResult)msg.obj;
-    //
-    //         if (ar.exception != null) {
-    //             loge("Exception in fetching EF_CSP data " + ar.exception);
-    //             break;
-    //         }
-    //
-    //         data = (byte[])ar.result;
-    //
-    //         log("EF_CSP: " + IccUtils.bytesToHexString(data));
-    //         handleEfCspData(data);
-    //         break;
-    //
-    //     case EVENT_GET_GID1_DONE:
-    //         isRecordLoadResponse = true;
-    //
-    //         ar = (AsyncResult)msg.obj;
-    //         data =(byte[])ar.result;
-    //
-    //         if (ar.exception != null) {
-    //             loge("Exception in get GID1 " + ar.exception);
-    //             mGid1 = null;
-    //             break;
-    //         }
-    //         mGid1 = IccUtils.bytesToHexString(data);
-    //         log("GID1: " + mGid1);
-    //
-    //         break;
-    //
-    //     default:
-    //         super.handleMessage(msg);   // IccRecords handles generic record load responses
-    //
+    AutoPtr<AsyncResult> ar;
+    AutoPtr<AdnRecord> adn;
+
+    AutoPtr<ArrayOf<Byte> > data;
+
+    Boolean isRecordLoadResponse = FALSE;
+
+    Int32 what = 0;
+    msg->GetWhat(&what);
+    if (mDestroyed.Get()) {
+        assert(0 && "TODO");
+        // Loge(String("Received message ") + msg +
+        //     String("[") + what + String("] ") +
+        //     String(" while being destroyed. Ignoring."));
+        return NOERROR;
+    }
+
+    AutoPtr<IInterface> obj;
+    msg->GetObj((IInterface**)&obj);
+    Int32 arg1 = 0;
+    msg->GetArg1(&arg1);
+    AutoPtr<IIccUtils> iccu;
+    CIccUtils::AcquireSingleton((IIccUtils**)&iccu);
+    // try {
+    switch (what) {
+        case EVENT_APP_READY: {
+            OnReady();
+            break;
+        }
+        case EVENT_APP_LOCKED: {
+            OnLocked();
+            break;
+        }
+        /* IO events */
+        case EVENT_GET_IMSI_DONE: {
+            isRecordLoadResponse = TRUE;
+
+            ar = (AsyncResult*)(IObject*)obj.Get();
+
+            if (ar->mException != NULL) {
+                assert(0 && "TODO");
+                // Loge(String("Exception querying IMSI, Exception:") + ar->mException);
+                break;
+            }
+
+            ICharSequence::Probe(ar->mResult)->ToString(&mImsi);
+
+            // IMSI (MCC+MNC+MSIN) is at least 6 digits, but not more
+            // than 15 (and usually 15).
+            if (!mImsi.IsNull() && (mImsi.GetLength() < 6 || mImsi.GetLength() > 15)) {
+                Loge(String("invalid IMSI ") + mImsi);
+                mImsi = String(NULL);
+            }
+
+            Log(String("IMSI: mMncLength=") + StringUtils::ToString(mMncLength));
+            Log(String("IMSI: ") + mImsi.Substring(0, 6) + String("xxxxxxx"));
+
+            if (((mMncLength == UNKNOWN) || (mMncLength == 2)) &&
+                    ((!mImsi.IsNull()) && (mImsi.GetLength() >= 6))) {
+                String mccmncCode = mImsi.Substring(0, 6);
+                for (Int32 i = 0; i < MCCMNC_CODES_HAVING_3DIGITS_MNC->GetLength(); i++) {
+                    String mccmnc = (*MCCMNC_CODES_HAVING_3DIGITS_MNC)[i];
+                    if (mccmnc.Equals(mccmncCode)) {
+                        mMncLength = 3;
+                        Log(String("IMSI: setting1 mMncLength=") + StringUtils::ToString(mMncLength));
+                        break;
+                    }
+                }
+            }
+
+            if (mMncLength == UNKNOWN) {
+                // the SIM has told us all it knows, but it didn't know the mnc length.
+                // guess using the mcc
+                // try {
+                    Int32 mcc = StringUtils::ParseInt32(mImsi.Substring(0,3));
+                    mMncLength = MccTable::SmallestDigitsMccForMnc(mcc);
+                    Log(String("setting2 mMncLength=") + StringUtils::ToString(mMncLength));
+                // } catch (NumberFormatException e) {
+                //     mMncLength = UNKNOWN;
+                //     loge("Corrupt IMSI! setting3 mMncLength=" + mMncLength);
+                // }
+            }
+
+            AutoPtr<IUICCConfig> uicc;
+            mParentApp->GetUICCConfig((IUICCConfig**)&uicc);
+            uicc->SetImsi(mImsi);
+            if (mMncLength == UNKNOWN || mMncLength == UNINITIALIZED) {
+                // We need to default to something that seems common
+                uicc->SetMncLength(3);
+            }
+            else {
+                uicc->SetMncLength(mMncLength);
+            }
+
+            if (mMncLength != UNKNOWN && mMncLength != UNINITIALIZED) {
+                Log(String("update mccmnc=") + mImsi.Substring(0, 3 + mMncLength));
+                // finally have both the imsi and the mncLength and can parse the imsi properly
+                MccTable::UpdateMccMncConfiguration(mContext,
+                        mImsi.Substring(0, 3 + mMncLength), FALSE);
+            }
+            mImsiReadyRegistrants->NotifyRegistrants();
+        break;
+        }
+        case EVENT_GET_MBI_DONE: {
+            Boolean isValidMbdn;
+            isRecordLoadResponse = TRUE;
+
+            ar = (AsyncResult*)(IObject*)obj.Get();
+            assert(0 && "TODO");
+            // data = (ArrayOf<Byte>*) ar->mResult;
+
+            isValidMbdn = FALSE;
+            if (ar->mException == NULL) {
+                // Refer TS 51.011 Section 10.3.44 for content details
+                String str;
+                iccu->BytesToHexString(data, &str);
+                Log(String("EF_MBI: ") + str);
+
+                // Voice mail record number stored first
+                mMailboxIndex = (*data)[0] & 0xff;
+
+                // check if dailing numbe id valid
+                if (mMailboxIndex != 0 && mMailboxIndex != 0xff) {
+                    Log(String("Got valid mailbox number for MBDN"));
+                    isValidMbdn = TRUE;
+                }
+            }
+
+            // one more record to load
+            mRecordsToLoad += 1;
+
+            if (isValidMbdn) {
+                // Note: MBDN was not included in NUM_OF_SIM_RECORDS_LOADED
+                AutoPtr<IAdnRecordLoader> loader;
+                CAdnRecordLoader::New(mFh, (IAdnRecordLoader**)&loader);
+                AutoPtr<IMessage> msg;
+                ObtainMessage(EVENT_GET_MBDN_DONE, (IMessage**)&msg);
+                loader->LoadFromEF(EF_MBDN, EF_EXT6,
+                        mMailboxIndex, msg);
+            }
+            else {
+                // If this EF not present, try mailbox as in CPHS standard
+                // CPHS (CPHS4_2.WW6) is a european standard.
+                AutoPtr<IAdnRecordLoader> loader;
+                CAdnRecordLoader::New(mFh, (IAdnRecordLoader**)&loader);
+                AutoPtr<IMessage> msg;
+                ObtainMessage(EVENT_GET_CPHS_MAILBOX_DONE, (IMessage**)&msg);
+                loader->LoadFromEF(EF_MAILBOX_CPHS,
+                        EF_EXT1, 1,
+                        msg);
+            }
+
+            break;
+        }
+        case EVENT_GET_CPHS_MAILBOX_DONE:
+        case EVENT_GET_MBDN_DONE: {
+            //Resetting the voice mail number and voice mail tag to NULL
+            //as these should be updated from the data read from EF_MBDN.
+            //If they are not reset, incase of invalid data/exception these
+            //variables are retaining their previous values and are
+            //causing invalid voice mailbox info display to user.
+            mVoiceMailNum = NULL;
+            mVoiceMailTag = NULL;
+            isRecordLoadResponse = TRUE;
+
+            ar = (AsyncResult*)(IObject*)obj.Get();
+
+            if (ar->mException != NULL) {
+
+                Log(String("Invalid or missing EF")
+                    + ((what == EVENT_GET_CPHS_MAILBOX_DONE) ? String("[MAILBOX]") : String("[MBDN]")));
+
+                // Bug #645770 fall back to CPHS
+                // FIXME should use SST to decide
+
+                if (what == EVENT_GET_MBDN_DONE) {
+                    //load CPHS on fail...
+                    // FIXME right now, only load line1's CPHS voice mail entry
+
+                    mRecordsToLoad += 1;
+                    AutoPtr<IAdnRecordLoader> loader;
+                    CAdnRecordLoader::New(mFh, (IAdnRecordLoader**)&loader);
+                    AutoPtr<IMessage> msg;
+                    ObtainMessage(EVENT_GET_CPHS_MAILBOX_DONE, (IMessage**)&msg);
+                    loader->LoadFromEF(
+                            EF_MAILBOX_CPHS, EF_EXT1, 1,
+                            msg);
+                }
+                break;
+            }
+
+            adn = (AdnRecord*)IAdnRecord::Probe(ar->mResult);
+
+            assert(0 && "TODO");
+            // Log(String("VM: ") + adn +
+            //         ((what == EVENT_GET_CPHS_MAILBOX_DONE) ? String(" EF[MAILBOX]") : String(" EF[MBDN]")));
+
+            Boolean bEmp = FALSE;
+            adn->IsEmpty(&bEmp);
+            if (bEmp && what == EVENT_GET_MBDN_DONE) {
+                // Bug #645770 fall back to CPHS
+                // FIXME should use SST to decide
+                // FIXME right now, only load line1's CPHS voice mail entry
+                mRecordsToLoad += 1;
+                AutoPtr<IAdnRecordLoader> loader;
+                CAdnRecordLoader::New(mFh, (IAdnRecordLoader**)&loader);
+                AutoPtr<IMessage> msg;
+                ObtainMessage(EVENT_GET_CPHS_MAILBOX_DONE, (IMessage**)&msg);
+                loader->LoadFromEF(
+                        EF_MAILBOX_CPHS, EF_EXT1, 1,
+                        msg);
+
+                break;
+            }
+
+            adn->GetNumber(&mVoiceMailNum);
+            adn->GetAlphaTag(&mVoiceMailTag);
+        break;
+        }
+        case EVENT_GET_MSISDN_DONE: {
+            isRecordLoadResponse = TRUE;
+
+            ar = (AsyncResult*)(IObject*)obj.Get();
+
+            if (ar->mException != NULL) {
+                Log(String("Invalid or missing EF[MSISDN]"));
+                break;
+            }
+
+            adn = (AdnRecord*)IAdnRecord::Probe(ar->mResult);
+
+            adn->GetNumber(&mMsisdn);
+            adn->GetAlphaTag(&mMsisdnTag);
+
+            Log(String("MSISDN: ") + /*mMsisdn*/ String("xxxxxxx"));
+        break;
+        }
+        case EVENT_SET_MSISDN_DONE: {
+            isRecordLoadResponse = FALSE;
+            ar = (AsyncResult*)(IObject*)obj.Get();
+
+            if (ar->mUserObj != NULL) {
+                AsyncResult::ForMessage(IMessage::Probe(ar->mUserObj))->mException
+                        = ar->mException;
+                IMessage::Probe(ar->mUserObj)->SendToTarget();
+            }
+            break;
+        }
+        case EVENT_GET_MWIS_DONE: {
+            isRecordLoadResponse = TRUE;
+
+            ar = (AsyncResult*)(IObject*)obj.Get();
+            assert(0 && "TODO");
+            // data = (ArrayOf<Byte>*)ar->mResult;
+
+            if (DBG) {
+                String str;
+                iccu->BytesToHexString(data, &str);
+                Log(String("EF_MWIS : ") + str);
+            }
+
+            if (ar->mException != NULL) {
+                if (DBG) {
+                    assert(0 && "TODO");
+                    // Log(String("EVENT_GET_MWIS_DONE exception = ")
+                    //     + ar->mException);
+                }
+                break;
+            }
+
+            if (((*data)[0] & 0xff) == 0xff) {
+                if (DBG) Log(String("SIMRecords: Uninitialized record MWIS"));
+                break;
+            }
+
+            mEfMWIS = data;
+            break;
+        }
+        case EVENT_GET_VOICE_MAIL_INDICATOR_CPHS_DONE: {
+            isRecordLoadResponse = TRUE;
+
+            ar = (AsyncResult*)(IObject*)obj.Get();
+            assert(0 && "TODO");
+            // data = (ArrayOf<Byte>*)ar->mResult;
+
+            if (DBG) {
+                String str;
+                iccu->BytesToHexString(data, &str);
+                Log(String("EF_CPHS_MWI: ") + str);
+            }
+
+            if (ar->mException != NULL) {
+                if (DBG) {
+                    assert(0 && "TODO");
+                    // Log(String("EVENT_GET_VOICE_MAIL_INDICATOR_CPHS_DONE exception = ")
+                    //     + ar->mException);
+                }
+                break;
+            }
+
+            mEfCPHS_MWI = data;
+            break;
+        }
+        case EVENT_GET_ICCID_DONE: {
+            isRecordLoadResponse = TRUE;
+
+            ar = (AsyncResult*)(IObject*)obj.Get();
+            assert(0 && "TODO");
+            // data = (ArrayOf<Byte>*)ar->mResult;
+
+            if (ar->mException != NULL) {
+                break;
+            }
+
+            iccu->BcdToString(data, 0, data->GetLength(), &mIccId);
+
+            Log(String("iccid: ") + mIccId);
+
+        break;
+        }
+        case EVENT_GET_AD_DONE: {
+            // try {
+                isRecordLoadResponse = TRUE;
+
+                ar = (AsyncResult*)(IObject*)obj.Get();
+                assert(0 && "TODO");
+                // data = (ArrayOf<Byte>*)ar->mResult;
+
+                if (ar->mException != NULL) {
+                    break;
+                }
+
+                String str;
+                iccu->BytesToHexString(data, &str);
+                Log(String("EF_AD: ") + str);
+
+                if (data->GetLength() < 3) {
+                    Log(String("Corrupt AD data on SIM"));
+                    break;
+                }
+
+                if (data->GetLength() == 3) {
+                    Log(String("MNC length not present in EF_AD"));
+                    break;
+                }
+
+                mMncLength = (*data)[3] & 0xf;
+                Log(String("setting4 mMncLength=") + StringUtils::ToString(mMncLength));
+
+                if (mMncLength == 0xf) {
+                    mMncLength = UNKNOWN;
+                    Log(String("setting5 mMncLength=") + StringUtils::ToString(mMncLength));
+                }
+                else {
+                    AutoPtr<IUICCConfig> uicc;
+                    mParentApp->GetUICCConfig((IUICCConfig**)&uicc);
+                    uicc->SetMncLength(mMncLength);
+                }
+
+            // } finally {
+                if (((mMncLength == UNINITIALIZED) || (mMncLength == UNKNOWN) ||
+                        (mMncLength == 2)) && ((mImsi != NULL) && (mImsi.GetLength() >= 6))) {
+                    String mccmncCode = mImsi.Substring(0, 6);
+                    Log(String("mccmncCode=") + mccmncCode);
+                    for (Int32 i = 0; i < MCCMNC_CODES_HAVING_3DIGITS_MNC->GetLength(); i++) {
+                        String mccmnc = (*MCCMNC_CODES_HAVING_3DIGITS_MNC)[i];
+                        if (mccmnc.Equals(mccmncCode)) {
+                            mMncLength = 3;
+                            Log(String("setting6 mMncLength=") + StringUtils::ToString(mMncLength));
+                            break;
+                        }
+                    }
+                }
+
+                if (mMncLength == UNKNOWN || mMncLength == UNINITIALIZED) {
+                    if (!mImsi.IsNull()) {
+                        // try {
+                            Int32 mcc = StringUtils::ParseInt32(mImsi.Substring(0,3));
+
+                            mMncLength = MccTable::SmallestDigitsMccForMnc(mcc);
+                            Log(String("setting7 mMncLength=") + StringUtils::ToString(mMncLength));
+                        // } catch (NumberFormatException e) {
+                        //     mMncLength = UNKNOWN;
+                        //     loge("Corrupt IMSI! setting8 mMncLength=" + mMncLength);
+                        // }
+                    }
+                    else {
+                        // Indicate we got this info, but it didn't contain the length.
+                        mMncLength = UNKNOWN;
+                        Log(String("MNC length not present in EF_AD setting9 mMncLength=") + StringUtils::ToString(mMncLength));
+                    }
+                }
+                if (!mImsi.IsNull() && mMncLength != UNKNOWN) {
+                    // finally have both imsi and the length of the mnc and can parse
+                    // the imsi properly
+                    Log(String("update mccmnc=") + mImsi.Substring(0, 3 + mMncLength));
+                    MccTable::UpdateMccMncConfiguration(mContext,
+                            mImsi.Substring(0, 3 + mMncLength), FALSE);
+                }
+            // }
+        break;
+        }
+        case EVENT_GET_SPN_DONE: {
+            isRecordLoadResponse = TRUE;
+            ar = (AsyncResult*)(IObject*)obj.Get();
+            GetSpnFsm(FALSE, ar);
+        break;
+        }
+        case EVENT_GET_CFF_DONE: {
+            isRecordLoadResponse = TRUE;
+
+            ar = (AsyncResult*)(IObject*)obj.Get();
+            assert(0 && "TODO");
+            // data = (ArrayOf<Byte>*)ar->mResult;
+
+            if (ar->mException != NULL) {
+                break;
+            }
+
+            String str;
+            iccu->BytesToHexString(data, &str);
+            Log(String("EF_CFF_CPHS: ") + str);
+            mEfCff = data;
+
+            // if EF_CFIS is valid, prefer it to EF_CFF_CPHS
+            if (!ValidEfCfis(mEfCfis)) {
+                mCallForwardingEnabled =
+                    (((*data)[0] & CFF_LINE1_MASK) == CFF_UNCONDITIONAL_ACTIVE);
+
+                mRecordsEventsRegistrants->NotifyResult(CoreUtils::Convert(EVENT_CFI));
+            }
+            else {
+                Log(String("EVENT_GET_CFF_DONE: EF_CFIS is valid, ignoring EF_CFF_CPHS"));
+            }
+            break;
+        }
+        case EVENT_GET_SPDI_DONE: {
+            isRecordLoadResponse = TRUE;
+
+            ar = (AsyncResult*)(IObject*)obj.Get();
+            assert(0 && "TODO");
+            // data = (ArrayOf<Byte>*)ar->mResult;
+
+            if (ar->mException != NULL) {
+                break;
+            }
+
+            ParseEfSpdi(data);
+        break;
+        }
+        case EVENT_UPDATE_DONE: {
+            ar = (AsyncResult*)(IObject*)obj.Get();
+            if (ar->mException != NULL) {
+                assert(0 && "TODO");
+                // Logw(String("update failed. "), ar->mException);
+            }
+        break;
+        }
+        case EVENT_GET_PNN_DONE: {
+            isRecordLoadResponse = TRUE;
+
+            ar = (AsyncResult*)(IObject*)obj.Get();
+            assert(0 && "TODO");
+            // data = (ArrayOf<Byte>*)ar->mResult;
+
+            if (ar->mException != NULL) {
+                break;
+            }
+
+            AutoPtr<ISimTlv> tlv;
+            CSimTlv::New(data, 0, data->GetLength(), (ISimTlv**)&tlv);
+
+            Boolean bValid = FALSE, nextObj = FALSE;
+            for ( ; (tlv->IsValidObject(&bValid), bValid); (tlv->NextObject(&nextObj), nextObj)) {
+                Int32 tag = 0;
+                tlv->GetTag(&tag);
+                if (tag == TAG_FULL_NETWORK_NAME) {
+                    AutoPtr<ArrayOf<Byte> > data;
+                    tlv->GetData((ArrayOf<Byte>**)&data);
+                    iccu->NetworkNameToString(
+                        data, 0, data->GetLength(),
+                        &mPnnHomeName);
+                    break;
+                }
+            }
+        break;
+        }
+        case EVENT_GET_ALL_SMS_DONE: {
+            isRecordLoadResponse = TRUE;
+
+            ar = (AsyncResult*)(IObject*)obj.Get();
+            if (ar->mException != NULL)
+                break;
+
+            HandleSmses(IArrayList::Probe(ar->mResult));
+            break;
+        }
+
+        case EVENT_MARK_SMS_READ_DONE: {
+            Logger::I(String("ENF"), String("marked read: sms ") + StringUtils::ToString(arg1));
+            break;
+        }
+
+        case EVENT_GET_SMS_DONE: {
+            isRecordLoadResponse = FALSE;
+            ar = (AsyncResult*)(IObject*)obj.Get();
+            if (ar->mException == NULL) {
+                assert(0 && "TODO");
+                // HandleSms((ArrayOf<Byte>*)ar->mResult);
+            }
+            else {
+                assert(0 && "TODO");
+                // Loge(String("Error on GET_SMS with exp ") + ar->mException);
+            }
+            break;
+        }
+        case EVENT_GET_SST_DONE: {
+            isRecordLoadResponse = TRUE;
+
+            ar = (AsyncResult*)(IObject*)obj.Get();
+            assert(0 && "TODO");
+            // data = (ArrayOf<Byte>*)ar->mResult;
+
+            if (ar->mException != NULL) {
+                break;
+            }
+
+            CUsimServiceTable::New(data, (IUsimServiceTable**)&mUsimServiceTable);
+            if (DBG) {
+                assert(0 && "TODO");
+                // Log(String("SST: ") + mUsimServiceTable);
+            }
+            break;
+        }
+
+        case EVENT_GET_INFO_CPHS_DONE: {
+            isRecordLoadResponse = TRUE;
+
+            ar = (AsyncResult*)(IObject*)obj.Get();
+
+            if (ar->mException != NULL) {
+                break;
+            }
+
+            assert(0 && "TODO");
+            // mCphsInfo = (ArrayOf<Byte>*)ar->mResult;
+
+            if (DBG) {
+                String str;
+                iccu->BytesToHexString(mCphsInfo, &str);
+                Log(String("iCPHS: ") + str);
+            }
+        break;
+        }
+
+        case EVENT_SET_MBDN_DONE: {
+            isRecordLoadResponse = FALSE;
+            ar = (AsyncResult*)(IObject*)obj.Get();
+
+            if (DBG) {
+                assert(0 && "TODO");
+                // Log(String("EVENT_SET_MBDN_DONE ex:") + ar->mException);
+            }
+            if (ar->mException == NULL) {
+                mVoiceMailNum = mNewVoiceMailNum;
+                mVoiceMailTag = mNewVoiceMailTag;
+            }
+
+            if (IsCphsMailboxEnabled()) {
+                CAdnRecord::New(mVoiceMailTag, mVoiceMailNum, (IAdnRecord**)&adn);
+                AutoPtr<IMessage> onCphsCompleted = IMessage::Probe(ar->mUserObj);
+
+                /* write to cphs mailbox whenever it is available but
+                * we only need notify caller once if both updating are
+                * successful.
+                *
+                * so if set_mbdn successful, notify caller here and set
+                * onCphsCompleted to NULL
+                */
+                if (ar->mException == NULL && ar->mUserObj != NULL) {
+                    AsyncResult::ForMessage(IMessage::Probe(ar->mUserObj))->mException
+                            = NULL;
+                    IMessage::Probe(ar->mUserObj)->SendToTarget();
+
+                    if (DBG) Log(String("Callback with MBDN successful."));
+
+                    onCphsCompleted = NULL;
+                }
+
+                AutoPtr<IAdnRecordLoader> loader;
+                CAdnRecordLoader::New(mFh, (IAdnRecordLoader**)&loader);
+                AutoPtr<IMessage> msg;
+                ObtainMessage(EVENT_SET_CPHS_MAILBOX_DONE,
+                                onCphsCompleted, (IMessage**)&msg);
+                loader->UpdateEF(adn, EF_MAILBOX_CPHS, EF_EXT1, 1, String(NULL),
+                        msg);
+            }
+            else {
+                if (ar->mUserObj != NULL) {
+                    AutoPtr<IResourcesHelper> hlp;
+                    CResourcesHelper::AcquireSingleton((IResourcesHelper**)&hlp);
+                    AutoPtr<IResources> resource;
+                    hlp->GetSystem((IResources**)&resource);
+                    Boolean b = FALSE;
+                    resource->GetBoolean(
+                                R::bool_::editable_voicemailnumber, &b);
+                    if (ar->mException != NULL && b) {
+                        // GSMPhone will store vm number on device
+                        // when IccVmNotSupportedException occurred
+                        AutoPtr<IccVmNotSupportedException> p =
+                            new IccVmNotSupportedException(
+                                    String("Update SIM voice mailbox error"));
+                        AsyncResult::ForMessage(IMessage::Probe(ar->mUserObj))->mException
+                            = IThrowable::Probe(p);
+                    }
+                    else {
+                        AsyncResult::ForMessage(IMessage::Probe(ar->mUserObj))->mException
+                            = ar->mException;
+                    }
+                    IMessage::Probe(ar->mUserObj)->SendToTarget();
+                }
+            }
+            break;
+        }
+        case EVENT_SET_CPHS_MAILBOX_DONE: {
+            isRecordLoadResponse = FALSE;
+            ar = (AsyncResult*)(IObject*)obj.Get();
+            if(ar->mException == NULL) {
+                mVoiceMailNum = mNewVoiceMailNum;
+                mVoiceMailTag = mNewVoiceMailTag;
+            }
+            else {
+                if (DBG) {
+                    assert(0 && "TODO");
+                    // Log(String("Set CPHS MailBox with exception: ")
+                    //     + ar->mException);
+                }
+            }
+            if (ar->mUserObj != NULL) {
+                if (DBG) Log(String("Callback with CPHS MB successful."));
+                AsyncResult::ForMessage(IMessage::Probe(ar->mUserObj))->mException
+                        = ar->mException;
+                IMessage::Probe(ar->mUserObj)->SendToTarget();
+            }
+            break;
+        }
+        case EVENT_GET_CFIS_DONE: {
+            isRecordLoadResponse = TRUE;
+
+            ar = (AsyncResult*)(IObject*)obj.Get();
+            assert(0 && "TODO");
+            // data = (ArrayOf<Byte>*)ar->mResult;
+
+            if (ar->mException != NULL) {
+                break;
+            }
+
+            String str;
+            iccu->BytesToHexString(data, &str);
+            Log(String("EF_CFIS: ") + str);
+
+            if (ValidEfCfis(data)) {
+                mEfCfis = data;
+
+                // Refer TS 51.011 Section 10.3.46 for the content description
+                mCallForwardingEnabled = (((*data)[1] & 0x01) != 0);
+                Log(String("EF_CFIS: callForwardingEnabled=") + StringUtils::ToString(mCallForwardingEnabled));
+
+                mRecordsEventsRegistrants->NotifyResult(CoreUtils::Convert(EVENT_CFI));
+            }
+            else {
+                String str;
+                iccu->BytesToHexString(data, &str);
+                Log(String("EF_CFIS: invalid data=") + str);
+            }
+            break;
+        }
+
+        case EVENT_GET_CSP_CPHS_DONE: {
+            isRecordLoadResponse = TRUE;
+
+            ar = (AsyncResult*)(IObject*)obj.Get();
+
+            if (ar->mException != NULL) {
+                assert(0 && "TODO");
+                // Loge(String("Exception in fetching EF_CSP data ") + ar->mException);
+                break;
+            }
+
+            assert(0 && "TODO");
+            // data = (ArrayOf<Byte>*)ar->mResult;
+            String str;
+            iccu->BytesToHexString(data, &str);
+            Log(String("EF_CSP: ") + str);
+            HandleEfCspData(data);
+            break;
+        }
+
+        case EVENT_GET_GID1_DONE: {
+            isRecordLoadResponse = TRUE;
+
+            ar = (AsyncResult*)(IObject*)obj.Get();
+            assert(0 && "TODO");
+            // data =(ArrayOf<Byte>*)ar->mResult;
+
+            if (ar->mException != NULL) {
+                assert(0 && "TODO");
+                // Loge(String("Exception in get GID1 ") + ar->mException);
+                mGid1 = NULL;
+                break;
+            }
+            iccu->BytesToHexString(data, &mGid1);
+            Log(String("GID1: ") + mGid1);
+
+            break;
+        }
+        default: {
+            IccRecords::HandleMessage(msg);   // IccRecords handles generic record load responses
+        }
+    }
+
     // }}catch (RuntimeException exc) {
     //     // I don't want these exceptions to be fatal
     //     logw("Exception parsing SIM record", exc);
     // } finally {
-    //     // Count up record load responses even if they are fails
-    //     if (isRecordLoadResponse) {
-    //         onRecordLoaded();
-    //     }
+        // Count up record load responses even if they are fails
+        if (isRecordLoadResponse) {
+            OnRecordLoaded();
+        }
     // }
-    assert(0);
     return NOERROR;
 }
 
 ECode SIMRecords::HandleSmsOnIcc(
     /* [in] */ AsyncResult* ar)
 {
-    // ==================before translated======================
-    //
-    // int[] index = (int[])ar.result;
-    //
-    // if (ar.exception != null || index.length != 1) {
-    //     loge(" Error on SMS_ON_SIM with exp "
-    //            + ar.exception + " length " + index.length);
-    // } else {
-    //     log("READ EF_SMS RECORD index= " + index[0]);
-    //     mFh.loadEFLinearFixed(EF_SMS,index[0],
-    //                     obtainMessage(EVENT_GET_SMS_DONE));
-    // }
-    assert(0);
+
+    assert(0 && "TODO");
+    AutoPtr<ArrayOf<Int32> > index;// = (ArrayOf<Int32>*)ar->mResult;
+
+    if (ar->mException != NULL || index->GetLength() != 1) {
+        assert(0 && "TODO");
+        // Loge(String(" Error on SMS_ON_SIM with exp ")
+        //        + ar->mException + String(" length ") + StringUtils::ToString(index->GetLength()));
+    }
+    else {
+        Log(String("READ EF_SMS RECORD index= ") + StringUtils::ToString((*index)[0]));
+        AutoPtr<IMessage> msg;
+        ObtainMessage(EVENT_GET_SMS_DONE, (IMessage**)&msg);
+        mFh->LoadEFLinearFixed(EF_SMS, (*index)[0],
+                        msg);
+    }
     return NOERROR;
 }
 
 ECode SIMRecords::OnReady()
 {
-    // ==================before translated======================
-    // fetchSimRecords();
-    assert(0);
+    FetchSimRecords();
     return NOERROR;
 }
 
@@ -1152,37 +1367,53 @@ ECode SIMRecords::GetDisplayRule(
     /* [out] */ Int32* result)
 {
     VALIDATE_NOT_NULL(result);
-    Logger::E("SIMRecords", "TODO GetDisplayRule");
-    *result = SPN_RULE_SHOW_SPN;//TODO
-    // ==================before translated======================
-    // int rule;
-    // if ((mContext != null) && mContext.getResources().getBoolean(
-    //         com.android.internal.R.bool.def_telephony_spn_spec_enabled)) {
-    //     rule = SPN_RULE_SHOW_SPN;
-    //     return rule;
-    // }
-    //
-    // if (mParentApp != null && mParentApp.getUiccCard() != null &&
-    //     mParentApp.getUiccCard().getOperatorBrandOverride() != null) {
-    // // If the operator has been overridden, treat it as the SPN file on the SIM did not exist.
-    //     rule = SPN_RULE_SHOW_PLMN;
-    // } else if (TextUtils.isEmpty(getServiceProviderName()) || mSpnDisplayCondition == -1) {
-    //     // No EF_SPN content was found on the SIM, or not yet loaded.  Just show ONS.
-    //     rule = SPN_RULE_SHOW_PLMN;
-    // } else if (isOnMatchingPlmn(plmn)) {
-    //     rule = SPN_RULE_SHOW_SPN;
-    //     if ((mSpnDisplayCondition & 0x01) == 0x01) {
-    //         // ONS required when registered to HPLMN or PLMN in EF_SPDI
-    //         rule |= SPN_RULE_SHOW_PLMN;
-    //     }
-    // } else {
-    //     rule = SPN_RULE_SHOW_PLMN;
-    //     if ((mSpnDisplayCondition & 0x02) == 0x00) {
-    //         // SPN required if not registered to HPLMN or PLMN in EF_SPDI
-    //         rule |= SPN_RULE_SHOW_SPN;
-    //     }
-    // }
-    // return rule;
+    Int32 rule = 0;
+    if (mContext != NULL) {
+        AutoPtr<IResources> res;
+        mContext->GetResources((IResources**)&res);
+        Boolean b = FALSE;
+        res->GetBoolean(
+            R::bool_::def_telephony_spn_spec_enabled, &b);
+        if (b) {
+            rule = SPN_RULE_SHOW_SPN;
+            *result = rule;
+            return NOERROR;
+        }
+    }
+
+    String name;
+    GetServiceProviderName(&name);
+    if (mParentApp != NULL) {
+        AutoPtr<IUiccCard> card;
+        mParentApp->GetUiccCard((IUiccCard**)&card);
+        if (card != NULL) {
+            String str;
+            card->GetOperatorBrandOverride(&str);
+            if (!str.IsNull()) {
+                // If the operator has been overridden, treat it as the SPN file on the SIM did not exist.
+                rule = SPN_RULE_SHOW_PLMN;
+            }
+        }
+    }
+    else if (TextUtils::IsEmpty(name) || mSpnDisplayCondition == -1) {
+        // No EF_SPN content was found on the SIM, or not yet loaded.  Just show ONS.
+        rule = SPN_RULE_SHOW_PLMN;
+    }
+    else if (IsOnMatchingPlmn(plmn)) {
+        rule = SPN_RULE_SHOW_SPN;
+        if ((mSpnDisplayCondition & 0x01) == 0x01) {
+            // ONS required when registered to HPLMN or PLMN in EF_SPDI
+            rule |= SPN_RULE_SHOW_PLMN;
+        }
+    }
+    else {
+        rule = SPN_RULE_SHOW_PLMN;
+        if ((mSpnDisplayCondition & 0x02) == 0x00) {
+            // SPN required if not registered to HPLMN or PLMN in EF_SPDI
+            rule |= SPN_RULE_SHOW_SPN;
+        }
+    }
+    *result = rule;
     return NOERROR;
 }
 
@@ -1190,9 +1421,7 @@ ECode SIMRecords::IsCspPlmnEnabled(
     /* [out] */ Boolean* result)
 {
     VALIDATE_NOT_NULL(result);
-    // ==================before translated======================
-    // return mCspPlmnEnabled;
-    assert(0);
+    *result = mCspPlmnEnabled;
     return NOERROR;
 }
 
@@ -1201,302 +1430,376 @@ ECode SIMRecords::Dump(
     /* [in] */ IPrintWriter* pw,
     /* [in] */ ArrayOf<String>* args)
 {
-    // ==================before translated======================
-    // pw.println("SIMRecords: " + this);
-    // pw.println(" extends:");
-    // super.dump(fd, pw, args);
-    // pw.println(" mVmConfig=" + mVmConfig);
-    // pw.println(" mSpnOverride=" + mSpnOverride);
-    // pw.println(" mCallForwardingEnabled=" + mCallForwardingEnabled);
-    // pw.println(" mSpnState=" + mSpnState);
-    // pw.println(" mCphsInfo=" + mCphsInfo);
-    // pw.println(" mCspPlmnEnabled=" + mCspPlmnEnabled);
-    // pw.println(" mEfMWIS[]=" + Arrays.toString(mEfMWIS));
-    // pw.println(" mEfCPHS_MWI[]=" + Arrays.toString(mEfCPHS_MWI));
-    // pw.println(" mEfCff[]=" + Arrays.toString(mEfCff));
-    // pw.println(" mEfCfis[]=" + Arrays.toString(mEfCfis));
-    // pw.println(" mSpnDisplayCondition=" + mSpnDisplayCondition);
-    // pw.println(" mSpdiNetworks[]=" + mSpdiNetworks);
-    // pw.println(" mPnnHomeName=" + mPnnHomeName);
-    // pw.println(" mUsimServiceTable=" + mUsimServiceTable);
-    // pw.println(" mGid1=" + mGid1);
-    // pw.flush();
-    assert(0);
+    assert(0 && "TODO");
+    // pw->Println(String("SIMRecords: ") + this);
+    pw->Println(String(" extends:"));
+    IccRecords::Dump(fd, pw, args);
+    // pw->Println(String(" mVmConfig=") + mVmConfig);
+    // pw->Println(String(" mSpnOverride=") + mSpnOverride);
+    pw->Println(String(" mCallForwardingEnabled=") + StringUtils::ToString(mCallForwardingEnabled));
+    // pw->Println(String(" mSpnState=") + mSpnState);
+    pw->Println(String(" mCphsInfo=") + Arrays::ToString(mCphsInfo));
+    pw->Println(String(" mCspPlmnEnabled=") + StringUtils::ToString(mCspPlmnEnabled));
+    pw->Println(String(" mEfMWIS[]=") + Arrays::ToString(mEfMWIS));
+    pw->Println(String(" mEfCPHS_MWI[]=") + Arrays::ToString(mEfCPHS_MWI));
+    pw->Println(String(" mEfCff[]=") + Arrays::ToString(mEfCff));
+    pw->Println(String(" mEfCfis[]=") + Arrays::ToString(mEfCfis));
+    pw->Println(String(" mSpnDisplayCondition=") + StringUtils::ToString(mSpnDisplayCondition));
+    // pw->Println(String(" mSpdiNetworks[]=") + mSpdiNetworks);
+    pw->Println(String(" mPnnHomeName=") + mPnnHomeName);
+    // pw->Println(String(" mUsimServiceTable=") + mUsimServiceTable);
+    pw->Println(String(" mGid1=") + mGid1);
+    IFlushable::Probe(pw)->Flush();
     return NOERROR;
 }
 
 ECode SIMRecords::Finalize()
 {
-    // ==================before translated======================
-    // if(DBG) log("finalized");
-    assert(0);
+    if (DBG) Log(String("finalized"));
     return NOERROR;
 }
 
 void SIMRecords::ResetRecords()
 {
-    // ==================before translated======================
-    // mImsi = null;
-    // mMsisdn = null;
-    // mVoiceMailNum = null;
-    // mMncLength = UNINITIALIZED;
-    // log("setting0 mMncLength" + mMncLength);
-    // mIccId = null;
-    // // -1 means no EF_SPN found; treat accordingly.
-    // mSpnDisplayCondition = -1;
-    // mEfMWIS = null;
-    // mEfCPHS_MWI = null;
-    // mSpdiNetworks = null;
-    // mPnnHomeName = null;
-    // mGid1 = null;
-    //
-    // mAdnCache.reset();
-    //
-    // log("SIMRecords: onRadioOffOrNotAvailable set 'gsm.sim.operator.numeric' to operator=null");
-    // log("update icc_operator_numeric=" + null);
-    // setSystemProperty(PROPERTY_ICC_OPERATOR_NUMERIC, null);
-    // setSystemProperty(PROPERTY_ICC_OPERATOR_ALPHA, null);
-    // setSystemProperty(PROPERTY_ICC_OPERATOR_ISO_COUNTRY, null);
-    // mParentApp.getUICCConfig().setImsi(mImsi);
-    // mParentApp.getUICCConfig().setMncLength(mMncLength);
-    //
-    // // recordsRequested is set to false indicating that the SIM
-    // // read requests made so far are not valid. This is set to
-    // // true only when fresh set of read requests are made.
-    // mRecordsRequested = false;
-    assert(0);
+    mImsi = NULL;
+    mMsisdn = NULL;
+    mVoiceMailNum = NULL;
+    mMncLength = UNINITIALIZED;
+    Log(String("setting0 mMncLength") + StringUtils::ToString(mMncLength));
+    mIccId = NULL;
+    // -1 means no EF_SPN found; treat accordingly.
+    mSpnDisplayCondition = -1;
+    mEfMWIS = NULL;
+    mEfCPHS_MWI = NULL;
+    mSpdiNetworks = NULL;
+    mPnnHomeName = NULL;
+    mGid1 = NULL;
+
+    mAdnCache->Reset();
+
+    Log(String("SIMRecords: onRadioOffOrNotAvailable set 'gsm.sim.operator.numeric' to operator=NULL"));
+    Log(String("update icc_operator_numeric=") + String(NULL));
+    SetSystemProperty(ITelephonyProperties::PROPERTY_ICC_OPERATOR_NUMERIC, String(NULL));
+    SetSystemProperty(ITelephonyProperties::PROPERTY_ICC_OPERATOR_ALPHA, String(NULL));
+    SetSystemProperty(ITelephonyProperties::PROPERTY_ICC_OPERATOR_ISO_COUNTRY, String(NULL));
+    AutoPtr<IUICCConfig> uicc;
+    mParentApp->GetUICCConfig((IUICCConfig**)&uicc);
+    uicc->SetImsi(mImsi);
+    uicc->SetMncLength(mMncLength);
+
+    // recordsRequested is set to FALSE indicating that the SIM
+    // read requests made so far are not valid. This is set to
+    // true only when fresh set of read requests are made.
+    mRecordsRequested = FALSE;
 }
 
 ECode SIMRecords::HandleFileUpdate(
     /* [in] */ Int32 efid)
 {
-    // ==================before translated======================
-    // switch(efid) {
-    //     case EF_MBDN:
-    //         mRecordsToLoad++;
-    //         new AdnRecordLoader(mFh).loadFromEF(EF_MBDN, EF_EXT6,
-    //                 mMailboxIndex, obtainMessage(EVENT_GET_MBDN_DONE));
-    //         break;
-    //     case EF_MAILBOX_CPHS:
-    //         mRecordsToLoad++;
-    //         new AdnRecordLoader(mFh).loadFromEF(EF_MAILBOX_CPHS, EF_EXT1,
-    //                 1, obtainMessage(EVENT_GET_CPHS_MAILBOX_DONE));
-    //         break;
-    //     case EF_CSP_CPHS:
-    //         mRecordsToLoad++;
-    //         log("[CSP] SIM Refresh for EF_CSP_CPHS");
-    //         mFh.loadEFTransparent(EF_CSP_CPHS,
-    //                 obtainMessage(EVENT_GET_CSP_CPHS_DONE));
-    //         break;
-    //     case EF_FDN:
-    //         if (DBG) log("SIM Refresh called for EF_FDN");
-    //         mParentApp.queryFdn();
-    //     case EF_MSISDN:
-    //         mRecordsToLoad++;
-    //         log("SIM Refresh called for EF_MSISDN");
-    //         new AdnRecordLoader(mFh).loadFromEF(EF_MSISDN, getExtFromEf(EF_MSISDN), 1,
-    //                 obtainMessage(EVENT_GET_MSISDN_DONE));
-    //         break;
-    //     case EF_CFIS:
-    //         mRecordsToLoad++;
-    //         log("SIM Refresh called for EF_CFIS");
-    //         mFh.loadEFLinearFixed(EF_CFIS,
-    //                 1, obtainMessage(EVENT_GET_CFIS_DONE));
-    //         break;
-    //     case EF_CFF_CPHS:
-    //         mRecordsToLoad++;
-    //         log("SIM Refresh called for EF_CFF_CPHS");
-    //         mFh.loadEFTransparent(EF_CFF_CPHS,
-    //                 obtainMessage(EVENT_GET_CFF_DONE));
-    //         break;
-    //     case EF_ADN:
-    //         log("SIM Refresh for EF_ADN");
-    //         mAdnCache.reset();
-    //         break;
-    //     default:
-    //         // For now, fetch all records if this is not a
-    //         // voicemail number.
-    //         // TODO: Handle other cases, instead of fetching all.
-    //         mAdnCache.reset();
-    //         fetchSimRecords();
-    //         break;
-    // }
-    assert(0);
+    switch(efid) {
+        case EF_MBDN: {
+            mRecordsToLoad++;
+            AutoPtr<IAdnRecordLoader> loader;
+            CAdnRecordLoader::New(mFh, (IAdnRecordLoader**)&loader);
+            AutoPtr<IMessage> msg;
+            ObtainMessage(EVENT_GET_MBDN_DONE, (IMessage**)&msg);
+            loader->LoadFromEF(EF_MBDN, EF_EXT6,
+                    mMailboxIndex, msg);
+            break;
+        }
+        case EF_MAILBOX_CPHS: {
+            mRecordsToLoad++;
+            AutoPtr<IAdnRecordLoader> loader;
+            CAdnRecordLoader::New(mFh, (IAdnRecordLoader**)&loader);
+            AutoPtr<IMessage> msg;
+            ObtainMessage(EVENT_GET_CPHS_MAILBOX_DONE, (IMessage**)&msg);
+            loader->LoadFromEF(EF_MAILBOX_CPHS, EF_EXT1,
+                    1, msg);
+            break;
+        }
+        case EF_CSP_CPHS: {
+            mRecordsToLoad++;
+            Log(String("[CSP] SIM Refresh for EF_CSP_CPHS"));
+            AutoPtr<IMessage> msg;
+            ObtainMessage(EVENT_GET_CSP_CPHS_DONE, (IMessage**)&msg);
+            mFh->LoadEFTransparent(EF_CSP_CPHS,
+                    msg);
+            break;
+        }
+        case EF_FDN: {
+            if (DBG) Log(String("SIM Refresh called for EF_FDN"));
+            assert(0 && "TODO");
+            // mParentApp->QueryFdn();
+        }
+        case EF_MSISDN: {
+            mRecordsToLoad++;
+            Log(String("SIM Refresh called for EF_MSISDN"));
+            AutoPtr<IAdnRecordLoader> loader;
+            CAdnRecordLoader::New(mFh, (IAdnRecordLoader**)&loader);
+            AutoPtr<IMessage> msg;
+            ObtainMessage(EVENT_GET_MSISDN_DONE, (IMessage**)&msg);
+            loader->LoadFromEF(EF_MSISDN, GetExtFromEf(EF_MSISDN), 1,
+                    msg);
+            break;
+        }
+        case EF_CFIS: {
+            mRecordsToLoad++;
+            Log(String("SIM Refresh called for EF_CFIS"));
+            AutoPtr<IMessage> msg;
+            ObtainMessage(EVENT_GET_CFIS_DONE, (IMessage**)&msg);
+            mFh->LoadEFLinearFixed(EF_CFIS,
+                    1, msg);
+            break;
+        }
+        case EF_CFF_CPHS: {
+            mRecordsToLoad++;
+            Log(String("SIM Refresh called for EF_CFF_CPHS"));
+            AutoPtr<IMessage> msg;
+            ObtainMessage(EVENT_GET_CFF_DONE, (IMessage**)&msg);
+            mFh->LoadEFTransparent(EF_CFF_CPHS,
+                    msg);
+            break;
+        }
+        case EF_ADN: {
+            Log(String("SIM Refresh for EF_ADN"));
+            mAdnCache->Reset();
+            break;
+        }
+        default:
+            // For now, fetch all records if this is not a
+            // voicemail number.
+            // TODO: Handle other cases, instead of fetching all.
+            mAdnCache->Reset();
+            FetchSimRecords();
+            break;
+    }
     return NOERROR;
 }
 
 ECode SIMRecords::OnRecordLoaded()
 {
-    // ==================before translated======================
-    // // One record loaded successfully or failed, In either case
-    // // we need to update the recordsToLoad count
-    // mRecordsToLoad -= 1;
-    // if (DBG) log("onRecordLoaded " + mRecordsToLoad + " requested: " + mRecordsRequested);
-    //
-    // if (mRecordsToLoad == 0 && mRecordsRequested == true) {
-    //     onAllRecordsLoaded();
-    // } else if (mRecordsToLoad < 0) {
-    //     loge("recordsToLoad <0, programmer error suspected");
-    //     mRecordsToLoad = 0;
-    // }
-    assert(0);
+    // One record loaded successfully or failed, In either case
+    // we need to update the recordsToLoad count
+    mRecordsToLoad -= 1;
+    if (DBG) {
+        Log(String("onRecordLoaded ") + StringUtils::ToString(mRecordsToLoad) +
+            String(" requested: ") + StringUtils::ToString(mRecordsRequested));
+    }
+
+    if (mRecordsToLoad == 0 && mRecordsRequested == TRUE) {
+        OnAllRecordsLoaded();
+    }
+    else if (mRecordsToLoad < 0) {
+        Loge(String("recordsToLoad <0, programmer error suspected"));
+        mRecordsToLoad = 0;
+    }
     return NOERROR;
 }
 
 ECode SIMRecords::OnAllRecordsLoaded()
 {
-    // ==================before translated======================
-    // if (DBG) log("record load complete");
-    //
-    // setLocaleFromUsim();
-    //
-    // if (mParentApp.getState() == AppState.APPSTATE_PIN ||
-    //        mParentApp.getState() == AppState.APPSTATE_PUK) {
-    //     // reset recordsRequested, since sim is not loaded really
-    //     mRecordsRequested = false;
-    //     // lock state, only update language
-    //     return ;
-    // }
-    //
-    // // Some fields require more than one SIM record to set
-    //
-    // String operator = getOperatorNumeric();
-    // if (!TextUtils.isEmpty(operator)) {
-    //     log("onAllRecordsLoaded set 'gsm.sim.operator.numeric' to operator='" +
-    //             operator + "'");
-    //     log("update icc_operator_numeric=" + operator);
-    //     setSystemProperty(PROPERTY_ICC_OPERATOR_NUMERIC, operator);
-    //     final SubscriptionController subController = SubscriptionController.getInstance();
-    //     subController.setMccMnc(operator, subController.getDefaultSmsSubId());
-    // } else {
-    //     log("onAllRecordsLoaded empty 'gsm.sim.operator.numeric' skipping");
-    // }
-    //
-    // if (!TextUtils.isEmpty(mImsi)) {
-    //     log("onAllRecordsLoaded set mcc imsi=" + mImsi);
-    //     setSystemProperty(PROPERTY_ICC_OPERATOR_ISO_COUNTRY,
-    //             MccTable.countryCodeForMcc(Integer.parseInt(mImsi.substring(0,3))));
-    // } else {
-    //     log("onAllRecordsLoaded empty imsi skipping setting mcc");
-    // }
-    //
-    // setVoiceMailByCountry(operator);
-    // setSpnFromConfig(operator);
-    //
-    // mRecordsLoadedRegistrants.notifyRegistrants(
-    //     new AsyncResult(null, null, null));
-    assert(0);
+    if (DBG) {
+        Log(String("record load complete"));
+    }
+
+    SetLocaleFromUsim();
+
+    AppState state;
+    mParentApp->GetState(&state);
+    if (state == APPSTATE_PIN ||
+           state == APPSTATE_PUK) {
+        // reset recordsRequested, since sim is not loaded really
+        mRecordsRequested = FALSE;
+        // lock state, only update language
+        return NOERROR;
+    }
+
+    // Some fields require more than one SIM record to set
+
+    String opt;
+    GetOperatorNumeric(&opt);
+    if (!TextUtils::IsEmpty(opt)) {
+        Log(String("onAllRecordsLoaded set 'gsm.sim.operator.numeric' to operator='") +
+                opt + String("'"));
+        Log(String("update icc_operator_numeric=") + opt);
+        SetSystemProperty(ITelephonyProperties::PROPERTY_ICC_OPERATOR_NUMERIC, opt);
+        AutoPtr<ISubscriptionControllerHelper> hlp;
+        CSubscriptionControllerHelper::AcquireSingleton((ISubscriptionControllerHelper**)&hlp);
+        AutoPtr<ISubscriptionController> subController;
+        hlp->GetInstance((ISubscriptionController**)&subController);
+        Int64 subid = 0;
+        IISub::Probe(subController)->GetDefaultSmsSubId(&subid);
+        Int32 res = 0;
+        subController->SetMccMnc(opt, subid, &res);
+    }
+    else {
+        Log(String("onAllRecordsLoaded empty 'gsm.sim.operator.numeric' skipping"));
+    }
+
+    if (!TextUtils::IsEmpty(mImsi)) {
+        Log(String("onAllRecordsLoaded set mcc imsi=") + mImsi);
+        SetSystemProperty(ITelephonyProperties::PROPERTY_ICC_OPERATOR_ISO_COUNTRY,
+                MccTable::CountryCodeForMcc(StringUtils::ParseInt32(mImsi.Substring(0,3))));
+    }
+    else {
+        Log(String("onAllRecordsLoaded empty imsi skipping setting mcc"));
+    }
+
+    SetVoiceMailByCountry(opt);
+    SetSpnFromConfig(opt);
+
+    AutoPtr<AsyncResult> p = new AsyncResult(NULL, NULL, NULL);
+    mRecordsLoadedRegistrants->NotifyRegistrants(p);
     return NOERROR;
 }
 
 void SIMRecords::FetchSimRecords()
 {
-    // ==================before translated======================
-    // mRecordsRequested = true;
-    //
-    // if (DBG) log("fetchSimRecords " + mRecordsToLoad);
-    //
-    // mCi.getIMSIForApp(mParentApp.getAid(), obtainMessage(EVENT_GET_IMSI_DONE));
-    // mRecordsToLoad++;
-    //
-    // mFh.loadEFTransparent(EF_ICCID, obtainMessage(EVENT_GET_ICCID_DONE));
-    // mRecordsToLoad++;
-    //
-    // // FIXME should examine EF[MSISDN]'s capability configuration
-    // // to determine which is the voice/data/fax line
-    // new AdnRecordLoader(mFh).loadFromEF(EF_MSISDN, getExtFromEf(EF_MSISDN), 1,
-    //             obtainMessage(EVENT_GET_MSISDN_DONE));
-    // mRecordsToLoad++;
-    //
-    // // Record number is subscriber profile
-    // mFh.loadEFLinearFixed(EF_MBI, 1, obtainMessage(EVENT_GET_MBI_DONE));
-    // mRecordsToLoad++;
-    //
-    // mFh.loadEFTransparent(EF_AD, obtainMessage(EVENT_GET_AD_DONE));
-    // mRecordsToLoad++;
-    //
-    // // Record number is subscriber profile
-    // mFh.loadEFLinearFixed(EF_MWIS, 1, obtainMessage(EVENT_GET_MWIS_DONE));
-    // mRecordsToLoad++;
-    //
-    //
-    // // Also load CPHS-style voice mail indicator, which stores
-    // // the same info as EF[MWIS]. If both exist, both are updated
-    // // but the EF[MWIS] data is preferred
-    // // Please note this must be loaded after EF[MWIS]
-    // mFh.loadEFTransparent(
-    //         EF_VOICE_MAIL_INDICATOR_CPHS,
-    //         obtainMessage(EVENT_GET_VOICE_MAIL_INDICATOR_CPHS_DONE));
-    // mRecordsToLoad++;
-    //
-    // // Same goes for Call Forward Status indicator: fetch both
-    // // EF[CFIS] and CPHS-EF, with EF[CFIS] preferred.
-    // mFh.loadEFLinearFixed(EF_CFIS, 1, obtainMessage(EVENT_GET_CFIS_DONE));
-    // mRecordsToLoad++;
-    // mFh.loadEFTransparent(EF_CFF_CPHS, obtainMessage(EVENT_GET_CFF_DONE));
-    // mRecordsToLoad++;
-    //
-    //
-    // getSpnFsm(true, null);
-    //
-    // mFh.loadEFTransparent(EF_SPDI, obtainMessage(EVENT_GET_SPDI_DONE));
-    // mRecordsToLoad++;
-    //
-    // mFh.loadEFLinearFixed(EF_PNN, 1, obtainMessage(EVENT_GET_PNN_DONE));
-    // mRecordsToLoad++;
-    //
-    // mFh.loadEFTransparent(EF_SST, obtainMessage(EVENT_GET_SST_DONE));
-    // mRecordsToLoad++;
-    //
-    // mFh.loadEFTransparent(EF_INFO_CPHS, obtainMessage(EVENT_GET_INFO_CPHS_DONE));
-    // mRecordsToLoad++;
-    //
-    // mFh.loadEFTransparent(EF_CSP_CPHS,obtainMessage(EVENT_GET_CSP_CPHS_DONE));
-    // mRecordsToLoad++;
-    //
-    // mFh.loadEFTransparent(EF_GID1, obtainMessage(EVENT_GET_GID1_DONE));
-    // mRecordsToLoad++;
-    //
-    // loadEfLiAndEfPl();
-    // mFh.getEFLinearRecordSize(EF_SMS, obtainMessage(EVENT_GET_SMS_RECORD_SIZE_DONE));
-    //
-    // // XXX should seek instead of examining them all
-    // if (false) { // XXX
-    //     mFh.loadEFLinearFixedAll(EF_SMS, obtainMessage(EVENT_GET_ALL_SMS_DONE));
-    //     mRecordsToLoad++;
-    // }
-    //
-    // if (CRASH_RIL) {
-    //     String sms = "0107912160130310f20404d0110041007030208054832b0120"
-    //                  + "fffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff"
-    //                  + "fffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff"
-    //                  + "fffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff"
-    //                  + "fffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff"
-    //                  + "ffffffffffffffffffffffffffffff";
-    //     byte[] ba = IccUtils.hexStringToBytes(sms);
-    //
-    //     mFh.updateEFLinearFixed(EF_SMS, 1, ba, null,
-    //                     obtainMessage(EVENT_MARK_SMS_READ_DONE, 1));
-    // }
-    // if (DBG) log("fetchSimRecords " + mRecordsToLoad + " requested: " + mRecordsRequested);
-    assert(0);
+    mRecordsRequested = TRUE;
+
+    if (DBG) Log(String("fetchSimRecords ") + StringUtils::ToString(mRecordsToLoad));
+
+    AutoPtr<IMessage> msg_imsi;
+    ObtainMessage(EVENT_GET_IMSI_DONE, (IMessage**)&msg_imsi);
+    String aid;
+    mParentApp->GetAid(&aid);
+    mCi->GetIMSIForApp(aid, msg_imsi);
+    mRecordsToLoad++;
+
+    AutoPtr<IMessage> msg_iccid;
+    ObtainMessage(EVENT_GET_ICCID_DONE, (IMessage**)&msg_iccid);
+    mFh->LoadEFTransparent(EF_ICCID, msg_iccid);
+    mRecordsToLoad++;
+
+    // FIXME should examine EF[MSISDN]'s capability configuration
+    // to determine which is the voice/data/fax line
+    AutoPtr<IAdnRecordLoader> loader;
+    CAdnRecordLoader::New(mFh, (IAdnRecordLoader**)&loader);
+    AutoPtr<IMessage> msg_msisdn;
+    ObtainMessage(EVENT_GET_MSISDN_DONE, (IMessage**)&msg_msisdn);
+    loader->LoadFromEF(EF_MSISDN, GetExtFromEf(EF_MSISDN), 1,
+                msg_msisdn);
+    mRecordsToLoad++;
+
+    // Record number is subscriber profile
+    AutoPtr<IMessage> msg_mbi;
+    ObtainMessage(EVENT_GET_MBI_DONE, (IMessage**)&msg_mbi);
+    mFh->LoadEFLinearFixed(EF_MBI, 1, msg_mbi);
+    mRecordsToLoad++;
+
+    AutoPtr<IMessage> msg_ad;
+    ObtainMessage(EVENT_GET_AD_DONE, (IMessage**)&msg_ad);
+    mFh->LoadEFTransparent(EF_AD, msg_ad);
+    mRecordsToLoad++;
+
+    // Record number is subscriber profile
+    AutoPtr<IMessage> msg_mwis;
+    ObtainMessage(EVENT_GET_MWIS_DONE, (IMessage**)&msg_mwis);
+    mFh->LoadEFLinearFixed(EF_MWIS, 1, msg_mwis);
+    mRecordsToLoad++;
+
+
+    // Also load CPHS-style voice mail indicator, which stores
+    // the same info as EF[MWIS]. If both exist, both are updated
+    // but the EF[MWIS] data is preferred
+    // Please note this must be loaded after EF[MWIS]
+    AutoPtr<IMessage> msg_cphs;
+    ObtainMessage(EVENT_GET_VOICE_MAIL_INDICATOR_CPHS_DONE, (IMessage**)&msg_cphs);
+    mFh->LoadEFTransparent(
+            EF_VOICE_MAIL_INDICATOR_CPHS,
+            msg_cphs);
+    mRecordsToLoad++;
+
+    // Same goes for Call Forward Status indicator: fetch both
+    // EF[CFIS] and CPHS-EF, with EF[CFIS] preferred.
+    AutoPtr<IMessage> msg_cfis;
+    ObtainMessage(EVENT_GET_CFIS_DONE, (IMessage**)&msg_cfis);
+    mFh->LoadEFLinearFixed(EF_CFIS, 1, msg_cfis);
+    mRecordsToLoad++;
+    AutoPtr<IMessage> msg_cff;
+    ObtainMessage(EVENT_GET_CFF_DONE, (IMessage**)&msg_cff);
+    mFh->LoadEFTransparent(EF_CFF_CPHS, msg_cff);
+    mRecordsToLoad++;
+
+    GetSpnFsm(TRUE, NULL);
+
+    AutoPtr<IMessage> msg_spdi;
+    ObtainMessage(EVENT_GET_SPDI_DONE, (IMessage**)&msg_spdi);
+    mFh->LoadEFTransparent(EF_SPDI, msg_spdi);
+    mRecordsToLoad++;
+
+    AutoPtr<IMessage> msg_pnn;
+    ObtainMessage(EVENT_GET_PNN_DONE, (IMessage**)&msg_pnn);
+    mFh->LoadEFLinearFixed(EF_PNN, 1, msg_pnn);
+    mRecordsToLoad++;
+
+    AutoPtr<IMessage> msg_sst;
+    ObtainMessage(EVENT_GET_SST_DONE, (IMessage**)&msg_sst);
+    mFh->LoadEFTransparent(EF_SST, msg_sst);
+    mRecordsToLoad++;
+
+    AutoPtr<IMessage> msg_info_cphs;
+    ObtainMessage(EVENT_GET_INFO_CPHS_DONE, (IMessage**)&msg_info_cphs);
+    mFh->LoadEFTransparent(EF_INFO_CPHS, msg_info_cphs);
+    mRecordsToLoad++;
+
+    AutoPtr<IMessage> msg_csp_cphs;
+    ObtainMessage(EVENT_GET_CSP_CPHS_DONE, (IMessage**)&msg_csp_cphs);
+    mFh->LoadEFTransparent(EF_CSP_CPHS, msg_csp_cphs);
+    mRecordsToLoad++;
+
+    AutoPtr<IMessage> msg_gid1;
+    ObtainMessage(EVENT_GET_GID1_DONE, (IMessage**)&msg_gid1);
+    mFh->LoadEFTransparent(EF_GID1, msg_gid1);
+    mRecordsToLoad++;
+
+    LoadEfLiAndEfPl();
+    AutoPtr<IMessage> msg_record;
+    ObtainMessage(EVENT_GET_SMS_RECORD_SIZE_DONE, (IMessage**)&msg_record);
+    mFh->GetEFLinearRecordSize(EF_SMS, msg_record);
+
+    // XXX should seek instead of examining them all
+    if (FALSE) { // XXX
+        AutoPtr<IMessage> msg_all_sms;
+        ObtainMessage(EVENT_GET_ALL_SMS_DONE, (IMessage**)&msg_all_sms);
+        mFh->LoadEFLinearFixedAll(EF_SMS, msg_all_sms);
+        mRecordsToLoad++;
+    }
+
+    if (CRASH_RIL) {
+        String sms = String("0107912160130310f20404d0110041007030208054832b0120")
+                     + String("fffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff")
+                     + String("fffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff")
+                     + String("fffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff")
+                     + String("fffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff")
+                     + String("ffffffffffffffffffffffffffffff");
+        AutoPtr<IIccUtils> iccu;
+        CIccUtils::AcquireSingleton((IIccUtils**)&iccu);
+        AutoPtr<ArrayOf<Byte> > ba;
+        iccu->HexStringToBytes(sms, (ArrayOf<Byte>**)&ba);
+
+        AutoPtr<IMessage> msg_sms_read;
+        ObtainMessage(EVENT_MARK_SMS_READ_DONE, CoreUtils::Convert(1), (IMessage**)&msg_sms_read);
+        mFh->UpdateEFLinearFixed(EF_SMS, 1, ba, String(NULL),
+                        msg_sms_read);
+    }
+    if (DBG) {
+        Log(String("fetchSimRecords ") + StringUtils::ToString(mRecordsToLoad) +
+            String(" requested: ") + StringUtils::ToString(mRecordsRequested));
+    }
 }
 
 ECode SIMRecords::Log(
     /* [in] */ const String& s)
 {
-    // ==================before translated======================
-    // Rlog.d(LOGTAG, "[SIMRecords] " + s);
-    assert(0);
+    Logger::D(LOGTAG, String("[SIMRecords] ") + s);
     return NOERROR;
 }
 
 ECode SIMRecords::Loge(
     /* [in] */ const String& s)
 {
-    // ==================before translated======================
-    // Rlog.e(LOGTAG, "[SIMRecords] " + s);
-    assert(0);
+    Logger::E(LOGTAG, String("[SIMRecords] ") + s);
     return NOERROR;
 }
 
@@ -1504,17 +1807,13 @@ void SIMRecords::Logw(
     /* [in] */ const String& s)
     ///* [in] */ Throwable* tr)
 {
-    // ==================before translated======================
-    // Rlog.w(LOGTAG, "[SIMRecords] " + s, tr);
-    assert(0);
+    Logger::W(LOGTAG, String("[SIMRecords] ") + s);
 }
 
 void SIMRecords::Logv(
     /* [in] */ const String& s)
 {
-    // ==================before translated======================
-    // Rlog.v(LOGTAG, "[SIMRecords] " + s);
-    assert(0);
+    Logger::V(LOGTAG, String("[SIMRecords] ") + s);
 }
 
 AutoPtr<ArrayOf<String> > SIMRecords::MiddleInitMccmncCodesHaving3digitsMnc()
@@ -1547,231 +1846,256 @@ AutoPtr<ArrayOf<String> > SIMRecords::MiddleInitMccmncCodesHaving3digitsMnc()
 Int32 SIMRecords::GetExtFromEf(
     /* [in] */ Int32 ef)
 {
-    // ==================before translated======================
-    // int ext;
-    // switch (ef) {
-    //     case EF_MSISDN:
-    //         /* For USIM apps use EXT5. (TS 31.102 Section 4.2.37) */
-    //         if (mParentApp.getType() == AppType.APPTYPE_USIM) {
-    //             ext = EF_EXT5;
-    //         } else {
-    //             ext = EF_EXT1;
-    //         }
-    //         break;
-    //     default:
-    //         ext = EF_EXT1;
-    // }
-    // return ext;
-    assert(0);
-    return 0;
+    Int32 ext = 0;
+    switch (ef) {
+        case EF_MSISDN: {
+            /* For USIM apps use EXT5. (TS 31.102 Section 4.2.37) */
+            AppType type;
+            mParentApp->GetType(&type);
+            if (type == APPTYPE_USIM) {
+                ext = EF_EXT5;
+            }
+            else {
+                ext = EF_EXT1;
+            }
+            break;
+        }
+        default:
+            ext = EF_EXT1;
+    }
+    return ext;
 }
 
 Boolean SIMRecords::ValidEfCfis(
     /* [in] */ ArrayOf<Byte>* data)
 {
-    // ==================before translated======================
-    // return ((data != null) && (data[0] >= 1) && (data[0] <= 4));
-    assert(0);
-    return FALSE;
+    return ((data != NULL) && ((*data)[0] >= 1) && ((*data)[0] <= 4));
 }
 
 Int32 SIMRecords::DispatchGsmMessage(
     /* [in] */ ISmsMessage* message)
 {
-    // ==================before translated======================
-    // mNewSmsRegistrants.notifyResult(message);
-    // return 0;
-    assert(0);
+    mNewSmsRegistrants->NotifyResult(message);
     return 0;
 }
 
 void SIMRecords::HandleSms(
     /* [in] */ ArrayOf<Byte>* ba)
 {
-    // ==================before translated======================
-    // if (ba[0] != 0)
-    //     Rlog.d("ENF", "status : " + ba[0]);
-    //
-    // // 3GPP TS 51.011 v5.0.0 (20011-12)  10.5.3
-    // // 3 == "received by MS from network; message to be read"
-    // if (ba[0] == 3) {
-    //     int n = ba.length;
-    //
-    //     // Note: Data may include trailing FF's.  That's OK; message
-    //     // should still parse correctly.
-    //     byte[] pdu = new byte[n - 1];
-    //     System.arraycopy(ba, 1, pdu, 0, n - 1);
-    //     SmsMessage message = SmsMessage.createFromPdu(pdu, SmsConstants.FORMAT_3GPP);
-    //
-    //     dispatchGsmMessage(message);
-    // }
-    assert(0);
+    if ((*ba)[0] != 0) {
+        Logger::D(String("ENF"), String("status : ") + (*ba)[0]);
+    }
+
+    // 3GPP TS 51.011 v5.0.0 (20011-12)  10.5.3
+    // 3 == "received by MS from network; message to be read"
+    if ((*ba)[0] == 3) {
+        Int32 n = ba->GetLength();
+
+        // Note: Data may include trailing FF's.  That's OK; message
+        // should still parse correctly.
+        AutoPtr<ArrayOf<Byte> > pdu = ArrayOf<Byte>::Alloc(n - 1);
+        // System::Arraycopy(ba, 1, pdu, 0, n - 1);
+        pdu->Copy(0, ba, 1, n - 1);
+        AutoPtr<ISmsMessageHelper> hlp;
+        CSmsMessageHelper::AcquireSingleton((ISmsMessageHelper**)&hlp);
+        AutoPtr<ISmsMessage> message;
+        hlp->CreateFromPdu(pdu, ISmsConstants::FORMAT_3GPP, (ISmsMessage**)&message);
+
+        DispatchGsmMessage(message);
+    }
 }
 
 void SIMRecords::HandleSmses(
     /* [in] */ IArrayList/*<ArrayOf<Byte>>*/* messages)
 {
-    // ==================before translated======================
-    // int count = messages.size();
-    //
-    // for (int i = 0; i < count; i++) {
-    //     byte[] ba = messages.get(i);
-    //
-    //     if (ba[0] != 0)
-    //         Rlog.i("ENF", "status " + i + ": " + ba[0]);
-    //
-    //     // 3GPP TS 51.011 v5.0.0 (20011-12)  10.5.3
-    //     // 3 == "received by MS from network; message to be read"
-    //
-    //     if (ba[0] == 3) {
-    //         int n = ba.length;
-    //
-    //         // Note: Data may include trailing FF's.  That's OK; message
-    //         // should still parse correctly.
-    //         byte[] pdu = new byte[n - 1];
-    //         System.arraycopy(ba, 1, pdu, 0, n - 1);
-    //         SmsMessage message = SmsMessage.createFromPdu(pdu, SmsConstants.FORMAT_3GPP);
-    //
-    //         dispatchGsmMessage(message);
-    //
-    //         // 3GPP TS 51.011 v5.0.0 (20011-12)  10.5.3
-    //         // 1 == "received by MS from network; message read"
-    //
-    //         ba[0] = 1;
-    //
-    //         if (false) { // FIXME: writing seems to crash RdoServD
-    //             mFh.updateEFLinearFixed(EF_SMS,
-    //                     i, ba, null, obtainMessage(EVENT_MARK_SMS_READ_DONE, i));
-    //         }
-    //     }
-    // }
-    assert(0);
+    Int32 count = 0;
+    messages->GetSize(&count);
+
+    for (Int32 i = 0; i < count; i++) {
+        AutoPtr<IInterface> p;
+        messages->Get(i, (IInterface**)&p);
+        assert(0 && "TODO");
+        AutoPtr<ArrayOf<Byte> > ba;// = p;
+
+        if ((*ba)[0] != 0) {
+            Logger::I(String("ENF"), String("status ") + StringUtils::ToString(i) +
+                String(": ") + StringUtils::ToString((*ba)[0]));
+        }
+
+        // 3GPP TS 51.011 v5.0.0 (20011-12)  10.5.3
+        // 3 == "received by MS from network; message to be read"
+
+        if ((*ba)[0] == 3) {
+            Int32 n = ba->GetLength();
+
+            // Note: Data may include trailing FF's.  That's OK; message
+            // should still parse correctly.
+            AutoPtr<ArrayOf<Byte> > pdu = ArrayOf<Byte>::Alloc(n - 1);
+            // System::Arraycopy(ba, 1, pdu, 0, n - 1);
+            pdu->Copy(0, ba, 1, n - 1);
+            AutoPtr<ISmsMessageHelper> hlp;
+            CSmsMessageHelper::AcquireSingleton((ISmsMessageHelper**)&hlp);
+            AutoPtr<ISmsMessage> message;
+            hlp->CreateFromPdu(pdu, ISmsConstants::FORMAT_3GPP, (ISmsMessage**)&message);
+
+            DispatchGsmMessage(message);
+
+            // 3GPP TS 51.011 v5.0.0 (20011-12)  10.5.3
+            // 1 == "received by MS from network; message read"
+
+            (*ba)[0] = 1;
+
+            if (FALSE) { // FIXME: writing seems to crash RdoServD
+                AutoPtr<IMessage> msg;
+                ObtainMessage(EVENT_MARK_SMS_READ_DONE, CoreUtils::Convert(i), (IMessage**)&msg);
+                mFh->UpdateEFLinearFixed(EF_SMS,
+                        i, ba, String(NULL), msg);
+            }
+        }
+    }
 }
 
 String SIMRecords::FindBestLanguage(
     /* [in] */ ArrayOf<Byte>* languages)
 {
-    // ==================before translated======================
-    // String bestMatch = null;
-    // String[] locales = mContext.getAssets().getLocales();
-    //
-    // if ((languages == null) || (locales == null)) return null;
-    //
-    // // Each 2-bytes consists of one language
-    // for (int i = 0; (i + 1) < languages.length; i += 2) {
-    //     try {
-    //         String lang = new String(languages, i, 2, "ISO-8859-1");
-    //         if (DBG) log ("languages from sim = " + lang);
-    //         for (int j = 0; j < locales.length; j++) {
-    //             if (locales[j] != null && locales[j].length() >= 2 &&
-    //                     locales[j].substring(0, 2).equalsIgnoreCase(lang)) {
-    //                 return lang;
-    //             }
-    //         }
-    //         if (bestMatch != null) break;
-    //     } catch(java.io.UnsupportedEncodingException e) {
-    //         log ("Failed to parse USIM language records" + e);
-    //     }
-    // }
-    // // no match found. return null
-    // return null;
-    assert(0);
-    return String("");
+    String bestMatch(NULL);
+    AutoPtr<IAssetManager> am;
+    mContext->GetAssets((IAssetManager**)&am);
+    AutoPtr<ArrayOf<String> > locales;
+    am->GetLocales((ArrayOf<String>**)&locales);
+
+    if ((languages == NULL) || (locales == NULL)) return String(NULL);
+
+    // Each 2-bytes consists of one language
+    for (Int32 i = 0; (i + 1) < languages->GetLength(); i += 2) {
+        // try {
+            String lang = String(*languages, i, 2); //, "ISO-8859-1");
+            if (DBG) Log(String("languages from sim = ") + lang);
+            for (Int32 j = 0; j < locales->GetLength(); j++) {
+                if (!((*locales)[j]).IsNull() && (*locales)[j].GetLength() >= 2 &&
+                        (*locales)[j].Substring(0, 2).EqualsIgnoreCase(lang)) {
+                    return lang;
+                }
+            }
+            if (!bestMatch.IsNull()) break;
+        // } catch(java.io.UnsupportedEncodingException e) {
+        //     log ("Failed to parse USIM language records" + e);
+        // }
+    }
+    // no match found. return NULL
+    return String(NULL);
 }
 
 void SIMRecords::SetLocaleFromUsim()
 {
-    // ==================before translated======================
-    // String prefLang = null;
-    // // check EFli then EFpl
-    // prefLang = findBestLanguage(mEfLi);
-    //
-    // if (prefLang == null) {
-    //     prefLang = findBestLanguage(mEfPl);
-    // }
-    //
-    // if (prefLang != null) {
-    //     // check country code from SIM
-    //     String imsi = getIMSI();
-    //     String country = null;
-    //     if (imsi != null) {
-    //         country = MccTable.countryCodeForMcc(
-    //                             Integer.parseInt(imsi.substring(0,3)));
-    //     }
-    //     if (DBG) log("Setting locale to " + prefLang + "_" + country);
-    //     MccTable.setSystemLocale(mContext, prefLang, country);
-    // } else {
-    //     if (DBG) log ("No suitable USIM selected locale");
-    // }
-    assert(0);
+    String prefLang(NULL);
+    // check EFli then EFpl
+    prefLang = FindBestLanguage(mEfLi);
+
+    if (prefLang.IsNull()) {
+        prefLang = FindBestLanguage(mEfPl);
+    }
+
+    if (!prefLang.IsNull()) {
+        // check country code from SIM
+        String imsi;
+        GetIMSI(&imsi);
+        String country(NULL);
+        if (!imsi.IsNull()) {
+            country = MccTable::CountryCodeForMcc(
+                                StringUtils::ParseInt32(imsi.Substring(0,3)));
+        }
+        if (DBG) {
+            Log(String("Setting locale to ") + prefLang +
+                String("_") + country);
+        }
+        MccTable::SetSystemLocale(mContext, prefLang, country);
+    }
+    else {
+        if (DBG) Log(String("No suitable USIM selected locale"));
+    }
 }
 
 void SIMRecords::SetSpnFromConfig(
     /* [in] */ const String& carrier)
 {
-    // ==================before translated======================
-    // if (mSpnOverride.containsCarrier(carrier)) {
-    //     setServiceProviderName(mSpnOverride.getSpn(carrier));
-    //     SystemProperties.set(PROPERTY_ICC_OPERATOR_ALPHA, getServiceProviderName());
-    // }
-    assert(0);
+    Boolean bContain = FALSE;
+    mSpnOverride->ContainsCarrier(carrier, &bContain);
+    if (bContain) {
+        String str;
+        mSpnOverride->GetSpn(carrier, &str);
+        SetServiceProviderName(str);
+        String name;
+        GetServiceProviderName(&name);
+        AutoPtr<ISystemProperties> sp;
+        CSystemProperties::AcquireSingleton((ISystemProperties**)&sp);
+        sp->Set(ITelephonyProperties::PROPERTY_ICC_OPERATOR_ALPHA, name);
+    }
 }
 
 void SIMRecords::SetVoiceMailByCountry(
     /* [in] */ const String& spn)
 {
-    // ==================before translated======================
-    // if (mVmConfig.containsCarrier(spn)) {
-    //     mIsVoiceMailFixed = true;
-    //     mVoiceMailNum = mVmConfig.getVoiceMailNumber(spn);
-    //     mVoiceMailTag = mVmConfig.getVoiceMailTag(spn);
-    // }
-    assert(0);
+    Boolean bContain = FALSE;
+    mVmConfig->ContainsCarrier(spn, &bContain);
+    if (bContain) {
+        mIsVoiceMailFixed = TRUE;
+        mVmConfig->GetVoiceMailNumber(spn, &mVoiceMailNum);
+        mVmConfig->GetVoiceMailTag(spn, &mVoiceMailTag);
+    }
 }
 
 void SIMRecords::OnLocked()
 {
-    // ==================before translated======================
-    // if (DBG) log("only fetch EF_LI and EF_PL in lock state");
-    // loadEfLiAndEfPl();
-    assert(0);
+    if (DBG) Log(String("only fetch EF_LI and EF_PL in lock state"));
+    LoadEfLiAndEfPl();
 }
 
 void SIMRecords::LoadEfLiAndEfPl()
 {
-    // ==================before translated======================
-    // if (mParentApp.getType() == AppType.APPTYPE_USIM) {
-    //     mRecordsRequested = true;
-    //     mFh.loadEFTransparent(EF_LI,
-    //             obtainMessage(EVENT_GET_ICC_RECORD_DONE, new EfUsimLiLoaded()));
-    //     mRecordsToLoad++;
-    //
-    //     mFh.loadEFTransparent(EF_PL,
-    //             obtainMessage(EVENT_GET_ICC_RECORD_DONE, new EfPlLoaded()));
-    //     mRecordsToLoad++;
-    // }
-    assert(0);
+    AppType type;
+    mParentApp->GetType(&type);
+    if (type == APPTYPE_USIM) {
+        AutoPtr<EfUsimLiLoaded> pUsim = new EfUsimLiLoaded(this);
+        AutoPtr<IMessage> msg1;
+        ObtainMessage(EVENT_GET_ICC_RECORD_DONE, (IObject*)pUsim.Get(), (IMessage**)&msg1);
+        mRecordsRequested = TRUE;
+        mFh->LoadEFTransparent(EF_LI, msg1);
+        mRecordsToLoad++;
+
+        AutoPtr<EfPlLoaded> pPl = new EfPlLoaded(this);
+        AutoPtr<IMessage> msg2;
+        ObtainMessage(EVENT_GET_ICC_RECORD_DONE, (IObject*)pPl.Get(), (IMessage**)&msg2);
+        mFh->LoadEFTransparent(EF_PL, msg2);
+        mRecordsToLoad++;
+    }
 }
 
 Boolean SIMRecords::IsOnMatchingPlmn(
     /* [in] */ const String& plmn)
 {
-    // ==================before translated======================
-    // if (plmn == null) return false;
-    //
-    // if (plmn.equals(getOperatorNumeric())) {
-    //     return true;
-    // }
-    //
-    // if (mSpdiNetworks != null) {
-    //     for (String spdiNet : mSpdiNetworks) {
-    //         if (plmn.equals(spdiNet)) {
-    //             return true;
-    //         }
-    //     }
-    // }
-    // return false;
-    assert(0);
+    if (plmn.IsNull()) return FALSE;
+
+    String strNumeric;
+    GetOperatorNumeric(&strNumeric);
+    if (plmn.Equals(strNumeric)) {
+        return TRUE;
+    }
+
+    if (mSpdiNetworks != NULL) {
+        AutoPtr<IIterator> it;
+        mSpdiNetworks->GetIterator((IIterator**)&it);
+        Boolean bHasNext = FALSE;
+        while ((it->HasNext(&bHasNext), bHasNext)) {
+            AutoPtr<IInterface> p;
+            it->GetNext((IInterface**)&p);
+            String spdiNet;
+            ICharSequence::Probe(p)->ToString(&spdiNet);
+            if (plmn.Equals(spdiNet)) {
+                return TRUE;
+            }
+        }
+    }
     return FALSE;
 }
 
@@ -1779,185 +2103,218 @@ void SIMRecords::GetSpnFsm(
     /* [in] */ Boolean start,
     /* [in] */ AsyncResult* ar)
 {
-    // ==================before translated======================
-    // byte[] data;
-    //
-    // if (start) {
-    //     // Check previous state to see if there is outstanding
-    //     // SPN read
-    //     if(mSpnState == GetSpnFsmState.READ_SPN_3GPP ||
-    //        mSpnState == GetSpnFsmState.READ_SPN_CPHS ||
-    //        mSpnState == GetSpnFsmState.READ_SPN_SHORT_CPHS ||
-    //        mSpnState == GetSpnFsmState.INIT) {
-    //         // Set INIT then return so the INIT code
-    //         // will run when the outstanding read done.
-    //         mSpnState = GetSpnFsmState.INIT;
-    //         return;
-    //     } else {
-    //         mSpnState = GetSpnFsmState.INIT;
-    //     }
-    // }
-    //
-    // switch(mSpnState){
-    //     case INIT:
-    //         setServiceProviderName(null);
-    //
-    //         mFh.loadEFTransparent(EF_SPN,
-    //                 obtainMessage(EVENT_GET_SPN_DONE));
-    //         mRecordsToLoad++;
-    //
-    //         mSpnState = GetSpnFsmState.READ_SPN_3GPP;
-    //         break;
-    //     case READ_SPN_3GPP:
-    //         if (ar != null && ar.exception == null) {
-    //             data = (byte[]) ar.result;
-    //             mSpnDisplayCondition = 0xff & data[0];
-    //             setServiceProviderName(IccUtils.adnStringFieldToString(
-    //                     data, 1, data.length - 1));
-    //
-    //             if (DBG) log("Load EF_SPN: " + getServiceProviderName()
-    //                     + " spnDisplayCondition: " + mSpnDisplayCondition);
-    //             setSystemProperty(PROPERTY_ICC_OPERATOR_ALPHA, getServiceProviderName());
-    //
-    //             mSpnState = GetSpnFsmState.IDLE;
-    //         } else {
-    //             mFh.loadEFTransparent( EF_SPN_CPHS,
-    //                     obtainMessage(EVENT_GET_SPN_DONE));
-    //             mRecordsToLoad++;
-    //
-    //             mSpnState = GetSpnFsmState.READ_SPN_CPHS;
-    //
-    //             // See TS 51.011 10.3.11.  Basically, default to
-    //             // show PLMN always, and SPN also if roaming.
-    //             mSpnDisplayCondition = -1;
-    //         }
-    //         break;
-    //     case READ_SPN_CPHS:
-    //         if (ar != null && ar.exception == null) {
-    //             data = (byte[]) ar.result;
-    //             setServiceProviderName(IccUtils.adnStringFieldToString(data, 0, data.length));
-    //
-    //             if (DBG) log("Load EF_SPN_CPHS: " + getServiceProviderName());
-    //             setSystemProperty(PROPERTY_ICC_OPERATOR_ALPHA, getServiceProviderName());
-    //
-    //             mSpnState = GetSpnFsmState.IDLE;
-    //         } else {
-    //             mFh.loadEFTransparent(
-    //                     EF_SPN_SHORT_CPHS, obtainMessage(EVENT_GET_SPN_DONE));
-    //             mRecordsToLoad++;
-    //
-    //             mSpnState = GetSpnFsmState.READ_SPN_SHORT_CPHS;
-    //         }
-    //         break;
-    //     case READ_SPN_SHORT_CPHS:
-    //         if (ar != null && ar.exception == null) {
-    //             data = (byte[]) ar.result;
-    //             setServiceProviderName(IccUtils.adnStringFieldToString(data, 0, data.length));
-    //
-    //             if (DBG) log("Load EF_SPN_SHORT_CPHS: " + getServiceProviderName());
-    //             setSystemProperty(PROPERTY_ICC_OPERATOR_ALPHA, getServiceProviderName());
-    //         }else {
-    //             if (DBG) log("No SPN loaded in either CHPS or 3GPP");
-    //             if (mPnnHomeName != null && mSpn == null) {
-    //                 if (DBG) log("Falling back to home network name for SPN");
-    //                 mSpn = mPnnHomeName;
-    //                 setSystemProperty(PROPERTY_ICC_OPERATOR_ALPHA, mSpn);
-    //                 mRecordsEventsRegistrants.notifyResult(EVENT_SPN);
-    //             }
-    //         }
-    //
-    //         mSpnState = GetSpnFsmState.IDLE;
-    //         break;
-    //     default:
-    //         mSpnState = GetSpnFsmState.IDLE;
-    // }
-    assert(0);
+    AutoPtr<ArrayOf<Byte> > data;
+
+    if (start) {
+        // Check previous state to see if there is outstanding
+        // SPN read
+        if (mSpnState == READ_SPN_3GPP ||
+           mSpnState == READ_SPN_CPHS ||
+           mSpnState == READ_SPN_SHORT_CPHS ||
+           mSpnState == INIT) {
+            // Set INIT then return so the INIT code
+            // will run when the outstanding read done.
+            mSpnState = INIT;
+            return;
+        }
+        else {
+            mSpnState = INIT;
+        }
+    }
+
+    AutoPtr<IIccUtils> iccu;
+    CIccUtils::AcquireSingleton((IIccUtils**)&iccu);
+    switch (mSpnState) {
+        case INIT: {
+            SetServiceProviderName(String(NULL));
+
+            AutoPtr<IMessage> msg;
+            ObtainMessage(EVENT_GET_SPN_DONE, (IMessage**)&msg);
+            mFh->LoadEFTransparent(EF_SPN, msg);
+            mRecordsToLoad++;
+
+            mSpnState = READ_SPN_3GPP;
+            break;
+        }
+        case READ_SPN_3GPP:
+            if (ar != NULL && ar->mException == NULL) {
+                assert(0 && "TODO");
+                // data = (ArrayOf<Byte>*) ar->mResult;
+                mSpnDisplayCondition = 0xff & (*data)[0];
+                String str;
+                iccu->AdnStringFieldToString(
+                        data, 1, data->GetLength() - 1,
+                        &str);
+                SetServiceProviderName(str);
+
+                String name;
+                GetServiceProviderName(&name);
+                if (DBG) {
+                    Log(String("Load EF_SPN: ") + name
+                        + String(" spnDisplayCondition: ") + StringUtils::ToString(mSpnDisplayCondition));
+                }
+                SetSystemProperty(ITelephonyProperties::PROPERTY_ICC_OPERATOR_ALPHA, name);
+
+                mSpnState = IDLE;
+            }
+            else {
+                AutoPtr<IMessage> msg;
+                ObtainMessage(EVENT_GET_SPN_DONE, (IMessage**)&msg);
+                mFh->LoadEFTransparent(EF_SPN_CPHS, msg);
+                mRecordsToLoad++;
+
+                mSpnState = READ_SPN_CPHS;
+
+                // See TS 51.011 10.3.11.  Basically, default to
+                // show PLMN always, and SPN also if roaming.
+                mSpnDisplayCondition = -1;
+            }
+            break;
+        case READ_SPN_CPHS:
+            if (ar != NULL && ar->mException == NULL) {
+                assert(0 && "TODO");
+                // data = (ArrayOf<Byte>*) ar->mResult;
+                String str;
+                iccu->AdnStringFieldToString(data, 0, data->GetLength(), &str);
+                SetServiceProviderName(str);
+
+                String name;
+                GetServiceProviderName(&name);
+                if (DBG) {
+                    Log(String("Load EF_SPN_CPHS: ") + name);
+                }
+                SetSystemProperty(ITelephonyProperties::PROPERTY_ICC_OPERATOR_ALPHA, name);
+
+                mSpnState = IDLE;
+            }
+            else {
+                AutoPtr<IMessage> msg;
+                ObtainMessage(EVENT_GET_SPN_DONE, (IMessage**)&msg);
+                mFh->LoadEFTransparent(
+                        EF_SPN_SHORT_CPHS, msg);
+                mRecordsToLoad++;
+
+                mSpnState = READ_SPN_SHORT_CPHS;
+            }
+            break;
+        case READ_SPN_SHORT_CPHS:
+            if (ar != NULL && ar->mException == NULL) {
+                assert(0 && "TODO");
+                // data = (ArrayOf<Byte>*) ar->mResult;
+                String str;
+                iccu->AdnStringFieldToString(data, 0, data->GetLength(), &str);
+                SetServiceProviderName(str);
+
+                String name;
+                GetServiceProviderName(&name);
+                if (DBG) {
+                    Log(String("Load EF_SPN_SHORT_CPHS: ") + name);
+                }
+                SetSystemProperty(ITelephonyProperties::PROPERTY_ICC_OPERATOR_ALPHA, name);
+            }
+            else {
+                if (DBG) Log(String("No SPN loaded in either CHPS or 3GPP"));
+                if (!mPnnHomeName.IsNull() && mSpn.IsNull()) {
+                    if (DBG) Log(String("Falling back to home network name for SPN"));
+                    mSpn = mPnnHomeName;
+                    SetSystemProperty(ITelephonyProperties::PROPERTY_ICC_OPERATOR_ALPHA, mSpn);
+                    mRecordsEventsRegistrants->NotifyResult(CoreUtils::Convert(EVENT_SPN));
+                }
+            }
+
+            mSpnState = IDLE;
+            break;
+        default:
+            mSpnState = IDLE;
+    }
 }
 
 void SIMRecords::ParseEfSpdi(
     /* [in] */ ArrayOf<Byte>* data)
 {
-    // ==================before translated======================
-    // SimTlv tlv = new SimTlv(data, 0, data.length);
-    //
-    // byte[] plmnEntries = null;
-    //
-    // for ( ; tlv.isValidObject() ; tlv.nextObject()) {
-    //     // Skip SPDI tag, if existant
-    //     if (tlv.getTag() == TAG_SPDI) {
-    //       tlv = new SimTlv(tlv.getData(), 0, tlv.getData().length);
-    //     }
-    //     // There should only be one TAG_SPDI_PLMN_LIST
-    //     if (tlv.getTag() == TAG_SPDI_PLMN_LIST) {
-    //         plmnEntries = tlv.getData();
-    //         break;
-    //     }
-    // }
-    //
-    // if (plmnEntries == null) {
-    //     return;
-    // }
-    //
-    // mSpdiNetworks = new ArrayList<String>(plmnEntries.length / 3);
-    //
-    // for (int i = 0 ; i + 2 < plmnEntries.length ; i += 3) {
-    //     String plmnCode;
-    //     plmnCode = IccUtils.bcdToString(plmnEntries, i, 3);
-    //
-    //     // Valid operator codes are 5 or 6 digits
-    //     if (plmnCode.length() >= 5) {
-    //         log("EF_SPDI network: " + plmnCode);
-    //         mSpdiNetworks.add(plmnCode);
-    //     }
-    // }
-    assert(0);
+    AutoPtr<ISimTlv> tlv;
+    CSimTlv::New(data, 0, data->GetLength(), (ISimTlv**)&tlv);
+
+    AutoPtr<ArrayOf<Byte> > plmnEntries;
+
+    Boolean bValid = FALSE, bNext = FALSE;
+    for ( ; (tlv->IsValidObject(&bValid), bValid); (tlv->NextObject(&bNext), bNext)) {
+        // Skip SPDI tag, if existant
+        Int32 tag = 0;
+        tlv->GetTag(&tag);
+        if (tag == TAG_SPDI) {
+            AutoPtr<ArrayOf<Byte> > data;
+            tlv->GetData((ArrayOf<Byte>**)&data);
+            CSimTlv::New(data, 0, data->GetLength(), (ISimTlv**)&tlv);
+        }
+        // There should only be one TAG_SPDI_PLMN_LIST
+        if (tag == TAG_SPDI_PLMN_LIST) {
+            tlv->GetData((ArrayOf<Byte>**)&plmnEntries);
+            break;
+        }
+    }
+
+    if (plmnEntries == NULL) {
+        return;
+    }
+
+    CArrayList::New(plmnEntries->GetLength() / 3, (IArrayList**)&mSpdiNetworks);
+
+    for (Int32 i = 0; i + 2 < plmnEntries->GetLength(); i += 3) {
+        String plmnCode;
+        AutoPtr<IIccUtils> iccu;
+        CIccUtils::AcquireSingleton((IIccUtils**)&iccu);
+        iccu->BcdToString(plmnEntries, i, 3, &plmnCode);
+
+        // Valid operator codes are 5 or 6 digits
+        if (plmnCode.GetLength() >= 5) {
+            Log(String("EF_SPDI network: ") + plmnCode);
+            mSpdiNetworks->Add(CoreUtils::Convert(plmnCode));
+        }
+    }
 }
 
 Boolean SIMRecords::IsCphsMailboxEnabled()
 {
-    // ==================before translated======================
-    // if (mCphsInfo == null)  return false;
-    // return ((mCphsInfo[1] & CPHS_SST_MBN_MASK) == CPHS_SST_MBN_ENABLED );
-    assert(0);
-    return FALSE;
+    if (mCphsInfo == NULL)  return FALSE;
+    return (((*mCphsInfo)[1] & CPHS_SST_MBN_MASK) == CPHS_SST_MBN_ENABLED );
 }
 
 void SIMRecords::HandleEfCspData(
     /* [in] */ ArrayOf<Byte>* data)
 {
-    // ==================before translated======================
-    // // As per spec CPHS4_2.WW6, CPHS B.4.7.1, EF_CSP contains CPHS defined
-    // // 18 bytes (i.e 9 service groups info) and additional data specific to
-    // // operator. The valueAddedServicesGroup is not part of standard
-    // // services. This is operator specific and can be programmed any where.
-    // // Normally this is programmed as 10th service after the standard
-    // // services.
-    // int usedCspGroups = data.length / 2;
-    // // This is the "Service Group Number" of "Value Added Services Group".
-    // byte valueAddedServicesGroup = (byte)0xC0;
-    //
-    // mCspPlmnEnabled = true;
-    // for (int i = 0; i < usedCspGroups; i++) {
-    //      if (data[2 * i] == valueAddedServicesGroup) {
-    //          log("[CSP] found ValueAddedServicesGroup, value " + data[(2 * i) + 1]);
-    //          if ((data[(2 * i) + 1] & 0x80) == 0x80) {
-    //              // Bit 8 is for
-    //              // "Restriction of menu options for manual PLMN selection".
-    //              // Operator Selection menu should be enabled.
-    //              mCspPlmnEnabled = true;
-    //          } else {
-    //              mCspPlmnEnabled = false;
-    //              // Operator Selection menu should be disabled.
-    //              // Operator Selection Mode should be set to Automatic.
-    //              log("[CSP] Set Automatic Network Selection");
-    //              mNetworkSelectionModeAutomaticRegistrants.notifyRegistrants();
-    //          }
-    //          return;
-    //      }
-    // }
-    //
-    // log("[CSP] Value Added Service Group (0xC0), not found!");
-    assert(0);
+    // As per spec CPHS4_2.WW6, CPHS B.4.7.1, EF_CSP contains CPHS defined
+    // 18 bytes (i.e 9 service groups info) and additional data specific to
+    // operator. The valueAddedServicesGroup is not part of standard
+    // services. This is operator specific and can be programmed any where.
+    // Normally this is programmed as 10th service after the standard
+    // services.
+    Int32 usedCspGroups = data->GetLength() / 2;
+    // This is the "Service Group Number" of "Value Added Services Group".
+    Byte valueAddedServicesGroup = (Byte)0xC0;
+
+    mCspPlmnEnabled = TRUE;
+    for (Int32 i = 0; i < usedCspGroups; i++) {
+         if ((*data)[2 * i] == valueAddedServicesGroup) {
+            Log(String("[CSP] found ValueAddedServicesGroup, value ") + StringUtils::ToString((*data)[(2 * i) + 1]));
+            if (((*data)[(2 * i) + 1] & 0x80) == 0x80) {
+                // Bit 8 is for
+                // "Restriction of menu options for manual PLMN selection".
+                // Operator Selection menu should be enabled.
+                mCspPlmnEnabled = TRUE;
+            }
+            else {
+                mCspPlmnEnabled = FALSE;
+                // Operator Selection menu should be disabled.
+                // Operator Selection Mode should be set to Automatic.
+                Log(String("[CSP] Set Automatic Network Selection"));
+                mNetworkSelectionModeAutomaticRegistrants->NotifyRegistrants();
+            }
+            return;
+        }
+    }
+
+    Log(String("[CSP] Value Added Service Group (0xC0), not found!"));
 }
 
 } // namespace Uicc
