@@ -39,6 +39,8 @@ class CatService
     , public ICatService
 {
 public:
+    TO_STRING_IMPL("CatService")
+
     CAR_INTERFACE_DECL();
 
     CatService();

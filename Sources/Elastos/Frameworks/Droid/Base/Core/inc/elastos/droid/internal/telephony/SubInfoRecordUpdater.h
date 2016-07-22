@@ -46,6 +46,8 @@ private:
     };
 
 public:
+    TO_STRING_IMPL("SubInfoRecordUpdater")
+
     CAR_INTERFACE_DECL()
 
     CARAPI constructor(

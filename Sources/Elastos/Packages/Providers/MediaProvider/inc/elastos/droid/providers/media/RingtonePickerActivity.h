@@ -5,7 +5,6 @@
 #include "Elastos.Droid.Widget.h"
 #include "Elastos.Droid.Content.h"
 #include "Elastos.Droid.Internal.h"
-#include <elastos/droid/os/Handler.h>
 #include <elastos/droid/os/Runnable.h>
 #include <elastos/droid/internal/app/AlertActivity.h>
 
@@ -17,7 +16,7 @@ using Elastos::Droid::Media::IRingtoneManager;
 using Elastos::Droid::Net::IUri;
 using Elastos::Droid::Internal::App::AlertActivity;
 using Elastos::Droid::Internal::App::IAlertControllerAlertParamsOnPrepareListViewListener;
-using Elastos::Droid::Os::Handler;
+using Elastos::Droid::Os::IHandler;
 using Elastos::Droid::Os::IBundle;
 using Elastos::Droid::Os::Runnable;
 using Elastos::Droid::View::IView;
@@ -149,7 +148,7 @@ private:
     AutoPtr<IRingtoneManager> mRingtoneManager;
     Int32 mType;
     AutoPtr<ICursor> mCursor;
-    AutoPtr<Handler> mHandler;
+    AutoPtr<IHandler> mHandler;
 
     /** The position in the list of the 'Silent' item. */
     Int32 mSilentPos;

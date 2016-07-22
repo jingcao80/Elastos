@@ -128,11 +128,14 @@ ECode CLinkedBlockingQueue::constructor(
     AutoPtr<IReentrantLock> putLock = mPutLock;
     ILock::Probe(putLock)->Lock(); // Never contended, but necessary for visibility
     Int32 n = 0;
-    AutoPtr< ArrayOf<IInterface*> > elems;
-    c->ToArray((ArrayOf<IInterface*>**)&elems);
-    for (Int32 i = 0; i < elems->GetLength(); ++i) {
-        AutoPtr<IInterface> e = (*elems)[i];
-        if (e == NULL) {
+
+    AutoPtr<IIterator> it;
+    c->GetIterator((IIterator**)&it);
+    Boolean hasNext;
+    while (it->HasNext(&hasNext), hasNext) {
+        AutoPtr<IInterface> obj;
+        it->GetNext((IInterface**)&obj);
+        if (obj == NULL) {
             ILock::Probe(putLock)->UnLock();
             return E_NULL_POINTER_EXCEPTION;
         }
@@ -140,7 +143,7 @@ ECode CLinkedBlockingQueue::constructor(
             ILock::Probe(putLock)->UnLock();
             return E_ILLEGAL_STATE_EXCEPTION;
         }
-        Enqueue(new Node(e));
+        Enqueue(new Node(obj));
         ++n;
     }
     mCount->Set(n);
@@ -656,12 +659,15 @@ ECode CLinkedBlockingQueue::AddAll(
     if (c == NULL) return E_NULL_POINTER_EXCEPTION;
     if (c == ICollection::Probe(this)) return E_ILLEGAL_ARGUMENT_EXCEPTION;
     *modified = FALSE;
-    AutoPtr< ArrayOf<IInterface*> > elems;
-    c->ToArray((ArrayOf<IInterface*>**)&elems);
-    for (Int32 i = 0; i < elems->GetLength(); ++i) {
-        AutoPtr<IInterface> e = (*elems)[i];
+
+    AutoPtr<IIterator> it;
+    c->GetIterator((IIterator**)&it);
+    Boolean hasNext;
+    while (it->HasNext(&hasNext), hasNext) {
+        AutoPtr<IInterface> obj;
+        it->GetNext((IInterface**)&obj);
         Boolean result = FALSE;
-        if (Add(e, &result), result) *modified = TRUE;
+        if (Add(obj, &result), result) *modified = TRUE;
     }
     return NOERROR;
 }

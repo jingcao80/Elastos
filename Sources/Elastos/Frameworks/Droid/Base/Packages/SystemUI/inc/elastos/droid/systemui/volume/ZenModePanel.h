@@ -82,6 +82,8 @@ private:
         : public Handler
     {
     public:
+        TO_STRING_IMPL("ZenModePanel::H")
+
         H(
             /* [in] */ ZenModePanel* host);
 

@@ -14,6 +14,8 @@ CarClass(CVolumePanel)
 {
 public:
     CAR_OBJECT_DECL()
+
+    TO_STRING_IMPL("CVolumePanel")
 };
 
 } // namespace Volume

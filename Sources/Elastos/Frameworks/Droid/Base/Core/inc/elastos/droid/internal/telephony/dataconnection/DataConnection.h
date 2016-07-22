@@ -325,6 +325,8 @@ private:
         : public NetworkAgent
     {
     public:
+        TO_STRING_IMPL("DataConnection::DcNetworkAgent")
+
         DcNetworkAgent(
             /* [in] */ DataConnection* host);
 

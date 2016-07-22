@@ -284,7 +284,7 @@ const Boolean PhoneWindowManager::localLOGV = FALSE;
 const Boolean PhoneWindowManager::DEBUG_LAYOUT = FALSE;
 const Boolean PhoneWindowManager::DEBUG_INPUT = FALSE;
 const Boolean PhoneWindowManager::DEBUG_STARTING_WINDOW = FALSE;
-const Boolean PhoneWindowManager::DEBUG_WAKEUP = FALSE;
+const Boolean PhoneWindowManager::DEBUG_WAKEUP = TRUE;
 const Boolean PhoneWindowManager::SHOW_STARTING_ANIMATIONS = TRUE;
 const Boolean PhoneWindowManager::SHOW_PROCESSES_ON_ALT_MENU = FALSE;
 
@@ -7356,19 +7356,18 @@ void PhoneWindowManager::FinishScreenTurningOn()
     Boolean enableScreen;
     {
         AutoLock lock(mLock);
-        //if (DEBUG_WAKEUP) Slogger::D(TAG,
-        //        "finishScreenTurningOn: mAwake=" + mAwake
-        //        + ", mScreenOnEarly=" + mScreenOnEarly
-        //        + ", mScreenOnFully=" + mScreenOnFully
-        //        + ", mKeyguardDrawComplete=" + mKeyguardDrawComplete
-        //        + ", mWindowManagerDrawComplete=" + mWindowManagerDrawComplete);
+        if (DEBUG_WAKEUP) Slogger::D(TAG,
+               "finishScreenTurningOn: mAwake=%d, mScreenOnEarly=%d, mScreenOnFully=%d"
+               "mKeyguardDrawComplete=%d, mWindowManagerDrawComplete=%d",
+               mAwake, mScreenOnEarly, mScreenOnFully, mKeyguardDrawComplete,
+               mWindowManagerDrawComplete);
 
         if (mScreenOnFully || !mScreenOnEarly || !mWindowManagerDrawComplete
                 || (mAwake && !mKeyguardDrawComplete)) {
             return; // spurious or not ready yet
         }
 
-        if (DEBUG_WAKEUP) Slogger::I(TAG, "Finished screen turning on...");
+        if (DEBUG_WAKEUP) Slogger::I(TAG, "Finishing screen turning on...");
         listener = mScreenOnListener;
         mScreenOnListener = NULL;
         mScreenOnFully = TRUE;
@@ -7382,7 +7381,8 @@ void PhoneWindowManager::FinishScreenTurningOn()
                 mBootMessageNeedsHiding = FALSE;
                 HideBootMessages();
             }
-        } else {
+        }
+        else {
             enableScreen = FALSE;
         }
     }
@@ -7397,6 +7397,7 @@ void PhoneWindowManager::FinishScreenTurningOn()
         //} catch (RemoteException unhandled) {
         //}
     }
+    if (DEBUG_WAKEUP) Slogger::I(TAG, "Finished screen turning on...");
 }
 
 void PhoneWindowManager::HandleHideBootMessage()

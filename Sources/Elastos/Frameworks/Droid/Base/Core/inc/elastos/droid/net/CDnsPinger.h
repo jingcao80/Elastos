@@ -71,6 +71,8 @@ private:
     };
 
 public:
+    TO_STRING_IMPL("CDnsPinger")
+
     CAR_OBJECT_DECL()
 
     CAR_INTERFACE_DECL()

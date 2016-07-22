@@ -163,13 +163,17 @@ ECode FilePreferencesImpl::KeysSpi(
     Int32 size = 0;
     IMap::Probe(ks)->GetSize(&size);
     AutoPtr<ArrayOf<IInterface*> > datas = ArrayOf<IInterface*>::Alloc(size);
-    ks->ToArray((ArrayOf<IInterface*>**)&datas);
-    *spi = ArrayOf<String>::Alloc(size);
-    for (Int32 i = 0; i < size; i++) {
-        String value;
-        IObject::Probe((*datas)[i])->ToString(&value);
-        (*spi)->Set(i, value);
+    AutoPtr<ArrayOf<String> > strArray = ArrayOf<String>::Alloc(size);
+    Int32 i = 0;
+    AutoPtr<IIterator> it;
+    ks->GetIterator((IIterator**)&it);
+    Boolean hasNext;
+    while (it->HasNext(&hasNext), hasNext) {
+        AutoPtr<IInterface> obj;
+        it->GetNext((IInterface**)&obj);
+        strArray->Set(i++, TO_STR(obj));
     }
+    *spi = strArray;
     REFCOUNT_ADD(*spi);
     return NOERROR;
 }

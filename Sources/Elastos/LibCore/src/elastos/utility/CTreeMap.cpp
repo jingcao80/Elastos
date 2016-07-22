@@ -72,9 +72,13 @@ ECode CTreeMap::constructor(
     AutoPtr<ArrayOf<IInterface*> > entries;
     AutoPtr<ISet> outset;
     copyFrommap->GetEntrySet((ISet**)&outset);
-    (ICollection::Probe(outset))->ToArray((ArrayOf<IInterface*>**)&entries);
-    for (Int32 i = 0; i < entries->GetLength(); i++) {
-        AutoPtr<IMapEntry> entry = IMapEntry::Probe((*entries)[i]);
+    AutoPtr<IIterator> it;
+    outset->GetIterator((IIterator**)&it);
+    Boolean hasNext;
+    while (it->HasNext(&hasNext), hasNext) {
+        AutoPtr<IInterface> obj;
+        it->GetNext((IInterface**)&obj);
+        AutoPtr<IMapEntry> entry = IMapEntry::Probe(obj);
         AutoPtr<IInterface> keyface;
         AutoPtr<IInterface> valueface;
         entry->GetKey((IInterface**)&keyface);
@@ -107,12 +111,16 @@ ECode CTreeMap::constructor(
     else {
         mComparator = NATURAL_ORDER;
     }
-    AutoPtr<ArrayOf<IInterface*> > entries;
+
     AutoPtr<ISet> outset;
-    (IMap::Probe(copyFrom))->GetEntrySet((ISet**)&outset);
-    (ICollection::Probe(outset))->ToArray((ArrayOf<IInterface*>**)&entries);
-    for (Int32 i = 0; i < entries->GetLength(); i++) {
-        AutoPtr<IMapEntry> entry = IMapEntry::Probe((*entries)[i]);
+    copyFrom->GetEntrySet((ISet**)&outset);
+    AutoPtr<IIterator> it;
+    outset->GetIterator((IIterator**)&it);
+    Boolean hasNext;
+    while (it->HasNext(&hasNext), hasNext) {
+        AutoPtr<IInterface> obj;
+        it->GetNext((IInterface**)&obj);
+        AutoPtr<IMapEntry> entry = IMapEntry::Probe(obj);
         AutoPtr<IInterface> keyface;
         AutoPtr<IInterface> valueface;
         entry->GetKey((IInterface**)&keyface);
@@ -1061,12 +1069,15 @@ ECode CTreeMap::WriteObject(
     stream->WriteFields();
     (IOutputStream::Probe(stream))->Write(mSize);
 
-    AutoPtr<ArrayOf<IInterface*> > entries;
     AutoPtr<ISet> outset;
     GetEntrySet((ISet**)&outset);
-    (ICollection::Probe(outset))->ToArray((ArrayOf<IInterface*>**)&entries);
-    for (Int32 i = 0; i < entries->GetLength(); i++) {
-        AutoPtr<IMapEntry> entry = IMapEntry::Probe((*entries)[i]);
+    AutoPtr<IIterator> it;
+    outset->GetIterator((IIterator**)&it);
+    Boolean hasNext;
+    while (it->HasNext(&hasNext), hasNext) {
+        AutoPtr<IInterface> obj;
+        it->GetNext((IInterface**)&obj);
+        AutoPtr<IMapEntry> entry = IMapEntry::Probe(obj);
         AutoPtr<IInterface> keyface;
         AutoPtr<IInterface> valueface;
         entry->GetKey((IInterface**)&keyface);

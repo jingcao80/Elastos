@@ -1243,9 +1243,7 @@ ECode ActivityRecord::SetSleeping(
         if (FAILED(mApp->mThread->ScheduleSleeping(IBinder::Probe(mAppToken), sleeping))) {
             AutoPtr<IComponentName> component;
             mIntent->GetComponent((IComponentName**)&component);
-            String str;
-            IObject::Probe(component)->ToString(&str);
-            Slogger::W(TAG, "Exception thrown when sleeping: %s", str.string());
+            Slogger::W(TAG, "Exception thrown when sleeping: %s", TO_CSTR(component));
         }
         else {
             Boolean contains;

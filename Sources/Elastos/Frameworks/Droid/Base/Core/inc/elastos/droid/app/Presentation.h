@@ -28,8 +28,9 @@ namespace Elastos {
 namespace Droid {
 namespace App {
 
-class Presentation
+class ECO_PUBLIC Presentation
     : public Dialog
+    , public IPresentation
 {
 private:
     class PresentationDisplayListener
@@ -93,6 +94,8 @@ private:
     };
 
 public:
+    CAR_INTERFACE_DECL()
+
     Presentation();
 
     virtual ~Presentation();

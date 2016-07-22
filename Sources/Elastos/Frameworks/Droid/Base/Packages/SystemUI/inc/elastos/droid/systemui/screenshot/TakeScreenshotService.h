@@ -44,6 +44,8 @@ private:
         : public Handler
     {
     public:
+        TO_STRING_IMPL("TakeScreenshotService::MyHandler")
+
         MyHandler(
             /* [in] */ TakeScreenshotService* host);
 

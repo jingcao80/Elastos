@@ -2394,7 +2394,7 @@ ECode CContextImpl::GetSystemService(
 
     else if (IContext::MEDIA_ROUTER_SERVICE.Equals(name)) {
         Slogger::E(TAG, " >>> TODO: Service %s is not ready!", name.string());
-        assert(0 && "TODO");
+        // assert(0 && "TODO");
     //     AutoPtr<IMediaRouter> obj;
     //     CMediaRouter::New(this, (IMediaRouter**)&obj);
     //     *object = obj.Get();
@@ -2828,7 +2828,7 @@ ECode CContextImpl::GetSystemService(
     }
     else if (IContext::FINGERPRINT_SERVICE.Equals(name)) {
         Slogger::E(TAG, " >>> TODO: Service %s is not ready!", name.string());
-        assert(0);
+        // assert(0);
     //     AutoPtr<IInterface> b = ServiceManager::GetService(IContext::FINGERPRINT_SERVICE);
     //     AutoPtr<IIFingerprintService> IIFingerprintService = IBinder::Probe(b);
     //     AutoPtr<IFingerprintManager> mgr;

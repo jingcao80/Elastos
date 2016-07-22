@@ -45,8 +45,6 @@ private:
 public:
     CAR_INTERFACE_DECL()
 
-    TO_STRING_IMPL("Handler")
-
     // sub class must call constructor() implicitly.
     Handler();
 
@@ -250,6 +248,8 @@ public:
     CARAPI GetMessageQueue(
         /* [out] */ IMessageQueue** cq);
 
+    virtual ToString(
+        /* [out] */ String* str) = 0;
 private:
     CARAPI_(Boolean) EnqueueMessage(
         /* [in] */ IMessageQueue* queue,

@@ -355,10 +355,13 @@ AutoPtr<IList> ThreadPoolExecutor::DrainQueue()
     q->DrainTo(ICollection::Probe(taskList), &number);
     Boolean isEmpty;
     if ((ICollection::Probe(q))->IsEmpty(&isEmpty), !isEmpty) {
-        AutoPtr< ArrayOf<IInterface*> > runnables;
-        (ICollection::Probe(q))->ToArray((ArrayOf<IInterface*>**)&runnables);
-        for (Int32 i = 0; i < runnables->GetLength(); i++) {
-            AutoPtr<IRunnable> r = IRunnable::Probe((*runnables)[i]);
+        AutoPtr<IIterator> it;
+        IIterable::Probe(q)->GetIterator((IIterator**)&it);
+        Boolean hasNext;
+        while (it->HasNext(&hasNext), hasNext) {
+            AutoPtr<IInterface> obj;
+            it->GetNext((IInterface**)&obj);
+            AutoPtr<IRunnable> r = IRunnable::Probe(obj);
             Boolean result;
             if ((ICollection::Probe(q))->Remove(r, &result), result) {
                 (IList::Probe(taskList))->Add(r);

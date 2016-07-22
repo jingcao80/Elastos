@@ -218,6 +218,8 @@ private:
         : public Handler
     {
     public:
+        TO_STRING_IMPL("ConnectionServiceWrapper::SubHandler")
+
         SubHandler(
             /* [in] */ ConnectionServiceWrapper* host);
 

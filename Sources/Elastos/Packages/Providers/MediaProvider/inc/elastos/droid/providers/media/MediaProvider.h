@@ -182,6 +182,8 @@ private:
         : public Handler
     {
     public:
+        TO_STRING_IMPL("MediaProvider::MyHandler")
+
         MyHandler(
             /* [in] */ MediaProvider* host,
             /* [in] */ ILooper* looper,

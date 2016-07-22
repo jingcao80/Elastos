@@ -23,6 +23,8 @@ class SIMFileHandler
     , public ISIMFileHandler
 {
 public:
+    TO_STRING_IMPL("SIMFileHandler")
+
     CAR_INTERFACE_DECL();
 
     SIMFileHandler();

@@ -290,7 +290,6 @@ void CKeyguardStatusView::UpdateOwnerInfo()
         ownerInfo = String("User");
     }
     if (!TextUtils::IsEmpty(ownerInfo)) {
-        Logger::D(DTAG, "TODO [UpdateOwnerInfo] : =======ownerInfo==[%s].", ownerInfo.string());
         IView::Probe(mOwnerInfo)->SetVisibility(IView::VISIBLE);
         AutoPtr<ICharSequence> cs;
         CString::New(ownerInfo, (ICharSequence**)&cs);

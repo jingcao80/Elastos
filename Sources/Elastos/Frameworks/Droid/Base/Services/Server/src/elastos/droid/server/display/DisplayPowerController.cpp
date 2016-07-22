@@ -860,7 +860,7 @@ void DisplayPowerController::UnBlockScreenOn()
     if (mPendingScreenOnUnblocker != NULL) {
         mPendingScreenOnUnblocker = NULL;
         Int64 delay = SystemClock::GetElapsedRealtime() - mScreenOnBlockStartRealTime;
-        Slogger::I(TAG, "Unblocked screen on after %s ms", delay);
+        Slogger::I(TAG, "Unblocked screen on after %lld ms", delay);
        // Trace.asyncTraceEnd(Trace.TRACE_TAG_POWER, SCREEN_ON_BLOCKED_TRACE_NAME, 0);
     }
 }

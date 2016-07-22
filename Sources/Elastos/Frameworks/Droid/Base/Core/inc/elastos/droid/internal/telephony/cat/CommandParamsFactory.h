@@ -35,6 +35,8 @@ class CommandParamsFactory
     : public Handler
 {
 public:
+    TO_STRING_IMPL("CommandParamsFactory")
+
     // synchronized
     static CARAPI_(AutoPtr<CommandParamsFactory>) GetInstance(
         /* [in] */ RilMessageDecoder* caller,

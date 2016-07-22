@@ -266,6 +266,8 @@ private:
     };
 
 public:
+    TO_STRING_IMPL("ImsPhoneCallTracker")
+
     CAR_INTERFACE_DECL();
 
     ImsPhoneCallTracker();

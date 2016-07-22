@@ -78,6 +78,8 @@ private:
     class SettingsObserverHandler : public Handler
     {
     public:
+        TO_STRING_IMPL("SmsUsageMonitor::SettingsObserverHandler")
+
         SettingsObserverHandler(
             /* [in] */ IContext* context,
             /* [in] */ IAtomicBoolean* enabled);
@@ -108,11 +110,15 @@ private:
     class SmsLimitObserverHandler : public Handler
     {
     public:
+        TO_STRING_IMPL("SmsUsageMonitor::SmsLimitObserverHandler")
+
         SmsLimitObserverHandler(
             /* [in] */ IContext* context);
     };
 
 public:
+    TO_STRING_IMPL("SmsUsageMonitor")
+
     CAR_INTERFACE_DECL()
 
     SmsUsageMonitor();

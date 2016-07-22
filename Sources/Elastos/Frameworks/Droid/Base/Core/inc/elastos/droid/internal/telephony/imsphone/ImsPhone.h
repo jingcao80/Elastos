@@ -103,6 +103,8 @@ private:
     };
 
 public:
+    TO_STRING_IMPL("Imsphone")
+
     CAR_INTERFACE_DECL();
 
     ImsPhone();

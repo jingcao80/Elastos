@@ -875,12 +875,15 @@ ECode HashTable::constructor(
 ECode HashTable::ConstructorPutAll(
     /* [in] */ IMap* map)
 {
-    AutoPtr<ArrayOf<IInterface*> > outarr;
     AutoPtr<ISet> outset;
     map->GetEntrySet((ISet**)&outset);
-    (ICollection::Probe(outset))->ToArray((ArrayOf<IInterface*>**)&outarr);
-    for (Int32 i = 0; i < outarr->GetLength(); i++) {
-        AutoPtr<IMapEntry> e = IMapEntry::Probe((*outarr)[i]);
+    AutoPtr<IIterator> it;
+    outset->GetIterator((IIterator**)&it);
+    Boolean hasNext;
+    while (it->HasNext(&hasNext), hasNext) {
+        AutoPtr<IInterface> obj;
+        it->GetNext((IInterface**)&obj);
+        AutoPtr<IMapEntry> e = IMapEntry::Probe(obj);
         AutoPtr<IInterface> keyface;
         AutoPtr<IInterface> valueface;
         e->GetKey((IInterface**)&keyface);
@@ -1137,12 +1140,15 @@ ECode HashTable::PutAll(
         Int32 sizelen = 0;
         map->GetSize(&sizelen);
         EnsureCapacity(sizelen);
-        AutoPtr<ArrayOf<IInterface*> > outarr;
         AutoPtr<ISet> outset;
         map->GetEntrySet((ISet**)&outset);
-        (ICollection::Probe(outset))->ToArray((ArrayOf<IInterface*>**)&outarr);
-        for (Int32 i = 0; i < outarr->GetLength(); i++) {
-            AutoPtr<IMapEntry> e = IMapEntry::Probe((*outarr)[i]);
+        AutoPtr<IIterator> it;
+        outset->GetIterator((IIterator**)&it);
+        Boolean hasNext;
+        while (it->HasNext(&hasNext), hasNext) {
+            AutoPtr<IInterface> obj;
+            it->GetNext((IInterface**)&obj);
+            AutoPtr<IMapEntry> e = IMapEntry::Probe(obj);
             AutoPtr<IInterface> keyface;
             AutoPtr<IInterface> valueface;
             e->GetKey((IInterface**)&keyface);
@@ -1446,12 +1452,15 @@ ECode HashTable::GetHashCode(
 
     {    AutoLock syncLock(this);
         Int32 result = 0;
-        AutoPtr<ArrayOf<IInterface*> > outarr;
         AutoPtr<ISet> outset;
         GetEntrySet((ISet**)&outset);
-        (ICollection::Probe(outset))->ToArray((ArrayOf<IInterface*>**)&outarr);
-        for (Int32 i = 0; i < outarr->GetLength(); i++) {
-            AutoPtr<IMapEntry> e = IMapEntry::Probe((*outarr)[i]);
+        AutoPtr<IIterator> it;
+        outset->GetIterator((IIterator**)&it);
+        Boolean hasNext;
+        while (it->HasNext(&hasNext), hasNext) {
+            AutoPtr<IInterface> obj;
+            it->GetNext((IInterface**)&obj);
+            AutoPtr<IMapEntry> e = IMapEntry::Probe(obj);
             AutoPtr<IInterface> key;
             e->GetKey((IInterface**)&key);
             AutoPtr<IInterface> value;
@@ -1549,12 +1558,16 @@ ECode HashTable::WriteObject(
 
         (IOutputStream::Probe(stream))->Write(mTable->GetLength()); // Capacity
         (IOutputStream::Probe(stream))->Write(mSize);
-        AutoPtr<ArrayOf<IInterface*> > outarr;
+
         AutoPtr<ISet> outset;
         GetEntrySet((ISet**)&outset);
-        (ICollection::Probe(outset))->ToArray((ArrayOf<IInterface*>**)&outarr);
-        for (Int32 i = 0; i < outarr->GetLength(); i++) {
-            AutoPtr<IMapEntry> e = IMapEntry::Probe((*outarr)[i]);
+        AutoPtr<IIterator> it;
+        outset->GetIterator((IIterator**)&it);
+        Boolean hasNext;
+        while (it->HasNext(&hasNext), hasNext) {
+            AutoPtr<IInterface> obj;
+            it->GetNext((IInterface**)&obj);
+            AutoPtr<IMapEntry> e = IMapEntry::Probe(obj);
             assert(0 && "TODO");
             // stream.writeObject(e.getKey());
             // stream.writeObject(e.getValue());

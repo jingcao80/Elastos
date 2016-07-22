@@ -1,5 +1,6 @@
 
 #include "elastos/droid/systemui/keyguard/KeyguardViewBase.h"
+#include "elastos/droid/systemui/keyguard/KeyguardUpdateMonitor.h"
 #include "Elastos.Droid.App.h"
 #include "Elastos.Droid.Internal.h"
 #include "Elastos.CoreLibrary.IO.h"
@@ -199,8 +200,7 @@ ECode KeyguardViewBase::Finish()
 {
     // If the alternate unlock was suppressed, it can now be safely
     // enabled because the user has left keyguard.
-    AutoPtr<IKeyguardUpdateMonitor> monitor;
-    // KeyguardUpdateMonitor::GetInstance(mContext)
+    AutoPtr<IKeyguardUpdateMonitor> monitor = KeyguardUpdateMonitor::GetInstance(mContext);
     monitor->SetAlternateUnlockEnabled(TRUE);
 
     // If there's a pending runnable because the user interacted with a widget
@@ -253,8 +253,7 @@ ECode KeyguardViewBase::OnPause()
             Object::GetHashCode(this), SystemClock::GetUptimeMillis());
     // Once the screen turns off, we no longer consider this to be first boot and we want the
     // biometric unlock to start next time keyguard is shown.
-    AutoPtr<IKeyguardUpdateMonitor> monitor;
-    // KeyguardUpdateMonitor::GetInstance(mContext)
+    AutoPtr<IKeyguardUpdateMonitor> monitor = KeyguardUpdateMonitor::GetInstance(mContext);
     monitor->SetAlternateUnlockEnabled(TRUE);
     mSecurityContainer->ShowPrimarySecurityScreen(TRUE);
     IKeyguardSecurityView::Probe(mSecurityContainer)->OnPause();

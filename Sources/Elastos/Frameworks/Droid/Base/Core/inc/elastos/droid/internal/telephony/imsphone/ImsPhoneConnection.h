@@ -59,6 +59,8 @@ public:
         : public Handler
     {
     public:
+        TO_STRING_IMPL("ImsPhoneConnection::MyHandler")
+
         MyHandler(
             /* [in] */ ILooper* l,
             /* [in] */ ImsPhoneConnection* host);

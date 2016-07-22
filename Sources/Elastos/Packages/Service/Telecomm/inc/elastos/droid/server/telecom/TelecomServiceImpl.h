@@ -64,6 +64,8 @@ private:
         : public Handler
     {
     public:
+        TO_STRING_IMPL("TelecomServiceImpl::MainThreadHandler")
+
         MainThreadHandler(
             /* [in] */ TelecomServiceImpl* host);
 

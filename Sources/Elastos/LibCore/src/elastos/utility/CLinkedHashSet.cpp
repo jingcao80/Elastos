@@ -44,12 +44,14 @@ ECode CLinkedHashSet::constructor(
     collection->GetSize(&sizelen);
     FAIL_RETURN(CLinkedHashMap::New(sizelen < 6 ? 11 : sizelen * 2, (IMap**)&res));
     FAIL_RETURN(HashSet::constructor(res));
-    AutoPtr< ArrayOf<IInterface*> > outarr;
-    collection->ToArray((ArrayOf<IInterface*>**)&outarr);
-    Boolean isflag = FALSE;
-    for (Int32 i = 0; i < outarr->GetLength(); i++) {
-        AutoPtr<IInterface> e = (*outarr)[i];
-        Add(e, &isflag);
+
+    AutoPtr<IIterator> it;
+    collection->GetIterator((IIterator**)&it);
+    Boolean hasNext, bval;
+    while (it->HasNext(&hasNext), hasNext) {
+        AutoPtr<IInterface> obj;
+        it->GetNext((IInterface**)&obj);
+        Add(obj, &bval);
     }
     return NOERROR;
 }

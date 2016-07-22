@@ -31,6 +31,8 @@ private:
     class GHandler: public Handler
     {
     public:
+        TO_STRING_IMPL("GestureRecorder::GHandler")
+
         GHandler(
             /* [in] */ GestureRecorder* host);
 

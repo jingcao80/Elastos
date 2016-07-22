@@ -37,6 +37,8 @@ private:
     class H: public Handler
     {
     public:
+        TO_STRING_IMPL("CQSPanel::H")
+
         H(
             /* [in] */ CQSPanel* host);
 

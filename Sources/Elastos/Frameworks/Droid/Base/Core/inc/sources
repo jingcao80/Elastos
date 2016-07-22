@@ -20,6 +20,7 @@ EXPORT_HEADERS += elastos/droid/animation/Animator.h
 EXPORT_HEADERS += elastos/droid/animation/AnimatorListenerAdapter.h
 EXPORT_HEADERS += elastos/droid/app/Dialog.h
 EXPORT_HEADERS += elastos/droid/app/AlertDialog.h
+EXPORT_HEADERS += elastos/droid/app/Presentation.h
 EXPORT_HEADERS += elastos/droid/app/IntentService.h
 EXPORT_HEADERS += elastos/droid/app/job/JobService.h
 //EXPORT_HEADERS += elastos/droid/app/backup/BackupAgent.h

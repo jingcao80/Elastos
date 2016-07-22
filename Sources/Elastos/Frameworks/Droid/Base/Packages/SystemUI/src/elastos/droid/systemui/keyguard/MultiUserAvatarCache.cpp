@@ -1,15 +1,21 @@
 
 #include "elastos/droid/systemui/keyguard/MultiUserAvatarCache.h"
-#include "Elastos.Droid.View.h"
+#include <elastos/core/CoreUtils.h>
+
+using Elastos::Core::CoreUtils;
+using Elastos::Core::IInteger32;
+using Elastos::Utility::CHashMap;
 
 namespace Elastos {
 namespace Droid {
 namespace SystemUI {
 namespace Keyguard {
 
+AutoPtr<MultiUserAvatarCache> MultiUserAvatarCache::sInstance;
+
 MultiUserAvatarCache::MultiUserAvatarCache()
 {
-    mCache = CHashMap::New((IHashMap**)&mCache);
+    CHashMap::New((IHashMap**)&mCache);
 }
 
 AutoPtr<MultiUserAvatarCache> MultiUserAvatarCache::GetInstance()

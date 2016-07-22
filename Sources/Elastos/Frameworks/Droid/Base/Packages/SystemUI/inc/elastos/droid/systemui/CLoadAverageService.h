@@ -55,6 +55,8 @@ private:
         class LoadViewHandler : public Handler
         {
         public:
+            TO_STRING_IMPL("CLoadAverageService::LoadViewHandler")
+
             LoadViewHandler(
                 /* [in] */ LoadView* host);
 

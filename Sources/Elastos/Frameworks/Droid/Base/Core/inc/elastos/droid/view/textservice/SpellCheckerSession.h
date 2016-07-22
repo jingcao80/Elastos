@@ -76,6 +76,8 @@ private:
         : public Handler
     {
     public:
+        TO_STRING_IMPL("SpellCheckerSession::MyHandler")
+
         MyHandler(
             /* [in] */ SpellCheckerSession* host)
             : mHost(host)

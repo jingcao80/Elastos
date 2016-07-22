@@ -781,7 +781,7 @@ ECode CStrictMode::AndroidBlockGuardPolicy::HandleViolation(
     }
 
     if (violationMaskSubset != 0) {
-        Int32 violationBit;//TODO: = ParseViolationFromMessage(info.crashInfo.exceptionMessage);
+        Int32 violationBit = 0;//TODO ParseViolationFromMessage(info.crashInfo.exceptionMessage);
         violationMaskSubset |= violationBit;
         Int32 savedPolicyMask;
         AutoPtr<IStrictMode> helper;

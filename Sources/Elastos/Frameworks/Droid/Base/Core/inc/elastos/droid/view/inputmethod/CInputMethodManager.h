@@ -47,6 +47,8 @@ private:
         : public Handler
     {
     public:
+        TO_STRING_IMPL("CInputMethodManager::MyHandler")
+
         MyHandler(
             /* [in] */ ILooper* looper,
             /* [in] */ CInputMethodManager* host)

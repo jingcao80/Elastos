@@ -84,6 +84,8 @@ class CDMALTEPhone
     , public ICDMALTEPhone
 {
 public:
+    TO_STRING_IMPL("CDMALTEPhone")
+
     CAR_INTERFACE_DECL();
 
     CDMALTEPhone();

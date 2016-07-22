@@ -27,8 +27,6 @@
 #include <utils/Log.h>
 #include <utils/Errors.h>
 
-#include <elastos/core/AutoLock.h>
-using Elastos::Core::AutoLock;
 using Elastos::Droid::App::IActivityManager;
 using Elastos::Droid::App::IActivityManagerRunningAppProcessInfo;
 using Elastos::Droid::Content::CIntentFilter;
@@ -77,6 +75,7 @@ using Elastos::Droid::Telephony::ITelephonyManager;
 using Elastos::Droid::Utility::TimeUtils;
 using Elastos::Droid::View::IDisplay;
 using Elastos::Droid::View::EIID_IWindowManagerPolicy;
+using Elastos::Core::AutoLock;
 using Elastos::Core::StringBuilder;
 using Elastos::Core::StringUtils;
 using Elastos::Core::EIID_IRunnable;
@@ -212,7 +211,7 @@ ECode PowerManagerService::BinderService::UpdateBlockedUids(
     /* [in] */ Int32 uid,
     /* [in] */ Boolean isBlocked)
 {
-    if (DEBUG_SPEW) Slogger::V(TAG, "updateBlockedUids: uid = %disBlocked = %d", uid, isBlocked);
+    if (DEBUG_SPEW) Slogger::V(TAG, "updateBlockedUids: uid = %d, disBlocked = %d", uid, isBlocked);
 
     if (Binder::GetCallingUid() != IProcess::SYSTEM_UID) {
         if (DEBUG_SPEW) Slogger::V(TAG, "UpdateBlockedUids is not allowed");
@@ -383,7 +382,8 @@ ECode PowerManagerService::BinderService::PowerHint(
         // Service not ready yet, so who the heck cares about power hints, bah.
         return NOERROR;
     }
-    FAIL_RETURN(mHost->mContext->EnforceCallingOrSelfPermission(Elastos::Droid::Manifest::permission::DEVICE_POWER, String(NULL)));
+    FAIL_RETURN(mHost->mContext->EnforceCallingOrSelfPermission(
+        Elastos::Droid::Manifest::permission::DEVICE_POWER, String(NULL)));
     mHost->PowerHintInternal(hintId, data);
     return NOERROR;
 }
@@ -559,8 +559,9 @@ ECode PowerManagerService::BinderService::UserActivity(
             AutoLock syncLock(mHost->mLock);
             if (now >= mHost->mLastWarningAboutUserActivityPermission + (5 * 60 * 1000)) {
                 mHost->mLastWarningAboutUserActivityPermission = now;
-                Slogger::W(TAG, "Ignoring call to PowerManager.userActivity() because the caller does not have DEVICE_POWER permission.  Please fix your app!   pid=%d uid=%d"
-                        , Binder::GetCallingPid(), Binder::GetCallingUid());
+                Slogger::W(TAG, "Ignoring call to PowerManager.userActivity() because the caller"
+                    " does not have DEVICE_POWER permission.  Please fix your app!   pid=%d uid=%d",
+                    Binder::GetCallingPid(), Binder::GetCallingUid());
             }
         }
         return NOERROR;
@@ -1267,8 +1268,6 @@ ECode PowerManagerService::SuspendBlockerImpl::ReleaseBlocker()
         else if (mReferenceCount < 0) {
             Slogger::E(TAG, "Suspend blocker %s was released without being acquired!",
                     mName.string());
-            // Log.wtf(TAG, "Suspend blocker \"" + mName
-            //         + "\" was released without being acquired!", new Throwable());
             mReferenceCount = 0;
             return E_INVALID_ARGUMENT;
         }
@@ -2147,15 +2146,15 @@ ECode PowerManagerService::AcquireWakeLockInternal(
         if((mBlockedUids->Contains(integer, &contains), contains) && uid != Process::MyUid()) {
             //wakelock acquisition for blocked uid, do not acquire.
             if (DEBUG_SPEW) {
-                Slogger::D(TAG, "uid is blocked not acquiring wakeLock flags=0x%s tag=%s uid=%d pid =%d",
-                        StringUtils::ToHexString(flags).string(), tag.string(), uid, pid);
+                Slogger::D(TAG, "uid is blocked not acquiring wakeLock flags=0x%08x tag=%s uid=%d pid =%d",
+                   flags, tag.string(), uid, pid);
             }
             return NOERROR;
         }
 
         if (DEBUG_SPEW) {
-            Slogger::D(TAG, "acquireWakeLockInternal: lock=%d, flags=0x%08x, tag=%s, ws=%p, uid=%d, pid=%d",
-                    Objects::GetHashCode(lock), flags, tag.string(), ws, uid, pid);
+            Slogger::D(TAG, "acquireWakeLockInternal: lock=%d, flags=0x%08x, tag=%s, ws=%s, uid=%d, pid=%d",
+                Objects::GetHashCode(lock), flags, tag.string(), TO_CSTR(ws), uid, pid);
         }
 
         AutoPtr<WakeLock> wakeLock;
@@ -2320,8 +2319,8 @@ ECode PowerManagerService::UpdateWakeLockWorkSourceInternal(
 
         if (index < 0) {
             if (DEBUG_SPEW) {
-                Slogger::D(TAG, "UpdateWakeLockWorkSourceInternal: lock=%d [not found], ws=%p",
-                        Objects::GetHashCode(lock), ws);
+                Slogger::D(TAG, "UpdateWakeLockWorkSourceInternal: lock=%d [not found], ws=%s",
+                        Objects::GetHashCode(lock), TO_CSTR(ws));
             }
             if (!isNsrmEnabled) {
                 Slogger::E(TAG, "Wake lock not active: %p from uid %d", lock, callingUid);
@@ -2336,8 +2335,8 @@ ECode PowerManagerService::UpdateWakeLockWorkSourceInternal(
         mWakeLocks->Get(index, (IInterface**)&obj);
         AutoPtr<WakeLock> wakeLock = (WakeLock*)(IObject*)obj.Get();
         if (DEBUG_SPEW) {
-            Slogger::D(TAG, "UpdateWakeLockWorkSourceInternal: lock=%d [%s], ws=%p",
-                    Objects::GetHashCode(lock), wakeLock->mTag.string(), ws);
+            Slogger::D(TAG, "UpdateWakeLockWorkSourceInternal: lock=%d [%s], ws=%s",
+                    Objects::GetHashCode(lock), wakeLock->mTag.string(), TO_CSTR(ws));
         }
 
         if (!wakeLock->HasSameWorkSource(ws)) {
@@ -2968,7 +2967,7 @@ void PowerManagerService::UpdateStayOnLocked(
                 mBatteryManagerInternal->IsPowered(mStayOnWhilePluggedInSetting, &mStayOn);
             }
             else {
-                Slogger::E(TAG, "UpdateStayOnLocked, mBatteryManagerInternal is %p", mBatteryManagerInternal.Get());
+                Slogger::E(TAG, "UpdateStayOnLocked, mBatteryManagerInternal is %s", TO_CSTR(mBatteryManagerInternal));
             }
         }
         else {
@@ -3154,7 +3153,8 @@ void PowerManagerService::UpdateUserActivitySummaryLocked(
         }
 
         if (DEBUG_SPEW) {
-            Slogger::D(TAG, "updateUserActivitySummaryLocked: mWakefulness=%s, mUserActivitySummary=0x%08x, now:%lld, nextTimeout=%s",
+            Slogger::D(TAG, "updateUserActivitySummaryLocked: mWakefulness=%s, mUserActivitySummary=0x%08x, "
+                "now:%lld, nextTimeout=%s",
                 WakefulnessToString(mWakefulness).string(), mUserActivitySummary, now,
                 TimeUtils::FormatUptime(nextTimeout).string());
         }
@@ -3705,7 +3705,8 @@ ECode PowerManagerService::ShutdownOrRebootInternal(
     /* [in] */ Boolean wait)
 {
     if (mHandler == NULL || !mSystemReady) {
-        Slogger::E(TAG, "Too early to call shutdown() or reboot(), mHandler:%p, mSystemReady:%d", mHandler.Get(), mSystemReady);
+        Slogger::E(TAG, "Too early to call shutdown() or reboot(), "
+            "mHandler:%s, mSystemReady:%d", TO_CSTR(mHandler), mSystemReady);
         return E_ILLEGAL_STATE_EXCEPTION;
         // throw new IllegalStateException("Too early to call shutdown() or reboot()");
     }
@@ -3930,7 +3931,8 @@ void PowerManagerService::DumpInternal(
     pw->Println(String("POWER MANAGER (dumpsys power)\n"));
 
     AutoPtr<WirelessChargerDetector> wcd;
-    {    AutoLock syncLock(mLock);
+    {
+        AutoLock syncLock(mLock);
         pw->Println(String("Power Manager State:"));
         pw->Println(String("  mDirty=0x") + StringUtils::ToHexString(mDirty));
         pw->Println(String("  mWakefulness=") + WakefulnessToString(mWakefulness));

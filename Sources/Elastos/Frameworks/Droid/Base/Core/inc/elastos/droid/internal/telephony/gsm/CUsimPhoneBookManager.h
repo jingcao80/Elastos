@@ -66,6 +66,8 @@ private:
     };
 
 public:
+    TO_STRING_IMPL("CUsimPhoneBookManager")
+
     CUsimPhoneBookManager();
 
     CAR_INTERFACE_DECL()

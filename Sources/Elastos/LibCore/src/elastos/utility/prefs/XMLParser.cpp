@@ -626,8 +626,9 @@ ECode XMLParser::WriteXmlPreferences(
     FAIL_RETURN(CFile::New(parent, String("prefs-") + uuid + String(".xml.tmp"),
             (IFile**)&temporaryForWriting));
 
+    Int32 i = 0;
+    AutoPtr<IIterator> it;
     AutoPtr<IBufferedWriter> out;
-
     AutoPtr<IFileOutputStream> fs;
     CFileOutputStream::New(temporaryForWriting, (IFileOutputStream**)&fs);
     AutoPtr<IOutputStreamWriter> osw;
@@ -642,11 +643,13 @@ ECode XMLParser::WriteXmlPreferences(
 
     IMap::Probe(properties)->GetKeySet((ISet**)&keySet);
     strKeys = ArrayOf<String>::Alloc(size);
-    keySet->ToArray((ArrayOf<IInterface*>**)&keys);
-    assert(keys->GetLength() >= size);
-    for (Int32 i = 0; i < size; i++) {
-        IObject::Probe((*keys)[i])->ToString(&value);
-        strKeys->Set(i, value);
+
+    keySet->GetIterator((IIterator**)&it);
+    Boolean hasNext;
+    while (it->HasNext(&hasNext), hasNext) {
+        AutoPtr<IInterface> obj;
+        it->GetNext((IInterface**)&obj);
+        strKeys->Set(i, TO_STR(obj));
     }
 
     length = strKeys->GetLength();

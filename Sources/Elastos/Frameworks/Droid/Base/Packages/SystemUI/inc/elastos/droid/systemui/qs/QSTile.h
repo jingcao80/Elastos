@@ -118,6 +118,8 @@ protected:
     class H: public Handler
     {
     public:
+        TO_STRING_IMPL("QSTile::H")
+
         H(
             /* [in] */ QSTile* host,
             /* [in] */ ILooper* looper);

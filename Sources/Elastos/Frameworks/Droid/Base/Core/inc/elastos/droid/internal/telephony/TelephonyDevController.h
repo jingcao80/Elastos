@@ -32,6 +32,8 @@ class TelephonyDevController
     , public ITelephonyDevController
 {
 public:
+    TO_STRING_IMPL("TelephonyDevController")
+
     CAR_INTERFACE_DECL()
 
     CARAPI constructor();

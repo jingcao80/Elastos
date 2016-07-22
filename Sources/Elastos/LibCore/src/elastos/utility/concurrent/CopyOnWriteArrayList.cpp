@@ -553,13 +553,14 @@ ECode CopyOnWriteArrayList::ContainsAll(
 {
     VALIDATE_NOT_NULL(value)
 
-    AutoPtr< ArrayOf<IInterface*> > outarr;
-    collection->ToArray((ArrayOf<IInterface*>**)&outarr);
-    Int32 length = outarr->GetLength();
-    for (Int32 i = 0; i < length; i++) {
-        AutoPtr<IInterface> o = (*outarr)[i];
+    AutoPtr<IIterator> it;
+    collection->GetIterator((IIterator**)&it);
+    Boolean hasNext;
+    while (it->HasNext(&hasNext), hasNext) {
+        AutoPtr<IInterface> obj;
+        it->GetNext((IInterface**)&obj);
         Int32 midvalue = 0;
-        if ((IndexOf(o, snapshot, from, to, &midvalue), midvalue) == -1) {
+        if ((IndexOf(obj, snapshot, from, to, &midvalue), midvalue) == -1) {
             *value = FALSE;
             return NOERROR;
         }

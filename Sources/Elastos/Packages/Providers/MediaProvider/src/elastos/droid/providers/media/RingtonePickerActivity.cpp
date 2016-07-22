@@ -18,6 +18,7 @@
 #include <elastos/core/StringUtils.h>
 #include <elastos/utility/logging/Logger.h>
 
+using Elastos::Droid::Os::CHandler;
 using Elastos::Droid::App::Activity;
 using Elastos::Droid::App::CActivity;
 using Elastos::Droid::App::IActivity;
@@ -136,7 +137,7 @@ ECode RingtonePickerActivity::OnCreate(
     Logger::I(TAG, " >> OnCreate");
     Activity::OnCreate(savedInstanceState);
 
-    mHandler = new Handler();
+    CHandler::New((IHandler**)&mHandler);
 
     AutoPtr<IIntent> intent;
     GetIntent((IIntent**)&intent);

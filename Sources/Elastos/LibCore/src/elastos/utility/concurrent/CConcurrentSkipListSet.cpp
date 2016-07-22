@@ -243,13 +243,15 @@ ECode CConcurrentSkipListSet::RemoveAll(
 {
     VALIDATE_NOT_NULL(res);
     // Override AbstractSet version to avoid unnecessary call to size()
-    AutoPtr<ArrayOf<IInterface*> > arr;
-    collection->ToArray((ArrayOf<IInterface*>**)&arr);
     Boolean modified = FALSE;
-    for (Int32 i = 0;i < arr->GetLength();i++) {
-        AutoPtr<IInterface> e = (*arr)[i];
+    AutoPtr<IIterator> it;
+    collection->GetIterator((IIterator**)&it);
+    Boolean hasNext;
+    while (it->HasNext(&hasNext), hasNext) {
+        AutoPtr<IInterface> obj;
+        it->GetNext((IInterface**)&obj);
         Boolean b = FALSE;
-        Remove(e, &b);
+        Remove(obj, &b);
         if (b) modified = TRUE;
     }
     *res = modified;

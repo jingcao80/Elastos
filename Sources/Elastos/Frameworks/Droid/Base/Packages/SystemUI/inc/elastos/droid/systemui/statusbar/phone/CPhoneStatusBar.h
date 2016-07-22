@@ -469,6 +469,8 @@ private:
         class DozeServiceHostHandler: public Handler
         {
         public:
+            TO_STRING_IMPL("CPhoneStatusBar::DozeServiceHostHandler")
+
             DozeServiceHostHandler(
                 /* [in] */ DozeServiceHost* host);
 

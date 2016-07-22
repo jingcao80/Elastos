@@ -8,6 +8,7 @@
 #include <elastos/core/StringBuilder.h>
 #include "R.h"
 
+using Elastos::Droid::Os::CHandler;
 using Elastos::Droid::Content::IContentResolver;
 using Elastos::Droid::Content::Res::IResources;
 using Elastos::Droid::Net::IUri;
@@ -90,11 +91,12 @@ CDeleteFdnContactScreen::CDeleteFdnContactScreen()
     , mNumber(NULL)
     , mPin2(NULL)
 {
-    mHandler = new Handler();
 }
 
 ECode CDeleteFdnContactScreen::constructor()
 {
+    CHandler::New((IHandler**)&mHandler);
+
     return Activity::constructor();
 }
 

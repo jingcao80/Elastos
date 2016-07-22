@@ -27,6 +27,8 @@ private:
         : public Handler
     {
     public:
+        TO_STRING_IMPL("CAccessibilityManager::MyHandler")
+
         MyHandler(
             /* [in] */ CAccessibilityManager* host,
             /* [in] */ ILooper* looper);

@@ -1773,12 +1773,14 @@ ECode CConcurrentHashMap::CollectionView::ContainsAll(
     VALIDATE_NOT_NULL(result)
 
     if (collection != (ICollection*)this) {
-        AutoPtr<ArrayOf<IInterface*> > arr;
-        collection->ToArray((ArrayOf<IInterface*>**)&arr);
-        for (Int32 i = 0;i < arr->GetLength();i++) {
-            AutoPtr<IInterface> e = (*arr)[i];
+        AutoPtr<IIterator> it;
+        collection->GetIterator((IIterator**)&it);
+        Boolean hasNext;
+        while (it->HasNext(&hasNext), hasNext) {
+            AutoPtr<IInterface> obj;
+            it->GetNext((IInterface**)&obj);
             Boolean b = FALSE;
-            if (e == NULL || !(Contains(e, &b), b)) {
+            if (obj == NULL || !(Contains(obj, &b), b)) {
                 *result = FALSE;
                 return NOERROR;
             }
@@ -2105,12 +2107,15 @@ ECode CConcurrentHashMap::KeySetView::AddAll(
     if ((v = mValue) == NULL) {
         return E_UNSUPPORTED_OPERATION_EXCEPTION;
     }
-    AutoPtr<ArrayOf<IInterface*> > arr;
-    collection->ToArray((ArrayOf<IInterface*>**)&arr);
-    for (Int32 i = 0;i < arr->GetLength();i++) {
-        AutoPtr<IInterface> e = (*arr)[i];
+
+    AutoPtr<IIterator> it;
+    collection->GetIterator((IIterator**)&it);
+    Boolean hasNext;
+    while (it->HasNext(&hasNext), hasNext) {
+        AutoPtr<IInterface> obj;
+        it->GetNext((IInterface**)&obj);
         AutoPtr<IInterface> oldValue;
-        FAIL_RETURN(mMap->PutVal(e, v, TRUE, (IInterface**)&oldValue))
+        FAIL_RETURN(mMap->PutVal(obj, v, TRUE, (IInterface**)&oldValue))
         if (oldValue == NULL) {
             added = TRUE;
         }
@@ -2125,11 +2130,13 @@ ECode CConcurrentHashMap::KeySetView::GetHashCode(
     VALIDATE_NOT_NULL(hashCode)
 
     Int32 h = 0;
-    AutoPtr<ArrayOf<IInterface*> > arr;
-    this->ToArray((ArrayOf<IInterface*>**)&arr);
-    for (Int32 i = 0;i < arr->GetLength();i++) {
-        AutoPtr<IInterface> e = (*arr)[i];
-        Int32 hc = Object::GetHashCode(e);
+    AutoPtr<IIterator> it;
+    GetIterator((IIterator**)&it);
+    Boolean hasNext;
+    while (it->HasNext(&hasNext), hasNext) {
+        AutoPtr<IInterface> obj;
+        it->GetNext((IInterface**)&obj);
+        Int32 hc = Object::GetHashCode(obj);
         h += hc;
     }
     *hashCode = h;
@@ -2439,11 +2446,13 @@ ECode CConcurrentHashMap::EntrySetView::AddAll(
     VALIDATE_NOT_NULL(modified)
 
     Boolean added = FALSE;
-    AutoPtr<ArrayOf<IInterface*> > arr;
-    collection->ToArray((ArrayOf<IInterface*>**)&arr);
-    for (Int32 i = 0;i < arr->GetLength();i++) {
-        AutoPtr<IInterface> p = (*arr)[i];
-        AutoPtr<IMapEntry> e = IMapEntry::Probe(p);
+    AutoPtr<IIterator> it;
+    collection->GetIterator((IIterator**)&it);
+    Boolean hasNext;
+    while (it->HasNext(&hasNext), hasNext) {
+        AutoPtr<IInterface> obj;
+        it->GetNext((IInterface**)&obj);
+        AutoPtr<IMapEntry> e = IMapEntry::Probe(obj);
         Boolean b = FALSE;
         if ((Add(e, &b), b)) {
             added = TRUE;
@@ -2840,12 +2849,16 @@ ECode CConcurrentHashMap::Equals(
                 return NOERROR;
             }
         }
+
         AutoPtr<ISet> s;
         m->GetEntrySet((ISet**)&s);
-        AutoPtr<ArrayOf<IInterface*> > arr;
-        ICollection::Probe(s)->ToArray((ArrayOf<IInterface*>**)&arr);
-        for (Int32 i = 0;i < arr->GetLength();i++) {
-            AutoPtr<IMapEntry> e = IMapEntry::Probe((*arr)[i]);
+        AutoPtr<IIterator> iter;
+        s->GetIterator((IIterator**)&iter);
+        Boolean hasNext;
+        while (iter->HasNext(&hasNext), hasNext) {
+            AutoPtr<IInterface> obj;
+            iter->GetNext((IInterface**)&obj);
+            AutoPtr<IMapEntry> e = IMapEntry::Probe(obj);
             AutoPtr<IInterface> mk, mv, v;
             if ((e->GetKey((IInterface**)&mk), mk) == NULL ||
                 (e->GetValue((IInterface**)&mv), mv) == NULL ||
@@ -2959,10 +2972,13 @@ ECode CConcurrentHashMap::PutAll(
     TryPresize(s);
     AutoPtr<ISet> outset;
     map->GetEntrySet((ISet**)&outset);
-    AutoPtr< ArrayOf<IInterface*> > outarr;
-    ICollection::Probe(outset)->ToArray((ArrayOf<IInterface*>**)&outarr);
-    for (Int32 i = 0; i < outarr->GetLength(); i++) {
-        AutoPtr<IMapEntry> e = IMapEntry::Probe((*outarr)[i]);
+    AutoPtr<IIterator> it;
+    outset->GetIterator((IIterator**)&it);
+    Boolean hasNext;
+    while (it->HasNext(&hasNext), hasNext) {
+        AutoPtr<IInterface> obj;
+        it->GetNext((IInterface**)&obj);
+        AutoPtr<IMapEntry> e = IMapEntry::Probe(obj);
         AutoPtr<IInterface> keyface;
         AutoPtr<IInterface> valueface;
         e->GetKey((IInterface**)&keyface);

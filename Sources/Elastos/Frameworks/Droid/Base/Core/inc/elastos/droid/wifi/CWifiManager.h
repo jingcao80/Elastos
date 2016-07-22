@@ -269,6 +269,8 @@ private:
         : public Handler
     {
     public:
+        TO_STRING_IMPL("CWifiManager::ServiceHandler")
+
         ServiceHandler(
             /* [in] */ ILooper* looper)
             : Handler(looper)

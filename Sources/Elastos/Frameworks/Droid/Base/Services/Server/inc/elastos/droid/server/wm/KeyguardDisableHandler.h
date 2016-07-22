@@ -37,6 +37,8 @@ public:
     };
 
 public:
+    TO_STRING_IMPL("KeyguardDisableHandler")
+
     KeyguardDisableHandler(
         /* [in] */ IContext* context,
         /* [in] */ IWindowManagerPolicy* policy);

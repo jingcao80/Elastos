@@ -28,6 +28,8 @@ private:
     class MyHandler : public Handler
     {
     public:
+        TO_STRING_IMPL("CCommandQueue::MyHandler")
+
         MyHandler(
             /* [in] */ CCommandQueue* host);
 

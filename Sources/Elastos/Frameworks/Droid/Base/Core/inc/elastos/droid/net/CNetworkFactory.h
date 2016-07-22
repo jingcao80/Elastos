@@ -29,6 +29,8 @@ CarClass(CNetworkFactory)
 {
 public:
     CAR_OBJECT_DECL()
+
+    TO_STRING_IMPL("CNetworkFactory")
 };
 
 } // namespace Net

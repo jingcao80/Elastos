@@ -77,6 +77,8 @@ private:
     class SlidingHandler : public Handler
     {
     public:
+        TO_STRING_IMPL("SlidingDrawer::SlidingHandler")
+
         SlidingHandler(
             /* [in] */ SlidingDrawer* host);
 

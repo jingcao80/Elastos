@@ -33,6 +33,8 @@ class IconLoader
     : public Handler
 {
 public:
+    TO_STRING_IMPL("IconLoader")
+
     static CARAPI_(AutoPtr<IconLoader>) GetInstance(
         /* [in] */ IHandler* caller,
         /* [in] */ IIccFileHandler* fh);

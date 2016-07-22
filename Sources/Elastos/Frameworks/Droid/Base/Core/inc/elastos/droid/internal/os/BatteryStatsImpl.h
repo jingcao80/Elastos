@@ -1313,7 +1313,7 @@ public:
             CARAPI GetBatteryStats(
                 /* [out] */ IBatteryStatsImpl** batteryStats);
 
-            CARAPI_(void) IncWakeupsLocked();
+            CARAPI IncWakeupsLocked();
 
         private:
             CARAPI_(void) Detach();

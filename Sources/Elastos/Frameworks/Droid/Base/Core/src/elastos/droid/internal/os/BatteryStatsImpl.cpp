@@ -2460,9 +2460,10 @@ ECode BatteryStatsImpl::Uid::Pkg::GetBatteryStats(
     return NOERROR;
 }
 
-void BatteryStatsImpl::Uid::Pkg::IncWakeupsLocked()
+ECode BatteryStatsImpl::Uid::Pkg::IncWakeupsLocked()
 {
     mWakeups++;
+    return NOERROR;
 }
 
 AutoPtr<BatteryStatsImpl::Uid::Pkg::Serv> BatteryStatsImpl::Uid::Pkg::NewServiceStatsLocked()

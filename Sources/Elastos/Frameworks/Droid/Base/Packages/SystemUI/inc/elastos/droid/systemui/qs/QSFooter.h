@@ -71,6 +71,8 @@ private:
     class H: public Handler
     {
     public:
+        TO_STRING_IMPL("QSFooter::H")
+
         H(
             /* [in] */ ILooper* looper,
             /* [in] */ QSFooter* host);

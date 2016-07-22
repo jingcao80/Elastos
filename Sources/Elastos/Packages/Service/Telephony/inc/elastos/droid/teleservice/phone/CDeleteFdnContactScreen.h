@@ -37,6 +37,8 @@ private:
         : public AsyncQueryHandler
     {
     public:
+        TO_STRING_IMPL("CDeleteFdnContactScreen::QueryHandler")
+
         QueryHandler(
             /* [in] */ IContentResolver* cr,
             /* [in] */ CDeleteFdnContactScreen* host);

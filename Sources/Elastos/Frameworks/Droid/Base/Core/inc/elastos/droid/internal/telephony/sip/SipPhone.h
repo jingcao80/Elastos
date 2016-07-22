@@ -299,6 +299,8 @@ private:
     };
 
 public:
+    TO_STRING_IMPL("SipPhone")
+
     CAR_INTERFACE_DECL();
 
     SipPhone();

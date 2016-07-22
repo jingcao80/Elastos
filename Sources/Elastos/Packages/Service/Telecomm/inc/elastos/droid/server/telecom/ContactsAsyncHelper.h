@@ -34,6 +34,8 @@ private:
         : public Handler
     {
     public:
+        TO_STRING_IMPL("ContactsAsyncHelper::SubHandler")
+
         SubHandler(
             /* [in] */ ILooper* looper);
 
@@ -68,6 +70,8 @@ private:
         : public Handler
     {
     public:
+        TO_STRING_IMPL("ContactsAsyncHelper::WorkerHandler")
+
         CARAPI constructor(
             /* [in] */ ILooper* looper);
 

@@ -69,6 +69,8 @@ private:
     class H: public Handler
     {
     public:
+        TO_STRING_IMPL("CNavigationBarView::H")
+
         H(
             /* [in] */ CNavigationBarView* host);
 

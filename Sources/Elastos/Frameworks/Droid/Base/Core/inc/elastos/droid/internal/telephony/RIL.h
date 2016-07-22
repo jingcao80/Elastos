@@ -124,6 +124,8 @@ public:
         , public IRunnable
     {
     public:
+        TO_STRING_IMPL("RILSender")
+
         CAR_INTERFACE_DECL()
 
         RILSender(

@@ -3,6 +3,13 @@
 #define __ELASTOS_DROID_SYSTEMUI_KEYGUARD_MULTIUSERAVATARCACHE_H__
 
 #include "_Elastos.Droid.SystemUI.h"
+#include "Elastos.Droid.Graphics.h"
+#include <Elastos.CoreLibrary.Utility.h>
+#include <elastos/core/Object.h>
+
+using Elastos::Droid::Graphics::Drawable::IDrawable;
+using Elastos::Core::Object;
+using Elastos::Utility::IHashMap;
 
 namespace Elastos {
 namespace Droid {

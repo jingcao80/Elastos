@@ -12,6 +12,7 @@
 #include <elastos/utility/logging/Logger.h>
 #include "R.h"
 
+using Elastos::Droid::Os::CHandler;
 using Elastos::Droid::Content::CIntent;
 using Elastos::Droid::Content::IContentResolver;
 using Elastos::Droid::Content::IContentValues;
@@ -198,15 +199,15 @@ CEditFdnContactScreen::CEditFdnContactScreen()
     , mAddContact(FALSE)
     , mDataBusy(FALSE)
 {
-    mHandler = new Handler();
-
-    mClicked = new MyViewOnClickListener(this);
-
-    mOnFocusChangeHandler = new MyViewOnFocusChangeListener(this);
 }
 
 ECode CEditFdnContactScreen::constructor()
 {
+    CHandler::New((IHandler**)&mHandler);
+
+    mClicked = new MyViewOnClickListener(this);
+
+    mOnFocusChangeHandler = new MyViewOnFocusChangeListener(this);
     return Activity::constructor();
 }
 

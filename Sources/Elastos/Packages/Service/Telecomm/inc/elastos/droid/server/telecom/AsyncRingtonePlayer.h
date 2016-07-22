@@ -32,6 +32,8 @@ private:
         : public Handler
     {
     public:
+        TO_STRING_IMPL("AsyncRingtonePlayer::SubHandler")
+
         SubHandler(
             /* [in] */ ILooper* looper,
             /* [in] */ AsyncRingtonePlayer* host);

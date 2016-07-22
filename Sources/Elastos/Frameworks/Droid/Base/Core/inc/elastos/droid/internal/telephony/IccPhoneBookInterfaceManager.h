@@ -34,6 +34,8 @@ protected:
     class BaseHandler: public Handler
     {
     public:
+        TO_STRING_IMPL("IccPhoneBookInterfaceManager::BaseHandler")
+
         BaseHandler(
             /* [in] */ IccPhoneBookInterfaceManager* host);
 

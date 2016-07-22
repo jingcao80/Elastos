@@ -46,6 +46,8 @@ class CdmaCallTracker
     , public ICdmaCallTracker
 {
 public:
+    TO_STRING_IMPL("CdmaCallTracker")
+
     CAR_INTERFACE_DECL();
 
     //    boolean needsPoll;

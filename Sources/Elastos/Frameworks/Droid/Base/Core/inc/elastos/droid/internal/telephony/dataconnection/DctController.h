@@ -45,6 +45,8 @@ private:
         : public Handler
     {
     public:
+        TO_STRING_IMPL("DctController::SubHandler")
+
         SubHandler(
             /* [in] */ DctController* host);
 
@@ -161,6 +163,8 @@ private:
         : public Handler
     {
     public:
+        TO_STRING_IMPL("DctController::DdsSwitchSerializerHandler")
+
         DdsSwitchSerializerHandler(
             /* [in] */ DctController* host);
 
@@ -183,6 +187,8 @@ private:
     };
 
 public:
+    TO_STRING_IMPL("DctController")
+
     CAR_INTERFACE_DECL()
 
     // [@private]

@@ -1646,11 +1646,14 @@ ECode CForkJoinPool::InvokeAll(
     AutoPtr<IArrayList> forkJoinTasks;
     CArrayList::New(size, (IArrayList**)&forkJoinTasks);
     Boolean done = FALSE;
-    AutoPtr<ArrayOf<IInterface*> > arr;
-    tasks->ToArray((ArrayOf<IInterface*>**)&arr);
-    for (Int32 i = 0;i < size; i++) {
-        AutoPtr<IInterface> p = (*arr)[i];
-        AutoPtr<ICallable> task = (ICallable*)p->Probe(EIID_ICallable);
+
+    AutoPtr<IIterator> it;
+    tasks->GetIterator((IIterator**)&it);
+    Boolean hasNext;
+    while (it->HasNext(&hasNext), hasNext) {
+        AutoPtr<IInterface> obj;
+        it->GetNext((IInterface**)&obj);
+        AutoPtr<ICallable> task = ICallable::Probe(obj);
         AutoPtr<IForkJoinTask> f = new AdaptedCallable(task);
         (IList::Probe(forkJoinTasks))->Add(f);
         ExternalPush(f);

@@ -4,13 +4,29 @@
 
 #include "_Elastos.Droid.SystemUI.h"
 #include "Elastos.Droid.App.h"
+#include "Elastos.Droid.Media.h"
 #include "Elastos.Droid.Content.h"
 #include "Elastos.Droid.Os.h"
-#include "elastos/droid/app/Service.h"
+#include "Elastos.Droid.View.h"
+#include <elastos/droid/os/Runnable.h>
+#include <elastos/droid/app/Presentation.h>
+#include <elastos/droid/media/MediaRouterSimpleCallback.h>
 
-using Elastos::Droid::App::Service;
+using Elastos::Droid::App::Presentation;
+using Elastos::Droid::App::IPresentation;
+using Elastos::Droid::Media::IMediaRouterRouteInfo;
+using Elastos::Droid::Media::IMediaRouter;
+using Elastos::Droid::Media::IMediaRouterCallback;
+using Elastos::Droid::Media::MediaRouterSimpleCallback;
+using Elastos::Droid::Media::IMediaRouterSimpleCallback;
 using Elastos::Droid::Content::IIntent;
+using Elastos::Droid::Content::IDialogInterface;
+using Elastos::Droid::Content::IDialogInterfaceOnDismissListener;
 using Elastos::Droid::Os::IBinder;
+using Elastos::Droid::Os::Runnable;
+using Elastos::Droid::View::IView;
+using Elastos::Droid::View::IDisplay;
+using Elastos::Core::IRunnable;
 
 namespace Elastos {
 namespace Droid {
@@ -19,6 +35,7 @@ namespace Keyguard {
 
 class KeyguardDisplayManager
     : public Object
+    , public IKeyguardDisplayManager
 {
 private:
     class MyMediaRouterSimpleCallback
@@ -35,16 +52,16 @@ private:
         CARAPI OnRouteSelected(
             /* [in] */ IMediaRouter* router,
             /* [in] */ Int32 type,
-            /* [in] */ IRouteInfo* info);
+            /* [in] */ IMediaRouterRouteInfo* info);
 
         CARAPI OnRouteUnselected(
             /* [in] */ IMediaRouter* router,
             /* [in] */ Int32 type,
-            /* [in] */ IRouteInfo* info);
+            /* [in] */ IMediaRouterRouteInfo* info);
 
         CARAPI OnRoutePresentationDisplayChanged(
             /* [in] */ IMediaRouter* router,
-            /* [in] */ IRouteInfo* info);
+            /* [in] */ IMediaRouterRouteInfo* info);
 
         private:
             KeyguardDisplayManager* mHost;
@@ -97,7 +114,7 @@ private:
     public:
         TO_STRING_IMPL("KeyguardDisplayManager::KeyguardPresentation")
 
-        KeyguardPresentation()
+        KeyguardPresentation();
 
         CARAPI constructor(
             /* [in] */ IContext* context,
@@ -108,10 +125,10 @@ private:
     protected:
         //@Override
         CARAPI OnCreate(
-            /* [in] */ IBundle* savedInstanceState)
+            /* [in] */ IBundle* savedInstanceState);
 
     public:
-        AutoPtr<Runnable> mMoveTextRunnable = new Runnable()
+        AutoPtr<Runnable> mMoveTextRunnable;
 
     private:
         static const Int32 VIDEO_SAFE_REGION; // Percentage of display width & height
@@ -125,7 +142,9 @@ private:
     };
 
 public:
-    KeyguardDisplayManager()
+    CAR_INTERFACE_DECL()
+
+    KeyguardDisplayManager();
 
     CARAPI constructor(
         /* [in] */ IContext* context);
@@ -150,7 +169,7 @@ private:
     AutoPtr<IContext> mContext;
     Boolean mShowing;
 
-    AutoPtr<IMediaRouterSimpleCallback> mMediaRouterCallback;
+    AutoPtr<IMediaRouterCallback> mMediaRouterCallback;
     AutoPtr<IDialogInterfaceOnDismissListener> mOnDismissListener;
 };
 

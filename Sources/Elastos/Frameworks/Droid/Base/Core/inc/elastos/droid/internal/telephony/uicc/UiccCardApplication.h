@@ -48,6 +48,8 @@ private:
         : public Handler
     {
     public:
+        TO_STRING_IMPL("UiccCardApplication::InnerHandler")
+
         InnerHandler(
             /* [in] */ UiccCardApplication* owner);
 

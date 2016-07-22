@@ -35,6 +35,8 @@ private:
         : public Handler
     {
     public:
+        TO_STRING_IMPL("DynamicIndexableContentMonitor::MyHandler")
+
         MyHandler(
             /* [in] */ DynamicIndexableContentMonitor* host);
 

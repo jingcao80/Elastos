@@ -723,7 +723,7 @@ void ActivityStack::AwakeFromSleepingLocked()
         IArrayList* activities = tr->mActivities;
         Int32 N;
         activities->GetSize(&N);
-        for (Int32 activityNdx = N; activityNdx >= 0; --activityNdx) {
+        for (Int32 activityNdx = N - 1; activityNdx >= 0; --activityNdx) {
             AutoPtr<IInterface> obj;
             activities->Get(activityNdx, (IInterface**)&obj);
             ActivityRecord* r = TO_ActivityRecord(obj);

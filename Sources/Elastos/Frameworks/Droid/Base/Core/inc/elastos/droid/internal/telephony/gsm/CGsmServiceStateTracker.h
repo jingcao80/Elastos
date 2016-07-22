@@ -109,6 +109,8 @@ private:
     };
 
 public:
+    TO_STRING_IMPL("CGsmServiceStateTracker")
+
     CGsmServiceStateTracker();
 
     virtual ~CGsmServiceStateTracker();
