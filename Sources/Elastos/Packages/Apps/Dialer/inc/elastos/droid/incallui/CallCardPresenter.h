@@ -10,9 +10,11 @@
 #include "elastos/droid/incallui/CallTimer.h"
 #include "elastos/droid/incallui/ContactInfoCache.h"
 #include "elastos/droid/incallui/Presenter.h"
+#include "elastos/droid/os/Runnable.h"
 #include <elastos/core/Object.h>
 
 using Elastos::Droid::Content::IContext;
+using Elastos::Droid::Os::Runnable;
 using Elastos::Droid::Telecomm::Telecom::ICallDetails;
 using Elastos::Droid::Telecomm::Telecom::IPhoneAccount;
 using Elastos::Droid::Telecomm::Telecom::ITelecomManager;
@@ -21,8 +23,14 @@ namespace Elastos {
 namespace Droid {
 namespace InCallUI {
 
+/**
+ * Presenter for the Call Card Fragment.
+ * <p>
+ * This class listens for changes to InCallState and passes it along to the fragment.
+ */
 class CallCardPresenter
     : public Presenter
+    , public ICallCardPresenter
     , public IInCallStateListener
     , public IIncomingCallListener
     , public IInCallDetailsListener
@@ -38,6 +46,8 @@ public:
             /* [in] */ CallCardPresenter* callCardPresenter,
             /* [in] */ Boolean isPrimary);
 
+        CAR_INTERFACE_DECL()
+
         // @Override
         CARAPI OnContactInfoComplete(
             /* [in] */ const String& callId,
@@ -50,6 +60,45 @@ public:
     private:
         AutoPtr<IWeakReference> mCallCardPresenter;
         Boolean mIsPrimary;
+    };
+
+private:
+    class UpdateCallTimeRunnable : public Runnable
+    {
+    public:
+        UpdateCallTimeRunnable(
+            /* [in] */ IContext* ctx,
+            /* [in] */ CallCardPresenter* host)
+            : mContext(ctx)
+            , mHost(host)
+        {}
+
+        CARAPI Run();
+
+    private:
+        AutoPtr<IContext> mContext;
+        CallCardPresenter* mHost;
+    };
+
+    class DialogOnClickListener
+        : public Object
+        , public IDialogInterfaceOnClickListener
+    {
+    public:
+        CAR_INTERFACE_DECL()
+
+        DialogOnClickListener(
+            /* [in] */ CallCardPresenter* host)
+            : mHost(host)
+        {}
+
+        // @Override
+        CARAPI OnClick(
+            /* [in] */ IDialogInterface* dialog,
+            /* [in] */ Int32 which);
+
+    private:
+        CallCardPresenter* mHost;
     };
 
 public:
@@ -103,6 +152,11 @@ public:
     CARAPI OnFullScreenVideoStateChanged(
         /* [in] */ Boolean isFullScreenVideo);
 
+    CARAPI_(void) BlacklistClicked(
+        /* [in] */ IContext* context);
+
+    CARAPI_(Int64) GetActiveSubscription();
+
 private:
     CARAPI_(String) GetSubscriptionNumber();
 
@@ -112,6 +166,14 @@ private:
      * Only show the conference call button if we can manage the conference.
      */
     CARAPI_(void) MaybeShowManageConferenceCallButton();
+
+    /**
+     * Determines if the manage conference button should be visible, based on the current primary
+     * call.
+     *
+     * @return {@code True} if the manage conference button should be visible.
+     */
+    CARAPI_(Boolean) ShouldShowManageConference();
 
     CARAPI_(void) SetCallbackNumber();
 
@@ -136,10 +198,7 @@ private:
         /* [in] */ const String& callId,
         /* [in] */ ContactInfoCache::ContactCacheEntry* entry);
 
-    static CARAPI_(Boolean) IsConference(
-        /* [in] */ Call* call);
-
-    static CARAPI_(Boolean) CanManageConference(
+    static CARAPI_(Boolean) IsForwarded(
         /* [in] */ Call* call);
 
     CARAPI_(void) UpdateContactEntry(
@@ -163,6 +222,17 @@ private:
     CARAPI_(void) UpdatePrimaryDisplayInfo(
         /* [in] */ ContactInfoCache::ContactCacheEntry* entry,
         /* [in] */ Boolean isConference);
+
+    CARAPI_(String) CheckIdp(
+        /* [in] */ const String& number,
+        /* [in] */ Boolean nameIsNumber,
+        /* [in] */ Boolean isIncoming);
+
+    CARAPI_(Boolean) IsCDMAPhone(
+        /* [in] */ Int64 subscription);
+
+    CARAPI_(Boolean) IsRoaming(
+        /* [in] */ Int64 subscription);
 
     CARAPI_(void) UpdateSecondaryDisplayInfo(
         /* [in] */ Boolean isConference);
@@ -217,9 +287,20 @@ private:
 
     CARAPI_(AutoPtr<ITelecomManager>) GetTelecomManager();
 
+    CARAPI_(String) GetConferenceString(
+        /* [in] */ Call* call);
+
+    CARAPI_(AutoPtr<IDrawable>) GetConferencePhoto(
+        /* [in] */ Call* call);
+
 private:
     static const String TAG;
-    static const Int64 CALL_TIME_UPDATE_INTERVAL_MS;
+    static const Int64 CALL_TIME_UPDATE_INTERVAL_MS = 1000;
+
+    static const String IDP_IDN;
+    static const String IDP_PLUS;
+    static const String IDP_ZERO;
+    static const String IDP_PREFIX;
 
     AutoPtr<Call> mPrimary;
     AutoPtr<Call> mSecondary;
