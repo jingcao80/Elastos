@@ -84,6 +84,17 @@ module
             [in] Boolean visible);
     }
 
+    /**
+     * @Involve
+     * interface IPresenter
+     * interface IInCallStateListener
+     * interface IIncomingCallListener
+     * interface IInCallDetailsListener
+     * interface IInCallEventListener
+     */
+    interface ICallCardPresenter
+    {}
+
     } // namespace InCallUI
     } // namespace Droid
     } // namespace Elastos
