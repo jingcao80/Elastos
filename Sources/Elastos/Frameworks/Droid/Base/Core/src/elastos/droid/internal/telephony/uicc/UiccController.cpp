@@ -381,7 +381,7 @@ AutoPtr<IIccRefreshResponse> UiccController::ParseOemSimRefresh(
     //to get app type and sub id in IccRecords.java after called this method.
     response->mAid = (aidLen == 0) ? String(NULL) : String(*aid).Substring(0, aidLen);
 
-    if (DBG){
+    if (DBG) {
         Logger::D(LOGTAG, "refresh SIM card , refresh result:%d, ef Id:%d, aid:%s"
                 , response->mRefreshResult, response->mEfId, response->mAid.string());
     }

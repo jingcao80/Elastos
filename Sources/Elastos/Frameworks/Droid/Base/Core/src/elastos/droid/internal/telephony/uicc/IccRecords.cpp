@@ -21,6 +21,7 @@
 #include <elastos/core/CoreUtils.h>
 #include <elastos/core/StringUtils.h>
 #include <elastos/core/AutoLock.h>
+#include <elastos/utility/logging/Logger.h>
 
 using Elastos::Droid::Content::CIntent;
 using Elastos::Droid::Content::IIntent;
@@ -40,6 +41,8 @@ using Elastos::IO::IFlushable;
 using Elastos::IO::IByteBuffer;
 using Elastos::IO::IByteBufferHelper;
 using Elastos::IO::CByteBufferHelper;
+using Elastos::Utility::Concurrent::Atomic::CAtomicBoolean;
+using Elastos::Utility::Logging::Logger;
 
 namespace Elastos {
 namespace Droid {

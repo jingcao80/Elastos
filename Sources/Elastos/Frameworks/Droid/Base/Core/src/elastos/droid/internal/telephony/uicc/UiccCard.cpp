@@ -3,6 +3,7 @@
 #include "Elastos.Droid.Internal.h"
 #include "Elastos.Droid.Telephony.h"
 #include "elastos/droid/internal/telephony/uicc/UiccCard.h"
+#include "elastos/droid/internal/telephony/cat/CatServiceFactory.h"
 #include "elastos/droid/internal/telephony/cat/CCatServiceFactory.h"
 #include "elastos/droid/internal/telephony/uicc/IccCardStatus.h"
 #include "elastos/droid/internal/telephony/uicc/CUICCConfig.h"
@@ -28,6 +29,7 @@ using Elastos::Droid::Os::CRegistrant;
 using Elastos::Droid::Preference::IPreferenceManagerHelper;
 using Elastos::Droid::Preference::CPreferenceManagerHelper;
 using Elastos::Droid::Internal::Telephony::Cat::ICatServiceFactory;
+using Elastos::Droid::Internal::Telephony::Cat::CatServiceFactory;
 using Elastos::Droid::Internal::Telephony::Cat::CCatServiceFactory;
 using Elastos::Droid::Internal::Telephony::ICommandsInterfaceRadioState;
 using Elastos::Droid::Telephony::ITelephonyManager;
