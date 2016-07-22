@@ -481,6 +481,9 @@ private:
 
     CARAPI_(AutoPtr<ICharSequence>) GetSnippet();
 
+    static CARAPI_(String) JsonTokenToString(
+        /* [in] */ JsonToken state);
+
 private:
     static const String sTRUE;// = "true";
     static const String sFALSE;// = "false";

@@ -592,6 +592,8 @@ module
     class CLauncher {
         constructor();
 
+        interface ILauncher;
+
         interface IContext;
         interface IContextWrapper;
         interface IContextThemeWrapper;
@@ -661,7 +663,7 @@ module
 
     class CLauncherApplication {
         constructor();
-        
+
         interface IContextWrapper;
         interface IContext;
         interface IComponentCallbacks2;

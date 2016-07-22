@@ -19,11 +19,10 @@
 #include "elastos/droid/view/inputmethod/CBaseInputConnection.h"
 #include "elastos/droid/view/inputmethod/CIInputMethodClient.h"
 #include "elastos/droid/view/inputmethod/CControlledInputConnectionWrapper.h"
+#include <elastos/core/AutoLock.h>
 #include <elastos/core/StringUtils.h>
 #include <elastos/utility/logging/Logger.h>
 
-#include <elastos/core/AutoLock.h>
-using Elastos::Core::AutoLock;
 using Elastos::Droid::Graphics::CRect;
 using Elastos::Droid::Graphics::CMatrix;
 using Elastos::Droid::Internal::View::CInputBindResult;
@@ -35,6 +34,7 @@ using Elastos::Droid::View::View;
 using Elastos::Droid::View::ViewRootImpl;
 using Elastos::Droid::View::InputMethod::CControlledInputConnectionWrapper;
 
+using Elastos::Core::AutoLock;
 using Elastos::Core::CString;
 using Elastos::Core::StringUtils;
 using Elastos::Utility::IHashMap;
@@ -310,7 +310,7 @@ ECode CInputMethodManager::GetEnabledInputMethodSubtypeList(
 {
     VALIDATE_NOT_NULL(infos);
     // try {
-    String id = String(NULL);
+    String id;
     if (imi != NULL) {
         imi->GetId(&id);
     }

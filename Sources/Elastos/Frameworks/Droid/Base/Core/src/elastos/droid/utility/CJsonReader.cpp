@@ -96,13 +96,13 @@ ECode CJsonReader::Expect(
     /* [in] */ JsonToken expected)
 {
     JsonToken jt, jt1;
-    Peek(&jt);
+    FAIL_RETURN(Peek(&jt))
     if (mToken != expected) {
-        Logger::E("CJsonReader::Expect", "Expected %s but was %s", expected, jt);
+        Logger::E("CJsonReader::Expect", "Expected %s but was %s", JsonTokenToString(expected).string(), JsonTokenToString(jt).string());
         return E_ILLEGAL_STATE_EXCEPTION;
         // throw new IllegalStateException("Expected " + expected + " but was " + Peek());
     }
-    Advance(&jt1);
+    FAIL_RETURN(Advance(&jt1))
     return NOERROR;
 }
 
@@ -110,8 +110,10 @@ ECode CJsonReader::HasNext(
     /* [out] */ Boolean* res)
 {
     VALIDATE_NOT_NULL(res)
+    *res = FALSE;
+
     JsonToken jt;
-    Peek(&jt);
+    FAIL_RETURN(Peek(&jt))
     *res = mToken != JsonToken_END_OBJECT && mToken != JsonToken_END_ARRAY;
     return NOERROR;
 }
@@ -120,6 +122,8 @@ ECode CJsonReader::Peek(
     /* [out] */ JsonToken* result)
 {
     VALIDATE_NOT_NULL(result)
+    *result = JsonToken_NULL;
+
     if (mToken != JsonToken_NULL) {
         *result = mToken;
         return NOERROR;
@@ -131,9 +135,9 @@ ECode CJsonReader::Peek(
         case JsonScope_EMPTY_DOCUMENT:
             ReplaceTop(JsonScope_NONEMPTY_DOCUMENT);
             JsonToken firstToken;
-            NextValue(&firstToken);
-            if (!mLenient && mToken != JsonToken_BEGIN_ARRAY && mToken != JsonToken_BEGIN_OBJECT) {
-                Logger::E("CJsonReader::Peek", "Expected JSON document to start with '[' or '{' but was ", mToken);
+            ec = NextValue(&firstToken);
+            if (FAILED(ec) || (!mLenient && mToken != JsonToken_BEGIN_ARRAY && mToken != JsonToken_BEGIN_OBJECT)) {
+                Logger::E("CJsonReader::Peek", "Expected JSON document to start with '[' or '{' but was %s", JsonTokenToString(mToken).string());
                 return E_IO_EXCEPTION;
                 // throw new IOException(
                 //         "Expected JSON document to start with '[' or '{' but was " + mToken);
@@ -154,9 +158,13 @@ ECode CJsonReader::Peek(
             // try {
                 JsonToken token;
                 ec = NextValue(&token);
-                if (FAILED(ec)) {
+                if (ec == (ECode)E_EOF_EXCEPTION) {
                     *result = token = JsonToken_END_DOCUMENT; // TODO: avoid throwing here?
                     return NOERROR;
+                }
+                else if (FAILED(ec)) {
+                    *result = token;
+                    return ec;
                 }
                 else {
                     if (mLenient) {
@@ -171,10 +179,12 @@ ECode CJsonReader::Peek(
             // }
         case JsonScope_CLOSED:
             Logger::E("CJsonReader::Peek", "JsonReader is closed");
+            *result = JsonToken_NULL;
             return E_ILLEGAL_STATE_EXCEPTION;
             // throw new IllegalStateException("JsonReader is closed");
         default:
             Logger::E("CJsonReader::Peek", "throw new AssertionError()");
+            *result = JsonToken_NULL;
             return E_ILLEGAL_STATE_EXCEPTION;
             // throw new AssertionError();
     }
@@ -185,8 +195,10 @@ ECode CJsonReader::Advance(
     /* [out] */ JsonToken* res)
 {
     VALIDATE_NOT_NULL(res)
+    *res = JsonToken_NULL;
+
     JsonToken jt;
-    Peek(&jt);
+    FAIL_RETURN(Peek(&jt))
 
     JsonToken result = mToken;
     mToken = JsonToken_NULL;
@@ -200,17 +212,19 @@ ECode CJsonReader::NextName(
     /* [out] */ String* str)
 {
     VALIDATE_NOT_NULL(str)
+    *str = String(NULL);
+
     JsonToken jt;
-    Peek(&jt);
+    FAIL_RETURN(Peek(&jt))
 
     if (mToken != JsonToken_NAME) {
-        Logger::E("CJsonReader::NextName", "Expected a name but was %s", jt);
+        Logger::E("CJsonReader::NextName", "Expected a name but was %s", JsonTokenToString(jt).string());
         return E_ILLEGAL_STATE_EXCEPTION;
         // throw new IllegalStateException("Expected a name but was " + Peek());
     }
     String result = mName;
     JsonToken jt1;
-    Advance(&jt1);
+    FAIL_RETURN(Advance(&jt1))
     *str = result;
     return NOERROR;
 }
@@ -219,17 +233,19 @@ ECode CJsonReader::NextString(
     /* [out] */ String* str)
 {
     VALIDATE_NOT_NULL(str)
+    *str = String(NULL);
+
     JsonToken jt;
-    Peek(&jt);
+    FAIL_RETURN(Peek(&jt))
     if (mToken != JsonToken_STRING && mToken != JsonToken_NUMBER) {
-        Logger::E("CJsonReader::NextString", "Expected a string but was %s", jt);
+        Logger::E("CJsonReader::NextString", "Expected a string but was %s", JsonTokenToString(jt).string());
         return E_ILLEGAL_STATE_EXCEPTION;
         // throw new IllegalStateException("Expected a string but was " + Peek());
     }
 
     String result = mValue;
     JsonToken jt1;
-    Advance(&jt1);
+    FAIL_RETURN(Advance(&jt1))
     *str = result;
     return NOERROR;
 }
@@ -238,17 +254,19 @@ ECode CJsonReader::NextBoolean(
     /* [out] */ Boolean* res)
 {
     VALIDATE_NOT_NULL(res)
+    *res = FALSE;
+
     JsonToken jt;
-    Peek(&jt);
+    FAIL_RETURN(Peek(&jt))
     if (mToken != JsonToken_BOOLEAN) {
-        Logger::E("CJsonReader::NextBoolean", "Expected a boolean but was %s", mToken);
+        Logger::E("CJsonReader::NextBoolean", "Expected a boolean but was %s", JsonTokenToString(mToken).string());
         return E_ILLEGAL_STATE_EXCEPTION;
         // throw new IllegalStateException("Expected a boolean but was " + mToken);
     }
 
     Boolean result = (mValue == sTRUE);
     JsonToken jt1;
-    Advance(&jt1);
+    FAIL_RETURN(Advance(&jt1))
     *res = result;
     return NOERROR;
 }
@@ -256,15 +274,15 @@ ECode CJsonReader::NextBoolean(
 ECode CJsonReader::NextNull()
 {
     JsonToken jt;
-    Peek(&jt);
+    FAIL_RETURN(Peek(&jt))
     if (mToken != JsonToken_NULL) {
-        Logger::E("CJsonReader::NextNull", "Expected null but was %s", mToken);
+        Logger::E("CJsonReader::NextNull", "Expected null but was %s", JsonTokenToString(mToken).string());
         return E_ILLEGAL_STATE_EXCEPTION;
         // throw new IllegalStateException("Expected null but was " + mToken);
     }
 
     JsonToken jt1;
-    Advance(&jt1);
+    FAIL_RETURN(Advance(&jt1))
     return NOERROR;
 }
 
@@ -272,17 +290,19 @@ ECode CJsonReader::NextDouble(
     /* [out] */ Double* data)
 {
     VALIDATE_NOT_NULL(data)
+    *data = 0;
+
     JsonToken jt;
-    Peek(&jt);
+    FAIL_RETURN(Peek(&jt))
     if (mToken != JsonToken_STRING && mToken != JsonToken_NUMBER) {
-        Logger::E("CJsonReader::NextDouble", "Expected a double but was %s", mToken);
+        Logger::E("CJsonReader::NextDouble", "Expected a double but was %s", JsonTokenToString(mToken).string());
         return E_ILLEGAL_STATE_EXCEPTION;
         // throw new IllegalStateException("Expected a double but was " + mToken);
     }
 
     Double result = StringUtils::ParseDouble(mValue);
     JsonToken jt1;
-    Advance(&jt1);
+    FAIL_RETURN(Advance(&jt1))
     *data = result;
     return NOERROR;
 }
@@ -291,27 +311,32 @@ ECode CJsonReader::NextLong(
     /* [out] */ Int64* data)
 {
     VALIDATE_NOT_NULL(data)
+    *data = 0;
+
     JsonToken jt;
-    Peek(&jt);
+    FAIL_RETURN(Peek(&jt))
     if (mToken != JsonToken_STRING && mToken != JsonToken_NUMBER) {
-        Logger::E("CJsonReader::NextLong", "Expected a long but was %s", mToken);
+        Logger::E("CJsonReader::NextLong", "Expected a long but was %s", JsonTokenToString(mToken).string());
         return E_ILLEGAL_STATE_EXCEPTION;
         // throw new IllegalStateException("Expected a long but was " + mToken);
     }
 
     Int64 result;
     // try {
-        result = StringUtils::ParseInt64(mValue);
+    ECode ec = StringUtils::Parse(mValue, &result);
+    if (FAILED(ec)) {
     // } catch (NumberFormatException ignored) {
-    //     Double asDouble = StringUtils::ParseDouble(mValue); // don't catch this NumberFormatException
-    //     result = (Int64) asDouble;
-    //     if ((Double) result != asDouble) {
-    //         throw new NumberFormatException(mValue);
-    //     }
+        Double asDouble = StringUtils::ParseDouble(mValue); // don't catch this NumberFormatException
+        result = (Int64) asDouble;
+        if ((Double) result != asDouble) {
+            return E_NUMBER_FORMAT_EXCEPTION;
+            // throw new NumberFormatException(mValue);
+        }
+    }
     // }
 
     JsonToken jt1;
-    Advance(&jt1);
+    FAIL_RETURN(Advance(&jt1))
     *data = result;
     return NOERROR;
 }
@@ -320,27 +345,32 @@ ECode CJsonReader::NextInt(
     /* [out] */ Int32* data)
 {
     VALIDATE_NOT_NULL(data)
+    *data = 0;
+
     JsonToken jt;
-    Peek(&jt);
+    FAIL_RETURN(Peek(&jt))
     if (mToken != JsonToken_STRING && mToken != JsonToken_NUMBER) {
-        Logger::E("CJsonReader::NextInt", "Expected an int but was %s", mToken);
+        Logger::E("CJsonReader::NextInt", "Expected an int but was %s", JsonTokenToString(mToken).string());
         return E_ILLEGAL_STATE_EXCEPTION;
         // throw new IllegalStateException("Expected an int but was " + mToken);
     }
 
     Int32 result;
     // try {
-        result = StringUtils::ParseInt32(mValue);
+    ECode ec = StringUtils::Parse(mValue, &result);
     // } catch (NumberFormatException ignored) {
-    //     Double asDouble = StringUtils::ParseDouble(mValue); // don't catch this NumberFormatException
-    //     result = (Int32) asDouble;
-    //     if ((Double) result != asDouble) {
-    //         throw new NumberFormatException(mValue);
-    //     }
+    if (FAILED(ec)) {
+        Double asDouble = StringUtils::ParseDouble(mValue); // don't catch this NumberFormatException
+        result = (Int32) asDouble;
+        if ((Double) result != asDouble) {
+            return E_NUMBER_FORMAT_EXCEPTION;
+            // throw new NumberFormatException(mValue);
+        }
+    }
     // }
 
     JsonToken jt1;
-    Advance(&jt1);
+    FAIL_RETURN(Advance(&jt1))
     *data = result;
     return NOERROR;
 }
@@ -361,8 +391,12 @@ ECode CJsonReader::SkipValue()
     ECode ec = NOERROR;
     Boolean res;
     // try {
-        HasNext(&res);
-        if (!res) {
+        ec = HasNext(&res);
+        if (FAILED(ec)) {
+            mSkipping = FALSE;
+            return ec;
+        }
+        else if (!res) {
             Logger::E("CJsonReader::SkipValue", "No element left to skip");
             return E_ILLEGAL_STATE_EXCEPTION;
             // throw new IllegalStateException("No element left to skip");
@@ -372,7 +406,7 @@ ECode CJsonReader::SkipValue()
             ec = Peek(&jt);
             if (FAILED(ec)) {
                 mSkipping = FALSE;
-                return NOERROR;
+                return ec;
             }
             else if (jt == JsonToken_END_DOCUMENT) {
                 Logger::E("CJsonReader::SkipValue", "No element left to skip");
@@ -387,11 +421,11 @@ ECode CJsonReader::SkipValue()
             ec = Advance(&token);
             if (FAILED(ec)) {
                 mSkipping = FALSE;
-                return NOERROR;
+                return ec;
             }
             else if (token == JsonToken_BEGIN_ARRAY || token == JsonToken_BEGIN_OBJECT) {
-                    count++;
-                }
+                count++;
+            }
             else if (token == JsonToken_END_ARRAY || token == JsonToken_END_OBJECT) {
                 count--;
             }
@@ -443,13 +477,15 @@ ECode CJsonReader::NextInArray(
     /* [out] */ JsonToken* result)
 {
     VALIDATE_NOT_NULL(result)
+    *result = JsonToken_NULL;
+
     if (firstElement) {
         ReplaceTop(JsonScope_NONEMPTY_ARRAY);
     }
     else {
         /* Look for a comma before each element after the first element. */
         Int32 nnw;
-        NextNonWhitespace(&nnw);
+        FAIL_RETURN(NextNonWhitespace(&nnw))
         switch (nnw) {
             case ']':
                 Pop();
@@ -466,7 +502,7 @@ ECode CJsonReader::NextInArray(
     }
 
     Int32 nnw;
-    NextNonWhitespace(&nnw);
+    FAIL_RETURN(NextNonWhitespace(&nnw))
     switch (nnw) {
         case ']':
             if (firstElement) {
@@ -495,6 +531,7 @@ ECode CJsonReader::NextInObject(
     /* [out] */ JsonToken* result)
 {
     VALIDATE_NOT_NULL(result)
+    *result = JsonToken_NULL;
     /*
      * Read delimiters. Either a comma/semicolon separating this and the
      * previous name-value pair, or a close brace to denote the end of the
@@ -503,7 +540,7 @@ ECode CJsonReader::NextInObject(
     if (firstElement) {
         /* Peek to see if this is the empty object. */
         Int32 nnw;
-        NextNonWhitespace(&nnw);
+        FAIL_RETURN(NextNonWhitespace(&nnw))
         switch (nnw) {
             case '}':
                 Pop();
@@ -515,7 +552,7 @@ ECode CJsonReader::NextInObject(
     }
     else {
         Int32 nnw;
-        NextNonWhitespace(&nnw);
+        FAIL_RETURN(NextNonWhitespace(&nnw))
         switch (nnw) {
             case '}':
                 Pop();
@@ -532,7 +569,7 @@ ECode CJsonReader::NextInObject(
 
     /* Read the name. */
     Int32 quote;
-    NextNonWhitespace(&quote);
+    FAIL_RETURN(NextNonWhitespace(&quote))
     switch (quote) {
         case '\'':
             CheckLenient(); // fall-through
@@ -558,13 +595,15 @@ ECode CJsonReader::ObjectValue(
     /* [out] */ JsonToken* result)
 {
     VALIDATE_NOT_NULL(result)
+    *result = JsonToken_NULL;
+
     /*
      * Read the name/value separator. Usually a colon ':'. In lenient mode
      * we also accept an equals sign '=', or an arrow "=>".
      */
     Boolean res;
     Int32 nnw;
-    NextNonWhitespace(&nnw);
+    FAIL_RETURN(NextNonWhitespace(&nnw))
     switch (nnw) {
         case ':':
             break;
@@ -587,8 +626,10 @@ ECode CJsonReader::NextValue(
     /* [out] */ JsonToken* result)
 {
     VALIDATE_NOT_NULL(result)
+    *result = JsonToken_NULL;
+
     Int32 c;
-    NextNonWhitespace(&c);
+    FAIL_RETURN(NextNonWhitespace(&c))
     switch (c) {
         case '{':
             Push(JsonScope_EMPTY_OBJECT);
@@ -646,7 +687,7 @@ ECode CJsonReader::FillBuffer(
 
         // if this is the first read, consume an optional byte order mark (BOM) if it exists
         if (mBufferStartLine == 1 && mBufferStartColumn == 1
-                && mLimit > 0 && (*mBuffer)[0] == '\ufeff') {
+                && mLimit > 0 && (*mBuffer)[0] == 0xfeff /*'\ufeff'*/) {
             mPos++;
             mBufferStartColumn--;
         }
@@ -693,7 +734,7 @@ ECode CJsonReader::NextNonWhitespace(
 
     Boolean res;
     while (mPos < mLimit || (FillBuffer(1, &res), res)) {
-        Int32 c = (*mBuffer)[mPos++];
+        Int32 c = (Int32)(*mBuffer)[mPos++];
         switch (c) {
             case '\t':
             case ' ':
@@ -801,6 +842,7 @@ ECode CJsonReader::NextString(
     /* [out] */ String* str)
 {
     VALIDATE_NOT_NULL(str)
+    *str = String(NULL);
 
     Boolean res;
 
@@ -862,6 +904,7 @@ ECode CJsonReader::NextLiteral(
 
     while (TRUE) {
         for (; mPos + i < mLimit; i++) {
+Logger::D("CJsonReader::NextLiteral", "================= i: %d ,  mPos + i : %d  , mLimit: %d ==============", i, mPos + i, mLimit);
             switch ((*mBuffer)[mPos + i]) {
                 case '/':
                 case '\\':
@@ -1006,6 +1049,7 @@ ECode CJsonReader::ReadLiteral(
     /* [out] */ JsonToken* result)
 {
     VALIDATE_NOT_NULL(result)
+    *result = JsonToken_NULL;
 
     NextLiteral(TRUE, &mValue);
     if (mValueLength == 0) {
@@ -1014,7 +1058,7 @@ ECode CJsonReader::ReadLiteral(
     }
     DecodeLiteral(&mToken);
     if (mToken == JsonToken_STRING) {
-      CheckLenient();
+        CheckLenient();
     }
     *result = mToken;
     return NOERROR;
@@ -1144,6 +1188,42 @@ AutoPtr<ICharSequence> CJsonReader::GetSnippet()
     Int32 afterPos = Math::Min(mLimit - mPos, 20);
     snippet.Append(*mBuffer, mPos, afterPos);
     return snippet.ToCharSequence();
+}
+
+String CJsonReader::JsonTokenToString(
+    /* [in] */ JsonToken state)
+{
+    if (state == JsonToken_BEGIN_ARRAY) {
+        return String("BEGIN_ARRAY");
+    }
+    else if (state == JsonToken_END_ARRAY) {
+        return String("END_ARRAY");
+    }
+    else if (state == JsonToken_BEGIN_OBJECT) {
+        return String("BEGIN_OBJECT");
+    }
+    else if (state == JsonToken_END_OBJECT) {
+        return String("END_OBJECT");
+    }
+    else if (state == JsonToken_NAME) {
+        return String("NAME");
+    }
+    else if (state == JsonToken_STRING) {
+        return String("STRING");
+    }
+    else if (state == JsonToken_NUMBER) {
+        return String("NUMBER");
+    }
+    else if (state == JsonToken_BOOLEAN) {
+        return String("BOOLEAN");
+    }
+    else if (state == JsonToken_NULL) {
+        return String("NULL");
+    }
+    else if (state == JsonToken_END_DOCUMENT) {
+        return String("END_DOCUMENT");
+    }
+    return String("error");
 }
 
 } //Utility

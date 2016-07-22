@@ -389,10 +389,12 @@ ECode LocalePicker::UpdateLocale(
 
     am->UpdateConfiguration(config);
     // Trigger the dirty bit for the Settings Provider.
-    AutoPtr<IBackupManagerHelper> backupMgrHelper;
-    assert(0);
-//    CBackupManagerHelper::AcquireSingleton((IBackupManagerHelper**)&backupMgrHelper);
-    backupMgrHelper->DataChanged(String("com.android.providers.settings"));
+    // TODO
+    Logger::D("LocalePicker::UpdateLocale", "CBackupManagerHelper is TODO");
+    // AutoPtr<IBackupManagerHelper> backupMgrHelper;
+    // CBackupManagerHelper::AcquireSingleton((IBackupManagerHelper**)&backupMgrHelper);
+    // backupMgrHelper->DataChanged(String("com.android.providers.settings"));
+
 //     } catch (RemoteException e) {
 //         // Intentionally left blank
 //     }

@@ -283,7 +283,7 @@ AutoPtr<IThemeConfig> ThemeConfig::JsonSerializer::FromJson(
     // try {
     CStringReader::New(json, (IStringReader**)&reader);
     CJsonReader::New(IReader::Probe(reader), (IJsonReader**)&jsonReader);
-    jsonReader->BeginObject();
+    FAIL_GOTO(jsonReader->BeginObject(), EXIT);
     Boolean hasNext;
     while (jsonReader->HasNext(&hasNext), hasNext) {
         String appPkgName;
@@ -301,6 +301,7 @@ AutoPtr<IThemeConfig> ThemeConfig::JsonSerializer::FromJson(
     //     closeQuietly(reader);
     //     closeQuietly(jsonReader);
     // }
+EXIT:
     CloseQuietly(IReader::Probe(reader));
     CloseQuietly(jsonReader);
     AutoPtr<IThemeConfig> config;
@@ -670,7 +671,7 @@ ECode ThemeConfig::ReadFromParcel(
     // try {
     CStringReader::New(json, (IStringReader**)&reader);
     CJsonReader::New(IReader::Probe(reader), (IJsonReader**)&jsonReader);
-    jsonReader->BeginObject();
+    FAIL_GOTO(jsonReader->BeginObject(), EXIT);
     Boolean hasNext;
     while (jsonReader->HasNext(&hasNext), hasNext) {
         String appPkgName;
@@ -688,6 +689,8 @@ ECode ThemeConfig::ReadFromParcel(
     //     closeQuietly(reader);
     //     closeQuietly(jsonReader);
     // }
+
+EXIT:
     JsonSerializer::CloseQuietly(IReader::Probe(reader));
     JsonSerializer::CloseQuietly(jsonReader);
     mThemes = map;

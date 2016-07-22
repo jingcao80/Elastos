@@ -3332,9 +3332,15 @@ ECode LauncherModel::DeleteFolderContentsFromDatabase(
 ECode LauncherModel::Initialize(
     /* [in] */ ILauncherModelCallbacks* _callbacks)
 {
-    {    AutoLock syncLock(mLock);
-        AutoPtr<IWeakReferenceSource> wrs = IWeakReferenceSource::Probe(_callbacks);
-        wrs->GetWeakReference((IWeakReference**)&mCallbacks);
+    {
+        AutoLock syncLock(mLock);
+        if (_callbacks != NULL) {
+            AutoPtr<IWeakReferenceSource> wrs = IWeakReferenceSource::Probe(_callbacks);
+            wrs->GetWeakReference((IWeakReference**)&mCallbacks);
+        }
+        else {
+            mCallbacks = NULL;
+        }
     }
     return NOERROR;
 }
