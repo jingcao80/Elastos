@@ -1,0 +1,74 @@
+
+module
+{
+    namespace Elastos {
+    namespace Droid {
+    namespace SystemUI {
+    namespace Keyguard {
+
+    interface ISlidingChallengeLayoutLayoutParams {
+        const Int32 CHILD_TYPE_NONE = 0;
+        const Int32 CHILD_TYPE_CHALLENGE = 2;
+        const Int32 CHILD_TYPE_SCRIM = 4;
+        const Int32 CHILD_TYPE_WIDGETS = 5;
+        const Int32 CHILD_TYPE_EXPAND_CHALLENGE_HANDLE = 6;
+    }
+
+    /**
+     * Listener interface that reports changes in scroll state of the challenge area.
+     */
+    interface ISlidingChallengeLayoutOnChallengeScrolledListener {
+        /**
+         * The scroll state itself changed.
+         *
+         * <p>scrollState will be one of the following:</p>
+         *
+         * <ul>
+         * <li><code>SCROLL_STATE_IDLE</code> - The challenge area is stationary.</li>
+         * <li><code>SCROLL_STATE_DRAGGING</code> - The user is actively dragging
+         * the challenge area.</li>
+         * <li><code>SCROLL_STATE_SETTLING</code> - The challenge area is animating
+         * into place.</li>
+         * </ul>
+         *
+         * <p>Do not perform expensive operations (e.g. layout)
+         * while the scroll state is not <code>SCROLL_STATE_IDLE</code>.</p>
+         *
+         * @param scrollState The new scroll state of the challenge area.
+         */
+        OnScrollStateChanged(
+           [in] Int32 scrollState);
+
+        /**
+         * The precise position of the challenge area has changed.
+         *
+         * <p>NOTE: It is NOT safe to modify layout or call any View methods that may
+         * result in a requestLayout anywhere in your view hierarchy as a result of this call.
+         * It may be called during drawing.</p>
+         *
+         * @param scrollPosition New relative position of the challenge area.
+         *                       1.f = fully visible/ready to be interacted with.
+         *                       0.f = fully invisible/inaccessible to the user.
+         * @param challengeTop Position of the top edge of the challenge view in px in the
+         *                     SlidingChallengeLayout's coordinate system.
+         */
+        OnScrollPositionChanged(
+           [in] Float scrollPosition,
+           [in] Int32 challengeTop);
+    }
+
+    interface ISlidingChallengeLayout {
+        const Int32 SCROLL_STATE_IDLE = 0;
+        const Int32 SCROLL_STATE_DRAGGING = 1;
+        const Int32 SCROLL_STATE_SETTLING = 2;
+        const Int32 SCROLL_STATE_FADING = 3;
+
+        const Int32 CHALLENGE_FADE_OUT_DURATION = 100;
+        const Int32 CHALLENGE_FADE_IN_DURATION = 160;
+    }
+
+    } // namespace Keyguard
+    } // namespace SystemUI
+    } // namespace Droid
+    } // namespace Elastos
+}
