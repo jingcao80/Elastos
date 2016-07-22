@@ -60,6 +60,8 @@ public:
         , public ICandidateViewListener
     {
     public:
+        TO_STRING_IMPL("CPinyinIME::ChoiceNotifier")
+
         CAR_INTERFACE_DECL();
 
         ChoiceNotifier(
