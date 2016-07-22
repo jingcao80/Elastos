@@ -158,6 +158,10 @@ module
         constructor();
 
         interface IApplication;
+        interface IContextWrapper;
+        interface IContext;
+        interface IComponentCallbacks2;
+        interface IComponentCallbacks;
         interface IApplicationOne;
     }
 

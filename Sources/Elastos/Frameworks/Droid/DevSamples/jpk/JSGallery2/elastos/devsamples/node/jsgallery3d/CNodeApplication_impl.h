@@ -2,8 +2,8 @@
 
 #include <elastos/utility/logging/Logger.h>
 
-using Elastos::Droid::App::EIID_IActivity;
-using Elastos::Droid::App::EIID_IApplication;
+//using Elastos::Droid::App::EIID_IActivity;
+//using Elastos::Droid::App::EIID_IApplication;
 using Elastos::Droid::App::IAlertDialog;
 using Elastos::Utility::Logging::Logger;
 
