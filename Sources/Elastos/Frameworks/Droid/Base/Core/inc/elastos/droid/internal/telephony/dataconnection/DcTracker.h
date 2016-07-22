@@ -119,6 +119,8 @@ private:
         : public NetworkFactory
     {
     public:
+        TO_STRING_IMPL("DcTracker::TelephonyNetworkFactory")
+
         TelephonyNetworkFactory(
             /* [in] */ DcTracker* host);
 
@@ -218,6 +220,8 @@ private:
     };
 
 public:
+    TO_STRING_IMPL("DcTracker")
+
     CAR_INTERFACE_DECL()
 
     DcTracker();

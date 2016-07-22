@@ -63,6 +63,8 @@ private:
         : public Handler
     {
     public:
+        TO_STRING_IMPL("UiccCard::InnerHandler")
+
         InnerHandler(
             /* [in] */ UiccCard* owner);
 

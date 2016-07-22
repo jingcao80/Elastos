@@ -35,6 +35,8 @@ class CdmaApnProfileTracker
     , public ICdmaApnProfileTracker
 {
 public:
+    TO_STRING_IMPL("CdmaApnProfileTracker")
+
     CAR_INTERFACE_DECL()
 
     CdmaApnProfileTracker();

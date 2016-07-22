@@ -174,6 +174,8 @@ public:
         : public Handler
     {
     public:
+        TO_STRING_IMPL("CStorageManager::ListenerHandler")
+
         ListenerHandler(
             /* [in] */ ListenerDelegate * host,
             /* [in] */ ILooper * looper)

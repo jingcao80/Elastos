@@ -171,15 +171,18 @@ ECode CLinkedBlockingDeque::constructor(
     constructor(Elastos::Core::Math::INT32_MAX_VALUE);
     AutoPtr<IReentrantLock> lock = mLock;
     (ILock::Probe(lock))->Lock(); // Never contended, but necessary for visibility
-    AutoPtr<ArrayOf<IInterface*> > arr;
-    c->ToArray((ArrayOf<IInterface*>**)&arr);
-    for (Int32 i = 0; i < arr->GetLength(); i++) {
-        AutoPtr<IInterface> e = (*arr)[i];
-        if (e == NULL) {
+
+    AutoPtr<IIterator> it;
+    c->GetIterator((IIterator**)&it);
+    Boolean hasNext;
+    while (it->HasNext(&hasNext), hasNext) {
+        AutoPtr<IInterface> obj;
+        it->GetNext((IInterface**)&obj);
+        if (obj == NULL) {
             (ILock::Probe(lock))->UnLock();
             return E_NULL_POINTER_EXCEPTION;
         }
-        AutoPtr<Node> p = new Node(e);
+        AutoPtr<Node> p = new Node(obj);
         if (!LinkLast(p)) {
             (ILock::Probe(lock))->UnLock();
             return E_ILLEGAL_STATE_EXCEPTION;

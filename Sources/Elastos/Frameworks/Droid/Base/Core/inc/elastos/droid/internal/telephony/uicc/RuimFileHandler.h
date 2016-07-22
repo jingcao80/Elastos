@@ -24,6 +24,8 @@ class RuimFileHandler
     , public IRuimFileHandler
 {
 public:
+    TO_STRING_IMPL("RuimFileHandler")
+
     CAR_INTERFACE_DECL();
 
     RuimFileHandler();

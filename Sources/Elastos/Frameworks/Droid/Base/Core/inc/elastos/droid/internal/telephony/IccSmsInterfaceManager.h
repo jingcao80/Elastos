@@ -34,6 +34,8 @@ protected:
     class InnerHandler: public Handler
     {
     public:
+        TO_STRING_IMPL("IccSmsInterfaceManager::InnerHandler")
+
         InnerHandler(
             /* [in] */ IccSmsInterfaceManager* host);
 

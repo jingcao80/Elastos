@@ -114,6 +114,8 @@ private:
     };
 
 public:
+    TO_STRING_IMPL("CDMAPhone")
+
     CAR_INTERFACE_DECL();
 
     CDMAPhone();

@@ -73,6 +73,8 @@ private:
         : public Handler
     {
     public:
+        TO_STRING_IMPL("DisplayControllerHandler")
+
         DisplayControllerHandler(
             /* [in] */ ILooper* looper,
             /* [in] */ DisplayPowerController* host);

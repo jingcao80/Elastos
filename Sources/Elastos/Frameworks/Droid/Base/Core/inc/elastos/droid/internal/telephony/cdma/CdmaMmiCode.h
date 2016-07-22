@@ -39,6 +39,8 @@ class CdmaMmiCode
     , public ICdmaMmiCode
 {
 public:
+    TO_STRING_IMPL("CdmaMmiCode")
+
     CAR_INTERFACE_DECL();
 
     CdmaMmiCode();

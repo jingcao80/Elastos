@@ -65,16 +65,8 @@ ECode ViewFlipper::FlipperReceiver::OnReceive(
     return NOERROR;
 }
 
-ECode ViewFlipper::FlipperReceiver::ToString(
-    /* [out] */ String* info)
-{
-    VALIDATE_NOT_NULL(info);
-    *info = String("ViewFlipper::FlipperReceiver: ");
-    (*info).AppendFormat("%p", this);
-    return NOERROR;
-}
-
 CAR_INTERFACE_IMPL(ViewFlipper, ViewAnimator, IViewFlipper);
+
 ViewFlipper::ViewFlipper()
     : mFlipInterval(DEFAULT_INTERVAL)
     , mAutoStart(FALSE)
@@ -84,7 +76,9 @@ ViewFlipper::ViewFlipper()
     , mUserPresent(TRUE)
 {
     mReceiver = new FlipperReceiver(this);
-    mHandler = new MyHandler(this);
+    AutoPtr<MyHandler> h = new MyHandler(this);
+    h->constructor();
+    mHandler = h.Get();
 }
 
 ECode ViewFlipper::constructor(
@@ -130,7 +124,8 @@ ECode ViewFlipper::OnAttachedToWindow()
     AutoPtr<IUserHandle> uh;
     Process::MyUserHandle((IUserHandle**)&uh);
     AutoPtr<IIntent> intent;
-    context->RegisterReceiverAsUser(mReceiver, uh, filter, String(NULL), mHandler, (IIntent**)&intent);
+    context->RegisterReceiverAsUser(
+        mReceiver, uh, filter, String(NULL), mHandler, (IIntent**)&intent);
 
     if (mAutoStart) {
         // Automatically start when requested
@@ -185,7 +180,7 @@ ECode ViewFlipper::OnInitializeAccessibilityEvent(
 {
     ViewAnimator::OnInitializeAccessibilityEvent(event);
     AutoPtr<ICharSequence> name;
-    CString::New(String("CViewFlipper"), (ICharSequence**)&name);
+    CString::New(String("Elastos.Droid.Widget.CViewFlipper"), (ICharSequence**)&name);
     IAccessibilityRecord::Probe(event)->SetClassName(name);
     return NOERROR;
 }
@@ -195,7 +190,7 @@ ECode ViewFlipper::OnInitializeAccessibilityNodeInfo(
 {
     ViewAnimator::OnInitializeAccessibilityNodeInfo(info);
     AutoPtr<ICharSequence> name;
-    CString::New(String("CViewFlipper"), (ICharSequence**)&name);
+    CString::New(String("Elastos.Droid.Widget.CViewFlipper"), (ICharSequence**)&name);
     info->SetClassName(name);
     return NOERROR;
 }

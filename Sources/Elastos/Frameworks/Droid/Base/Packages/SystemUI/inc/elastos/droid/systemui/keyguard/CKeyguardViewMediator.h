@@ -185,7 +185,7 @@ private:
     class StartKeyguardExitAnimParams
         : public Object
     {
-    private:
+    public:
         StartKeyguardExitAnimParams(
             /* [in] */ Int64 startTime,
             /* [in] */ Int64 fadeoutDuration);
@@ -217,6 +217,8 @@ private:
         : public Handler
     {
     public:
+        TO_STRING_IMPL("CKeyguardViewMediator::MyHandler")
+
         MyHandler(
             /* [in] */ CKeyguardViewMediator* host);
 
@@ -445,7 +447,7 @@ private:
      * @see #keyguardDone
      * @see #KEYGUARD_DONE
      */
-    CARAPI_(void) HandleKeyguardDone(
+    CARAPI HandleKeyguardDone(
         /* [in] */ Boolean authenticated,
         /* [in] */ Boolean wakeup);
 

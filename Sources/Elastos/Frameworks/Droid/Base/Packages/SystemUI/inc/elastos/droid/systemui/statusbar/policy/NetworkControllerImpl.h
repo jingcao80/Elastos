@@ -92,6 +92,8 @@ private:
     class WifiHandler: public Handler
     {
     public:
+        TO_STRING_IMPL("NetworkControllerImpl::WifiHandler")
+
         WifiHandler(
             /* [in] */ NetworkControllerImpl* host);
 

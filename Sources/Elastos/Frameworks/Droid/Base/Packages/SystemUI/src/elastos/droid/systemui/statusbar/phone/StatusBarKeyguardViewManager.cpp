@@ -1,5 +1,5 @@
-
 #include "elastos/droid/systemui/statusbar/phone/StatusBarKeyguardViewManager.h"
+#include "elastos/droid/systemui/keyguard/KeyguardUpdateMonitor.h"
 #include "Elastos.Droid.Internal.h"
 #include <elastos/droid/os/SystemClock.h>
 #include <elastos/core/Math.h>
@@ -9,6 +9,7 @@ using Elastos::Droid::Os::IBinder;
 using Elastos::Droid::Os::SystemClock;
 using Elastos::Droid::View::IView;
 using Elastos::Droid::View::IViewGroup;
+using Elastos::Droid::SystemUI::Keyguard::KeyguardUpdateMonitor;
 using Elastos::Droid::SystemUI::Keyguard::IKeyguardUpdateMonitor;
 using Elastos::Utility::Logging::Slogger;
 
@@ -454,9 +455,7 @@ void StatusBarKeyguardViewManager::UpdateStates()
         mScrimController->SetBouncerShowing(bouncerShowing);
     }
 
-    Slogger::D(TAG, "TODO [UpdateStates] : Need the app Keyguard.");
-    AutoPtr<IKeyguardUpdateMonitor> updateMonitor;
-    // KeyguardUpdateMonitor updateMonitor = KeyguardUpdateMonitor.getInstance(mContext);
+    AutoPtr<IKeyguardUpdateMonitor> updateMonitor = KeyguardUpdateMonitor::GetInstance(mContext);
     if (updateMonitor != NULL) {
         if ((showing && !occluded) != (mLastShowing && !mLastOccluded) || mFirstUpdate) {
             updateMonitor->SendKeyguardVisibilityChanged(showing && !occluded);

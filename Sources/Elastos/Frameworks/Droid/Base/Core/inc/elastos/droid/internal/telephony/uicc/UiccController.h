@@ -87,6 +87,8 @@ class UiccController
     , public IUiccController
 {
 public:
+    TO_STRING_IMPL("UiccController")
+
     CAR_INTERFACE_DECL();
 
     UiccController();

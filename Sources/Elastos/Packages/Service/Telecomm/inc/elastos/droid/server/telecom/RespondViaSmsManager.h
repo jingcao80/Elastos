@@ -32,6 +32,8 @@ private:
         : public Handler
     {
     public:
+        TO_STRING_IMPL("RespondViaSmsManager::Handler")
+
         SubHandler(
             /* [in] */ RespondViaSmsManager* host);
 
@@ -47,6 +49,8 @@ private:
         : public Thread
     {
     public:
+        TO_STRING_IMPL("RespondViaSmsManager::SubThread")
+
         SubThread(
             /* [in] */ RespondViaSmsManager* host,
             /* [in] */ IResponse* response,

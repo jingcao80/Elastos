@@ -150,8 +150,6 @@ private:
 
         ~EventHandler();
 
-        CAR_INTERFACE_DECL()
-
         CARAPI HandleMessage(
             /* [in] */ IMessage* msg);
 

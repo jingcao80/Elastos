@@ -53,6 +53,8 @@ private:
         : public Handler
     {
     public:
+        TO_STRING_IMPL("WifiEnabler::InitHandler")
+
         InitHandler(
             /* [in] */ WifiEnabler* host);
 

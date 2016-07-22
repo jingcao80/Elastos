@@ -682,6 +682,8 @@ private:
         : public NetworkFactory
     {
     public:
+        TO_STRING_IMPL("WifistateMachine::WifiNetworkFactory")
+
         WifiNetworkFactory(
             /* [in] */ ILooper* l,
             /* [in] */ IContext* c,
@@ -698,6 +700,8 @@ private:
         : public NetworkAgent
     {
     public:
+        TO_STRING_IMPL("WiFiStateMachine::WifiNetworkAgent")
+
         WifiNetworkAgent(
             /* [in] */ ILooper* l,
             /* [in] */ IContext* c,

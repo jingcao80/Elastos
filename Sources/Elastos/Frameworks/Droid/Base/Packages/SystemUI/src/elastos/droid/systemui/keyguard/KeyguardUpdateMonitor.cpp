@@ -1,4 +1,3 @@
-
 #include "elastos/droid/systemui/keyguard/KeyguardUpdateMonitor.h"
 #include "elastos/droid/systemui/keyguard/CKeyguardUpdateMonitorContentObserver.h"
 #include "elastos/droid/systemui/keyguard/CKeyguardUpdateMonitorBroadcastReceiver1.h"
@@ -1115,15 +1114,16 @@ ECode KeyguardUpdateMonitor::constructor(
     AutoPtr<IInterface> obj;
     context->GetSystemService(IContext::TRUST_SERVICE, (IInterface**)&obj);
     AutoPtr<ITrustManager> trustManager = ITrustManager::Probe(obj);
-    // TODO:
-    // trustManager->RegisterTrustListener(listener);
+    trustManager->RegisterTrustListener(listener);
 
     mFingerprintManagerReceiver = new MyFingerprintManagerReceiver(this);
     obj = NULL;
-    // TODO:
-    // context->GetSystemService(IContext::FINGERPRINT_SERVICE, (IInterface**)&obj);
-    // AutoPtr<IFingerprintManager> fpm = IFingerprintManager::Probe(obj);
-    // return fpm->StartListening(mFingerprintManagerReceiver);
+    context->GetSystemService(IContext::FINGERPRINT_SERVICE, (IInterface**)&obj);
+    AutoPtr<IFingerprintManager> fpm = IFingerprintManager::Probe(obj);
+    if (fpm) {
+        fpm->StartListening(mFingerprintManagerReceiver);
+    }
+
     return NOERROR;
 }
 
@@ -1132,8 +1132,11 @@ Boolean KeyguardUpdateMonitor::IsDeviceProvisionedInSettingsDb()
     AutoPtr<IContentResolver> cr;
     mContext->GetContentResolver((IContentResolver**)&cr);
     Int32 num;
-    Elastos::Droid::Provider::Settings::Global::GetInt32(cr, ISettingsGlobal::DEVICE_PROVISIONED, 0, &num);
-    return num != 0;
+    Elastos::Droid::Provider::Settings::Global::GetInt32(
+        cr, ISettingsGlobal::DEVICE_PROVISIONED, 0, &num);
+    Logger::W(TAG, " >> TODO DEVICE_PROVISIONED");
+    // return num != 0;
+    return TRUE;
 }
 
 void KeyguardUpdateMonitor::WatchForDeviceProvisioning()
@@ -1144,7 +1147,8 @@ void KeyguardUpdateMonitor::WatchForDeviceProvisioning()
     AutoPtr<IContentResolver> cr;
     mContext->GetContentResolver((IContentResolver**)&cr);
     AutoPtr<IUri> value;
-    Elastos::Droid::Provider::Settings::Global::GetUriFor(ISettingsGlobal::DEVICE_PROVISIONED, (IUri**)&value);
+    Elastos::Droid::Provider::Settings::Global::GetUriFor(
+        ISettingsGlobal::DEVICE_PROVISIONED, (IUri**)&value);
     cr->RegisterContentObserver(value, FALSE, mDeviceProvisionedObserver);
 
     // prevent a race condition between where we check the flag and where we register the

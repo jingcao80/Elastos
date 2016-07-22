@@ -23,6 +23,8 @@ class UsimFileHandler
     , public IUsimFileHandler
 {
 public:
+    TO_STRING_IMPL("UsimFileHandler")
+
     CAR_INTERFACE_DECL();
 
     UsimFileHandler();

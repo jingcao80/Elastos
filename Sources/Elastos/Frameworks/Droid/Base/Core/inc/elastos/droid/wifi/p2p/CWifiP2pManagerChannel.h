@@ -31,6 +31,8 @@ private:
         : public Handler
     {
     public:
+        TO_STRING_IMPL("CWifiP2pManagerChannel::P2pHandler")
+
         P2pHandler(
             /* [in] */ ILooper* looper,
             /* [in] */ CWifiP2pManagerChannel* context);

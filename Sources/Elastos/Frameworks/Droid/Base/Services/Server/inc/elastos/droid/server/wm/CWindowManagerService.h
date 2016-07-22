@@ -246,6 +246,8 @@ public:
     class H : public Handler
     {
     public:
+        TO_STRING_IMPL("CWindowManagerService::H")
+
         H(
             /* [in] */ CWindowManagerService * host);
 

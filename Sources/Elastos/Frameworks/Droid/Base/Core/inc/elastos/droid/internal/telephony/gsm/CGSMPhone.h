@@ -81,6 +81,8 @@ public:
 
     virtual ~CGSMPhone();
 
+    TO_STRING_IMPL("CGSMPhone")
+
     CAR_INTERFACE_DECL()
 
     CAR_OBJECT_DECL()

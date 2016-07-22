@@ -58,6 +58,8 @@ class CdmaLteServiceStateTracker
     , public ICdmaLteServiceStateTracker
 {
 public:
+    TO_STRING_IMPL("CdmaLteServiceStateTracker")
+
     CAR_INTERFACE_DECL();
 
     CdmaLteServiceStateTracker();

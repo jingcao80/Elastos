@@ -53,6 +53,8 @@ private:
         : public NetworkAgent
     {
     public:
+        TO_STRING_IMPL("Vpn::MyNetworkAgent")
+
         // @Override
         CARAPI Unwanted()
         {

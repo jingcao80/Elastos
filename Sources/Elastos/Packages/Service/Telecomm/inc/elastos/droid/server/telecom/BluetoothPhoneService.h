@@ -142,6 +142,8 @@ private:
         : public Handler
     {
     public:
+        TO_STRING_IMPL("BluetoothPhoneService::SubHandler")
+
         SubHandler(
             /* [in] */ BluetoothPhoneService* host);
 

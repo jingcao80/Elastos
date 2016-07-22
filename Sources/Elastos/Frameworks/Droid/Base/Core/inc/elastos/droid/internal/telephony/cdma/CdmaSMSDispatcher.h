@@ -49,6 +49,8 @@ class CdmaSMSDispatcher
     , public ICdmaSMSDispatcher
 {
 public:
+    TO_STRING_IMPL("CdmaSMSDispatcher")
+
     CAR_INTERFACE_DECL();
 
     CdmaSMSDispatcher();

@@ -396,20 +396,25 @@ ECode CLinkedList::AddAll(
             previous = previous->mPrevious;
         }
     }
+
     AutoPtr<Link> next = previous->mNext;
-    AutoPtr<ArrayOf<IInterface*> > elementsArray;
-    elements->ToArray((ArrayOf<IInterface*>**)&elementsArray);
-    for (Int32 i = 0; i < elementsArray->GetLength(); ++i) {
-        AutoPtr<Link> newLink = new Link((*elementsArray)[i], previous, NULL);
+    AutoPtr<IIterator> it;
+    elements->GetIterator((IIterator**)&it);
+    Boolean hasNext;
+    while (it->HasNext(&hasNext), hasNext) {
+        AutoPtr<IInterface> obj;
+        it->GetNext((IInterface**)&obj);
+        AutoPtr<Link> newLink = new Link(obj, previous, NULL);
         previous->mNext = newLink;
         previous = newLink;
-     }
-     previous->mNext = next;
-     next->mPrevious = previous;
-     mSize += adding;
-     mModCount++;
-     *result = TRUE;
-     return NOERROR;
+    }
+
+    previous->mNext = next;
+    next->mPrevious = previous;
+    mSize += adding;
+    mModCount++;
+    *result = TRUE;
+    return NOERROR;
 }
 
 ECode CLinkedList::AddAll(
@@ -439,10 +444,13 @@ ECode CLinkedList::AddAll(
     }
 
     AutoPtr<Link> previous = mVoidLink->mPrevious;
-    AutoPtr<ArrayOf<IInterface*> > elementsArray;
-    elements->ToArray((ArrayOf<IInterface*>**)&elementsArray);
-    for (Int32 i = 0; i < elementsArray->GetLength(); ++i) {
-        AutoPtr<Link> newLink = new Link((*elementsArray)[i], previous, NULL);
+    AutoPtr<IIterator> it;
+    elements->GetIterator((IIterator**)&it);
+    Boolean hasNext;
+    while (it->HasNext(&hasNext), hasNext) {
+        AutoPtr<IInterface> obj;
+        it->GetNext((IInterface**)&obj);
+        AutoPtr<Link> newLink = new Link(obj, previous, NULL);
         previous->mNext = newLink;
         previous = newLink;
     }

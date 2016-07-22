@@ -36,6 +36,8 @@ public:
     class MonitorHandler: public Handler
     {
     public:
+        TO_STRING_IMPL("ServiceMonitor::MonitorHandler")
+
         MonitorHandler(
             /* [in] */ ServiceMonitor* host);
 

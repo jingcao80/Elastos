@@ -104,10 +104,10 @@ module
      */
     [local]
     interface IBatteryStatsImplUidPkg {
-//        GetBatteryStats(
-//            [out] IBatteryStatsImpl** batteryStats);
-//
-//        IncWakeupsLocked();
+        GetBatteryStats(
+            [out] IBatteryStatsImpl** batteryStats);
+
+        IncWakeupsLocked();
     }
 
     /**

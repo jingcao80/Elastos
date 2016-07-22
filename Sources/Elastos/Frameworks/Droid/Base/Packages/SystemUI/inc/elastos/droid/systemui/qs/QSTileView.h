@@ -34,6 +34,8 @@ private:
     class H: public Handler
     {
     public:
+        TO_STRING_IMPL("QSTileView::H")
+
         H(
             /* [in] */ QSTileView* host);
 

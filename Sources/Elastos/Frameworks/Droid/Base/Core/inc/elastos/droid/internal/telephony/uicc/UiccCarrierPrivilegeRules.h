@@ -112,6 +112,8 @@ private:
     };
 
 public:
+    TO_STRING_IMPL("UiccCarrierPrivilegeRules")
+
     CAR_INTERFACE_DECL();
 
     UiccCarrierPrivilegeRules();

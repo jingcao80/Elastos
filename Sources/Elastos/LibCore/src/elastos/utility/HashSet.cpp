@@ -48,10 +48,14 @@ ECode HashSet::constructor(
     AutoPtr<IMap> map;
     FAIL_RETURN(CHashMap::New(clolen < 6 ? 11 : clolen * 2, (IMap**)&map));
     FAIL_RETURN(constructor(map));
-    AutoPtr< ArrayOf<IInterface*> > outarr;
-    collection->ToArray((ArrayOf<IInterface*>**)&outarr);
-    for (Int32 i = 0; i < outarr->GetLength(); i++) {
-        Add((*outarr)[i]);
+
+    AutoPtr<IIterator> it;
+    collection->GetIterator((IIterator**)&it);
+    Boolean hasNext;
+    while (it->HasNext(&hasNext), hasNext) {
+        AutoPtr<IInterface> obj;
+        it->GetNext((IInterface**)&obj);
+        Add(obj);
     }
     return NOERROR;
 }

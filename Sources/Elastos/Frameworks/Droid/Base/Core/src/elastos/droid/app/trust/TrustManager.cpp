@@ -179,14 +179,16 @@ ECode TrustManager::RegisterTrustListener(
     AutoPtr<IITrustListener> iTrustListener;
     CTrustManagerTrustListener::New(trustListener, mHandler, (IITrustListener**)&iTrustListener);
 
-    ECode ec = mService->RegisterTrustListener(iTrustListener);
-    if (ec == (ECode)E_REMOTE_EXCEPTION) {
-        OnError(ec);
-        return NOERROR;
-    }
-    else if (FAILED(ec)) {
-        OnError(ec);
-        return ec;
+    if (mService != NULL) {
+        ECode ec = mService->RegisterTrustListener(iTrustListener);
+        if (ec == (ECode)E_REMOTE_EXCEPTION) {
+            OnError(ec);
+            return NOERROR;
+        }
+        else if (FAILED(ec)) {
+            OnError(ec);
+            return ec;
+        }
     }
 
     mTrustListeners->Put(trustListener, TO_IINTERFACE(iTrustListener));
@@ -200,7 +202,7 @@ ECode TrustManager::UnregisterTrustListener(
     mTrustListeners->Remove(trustListener, (IInterface**)&obj);
     IITrustListener* iTrustListener = IITrustListener::Probe(obj);
     ECode ec = NOERROR;
-    if (iTrustListener != NULL) {
+    if (iTrustListener != NULL && mService != NULL) {
         ec = mService->UnregisterTrustListener(iTrustListener);
         if (ec == (ECode)E_REMOTE_EXCEPTION) {
             OnError(ec);

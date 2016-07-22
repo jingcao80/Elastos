@@ -46,9 +46,12 @@ class CallManager
     , public ICallManager
 {
 private:
-    class CallManagerHandler: public Handler
+    class CallManagerHandler
+        : public Handler
     {
     public:
+        TO_STRING_IMPL("CallManager::CallManagerHandler")
+
         CallManagerHandler(
             /* [in] */ CallManager* host);
 

@@ -17,6 +17,7 @@
 #include <elastos/droid/os/SystemClock.h>
 #include <elastos/droid/os/Looper.h>
 #include <elastos/droid/os/UserHandle.h>
+#include <elastos/droid/os/CHandler.h>
 #include <elastos/core/Math.h>
 
 #include <elastos/core/AutoLock.h>
@@ -26,6 +27,7 @@ using Elastos::Droid::App::IPendingIntent;
 using Elastos::Droid::Content::CComponentName;
 using Elastos::Droid::Content::Intent;
 using Elastos::Droid::Graphics::IBitmap;
+using Elastos::Droid::Os::CHandler;
 using Elastos::Droid::Os::EIID_IHandler;
 using Elastos::Droid::Os::CBundle;
 using Elastos::Droid::Os::IBundle;
@@ -338,8 +340,6 @@ RemoteController::EventHandler::EventHandler(
 
 RemoteController::EventHandler::~EventHandler()
 {}
-
-CAR_INTERFACE_IMPL(RemoteController::EventHandler, Object, IHandler)
 
 ECode RemoteController::EventHandler::HandleMessage(
     /* [in] */ IMessage* msg)
@@ -886,15 +886,15 @@ ECode RemoteController::StartListeningToSessions()
     AutoPtr<IComponentName> listenerComponent;
     // CComponentName::New(mContext,
     //     EIID_IRemoteControllerOnClientUpdateListener, (IComponentName**)&listenerComponent);
-    AutoPtr<Handler> handler;
+    AutoPtr<IHandler> handler;
     AutoPtr<ILooper> looper = Looper::GetMyLooper();
     if (looper == NULL) {
         AutoPtr<ILooper> p = Looper::GetMainLooper();
-        handler = new Handler(p.Get());
+        CHandler::New(p, (IHandler**)&handler);
     }
     Int32 userId = UserHandle::GetMyUserId();
     mSessionManager->AddOnActiveSessionsChangedListener(mSessionListener, listenerComponent.Get(),
-            userId, IHandler::Probe(handler));
+            userId, handler);
     AutoPtr<IList> list;
     mSessionManager->GetActiveSessions(listenerComponent.Get(), (IList**)&list);
     mSessionListener->OnActiveSessionsChanged(list.Get());

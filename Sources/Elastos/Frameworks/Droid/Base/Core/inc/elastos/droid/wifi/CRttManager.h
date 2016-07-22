@@ -26,6 +26,8 @@ private:
     class ServiceHandler : public Handler
     {
     public:
+        TO_STRING_IMPL("CRttManager::ServiceHandler")
+
         ServiceHandler(
             /* [in] */ ILooper* looper);
 

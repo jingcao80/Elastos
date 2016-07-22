@@ -377,6 +377,8 @@ private:
         : public Handler
     {
     public:
+        TO_STRING_IMPL("AlarmManagerService::AlarmHandler")
+
         AlarmHandler(
             /* [in] */ AlarmManagerService* host);
 

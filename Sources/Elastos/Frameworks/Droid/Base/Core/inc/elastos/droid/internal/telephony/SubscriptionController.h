@@ -76,6 +76,8 @@ private:
         : public Handler
     {
     public:
+        TO_STRING_IMPL("SubscriptionController::DataConnectionHandler")
+
         DataConnectionHandler(
             /* [in] */ SubscriptionController* host);
 
@@ -91,6 +93,8 @@ private:
         : public Handler
     {
     public:
+        TO_STRING_IMPL("SubscriptionController::MyHandler")
+
         MyHandler(
             /* [in] */ SubscriptionController* host);
 

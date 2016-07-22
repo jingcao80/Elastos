@@ -19,9 +19,12 @@ class ECO_PUBLIC ViewFlipper
     , public IViewFlipper
 {
 private:
-    class MyHandler : public Handler
+    class ECO_LOCAL MyHandler
+        : public Handler
     {
     public:
+        TO_STRING_IMPL("ViewFlipper::MyHandler")
+
         MyHandler(
             /* [in] */ ViewFlipper* host);
 
@@ -32,18 +35,18 @@ private:
         ViewFlipper* mHost;
     };
 
-    class FlipperReceiver: public BroadcastReceiver
+    class ECO_LOCAL FlipperReceiver
+        : public BroadcastReceiver
     {
     public:
+        TO_STRING_IMPL("ViewFlipper::FlipperReceiver")
+
         FlipperReceiver(
             /* [in] */ ViewFlipper* host);
 
         CARAPI OnReceive(
             /* [in] */ IContext* context,
             /* [in] */ IIntent* intent);
-
-        CARAPI ToString(
-            /* [out] */ String* info);
 
     private:
         ViewFlipper* mHost;

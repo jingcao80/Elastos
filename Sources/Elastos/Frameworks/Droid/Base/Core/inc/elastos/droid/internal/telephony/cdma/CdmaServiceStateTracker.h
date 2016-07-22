@@ -110,6 +110,8 @@ private:
     };
 
 public:
+    TO_STRING_IMPL("CdmaServiceStateTracker")
+
     CAR_INTERFACE_DECL();
 
     CdmaServiceStateTracker();

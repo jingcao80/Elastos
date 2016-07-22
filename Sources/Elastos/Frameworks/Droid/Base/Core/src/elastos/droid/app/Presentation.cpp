@@ -110,11 +110,10 @@ ECode Presentation::PresentationContextThemeWrapper::GetSystemService(
 //======================================================================================
 // Presentation
 //======================================================================================
+CAR_INTERFACE_IMPL(Presentation, Dialog, IPresentation)
+
 Presentation::Presentation()
 {
-    mDisplayListener = new PresentationDisplayListener(this);
-    mHandler = new PresentationHandler(this);
-    mHandler->constructor(FALSE);
 }
 
 Presentation::~Presentation()
@@ -133,6 +132,10 @@ ECode Presentation::constructor(
     /* [in] */ IDisplay * display,
     /* [in] */ Int32 theme)
 {
+    mDisplayListener = new PresentationDisplayListener(this);
+    mHandler = new PresentationHandler(this);
+    mHandler->constructor(FALSE);
+
     Dialog::constructor(CreatePresentationContext(outerContext, display, theme), theme, FALSE);
 
     mDisplay = display;
@@ -153,6 +156,7 @@ ECode Presentation::constructor(
 ECode Presentation::GetDisplay(
     /* [out] */ IDisplay **display)
 {
+    VALIDATE_NOT_NULL(display)
     *display = mDisplay;
     REFCOUNT_ADD(*display)
     return NOERROR;
@@ -161,6 +165,7 @@ ECode Presentation::GetDisplay(
 ECode Presentation::GetResources(
     /* [out] */ IResources **resources)
 {
+    VALIDATE_NOT_NULL(resources)
     AutoPtr<IContext> ctx;
     GetContext((IContext**)&ctx);
     return ctx->GetResources(resources);

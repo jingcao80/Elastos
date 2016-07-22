@@ -28,6 +28,8 @@ CarClass(CUsimDataDownloadHandler)
     , public IUsimDataDownloadHandler
 {
 public:
+    TO_STRING_IMPL("CUsimDataDownloadHandler")
+
     CUsimDataDownloadHandler();
 
     CAR_INTERFACE_DECL()

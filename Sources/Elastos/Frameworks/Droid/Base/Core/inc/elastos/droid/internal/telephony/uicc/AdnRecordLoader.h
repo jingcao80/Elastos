@@ -19,6 +19,8 @@ class AdnRecordLoader
     , public IAdnRecordLoader
 {
 public:
+    TO_STRING_IMPL("AdnRecordLoader")
+
     CAR_INTERFACE_DECL();
 
     AdnRecordLoader();

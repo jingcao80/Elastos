@@ -242,8 +242,9 @@ void WindowAnimator::UpdateWindowsLocked(
             if (win->mAttrs->GetPrivateFlags(&privateFlags), (privateFlags & IWindowManagerLayoutParams::PRIVATE_FLAG_KEYGUARD) != 0) {
                 if (!winAnimator->mAnimating) {
                     // Create a new animation to delay until keyguard is gone on its own.
-                    winAnimator->mAnimation = NULL;
-                    CAlphaAnimation::New(1.0f, 1.0f, (IAlphaAnimation**)&(winAnimator->mAnimation));
+                    AutoPtr<IAnimation> animation;
+                    CAlphaAnimation::New(1.0f, 1.0f, (IAnimation**)&animation);
+                    winAnimator->mAnimation = animation;
                     winAnimator->mAnimation->SetDuration(mBlurUiEnabled ? 0 : KEYGUARD_ANIM_TIMEOUT_MS);
                     winAnimator->mAnimationIsEntrance = FALSE;
                 }

@@ -37,6 +37,8 @@ CarClass(CGsmSMSDispatcher)
     , public IGsmSMSDispatcher
 {
 public:
+    TO_STRING_IMPL("CGsmSMSDispatcher")
+
     CGsmSMSDispatcher();
 
     CAR_INTERFACE_DECL()

@@ -28,6 +28,8 @@ class ModemBindingPolicyHandler
     , public IModemBindingPolicyHandler
 {
 public:
+    TO_STRING_IMPL("ModemBindingPolicyHandler")
+
     CAR_INTERFACE_DECL()
 
     //***** Class Methods

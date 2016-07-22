@@ -14,6 +14,8 @@ CarClass(CHandler)
 {
 public:
     CAR_OBJECT_DECL()
+
+    TO_STRING_IMPL("CHandler")
 };
 
 } // namespace Os

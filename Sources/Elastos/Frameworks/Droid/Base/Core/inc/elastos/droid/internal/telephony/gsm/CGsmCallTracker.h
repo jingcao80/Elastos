@@ -40,6 +40,8 @@ CarClass(CGsmCallTracker)
     , public IGsmCallTracker
 {
 public:
+    TO_STRING_IMPL("CGsmCallTracker")
+
     CGsmCallTracker();
 
     CAR_INTERFACE_DECL()

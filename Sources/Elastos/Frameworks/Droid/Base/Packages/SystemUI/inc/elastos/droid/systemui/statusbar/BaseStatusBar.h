@@ -126,6 +126,8 @@ protected:
     class H : public Handler
     {
     public:
+        TO_STRING_IMPL("BaseStatusBar::H")
+
         H(
             /* [in] */ BaseStatusBar* host);
 

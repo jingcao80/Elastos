@@ -39,6 +39,8 @@ private:
         , public IIdleHandler
     {
     public:
+        TO_STRING_IMPL("DeferredHandler::Impl")
+
         CAR_INTERFACE_DECL();
 
         Impl(

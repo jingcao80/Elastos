@@ -1545,7 +1545,8 @@ ECode Collections::_SynchronizedCollection::AddAll(
     /* [out] */ Boolean* modified)
 {
     VALIDATE_NOT_NULL(modified);
-    {    AutoLock syncLock(mLock);
+    {
+        AutoLock syncLock(mLock);
         mC->AddAll(collection, modified);
     }
     return NOERROR;
@@ -1560,7 +1561,8 @@ ECode Collections::_SynchronizedCollection::AddAll(
 
 ECode Collections::_SynchronizedCollection::Clear()
 {
-    {    AutoLock syncLock(mLock);
+    {
+        AutoLock syncLock(mLock);
         mC->Clear();
     }
     return NOERROR;
@@ -1571,7 +1573,8 @@ ECode Collections::_SynchronizedCollection::Contains(
     /* [out] */ Boolean* result)
 {
     VALIDATE_NOT_NULL(result);
-    {    AutoLock syncLock(mLock);
+    {
+        AutoLock syncLock(mLock);
         mC->Contains(object, result);
     }
     return NOERROR;
@@ -1582,7 +1585,8 @@ ECode Collections::_SynchronizedCollection::ContainsAll(
     /* [out] */ Boolean* result)
 {
     VALIDATE_NOT_NULL(result);
-    {    AutoLock syncLock(mLock);
+    {
+        AutoLock syncLock(mLock);
         mC->ContainsAll(collection, result);
     }
     return NOERROR;
@@ -1592,7 +1596,8 @@ ECode Collections::_SynchronizedCollection::IsEmpty(
     /* [out] */ Boolean* result)
 {
     VALIDATE_NOT_NULL(result);
-    {    AutoLock syncLock(mLock);
+    {
+        AutoLock syncLock(mLock);
         mC->IsEmpty(result);
     }
     return NOERROR;
@@ -1602,7 +1607,8 @@ ECode Collections::_SynchronizedCollection::GetIterator(
     /* [out] */ IIterator** it)
 {
     VALIDATE_NOT_NULL(it);
-    {    AutoLock syncLock(mLock);
+    {
+        AutoLock syncLock(mLock);
         (IIterable::Probe(mC))->GetIterator(it);
     }
     return NOERROR;
@@ -1613,7 +1619,8 @@ ECode Collections::_SynchronizedCollection::Remove(
     /* [out] */ Boolean* modified)
 {
     VALIDATE_NOT_NULL(modified);
-    {    AutoLock syncLock(mLock);
+    {
+        AutoLock syncLock(mLock);
         mC->Remove(object, modified);
     }
     return NOERROR;
@@ -1631,7 +1638,8 @@ ECode Collections::_SynchronizedCollection::RemoveAll(
     /* [out] */ Boolean* modified)
 {
     VALIDATE_NOT_NULL(modified);
-    {    AutoLock syncLock(mLock);
+    {
+        AutoLock syncLock(mLock);
         mC->RemoveAll(collection, modified);
     }
     return NOERROR;
@@ -1649,7 +1657,8 @@ ECode Collections::_SynchronizedCollection::RetainAll(
     /* [out] */ Boolean* modified)
 {
     VALIDATE_NOT_NULL(modified);
-    {    AutoLock syncLock(mLock);
+    {
+        AutoLock syncLock(mLock);
         mC->RetainAll(collection, modified);
     }
     return NOERROR;
@@ -1666,7 +1675,8 @@ ECode Collections::_SynchronizedCollection::GetSize(
     /* [out] */ Int32* size)
 {
     VALIDATE_NOT_NULL(size);
-    {    AutoLock syncLock(mLock);
+    {
+        AutoLock syncLock(mLock);
         mC->GetSize(size);
     }
     return NOERROR;
@@ -1676,7 +1686,8 @@ ECode Collections::_SynchronizedCollection::ToArray(
     /* [out, callee] */ ArrayOf<IInterface*>** array)
 {
     VALIDATE_NOT_NULL(array);
-    {    AutoLock syncLock(mLock);
+    {
+        AutoLock syncLock(mLock);
         mC->ToArray(array);
     }
     return NOERROR;
@@ -1703,7 +1714,8 @@ ECode Collections::_SynchronizedCollection::ToArray(
     /* [out, callee] */ ArrayOf<IInterface*>** outArray)
 {
     VALIDATE_NOT_NULL(outArray);
-    {    AutoLock syncLock(mLock);
+    {
+        AutoLock syncLock(mLock);
         mC->ToArray(inArray, outArray);
     }
     return NOERROR;
@@ -1729,7 +1741,8 @@ ECode Collections::_SynchronizedCollection::GetHashCode(
 ECode Collections::_SynchronizedCollection::WriteObject(
     /* [in] */ IObjectOutputStream* stream)
 {
-    {    AutoLock syncLock(mLock);
+    {
+        AutoLock syncLock(mLock);
         stream->DefaultWriteObject();
     }
     return NOERROR;
@@ -1759,7 +1772,8 @@ ECode Collections::SynchronizedRandomAccessList::GetSubList(
     /* [out] */ IList** subList)
 {
     VALIDATE_NOT_NULL(subList);
-    {    AutoLock syncLock(mLock);
+    {
+        AutoLock syncLock(mLock);
         AutoPtr<IList> sub;
         mList->GetSubList(start, end, (IList**)&sub);
         *subList = new SynchronizedRandomAccessList(sub, mLock);
@@ -1839,8 +1853,9 @@ ECode Collections::_SynchronizedList::Equals(
     /* [out] */ Boolean* result)
 {
     VALIDATE_NOT_NULL(result);
-    {    AutoLock syncLock(mLock);
-        (ICollection::Probe(mList))->Equals(object, result);
+    {
+        AutoLock syncLock(mLock);
+        mList->Equals(object, result);
     }
     return NOERROR;
 }
@@ -1850,7 +1865,8 @@ ECode Collections::_SynchronizedList::Get(
     /* [out] */ IInterface** object)
 {
     VALIDATE_NOT_NULL(object);
-    {    AutoLock syncLock(mLock);
+    {
+        AutoLock syncLock(mLock);
         mList->Get(location, object);
     }
     return NOERROR;
@@ -1860,8 +1876,9 @@ ECode Collections::_SynchronizedList::GetHashCode(
     /* [out] */ Int32* hashCode)
 {
     VALIDATE_NOT_NULL(hashCode);
-    {    AutoLock syncLock(mLock);
-        (ICollection::Probe(mList))->GetHashCode(hashCode);
+    {
+        AutoLock syncLock(mLock);
+        mList->GetHashCode(hashCode);
     }
     return NOERROR;
 }
@@ -1873,10 +1890,11 @@ ECode Collections::_SynchronizedList::IndexOf(
     VALIDATE_NOT_NULL(index);
     Int32 size;
     AutoPtr<ArrayOf<IInterface*> > array;
-    {    AutoLock syncLock(mLock);
-        (ICollection::Probe(mList))->GetSize(&size);
+    {
+        AutoLock syncLock(mLock);
+        mList->GetSize(&size);
         array = ArrayOf<IInterface*>::Alloc(size);
-        (ICollection::Probe(mList))->ToArray((ArrayOf<IInterface*>**)&array);
+        mList->ToArray((ArrayOf<IInterface*>**)&array);
     }
     if (object != NULL) {
         for (Int32 i = 0; i < size; i++) {
@@ -1905,10 +1923,11 @@ ECode Collections::_SynchronizedList::LastIndexOf(
     VALIDATE_NOT_NULL(index);
     Int32 size;
     AutoPtr<ArrayOf<IInterface*> > array;
-    {    AutoLock syncLock(mLock);
-        (ICollection::Probe(mList))->GetSize(&size);
+    {
+        AutoLock syncLock(mLock);
+        mList->GetSize(&size);
         array = ArrayOf<IInterface*>::Alloc(size);
-        (ICollection::Probe(mList))->ToArray((ArrayOf<IInterface*>**)&array);
+        mList->ToArray((ArrayOf<IInterface*>**)&array);
     }
     if (object != NULL) {
         for (Int32 i = size - 1; i >= 0; i--) {
@@ -1934,7 +1953,8 @@ ECode Collections::_SynchronizedList::GetListIterator(
     /* [out] */ IListIterator** it)
 {
     VALIDATE_NOT_NULL(it);
-    {    AutoLock syncLock(mLock);
+    {
+        AutoLock syncLock(mLock);
         mList->GetListIterator(it);
     }
     return NOERROR;
@@ -1945,7 +1965,8 @@ ECode Collections::_SynchronizedList::GetListIterator(
     /* [out] */ IListIterator** it)
 {
     VALIDATE_NOT_NULL(it);
-    {    AutoLock syncLock(mLock);
+    {
+        AutoLock syncLock(mLock);
         mList->GetListIterator(location, it);
     }
     return NOERROR;
@@ -1956,7 +1977,8 @@ ECode Collections::_SynchronizedList::Remove(
     /* [out] */ IInterface** object)
 {
     VALIDATE_NOT_NULL(object);
-    {    AutoLock syncLock(mLock);
+    {
+        AutoLock syncLock(mLock);
         mList->Remove(location, object);
     }
     return NOERROR;
@@ -1975,7 +1997,8 @@ ECode Collections::_SynchronizedList::Set(
     /* [out] */ IInterface** prevObject)
 {
     VALIDATE_NOT_NULL(prevObject);
-    {    AutoLock syncLock(mLock);
+    {
+        AutoLock syncLock(mLock);
         mList->Set(location, object, prevObject);
     }
     return NOERROR;
@@ -1994,7 +2017,8 @@ ECode Collections::_SynchronizedList::GetSubList(
     /* [in] */ Int32 end,
     /* [out] */ IList** subList)
 {
-    {    AutoLock syncLock(mLock);
+    {
+        AutoLock syncLock(mLock);
         AutoPtr<IList> sub;
         mList->GetSubList(start, end, (IList**)&sub);
         AutoPtr<IList> res = new _SynchronizedList(sub, mLock);
@@ -2007,7 +2031,8 @@ ECode Collections::_SynchronizedList::GetSubList(
 ECode Collections::_SynchronizedList::WriteObject(
     /* [in] */ IObjectOutputStream* stream)
 {
-    {    AutoLock syncLock(mLock);
+    {
+        AutoLock syncLock(mLock);
         stream->DefaultWriteObject();
     }
     return NOERROR;
@@ -2165,7 +2190,8 @@ Collections::_SynchronizedMap::~_SynchronizedMap()
 
 ECode Collections::_SynchronizedMap::Clear()
 {
-    {    AutoLock syncLock(mLock);
+    {
+        AutoLock syncLock(mLock);
         mM->Clear();
     }
     return NOERROR;
@@ -2176,7 +2202,8 @@ ECode Collections::_SynchronizedMap::ContainsKey(
     /* [out] */ Boolean* result)
 {
     VALIDATE_NOT_NULL(result);
-    {    AutoLock syncLock(mLock);
+    {
+        AutoLock syncLock(mLock);
         mM->ContainsKey(key, result);
     }
     return NOERROR;
@@ -2187,7 +2214,8 @@ ECode Collections::_SynchronizedMap::ContainsValue(
     /* [out] */ Boolean* result)
 {
     VALIDATE_NOT_NULL(result);
-    {    AutoLock syncLock(mLock);
+    {
+        AutoLock syncLock(mLock);
         mM->ContainsValue(value, result);
     }
     return NOERROR;
@@ -2197,7 +2225,8 @@ ECode Collections::_SynchronizedMap::GetEntrySet(
     /* [out, callee] */ ISet** entries)
 {
     VALIDATE_NOT_NULL(entries);
-    {    AutoLock syncLock(mLock);
+    {
+        AutoLock syncLock(mLock);
         AutoPtr<ISet> entry;
         mM->GetEntrySet((ISet**)&entry);
         AutoPtr<ISet> res = new _SynchronizedSet(entry, mLock);
@@ -2212,7 +2241,8 @@ ECode Collections::_SynchronizedMap::Equals(
     /* [out] */ Boolean* result)
 {
     VALIDATE_NOT_NULL(result);
-    {    AutoLock syncLock(mLock);
+    {
+        AutoLock syncLock(mLock);
         mM->Equals(object, result);
     }
     return NOERROR;
@@ -2344,7 +2374,8 @@ ECode Collections::_SynchronizedMap::GetValues(
 ECode Collections::_SynchronizedMap::ToString(
     /* [out] */ String* str)
 {
-    {    AutoLock syncLock(mLock);
+    {
+        AutoLock syncLock(mLock);
         AutoPtr<IObject> iObj = IObject::Probe(mM);
         if (iObj != NULL) {
             return iObj->ToString(str);
@@ -2357,7 +2388,8 @@ ECode Collections::_SynchronizedMap::ToString(
 ECode Collections::_SynchronizedMap::WriteObject(
     /* [in] */ IObjectOutputStream* stream)
 {
-    {    AutoLock syncLock(mLock);
+    {
+        AutoLock syncLock(mLock);
         stream->DefaultWriteObject();
     }
     return NOERROR;
@@ -2386,7 +2418,8 @@ ECode Collections::_SynchronizedSet::Equals(
     /* [out] */ Boolean* result)
 {
     VALIDATE_NOT_NULL(result);
-    {    AutoLock syncLock(mLock);
+    {
+        AutoLock syncLock(mLock);
         mC->Equals(object, result);
     }
     return NOERROR;
@@ -2396,7 +2429,8 @@ ECode Collections::_SynchronizedSet::GetHashCode(
     /* [out] */ Int32* hashCode)
 {
     VALIDATE_NOT_NULL(hashCode);
-    {    AutoLock syncLock(mLock);
+    {
+        AutoLock syncLock(mLock);
         mC->GetHashCode(hashCode);
     }
     return NOERROR;
@@ -2490,7 +2524,8 @@ ECode Collections::_SynchronizedSet::ToArray(
 ECode Collections::_SynchronizedSet::WriteObject(
     /* [in] */ IObjectOutputStream* stream)
 {
-    {    AutoLock syncLock(mLock);
+    {
+        AutoLock syncLock(mLock);
         stream->DefaultWriteObject();
     }
     return NOERROR;
@@ -2550,7 +2585,8 @@ ECode Collections::_SynchronizedSortedMap::GetComparator(
     /* [out] */ IComparator** comp)
 {
     VALIDATE_NOT_NULL(comp);
-    {    AutoLock syncLock(mLock);
+    {
+        AutoLock syncLock(mLock);
         mSm->GetComparator(comp);
     }
     return NOERROR;
@@ -2560,7 +2596,8 @@ ECode Collections::_SynchronizedSortedMap::GetFirstKey(
     /* [out] */ IInterface** outface)
 {
     VALIDATE_NOT_NULL(outface);
-    {    AutoLock syncLock(mLock);
+    {
+        AutoLock syncLock(mLock);
         mSm->GetFirstKey(outface);
     }
     return NOERROR;
@@ -2571,7 +2608,8 @@ ECode Collections::_SynchronizedSortedMap::GetHeadMap(
     /* [out] */ ISortedMap** sortmap)
 {
     VALIDATE_NOT_NULL(sortmap);
-    {    AutoLock syncLock(mLock);
+    {
+        AutoLock syncLock(mLock);
         AutoPtr<ISortedMap> map;
         mSm->GetHeadMap(endKey, (ISortedMap**)&map);
         AutoPtr<ISortedMap> res = new _SynchronizedSortedMap(map, mLock);
@@ -2585,7 +2623,8 @@ ECode Collections::_SynchronizedSortedMap::GetLastKey(
     /* [out] */ IInterface** outface)
 {
     VALIDATE_NOT_NULL(outface);
-    {    AutoLock syncLock(mLock);
+    {
+        AutoLock syncLock(mLock);
         mSm->GetLastKey(outface);
     }
     return NOERROR;
@@ -2597,7 +2636,8 @@ ECode Collections::_SynchronizedSortedMap::GetSubMap(
     /* [out] */ ISortedMap** sortmap)
 {
     VALIDATE_NOT_NULL(sortmap);
-    {    AutoLock syncLock(mLock);
+    {
+        AutoLock syncLock(mLock);
         AutoPtr<ISortedMap> map;
         mSm->GetSubMap(startKey, endKey, (ISortedMap**)&map);
         AutoPtr<ISortedMap> res = new _SynchronizedSortedMap(map, mLock);
@@ -2612,7 +2652,8 @@ ECode Collections::_SynchronizedSortedMap::GetTailMap(
     /* [out] */ ISortedMap** sortmap)
 {
     VALIDATE_NOT_NULL(sortmap);
-    {    AutoLock syncLock(mLock);
+    {
+        AutoLock syncLock(mLock);
         AutoPtr<ISortedMap> map;
         mSm->GetTailMap(startKey, (ISortedMap**)&map);
         AutoPtr<ISortedMap> res = new _SynchronizedSortedMap(map, mLock);
@@ -2730,7 +2771,8 @@ ECode Collections::_SynchronizedSortedMap::GetSize(
 ECode Collections::_SynchronizedSortedMap::WriteObject(
     /* [in] */ IObjectOutputStream* stream)
 {
-    {    AutoLock syncLock(mLock);
+    {
+        AutoLock syncLock(mLock);
         stream->DefaultWriteObject();
     }
     return NOERROR;
@@ -2760,7 +2802,8 @@ ECode Collections::_SynchronizedSortedSet::GetComparator(
     /* [out] */ IComparator** outcom)
 {
     VALIDATE_NOT_NULL(outcom);
-    {    AutoLock syncLock(mLock);
+    {
+        AutoLock syncLock(mLock);
         mSs->GetComparator(outcom);
     }
     return NOERROR;
@@ -2770,7 +2813,8 @@ ECode Collections::_SynchronizedSortedSet::GetFirst(
     /* [out] */ IInterface** outface)
 {
     VALIDATE_NOT_NULL(outface);
-    {    AutoLock syncLock(mLock);
+    {
+        AutoLock syncLock(mLock);
         mSs->GetFirst(outface);
     }
     return NOERROR;
@@ -2781,7 +2825,8 @@ ECode Collections::_SynchronizedSortedSet::GetHeadSet(
     /* [out] */ ISortedSet** outsort)
 {
     VALIDATE_NOT_NULL(outsort);
-    {    AutoLock syncLock(mLock);
+    {
+        AutoLock syncLock(mLock);
         AutoPtr<ISortedSet> sort;
         mSs->GetHeadSet(end, (ISortedSet**)&sort);
         AutoPtr<ISortedSet> res = new _SynchronizedSortedSet(sort, mLock);
@@ -2795,7 +2840,8 @@ ECode Collections::_SynchronizedSortedSet::GetLast(
     /* [out] */ IInterface** outface)
 {
     VALIDATE_NOT_NULL(outface);
-    {    AutoLock syncLock(mLock);
+    {
+        AutoLock syncLock(mLock);
         mSs->GetFirst(outface);
     }
     return NOERROR;
@@ -2807,7 +2853,8 @@ ECode Collections::_SynchronizedSortedSet::GetSubSet(
     /* [out] */ ISortedSet** outsort)
 {
     VALIDATE_NOT_NULL(outsort);
-    {    AutoLock syncLock(mLock);
+    {
+        AutoLock syncLock(mLock);
         AutoPtr<ISortedSet> set;
         mSs->GetSubSet(start, end, (ISortedSet**)&set);
         AutoPtr<ISortedSet> res = new _SynchronizedSortedSet(set, mLock);
@@ -2821,7 +2868,8 @@ ECode Collections::_SynchronizedSortedSet::GetTailSet(
     /* [in] */ IInterface* start,
     /* [out] */ ISortedSet** outsort)
 {
-    {    AutoLock syncLock(mLock);
+    {
+        AutoLock syncLock(mLock);
         AutoPtr<ISortedSet> set;
         mSs->GetTailSet(start, (ISortedSet**)&set);
         AutoPtr<ISortedSet> res = new _SynchronizedSortedSet(set, mLock);
@@ -2932,7 +2980,8 @@ ECode Collections::_SynchronizedSortedSet::ToArray(
 ECode Collections::_SynchronizedSortedSet::WriteObject(
     /* [in] */ IObjectOutputStream* stream)
 {
-    {    AutoLock syncLock(mLock);
+    {
+        AutoLock syncLock(mLock);
         stream->DefaultWriteObject();
     }
     return NOERROR;
@@ -3311,7 +3360,7 @@ ECode Collections::_UnmodifiableList::Equals(
     /* [out] */ Boolean* result)
 {
     VALIDATE_NOT_NULL(result);
-    return (ICollection::Probe(mList))->Equals(object, result);
+    return mList->Equals(object, result);
 }
 
 ECode Collections::_UnmodifiableList::Get(
@@ -3326,7 +3375,7 @@ ECode Collections::_UnmodifiableList::GetHashCode(
     /* [out] */ Int32* hashCode)
 {
     VALIDATE_NOT_NULL(hashCode);
-    return (ICollection::Probe(mList))->GetHashCode(hashCode);
+    return mList->GetHashCode(hashCode);
 }
 
 ECode Collections::_UnmodifiableList::IndexOf(
@@ -6052,11 +6101,15 @@ ECode Collections::_CheckedCollection::AddAll(
     /* [out] */ Boolean* modified)
 {
     VALIDATE_NOT_NULL(modified);
-    AutoPtr<ArrayOf<IInterface*> > array;
-    collection->ToArray((ArrayOf<IInterface*>**)&array);
-    for (Int32 i = 0; i < array->GetLength(); ++i) {
-        AutoPtr<IInterface> o = (*array)[i];
-        FAIL_RETURN(Collections::CheckType(o, mType));
+    *modified = FALSE;
+
+    AutoPtr<IIterator> it;
+    collection->GetIterator((IIterator**)&it);
+    Boolean hasNext;
+    while (it->HasNext(&hasNext), hasNext) {
+        AutoPtr<IInterface> obj;
+        it->GetNext((IInterface**)&obj);
+        FAIL_RETURN(Collections::CheckType(obj, mType));
     }
     return mC->AddAll(collection, modified);
 }
@@ -6218,11 +6271,16 @@ ECode Collections::_CheckedList::AddAll(
     /* [in] */ ICollection* collection,
     /* [out] */ Boolean* modified)
 {
-    AutoPtr<ArrayOf<IInterface*> > array;
-    collection->ToArray((ArrayOf<IInterface*>**)&array);
-    for (Int32 i = 0; i < array->GetLength();i++) {
-        AutoPtr<IInterface> o = (*array)[i];
-        FAIL_RETURN(Collections::CheckType(o, mType));
+    VALIDATE_NOT_NULL(modified)
+    *modified = FALSE;
+
+    AutoPtr<IIterator> it;
+    collection->GetIterator((IIterator**)&it);
+    Boolean hasNext;
+    while (it->HasNext(&hasNext), hasNext) {
+        AutoPtr<IInterface> obj;
+        it->GetNext((IInterface**)&obj);
+        FAIL_RETURN(Collections::CheckType(obj, mType));
     }
     return mL->AddAll(location, collection, modified);
 }

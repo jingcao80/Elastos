@@ -43,6 +43,8 @@ private:
     };
 
 public:
+    TO_STRING_IMPL("SubscriptionHelper")
+
     CAR_INTERFACE_DECL();
 
     static CARAPI_(AutoPtr<ISubscriptionHelper>) Init(

@@ -88,6 +88,8 @@ private:
         : public Handler
     {
     public:
+        TO_STRING_IMPL("Filter::RequestHandler")
+
         RequestHandler(
             /* [in] */ ILooper* looper,
             /* [in] */ Filter* host);
@@ -113,6 +115,8 @@ private:
         : public Handler
     {
     public:
+        TO_STRING_IMPL("Filter::ResultsHandler")
+
         ResultsHandler(
             /* [in] */ Filter* host);
 

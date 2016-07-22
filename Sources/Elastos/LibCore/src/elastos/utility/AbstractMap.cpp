@@ -113,8 +113,9 @@ ECode AbstractMap::Equals(
         *result = TRUE;
         return NOERROR;
     }
-    if (IMap::Probe(object)) {
-        AutoPtr<IMap> map = (IMap*) object->Probe(EIID_IMap);
+
+    IMap* map = IMap::Probe(object);
+    if (map) {
         Int32 len1 = 0;
         Int32 len2 = 0;
         if ((GetSize(&len1), len1) != (map->GetSize(&len2), len2)) {
@@ -126,9 +127,13 @@ ECode AbstractMap::Equals(
         AutoPtr< ArrayOf<IInterface*> > entries;
         AutoPtr<ISet> outset;
         GetEntrySet((ISet**)&outset);
-        (ICollection::Probe(outset))->ToArray((ArrayOf<IInterface*>**)&entries);
-        for (Int32 i = 0; i < entries->GetLength(); i++) {
-            AutoPtr<IMapEntry> entry = IMapEntry::Probe((*entries)[i]);
+        AutoPtr<IIterator> it;
+        outset->GetIterator((IIterator**)&it);
+        Boolean hasNext;
+        while (it->HasNext(&hasNext), hasNext) {
+            AutoPtr<IInterface> entryObj;
+            it->GetNext((IInterface**)&entryObj);
+            AutoPtr<IMapEntry> entry = IMapEntry::Probe(entryObj);
             AutoPtr<IInterface> key;
             entry->GetKey((IInterface**)&key);
             AutoPtr<IInterface> mine;
@@ -272,12 +277,15 @@ ECode AbstractMap::Put(
 ECode AbstractMap::PutAll(
     /* [in] */ IMap* map)
 {
-    AutoPtr< ArrayOf<IInterface*> > entries;
-    AutoPtr<ISet> outset;
-    map->GetEntrySet((ISet**)&outset);
-    (ICollection::Probe(outset))->ToArray((ArrayOf<IInterface*>**)&entries);
-    for (Int32 i = 0; i < entries->GetLength(); i++) {
-        AutoPtr<IMapEntry> entry = IMapEntry::Probe((*entries)[i]);
+    AutoPtr<ISet> entries;
+    map->GetEntrySet((ISet**)&entries);
+    AutoPtr<IIterator> it;
+    entries->GetIterator((IIterator**)&it);
+    Boolean hasNext;
+    while (it->HasNext(&hasNext), hasNext) {
+        AutoPtr<IInterface> entryObj;
+        it->GetNext((IInterface**)&entryObj);
+        AutoPtr<IMapEntry> entry = IMapEntry::Probe(entryObj);
         AutoPtr<IInterface> entkey;
         AutoPtr<IInterface> entvalue;
         entry->GetKey((IInterface**)&entkey);

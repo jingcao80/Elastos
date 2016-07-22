@@ -1277,34 +1277,34 @@ ECode CConcurrentSkipListMap::Equals(
 
     AutoPtr<ISet> entries;
     this->GetEntrySet((ISet**)&entries);
-    AutoPtr<ArrayOf<IInterface*> > arr;
-    (ICollection::Probe(entries))->ToArray((ArrayOf<IInterface*>**)&arr);
-    for (Int32 i = 0;i < arr->GetLength();i++) {
-        AutoPtr<IInterface> o = (*arr)[i];
-        AutoPtr<IMapEntry> e = (IMapEntry*)o->Probe(EIID_IMapEntry);
-        AutoPtr<IInterface> k;
+    AutoPtr<IIterator> it;
+    entries->GetIterator((IIterator**)&it);
+    Boolean hasNext;
+    while (it->HasNext(&hasNext), hasNext) {
+        AutoPtr<IInterface> obj;
+        it->GetNext((IInterface**)&obj);
+        AutoPtr<IMapEntry> e = IMapEntry::Probe(obj);
+        AutoPtr<IInterface> k, v, v2;
         e->GetKey((IInterface**)&k);
-        AutoPtr<IInterface> v;
         m->Get(k, (IInterface**)&v);
-        AutoPtr<IInterface> v2;
         e->GetValue((IInterface**)&v2);
         if (!Object::Equals(v2, v)) {
             *result = FALSE;
             return NOERROR;
         }
     }
+
     AutoPtr<ISet> entries2;
     m->GetEntrySet((ISet**)&entries2);
-    AutoPtr<ArrayOf<IInterface*> > arr2;
-    (ICollection::Probe(entries2))->ToArray((ArrayOf<IInterface*>**)&arr2);
-    for (Int32 i = 0;i < arr2->GetLength();i++) {
-        AutoPtr<IInterface> o = (*arr2)[i];
-        AutoPtr<IMapEntry> e = (IMapEntry*)o->Probe(EIID_IMapEntry);
-        AutoPtr<IInterface> k;
+    it = NULL;
+    entries2->GetIterator((IIterator**)&it);
+    while (it->HasNext(&hasNext), hasNext) {
+        AutoPtr<IInterface> obj;
+        it->GetNext((IInterface**)&obj);
+        AutoPtr<IMapEntry> e = IMapEntry::Probe(obj);
+        AutoPtr<IInterface> k, v, v2;
         e->GetKey((IInterface**)&k);
-        AutoPtr<IInterface> v;
         e->GetValue((IInterface**)&v);
-        AutoPtr<IInterface> v2;
         Get(k, (IInterface**)&v2);
         if (k == NULL || v == NULL || !Object::Equals(v2, v)) {
             *result = FALSE;
@@ -1855,15 +1855,17 @@ AutoPtr<IList> CConcurrentSkipListMap::ToList(
     /* [in] */ ICollection* c)
 {
     // Using size() here would be a pessimization.
-    AutoPtr<IArrayList> list;
-    CArrayList::New((IArrayList**)&list);
-    AutoPtr<ArrayOf<IInterface*> > arr;
-    c->ToArray((ArrayOf<IInterface*>**)&arr);
-    for (Int32 i = 0;i < arr->GetLength();i++) {
-        AutoPtr<IInterface> e = (*arr)[i];
-        (IList::Probe(list))->Add(e);
+    AutoPtr<IList> list;
+    CArrayList::New((IList**)&list);
+    AutoPtr<IIterator> it;
+    c->GetIterator((IIterator**)&it);
+    Boolean hasNext;
+    while (it->HasNext(&hasNext), hasNext) {
+        AutoPtr<IInterface> obj;
+        it->GetNext((IInterface**)&obj);
+        list->Add(obj);
     }
-    return (IList*)list->Probe(EIID_IList);
+    return list;
 }
 
 ECode CConcurrentSkipListMap::PutAll(

@@ -30,6 +30,7 @@
 #include <Elastos.CoreLibrary.Net.h>
 #include "elastos/droid/R.h"
 #include "elastos/droid/Manifest.h"
+#include <elastos/core/AutoLock.h>
 #include <elastos/core/Thread.h>
 #include <elastos/core/Math.h>
 #include <elastos/utility/logging/Slogger.h>
@@ -37,8 +38,6 @@
 #include <binder/IServiceManager.h>
 #include <elastos/core/StringUtils.h>
 
-#include <elastos/core/AutoLock.h>
-using Elastos::Core::AutoLock;
 using Elastos::Droid::R;
 using Elastos::Droid::Manifest;
 using Elastos::Droid::Animation::IValueAnimatorHelper;
@@ -173,6 +172,7 @@ using Elastos::Droid::View::Animation::IDecelerateInterpolator;
 using Elastos::Droid::View::Animation::CDecelerateInterpolator;
 using Elastos::Droid::View::Animation::EIID_IAnimation;
 
+using Elastos::Core::AutoLock;
 using Elastos::Core::CString;
 using Elastos::Core::StringUtils;
 using Elastos::Core::IBoolean;
@@ -7059,7 +7059,8 @@ void CWindowManagerService::EnableScreenAfterBoot()
 
 ECode CWindowManagerService::EnableScreenIfNeeded()
 {
-    {    AutoLock syncLock(mWindowMapLock);
+    {
+        AutoLock syncLock(mWindowMapLock);
         EnableScreenIfNeededLocked();
     }
     return NOERROR;
@@ -7163,7 +7164,8 @@ Boolean CWindowManagerService::CheckWaitingForWindowsLocked()
 
 void CWindowManagerService::PerformEnableScreen()
 {
-    {    AutoLock syncLock(mWindowMapLock);
+    {
+        AutoLock syncLock(mWindowMapLock);
         if (DEBUG_BOOT) {
             Slogger::I(TAG, "performEnableScreen: mDisplayEnabled=%d mForceDisplayEnabled=%d"
                 " mShowingBootMessages=%d mSystemBooted=%d mOnlyCore=%d mBootAnimationStopped=%d",

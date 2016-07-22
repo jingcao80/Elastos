@@ -22,6 +22,8 @@ class CsimFileHandler
     , public ICsimFileHandler
 {
 public:
+    TO_STRING_IMPL("CsimFileHandler")
+
     CAR_INTERFACE_DECL();
 
     CsimFileHandler();

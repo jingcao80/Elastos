@@ -31,6 +31,8 @@ class AdnRecordCache
     , public IIccConstants
 {
 public:
+    TO_STRING_IMPL("AdnRecordCache")
+
     CAR_INTERFACE_DECL();
 
     AdnRecordCache();

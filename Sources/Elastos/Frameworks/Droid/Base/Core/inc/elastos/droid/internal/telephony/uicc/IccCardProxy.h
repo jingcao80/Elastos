@@ -47,6 +47,8 @@ class IccCardProxy
     , public IIccCardProxy
 {
 public:
+    TO_STRING_IMPL("IccCardProxy")
+
     CAR_INTERFACE_DECL();
 
     IccCardProxy();

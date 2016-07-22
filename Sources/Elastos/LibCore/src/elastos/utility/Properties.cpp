@@ -516,10 +516,13 @@ ECode Properties::Store(
     AutoPtr<StringBuilder> sb = new StringBuilder(200);
     AutoPtr<ISet> entries;
     FAIL_RETURN(GetEntrySet((ISet**)&entries));
-    AutoPtr<ArrayOf<IInterface*> > outarr;
-    (ICollection::Probe(entries))->ToArray((ArrayOf<IInterface*>**)&outarr);
-    for (Int32 i = 0; i < outarr->GetLength(); i++) {
-        AutoPtr<IMapEntry> e = IMapEntry::Probe((*outarr)[i]);
+    AutoPtr<IIterator> it;
+    entries->GetIterator((IIterator**)&it);
+    Boolean hasNext;
+    while (it->HasNext(&hasNext), hasNext) {
+        AutoPtr<IInterface> obj;
+        it->GetNext((IInterface**)&obj);
+        AutoPtr<IMapEntry> e = IMapEntry::Probe(obj);
         AutoPtr<IInterface> iKey;
         e->GetKey((IInterface**)&iKey);
         AutoPtr<IInterface> iValue;
@@ -683,10 +686,13 @@ ECode Properties::StoreToXML(
 
     AutoPtr<ISet> entries;
     FAIL_RETURN(GetEntrySet((ISet**)&entries));
-    AutoPtr<ArrayOf<IInterface*> > outarr;
-    (ICollection::Probe(entries))->ToArray((ArrayOf<IInterface*>**)&outarr);
-    for (Int32 i = 0; i < outarr->GetLength(); i++) {
-        AutoPtr<IMapEntry> e = IMapEntry::Probe((*outarr)[i]);
+    AutoPtr<IIterator> it;
+    entries->GetIterator((IIterator**)&it);
+    Boolean hasNext;
+    while (it->HasNext(&hasNext), hasNext) {
+        AutoPtr<IInterface> obj;
+        it->GetNext((IInterface**)&obj);
+        AutoPtr<IMapEntry> e = IMapEntry::Probe(obj);
         AutoPtr<IInterface> iKey;
         e->GetKey((IInterface**)&iKey);
         AutoPtr<IInterface> iValue;

@@ -235,12 +235,14 @@ void CScheduledThreadPoolExecutor::OnShutdown()
     Boolean keepPeriodic =
         GetContinueExistingPeriodicTasksAfterShutdownPolicy();
     if (!keepDelayed && !keepPeriodic) {
-        AutoPtr<ArrayOf<IInterface*> > array;
-        IQueue::Probe(q)->ToArray((ArrayOf<IInterface*>**)&array);
-        for (Int32 i = 0;i < array->GetLength();i++) {
-            AutoPtr<IInterface> e = (*array)[i];
-            if (e->Probe(EIID_IRunnableScheduledFuture) != NULL) {
-                AutoPtr<IRunnableScheduledFuture> p = IRunnableScheduledFuture::Probe(e);
+        AutoPtr<IIterator> it;
+        IIterable::Probe(q)->GetIterator((IIterator**)&it);
+        Boolean hasNext;
+        while (it->HasNext(&hasNext), hasNext) {
+            AutoPtr<IInterface> obj;
+            it->GetNext((IInterface**)&obj);
+            IRunnableScheduledFuture* p = IRunnableScheduledFuture::Probe(obj);
+            if (p) {
                 Boolean b;
                 IFuture::Probe(p)->Cancel(FALSE, &b);
             }
@@ -248,13 +250,15 @@ void CScheduledThreadPoolExecutor::OnShutdown()
         IQueue::Probe(q)->Clear();
     }
     else {
-        AutoPtr<ArrayOf<IInterface*> > array;
-        IQueue::Probe(q)->ToArray((ArrayOf<IInterface*>**)&array);
         // Traverse snapshot to avoid iterator exceptions
-        for (Int32 i = 0;i < array->GetLength();i++) {
-            AutoPtr<IInterface> e = (*array)[i];
-            if (e->Probe(EIID_IRunnableScheduledFuture) != NULL) {
-                AutoPtr<IRunnableScheduledFuture> t = IRunnableScheduledFuture::Probe(e);
+        AutoPtr<IIterator> it;
+        IIterable::Probe(q)->GetIterator((IIterator**)&it);
+        Boolean hasNext;
+        while (it->HasNext(&hasNext), hasNext) {
+            AutoPtr<IInterface> obj;
+            it->GetNext((IInterface**)&obj);
+            AutoPtr<IRunnableScheduledFuture> t = IRunnableScheduledFuture::Probe(obj);
+            if (t) {
                 Boolean bPe = FALSE, bCal = FALSE;
                 if (((t->IsPeriodic(&bPe), bPe) ? !keepPeriodic : !keepDelayed) ||
                     (IFuture::Probe(t)->IsCancelled(&bCal), bCal)) { // also remove if already cancelled

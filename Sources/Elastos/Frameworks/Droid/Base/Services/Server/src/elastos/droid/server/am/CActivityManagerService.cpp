@@ -8296,7 +8296,8 @@ ECode CActivityManagerService::KeyguardWaitingForActivityDrawn()
 
 ECode CActivityManagerService::FinishBooting()
 {
-    {    AutoLock syncLock(this);
+    {
+        AutoLock syncLock(this);
         if (!mBootAnimationComplete) {
             mCallFinishBooting = TRUE;
             return NOERROR;
@@ -8376,7 +8377,8 @@ ECode CActivityManagerService::FinishBooting()
 ECode CActivityManagerService::BootAnimationComplete()
 {
     Boolean callFinishBooting = FALSE;
-    {    AutoLock syncLock(this);
+    {
+        AutoLock syncLock(this);
         callFinishBooting = mCallFinishBooting;
         mBootAnimationComplete = TRUE;
     }
@@ -14011,7 +14013,8 @@ ECode CActivityManagerService::NoteWakeupAlarm(
 
     AutoPtr<IBatteryStatsImpl> stats = mBatteryStatsService->GetActiveStatistics();
 
-    {    AutoLock syncLock(stats);
+    {
+        AutoLock syncLock(stats);
         if (mBatteryStatsService->IsOnBattery()) {
             mBatteryStatsService->EnforceCallingPermission();
             AutoPtr<CPendingIntentRecord> rec = (CPendingIntentRecord*)sender;
@@ -14021,8 +14024,9 @@ ECode CActivityManagerService::NoteWakeupAlarm(
             stats->GetPackageStatsLocked(sourceUid >= 0 ? sourceUid : uid,
                 sourcePkg != NULL ? sourcePkg : rec->mKey->mPackageName,
                 (IBatteryStatsImplUidPkg**)&pkg);
-            assert(0 && "TODO");
-            // pkg->IncWakeupsLocked();
+            if (pkg) {
+                pkg->IncWakeupsLocked();
+            }
         }
     }
     return NOERROR;

@@ -43,6 +43,8 @@ private:
         : public Handler
     {
     public:
+        TO_STRING_IMPL("MediaController::MyHandler")
+
         MyHandler(
             /* [in] */ MediaController* host)
             : mHost(host)

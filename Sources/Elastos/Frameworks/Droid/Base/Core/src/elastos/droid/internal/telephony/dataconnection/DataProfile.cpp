@@ -129,16 +129,21 @@ ECode DataProfile::Equals(
 {
     VALIDATE_NOT_NULL(result)
 
-    if (TO_IINTERFACE(this) == IInterface::Probe(o)) {
+    IDataProfile* dp = IDataProfile::Probe(o);
+    if (dp == NULL) {
+        *result = FALSE;
+        return NOERROR;
+    }
+
+    if (dp == (IDataProfile*)this) {
         *result = TRUE;
         return NOERROR;
     }
 
-    if (IDataProfile::Probe(o) != NULL == FALSE) {
-        *result = FALSE;
-        return NOERROR;
-    }
-    *result = (TO_STR(TO_IINTERFACE(this)).Equals(TO_STR(o)));
+    String str;
+    ToString(&str);
+    String ostr = Object::ToString(dp);
+    *result = str.Equals(ostr);
     return NOERROR;
 }
 

@@ -1,11 +1,24 @@
 
 #include "elastos/droid/systemui/keyguard/KeyguardDisplayManager.h"
-#include "Elastos.Droid.View.h"
+#include <elastos/utility/logging/Slogger.h>
+#include "../R.h"
+#include "Elastos.Droid.Graphics.h"
+#include <elastos/core/Math.h>
+
+using Elastos::Droid::App::IDialog;
+using Elastos::Droid::Content::EIID_IDialogInterfaceOnDismissListener;
+using Elastos::Droid::Graphics::IPoint;
+using Elastos::Droid::Graphics::CPoint;
+using Elastos::Droid::View::IWindow;
+using Elastos::Utility::Logging::Slogger;
 
 namespace Elastos {
 namespace Droid {
 namespace SystemUI {
 namespace Keyguard {
+
+static const String DTAG("KeyguardDisplayManager");
+Boolean KeyguardDisplayManager::DEBUG = TRUE;
 
 //==========================================================
 // KeyguardDisplayManager::MyMediaRouterSimpleCallback
@@ -14,27 +27,27 @@ namespace Keyguard {
 ECode KeyguardDisplayManager::MyMediaRouterSimpleCallback::OnRouteSelected(
     /* [in] */ IMediaRouter* router,
     /* [in] */ Int32 type,
-    /* [in] */ IRouteInfo* info)
+    /* [in] */ IMediaRouterRouteInfo* info)
 {
-    if (DEBUG) Slogger::D(TAG, "onRouteSelected: type=%d, info=%s", type, TO_CSTR(info));
-    return mHost->UpdateDisplays(mShowing);
+    if (DEBUG) Slogger::D(DTAG, "onRouteSelected: type=%d, info=%s", type, TO_CSTR(info));
+    return mHost->UpdateDisplays(mHost->mShowing);
 }
 
 ECode KeyguardDisplayManager::MyMediaRouterSimpleCallback::OnRouteUnselected(
     /* [in] */ IMediaRouter* router,
     /* [in] */ Int32 type,
-    /* [in] */ IRouteInfo* info)
+    /* [in] */ IMediaRouterRouteInfo* info)
 {
-    if (DEBUG) Slogger::D(TAG, "onRouteUnselected: type=%d, info=%s", type, TO_CSTR(info));
-    return mHost->UpdateDisplays(mShowing);
+    if (DEBUG) Slogger::D(DTAG, "onRouteUnselected: type=%d, info=%s", type, TO_CSTR(info));
+    return mHost->UpdateDisplays(mHost->mShowing);
 }
 
 ECode KeyguardDisplayManager::MyMediaRouterSimpleCallback::OnRoutePresentationDisplayChanged(
     /* [in] */ IMediaRouter* router,
-    /* [in] */ IRouteInfo* info)
+    /* [in] */ IMediaRouterRouteInfo* info)
 {
-    if (DEBUG) Slogger::D(TAG, "onRoutePresentationDisplayChanged: info=%s", TO_CSTR(info));
-    return mHost->UpdateDisplays(mShowing);
+    if (DEBUG) Slogger::D(DTAG, "onRoutePresentationDisplayChanged: info=%s", TO_CSTR(info));
+    return mHost->UpdateDisplays(mHost->mShowing);
 }
 
 //==========================================================
@@ -54,14 +67,16 @@ ECode KeyguardDisplayManager::MyDialogInterfaceOnDismissListener::OnDismiss(
 //==========================================================
 ECode KeyguardDisplayManager::KeyguardPresentation::MyRunnable::Run()
 {
+    using Elastos::Core::Math;
     Int32 width, height;
-    mClock->GetWidth(&width);
-    mClock->GetHeight(&height);
-    Int32 x = mMarginLeft + (Int32) (Math::Random() * (mUsableWidth - width));
-    Int32 y = mMarginTop + (Int32) (Math::Random() * (mUsableHeight - height));
-    mClock->SetTranslationX(x);
-    mClock->SetTranslationY(y);
-    return mClock->PostDelayed(mMoveTextRunnable, MOVE_CLOCK_TIMEOUT);
+    mHost->mClock->GetWidth(&width);
+    mHost->mClock->GetHeight(&height);
+    Int32 x = mHost->mMarginLeft + (Int32) (Math::Random() * (mHost->mUsableWidth - width));
+    Int32 y = mHost->mMarginTop + (Int32) (Math::Random() * (mHost->mUsableHeight - height));
+    mHost->mClock->SetTranslationX(x);
+    mHost-> mClock->SetTranslationY(y);
+    Boolean bval;
+    return mHost->mClock->PostDelayed(mHost->mMoveTextRunnable, MOVE_CLOCK_TIMEOUT, &bval);
 }
 
 //==========================================================
@@ -92,7 +107,8 @@ ECode KeyguardDisplayManager::KeyguardPresentation::constructor(
 
 ECode KeyguardDisplayManager::KeyguardPresentation::OnDetachedFromWindow()
 {
-    return mClock->RemoveCallbacks(mMoveTextRunnable);
+    Boolean bval;
+    return mClock->RemoveCallbacks(mMoveTextRunnable, &bval);
 }
 
 ECode KeyguardDisplayManager::KeyguardPresentation::OnCreate(
@@ -120,15 +136,15 @@ ECode KeyguardDisplayManager::KeyguardPresentation::OnCreate(
     FindViewById(R::id::clock, (IView**)&mClock);
 
     // Avoid screen burn in
-    return mClock->Post(mMoveTextRunnable);
+    Boolean bval;
+    return mClock->Post(mMoveTextRunnable, &bval);
 }
 
 //==========================================================
 // KeyguardDisplayManager
 //==========================================================
-const String KeyguardDisplayManager::TAG("KeyguardDisplayManager");
 
-Boolean KeyguardDisplayManager::DEBUG = TRUE;
+CAR_INTERFACE_IMPL(KeyguardDisplayManager, Object, IKeyguardDisplayManager)
 
 KeyguardDisplayManager::KeyguardDisplayManager()
     : mShowing(FALSE)
@@ -144,16 +160,18 @@ ECode KeyguardDisplayManager::constructor(
 
     AutoPtr<IInterface> obj;
     mContext->GetSystemService(IContext::MEDIA_ROUTER_SERVICE, (IInterface**)&obj);
-    mMediaRouter = IMediaRouter:Probe(obj);
+    mMediaRouter = IMediaRouter::Probe(obj);
     return NOERROR;
 }
 
 ECode KeyguardDisplayManager::Show()
 {
     if (!mShowing) {
-        if (DEBUG) Slogger::V(TAG, "show");
-        mMediaRouter->AddCallback(IMediaRouter::ROUTE_TYPE_REMOTE_DISPLAY,
-                mMediaRouterCallback, IMediaRouter::CALLBACK_FLAG_PASSIVE_DISCOVERY);
+        if (DEBUG) Slogger::V(DTAG, "show");
+        if (mMediaRouter != NULL) {
+            mMediaRouter->AddCallback(IMediaRouter::ROUTE_TYPE_REMOTE_DISPLAY,
+                    mMediaRouterCallback, IMediaRouter::CALLBACK_FLAG_PASSIVE_DISCOVERY);
+        }
         UpdateDisplays(TRUE);
     }
     mShowing = TRUE;
@@ -163,8 +181,10 @@ ECode KeyguardDisplayManager::Show()
 ECode KeyguardDisplayManager::Hide()
 {
     if (mShowing) {
-        if (DEBUG) Slogger::V(TAG, "hide");
-        mMediaRouter->RemoveCallback(mMediaRouterCallback);
+        if (DEBUG) Slogger::V(DTAG, "hide");
+        if (mMediaRouter) {
+            mMediaRouter->RemoveCallback(mMediaRouterCallback);
+        }
         UpdateDisplays(FALSE);
     }
     mShowing = FALSE;
@@ -176,8 +196,10 @@ ECode KeyguardDisplayManager::UpdateDisplays(
 {
     if (showing) {
         AutoPtr<IMediaRouterRouteInfo> route;
-        mMediaRouter->GetSelectedRoute(IMediaRouter::ROUTE_TYPE_REMOTE_DISPLAY,
+        if (mMediaRouter != NULL) {
+            mMediaRouter->GetSelectedRoute(IMediaRouter::ROUTE_TYPE_REMOTE_DISPLAY,
                 (IMediaRouterRouteInfo**)&route);
+        }
 
         Int32 type;
         Boolean useDisplay = route != NULL
@@ -187,31 +209,34 @@ ECode KeyguardDisplayManager::UpdateDisplays(
             route->GetPresentationDisplay((IDisplay**)&presentationDisplay);
         }
 
-        if (mPresentation != NULL)
+        if (mPresentation != NULL) {
             AutoPtr<IDisplay> display;
             mPresentation->GetDisplay((IDisplay**)&display);
             if (display.Get() != presentationDisplay.Get()) {
-                if (DEBUG) Slogger::V(TAG, "Display gone: %s", TO_CSTR(display));
-                mPresentation->Dismiss();
+                if (DEBUG) Slogger::V(DTAG, "Display gone: %s", TO_CSTR(display));
+                IDialogInterface::Probe(mPresentation)->Dismiss();
                 mPresentation = NULL;
+            }
         }
 
         if (mPresentation == NULL && presentationDisplay != NULL) {
-            if (DEBUG) Slogger::I(TAG, "Keyguard enabled on display: %s", TO_CSTR(presentationDisplay));
-            mPresentation = new KeyguardPresentation(mContext, presentationDisplay);
-            mPresentation->SetOnDismissListener(mOnDismissListener);
+            if (DEBUG) Slogger::I(DTAG, "Keyguard enabled on display: %s", TO_CSTR(presentationDisplay));
+            AutoPtr<KeyguardPresentation> kp = new KeyguardPresentation();
+            kp->constructor(mContext, presentationDisplay);
+            mPresentation = kp.Get();
+            kp->SetOnDismissListener(mOnDismissListener);
             //try {
-            ECode ec = mPresentation->Show();
+            ECode ec = kp->Show();
             //} catch (WindowManager.InvalidDisplayException ex) {
             if (ec == (ECode)E_INVALID_DISPLAY_EXCEPTION) {
-                Slogger::W(TAG, "Invalid display:%d", ec);
+                Slogger::W(DTAG, "Invalid display:%d", ec);
                 mPresentation = NULL;
             }
         }
     }
     else {
         if (mPresentation != NULL) {
-            mPresentation->Dismiss();
+            IDialogInterface::Probe(mPresentation)->Dismiss();
             mPresentation = NULL;
         }
     }

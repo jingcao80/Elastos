@@ -901,10 +901,13 @@ ECode ResourceBundle::HandleKeySet(
     GetKeySet((ISet**)&set);
     AutoPtr<ISet> ret;
     CHashSet::New((ISet**)&ret);
-    AutoPtr< ArrayOf<IInterface*> > outarr;
-    (ICollection::Probe(set))->ToArray((ArrayOf<IInterface*>**)&outarr);
-    for (Int32 i = 0; i < outarr->GetLength(); i++) {
-        AutoPtr<ICharSequence> sq = ICharSequence::Probe((*outarr)[i]);
+    AutoPtr<IIterator> it;
+    set->GetIterator((IIterator**)&it);
+    Boolean hasNext;
+    while (it->HasNext(&hasNext), hasNext) {
+        AutoPtr<IInterface> obj;
+        it->GetNext((IInterface**)&obj);
+        AutoPtr<ICharSequence> sq = ICharSequence::Probe(obj);
         if (sq != NULL) {
             String key;
             sq->ToString(&key);
@@ -955,14 +958,21 @@ AutoPtr<IResourceBundle> ResourceBundle::ProcessGetBundle(
     AutoPtr<IResourceBundle> ret;
     AutoPtr<IResourceBundle> currentBundle;
     AutoPtr<IResourceBundle> bundle;
-    AutoPtr< ArrayOf<IInterface*> > outlocarr;
-    (ICollection::Probe(locales))->ToArray((ArrayOf<IInterface*>**)&outlocarr);
-    for (Int32 i = 0; i < outlocarr->GetLength(); i++) {
-        AutoPtr<ILocale> locale = ILocale::Probe((*outlocarr)[i]);
-        AutoPtr< ArrayOf<IInterface*> > outformatarr;
-        (ICollection::Probe(formats))->ToArray((ArrayOf<IInterface*>**)&outformatarr);
-        for (Int32 j = 0; j < outformatarr->GetLength(); j++) {
-            AutoPtr<ICharSequence> sq = ICharSequence::Probe((*outformatarr)[j]);
+
+    AutoPtr<IIterator> it;
+    locales->GetIterator((IIterator**)&it);
+    Boolean hasNext;
+    while (it->HasNext(&hasNext), hasNext) {
+        AutoPtr<IInterface> obj;
+        it->GetNext((IInterface**)&obj);
+        AutoPtr<ILocale> locale = ILocale::Probe(obj);
+
+        AutoPtr<IIterator> itInner;
+        formats->GetIterator((IIterator**)&itInner);
+        while (itInner->HasNext(&hasNext), hasNext) {
+            obj = NULL;
+            itInner->GetNext((IInterface**)&obj);
+            AutoPtr<ICharSequence> sq = ICharSequence::Probe(obj);
             String format;
             if (sq != NULL) {
                 sq->ToString(&format);

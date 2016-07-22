@@ -36,6 +36,8 @@ private:
         : public Handler
     {
     public:
+        TO_STRING_IMPL("DashboardSummary::MyHandler")
+
         MyHandler(
             /* [in] */ DashboardSummary* host);
 

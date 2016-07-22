@@ -52,6 +52,8 @@ private:
     class H: public Handler
     {
     public:
+        TO_STRING_IMPL("CQSDetailItems::H")
+
         H(
             /* [in] */ CQSDetailItems* host);
 

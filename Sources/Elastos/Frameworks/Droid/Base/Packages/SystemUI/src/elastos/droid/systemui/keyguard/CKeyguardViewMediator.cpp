@@ -1,5 +1,7 @@
 #include "elastos/droid/systemui/keyguard/CKeyguardViewMediator.h"
 #include "elastos/droid/systemui/keyguard/KeyguardUpdateMonitor.h"
+#include "elastos/droid/systemui/keyguard/KeyguardDisplayManager.h"
+#include "elastos/droid/systemui/keyguard/MultiUserAvatarCache.h"
 #include "elastos/droid/systemui/statusbar/phone/StatusBarKeyguardViewManager.h"
 #include "Elastos.Droid.Provider.h"
 #include "Elastos.Droid.Telephony.h"
@@ -96,14 +98,9 @@ ECode CKeyguardViewMediator::MyKeyguardUpdateMonitorCallback::OnUserSwitching(
         mHost->AdjustStatusBarLocked();
         // When we switch users we want to bring the new user to the biometric unlock even
         // if the current user has gone to the backup.
-        assert(0);
-#if 0 //TODO
-        AutoPtr<IKeyguardUpdateMonitorHelper> kumh;
-        CKeyguardUpdateMonitorHelper::AcquireSingleton((IKeyguardUpdateMonitorHelper**)&kumh);
-        AutoPtr<IKeyguardUpdateMonitor> kum;
-        kumh->GetInstance(mHost->mContext, (IKeyguardUpdateMonitor**)&kum);
-        kum->SetAlternateUnlockEnabled(TRUE);
-#endif
+
+        AutoPtr<IKeyguardUpdateMonitor> monitor = KeyguardUpdateMonitor::GetInstance(mHost->mContext);
+        monitor->SetAlternateUnlockEnabled(TRUE);
     }
     return NOERROR;
 }
@@ -133,26 +130,16 @@ ECode CKeyguardViewMediator::MyKeyguardUpdateMonitorCallback::OnUserRemoved(
     /* [in] */ Int32 userId)
 {
     mHost->mLockPatternUtils->RemoveUser(userId);
-#if 0 //TODO
-    AutoPtr<IMultiUserAvatarCacheHelper> muach;
-    CMultiUserAvatarCacheHelper::AcquireSingleton((IMultiUserAvatarCacheHelper**)&muach);
-    AutoPtr<IMultiUserAvatarCache> muac;
-    muach->GetInstance((IMultiUserAvatarCache**)&muac);
-    muac->Clear(userId);
-#endif
+    AutoPtr<MultiUserAvatarCache> cache = MultiUserAvatarCache::GetInstance();
+    cache->Clear(userId);
     return NOERROR;
 }
 
 ECode CKeyguardViewMediator::MyKeyguardUpdateMonitorCallback::OnUserInfoChanged(
     /* [in] */ Int32 userId)
 {
-#if 0 //TODO
-    AutoPtr<IMultiUserAvatarCacheHelper> muach;
-    CMultiUserAvatarCacheHelper::AcquireSingleton((IMultiUserAvatarCacheHelper**)&muach);
-    AutoPtr<IMultiUserAvatarCache> muac;
-    muach->GetInstance((IMultiUserAvatarCache**)&muac);
-    muac->Clear(userId);
-#endif
+    AutoPtr<MultiUserAvatarCache> cache = MultiUserAvatarCache::GetInstance();
+    cache->Clear(userId);
     return NOERROR;
 }
 
@@ -326,9 +313,9 @@ ECode CKeyguardViewMediator::MyViewMediatorCallback::KeyguardDonePending()
 
 ECode CKeyguardViewMediator::MyViewMediatorCallback::KeyguardGone()
 {
-    //TODO
-    // return mHost->mKeyguardDisplayManager->Hide();
-    // assert(0 && "TODO");
+    if (mHost->mKeyguardDisplayManager != NULL) {
+        return mHost->mKeyguardDisplayManager->Hide();
+    }
     return NOERROR;
 }
 
@@ -560,7 +547,7 @@ CKeyguardViewMediator::CKeyguardViewMediator()
     , mBootCompleted(FALSE)
     , mBootSendUserPresent(FALSE)
     , mSuppressNextLockSound(TRUE)
-    , mExternallyEnabled(FALSE) // TRUE // TODO restore. zhaohui
+    , mExternallyEnabled(TRUE)
     , mNeedToReshowWhenReenabled(FALSE)
     , mShowing(FALSE)
     , mOccluded(FALSE)
@@ -577,7 +564,6 @@ CKeyguardViewMediator::CKeyguardViewMediator()
     , mLockSoundStreamId(0)
     , mLockSoundVolume(0.0f)
 {
-    Logger::E(TAG, "TODO restore mExternallyEnabled to TRUE when keyguard ready.");
 }
 
 ECode CKeyguardViewMediator::constructor()
@@ -618,8 +604,9 @@ void CKeyguardViewMediator::Setup()
     AutoPtr<IIntent> intent;
     mContext->RegisterReceiver(mBroadcastReceiver, filter, (IIntent**)&intent);
 
-    //TODO
-    // CKeyguardDisplayManager::New(mContext, (IKeyguardDisplayManager**)&mKeyguardDisplayManager);
+    AutoPtr<KeyguardDisplayManager> kdm = new KeyguardDisplayManager();
+    kdm->constructor(mContext);
+    mKeyguardDisplayManager = kdm.Get();
 
     obj = NULL;
     mContext->GetSystemService(IContext::ALARM_SERVICE, (IInterface**)&obj);
@@ -640,7 +627,7 @@ void CKeyguardViewMediator::Setup()
     mUpdateMonitor->IsDeviceProvisioned(&isDeviceProvisioned);
     mLockPatternUtils->IsSecure(&isSecure);
     mLockPatternUtils->IsLockScreenDisabled(&isLockScreenDisabled);
-    mShowing = isDeviceProvisioned || isSecure && (!isLockScreenDisabled);
+    mShowing = (isDeviceProvisioned || isSecure) && (!isLockScreenDisabled);
 
     mStatusBarKeyguardViewManager = new StatusBarKeyguardViewManager(mContext,
             mViewMediatorCallback, mLockPatternUtils);
@@ -697,8 +684,7 @@ ECode CKeyguardViewMediator::Start()
 ECode CKeyguardViewMediator::OnSystemReady()
 {
     AutoPtr<IInterface> obj;
-    Logger::D(TAG, "TODO [OnSystemReady]: Not implement SEARCH_SERVICE.");
-    // mContext->GetSystemService(IContext::SEARCH_SERVICE, (IInterface**)&obj);
+    mContext->GetSystemService(IContext::SEARCH_SERVICE, (IInterface**)&obj);
     mSearchManager = ISearchManager::Probe(obj);
     {
         AutoLock syncLock(this);
@@ -780,12 +766,8 @@ ECode CKeyguardViewMediator::OnScreenTurnedOff(
         }
     }
 
-    //TODO
-    // AutoPtr<IKeyguardUpdateMonitorHelper> kumh;
-    // CKeyguardUpdateMonitorHelper::AcquireSingleton((IKeyguardUpdateMonitorHelper**)&kumh);
-    // AutoPtr<IKeyguardUpdateMonitor> kum;
-    // kumh->GetInstance(mContext, (IKeyguardUpdateMonitor**)&kum);
-    // kum->DispatchScreenTurndOff(why);
+    AutoPtr<IKeyguardUpdateMonitor> monitor = KeyguardUpdateMonitor::GetInstance(mContext);
+    monitor->DispatchScreenTurndOff(why);
     return NOERROR;
 }
 
@@ -873,13 +855,9 @@ ECode CKeyguardViewMediator::OnScreenTurnedOn(
         }
     }
 
-    Logger::D(TAG, "TODO [OnScreenTurnedOn] : Not implement the app Keyguard");
-    //TODO
-    // AutoPtr<IKeyguardUpdateMonitorHelper> kumh;
-    // CKeyguardUpdateMonitorHelper::AcquireSingleton((IKeyguardUpdateMonitorHelper**)&kumh);
-    // AutoPtr<IKeyguardUpdateMonitor> kum;
-    // kumh->GetInstance(mContext, (IKeyguardUpdateMonitor**)&kum);
-    // kum->DispatchScreenTurnedOn();
+
+    AutoPtr<IKeyguardUpdateMonitor> monitor = KeyguardUpdateMonitor::GetInstance(mContext);
+    monitor->DispatchScreenTurnedOn();
     MaybeSendUserPresentBroadcast();
     return NOERROR;
 }
@@ -898,24 +876,20 @@ void CKeyguardViewMediator::MaybeSendUserPresentBroadcast()
 
 ECode CKeyguardViewMediator::OnDreamingStarted()
 {
-    {
-        AutoLock syncLock(this);
-        Boolean isSecure;
-        mLockPatternUtils->IsSecure(&isSecure);
-        if (mScreenOn && isSecure) {
-            DoKeyguardLaterLocked();
-        }
+    AutoLock syncLock(this);
+    Boolean isSecure;
+    mLockPatternUtils->IsSecure(&isSecure);
+    if (mScreenOn && isSecure) {
+        DoKeyguardLaterLocked();
     }
     return NOERROR;
 }
 
 ECode CKeyguardViewMediator::OnDreamingStopped()
 {
-    {
-        AutoLock syncLock(this);
-        if (mScreenOn) {
-            CancelDoKeyguardLaterLocked();
-        }
+    AutoLock syncLock(this);
+    if (mScreenOn) {
+        CancelDoKeyguardLaterLocked();
     }
     return NOERROR;
 }
@@ -923,63 +897,61 @@ ECode CKeyguardViewMediator::OnDreamingStopped()
 ECode CKeyguardViewMediator::SetKeyguardEnabled(
     /* [in] */ Boolean enabled)
 {
-    {
-        AutoLock syncLock(this);
-        if (DEBUG) Logger::D(TAG, "setKeyguardEnabled(%s)", enabled ? "TRUE" : "FALSE");
+    AutoLock syncLock(this);
+    if (DEBUG) Logger::D(TAG, "setKeyguardEnabled(%s)", enabled ? "TRUE" : "FALSE");
 
-        mExternallyEnabled = enabled;
+    mExternallyEnabled = enabled;
 
-        if (!enabled && mShowing) {
-            if (mExitSecureCallback != NULL) {
-                if (DEBUG) Logger::D(TAG, "in process of verifyUnlock request, ignoring");
-                // we're in the process of handling a request to verify the user
-                // can get past the keyguard. ignore extraneous requests to disable / reenable
-                return E_NULL_POINTER_EXCEPTION;
-            }
-
-            // hiding keyguard that is showing, remember to reshow later
-            if (DEBUG) Logger::D(TAG, "remembering to reshow, hiding keyguard, %s",
-                "disabling status bar expansion");
-            mNeedToReshowWhenReenabled = TRUE;
-            HideLocked();
+    if (!enabled && mShowing) {
+        if (mExitSecureCallback != NULL) {
+            if (DEBUG) Logger::D(TAG, "in process of verifyUnlock request, ignoring");
+            // we're in the process of handling a request to verify the user
+            // can get past the keyguard. ignore extraneous requests to disable / reenable
+            return E_NULL_POINTER_EXCEPTION;
         }
-        else if (enabled && mNeedToReshowWhenReenabled) {
-            // reenabled after previously hidden, reshow
-            if (DEBUG) Logger::D(TAG, "previously hidden, reshowing, reenabling %s",
-                "status bar expansion");
-            mNeedToReshowWhenReenabled = FALSE;
 
-            if (mExitSecureCallback != NULL) {
-                if (DEBUG) Logger::D(TAG, "onKeyguardExitResult(false), resetting");
+        // hiding keyguard that is showing, remember to reshow later
+        if (DEBUG) Logger::D(TAG, "remembering to reshow, hiding keyguard, %s",
+            "disabling status bar expansion");
+        mNeedToReshowWhenReenabled = TRUE;
+        HideLocked();
+    }
+    else if (enabled && mNeedToReshowWhenReenabled) {
+        // reenabled after previously hidden, reshow
+        if (DEBUG) Logger::D(TAG, "previously hidden, reshowing, reenabling %s",
+            "status bar expansion");
+        mNeedToReshowWhenReenabled = FALSE;
 
-                ECode ec = mExitSecureCallback->OnKeyguardExitResult(FALSE);
-                if (FAILED(ec)) {
-                    Logger::W(TAG, "Failed to call onKeyguardExitResult(false)%08x", ec);
-                    return E_REMOTE_EXCEPTION;
-                }
-                mExitSecureCallback = NULL;
-                ResetStateLocked();
+        if (mExitSecureCallback != NULL) {
+            if (DEBUG) Logger::D(TAG, "onKeyguardExitResult(false), resetting");
+
+            ECode ec = mExitSecureCallback->OnKeyguardExitResult(FALSE);
+            if (FAILED(ec)) {
+                Logger::W(TAG, "Failed to call onKeyguardExitResult(false)%08x", ec);
+                return E_REMOTE_EXCEPTION;
             }
-            else {
-                ShowLocked(NULL);
+            mExitSecureCallback = NULL;
+            ResetStateLocked();
+        }
+        else {
+            ShowLocked(NULL);
 
-                // block until we know the keygaurd is done drawing (and post a message
-                // to unblock us after a timeout so we don't risk blocking too long
-                // and causing an ANR).
-                mWaitingUntilKeyguardVisible = TRUE;
-                Boolean b3;
-                mHandler->SendEmptyMessageDelayed(KEYGUARD_DONE_DRAWING, KEYGUARD_DONE_DRAWING_TIMEOUT_MS, &b3);
-                if (DEBUG) Logger::D(TAG, "waiting until mWaitingUntilKeyguardVisible is false");
-                while (mWaitingUntilKeyguardVisible) {
-                    // try {
-                    Wait();
-                    // } catch (InterruptedException e) {
-                    AutoPtr<IThread> thread = Thread::GetCurrentThread();
-                    thread->Interrupt();
-                    // }
-                }
-                if (DEBUG) Logger::D(TAG, "done waiting for mWaitingUntilKeyguardVisible");
+            // block until we know the keygaurd is done drawing (and post a message
+            // to unblock us after a timeout so we don't risk blocking too long
+            // and causing an ANR).
+            mWaitingUntilKeyguardVisible = TRUE;
+            Boolean b3;
+            mHandler->SendEmptyMessageDelayed(KEYGUARD_DONE_DRAWING, KEYGUARD_DONE_DRAWING_TIMEOUT_MS, &b3);
+            if (DEBUG) Logger::D(TAG, "waiting until mWaitingUntilKeyguardVisible is false");
+            while (mWaitingUntilKeyguardVisible) {
+                // try {
+                Wait();
+                // } catch (InterruptedException e) {
+                AutoPtr<IThread> thread = Thread::GetCurrentThread();
+                thread->Interrupt();
+                // }
             }
+            if (DEBUG) Logger::D(TAG, "done waiting for mWaitingUntilKeyguardVisible");
         }
     }
     return NOERROR;
@@ -988,46 +960,44 @@ ECode CKeyguardViewMediator::SetKeyguardEnabled(
 ECode CKeyguardViewMediator::VerifyUnlock(
     /* [in] */ IIKeyguardExitCallback* callback)
 {
-    {
-        AutoLock syncLock(this);
-        Boolean isDeviceProvisioned = TRUE;
-        mUpdateMonitor->IsDeviceProvisioned(&isDeviceProvisioned);
-        if (!isDeviceProvisioned) {
-            // don't allow this api when the device isn't provisioned
-            if (DEBUG) Logger::D(TAG, "ignoring because device isn't provisioned");
-            ECode ec = callback->OnKeyguardExitResult(FALSE);
-            if (FAILED(ec)) {
-                Logger::W(TAG, "Failed to call onKeyguardExitResult(false)%08x", ec);
-                return E_REMOTE_EXCEPTION;
-            }
+    AutoLock syncLock(this);
+    Boolean isDeviceProvisioned = TRUE;
+    mUpdateMonitor->IsDeviceProvisioned(&isDeviceProvisioned);
+    if (!isDeviceProvisioned) {
+        // don't allow this api when the device isn't provisioned
+        if (DEBUG) Logger::D(TAG, "ignoring because device isn't provisioned");
+        ECode ec = callback->OnKeyguardExitResult(FALSE);
+        if (FAILED(ec)) {
+            Logger::W(TAG, "Failed to call onKeyguardExitResult(false)%08x", ec);
+            return E_REMOTE_EXCEPTION;
         }
-        else if (mExternallyEnabled) {
-            // this only applies when the user has externally disabled the
-            // keyguard.  this is unexpected and means the user is not
-            // using the api properly.
-            if (DEBUG) Logger::W(TAG, "verifyUnlock called when not externally disabled");
-            ECode ec = callback->OnKeyguardExitResult(FALSE);
-            if (FAILED(ec)) {
-                Logger::W(TAG, "Failed to call onKeyguardExitResult(false)%08x", ec);
-                return E_REMOTE_EXCEPTION;
-            }
+    }
+    else if (mExternallyEnabled) {
+        // this only applies when the user has externally disabled the
+        // keyguard.  this is unexpected and means the user is not
+        // using the api properly.
+        if (DEBUG) Logger::W(TAG, "verifyUnlock called when not externally disabled");
+        ECode ec = callback->OnKeyguardExitResult(FALSE);
+        if (FAILED(ec)) {
+            Logger::W(TAG, "Failed to call onKeyguardExitResult(false)%08x", ec);
+            return E_REMOTE_EXCEPTION;
         }
-        else if (mExitSecureCallback != NULL) {
-            if (DEBUG) {
-                Logger::D(TAG, "VerifyUnlock already in progress with someone else. %s",
-                    TO_CSTR(mExitSecureCallback));
-            }
-            // already in progress with someone else
-            ECode ec = callback->OnKeyguardExitResult(FALSE);
-            if (FAILED(ec)) {
-                Logger::W(TAG, "Failed to call onKeyguardExitResult(false)%08x", ec);
-                return E_REMOTE_EXCEPTION;
-            }
+    }
+    else if (mExitSecureCallback != NULL) {
+        if (DEBUG) {
+            Logger::D(TAG, "VerifyUnlock already in progress with someone else. %s",
+                TO_CSTR(mExitSecureCallback));
         }
-        else {
-            mExitSecureCallback = callback;
-            VerifyUnlockLocked();
+        // already in progress with someone else
+        ECode ec = callback->OnKeyguardExitResult(FALSE);
+        if (FAILED(ec)) {
+            Logger::W(TAG, "Failed to call onKeyguardExitResult(false)%08x", ec);
+            return E_REMOTE_EXCEPTION;
         }
+    }
+    else {
+        mExitSecureCallback = callback;
+        VerifyUnlockLocked();
     }
     return NOERROR;
 }
@@ -1071,14 +1041,12 @@ ECode CKeyguardViewMediator::SetOccluded(
 void CKeyguardViewMediator::HandleSetOccluded(
     /* [in] */ Boolean isOccluded)
 {
-    {
-        AutoLock syncLock(this);
-        if (mOccluded != isOccluded) {
-            mOccluded = isOccluded;
-            mStatusBarKeyguardViewManager->SetOccluded(isOccluded);
-            UpdateActivityLockScreenState();
-            AdjustStatusBarLocked();
-        }
+    AutoLock syncLock(this);
+    if (mOccluded != isOccluded) {
+        mOccluded = isOccluded;
+        mStatusBarKeyguardViewManager->SetOccluded(isOccluded);
+        UpdateActivityLockScreenState();
+        AdjustStatusBarLocked();
     }
 }
 
@@ -1130,7 +1098,6 @@ void CKeyguardViewMediator::DoKeyguardLocked(
         return;
     }
 
-    Logger::D(TAG, "TODO: Need the app Keyguard.");
     // if the setup wizard hasn't run yet, don't show
     AutoPtr<ISystemProperties> sp;
     CSystemProperties::AcquireSingleton((ISystemProperties**)&sp);
@@ -1252,16 +1219,11 @@ ECode CKeyguardViewMediator::IsSecure(
     Boolean b;
     mLockPatternUtils->IsSecure(&b);
 
-    //TODO
-    // AutoPtr<IKeyguardUpdateMonitorHelper> kumh;
-    // CKeyguardUpdateMonitorHelper::AcquireSingleton((IKeyguardUpdateMonitorHelper**)&kumh);
-    // AutoPtr<IKeyguardUpdateMonitor> kum;
-    // kumh->GetInstance(mContext, (IKeyguardUpdateMonitor**)&kum);
+    AutoPtr<IKeyguardUpdateMonitor> monitor = KeyguardUpdateMonitor::GetInstance(mContext);
+    Boolean b2;
+    monitor->IsSimPinSecure(&b2);
 
-    // Boolean b2;
-    // kum->IsSimPinSecure(&b2);
-
-    // *isSecure = b || b2;
+    *isSecure = b || b2;
 
     return NOERROR;
 }
@@ -1277,7 +1239,7 @@ ECode CKeyguardViewMediator::KeyguardDone(
     /* [in] */ Boolean wakeup)
 {
     if (DEBUG) Logger::D(TAG, "keyguardDone(%s)", authenticated ? "TRUE" : "FALSE");
-    // EventLog.writeEvent(70000, 2);//TODO
+    // EventLog.writeEvent(70000, 2);
     {
         AutoLock syncLock(this);
         mKeyguardDonePending = FALSE;
@@ -1289,7 +1251,7 @@ ECode CKeyguardViewMediator::KeyguardDone(
     return NOERROR;
 }
 
-void CKeyguardViewMediator::HandleKeyguardDone(
+ECode CKeyguardViewMediator::HandleKeyguardDone(
     /* [in] */ Boolean authenticated,
     /* [in] */ Boolean wakeup)
 {
@@ -1304,7 +1266,7 @@ void CKeyguardViewMediator::HandleKeyguardDone(
         ECode ec = mExitSecureCallback->OnKeyguardExitResult(authenticated);
         if (FAILED(ec)) {
             Logger::W(TAG, "Failed to call onKeyguardExitResult(%s)%08x", authenticated ? "TRUE" : "FALSE", ec);
-            // return E_REMOTE_EXCEPTION;
+            return E_REMOTE_EXCEPTION;
         }
 
         mExitSecureCallback = NULL;
@@ -1318,6 +1280,7 @@ void CKeyguardViewMediator::HandleKeyguardDone(
     }
 
     HandleHide();
+    return NOERROR;
 }
 
 void CKeyguardViewMediator::SendUserPresentBroadcast()
@@ -1444,7 +1407,10 @@ void CKeyguardViewMediator::HandleShow(
 
         mShowKeyguardWakeLock->ReleaseLock();
     }
-    // mKeyguardDisplayManager->Show();
+
+    if (mKeyguardDisplayManager != NULL) {
+        mKeyguardDisplayManager->Show();
+    }
 }
 
 void CKeyguardViewMediator::HandleHide()
@@ -1645,12 +1611,11 @@ ECode CKeyguardViewMediator::StartKeyguardExitAnimation(
     /* [in] */ Int64 startTime,
     /* [in] */ Int64 fadeoutDuration)
 {
-    //TODO
-    #if 0
-    Message msg = mHandler.obtainMessage(START_KEYGUARD_EXIT_ANIM,
-            new StartKeyguardExitAnimParams(startTime, fadeoutDuration));
-    mHandler.sendMessage(msg);
-    #endif
+    AutoPtr<IMessage> msg;
+    AutoPtr<StartKeyguardExitAnimParams> obj = new StartKeyguardExitAnimParams(startTime, fadeoutDuration);
+    mHandler->ObtainMessage(START_KEYGUARD_EXIT_ANIM, (IObject*)obj.Get(), (IMessage**)&msg);
+    Boolean bval;
+    mHandler->SendMessage(msg, &bval);
     return NOERROR;
 }
 

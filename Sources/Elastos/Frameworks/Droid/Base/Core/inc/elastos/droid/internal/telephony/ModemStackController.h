@@ -84,6 +84,8 @@ private:
     };
 
 public:
+    TO_STRING_IMPL("ModemStackController")
+
     //***** Class Methods
     static CARAPI_(AutoPtr<ModemStackController>) Make(
         /* [in] */ IContext* context,

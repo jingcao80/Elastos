@@ -23,6 +23,8 @@ class IsimFileHandler
     , public IIsimFileHandler
 {
 public:
+    TO_STRING_IMPL("IsimFileHandler")
+
     CAR_INTERFACE_DECL();
 
     IsimFileHandler();

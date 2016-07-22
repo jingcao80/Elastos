@@ -100,14 +100,19 @@ ECode TrustManagerService::AgentInfo::Equals(
     /* [out] */ Boolean* result)
 {
     VALIDATE_NOT_NULL(result)
+    *result = FALSE;
 
-    if (IAgentInfo::Probe(other) == NULL) {
-        *result = FALSE;
+    IAgentInfo* otherObj = IAgentInfo::Probe(other);
+    if (otherObj == NULL) {
         return NOERROR;
     }
-    AutoPtr<AgentInfo> o = (AgentInfo*) IAgentInfo::Probe(other);
-    Boolean bEquals;
-    IObject::Probe(mComponent)->Equals(o->mComponent, &bEquals);
+    if (otherObj == (IAgentInfo*)this) {
+        *result = TRUE;
+        return NOERROR;
+    }
+
+    AutoPtr<AgentInfo> o = (AgentInfo*)otherObj;
+    Boolean bEquals = Object::Equals(mComponent, o->mComponent);
     *result = bEquals && mUserId == o->mUserId;
     return NOERROR;
 }
@@ -117,8 +122,7 @@ ECode TrustManagerService::AgentInfo::GetHashCode(
 {
     VALIDATE_NOT_NULL(result)
 
-    Int32 rev;
-    IObject::Probe(mComponent)->GetHashCode(&rev);
+    Int32 rev = Object::GetHashCode(mComponent);
     *result = rev * 31 + mUserId;
     return NOERROR;
 }
@@ -169,7 +173,7 @@ ECode TrustManagerService::Receiver::Register(
     filter->AddAction(IIntent::ACTION_USER_PRESENT);
     filter->AddAction(IIntent::ACTION_USER_ADDED);
     AutoPtr<IIntent> tmp;
-    context->RegisterReceiverAsUser(IBroadcastReceiver::Probe(this),
+    context->RegisterReceiverAsUser(this,
             UserHandle::ALL,
             filter,
             String(NULL) /* permission */,

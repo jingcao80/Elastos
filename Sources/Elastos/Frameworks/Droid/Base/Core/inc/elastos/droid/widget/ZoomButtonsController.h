@@ -36,6 +36,8 @@ private:
     class MyHandler : public Handler
     {
     public:
+        TO_STRING_IMPL("ZoomButtonsController::MyHandler")
+
         MyHandler(
             /* [in] */ ZoomButtonsController* host);
 

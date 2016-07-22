@@ -3924,11 +3924,12 @@ ECode CActivityThread::HandleSleeping(
     /* [in] */ Boolean sleeping)
 {
     AutoPtr<ActivityClientRecord> r = GetActivityClientRecord(token);
-
     if (r == NULL) {
         Slogger::W(TAG, "handleSleeping: no activity for token %s", TO_CSTR(token));
         return NOERROR;
     }
+
+    Slogger::I(TAG, " >> HandleSleeping : %s, %d", TO_CSTR(r), sleeping);
 
     if (sleeping) {
         if (!r->mStopped && !r->IsPreHoneycomb()) {
@@ -3956,7 +3957,8 @@ ECode CActivityThread::HandleSleeping(
         ActivityManagerNative::GetDefault()->ActivitySlept(r->mToken);
 //         } catch (RemoteException ex) {
 //         }
-    } else {
+    }
+    else {
         Boolean isVisible;
         r->mActivity->IsVisibleFromServer(&isVisible);
         if (r->mStopped && isVisible) {

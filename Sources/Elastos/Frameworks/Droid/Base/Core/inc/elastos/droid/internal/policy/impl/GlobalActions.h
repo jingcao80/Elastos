@@ -875,6 +875,8 @@ private:
         : public Handler
     {
     public:
+        TO_STRING_IMPL("GlobalActions::TakeScreenshotHandler")
+
         TakeScreenshotHandler(
             /* [in] */ GlobalActions* host,
             /* [in] */ IServiceConnection* conn);

@@ -40,6 +40,8 @@ public:
         : public Handler
     {
     public:
+        TO_STRING_IMPL("CGsmConnection::MyHandler")
+
         MyHandler(
             /* [in] */ ILooper* l,
             /* [in] */ CGsmConnection* host);

@@ -72,6 +72,8 @@ public:
         friend class MediaScannerService;
 
     public:
+        TO_STRING_IMPL("MediaScannerService::ServiceHandler")
+
         ServiceHandler(
             /* [in] */ MediaScannerService* owner);
 

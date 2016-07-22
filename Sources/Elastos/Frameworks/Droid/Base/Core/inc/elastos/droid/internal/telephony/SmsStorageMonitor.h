@@ -34,6 +34,8 @@ private:
     };
 
 public:
+    TO_STRING_IMPL("SmsStorageMonitor")
+
     CAR_INTERFACE_DECL()
 
     SmsStorageMonitor();

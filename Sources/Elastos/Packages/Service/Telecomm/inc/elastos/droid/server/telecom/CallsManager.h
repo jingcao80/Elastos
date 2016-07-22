@@ -54,6 +54,8 @@ private:
         : public Handler
     {
     public:
+        TO_STRING_IMPL("CallsManager::LchHandler")
+
         LchHandler(
             /* [in] */ CallsManager* host);
 

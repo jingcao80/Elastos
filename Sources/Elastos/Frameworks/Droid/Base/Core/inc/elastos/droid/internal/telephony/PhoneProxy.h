@@ -38,6 +38,8 @@ class PhoneProxy
     , public IPhoneProxy
 {
 public:
+    TO_STRING_IMPL("PhoneProxy")
+
     CAR_INTERFACE_DECL()
 
     //***** Class Methods
