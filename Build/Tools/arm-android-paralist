@@ -497,6 +497,10 @@
   Elastos/Packages/Apps/Arity Org.Javia.Arity.car
 > Elastos/Packages/Apps/Arity
 
+# ==== buid Packages/Apps/Dialer ====
+  Elastos/Packages/Apps/Dialer Elastos.Droid.Dialer.car
+> Elastos/Packages/Apps/Dialer
+
 # ==== buid Packages/Apps/Calculator ====
 - Elastos/Packages/Apps/Calculator Elastos.Droid.Calculator2.car
 - Elastos/Packages/Apps/Calculator R.cpp
