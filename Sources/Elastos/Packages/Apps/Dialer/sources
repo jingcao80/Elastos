@@ -34,8 +34,5 @@ APPPACK = 1
 EXTRA_RES_DIR = $(MAKEDIR)/../ContactsCommon/res
 EXTRA_RES_DIR += $(MAKEDIR)/../PhoneCommon/res
 EXTRA_RES_DIR += $(MAKEDIR)/../InCallUI/res
-AAPT_FLAGS = --auto-add-overlay \
-    --extra-packages com.android.incallui \
-    --extra-packages com.android.contacts.common \
-    --extra-packages com.android.phone.common
+AAPT_FLAGS = --auto-add-overlay  --extra-packages com.android.incallui --extra-packages com.android.contacts.common --extra-packages com.android.phone.common
 DIRRESOURCES += $(MAKEDIR)/res;

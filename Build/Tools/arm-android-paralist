@@ -499,7 +499,29 @@
 
 # ==== buid Packages/Apps/Dialer ====
   Elastos/Packages/Apps/Dialer Elastos.Droid.Dialer.car
-> Elastos/Packages/Apps/Dialer
+  Elastos/Packages/Apps/Dialer R.cpp
+< Elastos/Packages/Apps/Dialer/src/elastos/droid/contacts/common/interactions
+  Elastos/Packages/Apps/Dialer/src/elastos/droid/contacts/common/util
+  Elastos/Packages/Apps/Dialer/src/elastos/droid/contacts/common/widget
+#  Elastos/Packages/Apps/Dialer/src/elastos/droid/contacts/common/list
+< Elastos/Packages/Apps/Dialer/src/elastos/droid/contacts/common
+  Elastos/Packages/Apps/Dialer/src/elastos/droid/dialer/activity
+  Elastos/Packages/Apps/Dialer/src/elastos/droid/dialer/database
+  Elastos/Packages/Apps/Dialer/src/elastos/droid/dialer/dialpad
+  Elastos/Packages/Apps/Dialer/src/elastos/droid/dialer/list
+  Elastos/Packages/Apps/Dialer/src/elastos/droid/dialer/util
+  Elastos/Packages/Apps/Dialer/src/elastos/droid/dialer/widget
+< Elastos/Packages/Apps/Dialer/src/elastos/droid/dialer
+  Elastos/Packages/Apps/Dialer/src/elastos/droid/dialerbind/analytics
+< Elastos/Packages/Apps/Dialer/src/elastos/droid/dialerbind
+  Elastos/Packages/Apps/Dialer/src/elastos/droid/phone/common/animation
+  Elastos/Packages/Apps/Dialer/src/elastos/droid/phone/common/dialpad
+  Elastos/Packages/Apps/Dialer/src/elastos/droid/phone/common/util
+  Elastos/Packages/Apps/Dialer/src/elastos/droid/phone/common/widget
+< Elastos/Packages/Apps/Dialer/src/elastos/droid/phone/common
+  Elastos/Packages/Apps/Dialer/src/elastos/droid/support/v4/view
+  Elastos/Packages/Apps/Dialer/src/elastos/droid/support/v13/app
+< Elastos/Packages/Apps/Dialer
 
 # ==== buid Packages/Apps/Calculator ====
 - Elastos/Packages/Apps/Calculator Elastos.Droid.Calculator2.car
