@@ -1996,9 +1996,11 @@ ECode CallsManager::UpdateForegroundCall()
                 newForegroundCall = call;
                 break;
             }
+            Boolean isAlive;
+            ((Call*) call.Get())->IsAlive(&isAlive);
             Int32 callState;
             ((Call*) call.Get())->GetState(&callState);
-            if (isActive || callState == ICallState::RINGING) {
+            if (isAlive|| callState == ICallState::RINGING) {
                 newForegroundCall = call;
                 // Don't break in case there's an active call that has priority.
             }

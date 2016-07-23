@@ -18,6 +18,7 @@ using Elastos::Droid::Telecomm::Telecom::IPhoneAccountHandle;
 using Elastos::Droid::Telephony::ITelephonyManager;
 using Elastos::Droid::Internal::Telephony::ICall;
 using Elastos::Droid::Internal::Telephony::ICallState;
+using Elastos::Droid::Internal::Telephony::ICallState_INCOMING;
 using Elastos::Droid::Internal::Telephony::ICallState_WAITING;
 using Elastos::Droid::Internal::Telephony::ITelephonyIntents;
 using Elastos::Droid::Internal::Telephony::IPhoneConstants;
@@ -183,8 +184,8 @@ void PstnIncomingCallNotifier::HandleNewRingingConnection(
             ICallState state;
             call->GetState(&state);
             Boolean res;
-            assert(0);
             //state->IsRinging(&res);
+            res = state == ICallState_INCOMING || state == ICallState_WAITING;
             if (res) {
                 SendIncomingCallIntent(connection);
             }

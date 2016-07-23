@@ -5718,9 +5718,7 @@ AutoPtr<IInterface> RIL::ResponseCallRing(
     p->ReadInt32(&isignal);
     (*response)[3] = (Char32) isignal;
 
-    assert(0 && "TODO");
-    // return response;
-    return NULL;
+    return CoreUtils::ConvertChar32Array(response);
 }
 
 AutoPtr<IArrayList> RIL::ResponseGetDataCallProfile(
