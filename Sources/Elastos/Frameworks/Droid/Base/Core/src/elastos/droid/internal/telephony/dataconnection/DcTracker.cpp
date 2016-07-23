@@ -5006,7 +5006,8 @@ ECode DcTracker::OnUpdateIcc(
         return NOERROR;
     }
     AutoPtr<IInterface> obj;
-    mIccRecords->Get((IInterface**)&obj);
+    if (mIccRecords != NULL)
+        mIccRecords->Get((IInterface**)&obj);
     AutoPtr<IIccRecords> r = IIccRecords::Probe(obj);
     if (r != newIccRecords) {
         if (r != NULL) {
