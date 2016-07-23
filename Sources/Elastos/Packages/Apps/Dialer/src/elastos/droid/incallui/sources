@@ -5,6 +5,8 @@ INCLUDES += $(MAKEDIR)/../../../../inc
 INCLUDES += $(MAKEDIR)/../../../../
 INCLUDES += ../../../../
 
+SOURCES += InCallPresenter.cpp
+
 SOURCES += BaseFragment.cpp
 SOURCES += CAnswerFragment.cpp
 SOURCES += Call.cpp

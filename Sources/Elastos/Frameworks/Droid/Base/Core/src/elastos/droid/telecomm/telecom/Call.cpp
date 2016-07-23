@@ -250,6 +250,134 @@ ECode Call::Details::GetHashCode(
     return NOERROR;
 }
 
+
+//===============================================================
+// Call::Listener::
+//===============================================================
+CAR_INTERFACE_IMPL(Call::Listener, Object, ICallListener)
+
+ECode Call::Listener::OnStateChanged(
+    /* [in] */ ICall* call,
+    /* [in] */ Int32 state)
+{
+    return NOERROR;
+}
+
+/**
+ * Invoked when the parent of this {@code Call} has changed. See {@link #getParent()}.
+ *
+ * @param call The {@code Call} invoking this method.
+ * @param parent The new parent of the {@code Call}.
+ */
+ECode Call::Listener::OnParentChanged(
+    /* [in] */ ICall* call,
+    /* [in] */ ICall* parent)
+{
+    return NOERROR;
+}
+
+/**
+ * Invoked when the children of this {@code Call} have changed. See {@link #getChildren()}.
+ *
+ * @param call The {@code Call} invoking this method.
+ * @param children The new children of the {@code Call}.
+ */
+ECode Call::Listener::OnChildrenChanged(
+    /* [in] */ ICall* call,
+    /* [in] */ IList* children)
+{
+    return NOERROR;
+}
+
+/**
+ * Invoked when the details of this {@code Call} have changed. See {@link #getDetails()}.
+ *
+ * @param call The {@code Call} invoking this method.
+ * @param details A {@code Details} object describing the {@code Call}.
+ */
+ECode Call::Listener::OnDetailsChanged(
+    /* [in] */ ICall* call,
+    /* [in] */ ICallDetails* details)
+{
+    return NOERROR;
+}
+
+/**
+ * Invoked when the text messages that can be used as responses to the incoming
+ * {@code Call} are loaded from the relevant database.
+ * See {@link #getCannedTextResponses()}.
+ *
+ * @param call The {@code Call} invoking this method.
+ * @param cannedTextResponses The text messages useable as responses.
+ */
+ECode Call::Listener::OnCannedTextResponsesLoaded(
+    /* [in] */ ICall* call,
+    /* [in] */ IList* cannedTextResponses)
+{
+    return NOERROR;
+}
+
+/**
+ * Invoked when the post-dial sequence in the outgoing {@code Call} has reached a pause
+ * character. This causes the post-dial signals to stop pending user confirmation. An
+ * implementation should present this choice to the user and invoke
+ * {@link #postDialContinue(boolean)} when the user makes the choice.
+ *
+ * @param call The {@code Call} invoking this method.
+ * @param remainingPostDialSequence The post-dial characters that remain to be sent.
+ */
+ECode Call::Listener::OnPostDialWait(
+    /* [in] */ ICall* call,
+    /* [in] */ const String& remainingPostDialSequence)
+{
+    return NOERROR;
+}
+
+/**
+ * Invoked when the {@code Call.VideoCall} of the {@code Call} has changed.
+ *
+ * @param call The {@code Call} invoking this method.
+ * @param videoCall The {@code Call.VideoCall} associated with the {@code Call}.
+ * @hide
+ */
+ECode Call::Listener::OnVideoCallChanged(
+    /* [in] */ ICall* call,
+    /* [in] */ IInCallServiceVideoCall* videoCall)
+{
+    return NOERROR;
+}
+
+/**
+ * Invoked when the {@code Call} is destroyed. Clients should refrain from cleaning
+ * up their UI for the {@code Call} in response to state transitions. Specifically,
+ * clients should not assume that a {@link #onStateChanged(Call, int)} with a state of
+ * {@link #STATE_DISCONNECTED} is the final notification the {@code Call} will send. Rather,
+ * clients should wait for this method to be invoked.
+ *
+ * @param call The {@code Call} being destroyed.
+ */
+ECode Call::Listener::OnCallDestroyed(
+    /* [in] */ ICall* call)
+{
+    return NOERROR;
+}
+
+/**
+ * Invoked upon changes to the set of {@code Call}s with which this {@code Call} can be
+ * conferenced.
+ *
+ * @param call The {@code Call} being updated.
+ * @param conferenceableCalls The {@code Call}s with which this {@code Call} can be
+ *          conferenced.
+ */
+ECode Call::Listener::OnConferenceableCallsChanged(
+    /* [in] */ ICall* call,
+    /* [in] */ IList* conferenceableCalls)
+{
+    return NOERROR;
+}
+
+
 //===============================================================
 // Call::
 //===============================================================

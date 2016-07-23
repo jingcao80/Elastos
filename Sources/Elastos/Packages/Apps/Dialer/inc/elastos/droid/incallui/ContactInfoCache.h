@@ -16,6 +16,7 @@ namespace Droid {
 namespace InCallUI {
 
 class ContactInfoCache
+    : public Object
 {
 public:
     class ContactCacheEntry
@@ -39,6 +40,10 @@ public:
         AutoPtr<IUri> mLookupUri; // Sent to NotificationMananger
         String mLookupKey;
     };
+
+public:
+    static AutoPtr<ContactInfoCache> GetInstance(
+        /* [in] */ IContext* mContext);
 };
 
 } // namespace InCallUI

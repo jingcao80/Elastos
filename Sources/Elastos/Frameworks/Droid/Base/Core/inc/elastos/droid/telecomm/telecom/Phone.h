@@ -19,7 +19,7 @@ namespace Telecom {
  *
  * {@hide}
  */
-class Phone
+class ECO_PUBLIC Phone
     : public Object
     , public IPhone
 {
@@ -197,19 +197,19 @@ public:
         /* [out] */ IAudioState** result);
 
 private:
-    CARAPI_(void) FireCallAdded(
+    ECO_LOCAL CARAPI_(void) FireCallAdded(
         /* [in] */ ICall* call);
 
-    CARAPI_(void) FireCallRemoved(
+    ECO_LOCAL CARAPI_(void) FireCallRemoved(
         /* [in] */ ICall* call);
 
-    CARAPI_(void) FireAudioStateChanged(
+    ECO_LOCAL CARAPI_(void) FireAudioStateChanged(
         /* [in] */ IAudioState* audioState);
 
-    CARAPI_(void) FireBringToForeground(
+    ECO_LOCAL CARAPI_(void) FireBringToForeground(
         /* [in] */ Boolean showDialpad);
 
-    CARAPI_(void) CheckCallTree(
+    ECO_LOCAL CARAPI_(void) CheckCallTree(
         /* [in] */ IParcelableCall* parcelableCall);
 
 private:

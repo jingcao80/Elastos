@@ -21,6 +21,11 @@ CarClass(CInCallActivity)
     , public IInCallActivity
 {
 public:
+    CAR_INTERFACE_DECL();
+
+    CARAPI_(void) DismissKeyguard(
+        /* [in] */ Boolean dismiss);
+
     CARAPI_(void) DisplayDialpad(
         /* [in] */ Boolean showDialpad,
         /* [in] */ Boolean animate);
