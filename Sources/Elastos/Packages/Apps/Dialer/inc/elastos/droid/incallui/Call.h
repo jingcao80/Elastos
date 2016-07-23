@@ -3,9 +3,20 @@
 #define __ELASTOS_DROID_INCALLUI_CALL_H__
 
 #include "_Elastos.Droid.Dialer.h"
+#include "elastos/droid/incallui/InCallVideoCallListener.h"
 #include <elastos/core/Object.h>
+#include <elastos/utility/etl/List.h>
 
+using Elastos::Droid::Net::IUri;
+using Elastos::Droid::Telecomm::Telecom::ICallListener;
+using Elastos::Droid::Telecomm::Telecom::IDisconnectCause;
+using Elastos::Droid::Telecomm::Telecom::ICallDetails;
+using Elastos::Droid::Telecomm::Telecom::IInCallServiceVideoCall;
+using Elastos::Droid::Telecomm::Telecom::IPhoneAccountHandle;
+using Elastos::Droid::Telecomm::Telecom::IGatewayInfo;
 using Elastos::Core::Object;
+using Elastos::Utility::IList;
+using Elastos::Utility::Etl::List;
 
 namespace Elastos {
 namespace Droid {
@@ -19,6 +30,16 @@ public:
     /* Defines different states of this call */
     class State
     {
+    public:
+        static CARAPI_(Boolean) IsConnectingOrConnected(
+            /* [in] */ Int32 state);
+
+        static CARAPI_(Boolean) IsDialing(
+            /* [in] */ Int32 state);
+
+        static CARAPI_(String) ToString(
+            /* [in] */ Int32 state);
+
     public:
         static const Int32 INVALID = 0;
         static const Int32 IDLE = 1;           /* The call is idle.  Nothing active */
@@ -48,8 +69,158 @@ public:
         static const Int32 RECEIVED_UPGRADE_TO_VIDEO_REQUEST = 3;
     };
 
+private:
+    class TelecommCallListener
+        : public Object
+        , public ICallListener
+    {
+    public:
+        TelecommCallListener(
+            /* [in] */ Call* host)
+            : mHost(host)
+        {}
+
+        CAR_INTERFACE_DECL()
+
+        CARAPI OnStateChanged(
+            /* [in] */ Elastos::Droid::Telecomm::Telecom::ICall* call,
+            /* [in] */ Int32 state);
+
+        CARAPI OnParentChanged(
+            /* [in] */ Elastos::Droid::Telecomm::Telecom::ICall* call,
+            /* [in] */ Elastos::Droid::Telecomm::Telecom::ICall* parent);
+
+        CARAPI OnChildrenChanged(
+            /* [in] */ Elastos::Droid::Telecomm::Telecom::ICall* call,
+            /* [in] */ IList* children);
+
+        CARAPI OnDetailsChanged(
+            /* [in] */ Elastos::Droid::Telecomm::Telecom::ICall* call,
+            /* [in] */ ICallDetails* details);
+
+        CARAPI OnCannedTextResponsesLoaded(
+            /* [in] */ Elastos::Droid::Telecomm::Telecom::ICall* call,
+            /* [in] */ IList* cannedTextResponses);
+
+        CARAPI OnPostDialWait(
+            /* [in] */ Elastos::Droid::Telecomm::Telecom::ICall* call,
+            /* [in] */ String remainingPostDialSequence);
+
+        CARAPI OnVideoCallChanged(
+            /* [in] */ Elastos::Droid::Telecomm::Telecom::ICall* call,
+            /* [in] */ IInCallServiceVideoCall* videoCall);
+
+        CARAPI OnCallDestroyed(
+            /* [in] */ Elastos::Droid::Telecomm::Telecom::ICall* call);
+
+        CARAPI OnConferenceableCallsChanged(
+            /* [in] */ Elastos::Droid::Telecomm::Telecom::ICall* call,
+            /* [in] */ IList* conferenceableCalls);
+
+    private:
+        Call* mHost;
+    };
+
 public:
-    CAR_INTERFACE_DECL();
+    CAR_INTERFACE_DECL()
+
+    Call(
+        /* [in] */ Elastos::Droid::Telecomm::Telecom::ICall* telecommCall);
+
+    CARAPI_(AutoPtr<Elastos::Droid::Telecomm::Telecom::ICall>) GetTelecommCall();
+
+    CARAPI_(String) GetId();
+
+    CARAPI_(String) GetNumber();
+
+    CARAPI_(AutoPtr<IUri>) GetHandle();
+
+    CARAPI_(Int32) GetState();
+
+    CARAPI_(void) SetState(
+        /* [in] */ Int32 state);
+
+    CARAPI_(Int32) GetNumberPresentation();
+
+    CARAPI_(Int32) GetCnapNamePresentation();
+
+    CARAPI_(String) GetCnapName();
+
+    /** Returns call disconnect cause, defined by {@link DisconnectCause}. */
+    CARAPI_(AutoPtr<IDisconnectCause>) GetDisconnectCause();
+
+    CARAPI_(void) SetDisconnectCause(
+        /* [in] */ IDisconnectCause* disconnectCause);
+
+    /** Returns the possible text message responses. */
+    CARAPI_(AutoPtr<IList>) GetCannedSmsResponses();
+
+    /** Checks if the call supports the given set of capabilities supplied as a bit mask. */
+    CARAPI_(Boolean) Can(
+        /* [in] */ Int32 capabilities);
+
+    /** Gets the time when the call first became active. */
+    CARAPI_(Int64) GetConnectTimeMillis();
+
+    CARAPI_(Boolean) IsConferenceCall();
+
+    CARAPI_(AutoPtr<IGatewayInfo>) GetGatewayInfo();
+
+    CARAPI_(AutoPtr<IPhoneAccountHandle>) GetAccountHandle();
+
+    CARAPI_(AutoPtr<IInCallServiceVideoCall>) GetVideoCall();
+
+    CARAPI_(List<String>&) GetChildCallIds();
+
+    CARAPI_(String) GetParentId();
+
+    CARAPI_(Int32) GetVideoState();
+
+    CARAPI_(Boolean) IsVideoCall(
+        /* [in] */ IContext* context);
+
+    CARAPI_(void) SetSessionModificationState(
+        /* [in] */ Int32 state);
+
+    static CARAPI_(Boolean) AreSame(
+        /* [in] */ Call* call1,
+        /* [in] */ Call* call2);
+
+    CARAPI_(Int32) GetSessionModificationState();
+
+    // @Override
+    CARAPI ToString(
+        /* [out] */ String* str);
+
+private:
+    CARAPI_(void) Update();
+
+    CARAPI_(void) UpdateFromTelecommCall();
+
+    static CARAPI_(Int32) TranslateState(
+        /* [in] */ Int32 state);
+
+    CARAPI_(Boolean) HasProperty(
+        /* [in] */ Int32 property);
+
+public:
+    Boolean mIsActiveSub;
+
+private:
+    static const String ID_PREFIX;
+    static Int32 sIdCounter;
+
+    AutoPtr<ICallListener> mTelecommCallListener;
+
+    AutoPtr<Elastos::Droid::Telecomm::Telecom::ICall> mTelecommCall;
+    String mId;
+    Int32 mState;
+    AutoPtr<IDisconnectCause> mDisconnectCause;
+    Int32 mSessionModificationState;
+    List<String> mChildCallIds;
+    Boolean mIsOutgoing;
+
+    AutoPtr<InCallVideoCallListener> mVideoCallListener;
 };
 
 } // namespace InCallUI

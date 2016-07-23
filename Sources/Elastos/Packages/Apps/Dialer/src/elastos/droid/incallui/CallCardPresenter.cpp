@@ -45,6 +45,10 @@ using Elastos::Core::CSystem;
 using Elastos::Core::ICharSequence;
 using Elastos::Utility::Logging::Logger;
 
+namespace Elastos {
+namespace Droid {
+namespace InCallUI {
+
 //================================================================
 // CallCardPresenter::ContactLookupCallback
 //================================================================
@@ -126,10 +130,6 @@ ECode CallCardPresenter::DialogOnClickListener::OnClick(
 
 const String CallCardPresenter::TAG("CallCardPresenter");
 const Int64 CALL_TIME_UPDATE_INTERVAL_MS;
-const String CallCardPresenter::IDP_IDN("+62");
-const String CallCardPresenter::IDP_PLUS("+");
-const String CallCardPresenter::IDP_ZERO("0");
-const String CallCardPresenter::IDP_PREFIX("01033");
 
 CAR_INTERFACE_IMPL_5(CallCardPresenter, Presenter
         , ICallCardPresenter
@@ -311,7 +311,7 @@ ECode CallCardPresenter::OnStateChange(
         GetUi((IUi**)&ui);
         ICallCardUi::Probe(ui)->SetCallState(callState, VideoProfile::VideoState::AUDIO_ONLY,
                 Call::SessionModificationState::NO_REQUEST, cause,
-                String(NULL), NULL, String(NULL), FALSE);
+                String(NULL), NULL, String(NULL));
     }
 
     // Hide/show the contact photo based on the video state.
@@ -342,16 +342,6 @@ ECode CallCardPresenter::OnDetailsChanged(
     /* [in] */ ICallDetails* details)
 {
     UpdatePrimaryCallState();
-
-    Int32 c;
-    details->GetCallCapabilities(&c);
-    AutoPtr<IPhoneCapabilities> capabilities;
-    CPhoneCapabilities::AcquireSingleton((IPhoneCapabilities**)&capabilities);
-    Boolean result;
-    capabilities->Can(c, IPhoneCapabilities::MANAGE_CONFERENCE, &result);
-    if (((Call*)call)->Can(IPhoneCapabilities::MANAGE_CONFERENCE) != result) {
-        MaybeShowManageConferenceCallButton();
-    }
     return NOERROR;
 }
 
@@ -388,17 +378,24 @@ void CallCardPresenter::UpdatePrimaryCallState()
                 mPrimary->GetDisconnectCause(),
                 GetConnectionLabel(),
                 GetConnectionIcon(),
-                GetGatewayNumber(),
-                mPrimary->IsWaitingForRemoteSide());
+                GetGatewayNumber());
         SetCallbackNumber();
     }
 }
 
 void CallCardPresenter::MaybeShowManageConferenceCallButton()
 {
+    if (mPrimary == NULL) {
+        AutoPtr<IUi> ui;
+        GetUi((IUi**)&ui);
+        ICallCardUi::Probe(ui)->ShowManageConferenceCallButton(ShouldShowManageConference());
+        return;
+    }
+
+    Boolean canManageConference = mPrimary->Can(IPhoneCapabilities::MANAGE_CONFERENCE);
     AutoPtr<IUi> ui;
     GetUi((IUi**)&ui);
-    ICallCardUi::Probe(ui)->ShowManageConferenceCallButton(ShouldShowManageConference());
+    ICallCardUi::Probe(ui)->ShowManageConferenceCallButton(mPrimary->IsConferenceCall() && canManageConference);
 }
 
 Boolean CallCardPresenter::ShouldShowManageConference()
@@ -522,7 +519,7 @@ void CallCardPresenter::OnContactInfoComplete(
         Logger::D(TAG, "Contact found: %s", TO_CSTR(entry));
     }
     if (entry->mContactUri != NULL) {
-        CallerInfoUtils::SendViewNotification(mContext, entry.contactUri);
+        CallerInfoUtils::SendViewNotification(mContext, entry->mContactUri);
     }
 }
 
@@ -543,10 +540,16 @@ void CallCardPresenter::OnImageLoadComplete(
     }
 }
 
-Boolean CallCardPresenter::IsForwarded(
+Boolean CallCardPresenter::IsConference(
     /* [in] */ Call* call)
 {
-    return call != NULL && call->IsForwarded();
+    return call != NULL && call->IsConferenceCall();
+}
+
+Boolean CallCardPresenter::CanManageConference(
+    /* [in] */ Call* call)
+{
+    return call != NULL && call->Can(IPhoneCapabilities::MANAGE_CONFERENCE);
 }
 
 void CallCardPresenter::UpdateContactEntry(
@@ -615,103 +618,18 @@ void CallCardPresenter::UpdatePrimaryDisplayInfo(
         return;
     }
 
-    if (mPrimary == NULL) {
-        // Clear the primary display info.
-        ui->SetPrimary(String(NULL), String(NULL), FALSE, FALSE, String(NULL), NULL, FALSE,
-                String(NULL), String(NULL), String(NULL), String(NULL));
-        return;
-    }
-
-    Boolean isForwarded = IsForwarded(mPrimary);
-    if (mPrimary->IsConferenceCall()) {
-        Logger::D(TAG, "Update primary display info for conference call.");
-
-        ui->SetPrimary(
-                String(NULL) /* number */,
-                GetConferenceString(mPrimary),
-                FALSE /* nameIsNumber */, isForwarded,
-                String(NULL) /* label */,
-                GetConferencePhoto(mPrimary),
-                FALSE /* isSipCall */,
-                String(NULL), String(NULL), String(NULL), String(NULL));
-    }
-    else if (mPrimaryContactInfo != NULL) {
-        Logger::D(TAG, "Update primary display info for %s", TO_CSTR(mPrimaryContactInfo));
-
-        String name = GetNameForCall(mPrimaryContactInfo);
-        String number = GetNumberForCall(mPrimaryContactInfo);
-        Boolean nameIsNumber = !name.IsNull() && name.Equals(mPrimaryContactInfo->mNumber);
-        ui->SetPrimary(number, name, nameIsNumber, isForwarded, mPrimaryContactInfo->mLabel,
-                mPrimaryContactInfo->mPhoto, mPrimaryContactInfo->mIsSipCall,
-                mPrimaryContactInfo->mNickName, mPrimaryContactInfo->mOrganization,
-                mPrimaryContactInfo->mPosition, mPrimaryContactInfo->mCity);
+    Boolean canManageConference = CanManageConference(mPrimary);
+    if (entry != NULL && mPrimary != NULL) {
+        String name = GetNameForCall(entry);
+        String number = GetNumberForCall(entry);
+        Boolean nameIsNumber = !name.IsNull() && name.Equals(entry->mNumber);
+        ui->SetPrimary(number, name, nameIsNumber, entry->mLabel,
+                entry->mPhoto, isConference, canManageConference, entry->mIsSipCall);
     }
     else {
-        // Clear the primary display info.
-        ui->SetPrimary(String(NULL), String(NULL), FALSE, FALSE, String(NULL), NULL, FALSE,
-                String(NULL), String(NULL), String(NULL), String(NULL));
+        ui->SetPrimary(String(NULL), String(NULL), FALSE, String(NULL), NULL,
+                isConference, canManageConference, FALSE)
     }
-}
-
-String CallCardPresenter::CheckIdp(
-    /* [in] */ const String& number,
-    /* [in] */ Boolean nameIsNumber,
-    /* [in] */ Boolean isIncoming)
-{
-    AutoPtr<IResources> res;
-    mContext->GetReSources((IResources**)&res);
-    Boolean value;
-    if ((res->GetBoolean(R::bool::def_incallui_checkidp_enabled, &value), value)
-            && IsCDMAPhone(GetActiveSubscription()) && isIncoming && nameIsNumber) {
-        if (number.IndexOf(IDP_PREFIX) == 0) {
-            return IDP_PLUS + number.Substring(IDP_PREFIX.GetLength());
-        }
-        else if ((number.IndexOf(IDP_IDN) == 0) && (!IsRoaming(getActiveSubscription()))) {
-            return IDP_ZERO + number.Substring(IDP_IDN.GetLength());
-        }
-    }
-    return number;
-}
-
-Boolean CallCardPresenter::IsCDMAPhone(
-    /* [in] */ Int64 subscription)
-{
-    Boolean isCDMA = FALSE;
-    AutoPtr<ITelephonyManagerHelper> helper;
-    CTelephonyManagerHelper::AcquireSingleton((ITelephonyManagerHelper**)&helper);
-    AutoPtr<ITelephonyManager> manager;
-    helper->GetDefault((ITelephonyManager**)&manager);
-    Boolean enabled;
-    manager->IsMultiSimEnabled(&enabled);
-    Int32 phoneType;
-    if (enabled) {
-        manager->GetCurrentPhoneType(&phoneType);
-    }
-    else {
-        manager->GetPhoneType(&phoneType);
-    }
-    if (ITelephonyManager::PHONE_TYPE_CDMA == phoneType) {
-        isCDMA = TRUE;
-    }
-    return isCDMA;
-}
-
-Boolean CallCardPresenter::IsRoaming(
-    /* [in] */ Int64 subscription)
-{
-    AutoPtr<ITelephonyManagerHelper> helper;
-    CTelephonyManagerHelper::AcquireSingleton((ITelephonyManagerHelper**)&helper);
-    AutoPtr<ITelephonyManager> manager;
-    helper->GetDefault((ITelephonyManager**)&manager);
-    Boolean enabled;
-    Boolean isRoaming;
-    if (manager->IsMultiSimEnabled(&enabled), enabled) {
-        manager->IsNetworkRoaming(subscription, &isRoaming);
-    }
-    else {
-        manager->IsNetworkRoaming(&isRoaming);
-    }
-    return isRoaming;
 }
 
 void CallCardPresenter::UpdateSecondaryDisplayInfo(
@@ -724,38 +642,20 @@ void CallCardPresenter::UpdateSecondaryDisplayInfo(
         return;
     }
 
-    if (mSecondary == NULL) {
-        // Clear the secondary display info.
-        ui->SetSecondary(FALSE, String(NULL), FALSE, String(NULL), String(NULL), NULL, FALSE /* isConference */);
-        return;
-    }
-
-    if (mSecondary->IsConferenceCall()) {
-        ui->SetSecondary(
-                TRUE /* show */,
-                GetConferenceString(mSecondary),
-                FALSE /* nameIsNumber */,
-                String(NULL) /* label */,
-                GetCallProviderLabel(mSecondary),
-                GetCallProviderIcon(mSecondary),
-                TRUE /* isConference */);
-    }
-    else if (mSecondaryContactInfo != NULL) {
+    Boolean canManageConference = CanManageConference(mSecondary);
+    if (mSecondaryContactInfo != NULL && mSecondary != NULL) {
         Logger::D(TAG, "updateSecondaryDisplayInfo() %s", TO_CSTR(mSecondaryContactInfo));
-        String name = GetNameForCall(mSecondaryContactInfo);
-        Boolean nameIsNumber = !name.IsNull() && name.Equals(mSecondaryContactInfo->mNumber);
-        ui->SetSecondary(
-                TRUE /* show */,
-                name,
-                nameIsNumber,
-                mSecondaryContactInfo->mLabel,
-                GetCallProviderLabel(mSecondary),
-                GetCallProviderIcon(mSecondary),
-                FALSE /* isConference */);
+        String nameForCall = GetNameForCall(mSecondaryContactInfo);
+
+        Boolean nameIsNumber = !nameForCall.IsNull() && nameForCall.Equals(
+                mSecondaryContactInfo->mNumber);
+        ui->SetSecondary(TRUE /* show */, nameForCall, nameIsNumber, mSecondaryContactInfo->mLabel,
+                GetCallProviderLabel(mSecondary), GetCallProviderIcon(mSecondary),
+                isConference, canManageConference);
     }
     else {
-        // Clear the secondary display info.
-        ui->SetSecondary(FALSE, String(NULL), FALSE, String(NULL), String(NULL), NULL, FALSE /* isConference */);
+        // reset to nothing so that it starts off blank next time we use it.
+        ui->SetSecondary(FALSE, String(NULL), FALSE, String(NULL), String(NULL), NULL, isConference, canManageConference);
     }
 }
 
@@ -953,27 +853,6 @@ ECode CallCardPresenter::OnFullScreenVideoStateChanged(
     return ui->SetCallCardVisible(!isFullScreenVideo);
 }
 
-void CallCardPresenter::BlacklistClicked(
-    /* [in] */ IContext* context)
-{
-    if (mPrimary == NULL) {
-        return;
-    }
-
-    String number = mPrimary->getNumber();
-    String message;
-    context->GetString(R::string::blacklist_dialog_message, number, &message);
-    AutoPtr<IAlertDialogBuilder> builder;
-    CAlertDialogBuilder::New(mHost->mContext, (IAlertDialogBuilder**)&builder);
-    builder->SetTitle(R::string::blacklist_dialog_title);
-    builder->SetMessage(message);
-    builder->SetPositiveButton(R::string::pause_prompt_yes,
-            new DialogOnClickListener(context, mHost));
-    builder->SetNegativeButton(R::string::pause_prompt_no, NULL);
-    AutoPtr<IAlertDialog> dialog;
-    builder->Show((IAlertDialog**)&dialog);
-}
-
 AutoPtr<ITelecomManager> CallCardPresenter::GetTelecomManager()
 {
     if (mTelecomManager == NULL) {
@@ -984,40 +863,6 @@ AutoPtr<ITelecomManager> CallCardPresenter::GetTelecomManager()
     return mTelecomManager;
 }
 
-String CallCardPresenter::GetConferenceString(
-    /* [in] */ Call* call)
-{
-    Boolean isGenericConference = call->Can(PhoneCapabilities.GENERIC_CONFERENCE);
-    Logger::V(TAG, "getConferenceString: %d", isGenericConference);
-
-    Int32 resId = isGenericConference? R::string::card_title_in_call : R::string::card_title_conf_call;
-    AutoPtr<IResources> res;
-    mContext->GetReSources((IResources**)&res);
-    String str;
-    res->GetString(resId, &str);
-    return str;
-}
-
-AutoPtr<IDrawable> CallCardPresenter::GetConferencePhoto(
-    /* [in] */ Call* call)
-{
-    Boolean isGenericConference = call->Can(IPhoneCapabilities::GENERIC_CONFERENCE);
-    Logger::V(this, "getConferencePhoto: %d", isGenericConference);
-
-    Int32 resId = isGenericConference? R::drawable::img_phone : R::drawable::img_conference;
-    AutoPtr<IResources> res;
-    mContext->GetReSources((IResources**)&res);
-    AutoPtr<IDrawable> photo;
-    res->GetDrawable(resId, (IDrawable**)&photo);
-    photo->SetAutoMirrored(TRUE);
-    return photo;
-}
-
-Int64 CallCardPresenter::GetActiveSubscription()
-{
-    AutoPtr<ISubscriptionManager> manager;
-    CSubscriptionManager::AcquireSingleton((ISubscriptionManager**)&manager);
-    Int64 id;
-    manager->GetDefaultSubId(&id);
-    return id;
-}
+} // namespace InCallUI
+} // namespace Droid
+} // namespace Elastos

@@ -152,11 +152,6 @@ public:
     CARAPI OnFullScreenVideoStateChanged(
         /* [in] */ Boolean isFullScreenVideo);
 
-    CARAPI_(void) BlacklistClicked(
-        /* [in] */ IContext* context);
-
-    CARAPI_(Int64) GetActiveSubscription();
-
 private:
     CARAPI_(String) GetSubscriptionNumber();
 
@@ -198,7 +193,10 @@ private:
         /* [in] */ const String& callId,
         /* [in] */ ContactInfoCache::ContactCacheEntry* entry);
 
-    static CARAPI_(Boolean) IsForwarded(
+    static CARAPI_(Boolean) IsConference(
+        /* [in] */ Call* call);
+
+    CARAPI_(Boolean) CanManageConference(
         /* [in] */ Call* call);
 
     CARAPI_(void) UpdateContactEntry(
@@ -222,17 +220,6 @@ private:
     CARAPI_(void) UpdatePrimaryDisplayInfo(
         /* [in] */ ContactInfoCache::ContactCacheEntry* entry,
         /* [in] */ Boolean isConference);
-
-    CARAPI_(String) CheckIdp(
-        /* [in] */ const String& number,
-        /* [in] */ Boolean nameIsNumber,
-        /* [in] */ Boolean isIncoming);
-
-    CARAPI_(Boolean) IsCDMAPhone(
-        /* [in] */ Int64 subscription);
-
-    CARAPI_(Boolean) IsRoaming(
-        /* [in] */ Int64 subscription);
 
     CARAPI_(void) UpdateSecondaryDisplayInfo(
         /* [in] */ Boolean isConference);
@@ -287,20 +274,9 @@ private:
 
     CARAPI_(AutoPtr<ITelecomManager>) GetTelecomManager();
 
-    CARAPI_(String) GetConferenceString(
-        /* [in] */ Call* call);
-
-    CARAPI_(AutoPtr<IDrawable>) GetConferencePhoto(
-        /* [in] */ Call* call);
-
 private:
     static const String TAG;
     static const Int64 CALL_TIME_UPDATE_INTERVAL_MS = 1000;
-
-    static const String IDP_IDN;
-    static const String IDP_PLUS;
-    static const String IDP_ZERO;
-    static const String IDP_PREFIX;
 
     AutoPtr<Call> mPrimary;
     AutoPtr<Call> mSecondary;
