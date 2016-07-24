@@ -1,0 +1,56 @@
+#==========================================================================
+# Copyright (c) 2000-2016,  Elastos, Inc.  All Rights Reserved.
+#==========================================================================
+
+TARGET_NAME = Elastos.CARBridge
+TARGET_TYPE = node
+
+C_DEFINES += -DNODE_GYP_MODULE_NAME=Elastos.CARBridge
+C_DEFINES += -D_LARGEFILE_SOURCE
+C_DEFINES += -D_FILE_OFFSET_BITS=64
+C_DEFINES += -DBUILDING_NODE_EXTENSION
+C_DEFINES += -DANDROID
+C_DEFINES += -DHAVE_SYS_UIO_H
+
+C_DEFINES += -D_ELASTOS_BUG_EVENT_HANDLER_MAKE
+
+C_FLAGS += -std=c++11
+C_FLAGS += -fexceptions
+C_FLAGS += -Wall
+C_FLAGS += -O0
+C_FLAGS += -fpermissive
+
+INCLUDES += $(PREBUILD_INC)
+INCLUDES += $(node -e "require('nan')")
+
+SOURCES += car-constant.cc
+SOURCES += car-data-type.cc
+SOURCES += car-function.cc
+SOURCES += car-function-adapter.cc
+SOURCES += car-imported-module.cc
+SOURCES += car-module.cc
+SOURCES += car-namespace.cc
+SOURCES += car-object.cc
+SOURCES += car-object-adapter.cc
+SOURCES += car-type-alias.cc
+SOURCES += elastos-ext.cc
+SOURCES += error.cc
+SOURCES += js-2-car.cc
+SOURCES += libc-ext.cc
+SOURCES += new.cc
+SOURCES += parse-uri.cc
+SOURCES += require.cc
+SOURCES += this.cc
+SOURCES += util.cc
+
+LIBRARIES += -lnode -llog
+
+LIBRARIES += $(XDK_USER_LIB)/Elastos.Runtime.lib
+
+ifeq "$(XDK_TARGET_PLATFORM)" "android"
+  LIBRARIES += $(XDK_USER_LIB)/crt0.lib
+
+  LIBRARIES += $(XDK_TARGETS)/Elastos.Runtime.eco
+  LIBRARIES += $(XDK_TARGETS)/Elastos.CoreLibrary.eco
+endif
+

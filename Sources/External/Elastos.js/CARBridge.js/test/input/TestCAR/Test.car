@@ -1,0 +1,140 @@
+
+module {
+    enum ETest {
+        ETest_0,
+        ETest_1,
+        ETest_2
+    }
+
+    struct STest {
+        Int16 i16;
+        Int32 i32;
+        Int64 i64;
+        Byte byte;
+        Float f;
+        Double d;
+        Char32 c32;
+        Boolean b;
+        EMuid emuid;
+        EGuid eguid;
+        ECode ec;
+        LocalPtr localPtr;
+        LocalType localTypeObject;
+        enum ETest etest;
+        struct SInnerTest {
+            Int16 i16;
+        } stest;
+        cppVector;
+    }
+
+    interface ITest {
+        TestInt16(
+                [in] Int16 i16);
+
+        TestInt32(
+                [in] Int32 i32);
+
+        TestInt64(
+                [in] Int64 i64);
+
+        TestByte(
+                [in] Byte byte);
+
+        TestFloat(
+                [in] Float f);
+
+        TestDouble(
+                [in] Double d);
+
+        TestChar32(
+                [in] Char32 c32);
+
+        TestString(
+                [in] String s);
+
+        TestBoolean(
+                [in] Boolean b);
+
+        TestEMuid(
+                [in] EMuid id);
+
+        TestEGuid(
+                [in] EGuid id);
+
+        TestECode(
+                [in] ECode ec);
+
+        TestLocalPtr(
+                [in] LocalPtr localPtr);
+
+        TestLocalType(
+                [in] PVoid localTypeObject);
+
+        TestEnum(
+                [in] enum ETest etest);
+
+        TestCARArray(
+                [in] ArrayOf<Int16> carArray);
+
+        TestCARArray(
+                [in] ArrayOf<Int32> carArray);
+
+        TestCARArray(
+                [in] ArrayOf<Int64> carArray);
+
+        TestCARArray(
+                [in] ArrayOf<Byte> carArray);
+
+        TestCARArray(
+                [in] ArrayOf<Float> carArray);
+
+        TestCARArray(
+                [in] ArrayOf<Double> carArray);
+
+        TestCARArray(
+                [in] ArrayOf<enum ETest> carArray);
+
+        TestCARArray(
+                [in] ArrayOf<Char32> carArray);
+
+        TestCARArray(
+                [in] ArrayOf<String> carArray);
+
+        TestCARArray(
+                [in] ArrayOf<Boolean> carArray);
+
+        TestCARArray(
+                [in] ArrayOf<EMuid> carArray);
+
+        TestCARArray(
+                [in] ArrayOf<EGuid> carArray);
+
+        TestCARArray(
+                [in] ArrayOf<ECode> carArray);
+
+        TestCARArray(
+                [in] ArrayOf<> carArray);
+
+        TestCARArray(
+                [in] ArrayOf<ITest *> carArray);
+
+        TestCARArray(
+                [in] ArrayOf<struct STest> carArray);
+
+        TestCPPVector(
+                [in] PCarQuintet cppVector);
+
+        TestStruct(
+                [in] struct STest stest);
+
+        TestInterface(
+                [in] ITest *itest);
+    }
+
+    class CTest {
+        constructor(void);
+
+        interface ITest;
+    }
+}
+
