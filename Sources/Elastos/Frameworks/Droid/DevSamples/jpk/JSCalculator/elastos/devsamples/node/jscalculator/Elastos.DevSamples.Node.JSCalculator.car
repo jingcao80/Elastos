@@ -25,6 +25,13 @@ module
     using interface Elastos.Droid.View.IViewOnCreateContextMenuListener;
     using interface Elastos.Droid.View.IOnWindowDismissedCallback;
 
+    using interface Elastos.Droid.Widget.ITextView;
+    using interface Elastos.Droid.Utility.IAttributeSet;
+    using interface Elastos.Droid.View.Accessibility.IAccessibilityEventSource;
+    using interface Elastos.Droid.Graphics.Drawable.IDrawableCallback;
+    using interface Elastos.Droid.View.IOnPreDrawListener;
+    using interface Elastos.Droid.Widget.IEditText;
+
     namespace Elastos {
     namespace DevSamples {
     namespace Node {
@@ -128,6 +135,25 @@ module
             [in] IView* v);
     }
 
+    [local]
+    interface IOnTextSizeChangeListener
+    {
+        OnTextSizeChanged(
+            [in] ITextView* textView,
+            [in] Float oldSize);
+    }
+
+    [local]
+    interface ICalculatorEditText
+    {
+        SetOnTextSizeChangeListener(
+            [in] IOnTextSizeChangeListener* listener);
+
+        GetVariableTextSize(
+            [in] String text,
+            [out] Float* result);
+    }
+
     class CCalculator {
         constructor();
 
@@ -143,6 +169,31 @@ module
         interface IComponentCallbacks2;
         interface IOnWindowDismissedCallback;
         interface IActivityOne;
+    }
+
+    [local]
+    class CCalculatorEditText
+    {
+        constructor(
+            [in] IContext* context);
+
+        constructor(
+            [in] IContext* ctx,
+            [in] IAttributeSet* attrs);
+
+        constructor(
+            [in] IContext* ctx,
+            [in] IAttributeSet* attrs,
+            [in] Int32 defStyle);
+
+        interface IEditText;
+        interface ITextView;
+        interface IOnPreDrawListener;
+        interface IView;
+        interface IDrawableCallback;
+        interface IKeyEventCallback;
+        interface IAccessibilityEventSource;
+        interface ICalculatorEditText;
     }
 
     class CNodeListener {
