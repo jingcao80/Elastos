@@ -21,6 +21,10 @@ public:
 
     CAR_OBJECT_DECL()
 
+    CARAPI createObject(
+        /* [in] */ const String& className,
+        /* [out] */ IInterface ** ppOutObject);
+
     CARAPI GetPath(
         /* [out] */ String * pPath);
 

@@ -1,0 +1,20 @@
+module
+{
+    importlib("Elastos.Droid.Core.eco");
+
+    interface IEventListener {
+        OnEvent(
+            [in] Int32 id);
+    }
+
+    interface IDemo {
+        addEventHandler(
+            [in] IEventListener* listener);
+
+        doTask();
+    }
+
+    class CDemo {
+        interface IDemo;
+    }
+}

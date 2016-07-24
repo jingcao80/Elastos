@@ -18,6 +18,36 @@ CAR_INTERFACE_IMPL(CTestModuleInfo, Object, ITestModuleInfo)
 
 CAR_OBJECT_IMPL(CTestModuleInfo)
 
+ECode CTestModuleInfo::createObject(
+    /* [in] */ const String& className,
+    /* [out] */ IInterface ** ppOutObject)
+{
+    assert(ppOutObject != NULL);
+
+    ECode ec = NOERROR;
+
+    AutoPtr<IModuleInfo> moduleInfo = mModuleInfo;
+
+    AutoPtr<IClassInfo> classInfo;
+    ec = moduleInfo->GetClassInfo(className, (IClassInfo**)&classInfo);
+    if (FAILED(ec)) {
+        ALOGD("Acquire \"%s\" class info failed!\n", className.string());
+        return ec;
+    }
+
+    AutoPtr<IInterface> testObject;
+    ec = classInfo->CreateObject((IInterface**)&testObject);
+    if (FAILED(ec)) {
+        ALOGD("Create object failed!\n");
+        return ec;
+    }
+
+    *ppOutObject = testObject;
+    REFCOUNT_ADD(*ppOutObject);
+
+    return ec;
+}
+
 ECode CTestModuleInfo::GetPath(
     /* [out] */ String * pPath)
 {

@@ -1,5 +1,5 @@
-#ifndef __CNodeActivity_H__
-#define __CNodeActivity_H__
+//#ifndef __CNodeActivity_H__
+//#define __CNodeActivity_H__
 
 #include "CNodeListener.h"
 
@@ -100,4 +100,4 @@ private:
 } // namespace DevSamples
 } // namespace Elastos
 
-#endif // __H__
+//#endif // __H__

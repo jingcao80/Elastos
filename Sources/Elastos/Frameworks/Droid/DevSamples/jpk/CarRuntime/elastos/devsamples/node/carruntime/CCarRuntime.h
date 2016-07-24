@@ -40,6 +40,13 @@ public:
         /* [in] */ const String& moduleName,
         /* [out] */ IInterface ** ppOutObject);
 
+    CARAPI log(
+        /* [in] */ const String& info);
+
+    CARAPI require(
+        /* [in] */ const String& moduleName,
+        /* [out] */ IInterface ** ppOutObject);
+
     CARAPI Test_Require_ClassInfo(
         /* [in] */ const String& moduleName,
         /* [in] */ const String& className,

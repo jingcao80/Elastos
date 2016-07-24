@@ -119,6 +119,13 @@ module
             [in] String moduleName,
             [out] IInterface** outObject);
 
+        log(
+            [in] String info);
+
+        require(
+            [in] String moduleName,
+            [out] IInterface** outObject);
+
         Test_Require_ClassInfo(
             [in] String moduleName,
             [in] String className,
@@ -1272,6 +1279,10 @@ module
 
     [deprecated]
     interface ITestModuleInfo {
+        createObject(
+            [in] String className,
+            [out] IInterface ** ppOutObject);
+
         GetPath(
             [out] String* path);
 

@@ -54,6 +54,21 @@ ECode CCarRuntime::Test_Require_ModuleInfo(
     return NOERROR;
 }
 
+ECode CCarRuntime::log(
+    /* [in] */ const String& info)
+{
+    ALOGD(info.string());
+
+    return NOERROR;
+}
+
+ECode CCarRuntime::require(
+    /* [in] */ const String& moduleName,
+    /* [out] */ IInterface ** ppOutObject)
+{
+    return Test_Require_ModuleInfo(moduleName, ppOutObject);
+}
+
 ECode CCarRuntime::Test_Require_ClassInfo(
     /* [in] */ const String& moduleName,
     /* [in] */ const String& className,

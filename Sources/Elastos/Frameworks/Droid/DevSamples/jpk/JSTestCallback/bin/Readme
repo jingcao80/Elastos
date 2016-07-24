@@ -1,0 +1,7 @@
+运行步骤:
+1.将Elastos手机连接电脑
+2.将本目录内文件push到Elastos手机内同一目录
+3.在电脑上打开两个terminal窗口,一个运行adb logcat, 另一个按下面步骤操作:
+3.1 chmod 777 node
+3.2 ./node demo.js
+4.此时可在运行logcat的窗口内观察到由回调打印出的信息,OK!

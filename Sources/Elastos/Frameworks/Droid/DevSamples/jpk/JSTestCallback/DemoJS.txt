@@ -1,0 +1,97 @@
+========Demo.car====begin====
+
+module
+{
+    importlib("Elastos.Droid.Core.eco");
+
+    interface IEventListener {
+        OnEvent(
+            [in] Int32 id);
+    }
+
+    interface IDemo {
+        addEventHandler(
+            [in] IEventListener* listener);
+
+        doTask();
+    }
+
+    class CDemo {
+        interface IDemo;
+    }
+}
+
+========Demo.car====end====
+
+========CDemo.h====begin====
+
+#ifndef __CDEMO_H__
+#define __CDEMO_H__
+
+#include "_CDemo.h"
+
+#include <elastos/droid/ext/frameworkdef.h>
+#include <elastos/core/Object.h>
+
+CarClass(CDemo)
+    , public Object
+    , public IDemo
+{
+public:
+    CAR_INTERFACE_DECL()
+
+    CAR_OBJECT_DECL()
+
+    CARAPI addEventHandler(
+        /* [in] */ IEventListener* listener);
+
+    CARAPI doTask();
+
+private:
+    AutoPtr<IEventListener> m_Listener;
+};
+
+#endif // __CDEMO_H__
+
+========CDemo.h====end====
+
+========CDemo.cpp====begin====
+
+#include "CDemo.h"
+
+CAR_INTERFACE_IMPL(CDemo, Object, IDemo)
+
+CAR_OBJECT_IMPL(CDemo)
+
+ECode CDemo::addEventHandler(
+    /* [in] */ IEventListener* listener)
+{
+    m_Listener = listener;
+    return NOERROR;
+}
+
+ECode CDemo::doTask()
+{
+    m_Listener->OnEvent(9);
+    return NOERROR;
+}
+
+========CDemo.cpp====end====
+
+========demo.js====begin====
+
+var eventHandler = (function() {
+    return {
+        OnEvent:function(i) {
+            var s = 'OnEvent, i: ' + JSON.stringify(i);
+            elastos.log(s);
+        },
+    }
+})();
+
+var module = elastos.require('./Demo.eco');
+var obj = module.createObject('CDemo');
+obj.addEventHandler(eventHandler);
+obj.doTask();
+
+========demo.js====end====

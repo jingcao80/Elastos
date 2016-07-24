@@ -1,0 +1,21 @@
+TARGET_NAME= Demo
+TARGET_TYPE= eco
+
+IMPORTS = Elastos.CoreLibrary.eco
+
+CAR_FLAGS += -n -u
+LUBE_FLAGS += -n -u
+
+include $(MAKEDIR)/../../../sources.inc
+INCLUDES += $(MAKEDIR)
+
+SOURCES = Demo.car
+SOURCES += CDemo.cpp
+
+SOURCES += Elastos.CoreLibrary.cpp
+
+LIBRARIES  = $(XDK_USER_LIB)/Elastos.Runtime.lib
+LIBRARIES += $(XDK_TARGETS)/Elastos.Runtime.eco
+LIBRARIES += $(XDK_TARGETS)/Elastos.CoreLibrary.eco
+LIBRARIES += $(XDK_USER_LIB)/crt0.lib
+LIBRARIES += -lm -licuuc -llog -lutils
