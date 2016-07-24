@@ -63,15 +63,9 @@
                 android:layout_height="8dp"
                 android:layout_alignParentBottom="true" />
 
-            <!-- <FrameLayout
-                android:id="@+id/dialpad_floating_action_button_container"
-                android:background="@drawable/fab_green"
-                android:layout_width="@dimen/floating_action_button_width"
-                android:layout_height="@dimen/floating_action_button_height"
-                android:layout_above="@id/dialpad_floating_action_button_margin_bottom"
-                android:layout_centerHorizontal="true"> -->
             <FrameLayout
                 android:id="@+id/dialpad_floating_action_button_container"
+                android:background="@drawable/fab_green"
                 android:layout_width="@dimen/floating_action_button_width"
                 android:layout_height="@dimen/floating_action_button_height"
                 android:layout_above="@id/dialpad_floating_action_button_margin_bottom"
