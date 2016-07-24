@@ -1414,14 +1414,14 @@ AutoPtr<IParcelable> OverlappingPaneLayout::OnSaveInstanceState()
 {
     AutoPtr<IParcelable> superState = ViewGroup::OnSaveInstanceState();
 
-    AutoPtr<IParcelable> ss;
-    COverlappingPaneLayoutSavedState::New(superState, (IParcelable**)&ss);
+    AutoPtr<COverlappingPaneLayoutSavedState> ss;
+    COverlappingPaneLayoutSavedState::NewByFriend(superState, (COverlappingPaneLayoutSavedState**)&ss);
     Boolean isSlideable;
     IsSlideable(&isSlideable);
     Boolean isOpen;
-    ((SavedState*)ss.Get())->mIsOpen = isSlideable ? (IsOpen(&isOpen), isOpen) : mPreservedOpenState;
+    ss->mIsOpen = isSlideable ? (IsOpen(&isOpen), isOpen) : mPreservedOpenState;
 
-    return ss;
+    return (IParcelable*)ss;
 }
 
 void OverlappingPaneLayout::OnRestoreInstanceState(
