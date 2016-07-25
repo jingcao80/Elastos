@@ -1,13 +1,25 @@
 
 #include "elastos/droid/internal/telephony/cdma/CdmaSubscriptionSourceManager.h"
 #include "elastos/droid/provider/Settings.h"
+#include "elastos/droid/os/CRegistrant.h"
 #include "Elastos.Droid.Content.h"
 #include "Elastos.Droid.Internal.h"
 #include "Elastos.Droid.Provider.h"
 #include "Elastos.CoreLibrary.Utility.Concurrent.h"
+#include <elastos/core/AutoLock.h>
+#include <elastos/core/StringUtils.h>
+#include <elastos/utility/logging/Logger.h>
 
+using Elastos::Droid::Os::CRegistrant;
+using Elastos::Droid::Os::IAsyncResult;
+using Elastos::Droid::Os::IRegistrant;
 using Elastos::Droid::Provider::ISettingsGlobal;
 using Elastos::Droid::Provider::Settings;
+using Elastos::Core::IArrayOf;
+using Elastos::Core::IInteger32;
+using Elastos::Core::StringUtils;
+using Elastos::Utility::Concurrent::Atomic::CAtomicInteger32;
+using Elastos::Utility::Logging::Logger;
 
 namespace Elastos {
 namespace Droid {
@@ -27,7 +39,7 @@ const Int32 CdmaSubscriptionSourceManager::EVENT_RADIO_ON;
 const Int32 CdmaSubscriptionSourceManager::EVENT_SUBSCRIPTION_STATUS_CHANGED;
 const Int32 CdmaSubscriptionSourceManager::SUBSCRIPTION_ACTIVATED;
 AutoPtr<ICdmaSubscriptionSourceManager> CdmaSubscriptionSourceManager::sInstance;
-AutoPtr<IObject> CdmaSubscriptionSourceManager::sReferenceCountMonitor = new Object();
+Object CdmaSubscriptionSourceManager::sReferenceCountMonitor;
 Int32 CdmaSubscriptionSourceManager::sReferenceCount = 0;
 
 AutoPtr<ICdmaSubscriptionSourceManager> CdmaSubscriptionSourceManager::GetInstance(
@@ -37,18 +49,15 @@ AutoPtr<ICdmaSubscriptionSourceManager> CdmaSubscriptionSourceManager::GetInstan
     /* [in] */ Int32 what,
     /* [in] */ IInterface* obj)
 {
-    // ==================before translated======================
-    // synchronized (sReferenceCountMonitor) {
-    //     if (null == sInstance) {
-    //         sInstance = new CdmaSubscriptionSourceManager(context, ci);
-    //     }
-    //     CdmaSubscriptionSourceManager.sReferenceCount++;
-    // }
-    // sInstance.registerForCdmaSubscriptionSourceChanged(h, what, obj);
-    // return sInstance;
-    assert(0);
-    AutoPtr<CdmaSubscriptionSourceManager> empty;
-    return (ICdmaSubscriptionSourceManager*)empty->Probe(EIID_ICdmaSubscriptionSourceManager);
+    {
+        AutoLock lock(sReferenceCountMonitor);
+        if (NULL == sInstance) {
+            sInstance = new CdmaSubscriptionSourceManager(context, ci);
+        }
+        CdmaSubscriptionSourceManager::sReferenceCount++;
+    }
+    ((CdmaSubscriptionSourceManager*)sInstance.Get())->RegisterForCdmaSubscriptionSourceChanged(h, what, obj);
+    return sInstance;
 }
 
 ECode CdmaSubscriptionSourceManager::Dispose(
@@ -63,7 +72,7 @@ ECode CdmaSubscriptionSourceManager::Dispose(
     //         mCi.unregisterForCdmaSubscriptionChanged(this);
     //         mCi.unregisterForOn(this);
     //         mCi.unregisterForSubscriptionStatusChanged(this);
-    //         sInstance = null;
+    //         sInstance = NULL;
     //     }
     // }
     assert(0);
@@ -74,43 +83,57 @@ ECode CdmaSubscriptionSourceManager::HandleMessage(
     /* [in] */ IMessage* msg)
 {
     VALIDATE_NOT_NULL(msg);
-    // ==================before translated======================
-    // AsyncResult ar;
-    // switch (msg.what) {
-    //     case EVENT_CDMA_SUBSCRIPTION_SOURCE_CHANGED:
-    //     case EVENT_GET_CDMA_SUBSCRIPTION_SOURCE:
-    //     {
-    //         log("CDMA_SUBSCRIPTION_SOURCE event = " + msg.what);
-    //         ar = (AsyncResult) msg.obj;
-    //         handleGetCdmaSubscriptionSource(ar);
-    //     }
-    //     break;
-    //     case EVENT_RADIO_ON: {
-    //         mCi.getCdmaSubscriptionSource(obtainMessage(EVENT_GET_CDMA_SUBSCRIPTION_SOURCE));
-    //     }
-    //     break;
-    //     case EVENT_SUBSCRIPTION_STATUS_CHANGED: {
-    //         log("EVENT_SUBSCRIPTION_STATUS_CHANGED");
-    //         ar = (AsyncResult)msg.obj;
-    //         if (ar.exception == null) {
-    //             Int32 actStatus = ((Int32[])ar.result)[0];
-    //             log("actStatus = " + actStatus);
-    //             if (actStatus == SUBSCRIPTION_ACTIVATED) { // Subscription Activated
-    //                 // In case of multi-SIM, framework should wait for the subscription ready
-    //                 // to send any request to RIL.  Otherwise it will return failure.
-    //                 Rlog.v(LOGTAG,"get Cdma Subscription Source");
-    //                 mCi.getCdmaSubscriptionSource(
-    //                         obtainMessage(EVENT_GET_CDMA_SUBSCRIPTION_SOURCE));
-    //             }
-    //         } else {
-    //             logw("EVENT_SUBSCRIPTION_STATUS_CHANGED, Exception:" + ar.exception);
-    //         }
-    //     }
-    //     break;
-    //     default:
-    //         super.handleMessage(msg);
-    // }
-    assert(0);
+    AsyncResult* ar = NULL;
+    Int32 what = 0;
+    msg->GetWhat(&what);
+    switch (what) {
+        case EVENT_CDMA_SUBSCRIPTION_SOURCE_CHANGED:
+        case EVENT_GET_CDMA_SUBSCRIPTION_SOURCE:
+        {
+            Log(String("CDMA_SUBSCRIPTION_SOURCE event = ") + StringUtils::ToString(what));
+            AutoPtr<IInterface> obj;
+            msg->GetObj((IInterface**)&obj);
+            ar = (AsyncResult*)IAsyncResult::Probe(obj);
+            HandleGetCdmaSubscriptionSource(ar);
+        }
+        break;
+        case EVENT_RADIO_ON: {
+            AutoPtr<IMessage> m;
+            ObtainMessage(EVENT_GET_CDMA_SUBSCRIPTION_SOURCE, (IMessage**)&m);
+            mCi->GetCdmaSubscriptionSource(m);
+        }
+        break;
+        case EVENT_SUBSCRIPTION_STATUS_CHANGED: {
+            Log(String("EVENT_SUBSCRIPTION_STATUS_CHANGED"));
+            AutoPtr<IInterface> obj;
+            msg->GetObj((IInterface**)&obj);
+            ar = (AsyncResult*)IAsyncResult::Probe(obj);
+            if (ar->mException == NULL) {
+                AutoPtr<IArrayOf> array = IArrayOf::Probe(ar->mResult);
+                assert(array != NULL);
+                AutoPtr<IInterface> o;
+                array->Get(0, (IInterface**)&o);
+                Int32 actStatus = 0;
+                IInteger32::Probe(o)->GetValue(&actStatus);
+                Log(String("actStatus = ") + StringUtils::ToString(actStatus));
+                if (actStatus == SUBSCRIPTION_ACTIVATED) { // Subscription Activated
+                    // In case of multi-SIM, framework should wait for the subscription ready
+                    // to send any request to RIL.  Otherwise it will return failure.
+                    Logger::V(LOGTAG,"get Cdma Subscription Source");
+                    AutoPtr<IMessage> m;
+                    ObtainMessage(EVENT_GET_CDMA_SUBSCRIPTION_SOURCE, (IMessage**)&m);
+                    mCi->GetCdmaSubscriptionSource(m);
+                }
+            }
+            else {
+                Logw(String("EVENT_SUBSCRIPTION_STATUS_CHANGED, Exception:") + TO_CSTR(ar->mException));
+            }
+        }
+        break;
+        default: {
+            Handler::HandleMessage(msg);
+        }
+    }
     return NOERROR;
 }
 
@@ -118,10 +141,7 @@ ECode CdmaSubscriptionSourceManager::GetCdmaSubscriptionSource(
     /* [out] */ Int32* result)
 {
     VALIDATE_NOT_NULL(result);
-    // ==================before translated======================
-    // return mCdmaSubscriptionSource.get();
-    assert(0);
-    return NOERROR;
+    return mCdmaSubscriptionSource->Get(result);
 }
 
 Int32 CdmaSubscriptionSourceManager::GetDefault(
@@ -140,14 +160,24 @@ CdmaSubscriptionSourceManager::CdmaSubscriptionSourceManager(
     /* [in] */ IContext* context,
     /* [in] */ ICommandsInterface* ci)
 {
-    // ==================before translated======================
-    // mContext = context;
-    // mCi = ci;
-    // mCi.registerForCdmaSubscriptionChanged(this, EVENT_CDMA_SUBSCRIPTION_SOURCE_CHANGED, null);
-    // mCi.registerForOn(this, EVENT_RADIO_ON, null);
-    // Int32 subscriptionSource = getDefault(context);
-    // mCdmaSubscriptionSource.set(subscriptionSource);
-    // mCi.registerForSubscriptionStatusChanged(this, EVENT_SUBSCRIPTION_STATUS_CHANGED, null);
+    Handler::constructor();
+
+    mCdmaSubscriptionSourceChangedRegistrants = new RegistrantList();
+    CAtomicInteger32::New(SUBSCRIPTION_FROM_NV, (IAtomicInteger32**)&mCdmaSubscriptionSource);
+
+    mContext = context;
+    mCi = ci;
+    mCi->RegisterForCdmaSubscriptionChanged(this, EVENT_CDMA_SUBSCRIPTION_SOURCE_CHANGED, NULL);
+    mCi->RegisterForOn(this, EVENT_RADIO_ON, NULL);
+    Int32 subscriptionSource = GetDefault(context);
+    mCdmaSubscriptionSource->Set(subscriptionSource);
+    mCi->RegisterForSubscriptionStatusChanged(this, EVENT_SUBSCRIPTION_STATUS_CHANGED, NULL);
+}
+
+ECode CdmaSubscriptionSourceManager::ToString(
+    /* [out] */ String* result)
+{
+    return Object::ToString(result);
 }
 
 void CdmaSubscriptionSourceManager::RegisterForCdmaSubscriptionSourceChanged(
@@ -155,53 +185,53 @@ void CdmaSubscriptionSourceManager::RegisterForCdmaSubscriptionSourceChanged(
     /* [in] */ Int32 what,
     /* [in] */ IInterface* obj)
 {
-    // ==================before translated======================
-    // Registrant r = new Registrant (h, what, obj);
-    // mCdmaSubscriptionSourceChangedRegistrants.add(r);
-    assert(0);
+    AutoPtr<IRegistrant> r;
+    CRegistrant::New(h, what, obj, (IRegistrant**)&r);
+    mCdmaSubscriptionSourceChangedRegistrants->Add(r);
 }
 
 void CdmaSubscriptionSourceManager::HandleGetCdmaSubscriptionSource(
     /* [in] */ AsyncResult* ar)
 {
-    // ==================before translated======================
-    // if ((ar.exception == null) && (ar.result != null)) {
-    //     Int32 newSubscriptionSource = ((Int32[]) ar.result)[0];
-    //
-    //     if (newSubscriptionSource != mCdmaSubscriptionSource.get()) {
-    //         log("Subscription Source Changed : " + mCdmaSubscriptionSource + " >> "
-    //                 + newSubscriptionSource);
-    //         mCdmaSubscriptionSource.set(newSubscriptionSource);
-    //
-    //         // Notify registrants of the new CDMA subscription source
-    //         mCdmaSubscriptionSourceChangedRegistrants.notifyRegistrants(new AsyncResult(null,
-    //                 null, null));
-    //     }
-    // } else {
-    //     // GET_CDMA_SUBSCRIPTION is returning Failure. Probably
-    //     // because modem created GSM Phone. If modem created
-    //     // GSMPhone, then PhoneProxy will trigger a change in
-    //     // Phone objects and this object will be destroyed.
-    //     logw("Unable to get CDMA Subscription Source, Exception: " + ar.exception
-    //             + ", result: " + ar.result);
-    // }
-    assert(0);
+    if ((ar->mException == NULL) && (ar->mResult != NULL)) {
+        AutoPtr<IArrayOf> array = IArrayOf::Probe(ar->mResult);
+        AutoPtr<IInterface> obj;
+        array->Get(0, (IInterface**)&obj);
+        Int32 newSubscriptionSource = 0;
+        IInteger32::Probe(obj)->GetValue(&newSubscriptionSource);
+
+        Int32 v = 0;
+        mCdmaSubscriptionSource->Get(&v);
+        if (newSubscriptionSource != v) {
+            Log(String("Subscription Source Changed : ") + TO_CSTR(mCdmaSubscriptionSource) + " >> "
+                    + StringUtils::ToString(newSubscriptionSource));
+            mCdmaSubscriptionSource->Set(newSubscriptionSource);
+
+            // Notify registrants of the new CDMA subscription source
+            AutoPtr<AsyncResult> ar = new AsyncResult(NULL, NULL, NULL);
+            mCdmaSubscriptionSourceChangedRegistrants->NotifyRegistrants(ar);
+        }
+    }
+    else {
+        // GET_CDMA_SUBSCRIPTION is returning Failure. Probably
+        // because modem created GSM Phone. If modem created
+        // GSMPhone, then PhoneProxy will trigger a change in
+        // Phone objects and this object will be destroyed.
+        Logw(String("Unable to get CDMA Subscription Source, Exception: ") + TO_CSTR(ar->mException)
+                + ", result: " + TO_CSTR(ar->mResult));
+    }
 }
 
 void CdmaSubscriptionSourceManager::Log(
     /* [in] */ const String& s)
 {
-    // ==================before translated======================
-    // Rlog.d(LOGTAG, s);
-    assert(0);
+    Logger::D(LOGTAG, s);
 }
 
 void CdmaSubscriptionSourceManager::Logw(
     /* [in] */ const String& s)
 {
-    // ==================before translated======================
-    // Rlog.w(LOGTAG, s);
-    assert(0);
+    Logger::W(LOGTAG, s);
 }
 
 } // namespace Cdma

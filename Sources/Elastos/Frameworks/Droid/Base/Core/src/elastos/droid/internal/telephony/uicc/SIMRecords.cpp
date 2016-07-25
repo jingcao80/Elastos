@@ -3,6 +3,7 @@
 #include "Elastos.Droid.Content.h"
 #include "Elastos.Droid.Internal.h"
 #include "elastos/droid/internal/telephony/uicc/SIMRecords.h"
+#include "elastos/droid/internal/telephony/uicc/UiccCardApplication.h"
 #include "elastos/droid/content/res/CResourcesHelper.h"
 #include "elastos/droid/internal/telephony/uicc/CIccUtils.h"
 #include "elastos/droid/internal/telephony/uicc/CAdnRecordLoader.h"
@@ -21,7 +22,6 @@
 #include "elastos/droid/text/TextUtils.h"
 #include "elastos/droid/os/CSystemProperties.h"
 #include "elastos/droid/R.h"
-
 #include <elastos/core/CoreUtils.h>
 #include <elastos/core/StringUtils.h>
 #include <elastos/utility/Arrays.h>
@@ -44,8 +44,10 @@ using Elastos::Droid::Telephony::CSmsMessageHelper;
 using Elastos::Droid::Os::ISystemProperties;
 using Elastos::Droid::Os::CSystemProperties;
 using Elastos::Droid::R;
-
 using Elastos::Core::CoreUtils;
+using Elastos::Core::IArrayOf;
+using Elastos::Core::IByte;
+using Elastos::Core::IInteger32;
 using Elastos::Core::StringUtils;
 using Elastos::Core::IThrowable;
 using Elastos::IO::IFlushable;
@@ -79,10 +81,19 @@ ECode SIMRecords::EfPlLoaded::GetEfName(
 }
 
 ECode SIMRecords::EfPlLoaded::OnRecordLoaded(
-    /* [in] */ AsyncResult* ar)
+    /* [in] */ IAsyncResult* ar)
 {
-    assert(0 && "TODO");
-    // mEfPl = (ArrayOf<Byte>*) ar->mResult;
+    AutoPtr<IArrayOf> array = IArrayOf::Probe(((AsyncResult*)ar)->mResult);
+    assert(array != NULL);
+    Int32 len = 0;
+    array->GetLength(&len);
+    mHost->mEfPl = ArrayOf<Byte>::Alloc(len);
+    for (Int32 i = 0; i < len; i++) {
+        AutoPtr<IInterface> obj;
+        array->Get(i, (IInterface**)&obj);
+        IByte::Probe(obj)->GetValue(&(*mHost->mEfPl)[i]);
+    }
+
     if (DBG) {
         AutoPtr<IIccUtils> iccu;
         CIccUtils::AcquireSingleton((IIccUtils**)&iccu);
@@ -112,10 +123,18 @@ ECode SIMRecords::EfUsimLiLoaded::GetEfName(
 }
 
 ECode SIMRecords::EfUsimLiLoaded::OnRecordLoaded(
-    /* [in] */ AsyncResult* ar)
+    /* [in] */ IAsyncResult* ar)
 {
-    assert(0 && "TODO");
-    // mEfLi = (ArrayOf<Byte>*) ar->mResult;
+    AutoPtr<IArrayOf> array = IArrayOf::Probe(((AsyncResult*)ar)->mResult);
+    assert(array != NULL);
+    Int32 len = 0;
+    array->GetLength(&len);
+    mHost->mEfLi = ArrayOf<Byte>::Alloc(len);
+    for (Int32 i = 0; i < len; i++) {
+        AutoPtr<IInterface> obj;
+        array->Get(i, (IInterface**)&obj);
+        IByte::Probe(obj)->GetValue(&(*mHost->mEfLi)[i]);
+    }
     if (DBG) {
         AutoPtr<IIccUtils> iccu;
         CIccUtils::AcquireSingleton((IIccUtils**)&iccu);
@@ -201,8 +220,7 @@ ECode SIMRecords::constructor(
     mParentApp->RegisterForReady(this, EVENT_APP_READY, NULL);
     mParentApp->RegisterForLocked(this, EVENT_APP_LOCKED, NULL);
     if (DBG) {
-        assert(0 && "TODO");
-        // Log(String("SIMRecords X ctor this=") + this);
+        Log(String("SIMRecords X ctor this=") + TO_CSTR(this));
     }
     return NOERROR;
 }
@@ -214,27 +232,25 @@ ECode SIMRecords::ToString(
     String str, strSuper;
     IccRecords::ToString(&strSuper);
     GetOperatorNumeric(&str);
-    assert(0 && "TODO");
-    // *result = String("SimRecords: ") + strSuper
-    //         + String(" mVmConfig") + mVmConfig
-    //         + String(" mSpnOverride=") + String("mSpnOverride")
-    //         + String(" callForwardingEnabled=") + StringUtils::ToString(mCallForwardingEnabled)
-    //         + String(" spnState=") + mSpnState
-    //         + String(" mCphsInfo=") + Arrays::ToString(mCphsInfo)
-    //         + String(" mCspPlmnEnabled=") + StringUtils::ToString(mCspPlmnEnabled)
-    //         + String(" efMWIS=") + Arrays::ToString(mEfMWIS)
-    //         + String(" efCPHS_MWI=") + Arrays::ToString(mEfCPHS_MWI)
-    //         + String(" mEfCff=") + Arrays::ToString(mEfCff)
-    //         + String(" mEfCfis=") + Arrays::ToString(mEfCfis)
-    //         + String(" getOperatorNumeric=") + str;
+    *result = String("SimRecords: ") + strSuper
+            + String(" mVmConfig") + TO_CSTR(mVmConfig)
+            + String(" mSpnOverride=") + String("mSpnOverride")
+            + String(" callForwardingEnabled=") + StringUtils::ToString(mCallForwardingEnabled)
+            + String(" spnState=") + StringUtils::ToString(mSpnState)
+            + String(" mCphsInfo=")// + Arrays::ToString(mCphsInfo)
+            + String(" mCspPlmnEnabled=") + StringUtils::ToString(mCspPlmnEnabled)
+            + String(" efMWIS=")// + Arrays::ToString(mEfMWIS)
+            + String(" efCPHS_MWI=")// + Arrays::ToString(mEfCPHS_MWI)
+            + String(" mEfCff=")// + Arrays::ToString(mEfCff)
+            + String(" mEfCfis=")// + Arrays::ToString(mEfCfis)
+            + String(" getOperatorNumeric=") + str;
     return NOERROR;
 }
 
 ECode SIMRecords::Dispose()
 {
     if (DBG) {
-        assert(0 && "TODO");
-        // Log(String("Disposing SIMRecords this=") + this);
+        Log(String("Disposing SIMRecords this=") + TO_CSTR(this));
     }
     //Unregister for all events
     mParentApp->UnregisterForReady(this);
@@ -611,10 +627,9 @@ ECode SIMRecords::HandleMessage(
     Int32 what = 0;
     msg->GetWhat(&what);
     if (mDestroyed.Get()) {
-        assert(0 && "TODO");
-        // Loge(String("Received message ") + msg +
-        //     String("[") + what + String("] ") +
-        //     String(" while being destroyed. Ignoring."));
+        Loge(String("Received message ") + TO_CSTR(msg) +
+            String("[") + StringUtils::ToString(what) + String("] ") +
+            String(" while being destroyed. Ignoring."));
         return NOERROR;
     }
 
@@ -641,8 +656,7 @@ ECode SIMRecords::HandleMessage(
             ar = (AsyncResult*)(IObject*)obj.Get();
 
             if (ar->mException != NULL) {
-                assert(0 && "TODO");
-                // Loge(String("Exception querying IMSI, Exception:") + ar->mException);
+                Loge(String("Exception querying IMSI, Exception:") + TO_CSTR(ar->mException));
                 break;
             }
 
@@ -709,8 +723,16 @@ ECode SIMRecords::HandleMessage(
             isRecordLoadResponse = TRUE;
 
             ar = (AsyncResult*)(IObject*)obj.Get();
-            assert(0 && "TODO");
-            // data = (ArrayOf<Byte>*) ar->mResult;
+            AutoPtr<IArrayOf> array = IArrayOf::Probe(ar->mResult);
+            assert(array != NULL);
+            Int32 len = 0;
+            array->GetLength(&len);
+            data = ArrayOf<Byte>::Alloc(len);
+            for (Int32 i = 0; i < len; i++) {
+                AutoPtr<IInterface> obj;
+                array->Get(i, (IInterface**)&obj);
+                IByte::Probe(obj)->GetValue(&(*data)[i]);
+            }
 
             isValidMbdn = FALSE;
             if (ar->mException == NULL) {
@@ -794,9 +816,8 @@ ECode SIMRecords::HandleMessage(
 
             adn = (AdnRecord*)IAdnRecord::Probe(ar->mResult);
 
-            assert(0 && "TODO");
-            // Log(String("VM: ") + adn +
-            //         ((what == EVENT_GET_CPHS_MAILBOX_DONE) ? String(" EF[MAILBOX]") : String(" EF[MBDN]")));
+            Log(String("VM: ") + TO_CSTR(adn) +
+                    ((what == EVENT_GET_CPHS_MAILBOX_DONE) ? String(" EF[MAILBOX]") : String(" EF[MBDN]")));
 
             Boolean bEmp = FALSE;
             adn->IsEmpty(&bEmp);
@@ -853,8 +874,16 @@ ECode SIMRecords::HandleMessage(
             isRecordLoadResponse = TRUE;
 
             ar = (AsyncResult*)(IObject*)obj.Get();
-            assert(0 && "TODO");
-            // data = (ArrayOf<Byte>*)ar->mResult;
+            AutoPtr<IArrayOf> array = IArrayOf::Probe(ar->mResult);
+            assert(array != NULL);
+            Int32 len = 0;
+            array->GetLength(&len);
+            data = ArrayOf<Byte>::Alloc(len);
+            for (Int32 i = 0; i < len; i++) {
+                AutoPtr<IInterface> obj;
+                array->Get(i, (IInterface**)&obj);
+                IByte::Probe(obj)->GetValue(&(*data)[i]);
+            }
 
             if (DBG) {
                 String str;
@@ -864,9 +893,7 @@ ECode SIMRecords::HandleMessage(
 
             if (ar->mException != NULL) {
                 if (DBG) {
-                    assert(0 && "TODO");
-                    // Log(String("EVENT_GET_MWIS_DONE exception = ")
-                    //     + ar->mException);
+                    Log(String("EVENT_GET_MWIS_DONE exception = ") + TO_CSTR(ar->mException));
                 }
                 break;
             }
@@ -883,8 +910,16 @@ ECode SIMRecords::HandleMessage(
             isRecordLoadResponse = TRUE;
 
             ar = (AsyncResult*)(IObject*)obj.Get();
-            assert(0 && "TODO");
-            // data = (ArrayOf<Byte>*)ar->mResult;
+            AutoPtr<IArrayOf> array = IArrayOf::Probe(ar->mResult);
+            assert(array != NULL);
+            Int32 len = 0;
+            array->GetLength(&len);
+            data = ArrayOf<Byte>::Alloc(len);
+            for (Int32 i = 0; i < len; i++) {
+                AutoPtr<IInterface> obj;
+                array->Get(i, (IInterface**)&obj);
+                IByte::Probe(obj)->GetValue(&(*data)[i]);
+            }
 
             if (DBG) {
                 String str;
@@ -894,9 +929,7 @@ ECode SIMRecords::HandleMessage(
 
             if (ar->mException != NULL) {
                 if (DBG) {
-                    assert(0 && "TODO");
-                    // Log(String("EVENT_GET_VOICE_MAIL_INDICATOR_CPHS_DONE exception = ")
-                    //     + ar->mException);
+                    Log(String("EVENT_GET_VOICE_MAIL_INDICATOR_CPHS_DONE exception = ") + TO_CSTR(ar->mException));
                 }
                 break;
             }
@@ -908,8 +941,16 @@ ECode SIMRecords::HandleMessage(
             isRecordLoadResponse = TRUE;
 
             ar = (AsyncResult*)(IObject*)obj.Get();
-            assert(0 && "TODO");
-            // data = (ArrayOf<Byte>*)ar->mResult;
+            AutoPtr<IArrayOf> array = IArrayOf::Probe(ar->mResult);
+            assert(array != NULL);
+            Int32 len = 0;
+            array->GetLength(&len);
+            data = ArrayOf<Byte>::Alloc(len);
+            for (Int32 i = 0; i < len; i++) {
+                AutoPtr<IInterface> obj;
+                array->Get(i, (IInterface**)&obj);
+                IByte::Probe(obj)->GetValue(&(*data)[i]);
+            }
 
             if (ar->mException != NULL) {
                 break;
@@ -923,83 +964,91 @@ ECode SIMRecords::HandleMessage(
         }
         case EVENT_GET_AD_DONE: {
             // try {
-                isRecordLoadResponse = TRUE;
+            isRecordLoadResponse = TRUE;
 
-                ar = (AsyncResult*)(IObject*)obj.Get();
-                assert(0 && "TODO");
-                // data = (ArrayOf<Byte>*)ar->mResult;
+            ar = (AsyncResult*)(IObject*)obj.Get();
+            AutoPtr<IArrayOf> array = IArrayOf::Probe(ar->mResult);
+            assert(array != NULL);
+            Int32 len = 0;
+            array->GetLength(&len);
+            data = ArrayOf<Byte>::Alloc(len);
+            for (Int32 i = 0; i < len; i++) {
+                AutoPtr<IInterface> obj;
+                array->Get(i, (IInterface**)&obj);
+                IByte::Probe(obj)->GetValue(&(*data)[i]);
+            }
 
-                if (ar->mException != NULL) {
-                    break;
+            if (ar->mException != NULL) {
+                break;
+            }
+
+            String str;
+            iccu->BytesToHexString(data, &str);
+            Log(String("EF_AD: ") + str);
+
+            if (data->GetLength() < 3) {
+                Log(String("Corrupt AD data on SIM"));
+                break;
+            }
+
+            if (data->GetLength() == 3) {
+                Log(String("MNC length not present in EF_AD"));
+                break;
+            }
+
+            mMncLength = (*data)[3] & 0xf;
+            Log(String("setting4 mMncLength=") + StringUtils::ToString(mMncLength));
+
+            if (mMncLength == 0xf) {
+                mMncLength = UNKNOWN;
+                Log(String("setting5 mMncLength=") + StringUtils::ToString(mMncLength));
+            }
+            else {
+                AutoPtr<IUICCConfig> uicc;
+                mParentApp->GetUICCConfig((IUICCConfig**)&uicc);
+                uicc->SetMncLength(mMncLength);
+            }
+
+        // } finally {
+            if (((mMncLength == UNINITIALIZED) || (mMncLength == UNKNOWN) ||
+                    (mMncLength == 2)) && ((mImsi != NULL) && (mImsi.GetLength() >= 6))) {
+                String mccmncCode = mImsi.Substring(0, 6);
+                Log(String("mccmncCode=") + mccmncCode);
+                for (Int32 i = 0; i < MCCMNC_CODES_HAVING_3DIGITS_MNC->GetLength(); i++) {
+                    String mccmnc = (*MCCMNC_CODES_HAVING_3DIGITS_MNC)[i];
+                    if (mccmnc.Equals(mccmncCode)) {
+                        mMncLength = 3;
+                        Log(String("setting6 mMncLength=") + StringUtils::ToString(mMncLength));
+                        break;
+                    }
                 }
+            }
 
-                String str;
-                iccu->BytesToHexString(data, &str);
-                Log(String("EF_AD: ") + str);
+            if (mMncLength == UNKNOWN || mMncLength == UNINITIALIZED) {
+                if (!mImsi.IsNull()) {
+                    // try {
+                        Int32 mcc = StringUtils::ParseInt32(mImsi.Substring(0,3));
 
-                if (data->GetLength() < 3) {
-                    Log(String("Corrupt AD data on SIM"));
-                    break;
-                }
-
-                if (data->GetLength() == 3) {
-                    Log(String("MNC length not present in EF_AD"));
-                    break;
-                }
-
-                mMncLength = (*data)[3] & 0xf;
-                Log(String("setting4 mMncLength=") + StringUtils::ToString(mMncLength));
-
-                if (mMncLength == 0xf) {
-                    mMncLength = UNKNOWN;
-                    Log(String("setting5 mMncLength=") + StringUtils::ToString(mMncLength));
+                        mMncLength = MccTable::SmallestDigitsMccForMnc(mcc);
+                        Log(String("setting7 mMncLength=") + StringUtils::ToString(mMncLength));
+                    // } catch (NumberFormatException e) {
+                    //     mMncLength = UNKNOWN;
+                    //     loge("Corrupt IMSI! setting8 mMncLength=" + mMncLength);
+                    // }
                 }
                 else {
-                    AutoPtr<IUICCConfig> uicc;
-                    mParentApp->GetUICCConfig((IUICCConfig**)&uicc);
-                    uicc->SetMncLength(mMncLength);
+                    // Indicate we got this info, but it didn't contain the length.
+                    mMncLength = UNKNOWN;
+                    Log(String("MNC length not present in EF_AD setting9 mMncLength=") + StringUtils::ToString(mMncLength));
                 }
-
-            // } finally {
-                if (((mMncLength == UNINITIALIZED) || (mMncLength == UNKNOWN) ||
-                        (mMncLength == 2)) && ((mImsi != NULL) && (mImsi.GetLength() >= 6))) {
-                    String mccmncCode = mImsi.Substring(0, 6);
-                    Log(String("mccmncCode=") + mccmncCode);
-                    for (Int32 i = 0; i < MCCMNC_CODES_HAVING_3DIGITS_MNC->GetLength(); i++) {
-                        String mccmnc = (*MCCMNC_CODES_HAVING_3DIGITS_MNC)[i];
-                        if (mccmnc.Equals(mccmncCode)) {
-                            mMncLength = 3;
-                            Log(String("setting6 mMncLength=") + StringUtils::ToString(mMncLength));
-                            break;
-                        }
-                    }
-                }
-
-                if (mMncLength == UNKNOWN || mMncLength == UNINITIALIZED) {
-                    if (!mImsi.IsNull()) {
-                        // try {
-                            Int32 mcc = StringUtils::ParseInt32(mImsi.Substring(0,3));
-
-                            mMncLength = MccTable::SmallestDigitsMccForMnc(mcc);
-                            Log(String("setting7 mMncLength=") + StringUtils::ToString(mMncLength));
-                        // } catch (NumberFormatException e) {
-                        //     mMncLength = UNKNOWN;
-                        //     loge("Corrupt IMSI! setting8 mMncLength=" + mMncLength);
-                        // }
-                    }
-                    else {
-                        // Indicate we got this info, but it didn't contain the length.
-                        mMncLength = UNKNOWN;
-                        Log(String("MNC length not present in EF_AD setting9 mMncLength=") + StringUtils::ToString(mMncLength));
-                    }
-                }
-                if (!mImsi.IsNull() && mMncLength != UNKNOWN) {
-                    // finally have both imsi and the length of the mnc and can parse
-                    // the imsi properly
-                    Log(String("update mccmnc=") + mImsi.Substring(0, 3 + mMncLength));
-                    MccTable::UpdateMccMncConfiguration(mContext,
-                            mImsi.Substring(0, 3 + mMncLength), FALSE);
-                }
+            }
+            if (!mImsi.IsNull() && mMncLength != UNKNOWN) {
+                // finally have both imsi and the length of the mnc and can parse
+                // the imsi properly
+                Log(String("update mccmnc=") + mImsi.Substring(0, 3 + mMncLength));
+                MccTable::UpdateMccMncConfiguration(mContext,
+                        mImsi.Substring(0, 3 + mMncLength), FALSE);
+            }
             // }
         break;
         }
@@ -1013,8 +1062,16 @@ ECode SIMRecords::HandleMessage(
             isRecordLoadResponse = TRUE;
 
             ar = (AsyncResult*)(IObject*)obj.Get();
-            assert(0 && "TODO");
-            // data = (ArrayOf<Byte>*)ar->mResult;
+            AutoPtr<IArrayOf> array = IArrayOf::Probe(ar->mResult);
+            assert(array != NULL);
+            Int32 len = 0;
+            array->GetLength(&len);
+            data = ArrayOf<Byte>::Alloc(len);
+            for (Int32 i = 0; i < len; i++) {
+                AutoPtr<IInterface> obj;
+                array->Get(i, (IInterface**)&obj);
+                IByte::Probe(obj)->GetValue(&(*data)[i]);
+            }
 
             if (ar->mException != NULL) {
                 break;
@@ -1041,8 +1098,16 @@ ECode SIMRecords::HandleMessage(
             isRecordLoadResponse = TRUE;
 
             ar = (AsyncResult*)(IObject*)obj.Get();
-            assert(0 && "TODO");
-            // data = (ArrayOf<Byte>*)ar->mResult;
+            AutoPtr<IArrayOf> array = IArrayOf::Probe(ar->mResult);
+            assert(array != NULL);
+            Int32 len = 0;
+            array->GetLength(&len);
+            data = ArrayOf<Byte>::Alloc(len);
+            for (Int32 i = 0; i < len; i++) {
+                AutoPtr<IInterface> obj;
+                array->Get(i, (IInterface**)&obj);
+                IByte::Probe(obj)->GetValue(&(*data)[i]);
+            }
 
             if (ar->mException != NULL) {
                 break;
@@ -1054,8 +1119,7 @@ ECode SIMRecords::HandleMessage(
         case EVENT_UPDATE_DONE: {
             ar = (AsyncResult*)(IObject*)obj.Get();
             if (ar->mException != NULL) {
-                assert(0 && "TODO");
-                // Logw(String("update failed. "), ar->mException);
+                Logw(String("update failed. ") + TO_CSTR(ar->mException));
             }
         break;
         }
@@ -1063,8 +1127,16 @@ ECode SIMRecords::HandleMessage(
             isRecordLoadResponse = TRUE;
 
             ar = (AsyncResult*)(IObject*)obj.Get();
-            assert(0 && "TODO");
-            // data = (ArrayOf<Byte>*)ar->mResult;
+            AutoPtr<IArrayOf> array = IArrayOf::Probe(ar->mResult);
+            assert(array != NULL);
+            Int32 len = 0;
+            array->GetLength(&len);
+            data = ArrayOf<Byte>::Alloc(len);
+            for (Int32 i = 0; i < len; i++) {
+                AutoPtr<IInterface> obj;
+                array->Get(i, (IInterface**)&obj);
+                IByte::Probe(obj)->GetValue(&(*data)[i]);
+            }
 
             if (ar->mException != NULL) {
                 break;
@@ -1108,12 +1180,20 @@ ECode SIMRecords::HandleMessage(
             isRecordLoadResponse = FALSE;
             ar = (AsyncResult*)(IObject*)obj.Get();
             if (ar->mException == NULL) {
-                assert(0 && "TODO");
-                // HandleSms((ArrayOf<Byte>*)ar->mResult);
+                AutoPtr<IArrayOf> array = IArrayOf::Probe(ar->mResult);
+                assert(array != NULL);
+                Int32 len = 0;
+                array->GetLength(&len);
+                AutoPtr<ArrayOf<Byte> > d = ArrayOf<Byte>::Alloc(len);
+                for (Int32 i = 0; i < len; i++) {
+                    AutoPtr<IInterface> obj;
+                    array->Get(i, (IInterface**)&obj);
+                    IByte::Probe(obj)->GetValue(&(*d)[i]);
+                }
+                HandleSms(d);
             }
             else {
-                assert(0 && "TODO");
-                // Loge(String("Error on GET_SMS with exp ") + ar->mException);
+                Loge(String("Error on GET_SMS with exp ") + TO_CSTR(ar->mException));
             }
             break;
         }
@@ -1121,8 +1201,16 @@ ECode SIMRecords::HandleMessage(
             isRecordLoadResponse = TRUE;
 
             ar = (AsyncResult*)(IObject*)obj.Get();
-            assert(0 && "TODO");
-            // data = (ArrayOf<Byte>*)ar->mResult;
+            AutoPtr<IArrayOf> array = IArrayOf::Probe(ar->mResult);
+            assert(array != NULL);
+            Int32 len = 0;
+            array->GetLength(&len);
+            data = ArrayOf<Byte>::Alloc(len);
+            for (Int32 i = 0; i < len; i++) {
+                AutoPtr<IInterface> obj;
+                array->Get(i, (IInterface**)&obj);
+                IByte::Probe(obj)->GetValue(&(*data)[i]);
+            }
 
             if (ar->mException != NULL) {
                 break;
@@ -1130,8 +1218,7 @@ ECode SIMRecords::HandleMessage(
 
             CUsimServiceTable::New(data, (IUsimServiceTable**)&mUsimServiceTable);
             if (DBG) {
-                assert(0 && "TODO");
-                // Log(String("SST: ") + mUsimServiceTable);
+                Log(String("SST: ") + TO_CSTR(mUsimServiceTable));
             }
             break;
         }
@@ -1145,8 +1232,16 @@ ECode SIMRecords::HandleMessage(
                 break;
             }
 
-            assert(0 && "TODO");
-            // mCphsInfo = (ArrayOf<Byte>*)ar->mResult;
+            AutoPtr<IArrayOf> array = IArrayOf::Probe(ar->mResult);
+            assert(array != NULL);
+            Int32 len = 0;
+            array->GetLength(&len);
+            mCphsInfo = ArrayOf<Byte>::Alloc(len);
+            for (Int32 i = 0; i < len; i++) {
+                AutoPtr<IInterface> obj;
+                array->Get(i, (IInterface**)&obj);
+                IByte::Probe(obj)->GetValue(&(*mCphsInfo)[i]);
+            }
 
             if (DBG) {
                 String str;
@@ -1161,8 +1256,7 @@ ECode SIMRecords::HandleMessage(
             ar = (AsyncResult*)(IObject*)obj.Get();
 
             if (DBG) {
-                assert(0 && "TODO");
-                // Log(String("EVENT_SET_MBDN_DONE ex:") + ar->mException);
+                Log(String("EVENT_SET_MBDN_DONE ex:") + TO_CSTR(ar->mException));
             }
             if (ar->mException == NULL) {
                 mVoiceMailNum = mNewVoiceMailNum;
@@ -1234,9 +1328,7 @@ ECode SIMRecords::HandleMessage(
             }
             else {
                 if (DBG) {
-                    assert(0 && "TODO");
-                    // Log(String("Set CPHS MailBox with exception: ")
-                    //     + ar->mException);
+                    Log(String("Set CPHS MailBox with exception: ") + TO_CSTR(ar->mException));
                 }
             }
             if (ar->mUserObj != NULL) {
@@ -1251,8 +1343,16 @@ ECode SIMRecords::HandleMessage(
             isRecordLoadResponse = TRUE;
 
             ar = (AsyncResult*)(IObject*)obj.Get();
-            assert(0 && "TODO");
-            // data = (ArrayOf<Byte>*)ar->mResult;
+            AutoPtr<IArrayOf> array = IArrayOf::Probe(ar->mResult);
+            assert(array != NULL);
+            Int32 len = 0;
+            array->GetLength(&len);
+            data = ArrayOf<Byte>::Alloc(len);
+            for (Int32 i = 0; i < len; i++) {
+                AutoPtr<IInterface> obj;
+                array->Get(i, (IInterface**)&obj);
+                IByte::Probe(obj)->GetValue(&(*data)[i]);
+            }
 
             if (ar->mException != NULL) {
                 break;
@@ -1285,13 +1385,20 @@ ECode SIMRecords::HandleMessage(
             ar = (AsyncResult*)(IObject*)obj.Get();
 
             if (ar->mException != NULL) {
-                assert(0 && "TODO");
-                // Loge(String("Exception in fetching EF_CSP data ") + ar->mException);
+                Loge(String("Exception in fetching EF_CSP data ") + TO_CSTR(ar->mException));
                 break;
             }
 
-            assert(0 && "TODO");
-            // data = (ArrayOf<Byte>*)ar->mResult;
+            AutoPtr<IArrayOf> array = IArrayOf::Probe(ar->mResult);
+            assert(array != NULL);
+            Int32 len = 0;
+            array->GetLength(&len);
+            data = ArrayOf<Byte>::Alloc(len);
+            for (Int32 i = 0; i < len; i++) {
+                AutoPtr<IInterface> obj;
+                array->Get(i, (IInterface**)&obj);
+                IByte::Probe(obj)->GetValue(&(*data)[i]);
+            }
             String str;
             iccu->BytesToHexString(data, &str);
             Log(String("EF_CSP: ") + str);
@@ -1303,12 +1410,19 @@ ECode SIMRecords::HandleMessage(
             isRecordLoadResponse = TRUE;
 
             ar = (AsyncResult*)(IObject*)obj.Get();
-            assert(0 && "TODO");
-            // data =(ArrayOf<Byte>*)ar->mResult;
+            AutoPtr<IArrayOf> array = IArrayOf::Probe(ar->mResult);
+            assert(array != NULL);
+            Int32 len = 0;
+            array->GetLength(&len);
+            data = ArrayOf<Byte>::Alloc(len);
+            for (Int32 i = 0; i < len; i++) {
+                AutoPtr<IInterface> obj;
+                array->Get(i, (IInterface**)&obj);
+                IByte::Probe(obj)->GetValue(&(*data)[i]);
+            }
 
             if (ar->mException != NULL) {
-                assert(0 && "TODO");
-                // Loge(String("Exception in get GID1 ") + ar->mException);
+                Loge(String("Exception in get GID1 ") + TO_CSTR(ar->mException));
                 mGid1 = NULL;
                 break;
             }
@@ -1338,13 +1452,21 @@ ECode SIMRecords::HandleSmsOnIcc(
     /* [in] */ AsyncResult* ar)
 {
 
-    assert(0 && "TODO");
     AutoPtr<ArrayOf<Int32> > index;// = (ArrayOf<Int32>*)ar->mResult;
+    AutoPtr<IArrayOf> array = IArrayOf::Probe(ar->mResult);
+    assert(array != NULL);
+    Int32 len = 0;
+    array->GetLength(&len);
+    index = ArrayOf<Int32>::Alloc(len);
+    for (Int32 i = 0; i < len; i++) {
+        AutoPtr<IInterface> obj;
+        array->Get(i, (IInterface**)&obj);
+        IInteger32::Probe(obj)->GetValue(&(*index)[i]);
+    }
 
     if (ar->mException != NULL || index->GetLength() != 1) {
-        assert(0 && "TODO");
-        // Loge(String(" Error on SMS_ON_SIM with exp ")
-        //        + ar->mException + String(" length ") + StringUtils::ToString(index->GetLength()));
+        Loge(String(" Error on SMS_ON_SIM with exp ") + TO_CSTR(ar->mException)
+            + String(" length ") + StringUtils::ToString(index->GetLength()));
     }
     else {
         Log(String("READ EF_SMS RECORD index= ") + StringUtils::ToString((*index)[0]));
@@ -1528,8 +1650,7 @@ ECode SIMRecords::HandleFileUpdate(
         }
         case EF_FDN: {
             if (DBG) Log(String("SIM Refresh called for EF_FDN"));
-            assert(0 && "TODO");
-            // mParentApp->QueryFdn();
+            ((UiccCardApplication*)mParentApp.Get())->QueryFdn();
         }
         case EF_MSISDN: {
             mRecordsToLoad++;
@@ -1914,8 +2035,16 @@ void SIMRecords::HandleSmses(
     for (Int32 i = 0; i < count; i++) {
         AutoPtr<IInterface> p;
         messages->Get(i, (IInterface**)&p);
-        assert(0 && "TODO");
-        AutoPtr<ArrayOf<Byte> > ba;// = p;
+        AutoPtr<IArrayOf> array = IArrayOf::Probe(p);
+        assert(array != NULL);
+        Int32 len = 0;
+        array->GetLength(&len);
+        AutoPtr<ArrayOf<Byte> > ba = ArrayOf<Byte>::Alloc(len);
+        for (Int32 j = 0; j < len; j++) {
+            AutoPtr<IInterface> obj;
+            array->Get(j, (IInterface**)&obj);
+            IByte::Probe(obj)->GetValue(&(*ba)[j]);
+        }
 
         if ((*ba)[0] != 0) {
             Logger::I(String("ENF"), String("status ") + StringUtils::ToString(i) +
@@ -2138,8 +2267,17 @@ void SIMRecords::GetSpnFsm(
         }
         case READ_SPN_3GPP:
             if (ar != NULL && ar->mException == NULL) {
-                assert(0 && "TODO");
-                // data = (ArrayOf<Byte>*) ar->mResult;
+                AutoPtr<IArrayOf> array = IArrayOf::Probe(ar->mResult);
+                assert(array != NULL);
+                Int32 len = 0;
+                array->GetLength(&len);
+                data = ArrayOf<Byte>::Alloc(len);
+                for (Int32 i = 0; i < len; i++) {
+                    AutoPtr<IInterface> obj;
+                    array->Get(i, (IInterface**)&obj);
+                    IByte::Probe(obj)->GetValue(&(*data)[i]);
+                }
+
                 mSpnDisplayCondition = 0xff & (*data)[0];
                 String str;
                 iccu->AdnStringFieldToString(
@@ -2172,8 +2310,16 @@ void SIMRecords::GetSpnFsm(
             break;
         case READ_SPN_CPHS:
             if (ar != NULL && ar->mException == NULL) {
-                assert(0 && "TODO");
-                // data = (ArrayOf<Byte>*) ar->mResult;
+                AutoPtr<IArrayOf> array = IArrayOf::Probe(ar->mResult);
+                assert(array != NULL);
+                Int32 len = 0;
+                array->GetLength(&len);
+                data = ArrayOf<Byte>::Alloc(len);
+                for (Int32 i = 0; i < len; i++) {
+                    AutoPtr<IInterface> obj;
+                    array->Get(i, (IInterface**)&obj);
+                    IByte::Probe(obj)->GetValue(&(*data)[i]);
+                }
                 String str;
                 iccu->AdnStringFieldToString(data, 0, data->GetLength(), &str);
                 SetServiceProviderName(str);
@@ -2199,8 +2345,16 @@ void SIMRecords::GetSpnFsm(
             break;
         case READ_SPN_SHORT_CPHS:
             if (ar != NULL && ar->mException == NULL) {
-                assert(0 && "TODO");
-                // data = (ArrayOf<Byte>*) ar->mResult;
+                AutoPtr<IArrayOf> array = IArrayOf::Probe(ar->mResult);
+                assert(array != NULL);
+                Int32 len = 0;
+                array->GetLength(&len);
+                data = ArrayOf<Byte>::Alloc(len);
+                for (Int32 i = 0; i < len; i++) {
+                    AutoPtr<IInterface> obj;
+                    array->Get(i, (IInterface**)&obj);
+                    IByte::Probe(obj)->GetValue(&(*data)[i]);
+                }
                 String str;
                 iccu->AdnStringFieldToString(data, 0, data->GetLength(), &str);
                 SetServiceProviderName(str);

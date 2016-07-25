@@ -2,11 +2,12 @@
 #include "Elastos.CoreLibrary.IO.h"
 #include "Elastos.Droid.Content.h"
 #include "Elastos.Droid.Internal.h"
+#include "elastos/droid/content/CIntent.h"
 #include "elastos/droid/os/AsyncResult.h"
 #include "elastos/droid/os/CRegistrant.h"
 #include "elastos/droid/os/RegistrantList.h"
 #include "elastos/droid/internal/telephony/uicc/IccRecords.h"
-#include "elastos/droid/content/CIntent.h"
+#include "elastos/droid/internal/telephony/uicc/IccIoResult.h"
 #include "elastos/droid/internal/telephony/uicc/CAdnRecord.h"
 #include "elastos/droid/internal/telephony/uicc/CAdnRecordLoader.h"
 #include "elastos/droid/internal/telephony/uicc/CIccRefreshResponse.h"
@@ -14,11 +15,12 @@
 #include "elastos/droid/internal/telephony/uicc/CUiccControllerHelper.h"
 #include "elastos/droid/internal/telephony/uicc/CIccRefreshResponse.h"
 #include "elastos/droid/internal/telephony/CSubscriptionControllerHelper.h"
-#include "elastos/droid/telephony/CTelephonyManagerHelper.h"
 #include "elastos/droid/os/CRegistrant.h"
+#include "elastos/droid/telephony/CTelephonyManagerHelper.h"
+#include "elastos/droid/utility/CBase64.h"
 #include "elastos/droid/R.h"
-
 #include <elastos/core/CoreUtils.h>
+#include <elastos/core/StringBuilder.h>
 #include <elastos/core/StringUtils.h>
 #include <elastos/core/AutoLock.h>
 #include <elastos/utility/logging/Logger.h>
@@ -29,12 +31,14 @@ using Elastos::Droid::Content::Res::IResources;
 using Elastos::Droid::Os::IRegistrant;
 using Elastos::Droid::Os::CRegistrant;
 using Elastos::Droid::Internal::Telephony::CSubscriptionControllerHelper;
+using Elastos::Droid::R;
 using Elastos::Droid::Telephony::ITelephonyManager;
 using Elastos::Droid::Telephony::ITelephonyManagerHelper;
 using Elastos::Droid::Telephony::CTelephonyManagerHelper;
-using Elastos::Droid::R;
-
+using Elastos::Droid::Utility::CBase64;
+using Elastos::Droid::Utility::IBase64;
 using Elastos::Core::CoreUtils;
+using Elastos::Core::StringBuilder;
 using Elastos::Core::StringUtils;
 using Elastos::Core::AutoLock;
 using Elastos::IO::IFlushable;
@@ -90,6 +94,7 @@ ECode IccRecords::constructor(
     /* [in] */ IContext* c,
     /* [in] */ ICommandsInterface* ci)
 {
+    Handler::constructor();
     mContext = c;
     mCi = ci;
     app->GetIccFileHandler((IIccFileHandler**)&mFh);
@@ -111,34 +116,44 @@ ECode IccRecords::ToString(
     /* [out] */ String* result)
 {
     VALIDATE_NOT_NULL(result);
-    assert(0 && "TODO");
-    // *result = String("mDestroyed=") + mDestroyed
-    //         + String(" mContext=") + mContext
-    //         + String(" mCi=") + mCi
-    //         + String(" mFh=") + mFh
-    //         + String(" mParentApp=") + mParentApp
-    //         + String(" recordsLoadedRegistrants=") + mRecordsLoadedRegistrants
-    //         + String(" mImsiReadyRegistrants=") + mImsiReadyRegistrants
-    //         + String(" mRecordsEventsRegistrants=") + mRecordsEventsRegistrants
-    //         + String(" mNewSmsRegistrants=") + mNewSmsRegistrants
-    //         + String(" mNetworkSelectionModeAutomaticRegistrants=")
-    //                 + mNetworkSelectionModeAutomaticRegistrants
-    //         + String(" recordsToLoad=") + StringUtils::ToString(mRecordsToLoad)
-    //         + String(" adnCache=") + mAdnCache
-    //         + String(" recordsRequested=") + StringUtils::ToString(mRecordsRequested)
-    //         + String(" iccid=") + mIccId
-    //         + String(" msisdn=") + mMsisdn
-    //         + String(" msisdnTag=") + mMsisdnTag
-    //         + String(" voiceMailNum=") + mVoiceMailNum
-    //         + String(" voiceMailTag=") + mVoiceMailTag
-    //         + String(" newVoiceMailNum=") + mNewVoiceMailNum
-    //         + String(" newVoiceMailTag=") + mNewVoiceMailTag
-    //         + String(" isVoiceMailFixed=") + StringUtils::ToString(mIsVoiceMailFixed)
-    //         + String(" mImsi=") + mImsi
-    //         + String(" mncLength=") + StringUtils::ToString(mMncLength)
-    //         + String(" mailboxIndex=") + StringUtils::ToString(mMailboxIndex)
-    //         + String(" spn=") + mSpn;
-    return NOERROR;
+    StringBuilder sb("mDestroyed=");
+    sb.Append(mDestroyed);
+    *result = String("mDestroyed=") + TO_CSTR(mDestroyed);
+    sb += String(" mContext=");
+    sb += TO_CSTR(mContext);
+    sb += String(" mCi=");
+    sb += TO_CSTR(mCi);
+    sb += String(" mFh=");
+    sb += TO_CSTR(mFh);
+    sb += String(" mParentApp=");
+    sb += TO_CSTR(mParentApp);
+    sb += String(" recordsLoadedRegistrants=");
+    sb += TO_CSTR(mRecordsLoadedRegistrants);
+    sb += String(" mImsiReadyRegistrants=");
+    sb += TO_CSTR(mImsiReadyRegistrants);
+    sb += String(" mRecordsEventsRegistrants=");
+    sb += TO_CSTR(mRecordsEventsRegistrants);
+    sb += String(" mNewSmsRegistrants=");
+    sb += TO_CSTR(mNewSmsRegistrants);
+    sb += String(" mNetworkSelectionModeAutomaticRegistrants=");
+    sb += TO_CSTR(mNetworkSelectionModeAutomaticRegistrants);
+    sb += String(" recordsToLoad=") + StringUtils::ToString(mRecordsToLoad);
+    sb += String(" adnCache=");
+    sb += TO_CSTR(mAdnCache);
+    sb += String(" recordsRequested=") + StringUtils::ToString(mRecordsRequested);
+    sb += String(" iccid=") + mIccId;
+    sb += String(" msisdn=") + mMsisdn;
+    sb += String(" msisdnTag=") + mMsisdnTag;
+    sb += String(" voiceMailNum=") + mVoiceMailNum;
+    sb += String(" voiceMailTag=") + mVoiceMailTag;
+    sb += String(" newVoiceMailNum=") + mNewVoiceMailNum;
+    sb += String(" newVoiceMailTag=") + mNewVoiceMailTag;
+    sb += String(" isVoiceMailFixed=") + StringUtils::ToString(mIsVoiceMailFixed);
+    sb += String(" mImsi=") + mImsi;
+    sb += String(" mncLength=") + StringUtils::ToString(mMncLength);
+    sb += String(" mailboxIndex=") + StringUtils::ToString(mMailboxIndex);
+    sb += String(" spn=") + mSpn;
+    return sb.ToString(result);
 }
 
 ECode IccRecords::Dispose()
@@ -386,8 +401,7 @@ ECode IccRecords::GetServiceProviderName(
     AutoPtr<IUiccCardApplication> parentApp = mParentApp;
     if (parentApp != NULL) {
         AutoPtr<IUiccCard> card;
-        assert(0 && "TODO");
-        // parentApp->GetUiccCard((IUiccCard**)&card);
+        parentApp->GetUiccCard((IUiccCard**)&card);
         if (card != NULL) {
             String brandOverride;
             card->GetOperatorBrandOverride(&brandOverride);
@@ -453,12 +467,10 @@ ECode IccRecords::HandleMessage(
                 }
 
                 if (ar->mException != NULL) {
-                    assert(0 && "TODO");
-                    // Loge(String("Record Load Exception: ") + ar->mException);
+                    Loge(String("Record Load Exception: ") + TO_CSTR(ar->mException));
                 }
                 else {
-                    assert(0 && "TODO");
-                    // recordLoaded->OnRecordLoaded(ar);
+                    recordLoaded->OnRecordLoaded(ar);
                 }
             // }catch (RuntimeException exc) {
             //     // I don't want these exceptions to be fatal
@@ -477,8 +489,7 @@ ECode IccRecords::HandleMessage(
                 HandleRefresh(IIccRefreshResponse::Probe(ar->mResult));
             }
             else {
-                assert(0 && "TODO");
-                // Loge(String("Icc refresh Exception: ") + ar->mException);
+                Loge(String("Icc refresh Exception: ") + TO_CSTR(ar->mException));
             }
             break;
         }
@@ -486,12 +497,20 @@ ECode IccRecords::HandleMessage(
             ar = (AsyncResult*)(IObject*)obj.Get();
             if (DBG) Log(String("Card REFRESH OEM occurred: "));
             if (ar->mException == NULL) {
-                assert(0 && "TODO");
-                // HandleRefreshOem((byte[])ar->mResult);
+                AutoPtr<IArrayOf> array = IArrayOf::Probe(ar->mResult);
+                assert(array != NULL);
+                Int32 len = 0;
+                array->GetLength(&len);
+                AutoPtr<ArrayOf<Byte> > records = ArrayOf<Byte>::Alloc(len);
+                for (Int32 i = 0; i < len; i++) {
+                    AutoPtr<IInterface> o;
+                    array->Get(i, (IInterface**)&o);
+                    IByte::Probe(o)->GetValue(&(*records)[i]);
+                }
+                HandleRefreshOem(records);
             }
             else {
-                assert(0 && "TODO");
-                // Loge(String("Icc refresh OEM Exception: ") + ar->mException);
+                Loge(String("Icc refresh OEM Exception: ") + TO_CSTR(ar->mException));
             }
             break;
         }
@@ -500,13 +519,11 @@ ECode IccRecords::HandleMessage(
             auth_rsp = NULL;
             if (DBG) Log(String("EVENT_AKA_AUTHENTICATE_DONE"));
             if (ar->mException != NULL) {
-                assert(0 && "TODO");
-                // Loge(String("Exception ICC SIM AKA: ") + ar->mException);
+                Loge(String("Exception ICC SIM AKA: ") + TO_CSTR(ar->mException));
             }
             else {
                 // try {
                     auth_rsp = IIccIoResult::Probe(ar->mResult);
-                    assert(0 && "TODO");
                     // if (DBG) Log(String("ICC SIM AKA: auth_rsp = ") + auth_rsp);
                 // } catch (Exception e) {
                 //     loge("Failed to parse ICC SIM AKA contents: " + e);
@@ -522,13 +539,20 @@ ECode IccRecords::HandleMessage(
         case EVENT_GET_SMS_RECORD_SIZE_DONE: {
             ar = (AsyncResult*)(IObject*)obj.Get();
             if (ar->mException != NULL) {
-                assert(0 && "TODO");
-                // Loge(String("Exception in EVENT_GET_SMS_RECORD_SIZE_DONE ") + ar->mException);
+                Loge(String("Exception in EVENT_GET_SMS_RECORD_SIZE_DONE ") + TO_CSTR(ar->mException));
                 break;
             }
 
-            assert(0 && "TODO");
-            AutoPtr<ArrayOf<Int32> > recordSize; // = (Int32[])ar->mResult;
+            AutoPtr<IArrayOf> array = IArrayOf::Probe(ar->mResult);
+            assert(array != NULL);
+            Int32 len = 0;
+            array->GetLength(&len);
+            AutoPtr<ArrayOf<Int32> > recordSize = ArrayOf<Int32>::Alloc(len);
+            for (Int32 i = 0; i < len; i++) {
+                AutoPtr<IInterface> o;
+                array->Get(i, (IInterface**)&o);
+                IInteger32::Probe(o)->GetValue(&(*recordSize)[i]);
+            }
             // try {
                 // recordSize[0]  is the record length
                 // recordSize[1]  is the total length of the EF file
@@ -657,9 +681,9 @@ ECode IccRecords::GetIccSimChallengeResponse(
 
     if (DBG) Log(String("getIccSimChallengeResponse: return auth_rsp"));
 
-    assert(0 && "TODO");
-    // *result = android.util.Base64.encodeToString(auth_rsp.payload, android.util.Base64.NO_WRAP);
-    return NOERROR;
+    AutoPtr<IBase64> base64;
+    CBase64::AcquireSingleton((IBase64**)&base64);
+    return base64->EncodeToString(((IccIoResult*)auth_rsp.Get())->mPayload, IBase64::NO_WRAP, result);
 }
 
 ECode IccRecords::GetSmsCapacityOnIcc(
@@ -870,8 +894,7 @@ void IccRecords::SetSystemProperty(
 {
     if (mParentApp == NULL) return;
     AutoPtr<IUiccCard> uicc;
-    assert(0 && "TODO");
-    // mParentApp->GetUiccCard((IUiccCard**)&uicc);
+    mParentApp->GetUiccCard((IUiccCard**)&uicc);
     Int32 slotId = 0;
     uicc->GetSlotId(&slotId);
 

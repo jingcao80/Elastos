@@ -23,6 +23,9 @@ using Elastos::Droid::Os::IRegistrant;
 using Elastos::Droid::Os::CRegistrant;
 using Elastos::Droid::Os::RegistrantList;
 using Elastos::Core::AutoLock;
+using Elastos::Core::CInteger32;
+using Elastos::Core::IArrayOf;
+using Elastos::Core::IInteger32;
 using Elastos::Core::StringUtils;
 using Elastos::Utility::Logging::Logger;
 
@@ -47,53 +50,55 @@ ECode UiccCardApplication::InnerHandler::HandleMessage(
 {
     Int32 what;
     msg->GetWhat(&what);
-    Logger::E("UiccCardApplication", "TODO InnerHandler::HandleMessage, msg:%d", what);
-    // ==================before translated======================
-    // AsyncResult ar;
-    //
-    // if (mDestroyed) {
-    //     loge("Received message " + msg + "[" + msg.what
-    //             + "] while being destroyed. Ignoring.");
-    //     return;
-    // }
-    //
-    // switch (msg.what) {
-    //     case EVENT_PIN1_PUK1_DONE:
-    //     case EVENT_PIN2_PUK2_DONE:
-    //     case EVENT_CHANGE_PIN1_DONE:
-    //     case EVENT_CHANGE_PIN2_DONE:
-    //         // a PIN/PUK/PIN2/PUK2 complete
-    //         // request has completed. ar.userObj is the response Message
-    //         int attemptsRemaining = -1;
-    //         ar = (AsyncResult)msg.obj;
-    //         if (ar.result != NULL) {
-    //             attemptsRemaining = parsePinPukErrorResult(ar);
-    //         }
-    //         Message response = (Message)ar.userObj;
-    //         AsyncResult.forMessage(response).exception = ar.exception;
-    //         response.arg1 = attemptsRemaining;
-    //         response.sendToTarget();
-    //         break;
-    //     case EVENT_QUERY_FACILITY_FDN_DONE:
-    //         ar = (AsyncResult)msg.obj;
-    //         onQueryFdnEnabled(ar);
-    //         break;
-    //     case EVENT_CHANGE_FACILITY_FDN_DONE:
-    //         ar = (AsyncResult)msg.obj;
-    //         onChangeFdnDone(ar);
-    //         break;
-    //     case EVENT_QUERY_FACILITY_LOCK_DONE:
-    //         ar = (AsyncResult)msg.obj;
-    //         onQueryFacilityLock(ar);
-    //         break;
-    //     case EVENT_CHANGE_FACILITY_LOCK_DONE:
-    //         ar = (AsyncResult)msg.obj;
-    //         onChangeFacilityLock(ar);
-    //         break;
-    //     default:
-    //         loge("Unknown Event " + msg.what);
-    // }
-    assert(0);
+    Logger::E("UiccCardApplication", "InnerHandler::HandleMessage, msg:%d", what);
+    AsyncResult* ar = NULL;
+
+    if (mOwner->mDestroyed) {
+        mOwner->Loge(String("Received message ") + TO_CSTR(msg) + "[" + StringUtils::ToString(what)
+                + "] while being destroyed. Ignoring.");
+        return NOERROR;
+    }
+
+    AutoPtr<IInterface> obj;
+    msg->GetObj((IInterface**)&obj);
+    switch (what) {
+        case EVENT_PIN1_PUK1_DONE:
+        case EVENT_PIN2_PUK2_DONE:
+        case EVENT_CHANGE_PIN1_DONE:
+        case EVENT_CHANGE_PIN2_DONE: {
+            // a PIN/PUK/PIN2/PUK2 complete
+            // request has completed. ar.userObj is the response Message
+            Int32 attemptsRemaining = -1;
+            ar = (AsyncResult*)IAsyncResult::Probe(obj);
+            if (ar->mResult != NULL) {
+                attemptsRemaining = mOwner->ParsePinPukErrorResult(ar);
+            }
+            AutoPtr<IMessage> response = IMessage::Probe(ar->mUserObj);
+            AsyncResult::ForMessage(response)->mException = ar->mException;
+            response->SetArg1(attemptsRemaining);
+            response->SendToTarget();
+            break;
+        }
+        case EVENT_QUERY_FACILITY_FDN_DONE:
+            ar = (AsyncResult*)IAsyncResult::Probe(obj);
+            mOwner->OnQueryFdnEnabled(ar);
+            break;
+        case EVENT_CHANGE_FACILITY_FDN_DONE:
+            ar = (AsyncResult*)IAsyncResult::Probe(obj);
+            mOwner->OnChangeFdnDone(ar);
+            break;
+        case EVENT_QUERY_FACILITY_LOCK_DONE:
+            ar = (AsyncResult*)IAsyncResult::Probe(obj);
+            mOwner->OnQueryFacilityLock(ar);
+            break;
+        case EVENT_CHANGE_FACILITY_LOCK_DONE:
+            ar = (AsyncResult*)IAsyncResult::Probe(obj);
+            mOwner->OnChangeFacilityLock(ar);
+            break;
+        default: {
+            mOwner->Loge(String("Unknown Event ") + StringUtils::ToString(what));
+        }
+    }
     return NOERROR;
 }
 
@@ -225,32 +230,33 @@ ECode UiccCardApplication::Update(
 
 ECode UiccCardApplication::Dispose()
 {
-    // ==================before translated======================
-    // synchronized (mLock) {
-    //     if (DBG) log(mAppType + " being Disposed");
-    //     mDestroyed = true;
-    //     if (mIccRecords != NULL) { mIccRecords.dispose();}
-    //     if (mIccFh != NULL) { mIccFh.dispose();}
-    //     mIccRecords = NULL;
-    //     mIccFh = NULL;
-    // }
-    assert(0);
+    AutoLock lock(mLock);
+    if (DBG) Log(StringUtils::ToString(mAppType) + " being Disposed");
+    mDestroyed = TRUE;
+    if (mIccRecords != NULL) {
+        mIccRecords->Dispose();
+    }
+    if (mIccFh != NULL) {
+        mIccFh->Dispose();
+    }
+    mIccRecords = NULL;
+    mIccFh = NULL;
     return NOERROR;
 }
 
 ECode UiccCardApplication::QueryFdn()
 {
     Logger::E("UiccCardApplication", "TODO QueryFdn is not implemented");
-    // ==================before translated======================
-    // //This shouldn't change run-time. So needs to be called only once.
-    // int serviceClassX;
-    //
-    // serviceClassX = CommandsInterface.SERVICE_CLASS_VOICE +
-    //                 CommandsInterface.SERVICE_CLASS_DATA +
-    //                 CommandsInterface.SERVICE_CLASS_FAX;
-    // mCi.queryFacilityLockForApp (
-    //         CommandsInterface.CB_FACILITY_BA_FD, "", serviceClassX,
-    //         mAid, mHandler.obtainMessage(EVENT_QUERY_FACILITY_FDN_DONE));
+    //This shouldn't change run-time. So needs to be called only once.
+    Int32 serviceClassX = 0;
+
+    serviceClassX = ICommandsInterface::SERVICE_CLASS_VOICE +
+                    ICommandsInterface::SERVICE_CLASS_DATA +
+                    ICommandsInterface::SERVICE_CLASS_FAX;
+    AutoPtr<IMessage> msg;
+    mHandler->ObtainMessage(EVENT_QUERY_FACILITY_FDN_DONE, (IMessage**)&msg);
+    mCi->QueryFacilityLockForApp(ICommandsInterface::CB_FACILITY_BA_FD, String(""), serviceClassX,
+            mAid, msg);
     return NOERROR;
 }
 
@@ -259,13 +265,13 @@ ECode UiccCardApplication::OnRefresh(
 {
     // ==================before translated======================
     // if (refreshResponse == NULL) {
-    //     loge("onRefresh received without input");
+    //     Loge("onRefresh received without input");
     //     return;
     // }
     //
     // if (refreshResponse.aid == NULL ||
     //         refreshResponse.aid.equals(mAid)) {
-    //     log("refresh for app " + refreshResponse.aid);
+    //     Log("refresh for app " + refreshResponse.aid);
     // } else {
     //  // This is for a different app. Ignore.
     //     return;
@@ -274,7 +280,7 @@ ECode UiccCardApplication::OnRefresh(
     // switch (refreshResponse.refreshResult) {
     //     case IccRefreshResponse.REFRESH_RESULT_INIT:
     //     case IccRefreshResponse.REFRESH_RESULT_RESET:
-    //         log("onRefresh: Setting app state to unknown");
+    //         Log("onRefresh: Setting app state to unknown");
     //         // Move our state to Unknown as soon as we know about a refresh
     //         // so that anyone interested does not get a stale state.
     //         mAppState = AppState.APPSTATE_UNKNOWN;
@@ -325,24 +331,19 @@ ECode UiccCardApplication::RegisterForLocked(
     /* [in] */ Int32 what,
     /* [in] */ IInterface* obj)
 {
-    // ==================before translated======================
-    // synchronized (mLock) {
-    //     Registrant r = new Registrant (h, what, obj);
-    //     mPinLockedRegistrants.add(r);
-    //     notifyPinLockedRegistrantsIfNeeded(r);
-    // }
-    assert(0);
+    AutoLock lock(mLock);
+    AutoPtr<IRegistrant> r;
+    CRegistrant::New(h, what, obj, (IRegistrant**)&r);
+    mPinLockedRegistrants->Add(r);
+    NotifyPinLockedRegistrantsIfNeeded((Registrant*)r.Get());
     return NOERROR;
 }
 
 ECode UiccCardApplication::UnregisterForLocked(
     /* [in] */ IHandler* h)
 {
-    // ==================before translated======================
-    // synchronized (mLock) {
-    //     mPinLockedRegistrants.remove(h);
-    // }
-    assert(0);
+    AutoLock lock(mLock);
+    mPinLockedRegistrants->Remove(h);
     return NOERROR;
 }
 
@@ -351,24 +352,19 @@ ECode UiccCardApplication::RegisterForPersoLocked(
     /* [in] */ Int32 what,
     /* [in] */ IInterface* obj)
 {
-    // ==================before translated======================
-    // synchronized (mLock) {
-    //     Registrant r = new Registrant (h, what, obj);
-    //     mPersoLockedRegistrants.add(r);
-    //     notifyPersoLockedRegistrantsIfNeeded(r);
-    // }
-    assert(0);
+    AutoLock lock(mLock);
+    AutoPtr<IRegistrant> r;
+    CRegistrant::New(h, what, obj, (IRegistrant**)&r);
+    mPersoLockedRegistrants->Add(r);
+    NotifyPersoLockedRegistrantsIfNeeded((Registrant*)r.Get());
     return NOERROR;
 }
 
 ECode UiccCardApplication::UnregisterForPersoLocked(
     /* [in] */ IHandler* h)
 {
-    // ==================before translated======================
-    // synchronized (mLock) {
-    //     mPersoLockedRegistrants.remove(h);
-    // }
-    assert(0);
+    AutoLock lock(mLock);
+    mPersoLockedRegistrants->Remove(h);
     return NOERROR;
 }
 
@@ -398,11 +394,8 @@ ECode UiccCardApplication::GetAuthContext(
     /* [out] */ Int32* result)
 {
     VALIDATE_NOT_NULL(result);
-    // ==================before translated======================
-    // synchronized (mLock) {
-    //     return mAuthContext;
-    // }
-    assert(0);
+    AutoLock lock(mLock);
+    *result = mAuthContext;
     return NOERROR;
 }
 
@@ -410,11 +403,8 @@ ECode UiccCardApplication::GetPersoSubState(
     /* [out] */ PersoSubState* result)
 {
     VALIDATE_NOT_NULL(result);
-    // ==================before translated======================
-    // synchronized (mLock) {
-    //     return mPersoSubState;
-    // }
-    assert(0);
+    AutoLock lock(mLock);
+    *result = mPersoSubState;
     return NOERROR;
 }
 
@@ -422,11 +412,8 @@ ECode UiccCardApplication::GetAid(
     /* [out] */ String* result)
 {
     VALIDATE_NOT_NULL(result);
-    // ==================before translated======================
-    // synchronized (mLock) {
-    //     return mAid;
-    // }
-    assert(0);
+    AutoLock lock(mLock);
+    *result = mAid;
     return NOERROR;
 }
 
@@ -434,9 +421,7 @@ ECode UiccCardApplication::GetAppLabel(
     /* [out] */ String* result)
 {
     VALIDATE_NOT_NULL(result);
-    // ==================before translated======================
-    // return mAppLabel;
-    assert(0);
+    *result = mAppLabel;
     return NOERROR;
 }
 
@@ -444,14 +429,11 @@ ECode UiccCardApplication::GetPin1State(
     /* [out] */ PinState* result)
 {
     VALIDATE_NOT_NULL(result);
-    // ==================before translated======================
-    // synchronized (mLock) {
-    //     if (mPin1Replaced) {
-    //         return mUiccCard.getUniversalPinState();
-    //     }
-    //     return mPin1State;
-    // }
-    assert(0);
+    AutoLock lock(mLock);
+    if (mPin1Replaced) {
+        return mUiccCard->GetUniversalPinState(result);
+    }
+    *result = mPin1State;
     return NOERROR;
 }
 
@@ -503,12 +485,10 @@ ECode UiccCardApplication::SupplyPin(
     /* [in] */ const String& pin,
     /* [in] */ IMessage* onComplete)
 {
-    // ==================before translated======================
-    // synchronized (mLock) {
-    //     mCi.supplyIccPinForApp(pin, mAid, mHandler.obtainMessage(EVENT_PIN1_PUK1_DONE,
-    //             onComplete));
-    // }
-    assert(0);
+    AutoLock lock(mLock);
+    AutoPtr<IMessage> msg;
+    mHandler->ObtainMessage(EVENT_PIN1_PUK1_DONE, onComplete, (IMessage**)&msg);
+    mCi->SupplyIccPinForApp(pin, mAid, msg);
     return NOERROR;
 }
 
@@ -517,12 +497,11 @@ ECode UiccCardApplication::SupplyPuk(
     /* [in] */ const String& newPin,
     /* [in] */ IMessage* onComplete)
 {
-    // ==================before translated======================
-    // synchronized (mLock) {
-    // mCi.supplyIccPukForApp(puk, newPin, mAid,
-    //         mHandler.obtainMessage(EVENT_PIN1_PUK1_DONE, onComplete));
-    // }
-    assert(0);
+    AutoLock lock(mLock);
+    AutoPtr<IMessage> msg;
+    mHandler->ObtainMessage(EVENT_PIN1_PUK1_DONE, onComplete, (IMessage**)&msg);
+    mCi->SupplyIccPukForApp(puk, newPin, mAid, msg);
+
     return NOERROR;
 }
 
@@ -530,12 +509,10 @@ ECode UiccCardApplication::SupplyPin2(
     /* [in] */ const String& pin2,
     /* [in] */ IMessage* onComplete)
 {
-    // ==================before translated======================
-    // synchronized (mLock) {
-    //     mCi.supplyIccPin2ForApp(pin2, mAid,
-    //             mHandler.obtainMessage(EVENT_PIN2_PUK2_DONE, onComplete));
-    // }
-    assert(0);
+    AutoLock lock(mLock);
+    AutoPtr<IMessage> msg;
+    mHandler->ObtainMessage(EVENT_PIN2_PUK2_DONE, onComplete, (IMessage**)&msg);
+    mCi->SupplyIccPin2ForApp(pin2, mAid, msg);
     return NOERROR;
 }
 
@@ -544,12 +521,10 @@ ECode UiccCardApplication::SupplyPuk2(
     /* [in] */ const String& newPin2,
     /* [in] */ IMessage* onComplete)
 {
-    // ==================before translated======================
-    // synchronized (mLock) {
-    //     mCi.supplyIccPuk2ForApp(puk2, newPin2, mAid,
-    //             mHandler.obtainMessage(EVENT_PIN2_PUK2_DONE, onComplete));
-    // }
-    assert(0);
+    AutoLock lock(mLock);
+    AutoPtr<IMessage> msg;
+    mHandler->ObtainMessage(EVENT_PIN2_PUK2_DONE, onComplete, (IMessage**)&msg);
+    mCi->SupplyIccPuk2ForApp(puk2, newPin2, mAid, msg);
     return NOERROR;
 }
 
@@ -558,12 +533,9 @@ ECode UiccCardApplication::SupplyDepersonalization(
     /* [in] */ const String& type,
     /* [in] */ IMessage* onComplete)
 {
-    // ==================before translated======================
-    // synchronized (mLock) {
-    //     if (DBG) log("Network Despersonalization: pin = **** , type = " + type);
-    //     mCi.supplyDepersonalization(pin, type, onComplete);
-    // }
-    assert(0);
+    AutoLock lock(mLock);
+    if (DBG) Log(String("Network Despersonalization: pin = **** , type = ") + type);
+    mCi->SupplyDepersonalization(pin, type, onComplete);
     return NOERROR;
 }
 
@@ -571,8 +543,7 @@ ECode UiccCardApplication::GetIccLockEnabled(
     /* [out] */ Boolean* result)
 {
     VALIDATE_NOT_NULL(result);
-    // ==================before translated======================
-    // return mIccLockEnabled;
+    *result = mIccLockEnabled;
     // /* STOPSHIP: Remove line above and all code associated with setting
     //    mIccLockEanbled once all RIL correctly sends the pin1 state.
     // // Use getPin1State to take into account pin1Replaced flag
@@ -581,7 +552,6 @@ ECode UiccCardApplication::GetIccLockEnabled(
     //        pinState == PinState.PINSTATE_ENABLED_VERIFIED ||
     //        pinState == PinState.PINSTATE_ENABLED_BLOCKED ||
     //        pinState == PinState.PINSTATE_ENABLED_PERM_BLOCKED;*/
-    assert(0);
     return NOERROR;
 }
 
@@ -589,11 +559,8 @@ ECode UiccCardApplication::GetIccFdnEnabled(
     /* [out] */ Boolean* result)
 {
     VALIDATE_NOT_NULL(result);
-    // ==================before translated======================
-    // synchronized (mLock) {
-    //     return mIccFdnEnabled;
-    // }
-    assert(0);
+    AutoLock lock(mLock);
+    *result =  mIccFdnEnabled;
     return NOERROR;
 }
 
@@ -601,9 +568,7 @@ ECode UiccCardApplication::GetIccFdnAvailable(
     /* [out] */ Boolean* result)
 {
     VALIDATE_NOT_NULL(result);
-    // ==================before translated======================
-    // return mIccFdnAvailable;
-    assert(0);
+    *result = mIccFdnAvailable;
     return NOERROR;
 }
 
@@ -612,20 +577,18 @@ ECode UiccCardApplication::SetIccLockEnabled(
     /* [in] */ const String& password,
     /* [in] */ IMessage* onComplete)
 {
-    // ==================before translated======================
-    // synchronized (mLock) {
-    //     int serviceClassX;
-    //     serviceClassX = CommandsInterface.SERVICE_CLASS_VOICE +
-    //             CommandsInterface.SERVICE_CLASS_DATA +
-    //             CommandsInterface.SERVICE_CLASS_FAX;
-    //
-    //     mDesiredPinLocked = enabled;
-    //
-    //     mCi.setFacilityLockForApp(CommandsInterface.CB_FACILITY_BA_SIM,
-    //             enabled, password, serviceClassX, mAid,
-    //             mHandler.obtainMessage(EVENT_CHANGE_FACILITY_LOCK_DONE, onComplete));
-    // }
-    assert(0);
+    AutoLock lock(mLock);
+    Int32 serviceClassX;
+    serviceClassX = ICommandsInterface::SERVICE_CLASS_VOICE +
+            ICommandsInterface::SERVICE_CLASS_DATA +
+            ICommandsInterface::SERVICE_CLASS_FAX;
+
+    mDesiredPinLocked = enabled;
+
+    AutoPtr<IMessage> msg;
+    mHandler->ObtainMessage(EVENT_CHANGE_FACILITY_LOCK_DONE, onComplete, (IMessage**)&msg);
+    mCi->SetFacilityLockForApp(ICommandsInterface::CB_FACILITY_BA_SIM,
+            enabled, password, serviceClassX, mAid, msg);
     return NOERROR;
 }
 
@@ -634,21 +597,20 @@ ECode UiccCardApplication::SetIccFdnEnabled(
     /* [in] */ const String& password,
     /* [in] */ IMessage* onComplete)
 {
-    // ==================before translated======================
-    // synchronized (mLock) {
-    //     int serviceClassX;
-    //     serviceClassX = CommandsInterface.SERVICE_CLASS_VOICE +
-    //             CommandsInterface.SERVICE_CLASS_DATA +
-    //             CommandsInterface.SERVICE_CLASS_FAX +
-    //             CommandsInterface.SERVICE_CLASS_SMS;
-    //
-    //     mDesiredFdnEnabled = enabled;
-    //
-    //     mCi.setFacilityLockForApp(CommandsInterface.CB_FACILITY_BA_FD,
-    //             enabled, password, serviceClassX, mAid,
-    //             mHandler.obtainMessage(EVENT_CHANGE_FACILITY_FDN_DONE, onComplete));
-    // }
-    assert(0);
+    AutoLock lock(mLock);
+
+    Int32 serviceClassX;
+    serviceClassX = ICommandsInterface::SERVICE_CLASS_VOICE +
+            ICommandsInterface::SERVICE_CLASS_DATA +
+            ICommandsInterface::SERVICE_CLASS_FAX +
+            ICommandsInterface::SERVICE_CLASS_SMS;
+
+    mDesiredFdnEnabled = enabled;
+
+    AutoPtr<IMessage> msg;
+    mHandler->ObtainMessage(EVENT_CHANGE_FACILITY_FDN_DONE, onComplete, (IMessage**)&msg);
+    mCi->SetFacilityLockForApp(ICommandsInterface::CB_FACILITY_BA_FD,
+            enabled, password, serviceClassX, mAid, msg);
     return NOERROR;
 }
 
@@ -657,13 +619,11 @@ ECode UiccCardApplication::ChangeIccLockPassword(
     /* [in] */ const String& newPassword,
     /* [in] */ IMessage* onComplete)
 {
-    // ==================before translated======================
-    // synchronized (mLock) {
-    //     if (DBG) log("changeIccLockPassword");
-    //     mCi.changeIccPinForApp(oldPassword, newPassword, mAid,
-    //             mHandler.obtainMessage(EVENT_CHANGE_PIN1_DONE, onComplete));
-    // }
-    assert(0);
+    AutoLock lock(mLock);
+    if (DBG) Log(String("changeIccLockPassword"));
+    AutoPtr<IMessage> msg;
+    mHandler->ObtainMessage(EVENT_CHANGE_PIN1_DONE, onComplete, (IMessage**)&msg);
+    mCi->ChangeIccPinForApp(oldPassword, newPassword, mAid, msg);
     return NOERROR;
 }
 
@@ -672,13 +632,11 @@ ECode UiccCardApplication::ChangeIccFdnPassword(
     /* [in] */ const String& newPassword,
     /* [in] */ IMessage* onComplete)
 {
-    // ==================before translated======================
-    // synchronized (mLock) {
-    //     if (DBG) log("changeIccFdnPassword");
-    //     mCi.changeIccPin2ForApp(oldPassword, newPassword, mAid,
-    //             mHandler.obtainMessage(EVENT_CHANGE_PIN2_DONE, onComplete));
-    // }
-    assert(0);
+    AutoLock lock(mLock);
+    if (DBG) Log(String("changeIccFdnPassword"));
+    AutoPtr<IMessage> msg;
+    mHandler->ObtainMessage(EVENT_CHANGE_PIN2_DONE, onComplete, (IMessage**)&msg);
+    mCi->ChangeIccPin2ForApp(oldPassword, newPassword, mAid, msg);
     return NOERROR;
 }
 
@@ -686,11 +644,8 @@ ECode UiccCardApplication::GetIccPin2Blocked(
     /* [out] */ Boolean* result)
 {
     VALIDATE_NOT_NULL(result);
-    // ==================before translated======================
-    // synchronized (mLock) {
-    //     return mPin2State == PinState.PINSTATE_ENABLED_BLOCKED;
-    // }
-    assert(0);
+    AutoLock lock(mLock);
+    *result = mPin2State == PINSTATE_ENABLED_BLOCKED;
     return NOERROR;
 }
 
@@ -698,11 +653,8 @@ ECode UiccCardApplication::GetIccPuk2Blocked(
     /* [out] */ Boolean* result)
 {
     VALIDATE_NOT_NULL(result);
-    // ==================before translated======================
-    // synchronized (mLock) {
-    //     return mPin2State == PinState.PINSTATE_ENABLED_PERM_BLOCKED;
-    // }
-    assert(0);
+    AutoLock lock(mLock);
+    *result = mPin2State == PINSTATE_ENABLED_PERM_BLOCKED;
     return NOERROR;
 }
 
@@ -710,10 +662,7 @@ ECode UiccCardApplication::GetUICCConfig(
     /* [out] */ IUICCConfig** result)
 {
     VALIDATE_NOT_NULL(result);
-    // ==================before translated======================
-    // return mUiccCard.getUICCConfig();
-    assert(0);
-    return NOERROR;
+    return mUiccCard->GetUICCConfig(result);
 }
 
 ECode UiccCardApplication::Dump(
@@ -741,17 +690,17 @@ ECode UiccCardApplication::Dump(
     // pw.println(" mIccFh=" + mIccFh);
     // pw.println(" mDestroyed=" + mDestroyed);
     // pw.println(" mReadyRegistrants: size=" + mReadyRegistrants.size());
-    // for (int i = 0; i < mReadyRegistrants.size(); i++) {
+    // for (Int32 i = 0; i < mReadyRegistrants.size(); i++) {
     //     pw.println("  mReadyRegistrants[" + i + "]="
     //             + ((Registrant)mReadyRegistrants.get(i)).getHandler());
     // }
     // pw.println(" mPinLockedRegistrants: size=" + mPinLockedRegistrants.size());
-    // for (int i = 0; i < mPinLockedRegistrants.size(); i++) {
+    // for (Int32 i = 0; i < mPinLockedRegistrants.size(); i++) {
     //     pw.println("  mPinLockedRegistrants[" + i + "]="
     //             + ((Registrant)mPinLockedRegistrants.get(i)).getHandler());
     // }
     // pw.println(" mPersoLockedRegistrants: size=" + mPersoLockedRegistrants.size());
-    // for (int i = 0; i < mPersoLockedRegistrants.size(); i++) {
+    // for (Int32 i = 0; i < mPersoLockedRegistrants.size(); i++) {
     //     pw.println("  mPersoLockedRegistrants[" + i + "]="
     //             + ((Registrant)mPersoLockedRegistrants.get(i)).getHandler());
     // }
@@ -764,8 +713,8 @@ ECode UiccCardApplication::GetUiccCard(
     /* [out] */ IUiccCard** result)
 {
     VALIDATE_NOT_NULL(result)
-    // ==================before translated======================
-    // return mUiccCard;
+    *result = mUiccCard;
+    REFCOUNT_ADD(*result);
     return NOERROR;
 }
 
@@ -814,236 +763,250 @@ AutoPtr<IIccFileHandler> UiccCardApplication::CreateIccFileHandler(
 void UiccCardApplication::OnQueryFdnEnabled(
     /* [in] */ AsyncResult* ar)
 {
-    // ==================before translated======================
-    // synchronized (mLock) {
-    //     if (ar.exception != NULL) {
-    //         if (DBG) log("Error in querying facility lock:" + ar.exception);
-    //         return;
-    //     }
-    //
-    //     int[] result = (int[])ar.result;
-    //     if(result.length != 0) {
-    //         //0 - Available & Disabled, 1-Available & Enabled, 2-Unavailable.
-    //         if (result[0] == 2) {
-    //             mIccFdnEnabled = false;
-    //             mIccFdnAvailable = false;
-    //         } else {
-    //             mIccFdnEnabled = (result[0] == 1) ? true : false;
-    //             mIccFdnAvailable = true;
-    //         }
-    //         log("Query facility FDN : FDN service available: "+ mIccFdnAvailable
-    //                 +" enabled: "  + mIccFdnEnabled);
-    //     } else {
-    //         loge("Bogus facility lock response");
-    //     }
-    // }
-    assert(0);
+    AutoLock lock(mLock);
+    if (ar->mException != NULL) {
+        if (DBG) Log(String("Error in querying facility lock:") + TO_CSTR(ar->mException));
+        return;
+    }
+
+    AutoPtr<IArrayOf> array = IArrayOf::Probe(ar->mResult);
+    Int32 len = 0;
+    array->GetLength(&len);
+    AutoPtr<ArrayOf<Int32> > result = ArrayOf<Int32>::Alloc(len);
+    for (Int32 i = 0; i < len; i++) {
+        AutoPtr<IInterface> obj;
+        array->Get(i, (IInterface**)&obj);
+        IInteger32::Probe(obj)->GetValue(&(*result)[i]);
+    }
+    if(result->GetLength() != 0) {
+        //0 - Available & Disabled, 1-Available & Enabled, 2-Unavailable.
+        if ((*result)[0] == 2) {
+            mIccFdnEnabled = FALSE;
+            mIccFdnAvailable = FALSE;
+        }
+        else {
+            mIccFdnEnabled = ((*result)[0] == 1) ? TRUE : FALSE;
+            mIccFdnAvailable = TRUE;
+        }
+        Log(String("Query facility FDN : FDN service available: ") + StringUtils::ToString(mIccFdnAvailable)
+                +" enabled: "  + StringUtils::ToString(mIccFdnEnabled));
+    }
+    else {
+        Loge(String("Bogus facility lock response"));
+    }
 }
 
 void UiccCardApplication::OnChangeFdnDone(
     /* [in] */ AsyncResult* ar)
 {
-    // ==================before translated======================
-    // synchronized (mLock) {
-    //     int attemptsRemaining = -1;
-    //
-    //     if (ar.exception == NULL) {
-    //         mIccFdnEnabled = mDesiredFdnEnabled;
-    //         if (DBG) log("EVENT_CHANGE_FACILITY_FDN_DONE: " +
-    //                 "mIccFdnEnabled=" + mIccFdnEnabled);
-    //     } else {
-    //         attemptsRemaining = parsePinPukErrorResult(ar);
-    //         loge("Error change facility fdn with exception " + ar.exception);
-    //     }
-    //     Message response = (Message)ar.userObj;
-    //     response.arg1 = attemptsRemaining;
-    //     AsyncResult.forMessage(response).exception = ar.exception;
-    //     response.sendToTarget();
-    // }
-    assert(0);
+    AutoLock lock(mLock);
+    Int32 attemptsRemaining = -1;
+
+    if (ar->mException == NULL) {
+        mIccFdnEnabled = mDesiredFdnEnabled;
+        if (DBG) Log(String("EVENT_CHANGE_FACILITY_FDN_DONE: mIccFdnEnabled=") + StringUtils::ToString(mIccFdnEnabled));
+    }
+    else {
+        attemptsRemaining = ParsePinPukErrorResult(ar);
+        Loge(String("Error change facility fdn with exception ") + TO_CSTR(ar->mException));
+    }
+    AutoPtr<IMessage> response = IMessage::Probe(ar->mUserObj);
+    response->SetArg1(attemptsRemaining);
+    AsyncResult::ForMessage(response)->mException = ar->mException;
+    response->SendToTarget();
 }
 
 void UiccCardApplication::QueryPin1State()
 {
-    Logger::E("UiccCardApplication", "TODO QueryPin1State is not implemented");
-    // ==================before translated======================
-    // int serviceClassX = CommandsInterface.SERVICE_CLASS_VOICE +
-    //         CommandsInterface.SERVICE_CLASS_DATA +
-    //         CommandsInterface.SERVICE_CLASS_FAX;
-    // mCi.queryFacilityLockForApp (
-    //     CommandsInterface.CB_FACILITY_BA_SIM, "", serviceClassX,
-    //     mAid, mHandler.obtainMessage(EVENT_QUERY_FACILITY_LOCK_DONE));
+    Int32 serviceClassX = ICommandsInterface::SERVICE_CLASS_VOICE +
+            ICommandsInterface::SERVICE_CLASS_DATA +
+            ICommandsInterface::SERVICE_CLASS_FAX;
+    AutoPtr<IMessage> msg;
+    mHandler->ObtainMessage(EVENT_QUERY_FACILITY_LOCK_DONE, (IMessage**)&msg);
+    mCi->QueryFacilityLockForApp(ICommandsInterface::CB_FACILITY_BA_SIM, String(""), serviceClassX,
+        mAid, msg);
 }
 
 void UiccCardApplication::OnQueryFacilityLock(
     /* [in] */ AsyncResult* ar)
 {
-    // ==================before translated======================
-    // synchronized (mLock) {
-    //     if(ar.exception != NULL) {
-    //         if (DBG) log("Error in querying facility lock:" + ar.exception);
-    //         return;
-    //     }
-    //
-    //     int[] ints = (int[])ar.result;
-    //     if(ints.length != 0) {
-    //         if (DBG) log("Query facility lock : "  + ints[0]);
-    //
-    //         mIccLockEnabled = (ints[0] != 0);
-    //
-    //         if (mIccLockEnabled) {
-    //             mPinLockedRegistrants.notifyRegistrants();
-    //         }
-    //
-    //         // Sanity check: we expect mPin1State to match mIccLockEnabled.
-    //         // When mPin1State is DISABLED mIccLockEanbled should be false.
-    //         // When mPin1State is ENABLED mIccLockEnabled should be true.
-    //         //
-    //         // Here we validate these assumptions to assist in identifying which ril/radio's
-    //         // have not correctly implemented GET_SIM_STATUS
-    //         switch (mPin1State) {
-    //             case PINSTATE_DISABLED:
-    //                 if (mIccLockEnabled) {
-    //                     loge("QUERY_FACILITY_LOCK:enabled GET_SIM_STATUS.Pin1:disabled."
-    //                             + " Fixme");
-    //                 }
-    //                 break;
-    //             case PINSTATE_ENABLED_NOT_VERIFIED:
-    //             case PINSTATE_ENABLED_VERIFIED:
-    //             case PINSTATE_ENABLED_BLOCKED:
-    //             case PINSTATE_ENABLED_PERM_BLOCKED:
-    //                 if (!mIccLockEnabled) {
-    //                     loge("QUERY_FACILITY_LOCK:disabled GET_SIM_STATUS.Pin1:enabled."
-    //                             + " Fixme");
-    //                 }
-    //             case PINSTATE_UNKNOWN:
-    //             default:
-    //                 if (DBG) log("Ignoring: pin1state=" + mPin1State);
-    //                 break;
-    //         }
-    //     } else {
-    //         loge("Bogus facility lock response");
-    //     }
-    // }
-    assert(0);
+    AutoLock lock(mLock);
+    if(ar->mException != NULL) {
+        if (DBG) Log(String("Error in querying facility lock:") + TO_CSTR(ar->mException));
+        return;
+    }
+
+    AutoPtr<IArrayOf> array = IArrayOf::Probe(ar->mResult);
+    Int32 len = 0;
+    array->GetLength(&len);
+    AutoPtr<ArrayOf<Int32> > ints = ArrayOf<Int32>::Alloc(len);
+    for (Int32 i = 0; i < len; i++) {
+        AutoPtr<IInterface> obj;
+        array->Get(i, (IInterface**)&obj);
+        IInteger32::Probe(obj)->GetValue(&(*ints)[i]);
+    }
+    if(ints->GetLength() != 0) {
+        if (DBG) Log(String("Query facility lock : ") + StringUtils::ToString((*ints)[0]));
+
+        mIccLockEnabled = ((*ints)[0] != 0);
+
+        if (mIccLockEnabled) {
+            mPinLockedRegistrants->NotifyRegistrants();
+        }
+
+        // Sanity check: we expect mPin1State to match mIccLockEnabled.
+        // When mPin1State is DISABLED mIccLockEanbled should be FALSE.
+        // When mPin1State is ENABLED mIccLockEnabled should be TRUE.
+        //
+        // Here we validate these assumptions to assist in identifying which ril/radio's
+        // have not correctly implemented GET_SIM_STATUS
+        switch (mPin1State) {
+            case PINSTATE_DISABLED:
+                if (mIccLockEnabled) {
+                    Loge(String("QUERY_FACILITY_LOCK:enabled GET_SIM_STATUS.Pin1:disabled. Fixme"));
+                }
+                break;
+            case PINSTATE_ENABLED_NOT_VERIFIED:
+            case PINSTATE_ENABLED_VERIFIED:
+            case PINSTATE_ENABLED_BLOCKED:
+            case PINSTATE_ENABLED_PERM_BLOCKED:
+                if (!mIccLockEnabled) {
+                    Loge(String("QUERY_FACILITY_LOCK:disabled GET_SIM_STATUS.Pin1:enabled. Fixme"));
+                }
+            case PINSTATE_UNKNOWN:
+            default:
+                if (DBG) Log(String("Ignoring: pin1state=") + StringUtils::ToString(mPin1State));
+                break;
+        }
+    }
+    else {
+        Loge(String("Bogus facility lock response"));
+    }
 }
 
 void UiccCardApplication::OnChangeFacilityLock(
     /* [in] */ AsyncResult* ar)
 {
-    // ==================before translated======================
-    // synchronized (mLock) {
-    //     int attemptsRemaining = -1;
-    //
-    //     if (ar.exception == NULL) {
-    //         mIccLockEnabled = mDesiredPinLocked;
-    //         if (DBG) log( "EVENT_CHANGE_FACILITY_LOCK_DONE: mIccLockEnabled= "
-    //                 + mIccLockEnabled);
-    //     } else {
-    //         attemptsRemaining = parsePinPukErrorResult(ar);
-    //         loge("Error change facility lock with exception " + ar.exception);
-    //     }
-    //     Message response = (Message)ar.userObj;
-    //     AsyncResult.forMessage(response).exception = ar.exception;
-    //     response.arg1 = attemptsRemaining;
-    //     response.sendToTarget();
-    // }
-    assert(0);
+    AutoLock lock(mLock);
+    Int32 attemptsRemaining = -1;
+
+    if (ar->mException == NULL) {
+        mIccLockEnabled = mDesiredPinLocked;
+        if (DBG) Log(String("EVENT_CHANGE_FACILITY_LOCK_DONE: mIccLockEnabled= ")
+                + StringUtils::ToString(mIccLockEnabled));
+    }
+    else {
+        attemptsRemaining = ParsePinPukErrorResult(ar);
+        Loge(String("Error change facility lock with exception ") + TO_CSTR(ar->mException));
+    }
+    AutoPtr<IMessage> response = IMessage::Probe(ar->mUserObj);
+    AsyncResult::ForMessage(response)->mException = ar->mException;
+    response->SetArg1(attemptsRemaining);
+    response->SendToTarget();
 }
 
 Int32 UiccCardApplication::ParsePinPukErrorResult(
     /* [in] */ AsyncResult* ar)
 {
-    // ==================before translated======================
-    // int[] result = (int[]) ar.result;
-    // if (result == NULL) {
-    //     return -1;
-    // } else {
-    //     int length = result.length;
-    //     int attemptsRemaining = -1;
-    //     if (length > 0) {
-    //         attemptsRemaining = result[0];
-    //     }
-    //     log("parsePinPukErrorResult: attemptsRemaining=" + attemptsRemaining);
-    //     return attemptsRemaining;
-    // }
-    assert(0);
-    return 0;
+    if (ar->mResult == NULL) {
+        return -1;
+    }
+
+    AutoPtr<IArrayOf> array = IArrayOf::Probe(ar->mResult);
+    Int32 len = 0;
+    array->GetLength(&len);
+    AutoPtr<ArrayOf<Int32> > result = ArrayOf<Int32>::Alloc(len);
+    for (Int32 i = 0; i < len; i++) {
+        AutoPtr<IInterface> obj;
+        array->Get(i, (IInterface**)&obj);
+        IInteger32::Probe(obj)->GetValue(&(*result)[i]);
+    }
+    if (result == NULL) {
+        return -1;
+    }
+
+    Int32 length = len;
+    Int32 attemptsRemaining = -1;
+    if (length > 0) {
+        attemptsRemaining = (*result)[0];
+    }
+    Log(String("parsePinPukErrorResult: attemptsRemaining=") + StringUtils::ToString(attemptsRemaining));
+    return attemptsRemaining;
 }
 
 void UiccCardApplication::NotifyReadyRegistrantsIfNeeded(
     /* [in] */ Registrant* r)
 {
-    Logger::E("UiccCardApplication", "TODO NotifyReadyRegistrantsIfNeeded");
-    // ==================before translated======================
-    // if (mDestroyed) {
-    //     return;
-    // }
-    // if (mAppState == AppState.APPSTATE_READY) {
-    //     if (mPin1State == PinState.PINSTATE_ENABLED_NOT_VERIFIED ||
-    //             mPin1State == PinState.PINSTATE_ENABLED_BLOCKED ||
-    //             mPin1State == PinState.PINSTATE_ENABLED_PERM_BLOCKED) {
-    //         loge("Sanity check failed! APPSTATE is ready while PIN1 is not verified!!!");
-    //         // Don't notify if application is in insane state
-    //         return;
-    //     }
-    //     if (r == NULL) {
-    //         if (DBG) log("Notifying registrants: READY");
-    //         mReadyRegistrants.notifyRegistrants();
-    //     } else {
-    //         if (DBG) log("Notifying 1 registrant: READY");
-    //         r.notifyRegistrant(new AsyncResult(NULL, NULL, NULL));
-    //     }
-    // }
+    if (mDestroyed) {
+        return;
+    }
+    if (mAppState == APPSTATE_READY) {
+        if (mPin1State == PINSTATE_ENABLED_NOT_VERIFIED ||
+                mPin1State == PINSTATE_ENABLED_BLOCKED ||
+                mPin1State == PINSTATE_ENABLED_PERM_BLOCKED) {
+            Loge(String("Sanity check failed! APPSTATE is ready while PIN1 is not verified!!!"));
+            // Don't notify if application is in insane state
+            return;
+        }
+        if (r == NULL) {
+            if (DBG) Log(String("Notifying registrants: READY"));
+            mReadyRegistrants->NotifyRegistrants();
+        } else {
+            if (DBG) Log(String("Notifying 1 registrant: READY"));
+            AutoPtr<AsyncResult> ar = new AsyncResult(NULL, NULL, NULL);
+            r->NotifyRegistrant(ar);
+        }
+    }
 }
 
 void UiccCardApplication::NotifyPinLockedRegistrantsIfNeeded(
     /* [in] */ Registrant* r)
 {
-    // ==================before translated======================
-    // if (mDestroyed) {
-    //     return;
-    // }
-    //
-    // if (mAppState == AppState.APPSTATE_PIN ||
-    //         mAppState == AppState.APPSTATE_PUK) {
-    //     if (mPin1State == PinState.PINSTATE_ENABLED_VERIFIED ||
-    //             mPin1State == PinState.PINSTATE_DISABLED) {
-    //         loge("Sanity check failed! APPSTATE is locked while PIN1 is not!!!");
-    //         //Don't notify if application is in insane state
-    //         return;
-    //     }
-    //     if (r == NULL) {
-    //         if (DBG) log("Notifying registrants: LOCKED");
-    //         mPinLockedRegistrants.notifyRegistrants();
-    //     } else {
-    //         if (DBG) log("Notifying 1 registrant: LOCKED");
-    //         r.notifyRegistrant(new AsyncResult(NULL, NULL, NULL));
-    //     }
-    // }
-    assert(0);
+    if (mDestroyed) {
+        return;
+    }
+
+    if (mAppState == APPSTATE_PIN ||
+            mAppState == APPSTATE_PUK) {
+        if (mPin1State == PINSTATE_ENABLED_VERIFIED ||
+                mPin1State == PINSTATE_DISABLED) {
+            Loge(String("Sanity check failed! APPSTATE is locked while PIN1 is not!!!"));
+            //Don't notify if application is in insane state
+            return;
+        }
+        if (r == NULL) {
+            if (DBG) Log(String("Notifying registrants: LOCKED"));
+            mPinLockedRegistrants->NotifyRegistrants();
+        } else {
+            if (DBG) Log(String("Notifying 1 registrant: LOCKED"));
+            AutoPtr<AsyncResult> ar = new AsyncResult(NULL, NULL, NULL);
+            r->NotifyRegistrant(ar);
+        }
+    }
 }
 
 void UiccCardApplication::NotifyPersoLockedRegistrantsIfNeeded(
     /* [in] */ Registrant* r)
 {
-    // ==================before translated======================
-    // if (mDestroyed) {
-    //     return;
-    // }
-    //
-    // if (mAppState == AppState.APPSTATE_SUBSCRIPTION_PERSO &&
-    //         isPersoLocked()) {
-    //     AsyncResult ar = new AsyncResult(NULL, mPersoSubState.ordinal(), NULL);
-    //     if (r == NULL) {
-    //         if (DBG) log("Notifying registrants: PERSO_LOCKED");
-    //         mPersoLockedRegistrants.notifyRegistrants(ar);
-    //     } else {
-    //         if (DBG) log("Notifying 1 registrant: PERSO_LOCKED");
-    //         r.notifyRegistrant(ar);
-    //     }
-    // }
-    assert(0);
+    if (mDestroyed) {
+        return;
+    }
+
+    Boolean tmp = FALSE;
+    if (mAppState == APPSTATE_SUBSCRIPTION_PERSO &&
+            (IsPersoLocked(&tmp), tmp)) {
+        AutoPtr<IInteger32> vo;
+        CInteger32::New(mPersoSubState/*.ordinal()*/, (IInteger32**)&vo);
+        AutoPtr<AsyncResult> ar = new AsyncResult(NULL, vo, NULL);
+        if (r == NULL) {
+            if (DBG) Log(String("Notifying registrants: PERSO_LOCKED"));
+            mPersoLockedRegistrants->NotifyRegistrants(ar);
+        }
+        else {
+            if (DBG) Log(String("Notifying 1 registrant: PERSO_LOCKED"));
+            r->NotifyRegistrant(ar);
+        }
+    }
 }
 
 Int32 UiccCardApplication::GetAuthContext(

@@ -6,9 +6,11 @@
 #include "elastos/droid/internal/telephony/uicc/IccIoResult.h"
 #include "elastos/droid/internal/telephony/uicc/UiccTlvData.h"
 #include "elastos/droid/internal/telephony/uicc/CUiccTlvDataHelper.h"
-
+#include <elastos/core/CoreUtils.h>
 #include <elastos/core/StringUtils.h>
 
+using Elastos::Droid::Os::IAsyncResult;
+using Elastos::Core::CoreUtils;
 using Elastos::Core::IInteger32;
 using Elastos::Core::StringUtils;
 using Elastos::Utility::CArrayList;
@@ -104,8 +106,7 @@ void IccFileHandler::LoadLinearFixedContext::InitLCResults(
         (*data)[i] = (Byte) 0xff;
     }
     for (Int32 i = 0; i < size; i++) {
-        assert(0 && "TODO");
-        // mResults->Add(data);
+        mResults->Add(CoreUtils::ConvertByteArray(data));
     }
 }
 
@@ -156,7 +157,6 @@ const Int32 IccFileHandler::EVENT_GET_RECORD_SIZE_IMG_DONE;
 
 ECode IccFileHandler::Dispose()
 {
-    assert(0);
     return NOERROR;
 }
 
@@ -396,12 +396,12 @@ ECode IccFileHandler::HandleMessage(
     // try {
     switch (what) {
         case EVENT_GET_EF_LINEAR_RECORD_SIZE_DONE: {
-            ar = (AsyncResult*)(IObject*)obj.Get();
+            ar = (AsyncResult*)IAsyncResult::Probe(obj);
             lc = (LoadLinearFixedContext*)(IObject*)((ar->mUserObj).Get());
             result = (IccIoResult*)IIccIoResult::Probe(ar->mResult);
             response = lc->mOnLoaded;
 
-            if (ProcessException(response, (AsyncResult*)(IObject*)obj.Get())) {
+            if (ProcessException(response, (AsyncResult*)IAsyncResult::Probe(obj))) {
                 break;
             }
 
@@ -442,18 +442,17 @@ ECode IccFileHandler::HandleMessage(
                 return E_ILLEGAL_ARGUMENT_EXCEPTION;
             }
 
-            assert(0 && "TODO");
-            // SendResult(response, recordSize);
+            SendResult(response, CoreUtils::Convert(recordSize));
             break;
         }
         case EVENT_GET_RECORD_SIZE_IMG_DONE:
         case EVENT_GET_RECORD_SIZE_DONE: {
-            ar = (AsyncResult*)(IObject*)obj.Get();
+            ar = (AsyncResult*)IAsyncResult::Probe(obj);
             lc = (LoadLinearFixedContext*)(IObject*)((ar->mUserObj).Get());
             result = (IccIoResult*)IIccIoResult::Probe(ar->mResult);
             response = lc->mOnLoaded;
 
-            if (ProcessException(response, (AsyncResult*)(IObject*)obj.Get())) {
+            if (ProcessException(response, (AsyncResult*)IAsyncResult::Probe(obj))) {
                 break;
             }
 
@@ -518,7 +517,7 @@ ECode IccFileHandler::HandleMessage(
             break;
         }
         case EVENT_GET_BINARY_SIZE_DONE: {
-            ar = (AsyncResult*)(IObject*)obj.Get();
+            ar = (AsyncResult*)IAsyncResult::Probe(obj);
             response = IMessage::Probe(ar->mUserObj);
             result = (IccIoResult*)IIccIoResult::Probe(ar->mResult);
 
@@ -570,8 +569,8 @@ ECode IccFileHandler::HandleMessage(
         }
         case EVENT_READ_IMG_DONE:
         case EVENT_READ_RECORD_DONE: {
-            ar = (AsyncResult*)(IObject*)obj.Get();
-            lc = (LoadLinearFixedContext*)(IObject*)(ar->mUserObj.Get());
+            ar = (AsyncResult*)IAsyncResult::Probe(obj);
+            lc = (LoadLinearFixedContext*)IObject::Probe(ar->mUserObj);
             result = (IccIoResult*)IIccIoResult::Probe(ar->mResult);
             response = lc->mOnLoaded;
             path = lc->mPath;
@@ -581,8 +580,7 @@ ECode IccFileHandler::HandleMessage(
             }
 
             if (lc->mLoadAll) {
-                assert(0 && "TODO");
-                // lc->mResults->Add(result->mPayload);
+                lc->mResults->Add(CoreUtils::ConvertByteArray(result->mPayload));
 
                 lc->mRecordNum++;
 
@@ -604,8 +602,7 @@ ECode IccFileHandler::HandleMessage(
                 }
             }
             else if (lc->mLoadPart) {
-                assert(0 && "TODO");
-                // lc->mResults->Set(lc->mRecordNum - 1, result->mPayload);
+                lc->mResults->Set(lc->mRecordNum - 1, CoreUtils::ConvertByteArray(result->mPayload));
                 lc->mCount++;
                 if (lc->mCount < lc->mCountLoadrecords) {
                     AutoPtr<IInterface> p;
@@ -630,14 +627,13 @@ ECode IccFileHandler::HandleMessage(
                 }
             }
             else {
-                assert(0 && "TODO");
-                // SendResult(response, result->mPayload);
+                SendResult(response, CoreUtils::ConvertByteArray(result->mPayload));
             }
         }
         break;
         case EVENT_READ_BINARY_DONE:
         case EVENT_READ_ICON_DONE: {
-            ar = (AsyncResult*)(IObject*)obj.Get();
+            ar = (AsyncResult*)IAsyncResult::Probe(obj);
             response = IMessage::Probe(ar->mUserObj);
             result = (IccIoResult*)IIccIoResult::Probe(ar->mResult);
 
@@ -645,8 +641,7 @@ ECode IccFileHandler::HandleMessage(
                 break;
             }
 
-            assert(0 && "TODO");
-            // SendResult(response, result->mPayload);
+            SendResult(response, CoreUtils::ConvertByteArray(result->mPayload));
         break;
         }
     }
@@ -705,8 +700,7 @@ void IccFileHandler::SendResult(
         return;
     }
 
-    assert(0 && "TODO");
-    // AsyncResult::ForMessage(response, result, ex);
+    AsyncResult::ForMessage(response, result, NULL/*ex*/);
 
     response->SendToTarget();
 }

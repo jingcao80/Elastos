@@ -343,7 +343,7 @@ CARAPI SubInfoRecordUpdater::HandleMessage(
     AutoPtr<IInterface> obj;
     msg->GetObj((IInterface**)&obj);
 
-    AutoPtr<AsyncResult> ar = (AsyncResult*)(IObject::Probe(obj));
+    AutoPtr<AsyncResult> ar = (AsyncResult*)IAsyncResult::Probe(obj);
     Int32 slotId;
     for (slotId = IPhoneConstants::SUB1; slotId <= IPhoneConstants::SUB3; slotId++) {
         Int32 pivot = 1 << (slotId * EVENT_OFFSET);

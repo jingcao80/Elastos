@@ -7,6 +7,7 @@
 #include "Elastos.Droid.App.h"
 #include "Elastos.Droid.Content.h"
 #include "Elastos.Droid.Provider.h"
+#include "Elastos.Droid.Telecomm.h"
 #include <elastos/droid/app/ActivityManagerNative.h>
 #include <elastos/droid/os/AsyncTask.h>
 #include <elastos/droid/R.h>
@@ -26,6 +27,8 @@ using Elastos::Droid::Os::IUserHandle;
 using Elastos::Droid::Os::IUserHandleHelper;
 using Elastos::Droid::Provider::IMediaStore;
 using Elastos::Droid::SystemUI::StatusBar::Policy::EIID_IAccessibilityStateChangedCallback;
+using Elastos::Droid::Telecomm::Telecom::CTelecomManagerHelper;
+using Elastos::Droid::Telecomm::Telecom::ITelecomManagerHelper;
 using Elastos::Droid::View::Accessibility::CAccessibilityNodeInfoAccessibilityAction;
 using Elastos::Droid::View::EIID_IViewOnClickListener;
 using Elastos::Droid::View::EIID_IViewOnLongClickListener;
@@ -588,8 +591,10 @@ ECode CKeyguardBottomAreaView::LaunchCamera()
 
 ECode CKeyguardBottomAreaView::LaunchPhone()
 {
-    Logger::D(TAG, "TODO: Not implement TelecomManager::From.");
-    AutoPtr<ITelecomManager> tm/* = TelecomManager::From(mContext)*/;
+    AutoPtr<ITelecomManagerHelper> helper;
+    CTelecomManagerHelper::AcquireSingleton((ITelecomManagerHelper**)&helper);
+    AutoPtr<ITelecomManager> tm;
+    helper->From(mContext, (ITelecomManager**)&tm);
     Boolean call = FALSE;
     if (tm != NULL && (tm->IsInCall(&call), call)) {
         AutoPtr<TaskRunnable> run = new TaskRunnable(tm);

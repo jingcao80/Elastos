@@ -27,9 +27,9 @@ String UiccIccUtils::BcdToString(
     // ==================before translated======================
     // StringBuilder ret = new StringBuilder(length*2);
     //
-    // for (int i = offset ; i < offset + length ; i++) {
+    // for (Int32 i = offset ; i < offset + length ; i++) {
     //     byte b;
-    //     int v;
+    //     Int32 v;
     //
     //     v = data[i] & 0xf;
     //     if (v > 9)  break;
@@ -55,9 +55,9 @@ String UiccIccUtils::CdmaBcdToString(
     // ==================before translated======================
     // StringBuilder ret = new StringBuilder(length);
     //
-    // int count = 0;
-    // for (int i = offset; count < length; i++) {
-    //     int v;
+    // Int32 count = 0;
+    // for (Int32 i = offset; count < length; i++) {
+    //     Int32 v;
     //     v = data[i] & 0xf;
     //     if (v > 9)  v = 0;
     //     ret.append((char)('0' + v));
@@ -78,7 +78,7 @@ Int32 UiccIccUtils::GsmBcdByteToInt(
     /* [in] */ Byte b)
 {
     // ==================before translated======================
-    // int ret = 0;
+    // Int32 ret = 0;
     //
     // // treat out-of-range BCD values as 0
     // if ((b & 0xf0) <= 0x90) {
@@ -98,7 +98,7 @@ Int32 UiccIccUtils::CdmaBcdByteToInt(
     /* [in] */ Byte b)
 {
     // ==================before translated======================
-    // int ret = 0;
+    // Int32 ret = 0;
     //
     // // treat out-of-range BCD values as 0
     // if ((b & 0xf0) <= 0x90) {
@@ -125,8 +125,8 @@ String UiccIccUtils::AdnStringFieldToString(
     // }
     // if (length >= 1) {
     //     if (data[offset] == (byte) 0x80) {
-    //         int ucslen = (length - 1) / 2;
-    //         String ret = null;
+    //         Int32 ucslen = (length - 1) / 2;
+    //         String ret = NULL;
     //
     //         try {
     //             ret = new String(data, offset + 1, ucslen * 2, "utf-16be");
@@ -135,7 +135,7 @@ String UiccIccUtils::AdnStringFieldToString(
     //                   ex);
     //         }
     //
-    //         if (ret != null) {
+    //         if (ret != NULL) {
     //             // trim off trailing FFFF characters
     //
     //             ucslen = ret.length();
@@ -149,7 +149,7 @@ String UiccIccUtils::AdnStringFieldToString(
     //
     // boolean isucs2 = false;
     // char base = '\0';
-    // int len = 0;
+    // Int32 len = 0;
     //
     // if (length >= 3 && data[offset] == (byte) 0x81) {
     //     len = data[offset + 1] & 0xFF;
@@ -184,7 +184,7 @@ String UiccIccUtils::AdnStringFieldToString(
     //
     //         // GSM character set case
     //
-    //         int count = 0;
+    //         Int32 count = 0;
     //         while (count < len && data[offset + count] >= 0)
     //             count++;
     //
@@ -212,51 +212,46 @@ String UiccIccUtils::AdnStringFieldToString(
 }
 
 Int32 UiccIccUtils::HexCharToInt(
-    /* [in] */ Char16 c)
+    /* [in] */ Char32 c)
 {
-    // ==================before translated======================
-    // if (c >= '0' && c <= '9') return (c - '0');
-    // if (c >= 'A' && c <= 'F') return (c - 'A' + 10);
-    // if (c >= 'a' && c <= 'f') return (c - 'a' + 10);
-    //
+    if (c >= '0' && c <= '9') return (c - '0');
+    if (c >= 'A' && c <= 'F') return (c - 'A' + 10);
+    if (c >= 'a' && c <= 'f') return (c - 'a' + 10);
+
     // throw new RuntimeException ("invalid hex char '" + c + "'");
-    assert(0);
+    assert(0 && "RuntimeException");
     return 0;
 }
 
 AutoPtr< ArrayOf<Byte> > UiccIccUtils::HexStringToBytes(
     /* [in] */ const String& s)
 {
-    Logger::E("UiccIccUtils", "TODO HexStringToBytes no impl, s:%s", s.string());
-    // ==================before translated======================
-    // byte[] ret;
-    //
-    // if (s == null) return null;
-    //
-    // int sz = s.length();
-    //
-    // ret = new byte[sz/2];
-    //
-    // for (int i=0 ; i <sz ; i+=2) {
-    //     ret[i/2] = (byte) ((hexCharToInt(s.charAt(i)) << 4)
-    //                         | hexCharToInt(s.charAt(i+1)));
-    // }
-    //
-    // return ret;
-    AutoPtr< ArrayOf<Byte> > empty;
-    return empty;
+    AutoPtr< ArrayOf<Byte> > ret;
+
+    if (s == NULL) return NULL;
+
+    Int32 sz = s.GetLength();
+
+    ret = ArrayOf<Byte>::Alloc(sz / 2);
+
+    for (Int32 i = 0 ; i < sz ; i += 2) {
+        (*ret)[i / 2] = (Byte) ((HexCharToInt(s.GetChar(i)) << 4)
+                            | HexCharToInt(s.GetChar(i + 1)));
+    }
+
+    return ret;
 }
 
 String UiccIccUtils::BytesToHexString(
     /* [in] */ ArrayOf<Byte>* bytes)
 {
     // ==================before translated======================
-    // if (bytes == null) return null;
+    // if (bytes == NULL) return NULL;
     //
     // StringBuilder ret = new StringBuilder(2*bytes.length);
     //
-    // for (int i = 0 ; i < bytes.length ; i++) {
-    //     int b;
+    // for (Int32 i = 0 ; i < bytes.length ; i++) {
+    //     Int32 b;
     //
     //     b = 0x0f & (bytes[i] >> 4);
     //
@@ -287,8 +282,8 @@ String UiccIccUtils::NetworkNameToString(
     // switch ((data[offset] >>> 4) & 0x7) {
     //     case 0:
     //         // SMS character set
-    //         int countSeptets;
-    //         int unusedBits = data[offset] & 7;
+    //         Int32 countSeptets;
+    //         Int32 unusedBits = data[offset] & 7;
     //         countSeptets = (((length - 1) * 8) - unusedBits) / 7 ;
     //         ret =  GsmAlphabet.gsm7BitPackedToString(data, offset + 1, countSeptets);
     //     break;
@@ -328,15 +323,15 @@ AutoPtr<IBitmap> UiccIccUtils::ParseToBnW(
     /* [in] */ Int32 length)
 {
     // ==================before translated======================
-    // int valueIndex = 0;
-    // int width = data[valueIndex++] & 0xFF;
-    // int height = data[valueIndex++] & 0xFF;
-    // int numOfPixels = width*height;
+    // Int32 valueIndex = 0;
+    // Int32 width = data[valueIndex++] & 0xFF;
+    // Int32 height = data[valueIndex++] & 0xFF;
+    // Int32 numOfPixels = width*height;
     //
-    // int[] pixels = new int[numOfPixels];
+    // Int32[] pixels = new Int32[numOfPixels];
     //
-    // int pixelIndex = 0;
-    // int bitIndex = 7;
+    // Int32 pixelIndex = 0;
+    // Int32 bitIndex = 7;
     // byte currentByte = 0x00;
     // while (pixelIndex < numOfPixels) {
     //     // reassign data and index for every byte (8 bits).
@@ -362,20 +357,20 @@ AutoPtr<IBitmap> UiccIccUtils::ParseToRGB(
     /* [in] */ Boolean transparency)
 {
     // ==================before translated======================
-    // int valueIndex = 0;
-    // int width = data[valueIndex++] & 0xFF;
-    // int height = data[valueIndex++] & 0xFF;
-    // int bits = data[valueIndex++] & 0xFF;
-    // int colorNumber = data[valueIndex++] & 0xFF;
-    // int clutOffset = ((data[valueIndex++] & 0xFF) << 8)
+    // Int32 valueIndex = 0;
+    // Int32 width = data[valueIndex++] & 0xFF;
+    // Int32 height = data[valueIndex++] & 0xFF;
+    // Int32 bits = data[valueIndex++] & 0xFF;
+    // Int32 colorNumber = data[valueIndex++] & 0xFF;
+    // Int32 clutOffset = ((data[valueIndex++] & 0xFF) << 8)
     //         | (data[valueIndex++] & 0xFF);
     //
-    // int[] colorIndexArray = getCLUT(data, clutOffset, colorNumber);
+    // Int32[] colorIndexArray = getCLUT(data, clutOffset, colorNumber);
     // if (true == transparency) {
     //     colorIndexArray[colorNumber - 1] = Color.TRANSPARENT;
     // }
     //
-    // int[] resultArray = null;
+    // Int32[] resultArray = NULL;
     // if (0 == (8 % bits)) {
     //     resultArray = mapTo2OrderBitColor(data, valueIndex,
     //             (width * height), colorIndexArray, bits);
@@ -397,7 +392,7 @@ AutoPtr< ArrayOf<Byte> > UiccIccUtils::StringToAdnStringField(
     // ==================before translated======================
     // boolean isUcs2 = false;
     // try {
-    //    for(int i = 0; i < alphaTag.length(); i++) {
+    //    for(Int32 i = 0; i < alphaTag.length(); i++) {
     //        GsmAlphabet.countGsmSeptets(alphaTag.charAt(i), true);
     //    }
     // } catch (EncodeException e) {
@@ -455,7 +450,7 @@ AutoPtr< ArrayOf<Int32> > UiccIccUtils::MapTo2OrderBitColor(
     //             bits);
     // }
     //
-    // int mask = 0x01;
+    // Int32 mask = 0x01;
     // switch (bits) {
     // case 1:
     //     mask = 0x01;
@@ -471,13 +466,13 @@ AutoPtr< ArrayOf<Int32> > UiccIccUtils::MapTo2OrderBitColor(
     //     break;
     // }
     //
-    // int[] resultArray = new int[length];
-    // int resultIndex = 0;
-    // int run = 8 / bits;
+    // Int32[] resultArray = new Int32[length];
+    // Int32 resultIndex = 0;
+    // Int32 run = 8 / bits;
     // while (resultIndex < length) {
     //     byte tempByte = data[valueIndex++];
-    //     for (int runIndex = 0; runIndex < run; ++runIndex) {
-    //         int offset = run - runIndex - 1;
+    //     for (Int32 runIndex = 0; runIndex < run; ++runIndex) {
+    //         Int32 offset = run - runIndex - 1;
     //         resultArray[resultIndex++] = colorArray[(tempByte >> (offset * bits))
     //                 & mask];
     //     }
@@ -502,7 +497,7 @@ AutoPtr< ArrayOf<Int32> > UiccIccUtils::MapToNon2OrderBitColor(
     //             bits);
     // }
     //
-    // int[] resultArray = new int[length];
+    // Int32[] resultArray = new Int32[length];
     // // TODO fix me:
     // return resultArray;
     assert(0);
@@ -516,15 +511,15 @@ AutoPtr< ArrayOf<Int32> > UiccIccUtils::GetCLUT(
     /* [in] */ Int32 number)
 {
     // ==================before translated======================
-    // if (null == rawData) {
-    //     return null;
+    // if (NULL == rawData) {
+    //     return NULL;
     // }
     //
-    // int[] result = new int[number];
-    // int endIndex = offset + (number * 3); // 1 color use 3 bytes
-    // int valueIndex = offset;
-    // int colorIndex = 0;
-    // int alpha = 0xff << 24;
+    // Int32[] result = new Int32[number];
+    // Int32 endIndex = offset + (number * 3); // 1 color use 3 bytes
+    // Int32 valueIndex = offset;
+    // Int32 colorIndex = 0;
+    // Int32 alpha = 0xff << 24;
     // do {
     //     result[colorIndex++] = alpha
     //             | ((rawData[valueIndex++] & 0xFF) << 16)

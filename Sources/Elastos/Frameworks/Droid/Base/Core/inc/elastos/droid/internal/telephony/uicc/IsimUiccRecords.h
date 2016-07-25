@@ -8,6 +8,7 @@
 using Elastos::Droid::Content::IContext;
 using Elastos::Droid::Internal::Telephony::ICommandsInterface;
 using Elastos::Droid::Os::AsyncResult;
+using Elastos::Droid::Os::IAsyncResult;
 using Elastos::Droid::Os::IMessage;
 using Elastos::IO::IFileDescriptor;
 using Elastos::IO::IPrintWriter;
@@ -40,7 +41,7 @@ private:
             /* [out] */ String* name);
 
         virtual CARAPI OnRecordLoaded(
-            /* [in] */ AsyncResult* ar);
+            /* [in] */ IAsyncResult* ar);
 
     public:
         IsimUiccRecords* mHost;
@@ -60,7 +61,7 @@ private:
             /* [out] */ String* name);
 
         virtual CARAPI OnRecordLoaded(
-            /* [in] */ AsyncResult* ar);
+            /* [in] */ IAsyncResult* ar);
 
     public:
         IsimUiccRecords* mHost;
@@ -80,7 +81,7 @@ private:
             /* [out] */ String* name);
 
         virtual CARAPI OnRecordLoaded(
-            /* [in] */ AsyncResult* ar);
+            /* [in] */ IAsyncResult* ar);
 
     public:
         IsimUiccRecords* mHost;
@@ -100,7 +101,7 @@ private:
             /* [out] */ String* name);
 
         virtual CARAPI OnRecordLoaded(
-            /* [in] */ AsyncResult* ar);
+            /* [in] */ IAsyncResult* ar);
 
     public:
         IsimUiccRecords* mHost;
@@ -120,7 +121,7 @@ private:
             /* [out] */ String* name);
 
         virtual CARAPI OnRecordLoaded(
-            /* [in] */ AsyncResult* ar);
+            /* [in] */ IAsyncResult* ar);
 
     public:
         IsimUiccRecords* mHost;

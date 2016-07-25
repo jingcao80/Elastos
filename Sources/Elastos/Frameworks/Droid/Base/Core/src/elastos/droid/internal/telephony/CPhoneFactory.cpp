@@ -599,9 +599,7 @@ ECode CPhoneFactory::CalculatePreferredNetworkType(
     Int32 preferredNetworkType = IRILConstants::PREFERRED_NETWORK_MODE;
     AutoPtr<ITelephonyManagerHelper> hlp;
     CTelephonyManagerHelper::AcquireSingleton((ITelephonyManagerHelper**)&hlp);
-    Int32 cdmamodestatic = 0;
-    assert(0 && "TODO");
-    // hlp->GetLteOnCdmaModeStatic(phoneId, &cdmamodestatic);
+    Int32 cdmamodestatic = CTelephonyManager::GetLteOnCdmaModeStatic(phoneId);
     if (cdmamodestatic == IPhoneConstants::LTE_ON_CDMA_TRUE) {
         preferredNetworkType = IPhone::NT_MODE_GLOBAL;
     }

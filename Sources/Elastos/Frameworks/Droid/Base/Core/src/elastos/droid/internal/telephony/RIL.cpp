@@ -287,6 +287,8 @@ void RILRequest::OnError(
     }
 }
 
+const Int32 RIL::EVENT_SEND                 = 1;
+const Int32 RIL::EVENT_WAKE_LOCK_TIMEOUT    = 2;
 //==============================================================
 //  RIL::RILSender::
 //==============================================================
@@ -319,7 +321,7 @@ ECode RIL::RILSender::HandleMessage(
     msg->GetWhat(&what);
     Logger::E("leliang", "line:%d, func:%s, what:%d\n", __LINE__, __func__, what);
     switch (what) {
-        case 1: {// EVENT_SEND
+        case EVENT_SEND: {
             // try {
                 AutoPtr<ILocalSocket> s;
 
@@ -385,7 +387,7 @@ ECode RIL::RILSender::HandleMessage(
             // }
         }
         break;
-        case 2: { // EVENT_WAKE_LOCK_TIMEOUT
+        case EVENT_WAKE_LOCK_TIMEOUT: {
             Logger::E("RILJ", "EVENT_WAKE_LOCK_TIMEOUT");
             // Haven't heard back from the last request.  Assume we're
             // not getting a response and  release the wake lock.
@@ -642,9 +644,6 @@ Int32 RIL::OEMHOOK_EVT_HOOK_UPDATE_SUB_BINDING = OEMHOOK_BASE + 36;
 
 Int32 RIL::INT_SIZE = 4;
 String RIL::OEM_IDENTIFIER("QOEMHOOK");
-
-const Int32 RIL::EVENT_SEND                 = 1;
-const Int32 RIL::EVENT_WAKE_LOCK_TIMEOUT    = 2;
 
 Int32 RIL::RIL_MAX_COMMAND_BYTES = (8 * 1024);
 Int32 RIL::RESPONSE_SOLICITED = 0;

@@ -42,6 +42,7 @@ using Elastos::Droid::Telephony::CTelephonyManagerHelper;
 using Elastos::Droid::Telephony::ISubscriptionManager;
 using Elastos::Droid::Telephony::CSubscriptionManager;
 using Elastos::Droid::Os::AsyncResult;
+using Elastos::Droid::Os::IAsyncResult;
 using Elastos::Droid::Os::IRegistrant;
 using Elastos::Droid::Os::CRegistrant;
 using Elastos::Droid::Os::IUserHandle;
@@ -84,13 +85,24 @@ const Int32 IccCardProxy::EVENT_SUBSCRIPTION_DEACTIVATED;
 const Int32 IccCardProxy::EVENT_CARRIER_PRIVILIGES_LOADED;
 
 IccCardProxy::IccCardProxy()
+    : mCurrentAppType(IUiccController::APP_FAM_3GPP)
+    , mRadioOn(FALSE)
+    , mQuietMode(FALSE)
+    , mInitialized(FALSE)
+    , mExternalState(IccCardConstantsState_UNKNOWN)
+    , mIsCardStatusAvailable(FALSE)
+    , mPersoSubState(PERSOSUBSTATE_UNKNOWN)
 {
+    mAbsentRegistrants = new RegistrantList();
+    mPinLockedRegistrants = new RegistrantList();
+    mPersoLockedRegistrants = new RegistrantList();
 }
 
 ECode IccCardProxy::constructor(
     /* [in] */ IContext* context,
     /* [in] */ ICommandsInterface* ci)
 {
+    Handler::constructor();
     Log(String("Creating"));
     mContext = context;
     mCi = ci;
@@ -293,7 +305,7 @@ ECode IccCardProxy::HandleMessage(
         case EVENT_ICC_RECORD_EVENTS:
             if ((mCurrentAppType == IUiccController::APP_FAM_3GPP) && (mIccRecords != NULL)) {
                 Int32 slotId = mCardIndex;
-                AutoPtr<AsyncResult> ar = (AsyncResult*)(IObject*)obj.Get();
+                AutoPtr<AsyncResult> ar = (AsyncResult*)IAsyncResult::Probe(obj);
                 Int32 eventCode = 0;
                 IInteger32::Probe(ar->mResult)->GetValue(&eventCode);
                 if (eventCode == IIccRecords::EVENT_SPN) {
@@ -840,14 +852,14 @@ ECode IccCardProxy::Dump(
 
 void IccCardProxy::UpdateActiveRecord()
 {
-    assert(0 && "TODO");
-    // Log(String("updateActiveRecord app type = ") + StringUtils::ToString(mCurrentAppType) +
-    //         String("mIccRecords = ") + mIccRecords);
+    Log(String("updateActiveRecord app type = ") + StringUtils::ToString(mCurrentAppType) +
+            String("mIccRecords = "));
 
     if (mIccRecords == NULL) {
         return;
     }
 
+    Log(TO_STR(mIccRecords));
     if (mCurrentAppType == IUiccController::APP_FAM_3GPP2) {
         Int32 newSubscriptionSource = 0;
         mCdmaSSM->GetCdmaSubscriptionSource(&newSubscriptionSource);

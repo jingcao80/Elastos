@@ -1206,6 +1206,9 @@ public:
     static CARAPI GetLteOnCdmaModeStatic(
         /* [out] */ Int32* val);
 
+    static CARAPI_(Int32) GetLteOnCdmaModeStatic(
+        /* [in] */ Int32 phoneId);
+
     static CARAPI GetNetworkClass(
         /* [in] */ Int32 networkType,
         /* [out] */ Int32* val);
@@ -1282,6 +1285,16 @@ public:
         /* [in] */ Int64 subId,
         /* [in] */ const String& defaultVal,
         /* [out] */ String* result);
+
+    /**
+     * Gets the telephony property.
+     *
+     * @hide
+     */
+    static CARAPI_(Int32) GetTelephonyProperty(
+        /* [in] */ const String& property,
+        /* [in] */ Int32 subId,
+        /* [in] */ Int32 defaultVal);
 
     /**
      * Convert network type to String

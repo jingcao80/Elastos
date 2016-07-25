@@ -14,6 +14,7 @@ Elastos.Droid.DefContainer.epk              /system/priv-app
 Elastos.Droid.Settings.epk					/system/priv-app
 Elastos.Droid.Server.Telecom.epk			/system/priv-app
 Elastos.Droid.Dialer.epk					/system/priv-app
+Elastos.Droid.TeleService.epk               /system/priv-app
 Elastos.DevSamples.ImageDemo.epk            /system/app
 Elastos.DevSamples.TabHostDemo.epk          /system/app
 Elastos.DevSamples.TextViewDemo.epk         /system/app

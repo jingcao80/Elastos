@@ -2140,6 +2140,42 @@ ECode CTelephonyManager::GetLteOnCdmaModeStatic(
     return NOERROR;
 }
 
+Int32 CTelephonyManager::GetLteOnCdmaModeStatic(
+    /* [in] */ Int32 slotId)
+{
+    Int32 retVal = 0;
+    Int32 curVal = 0;
+    String productType("");
+
+    curVal = GetTelephonyProperty(ITelephonyProperties::PROPERTY_LTE_ON_CDMA_DEVICE, slotId,
+                IPhoneConstants::LTE_ON_CDMA_UNKNOWN);
+    retVal = curVal;
+
+    if (retVal == IPhoneConstants::LTE_ON_CDMA_UNKNOWN) {
+        AutoPtr<IMatcher> matcher;
+        sProductTypePattern->Matcher(sKernelCmdLine, (IMatcher**)&matcher);
+
+        Boolean b;
+        if (matcher->Find(&b), b) {
+            IMatchResult::Probe(matcher)->Group(1, &productType);
+
+            if (sLteOnCdmaProductType.Equals(productType)) {
+                retVal = IPhoneConstants::LTE_ON_CDMA_TRUE;
+            }
+            else {
+                retVal = IPhoneConstants::LTE_ON_CDMA_FALSE;
+            }
+        }
+        else {
+            retVal = IPhoneConstants::LTE_ON_CDMA_FALSE;
+        }
+    }
+
+    Logger::D(TAG, "getLteOnCdmaMode=%d curVal=%d product_type='%s' lteOnCdmaProductType='%s'",
+            retVal, curVal, productType.string(), sLteOnCdmaProductType.string());
+    return retVal;
+}
+
 ECode CTelephonyManager::GetNetworkClass(
     /* [in] */ Int32 networkType,
     /* [out] */ Int32* res)
@@ -2378,6 +2414,24 @@ ECode CTelephonyManager::GetTelephonyProperty(
     }
     *res = propVal == NULL ? defaultVal : propVal;
     return NOERROR;
+}
+
+Int32 CTelephonyManager::GetTelephonyProperty(
+    /* [in] */ const String& property,
+    /* [in] */ Int32 slotId,
+    /* [in] */ Int32 defaultVal)
+{
+    String propVal;
+    String prop;
+    SystemProperties::Get(property, &prop);
+    if ((prop != NULL) && (prop.GetLength() > 0)) {
+        AutoPtr<ArrayOf<String> > values;
+        StringUtils::Split(prop, String(","), (ArrayOf<String>**)&values);
+        if ((slotId >= 0) && (slotId < values->GetLength()) && (!(*values)[slotId].IsNull())) {
+            propVal = (*values)[slotId];
+        }
+    }
+    return propVal.IsNull() ? defaultVal : StringUtils::ParseInt32(propVal);
 }
 
 ECode CTelephonyManager::NetworkTypeToString(
