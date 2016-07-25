@@ -5,7 +5,7 @@
 #include "Elastos.Droid.Net.h"
 #include "Elastos.Droid.Provider.h"
 #include "Elastos.Droid.Telephony.h"
-#include "Elastos.Droid.Telecomm.h"
+#include "Elastos.Droid.Telecom.h"
 #include <Elastos.CoreLibrary.Utility.h>
 #include <elastos/core/AutoLock.h>
 #include <elastos/core/CoreUtils.h>
@@ -16,7 +16,7 @@
 using Elastos::Droid::Telephony::IPhoneNumberUtils;
 using Elastos::Droid::Telephony::CPhoneNumberUtils;
 using Elastos::Droid::TeleService::Phone::IConstants;
-using Elastos::Droid::Telecomm::Telecom::IPhoneCapabilities;
+using Elastos::Droid::Telecom::IPhoneCapabilities;
 using Elastos::Droid::Internal::Telephony::ICallState;
 using Elastos::Droid::Internal::Telephony::ICallState_WAITING;
 using Elastos::Droid::Internal::Telephony::ICallState_INCOMING;
@@ -156,7 +156,7 @@ ECode CdmaConnection::OnStateChanged(
     mIsCallWaiting = (originalConnection != NULL) &&
             ((originalConnection->GetState(&_state), _state) == ICallState_WAITING);
 
-    if (state == Elastos::Droid::Telecomm::Telecom::IConnection::STATE_DIALING) {
+    if (state == Elastos::Droid::Telecom::IConnection::STATE_DIALING) {
         if (IsEmergency()) {
             mEmergencyTonePlayer->Start();
         }

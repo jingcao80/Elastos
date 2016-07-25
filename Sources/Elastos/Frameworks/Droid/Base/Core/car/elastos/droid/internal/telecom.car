@@ -1,0 +1,11 @@
+module
+{
+    merge("telecom/IConnectionServiceAdapter.car");
+    merge("telecom/IConnectionService.car");
+    merge("telecom/IInCallAdapter.car");
+    merge("telecom/IInCallService.car");
+    merge("telecom/ITelecomService.car");
+    merge("telecom/IVideoCallback.car");
+    merge("telecom/IVideoProvider.car");
+    merge("telecom/RemoteServiceCallback.car");
+}

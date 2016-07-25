@@ -2,12 +2,12 @@
 #ifndef __ELASTOS_DROID_INCALLUI_CINCALLSERVICEIMPL_H__
 #define __ELASTOS_DROID_INCALLUI_CINCALLSERVICEIMPL_H__
 
-#include "Elastos.Droid.Telecomm.h"
+#include "Elastos.Droid.Telecom.h"
 #include "_Elastos_Droid_InCallUI_CInCallServiceImpl.h"
-#include <elastos/droid/telecomm/telecom/InCallService.h>
+#include <elastos/droid/telecom/InCallService.h>
 
-using Elastos::Droid::Telecomm::Telecom::InCallService;
-using Elastos::Droid::Telecomm::Telecom::IPhone;
+using Elastos::Droid::Telecom::InCallService;
+using Elastos::Droid::Telecom::IPhone;
 
 namespace Elastos {
 namespace Droid {

@@ -13,8 +13,8 @@ using Elastos::Droid::Os::Handler;
 using Elastos::Droid::Os::IBinder;
 using Elastos::Droid::Os::IHandler;
 using Elastos::Droid::Os::IMessage;
-using Elastos::Droid::Telecomm::Internal::IIInCallAdapter;
-using Elastos::Droid::Telecomm::Telecom::IPhoneAccountHandle;
+using Elastos::Droid::Internal::Telecom::IIInCallAdapter;
+using Elastos::Droid::Telecom::IPhoneAccountHandle;
 
 namespace Elastos {
 namespace Droid {

@@ -42,7 +42,7 @@ using Elastos::Droid::Provider::IContactsPhones;
 using Elastos::Droid::Provider::IContactsPhonesColumns;
 using Elastos::Droid::Provider::Settings;
 using Elastos::Droid::Provider::ISettingsSystem;
-using Elastos::Droid::Telecomm::Telecom::IPhoneAccount;
+using Elastos::Droid::Telecom::IPhoneAccount;
 using Elastos::Droid::Telephony::IPhoneNumberUtils;
 using Elastos::Droid::Telephony::CPhoneNumberUtils;
 using Elastos::Droid::Telephony::IPhoneStateListener;

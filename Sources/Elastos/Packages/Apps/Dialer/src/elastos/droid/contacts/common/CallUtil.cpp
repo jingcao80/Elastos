@@ -7,9 +7,9 @@
 
 using Elastos::Droid::Content::CIntent;
 using Elastos::Droid::Net::Uri;
-using Elastos::Droid::Telecomm::Telecom::IPhoneAccount;
-using Elastos::Droid::Telecomm::Telecom::ITelecomManager;
-using Elastos::Droid::Telecomm::Telecom::IVideoProfileVideoState;
+using Elastos::Droid::Telecom::IPhoneAccount;
+using Elastos::Droid::Telecom::ITelecomManager;
+using Elastos::Droid::Telecom::IVideoProfileVideoState;
 
 using Elastos::Droid::Contacts::Common::Util::PhoneNumberHelper;
 using Elastos::Droid::Phone::Common::PhoneConstants;

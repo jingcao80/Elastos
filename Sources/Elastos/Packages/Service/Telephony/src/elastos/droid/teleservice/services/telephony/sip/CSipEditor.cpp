@@ -5,7 +5,7 @@
 #include "elastos/droid/R.h"
 #include "Elastos.Droid.App.h"
 #include "Elastos.Droid.Os.h"
-#include "Elastos.Droid.Telecomm.h"
+#include "Elastos.Droid.Telecom.h"
 #include <elastos/core/CoreUtils.h>
 #include <elastos/core/StringUtils.h>
 #include <elastos/core/StringBuilder.h>

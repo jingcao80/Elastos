@@ -4,9 +4,9 @@
 
 #include "_Elastos_Droid_Dialer_CallLog_CIntentProviderHelper.h"
 #include <elastos/core/Singleton.h>
-#include "Elastos.Droid.Telecomm.h"
+#include "Elastos.Droid.Telecom.h"
 
-using Elastos::Droid::Telecomm::Telecom::IPhoneAccountHandle;
+using Elastos::Droid::Telecom::IPhoneAccountHandle;
 
 namespace Elastos {
 namespace Droid {

@@ -19,9 +19,9 @@ using Elastos::Droid::Os::IBundle;
 using Elastos::Droid::Os::IBundleHelper;
 using Elastos::Droid::Os::IUserHandle;
 using Elastos::Droid::Os::IUserHandleHelper;
-using Elastos::Droid::Telecomm::Telecom::IPhoneAccount;
-using Elastos::Droid::Telecomm::Telecom::IPhoneAccountHandle;
-using Elastos::Droid::Telecomm::Telecom::ITelecomManager;
+using Elastos::Droid::Telecom::IPhoneAccount;
+using Elastos::Droid::Telecom::IPhoneAccountHandle;
+using Elastos::Droid::Telecom::ITelecomManager;
 using Elastos::Droid::Telephony::CPhoneNumberUtils;
 using Elastos::Droid::Telephony::IPhoneNumberUtils;
 

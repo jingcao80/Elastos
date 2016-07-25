@@ -7,7 +7,7 @@
 
 using Elastos::Droid::Internal::Utility::CPreconditions;
 using Elastos::Droid::Internal::Utility::IPreconditions;
-using Elastos::Droid::Telecomm::Telecom::ICallState;
+using Elastos::Droid::Telecom::ICallState;
 
 namespace Elastos {
 namespace Droid {

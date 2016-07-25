@@ -10,8 +10,8 @@
 #include <elastos/droid/ext/frameworkext.h>
 
 using Elastos::Droid::Content::IContext;
-using Elastos::Droid::Telecomm::Telecom::IDisconnectCause;
-using Elastos::Droid::Telecomm::Telecom::IParcelableConnection;
+using Elastos::Droid::Telecom::IDisconnectCause;
+using Elastos::Droid::Telecom::IParcelableConnection;
 using Elastos::Utility::IIterator;
 using Elastos::Utility::IList;
 

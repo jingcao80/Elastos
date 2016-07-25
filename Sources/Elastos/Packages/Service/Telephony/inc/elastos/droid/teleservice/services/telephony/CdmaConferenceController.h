@@ -2,18 +2,18 @@
 #define  __ELASTOS_DROID_SERVICES_TELEPHONY_CDMACONFERENCECONTROLLER_H__
 
 #include "_Elastos.Droid.TeleService.h"
-#include "elastos/droid/telecomm/telecom/Conference.h"
+#include "elastos/droid/telecom/Conference.h"
 #include "elastos/droid/teleservice/services/telephony/CdmaConference.h"
 #include "elastos/droid/teleservice/services/telephony/CdmaConnection.h"
 #include "elastos/droid/ext/frameworkext.h"
 #include "elastos/droid/os/Runnable.h"
-#include "Elastos.Droid.Telecomm.h"
+#include "Elastos.Droid.Telecom.h"
 
 using Elastos::Droid::Os::Runnable;
-using Elastos::Droid::Telecomm::Telecom::IDisconnectCause;
-using Elastos::Droid::Telecomm::Telecom::Connection;
-using Elastos::Droid::Telecomm::Telecom::Conference;
-using Elastos::Droid::Telecomm::Telecom::IConnectionListener;
+using Elastos::Droid::Telecom::IDisconnectCause;
+using Elastos::Droid::Telecom::Connection;
+using Elastos::Droid::Telecom::Conference;
+using Elastos::Droid::Telecom::IConnectionListener;
 
 namespace Elastos {
 namespace Droid {
@@ -59,17 +59,17 @@ private:
 
         //@Override
         CARAPI OnStateChanged(
-            /* [in] */ Elastos::Droid::Telecomm::Telecom::IConnection* c,
+            /* [in] */ Elastos::Droid::Telecom::IConnection* c,
             /* [in] */ Int32 state);
 
         //@Override
         CARAPI OnDisconnected(
-            /* [in] */ Elastos::Droid::Telecomm::Telecom::IConnection* c,
+            /* [in] */ Elastos::Droid::Telecom::IConnection* c,
             /* [in] */ IDisconnectCause* disconnectCause);
 
         //@Override
         CARAPI OnDestroyed(
-            /* [in] */ Elastos::Droid::Telecomm::Telecom::IConnection* c);
+            /* [in] */ Elastos::Droid::Telecom::IConnection* c);
 
     private:
         CdmaConferenceController* mHost;

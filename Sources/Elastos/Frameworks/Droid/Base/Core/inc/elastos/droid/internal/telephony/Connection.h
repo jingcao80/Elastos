@@ -8,7 +8,7 @@
 
 using Elastos::Droid::Net::IUri;
 using Elastos::Droid::Os::IBundle;
-using Elastos::Droid::Telecomm::Telecom::IConnectionVideoProvider;
+using Elastos::Droid::Telecom::IConnectionVideoProvider;
 using Elastos::Core::Object;
 using Elastos::Utility::IList;
 using Elastos::Utility::ISet;

@@ -12,7 +12,7 @@
 #include <elastos/core/Object.h>
 
 using Elastos::Droid::App::Application;
-using Elastos::Droid::Telecomm::Internal::IITelecomService;
+using Elastos::Droid::Internal::Telecom::IITelecomService;
 
 namespace Elastos {
 namespace Droid {

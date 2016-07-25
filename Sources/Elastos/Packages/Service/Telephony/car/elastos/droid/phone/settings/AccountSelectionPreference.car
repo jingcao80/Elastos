@@ -1,7 +1,7 @@
 module
 {
-    using interface Elastos.Droid.Telecomm.Telecom.IPhoneAccountHandle;
-    using interface Elastos.Droid.Telecomm.Telecom.ITelecomManager;
+    using interface Elastos.Droid.Telecom.IPhoneAccountHandle;
+    using interface Elastos.Droid.Telecom.ITelecomManager;
     using interface Elastos.Core.ICharSequence;
     using interface Elastos.Utility.IList;
 

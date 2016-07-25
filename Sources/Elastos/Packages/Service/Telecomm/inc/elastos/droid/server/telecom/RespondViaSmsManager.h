@@ -14,7 +14,7 @@ using Elastos::Droid::Content::IContext;
 using Elastos::Droid::Os::Handler;
 using Elastos::Droid::Os::IHandler;
 using Elastos::Droid::Os::IMessage;
-using Elastos::Droid::Telecomm::Telecom::IResponse;
+using Elastos::Droid::Telecom::IResponse;
 
 namespace Elastos {
 namespace Droid {

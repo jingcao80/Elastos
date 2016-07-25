@@ -11,7 +11,7 @@
 using Elastos::Droid::App::IActivity;
 using Elastos::Droid::Graphics::Drawable::IDrawable;
 using Elastos::Droid::Graphics::Drawable::ILayerDrawable;
-using Elastos::Droid::Telecomm::Telecom::IAudioState;
+using Elastos::Droid::Telecom::IAudioState;
 using Elastos::Droid::View::CContextThemeWrapper;
 using Elastos::Droid::View::EIID_IViewOnClickListener;
 using Elastos::Droid::View::Accessibility::IAccessibilityEvent;

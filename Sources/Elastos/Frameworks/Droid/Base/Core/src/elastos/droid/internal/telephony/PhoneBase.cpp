@@ -13,7 +13,7 @@
 #include "elastos/droid/os/SystemProperties.h"
 #include "elastos/droid/preference/PreferenceManager.h"
 #include "elastos/droid/provider/Settings.h"
-#include "elastos/droid/telecomm/telecom/VideoProfile.h"
+#include "elastos/droid/telecom/VideoProfile.h"
 #include "elastos/droid/telephony/CCellIdentityCdma.h"
 #include "elastos/droid/telephony/CCellInfoCdma.h"
 #include "elastos/droid/telephony/CSignalStrength.h"
@@ -21,7 +21,7 @@
 #include "elastos/droid/telephony/CVoLteServiceState.h"
 #include "elastos/droid/text/TextUtils.h"
 #include "Elastos.Droid.Provider.h"
-#include "Elastos.Droid.Telecomm.h"
+#include "Elastos.Droid.Telecom.h"
 #include "Elastos.Droid.Wifi.h"
 #include <elastos/droid/R.h>
 #include <elastos/core/AutoLock.h>
@@ -45,9 +45,9 @@ using Elastos::Droid::Preference::PreferenceManager;
 using Elastos::Droid::Provider::ISettingsGlobal;
 using Elastos::Droid::Provider::ISettingsSecure;
 using Elastos::Droid::Provider::Settings;
-using Elastos::Droid::Telecomm::Telecom::IVideoProfile;
-using Elastos::Droid::Telecomm::Telecom::IVideoProfileVideoState;
-using Elastos::Droid::Telecomm::Telecom::VideoProfile;
+using Elastos::Droid::Telecom::IVideoProfile;
+using Elastos::Droid::Telecom::IVideoProfileVideoState;
+using Elastos::Droid::Telecom::VideoProfile;
 using Elastos::Droid::Telephony::CCellIdentityCdma;
 using Elastos::Droid::Telephony::CCellInfoCdma;
 using Elastos::Droid::Telephony::CSignalStrength;

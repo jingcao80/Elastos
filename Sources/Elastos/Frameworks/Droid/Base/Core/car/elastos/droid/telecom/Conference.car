@@ -1,0 +1,125 @@
+
+module
+{
+
+    interface Elastos.Droid.Telecom.IConference;
+    interface Elastos.Droid.Telecom.IConnection;
+    using interface Elastos.Utility.IList;
+
+    namespace Elastos {
+    namespace Droid {
+    namespace Telecom {
+
+    interface IConferenceListener {
+        OnStateChanged(
+            [in] IConference* conference,
+            [in] Int32 oldState,
+            [in] Int32 newState);
+
+        OnDisconnected(
+            [in] IConference* conference,
+            [in] IDisconnectCause* disconnectCause);
+
+        OnConnectionAdded(
+            [in] IConference* conference,
+            [in] IConnection* connection);
+
+        OnConnectionRemoved(
+            [in] IConference* conference,
+            [in] IConnection* connection);
+
+        OnConferenceableConnectionsChanged(
+            [in] IConference* conference,
+            [in] IList* conferenceableConnections);
+
+        OnDestroyed(
+            [in] IConference* conference);
+
+        OnCapabilitiesChanged(
+            [in] IConference* conference,
+            [in] Int32 capabilities);
+    }
+
+    /**
+     *  Encapsulates all audio states during a call.
+     *  @hide
+     */
+    interface IConference {
+        GetPhoneAccountHandle(
+            [out] IPhoneAccountHandle** res);
+
+        GetConnections(
+            [out] IList** res);
+
+        GetState(
+            [out] Int32* res);
+
+        GetCapabilities(
+            [out] Int32* res);
+
+        GetAudioState(
+            [out] IAudioState** res);
+
+        OnDisconnect();
+
+        OnSeparate(
+            [in] IConnection* connection);
+
+        OnMerge(
+            [in] IConnection* connection);
+
+        OnHold();
+
+        OnUnhold();
+
+        OnMerge();
+
+        OnSwap();
+
+        OnPlayDtmfTone(
+            [in] Char32 c);
+
+        OnStopDtmfTone();
+
+        OnAudioStateChanged(
+            [in] IAudioState* state);
+
+        SetOnHold();
+
+        SetActive();
+
+        SetDisconnected(
+            [in] IDisconnectCause* disconnectCause);
+
+        SetCapabilities(
+            [in] Int32 capabilities);
+
+        AddConnection(
+            [in] IConnection* connection,
+            [out] Boolean* res);
+
+        RemoveConnection(
+            [in] IConnection* connection);
+
+        SetConferenceableConnections(
+            [in] IList* conferenceableConnections);
+
+        GetConferenceableConnections(
+            [out] IList** res);
+
+        Destroy();
+
+        AddListener(
+            [in] IConferenceListener* listener);
+
+        RemoveListener(
+            [in] IConferenceListener* listener);
+
+        SetAudioState(
+            [in] IAudioState* state);
+    }
+
+    } // namespace Telecom
+    } // namespace Droid
+    } // namespace Elastos
+}

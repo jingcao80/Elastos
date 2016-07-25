@@ -6,7 +6,7 @@
 #include "Elastos.Droid.App.h"
 #include "Elastos.Droid.Content.h"
 #include "Elastos.Droid.Os.h"
-#include "Elastos.Droid.Telecomm.h"
+#include "Elastos.Droid.Telecom.h"
 #include "Elastos.Droid.Widget.h"
 #include <elastos/core/StringBuilder.h>
 #include <elastos/core/CoreUtils.h>
@@ -23,10 +23,10 @@ using Elastos::Droid::Os::IBundle;
 using Elastos::Droid::Os::CBundle;
 using Elastos::Droid::Preference::IPreferenceGroup;
 using Elastos::Droid::Preference::IPreferenceScreen;
-using Elastos::Droid::Telecomm::Telecom::ITelecomManager;
-using Elastos::Droid::Telecomm::Telecom::IPhoneAccountHandle;
-using Elastos::Droid::Telecomm::Telecom::ITelecomManagerHelper;
-using Elastos::Droid::Telecomm::Telecom::CTelecomManagerHelper;
+using Elastos::Droid::Telecom::ITelecomManager;
+using Elastos::Droid::Telecom::IPhoneAccountHandle;
+using Elastos::Droid::Telecom::ITelecomManagerHelper;
+using Elastos::Droid::Telecom::CTelecomManagerHelper;
 using Elastos::Droid::Widget::IListView;
 using Elastos::Core::StringBuilder;
 using Elastos::Core::CoreUtils;

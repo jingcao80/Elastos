@@ -1,7 +1,7 @@
 
 module
 {
-    using interface Elastos.Droid.Telecomm.Telecom.ICallDetails;
+    using interface Elastos.Droid.Telecom.ICallDetails;
 
     namespace Elastos {
     namespace Droid {

@@ -2,7 +2,7 @@
 #include "R.h"
 #include "elastos/droid/server/telecom/AccountSelection.h"
 #include "elastos/droid/server/telecom/CallsManager.h"
-#include <Elastos.Droid.Telecomm.h>
+#include <Elastos.Droid.Telecom.h>
 #include <Elastos.Droid.Media.h>
 #include <elastos/core/StringUtils.h>
 #include <elastos/droid/R.h>
@@ -23,7 +23,7 @@ using Elastos::Droid::Graphics::Drawable::IDrawable;
 using Elastos::Droid::Net::IUri;
 using Elastos::Droid::Net::Uri;
 using Elastos::Droid::Os::IBundle;
-using Elastos::Droid::Telecomm::Telecom::IPhoneAccount;
+using Elastos::Droid::Telecom::IPhoneAccount;
 using Elastos::Droid::View::ILayoutInflater;
 using Elastos::Droid::View::IView;
 using Elastos::Droid::Widget::IImageView;
@@ -158,7 +158,7 @@ ECode AccountSelection::OnCreate(
     extras->GetString(String("Handle"), &s);
     Uri::Parse(s, (IUri**)&mHandle);
     AutoPtr<IArrayList> al;
-    extras->GetParcelableArrayList(Elastos::Droid::Telecomm::Telecom::ICall::AVAILABLE_PHONE_ACCOUNTS,
+    extras->GetParcelableArrayList(Elastos::Droid::Telecom::ICall::AVAILABLE_PHONE_ACCOUNTS,
         (IArrayList**)&al);
     mAccountHandles = IList::Probe(al);
     if (mAccountHandles == NULL ) {

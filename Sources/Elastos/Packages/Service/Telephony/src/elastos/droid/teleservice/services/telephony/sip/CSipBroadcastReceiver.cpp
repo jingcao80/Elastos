@@ -3,15 +3,15 @@
 #include "elastos/droid/teleservice/services/telephony/sip/SipUtil.h"
 #include "elastos/droid/teleservice/services/telephony/sip/SipAccountRegistry.h"
 #include "Elastos.Droid.Os.h"
-#include "Elastos.Droid.Telecomm.h"
+#include "Elastos.Droid.Telecom.h"
 #include <elastos/utility/logging/Logger.h>
 
 using Elastos::Droid::Os::IBundle;
 using Elastos::Droid::Os::CBundle;
-using Elastos::Droid::Telecomm::Telecom::ITelecomManager;
-using Elastos::Droid::Telecomm::Telecom::IPhoneAccountHandle;
-using Elastos::Droid::Telecomm::Telecom::ITelecomManagerHelper;
-using Elastos::Droid::Telecomm::Telecom::CTelecomManagerHelper;
+using Elastos::Droid::Telecom::ITelecomManager;
+using Elastos::Droid::Telecom::IPhoneAccountHandle;
+using Elastos::Droid::Telecom::ITelecomManagerHelper;
+using Elastos::Droid::Telecom::CTelecomManagerHelper;
 using Elastos::Utility::Logging::Logger;
 
 namespace Elastos {

@@ -9,8 +9,8 @@
 using Elastos::Droid::Content::IComponentName;
 using Elastos::Droid::Content::IContext;
 using Elastos::Droid::Net::IUri;
-using Elastos::Droid::Telecomm::Telecom::IPhoneAccount;
-using Elastos::Droid::Telecomm::Telecom::IPhoneAccountHandle;
+using Elastos::Droid::Telecom::IPhoneAccount;
+using Elastos::Droid::Telecom::IPhoneAccountHandle;
 
 namespace Elastos {
 namespace Droid {

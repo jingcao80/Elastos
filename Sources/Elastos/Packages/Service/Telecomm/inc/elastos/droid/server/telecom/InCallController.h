@@ -13,8 +13,8 @@ using Elastos::Droid::Content::IComponentName;
 using Elastos::Droid::Content::IContext;
 using Elastos::Droid::Content::IServiceConnection;
 using Elastos::Droid::Os::IBinder;
-using Elastos::Droid::Telecomm::Telecom::IAudioState;
-using Elastos::Droid::Telecomm::Telecom::IParcelableCall;
+using Elastos::Droid::Telecom::IAudioState;
+using Elastos::Droid::Telecom::IParcelableCall;
 using Elastos::Utility::IMap;
 
 namespace Elastos {

@@ -1,0 +1,450 @@
+
+module
+{
+    merge("telecom/AudioState.car");
+    merge("telecom/PhoneAccountHandle.car");
+    merge("telecom/DisconnectCause.car");
+    merge("telecom/GatewayInfo.car");
+    merge("telecom/StatusHints.car");
+    merge("telecom/Phone.car");
+    merge("telecom/InCallService.car");
+    merge("telecom/Call.car");
+    merge("telecom/CallProperties.car");
+    merge("telecom/VideoProfile.car");
+    merge("telecom/CallState.car");
+    merge("telecom/CameraCapabilities.car");
+    merge("telecom/Conference.car");
+    merge("telecom/ConnectionService.car");
+    merge("telecom/Connection.car");
+    merge("telecom/ConnectionRequest.car");
+    merge("telecom/ConnectionServiceAdapter.car");
+    merge("telecom/ConnectionServiceAdapterServant.car");
+    merge("telecom/InCallAdapter.car");
+    merge("telecom/ParcelableCall.car");
+    merge("telecom/ParcelableConference.car");
+    merge("telecom/ParcelableConnection.car");
+    merge("telecom/PhoneAccount.car");
+    merge("telecom/PhoneCapabilities.car");
+    merge("telecom/RemoteConference.car");
+    merge("telecom/RemoteConnection.car");
+    merge("telecom/RemoteConnectionManager.car");
+    merge("telecom/RemoteConnectionService.car");
+    merge("telecom/Response.car");
+    merge("telecom/TelecomManager.car");
+    merge("telecom/VideoCallImpl.car");
+    merge("telecom/VideoCallbackServant.car");
+    merge("telecom/VideoCallListenerBinder.car");
+
+    using interface Elastos.Core.ICharSequence;
+    using interface Elastos.Utility.IList;
+
+    interface Elastos.Droid.Content.IComponentName;
+    interface Elastos.Droid.Content.IContext;
+    interface Elastos.Droid.Net.IUri;
+    interface Elastos.Droid.Os.IHandler;
+    interface Elastos.Droid.Os.IBundle;
+    interface Elastos.Droid.Os.IBinder;
+    interface Elastos.Droid.Internal.Telecom.IRemoteServiceCallback;
+    interface Elastos.Droid.Internal.Telecom.IIVideoProvider;
+    interface Elastos.Droid.Internal.Telecom.IIInCallService;
+    interface Elastos.Droid.Internal.Telecom.IIVideoCallback;
+    interface Elastos.Droid.Internal.Telecom.IIConnectionServiceAdapter;
+    interface Elastos.Droid.Internal.Telecom.IIInCallAdapter;
+    interface Elastos.Droid.Internal.Telecom.IIConnectionService;
+
+    namespace Elastos {
+    namespace Droid {
+    namespace Telecom {
+
+    singleton class CCallState {
+        interface ICallState;
+    }
+
+    class CConnectionServiceBinder {
+        constructor(
+            [in] IHandler* handler);
+
+        interface IIConnectionService;
+        interface IBinder;
+    }
+
+    class CRemoteServiceCallback {
+
+        interface IRemoteServiceCallback;
+    }
+
+    class CVideoProviderBinder {
+        constructor(
+            [in] IHandler* handler);
+
+        interface IIVideoProvider;
+    }
+
+    class CInCallServiceBinder {
+        constructor(
+            [in] IHandler* handler);
+
+        interface IIInCallService;
+    }
+
+    class CVideoCallListenerBinder {
+        constructor(
+            [in] IHandler* handler);
+
+        interface IVideoCallListenerBinder;
+        interface IIVideoCallback;
+    }
+
+    class CVideoCallback {
+        constructor(
+            [in] IHandler* handler);
+
+        interface IIVideoCallback;
+    }
+
+    class CConnectionServiceAdapterStub {
+        constructor(
+            [in] IHandler* handler);
+
+        interface IIConnectionServiceAdapter;
+    }
+
+    class CAudioState {
+        constructor();
+
+        constructor(
+            [in] Boolean isMuted,
+            [in] Int32 route,
+            [in] Int32 supportedRouteMask);
+
+        constructor(
+            [in] IAudioState* state);
+
+        interface IAudioState;
+        interface IParcelable;
+    }
+
+    class CCall {
+        constructor(
+            [in] IPhone* phone,
+            [in] String telecomCallId,
+            [in] IInCallAdapter* inCallAdapter);
+
+        interface ICall;
+    }
+
+    class CCameraCapabilities {
+        constructor();
+
+        constructor(
+            [in] Boolean zoomSupported,
+            [in] Float maxZoom,
+            [in] Int32 width,
+            [in] Int32 height);
+
+        interface ICameraCapabilities;
+        interface IParcelable;
+    }
+
+    class CConnectionRequest {
+        constructor();
+
+        constructor(
+            [in] IPhoneAccountHandle* accountHandle,
+            [in] IUri* handle,
+            [in] IBundle* extras);
+
+        constructor(
+            [in] IPhoneAccountHandle* accountHandle,
+            [in] IUri* handle,
+            [in] IBundle* extras,
+            [in] Int32 videoState);
+
+        interface IConnectionRequest;
+        interface IParcelable;
+    }
+
+    class CConnectionServiceAdapter {
+        interface IConnectionServiceAdapter;
+        interface IProxyDeathRecipient;
+    }
+
+    class CConnectionServiceAdapterServant {
+        constructor(
+            [in] IIConnectionServiceAdapter* dele);
+
+        interface IConnectionServiceAdapterServant;
+    }
+
+    class CDisconnectCause {
+        constructor();
+
+        constructor(
+            [in] Int32 code);
+
+        constructor(
+            [in] Int32 code,
+            [in] String reason);
+
+        constructor(
+            [in] Int32 code,
+            [in] ICharSequence* label,
+            [in] ICharSequence* description,
+            [in] String reason);
+
+        constructor(
+            [in] Int32 code,
+            [in] ICharSequence* label,
+            [in] ICharSequence* description,
+            [in] String reason,
+            [in] Int32 toneToPlay);
+
+        interface IDisconnectCause;
+        interface IParcelable;
+    }
+
+    class CGatewayInfo {
+        constructor();
+
+        constructor(
+            [in] String packageName,
+            [in] IUri* gatewayUri,
+            [in] IUri* originalAddress);
+
+        interface IGatewayInfo;
+        interface IParcelable;
+    }
+
+    class CInCallAdapter {
+        constructor(
+            [in] IIInCallAdapter* adapter);
+
+        interface IInCallAdapter;
+    }
+
+    class CParcelableCall {
+        constructor();
+
+        constructor(
+            [in] String id,
+            [in] Int32 state,
+            [in] IDisconnectCause* disconnectCause,
+            [in] IList* cannedSmsResponses,
+            [in] Int32 capabilities,
+            [in] Int32 properties,
+            [in] Int64 connectTimeMillis,
+            [in] IUri* handle,
+            [in] Int32 handlePresentation,
+            [in] String callerDisplayName,
+            [in] Int32 callerDisplayNamePresentation,
+            [in] IGatewayInfo* gatewayInfo,
+            [in] IPhoneAccountHandle* accountHandle,
+            [in] IIVideoProvider* videoCallProvider,
+            [in] String parentCallId,
+            [in] IList* childCallIds,
+            [in] IStatusHints* statusHints,
+            [in] Int32 videoState,
+            [in] IList* conferenceableCallIds,
+            [in] IBundle* extras);
+
+        interface IParcelableCall;
+        interface IParcelable;
+    }
+
+    class CParcelableConference {
+        constructor();
+
+        constructor(
+            [in] IPhoneAccountHandle* phoneAccount,
+            [in] Int32 state,
+            [in] Int32 capabilities,
+            [in] IList* connectionIds);
+
+        interface IParcelableConference;
+        interface IParcelable;
+    }
+
+    class CParcelableConnection {
+        constructor();
+
+        constructor(
+            [in] IPhoneAccountHandle* phoneAccount,
+            [in] Int32 state,
+            [in] Int32 capabilities,
+            [in] IUri* address,
+            [in] Int32 addressPresentation,
+            [in] String callerDisplayName,
+            [in] Int32 callerDisplayNamePresentation,
+            [in] IIVideoProvider* videoProvider,
+            [in] Int32 videoState,
+            [in] Boolean ringbackRequested,
+            [in] Boolean isVoipAudioMode,
+            [in] IStatusHints* statusHints,
+            [in] IDisconnectCause* disconnectCause,
+            [in] IList* conferenceableConnectionIds);
+
+        interface IParcelableConnection;
+        interface IParcelable;
+    }
+
+    class CPhone {
+        constructor(
+            [in] IInCallAdapter* adapter);
+
+        interface IPhone;
+    }
+
+    class CPhoneAccount {
+        constructor();
+
+        constructor(
+            [in] IPhoneAccountHandle* account,
+            [in] IUri* address,
+            [in] IUri* subscriptionAddress,
+            [in] Int32 capabilities,
+            [in] Int32 iconResId,
+            [in] ICharSequence* label,
+            [in] ICharSequence* shortDescription,
+            [in] IList* supportedUriSchemes);
+
+        interface IPhoneAccount;
+        interface IParcelable;
+    }
+
+    class CPhoneAccountBuilder {
+        constructor(
+            [in] IPhoneAccountHandle* accountHandle,
+            [in] ICharSequence* label);
+
+        interface IPhoneAccountBuilder;
+    }
+
+    class CPhoneAccountHandle {
+        constructor();
+
+        constructor(
+            [in] IComponentName* componentName,
+            [in] String id);
+
+        interface IPhoneAccountHandle;
+        interface IParcelable;
+    }
+
+    singleton class CPhoneCapabilities {
+        interface IPhoneCapabilities;
+    }
+
+    class CRemoteConference {
+        constructor(
+            [in] String id,
+            [in] IIConnectionService* connectionService);
+
+        interface IRemoteConference;
+    }
+
+    class CRemoteConnection {
+        constructor(
+            [in] String id,
+            [in] IIConnectionService* connectionService,
+            [in] IConnectionRequest* request);
+
+        constructor(
+            [in] IDisconnectCause* disconnectCause);
+
+        interface IRemoteConnection;
+    }
+
+    class CRemoteConnectionManager {
+        constructor(
+            [in] IConnectionService* ourConnectionServiceImpl);
+
+        interface IRemoteConnectionManager;
+    }
+
+    class CRemoteConnectionService {
+        constructor(
+            [in] IIConnectionService* outgoingConnectionServiceRpc,
+            [in] IConnectionService* ourConnectionServiceImpl);
+
+        interface IRemoteConnectionService;
+    }
+
+    class CStatusHints {
+        constructor();
+
+        constructor(
+            [in] IComponentName* packageName,
+            [in] ICharSequence* label,
+            [in] Int32 iconResId,
+            [in] IBundle* extras);
+
+        interface IStatusHints;
+        interface IParcelable;
+    }
+
+    [local]
+    class CTelecomManager {
+        constructor(
+            [in] IContext* context);
+
+        interface ITelecomManager;
+    }
+
+    class CVideoCallImpl {
+        constructor(
+            [in] IIVideoProvider* videoProvider);
+
+        interface IInCallServiceVideoCall;
+        interface IVideoCallImpl;
+    }
+
+    class CVideoCallbackServant {
+        constructor(
+            [in] IIVideoCallback* dele);
+
+        interface IVideoCallbackServant;
+    }
+
+    class CVideoProfile {
+        constructor();
+
+        constructor(
+            [in] Int32 videoState);
+
+        constructor(
+            [in] Int32 videoState,
+            [in] Int32 quality);
+
+        interface IVideoProfile;
+        interface IParcelable;
+    }
+
+    singleton class CAudioStateHelper {
+        interface IAudioStateHelper;
+    }
+
+    singleton class CConnectionHelper {
+        interface IConnectionHelper;
+    }
+
+    singleton class CPhoneAccountHelper {
+        interface IPhoneAccountHelper;
+    }
+
+    singleton class CRemoteConnectionHelper {
+        interface IRemoteConnectionHelper;
+    }
+
+    singleton class CTelecomManagerHelper {
+        interface ITelecomManagerHelper;
+    }
+
+    singleton class CVideoProfileVideoStateHelper {
+        interface IVideoProfileVideoStateHelper;
+    }
+
+    } // namespace Telecom
+    } // namespace Droid
+    } // namespace Elastos
+
+}

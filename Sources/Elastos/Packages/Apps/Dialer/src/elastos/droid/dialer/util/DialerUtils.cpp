@@ -6,7 +6,7 @@
 #include "Elastos.Droid.Internal.h"
 #include "Elastos.Droid.Net.h"
 #include "Elastos.Droid.Os.h"
-#include "Elastos.Droid.Telecomm.h"
+#include "Elastos.Droid.Telecom.h"
 #include "Elastos.Droid.Widget.h"
 #include <elastos/core/CoreUtils.h>
 #include <elastos/droid/text/TextUtils.h>
@@ -28,7 +28,7 @@ using Elastos::Droid::Net::CUriHelper;
 using Elastos::Droid::Os::IBinder;
 using Elastos::Droid::Os::IBundle;
 using Elastos::Droid::Os::CBundle;
-using Elastos::Droid::Telecomm::Telecom::ITelecomManager;
+using Elastos::Droid::Telecom::ITelecomManager;
 using Elastos::Droid::Text::TextUtils;
 using Elastos::Droid::Widget::IImageView;
 using Elastos::Droid::Widget::ITextView;

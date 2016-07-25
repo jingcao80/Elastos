@@ -10,7 +10,7 @@
 #include "Elastos.Droid.Provider.h"
 #include "Elastos.Droid.Preference.h"
 #include "Elastos.Droid.Telephony.h"
-#include "Elastos.Droid.Telecomm.h"
+#include "Elastos.Droid.Telecom.h"
 #include "elastos/droid/R.h"
 #include "R.h"
 #include <elastos/core/StringBuilder.h>
@@ -64,7 +64,7 @@ using Elastos::Droid::Text::TextUtils;
 using Elastos::Droid::Telephony::IServiceState;
 using Elastos::Droid::Telephony::IPhoneNumberUtils;
 using Elastos::Droid::Telephony::CPhoneNumberUtils;
-using Elastos::Droid::Telecomm::Telecom::IPhoneAccount;
+using Elastos::Droid::Telecom::IPhoneAccount;
 using Elastos::Core::StringBuilder;
 using Elastos::Core::StringUtils;
 using Elastos::Core::CSystem;

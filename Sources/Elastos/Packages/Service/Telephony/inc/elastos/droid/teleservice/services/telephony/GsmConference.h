@@ -2,15 +2,15 @@
 #define  __ELASTOS_DROID_SERVICES_TELEPHONY_GSMCONFERENCE_H__
 
 #include "_Elastos.Droid.TeleService.h"
-#include "elastos/droid/telecomm/telecom/Conference.h"
+#include "elastos/droid/telecom/Conference.h"
 #include "elastos/droid/ext/frameworkext.h"
-#include "Elastos.Droid.Telecomm.h"
+#include "Elastos.Droid.Telecom.h"
 #include "Elastos.Droid.Internal.h"
 
 using Elastos::Droid::Internal::Telephony::ICall;
-using Elastos::Droid::Telecomm::Telecom::IConnection;
-using Elastos::Droid::Telecomm::Telecom::Conference;
-using Elastos::Droid::Telecomm::Telecom::IPhoneAccountHandle;
+using Elastos::Droid::Telecom::IConnection;
+using Elastos::Droid::Telecom::Conference;
+using Elastos::Droid::Telecom::IPhoneAccountHandle;
 
 namespace Elastos {
 namespace Droid {

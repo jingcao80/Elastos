@@ -3,15 +3,15 @@
 #include "elastos/droid/teleservice/services/telephony/sip/SipUtil.h"
 #include "elastos/droid/teleservice/services/telephony/sip/SipSharedPreferences.h"
 #include "elastos/droid/text/TextUtils.h"
-#include "Elastos.Droid.Telecomm.h"
+#include "Elastos.Droid.Telecom.h"
 #include "Elastos.CoreLibrary.Core.h"
 #include <Elastos.CoreLibrary.Utility.Concurrent.h>
 #include <elastos/utility/logging/Logger.h>
 
-using Elastos::Droid::Telecomm::Telecom::ITelecomManager;
-using Elastos::Droid::Telecomm::Telecom::IPhoneAccountHandle;
-using Elastos::Droid::Telecomm::Telecom::ITelecomManagerHelper;
-using Elastos::Droid::Telecomm::Telecom::CTelecomManagerHelper;
+using Elastos::Droid::Telecom::ITelecomManager;
+using Elastos::Droid::Telecom::IPhoneAccountHandle;
+using Elastos::Droid::Telecom::ITelecomManagerHelper;
+using Elastos::Droid::Telecom::CTelecomManagerHelper;
 using Elastos::Core::IRunnable;
 using Elastos::Core::IThread;
 using Elastos::Core::CThread;

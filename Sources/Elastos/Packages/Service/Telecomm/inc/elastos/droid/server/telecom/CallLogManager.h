@@ -13,7 +13,7 @@ using Elastos::Droid::Content::IContext;
 using Elastos::Droid::Internal::Telephony::ICallerInfo;
 using Elastos::Droid::Net::IUri;
 using Elastos::Droid::Os::AsyncTask;
-using Elastos::Droid::Telecomm::Telecom::IPhoneAccountHandle;
+using Elastos::Droid::Telecom::IPhoneAccountHandle;
 using Elastos::Core::IInteger64;
 
 namespace Elastos {

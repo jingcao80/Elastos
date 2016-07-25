@@ -2,7 +2,7 @@
 #ifndef __ELASTOS_DROID_INCALLUI_INCALLPRESENTER_H__
 #define __ELASTOS_DROID_INCALLUI_INCALLPRESENTER_H__
 
-#include "Elastos.Droid.Telecomm.h"
+#include "Elastos.Droid.Telecom.h"
 #include "Elastos.CoreLibrary.Utility.h"
 #include "_Elastos.Droid.Dialer.h"
 #include "elastos/droid/incallui/AudioModeProvider.h"
@@ -13,16 +13,16 @@
 #include "elastos/droid/incallui/InCallCameraManager.h"
 #include "elastos/droid/incallui/ProximitySensor.h"
 #include "elastos/droid/incallui/StatusBarNotifier.h"
-#include <elastos/droid/telecomm/telecom/Call.h>
-#include <elastos/droid/telecomm/telecom/Phone.h>
+#include <elastos/droid/telecom/Call.h>
+#include <elastos/droid/telecom/Phone.h>
 #include <elastos/core/Object.h>
 
-using Elastos::Droid::Telecomm::Telecom::ICall;
-using Elastos::Droid::Telecomm::Telecom::ICallDetails;
-using Elastos::Droid::Telecomm::Telecom::ICallListener;
-using Elastos::Droid::Telecomm::Telecom::IPhone;
-using Elastos::Droid::Telecomm::Telecom::IPhoneAccountHandle;
-using Elastos::Droid::Telecomm::Telecom::IPhoneListener;
+using Elastos::Droid::Telecom::ICall;
+using Elastos::Droid::Telecom::ICallDetails;
+using Elastos::Droid::Telecom::ICallListener;
+using Elastos::Droid::Telecom::IPhone;
+using Elastos::Droid::Telecom::IPhoneAccountHandle;
+using Elastos::Droid::Telecom::IPhoneListener;
 using Elastos::Core::Object;
 using Elastos::Utility::ISet;
 
@@ -37,7 +37,7 @@ class InCallPresenter
 {
 private:
     class PhoneListener
-        : public Elastos::Droid::Telecomm::Telecom::Phone::Listener
+        : public Elastos::Droid::Telecom::Phone::Listener
     {
     public:
         PhoneListener(
@@ -53,19 +53,19 @@ private:
         // @Override
         CARAPI OnCallAdded(
             /* [in] */ IPhone* phone,
-            /* [in] */ Elastos::Droid::Telecomm::Telecom::ICall* call);
+            /* [in] */ Elastos::Droid::Telecom::ICall* call);
 
         // @Override
         CARAPI OnCallRemoved(
             /* [in] */ IPhone* phone,
-            /* [in] */ Elastos::Droid::Telecomm::Telecom::ICall* call);
+            /* [in] */ Elastos::Droid::Telecom::ICall* call);
 
     private:
         InCallPresenter* mHost;
     };
 
     class CallListener
-        : public Elastos::Droid::Telecomm::Telecom::Call::Listener
+        : public Elastos::Droid::Telecom::Call::Listener
     {
     public:
         CallListener(
@@ -75,17 +75,17 @@ private:
 
         // @Override
         CARAPI OnPostDialWait(
-            /* [in] */ Elastos::Droid::Telecomm::Telecom::ICall* call,
+            /* [in] */ Elastos::Droid::Telecom::ICall* call,
             /* [in] */ const String& remainingPostDialSequence);
 
         // @Override
         CARAPI OnDetailsChanged(
-            /* [in] */ Elastos::Droid::Telecomm::Telecom::ICall* call,
+            /* [in] */ Elastos::Droid::Telecom::ICall* call,
             /* [in] */ ICallDetails* details);
 
         // @Override
         CARAPI OnConferenceableCallsChanged(
-            /* [in] */ Elastos::Droid::Telecomm::Telecom::ICall* call,
+            /* [in] */ Elastos::Droid::Telecom::ICall* call,
             /* [in] */ IList* conferenceableCalls);
 
     private:

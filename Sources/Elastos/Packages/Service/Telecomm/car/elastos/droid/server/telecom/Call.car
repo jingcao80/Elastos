@@ -2,9 +2,9 @@
 module
 {
     using interface Elastos.Droid.Net.IUri;
-    using interface Elastos.Droid.Telecomm.Internal.IIVideoProvider;
-    using interface Elastos.Droid.Telecomm.Telecom.IDisconnectCause;
-    using interface Elastos.Droid.Telecomm.Telecom.IStatusHints;
+    using interface Elastos.Droid.Internal.Telecom.IIVideoProvider;
+    using interface Elastos.Droid.Telecom.IDisconnectCause;
+    using interface Elastos.Droid.Telecom.IStatusHints;
 
     interface Elastos.Droid.Server.Telecom.ICall;
 

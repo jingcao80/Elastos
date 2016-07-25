@@ -3,7 +3,7 @@ module
 {
     interface Elastos.Droid.Net.IUri;
     interface Elastos.Droid.Os.IBundle;
-    interface Elastos.Droid.Telecomm.Telecom.IConnectionVideoProvider;
+    interface Elastos.Droid.Telecom.IConnectionVideoProvider;
     // interface Elastos.Droid.Internal.Telephony.IUUSInfo;
 
     using interface Elastos.Utility.IList;

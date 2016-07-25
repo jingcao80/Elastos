@@ -7,7 +7,7 @@
 #include "elastos/droid/telephony/PhoneStateListener.h"
 #include "Elastos.Droid.Content.h"
 #include "Elastos.Droid.Internal.h"
-#include "Elastos.Droid.Telecomm.h"
+#include "Elastos.Droid.Telecom.h"
 #include "Elastos.Droid.Telephony.h"
 #include <elastos/core/Object.h>
 #include "Elastos.CoreLibrary.Utility.h"
@@ -16,9 +16,9 @@ using Elastos::Droid::Content::IContext;
 using Elastos::Droid::Content::IIntent;
 using Elastos::Droid::Content::BroadcastReceiver;
 using Elastos::Droid::Content::IBroadcastReceiver;
-using Elastos::Droid::Telecomm::Telecom::ITelecomManager;
-using Elastos::Droid::Telecomm::Telecom::IPhoneAccount;
-using Elastos::Droid::Telecomm::Telecom::IPhoneAccountHandle;
+using Elastos::Droid::Telecom::ITelecomManager;
+using Elastos::Droid::Telecom::IPhoneAccount;
+using Elastos::Droid::Telecom::IPhoneAccountHandle;
 using Elastos::Droid::Telephony::PhoneStateListener;
 using Elastos::Droid::Telephony::IServiceState;
 using Elastos::Droid::Telephony::ITelephonyManager;

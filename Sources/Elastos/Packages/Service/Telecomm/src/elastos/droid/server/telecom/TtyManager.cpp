@@ -6,7 +6,7 @@
 #include <Elastos.Droid.Media.h>
 #include <Elastos.Droid.Os.h>
 #include <Elastos.Droid.Provider.h>
-#include <Elastos.Droid.Telecomm.h>
+#include <Elastos.Droid.Telecom.h>
 #include <elastos/droid/provider/Settings.h>
 
 using Elastos::Droid::Content::CIntent;
@@ -20,7 +20,7 @@ using Elastos::Droid::Os::IUserHandle;
 using Elastos::Droid::Os::IUserHandleHelper;
 using Elastos::Droid::Provider::ISettingsSecure;
 using Elastos::Droid::Provider::Settings;
-using Elastos::Droid::Telecomm::Telecom::ITelecomManager;
+using Elastos::Droid::Telecom::ITelecomManager;
 
 namespace Elastos {
 namespace Droid {

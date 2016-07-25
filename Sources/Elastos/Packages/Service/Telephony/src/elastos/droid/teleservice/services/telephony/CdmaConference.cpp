@@ -1,9 +1,9 @@
 
 #include "elastos/droid/teleservice/services/telephony/CdmaConference.h"
-#include "Elastos.Droid.Telecomm.h"
+#include "Elastos.Droid.Telecom.h"
 #include <elastos/utility/logging/Logger.h>
 
-using Elastos::Droid::Telecomm::Telecom::IPhoneCapabilities;
+using Elastos::Droid::Telecom::IPhoneCapabilities;
 using Elastos::Utility::Logging::Logger;
 
 
@@ -45,7 +45,7 @@ ECode CdmaConference::OnDisconnect()
 }
 
 ECode CdmaConference::OnSeparate(
-    /* [in] */ Elastos::Droid::Telecomm::Telecom::IConnection* connection)
+    /* [in] */ Elastos::Droid::Telecom::IConnection* connection)
 {
     Logger::E("CdmaConference", "Separate not supported for CDMA conference call.");
     assert(0 && "return exception");
@@ -131,7 +131,7 @@ void CdmaConference::SendFlash()
 }
 
 AutoPtr<ICall> CdmaConference::GetMultipartyCallForConnection(
-    /* [in] */ Elastos::Droid::Telecomm::Telecom::IConnection* connection)
+    /* [in] */ Elastos::Droid::Telecom::IConnection* connection)
 {
     AutoPtr<Elastos::Droid::Internal::Telephony::IConnection> radioConnection =
             GetOriginalConnection(connection);
@@ -156,7 +156,7 @@ AutoPtr<ICall> CdmaConference::GetOriginalCall()
         AutoPtr<IInterface> obj;
         connections->Get(0, (IInterface**)&obj);
         AutoPtr<Elastos::Droid::Internal::Telephony::IConnection> originalConnection =
-                GetOriginalConnection(Elastos::Droid::Telecomm::Telecom::IConnection::Probe(obj));
+                GetOriginalConnection(Elastos::Droid::Telecom::IConnection::Probe(obj));
         if (originalConnection != NULL) {
             AutoPtr<ICall> tmp;
             originalConnection->GetCall((ICall**)&tmp);
@@ -167,7 +167,7 @@ AutoPtr<ICall> CdmaConference::GetOriginalCall()
 }
 
 AutoPtr<Elastos::Droid::Internal::Telephony::IConnection> CdmaConference::GetOriginalConnection(
-    /* [in] */ Elastos::Droid::Telecomm::Telecom::IConnection* connection)
+    /* [in] */ Elastos::Droid::Telecom::IConnection* connection)
 {
     if (ICdmaConnection::Probe(connection) != NULL) {
         AutoPtr<Elastos::Droid::Internal::Telephony::IConnection> con;

@@ -7,7 +7,7 @@
 #include <Elastos.Droid.App.h>
 #include <Elastos.Droid.Content.h>
 #include <Elastos.Droid.Preference.h>
-#include <Elastos.Droid.Telecomm.h>
+#include <Elastos.Droid.Telecom.h>
 #include "Elastos.CoreLibrary.Utility.h"
 #include <elastos/core/Object.h>
 
@@ -16,8 +16,8 @@ using Elastos::Droid::Content::IContext;
 using Elastos::Droid::Preference::IPreference;
 using Elastos::Droid::Preference::ListPreference;
 using Elastos::Droid::Preference::IPreferenceOnPreferenceChangeListener;
-using Elastos::Droid::Telecomm::Telecom::ITelecomManager;
-using Elastos::Droid::Telecomm::Telecom::IPhoneAccountHandle;
+using Elastos::Droid::Telecom::ITelecomManager;
+using Elastos::Droid::Telecom::IPhoneAccountHandle;
 using Elastos::Utility::IList;
 
 namespace Elastos {

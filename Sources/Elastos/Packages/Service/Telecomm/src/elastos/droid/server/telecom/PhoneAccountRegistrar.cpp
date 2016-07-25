@@ -8,7 +8,7 @@
 #include <Elastos.CoreLibrary.Utility.Concurrent.h>
 #include <Elastos.Droid.Content.h>
 #include <Elastos.Droid.Provider.h>
-#include <Elastos.Droid.Telecomm.h>
+#include <Elastos.Droid.Telecom.h>
 #include <Elastos.Droid.Telephony.h>
 #include <elastos/core/StringUtils.h>
 #include <elastos/droid/Manifest.h>
@@ -47,10 +47,10 @@ using Elastos::Droid::Os::Build;
 using Elastos::Droid::Os::Environment;
 using Elastos::Droid::Os::UserHandle;
 using Elastos::Droid::Provider::ISettingsSystem;
-using Elastos::Droid::Telecomm::Telecom::CPhoneAccountBuilder;
-using Elastos::Droid::Telecomm::Telecom::CPhoneAccountHandle;
-using Elastos::Droid::Telecomm::Telecom::IConnectionService;
-using Elastos::Droid::Telecomm::Telecom::IPhoneAccountBuilder;
+using Elastos::Droid::Telecom::CPhoneAccountBuilder;
+using Elastos::Droid::Telecom::CPhoneAccountHandle;
+using Elastos::Droid::Telecom::IConnectionService;
+using Elastos::Droid::Telecom::IPhoneAccountBuilder;
 using Elastos::Droid::Telephony::CSubscriptionManager;
 using Elastos::Droid::Telephony::CTelephonyManagerHelper;
 using Elastos::Droid::Telephony::ISubscriptionManager;

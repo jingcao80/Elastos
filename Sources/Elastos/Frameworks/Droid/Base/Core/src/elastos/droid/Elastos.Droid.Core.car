@@ -55,6 +55,7 @@ module
     merge("../../../car/elastos/droid/internal/os.car");
     merge("../../../car/elastos/droid/internal/statusbar.car");
     merge("../../../car/elastos/droid/internal/telephony.car");
+    merge("../../../car/elastos/droid/internal/telecom.car");
     merge("../../../car/elastos/droid/internal/textservice.car");
     merge("../../../car/elastos/droid/internal/utility.car");
     merge("../../../car/elastos/droid/internal/view2.car");
@@ -203,8 +204,8 @@ module
     merge("../../../car/elastos/droid/ims.car");
     }
 
-    submodule Elastos.Droid.Telecomm {
-    merge("../../../car/elastos/droid/telecomm.car");
+    submodule Elastos.Droid.Telecom {
+    merge("../../../car/elastos/droid/telecom.car");
     }
 
     submodule Elastos.Droid.Webkit {

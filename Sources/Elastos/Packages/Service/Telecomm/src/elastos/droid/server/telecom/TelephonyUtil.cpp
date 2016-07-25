@@ -2,14 +2,14 @@
 #include "elastos/droid/server/telecom/TelephonyUtil.h"
 #include <Elastos.Droid.Content.h>
 #include <Elastos.Droid.Net.h>
-#include <Elastos.Droid.Telecomm.h>
+#include <Elastos.Droid.Telecom.h>
 #include <Elastos.Droid.Telephony.h>
 #include <elastos/core/StringUtils.h>
 
 using Elastos::Droid::Content::CComponentName;
-using Elastos::Droid::Telecomm::Telecom::CPhoneAccountBuilder;
-using Elastos::Droid::Telecomm::Telecom::CPhoneAccountHandle;
-using Elastos::Droid::Telecomm::Telecom::IPhoneAccountBuilder;
+using Elastos::Droid::Telecom::CPhoneAccountBuilder;
+using Elastos::Droid::Telecom::CPhoneAccountHandle;
+using Elastos::Droid::Telecom::IPhoneAccountBuilder;
 using Elastos::Droid::Telephony::CPhoneNumberUtils;
 using Elastos::Droid::Telephony::IPhoneNumberUtils;
 using Elastos::Core::StringUtils;

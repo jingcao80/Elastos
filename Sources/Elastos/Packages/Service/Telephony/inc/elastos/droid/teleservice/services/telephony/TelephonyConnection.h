@@ -2,11 +2,11 @@
 #define  __ELASTOS_DROID_SERVICES_TELEPHONY_TELEPHONECONNECTION_H__
 
 #include "_Elastos.Droid.TeleService.h"
-#include "elastos/droid/telecomm/telecom/Connection.h"
+#include "elastos/droid/telecom/Connection.h"
 #include "elastos/droid/internal/telephony/Connection.h"
 #include "Elastos.Droid.Internal.h"
 #include "Elastos.Droid.Net.h"
-#include "Elastos.Droid.Telecomm.h"
+#include "Elastos.Droid.Telecom.h"
 #include "elastos/droid/ext/frameworkext.h"
 #include <elastos/core/Object.h>
 
@@ -14,7 +14,7 @@ using Elastos::Droid::Internal::Telephony::IPhone;
 using Elastos::Droid::Internal::Telephony::ICall;
 using Elastos::Droid::Internal::Telephony::ICallState;
 using Elastos::Droid::Internal::Telephony::IConnectionPostDialListener;
-using Elastos::Droid::Telecomm::Telecom::IAudioState;
+using Elastos::Droid::Telecom::IAudioState;
 using Elastos::Droid::Net::IUri;
 using Elastos::Core::Object;
 
@@ -28,7 +28,7 @@ namespace Telephony {
  * Base class for CDMA and GSM connections.
  */
 class TelephonyConnection
-    : public Elastos::Droid::Telecomm::Telecom::Connection
+    : public Elastos::Droid::Telecom::Connection
     , public ITelephonyConnection
 {
 private:

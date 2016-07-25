@@ -29,9 +29,9 @@ using Elastos::Droid::Os::Handler;
 using Elastos::Droid::Os::IBundle;
 using Elastos::Droid::Os::IHandler;
 using Elastos::Droid::Os::IMessage;
-using Elastos::Droid::Telecomm::Telecom::IAudioState;
-using Elastos::Droid::Telecomm::Telecom::IDisconnectCause;
-using Elastos::Droid::Telecomm::Telecom::IParcelableConference;
+using Elastos::Droid::Telecom::IAudioState;
+using Elastos::Droid::Telecom::IDisconnectCause;
+using Elastos::Droid::Telecom::IParcelableConference;
 using Elastos::Utility::ISet;
 
 namespace Elastos {

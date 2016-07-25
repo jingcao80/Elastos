@@ -6,7 +6,7 @@
 #include <elastos/droid/ext/frameworkext.h>
 #include <elastos/core/Object.h>
 
-using Elastos::Droid::Telecomm::Telecom::IAudioState;
+using Elastos::Droid::Telecom::IAudioState;
 
 namespace Elastos {
 namespace Droid {

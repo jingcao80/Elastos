@@ -6,7 +6,7 @@
 #include "Elastos.Droid.Os.h"
 #include "Elastos.Droid.Net.h"
 #include "Elastos.Droid.Provider.h"
-#include "Elastos.Droid.Telecomm.h"
+#include "Elastos.Droid.Telecom.h"
 #include "Elastos.Droid.Telephony.h"
 #include "Elastos.Droid.Widget.h"
 #include <elastos/core/AutoLock.h>
@@ -38,7 +38,7 @@ using Elastos::Droid::Text::Method::IKeyListener;
 using Elastos::Droid::Text::Method::IDialerKeyListener;
 using Elastos::Droid::Text::Method::IDialerKeyListenerHelper;
 using Elastos::Droid::Text::Method::CDialerKeyListenerHelper;
-using Elastos::Droid::Telecomm::Telecom::IPhoneAccount;
+using Elastos::Droid::Telecom::IPhoneAccount;
 using Elastos::Droid::Telephony::IPhoneNumberUtils;
 using Elastos::Droid::Telephony::CPhoneNumberUtils;
 using Elastos::Droid::View::IWindow;

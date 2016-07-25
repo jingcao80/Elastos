@@ -4,7 +4,7 @@
 
 #include "_Elastos.Droid.Dialer.h"
 #include "Elastos.Droid.Content.h"
-#include "Elastos.Droid.Telecomm.h"
+#include "Elastos.Droid.Telecom.h"
 #include "elastos/droid/incallui/Call.h"
 #include "elastos/droid/incallui/CallList.h"
 #include "elastos/droid/incallui/CallTimer.h"
@@ -15,9 +15,9 @@
 
 using Elastos::Droid::Content::IContext;
 using Elastos::Droid::Os::Runnable;
-using Elastos::Droid::Telecomm::Telecom::ICallDetails;
-using Elastos::Droid::Telecomm::Telecom::IPhoneAccount;
-using Elastos::Droid::Telecomm::Telecom::ITelecomManager;
+using Elastos::Droid::Telecom::ICallDetails;
+using Elastos::Droid::Telecom::IPhoneAccount;
+using Elastos::Droid::Telecom::ITelecomManager;
 
 namespace Elastos {
 namespace Droid {

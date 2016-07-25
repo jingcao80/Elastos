@@ -1,7 +1,7 @@
 
 module
 {
-    interface Elastos.Droid.Telecomm.Telecom.IPhone;
+    interface Elastos.Droid.Telecom.IPhone;
 
     namespace Elastos {
     namespace Droid {

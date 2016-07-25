@@ -10,7 +10,7 @@
 #include "Elastos.Droid.App.h"
 #include "Elastos.Droid.Content.h"
 #include "Elastos.Droid.Internal.h"
-#include "Elastos.Droid.Telecomm.h"
+#include "Elastos.Droid.Telecom.h"
 #include "Elastos.Droid.Net.h"
 #include "Elastos.Droid.Os.h"
 #include "Elastos.Droid.View.h"

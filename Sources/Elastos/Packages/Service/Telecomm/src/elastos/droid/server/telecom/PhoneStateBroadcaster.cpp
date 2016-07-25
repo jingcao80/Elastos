@@ -9,7 +9,7 @@
 
 using Elastos::Droid::Net::IUri;
 using Elastos::Droid::Os::ServiceManager;
-using Elastos::Droid::Telecomm::Telecom::ICallState;
+using Elastos::Droid::Telecom::ICallState;
 using Elastos::Droid::Telephony::ITelephonyManager;
 
 namespace Elastos {

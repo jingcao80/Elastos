@@ -6,7 +6,7 @@
 #include "elastos/droid/server/telecom/ConnectionServiceRepository.h"
 #include "elastos/droid/server/telecom/CreateConnectionProcessor.h"
 #include <Elastos.Droid.Internal.h>
-#include <Elastos.Droid.Telecomm.h>
+#include <Elastos.Droid.Telecom.h>
 #include <elastos/core/Object.h>
 #include <elastos/droid/ext/frameworkext.h>
 
@@ -18,11 +18,11 @@ using Elastos::Droid::Internal::Telephony::ICallerInfoAsyncQueryOnQueryCompleteL
 using Elastos::Droid::Net::IUri;
 using Elastos::Droid::Os::IBundle;
 using Elastos::Droid::Os::IHandler;
-using Elastos::Droid::Telecomm::Internal::IIVideoProvider;
-using Elastos::Droid::Telecomm::Telecom::IDisconnectCause;
-using Elastos::Droid::Telecomm::Telecom::IGatewayInfo;
-using Elastos::Droid::Telecomm::Telecom::IResponse;
-using Elastos::Droid::Telecomm::Telecom::IStatusHints;
+using Elastos::Droid::Internal::Telecom::IIVideoProvider;
+using Elastos::Droid::Telecom::IDisconnectCause;
+using Elastos::Droid::Telecom::IGatewayInfo;
+using Elastos::Droid::Telecom::IResponse;
+using Elastos::Droid::Telecom::IStatusHints;
 using Elastos::Core::IRunnable;
 using Elastos::Utility::IList;
 using Elastos::Utility::ISet;

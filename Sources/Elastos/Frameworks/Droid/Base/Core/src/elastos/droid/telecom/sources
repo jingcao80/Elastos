@@ -1,0 +1,58 @@
+
+TARGET_NAME= telecom
+TARGET_TYPE= lib
+
+C_DEFINES += -DDROID_CORE
+
+include $(MAKEDIR)/../../../../../../sources.inc
+
+INCLUDES += ../
+INCLUDES += $(MAKEDIR)/../../../../inc/
+
+
+C_DEFINES += -DDROID_CORE
+
+SOURCES = AudioState.cpp
+SOURCES += Call.cpp
+SOURCES += CCallState.cpp
+SOURCES += CameraCapabilities.cpp
+SOURCES += Conference.cpp
+SOURCES += Connection.cpp
+SOURCES += ConnectionRequest.cpp
+SOURCES += ConnectionService.cpp
+SOURCES += CConnectionServiceBinder.cpp
+SOURCES += CRemoteServiceCallback.cpp
+SOURCES += CVideoProviderBinder.cpp
+SOURCES += ConnectionServiceAdapter.cpp
+SOURCES += ConnectionServiceAdapterServant.cpp
+SOURCES += DisconnectCause.cpp
+SOURCES += GatewayInfo.cpp
+SOURCES += InCallAdapter.cpp
+SOURCES += InCallService.cpp
+SOURCES += CInCallServiceBinder.cpp
+SOURCES += ParcelableCall.cpp
+SOURCES += ParcelableConference.cpp
+SOURCES += ParcelableConnection.cpp
+SOURCES += Phone.cpp
+SOURCES += PhoneAccount.cpp
+SOURCES += PhoneAccountHandle.cpp
+SOURCES += CPhoneCapabilities.cpp
+SOURCES += RemoteConference.cpp
+SOURCES += RemoteConnection.cpp
+SOURCES += RemoteConnectionManager.cpp
+SOURCES += RemoteConnectionService.cpp
+SOURCES += StatusHints.cpp
+SOURCES += TelecomManager.cpp
+SOURCES += VideoCallImpl.cpp
+SOURCES += VideoCallbackServant.cpp
+SOURCES += VideoProfile.cpp
+SOURCES += CVideoCallListenerBinder.cpp
+SOURCES += CVideoCallback.cpp
+SOURCES += CConnectionServiceAdapterStub.cpp
+SOURCES += CAudioStateHelper.cpp
+SOURCES += CConnectionHelper.cpp
+SOURCES += CPhoneAccountHelper.cpp
+SOURCES += CRemoteConnectionHelper.cpp
+SOURCES += CTelecomManagerHelper.cpp
+SOURCES += CVideoProfileVideoStateHelper.cpp
+SOURCES += telecom.cpp

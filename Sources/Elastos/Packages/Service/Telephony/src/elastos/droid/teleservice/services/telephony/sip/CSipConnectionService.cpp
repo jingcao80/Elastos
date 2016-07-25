@@ -21,10 +21,10 @@ using Elastos::Droid::Os::CBundle;
 using Elastos::Droid::Os::IHandler;
 using Elastos::Droid::Os::CHandler;
 using Elastos::Droid::Internal::Telephony::IPhone;
-using Elastos::Droid::Telecomm::Telecom::ITelecomManager;
-using Elastos::Droid::Telecomm::Telecom::IPhoneAccountHandle;
-using Elastos::Droid::Telecomm::Telecom::ITelecomManagerHelper;
-using Elastos::Droid::Telecomm::Telecom::CTelecomManagerHelper;
+using Elastos::Droid::Telecom::ITelecomManager;
+using Elastos::Droid::Telecom::IPhoneAccountHandle;
+using Elastos::Droid::Telecom::ITelecomManagerHelper;
+using Elastos::Droid::Telecom::CTelecomManagerHelper;
 using Elastos::Core::StringUtils;
 using Elastos::Core::CoreUtils;
 using Elastos::Utility::Objects;
@@ -52,7 +52,7 @@ ECode CSipConnectionService::OnCreate()
 ECode CSipConnectionService::OnCreateOutgoingConnection(
     /* [in] */ IPhoneAccountHandle* connectionManagerPhoneAccount,
     /* [in] */ IConnectionRequest* request,
-    /* [out] */ Elastos::Droid::Telecomm::Telecom::IConnection** res)
+    /* [out] */ Elastos::Droid::Telecom::IConnection** res)
 {
     VALIDATE_NOT_NULL(res)
 
@@ -64,7 +64,7 @@ ECode CSipConnectionService::OnCreateOutgoingConnection(
         String str;
         extras->GetString(ITelecomManager::GATEWAY_PROVIDER_PACKAGE, &str);
         if (!str.IsNull()) {
-            AutoPtr<Elastos::Droid::Telecomm::Telecom::IDisconnectCause> cause =
+            AutoPtr<Elastos::Droid::Telecom::IDisconnectCause> cause =
                 DisconnectCauseUtil::ToTelecomDisconnectCause(
                     Elastos::Droid::Telephony::IDisconnectCause::CALL_BARRED,
                     String("Cannot make a SIP call with a gateway number."));
@@ -80,7 +80,7 @@ ECode CSipConnectionService::OnCreateOutgoingConnection(
     AutoPtr<IComponentName> name;
     accountHandle->GetComponentName((IComponentName**)&name);
     if (!Objects::Equals(name, sipComponentName)) {
-        AutoPtr<Elastos::Droid::Telecomm::Telecom::IDisconnectCause> cause =
+        AutoPtr<Elastos::Droid::Telecom::IDisconnectCause> cause =
                 DisconnectCauseUtil::ToTelecomDisconnectCause(
                 Elastos::Droid::Telephony::IDisconnectCause::OUTGOING_FAILURE,
                 String("Did not match service connection"));
@@ -99,10 +99,10 @@ ECode CSipConnectionService::OnCreateOutgoingConnection(
         String str;
         GetString(R::string::no_voip, &str);
         AutoPtr<ICharSequence> description = CoreUtils::Convert(str);
-        AutoPtr<Elastos::Droid::Telecomm::Telecom::IDisconnectCause> cause;
-        Elastos::Droid::Telecomm::Telecom::CDisconnectCause::New(
-                Elastos::Droid::Telecomm::Telecom::IDisconnectCause::ERROR, NULL, description,
-                String("VoIP unsupported"), (Elastos::Droid::Telecomm::Telecom::IDisconnectCause**)&cause);
+        AutoPtr<Elastos::Droid::Telecom::IDisconnectCause> cause;
+        Elastos::Droid::Telecom::CDisconnectCause::New(
+                Elastos::Droid::Telecom::IDisconnectCause::ERROR, NULL, description,
+                String("VoIP unsupported"), (Elastos::Droid::Telecom::IDisconnectCause**)&cause);
         connection->SetDisconnected(cause);
         attemptCall = FALSE;
     }
@@ -116,10 +116,10 @@ ECode CSipConnectionService::OnCreateOutgoingConnection(
         //GetString(wifiOnly ? R::string::no_wifi_available
         //        : R::string::no_internet_available, (ICharSequence**)&description);
 
-        AutoPtr<Elastos::Droid::Telecomm::Telecom::IDisconnectCause> cause;
-        Elastos::Droid::Telecomm::Telecom::CDisconnectCause::New(
-                Elastos::Droid::Telecomm::Telecom::IDisconnectCause::ERROR, NULL, description,
-                String("Network not connected"), (Elastos::Droid::Telecomm::Telecom::IDisconnectCause**)&cause);
+        AutoPtr<Elastos::Droid::Telecom::IDisconnectCause> cause;
+        Elastos::Droid::Telecom::CDisconnectCause::New(
+                Elastos::Droid::Telecom::IDisconnectCause::ERROR, NULL, description,
+                String("Network not connected"), (Elastos::Droid::Telecom::IDisconnectCause**)&cause);
         connection->SetDisconnected(cause);
         attemptCall = FALSE;
     }
@@ -153,7 +153,7 @@ ECode CSipConnectionService::OnCreateOutgoingConnection(
         // });
     }
 
-    *res = Elastos::Droid::Telecomm::Telecom::IConnection::Probe(connection);
+    *res = Elastos::Droid::Telecom::IConnection::Probe(connection);
     REFCOUNT_ADD(*res);
     return NOERROR;
 }
@@ -161,7 +161,7 @@ ECode CSipConnectionService::OnCreateOutgoingConnection(
 ECode CSipConnectionService::OnCreateIncomingConnection(
     /* [in] */ IPhoneAccountHandle* connectionManagerPhoneAccount,
     /* [in] */ IConnectionRequest* request,
-    /* [out] */ Elastos::Droid::Telecomm::Telecom::IConnection** res)
+    /* [out] */ Elastos::Droid::Telecom::IConnection** res)
 {
     VALIDATE_NOT_NULL(res)
 
@@ -171,7 +171,7 @@ ECode CSipConnectionService::OnCreateIncomingConnection(
     request->GetExtras((IBundle**)&bundle);
     if (bundle == NULL) {
         if (VERBOSE) Log(String("onCreateIncomingConnection, no extras"));
-        AutoPtr<Elastos::Droid::Telecomm::Telecom::IDisconnectCause> cause =
+        AutoPtr<Elastos::Droid::Telecom::IDisconnectCause> cause =
                 DisconnectCauseUtil::ToTelecomDisconnectCause(
                 Elastos::Droid::Telephony::IDisconnectCause::ERROR_UNSPECIFIED,
                 String("No extras on request."));
@@ -183,7 +183,7 @@ ECode CSipConnectionService::OnCreateIncomingConnection(
     AutoPtr<IIntent> sipIntent = IIntent::Probe(p);
     if (sipIntent == NULL) {
         if (VERBOSE) Log(String("onCreateIncomingConnection, no SIP intent"));
-        AutoPtr<Elastos::Droid::Telecomm::Telecom::IDisconnectCause> cause =
+        AutoPtr<Elastos::Droid::Telecom::IDisconnectCause> cause =
                 DisconnectCauseUtil::ToTelecomDisconnectCause(
                 Elastos::Droid::Telephony::IDisconnectCause::ERROR_UNSPECIFIED,
                 String("No SIP intent"));
@@ -214,7 +214,7 @@ ECode CSipConnectionService::OnCreateIncomingConnection(
             AutoPtr<SipConnection> sipConnection = new SipConnection();
             sipConnection->Initialize(originalConnection);
             sipConnection->OnAddedToCallService();
-            *res = Elastos::Droid::Telecomm::Telecom::IConnection::Probe(sipConnection);
+            *res = Elastos::Droid::Telecom::IConnection::Probe(sipConnection);
             REFCOUNT_ADD(*res);
             return NOERROR;
         }
@@ -223,7 +223,7 @@ ECode CSipConnectionService::OnCreateIncomingConnection(
             return Connection::CreateCanceledConnection(res);
         }
     }
-    AutoPtr<Elastos::Droid::Telecomm::Telecom::IDisconnectCause> cause = DisconnectCauseUtil::ToTelecomDisconnectCause(
+    AutoPtr<Elastos::Droid::Telecom::IDisconnectCause> cause = DisconnectCauseUtil::ToTelecomDisconnectCause(
             Elastos::Droid::Telephony::IDisconnectCause::ERROR_UNSPECIFIED);
     return Connection::CreateFailedConnection(cause, res);
 }

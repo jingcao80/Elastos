@@ -30,7 +30,7 @@ ECode InCallPresenter::PhoneListener::OnBringToForeground(
 // @Override
 ECode InCallPresenter::PhoneListener::OnCallAdded(
     /* [in] */ IPhone* phone,
-    /* [in] */ Elastos::Droid::Telecomm::Telecom::ICall* call)
+    /* [in] */ Elastos::Droid::Telecom::ICall* call)
 {
     call->AddListener(mHost->mCallListener);
     return NOERROR;
@@ -39,7 +39,7 @@ ECode InCallPresenter::PhoneListener::OnCallAdded(
 // @Override
 ECode InCallPresenter::PhoneListener::OnCallRemoved(
     /* [in] */ IPhone* phone,
-    /* [in] */ Elastos::Droid::Telecomm::Telecom::ICall* call)
+    /* [in] */ Elastos::Droid::Telecom::ICall* call)
 {
     call->RemoveListener(mHost->mCallListener);
     return NOERROR;
@@ -50,7 +50,7 @@ ECode InCallPresenter::PhoneListener::OnCallRemoved(
 // InCallPresenter::CallListener
 //========================================================================
 ECode InCallPresenter::CallListener::OnPostDialWait(
-    /* [in] */ Elastos::Droid::Telecomm::Telecom::ICall* call,
+    /* [in] */ Elastos::Droid::Telecom::ICall* call,
     /* [in] */ const String& remainingPostDialSequence)
 {
     mHost->OnPostDialCharWait(
@@ -61,7 +61,7 @@ ECode InCallPresenter::CallListener::OnPostDialWait(
 
 // @Override
 ECode InCallPresenter::CallListener::OnDetailsChanged(
-    /* [in] */ Elastos::Droid::Telecomm::Telecom::ICall* call,
+    /* [in] */ Elastos::Droid::Telecom::ICall* call,
     /* [in] */ ICallDetails* details)
 {
     AutoPtr<IIterator> it;
@@ -79,7 +79,7 @@ ECode InCallPresenter::CallListener::OnDetailsChanged(
 
 // @Override
 ECode InCallPresenter::CallListener::OnConferenceableCallsChanged(
-    /* [in] */ Elastos::Droid::Telecomm::Telecom::ICall* call,
+    /* [in] */ Elastos::Droid::Telecom::ICall* call,
     /* [in] */ IList* conferenceableCalls)
 {
     Logger::I("InCallPresenter", "onConferenceableCallsChanged: %s", TO_CSTR(call));

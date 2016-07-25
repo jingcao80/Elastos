@@ -280,7 +280,7 @@
 #- Elastos/Frameworks/Droid/Base/Core/src/elastos/droid/wifidisplay
 - Elastos/Frameworks/Droid/Base/Core/src/elastos/droid/opengl/gles
 - Elastos/Frameworks/Droid/Base/Core/src/elastos/droid/opengl
-- Elastos/Frameworks/Droid/Base/Core/src/elastos/droid/telecomm/telecom
+- Elastos/Frameworks/Droid/Base/Core/src/elastos/droid/telecom
 #- Elastos/Frameworks/Droid/Base/Core/src/elastos/droid/swextend/gpio
 > Elastos/Frameworks/Droid/Base/Core/src/elastos/droid/sax
 > Elastos/Frameworks/Droid/Base/Core/src/elastos/droid/services/securitybridge/api

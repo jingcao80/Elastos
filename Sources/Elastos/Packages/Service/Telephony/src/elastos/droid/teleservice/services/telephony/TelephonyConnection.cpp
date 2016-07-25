@@ -9,9 +9,9 @@
 #include <Elastos.CoreLibrary.Core.h>
 #include <Elastos.CoreLibrary.Utility.h>
 
-using Elastos::Droid::Telecomm::Telecom::IPhoneAccount;
-using Elastos::Droid::Telecomm::Telecom::IPhoneCapabilities;
-using Elastos::Droid::Telecomm::Telecom::IConnectionService;
+using Elastos::Droid::Telecom::IPhoneAccount;
+using Elastos::Droid::Telecom::IPhoneCapabilities;
+using Elastos::Droid::Telecom::IConnectionService;
 using Elastos::Droid::Internal::Telephony::ICallState_IDLE;
 using Elastos::Droid::Internal::Telephony::ICallState_ACTIVE;
 using Elastos::Droid::Internal::Telephony::ICallState_HOLDING;
@@ -181,7 +181,7 @@ ECode TelephonyConnection::OnStateChanged(
     /* [in] */ Int32 state)
 {
     String str;
-    Elastos::Droid::Telecomm::Telecom::Connection::StateToString(state, &str);
+    Elastos::Droid::Telecom::Connection::StateToString(state, &str);
     Logger::V("TelephonyConnection", "onStateChanged, state: %s", str.string());
     return NOERROR;
 }
@@ -648,7 +648,7 @@ ECode TelephonyConnection::UpdateState()
             {
                 Int32 telephonyDisconnectCause;
                 mOriginalConnection->GetDisconnectCause(&telephonyDisconnectCause);
-                AutoPtr<Elastos::Droid::Telecomm::Telecom::IDisconnectCause> cause = DisconnectCauseUtil::ToTelecomDisconnectCause(
+                AutoPtr<Elastos::Droid::Telecom::IDisconnectCause> cause = DisconnectCauseUtil::ToTelecomDisconnectCause(
                         telephonyDisconnectCause);
                 SetDisconnected(cause);
                 Close();
@@ -692,7 +692,7 @@ void TelephonyConnection::SetActiveInternal()
             if (TO_IINTERFACE(current) != TO_IINTERFACE(this) && ITelephonyConnection::Probe(current) != NULL) {
                 AutoPtr<ITelephonyConnection> other = ITelephonyConnection::Probe(current);
                 Int32 _state;
-                Elastos::Droid::Telecomm::Telecom::IConnection::Probe(other)->GetState(&_state);
+                Elastos::Droid::Telecom::IConnection::Probe(other)->GetState(&_state);
                 if (_state == STATE_ACTIVE) {
                     other->UpdateState();
                 }

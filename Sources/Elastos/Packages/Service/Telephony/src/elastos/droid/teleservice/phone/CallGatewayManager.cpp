@@ -3,14 +3,14 @@
 #include "elastos/droid/text/TextUtils.h"
 #include "Elastos.CoreLibrary.Utility.Concurrent.h"
 #include "Elastos.Droid.Content.h"
-#include "Elastos.Droid.Telecomm.h"
+#include "Elastos.Droid.Telecom.h"
 #include "Elastos.Droid.Telephony.h"
 #include <elastos/core/AutoLock.h>
 #include <elastos/utility/logging/Logger.h>
 
 using Elastos::Droid::Net::IUriHelper;
 using Elastos::Droid::Net::CUriHelper;
-using Elastos::Droid::Telecomm::Telecom::IPhoneAccount;
+using Elastos::Droid::Telecom::IPhoneAccount;
 using Elastos::Droid::Telephony::CPhoneNumberUtils;
 using Elastos::Droid::Telephony::IPhoneNumberUtils;
 using Elastos::Droid::Text::TextUtils;

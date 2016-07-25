@@ -1,9 +1,9 @@
 
 #include "elastos/droid/teleservice/services/telephony/GsmConnection.h"
 #include <elastos/utility/logging/Logger.h>
-#include "Elastos.Droid.Telecomm.h"
+#include "Elastos.Droid.Telecom.h"
 
-using Elastos::Droid::Telecomm::Telecom::IPhoneCapabilities;
+using Elastos::Droid::Telecom::IPhoneCapabilities;
 using Elastos::Utility::Logging::Logger;
 
 namespace Elastos {

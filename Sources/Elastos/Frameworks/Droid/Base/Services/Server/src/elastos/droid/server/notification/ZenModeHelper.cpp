@@ -1,6 +1,6 @@
 
 #include <Elastos.Droid.Provider.h>
-#include <Elastos.Droid.Telecomm.h>
+#include <Elastos.Droid.Telecom.h>
 #include <Elastos.CoreLibrary.Libcore.h>
 #include <Elastos.CoreLibrary.External.h>
 #include "elastos/droid/server/notification/ZenModeHelper.h"
@@ -29,7 +29,7 @@ using Elastos::Droid::Service::Notification::CZenModeConfig;
 using Elastos::Droid::Service::Notification::CZenModeConfigHelper;
 using Elastos::Droid::Service::Notification::IZenModeConfigHelper;
 using Elastos::Droid::Service::Notification::INotificationListenerService;
-using Elastos::Droid::Telecomm::Telecom::ITelecomManager;
+using Elastos::Droid::Telecom::ITelecomManager;
 using Elastos::Droid::Utility::ILogHelper;
 using Elastos::Droid::R;
 using Elastos::Core::CoreUtils;

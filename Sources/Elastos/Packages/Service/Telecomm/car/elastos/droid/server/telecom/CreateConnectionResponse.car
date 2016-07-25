@@ -1,8 +1,8 @@
 
 module
 {
-    using interface Elastos.Droid.Telecomm.Telecom.IDisconnectCause;
-    using interface Elastos.Droid.Telecomm.Telecom.IParcelableConnection;
+    using interface Elastos.Droid.Telecom.IDisconnectCause;
+    using interface Elastos.Droid.Telecom.IParcelableConnection;
 
     interface Elastos.Droid.Server.Telecom.ICallIdMapper;
 

@@ -4,7 +4,7 @@
 #include "Elastos.Droid.Database.h"
 #include "Elastos.Droid.Net.h"
 #include "Elastos.Droid.Provider.h"
-#include "Elastos.Droid.Telecomm.h"
+#include "Elastos.Droid.Telecom.h"
 #include "Elastos.Droid.Widget.h"
 #include "elastos/core/Character.h"
 #include <elastos/core/CoreUtils.h>
@@ -47,7 +47,7 @@ using Elastos::Droid::Provider::IContactsContractData;
 using Elastos::Droid::Provider::CContactsContractData;
 using Elastos::Droid::Provider::IContactsContractCommonDataKindsStructuredName;
 using Elastos::Droid::Text::TextUtils;
-using Elastos::Droid::Telecomm::Telecom::IPhoneAccount;
+using Elastos::Droid::Telecom::IPhoneAccount;
 using Elastos::Droid::View::IView;
 using Elastos::Droid::View::IContextMenuInfo;
 using Elastos::Droid::Widget::ISimpleCursorAdapter;

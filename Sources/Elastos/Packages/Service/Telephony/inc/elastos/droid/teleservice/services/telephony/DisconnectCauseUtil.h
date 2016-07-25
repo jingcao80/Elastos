@@ -4,10 +4,10 @@
 #include "_Elastos.Droid.TeleService.h"
 #include "elastos/droid/ext/frameworkext.h"
 #include "Elastos.Droid.Content.h"
-#include "Elastos.Droid.Telecomm.h"
+#include "Elastos.Droid.Telecom.h"
 
 using Elastos::Droid::Content::IContext;
-using Elastos::Droid::Telecomm::Telecom::IDisconnectCause;
+using Elastos::Droid::Telecom::IDisconnectCause;
 using Elastos::Core::ICharSequence;
 
 namespace Elastos {

@@ -1,0 +1,112 @@
+
+module
+{
+
+    using interface Elastos.Utility.IList;
+
+    namespace Elastos {
+    namespace Droid {
+    namespace Telecom {
+
+    interface IRemoteConferenceCallback {
+        OnStateChanged(
+            [in] IRemoteConference* conference,
+            [in] Int32 oldState,
+            [in] Int32 newState);
+
+        OnDisconnected(
+            [in] IRemoteConference* conference,
+            [in] IDisconnectCause* disconnectCause);
+
+        OnConnectionAdded(
+            [in] IRemoteConference* conference,
+            [in] IRemoteConnection* connection);
+
+        OnConnectionRemoved(
+            [in] IRemoteConference* conference,
+            [in] IRemoteConnection* connection);
+
+        OnCapabilitiesChanged(
+            [in] IRemoteConference* conference,
+            [in] Int32 capabilities);
+
+        OnConferenceableConnectionsChanged(
+            [in] IRemoteConference* conference,
+            [in] IList* conferenceableConnections);
+
+        OnDestroyed(
+            [in] IRemoteConference* conference);
+    }
+
+    /**
+     * Represents a conference call which can contain any number of {@link Connection} objects.
+     * @hide
+     */
+    interface IRemoteConference {
+        GetConnections(
+            [out] IList** res);
+
+        GetState(
+            [out] Int32* res);
+
+        GetCallCapabilities(
+            [out] Int32* res);
+
+        Disconnect();
+
+        Separate(
+            [in] IRemoteConnection* connection);
+
+        Merge();
+
+        Swap();
+
+        Hold();
+
+        Unhold();
+
+        GetDisconnectCause(
+            [out] IDisconnectCause** res);
+
+        PlayDtmfTone(
+            [in] Char32 digit);
+
+        StopDtmfTone();
+
+        SetAudioState(
+            [in] IAudioState* state);
+
+        GetConferenceableConnections(
+            [out] IList** res);
+
+        RegisterCallback(
+            [in] IRemoteConferenceCallback* cb);
+
+        UnregisterCallback(
+            [in] IRemoteConferenceCallback* cb);
+
+        RemoveConnection(
+            [in] IRemoteConnection* connection);
+
+        AddConnection(
+            [in] IRemoteConnection* connection);
+
+        SetState(
+            [in] Int32 newState);
+
+        SetCallCapabilities(
+            [in] Int32 capabilities);
+
+        SetDisconnected(
+            [in] IDisconnectCause* disconnectCause);
+
+        SetDestroyed();
+
+        SetConferenceableConnections(
+            [in] IList* conferenceableConnections);
+    }
+
+    } // namespace Telecom
+    } // namespace Droid
+    } // namespace Elastos
+}

@@ -5,7 +5,7 @@
 #include "Elastos.Droid.Bluetooth.h"
 #include "Elastos.Droid.Media.h"
 #include "Elastos.Droid.Net.h"
-#include "Elastos.Droid.Telecomm.h"
+#include "Elastos.Droid.Telecom.h"
 #include "Elastos.Droid.Telephony.h"
 #include "Elastos.Droid.View.h"
 #include <elastos/core/CoreUtils.h>
@@ -54,8 +54,8 @@ using Elastos::Droid::Media::IAudioManager;
 using Elastos::Droid::Net::IUri;
 using Elastos::Droid::Net::IUriHelper;
 using Elastos::Droid::Net::CUriHelper;
-using Elastos::Droid::Telecomm::Telecom::IPhoneAccount;
-using Elastos::Droid::Telecomm::Telecom::IVideoProfileVideoState;
+using Elastos::Droid::Telecom::IPhoneAccount;
+using Elastos::Droid::Telecom::IVideoProfileVideoState;
 using Elastos::Droid::Telephony::IPhoneNumberUtils;
 using Elastos::Droid::Telephony::CPhoneNumberUtils;
 using Elastos::Droid::Text::TextUtils;

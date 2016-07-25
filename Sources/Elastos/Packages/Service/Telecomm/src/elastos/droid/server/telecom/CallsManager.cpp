@@ -33,16 +33,16 @@ using Elastos::Droid::Os::EIID_IHandler;
 using Elastos::Droid::Os::IMessageHelper;
 using Elastos::Droid::Os::ISystemProperties;
 using Elastos::Droid::Provider::ICalls;
-using Elastos::Droid::Telecomm::Telecom::CCallState;
-using Elastos::Droid::Telecomm::Telecom::CDisconnectCause;
-using Elastos::Droid::Telecomm::Telecom::ICallState;
-using Elastos::Droid::Telecomm::Telecom::IConnectionService;
-using Elastos::Droid::Telecomm::Telecom::IGatewayInfo;
-using Elastos::Droid::Telecomm::Telecom::IParcelableConnection;
-using Elastos::Droid::Telecomm::Telecom::IPhoneAccount;
-using Elastos::Droid::Telecomm::Telecom::IPhoneAccountHandle;
-using Elastos::Droid::Telecomm::Telecom::IPhoneCapabilities;
-using Elastos::Droid::Telecomm::Telecom::ITelecomManager;
+using Elastos::Droid::Telecom::CCallState;
+using Elastos::Droid::Telecom::CDisconnectCause;
+using Elastos::Droid::Telecom::ICallState;
+using Elastos::Droid::Telecom::IConnectionService;
+using Elastos::Droid::Telecom::IGatewayInfo;
+using Elastos::Droid::Telecom::IParcelableConnection;
+using Elastos::Droid::Telecom::IPhoneAccount;
+using Elastos::Droid::Telecom::IPhoneAccountHandle;
+using Elastos::Droid::Telecom::IPhoneCapabilities;
+using Elastos::Droid::Telecom::ITelecomManager;
 using Elastos::Droid::Telephony::CTelephonyManagerHelper;
 using Elastos::Droid::Telephony::ITelephonyManager;
 using Elastos::Droid::Telephony::ITelephonyManagerHelper;
@@ -686,7 +686,7 @@ ECode CallsManager::StartOutgoingCall(
     if (phoneAccountHandle == NULL && accountsSize > 1 && !isEmergencyCall) {
         // This is the state where the user is expected to select an account
         ((Call*) call.Get())->SetState(ICallState::PRE_DIAL_WAIT);
-        extras->PutParcelableList(Elastos::Droid::Telecomm::Telecom::ICall::AVAILABLE_PHONE_ACCOUNTS, accounts);
+        extras->PutParcelableList(Elastos::Droid::Telecom::ICall::AVAILABLE_PHONE_ACCOUNTS, accounts);
     } else {
         ((Call*) call.Get())->SetState(ICallState::CONNECTING);
     }

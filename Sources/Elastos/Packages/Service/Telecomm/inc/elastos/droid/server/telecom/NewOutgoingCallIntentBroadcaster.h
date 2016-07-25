@@ -13,7 +13,7 @@ using Elastos::Droid::Content::BroadcastReceiver;
 using Elastos::Droid::Content::IContext;
 using Elastos::Droid::Content::IIntent;
 using Elastos::Droid::Net::IUri;
-using Elastos::Droid::Telecomm::Telecom::IGatewayInfo;
+using Elastos::Droid::Telecom::IGatewayInfo;
 
 namespace Elastos {
 namespace Droid {

@@ -2,15 +2,15 @@
 #include "elastos/droid/teleservice/services/telephony/TtyManager.h"
 #include "elastos/droid/teleservice/services/telephony/CTtyManagerBroadcastReceiver.h"
 #include "elastos/droid/os/AsyncResult.h"
-#include "Elastos.Droid.Telecomm.h"
+#include "Elastos.Droid.Telecom.h"
 #include <elastos/utility/logging/Logger.h>
 
 using Elastos::Droid::Content::CIntentFilter;
 using Elastos::Droid::Content::IIntentFilter;
 using Elastos::Droid::Os::AsyncResult;
-using Elastos::Droid::Telecomm::Telecom::ITelecomManager;
-using Elastos::Droid::Telecomm::Telecom::CTelecomManagerHelper;
-using Elastos::Droid::Telecomm::Telecom::ITelecomManagerHelper;
+using Elastos::Droid::Telecom::ITelecomManager;
+using Elastos::Droid::Telecom::CTelecomManagerHelper;
+using Elastos::Droid::Telecom::ITelecomManagerHelper;
 using Elastos::Utility::Logging::Logger;
 using Elastos::Core::IInteger32;
 using Elastos::Core::IArrayOf;

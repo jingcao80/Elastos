@@ -4,7 +4,7 @@
 #include "_Elastos_Droid_SystemUI_StatusBar_Phone_CKeyguardBottomAreaView.h"
 #include "elastos/droid/systemui/statusbar/phone/UnlockMethodCache.h"
 #include "elastos/droid/systemui/statusbar/policy/PreviewInflater.h"
-#include "Elastos.Droid.Telecomm.h"
+#include "Elastos.Droid.Telecom.h"
 #include "Elastos.Droid.View.h"
 #include "Elastos.Droid.Widget.h"
 #include <elastos/droid/content/BroadcastReceiver.h>
@@ -13,7 +13,7 @@
 
 using Elastos::Droid::Content::BroadcastReceiver;
 using Elastos::Droid::Graphics::Drawable::InsetDrawable;
-using Elastos::Droid::Telecomm::Telecom::ITelecomManager;
+using Elastos::Droid::Telecom::ITelecomManager;
 using Elastos::Droid::SystemUI::StatusBar::Policy::IAccessibilityController;
 using Elastos::Droid::SystemUI::StatusBar::Policy::IAccessibilityStateChangedCallback;
 using Elastos::Droid::SystemUI::StatusBar::Policy::IFlashlightController;

@@ -1,5 +1,5 @@
 
-#include "Elastos.Droid.Telecomm.h"
+#include "Elastos.Droid.Telecom.h"
 #include "Elastos.Droid.Telephony.h"
 #include "Elastos.Droid.Utility.h"
 #include "Elastos.CoreLibrary.Utility.h"
@@ -23,8 +23,8 @@ using Elastos::Droid::Animation::IObjectAnimatorHelper;
 using Elastos::Droid::Animation::CObjectAnimatorHelper;
 using Elastos::Droid::Animation::ITimeInterpolator;
 using Elastos::Droid::Graphics::CPoint;
-using Elastos::Droid::Telecomm::Telecom::IVideoProfileVideoStateHelper;
-using Elastos::Droid::Telecomm::Telecom::CVideoProfileVideoStateHelper;
+using Elastos::Droid::Telecom::IVideoProfileVideoStateHelper;
+using Elastos::Droid::Telecom::CVideoProfileVideoStateHelper;
 using Elastos::Droid::Telephony::IPhoneNumberUtils;
 using Elastos::Droid::Telephony::CPhoneNumberUtils;
 using Elastos::Droid::Text::TextUtils;

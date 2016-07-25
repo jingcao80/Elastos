@@ -54,7 +54,7 @@ using Elastos::Droid::Preference::PreferenceManager;
 using Elastos::Droid::Provider::CTelephonyCarriers;
 using Elastos::Droid::Provider::ITelephonyCarriers;
 using Elastos::Droid::R;
-using Elastos::Droid::Telecomm::Telecom::IVideoProfileVideoState;
+using Elastos::Droid::Telecom::IVideoProfileVideoState;
 using Elastos::Droid::Telephony::CServiceState;
 using Elastos::Droid::Telephony::CTelephonyManager;
 using Elastos::Droid::Telephony::CSubscriptionManager;

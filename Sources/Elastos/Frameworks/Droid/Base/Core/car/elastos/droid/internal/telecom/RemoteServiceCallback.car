@@ -1,0 +1,29 @@
+
+module
+{
+
+    using interface Elastos.Utility.IList;
+
+    namespace Elastos {
+    namespace Droid {
+    namespace Internal {
+    namespace Telecom {
+
+    /**
+     * Simple response callback object.
+     *
+     * {@hide}
+     */
+    interface IRemoteServiceCallback {
+        OnError();
+
+        OnResult(
+            [in] IList* components,
+            [in] IList* callServices);
+    }
+
+    } // namespace Telecom
+    } // namespace Internal
+    } // namespace Droid
+    } // namespace Elastos
+}

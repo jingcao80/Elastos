@@ -1,8 +1,8 @@
 
 module
 {
-    interface Elastos.Droid.Telecomm.Telecom.IVideoProfile;
-    interface Elastos.Droid.Telecomm.Telecom.ICameraCapabilities;
+    interface Elastos.Droid.Telecom.IVideoProfile;
+    interface Elastos.Droid.Telecom.ICameraCapabilities;
 
     namespace Elastos {
     namespace Droid {

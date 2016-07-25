@@ -1,0 +1,217 @@
+
+module
+{
+
+    interface Elastos.Droid.Content.IComponentName;
+    interface Elastos.Droid.Os.IBundle;
+    interface Elastos.Droid.Telecom.IPhoneAccountHandle;
+    interface Elastos.Droid.Telecom.IPhoneAccount;
+    using interface Elastos.Utility.IList;
+
+    namespace Elastos {
+    namespace Droid {
+    namespace Internal {
+    namespace Telecom {
+
+        /**
+         * Interface used to interact with Telecom. Mostly this is used by TelephonyManager for passing
+         * commands that were previously handled by ITelephony.
+         * {@hide}
+        */
+        interface IITelecomService {
+            /**
+             * Brings the in-call screen to the foreground if there is an active call.
+             *
+             * @param showDialpad if true, make the dialpad visible initially.
+             */
+            ShowInCallScreen(
+                [in] Boolean showDialpad);
+
+            /**
+             * @see TelecomServiceImpl#getDefaultOutgoingPhoneAccount
+             */
+            GetDefaultOutgoingPhoneAccount(
+                [in] String uriScheme,
+                [out] IPhoneAccountHandle** handle);
+
+            /**
+             * @see TelecomServiceImpl#getUserSelectedOutgoingPhoneAccount
+             */
+            GetUserSelectedOutgoingPhoneAccount(
+                [out] IPhoneAccountHandle** list);
+
+            /**
+             * @see TelecomServiceImpl#setUserSelectedOutgoingPhoneAccount
+             */
+            SetUserSelectedOutgoingPhoneAccount(
+                [in] IPhoneAccountHandle* account);
+
+            /**
+             * @see TelecomServiceImpl#getCallCapablePhoneAccounts
+             */
+            GetCallCapablePhoneAccounts(
+                [out] IList** list);
+
+            /**
+             * @see TelecomManager#getPhoneAccountsSupportingScheme
+             */
+            GetPhoneAccountsSupportingScheme(
+                [in] String uriScheme,
+                [out] IList** list);
+
+            /**
+             * @see TelecomManager#getPhoneAccountsForPackage
+             */
+            GetPhoneAccountsForPackage(
+                [in] String packageName,
+                [out] IList** list);
+
+            /**
+             * @see TelecomManager#getPhoneAccount
+             */
+            GetPhoneAccount(
+                [in] IPhoneAccountHandle* account,
+                [out] IPhoneAccount** list);
+
+            /**
+             * @see TelecomManager#getAllPhoneAccountsCount
+             */
+            GetAllPhoneAccountsCount(
+                [out] Int32* list);
+
+            /**
+             * @see TelecomManager#getAllPhoneAccounts
+             */
+            GetAllPhoneAccounts(
+                [out] IList** list);
+
+            /**
+             * @see TelecomManager#getAllPhoneAccountHandles
+             */
+            GetAllPhoneAccountHandles(
+                [out] IList** list);
+
+            /**
+             * @see TelecomServiceImpl#getSimCallManager
+             */
+            GetSimCallManager(
+                [out] IPhoneAccountHandle** res);
+
+            /**
+             * @see TelecomServiceImpl#setSimCallManager
+             */
+            SetSimCallManager(
+                [in] IPhoneAccountHandle* account);
+
+            /**
+             * @see TelecomServiceImpl#getSimCallManagers
+             */
+            GetSimCallManagers(
+                [out] IList** list);
+
+            /**
+             * @see TelecomServiceImpl#registerPhoneAccount
+             */
+            RegisterPhoneAccount(
+                [in] IPhoneAccount* metadata);
+
+            /**
+             * @see TelecomServiceImpl#unregisterPhoneAccount
+             */
+            UnregisterPhoneAccount(
+                [in] IPhoneAccountHandle* account);
+
+            /**
+             * @see TelecomServiceImpl#clearAccounts
+             */
+            ClearAccounts(
+                [in] String packageName);
+
+            /**
+             * @see TelecomServiceImpl#getDefaultPhoneApp
+             */
+            GetDefaultPhoneApp(
+                [out] IComponentName** res);
+
+            //
+            // Internal system apis relating to call management.
+            //
+
+            /**
+             * @see TelecomServiceImpl#silenceRinger
+             */
+            SilenceRinger();
+
+            /**
+             * @see TelecomServiceImpl#isInCall
+             */
+            IsInCall(
+                [out] Boolean* res);
+
+            /**
+             * @see TelecomServiceImpl#isRinging
+             */
+            IsRinging(
+                [out] Boolean* res);
+
+            /**
+             * @see TelecomServiceImpl#getCallState
+             */
+            GetCallState(
+                [out] Int32* res);
+
+            /**
+             * @see TelecomServiceImpl#endCall
+             */
+            EndCall(
+                [out] Boolean* res);
+
+            /**
+             * @see TelecomServiceImpl#acceptRingingCall
+             */
+            AcceptRingingCall();
+
+            /**
+             * @see TelecomServiceImpl#cancelMissedCallsNotification
+             */
+            CancelMissedCallsNotification();
+
+            /**
+             * @see TelecomServiceImpl#handleMmi
+             */
+            HandlePinMmi(
+                [in] String dialString,
+                [out] Boolean* res);
+
+            /**
+             * @see TelecomServiceImpl#isTtySupported
+             */
+            IsTtySupported(
+                [out] Boolean* res);
+
+            /**
+             * @see TelecomServiceImpl#getCurrentTtyMode
+             */
+            GetCurrentTtyMode(
+                [out] Int32* mode);
+
+            /**
+             * @see TelecomServiceImpl#addNewIncomingCall
+             */
+            AddNewIncomingCall(
+                [in] IPhoneAccountHandle* phoneAccount,
+                [in] IBundle* extras);
+
+            /**
+             * @see TelecomServiceImpl#addNewUnknownCall
+             */
+            AddNewUnknownCall(
+                [in] IPhoneAccountHandle* phoneAccount,
+                [in] IBundle* extras);
+        }
+
+    } // namespace Telecom
+    } // namespace Internal
+    } // namespace Droid
+    } // namespace Elastos
+}

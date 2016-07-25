@@ -13,9 +13,9 @@
 using Elastos::Droid::Content::IComponentName;
 using Elastos::Droid::Net::IUri;
 using Elastos::Droid::Os::Process;
-using Elastos::Droid::Telecomm::Telecom::CDisconnectCause;
-using Elastos::Droid::Telecomm::Telecom::IPhoneAccount;
-using Elastos::Droid::Telecomm::Telecom::IPhoneAccountHandle;
+using Elastos::Droid::Telecom::CDisconnectCause;
+using Elastos::Droid::Telecom::IPhoneAccount;
+using Elastos::Droid::Telecom::IPhoneAccountHandle;
 using Elastos::Utility::CArrayList;
 using Elastos::Utility::Objects;
 

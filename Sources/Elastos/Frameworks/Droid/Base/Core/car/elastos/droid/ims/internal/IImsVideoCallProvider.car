@@ -2,7 +2,7 @@
 module
 {
     interface Elastos.Droid.Ims.Internal.IIImsVideoCallCallback;
-    interface Elastos.Droid.Telecomm.Telecom.IVideoProfile;
+    interface Elastos.Droid.Telecom.IVideoProfile;
     interface Elastos.Droid.View.ISurface;
 
     namespace Elastos {

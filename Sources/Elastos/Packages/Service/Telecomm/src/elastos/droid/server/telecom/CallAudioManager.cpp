@@ -15,11 +15,11 @@
 using Elastos::Droid::Content::Res::IResources;
 using Elastos::Droid::Internal::Utility::CPreconditions;
 using Elastos::Droid::Internal::Utility::IPreconditions;
-using Elastos::Droid::Telecomm::Telecom::CAudioState;
-using Elastos::Droid::Telecomm::Telecom::CAudioStateHelper;
-using Elastos::Droid::Telecomm::Telecom::IAudioStateHelper;
-using Elastos::Droid::Telecomm::Telecom::ICallState;
-using Elastos::Droid::Telecomm::Telecom::IPhoneAccountHandle;
+using Elastos::Droid::Telecom::CAudioState;
+using Elastos::Droid::Telecom::CAudioStateHelper;
+using Elastos::Droid::Telecom::IAudioStateHelper;
+using Elastos::Droid::Telecom::ICallState;
+using Elastos::Droid::Telecom::IPhoneAccountHandle;
 using Elastos::Utility::IList;
 using Elastos::Utility::Objects;
 

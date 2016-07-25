@@ -5,7 +5,7 @@
 
 using Elastos::Droid::Internal::Telephony::IPhoneConstants;
 using Elastos::Droid::Os::CBundle;
-using Elastos::Droid::Telecomm::Telecom::IVideoProfileVideoState;
+using Elastos::Droid::Telecom::IVideoProfileVideoState;
 using Elastos::Core::ICloneable;
 using Elastos::Core::StringBuilder;
 

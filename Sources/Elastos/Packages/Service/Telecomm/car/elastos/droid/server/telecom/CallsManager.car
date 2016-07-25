@@ -1,7 +1,7 @@
 
 module
 {
-    using interface Elastos.Droid.Telecomm.Telecom.IAudioState;
+    using interface Elastos.Droid.Telecom.IAudioState;
 
     interface Elastos.Droid.Server.Telecom.IConnectionServiceWrapper;
 

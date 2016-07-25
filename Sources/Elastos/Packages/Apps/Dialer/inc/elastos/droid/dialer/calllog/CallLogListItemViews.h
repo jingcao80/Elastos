@@ -4,7 +4,7 @@
 #include "_Elastos.Droid.Dialer.h"
 #include "Elastos.Droid.Content.h"
 #include "Elastos.Droid.View.h"
-#include "Elastos.Droid.Telecomm.h"
+#include "Elastos.Droid.Telecom.h"
 #include "Elastos.Droid.Widget.h"
 #include "elastos/core/Object.h"
 
@@ -13,7 +13,7 @@ using Elastos::Droid::Content::IContext;
 using Elastos::Droid::View::IView;
 using Elastos::Droid::Widget::IQuickContactBadge;
 using Elastos::Droid::Widget::ITextView;
-using Elastos::Droid::Telecomm::Telecom::IPhoneAccountHandle;
+using Elastos::Droid::Telecom::IPhoneAccountHandle;
 
 namespace Elastos {
 namespace Droid {

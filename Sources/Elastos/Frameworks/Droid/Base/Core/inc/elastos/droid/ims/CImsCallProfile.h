@@ -3,7 +3,7 @@
 #define __ELASTOS_DROID_IMS_CIMSCALLPROFILE_H__
 
 #include "Elastos.Droid.Internal.h"
-#include "Elastos.Droid.Telecomm.h"
+#include "Elastos.Droid.Telecom.h"
 #include "_Elastos_Droid_Ims_CImsCallProfile.h"
 #include "elastos/droid/ext/frameworkdef.h"
 #include <elastos/core/Object.h>

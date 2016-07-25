@@ -10,7 +10,7 @@
 #include "elastos/droid/text/TextUtils.h"
 #include "Elastos.Droid.Internal.h"
 #include "Elastos.Droid.Telephony.h"
-#include "Elastos.Droid.Telecomm.h"
+#include "Elastos.Droid.Telecom.h"
 #include "Elastos.Droid.View.h"
 #include <elastos/utility/logging/Logger.h>
 #include "elastos/core/Thread.h"
@@ -39,7 +39,7 @@ using Elastos::Droid::Os::CUserHandleHelper;
 using Elastos::Droid::Text::TextUtils;
 using Elastos::Droid::Telephony::IPhoneNumberUtils;
 using Elastos::Droid::Telephony::CPhoneNumberUtils;
-using Elastos::Droid::Telecomm::Telecom::IPhoneAccount;
+using Elastos::Droid::Telecom::IPhoneAccount;
 using Elastos::Droid::View::IView;
 using Elastos::Core::Thread;
 using Elastos::Core::StringBuilder;

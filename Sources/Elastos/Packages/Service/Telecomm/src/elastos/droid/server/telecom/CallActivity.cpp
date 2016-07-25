@@ -5,7 +5,7 @@
 #include "elastos/droid/server/telecom/Log.h"
 #include "elastos/droid/server/telecom/TelephonyUtil.h"
 #include <Elastos.Droid.Provider.h>
-#include <Elastos.Droid.Telecomm.h>
+#include <Elastos.Droid.Telecom.h>
 #include <Elastos.Droid.Telephony.h>
 #include <elastos/droid/R.h>
 #include <elastos/droid/app/ActivityManagerNative.h>
@@ -31,9 +31,9 @@ using Elastos::Droid::Os::IUserHandle;
 using Elastos::Droid::Os::IUserManager;
 using Elastos::Droid::Os::UserHandle;
 using Elastos::Droid::Provider::ISettingsSecure;
-using Elastos::Droid::Telecomm::Telecom::IPhoneAccount;
-using Elastos::Droid::Telecomm::Telecom::ITelecomManager;
-using Elastos::Droid::Telecomm::Telecom::IVideoProfileVideoState;
+using Elastos::Droid::Telecom::IPhoneAccount;
+using Elastos::Droid::Telecom::ITelecomManager;
+using Elastos::Droid::Telecom::IVideoProfileVideoState;
 using Elastos::Droid::Telephony::CPhoneNumberUtils;
 using Elastos::Droid::Telephony::IPhoneNumberUtils;
 using Elastos::Droid::Text::TextUtils;

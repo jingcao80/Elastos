@@ -2,7 +2,7 @@
 module
 {
     using interface Elastos.Droid.Graphics.Drawable.IDrawable;
-    using interface Elastos.Droid.Telecomm.Telecom.IDisconnectCause;
+    using interface Elastos.Droid.Telecom.IDisconnectCause;
 
     namespace Elastos {
     namespace Droid {

@@ -8,12 +8,12 @@
 #include <elastos/utility/etl/List.h>
 
 using Elastos::Droid::Net::IUri;
-using Elastos::Droid::Telecomm::Telecom::ICallListener;
-using Elastos::Droid::Telecomm::Telecom::IDisconnectCause;
-using Elastos::Droid::Telecomm::Telecom::ICallDetails;
-using Elastos::Droid::Telecomm::Telecom::IInCallServiceVideoCall;
-using Elastos::Droid::Telecomm::Telecom::IPhoneAccountHandle;
-using Elastos::Droid::Telecomm::Telecom::IGatewayInfo;
+using Elastos::Droid::Telecom::ICallListener;
+using Elastos::Droid::Telecom::IDisconnectCause;
+using Elastos::Droid::Telecom::ICallDetails;
+using Elastos::Droid::Telecom::IInCallServiceVideoCall;
+using Elastos::Droid::Telecom::IPhoneAccountHandle;
+using Elastos::Droid::Telecom::IGatewayInfo;
 using Elastos::Core::Object;
 using Elastos::Utility::IList;
 using Elastos::Utility::Etl::List;
@@ -83,38 +83,38 @@ private:
         CAR_INTERFACE_DECL()
 
         CARAPI OnStateChanged(
-            /* [in] */ Elastos::Droid::Telecomm::Telecom::ICall* call,
+            /* [in] */ Elastos::Droid::Telecom::ICall* call,
             /* [in] */ Int32 state);
 
         CARAPI OnParentChanged(
-            /* [in] */ Elastos::Droid::Telecomm::Telecom::ICall* call,
-            /* [in] */ Elastos::Droid::Telecomm::Telecom::ICall* parent);
+            /* [in] */ Elastos::Droid::Telecom::ICall* call,
+            /* [in] */ Elastos::Droid::Telecom::ICall* parent);
 
         CARAPI OnChildrenChanged(
-            /* [in] */ Elastos::Droid::Telecomm::Telecom::ICall* call,
+            /* [in] */ Elastos::Droid::Telecom::ICall* call,
             /* [in] */ IList* children);
 
         CARAPI OnDetailsChanged(
-            /* [in] */ Elastos::Droid::Telecomm::Telecom::ICall* call,
+            /* [in] */ Elastos::Droid::Telecom::ICall* call,
             /* [in] */ ICallDetails* details);
 
         CARAPI OnCannedTextResponsesLoaded(
-            /* [in] */ Elastos::Droid::Telecomm::Telecom::ICall* call,
+            /* [in] */ Elastos::Droid::Telecom::ICall* call,
             /* [in] */ IList* cannedTextResponses);
 
         CARAPI OnPostDialWait(
-            /* [in] */ Elastos::Droid::Telecomm::Telecom::ICall* call,
+            /* [in] */ Elastos::Droid::Telecom::ICall* call,
             /* [in] */ String remainingPostDialSequence);
 
         CARAPI OnVideoCallChanged(
-            /* [in] */ Elastos::Droid::Telecomm::Telecom::ICall* call,
+            /* [in] */ Elastos::Droid::Telecom::ICall* call,
             /* [in] */ IInCallServiceVideoCall* videoCall);
 
         CARAPI OnCallDestroyed(
-            /* [in] */ Elastos::Droid::Telecomm::Telecom::ICall* call);
+            /* [in] */ Elastos::Droid::Telecom::ICall* call);
 
         CARAPI OnConferenceableCallsChanged(
-            /* [in] */ Elastos::Droid::Telecomm::Telecom::ICall* call,
+            /* [in] */ Elastos::Droid::Telecom::ICall* call,
             /* [in] */ IList* conferenceableCalls);
 
     private:
@@ -125,9 +125,9 @@ public:
     CAR_INTERFACE_DECL()
 
     Call(
-        /* [in] */ Elastos::Droid::Telecomm::Telecom::ICall* telecommCall);
+        /* [in] */ Elastos::Droid::Telecom::ICall* telecommCall);
 
-    CARAPI_(AutoPtr<Elastos::Droid::Telecomm::Telecom::ICall>) GetTelecommCall();
+    CARAPI_(AutoPtr<Elastos::Droid::Telecom::ICall>) GetTelecommCall();
 
     CARAPI_(String) GetId();
 
@@ -212,7 +212,7 @@ private:
 
     AutoPtr<ICallListener> mTelecommCallListener;
 
-    AutoPtr<Elastos::Droid::Telecomm::Telecom::ICall> mTelecommCall;
+    AutoPtr<Elastos::Droid::Telecom::ICall> mTelecommCall;
     String mId;
     Int32 mState;
     AutoPtr<IDisconnectCause> mDisconnectCause;

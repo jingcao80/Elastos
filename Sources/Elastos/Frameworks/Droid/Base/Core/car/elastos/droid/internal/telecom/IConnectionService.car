@@ -1,0 +1,91 @@
+
+module
+{
+
+    interface Elastos.Droid.Internal.Telecom.IIConnectionServiceAdapter;
+    interface Elastos.Droid.Telecom.IPhoneAccountHandle;
+    interface Elastos.Droid.Telecom.IConnectionRequest;
+    interface Elastos.Droid.Telecom.IAudioState;
+
+    namespace Elastos {
+    namespace Droid {
+    namespace Internal {
+    namespace Telecom {
+
+    /**
+     * Internal remote interface for connection services.
+     *
+     * @see android.telecom.ConnectionService
+     *
+     * @hide
+    */
+    interface IIConnectionService {
+        AddConnectionServiceAdapter(
+            [in] IIConnectionServiceAdapter* adapter);
+
+        RemoveConnectionServiceAdapter(
+            [in] IIConnectionServiceAdapter* adapter);
+
+        CreateConnection(
+            [in] IPhoneAccountHandle* connectionManagerPhoneAccount,
+            [in] String callId,
+            [in] IConnectionRequest* request,
+            [in] Boolean isIncoming,
+            [in] Boolean isUnknown);
+
+        Abort(
+            [in] String callId);
+
+        AnswerVideo(
+            [in] String callId,
+            [in] Int32 videoState);
+
+        Answer(
+            [in] String callId);
+
+        Reject(
+            [in] String callId);
+
+        Disconnect(
+            [in] String callId);
+
+        Hold(
+            [in] String callId);
+
+        Unhold(
+            [in] String callId);
+
+        OnAudioStateChanged(
+            [in] String activeCallId,
+            [in] IAudioState* audioState);
+
+        PlayDtmfTone(
+            [in] String callId,
+            [in] Char32 digit);
+
+        StopDtmfTone(
+            [in] String callId);
+
+        Conference(
+            [in] String conferenceCallId,
+            [in] String callId);
+
+        SplitFromConference(
+            [in] String callId);
+
+        MergeConference(
+            [in] String conferenceCallId);
+
+        SwapConference(
+            [in] String conferenceCallId);
+
+        OnPostDialContinue(
+            [in] String callId,
+            [in] Boolean proceed);
+    }
+
+    } // namespace Telecom
+    } // namespace Internal
+    } // namespace Droid
+    } // namespace Elastos
+}

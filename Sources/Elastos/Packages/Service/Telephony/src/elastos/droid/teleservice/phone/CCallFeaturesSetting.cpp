@@ -11,7 +11,7 @@
 #include "Elastos.Droid.Os.h"
 #include "Elastos.Droid.Provider.h"
 #include "Elastos.Droid.Widget.h"
-#include "Elastos.Droid.Telecomm.h"
+#include "Elastos.Droid.Telecom.h"
 #include "Elastos.Droid.Telephony.h"
 #include "elastos/droid/text/TextUtils.h"
 #include <elastos/core/StringBuilder.h>
@@ -52,9 +52,9 @@ using Elastos::Droid::Provider::IContactsContractCommonDataKindsPhone;
 using Elastos::Droid::Provider::ISettingsGlobal;
 using Elastos::Droid::Provider::ISettingsSecure;
 using Elastos::Droid::Provider::ISettingsSystem;
-using Elastos::Droid::Telecomm::Telecom::CTelecomManagerHelper;
-using Elastos::Droid::Telecomm::Telecom::ITelecomManagerHelper;
-using Elastos::Droid::Telecomm::Telecom::ITelecomManager;
+using Elastos::Droid::Telecom::CTelecomManagerHelper;
+using Elastos::Droid::Telecom::ITelecomManagerHelper;
+using Elastos::Droid::Telecom::ITelecomManager;
 using Elastos::Droid::Telephony::IPhoneNumberUtils;
 using Elastos::Droid::Text::TextUtils;
 using Elastos::Droid::Widget::IAdapter;

@@ -3,7 +3,7 @@
 #include "elastos/droid/teleservice/services/telephony/GsmConference.h"
 #include <elastos/utility/logging/Logger.h>
 
-using Elastos::Droid::Telecomm::Telecom::IConnectionService;
+using Elastos::Droid::Telecom::IConnectionService;
 using Elastos::Droid::Internal::Telephony::ICall;
 using Elastos::Droid::Internal::Telephony::ICallState;
 using Elastos::Droid::Internal::Telephony::ICallState_ACTIVE;

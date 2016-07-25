@@ -11,7 +11,7 @@ using Elastos::Droid::Content::Res::IResources;
 using Elastos::Droid::Media::IToneGenerator;
 using Elastos::Droid::TeleService::R;
 using Elastos::Droid::TeleService::Phone::PhoneGlobals;
-using Elastos::Droid::Telecomm::Telecom::CDisconnectCause;
+using Elastos::Droid::Telecom::CDisconnectCause;
 using Elastos::Core::CoreUtils;
 using Elastos::Core::StringBuilder;
 
@@ -51,22 +51,22 @@ Int32 DisconnectCauseUtil::ToTelecomDisconnectCauseCode(
 {
     switch (telephonyDisconnectCause) {
         case Elastos::Droid::Telephony::IDisconnectCause::LOCAL:
-            return Elastos::Droid::Telecomm::Telecom::IDisconnectCause::LOCAL;
+            return Elastos::Droid::Telecom::IDisconnectCause::LOCAL;
 
         case Elastos::Droid::Telephony::IDisconnectCause::NORMAL:
-            return Elastos::Droid::Telecomm::Telecom::IDisconnectCause::REMOTE;
+            return Elastos::Droid::Telecom::IDisconnectCause::REMOTE;
 
         case Elastos::Droid::Telephony::IDisconnectCause::OUTGOING_CANCELED:
-            return Elastos::Droid::Telecomm::Telecom::IDisconnectCause::CANCELED;
+            return Elastos::Droid::Telecom::IDisconnectCause::CANCELED;
 
         case Elastos::Droid::Telephony::IDisconnectCause::INCOMING_MISSED:
-            return Elastos::Droid::Telecomm::Telecom::IDisconnectCause::MISSED;
+            return Elastos::Droid::Telecom::IDisconnectCause::MISSED;
 
         case Elastos::Droid::Telephony::IDisconnectCause::INCOMING_REJECTED:
-            return Elastos::Droid::Telecomm::Telecom::IDisconnectCause::REJECTED;
+            return Elastos::Droid::Telecom::IDisconnectCause::REJECTED;
 
         case Elastos::Droid::Telephony::IDisconnectCause::BUSY:
-            return Elastos::Droid::Telecomm::Telecom::IDisconnectCause::BUSY;
+            return Elastos::Droid::Telecom::IDisconnectCause::BUSY;
 
         case Elastos::Droid::Telephony::IDisconnectCause::CALL_BARRED:
         case Elastos::Droid::Telephony::IDisconnectCause::CDMA_ACCESS_BLOCKED:
@@ -77,7 +77,7 @@ Int32 DisconnectCauseUtil::ToTelecomDisconnectCauseCode(
         case Elastos::Droid::Telephony::IDisconnectCause::EMERGENCY_ONLY:
         case Elastos::Droid::Telephony::IDisconnectCause::FDN_BLOCKED:
         case Elastos::Droid::Telephony::IDisconnectCause::LIMIT_EXCEEDED:
-            return Elastos::Droid::Telecomm::Telecom::IDisconnectCause::RESTRICTED;
+            return Elastos::Droid::Telecom::IDisconnectCause::RESTRICTED;
 
         case Elastos::Droid::Telephony::IDisconnectCause::CDMA_ACCESS_FAILURE:
         case Elastos::Droid::Telephony::IDisconnectCause::CDMA_CALL_LOST:
@@ -105,16 +105,16 @@ Int32 DisconnectCauseUtil::ToTelecomDisconnectCauseCode(
         case Elastos::Droid::Telephony::IDisconnectCause::UNOBTAINABLE_NUMBER:
         case Elastos::Droid::Telephony::IDisconnectCause::VOICEMAIL_NUMBER_MISSING:
         case Elastos::Droid::Telephony::IDisconnectCause::ERROR_UNSPECIFIED:
-            return Elastos::Droid::Telecomm::Telecom::IDisconnectCause::ERROR;
+            return Elastos::Droid::Telecom::IDisconnectCause::ERROR;
 
         case Elastos::Droid::Telephony::IDisconnectCause::DIALED_MMI:
         case Elastos::Droid::Telephony::IDisconnectCause::EXITED_ECM:
         case Elastos::Droid::Telephony::IDisconnectCause::MMI:
-            return Elastos::Droid::Telecomm::Telecom::IDisconnectCause::OTHER;
+            return Elastos::Droid::Telecom::IDisconnectCause::OTHER;
 
         case Elastos::Droid::Telephony::IDisconnectCause::NOT_VALID:
         case Elastos::Droid::Telephony::IDisconnectCause::NOT_DISCONNECTED:
-            return Elastos::Droid::Telecomm::Telecom::IDisconnectCause::UNKNOWN;
+            return Elastos::Droid::Telecom::IDisconnectCause::UNKNOWN;
 
         default:
             //throw new IllegalStateException("Unrecognized Telephony DisconnectCause");

@@ -2,7 +2,7 @@
 #ifndef __ELASTOS_DROID_INCALLUI_CALLLIST_H__
 #define __ELASTOS_DROID_INCALLUI_CALLLIST_H__
 
-#include "Elastos.Droid.Telecomm.h"
+#include "Elastos.Droid.Telecom.h"
 #include "_Elastos.Droid.Dialer.h"
 #include "elastos/droid/incallui/Call.h"
 #include "elastos/droid/telecomm/telecom/Phone.h"
@@ -14,8 +14,8 @@
 #include <elastos/utility/etl/Set.h>
 
 using Elastos::Droid::Os::Handler;
-using Elastos::Droid::Telecomm::Telecom::IPhone;
-using Elastos::Droid::Telecomm::Telecom::IPhoneListener;
+using Elastos::Droid::Telecom::IPhone;
+using Elastos::Droid::Telecom::IPhoneListener;
 using Elastos::Core::Object;
 using Elastos::Utility::Etl::HashMap;
 using Elastos::Utility::Etl::Set;
@@ -42,12 +42,12 @@ private:
         // @Override
         CARAPI OnCallAdded(
             /* [in] */ IPhone* phone,
-            /* [in] */ Elastos::Droid::Telecomm::Telecom::ICall* call);
+            /* [in] */ Elastos::Droid::Telecom::ICall* call);
 
         // @Override
         CARAPI OnCallRemoved(
             /* [in] */ IPhone* phone,
-            /* [in] */ Elastos::Droid::Telecomm::Telecom::ICall* call);
+            /* [in] */ Elastos::Droid::Telecom::ICall* call);
 
     private:
         CallList* mHost;
@@ -178,7 +178,7 @@ public:
         /* [in] */ const String& callId);
 
     CARAPI_(AutoPtr<Call>) GetCallByTelecommCall(
-        /* [in] */ Elastos::Droid::Telecomm::Telecom::ICall* telecommCall);
+        /* [in] */ Elastos::Droid::Telecom::ICall* telecommCall);
 
     CARAPI_(AutoPtr<IList>) GetTextResponses(
         /* [in] */ const String& callId);
@@ -271,7 +271,7 @@ private:
     static AutoPtr<CallList> sInstance;
 
     HashMap<String, AutoPtr<Call> > mCallById;
-    HashMap<AutoPtr<Elastos::Droid::Telecomm::Telecom::ICall>, AutoPtr<Call> > mCallByTelecommCall;
+    HashMap<AutoPtr<Elastos::Droid::Telecom::ICall>, AutoPtr<Call> > mCallByTelecommCall;
     HashMap<String, AutoPtr<IList> > mCallTextReponsesMap;
     /**
      * ConcurrentHashMap constructor params: 8 is initial table size, 0.9f is

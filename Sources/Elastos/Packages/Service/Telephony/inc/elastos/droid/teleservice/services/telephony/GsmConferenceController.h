@@ -2,18 +2,18 @@
 #define  __ELASTOS_DROID_SERVICES_TELEPHONY_GSMCONFERENCECONTROLLER_H__
 
 #include "_Elastos.Droid.TeleService.h"
-#include "elastos/droid/telecomm/telecom/Connection.h"
+#include "elastos/droid/telecom/Connection.h"
 #include "elastos/droid/ext/frameworkext.h"
 #include "Elastos.Droid.Internal.h"
-#include "Elastos.Droid.Telecomm.h"
+#include "Elastos.Droid.Telecom.h"
 #include <elastos/core/Object.h>
 #include "Elastos.CoreLibrary.Utility.h"
 
-using Elastos::Droid::Telecomm::Telecom::Connection;
-using Elastos::Droid::Telecomm::Telecom::IConference;
-using Elastos::Droid::Telecomm::Telecom::IDisconnectCause;
-using Elastos::Droid::Telecomm::Telecom::IConnection;
-using Elastos::Droid::Telecomm::Telecom::IConnectionListener;
+using Elastos::Droid::Telecom::Connection;
+using Elastos::Droid::Telecom::IConference;
+using Elastos::Droid::Telecom::IDisconnectCause;
+using Elastos::Droid::Telecom::IConnection;
+using Elastos::Droid::Telecom::IConnectionListener;
 using Elastos::Core::Object;
 using Elastos::Utility::IList;
 

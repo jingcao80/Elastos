@@ -3,18 +3,18 @@
 
 #include "_Elastos.Droid.TeleService.h"
 #include "elastos/droid/ext/frameworkext.h"
-#include "elastos/droid/telecomm/telecom/Connection.h"
+#include "elastos/droid/telecom/Connection.h"
 #include "Elastos.Droid.Internal.h"
 #include "Elastos.Droid.Os.h"
-#include "Elastos.Droid.Telecomm.h"
+#include "Elastos.Droid.Telecom.h"
 #include <elastos/core/Object.h>
 
 using Elastos::Droid::Internal::Telephony::ICall;
 using Elastos::Droid::Internal::Telephony::ICallState;
 using Elastos::Droid::Internal::Telephony::Sip::ISipPhone;
 using Elastos::Droid::Os::IMessage;
-using Elastos::Droid::Telecomm::Telecom::IAudioState;
-using Elastos::Droid::Telecomm::Telecom::Connection;
+using Elastos::Droid::Telecom::IAudioState;
+using Elastos::Droid::Telecom::Connection;
 using Elastos::Core::Object;
 
 namespace Elastos {

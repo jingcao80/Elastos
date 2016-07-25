@@ -2,12 +2,12 @@
 #ifndef __ELASTOS_DROID_INCALLUI_CALLBUTTONPRESENTER_H__
 #define __ELASTOS_DROID_INCALLUI_CALLBUTTONPRESENTER_H__
 
-#include "Elastos.Droid.Telecomm.h"
+#include "Elastos.Droid.Telecom.h"
 #include "_Elastos.Droid.Dialer.h"
 #include "elastos/droid/incallui/Call.h"
 #include "elastos/droid/incallui/Presenter.h"
 
-using Elastos::Droid::Telecomm::Telecom::ICallDetails;
+using Elastos::Droid::Telecom::ICallDetails;
 
 namespace Elastos {
 namespace Droid {

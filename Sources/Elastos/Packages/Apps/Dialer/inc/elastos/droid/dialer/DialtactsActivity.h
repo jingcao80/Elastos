@@ -3,7 +3,7 @@
 
 #include "Elastos.Droid.App.h"
 #include "Elastos.Droid.Telephony.h"
-#include "Elastos.Droid.Telecomm.h"
+#include "Elastos.Droid.Telecom.h"
 #include "Elastos.Droid.Text.h"
 #include "Elastos.Droid.View.h"
 #include "Elastos.Droid.Widget.h"
@@ -24,7 +24,7 @@
 using Elastos::Droid::App::IActionBar;
 using Elastos::Droid::App::IFragment;
 using Elastos::Droid::Telephony::ITelephonyManager;
-using Elastos::Droid::Telecomm::Telecom::ITelecomManager;
+using Elastos::Droid::Telecom::ITelecomManager;
 using Elastos::Droid::Text::IEditable;
 using Elastos::Droid::Text::ITextWatcher;
 using Elastos::Droid::View::IDragEvent;

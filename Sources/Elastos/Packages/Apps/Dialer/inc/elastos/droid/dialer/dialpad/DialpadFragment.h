@@ -8,7 +8,7 @@
 #include "Elastos.Droid.Graphics.h"
 #include "Elastos.Droid.Media.h"
 #include "Elastos.Droid.Os.h"
-#include "Elastos.Droid.Telecomm.h"
+#include "Elastos.Droid.Telecom.h"
 #include "Elastos.Droid.Telephony.h"
 #include "Elastos.Droid.Text.h"
 #include "Elastos.Droid.View.h"
@@ -38,7 +38,7 @@ using Elastos::Droid::Content::IIntent;
 using Elastos::Droid::Graphics::IBitmap;
 using Elastos::Droid::Media::IToneGenerator;
 using Elastos::Droid::Os::IBundle;
-using Elastos::Droid::Telecomm::Telecom::ITelecomManager;
+using Elastos::Droid::Telecom::ITelecomManager;
 using Elastos::Droid::Telephony::PhoneStateListener;
 using Elastos::Droid::Telephony::ITelephonyManager;
 using Elastos::Droid::Text::IEditable;

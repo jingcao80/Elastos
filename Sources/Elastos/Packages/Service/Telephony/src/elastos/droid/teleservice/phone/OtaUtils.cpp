@@ -6,7 +6,7 @@
 #include "elastos/droid/R.h"
 #include "Elastos.Droid.Internal.h"
 #include "Elastos.Droid.Net.h"
-#include "Elastos.Droid.Telecomm.h"
+#include "Elastos.Droid.Telecom.h"
 #include "Elastos.Droid.Telephony.h"
 #include "Elastos.Droid.View.h"
 #include "Elastos.Droid.Widget.h"
@@ -38,7 +38,7 @@ using Elastos::Droid::Os::SystemClock;
 using Elastos::Droid::Os::IUserHandle;
 using Elastos::Droid::Os::IUserHandleHelper;
 using Elastos::Droid::Os::CUserHandleHelper;
-using Elastos::Droid::Telecomm::Telecom::IPhoneAccount;
+using Elastos::Droid::Telecom::IPhoneAccount;
 using Elastos::Droid::Telephony::ITelephonyManager;
 using Elastos::Droid::TeleService::R;
 using Elastos::Droid::View::IView;

@@ -29,7 +29,7 @@ using Elastos::Droid::Os::IHandler;
 using Elastos::Droid::Os::IMessage;
 using Elastos::Utility::IMap;
 using Elastos::Droid::Bluetooth::IBluetoothAdapter;
-using Elastos::Droid::Telecomm::Telecom::IPhoneAccount;
+using Elastos::Droid::Telecom::IPhoneAccount;
 using Elastos::Droid::Bluetooth::IBluetoothHeadset;
 
 namespace Elastos {

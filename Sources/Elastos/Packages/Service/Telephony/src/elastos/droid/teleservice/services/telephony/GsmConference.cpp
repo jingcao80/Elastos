@@ -4,7 +4,7 @@
 #include <elastos/utility/logging/Logger.h>
 
 using Elastos::Droid::Internal::Telephony::IPhone;
-using Elastos::Droid::Telecomm::Telecom::IPhoneCapabilities;
+using Elastos::Droid::Telecom::IPhoneCapabilities;
 using Elastos::Utility::IList;
 using Elastos::Utility::Logging::Logger;
 

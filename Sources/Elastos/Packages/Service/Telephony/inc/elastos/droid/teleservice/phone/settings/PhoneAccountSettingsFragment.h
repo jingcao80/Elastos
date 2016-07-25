@@ -8,7 +8,7 @@
 #include <Elastos.Droid.Content.h>
 #include <Elastos.Droid.Os.h>
 #include <Elastos.Droid.Preference.h>
-#include <Elastos.Droid.Telecomm.h>
+#include <Elastos.Droid.Telecom.h>
 
 using Elastos::Droid::Content::IIntent;
 using Elastos::Droid::Os::IBundle;
@@ -18,8 +18,8 @@ using Elastos::Droid::Preference::PreferenceFragment;
 using Elastos::Droid::Preference::ICheckBoxPreference;
 using Elastos::Droid::Preference::IPreferenceOnPreferenceChangeListener;
 using Elastos::Droid::Preference::IPreferenceOnPreferenceClickListener;
-using Elastos::Droid::Telecomm::Telecom::IPhoneAccountHandle;
-using Elastos::Droid::Telecomm::Telecom::ITelecomManager;
+using Elastos::Droid::Telecom::IPhoneAccountHandle;
+using Elastos::Droid::Telecom::ITelecomManager;
 using Elastos::Droid::TeleService::Services::Telephony::Sip::SipSharedPreferences;
 
 namespace Elastos {

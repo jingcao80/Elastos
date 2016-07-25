@@ -3,7 +3,7 @@
 #include "Elastos.Droid.Accounts.h"
 #include "Elastos.Droid.Location.h"
 #include "Elastos.Droid.Media.h"
-#include "Elastos.Droid.Telecomm.h"
+#include "Elastos.Droid.Telecom.h"
 #include "Elastos.Droid.Telephony.h"
 #include "Elastos.Droid.Wifi.h"
 #include "Elastos.Droid.Service.h"
@@ -64,7 +64,7 @@
 #include "elastos/droid/net/CConnectivityManager.h"
 #include "elastos/droid/net/CNetworkPolicyManager.h"
 #include "elastos/droid/net/CNetworkScoreManager.h"
-#include "elastos/droid/telecomm/telecom/CTelecomManager.h"
+#include "elastos/droid/telecom/CTelecomManager.h"
 #include "elastos/droid/telephony/CTelephonyManager.h"
 #include "elastos/droid/wifi/CWifiManager.h"
 #include "elastos/droid/wifi/p2p/CWifiP2pManager.h"
@@ -209,8 +209,8 @@ using Elastos::Droid::Privacy::IPrivacySettingsManager;
 using Elastos::Droid::Service::Persistentdata::IIPersistentDataBlockService;
 using Elastos::Droid::Service::Persistentdata::IPersistentDataBlockManager;
 using Elastos::Droid::Service::Persistentdata::CPersistentDataBlockManager;
-using Elastos::Droid::Telecomm::Telecom::CTelecomManager;
-using Elastos::Droid::Telecomm::Telecom::ITelecomManager;
+using Elastos::Droid::Telecom::CTelecomManager;
+using Elastos::Droid::Telecom::ITelecomManager;
 using Elastos::Droid::Telephony::CTelephonyManager;
 using Elastos::Droid::Telephony::ITelephonyManager;
 using Elastos::Droid::View::DisplayAdjustments;

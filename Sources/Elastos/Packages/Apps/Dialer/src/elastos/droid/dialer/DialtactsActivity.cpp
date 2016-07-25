@@ -1,7 +1,7 @@
 
 #include "Elastos.Droid.Provider.h"
 #include "Elastos.Droid.Speech.h"
-#include "Elastos.Droid.Telecomm.h"
+#include "Elastos.Droid.Telecom.h"
 #include "elastos/droid/dialer/DialtactsActivity.h"
 #include "elastos/droid/dialer/dialpad/SmartDialPrefix.h"
 // #include "elastos/droid/dialer/interactions/PhoneNumberInteraction.h"
@@ -33,8 +33,8 @@ using Elastos::Droid::Net::IUri;
 using Elastos::Droid::Provider::IContactsContractContacts;
 using Elastos::Droid::Provider::CContactsContractContacts;
 using Elastos::Droid::Provider::IContactsContractIntentsInsert;
-using Elastos::Droid::Telecomm::Telecom::IPhoneAccount;
-using Elastos::Droid::Telecomm::Telecom::ITelecomManager;
+using Elastos::Droid::Telecom::IPhoneAccount;
+using Elastos::Droid::Telecom::ITelecomManager;
 // using Elastos::Droid::Telephony::ITelephonyManager;
 using Elastos::Droid::Speech::IRecognizerIntent;
 using Elastos::Droid::Text::TextUtils;

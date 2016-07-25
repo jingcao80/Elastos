@@ -6,13 +6,13 @@
 #include <elastos/utility/logging/Logger.h>
 
 using Elastos::Droid::InCallUI::EIID_ICall;
-using Elastos::Droid::Telecomm::Telecom::EIID_ICallListener;
-using Elastos::Droid::Telecomm::Telecom::ICallDetails;
-using Elastos::Droid::Telecomm::Telecom::CDisconnectCause;
-using Elastos::Droid::Telecomm::Telecom::IPhoneCapabilities;
-using Elastos::Droid::Telecomm::Telecom::ICallProperties;
-using Elastos::Droid::Telecomm::Telecom::IVideoProfileVideoStateHelper;
-using Elastos::Droid::Telecomm::Telecom::CVideoProfileVideoStateHelper;
+using Elastos::Droid::Telecom::EIID_ICallListener;
+using Elastos::Droid::Telecom::ICallDetails;
+using Elastos::Droid::Telecom::CDisconnectCause;
+using Elastos::Droid::Telecom::IPhoneCapabilities;
+using Elastos::Droid::Telecom::ICallProperties;
+using Elastos::Droid::Telecom::IVideoProfileVideoStateHelper;
+using Elastos::Droid::Telecom::CVideoProfileVideoStateHelper;
 using Elastos::Core::StringUtils;
 using Elastos::Core::ICharSequence;
 using Elastos::Utility::Logging::Logger;
@@ -118,7 +118,7 @@ const Int32 Call::SessionModificationState::RECEIVED_UPGRADE_TO_VIDEO_REQUEST;
 CAR_INTERFACE_IMPL(Call::TelecommCallListener, Object, ICallListener)
 
 ECode Call::TelecommCallListener::OnStateChanged(
-    /* [in] */ Elastos::Droid::Telecomm::Telecom::ICall* call,
+    /* [in] */ Elastos::Droid::Telecom::ICall* call,
     /* [in] */ Int32 state)
 {
     mHost->Update();
@@ -126,15 +126,15 @@ ECode Call::TelecommCallListener::OnStateChanged(
 }
 
 ECode Call::TelecommCallListener::OnParentChanged(
-    /* [in] */ Elastos::Droid::Telecomm::Telecom::ICall* call,
-    /* [in] */ Elastos::Droid::Telecomm::Telecom::ICall* parent)
+    /* [in] */ Elastos::Droid::Telecom::ICall* call,
+    /* [in] */ Elastos::Droid::Telecom::ICall* parent)
 {
     mHost->Update();
     return NOERROR;
 }
 
 ECode Call::TelecommCallListener::OnChildrenChanged(
-    /* [in] */ Elastos::Droid::Telecomm::Telecom::ICall* call,
+    /* [in] */ Elastos::Droid::Telecom::ICall* call,
     /* [in] */ IList* children)
 {
     mHost->Update();
@@ -142,7 +142,7 @@ ECode Call::TelecommCallListener::OnChildrenChanged(
 }
 
 ECode Call::TelecommCallListener::OnDetailsChanged(
-    /* [in] */ Elastos::Droid::Telecomm::Telecom::ICall* call,
+    /* [in] */ Elastos::Droid::Telecom::ICall* call,
     /* [in] */ ICallDetails* details)
 {
     mHost->Update();
@@ -150,7 +150,7 @@ ECode Call::TelecommCallListener::OnDetailsChanged(
 }
 
 ECode Call::TelecommCallListener::OnCannedTextResponsesLoaded(
-    /* [in] */ Elastos::Droid::Telecomm::Telecom::ICall* call,
+    /* [in] */ Elastos::Droid::Telecom::ICall* call,
     /* [in] */ IList* cannedTextResponses)
 {
     mHost->Update();
@@ -158,7 +158,7 @@ ECode Call::TelecommCallListener::OnCannedTextResponsesLoaded(
 }
 
 ECode Call::TelecommCallListener::OnPostDialWait(
-    /* [in] */ Elastos::Droid::Telecomm::Telecom::ICall* call,
+    /* [in] */ Elastos::Droid::Telecom::ICall* call,
     /* [in] */ String remainingPostDialSequence)
 {
     mHost->Update();
@@ -166,7 +166,7 @@ ECode Call::TelecommCallListener::OnPostDialWait(
 }
 
 ECode Call::TelecommCallListener::OnVideoCallChanged(
-    /* [in] */ Elastos::Droid::Telecomm::Telecom::ICall* call,
+    /* [in] */ Elastos::Droid::Telecom::ICall* call,
     /* [in] */ IInCallServiceVideoCall* videoCall)
 {
     mHost->Update();
@@ -174,13 +174,13 @@ ECode Call::TelecommCallListener::OnVideoCallChanged(
 }
 
 ECode Call::TelecommCallListener::OnCallDestroyed(
-    /* [in] */ Elastos::Droid::Telecomm::Telecom::ICall* call)
+    /* [in] */ Elastos::Droid::Telecom::ICall* call)
 {
     return call->RemoveListener(mHost->mTelecommCallListener);
 }
 
 ECode Call::TelecommCallListener::OnConferenceableCallsChanged(
-    /* [in] */ Elastos::Droid::Telecomm::Telecom::ICall* call,
+    /* [in] */ Elastos::Droid::Telecom::ICall* call,
     /* [in] */ IList* conferenceableCalls)
 {
     mHost->Update();
@@ -198,7 +198,7 @@ Int32 Call::sIdCounter = 0;
 CAR_INTERFACE_IMPL(Call, Object, ICall)
 
 Call::Call(
-    /* [in] */ Elastos::Droid::Telecomm::Telecom::ICall* telecommCall)
+    /* [in] */ Elastos::Droid::Telecom::ICall* telecommCall)
     : mIsActiveSub(FALSE)
     , mTelecommCall(telecommCall)
     , mState(State::INVALID)
@@ -212,7 +212,7 @@ Call::Call(
     mTelecommCall->AddListener(mTelecommCallListener);
 }
 
-AutoPtr<Elastos::Droid::Telecomm::Telecom::ICall> Call::GetTelecommCall()
+AutoPtr<Elastos::Droid::Telecom::ICall> Call::GetTelecommCall()
 {
     return mTelecommCall;
 }
@@ -269,22 +269,22 @@ Int32 Call::TranslateState(
     /* [in] */ Int32 state)
 {
     switch (state) {
-        case Elastos::Droid::Telecomm::Telecom::ICall::STATE_CONNECTING:
+        case Elastos::Droid::Telecom::ICall::STATE_CONNECTING:
             return Call::State::CONNECTING;
-        case Elastos::Droid::Telecomm::Telecom::ICall::STATE_PRE_DIAL_WAIT:
+        case Elastos::Droid::Telecom::ICall::STATE_PRE_DIAL_WAIT:
             return Call::State::PRE_DIAL_WAIT;
-        case Elastos::Droid::Telecomm::Telecom::ICall::STATE_DIALING:
-        case Elastos::Droid::Telecomm::Telecom::ICall::STATE_NEW:
+        case Elastos::Droid::Telecom::ICall::STATE_DIALING:
+        case Elastos::Droid::Telecom::ICall::STATE_NEW:
             return Call::State::DIALING;
-        case Elastos::Droid::Telecomm::Telecom::ICall::STATE_RINGING:
+        case Elastos::Droid::Telecom::ICall::STATE_RINGING:
             return Call::State::INCOMING;
-        case Elastos::Droid::Telecomm::Telecom::ICall::STATE_ACTIVE:
+        case Elastos::Droid::Telecom::ICall::STATE_ACTIVE:
             return Call::State::ACTIVE;
-        case Elastos::Droid::Telecomm::Telecom::ICall::STATE_HOLDING:
+        case Elastos::Droid::Telecom::ICall::STATE_HOLDING:
             return Call::State::ONHOLD;
-        case Elastos::Droid::Telecomm::Telecom::ICall::STATE_DISCONNECTED:
+        case Elastos::Droid::Telecom::ICall::STATE_DISCONNECTED:
             return Call::State::DISCONNECTED;
-        case Elastos::Droid::Telecomm::Telecom::ICall::STATE_DISCONNECTING:
+        case Elastos::Droid::Telecom::ICall::STATE_DISCONNECTING:
             return Call::State::DISCONNECTING;
         default:
             return Call::State::INVALID;
@@ -327,8 +327,8 @@ AutoPtr<IUri> Call::GetHandle()
 
 Int32 Call::GetState()
 {
-    AutoPtr<Elastos::Droid::Telecomm::Telecom::ICall> parent;
-    if (mTelecommCall->GetParent((Elastos::Droid::Telecomm::Telecom::ICall**)&parent), parent != NULL) {
+    AutoPtr<Elastos::Droid::Telecom::ICall> parent;
+    if (mTelecommCall->GetParent((Elastos::Droid::Telecom::ICall**)&parent), parent != NULL) {
         return State::CONFERENCED;
     }
     else {
@@ -473,8 +473,8 @@ List<String>& Call::GetChildCallIds()
 
 String Call::GetParentId()
 {
-    AutoPtr<Elastos::Droid::Telecomm::Telecom::ICall> parentCall;
-    mTelecommCall->GetParent((Elastos::Droid::Telecomm::Telecom::ICall**)&parentCall);
+    AutoPtr<Elastos::Droid::Telecom::ICall> parentCall;
+    mTelecommCall->GetParent((Elastos::Droid::Telecom::ICall**)&parentCall);
     if (parentCall != NULL) {
         return CallList::GetInstance()->GetCallByTelecommCall(parentCall)->GetId();
     }

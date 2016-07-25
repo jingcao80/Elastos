@@ -9,7 +9,7 @@
 
 using Elastos::Droid::Internal::Os::SomeArgs;
 using Elastos::Droid::Os::EIID_IBinder;
-using Elastos::Droid::Telecomm::Internal::EIID_IIInCallAdapter;
+using Elastos::Droid::Internal::Telecom::EIID_IIInCallAdapter;
 using Elastos::Core::CBoolean;
 using Elastos::Core::CInteger32;
 using Elastos::Core::IBoolean;

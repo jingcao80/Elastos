@@ -2,7 +2,7 @@
 #include "elastos/droid/server/telecom/Log.h"
 #include <Elastos.CoreLibrary.Security.h>
 #include <Elastos.Droid.Telephony.h>
-#include <Elastos.Droid.Telecomm.h>
+#include <Elastos.Droid.Telecom.h>
 #include <elastos/core/StringBuffer.h>
 #include <elastos/core/StringBuilder.h>
 #include <elastos/core/StringUtils.h>
@@ -12,7 +12,7 @@
 
 using Elastos::Droid::Net::IUri;
 using Elastos::Droid::Net::Uri;
-using Elastos::Droid::Telecomm::Telecom::IPhoneAccount;
+using Elastos::Droid::Telecom::IPhoneAccount;
 using Elastos::Droid::Telephony::CPhoneNumberUtils;
 using Elastos::Droid::Telephony::IPhoneNumberUtils;
 using Elastos::Core::CObject;

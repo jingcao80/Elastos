@@ -7,8 +7,8 @@
 #include <elastos/droid/ext/frameworkext.h>
 
 using Elastos::Droid::Content::IContext;
-using Elastos::Droid::Telecomm::Telecom::IPhoneAccount;
-using Elastos::Droid::Telecomm::Telecom::IPhoneAccountHandle;
+using Elastos::Droid::Telecom::IPhoneAccount;
+using Elastos::Droid::Telecom::IPhoneAccountHandle;
 using Elastos::Droid::Utility::IAtomicFile;
 using Elastos::Utility::IList;
 using Org::Xmlpull::V1::IXmlPullParser;

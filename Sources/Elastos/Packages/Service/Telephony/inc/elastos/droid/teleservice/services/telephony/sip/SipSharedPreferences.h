@@ -4,14 +4,14 @@
 #include "_Elastos.Droid.TeleService.h"
 #include "elastos/droid/ext/frameworkext.h"
 #include "Elastos.Droid.App.h"
-#include "Elastos.Droid.Telecomm.h"
+#include "Elastos.Droid.Telecom.h"
 #include <elastos/core/Object.h>
 #include <elastos/core/StringBuffer.h>
 
 using Elastos::Droid::App::IPendingIntent;
 using Elastos::Droid::Content::IContext;
 using Elastos::Droid::Content::ISharedPreferences;
-using Elastos::Droid::Telecomm::Telecom::IPhoneAccountHandle;
+using Elastos::Droid::Telecom::IPhoneAccountHandle;
 using Elastos::Core::Object;
 using Elastos::Core::StringBuffer;
 

@@ -2,7 +2,7 @@
 #define __ELASTOS_DROID_INTERNAL_POLICY_IMPL_PHONEWINDOWMANAGER_H__
 
 #include "Elastos.Droid.Service.h"
-#include "Elastos.Droid.Telecomm.h"
+#include "Elastos.Droid.Telecom.h"
 #include <Elastos.CoreLibrary.Utility.h>
 #include "elastos/droid/app/ProgressDialog.h"
 #include "elastos/droid/content/BroadcastReceiver.h"
@@ -92,7 +92,7 @@ using Elastos::Droid::View::IWindowManagerPolicyWindowManagerFuncs;
 using Elastos::Droid::View::IWindowState;
 using Elastos::Droid::View::IWindowCallback;
 using Elastos::Droid::Widget::IToast;
-using Elastos::Droid::Telecomm::Telecom::ITelecomManager;
+using Elastos::Droid::Telecom::ITelecomManager;
 
 using Elastos::Core::ICharSequence;
 using Elastos::Core::IRunnable;

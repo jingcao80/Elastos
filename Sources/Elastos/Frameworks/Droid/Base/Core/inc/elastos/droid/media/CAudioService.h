@@ -12,7 +12,7 @@
 #include "Elastos.Droid.Hardware.h"
 #include "Elastos.Droid.Os.h"
 #include "Elastos.Droid.Provider.h"
-#include "Elastos.Droid.Telecomm.h"
+#include "Elastos.Droid.Telecom.h"
 #include "Elastos.Droid.View.h"
 #include "_Elastos_Droid_Media_CAudioService.h"
 #include "elastos/droid/content/BroadcastReceiver.h"

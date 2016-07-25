@@ -1,0 +1,82 @@
+
+module
+{
+
+    interface Elastos.Droid.Telecom.IPhoneAccountHandle;
+
+    namespace Elastos {
+    namespace Droid {
+    namespace Internal {
+    namespace Telecom {
+
+        /**
+         * Internal remote callback interface for in-call services.
+         *
+         * @see android.telecom.InCallAdapter
+         *
+         * {@hide}
+        */
+        interface IIInCallAdapter {
+            AnswerCall(
+                [in] String callId,
+                [in] Int32 videoState);
+
+            RejectCall(
+                [in] String callId,
+                [in] Boolean rejectWithMessage,
+                [in] String textMessage);
+
+            DisconnectCall(
+                [in] String callId);
+
+            HoldCall(
+                [in] String callId);
+
+            UnholdCall(
+                [in] String callId);
+
+            Mute(
+                [in] Boolean shouldMute);
+
+            SetAudioRoute(
+                [in] Int32 route);
+
+            PlayDtmfTone(
+                [in] String callId,
+                [in] Char32 digit);
+
+            StopDtmfTone(
+                [in] String callId);
+
+            PostDialContinue(
+                [in] String callId,
+                [in] Boolean proceed);
+
+            PhoneAccountSelected(
+                [in] String callId,
+                [in] IPhoneAccountHandle* accountHandle);
+
+            Conference(
+                [in] String callId,
+                [in] String otherCallId);
+
+            SplitFromConference(
+                [in] String callId);
+
+            MergeConference(
+                [in] String callId);
+
+            SwapConference(
+                [in] String callId);
+
+            TurnOnProximitySensor();
+
+            TurnOffProximitySensor(
+                [in] Boolean screenOnImmediately);
+        }
+
+    } // namespace Telecom
+    } // namespace Internal
+    } // namespace Droid
+    } // namespace Elastos
+}

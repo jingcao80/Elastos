@@ -5,7 +5,7 @@
 #include <Elastos.Droid.Os.h>
 #include <Elastos.Droid.View.h>
 #include <Elastos.Droid.Wifi.h>
-#include <Elastos.Droid.Telecomm.h>
+#include <Elastos.Droid.Telecom.h>
 #include <Elastos.CoreLibrary.Utility.h>
 #include "CActivityOne.h"
 #include "R.h"
@@ -28,9 +28,9 @@ using Elastos::Droid::Net::IUriHelper;
 using Elastos::Droid::Net::CUriHelper;
 using Elastos::Droid::Os::IPowerManager;
 using Elastos::Droid::Os::IPowerManagerWakeLock;
-using Elastos::Droid::Telecomm::Telecom::IPhoneAccount;
-using Elastos::Droid::Telecomm::Telecom::IVideoProfileVideoState;
-using Elastos::Droid::Telecomm::Telecom::ITelecomManager;
+using Elastos::Droid::Telecom::IPhoneAccount;
+using Elastos::Droid::Telecom::IVideoProfileVideoState;
+using Elastos::Droid::Telecom::ITelecomManager;
 using Elastos::Droid::View::EIID_IViewOnTouchListener;
 using Elastos::Droid::View::EIID_IViewOnKeyListener;
 using Elastos::Droid::View::EIID_IViewOnClickListener;

@@ -18,8 +18,8 @@ using Elastos::Droid::Content::CIntent;
 using Elastos::Droid::Content::Res::IResources;
 using Elastos::Droid::Provider::ISettingsSystem;
 using Elastos::Droid::Text::TextUtils;
-using Elastos::Droid::Telecomm::Telecom::ITelecomManager;
-using Elastos::Droid::Telecomm::Telecom::CPhoneAccountHandle;
+using Elastos::Droid::Telecom::ITelecomManager;
+using Elastos::Droid::Telecom::CPhoneAccountHandle;
 
 namespace Elastos {
 namespace Droid {

@@ -5,7 +5,7 @@
 #include "_Elastos.Droid.Server.Telecom.h"
 #include <Elastos.CoreLibrary.Utility.h>
 #include <Elastos.Droid.Net.h>
-#include <Elastos.Droid.Telecomm.h>
+#include <Elastos.Droid.Telecom.h>
 #include <elastos/droid/app/Activity.h>
 #include <elastos/droid/ext/frameworkext.h>
 #include <elastos/droid/widget/ArrayAdapter.h>
@@ -18,7 +18,7 @@ using Elastos::Droid::Content::IDialogInterfaceOnCancelListener;
 using Elastos::Droid::Content::IDialogInterfaceOnClickListener;
 using Elastos::Droid::Net::IUri;
 using Elastos::Droid::Os::IBundle;
-using Elastos::Droid::Telecomm::Telecom::ITelecomManager;
+using Elastos::Droid::Telecom::ITelecomManager;
 using Elastos::Droid::View::IView;
 using Elastos::Droid::Widget::ArrayAdapter;
 using Elastos::Utility::IList;

@@ -6,8 +6,8 @@ using Elastos::Droid::Content::IComponentName;
 using Elastos::Droid::Content::IComponentNameHelper;
 using Elastos::Droid::Content::CComponentNameHelper;
 using Elastos::Droid::Text::TextUtils;
-using Elastos::Droid::Telecomm::Telecom::CPhoneAccountHandle;
-using Elastos::Droid::Telecomm::Telecom::ITelecomManager;
+using Elastos::Droid::Telecom::CPhoneAccountHandle;
+using Elastos::Droid::Telecom::ITelecomManager;
 
 namespace Elastos {
 namespace Droid {

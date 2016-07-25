@@ -20,7 +20,7 @@ using Elastos::Droid::Internal::Os::SomeArgs;
 using Elastos::Droid::Internal::Telephony::IPhoneConstants;
 using Elastos::Droid::Net::IUri;
 using Elastos::Droid::Net::Uri;
-using Elastos::Droid::Telecomm::Telecom::IPhoneAccountHandle;
+using Elastos::Droid::Telecom::IPhoneAccountHandle;
 using Elastos::Droid::Telephony::CSubscriptionManager;
 using Elastos::Droid::Telephony::ISubscriptionManager;
 using Elastos::Droid::Telephony::ITelephonyManager;

@@ -6,7 +6,7 @@
 #include "elastos/utility/Objects.h"
 
 using Elastos::Droid::Preference::EIID_IPreferenceOnPreferenceChangeListener;
-using Elastos::Droid::Telecomm::Telecom::IPhoneAccount;
+using Elastos::Droid::Telecom::IPhoneAccount;
 using Elastos::Core::Object;
 using Elastos::Core::CoreUtils;
 using Elastos::Core::StringUtils;

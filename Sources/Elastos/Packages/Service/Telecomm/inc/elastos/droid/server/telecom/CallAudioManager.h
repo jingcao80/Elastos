@@ -12,7 +12,7 @@
 
 using Elastos::Droid::Content::IContext;
 using Elastos::Droid::Media::IAudioManager;
-using Elastos::Droid::Telecomm::Telecom::IAudioState;
+using Elastos::Droid::Telecom::IAudioState;
 
 namespace Elastos {
 namespace Droid {

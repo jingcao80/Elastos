@@ -1,0 +1,49 @@
+
+module
+{
+
+    interface Elastos.Droid.Telecom.IParcelableCall;
+    interface Elastos.Droid.Telecom.IAudioState;
+
+    namespace Elastos {
+    namespace Droid {
+    namespace Internal {
+    namespace Telecom {
+
+        /**
+         * Internal remote interface for in-call services.
+         *
+         * @see android.telecom.InCallService
+         *
+         * {@hide}
+         */
+        interface IIInCallService {
+            SetInCallAdapter(
+                [in] IIInCallAdapter* inCallAdapter);
+
+            AddCall(
+                [in] IParcelableCall* call);
+
+            UpdateCall(
+                [in] IParcelableCall* call);
+
+            SetPostDial(
+                [in] String callId,
+                [in] String remaining);
+
+            SetPostDialWait(
+                [in] String callId,
+                [in] String remaining);
+
+            OnAudioStateChanged(
+                [in] IAudioState* audioState);
+
+            BringToForeground(
+                [in] Boolean showDialpad);
+        }
+
+    } // namespace Telecom
+    } // namespace Internal
+    } // namespace Droid
+    } // namespace Elastos
+}

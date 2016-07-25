@@ -2,7 +2,7 @@
 #include "elastos/droid/internal/telephony/CallManager.h"
 #include "elastos/droid/os/AsyncResult.h"
 #include "elastos/droid/os/Registrant.h"
-#include "Elastos.Droid.Telecomm.h"
+#include "Elastos.Droid.Telecom.h"
 #include "elastos/droid/telephony/CTelephonyManager.h"
 #include "elastos/droid/telephony/PhoneNumberUtils.h"
 #include <elastos/core/StringUtils.h>
@@ -12,7 +12,7 @@ using Elastos::Droid::Internal::Telephony::ImsPhone::IImsPhone;
 using Elastos::Droid::Internal::Telephony::Sip::ISipPhone;
 using Elastos::Droid::Os::AsyncResult;
 using Elastos::Droid::Os::Registrant;
-using Elastos::Droid::Telecomm::Telecom::IVideoProfileVideoState;
+using Elastos::Droid::Telecom::IVideoProfileVideoState;
 using Elastos::Droid::Telephony::CTelephonyManager;
 using Elastos::Droid::Telephony::ITelephonyManager;
 using Elastos::Droid::Telephony::IServiceState;

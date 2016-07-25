@@ -4,14 +4,14 @@
 #include "_Elastos_Droid_TeleService_Services_Telephony_Sip_CSipConnectionService.h"
 #include "elastos/droid/ext/frameworkext.h"
 #include "elastos/droid/teleservice/services/telephony/sip/SipProfileDb.h"
-#include "elastos/droid/telecomm/telecom/ConnectionService.h"
+#include "elastos/droid/telecom/ConnectionService.h"
 #include "Elastos.Droid.Internal.h"
-#include "Elastos.Droid.Telecomm.h"
+#include "Elastos.Droid.Telecom.h"
 
 using Elastos::Droid::Internal::Telephony::Sip::ISipPhone;
-using Elastos::Droid::Telecomm::Telecom::IConnectionRequest;
-using Elastos::Droid::Telecomm::Telecom::ConnectionService;
-using Elastos::Droid::Telecomm::Telecom::IPhoneAccountHandle;
+using Elastos::Droid::Telecom::IConnectionRequest;
+using Elastos::Droid::Telecom::ConnectionService;
+using Elastos::Droid::Telecom::IPhoneAccountHandle;
 
 namespace Elastos {
 namespace Droid {
@@ -33,13 +33,13 @@ public:
     CARAPI OnCreateOutgoingConnection(
         /* [in] */ IPhoneAccountHandle* connectionManagerPhoneAccount,
         /* [in] */ IConnectionRequest* request,
-        /* [out] */ Elastos::Droid::Telecomm::Telecom::IConnection** res);
+        /* [out] */ Elastos::Droid::Telecom::IConnection** res);
 
     //@Override
     CARAPI OnCreateIncomingConnection(
         /* [in] */ IPhoneAccountHandle* connectionManagerPhoneAccount,
         /* [in] */ IConnectionRequest* request,
-        /* [out] */ Elastos::Droid::Telecomm::Telecom::IConnection** res);
+        /* [out] */ Elastos::Droid::Telecom::IConnection** res);
 
 private:
     // CARAPI_(AutoPtr<Elastos::Droid::Internal::Telephony::IConnection>) CreateConnectionForProfile(

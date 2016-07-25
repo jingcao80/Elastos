@@ -9,7 +9,7 @@
 #include "Elastos.Droid.App.h"
 #include "Elastos.Droid.Content.h"
 #include "Elastos.Droid.Provider.h"
-#include "Elastos.Droid.Telecomm.h"
+#include "Elastos.Droid.Telecom.h"
 #include <elastos/droid/app/ActivityManagerNative.h>
 #include <elastos/droid/os/AsyncTask.h>
 #include <elastos/droid/R.h>
@@ -29,8 +29,8 @@ using Elastos::Droid::Os::IUserHandle;
 using Elastos::Droid::Os::IUserHandleHelper;
 using Elastos::Droid::Provider::IMediaStore;
 using Elastos::Droid::SystemUI::StatusBar::Policy::EIID_IAccessibilityStateChangedCallback;
-using Elastos::Droid::Telecomm::Telecom::CTelecomManagerHelper;
-using Elastos::Droid::Telecomm::Telecom::ITelecomManagerHelper;
+using Elastos::Droid::Telecom::CTelecomManagerHelper;
+using Elastos::Droid::Telecom::ITelecomManagerHelper;
 using Elastos::Droid::View::Accessibility::CAccessibilityNodeInfoAccessibilityAction;
 using Elastos::Droid::View::EIID_IViewOnClickListener;
 using Elastos::Droid::View::EIID_IViewOnLongClickListener;

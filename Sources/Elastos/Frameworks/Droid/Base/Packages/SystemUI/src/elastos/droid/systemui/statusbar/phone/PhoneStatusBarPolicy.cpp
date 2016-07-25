@@ -7,7 +7,7 @@
 #include "Elastos.Droid.Internal.h"
 #include "Elastos.Droid.Media.h"
 #include "Elastos.Droid.Provider.h"
-#include "Elastos.Droid.Telecomm.h"
+#include "Elastos.Droid.Telecom.h"
 #include <elastos/utility/logging/Logger.h>
 
 using Elastos::Droid::App::IAlarmClockInfo;
@@ -32,7 +32,7 @@ using Elastos::Droid::Os::IUserHandle;
 using Elastos::Droid::Provider::ISettingsGlobal;
 using Elastos::Droid::SystemUI::StatusBar::Policy::EIID_ICastControllerCallback;
 using Elastos::Droid::SystemUI::StatusBar::Policy::ICastControllerCastDevice;
-using Elastos::Droid::Telecomm::Telecom::ITelecomManager;
+using Elastos::Droid::Telecom::ITelecomManager;
 using Elastos::Utility::IIterator;
 using Elastos::Utility::ISet;
 using Elastos::Utility::Logging::Logger;

@@ -1,0 +1,19 @@
+
+module
+{
+
+    interface Elastos.Droid.Internal.Telecom.IIVideoCallback;
+
+    namespace Elastos {
+    namespace Droid {
+    namespace Telecom {
+
+    interface IVideoCallbackServant {
+        GetStub(
+            [out] IIVideoCallback** stub);
+    }
+
+    } // namespace Telecom
+    } // namespace Droid
+    } // namespace Elastos
+}

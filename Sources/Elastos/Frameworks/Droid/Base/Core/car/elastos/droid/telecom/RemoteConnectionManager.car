@@ -1,0 +1,37 @@
+
+module
+{
+    interface Elastos.Droid.Telecom.IConnectionRequest;
+    interface Elastos.Droid.Telecom.IPhoneAccountHandle;
+    interface Elastos.Droid.Telecom.IRemoteConnection;
+    interface Elastos.Droid.Internal.Telecom.IIConnectionService;
+
+    using interface Elastos.Droid.Content.IComponentName;
+
+    namespace Elastos {
+    namespace Droid {
+    namespace Telecom {
+
+    /**
+     *  @hide
+     */
+    interface IRemoteConnectionManager {
+        AddConnectionService(
+            [in] IComponentName* componentName,
+            [in] IIConnectionService* outgoingConnectionServiceRpc);
+
+        CreateRemoteConnection(
+            [in] IPhoneAccountHandle* connectionManagerPhoneAccount,
+            [in] IConnectionRequest* request,
+            [in] Boolean isIncoming,
+            [out] IRemoteConnection** res);
+
+        ConferenceRemoteConnections(
+            [in] IRemoteConnection* a,
+            [in] IRemoteConnection* b);
+    }
+
+    } // namespace Telecom
+    } // namespace Droid
+    } // namespace Elastos
+}

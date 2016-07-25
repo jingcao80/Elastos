@@ -5,7 +5,7 @@
 #include "Elastos.Droid.Content.h"
 #include "Elastos.Droid.Internal.h"
 #include "Elastos.Droid.Os.h"
-#include "Elastos.Droid.Telecomm.h"
+#include "Elastos.Droid.Telecom.h"
 #include <Elastos.CoreLibrary.Core.h>
 #include <Elastos.CoreLibrary.IO.h>
 #include <Elastos.CoreLibrary.Utility.h>
@@ -20,7 +20,7 @@ using Elastos::Droid::Internal::Telephony::IIPhoneSubInfo;
 using Elastos::Droid::Internal::Telephony::IITelephony;
 using Elastos::Droid::Internal::Telephony::IITelephonyRegistry;
 using Elastos::Droid::Internal::Telephony::ITelephonyProperties;
-using Elastos::Droid::Telecomm::Internal::IITelecomService;
+using Elastos::Droid::Internal::Telecom::IITelecomService;
 using Elastos::Utility::IList;
 using Elastos::Utility::Regex::IPattern;
 

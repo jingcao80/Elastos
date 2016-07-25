@@ -73,7 +73,7 @@ module
     using interface Elastos.Droid.Internal.Telephony.IIccProvider;
     using interface Elastos.Droid.Os.IBinder;
     using interface Elastos.Droid.Text.ITextWatcher;
-    using interface Elastos.Droid.Telecomm.Telecom.IConnectionService;
+    using interface Elastos.Droid.Telecom.IConnectionService;
     using interface Elastos.Droid.View.IContextThemeWrapper;
     using interface Elastos.Droid.View.IViewOnClickListener;
     using interface Elastos.Droid.View.IViewOnKeyListener;

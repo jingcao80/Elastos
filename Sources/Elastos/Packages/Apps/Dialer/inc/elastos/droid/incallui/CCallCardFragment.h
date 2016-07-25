@@ -4,7 +4,7 @@
 
 #include "Elastos.Droid.Animation.h"
 #include "Elastos.Droid.Graphics.h"
-#include "Elastos.Droid.Telecomm.h"
+#include "Elastos.Droid.Telecom.h"
 #include "Elastos.Droid.View.h"
 #include "Elastos.Droid.Widget.h"
 #include "_Elastos_Droid_InCallUI_CCallCardFragment.h"
@@ -18,7 +18,7 @@ using Elastos::Droid::Animation::IAnimator;
 using Elastos::Droid::Animation::IAnimatorSet;
 using Elastos::Droid::Graphics::IPoint;
 using Elastos::Droid::Graphics::Drawable::IDrawable;
-using Elastos::Droid::Telecomm::Telecom::IDisconnectCause;
+using Elastos::Droid::Telecom::IDisconnectCause;
 using Elastos::Droid::View::IOnGlobalLayoutListener;
 using Elastos::Droid::View::IOnPreDrawListener;
 using Elastos::Droid::View::IView;

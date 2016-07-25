@@ -2,8 +2,8 @@
 #include "elastos/droid/server/telecom/InCallToneMonitor.h"
 #include "elastos/droid/server/telecom/Log.h"
 
-using Elastos::Droid::Telecomm::Telecom::ICallState;
-using Elastos::Droid::Telecomm::Telecom::IDisconnectCause;
+using Elastos::Droid::Telecom::ICallState;
+using Elastos::Droid::Telecom::IDisconnectCause;
 
 namespace Elastos {
 namespace Droid {

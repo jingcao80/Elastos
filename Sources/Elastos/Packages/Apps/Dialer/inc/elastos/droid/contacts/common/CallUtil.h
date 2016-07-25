@@ -4,12 +4,12 @@
 #include "_Elastos.Droid.Dialer.h"
 #include "Elastos.Droid.Content.h"
 #include "Elastos.Droid.Net.h"
-#include "Elastos.Droid.Telecomm.h"
+#include "Elastos.Droid.Telecom.h"
 
 using Elastos::Droid::Content::IContext;
 using Elastos::Droid::Content::IIntent;
 using Elastos::Droid::Net::IUri;
-using Elastos::Droid::Telecomm::Telecom::IPhoneAccountHandle;
+using Elastos::Droid::Telecom::IPhoneAccountHandle;
 
 namespace Elastos{
 namespace Droid {
