@@ -2,15 +2,22 @@
 #ifndef __ELASTOS_DROID_INCALLUI_CINCALLACTIVITY_H__
 #define __ELASTOS_DROID_INCALLUI_CINCALLACTIVITY_H__
 
+#include "Elastos.Droid.Os.h"
+#include "Elastos.Droid.Telecom.h"
 #include "_Elastos_Droid_InCallUI_CInCallActivity.h"
 #include "elastos/droid/dialer/dialpad/CDialpadFragment.h"
 #include "elastos/droid/incallui/CAnswerFragment.h"
 #include "elastos/droid/incallui/CCallButtonFragment.h"
 #include "elastos/droid/incallui/CCallCardFragment.h"
+#include "R.h"
 #include <elastos/droid/app/Activity.h>
 
 using Elastos::Droid::App::Activity;
+using Elastos::Droid::Os::CBundle;
+using Elastos::Droid::Telecom::CDisconnectCause;
+using Elastos::Droid::Telecom::IPhoneAccount;
 using Elastos::Droid::Dialer::Dialpad::CDialpadFragment;
+using Elastos::Droid::Dialer::R;
 
 namespace Elastos {
 namespace Droid {
@@ -30,11 +37,13 @@ public:
      */
     CARAPI_(Boolean) IsForegroundActivity();
 
+    CARAPI_(AutoPtr<CCallCardFragment>) GetCallCardFragment();
+
     /**
      * Simulates a user click to hide the dialpad. This will update the UI to show the call card,
      * update the checked state of the dialpad button, and update the proximity sensor state.
      */
-    public void hideDialpadForDisconnect()
+    CARAPI_(void) HideDialpadForDisconnect();
 
     CARAPI_(void) DismissKeyguard(
         /* [in] */ Boolean dismiss);
@@ -53,6 +62,8 @@ public:
 
     CARAPI_(void) MaybeShowErrorDialogOnDisconnect(
         /* [in] */ IDisconnectCause* disconnectCause);
+
+    CARAPI_(void) DismissPendingDialogs();
 
 public:
     static const String SHOW_DIALPAD_EXTRA;

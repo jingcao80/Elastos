@@ -106,7 +106,7 @@ private:
 
         CARAPI OnPostDialWait(
             /* [in] */ Elastos::Droid::Telecom::ICall* call,
-            /* [in] */ String remainingPostDialSequence);
+            /* [in] */ const String& remainingPostDialSequence);
 
         CARAPI OnVideoCallChanged(
             /* [in] */ Elastos::Droid::Telecom::ICall* call,

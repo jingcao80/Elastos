@@ -23,6 +23,8 @@ public:
         /* [in] */ IContext* context,
         /* [in] */ AudioModeProvider* audioModeProvider);
 
+    CARAPI_(void) TearDown();
+
     /**
      * Called to keep track of the overall UI state.
      */
@@ -37,6 +39,13 @@ public:
      */
     CARAPI_(void) OnInCallShowing(
         /* [in] */ Boolean showing);
+
+    /**
+     * TODO: There is no way to determine if a screen is off due to proximity or if it is
+     * legitimately off, but if ever we can do that in the future, it would be useful here.
+     * Until then, this function will simply return true of the screen is off.
+     */
+    CARAPI_(Boolean) IsScreenReallyOff();
 };
 
 } // namespace InCallUI

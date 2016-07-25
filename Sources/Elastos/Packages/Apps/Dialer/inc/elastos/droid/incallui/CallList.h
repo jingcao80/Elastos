@@ -5,7 +5,7 @@
 #include "Elastos.Droid.Telecom.h"
 #include "_Elastos.Droid.Dialer.h"
 #include "elastos/droid/incallui/Call.h"
-#include "elastos/droid/telecomm/telecom/Phone.h"
+#include "elastos/droid/telecom/Phone.h"
 #include "elastos/droid/os/Handler.h"
 #define HASH_FOR_TELECOMM_TELECOM
 #include "elastos/droid/ext/frameworkhash.h"
@@ -31,7 +31,7 @@ class CallList
 {
 private:
     class PhoneListener
-        : public Phone::Listener
+        : public Elastos::Droid::Telecom::Phone::Listener
     {
     public:
         PhoneListener(

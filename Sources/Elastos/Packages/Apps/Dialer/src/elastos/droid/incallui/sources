@@ -5,8 +5,6 @@ INCLUDES += $(MAKEDIR)/../../../../inc
 INCLUDES += $(MAKEDIR)/../../../../
 INCLUDES += ../../../../
 
-SOURCES += InCallPresenter.cpp
-
 SOURCES += BaseFragment.cpp
 SOURCES += CAnswerFragment.cpp
 SOURCES += Call.cpp
@@ -15,4 +13,5 @@ SOURCES += CCallCardFragment.cpp
 SOURCES += CConferenceManagerFragment.cpp
 #SOURCES += CInCallActivity.cpp
 SOURCES += CInCallServiceImpl.cpp
+SOURCES += InCallPresenter.cpp
 SOURCES += Presenter.cpp

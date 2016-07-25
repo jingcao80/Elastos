@@ -2,11 +2,11 @@
 #ifndef __ELASTOS_DROID_INCALLUI_TELECOMADAPTER_H__
 #define __ELASTOS_DROID_INCALLUI_TELECOMADAPTER_H__
 
-#include "Elastos.Droid.Telecomm.h"
+#include "Elastos.Droid.Telecom.h"
 #include "_Elastos.Droid.Dialer.h"
 #include <elastos/core/Object.h>
 
-using Elastos::Droid::Telecomm::Telecom::IPhoneAccountHandle;
+using Elastos::Droid::Telecom::IPhoneAccountHandle;
 using Elastos::Core::Object;
 
 namespace Elastos {
