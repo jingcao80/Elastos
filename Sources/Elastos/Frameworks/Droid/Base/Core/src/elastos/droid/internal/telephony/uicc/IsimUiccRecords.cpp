@@ -53,7 +53,7 @@ ECode IsimUiccRecords::EfIsimImpiLoaded::GetEfName(
 }
 
 ECode IsimUiccRecords::EfIsimImpiLoaded::OnRecordLoaded(
-    /* [in] */ AsyncResult* ar)
+    /* [in] */ IAsyncResult* ar)
 {
     assert(0 && "TODO");
     AutoPtr<ArrayOf<Byte> > data;// = (ArrayOf<Byte>*)ar->mResult;
@@ -82,9 +82,9 @@ ECode IsimUiccRecords::EfIsimImpuLoaded::GetEfName(
 }
 
 ECode IsimUiccRecords::EfIsimImpuLoaded::OnRecordLoaded(
-    /* [in] */ AsyncResult* ar)
+    /* [in] */ IAsyncResult* ar)
 {
-    AutoPtr<IArrayList> impuList = IArrayList::Probe(ar->mResult);
+    AutoPtr<IArrayList> impuList = IArrayList::Probe(((AsyncResult*)ar)->mResult);
     Int32 size = 0;
     impuList->GetSize(&size);
     if (DBG) {
@@ -129,7 +129,7 @@ ECode IsimUiccRecords::EfIsimDomainLoaded::GetEfName(
 }
 
 ECode IsimUiccRecords::EfIsimDomainLoaded::OnRecordLoaded(
-    /* [in] */ AsyncResult* ar)
+    /* [in] */ IAsyncResult* ar)
 {
     assert(0 && "TODO");
     AutoPtr<ArrayOf<Byte> > data;// = (byte[]) ar->mResult;
@@ -160,7 +160,7 @@ ECode IsimUiccRecords::EfIsimIstLoaded::GetEfName(
 }
 
 ECode IsimUiccRecords::EfIsimIstLoaded::OnRecordLoaded(
-    /* [in] */ AsyncResult* ar)
+    /* [in] */ IAsyncResult* ar)
 {
     assert(0 && "TODO");
     AutoPtr<ArrayOf<Byte> > data;// = (ArrayOf<Byte>*) ar->mResult;
@@ -191,7 +191,7 @@ ECode IsimUiccRecords::EfIsimPcscfLoaded::GetEfName(
 }
 
 ECode IsimUiccRecords::EfIsimPcscfLoaded::OnRecordLoaded(
-    /* [in] */ AsyncResult* ar)
+    /* [in] */ IAsyncResult* ar)
 {
     assert(0 && "TODO");
     AutoPtr<IArrayList> pcscflist;// = IArrayList::Probe(ar->mResult);

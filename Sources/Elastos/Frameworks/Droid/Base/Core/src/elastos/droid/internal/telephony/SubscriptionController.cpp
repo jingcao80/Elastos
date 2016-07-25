@@ -970,7 +970,9 @@ ECode SubscriptionController::AddSubInfoRecord(
         resolver->Insert(content_uri, value, (IUri**)&uri);
         str = "[addSubInfoRecord]- New record created: ";
         String uriStr;
-        IObject::Probe(uri)->ToString(&uriStr);
+        if (uri != NULL) {
+            IObject::Probe(uri)->ToString(&uriStr);
+        }
         str += uriStr;
         Logdl(str);
     }

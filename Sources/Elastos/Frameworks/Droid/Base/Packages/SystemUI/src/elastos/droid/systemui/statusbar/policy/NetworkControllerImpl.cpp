@@ -332,7 +332,6 @@ NetworkControllerImpl::NetworkControllerImpl(
     obj = NULL;
     context->GetSystemService(IContext::TELEPHONY_SERVICE, (IInterface**)&obj);
     mPhone = ITelephonyManager::Probe(obj);
-    Logger::D(TAG, "TODO: TELEPHONY_SERVICE not ready.");
     mPhone->Listen(mPhoneStateListener,
                       IPhoneStateListener::LISTEN_SERVICE_STATE
                     | IPhoneStateListener::LISTEN_SIGNAL_STRENGTHS
@@ -1439,30 +1438,53 @@ void NetworkControllerImpl::RefreshViews()
     }
 
     if (DEBUG) {
-        assert(0 && "TODO");
-        // Logger::D(TAG, "RefreshViews connected={"
-        //         + (mWifiConnected?" wifi":"")
-        //         + (mDataConnected?" data":"")
-        //         + " } level="
-        //         + ((mSignalStrength == NULL)?"??":Integer.toString(mSignalStrength.getLevel()))
-        //         + " combinedSignalIconId=0x"
-        //         + Integer.toHexString(combinedSignalIconId)
-        //         + "/" + GetResourceName(combinedSignalIconId)
-        //         + " mobileLabel=" + mobileLabel
-        //         + " wifiLabel=" + wifiLabel
-        //         + " emergencyOnly=" + emergencyOnly
-        //         + " combinedLabel=" + combinedLabel
-        //         + " mAirplaneMode=" + mAirplaneMode
-        //         + " mDataActivity=" + mDataActivity
-        //         + " mPhoneSignalIconId=0x" + Integer.toHexString(mPhoneSignalIconId)
-        //         + " mQSPhoneSignalIconId=0x" + Integer.toHexString(mQSPhoneSignalIconId)
-        //         + " mDataDirectionIconId=0x" + Integer.toHexString(mDataDirectionIconId)
-        //         + " mDataSignalIconId=0x" + Integer.toHexString(mDataSignalIconId)
-        //         + " mDataTypeIconId=0x" + Integer.toHexString(mDataTypeIconId)
-        //         + " mQSDataTypeIconId=0x" + Integer.toHexString(mQSDataTypeIconId)
-        //         + " mWifiIconId=0x" + Integer.toHexString(mWifiIconId)
-        //         + " mQSWifiIconId=0x" + Integer.toHexString(mQSWifiIconId)
-        //         + " mBluetoothTetherIconId=0x" + Integer.toHexString(mBluetoothTetherIconId));
+        StringBuilder sb("RefreshViews connected={");
+        sb.Append(mWifiConnected?" wifi":"");
+        sb.Append(mDataConnected?" data":"");
+        sb.Append(" } level=");
+        if (mSignalStrength == NULL) {
+            sb.Append("??");
+        }
+        else {
+            Int32 level = 0;
+            mSignalStrength->GetLevel(&level);
+            sb.Append(level);
+        }
+        sb.Append(" combinedSignalIconId=0x");
+        sb.Append(StringUtils::ToHexString(combinedSignalIconId));
+        sb.Append("/");
+        sb.Append(GetResourceName(combinedSignalIconId));
+        sb.Append(" mobileLabel=");
+        sb.Append(mobileLabel);
+        sb.Append(" wifiLabel=");
+        sb.Append(wifiLabel);
+        sb.Append(" emergencyOnly=");
+        sb.Append(emergencyOnly);
+        sb.Append(" combinedLabel=");
+        sb.Append(combinedLabel);
+        sb.Append(" mAirplaneMode=");
+        sb.Append(mAirplaneMode);
+        sb.Append(" mDataActivity=");
+        sb.Append(mDataActivity);
+        sb.Append(" mPhoneSignalIconId=0x");
+        sb.Append(StringUtils::ToHexString(mPhoneSignalIconId));
+        sb.Append(" mQSPhoneSignalIconId=0x");
+        sb.Append(StringUtils::ToHexString(mQSPhoneSignalIconId));
+        sb.Append(" mDataDirectionIconId=0x");
+        sb.Append(StringUtils::ToHexString(mDataDirectionIconId));
+        sb.Append(" mDataSignalIconId=0x");
+        sb.Append(StringUtils::ToHexString(mDataSignalIconId));
+        sb.Append(" mDataTypeIconId=0x");
+        sb.Append(StringUtils::ToHexString(mDataTypeIconId));
+        sb.Append(" mQSDataTypeIconId=0x");
+        sb.Append(StringUtils::ToHexString(mQSDataTypeIconId));
+        sb.Append(" mWifiIconId=0x");
+        sb.Append(StringUtils::ToHexString(mWifiIconId));
+        sb.Append(" mQSWifiIconId=0x");
+        sb.Append(StringUtils::ToHexString(mQSWifiIconId));
+        sb.Append(" mBluetoothTetherIconId=0x");
+        sb.Append(StringUtils::ToHexString(mBluetoothTetherIconId));
+        Logger::D(TAG, sb.ToString());
     }
 
     // update QS

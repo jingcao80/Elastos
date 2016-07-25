@@ -101,8 +101,7 @@ ECode PhoneProxy::constructor(
     IPhone::Probe(phone)->GetPhoneType(&type);
     if (type == IPhoneConstants::PHONE_TYPE_GSM) {
         // For the purpose of IccCardProxy we only care about the technology family
-        Logger::E("PhoneProxy", "TODO constructor IccCardProxy is not ready!");
-        //TODO mIccCardProxy->SetVoiceRadioTech(IServiceState::RIL_RADIO_TECHNOLOGY_UMTS);
+        mIccCardProxy->SetVoiceRadioTech(IServiceState::RIL_RADIO_TECHNOLOGY_UMTS);
     }
     else if (type == IPhoneConstants::PHONE_TYPE_CDMA) {
         mIccCardProxy->SetVoiceRadioTech(IServiceState::RIL_RADIO_TECHNOLOGY_1xRTT);

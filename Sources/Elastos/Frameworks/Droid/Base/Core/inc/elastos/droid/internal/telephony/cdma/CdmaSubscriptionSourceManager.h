@@ -76,6 +76,9 @@ public:
     static CARAPI_(Int32) GetDefault(
         /* [in] */ IContext* context);
 
+    CARAPI ToString(
+        /* [out] */ String* result);
+
 private:
     // Constructor
     CdmaSubscriptionSourceManager(
@@ -117,7 +120,7 @@ private:
     // To know subscription is activated
     static const Int32 SUBSCRIPTION_ACTIVATED = 1;
     static AutoPtr<ICdmaSubscriptionSourceManager> sInstance;
-    static AutoPtr<IObject> sReferenceCountMonitor;
+    static Object sReferenceCountMonitor;
     static Int32 sReferenceCount;
     // ***** Instance Variables
     AutoPtr<ICommandsInterface> mCi;

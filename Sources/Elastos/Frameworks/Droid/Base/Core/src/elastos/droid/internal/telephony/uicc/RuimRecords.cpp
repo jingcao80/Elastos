@@ -65,7 +65,7 @@ ECode RuimRecords::EfPlLoaded::GetEfName(
 }
 
 ECode RuimRecords::EfPlLoaded::OnRecordLoaded(
-    /* [in] */ AsyncResult* ar)
+    /* [in] */ IAsyncResult* ar)
 {
     assert(0 && "TODO");
     // mEFpl = (byte[]) ar->mResult;
@@ -98,7 +98,7 @@ ECode RuimRecords::EfCsimLiLoaded::GetEfName(
 }
 
 ECode RuimRecords::EfCsimLiLoaded::OnRecordLoaded(
-    /* [in] */ AsyncResult* ar)
+    /* [in] */ IAsyncResult* ar)
 {
     assert(0 && "TODO");
     // mEFli = (byte[]) ar.result;
@@ -145,7 +145,7 @@ ECode RuimRecords::EfCsimSpnLoaded::GetEfName(
 }
 
 ECode RuimRecords::EfCsimSpnLoaded::OnRecordLoaded(
-    /* [in] */ AsyncResult* ar)
+    /* [in] */ IAsyncResult* ar)
 {
     assert(0 && "TODO");
     AutoPtr<ArrayOf<Byte> > data;// = (byte[]) ar.result;
@@ -257,7 +257,7 @@ ECode RuimRecords::EfCsimMdnLoaded::GetEfName(
 }
 
 ECode RuimRecords::EfCsimMdnLoaded::OnRecordLoaded(
-    /* [in] */ AsyncResult* ar)
+    /* [in] */ IAsyncResult* ar)
 {
     assert(0 && "TODO");
     AutoPtr<ArrayOf<Byte> > data;// = (ArrayOf<Byte>*) ar->mResult;
@@ -294,7 +294,7 @@ ECode RuimRecords::EfCsimImsimLoaded::GetEfName(
 }
 
 ECode RuimRecords::EfCsimImsimLoaded::OnRecordLoaded(
-    /* [in] */ AsyncResult* ar)
+    /* [in] */ IAsyncResult* ar)
 {
     assert(0 && "TODO");
     AutoPtr<ArrayOf<Byte> > data;// = (ArrayOf<Byte>*) ar->mResult;
@@ -363,10 +363,10 @@ ECode RuimRecords::EfCsimCdmaHomeLoaded::GetEfName(
 }
 
 ECode RuimRecords::EfCsimCdmaHomeLoaded::OnRecordLoaded(
-    /* [in] */ AsyncResult* ar)
+    /* [in] */ IAsyncResult* ar)
 {
     // Per C.S0065 section 5.2.8
-    AutoPtr<IArrayList> dataList = IArrayList::Probe(ar->mResult);
+    AutoPtr<IArrayList> dataList = IArrayList::Probe(((AsyncResult*)ar)->mResult);
     Int32 size = 0;
     dataList->GetSize(&size);
     if (DBG) mHost->Log(String("CSIM_CDMAHOME data size=") + StringUtils::ToString(size));
@@ -423,9 +423,9 @@ ECode RuimRecords::EfCsimEprlLoaded::GetEfName(
 }
 
 ECode RuimRecords::EfCsimEprlLoaded::OnRecordLoaded(
-    /* [in] */ AsyncResult* ar)
+    /* [in] */ IAsyncResult* ar)
 {
-    mHost->OnGetCSimEprlDone(ar);
+    mHost->OnGetCSimEprlDone(((AsyncResult*)ar));
     return NOERROR;
 }
 
@@ -448,7 +448,7 @@ ECode RuimRecords::EfCsimModelLoaded::GetEfName(
 }
 
 ECode RuimRecords::EfCsimModelLoaded::OnRecordLoaded(
-    /* [in] */ AsyncResult* ar)
+    /* [in] */ IAsyncResult* ar)
 {
     assert(0 && "TODO");
     AutoPtr<ArrayOf<Byte> > data;// = (ArrayOf<Byte>*) ar->mResult;
@@ -481,7 +481,7 @@ ECode RuimRecords::EfRuimModelLoaded::GetEfName(
 }
 
 ECode RuimRecords::EfRuimModelLoaded::OnRecordLoaded(
-    /* [in] */ AsyncResult* ar)
+    /* [in] */ IAsyncResult* ar)
 {
     assert(0 && "TODO");
     AutoPtr<ArrayOf<Byte> > data;// = (ArrayOf<Byte>*) ar->mResult;
@@ -514,7 +514,7 @@ ECode RuimRecords::EfRuimIdLoaded::GetEfName(
 }
 
 ECode RuimRecords::EfRuimIdLoaded::OnRecordLoaded(
-    /* [in] */ AsyncResult* ar)
+    /* [in] */ IAsyncResult* ar)
 {
     // The first byte represent the num bytes of valid data for RUIM ID data.
     // It is valid RUIM ID data From the second byte to num+1 byte.

@@ -6,6 +6,7 @@
 #include "elastos/droid/internal/telephony/uicc/IccRecords.h"
 
 using Elastos::Droid::Os::AsyncResult;
+using Elastos::Droid::Os::IAsyncResult;
 using Elastos::Droid::Os::IMessage;
 using Elastos::Droid::Content::IContext;
 using Elastos::Droid::Internal::Telephony::ICommandsInterface;
@@ -43,7 +44,7 @@ private:
 
         // @Override
         CARAPI OnRecordLoaded(
-            /* [in] */ AsyncResult* ar);
+            /* [in] */ IAsyncResult* ar);
 
     public:
         RuimRecords* mHost;
@@ -66,7 +67,7 @@ private:
 
         // @Override
         CARAPI OnRecordLoaded(
-            /* [in] */ AsyncResult* ar);
+            /* [in] */ IAsyncResult* ar);
 
     public:
         RuimRecords* mHost;
@@ -89,7 +90,7 @@ private:
 
         // @Override
         CARAPI OnRecordLoaded(
-            /* [in] */ AsyncResult* ar);
+            /* [in] */ IAsyncResult* ar);
 
     public:
         RuimRecords* mHost;
@@ -111,7 +112,7 @@ private:
 
         // @Override
         CARAPI OnRecordLoaded(
-            /* [in] */ AsyncResult* ar);
+            /* [in] */ IAsyncResult* ar);
 
     public:
         RuimRecords* mHost;
@@ -133,7 +134,7 @@ private:
 
         // @Override
         CARAPI OnRecordLoaded(
-            /* [in] */ AsyncResult* ar);
+            /* [in] */ IAsyncResult* ar);
 
     public:
         RuimRecords* mHost;
@@ -155,7 +156,7 @@ private:
 
         // @Override
         CARAPI OnRecordLoaded(
-            /* [in] */ AsyncResult* ar);
+            /* [in] */ IAsyncResult* ar);
 
     public:
         RuimRecords* mHost;
@@ -177,7 +178,7 @@ private:
 
         // @Override
         CARAPI OnRecordLoaded(
-            /* [in] */ AsyncResult* ar);
+            /* [in] */ IAsyncResult* ar);
 
     public:
         RuimRecords* mHost;
@@ -197,7 +198,7 @@ private:
             /* [out] */ String* result);
 
         virtual CARAPI OnRecordLoaded(
-            /* [in] */ AsyncResult* ar);
+            /* [in] */ IAsyncResult* ar);
 
     public:
         RuimRecords* mHost;
@@ -217,7 +218,7 @@ private:
             /* [out] */ String* result);
 
         virtual CARAPI OnRecordLoaded(
-            /* [in] */ AsyncResult* ar);
+            /* [in] */ IAsyncResult* ar);
 
     public:
         RuimRecords* mHost;
@@ -237,7 +238,7 @@ private:
             /* [out] */ String* result);
 
         virtual CARAPI OnRecordLoaded(
-            /* [in] */ AsyncResult* ar);
+            /* [in] */ IAsyncResult* ar);
 
     public:
         RuimRecords* mHost;

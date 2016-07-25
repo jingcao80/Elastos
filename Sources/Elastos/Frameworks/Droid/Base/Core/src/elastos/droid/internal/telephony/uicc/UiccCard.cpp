@@ -28,9 +28,9 @@ using Elastos::Droid::Os::IRegistrant;
 using Elastos::Droid::Os::CRegistrant;
 using Elastos::Droid::Preference::IPreferenceManagerHelper;
 using Elastos::Droid::Preference::CPreferenceManagerHelper;
-using Elastos::Droid::Internal::Telephony::Cat::ICatServiceFactory;
 using Elastos::Droid::Internal::Telephony::Cat::CatServiceFactory;
 using Elastos::Droid::Internal::Telephony::Cat::CCatServiceFactory;
+using Elastos::Droid::Internal::Telephony::Cat::ICatServiceFactory;
 using Elastos::Droid::Internal::Telephony::ICommandsInterfaceRadioState;
 using Elastos::Droid::Telephony::ITelephonyManager;
 using Elastos::Droid::Text::TextUtils;
@@ -114,8 +114,7 @@ ECode UiccCard::InnerHandler::HandleMessage(
             AutoPtr<AsyncResult> ar = (AsyncResult*)(IObject*)obj.Get();
             if (ar->mException != NULL) {
                 if (DBG) {
-                    assert(0 && "TODO");
-                    // Log(String("Error in SIM access with exception") + ar->mException);
+                    mOwner->Log(String("Error in SIM access with exception") + TO_CSTR(ar->mException));
                 }
             }
             AsyncResult::ForMessage(IMessage::Probe(ar->mUserObj), ar->mResult, ar->mException);
@@ -151,12 +150,17 @@ const Int32 UiccCard::EVENT_SIM_GET_ATR_DONE;
 
 UiccCard::UiccCard()
 {
+    mCardState = -1;
+    mUniversalPinState = -1;
     mGsmUmtsSubscriptionAppIndex = 0;
     mCdmaSubscriptionAppIndex = 0;
     mImsSubscriptionAppIndex = 0;
     mDestroyed = FALSE;
     mUiccApplications = ArrayOf<IUiccCardApplication*>::Alloc(IIccCardStatus::CARD_MAX_APPS);
     mHandler = new InnerHandler(this);
+    mLastRadioState = RADIO_UNAVAILABLE;
+    mAbsentRegistrants = new RegistrantList();
+    mCarrierPrivilegeRegistrants = new RegistrantList();
 }
 
 ECode UiccCard::constructor(
@@ -710,19 +714,20 @@ ECode UiccCard::GetIccId(
     /* [out] */ String* result)
 {
     VALIDATE_NOT_NULL(result);
-    // ==================before translated======================
-    // // ICCID should be same across all the apps.
-    // for (UiccCardApplication app : mUiccApplications) {
-    //     if (app != NULL) {
-    //         IccRecords ir = app.getIccRecords();
-    //         if (ir != NULL && ir.getIccId() != NULL) {
-    //             return ir.getIccId();
-    //         }
-    //     }
-    // }
-    // return null;
-    Logger::E("leliang", "TODO not implemented line:%d, func:%s\n", __LINE__, __func__);
-    *result = String("89860115831000000001");// unicom code
+    // ICCID should be same across all the apps.
+    Int32 len = mUiccApplications->GetLength();
+    String v;
+    for (Int32 i = 0; i < len; i++) {
+        AutoPtr<IUiccCardApplication> app = (*mUiccApplications)[i];
+        if (app != NULL) {
+            AutoPtr<IIccRecords> ir;
+            app->GetIccRecords((IIccRecords**)&ir);
+            if (ir != NULL && (ir->GetIccId(&v), v) != NULL) {
+                return ir->GetIccId(result);
+            }
+        }
+    }
+    *result = String(NULL);
     return NOERROR;
 }
 
@@ -730,23 +735,21 @@ ECode UiccCard::GetUICCConfig(
     /* [out] */ IUICCConfig** result)
 {
     VALIDATE_NOT_NULL(result);
-    // ==================before translated======================
-    // return mUICCConfig;
-    assert(0);
+    *result = mUICCConfig;
+    REFCOUNT_ADD(*result);
     return NOERROR;
 }
 
 ECode UiccCard::OnRefresh(
     /* [in] */ IIccRefreshResponse* refreshResponse)
 {
-    // ==================before translated======================
-    // for ( int i = 0; i < mUiccApplications.length; i++) {
-    //     if (mUiccApplications[i] != NULL) {
-    //         // Let the app know that the refresh occurred
-    //         mUiccApplications[i].onRefresh(refreshResponse);
-    //     }
-    // }
-    assert(0);
+    Int32 len = mUiccApplications->GetLength();
+    for (Int32 i = 0; i < len; i++) {
+        if ((*mUiccApplications)[i] != NULL) {
+            // Let the app know that the refresh occurred
+            ((UiccCardApplication*)(*mUiccApplications)[i])->OnRefresh(refreshResponse);
+        }
+    }
     return NOERROR;
 }
 
@@ -826,9 +829,7 @@ void UiccCard::CreateAndUpdateCatService()
 
 ECode UiccCard::Finalize()
 {
-    // ==================before translated======================
-    // if (DBG) log("UiccCard finalized");
-    assert(0);
+    if (DBG) Log(String("UiccCard finalized"));
     return NOERROR;
 }
 
@@ -951,11 +952,8 @@ void UiccCard::OnIccSwap(
 
 void UiccCard::OnCarrierPriviligesLoadedMessage()
 {
-    // ==================before translated======================
-    // synchronized (mLock) {
-    //     mCarrierPrivilegeRegistrants.notifyRegistrants();
-    // }
-    assert(0);
+    AutoLock lock(mLock);
+    mCarrierPrivilegeRegistrants->NotifyRegistrants();
 }
 
 void UiccCard::Loge(
