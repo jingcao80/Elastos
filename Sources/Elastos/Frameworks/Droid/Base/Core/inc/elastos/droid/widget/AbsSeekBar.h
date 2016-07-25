@@ -226,12 +226,12 @@ protected:
     CARAPI DrawableStateChanged();
 
     //@Override
-    CARAPI_(void) OnProgressRefresh(
+    CARAPI OnProgressRefresh(
         /* [in] */ Float scale,
         /* [in] */ Boolean fromUser);
 
     //@Overide
-    CARAPI_(void) OnAnimatePosition(
+    CARAPI OnAnimatePosition(
         /* [in] */ Float scale,
         /* [in] */ Boolean fromUser);
 
@@ -265,22 +265,22 @@ protected:
     /**
      * This is called when the user has started touching this widget.
      */
-    virtual CARAPI_(void) OnStartTrackingTouch();
+    virtual CARAPI OnStartTrackingTouch();
 
     /**
      * This is called when the user either releases his touch or the touch is
      * canceled.
      */
-    virtual CARAPI_(void) OnStopTrackingTouch();
+    virtual CARAPI OnStopTrackingTouch();
 
     /**
      * Called when the user changes the seekbar's progress by using a key event.
      */
-    virtual CARAPI_(void) OnKeyChange();
+    virtual CARAPI OnKeyChange();
 
     virtual CARAPI_(Boolean) IsAnimationRunning();
 
-    virtual CARAPI_(void) AnimateSetProgress(
+    virtual CARAPI AnimateSetProgress(
         /* [in] */ Int32 progress);
 
     virtual CARAPI_(Int32) UpdateTouchProgress(
@@ -290,7 +290,7 @@ protected:
 private:
     CARAPI_(void) ApplyThumbTint();
 
-    CARAPI_(void) updateThumbAndTrackPos(
+    CARAPI_(void) UpdateThumbAndTrackPos(
         /* [in] */ Int32 w,
         /* [in] */ Int32 h);
 

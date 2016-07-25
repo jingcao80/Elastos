@@ -49,7 +49,7 @@ ECode SeekBar::constructor(
     return AbsSeekBar::constructor(context, attrs, defStyleAttr, defStyleRes);
 }
 
-void SeekBar::OnProgressRefresh(
+ECode SeekBar::OnProgressRefresh(
     /* [in] */ Float scale,
     /* [in] */ Boolean fromUser)
 {
@@ -62,6 +62,7 @@ void SeekBar::OnProgressRefresh(
         mOnSeekBarChangeListener->OnProgressChanged(
                 this, progress, fromUser);
     }
+    return NOERROR;
 }
 
 ECode SeekBar::SetOnSeekBarChangeListener(
@@ -72,22 +73,24 @@ ECode SeekBar::SetOnSeekBarChangeListener(
     return NOERROR;
 }
 
-void SeekBar::OnStartTrackingTouch()
+ECode SeekBar::OnStartTrackingTouch()
 {
     AbsSeekBar::OnStartTrackingTouch();
 
     if (mOnSeekBarChangeListener != NULL) {
         mOnSeekBarChangeListener->OnStartTrackingTouch(this);
     }
+    return NOERROR;
 }
 
-void SeekBar::OnStopTrackingTouch()
+ECode SeekBar::OnStopTrackingTouch()
 {
     AbsSeekBar::OnStopTrackingTouch();
 
     if (mOnSeekBarChangeListener != NULL) {
         mOnSeekBarChangeListener->OnStopTrackingTouch(this);
     }
+    return NOERROR;
 }
 
 ECode SeekBar::OnInitializeAccessibilityEvent(

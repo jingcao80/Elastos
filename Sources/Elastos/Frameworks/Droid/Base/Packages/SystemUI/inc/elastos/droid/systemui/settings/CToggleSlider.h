@@ -111,18 +111,15 @@ public:
     CARAPI SetValue(
         /* [in] */ Int32 value);
 
-    // @Override
-    CARAPI OnStartTrackingTouch(
-        /* [in] */ ISeekBar* seekBar);
-
-    // @Override
-    CARAPI OnStopTrackingTouch(
-        /* [in] */ ISeekBar* seekBar);
-
 protected:
     // @Override
     CARAPI OnAttachedToWindow();
 
+    CARAPI OnStartTrackingTouch(
+        /* [in] */ ISeekBar* seekBar);
+
+    CARAPI OnStopTrackingTouch(
+         /* [in] */ ISeekBar* seekBar);
 private:
     AutoPtr<IToggleSliderListener> mListener;
     Boolean mTracking;

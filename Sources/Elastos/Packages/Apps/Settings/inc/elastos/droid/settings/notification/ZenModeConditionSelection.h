@@ -64,13 +64,13 @@ public class ZenModeConditionSelection extends RadioGroup {
     }
 
     //@Override
-    protected void OnAttachedToWindow() {
+    protected OnAttachedToWindow() {
         super->OnAttachedToWindow();
         RequestZenModeConditions(Condition.FLAG_RELEVANT_NOW);
     }
 
     //@Override
-    protected void OnDetachedFromWindow() {
+    protected OnDetachedFromWindow() {
         super->OnDetachedFromWindow();
         RequestZenModeConditions(0 /*none*/);
     }

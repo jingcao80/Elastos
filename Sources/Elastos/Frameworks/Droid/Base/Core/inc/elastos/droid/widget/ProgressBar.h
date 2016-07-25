@@ -505,7 +505,7 @@ public:
     //@Override
     CARAPI PostInvalidate();
 
-    virtual CARAPI_(void) OnProgressRefresh(
+    virtual CARAPI OnProgressRefresh(
         /* [in] */ Float scale,
         /* [in] */ Boolean fromUser);
 
@@ -744,7 +744,7 @@ protected:
      * @param scale Current position/progress between 0 and 1.
      * @param fromUser True if the progress change was initiated by the user.
      */
-    virtual CARAPI_(void) OnAnimatePosition(
+    virtual CARAPI OnAnimatePosition(
         /* [in] */ Float scale,
         /* [in] */ Boolean fromUser);
 

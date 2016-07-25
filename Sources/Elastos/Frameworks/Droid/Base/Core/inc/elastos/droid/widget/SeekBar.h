@@ -57,16 +57,16 @@ public:
 
 protected:
     // @Override
-    virtual CARAPI_(void) OnProgressRefresh(
+    virtual CARAPI OnProgressRefresh(
         /* [in] */ Float scale,
         /* [in] */ Boolean fromUser);
 
     //java package access permission
     // @Override
-    virtual CARAPI_(void) OnStartTrackingTouch();
+    virtual CARAPI OnStartTrackingTouch();
 
     // @Override
-    virtual CARAPI_(void) OnStopTrackingTouch();
+    virtual CARAPI OnStopTrackingTouch();
 
 private:
     AutoPtr<ISeekBarOnSeekBarChangeListener> mOnSeekBarChangeListener;

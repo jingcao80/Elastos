@@ -138,7 +138,7 @@ protected:
     CARAPI_(AutoPtr<IShape>) GetDrawableShape();
 
     // @Override
-    CARAPI_(void) OnProgressRefresh(
+    CARAPI OnProgressRefresh(
         /* [in] */ Float scale,
         /* [in] */ Boolean fromUser);
 
@@ -148,18 +148,18 @@ protected:
         /* [in] */ Int32 heightMeasureSpec);
 
     // @Override
-    CARAPI_(void) OnStartTrackingTouch();
+    CARAPI OnStartTrackingTouch();
 
     // @Override
-    CARAPI_(void) OnStopTrackingTouch();
+    CARAPI OnStopTrackingTouch();
 
     // @Override
-    CARAPI_(void) OnKeyChange();
+    CARAPI OnKeyChange();
 
-    virtual CARAPI_(void) AnimateSetProgress(
+    virtual CARAPI AnimateSetProgress(
         /* [in] */ Int32 progress);
 
-    virtual CARAPI_(void) DispatchRatingChange(
+    virtual CARAPI DispatchRatingChange(
         /* [in] */ Boolean fromUser);
 
 private:

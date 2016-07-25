@@ -87,13 +87,13 @@ public class ZenModeAutomaticConditionSelection extends LinearLayout {
     }
 
     //@Override
-    protected void OnAttachedToWindow() {
+    protected OnAttachedToWindow() {
         super->OnAttachedToWindow();
         RequestZenModeConditions(Condition.FLAG_RELEVANT_ALWAYS);
     }
 
     //@Override
-    protected void OnDetachedFromWindow() {
+    protected OnDetachedFromWindow() {
         super->OnDetachedFromWindow();
         RequestZenModeConditions(0 /*none*/);
     }
