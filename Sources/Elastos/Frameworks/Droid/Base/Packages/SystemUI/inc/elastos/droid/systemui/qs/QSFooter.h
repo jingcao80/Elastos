@@ -120,7 +120,7 @@ public:
     CARAPI_(void) SetListening(
         /* [in] */ Boolean listening);
 
-    CARAPI_(void) OnConfigurationChanged();
+    CARAPI OnConfigurationChanged();
 
     CARAPI_(AutoPtr<IView>) GetView();
 

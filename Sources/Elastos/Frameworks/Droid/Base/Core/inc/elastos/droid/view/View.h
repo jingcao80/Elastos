@@ -4937,7 +4937,7 @@ protected:
     virtual CARAPI_(void) OnWindowVisibilityChanged(
         /* [in] */ Int32 visibility);
 
-    virtual CARAPI_(void) OnConfigurationChanged(
+    virtual CARAPI OnConfigurationChanged(
         /* [in] */ IConfiguration* newConfig);
 
     virtual CARAPI_(AutoPtr<IContextMenuInfo>) GetContextMenuInfo();

@@ -428,7 +428,7 @@ ECode ShortcutCardsAdapter::GetItem(
 
 ECode ShortcutCardsAdapter::GetItemId(
     /* [in] */ Int32 position,
-    /* [out] */ Int64** id)
+    /* [out] */ Int64* id)
 {
     VALIDATE_NOT_NULL(id);
     *id = position;

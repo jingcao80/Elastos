@@ -102,68 +102,67 @@ ECode IccProvider::Query(
     /* [out] */ ICursor** result)
 {
     VALIDATE_NOT_NULL(result);
+    *result = NULL;
+
     if (DBG) Log(String("query"));
 
     Int64 iv = 0;
     SubscriptionManager::GetDefaultSubId(&iv);
 
+    AutoPtr<ICursor> mc;
     Int32 value = 0;
     URL_MATCHER->Match(url, &value);
     switch (value) {
         case ADN: {
-            *result = ICursor::Probe(LoadFromEf(IIccConstants::EF_ADN, iv));
-            REFCOUNT_ADD(*result);
+            mc = ICursor::Probe(LoadFromEf(IIccConstants::EF_ADN, iv));
             return NOERROR;
         }
 
         case ADN_SUB: {
-            *result = ICursor::Probe(LoadFromEf(IIccConstants::EF_ADN, GetRequestSubId(url)));
-            REFCOUNT_ADD(*result);
-            return NOERROR;
+            mc = ICursor::Probe(LoadFromEf(IIccConstants::EF_ADN, GetRequestSubId(url)));
+            break;
         }
 
         case FDN: {
-            *result = ICursor::Probe(LoadFromEf(IIccConstants::EF_FDN, iv));
-            REFCOUNT_ADD(*result);
-            return NOERROR;
+            mc = ICursor::Probe(LoadFromEf(IIccConstants::EF_FDN, iv));
+            break;
         }
 
         case FDN_SUB: {
-            *result = ICursor::Probe(LoadFromEf(IIccConstants::EF_FDN, GetRequestSubId(url)));
-            REFCOUNT_ADD(*result);
-            return NOERROR;
+            mc = ICursor::Probe(LoadFromEf(IIccConstants::EF_FDN, GetRequestSubId(url)));
+            break;
         }
 
         case SDN: {
-            *result = ICursor::Probe(LoadFromEf(IIccConstants::EF_SDN, iv));
-            REFCOUNT_ADD(*result);
-            return NOERROR;
+            mc = ICursor::Probe(LoadFromEf(IIccConstants::EF_SDN, iv));
+            break;
         }
 
         case SDN_SUB: {
-            *result = ICursor::Probe(LoadFromEf(IIccConstants::EF_SDN, GetRequestSubId(url)));
-            REFCOUNT_ADD(*result);
-            return NOERROR;
+            mc = ICursor::Probe(LoadFromEf(IIccConstants::EF_SDN, GetRequestSubId(url)));
+            break;
         }
 
         case ADN_ALL:{
-            *result = LoadAllSimContacts(IIccConstants::EF_ADN);
-            REFCOUNT_ADD(*result);
-            return NOERROR;
+            mc = LoadAllSimContacts(IIccConstants::EF_ADN);
+            break;
         }
 
-        // default:
-        //     throw new IllegalArgumentException("Unknown URL " + url);
+        default:
+            //     throw new IllegalArgumentException("Unknown URL " + url);
+            return E_ILLEGAL_ARGUMENT_EXCEPTION;
     }
-    *result = NULL;
-    return E_ILLEGAL_ARGUMENT_EXCEPTION;
+
+    *result = mc;
+    REFCOUNT_ADD(*result);
+    return NOERROR;
 }
 
 AutoPtr<ICursor> IccProvider::LoadAllSimContacts(
     /* [in] */ Int32 efType)
 {
     AutoPtr<ArrayOf<ICursor*> > result;
-    AutoPtr<IList/*<SubInfoRecord*/> subInfoList;
+    AutoPtr<IList> subInfoList;/*<SubInfoRecord*/
     SubscriptionManager::GetActiveSubInfoList((IList**)&subInfoList);
 
     Int32 size = 0;
@@ -547,7 +546,7 @@ AutoPtr<IMatrixCursor> IccProvider::LoadFromEf(
     if (DBG) Log(String("loadFromEf: efType=") + StringUtils::ToString(efType)
         + ", subscription=" + StringUtils::ToString(subId));
 
-    AutoPtr<IList/*<AdnRecord*/> adnRecords;
+    AutoPtr<IList> adnRecords;/*<AdnRecord*/
     // try {
     AutoPtr<IIIccPhoneBook> iccIpb = IIIccPhoneBook::Probe(
             ServiceManager::GetService(String("simphonebook")));

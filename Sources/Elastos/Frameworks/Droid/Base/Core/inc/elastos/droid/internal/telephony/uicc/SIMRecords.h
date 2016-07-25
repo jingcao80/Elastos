@@ -407,7 +407,7 @@ private:
 public:
     // ***** Instance Variables
     AutoPtr<VoiceMailConstants> mVmConfig;
-    AutoPtr<SpnOverride> mSpnOverride;
+    AutoPtr<ISpnOverride> mSpnOverride;
     Boolean mCspPlmnEnabled;
     AutoPtr<ArrayOf<Byte> > mEfMWIS;
     AutoPtr<ArrayOf<Byte> > mEfCPHS_MWI;
@@ -417,7 +417,7 @@ public:
     AutoPtr<ArrayOf<Byte> > mEfPl;
     Int32 mSpnDisplayCondition;
     // Numeric network codes listed in TS 51.011 EF[SPDI]
-    AutoPtr<IArrayList/*<String>*/> mSpdiNetworks;
+    AutoPtr<IArrayList> mSpdiNetworks;/*<String>*/
     String mPnnHomeName;
     AutoPtr<IUsimServiceTable> mUsimServiceTable;
     // ***** Constants

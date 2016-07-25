@@ -42,6 +42,8 @@ private:
 public:
     CAR_INTERFACE_DECL()
 
+    CAR_OBJECT_DECL()
+
     CInstallFlowAnalytics();
 
     CARAPI constructor();

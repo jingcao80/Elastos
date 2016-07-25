@@ -833,7 +833,7 @@ ECode ActionBarOverlayLayout::OnDetachedFromWindow()
     return NOERROR;
 }
 
-void ActionBarOverlayLayout::OnConfigurationChanged(
+ECode ActionBarOverlayLayout::OnConfigurationChanged(
     /* [in] */ IConfiguration* newConfig)
 {
     ViewGroup::OnConfigurationChanged(newConfig);
@@ -841,6 +841,7 @@ void ActionBarOverlayLayout::OnConfigurationChanged(
     GetContext((IContext**)&context);
     Init(context);
     RequestApplyInsets();
+    return NOERROR;
 }
 
 void ActionBarOverlayLayout::OnWindowVisibilityChanged(

@@ -61,8 +61,8 @@ public:
         /* [in] */ IParcel* source);
 
 public:
-    AutoPtr<IList/*<Item>*/> mItems;
-    AutoPtr<IList/*<TextAttribute>*/> mTitleAttrs;
+    AutoPtr<IList> mItems;  /*<Item>*/
+    AutoPtr<IList> mTitleAttrs; /*<TextAttribute>*/
     PresentationType mPresentationType;
     String mTitle;
     AutoPtr<IBitmap> mTitleIcon;

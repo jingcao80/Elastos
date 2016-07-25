@@ -27,6 +27,7 @@ ECode CSlidingChallengeLayout::MyProperty::Get(
     AutoPtr<SlidingChallengeLayout> view = (SlidingChallengeLayout*)ISlidingChallengeLayout::Probe(obj);
     AutoPtr<IFloat> obj = CoreUtils::Convert(view->mHandleAlpha);
     *rst = TO_IINTERFACE(obj);
+    REFCOUNT_ADD(*rst)
     return NOERROR;
 }
 
@@ -1575,6 +1576,7 @@ ECode CSlidingChallengeLayout::GenerateLayoutParams(
             new SlidingChallengeLayoutLayoutParams();
     params->constructor(context, attrs)
     *p = IViewGroupLayoutParams::Probe(params);
+    REFCOUNT_ADD(*p)
     return NOERROR;
 }
 

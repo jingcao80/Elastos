@@ -254,7 +254,7 @@ ECode CActivityOne::OtherTest()
     AutoPtr<IServiceManager> serviceManager;
     CServiceManager::AcquireSingleton((IServiceManager**)&serviceManager);
 
-    AutoPtr<IObject> obj;
+    AutoPtr<IInterface> obj;
     serviceManager->GetService(String("mount"), (IInterface**)&obj);
     AutoPtr<IIMountService> mount = IIMountService::Probe(obj);
     if (mount != NULL) {

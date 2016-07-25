@@ -82,7 +82,7 @@ ECode DialerSettingsActivity::HeaderAdapter::GetView(
         holder->mSummary->SetVisibility(IView::GONE);
     }
     *result = view;
-    REFCOUNT_AA(*result);
+    REFCOUNT_ADD(*result)
     return NOERROR;
 }
 

@@ -1427,6 +1427,7 @@ ECode Call::GetRingtone(
     AutoPtr<IUri> contactRingtoneUri;
     mCallerInfo->GetContactRingtoneUri((IUri**)&contactRingtoneUri);
     *result = mCallerInfo == NULL ? NULL : contactRingtoneUri;
+    REFCOUNT_ADD(*result)
     return NOERROR;
 }
 

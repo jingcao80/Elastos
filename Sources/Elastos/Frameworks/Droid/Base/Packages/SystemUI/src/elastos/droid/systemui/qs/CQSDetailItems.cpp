@@ -150,7 +150,7 @@ ECode CQSDetailItems::OnFinishInflate()
     return NOERROR;
 }
 
-void CQSDetailItems::OnConfigurationChanged(
+ECode CQSDetailItems::OnConfigurationChanged(
     /* [in] */ IConfiguration* newConfig)
 {
     FrameLayout::OnConfigurationChanged(newConfig);
@@ -165,6 +165,7 @@ void CQSDetailItems::OnConfigurationChanged(
         FontSizeUtils::UpdateFontSize(item, Elastos::Droid::R::id::summary,
                 R::dimen::qs_detail_item_secondary_text_size);
     }
+    return NOERROR;
 }
 
 ECode CQSDetailItems::SetTagSuffix(

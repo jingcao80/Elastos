@@ -2,7 +2,9 @@
 #include "elastos/droid/systemui/statusbar/phone/CKeyguardBottomAreaView.h"
 #include "elastos/droid/systemui/statusbar/phone/CTrustDrawable.h"
 #include "elastos/droid/systemui/statusbar/phone/KeyguardTouchDelegate.h"
+#include "elastos/droid/systemui/statusbar/phone/CIntrinsicSizeDrawable.h"
 #include "elastos/droid/systemui/statusbar/policy/PreviewInflater.h"
+#include "elastos/droid/systemui/keyguard/KeyguardUpdateMonitor.h"
 #include "../R.h"
 #include "Elastos.Droid.App.h"
 #include "Elastos.Droid.Content.h"
@@ -34,6 +36,8 @@ using Elastos::Droid::View::EIID_IViewOnClickListener;
 using Elastos::Droid::View::EIID_IViewOnLongClickListener;
 using Elastos::Droid::View::Accessibility::IAccessibilityNodeInfoAccessibilityAction;
 using Elastos::Droid::Widget::IImageView;
+using Elastos::Droid::SystemUI::Keyguard::KeyguardUpdateMonitor;
+using Elastos::Droid::SystemUI::StatusBar::Policy::EIID_IAccessibilityStateChangedCallback;
 using Elastos::Core::CString;
 using Elastos::Core::ICharSequence;
 
@@ -43,14 +47,20 @@ namespace SystemUI {
 namespace StatusBar {
 namespace Phone {
 
-CKeyguardBottomAreaView::IntrinsicSizeDrawable::IntrinsicSizeDrawable(
+CKeyguardBottomAreaView::IntrinsicSizeDrawable::IntrinsicSizeDrawable()
+    : mIntrinsicWidth(0)
+    , mIntrinsicHeight(0)
+{
+}
+
+CKeyguardBottomAreaView::IntrinsicSizeDrawable::constructor(
     /* [in] */ IDrawable* drawable,
     /* [in] */ Int32 intrinsicWidth,
     /* [in] */ Int32 intrinsicHeight)
-    : mIntrinsicWidth(intrinsicWidth)
-    , mIntrinsicHeight(intrinsicHeight)
 {
-    InsetDrawable::constructor(drawable, 0);
+    mIntrinsicWidth = intrinsicWidth;
+    mIntrinsicHeight = intrinsicHeight;
+    return InsetDrawable::constructor(drawable, 0);
 }
 
 ECode CKeyguardBottomAreaView::IntrinsicSizeDrawable::GetIntrinsicWidth(
@@ -230,8 +240,6 @@ CAR_INTERFACE_IMPL_5(CKeyguardBottomAreaView, FrameLayout, IKeyguardBottomAreaVi
 CKeyguardBottomAreaView::CKeyguardBottomAreaView()
     : mLastUnlockIconRes(0)
 {
-    mAccessibilityDelegate = new KBAAccessibilityDelegate(this);
-    mDevicePolicyReceiver = new DevicePolicyReceiver(this);
 }
 
 ECode CKeyguardBottomAreaView::constructor(
@@ -263,6 +271,9 @@ ECode CKeyguardBottomAreaView::constructor(
 {
     FrameLayout::constructor(context, attrs, defStyleAttr, defStyleRes);
     CTrustDrawable::New(mContext, (IDrawable**)&mTrustDrawable);
+    mUpdateMonitorCallback = new UpdateMonitorCallback(this);
+    mAccessibilityDelegate = new KBAAccessibilityDelegate(this);
+    mDevicePolicyReceiver = new DevicePolicyReceiver(this);
     return NOERROR;
 }
 
@@ -327,7 +338,7 @@ void CKeyguardBottomAreaView::InitAccessibility()
     IView::Probe(mCameraImageView)->SetAccessibilityDelegate(mAccessibilityDelegate);
 }
 
-void CKeyguardBottomAreaView::OnConfigurationChanged(
+ECode CKeyguardBottomAreaView::OnConfigurationChanged(
     /* [in] */ IConfiguration* newConfig)
 {
     FrameLayout::OnConfigurationChanged(newConfig);
@@ -350,6 +361,7 @@ void CKeyguardBottomAreaView::OnConfigurationChanged(
     Int32 size = 0;
     res->GetDimensionPixelSize(Elastos::Droid::R::dimen::text_size_small_material, &size);
     mIndicationText->SetTextSize(ITypedValue::COMPLEX_UNIT_PX, size);
+    return NOERROR;
 }
 
 ECode CKeyguardBottomAreaView::SetActivityStarter(
@@ -383,18 +395,18 @@ ECode CKeyguardBottomAreaView::SetPhoneStatusBar(
 
 AutoPtr<IIntent> CKeyguardBottomAreaView::GetCameraIntent()
 {
-    Logger::D(TAG, "TODO: need the app Keyguard.");
-    // KeyguardUpdateMonitor updateMonitor = KeyguardUpdateMonitor.getInstance(mContext);
+    AutoPtr<IKeyguardUpdateMonitor> updateMonitor = KeyguardUpdateMonitor::GetInstance(mContext);
     Boolean currentUserHasTrust = TRUE;
-    // currentUserHasTrust = updateMonitor.getUserHasTrust(
-    //         mLockPatternUtils.getCurrentUser());
+    Int32 user;
+    mLockPatternUtils->GetCurrentUser(&user);
+    updateMonitor->GetUserHasTrust(user, &currentUserHasTrust);
 
     Boolean tmp = FALSE;
     return (mLockPatternUtils->IsSecure(&tmp), tmp) && !currentUserHasTrust
              ? SECURE_CAMERA_INTENT : INSECURE_CAMERA_INTENT;
 }
 
-void CKeyguardBottomAreaView::UpdateCameraVisibility()
+ECode CKeyguardBottomAreaView::UpdateCameraVisibility()
 {
     AutoPtr<IResolveInfo> resolved;
     AutoPtr<IPackageManager> pm;
@@ -412,12 +424,14 @@ void CKeyguardBottomAreaView::UpdateCameraVisibility()
     Boolean visible = !IsCameraDisabledByDpm() && resolved != NULL
             && (res->GetBoolean(R::bool_::config_keyguardShowCameraAffordance, &tmp), tmp);
     IView::Probe(mCameraImageView)->SetVisibility(visible ? IView::VISIBLE : IView::GONE);
+    return NOERROR;
 }
 
-void CKeyguardBottomAreaView::UpdatePhoneVisibility()
+ECode CKeyguardBottomAreaView::UpdatePhoneVisibility()
 {
     Boolean visible = IsPhoneVisible();
     IView::Probe(mPhoneImageView)->SetVisibility(visible ? IView::VISIBLE : IView::GONE);
+    return NOERROR;
 }
 
 Boolean CKeyguardBottomAreaView::IsPhoneVisible()
@@ -492,8 +506,8 @@ void CKeyguardBottomAreaView::WatchForCameraPolicyChanges()
 
     AutoPtr<IIntent> i;
     ctx->RegisterReceiverAsUser(mDevicePolicyReceiver, ALL, filter, String(NULL), NULL, (IIntent**)&i);
-    Logger::D(TAG, "TODO: need the app Keyguard.");
-    // KeyguardUpdateMonitor.getInstance(mContext).registerCallback(mUpdateMonitorCallback);
+    AutoPtr<IKeyguardUpdateMonitor> monitor = KeyguardUpdateMonitor::GetInstance(mContext);
+    monitor->RegisterCallback(mUpdateMonitorCallback);
 }
 
 ECode CKeyguardBottomAreaView::OnStateChanged(
@@ -508,10 +522,10 @@ ECode CKeyguardBottomAreaView::OnStateChanged(
     return NOERROR;
 }
 
-void CKeyguardBottomAreaView::UpdateLockIconClickability()
+ECode CKeyguardBottomAreaView::UpdateLockIconClickability()
 {
     if (mAccessibilityController == NULL) {
-        return;
+        return NOERROR;
     }
     Boolean clickToUnlock = FALSE;
     mAccessibilityController->IsTouchExplorationEnabled(&clickToUnlock);
@@ -523,6 +537,7 @@ void CKeyguardBottomAreaView::UpdateLockIconClickability()
     IView::Probe(mLockIcon)->SetClickable(clickToForceLock || clickToUnlock);
     IView::Probe(mLockIcon)->SetLongClickable(longClickToForceLock);
     IView::Probe(mLockIcon)->SetFocusable(enabled);
+    return NOERROR;
 }
 
 ECode CKeyguardBottomAreaView::OnClick(
@@ -632,12 +647,13 @@ ECode CKeyguardBottomAreaView::OnDetachedFromWindow()
     return NOERROR;
 }
 
-void CKeyguardBottomAreaView::UpdateLockIcon()
+ECode CKeyguardBottomAreaView::UpdateLockIcon()
 {
-    Boolean shown = FALSE;
-    IsShown(&shown);
-    Logger::D(TAG, "TODO [UpdateLockIcon] : need the app Keyguard.");
-    Boolean visible = shown/* && KeyguardUpdateMonitor.getInstance(mContext).isScreenOn()*/;
+    Boolean visible = FALSE;
+    IsShown(&visible);
+    if (!visible) {
+        KeyguardUpdateMonitor::GetInstance(mContext)->IsScreenOn(&visible);
+    }
     if (visible) {
         ((CTrustDrawable*)mTrustDrawable.Get())->Start();
     }
@@ -645,7 +661,7 @@ void CKeyguardBottomAreaView::UpdateLockIcon()
         ((CTrustDrawable*)mTrustDrawable.Get())->Stop();
     }
     if (!visible) {
-        return;
+        return NOERROR;
     }
     // TODO: Real icon for facelock.
     Int32 iconRes = mUnlockMethodCache->IsFaceUnlockRunning()
@@ -664,9 +680,8 @@ void CKeyguardBottomAreaView::UpdateLockIcon()
         Int32 h = 0, w = 0;
         icon->GetIntrinsicHeight(&h);
         if (h != iconHeight || (icon->GetIntrinsicWidth(&w), w) != iconWidth) {
-            assert(0);
             AutoPtr<IDrawable> newIcon;
-            // CIntrinsicSizeDrawable::New(icon, iconWidth, iconHeight, (IDrawable**)&newIcon);
+            CIntrinsicSizeDrawable::New(icon, iconWidth, iconHeight, (IDrawable**)&newIcon);
             icon = newIcon;
         }
         IImageView::Probe(mLockIcon)->SetImageDrawable(icon);
@@ -674,6 +689,7 @@ void CKeyguardBottomAreaView::UpdateLockIcon()
     Boolean trustManaged = mUnlockMethodCache->IsTrustManaged();
     ((CTrustDrawable*)mTrustDrawable.Get())->SetTrustManaged(trustManaged);
     UpdateLockIconClickability();
+    return NOERROR;
 }
 
 ECode CKeyguardBottomAreaView::GetPhoneView(

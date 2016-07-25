@@ -194,16 +194,16 @@ ECode CarCallbackInterfaceProxy::ReadParam(
         CarDataType localPtrElementDataType;
 
         if(paramDataType == CarDataType_ArrayOf) {
-            (*(ICarArrayInfo **)&paramTypeInfo)->GetElementTypeInfo((IDataTypeInfo**)&elementDataTypeInfo);
+            ICarArrayInfo::Probe(paramTypeInfo)->GetElementTypeInfo((IDataTypeInfo**)&elementDataTypeInfo);
             elementDataTypeInfo->GetDataType(&elementDataType);
         } else if (paramDataType == CarDataType_CppVector) {
-            (*(ICppVectorInfo **)&paramTypeInfo)->GetElementTypeInfo((IDataTypeInfo**)&elementDataTypeInfo);
+            ICppVectorInfo::Probe(paramTypeInfo)->GetElementTypeInfo((IDataTypeInfo**)&elementDataTypeInfo);
             elementDataTypeInfo->GetDataType(&elementDataType);
         } else if (paramDataType == CarDataType_LocalPtr) {
-            (*(ILocalPtrInfo **)&paramTypeInfo)->GetTargetTypeInfo((IDataTypeInfo**)&elementDataTypeInfo);
+            ILocalPtrInfo::Probe(paramTypeInfo)->GetTargetTypeInfo((IDataTypeInfo**)&elementDataTypeInfo);
             elementDataTypeInfo->GetDataType(&elementDataType);
             if (elementDataType == CarDataType_ArrayOf) {
-                (*(ICarArrayInfo **)&elementDataTypeInfo)->GetElementTypeInfo((IDataTypeInfo**)&localPtrElementDataTypeInfo);
+                ICarArrayInfo::Probe(elementDataTypeInfo)->GetElementTypeInfo((IDataTypeInfo**)&localPtrElementDataTypeInfo);
                 localPtrElementDataTypeInfo->GetDataType(&localPtrElementDataType);
 
             }
@@ -809,13 +809,13 @@ ECode CarCallbackInterfaceProxy::ReadParam_bak(
         AutoPtr<IDataTypeInfo> elementDataTypeInfo;
         CarDataType elementDataType;
         if(paramDataType == CarDataType_ArrayOf) {
-            (*(ICarArrayInfo **)&paramTypeInfo)->GetElementTypeInfo((IDataTypeInfo**)&elementDataTypeInfo);
+            ICarArrayInfo::Probe(paramTypeInfo)->GetElementTypeInfo((IDataTypeInfo**)&elementDataTypeInfo);
             elementDataTypeInfo->GetDataType(&elementDataType);
         } else if (paramDataType == CarDataType_CppVector) {
-            (*(ICppVectorInfo **)&paramTypeInfo)->GetElementTypeInfo((IDataTypeInfo**)&elementDataTypeInfo);
+            ICppVectorInfo::Probe(paramTypeInfo)->GetElementTypeInfo((IDataTypeInfo**)&elementDataTypeInfo);
             elementDataTypeInfo->GetDataType(&elementDataType);
         } else if (paramDataType == CarDataType_LocalPtr) {
-            (*(ILocalPtrInfo **)&paramTypeInfo)->GetTargetTypeInfo((IDataTypeInfo**)&elementDataTypeInfo);
+            ILocalPtrInfo::Probe(paramTypeInfo)->GetTargetTypeInfo((IDataTypeInfo**)&elementDataTypeInfo);
             elementDataTypeInfo->GetDataType(&elementDataType);
         }
 

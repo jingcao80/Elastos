@@ -411,7 +411,7 @@ ECode CQSPanel::UpdateResources()
     return NOERROR;
 }
 
-void CQSPanel::OnConfigurationChanged(
+ECode CQSPanel::OnConfigurationChanged(
     /* [in] */ IConfiguration* newConfig)
 {
     ViewGroup::OnConfigurationChanged(newConfig);
@@ -431,6 +431,7 @@ void CQSPanel::OnConfigurationChanged(
         }
     }
     mFooter->OnConfigurationChanged();
+    return NOERROR;
 }
 
 ECode CQSPanel::SetExpanded(

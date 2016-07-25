@@ -51,9 +51,9 @@ ECode CTestStructInfo::GetModuleInfo(
         return ec;
     }
     *ppModuleInfo = testInfo;
+    REFCOUNT_ADD(*ppModuleInfo)
 
     info->AddRef();
-    testInfo->AddRef();
 
     return ec;
 }
@@ -80,6 +80,7 @@ ECode CTestStructInfo::GetAllFieldInfos(
     Int32 used = count;
 
     *ppFieldInfos = ArrayOf<ITestFieldInfo *>::Alloc(used);
+    REFCOUNT_ADD(*ppFieldInfos)
 
     for(Int32 i = 0; i < used; i++){
         AutoPtr<ITestFieldInfo> info;
@@ -89,9 +90,6 @@ ECode CTestStructInfo::GetAllFieldInfos(
             return ec;
         }
         (*ppFieldInfos)->Set(i,info);
-
-        (*infos)[i]->AddRef();
-        info->AddRef();
     }   //for
 
     return ec;
@@ -117,9 +115,9 @@ ECode CTestStructInfo::GetFieldInfo(
         return ec;
     }
     *ppFieldInfo = testInfo;
+    REFCOUNT_ADD(*ppFieldInfo)
 
     info->AddRef();
-    testInfo->AddRef();
 
     return ec;
 }
@@ -143,9 +141,9 @@ ECode CTestStructInfo::CreateVariable(
         return ec;
     }
     *ppVariableBox = testVariableOfStruct;
+    REFCOUNT_ADD(*ppVariableBox)
 
     variableOfStruct->AddRef();
-    testVariableOfStruct->AddRef();
 
     return ec;
 }
@@ -170,9 +168,9 @@ ECode CTestStructInfo::CreateVariableBox(
         return ec;
     }
     *ppVariableBox = testVariableOfStruct;
+    REFCOUNT_ADD(*ppVariableBox)
 
     variableOfStruct->AddRef();
-    testVariableOfStruct->AddRef();
 
     return ec;
 }
@@ -191,8 +189,10 @@ ECode CTestStructInfo::constructor(
 }
 
 ECode CTestStructInfo::GetInternalObject(
-    /* [out] */ PInterface* ppObject){
+    /* [out] */ PInterface* ppObject)
+{
     *ppObject = mStructInfo;
+    REFCOUNT_ADD(*ppObject)
     return NOERROR;
 }
 

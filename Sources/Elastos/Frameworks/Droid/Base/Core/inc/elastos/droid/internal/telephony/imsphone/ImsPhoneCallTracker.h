@@ -520,7 +520,7 @@ private:
     static const Int32 EVENT_DIAL_PENDINGMO = 20;
     static const Int32 TIMEOUT_HANGUP_PENDINGMO = 500;
     //***** Instance Variables
-    AutoPtr<IArrayList/*<ImsPhoneConnection>*/> mConnections;
+    AutoPtr<IArrayList> mConnections;/*<ImsPhoneConnection>*/
     AutoPtr<RegistrantList> mVoiceCallEndedRegistrants;
     AutoPtr<RegistrantList> mVoiceCallStartedRegistrants;
     AutoPtr<IImsPhoneConnection> mPendingMO;

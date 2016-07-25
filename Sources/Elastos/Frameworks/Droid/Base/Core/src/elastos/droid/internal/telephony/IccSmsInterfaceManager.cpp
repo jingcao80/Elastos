@@ -1037,7 +1037,7 @@ AutoPtr<IArrayList> IccSmsInterfaceManager::BuildValidRawData(
 {
     Int32 count = 0;
     messages->GetSize(&count);
-    AutoPtr<IArrayList/*<SmsRawData*/> ret;
+    AutoPtr<IArrayList> ret;/*<SmsRawData*/
     CArrayList::New(count, (IArrayList**)&ret);
 
     for (Int32 i = 0; i < count; i++) {

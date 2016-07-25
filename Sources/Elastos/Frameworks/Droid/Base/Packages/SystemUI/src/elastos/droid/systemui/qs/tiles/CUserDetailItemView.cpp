@@ -136,11 +136,12 @@ ECode CUserDetailItemView::OnFinishInflate()
     return NOERROR;
 }
 
-void CUserDetailItemView::OnConfigurationChanged(
+ECode CUserDetailItemView::OnConfigurationChanged(
     /* [in] */ IConfiguration* newConfig)
 {
     LinearLayout::OnConfigurationChanged(newConfig);
     FontSizeUtils::UpdateFontSize(mName, R::dimen::qs_detail_item_secondary_text_size);
+    return NOERROR;
 }
 
 ECode CUserDetailItemView::DrawableStateChanged()

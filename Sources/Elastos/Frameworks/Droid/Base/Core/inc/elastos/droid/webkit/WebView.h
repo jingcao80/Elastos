@@ -1791,7 +1791,7 @@ protected:
     CARAPI_(void) OnDraw(
         /* [in] */ ICanvas* canvas);
 
-    CARAPI_(void) OnConfigurationChanged(
+    CARAPI OnConfigurationChanged(
         /* [in] */ IConfiguration* newConfig);
 
     CARAPI OnVisibilityChanged(

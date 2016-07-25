@@ -1252,11 +1252,12 @@ ECode DatePicker::OnInitializeAccessibilityNodeInfo(
     return mDelegate->OnInitializeAccessibilityNodeInfo(info);
 }
 
-void DatePicker::OnConfigurationChanged(
+ECode DatePicker::OnConfigurationChanged(
     /* [in] */ IConfiguration* newConfig)
 {
     FrameLayout::OnConfigurationChanged(newConfig);
     mDelegate->OnConfigurationChanged(newConfig);
+    return NOERROR;
 }
 
 ECode DatePicker::SetFirstDayOfWeek(

@@ -18,13 +18,14 @@ ECode CEmptyShadeView::constructor(
     return StackScrollerDecorView::constructor(context, attrs);
 }
 
-void CEmptyShadeView::OnConfigurationChanged(
+ECode CEmptyShadeView::OnConfigurationChanged(
     /* [in] */ IConfiguration* newConfig)
 {
     StackScrollerDecorView::OnConfigurationChanged(newConfig);
     AutoPtr<IView> view;
     FindViewById(R::id::no_notifications, (IView**)&view);
     ITextView::Probe(view)->SetText(R::string::empty_shade_text);
+    return NOERROR;
 }
 
 AutoPtr<IView> CEmptyShadeView::FindContentView()

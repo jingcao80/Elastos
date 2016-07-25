@@ -164,7 +164,7 @@ ECode CKeyguardStatusBarView::OnFinishInflate()
     return NOERROR;
 }
 
-void CKeyguardStatusBarView::OnConfigurationChanged(
+ECode CKeyguardStatusBarView::OnConfigurationChanged(
     /* [in] */ IConfiguration* newConfig)
 {
     RelativeLayout::OnConfigurationChanged(newConfig);
@@ -180,6 +180,7 @@ void CKeyguardStatusBarView::OnConfigurationChanged(
 
     res->GetDimensionPixelSize(R::dimen::battery_level_text_size, &size);
     mBatteryLevel->SetTextSize(ITypedValue::COMPLEX_UNIT_PX, size);
+    return NOERROR;
 }
 
 void CKeyguardStatusBarView::LoadDimens()

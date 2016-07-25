@@ -23,8 +23,7 @@ ECode EmptyLoader::Callback::OnCreateLoader(
     /* [in] */ IBundle* args,
     /* [out] */ ILoader** loader)
 {
-    VALIDATE_NOT_NULL(loader);
-    return CEmptyLoader::New((ILoader**)&mContext);
+    return CEmptyLoader::New(loader);
 }
 
 ECode EmptyLoader::Callback::OnLoadFinished(

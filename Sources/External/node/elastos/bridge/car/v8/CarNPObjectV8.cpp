@@ -582,7 +582,7 @@ bool CarNPObjectInvoke(NPObject* npobj, NPIdentifier identifier, const NPVariant
             aElementDataTypeInfo->GetDataType(&elementDataType);
         }
         else if (dataType == CarDataType_LocalPtr) {
-            (*(ILocalPtrInfo **)&aDataTypeInfo)->GetTargetTypeInfo((IDataTypeInfo**)&aElementDataTypeInfo);
+            ILocalPtrInfo::Probe(aDataTypeInfo)->GetTargetTypeInfo((IDataTypeInfo**)&aElementDataTypeInfo);
             aElementDataTypeInfo->GetDataType(&elementDataType);
         }
 

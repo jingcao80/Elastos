@@ -288,17 +288,22 @@ ECode CSymbols::GetTopFrame(
     /* [out, callee] */ ArrayOf<ISymbol*>** topFrame)
 {
     VALIDATE_NOT_NULL(topFrame)
-    *topFrame = ArrayOf<ISymbol*>::Alloc(0);
+
     if (mDelta != NULL) {
         AutoPtr<ArrayOf<IInterface*> > temp = ArrayOf<IInterface*>::Alloc(0);
         AutoPtr<ArrayOf<IInterface*> > out;
         ISet::Probe(mDelta)->ToArray(temp, (ArrayOf<IInterface*>**)&out);
         *topFrame = ArrayOf<ISymbol*>::Alloc(out->GetLength());
+        REFCOUNT_ADD(*topFrame)
+
         for (Int32 i = 0; i < out->GetLength(); ++i) {
             (*topFrame)->Set(i, ISymbol::Probe((*out)[i]));
         }
     }
-    REFCOUNT_ADD(*topFrame)
+    else {
+        *topFrame = ArrayOf<ISymbol*>::Alloc(0);
+        REFCOUNT_ADD(*topFrame)
+    }
     return NOERROR;
 }
 
@@ -310,6 +315,8 @@ ECode CSymbols::GetAllSymbols(
     mSymbols->GetSize(&size);
     AutoPtr<ArrayOf<IInterface*> > ret = ArrayOf<IInterface*>::Alloc(size);
     *symbols = ArrayOf<ISymbol*>::Alloc(size);
+    REFCOUNT_ADD(*symbols)
+
     AutoPtr<ISet> set;
     mSymbols->GetKeySet((ISet**)&set);
     AutoPtr<ArrayOf<IInterface*> > out;
@@ -317,7 +324,6 @@ ECode CSymbols::GetAllSymbols(
     for (Int32 i = 0; i < out->GetLength(); ++i) {
         (*symbols)->Set(i, ISymbol::Probe((*out)[i]));
     }
-    REFCOUNT_ADD(*symbols)
     return NOERROR;
 }
 

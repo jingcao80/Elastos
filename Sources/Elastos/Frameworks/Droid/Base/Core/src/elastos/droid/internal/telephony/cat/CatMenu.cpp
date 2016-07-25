@@ -102,7 +102,7 @@ ECode CatMenu::ReadFromParcel(
     in->ReadString(&mTitle);
     IParcelable::Probe(mTitleIcon)->ReadFromParcel(in);
     // rebuild items list.
-    CArrayList::New((IArrayList**)&mItems);
+    CArrayList::New((IList**)&mItems);
     Int32 size = 0;
     in->ReadInt32(&size);
     for (Int32 i = 0; i < size; i++) {

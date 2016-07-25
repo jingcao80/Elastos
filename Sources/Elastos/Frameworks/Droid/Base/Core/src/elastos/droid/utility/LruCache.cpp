@@ -322,7 +322,7 @@ ECode LruCache::GetEvictionCount(
 ECode LruCache::Snapshot(
     /* [out] */ IMap** map)
 {
-    return CLinkedHashMap::New(IMap::Probe(mMap), (IMap**)&map);
+    return CLinkedHashMap::New(IMap::Probe(mMap), map);
 }
 
 ECode LruCache::ToString(

@@ -3388,7 +3388,7 @@ void AppWidgetServiceImpl::RegisterOnCrossProfileProvidersChangedListener()
     // }
 }
 
-void AppWidgetServiceImpl::OnConfigurationChanged()
+ECode AppWidgetServiceImpl::OnConfigurationChanged()
 {
     if (DEBUG) {
         Slogger::I(TAG, "onConfigurationChanged()");
@@ -3461,6 +3461,7 @@ void AppWidgetServiceImpl::OnConfigurationChanged()
             }
         }
     }
+    return NOERROR;
 }
 
 void AppWidgetServiceImpl::OnPackageBroadcastReceived(

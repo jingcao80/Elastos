@@ -42,9 +42,9 @@ ECode CTestConstantInfo::GetModuleInfo(
         return ec;
     }
     *ppModuleInfo = testInfo;
+    REFCOUNT_ADD(*ppModuleInfo)
 
     info->AddRef();
-    testInfo->AddRef();
 
     return ec;
 }

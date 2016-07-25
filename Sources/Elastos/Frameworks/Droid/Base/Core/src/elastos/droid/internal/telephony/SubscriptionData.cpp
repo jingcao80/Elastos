@@ -102,16 +102,18 @@ ECode SubscriptionData::GetSubscription(
     /* [out] */ ISubscription** result)
 {
     VALIDATE_NOT_NULL(result)
+    *result = NULL;
+
     Int32 length = mSubscription->GetLength();
     for (Int32 i = 0; i < length; i++) {
         Boolean bSame = FALSE;
         (*mSubscription)[i]->IsSame(sub, &bSame);
         if (bSame) {
             *result = (*mSubscription)[i];
+            REFCOUNT_ADD(*result)
             return NOERROR;
         }
     }
-    *result = NULL;
     return NOERROR;
 }
 

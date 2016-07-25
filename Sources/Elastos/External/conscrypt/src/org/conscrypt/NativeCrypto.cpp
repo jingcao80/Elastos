@@ -5873,9 +5873,9 @@ ECode NativeCrypto::Get_X509_GENERAL_NAME_stack(
         AutoPtr<IArrayOf> item;
         CArrayOf::New(EIID_IInterface, 2, (IArrayOf**)&item);
 
-        AutoPtr<IInteger32> type;
-        CInteger32::New(gen->type, (IInteger32**)&type);
-        item->Set(0, type);
+        AutoPtr<IInteger32> typeObj;
+        CInteger32::New(gen->type, (IInteger32**)&typeObj);
+        item->Set(0, typeObj);
         item->Set(1, val);
 
         joa->Set(j, item);

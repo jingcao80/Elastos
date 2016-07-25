@@ -515,14 +515,14 @@ ECode DayPickerView::LayoutChildren()
     return NOERROR;
 }
 
-void DayPickerView::OnConfigurationChanged(
+ECode DayPickerView::OnConfigurationChanged(
     /* [in] */ IConfiguration* newConfig)
 {
     AutoPtr<ILocaleHelper> helper;
     CLocaleHelper::AcquireSingleton((ILocaleHelper**)&helper);
     AutoPtr<ILocale> locale;
     helper->GetDefault((ILocale**)&locale);
-    CSimpleDateFormat::New(String("yyyy"), locale, (ISimpleDateFormat**)&mYearFormat);
+    return CSimpleDateFormat::New(String("yyyy"), locale, (ISimpleDateFormat**)&mYearFormat);
 }
 
 Int32 DayPickerView::GetDiffMonths(

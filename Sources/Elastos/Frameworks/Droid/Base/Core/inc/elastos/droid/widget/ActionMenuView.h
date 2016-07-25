@@ -307,7 +307,7 @@ protected:
     CARAPI_(Boolean) HasDividerBeforeChildAt(
         /* [in] */ Int32 childIndex);
 
-    CARAPI_(void) OnConfigurationChanged(
+    CARAPI OnConfigurationChanged(
         /* [in] */ IConfiguration* newConfig);
 
 private:

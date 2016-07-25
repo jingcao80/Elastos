@@ -544,7 +544,7 @@ ECode CPasswordTextView::OnDraw(
     Float currentDrawPosition = width / 2 - totalDrawingWidth / 2;
     Int32 length;
     mTextChars->GetSize(&length);
-    AutoPre<IRect> bounds;
+    AutoPtr<IRect> bounds;
     GetCharBounds((IRect**)&bounds);
 
     Int32 bottom;

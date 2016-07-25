@@ -95,7 +95,7 @@ public:
         /* [in] */ Int32 defStyleRes);
 
     //@Override
-    CARAPI_(void) OnConfigurationChanged(
+    CARAPI OnConfigurationChanged(
         /* [in] */ IConfiguration* newConfig);
 
     //@Override

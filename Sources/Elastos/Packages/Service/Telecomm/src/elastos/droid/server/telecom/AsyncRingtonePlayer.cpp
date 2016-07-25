@@ -262,11 +262,12 @@ ECode AsyncRingtonePlayer::HandleStop()
 }
 
 ECode AsyncRingtonePlayer::GetRingtone(
-    /* [in] */ IUri* ringtoneUri,
+    /* [in] */ IUri* ruri,
     /* [out] */ IRingtone** result)
 {
     VALIDATE_NOT_NULL(result)
 
+    AutoPtr<IUri> ringtoneUri = ruri;
     AutoPtr<IRingtoneManagerHelper> helper;
     CRingtoneManagerHelper::AcquireSingleton((IRingtoneManagerHelper**)&helper);
     if (ringtoneUri == NULL) {

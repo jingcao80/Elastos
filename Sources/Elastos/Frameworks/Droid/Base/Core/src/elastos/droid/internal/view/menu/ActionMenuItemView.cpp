@@ -159,7 +159,7 @@ ECode ActionMenuItemView::constructor(
     return NOERROR;
 }
 
-void ActionMenuItemView::OnConfigurationChanged(
+ECode ActionMenuItemView::OnConfigurationChanged(
     /* [in] */ IConfiguration* newConfig)
 {
     TextView::OnConfigurationChanged(newConfig);
@@ -170,6 +170,7 @@ void ActionMenuItemView::OnConfigurationChanged(
     context->GetResources((IResources**)&res);
     res->GetBoolean(R::bool_::config_allowActionMenuItemTextWithIcon, &mAllowTextWithIcon);
     UpdateTextButtonVisibility();
+    return NOERROR;
 }
 
 ECode ActionMenuItemView::SetPadding(

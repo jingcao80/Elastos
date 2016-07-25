@@ -42,7 +42,7 @@ namespace RenderScript {
     AutoPtr<IArrayOf> array = IArrayOf::Probe(d);                                       \
     switch(dataType) {                                                                  \
     case RS_TYPE_FLOAT_32:                                                              \
-        array->GetLength((Int32*)&len);                                                 \
+        array->GetLength(len);                                                          \
         AutoPtr<ArrayOf<Float> > arrayF = ArrayOf<Float>::Alloc(len);                   \
         for (Int32 i = 0; i < len; i++) {                                               \
             AutoPtr<IInterface> v;                                                      \
@@ -54,7 +54,7 @@ namespace RenderScript {
         fnc(__VA_ARGS__);                                                               \
         return;                                                                         \
     case RS_TYPE_FLOAT_64:                                                              \
-        array->GetLength((Int32*)&len);                                                 \
+        array->GetLength(len);                                                          \
         AutoPtr<ArrayOf<Double> > arrayD = ArrayOf<Double>::Alloc(len);                 \
         for (Int32 i = 0; i < len; i++) {                                               \
             AutoPtr<IInterface> v;                                                      \
@@ -67,7 +67,7 @@ namespace RenderScript {
         return;                                                                         \
     case RS_TYPE_SIGNED_8:                                                              \
     case RS_TYPE_UNSIGNED_8:                                                            \
-        array->GetLength((Int32*)&len);                                                 \
+        array->GetLength(len);                                                          \
         AutoPtr<ArrayOf<Byte> > arrayB = ArrayOf<Byte>::Alloc(len);                     \
         for (Int32 i = 0; i < len; i++) {                                               \
             AutoPtr<IInterface> v;                                                      \
@@ -80,7 +80,7 @@ namespace RenderScript {
         return;                                                                         \
     case RS_TYPE_SIGNED_16:                                                             \
     case RS_TYPE_UNSIGNED_16:                                                           \
-        array->GetLength((Int32*)&len);                                                 \
+        array->GetLength(len);                                                          \
         AutoPtr<ArrayOf<Int16> > arrayI16 = ArrayOf<Int16>::Alloc(len);                 \
         for (Int32 i = 0; i < len; i++) {                                               \
             AutoPtr<IInterface> v;                                                      \
@@ -93,7 +93,7 @@ namespace RenderScript {
         return;                                                                         \
     case RS_TYPE_SIGNED_32:                                                             \
     case RS_TYPE_UNSIGNED_32:                                                           \
-        array->GetLength((Int32*)&len);                                                 \
+        array->GetLength(len);                                                          \
         AutoPtr<ArrayOf<Int32> > arrayI32 = ArrayOf<Int32>::Alloc(len);                 \
         for (Int32 i = 0; i < len; i++) {                                               \
             AutoPtr<IInterface> v;                                                      \
@@ -106,7 +106,7 @@ namespace RenderScript {
         return;                                                                         \
     case RS_TYPE_SIGNED_64:                                                             \
     case RS_TYPE_UNSIGNED_64:                                                           \
-        array->GetLength((Int32*)&len);                                                 \
+        array->GetLength(len);                                                          \
         AutoPtr<ArrayOf<Int64> > arrayI64 = ArrayOf<Int64>::Alloc(len);                 \
         for (Int32 i = 0; i < len; i++) {                                               \
             AutoPtr<IInterface> v;                                                      \
@@ -1323,7 +1323,8 @@ ECode NAllocationGetSurface(
     VALIDATE_NOT_NULL(surface)
     *surface = NULL;
     FAIL_RETURN(Validate())
-    *surface = RsnAllocationGetSurface(mContext, alloc);
+    AutoPtr<ISurface> s = RsnAllocationGetSurface(mContext, alloc);
+    *surface = s;
     REFCOUNT_ADD(*surface)
     return NOERROR;
 }

@@ -33,7 +33,7 @@ ECode CDataUsageDetailView::constructor(
     return LinearLayout::constructor(context, attrs);
 }
 
-void CDataUsageDetailView::OnConfigurationChanged(
+ECode CDataUsageDetailView::OnConfigurationChanged(
     /* [in] */ IConfiguration* newConfig)
 {
     LinearLayout::OnConfigurationChanged(newConfig);
@@ -43,6 +43,7 @@ void CDataUsageDetailView::OnConfigurationChanged(
     FontSizeUtils::UpdateFontSize(this, R::id::usage_info_top_text, R::dimen::qs_data_usage_text_size);
     FontSizeUtils::UpdateFontSize(this, R::id::usage_period_text, R::dimen::qs_data_usage_text_size);
     FontSizeUtils::UpdateFontSize(this, R::id::usage_info_bottom_text, R::dimen::qs_data_usage_text_size);
+    return NOERROR;
 }
 
 ECode CDataUsageDetailView::Bind(

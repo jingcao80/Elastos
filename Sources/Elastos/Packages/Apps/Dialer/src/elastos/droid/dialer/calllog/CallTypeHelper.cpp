@@ -76,7 +76,8 @@ ECode CallTypeHelper::GetCallTypeText(
             break;
     }
 
-    *text = CoreUtils::Convert(result);
+    AutoPtr<ICharSequence> csq = CoreUtils::Convert(result);
+    *text = csq;
     REFCOUNT_ADD(*text);
     return NOERROR;
 }
@@ -87,37 +88,33 @@ ECode CallTypeHelper::GetHighlightedColor(
 {
     VALIDATE_NOT_NULL(result);
 
+    AutoPtr<IInteger32> obj;
     switch (callType) {
         case ICalls::INCOMING_TYPE:
             // New incoming calls are not highlighted.
-            *result =  NULL;
             break;
 
         case ICalls::OUTGOING_TYPE:
             // New outgoing calls are not highlighted.
-            result =  NULL;
             break;
 
         case ICalls::MISSED_TYPE:
-            *result = CoreUtils::Convert(mNewMissedColor);
+            obj = CoreUtils::Convert(mNewMissedColor);
             break;
 
         case ICalls::VOICEMAIL_TYPE:
-            *result = CoreUtils::Convert(mNewVoicemailColor);
+            obj = CoreUtils::Convert(mNewVoicemailColor);
             break;
 
         default:
             // Don't highlight calls of unknown types. They are treated as missed calls by
             // the rest of the UI, but since they will never be marked as read by
             // {@link CallLogQueryHandler}, just don't ever highlight them anyway.
-            *result =  NULL;
             break;
     }
 
-    if (*result != NULL) {
-        REFCOUNT_ADD(*result);
-    }
-
+    *result = obj;
+    REFCOUNT_ADD(*result)
     return NOERROR;
 }
 

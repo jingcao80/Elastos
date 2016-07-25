@@ -27,8 +27,7 @@ ECode CCountryDetectorHelper::GetInstance(
     VALUE_NOT_NULL(detector);
     AutoPtr<ICountryDetector> cd = CountryDetector::GetInstance(context);
     *detector = cd;
-    REFCOUNT_ADD(detector);
-
+    REFCOUNT_ADD(*detector)
     return NOERROR;
 }
 

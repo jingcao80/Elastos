@@ -1674,7 +1674,7 @@ ECode DataConnection::constructor(
     AddState(mDisconnectingState, mDefaultState);
     AddState(mDisconnectingErrorCreatingConnection, mDefaultState);
     SetInitialState(mInactiveState);
-    CArrayList::New((IArrayList**)&mApnContexts);
+    CArrayList::New((IList**)&mApnContexts);
     if (DBG) Log("DataConnection constructor X");
     return NOERROR;
 }

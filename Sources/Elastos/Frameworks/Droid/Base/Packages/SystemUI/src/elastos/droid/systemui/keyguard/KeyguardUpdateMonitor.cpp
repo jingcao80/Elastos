@@ -753,7 +753,7 @@ ECode KeyguardUpdateMonitor::TrustListener::OnTrustManagedChanged(
 // KeyguardUpdateMonitor::KeyguardUpdateMonitor
 //========================================================================
 const String KeyguardUpdateMonitor::TAG("KeyguardUpdateMonitor");
-const Boolean KeyguardUpdateMonitor::DEBUG = TRUE;
+const Boolean KeyguardUpdateMonitor::DEBUG = FALSE;
 const Boolean KeyguardUpdateMonitor::DEBUG_SIM_STATES = DEBUG || FALSE;
 const Int32 KeyguardUpdateMonitor::FAILED_BIOMETRIC_UNLOCK_ATTEMPTS_BEFORE_BACKUP = 3;
 const Int32 KeyguardUpdateMonitor::LOW_BATTERY_THRESHOLD = 20;

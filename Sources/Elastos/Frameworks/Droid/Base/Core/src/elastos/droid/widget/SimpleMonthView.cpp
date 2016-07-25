@@ -520,13 +520,13 @@ ECode SimpleMonthView::RestoreAccessibilityFocus(
     return NOERROR;
 }
 
-void SimpleMonthView::OnConfigurationChanged(
+ECode SimpleMonthView::OnConfigurationChanged(
     /* [in] */ IConfiguration* newConfig)
 {
     View::OnConfigurationChanged(newConfig);
     AutoPtr<ILocale> locale;
     newConfig->GetLocale((ILocale**)&locale);
-    CSimpleDateFormat::New(String("EEEEE"), locale, (ISimpleDateFormat**)&mDayFormatter);
+    return CSimpleDateFormat::New(String("EEEEE"), locale, (ISimpleDateFormat**)&mDayFormatter);
 }
 
 void SimpleMonthView::OnDraw(

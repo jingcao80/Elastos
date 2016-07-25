@@ -644,7 +644,7 @@ AutoPtr<ISpinner> ScrollingTabContainerView::CreateSpinner()
     return spinner;
 }
 
-void ScrollingTabContainerView::OnConfigurationChanged(
+ECode ScrollingTabContainerView::OnConfigurationChanged(
     /* [in] */ IConfiguration* newConfig)
 {
     HorizontalScrollView::OnConfigurationChanged(newConfig);
@@ -658,6 +658,7 @@ void ScrollingTabContainerView::OnConfigurationChanged(
     abp->GetTabContainerHeight(&height);
     SetContentHeight(height);
     abp->GetStackedTabMaxWidth(&mStackedTabMaxWidth);
+    return NOERROR;
 }
 
 ECode ScrollingTabContainerView::AnimateToVisibility(

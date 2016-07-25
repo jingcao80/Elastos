@@ -1264,7 +1264,9 @@ ECode SIMRecords::HandleMessage(
             }
 
             if (IsCphsMailboxEnabled()) {
-                CAdnRecord::New(mVoiceMailTag, mVoiceMailNum, (IAdnRecord**)&adn);
+                AutoPtr<IAdnRecord> tmp;
+                CAdnRecord::New(mVoiceMailTag, mVoiceMailNum, (IAdnRecord**)&tmp);
+                adn = (AdnRecord*)tmp.Get();
                 AutoPtr<IMessage> onCphsCompleted = IMessage::Probe(ar->mUserObj);
 
                 /* write to cphs mailbox whenever it is available but

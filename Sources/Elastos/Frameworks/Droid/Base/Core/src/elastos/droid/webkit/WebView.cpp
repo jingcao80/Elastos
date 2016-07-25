@@ -2564,12 +2564,13 @@ Boolean WebView::PerformLongClick()
     return result;
 }
 
-void WebView::OnConfigurationChanged(
+ECode WebView::OnConfigurationChanged(
     /* [in] */ IConfiguration* newConfig)
 {
     AutoPtr<IWebViewProviderViewDelegate> viewDelegate;
     mProvider->GetViewDelegate((IWebViewProviderViewDelegate**)&viewDelegate);
     viewDelegate->OnConfigurationChanged(newConfig);
+    return NOERROR;
 }
 
 AutoPtr<IInputConnection> WebView::OnCreateInputConnection(

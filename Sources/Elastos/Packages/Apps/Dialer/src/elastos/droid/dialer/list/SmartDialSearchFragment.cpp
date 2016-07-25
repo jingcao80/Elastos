@@ -57,6 +57,7 @@ ECode SmartDialSearchFragment::OnCreateLoader(
         CSmartDialCursorLoader::New(context, (ISmartDialCursorLoader**)&smartLoader);
         ISmartDialNumberListAdapter::Probe(adapter)->ConfigureLoader(smartLoader);
         *loader = smartLoader;
+        REFCOUNT_ADD(*loader)
         return NOERROR;
     }
 }

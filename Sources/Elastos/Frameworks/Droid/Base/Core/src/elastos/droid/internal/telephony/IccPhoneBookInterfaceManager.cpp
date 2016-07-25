@@ -443,6 +443,8 @@ ECode IccPhoneBookInterfaceManager::GetAdnRecordsInEf(
     /* [out] */ IList** result)
 {
     VALIDATE_NOT_NULL(result);
+    *result = NULL;
+
     AutoPtr<IContext> ctx;
     IPhone::Probe(mPhone)->GetContext((IContext**)&ctx);
     Int32 v = 0;
@@ -451,7 +453,6 @@ ECode IccPhoneBookInterfaceManager::GetAdnRecordsInEf(
     if (v != IPackageManager::PERMISSION_GRANTED) {
         // throw new SecurityException(
         //         "Requires android.permission.READ_CONTACTS permission");
-        *result = FALSE;
         return E_SECURITY_EXCEPTION;
     }
 

@@ -23,6 +23,8 @@ CarClass(CInCallActivity)
 public:
     CAR_INTERFACE_DECL();
 
+    CAR_OBJECT_DECL()
+
     CARAPI_(void) DismissKeyguard(
         /* [in] */ Boolean dismiss);
 

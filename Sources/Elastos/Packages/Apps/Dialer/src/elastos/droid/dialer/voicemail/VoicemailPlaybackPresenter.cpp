@@ -30,7 +30,8 @@ ECode VoicemailPlaybackPresenter::FetchResultHandler::FetchResultHandlerAsyncTas
     VALIDATE_NOT_NULL(*result);
     Boolean hasContent;
     mHost->mHost->mView->QueryHasContent(mVoicemailUri, &hasContent);
-    *result = CoreUtils::Convert(hasContent);
+    AutoPtr<IBoolean> obj = CoreUtils::Convert(hasContent);
+    *result = obj;
     REFCOUNT_ADD(*result);
     return NOERROR;
 }
@@ -235,11 +236,12 @@ ECode VoicemailPlaybackPresenter::AsyncPrepareTask::DoInBackground(
 exit:
     if (SUCCEEDED(ec)) {
         *result = NULL;
+        return NOERROR;
     }
     else {
-        *result = CoreUtils::Convert(ec);
+        *result = NULL;
+        return ec;
     }
-    return NOERROR;
     // } catch (Exception e) {
     //     return e;
     // }
@@ -497,7 +499,8 @@ ECode VoicemailPlaybackPresenter::CheckThatWeHaveContentAsyncTask::DoInBackgroun
     VALIDATE_NOT_NULL(result);
     Boolean hasContent;
     mHost->mView->QueryHasContent(mVoicemailUri, &hasContent);
-    *result = CoreUtils::Convert(hasContent);
+    AutoPtr<IBoolean> obj = CoreUtils::Convert(hasContent);
+    *result = obj;
     REFCOUNT_ADD(*result);
     return NOERROR;
 }
@@ -552,14 +555,13 @@ ECode VoicemailPlaybackPresenter::SuccessfullyFetchedContentAsyncTask::DoInBackg
 
 exit:
     if (SUCCEEDED(ec)) {
-        *result = NULL
+        *result = NULL;
+        return NOERROR;
     }
     else {
-        *result = CoreUtils::Convert(ec);
-        REFCOUNT_ADD(*result);
+        *result = NULL;
+        return ec;
     }
-
-    return NOERROR;
 }
 
 ECode VoicemailPlaybackPresenter::SuccessfullyFetchedContentAsyncTask::OnPostExecute(
@@ -600,7 +602,7 @@ const Int32 VoicemailPlaybackPresenter::PRESET_NAMES[] = {
 VoicemailPlaybackPresenter::VoicemailPlaybackPresenter()
     : mRateIndex(2)
 {
-    CAtomicInteger32::New((IAtomicInteger**)&mDuration);
+    CAtomicInteger32::New((IAtomicInteger32**)&mDuration);
 }
 
 // TODO:

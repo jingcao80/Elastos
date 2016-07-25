@@ -273,7 +273,7 @@ public:
 
 protected:
     // @Override
-    CARAPI_(void) OnConfigurationChanged(
+    CARAPI OnConfigurationChanged(
         /* [in] */ IConfiguration* newConfig);
 
     // @Override

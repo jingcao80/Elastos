@@ -2566,10 +2566,11 @@ Boolean AwContents::OnGenericMotionEvent(
 /**
  * @see android.view.View#onConfigurationChanged()
  */
-void AwContents::OnConfigurationChanged(
+ECode AwContents::OnConfigurationChanged(
     /* [in] */ IConfiguration* newConfig)
 {
     mAwViewMethods->OnConfigurationChanged(newConfig);
+    return NOERROR;
 }
 
 /**

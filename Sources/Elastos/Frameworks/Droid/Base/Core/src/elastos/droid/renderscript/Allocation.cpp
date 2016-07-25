@@ -1437,7 +1437,7 @@ ECode Allocation::TypeFromBitmap(
     AutoPtr<IElement> e;
     ElementFromBitmap(rs, b, (IElement**)&e);
     AutoPtr<ITypeBuilder> tb;
-    CTypeBuilder::New(rs, e, (ITyeBuilder**)&tb);
+    CTypeBuilder::New(rs, e, (ITypeBuilder**)&tb);
     Int32 width, height;
     b->GetWidth(&width);
     b->GetHeight(&height);
@@ -1531,7 +1531,8 @@ ECode Allocation::GetSurface(
     }
     Int64 id;
     GetID(mRS, &id);
-    *surface = mRS->NAllocationGetSurface(id);
+    AutoPtr<ISurface> s = mRS->NAllocationGetSurface(id);
+    *surface = s;
     REFCOUNT_ADD(*surface)
     return NOERROR;
 }
@@ -1667,7 +1668,7 @@ ECode Allocation::CreateCubemapFromCubeFaces(
     AutoPtr<IElement> e;
     ElementFromBitmap(rs, xpos, (IElement**)&e);
     AutoPtr<ITypeBuilder> tb;
-    CTypeBuilder::New(rs, e, (ITyeBuilder**)&tb);
+    CTypeBuilder::New(rs, e, (ITypeBuilder**)&tb);
     tb->SetX(height);
     tb->SetY(height);
     tb->SetFaces(TRUE);
@@ -1729,7 +1730,7 @@ ECode Allocation::CreateFromBitmapResource(
         return E_RS_ILLEGAL_ARGUMENT_EXCEPTION;
     }
     AutoPtr<IBitmapFactory> factory;
-    CBitmapFactory::AcquireSingleton((IBitmapFactory**)&helper);
+    CBitmapFactory::AcquireSingleton((IBitmapFactory**)&factory);
     AutoPtr<IBitmap> b;
     factory->DecodeResource(res, id, (IBitmap**)&b);
     AutoPtr<IAllocation> alloc;

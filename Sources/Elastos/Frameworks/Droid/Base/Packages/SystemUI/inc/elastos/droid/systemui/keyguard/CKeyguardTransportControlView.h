@@ -398,7 +398,7 @@ private:
     AutoPtr<IImageView> mBtnPrev;
     AutoPtr<IImageView> mBtnPlay;
     AutoPtr<IImageView> mBtnNext;
-    AutoPtr<Metadata> mMetadata;
+    AutoPtr<IMetadata> mMetadata;
     Int32 mTransportControlFlags;
     Int32 mCurrentPlayState;
     AutoPtr<IAudioManager> mAudioManager;

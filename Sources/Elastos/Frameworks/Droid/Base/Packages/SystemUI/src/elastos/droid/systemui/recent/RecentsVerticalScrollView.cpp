@@ -595,7 +595,7 @@ ECode RecentsVerticalScrollView::OnAttachedToWindow()
     return NOERROR;
 }
 
-void RecentsVerticalScrollView::OnConfigurationChanged(
+ECode RecentsVerticalScrollView::OnConfigurationChanged(
     /* [in] */ IConfiguration* newConfig)
 {
     ScrollView::OnConfigurationChanged(newConfig);
@@ -615,6 +615,7 @@ void RecentsVerticalScrollView::OnConfigurationChanged(
     Int32 pagingTouchSlop;
     vc->GetScaledPagingTouchSlop(&pagingTouchSlop);
     mSwipeHelper->SetPagingTouchSlop((Float)pagingTouchSlop);
+    return NOERROR;
 }
 
 void RecentsVerticalScrollView::SetOverScrollEffectPadding(

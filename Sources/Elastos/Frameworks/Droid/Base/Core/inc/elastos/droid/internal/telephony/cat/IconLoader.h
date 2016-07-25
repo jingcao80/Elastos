@@ -140,7 +140,7 @@ private:
     AutoPtr<ArrayOf<Int32> > mRecordNumbers;
     Int32 mCurrentRecordIndex;
     AutoPtr<ArrayOf<IBitmap*> > mIcons;
-    AutoPtr<IHashMap/*<Integer, IBitmap>*/> mIconsCache;
+    AutoPtr<IHashMap> mIconsCache;/*<Integer, IBitmap>*/
     static AutoPtr<IconLoader> sLoader;
     static AutoPtr<IHandlerThread> sThread;
     // Loader state values.

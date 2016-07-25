@@ -403,7 +403,7 @@ protected:
     Int64 mDuration;
     Int64 mHoldingStartTime;  // The time when the Connection last transitioned
                             // into HOLDING
-    AutoPtr<Connection> mOrigConnection;
+    AutoPtr<IConnection> mOrigConnection;
     AutoPtr<IList> mPostDialListeners; //List<IConnectionPostDialListener>
 
     Boolean mNumberConverted;

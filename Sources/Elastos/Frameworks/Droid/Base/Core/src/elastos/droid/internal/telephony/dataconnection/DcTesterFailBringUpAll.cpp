@@ -113,6 +113,7 @@ ECode DcTesterFailBringUpAll::GetDcFailBringUp(
 {
     VALIDATE_NOT_NULL(result)
     *result = mFailBringUp;
+    REFCOUNT_ADD(*result)
     return NOERROR;
 }
 

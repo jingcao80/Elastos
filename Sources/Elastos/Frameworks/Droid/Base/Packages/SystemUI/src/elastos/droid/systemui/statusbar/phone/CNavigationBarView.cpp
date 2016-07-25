@@ -721,12 +721,13 @@ void CNavigationBarView::NotifyVerticalChangedListener(
     }
 }
 
-void CNavigationBarView::OnConfigurationChanged(
+ECode CNavigationBarView::OnConfigurationChanged(
     /* [in] */ IConfiguration* newConfig)
 {
     LinearLayout::OnConfigurationChanged(newConfig);
     UpdateRTLOrder();
     UpdateTaskSwitchHelper();
+    return NOERROR;
 }
 
 void CNavigationBarView::UpdateRTLOrder()

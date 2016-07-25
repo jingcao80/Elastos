@@ -788,7 +788,7 @@ Int32 ModemStackController::GetMaxDataAllowed()
 {
     Logd(String("getMaxDataAllowed"));
     Int32 ret = DEFAULT_MAX_DATA_ALLOWED;
-    AutoPtr<IList/*<Integer*/> unsortedList;
+    AutoPtr<IList> unsortedList;
     CArrayList::New((IList**)&unsortedList);
 
     for (Int32 i = 0; i < mNumPhones; i++) {

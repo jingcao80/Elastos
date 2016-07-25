@@ -3180,9 +3180,10 @@ ECode ViewPager::ArrowScroll(
 }
 
 AutoPtr<IRect> ViewPager::GetChildRectInPagerCoordinates(
-    /* [in] */ IRect* outRect,
+    /* [in] */ IRect* r,
     /* [in] */ IView* child)
 {
+    AutoPtr<IRect> outRect = r;
     if (outRect == NULL) {
         CRect::New((IRect**)&outRect);
     }

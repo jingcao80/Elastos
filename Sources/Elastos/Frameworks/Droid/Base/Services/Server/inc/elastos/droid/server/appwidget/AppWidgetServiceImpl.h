@@ -781,7 +781,7 @@ private:
 
     CARAPI_(void) RegisterOnCrossProfileProvidersChangedListener();
 
-    CARAPI_(void) OnConfigurationChanged();
+    CARAPI OnConfigurationChanged();
 
     CARAPI_(void) OnPackageBroadcastReceived(
         /* [in] */ IIntent* intent,

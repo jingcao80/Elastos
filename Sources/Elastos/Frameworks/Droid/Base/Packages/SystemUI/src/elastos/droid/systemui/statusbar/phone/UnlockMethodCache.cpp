@@ -1,7 +1,10 @@
 
 #include "elastos/droid/systemui/statusbar/phone/UnlockMethodCache.h"
+#include "elastos/droid/systemui/keyguard/KeyguardUpdateMonitor.h"
 #include <elastos/utility/logging/Logger.h>
 
+using Elastos::Droid::SystemUI::Keyguard::KeyguardUpdateMonitor;
+using Elastos::Droid::SystemUI::Keyguard::IKeyguardUpdateMonitor;
 using Elastos::Droid::Internal::Widget::CLockPatternUtils;
 using Elastos::Utility::CArrayList;
 using Elastos::Utility::IIterator;
@@ -14,22 +17,25 @@ namespace StatusBar {
 namespace Phone {
 
 AutoPtr<UnlockMethodCache> UnlockMethodCache::sInstance;
-UnlockMethodCache::UnlockMethodCache(
+
+ECode UnlockMethodCache::constructor(
     /* [in] */ IContext* ctx)
 {
     CArrayList::New((IArrayList**)&mListeners);
     CLockPatternUtils::New(ctx, (ILockPatternUtils**)&mLockPatternUtils);
-    Logger::D("UnlockMethodCache", "TODO: Not implement the app Keyguard.");
-    // mKeyguardUpdateMonitor = KeyguardUpdateMonitor.getInstance(ctx);
-    // KeyguardUpdateMonitor.getInstance(ctx).registerCallback(mCallback);
+    mCallback = new MyKeyguardUpdateMonitorCallback(this);
+    mKeyguardUpdateMonitor = KeyguardUpdateMonitor::GetInstance(ctx);
+    mKeyguardUpdateMonitor->RegisterCallback(mCallback);
     UpdateMethodSecure(TRUE /* updateAlways */);
+    return NOERROR;
 }
 
 AutoPtr<UnlockMethodCache> UnlockMethodCache::GetInstance(
     /* [in] */ IContext* context)
 {
     if (sInstance == NULL) {
-        sInstance = new UnlockMethodCache(context);
+        sInstance = new UnlockMethodCache();
+        sInstance->constructor(context);
     }
     return sInstance;
 }
@@ -51,7 +57,7 @@ void UnlockMethodCache::RemoveListener(
     mListeners->Remove(listener);
 }
 
-void UnlockMethodCache::UpdateMethodSecure(
+ECode UnlockMethodCache::UpdateMethodSecure(
     /* [in] */ Boolean updateAlways)
 {
     Int32 user = 0;
@@ -59,15 +65,12 @@ void UnlockMethodCache::UpdateMethodSecure(
     Boolean secure = FALSE;
     mLockPatternUtils->IsSecure(&secure);
     Boolean hasTrust = TRUE;
-    Logger::D("UnlockMethodCache", "TODO [UpdateMethodSecure 1] : Not implement the app Keyguard.");
-    // mKeyguardUpdateMonitor->GetUserHasTrust(user, &hasTrust);
+    mKeyguardUpdateMonitor->GetUserHasTrust(user, &hasTrust);
     Boolean methodInsecure = !secure || hasTrust;
     Boolean trustManaged = TRUE;
-    Logger::D("UnlockMethodCache", "TODO [UpdateMethodSecure 2] : Not implement the app Keyguard.");
-    // mKeyguardUpdateMonitor->GetUserTrustIsManaged(user, &trustManaged);
+    mKeyguardUpdateMonitor->GetUserTrustIsManaged(user, &trustManaged);
     Boolean running = FALSE;
-    Logger::D("UnlockMethodCache", "TODO [UpdateMethodSecure 3] : Not implement the app Keyguard.");
-    // mKeyguardUpdateMonitor->IsFaceUnlockRunning(user, &running);
+    mKeyguardUpdateMonitor->IsFaceUnlockRunning(user, &running);
     Boolean faceUnlockRunning = running && trustManaged;
     Boolean changed = methodInsecure != mMethodInsecure || trustManaged != mTrustManaged
             || faceUnlockRunning != mFaceUnlockRunning;
@@ -77,6 +80,7 @@ void UnlockMethodCache::UpdateMethodSecure(
         mFaceUnlockRunning = faceUnlockRunning;
         NotifyListeners(mMethodInsecure);
     }
+    return NOERROR;
 }
 
 void UnlockMethodCache::NotifyListeners(

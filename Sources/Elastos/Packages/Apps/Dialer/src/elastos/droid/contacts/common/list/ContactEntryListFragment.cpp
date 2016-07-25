@@ -379,6 +379,7 @@ ECode ContactEntryListFragment::OnCreateLoader(
         loader->SetLocalInvisibleDirectoryEnabled(
                 IContactEntryListAdapter::LOCAL_INVISIBLE_DIRECTORY_ENABLED);
         *_loader = ILoader::Probe(loader);
+        REFCOUNT_ADD(*_loader)
     }
     else {
         AutoPtr<ICursorLoader> loader;
@@ -390,8 +391,8 @@ ECode ContactEntryListFragment::OnCreateLoader(
         }
         mAdapter->ConfigureLoader(loader, directoryId);
         *_loader = ILoader::Probe(loader);
+        REFCOUNT_ADD(*_loader)
     }
-    REFCOUNT_ADD(*_loader)
     return NOERROR;
 }
 

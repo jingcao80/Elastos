@@ -258,11 +258,12 @@ ECode TimePicker::OnInitializeAccessibilityNodeInfo(
     return NOERROR;
 }
 
-void TimePicker::OnConfigurationChanged(
+ECode TimePicker::OnConfigurationChanged(
     /* [in] */ IConfiguration* newConfig)
 {
     FrameLayout::OnConfigurationChanged(newConfig);
     mDelegate->OnConfigurationChanged(newConfig);
+    return NOERROR;
 }
 
 AutoPtr<IParcelable> TimePicker::OnSaveInstanceState()

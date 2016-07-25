@@ -137,7 +137,7 @@ ECode CameraWidgetFrame::constructor(
     AddView(mPreview);
 
     AutoPtr<IView> clickBlocker;
-    CView::New(context, (IView**)&IView);
+    CView::New(context, (IView**)&clickBlocker);
     clickBlocker->SetBackgroundColor(IColor::TRANSPARENT);
     clickBlocker->SetOnClickListener(this);
     AddView(clickBlocker);

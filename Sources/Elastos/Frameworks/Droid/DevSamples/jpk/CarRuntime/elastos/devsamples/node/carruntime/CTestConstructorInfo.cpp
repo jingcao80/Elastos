@@ -96,9 +96,9 @@ ECode CTestConstructorInfo::GetParamInfoByIndex(
         return ec;
     }
     *ppParamInfo = testInfo;
+    REFCOUNT_ADD(*ppParamInfo)
 
     info->AddRef();
-    testInfo->AddRef();
 
     return ec;
 }
@@ -123,9 +123,9 @@ ECode CTestConstructorInfo::GetParamInfoByName(
         return ec;
     }
     *ppParamInfo = testInfo;
+    REFCOUNT_ADD(*ppParamInfo)
 
     info->AddRef();
-    testInfo->AddRef();
 
     return ec;
 }
@@ -149,9 +149,9 @@ ECode CTestConstructorInfo::CreateArgumentList(
         return ec;
     }
     *ppArgumentList = testArgumentList;
+    REFCOUNT_ADD(*ppArgumentList)
 
     argumentList->AddRef();
-    testArgumentList->AddRef();
 
     return ec;
 }
@@ -172,7 +172,7 @@ ECode CTestConstructorInfo::CreateObject(
         ALOGD("CTestConstructorInfo::CreateObject: pArgumentList->GetInternalObject success!");
     }
 
-    ec = mConstructorInfo->CreateObject(argumentList,ppObject);
+    ec = mConstructorInfo->CreateObject(argumentList, ppObject);
     if (FAILED(ec)) {
         ALOGD("CTestConstructorInfo::CreateObject: mConstructorInfo->CreateObject fail!");
         return ec;
@@ -180,8 +180,6 @@ ECode CTestConstructorInfo::CreateObject(
     else {
         ALOGD("CTestConstructorInfo::CreateObject: mConstructorInfo->CreateObject success!");
     }
-
-    (*ppObject)->AddRef();
 
     return ec;
 }
@@ -202,7 +200,7 @@ ECode CTestConstructorInfo::LocalCreateObject(
         ALOGD("CTestConstructorInfo::CreateObject: pArgumentList->GetInternalObject success!");
     }
 
-    ec = mConstructorInfo->CreateObject(argumentList.Get(),ppObject);
+    ec = mConstructorInfo->CreateObject(argumentList.Get(), ppObject);
     if (FAILED(ec)) {
         ALOGD("CTestConstructorInfo::CreateObject: mConstructorInfo->CreateObject fail!");
         return ec;
@@ -210,8 +208,6 @@ ECode CTestConstructorInfo::LocalCreateObject(
     else {
         ALOGD("CTestConstructorInfo::CreateObject: mConstructorInfo->CreateObject success!");
     }
-
-    (*ppObject)->AddRef();
 
     return ec;
 }
@@ -240,8 +236,6 @@ ECode CTestConstructorInfo::RemoteCreateObject(
     else {
         ALOGD("CTestConstructorInfo::CreateObject: mConstructorInfo->CreateObject success!");
     }
-
-    (*ppObject)->AddRef();
 
     return ec;
 }
@@ -286,14 +280,13 @@ ECode CTestConstructorInfo::GetClassInfo(
 
     ALOGD("CTestConstructorInfo::GetClassInfo=================3==========================");
     *ppClassInfo = testClassInfo;
+    REFCOUNT_ADD(testClassInfo)
 
     ALOGD("CTestConstructorInfo::GetClassInfo=================4==========================");
 
     //classInfo->AddRef();
     REFCOUNT_ADD(classInfo.Get());
     ALOGD("CTestConstructorInfo::GetClassInfo=================5==========================");
-    testClassInfo->AddRef();
-    ALOGD("CTestConstructorInfo::GetClassInfo=================6==========================");
 
     return ec;
 }
@@ -312,9 +305,10 @@ ECode CTestConstructorInfo::constructor(
 }
 
 ECode CTestConstructorInfo::GetInternalObject(
-    /* [out] */ PInterface* ppObject){
+    /* [out] */ PInterface* ppObject)
+{
     *ppObject = mConstructorInfo.Get();
-    (*ppObject)->AddRef();
+    REFCOUNT_ADD(*ppObject)
     return NOERROR;
 }
 

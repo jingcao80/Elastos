@@ -300,7 +300,7 @@ public:
 protected:
     CARAPI OnFinishInflate();
 
-    CARAPI_(void) OnConfigurationChanged(
+    CARAPI OnConfigurationChanged(
         /* [in] */ IConfiguration* newConfig);
 
     CARAPI_(void) OnSizeChanged(

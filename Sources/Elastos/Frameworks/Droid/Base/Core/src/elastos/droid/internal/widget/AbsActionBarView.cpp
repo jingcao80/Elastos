@@ -410,7 +410,7 @@ ECode AbsActionBarView::DismissPopupMenus()
     return NOERROR;
 }
 
-void AbsActionBarView::OnConfigurationChanged(
+ECode AbsActionBarView::OnConfigurationChanged(
     /* [in] */ IConfiguration* newConfig)
 {
     ViewGroup::OnConfigurationChanged(newConfig);
@@ -441,6 +441,7 @@ void AbsActionBarView::OnConfigurationChanged(
     if (mActionMenuPresenter != NULL) {
         mActionMenuPresenter->OnConfigurationChanged(newConfig);
     }
+    return NOERROR;
 }
 
 Int32 AbsActionBarView::MeasureChildView(

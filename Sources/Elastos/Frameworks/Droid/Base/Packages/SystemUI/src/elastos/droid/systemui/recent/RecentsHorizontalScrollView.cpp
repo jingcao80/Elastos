@@ -539,7 +539,7 @@ ECode RecentsHorizontalScrollView::OnAttachedToWindow()
     return NOERROR;
 }
 
-void RecentsHorizontalScrollView::OnConfigurationChanged(
+ECode RecentsHorizontalScrollView::OnConfigurationChanged(
     /* [in] */ IConfiguration* newConfig)
 {
     OnConfigurationChanged(newConfig);
@@ -559,6 +559,7 @@ void RecentsHorizontalScrollView::OnConfigurationChanged(
     Int32 pagingTouchSlop;
     vc->GetScaledPagingTouchSlop(&pagingTouchSlop);
     mSwipeHelper->SetPagingTouchSlop((Float)pagingTouchSlop);
+    return NOERROR;
 }
 
 void RecentsHorizontalScrollView::SetOverScrollEffectPadding(

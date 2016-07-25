@@ -48,7 +48,7 @@ public:
     static const String PARTNER_SPN_OVERRIDE_PATH;
 
 private:
-     AutoPtr<IHashMap/*<String, String*/> mCarrierSpnMap;
+     AutoPtr<IHashMap> mCarrierSpnMap;/*<String, String*/
 };
 
 } // namespace Uicc

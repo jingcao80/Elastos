@@ -239,7 +239,7 @@ protected:
         /* [in] */ IRect* previouslyFocusedRect);
 
     //@Override
-    CARAPI_(void) OnConfigurationChanged(
+    CARAPI OnConfigurationChanged(
         /* [in] */ IConfiguration* newConfig);
 
     //@Override

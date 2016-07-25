@@ -182,11 +182,11 @@ private:
 
 public:
     // Indexed by EF ID
-    AutoPtr<ISparseArray/*< AutoPtr< IArrayList<AdnRecord> > >*/> mAdnLikeFiles;
+    AutoPtr<ISparseArray> mAdnLikeFiles;/*< AutoPtr< IArrayList<AdnRecord> > >*/
     // People waiting for ADN-like files to be loaded
-    AutoPtr<ISparseArray/*<AutoPtr< IArrayList<IMessage> > >*/> mAdnLikeWaiters;
+    AutoPtr<ISparseArray> mAdnLikeWaiters;/*<AutoPtr< IArrayList<IMessage> > >*/
     // People waiting for adn record to be updated
-    AutoPtr<ISparseArray/*<IMessage> */> mUserWriteResponse;
+    AutoPtr<ISparseArray> mUserWriteResponse;/*<IMessage> */
     //***** Event Constants
     static const Int32 EVENT_LOAD_ALL_ADN_LIKE_DONE = 1;
     static const Int32 EVENT_UPDATE_ADN_DONE = 2;

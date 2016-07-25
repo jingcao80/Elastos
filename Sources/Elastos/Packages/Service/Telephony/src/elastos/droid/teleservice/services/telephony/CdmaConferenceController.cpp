@@ -69,10 +69,8 @@ CdmaConferenceController::CdmaConferenceController(
 {
     mConnectionListener = new MyConnectionListener(this);
 
-    CArrayList::New((IArrayList**)&mCdmaConnections);
-
-    CArrayList::New((IArrayList**)&mPendingOutgoingConnections);
-
+    CArrayList::New((IList**)&mCdmaConnections);
+    CArrayList::New((IList**)&mPendingOutgoingConnections);
     CHandler::New((IHandler**)&mHandler);
 }
 
@@ -92,7 +90,7 @@ ECode CdmaConferenceController::Add(
         Int32 size;
         mCdmaConnections->GetSize(&size);
         AutoPtr<IList> connectionsToReset;
-        CArrayList::New(size, (IArrayList**)&connectionsToReset);
+        CArrayList::New(size, (IList**)&connectionsToReset);
 
         for (Int32 i = 0; i < size; i++) {
             AutoPtr<IInterface> obj;
@@ -137,7 +135,7 @@ void CdmaConferenceController::RecalculateConference()
     Int32 size;
     mCdmaConnections->GetSize(&size);
     AutoPtr<IList> conferenceConnections;
-    CArrayList::New(size, (IArrayList**)&conferenceConnections);
+    CArrayList::New(size, (IList**)&conferenceConnections);
     for (Int32 i = 0; i < size; i++) {
             AutoPtr<IInterface> obj;
             mCdmaConnections->Get(i, (IInterface**)&obj);

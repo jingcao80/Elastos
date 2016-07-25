@@ -466,7 +466,7 @@ public:
         /* [in] */ Boolean shown);
 
 protected:
-    virtual CARAPI_(void) OnConfigurationChanged(
+    virtual CARAPI OnConfigurationChanged(
         /* [in] */ IConfiguration* newConfig);
 
     /*protected void dispatchRestoreInstanceState(SparseArray<IParcelable> container);*/

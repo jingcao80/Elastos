@@ -99,7 +99,7 @@ ECode CGsmSmsCbMessage::CreateSmsCbMessage(
         return CSmsCbMessage::New(ISmsCbMessage::MESSAGE_FORMAT_3GPP,
                 scope, number, location, category,
                 String(NULL), String("ETWS"), ISmsCbMessage::MESSAGE_PRIORITY_EMERGENCY,
-                etwsInfo, cmasInfo, (ISmsCbMessage**)&result);
+                etwsInfo, cmasInfo, result);
     }
     else {
         String language;
@@ -150,7 +150,7 @@ ECode CGsmSmsCbMessage::CreateSmsCbMessage(
         return CSmsCbMessage::New(ISmsCbMessage::MESSAGE_FORMAT_3GPP,
                 scope, number, location,
                 category, language, (sb.ToString(&str), str), priority,
-                etwsInfo, cmasInfo, (ISmsCbMessage**)&result);
+                etwsInfo, cmasInfo, result);
     }
     return NOERROR;
 }

@@ -219,7 +219,7 @@ ECode CallLogActivity::OnCreate(
         // mViewPager->SetCurrentItem(startingTab);
     }
 
-    CVoicemailStatusHelperImpl::New((IVoicemailStatusHelperImpl**)&mVoicemailStatusHelper);
+    CVoicemailStatusHelperImpl::New((IVoicemailStatusHelper**)&mVoicemailStatusHelper);
     return NOERROR;
 }
 

@@ -58,11 +58,10 @@ ECode SipProfileDb::RetrieveSipProfileList(
 {
     VALIDATE_NOT_NULL(list)
 
-    {
-        AutoLock syncLock(sLock);
-        *list = RetrieveSipProfileListInternal();
-        REFCOUNT_ADD(*list);
-    }
+    AutoLock syncLock(sLock);
+    AutoPtr<IList> l = RetrieveSipProfileListInternal();
+    *list = l;
+    REFCOUNT_ADD(*list);
     return NOERROR;
 }
 

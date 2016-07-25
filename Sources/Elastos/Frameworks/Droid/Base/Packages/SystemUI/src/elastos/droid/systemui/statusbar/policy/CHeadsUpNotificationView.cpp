@@ -441,7 +441,7 @@ ECode CHeadsUpNotificationView::OnTouchEvent(
     return NOERROR;
 }
 
-void CHeadsUpNotificationView::OnConfigurationChanged(
+ECode CHeadsUpNotificationView::OnConfigurationChanged(
     /* [in] */ IConfiguration* newConfig)
 {
     FrameLayout::OnConfigurationChanged(newConfig);
@@ -465,6 +465,7 @@ void CHeadsUpNotificationView::OnConfigurationChanged(
     viewConfiguration->GetScaledPagingTouchSlop(&value);
     Float pagingTouchSlop = value;
     mSwipeHelper->SetPagingTouchSlop(pagingTouchSlop);
+    return NOERROR;
 }
 
 ECode CHeadsUpNotificationView::GetChildAtRawPosition(

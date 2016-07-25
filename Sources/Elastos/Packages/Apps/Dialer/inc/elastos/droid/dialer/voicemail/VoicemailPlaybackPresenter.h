@@ -531,7 +531,7 @@ private:
      */
     AutoPtr<FetchResultHandler> mFetchResultHandler;
     AutoPtr<IPowerManagerWakeLock> mWakeLock;
-    AutoPtr<AsyncTask> mPrepareTask;
+    AutoPtr<IAsyncTask> mPrepareTask;
 };
 
 } // Voicemail

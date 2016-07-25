@@ -102,6 +102,8 @@ const Int32 CInstallFlowAnalytics::FLAG_ALL_PERMISSIONS_DISPLAYED;
 
 CAR_INTERFACE_IMPL(CInstallFlowAnalytics, Object, IParcelable)
 
+CAR_OBJECT_IMPL(CInstallFlowAnalytics)
+
 CInstallFlowAnalytics::CInstallFlowAnalytics()
     : mFlags(0)
     , mResult(0)

@@ -50,13 +50,6 @@ CKeyguardWidgetFrame::CKeyguardWidgetFrame()
     , mFrameHeight(0)
     , mIsHoveringOverDeleteDropTarget(FALSE)
 {
-    CPaint::New((IPain**)&mGradientPaint);
-
-    CRect::New((IRect**)&mForegroundRect);
-
-    CRect::New((IRect**)&mBackgroundRect);
-
-    mUpdateMonitorCallbacks = new MyKeyguardUpdateMonitorCallback(this);
 }
 
 ECode CKeyguardWidgetFrame::constructor(
@@ -78,6 +71,12 @@ ECode CKeyguardWidgetFrame::constructor(
     /* [in] */ Int32 defStyle)
 {
     FrameLayout::constructor(context, attrs, defStyle);
+
+    CPaint::New((IPaint**)&mGradientPaint);
+    CRect::New((IRect**)&mForegroundRect);
+    CRect::New((IRect**)&mBackgroundRect);
+
+    mUpdateMonitorCallbacks = new MyKeyguardUpdateMonitorCallback(this);
 
     mLongPressHelper = new CheckLongPressHelper(this);
 

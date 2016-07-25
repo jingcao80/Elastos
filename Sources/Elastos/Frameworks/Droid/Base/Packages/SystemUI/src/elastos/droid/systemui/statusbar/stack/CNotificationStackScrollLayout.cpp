@@ -1092,7 +1092,7 @@ void CNotificationStackScrollLayout::SetSwipingInProgress(
     }
 }
 
-void CNotificationStackScrollLayout::OnConfigurationChanged(
+ECode CNotificationStackScrollLayout::OnConfigurationChanged(
     /* [in] */ IConfiguration* newConfig)
 {
     ViewGroup::OnConfigurationChanged(newConfig);
@@ -1114,6 +1114,7 @@ void CNotificationStackScrollLayout::OnConfigurationChanged(
     cfg->GetScaledPagingTouchSlop(&pagingTouchSlop);
     mSwipeHelper->SetPagingTouchSlop(pagingTouchSlop);
     InitView(ctx);
+    return NOERROR;
 }
 
 ECode CNotificationStackScrollLayout::DismissViewAnimated(

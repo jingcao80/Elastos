@@ -167,7 +167,7 @@ public:
 
     CARAPI_(void) AnimateHideLeftRightIcon();
 
-    CARAPI_(void) OnConfigurationChanged();
+    CARAPI OnConfigurationChanged();
 
     CARAPI_(void) Reset(
         /* [in] */ Boolean animate);

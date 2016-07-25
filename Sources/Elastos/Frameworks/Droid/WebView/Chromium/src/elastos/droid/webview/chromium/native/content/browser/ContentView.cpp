@@ -236,10 +236,11 @@ Boolean ContentView::PerformLongClick()
 }
 
 //@Override
-void ContentView::OnConfigurationChanged(
+ECode ContentView::OnConfigurationChanged(
     /* [in] */ IConfiguration* newConfig)
 {
     mContentViewCore->OnConfigurationChanged(newConfig);
+    return NOERROR;
 }
 
 /**

@@ -6449,9 +6449,10 @@ ECode View::DispatchConfigurationChanged(
  *
  * @param newConfig The new resource configuration.
  */
-void View::OnConfigurationChanged(
+ECode View::OnConfigurationChanged(
     /* [in] */ IConfiguration* newConfig)
 {
+    return NOERROR;
 }
 
 /**

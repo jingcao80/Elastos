@@ -242,14 +242,14 @@ ECode CUsimPhoneBookManager::constructor(
     mFh = fh;
     CArrayList::New((IArrayList**)&mPhoneBookRecords);
     CArrayList::New((IArrayList**)&mAdnLengthList);
-    CHashMap::New((IHashMap**)&mIapFileRecord);
-    CHashMap::New((IHashMap**)&mEmailFileRecord);
-    CHashMap::New((IHashMap**)&mAnrFileRecord);
-    CHashMap::New((IHashMap**)&mRecordNums);
+    CHashMap::New((IMap**)&mIapFileRecord);
+    CHashMap::New((IMap**)&mEmailFileRecord);
+    CHashMap::New((IMap**)&mAnrFileRecord);
+    CHashMap::New((IMap**)&mRecordNums);
     mPbrFile = NULL;
 
-    CHashMap::New((IHashMap**)&mAnrFlags);
-    CHashMap::New((IHashMap**)&mEmailFlags);
+    CHashMap::New((IMap**)&mAnrFlags);
+    CHashMap::New((IMap**)&mEmailFlags);
 
     // We assume its present, after the first read this is updated.
     // So we don't have to read from UICC if its not present on subsequent reads.

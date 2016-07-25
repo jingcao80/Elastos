@@ -281,7 +281,7 @@ ECode ActionBarView::HomeView::GetUpWidth(
     return NOERROR;
 }
 
-void ActionBarView::HomeView::OnConfigurationChanged(
+ECode ActionBarView::HomeView::OnConfigurationChanged(
     /* [in] */ IConfiguration* newConfig)
 {
     FrameLayout::OnConfigurationChanged(newConfig);
@@ -289,6 +289,7 @@ void ActionBarView::HomeView::OnConfigurationChanged(
         // Reload for config change
         UpdateUpIndicator();
     }
+    return NOERROR;
 }
 
 ECode ActionBarView::HomeView::OnFinishInflate()
@@ -1615,7 +1616,7 @@ ECode ActionBarView::SetDefaultNavigationContentDescription(
     return NOERROR;
 }
 
-void ActionBarView::OnConfigurationChanged(
+ECode ActionBarView::OnConfigurationChanged(
     /* [in] */ IConfiguration* newConfig)
 {
     AbsActionBarView::OnConfigurationChanged(newConfig);
@@ -1649,6 +1650,7 @@ void ActionBarView::OnConfigurationChanged(
         }
         mTabScrollView->SetAllowCollapse(TRUE);
     }
+    return NOERROR;
 }
 
 ECode ActionBarView::GenerateDefaultLayoutParams(

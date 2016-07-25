@@ -288,6 +288,7 @@ ECode ImsPhone::GetForegroundCall(
 {
     VALIDATE_NOT_NULL(result);
     *result = ICall::Probe(((ImsPhoneCallTracker*)mCT.Get())->mForegroundCall);
+    REFCOUNT_ADD(*result)
     return NOERROR;
 }
 
@@ -296,6 +297,7 @@ ECode ImsPhone::GetBackgroundCall(
 {
     VALIDATE_NOT_NULL(result);
     *result = ICall::Probe(((ImsPhoneCallTracker*)mCT.Get())->mBackgroundCall);
+    REFCOUNT_ADD(*result)
     return NOERROR;
 }
 
@@ -304,6 +306,7 @@ ECode ImsPhone::GetRingingCall(
 {
     VALIDATE_NOT_NULL(result);
     *result = ICall::Probe(((ImsPhoneCallTracker*)mCT.Get())->mRingingCall);
+    REFCOUNT_ADD(*result)
     return NOERROR;
 }
 

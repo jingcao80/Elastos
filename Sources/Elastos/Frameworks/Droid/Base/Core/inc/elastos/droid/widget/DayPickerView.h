@@ -198,7 +198,7 @@ protected:
     CARAPI LayoutChildren();
 
     // @Override
-    CARAPI_(void) OnConfigurationChanged(
+    CARAPI OnConfigurationChanged(
         /* [in] */ IConfiguration* newConfig);
 
 private:

@@ -1161,7 +1161,7 @@ public:
      * @see View#onConfigurationChanged(Configuration)
      */
     //@SuppressWarnings("javadoc")
-    CARAPI_(void) OnConfigurationChanged(
+    CARAPI OnConfigurationChanged(
         /* [in] */ IConfiguration* newConfig);
 
     /**

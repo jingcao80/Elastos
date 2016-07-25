@@ -218,7 +218,7 @@ AutoPtr<IList> SavedAccessPointsWifiSettings::ConstructSavedAccessPoints(
 
             obj = NULL;
             resultsMap->Get(CoreUtils::Convert(SSID), (IInterface**)&obj);
-            IList* res = IList::Probe(obj);
+            AutoPtr<IList> res = IList::Probe(obj);
             if (res == NULL){
                 CArrayList::New((IList**)&res);
                 resultsMap->Put(CoreUtils::Convert(SSID), res);

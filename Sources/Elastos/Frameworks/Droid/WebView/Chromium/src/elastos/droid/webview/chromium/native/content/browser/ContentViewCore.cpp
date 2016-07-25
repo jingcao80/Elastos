@@ -2219,7 +2219,7 @@ Boolean ContentViewCore::OnCheckIsTextEditor()
  * @see View#onConfigurationChanged(Configuration)
  */
 //@SuppressWarnings("javadoc")
-void ContentViewCore::OnConfigurationChanged(
+ECode ContentViewCore::OnConfigurationChanged(
     /* [in] */ IConfiguration* newConfig)
 {
     TraceEvent::Begin();
@@ -2241,6 +2241,7 @@ void ContentViewCore::OnConfigurationChanged(
     AutoPtr<IView> view = IView::Probe(mContainerView);
     view->RequestLayout();
     TraceEvent::End();
+    return NOERROR;
 }
 
 /**

@@ -131,7 +131,7 @@ void QSTileView::UpdateTopPadding()
     RequestLayout();
 }
 
-void QSTileView::OnConfigurationChanged(
+ECode QSTileView::OnConfigurationChanged(
     /* [in] */ IConfiguration* newConfig)
 {
     ViewGroup::OnConfigurationChanged(newConfig);
@@ -144,6 +144,7 @@ void QSTileView::OnConfigurationChanged(
         res->GetDimensionPixelSize(R::dimen::qs_tile_text_size, &v);
         mDualLabel->SetTextSize(ITypedValue::COMPLEX_UNIT_PX, v);
     }
+    return NOERROR;
 }
 
 void QSTileView::RecreateLabel()

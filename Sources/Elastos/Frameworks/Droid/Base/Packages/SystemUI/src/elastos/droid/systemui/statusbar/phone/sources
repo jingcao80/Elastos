@@ -6,8 +6,8 @@ INCLUDES += ../../../../../../
 INCLUDES += $(MAKEDIR)/../../../../../../
 INCLUDES += $(MAKEDIR)/../../../../../../inc/
 
+SOURCES += phone.cpp
 SOURCES += SystemUIDialog.cpp
-SOURCES += CSystemUIDialog.cpp
 SOURCES += IconMerger.cpp
 SOURCES += CIconMerger.cpp
 SOURCES += KeyguardPreviewContainer.cpp

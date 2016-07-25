@@ -521,6 +521,7 @@ ECode CKeyguardTransportControlView::OnSaveInstanceState(
     ss->mDuration = mMetadata->mDuration;
     ss->mBitmap = mMetadata->mBitmap;
     *p = IParcelable::Probe(ss);
+    REFCOUNT_ADD(*p)
     return NOERROR;
 }
 
@@ -651,7 +652,7 @@ void CKeyguardTransportControlView::PopulateMetadata()
         AutoPtr<ILocale> locale;
         config->GetLocale((ILocale**)&locale);
         String pattern = DateFormat::GetBestDateTimePattern(locale, skeleton);
-        CSimpleDateFormat::New(pattern, (ISimpleDateFormat**)&mFormat);
+        CSimpleDateFormat::New(pattern, (IDateFormat**)&mFormat);
         AutoPtr<ITimeZoneHelper> helper;
         CTimeZoneHelper::AcquireSingleton((ITimeZoneHelper**)&helper);
         AutoPtr<ITimeZone> ppTimezone;

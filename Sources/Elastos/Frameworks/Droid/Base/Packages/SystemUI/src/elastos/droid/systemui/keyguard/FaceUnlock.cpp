@@ -44,7 +44,7 @@ FaceUnlock::FaceUnlock(
 {
     mConnection = new MyServiceConnection(this);
 
-    CFaceUnlockFaceLockCallback::New((IIFaceLockCallbac**)&mFaceUnlockCallback);
+    CFaceUnlockFaceLockCallback::New((IIFaceLockCallback**)&mFaceUnlockCallback);
 
     CLockPatternUtils::New(context, (ILockPatternUtils**)&mLockPatternUtils);
     CHandler::New(this, (IHandler**)&mHandler);

@@ -205,7 +205,7 @@ void WifiSettings::Multimap::Put(
 {
     AutoPtr<IInterface> obj;
     mStore->Get(CoreUtils::Convert(key), (IInterface**)&obj);
-    IList* curVals = IList::Probe(obj);
+    AutoPtr<IList> curVals = IList::Probe(obj);
     if (curVals == NULL) {
         CArrayList::New(3, (IList**)&curVals);
         mStore->Put(CoreUtils::Convert(key), curVals);

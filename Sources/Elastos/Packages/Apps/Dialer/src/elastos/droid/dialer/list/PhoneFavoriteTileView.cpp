@@ -159,9 +159,8 @@ ECode PhoneFavoriteTileView::CreateClickListener(
 {
     VALIDATE_NOT_NULL(listener);
     AutoPtr<MyClickListener> clickListener = new MyClickListener(this);
-    *listener = (IViewOnClickListener*)clickListener;
-    REFCOUNT_ADD(listener);
-
+    *listener = (IViewOnClickListener*)clickListener.Get();
+    REFCOUNT_ADD(*listener)
     return NOERROR;
 }
 

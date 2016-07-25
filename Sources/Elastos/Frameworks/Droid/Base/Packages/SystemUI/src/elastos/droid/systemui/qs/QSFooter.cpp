@@ -154,9 +154,10 @@ void QSFooter::SetListening(
     }
 }
 
-void QSFooter::OnConfigurationChanged()
+ECode QSFooter::OnConfigurationChanged()
 {
     FontSizeUtils::UpdateFontSize(mFooterText, R::dimen::qs_tile_text_size);
+    return NOERROR;
 }
 
 AutoPtr<IView> QSFooter::GetView()

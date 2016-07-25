@@ -6,7 +6,11 @@
 #include "Elastos.CoreLibrary.Utility.h"
 #include "Elastos.Droid.Internal.h"
 #include <elastos/core/Object.h>
+#include "elastos/droid/systemui/keyguard/KeyguardUpdateMonitorCallback.h"
 
+using Elastos::Droid::SystemUI::Keyguard::IKeyguardUpdateMonitor;
+using Elastos::Droid::SystemUI::Keyguard::KeyguardUpdateMonitorCallback;
+using Elastos::Droid::SystemUI::Keyguard::IKeyguardUpdateMonitorCallback;
 using Elastos::Droid::Content::IContext;
 using Elastos::Droid::Internal::Widget::ILockPatternUtils;
 using Elastos::Core::Object;
@@ -25,6 +29,49 @@ namespace Phone {
  */
 class UnlockMethodCache: public Object
 {
+private:
+    class MyKeyguardUpdateMonitorCallback
+        : public KeyguardUpdateMonitorCallback
+    {
+    public:
+        MyKeyguardUpdateMonitorCallback(
+            /* [in] */ UnlockMethodCache* host)
+            : mHost(host)
+        {}
+
+        //@Override
+        CARAPI OnUserSwitchComplete(Int32 userId) {
+            return mHost->UpdateMethodSecure(FALSE /* updateAlways */);
+        }
+
+        //@Override
+        CARAPI OnTrustChanged(Int32 userId) {
+            return mHost->UpdateMethodSecure(FALSE /* updateAlways */);
+        }
+
+        //@Override
+        CARAPI OnTrustManagedChanged(Int32 userId) {
+            return mHost->UpdateMethodSecure(FALSE /* updateAlways */);
+        }
+
+        //@Override
+        CARAPI OnScreenTurnedOn() {
+            return mHost->UpdateMethodSecure(FALSE /* updateAlways */);
+        }
+
+        //@Override
+        CARAPI OnFingerprintRecognized(Int32 userId) {
+            return mHost->UpdateMethodSecure(FALSE /* updateAlways */);
+        }
+
+        //@Override
+        CARAPI OnFaceUnlockStateChanged(Boolean running, Int32 userId) {
+            return mHost->UpdateMethodSecure(FALSE /* updateAlways */);
+        }
+    private:
+        UnlockMethodCache* mHost;
+    };
+
 public:
     static CARAPI_(AutoPtr<UnlockMethodCache>) GetInstance(
         /* [in] */ IContext* context);
@@ -40,47 +87,15 @@ public:
     CARAPI_(void) RemoveListener(
         /* [in] */ IOnUnlockMethodChangedListener* listener);
 
-    // private final KeyguardUpdateMonitorCallback mCallback = new KeyguardUpdateMonitorCallback() {
-    //     @Override
-    //     public void onUserSwitchComplete(int userId) {
-    //         updateMethodSecure(FALSE /* updateAlways */);
-    //     }
-
-    //     @Override
-    //     public void onTrustChanged(int userId) {
-    //         updateMethodSecure(FALSE /* updateAlways */);
-    //     }
-
-    //     @Override
-    //     public void onTrustManagedChanged(int userId) {
-    //         updateMethodSecure(FALSE /* updateAlways */);
-    //     }
-
-    //     @Override
-    //     public void onScreenTurnedOn() {
-    //         updateMethodSecure(FALSE /* updateAlways */);
-    //     }
-
-    //     @Override
-    //     public void onFingerprintRecognized(int userId) {
-    //         updateMethodSecure(FALSE /* updateAlways */);
-    //     }
-
-    //     @Override
-    //     public void onFaceUnlockStateChanged(Boolean running, int userId) {
-    //         updateMethodSecure(FALSE /* updateAlways */);
-    //     }
-    // };
-
     CARAPI_(Boolean) IsTrustManaged();
 
     CARAPI_(Boolean) IsFaceUnlockRunning();
 
 private:
-    UnlockMethodCache(
+    CARAPI constructor(
         /* [in] */ IContext* ctx);
 
-    CARAPI_(void) UpdateMethodSecure(
+    CARAPI UpdateMethodSecure(
         /* [in] */ Boolean updateAlways);
 
     CARAPI_(void) NotifyListeners(
@@ -90,7 +105,8 @@ private:
     static AutoPtr<UnlockMethodCache> sInstance;
 
     AutoPtr<ILockPatternUtils> mLockPatternUtils;
-    // AutoPtr<IKeyguardUpdateMonitor> mKeyguardUpdateMonitor;
+    AutoPtr<IKeyguardUpdateMonitor> mKeyguardUpdateMonitor;
+    AutoPtr<IKeyguardUpdateMonitorCallback> mCallback;
     AutoPtr<IArrayList> mListeners;  /*<OnUnlockMethodChangedListener*/
     Boolean mMethodInsecure;
     Boolean mTrustManaged;

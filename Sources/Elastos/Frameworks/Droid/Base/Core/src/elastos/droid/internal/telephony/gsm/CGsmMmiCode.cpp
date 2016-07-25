@@ -137,7 +137,7 @@ ECode CGsmMmiCode::NewFromDialString(
                 ret->mDialingNumber.EndWith("#") &&
                 dialString.EndWith("#"))
         {
-            CGsmMmiCode::New(phone, app, (IGsmMmiCode**)&ret);
+            CGsmMmiCode::NewByFriend(phone, app, (CGsmMmiCode**)&ret);
             ret->mPoundString = dialString;
         }
     }
@@ -146,7 +146,7 @@ ECode CGsmMmiCode::NewFromDialString(
         // "Entry of any characters defined in the 3GPP TS 23.038 [8] Default Alphabet
         // (up to the maximum defined in 3GPP TS 24.080 [10]), followed by #SEND".
 
-        CGsmMmiCode::New(phone, app, (IGsmMmiCode**)&ret);
+        CGsmMmiCode::NewByFriend(phone, app, (CGsmMmiCode**)&ret);
         ret->mPoundString = dialString;
     }
     else if (IsTwoDigitShortCode(ctx, dialString)) {
@@ -155,7 +155,7 @@ ECode CGsmMmiCode::NewFromDialString(
     }
     else if (IsShortCode(dialString, phone)) {
         // this may be a short code, as defined in TS 22.030, 6.5.3.2
-        CGsmMmiCode::New(phone, app, (IGsmMmiCode**)&ret);
+        CGsmMmiCode::NewByFriend(phone, app, (CGsmMmiCode**)&ret);
         ret->mDialingNumber = dialString;
     }
 

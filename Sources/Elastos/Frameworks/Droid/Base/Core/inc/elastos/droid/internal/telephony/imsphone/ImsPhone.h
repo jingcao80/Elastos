@@ -508,7 +508,7 @@ public:
     // Instance Variables
     AutoPtr<IPhoneBase> mDefaultPhone;
     AutoPtr<IImsPhoneCallTracker> mCT;
-    AutoPtr<IArrayList/*<ImsPhoneMmiCode>*/> mPendingMMIs;
+    AutoPtr<IArrayList> mPendingMMIs;/*<ImsPhoneMmiCode>*/
     AutoPtr<IRegistrant> mPostDialHandler;
     AutoPtr<IServiceState> mSS;
     AutoPtr<IPowerManagerWakeLock> mWakeLock;

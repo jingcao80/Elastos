@@ -247,10 +247,11 @@ Boolean FullScreenView::OnGenericMotionEvent(
 }
 
 //@Override
-void FullScreenView::OnConfigurationChanged(
+ECode FullScreenView::OnConfigurationChanged(
     /* [in] */ IConfiguration* newConfig)
 {
     mAwViewMethods->OnConfigurationChanged(newConfig);
+    return NOERROR;
 }
 
 //@Override

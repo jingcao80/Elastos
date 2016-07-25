@@ -341,7 +341,7 @@ ECode CCallDetailActivity::UpdateContactDetailsTask::OnPostExecute(
     FAIL_RETURN(FindViewById(R::id::history, (IView**)&historyList));
     AutoPtr<ICallDetailHistoryAdapter> adapter;
     CCallDetailHistoryAdapter::New(this, mInflater,
-            mCallTypeHelper, details, (ICallDetailHistoryAdapter**)&details);
+            mCallTypeHelper, details, (ICallDetailHistoryAdapter**)&adapter);
     IListView::Probe(historyList)->SetAdapter(adapter);
 
     String lookupKey = contactUri == NULL ? NULL
@@ -514,7 +514,7 @@ ECode CCallDetailActivity::OnCreate(
 
     CCallTypeHelper::New(mResources, (ICallTypeHelper**)&mCallTypeHelper);
     CPhoneNumberDisplayHelper::New(mResources, (IPhoneNumberDisplayHelper**)&mPhoneNumberHelper);
-    CVoicemailStatusHelperImpl::New((IVoicemailStatusHelperImpl**)&mVoicemailStatusHelper);
+    CVoicemailStatusHelperImpl::New((IVoicemailStatusHelper**)&mVoicemailStatusHelper);
     CCallDetailActivityQueryHandler::New(this, (ICallDetailActivityQueryHandler**)&mAsyncQueryHandler);
 
     AutoPtr<IIntent> intent;

@@ -852,7 +852,8 @@ ECode CGSMPhone::Dial(
     }
 
     if (LOCAL_DEBUG) Logger::D(TAG, "Trying (non-IMS) CS call");
-    *result = DialInternal(dialString, NULL, IVideoProfileVideoState::AUDIO_ONLY);
+    AutoPtr<IConnection> c = DialInternal(dialString, NULL, IVideoProfileVideoState::AUDIO_ONLY);
+    *result = c;
     REFCOUNT_ADD(*result)
     return NOERROR;
 }

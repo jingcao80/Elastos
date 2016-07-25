@@ -770,7 +770,7 @@ ECode CMultiPaneChallengeLayout::GenerateLayoutParams(
             new MultiPaneChallengeLayout::LayoutParams();
         _p->constructor(IMultiPaneChallengeLayoutLayoutParams::Probe(p));
         *outp = IViewGroupLayoutParams::Probe(_p);
-        REFCOUNT_ADD(*p)
+        REFCOUNT_ADD(*outp)
         return NOERROR;
     }
     else {
@@ -779,7 +779,7 @@ ECode CMultiPaneChallengeLayout::GenerateLayoutParams(
                 new MultiPaneChallengeLayout::LayoutParams();
             _p->constructor(IViewGroupMarginLayoutParams::Probe(p));
             *outp = IViewGroupLayoutParams::Probe(_p);
-            REFCOUNT_ADD(*p)
+            REFCOUNT_ADD(*outp)
             return NOERROR;
         }
         else {
@@ -788,7 +788,7 @@ ECode CMultiPaneChallengeLayout::GenerateLayoutParams(
                 new MultiPaneChallengeLayout::LayoutParams();
             _p->constructor(p);
             *outp = IViewGroupLayoutParams::Probe(_p);
-            REFCOUNT_ADD(*p)
+            REFCOUNT_ADD(*outp)
             return NOERROR;
         }
     }
@@ -804,7 +804,7 @@ ECode CMultiPaneChallengeLayout::GenerateDefaultLayoutParams(
             new MultiPaneChallengeLayout::LayoutParams();
     _p->constructor();
     *outp = IViewGroupLayoutParams::Probe(_p);
-    REFCOUNT_ADD(*p)
+    REFCOUNT_ADD(*outp)
     return NOERROR;
 }
 

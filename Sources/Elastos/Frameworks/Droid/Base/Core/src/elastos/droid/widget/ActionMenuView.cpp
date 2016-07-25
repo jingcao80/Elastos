@@ -301,7 +301,7 @@ ECode ActionMenuView::SetPresenter(
     return NOERROR;
 }
 
-void ActionMenuView::OnConfigurationChanged(
+ECode ActionMenuView::OnConfigurationChanged(
     /* [in] */ IConfiguration* newConfig)
 {
     LinearLayout::OnConfigurationChanged(newConfig);
@@ -314,6 +314,7 @@ void ActionMenuView::OnConfigurationChanged(
         presenter->HideOverflowMenu(&rst);
         presenter->ShowOverflowMenu(&rst);
     }
+    return NOERROR;
 }
 
 ECode ActionMenuView::SetOnMenuItemClickListener(

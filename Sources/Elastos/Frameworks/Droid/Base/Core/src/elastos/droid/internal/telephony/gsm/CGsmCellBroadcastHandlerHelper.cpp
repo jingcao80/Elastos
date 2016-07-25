@@ -17,7 +17,9 @@ ECode CGsmCellBroadcastHandlerHelper::MakeGsmCellBroadcastHandler(
     /* [out] */ IGsmCellBroadcastHandler** result)
 {
     VALIDATE_NOT_NULL(result)
-    *result = CGsmCellBroadcastHandler::MakeGsmCellBroadcastHandler(context, phone);
+    AutoPtr<IGsmCellBroadcastHandler> h;
+    h = CGsmCellBroadcastHandler::MakeGsmCellBroadcastHandler(context, phone);
+    *result = h;
     REFCOUNT_ADD(*result)
     return NOERROR;
 }

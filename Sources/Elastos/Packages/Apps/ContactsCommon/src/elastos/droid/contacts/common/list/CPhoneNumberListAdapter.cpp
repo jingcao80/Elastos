@@ -136,7 +136,7 @@ ECode CPhoneNumberListAdapter::CPhoneNumberListAdapter::ConfigureLoader(
             if (isRemoteDirectoryQuery) {
                 AutoPtr<IContactsContractCommonDataKindsPhone> phone;
                 CContactsContractCommonDataKindsPhone::AcquireSingleton(
-                        (IContactsContractCommonDataKindsCallable**)&phone);
+                        (IContactsContractCommonDataKindsPhone**)&phone);
                 phone->GetCONTENT_FILTER_URI((IUri**)&baseUri);
             }
             else if (mUseCallableUri) {
@@ -148,7 +148,7 @@ ECode CPhoneNumberListAdapter::CPhoneNumberListAdapter::ConfigureLoader(
             else {
                  AutoPtr<IContactsContractCommonDataKindsPhone> phone;
                 CContactsContractCommonDataKindsPhone::AcquireSingleton(
-                        (IContactsContractCommonDataKindsCallable**)&phone);
+                        (IContactsContractCommonDataKindsPhone**)&phone);
                 phone->GetCONTENT_FILTER_URI((IUri**)&baseUri);
             }
             baseUri->BuildUpon((IUriBuilder**)&builder);
@@ -174,7 +174,7 @@ ECode CPhoneNumberListAdapter::CPhoneNumberListAdapter::ConfigureLoader(
             else {
                  AutoPtr<IContactsContractCommonDataKindsPhone> phone;
                 CContactsContractCommonDataKindsPhone::AcquireSingleton(
-                        (IContactsContractCommonDataKindsCallable**)&phone);
+                        (IContactsContractCommonDataKindsPhone**)&phone);
                 phone->GetCONTENT_URI((IUri**)&baseUri);
             }
             baseUri->BuildUpon((IUriBuilder**)&builder);

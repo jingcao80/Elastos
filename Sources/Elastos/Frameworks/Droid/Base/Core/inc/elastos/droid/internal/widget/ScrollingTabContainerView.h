@@ -239,7 +239,7 @@ public:
         /* [in] */ Int64 id);
 
 protected:
-    virtual CARAPI_(void) OnConfigurationChanged(
+    virtual CARAPI OnConfigurationChanged(
         /* [in] */ IConfiguration* newConfig);
 
 private:

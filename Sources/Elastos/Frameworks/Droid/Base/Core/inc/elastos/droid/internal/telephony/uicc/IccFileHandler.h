@@ -69,11 +69,11 @@ public:
         String mPath;
         // Variables used to load part records
         Boolean mLoadPart;
-        AutoPtr<IArrayList/*<Integer>*/> mRecordNums;
+        AutoPtr<IArrayList> mRecordNums;/*<Integer>*/
         Int32 mCountLoadrecords;
         Int32 mCount;
         AutoPtr<IMessage> mOnLoaded;
-        AutoPtr<IArrayList/*< AutoPtr< ArrayOf<Byte> > >*/> mResults;
+        AutoPtr<IArrayList> mResults;/*< AutoPtr< ArrayOf<Byte> > >*/
     };
 
 public:

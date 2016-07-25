@@ -294,6 +294,7 @@ module
     using interface Elastos.Droid.Graphics.Drawable.IColorDrawable;
     using interface Elastos.Droid.Graphics.Drawable.IDrawable;
     using interface Elastos.Droid.Graphics.Drawable.IDrawableCallback;
+    using interface Elastos.Droid.Graphics.Drawable.IInsetDrawable;
     using interface Elastos.Droid.Internal.App.IAlertActivity;
     using interface Elastos.Droid.Internal.App.IResolverActivity;
     using interface Elastos.Droid.Internal.Policy.IIKeyguardService;
@@ -2454,6 +2455,17 @@ module
             interface IDrawableCallback;
             interface IKeyEventCallback;
             interface IAccessibilityEventSource;
+        }
+
+        class CIntrinsicSizeDrawable {
+            constructor(
+                [in] IDrawable* drawable,
+                [in] Int32 intrinsicWidth,
+                [in] Int32 intrinsicHeight);
+
+            interface IInsetDrawable;
+            interface IDrawable;
+            interface IDrawableCallback;
         }
 
         [local]

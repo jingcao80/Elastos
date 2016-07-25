@@ -583,7 +583,7 @@ protected:
         /* [in] */ Int32 b);
 
     // @Override
-    CARAPI_(void) OnConfigurationChanged(
+    CARAPI OnConfigurationChanged(
         /* [in] */ IConfiguration* newConfig);
 
     // @Override

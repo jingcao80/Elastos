@@ -129,12 +129,13 @@ ECode DataCallResponse::ToString(
 }
 
 ECode DataCallResponse::SetLinkProperties(
-    /* [in] */ ILinkProperties* linkProperties,
+    /* [in] */ ILinkProperties* lp,
     /* [in] */ Boolean okToUseSystemPropertyDns,
     /* [out] */ IDataCallResponseSetupResult** _result)
 {
     VALIDATE_NOT_NULL(_result)
 
+    AutoPtr<ILinkProperties> linkProperties = lp;
     AutoPtr<DataCallResponse::SetupResult> result = new DataCallResponse::SetupResult();
     // Start with clean network properties and if we have
     // a failure we'll clear again at the bottom of this code.

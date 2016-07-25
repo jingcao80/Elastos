@@ -157,7 +157,10 @@ ECode AccountSelection::OnCreate(
     String s;
     extras->GetString(String("Handle"), &s);
     Uri::Parse(s, (IUri**)&mHandle);
-    extras->GetParcelableArrayList(Elastos::Droid::Telecomm::Telecom::ICall::AVAILABLE_PHONE_ACCOUNTS, (IArrayList**)&mAccountHandles);
+    AutoPtr<IArrayList> al;
+    extras->GetParcelableArrayList(Elastos::Droid::Telecomm::Telecom::ICall::AVAILABLE_PHONE_ACCOUNTS,
+        (IArrayList**)&al);
+    mAccountHandles = IList::Probe(al);
     if (mAccountHandles == NULL ) {
         Finish();
         return NOERROR;

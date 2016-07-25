@@ -99,10 +99,11 @@ Boolean NullAwViewMethods::OnGenericMotionEvent(
 }
 
 //@Override
-void NullAwViewMethods::OnConfigurationChanged(
+ECode NullAwViewMethods::OnConfigurationChanged(
     /* [in] */ IConfiguration* newConfig)
 {
     // Intentional no-op.
+    return NOERROR;
 }
 
 //@Override

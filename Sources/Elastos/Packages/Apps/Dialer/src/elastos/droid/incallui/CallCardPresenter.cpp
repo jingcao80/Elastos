@@ -733,7 +733,7 @@ String CallCardPresenter::GetConnectionLabel()
         }
     }
 
-    AutoPtr<IUi> ui
+    AutoPtr<IUi> ui;
     if (HasOutgoingGatewayCall() && (GetUi((IUi**)&ui), ui != NULL)) {
         // Return the label for the gateway app on outgoing calls.
         AutoPtr<IPackageManager> pm;

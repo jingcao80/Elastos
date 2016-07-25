@@ -216,7 +216,7 @@ public:
     // @Override
     CARAPI GetItemId(
         /* [in] */ Int32 position,
-        /* [out] */ Int64** id);
+        /* [out] */ Int64* id);
 
     // @Override
     CARAPI HasStableIds(

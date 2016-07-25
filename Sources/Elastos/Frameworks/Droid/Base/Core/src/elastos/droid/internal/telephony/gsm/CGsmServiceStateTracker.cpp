@@ -247,7 +247,7 @@ ECode CGsmServiceStateTracker::constructor(
     SetSignalStrengthDefaultValues();
 
     // Monitor locale change
-    AutoPtr<IIntentFilter >filter;
+    AutoPtr<IIntentFilter> filter;
     CIntentFilter::New((IIntentFilter**)&filter);
     filter->AddAction(IIntent::ACTION_LOCALE_CHANGED);
     AutoPtr<IIntent> intent;

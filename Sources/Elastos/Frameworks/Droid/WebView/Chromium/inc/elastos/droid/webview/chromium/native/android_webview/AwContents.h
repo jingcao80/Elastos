@@ -466,7 +466,7 @@ public:
         CARAPI_(void) OnLowMemory();
 
         //@Override
-        CARAPI_(void) OnConfigurationChanged(
+        CARAPI OnConfigurationChanged(
             /* [in] */ IConfiguration* configuration);
 
     private:
@@ -595,7 +595,7 @@ public:
             /* [in] */ IMotionEvent* event);
 
         //@Override
-        CARAPI_(void) OnConfigurationChanged(
+        CARAPI OnConfigurationChanged(
             /* [in] */ IConfiguration* newConfig);
 
         //@Override
@@ -1346,7 +1346,7 @@ public:
     /**
      * @see android.view.View#onConfigurationChanged()
      */
-    virtual CARAPI_(void) OnConfigurationChanged(
+    virtual CARAPI OnConfigurationChanged(
         /* [in] */ IConfiguration* newConfig);
 
     /**

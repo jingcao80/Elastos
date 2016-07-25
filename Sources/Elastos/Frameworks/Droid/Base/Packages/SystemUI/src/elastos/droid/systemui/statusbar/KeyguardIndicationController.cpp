@@ -1,5 +1,6 @@
 
 #include "elastos/droid/systemui/statusbar/KeyguardIndicationController.h"
+#include "elastos/droid/systemui/keyguard/KeyguardUpdateMonitor.h"
 #include "R.h"
 #include "Elastos.Droid.Content.h"
 #include "Elastos.Droid.Internal.h"
@@ -9,6 +10,7 @@
 #include <elastos/droid/text/format/Formatter.h>
 #include <elastos/utility/logging/Logger.h>
 
+using Elastos::Droid::SystemUI::Keyguard::KeyguardUpdateMonitor;
 using Elastos::Droid::Content::CIntentFilter;
 using Elastos::Droid::Content::IIntentFilter;
 using Elastos::Droid::Content::Res::IResources;
@@ -78,8 +80,8 @@ KeyguardIndicationController::KeyguardIndicationController(
 
     AutoPtr<IInterface> obj = ServiceManager::GetService(IBatteryStats::SERVICE_NAME);
     mBatteryInfo = IIBatteryStats::Probe(obj);
-    Logger::D("KeyguardIndicationController", "TODO [KeyguardIndicationController] : need the app Keyguard.");
-    // KeyguardUpdateMonitor.getInstance(context).registerCallback(mUpdateMonitor);
+    // TODO
+    // KeyguardUpdateMonitor::GetInstance(context)->RegisterCallback(mUpdateMonitor);
     AutoPtr<IUserHandleHelper> helper;
     CUserHandleHelper::AcquireSingleton((IUserHandleHelper**)&helper);
     AutoPtr<IUserHandle> user;

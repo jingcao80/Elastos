@@ -87,7 +87,7 @@ public:
     // For "load one"
     Int32 mRecordNumber;
     // for "load all"
-    AutoPtr<IArrayList/*<AdnRecord> */> mAdns;
+    AutoPtr<IArrayList> mAdns;/*<AdnRecord> */
     // only valid after EVENT_ADN_LOAD_ALL_DONE
     // Either an AdnRecord or a reference to adns depending
     // if this is a load one or load all operation

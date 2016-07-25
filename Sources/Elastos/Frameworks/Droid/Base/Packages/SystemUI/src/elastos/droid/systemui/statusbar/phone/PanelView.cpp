@@ -722,11 +722,12 @@ ECode PanelView::OnFinishInflate()
     return NOERROR;
 }
 
-void PanelView::OnConfigurationChanged(
+ECode PanelView::OnConfigurationChanged(
     /* [in] */ IConfiguration* newConfig)
 {
     FrameLayout::OnConfigurationChanged(newConfig);
     LoadDimens();
+    return NOERROR;
 }
 
 Boolean PanelView::FlingExpands(

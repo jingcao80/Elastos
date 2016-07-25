@@ -633,7 +633,7 @@ void PhoneBase::HandleSrvccStateChanged(
 {
     Logger::D(TAG, "HandleSrvccStateChanged");
 
-    AutoPtr<IArrayList/*<Connection*/> conn;
+    AutoPtr<IArrayList> conn;/*<Connection*/
     AutoPtr<IImsPhone> imsPhone = mImsPhone;
     ICallSrvccState srvccState = ICallSrvccState_NONE;
     if (ret != NULL && ret->GetLength() != 0) {
@@ -1555,7 +1555,7 @@ ECode PhoneBase::GetAllCellInfo(
     VALIDATE_NOT_NULL(result);
     AutoPtr<IServiceStateTracker> sst;
     GetServiceStateTracker((IServiceStateTracker**)&sst);
-    AutoPtr<IList/*<CellInfo*/> cellInfoList;
+    AutoPtr<IList> cellInfoList;/*<CellInfo*/
     sst->GetAllCellInfo((IList**)&cellInfoList);
     AutoPtr<IList> l = PrivatizeCellInfoList(cellInfoList);
     *result = l;
@@ -1580,7 +1580,7 @@ AutoPtr<IList/*<CellInfo*/> PhoneBase::PrivatizeCellInfoList(
     Settings::Secure::GetInt32(cr,
             ISettingsSecure::LOCATION_MODE, ISettingsSecure::LOCATION_MODE_OFF, &mode);
     if (mode == ISettingsSecure::LOCATION_MODE_OFF) {
-        AutoPtr<IArrayList/*<CellInfo*/> privateCellInfoList;
+        AutoPtr<IArrayList> privateCellInfoList;/*<CellInfo*/
         Int32 size = 0;
         cellInfoList->GetSize(&size);
         CArrayList::New(size, (IArrayList**)&privateCellInfoList);
@@ -2965,6 +2965,7 @@ ECode PhoneBase::GetSubscriptionInfo(
 {
     VALIDATE_NOT_NULL(result);
     *result = mSubscriptionData;
+    REFCOUNT_ADD(*result)
     return NOERROR;
 }
 

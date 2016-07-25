@@ -1275,7 +1275,7 @@ public:
         /* [in] */ Boolean animate,
         /* [in] */ Boolean center);
 
-    CARAPI_(void) OnConfigurationChanged(
+    CARAPI OnConfigurationChanged(
         /* [in] */ IConfiguration* newConfig);
 
     CARAPI OnInitializeAccessibilityEvent(

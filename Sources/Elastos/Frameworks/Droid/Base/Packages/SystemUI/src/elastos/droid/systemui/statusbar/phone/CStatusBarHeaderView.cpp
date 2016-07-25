@@ -548,7 +548,7 @@ ECode CStatusBarHeaderView::OnLayout(
     return NOERROR;
 }
 
-void CStatusBarHeaderView::OnConfigurationChanged(
+ECode CStatusBarHeaderView::OnConfigurationChanged(
     /* [in] */ IConfiguration* newConfig)
 {
     RelativeLayout::OnConfigurationChanged(newConfig);
@@ -573,6 +573,7 @@ void CStatusBarHeaderView::OnConfigurationChanged(
 
     UpdateClockScale();
     UpdateClockCollapsedMargin();
+    return NOERROR;
 }
 
 void CStatusBarHeaderView::UpdateClockCollapsedMargin()

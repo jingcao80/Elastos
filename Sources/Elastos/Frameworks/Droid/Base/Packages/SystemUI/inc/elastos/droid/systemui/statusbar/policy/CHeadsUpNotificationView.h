@@ -241,7 +241,7 @@ protected:
         /* [in] */ Int32 visibility);
 
     // @Override
-    CARAPI_(void) OnConfigurationChanged(
+    CARAPI OnConfigurationChanged(
         /* [in] */ IConfiguration* newConfig);
 
 private:

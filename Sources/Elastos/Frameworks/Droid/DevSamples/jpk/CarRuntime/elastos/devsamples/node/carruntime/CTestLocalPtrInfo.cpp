@@ -81,9 +81,9 @@ ECode CTestLocalPtrInfo::GetTargetTypeInfo(
     }
 
     *ppDataTypeInfo = testDataTypeInfo;
+    REFCOUNT_ADD(*ppDataTypeInfo)
 
     dataTypeInfo->AddRef();
-    testDataTypeInfo->AddRef();
 
     return ec;
 }

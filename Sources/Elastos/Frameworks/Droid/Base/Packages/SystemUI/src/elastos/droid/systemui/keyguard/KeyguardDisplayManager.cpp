@@ -18,7 +18,7 @@ namespace SystemUI {
 namespace Keyguard {
 
 static const String DTAG("KeyguardDisplayManager");
-Boolean KeyguardDisplayManager::DEBUG = TRUE;
+Boolean KeyguardDisplayManager::DEBUG = FALSE;
 
 //==========================================================
 // KeyguardDisplayManager::MyMediaRouterSimpleCallback

@@ -502,8 +502,8 @@ CAR_INTERFACE_IMPL(CKeyguardViewMediator, SystemUI, IKeyguardViewMediator)
 CAR_OBJECT_IMPL(CKeyguardViewMediator)
 
 const Int32 CKeyguardViewMediator::KEYGUARD_DISPLAY_TIMEOUT_DELAY_DEFAULT;
-const Boolean CKeyguardViewMediator::DEBUG = TRUE;
-const Boolean CKeyguardViewMediator::DBG_WAKE = TRUE;
+const Boolean CKeyguardViewMediator::DEBUG = FALSE;
+const Boolean CKeyguardViewMediator::DBG_WAKE = FALSE;
 
 const String CKeyguardViewMediator::TAG("CKeyguardViewMediator");
 const String CKeyguardViewMediator::DELAYED_KEYGUARD_ACTION("com.android.internal.policy.impl.PhoneWindowManager.DELAYED_KEYGUARD");

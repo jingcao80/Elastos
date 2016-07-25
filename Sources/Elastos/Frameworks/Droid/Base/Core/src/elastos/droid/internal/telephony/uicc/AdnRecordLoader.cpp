@@ -228,7 +228,9 @@ ECode AdnRecordLoader::HandleMessage(
                         + String("\n") + str);
                 }
 
-                CAdnRecord::New(mEf, mRecordNumber, data, (IAdnRecord**)&adn);
+                AutoPtr<IAdnRecord> tmp;
+                CAdnRecord::New(mEf, mRecordNumber, data, (IAdnRecord**)&tmp);
+                adn = (AdnRecord*)tmp.Get();
                 mResult = (IObject*)adn.Get();
 
                 Boolean bHasExtendedRecord = FALSE;

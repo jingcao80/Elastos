@@ -657,7 +657,7 @@ protected:
         /* [in] */ Boolean expand);
 
     // @Override
-    CARAPI_(void) OnConfigurationChanged(
+    CARAPI OnConfigurationChanged(
         /* [in] */ IConfiguration* newConfig);
 
     // @Override

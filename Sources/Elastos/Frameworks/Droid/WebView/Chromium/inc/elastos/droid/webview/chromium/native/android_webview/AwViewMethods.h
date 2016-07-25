@@ -95,7 +95,7 @@ public:
     /**
      * @see android.view.View#onConfigurationChanged
      */
-    virtual CARAPI_(void) OnConfigurationChanged(
+    virtual CARAPI OnConfigurationChanged(
         /* [in] */ IConfiguration* newConfig) = 0;
 
     /**

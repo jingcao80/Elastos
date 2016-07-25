@@ -331,7 +331,7 @@ AutoPtr<ILocale> MccTable::GetLocaleForLanguageCountry(
 
     AutoPtr<IList> l;
     Arrays::AsList(localeArray, (IList**)&l);
-    AutoPtr<IList/*<String*/> locales;
+    AutoPtr<IList> locales; ///*<String*/
     CArrayList::New(ICollection::Probe(l), (IList**)&locales);
 
     // Even in developer mode, you don't want the pseudolocales.

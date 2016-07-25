@@ -588,10 +588,11 @@ Float KeyguardAffordanceHelper::GetCurrentVelocity()
     return fv;
 }
 
-void KeyguardAffordanceHelper::OnConfigurationChanged()
+ECode KeyguardAffordanceHelper::OnConfigurationChanged()
 {
     InitDimens();
     InitIcons();
+    return NOERROR;
 }
 
 void KeyguardAffordanceHelper::Reset(

@@ -14,7 +14,9 @@ ECode CGSMSmsManagerHelper::GetDefault(
     /* [out] */ ISmsManager** result)
 {
     VALIDATE_NOT_NULL(result);
-    *result = GSMSmsManager::GetDefault();
+    AutoPtr<ISmsManager> sm = GSMSmsManager::GetDefault();
+    *result = sm;
+    REFCOUNT_ADD(*result)
     return NOERROR;
 }
 

@@ -149,7 +149,8 @@ ECode DirectoryListLoader::LoadInBackground(
 {
     VALIDATE_NOT_NULL(_cursor)
     if (mDirectorySearchMode == SEARCH_MODE_NONE) {
-        *_cursor = GetDefaultDirectories();
+        AutoPtr<ICursor> c = GetDefaultDirectories();
+        *_cursor = c;
         REFCOUNT_ADD(*_cursor)
         return NOERROR;
     }

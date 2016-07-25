@@ -27,7 +27,7 @@ namespace SystemUI {
 namespace Keyguard {
 
 static const String DTAG("KeyguardStatusView");
-const Boolean CKeyguardStatusView::DEBUG = TRUE;
+const Boolean CKeyguardStatusView::DEBUG = FALSE;
 
 CKeyguardStatusView::MyKeyguardUpdateMonitorCallback::MyKeyguardUpdateMonitorCallback(
     /* [in] */ CKeyguardStatusView* host)
@@ -186,7 +186,7 @@ ECode CKeyguardStatusView::OnFinishInflate()
     return NOERROR;
 }
 
-void CKeyguardStatusView::OnConfigurationChanged(
+ECode CKeyguardStatusView::OnConfigurationChanged(
     /* [in] */ IConfiguration* newConfig)
 {
     GridLayout::OnConfigurationChanged(newConfig);
@@ -199,6 +199,7 @@ void CKeyguardStatusView::OnConfigurationChanged(
     ITextView::Probe(mDateView)->SetTextSize(ITypedValue::COMPLEX_UNIT_PX, v);
     res->GetDimensionPixelSize(R::dimen::widget_label_font_size, &v);
     mOwnerInfo->SetTextSize(ITypedValue::COMPLEX_UNIT_PX, v);
+    return NOERROR;
 }
 
 ECode CKeyguardStatusView::RefreshTime()

@@ -2154,11 +2154,12 @@ ECode CNotificationPanelView::OnScrollChanged()
     return NOERROR;
 }
 
-void CNotificationPanelView::OnConfigurationChanged(
+ECode CNotificationPanelView::OnConfigurationChanged(
     /* [in] */ IConfiguration* newConfig)
 {
     PanelView::OnConfigurationChanged(newConfig);
     mAfforanceHelper->OnConfigurationChanged();
+    return NOERROR;
 }
 
 ECode CNotificationPanelView::OnClick(

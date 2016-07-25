@@ -834,6 +834,7 @@ ECode CCallButtonFragment::GetContext(
     AutoPtr<IActivity> activity;
     GetActivity((IActivity**)&activity);
     *context = IContext::Probe(activity);
+    REFCOUNT_ADD(*context)
     return NOERROR;
 }
 

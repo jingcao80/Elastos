@@ -1002,11 +1002,11 @@ Boolean InboundSmsHandler::ProcessMessagePart(
     AutoPtr<IIntent> intent;
     AutoPtr<IContentResolver> cr;
     mContext->GetContentResolver((IContentResolver**)&cr);
-    AutoPtr<IList/*<String*/> regAddresses;
+    AutoPtr<IList> regAddresses;    /*List<String*/
     Settings::Secure::GetDelimitedStringAsList(cr, ISettingsSecure::PROTECTED_SMS_ADDRESSES
             , String("|"), (IList**)&regAddresses);
 
-    AutoPtr<IList/*<String*/> allAddresses;
+    AutoPtr<IList> allAddresses;    /*List<String*/
     Elastos::Droid::Provider::Telephony::Sms::Intents::GetNormalizedAddressesFromPdus(pdus, tracker->GetFormat(), (IList**)&allAddresses);
 
     AutoPtr<ICollections> collections;
@@ -1023,7 +1023,7 @@ Boolean InboundSmsHandler::ProcessMessagePart(
     }
 
     CIntent::New(ITelephonySmsIntents::SMS_FILTER_ACTION, (IIntent**)&intent);
-    AutoPtr<IList/*<String*/> carrierPackages;
+    AutoPtr<IList> carrierPackages; // List<<String>
     AutoPtr<IUiccCard> card;
     assert(0 && "TODO");
     // card = UiccController.getInstance().getUiccCard();

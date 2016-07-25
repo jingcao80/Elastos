@@ -640,7 +640,7 @@ ECode CCallLogFragment::OnCreateView(
 
     AutoPtr<IView> view;
     inflater->Inflate(R::layout::call_log_fragment, container, FALSE, (IView**)&view);
-    CVoicemailStatusHelperImpl::New((IVoicemailStatusHelperImpl**)&mVoicemailStatusHelper);
+    CVoicemailStatusHelperImpl::New((IVoicemailStatusHelper**)&mVoicemailStatusHelper);
     view->FindViewById(R::id::voicemail_status, (IView**)&mStatusMessageView);
 
     AutoPtr<IView> temp;

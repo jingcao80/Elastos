@@ -593,7 +593,7 @@ ECode IntRangeManager::DisableRange(
                     // there is a gap in the sequence. After radio update succeeds,
                     // remove the original IntRange and append newRanges to mRanges.
                     // Otherwise, leave the original IntRange in mRanges and return FALSE.
-                    AutoPtr<IArrayList/*<IntRange*/> newRanges;
+                    AutoPtr<IArrayList> newRanges; // /*<IntRange*/
                     CArrayList::New((IArrayList**)&newRanges);
 
                     IntRange* currentRange = rangeCopy;

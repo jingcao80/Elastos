@@ -1957,11 +1957,12 @@ ECode CalendarView::SetDate(
     return mDelegate->SetDate(date, animate, center);
 }
 
-void CalendarView::OnConfigurationChanged(
+ECode CalendarView::OnConfigurationChanged(
     /* [in] */ IConfiguration* newConfig)
 {
     FrameLayout::OnConfigurationChanged(newConfig);
     mDelegate->OnConfigurationChanged(newConfig);
+    return NOERROR;
 }
 
 ECode CalendarView::OnInitializeAccessibilityEvent(

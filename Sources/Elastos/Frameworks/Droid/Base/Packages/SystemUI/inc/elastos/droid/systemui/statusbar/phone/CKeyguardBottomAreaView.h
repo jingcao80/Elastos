@@ -42,14 +42,17 @@ CarClass(CKeyguardBottomAreaView)
     , public IAccessibilityStateChangedCallback
     , public IViewOnLongClickListener
 {
-private:
+public:
     /**
      * A wrapper around another Drawable that overrides the intrinsic size.
      */
-    class IntrinsicSizeDrawable: public InsetDrawable
+    class IntrinsicSizeDrawable
+        : public InsetDrawable
     {
     public:
-        IntrinsicSizeDrawable(
+        IntrinsicSizeDrawable();
+
+        CARAPI constructor(
             /* [in] */ IDrawable* drawable,
             /* [in] */ Int32 intrinsicWidth,
             /* [in] */ Int32 intrinsicHeight);
@@ -67,6 +70,7 @@ private:
         Int32 mIntrinsicHeight;
     };
 
+private:
     class KBAAccessibilityDelegate: public AccessibilityDelegate
     {
     public:
@@ -120,23 +124,32 @@ private:
         CKeyguardBottomAreaView* mHost;
     };
 
-    // class UpdateMonitorCallback: public KeyguardUpdateMonitorCallback
-    // {
-    //     @Override
-    //     public void onUserSwitchComplete(Int32 userId) {
-    //         updateCameraVisibility();
-    //     }
+    class UpdateMonitorCallback
+        : public KeyguardUpdateMonitorCallback
+    {
+    public:
+        UpdateMonitorCallback(
+            /* [in] */ CKeyguardBottomAreaView* host)
+            : mHost(host)
+        {}
 
-    //     @Override
-    //     public void onScreenTurnedOn() {
-    //         updateLockIcon();
-    //     }
+        // @Override
+        CARAPI OnUserSwitchComplete(Int32 userId) {
+            return mHost->UpdateCameraVisibility();
+        }
 
-    //     @Override
-    //     public void onScreenTurnedOff(Int32 why) {
-    //         updateLockIcon();
-    //     }
-    // };
+        // @Override
+        CARAPI OnScreenTurnedOn() {
+            return mHost->UpdateLockIcon();
+        }
+
+        // @Override
+        CARAPI OnScreenTurnedOff(Int32 why) {
+            return mHost->UpdateLockIcon();
+        }
+    private:
+        CKeyguardBottomAreaView* mHost;
+    };
 
     class UnlockMethodChangedListener
         : public Object
@@ -289,7 +302,7 @@ public:
 
 protected:
     // @Override
-    CARAPI_(void) OnConfigurationChanged(
+    CARAPI OnConfigurationChanged(
         /* [in] */ IConfiguration* newConfig);
 
     // @Override
@@ -308,9 +321,9 @@ private:
 
     CARAPI_(AutoPtr<IIntent>) GetCameraIntent();
 
-    CARAPI_(void) UpdateCameraVisibility();
+    CARAPI UpdateCameraVisibility();
 
-    CARAPI_(void) UpdatePhoneVisibility();
+    CARAPI UpdatePhoneVisibility();
 
     CARAPI_(Boolean) IsPhoneVisible();
 
@@ -318,11 +331,11 @@ private:
 
     CARAPI_(void) WatchForCameraPolicyChanges();
 
-    CARAPI_(void) UpdateLockIconClickability();
+    CARAPI UpdateLockIconClickability();
 
     CARAPI_(void) HandleTrustCircleClick();
 
-    CARAPI_(void) UpdateLockIcon();
+    CARAPI UpdateLockIcon();
 
     CARAPI_(void) InflatePreviews();
 
@@ -356,7 +369,7 @@ private:
     Int32 mLastUnlockIconRes;
     AutoPtr<IAccessibilityDelegate> mAccessibilityDelegate;
     AutoPtr<IBroadcastReceiver> mDevicePolicyReceiver;
-    // AutoPtr<IKeyguardUpdateMonitorCallback> mUpdateMonitorCallback;
+    AutoPtr<IKeyguardUpdateMonitorCallback> mUpdateMonitorCallback;
 };
 
 } // namespace Phone
