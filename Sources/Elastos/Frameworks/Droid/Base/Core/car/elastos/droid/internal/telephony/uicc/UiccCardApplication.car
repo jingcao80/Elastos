@@ -3,8 +3,10 @@ module
 {
     enum Elastos.Droid.Internal.Telephony.Uicc.PersoSubState;
     enum Elastos.Droid.Internal.Telephony.Uicc.PinState;
+    interface Elastos.Droid.Content.IContext;
     interface Elastos.Droid.Os.IHandler;
     interface Elastos.Droid.Os.IMessage;
+    interface Elastos.Droid.Internal.Telephony.ICommandsInterface;
 
     namespace Elastos {
     namespace Droid {
@@ -20,6 +22,19 @@ module
         const Int32 AUTH_CONTEXT_EAP_SIM = 128;
         const Int32 AUTH_CONTEXT_EAP_AKA = 129;
         const Int32 AUTH_CONTEXT_UNDEFINED = -1;
+
+        Update(
+            [in] IIccCardApplicationStatus* as,
+            [in] IContext* c,
+            [in] ICommandsInterface* ci);
+
+        Dispose();
+
+        /** Assumes mLock is held. */
+        QueryFdn();
+
+        OnRefresh(
+            [in] IIccRefreshResponse* refreshResponse);
 
         RegisterForReady(
             [in] IHandler* h,

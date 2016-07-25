@@ -4,17 +4,6 @@
 #include "elastos/droid/ext/frameworkext.h"
 #include "elastos/core/Object.h"
 
-// import android.os.Environment;
-// import android.util.Xml;
-// import android.telephony.Rlog;
-// import java.util.HashMap;
-// import java.io.FileReader;
-// import java.io.File;
-// import java.io.FileNotFoundException;
-// import java.io.IOException;
-// import org.xmlpull.v1.XmlPullParser;
-// import org.xmlpull.v1.XmlPullParserException;
-// import com.android.internal.util.XmlUtils;
 using Elastos::Utility::IHashMap;
 
 namespace Elastos {
@@ -60,7 +49,7 @@ public:
     static const Int32 SIZE = 3;
 
 private:
-     AutoPtr<IHashMap/*<String,String[]*/> CarrierVmMap;
+     AutoPtr<IHashMap/*<String,String[]*/> mCarrierVmMap;
 };
 
 } // namespace Uicc

@@ -1,7 +1,53 @@
 #include "Elastos.CoreLibrary.Utility.h"
 #include "Elastos.CoreLibrary.Utility.Concurrent.h"
+#include "Elastos.CoreLibrary.Security.h"
+#include "Elastos.CoreLibrary.IO.h"
+#include "Elastos.Droid.Content.h"
 #include "Elastos.Droid.Internal.h"
+#include "Elastos.Droid.Telephony.h"
 #include "elastos/droid/internal/telephony/uicc/UiccCarrierPrivilegeRules.h"
+#include "elastos/droid/content/pm/CPackageInfo.h"
+#include "elastos/droid/content/pm/CActivityInfo.h"
+#include "elastos/droid/content/pm/CResolveInfo.h"
+#include "elastos/droid/internal/telephony/uicc/CIccUtils.h"
+#include "elastos/droid/internal/telephony/uicc/IccIoResult.h"
+#include "elastos/droid/os/Binder.h"
+#include "elastos/droid/os/AsyncResult.h"
+
+#include <elastos/core/CoreUtils.h>
+#include <elastos/core/StringUtils.h>
+//#include <elastos/security/cert/CCertificateFactoryHelper.h>
+#include <elastos/utility/Arrays.h>
+#include <elastos/utility/logging/Logger.h>
+
+using Elastos::Droid::Content::Pm::IPackageInfo;
+using Elastos::Droid::Content::Pm::CPackageInfo;
+using Elastos::Droid::Content::Pm::IResolveInfo;
+using Elastos::Droid::Content::Pm::CResolveInfo;
+using Elastos::Droid::Content::Pm::CActivityInfo;
+using Elastos::Droid::Os::AsyncResult;
+using Elastos::Droid::Os::Binder;
+using Elastos::Droid::Telephony::ITelephonyManager;
+
+using Elastos::Core::CoreUtils;
+using Elastos::Core::StringUtils;
+using Elastos::IO::IInputStream;
+using Elastos::IO::IByteArrayInputStream;
+using Elastos::IO::CByteArrayInputStream;
+using Elastos::Utility::Arrays;
+using Elastos::Utility::CArrayList;
+using Elastos::Utility::IIterator;
+using Elastos::Utility::ICollection;
+using Elastos::Utility::Concurrent::Atomic::CAtomicInteger32;
+using Elastos::Utility::Logging::Logger;
+using Elastos::Security::IMessageDigest;
+using Elastos::Security::IMessageDigestHelper;
+using Elastos::Security::CMessageDigestHelper;
+using Elastos::Security::Cert::IX509Certificate;
+using Elastos::Security::Cert::ICertificate;
+using Elastos::Security::Cert::ICertificateFactory;
+using Elastos::Security::Cert::ICertificateFactoryHelper;
+//using Elastos::Security::Cert::CCertificateFactoryHelper;
 
 namespace Elastos {
 namespace Droid {
@@ -17,10 +63,9 @@ UiccCarrierPrivilegeRules::AccessRule::AccessRule(
     /* [in] */ const String& packageName,
     /* [in] */ Int64 accessType)
 {
-    // ==================before translated======================
-    // this.certificateHash = certificateHash;
-    // this.packageName = packageName;
-    // this.accessType = accessType;
+    mCertificateHash = certificateHash;
+    mPackageName = packageName;
+    mAccessType = accessType;
 }
 
 ECode UiccCarrierPrivilegeRules::AccessRule::Matches(
@@ -29,10 +74,8 @@ ECode UiccCarrierPrivilegeRules::AccessRule::Matches(
     /* [out] */ Boolean* result)
 {
     VALIDATE_NOT_NULL(result);
-    // ==================before translated======================
-    // return certHash != null && Arrays.equals(this.certificateHash, certHash) &&
-    //       (this.packageName == null || this.packageName.equals(packageName));
-    assert(0);
+    *result = certHash != NULL && Arrays::Equals(mCertificateHash.Get(), certHash) &&
+          (mPackageName.IsNull() || mPackageName.Equals(packageName));
     return NOERROR;
 }
 
@@ -40,10 +83,9 @@ ECode UiccCarrierPrivilegeRules::AccessRule::ToString(
     /* [out] */ String* result)
 {
     VALIDATE_NOT_NULL(result);
-    // ==================before translated======================
-    // return "cert: " + certificateHash + " pkg: " + packageName +
-    //     " access: " + accessType;
-    assert(0);
+    *result = String("cert: ") + Arrays::ToString(mCertificateHash) +
+            String(" pkg: ") + mPackageName +
+            String(" access: ") + StringUtils::ToString(mAccessType);
     return NOERROR;
 }
 
@@ -53,8 +95,7 @@ ECode UiccCarrierPrivilegeRules::AccessRule::ToString(
 UiccCarrierPrivilegeRules::TLV::TLV(
     /* [in] */ const String& tag)
 {
-    // ==================before translated======================
-    // this.tag = tag;
+    mTag = tag;
 }
 
 ECode UiccCarrierPrivilegeRules::TLV::Parse(
@@ -63,32 +104,35 @@ ECode UiccCarrierPrivilegeRules::TLV::Parse(
     /* [out] */ String* result)
 {
     VALIDATE_NOT_NULL(result);
-    // ==================before translated======================
-    // Rlog.d(LOGTAG, "Parse TLV: " + tag);
-    // if (!data.startsWith(tag)) {
-    //     throw new IllegalArgumentException("Tags don't match.");
-    // }
-    // int index = tag.length();
-    // if (index + 2 > data.length()) {
-    //     throw new IllegalArgumentException("No length.");
-    // }
-    // length = new Integer(2 * Integer.parseInt(
-    //         data.substring(index, index + 2), 16));
-    // index += 2;
-    //
-    // int remainingLength = data.length() - (index + length);
-    // if (remainingLength < 0) {
-    //     throw new IllegalArgumentException("Not enough data.");
-    // }
-    // if (shouldConsumeAll && (remainingLength != 0)) {
-    //     throw new IllegalArgumentException("Did not consume all.");
-    // }
-    // value = data.substring(index, index + length);
-    //
-    // Rlog.d(LOGTAG, "Got TLV: " + tag + "," + length + "," + value);
-    //
-    // return data.substring(index + length);
-    assert(0);
+    Logger::D(LOGTAG, String("Parse TLV: ") + mTag);
+    if (!data.StartWith(mTag)) {
+        // throw new IllegalArgumentException("Tags don't match.");
+        return E_ILLEGAL_ARGUMENT_EXCEPTION;
+    }
+    Int32 index = mTag.GetLength();
+    if (index + 2 > data.GetLength()) {
+        // throw new IllegalArgumentException("No length.");v
+        return E_ILLEGAL_ARGUMENT_EXCEPTION;
+    }
+    mLength = 2 * StringUtils::ParseInt32(
+            data.Substring(index, index + 2), 16);
+    index += 2;
+
+    Int32 remainingLength = data.GetLength() - (index + mLength);
+    if (remainingLength < 0) {
+        // throw new IllegalArgumentException("Not enough data.");
+        return E_ILLEGAL_ARGUMENT_EXCEPTION;
+    }
+    if (shouldConsumeAll && (remainingLength != 0)) {
+        // throw new IllegalArgumentException("Did not consume all.");
+        return E_ILLEGAL_ARGUMENT_EXCEPTION;
+    }
+    mValue = data.Substring(index, index + mLength);
+
+    Logger::D(LOGTAG, String("Got TLV: ") + mTag + String(",") +
+            StringUtils::ToString(mLength) + String(",") + mValue);
+
+    *result = data.Substring(index + mLength);
     return NOERROR;
 }
 
@@ -127,15 +171,15 @@ ECode UiccCarrierPrivilegeRules::constructor(
     /* [in] */ IUiccCard* uiccCard,
     /* [in] */ IMessage* loadedCallback)
 {
-    // ==================before translated======================
-    // Rlog.d(LOGTAG, "Creating UiccCarrierPrivilegeRules");
-    // mUiccCard = uiccCard;
-    // mState = new AtomicInteger(STATE_LOADING);
-    // mLoadedCallback = loadedCallback;
-    //
-    // // Start loading the rules.
-    // mUiccCard.iccOpenLogicalChannel(AID,
-    //     obtainMessage(EVENT_OPEN_LOGICAL_CHANNEL_DONE, null));
+    Logger::D(LOGTAG, String("Creating UiccCarrierPrivilegeRules"));
+    mUiccCard = uiccCard;
+    CAtomicInteger32::New(STATE_LOADING, (IAtomicInteger32**)&mState);
+    mLoadedCallback = loadedCallback;
+
+    // Start loading the rules.
+    AutoPtr<IMessage> msg;
+    ObtainMessage(EVENT_OPEN_LOGICAL_CHANNEL_DONE, NULL, (IMessage**)&msg);
+    mUiccCard->IccOpenLogicalChannel(AID, msg);
     return NOERROR;
 }
 
@@ -143,9 +187,9 @@ ECode UiccCarrierPrivilegeRules::AreCarrierPriviligeRulesLoaded(
     /* [out] */ Boolean* result)
 {
     VALIDATE_NOT_NULL(result);
-    // ==================before translated======================
-    // return mState.get() != STATE_LOADING;
-    assert(0);
+    Int32 state = 0;
+    mState->Get(&state);
+    *result = state != STATE_LOADING;
     return NOERROR;
 }
 
@@ -155,33 +199,51 @@ ECode UiccCarrierPrivilegeRules::GetCarrierPrivilegeStatus(
     /* [out] */ Int32* result)
 {
     VALIDATE_NOT_NULL(result);
-    // ==================before translated======================
-    // Rlog.d(LOGTAG, "hasCarrierPrivileges: " + signature + " : " + packageName);
-    // int state = mState.get();
-    // if (state == STATE_LOADING) {
-    //     Rlog.d(LOGTAG, "Rules not loaded.");
-    //     return TelephonyManager.CARRIER_PRIVILEGE_STATUS_RULES_NOT_LOADED;
-    // } else if (state == STATE_ERROR) {
-    //     Rlog.d(LOGTAG, "Error loading rules.");
-    //     return TelephonyManager.CARRIER_PRIVILEGE_STATUS_ERROR_LOADING_RULES;
-    // }
-    //
-    // byte[] certHash = getCertHash(signature);
-    // if (certHash == null) {
-    //   return TelephonyManager.CARRIER_PRIVILEGE_STATUS_NO_ACCESS;
-    // }
-    // Rlog.e(LOGTAG, "Checking: " + IccUtils.bytesToHexString(certHash) + " : " + packageName);
-    //
-    // for (AccessRule ar : mAccessRules) {
-    //     if (ar.matches(certHash, packageName)) {
-    //         Rlog.d(LOGTAG, "Match found!");
-    //         return TelephonyManager.CARRIER_PRIVILEGE_STATUS_HAS_ACCESS;
-    //     }
-    // }
-    //
-    // Rlog.d(LOGTAG, "No matching rule found. Returning false.");
-    // return TelephonyManager.CARRIER_PRIVILEGE_STATUS_NO_ACCESS;
-    assert(0);
+    Logger::D(LOGTAG, String("hasCarrierPrivileges: ")/* + signature*/ +
+            String(" : ") + packageName);
+    Int32 state = 0;
+    mState->Get(&state);
+    if (state == STATE_LOADING) {
+        Logger::D(LOGTAG, String("Rules not loaded."));
+        *result = ITelephonyManager::CARRIER_PRIVILEGE_STATUS_RULES_NOT_LOADED;
+        return NOERROR;
+    }
+    else if (state == STATE_ERROR) {
+        Logger::D(LOGTAG, String("Error loading rules."));
+        *result = ITelephonyManager::CARRIER_PRIVILEGE_STATUS_ERROR_LOADING_RULES;
+        return NOERROR;
+    }
+
+    AutoPtr<ArrayOf<Byte> > certHash = GetCertHash(signature);
+    if (certHash == NULL) {
+        *result = ITelephonyManager::CARRIER_PRIVILEGE_STATUS_NO_ACCESS;
+        return NOERROR;
+    }
+    AutoPtr<IIccUtils> iccu;
+    CIccUtils::AcquireSingleton((IIccUtils**)&iccu);
+    String str;
+    iccu->BytesToHexString(certHash, &str);
+    Logger::E(LOGTAG, String("Checking: ") + str
+            + String(" : ") + packageName);
+
+    AutoPtr<IIterator> it;
+    mAccessRules->GetIterator((IIterator**)&it);
+    Boolean bHasNext = FALSE;
+    while ((it->HasNext(&bHasNext), bHasNext)) {
+        AutoPtr<IInterface> p;
+        it->GetNext((IInterface**)&p);
+        AutoPtr<AccessRule> ar = (AccessRule*)(IObject*)p.Get();
+        Boolean b = FALSE;
+        ar->Matches(certHash, packageName, &b);
+        if (b) {
+            Logger::D(LOGTAG, String("Match found!"));
+            *result = ITelephonyManager::CARRIER_PRIVILEGE_STATUS_HAS_ACCESS;
+            return NOERROR;
+        }
+    }
+
+    Logger::D(LOGTAG, String("No matching rule found. Returning false."));
+    *result = ITelephonyManager::CARRIER_PRIVILEGE_STATUS_NO_ACCESS;
     return NOERROR;
 }
 
@@ -191,22 +253,25 @@ ECode UiccCarrierPrivilegeRules::GetCarrierPrivilegeStatus(
     /* [out] */ Int32* result)
 {
     VALIDATE_NOT_NULL(result);
-    // ==================before translated======================
     // try {
-    //     PackageInfo pInfo = packageManager.getPackageInfo(packageName,
-    //         PackageManager.GET_SIGNATURES);
-    //     Signature[] signatures = pInfo.signatures;
-    //     for (Signature sig : signatures) {
-    //         int accessStatus = getCarrierPrivilegeStatus(sig, pInfo.packageName);
-    //         if (accessStatus != TelephonyManager.CARRIER_PRIVILEGE_STATUS_NO_ACCESS) {
-    //             return accessStatus;
-    //         }
-    //     }
+    AutoPtr<IPackageInfo> pInfo;
+    packageManager->GetPackageInfo(packageName,
+        IPackageManager::GET_SIGNATURES, (IPackageInfo**)&pInfo);
+    AutoPtr<CPackageInfo> _pInfo = (CPackageInfo*)pInfo.Get();
+    AutoPtr<ArrayOf<ISignature*> > signatures = _pInfo->mSignatures;
+    for (Int32 i = 0; i < signatures->GetLength(); i++) {
+        AutoPtr<ISignature> sig = (*signatures)[i];
+        Int32 accessStatus = 0;
+        GetCarrierPrivilegeStatus(sig, _pInfo->mPackageName, &accessStatus);
+        if (accessStatus != ITelephonyManager::CARRIER_PRIVILEGE_STATUS_NO_ACCESS) {
+            *result = accessStatus;
+            return NOERROR;
+        }
+    }
     // } catch (PackageManager.NameNotFoundException ex) {
     //     Rlog.e(LOGTAG, "NameNotFoundException", ex);
     // }
-    // return TelephonyManager.CARRIER_PRIVILEGE_STATUS_NO_ACCESS;
-    assert(0);
+    *result = ITelephonyManager::CARRIER_PRIVILEGE_STATUS_NO_ACCESS;
     return NOERROR;
 }
 
@@ -215,17 +280,19 @@ ECode UiccCarrierPrivilegeRules::GetCarrierPrivilegeStatusForCurrentTransaction(
     /* [out] */ Int32* result)
 {
     VALIDATE_NOT_NULL(result);
-    // ==================before translated======================
-    // String[] packages = packageManager.getPackagesForUid(Binder.getCallingUid());
-    //
-    // for (String pkg : packages) {
-    //     int accessStatus = getCarrierPrivilegeStatus(packageManager, pkg);
-    //     if (accessStatus != TelephonyManager.CARRIER_PRIVILEGE_STATUS_NO_ACCESS) {
-    //         return accessStatus;
-    //     }
-    // }
-    // return TelephonyManager.CARRIER_PRIVILEGE_STATUS_NO_ACCESS;
-    assert(0);
+    AutoPtr<ArrayOf<String> > packages;
+    packageManager->GetPackagesForUid(Binder::GetCallingUid(), (ArrayOf<String>**)&packages);
+
+    for (Int32 i = 0; i < packages->GetLength(); i++) {
+        String pkg = (*packages)[i];
+        Int32 accessStatus = 0;
+        GetCarrierPrivilegeStatus(packageManager, pkg, &accessStatus);
+        if (accessStatus != ITelephonyManager::CARRIER_PRIVILEGE_STATUS_NO_ACCESS) {
+            *result = accessStatus;
+            return NOERROR;
+        }
+    }
+    *result = ITelephonyManager::CARRIER_PRIVILEGE_STATUS_NO_ACCESS;
     return NOERROR;
 }
 
@@ -235,219 +302,274 @@ ECode UiccCarrierPrivilegeRules::GetCarrierPackageNamesForIntent(
     /* [out] */ IList/*<String>*/** result)
 {
     VALIDATE_NOT_NULL(result);
-    // ==================before translated======================
-    // List<String> packages = new ArrayList<String>();
-    // List<ResolveInfo> receivers = new ArrayList<ResolveInfo>();
-    // receivers.addAll(packageManager.queryBroadcastReceivers(intent, 0));
-    // receivers.addAll(packageManager.queryIntentContentProviders(intent, 0));
-    // receivers.addAll(packageManager.queryIntentActivities(intent, 0));
-    // receivers.addAll(packageManager.queryIntentServices(intent, 0));
-    //
-    // for (ResolveInfo resolveInfo : receivers) {
-    //     if (resolveInfo.activityInfo == null) {
-    //         continue;
-    //     }
-    //     String packageName = resolveInfo.activityInfo.packageName;
-    //     int status = getCarrierPrivilegeStatus(packageManager, packageName);
-    //     if (status == TelephonyManager.CARRIER_PRIVILEGE_STATUS_HAS_ACCESS) {
-    //         packages.add(packageName);
-    //     } else if (status != TelephonyManager.CARRIER_PRIVILEGE_STATUS_NO_ACCESS) {
-    //         // Any status apart from HAS_ACCESS and NO_ACCESS is considered an error.
-    //         return null;
-    //     }
-    // }
-    //
-    // return packages;
-    assert(0);
+    AutoPtr<IList> packages;
+    CArrayList::New((IList**)&packages);
+    AutoPtr<IList> receivers;
+    CArrayList::New((IList**)&receivers);
+    AutoPtr<IList> broadcastReceivers;
+    packageManager->QueryBroadcastReceivers(intent, 0, (IList**)&broadcastReceivers);
+    receivers->AddAll(ICollection::Probe(broadcastReceivers));
+    AutoPtr<IList> contentProviders;
+    packageManager->QueryIntentContentProviders(intent, 0, (IList**)&contentProviders);
+    receivers->AddAll(ICollection::Probe(contentProviders));
+    AutoPtr<IList> activities;
+    packageManager->QueryIntentActivities(intent, 0, (IList**)&activities);
+    receivers->AddAll(ICollection::Probe(activities));
+    AutoPtr<IList> services;
+    packageManager->QueryIntentServices(intent, 0, (IList**)&services);
+    receivers->AddAll(ICollection::Probe(services));
+
+    AutoPtr<IIterator> it;
+    receivers->GetIterator((IIterator**)&it);
+    Boolean bHasNext = FALSE;
+    while ((it->HasNext(&bHasNext), bHasNext)) {
+        AutoPtr<IInterface> p;
+        it->GetNext((IInterface**)&p);
+        AutoPtr<CResolveInfo> resolveInfo = (CResolveInfo*)IResolveInfo::Probe(p);
+        if (resolveInfo->mActivityInfo == NULL) {
+            continue;
+        }
+        AutoPtr<CActivityInfo> _activityInfo = (CActivityInfo*)(resolveInfo->mActivityInfo).Get();
+        String packageName = _activityInfo->mPackageName;
+        Int32 status = 0;
+        GetCarrierPrivilegeStatus(packageManager, packageName, &status);
+        if (status == ITelephonyManager::CARRIER_PRIVILEGE_STATUS_HAS_ACCESS) {
+            packages->Add(CoreUtils::Convert(packageName));
+        }
+        else if (status != ITelephonyManager::CARRIER_PRIVILEGE_STATUS_NO_ACCESS) {
+            // Any status apart from HAS_ACCESS and NO_ACCESS is considered an error.
+            *result = NULL;
+            return NOERROR;
+        }
+    }
+
+    *result = packages;
+    REFCOUNT_ADD(*result)
     return NOERROR;
 }
 
 ECode UiccCarrierPrivilegeRules::HandleMessage(
     /* [in] */ IMessage* msg)
 {
-    // ==================before translated======================
-    // AsyncResult ar;
-    //
-    // switch (msg.what) {
-    //
-    //   case EVENT_OPEN_LOGICAL_CHANNEL_DONE:
-    //       Rlog.d(LOGTAG, "EVENT_OPEN_LOGICAL_CHANNEL_DONE");
-    //       ar = (AsyncResult) msg.obj;
-    //       if (ar.exception == null && ar.result != null) {
-    //           int channelId = ((int[]) ar.result)[0];
-    //           mUiccCard.iccTransmitApduLogicalChannel(channelId, CLA, COMMAND, P1, P2, P3, DATA,
-    //               obtainMessage(EVENT_TRANSMIT_LOGICAL_CHANNEL_DONE, new Integer(channelId)));
-    //       } else {
-    //           Rlog.e(LOGTAG, "Error opening channel");
-    //           updateState(STATE_ERROR);
-    //       }
-    //       break;
-    //
-    //   case EVENT_TRANSMIT_LOGICAL_CHANNEL_DONE:
-    //       Rlog.d(LOGTAG, "EVENT_TRANSMIT_LOGICAL_CHANNEL_DONE");
-    //       ar = (AsyncResult) msg.obj;
-    //       if (ar.exception == null && ar.result != null) {
-    //           IccIoResult response = (IccIoResult) ar.result;
-    //           if (response.payload != null && response.sw1 == 0x90 && response.sw2 == 0x00) {
-    //               try {
-    //                   mAccessRules = parseRules(IccUtils.bytesToHexString(response.payload));
-    //                   updateState(STATE_LOADED);
-    //               } catch (IllegalArgumentException ex) {
-    //                   Rlog.e(LOGTAG, "Error parsing rules: " + ex);
-    //                   updateState(STATE_ERROR);
-    //               }
-    //            } else {
-    //               Rlog.e(LOGTAG, "Invalid response: payload=" + response.payload +
-    //                       " sw1=" + response.sw1 + " sw2=" + response.sw2);
-    //               updateState(STATE_ERROR);
-    //            }
-    //       } else {
-    //           Rlog.e(LOGTAG, "Error reading value from SIM.");
-    //           updateState(STATE_ERROR);
-    //       }
-    //
-    //       int channelId = (Integer) ar.userObj;
-    //       mUiccCard.iccCloseLogicalChannel(channelId, obtainMessage(
-    //               EVENT_CLOSE_LOGICAL_CHANNEL_DONE));
-    //       break;
-    //
-    //   case EVENT_CLOSE_LOGICAL_CHANNEL_DONE:
-    //       Rlog.d(LOGTAG, "EVENT_CLOSE_LOGICAL_CHANNEL_DONE");
-    //       break;
-    //
-    //   default:
-    //       Rlog.e(LOGTAG, "Unknown event " + msg.what);
-    // }
-    assert(0);
+    AutoPtr<AsyncResult> ar;
+
+    Int32 what = 0;
+    msg->GetWhat(&what);
+    AutoPtr<IInterface> obj;
+    msg->GetObj((IInterface**)&obj);
+    switch (what) {
+        case EVENT_OPEN_LOGICAL_CHANNEL_DONE: {
+            Logger::D(LOGTAG, String("EVENT_OPEN_LOGICAL_CHANNEL_DONE"));
+            ar = (AsyncResult*)(IObject*)obj.Get();
+            if (ar->mException == NULL && ar->mResult != NULL) {
+                assert(0 && "TODO");
+                Int32 channelId = 0; // ((Int32[]) ar.result)[0];
+                AutoPtr<IMessage> msg;
+                ObtainMessage(EVENT_TRANSMIT_LOGICAL_CHANNEL_DONE, CoreUtils::Convert(channelId), (IMessage**)&msg);
+                mUiccCard->IccTransmitApduLogicalChannel(channelId, CLA, COMMAND, P1, P2, P3, DATA,
+                    msg);
+            }
+            else {
+                Logger::E(LOGTAG, String("Error opening channel"));
+                UpdateState(STATE_ERROR);
+            }
+            break;
+        }
+        case EVENT_TRANSMIT_LOGICAL_CHANNEL_DONE: {
+            Logger::D(LOGTAG, String("EVENT_TRANSMIT_LOGICAL_CHANNEL_DONE"));
+            ar = (AsyncResult*)(IObject*)obj.Get();
+            if (ar->mException == NULL && ar->mResult != NULL) {
+                AutoPtr<IccIoResult> response = (IccIoResult*)IIccIoResult::Probe(ar->mResult);
+                if (response->mPayload != NULL && response->mSw1 == 0x90 && response->mSw2 == 0x00) {
+                    // try {
+                    AutoPtr<IIccUtils> iccu;
+                    CIccUtils::AcquireSingleton((IIccUtils**)&iccu);
+                    String str;
+                    iccu->BytesToHexString(response->mPayload, &str);
+                    mAccessRules = ParseRules(str);
+                    UpdateState(STATE_LOADED);
+                    // } catch (IllegalArgumentException ex) {
+                    //     Rlog.e(LOGTAG, "Error parsing rules: " + ex);
+                    //     updateState(STATE_ERROR);
+                    // }
+                }
+                else {
+                    Logger::E(LOGTAG, String("Invalid response: payload=") + Arrays::ToString(response->mPayload) +
+                            String(" sw1=") + StringUtils::ToString(response->mSw1) +
+                            String(" sw2=") + StringUtils::ToString(response->mSw2));
+                    UpdateState(STATE_ERROR);
+                }
+            }
+            else {
+                Logger::E(LOGTAG, String("Error reading value from SIM."));
+                UpdateState(STATE_ERROR);
+            }
+
+            Int32 channelId = 0;
+            IInteger32::Probe(ar->mUserObj)->GetValue(&channelId);
+            AutoPtr<IMessage> msg;
+            ObtainMessage(EVENT_CLOSE_LOGICAL_CHANNEL_DONE, (IMessage**)&msg);
+            mUiccCard->IccCloseLogicalChannel(channelId, msg);
+        break;
+        }
+        case EVENT_CLOSE_LOGICAL_CHANNEL_DONE:
+            Logger::D(LOGTAG, String("EVENT_CLOSE_LOGICAL_CHANNEL_DONE"));
+            break;
+
+        default:
+            Logger::E(LOGTAG, String("Unknown event ") + StringUtils::ToString(what));
+    }
     return NOERROR;
 }
 
 AutoPtr<IList/*< AutoPtr<AccessRule> >*/> UiccCarrierPrivilegeRules::ParseRules(
-    /* [in] */ const String& rules)
+    /* [in] */ const String& _rules)
 {
-    // ==================before translated======================
-    // rules = rules.toUpperCase(Locale.US);
-    // Rlog.d(LOGTAG, "Got rules: " + rules);
-    //
-    // TLV allRefArDo = new TLV(TAG_ALL_REF_AR_DO); //FF40
-    // allRefArDo.parse(rules, true);
-    //
-    // String arDos = allRefArDo.value;
-    // List<AccessRule> accessRules = new ArrayList<AccessRule>();
-    // while (!arDos.isEmpty()) {
-    //     TLV refArDo = new TLV(TAG_REF_AR_DO); //E2
-    //     arDos = refArDo.parse(arDos, false);
-    //     AccessRule accessRule = parseRefArdo(refArDo.value);
-    //     if (accessRule != null) {
-    //         accessRules.add(accessRule);
-    //     } else {
-    //       Rlog.e(LOGTAG, "Skip unrecognized rule." + refArDo.value);
-    //     }
-    // }
-    // return accessRules;
-    assert(0);
-    AutoPtr<IList/*< AutoPtr<AccessRule>>*/> empty;
-    return empty;
+    String rules = _rules.ToUpperCase(); // rules.ToUpperCase(Locale.US);
+    Logger::D(LOGTAG, String("Got rules: ") + rules);
+
+    AutoPtr<TLV> allRefArDo = new TLV(TAG_ALL_REF_AR_DO); //FF40
+    String res;
+    allRefArDo->Parse(rules, TRUE, &res);
+
+    String arDos = allRefArDo->mValue;
+    AutoPtr<IList> accessRules;
+    CArrayList::New((IList**)&accessRules);
+    while (!arDos.IsEmpty()) {
+        AutoPtr<TLV> refArDo = new TLV(TAG_REF_AR_DO); //E2
+        refArDo->Parse(arDos, FALSE, &arDos);
+        AutoPtr<AccessRule> accessRule = ParseRefArdo(refArDo->mValue);
+        if (accessRule != NULL) {
+            accessRules->Add((IObject*)accessRule.Get());
+        }
+        else {
+            Logger::E(LOGTAG, String("Skip unrecognized rule.") + refArDo->mValue);
+        }
+    }
+    return accessRules;
 }
 
 AutoPtr<UiccCarrierPrivilegeRules::AccessRule> UiccCarrierPrivilegeRules::ParseRefArdo(
     /* [in] */ const String& rule)
 {
-    // ==================before translated======================
-    // Rlog.d(LOGTAG, "Got rule: " + rule);
-    //
-    // String certificateHash = null;
-    // String packageName = null;
-    // String tmp = null;
-    // long accessType = 0;
-    //
-    // while (!rule.isEmpty()) {
-    //     if (rule.startsWith(TAG_REF_DO)) {
-    //         TLV refDo = new TLV(TAG_REF_DO); //E1
-    //         rule = refDo.parse(rule, false);
-    //
-    //         // Skip unrelated rules.
-    //         if (!refDo.value.startsWith(TAG_DEVICE_APP_ID_REF_DO)) {
-    //             return null;
-    //         }
-    //
-    //         TLV deviceDo = new TLV(TAG_DEVICE_APP_ID_REF_DO); //C1
-    //         tmp = deviceDo.parse(refDo.value, false);
-    //         certificateHash = deviceDo.value;
-    //
-    //         if (!tmp.isEmpty()) {
-    //           if (!tmp.startsWith(TAG_PKG_REF_DO)) {
-    //               return null;
-    //           }
-    //           TLV pkgDo = new TLV(TAG_PKG_REF_DO); //CA
-    //           pkgDo.parse(tmp, true);
-    //           packageName = new String(IccUtils.hexStringToBytes(pkgDo.value));
-    //         } else {
-    //           packageName = null;
-    //         }
-    //     } else if (rule.startsWith(TAG_AR_DO)) {
-    //         TLV arDo = new TLV(TAG_AR_DO); //E3
-    //         rule = arDo.parse(rule, false);
-    //
-    //         // Skip unrelated rules.
-    //         if (!arDo.value.startsWith(TAG_PERM_AR_DO)) {
-    //             return null;
-    //         }
-    //
-    //         TLV permDo = new TLV(TAG_PERM_AR_DO); //DB
-    //         permDo.parse(arDo.value, true);
-    //         Rlog.e(LOGTAG, permDo.value);
-    //     } else  {
-    //         // Spec requires it must be either TAG_REF_DO or TAG_AR_DO.
-    //         throw new RuntimeException("Invalid Rule type");
-    //     }
-    // }
-    //
-    // Rlog.e(LOGTAG, "Adding: " + certificateHash + " : " + packageName + " : " + accessType);
-    //
-    // AccessRule accessRule = new AccessRule(IccUtils.hexStringToBytes(certificateHash),
-    //     packageName, accessType);
-    // Rlog.e(LOGTAG, "Parsed rule: " + accessRule);
-    // return accessRule;
-    assert(0);
-    AutoPtr<AccessRule> empty;
-    return empty;
+    String _rule = rule;
+    Logger::D(LOGTAG, String("Got rule: ") + rule);
+
+    String certificateHash(NULL);
+    String packageName(NULL);
+    String tmp(NULL);
+    Int64 accessType = 0;
+
+    while (!_rule.IsEmpty()) {
+        if (_rule.StartWith(TAG_REF_DO)) {
+            AutoPtr<TLV> refDo = new TLV(TAG_REF_DO); //E1
+            refDo->Parse(_rule, FALSE, &_rule);
+
+            // Skip unrelated rules.
+            if (!refDo->mValue.StartWith(TAG_DEVICE_APP_ID_REF_DO)) {
+                return NULL;
+            }
+
+            AutoPtr<TLV> deviceDo = new TLV(TAG_DEVICE_APP_ID_REF_DO); //C1
+            deviceDo->Parse(refDo->mValue, FALSE, &tmp);
+            certificateHash = deviceDo->mValue;
+
+            if (!tmp.IsEmpty()) {
+                if (!tmp.StartWith(TAG_PKG_REF_DO)) {
+                    return NULL;
+                }
+                AutoPtr<TLV> pkgDo = new TLV(TAG_PKG_REF_DO); //CA
+                String res;
+                pkgDo->Parse(tmp, TRUE, &res);
+                AutoPtr<IIccUtils> iccu;
+                CIccUtils::AcquireSingleton((IIccUtils**)&iccu);
+                AutoPtr<ArrayOf<Byte> > arr;
+                iccu->HexStringToBytes(pkgDo->mValue, (ArrayOf<Byte>**)&arr);
+                packageName = String(*arr);
+            }
+            else {
+                packageName = String(NULL);
+            }
+        }
+        else if (_rule.StartWith(TAG_AR_DO)) {
+            AutoPtr<TLV> arDo = new TLV(TAG_AR_DO); //E3
+            arDo->Parse(_rule, FALSE, &_rule);
+
+            // Skip unrelated rules.
+            if (!arDo->mValue.StartWith(TAG_PERM_AR_DO)) {
+                return NULL;
+            }
+
+            AutoPtr<TLV> permDo = new TLV(TAG_PERM_AR_DO); //DB
+            String res;
+            permDo->Parse(arDo->mValue, TRUE, &res);
+            Logger::E(LOGTAG, permDo->mValue);
+        }
+        else  {
+            // Spec requires it must be either TAG_REF_DO or TAG_AR_DO.
+            // throw new RuntimeException("Invalid Rule type");
+            return NULL;
+        }
+    }
+
+    Logger::E(LOGTAG, String("Adding: ") + certificateHash +
+            String(" : ") + packageName +
+            String(" : ") + StringUtils::ToString(accessType));
+
+    AutoPtr<IIccUtils> iccu;
+    CIccUtils::AcquireSingleton((IIccUtils**)&iccu);
+    AutoPtr<ArrayOf<Byte> > arr;
+    iccu->HexStringToBytes(certificateHash, (ArrayOf<Byte>**)&arr);
+    AutoPtr<AccessRule> accessRule = new AccessRule(arr,
+                                        packageName, accessType);
+    Logger::E(LOGTAG, String("Parsed rule: ")/* + accessRule*/);
+    return accessRule;
 }
 
 AutoPtr<ArrayOf<Byte> > UiccCarrierPrivilegeRules::GetCertHash(
     /* [in] */ ISignature* signature)
 {
-    // ==================before translated======================
-    // // TODO: Is the following sufficient.
+    // TODO: Is the following sufficient.
     // try {
-    //     CertificateFactory certFactory = CertificateFactory.getInstance("X.509");
-    //     X509Certificate cert = (X509Certificate) certFactory.generateCertificate(
-    //             new ByteArrayInputStream(signature.toByteArray()));
-    //
-    //     MessageDigest md = MessageDigest.getInstance("SHA");
-    //     return md.digest(cert.getEncoded());
+    AutoPtr<ICertificateFactoryHelper> hlp;
+    assert(0 && "TODO");
+    // CCertificateFactoryHelper::AcquireSingleton((ICertificateFactoryHelper**)&hlp);
+    AutoPtr<ICertificateFactory> certFactory;
+    hlp->GetInstance(String("X.509"), (ICertificateFactory**)&certFactory);
+
+    AutoPtr<ArrayOf<Byte> > arr; // = signature.toByteArray();
+    AutoPtr<IByteArrayInputStream> inputStream;
+    CByteArrayInputStream::New(arr, (IByteArrayInputStream**)&inputStream);
+    AutoPtr<ICertificate> cf;
+    certFactory->GenerateCertificate(IInputStream::Probe(inputStream), (ICertificate**)&cf);
+    AutoPtr<IX509Certificate> cert = IX509Certificate::Probe(cf);
+
+    AutoPtr<IMessageDigestHelper> mdhlp;
+    CMessageDigestHelper::AcquireSingleton((IMessageDigestHelper**)&mdhlp);
+    AutoPtr<IMessageDigest> md;
+    mdhlp->GetInstance(String("SHA"), (IMessageDigest**)&md);
+    AutoPtr<ArrayOf<Byte> > encode;
+    ICertificate::Probe(cert)->GetEncoded((ArrayOf<Byte>**)&encode);
+    AutoPtr<ArrayOf<Byte> > res;
+    md->Digest(encode, (ArrayOf<Byte>**)&res);
+    return res;
     // } catch (CertificateException ex) {
     //     Rlog.e(LOGTAG, "CertificateException: " + ex);
     // } catch (NoSuchAlgorithmException ex) {
     //     Rlog.e(LOGTAG, "NoSuchAlgorithmException: " + ex);
     // }
-    //
+
     // Rlog.e(LOGTAG, "Cannot compute cert hash");
-    // return null;
-    assert(0);
-    AutoPtr<ArrayOf<Byte> > empty;
-    return empty;
+    // return NULL;
 }
 
 void UiccCarrierPrivilegeRules::UpdateState(
     /* [in] */ Int32 newState)
 {
-    // ==================before translated======================
-    // mState.set(newState);
-    // if (mLoadedCallback != null) {
-    //     mLoadedCallback.sendToTarget();
-    // }
-    assert(0);
+    mState->Set(newState);
+    if (mLoadedCallback != NULL) {
+        mLoadedCallback->SendToTarget();
+    }
 }
 
 } // namespace Uicc

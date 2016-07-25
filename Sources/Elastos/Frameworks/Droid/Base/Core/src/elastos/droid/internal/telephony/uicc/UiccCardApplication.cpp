@@ -1,6 +1,7 @@
 
 #include "Elastos.Droid.Content.h"
 #include "Elastos.Droid.Internal.h"
+#include "Elastos.CoreLibrary.IO.h"
 #include "elastos/droid/os/RegistrantList.h"
 #include "elastos/droid/os/CRegistrant.h"
 #include "elastos/droid/internal/telephony/uicc/UiccCardApplication.h"
@@ -13,7 +14,10 @@
 #include "elastos/droid/internal/telephony/uicc/CRuimRecords.h"
 #include "elastos/droid/internal/telephony/uicc/CIsimUiccRecords.h"
 #include "elastos/droid/internal/telephony/uicc/IccCardApplicationStatus.h"
-#include "elastos/core/AutoLock.h"
+#include "elastos/droid/internal/telephony/uicc/IccRefreshResponse.h"
+
+#include <elastos/core/AutoLock.h>
+#include <elastos/core/CoreUtils.h>
 #include <elastos/core/StringUtils.h>
 #include <elastos/utility/logging/Logger.h>
 
@@ -22,11 +26,12 @@ using Elastos::Droid::Os::Registrant;
 using Elastos::Droid::Os::IRegistrant;
 using Elastos::Droid::Os::CRegistrant;
 using Elastos::Droid::Os::RegistrantList;
+
 using Elastos::Core::AutoLock;
-using Elastos::Core::CInteger32;
 using Elastos::Core::IArrayOf;
-using Elastos::Core::IInteger32;
+using Elastos::Core::CoreUtils;
 using Elastos::Core::StringUtils;
+using Elastos::IO::IFlushable;
 using Elastos::Utility::Logging::Logger;
 
 namespace Elastos {
@@ -48,14 +53,14 @@ UiccCardApplication::InnerHandler::InnerHandler(
 ECode UiccCardApplication::InnerHandler::HandleMessage(
     /* [in] */ IMessage* msg)
 {
-    Int32 what;
-    msg->GetWhat(&what);
-    Logger::E("UiccCardApplication", "InnerHandler::HandleMessage, msg:%d", what);
-    AsyncResult* ar = NULL;
+    AutoPtr<AsyncResult> ar;
 
+    Int32 what = 0;
+    msg->GetWhat(&what);
     if (mOwner->mDestroyed) {
-        mOwner->Loge(String("Received message ") + TO_CSTR(msg) + "[" + StringUtils::ToString(what)
-                + "] while being destroyed. Ignoring.");
+        Logger::E(String("UiccCardApplication"), String("Received message %p")
+            + String("[") + StringUtils::ToString(what)
+            + String("] while being destroyed. Ignoring."), msg);
         return NOERROR;
     }
 
@@ -230,17 +235,21 @@ ECode UiccCardApplication::Update(
 
 ECode UiccCardApplication::Dispose()
 {
-    AutoLock lock(mLock);
-    if (DBG) Log(StringUtils::ToString(mAppType) + " being Disposed");
-    mDestroyed = TRUE;
-    if (mIccRecords != NULL) {
-        mIccRecords->Dispose();
+    {
+        AutoLock lock(mLock);
+        if (DBG) {
+            Log(StringUtils::ToString(mAppType) + String(" being Disposed"));
+        }
+        mDestroyed = TRUE;
+        if (mIccRecords != NULL) {
+            mIccRecords->Dispose();
+        }
+        if (mIccFh != NULL) {
+            mIccFh->Dispose();
+        }
+        mIccRecords = NULL;
+        mIccFh = NULL;
     }
-    if (mIccFh != NULL) {
-        mIccFh->Dispose();
-    }
-    mIccRecords = NULL;
-    mIccFh = NULL;
     return NOERROR;
 }
 
@@ -263,30 +272,30 @@ ECode UiccCardApplication::QueryFdn()
 ECode UiccCardApplication::OnRefresh(
     /* [in] */ IIccRefreshResponse* refreshResponse)
 {
-    // ==================before translated======================
-    // if (refreshResponse == NULL) {
-    //     Loge("onRefresh received without input");
-    //     return;
-    // }
-    //
-    // if (refreshResponse.aid == NULL ||
-    //         refreshResponse.aid.equals(mAid)) {
-    //     Log("refresh for app " + refreshResponse.aid);
-    // } else {
-    //  // This is for a different app. Ignore.
-    //     return;
-    // }
-    //
-    // switch (refreshResponse.refreshResult) {
-    //     case IccRefreshResponse.REFRESH_RESULT_INIT:
-    //     case IccRefreshResponse.REFRESH_RESULT_RESET:
-    //         Log("onRefresh: Setting app state to unknown");
-    //         // Move our state to Unknown as soon as we know about a refresh
-    //         // so that anyone interested does not get a stale state.
-    //         mAppState = AppState.APPSTATE_UNKNOWN;
-    //         break;
-    // }
-    assert(0);
+    if (refreshResponse == NULL) {
+        Loge(String("onRefresh received without input"));
+        return NOERROR;
+    }
+
+    AutoPtr<IccRefreshResponse> _refreshResponse = (IccRefreshResponse*)refreshResponse;
+    if (_refreshResponse->mAid == NULL ||
+            _refreshResponse->mAid.Equals(mAid)) {
+        Log(String("refresh for app ") + _refreshResponse->mAid);
+    }
+    else {
+        // This is for a different app. Ignore.
+        return NOERROR;
+    }
+
+    switch (_refreshResponse->mRefreshResult) {
+        case IIccRefreshResponse::REFRESH_RESULT_INIT:
+        case IIccRefreshResponse::REFRESH_RESULT_RESET:
+            Log(String("onRefresh: Setting app state to unknown"));
+            // Move our state to Unknown as soon as we know about a refresh
+            // so that anyone interested does not get a stale state.
+            mAppState = APPSTATE_UNKNOWN;
+            break;
+    }
     return NOERROR;
 }
 
@@ -299,7 +308,7 @@ ECode UiccCardApplication::RegisterForReady(
         AutoLock lock(mLock);
         for (Int32 i = mReadyRegistrants->GetSize() - 1; i >= 0 ; i--) {
             AutoPtr<IInterface> obj = mReadyRegistrants->Get(i);
-            Registrant*  r = (Registrant*)IRegistrant::Probe(obj);
+            Registrant* r = (Registrant*)IRegistrant::Probe(obj);
             AutoPtr<IHandler> rH;
             r->GetHandler((IHandler**)&rH);
 
@@ -331,11 +340,13 @@ ECode UiccCardApplication::RegisterForLocked(
     /* [in] */ Int32 what,
     /* [in] */ IInterface* obj)
 {
-    AutoLock lock(mLock);
-    AutoPtr<IRegistrant> r;
-    CRegistrant::New(h, what, obj, (IRegistrant**)&r);
-    mPinLockedRegistrants->Add(r);
-    NotifyPinLockedRegistrantsIfNeeded((Registrant*)r.Get());
+    {
+        AutoLock lock(mLock);
+        AutoPtr<IRegistrant> r;
+        CRegistrant::New(h, what, obj, (IRegistrant**)&r);
+        mPinLockedRegistrants->Add(r);
+        NotifyPinLockedRegistrantsIfNeeded((Registrant*)r.Get());
+    }
     return NOERROR;
 }
 
@@ -544,14 +555,14 @@ ECode UiccCardApplication::GetIccLockEnabled(
 {
     VALIDATE_NOT_NULL(result);
     *result = mIccLockEnabled;
-    // /* STOPSHIP: Remove line above and all code associated with setting
-    //    mIccLockEanbled once all RIL correctly sends the pin1 state.
-    // // Use getPin1State to take into account pin1Replaced flag
-    // PinState pinState = getPin1State();
-    // return pinState == PinState.PINSTATE_ENABLED_NOT_VERIFIED ||
-    //        pinState == PinState.PINSTATE_ENABLED_VERIFIED ||
-    //        pinState == PinState.PINSTATE_ENABLED_BLOCKED ||
-    //        pinState == PinState.PINSTATE_ENABLED_PERM_BLOCKED;*/
+    /* STOPSHIP: Remove line above and all code associated with setting
+       mIccLockEanbled once all RIL correctly sends the pin1 state.
+    // Use getPin1State to take into account pin1Replaced flag
+    PinState pinState = getPin1State();
+    return pinState == PinState.PINSTATE_ENABLED_NOT_VERIFIED ||
+           pinState == PinState.PINSTATE_ENABLED_VERIFIED ||
+           pinState == PinState.PINSTATE_ENABLED_BLOCKED ||
+           pinState == PinState.PINSTATE_ENABLED_PERM_BLOCKED;*/
     return NOERROR;
 }
 
@@ -670,42 +681,47 @@ ECode UiccCardApplication::Dump(
     /* [in] */ IPrintWriter* pw,
     /* [in] */ ArrayOf<String>* args)
 {
-    // ==================before translated======================
-    // pw.println("UiccCardApplication: " + this);
-    // pw.println(" mUiccCard=" + mUiccCard);
-    // pw.println(" mAppState=" + mAppState);
-    // pw.println(" mAppType=" + mAppType);
-    // pw.println(" mPersoSubState=" + mPersoSubState);
-    // pw.println(" mAid=" + mAid);
-    // pw.println(" mAppLabel=" + mAppLabel);
-    // pw.println(" mPin1Replaced=" + mPin1Replaced);
-    // pw.println(" mPin1State=" + mPin1State);
-    // pw.println(" mPin2State=" + mPin2State);
-    // pw.println(" mIccFdnEnabled=" + mIccFdnEnabled);
-    // pw.println(" mDesiredFdnEnabled=" + mDesiredFdnEnabled);
-    // pw.println(" mIccLockEnabled=" + mIccLockEnabled);
-    // pw.println(" mDesiredPinLocked=" + mDesiredPinLocked);
-    // pw.println(" mCi=" + mCi);
-    // pw.println(" mIccRecords=" + mIccRecords);
-    // pw.println(" mIccFh=" + mIccFh);
-    // pw.println(" mDestroyed=" + mDestroyed);
-    // pw.println(" mReadyRegistrants: size=" + mReadyRegistrants.size());
-    // for (Int32 i = 0; i < mReadyRegistrants.size(); i++) {
-    //     pw.println("  mReadyRegistrants[" + i + "]="
-    //             + ((Registrant)mReadyRegistrants.get(i)).getHandler());
-    // }
-    // pw.println(" mPinLockedRegistrants: size=" + mPinLockedRegistrants.size());
-    // for (Int32 i = 0; i < mPinLockedRegistrants.size(); i++) {
-    //     pw.println("  mPinLockedRegistrants[" + i + "]="
-    //             + ((Registrant)mPinLockedRegistrants.get(i)).getHandler());
-    // }
-    // pw.println(" mPersoLockedRegistrants: size=" + mPersoLockedRegistrants.size());
-    // for (Int32 i = 0; i < mPersoLockedRegistrants.size(); i++) {
-    //     pw.println("  mPersoLockedRegistrants[" + i + "]="
-    //             + ((Registrant)mPersoLockedRegistrants.get(i)).getHandler());
-    // }
-    // pw.flush();
-    assert(0);
+    assert(0 && "TODO");
+    // pw->Println(String("UiccCardApplication: ") + this);
+    // pw->Println(String(" mUiccCard=") + mUiccCard);
+    pw->Println(String(" mAppState=") + StringUtils::ToString(mAppState));
+    pw->Println(String(" mAppType=") + StringUtils::ToString(mAppType));
+    pw->Println(String(" mPersoSubState=") + StringUtils::ToString(mPersoSubState));
+    pw->Println(String(" mAid=") + mAid);
+    pw->Println(String(" mAppLabel=") + mAppLabel);
+    pw->Println(String(" mPin1Replaced=") + StringUtils::ToString(mPin1Replaced));
+    pw->Println(String(" mPin1State=") + StringUtils::ToString(mPin1State));
+    pw->Println(String(" mPin2State=") + StringUtils::ToString(mPin2State));
+    pw->Println(String(" mIccFdnEnabled=") + StringUtils::ToString(mIccFdnEnabled));
+    pw->Println(String(" mDesiredFdnEnabled=") + StringUtils::ToString(mDesiredFdnEnabled));
+    pw->Println(String(" mIccLockEnabled=") + StringUtils::ToString(mIccLockEnabled));
+    pw->Println(String(" mDesiredPinLocked=") + StringUtils::ToString(mDesiredPinLocked));
+    // pw->Println(String(" mCi=") + mCi);
+    // pw->Println(String(" mIccRecords=") + mIccRecords);
+    // pw->Println(String(" mIccFh=") + mIccFh);
+    pw->Println(String(" mDestroyed=") + StringUtils::ToString(mDestroyed));
+    pw->Println(String(" mReadyRegistrants: size=") + StringUtils::ToString(mReadyRegistrants->GetSize()));
+    for (Int32 i = 0; i < mReadyRegistrants->GetSize(); i++) {
+        AutoPtr<IHandler> hdl;
+        IRegistrant::Probe(mReadyRegistrants->Get(i))->GetHandler((IHandler**)&hdl);
+        pw->Println(String("  mReadyRegistrants[") + StringUtils::ToString(i) +
+                String("]=")/* + hdl*/);
+    }
+    pw->Println(String(" mPinLockedRegistrants: size=") + StringUtils::ToString(mPinLockedRegistrants->GetSize()));
+    for (Int32 i = 0; i < mPinLockedRegistrants->GetSize(); i++) {
+        AutoPtr<IHandler> hdl;
+        IRegistrant::Probe(mPinLockedRegistrants->Get(i))->GetHandler((IHandler**)&hdl);
+        pw->Println(String("  mPinLockedRegistrants[") + StringUtils::ToString(i) +
+                    String("]=")/* + hdl*/);
+    }
+    pw->Println(String(" mPersoLockedRegistrants: size=") + StringUtils::ToString(mPersoLockedRegistrants->GetSize()));
+    for (Int32 i = 0; i < mPersoLockedRegistrants->GetSize(); i++) {
+        AutoPtr<IHandler> hdl;
+        IRegistrant::Probe(mPersoLockedRegistrants->Get(i))->GetHandler((IHandler**)&hdl);
+        pw->Println(String("  mPersoLockedRegistrants[") + StringUtils::ToString(i) +
+                    String("]=")/* + hdl*/);
+    }
+    IFlushable::Probe(pw)->Flush();
     return NOERROR;
 }
 
@@ -714,7 +730,7 @@ ECode UiccCardApplication::GetUiccCard(
 {
     VALIDATE_NOT_NULL(result)
     *result = mUiccCard;
-    REFCOUNT_ADD(*result);
+    REFCOUNT_ADD(*result)
     return NOERROR;
 }
 
@@ -726,11 +742,14 @@ AutoPtr<IIccRecords> UiccCardApplication::CreateIccRecords(
     AutoPtr<IIccRecords> ir;
     if (type == APPTYPE_USIM || type == APPTYPE_SIM) {
         CSIMRecords::New(this, c, ci, (IIccRecords**)&ir);
-    } else if (type == APPTYPE_RUIM || type == APPTYPE_CSIM){
+    }
+    else if (type == APPTYPE_RUIM || type == APPTYPE_CSIM){
         CRuimRecords::New(this, c, ci, (IIccRecords**)&ir);
-    } else if (type == APPTYPE_ISIM) {
+    }
+    else if (type == APPTYPE_ISIM) {
         CIsimUiccRecords::New(this, c, ci, (IIccRecords**)&ir);
-    } else {
+    }
+    else {
         // Unknown app type (maybe detection is still in progress)
         ir = NULL;
     }
@@ -743,17 +762,21 @@ AutoPtr<IIccFileHandler> UiccCardApplication::CreateIccFileHandler(
     AutoPtr<IIccFileHandler> fh;
     switch (type) {
         case APPTYPE_SIM:
-            CSIMFileHandler::New(this, mAid, mCi, (IIccFileHandler**)&fh);break;
+            CSIMFileHandler::New(this, mAid, mCi, (IIccFileHandler**)&fh);
+            break;
         case APPTYPE_RUIM:
-            CRuimFileHandler::New(this, mAid, mCi, (IIccFileHandler**)&fh);break;
+            CRuimFileHandler::New(this, mAid, mCi, (IIccFileHandler**)&fh);
+            break;
         case APPTYPE_USIM: {// leliang this type
             CUsimFileHandler::New(this, mAid, mCi, (IIccFileHandler**)&fh);
             break;
         }
         case APPTYPE_CSIM:
-            CCsimFileHandler::New(this, mAid, mCi, (IIccFileHandler**)&fh);break;
+            CCsimFileHandler::New(this, mAid, mCi, (IIccFileHandler**)&fh);
+            break;
         case APPTYPE_ISIM:
-            CIsimFileHandler::New(this, mAid, mCi, (IIccFileHandler**)&fh);break;
+            CIsimFileHandler::New(this, mAid, mCi, (IIccFileHandler**)&fh);
+            break;
         default:
             fh = NULL;
     }
@@ -951,7 +974,8 @@ void UiccCardApplication::NotifyReadyRegistrantsIfNeeded(
         if (r == NULL) {
             if (DBG) Log(String("Notifying registrants: READY"));
             mReadyRegistrants->NotifyRegistrants();
-        } else {
+        }
+        else {
             if (DBG) Log(String("Notifying 1 registrant: READY"));
             AutoPtr<AsyncResult> ar = new AsyncResult(NULL, NULL, NULL);
             r->NotifyRegistrant(ar);
@@ -977,10 +1001,11 @@ void UiccCardApplication::NotifyPinLockedRegistrantsIfNeeded(
         if (r == NULL) {
             if (DBG) Log(String("Notifying registrants: LOCKED"));
             mPinLockedRegistrants->NotifyRegistrants();
-        } else {
+        }
+        else {
             if (DBG) Log(String("Notifying 1 registrant: LOCKED"));
-            AutoPtr<AsyncResult> ar = new AsyncResult(NULL, NULL, NULL);
-            r->NotifyRegistrant(ar);
+            AutoPtr<AsyncResult> p = new AsyncResult(NULL, NULL, NULL);
+            r->NotifyRegistrant(p);
         }
     }
 }
@@ -992,12 +1017,10 @@ void UiccCardApplication::NotifyPersoLockedRegistrantsIfNeeded(
         return;
     }
 
-    Boolean tmp = FALSE;
-    if (mAppState == APPSTATE_SUBSCRIPTION_PERSO &&
-            (IsPersoLocked(&tmp), tmp)) {
-        AutoPtr<IInteger32> vo;
-        CInteger32::New(mPersoSubState/*.ordinal()*/, (IInteger32**)&vo);
-        AutoPtr<AsyncResult> ar = new AsyncResult(NULL, vo, NULL);
+    Boolean b = FALSE;
+    IsPersoLocked(&b);
+    if (mAppState == APPSTATE_SUBSCRIPTION_PERSO && b) {
+        AutoPtr<AsyncResult> ar = new AsyncResult(NULL, CoreUtils::Convert(mPersoSubState), NULL);
         if (r == NULL) {
             if (DBG) Log(String("Notifying registrants: PERSO_LOCKED"));
             mPersoLockedRegistrants->NotifyRegistrants(ar);
@@ -1012,7 +1035,7 @@ void UiccCardApplication::NotifyPersoLockedRegistrantsIfNeeded(
 Int32 UiccCardApplication::GetAuthContext(
     /* [in] */ AppType appType)
 {
-    Int32 authContext;
+    Int32 authContext = 0;
 
     switch (appType) {
         case APPTYPE_SIM:
@@ -1034,7 +1057,6 @@ Int32 UiccCardApplication::GetAuthContext(
 void UiccCardApplication::Log(
     /* [in] */ const String& msg)
 {
-    // ==================before translated======================
     // Rlog.d(LOGTAG, msg);
     Logger::E("UiccCardApplication", "TODO Log, msg:%s", msg.string());
 }
@@ -1042,7 +1064,6 @@ void UiccCardApplication::Log(
 void UiccCardApplication::Loge(
     /* [in] */ const String& msg)
 {
-    // ==================before translated======================
     // Rlog.e(LOGTAG, msg);
     Logger::E("UiccCardApplication", "TODO Loge, msg:%s", msg.string());
 }

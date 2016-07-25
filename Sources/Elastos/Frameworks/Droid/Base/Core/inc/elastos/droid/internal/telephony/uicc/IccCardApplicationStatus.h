@@ -4,9 +4,6 @@
 #include "_Elastos.Droid.Internal.h"
 #include "elastos/core/Object.h"
 
-// import android.telephony.Rlog;
-//using Elastos::Droid::Internal::Telephony::Uicc::IccCardStatusPinState;
-
 namespace Elastos {
 namespace Droid {
 namespace Internal {

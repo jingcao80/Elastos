@@ -4,8 +4,6 @@
 #include "elastos/droid/ext/frameworkext.h"
 #include "elastos/droid/internal/telephony/uicc/IccFileHandler.h"
 
-// import android.telephony.Rlog;
-
 using Elastos::Droid::Internal::Telephony::ICommandsInterface;
 
 namespace Elastos {

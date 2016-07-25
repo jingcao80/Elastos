@@ -7,9 +7,6 @@
 #include "elastos/droid/os/Handler.h"
 #include "elastos/droid/os/RegistrantList.h"
 
-// import android.telephony.Rlog;
-// import com.android.internal.telephony.PhoneConstants;
-
 using Elastos::Droid::Content::IContext;
 using Elastos::Droid::Os::IHandler;
 using Elastos::Droid::Os::Handler;

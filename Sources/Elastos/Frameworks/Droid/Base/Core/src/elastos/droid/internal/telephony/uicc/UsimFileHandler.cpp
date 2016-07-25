@@ -2,6 +2,10 @@
 #include "Elastos.Droid.Internal.h"
 #include "elastos/droid/internal/telephony/uicc/UsimFileHandler.h"
 
+#include <elastos/utility/logging/Logger.h>
+
+using Elastos::Utility::Logging::Logger;
+
 namespace Elastos {
 namespace Droid {
 namespace Internal {
@@ -79,18 +83,14 @@ String UsimFileHandler::GetEFPath(
 ECode UsimFileHandler::Logd(
     /* [in] */ const String& msg)
 {
-    // ==================before translated======================
-    // Rlog.d(LOGTAG, msg);
-    assert(0);
+    Logger::D(LOGTAG, msg);
     return NOERROR;
 }
 
 ECode UsimFileHandler::Loge(
     /* [in] */ const String& msg)
 {
-    // ==================before translated======================
-    // Rlog.e(LOGTAG, msg);
-    assert(0);
+    Logger::D(LOGTAG, msg);
     return NOERROR;
 }
 

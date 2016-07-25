@@ -5,10 +5,6 @@
 #include "elastos/droid/os/AsyncResult.h"
 #include "elastos/droid/os/Handler.h"
 
-// import android.text.TextUtils;
-// import android.util.Log;
-// import java.util.Iterator;
-
 using Elastos::Droid::Internal::Telephony::Gsm::IUsimPhoneBookManager;
 using Elastos::Droid::Os::IMessage;
 using Elastos::Droid::Os::Handler;

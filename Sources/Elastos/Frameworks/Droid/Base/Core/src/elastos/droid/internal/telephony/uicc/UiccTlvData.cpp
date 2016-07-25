@@ -1,8 +1,14 @@
 
 #include "Elastos.Droid.Internal.h"
 #include "elastos/droid/internal/telephony/uicc/UiccTlvData.h"
+#include "elastos/droid/internal/telephony/uicc/CUiccTlvData.h"
+
+#include <elastos/core/CoreUtils.h>
+#include <elastos/core/StringUtils.h>
 #include <elastos/utility/logging/Logger.h>
 
+using Elastos::Core::CoreUtils;
+using Elastos::Core::StringUtils;
 using Elastos::Utility::Logging::Logger;
 
 namespace Elastos {

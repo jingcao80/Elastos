@@ -14,7 +14,9 @@
 #include "Elastos.Droid.Content.h"
 #include "Elastos.Droid.Internal.h"
 #include "elastos/droid/R.h"
+
 #include <elastos/core/AutoLock.h>
+#include <elastos/core/StringUtils.h>
 #include <elastos/utility/logging/Logger.h>
 
 using Elastos::Droid::Content::Res::IResources;
@@ -28,15 +30,18 @@ using Elastos::Droid::Telephony::CServiceState;
 using Elastos::Droid::Telephony::CTelephonyManager;
 using Elastos::Droid::Telephony::IServiceState;
 using Elastos::Droid::Telephony::ITelephonyManager;
+
 using Elastos::Core::CInteger32;
 using Elastos::Core::IArrayOf;
 using Elastos::Core::IByte;
 using Elastos::Core::IInteger32;
+using Elastos::Core::StringUtils;
 using Elastos::IO::ByteOrder;
 using Elastos::IO::CByteOrderHelper;
 using Elastos::IO::CByteBufferHelper;
 using Elastos::IO::IByteBufferHelper;
 using Elastos::IO::IByteOrderHelper;
+using Elastos::IO::IFlushable;
 using Elastos::Utility::Logging::Logger;
 
 namespace Elastos {
@@ -410,23 +415,25 @@ ECode UiccController::Dump(
     /* [in] */ IPrintWriter* pw,
     /* [in] */ ArrayOf<String>* args)
 {
-    // ==================before translated======================
-    //         pw.println("UiccController: " + this);
-    //         pw.println(" mContext=" + mContext);
-    //         pw.println(" mInstance=" + mInstance);
-    // //        pw.println(" mCi=" + mCi);
-    // //        pw.println(" mUiccCard=" + mUiccCard);
-    //         pw.println(" mIccChangedRegistrants: size=" + mIccChangedRegistrants.size());
-    //         for (int i = 0; i < mIccChangedRegistrants.size(); i++) {
-    //             pw.println("  mIccChangedRegistrants[" + i + "]="
-    //                     + ((Registrant)mIccChangedRegistrants.get(i)).getHandler());
-    //         }
-    //         pw.println();
-    //         pw.flush();
-    // //        for (int i = 0; i < mUiccCards.length; i++) {
-    // //            mUiccCards[i].dump(fd, pw, args);
-    // //        }
-    assert(0);
+    assert(0 && "TODO");
+    // pw->Println(String("UiccController: ") + this);
+    // pw->Println(String(" mContext=") + mContext);
+    // pw->Println(String(" mInstance=") + mInstance);
+//        pw->Println(" mCi=" + mCi);
+//        pw->Println(" mUiccCard=" + mUiccCard);
+    pw->Println(String(" mIccChangedRegistrants: size=") +
+                StringUtils::ToString(mIccChangedRegistrants->GetSize()));
+    for (Int32 i = 0; i < mIccChangedRegistrants->GetSize(); i++) {
+        AutoPtr<IHandler> hdl;
+        IRegistrant::Probe(mIccChangedRegistrants->Get(i))->GetHandler((IHandler**)&hdl);
+        pw->Println(String("  mIccChangedRegistrants[") + StringUtils::ToString(i)
+                + String("]=")/* + hdl*/);
+    }
+    pw->Println();
+    IFlushable::Probe(pw)->Flush();
+//        for (int i = 0; i < mUiccCards.length; i++) {
+//            mUiccCards[i].dump(fd, pw, args);
+//        }
     return NOERROR;
 }
 
