@@ -3,7 +3,6 @@
 
 #include "_CDemo.h"
 
-#include <elastos/droid/ext/frameworkdef.h>
 #include <elastos/core/Object.h>
 
 CarClass(CDemo)
