@@ -4,31 +4,6 @@
 #include "elastos/droid/ext/frameworkext.h"
 #include "elastos/droid/os/Handler.h"
 
-// import android.content.Intent;
-// import android.content.pm.PackageInfo;
-// import android.content.pm.PackageManager;
-// import android.content.pm.ResolveInfo;
-// import android.content.pm.Signature;
-// import android.os.AsyncResult;
-// import android.os.Binder;
-// import android.telephony.Rlog;
-// import android.telephony.TelephonyManager;
-// import com.android.internal.telephony.CommandsInterface;
-// import com.android.internal.telephony.uicc.IccUtils;
-// import java.io.ByteArrayInputStream;
-// import java.lang.IllegalArgumentException;
-// import java.security.MessageDigest;
-// import java.security.NoSuchAlgorithmException;
-// import java.security.cert.Certificate;
-// import java.security.cert.CertificateException;
-// import java.security.cert.CertificateFactory;
-// import java.security.cert.X509Certificate;
-// import java.util.ArrayList;
-// import java.util.Arrays;
-// import java.util.List;
-// import java.util.Locale;
-// import java.util.concurrent.atomic.AtomicInteger;
-
 using Elastos::Droid::Os::IMessage;
 using Elastos::Droid::Os::Handler;
 using Elastos::Droid::Content::Pm::ISignature;
@@ -87,9 +62,9 @@ private:
             /* [out] */ String* result);
 
     public:
-        AutoPtr<ArrayOf<Byte> > certificateHash;
-        String packageName;
-        Int64 accessType;
+        AutoPtr<ArrayOf<Byte> > mCertificateHash;
+        String mPackageName;
+        Int64 mAccessType;
     };
 
     // Used for parsing the data from the UICC.
@@ -105,10 +80,10 @@ private:
             /* [in] */ Boolean shouldConsumeAll,
             /* [out] */ String* result);
 
-    private:
-        String tag;
-        AutoPtr<IInteger32> length;
-        String value;
+    public:
+        String mTag;
+        Int32 mLength;
+        String mValue;
     };
 
 public:

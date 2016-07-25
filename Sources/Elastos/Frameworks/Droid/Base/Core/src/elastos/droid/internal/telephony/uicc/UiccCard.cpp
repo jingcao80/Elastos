@@ -2,7 +2,11 @@
 #include "Elastos.Droid.Content.h"
 #include "Elastos.Droid.Internal.h"
 #include "Elastos.Droid.Telephony.h"
+#include "Elastos.Droid.View.h"
+#include "Elastos.CoreLibrary.IO.h"
 #include "elastos/droid/internal/telephony/uicc/UiccCard.h"
+#include "elastos/droid/app/CAlertDialogBuilder.h"
+#include "elastos/droid/content/res/CResourcesHelper.h"
 #include "elastos/droid/internal/telephony/cat/CatServiceFactory.h"
 #include "elastos/droid/internal/telephony/cat/CCatServiceFactory.h"
 #include "elastos/droid/internal/telephony/uicc/IccCardStatus.h"
@@ -14,14 +18,23 @@
 #include "elastos/droid/os/CRegistrant.h"
 #include "elastos/droid/preference/CPreferenceManagerHelper.h"
 #include "elastos/droid/text/TextUtils.h"
+#include "elastos/droid/R.h"
 
 #include <elastos/core/AutoLock.h>
+#include <elastos/core/CoreUtils.h>
 #include <elastos/core/StringUtils.h>
 #include <elastos/utility/logging/Logger.h>
 
+using Elastos::Droid::App::IAlertDialog;
+using Elastos::Droid::App::IAlertDialogBuilder;
+using Elastos::Droid::App::CAlertDialogBuilder;
+using Elastos::Droid::App::IDialog;
 using Elastos::Droid::Content::EIID_IDialogInterfaceOnClickListener;
 using Elastos::Droid::Content::ISharedPreferences;
 using Elastos::Droid::Content::ISharedPreferencesEditor;
+using Elastos::Droid::Content::Res::IResources;
+using Elastos::Droid::Content::Res::IResourcesHelper;
+using Elastos::Droid::Content::Res::CResourcesHelper;
 using Elastos::Droid::Os::IPowerManager;
 using Elastos::Droid::Os::AsyncResult;
 using Elastos::Droid::Os::IRegistrant;
@@ -34,8 +47,13 @@ using Elastos::Droid::Internal::Telephony::Cat::ICatServiceFactory;
 using Elastos::Droid::Internal::Telephony::ICommandsInterfaceRadioState;
 using Elastos::Droid::Telephony::ITelephonyManager;
 using Elastos::Droid::Text::TextUtils;
+using Elastos::Droid::R;
+using Elastos::Droid::View::IWindow;
+using Elastos::Droid::View::IWindowManagerLayoutParams;
 
+using Elastos::Core::CoreUtils;
 using Elastos::Core::StringUtils;
+using Elastos::IO::IFlushable;
 using Elastos::Utility::Logging::Logger;
 
 namespace Elastos {
@@ -736,7 +754,7 @@ ECode UiccCard::GetUICCConfig(
 {
     VALIDATE_NOT_NULL(result);
     *result = mUICCConfig;
-    REFCOUNT_ADD(*result);
+    REFCOUNT_ADD(*result)
     return NOERROR;
 }
 
@@ -758,69 +776,84 @@ ECode UiccCard::Dump(
     /* [in] */ IPrintWriter* pw,
     /* [in] */ ArrayOf<String>* args)
 {
-    // ==================before translated======================
-    // pw.println("UiccCard:");
-    // pw.println(" mCi=" + mCi);
-    // pw.println(" mDestroyed=" + mDestroyed);
-    // pw.println(" mLastRadioState=" + mLastRadioState);
-    // pw.println(" mCatService=" + mCatService);
-    // pw.println(" mAbsentRegistrants: size=" + mAbsentRegistrants.size());
-    // for (int i = 0; i < mAbsentRegistrants.size(); i++) {
-    //     pw.println("  mAbsentRegistrants[" + i + "]="
-    //             + ((Registrant)mAbsentRegistrants.get(i)).getHandler());
-    // }
-    // for (int i = 0; i < mCarrierPrivilegeRegistrants.size(); i++) {
-    //     pw.println("  mCarrierPrivilegeRegistrants[" + i + "]="
-    //             + ((Registrant)mCarrierPrivilegeRegistrants.get(i)).getHandler());
-    // }
-    // pw.println(" mCardState=" + mCardState);
-    // pw.println(" mUniversalPinState=" + mUniversalPinState);
-    // pw.println(" mGsmUmtsSubscriptionAppIndex=" + mGsmUmtsSubscriptionAppIndex);
-    // pw.println(" mCdmaSubscriptionAppIndex=" + mCdmaSubscriptionAppIndex);
-    // pw.println(" mImsSubscriptionAppIndex=" + mImsSubscriptionAppIndex);
-    // pw.println(" mImsSubscriptionAppIndex=" + mImsSubscriptionAppIndex);
-    // pw.println(" mUiccApplications: length=" + mUiccApplications.length);
-    // for (int i = 0; i < mUiccApplications.length; i++) {
-    //     if (mUiccApplications[i] == NULL) {
-    //         pw.println("  mUiccApplications[" + i + "]=" + NULL);
-    //     } else {
-    //         pw.println("  mUiccApplications[" + i + "]="
-    //                 + mUiccApplications[i].getType() + " " + mUiccApplications[i]);
-    //     }
-    // }
-    // pw.println();
-    // // Print details of all applications
-    // for (UiccCardApplication app : mUiccApplications) {
-    //     if (app != NULL) {
-    //         app.dump(fd, pw, args);
-    //         pw.println();
-    //     }
-    // }
-    // // Print details of all IccRecords
-    // for (UiccCardApplication app : mUiccApplications) {
-    //     if (app != NULL) {
-    //         IccRecords ir = app.getIccRecords();
-    //         if (ir != NULL) {
-    //             ir.dump(fd, pw, args);
-    //             pw.println();
-    //         }
-    //     }
-    // }
-    // pw.flush();
-    assert(0);
+    pw->Println(String("UiccCard:"));
+    // pw->Println(String(" mCi=") + mCi);
+    pw->Println(String(" mDestroyed=") + StringUtils::ToString(mDestroyed));
+    pw->Println(String(" mLastRadioState=") + StringUtils::ToString(mLastRadioState));
+    // pw->Println(String(" mCatService=") + mCatService);
+    pw->Println(String(" mAbsentRegistrants: size=") + StringUtils::ToString(mAbsentRegistrants->GetSize()));
+    for (Int32 i = 0; i < mAbsentRegistrants->GetSize(); i++) {
+        AutoPtr<IHandler> hdl;
+        IRegistrant::Probe(mAbsentRegistrants->Get(i))->GetHandler((IHandler**)&hdl);
+        pw->Println(String("  mAbsentRegistrants[") + StringUtils::ToString(i) +
+                String("]=")/* + hdl*/);
+    }
+    for (Int32 i = 0; i < mCarrierPrivilegeRegistrants->GetSize(); i++) {
+        AutoPtr<IHandler> hdl;
+        IRegistrant::Probe(mCarrierPrivilegeRegistrants->Get(i))->GetHandler((IHandler**)&hdl);
+        pw->Println(String("  mCarrierPrivilegeRegistrants[") + StringUtils::ToString(i) +
+                String("]=")/* + hdl*/);
+    }
+    pw->Println(String(" mCardState=") + StringUtils::ToString(mCardState));
+    pw->Println(String(" mUniversalPinState=") + StringUtils::ToString(mUniversalPinState));
+    pw->Println(String(" mGsmUmtsSubscriptionAppIndex=") + StringUtils::ToString(mGsmUmtsSubscriptionAppIndex));
+    pw->Println(String(" mCdmaSubscriptionAppIndex=") + StringUtils::ToString(mCdmaSubscriptionAppIndex));
+    pw->Println(String(" mImsSubscriptionAppIndex=") + StringUtils::ToString(mImsSubscriptionAppIndex));
+    pw->Println(String(" mImsSubscriptionAppIndex=") + StringUtils::ToString(mImsSubscriptionAppIndex));
+    pw->Println(String(" mUiccApplications: length=") + StringUtils::ToString(mUiccApplications->GetLength()));
+    for (Int32 i = 0; i < mUiccApplications->GetLength(); i++) {
+        if ((*mUiccApplications)[i] == NULL) {
+            pw->Println(String("  mUiccApplications[") + StringUtils::ToString(i)
+                + String("]=") + String(NULL));
+        }
+        else {
+            AppType type;
+            (*mUiccApplications)[i]->GetType(&type);
+            pw->Println(String("  mUiccApplications[")
+                + StringUtils::ToString(i) + String("]=")
+                + StringUtils::ToString(type) + String(" ")/* + (*mUiccApplications)[i]*/);
+        }
+    }
+    pw->Println();
+    // Print details of all applications
+    for (Int32 i = 0; i < mUiccApplications->GetLength(); i++) {
+        AutoPtr<IUiccCardApplication> app = (*mUiccApplications)[i];
+        if (app != NULL) {
+            assert(0 && "TODO");
+            // app->Dump(fd, pw, args);
+            pw->Println();
+        }
+    }
+    // Print details of all IccRecords
+    for (Int32 i = 0; i < mUiccApplications->GetLength(); i++) {
+        AutoPtr<IUiccCardApplication> app = (*mUiccApplications)[i];
+        if (app != NULL) {
+            AutoPtr<IIccRecords> ir;
+            app->GetIccRecords((IIccRecords**)&ir);
+            if (ir != NULL) {
+                assert(0 && "TODO");
+                // ir->Dump(fd, pw, args);
+                pw->Println();
+            }
+        }
+    }
+    IFlushable::Probe(pw)->Flush();
     return NOERROR;
 }
 
 void UiccCard::CreateAndUpdateCatService()
 {
+    AutoPtr<ICatServiceFactory> cf;
+    CCatServiceFactory::AcquireSingleton((ICatServiceFactory**)&cf);
     if (mUiccApplications->GetLength() > 0 && (*mUiccApplications)[0] != NULL) {
         // Initialize or Reinitialize CatService
         if (mCatService == NULL) {
-            mCatService = CatServiceFactory::MakeCatService(mCi, mContext, this, mSlotId);
+            cf->MakeCatService(mCi, mContext, this, mSlotId, (ICatService**)&mCatService);
         }
-    } else {
+    }
+    else {
         if (mCatService != NULL) {
-            CatServiceFactory::DisposeCatService(mSlotId);
+            cf->DisposeCatService(mSlotId);
         }
         mCatService = NULL;
     }
@@ -836,18 +869,15 @@ ECode UiccCard::Finalize()
 void UiccCard::Log(
     /* [in] */ const String& msg)
 {
-    // ==================before translated======================
     // Rlog.d(LOGTAG, msg);
     Logger::E("leliang", "TODO msg:%s, line:%d, func:%s\n", msg.string(), __LINE__, __func__);
 }
 
 AutoPtr<ArrayOf<IUiccCardApplication*> > UiccCard::MiddleInitMuiccapplications()
 {
-    // ==================before translated======================
-    // UiccCardApplication[] result = new UiccCardApplication[IccCardStatus.CARD_MAX_APPS];
-    assert(0);
-    AutoPtr<ArrayOf<IUiccCardApplication*> > empty;
-    return empty;
+    AutoPtr<ArrayOf<IUiccCardApplication*> > result =
+        ArrayOf<IUiccCardApplication*>::Alloc(IIccCardStatus::CARD_MAX_APPS);
+    return result;
 }
 
 void UiccCard::SanitizeApplicationIndexes()
@@ -894,60 +924,66 @@ Int32 UiccCard::CheckIndex(
 void UiccCard::OnIccSwap(
     /* [in] */ Boolean isAdded)
 {
-    // ==================before translated======================
-    //
-    // boolean isHotSwapSupported = mContext.getResources().getBoolean(
-    //         com.android.internal.R.bool.config_hotswapCapable);
-    //
-    // if (isHotSwapSupported) {
-    //     log("onIccSwap: isHotSwapSupported is true, don't prompt for rebooting");
-    //     return;
-    // }
-    // log("onIccSwap: isHotSwapSupported is false, prompt for rebooting");
-    //
-    // synchronized (mLock) {
-    //     // TODO: Here we assume the device can't handle SIM hot-swap
-    //     //      and has to reboot. We may want to add a property,
-    //     //      e.g. REBOOT_ON_SIM_SWAP, to indicate if modem support
-    //     //      hot-swap.
-    //     DialogInterface.OnClickListener listener = NULL;
-    //
-    //
-    //     // TODO: SimRecords is not reset while SIM ABSENT (only reset while
-    //     //       Radio_off_or_not_available). Have to reset in both both
-    //     //       added or removed situation.
-    //     listener = new DialogInterface.OnClickListener() {
-    //         @Override
-    //         public void onClick(DialogInterface dialog, int which) {
-    //             synchronized (mLock) {
-    //                 if (which == DialogInterface.BUTTON_POSITIVE) {
-    //                     if (DBG) log("Reboot due to SIM swap");
-    //                     PowerManager pm = (PowerManager) mContext
-    //                             .getSystemService(Context.POWER_SERVICE);
-    //                     pm.reboot("SIM is added.");
-    //                 }
-    //             }
-    //         }
-    //
-    //     };
-    //
-    //     Resources r = Resources.getSystem();
-    //
-    //     String title = (isAdded) ? r.getString(R.string.sim_added_title) :
-    //         r.getString(R.string.sim_removed_title);
-    //     String message = (isAdded) ? r.getString(R.string.sim_added_message) :
-    //         r.getString(R.string.sim_removed_message);
-    //     String buttonTxt = r.getString(R.string.sim_restart_button);
-    //
-    //     AlertDialog dialog = new AlertDialog.Builder(mContext)
-    //     .setTitle(title)
-    //     .setMessage(message)
-    //     .setPositiveButton(buttonTxt, listener)
-    //     .create();
-    //     dialog.getWindow().setType(WindowManager.LayoutParams.TYPE_SYSTEM_ALERT);
-    //     dialog.show();
-    // }
-    assert(0);
+    AutoPtr<IResources> res;
+    mContext->GetResources((IResources**)&res);
+    Boolean isHotSwapSupported = FALSE;
+    res->GetBoolean(
+            R::bool_::config_hotswapCapable, &isHotSwapSupported);
+
+    if (isHotSwapSupported) {
+        Log(String("onIccSwap: isHotSwapSupported is true, don't prompt for rebooting"));
+        return;
+    }
+    Log(String("onIccSwap: isHotSwapSupported is false, prompt for rebooting"));
+
+    {
+        AutoLock lock(mLock);
+        // TODO: Here we assume the device can't handle SIM hot-swap
+        //      and has to reboot. We may want to add a property,
+        //      e.g. REBOOT_ON_SIM_SWAP, to indicate if modem support
+        //      hot-swap.
+        AutoPtr<IDialogInterfaceOnClickListener> listener;
+
+
+        // TODO: SimRecords is not reset while SIM ABSENT (only reset while
+        //       Radio_off_or_not_available). Have to reset in both both
+        //       added or removed situation.
+        listener = new InnerDialogInterfaceOnClickListener1(this);
+
+        AutoPtr<IResourcesHelper> resHlp;
+        CResourcesHelper::AcquireSingleton((IResourcesHelper**)&resHlp);
+        AutoPtr<IResources> r;
+        resHlp->GetSystem((IResources**)&r);
+
+        String title;
+        if (isAdded) {
+            r->GetString(R::string::sim_added_title, &title);
+        }
+        else {
+            r->GetString(R::string::sim_removed_title, &title);
+        }
+        String message;
+        if (isAdded) {
+            r->GetString(R::string::sim_added_message, &message);
+        }
+        else {
+            r->GetString(R::string::sim_removed_message, &message);
+        }
+        String buttonTxt;
+        r->GetString(R::string::sim_restart_button, &buttonTxt);
+
+        AutoPtr<IAlertDialogBuilder> dialogBuilder;
+        CAlertDialogBuilder::New(mContext, (IAlertDialogBuilder**)&dialogBuilder);
+        dialogBuilder->SetTitle(CoreUtils::Convert(title));
+        dialogBuilder->SetMessage(CoreUtils::Convert(message));
+        dialogBuilder->SetPositiveButton(CoreUtils::Convert(buttonTxt), listener);
+        AutoPtr<IAlertDialog> dialog;
+        dialogBuilder->Create((IAlertDialog**)&dialog);
+        AutoPtr<IWindow> wd;
+        IDialog::Probe(dialog)->GetWindow((IWindow**)&wd);
+        wd->SetType(IWindowManagerLayoutParams::TYPE_SYSTEM_ALERT);
+        IDialog::Probe(dialog)->Show();
+    }
 }
 
 void UiccCard::OnCarrierPriviligesLoadedMessage()
@@ -959,7 +995,6 @@ void UiccCard::OnCarrierPriviligesLoadedMessage()
 void UiccCard::Loge(
     /* [in] */ const String& msg)
 {
-    // ==================before translated======================
     // Rlog.e(LOGTAG, msg);
     Logger::E("leliang", "TODO msg:%s, line:%d, func:%s\n", msg.string(), __LINE__, __func__);
 }

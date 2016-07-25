@@ -4,7 +4,7 @@
 #include "elastos/droid/ext/frameworkext.h"
 #include "elastos/droid/internal/telephony/uicc/IccServiceTable.h"
 
-// package com.android.internal.telephony.uicc;
+using Elastos::Droid::Internal::Telephony::Uicc::UsimService;
 
 namespace Elastos {
 namespace Droid {

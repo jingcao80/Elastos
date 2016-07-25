@@ -4,8 +4,6 @@
 #include "elastos/droid/ext/frameworkext.h"
 #include "elastos/droid/internal/telephony/uicc/IccException.h"
 
-// package com.android.internal.telephony.uicc;
-
 namespace Elastos {
 namespace Droid {
 namespace Internal {

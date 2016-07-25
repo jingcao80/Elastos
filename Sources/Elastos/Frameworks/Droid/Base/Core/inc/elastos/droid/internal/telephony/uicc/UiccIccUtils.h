@@ -4,16 +4,6 @@
 #include "elastos/droid/ext/frameworkext.h"
 #include "elastos/core/Object.h"
 
-// import android.content.res.Resources;
-// import android.content.res.Resources.NotFoundException;
-// import android.graphics.Bitmap;
-// import android.graphics.Color;
-// import android.telephony.Rlog;
-// import com.android.internal.telephony.EncodeException;
-// import com.android.internal.telephony.GsmAlphabet;
-// import java.io.UnsupportedEncodingException;
-// import java.nio.charset.Charset;
-
 using Elastos::Droid::Graphics::IBitmap;
 
 namespace Elastos {
@@ -119,8 +109,8 @@ public:
         /* [in] */ Int32 offset,
         /* [in] */ Int32 length);
 
-    static CARAPI_(Int32) HexCharToInt(
-        /* [in] */ Char32 c);
+    static CARAPI_(Int32) HexCharToInt32(
+        /* [in] */ Char16 c);
 
     /**
       * Converts a hex String to a byte array.

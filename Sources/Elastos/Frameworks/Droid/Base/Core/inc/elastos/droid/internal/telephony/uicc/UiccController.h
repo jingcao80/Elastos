@@ -7,23 +7,6 @@
 #include "elastos/droid/os/Handler.h"
 #include "elastos/droid/os/RegistrantList.h"
 
-// import android.content.Context;
-// import android.content.Intent;
-// import android.os.Message;
-// import android.os.Registrant;
-// import android.os.SystemProperties;
-// import android.telephony.TelephonyManager;
-// import android.telephony.Rlog;
-// import android.telephony.ServiceState;
-// import com.android.internal.telephony.CommandsInterface;
-// import com.android.internal.telephony.PhoneConstants;
-// import com.android.internal.telephony.SubscriptionController;
-// import com.android.internal.telephony.uicc.IccCardApplicationStatus.AppState;
-// import java.io.FileDescriptor;
-// import java.io.PrintWriter;
-// import java.nio.ByteBuffer;
-// import java.nio.ByteOrder;
-
 using Elastos::Droid::Content::IContext;
 using Elastos::Droid::Os::IHandler;
 using Elastos::Droid::Os::Handler;

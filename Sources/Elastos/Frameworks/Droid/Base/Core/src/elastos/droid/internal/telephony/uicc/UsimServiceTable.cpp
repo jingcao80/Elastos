@@ -20,8 +20,7 @@ UsimServiceTable::UsimServiceTable()
 ECode UsimServiceTable::constructor(
     /* [in] */ ArrayOf<Byte>* table)
 {
-    // ==================before translated======================
-    // super(table);
+    IccServiceTable::constructor(table);
     return NOERROR;
 }
 
@@ -30,9 +29,7 @@ ECode UsimServiceTable::IsAvailable(
     /* [out] */ Boolean* result)
 {
     VALIDATE_NOT_NULL(result);
-    // ==================before translated======================
-    // return super.isAvailable(service.ordinal());
-    assert(0);
+    IccServiceTable::IsAvailable(service);
     return NOERROR;
 }
 
@@ -43,9 +40,8 @@ String UsimServiceTable::GetTag()
 
 AutoPtr<ArrayOf<IInterface*> > UsimServiceTable::GetValues()
 {
-    // ==================before translated======================
-    // return UsimService.values();
-    assert(0);
+    assert(0 && "TODO");
+    // return UsimService::Values();
     return NULL;
 }
 

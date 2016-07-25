@@ -1,6 +1,25 @@
 #include "Elastos.CoreLibrary.Utility.h"
 #include "Elastos.Droid.Internal.h"
 #include "elastos/droid/internal/telephony/uicc/VoiceMailConstants.h"
+#include "elastos/droid/os/Environment.h"
+#include "elastos/droid/utility/Xml.h"
+#include "elastos/droid/internal/utility/XmlUtils.h"
+
+#include <elastos/core/CoreUtils.h>
+
+using Elastos::Droid::Os::Environment;
+using Elastos::Droid::Utility::Xml;
+using Elastos::Droid::Internal::Utility::XmlUtils;
+
+using Elastos::Core::CoreUtils;
+using Elastos::IO::IFile;
+using Elastos::IO::CFile;
+using Elastos::IO::IFileReader;
+using Elastos::IO::CFileReader;
+using Elastos::IO::IReader;
+using Elastos::IO::ICloseable;
+using Elastos::Utility::CHashMap;
+using Org::Xmlpull::V1::IXmlPullParser;
 
 namespace Elastos {
 namespace Droid {
@@ -20,9 +39,8 @@ const Int32 VoiceMailConstants::SIZE;
 
 VoiceMailConstants::VoiceMailConstants()
 {
-    // ==================before translated======================
-    // CarrierVmMap = new HashMap<String, String[]>();
-    // loadVoiceMail();
+    CHashMap::New((IHashMap**)&mCarrierVmMap);
+    LoadVoiceMail();
 }
 
 ECode VoiceMailConstants::ContainsCarrier(
@@ -30,10 +48,7 @@ ECode VoiceMailConstants::ContainsCarrier(
     /* [out] */ Boolean* result)
 {
     VALIDATE_NOT_NULL(result);
-    // ==================before translated======================
-    // return CarrierVmMap.containsKey(carrier);
-    assert(0);
-    return NOERROR;
+    return mCarrierVmMap->ContainsKey(CoreUtils::Convert(carrier), result);
 }
 
 ECode VoiceMailConstants::GetCarrierName(
@@ -41,10 +56,11 @@ ECode VoiceMailConstants::GetCarrierName(
     /* [out] */ String* result)
 {
     VALIDATE_NOT_NULL(result);
-    // ==================before translated======================
-    // String[] data = CarrierVmMap.get(carrier);
-    // return data[NAME];
-    assert(0);
+    AutoPtr<IInterface> p;
+    mCarrierVmMap->Get(CoreUtils::Convert(carrier), (IInterface**)&p);
+    assert(0 && "TODO");
+    AutoPtr<ArrayOf<String> > data; // = p;
+    *result = (*data)[NAME];
     return NOERROR;
 }
 
@@ -53,10 +69,11 @@ ECode VoiceMailConstants::GetVoiceMailNumber(
     /* [out] */ String* result)
 {
     VALIDATE_NOT_NULL(result);
-    // ==================before translated======================
-    // String[] data = CarrierVmMap.get(carrier);
-    // return data[NUMBER];
-    assert(0);
+    AutoPtr<IInterface> p;
+    mCarrierVmMap->Get(CoreUtils::Convert(carrier), (IInterface**)&p);
+    assert(0 && "TODO");
+    AutoPtr<ArrayOf<String> > data; // = p;
+    *result = (*data)[NUMBER];
     return NOERROR;
 }
 
@@ -65,63 +82,67 @@ ECode VoiceMailConstants::GetVoiceMailTag(
     /* [out] */ String* result)
 {
     VALIDATE_NOT_NULL(result);
-    // ==================before translated======================
-    // String[] data = CarrierVmMap.get(carrier);
-    // return data[TAG];
-    assert(0);
+    AutoPtr<IInterface> p;
+    mCarrierVmMap->Get(CoreUtils::Convert(carrier), (IInterface**)&p);
+    assert(0 && "TODO");
+    AutoPtr<ArrayOf<String> > data; // = p;
+    *result = (*data)[TAG];
     return NOERROR;
 }
 
 void VoiceMailConstants::LoadVoiceMail()
 {
-    // ==================before translated======================
-    // FileReader vmReader;
-    //
-    // final File vmFile = new File(Environment.getRootDirectory(),
-    //         PARTNER_VOICEMAIL_PATH);
-    //
+    AutoPtr<IFileReader> vmReader;
+
+    AutoPtr<IFile> vmFile;
+    CFile::New(Environment::GetRootDirectory(),
+            PARTNER_VOICEMAIL_PATH, (IFile**)&vmFile);
+
     // try {
-    //     vmReader = new FileReader(vmFile);
+        CFileReader::New(vmFile, (IFileReader**)&vmReader);
     // } catch (FileNotFoundException e) {
     //     Rlog.w(LOG_TAG, "Can't open " +
     //             Environment.getRootDirectory() + "/" + PARTNER_VOICEMAIL_PATH);
     //     return;
     // }
-    //
+
     // try {
-    //     XmlPullParser parser = Xml.newPullParser();
-    //     parser.setInput(vmReader);
-    //
-    //     XmlUtils.beginDocument(parser, "voicemail");
-    //
-    //     while (true) {
-    //         XmlUtils.nextElement(parser);
-    //
-    //         String name = parser.getName();
-    //         if (!"voicemail".equals(name)) {
-    //             break;
-    //         }
-    //
-    //         String[] data = new String[SIZE];
-    //         String numeric = parser.getAttributeValue(null, "numeric");
-    //         data[NAME]     = parser.getAttributeValue(null, "carrier");
-    //         data[NUMBER]   = parser.getAttributeValue(null, "vmnumber");
-    //         data[TAG]      = parser.getAttributeValue(null, "vmtag");
-    //
-    //         CarrierVmMap.put(numeric, data);
-    //     }
+        AutoPtr<IXmlPullParser> parser;
+        Xml::NewPullParser((IXmlPullParser**)&parser);
+        parser->SetInput(IReader::Probe(vmReader));
+
+        XmlUtils::BeginDocument(parser, String("voicemail"));
+
+        while (TRUE) {
+            XmlUtils::NextElement(parser);
+
+            String name;
+            parser->GetName(&name);
+            if (!String("voicemail").Equals(name)) {
+                break;
+            }
+
+            AutoPtr<ArrayOf<String> > data = ArrayOf<String>::Alloc(SIZE);
+            String numeric;
+            parser->GetAttributeValue(String(NULL), String("numeric"), &numeric);
+            parser->GetAttributeValue(String(NULL), String("carrier"), &((*data)[NAME]));
+            parser->GetAttributeValue(String(NULL), String("vmnumber"), &((*data)[NUMBER]));
+            parser->GetAttributeValue(String(NULL), String("vmtag"), &((*data)[TAG]));
+
+            assert(0 && "TODO");
+            // mCarrierVmMap->Put(CoreUtils::Convert(numeric), data);
+        }
     // } catch (XmlPullParserException e) {
     //     Rlog.w(LOG_TAG, "Exception in Voicemail parser " + e);
     // } catch (IOException e) {
     //     Rlog.w(LOG_TAG, "Exception in Voicemail parser " + e);
     // } finally {
-    //     try {
-    //         if (vmReader != null) {
-    //             vmReader.close();
-    //         }
-    //     } catch (IOException e) {}
+        // try {
+            if (vmReader != NULL) {
+                ICloseable::Probe(vmReader)->Close();
+            }
+        // } catch (IOException e) {}
     // }
-    assert(0);
 }
 
 } // namespace Uicc

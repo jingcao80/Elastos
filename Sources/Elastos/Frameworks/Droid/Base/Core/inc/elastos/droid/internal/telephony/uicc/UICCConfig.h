@@ -4,10 +4,6 @@
 #include "elastos/droid/ext/frameworkext.h"
 #include "elastos/core/Object.h"
 
-// import android.content.Context;
-// import android.content.SharedPreferences;
-// import android.telephony.Rlog;
-
 namespace Elastos {
 namespace Droid {
 namespace Internal {

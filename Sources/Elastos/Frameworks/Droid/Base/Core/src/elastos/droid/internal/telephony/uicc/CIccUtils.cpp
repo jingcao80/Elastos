@@ -67,7 +67,7 @@ ECode CIccUtils::HexCharToInt(
     /* [out] */ Int32* result)
 {
     VALIDATE_NOT_NULL(result);
-    *result = UiccIccUtils::HexCharToInt(c);
+    *result = UiccIccUtils::HexCharToInt32(c);
     return NOERROR;
 }
 
