@@ -1,5 +1,5 @@
-﻿var _api = require('./elastos.node');
-var elastos = _api.require("./Elastos.DevSamples.Node.CarRuntime.eco", "Elastos.DevSamples.Node.CarRuntime.CCarRuntime");
+//var _api = require('./elastos.node');
+//var elastos = _api.require("./Elastos.DevSamples.Node.CarRuntime.eco", "Elastos.DevSamples.Node.CarRuntime.CCarRuntime");
 
 var eventHandler = (function() {
     return {
