@@ -124,7 +124,7 @@ def process(path, logPath):
     summarize_log(logPath)
 
 ##########################################################
-scan_path = '/home/kesalin/Elastos5/Sources/'
+scan_path = '/home/luozhaohui/Elastos5/Sources/'
 log_filepath = 'car_objectimpl_checker.log'
 
 print "python  :", sys.argv[0]

@@ -157,7 +157,7 @@ def process_dir(path, logFile):
                 pass
             else:
                 # skip bak dirs
-                if filename != 'bak':
+                if filename != 'bak' and filename != 'jpk':
                     process_dir(filepath, logFile)
         elif(os.path.isfile(filepath)):
             process_file(filepath, logFile)
@@ -282,8 +282,8 @@ ignored_list = [
 ############################################################################################################
 
 #results: 101 errors, 59 warnings.
-scan_path = '/home/kesalin/Elastos5/Sources/'                                       # default sacn dir
-log_filepath = '/home/kesalin/Elastos5/DevDoc/DbgTools/elastos_cast_checker.log'    # default log file path
+scan_path = '/home/luozhaohui/Elastos5/Sources/'                                       # default sacn dir
+log_filepath = '/home/luozhaohui/Elastos5/DevDoc/DbgTools/elastos_cast_checker.log'    # default log file path
 
 print "python  :", sys.argv[0]
 argc = len(sys.argv)
