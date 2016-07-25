@@ -2791,9 +2791,10 @@ void PositionListener::UpdatePosition()
     mPositionY = (*mTempCoords)[1];
 }
 
-void PositionListener::OnScrollChanged()
+ECode PositionListener::OnScrollChanged()
 {
     mScrollHasChanged = TRUE;
+    return NOERROR;
 }
 
 //==============================================================================
@@ -5013,11 +5014,12 @@ Boolean Editor::AreSuggestionsShown()
     return mSuggestionsPopupWindow != NULL && mSuggestionsPopupWindow->IsShowing();
 }
 
-void Editor::OnScrollChanged()
+ECode Editor::OnScrollChanged()
 {
     if (mPositionListener != NULL) {
         mPositionListener->OnScrollChanged();
     }
+    return NOERROR;
 }
 
 Boolean Editor::ShouldBlink()

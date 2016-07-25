@@ -6,6 +6,7 @@
 #include <elastos/droid/content/BroadcastReceiver.h>
 #include <elastos/droid/os/Handler.h>
 #include <elastos/core/Object.h>
+#include "elastos/droid/systemui/keyguard/KeyguardUpdateMonitorCallback.h"
 
 using Elastos::Droid::Content::BroadcastReceiver;
 using Elastos::Droid::Content::IContext;
@@ -13,6 +14,9 @@ using Elastos::Droid::Content::IIntent;
 using Elastos::Droid::Internal::App::IIBatteryStats;
 using Elastos::Droid::Os::Handler;
 using Elastos::Droid::SystemUI::StatusBar::Phone::IKeyguardIndicationTextView;
+using Elastos::Droid::SystemUI::Keyguard::KeyguardUpdateMonitorCallback;
+using Elastos::Droid::SystemUI::Keyguard::IKeyguardUpdateMonitorCallback;
+using Elastos::Droid::SystemUI::Keyguard::IKeyguardUpdateMonitorBatteryStatus;
 using Elastos::Core::Object;
 
 namespace Elastos {
@@ -28,6 +32,24 @@ class KeyguardIndicationController
     , public IKeyguardIndicationController
 {
 private:
+
+    class UpdateMonitorCallback
+        : public KeyguardUpdateMonitorCallback
+    {
+    public:
+        UpdateMonitorCallback(
+            /* [in] */ KeyguardIndicationController* host)
+            : mHost(host)
+        {}
+
+        // @Override
+        CARAPI OnRefreshBatteryInfo(
+            /* [in] */ IKeyguardUpdateMonitorBatteryStatus* status);
+
+    private:
+        KeyguardIndicationController* mHost;
+    };
+
     class ControllerBroadcastReceiver
         : public BroadcastReceiver
     {
@@ -66,7 +88,9 @@ private:
 public:
     CAR_INTERFACE_DECL()
 
-    KeyguardIndicationController(
+    KeyguardIndicationController();
+
+    CARAPI constructor(
         /* [in] */ IContext* context,
         /* [in] */ IKeyguardIndicationTextView* textView);
 
@@ -124,16 +148,7 @@ private:
     Boolean mPowerPluggedIn;
     Boolean mPowerCharged;
 
-    // KeyguardUpdateMonitorCallback mUpdateMonitor = new KeyguardUpdateMonitorCallback() {
-    //     @Override
-    //     public void onRefreshBatteryInfo(KeyguardUpdateMonitor.BatteryStatus status) {
-    //         mPowerPluggedIn = status.status == BatteryManager.BATTERY_STATUS_CHARGING
-    //                 || status.status == BatteryManager.BATTERY_STATUS_FULL;
-    //         mPowerCharged = status.isCharged();
-    //         updateIndication();
-    //     }
-    // };
-
+    AutoPtr<IKeyguardUpdateMonitorCallback> mUpdateMonitor;
     AutoPtr<IBroadcastReceiver> mReceiver;
 
     AutoPtr<IHandler> mHandler;

@@ -1653,7 +1653,7 @@ void CNotificationStackScrollLayout::CustomScrollTo(
     UpdateChildren();
 }
 
-void CNotificationStackScrollLayout::OnOverScrolled(
+ECode CNotificationStackScrollLayout::OnOverScrolled(
     /* [in] */ Int32 scrollX,
     /* [in] */ Int32 scrollY,
     /* [in] */ Boolean clampedX,
@@ -1688,6 +1688,7 @@ void CNotificationStackScrollLayout::OnOverScrolled(
         CustomScrollTo(scrollY);
         ScrollTo(scrollX, mScrollY);
     }
+    return NOERROR;
 }
 
 void CNotificationStackScrollLayout::SpringBack()

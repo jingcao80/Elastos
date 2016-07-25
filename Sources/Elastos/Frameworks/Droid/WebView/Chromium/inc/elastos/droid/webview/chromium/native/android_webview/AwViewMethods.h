@@ -125,7 +125,7 @@ public:
     /**
      * @see android.view.View#onSizeChanged
      */
-    virtual CARAPI_(void) OnSizeChanged(
+    virtual CARAPI OnSizeChanged(
         /* [in] */ Int32 w,
         /* [in] */ Int32 h,
         /* [in] */ Int32 ow,
@@ -134,14 +134,14 @@ public:
     /**
      * @see android.view.View#onVisibilityChanged
      */
-    virtual CARAPI_(void) OnVisibilityChanged(
+    virtual CARAPI OnVisibilityChanged(
         /* [in] */ IView* changedView,
         /* [in] */ Int32 visibility) = 0;
 
     /**
      * @see android.view.View#onWindowVisibilityChanged
      */
-    virtual CARAPI_(void) OnWindowVisibilityChanged(
+    virtual CARAPI OnWindowVisibilityChanged(
         /* [in] */ Int32 visibility) = 0;
 };
 

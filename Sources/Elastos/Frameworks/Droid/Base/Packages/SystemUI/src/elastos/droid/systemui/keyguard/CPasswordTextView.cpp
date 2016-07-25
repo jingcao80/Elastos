@@ -533,7 +533,7 @@ ECode CPasswordTextView::constructor(
     return NOERROR;
 }
 
-ECode CPasswordTextView::OnDraw(
+void CPasswordTextView::OnDraw(
     /* [in] */ ICanvas* canvas);
 {
     Float totalDrawingWidth;
@@ -571,7 +571,6 @@ ECode CPasswordTextView::OnDraw(
                 charLength, &charWidth);
         currentDrawPosition += charWidth;
     }
-    return NOERROR;
 }
 
 ECode CPasswordTextView::HasOverlappingRendering(

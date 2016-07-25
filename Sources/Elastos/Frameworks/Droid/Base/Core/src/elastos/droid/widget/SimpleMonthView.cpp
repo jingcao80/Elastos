@@ -545,7 +545,7 @@ ECode SimpleMonthView::OnMeasure(
     return NOERROR;
 }
 
-void SimpleMonthView::OnSizeChanged(
+ECode SimpleMonthView::OnSizeChanged(
     /* [in] */ Int32 w,
     /* [in] */ Int32 h,
     /* [in] */ Int32 oldw,
@@ -555,6 +555,7 @@ void SimpleMonthView::OnSizeChanged(
 
     // Invalidate cached accessibility information.
     mTouchHelper->InvalidateRoot();
+    return NOERROR;
 }
 
 ECode SimpleMonthView::InitView()

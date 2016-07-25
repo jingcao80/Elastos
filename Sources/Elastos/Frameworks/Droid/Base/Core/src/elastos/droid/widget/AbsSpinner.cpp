@@ -461,7 +461,7 @@ AutoPtr<IParcelable> AbsSpinner::OnSaveInstanceState()
     return IParcelable::Probe(ss);
 }
 
-void AbsSpinner::OnRestoreInstanceState(
+ECode AbsSpinner::OnRestoreInstanceState(
     /* [in] */ IParcelable* state)
 {
     AutoPtr<CAbsSpinnerSavedState> ss = (CAbsSpinnerSavedState*)IAbsSpinnerSavedState::Probe(state);
@@ -478,6 +478,7 @@ void AbsSpinner::OnRestoreInstanceState(
         mSyncMode = AdapterView::SYNC_SELECTED_POSITION;
         RequestLayout();
     }
+    return NOERROR;
 }
 
 AbsSpinner::RecycleBin::RecycleBin(

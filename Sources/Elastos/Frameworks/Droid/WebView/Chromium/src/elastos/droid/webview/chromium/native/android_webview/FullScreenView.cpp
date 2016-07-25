@@ -99,13 +99,14 @@ Boolean FullScreenView::InternalAccessAdapter::Super_awakenScrollBars(
 }
 
 //@Override
-void FullScreenView::InternalAccessAdapter::OnScrollChanged(
+ECode FullScreenView::InternalAccessAdapter::OnScrollChanged(
     /* [in] */ Int32 lPix,
     /* [in] */ Int32 tPix,
     /* [in] */ Int32 oldlPix,
     /* [in] */ Int32 oldtPix)
 {
     // Intentional no-op.
+    return NOERROR;
 }
 
 //@Override
@@ -291,7 +292,7 @@ void FullScreenView::OnFocusChanged(
 }
 
 //@Override
-void FullScreenView::OnSizeChanged(
+ECode FullScreenView::OnSizeChanged(
     /* [in] */ Int32 w,
     /* [in] */ Int32 h,
     /* [in] */ Int32 ow,
@@ -299,6 +300,7 @@ void FullScreenView::OnSizeChanged(
 {
     AbsoluteLayout::OnSizeChanged(w, h, ow, oh);
     mAwViewMethods->OnSizeChanged(w, h, ow, oh);
+    return NOERROR;
 }
 
 //@Override
@@ -312,11 +314,12 @@ ECode FullScreenView::OnVisibilityChanged(
 }
 
 //@Override
-void FullScreenView::OnWindowVisibilityChanged(
+ECode FullScreenView::OnWindowVisibilityChanged(
     /* [in] */ Int32 visibility)
 {
     AbsoluteLayout::OnWindowVisibilityChanged(visibility);
     mAwViewMethods->OnWindowVisibilityChanged(visibility);
+    return NOERROR;
 }
 
 } // namespace AndroidWebview

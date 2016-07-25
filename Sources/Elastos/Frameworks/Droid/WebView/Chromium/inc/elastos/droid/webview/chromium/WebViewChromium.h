@@ -1980,7 +1980,7 @@ private:
             /* [in] */ Boolean arg1);
 
         // @Override
-        CARAPI_(void) OnScrollChanged(
+        CARAPI OnScrollChanged(
             /* [in] */ Int32 l,
             /* [in] */ Int32 t,
             /* [in] */ Int32 oldl,
@@ -2476,7 +2476,7 @@ public:
         /* [in] */ Int32 visibility);
 
     // @Override
-    CARAPI OnDraw(
+    CARAPI_(void) OnDraw(
         /* [in] */ ICanvas* canvas);
 
     // @Override

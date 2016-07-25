@@ -154,7 +154,7 @@ QSTileHost::QSTileHost(
     mSecurity = security;
 
     AutoPtr<IHandlerThread> ht;
-    CHandlerThread::New(String("QSTileHost.class.getSimpleName()"), (IHandlerThread**)&ht);
+    CHandlerThread::New(String("QSTileHost"), (IHandlerThread**)&ht);
     IThread::Probe(ht)->Start();
     ht->GetLooper((ILooper**)&mLooper);
 

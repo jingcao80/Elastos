@@ -80,14 +80,14 @@ ECode TabWidget::constructor(
     return NOERROR;
 }
 
-void TabWidget::OnSizeChanged(
+ECode TabWidget::OnSizeChanged(
     /* [in] */ Int32 w,
     /* [in] */ Int32 h,
     /* [in] */ Int32 oldw,
     /* [in] */ Int32 oldh)
 {
     mStripMoved = TRUE;
-    LinearLayout::OnSizeChanged(w, h, oldw, oldh);
+    return LinearLayout::OnSizeChanged(w, h, oldw, oldh);
 }
 
 Int32 TabWidget::GetChildDrawingOrder(

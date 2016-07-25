@@ -167,8 +167,9 @@ ECode PseudoGridView::OnMeasure(
 {
     if (MeasureSpec::GetMode(widthMeasureSpec) == MeasureSpec::UNSPECIFIED) {
         // throw new UnsupportedOperationException("Needs a maximum width");
-        assert(0 && "TODO: Needs a maximum width");
+        return E_UNSUPPORTED_OPERATION_EXCEPTION;
     }
+
     Int32 width = MeasureSpec::GetSize(widthMeasureSpec);
 
     Int32 childWidth = (width - (mNumColumns - 1) * mHorizontalSpacing) / mNumColumns;

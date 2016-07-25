@@ -300,7 +300,7 @@ Int32 CDessertCaseView::Random_color()
 }
 
 // synchronized
-void CDessertCaseView::OnSizeChanged (
+ECode CDessertCaseView::OnSizeChanged (
     /* [in] */ Int32 w,
     /* [in] */ Int32 h,
     /* [in] */ Int32 oldw,
@@ -308,7 +308,7 @@ void CDessertCaseView::OnSizeChanged (
 {
     AutoLock lock(this);
     FrameLayout::OnSizeChanged(w, h, oldw, oldh);
-    if (mWidth == w && mHeight == h) return;
+    if (mWidth == w && mHeight == h) return NOERROR;
 
     Boolean wasStarted = mStarted;
     if (wasStarted) {
@@ -345,6 +345,7 @@ void CDessertCaseView::OnSizeChanged (
     if (wasStarted) {
         Start();
     }
+    return NOERROR;
 }
 
 ECode CDessertCaseView::FillFreeList()

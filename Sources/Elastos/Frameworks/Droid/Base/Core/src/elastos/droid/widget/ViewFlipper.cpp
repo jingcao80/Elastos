@@ -146,12 +146,13 @@ ECode ViewFlipper::OnDetachedFromWindow()
     return NOERROR;
 }
 
-void ViewFlipper::OnWindowVisibilityChanged(
+ECode ViewFlipper::OnWindowVisibilityChanged(
     /* [in] */ Int32 visibility)
 {
     ViewAnimator::OnWindowVisibilityChanged(visibility);
     mVisible = visibility == IView::VISIBLE;
     UpdateRunning(FALSE);
+    return NOERROR;
 }
 
 ECode ViewFlipper::SetFlipInterval(

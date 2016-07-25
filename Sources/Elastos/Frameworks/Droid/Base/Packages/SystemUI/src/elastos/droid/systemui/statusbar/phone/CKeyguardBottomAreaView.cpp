@@ -166,6 +166,7 @@ ECode CKeyguardBottomAreaView::DevicePolicyReceiver::OnReceive(
 }
 
 CAR_INTERFACE_IMPL(CKeyguardBottomAreaView::UnlockMethodChangedListener, Object, IOnUnlockMethodChangedListener)
+
 CKeyguardBottomAreaView::UnlockMethodChangedListener::UnlockMethodChangedListener(
     /* [in] */ CKeyguardBottomAreaView* host)
     : mHost(host)
@@ -178,6 +179,7 @@ ECode CKeyguardBottomAreaView::UnlockMethodChangedListener::OnMethodSecureChange
 }
 
 CAR_INTERFACE_IMPL(CKeyguardBottomAreaView::OnClickListener, Object, IViewOnClickListener)
+
 CKeyguardBottomAreaView::OnClickListener::OnClickListener(
     /* [in] */ CKeyguardBottomAreaView* host)
     : mHost(host)
@@ -190,6 +192,7 @@ ECode CKeyguardBottomAreaView::OnClickListener::OnClick(
 }
 
 CAR_INTERFACE_IMPL(CKeyguardBottomAreaView::OnLongClickListener, Object, IViewOnLongClickListener)
+
 CKeyguardBottomAreaView::OnLongClickListener::OnLongClickListener(
     /* [in] */ CKeyguardBottomAreaView* host)
     : mHost(host)

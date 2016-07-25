@@ -615,19 +615,19 @@ public:
             /* [in] */ IRect* previouslyFocusedRect);
 
         //@Override
-        CARAPI_(void) OnSizeChanged(
+        CARAPI OnSizeChanged(
             /* [in] */ Int32 w,
             /* [in] */ Int32 h,
             /* [in] */ Int32 ow,
             /* [in] */ Int32 oh);
 
         //@Override
-        CARAPI_(void) OnVisibilityChanged(
+        CARAPI OnVisibilityChanged(
             /* [in] */ IView* changedView,
             /* [in] */ Int32 visibility);
 
         //@Override
-        CARAPI_(void) OnWindowVisibilityChanged(
+        CARAPI OnWindowVisibilityChanged(
             /* [in] */ Int32 visibility);
 
     private:
@@ -1387,7 +1387,7 @@ public:
     /**
      * @see android.view.View#onSizeChanged()
      */
-    virtual CARAPI_(void) OnSizeChanged(
+    virtual CARAPI OnSizeChanged(
         /* [in] */ Int32 w,
         /* [in] */ Int32 h,
         /* [in] */ Int32 ow,
@@ -1396,14 +1396,14 @@ public:
     /**
      * @see android.view.View#onVisibilityChanged()
      */
-    virtual CARAPI_(void) OnVisibilityChanged(
+    virtual CARAPI OnVisibilityChanged(
         /* [in] */ IView* changedView,
         /* [in] */ Int32 visibility);
 
     /**
      * @see android.view.View#onWindowVisibilityChanged()
      */
-    virtual CARAPI_(void) OnWindowVisibilityChanged(
+    virtual CARAPI OnWindowVisibilityChanged(
         /* [in] */ Int32 visibility);
 
     /**

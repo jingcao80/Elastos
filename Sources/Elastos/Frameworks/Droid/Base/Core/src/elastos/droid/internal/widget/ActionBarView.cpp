@@ -1529,12 +1529,12 @@ ECode ActionBarView::OnSaveInstanceState(
     return NOERROR;
 }
 
-void ActionBarView::OnRestoreInstanceState(
+ECode ActionBarView::OnRestoreInstanceState(
     /* [in] */ IParcelable* p)
 {
     AutoPtr<CActionBarViewSavedState> ss =
             (CActionBarViewSavedState*)IActionBarViewSavedState::Probe(p);
-    if (!ss) return;
+    if (!ss) return NOERROR;
 
     AutoPtr<IParcelable> superState;
     ss->GetSuperState((IParcelable**)&superState);
@@ -1552,6 +1552,7 @@ void ActionBarView::OnRestoreInstanceState(
     if (ss->mIsOverflowOpen) {
         PostShowOverflowMenu();
     }
+    return NOERROR;
 }
 
 ECode ActionBarView::SetNavigationIcon(

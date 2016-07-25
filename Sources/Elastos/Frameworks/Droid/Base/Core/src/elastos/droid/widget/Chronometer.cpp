@@ -195,12 +195,13 @@ ECode Chronometer::OnDetachedFromWindow()
     return NOERROR;
 }
 
-void Chronometer::OnWindowVisibilityChanged(
+ECode Chronometer::OnWindowVisibilityChanged(
     /* [in] */ Int32 visibility)
 {
     TextView::OnWindowVisibilityChanged(visibility);
     mVisible = visibility == IView::VISIBLE;
     UpdateRunning();
+    return NOERROR;
 }
 
 //synchronized

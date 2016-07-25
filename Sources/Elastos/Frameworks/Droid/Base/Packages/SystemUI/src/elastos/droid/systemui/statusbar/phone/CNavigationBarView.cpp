@@ -693,7 +693,7 @@ ECode CNavigationBarView::OnLayout(
     return NOERROR;
 }
 
-void CNavigationBarView::OnSizeChanged(
+ECode CNavigationBarView::OnSizeChanged(
     /* [in] */ Int32 w,
     /* [in] */ Int32 h,
     /* [in] */ Int32 oldw,
@@ -711,6 +711,7 @@ void CNavigationBarView::OnSizeChanged(
 
     PostCheckForInvalidLayout(String("sizeChanged"));
     LinearLayout::OnSizeChanged(w, h, oldw, oldh);
+    return NOERROR;
 }
 
 void CNavigationBarView::NotifyVerticalChangedListener(

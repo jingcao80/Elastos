@@ -220,7 +220,7 @@ public:
         /**
          * @see View#onScrollChanged(int, int, int, int)
          */
-        virtual CARAPI_(void) OnScrollChanged(
+        virtual CARAPI OnScrollChanged(
             /* [in] */ Int32 lPix,
             /* [in] */ Int32 tPix,
             /* [in] */ Int32 oldlPix,
@@ -1136,7 +1136,7 @@ public:
     /**
      * @see View#onVisibilityChanged(android.view.View, int)
      */
-    CARAPI_(void) OnVisibilityChanged(
+    CARAPI OnVisibilityChanged(
         /* [in] */ IView* changedView,
         /* [in] */ Int32 visibility);
 
@@ -1168,7 +1168,7 @@ public:
      * @see View#onSizeChanged(int, int, int, int)
      */
     //@SuppressWarnings("javadoc")
-    CARAPI_(void) OnSizeChanged(
+    CARAPI OnSizeChanged(
         /* [in] */ Int32 wPix,
         /* [in] */ Int32 hPix,
         /* [in] */ Int32 owPix,

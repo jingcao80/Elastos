@@ -111,17 +111,17 @@ Boolean ContentView::DrawChild(
 
 // Needed by ContentViewCore.InternalAccessDelegate
 //@Override
-void ContentView::OnScrollChanged(
+ECode ContentView::OnScrollChanged(
     /* [in] */ Int32 l,
     /* [in] */ Int32 t,
     /* [in] */ Int32 oldl,
     /* [in] */ Int32 oldt)
 {
-    FrameLayout::OnScrollChanged(l, t, oldl, oldt);
+    return FrameLayout::OnScrollChanged(l, t, oldl, oldt);
 }
 
 //@Override
-void ContentView::OnSizeChanged(
+ECode ContentView::OnSizeChanged(
     /* [in] */ Int32 w,
     /* [in] */ Int32 h,
     /* [in] */ Int32 ow,
@@ -131,6 +131,7 @@ void ContentView::OnSizeChanged(
     FrameLayout::OnSizeChanged(w, h, ow, oh);
     mContentViewCore->OnSizeChanged(w, h, ow, oh);
     TraceEvent::End();
+    return NOERROR;
 }
 
 //@Override

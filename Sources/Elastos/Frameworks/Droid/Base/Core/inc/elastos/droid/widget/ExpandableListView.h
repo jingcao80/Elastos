@@ -525,7 +525,7 @@ public:
 
     CARAPI_(AutoPtr<IParcelable>) OnSaveInstanceState();
 
-    CARAPI_(void) OnRestoreInstanceState(
+    CARAPI OnRestoreInstanceState(
         /* [in] */ IParcelable* state);
 
     CARAPI OnInitializeAccessibilityEvent(

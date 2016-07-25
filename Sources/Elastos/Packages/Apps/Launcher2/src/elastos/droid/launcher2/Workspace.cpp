@@ -1533,10 +1533,11 @@ ECode Workspace::IsFinishedSwitchingState(
     return NOERROR;
 }
 
-void Workspace::OnWindowVisibilityChanged(
+ECode Workspace::OnWindowVisibilityChanged(
     /* [in] */ Int32 visibility)
 {
     mLauncher->OnWindowVisibilityChanged(visibility);
+    return NOERROR;
 }
 
 ECode Workspace::DispatchUnhandledMove(
@@ -5258,11 +5259,12 @@ ECode Workspace::IsDropEnabled(
     return NOERROR;
 }
 
-void Workspace::OnRestoreInstanceState(
+ECode Workspace::OnRestoreInstanceState(
     /* [in] */ IParcelable* state)
 {
     SmoothPagedView::OnRestoreInstanceState(state);
     Launcher::SetScreen(mCurrentPage);
+    return NOERROR;
 }
 
 ECode Workspace::DispatchRestoreInstanceState(

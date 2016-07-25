@@ -87,7 +87,7 @@ public:
 
     // Needed by ContentViewCore.InternalAccessDelegate
     //@Override
-    CARAPI_(void) OnScrollChanged(
+    CARAPI OnScrollChanged(
         /* [in] */ Int32 l,
         /* [in] */ Int32 t,
         /* [in] */ Int32 oldl,
@@ -226,7 +226,7 @@ protected:
         /* [in] */ ContentViewCore* cvc);
 
     //@Override
-    CARAPI_(void) OnSizeChanged(
+    CARAPI OnSizeChanged(
         /* [in] */ Int32 w,
         /* [in] */ Int32 h,
         /* [in] */ Int32 ow,

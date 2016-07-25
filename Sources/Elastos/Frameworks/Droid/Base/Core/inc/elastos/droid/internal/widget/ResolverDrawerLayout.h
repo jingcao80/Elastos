@@ -218,7 +218,7 @@ protected:
     CARAPI OnSaveInstanceState(
         /* [out] */ IParcelable** result);
 
-    CARAPI_(void) OnRestoreInstanceState(
+    CARAPI OnRestoreInstanceState(
         /* [in] */ IParcelable* state);
 
 private:

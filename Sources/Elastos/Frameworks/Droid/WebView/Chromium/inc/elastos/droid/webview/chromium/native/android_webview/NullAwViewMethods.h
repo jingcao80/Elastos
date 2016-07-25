@@ -98,19 +98,19 @@ public:
         /* [in] */ IRect* previouslyFocusedRect);
 
     //@Override
-    CARAPI_(void) OnSizeChanged(
+    CARAPI OnSizeChanged(
         /* [in] */ Int32 w,
         /* [in] */ Int32 h,
         /* [in] */ Int32 ow,
         /* [in] */ Int32 oh);
 
     //@Override
-    CARAPI_(void) OnVisibilityChanged(
+    CARAPI OnVisibilityChanged(
         /* [in] */ IView* changedView,
         /* [in] */ Int32 visibility);
 
     //@Override
-    CARAPI_(void) OnWindowVisibilityChanged(
+    CARAPI OnWindowVisibilityChanged(
         /* [in] */ Int32 visibility);
 
 private:

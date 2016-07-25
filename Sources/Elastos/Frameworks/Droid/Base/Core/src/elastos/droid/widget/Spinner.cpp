@@ -1147,7 +1147,7 @@ AutoPtr<IParcelable> Spinner::OnSaveInstanceState()
     return ss;
 }
 
-void Spinner::OnRestoreInstanceState(
+ECode Spinner::OnRestoreInstanceState(
     /* [in] */ IParcelable* state)
 {
     AutoPtr<SpinnerSavedState> ss = (SpinnerSavedState*) state;
@@ -1164,6 +1164,7 @@ void Spinner::OnRestoreInstanceState(
             vto->AddOnGlobalLayoutListener(listener);
         }
     }
+    return NOERROR;
 }
 
 ECode Spinner::OnDetachedFromWindow()

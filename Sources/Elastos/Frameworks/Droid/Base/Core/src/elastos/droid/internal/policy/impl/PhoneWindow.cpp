@@ -2488,7 +2488,7 @@ AutoPtr<IParcelable> PhoneWindow::PanelFeatureState::OnSaveInstanceState()
     return savedState;
 }
 
-void PhoneWindow::PanelFeatureState::OnRestoreInstanceState(
+ECode PhoneWindow::PanelFeatureState::OnRestoreInstanceState(
     /* [in] */ IParcelable* state)
 {
     AutoPtr<SavedState> savedState = (SavedState*)state;
@@ -2508,6 +2508,7 @@ void PhoneWindow::PanelFeatureState::OnRestoreInstanceState(
     mCreatedPanelView = NULL;
     mShownPanelView = NULL;
     mDecorView = NULL;
+    return NOERROR;
 }
 
 void PhoneWindow::PanelFeatureState::ApplyFrozenState()

@@ -1106,7 +1106,7 @@ protected:
         /* [in] */ Float y,
         /* [out] */ Boolean* result);
 
-    CARAPI_(void) OnWindowVisibilityChanged(
+    CARAPI OnWindowVisibilityChanged(
         /* [in] */ Int32 visibility);
 
     CARAPI ReinflateWidgetsIfNecessary();
@@ -1174,7 +1174,7 @@ protected:
         /* [in] */ IMotionEvent* ev);
 
     //@Override
-    CARAPI_(void) OnRestoreInstanceState(
+    CARAPI OnRestoreInstanceState(
         /* [in] */ IParcelable* state);
 
     //@Override

@@ -11,9 +11,6 @@
 #include <elastos/utility/etl/List.h>
 #include <elastos/utility/etl/HashMap.h>
 
-using Elastos::Utility::Etl::List;
-using Elastos::Utility::Etl::HashMap;
-using Elastos::Core::ICharSequence;
 using Elastos::Droid::Animation::IStateListAnimator;
 using Elastos::Droid::Content::IClipData;
 using Elastos::Droid::Content::IContext;
@@ -58,9 +55,12 @@ using Elastos::Droid::Utility::IProperty;
 using Elastos::Droid::Utility::ISparseArray;
 using Elastos::Droid::Utility::FloatProperty;
 using Elastos::Droid::Content::Res::IColorStateList;
+using Elastos::Core::ICharSequence;
 using Elastos::Utility::IList;
 using Elastos::Utility::IMap;
 using Elastos::Utility::IArrayList;
+using Elastos::Utility::Etl::List;
+using Elastos::Utility::Etl::HashMap;
 
 namespace Elastos {
 namespace Droid {
@@ -4934,7 +4934,7 @@ protected:
     virtual CARAPI_(void) OnDisplayHint(
         /* [in] */ Int32 hint);
 
-    virtual CARAPI_(void) OnWindowVisibilityChanged(
+    virtual CARAPI OnWindowVisibilityChanged(
         /* [in] */ Int32 visibility);
 
     virtual CARAPI OnConfigurationChanged(
@@ -4942,10 +4942,10 @@ protected:
 
     virtual CARAPI_(AutoPtr<IContextMenuInfo>) GetContextMenuInfo();
 
-    virtual CARAPI_(void) OnCreateContextMenu(
+    virtual CARAPI OnCreateContextMenu(
         /* [in] */ IContextMenu* menu);
 
-    virtual CARAPI_(void) OnScrollChanged(
+    virtual CARAPI OnScrollChanged(
         /* [in] */ Int32 l,
         /* [in] */ Int32 t,
         /* [in] */ Int32 oldl,
@@ -4955,7 +4955,7 @@ protected:
         /* [in] */ Int32 flags,
         /* [in] */ Int32 mask);
 
-    virtual CARAPI_(void) OnSizeChanged(
+    virtual CARAPI OnSizeChanged(
         /* [in] */ Int32 w,
         /* [in] */ Int32 h,
         /* [in] */ Int32 oldw,
@@ -5035,7 +5035,7 @@ protected:
     virtual CARAPI DispatchRestoreInstanceState(
         /* [in] */ ISparseArray* container);
 
-    virtual CARAPI_(void) OnRestoreInstanceState(
+    virtual CARAPI OnRestoreInstanceState(
         /* [in] */ IParcelable* state);
 
     virtual CARAPI_(Boolean) IsPaddingOffsetRequired();
@@ -5103,9 +5103,9 @@ protected:
 
     virtual CARAPI_(Int32) GetSuggestedMinimumWidth();
 
-    virtual CARAPI_(void) OnAnimationStart();
+    virtual CARAPI OnAnimationStart();
 
-    virtual CARAPI_(void) OnAnimationEnd();
+    virtual CARAPI OnAnimationEnd();
 
     virtual CARAPI_(Boolean) OnSetAlpha(
         /* [in] */ Int32 alpha);
@@ -5121,7 +5121,7 @@ protected:
         /* [in] */ Int32 maxOverScrollY,
         /* [in] */ Boolean isTouchEvent);
 
-    virtual CARAPI_(void) OnOverScrolled(
+    virtual CARAPI OnOverScrolled(
         /* [in] */ Int32 scrollX,
         /* [in] */ Int32 scrollY,
         /* [in] */ Boolean clampedX,

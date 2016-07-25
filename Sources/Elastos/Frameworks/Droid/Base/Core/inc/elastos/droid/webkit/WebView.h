@@ -1779,13 +1779,13 @@ protected:
         /* [in] */ Int32 r,
         /* [in] */ Int32 b);
 
-    CARAPI_(void) OnOverScrolled(
+    CARAPI OnOverScrolled(
         /* [in] */ Int32 scrollX,
         /* [in] */ Int32 scrollY,
         /* [in] */ Boolean clampedX,
         /* [in] */ Boolean clampedY);
 
-    CARAPI_(void) OnWindowVisibilityChanged(
+    CARAPI OnWindowVisibilityChanged(
         /* [in] */ Int32 visibility);
 
     CARAPI_(void) OnDraw(
@@ -1810,13 +1810,13 @@ protected:
         /* [in] */ Int32 right,
         /* [in] */ Int32 bottom);
 
-    CARAPI_(void) OnSizeChanged(
+    CARAPI OnSizeChanged(
         /* [in] */ Int32 w,
         /* [in] */ Int32 h,
         /* [in] */ Int32 ow,
         /* [in] */ Int32 oh);
 
-    CARAPI_(void) OnScrollChanged(
+    CARAPI OnScrollChanged(
         /* [in] */ Int32 l,
         /* [in] */ Int32 t,
         /* [in] */ Int32 oldl,

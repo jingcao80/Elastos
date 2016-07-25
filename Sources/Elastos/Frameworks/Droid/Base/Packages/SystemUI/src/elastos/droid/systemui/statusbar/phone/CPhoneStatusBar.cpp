@@ -202,7 +202,6 @@ ECode CPhoneStatusBarUserSetupObserver::OnChange(
             0 /*default */,
             mHost->mCurrentUserId, &v);
     Boolean userSetup = 0 != v;
-    Logger::I(TAG, " TODO >> CPhoneStatusBarUserSetupObserver::OnChange: %d", userSetup);
     userSetup = TRUE;
     if (CPhoneStatusBar::MULTIUSER_DEBUG) {
         Logger::D(TAG, "User setup changed: selfChange=%d userSetup=%d mUserSetup=%d",
@@ -1843,8 +1842,8 @@ AutoPtr<IPhoneStatusBarView> CPhoneStatusBar::MakeStatusBarView()
 
     view = NULL;
     statusBarWindow->FindViewById(R::id::keyguard_indication_text, (IView**)&view);
-    mKeyguardIndicationController = new KeyguardIndicationController(mContext,
-            IKeyguardIndicationTextView::Probe(view));
+    mKeyguardIndicationController = new KeyguardIndicationController();
+    mKeyguardIndicationController->constructor(mContext, IKeyguardIndicationTextView::Probe(view));
     mKeyguardBottomArea->SetKeyguardIndicationController(mKeyguardIndicationController);
 
     res->GetBoolean(R::bool_::enable_ticker, &mTickerEnabled);
@@ -1975,7 +1974,8 @@ AutoPtr<IPhoneStatusBarView> CPhoneStatusBar::MakeStatusBarView()
         qsh->GetTiles((ICollection**)&c);
         mQSPanel->SetTiles(c);
 
-        mBrightnessMirrorController = new BrightnessMirrorController(mStatusBarWindow);
+        mBrightnessMirrorController = new BrightnessMirrorController();
+        mBrightnessMirrorController->constructor(mStatusBarWindow);
         mQSPanel->SetBrightnessMirror(mBrightnessMirrorController);
         mHeader->SetQSPanel(mQSPanel);
 

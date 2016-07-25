@@ -123,7 +123,7 @@ protected:
         /* [in] */ ICanvas* canvas);
 
 private:
-    CARAPI_(void) OnSizeChanged();
+    CARAPI OnSizeChanged();
 
     CARAPI_(Boolean) CalculatePage(
         /* [in] */ Int32 pageNo);

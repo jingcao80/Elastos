@@ -470,7 +470,7 @@ public:
     CARAPI_(AutoPtr<IParcelable>) OnSaveInstanceState();
 
     // @Override
-    CARAPI_(void) OnRestoreInstanceState(
+    CARAPI OnRestoreInstanceState(
         /* [in] */ IParcelable* state);
 
     // @Override
@@ -721,7 +721,7 @@ protected:
         /* [in] */ Int32 heightMeasureSpec);
 
     // @Override
-    CARAPI_(void) OnSizeChanged(
+    CARAPI OnSizeChanged(
         /* [in] */ Int32 w,
         /* [in] */ Int32 h,
         /* [in] */ Int32 oldw,

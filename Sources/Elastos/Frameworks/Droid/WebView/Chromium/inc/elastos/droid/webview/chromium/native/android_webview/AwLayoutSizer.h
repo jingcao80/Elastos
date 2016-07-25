@@ -94,7 +94,7 @@ public:
      * This should be called by the Android view system after onMeasure if the view's size has
      * changed.
      */
-    CARAPI_(void) OnSizeChanged(
+    CARAPI OnSizeChanged(
         /* [in] */ Int32 w,
         /* [in] */ Int32 h,
         /* [in] */ Int32 ow,

@@ -8,6 +8,7 @@
 #include <elastos/droid/R.h>
 #include <elastos/droid/utility/MathUtils.h>
 #include <elastos/core/Math.h>
+#include <elastos/utility/logging/Logger.h>
 
 using Elastos::Droid::App::IPendingIntent;
 using Elastos::Droid::Content::CIntent;
@@ -34,6 +35,7 @@ using Elastos::Core::CString;
 using Elastos::Core::IBoolean;
 using Elastos::Core::ICharSequence;
 using Elastos::Core::IInteger32;
+using Elastos::Utility::Logging::Logger;
 
 namespace Elastos {
 namespace Droid {
@@ -253,6 +255,8 @@ void CStatusBarHeaderView::QsPanelCallback::HandleScanStateChanged(
 void CStatusBarHeaderView::QsPanelCallback::HandleShowingDetail(
     /* [in] */ IQSTileDetailAdapter* detail)
 {
+    Logger::I(TAG, " >> HandleShowingDetail: %s", TO_CSTR(detail));
+
     const Boolean showingDetail = detail != NULL;
     Transition(mHost->mClock, !showingDetail);
     Transition(mHost->mDateGroup, !showingDetail);

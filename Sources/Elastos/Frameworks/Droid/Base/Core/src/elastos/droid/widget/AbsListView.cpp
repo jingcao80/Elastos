@@ -3883,12 +3883,12 @@ AutoPtr<IParcelable> AbsListView::OnSaveInstanceState()
     return IParcelable::Probe(ss);
 }
 
-void AbsListView::OnRestoreInstanceState(
+ECode AbsListView::OnRestoreInstanceState(
     /* [in] */ IParcelable* state)
 {
     AutoPtr<CAbsListViewSavedState> ss =
             (CAbsListViewSavedState*)IAbsListViewSavedState::Probe(state);
-    if (!ss) return;
+    if (!ss) return NOERROR;
 
     AutoPtr<IParcelable> superState;
     ss->GetSuperState((IParcelable**)&superState);
@@ -3939,6 +3939,7 @@ void AbsListView::OnRestoreInstanceState(
     }
 
     RequestLayout();
+    return NOERROR;
 }
 
 Boolean AbsListView::AcceptFilter()
@@ -4725,7 +4726,7 @@ Int32 AbsListView::GetBottomPaddingOffset()
     return (mGroupFlags & ViewGroup::CLIP_TO_PADDING_MASK) == ViewGroup::CLIP_TO_PADDING_MASK ? 0 : mPaddingBottom;
 }
 
-void AbsListView::OnSizeChanged(
+ECode AbsListView::OnSizeChanged(
     /* [in] */ Int32 w,
     /* [in] */ Int32 h,
     /* [in] */ Int32 oldw,
@@ -4741,6 +4742,7 @@ void AbsListView::OnSizeChanged(
     if (mFastScroll != NULL) {
         mFastScroll->OnSizeChanged(w, h, oldw, oldh);
     }
+    return NOERROR;
 }
 
 Boolean AbsListView::TouchModeDrawsInPressedState()
@@ -6262,7 +6264,7 @@ void AbsListView::OnTouchCancel()
     mActivePointerId = INVALID_POINTER;
 }
 
-void AbsListView::OnOverScrolled(
+ECode AbsListView::OnOverScrolled(
     /* [in] */ Int32 scrollX,
     /* [in] */ Int32 scrollY,
     /* [in] */ Boolean clampedX,
@@ -6275,6 +6277,7 @@ void AbsListView::OnOverScrolled(
 
         AwakenScrollBars();
     }
+    return NOERROR;
 }
 
 ECode AbsListView::OnGenericMotionEvent(

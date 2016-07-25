@@ -348,7 +348,7 @@ protected:
         /* [in] */ IConfiguration* newConfig);
 
     // @Override
-    CARAPI_(void) OnWindowVisibilityChanged(
+    CARAPI OnWindowVisibilityChanged(
         /* [in] */ Int32 visibility);
 
     // @Override

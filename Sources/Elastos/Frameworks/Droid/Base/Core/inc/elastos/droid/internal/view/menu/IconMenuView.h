@@ -258,7 +258,7 @@ protected:
     CARAPI_(AutoPtr<IParcelable>) OnSaveInstanceState();
 
     //@override
-    CARAPI_(void) OnRestoreInstanceState(
+    CARAPI OnRestoreInstanceState(
         /* [in] */ IParcelable* state);
 
     CARAPI_(AutoPtr<IDrawable>) GetItemBackgroundDrawable();

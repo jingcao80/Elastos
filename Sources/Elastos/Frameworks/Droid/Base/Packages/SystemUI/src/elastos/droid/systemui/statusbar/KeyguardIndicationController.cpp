@@ -16,6 +16,7 @@ using Elastos::Droid::Content::IIntentFilter;
 using Elastos::Droid::Content::Res::IResources;
 using Elastos::Droid::Os::CUserHandleHelper;
 using Elastos::Droid::Os::IBatteryStats;
+using Elastos::Droid::Os::IBatteryManager;
 using Elastos::Droid::Os::IUserHandle;
 using Elastos::Droid::Os::IUserHandleHelper;
 using Elastos::Droid::Os::ServiceManager;
@@ -33,6 +34,18 @@ namespace StatusBar {
 
 const String KeyguardIndicationController::TAG("KeyguardIndicationController");
 const Int32 KeyguardIndicationController::MSG_HIDE_TRANSIENT = 1;
+
+ECode KeyguardIndicationController::UpdateMonitorCallback::OnRefreshBatteryInfo(
+    /* [in] */ IKeyguardUpdateMonitorBatteryStatus* status)
+{
+    Int32 bs;
+    status->GetStatus(&bs);
+    mHost->mPowerPluggedIn = bs == IBatteryManager::BATTERY_STATUS_CHARGING
+        || bs == IBatteryManager::BATTERY_STATUS_FULL;
+    status->IsCharged(&mHost->mPowerCharged);
+    mHost->UpdateIndication();
+    return NOERROR;
+}
 
 KeyguardIndicationController::ControllerBroadcastReceiver::ControllerBroadcastReceiver(
     /* [in] */ KeyguardIndicationController* host)
@@ -69,7 +82,15 @@ ECode KeyguardIndicationController::ControllerHandler::HandleMessage(
 }
 
 CAR_INTERFACE_IMPL(KeyguardIndicationController, Object, IKeyguardIndicationController)
-KeyguardIndicationController::KeyguardIndicationController(
+
+
+KeyguardIndicationController::KeyguardIndicationController()
+    : mVisible(FALSE)
+    , mPowerPluggedIn(FALSE)
+    , mPowerCharged(FALSE)
+{}
+
+ECode KeyguardIndicationController::constructor(
     /* [in] */ IContext* context,
     /* [in] */ IKeyguardIndicationTextView* textView)
 {
@@ -80,8 +101,9 @@ KeyguardIndicationController::KeyguardIndicationController(
 
     AutoPtr<IInterface> obj = ServiceManager::GetService(IBatteryStats::SERVICE_NAME);
     mBatteryInfo = IIBatteryStats::Probe(obj);
-    // TODO
-    // KeyguardUpdateMonitor::GetInstance(context)->RegisterCallback(mUpdateMonitor);
+    mUpdateMonitor = new UpdateMonitorCallback(this);
+
+    KeyguardUpdateMonitor::GetInstance(context)->RegisterCallback(mUpdateMonitor);
     AutoPtr<IUserHandleHelper> helper;
     CUserHandleHelper::AcquireSingleton((IUserHandleHelper**)&helper);
     AutoPtr<IUserHandle> user;
@@ -89,7 +111,7 @@ KeyguardIndicationController::KeyguardIndicationController(
     AutoPtr<IIntentFilter> filter;
     CIntentFilter::New(IIntent::ACTION_TIME_TICK, (IIntentFilter**)&filter);
     AutoPtr<IIntent> i;
-    context->RegisterReceiverAsUser(mReceiver, user, filter, String(NULL), NULL, (IIntent**)&i);
+    return context->RegisterReceiverAsUser(mReceiver, user, filter, String(NULL), NULL, (IIntent**)&i);
 }
 
 ECode KeyguardIndicationController::SetVisible(

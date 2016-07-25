@@ -135,28 +135,31 @@ void NullAwViewMethods::OnFocusChanged(
 }
 
 //@Override
-void NullAwViewMethods::OnSizeChanged(
+ECode NullAwViewMethods::OnSizeChanged(
     /* [in] */ Int32 w,
     /* [in] */ Int32 h,
     /* [in] */ Int32 ow,
     /* [in] */ Int32 oh)
 {
     // Intentional no-op.
+    return NOERROR;
 }
 
 //@Override
-void NullAwViewMethods::OnVisibilityChanged(
+ECode NullAwViewMethods::OnVisibilityChanged(
     /* [in] */ IView* changedView,
     /* [in] */ Int32 visibility)
 {
     // Intentional no-op.
+    return NOERROR;
 }
 
 //@Override
-void NullAwViewMethods::OnWindowVisibilityChanged(
+ECode NullAwViewMethods::OnWindowVisibilityChanged(
     /* [in] */ Int32 visibility)
 {
     // Intentional no-op.
+    return NOERROR;
 }
 
 } // namespace AndroidWebview

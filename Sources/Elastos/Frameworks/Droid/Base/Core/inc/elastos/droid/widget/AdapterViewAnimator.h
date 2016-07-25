@@ -193,7 +193,7 @@ public:
         /* [out] */ IParcelable** result);
 
     // @Override
-    CARAPI_(void) OnRestoreInstanceState(
+    CARAPI OnRestoreInstanceState(
         /* [in] */ IParcelable* state);
 
     virtual CARAPI GetCurrentView(

@@ -1244,7 +1244,7 @@ AutoPtr<IParcelable> Toolbar::OnSaveInstanceState()
     return IParcelable::Probe(state);
 }
 
-void Toolbar::OnRestoreInstanceState(
+ECode Toolbar::OnRestoreInstanceState(
     /* [in] */ IParcelable* state)
 {
     AutoPtr<IToolbarSavedState> ss = IToolbarSavedState::Probe(state);

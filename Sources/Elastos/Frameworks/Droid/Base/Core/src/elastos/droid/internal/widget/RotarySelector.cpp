@@ -165,7 +165,7 @@ AutoPtr<IBitmap> RotarySelector::GetBitmapFor(
     return bm;
 }
 
-void RotarySelector::OnSizeChanged(
+ECode RotarySelector::OnSizeChanged(
     /* [in] */ Int32 w,
     /* [in] */ Int32 h,
     /* [in] */ Int32 oldw,
@@ -193,6 +193,7 @@ void RotarySelector::OnSizeChanged(
         Boolean rst = FALSE;
         mBgMatrix->PostTranslate(0.f, h - mBackgroundHeight, &rst);
     }
+    return NOERROR;
 }
 
 Boolean RotarySelector::IsHoriz()

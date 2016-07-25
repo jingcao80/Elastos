@@ -475,7 +475,7 @@ protected:
 
     virtual CARAPI_(AutoPtr<IParcelable>) OnSaveInstanceState();
 
-    virtual CARAPI_(void) OnRestoreInstanceState(
+    virtual CARAPI OnRestoreInstanceState(
             /* [in] */ IParcelable* state);
 
 private:

@@ -172,13 +172,14 @@ ECode AwLayoutSizer::OnMeasure(
  * This should be called by the Android view system after onMeasure if the view's size has
  * changed.
  */
-void AwLayoutSizer::OnSizeChanged(
+ECode AwLayoutSizer::OnSizeChanged(
     /* [in] */ Int32 w,
     /* [in] */ Int32 h,
     /* [in] */ Int32 ow,
     /* [in] */ Int32 oh)
 {
     UpdateLayoutSettings();
+    return NOERROR;
 }
 
 /**

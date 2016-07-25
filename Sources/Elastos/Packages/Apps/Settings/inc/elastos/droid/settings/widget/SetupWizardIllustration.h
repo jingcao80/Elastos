@@ -126,7 +126,7 @@ public class SetupWizardIllustration extends FrameLayout {
     }
 
     //@Override
-    CARAPI OnDraw(Canvas canvas) {
+    CARAPI_(void) OnDraw(Canvas canvas) {
         if (mBackground != NULL) {
             canvas->Save();
             // Draw the background filling parts not covered by the illustration

@@ -1036,7 +1036,7 @@ ECode OverlappingPaneLayout::OnLayout(
     return NOERROR;
 }
 
-void OverlappingPaneLayout::OnSizeChanged(
+ECode OverlappingPaneLayout::OnSizeChanged(
     /* [in] */ Int32 w,
     /* [in] */ Int32 h,
     /* [in] */ Int32 oldw,
@@ -1047,6 +1047,7 @@ void OverlappingPaneLayout::OnSizeChanged(
     if (h != oldh) {
         mFirstLayout = TRUE;
     }
+    return NOERROR;
 }
 
 ECode OverlappingPaneLayout::RequestChildFocus(
@@ -1424,7 +1425,7 @@ AutoPtr<IParcelable> OverlappingPaneLayout::OnSaveInstanceState()
     return (IParcelable*)ss;
 }
 
-void OverlappingPaneLayout::OnRestoreInstanceState(
+ECode OverlappingPaneLayout::OnRestoreInstanceState(
     /* [in] */ IParcelable* state)
 {
     AutoPtr<SavedState> ss = (SavedState*)state;
@@ -1441,6 +1442,7 @@ void OverlappingPaneLayout::OnRestoreInstanceState(
         ClosePane(&result);
     }
     mPreservedOpenState = ss->mIsOpen;
+    return NOERROR;
 }
 
 ECode OverlappingPaneLayout::OnStartNestedScroll(

@@ -173,6 +173,7 @@ ECode RecentsHorizontalScrollView::constructor(
 
     mFadedEdgeDrawHelper = FadedEdgeDrawHelper::Create(ctx, attrs, this, FALSE);
     CHashSet::New((IHashSet**)&mRecycledViews);
+    return NOERROR;
 }
 
 ECode RecentsHorizontalScrollView::SetMinSwipeAlpha(
@@ -469,16 +470,17 @@ ECode RecentsHorizontalScrollView::DrawFadedEdges(
     return NOERROR;
 }
 
-void RecentsHorizontalScrollView::OnScrollChanged(
+ECode RecentsHorizontalScrollView::OnScrollChanged(
     /* [in] */ Int32 l,
     /* [in] */ Int32 t,
     /* [in] */ Int32 oldl,
     /* [in] */ Int32 oldt)
 {
-   OnScrollChanged(l, t, oldl, oldt);
-   if (mOnScrollListener != NULL) {
-       mOnScrollListener->Run();
-   }
+    OnScrollChanged(l, t, oldl, oldt);
+    if (mOnScrollListener != NULL) {
+        mOnScrollListener->Run();
+    }
+    return NOERROR;
 }
 
 ECode RecentsHorizontalScrollView::SetOnScrollListener(
@@ -568,7 +570,7 @@ void RecentsHorizontalScrollView::SetOverScrollEffectPadding(
 {
 }
 
-void RecentsHorizontalScrollView::OnSizeChanged(
+ECode RecentsHorizontalScrollView::OnSizeChanged(
     /* [in] */ Int32 w,
     /* [in] */ Int32 h,
     /* [in] */ Int32 oldw,
@@ -582,7 +584,7 @@ void RecentsHorizontalScrollView::OnSizeChanged(
     IViewGroup::Probe(mLinearLayout)->GetLayoutTransition((ILayoutTransition**)&transition);
     Boolean b = FALSE;
     if (transition != NULL && (transition->IsRunning(&b), b)) {
-        return;
+        return NOERROR;
     }
     // Keep track of the last visible item in the list so we can restore it
     // to the bottom when the orientation changes.
@@ -590,6 +592,7 @@ void RecentsHorizontalScrollView::OnSizeChanged(
 
     AutoPtr<SizeChangedRunnable> run = new SizeChangedRunnable(this);
     Post(run, &b);
+    return NOERROR;
 }
 
 ECode RecentsHorizontalScrollView::SetAdapter(

@@ -446,7 +446,7 @@ public:
         /* [out] */ IParcelable** result);
 
     // @Override
-    CARAPI_(void) OnRestoreInstanceState(
+    CARAPI OnRestoreInstanceState(
         /* [in] */ IParcelable* p);
 
     virtual CARAPI SetNavigationIcon(

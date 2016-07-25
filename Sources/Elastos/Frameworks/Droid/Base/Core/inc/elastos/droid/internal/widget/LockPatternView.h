@@ -462,7 +462,7 @@ private:
         /* [in] */ Float alpha);
 
 protected:
-    virtual CARAPI_(void) OnSizeChanged(
+    virtual CARAPI OnSizeChanged(
         /* [in] */ Int32 w,
         /* [in] */ Int32 h,
         /* [in] */ Int32 oldw,
@@ -477,7 +477,7 @@ protected:
 
     virtual CARAPI_(AutoPtr<IParcelable>) OnSaveInstanceState();
 
-    virtual CARAPI_(void) OnRestoreInstanceState(
+    virtual CARAPI OnRestoreInstanceState(
         /* [in] */ IParcelable* state);
 
 private:

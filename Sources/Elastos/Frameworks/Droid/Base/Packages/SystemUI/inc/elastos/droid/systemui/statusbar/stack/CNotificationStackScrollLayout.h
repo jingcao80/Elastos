@@ -599,7 +599,7 @@ protected:
         /* [in] */ Boolean isTouchEvent);
 
     // @Override
-    CARAPI_(void) OnOverScrolled(
+    CARAPI OnOverScrolled(
         /* [in] */ Int32 scrollX,
         /* [in] */ Int32 scrollY,
         /* [in] */ Boolean clampedX,

@@ -382,7 +382,7 @@ public:
 
 protected:
     //@Override
-    CARAPI OnDraw(
+    CARAPI_(void) OnDraw(
         /* [in] */ ICanvas* canvas);
 
 private:

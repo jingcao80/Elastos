@@ -79,7 +79,7 @@ private:
             /* [in] */ Boolean invalidate);
 
         //@Override
-        CARAPI_(void) OnScrollChanged(
+        CARAPI OnScrollChanged(
             /* [in] */ Int32 lPix,
             /* [in] */ Int32 tPix,
             /* [in] */ Int32 oldlPix,
@@ -184,14 +184,14 @@ public:
         /* [in] */ IRect* previouslyFocusedRect);
 
     //@Override
-    CARAPI_(void) OnSizeChanged(
+    CARAPI OnSizeChanged(
         /* [in] */ Int32 w,
         /* [in] */ Int32 h,
         /* [in] */ Int32 ow,
         /* [in] */ Int32 oh);
 
     //@Override
-    CARAPI_(void) OnWindowVisibilityChanged(
+    CARAPI OnWindowVisibilityChanged(
         /* [in] */ Int32 visibility);
 
 protected:

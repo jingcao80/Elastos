@@ -2166,13 +2166,14 @@ void ContentViewCore::OnDetachedFromWindow()
 /**
  * @see View#onVisibilityChanged(android.view.View, int)
  */
-void ContentViewCore::OnVisibilityChanged(
+ECode ContentViewCore::OnVisibilityChanged(
     /* [in] */ IView* changedView,
     /* [in] */ Int32 visibility)
 {
     if (visibility != IView::VISIBLE) {
         mZoomControlsDelegate->DismissZoomPicker();
     }
+    return NOERROR;
 }
 
 /**
@@ -2248,7 +2249,7 @@ ECode ContentViewCore::OnConfigurationChanged(
  * @see View#onSizeChanged(int, int, int, int)
  */
 //@SuppressWarnings("javadoc")
-void ContentViewCore::OnSizeChanged(
+ECode ContentViewCore::OnSizeChanged(
     /* [in] */ Int32 wPix,
     /* [in] */ Int32 hPix,
     /* [in] */ Int32 owPix,
@@ -2265,6 +2266,7 @@ void ContentViewCore::OnSizeChanged(
     }
 
     UpdateAfterSizeChanged();
+    return NOERROR;
 }
 
 /**

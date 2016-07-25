@@ -2912,16 +2912,16 @@ Boolean WebViewChromium::InternalAccessAdapter::Super_awakenScrollBars(
     return FALSE;
 }
 
-void WebViewChromium::InternalAccessAdapter::OnScrollChanged(
+ECode WebViewChromium::InternalAccessAdapter::OnScrollChanged(
     /* [in] */ Int32 l,
     /* [in] */ Int32 t,
     /* [in] */ Int32 oldl,
     /* [in] */ Int32 oldt)
 {
-    // ==================before translated======================
-    // // Intentional no-op.
-    // // Chromium calls this directly to trigger accessibility events. That isn't needed
-    // // for WebView since super_scrollTo invokes onScrollChanged for us.
+    // Intentional no-op.
+    // Chromium calls this directly to trigger accessibility events. That isn't needed
+    // for WebView since super_scrollTo invokes onScrollChanged for us.
+    return NOERROR;
 }
 
 void WebViewChromium::InternalAccessAdapter::OverScrollBy(
@@ -5803,7 +5803,7 @@ ECode WebViewChromium::OnWindowVisibilityChanged(
     return NOERROR;
 }
 
-ECode WebViewChromium::OnDraw(
+void WebViewChromium::OnDraw(
     /* [in] */ ICanvas* canvas)
 {
     VALIDATE_NOT_NULL(canvas);
@@ -5828,7 +5828,6 @@ ECode WebViewChromium::OnDraw(
     }
 
     mAwContents->OnDraw(canvas);
-    return NOERROR;
 }
 
 ECode WebViewChromium::SetLayoutParams(

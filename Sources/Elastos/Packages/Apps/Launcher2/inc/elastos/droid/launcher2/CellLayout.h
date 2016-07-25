@@ -1325,7 +1325,7 @@ protected:
         /* [in] */ Int32 b);
 
     // @Override
-    CARAPI_(void) OnSizeChanged(
+    CARAPI OnSizeChanged(
         /* [in] */ Int32 w,
         /* [in] */ Int32 h,
         /* [in] */ Int32 oldw,
