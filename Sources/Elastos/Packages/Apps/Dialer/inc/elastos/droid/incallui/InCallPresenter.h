@@ -378,7 +378,7 @@ private:
     /**
      * Private constructor. Must use getInstance() to get this singleton.
      */
-    InCallPresenter() {}
+    InCallPresenter();
 
 private:
     static const String EXTRA_FIRST_TIME_SHOWN;

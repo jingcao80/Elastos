@@ -1,20 +1,31 @@
 
-#include "Elastos.Droid.Telecomm.h"
+#include "Elastos.Droid.Content.h"
+#include "Elastos.Droid.Telecom.h"
+#include "Elastos.Droid.View.h"
 #include "Elastos.CoreLibrary.Utility.h"
 #include "Elastos.CoreLibrary.Utility.Concurrent.h"
 #include "elastos/droid/incallui/InCallPresenter.h"
 #include "elastos/droid/incallui/TelecomAdapter.h"
 #include "elastos/droid/incalluibind/ObjectFactory.h"
+#include <elastos/droid/text/TextUtils.h>
+#include <elastos/core/CoreUtils.h>
 #include <elastos/utility/logging/Logger.h>
 
 using Elastos::Droid::InCallUIBind::ObjectFactory;
-using Elastos::Droid::Telecomm::Telecom::IPhoneCapabilities;
-using Elastos::Droid::Telecomm::Telecom::IVideoProfile;
-using Elastos::Droid::Telecomm::Telecom::CVideoProfile;
-using Elastos::Droid::Telecomm::Telecom::IVideoProfileVideoState;
+using Elastos::Droid::Content::CIntent;
+using Elastos::Droid::Telecom::IPhoneCapabilities;
+using Elastos::Droid::Telecom::IVideoProfile;
+using Elastos::Droid::Telecom::CVideoProfile;
+using Elastos::Droid::Telecom::IVideoProfileVideoState;
+using Elastos::Droid::Text::TextUtils;
+using Elastos::Droid::View::ISurface;
+using Elastos::Core::CoreUtils;
 using Elastos::Utility::IIterator;
 using Elastos::Utility::ICollections;
 using Elastos::Utility::CCollections;
+using Elastos::Utility::ILocaleHelper;
+using Elastos::Utility::CLocaleHelper;
+using Elastos::Utility::ILocale;
 using Elastos::Utility::Concurrent::CConcurrentHashMap;
 using Elastos::Utility::Concurrent::CCopyOnWriteArrayList;
 using Elastos::Utility::Logging::Logger;
@@ -868,7 +879,7 @@ InCallState InCallPresenter::StartOrFinishUi(
 
     if (showCallUi || showAccountPicker) {
         Logger::I("InCallPresenter", "Start in call UI");
-        showInCall(FALSE /* showDialpad */, !showAccountPicker /* newOutgoingCall */);
+        ShowInCall(FALSE /* showDialpad */, !showAccountPicker /* newOutgoingCall */);
     }
     else if (startStartupSequence) {
         Logger::I("InCallPresenter", "Start Full Screen in call UI");
@@ -928,7 +939,7 @@ void InCallPresenter::SetDisconnectCauseForMissingAccounts(
             mContext->GetString(R::string::incall_error_supp_service_unknown, &errorMsg);
         }
         AutoPtr<IDisconnectCause> disconnectCause;
-        CDisconnectCause::New(IDisconnectCause::ERROR, String(NULL), errorMsg, errorMsg,
+        CDisconnectCause::New(IDisconnectCause::ERROR, NULL, CoreUtils::Convert(errorMsg), errorMsg,
                 (IDisconnectCause**)&disconnectCause);
         call->SetDisconnectCause(disconnectCause);
     }
@@ -1032,7 +1043,7 @@ AutoPtr<IIntent> InCallPresenter::GetInCallIntent(
         intent->PutBooleanExtra(CInCallActivity::SHOW_DIALPAD_EXTRA, TRUE);
     }
 
-    intent->PutBooleanExtra(CInCallActivity.::NEW_OUTGOING_CALL, newOutgoingCall);
+    intent->PutBooleanExtra(CInCallActivity::NEW_OUTGOING_CALL, newOutgoingCall);
     return intent;
 }
 
@@ -1041,7 +1052,8 @@ AutoPtr<InCallCameraManager> InCallPresenter::GetInCallCameraManager()
     {
         AutoLock lock(this);
         if (mInCallCameraManager == NULL) {
-            mInCallCameraManager = new InCallCameraManager(mContext);
+            mInCallCameraManager = new InCallCameraManager();
+            mInCallCameraManager->constructor(mContext);
         }
 
         return mInCallCameraManager;
@@ -1106,7 +1118,9 @@ Float InCallPresenter::GetSpaceBesideCallCard()
 Boolean InCallPresenter::GetCallCardFragmentVisible()
 {
     if (mInCallActivity != NULL) {
-        return mInCallActivity->GetCallCardFragment()->IsVisible();
+        Boolean isVisible;
+        mInCallActivity->GetCallCardFragment()->IsVisible(&isVisible);
+        return isVisible;
     }
     return FALSE;
 }

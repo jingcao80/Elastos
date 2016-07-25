@@ -5,11 +5,13 @@
 #include <elastos/core/StringUtils.h>
 #include <elastos/utility/logging/Logger.h>
 
+using Elastos::Droid::Contacts::Common::CallUtil;
 using Elastos::Droid::InCallUI::EIID_ICall;
 using Elastos::Droid::Telecom::EIID_ICallListener;
 using Elastos::Droid::Telecom::ICallDetails;
 using Elastos::Droid::Telecom::CDisconnectCause;
 using Elastos::Droid::Telecom::IPhoneCapabilities;
+using Elastos::Droid::Telecom::CPhoneCapabilities;
 using Elastos::Droid::Telecom::ICallProperties;
 using Elastos::Droid::Telecom::IVideoProfileVideoStateHelper;
 using Elastos::Droid::Telecom::CVideoProfileVideoStateHelper;
@@ -24,7 +26,6 @@ namespace InCallUI {
 //================================================================
 // Call::State
 //================================================================
-
 const Int32 Call::State::INVALID;
 const Int32 Call::State::IDLE;
 const Int32 Call::State::ACTIVE;
@@ -42,7 +43,7 @@ const Int32 Call::State::CONNECTING;
 Boolean Call::State::IsConnectingOrConnected(
     /* [in] */ Int32 state)
 {
-    switch(state) {
+    switch (state) {
         case ACTIVE:
         case INCOMING:
         case CALL_WAITING:
@@ -53,8 +54,8 @@ Boolean Call::State::IsConnectingOrConnected(
         case CONFERENCED:
             return TRUE;
         default:
+            return FALSE;
     }
-    return FALSE;
 }
 
 Boolean Call::State::IsDialing(
@@ -69,8 +70,6 @@ String Call::State::ToString(
     switch (state) {
         case INVALID:
             return String("INVALID");
-        case NEW:
-            return String("NEW");
         case IDLE:
             return String("IDLE");
         case ACTIVE:
@@ -104,7 +103,6 @@ String Call::State::ToString(
 //================================================================
 // Call::SessionModificationState
 //================================================================
-
 const Int32 Call::SessionModificationState::NO_REQUEST;
 const Int32 Call::SessionModificationState::WAITING_FOR_RESPONSE;
 const Int32 Call::SessionModificationState::REQUEST_FAILED;
@@ -114,7 +112,6 @@ const Int32 Call::SessionModificationState::RECEIVED_UPGRADE_TO_VIDEO_REQUEST;
 //================================================================
 // Call::TelecommCallListener
 //================================================================
-
 CAR_INTERFACE_IMPL(Call::TelecommCallListener, Object, ICallListener)
 
 ECode Call::TelecommCallListener::OnStateChanged(
@@ -159,7 +156,7 @@ ECode Call::TelecommCallListener::OnCannedTextResponsesLoaded(
 
 ECode Call::TelecommCallListener::OnPostDialWait(
     /* [in] */ Elastos::Droid::Telecom::ICall* call,
-    /* [in] */ String remainingPostDialSequence)
+    /* [in] */ const String& remainingPostDialSequence)
 {
     mHost->Update();
     return NOERROR;
@@ -191,8 +188,7 @@ ECode Call::TelecommCallListener::OnConferenceableCallsChanged(
 //================================================================
 // Call
 //================================================================
-
-const String Call::ID_PREFIX(Call_);
+const String Call::ID_PREFIX("Call_");
 Int32 Call::sIdCounter = 0;
 
 CAR_INTERFACE_IMPL(Call, Object, ICall)
@@ -240,7 +236,6 @@ void Call::UpdateFromTelecommCall()
     AutoPtr<IDisconnectCause> cause;
     details->GetDisconnectCause((IDisconnectCause**)&cause);
     SetDisconnectCause(cause);
-    mIsActiveSub = mTelecommCall.mIsActiveSub;
 
     AutoPtr<IInCallServiceVideoCall> videoCall;
     if (mTelecommCall->GetVideoCall((IInCallServiceVideoCall**)&videoCall), videoCall != NULL) {
@@ -252,16 +247,15 @@ void Call::UpdateFromTelecommCall()
 
     mChildCallIds.Clear();
     AutoPtr<IList> children;
-    mTelecommCall->GetChildern((IList**)&children);
+    mTelecommCall->GetChildren((IList**)&children);
     Int32 size;
-    mTelecommCall->GetChildern(&size);
+    children->GetSize(&size);
     for (Int32 i = 0; i < size; i++) {
         AutoPtr<IInterface> value;
         children->Get(i, (IInterface**)&value);
-        String str;
-        ICharSequence::Probe(value)->ToString(&str);
         mChildCallIds.PushBack(
-                CallList::GetInstance()->GetCallByTelecommCall(str)->GetId());
+                CallList::GetInstance()->GetCallByTelecommCall(
+                        Elastos::Droid::Telecom::ICall::Probe(value))->GetId());
     }
 }
 
@@ -308,9 +302,9 @@ String Call::GetNumber()
         address->GetSchemeSpecificPart(&part);
         return part;
     }
-    AutoPtr<IUri> handle;
-    String part(NULL);
-    if (GetHandle((IUri**)&handle), handle != NULL) {
+    String part;
+    AutoPtr<IUri> handle = GetHandle();
+    if (handle != NULL) {
         handle->GetSchemeSpecificPart(&part);
     }
     return part;
@@ -376,7 +370,7 @@ AutoPtr<IDisconnectCause> Call::GetDisconnectCause()
     }
 
     AutoPtr<IDisconnectCause> cause;
-    CDisconnectCause::NEW(IDisconnectCause::UNKNOWN, (IDisconnectCause**)&cause);
+    CDisconnectCause::New(IDisconnectCause::UNKNOWN, (IDisconnectCause**)&cause);
     return cause;
 }
 
@@ -389,7 +383,7 @@ void Call::SetDisconnectCause(
 AutoPtr<IList> Call::GetCannedSmsResponses()
 {
     AutoPtr<IList> responses;
-    mTelecommCall->GetCannedSmsResponses((IList**)&responses);
+    mTelecommCall->GetCannedTextResponses((IList**)&responses);
     return responses;
 }
 
@@ -455,7 +449,7 @@ AutoPtr<IPhoneAccountHandle> Call::GetAccountHandle()
     AutoPtr<ICallDetails> details;
     mTelecommCall->GetDetails((ICallDetails**)&details);
     AutoPtr<IPhoneAccountHandle> handle;
-    details->GetGatewayInfo((IPhoneAccountHandle**)&handle);
+    details->GetAccountHandle((IPhoneAccountHandle**)&handle);
     return handle;
 }
 
@@ -500,7 +494,7 @@ Boolean Call::IsVideoCall(
         AutoPtr<IVideoProfileVideoStateHelper> helper;
         CVideoProfileVideoStateHelper::AcquireSingleton((IVideoProfileVideoStateHelper**)&helper);
         Boolean result;
-        helper->IsBidirectional(GetVideoState(), &result)
+        helper->IsBidirectional(GetVideoState(), &result);
         return result;
     }
 }
@@ -540,12 +534,14 @@ ECode Call::ToString(
     /* [out] */ String* str)
 {
     VALIDATE_NOT_NULL(str)
+    AutoPtr<ICallDetails> details;
+    mTelecommCall->GetDetails((ICallDetails**)&details);
+    Int32 caps;
+    details->GetCallCapabilities(&caps);
     AutoPtr<IPhoneCapabilities> capabilities;
     CPhoneCapabilities::AcquireSingleton((IPhoneCapabilities**)&capabilities);
     String s;
-    capabilities->ToString(&s);
-    AutoPtr<ICallDetails> details;
-    mTelecommCall->GetDetails((ICallDetails**)&details);
+    capabilities->ToString(caps, &s);
     Int32 state;
     details->GetVideoState(&state);
     *str = String("[") + mId + "," + State::ToString(GetState()) + "," + s

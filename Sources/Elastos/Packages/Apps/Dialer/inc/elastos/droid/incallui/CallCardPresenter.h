@@ -14,6 +14,8 @@
 #include <elastos/core/Object.h>
 
 using Elastos::Droid::Content::IContext;
+using Elastos::Droid::Content::IDialogInterface;
+using Elastos::Droid::Content::IDialogInterfaceOnClickListener;
 using Elastos::Droid::Os::Runnable;
 using Elastos::Droid::Telecom::ICallDetails;
 using Elastos::Droid::Telecom::IPhoneAccount;

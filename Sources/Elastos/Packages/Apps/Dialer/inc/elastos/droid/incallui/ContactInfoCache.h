@@ -44,6 +44,11 @@ public:
 public:
     static AutoPtr<ContactInfoCache> GetInstance(
         /* [in] */ IContext* mContext);
+
+    /**
+     * Blows away the stored cache values.
+     */
+    CARAPI_(void) ClearCache();
 };
 
 } // namespace InCallUI
