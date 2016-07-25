@@ -177,7 +177,7 @@ ECode AbsSeekBar::SetThumb(
     Invalidate();
     if (needUpdate) {
         Int32 width, height;
-        updateThumbAndTrackPos((GetWidth(&width), width), (GetHeight(&height), height));
+        UpdateThumbAndTrackPos((GetWidth(&width), width), (GetHeight(&height), height));
         Boolean res;
         if (thumb != NULL && (thumb->IsStateful(&res), res)) {
             // Note that if the states are different this won't work.
@@ -370,7 +370,7 @@ ECode AbsSeekBar::DrawableHotspotChanged(
     return NOERROR;
 }
 
-void AbsSeekBar::OnProgressRefresh(
+ECode AbsSeekBar::OnProgressRefresh(
     /* [in] */ Float scale,
     /* [in] */ Boolean fromUser)
 {
@@ -380,13 +380,15 @@ void AbsSeekBar::OnProgressRefresh(
     if (!IsAnimationRunning()) {
         SetThumbPos(scale);
     }
+    return NOERROR;
 }
 
-void AbsSeekBar::OnAnimatePosition(
+ECode AbsSeekBar::OnAnimatePosition(
     /* [in] */ Float scale,
     /* [in] */ Boolean fromUser)
 {
     SetThumbPos(scale);
+    return NOERROR;
 }
 
 ECode AbsSeekBar::OnSizeChanged(
@@ -396,11 +398,11 @@ ECode AbsSeekBar::OnSizeChanged(
     /* [in] */ Int32 oldh)
 {
     ProgressBar::OnSizeChanged(w, h, oldw, oldh);
-    updateThumbAndTrackPos(w, h);
+    UpdateThumbAndTrackPos(w, h);
     return NOERROR;
 }
 
-void AbsSeekBar::updateThumbAndTrackPos(
+void AbsSeekBar::UpdateThumbAndTrackPos(
     /* [in] */ Int32 w,
     /* [in] */ Int32 h)
 {
@@ -749,18 +751,21 @@ void AbsSeekBar::AttemptClaimDrag()
     }
 }
 
-void AbsSeekBar::OnStartTrackingTouch()
+ECode AbsSeekBar::OnStartTrackingTouch()
 {
     mIsDragging = TRUE;
+    return NOERROR;
 }
 
-void AbsSeekBar::OnStopTrackingTouch()
+ECode AbsSeekBar::OnStopTrackingTouch()
 {
     mIsDragging = FALSE;
+    return NOERROR;
 }
 
-void AbsSeekBar::OnKeyChange()
+ECode AbsSeekBar::OnKeyChange()
 {
+    return NOERROR;
 }
 
 ECode AbsSeekBar::OnKeyDown(
@@ -811,7 +816,7 @@ ECode AbsSeekBar::SetProgress(
     return ProgressBar::SetProgress(progress, fromUser);
 }
 
-void AbsSeekBar::AnimateSetProgress(
+ECode AbsSeekBar::AnimateSetProgress(
     /* [in] */ Int32 progress)
 {
     Int32 pro;
@@ -836,6 +841,7 @@ void AbsSeekBar::AnimateSetProgress(
     IAnimator::Probe(mPositionAnimator)->SetDuration(PROGRESS_ANIMATION_DURATION);
     mPositionAnimator->SetAutoCancel(TRUE);
     IAnimator::Probe(mPositionAnimator)->Start();
+    return NOERROR;
 }
 
 Int32 AbsSeekBar::UpdateTouchProgress(

@@ -673,7 +673,6 @@ void SettingsProvider::SendNotify(
 
     // Inform the backup manager about a data change
     if (backedUpDataChanged) {
-        Logger::W(TAG, "Backup data has changed!!!!!!");
         if (mBackupManager) {
             mBackupManager->DataChanged();
         }
@@ -695,16 +694,12 @@ void SettingsProvider::SendNotify(
         Binder::RestoreCallingIdentity(oldId);
         // }
         if (LOCAL_LOGV) {
-            String str;
-            IObject::Probe(uri)->ToString(&str);
-            Logger::V(TAG, "notifying for %d: %p", notifyTarget, str.string());
+            Logger::V(TAG, "notifying for %d: %s", notifyTarget, TO_CSTR(uri));
         }
     }
     else {
         if (LOCAL_LOGV) {
-            String str;
-            IObject::Probe(uri)->ToString(&str);
-            Logger::V(TAG, "notification suppressed: %p", str.string());
+            Logger::V(TAG, "notification suppressed: %s", TO_CSTR(uri));
         }
     }
 }

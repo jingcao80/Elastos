@@ -4,6 +4,7 @@
 #include "Elastos.CoreLibrary.Core.h"
 #include "elastos/droid/view/View.h"
 #include "R.h"
+#include <elastos/utility/logging/Logger.h>
 
 using Elastos::Droid::Content::Res::IResources;
 using Elastos::Droid::Content::Res::ITypedArray;
@@ -16,6 +17,7 @@ using Elastos::Droid::Widget::ICheckable;
 using Elastos::Droid::Widget::IProgressBar;
 using Elastos::Core::CString;
 using Elastos::Core::ICharSequence;
+using Elastos::Utility::Logging::Logger;
 
 namespace Elastos {
 namespace Droid {
@@ -80,13 +82,13 @@ ECode CToggleSlider::MySeekListener::OnProgressChanged(
 ECode CToggleSlider::MySeekListener::OnStartTrackingTouch(
     /* [in] */ ISeekBar* seekBar)
 {
-    return NOERROR;
+    return mHost->OnStartTrackingTouch(seekBar);
 }
 
 ECode CToggleSlider::MySeekListener::OnStopTrackingTouch(
      /* [in] */ ISeekBar* seekBar)
 {
-    return NOERROR;
+    return mHost->OnStopTrackingTouch(seekBar);
 }
 
 //==================================

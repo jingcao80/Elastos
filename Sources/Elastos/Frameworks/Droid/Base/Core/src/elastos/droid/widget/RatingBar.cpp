@@ -215,7 +215,7 @@ AutoPtr<IShape> RatingBar::GetDrawableShape()
     return IShape::Probe(shape);
 }
 
-void RatingBar::OnProgressRefresh(
+ECode RatingBar::OnProgressRefresh(
     /* [in] */ Float scale,
     /* [in] */ Boolean fromUser)
 {
@@ -226,6 +226,7 @@ void RatingBar::OnProgressRefresh(
     if (!fromUser) {
         DispatchRatingChange(FALSE);
     }
+    return NOERROR;
 }
 
 void RatingBar::UpdateSecondaryProgress(
@@ -258,13 +259,14 @@ ECode RatingBar::OnMeasure(
     return NOERROR;
 }
 
-void RatingBar::OnStartTrackingTouch()
+ECode RatingBar::OnStartTrackingTouch()
 {
     GetProgress(&mProgressOnStartTracking);
     AbsSeekBar::OnStartTrackingTouch();
+    return NOERROR;
 }
 
-void RatingBar::OnStopTrackingTouch()
+ECode RatingBar::OnStopTrackingTouch()
 {
     AbsSeekBar::OnStopTrackingTouch();
     Int32 progress;
@@ -272,19 +274,23 @@ void RatingBar::OnStopTrackingTouch()
     if (progress != mProgressOnStartTracking) {
         DispatchRatingChange(TRUE);
     }
+    return NOERROR;
 }
 
-void RatingBar::OnKeyChange()
+ECode RatingBar::OnKeyChange()
 {
     AbsSeekBar::OnKeyChange();
     DispatchRatingChange(TRUE);
+    return NOERROR;
 }
 
-void RatingBar::AnimateSetProgress(
+ECode RatingBar::AnimateSetProgress(
     /* [in] */ Int32 progress)
-{}
+{
+    return NOERROR;
+}
 
-void RatingBar::DispatchRatingChange(
+ECode RatingBar::DispatchRatingChange(
     /* [in] */ Boolean fromUser)
 {
     if (mOnRatingBarChangeListener != NULL) {
@@ -292,6 +298,7 @@ void RatingBar::DispatchRatingChange(
         GetRating(&rating);
         mOnRatingBarChangeListener->OnRatingChanged(this, rating, fromUser);
     }
+    return NOERROR;
 }
 
 ECode RatingBar::SetMax(

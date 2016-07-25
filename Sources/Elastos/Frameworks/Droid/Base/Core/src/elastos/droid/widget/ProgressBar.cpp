@@ -1116,10 +1116,11 @@ void ProgressBar::DoRefreshProgress(
     }
 }
 
-void ProgressBar::OnAnimatePosition(
+ECode ProgressBar::OnAnimatePosition(
     /* [in] */ Float scale,
     /* [in] */ Boolean fromUser)
 {
+    return NOERROR;
 }
 
 void ProgressBar::SetProgressValueOnly(
@@ -1141,7 +1142,7 @@ Float ProgressBar::GetAnimationPosition()
     return mAnimationPosition;
 }
 
-void ProgressBar::OnProgressRefresh(
+ECode ProgressBar::OnProgressRefresh(
     /* [in] */ Float scale,
     /* [in] */ Boolean fromUser)
 {
@@ -1155,6 +1156,7 @@ void ProgressBar::OnProgressRefresh(
     if (enable) {
         ScheduleAccessibilityEventSender();
     }
+    return NOERROR;
 }
 
 void ProgressBar::RefreshProgress(
