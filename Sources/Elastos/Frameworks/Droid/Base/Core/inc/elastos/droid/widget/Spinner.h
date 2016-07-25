@@ -452,7 +452,7 @@ public:
     CARAPI_(AutoPtr<IParcelable>) OnSaveInstanceState();
 
     // @Override
-    CARAPI_(void) OnRestoreInstanceState(
+    CARAPI OnRestoreInstanceState(
         /* [in] */ IParcelable* state);
 
 protected:

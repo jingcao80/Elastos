@@ -389,7 +389,7 @@ void AbsSeekBar::OnAnimatePosition(
     SetThumbPos(scale);
 }
 
-void AbsSeekBar::OnSizeChanged(
+ECode AbsSeekBar::OnSizeChanged(
     /* [in] */ Int32 w,
     /* [in] */ Int32 h,
     /* [in] */ Int32 oldw,
@@ -397,6 +397,7 @@ void AbsSeekBar::OnSizeChanged(
 {
     ProgressBar::OnSizeChanged(w, h, oldw, oldh);
     updateThumbAndTrackPos(w, h);
+    return NOERROR;
 }
 
 void AbsSeekBar::updateThumbAndTrackPos(

@@ -6361,12 +6361,13 @@ ECode View::DispatchWindowVisibilityChanged(
  *
  * @param visibility The new visibility of the window.
  */
-void View::OnWindowVisibilityChanged(
+ECode View::OnWindowVisibilityChanged(
     /* [in] */ Int32 visibility)
 {
     if (visibility == IView::VISIBLE) {
         InitialAwakenScrollBars();
     }
+    return NOERROR;
 }
 
 /**
@@ -6812,9 +6813,10 @@ AutoPtr<IContextMenuInfo> View::GetContextMenuInfo()
  *
  * @param menu the context menu to populate
  */
-void View::OnCreateContextMenu(
+ECode View::OnCreateContextMenu(
     /* [in] */ IContextMenu* menu)
 {
+    return NOERROR;
 }
 
 /**
@@ -7503,7 +7505,7 @@ ECode View::BringToFront()
  * @param oldl Previous horizontal scroll origin.
  * @param oldt Previous vertical scroll origin.
  */
-void View::OnScrollChanged(
+ECode View::OnScrollChanged(
     /* [in] */ Int32 l,
     /* [in] */ Int32 t,
     /* [in] */ Int32 oldl,
@@ -7522,6 +7524,7 @@ void View::OnScrollChanged(
     if (ai != NULL) {
         ai->mViewScrollChanged = TRUE;
     }
+    return NOERROR;
 }
 
 /**
@@ -7534,12 +7537,14 @@ void View::OnScrollChanged(
  * @param oldw Old width of this view.
  * @param oldh Old height of this view.
  */
-void View::OnSizeChanged(
+ECode View::OnSizeChanged(
     /* [in] */ Int32 w,
     /* [in] */ Int32 h,
     /* [in] */ Int32 oldw,
     /* [in] */ Int32 oldh)
-{}
+{
+    return NOERROR;
+}
 
 /**
  * Called by draw to draw the child views. This may be overridden
@@ -11459,7 +11464,7 @@ ECode View::DispatchRestoreInstanceState(
  * @see #restoreHierarchyState(android.util.SparseArray)
  * @see #dispatchRestoreInstanceState(android.util.SparseArray)
  */
-void View::OnRestoreInstanceState(
+ECode View::OnRestoreInstanceState(
     /* [in] */ IParcelable* state)
 {
     mPrivateFlags |= PFLAG_SAVE_STATE_CALLED;
@@ -11470,6 +11475,7 @@ void View::OnRestoreInstanceState(
                 + "This view's id is " + ViewDebug.resolveId(mContext, getId()) + ". Make sure "
                 + "other views do not use the same id.");*/
     //}
+    return NOERROR;
 }
 
 /**
@@ -16337,9 +16343,10 @@ ECode View::SetAnimation(
  * @see #setAnimation(android.view.animation.Animation)
  * @see #getAnimation()
  */
-void View::OnAnimationStart()
+ECode View::OnAnimationStart()
 {
     mPrivateFlags |= PFLAG_ANIMATION_STARTED;
+    return NOERROR;
 }
 
 /**
@@ -16350,9 +16357,10 @@ void View::OnAnimationStart()
  * @see #setAnimation(android.view.animation.Animation)
  * @see #getAnimation()
  */
-void View::OnAnimationEnd()
+ECode View::OnAnimationEnd()
 {
     mPrivateFlags &= ~PFLAG_ANIMATION_STARTED;
+    return NOERROR;
 }
 
 /**
@@ -16923,13 +16931,14 @@ Boolean View::OverScrollBy(
  * @param clampedX True if scrollX was clamped to an over-scroll boundary
  * @param clampedY True if scrollY was clamped to an over-scroll boundary
  */
-void View::OnOverScrolled(
+ECode View::OnOverScrolled(
     /* [in] */ Int32 scrollX,
     /* [in] */ Int32 scrollY,
     /* [in] */ Boolean clampedX,
     /* [in] */ Boolean clampedY)
 {
     // Intentionally empty.
+    return NOERROR;
 }
 
 /**

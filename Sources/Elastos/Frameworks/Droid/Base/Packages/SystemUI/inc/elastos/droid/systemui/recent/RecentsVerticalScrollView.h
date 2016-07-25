@@ -283,14 +283,14 @@ protected:
     CARAPI OnConfigurationChanged(
         /* [in] */ IConfiguration* newConfig);
 
-    CARAPI_(void) OnSizeChanged(
+    CARAPI OnSizeChanged(
         /* [in] */ Int32 w,
         /* [in] */ Int32 h,
         /* [in] */ Int32 oldw,
         /* [in] */ Int32 oldh);
 
     // @Override
-    CARAPI_(void) OnScrollChanged(
+    CARAPI OnScrollChanged(
         /* [in] */ Int32 l,
         /* [in] */ Int32 t,
         /* [in] */ Int32 oldl,

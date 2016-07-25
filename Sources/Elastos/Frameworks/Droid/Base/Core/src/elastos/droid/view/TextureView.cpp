@@ -288,7 +288,7 @@ void TextureView::OnDraw(
 {
 }
 
-void TextureView::OnSizeChanged(
+ECode TextureView::OnSizeChanged(
     /* [in] */ Int32 w,
     /* [in] */ Int32 h,
     /* [in] */ Int32 oldw,
@@ -305,6 +305,7 @@ void TextureView::OnSizeChanged(
             mListener->OnSurfaceTextureSizeChanged(mSurface, w, h);
         }
     }
+    return NOERROR;
 }
 
 void TextureView::DestroyHardwareResources()

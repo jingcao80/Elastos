@@ -47,7 +47,9 @@ public:
 
     TO_STRING_IMPL("BrightnessMirrorController")
 
-    BrightnessMirrorController(
+    BrightnessMirrorController();
+
+    CARAPI constructor(
         /* [in] */ IStatusBarWindowView* statusBarWindow);
 
     CARAPI ShowMirror();

@@ -406,12 +406,12 @@ ECode AdapterViewAnimator::OnSaveInstanceState(
     return NOERROR;
 }
 
-void AdapterViewAnimator::OnRestoreInstanceState(
+ECode AdapterViewAnimator::OnRestoreInstanceState(
     /* [in] */ IParcelable* state)
 {
     AutoPtr<CAdapterViewAnimatorSavedState> ss =
             (CAdapterViewAnimatorSavedState*)IAdapterViewAnimatorSavedState::Probe(state);
-    if (!ss) return;
+    if (!ss) return NOERROR;
 
     AutoPtr<IParcelable> superState;
     ss->GetSuperState((IParcelable**)&superState);
@@ -433,6 +433,7 @@ void AdapterViewAnimator::OnRestoreInstanceState(
     else {
         SetDisplayedChild(mWhichChild, FALSE);
     }
+    return NOERROR;
 }
 
 ECode AdapterViewAnimator::GetCurrentView(

@@ -64,7 +64,7 @@ public:
     using AnimatedImageView::SetContentDescription;
 
 protected:
-    virtual CARAPI_(void) OnSizeChanged(
+    virtual CARAPI OnSizeChanged(
         /* [in] */ Int32 w,
         /* [in] */ Int32 h,
         /* [in] */ Int32 oldw,

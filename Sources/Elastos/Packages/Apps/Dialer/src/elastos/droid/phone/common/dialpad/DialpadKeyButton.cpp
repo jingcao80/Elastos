@@ -100,7 +100,7 @@ ECode DialpadKeyButton::SetPressed(
 }
 
 // @Override
-void DialpadKeyButton::OnSizeChanged(
+ECode DialpadKeyButton::OnSizeChanged(
     /* [in] */ Int32 w,
     /* [in] */ Int32 h,
     /* [in] */ Int32 oldw,
@@ -115,6 +115,7 @@ void DialpadKeyButton::OnSizeChanged(
     GetPaddingBottom(&pb);
 
     mHoverBounds->Set(pl, w - pr, pt, h - pb);
+    return NOERROR;
 }
 
 // @Override

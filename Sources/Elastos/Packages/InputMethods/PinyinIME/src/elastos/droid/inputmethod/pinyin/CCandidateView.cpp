@@ -276,7 +276,7 @@ Boolean CCandidateView::ActiveCurseBackward()
     return FALSE;
 }
 
-void CCandidateView::OnSizeChanged()
+ECode CCandidateView::OnSizeChanged()
 {
     Int32 width, height;
     GetMeasuredWidth(&width);
@@ -331,6 +331,7 @@ void CCandidateView::OnSizeChanged()
     // When the size is changed, the first page will be displayed.
     // mPageNo = 0;
     // mActiveCandInPage = 0;
+    return NOERROR;
 }
 
 Boolean CCandidateView::CalculatePage(

@@ -555,12 +555,12 @@ AutoPtr<IParcelable> CompoundButton::OnSaveInstanceState()
    return IParcelable::Probe(ss);
 }
 
-void CompoundButton::OnRestoreInstanceState(
+ECode CompoundButton::OnRestoreInstanceState(
     /* [in] */ IParcelable* state)
 {
     AutoPtr<CCompoundButtonSavedState> ss =
             (CCompoundButtonSavedState*)ICompoundButtonSavedState::Probe(state);
-    if (!ss) return;
+    if (!ss) return NOERROR;
 
     AutoPtr<IParcelable> superState;
     ss->GetSuperState((IParcelable**)&superState);
@@ -568,6 +568,7 @@ void CompoundButton::OnRestoreInstanceState(
     Button::OnRestoreInstanceState(superState);
     SetChecked(ss->mSavedStateChecked);
     RequestLayout();
+    return NOERROR;
 }
 
 }// namespace Widget

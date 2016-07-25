@@ -1324,7 +1324,7 @@ AutoPtr<IParcelable> DatePicker::OnSaveInstanceState()
     return res;
 }
 
-void DatePicker::OnRestoreInstanceState(
+ECode DatePicker::OnRestoreInstanceState(
     /* [in] */ IParcelable* state)
 {
     AutoPtr<BaseSavedState> ss = (BaseSavedState*) state;
@@ -1332,6 +1332,7 @@ void DatePicker::OnRestoreInstanceState(
     ss->GetSuperState((IParcelable**)&pcl);
     FrameLayout::OnRestoreInstanceState(pcl);
     mDelegate->OnRestoreInstanceState(ss);
+    return NOERROR;
 }
 
 } // namespace Widget

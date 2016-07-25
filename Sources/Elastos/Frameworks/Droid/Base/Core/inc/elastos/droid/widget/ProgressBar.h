@@ -676,7 +676,7 @@ public:
     virtual CARAPI_(AutoPtr<IParcelable>) OnSaveInstanceState();
 
     //@Override
-    virtual CARAPI_(void) OnRestoreInstanceState(
+    virtual CARAPI OnRestoreInstanceState(
         /* [in] */ IParcelable* state);
 
     CARAPI JumpDrawablesToCurrentState();
@@ -706,7 +706,7 @@ protected:
         /* [in] */ Int32 visibility);
 
     //@Override
-    virtual CARAPI_(void) OnSizeChanged(
+    virtual CARAPI OnSizeChanged(
         /* [in] */ Int32 w,
         /* [in] */ Int32 h,
         /* [in] */ Int32 oldw,

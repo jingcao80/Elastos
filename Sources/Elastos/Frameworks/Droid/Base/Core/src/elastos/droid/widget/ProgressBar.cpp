@@ -1454,13 +1454,14 @@ ECode ProgressBar::InvalidateDrawable(
     return NOERROR;
 }
 
-void ProgressBar::OnSizeChanged(
+ECode ProgressBar::OnSizeChanged(
     /* [in] */ Int32 w,
     /* [in] */ Int32 h,
     /* [in] */ Int32 oldw,
     /* [in] */ Int32 oldh)
 {
     UpdateDrawableBounds(w, h);
+    return NOERROR;
 }
 
 void ProgressBar::UpdateDrawableBounds(
@@ -1647,7 +1648,7 @@ AutoPtr<IParcelable> ProgressBar::OnSaveInstanceState()
     return IParcelable::Probe(ss);
 }
 
-void ProgressBar::OnRestoreInstanceState(
+ECode ProgressBar::OnRestoreInstanceState(
     /* [in] */ IParcelable* state)
 {
     AutoPtr<IProgressBarSavedState> ss = IProgressBarSavedState::Probe(state);
@@ -1658,6 +1659,7 @@ void ProgressBar::OnRestoreInstanceState(
 
     SetProgress(((CProgressBarSavedState*)(ss.Get()))->mProgress);
     SetSecondaryProgress(((CProgressBarSavedState*)ss.Get())->mSecondaryProgress);
+    return NOERROR;
 }
 
 ECode ProgressBar::OnAttachedToWindow()

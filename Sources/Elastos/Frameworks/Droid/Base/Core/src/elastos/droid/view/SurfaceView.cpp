@@ -442,13 +442,14 @@ ECode SurfaceView::OnAttachedToWindow()
     return NOERROR;
 }
 
-void SurfaceView::OnWindowVisibilityChanged(
+ECode SurfaceView::OnWindowVisibilityChanged(
     /* [in] */ Int32 visibility)
 {
     View::OnWindowVisibilityChanged(visibility);
     mWindowVisibility = visibility == IView::VISIBLE;
     mRequestedVisible = mWindowVisibility && mViewVisibility;
     UpdateWindow(FALSE, FALSE);
+    return NOERROR;
 }
 
 ECode SurfaceView::SetVisibility(

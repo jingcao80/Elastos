@@ -527,16 +527,17 @@ ECode RecentsVerticalScrollView::DrawFadedEdges(
     return NOERROR;
 }
 
-void RecentsVerticalScrollView::OnScrollChanged(
+ECode RecentsVerticalScrollView::OnScrollChanged(
     /* [in] */ Int32 l,
     /* [in] */ Int32 t,
     /* [in] */ Int32 oldl,
     /* [in] */ Int32 oldt)
 {
-   ScrollView::OnScrollChanged(l, t, oldl, oldt);
-   if (mOnScrollListener != NULL) {
-       mOnScrollListener->Run();
-   }
+    ScrollView::OnScrollChanged(l, t, oldl, oldt);
+    if (mOnScrollListener != NULL) {
+        mOnScrollListener->Run();
+    }
+    return NOERROR;
 }
 
 ECode RecentsVerticalScrollView::SetOnScrollListener(
@@ -625,7 +626,7 @@ void RecentsVerticalScrollView::SetOverScrollEffectPadding(
     return;
 }
 
-void RecentsVerticalScrollView::OnSizeChanged(
+ECode RecentsVerticalScrollView::OnSizeChanged(
     /* [in] */ Int32 w,
     /* [in] */ Int32 h,
     /* [in] */ Int32 oldw,
@@ -639,7 +640,7 @@ void RecentsVerticalScrollView::OnSizeChanged(
     IViewGroup::Probe(mLinearLayout)->GetLayoutTransition((ILayoutTransition**)&transition);
     Boolean b;
     if (transition != NULL && (transition->IsRunning(&b), b)) {
-        return;
+        return NOERROR;
     }
     // Keep track of the last visible item in the list so we can restore it
     // to the bottom when the orientation changes.
@@ -647,6 +648,7 @@ void RecentsVerticalScrollView::OnSizeChanged(
 
     AutoPtr<SizeChangedRunnable> run = new SizeChangedRunnable(this);
     Post(run, &b);
+    return NOERROR;
 }
 
 ECode RecentsVerticalScrollView::SetAdapter(

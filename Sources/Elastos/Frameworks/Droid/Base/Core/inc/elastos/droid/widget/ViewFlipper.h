@@ -114,7 +114,7 @@ protected:
 
     CARAPI OnDetachedFromWindow();
 
-    CARAPI_(void) OnWindowVisibilityChanged(
+    CARAPI OnWindowVisibilityChanged(
         /* [in] */ Int32 visibility);
     /**
      * Internal method to start or stop dispatching flip {@link Message} based

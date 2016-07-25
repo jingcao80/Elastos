@@ -295,7 +295,7 @@ AutoPtr<ArrayOf<Float> > CBatteryMeterView::LoadBoltPoints(
     return ptsF;
 }
 
-void CBatteryMeterView::OnSizeChanged(
+ECode CBatteryMeterView::OnSizeChanged(
     /* [in] */ Int32 w,
     /* [in] */ Int32 h,
     /* [in] */ Int32 oldw,
@@ -308,6 +308,7 @@ void CBatteryMeterView::OnSizeChanged(
     mWarningTextPaint->GetFontMetrics((IPaintFontMetrics**)&fm);
     fm->GetAscent(&mWarningTextHeight);
     mWarningTextHeight = -mWarningTextHeight;
+    return NOERROR;
 }
 
 Int32 CBatteryMeterView::GetColorForLevel(

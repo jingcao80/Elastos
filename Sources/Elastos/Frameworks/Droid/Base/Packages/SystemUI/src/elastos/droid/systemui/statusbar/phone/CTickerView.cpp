@@ -16,7 +16,7 @@ ECode CTickerView::constructor(
     return TextSwitcher::constructor(context, attrs);
 }
 
-void CTickerView::OnSizeChanged(
+ECode CTickerView::OnSizeChanged(
     /* [in] */ Int32 w,
     /* [in] */ Int32 h,
     /* [in] */ Int32 oldw,
@@ -24,6 +24,7 @@ void CTickerView::OnSizeChanged(
 {
     TextSwitcher::OnSizeChanged(w, h, oldw, oldh);
     if (mTicker != NULL) mTicker->ReflowText();
+    return NOERROR;
 }
 
 ECode CTickerView::SetTicker(

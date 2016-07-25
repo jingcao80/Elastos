@@ -832,7 +832,7 @@ AutoPtr<IParcelable> IconMenuView::OnSaveInstanceState()
 
 }
 
-void IconMenuView::OnRestoreInstanceState(
+ECode IconMenuView::OnRestoreInstanceState(
     /* [in] */ IParcelable* state)
 {
     AutoPtr<IIconMenuViewSavedState> ss = IIconMenuViewSavedState::Probe(state);
@@ -844,7 +844,7 @@ void IconMenuView::OnRestoreInstanceState(
     Int32 childCount;
     GetChildCount(&childCount);
     if (focusedPosition >= childCount) {
-        return;
+        return NOERROR;
     }
 
     AutoPtr<IView> v;
@@ -853,6 +853,7 @@ void IconMenuView::OnRestoreInstanceState(
         Boolean rst;
         v->RequestFocus(&rst);
     }
+    return NOERROR;
 }
 
 } // namespace Menu

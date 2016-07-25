@@ -69,7 +69,7 @@ public:
 
 protected:
     // @Override
-    CARAPI_(void) OnScrollChanged(
+    CARAPI OnScrollChanged(
         /* [in] */ Int32 l,
         /* [in] */ Int32 t,
         /* [in] */ Int32 oldl,
@@ -88,7 +88,7 @@ protected:
         /* [in] */ Boolean isTouchEvent);
 
     // @Override
-    CARAPI_(void) OnOverScrolled(
+    CARAPI OnOverScrolled(
         /* [in] */ Int32 scrollX,
         /* [in] */ Int32 scrollY,
         /* [in] */ Boolean clampedX,

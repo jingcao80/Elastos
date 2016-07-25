@@ -1308,7 +1308,7 @@ public:
     CARAPI_(AutoPtr<IParcelable>) OnSaveInstanceState();
 
     //@Override
-    CARAPI_(void) OnRestoreInstanceState(
+    CARAPI OnRestoreInstanceState(
         /* [in] */ IParcelable* state);
 
     /**
@@ -2010,7 +2010,7 @@ protected:
     CARAPI_(Int32) GetBottomPaddingOffset();
 
     //@Override
-    CARAPI_(void) OnSizeChanged(
+    CARAPI OnSizeChanged(
         /* [in] */ Int32 w,
         /* [in] */ Int32 h,
         /* [in] */ Int32 oldw,
@@ -2082,7 +2082,7 @@ protected:
         /* [in] */ Boolean pressed);
 
     //@Override
-    virtual CARAPI_(void) OnOverScrolled(
+    virtual CARAPI OnOverScrolled(
         /* [in] */ Int32 scrollX,
         /* [in] */ Int32 scrollY,
         /* [in] */ Boolean clampedX,

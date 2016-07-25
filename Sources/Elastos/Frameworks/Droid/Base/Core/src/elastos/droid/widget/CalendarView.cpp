@@ -1624,7 +1624,7 @@ void CalendarView::LegacyCalendarViewDelegate::WeekView::DrawSelectedDateVertica
     mHost->mSelectedDateVerticalBar->Draw(canvas);
 }
 
-void CalendarView::LegacyCalendarViewDelegate::WeekView::OnSizeChanged(
+ECode CalendarView::LegacyCalendarViewDelegate::WeekView::OnSizeChanged(
     /* [in] */ Int32 w,
     /* [in] */ Int32 h,
     /* [in] */ Int32 oldw,
@@ -1632,6 +1632,7 @@ void CalendarView::LegacyCalendarViewDelegate::WeekView::OnSizeChanged(
 {
     mWidth = w;
     UpdateSelectionPositions();
+    return NOERROR;
 }
 
 void CalendarView::LegacyCalendarViewDelegate::WeekView::UpdateSelectionPositions()

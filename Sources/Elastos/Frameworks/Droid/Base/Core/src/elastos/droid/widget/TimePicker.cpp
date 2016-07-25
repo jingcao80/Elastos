@@ -274,7 +274,7 @@ AutoPtr<IParcelable> TimePicker::OnSaveInstanceState()
     return result;
 }
 
-void TimePicker::OnRestoreInstanceState(
+ECode TimePicker::OnRestoreInstanceState(
     /* [in] */ IParcelable* state)
 {
     View::BaseSavedState* ss = (View::BaseSavedState*)state;
@@ -282,6 +282,7 @@ void TimePicker::OnRestoreInstanceState(
     ss->GetSuperState((IParcelable**)&superState);
     FrameLayout::OnRestoreInstanceState(superState);
     mDelegate->OnRestoreInstanceState(state);
+    return NOERROR;
 }
 
 } // namespace Widget

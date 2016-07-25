@@ -879,7 +879,7 @@ ECode HorizontalScrollView::ShouldDelayChildPressedState(
     return NOERROR;
 }
 
-void HorizontalScrollView::OnOverScrolled(
+ECode HorizontalScrollView::OnOverScrolled(
     /* [in] */ Int32 scrollX,
     /* [in] */ Int32 scrollY,
     /* [in] */ Boolean clampedX,
@@ -902,6 +902,7 @@ void HorizontalScrollView::OnOverScrolled(
         FrameLayout::ScrollTo(scrollX, scrollY);
     }
     AwakenScrollBars();
+    return NOERROR;
 }
 
 ECode HorizontalScrollView::PerformAccessibilityAction(
@@ -1694,7 +1695,7 @@ ECode HorizontalScrollView::OnLayout(
     return NOERROR;
 }
 
-void HorizontalScrollView::OnSizeChanged(
+ECode HorizontalScrollView::OnSizeChanged(
     /* [in] */ Int32 w,
     /* [in] */ Int32 h,
     /* [in] */ Int32 oldw,
@@ -1705,7 +1706,7 @@ void HorizontalScrollView::OnSizeChanged(
     AutoPtr<IView> currentFocused;
     FindFocus((IView**)&currentFocused);
     if (NULL == currentFocused || this == currentFocused.Get()) {
-        return;
+        return NOERROR;
     }
 
     Int32 maxJump = mRight - mLeft;
@@ -1716,6 +1717,7 @@ void HorizontalScrollView::OnSizeChanged(
         Int32 scrollDelta = ComputeScrollDeltaToGetChildRectOnScreen(mTempRect);
         DoScrollX(scrollDelta);
     }
+    return NOERROR;
 }
 
 Boolean HorizontalScrollView::IsViewDescendantOf(
@@ -1873,7 +1875,7 @@ Int32 HorizontalScrollView::Clamp(
     return n;
 }
 
-void HorizontalScrollView::OnRestoreInstanceState(
+ECode HorizontalScrollView::OnRestoreInstanceState(
     /* [in] */ IParcelable* state)
 {
     AutoPtr<IApplicationInfo> info;
@@ -1884,7 +1886,7 @@ void HorizontalScrollView::OnRestoreInstanceState(
         // Some old apps reused IDs in ways they shouldn't have.
         // Don't break them, but they don't get scroll state restoration.
         FrameLayout::OnRestoreInstanceState(state);
-        return;
+        return NOERROR;
     }
     AutoPtr<HorizontalScrollViewSavedState> ss = (HorizontalScrollViewSavedState*) IViewBaseSavedState::Probe(state);
     AutoPtr<IParcelable> p;
@@ -1892,6 +1894,7 @@ void HorizontalScrollView::OnRestoreInstanceState(
     FrameLayout::OnRestoreInstanceState(p);
     mSavedState = ss;
     RequestLayout();
+    return NOERROR;
 }
 
 AutoPtr<IParcelable> HorizontalScrollView::OnSaveInstanceState()

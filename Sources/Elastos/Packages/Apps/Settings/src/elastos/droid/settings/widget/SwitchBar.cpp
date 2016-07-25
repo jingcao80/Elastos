@@ -333,7 +333,7 @@ AutoPtr<IParcelable> SwitchBar::OnSaveInstanceState()
     return IParcelable::Probe(ss);
 }
 
-void SwitchBar::OnRestoreInstanceState(
+ECode SwitchBar::OnRestoreInstanceState(
     /* [in] */ IParcelable* state)
 {
     AutoPtr<ISwitchBarSavedState> is = ISwitchBarSavedState::Probe(state);
@@ -348,6 +348,7 @@ void SwitchBar::OnRestoreInstanceState(
     ICompoundButton::Probe(mSwitch)->SetOnCheckedChangeListener(ss->mVisible ? this : NULL);
 
     RequestLayout();
+    return NOERROR;
 }
 
 } // namespace Widget

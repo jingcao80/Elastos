@@ -45,7 +45,7 @@ ECode ResizingTextEditText::OnTextChanged(
     return NOERROR;
 }
 
-void ResizingTextEditText::OnSizeChanged(
+ECode ResizingTextEditText::OnSizeChanged(
     /* [in] */ Int32 w,
     /* [in] */ Int32 h,
     /* [in] */ Int32 oldw,
@@ -53,6 +53,7 @@ void ResizingTextEditText::OnSizeChanged(
 {
     EditText::OnSizeChanged(w, h, oldw, oldh);
     ViewUtil::ResizeText(this, mOriginalTextSize, mMinTextSize);
+    return NOERROR;
 }
 
 } // namespace Widget

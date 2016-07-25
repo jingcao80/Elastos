@@ -441,7 +441,7 @@ ECode AdapterViewFlipper::OnDetachedFromWindow()
     return NOERROR;
 }
 
-void AdapterViewFlipper::OnWindowVisibilityChanged(
+ECode AdapterViewFlipper::OnWindowVisibilityChanged(
     /* [in] */ Int32 visibility)
 {
     // ==================before translated======================
@@ -452,6 +452,7 @@ void AdapterViewFlipper::OnWindowVisibilityChanged(
     AdapterViewAnimator::OnWindowVisibilityChanged(visibility);
     mVisible = (visibility == VISIBLE);
     UpdateRunning(FALSE);
+    return NOERROR;
 }
 
 ECode AdapterViewFlipper::UpdateRunning()

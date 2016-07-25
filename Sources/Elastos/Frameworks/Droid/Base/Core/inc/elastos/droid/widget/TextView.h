@@ -2424,7 +2424,7 @@ public:
 
     virtual CARAPI_(AutoPtr<IParcelable>) OnSaveInstanceState();
 
-    virtual CARAPI_(void) OnRestoreInstanceState(
+    virtual CARAPI OnRestoreInstanceState(
         /* [in] */ IParcelable* state);
 
     virtual CARAPI OnScreenStateChanged(
@@ -2855,7 +2855,7 @@ protected:
 
      virtual CARAPI_(Int32) ComputeVerticalScrollExtent();
 
-     virtual CARAPI_(void) OnScrollChanged(
+     virtual CARAPI OnScrollChanged(
         /* [in] */ Int32 horiz,
         /* [in] */ Int32 vert,
         /* [in] */ Int32 oldHoriz,

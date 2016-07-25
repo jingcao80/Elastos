@@ -237,7 +237,7 @@ protected:
         /* [in] */ Int32 widthMeasureSpec,
         /* [in] */ Int32 heightMeasureSpec);
 
-    virtual CARAPI_(void) OnOverScrolled(
+    virtual CARAPI OnOverScrolled(
         /* [in] */ Int32 scrollX,
         /* [in] */ Int32 scrollY,
         /* [in] */ Boolean clampedX,
@@ -288,7 +288,7 @@ protected:
         /* [in] */ Int32 right,
         /* [in] */ Int32 bottom);
 
-    virtual CARAPI_(void) OnSizeChanged(
+    virtual CARAPI OnSizeChanged(
         /* [in] */ Int32 w,
         /* [in] */ Int32 h,
         /* [in] */ Int32 oldw,
@@ -298,7 +298,7 @@ protected:
 
 
     // @Override
-    CARAPI_(void) OnRestoreInstanceState(
+    CARAPI OnRestoreInstanceState(
         /* [in] */ IParcelable* state);
 
     // @Override

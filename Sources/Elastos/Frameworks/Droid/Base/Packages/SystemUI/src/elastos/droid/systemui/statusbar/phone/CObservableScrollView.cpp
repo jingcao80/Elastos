@@ -141,7 +141,7 @@ ECode CObservableScrollView::DispatchTouchEvent(
     return ScrollView::DispatchTouchEvent(ev, result);
 }
 
-void CObservableScrollView::OnScrollChanged(
+ECode CObservableScrollView::OnScrollChanged(
     /* [in] */ Int32 l,
     /* [in] */ Int32 t,
     /* [in] */ Int32 oldl,
@@ -151,6 +151,7 @@ void CObservableScrollView::OnScrollChanged(
     if (mListener != NULL) {
         mListener->OnScrollChanged();
     }
+    return NOERROR;
 }
 
 Boolean CObservableScrollView::OverScrollBy(
@@ -185,7 +186,7 @@ ECode CObservableScrollView::Fling(
     return NOERROR;
 }
 
-void CObservableScrollView::OnOverScrolled(
+ECode CObservableScrollView::OnOverScrolled(
     /* [in] */ Int32 scrollX,
     /* [in] */ Int32 scrollY,
     /* [in] */ Boolean clampedX,
@@ -195,6 +196,7 @@ void CObservableScrollView::OnOverScrolled(
     if (mListener != NULL && mLastOverscrollAmount > 0) {
         mListener->OnOverscrolled(mLastX, mLastY, mLastOverscrollAmount);
     }
+    return NOERROR;
 }
 
 } // namespace Phone

@@ -194,7 +194,7 @@ ECode WaveView::constructor(
     return NOERROR;
 }
 
-void WaveView::OnSizeChanged(
+ECode WaveView::OnSizeChanged(
     /* [in] */ Int32 w,
     /* [in] */ Int32 h,
     /* [in] */ Int32 oldw,
@@ -203,6 +203,7 @@ void WaveView::OnSizeChanged(
     mLockCenterX = 0.5f * w;
     mLockCenterY = 0.5f * h;
     View::OnSizeChanged(w, h, oldw, oldh);
+    return NOERROR;
 }
 
 Int32 WaveView::GetSuggestedMinimumWidth()

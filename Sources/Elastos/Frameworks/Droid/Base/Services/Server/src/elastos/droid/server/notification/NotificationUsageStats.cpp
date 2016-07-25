@@ -167,7 +167,7 @@ void SingleNotificationStats::OnRemoved()
     Finish();
 }
 
-void SingleNotificationStats::OnVisibilityChanged(
+ECode SingleNotificationStats::OnVisibilityChanged(
     /* [in] */ Boolean visible)
 {
     Int64 elapsedNowMs = SystemClock::GetElapsedRealtime();
@@ -192,6 +192,7 @@ void SingleNotificationStats::OnVisibilityChanged(
     if (wasVisible != mIsVisible) {
         UpdateVisiblyExpandedStats();
     }
+    return NOERROR;
 }
 
 void SingleNotificationStats::OnExpansionChanged(

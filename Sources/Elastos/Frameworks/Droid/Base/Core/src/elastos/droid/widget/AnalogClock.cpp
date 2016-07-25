@@ -202,7 +202,7 @@ ECode AnalogClock::OnMeasure(
     return NOERROR;
 }
 
-void AnalogClock::OnSizeChanged(
+ECode AnalogClock::OnSizeChanged(
     /* [in] */ Int32 w,
     /* [in] */ Int32 h,
     /* [in] */ Int32 oldw,
@@ -210,6 +210,7 @@ void AnalogClock::OnSizeChanged(
 {
     View::OnSizeChanged(w, h, oldw, oldh);
     mChanged = TRUE;
+    return NOERROR;
 }
 
 void AnalogClock::OnDraw(

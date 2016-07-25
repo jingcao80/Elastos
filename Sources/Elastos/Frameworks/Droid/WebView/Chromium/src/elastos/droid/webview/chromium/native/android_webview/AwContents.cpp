@@ -1044,7 +1044,7 @@ void AwContents::AwViewMethodsImpl::OnFocusChanged(
 }
 
 //@Override
-void AwContents::AwViewMethodsImpl::OnSizeChanged(
+ECode AwContents::AwViewMethodsImpl::OnSizeChanged(
     /* [in] */ Int32 w,
     /* [in] */ Int32 h,
     /* [in] */ Int32 ow,
@@ -1060,10 +1060,11 @@ void AwContents::AwViewMethodsImpl::OnSizeChanged(
     mOwner->mContentViewCore->OnPhysicalBackingSizeChanged(w, h);
     mOwner->mContentViewCore->OnSizeChanged(w, h, ow, oh);
     mOwner->NativeOnSizeChanged(mOwner->mNativeAwContents, w, h, ow, oh);
+    return NOERROR;
 }
 
 //@Override
-void AwContents::AwViewMethodsImpl::OnVisibilityChanged(
+ECode AwContents::AwViewMethodsImpl::OnVisibilityChanged(
     /* [in] */ IView* changedView,
     /* [in] */ Int32 _visibility)
 {
@@ -1073,15 +1074,17 @@ void AwContents::AwViewMethodsImpl::OnVisibilityChanged(
     Boolean viewVisible = visibility == IView::VISIBLE;
     if (mOwner->mIsViewVisible == viewVisible) return;
     mOwner->SetViewVisibilityInternal(viewVisible);
+    return NOERROR;
 }
 
 //@Override
-void AwContents::AwViewMethodsImpl::OnWindowVisibilityChanged(
+ECode AwContents::AwViewMethodsImpl::OnWindowVisibilityChanged(
     /* [in] */ Int32 visibility)
 {
     Boolean windowVisible = visibility == IView::VISIBLE;
     if (mOwner->mIsWindowVisible == windowVisible) return;
     mOwner->SetWindowVisibilityInternal(windowVisible);
+    return NOERROR;
 }
 
 //===============================================================
@@ -2632,32 +2635,34 @@ void AwContents::OnFinishTemporaryDetach()
 /**
  * @see android.view.View#onSizeChanged()
  */
-void AwContents::OnSizeChanged(
+ECode AwContents::OnSizeChanged(
     /* [in] */ Int32 w,
     /* [in] */ Int32 h,
     /* [in] */ Int32 ow,
     /* [in] */ Int32 oh)
 {
-    mAwViewMethods->OnSizeChanged(w, h, ow, oh);
+    return mAwViewMethods->OnSizeChanged(w, h, ow, oh);
 }
 
 /**
  * @see android.view.View#onVisibilityChanged()
  */
-void AwContents::OnVisibilityChanged(
+ECode AwContents::OnVisibilityChanged(
     /* [in] */ IView* changedView,
     /* [in] */ Int32 visibility)
 {
     mAwViewMethods->OnVisibilityChanged(changedView, visibility);
+    return NOERROR;
 }
 
 /**
  * @see android.view.View#onWindowVisibilityChanged()
  */
-void AwContents::OnWindowVisibilityChanged(
+ECode AwContents::OnWindowVisibilityChanged(
     /* [in] */ Int32 visibility)
 {
     mAwViewMethods->OnWindowVisibilityChanged(visibility);
+    return NOERROR;
 }
 
 void AwContents::SetViewVisibilityInternal(

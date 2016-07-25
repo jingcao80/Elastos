@@ -844,7 +844,7 @@ ECode ActionBarOverlayLayout::OnConfigurationChanged(
     return NOERROR;
 }
 
-void ActionBarOverlayLayout::OnWindowVisibilityChanged(
+ECode ActionBarOverlayLayout::OnWindowVisibilityChanged(
     /* [in] */ Int32 visibility)
 {
     ViewGroup::OnWindowVisibilityChanged(visibility);
@@ -852,6 +852,7 @@ void ActionBarOverlayLayout::OnWindowVisibilityChanged(
     if (mActionBarVisibilityCallback != NULL) {
         mActionBarVisibilityCallback->OnWindowVisibilityChanged(visibility);
     }
+    return NOERROR;
 }
 
 ECode ActionBarOverlayLayout::GenerateDefaultLayoutParams(

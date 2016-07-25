@@ -3908,7 +3908,7 @@ void ViewGroup::SetChildrenDrawingCacheEnabled(
     }
 }
 
-void ViewGroup::OnAnimationStart()
+ECode ViewGroup::OnAnimationStart()
 {
     View::OnAnimationStart();
 
@@ -3929,9 +3929,10 @@ void ViewGroup::OnAnimationStart()
 
         mGroupFlags |= FLAG_CHILDREN_DRAWN_WITH_CACHE;
     }
+    return NOERROR;
 }
 
-void ViewGroup::OnAnimationEnd()
+ECode ViewGroup::OnAnimationEnd()
 {
     View::OnAnimationEnd();
 
@@ -3943,6 +3944,7 @@ void ViewGroup::OnAnimationEnd()
             SetChildrenDrawingCacheEnabled(FALSE);
         }
     }
+    return NOERROR;
 }
 
 ECode ViewGroup::CreateSnapshot(

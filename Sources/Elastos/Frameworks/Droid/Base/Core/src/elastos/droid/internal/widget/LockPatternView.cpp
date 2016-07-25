@@ -935,7 +935,7 @@ void LockPatternView::ClearPatternDrawLookup()
     }
 }
 
-void LockPatternView::OnSizeChanged(
+ECode LockPatternView::OnSizeChanged(
     /* [in] */ Int32 w,
     /* [in] */ Int32 h,
     /* [in] */ Int32 oldw,
@@ -946,6 +946,7 @@ void LockPatternView::OnSizeChanged(
 
     Int32 height = h - mPaddingTop - mPaddingBottom;
     mSquareHeight = height / (Float)mPatternSize;
+    return NOERROR;
 }
 
 Int32 LockPatternView::ResolveMeasured(
@@ -1555,7 +1556,7 @@ AutoPtr<IParcelable> LockPatternView::OnSaveInstanceState()
     return state;
 }
 
-void LockPatternView::OnRestoreInstanceState(
+ECode LockPatternView::OnRestoreInstanceState(
     /* [in] */ IParcelable* state)
 {
     AutoPtr<LockPatternViewSavedState> ss = (LockPatternViewSavedState*) state;
@@ -1576,6 +1577,7 @@ void LockPatternView::OnRestoreInstanceState(
     ss->IsTactileFeedbackEnabled(&mEnableHapticFeedback);
     ss->IsVisibleDots(&mVisibleDots);
     ss->IsShowErrorPath(&mShowErrorPath);
+    return NOERROR;
 }
 
 }// namespace Widget

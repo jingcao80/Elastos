@@ -1143,7 +1143,7 @@ AutoPtr<IParcelable> ExpandableListView::OnSaveInstanceState()
     return IParcelable::Probe(ss);
 }
 
-void ExpandableListView::OnRestoreInstanceState(
+ECode ExpandableListView::OnRestoreInstanceState(
     /* [in] */ IParcelable* state)
 {
     if (!(IExpandableListViewSavedState::Probe(state))) {
@@ -1159,6 +1159,7 @@ void ExpandableListView::OnRestoreInstanceState(
     if (mConnector.Get() != NULL && ss->mExpandedGroupMetadataList != NULL) {
         ((ExpandableListConnector*)mConnector.Get())->SetExpandedGroupMetadataList(IList::Probe(ss->mExpandedGroupMetadataList));
     }
+    return NOERROR;
 }
 
 ECode ExpandableListView::OnInitializeAccessibilityEvent(

@@ -956,7 +956,7 @@ ECode ScrollView::OnGenericMotionEvent(
     return FrameLayout::OnGenericMotionEvent(event, handled);
 }
 
-void ScrollView::OnOverScrolled(
+ECode ScrollView::OnOverScrolled(
     /* [in] */ Int32 scrollX,
     /* [in] */ Int32 scrollY,
     /* [in] */ Boolean clampedX,
@@ -981,6 +981,7 @@ void ScrollView::OnOverScrolled(
     }
 
     AwakenScrollBars();
+    return NOERROR;
 }
 
 ECode ScrollView::PerformAccessibilityAction(
@@ -1858,7 +1859,7 @@ ECode ScrollView::OnLayout(
     return NOERROR;
 }
 
-void ScrollView::OnSizeChanged(
+ECode ScrollView::OnSizeChanged(
     /* [in] */ Int32 w,
     /* [in] */ Int32 h,
     /* [in] */ Int32 oldw,
@@ -1869,7 +1870,7 @@ void ScrollView::OnSizeChanged(
     AutoPtr<IView> currentFocused;
     FindFocus((IView**)&currentFocused);
     if (NULL == currentFocused || (IView*)this == currentFocused.Get()) {
-        return;
+        return NOERROR;
     }
 
     // If the currently-focused view was visible on the screen when the
@@ -1881,6 +1882,7 @@ void ScrollView::OnSizeChanged(
         Int32 scrollDelta = ComputeScrollDeltaToGetChildRectOnScreen(mTempRect);
         DoScrollY(scrollDelta);
     }
+    return NOERROR;
 }
 
 Boolean ScrollView::IsViewDescendantOf(
@@ -2145,7 +2147,7 @@ Int32 ScrollView::Clamp(
     return n;
 }
 
-void ScrollView::OnRestoreInstanceState(
+ECode ScrollView::OnRestoreInstanceState(
     /* [in] */ IParcelable* state)
 {
     AutoPtr<IApplicationInfo> info;
@@ -2156,7 +2158,7 @@ void ScrollView::OnRestoreInstanceState(
         // Some old apps reused IDs in ways they shouldn't have.
         // Don't break them, but they don't get scroll state restoration.
         FrameLayout::OnRestoreInstanceState(state);
-        return;
+        return NOERROR;
     }
     AutoPtr<ScrollViewSavedState> ss = (ScrollViewSavedState*) state;
     AutoPtr<IParcelable> p;
@@ -2164,6 +2166,7 @@ void ScrollView::OnRestoreInstanceState(
     FrameLayout::OnRestoreInstanceState(p);
     mSavedState = ss;
     RequestLayout();
+    return NOERROR;
 }
 
 AutoPtr<IParcelable> ScrollView::OnSaveInstanceState()

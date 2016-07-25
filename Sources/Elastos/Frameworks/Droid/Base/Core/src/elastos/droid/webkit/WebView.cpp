@@ -2527,7 +2527,7 @@ void WebView::OnDrawVerticalScrollBar(
     viewDelegate->OnDrawVerticalScrollBar(canvas, scrollBar, l, t, r, b);
 }
 
-void WebView::OnOverScrolled(
+ECode WebView::OnOverScrolled(
     /* [in] */ Int32 scrollX,
     /* [in] */ Int32 scrollY,
     /* [in] */ Boolean clampedX,
@@ -2536,15 +2536,17 @@ void WebView::OnOverScrolled(
     AutoPtr<IWebViewProviderViewDelegate> viewDelegate;
     mProvider->GetViewDelegate((IWebViewProviderViewDelegate**)&viewDelegate);
     viewDelegate->OnOverScrolled(scrollX, scrollY, clampedX, clampedY);
+    return NOERROR;
 }
 
-void WebView::OnWindowVisibilityChanged(
+ECode WebView::OnWindowVisibilityChanged(
     /* [in] */ Int32 visibility)
 {
     AbsoluteLayout::OnWindowVisibilityChanged(visibility);
     AutoPtr<IWebViewProviderViewDelegate> viewDelegate;
     mProvider->GetViewDelegate((IWebViewProviderViewDelegate**)&viewDelegate);
     viewDelegate->OnWindowVisibilityChanged(visibility);
+    return NOERROR;
 }
 
 void WebView::OnDraw(
@@ -2631,7 +2633,7 @@ Boolean WebView::SetFrame(
     return result;
 }
 
-void WebView::OnSizeChanged(
+ECode WebView::OnSizeChanged(
     /* [in] */ Int32 w,
     /* [in] */ Int32 h,
     /* [in] */ Int32 ow,
@@ -2641,9 +2643,10 @@ void WebView::OnSizeChanged(
     AutoPtr<IWebViewProviderViewDelegate> viewDelegate;
     mProvider->GetViewDelegate((IWebViewProviderViewDelegate**)&viewDelegate);
     viewDelegate->OnSizeChanged(w, h, ow, oh);
+    return NOERROR;
 }
 
-void WebView::OnScrollChanged(
+ECode WebView::OnScrollChanged(
     /* [in] */ Int32 l,
     /* [in] */ Int32 t,
     /* [in] */ Int32 oldl,
@@ -2653,6 +2656,7 @@ void WebView::OnScrollChanged(
     AutoPtr<IWebViewProviderViewDelegate> viewDelegate;
     mProvider->GetViewDelegate((IWebViewProviderViewDelegate**)&viewDelegate);
     viewDelegate->OnScrollChanged(l, t, oldl, oldt);
+    return NOERROR;
 }
 
 Boolean WebView::DispatchKeyEvent(

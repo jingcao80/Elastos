@@ -148,7 +148,7 @@ protected:
     virtual CARAPI OnDetachedFromWindow();
 
 
-    virtual CARAPI_(void) OnWindowVisibilityChanged(
+    virtual CARAPI OnWindowVisibilityChanged(
         /* [in] */ Int32 visibility);
 
 private:

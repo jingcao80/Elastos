@@ -4424,12 +4424,12 @@ ECode TextView::RemoveMisspelledSpans(
     return NOERROR;
 }
 
-void TextView::OnRestoreInstanceState(
+ECode TextView::OnRestoreInstanceState(
     /* [in] */ IParcelable* state)
 {
     if (ITextViewSavedState::Probe(state) == NULL) {
        View::OnRestoreInstanceState(state);
-       return;
+       return NOERROR;
     }
 
     AutoPtr<CTextViewSavedState> ss =
@@ -4480,6 +4480,7 @@ void TextView::OnRestoreInstanceState(
         Boolean result;
         Post(runnable, &result);
     }
+    return NOERROR;
 }
 
 ECode TextView::SetFreezesText(
@@ -10246,7 +10247,7 @@ ECode TextView::PerformLongClick(
     return NOERROR;
 }
 
-void TextView::OnScrollChanged(
+ECode TextView::OnScrollChanged(
     /* [in] */ Int32 horiz,
     /* [in] */ Int32 vert,
     /* [in] */ Int32 oldHoriz,
@@ -10256,6 +10257,7 @@ void TextView::OnScrollChanged(
     if (mEditor != NULL) {
         TO_EDITOR(mEditor)->OnScrollChanged();
     }
+    return NOERROR;
 }
 
 ECode TextView::IsSuggestionsEnabled(

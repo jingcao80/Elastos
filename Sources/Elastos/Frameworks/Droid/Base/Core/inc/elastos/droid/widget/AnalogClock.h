@@ -86,7 +86,7 @@ protected:
         /* [in] */ Int32 widthMeasureSpec,
         /* [in] */ Int32 heightMeasureSpec);
 
-    virtual CARAPI_(void) OnSizeChanged(
+    virtual CARAPI OnSizeChanged(
         /* [in] */ Int32 w,
         /* [in] */ Int32 h,
         /* [in] */ Int32 oldw,

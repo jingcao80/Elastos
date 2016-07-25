@@ -887,7 +887,7 @@ void KeyboardView::ComputeProximityThreshold(
     mProximityThreshold *= mProximityThreshold; // Square it
 }
 
-void KeyboardView::OnSizeChanged(
+ECode KeyboardView::OnSizeChanged(
     /* [in] */ Int32 w,
     /* [in] */ Int32 h,
     /* [in] */ Int32 oldw,
@@ -900,6 +900,7 @@ void KeyboardView::OnSizeChanged(
 
     // Release the buffer, if any and it will be reallocated on the next draw
     mBuffer = NULL;
+    return NOERROR;
 }
 
 void KeyboardView::OnDraw(

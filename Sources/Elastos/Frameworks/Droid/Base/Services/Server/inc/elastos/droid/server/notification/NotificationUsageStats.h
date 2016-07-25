@@ -57,7 +57,7 @@ public:
 
     CARAPI_(void) OnRemoved();
 
-    CARAPI_(void) OnVisibilityChanged(
+    CARAPI OnVisibilityChanged(
         /* [in] */ Boolean visible);
 
     CARAPI_(void) OnExpansionChanged(

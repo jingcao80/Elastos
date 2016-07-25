@@ -2100,7 +2100,7 @@ ECode CellLayout::OnLayout(
     return NOERROR;
 }
 
-void CellLayout::OnSizeChanged(
+ECode CellLayout::OnSizeChanged(
     /* [in] */ Int32 w,
     /* [in] */ Int32 h,
     /* [in] */ Int32 oldw,
@@ -2110,6 +2110,7 @@ void CellLayout::OnSizeChanged(
     mBackgroundRect->Set(0, 0, w, h);
     mForegroundRect->Set(mForegroundPadding, mForegroundPadding,
             w - mForegroundPadding, h - mForegroundPadding);
+    return NOERROR;
 }
 
 void CellLayout::SetChildrenDrawingCacheEnabled(

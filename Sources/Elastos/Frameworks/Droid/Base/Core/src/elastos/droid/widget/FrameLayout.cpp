@@ -662,7 +662,7 @@ void FrameLayout::LayoutChildren(
     }
 }
 
-void FrameLayout::OnSizeChanged(
+ECode FrameLayout::OnSizeChanged(
     /* [in] */ Int32 w,
     /* [in] */ Int32 h,
     /* [in] */ Int32 oldw,
@@ -670,6 +670,7 @@ void FrameLayout::OnSizeChanged(
 {
     ViewGroup::OnSizeChanged(w, h, oldw, oldh);
     mForegroundBoundsChanged = TRUE;
+    return NOERROR;
 }
 
 ECode FrameLayout::Draw(

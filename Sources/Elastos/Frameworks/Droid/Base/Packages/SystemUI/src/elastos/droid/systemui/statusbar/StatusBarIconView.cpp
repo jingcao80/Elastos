@@ -316,16 +316,17 @@ ECode StatusBarIconView::OnInitializeAccessibilityEvent(
     return NOERROR;
 }
 
-void StatusBarIconView::OnSizeChanged(
+ECode StatusBarIconView::OnSizeChanged(
     /* [in] */ Int32 w,
     /* [in] */ Int32 h,
     /* [in] */ Int32 oldw,
     /* [in] */ Int32 oldh)
 {
-     AnimatedImageView::OnSizeChanged(w, h, oldw, oldh);
+    AnimatedImageView::OnSizeChanged(w, h, oldw, oldh);
     if (mNumberBackground != NULL) {
         PlaceNumber();
     }
+    return NOERROR;
 }
 
 void StatusBarIconView::OnDraw(

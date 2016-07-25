@@ -1028,7 +1028,7 @@ ECode ResolverDrawerLayout::OnSaveInstanceState(
     return NOERROR;
 }
 
-void ResolverDrawerLayout::OnRestoreInstanceState(
+ECode ResolverDrawerLayout::OnRestoreInstanceState(
     /* [in] */ IParcelable* state)
 {
     ResolverDrawerLayoutSavedState* ss = (ResolverDrawerLayoutSavedState*)state;
@@ -1036,6 +1036,7 @@ void ResolverDrawerLayout::OnRestoreInstanceState(
     ss->GetSuperState((IParcelable**)&parcl);
     View::OnRestoreInstanceState(parcl);
     mOpenOnLayout = ss->mOpen;
+    return NOERROR;
 }
 
 }// namespace Widget

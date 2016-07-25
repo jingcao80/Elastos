@@ -1077,7 +1077,7 @@ AutoPtr<IView> ListView::MoveSelection(
     return sel;
 }
 
-void ListView::OnSizeChanged(
+ECode ListView::OnSizeChanged(
     /* [in] */ Int32 w,
     /* [in] */ Int32 h,
     /* [in] */ Int32 oldw,
@@ -1106,6 +1106,7 @@ void ListView::OnSizeChanged(
         }
     }
     AbsListView::OnSizeChanged(w, h, oldw, oldh);
+    return NOERROR;
 }
 
 ECode ListView::OnMeasure(

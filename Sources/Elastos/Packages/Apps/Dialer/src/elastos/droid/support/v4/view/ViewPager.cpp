@@ -1480,13 +1480,13 @@ AutoPtr<IParcelable> ViewPager::OnSaveInstanceState()
     return IParcelable::Probe(ss);
 }
 
-void ViewPager::OnRestoreInstanceState(
+ECode ViewPager::OnRestoreInstanceState(
     /* [in] */ IParcelable* state)
 {
     AutoPtr<IViewPagerSavedState> ss = IViewPagerSavedState::Probe(state);
     if (ss == NULL) {
         ViewGroup::OnRestoreInstanceState(state);
-        return;
+        return NOERROR;
     }
 
     AutoPtr<CViewPagerSavedState> ssObj = (CViewPagerSavedState*)ss.Get();
@@ -1503,6 +1503,7 @@ void ViewPager::OnRestoreInstanceState(
         mRestoredAdapterState = ssObj->mAdapterState;
         mRestoredClassLoader = ssObj->mLoader;
     }
+    return NOERROR;
 }
 
 ECode ViewPager::AddView(
@@ -1727,7 +1728,7 @@ ECode ViewPager::OnMeasure(
     return NOERROR;
 }
 
-void ViewPager::OnSizeChanged(
+ECode ViewPager::OnSizeChanged(
     /* [in] */ Int32 w,
     /* [in] */ Int32 h,
     /* [in] */ Int32 oldw,
@@ -1739,6 +1740,7 @@ void ViewPager::OnSizeChanged(
     if (w != oldw) {
         RecomputeScrollPosition(w, oldw, mPageMargin, mPageMargin);
     }
+    return NOERROR;
 }
 
 void ViewPager::RecomputeScrollPosition(

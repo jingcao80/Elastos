@@ -40,10 +40,14 @@ ECode BrightnessMirrorController::Runnable1::Run()
 //===============================================================================
 CAR_INTERFACE_IMPL(BrightnessMirrorController, Object, IBrightnessMirrorController)
 
-BrightnessMirrorController::BrightnessMirrorController(
-    /* [in] */ IStatusBarWindowView* statusBarWindow)
+BrightnessMirrorController::BrightnessMirrorController()
     : TRANSITION_DURATION_OUT(150)
     , TRANSITION_DURATION_IN(200)
+{
+}
+
+ECode BrightnessMirrorController::constructor(
+    /* [in] */ IStatusBarWindowView* statusBarWindow)
 {
     mInt2Cache = ArrayOf<Int32>::Alloc(2);
     IView* statusbar = IView::Probe(statusBarWindow);
@@ -57,6 +61,7 @@ BrightnessMirrorController::BrightnessMirrorController(
 
 ECode BrightnessMirrorController::ShowMirror()
 {
+    Logger::I(TAG, " >> ShowMirror");
     mBrightnessMirror->SetVisibility(IView::VISIBLE);
     mScrimBehind->AnimateViewAlpha(0.0f, TRANSITION_DURATION_OUT, CPhoneStatusBar::ALPHA_OUT);
     AutoPtr<IViewPropertyAnimator> a;
@@ -68,6 +73,7 @@ ECode BrightnessMirrorController::ShowMirror()
 
 ECode BrightnessMirrorController::HideMirror()
 {
+    Logger::I(TAG, " >> HideMirror");
     mScrimBehind->AnimateViewAlpha(1.0f, TRANSITION_DURATION_IN, CPhoneStatusBar::ALPHA_IN);
     AutoPtr<IViewPropertyAnimator> a;
     mPanelHolder->Animate((IViewPropertyAnimator**)&a);

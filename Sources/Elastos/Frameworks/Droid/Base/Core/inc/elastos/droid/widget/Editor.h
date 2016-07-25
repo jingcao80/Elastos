@@ -1044,7 +1044,7 @@ public:
 
     CARAPI_(void) UpdatePosition();
 
-    CARAPI_(void) OnScrollChanged();
+    CARAPI OnScrollChanged();
 
 private:
     // 3 handles
@@ -1525,7 +1525,7 @@ public: /* package */
 
     CARAPI_(Boolean) AreSuggestionsShown();
 
-    CARAPI_(void) OnScrollChanged();
+    CARAPI OnScrollChanged();
 
     CARAPI_(void) MakeBlink();
 

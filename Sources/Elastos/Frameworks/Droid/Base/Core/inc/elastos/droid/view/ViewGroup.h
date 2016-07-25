@@ -1442,9 +1442,9 @@ protected:
     CARAPI_(void) SetChildrenDrawingCacheEnabled(
         /* [in] */ Boolean enabled);
 
-    CARAPI_(void) OnAnimationStart();
+    CARAPI OnAnimationStart();
 
-    CARAPI_(void) OnAnimationEnd();
+    CARAPI OnAnimationEnd();
 
     CARAPI CreateSnapshot(
         /* [in] */ BitmapConfig quality,
