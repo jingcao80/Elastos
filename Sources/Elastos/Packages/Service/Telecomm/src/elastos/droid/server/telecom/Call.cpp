@@ -612,7 +612,9 @@ ECode Call::GetName(
 {
     VALIDATE_NOT_NULL(result)
     String name;
-    mCallerInfo->GetName(&name);
+    if (mCallerInfo != NULL) {
+        mCallerInfo->GetName(&name);
+    }
     *result = mCallerInfo == NULL ? String(NULL) : name;
     return NOERROR;
 }
@@ -1009,8 +1011,8 @@ ECode Call::ProcessDirectToVoicemail()
 {
     if (mDirectToVoicemailQueryPending) {
         Boolean shouldSendToVoicemail;
-        mCallerInfo->GetShouldSendToVoicemail(&shouldSendToVoicemail);
-        if (mCallerInfo != NULL && shouldSendToVoicemail) {
+        if (mCallerInfo != NULL
+            && (mCallerInfo->GetShouldSendToVoicemail(&shouldSendToVoicemail), shouldSendToVoicemail)) {
             Log::I("Call", "Directing call to voicemail: %s.", TO_CSTR(this));
             // TODO: Once we move State handling from CallsManager to Call, we
             // will not need to set STATE_RINGING state prior to calling reject.
@@ -1405,9 +1407,8 @@ ECode Call::GetContactUri(
 {
     VALIDATE_NOT_NULL(result)
 
-        Boolean contactExists;
-        mCallerInfo->GetContactExists(&contactExists);
-        if (mCallerInfo == NULL || !contactExists) {
+        Boolean contactExists = FALSE;
+        if (mCallerInfo == NULL || (mCallerInfo->GetContactExists(&contactExists), !contactExists)) {
             return GetHandle(result);
         }
         AutoPtr<IContactsContractContacts> helper;
@@ -1425,7 +1426,9 @@ ECode Call::GetRingtone(
     VALIDATE_NOT_NULL(result)
 
     AutoPtr<IUri> contactRingtoneUri;
-    mCallerInfo->GetContactRingtoneUri((IUri**)&contactRingtoneUri);
+    if (mCallerInfo != NULL) {
+        mCallerInfo->GetContactRingtoneUri((IUri**)&contactRingtoneUri);
+    }
     *result = mCallerInfo == NULL ? NULL : contactRingtoneUri;
     REFCOUNT_ADD(*result)
     return NOERROR;
