@@ -2,6 +2,7 @@
 #include "Elastos.Droid.Os.h"
 #include "Elastos.Droid.Internal.h"
 #include "elastos/droid/internal/telephony/cat/CommandParamsFactory.h"
+#include "elastos/droid/internal/telephony/cat/CCatMenu.h"
 #include "elastos/droid/internal/telephony/cat/RilMessageDecoder.h"
 #include "elastos/droid/internal/telephony/cat/ValueParser.h"
 #include "elastos/droid/internal/telephony/cat/CatLog.h"
@@ -538,8 +539,8 @@ Boolean CommandParamsFactory::ProcessSelectItem(
 {
     CatLog::D(IHandler::Probe(this), String("process SelectItem"));
 
-    assert(0 && "TODO");
-    AutoPtr<IMenu> menu; // = new Menu();
+    AutoPtr<CCatMenu> menu;
+    CCatMenu::NewByFriend((CCatMenu**)&menu);
     AutoPtr<IconId> titleIconId;
     AutoPtr<ItemsIconId> itemsIconId;
     AutoPtr<IIterator> iter;
@@ -548,15 +549,13 @@ Boolean CommandParamsFactory::ProcessSelectItem(
     AutoPtr<ComprehensionTlv> ctlv = SearchForTag(ComprehensionTlvTag_ALPHA_ID,
             ctlvs);
     if (ctlv != NULL) {
-        assert(0 && "TODO");
-        // menu->mTitle = ValueParser::RetrieveAlphaId(ctlv);
+        menu->mTitle = ValueParser::RetrieveAlphaId(ctlv);
     }
 
     while (TRUE) {
         ctlv = SearchForNextTag(ComprehensionTlvTag_ITEM, iter);
         if (ctlv != NULL) {
-            assert(0 && "TODO");
-            // menu->mItems->Add(ValueParser::RetrieveItem(ctlv));
+            menu->mItems->Add(ValueParser::RetrieveItem(ctlv));
         }
         else {
             break;
@@ -564,81 +563,76 @@ Boolean CommandParamsFactory::ProcessSelectItem(
     }
 
     // We must have at least one menu item.
-    assert(0 && "TODO");
-    // if (menu->mItems->GetSize() == 0) {
-    //     // throw new ResultException(ResultCode_REQUIRED_VALUES_MISSING);
-    //     return FALSE;
-    // }
+    Int32 size = 0;
+    menu->mItems->GetSize(&size);
+    if (size == 0) {
+        assert(0 && "ResultException");
+        // throw new ResultException(ResultCode_REQUIRED_VALUES_MISSING);
+        return FALSE;
+    }
 
     ctlv = SearchForTag(ComprehensionTlvTag_ITEM_ID, ctlvs);
     if (ctlv != NULL) {
         // CAT items are listed 1...n while list start at 0, need to
         // subtract one.
-        assert(0 && "TODO");
-        // menu->mDefaultItem = ValueParser::RetrieveItemId(ctlv) - 1;
+        menu->mDefaultItem = ValueParser::RetrieveItemId(ctlv) - 1;
     }
 
     ctlv = SearchForTag(ComprehensionTlvTag_ICON_ID, ctlvs);
     if (ctlv != NULL) {
         mIconLoadState = LOAD_SINGLE_ICON;
         titleIconId = ValueParser::RetrieveIconId(ctlv);
-        assert(0 && "TODO");
-        // menu->mTitleIconSelfExplanatory = titleIconId->mSelfExplanatory;
+        menu->mTitleIconSelfExplanatory = titleIconId->mSelfExplanatory;
     }
 
     ctlv = SearchForTag(ComprehensionTlvTag_ITEM_ICON_ID_LIST, ctlvs);
     if (ctlv != NULL) {
         mIconLoadState = LOAD_MULTI_ICONS;
         itemsIconId = ValueParser::RetrieveItemsIconId(ctlv);
-        assert(0 && "TODO");
-        // menu->mItemsIconSelfExplanatory = itemsIconId->mSelfExplanatory;
+        menu->mItemsIconSelfExplanatory = itemsIconId->mSelfExplanatory;
     }
 
     Boolean presentTypeSpecified = (cmdDet->mCommandQualifier & 0x01) != 0;
     if (presentTypeSpecified) {
         if ((cmdDet->mCommandQualifier & 0x02) == 0) {
-            assert(0 && "TODO");
-            // menu->mPresentationType = PresentationType_DATA_VALUES;
+            menu->mPresentationType = PresentationType_DATA_VALUES;
         }
         else {
-            assert(0 && "TODO");
-            // menu->mPresentationType = PresentationType_NAVIGATION_OPTIONS;
+            menu->mPresentationType = PresentationType_NAVIGATION_OPTIONS;
         }
     }
-    assert(0 && "TODO");
-    // menu->mSoftKeyPreferred = (cmdDet->mCommandQualifier & 0x04) != 0;
-    // menu->mHelpAvailable = (cmdDet->mCommandQualifier & 0x80) != 0;
+    menu->mSoftKeyPreferred = (cmdDet->mCommandQualifier & 0x04) != 0;
+    menu->mHelpAvailable = (cmdDet->mCommandQualifier & 0x80) != 0;
 
-    assert(0 && "TODO");
-    // mCmdParams = new SelectItemParams(cmdDet, menu, titleIconId != NULL);
+    mCmdParams = new SelectItemParams(cmdDet, menu, titleIconId != NULL);
 
     // Load icons data if needed.
     switch(mIconLoadState) {
-    case LOAD_NO_ICON:
-        return FALSE;
-    case LOAD_SINGLE_ICON: {
-        mloadIcon = TRUE;
-        AutoPtr<IMessage> msg;
-        ObtainMessage(MSG_ID_LOAD_ICON_DONE, (IMessage**)&msg);
-        mIconLoader->LoadIcon(titleIconId->mRecordNumber, msg);
-        break;
-    }
-    case LOAD_MULTI_ICONS: {
-        AutoPtr<ArrayOf<Int32> > recordNumbers = itemsIconId->mRecordNumbers;
-        if (titleIconId != NULL) {
-            // Create a new array for all the icons (title and items).
-            recordNumbers = ArrayOf<Int32>::Alloc(itemsIconId->mRecordNumbers->GetLength() + 1);
-            (*recordNumbers)[0] = titleIconId->mRecordNumber;
-            assert(0 && "TODO");
-            // System::Arraycopy(itemsIconId->mRecordNumbers, 0, recordNumbers,
-            //         1, itemsIconId->mRecordNumbers->GetLength());
+        case LOAD_NO_ICON:
+            return FALSE;
+        case LOAD_SINGLE_ICON: {
+            mloadIcon = TRUE;
+            AutoPtr<IMessage> msg;
+            ObtainMessage(MSG_ID_LOAD_ICON_DONE, (IMessage**)&msg);
+            mIconLoader->LoadIcon(titleIconId->mRecordNumber, msg);
+            break;
         }
-        mloadIcon = TRUE;
-        AutoPtr<IMessage> msg;
-        ObtainMessage(MSG_ID_LOAD_ICON_DONE, (IMessage**)&msg);
-        mIconLoader->LoadIcons(recordNumbers, msg);
-        break;
-    }
+        case LOAD_MULTI_ICONS: {
+            AutoPtr<ArrayOf<Int32> > recordNumbers = itemsIconId->mRecordNumbers;
+            if (titleIconId != NULL) {
+                // Create a new array for all the icons (title and items).
+                recordNumbers = ArrayOf<Int32>::Alloc(itemsIconId->mRecordNumbers->GetLength() + 1);
+                (*recordNumbers)[0] = titleIconId->mRecordNumber;
+                // System::Arraycopy(itemsIconId->mRecordNumbers, 0, recordNumbers,
+                //         1, itemsIconId->mRecordNumbers->GetLength());
+                itemsIconId->mRecordNumbers->Copy(0, recordNumbers, 1, itemsIconId->mRecordNumbers->GetLength());
+            }
+            mloadIcon = TRUE;
+            AutoPtr<IMessage> msg;
+            ObtainMessage(MSG_ID_LOAD_ICON_DONE, (IMessage**)&msg);
+            mIconLoader->LoadIcons(recordNumbers, msg);
+            break;
+        }
     }
     return TRUE;
 }
@@ -999,10 +993,9 @@ Boolean CommandParamsFactory::ProcessBIPClient(
     /* [in] */ IList/*<ComprehensionTlv*>*/* ctlvs)
 {
     CommandType commandType = cmdDet->mTypeOfCommand;
-    assert(0 && "TODO");
-    // if (commandType != NULL) {
-    //     CatLog::D(this, "process "+ commandType.name());
-    // }
+    if (commandType != -1) {
+        CatLog::D(this->Probe(EIID_IInterface), String("process ") + StringUtils::ToString(commandType));
+    }
 
     AutoPtr<ITextMessage> _textMsg;
     CTextMessage::New((ITextMessage**)&_textMsg);

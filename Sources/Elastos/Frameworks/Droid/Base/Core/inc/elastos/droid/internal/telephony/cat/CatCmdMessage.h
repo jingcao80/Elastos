@@ -72,7 +72,7 @@ public:
         CARAPI GetCallMsg(
             /* [out] */ ITextMessage** result);
 
-    private:
+    public:
         AutoPtr<ITextMessage> mConfirmMsg;
         AutoPtr<ITextMessage> mCallMsg;
     };
@@ -90,7 +90,7 @@ public:
         CARAPI GetEventList(
             /* [out] */ ArrayOf<Int32>** eventList);
 
-    private:
+    public:
         AutoPtr<ArrayOf<Int32> > mEventList;
     };
 

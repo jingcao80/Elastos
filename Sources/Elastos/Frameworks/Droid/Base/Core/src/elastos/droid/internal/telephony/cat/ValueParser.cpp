@@ -5,6 +5,7 @@
 #include "elastos/droid/internal/telephony/cat/ValueParser.h"
 #include "elastos/droid/internal/telephony/cat/CatLog.h"
 #include "elastos/droid/internal/telephony/cat/CatService.h"
+#include "elastos/droid/internal/telephony/cat/CCommandDetails.h"
 #include "elastos/droid/internal/telephony/cat/CDuration.h"
 #include "elastos/droid/internal/telephony/cat/CItem.h"
 #include "elastos/droid/internal/telephony/cat/CTextAttribute.h"
@@ -40,7 +41,9 @@ namespace Cat {
 AutoPtr<CommandDetails> ValueParser::RetrieveCommandDetails(
     /* [in] */ ComprehensionTlv* ctlv)
 {
-    AutoPtr<CommandDetails> cmdDet = new CommandDetails();
+    AutoPtr<IParcelable> cd;
+    CCommandDetails::New((IParcelable**)&cd);
+    AutoPtr<CommandDetails> cmdDet = (CommandDetails*)cd.Get();
     AutoPtr<ArrayOf<Byte> > rawValue;
     ctlv->GetRawValue((ArrayOf<Byte>**)&rawValue);
     Int32 valueIndex = 0;

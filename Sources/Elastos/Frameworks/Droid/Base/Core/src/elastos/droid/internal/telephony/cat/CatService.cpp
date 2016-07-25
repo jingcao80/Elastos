@@ -4,6 +4,8 @@
 #include "Elastos.CoreLibrary.IO.h"
 #include "Elastos.CoreLibrary.Utility.h"
 #include "elastos/droid/internal/telephony/cat/CatService.h"
+#include "elastos/droid/internal/telephony/cat/CatMenu.h"
+#include "elastos/droid/internal/telephony/cat/ResponseData.h"
 #include "elastos/droid/content/CIntent.h"
 #include "elastos/droid/internal/telephony/cat/RilMessage.h"
 #include "elastos/droid/internal/telephony/cat/CatLog.h"
@@ -12,8 +14,8 @@
 #include "elastos/droid/internal/telephony/cat/Input.h"
 #include "elastos/droid/internal/telephony/cat/Duration.h"
 #include "elastos/droid/internal/telephony/uicc/CUiccControllerHelper.h"
-#include "elastos/droid/internal/telephony/uicc/CIccUtils.h"
 #include "elastos/droid/internal/telephony/uicc/IccRefreshResponse.h"
+#include "elastos/droid/internal/telephony/IccUtils.h"
 #include "elastos/droid/os/HandlerThread.h"
 #include "elastos/droid/os/AsyncResult.h"
 #include "elastos/droid/os/CSystemProperties.h"
@@ -33,24 +35,27 @@ using Elastos::Droid::Internal::Telephony::Cat::Duration;
 using Elastos::Droid::Internal::Telephony::Uicc::CardState;
 using Elastos::Droid::Internal::Telephony::Uicc::CARDSTATE_ABSENT;
 using Elastos::Droid::Internal::Telephony::Uicc::CARDSTATE_PRESENT;
-using Elastos::Droid::Internal::Telephony::Uicc::IUiccCard;
-using Elastos::Droid::Internal::Telephony::Uicc::CIccUtils;
-using Elastos::Droid::Internal::Telephony::Uicc::IUiccControllerHelper;
 using Elastos::Droid::Internal::Telephony::Uicc::CUiccControllerHelper;
+using Elastos::Droid::Internal::Telephony::Uicc::IUiccControllerHelper;
 using Elastos::Droid::Internal::Telephony::Uicc::IccRefreshResponse;
+using Elastos::Droid::Internal::Telephony::Uicc::IUiccCard;
+using Elastos::Droid::Internal::Telephony::IccUtils;
 using Elastos::Droid::Internal::Telephony::IIccUtils;
 using Elastos::Droid::Os::HandlerThread;
 using Elastos::Droid::Os::AsyncResult;
 using Elastos::Droid::Os::ISystemProperties;
 using Elastos::Droid::Os::CSystemProperties;
 using Elastos::Droid::R;
-
+using Elastos::Core::IArrayOf;
 using Elastos::Core::ICharSequence;
+using Elastos::Core::IInteger32;
 using Elastos::Core::CString;
 using Elastos::Core::StringUtils;
 using Elastos::Core::IThread;
 using Elastos::IO::IOutputStream;
 using Elastos::IO::CByteArrayOutputStream;
+using Elastos::Utility::CLocaleHelper;
+using Elastos::Utility::ILocaleHelper;
 using Elastos::Utility::Logging::Logger;
 
 namespace Elastos {
@@ -253,8 +258,7 @@ ECode CatService::HandleMessage(
                                 IIccRefreshResponse::Probe(ar->mResult));
             }
             else {
-                assert(0 && "TODO");
-                // CatLog::D(ICatService::Probe(this), String("Icc REFRESH with exception: ") + ar->mException);
+                CatLog::D(ICatService::Probe(this), String("Icc REFRESH with exception: ") + TO_CSTR(ar->mException));
             }
         }
         else {
@@ -310,9 +314,18 @@ ECode CatService::HandleMessage(
             ar = (AsyncResult*)(IObject*)obj.Get();
             if (ar == NULL || ar->mResult == NULL || mCurrntCmd == NULL || mCurrntCmd->mCmdDet == NULL)
                 break;
-            assert(0 && "TODO");
-            // sendResult = (int[]) ar.result;
-            if (sendResult->GetLength() == 0)
+
+            AutoPtr<IArrayOf> array = IArrayOf::Probe(ar->mResult);
+            Int32 len = 0;
+            array->GetLength(&len);
+            sendResult = ArrayOf<Int32>::Alloc(len);
+            for (Int32 i = 0; i < len; i++) {
+                AutoPtr<IInterface> obj;
+                array->Get(i, (IInterface**)&obj);
+                IInteger32::Probe(obj)->GetValue(&(*sendResult)[i]);
+            }
+
+            if (len == 0)
                 break;
             switch ((*sendResult)[0]) {
                 default:
@@ -516,8 +529,7 @@ void CatService::HandleCommand(
 {
     CommandType type;
     cmdParams->GetCommandType(&type);
-    assert(0 && "TODO");
-    // CatLog::D(ICatService::Probe(this), type.Name());
+    CatLog::D(ICatService::Probe(this), StringUtils::ToString(type));
 
     AutoPtr<ICharSequence> message;
     ResultCode resultCode;
@@ -568,27 +580,27 @@ void CatService::HandleCommand(
             break;
         }
         case PROVIDE_LOCAL_INFORMATION: {
-            assert(0 && "TODO");
-            // ResponseData resp;
-            // switch (cmdParams.mCmdDet.commandQualifier) {
-            //     case CommandParamsFactory::DTTZ_SETTING:
-            //         resp = new DTTZResponseData(NULL);
-            //         SendTerminalResponse(cmdParams->mCmdDet, ResultCode_OK, FALSE, 0, resp);
-            //         break;
-            //     case CommandParamsFactory::LANGUAGE_SETTING:
-            //         AutoPtr<ILocaleHelper> hlp;
-            //         CLocaleHelper::AcquireSingleton((ILocaleHelper**)&hlp);
-            //         AutoPtr<ILocale> loc;
-            //         hlp->GetDefault((ILocale**)&loc);
-            //         String lang;
-            //         loc->GetLanguage(&lang);
-            //         resp = new LanguageResponseData(lang);
-            //         SendTerminalResponse(cmdParams->mCmdDet, ResultCode_OK, FALSE, 0, resp);
-            //         break;
-            //     default:
-            //         SendTerminalResponse(cmdParams->mCmdDet, ResultCode_OK, FALSE, 0, NULL);
-            // }
-            // // No need to start STK app here.
+            ResponseData* resp = NULL;
+            switch (cmdParams->mCmdDet->mCommandQualifier) {
+                case CommandParamsFactory::DTTZ_SETTING:
+                    resp = new DTTZResponseData(NULL);
+                    SendTerminalResponse(cmdParams->mCmdDet, ResultCode_OK, FALSE, 0, resp);
+                    break;
+                case CommandParamsFactory::LANGUAGE_SETTING: {
+                    AutoPtr<ILocaleHelper> hlp;
+                    CLocaleHelper::AcquireSingleton((ILocaleHelper**)&hlp);
+                    AutoPtr<ILocale> loc;
+                    hlp->GetDefault((ILocale**)&loc);
+                    String lang;
+                    loc->GetLanguage(&lang);
+                    resp = new LanguageResponseData(lang);
+                    SendTerminalResponse(cmdParams->mCmdDet, ResultCode_OK, FALSE, 0, resp);
+                    break;
+                }
+                default:
+                    SendTerminalResponse(cmdParams->mCmdDet, ResultCode_OK, FALSE, 0, NULL);
+            }
+            // No need to start STK app here.
             return;
         }
         case LAUNCH_BROWSER: {
@@ -719,9 +731,8 @@ void CatService::BroadcastCatCmdIntent(
     intent->AddFlags(IIntent::FLAG_RECEIVER_FOREGROUND);
     intent->PutExtra(String("STK CMD"), IParcelable::Probe(cmdMsg));
     intent->PutExtra(String("SLOT_ID"), mSlotId);
-    assert(0 && "TODO");
-    // CatLog::D(ICatService::Probe(this), String("Sending CmdMsg: ") + cmdMsg
-    //         + String(" on slotid:") + StringUtils::ToString(mSlotId));
+    CatLog::D(ICatService::Probe(this), String("Sending CmdMsg: ") + TO_CSTR(cmdMsg)
+            + String(" on slotid:") + StringUtils::ToString(mSlotId));
     mContext->SendBroadcast(intent, IAppInterface::STK_PERMISSION);
 }
 
@@ -804,11 +815,7 @@ void CatService::SendTerminalResponse(
 
     AutoPtr<ArrayOf<Byte> > rawData;
     buf->ToByteArray((ArrayOf<Byte>**)&rawData);
-    AutoPtr<IIccUtils> iccu;
-    assert(0 && "TODO");
-    // CIccUtils::AcquireSingleton((IIccUtils**)&iccu);
-    String hexString;
-    iccu->BytesToHexString(rawData, &hexString);
+    String hexString = IccUtils::BytesToHexString(rawData);
     if (DBG) {
         CatLog::D(ICatService::Probe(this), String("TERMINAL RESPONSE: ") + hexString);
     }
@@ -823,17 +830,16 @@ void CatService::EncodeOptionalTags(
     /* [in] */ IByteArrayOutputStream* buf)
 {
     CommandType cmdType = cmdDet->mTypeOfCommand;
-    // if (cmdType != NULL) {
+    if (cmdType != -1) {
         switch (cmdType) {
             case GET_INKEY:
                 // ETSI TS 102 384,27.22.4.2.8.4.2.
                 // If it is a response for GET_INKEY command and the response timeout
                 // occured, then add DURATION TLV for variable timeout case.
-                assert(0 && "TODO");
-                // if ((resultCode == ResultCode_NO_RESPONSE_FROM_USER) &&
-                //     (cmdInput != NULL) && (cmdInput->mDuration != NULL)) {
-                //     GetInKeyResponse(buf, cmdInput);
-                // }
+                if ((resultCode == ResultCode_NO_RESPONSE_FROM_USER) &&
+                    (cmdInput != NULL) && (((Input*)cmdInput)->mDuration != NULL)) {
+                    GetInKeyResponse(buf, cmdInput);
+                }
                 break;
             case PROVIDE_LOCAL_INFORMATION:
                 if ((cmdDet->mCommandQualifier == CommandParamsFactory::LANGUAGE_SETTING) &&
@@ -842,15 +848,14 @@ void CatService::EncodeOptionalTags(
                 }
                 break;
             default:
-                assert(0 && "TODO");
-                // CatLog::D(ICatService::Probe(this), String("encodeOptionalTags() Unsupported Cmd details=")
-                //         + cmdDet);
+                CatLog::D(ICatService::Probe(this), String("encodeOptionalTags() Unsupported Cmd details=")
+                        + TO_CSTR(cmdDet));
                 break;
         }
-    // }
-    // else {
-    //     CatLog::D(ICatService::Probe(this), String("encodeOptionalTags() bad Cmd details=") + cmdDet);
-    // }
+    }
+    else {
+        CatLog::D(ICatService::Probe(this), String("encodeOptionalTags() bad Cmd details=") + TO_CSTR(cmdDet));
+    }
 }
 
 void CatService::GetInKeyResponse(
@@ -863,8 +868,7 @@ void CatService::GetInKeyResponse(
     IOutputStream::Probe(buf)->Write(0x02); // length
     AutoPtr<Input> cinput = (Input*)cmdInput;
     AutoPtr<Duration> cd = (Duration*)(cinput->mDuration.Get());
-    assert(0 && "TODO");
-    // IOutputStream::Probe(buf)->Write(cd->timeUnit.TimeUnit_SECOND); // Time (Unit,Seconds)
+    IOutputStream::Probe(buf)->Write(TimeUnit_SECOND); // Time (Unit,Seconds)
     IOutputStream::Probe(buf)->Write(cd->mTimeInterval); // Time Duration
 }
 
@@ -927,11 +931,7 @@ void CatService::SendMenuSelection(
     Int32 len = rawData->GetLength() - 2; // minus (tag + length)
     (*rawData)[1] = (Byte) len;
 
-    AutoPtr<IIccUtils> iccu;
-    assert(0 && "TODO");
-    // CIccUtils::AcquireSingleton((IIccUtils**)&iccu);
-    String hexString;
-    iccu->BytesToHexString(rawData, &hexString);
+    String hexString = IccUtils::BytesToHexString(rawData);
 
     mCmdIf->SendEnvelope(hexString, NULL);
 }
@@ -1013,11 +1013,7 @@ void CatService::EventDownload(
     Int32 len = rawData->GetLength() - 2; // minus (tag + length)
     (*rawData)[1] = (Byte) len;
 
-    AutoPtr<IIccUtils> iccu;
-    assert(0 && "TODO");
-    // CIccUtils::AcquireSingleton((IIccUtils**)&iccu);
-    String hexString;
-    iccu->BytesToHexString(rawData, &hexString);
+    String hexString = IccUtils::BytesToHexString(rawData);
 
     CatLog::D(ICatService::Probe(this), String("ENVELOPE COMMAND: ") + hexString);
 
@@ -1081,12 +1077,19 @@ Boolean CatService::ValidateResponse(
 }
 
 Boolean CatService::RemoveMenu(
-    /* [in] */ IMenu* menu)
+    /* [in] */ IMenu* _menu)
 {
-    assert(0 && "TODO");
-    // if (menu->mItems->GetSize() == 1 && menu->mItems->Get(0) == NULL) {
-    //     return TRUE;
-    // }
+    CatMenu* menu = (CatMenu*)_menu;
+    if (menu == NULL || menu->mItems == NULL) {
+        CatLog::D(ICatService::Probe(this), String("Unable to get Menu's items size"));
+        return TRUE;
+    }
+    Int32 size = 0;
+    menu->mItems->GetSize(&size);
+    AutoPtr<IInterface> obj;
+    if (size == 1 && (menu->mItems->Get(0, (IInterface**)&obj), obj.Get()) == NULL) {
+        return TRUE;
+    }
     return FALSE;
 }
 

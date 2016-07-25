@@ -16,6 +16,7 @@ SOURCES += CatResponseMessage.cpp
 SOURCES += CatService.cpp
 SOURCES += CatServiceFactory.cpp
 SOURCES += CommandDetails.cpp
+SOURCES += CCommandDetails.cpp
 SOURCES += CommandParams.cpp
 SOURCES += CommandParamsFactory.cpp
 SOURCES += ComprehensionTlv.cpp

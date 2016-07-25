@@ -1,9 +1,19 @@
 
+#include "Elastos.Droid.Content.h"
 #include "Elastos.Droid.Graphics.h"
 #include "Elastos.Droid.Internal.h"
 #include "elastos/droid/internal/telephony/uicc/UiccIccUtils.h"
+#include "elastos/droid/internal/telephony/GsmAlphabet.h"
+#include "elastos/droid/content/res/CResources.h"
+#include <elastos/droid/R.h>
+#include <elastos/core/StringBuilder.h>
 #include <elastos/utility/logging/Logger.h>
 
+using Elastos::Droid::Content::Res::CResources;
+using Elastos::Droid::Content::Res::IResources;
+using Elastos::Droid::Internal::Telephony::GsmAlphabet;
+using Elastos::Droid::R;
+using Elastos::Core::StringBuilder;
 using Elastos::Utility::Logging::Logger;
 
 namespace Elastos {
@@ -33,13 +43,13 @@ String UiccIccUtils::BcdToString(
     //
     //     v = data[i] & 0xf;
     //     if (v > 9)  break;
-    //     ret.append((char)('0' + v));
+    //     ret.append((Char32)('0' + v));
     //
     //     v = (data[i] >> 4) & 0xf;
     //     // Some PLMNs have 'f' as high nibble, ignore it
     //     if (v == 0xf) continue;
     //     if (v > 9)  break;
-    //     ret.append((char)('0' + v));
+    //     ret.append((Char32)('0' + v));
     // }
     //
     // return ret.toString();
@@ -60,13 +70,13 @@ String UiccIccUtils::CdmaBcdToString(
     //     Int32 v;
     //     v = data[i] & 0xf;
     //     if (v > 9)  v = 0;
-    //     ret.append((char)('0' + v));
+    //     ret.append((Char32)('0' + v));
     //
     //     if (++count == length) break;
     //
     //     v = (data[i] >> 4) & 0xf;
     //     if (v > 9)  v = 0;
-    //     ret.append((char)('0' + v));
+    //     ret.append((Char32)('0' + v));
     //     ++count;
     // }
     // return ret.toString();
@@ -119,96 +129,96 @@ String UiccIccUtils::AdnStringFieldToString(
     /* [in] */ Int32 offset,
     /* [in] */ Int32 length)
 {
-    // ==================before translated======================
-    // if (length == 0) {
-    //     return "";
-    // }
-    // if (length >= 1) {
-    //     if (data[offset] == (byte) 0x80) {
-    //         Int32 ucslen = (length - 1) / 2;
-    //         String ret = NULL;
-    //
-    //         try {
-    //             ret = new String(data, offset + 1, ucslen * 2, "utf-16be");
-    //         } catch (UnsupportedEncodingException ex) {
-    //             Rlog.e(LOGTAG, "implausible UnsupportedEncodingException",
-    //                   ex);
-    //         }
-    //
-    //         if (ret != NULL) {
-    //             // trim off trailing FFFF characters
-    //
-    //             ucslen = ret.length();
-    //             while (ucslen > 0 && ret.charAt(ucslen - 1) == '\uFFFF')
-    //                 ucslen--;
-    //
-    //             return ret.substring(0, ucslen);
-    //         }
-    //     }
-    // }
-    //
-    // boolean isucs2 = false;
-    // char base = '\0';
-    // Int32 len = 0;
-    //
-    // if (length >= 3 && data[offset] == (byte) 0x81) {
-    //     len = data[offset + 1] & 0xFF;
-    //     if (len > length - 3)
-    //         len = length - 3;
-    //
-    //     base = (char) ((data[offset + 2] & 0xFF) << 7);
-    //     offset += 3;
-    //     isucs2 = true;
-    // } else if (length >= 4 && data[offset] == (byte) 0x82) {
-    //     len = data[offset + 1] & 0xFF;
-    //     if (len > length - 4)
-    //         len = length - 4;
-    //
-    //     base = (char) (((data[offset + 2] & 0xFF) << 8) |
-    //                     (data[offset + 3] & 0xFF));
-    //     offset += 4;
-    //     isucs2 = true;
-    // }
-    //
-    // if (isucs2) {
-    //     StringBuilder ret = new StringBuilder();
-    //
-    //     while (len > 0) {
-    //         // UCS2 subset case
-    //
-    //         if (data[offset] < 0) {
-    //             ret.append((char) (base + (data[offset] & 0x7F)));
-    //             offset++;
-    //             len--;
-    //         }
-    //
-    //         // GSM character set case
-    //
-    //         Int32 count = 0;
-    //         while (count < len && data[offset + count] >= 0)
-    //             count++;
-    //
-    //         ret.append(GsmAlphabet.gsm8BitUnpackedToString(data,
-    //                    offset, count));
-    //
-    //         offset += count;
-    //         len -= count;
-    //     }
-    //
-    //     return ret.toString();
-    // }
-    //
-    // Resources resource = Resources.getSystem();
-    // String defaultCharset = "";
+    if (length == 0) {
+        return String("");
+    }
+    if (length >= 1) {
+        if ((*data)[offset] == (byte) 0x80) {
+            Int32 ucslen = (length - 1) / 2;
+            String ret;
+
+            // try {
+            // ret = new String(data, offset + 1, ucslen * 2, "utf-16be");
+            ret = String(*data, offset + 1, ucslen * 2);
+            // } catch (UnsupportedEncodingException ex) {
+            //     Rlog.e(LOGTAG, "implausible UnsupportedEncodingException",
+            //           ex);
+            // }
+
+            if (ret != NULL) {
+                // trim off trailing FFFF characters
+                ucslen = ret.GetLength();
+                while (ucslen > 0 && ret.GetChar(ucslen - 1) == 0xFFFF)
+                    ucslen--;
+
+                return ret.Substring(0, ucslen);
+            }
+        }
+    }
+
+    Boolean isucs2 = false;
+    Char32 base = '\0';
+    Int32 len = 0;
+
+    if (length >= 3 && (*data)[offset] == (byte) 0x81) {
+        len = (*data)[offset + 1] & 0xFF;
+        if (len > length - 3)
+            len = length - 3;
+
+        base = (Char32) (((*data)[offset + 2] & 0xFF) << 7);
+        offset += 3;
+        isucs2 = TRUE;
+    }
+    else if (length >= 4 && (*data)[offset] == (byte) 0x82) {
+        len = (*data)[offset + 1] & 0xFF;
+        if (len > length - 4)
+            len = length - 4;
+
+        base = (Char32) ((((*data)[offset + 2] & 0xFF) << 8) |
+                        ((*data)[offset + 3] & 0xFF));
+        offset += 4;
+        isucs2 = TRUE;
+    }
+
+    if (isucs2) {
+        StringBuilder ret;
+
+        while (len > 0) {
+            // UCS2 subset case
+
+            if ((*data)[offset] < 0) {
+                ret.AppendChar((Char32) (base + ((*data)[offset] & 0x7F)));
+                offset++;
+                len--;
+            }
+
+            // GSM character set case
+
+            Int32 count = 0;
+            while (count < len && (*data)[offset + count] >= 0)
+                count++;
+
+            String v;
+            GsmAlphabet::Gsm8BitUnpackedToString(data, offset, count, &v);
+            ret.Append(v);
+
+            offset += count;
+            len -= count;
+        }
+
+        return ret.ToString();
+    }
+
+    AutoPtr<IResources> resource = CResources::GetSystem();
+    String defaultCharset("");
     // try {
-    //     defaultCharset =
-    //             resource.getString(com.android.internal.R.string.gsm_alphabet_default_charset);
+    resource->GetString(R::string::gsm_alphabet_default_charset, &defaultCharset);
     // } catch (NotFoundException e) {
     //     // Ignore Exception and defaultCharset is set to a empty string.
     // }
-    // return GsmAlphabet.gsm8BitUnpackedToString(data, offset, length, defaultCharset.trim());
-    assert(0);
-    return String("");
+    String v;
+    GsmAlphabet::Gsm8BitUnpackedToString(data, offset, length, defaultCharset.Trim(), &v);
+    return v;
 }
 
 Int32 UiccIccUtils::HexCharToInt(
@@ -218,7 +228,7 @@ Int32 UiccIccUtils::HexCharToInt(
     if (c >= 'A' && c <= 'F') return (c - 'A' + 10);
     if (c >= 'a' && c <= 'f') return (c - 'a' + 10);
 
-    // throw new RuntimeException ("invalid hex char '" + c + "'");
+    // throw new RuntimeException ("invalid hex Char32 '" + c + "'");
     assert(0 && "RuntimeException");
     return 0;
 }
@@ -366,7 +376,7 @@ AutoPtr<IBitmap> UiccIccUtils::ParseToRGB(
     //         | (data[valueIndex++] & 0xFF);
     //
     // Int32[] colorIndexArray = getCLUT(data, clutOffset, colorNumber);
-    // if (true == transparency) {
+    // if (TRUE == transparency) {
     //     colorIndexArray[colorNumber - 1] = Color.TRANSPARENT;
     // }
     //
@@ -393,10 +403,10 @@ AutoPtr< ArrayOf<Byte> > UiccIccUtils::StringToAdnStringField(
     // boolean isUcs2 = false;
     // try {
     //    for(Int32 i = 0; i < alphaTag.length(); i++) {
-    //        GsmAlphabet.countGsmSeptets(alphaTag.charAt(i), true);
+    //        GsmAlphabet.countGsmSeptets(alphaTag.charAt(i), TRUE);
     //    }
     // } catch (EncodeException e) {
-    //     isUcs2 = true;
+    //     isUcs2 = TRUE;
     // }
     // return stringToAdnStringField(alphaTag, isUcs2);
     assert(0);

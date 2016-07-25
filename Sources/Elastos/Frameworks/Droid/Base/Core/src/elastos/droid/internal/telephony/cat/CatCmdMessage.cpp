@@ -163,66 +163,66 @@ ECode CatCmdMessage::constructor(
     CommandType type;
     GetCmdType(&type);
     switch(type) {
-    case SET_UP_MENU:
-    case SELECT_ITEM: {
-        mMenu = ((SelectItemParams*) cmdParams.Get())->mMenu;
-        break;
-    }
-    case DISPLAY_TEXT:
-    case SET_UP_IDLE_MODE_TEXT:
-    case SEND_DTMF:
-    case SEND_SMS:
-    case REFRESH:
-    case SEND_SS:
-    case SEND_USSD: {
-        mTextMsg = ((DisplayTextParams*) cmdParams.Get())->mTextMsg;
-        break;
-    }
-    case GET_INPUT:
-    case GET_INKEY: {
-        mInput = ((GetInputParams*) cmdParams.Get())->mInput;
-        break;
-    }
-    case LAUNCH_BROWSER: {
-        mTextMsg = ((LaunchBrowserParams*) cmdParams.Get())->mConfirmMsg;
-        mBrowserSettings = new BrowserSettings();
-        mBrowserSettings->SetUrl(((LaunchBrowserParams*) cmdParams.Get())->mUrl);
-        mBrowserSettings->SetMode(((LaunchBrowserParams*) cmdParams.Get())->mMode);
-        break;
-    }
-    case PLAY_TONE: {
-        AutoPtr<PlayToneParams> params = (PlayToneParams*) cmdParams.Get();
-        mToneSettings = params->mSettings;
-        mTextMsg = params->mTextMsg;
-        break;
-    }
-    case GET_CHANNEL_STATUS: {
-        mTextMsg = ((CallSetupParams*) cmdParams.Get())->mConfirmMsg;
-        break;
-    }
-    case SET_UP_CALL: {
-        mCallSettings = new CallSettings();
-        mCallSettings->SetConfirmMsg(((CallSetupParams*) cmdParams.Get())->mConfirmMsg);
-        mCallSettings->SetCallMsg(((CallSetupParams*) cmdParams.Get())->mCallMsg);
-        break;
-    }
-    case OPEN_CHANNEL:
-    case CLOSE_CHANNEL:
-    case RECEIVE_DATA:
-    case SEND_DATA: {
-        AutoPtr<BIPClientParams> param = (BIPClientParams*) cmdParams.Get();
-        mTextMsg = param->mTextMsg;
-        break;
-    }
-    case SET_UP_EVENT_LIST: {
-        mSetupEventListSettings = new SetupEventListSettings();
-        mSetupEventListSettings->SetEventList(((SetEventListParams*) cmdParams.Get())->mEventInfo);
-        break;
-    }
-    case ACTIVATE:
-    case PROVIDE_LOCAL_INFORMATION:
-    default:
-        break;
+        case SET_UP_MENU:
+        case SELECT_ITEM: {
+            mMenu = ((SelectItemParams*) cmdParams.Get())->mMenu;
+            break;
+        }
+        case DISPLAY_TEXT:
+        case SET_UP_IDLE_MODE_TEXT:
+        case SEND_DTMF:
+        case SEND_SMS:
+        case REFRESH:
+        case SEND_SS:
+        case SEND_USSD: {
+            mTextMsg = ((DisplayTextParams*) cmdParams.Get())->mTextMsg;
+            break;
+        }
+        case GET_INPUT:
+        case GET_INKEY: {
+            mInput = ((GetInputParams*) cmdParams.Get())->mInput;
+            break;
+        }
+        case LAUNCH_BROWSER: {
+            mTextMsg = ((LaunchBrowserParams*) cmdParams.Get())->mConfirmMsg;
+            mBrowserSettings = new BrowserSettings();
+            mBrowserSettings->SetUrl(((LaunchBrowserParams*) cmdParams.Get())->mUrl);
+            mBrowserSettings->SetMode(((LaunchBrowserParams*) cmdParams.Get())->mMode);
+            break;
+        }
+        case PLAY_TONE: {
+            AutoPtr<PlayToneParams> params = (PlayToneParams*) cmdParams.Get();
+            mToneSettings = params->mSettings;
+            mTextMsg = params->mTextMsg;
+            break;
+        }
+        case GET_CHANNEL_STATUS: {
+            mTextMsg = ((CallSetupParams*) cmdParams.Get())->mConfirmMsg;
+            break;
+        }
+        case SET_UP_CALL: {
+            mCallSettings = new CallSettings();
+            mCallSettings->SetConfirmMsg(((CallSetupParams*) cmdParams.Get())->mConfirmMsg);
+            mCallSettings->SetCallMsg(((CallSetupParams*) cmdParams.Get())->mCallMsg);
+            break;
+        }
+        case OPEN_CHANNEL:
+        case CLOSE_CHANNEL:
+        case RECEIVE_DATA:
+        case SEND_DATA: {
+            AutoPtr<BIPClientParams> param = (BIPClientParams*) cmdParams.Get();
+            mTextMsg = param->mTextMsg;
+            break;
+        }
+        case SET_UP_EVENT_LIST: {
+            mSetupEventListSettings = new SetupEventListSettings();
+            mSetupEventListSettings->SetEventList(((SetEventListParams*) cmdParams.Get())->mEventInfo);
+            break;
+        }
+        case ACTIVATE:
+        case PROVIDE_LOCAL_INFORMATION:
+        default:
+            break;
     }
     return NOERROR;
 }
@@ -230,11 +230,39 @@ ECode CatCmdMessage::constructor(
 ECode CatCmdMessage::ReadFromParcel(
     /* [in] */ IParcel* in)
 {
-    assert(0 && "TODO");
-    // in->ReadParcelable(NULL, &mCmdDet);
-    // in->ReadParcelable(NULL, &mTextMsg);
-    // in->ReadParcelable(NULL, &mMenu);
-    // in->ReadParcelable(NULL, &mInput);
+    Boolean flag;
+    in->ReadBoolean(&flag);
+    mCmdDet = NULL;
+    if (flag) {
+        AutoPtr<IInterface> obj;
+        in->ReadInterfacePtr((Handle32*)&obj);
+        mCmdDet = (CommandDetails*)IParcelable::Probe(obj);
+    }
+
+    in->ReadBoolean(&flag);
+    mTextMsg = NULL;
+    if (flag) {
+        AutoPtr<IInterface> obj;
+        in->ReadInterfacePtr((Handle32*)&obj);
+        mTextMsg = ITextMessage::Probe(obj);
+    }
+
+    in->ReadBoolean(&flag);
+    mMenu = NULL;
+    if (flag) {
+        AutoPtr<IInterface> obj;
+        in->ReadInterfacePtr((Handle32*)&obj);
+        mMenu = IMenu::Probe(obj);
+    }
+
+    in->ReadBoolean(&flag);
+    mInput = NULL;
+    if (flag) {
+        AutoPtr<IInterface> obj;
+        in->ReadInterfacePtr((Handle32*)&obj);
+        mInput = IInput::Probe(obj);
+    }
+
     Byte num = 0;
     in->ReadByte(&num);
     mLoadIconFailed = (num == 1);
@@ -252,27 +280,41 @@ ECode CatCmdMessage::ReadFromParcel(
         break;
     }
     case PLAY_TONE: {
-        // mToneSettings = in->ReadParcelable(NULL);
+        in->ReadBoolean(&flag);
+        mToneSettings = NULL;
+        if (flag) {
+            AutoPtr<IInterface> obj;
+            in->ReadInterfacePtr((Handle32*)&obj);
+            mToneSettings = IToneSettings::Probe(obj);
+        }
         break;
     }
     case SET_UP_CALL: {
         mCallSettings = new CallSettings();
-        // in->ReadParcelable(NULL, &(mCallSettings->mConfirmMsg));
-        // in->ReadParcelable(NULL, &(mCallSettings->mCallMsg));
+        in->ReadBoolean(&flag);
+        AutoPtr<ITextMessage> cfm;
+        if (flag) {
+            AutoPtr<IInterface> obj;
+            in->ReadInterfacePtr((Handle32*)&obj);
+            cfm = ITextMessage::Probe(obj);
+        }
+        mCallSettings->mConfirmMsg = cfm;
+
+        AutoPtr<ITextMessage> cm;
+        in->ReadBoolean(&flag);
+        if (flag) {
+            AutoPtr<IInterface> obj;
+            in->ReadInterfacePtr((Handle32*)&obj);
+            cm = ITextMessage::Probe(obj);
+        }
+        mCallSettings->mCallMsg = cm;
         break;
     }
     case SET_UP_EVENT_LIST: {
         mSetupEventListSettings = new SetupEventListSettings();
-        Int32 length = 0;
-        in->ReadInt32(&length);
         AutoPtr<ArrayOf<Int32> > eventList;
-        mSetupEventListSettings->GetEventList((ArrayOf<Int32>**)&eventList);
-        eventList = ArrayOf<Int32>::Alloc(length);
-        for (Int32 i = 0; i < length; i++) {
-            Int32 r = 0;
-            in->ReadInt32(&r);
-            (*eventList)[i] = r;
-        }
+        in->ReadArrayOf((Handle32*)(&eventList));
+        mSetupEventListSettings->mEventList = eventList;
         break;
     }
     default:
@@ -284,10 +326,37 @@ ECode CatCmdMessage::ReadFromParcel(
 ECode CatCmdMessage::WriteToParcel(
     /* [in] */ IParcel* dest)
 {
-    IParcelable::Probe(mCmdDet)->WriteToParcel(dest);
-    IParcelable::Probe(mTextMsg)->WriteToParcel(dest);
-    IParcelable::Probe(mMenu)->WriteToParcel(dest);
-    IParcelable::Probe(mInput)->WriteToParcel(dest);
+    if (mCmdDet == NULL) {
+        dest->WriteBoolean(FALSE);
+    }
+    else {
+        dest->WriteBoolean(TRUE);
+        IParcelable::Probe(mCmdDet)->WriteToParcel(dest);
+    }
+
+    if (mTextMsg == NULL) {
+        dest->WriteBoolean(FALSE);
+    }
+    else {
+        dest->WriteBoolean(TRUE);
+        IParcelable::Probe(mTextMsg)->WriteToParcel(dest);
+    }
+
+    if (mMenu == NULL) {
+        dest->WriteBoolean(FALSE);
+    }
+    else {
+        dest->WriteBoolean(TRUE);
+        IParcelable::Probe(mMenu)->WriteToParcel(dest);
+    }
+
+    if (mInput == NULL) {
+        dest->WriteBoolean(FALSE);
+    }
+    else {
+        dest->WriteBoolean(TRUE);
+        IParcelable::Probe(mInput)->WriteToParcel(dest);
+    }
     dest->WriteByte((Byte) (mLoadIconFailed ? 1 : 0));
     Int32 type = 0;
     GetCmdType(&type);
@@ -302,23 +371,40 @@ ECode CatCmdMessage::WriteToParcel(
         break;
     }
     case PLAY_TONE: {
-        IParcelable::Probe(mToneSettings)->WriteToParcel(dest);
+        if (mToneSettings == NULL) {
+            dest->WriteBoolean(FALSE);
+        }
+        else {
+            dest->WriteBoolean(TRUE);
+            IParcelable::Probe(mToneSettings)->WriteToParcel(dest);
+        }
         break;
     }
     case SET_UP_CALL: {
         AutoPtr<ITextMessage> confirmMsg;
         mCallSettings->GetConfirmMsg((ITextMessage**)&confirmMsg);
-        IParcelable::Probe(confirmMsg)->WriteToParcel(dest);
+        if (confirmMsg == NULL) {
+            dest->WriteBoolean(FALSE);
+        }
+        else {
+            dest->WriteBoolean(TRUE);
+            IParcelable::Probe(confirmMsg)->WriteToParcel(dest);
+        }
         AutoPtr<ITextMessage> callMsg;
         mCallSettings->GetConfirmMsg((ITextMessage**)&callMsg);
-        IParcelable::Probe(callMsg)->WriteToParcel(dest);
+        if (callMsg == NULL) {
+            dest->WriteBoolean(FALSE);
+        }
+        else {
+            dest->WriteBoolean(TRUE);
+            IParcelable::Probe(callMsg)->WriteToParcel(dest);
+        }
         break;
     }
     case SET_UP_EVENT_LIST: {
         AutoPtr<ArrayOf<Int32> > eventList;
         mSetupEventListSettings->GetEventList((ArrayOf<Int32>**)&eventList);
-        assert(0 && "TODO");
-        // dest->Write(eventList);
+        dest->WriteArrayOf((Handle32)eventList.Get());
         break;
     }
     default:

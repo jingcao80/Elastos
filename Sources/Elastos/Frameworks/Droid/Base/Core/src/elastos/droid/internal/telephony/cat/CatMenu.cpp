@@ -3,6 +3,7 @@
 #include "Elastos.Droid.Internal.h"
 #include "Elastos.CoreLibrary.Utility.h"
 #include "elastos/droid/internal/telephony/cat/CatMenu.h"
+#include "elastos/droid/internal/telephony/cat/CItem.h"
 
 using Elastos::Utility::IArrayList;
 using Elastos::Utility::CArrayList;
@@ -77,7 +78,13 @@ ECode CatMenu::WriteToParcel(
     /* [in] */ IParcel* dest)
 {
     dest->WriteString(mTitle);
-    IParcelable::Probe(mTitleIcon)->WriteToParcel(dest);
+    if (mTitleIcon == NULL) {
+        dest->WriteBoolean(FALSE);
+    }
+    else {
+        dest->WriteBoolean(TRUE);
+        IParcelable::Probe(mTitleIcon)->WriteToParcel(dest);
+    }
     // write items list to the parcel.
     Int32 size = 0;
     mItems->GetSize(&size);
@@ -85,7 +92,14 @@ ECode CatMenu::WriteToParcel(
     for (Int32 i = 0; i < size; i++) {
         AutoPtr<IInterface> p;
         mItems->Get(i, (IInterface**)&p);
-        IParcelable::Probe(p)->WriteToParcel(dest);
+
+        if (p == NULL) {
+            dest->WriteBoolean(FALSE);
+        }
+        else {
+            dest->WriteBoolean(TRUE);
+            IParcelable::Probe(p)->WriteToParcel(dest);
+        }
     }
     dest->WriteInt32(mDefaultItem);
     dest->WriteInt32(mSoftKeyPreferred ? 1 : 0);
@@ -100,14 +114,22 @@ ECode CatMenu::ReadFromParcel(
     /* [in] */ IParcel* in)
 {
     in->ReadString(&mTitle);
-    IParcelable::Probe(mTitleIcon)->ReadFromParcel(in);
+    Boolean flag = FALSE;
+    in->ReadBoolean(&flag);
+    if (flag) {
+        IParcelable::Probe(mTitleIcon)->ReadFromParcel(in);
+    }
     // rebuild items list.
     CArrayList::New((IList**)&mItems);
     Int32 size = 0;
     in->ReadInt32(&size);
     for (Int32 i = 0; i < size; i++) {
-        assert(0 && "TODO");
-        AutoPtr<IItem> item;// = in->ReadParcelable(NULL);
+        AutoPtr<IItem> item;
+        in->ReadBoolean(&flag);
+        if (flag) {
+            CItem::New((IItem**)&item);
+            IParcelable::Probe(item)->ReadFromParcel(in);
+        }
         mItems->Add(item);
     }
     in->ReadInt32(&mDefaultItem);

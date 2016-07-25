@@ -1047,6 +1047,12 @@ module
             interface IParcelable;
         }
 
+        class CCommandDetails {
+            constructor();
+
+            interface IParcelable;
+        }
+
     } // Cat
     } // Telephony
     } // Internal

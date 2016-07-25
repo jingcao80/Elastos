@@ -84,7 +84,13 @@ ECode Item::WriteToParcel(
 {
     dest->WriteInt32(mId);
     dest->WriteString(mText);
-    IParcelable::Probe(mIcon)->WriteToParcel(dest);
+    if (mIcon != NULL) {
+        dest->WriteBoolean(TRUE);
+        IParcelable::Probe(mIcon)->WriteToParcel(dest);
+    }
+    else {
+        dest->WriteBoolean(FALSE);
+    }
     return NOERROR;
 }
 
@@ -93,7 +99,11 @@ ECode Item::ReadFromParcel(
 {
     in->ReadInt32(&mId);
     in->ReadString(&mText);
-    IParcelable::Probe(mIcon)->ReadFromParcel(in);
+    Boolean flag = FALSE;
+    in->ReadBoolean(&flag);
+    if (flag) {
+        IParcelable::Probe(mIcon)->ReadFromParcel(in);
+    }
     return NOERROR;
 }
 
