@@ -63,7 +63,7 @@ void CCaffeinatedScrollView::OnDraw(
     CheckFullScrollAction();
 }
 
-void CCaffeinatedScrollView::OnScrollChanged(
+ECode CCaffeinatedScrollView::OnScrollChanged(
     /* [in] */ Int32 l,
     /* [in] */ Int32 t,
     /* [in] */ Int32 oldl,
@@ -71,6 +71,7 @@ void CCaffeinatedScrollView::OnScrollChanged(
 {
     ScrollView::OnScrollChanged(l, t, oldl, oldt);
     CheckFullScrollAction();
+    return NOERROR;
 }
 
 void CCaffeinatedScrollView::CheckFullScrollAction()

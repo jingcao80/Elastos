@@ -48,7 +48,7 @@ protected:
         /* [in] */ ICanvas* canvas);
 
     // @Override
-    CARAPI_(void) OnScrollChanged(
+    CARAPI OnScrollChanged(
         /* [in] */ Int32 l,
         /* [in] */ Int32 t,
         /* [in] */ Int32 oldl,
