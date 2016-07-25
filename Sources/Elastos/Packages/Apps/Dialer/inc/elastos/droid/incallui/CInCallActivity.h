@@ -25,6 +25,17 @@ public:
 
     CAR_OBJECT_DECL()
 
+    /**
+     * Returns true when theActivity is in foreground (between onResume and onPause).
+     */
+    CARAPI_(Boolean) IsForegroundActivity();
+
+    /**
+     * Simulates a user click to hide the dialpad. This will update the UI to show the call card,
+     * update the checked state of the dialpad button, and update the proximity sensor state.
+     */
+    public void hideDialpadForDisconnect()
+
     CARAPI_(void) DismissKeyguard(
         /* [in] */ Boolean dismiss);
 
@@ -35,6 +46,13 @@ public:
     CARAPI_(Boolean) IsDialpadVisible();
 
     CARAPI_(void) ShowConferenceCallManager();
+
+    CARAPI_(void) ShowPostCharWaitDialog(
+        /* [in] */ const String& callId,
+        /* [in] */ const String& chars);
+
+    CARAPI_(void) MaybeShowErrorDialogOnDisconnect(
+        /* [in] */ IDisconnectCause* disconnectCause);
 
 public:
     static const String SHOW_DIALPAD_EXTRA;

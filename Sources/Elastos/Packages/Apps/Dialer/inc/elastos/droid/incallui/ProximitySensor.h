@@ -31,6 +31,12 @@ public:
         /* [in] */ InCallState oldState,
         /* [in] */ InCallState newState,
         /* [in] */ ICallList* callList);
+
+    /**
+     * Used to save when the UI goes in and out of the foreground.
+     */
+    CARAPI_(void) OnInCallShowing(
+        /* [in] */ Boolean showing);
 };
 
 } // namespace InCallUI

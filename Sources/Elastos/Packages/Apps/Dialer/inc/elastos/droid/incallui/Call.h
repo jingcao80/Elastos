@@ -2,11 +2,13 @@
 #ifndef __ELASTOS_DROID_INCALLUI_CALL_H__
 #define __ELASTOS_DROID_INCALLUI_CALL_H__
 
+#include "Elastos.Droid.Content.h"
 #include "_Elastos.Droid.Dialer.h"
 #include "elastos/droid/incallui/InCallVideoCallListener.h"
 #include <elastos/core/Object.h>
 #include <elastos/utility/etl/List.h>
 
+using Elastos::Droid::Content::IContext;
 using Elastos::Droid::Net::IUri;
 using Elastos::Droid::Telecom::ICallListener;
 using Elastos::Droid::Telecom::IDisconnectCause;
