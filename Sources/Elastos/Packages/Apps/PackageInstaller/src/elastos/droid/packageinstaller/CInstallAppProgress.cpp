@@ -203,6 +203,15 @@ ECode CInstallAppProgress::InnerHandler::HandleMessage(
     return NOERROR;
 }
 
+ECode CInstallAppProgress::InnerHandler::ToString(
+    /* [out] */ String* str)
+{
+    VALIDATE_NOT_NULL(str);
+    *str = "CInstallAppProgress::InnerHandler";
+    return NOERROR;
+}
+
+
 //=====================================================================
 //        CInstallAppProgress::InnerStartActivityOnClickListener
 //=====================================================================

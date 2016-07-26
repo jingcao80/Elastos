@@ -253,6 +253,15 @@ ECode CUninstallAppProgress::InnerHandler::HandleMessage(
     return NOERROR;
 }
 
+ECode CUninstallAppProgress::InnerHandler::ToString(
+    /* [out] */ String* str)
+{
+    VALIDATE_NOT_NULL(str);
+    *str = "CUninstallAppProgress::InnerHandler";
+    return NOERROR;
+}
+
+
 //=====================================================================
 //             CUninstallAppProgress::InnerOnClickListener
 //=====================================================================

@@ -29,14 +29,17 @@ private:
         CAR_INTERFACE_DECL();
 
         EndButtonClickListener(
+            /* [in] */ Int32 rowId,
             /* [in] */ CConferenceManagerFragment* host)
-            : mHost(host)
+            : mRowId(rowId)
+            , mHost(host)
         {}
 
         CARAPI OnClick(
             /* [in] */ IView* v);
 
     private:
+        Int32 mRowId;
         CConferenceManagerFragment* mHost;
     };
 
@@ -48,14 +51,17 @@ private:
         CAR_INTERFACE_DECL();
 
         SeparateButtonClickListener(
+            /* [in] */ Int32 rowId,
             /* [in] */ CConferenceManagerFragment* host)
-            : mHost(host)
+            : mRowId(rowId)
+            , mHost(host)
         {}
 
         CARAPI OnClick(
             /* [in] */ IView* v);
 
     private:
+        Int32 mRowId;
         CConferenceManagerFragment* mHost;
     };
 

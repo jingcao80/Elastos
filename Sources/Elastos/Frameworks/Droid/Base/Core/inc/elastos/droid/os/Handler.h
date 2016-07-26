@@ -248,8 +248,9 @@ public:
     CARAPI GetMessageQueue(
         /* [out] */ IMessageQueue** cq);
 
-    virtual ToString(
+    virtual CARAPI ToString(
         /* [out] */ String* str) = 0;
+
 private:
     CARAPI_(Boolean) EnqueueMessage(
         /* [in] */ IMessageQueue* queue,

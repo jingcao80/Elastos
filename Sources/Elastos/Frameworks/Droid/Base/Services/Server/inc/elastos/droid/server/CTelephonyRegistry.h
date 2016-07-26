@@ -334,8 +334,8 @@ public:
 
     CARAPI ToString(
         /* [out] */ String* str);
-private:
 
+private:
     //
     // the legacy intent Broadcasting
     //
@@ -385,7 +385,7 @@ private:
         /* [in] */ ILinkProperties* linkProperties,
         /* [in] */ const String& failCause);
 
-    Boolean CheckNotifyPermission(
+    CARAPI_(Boolean) CheckNotifyPermission(
         /* [in] */ const String& method);
 
     CARAPI CheckListenerPermission(
@@ -393,14 +393,14 @@ private:
 
     CARAPI HandleRemoveListLocked();
 
-    Boolean ValidateEventsAndUserLocked(
+    CARAPI_(Boolean) ValidateEventsAndUserLocked(
         /* [in] */ Record* r,
         /* [in] */ Int32 events);
 
-    Boolean ValidatePhoneId(
+    CARAPI_(Boolean) ValidatePhoneId(
         /* [in] */ Int32 phoneId);
 
-    static void Log(
+    static CARAPI_(void) Log(
         /* [in] */ const String& s);
 
     CARAPI LogServiceStateChanged(
@@ -413,7 +413,6 @@ private:
         /* [in] */ const String& prompt);
 
 private:
-
     static const String TAG;
     static const Boolean DBG;// = FALSE; // STOPSHIP if true
     static const Boolean DBG_LOC;// = FALSE; // STOPSHIP if true

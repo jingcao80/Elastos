@@ -359,7 +359,7 @@ ECode CTelephonyRegistry::Listen(
     Int32 myUid = UserHandle::GetMyUserId();
     if (VDBG) {
         Slogger::D(TAG, "listen: E pkg=%s events=0x%08x notifyNow=%d subId=%lld myUid=%d callerUid=%d, callback:%p",
-         pkgForDebug.string(), events, notifyNow, subId, myUid, callerUid, callback);
+                pkgForDebug.string(), events, notifyNow, subId, myUid, callerUid, callback);
     }
     if (events != 0) {
         /* Checks permission and throws Security exception */
@@ -1694,7 +1694,6 @@ ECode CTelephonyRegistry::ToStringLogSSC(
     }
     return NOERROR;
 }
-
 
 }// Server
 }// Droid

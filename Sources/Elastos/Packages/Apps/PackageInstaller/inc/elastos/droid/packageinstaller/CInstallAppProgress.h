@@ -97,6 +97,9 @@ private:
         CARAPI HandleMessage(
             /* [in] */ IMessage* msg);
 
+        CARAPI ToString(
+            /* [out] */ String* str);
+
     private:
         CInstallAppProgress* mOwner;
     };

@@ -3073,7 +3073,7 @@ ECode CContextImpl::EnforcePermission(
     /* [in] */ const String& message)
 {
     Int32 res;
-    CheckPermission(permission, pid, uid, &res);
+    FAIL_RETURN(CheckPermission(permission, pid, uid, &res));
     return Enforce(permission,
             res,
             FALSE,
@@ -3086,7 +3086,7 @@ ECode CContextImpl::EnforceCallingPermission(
     /* [in] */ const String& message)
 {
     Int32 res;
-    CheckCallingPermission(permission, &res);
+    FAIL_RETURN(CheckCallingPermission(permission, &res));
     return Enforce(permission,
             res,
             false,
@@ -3099,7 +3099,7 @@ ECode CContextImpl::EnforceCallingOrSelfPermission(
     /* [in] */ const String& message)
 {
     Int32 res;
-    CheckCallingOrSelfPermission(permission, &res);
+    FAIL_RETURN(CheckCallingOrSelfPermission(permission, &res));
     return Enforce(permission,
             res,
             TRUE,

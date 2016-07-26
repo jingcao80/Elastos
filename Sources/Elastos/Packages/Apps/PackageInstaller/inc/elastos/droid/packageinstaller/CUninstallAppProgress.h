@@ -90,8 +90,11 @@ private:
         InnerHandler(
             /* [in] */ CUninstallAppProgress* owner);
 
-        virtual CARAPI HandleMessage(
+        CARAPI HandleMessage(
             /* [in] */ IMessage* msg);
+
+        CARAPI ToString(
+            /* [out] */ String* str);
 
     private:
         CUninstallAppProgress* mOwner;
