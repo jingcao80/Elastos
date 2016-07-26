@@ -24,7 +24,9 @@ const Int32 ViewFlipper::FLIP_MSG = 1;
 ViewFlipper::MyHandler::MyHandler(
     /* [in] */ ViewFlipper* host)
     : mHost(host)
-{}
+{
+    Handler::constructor();
+}
 
 ECode ViewFlipper::MyHandler::HandleMessage(
     /* [in] */ IMessage* msg)

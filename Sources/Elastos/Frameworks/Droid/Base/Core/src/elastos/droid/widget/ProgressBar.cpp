@@ -692,11 +692,12 @@ void ProgressBar::ApplyIndeterminateTint()
 ECode ProgressBar::SetIndeterminateDrawableTiled(
     /* [in] */ IDrawable* d)
 {
+    AutoPtr<IDrawable> drawable;
     if (d != NULL) {
-        d = TileifyIndeterminate(d);
+        drawable = TileifyIndeterminate(d);
     }
 
-    SetIndeterminateDrawable(d);
+    SetIndeterminateDrawable(drawable);
     return NOERROR;
 }
 

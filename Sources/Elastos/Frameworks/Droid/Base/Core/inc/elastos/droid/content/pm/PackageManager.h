@@ -250,7 +250,9 @@ public:
         LegacyPackageInstallObserver(
             /* [in] */ IIPackageInstallObserver* legacy)
             : mLegacy(legacy)
-        {}
+        {
+            PackageInstallObserver::constructor();
+        }
 
         CARAPI OnPackageInstalled(
             /* [in] */ const String& basePackageName,
@@ -260,9 +262,11 @@ public:
         {
             if (mLegacy == NULL) return NOERROR;
             // try {
-                return mLegacy->PackageInstalled(basePackageName, returnCode);
+                mLegacy->PackageInstalled(basePackageName, returnCode);
             // } catch (RemoteException ignored) {
             // }
+            Release();
+            return NOERROR;
         }
     };
 

@@ -164,19 +164,17 @@ void TaskStack::AddTask(
         it = mTasks.Begin();
     }
     else {
-        List<AutoPtr<Task> >::ReverseIterator taskRit = mTasks.RBegin();
+        it = mTasks.End();
         if (!mService->IsCurrentProfileLocked(task->mUserId)) {
             // Place the task below all current user tasks.
-            while (taskRit != mTasks.REnd()) {
-                if (!mService->IsCurrentProfileLocked((*taskRit)->mUserId)) {
+            while (--it != mTasks.End()) {
+                if (!mService->IsCurrentProfileLocked((*it)->mUserId)) {
                     break;
                 }
-                ++taskRit;
             }
             // Put it above first non-current user task.
-            --taskRit;
+            ++it;
         }
-        it = (--(taskRit.GetBase()));
     }
     if (CWindowManagerService::DEBUG_TASK_MOVEMENT) {
         Slogger::D(CWindowManagerService::TAG, "addTask: task=%p toTop=%d pos=", task, toTop /*, stackNdx*/);

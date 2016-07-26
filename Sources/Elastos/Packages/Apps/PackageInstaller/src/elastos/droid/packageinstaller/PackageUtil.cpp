@@ -106,7 +106,7 @@ AutoPtr<IView> PackageUtil::InitSnippetForInstalledApp(
     IContext::Probe(pContext)->GetPackageManager((IPackageManager**)&pm);
     AutoPtr<IDrawable> icon;
     IPackageItemInfo::Probe(appInfo)->LoadIcon(pm, (IDrawable**)&icon);
-    if (TO_IINTERFACE(user) != TO_IINTERFACE(icon)) {
+    if (user != NULL) {
         AutoPtr<IPackageManager> packageManager;
         IContext::Probe(pContext)->GetPackageManager((IPackageManager**)&packageManager);
         packageManager->GetUserBadgedIcon(icon, user, (IDrawable**)&icon);

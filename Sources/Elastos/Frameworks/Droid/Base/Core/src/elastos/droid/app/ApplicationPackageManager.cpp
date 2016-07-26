@@ -1859,6 +1859,7 @@ ECode ApplicationPackageManager::InstallPackage(
         (IVerificationParams**)&verificationParams);
 
     AutoPtr<IPackageInstallObserver> lpio = new LegacyPackageInstallObserver(observer);
+    lpio->AddRef();
     return InstallCommon(packageURI, lpio, flags,
             installerPackageName, verificationParams, NULL);
 }
@@ -1878,6 +1879,7 @@ ECode ApplicationPackageManager::InstallPackageWithVerification(
         (IVerificationParams**)&verificationParams);
 
     AutoPtr<IPackageInstallObserver> lpio = new LegacyPackageInstallObserver(observer);
+    lpio->AddRef();
     return InstallCommon(packageURI, lpio, flags,
             installerPackageName, verificationParams, encryptionParams);
 }
@@ -1891,6 +1893,7 @@ ECode ApplicationPackageManager::InstallPackageWithVerificationAndEncryption(
     /* [in] */ IContainerEncryptionParams* encryptionParams)
 {
     AutoPtr<IPackageInstallObserver> lpio = new LegacyPackageInstallObserver(observer);
+    lpio->AddRef();
     return InstallCommon(packageURI, lpio, flags,
             installerPackageName, verificationParams, encryptionParams);
 }

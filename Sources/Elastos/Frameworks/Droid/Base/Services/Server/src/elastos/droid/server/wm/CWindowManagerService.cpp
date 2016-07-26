@@ -6655,7 +6655,10 @@ ECode CWindowManagerService::InKeyguardRestrictedInputMode(
     /* [out] */ Boolean* result)
 {
     VALIDATE_NOT_NULL(result)
-    return mPolicy->InKeyguardRestrictedKeyInputMode(result);
+    mPolicy->InKeyguardRestrictedKeyInputMode(result);
+    Slogger::D(TAG, "InKeyguardRestrictedInputMode result = %d", *result);
+    *result = FALSE;
+    return NOERROR;
 }
 
 ECode CWindowManagerService::IsKeyguardLocked(

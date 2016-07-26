@@ -312,7 +312,7 @@ ECode CUninstallerActivity::StartUninstallProgress()
     AutoPtr<IIntent> newIntent;
     CIntent::New(IIntent::ACTION_VIEW, (IIntent**)&newIntent);
     newIntent->PutExtra(IIntent::EXTRA_USER, IParcelable::Probe(mDialogInfo->user));
-    newIntent->PutExtra(IIntent::EXTRA_UNINSTALL_ALL_USERS, mDialogInfo->allUsers);
+    newIntent->PutBooleanExtra(IIntent::EXTRA_UNINSTALL_ALL_USERS, mDialogInfo->allUsers);
     newIntent->PutExtra(IPackageInstaller::EXTRA_CALLBACK, mDialogInfo->callback);
     newIntent->PutExtra(PackageUtil::INTENT_ATTR_APPLICATION_INFO, IParcelable::Probe(mDialogInfo->appInfo));
 

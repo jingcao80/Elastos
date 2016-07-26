@@ -3,6 +3,7 @@
 #include "elastos/droid/packageinstaller/PackageUtil.h"
 #include "elastos/droid/packageinstaller/TabsAdapter.h"
 #include "elastos/droid/app/ActivityManagerNative.h"
+#include "elastos/droid/content/pm/PackageUserState.h"
 #include "elastos/droid/os/SystemClock.h"
 #include "elastos/utility/logging/Logger.h"
 #include <Elastos.Droid.App.h>
@@ -30,6 +31,7 @@ using Elastos::Droid::Content::ISharedPreferencesEditor;
 using Elastos::Droid::Content::Pm::IPackageInstallerSessionInfo;
 using Elastos::Droid::Content::Pm::IPackageItemInfo;
 using Elastos::Droid::Content::Pm::IVerificationParams;
+using Elastos::Droid::Content::Pm::PackageUserState;
 using Elastos::Droid::Graphics::Drawable::IDrawable;
 using Elastos::Droid::Net::CUriHelper;
 using Elastos::Droid::Net::IUriHelper;
@@ -677,9 +679,9 @@ ECode CPackageInstallerActivity::OnCreate(
             return NOERROR;
         }
 
-        //AutoPtr<PackageUserState> userState = new PackageUserState();
-        //mPkgInfo = PackageParser::GeneratePackageInfo(parsed, NULL, IPackageManager::GET_PERMISSIONS, 0, 0, NULL, userState);
-        //mPkgDigest = parsed->manifestDigest;
+        AutoPtr<PackageUserState> userState = new PackageUserState();
+        mPkgInfo = PackageParser::GeneratePackageInfo(parsed, NULL, IPackageManager::GET_PERMISSIONS, 0, 0, NULL, userState);
+        mPkgDigest = parsed->mManifestDigest;
         AutoPtr<IApplicationInfo> applicationInfo;
         mPkgInfo->GetApplicationInfo((IApplicationInfo**)&applicationInfo);
         as = PackageUtil::GetAppSnippet(this, applicationInfo, sourceFile);
@@ -903,24 +905,26 @@ void CPackageInstallerActivity::LaunchSettingsAppAndFinish()
 
 Boolean CPackageInstallerActivity::IsInstallingUnknownAppsAllowed()
 {
-    AutoPtr<IInterface> interfaceTmp;
-    GetSystemService(USER_SERVICE, (IInterface**)&interfaceTmp);
-    IUserManager* um = IUserManager::Probe(interfaceTmp);
+    Logger::E(TAG, "TODO: need Elasto's Settings can set AllowInstallUnknownSources apk!");
+    // AutoPtr<IInterface> interfaceTmp;
+    // GetSystemService(USER_SERVICE, (IInterface**)&interfaceTmp);
+    // IUserManager* um = IUserManager::Probe(interfaceTmp);
 
-    AutoPtr<IBundle> bundle;
-    um->GetUserRestrictions((IBundle**)&bundle);
-    Boolean disallowedByUserManager;
-    bundle->GetBoolean(IUserManager::DISALLOW_INSTALL_UNKNOWN_SOURCES, FALSE, &disallowedByUserManager);
+    // AutoPtr<IBundle> bundle;
+    // um->GetUserRestrictions((IBundle**)&bundle);
+    // Boolean disallowedByUserManager;
+    // bundle->GetBoolean(IUserManager::DISALLOW_INSTALL_UNKNOWN_SOURCES, FALSE, &disallowedByUserManager);
 
-    AutoPtr<ISettingsSecure> settingsSecure;
-    CSettingsSecure::AcquireSingleton((ISettingsSecure**)&settingsSecure);
+    // AutoPtr<ISettingsSecure> settingsSecure;
+    // CSettingsSecure::AcquireSingleton((ISettingsSecure**)&settingsSecure);
 
-    AutoPtr<IContentResolver> contentResolver;
-    GetContentResolver((IContentResolver**)&contentResolver);
-    Int32 val = 0;
-    settingsSecure->GetInt32(contentResolver, ISettingsSecure::INSTALL_NON_MARKET_APPS, 0, &val);
-    Boolean allowedBySecureSettings = val > 0;
-    return (allowedBySecureSettings && (!disallowedByUserManager));
+    // AutoPtr<IContentResolver> contentResolver;
+    // GetContentResolver((IContentResolver**)&contentResolver);
+    // Int32 val = 0;
+    // settingsSecure->GetInt32(contentResolver, ISettingsSecure::INSTALL_NON_MARKET_APPS, 0, &val);
+    // Boolean allowedBySecureSettings = val > 0;
+    // return (allowedBySecureSettings && (!disallowedByUserManager));
+    return TRUE;
 }
 
 Boolean CPackageInstallerActivity::IsInstallRequestFromUnknownSource(
@@ -1006,20 +1010,25 @@ void CPackageInstallerActivity::InitiateInstall()
         // This is a little convoluted because we want to get all uninstalled
         // apps, but this may include apps with just data, and if it is just
         // data we still want to count it as "installed".
-        mPm->GetApplicationInfo(pkgName, IPackageManager::GET_UNINSTALLED_PACKAGES, (IApplicationInfo**)&mAppInfo);
-        Int32 flags = 0;
-        mAppInfo->GetFlags(&flags);
-        if ((flags & IApplicationInfo::FLAG_INSTALLED) == 0) {
+
+        if (FAILED(mPm->GetApplicationInfo(pkgName, IPackageManager::GET_UNINSTALLED_PACKAGES, (IApplicationInfo**)&mAppInfo))) {
             mAppInfo = NULL;
+        }
+        else {
+            Int32 flags = 0;
+            mAppInfo->GetFlags(&flags);
+            if ((flags & IApplicationInfo::FLAG_INSTALLED) == 0) {
+                mAppInfo = NULL;
+            }
         }
     //} catch (NameNotFoundException e) {
         //mAppInfo = null;
     //}
 
     mInstallFlowAnalytics->SetReplace(mAppInfo != NULL);
-    flags = 0;
-    mAppInfo->GetFlags(&flags);
-    mInstallFlowAnalytics->SetSystemApp((mAppInfo != NULL) && ((flags & IApplicationInfo::FLAG_SYSTEM) != 0));
+    Int32 flags = 0;
+    mInstallFlowAnalytics->SetSystemApp((mAppInfo != NULL) &&
+        (mAppInfo->GetFlags(&flags), (flags & IApplicationInfo::FLAG_SYSTEM) != 0));
     StartInstallConfirm();
 }
 

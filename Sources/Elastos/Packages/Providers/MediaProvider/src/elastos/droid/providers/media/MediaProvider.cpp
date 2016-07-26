@@ -5607,8 +5607,10 @@ ECode MediaProvider::CheckAccess(
         Logger::E(TAG, "Can't access %s", TO_CSTR(file));
         return E_FILE_NOT_FOUND_EXCEPTION;
     }
-
-    return CheckWorldReadAccess(path);
+    else {
+        return CheckWorldReadAccess(path);
+    }
+    return NOERROR;
 }
 
 Boolean MediaProvider::IsSecondaryExternalPath(

@@ -6,6 +6,7 @@ using Elastos::Droid::View::CView;
 using Elastos::Droid::Widget::EIID_ITabHostOnTabChangeListener;
 using Elastos::Droid::Widget::EIID_ITabHostTabContentFactory;
 using Elastos::Droid::Widget::ITabWidget;
+using Elastos::Utility::CArrayList;
 
 namespace Elastos {
 namespace Droid {
@@ -65,6 +66,7 @@ TabsAdapter::TabsAdapter(
     /* [in] */ ITabHost* tabHost,
     /* [in] */ IViewPager* pager)
 {
+    CArrayList::New((IList**)&mTabs);
     mContext = IContext::Probe(activity);
     mTabHost = tabHost;
     mViewPager = pager;

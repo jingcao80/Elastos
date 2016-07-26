@@ -528,6 +528,10 @@
 - Elastos/Packages/Apps/Calculator R.cpp
 > Elastos/Packages/Apps/Calculator
 
+# ==== build Packages/Apps/PackageInstaller ====
+  Elastos/Packages/Apps/PackageInstaller Elastos.Droid.PackageInstaller.car
+< Elastos/Packages/Apps/PackageInstaller
+
 # ==== build DevSamples ====
  Elastos/Frameworks/Droid/DevSamples/ImageDemo Elastos.DevSamples.ImageDemo.car
 > Elastos/Frameworks/Droid/DevSamples/ImageDemo

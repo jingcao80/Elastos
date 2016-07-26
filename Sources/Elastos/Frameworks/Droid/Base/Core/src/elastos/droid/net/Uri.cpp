@@ -1705,13 +1705,9 @@ EmptyPart::EmptyPart(
     : Part(value, value)
 {}
 
-ECode EmptyPart::IsEmpty(
-    /* [out] */ Boolean* result)
+Boolean EmptyPart::IsEmpty()
 {
-    VALIDATE_NOT_NULL(result)
-
-    *result = TRUE;
-    return NOERROR;
+    return TRUE;
 }
 
 //====================================================================================

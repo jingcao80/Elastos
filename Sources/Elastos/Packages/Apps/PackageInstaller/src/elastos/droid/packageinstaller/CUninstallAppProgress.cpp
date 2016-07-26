@@ -288,6 +288,7 @@ CAR_OBJECT_IMPL(CUninstallAppProgress)
 
 CUninstallAppProgress::CUninstallAppProgress()
 {
+    mHandler = new InnerHandler(this);
 }
 
 ECode CUninstallAppProgress::OnCreate(
@@ -356,7 +357,7 @@ ECode CUninstallAppProgress::InitView()
     // Initialize views
     AutoPtr<IView> snippetView;
     FindViewById(R::id::app_snippet, (IView**)&snippetView);
-    PackageUtil::InitSnippetForInstalledApp(NULL/*this*/, mAppInfo, snippetView);
+    PackageUtil::InitSnippetForInstalledApp(this, mAppInfo, snippetView);
 
     AutoPtr<IView> viewTmp;
     FindViewById(R::id::center_text, (IView**)&viewTmp);

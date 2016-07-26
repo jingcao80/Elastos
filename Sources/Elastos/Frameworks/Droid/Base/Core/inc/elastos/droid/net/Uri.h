@@ -175,8 +175,7 @@ public:
         /* [in] */ const String& value);
 
     // @Override
-    CARAPI IsEmpty(
-        /* [out] */ Boolean* result);
+    CARAPI_(Boolean) IsEmpty();
 };
 
 /**

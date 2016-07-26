@@ -261,6 +261,7 @@ CAR_OBJECT_IMPL(CInstallAppProgress)
 CInstallAppProgress::CInstallAppProgress()
     : TAG("CInstallAppProgress")
 {
+    mHandler = new InnerHandler(this);
 }
 
 ECode CInstallAppProgress::OnCreate(

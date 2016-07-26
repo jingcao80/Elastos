@@ -4955,15 +4955,20 @@ ECode PhoneWindow::GenerateLayout(
     AutoPtr<ITypedArray> a;
     FAIL_RETURN(GetWindowStyle((ITypedArray**)&a));
 
-//    if (FALSE) {
-//        System.out.println("From style:");
-//        String s = "Attrs:";
-//        for (Int32 i = 0; i < R.styleable.Window.length; i++) {
-//            s = s + " " + Integer.toHexString(R.styleable.Window[i]) + "="
-//                    + a.getString(i);
-//        }
-//        System.out.println(s);
-//    }
+   if (FALSE) {
+       Logger::D(TAG, "From style:");
+       StringBuilder s("Attrs:");
+       Int32 length = ArraySize(R::styleable::Window);
+       for (Int32 i = 0; i < length; i++) {
+            s += " ";
+            s += StringUtils::ToString(R::styleable::Window[i], 16);
+            s += "=";
+            String str;
+            a->GetString(i, &str);
+            s += str;
+       }
+       Logger::D(TAG, s.ToString());
+   }
 
     a->GetBoolean(R::styleable::Window_windowIsFloating, FALSE, &mIsFloating);
     Int32 flagsToUpdate = (IWindowManagerLayoutParams::FLAG_LAYOUT_IN_SCREEN
