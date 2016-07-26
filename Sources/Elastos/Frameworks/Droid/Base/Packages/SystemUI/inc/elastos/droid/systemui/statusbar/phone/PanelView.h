@@ -73,7 +73,7 @@ private:
         PanelView* mHost;
     };
 
-    class AnimatorListenerAdapter1: public AnimatorListenerAdapter
+    class PeekAnimatorListenerAdapter: public AnimatorListenerAdapter
     {
     private:
         class ListenerRunnable: public Runnable
@@ -90,7 +90,7 @@ private:
         };
 
     public:
-        AnimatorListenerAdapter1(
+        PeekAnimatorListenerAdapter(
             /* [in] */ PanelView* host);
 
         // @Override
@@ -106,10 +106,10 @@ private:
         Boolean mCancelled;
     };
 
-    class AnimatorListenerAdapter2: public AnimatorListenerAdapter
+    class FlingAnimatorListenerAdapter: public AnimatorListenerAdapter
     {
     public:
-        AnimatorListenerAdapter2(
+        FlingAnimatorListenerAdapter(
             /* [in] */ PanelView* host,
             /* [in] */ Boolean clearAllExpandHack);
 
@@ -144,10 +144,10 @@ private:
         PanelView* mHost;
     };
 
-    class Runnable1: public Runnable
+    class UnlockHintAnimationEndRunnable: public Runnable
     {
     public:
-        Runnable1(
+        UnlockHintAnimationEndRunnable(
             /* [in] */ PanelView* host);
 
         // @Override
@@ -157,10 +157,10 @@ private:
         PanelView* mHost;
     };
 
-    class AnimatorListenerAdapter3: public AnimatorListenerAdapter
+    class HeightAnimatorPhase1ListenerAdapter: public AnimatorListenerAdapter
     {
     public:
-        AnimatorListenerAdapter3(
+        HeightAnimatorPhase1ListenerAdapter(
             /* [in] */ PanelView* host,
             /* [in] */ IRunnable* onAnimationFinished);
 
@@ -178,10 +178,10 @@ private:
         AutoPtr<IRunnable> mOnAnimationFinished;
     };
 
-    class Runnable2: public Runnable
+    class IndicationViewAnimationFinishedRunnable: public Runnable
     {
     public:
-        Runnable2(
+        IndicationViewAnimationFinishedRunnable(
             /* [in] */ PanelView* host);
 
         // @Override
@@ -191,10 +191,10 @@ private:
         PanelView* mHost;
     };
 
-    class AnimatorListenerAdapter4: public AnimatorListenerAdapter
+    class HeightAnimatorPhase2ListenerAdapter: public AnimatorListenerAdapter
     {
     public:
-        AnimatorListenerAdapter4(
+        HeightAnimatorPhase2ListenerAdapter(
             /* [in] */ PanelView* host,
             /* [in] */ IRunnable* onAnimationFinished);
 
@@ -207,14 +207,14 @@ private:
         AutoPtr<IRunnable> mOnAnimationFinished;
     };
 
-    class AnimatorUpdateListener
+    class HeightAnimatorUpdateListener
         : public Object
         , public IAnimatorUpdateListener
     {
     public:
         CAR_INTERFACE_DECL()
 
-        AnimatorUpdateListener(
+        HeightAnimatorUpdateListener(
             /* [in] */ PanelView* host);
 
         // @Override
@@ -452,7 +452,7 @@ private:
 public:
     static const Boolean DEBUG;
 
-protected:
+// protected:
     AutoPtr<IPhoneStatusBar> mStatusBar;
     Float mExpandedHeight;
     Boolean mTracking;
@@ -497,9 +497,9 @@ private:
     Float mInitialTouchX;
     Boolean mTouchDisabled;
 
-    AutoPtr<IInterpolator> mLinearOutSlowInInterpolator;
-    AutoPtr<IInterpolator> mFastOutSlowInInterpolator;
-    AutoPtr<IInterpolator> mBounceInterpolator;
+    AutoPtr<ITimeInterpolator> mLinearOutSlowInInterpolator;
+    AutoPtr<ITimeInterpolator> mFastOutSlowInInterpolator;
+    AutoPtr<ITimeInterpolator> mBounceInterpolator;
 
     Boolean mPeekPending;
     Boolean mCollapseAfterPeek;

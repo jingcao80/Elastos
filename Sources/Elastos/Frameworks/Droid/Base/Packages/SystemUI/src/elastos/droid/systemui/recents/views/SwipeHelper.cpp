@@ -275,6 +275,7 @@ void SwipeHelper::SetMinAlpha(
 Float SwipeHelper::GetAlphaForOffset(
     /* [in] */ IView* view)
 {
+    Logger::I(TAG, " >> GetAlphaForOffset:: %s", TO_CSTR(view));
     Float viewSize = GetSize(view);
     Float fadeSize = ALPHA_FADE_END * viewSize;
     Float result = 1.0f;

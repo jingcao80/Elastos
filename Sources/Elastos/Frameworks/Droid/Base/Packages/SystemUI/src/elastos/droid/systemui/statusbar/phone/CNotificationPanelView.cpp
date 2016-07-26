@@ -91,14 +91,14 @@ ECode CNotificationPanelView::AnimatorListenerAdapter1::OnAnimationEnd(
     return NOERROR;
 }
 
-CAR_INTERFACE_IMPL(CNotificationPanelView::OnLayoutChangeListener, Object, IViewOnLayoutChangeListener)
+CAR_INTERFACE_IMPL(CNotificationPanelView::QsContainerAnimatorUpdaterListener, Object, IViewOnLayoutChangeListener)
 
-CNotificationPanelView::OnLayoutChangeListener::OnLayoutChangeListener(
+CNotificationPanelView::QsContainerAnimatorUpdaterListener::QsContainerAnimatorUpdaterListener(
     /* [in] */ CNotificationPanelView* host)
     : mHost(host)
 {}
 
-ECode CNotificationPanelView::OnLayoutChangeListener::OnLayoutChange(
+ECode CNotificationPanelView::QsContainerAnimatorUpdaterListener::OnLayoutChange(
     /* [in] */ IView* v,
     /* [in] */ Int32 left,
     /* [in] */ Int32 top,
@@ -112,8 +112,9 @@ ECode CNotificationPanelView::OnLayoutChangeListener::OnLayoutChange(
     Int32 oldHeight = oldBottom - oldTop;
     Int32 height = bottom - top;
     if (height != oldHeight && mHost->mQsContainerAnimator != NULL) {
+        IValueAnimator* va = IValueAnimator::Probe(mHost->mQsContainerAnimator);
         AutoPtr<ArrayOf<IPropertyValuesHolder*> > values;
-        IValueAnimator::Probe(mHost->mQsContainerAnimator)->GetValues((ArrayOf<IPropertyValuesHolder*>**)&values);
+        va->GetValues((ArrayOf<IPropertyValuesHolder*>**)&values);
         Int32 h = 0;
         mHost->mHeader->GetCollapsedHeight(&h);
         Float newEndValue = h + mHost->mQsPeekHeight - height - top;
@@ -123,8 +124,8 @@ ECode CNotificationPanelView::OnLayoutChangeListener::OnLayoutChange(
         (*fvs)[1] = newEndValue;
         (*values)[0]->SetFloatValues(fvs);
         Int64 t = 0;
-        IValueAnimator::Probe(mHost->mQsContainerAnimator)->GetCurrentPlayTime(&t);
-        IValueAnimator::Probe(mHost->mQsContainerAnimator)->SetCurrentPlayTime(t);
+        va->GetCurrentPlayTime(&t);
+        va->SetCurrentPlayTime(t);
     }
     return NOERROR;
 }
@@ -186,34 +187,34 @@ ECode CNotificationPanelView::OnPreDrawListener::OnPreDraw(
     return NOERROR;
 }
 
-CNotificationPanelView::Runnable3::Runnable3(
+CNotificationPanelView::KeyguardStatusBarVisibilityRunnable::KeyguardStatusBarVisibilityRunnable(
     /* [in] */ CNotificationPanelView* host)
     : mHost(host)
 {}
 
-ECode CNotificationPanelView::Runnable3::Run()
+ECode CNotificationPanelView::KeyguardStatusBarVisibilityRunnable::Run()
 {
     IView::Probe(mHost->mKeyguardStatusBar)->SetVisibility(IView::INVISIBLE);
     return NOERROR;
 }
 
-CNotificationPanelView::Runnable4::Runnable4(
+CNotificationPanelView::KeyguardBottomAreaVisibilityRunnable::KeyguardBottomAreaVisibilityRunnable(
     /* [in] */ CNotificationPanelView* host)
     : mHost(host)
 {}
 
-ECode CNotificationPanelView::Runnable4::Run()
+ECode CNotificationPanelView::KeyguardBottomAreaVisibilityRunnable::Run()
 {
     IView::Probe(mHost->mKeyguardBottomArea)->SetVisibility(IView::GONE);
     return NOERROR;
 }
 
-CNotificationPanelView::Runnable5::Runnable5(
+CNotificationPanelView::HeaderUpdateEverythingRunnable::HeaderUpdateEverythingRunnable(
     /* [in] */ CNotificationPanelView* host)
     : mHost(host)
 {}
 
-ECode CNotificationPanelView::Runnable5::Run()
+ECode CNotificationPanelView::HeaderUpdateEverythingRunnable::Run()
 {
     mHost->mHeader->UpdateEverything();
     return NOERROR;
@@ -232,19 +233,19 @@ ECode CNotificationPanelView::ViewOnClickListener::OnClick(
     return mHost->OnClick(v);
 }
 
-CAR_INTERFACE_IMPL(CNotificationPanelView::Listener, Object, IListener)
+CAR_INTERFACE_IMPL(CNotificationPanelView::ScrollViewListener, Object, IListener)
 
-CNotificationPanelView::Listener::Listener(
+CNotificationPanelView::ScrollViewListener::ScrollViewListener(
     /* [in] */ CNotificationPanelView* host)
     : mHost(host)
 {}
 
-ECode CNotificationPanelView::Listener::OnScrollChanged()
+ECode CNotificationPanelView::ScrollViewListener::OnScrollChanged()
 {
     return mHost->OnScrollChanged();
 }
 
-ECode CNotificationPanelView::Listener::OnOverscrolled(
+ECode CNotificationPanelView::ScrollViewListener::OnOverscrolled(
     /* [in] */ Float lastX,
     /* [in] */ Float lastY,
     /* [in] */ Int32 amount)
@@ -292,14 +293,14 @@ ECode CNotificationPanelView::TopChangedListener::FlingTopOverscroll(
     return mHost->FlingTopOverscroll(velocity, open);
 }
 
-CAR_INTERFACE_IMPL(CNotificationPanelView::OnLayoutChangeListener2, Object, IViewOnLayoutChangeListener)
+CAR_INTERFACE_IMPL(CNotificationPanelView::QsContainerOnLayoutChangeListener, Object, IViewOnLayoutChangeListener)
 
-CNotificationPanelView::OnLayoutChangeListener2::OnLayoutChangeListener2(
+CNotificationPanelView::QsContainerOnLayoutChangeListener::QsContainerOnLayoutChangeListener(
     /* [in] */ CNotificationPanelView* host)
     : mHost(host)
 {}
 
-ECode CNotificationPanelView::OnLayoutChangeListener2::OnLayoutChange(
+ECode CNotificationPanelView::QsContainerOnLayoutChangeListener::OnLayoutChange(
     /* [in] */ IView* v,
     /* [in] */ Int32 left,
     /* [in] */ Int32 top,
@@ -341,6 +342,7 @@ CNotificationPanelView::OnPreDrawListener2::OnPreDrawListener2(
 ECode CNotificationPanelView::OnPreDrawListener2::OnPreDraw(
     /* [out] */ Boolean* result)
 {
+    VALIDATE_NOT_NULL(result)
     AutoPtr<IViewTreeObserver> vto;
     mHost->GetViewTreeObserver((IViewTreeObserver**)&vto);
     vto->RemoveOnPreDrawListener(this);
@@ -352,16 +354,18 @@ ECode CNotificationPanelView::OnPreDrawListener2::OnPreDraw(
     AutoPtr<ArrayOf<Float> > fvs = ArrayOf<Float>::Alloc(1);
     (*fvs)[0] = mHost->mClockAnimationTarget;
 
+    mHost->mClockAnimator = NULL;
     AutoPtr<IObjectAnimatorHelper> helper;
     CObjectAnimatorHelper::AcquireSingleton((IObjectAnimatorHelper**)&helper);
-    helper->OfFloat(mHost->mKeyguardStatusView, View::Y, fvs
-            , (IObjectAnimator**)&mHost->mClockAnimator);
-    IAnimator::Probe(mHost->mClockAnimator)->SetInterpolator(ITimeInterpolator::Probe(mHost->mFastOutSlowInInterpolator));
-    IAnimator::Probe(mHost->mClockAnimator)->SetDuration(IStackStateAnimator::ANIMATION_DURATION_STANDARD);
+    helper->OfFloat(mHost->mKeyguardStatusView, View::Y, fvs, (IObjectAnimator**)&mHost->mClockAnimator);
+    IAnimator* animator = IAnimator::Probe(mHost->mClockAnimator);
+    animator->SetInterpolator(ITimeInterpolator::Probe(mHost->mFastOutSlowInInterpolator));
+    animator->SetDuration(IStackStateAnimator::ANIMATION_DURATION_STANDARD);
     AutoPtr<AnimatorListenerAdapter2> listener = new AnimatorListenerAdapter2(mHost);
-    IAnimator::Probe(mHost->mClockAnimator)->AddListener(listener);
-    IAnimator::Probe(mHost->mClockAnimator)->Start();
-    return TRUE;
+    animator->AddListener(listener);
+    animator->Start();
+    *result = TRUE;
+    return NOERROR;
 }
 
 CNotificationPanelView::Runnable6::Runnable6(
@@ -482,6 +486,7 @@ ECode CNotificationPanelView::AnimatorListenerAdapter4::OnAnimationEnd(
     return NOERROR;
 }
 
+CAR_INTERFACE_IMPL(CNotificationPanelView::AffordanceHelperCallback, Object, IKeyguardAffordanceHelperCallback)
 
 const Int32 CNotificationPanelView::CAP_HEIGHT = 1456;
 const Int32 CNotificationPanelView::FONT_HEIGHT = 2163;
@@ -493,8 +498,8 @@ const Int64 CNotificationPanelView::DOZE_BACKGROUND_ANIM_DURATION = ScrimControl
 
 CAR_OBJECT_IMPL(CNotificationPanelView)
 
-CAR_INTERFACE_IMPL_6(CNotificationPanelView, PanelView, INotificationPanelView, IExpandableViewOnHeightChangedListener \
-    , IListener, IViewOnClickListener, IOnOverscrollTopChangedListener, IKeyguardAffordanceHelperCallback);
+CAR_INTERFACE_IMPL_5(CNotificationPanelView, PanelView, INotificationPanelView, IExpandableViewOnHeightChangedListener \
+    , IListener, IViewOnClickListener, IOnOverscrollTopChangedListener);
 
 CNotificationPanelView::CNotificationPanelView()
     : mNotificationTopPadding(0)
@@ -547,22 +552,23 @@ CNotificationPanelView::CNotificationPanelView()
     , mQsTouchAboveFalsingThreshold(FALSE)
     , mQsFalsingThreshold(0)
 {
-    mAnimateKeyguardStatusViewInvisibleEndRunnable = new Runnable1(this);
-    mAnimateKeyguardStatusViewVisibleEndRunnable = new Runnable2(this);
-    mAnimateHeaderSlidingInListener = new AnimatorListenerAdapter1(this);
-    mQsContainerAnimatorUpdater = new OnLayoutChangeListener(this);
-    mStartHeaderSlidingIn = new OnPreDrawListener(this);
-    mAnimateKeyguardStatusBarInvisibleEndRunnable = new Runnable3(this);
-    mAnimateKeyguardBottomAreaInvisibleEndRunnable = new Runnable4(this);
-    mUpdateHeader = new Runnable5(this);
-    mClockPositionAlgorithm = new KeyguardClockPositionAlgorithm();
-    mClockPositionResult = new KeyguardClockPositionAlgorithm::Result();
 }
 
 ECode CNotificationPanelView::constructor(
     /* [in] */ IContext* context,
     /* [in] */ IAttributeSet* attrs)
 {
+    mAnimateKeyguardStatusViewInvisibleEndRunnable = new Runnable1(this);
+    mAnimateKeyguardStatusViewVisibleEndRunnable = new Runnable2(this);
+    mAnimateHeaderSlidingInListener = new AnimatorListenerAdapter1(this);
+    mQsContainerAnimatorUpdater = new QsContainerAnimatorUpdaterListener(this);
+    mStartHeaderSlidingIn = new OnPreDrawListener(this);
+    mAnimateKeyguardStatusBarInvisibleEndRunnable = new KeyguardStatusBarVisibilityRunnable(this);
+    mAnimateKeyguardBottomAreaInvisibleEndRunnable = new KeyguardBottomAreaVisibilityRunnable(this);
+    mUpdateHeader = new HeaderUpdateEverythingRunnable(this);
+    mClockPositionAlgorithm = new KeyguardClockPositionAlgorithm();
+    mClockPositionResult = new KeyguardClockPositionAlgorithm::Result();
+
     return PanelView::constructor(context, attrs);
 }
 
@@ -604,7 +610,7 @@ ECode CNotificationPanelView::OnFinishInflate()
     FindViewById(R::id::scroll_view, (IView**)&view);
     mScrollView = IObservableScrollView::Probe(view);
 
-    AutoPtr<Listener> l = new Listener(this);
+    AutoPtr<ScrollViewListener> l = new ScrollViewListener(this);
     mScrollView->SetListener(l);
     IView::Probe(mScrollView)->SetFocusable(FALSE);
     FindViewById(R::id::reserve_notification_space, (IView**)&mReserveNotificationSpace);
@@ -632,12 +638,13 @@ ECode CNotificationPanelView::OnFinishInflate()
     FindViewById(R::id::keyguard_bottom_area, (IView**)&view);
     mKeyguardBottomArea = IKeyguardBottomAreaView::Probe(view);
     FindViewById(R::id::qs_navbar_scrim, (IView**)&mQsNavbarScrim);
-    mAfforanceHelper = new KeyguardAffordanceHelper(this, ctx);
+    AutoPtr<AffordanceHelperCallback> cb = new AffordanceHelperCallback(this);
+    mAfforanceHelper = new KeyguardAffordanceHelper(cb, ctx);
 
     mSecureCameraLaunchManager = new SecureCameraLaunchManager(ctx, mKeyguardBottomArea);
 
     // recompute internal state when qspanel height changes
-    AutoPtr<OnLayoutChangeListener2> lcl = new OnLayoutChangeListener2(this);
+    AutoPtr<QsContainerOnLayoutChangeListener> lcl = new QsContainerOnLayoutChangeListener(this);
     mQsContainer->AddOnLayoutChangeListener(lcl);
     return NOERROR;
 }
@@ -1088,9 +1095,11 @@ ECode CNotificationPanelView::OnTouchEvent(
         *result = FALSE;
         return NOERROR;
     }
+
     ResetDownStates(event);
     Int32 state = 0;
     mStatusBar->GetBarState(&state);
+
     if ((!mIsExpanding || mHintAnimationRunning)
             && !mQsExpanded
             && state != IStatusBarState::SHADE) {
@@ -1423,14 +1432,15 @@ void CNotificationPanelView::SetKeyguardBottomAreaVisibility(
     /* [in] */ Int32 statusBarState,
     /* [in] */ Boolean goingToFullShade)
 {
+    IView* area = IView::Probe(mKeyguardBottomArea);
     AutoPtr<IViewPropertyAnimator> vpa;
     if (goingToFullShade) {
-        IView::Probe(mKeyguardBottomArea)->Animate((IViewPropertyAnimator**)&vpa);
+        area->Animate((IViewPropertyAnimator**)&vpa);
         vpa->Cancel();
 
         vpa = NULL;
-        IView::Probe(mKeyguardBottomArea)->Animate((IViewPropertyAnimator**)&vpa);
-        vpa->Alpha(0.f);
+        area->Animate((IViewPropertyAnimator**)&vpa);
+        vpa->Alpha(0.0f);
         Int64 t = 0;
         vpa->SetStartDelay((mStatusBar->GetKeyguardFadingAwayDelay(&t), t));
         vpa->SetDuration((mStatusBar->GetKeyguardFadingAwayDuration(&t), t) / 2);
@@ -1442,17 +1452,17 @@ void CNotificationPanelView::SetKeyguardBottomAreaVisibility(
     else if (statusBarState == IStatusBarState::KEYGUARD
             || statusBarState == IStatusBarState::SHADE_LOCKED) {
         vpa = NULL;
-        IView::Probe(mKeyguardBottomArea)->Animate((IViewPropertyAnimator**)&vpa);
+        area->Animate((IViewPropertyAnimator**)&vpa);
         vpa->Cancel();
-        IView::Probe(mKeyguardBottomArea)->SetVisibility(IView::VISIBLE);
-        IView::Probe(mKeyguardBottomArea)->SetAlpha(1.f);
+        area->SetVisibility(IView::VISIBLE);
+        area->SetAlpha(1.f);
     }
     else {
         vpa = NULL;
-        IView::Probe(mKeyguardBottomArea)->Animate((IViewPropertyAnimator**)&vpa);
+        area->Animate((IViewPropertyAnimator**)&vpa);
         vpa->Cancel();
-        IView::Probe(mKeyguardBottomArea)->SetVisibility(IView::GONE);
-        IView::Probe(mKeyguardBottomArea)->SetAlpha(1.f);
+        area->SetVisibility(IView::GONE);
+        area->SetAlpha(1.f);
     }
 }
 
@@ -1992,8 +2002,7 @@ void CNotificationPanelView::UpdateHeaderKeyguard()
         // When on Keyguard, we hide the header as soon as the top card of the notification
         // stack scroller is close enough (collision distance) to the bottom of the header.
         alphaNotifications = GetNotificationsTopY()
-                /
-                (v + mNotificationsHeaderCollideDistance);
+                / (v + mNotificationsHeaderCollideDistance);
     }
     else {
 

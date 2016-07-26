@@ -152,6 +152,7 @@ const Int64 KeyguardAffordanceHelper::HINT_PHASE1_DURATION = 200;
 const Int64 KeyguardAffordanceHelper::HINT_PHASE2_DURATION = 350;
 const Float KeyguardAffordanceHelper::BACKGROUND_RADIUS_SCALE_FACTOR = 0.15f;
 const Int32 KeyguardAffordanceHelper::HINT_CIRCLE_OPEN_DURATION = 500;
+
 KeyguardAffordanceHelper::KeyguardAffordanceHelper(
     /* [in] */ IKeyguardAffordanceHelperCallback* callback,
     /* [in] */ IContext* context)

@@ -355,14 +355,14 @@ private:
     AutoPtr<IView> mPhonePreview;
     AutoPtr<IView> mCameraPreview;
 
-    AutoPtr<IActivityStarter> mActivityStarter;
+    IActivityStarter* mActivityStarter; // weak-ref
     AutoPtr<UnlockMethodCache> mUnlockMethodCache;
     AutoPtr<ILockPatternUtils> mLockPatternUtils;
     AutoPtr<IFlashlightController> mFlashlightController;
     AutoPtr<PreviewInflater> mPreviewInflater;
     AutoPtr<IKeyguardIndicationController> mIndicationController;
     AutoPtr<IAccessibilityController> mAccessibilityController;
-    AutoPtr<IPhoneStatusBar> mPhoneStatusBar;
+    IPhoneStatusBar* mPhoneStatusBar; // weak-ref
 
     AutoPtr<IDrawable> mTrustDrawable;
 

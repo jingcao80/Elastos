@@ -8,6 +8,7 @@
 #include <elastos/droid/os/ServiceManager.h>
 #include <elastos/droid/text/TextUtils.h>
 #include <elastos/droid/text/format/Formatter.h>
+#include <elastos/core/CoreUtils.h>
 #include <elastos/utility/logging/Logger.h>
 
 using Elastos::Droid::SystemUI::Keyguard::KeyguardUpdateMonitor;
@@ -23,6 +24,7 @@ using Elastos::Droid::Os::ServiceManager;
 using Elastos::Droid::Text::TextUtils;
 using Elastos::Droid::Text::Format::Formatter;
 using Elastos::Droid::View::IView;
+using Elastos::Core::CoreUtils;
 using Elastos::Core::CString;
 using Elastos::Core::ICharSequence;
 using Elastos::Utility::Logging::Logger;
@@ -177,8 +179,7 @@ ECode KeyguardIndicationController::HideTransientIndication()
 void KeyguardIndicationController::UpdateIndication()
 {
     if (mVisible) {
-        AutoPtr<ICharSequence> value;
-        CString::New(ComputeIndication(), (ICharSequence**)&value);
+        AutoPtr<ICharSequence> value = CoreUtils::Convert(ComputeIndication());
         mTextView->SwitchIndication(value);
     }
 }

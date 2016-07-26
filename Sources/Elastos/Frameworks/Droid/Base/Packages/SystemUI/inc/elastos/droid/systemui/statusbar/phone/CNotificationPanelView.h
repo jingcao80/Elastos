@@ -39,9 +39,92 @@ CarClass(CNotificationPanelView)
     , public IListener
     , public IViewOnClickListener
     , public IOnOverscrollTopChangedListener
-    , public IKeyguardAffordanceHelperCallback
 {
 private:
+    class AffordanceHelperCallback
+        : public Object
+        , public IKeyguardAffordanceHelperCallback
+    {
+    public:
+        CAR_INTERFACE_DECL()
+
+        AffordanceHelperCallback(
+            /* [in] */ CNotificationPanelView* host)
+            : mHost(host)
+        {}
+
+        // @Override
+        CARAPI OnAnimationToSideStarted(
+            /* [in] */ Boolean rightPage)
+        {
+            return mHost->OnAnimationToSideStarted(rightPage);
+        }
+
+        // @Override
+        CARAPI OnAnimationToSideEnded()
+        {
+            return mHost->OnAnimationToSideEnded();
+        }
+
+        // @Override
+        CARAPI GetPageWidth(
+            /* [out] */ Float* result)
+        {
+            return mHost->GetPageWidth(result);
+        }
+
+        // @Override
+        CARAPI OnSwipingStarted()
+        {
+            return mHost->OnSwipingStarted();
+        }
+
+        // @Override
+        CARAPI GetLeftIcon(
+            /* [out] */ IKeyguardAffordanceView** view)
+        {
+            return mHost->GetLeftIcon(view);
+        }
+
+        // @Override
+        CARAPI GetCenterIcon(
+            /* [out] */ IKeyguardAffordanceView** view)
+        {
+            return mHost->GetCenterIcon(view);
+        }
+
+        // @Override
+        CARAPI GetRightIcon(
+            /* [out] */ IKeyguardAffordanceView** view)
+        {
+            return mHost->GetRightIcon(view);
+        }
+
+        // @Override
+        CARAPI GetLeftPreview(
+            /* [out] */ IView** view)
+        {
+            return mHost->GetLeftPreview(view);
+        }
+
+        // @Override
+        CARAPI GetRightPreview(
+            /* [out] */ IView** view)
+        {
+            return mHost->GetRightPreview(view);
+        }
+
+        // @Override
+        CARAPI GetAffordanceFalsingFactor(
+            /* [out] */ Float* result)
+        {
+            return mHost->GetAffordanceFalsingFactor(result);
+        }
+
+    private:
+        CNotificationPanelView* mHost;
+    };
+
     class Runnable1: public Runnable
     {
     public:
@@ -82,14 +165,14 @@ private:
         CNotificationPanelView* mHost;
     };
 
-    class OnLayoutChangeListener
+    class QsContainerAnimatorUpdaterListener
         : public Object
         , public IViewOnLayoutChangeListener
     {
     public:
         CAR_INTERFACE_DECL()
 
-        OnLayoutChangeListener(
+        QsContainerAnimatorUpdaterListener(
             /* [in] */ CNotificationPanelView* host);
 
         // @Override
@@ -108,14 +191,14 @@ private:
         CNotificationPanelView* mHost;
     };
 
-    class OnLayoutChangeListener2
+    class QsContainerOnLayoutChangeListener
         : public Object
         , public IViewOnLayoutChangeListener
     {
     public:
         CAR_INTERFACE_DECL()
 
-        OnLayoutChangeListener2(
+        QsContainerOnLayoutChangeListener(
             /* [in] */ CNotificationPanelView* host);
 
         // @Override
@@ -152,10 +235,10 @@ private:
         CNotificationPanelView* mHost;
     };
 
-    class Runnable3: public Runnable
+    class KeyguardStatusBarVisibilityRunnable: public Runnable
     {
     public:
-        Runnable3(
+        KeyguardStatusBarVisibilityRunnable(
             /* [in] */ CNotificationPanelView* host);
 
         // @Override
@@ -165,10 +248,10 @@ private:
         CNotificationPanelView* mHost;
     };
 
-    class Runnable4: public Runnable
+    class KeyguardBottomAreaVisibilityRunnable: public Runnable
     {
     public:
-        Runnable4(
+        KeyguardBottomAreaVisibilityRunnable(
             /* [in] */ CNotificationPanelView* host);
 
         // @Override
@@ -178,10 +261,10 @@ private:
         CNotificationPanelView* mHost;
     };
 
-    class Runnable5: public Runnable
+    class HeaderUpdateEverythingRunnable: public Runnable
     {
     public:
-        Runnable5(
+        HeaderUpdateEverythingRunnable(
             /* [in] */ CNotificationPanelView* host);
 
         // @Override
@@ -208,14 +291,14 @@ private:
         CNotificationPanelView* mHost;
     };
 
-    class Listener
+    class ScrollViewListener
         : public Object
         , public IListener
     {
     public:
         CAR_INTERFACE_DECL()
 
-        Listener(
+        ScrollViewListener(
             /* [in] */ CNotificationPanelView* host);
 
         CARAPI OnScrollChanged();

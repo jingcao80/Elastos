@@ -1,6 +1,7 @@
 
 #include "elastos/droid/systemui/statusbar/phone/PanelView.h"
 #include "elastos/droid/systemui/statusbar/phone/VelocityTrackerFactory.h"
+#include "elastos/droid/systemui/statusbar/phone/CBounceInterpolator.h"
 #include "elastos/droid/systemui/doze/DozeLog.h"
 #include "../R.h"
 #include <elastos/droid/R.h>
@@ -16,7 +17,6 @@ using Elastos::Droid::Animation::IValueAnimatorHelper;
 using Elastos::Droid::Animation::ITimeInterpolator;
 using Elastos::Droid::SystemUI::Doze::DozeLog;
 using Elastos::Droid::View::Animation::AnimationUtils;
-using Elastos::Droid::View::Animation::CBounceInterpolator;
 using Elastos::Droid::View::CViewConfigurationHelper;
 using Elastos::Droid::View::EIID_IOnGlobalLayoutListener;
 using Elastos::Droid::View::IViewTreeObserver;
@@ -33,6 +33,9 @@ namespace Phone {
 
 static const String TAG("PanelView");
 
+//===============================================================================
+// PanelView::PeekRunnable
+//===============================================================================
 PanelView::PeekRunnable::PeekRunnable(
     /* [in] */ PanelView* host)
     : mHost(host)
@@ -45,6 +48,9 @@ ECode PanelView::PeekRunnable::Run()
     return NOERROR;
 }
 
+//===============================================================================
+// PanelView::FlingCollapseRunnable
+//===============================================================================
 PanelView::FlingCollapseRunnable::FlingCollapseRunnable(
     /* [in] */ PanelView* host)
     : mHost(host)
@@ -56,6 +62,9 @@ ECode PanelView::FlingCollapseRunnable::Run()
     return NOERROR;
 }
 
+//===============================================================================
+// PanelView::PostCollapseRunnable
+//===============================================================================
 PanelView::PostCollapseRunnable::PostCollapseRunnable(
     /* [in] */ PanelView* host)
     : mHost(host)
@@ -67,31 +76,37 @@ ECode PanelView::PostCollapseRunnable::Run()
     return NOERROR;
 }
 
-PanelView::AnimatorListenerAdapter1::ListenerRunnable::ListenerRunnable(
+//===============================================================================
+// PanelView::PeekAnimatorListenerAdapter::ListenerRunnable
+//===============================================================================
+PanelView::PeekAnimatorListenerAdapter::ListenerRunnable::ListenerRunnable(
     /* [in] */ PanelView* host)
     : mHost(host)
 {}
 
-ECode PanelView::AnimatorListenerAdapter1::ListenerRunnable::Run()
+ECode PanelView::PeekAnimatorListenerAdapter::ListenerRunnable::Run()
 {
     mHost->Collapse(FALSE /* delayed */);
     return NOERROR;
 }
 
-PanelView::AnimatorListenerAdapter1::AnimatorListenerAdapter1(
+//===============================================================================
+// PanelView::PeekAnimatorListenerAdapter
+//===============================================================================
+PanelView::PeekAnimatorListenerAdapter::PeekAnimatorListenerAdapter(
     /* [in] */ PanelView* host)
     : mHost(host)
     , mCancelled(FALSE)
 {}
 
-ECode PanelView::AnimatorListenerAdapter1::OnAnimationCancel(
+ECode PanelView::PeekAnimatorListenerAdapter::OnAnimationCancel(
     /* [in] */ IAnimator* animation)
 {
     mCancelled = TRUE;
     return NOERROR;
 }
 
-ECode PanelView::AnimatorListenerAdapter1::OnAnimationEnd(
+ECode PanelView::PeekAnimatorListenerAdapter::OnAnimationEnd(
     /* [in] */ IAnimator* animation)
 {
     mHost->mPeekAnimator = NULL;
@@ -103,7 +118,10 @@ ECode PanelView::AnimatorListenerAdapter1::OnAnimationEnd(
     return NOERROR;
 }
 
-PanelView::AnimatorListenerAdapter2::AnimatorListenerAdapter2(
+//===============================================================================
+// PanelView::FlingAnimatorListenerAdapter
+//===============================================================================
+PanelView::FlingAnimatorListenerAdapter::FlingAnimatorListenerAdapter(
     /* [in] */ PanelView* host,
     /* [in] */ Boolean clearAllExpandHack)
     : mHost(host)
@@ -111,14 +129,14 @@ PanelView::AnimatorListenerAdapter2::AnimatorListenerAdapter2(
     , mClearAllExpandHack(clearAllExpandHack)
 {}
 
-ECode PanelView::AnimatorListenerAdapter2::OnAnimationCancel(
+ECode PanelView::FlingAnimatorListenerAdapter::OnAnimationCancel(
     /* [in] */ IAnimator* animation)
 {
     mCancelled = TRUE;
     return NOERROR;
 }
 
-ECode PanelView::AnimatorListenerAdapter2::OnAnimationEnd(
+ECode PanelView::FlingAnimatorListenerAdapter::OnAnimationEnd(
     /* [in] */ IAnimator* animation)
 {
     if (mClearAllExpandHack && !mCancelled) {
@@ -131,7 +149,11 @@ ECode PanelView::AnimatorListenerAdapter2::OnAnimationEnd(
     return NOERROR;
 }
 
+//===============================================================================
+// PanelView::OnGlobalLayoutListener
+//===============================================================================
 CAR_INTERFACE_IMPL(PanelView::OnGlobalLayoutListener, Object, IOnGlobalLayoutListener)
+
 PanelView::OnGlobalLayoutListener::OnGlobalLayoutListener(
     /* [in] */ PanelView* host)
     : mHost(host)
@@ -154,12 +176,15 @@ ECode PanelView::OnGlobalLayoutListener::OnGlobalLayout()
     return NOERROR;
 }
 
-PanelView::Runnable1::Runnable1(
+//===============================================================================
+// PanelView::UnlockHintAnimationEndRunnable
+//===============================================================================
+PanelView::UnlockHintAnimationEndRunnable::UnlockHintAnimationEndRunnable(
     /* [in] */ PanelView* host)
     : mHost(host)
 {}
 
-ECode PanelView::Runnable1::Run()
+ECode PanelView::UnlockHintAnimationEndRunnable::Run()
 {
     mHost->NotifyExpandingFinished();
     mHost->mStatusBar->OnHintFinished();
@@ -167,7 +192,10 @@ ECode PanelView::Runnable1::Run()
     return NOERROR;
 }
 
-PanelView::AnimatorListenerAdapter3::AnimatorListenerAdapter3(
+//===============================================================================
+// PanelView::HeightAnimatorPhase1ListenerAdapter
+//===============================================================================
+PanelView::HeightAnimatorPhase1ListenerAdapter::HeightAnimatorPhase1ListenerAdapter(
     /* [in] */ PanelView* host,
     /* [in] */ IRunnable* onAnimationFinished)
     : mHost(host)
@@ -175,14 +203,14 @@ PanelView::AnimatorListenerAdapter3::AnimatorListenerAdapter3(
     , mOnAnimationFinished(onAnimationFinished)
 {}
 
-ECode PanelView::AnimatorListenerAdapter3::OnAnimationCancel(
+ECode PanelView::HeightAnimatorPhase1ListenerAdapter::OnAnimationCancel(
     /* [in] */ IAnimator* animation)
 {
     mCancelled = TRUE;
     return NOERROR;
 }
 
-ECode PanelView::AnimatorListenerAdapter3::OnAnimationEnd(
+ECode PanelView::HeightAnimatorPhase1ListenerAdapter::OnAnimationEnd(
     /* [in] */ IAnimator* animation)
 {
     if (mCancelled) {
@@ -195,34 +223,39 @@ ECode PanelView::AnimatorListenerAdapter3::OnAnimationEnd(
     return NOERROR;
 }
 
-PanelView::Runnable2::Runnable2(
+//===============================================================================
+// PanelView::IndicationViewAnimationFinishedRunnable
+//===============================================================================
+PanelView::IndicationViewAnimationFinishedRunnable::IndicationViewAnimationFinishedRunnable(
     /* [in] */ PanelView* host)
     : mHost(host)
 {}
 
-ECode PanelView::Runnable2::Run()
+ECode PanelView::IndicationViewAnimationFinishedRunnable::Run()
 {
     AutoPtr<IView> view;
     mHost->mKeyguardBottomArea->GetIndicationView((IView**)&view);
 
     AutoPtr<IViewPropertyAnimator> vpa;
     view->Animate((IViewPropertyAnimator**)&vpa);
-
     vpa->Y(mHost->mOriginalIndicationY);
     vpa->SetDuration(450);
-    vpa->SetInterpolator(ITimeInterpolator::Probe(mHost->mBounceInterpolator));
+    vpa->SetInterpolator(mHost->mBounceInterpolator);
     vpa->Start();
     return NOERROR;
 }
 
-PanelView::AnimatorListenerAdapter4::AnimatorListenerAdapter4(
+//===============================================================================
+// PanelView::HeightAnimatorPhase2ListenerAdapter
+//===============================================================================
+PanelView::HeightAnimatorPhase2ListenerAdapter::HeightAnimatorPhase2ListenerAdapter(
     /* [in] */ PanelView* host,
     /* [in] */ IRunnable* onAnimationFinished)
     : mHost(host)
     , mOnAnimationFinished(onAnimationFinished)
 {}
 
-ECode PanelView::AnimatorListenerAdapter4::OnAnimationEnd(
+ECode PanelView::HeightAnimatorPhase2ListenerAdapter::OnAnimationEnd(
     /* [in] */ IAnimator* animation)
 {
     mHost->mHeightAnimator = NULL;
@@ -230,13 +263,17 @@ ECode PanelView::AnimatorListenerAdapter4::OnAnimationEnd(
     return NOERROR;
 }
 
-CAR_INTERFACE_IMPL(PanelView::AnimatorUpdateListener, Object, IAnimatorUpdateListener)
-PanelView::AnimatorUpdateListener::AnimatorUpdateListener(
+//===============================================================================
+// PanelView::HeightAnimatorUpdateListener
+//===============================================================================
+CAR_INTERFACE_IMPL(PanelView::HeightAnimatorUpdateListener, Object, IAnimatorUpdateListener)
+
+PanelView::HeightAnimatorUpdateListener::HeightAnimatorUpdateListener(
     /* [in] */ PanelView* host)
     : mHost(host)
 {}
 
-ECode PanelView::AnimatorUpdateListener::OnAnimationUpdate(
+ECode PanelView::HeightAnimatorUpdateListener::OnAnimationUpdate(
     /* [in] */ IValueAnimator* animation)
 {
     AutoPtr<IInterface> obj;
@@ -247,7 +284,9 @@ ECode PanelView::AnimatorUpdateListener::OnAnimationUpdate(
     return NOERROR;
 }
 
-
+//===============================================================================
+// PanelView
+//===============================================================================
 const Boolean PanelView::DEBUG = FALSE;
 
 CAR_INTERFACE_IMPL(PanelView, FrameLayout, IPanelView)
@@ -292,7 +331,7 @@ void PanelView::SchedulePeek()
 void PanelView::RunPeekAnimation()
 {
     mPeekHeight = GetPeekHeight();
-    if (DEBUG) Logger::V(TAG, "%speek to height=%.1f", (mViewName != NULL ? (mViewName + String(": ")).string() : "") , mPeekHeight);
+    if (DEBUG) Logger::V(TAG, "%s peek to height=%.1f", (mViewName != NULL ? (mViewName + String(": ")).string() : "") , mPeekHeight);
     if (mHeightAnimator != NULL) {
         return;
     }
@@ -303,12 +342,13 @@ void PanelView::RunPeekAnimation()
     AutoPtr<ArrayOf<Float> > fvs = ArrayOf<Float>::Alloc(1);
     (*fvs)[0] = mPeekHeight;
     helper->OfFloat(TO_IINTERFACE(this), String("expandedHeight"), fvs, (IObjectAnimator**)&mPeekAnimator);
-    IAnimator::Probe(mPeekAnimator)->SetDuration(250);
-    IAnimator::Probe(mPeekAnimator)->SetInterpolator(ITimeInterpolator::Probe(mLinearOutSlowInInterpolator));
-    AutoPtr<AnimatorListenerAdapter1> listener = new AnimatorListenerAdapter1(this);
-    IAnimator::Probe(mPeekAnimator)->AddListener(listener);
+    IAnimator* a = IAnimator::Probe(mPeekAnimator);
+    a->SetDuration(250);
+    a->SetInterpolator(mLinearOutSlowInInterpolator);
+    AutoPtr<PeekAnimatorListenerAdapter> listener = new PeekAnimatorListenerAdapter(this);
+    a->AddListener(listener);
     NotifyExpandingStarted();
-    IAnimator::Probe(mPeekAnimator)->Start();
+    a->Start();
     mJustPeeked = TRUE;
 }
 
@@ -344,9 +384,6 @@ PanelView::PanelView()
     , mExpanding(FALSE)
     , mGestureWaitForTouchSlop(FALSE)
 {
-    mFlingCollapseRunnable = new FlingCollapseRunnable(this);
-    mPeekRunnable = new PeekRunnable(this);
-    mPostCollapseRunnable = new PostCollapseRunnable(this);
 }
 
 ECode PanelView::constructor(
@@ -354,13 +391,19 @@ ECode PanelView::constructor(
     /* [in] */ IAttributeSet* attrs)
 {
     FrameLayout::constructor(context, attrs);
-    mFlingAnimationUtils = new FlingAnimationUtils(context, 0.6f);
-    AnimationUtils::LoadInterpolator(context, Elastos::Droid::R::interpolator::fast_out_slow_in,
-            (IInterpolator**)&mFastOutSlowInInterpolator);
-    AnimationUtils::LoadInterpolator(context, Elastos::Droid::R::interpolator::linear_out_slow_in,
-            (IInterpolator**)&mLinearOutSlowInInterpolator);
 
-    CBounceInterpolator::New((IInterpolator**)&mBounceInterpolator);
+    mFlingCollapseRunnable = new FlingCollapseRunnable(this);
+    mPeekRunnable = new PeekRunnable(this);
+    mPostCollapseRunnable = new PostCollapseRunnable(this);
+
+    mFlingAnimationUtils = new FlingAnimationUtils(context, 0.6f);
+    AutoPtr<IInterpolator> ip;
+    AnimationUtils::LoadInterpolator(context, Elastos::Droid::R::interpolator::fast_out_slow_in, (IInterpolator**)&ip);
+    mFastOutSlowInInterpolator = ITimeInterpolator::Probe(ip);
+    ip = NULL;
+    AnimationUtils::LoadInterpolator(context, Elastos::Droid::R::interpolator::linear_out_slow_in, (IInterpolator**)&ip);
+    mLinearOutSlowInInterpolator = ITimeInterpolator::Probe(ip);
+    CBounceInterpolator::New((ITimeInterpolator**)&mBounceInterpolator);
     return NOERROR;
 }
 
@@ -589,6 +632,7 @@ void PanelView::OnTrackingStopped(
 
 void PanelView::OnTrackingStarted()
 {
+    Logger::I(TAG, " >> OnTrackingStarted");
     mClosing = FALSE;
     mTracking = TRUE;
     mCollapseAfterPeek = FALSE;
@@ -774,6 +818,7 @@ void PanelView::Fling(
     }
     mOverExpandedBeforeFling = GetOverExpansionAmount() > 0.f;
     AutoPtr<IValueAnimator> animator = CreateHeightAnimator(target);
+    IAnimator* fa = IAnimator::Probe(animator);
 
     Int32 h = 0;
     GetHeight(&h);
@@ -782,27 +827,27 @@ void PanelView::Fling(
         if (belowFalsingThreshold) {
             vel = 0;
         }
-        mFlingAnimationUtils->Apply(IAnimator::Probe(animator), mExpandedHeight, target, vel, h);
+        mFlingAnimationUtils->Apply(fa, mExpandedHeight, target, vel, h);
         if (belowFalsingThreshold) {
-            IAnimator::Probe(animator)->SetDuration(350);
+            fa->SetDuration(350);
         }
     }
     else {
-        mFlingAnimationUtils->ApplyDismissing(IAnimator::Probe(animator), mExpandedHeight, target, vel, h);
+        mFlingAnimationUtils->ApplyDismissing(fa, mExpandedHeight, target, vel, h);
 
         // Make it shorter if we run a canned animation
         if (vel == 0) {
             Int64 d = 0;
             animator->GetDuration(&d);
-            IAnimator::Probe(animator)->SetDuration((Int64)
+            fa->SetDuration((Int64)
                     (d * GetCannedFlingDurationFactor()));
         }
     }
 
-    AutoPtr<AnimatorListenerAdapter2> listener = new AnimatorListenerAdapter2(this, clearAllExpandHack);
-    IAnimator::Probe(animator)->AddListener(listener);
+    AutoPtr<FlingAnimatorListenerAdapter> listener = new FlingAnimatorListenerAdapter(this, clearAllExpandHack);
+    fa->AddListener(listener);
     mHeightAnimator = animator;
-    IAnimator::Probe(animator)->Start();
+    fa->Start();
 }
 
 ECode PanelView::OnAttachedToWindow()
@@ -1075,7 +1120,7 @@ void PanelView::StartUnlockHintAnimation()
     }
     CancelPeek();
     NotifyExpandingStarted();
-    AutoPtr<Runnable1> run = new Runnable1(this);
+    AutoPtr<UnlockHintAnimationEndRunnable> run = new UnlockHintAnimationEndRunnable(this);
     StartUnlockHintAnimationPhase1(run);
     mStatusBar->OnUnlockHintStarted();
     mHintAnimationRunning = TRUE;
@@ -1088,11 +1133,13 @@ void PanelView::StartUnlockHintAnimationPhase1(
     AutoPtr<IValueAnimator> animator = CreateHeightAnimator(target);
     IAnimator* ani = IAnimator::Probe(animator);
     ani->SetDuration(250);
-    ani->SetInterpolator(ITimeInterpolator::Probe(mFastOutSlowInInterpolator));
-    AutoPtr<AnimatorListenerAdapter3> listener = new AnimatorListenerAdapter3(this, onAnimationFinished);
+    ani->SetInterpolator(mFastOutSlowInInterpolator);
+    AutoPtr<HeightAnimatorPhase1ListenerAdapter> listener
+        = new HeightAnimatorPhase1ListenerAdapter(this, onAnimationFinished);
     ani->AddListener(listener);
     ani->Start();
     mHeightAnimator = animator;
+
     AutoPtr<IView> view;
     mKeyguardBottomArea->GetIndicationView((IView**)&view);
     view->GetY(&mOriginalIndicationY);
@@ -1101,8 +1148,8 @@ void PanelView::StartUnlockHintAnimationPhase1(
     view->Animate((IViewPropertyAnimator**)&vpa);
     vpa->Y(mOriginalIndicationY - mHintDistance);
     vpa->SetDuration(250);
-    vpa->SetInterpolator(ITimeInterpolator::Probe(mFastOutSlowInInterpolator));
-    AutoPtr<Runnable2> run = new Runnable2(this);
+    vpa->SetInterpolator(mFastOutSlowInInterpolator);
+    AutoPtr<IndicationViewAnimationFinishedRunnable> run = new IndicationViewAnimationFinishedRunnable(this);
     vpa->WithEndAction(run);
     vpa->Start();
 }
@@ -1113,8 +1160,9 @@ void PanelView::StartUnlockHintAnimationPhase2(
     AutoPtr<IValueAnimator> animator = CreateHeightAnimator(GetMaxPanelHeight());
     IAnimator* ani = IAnimator::Probe(animator);
     ani->SetDuration(450);
-    ani->SetInterpolator(ITimeInterpolator::Probe(mBounceInterpolator));
-    AutoPtr<AnimatorListenerAdapter4> listener = new AnimatorListenerAdapter4(this, onAnimationFinished);
+    ani->SetInterpolator(mBounceInterpolator);
+    AutoPtr<HeightAnimatorPhase2ListenerAdapter> listener =
+        new HeightAnimatorPhase2ListenerAdapter(this, onAnimationFinished);
     ani->AddListener(listener);
     ani->Start();
     mHeightAnimator = animator;
@@ -1130,7 +1178,7 @@ AutoPtr<IValueAnimator> PanelView::CreateHeightAnimator(
     (*fvs)[0] = mExpandedHeight;
     (*fvs)[1] = targetHeight;
     helper->OfFloat(fvs, (IValueAnimator**)&animator);
-    AutoPtr<AnimatorUpdateListener> listener = new AnimatorUpdateListener(this);
+    AutoPtr<HeightAnimatorUpdateListener> listener = new HeightAnimatorUpdateListener(this);
     animator->AddUpdateListener(listener);
     return animator;
 }

@@ -14,6 +14,11 @@ const Float BounceInterpolator::SCALE_FACTOR = 7.5625f;
 
 CAR_INTERFACE_IMPL_3(BounceInterpolator, Object, IBounceInterpolator, IInterpolator, ITimeInterpolator);
 
+ECode BounceInterpolator::constructor()
+{
+    return NOERROR;
+}
+
 ECode BounceInterpolator::GetInterpolation(
     /* [in] */ Float t,
     /* [out] */ Float* value)

@@ -29,6 +29,8 @@ class BounceInterpolator
 public:
     CAR_INTERFACE_DECL()
 
+    CARAPI constructor();
+
     // @Override
     CARAPI GetInterpolation(
         /* [in] */ Float t,

@@ -273,6 +273,7 @@ module
     using interface Elastos.Droid.App.IActivity;
     using interface Elastos.Droid.App.IIUserSwitchObserver;
     using interface Elastos.Droid.Animation.IAnimatorListener;
+    using interface Elastos.Droid.Animation.ITimeInterpolator;
     using interface Elastos.Droid.Content.IBroadcastReceiver;
     using interface Elastos.Droid.Content.IContext;
     using interface Elastos.Droid.Content.IContextWrapper;
@@ -327,6 +328,7 @@ module
     using interface Elastos.Droid.View.IWindowCallback;
     using interface Elastos.Droid.View.IKeyEventCallback;
     using interface Elastos.Droid.View.IViewOnCreateContextMenuListener;
+    using interface Elastos.Droid.View.Animation.IInterpolator;
     using interface Elastos.Droid.Widget.IBaseAdapter;
     using interface Elastos.Droid.Widget.IAbsSeekBar;
     using interface Elastos.Droid.Widget.IAdapterViewOnItemClickListener;
@@ -2378,6 +2380,14 @@ module
     //                                  Phone
     //===========================================================================
     namespace Phone {
+        class CBounceInterpolator {
+            constructor();
+
+            interface IBounceInterpolator;
+            interface IInterpolator;
+            interface ITimeInterpolator;
+        }
+
         [local]
         class CSystemUIDialog {
             constructor(
@@ -2579,7 +2589,6 @@ module
             interface IListener;
             interface IViewOnClickListener;
             interface IOnOverscrollTopChangedListener;
-            interface IKeyguardAffordanceHelperCallback;
             interface IPanelView;
             interface IFrameLayout;
             interface IViewGroup;

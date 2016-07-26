@@ -357,7 +357,7 @@ ECode CKeyguardBottomAreaView::OnConfigurationChanged(
     mlp->GetBottomMargin(&bottomMargin);
     if (bottomMargin != indicationBottomMargin) {
         mlp->SetBottomMargin(indicationBottomMargin);
-        IView::Probe(mIndicationText)->SetLayoutParams(IViewGroupLayoutParams::Probe(mlp));
+        IView::Probe(mIndicationText)->SetLayoutParams(vp);
     }
 
     // Respect font size setting.
