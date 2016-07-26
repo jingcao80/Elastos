@@ -2857,13 +2857,8 @@ InstallArgs::InstallArgs(
     , mAbiOverride(abiOverride)
     , mInstructionSets(instructionSets)
     , mHost(owner)
-    , mIsEpk(FALSE)
 {
-    // for epk
-    if (mOrigin->mResolvedPath.EndWith(".epk")) {
-        mIsEpk = TRUE;
-    }
-    Slogger::I("CPackageManagerService", "InstallArgs: %s", mOrigin->mResolvedPath.string());
+    Slogger::E("CPackageManagerService", "InstallArgs: %s", mOrigin->mResolvedPath.string());
 }
 
 void InstallArgs::Init(
@@ -2887,11 +2882,7 @@ void InstallArgs::Init(
     mInstructionSets = instructionSets;
     mHost = owner;
 
-    // for epk
-    if (mOrigin->mResolvedPath.EndWith(".epk")) {
-        mIsEpk = TRUE;
-    }
-    Slogger::I("CPackageManagerService", "InstallArgs: %s", mOrigin->mResolvedPath.string());
+    Slogger::E("CPackageManagerService", "InstallArgs: %s", mOrigin->mResolvedPath.string());
 }
 
 Int32 InstallArgs::DoPreCopy()
@@ -8955,7 +8946,7 @@ ECode CPackageManagerService::ScanDirLI(
             AutoPtr<PackageParser::Package> pkg;
             // try {
             AutoPtr<PackageParser> pp = new PackageParser();
-            FAIL_RETURN(pp->ParsePackage(file, parseFlags, readBuffer, pkg->mIsEpk, (PackageParser::Package**)&pkg))
+            FAIL_RETURN(pp->ParsePackage(file, parseFlags, readBuffer, (PackageParser::Package**)&pkg))
             // } catch (PackageParserException e) {
             //     throw PackageManagerException.from(e);
             // }
@@ -9140,7 +9131,7 @@ ECode CPackageManagerService::ScanPackageLI(
 
     AutoPtr<PackageParser::Package> pkg;
     // try {
-    if (FAILED(pp->ParsePackage(scanFile, parseFlags, readBuffer, FALSE, (PackageParser::Package**)&pkg))) {
+    if (FAILED(pp->ParsePackage(scanFile, parseFlags, readBuffer, (PackageParser::Package**)&pkg))) {
         sLastScanError = pp->GetParseError();
         return E_PACKAGE_MANAGER_EXCEPTION;
     }
@@ -15507,7 +15498,7 @@ void CPackageManagerService::InstallPackageLI(
 
     AutoPtr<PackageParser::Package> pkg;
     // try {
-    ECode ec = pp->ParsePackage(tmpPackageFile, parseFlags, readBuffer, args->mIsEpk, (PackageParser::Package**)&pkg);
+    ECode ec = pp->ParsePackage(tmpPackageFile, parseFlags, readBuffer, (PackageParser::Package**)&pkg);
     if (FAILED(ec)) {
         res->SetError(String("Failed parse during installPackageLI"), pp->GetParseError(), ec);
         return;

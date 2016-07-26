@@ -163,7 +163,6 @@ class InstallArgs : public Object
 public:
     InstallArgs()
         : mInstallFlags(0)
-        , mIsEpk(FALSE)
     {}
 
     InstallArgs(
@@ -272,8 +271,6 @@ public:
     /* nullable */ AutoPtr< ArrayOf<String> > mInstructionSets;
 
     CPackageManagerService* mHost;
-    // for epk
-    Boolean mIsEpk;
 
     friend class CPackageManagerService;
 };

@@ -1456,7 +1456,6 @@ ECode PackageParser::ParsePackage(
     /* [in] */ IFile* packageFile,
     /* [in] */ Int32 flags,
     /* [in] */ ArrayOf<Byte>* readBuffer,
-    /* [in] */ Boolean isEpk,
     /* [out] */ Package** pkgLite)
 {
     VALIDATE_NOT_NULL(pkgLite)
@@ -1465,22 +1464,11 @@ ECode PackageParser::ParsePackage(
     Boolean isDir;
     packageFile->IsDirectory(&isDir);
     if (isDir) {
-        ec = ParseClusterPackage(packageFile, flags, readBuffer, pkgLite);
+        return ParseClusterPackage(packageFile, flags, readBuffer, pkgLite);
     }
     else {
-        ec = ParseMonolithicPackage(packageFile, flags, readBuffer, pkgLite);
+        return ParseMonolithicPackage(packageFile, flags, readBuffer, pkgLite);
     }
-
-    // for epk
-    if (*pkgLite != NULL) {
-        String name;
-        packageFile->GetName(&name);
-        if (isEpk || name.EndWith(".epk")) {
-            (*pkgLite)->mIsEpk = TRUE;
-        }
-    }
-
-    return ec;
 }
 
 ECode PackageParser::ParseClusterPackage(
@@ -1506,8 +1494,8 @@ ECode PackageParser::ParseClusterPackage(
     AutoPtr<IIoUtils> ioUtils;
     CIoUtils::AcquireSingleton((IIoUtils**)&ioUtils);
 
-    AutoPtr<IFile> baseApk;
-    CFile::New(lite->mBaseCodePath, (IFile**)&baseApk);
+    AutoPtr<IFile> basePkg;
+    CFile::New(lite->mBaseCodePath, (IFile**)&basePkg);
     AutoPtr<Package> pkg;
 
     AutoPtr<IAssetManager> assets;
@@ -1519,25 +1507,25 @@ ECode PackageParser::ParseClusterPackage(
     // Load the base and all splits into the AssetManager
     // so that resources can be overriden when parsing the manifests.
     Int32 ival;
-    ECode ec = LoadApkIntoAssetManager(assets, lite->mBaseCodePath, flags, &ival);
+    ECode ec = LoadPkgIntoAssetManager(assets, lite->mBaseCodePath, flags, &ival);
     FAIL_GOTO(ec, _EXIT_)
 
     if (lite->mSplitCodePaths != NULL && lite->mSplitCodePaths->GetLength() > 0) {
         for (Int32 i = 0; i < lite->mSplitCodePaths->GetLength(); ++i) {
             path = (*lite->mSplitCodePaths)[i];
-            ec = LoadApkIntoAssetManager(assets, path, flags, &ival);
+            ec = LoadPkgIntoAssetManager(assets, path, flags, &ival);
             FAIL_GOTO(ec, _EXIT_)
         }
     }
 
-    ec = ParseBaseApk(baseApk, assets, flags, (Package**)&pkg);
+    ec = ParseBasePkg(basePkg, assets, flags, (Package**)&pkg);
     FAIL_GOTO(ec, _EXIT_)
 
     if (pkg == NULL) {
         // throw new PackageParserException(INSTALL_PARSE_FAILED_NOT_APK,
         //         "Failed to parse base APK: " + baseApk);
         Logger::E(TAG, "INSTALL_PARSE_FAILED_NOT_APK: Failed to parse base APK: %s",
-            TO_CSTR(baseApk));
+            TO_CSTR(basePkg));
         ec = E_PACKAGE_PARSER_EXCEPTION;
         goto _EXIT_;
     }
@@ -1549,7 +1537,7 @@ ECode PackageParser::ParseClusterPackage(
         pkg->mSplitFlags = ArrayOf<Int32>::Alloc(num);
 
         for (Int32 i = 0; i < num; i++) {
-            ec = ParseSplitApk(pkg, i, assets, flags);
+            ec = ParseSplitPkg(pkg, i, assets, flags);
             FAIL_GOTO(ec, _EXIT_)
         }
     }
@@ -1567,7 +1555,7 @@ _EXIT_:
 }
 
 ECode PackageParser::ParseMonolithicPackage(
-    /* [in] */ IFile* apkFile,
+    /* [in] */ IFile* pkgFile,
     /* [in] */ Int32 flags,
     /* [in] */ ArrayOf<Byte>* readBuffer,
     /* [out] */ Package** pkgLite)
@@ -1579,13 +1567,13 @@ ECode PackageParser::ParseMonolithicPackage(
     CIoUtils::AcquireSingleton((IIoUtils**)&ioUtils);
     if (mOnlyCoreApps) {
         AutoPtr<PackageLite> obj;
-        ParseMonolithicPackageLite(apkFile, flags, readBuffer, (PackageLite**)&obj);
+        ParseMonolithicPackageLite(pkgFile, flags, readBuffer, (PackageLite**)&obj);
         PackageLite* lite = (PackageLite*)obj.Get();
         if (!lite->mCoreApp) {
             // throw new PackageParserException(INSTALL_PARSE_FAILED_MANIFEST_MALFORMED,
             //         "Not a coreApp: " + apkFile);
             Logger::E(TAG, "INSTALL_PARSE_FAILED_MANIFEST_MALFORMED : Not a coreApp: %s",
-                TO_CSTR(apkFile));
+                TO_CSTR(pkgFile));
             return E_PACKAGE_PARSER_EXCEPTION;
         }
     }
@@ -1595,30 +1583,30 @@ ECode PackageParser::ParseMonolithicPackage(
     AutoPtr<Package> pkg;
 
     // try {
-    ECode ec = ParseBaseApk(apkFile, assets, flags, (Package**)&pkg);
+    ECode ec = ParseBasePkg(pkgFile, assets, flags, (Package**)&pkg);
     ioUtils->CloseQuietly(ICloseable::Probe(assets));
 
     FAIL_RETURN(ec)
-    apkFile->GetAbsolutePath(&pkg->mCodePath);
+    pkgFile->GetAbsolutePath(&pkg->mCodePath);
 
     *pkgLite = pkg;
     REFCOUNT_ADD(*pkgLite)
     return NOERROR;
 }
 
-ECode PackageParser::LoadApkIntoAssetManager(
+ECode PackageParser::LoadPkgIntoAssetManager(
     /* [in] */ IAssetManager* assets,
-    /* [in] */ const String& apkPath,
+    /* [in] */ const String& pkgPath,
     /* [in] */ Int32 flags,
     /* [out] */ Int32* result)
 {
     VALIDATE_NOT_NULL(result)
     *result = 0;
 
-    if ((flags & PARSE_MUST_BE_APK) != 0 && !IsApkPath(apkPath)) {
+    if ((flags & PARSE_MUST_BE_APK) != 0 && !IsApkPath(pkgPath)) {
         // throw new PackageParserException(INSTALL_PARSE_FAILED_NOT_APK,
         //         "Invalid package file: " + apkPath);
-        Logger::E(TAG, "INSTALL_PARSE_FAILED_NOT_APK Invalid package file: ", apkPath.string());
+        Logger::E(TAG, "INSTALL_PARSE_FAILED_NOT_APK Invalid package file: ", pkgPath.string());
         return E_PACKAGE_PARSER_EXCEPTION;
     }
 
@@ -1626,11 +1614,11 @@ ECode PackageParser::LoadApkIntoAssetManager(
     // already exists in the AssetManager, addAssetPath will only return the cookie
     // assigned to it.
     Int32 cookie;
-    assets->AddAssetPath(apkPath, &cookie);
+    assets->AddAssetPath(pkgPath, &cookie);
     if (cookie == 0) {
         // throw new PackageParserException(INSTALL_PARSE_FAILED_BAD_MANIFEST,
         //         "Failed adding asset path: " + apkPath);
-        Logger::E(TAG, "INSTALL_PARSE_FAILED_NOT_APK Failed adding asset path: ", apkPath.string());
+        Logger::E(TAG, "INSTALL_PARSE_FAILED_NOT_APK Failed adding asset path: ", pkgPath.string());
         return E_PACKAGE_PARSER_EXCEPTION;
     }
 
@@ -1638,8 +1626,8 @@ ECode PackageParser::LoadApkIntoAssetManager(
     return NOERROR;
 }
 
-ECode PackageParser::ParseBaseApk(
-    /* [in] */ IFile* apkFile,
+ECode PackageParser::ParseBasePkg(
+    /* [in] */ IFile* pkgFile,
     /* [in] */ IAssetManager* assets,
     /* [in] */ Int32 flags,
     /* [out] */ PackageParser::Package** pkgLite)
@@ -1647,16 +1635,15 @@ ECode PackageParser::ParseBaseApk(
     VALIDATE_NOT_NULL(pkgLite)
     *pkgLite = NULL;
 
-    String apkPath;
-    apkFile->GetAbsolutePath(&apkPath);
-
+    String pkgPath;
+    pkgFile->GetAbsolutePath(&pkgPath);
     sParseError = IPackageManager::INSTALL_SUCCEEDED;
-    mArchiveSourcePath = apkPath;
+    mArchiveSourcePath = pkgPath;
 
-    if (DEBUG_JAR) Slogger::D(TAG, "========= Scanning base APK: %s", apkPath.string());
+    if (DEBUG_JAR) Slogger::D(TAG, "========= Scanning base PKG: %s", pkgPath.string());
 
     Int32 cookie;
-    FAIL_RETURN(LoadApkIntoAssetManager(assets, apkPath, flags, &cookie))
+    FAIL_RETURN(LoadPkgIntoAssetManager(assets, pkgPath, flags, &cookie))
 
     AutoPtr<IIoUtils> ioUtils;
     CIoUtils::AcquireSingleton((IIoUtils**)&ioUtils);
@@ -1672,7 +1659,7 @@ ECode PackageParser::ParseBaseApk(
     ECode ec = assets->OpenXmlResourceParser(cookie, ANDROID_MANIFEST_FILENAME, (IXmlResourceParser**)&parser);
     FAIL_GOTO(ec, _EXIT_)
 
-    ec = ParseBaseApk(res, parser, flags, outError, (Package**)&pkg);
+    ec = ParseBasePkg(res, parser, flags, outError, (Package**)&pkg);
     FAIL_GOTO(ec, _EXIT_)
 
     if (pkg == NULL) {
@@ -1681,25 +1668,29 @@ ECode PackageParser::ParseBaseApk(
         String pos;
         IXmlPullParser::Probe(parser)->GetPositionDescription(&pos);
         Logger::E(TAG, "ParseBaseApk error %d, file %s (at %s): %s",
-            sParseError, apkPath.string(), pos.string(),(*outError)[0].string());
+            sParseError, pkgPath.string(), pos.string(),(*outError)[0].string());
         ec = E_PACKAGE_PARSER_EXCEPTION;
         goto _EXIT_;
     }
 
-    pkg->mBaseCodePath = apkPath;
+    pkg->mBaseCodePath = pkgPath;
     pkg->mSignatures = NULL;
 
     // If the pkg is a theme, we need to know what themes it overlays
     // and determine if it has an icon pack
     if (pkg->mIsThemeApk) {
         //Determine existance of Overlays
-        AutoPtr<List<String> > overlayTargets = ScanPackageOverlays(apkFile);
+        AutoPtr<List<String> > overlayTargets = ScanPackageOverlays(pkgFile);
         List<String>::Iterator it = overlayTargets->Begin();
         for (; it != overlayTargets->End(); ++it) {
             pkg->mOverlayTargets->Add(CoreUtils::Convert(*it));
         }
 
-        pkg->mHasIconPack = PackageHasIconPack(apkFile);
+        pkg->mHasIconPack = PackageHasIconPack(pkgFile);
+    }
+
+    if (pkgPath.EndWith(".epk")) {
+        pkg->mIsEpk = TRUE;
     }
 
     // } catch (PackageParserException e) {
@@ -1715,7 +1706,7 @@ _EXIT_:
     if (FAILED(ec) && ec != (ECode)E_PACKAGE_PARSER_EXCEPTION) {
         ec = E_PACKAGE_PARSER_EXCEPTION;
         Logger::E(TAG, "INSTALL_PARSE_FAILED_UNEXPECTED_EXCEPTION Failed to read manifest from %s",
-            apkPath.string());
+            pkgPath.string());
     }
     // } finally {
     ioUtils->CloseQuietly(ICloseable::Probe(assets));
@@ -1726,23 +1717,23 @@ _EXIT_:
     return ec;
 }
 
-ECode PackageParser::ParseSplitApk(
+ECode PackageParser::ParseSplitPkg(
     /* [in] */ PackageParser::Package* pkg,
     /* [in] */ Int32 splitIndex,
     /* [in] */ IAssetManager* assets,
     /* [in] */ Int32 flags)
 {
-    String apkPath = (*pkg->mSplitCodePaths)[splitIndex];
-    AutoPtr<IFile> apkFile;
-    CFile::New(apkPath, (IFile**)&apkFile);
+    String pkgPath = (*pkg->mSplitCodePaths)[splitIndex];
+    AutoPtr<IFile> pkgFile;
+    CFile::New(pkgPath, (IFile**)&pkgFile);
 
     sParseError = IPackageManager::INSTALL_SUCCEEDED;
-    mArchiveSourcePath = apkPath;
+    mArchiveSourcePath = pkgPath;
 
-    if (DEBUG_JAR) Slogger::D(TAG, "Scanning split APK: %s", apkPath.string());
+    if (DEBUG_JAR) Slogger::D(TAG, "Scanning split APK: %s", pkgPath.string());
 
     Int32 cookie;
-    FAIL_RETURN(LoadApkIntoAssetManager(assets, apkPath, flags, &cookie))
+    FAIL_RETURN(LoadPkgIntoAssetManager(assets, pkgPath, flags, &cookie))
 
     AutoPtr<IIoUtils> ioUtils;
     CIoUtils::AcquireSingleton((IIoUtils**)&ioUtils);
@@ -1757,7 +1748,7 @@ ECode PackageParser::ParseSplitApk(
     ECode ec = assets->OpenXmlResourceParser(cookie, ANDROID_MANIFEST_FILENAME, (IXmlResourceParser**)&parser);
     FAIL_GOTO(ec, _EXIT_)
 
-    ec = ParseSplitApk(pkg, res, parser, flags, splitIndex, outError, (Package**)&outPkg);
+    ec = ParseSplitPkg(pkg, res, parser, flags, splitIndex, outError, (Package**)&outPkg);
     FAIL_GOTO(ec, _EXIT_)
 
     if (outPkg == NULL) {
@@ -1765,7 +1756,7 @@ ECode PackageParser::ParseSplitApk(
         //         apkPath + " (at " + parser.getPositionDescription() + "): " + outError[0]);
         String pos;
         IXmlPullParser::Probe(parser)->GetPositionDescription(&pos);
-        Logger::E(TAG, "%d %s (at %d): %s", sParseError, apkPath.string(), pos.string(),(*outError)[0].string());
+        Logger::E(TAG, "%d %s (at %d): %s", sParseError, pkgPath.string(), pos.string(),(*outError)[0].string());
         ec = E_PACKAGE_PARSER_EXCEPTION;
         goto _EXIT_;
     }
@@ -1783,7 +1774,7 @@ _EXIT_:
     if (FAILED(ec) && ec != (ECode)E_PACKAGE_PARSER_EXCEPTION) {
         ec = E_PACKAGE_PARSER_EXCEPTION;
         Logger::E(TAG, "INSTALL_PARSE_FAILED_UNEXPECTED_EXCEPTION Failed to read manifest from %s",
-            apkPath.string());
+            pkgPath.string());
     }
     // } finally {
     ioUtils->CloseQuietly(ICloseable::Probe(assets));
@@ -1792,7 +1783,7 @@ _EXIT_:
     return NOERROR;
 }
 
-ECode PackageParser::ParseSplitApk(
+ECode PackageParser::ParseSplitPkg(
     /* [in] */ PackageParser::Package* pkg,
     /* [in] */ IResources* res,
     /* [in] */ IXmlResourceParser* parser,
@@ -2576,7 +2567,7 @@ AutoPtr<ISignature> PackageParser::StringToSignature(
     // return new Signature(sig);
 }
 
-ECode PackageParser::ParseBaseApk(
+ECode PackageParser::ParseBasePkg(
     /* [in] */ IResources* res,
     /* [in] */ IXmlResourceParser* xrp,
     /* [in] */ Int32 flags,
@@ -2615,7 +2606,7 @@ ECode PackageParser::ParseBaseApk(
         return NOERROR;
     }
 
-    Slogger::I(TAG, "=================ParseBaseApk: %s", pkgName.string());
+    Slogger::I(TAG, "=================ParseBasePkg: %s", pkgName.string());
 
     AutoPtr<PackageParser::Package> pkg = new PackageParser::Package(pkgName);
     AutoPtr<IBundle> metaDataBundle;
