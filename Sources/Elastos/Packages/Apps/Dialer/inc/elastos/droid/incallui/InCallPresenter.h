@@ -8,7 +8,7 @@
 #include "elastos/droid/incallui/AudioModeProvider.h"
 #include "elastos/droid/incallui/Call.h"
 #include "elastos/droid/incallui/CallList.h"
-#include "elastos/droid/incallui/CInCallActivity.h"
+// #include "elastos/droid/incallui/CInCallActivity.h"
 #include "elastos/droid/incallui/ContactInfoCache.h"
 #include "elastos/droid/incallui/InCallCameraManager.h"
 #include "elastos/droid/incallui/ProximitySensor.h"
@@ -17,6 +17,7 @@
 #include <elastos/droid/telecom/Phone.h>
 #include <elastos/core/Object.h>
 
+using Elastos::Droid::Content::IIntent;
 using Elastos::Droid::Telecom::ICall;
 using Elastos::Droid::Telecom::ICallDetails;
 using Elastos::Droid::Telecom::ICallListener;
@@ -29,6 +30,8 @@ using Elastos::Utility::ISet;
 namespace Elastos {
 namespace Droid {
 namespace InCallUI {
+
+class CInCallActivity;
 
 class InCallPresenter
     : public Object

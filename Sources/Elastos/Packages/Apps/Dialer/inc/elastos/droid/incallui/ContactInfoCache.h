@@ -15,6 +15,8 @@ namespace Elastos {
 namespace Droid {
 namespace InCallUI {
 
+class Call;
+
 class ContactInfoCache
     : public Object
 {
@@ -44,6 +46,23 @@ public:
 public:
     static AutoPtr<ContactInfoCache> GetInstance(
         /* [in] */ IContext* mContext);
+
+    static CARAPI_(AutoPtr<ContactCacheEntry>) BuildCacheEntryFromCall(
+        /* [in] */ IContext* context,
+        /* [in] */ Call* call,
+        /* [in] */ Boolean isIncoming);
+
+    /**
+     * Requests contact data for the Call object passed in.
+     * Returns the data through callback.  If callback is null, no response is made, however the
+     * query is still performed and cached.
+     *
+     * @param callback The function to call back when the call is found. Can be null.
+     */
+    CARAPI_(void) FindInfo(
+        /* [in] */ Call* call,
+        /* [in] */ Boolean isIncoming,
+        /* [in] */ IContactInfoCacheCallback* callback);
 
     /**
      * Blows away the stored cache values.

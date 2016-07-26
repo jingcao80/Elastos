@@ -1,18 +1,23 @@
 
 #include "elastos/droid/incallui/CallCardPresenter.h"
 #include "elastos/droid/incallui/CallTimer.h"
-#include "elastos/droid/incallui/CallerInfoUtils.h"
+// #include "elastos/droid/incallui/CallerInfoUtils.h"
 #include "elastos/droid/incallui/TelecomAdapter.h"
+#include "elastos/droid/incallui/InCallPresenter.h"
 #include "elastos/droid/Manifest.h"
 #include "elastos/droid/text/TextUtils.h"
 #include <elastos/utility/logging/Logger.h>
 #include "R.h"
+#include "Elastos.Droid.App.h"
+#include "Elastos.Droid.Internal.h"
+#include "Elastos.Droid.Telephony.h"
 
 using Elastos::Droid::App::IAlertDialogBuilder;
 using Elastos::Droid::App::CAlertDialogBuilder;
 using Elastos::Droid::App::IAlertDialog;
 using Elastos::Droid::Content::EIID_IDialogInterfaceOnClickListener;
 using Elastos::Droid::Content::Pm::IPackageManager;
+using Elastos::Droid::Content::Pm::IApplicationInfo;
 using Elastos::Droid::Content::Res::IResources;
 using Elastos::Droid::InCallUI::EIID_IContactInfoCacheCallback;
 using Elastos::Droid::InCallUI::EIID_ICallCardPresenter;
@@ -22,14 +27,13 @@ using Elastos::Droid::InCallUI::EIID_IInCallDetailsListener;
 using Elastos::Droid::InCallUI::EIID_IInCallEventListener;
 using Elastos::Droid::Internal::Utility::IPreconditions;
 using Elastos::Droid::Internal::Utility::CPreconditions;
-using Elastos::Droid::Internal::Telephony::Utility::CBlacklistUtils;
-using Elastos::Droid::Internal::Telephony::Utility::IBlacklistUtils;
 using Elastos::Droid::Telecom::IDisconnectCause;
 using Elastos::Droid::Telecom::CDisconnectCause;
 using Elastos::Droid::Telecom::IPhoneCapabilities;
 using Elastos::Droid::Telecom::CPhoneCapabilities;
 using Elastos::Droid::Telecom::ITelecomManager;
 using Elastos::Droid::Telecom::IStatusHints;
+using Elastos::Droid::Telecom::IVideoProfileVideoState;
 using Elastos::Droid::Telephony::IPhoneNumberUtils;
 using Elastos::Droid::Telephony::CPhoneNumberUtils;
 using Elastos::Droid::Telephony::ITelephonyManagerHelper;
@@ -53,12 +57,12 @@ namespace InCallUI {
 // CallCardPresenter::ContactLookupCallback
 //================================================================
 
-CallCardPresenter::ContactLookupCallback(
+CallCardPresenter::ContactLookupCallback::ContactLookupCallback(
     /* [in] */ CallCardPresenter* callCardPresenter,
     /* [in] */ Boolean isPrimary)
     : mIsPrimary(isPrimary)
 {
-    AutoPtr<IWeakReferenceSource> wrs = IWeakReferenceSource::Probe(callCardPresenter);
+    AutoPtr<IWeakReferenceSource> wrs = IWeakReferenceSource::Probe((ICallCardPresenter*)callCardPresenter);
     wrs->GetWeakReference((IWeakReference**)&mCallCardPresenter);
 }
 
@@ -73,7 +77,7 @@ ECode CallCardPresenter::ContactLookupCallback::OnContactInfoComplete(
     AutoPtr<ICallCardPresenter> p = ICallCardPresenter::Probe(obj);
     if (p != NULL) {
         AutoPtr<CallCardPresenter> presenter = (CallCardPresenter*)p.Get();
-        presenter->OnContactInfoComplete(callId, entry, mIsPrimary);
+        presenter->OnContactInfoComplete(callId, (ContactInfoCache::ContactCacheEntry*)entry, mIsPrimary);
     }
     return NOERROR;
 }
@@ -87,7 +91,7 @@ ECode CallCardPresenter::ContactLookupCallback::OnImageLoadComplete(
     AutoPtr<ICallCardPresenter> p = ICallCardPresenter::Probe(obj);
     if (p != NULL) {
         AutoPtr<CallCardPresenter> presenter = (CallCardPresenter*)p.Get();
-        presenter->OnImageLoadComplete(callId, entry);
+        presenter->OnImageLoadComplete(callId, (ContactInfoCache::ContactCacheEntry*)entry);
     }
     return NOERROR;
 }
@@ -104,32 +108,12 @@ ECode CallCardPresenter::UpdateCallTimeRunnable::Run()
 }
 
 
-//==========================================================================
-// CallCardPresenter::DialogOnClickListener
-//==========================================================================
-
-CAR_INTERFACE_IMPL(CallCardPresenter::DialogOnClickListener, Object, IDialogInterfaceOnClickListener);
-
-ECode CallCardPresenter::DialogOnClickListener::OnClick(
-    /* [in] */ IDialogInterface* dialog,
-    /* [in] */ Int32 which)
-{
-    Logger::D(TAG, "hanging up due to blacklist: %s", mHost->mPrimary->GetId().string());
-    TelecomAdapter::GetInstance()->DisconnectCall(mHost->mPrimary->GetId());
-    AutoPtr<IBlacklistUtils> utils;
-    CBlacklistUtils::AcquireSingleton((IBlacklistUtils**)&utils);
-    utils->AddOrUpdate(mContext, mHost->mPrimary->GetNumber(),
-            IBlacklistUtils::BLOCK_CALLS, IBlacklistUtils::BLOCK_CALLS);
-    return NOERROR;
-}
-
-
 //================================================================
 // CallCardPresenter
 //================================================================
 
 const String CallCardPresenter::TAG("CallCardPresenter");
-const Int64 CALL_TIME_UPDATE_INTERVAL_MS;
+const Int64 CallCardPresenter::CALL_TIME_UPDATE_INTERVAL_MS;
 
 CAR_INTERFACE_IMPL_5(CallCardPresenter, Presenter
         , ICallCardPresenter
@@ -151,8 +135,8 @@ void CallCardPresenter::Init(
 {
     AutoPtr<IPreconditions> preconditions;
     CPreconditions::AcquireSingleton((IPreconditions**)&preconditions);
-    mContext = NULL;
-    preconditions->CheckNotNull(context, (IContext**)&mContext);
+    if (FAILED(preconditions->CheckNotNull(context))) assert(0);
+    mContext = context;
 
     // Call may be null if disconnect happened already.
     if (call != NULL) {
@@ -163,7 +147,7 @@ void CallCardPresenter::Init(
             StartContactInfoSearch(call, TRUE, call->GetState() == Call::State::INCOMING);
         }
         else {
-            UpdateContactEntry(NULL, TRUE);
+            UpdateContactEntry(NULL, TRUE, TRUE);
         }
     }
 }
@@ -175,7 +159,7 @@ ECode CallCardPresenter::OnUiReady(
 
     // Contact search may have completed before ui is ready.
     if (mPrimaryContactInfo != NULL) {
-        UpdatePrimaryDisplayInfo();
+        UpdatePrimaryDisplayInfo(mPrimaryContactInfo, IsConference(mPrimary));
     }
 
     // Register for call state changes last
@@ -211,7 +195,7 @@ ECode CallCardPresenter::OnIncomingCall(
     /* [in] */ ICall* call)
 {
     // same logic should happen as with onStateChange()
-    AutoPtr<CallList> callList = CallList::GetInstance()
+    AutoPtr<CallList> callList = CallList::GetInstance();
     OnStateChange(oldState, newState, callList);
     return NOERROR;
 }
@@ -219,10 +203,12 @@ ECode CallCardPresenter::OnIncomingCall(
 ECode CallCardPresenter::OnStateChange(
     /* [in] */ InCallState oldState,
     /* [in] */ InCallState newState,
-    /* [in] */ ICallList* callList)
+    /* [in] */ ICallList* _callList)
 {
-    Logger::D(TAG, "onStateChange() %s", TO_CSTR(newState));
-    AutoPtr<CallCardUi> ui = GetUi();
+    Logger::D(TAG, "onStateChange() %d", newState);
+    AutoPtr<IUi> temp;
+    GetUi((IUi**)&temp);
+    AutoPtr<ICallCardUi> ui = ICallCardUi::Probe(temp);
     if (ui == NULL) {
         return NOERROR;
     }
@@ -230,10 +216,11 @@ ECode CallCardPresenter::OnStateChange(
     AutoPtr<Call> primary;
     AutoPtr<Call> secondary;
 
-    if (newState == InCallState::INCOMING) {
+    AutoPtr<CallList> callList = (CallList*)_callList;
+    if (newState == InCallState_INCOMING) {
         primary = callList->GetIncomingCall();
     }
-    else if (newState == InCallState::PENDING_OUTGOING || newState == InCallState::OUTGOING) {
+    else if (newState == InCallState_PENDING_OUTGOING || newState == InCallState_OUTGOING) {
         primary = callList->GetOutgoingCall();
         if (primary == NULL) {
             primary = callList->GetPendingOutgoingCall();
@@ -242,7 +229,7 @@ ECode CallCardPresenter::OnStateChange(
         // highest priority call to display as the secondary call.
         secondary = GetCallToDisplay(callList, NULL, TRUE);
     }
-    else if (newState == InCallState::INCALL) {
+    else if (newState == InCallState_INCALL) {
         primary = GetCallToDisplay(callList, NULL, FALSE);
         secondary = GetCallToDisplay(callList, primary, TRUE);
     }
@@ -251,38 +238,30 @@ ECode CallCardPresenter::OnStateChange(
     Logger::D(TAG, "Secondary call: %s", TO_CSTR(secondary));
 
     Boolean primaryChanged = !Call::AreSame(mPrimary, primary);
-    Boolean primaryForwardedChanged = IsForwarded(mPrimary) != IsForwarded(primary);
     Boolean secondaryChanged = !Call::AreSame(mSecondary, secondary);
 
     mSecondary = secondary;
     mPrimary = primary;
 
-    // Refresh primary call information if either:
-    // 1. Primary call changed.
-    // 2. The call's ability to manage conference has changed.
-    if (mPrimary != NULL && (primaryChanged ||
-            ui->IsManageConferenceVisible() != ShouldShowManageConference())) {
+    if (primaryChanged && mPrimary != NULL) {
         // primary call has changed
         mPrimaryContactInfo = ContactInfoCache::BuildCacheEntryFromCall(mContext, mPrimary,
                 mPrimary->GetState() == Call::State::INCOMING);
-        UpdatePrimaryDisplayInfo();
+        UpdatePrimaryDisplayInfo(mPrimaryContactInfo, IsConference(mPrimary));
         MaybeStartSearch(mPrimary, TRUE);
         mPrimary->SetSessionModificationState(Call::SessionModificationState::NO_REQUEST);
-    }
-    else if (primaryForwardedChanged && mPrimary != NULL) {
-        UpdatePrimaryDisplayInfo();
     }
 
     if (mSecondary == NULL) {
         // Secondary call may have ended.  Update the ui.
         mSecondaryContactInfo = NULL;
-        UpdateSecondaryDisplayInfo();
+        UpdateSecondaryDisplayInfo(FALSE);
     }
     else if (secondaryChanged) {
         // secondary call has changed
         mSecondaryContactInfo = ContactInfoCache::BuildCacheEntryFromCall(mContext, mSecondary,
                 mSecondary->GetState() == Call::State::INCOMING);
-        UpdateSecondaryDisplayInfo();
+        UpdateSecondaryDisplayInfo(mSecondary->IsConferenceCall());
         MaybeStartSearch(mSecondary, FALSE);
         mSecondary->SetSessionModificationState(Call::SessionModificationState::NO_REQUEST);
     }
@@ -295,7 +274,7 @@ ECode CallCardPresenter::OnStateChange(
     else {
         Logger::D(TAG, "Canceling the calltime timer");
         mCallTimer->Cancel();
-        ui->SetPrimaryCallElapsedTime(FALSE, NULL);
+        ui->SetPrimaryCallElapsedTime(FALSE, String(NULL));
     }
 
     // Set the call state
@@ -306,10 +285,10 @@ ECode CallCardPresenter::OnStateChange(
     }
     else {
         AutoPtr<IDisconnectCause> cause;
-        CDisconnectCause::New(DisconnectCause::UNKNOWN, (IDisconnectCause**)&cause);
-        AutoPtr<IUi> ui;
-        GetUi((IUi**)&ui);
-        ICallCardUi::Probe(ui)->SetCallState(callState, VideoProfile::VideoState::AUDIO_ONLY,
+        CDisconnectCause::New(IDisconnectCause::UNKNOWN, (IDisconnectCause**)&cause);
+        AutoPtr<IUi> u;
+        GetUi((IUi**)&u);
+        ICallCardUi::Probe(u)->SetCallState(callState, IVideoProfileVideoState::AUDIO_ONLY,
                 Call::SessionModificationState::NO_REQUEST, cause,
                 String(NULL), NULL, String(NULL));
     }
@@ -318,9 +297,9 @@ ECode CallCardPresenter::OnStateChange(
     // If the primary call is a video call on hold, still show the contact photo.
     // If the primary call is an active video call, hide the contact photo.
     if (mPrimary != NULL) {
-        AutoPtr<IUi> ui;
-        GetUi((IUi**)&ui);
-        ICallCardUi::Probe(ui)->SetPhotoVisible(!(mPrimary->IsVideoCall(mContext) &&
+        AutoPtr<IUi> u;
+        GetUi((IUi**)&u);
+        ICallCardUi::Probe(u)->SetPhotoVisible(!(mPrimary->IsVideoCall(mContext) &&
                 callState != Call::State::ONHOLD));
     }
 
@@ -329,9 +308,9 @@ ECode CallCardPresenter::OnStateChange(
     Boolean enableEndCallButton = Call::State::IsConnectingOrConnected(callState) &&
             callState != Call::State::INCOMING && mPrimary != NULL;
     // Hide the end call button instantly if we're receiving an incoming call.
-    AutoPtr<IUi> ui;
-    GetUi((IUi**)&ui);
-    ICallCardUi::Probe(ui)->SetEndCallButtonEnabled(
+    AutoPtr<IUi> u;
+    GetUi((IUi**)&u);
+    ICallCardUi::Probe(u)->SetEndCallButtonEnabled(
             enableEndCallButton, callState != Call::State::INCOMING /* animate */);
 
     return NOERROR;
@@ -411,7 +390,7 @@ void CallCardPresenter::SetCallbackNumber()
 {
     String callbackNumber(NULL);
 
-    AutoPtr<IUir> handle = mPrimary->GetHandle();
+    AutoPtr<IUri> handle = mPrimary->GetHandle();
     AutoPtr<IPhoneNumberUtils> utils;
     CPhoneNumberUtils::AcquireSingleton((IPhoneNumberUtils**)&utils);
     Boolean isEmergencyCall;
@@ -435,11 +414,9 @@ void CallCardPresenter::SetCallbackNumber()
 
     AutoPtr<IInterface> service;
     mContext->GetSystemService(IContext::TELEPHONY_SERVICE, (IInterface**)&service);
-    AutoPtr<ITelecomManager> telephonyManager = ITelecomManager::Probe(service);
+    AutoPtr<ITelephonyManager> telephonyManager = ITelephonyManager::Probe(service);
     String simNumber;
     telephonyManager->GetLine1Number(&simNumber);
-    AutoPtr<IPhoneNumberUtils> utils;
-    CPhoneNumberUtils::AcquireSingleton((IPhoneNumberUtils**)&utils);
     Boolean result;
     if (utils->Compare(callbackNumber, simNumber, &result), result) {
         Logger::D(TAG, "Numbers are the same; not showing the callback number");
@@ -459,7 +436,7 @@ void CallCardPresenter::UpdateCallTime()
 
     if (ui == NULL || mPrimary == NULL || mPrimary->GetState() != Call::State::ACTIVE) {
         if (ui != NULL) {
-            ui->SetPrimaryCallElapsedTime(FALSE, NULL);
+            ui->SetPrimaryCallElapsedTime(FALSE, String(NULL));
         }
         mCallTimer->Cancel();
     }
@@ -505,7 +482,7 @@ void CallCardPresenter::StartContactInfoSearch(
 {
     AutoPtr<ContactInfoCache> cache = ContactInfoCache::GetInstance(mContext);
 
-    AutoPtr<ContactLookupCallback> cb = new ContactLookupCallback(this, isPrimary);
+    AutoPtr<IContactInfoCacheCallback> cb = (IContactInfoCacheCallback*)new ContactLookupCallback(this, isPrimary);
     cache->FindInfo(call, isIncoming, cb);
 }
 
@@ -514,12 +491,13 @@ void CallCardPresenter::OnContactInfoComplete(
     /* [in] */ ContactInfoCache::ContactCacheEntry* entry,
     /* [in] */ Boolean isPrimary)
 {
-    UpdateContactEntry(entry, isPrimary);
+    UpdateContactEntry(entry, isPrimary, FALSE);
     if (!entry->mName.IsNull()) {
         Logger::D(TAG, "Contact found: %s", TO_CSTR(entry));
     }
     if (entry->mContactUri != NULL) {
-        CallerInfoUtils::SendViewNotification(mContext, entry->mContactUri);
+        assert(0);
+        // CallerInfoUtils::SendViewNotification(mContext, entry->mContactUri);
     }
 }
 
@@ -559,22 +537,22 @@ void CallCardPresenter::UpdateContactEntry(
 {
     if (isPrimary) {
         mPrimaryContactInfo = entry;
-        UpdatePrimaryDisplayInfo();
+        UpdatePrimaryDisplayInfo(entry, isConference);
     }
     else {
         mSecondaryContactInfo = entry;
-        UpdateSecondaryDisplayInfo();
+        UpdateSecondaryDisplayInfo(isConference);
     }
 }
 
-AutoPtr<Call> callCardPresenter::GetCallToDisplay(
+AutoPtr<Call> CallCardPresenter::GetCallToDisplay(
     /* [in] */ CallList* callList,
     /* [in] */ Call* ignore,
     /* [in] */ Boolean skipDisconnected)
 {
     // Active calls come second.  An active call always gets precedent.
     AutoPtr<Call> retval = callList->GetActiveCall();
-    if (retval != NULL && retval != ignore) {
+    if (retval != NULL && retval.Get() != ignore) {
         return retval;
     }
 
@@ -583,18 +561,18 @@ AutoPtr<Call> callCardPresenter::GetCallToDisplay(
     // calls are very short lived.
     if (!skipDisconnected) {
         retval = callList->GetDisconnectingCall();
-        if (retval != NULL && retval != ignore) {
+        if (retval != NULL && retval.Get() != ignore) {
             return retval;
         }
         retval = callList->GetDisconnectedCall();
-        if (retval != NULL && retval != ignore) {
+        if (retval != NULL && retval.Get() != ignore) {
             return retval;
         }
     }
 
     // Then we go to background call (calls on hold)
     retval = callList->GetBackgroundCall();
-    if (retval != NULL && retval != ignore) {
+    if (retval != NULL && retval.Get() != ignore) {
         return retval;
     }
 
@@ -614,7 +592,7 @@ void CallCardPresenter::UpdatePrimaryDisplayInfo(
     if (ui == NULL) {
         // TODO: May also occur if search result comes back after ui is destroyed. Look into
         // removing that case completely.
-        Logger::d(TAG, "updatePrimaryDisplayInfo called but ui is null!");
+        Logger::D(TAG, "updatePrimaryDisplayInfo called but ui is null!");
         return;
     }
 
@@ -628,7 +606,7 @@ void CallCardPresenter::UpdatePrimaryDisplayInfo(
     }
     else {
         ui->SetPrimary(String(NULL), String(NULL), FALSE, String(NULL), NULL,
-                isConference, canManageConference, FALSE)
+                isConference, canManageConference, FALSE);
     }
 }
 
@@ -685,12 +663,8 @@ AutoPtr<IDrawable> CallCardPresenter::GetCallProviderIcon(
     /* [in] */ Call* call)
 {
     AutoPtr<IPhoneAccount> account = GetAccountForCall(call);
-
-    // on MSIM devices irrespective of number of enabled phone
-    // accounts pick icon from phone account and display on UI
     Boolean result;
-    if (account != NULL && (GetTelecomManager()->HasMultipleCallCapableAccounts(&result), result)
-            || (CallList::PHONE_COUNT > 1))) {
+    if (account != NULL && (GetTelecomManager()->HasMultipleCallCapableAccounts(&result), result)) {
         AutoPtr<IDrawable> d;
         account->GetIcon(mContext, (IDrawable**)&d);
         return d;
@@ -706,8 +680,7 @@ String CallCardPresenter::GetCallProviderLabel(
     // on MSIM devices irrespective of number of
     // enabled phone accounts display label info on UI
     Boolean result;
-    if (account != NULL && (GetTelecomManager()->HasMultipleCallCapableAccounts(&result), result)
-            || (CallList::PHONE_COUNT > 1))) {
+    if (account != NULL && (GetTelecomManager()->HasMultipleCallCapableAccounts(&result), result)) {
         AutoPtr<ICharSequence> cs;
         account->GetLabel((ICharSequence**)&cs);
         String str;
@@ -747,7 +720,7 @@ String CallCardPresenter::GetConnectionLabel()
             return String(NULL);
         }
         AutoPtr<ICharSequence> label;
-        pm->GetApplicationLabel((ICharSequence**)&label);
+        pm->GetApplicationLabel(info, (ICharSequence**)&label);
         String str;
         label->ToString(&str);
         return str;
@@ -795,7 +768,7 @@ String CallCardPresenter::GetNameForCall(
     /* [in] */ ContactInfoCache::ContactCacheEntry* contactInfo)
 {
     if (TextUtils::IsEmpty(contactInfo->mName)) {
-        return contactInfo.number;
+        return contactInfo->mNumber;
     }
     return contactInfo->mName;
 }

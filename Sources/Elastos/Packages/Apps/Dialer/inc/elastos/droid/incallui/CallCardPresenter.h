@@ -69,35 +69,11 @@ private:
     {
     public:
         UpdateCallTimeRunnable(
-            /* [in] */ IContext* ctx,
-            /* [in] */ CallCardPresenter* host)
-            : mContext(ctx)
-            , mHost(host)
-        {}
-
-        CARAPI Run();
-
-    private:
-        AutoPtr<IContext> mContext;
-        CallCardPresenter* mHost;
-    };
-
-    class DialogOnClickListener
-        : public Object
-        , public IDialogInterfaceOnClickListener
-    {
-    public:
-        CAR_INTERFACE_DECL()
-
-        DialogOnClickListener(
             /* [in] */ CallCardPresenter* host)
             : mHost(host)
         {}
 
-        // @Override
-        CARAPI OnClick(
-            /* [in] */ IDialogInterface* dialog,
-            /* [in] */ Int32 which);
+        CARAPI Run();
 
     private:
         CallCardPresenter* mHost;

@@ -7,7 +7,7 @@
 #include "elastos/droid/incallui/Call.h"
 #include "elastos/droid/telecom/Phone.h"
 #include "elastos/droid/os/Handler.h"
-#define HASH_FOR_TELECOMM_TELECOM
+#define HASH_FOR_TELECOM
 #include "elastos/droid/ext/frameworkhash.h"
 #include <elastos/core/Object.h>
 #include <elastos/utility/etl/HashMap.h>
@@ -60,6 +60,8 @@ private:
             /* [in] */ CallList* host)
             : mHost(host)
         {}
+
+        TO_STRING_IMPL("CallList::MyHandler")
 
         CARAPI HandleMessage(
             /* [in] */ IMessage* msg);

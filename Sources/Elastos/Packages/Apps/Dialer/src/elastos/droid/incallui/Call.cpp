@@ -239,10 +239,11 @@ void Call::UpdateFromTelecommCall()
 
     AutoPtr<IInCallServiceVideoCall> videoCall;
     if (mTelecommCall->GetVideoCall((IInCallServiceVideoCall**)&videoCall), videoCall != NULL) {
-        if (mVideoCallListener == NULL) {
-            mVideoCallListener = new InCallVideoCallListener(this);
-        }
-        videoCall->SetVideoCallListener((IVideoCallListener*)mVideoCallListener.Get());
+        assert(0);
+        // if (mVideoCallListener == NULL) {
+        //     mVideoCallListener = new InCallVideoCallListener(this);
+        // }
+        // videoCall->SetVideoCallListener((IVideoCallListener*)mVideoCallListener.Get());
     }
 
     mChildCallIds.Clear();

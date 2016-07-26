@@ -2,13 +2,13 @@
 #include "elastos/droid/incallui/CallList.h"
 #include "elastos/droid/incallui/Call.h"
 #include <elastos/utility/logging/Logger.h>
+#include "Elastos.Droid.Internal.h"
 
 using Elastos::Droid::InCallUI::EIID_ICallList;
 using Elastos::Droid::InCallUI::EIID_IInCallPhoneListener;
 using Elastos::Droid::Internal::Utility::IPreconditions;
 using Elastos::Droid::Internal::Utility::CPreconditions;
-using Elastos::Droid::Telecomm::Telecom::CDisconnectCause;
-
+using Elastos::Droid::Telecom::CDisconnectCause;
 using Elastos::Utility::Logging::Logger;
 
 namespace Elastos {
@@ -21,7 +21,7 @@ namespace InCallUI {
 
 ECode CallList::PhoneListener::OnCallAdded(
     /* [in] */ IPhone* phone,
-    /* [in] */ Elastos::Droid::Telecomm::Telecom::ICall* telecommCall)
+    /* [in] */ Elastos::Droid::Telecom::ICall* telecommCall)
 {
     AutoPtr<Call> call = new Call(telecommCall);
     if (call->GetState() == Call::State::INCOMING) {
@@ -35,9 +35,9 @@ ECode CallList::PhoneListener::OnCallAdded(
 
 ECode CallList::PhoneListener::OnCallRemoved(
     /* [in] */ IPhone* phone,
-    /* [in] */ Elastos::Droid::Telecomm::Telecom::ICall* telecommCall)
+    /* [in] */ Elastos::Droid::Telecom::ICall* telecommCall)
 {
-    HashMap<AutoPtr<Elastos::Droid::Telecomm::Telecom::ICall>, AutoPtr<Call> >::Iterator it
+    HashMap<AutoPtr<Elastos::Droid::Telecom::ICall>, AutoPtr<Call> >::Iterator it
             = mHost->mCallByTelecommCall.Find(telecommCall);
     if (it != mHost->mCallByTelecommCall.End()) {
         AutoPtr<Call> call = it->mSecond;
@@ -146,7 +146,7 @@ ECode CallList::OnIncoming(
     for (; it != mListeners.End(); ++it) {
         (*it)->OnIncomingCall((ICall*)call);
     }
-    return NOERROR
+    return NOERROR;
 }
 
 void CallList::OnUpdate(
@@ -193,7 +193,7 @@ void CallList::RemoveCallUpdateListener(
     /* [in] */ ICallUpdateListener* listener)
 {
     HashMap<String, AutoPtr<List<AutoPtr<ICallUpdateListener> > > >::Iterator it
-            = mCallUpdateListenerMap.Find(call->GetId());
+            = mCallUpdateListenerMap.Find(callId);
     AutoPtr<List<AutoPtr<ICallUpdateListener> > > listeners;
     if (it != mCallUpdateListenerMap.End()) {
         listeners = it->mSecond;
@@ -356,10 +356,10 @@ AutoPtr<Call> CallList::GetCallById(
 }
 
 AutoPtr<Call> CallList::GetCallByTelecommCall(
-    /* [in] */ Elastos::Droid::Telecomm::Telecom::ICall* telecommCall)
+    /* [in] */ Elastos::Droid::Telecom::ICall* telecommCall)
 {
     AutoPtr<Call> call;
-    HashMap<AutoPtr<Elastos::Droid::Telecomm::Telecom::ICall>, AutoPtr<Call> >::Iterator it
+    HashMap<AutoPtr<Elastos::Droid::Telecom::ICall>, AutoPtr<Call> >::Iterator it
             = mCallByTelecommCall.Find(telecommCall);
     if (it != mCallByTelecommCall.End()) call = it->mSecond;
     return call;
@@ -368,7 +368,7 @@ AutoPtr<Call> CallList::GetCallByTelecommCall(
 AutoPtr<IList> CallList::GetTextResponses(
     /* [in] */ const String& callId)
 {
-    AutoPtr<List<String> > responses;
+    AutoPtr<IList> responses;
     HashMap<String, AutoPtr<IList> >::Iterator it = mCallTextReponsesMap.Find(callId);
     if (it != mCallTextReponsesMap.End()) responses = it->mSecond;
     return responses;
@@ -436,7 +436,7 @@ ECode CallList::OnUpdateCall(
 
 void CallList::NotifyGenericListeners()
 {
-    Set<AutoPtr<ICallListListener> >::Iterator it = mListeners.Begin;
+    Set<AutoPtr<ICallListListener> >::Iterator it = mListeners.Begin();
     for (; it != mListeners.End(); ++it) {
         (*it)->OnCallListChange((ICallList*)this);
     }
@@ -445,9 +445,9 @@ void CallList::NotifyGenericListeners()
 void CallList::NotifyListenersOfDisconnect(
     /* [in] */ Call* call)
 {
-    Set<AutoPtr<ICallListListener> >::Iterator it = mListeners.Begin;
+    Set<AutoPtr<ICallListListener> >::Iterator it = mListeners.Begin();
     for (; it != mListeners.End(); ++it) {
-        (*it)->OnDisconnect((ICallList*)this);
+        (*it)->OnDisconnect((ICall*)call);
     }
 }
 
@@ -473,24 +473,24 @@ Boolean CallList::UpdateCallInMap(
             // Set up a timer to destroy the call after X seconds.
             AutoPtr<IMessage> msg;
             mHandler->ObtainMessage(EVENT_DISCONNECTED_TIMEOUT, (ICall*)call, (IMessage**)&msg);
-            Boolean result
+            Boolean result;
             mHandler->SendMessageDelayed(msg, GetDelayForDisconnect(call), &result);
 
             mCallById[call->GetId()] = call;
-            AutoPtr<Elastos::Droid::Telecomm::Telecom::ICall> telecommCall = call->GetTelecommCall();
+            AutoPtr<Elastos::Droid::Telecom::ICall> telecommCall = call->GetTelecommCall();
             mCallByTelecommCall[telecommCall] = call;
             updated = TRUE;
         }
     }
     else if (!IsCallDead(call)) {
         mCallById[call->GetId()] = call;
-        AutoPtr<Elastos::Droid::Telecomm::Telecom::ICall> telecommCall = call->GetTelecommCall();
+        AutoPtr<Elastos::Droid::Telecom::ICall> telecommCall = call->GetTelecommCall();
         mCallByTelecommCall[telecommCall] = call;
         updated = TRUE;
     }
     else if (mCallById.Find(call->GetId()) != mCallById.End()) {
         mCallById.Erase(call->GetId());
-        AutoPtr<Elastos::Droid::Telecomm::Telecom::ICall> telecommCall = call->GetTelecommCall();
+        AutoPtr<Elastos::Droid::Telecom::ICall> telecommCall = call->GetTelecommCall();
         mCallByTelecommCall.Erase(telecommCall);
         updated = TRUE;
     }
@@ -503,7 +503,7 @@ Int32 CallList::GetDelayForDisconnect(
 {
     AutoPtr<IPreconditions> preconditions;
     CPreconditions::AcquireSingleton((IPreconditions**)&preconditions);
-    if (FAILED(preconditions->CheckState(call->getState() == Call::State::DISCONNECTED))) {
+    if (FAILED(preconditions->CheckState(call->GetState() == Call::State::DISCONNECTED))) {
         return 0;
     }
 
@@ -547,12 +547,13 @@ ECode CallList::UpdateCallTextMap(
     else if (mCallById.Find(call->GetId()) != mCallById.End()) {
         mCallTextReponsesMap.Erase(call->GetId());
     }
+    return NOERROR;
 }
 
 Boolean CallList::IsCallDead(
     /* [in] */ Call* call)
 {
-    Int32 state = call.getState();
+    Int32 state = call->GetState();
     return Call::State::IDLE == state || Call::State::INVALID == state;
 }
 

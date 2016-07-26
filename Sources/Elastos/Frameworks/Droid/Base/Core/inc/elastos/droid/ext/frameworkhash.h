@@ -108,6 +108,14 @@ DEFINE_OBJECT_HASH_FUNC_FOR(Elastos::Droid::Widget::IRemoteViewsFrameLayout)
 DEFINE_OBJECT_HASH_FUNC_FOR(Elastos::Droid::Text::Style::ISuggestionSpan)
 #endif
 
+//
+//TELECOMM::TELECOM
+//
+#ifdef HASH_FOR_TELECOMM_TELECOM
+#include "Elastos.Droid.Telecom.h"
+DEFINE_OBJECT_HASH_FUNC_FOR(Elastos::Droid::Telecomm::Telecom::ICall)
+#endif
+
 #endif // __ELASTOS_DROID_EXT_FRAMEWORKHASH_H__
 
 
