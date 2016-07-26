@@ -5,12 +5,13 @@ INCLUDES += $(MAKEDIR)/../../../../inc
 INCLUDES += $(MAKEDIR)/../../../../
 INCLUDES += ../../../../
 
+SOURCES += AudioModeProvider.cpp
 SOURCES += BaseFragment.cpp
 SOURCES += CAnswerFragment.cpp
 SOURCES += Call.cpp
 SOURCES += CCallButtonFragment.cpp
 SOURCES += CCallCardFragment.cpp
-SOURCES += CConferenceManagerFragment.cpp
+#SOURCES += CConferenceManagerFragment.cpp
 #SOURCES += CInCallActivity.cpp
 SOURCES += CInCallServiceImpl.cpp
 SOURCES += InCallPresenter.cpp

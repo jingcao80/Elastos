@@ -22,6 +22,9 @@ public:
 
     static CARAPI_(AutoPtr<TelecomAdapter>) GetInstance();
 
+    CARAPI_(void) SetContext(
+        /* [in] */ IContext* context);
+
     CARAPI_(void) AnswerCall(
         /* [in] */ const String& callId,
         /* [in] */ Int32 videoState);
