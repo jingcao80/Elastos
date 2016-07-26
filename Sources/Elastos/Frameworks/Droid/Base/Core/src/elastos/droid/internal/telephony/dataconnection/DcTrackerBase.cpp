@@ -451,9 +451,7 @@ DcTrackerBase::DcTrackerBase()
 {
     mDataStallAlarmTag = (Int32) SystemClock::GetElapsedRealtime();
     mProvisioningApnAlarmTag = (Int32) SystemClock::GetElapsedRealtime();
-    AutoPtr<IObject> mDataEnabledLock;
     Elastos::Core::CObject::New((IObject**)&mDataEnabledLock);
-    AutoPtr<IAtomicReference> mIccRecords;
     CAtomicReference::New((IAtomicReference**)&mIccRecords);
     mDataStallTxRxSum = new TxRxSum();
     ((TxRxSum*) mDataStallTxRxSum.Get())->constructor(0, 0);

@@ -163,6 +163,7 @@ const Int32 UiccCarrierPrivilegeRules::STATE_ERROR;
 
 UiccCarrierPrivilegeRules::UiccCarrierPrivilegeRules()
 {
+    Handler::constructor();
 }
 
 ECode UiccCarrierPrivilegeRules::constructor(
@@ -231,7 +232,7 @@ ECode UiccCarrierPrivilegeRules::GetCarrierPrivilegeStatus(
     while ((it->HasNext(&bHasNext), bHasNext)) {
         AutoPtr<IInterface> p;
         it->GetNext((IInterface**)&p);
-        AutoPtr<AccessRule> ar = (AccessRule*)(IObject*)p.Get();
+        AutoPtr<AccessRule> ar = (AccessRule*)(IObject::Probe(p));
         Boolean b = FALSE;
         ar->Matches(certHash, packageName, &b);
         if (b) {
@@ -442,7 +443,7 @@ AutoPtr<IList/*< AutoPtr<AccessRule> >*/> UiccCarrierPrivilegeRules::ParseRules(
         refArDo->Parse(arDos, FALSE, &arDos);
         AutoPtr<AccessRule> accessRule = ParseRefArdo(refArDo->mValue);
         if (accessRule != NULL) {
-            accessRules->Add((IObject*)accessRule.Get());
+            accessRules->Add(TO_IINTERFACE(accessRule));
         }
         else {
             Logger::E(LOGTAG, String("Skip unrecognized rule.") + refArDo->mValue);

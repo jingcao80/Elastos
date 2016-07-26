@@ -2,6 +2,7 @@
 module
 {
     interface Elastos.Droid.Content.IContext;
+    interface Elastos.Droid.Provider.ISettingsSystem;
 
     namespace Elastos {
     namespace Droid {
@@ -17,6 +18,9 @@ module
         const Int32 MATCH_UNKNOWN = 2;
         const Int32 MATCH_LIST = 3;
         const Int32 MATCH_REGEX = 4;
+
+        const Int32 BLOCK_CALLS = 1<<0;//TODO ((ISettingsSystem::BLACKLIST_BLOCK) << (ISettingsSystem::BLACKLIST_PHONE_SHIFT));
+        const Int32 BLOCK_MESSAGES = 1<<4;//TODO(ISettingsSystem::BLACKLIST_BLOCK << ISettingsSystem::BLACKLIST_MESSAGE_SHIFT);
 
         AddOrUpdate(
             [in] IContext* context,

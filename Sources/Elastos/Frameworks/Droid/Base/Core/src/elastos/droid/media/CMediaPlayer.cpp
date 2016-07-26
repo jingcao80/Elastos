@@ -2272,12 +2272,11 @@ ECode CMediaPlayer::SetAudioAttributes(
         return E_ILLEGAL_ARGUMENT_EXCEPTION;
     }
     attributes->GetUsage(&mUsage);
-    assert(0);
-    // AutoPtr<IParcel> pattributes; // = Parcel.obtain();
-    // CParcel::New((IParcel**)&pattributes);
-    // IParcelable::Probe(attributes)->WriteToParcel(pattributes, IAudioAttributes::FLATTEN_TAGS);
-    // NativeSetParameter(KEY_PARAMETER_AUDIO_ATTRIBUTES, pattributes);
-    // pattributes->Recycle();
+    AutoPtr<IParcel> pattributes; // = Parcel.obtain();
+    CParcel::New((IParcel**)&pattributes);
+    IParcelable::Probe(attributes)->WriteToParcel(pattributes);//, IAudioAttributes::FLATTEN_TAGS);
+    NativeSetParameter(KEY_PARAMETER_AUDIO_ATTRIBUTES, pattributes);
+    //pattributes->Recycle();
     return NOERROR;
 }
 

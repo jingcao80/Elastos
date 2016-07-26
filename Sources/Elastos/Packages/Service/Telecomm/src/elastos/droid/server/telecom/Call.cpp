@@ -14,6 +14,7 @@
 #include <Elastos.Droid.Provider.h>
 #include <Elastos.Droid.Telephony.h>
 #include <Elastos.Droid.Telecom.h>
+#include <Elastos.Droid.Internal.h>
 #include <elastos/droid/internal/utility/State.h>
 #include <elastos/droid/os/Process.h>
 #include <elastos/droid/text/TextUtils.h>
@@ -26,6 +27,8 @@ using Elastos::Droid::Internal::Telephony::CCallerInfoAsyncQueryHelper;
 using Elastos::Droid::Internal::Telephony::EIID_ICallerInfoAsyncQueryOnQueryCompleteListener;
 using Elastos::Droid::Internal::Telephony::ICallerInfoAsyncQuery;
 using Elastos::Droid::Internal::Telephony::ICallerInfoAsyncQueryHelper;
+using Elastos::Droid::Internal::Telephony::ISmsApplication;
+using Elastos::Droid::Internal::Telephony::CSmsApplication;
 using Elastos::Droid::Internal::Utility::CPreconditions;
 using Elastos::Droid::Internal::Utility::IPreconditions;
 using Elastos::Droid::Internal::Utility::State;
@@ -1672,12 +1675,14 @@ ECode Call::IsRespondViaSmsCapable(
         return NOERROR;
     }
     // Is there a valid SMS application on the phone?
-    assert(0 && "TODO: SmsApplication");
-    // if (SmsApplication::GetDefaultRespondViaMessageApplication(mContext,
-            // TRUE /*updateIfNeeded*/) == NULL) {
-        // *result = FALSE;
-        // return NOERROR;
-    // }
+    AutoPtr<ISmsApplication> smsapp;
+    CSmsApplication::AcquireSingleton((ISmsApplication**)&smsapp);
+    AutoPtr<IComponentName> app;
+    smsapp->GetDefaultRespondViaMessageApplication(mContext, TRUE, (IComponentName**)&app);
+    if (app == NULL) {
+        *result = FALSE;
+        return NOERROR;
+    }
     // TODO: with some carriers (in certain countries) you *can* actually
     // tell whether a given number is a mobile phone or not. So in that
     // case we could potentially return false here if the incoming call is

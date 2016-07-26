@@ -291,7 +291,8 @@ void PowerNotificationWarnings::UpdateNotification()
         ShowSaverNotification();
         mShowing = SHOWING_SAVER;
     } else {
-        mNoMan->Cancel(TAG_NOTIFICATION, ID_NOTIFICATION);
+        if (mNoMan != NULL)
+            mNoMan->Cancel(TAG_NOTIFICATION, ID_NOTIFICATION);
         mShowing = SHOWING_NOTHING;
     }
 }

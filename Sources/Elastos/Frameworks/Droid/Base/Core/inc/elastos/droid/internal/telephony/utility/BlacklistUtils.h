@@ -53,10 +53,6 @@ public:
     static Boolean IsBlacklistRegexEnabled(
         /* [in] */ IContext* context);
 
-public:
-    static const Int32 BLOCK_CALLS = ISettingsSystem::BLACKLIST_BLOCK << ISettingsSystem::BLACKLIST_PHONE_SHIFT;
-    static const Int32 BLOCK_MESSAGES = ISettingsSystem::BLACKLIST_BLOCK << ISettingsSystem::BLACKLIST_MESSAGE_SHIFT;
-
 private:
     static const String TAG;// = "BlacklistUtils";
     static const Boolean DEBUG;// = FALSE;

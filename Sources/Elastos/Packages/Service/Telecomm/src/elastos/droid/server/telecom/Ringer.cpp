@@ -11,6 +11,7 @@
 #include <Elastos.Droid.Telephony.h>
 #include <elastos/core/StringUtils.h>
 #include <elastos/droid/provider/Settings.h>
+#include <elastos/utility/logging/Logger.h>
 
 using Elastos::Droid::App::INotification;
 using Elastos::Droid::App::INotificationManager;
@@ -30,6 +31,7 @@ using Elastos::Droid::Telephony::ISubscriptionManager;
 using Elastos::Core::ISystem;
 using Elastos::Core::StringUtils;
 using Elastos::Utility::CLinkedList;
+using Elastos::Utility::Logging::Logger;
 
 namespace Elastos {
 namespace Droid {
@@ -326,9 +328,13 @@ ECode Ringer::ShouldRingForContact(
         (*array)[0] = TO_STR(contactUri);
         extras->PutStringArray(INotification::EXTRA_PEOPLE, array);
     }
-    assert(0 && "TODO INotificationManager");
-    return NOERROR;
-    // return manager->MatchesCallFilter(extras, result);
+    if (manager != NULL) {
+        return manager->MatchesCallFilter(extras, result);
+    }
+    else {
+        Logger::E("Ringer", "TODO ShouldRingForContact NOTIFICATION_SERVICE is not ok???");
+        return NOERROR;
+    }
 }
 
 ECode Ringer::StopRinging()

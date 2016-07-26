@@ -3308,8 +3308,7 @@ ECode DcTracker::OnRadioAvailable()
     //     Log("onRadioAvailable: We're on the simulator; assuming data is connected");
     // }
     AutoPtr<IInterface> obj;
-    if (mIccRecords)
-        mIccRecords->Get((IInterface**)&obj);
+    mIccRecords->Get((IInterface**)&obj);
     AutoPtr<IIccRecords> r = IIccRecords::Probe(obj);
     Boolean isRecordsLoaded;
     if (r != NULL)
@@ -5006,8 +5005,7 @@ ECode DcTracker::OnUpdateIcc(
         return NOERROR;
     }
     AutoPtr<IInterface> obj;
-    if (mIccRecords != NULL)
-        mIccRecords->Get((IInterface**)&obj);
+    mIccRecords->Get((IInterface**)&obj);
     AutoPtr<IIccRecords> r = IIccRecords::Probe(obj);
     if (r != newIccRecords) {
         if (r != NULL) {

@@ -58,9 +58,12 @@ ECode VoiceMailConstants::GetCarrierName(
     VALIDATE_NOT_NULL(result);
     AutoPtr<IInterface> p;
     mCarrierVmMap->Get(CoreUtils::Convert(carrier), (IInterface**)&p);
-    assert(0 && "TODO");
-    AutoPtr<ArrayOf<String> > data; // = p;
-    *result = (*data)[NAME];
+    AutoPtr<IArrayOf> arrayOf = IArrayOf::Probe(p);
+    AutoPtr<IInterface> obj;
+    arrayOf->Get(NAME, (IInterface**)&obj);
+    if (obj != NULL);
+        ICharSequence::Probe(obj)->ToString(result);
+    //*result = (*data)[NAME];
     return NOERROR;
 }
 
@@ -71,9 +74,11 @@ ECode VoiceMailConstants::GetVoiceMailNumber(
     VALIDATE_NOT_NULL(result);
     AutoPtr<IInterface> p;
     mCarrierVmMap->Get(CoreUtils::Convert(carrier), (IInterface**)&p);
-    assert(0 && "TODO");
-    AutoPtr<ArrayOf<String> > data; // = p;
-    *result = (*data)[NUMBER];
+    AutoPtr<IArrayOf> arrayOf = IArrayOf::Probe(p);
+    AutoPtr<IInterface> obj;
+    arrayOf->Get(NUMBER, (IInterface**)&obj);
+    if (obj != NULL);
+        ICharSequence::Probe(obj)->ToString(result);
     return NOERROR;
 }
 
@@ -84,9 +89,11 @@ ECode VoiceMailConstants::GetVoiceMailTag(
     VALIDATE_NOT_NULL(result);
     AutoPtr<IInterface> p;
     mCarrierVmMap->Get(CoreUtils::Convert(carrier), (IInterface**)&p);
-    assert(0 && "TODO");
-    AutoPtr<ArrayOf<String> > data; // = p;
-    *result = (*data)[TAG];
+    AutoPtr<IArrayOf> arrayOf = IArrayOf::Probe(p);
+    AutoPtr<IInterface> obj;
+    arrayOf->Get(TAG, (IInterface**)&obj);
+    if (obj != NULL);
+        ICharSequence::Probe(obj)->ToString(result);
     return NOERROR;
 }
 
@@ -108,6 +115,10 @@ void VoiceMailConstants::LoadVoiceMail()
     //             Environment.getRootDirectory() + "/" + PARTNER_VOICEMAIL_PATH);
     //     return;
     // }
+    //if (vmReader == NULL) {
+    //    Logger::E("VoiceMailConstants", "Can't open file: %s", PARTNER_VOICEMAIL_PATH.string());
+    //    return;
+    //}
 
     // try {
     ECode ec = NOERROR;
@@ -140,8 +151,7 @@ void VoiceMailConstants::LoadVoiceMail()
             parser->GetAttributeValue(String(NULL), String("vmnumber"), &((*data)[NUMBER]));
             parser->GetAttributeValue(String(NULL), String("vmtag"), &((*data)[TAG]));
 
-            assert(0 && "TODO");
-            // mCarrierVmMap->Put(CoreUtils::Convert(numeric), data);
+            mCarrierVmMap->Put(CoreUtils::Convert(numeric), CoreUtils::Convert(data));
         }
     } while (0);
 

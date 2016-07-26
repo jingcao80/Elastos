@@ -17,6 +17,7 @@
 #include <Elastos.Droid.Net.h>
 #include <Elastos.Droid.Provider.h>
 #include <Elastos.Droid.Telephony.h>
+#include <Elastos.Droid.Internal.h>
 #include <elastos/droid/Manifest.h>
 #include <elastos/utility/Objects.h>
 //#include <elastos/utility/logging/Logger.h>
@@ -26,6 +27,8 @@ using Elastos::Droid::Content::CIntent;
 using Elastos::Droid::Content::IIntent;
 using Elastos::Droid::Content::Res::IResources;
 using Elastos::Droid::Internal::Telephony::ITelephonyProperties;
+using Elastos::Droid::Internal::Telephony::Utility::IBlacklistUtils;
+using Elastos::Droid::Internal::Telephony::Utility::CBlacklistUtils;
 using Elastos::Droid::Manifest;
 using Elastos::Droid::Os::CMessageHelper;
 using Elastos::Droid::Os::CSystemProperties;
@@ -33,6 +36,7 @@ using Elastos::Droid::Os::EIID_IHandler;
 using Elastos::Droid::Os::IMessageHelper;
 using Elastos::Droid::Os::ISystemProperties;
 using Elastos::Droid::Provider::ICalls;
+using Elastos::Droid::Provider::ISettingsSystem;
 using Elastos::Droid::Telecom::CCallState;
 using Elastos::Droid::Telecom::CDisconnectCause;
 using Elastos::Droid::Telecom::ICallState;
@@ -2981,16 +2985,21 @@ ECode CallsManager::IsCallBlacklisted(
     }
     // See if the number is in the blacklist
     // Result is one of: MATCH_NONE, MATCH_LIST or MATCH_REGEX
-    assert(0 && "TODO: BlacklistUtils");
-    // Int32 listType = BlacklistUtils::IsListed(mContext, number, IBlacklistUtils::BLOCK_CALLS);
-    // if (listType != IBlacklistUtils::MATCH_NONE) {
-    //     // We have a match, set the user and hang up the call and notify
-    //     Log::D(TAG, "Incoming call from " + number + " blocked.");
-    //     mBlacklistCallNotifier->NotifyBlacklistedCall(number,
-    //             c->GetCreationTimeMillis(), listType);
-    //     *result = TRUE;
-    //     return NOERROR;
-    // }
+    AutoPtr<IBlacklistUtils> bu;
+    CBlacklistUtils::AcquireSingleton((IBlacklistUtils**)&bu);
+    Int32 mode = IBlacklistUtils::BLOCK_CALLS;//ISettingsSystem::BLACKLIST_BLOCK << ISettingsSystem::BLACKLIST_PHONE_SHIFT;
+    Int32 listType;
+    bu->IsListed(mContext, number, mode, &listType);
+    if (listType != IBlacklistUtils::MATCH_NONE) {
+        // We have a match, set the user and hang up the call and notify
+        Log::D(TAG, "Incoming call from %s  blocked.", number.string());
+        Int64 createTime;
+        ((Call*)c)->GetCreationTimeMillis(&createTime);
+        mBlacklistCallNotifier->NotifyBlacklistedCall(number,
+                createTime, listType);
+        *result = TRUE;
+        return NOERROR;
+    }
     *result = FALSE;
     return NOERROR;
 }

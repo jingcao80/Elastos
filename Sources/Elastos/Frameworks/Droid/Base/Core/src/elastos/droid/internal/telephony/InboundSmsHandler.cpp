@@ -836,7 +836,7 @@ Int32 InboundSmsHandler::CheckIfBlacklisted(
     String s;
     sms->GetOriginatingAddress(&s);
     Int32 result = BlacklistUtils::IsListed(mContext,
-            s, BlacklistUtils::BLOCK_MESSAGES);
+            s, IBlacklistUtils::BLOCK_MESSAGES);
 
     switch (result) {
         case IBlacklistUtils::MATCH_UNKNOWN:

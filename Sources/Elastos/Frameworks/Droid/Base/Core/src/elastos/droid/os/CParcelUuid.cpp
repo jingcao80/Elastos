@@ -1,10 +1,12 @@
 
 #include <Elastos.CoreLibrary.Utility.h>
 #include "elastos/droid/os/CParcelUuid.h"
+#include <elastos/utility/logging/Logger.h>
 
 using Elastos::Utility::CUUID;
 using Elastos::Utility::IUUIDHelper;
 using Elastos::Utility::CUUIDHelper;
+using Elastos::Utility::Logging::Logger;
 
 namespace Elastos {
 namespace Droid {
@@ -112,9 +114,14 @@ ECode CParcelUuid::ReadFromParcel(
 ECode CParcelUuid::WriteToParcel(
     /* [in] */ IParcel* dest)
 {
-    Int64 most, least;
-    mUuid->GetMostSignificantBits(&most);
-    mUuid->GetLeastSignificantBits(&least);
+    Int64 most = 0, least = 0;
+    if (mUuid != NULL) {
+        mUuid->GetMostSignificantBits(&most);
+        mUuid->GetLeastSignificantBits(&least);
+    }
+    else {
+        Logger::E("CParcelUuid", "TODO mUuid is null");
+    }
 
     dest->WriteInt64(most);
     dest->WriteInt64(least);

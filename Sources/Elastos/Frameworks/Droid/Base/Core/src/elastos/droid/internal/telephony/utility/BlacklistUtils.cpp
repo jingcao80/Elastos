@@ -50,11 +50,11 @@ Boolean BlacklistUtils::AddOrUpdate(
     AutoPtr<IContentValues> cv;
     CContentValues::New((IContentValues**)&cv);
 
-    if ((valid & BLOCK_CALLS) != 0) {
-        cv->Put(ITelephonyBlacklist::PHONE_MODE, (flags & BLOCK_CALLS) != 0 ? 1 : 0);
+    if ((valid & IBlacklistUtils::BLOCK_CALLS) != 0) {
+        cv->Put(ITelephonyBlacklist::PHONE_MODE, (flags & IBlacklistUtils::BLOCK_CALLS) != 0 ? 1 : 0);
     }
-    if ((valid & BLOCK_MESSAGES) != 0) {
-        cv->Put(ITelephonyBlacklist::MESSAGE_MODE, (flags & BLOCK_MESSAGES) != 0 ? 1 : 0);
+    if ((valid & IBlacklistUtils::BLOCK_MESSAGES) != 0) {
+        cv->Put(ITelephonyBlacklist::MESSAGE_MODE, (flags & IBlacklistUtils::BLOCK_MESSAGES) != 0 ? 1 : 0);
     }
 
     AutoPtr<IUriHelper> helper;
@@ -84,10 +84,10 @@ Int32 BlacklistUtils::IsListed(
 
     String type;
 
-    if (mode == BLOCK_CALLS) {
+    if (mode == IBlacklistUtils::BLOCK_CALLS) {
         if (DEBUG) Logger::D(TAG, "Checking if an incoming call should be blocked");
         type = ITelephonyBlacklist::PHONE_MODE;
-    } else if (mode == BLOCK_MESSAGES) {
+    } else if (mode == IBlacklistUtils::BLOCK_MESSAGES) {
         if (DEBUG) Logger::D(TAG, "Checking if an incoming message should be blocked");
         type = ITelephonyBlacklist::MESSAGE_MODE;
     } else {
