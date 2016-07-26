@@ -40,3 +40,5 @@ APPPACK = 1
 APP_PACKAGE_NAME = Elastos.Droid.PackageInstaller
 RES_NAMESPACE = Elastos.Droid.PackageInstaller
 DIRRESOURCES += $(MAKEDIR)/res;
+
+APP_DIR_NAME = PackageInstaller
