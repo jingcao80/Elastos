@@ -801,7 +801,6 @@ public:
         /* [in] */ IFile* packageFile,
         /* [in] */ Int32 flags,
         /* [in] */ ArrayOf<Byte>* readBuffer,
-        /* [in] */ Boolean isEpk,
         /* [out] */ Package** pkgLite);
 
     /**
@@ -982,19 +981,19 @@ private:
         /* [in] */ ArrayOf<Byte>* readBuffer,
         /* [out] */ Package** pkgLite);
 
-    CARAPI LoadApkIntoAssetManager(
+    CARAPI LoadPkgIntoAssetManager(
         /* [in] */ IAssetManager* assets,
-        /* [in] */ const String& apkPath,
+        /* [in] */ const String& pkgPath,
         /* [in] */ Int32 flags,
         /* [out] */ Int32* result);
 
-    CARAPI ParseBaseApk(
+    CARAPI ParseBasePkg(
         /* [in] */ IFile* apkFile,
         /* [in] */ IAssetManager* assets,
         /* [in] */ Int32 flags,
         /* [out] */ Package** pkg);
 
-    CARAPI ParseSplitApk(
+    CARAPI ParseSplitPkg(
         /* [in] */ Package* pkg,
         /* [in] */ Int32 splitIndex,
         /* [in] */ IAssetManager* assets,
@@ -1007,7 +1006,7 @@ private:
      * of doing, so many valid features of a base APK have been carefully
      * omitted here.
      */
-    CARAPI ParseSplitApk(
+    CARAPI ParseSplitPkg(
         /* [in] */ Package* pkg,
         /* [in] */ IResources* res,
         /* [in] */ IXmlResourceParser* parser,
@@ -1049,7 +1048,7 @@ private:
      * When adding new features, carefully consider if they should also be
      * supported by split APKs.
      */
-    CARAPI ParseBaseApk(
+    CARAPI ParseBasePkg(
         /* [in] */ IResources* res,
         /* [in] */ IXmlResourceParser* parser,
         /* [in] */ Int32 flags,
