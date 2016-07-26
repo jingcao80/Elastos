@@ -2,6 +2,10 @@
 #include "Elastos.Droid.Graphics.h"
 #include "Elastos.Droid.Internal.h"
 #include "elastos/droid/internal/telephony/cat/TextMessage.h"
+#include "elastos/droid/internal/telephony/cat/CDuration.h"
+#include "elastos/droid/graphics/CBitmap.h"
+
+using Elastos::Droid::Graphics::CBitmap;
 
 namespace Elastos {
 namespace Droid {
@@ -73,12 +77,24 @@ ECode TextMessage::WriteToParcel(
 {
     dest->WriteString(mTitle);
     dest->WriteString(mText);
-    IParcelable::Probe(mIcon)->WriteToParcel(dest);
+    if (mIcon) {
+        dest->WriteInt32(1);
+        IParcelable::Probe(mIcon)->WriteToParcel(dest);
+    }
+    else {
+        dest->WriteInt32(0);
+    }
     dest->WriteInt32(mIconSelfExplanatory ? 1 : 0);
     dest->WriteInt32(mIsHighPriority ? 1 : 0);
     dest->WriteInt32(mResponseNeeded ? 1 : 0);
     dest->WriteInt32(mUserClear ? 1 : 0);
-    IParcelable::Probe(mDuration)->WriteToParcel(dest);
+    if (mDuration) {
+        dest->WriteInt32(1);
+        IParcelable::Probe(mDuration)->WriteToParcel(dest);
+    }
+    else {
+        dest->WriteInt32(0);
+    }
     return NOERROR;
 }
 
@@ -87,7 +103,18 @@ ECode TextMessage::ReadFromParcel(
 {
     in->ReadString(&mTitle);
     in->ReadString(&mText);
-    IParcelable::Probe(mIcon)->ReadFromParcel(in);
+    Int32 value;
+
+    mIcon = NULL;
+    in->ReadInt32(&value);
+    if (value != 0) {
+        AutoPtr<IBitmap> bitmap;
+        CBitmap::New((IBitmap**)&bitmap);
+        IParcelable* parcel = IParcelable::Probe(bitmap);
+        parcel->ReadFromParcel(in);
+        mIcon = bitmap;
+    }
+
     Int32 iconSelfExplanatory = 0;
     in->ReadInt32(&iconSelfExplanatory);
     mIconSelfExplanatory = iconSelfExplanatory == 1 ? TRUE : FALSE;
@@ -100,7 +127,17 @@ ECode TextMessage::ReadFromParcel(
     Int32 userClear = 0;
     in->ReadInt32(&userClear);
     mUserClear = userClear == 1 ? TRUE : FALSE;
-    IParcelable::Probe(mDuration)->ReadFromParcel(in);
+
+    mDuration = NULL;
+    in->ReadInt32(&value);
+    if (value != 0) {
+        AutoPtr<IDuration> duration;
+        CDuration::New((IDuration**)&duration);
+        IParcelable* parcel = IParcelable::Probe(duration);
+        parcel->ReadFromParcel(in);
+        mDuration = duration;
+    }
+
     return NOERROR;
 }
 
