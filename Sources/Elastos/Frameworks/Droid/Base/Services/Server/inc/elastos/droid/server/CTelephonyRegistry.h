@@ -39,9 +39,7 @@ using Elastos::Droid::Text::Format::ITime;
 using Elastos::Droid::Internal::App::IIBatteryStats;
 using Elastos::Droid::Internal::Telephony::IITelephonyRegistry;
 using Elastos::Droid::Internal::Telephony::IIPhoneStateListener;
-// using Elastos::Droid::Internal::Telephony::IDefaultPhoneNotifier;
 using Elastos::Droid::Internal::Telephony::IPhoneConstants;
-// using Elastos::Droid::Internal::Telephony::IServiceStateTracker;
 using Elastos::Droid::Internal::Telephony::ITelephonyIntents;
 
 using Elastos::Utility::IArrayList;
@@ -72,6 +70,7 @@ public:
     //@Override
     CARAPI ToString(
         /* [out] */ String* str);
+
 private:
     AutoPtr<ITime> mTime;
     String mS;
@@ -110,7 +109,6 @@ CarClass(CTelephonyRegistry)
     , public IBinder
 {
 private:
-
     class Record
         : public Object
     {
@@ -145,6 +143,7 @@ private:
         //@Override
         CARAPI HandleMessage(
             /* [in] */ IMessage* msg);
+
     private:
         CTelephonyRegistry* mHost;
     };
@@ -461,30 +460,30 @@ private:
 
     AutoPtr<ArrayOf<Int32> > mDataConnectionNetworkType;
 
-    Int32 mOtaspMode;// = ServiceStateTracker.OTASP_UNKNOWN;
+    Int32 mOtaspMode;
 
-    List<AutoPtr<IList> > mCellInfo;
+    AutoPtr<IArrayList> mCellInfo;
 
-    AutoPtr<IVoLteServiceState> mVoLteServiceState;// = new VoLteServiceState();
+    AutoPtr<IVoLteServiceState> mVoLteServiceState;
 
-    AutoPtr<IDataConnectionRealTimeInfo> mDcRtInfo;// = new DataConnectionRealTimeInfo();
+    AutoPtr<IDataConnectionRealTimeInfo> mDcRtInfo;
 
-    Int32 mRingingCallState;// = PreciseCallState.PRECISE_CALL_STATE_IDLE;
+    Int32 mRingingCallState;
 
-    Int32 mForegroundCallState;// = PreciseCallState.PRECISE_CALL_STATE_IDLE;
+    Int32 mForegroundCallState;
 
-    Int32 mBackgroundCallState;// = PreciseCallState.PRECISE_CALL_STATE_IDLE;
+    Int32 mBackgroundCallState;
 
-    AutoPtr<IPreciseCallState> mPreciseCallState;// = new PreciseCallState();
+    AutoPtr<IPreciseCallState> mPreciseCallState;
 
-    AutoPtr<IPreciseDataConnectionState> mPreciseDataConnectionState;// = new PreciseDataConnectionState();
+    AutoPtr<IPreciseDataConnectionState> mPreciseDataConnectionState;
 
     static const Int32 PHONE_STATE_PERMISSION_MASK;
 
     static const Int32 PRECISE_PHONE_STATE_PERMISSION_MASK;
 
-    static const Int32 MSG_USER_SWITCHED;
-    static const Int32 MSG_UPDATE_DEFAULT_SUB;
+    static const Int32 MSG_USER_SWITCHED = 1;
+    static const Int32 MSG_UPDATE_DEFAULT_SUB = 2;
 
     AutoPtr<IHandler> mHandler;
 
