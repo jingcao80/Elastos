@@ -8366,7 +8366,7 @@ ECode View::GetY(
     VALIDATE_NOT_NULL(y)
     Float translationY;
     GetTranslationY(&translationY);
-    *y = mLeft + translationY;
+    *y = mTop + translationY;
     return NOERROR;
 }
 
