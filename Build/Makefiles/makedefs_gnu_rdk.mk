@@ -409,6 +409,9 @@ endif
 
 ifdef APPPACK
   APPPCK_LABLE=$(MAKEDIR)/R.cpp
+ifndef APP_DIR_NAME
+  APP_DIR_NAME=$(APP_PACKAGE_NAME)
+endif
 endif
 
 

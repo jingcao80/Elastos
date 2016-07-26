@@ -43,6 +43,7 @@ RES_NAMESPACE = Elastos.Droid.Calculator2
 DIRRESOURCES += $(MAKEDIR)/res;
 TARGET_CPU_ABI = armeabi-v7a
 LIBRESOURCES = $(XDK_TARGETS)/Org.Javia.Arity.eco
+APP_DIR_NAME = Calculator2
 
 
 

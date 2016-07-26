@@ -38,3 +38,4 @@ APPPACK = 1
 APP_PACKAGE_NAME = Elastos.Droid.Providers.Media
 RES_NAMESPACE = Elastos.Droid.Providers.Media
 DIRRESOURCES += $(MAKEDIR)/res;
+APP_DIR_NAME = MediaProvider

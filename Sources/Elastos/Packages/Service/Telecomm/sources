@@ -80,3 +80,4 @@ RES_NAMESPACE = Elastos.Droid.Server.Telecom
 APPPACK = 1
 DIRRESOURCES += $(MAKEDIR)/res;
 APP_PACKAGE_NAME = Elastos.Droid.Server.Telecom
+APP_DIR_NAME = Telecom

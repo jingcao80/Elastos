@@ -355,6 +355,7 @@ endif
 
 ifneq "$(APPPACK)" ""
 	if [ ! -d  $(XDK_TARGETS)/$(TARGET_NAME) ]; then $(MKDIR) $(XDK_TARGETS)/$(TARGET_NAME); fi
+	if [ ! -d  $(TARGET_PACK_PATH)/$(APP_DIR_NAME) ]; then $(MKDIR) $(TARGET_PACK_PATH)/$(APP_DIR_NAME); fi
 ifneq "$(FILERESOURCES)" ""
 	$(foreach resources_file, $(FILERESOURCES), $(CP) $(resources_file) $(XDK_TARGETS)/$(TARGET_NAME); )
 endif
@@ -363,12 +364,12 @@ ifneq "$(DIRRESOURCES)" ""
 endif
 
 ifneq "$(LIBRESOURCES)" ""
-ifeq "$(TARGET_CPU_ABI)" ""
-	$(error please check if set value for variable TARGET_CPU_ABI)
-endif
-	if [ ! -d  $(XDK_TARGETS)/$(TARGET_NAME)/lib ]; then $(MKDIR) $(XDK_TARGETS)/$(TARGET_NAME)/lib; fi
-	if [ ! -d  $(XDK_TARGETS)/$(TARGET_NAME)/lib/$(TARGET_CPU_ABI) ]; then $(MKDIR) $(XDK_TARGETS)/$(TARGET_NAME)/lib/$(TARGET_CPU_ABI); fi
-	$(foreach resources_lib, $(LIBRESOURCES), $(CP) $(resources_lib) $(XDK_TARGETS)/$(TARGET_NAME)/lib/$(TARGET_CPU_ABI); )
+#ifeq "$(TARGET_CPU_ABI)" ""
+#	$(error please check if set value for variable TARGET_CPU_ABI)
+#endif
+	if [ ! -d  $(TARGET_PACK_PATH)/$(APP_DIR_NAME)/lib ]; then $(MKDIR) $(TARGET_PACK_PATH)/$(APP_DIR_NAME)/lib; fi
+	if [ ! -d  $(TARGET_PACK_PATH)/$(APP_DIR_NAME)/lib/arm ]; then $(MKDIR) $(TARGET_PACK_PATH)/$(APP_DIR_NAME)/lib/arm; fi
+	$(foreach resources_lib, $(LIBRESOURCES), $(CP) $(resources_lib) $(TARGET_PACK_PATH)/$(APP_DIR_NAME)/lib/arm; )
 endif
 	echo "Res Path: " $(XDK_TARGETS)/$(TARGET_NAME)/res
 	echo "AAPT_FLAGS: " $(AAPT_FLAGS)
@@ -377,19 +378,19 @@ endif
 	$(RMDIR) `find $(XDK_TARGETS)/$(TARGET_NAME) -name *.svn`
 	if [ -d "$(XDK_TARGETS)/$(TARGET_NAME)/assets" ]; then \
 	    if [ -d $(XDK_TARGETS)/$(TARGET_NAME)/res ]; then \
-			aapt package -f $(AAPT_FLAGS) -S $(XDK_TARGETS)/$(TARGET_NAME)/res -A $(XDK_TARGETS)/$(TARGET_NAME)/assets -I $(EMULATOR_PATH)/platforms/android-23/android.jar -M $(MAKEDIR)/AndroidManifest.xml --min-sdk-version 21 --target-sdk-version 21 -F $(XDK_TARGETS)/$(TARGET_NAME).epk; \
+			aapt package -f $(AAPT_FLAGS) -S $(XDK_TARGETS)/$(TARGET_NAME)/res -A $(XDK_TARGETS)/$(TARGET_NAME)/assets -I $(EMULATOR_PATH)/platforms/android-23/android.jar -M $(MAKEDIR)/AndroidManifest.xml --min-sdk-version 21 --target-sdk-version 21 -F $(TARGET_PACK_PATH)/$(APP_DIR_NAME)/$(TARGET_NAME).epk; \
 		else \
-			aapt package -f $(AAPT_FLAGS) -A $(XDK_TARGETS)/$(TARGET_NAME)/assets -I $(EMULATOR_PATH)/platforms/android-23/android.jar -M $(MAKEDIR)/AndroidManifest.xml --min-sdk-version 21 --target-sdk-version 21 -F $(XDK_TARGETS)/$(TARGET_NAME).epk; \
+			aapt package -f $(AAPT_FLAGS) -A $(XDK_TARGETS)/$(TARGET_NAME)/assets -I $(EMULATOR_PATH)/platforms/android-23/android.jar -M $(MAKEDIR)/AndroidManifest.xml --min-sdk-version 21 --target-sdk-version 21 -F $(TARGET_PACK_PATH)/$(APP_DIR_NAME)/$(TARGET_NAME).epk; \
 		fi \
 	else \
 	    if [ -d $(XDK_TARGETS)/$(TARGET_NAME)/res ]; then \
-				aapt package -u $(AAPT_FLAGS) $(addprefix -S ,$(EXTRA_RES_DIR)) -S $(XDK_TARGETS)/$(TARGET_NAME)/res -I $(EMULATOR_PATH)/platforms/android-23/package-export.apk -M $(MAKEDIR)/AndroidManifest.xml --min-sdk-version 21 --target-sdk-version 21 -F $(XDK_TARGETS)/$(TARGET_NAME).epk; \
+				aapt package -u $(AAPT_FLAGS) $(addprefix -S ,$(EXTRA_RES_DIR)) -S $(XDK_TARGETS)/$(TARGET_NAME)/res -I $(EMULATOR_PATH)/platforms/android-23/package-export.apk -M $(MAKEDIR)/AndroidManifest.xml --min-sdk-version 21 --target-sdk-version 21 -F $(TARGET_PACK_PATH)/$(APP_DIR_NAME)/$(TARGET_NAME).epk; \
 		else \
-			aapt package -f $(AAPT_FLAGS) -I $(EMULATOR_PATH)/platforms/android-23/android.jar -M $(MAKEDIR)/AndroidManifest.xml --min-sdk-version 21 --target-sdk-version 21 -F $(XDK_TARGETS)/$(TARGET_NAME).epk; \
+			aapt package -f $(AAPT_FLAGS) -I $(EMULATOR_PATH)/platforms/android-23/android.jar -M $(MAKEDIR)/AndroidManifest.xml --min-sdk-version 21 --target-sdk-version 21 -F $(TARGET_PACK_PATH)/$(APP_DIR_NAME)/$(TARGET_NAME).epk; \
 		fi \
 	fi
-	cd $(XDK_TARGETS)/$(TARGET_NAME);zip -r9D $(XDK_TARGETS)/$(TARGET_NAME).epk $@ $(BLACKHOLE)
-	if [ -d $(XDK_TARGETS)/$(TARGET_NAME)/lib ]; then cd $(XDK_TARGETS)/$(TARGET_NAME);zip -r9D $(XDK_TARGETS)/$(TARGET_NAME).epk lib $(BLACKHOLE); fi
+	cd $(XDK_TARGETS)/$(TARGET_NAME);zip -r9D $(TARGET_PACK_PATH)/$(APP_DIR_NAME)/$(TARGET_NAME).epk $@ $(BLACKHOLE)
+#	if [ -d $(XDK_TARGETS)/$(TARGET_NAME)/lib ]; then cd $(XDK_TARGETS)/$(TARGET_NAME);zip -r9D $(TARGET_PACK_PATH)/$(APP_DIR_NAME)/$(TARGET_NAME).epk lib $(BLACKHOLE); fi
 #	if [ -d $(XDK_TARGETS)/$(TARGET_NAME)/res ]; then rm -f $(MAKEDIR)/R.cpp; fi
 endif
 

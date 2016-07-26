@@ -5,17 +5,17 @@
 ;          SrcFile/Folder [DestFolder]
 ;
 ;
-Elastos.Droid.InputMethod.Pinyin.epk        /system/priv-app
-Elastos.Droid.Launcher2.epk                 /system/priv-app
-Elastos.Droid.SettingsProvider.epk          /system/priv-app
-Elastos.Droid.Providers.Media.epk           /system/priv-app
-Elastos.Droid.SystemUI.epk                  /system/priv-app
-Elastos.Droid.DefContainer.epk              /system/priv-app
-Elastos.Droid.Settings.epk					/system/priv-app
-Elastos.Droid.Server.Telecom.epk			/system/priv-app
-Elastos.Droid.Dialer.epk					/system/priv-app
-Elastos.Droid.TeleService.epk               /system/priv-app
-Elastos.DevSamples.ImageDemo.epk            /system/app
-Elastos.DevSamples.TabHostDemo.epk          /system/app
-Elastos.DevSamples.TextViewDemo.epk         /system/app
-Elastos.Droid.Calculator2.epk               /system/app
+Pinyin                                  /system/priv-app
+Launcher2                               /system/priv-app
+SettingsProvider                        /system/priv-app
+MediaProvider                           /system/priv-app
+SystemUI                                /system/priv-app
+DefContainer                            /system/priv-app
+Settings                                /system/priv-app
+Telecom                                 /system/priv-app
+Dialer                                  /system/priv-app
+TeleService                             /system/priv-app
+Elastos.DevSamples.ImageDemo            /system/app
+Elastos.DevSamples.TabHostDemo          /system/app
+Elastos.DevSamples.TextViewDemo         /system/app
+Calculator2                             /system/app

@@ -282,7 +282,7 @@ function eldrop ()
                 if [ "`expr index "$LINE" ";"`" == "0" ]; then
                     TARGET=${LINE% *}
                     TARGET_DIR=${LINE#* }
-                    elcopy $XDK_TARGETS/$TARGET $TARGET_DIR
+                    elcopy $TARGET_PACK_PATH/$TARGET $TARGET_DIR/$TARGET
                 fi
             done 3<$XDK_TOOLS/eldrop_epk.list
             unset ANDROID_AVD_TAG MAKE_DIR SET_FOR_ANDROID ANDROID_AVD
