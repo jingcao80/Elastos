@@ -110,7 +110,7 @@ public:
         /* [in] */ Int32 length);
 
     static CARAPI_(Int32) HexCharToInt32(
-        /* [in] */ Char16 c);
+        /* [in] */ Char32 c);
 
     /**
       * Converts a hex String to a byte array.

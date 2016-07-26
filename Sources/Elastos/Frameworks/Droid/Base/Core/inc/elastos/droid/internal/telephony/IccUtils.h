@@ -107,7 +107,7 @@ public:
         /* [in] */ Int32 offset,
         /* [in] */ Int32 length);
 
-    static CARAPI_(Int32) HexCharToInt(
+    static CARAPI_(Int32) HexCharToInt32(
         /* [in] */ Char32 c);
 
     /**

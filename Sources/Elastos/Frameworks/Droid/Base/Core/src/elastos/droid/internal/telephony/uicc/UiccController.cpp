@@ -67,6 +67,7 @@ Object UiccController::THIS;
 AutoPtr<IUiccController> UiccController::mInstance;
 
 UiccController::UiccController()
+    : mOEMHookSimRefresh(FALSE)
 {
     mIccChangedRegistrants = new RegistrantList();
     AutoPtr<ITelephonyManager> tm;

@@ -37,6 +37,7 @@ using Elastos::Droid::Content::Res::IResourcesHelper;
 using Elastos::Droid::Content::Res::CResourcesHelper;
 using Elastos::Droid::Os::IPowerManager;
 using Elastos::Droid::Os::AsyncResult;
+using Elastos::Droid::Os::IAsyncResult;
 using Elastos::Droid::Os::IRegistrant;
 using Elastos::Droid::Os::CRegistrant;
 using Elastos::Droid::Preference::IPreferenceManagerHelper;
@@ -129,7 +130,7 @@ ECode UiccCard::InnerHandler::HandleMessage(
         case EVENT_TRANSMIT_APDU_BASIC_CHANNEL_DONE:
         case EVENT_SIM_IO_DONE:
         case EVENT_SIM_GET_ATR_DONE: {
-            AutoPtr<AsyncResult> ar = (AsyncResult*)(IObject*)obj.Get();
+            AutoPtr<AsyncResult> ar = (AsyncResult*)IAsyncResult::Probe(obj);
             if (ar->mException != NULL) {
                 if (DBG) {
                     mOwner->Log(String("Error in SIM access with exception") + TO_CSTR(ar->mException));

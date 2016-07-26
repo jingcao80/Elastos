@@ -124,14 +124,20 @@ const Int32 UiccCardApplication::EVENT_CHANGE_FACILITY_LOCK_DONE;
 const Int32 UiccCardApplication::EVENT_PIN2_PUK2_DONE;
 
 UiccCardApplication::UiccCardApplication()
+    : mAppState(-1)
+    , mAppType(-1)
+    , mAuthContext(0)
+    , mPersoSubState(-1)
+    , mPin1Replaced(FALSE)
+    , mPin1State(-1)
+    , mPin2State(-1)
+    , mIccFdnEnabled(FALSE)
+    , mDesiredFdnEnabled(FALSE)
+    , mIccLockEnabled(FALSE)
+    , mDesiredPinLocked(FALSE)
+    , mIccFdnAvailable(TRUE)
+    , mDestroyed(FALSE)
 {
-    mIccFdnEnabled = FALSE;
-    mDesiredFdnEnabled = FALSE;
-    mIccLockEnabled = FALSE;
-    mDesiredPinLocked = FALSE;
-    mIccFdnAvailable = TRUE;
-    mDestroyed = FALSE;
-
     mReadyRegistrants = new RegistrantList();
     mPinLockedRegistrants = new RegistrantList();
     mPersoLockedRegistrants = new RegistrantList();

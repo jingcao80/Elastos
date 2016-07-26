@@ -46,8 +46,8 @@ public:
         /* [in] */ Int32 length,
         /* [out] */ String* result);
 
-    CARAPI HexCharToInt(
-        /* [in] */ Char16 c,
+    CARAPI HexCharToInt32(
+        /* [in] */ Char32 c,
         /* [out] */ Int32* result);
 
     CARAPI HexStringToBytes(

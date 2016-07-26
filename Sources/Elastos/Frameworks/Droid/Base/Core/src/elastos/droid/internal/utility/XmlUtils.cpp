@@ -1337,9 +1337,10 @@ ECode XmlUtils::BeginDocument(
     /* [in] */ const String& firstElementName)
 {
     Int32 type;
-    while ((parser->Next(&type), type) != IXmlPullParser::START_TAG
+    ECode ec = NOERROR;
+    while ((ec = parser->Next(&type), type) != IXmlPullParser::START_TAG
                && type != IXmlPullParser::END_DOCUMENT) {
-        ;
+        FAIL_RETURN(ec);
     }
 
     if (type != IXmlPullParser::START_TAG) {

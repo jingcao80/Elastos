@@ -102,7 +102,7 @@ module
             [in] Int32 length,
             [out] String* result);
 
-        HexCharToInt(
+        HexCharToInt32(
             [in] Char32 c,
             [out] Int32* result);
 

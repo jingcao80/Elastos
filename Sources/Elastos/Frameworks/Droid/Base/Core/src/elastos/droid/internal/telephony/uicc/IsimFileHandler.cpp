@@ -28,7 +28,7 @@ ECode IsimFileHandler::constructor(
     /* [in] */ const String& aid,
     /* [in] */ ICommandsInterface* ci)
 {
-    return constructor(app, aid, ci);
+    return IccFileHandler::constructor(app, aid, ci);
 }
 
 String IsimFileHandler::GetEFPath(

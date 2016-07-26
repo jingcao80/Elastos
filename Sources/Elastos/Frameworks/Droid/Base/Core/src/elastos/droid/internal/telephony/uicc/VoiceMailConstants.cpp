@@ -4,13 +4,12 @@
 #include "elastos/droid/os/Environment.h"
 #include "elastos/droid/utility/Xml.h"
 #include "elastos/droid/internal/utility/XmlUtils.h"
-
 #include <elastos/core/CoreUtils.h>
+#include <elastos/utility/logging/Logger.h>
 
 using Elastos::Droid::Os::Environment;
 using Elastos::Droid::Utility::Xml;
 using Elastos::Droid::Internal::Utility::XmlUtils;
-
 using Elastos::Core::CoreUtils;
 using Elastos::IO::IFile;
 using Elastos::IO::CFile;
@@ -19,6 +18,7 @@ using Elastos::IO::CFileReader;
 using Elastos::IO::IReader;
 using Elastos::IO::ICloseable;
 using Elastos::Utility::CHashMap;
+using Elastos::Utility::Logging::Logger;
 using Org::Xmlpull::V1::IXmlPullParser;
 
 namespace Elastos {
@@ -99,7 +99,10 @@ void VoiceMailConstants::LoadVoiceMail()
             PARTNER_VOICEMAIL_PATH, (IFile**)&vmFile);
 
     // try {
-        CFileReader::New(vmFile, (IFileReader**)&vmReader);
+    if (FAILED(CFileReader::New(vmFile, (IFileReader**)&vmReader))) {
+        Logger::W(LOGTAG, "Can't open %s", TO_CSTR(vmFile));
+        return;
+    }
     // } catch (FileNotFoundException e) {
     //     Rlog.w(LOG_TAG, "Can't open " +
     //             Environment.getRootDirectory() + "/" + PARTNER_VOICEMAIL_PATH);
@@ -107,14 +110,22 @@ void VoiceMailConstants::LoadVoiceMail()
     // }
 
     // try {
+    ECode ec = NOERROR;
+    do {
         AutoPtr<IXmlPullParser> parser;
         Xml::NewPullParser((IXmlPullParser**)&parser);
         parser->SetInput(IReader::Probe(vmReader));
 
-        XmlUtils::BeginDocument(parser, String("voicemail"));
+        ec = XmlUtils::BeginDocument(parser, String("voicemail"));
+        if (FAILED(ec)) {
+            break;
+        }
 
         while (TRUE) {
-            XmlUtils::NextElement(parser);
+            ec = XmlUtils::NextElement(parser);
+            if (FAILED(ec)) {
+                break;
+            }
 
             String name;
             parser->GetName(&name);
@@ -132,6 +143,12 @@ void VoiceMailConstants::LoadVoiceMail()
             assert(0 && "TODO");
             // mCarrierVmMap->Put(CoreUtils::Convert(numeric), data);
         }
+    } while (0);
+
+    if (FAILED(ec)) {
+        Logger::D(LOGTAG, "Exception in Voicemail parser");
+    }
+
     // } catch (XmlPullParserException e) {
     //     Rlog.w(LOG_TAG, "Exception in Voicemail parser " + e);
     // } catch (IOException e) {

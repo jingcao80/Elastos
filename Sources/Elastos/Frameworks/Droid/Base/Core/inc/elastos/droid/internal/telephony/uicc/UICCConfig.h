@@ -21,6 +21,8 @@ class UICCConfig
 public:
     CAR_INTERFACE_DECL();
 
+    UICCConfig();
+
     /**
       * A method to get the stored Imsi.
       * @hide

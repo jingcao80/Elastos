@@ -203,7 +203,7 @@ String IccUtils::AdnStringFieldToString(
     return s;
 }
 
-Int32 IccUtils::HexCharToInt(
+Int32 IccUtils::HexCharToInt32(
     /* [in] */ Char32 c)
 {
     if (c >= '0' && c <= '9') return (c - '0');
@@ -224,8 +224,8 @@ AutoPtr<ArrayOf<Byte> > IccUtils::HexStringToBytes(
     AutoPtr<ArrayOf<Byte> > ret = ArrayOf<Byte>::Alloc(sz / 2);
 
     for (Int32 i = 0 ; i < sz ; i += 2) {
-        (*ret)[i / 2] = (Byte) ((HexCharToInt(s.GetChar(i)) << 4)
-                            | HexCharToInt(s.GetChar(i + 1)));
+        (*ret)[i / 2] = (Byte) ((HexCharToInt32(s.GetChar(i)) << 4)
+                            | HexCharToInt32(s.GetChar(i + 1)));
     }
 
     return ret;

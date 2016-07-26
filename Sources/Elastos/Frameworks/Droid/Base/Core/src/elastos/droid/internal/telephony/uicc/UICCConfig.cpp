@@ -18,6 +18,9 @@ namespace Uicc {
 //                              UICCConfig
 //=====================================================================
 CAR_INTERFACE_IMPL(UICCConfig, Object, IUICCConfig);
+UICCConfig::UICCConfig()
+    : mMncLength(0)
+{}
 
 ECode UICCConfig::GetImsi(
     /* [out] */ String* result)

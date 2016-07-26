@@ -4831,7 +4831,6 @@ AutoPtr<IInterface> RIL::ResponseInts(
     }
 
     return CoreUtils::Convert(response);
-    //return NULL;
 }
 
 AutoPtr<IInterface> RIL::ResponseVoid(

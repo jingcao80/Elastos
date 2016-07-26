@@ -229,7 +229,7 @@ String UiccIccUtils::AdnStringFieldToString(
 }
 
 Int32 UiccIccUtils::HexCharToInt32(
-    /* [in] */ Char16 c)
+    /* [in] */ Char32 c)
 {
     if (c >= '0' && c <= '9') return (c - '0');
     if (c >= 'A' && c <= 'F') return (c - 'A' + 10);

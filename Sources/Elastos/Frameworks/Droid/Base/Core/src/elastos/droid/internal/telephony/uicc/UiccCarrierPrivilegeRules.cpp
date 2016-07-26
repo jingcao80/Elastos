@@ -13,10 +13,8 @@
 #include "elastos/droid/internal/telephony/uicc/IccIoResult.h"
 #include "elastos/droid/os/Binder.h"
 #include "elastos/droid/os/AsyncResult.h"
-
 #include <elastos/core/CoreUtils.h>
 #include <elastos/core/StringUtils.h>
-//#include <elastos/security/cert/CCertificateFactoryHelper.h>
 #include <elastos/utility/Arrays.h>
 #include <elastos/utility/logging/Logger.h>
 
@@ -27,8 +25,8 @@ using Elastos::Droid::Content::Pm::CResolveInfo;
 using Elastos::Droid::Content::Pm::CActivityInfo;
 using Elastos::Droid::Os::AsyncResult;
 using Elastos::Droid::Os::Binder;
+using Elastos::Droid::Os::IAsyncResult;
 using Elastos::Droid::Telephony::ITelephonyManager;
-
 using Elastos::Core::CoreUtils;
 using Elastos::Core::StringUtils;
 using Elastos::IO::IInputStream;
@@ -43,11 +41,11 @@ using Elastos::Utility::Logging::Logger;
 using Elastos::Security::IMessageDigest;
 using Elastos::Security::IMessageDigestHelper;
 using Elastos::Security::CMessageDigestHelper;
+using Elastos::Security::Cert::CCertificateFactoryHelper;
 using Elastos::Security::Cert::IX509Certificate;
 using Elastos::Security::Cert::ICertificate;
 using Elastos::Security::Cert::ICertificateFactory;
 using Elastos::Security::Cert::ICertificateFactoryHelper;
-//using Elastos::Security::Cert::CCertificateFactoryHelper;
 
 namespace Elastos {
 namespace Droid {
@@ -171,6 +169,7 @@ ECode UiccCarrierPrivilegeRules::constructor(
     /* [in] */ IUiccCard* uiccCard,
     /* [in] */ IMessage* loadedCallback)
 {
+    Handler::constructor();
     Logger::D(LOGTAG, String("Creating UiccCarrierPrivilegeRules"));
     mUiccCard = uiccCard;
     CAtomicInteger32::New(STATE_LOADING, (IAtomicInteger32**)&mState);
@@ -360,10 +359,13 @@ ECode UiccCarrierPrivilegeRules::HandleMessage(
     switch (what) {
         case EVENT_OPEN_LOGICAL_CHANNEL_DONE: {
             Logger::D(LOGTAG, String("EVENT_OPEN_LOGICAL_CHANNEL_DONE"));
-            ar = (AsyncResult*)(IObject*)obj.Get();
+            ar = (AsyncResult*)IAsyncResult::Probe(obj);
             if (ar->mException == NULL && ar->mResult != NULL) {
-                assert(0 && "TODO");
-                Int32 channelId = 0; // ((Int32[]) ar.result)[0];
+                AutoPtr<IArrayOf> array = IArrayOf::Probe(ar->mResult);
+                AutoPtr<IInterface> o;
+                array->Get(0, (IInterface**)&o);
+                Int32 channelId = 0;
+                IInteger32::Probe(o)->GetValue(&channelId);
                 AutoPtr<IMessage> msg;
                 ObtainMessage(EVENT_TRANSMIT_LOGICAL_CHANNEL_DONE, CoreUtils::Convert(channelId), (IMessage**)&msg);
                 mUiccCard->IccTransmitApduLogicalChannel(channelId, CLA, COMMAND, P1, P2, P3, DATA,
@@ -377,7 +379,7 @@ ECode UiccCarrierPrivilegeRules::HandleMessage(
         }
         case EVENT_TRANSMIT_LOGICAL_CHANNEL_DONE: {
             Logger::D(LOGTAG, String("EVENT_TRANSMIT_LOGICAL_CHANNEL_DONE"));
-            ar = (AsyncResult*)(IObject*)obj.Get();
+            ar = (AsyncResult*)IAsyncResult::Probe(obj);
             if (ar->mException == NULL && ar->mResult != NULL) {
                 AutoPtr<IccIoResult> response = (IccIoResult*)IIccIoResult::Probe(ar->mResult);
                 if (response->mPayload != NULL && response->mSw1 == 0x90 && response->mSw2 == 0x00) {
@@ -532,8 +534,7 @@ AutoPtr<ArrayOf<Byte> > UiccCarrierPrivilegeRules::GetCertHash(
     // TODO: Is the following sufficient.
     // try {
     AutoPtr<ICertificateFactoryHelper> hlp;
-    assert(0 && "TODO");
-    // CCertificateFactoryHelper::AcquireSingleton((ICertificateFactoryHelper**)&hlp);
+    CCertificateFactoryHelper::AcquireSingleton((ICertificateFactoryHelper**)&hlp);
     AutoPtr<ICertificateFactory> certFactory;
     hlp->GetInstance(String("X.509"), (ICertificateFactory**)&certFactory);
 

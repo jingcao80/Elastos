@@ -37,8 +37,8 @@ const Int32 AdnRecordCache::USIM_EFANR_TAG;
 const Int32 AdnRecordCache::USIM_EFEMAIL_TAG;
 
 AdnRecordCache::AdnRecordCache()
+    : mAdncountofIcc(0)
 {
-
     CSparseArray::New((ISparseArray**)&mAdnLikeFiles);
 
     CSparseArray::New((ISparseArray**)&mAdnLikeWaiters);

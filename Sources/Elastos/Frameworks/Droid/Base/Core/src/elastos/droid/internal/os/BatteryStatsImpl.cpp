@@ -10069,7 +10069,9 @@ void BatteryStatsImpl::WriteSummaryToParcel(
             AutoPtr<IInterface> ki;
             ent->GetKey((IInterface**)&ki);
             String key;
-            ICharSequence::Probe(ki)->ToString(&key);
+            if (ICharSequence::Probe(ki) != NULL) {
+                ICharSequence::Probe(ki)->ToString(&key);
+            }
             out->WriteString(key);
             kwlt->WriteSummaryFromParcelLocked(out, NOWREAL_SYS);
         }

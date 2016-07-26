@@ -62,8 +62,8 @@ ECode CIccUtils::AdnStringFieldToString(
     return NOERROR;
 }
 
-ECode CIccUtils::HexCharToInt(
-    /* [in] */ Char16 c,
+ECode CIccUtils::HexCharToInt32(
+    /* [in] */ Char32 c,
     /* [out] */ Int32* result)
 {
     VALIDATE_NOT_NULL(result);
