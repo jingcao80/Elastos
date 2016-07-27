@@ -106,7 +106,7 @@ SubscriptionController::ScLocalLog::ScLocalLog(
 }
 
 void SubscriptionController::ScLocalLog::Log(
-    /* [in] */ String msg)
+    /* [in] */ const String& msg)
 {
     if (mMaxLines > 0) {
         Int32 pid = Process::MyPid();
@@ -223,7 +223,7 @@ const Boolean SubscriptionController::DBG = TRUE;
 const Boolean SubscriptionController::VDBG = TRUE;
 const Int32 SubscriptionController::MAX_LOCAL_LOG_LINES = 500; // TODO: Reduce to 100 when 17678050 is fixed
 
-AutoPtr<ISubscriptionController> SubscriptionController::sInstance = NULL;
+AutoPtr<ISubscriptionController> SubscriptionController::sInstance;
 AutoPtr<ArrayOf<IPhoneProxy*> > SubscriptionController::sProxyPhones;
 
 const Int32 SubscriptionController::RES_TYPE_BACKGROUND_DARK = 0;
@@ -407,9 +407,9 @@ void SubscriptionController::EnforceSubscriptionPermission()
 
 void SubscriptionController::BroadcastSimInfoContentChanged(
     /* [in] */ Int64 subId,
-    /* [in] */ String columnName,
+    /* [in] */ const String& columnName,
     /* [in] */ Int32 intContent,
-    /* [in] */ String stringContent)
+    /* [in] */ const String& stringContent)
 {
     AutoPtr<IIntent> intent;
     CIntent::New(ITelephonyIntents::ACTION_SUBINFO_CONTENT_CHANGE, (IIntent**)&intent);
@@ -530,7 +530,7 @@ AutoPtr<ISubInfoRecord> SubscriptionController::GetSubInfoRecord(
 }
 
 AutoPtr<IList> SubscriptionController::GetSubInfo(
-    /* [in] */ String selection,
+    /* [in] */ const String& selection,
     /* [in] */ IInterface* queryKey)
 {
     // String str("selection:");
@@ -1533,6 +1533,7 @@ ECode SubscriptionController::GetSubId(
     if (slotId < 0) {
         Logd(String("[getSubId]- slotId < 0, return dummy instead"));
         *result = DUMMY_VALUES;
+        REFCOUNT_ADD(*result);
         return NOERROR;
     }
 
@@ -1543,6 +1544,7 @@ ECode SubscriptionController::GetSubId(
         Logd(String("[getSubId]- size == 0, return dummy instead"));
         //FIXME return NULL
         *result = DUMMY_VALUES;
+        REFCOUNT_ADD(*result);
         return NOERROR;
     }
 
@@ -1582,6 +1584,7 @@ ECode SubscriptionController::GetSubId(
     if (numSubIds == 0) {
         Logd(String("[getSubId]- numSubIds == 0, return dummy instead"));
         *result = DUMMY_VALUES;
+        REFCOUNT_ADD(*result);
         return NOERROR;
     }
 
@@ -1593,6 +1596,7 @@ ECode SubscriptionController::GetSubId(
     }
 
     *result = subIdArr;
+    REFCOUNT_ADD(*result);
     return NOERROR;
 }
 
@@ -1751,49 +1755,49 @@ AutoPtr<ArrayOf<Int32> > SubscriptionController::SetSimResource(
 }
 
 void SubscriptionController::Logvl(
-    /* [in] */ String msg)
+    /* [in] */ const String& msg)
 {
     Logv(msg);
     mLocalLog->Log(msg);
 }
 
 void SubscriptionController::Logv(
-    /* [in] */ String msg)
+    /* [in] */ const String& msg)
 {
     //TODO Rlog::V(LOGTAG, msg);
     Logger::V(LOGTAG, "%s", msg.string());
 }
 
 void SubscriptionController::Logdl(
-    /* [in] */ String msg)
+    /* [in] */ const String& msg)
 {
     Logd(msg);
     mLocalLog->Log(msg);
 }
 
 void SubscriptionController::Slogd(
-    /* [in] */ String msg)
+    /* [in] */ const String& msg)
 {
     //TODO Rlog::D(LOGTAG, msg);
     Logger::D(LOGTAG, "%s", msg.string());
 }
 
 void SubscriptionController::Logd(
-    /* [in] */ String msg)
+    /* [in] */ const String& msg)
 {
     //TODO Rlog::D(LOGTAG, msg);
     Logger::D(LOGTAG, "%s", msg.string());
 }
 
 void SubscriptionController::Logel(
-    /* [in] */ String msg)
+    /* [in] */ const String& msg)
 {
     Loge(msg);
     mLocalLog->Log(msg);
 }
 
 void SubscriptionController::Loge(
-    /* [in] */ String msg)
+    /* [in] */ const String& msg)
 {
     //TODO Rlog::E(LOGTAG, msg);
     Logger::D(LOGTAG, "%s", msg.string());
@@ -2394,7 +2398,7 @@ ECode SubscriptionController::GetActiveSubIdList(
 }
 
 void SubscriptionController::PrintStackTrace(
-    /* [in] */ String msg)
+    /* [in] */ const String& msg)
 {
     assert(0 && "TODO");
     // AutoPtr<IRuntimeException> re;

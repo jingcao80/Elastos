@@ -58,7 +58,7 @@ public:
             /* [in] */ Int32 maxLines);
 
         CARAPI_(void) Log(
-            /* [in] */ String msg);
+            /* [in] */ const String& msg);
 
         CARAPI_(void) Dump(
             /* [in] */ IFileDescriptor* fd,
@@ -489,9 +489,9 @@ public:
      */
     CARAPI_(void) BroadcastSimInfoContentChanged(
         /* [in] */ Int64 subId,
-        /* [in] */ String columnName,
+        /* [in] */ const String& columnName,
         /* [in] */ Int32 intContent,
-        /* [in] */ String stringContent);
+        /* [in] */ const String& stringContent);
 
     /**
      * New SubInfoRecord instance and fill in detail info
@@ -508,32 +508,32 @@ public:
      * @return Array list of queried result from database
      */
     CARAPI_(AutoPtr<IList>) GetSubInfo(
-        /* [in] */ String selection,
+        /* [in] */ const String& selection,
         /* [in] */ IInterface* queryKey);
 
     static CARAPI_(AutoPtr<ArrayOf<Int32> >) SetSimResource(
         /* [in] */ Int32 type);
 
     CARAPI_(void) Logvl(
-        /* [in] */ String msg);
+        /* [in] */ const String& msg);
 
     CARAPI_(void) Logv(
-        /* [in] */ String msg);
+        /* [in] */ const String& msg);
 
     CARAPI_(void) Logdl(
-        /* [in] */ String msg);
+        /* [in] */ const String& msg);
 
     static CARAPI_(void) Slogd(
-        /* [in] */ String msg);
+        /* [in] */ const String& msg);
 
     CARAPI_(void) Logd(
-        /* [in] */ String msg);
+        /* [in] */ const String& msg);
 
     CARAPI_(void) Logel(
-        /* [in] */ String msg);
+        /* [in] */ const String& msg);
 
     CARAPI_(void) Loge(
-        /* [in] */ String msg);
+        /* [in] */ const String& msg);
 
     CARAPI_(void) BroadcastDefaultSmsSubIdChanged(
         /* [in] */ Int64 subId);
@@ -557,9 +557,10 @@ public:
         /* [in] */ Int64 subId);
 
     static CARAPI_(void) PrintStackTrace(
-        /* [in] */ String msg);
+        /* [in] */ const String& msg);
 
     TO_STRING_IMPL("SubscriptionController");
+
 public:
     static const String LOGTAG;
     static const Boolean DBG;
