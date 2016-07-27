@@ -1,50 +1,33 @@
-/*
- * Copyright (C) 2010 The Android Open Source Project
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
+#ifndef __ELASTOS_DROID_SETTINGS_CHOOSELOCKSETTINGSHELPER_H__
+#define __ELASTOS_DROID_SETTINGS_CHOOSELOCKSETTINGSHELPER_H__
 
-package com.android.settings;
-
-using Elastos::Droid::Internal::Widget::ILockPatternUtils;
+#include "Elastos.Droid.App.h"
+#include "Elastos.Droid.Internal.h"
+#include <elastos/core/Object.h>
 
 using Elastos::Droid::App::IActivity;
 using Elastos::Droid::App::IFragment;
-using Elastos::Droid::App::Admin::IDevicePolicyManager;
-using Elastos::Droid::Content::IIntent;
+using Elastos::Droid::Internal::Widget::ILockPatternUtils;
+using Elastos::Core::Object;
 
-public class ChooseLockSettingsHelper {
+namespace Elastos {
+namespace Droid {
+namespace Settings {
 
-    static const String EXTRA_KEY_TYPE = "type";
-    static const String EXTRA_KEY_PASSWORD = "password";
+class ChooseLockSettingsHelper
+    : public Object
+{
+public:
+    ChooseLockSettingsHelper();
 
-    private LockPatternUtils mLockPatternUtils;
-    private Activity mActivity;
-    private Fragment mFragment;
+    CARAPI constructor(
+        /* [in] */ IActivity* activity);
 
-    public ChooseLockSettingsHelper(Activity activity) {
-        mActivity = activity;
-        mLockPatternUtils = new LockPatternUtils(activity);
-    }
+    CARAPI constructor(
+        /* [in] */ IActivity* activity,
+        /* [in] */ IFragment* fragment);
 
-    public ChooseLockSettingsHelper(Activity activity, Fragment fragment) {
-        This(activity);
-        mFragment = fragment;
-    }
-
-    public LockPatternUtils Utils() {
-        return mLockPatternUtils;
-    }
+    virtual CARAPI_(AutoPtr<ILockPatternUtils>) Utils();
 
     /**
      * If a pattern, password or PIN exists, prompt the user before allowing them to change it.
@@ -53,9 +36,10 @@ public class ChooseLockSettingsHelper {
      * @return TRUE if one exists and we launched an activity to confirm it
      * @see #OnActivityResult(Int32, Int32, android.content.Intent)
      */
-    Boolean LaunchConfirmationActivity(Int32 request, CharSequence message, CharSequence details) {
-        return LaunchConfirmationActivity(request, message, details, FALSE);
-    }
+    virtual CARAPI_(Boolean) LaunchConfirmationActivity(
+        /* [in] */ Int32 request,
+        /* [in] */ ICharSequence* message,
+        /* [in] */ ICharSequence* details);
 
     /**
      * If a pattern, password or PIN exists, prompt the user before allowing them to change it.
@@ -66,25 +50,13 @@ public class ChooseLockSettingsHelper {
      * @return TRUE if one exists and we launched an activity to confirm it
      * @see #OnActivityResult(Int32, Int32, android.content.Intent)
      */
-    Boolean LaunchConfirmationActivity(Int32 request, CharSequence message, CharSequence details,
-                                       Boolean returnCredentials) {
-        Boolean launched = FALSE;
-        switch (mLockPatternUtils->GetKeyguardStoredPasswordQuality()) {
-            case DevicePolicyManager.PASSWORD_QUALITY_SOMETHING:
-                launched = ConfirmPattern(request, message, details, returnCredentials);
-                break;
-            case DevicePolicyManager.PASSWORD_QUALITY_NUMERIC:
-            case DevicePolicyManager.PASSWORD_QUALITY_NUMERIC_COMPLEX:
-            case DevicePolicyManager.PASSWORD_QUALITY_ALPHABETIC:
-            case DevicePolicyManager.PASSWORD_QUALITY_ALPHANUMERIC:
-            case DevicePolicyManager.PASSWORD_QUALITY_COMPLEX:
-                // TODO: update UI layout for ConfirmPassword to show message and details
-                launched = ConfirmPassword(request, message, returnCredentials);
-                break;
-        }
-        return launched;
-    }
+    virtual CARAPI_(Boolean) LaunchConfirmationActivity(
+        /* [in] */ Int32 request,
+        /* [in] */ ICharSequence* message,
+        /* [in] */ ICharSequence* details,
+        /* [in] */ Boolean returnCredentials);
 
+private:
     /**
      * Launch screen to confirm the existing lock pattern.
      * @param message shown in header of ConfirmLockPattern if not NULL
@@ -93,26 +65,11 @@ public class ChooseLockSettingsHelper {
      * @see #OnActivityResult(Int32, Int32, android.content.Intent)
      * @return TRUE if we launched an activity to confirm pattern
      */
-    private Boolean ConfirmPattern(Int32 request, CharSequence message,
-                                   CharSequence details, Boolean returnCredentials) {
-        if (!mLockPatternUtils->IsLockPatternEnabled() || !mLockPatternUtils->SavedPatternExists()) {
-            return FALSE;
-        }
-        final Intent intent = new Intent();
-        // supply header and footer text in the intent
-        intent->PutExtra(ConfirmLockPattern.HEADER_TEXT, message);
-        intent->PutExtra(ConfirmLockPattern.FOOTER_TEXT, details);
-        intent->SetClassName("com.android.settings",
-                            returnCredentials
-                            ? ConfirmLockPattern.InternalActivity.class->GetName()
-                            : ConfirmLockPattern.class->GetName());
-        if (mFragment != NULL) {
-            mFragment->StartActivityForResult(intent, request);
-        } else {
-            mActivity->StartActivityForResult(intent, request);
-        }
-        return TRUE;
-    }
+    CARAPI_(Boolean) ConfirmPattern(
+        /* [in] */ Int32 request,
+        /* [in] */ ICharSequence* message,
+        /* [in] */ ICharSequence* details,
+        /* [in] */ Boolean returnCredentials);
 
     /**
      * Launch screen to confirm the existing lock password.
@@ -121,23 +78,23 @@ public class ChooseLockSettingsHelper {
      * @see #OnActivityResult(Int32, Int32, android.content.Intent)
      * @return TRUE if we launched an activity to confirm password
      */
-    private Boolean ConfirmPassword(Int32 request, CharSequence message,
-            Boolean returnCredentials) {
-        if (!mLockPatternUtils->IsLockPasswordEnabled()) return FALSE;
-        final Intent intent = new Intent();
-        // supply header text in the intent
-        intent->PutExtra(ConfirmLockPattern.HEADER_TEXT, message);
-        intent->SetClassName("com.android.settings",
-                            returnCredentials
-                            ? ConfirmLockPassword.InternalActivity.class->GetName()
-                            : ConfirmLockPassword.class->GetName());
-        if (mFragment != NULL) {
-            mFragment->StartActivityForResult(intent, request);
-        } else {
-            mActivity->StartActivityForResult(intent, request);
-        }
-        return TRUE;
-    }
+    CARAPI_(Boolean) ConfirmPassword(
+        /* [in] */ Int32 request,
+        /* [in] */ ICharSequence* message,
+        /* [in] */ Boolean returnCredentials);
 
+public:
+    static const String EXTRA_KEY_TYPE;
+    static const String EXTRA_KEY_PASSWORD;
 
-}
+private:
+    AutoPtr<ILockPatternUtils> mLockPatternUtils;
+    AutoPtr<IActivity> mActivity;
+    AutoPtr<IFragment> mFragment;
+};
+
+} // namespace Settings
+} // namespace Droid
+} // namespace Elastos
+
+#endif //__ELASTOS_DROID_SETTINGS_CHOOSELOCKSETTINGSHELPER_H__

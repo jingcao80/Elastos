@@ -146,7 +146,7 @@ static AutoPtr< ArrayOf<String> > InitENTRY_FRAGMENTS()
     (*args)[20] = "Elastos.Droid.Settings.Applications.ProcessStatsUi";
     (*args)[21] = "Elastos.Droid.Settings.Notification.NotificationStation";
     (*args)[22] = "Elastos.Droid.Settings.Location.LocationSettings";
-    (*args)[23] = "Elastos.Droid.Settings.SecuritySettings";
+    (*args)[23] = "Elastos.Droid.Settings.CSecuritySettings";
     (*args)[24] = "Elastos.Droid.Settings.UsageAccessSettings";
     (*args)[25] = "Elastos.Droid.Settings.PrivacySettings";
     (*args)[26] = "Elastos.Droid.Settings.DeviceAdminSettings";

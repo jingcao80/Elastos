@@ -3339,7 +3339,7 @@ ECode LauncherModel::Initialize(
             wrs->GetWeakReference((IWeakReference**)&mCallbacks);
         }
         else {
-            mCallbacks = NULL;
+            mCallbacks = new WeakReferenceImpl(NULL, NULL);
         }
     }
     return NOERROR;
@@ -3411,7 +3411,7 @@ ECode LauncherModel::OnReceive(
 
 ECode LauncherModel::ForceReload()
 {
-    ResetLoadedState(true, true);
+    ResetLoadedState(TRUE, TRUE);
 
     // Do this here because if the launcher activity is running it will be restarted.
     // If it's not running startLoaderFromBackground will merely tell it that it needs

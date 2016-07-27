@@ -310,6 +310,7 @@ ECode FragmentManagerImpl::GetFragment(
     bundle->GetInt32(key, -1, &index);
     if (index == -1) {
         *fragment = NULL;
+        return NOERROR;
     }
     Int32 N;
     mActive->GetSize(&N);
@@ -1373,7 +1374,7 @@ ECode FragmentManagerImpl::FindFragmentByTag(
             }
         }
     }
-    if (mActive != NULL && tag != NULL) {
+    if (mActive != NULL && !tag.IsNull()) {
         // Now for any known fragment.
         Int32 N;
         mActive->GetSize(&N);
@@ -1901,7 +1902,7 @@ ECode FragmentManagerImpl::SaveAllState(
             haveFragments = TRUE;
 
             AutoPtr<CFragmentState> fs;
-            CFragmentState::NewByFriend((CFragmentState**)&fs);
+            CFragmentState::NewByFriend(f, (CFragmentState**)&fs);
             active->Set(i, fs);
 
             Int32 fstate;
@@ -1963,7 +1964,7 @@ ECode FragmentManagerImpl::SaveAllState(
                 mAdded->Get(i, (IInterface**)&obj);
                 IFragment* f = IFragment::Probe(obj);
                 Int32 index;
-                IFragment::Probe(obj)->GetIndex(&index);
+                f->GetIndex(&index);
                 (*added)[i] = index;
                 if ((*added)[i] < 0) {
                     Logger::V(TAG, "Failure saving state: active %s has cleared index: %d",

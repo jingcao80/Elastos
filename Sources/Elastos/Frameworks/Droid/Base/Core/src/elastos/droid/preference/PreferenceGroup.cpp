@@ -4,11 +4,9 @@
 #include "elastos/droid/preference/PreferenceGroup.h"
 #include "elastos/droid/text/TextUtils.h"
 #include "elastos/droid/R.h"
+#include <elastos/core/AutoLock.h>
 #include <elastos/utility/logging/Slogger.h>
-#include <elastos/core/AutoLock.h>
 
-#include <elastos/core/AutoLock.h>
-using Elastos::Core::AutoLock;
 using Elastos::Droid::Text::TextUtils;
 using Elastos::Droid::R;
 using Elastos::Core::AutoLock;
@@ -112,22 +110,25 @@ ECode PreferenceGroup::AddPreference(
 {
     VALIDATE_NOT_NULL(result)
 
-    if (mPreferenceList->Contains(preference, result), *result) {
+    Boolean res;
+    mPreferenceList->Contains(preference, &res);
+    if (res) {
         // Exists
+        *result = TRUE;
         return NOERROR;
     }
 
     Int32 order;
-    if (preference->GetOrder(&order), order == IPreference::DEFAULT_ORDER) {
+    preference->GetOrder(&order);
+    if (order == IPreference::DEFAULT_ORDER) {
         if (mOrderingAsAdded) {
             preference->SetOrder(mCurrentPreferenceOrder++);
         }
 
-        AutoPtr<IPreferenceGroup> group;
-        if(IPreferenceGroup::Probe(preference) != NULL){
+        AutoPtr<IPreferenceGroup> group = IPreferenceGroup::Probe(preference);
+        if(group != NULL){
             // TODO: fix (method is called tail recursively when inflating,
             // so we won't end up properly passing this flag down to children
-            AutoPtr<IPreferenceGroup> group = IPreferenceGroup::Probe(preference);
             group->SetOrderingAsAdded(mOrderingAsAdded);
         }
 
@@ -141,13 +142,14 @@ ECode PreferenceGroup::AddPreference(
         insertionIndex = insertionIndex * -1 - 1;
     }
 
-    Boolean value;
-    if (OnPrepareAddPreference(preference, &value), !value) {
+    OnPrepareAddPreference(preference, &res);
+    if (!res) {
         *result = FALSE;
         return NOERROR;
     }
 
-    {    AutoLock syncLock(this);
+    {
+        AutoLock syncLock(this);
         mPreferenceList->Add(insertionIndex, preference);
     }
 
@@ -179,7 +181,8 @@ Boolean PreferenceGroup::RemovePreferenceInt(
     /* [in] */ IPreference* preference)
 {
     Boolean modified;
-    {    AutoLock syncLock(this);
+    {
+        AutoLock syncLock(this);
         preference->OnPrepareForRemoval();
         mPreferenceList->Remove(preference, &modified);
     }
@@ -188,7 +191,8 @@ Boolean PreferenceGroup::RemovePreferenceInt(
 
 ECode PreferenceGroup::RemoveAll()
 {
-    {    AutoLock syncLock(this);
+    {
+        AutoLock syncLock(this);
         AutoPtr<IList> preferenceList = mPreferenceList;
         Int32 size;
         preferenceList->GetSize(&size);
@@ -242,8 +246,8 @@ ECode PreferenceGroup::FindPreference(
             return NOERROR;
         }
 
-        if (IPreferenceGroup::Probe(preference) != NULL) {
-            AutoPtr<IPreferenceGroup> group = IPreferenceGroup::Probe(preference);
+        IPreferenceGroup* group = IPreferenceGroup::Probe(preference);
+        if (group != NULL) {
             AutoPtr<IPreference> returnedPreference;
             group->FindPreference(key, (IPreference**)&returnedPreference);
             if (returnedPreference != NULL) {
@@ -313,7 +317,8 @@ ECode PreferenceGroup::NotifyDependencyChange(
 
 ECode PreferenceGroup::SortPreferences()
 {
-    {    AutoLock syncLock(this);
+    {
+        AutoLock syncLock(this);
         AutoPtr<ICollections> coll;
         CCollections::AcquireSingleton((ICollections**)&coll);
         coll->Sort(mPreferenceList);

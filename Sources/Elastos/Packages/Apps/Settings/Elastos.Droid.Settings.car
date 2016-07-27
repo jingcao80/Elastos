@@ -666,6 +666,23 @@ module
         interface IOnActionExpandListener;
     }
 
+    class CSecuritySettings {
+        constructor();
+
+        interface ISettingsPreferenceFragment;
+        interface IPreferenceFragment;
+        interface IFragment;
+        interface IPreferenceManagerOnPreferenceTreeClickListener;
+        interface IComponentCallbacks;
+        interface IComponentCallbacks2;
+        interface IViewOnCreateContextMenuListener;
+        interface IDialogCreatable;
+
+        interface IPreferenceOnPreferenceChangeListener;
+        interface IDialogInterfaceOnClickListener;
+        interface IIndexable;
+    }
+
     class CSettingsActivity {
         constructor();
 
