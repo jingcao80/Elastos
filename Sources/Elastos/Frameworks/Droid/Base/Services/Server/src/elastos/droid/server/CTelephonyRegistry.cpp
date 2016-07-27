@@ -347,13 +347,13 @@ ECode CTelephonyRegistry::Listen(
     /* [in] */ Int32 events,
     /* [in] */ Boolean notifyNow)
 {
-    return ListenForSubscriber(ISubscriptionManager::DEFAULT_SUB_ID, pkgForDebug, callback, events,
+    return ListenForSubscriber(pkgForDebug, ISubscriptionManager::DEFAULT_SUB_ID, callback, events,
         notifyNow);
 }
 
 ECode CTelephonyRegistry::ListenForSubscriber(
-    /* [in] */ Int64 subId,
     /* [in] */ const String& pkgForDebug,
+    /* [in] */ Int64 subId,
     /* [in] */ IIPhoneStateListener* callback,
     /* [in] */ Int32 events,
     /* [in] */ Boolean notifyNow)

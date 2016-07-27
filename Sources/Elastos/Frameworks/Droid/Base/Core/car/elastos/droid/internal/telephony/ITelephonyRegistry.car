@@ -27,9 +27,13 @@ module
             [in] Int32 events,
             [in] Boolean notifyNow);
 
+        /**
+         * the parameter order is not consistent with android.
+         * do not change the order. the original order will make the elsystemserver crash in release version.
+         */
         ListenForSubscriber(
-            [in] Int64 subId,
             [in] String pkg,
+            [in] Int64 subId,
             [in] IIPhoneStateListener* clb,
             [in] Int32 events,
             [in] Boolean notifyNow);

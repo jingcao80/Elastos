@@ -194,8 +194,8 @@ public:
 
     //@Override
     CARAPI ListenForSubscriber(
-        /* [in] */ Int64 subId,
         /* [in] */ const String& pkgForDebug,
+        /* [in] */ Int64 subId,
         /* [in] */ IIPhoneStateListener* callback,
         /* [in] */ Int32 events,
         /* [in] */ Boolean NotifyNow);
