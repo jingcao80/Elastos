@@ -13,6 +13,9 @@ namespace Elastos {
 namespace Droid {
 namespace InCallUI {
 
+/**
+ * Logic for call buttons.
+ */
 class CallButtonPresenter
     : public Presenter
     , public IInCallStateListener
@@ -129,7 +132,7 @@ private:
     CARAPI_(void) UpdateVideoCallButtons();
 
     CARAPI_(void) UpdateVoiceCallButtons(
-        /* [in] */ ICall* call);
+        /* [in] */ Call* call);
 
 private:
     AutoPtr<Call> mCall;

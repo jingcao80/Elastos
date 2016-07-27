@@ -22,7 +22,6 @@ using Elastos::Droid::Content::Res::IResources;
 using Elastos::Droid::InCallUI::EIID_IContactInfoCacheCallback;
 using Elastos::Droid::InCallUI::EIID_ICallCardPresenter;
 using Elastos::Droid::InCallUI::EIID_IIncomingCallListener;
-using Elastos::Droid::InCallUI::EIID_IIncomingCallListener;
 using Elastos::Droid::InCallUI::EIID_IInCallDetailsListener;
 using Elastos::Droid::InCallUI::EIID_IInCallEventListener;
 using Elastos::Droid::Internal::Utility::IPreconditions;
