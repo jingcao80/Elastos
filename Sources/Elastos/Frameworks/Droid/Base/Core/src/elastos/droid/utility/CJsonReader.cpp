@@ -904,7 +904,6 @@ ECode CJsonReader::NextLiteral(
 
     while (TRUE) {
         for (; mPos + i < mLimit; i++) {
-Logger::D("CJsonReader::NextLiteral", "================= i: %d ,  mPos + i : %d  , mLimit: %d ==============", i, mPos + i, mLimit);
             switch ((*mBuffer)[mPos + i]) {
                 case '/':
                 case '\\':

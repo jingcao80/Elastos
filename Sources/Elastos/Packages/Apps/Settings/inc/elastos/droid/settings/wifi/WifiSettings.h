@@ -404,7 +404,7 @@ public:
 
     /* End of "used in Wifi Setup context" */
 
-    static AutoPtr<IIndexableSearchIndexProvider> GetSEARCH_INDEX_DATA_PROVIDER();
+    static CARAPI_(AutoPtr<IIndexableSearchIndexProvider>) GetSEARCH_INDEX_DATA_PROVIDER();
 
 private:
     static AutoPtr<IIndexableSearchIndexProvider> SEARCH_INDEX_DATA_PROVIDER;

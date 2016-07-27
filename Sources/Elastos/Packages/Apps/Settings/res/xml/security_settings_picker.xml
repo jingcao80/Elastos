@@ -14,38 +14,38 @@
      limitations under the License.
 -->
 
-<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android"
+<Elastos.Droid.Preference.CPreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android"
         android:title="@string/lock_settings_picker_title"
         android:key="lock_settings_picker">
 
-    <PreferenceScreen
+    <Elastos.Droid.Preference.CPreferenceScreen
             android:key="unlock_set_off"
             android:title="@string/unlock_set_unlock_off_title"
             android:persistent="false"/>
 
-    <PreferenceScreen
+    <Elastos.Droid.Preference.CPreferenceScreen
             android:key="unlock_set_none"
             android:title="@string/unlock_set_unlock_none_title"
             android:persistent="false"/>
 
-    <PreferenceScreen
+    <Elastos.Droid.Preference.CPreferenceScreen
             android:key="unlock_set_biometric_weak"
             android:title="@string/unlock_set_unlock_biometric_weak_title"
             android:persistent="false"/>
 
-    <PreferenceScreen
+    <Elastos.Droid.Preference.CPreferenceScreen
             android:key="unlock_set_pattern"
             android:title="@string/unlock_set_unlock_pattern_title"
             android:persistent="false"/>
 
-    <PreferenceScreen
+    <Elastos.Droid.Preference.CPreferenceScreen
             android:key="unlock_set_pin"
             android:title="@string/unlock_set_unlock_pin_title"
             android:persistent="false"/>
 
-    <PreferenceScreen
+    <Elastos.Droid.Preference.CPreferenceScreen
             android:key="unlock_set_password"
             android:title="@string/unlock_set_unlock_password_title"
             android:persistent="false"/>
 
-</PreferenceScreen>
+</Elastos.Droid.Preference.CPreferenceScreen>

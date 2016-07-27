@@ -127,7 +127,7 @@ static AutoPtr<IHashMap> InitsRankMap()
             Ranking::RANK_LOCATION);
 
     // Security
-    InitPut(map, String("Elastos.Droid.Settings.SecuritySettings"),
+    InitPut(map, String("Elastos.Droid.Settings.CSecuritySettings"),
             Ranking::RANK_SECURITY);
     InitPut(map,
             String("Elastos.Droid.Settings.ChooseLockGeneric.ChooseLockGenericFragment"),

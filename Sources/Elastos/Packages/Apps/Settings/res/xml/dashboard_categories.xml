@@ -166,7 +166,7 @@
         <dashboard-tile
                 android:id="@+id/security_settings"
                 android:title="@string/security_settings_title"
-                android:fragment="Elastos.Droid.Settings.SecuritySettings"
+                android:fragment="Elastos.Droid.Settings.CSecuritySettings"
                 android:icon="@drawable/ic_settings_security"
                 />
 

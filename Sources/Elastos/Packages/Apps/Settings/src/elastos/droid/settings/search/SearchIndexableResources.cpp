@@ -107,7 +107,7 @@ static AutoPtr<IHashMap> InitsResMap()
     InitPut(map, String("Elastos.Droid.Settings.Location.LocationSettings"),
             R::xml::location_settings, R::drawable::ic_settings_location);
 
-    InitPut(map, String("Elastos.Droid.Settings.SecuritySettings"),
+    InitPut(map, String("Elastos.Droid.Settings.CSecuritySettings"),
             SearchIndexableResources::NO_DATA_RES_ID,
             R::drawable::ic_settings_security);
 
