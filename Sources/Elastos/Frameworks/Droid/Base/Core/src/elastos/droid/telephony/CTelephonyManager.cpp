@@ -524,6 +524,21 @@ ECode CTelephonyManager::GetVoiceNetworkType(
     return NOERROR;
 }
 
+ECode CTelephonyManager::GetIccOperatorNumeric(
+    /* [in] */ Int64 subId,
+    /* [out] */ String* result)
+{
+    VALIDATE_NOT_NULL(result);
+    *result = String(NULL);
+    // try {
+    return GetITelephony()->GetIccOperatorNumeric(subId, result);
+    // } catch (RemoteException ex) {
+    //     return null;
+    // } catch (NullPointerException ex) {
+    //     return null;
+    // }
+}
+
 ECode CTelephonyManager::GetNetworkTypeName(
     /* [out] */ String* res)
 {

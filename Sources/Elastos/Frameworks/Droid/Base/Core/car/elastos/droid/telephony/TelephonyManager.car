@@ -1276,6 +1276,15 @@ module
         NetworkTypeToString(
             [in] Int32 networkType,
             [out] String* str);
+
+        /**
+         * Returns the icc operator numeric for a given subId
+         *
+         */
+        /** {@hide} */
+        GetIccOperatorNumeric(
+            [in] Int64 subId,
+            [out] String* result);
     }
 
     [deprecated, local]

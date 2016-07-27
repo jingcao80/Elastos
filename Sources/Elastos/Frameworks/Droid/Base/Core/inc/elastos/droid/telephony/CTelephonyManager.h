@@ -302,6 +302,15 @@ public:
         /* [in] */ Int64 subId,
         /* [out] */ Int32* val);
 
+    /**
+     * Returns the icc operator numeric for a given subId
+     *
+     */
+    /** {@hide} */
+    CARAPI GetIccOperatorNumeric(
+        /* [in] */ Int64 subId,
+        /* [out] */ String* result);
+
     CARAPI GetNetworkTypeName(
         /* [out] */ String* res);
 

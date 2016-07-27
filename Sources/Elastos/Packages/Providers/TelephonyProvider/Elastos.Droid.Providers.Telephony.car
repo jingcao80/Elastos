@@ -1,0 +1,26 @@
+module
+{
+    importlib("Elastos.Droid.Core.eco");
+
+    using interface Elastos.Droid.Content.IComponentCallbacks;
+    using interface Elastos.Droid.Content.IComponentCallbacks2;
+    using interface Elastos.Droid.Content.IContentProvider;
+
+    namespace Elastos {
+    namespace Droid {
+    namespace Providers {
+    namespace Telephony {
+
+    class CTelephonyProvider {
+        constructor();
+
+        interface IContentProvider;
+        interface IComponentCallbacks;
+        interface IComponentCallbacks2;
+    }
+
+    } // namespace Telephony
+    } // namespace Providers
+    } // namespace Droid
+    } // namespace Elastos
+}

@@ -598,6 +598,13 @@ public:
         /* [out] */ Int32* result);
 
     /**
+     * get operator numeric value from icc records
+     */
+    CARAPI GetIccOperatorNumeric(
+        /* [in] */ Int64 subId,
+        /* [out] */ String* result);
+
+    /**
      * @see android.telephony.TelephonyManager.WifiCallingChoices
      */
     CARAPI SetWhenToMakeWifiCalls(

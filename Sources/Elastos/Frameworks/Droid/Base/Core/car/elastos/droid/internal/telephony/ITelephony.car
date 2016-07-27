@@ -532,6 +532,15 @@ module
             [out] Int32* result);
 
         /**
+          * Return icc operator numeric for given subId
+          * @param subId user preferred subId.
+          * Returns icc operator numeric
+          */
+        GetIccOperatorNumeric(
+            [in] Int64 subId,
+            [out] String* result);
+
+        /**
          * Return true if an ICC card is present
          */
         HasIccCard(

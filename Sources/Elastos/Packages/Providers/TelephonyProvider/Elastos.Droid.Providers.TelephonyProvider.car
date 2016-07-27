@@ -1,0 +1,180 @@
+module
+{
+    importlib("Elastos.Droid.Core.eco");
+
+    merge("car/elastos/droid/providers/media/IMtpService.car");
+    merge("car/elastos/droid/providers/media/MediaDocumentsProvider.car");
+    merge("car/elastos/droid/providers/media/MediaProvider.car");
+    merge("car/elastos/droid/providers/media/MediaScannerReceiver.car");
+    merge("car/elastos/droid/providers/media/MediaScannerService.car");
+    merge("car/elastos/droid/providers/media/MediaUpgradeReceiver.car");
+    merge("car/elastos/droid/providers/media/MtpReceiver.car");
+    merge("car/elastos/droid/providers/media/MtpService.car");
+    merge("car/elastos/droid/providers/media/RingtonePickerActivity.car");
+    merge("car/elastos/droid/providers/media/MediaThumbRequest.car");
+
+
+    using interface Elastos.Droid.App.IActivity;
+    using interface Elastos.Droid.App.IService;
+    using interface Elastos.Droid.Content.IComponentCallbacks;
+    using interface Elastos.Droid.Content.IComponentCallbacks2;
+    using interface Elastos.Droid.Content.IContentProvider;
+    using interface Elastos.Droid.Content.IContentResolver;
+    using interface Elastos.Droid.Content.IContext;
+    using interface Elastos.Droid.Content.IContextWrapper;
+    using interface Elastos.Droid.Content.IDialogInterface;
+    using interface Elastos.Droid.Content.IDialogInterfaceOnClickListener;
+    using interface Elastos.Droid.Content.IBroadcastReceiver;
+    using interface Elastos.Droid.Internal.App.IAlertControllerAlertParamsOnPrepareListViewListener;
+    using interface Elastos.Droid.Internal.App.IAlertActivity;
+    using interface Elastos.Droid.Graphics.IBitmap;
+    using interface Elastos.Droid.Media.IIMediaScannerService;
+    using interface Elastos.Droid.Net.IUri;
+    using interface Elastos.Droid.Provider.IDocumentsProvider;
+    using interface Elastos.Droid.View.IContextThemeWrapper;
+    using interface Elastos.Droid.View.ILayoutInflaterFactory;
+    using interface Elastos.Droid.View.ILayoutInflaterFactory2;
+    using interface Elastos.Droid.View.IWindowCallback;
+    using interface Elastos.Droid.View.IKeyEventCallback;
+    using interface Elastos.Droid.View.IOnWindowDismissedCallback;
+    using interface Elastos.Droid.View.IViewOnCreateContextMenuListener;
+    using interface Elastos.Droid.Widget.IAdapterViewOnItemSelectedListener;
+    using interface Elastos.Droid.Providers.Media.IMediaDocumentsProvider;
+    using interface Elastos.Droid.Providers.Media.IMediaProvider;
+    using interface Elastos.Droid.Providers.Media.IMediaScannerReceiver;
+    using interface Elastos.Droid.Providers.Media.IMediaScannerService;
+    using interface Elastos.Droid.Providers.Media.IMediaUpgradeReceiver;
+    using interface Elastos.Droid.Providers.Media.IMtpReceiver;
+    using interface Elastos.Droid.Providers.Media.IMtpService;
+    using interface Elastos.Droid.Os.IBinder;
+    using interface Elastos.Core.IComparator;
+    using interface Elastos.Core.IRunnable;
+
+    namespace Elastos {
+    namespace Droid {
+    namespace Providers {
+    namespace Media {
+
+    class CMediaDocumentsProvider {
+        constructor();
+
+        interface IDocumentsProvider;
+        interface IContentProvider;
+        interface IComponentCallbacks;
+        interface IComponentCallbacks2;
+        interface IMediaDocumentsProvider;
+    }
+
+    class CMediaProvider {
+        constructor();
+
+        interface IContentProvider;
+        interface IComponentCallbacks;
+        interface IComponentCallbacks2;
+        interface IMediaProvider;
+    }
+
+    class CMediaScannerReceiver {
+        constructor();
+
+        interface IMediaScannerReceiver;
+        interface IBroadcastReceiver;
+    }
+
+    class CIMediaScannerService {
+        constructor(
+            [in] IMediaScannerService* owner);
+
+        interface IIMediaScannerService;
+        interface IBinder;
+    }
+
+    class CMediaScannerService {
+        constructor();
+
+        interface IMediaScannerService;
+        interface IRunnable;
+        interface IService;
+        interface IContext;
+        interface IContextWrapper;
+        interface IComponentCallbacks;
+        interface IComponentCallbacks2;
+    }
+
+    class CMediaUpgradeReceiver {
+        constructor();
+
+        interface IMediaUpgradeReceiver;
+        interface IBroadcastReceiver;
+    }
+
+    class CMtpReceiver {
+        constructor();
+        
+        interface IBroadcastReceiver;
+        interface IMtpReceiver;
+    }
+
+    class CIMtpService {
+        constructor(
+            [in] IMtpService* owner);
+
+        interface IIMtpService;
+        interface IBinder;
+    }
+
+    class CMtpService {
+        constructor();
+
+        interface IMtpService;
+        interface IService;
+        interface IContext;
+        interface IContextWrapper;
+        interface IComponentCallbacks;
+        interface IComponentCallbacks2;
+    }
+
+    class CRingtonePickerActivity {
+        constructor();
+
+        interface IAlertActivity;
+        interface IActivity;
+        interface IContext;
+        interface IContextWrapper;
+        interface IContextThemeWrapper;
+        interface ILayoutInflaterFactory;
+        interface ILayoutInflaterFactory2;
+        interface IWindowCallback;
+        interface IKeyEventCallback;
+        interface IViewOnCreateContextMenuListener;
+        interface IOnWindowDismissedCallback;
+        interface IComponentCallbacks;
+        interface IComponentCallbacks2;
+        interface IDialogInterface;
+        interface IAdapterViewOnItemSelectedListener;
+        interface IRunnable;
+        interface IDialogInterfaceOnClickListener;
+        interface IAlertControllerAlertParamsOnPrepareListViewListener;
+    }
+
+    class CMediaThumbRequest {
+        constructor(
+            [in] IContentResolver* cr,
+            [in] String path,
+            [in] IUri* uri,
+            [in] Int32 priority,
+            [in] Int64 magic);
+
+        interface IMediaThumbRequest;
+    }
+
+    singleton class CMediaThumbRequestHelper {
+        interface IMediaThumbRequestHelper;
+    }
+
+
+    } // namespace Media
+    } // namespace Providers
+    } // namespace Droid
+    } // namespace Elastos
+}

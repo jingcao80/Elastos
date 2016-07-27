@@ -33,6 +33,7 @@ using Elastos::Droid::Internal::Telephony::PhoneConstantsState_RINGING;
 using Elastos::Droid::Internal::Telephony::Uicc::CIccIoResult;
 using Elastos::Droid::Internal::Telephony::Uicc::CUiccControllerHelper;
 using Elastos::Droid::Internal::Telephony::Uicc::IIccIoResult;
+using Elastos::Droid::Internal::Telephony::Uicc::IIccRecords;
 using Elastos::Droid::Internal::Telephony::Uicc::IUiccCard;
 using Elastos::Droid::Internal::Telephony::Uicc::IUiccController;
 using Elastos::Droid::Internal::Telephony::Uicc::IUiccControllerHelper;
@@ -2235,6 +2236,51 @@ ECode CPhoneInterfaceManager::GetWhenToMakeWifiCalls(
     CSettingsSystem::AcquireSingleton((ISettingsSystem**)&helper);
     helper->GetInt32(contentResolver, ISettingsSystem::WHEN_TO_MAKE_WIFI_CALLS,
             GetWhenToMakeWifiCallsDefaultPreference(), result);
+    return NOERROR;
+}
+
+ECode CPhoneInterfaceManager::GetIccOperatorNumeric(
+    /* [in] */ Int64 subId,
+    /* [out] */ String* result)
+{
+    VALIDATE_NOT_NULL(result);
+    String iccOperatorNumeric;
+    AutoPtr<IServiceState> ss;
+    GetPhone(subId)->GetServiceState((IServiceState**)&ss);
+    Int32 netType = 0;
+    ss->GetRilDataRadioTechnology(&netType);
+
+    AutoPtr<IUiccControllerHelper> helper;
+    CUiccControllerHelper::AcquireSingleton((IUiccControllerHelper**)&helper);
+    Int32 family = 0;
+    helper->GetFamilyFromRadioTechnology(netType, &family);
+    if (IUiccController::APP_FAM_UNKNOWN == family) {
+        Int32 phoneType = 0;
+        GetActivePhoneTypeForSubscriber(subId, &phoneType);
+        switch (phoneType) {
+            case ITelephonyManager::PHONE_TYPE_GSM:
+                family = IUiccController::APP_FAM_3GPP;
+                break;
+            case ITelephonyManager::PHONE_TYPE_CDMA:
+                family = IUiccController::APP_FAM_3GPP2;
+                break;
+        }
+    }
+
+    if (IUiccController::APP_FAM_UNKNOWN != family) {
+        AutoPtr<ISubscriptionManager> sm;
+        CSubscriptionManager::AcquireSingleton((ISubscriptionManager**)&sm);
+        Int32 slotId = 0;
+        sm->GetPhoneId(subId, &slotId);
+        AutoPtr<IUiccController> controller;
+        helper->GetInstance((IUiccController**)&controller);
+        AutoPtr<IIccRecords> iccRecords;
+        controller->GetIccRecords(slotId, family, (IIccRecords**)&iccRecords);
+        if (iccRecords != NULL) {
+            iccRecords->GetOperatorNumeric(&iccOperatorNumeric);
+        }
+    }
+    *result = iccOperatorNumeric;
     return NOERROR;
 }
 
