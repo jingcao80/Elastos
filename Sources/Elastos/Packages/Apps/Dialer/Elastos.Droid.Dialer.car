@@ -110,6 +110,10 @@ module
     merge("car/elastos/droid/incallui/InCallPresenter.car");
     merge("car/elastos/droid/incallui/Presenter.car");
     merge("car/elastos/droid/incallui/Ui.car");
+    merge("car/elastos/droid/incallui/CallerInfoAsyncQuery.car");
+    merge("car/elastos/droid/incallui/ContactsAsyncHelper.car");
+    merge("car/elastos/droid/incallui/CallerInfo.car");
+    merge("car/elastos/droid/incallui/service/PhoneNumberService.car");
     merge("car/elastos/droid/phone/common/animation/AnimUtils.car");
     merge("car/elastos/droid/phone/common/dialpad/DialpadKeyButton.car");
     merge("car/elastos/droid/phone/common/dialpad/DialpadView.car");

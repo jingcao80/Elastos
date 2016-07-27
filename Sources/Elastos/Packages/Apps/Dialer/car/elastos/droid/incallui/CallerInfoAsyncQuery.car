@@ -1,0 +1,24 @@
+
+module
+{
+
+    interface Elastos.Droid.InCallUI.ICallerInfo;
+
+    namespace Elastos {
+    namespace Droid {
+    namespace InCallUI {
+
+    interface IOnQueryCompleteListener {
+        /**
+         * Called when the query is complete.
+         */
+        OnQueryComplete(
+            [in] Int32 token,
+            [in] IInterface* cookie,
+            [in] ICallerInfo* ci);
+    }
+
+    } // namespace InCallUI
+    } // namespace Droid
+    } // namespace Elastos
+}

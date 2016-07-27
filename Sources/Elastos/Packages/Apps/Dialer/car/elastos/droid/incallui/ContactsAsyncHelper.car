@@ -1,0 +1,38 @@
+
+module
+{
+    using interface Elastos.Droid.Graphics.Drawable.IDrawable;
+    using interface Elastos.Droid.Graphics.IBitmap;
+
+    namespace Elastos {
+    namespace Droid {
+    namespace InCallUI {
+
+    /**
+     * Interface for a WorkerHandler result return.
+     */
+    interface IOnImageLoadCompleteListener {
+
+        /**
+         * Called when the image load is complete.
+         *
+         * @param token Integer passed in {@link ContactsAsyncHelper#startObtainPhotoAsync(int,
+         * Context, Uri, OnImageLoadCompleteListener, Object)}.
+         * @param photo Drawable object obtained by the async load.
+         * @param photoIcon Bitmap object obtained by the async load.
+         * @param cookie Object passed in {@link ContactsAsyncHelper#startObtainPhotoAsync(int,
+         * Context, Uri, OnImageLoadCompleteListener, Object)}. Can be null iff. the original
+         * cookie is null.
+         */
+        OnImageLoadComplete(
+            [in] Int32 token,
+            [in] IDrawable* photo,
+            [in] IBitmap* photoIcon,
+            [in] IInterface* cookie);
+
+    }
+
+    } // namespace InCallUI
+    } // namespace Droid
+    } // namespace Elastos
+}

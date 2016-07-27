@@ -1,0 +1,82 @@
+
+module
+{
+
+    using interface Elastos.Droid.Graphics.IBitmap;
+
+    namespace Elastos {
+    namespace Droid {
+    namespace InCallUI {
+    namespace Service {
+
+    interface IPhoneNumberInfo {
+
+        GetDisplayName(
+            [out] String* name);
+
+        GetNumber(
+            [out] String* number);
+
+        GetPhoneType(
+            [out] Int32* type);
+
+        GetPhoneLabel(
+            [out] String* label);
+
+        GetNormalizedNumber(
+            [out] String* number);
+
+        GetImageUrl(
+            [out] String* url);
+
+        IsBusiness(
+            [out] Boolean* isBusiness);
+
+    }
+
+    interface INumberLookupListener {
+
+        /**
+         * Callback when a phone number has been looked up.
+         *
+         * @param info The looked up information.  Or (@literal null} if there are no results.
+         */
+        OnPhoneNumberInfoComplete(
+            [in] IPhoneNumberInfo* info);
+
+    }
+
+    interface IImageLookupListener {
+
+        /**
+         * Callback when a image has been fetched.
+         *
+         * @param bitmap The fetched image.
+         */
+        OnImageFetchComplete(
+            [in] IBitmap* bitmap);
+
+    }
+
+    interface IPhoneNumberService {
+
+        /**
+         * Get a phone number number asynchronously.
+         *
+         * @param phoneNumber The phone number to lookup.
+         * @param listener The listener to notify when the phone number lookup is complete.
+         * @param imageListener The listener to notify when the image lookup is complete.
+         */
+        GetPhoneNumberInfo(
+            [in] String phoneNumber,
+            [in] INumberLookupListener* listener,
+            [in] IImageLookupListener* imageListener,
+            [in] Boolean isIncoming);
+
+    }
+
+    } // namespace Service
+    } // namespace InCallUI
+    } // namespace Droid
+    } // namespace Elastos
+}
