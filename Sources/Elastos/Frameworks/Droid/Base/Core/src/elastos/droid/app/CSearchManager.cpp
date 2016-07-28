@@ -111,7 +111,12 @@ ECode CSearchManager::GetGlobalSearchActivity(
     /* [out] */ IComponentName** name)
 {
     //try {
+    VALIDATE_NOT_NULL(name)
+    *name = NULL;
+    if (mService) {
         return mService->GetGlobalSearchActivity(name);
+    }
+    return NOERROR;
     //} catch (RemoteException ex) {
     //    Log.e(TAG, "getGlobalSearchActivity() failed: " + ex);
     //    return null;

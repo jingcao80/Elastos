@@ -1689,27 +1689,30 @@ AutoPtr<IPhoneStatusBarView> CPhoneStatusBar::MakeStatusBarView()
     AutoPtr<IActivityManagerHelper> helper;
     CActivityManagerHelper::AcquireSingleton((IActivityManagerHelper**)&helper);
     Boolean tmp = FALSE;
-    if (helper->IsHighEndGfx(&tmp), !tmp) {
+    helper->IsHighEndGfx(&tmp);
+    if (!tmp) {
         statusBarWindow->SetBackground(NULL);
 
         Int32 c = 0;
         res->GetColor(R::color::notification_panel_solid_background, &c);
         AutoPtr<IDrawable> d;
         CFastColorDrawable::New(c, (IDrawable**)&d);
-        IView::Probe(mNotificationPanel)->SetBackground(d);
+        view->SetBackground(d);
     }
+
     if (ENABLE_HEADS_UP) {
         view = NULL;
         Elastos::Droid::View::View::Inflate(context, R::layout::heads_up, NULL, (IView**)&view);
         mHeadsUpNotificationView = IHeadsUpNotificationView::Probe(view);
-        IView::Probe(mHeadsUpNotificationView)->SetVisibility(IView::GONE);
+        view->SetVisibility(IView::GONE);
         mHeadsUpNotificationView->SetBar(this);
     }
+
     if (MULTIUSER_DEBUG) {
         view = NULL;
         IView::Probe(mNotificationPanel)->FindViewById(R::id::header_debug_info, (IView**)&view);
         mNotificationPanelDebugText = ITextView::Probe(view);
-        IView::Probe(mNotificationPanelDebugText)->SetVisibility(IView::VISIBLE);
+        view->SetVisibility(IView::VISIBLE);
     }
 
     UpdateShowSearchHoldoff();
@@ -1730,7 +1733,7 @@ AutoPtr<IPhoneStatusBarView> CPhoneStatusBar::MakeStatusBarView()
             mNavigationBarView->SetOnVerticalChangedListener(cl);
 
             AutoPtr<NavigationBarViewOnTouchListener> tl = new NavigationBarViewOnTouchListener(this);
-            IView::Probe(mNavigationBarView)->SetOnTouchListener(tl);
+            view->SetOnTouchListener(tl);
         }
     } /*catch (RemoteException ex) {
         // no window manager? good luck with that
@@ -5086,7 +5089,6 @@ ECode CPhoneStatusBar::GetBarState(
 
 ECode CPhoneStatusBar::ShowKeyguard()
 {
-    Logger::I(TAG, " >> ShowKeyguard");
     if (mLaunchTransitionFadingAway) {
         AutoPtr<IViewPropertyAnimator> vpa;
         IView::Probe(mNotificationPanel)->Animate((IViewPropertyAnimator**)&vpa);
@@ -5170,7 +5172,6 @@ ECode CPhoneStatusBar::FadeKeyguardAfterLaunchTransition(
 ECode CPhoneStatusBar::HideKeyguard(
     /* [out] */ Boolean* result)
 {
-    Logger::I(TAG, " >> HideKeyguard");
     VALIDATE_NOT_NULL(result);
     Boolean staying = mLeaveOpenOnKeyguardHide;
     SetBarState(IStatusBarState::SHADE);
@@ -5248,7 +5249,6 @@ void CPhoneStatusBar::UpdateKeyguardState(
     /* [in] */ Boolean goingToFullShade,
     /* [in] */ Boolean fromShadeLocked)
 {
-    Logger::I(TAG, " >> UpdateKeyguardState: goingToFullShade:%d, fromShadeLocked: %d", goingToFullShade, fromShadeLocked);
     if (mState == IStatusBarState::KEYGUARD) {
         mKeyguardIndicationController->SetVisible(TRUE);
         IPanelView::Probe(mNotificationPanel)->ResetViews();
@@ -5430,7 +5430,6 @@ ECode CPhoneStatusBar::OnActivated(
 ECode CPhoneStatusBar::SetBarState(
     /* [in] */ Int32 state)
 {
-    Logger::I(TAG, " >> SetBarState: %d", state);
     mState = state;
     mStatusBarWindowManager->SetStatusBarState(state);
     return NOERROR;
@@ -5559,7 +5558,6 @@ ECode CPhoneStatusBar::SetEmptyDragAmount(
 ECode CPhoneStatusBar::GoToLockedShade(
     /* [in] */ IView* expandView)
 {
-    Logger::I(TAG, " >> GoToLockedShade: %s", TO_CSTR(expandView));
     AutoPtr<IExpandableNotificationRow> row;
     if (IExpandableNotificationRow::Probe(expandView)) {
         row = IExpandableNotificationRow::Probe(expandView);
@@ -5589,7 +5587,6 @@ ECode CPhoneStatusBar::GoToLockedShade(
  */
 ECode CPhoneStatusBar::GoToKeyguard()
 {
-    Logger::I(TAG, " >> GoToKeyguard");
     if (mState == IStatusBarState::SHADE_LOCKED) {
         mStackScroller->OnGoToKeyguard();
         SetBarState(IStatusBarState::KEYGUARD);

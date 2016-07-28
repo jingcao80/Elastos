@@ -136,7 +136,7 @@ ECode CKeyguardSecurityContainer::NullKeyguardSecurityCallback::ShowBackupSecuri
 //===========================================================================
 // CKeyguardSecurityContainer
 //===========================================================================
-const Boolean CKeyguardSecurityContainer::DEBUG = TRUE;
+const Boolean CKeyguardSecurityContainer::DEBUG = FALSE;
 
 CAR_OBJECT_IMPL(CKeyguardSecurityContainer)
 

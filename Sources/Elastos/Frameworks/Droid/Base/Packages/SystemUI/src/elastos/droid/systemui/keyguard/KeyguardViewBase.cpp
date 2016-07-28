@@ -66,7 +66,7 @@ ECode KeyguardViewBase::MyKeyguardActivityLauncher::RequestDismissKeyguard()
 //=======================================================================
 // KeyguardViewBase
 //=======================================================================
-const Boolean KeyguardViewBase::DEBUG = TRUE;
+const Boolean KeyguardViewBase::DEBUG = FALSE;
 const Boolean KeyguardViewBase::KEYGUARD_MANAGES_VOLUME = FALSE;
 
 const String KeyguardViewBase::ENABLE_MENU_KEY_FILE("/data/local/enable_menu_key");

@@ -63,7 +63,7 @@ namespace SystemUI {
 namespace Volume {
 
 const String ZenModePanel::TAG("ZenModePanel");
-const Boolean ZenModePanel::DEBUG = TRUE;//Logger::IsLoggable(TAG.string(), Logger::___DEBUG);
+const Boolean ZenModePanel::DEBUG = FALSE;//Logger::IsLoggable(TAG.string(), Logger::___DEBUG);
 
 //====================================================================
 // ZenModePanel::ZenCallback

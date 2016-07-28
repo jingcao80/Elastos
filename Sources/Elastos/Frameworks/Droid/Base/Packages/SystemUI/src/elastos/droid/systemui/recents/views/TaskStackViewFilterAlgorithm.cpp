@@ -7,6 +7,8 @@
 using Elastos::Utility::CArrayList;
 using Elastos::Utility::CHashMap;
 using Elastos::Utility::ISet;
+using Elastos::Utility::IMapEntry;
+using Elastos::Utility::IIterator;
 
 namespace Elastos {
 namespace Droid {
@@ -52,15 +54,19 @@ ECode TaskStackViewFilterAlgorithm::EndActionRunnable::Run()
             mChildViewTransforms->Clear();
             Int32 duration = mHost->GetEnterTransformsForFilterAnimation(mTasks,
                     mTaskTransforms, mChildViewTransforms);
-            AutoPtr<ISet> keySet;
-            mChildViewTransforms->GetKeySet((ISet**)&keySet);
-            AutoPtr<ArrayOf<IInterface*> > array;
-            keySet->ToArray((ArrayOf<IInterface*>**)&array);
-            for (Int32 i = 0; i < array->GetLength(); i++) {
-                AutoPtr<TaskView> tv = (TaskView*)ITaskView::Probe((*array)[i]);
-                AutoPtr<IInterface> value;
-                mChildViewTransforms->Get((*array)[i], (IInterface**)&value);
-                TaskViewTransform* t = (TaskViewTransform*)IObject::Probe(value);
+            AutoPtr<ISet> set;
+            mChildViewTransforms->GetEntrySet((ISet**)&set);
+            AutoPtr<IIterator> it;
+            set->GetIterator((IIterator**)&it);
+            Boolean hasNext;
+            while (it->HasNext(&hasNext), hasNext) {
+                AutoPtr<IInterface> meo, ko, vo;
+                it->GetNext((IInterface**)&meo);
+                IMapEntry* me = IMapEntry::Probe(meo);
+                me->GetKey((IInterface**)&ko);
+                me->GetValue((IInterface**)&vo);
+                TaskView* tv = (TaskView*)ITaskView::Probe(ko);
+                TaskViewTransform* t = (TaskViewTransform*)IObject::Probe(vo);
                 tv->UpdateViewPropertiesToTaskTransform(t, duration);
             }
         }
@@ -106,15 +112,20 @@ void TaskStackViewFilterAlgorithm::StartFilteringAnimation(
     }
 
     // Animate all the views to their final transforms
-    AutoPtr<ISet> keySet;
-    childViewTransforms->GetKeySet((ISet**)&keySet);
-    AutoPtr<ArrayOf<IInterface*> > array;
-    keySet->ToArray((ArrayOf<IInterface*>**)&array);
-    for (Int32 i = 0; i < array->GetLength(); i++) {
-        AutoPtr<TaskView> tv = (TaskView*)ITaskView::Probe((*array)[i]);
-        AutoPtr<IInterface> value;
-        childViewTransforms->Get((*array)[i], (IInterface**)&value);
-        TaskViewTransform* t = (TaskViewTransform*)IObject::Probe(value);
+    AutoPtr<ISet> set;
+    childViewTransforms->GetEntrySet((ISet**)&set);
+    AutoPtr<IIterator> it;
+    set->GetIterator((IIterator**)&it);
+    Boolean hasNext;
+    while (it->HasNext(&hasNext), hasNext) {
+        AutoPtr<IInterface> meo, ko, vo;
+        it->GetNext((IInterface**)&meo);
+        IMapEntry* me = IMapEntry::Probe(meo);
+        me->GetKey((IInterface**)&ko);
+        me->GetValue((IInterface**)&vo);
+        TaskView* tv = (TaskView*)ITaskView::Probe(ko);
+        TaskViewTransform* t = (TaskViewTransform*)IObject::Probe(vo);
+
         AutoPtr<IViewPropertyAnimator> animate;
         tv->Animate((IViewPropertyAnimator**)&animate);
         animate->Cancel();

@@ -23,6 +23,7 @@ const Int32 StackScrollState::ViewState::LOCATION_TOP_STACK_PEEKING = 0x04;
 const Int32 StackScrollState::ViewState::LOCATION_MAIN_AREA = 0x08;
 const Int32 StackScrollState::ViewState::LOCATION_BOTTOM_STACK_PEEKING = 0x10;
 const Int32 StackScrollState::ViewState::LOCATION_BOTTOM_STACK_HIDDEN = 0x20;
+
 StackScrollState::ViewState::ViewState()
     : mAlpha(0)
     , mYTranslation(0)
@@ -42,6 +43,7 @@ StackScrollState::ViewState::ViewState()
 
 const String StackScrollState::CHILD_NOT_FOUND_TAG("StackScrollStateNoSuchChild");
 CAR_INTERFACE_IMPL(StackScrollState, Object, IStackScrollState)
+
 StackScrollState::StackScrollState(
     /* [in] */ IViewGroup* hostView)
     : mClearAllTopPadding(0)
@@ -76,16 +78,16 @@ ECode StackScrollState::ResetViewStates()
         AutoPtr<IExpandableView> child = IExpandableView::Probe(v);
 
         AutoPtr<IInterface> obj;
-        mStateMap->Get(IView::Probe(child), (IInterface**)&obj);
+        mStateMap->Get(v, (IInterface**)&obj);
         AutoPtr<ViewState> viewState = (ViewState*)IObject::Probe(obj);
         if (viewState == NULL) {
             viewState = new ViewState();
-            mStateMap->Put(IView::Probe(child), (IObject*)viewState->Probe(EIID_IObject));
+            mStateMap->Put(v, (IObject*)viewState->Probe(EIID_IObject));
         }
         // initialize with the default values of the view
         child->GetIntrinsicHeight(&viewState->mHeight);
         Int32 visibility = 0;
-        IView::Probe(child)->GetVisibility(&visibility);
+        v->GetVisibility(&visibility);
         viewState->mGone = visibility == IView::GONE;
         viewState->mAlpha = 1;
         viewState->mNotGoneIndex = -1;
@@ -118,23 +120,19 @@ ECode StackScrollState::Apply()
         AutoPtr<IExpandableView> child = IExpandableView::Probe(view);
 
         AutoPtr<IInterface> obj;
-        mStateMap->Get(IView::Probe(child), (IInterface**)&obj);
+        mStateMap->Get(view, (IInterface**)&obj);
         AutoPtr<ViewState> state = (ViewState*)IObject::Probe(obj);
         if (state == NULL) {
             Logger::W(CHILD_NOT_FOUND_TAG, "No child state was found when applying this state to the hostView");
             continue;
         }
         if (!state->mGone) {
-            Float alpha = 0;
-            IView::Probe(child)->GetAlpha(&alpha);
-            Float yTranslation = 0;
-            IView::Probe(child)->GetTranslationY(&yTranslation);
-            Float xTranslation = 0;
-            IView::Probe(child)->GetTranslationX(&xTranslation);
-            Float zTranslation = 0;
-            IView::Probe(child)->GetTranslationZ(&zTranslation);
-            Float scale = 0;
-            IView::Probe(child)->GetScaleX(&scale);
+            Float alpha = 0, yTranslation, xTranslation, zTranslation, scale;
+            view->GetAlpha(&alpha);
+            view->GetTranslationY(&yTranslation);
+            view->GetTranslationX(&xTranslation);
+            view->GetTranslationZ(&zTranslation);
+            view->GetScaleX(&scale);
             Int32 height = 0;
             child->GetActualHeight(&height);
             Float newAlpha = state->mAlpha;
@@ -148,42 +146,42 @@ ECode StackScrollState::Apply()
                 Boolean becomesFullyVisible = newAlpha == 1.0f;
                 Boolean newLayerTypeIsHardware = !becomesInvisible && !becomesFullyVisible;
                 Int32 layerType = 0;
-                IView::Probe(child)->GetLayerType(&layerType);
+                view->GetLayerType(&layerType);
                 Int32 newLayerType = newLayerTypeIsHardware
                         ? IView::LAYER_TYPE_HARDWARE
                         : IView::LAYER_TYPE_NONE;
                 if (layerType != newLayerType) {
-                    IView::Probe(child)->SetLayerType(newLayerType, NULL);
+                    view->SetLayerType(newLayerType, NULL);
                 }
 
                 // apply alpha
                 if (!becomesInvisible) {
-                    IView::Probe(child)->SetAlpha(newAlpha);
+                    view->SetAlpha(newAlpha);
                 }
             }
 
             // apply visibility
             Int32 oldVisibility = 0;
-            IView::Probe(child)->GetVisibility(&oldVisibility);
+            view->GetVisibility(&oldVisibility);
             Int32 newVisibility = becomesInvisible ? IView::INVISIBLE : IView::VISIBLE;
             if (newVisibility != oldVisibility) {
-                IView::Probe(child)->SetVisibility(newVisibility);
+                view->SetVisibility(newVisibility);
             }
 
             // apply yTranslation
             if (yTranslation != newYTranslation) {
-                IView::Probe(child)->SetTranslationY(newYTranslation);
+                view->SetTranslationY(newYTranslation);
             }
 
             // apply zTranslation
             if (zTranslation != newZTranslation) {
-                IView::Probe(child)->SetTranslationZ(newZTranslation);
+                view->SetTranslationZ(newZTranslation);
             }
 
             // apply scale
             if (scale != newScale) {
-                IView::Probe(child)->SetScaleX(newScale);
-                IView::Probe(child)->SetScaleY(newScale);
+                view->SetScaleX(newScale);
+                view->SetScaleY(newScale);
             }
 
             // apply height
@@ -211,7 +209,7 @@ ECode StackScrollState::Apply()
             if (oldClipTopAmount != state->mClipTopAmount) {
                 child->SetClipTopAmount(state->mClipTopAmount);
             }
-            UpdateChildClip(IView::Probe(child), newHeight, state->mTopOverLap);
+            UpdateChildClip(view, newHeight, state->mTopOverLap);
 
             if(ISpeedBumpView::Probe(child)) {
                 PerformSpeedBumpAnimation(i, ISpeedBumpView::Probe(child),

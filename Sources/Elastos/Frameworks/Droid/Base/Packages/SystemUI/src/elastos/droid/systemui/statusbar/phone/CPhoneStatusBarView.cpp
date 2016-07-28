@@ -172,6 +172,7 @@ ECode CPhoneStatusBarView::OnTouchEvent(
     /* [in] */ IMotionEvent* event,
     /* [out] */ Boolean* result)
 {
+    VALIDATE_NOT_NULL(result)
     Boolean barConsumedEvent = FALSE;
     mBar->InterceptTouchEvent(event, &barConsumedEvent);
 

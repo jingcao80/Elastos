@@ -18,6 +18,7 @@ namespace SystemUI {
 namespace StatusBar {
 
 CAR_INTERFACE_IMPL(CScrimView::AlphaUpdateListener, Object, IAnimatorUpdateListener)
+
 CScrimView::AlphaUpdateListener::AlphaUpdateListener(
     /* [in] */ CScrimView* host)
     : mHost(host)
@@ -46,15 +47,15 @@ ECode CScrimView::ClearAnimatorListener::OnAnimationEnd(
 }
 
 CAR_OBJECT_IMPL(CScrimView)
+
 CAR_INTERFACE_IMPL(CScrimView, View, IScrimView)
+
 CScrimView::CScrimView()
     : mScrimColor(0)
     , mIsEmpty(TRUE)
     , mDrawAsSrc(FALSE)
     , mViewAlpha(1.0)
 {
-    mAlphaUpdateListener = new AlphaUpdateListener(this);
-    mClearAnimatorListener = new ClearAnimatorListener(this);
 }
 
 ECode CScrimView::constructor(
@@ -84,6 +85,8 @@ ECode CScrimView::constructor(
     /* [in] */ Int32 defStyleAttr,
     /* [in] */ Int32 defStyleRes)
 {
+    mAlphaUpdateListener = new AlphaUpdateListener(this);
+    mClearAnimatorListener = new ClearAnimatorListener(this);
     return View::constructor(context, attrs, defStyleAttr, defStyleRes);
 }
 
@@ -163,7 +166,9 @@ ECode CScrimView::AnimateViewAlpha(
 {
     if (mAlphaAnimator != NULL) {
         IAnimator::Probe(mAlphaAnimator)->Cancel();
+        mAlphaAnimator = NULL;
     }
+
     AutoPtr<IValueAnimatorHelper> helper;
     CValueAnimatorHelper::AcquireSingleton((IValueAnimatorHelper**)&helper);
 
@@ -171,11 +176,12 @@ ECode CScrimView::AnimateViewAlpha(
     (*floats)[0] = mViewAlpha;
     (*floats)[1] = alpha;
     helper->OfFloat(floats, (IValueAnimator**)&mAlphaAnimator);
+    IAnimator* animator = IAnimator::Probe(mAlphaAnimator);
     mAlphaAnimator->AddUpdateListener(mAlphaUpdateListener);
-    IAnimator::Probe(mAlphaAnimator)->AddListener(mClearAnimatorListener);
-    IAnimator::Probe(mAlphaAnimator)->SetInterpolator(ITimeInterpolator::Probe(interpolator));
+    animator->AddListener(mClearAnimatorListener);
+    animator->SetInterpolator(ITimeInterpolator::Probe(interpolator));
     mAlphaAnimator->SetDuration(durationOut);
-    IAnimator::Probe(mAlphaAnimator)->Start();
+    animator->Start();
     return NOERROR;
 }
 

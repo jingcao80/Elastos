@@ -67,7 +67,7 @@ CAR_OBJECT_IMPL(CRecents)
 CAR_INTERFACE_IMPL(CRecents, SystemUI, IRecentsComponent)
 
 const String CRecents::TAG("CRecents");
-const Boolean CRecents::DEBUG = TRUE;
+const Boolean CRecents::DEBUG = FALSE;
 
 CRecents::CRecents()
     : mUseAlternateRecents(TRUE)

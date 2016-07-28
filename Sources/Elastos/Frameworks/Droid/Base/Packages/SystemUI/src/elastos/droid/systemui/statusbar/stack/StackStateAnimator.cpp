@@ -8,6 +8,7 @@
 #include <elastos/droid/view/animation/AnimationUtils.h>
 #include <elastos/droid/view/View.h>
 #include <elastos/core/Math.h>
+#include <elastos/utility/logging/Logger.h>
 
 using Elastos::Droid::Animation::CObjectAnimatorHelper;
 using Elastos::Droid::Animation::CPropertyValuesHolderHelper;
@@ -33,6 +34,7 @@ using Elastos::Utility::CArrayList;
 using Elastos::Utility::CHashSet;
 using Elastos::Utility::CStack;
 using Elastos::Utility::IIterator;
+using Elastos::Utility::Logging::Logger;
 
 #define AnimationEvent CNotificationStackScrollLayout::AnimationEvent
 #define View Elastos::Droid::View::View
@@ -43,7 +45,13 @@ namespace SystemUI {
 namespace StatusBar {
 namespace Stack {
 
+static const String TAG("StackStateAnimator");
+
+//==============================================================================
+// StackStateAnimator::AnimatorUpdateListener1
+//==============================================================================
 CAR_INTERFACE_IMPL(StackStateAnimator::AnimatorUpdateListener1, Object, IAnimatorUpdateListener)
+
 StackStateAnimator::AnimatorUpdateListener1::AnimatorUpdateListener1(
     /* [in] */ IExpandableView* child)
     : mChild(child)
@@ -68,13 +76,18 @@ StackStateAnimator::AnimatorListenerAdapter1::AnimatorListenerAdapter1(
 ECode StackStateAnimator::AnimatorListenerAdapter1::OnAnimationEnd(
     /* [in] */ IAnimator* animation)
 {
-    IView::Probe(mChild)->SetTag(TAG_ANIMATOR_HEIGHT, NULL);
-    IView::Probe(mChild)->SetTag(TAG_START_HEIGHT, NULL);
-    IView::Probe(mChild)->SetTag(TAG_END_HEIGHT, NULL);
+    IView* child = IView::Probe(mChild);
+    child->SetTag(TAG_ANIMATOR_HEIGHT, NULL);
+    child->SetTag(TAG_START_HEIGHT, NULL);
+    child->SetTag(TAG_END_HEIGHT, NULL);
     return NOERROR;
 }
 
+//==============================================================================
+// StackStateAnimator::AnimatorUpdateListener2
+//==============================================================================
 CAR_INTERFACE_IMPL(StackStateAnimator::AnimatorUpdateListener2, Object, IAnimatorUpdateListener)
+
 StackStateAnimator::AnimatorUpdateListener2::AnimatorUpdateListener2(
     /* [in] */ IExpandableView* child)
     : mChild(child)
@@ -100,12 +113,16 @@ StackStateAnimator::AnimatorListenerAdapter2::AnimatorListenerAdapter2(
 ECode StackStateAnimator::AnimatorListenerAdapter2::OnAnimationEnd(
     /* [in] */ IAnimator* animation)
 {
-    IView::Probe(mChild)->SetTag(TAG_ANIMATOR_TOP_INSET, NULL);
-    IView::Probe(mChild)->SetTag(TAG_START_TOP_INSET, NULL);
-    IView::Probe(mChild)->SetTag(TAG_END_TOP_INSET, NULL);
+    IView* child = IView::Probe(mChild);
+    child->SetTag(TAG_ANIMATOR_TOP_INSET, NULL);
+    child->SetTag(TAG_START_TOP_INSET, NULL);
+    child->SetTag(TAG_END_TOP_INSET, NULL);
     return NOERROR;
 }
 
+//==============================================================================
+// StackStateAnimator::AnimatorListenerAdapter3
+//==============================================================================
 StackStateAnimator::AnimatorListenerAdapter3::AnimatorListenerAdapter3(
     /* [in] */ IExpandableView* child,
     /* [in] */ Float newEndValue)
@@ -117,13 +134,14 @@ StackStateAnimator::AnimatorListenerAdapter3::AnimatorListenerAdapter3(
 ECode StackStateAnimator::AnimatorListenerAdapter3::OnAnimationEnd(
     /* [in] */ IAnimator* animation)
 {
-    IView::Probe(mChild)->SetLayerType(IView::LAYER_TYPE_NONE, NULL);
+    IView* child = IView::Probe(mChild);
+    child->SetLayerType(IView::LAYER_TYPE_NONE, NULL);
     if (mNewEndValue == 0 && !mWasCancelled) {
-        IView::Probe(mChild)->SetVisibility(IView::INVISIBLE);
+        child->SetVisibility(IView::INVISIBLE);
     }
-    IView::Probe(mChild)->SetTag(TAG_ANIMATOR_ALPHA, NULL);
-    IView::Probe(mChild)->SetTag(TAG_START_ALPHA, NULL);
-    IView::Probe(mChild)->SetTag(TAG_END_ALPHA, NULL);
+    child->SetTag(TAG_ANIMATOR_ALPHA, NULL);
+    child->SetTag(TAG_START_ALPHA, NULL);
+    child->SetTag(TAG_END_ALPHA, NULL);
     return NOERROR;
 }
 
@@ -141,15 +159,27 @@ ECode StackStateAnimator::AnimatorListenerAdapter3::OnAnimationStart(
     return NOERROR;
 }
 
-StackStateAnimator::AnimatorListenerAdapter4::AnimatorListenerAdapter4()
+//==============================================================================
+// StackStateAnimator::RemoveTagAdapter
+//==============================================================================
+StackStateAnimator::RemoveTagAdapter::RemoveTagAdapter(
+    /* [in] */ IExpandableView* child)
+    : mChild(child)
 {}
 
-ECode StackStateAnimator::AnimatorListenerAdapter4::OnAnimationEnd(
+ECode StackStateAnimator::RemoveTagAdapter::OnAnimationEnd(
     /* [in] */ IAnimator* animation)
 {
+    IView* child = IView::Probe(mChild);
+    child->SetTag(TAG_ANIMATOR_HEIGHT, NULL);
+    child->SetTag(TAG_START_HEIGHT, NULL);
+    child->SetTag(TAG_END_HEIGHT, NULL);
     return NOERROR;
 }
 
+//==============================================================================
+// StackStateAnimator::AnimatorListenerAdapter5
+//==============================================================================
 StackStateAnimator::AnimatorListenerAdapter5::AnimatorListenerAdapter5(
     /* [in] */ IExpandableView* child)
     : mChild(child)
@@ -158,12 +188,16 @@ StackStateAnimator::AnimatorListenerAdapter5::AnimatorListenerAdapter5(
 ECode StackStateAnimator::AnimatorListenerAdapter5::OnAnimationEnd(
     /* [in] */ IAnimator* animation)
 {
-    IView::Probe(mChild)->SetTag(TAG_ANIMATOR_TRANSLATION_Z, NULL);
-    IView::Probe(mChild)->SetTag(TAG_START_TRANSLATION_Z, NULL);
-    IView::Probe(mChild)->SetTag(TAG_END_TRANSLATION_Z, NULL);
+    IView* child = IView::Probe(mChild);
+    child->SetTag(TAG_ANIMATOR_TRANSLATION_Z, NULL);
+    child->SetTag(TAG_START_TRANSLATION_Z, NULL);
+    child->SetTag(TAG_END_TRANSLATION_Z, NULL);
     return NOERROR;
 }
 
+//==============================================================================
+// StackStateAnimator::AnimatorListenerAdapter6
+//==============================================================================
 StackStateAnimator::AnimatorListenerAdapter6::AnimatorListenerAdapter6(
     /* [in] */ IExpandableView* child)
     : mChild(child)
@@ -172,12 +206,16 @@ StackStateAnimator::AnimatorListenerAdapter6::AnimatorListenerAdapter6(
 ECode StackStateAnimator::AnimatorListenerAdapter6::OnAnimationEnd(
     /* [in] */ IAnimator* animation)
 {
-    IView::Probe(mChild)->SetTag(TAG_ANIMATOR_TRANSLATION_Y, NULL);
-    IView::Probe(mChild)->SetTag(TAG_START_TRANSLATION_Y, NULL);
-    IView::Probe(mChild)->SetTag(TAG_END_TRANSLATION_Y, NULL);
+    IView* child = IView::Probe(mChild);
+    child->SetTag(TAG_ANIMATOR_TRANSLATION_Y, NULL);
+    child->SetTag(TAG_START_TRANSLATION_Y, NULL);
+    child->SetTag(TAG_END_TRANSLATION_Y, NULL);
     return NOERROR;
 }
 
+//==============================================================================
+// StackStateAnimator::AnimatorListenerAdapter7
+//==============================================================================
 StackStateAnimator::AnimatorListenerAdapter7::AnimatorListenerAdapter7(
     /* [in] */ IExpandableView* child)
     : mChild(child)
@@ -186,12 +224,16 @@ StackStateAnimator::AnimatorListenerAdapter7::AnimatorListenerAdapter7(
 ECode StackStateAnimator::AnimatorListenerAdapter7::OnAnimationEnd(
     /* [in] */ IAnimator* animation)
 {
-    IView::Probe(mChild)->SetTag(TAG_ANIMATOR_SCALE, NULL);
-    IView::Probe(mChild)->SetTag(TAG_START_SCALE, NULL);
-    IView::Probe(mChild)->SetTag(TAG_END_SCALE, NULL);
+    IView* child = IView::Probe(mChild);
+    child->SetTag(TAG_ANIMATOR_SCALE, NULL);
+    child->SetTag(TAG_START_SCALE, NULL);
+    child->SetTag(TAG_END_SCALE, NULL);
     return NOERROR;
 }
 
+//==============================================================================
+// StackStateAnimator::AnimatorListenerAdapter8
+//==============================================================================
 StackStateAnimator::AnimatorListenerAdapter8::AnimatorListenerAdapter8(
     /* [in] */ StackStateAnimator* host)
     : mHost(host)
@@ -224,6 +266,9 @@ ECode StackStateAnimator::AnimatorListenerAdapter8::OnAnimationStart(
     return NOERROR;
 }
 
+//==============================================================================
+// StackStateAnimator::Runnable1
+//==============================================================================
 StackStateAnimator::Runnable1::Runnable1(
     /* [in] */ StackStateAnimator* host,
     /* [in] */ IExpandableView* changingView)
@@ -240,7 +285,11 @@ ECode StackStateAnimator::Runnable1::Run()
     return NOERROR;
 }
 
+//==============================================================================
+// StackStateAnimator::AnimatorUpdateListener3
+//==============================================================================
 CAR_INTERFACE_IMPL(StackStateAnimator::AnimatorUpdateListener3, Object, IAnimatorUpdateListener)
+
 StackStateAnimator::AnimatorUpdateListener3::AnimatorUpdateListener3(
     /* [in] */ StackStateAnimator* host,
     /* [in] */ Boolean onTop,
@@ -263,6 +312,9 @@ ECode StackStateAnimator::AnimatorUpdateListener3::OnAnimationUpdate(
     return NOERROR;
 }
 
+//==============================================================================
+// StackStateAnimator::AnimatorListenerAdapter9
+//==============================================================================
 StackStateAnimator::AnimatorListenerAdapter9::AnimatorListenerAdapter9(
     /* [in] */ StackStateAnimator* host,
     /* [in] */ Boolean onTop)
@@ -282,6 +334,10 @@ ECode StackStateAnimator::AnimatorListenerAdapter9::OnAnimationEnd(
     return NOERROR;
 }
 
+
+//==============================================================================
+// StackStateAnimator
+//==============================================================================
 
 const Int32 StackStateAnimator::ANIMATION_DURATION_STANDARD = 360;
 const Int32 StackStateAnimator::ANIMATION_DURATION_GO_TO_FULL_SHADE = 448;
@@ -309,7 +365,9 @@ const Int32 StackStateAnimator::TAG_START_SCALE = R::id::scale_animator_start_va
 const Int32 StackStateAnimator::TAG_START_ALPHA = R::id::alpha_animator_start_value_tag;
 const Int32 StackStateAnimator::TAG_START_HEIGHT = R::id::height_animator_start_value_tag;
 const Int32 StackStateAnimator::TAG_START_TOP_INSET = R::id::top_inset_animator_start_value_tag;
+
 CAR_INTERFACE_IMPL(StackStateAnimator, Object, IStackStateAnimator)
+
 StackStateAnimator::StackStateAnimator(
     /* [in] */ INotificationStackScrollLayout* hostLayout)
     : mGoToFullShadeAppearingTranslation(0)
@@ -417,24 +475,25 @@ void StackStateAnimator::StartAnimations(
     /* [in] */ StackScrollState* finalState,
     /* [in] */ Int32 i)
 {
+    IView* childView = IView::Probe(child);
     Int32 childVisibility = 0;
-    IView::Probe(child)->GetVisibility(&childVisibility);
+    childView->GetVisibility(&childVisibility);
     Boolean wasVisible = childVisibility == IView::VISIBLE;
     const Float alpha = viewState->mAlpha;
     if (!wasVisible && alpha != 0 && !viewState->mGone) {
-        IView::Probe(child)->SetVisibility(IView::VISIBLE);
+        childView->SetVisibility(IView::VISIBLE);
     }
 
     Float fy = 0, fz = 0;
-    IView::Probe(child)->GetTranslationY(&fy);
-    IView::Probe(child)->GetTranslationZ(&fz);
+    childView->GetTranslationY(&fy);
+    childView->GetTranslationZ(&fz);
     Boolean yTranslationChanging = fy != viewState->mYTranslation;
     Boolean zTranslationChanging = fz != viewState->mZTranslation;
 
     Float f1 = 0, f2 = 0;
-    IView::Probe(child)->GetScaleX(&f1);
+    childView->GetScaleX(&f1);
     Boolean scaleChanging = f1 != viewState->mScale;
-    Boolean alphaChanging = alpha != (IView::Probe(child)->GetAlpha(&f2), f2);
+    Boolean alphaChanging = alpha != (childView->GetAlpha(&f2), f2);
 
     Int32 iv = 0;
     Boolean heightChanging = viewState->mHeight != (child->GetActualHeight(&iv), iv);
@@ -452,7 +511,7 @@ void StackStateAnimator::StartAnimations(
     }
 
     if (wasAdded && mAnimationFilter->mHasGoToFullShadeEvent) {
-        IView::Probe(child)->SetTranslationY(fy + mGoToFullShadeAppearingTranslation);
+        childView->SetTranslationY(fy + mGoToFullShadeAppearingTranslation);
         yTranslationChanging = TRUE;
         Float longerDurationFactor = viewState->mNotGoneIndex - mCurrentLastNotAddedIndex;
         longerDurationFactor = (Float) Elastos::Core::Math::Pow(longerDurationFactor, 0.7f);
@@ -463,7 +522,7 @@ void StackStateAnimator::StartAnimations(
     // start translationY animation
     if (yTranslationChanging) {
         if (noAnimation && !mAnimationFilter->mHasGoToFullShadeEvent) {
-            IView::Probe(child)->SetTranslationY(viewState->mYTranslation);
+            childView->SetTranslationY(viewState->mYTranslation);
         }
         else {
             StartYTranslationAnimation(child, viewState, duration, delay);
@@ -473,7 +532,7 @@ void StackStateAnimator::StartAnimations(
     // start translationZ animation
     if (zTranslationChanging) {
         if (noAnimation) {
-            IView::Probe(child)->SetTranslationZ(viewState->mZTranslation);
+            childView->SetTranslationZ(viewState->mZTranslation);
         }
         else {
             StartZTranslationAnimation(child, viewState, duration, delay);
@@ -483,8 +542,8 @@ void StackStateAnimator::StartAnimations(
     // start scale animation
     if (scaleChanging) {
         if (noAnimation) {
-            IView::Probe(child)->SetScaleX(viewState->mScale);
-            IView::Probe(child)->SetScaleY(viewState->mScale);
+            childView->SetScaleX(viewState->mScale);
+            childView->SetScaleY(viewState->mScale);
         }
         else {
             StartScaleAnimation(child, viewState, duration);
@@ -493,9 +552,9 @@ void StackStateAnimator::StartAnimations(
 
     // start alpha animation
     Float fx = 0;
-    if (alphaChanging && (IView::Probe(child)->GetTranslationX(&fx), fx) == 0) {
+    if (alphaChanging && (childView->GetTranslationX(&fx), fx) == 0) {
         if (noAnimation) {
-            IView::Probe(child)->SetAlpha(viewState->mAlpha);
+            childView->SetAlpha(viewState->mAlpha);
         }
         else {
             StartAlphaAnimation(child, viewState, duration, delay);
@@ -627,8 +686,9 @@ void StackStateAnimator::StartHeightAnimation(
     /* [in] */ Int64 duration,
     /* [in] */ Int64 delay)
 {
-    AutoPtr<IInteger32> _previousStartValue = IInteger32::Probe(GetChildTag(IView::Probe(child), TAG_START_HEIGHT));
-    AutoPtr<IInteger32> _previousEndValue = IInteger32::Probe(GetChildTag(IView::Probe(child), TAG_END_HEIGHT));
+    IView* childView = IView::Probe(child);
+    AutoPtr<IInteger32> _previousStartValue = IInteger32::Probe(GetChildTag(childView, TAG_START_HEIGHT));
+    AutoPtr<IInteger32> _previousEndValue = IInteger32::Probe(GetChildTag(childView, TAG_END_HEIGHT));
     Int32 newEndValue = viewState->mHeight;
     Int32 previousStartValue = 0, previousEndValue = 0;
 
@@ -639,7 +699,7 @@ void StackStateAnimator::StartHeightAnimation(
         && (_previousEndValue->GetValue(&previousEndValue), previousEndValue) == newEndValue) {
         return;
     }
-    AutoPtr<IValueAnimator> previousAnimator = IValueAnimator::Probe(GetChildTag(IView::Probe(child), TAG_ANIMATOR_HEIGHT));
+    AutoPtr<IValueAnimator> previousAnimator = IValueAnimator::Probe(GetChildTag(childView, TAG_ANIMATOR_HEIGHT));
     if (!mAnimationFilter->mAnimateHeight) {
         // just a local update was performed
         if (previousAnimator != NULL) {
@@ -657,11 +717,11 @@ void StackStateAnimator::StartHeightAnimation(
 
             AutoPtr<IInteger32> iobj;
             CInteger32::New(newStartValue, (IInteger32**)&iobj);
-            IView::Probe(child)->SetTag(TAG_START_HEIGHT, iobj);
+            childView->SetTag(TAG_START_HEIGHT, iobj);
 
             iobj = NULL;
             CInteger32::New(newEndValue, (IInteger32**)&iobj);
-            IView::Probe(child)->SetTag(TAG_END_HEIGHT, iobj);
+            childView->SetTag(TAG_END_HEIGHT, iobj);
             Int64 pt = 0;
             previousAnimator->GetCurrentPlayTime(&pt);
             previousAnimator->SetCurrentPlayTime(pt);
@@ -697,15 +757,15 @@ void StackStateAnimator::StartHeightAnimation(
     AutoPtr<AnimatorListenerAdapter1> adapter = new AnimatorListenerAdapter1(child);
     IAnimator::Probe(animator)->AddListener(adapter);
     StartAnimator(animator);
-    IView::Probe(child)->SetTag(TAG_ANIMATOR_HEIGHT, animator);
+    childView->SetTag(TAG_ANIMATOR_HEIGHT, animator);
 
     AutoPtr<IInteger32> iobj;
     CInteger32::New(ah, (IInteger32**)&iobj);
-    IView::Probe(child)->SetTag(TAG_START_HEIGHT, iobj);
+    childView->SetTag(TAG_START_HEIGHT, iobj);
 
     iobj = NULL;
     CInteger32::New(newEndValue, (IInteger32**)&iobj);
-    IView::Probe(child)->SetTag(TAG_END_HEIGHT, iobj);
+    childView->SetTag(TAG_END_HEIGHT, iobj);
 }
 
 void StackStateAnimator::StartInsetAnimation(
@@ -714,8 +774,9 @@ void StackStateAnimator::StartInsetAnimation(
     /* [in] */ Int64 duration,
     /* [in] */ Int64 delay)
 {
-    AutoPtr<IInteger32> _previousStartValue = IInteger32::Probe(GetChildTag(IView::Probe(child), TAG_START_TOP_INSET));
-    AutoPtr<IInteger32> _previousEndValue = IInteger32::Probe(GetChildTag(IView::Probe(child), TAG_END_TOP_INSET));
+    IView* childView = IView::Probe(child);
+    AutoPtr<IInteger32> _previousStartValue = IInteger32::Probe(GetChildTag(childView, TAG_START_TOP_INSET));
+    AutoPtr<IInteger32> _previousEndValue = IInteger32::Probe(GetChildTag(childView, TAG_END_TOP_INSET));
     Int32 previousStartValue = 0, previousEndValue = 0;
 
     if (_previousStartValue != NULL) {
@@ -727,7 +788,7 @@ void StackStateAnimator::StartInsetAnimation(
         && (_previousEndValue->GetValue(&previousEndValue), previousEndValue) == newEndValue) {
         return;
     }
-    AutoPtr<IValueAnimator> previousAnimator = IValueAnimator::Probe(GetChildTag(IView::Probe(child), TAG_ANIMATOR_TOP_INSET));
+    AutoPtr<IValueAnimator> previousAnimator = IValueAnimator::Probe(GetChildTag(childView, TAG_ANIMATOR_TOP_INSET));
     if (!mAnimationFilter->mAnimateTopInset) {
         // just a local update was performed
         if (previousAnimator != NULL) {
@@ -746,11 +807,11 @@ void StackStateAnimator::StartInsetAnimation(
 
             AutoPtr<IInteger32> iobj;
             CInteger32::New(newStartValue, (IInteger32**)&iobj);
-            IView::Probe(child)->SetTag(TAG_START_TOP_INSET, iobj);
+            childView->SetTag(TAG_START_TOP_INSET, iobj);
 
             iobj = NULL;
             CInteger32::New(newEndValue, (IInteger32**)&iobj);
-            IView::Probe(child)->SetTag(TAG_END_TOP_INSET, iobj);
+            childView->SetTag(TAG_END_TOP_INSET, iobj);
 
             Int64 pt = 0;
             previousAnimator->GetCurrentPlayTime(&pt);
@@ -787,11 +848,11 @@ void StackStateAnimator::StartInsetAnimation(
     AutoPtr<AnimatorListenerAdapter2> adapter = new AnimatorListenerAdapter2(child);
     IAnimator::Probe(animator)->AddListener(adapter);
     StartAnimator(animator);
-    IView::Probe(child)->SetTag(TAG_ANIMATOR_TOP_INSET, animator);
+    childView->SetTag(TAG_ANIMATOR_TOP_INSET, animator);
 
     AutoPtr<IInteger32> iobj;
     CInteger32::New(it, (IInteger32**)&iobj);
-    IView::Probe(child)->SetTag(TAG_START_TOP_INSET, iobj);
+    childView->SetTag(TAG_START_TOP_INSET, iobj);
 
     iobj = NULL;
     CInteger32::New(newEndValue, (IInteger32**)&iobj);
@@ -804,8 +865,9 @@ void StackStateAnimator::StartAlphaAnimation(
     /* [in] */ Int64 duration,
     /* [in] */ Int64 delay)
 {
-    AutoPtr<IFloat> _previousStartValue = IFloat::Probe(GetChildTag(IView::Probe(child), TAG_START_ALPHA));
-    AutoPtr<IFloat> _previousEndValue = IFloat::Probe(GetChildTag(IView::Probe(child), TAG_END_ALPHA));
+    IView* childView = IView::Probe(child);
+    AutoPtr<IFloat> _previousStartValue = IFloat::Probe(GetChildTag(childView, TAG_START_ALPHA));
+    AutoPtr<IFloat> _previousEndValue = IFloat::Probe(GetChildTag(childView, TAG_END_ALPHA));
     Float previousStartValue = 0, previousEndValue = 0;
 
     if (_previousStartValue != NULL) {
@@ -817,7 +879,7 @@ void StackStateAnimator::StartAlphaAnimation(
         return;
     }
     AutoPtr<IObjectAnimator> previousAnimator
-            = IObjectAnimator::Probe(GetChildTag(IView::Probe(child), TAG_ANIMATOR_ALPHA));
+            = IObjectAnimator::Probe(GetChildTag(childView, TAG_ANIMATOR_ALPHA));
     if (!mAnimationFilter->mAnimateAlpha) {
         // just a local update was performed
         if (previousAnimator != NULL) {
@@ -836,11 +898,11 @@ void StackStateAnimator::StartAlphaAnimation(
 
             AutoPtr<IFloat> fObj;
             CFloat::New(newStartValue, (IFloat**)&fObj);
-            IView::Probe(child)->SetTag(TAG_START_ALPHA, fObj);
+            childView->SetTag(TAG_START_ALPHA, fObj);
 
             fObj = NULL;
             CFloat::New(newEndValue, (IFloat**)&fObj);
-            IView::Probe(child)->SetTag(TAG_END_ALPHA, fObj);
+            childView->SetTag(TAG_END_ALPHA, fObj);
 
             Int64 pt = 0;
             IValueAnimator::Probe(previousAnimator)->GetCurrentPlayTime(&pt);
@@ -849,9 +911,9 @@ void StackStateAnimator::StartAlphaAnimation(
         }
         else {
             // no new animation needed, let's just apply the value
-            IView::Probe(child)->SetAlpha(newEndValue);
+            childView->SetAlpha(newEndValue);
             if (newEndValue == 0) {
-                IView::Probe(child)->SetVisibility(IView::INVISIBLE);
+                childView->SetVisibility(IView::INVISIBLE);
             }
         }
     }
@@ -859,7 +921,7 @@ void StackStateAnimator::StartAlphaAnimation(
     AutoPtr<IObjectAnimatorHelper> helper;
     CObjectAnimatorHelper::AcquireSingleton((IObjectAnimatorHelper**)&helper);
     Float alpha = 0;
-    IView::Probe(child)->GetAlpha(&alpha);
+    childView->GetAlpha(&alpha);
     AutoPtr<ArrayOf<Float> > fvs = ArrayOf<Float>::Alloc(2);
     (*fvs)[0] = alpha;
     (*fvs)[1] = newEndValue;
@@ -867,7 +929,7 @@ void StackStateAnimator::StartAlphaAnimation(
     helper->OfFloat(child, View::ALPHA, fvs, (IObjectAnimator**)&animator);
     IAnimator::Probe(animator)->SetInterpolator(ITimeInterpolator::Probe(mFastOutSlowInInterpolator));
     // Handle layer type
-    IView::Probe(child)->SetLayerType(IView::LAYER_TYPE_HARDWARE, NULL);
+    childView->SetLayerType(IView::LAYER_TYPE_HARDWARE, NULL);
     AutoPtr<AnimatorListenerAdapter3> listener = new AnimatorListenerAdapter3(child, newEndValue);
     IAnimator::Probe(animator)->AddListener(listener);
     Int64 newDuration = CancelAnimatorAndGetNewDuration(duration, IValueAnimator::Probe(previousAnimator));
@@ -878,18 +940,18 @@ void StackStateAnimator::StartAlphaAnimation(
     }
     IAnimator::Probe(animator)->AddListener(GetGlobalAnimationFinishedListener());
     // remove the tag when the animation is finished
-    AutoPtr<AnimatorListenerAdapter4> adapter = new AnimatorListenerAdapter4();
+    AutoPtr<RemoveTagAdapter> adapter = new RemoveTagAdapter(child);
     IAnimator::Probe(animator)->AddListener(adapter);
     StartAnimator(IValueAnimator::Probe(animator));
-    IView::Probe(child)->SetTag(TAG_ANIMATOR_ALPHA, animator);
+    childView->SetTag(TAG_ANIMATOR_ALPHA, animator);
 
     AutoPtr<IFloat> fObj;
     CFloat::New(alpha, (IFloat**)&fObj);
-    IView::Probe(child)->SetTag(TAG_START_ALPHA, fObj);
+    childView->SetTag(TAG_START_ALPHA, fObj);
 
     fObj = NULL;
     CFloat::New(newEndValue, (IFloat**)&fObj);
-    IView::Probe(child)->SetTag(TAG_END_ALPHA, fObj);
+    childView->SetTag(TAG_END_ALPHA, fObj);
 }
 
 void StackStateAnimator::StartZTranslationAnimation(
@@ -898,8 +960,9 @@ void StackStateAnimator::StartZTranslationAnimation(
     /* [in] */ Int64 duration,
     /* [in] */ Int64 delay)
 {
-    AutoPtr<IFloat> _previousStartValue = IFloat::Probe(GetChildTag(IView::Probe(child), TAG_START_TRANSLATION_Z));
-    AutoPtr<IFloat> _previousEndValue = IFloat::Probe(GetChildTag(IView::Probe(child), TAG_END_TRANSLATION_Z));
+    IView* childView = IView::Probe(child);
+    AutoPtr<IFloat> _previousStartValue = IFloat::Probe(GetChildTag(childView, TAG_START_TRANSLATION_Z));
+    AutoPtr<IFloat> _previousEndValue = IFloat::Probe(GetChildTag(childView, TAG_END_TRANSLATION_Z));
     Float previousStartValue = 0, previousEndValue = 0;
 
     if (_previousStartValue != NULL) {
@@ -911,7 +974,7 @@ void StackStateAnimator::StartZTranslationAnimation(
         return;
     }
     AutoPtr<IObjectAnimator> previousAnimator
-            = IObjectAnimator::Probe(GetChildTag(IView::Probe(child), TAG_ANIMATOR_TRANSLATION_Z));
+            = IObjectAnimator::Probe(GetChildTag(childView, TAG_ANIMATOR_TRANSLATION_Z));
     if (!mAnimationFilter->mAnimateZ) {
         // just a local update was performed
         if (previousAnimator != NULL) {
@@ -930,11 +993,11 @@ void StackStateAnimator::StartZTranslationAnimation(
 
             AutoPtr<IFloat> fObj;
             CFloat::New(newStartValue, (IFloat**)&fObj);
-            IView::Probe(child)->SetTag(TAG_START_TRANSLATION_Z, fObj);
+            childView->SetTag(TAG_START_TRANSLATION_Z, fObj);
 
             fObj = NULL;
             CFloat::New(newEndValue, (IFloat**)&fObj);
-            IView::Probe(child)->SetTag(TAG_END_TRANSLATION_Z, fObj);
+            childView->SetTag(TAG_END_TRANSLATION_Z, fObj);
 
             Int64 pt = 0;
             IValueAnimator::Probe(previousAnimator)->GetCurrentPlayTime(&pt);
@@ -943,14 +1006,14 @@ void StackStateAnimator::StartZTranslationAnimation(
         }
         else {
             // no new animation needed, let's just apply the value
-            IView::Probe(child)->SetTranslationZ(newEndValue);
+            childView->SetTranslationZ(newEndValue);
         }
     }
 
     AutoPtr<IObjectAnimatorHelper> helper;
     CObjectAnimatorHelper::AcquireSingleton((IObjectAnimatorHelper**)&helper);
     Float fz = 0;
-    IView::Probe(child)->GetTranslationZ(&fz);
+    childView->GetTranslationZ(&fz);
     AutoPtr<ArrayOf<Float> > fvs = ArrayOf<Float>::Alloc(2);
     (*fvs)[0] = fz;
     (*fvs)[1] = newEndValue;
@@ -968,15 +1031,15 @@ void StackStateAnimator::StartZTranslationAnimation(
     AutoPtr<AnimatorListenerAdapter5> listener = new AnimatorListenerAdapter5(child);
     IAnimator::Probe(animator)->AddListener(listener);
     StartAnimator(IValueAnimator::Probe(animator));
-    IView::Probe(child)->SetTag(TAG_ANIMATOR_TRANSLATION_Z, animator);
+    childView->SetTag(TAG_ANIMATOR_TRANSLATION_Z, animator);
 
     AutoPtr<IFloat> fObj;
     CFloat::New(fz, (IFloat**)&fObj);
-    IView::Probe(child)->SetTag(TAG_START_TRANSLATION_Z, fObj);
+    childView->SetTag(TAG_START_TRANSLATION_Z, fObj);
 
     fObj = NULL;
     CFloat::New(newEndValue, (IFloat**)&fObj);
-    IView::Probe(child)->SetTag(TAG_END_TRANSLATION_Z, fObj);
+    childView->SetTag(TAG_END_TRANSLATION_Z, fObj);
 }
 
 void StackStateAnimator::StartYTranslationAnimation(
@@ -985,8 +1048,9 @@ void StackStateAnimator::StartYTranslationAnimation(
     /* [in] */ Int64 duration,
     /* [in] */ Int64 delay)
 {
-    AutoPtr<IFloat> _previousStartValue = IFloat::Probe(GetChildTag(IView::Probe(child), TAG_START_TRANSLATION_Y));
-    AutoPtr<IFloat> _previousEndValue = IFloat::Probe(GetChildTag(IView::Probe(child), TAG_END_TRANSLATION_Y));
+    IView* childView = IView::Probe(child);
+    AutoPtr<IFloat> _previousStartValue = IFloat::Probe(GetChildTag(childView, TAG_START_TRANSLATION_Y));
+    AutoPtr<IFloat> _previousEndValue = IFloat::Probe(GetChildTag(childView, TAG_END_TRANSLATION_Y));
     Float previousStartValue = 0, previousEndValue = 0;
     if (_previousStartValue != NULL) {
         _previousStartValue->GetValue(&previousStartValue);
@@ -997,7 +1061,7 @@ void StackStateAnimator::StartYTranslationAnimation(
         return;
     }
     AutoPtr<IObjectAnimator> previousAnimator
-            = IObjectAnimator::Probe(GetChildTag(IView::Probe(child), TAG_ANIMATOR_TRANSLATION_Y));
+            = IObjectAnimator::Probe(GetChildTag(childView, TAG_ANIMATOR_TRANSLATION_Y));
     if (!mAnimationFilter->mAnimateY) {
         // just a local update was performed
         if (previousAnimator != NULL) {
@@ -1016,11 +1080,11 @@ void StackStateAnimator::StartYTranslationAnimation(
 
             AutoPtr<IFloat> fObj;
             CFloat::New(newStartValue, (IFloat**)&fObj);
-            IView::Probe(child)->SetTag(TAG_START_TRANSLATION_Y, fObj);
+            childView->SetTag(TAG_START_TRANSLATION_Y, fObj);
 
             fObj = NULL;
             CFloat::New(newEndValue, (IFloat**)&fObj);
-            IView::Probe(child)->SetTag(TAG_END_TRANSLATION_Y, fObj);
+            childView->SetTag(TAG_END_TRANSLATION_Y, fObj);
             Int64 pt = 0;
             IValueAnimator::Probe(previousAnimator)->GetCurrentPlayTime(&pt);
             IValueAnimator::Probe(previousAnimator)->SetCurrentPlayTime(pt);
@@ -1028,7 +1092,7 @@ void StackStateAnimator::StartYTranslationAnimation(
         }
         else {
             // no new animation needed, let's just apply the value
-            IView::Probe(child)->SetTranslationY(newEndValue);
+            childView->SetTranslationY(newEndValue);
             return;
         }
     }
@@ -1036,7 +1100,7 @@ void StackStateAnimator::StartYTranslationAnimation(
     AutoPtr<IObjectAnimatorHelper> helper;
     CObjectAnimatorHelper::AcquireSingleton((IObjectAnimatorHelper**)&helper);
     Float fy = 0;
-    IView::Probe(child)->GetTranslationY(&fy);
+    childView->GetTranslationY(&fy);
     AutoPtr<ArrayOf<Float> > fvs = ArrayOf<Float>::Alloc(2);
     (*fvs)[0] = fy;
     (*fvs)[1] = newEndValue;
@@ -1054,15 +1118,15 @@ void StackStateAnimator::StartYTranslationAnimation(
     AutoPtr<AnimatorListenerAdapter6> listener = new AnimatorListenerAdapter6(child);
     IAnimator::Probe(animator)->AddListener(listener);
     StartAnimator(IValueAnimator::Probe(animator));
-    IView::Probe(child)->SetTag(TAG_ANIMATOR_TRANSLATION_Y, animator);
+    childView->SetTag(TAG_ANIMATOR_TRANSLATION_Y, animator);
 
     AutoPtr<IFloat> fObj;
     CFloat::New(fy, (IFloat**)&fObj);
-    IView::Probe(child)->SetTag(TAG_START_TRANSLATION_Y, fObj);
+    childView->SetTag(TAG_START_TRANSLATION_Y, fObj);
 
     fObj = NULL;
     CFloat::New(newEndValue, (IFloat**)&fObj);
-    IView::Probe(child)->SetTag(TAG_END_TRANSLATION_Y, fObj);
+    childView->SetTag(TAG_END_TRANSLATION_Y, fObj);
 }
 
 void StackStateAnimator::StartScaleAnimation(
@@ -1070,8 +1134,9 @@ void StackStateAnimator::StartScaleAnimation(
     /* [in] */ ViewState* viewState,
     /* [in] */ Int64 duration)
 {
-    AutoPtr<IFloat> _previousStartValue = IFloat::Probe(GetChildTag(IView::Probe(child), TAG_START_SCALE));
-    AutoPtr<IFloat> _previousEndValue = IFloat::Probe(GetChildTag(IView::Probe(child), TAG_END_SCALE));
+    IView* childView = IView::Probe(child);
+    AutoPtr<IFloat> _previousStartValue = IFloat::Probe(GetChildTag(childView, TAG_START_SCALE));
+    AutoPtr<IFloat> _previousEndValue = IFloat::Probe(GetChildTag(childView, TAG_END_SCALE));
     Float previousStartValue = 0, previousEndValue = 0;
 
     if (_previousStartValue != NULL) {
@@ -1083,7 +1148,7 @@ void StackStateAnimator::StartScaleAnimation(
         return;
     }
     AutoPtr<IObjectAnimator> previousAnimator
-        = IObjectAnimator::Probe(GetChildTag(IView::Probe(child), TAG_ANIMATOR_SCALE));
+        = IObjectAnimator::Probe(GetChildTag(childView, TAG_ANIMATOR_SCALE));
     if (!mAnimationFilter->mAnimateScale) {
         // just a local update was performed
         if (previousAnimator != NULL) {
@@ -1103,11 +1168,11 @@ void StackStateAnimator::StartScaleAnimation(
 
             AutoPtr<IFloat> fObj;
             CFloat::New(newStartValue, (IFloat**)&fObj);
-            IView::Probe(child)->SetTag(TAG_START_SCALE, fObj);
+            childView->SetTag(TAG_START_SCALE, fObj);
 
             fObj = NULL;
             CFloat::New(newEndValue, (IFloat**)&fObj);
-            IView::Probe(child)->SetTag(TAG_END_SCALE, fObj);
+            childView->SetTag(TAG_END_SCALE, fObj);
             Int64 pt = 0;
             IValueAnimator::Probe(previousAnimator)->GetCurrentPlayTime(&pt);
             IValueAnimator::Probe(previousAnimator)->SetCurrentPlayTime(pt);
@@ -1115,22 +1180,22 @@ void StackStateAnimator::StartScaleAnimation(
         }
         else {
             // no new animation needed, let's just apply the value
-            IView::Probe(child)->SetScaleX(newEndValue);
-            IView::Probe(child)->SetScaleY(newEndValue);
+            childView->SetScaleX(newEndValue);
+            childView->SetScaleY(newEndValue);
         }
     }
 
     AutoPtr<IPropertyValuesHolderHelper> helper;
     CPropertyValuesHolderHelper::AcquireSingleton((IPropertyValuesHolderHelper**)&helper);
     Float fx = 0, fy = 0;
-    IView::Probe(child)->GetScaleX(&fx);
+    childView->GetScaleX(&fx);
     AutoPtr<ArrayOf<Float> > fvs = ArrayOf<Float>::Alloc(2);
     (*fvs)[0] = fx;
     (*fvs)[1] = newEndValue;
     AutoPtr<IPropertyValuesHolder> holderX;
     helper->OfFloat(View::SCALE_X, fvs, (IPropertyValuesHolder**)&holderX);
 
-    IView::Probe(child)->GetScaleY(&fy);
+    childView->GetScaleY(&fy);
     (*fvs)[0] = fy;
     (*fvs)[1] = newEndValue;
     AutoPtr<IPropertyValuesHolder> holderY;
@@ -1151,15 +1216,15 @@ void StackStateAnimator::StartScaleAnimation(
     AutoPtr<AnimatorListenerAdapter7> listener = new AnimatorListenerAdapter7(child);
     IAnimator::Probe(animator)->AddListener(listener);
     StartAnimator(IValueAnimator::Probe(animator));
-    IView::Probe(child)->SetTag(TAG_ANIMATOR_SCALE, animator);
+    childView->SetTag(TAG_ANIMATOR_SCALE, animator);
 
     AutoPtr<IFloat> fObj;
     CFloat::New(fx, (IFloat**)&fObj);
-    IView::Probe(child)->SetTag(TAG_START_SCALE, fObj);
+    childView->SetTag(TAG_START_SCALE, fObj);
 
     fObj = NULL;
     CFloat::New(newEndValue, (IFloat**)&fObj);
-    IView::Probe(child)->SetTag(TAG_END_SCALE, fObj);
+    childView->SetTag(TAG_END_SCALE, fObj);
 }
 
 void StackStateAnimator::StartAnimator(

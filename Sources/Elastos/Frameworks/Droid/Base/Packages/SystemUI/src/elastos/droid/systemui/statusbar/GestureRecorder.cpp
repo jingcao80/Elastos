@@ -198,7 +198,7 @@ String GestureRecorder::Gesture::ToJson()
 ////////////////////////////////////////////////////////////////////
 //        class GestureRecorder
 ////////////////////////////////////////////////////////////////////
-const Boolean GestureRecorder::DEBUG = TRUE; // for now
+const Boolean GestureRecorder::DEBUG = FALSE; 
 const String GestureRecorder::TAG("GestureRecorder"); //GestureRecorder.class.getSimpleName()
 const Int64 GestureRecorder::SAVE_DELAY = 5000; // ms
 const Int32 GestureRecorder::SAVE_MESSAGE = 6351;

@@ -92,7 +92,7 @@ ECode CKeyguardSecurityViewFlipper::LayoutParams::GetMaxHeight(
 // CKeyguardSecurityViewFlipper
 //================================================================================
 
-const Boolean CKeyguardSecurityViewFlipper::DEBUG = TRUE;
+const Boolean CKeyguardSecurityViewFlipper::DEBUG = FALSE;
 
 CAR_OBJECT_IMPL(CKeyguardSecurityViewFlipper)
 

@@ -63,7 +63,7 @@ ECode KeyguardSecurityViewHelper::ShowBouncer(
     return NOERROR;
 }
 
-ECode KeyguardSecurityViewHelper::hideBouncer(
+ECode KeyguardSecurityViewHelper::HideBouncer(
     /* [in] */ ISecurityMessageDisplay* securityMessageDisplay,
     /* [in] */ IView* ecaView,
     /* [in] */ IDrawable* bouncerFrame,

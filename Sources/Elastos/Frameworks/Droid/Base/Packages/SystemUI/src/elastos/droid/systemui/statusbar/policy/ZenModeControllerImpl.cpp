@@ -35,7 +35,7 @@ namespace StatusBar {
 namespace Policy {
 
 const String ZenModeControllerImpl::TAG("ZenModeController");
-const Boolean ZenModeControllerImpl::DEBUG = TRUE;//Logger::IsLoggable(TAG, Logger::___DEBUG);
+const Boolean ZenModeControllerImpl::DEBUG = FALSE;//Logger::IsLoggable(TAG, Logger::___DEBUG);
 
 //==========================================================================
 // CZenModeControllerConditionListener

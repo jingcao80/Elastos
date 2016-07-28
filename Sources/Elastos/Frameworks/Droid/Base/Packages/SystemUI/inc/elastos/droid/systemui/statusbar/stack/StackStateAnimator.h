@@ -132,14 +132,17 @@ private:
         Float mNewEndValue;
     };
 
-    class AnimatorListenerAdapter4: public AnimatorListenerAdapter
+    class RemoveTagAdapter: public AnimatorListenerAdapter
     {
     public:
-        AnimatorListenerAdapter4();
+        RemoveTagAdapter(
+            /* [in] */ IExpandableView* child);
 
         // @Override
         CARAPI OnAnimationEnd(
             /* [in] */ IAnimator* animation);
+    private:
+        AutoPtr<IExpandableView> mChild;
     };
 
     class AnimatorListenerAdapter5: public AnimatorListenerAdapter

@@ -56,7 +56,7 @@ public:
         /* [in] */ IDrawable* bouncerFrame,
         /* [in] */ Int32 duration);
 
-    static CARAPI hideBouncer(
+    static CARAPI HideBouncer(
         /* [in] */ ISecurityMessageDisplay* securityMessageDisplay,
         /* [in] */ IView* ecaView,
         /* [in] */ IDrawable* bouncerFrame,

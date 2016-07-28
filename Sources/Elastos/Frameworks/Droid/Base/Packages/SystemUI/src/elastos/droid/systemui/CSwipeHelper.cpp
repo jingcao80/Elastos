@@ -133,7 +133,7 @@ AutoPtr<ILinearInterpolator> InitLinearInterpolator()
 }
 
 const String CSwipeHelper::TAG("Elastos.Droid.SystemUI.SwipeHelper");
-const Boolean CSwipeHelper::DEBUG = TRUE;
+const Boolean CSwipeHelper::DEBUG = FALSE;
 const Boolean CSwipeHelper::DEBUG_INVALIDATE = FALSE;
 const Boolean CSwipeHelper::SLOW_ANIMATIONS = CSwipeHelper::DEBUG;
 const Boolean CSwipeHelper::CONSTRAIN_SWIPE = TRUE;

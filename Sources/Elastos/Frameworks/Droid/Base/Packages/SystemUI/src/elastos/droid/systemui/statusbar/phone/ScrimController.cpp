@@ -32,7 +32,7 @@ namespace Phone {
 
 const Int64 ScrimController::ANIMATION_DURATION = 220;
 const String ScrimController::TAG("ScrimController");
-const Boolean ScrimController::DEBUG = Logger::IsLoggable(TAG, Logger::___DEBUG);
+const Boolean ScrimController::DEBUG = FALSE;//Logger::IsLoggable(TAG, Logger::___DEBUG);
 const Float ScrimController::SCRIM_BEHIND_ALPHA = 0.62f;
 const Float ScrimController::SCRIM_BEHIND_ALPHA_KEYGUARD = 0.55f;
 const Float ScrimController::SCRIM_BEHIND_ALPHA_UNLOCKING = 0.2f;
@@ -108,6 +108,7 @@ ECode ScrimController::PulseOutFinished::Run()
 }
 
 CAR_INTERFACE_IMPL(ScrimController::AnimatorUpdateListener, Object, IAnimatorUpdateListener)
+
 ScrimController::AnimatorUpdateListener::AnimatorUpdateListener(
     /* [in] */ IScrimView* scrim)
     : mScrim(scrim)
@@ -159,6 +160,7 @@ ECode ScrimController::Runnable1::Run()
 }
 
 CAR_INTERFACE_IMPL_2(ScrimController, Object, IScrimController, IOnPreDrawListener);
+
 ScrimController::ScrimController(
     /* [in] */ IScrimView* scrimBehind,
     /* [in] */ IScrimView* scrimInFront,
@@ -182,13 +184,15 @@ ScrimController::ScrimController(
     mPulseInFinished = new PulseInFinished(this);
     mPulseOut = new PulseOut(this);
     mPulseOutFinished = new PulseOutFinished(this);
+
     mScrimBehind = scrimBehind;
     mScrimInFront = scrimInFront;
     AutoPtr<IContext> context;
     IView::Probe(scrimBehind)->GetContext((IContext**)&context);
     mUnlockMethodCache = UnlockMethodCache::GetInstance(context);
-    AnimationUtils::LoadInterpolator(context, Elastos::Droid::R::interpolator::linear_out_slow_in
-                , (IInterpolator**)&mLinearOutSlowInInterpolator);
+    AnimationUtils::LoadInterpolator(
+        context, Elastos::Droid::R::interpolator::linear_out_slow_in,
+        (IInterpolator**)&mLinearOutSlowInInterpolator);
     mDozeParameters = new DozeParameters(context);
     mScrimSrcEnabled = scrimSrcEnabled;
 }
@@ -278,7 +282,7 @@ ECode ScrimController::Pulse(
     /* [in] */ /*@NonNull*/ IDozeHostPulseCallback* callback)
 {
     if (callback == NULL) {
-        // throw new IllegalArgumentException("callback must not be NULL");
+        Logger::E(TAG, "callback must not be NULL");
         return E_ILLEGAL_ARGUMENT_EXCEPTION;
     }
 
@@ -362,11 +366,12 @@ void ScrimController::UpdateScrims()
 
 void ScrimController::UpdateScrimKeyguard()
 {
+    using Elastos::Core::Math;
     if (mExpanding && mDarkenWhileDragging) {
-        Float behindFraction = Elastos::Core::Math::Max((Float)0, Elastos::Core::Math::Min(mFraction, (Float)1));
+        Float behindFraction = Math::Max(0.0, Math::Min(mFraction, 1.0));
         Float fraction = 1 - behindFraction;
-        fraction = (Float) Elastos::Core::Math::Pow(fraction, 0.8f);
-        behindFraction = (Float) Elastos::Core::Math::Pow(behindFraction, 0.8f);
+        fraction = (Float) Math::Pow(fraction, 0.8f);
+        behindFraction = (Float) Math::Pow(behindFraction, 0.8f);
         SetScrimInFrontColor(fraction * SCRIM_IN_FRONT_ALPHA);
         SetScrimBehindColor(behindFraction * SCRIM_BEHIND_ALPHA_KEYGUARD);
     }
@@ -378,7 +383,7 @@ void ScrimController::UpdateScrimKeyguard()
         SetScrimInFrontColor(1);
     }
     else {
-        Float fraction = Elastos::Core::Math::Max((Float)0, Elastos::Core::Math::Min(mFraction, (Float)1));
+        Float fraction = Math::Max(0.0, Math::Min(mFraction, 1.0));
         SetScrimInFrontColor(0.f);
         SetScrimBehindColor(fraction
                 * (SCRIM_BEHIND_ALPHA_KEYGUARD - SCRIM_BEHIND_ALPHA_UNLOCKING)
@@ -388,6 +393,7 @@ void ScrimController::UpdateScrimKeyguard()
 
 void ScrimController::UpdateScrimNormal()
 {
+    using Elastos::Core::Math;
     Float frac = mFraction;
     // let's start this 20% of the way down the screen
     frac = frac * 1.2f - 0.2f;
@@ -397,7 +403,7 @@ void ScrimController::UpdateScrimNormal()
     else {
         // woo, special effects
         const Float k = (Float)(1.f - 0.5f *
-                (1.f - Elastos::Core::Math::Cos(3.14159f * Elastos::Core::Math::Pow(1.f-frac, 2.f))));
+            (1.f - Math::Cos(3.14159f * Math::Pow(1.f-frac, 2.f))));
         SetScrimBehindColor(k * SCRIM_BEHIND_ALPHA);
     }
 }
@@ -452,32 +458,33 @@ void ScrimController::StartScrimAnimation(
     CColor::AcquireSingleton((IColor**)&color);
     Int32 v = 0;
     scrim->GetScrimColor(&v);
-    Int32 current = 0;
+    Int32 current = 0, target = 0;
     color->Alpha(v, &current);
-    Int32 target = 0;
     color->Alpha(targetColor, &target);
     if (current == targetColor) {
         return;
     }
-    AutoPtr<IValueAnimator> anim;
+
     AutoPtr<IValueAnimatorHelper> helper;
     CValueAnimatorHelper::AcquireSingleton((IValueAnimatorHelper**)&helper);
     AutoPtr<ArrayOf<Int32> > ivs = ArrayOf<Int32>::Alloc(2);
     (*ivs)[0] = current;
     (*ivs)[1] = target;
+    AutoPtr<IValueAnimator> anim;
     helper->OfInt32(ivs, (IValueAnimator**)&anim);
+    IAnimator* animator = IAnimator::Probe(anim);
 
     AutoPtr<AnimatorUpdateListener> ul = new AnimatorUpdateListener(scrim);
     anim->AddUpdateListener(ul);
-    IAnimator::Probe(anim)->SetInterpolator(mAnimateKeyguardFadingOut
+    animator->SetInterpolator(mAnimateKeyguardFadingOut
             ? ITimeInterpolator::Probe(mLinearOutSlowInInterpolator)
             : ITimeInterpolator::Probe(mInterpolator));
-    IAnimator::Probe(anim)->SetStartDelay(mAnimationDelay);
+    animator->SetStartDelay(mAnimationDelay);
     anim->SetDuration(mDurationOverride != -1 ? mDurationOverride : ANIMATION_DURATION);
 
     AutoPtr<AnimatorListenerAdapter1> la = new AnimatorListenerAdapter1(this, scrim);
-    IAnimator::Probe(anim)->AddListener(la);
-    IAnimator::Probe(anim)->Start();
+    animator->AddListener(la);
+    animator->Start();
     IView::Probe(scrim)->SetTag(TAG_KEY_ANIM, anim);
     mAnimationStarted = TRUE;
 }

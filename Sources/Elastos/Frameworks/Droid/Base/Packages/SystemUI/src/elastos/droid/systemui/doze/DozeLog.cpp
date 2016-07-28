@@ -29,8 +29,8 @@ namespace Doze {
 //===============================================================
 // DozeLog::
 //===============================================================
-String DozeLog::TAG = String("DozeLog");
-Boolean DozeLog::DEBUG = Logger::IsLoggable(TAG, Logger::___DEBUG);
+String DozeLog::TAG("DozeLog");
+Boolean DozeLog::DEBUG = FALSE;//Logger::IsLoggable(TAG, Logger::___DEBUG);
 Boolean DozeLog::ENABLED = TRUE;
 Int32 DozeLog::SIZE = Build::IS_DEBUGGABLE ? 400 : 50;
 AutoPtr<ISimpleDateFormat> DozeLog::FORMAT;

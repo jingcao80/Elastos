@@ -21,9 +21,9 @@ module
          * If the user attempts to escape from the bouncer, it will be dismissed,
          * this method will be called with false as the parameter, and the action
          * should be canceled. If the security component reports a successful
-         * authentication and the containing code calls hideBouncer() as a result,
+         * authentication and the containing code calls HideBouncer() as a result,
          * this method will also be called with a false parameter. It is up to the
-         * caller of hideBouncer to be ready for this.</p>
+         * caller of HideBouncer to be ready for this.</p>
          *
          * @param bouncerActive true if the bouncer is now active,
          *                      false if the bouncer was dismissed.

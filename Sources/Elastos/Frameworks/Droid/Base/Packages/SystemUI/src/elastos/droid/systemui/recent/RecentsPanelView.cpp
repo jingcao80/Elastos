@@ -521,7 +521,7 @@ ECode RecentsPanelView::OnScrollListenerRunnable::Run()
 //=================================================================================
 
 const String RecentsPanelView::TAG("RecentsPanelView");
-const Boolean RecentsPanelView::DEBUG = TRUE;
+const Boolean RecentsPanelView::DEBUG = FALSE;
 
 CAR_INTERFACE_IMPL_5(RecentsPanelView, FrameLayout, IAdapterViewOnItemClickListener, \
     IRecentsCallback, IStatusBarPanel, IAnimatorListener, IRecentsPanelView)

@@ -469,9 +469,10 @@ ECode PanelView::OnTouchEvent(
         pointerIndex = 0;
         event->GetPointerId(pointerIndex, &mTrackingPointer);
     }
-    Float fv1 = 0, fv2 = 0;
-    Float y = (event->GetY(pointerIndex, &fv1), fv1);
-    Float x = (event->GetX(pointerIndex, &fv1), fv1);
+    Float fv1 = 0;
+    Float x, y;
+    event->GetY(pointerIndex, &y);
+    event->GetX(pointerIndex, &x);
 
     Int32 value = 0, masked = 0;
     if ((event->GetActionMasked(&masked), masked) == IMotionEvent::ACTION_DOWN) {
@@ -517,8 +518,9 @@ ECode PanelView::OnTouchEvent(
             if (mTrackingPointer == upPointer) {
                 // gesture is ongoing, find a new pointer to track
                 const Int32 newIndex = (event->GetPointerId(0, &value), value) != upPointer ? 0 : 1;
-                const Float newY = (event->GetY(newIndex, &fv1), fv1);
-                const Float newX = (event->GetX(newIndex, &fv1), fv1);
+                Float newX, newY;
+                event->GetY(newIndex, &newY);
+                event->GetX(newIndex, &newX);
                 event->GetPointerId(newIndex, &mTrackingPointer);
                 mInitialOffsetOnTouch = mExpandedHeight;
                 mInitialTouchY = newY;

@@ -11,6 +11,7 @@
 #include "Elastos.Droid.Graphics.h"
 #include <elastos/droid/utility/MathUtils.h>
 #include <elastos/droid/R.h>
+#include <elastos/core/CoreUtils.h>
 #include <elastos/core/StringUtils.h>
 #include <elastos/utility/logging/Logger.h>
 
@@ -43,6 +44,7 @@ using Elastos::Core::CString;
 using Elastos::Core::ICharSequence;
 using Elastos::Core::IFloat;
 using Elastos::Core::IInteger32;
+using Elastos::Core::CoreUtils;
 using Elastos::Core::StringUtils;
 using Elastos::Utility::Logging::Logger;
 
@@ -445,9 +447,9 @@ ECode CNotificationPanelView::Runnable8::Run()
     return NOERROR;
 }
 
-CAR_INTERFACE_IMPL(CNotificationPanelView::AnimatorUpdateListener2, Object, IAnimatorUpdateListener)
+CAR_INTERFACE_IMPL(CNotificationPanelView::SetBgColorAlphaAnimatorUpdateListener, Object, IAnimatorUpdateListener)
 
-CNotificationPanelView::AnimatorUpdateListener2::AnimatorUpdateListener2(
+CNotificationPanelView::SetBgColorAlphaAnimatorUpdateListener::SetBgColorAlphaAnimatorUpdateListener(
     /* [in] */ IView* target,
     /* [in] */ Int32 r,
     /* [in] */ Int32 g,
@@ -458,7 +460,7 @@ CNotificationPanelView::AnimatorUpdateListener2::AnimatorUpdateListener2(
     , mB(b)
 {}
 
-ECode CNotificationPanelView::AnimatorUpdateListener2::OnAnimationUpdate(
+ECode CNotificationPanelView::SetBgColorAlphaAnimatorUpdateListener::OnAnimationUpdate(
     /* [in] */ IValueAnimator* animation)
 {
     AutoPtr<IInterface> obj;
@@ -474,12 +476,12 @@ ECode CNotificationPanelView::AnimatorUpdateListener2::OnAnimationUpdate(
     return NOERROR;
 }
 
-CNotificationPanelView::AnimatorListenerAdapter4::AnimatorListenerAdapter4(
+CNotificationPanelView::SetBgColorAlphaAnimatorListenerAdapter::SetBgColorAlphaAnimatorListenerAdapter(
     /* [in] */ IView* target)
     : mTarget(target)
 {}
 
-ECode CNotificationPanelView::AnimatorListenerAdapter4::OnAnimationEnd(
+ECode CNotificationPanelView::SetBgColorAlphaAnimatorListenerAdapter::OnAnimationEnd(
     /* [in] */ IAnimator* animation)
 {
     mTarget->SetTag(TAG_KEY_ANIM, NULL);
@@ -1578,6 +1580,7 @@ void CNotificationPanelView::SetQsExpansion(
     if (mKeyguardShowing) {
         UpdateHeaderKeyguard();
     }
+
     if (mStatusBarState == IStatusBarState::SHADE && mQsExpanded
             && !mStackScrollerOverscrolling && mQsScrimEnabled) {
         mQsNavbarScrim->SetAlpha(GetQsExpansionFraction());
@@ -1590,9 +1593,7 @@ void CNotificationPanelView::SetQsExpansion(
         GetContext((IContext**)&ctx);
         String str;
         ctx->GetString(R::string::accessibility_desc_quick_settings, &str);
-        AutoPtr<ICharSequence> value;
-        CString::New(str, (ICharSequence**)&value);
-        AnnounceForAccessibility(value);
+        AnnounceForAccessibility(CoreUtils::Convert(str));
         mLastAnnouncementWasQuickSettings = TRUE;
     }
 }
@@ -1889,12 +1890,16 @@ Int32 CNotificationPanelView::GetScrollViewScrollY()
 
 void CNotificationPanelView::UpdateNotificationTranslucency()
 {
+    using Elastos::Core::Math;
     Int32 v1 = 0, v2 = 0, v3 = 0;
-    Float alpha = (GetNotificationsTopY() + (mNotificationStackScroller->GetItemHeight(&v1), v1))
-            / (mQsMinExpansionHeight + (mNotificationStackScroller->GetBottomStackPeekSize(&v2), v2)
-                    - (mNotificationStackScroller->GetCollapseSecondCardPadding(&v3), v3));
-    alpha = Elastos::Core::Math::Max((Float)0, Elastos::Core::Math::Min(alpha, (Float)1));
-    alpha = (Float) Elastos::Core::Math::Pow(alpha, 0.75);
+    Float y = GetNotificationsTopY();
+    mNotificationStackScroller->GetItemHeight(&v1);
+    mNotificationStackScroller->GetBottomStackPeekSize(&v2);
+    mNotificationStackScroller->GetCollapseSecondCardPadding(&v3);
+
+    Float alpha = (y + v1) / (mQsMinExpansionHeight + v2 - v3);
+    alpha = Math::Max(0.0f, Math::Min(alpha, (Float)1.0f));
+    alpha = (Float) Math::Pow(alpha, 0.75);
 
     IView* view = IView::Probe(mNotificationStackScroller);
     Int32 type = 0;
@@ -2523,11 +2528,9 @@ void CNotificationPanelView::SetBackgroundColorAlpha(
 
     AutoPtr<IColor> color;
     CColor::AcquireSingleton((IColor**)&color);
-    Int32 r = 0;
+    Int32 r, g, b;
     color->Red(rgb, &r);
-    Int32 g = 0;
     color->Green(rgb, &g);
-    Int32 b = 0;
     color->Blue(rgb, &b);
     AutoPtr<IInterface> runningAnim;
     target->GetTag(TAG_KEY_ANIM, (IInterface**)&runningAnim);
@@ -2549,11 +2552,11 @@ void CNotificationPanelView::SetBackgroundColorAlpha(
     (*ivs)[1] = targetAlpha;
     helper->OfInt32(ivs, (IValueAnimator**)&anim);
 
-    AutoPtr<AnimatorUpdateListener2> ul = new AnimatorUpdateListener2(target, r, g, b);
+    AutoPtr<SetBgColorAlphaAnimatorUpdateListener> ul = new SetBgColorAlphaAnimatorUpdateListener(target, r, g, b);
     anim->AddUpdateListener(ul);
     anim->SetDuration(DOZE_BACKGROUND_ANIM_DURATION);
 
-    AutoPtr<AnimatorListenerAdapter4> al = new AnimatorListenerAdapter4(target);
+    AutoPtr<SetBgColorAlphaAnimatorListenerAdapter> al = new SetBgColorAlphaAnimatorListenerAdapter(target);
     IAnimator::Probe(anim)->AddListener(al);
     IAnimator::Probe(anim)->Start();
     target->SetTag(TAG_KEY_ANIM, anim);
@@ -2564,9 +2567,8 @@ Int32 CNotificationPanelView::GetBackgroundAlpha(
 {
     AutoPtr<IDrawable> d;
     view->GetBackground((IDrawable**)&d);
-    if (IColorDrawable::Probe(d)) {
-        AutoPtr<IColorDrawable> drawable = IColorDrawable::Probe(d);
-
+    AutoPtr<IColorDrawable> drawable = IColorDrawable::Probe(d);
+    if (drawable) {
         AutoPtr<IColor> color;
         CColor::AcquireSingleton((IColor**)&color);
         Int32 alpha = 0, c = 0;

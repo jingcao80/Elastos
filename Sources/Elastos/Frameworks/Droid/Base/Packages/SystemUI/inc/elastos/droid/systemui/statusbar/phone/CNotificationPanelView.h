@@ -462,14 +462,14 @@ private:
         AutoPtr<IKeyguardAffordanceView> mIcon;
     };
 
-    class AnimatorUpdateListener2
+    class SetBgColorAlphaAnimatorUpdateListener
         : public Object
         , public IAnimatorUpdateListener
     {
     public:
         CAR_INTERFACE_DECL()
 
-        AnimatorUpdateListener2(
+        SetBgColorAlphaAnimatorUpdateListener(
             /* [in] */ IView* target,
             /* [in] */ Int32 r,
             /* [in] */ Int32 g,
@@ -486,10 +486,10 @@ private:
         Int32 mB;
     };
 
-    class AnimatorListenerAdapter4: public AnimatorListenerAdapter
+    class SetBgColorAlphaAnimatorListenerAdapter: public AnimatorListenerAdapter
     {
     public:
-        AnimatorListenerAdapter4(
+        SetBgColorAlphaAnimatorListenerAdapter(
             /* [in] */ IView* target);
 
         // @Override

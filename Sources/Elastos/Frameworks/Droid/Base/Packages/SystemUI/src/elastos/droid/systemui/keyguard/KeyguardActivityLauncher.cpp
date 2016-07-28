@@ -173,7 +173,7 @@ ECode KeyguardActivityLauncher::CameraWidgetInfo::GetLayoutId(
 //===================================================================
 // KeyguardActivityLauncher
 //===================================================================
-const Boolean KeyguardActivityLauncher::DEBUG = TRUE;
+const Boolean KeyguardActivityLauncher::DEBUG = FALSE;
 
 const String KeyguardActivityLauncher::META_DATA_KEYGUARD_LAYOUT("com.android.keyguard.layout");
 

@@ -2940,28 +2940,29 @@ ECode CNotificationStackScrollLayout::SetEmptyShadeView(
 ECode CNotificationStackScrollLayout::UpdateEmptyShadeView(
     /* [in] */ Boolean visible)
 {
+    IStackScrollerDecorView* decorView = IStackScrollerDecorView::Probe(mEmptyShadeView);
     Boolean willBeGone = FALSE;
-    IStackScrollerDecorView::Probe(mEmptyShadeView)->WillBeGone(&willBeGone);
+    decorView->WillBeGone(&willBeGone);
     Int32 v = 0;
     Int32 oldVisibility = willBeGone ? IView::GONE : (IView::Probe(mEmptyShadeView)->GetVisibility(&v), v);
     Int32 newVisibility = visible ? IView::VISIBLE : IView::GONE;
     if (oldVisibility != newVisibility) {
         if (newVisibility != IView::GONE) {
             if (willBeGone) {
-                IStackScrollerDecorView::Probe(mEmptyShadeView)->CancelAnimation();
+                decorView->CancelAnimation();
             }
             else {
-                IStackScrollerDecorView::Probe(mEmptyShadeView)->SetInvisible();
+                decorView->SetInvisible();
             }
             IView::Probe(mEmptyShadeView)->SetVisibility(newVisibility);
-            IStackScrollerDecorView::Probe(mEmptyShadeView)->SetWillBeGone(FALSE);
+            decorView->SetWillBeGone(FALSE);
             UpdateContentHeight();
             NotifyHeightChangeListener(IExpandableView::Probe(mDismissView));
         }
         else {
-            IStackScrollerDecorView::Probe(mEmptyShadeView)->SetWillBeGone(TRUE);
+            decorView->SetWillBeGone(TRUE);
             AutoPtr<EmptyShadeViewGoneRunnable> run = new EmptyShadeViewGoneRunnable(this);
-            IStackScrollerDecorView::Probe(mEmptyShadeView)->PerformVisibilityAnimation(FALSE, run);
+            decorView->PerformVisibilityAnimation(FALSE, run);
         }
     }
     return NOERROR;

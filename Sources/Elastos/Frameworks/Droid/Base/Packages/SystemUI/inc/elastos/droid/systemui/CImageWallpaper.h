@@ -4,12 +4,20 @@
 
 #include "_Elastos_Droid_SystemUI_CImageWallpaper.h"
 #include "Elastos.Droid.App.h"
+#include "Elastos.Droid.Opengl.h"
+#include "Elastos.CoreLibrary.IO.h"
 #include <elastos/droid/service/wallpaper/WallpaperService.h>
 
 using Elastos::Droid::App::IWallpaperManager;
 using Elastos::Droid::Graphics::IPoint;
 using Elastos::Droid::Service::Wallpaper::IWallpaperServiceEngine;
 using Elastos::Droid::Service::Wallpaper::WallpaperService;
+using Elastosx::Microedition::Khronos::Egl::IEGLDisplay;
+using Elastosx::Microedition::Khronos::Egl::IEGLConfig;
+using Elastosx::Microedition::Khronos::Egl::IEGLContext;
+using Elastosx::Microedition::Khronos::Egl::IEGLSurface;
+using Elastosx::Microedition::Khronos::Egl::IEGL10;
+using Elastos::IO::IFloatBuffer;
 
 namespace Elastos {
 namespace Droid {
@@ -105,6 +113,48 @@ private:
             /* [in] */ Int32 x,
             /* [in] */ Int32 y);
 
+        CARAPI_(Boolean) DrawWallpaperWithOpenGL(
+            /* [in] */ ISurfaceHolder* sh,
+            /* [in] */ Int32 w,
+            /* [in] */ Int32 h,
+            /* [in] */ Int32 x,
+            /* [in] */ Int32 y);
+
+        AutoPtr<IFloatBuffer> CreateMesh(
+            /* [in] */ Int32 left,
+            /* [in] */ Int32 top,
+            /* [in] */ Int32 right,
+            /* [in] */ Int32 bottom);
+
+        Int32 LoadTexture(
+            /* [in] */ IBitmap* bitmap);
+
+        Int32 BuildProgram(
+            /* [in] */ const String& vertex,
+            /* [in] */ const String& fragment);
+
+        Int32 BuildShader(
+            /* [in] */ const String& source,
+            /* [in] */ Int32 type);
+
+        void CheckEglError();
+
+        void CheckGlError();
+
+        void FinishGL();
+
+        Boolean InitGL(
+            /* [in] */ ISurfaceHolder* surfaceHolder);
+
+        AutoPtr<IEGLContext> CreateContext(
+            /* [in] */ IEGL10* egl,
+            /* [in] */ IEGLDisplay* eglDisplay,
+            /* [in] */ IEGLConfig* eglConfig);
+
+        AutoPtr<IEGLConfig> ChooseEglConfig();
+
+        AutoPtr<ArrayOf<Int32> > GetConfig();
+
     private:
         static const Int32 EGL_CONTEXT_CLIENT_VERSION;
         static const Int32 EGL_OPENGL_ES2_BIT;
@@ -135,28 +185,14 @@ private:
         Int32 mLastXTranslation;
         Int32 mLastYTranslation;
 
-        // private EGL10 mEgl;
-        // private EGLDisplay mEglDisplay;
-        // private EGLConfig mEglConfig;
-        // private EGLContext mEglContext;
-        // private EGLSurface mEglSurface;
+        AutoPtr<IEGL10> mEgl;
+        AutoPtr<IEGLDisplay> mEglDisplay;
+        AutoPtr<IEGLConfig> mEglConfig;
+        AutoPtr<IEGLContext> mEglContext;
+        AutoPtr<IEGLSurface> mEglSurface;
 
-        // private static final String sSimpleVS =
-        //         "attribute vec4 position;\n" +
-        //         "attribute vec2 texCoords;\n" +
-        //         "varying vec2 outTexCoords;\n" +
-        //         "uniform mat4 projection;\n" +
-        //         "\nvoid main(void) {\n" +
-        //         "    outTexCoords = texCoords;\n" +
-        //         "    gl_Position = projection * position;\n" +
-        //         "}\n\n";
-        // private static final String sSimpleFS =
-        //         "precision mediump Float;\n\n" +
-        //         "varying vec2 outTexCoords;\n" +
-        //         "uniform sampler2D texture;\n" +
-        //         "\nvoid main(void) {\n" +
-        //         "    gl_FragColor = texture2D(texture, outTexCoords);\n" +
-        //         "}\n\n";
+        static const String sSimpleVS;
+        static const String sSimpleFS;
 
         CImageWallpaper* mOwner;
     };
@@ -176,8 +212,9 @@ public:
     virtual CARAPI OnCreateEngine(
         /* [out] */ IWallpaperServiceEngine** engine);
 
+    static Boolean IsEmulator();
+
 private:
-    static const String TAG;
     static const String GL_LOG_TAG;
     static const Boolean DEBUG;
     static const String PROPERTY_KERNEL_QEMU;

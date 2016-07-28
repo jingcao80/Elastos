@@ -903,7 +903,7 @@ Boolean CActivityManager::IsHighEndGfx()
     AutoPtr<IResources> resources = CResources::GetSystem();
     Boolean bval;
     resources->GetBoolean(R::bool_::config_avoidGfxAccel, &bval);
-    return !IsLowRamDeviceStatic() && bval;
+    return (!IsLowRamDeviceStatic() && !bval) || IsForcedHighEndGfx();
 }
 
 Boolean CActivityManager::IsForcedHighEndGfx()

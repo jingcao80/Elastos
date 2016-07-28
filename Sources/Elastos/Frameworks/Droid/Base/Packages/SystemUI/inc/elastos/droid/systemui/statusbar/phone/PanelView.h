@@ -452,8 +452,8 @@ private:
 public:
     static const Boolean DEBUG;
 
-// protected:
-    AutoPtr<IPhoneStatusBar> mStatusBar;
+protected:
+    IPhoneStatusBar* mStatusBar;
     Float mExpandedHeight;
     Boolean mTracking;
     Int32 mTouchSlop;

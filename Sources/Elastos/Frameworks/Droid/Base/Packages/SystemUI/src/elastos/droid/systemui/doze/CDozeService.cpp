@@ -41,7 +41,7 @@ namespace SystemUI {
 namespace Doze {
 
 const String CDozeService::TAG("DozeService");
-Boolean CDozeService::DEBUG = Logger::IsLoggable(TAG, Logger::___DEBUG);
+Boolean CDozeService::DEBUG = FALSE;//Logger::IsLoggable(TAG, Logger::___DEBUG);
 const String CDozeService::PULSE_ACTION("com.android.systemui.doze.pulse");
 const String CDozeService::NOTIFICATION_PULSE_ACTION("com.android.systemui.doze.notification_pulse");
 const String CDozeService::EXTRA_INSTANCE("instance");
