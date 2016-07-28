@@ -965,6 +965,17 @@ module
             interface IContentProvider;
         }
 
+        class CParcelFileDescriptorInner {
+            constructor(
+                [in] IParcelFileDescriptor* pfd,
+                [in] IIContentProvider* icp,
+                [in] IContentResolver* contentResolver);
+
+            interface IParcelFileDescriptor;
+            interface IParcelable;
+            interface ICloseable;
+        }
+
     }//namespace Content
     }//namespace Droid
     }//namespace Elastos

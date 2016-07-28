@@ -834,7 +834,7 @@ AutoPtr<IRingtone> CRingtoneManager::GetRingtone(
 exception:
         String tempText;
         IObject::Probe(ringtoneUri)->ToString(&tempText);
-        Logger::E(TAG, "Failed to open ringtone %s : %08x", tempText.string(), ec);
+        Logger::E(TAG, "Failed to open ringtone %s : 0x%08x", tempText.string(), ec);
 //    }
     return NULL;
 }

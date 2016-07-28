@@ -22,6 +22,7 @@ CarClass(CAssetFileDescriptorAutoCloseInputStream)
     , public ParcelFileDescriptor::AutoCloseInputStream
 {
 public:
+    TO_STRING_IMPL("CAssetFileDescriptorAutoCloseInputStream");
     CAR_OBJECT_DECL()
 
     CAssetFileDescriptorAutoCloseInputStream();

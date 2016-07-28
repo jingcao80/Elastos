@@ -76,6 +76,7 @@ SOURCES += UndoOperation.cpp
 SOURCES += UndoOwner.cpp
 SOURCES += CUriMatcher.cpp
 SOURCES += CUriPermission.cpp
+SOURCES += CParcelFileDescriptorInner.cpp
 
 ELASTOS_LIBS += pm/pm.lib
 ELASTOS_LIBS += res/res.lib

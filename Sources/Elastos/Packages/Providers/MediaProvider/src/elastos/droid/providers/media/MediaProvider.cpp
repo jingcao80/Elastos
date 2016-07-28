@@ -5544,6 +5544,10 @@ ECode MediaProvider::CheckAccess(
     /* [in] */ IFile* file,
     /* [in] */ Int32 modeBits)
 {
+    if (file == NULL) {
+        Logger::E(TAG, "MediaProvider::CheckAccess file should not be null");
+        return E_ILLEGAL_ARGUMENT_EXCEPTION;
+    }
     Boolean isWrite = (modeBits & IParcelFileDescriptor::MODE_WRITE_ONLY) != 0;
     String path;
     ECode ec = file->GetCanonicalPath(&path);

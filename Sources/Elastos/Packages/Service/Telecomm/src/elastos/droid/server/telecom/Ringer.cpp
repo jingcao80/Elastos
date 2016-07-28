@@ -279,12 +279,14 @@ ECode Ringer::StartRingingOrCallWaiting()
                     ec = NOERROR;
                 }
                 else {
+                    Log::E("Ringer","error happen %d", ec);
                     return ec;
                 }
             }
             // }
             AutoPtr<IUri> ringtone;
             ((Call*) foregroundCall.Get())->GetRingtone((IUri**)&ringtone);
+            //Logger::E("leliang", "line:%d, func:%s, ringtone:%p, startVolume:%f, rampUpTime:%d\n", __LINE__, __func__, ringtone.Get(), startVolume, rampUpTime);
             mRingtonePlayer->Play(ringtone, startVolume, rampUpTime);
         } else {
             Log::V("Ringer", "startRingingOrCallWaiting, skipping because volume is 0");

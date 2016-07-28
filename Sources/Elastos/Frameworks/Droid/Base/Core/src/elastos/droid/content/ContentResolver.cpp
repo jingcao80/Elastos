@@ -10,6 +10,7 @@
 #include "elastos/droid/content/CContentProviderClient.h"
 #include "elastos/droid/content/ContentProvider.h"
 #include "elastos/droid/content/CSyncRequestBuilder.h"
+#include "elastos/droid/content/CParcelFileDescriptorInner.h"
 #include "elastos/droid/content/res/CAssetFileDescriptor.h"
 //#include "elastos/droid/accounts/CAccount.h"
 #include "elastos/droid/app/ActivityManagerNative.h"
@@ -109,7 +110,7 @@ ECode ContentResolver::CursorWrapperInner::Close()
     mProviderReleased = TRUE;
 
     if (mCloseGuard != NULL) {
-        mCloseGuard->WarnIfOpen();
+        mCloseGuard->Close();
     }
     return NOERROR;
 }
@@ -141,11 +142,11 @@ ContentResolver::ParcelFileDescriptorInner::ParcelFileDescriptorInner()
 ECode ContentResolver::ParcelFileDescriptorInner::constructor(
     /* [in] */ IParcelFileDescriptor* pfd,
     /* [in] */ IIContentProvider* icp,
-    /* [in] */ ContentResolver* contentResolver)
+    /* [in] */ IContentResolver* contentResolver)
 {
     FAIL_RETURN(ParcelFileDescriptor::constructor(pfd))
     mContentProvider = icp;
-    mContentResolver = contentResolver;
+    mContentResolver = (ContentResolver*)contentResolver;
     return NOERROR;
 }
 
@@ -158,6 +159,19 @@ ECode ContentResolver::ParcelFileDescriptorInner::ReleaseResources()
     }
     return NOERROR;
 }
+
+ECode ContentResolver::ParcelFileDescriptorInner::ToString(
+    /* [out] */ String* str)
+{
+    VALIDATE_NOT_NULL(str);
+    String value("ContentResolver::ParcelFileDescriptorInner: ");
+    String pfdstr;
+    ParcelFileDescriptor::ToString(&pfdstr);
+    value += pfdstr;
+    *str =  value;
+    return NOERROR;
+}
+
 
 //========================================================================
 // ContentResolver
@@ -596,7 +610,7 @@ ECode ContentResolver::OpenFileDescriptor(
     /* [in] */ const String& mode,
     /* [out] */ IParcelFileDescriptor** fileDescriptor)
 {
-    return OpenFileDescriptor(uri, mode, fileDescriptor);
+    return OpenFileDescriptor(uri, mode, NULL, fileDescriptor);
 }
 
 ECode ContentResolver::OpenFileDescriptor(
@@ -681,6 +695,7 @@ ECode ContentResolver::OpenAssetFileDescriptor(
         }
         else {
             AutoPtr<ParcelFileDescriptorInner> pfdi;
+            AutoPtr<IParcelFileDescriptor> pfdtmp;
             AutoPtr<IParcelFileDescriptor> pfd, pfd2;
             Int64 startOffset = 0, length = 0;
 
@@ -743,8 +758,8 @@ ECode ContentResolver::OpenAssetFileDescriptor(
             ReleaseUnstableProvider(unstableProvider, &isRelease);
 
             fd->GetParcelFileDescriptor((IParcelFileDescriptor**)&pfd2);
-            pfdi = new ParcelFileDescriptorInner();
-            pfdi->constructor(pfd2, stableProvider, this);
+            CParcelFileDescriptorInner::New(pfd2, stableProvider, this, (IParcelFileDescriptor**)&pfdtmp);
+            pfdi = (ParcelFileDescriptorInner*)(pfdtmp.Get());
             pfd = IParcelFileDescriptor::Probe(pfdi);
 
             // Success!  Don't release the provider when exiting, let
@@ -814,6 +829,7 @@ ECode ContentResolver::OpenTypedAssetFileDescriptor(
     AutoPtr<IAssetFileDescriptor> fd;
     Boolean isRelease = FALSE;
     AutoPtr<ParcelFileDescriptorInner> pfdi;
+    AutoPtr<IParcelFileDescriptor> pfdtmp;
     AutoPtr<IParcelFileDescriptor> pfd, pfd2;
     Int64 startOffset = 0;
     Int64 length = 0;
@@ -862,8 +878,8 @@ ECode ContentResolver::OpenTypedAssetFileDescriptor(
     ReleaseUnstableProvider(unstableProvider, &isRelease);
     fd->GetParcelFileDescriptor((IParcelFileDescriptor**)&pfd2);
 
-    pfdi = new ParcelFileDescriptorInner();
-    pfdi->constructor(pfd2, stableProvider, this);
+    CParcelFileDescriptorInner::New(pfd2, stableProvider, this, (IParcelFileDescriptor**)&pfdtmp);
+    pfdi = (ParcelFileDescriptorInner*)(pfdtmp.Get());
     pfd = IParcelFileDescriptor::Probe(pfdi);
 
     // Success!  Don't release the provider when exiting, let

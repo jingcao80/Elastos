@@ -32,6 +32,7 @@ CAR_OBJECT_IMPL(CAssetFileDescriptor)
 CAssetFileDescriptor::CAssetFileDescriptor()
     : mStartOffset(0)
     , mLength(0)
+    , mExtras(NULL)
 {}
 
 CAssetFileDescriptor::~CAssetFileDescriptor()
@@ -171,12 +172,19 @@ ECode CAssetFileDescriptor::CreateOutputStream(
 ECode CAssetFileDescriptor::ReadFromParcel(
     /* [in] */ IParcel* source)
 {
-    AutoPtr<IInterface> fd;
-    source->ReadInterfacePtr((Handle32*)(IInterface**)&fd);
-    mFd = IParcelFileDescriptor::Probe(fd);
+    Int32 ival;
+    source->ReadInt32(&ival);
+    if (ival != 0) {
+        mFd = NULL;
+        CParcelFileDescriptor::New((IParcelFileDescriptor**)&mFd);
+        IParcelable::Probe(mFd)->ReadFromParcel(source);
+    }
+    else {
+        mFd = NULL;
+    }
+
     FAIL_RETURN(source->ReadInt64(&mStartOffset));
     FAIL_RETURN(source->ReadInt64(&mLength));
-    Int32 ival;
     source->ReadInt32(&ival);
     if (ival != 0) {
         CBundle::New((IBundle**)&mExtras);
@@ -191,7 +199,13 @@ ECode CAssetFileDescriptor::ReadFromParcel(
 ECode CAssetFileDescriptor::WriteToParcel(
     /* [in] */ IParcel * dest)
 {
-    dest->WriteInterfacePtr(mFd);
+    if (mFd) {
+        dest->WriteInt32(1);
+        IParcelable::Probe(mFd)->WriteToParcel(dest);
+    }
+    else {
+        dest->WriteInt32(0);
+    }
     FAIL_RETURN(dest->WriteInt64(mStartOffset));
     FAIL_RETURN(dest->WriteInt64(mLength));
     if (mExtras != NULL) {

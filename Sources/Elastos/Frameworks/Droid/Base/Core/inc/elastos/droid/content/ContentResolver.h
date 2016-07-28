@@ -72,6 +72,7 @@ private:
         ContentResolver* mContentResolver;
     };
 
+public:
     class ParcelFileDescriptorInner
         : public ParcelFileDescriptor
     {
@@ -81,9 +82,12 @@ private:
         CARAPI constructor(
             /* [in] */ IParcelFileDescriptor* pfd,
             /* [in] */ IIContentProvider* icp,
-            /* [in] */ ContentResolver* contentResolver);
+            /* [in] */ IContentResolver* contentResolver);
 
         CARAPI ReleaseResources();
+
+        CARAPI ToString(
+            /* [out] */ String* str);
 
     private:
         AutoPtr<IIContentProvider> mContentProvider;

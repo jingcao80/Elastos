@@ -181,11 +181,12 @@ ECode AsyncRingtonePlayer::HandlePlay(
         return NOERROR;
     }
     ThreadUtil::CheckNotOnMainThread();
-    Log::I("AsyncRingtonePlayer", "Play ringtone.");
+    Log::I("AsyncRingtonePlayer", "Play ringtone. ringtoneUri:%p, incStartVolume:%f, incRampUpTime:%d, mRingtone:%p", ringtoneUri, incStartVolume, incRampUpTime, mRingtone.Get());
     if (mRingtone == NULL) {
         GetRingtone(ringtoneUri, (IRingtone**)&mRingtone);
         // Cancel everything if there is no ringtone.
         if (mRingtone == NULL) {
+        Log::D("AsyncRingtonePlayer", "cannot get ringtone, stop ringtone");
             HandleStop();
             return NOERROR;
         }
