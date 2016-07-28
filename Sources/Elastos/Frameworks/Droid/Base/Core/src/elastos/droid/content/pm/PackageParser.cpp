@@ -662,7 +662,7 @@ ECode PackageParser::PermissionGroup::ToString(
 PackageParser::Activity::Activity(
     /* [in] */ ParseComponentArgs* args,
     /* [in] */ IActivityInfo* info)
-    : Component<ActivityIntentInfo>(args, IPackageItemInfo::Probe(info))
+    : Component<ActivityIntentInfo>(args, IComponentInfo::Probe(info))
     , mInfo(info)
 {
     IComponentInfo::Probe(mInfo)->SetApplicationInfo(args->mOwner->mApplicationInfo);
@@ -691,7 +691,7 @@ ECode PackageParser::Activity::ToString(
 PackageParser::Service::Service(
     /* [in] */ ParseComponentArgs* args,
     /* [in] */ IServiceInfo* info)
-    : Component<ServiceIntentInfo>(args, IPackageItemInfo::Probe(info))
+    : Component<ServiceIntentInfo>(args, IComponentInfo::Probe(info))
     , mInfo(info)
 {
     IComponentInfo::Probe(mInfo)->SetApplicationInfo(args->mOwner->mApplicationInfo);
@@ -720,7 +720,7 @@ ECode PackageParser::Service::ToString(
 PackageParser::Provider::Provider(
     /* [in] */ ParseComponentArgs* args,
     /* [in] */ IProviderInfo* info)
-    : Component<ProviderIntentInfo>(args, IPackageItemInfo::Probe(info))
+    : Component<ProviderIntentInfo>(args, IComponentInfo::Probe(info))
     , mInfo(info)
     , mSyncable(FALSE)
 {
@@ -1551,7 +1551,7 @@ _EXIT_:
 
     *pkgLite = pkg;
     REFCOUNT_ADD(*pkgLite)
-    return NOERROR;
+    return ec;
 }
 
 ECode PackageParser::ParseMonolithicPackage(

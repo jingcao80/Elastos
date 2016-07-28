@@ -427,7 +427,7 @@ ECode DialpadFragment::DialpadChooserAdapter::GetView(
 //=================================================================
 const String DialpadFragment::TAG("DialpadFragment");
 
-const Boolean DialpadFragment:: DEBUG = TRUE;
+const Boolean DialpadFragment:: DEBUG = FALSE;
 
 const Float DialpadFragment::DIALPAD_SLIDE_FRACTION = 0.67f;
 

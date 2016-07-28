@@ -4897,13 +4897,6 @@ ECode CPackageManagerService::constructor(
 //                 SystemClock.uptimeMillis());
             Slogger::I(TAG, " ==== Time to scan packages: %lld ms", SystemClock::GetUptimeMillis() - startTime);
 
-            // scan package of elastos
-            //todo: parse Elastos apps
-            CApplicationInfo::New((IApplicationInfo**)&mElastosApplication);
-            mElastosApplication->SetProcessName(String("SystemServer"));
-            IPackageItemInfo::Probe(mElastosApplication)->SetPackageName(String("Elastos.Droid"));
-
-
             // If the platform SDK has changed since the last time we booted,
             // we need to re-grant app permission to catch any new ones that
             // appear.  This is really a hack, and means that apps can in some

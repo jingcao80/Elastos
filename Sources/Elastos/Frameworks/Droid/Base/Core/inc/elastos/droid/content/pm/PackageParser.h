@@ -1437,7 +1437,7 @@ PackageParser::Component<II>::Component(
     /* [in] */ ParseComponentArgs* args,
     /* [in] */ IComponentInfo* outInfo)
 {
-    Init(args, (IPackageItemInfo*)outInfo);
+    Init(args, IPackageItemInfo::Probe(outInfo));
     if (!(*args->mOutError)[0].IsNull()) {
         return;
     }
