@@ -651,8 +651,9 @@ ECode SubscriptionManager::IsValidPhoneId(
     // not assume that INVALID_PHONE_ID will always be a negative value.  Any negative
     // value is invalid.
     AutoPtr<ITelephonyManager> tm;
-// TODO: Need TelephonyManager
-    // TelephonyManager::GetDefault((ITelephonyManager**)&tm);
+    AutoPtr<ITelephonyManagerHelper> tmHelper;
+    CTelephonyManagerHelper::AcquireSingleton((ITelephonyManagerHelper**)&tmHelper);
+    tmHelper->GetDefault((ITelephonyManager**)&tm);
     Int32 count;
     tm->GetPhoneCount(&count);
     *result = phoneId != ISubscriptionManager::INVALID_PHONE_ID && phoneId >= 0 &&

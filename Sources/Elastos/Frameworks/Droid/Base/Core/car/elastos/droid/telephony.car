@@ -548,7 +548,9 @@ module
                 [in] Int32 roaming,
                 [in] ArrayOf<Int32>* iconRes,
                 [in] Int32 mcc,
-                [in] Int32 mnc);
+                [in] Int32 mnc,
+                [in] Int32 status,
+                [in] Int32 nwMode);
 
             interface ISubInfoRecord;
             interface IParcelable;

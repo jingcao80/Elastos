@@ -79,7 +79,13 @@ ProxyController::ProxyController(
 
     AutoPtr<ILooper> lp;
     t->GetLooper((ILooper**)&lp);
-    DctController::MakeDctController((ArrayOf<IPhoneProxy*>*)phoneProxy, lp, (IDctController**)&mDctController);
+
+    Int32 len = phoneProxy->GetLength();
+    AutoPtr<ArrayOf<IPhoneProxy*> > pps = ArrayOf<IPhoneProxy*>::Alloc(len);
+    for (Int32 i = 0; i < len; i++) {
+        pps->Set(i, IPhoneProxy::Probe((*phoneProxy)[i]));
+    }
+    DctController::MakeDctController(pps, lp, (IDctController**)&mDctController);
     CUiccPhoneBookController::New(mProxyPhones, (IUiccPhoneBookController**)&mUiccPhoneBookController);
     CPhoneSubInfoController::New(mProxyPhones, (IPhoneSubInfoController**)&mPhoneSubInfoController);
     CUiccSmsController::New(mProxyPhones, context, (IUiccSmsController**)&mUiccSmsController);

@@ -29,6 +29,7 @@ using Elastos::Droid::Net::IUri;
 using Elastos::Droid::Net::IUriHelper;
 using Elastos::Droid::Net::CUriHelper;
 using Elastos::Droid::Os::CBundle;
+using Elastos::Droid::Os::IAsyncResult;
 using Elastos::Droid::Os::IBundle;
 using Elastos::Droid::Text::TextUtils;
 using Elastos::Core::IInteger32;
@@ -57,7 +58,7 @@ ECode PstnIncomingCallNotifier::MyHandler::HandleMessage(
         {
             AutoPtr<IInterface> obj;
             msg->GetObj((IInterface**)&obj);
-            AutoPtr<AsyncResult> ar = (AsyncResult*)IObject::Probe(obj);
+            AutoPtr<AsyncResult> ar = (AsyncResult*)IAsyncResult::Probe(obj);
             mHost->HandleNewRingingConnection(ar);
             break;
         }
@@ -65,7 +66,7 @@ ECode PstnIncomingCallNotifier::MyHandler::HandleMessage(
         {
             AutoPtr<IInterface> obj;
             msg->GetObj((IInterface**)&obj);
-            AutoPtr<AsyncResult> ar = (AsyncResult*)IObject::Probe(obj);
+            AutoPtr<AsyncResult> ar = (AsyncResult*)IAsyncResult::Probe(obj);
             mHost->HandleCdmaCallWaiting(ar);
             break;
         }
@@ -73,7 +74,7 @@ ECode PstnIncomingCallNotifier::MyHandler::HandleMessage(
         {
             AutoPtr<IInterface> obj;
             msg->GetObj((IInterface**)&obj);
-            AutoPtr<AsyncResult> ar = (AsyncResult*)IObject::Probe(obj);
+            AutoPtr<AsyncResult> ar = (AsyncResult*)IAsyncResult::Probe(obj);
             mHost->HandleNewUnknownConnection(ar);
             break;
         }

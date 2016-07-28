@@ -17,6 +17,7 @@ using Elastos::Droid::Internal::Telephony::IPhone;
 using Elastos::Droid::Internal::Telephony::IServiceStateTracker;
 using Elastos::Droid::Internal::Telephony::ITelephonyCapabilities;
 using Elastos::Droid::Os::AsyncResult;
+using Elastos::Droid::Os::IAsyncResult;
 using Elastos::Droid::Os::ISystemProperties;
 using Elastos::Droid::Os::CSystemProperties;
 using Elastos::Droid::Provider::ISettingsGlobal;
@@ -80,7 +81,7 @@ ECode COtaStartupReceiver::MyHandler::HandleMessage(
         {
             AutoPtr<IInterface> obj;
             msg->GetObj((IInterface**)&obj);
-            AutoPtr<AsyncResult> result = (AsyncResult*)IObject::Probe(obj);
+            AutoPtr<AsyncResult> result = (AsyncResult*)IAsyncResult::Probe(obj);
             AutoPtr<IServiceState> state = IServiceState::Probe(result->mResult);
             StringBuilder sb;
             sb += "onServiceStateChanged()...  new state = ";

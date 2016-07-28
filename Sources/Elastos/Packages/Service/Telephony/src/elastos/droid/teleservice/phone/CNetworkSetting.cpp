@@ -18,6 +18,7 @@ using Elastos::Droid::Content::EIID_IServiceConnection;
 using Elastos::Droid::Content::EIID_IDialogInterfaceOnCancelListener;
 using Elastos::Droid::Os::AsyncResult;
 using Elastos::Droid::Os::EIID_IBinder;
+using Elastos::Droid::Os::IAsyncResult;
 using Elastos::Droid::Preference::CPreference;
 using Elastos::Droid::Text::TextUtils;
 using Elastos::Droid::Internal::Telephony::ICommandException;
@@ -68,7 +69,7 @@ ECode CNetworkSetting::MyHandler::HandleMessage(
 
             AutoPtr<IInterface> obj;
             msg->GetObj((IInterface**)&obj);
-            ar = (AsyncResult*)IObject::Probe(obj);
+            ar = (AsyncResult*)IAsyncResult::Probe(obj);
             if (ar->mException != NULL) {
                 if (DBG) mHost->Log(String("manual network selection: failed!"));
                 mHost->DisplayNetworkSelectionFailed(ar->mException);
@@ -101,7 +102,7 @@ ECode CNetworkSetting::MyHandler::HandleMessage(
 
             AutoPtr<IInterface> obj;
             msg->GetObj((IInterface**)&obj);
-            ar = (AsyncResult*)IObject::Probe(obj);
+            ar = (AsyncResult*)IAsyncResult::Probe(obj);
             if (ar->mException != NULL) {
                 if (DBG) mHost->Log(String("automatic network selection: failed!"));
                 mHost->DisplayNetworkSelectionFailed(ar->mException);

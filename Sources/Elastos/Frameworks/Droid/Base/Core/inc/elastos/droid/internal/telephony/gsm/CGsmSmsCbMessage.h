@@ -35,7 +35,7 @@ public:
 
     CAR_OBJECT_DECL()
 
-    CARAPI constructor() {}
+    CARAPI constructor();
 
     /**
      * Create a new SmsCbMessage object from a header object plus one or more received PDUs.

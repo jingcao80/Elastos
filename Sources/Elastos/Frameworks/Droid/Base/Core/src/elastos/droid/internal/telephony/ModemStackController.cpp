@@ -19,6 +19,7 @@ using Elastos::Droid::Content::IContentResolver;
 using Elastos::Droid::Content::IIntentFilter;
 using Elastos::Droid::Os::CMessage;
 using Elastos::Droid::Os::CRegistrant;
+using Elastos::Droid::Os::IAsyncResult;
 using Elastos::Droid::Os::IRegistrant;
 using Elastos::Droid::Os::Registrant;
 using Elastos::Droid::Provider::IBaseColumns;
@@ -304,7 +305,7 @@ ECode ModemStackController::HandleMessage(
     msg->GetObj((IInterface**)&obj);
     switch(what) {
         case EVENT_RADIO_AVAILABLE:
-            ar = (AsyncResult*)IObject::Probe(obj);
+            ar = (AsyncResult*)IAsyncResult::Probe(obj);
             phoneId = IInteger32::Probe(ar->mUserObj);
             Logd(String("EVENT_RADIO_AVAILABLE"));
             phoneId->GetValue(&v);
@@ -312,7 +313,7 @@ ECode ModemStackController::HandleMessage(
             break;
 
         case EVENT_GET_MODEM_CAPS_DONE: {
-            ar = (AsyncResult*)IObject::Probe(obj);
+            ar = (AsyncResult*)IAsyncResult::Probe(obj);
             phoneId = IInteger32::Probe(ar->mUserObj);
             Logd(String("EVENT_GET_MODEM_CAPS_DONE"));
             phoneId->GetValue(&v);
@@ -336,7 +337,7 @@ ECode ModemStackController::HandleMessage(
         }
 
         case EVENT_MODEM_CAPABILITY_CHANGED:
-            ar = (AsyncResult*)IObject::Probe(obj);
+            ar = (AsyncResult*)IAsyncResult::Probe(obj);
             Logd(String("EVENT_MODEM_CAPABILITY_CHANGED ar =") + TO_CSTR(ar));
             OnUnsolModemCapabilityChanged(ar);
             break;
@@ -347,7 +348,7 @@ ECode ModemStackController::HandleMessage(
             break;
 
         case EVENT_SUB_DEACTIVATED:
-            ar = (AsyncResult*)IObject::Probe(obj);
+            ar = (AsyncResult*)IAsyncResult::Probe(obj);
             phoneId = IInteger32::Probe(ar->mUserObj);
             Logd(String("EVENT_SUB_DEACTIVATED"));
             phoneId->GetValue(&v);
@@ -362,7 +363,7 @@ ECode ModemStackController::HandleMessage(
             break;
 
         case EVENT_UNBIND_DONE:
-            ar = (AsyncResult*)IObject::Probe(obj);
+            ar = (AsyncResult*)IAsyncResult::Probe(obj);
             phoneId = IInteger32::Probe(ar->mUserObj);
             Logd(String("EVENT_UNBIND_DONE"));
             phoneId->GetValue(&v);
@@ -377,7 +378,7 @@ ECode ModemStackController::HandleMessage(
             break;
 
         case EVENT_BIND_DONE:
-            ar = (AsyncResult*)IObject::Probe(obj);
+            ar = (AsyncResult*)IAsyncResult::Probe(obj);
             phoneId = IInteger32::Probe(ar->mUserObj);
             Logd(String("EVENT_BIND_DONE"));
             phoneId->GetValue(&v);
@@ -385,7 +386,7 @@ ECode ModemStackController::HandleMessage(
             break;
 
         case EVENT_SET_PREF_MODE_DONE:
-            ar = (AsyncResult*)IObject::Probe(obj);
+            ar = (AsyncResult*)IAsyncResult::Probe(obj);
             phoneId = IInteger32::Probe(ar->mUserObj);
             Logd(String("EVENT_SET_PREF_MODE_DONE"));
             phoneId->GetValue(&v);

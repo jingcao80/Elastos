@@ -12,6 +12,7 @@
 using Elastos::Droid::Content::IContentResolver;
 using Elastos::Droid::Internal::Telephony::IISub;
 using Elastos::Droid::Os::CMessage;
+using Elastos::Droid::Os::IAsyncResult;
 using Elastos::Droid::Provider::ISettingsGlobal;
 using Elastos::Droid::Telephony::CTelephonyManager;
 using Elastos::Droid::Telephony::IServiceState;
@@ -197,7 +198,7 @@ ECode ModemBindingPolicyHandler::HandleMessage(
         case EVENT_UPDATE_BINDING_DONE: {
             AutoPtr<IInterface> obj;
             msg->GetObj((IInterface**)&obj);
-            ar = (AsyncResult*)IObject::Probe(obj);
+            ar = (AsyncResult*)IAsyncResult::Probe(obj);
             HandleUpdateBindingDone(ar);
             break;
         }
@@ -221,7 +222,7 @@ void ModemBindingPolicyHandler::HandleSetPreferredNetwork(
 {
     AutoPtr<IInterface> obj;
     msg->GetObj((IInterface**)&obj);
-    AsyncResult* ar = (AsyncResult*)IObject::Probe(obj);
+    AsyncResult* ar = (AsyncResult*)IAsyncResult::Probe(obj);
     Int32 index = 0;
     IInteger32::Probe(ar->mUserObj)->GetValue(&index);
     if (ar->mException == NULL) {

@@ -241,6 +241,9 @@ ECode DctController::DataStateReceiver::OnReceive(
 DctController::SwitchInfo::SwitchInfo(
     /* [in] */ DctController* host)
     : mRetryCount(0)
+    , mPhoneId(0)
+    , mIsDefaultDataSwitchRequested(FALSE)
+    , mIsOnDemandPsAttachRequested(FALSE)
     , mHost(host)
 {}
 
@@ -446,6 +449,7 @@ ECode DctController::DdsSwitchSerializerHandler::HandleMessage(
         (*mHost->mPhones)[prefPhoneId]->GetActivePhone((IPhone**)&phone);
         AutoPtr<IDcTrackerBase> dcTracker = ((PhoneBase*) phone.Get())->mDcTracker;
         AutoPtr<SwitchInfo> s = new DctController::SwitchInfo(mHost);
+        s->constructor(phoneId, n, FALSE, FALSE);
         AutoPtr<IMessage> dataAllowFalse = CMessage::Obtain(mHost,
                 EVENT_SET_DATA_ALLOW_FALSE, TO_IINTERFACE(s));
         dcTracker->SetDataAllowed(FALSE, dataAllowFalse);
@@ -543,7 +547,8 @@ ECode DctController::MakeDctController(
 }
 
 DctController::DctController()
-    : mCurrentDataPhone(PHONE_NONE)
+    : mPhoneNum(0)
+    , mCurrentDataPhone(PHONE_NONE)
     , mRequestedDataPhone(PHONE_NONE)
     , mIsDdsSwitchCompleted(TRUE)
     , MAX_RETRY_FOR_ATTACH(6)
@@ -679,13 +684,14 @@ ECode DctController::EnableApnType(
     }
     Logd("enableApnType(): CurrentDataPhone=%d"
             ", RequestedDataPhone=%d", mCurrentDataPhone, mRequestedDataPhone);
-    Boolean isIdleOrDeactingSync;
-    (*mDcSwitchAsyncChannel)[mCurrentDataPhone]->IsIdleOrDeactingSync(&isIdleOrDeactingSync);
-    if (phoneId == mCurrentDataPhone && !isIdleOrDeactingSync) {
+    Boolean isIdleOrDeactingSync = FALSE;
+    if (phoneId == mCurrentDataPhone &&
+        ((*mDcSwitchAsyncChannel)[mCurrentDataPhone]->IsIdleOrDeactingSync(&isIdleOrDeactingSync), !isIdleOrDeactingSync)) {
         mRequestedDataPhone = PHONE_NONE;
         Logd("enableApnType(): mRequestedDataPhone equals request PHONE ID.");
         return (*mDcSwitchAsyncChannel)[phoneId]->ConnectSync(type, result);
-    } else {
+    }
+    else {
         // Only can switch data when mCurrentDataPhone is PHONE_NONE,
         // it is set to PHONE_NONE only as receiving EVENT_PHONEX_DETACH
         if (mCurrentDataPhone == PHONE_NONE) {
@@ -888,6 +894,7 @@ ECode DctController::SetDefaultDataSubId(
     Int64 defaultDds;
     IISub::Probe(mSubController)->GetDefaultDataSubId(&defaultDds);
     AutoPtr<SwitchInfo> s = new SwitchInfo(this);
+    s->constructor(reqPhoneId, TRUE);
     Int32 currentDdsPhoneId;
     IISub::Probe(mSubController)->GetPhoneId(currentDds, &currentDdsPhoneId);
     if (currentDdsPhoneId < 0 || currentDdsPhoneId >= mPhoneNum) {
@@ -947,6 +954,7 @@ ECode DctController::DoPsAttach(
     //request only PS ATTACH on requested subscription.
     //No DdsSerealization lock required.
     AutoPtr<SwitchInfo> s = new SwitchInfo(this);
+    s->constructor(phoneId, n, FALSE, TRUE);
     AutoPtr<IMessage> psAttachDone = CMessage::Obtain(this,
             EVENT_SET_DATA_ALLOW_DONE, TO_IINTERFACE(s));
     Int32 defDdsPhoneId;
@@ -1073,7 +1081,7 @@ ECode DctController::HandleMessage(
             Int32 i32;
             phoneId->GetValue(&i32);
             AutoPtr<IPhone> phone;
-            (*mPhones)[i32]->GetActivePhone((IPhone**)&phone);;
+            (*mPhones)[i32]->GetActivePhone((IPhone**)&phone);
             InformDefaultDdsToPropServ(i32);
             AutoPtr<IDcTrackerBase> dcTracker = ((PhoneBase*) phone.Get())->mDcTracker;
             dcTracker->SetDataAllowed(TRUE, allowedDataDone);

@@ -7,9 +7,10 @@
 #include <elastos/core/AutoLock.h>
 #include "Elastos.CoreLibrary.Utility.h"
 
+using Elastos::Droid::Os::EIID_IBinder;
+using Elastos::Droid::Os::IAsyncResult;
 using Elastos::Droid::Os::IRemoteCallbackList;
 using Elastos::Droid::Os::CRemoteCallbackList;
-using Elastos::Droid::Os::EIID_IBinder;
 using Elastos::Droid::Internal::Telephony::IPhoneFactory;
 using Elastos::Droid::Internal::Telephony::CPhoneFactory;
 using Elastos::Core::StringBuilder;
@@ -60,7 +61,7 @@ ECode CNetworkQueryService::MyHandler::HandleMessage(
             if (DBG) mHost->Log(String("scan completed, broadcasting results"));
             AutoPtr<IInterface> obj;
             msg->GetObj((IInterface**)&obj);
-            AutoPtr<AsyncResult> result = (AsyncResult*)IObject::Probe(obj);
+            AutoPtr<AsyncResult> result = (AsyncResult*)IAsyncResult::Probe(obj);
             mHost->BroadcastQueryResults(result);
             break;
         }

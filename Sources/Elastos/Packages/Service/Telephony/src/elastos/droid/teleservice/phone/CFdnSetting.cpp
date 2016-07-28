@@ -18,6 +18,7 @@ using Elastos::Droid::Content::EIID_IDialogInterfaceOnCancelListener;
 using Elastos::Droid::Internal::Telephony::IIccCard;
 using Elastos::Droid::Internal::Telephony::ICommandException;
 using Elastos::Droid::Os::AsyncResult;
+using Elastos::Droid::Os::IAsyncResult;
 using Elastos::Droid::Os::IMessage;
 using Elastos::Droid::Preference::IPreference;
 using Elastos::Droid::Preference::IPreferenceGroup;
@@ -56,7 +57,7 @@ ECode CFdnSetting::MyHandler::HandleMessage(
         {
             AutoPtr<IInterface> obj;
             msg->GetObj((IInterface**)&obj);
-            AutoPtr<AsyncResult> ar = (AsyncResult*)IObject::Probe(obj);
+            AutoPtr<AsyncResult> ar = (AsyncResult*)IAsyncResult::Probe(obj);
             if (ar->mException != NULL && ICommandException::Probe(ar->mException) != NULL) {
                 Int32 attemptsRemaining;
                 msg->GetArg1(&attemptsRemaining);
@@ -93,7 +94,7 @@ ECode CFdnSetting::MyHandler::HandleMessage(
             if (DBG) mHost->Log(String("Handle EVENT_PIN2_CHANGE_COMPLETE"));
             AutoPtr<IInterface> obj;
             msg->GetObj((IInterface**)&obj);
-            AutoPtr<AsyncResult> ar = (AsyncResult*)IObject::Probe(obj);
+            AutoPtr<AsyncResult> ar = (AsyncResult*)IAsyncResult::Probe(obj);
             if (ar->mException != NULL) {
                 Int32 attemptsRemaining;
                 msg->GetArg1(&attemptsRemaining);

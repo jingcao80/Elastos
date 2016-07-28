@@ -27,6 +27,7 @@ using Elastos::Droid::Internal::Telephony::Uicc::IUiccController;
 using Elastos::Droid::Manifest;
 using Elastos::Droid::Os::AsyncResult;
 using Elastos::Droid::Os::Binder;
+using Elastos::Droid::Os::IAsyncResult;
 using Elastos::Droid::Os::IProcess;
 using Elastos::Droid::Os::Process;
 using Elastos::Droid::Provider::ITelephonyTextBasedSmsColumns;
@@ -74,7 +75,7 @@ ECode IccSmsInterfaceManager::InnerHandler::HandleMessage(
     msg->GetObj((IInterface**)&obj);
     switch (what) {
         case EVENT_UPDATE_DONE: {
-            ar = (AsyncResult*)IObject::Probe(obj);
+            ar = (AsyncResult*)IAsyncResult::Probe(obj);
             {
                 AutoLock lock(mHost->mLock);
                 mHost->mSuccess = (ar->mException == NULL);
@@ -83,7 +84,7 @@ ECode IccSmsInterfaceManager::InnerHandler::HandleMessage(
             break;
         }
         case EVENT_LOAD_DONE: {
-            ar = (AsyncResult*)IObject::Probe(obj);
+            ar = (AsyncResult*)IAsyncResult::Probe(obj);
             {
                 AutoLock lock(mHost->mLock);
                 if (ar->mException == NULL) {
@@ -106,7 +107,7 @@ ECode IccSmsInterfaceManager::InnerHandler::HandleMessage(
         }
         case EVENT_SET_BROADCAST_ACTIVATION_DONE:
         case EVENT_SET_BROADCAST_CONFIG_DONE: {
-            ar = (AsyncResult*)IObject::Probe(obj);
+            ar = (AsyncResult*)IAsyncResult::Probe(obj);
             {
                 AutoLock lock(mHost->mLock);
                 mHost->mSuccess = (ar->mException == NULL);

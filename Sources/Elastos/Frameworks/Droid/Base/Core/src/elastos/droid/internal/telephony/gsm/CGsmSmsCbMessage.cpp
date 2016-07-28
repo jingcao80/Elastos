@@ -77,6 +77,11 @@ CAR_INTERFACE_IMPL(CGsmSmsCbMessage, Object, IGsmSmsCbMessage)
 
 CAR_OBJECT_IMPL(CGsmSmsCbMessage)
 
+ECode CGsmSmsCbMessage::constructor()
+{
+    return NOERROR;
+}
+
 ECode CGsmSmsCbMessage::CreateSmsCbMessage(
     /* [in] */ ISmsCbHeader* header,
     /* [in] */ ISmsCbLocation* location,

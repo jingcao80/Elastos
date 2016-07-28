@@ -24,6 +24,7 @@ using Elastos::Droid::Content::EIID_IServiceConnection;
 using Elastos::Droid::Content::EIID_IDialogInterfaceOnClickListener;
 using Elastos::Droid::Content::EIID_IDialogInterfaceOnDismissListener;
 using Elastos::Droid::Content::Res::IResources;
+using Elastos::Droid::Os::IAsyncResult;
 using Elastos::Droid::Os::Looper;
 using Elastos::Droid::Os::ISystemProperties;
 using Elastos::Droid::Os::CSystemProperties;
@@ -200,7 +201,7 @@ ECode CEmergencyCallbackModeExitDialog::MyHandler::HandleMessage(
         {
             AutoPtr<IInterface> obj;
             msg->GetObj((IInterface**)&obj);
-            AutoPtr<AsyncResult> result = (AsyncResult*)IObject::Probe(obj);
+            AutoPtr<AsyncResult> result = (AsyncResult*)IAsyncResult::Probe(obj);
             AutoPtr<IBoolean> value = IBoolean::Probe(result->mResult);
             Boolean res;
             value->GetValue(&res);

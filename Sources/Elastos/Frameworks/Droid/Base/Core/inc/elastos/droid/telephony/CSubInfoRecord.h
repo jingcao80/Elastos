@@ -38,7 +38,9 @@ public:
         /* [in] */ Int32 roaming,
         /* [in] */ ArrayOf<Int32>* iconRes,
         /* [in] */ Int32 mcc,
-        /* [in] */ Int32 mnc);
+        /* [in] */ Int32 mnc,
+        /* [in] */ Int32 status,
+        /* [in] */ Int32 nwMode);
 
     CARAPI ReadFromParcel(
         /* [in] */ IParcel* source);
@@ -100,6 +102,10 @@ public:
      * Mobile Network Code
      */
     Int32 mMnc;
+
+    Int32 mStatus;
+
+    Int32 mNwMode;
 };
 
 } // namespace Telephony

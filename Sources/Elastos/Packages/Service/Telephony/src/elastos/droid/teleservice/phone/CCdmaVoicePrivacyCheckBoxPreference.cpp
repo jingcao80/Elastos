@@ -8,6 +8,7 @@
 
 using Elastos::Droid::Content::IContentResolver;
 using Elastos::Droid::Os::AsyncResult;
+using Elastos::Droid::Os::IAsyncResult;
 using Elastos::Droid::Provider::CSettingsSecure;
 using Elastos::Droid::Provider::ISettingsSecure;
 using Elastos::Core::IArrayOf;
@@ -51,7 +52,7 @@ void CCdmaVoicePrivacyCheckBoxPreference::MyHandler::HandleGetVPResponse(
 {
     AutoPtr<IInterface> obj;
     msg->GetObj((IInterface**)&obj);
-    AsyncResult* ar = (AsyncResult*) IObject::Probe(obj);
+    AsyncResult* ar = (AsyncResult*) IAsyncResult::Probe(obj);
 
     if (ar->mException != NULL) {
         if (mHost->DBG) Logger::D(TAG, "handleGetVPResponse: ar.exception=%s", TO_CSTR(ar->mException));
@@ -86,7 +87,7 @@ void CCdmaVoicePrivacyCheckBoxPreference::MyHandler::HandleSetVPResponse(
 {
     AutoPtr<IInterface> obj;
     msg->GetObj((IInterface**)&obj);
-    AsyncResult* ar = (AsyncResult*) IObject::Probe(obj);
+    AsyncResult* ar = (AsyncResult*) IAsyncResult::Probe(obj);
 
     if (ar->mException != NULL) {
         if (mHost->DBG) Logger::D(TAG, "handleSetVPResponse: ar.exception=%s", TO_CSTR(ar->mException));

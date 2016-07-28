@@ -11,6 +11,7 @@
 using Elastos::Droid::Internal::Telephony::ImsPhone::IImsPhone;
 using Elastos::Droid::Internal::Telephony::Sip::ISipPhone;
 using Elastos::Droid::Os::AsyncResult;
+using Elastos::Droid::Os::IAsyncResult;
 using Elastos::Droid::Os::Registrant;
 using Elastos::Droid::Telecom::IVideoProfileVideoState;
 using Elastos::Droid::Telephony::CTelephonyManager;
@@ -75,15 +76,15 @@ ECode CallManager::CallManagerHandler::HandleMessage(
     switch (what) {
         case EVENT_DISCONNECT:
             if (VDBG) Logger::D(TAG, " handleMessage (EVENT_DISCONNECT)");
-            mHost->mDisconnectRegistrants->NotifyRegistrants((AsyncResult*) IObject::Probe(obj));
+            mHost->mDisconnectRegistrants->NotifyRegistrants((AsyncResult*) IAsyncResult::Probe(obj));
             break;
         case EVENT_PRECISE_CALL_STATE_CHANGED:
             if (VDBG) Logger::D(TAG, " handleMessage (EVENT_PRECISE_CALL_STATE_CHANGED)");
-            mHost->mPreciseCallStateRegistrants->NotifyRegistrants((AsyncResult*) IObject::Probe(obj));
+            mHost->mPreciseCallStateRegistrants->NotifyRegistrants((AsyncResult*) IAsyncResult::Probe(obj));
             break;
         case EVENT_NEW_RINGING_CONNECTION: {
             if (VDBG) Logger::D(TAG, " handleMessage (EVENT_NEW_RINGING_CONNECTION)");
-            AutoPtr<IConnection> c = IConnection::Probe(((AsyncResult*) IObject::Probe(obj))->mResult);
+            AutoPtr<IConnection> c = IConnection::Probe(((AsyncResult*) IAsyncResult::Probe(obj))->mResult);
             AutoPtr<ICall> call;
             c->GetCall((ICall**)&call);
             AutoPtr<IPhone> phone;
@@ -100,13 +101,13 @@ ECode CallManager::CallManagerHandler::HandleMessage(
                 }
             }
             else {
-                mHost->mNewRingingConnectionRegistrants->NotifyRegistrants((AsyncResult*) IObject::Probe(obj));
+                mHost->mNewRingingConnectionRegistrants->NotifyRegistrants((AsyncResult*) IAsyncResult::Probe(obj));
             }
             break;
         }
         case EVENT_UNKNOWN_CONNECTION:
             if (VDBG) Logger::D(TAG, " handleMessage (EVENT_UNKNOWN_CONNECTION)");
-            mHost->mUnknownConnectionRegistrants->NotifyRegistrants((AsyncResult*) IObject::Probe(obj));
+            mHost->mUnknownConnectionRegistrants->NotifyRegistrants((AsyncResult*) IAsyncResult::Probe(obj));
             break;
         case EVENT_INCOMING_RING: {
             if (VDBG) Logger::D(TAG, " handleMessage (EVENT_INCOMING_RING)");
@@ -114,69 +115,69 @@ ECode CallManager::CallManagerHandler::HandleMessage(
             Boolean has = FALSE;
             mHost->HasActiveFgCall(&has);
             if (!has) {
-                mHost->mIncomingRingRegistrants->NotifyRegistrants((AsyncResult*) IObject::Probe(obj));
+                mHost->mIncomingRingRegistrants->NotifyRegistrants((AsyncResult*) IAsyncResult::Probe(obj));
             }
             break;
         }
         case EVENT_RINGBACK_TONE:
             if (VDBG) Logger::D(TAG, " handleMessage (EVENT_RINGBACK_TONE)");
-            mHost->mRingbackToneRegistrants->NotifyRegistrants((AsyncResult*) IObject::Probe(obj));
+            mHost->mRingbackToneRegistrants->NotifyRegistrants((AsyncResult*) IAsyncResult::Probe(obj));
             break;
         case EVENT_IN_CALL_VOICE_PRIVACY_ON:
             if (VDBG) Logger::D(TAG, " handleMessage (EVENT_IN_CALL_VOICE_PRIVACY_ON)");
-            mHost->mInCallVoicePrivacyOnRegistrants->NotifyRegistrants((AsyncResult*) IObject::Probe(obj));
+            mHost->mInCallVoicePrivacyOnRegistrants->NotifyRegistrants((AsyncResult*) IAsyncResult::Probe(obj));
             break;
         case EVENT_IN_CALL_VOICE_PRIVACY_OFF:
             if (VDBG) Logger::D(TAG, " handleMessage (EVENT_IN_CALL_VOICE_PRIVACY_OFF)");
-            mHost->mInCallVoicePrivacyOffRegistrants->NotifyRegistrants((AsyncResult*) IObject::Probe(obj));
+            mHost->mInCallVoicePrivacyOffRegistrants->NotifyRegistrants((AsyncResult*) IAsyncResult::Probe(obj));
             break;
         case EVENT_CALL_WAITING:
             if (VDBG) Logger::D(TAG, " handleMessage (EVENT_CALL_WAITING)");
-            mHost->mCallWaitingRegistrants->NotifyRegistrants((AsyncResult*) IObject::Probe(obj));
+            mHost->mCallWaitingRegistrants->NotifyRegistrants((AsyncResult*) IAsyncResult::Probe(obj));
             break;
         case EVENT_DISPLAY_INFO:
             if (VDBG) Logger::D(TAG, " handleMessage (EVENT_DISPLAY_INFO)");
-            mHost->mDisplayInfoRegistrants->NotifyRegistrants((AsyncResult*) IObject::Probe(obj));
+            mHost->mDisplayInfoRegistrants->NotifyRegistrants((AsyncResult*) IAsyncResult::Probe(obj));
             break;
         case EVENT_SIGNAL_INFO:
             if (VDBG) Logger::D(TAG, " handleMessage (EVENT_SIGNAL_INFO)");
-            mHost->mSignalInfoRegistrants->NotifyRegistrants((AsyncResult*) IObject::Probe(obj));
+            mHost->mSignalInfoRegistrants->NotifyRegistrants((AsyncResult*) IAsyncResult::Probe(obj));
             break;
         case EVENT_CDMA_OTA_STATUS_CHANGE:
             if (VDBG) Logger::D(TAG, " handleMessage (EVENT_CDMA_OTA_STATUS_CHANGE)");
-            mHost->mCdmaOtaStatusChangeRegistrants->NotifyRegistrants((AsyncResult*) IObject::Probe(obj));
+            mHost->mCdmaOtaStatusChangeRegistrants->NotifyRegistrants((AsyncResult*) IAsyncResult::Probe(obj));
             break;
         case EVENT_RESEND_INCALL_MUTE:
             if (VDBG) Logger::D(TAG, " handleMessage (EVENT_RESEND_INCALL_MUTE)");
-            mHost->mResendIncallMuteRegistrants->NotifyRegistrants((AsyncResult*) IObject::Probe(obj));
+            mHost->mResendIncallMuteRegistrants->NotifyRegistrants((AsyncResult*) IAsyncResult::Probe(obj));
             break;
         case EVENT_MMI_INITIATE:
             if (VDBG) Logger::D(TAG, " handleMessage (EVENT_MMI_INITIATE)");
-            mHost->mMmiInitiateRegistrants->NotifyRegistrants((AsyncResult*) IObject::Probe(obj));
+            mHost->mMmiInitiateRegistrants->NotifyRegistrants((AsyncResult*) IAsyncResult::Probe(obj));
             break;
         case EVENT_MMI_COMPLETE:
             if (VDBG) Logger::D(TAG, " handleMessage (EVENT_MMI_COMPLETE)");
-            mHost->mMmiCompleteRegistrants->NotifyRegistrants((AsyncResult*) IObject::Probe(obj));
+            mHost->mMmiCompleteRegistrants->NotifyRegistrants((AsyncResult*) IAsyncResult::Probe(obj));
             break;
         case EVENT_ECM_TIMER_RESET:
             if (VDBG) Logger::D(TAG, " handleMessage (EVENT_ECM_TIMER_RESET)");
-            mHost->mEcmTimerResetRegistrants->NotifyRegistrants((AsyncResult*) IObject::Probe(obj));
+            mHost->mEcmTimerResetRegistrants->NotifyRegistrants((AsyncResult*) IAsyncResult::Probe(obj));
             break;
         case EVENT_SUBSCRIPTION_INFO_READY:
             if (VDBG) Logger::D(TAG, " handleMessage (EVENT_SUBSCRIPTION_INFO_READY)");
-            mHost->mSubscriptionInfoReadyRegistrants->NotifyRegistrants((AsyncResult*) IObject::Probe(obj));
+            mHost->mSubscriptionInfoReadyRegistrants->NotifyRegistrants((AsyncResult*) IAsyncResult::Probe(obj));
             break;
         case EVENT_SUPP_SERVICE_NOTIFY:
             if (VDBG) Logger::D(TAG, " handleMessage (EVENT_SUPP_SERVICE_NOTIFY)");
-            mHost->mSuppServiceNotifyRegistrants->NotifyRegistrants((AsyncResult*) IObject::Probe(obj));
+            mHost->mSuppServiceNotifyRegistrants->NotifyRegistrants((AsyncResult*) IAsyncResult::Probe(obj));
             break;
         case EVENT_SUPP_SERVICE_FAILED:
             if (VDBG) Logger::D(TAG, " handleMessage (EVENT_SUPP_SERVICE_FAILED)");
-            mHost->mSuppServiceFailedRegistrants->NotifyRegistrants((AsyncResult*) IObject::Probe(obj));
+            mHost->mSuppServiceFailedRegistrants->NotifyRegistrants((AsyncResult*) IAsyncResult::Probe(obj));
             break;
         case EVENT_SERVICE_STATE_CHANGED:
             if (VDBG) Logger::D(TAG, " handleMessage (EVENT_SERVICE_STATE_CHANGED)");
-            mHost->mServiceStateChangedRegistrants->NotifyRegistrants((AsyncResult*) IObject::Probe(obj));
+            mHost->mServiceStateChangedRegistrants->NotifyRegistrants((AsyncResult*) IAsyncResult::Probe(obj));
             break;
         case EVENT_POST_DIAL_CHARACTER:
             // we need send the character that is being processed in msg.arg1
@@ -194,7 +195,7 @@ ECode CallManager::CallManagerHandler::HandleMessage(
             break;
         case EVENT_ONHOLD_TONE:
             if (VDBG) Logger::D(TAG, " handleMessage (EVENT_ONHOLD_TONE)");
-            mHost->mOnHoldToneRegistrants->NotifyRegistrants((AsyncResult*) IObject::Probe(obj));
+            mHost->mOnHoldToneRegistrants->NotifyRegistrants((AsyncResult*) IAsyncResult::Probe(obj));
             break;
     }
     return NOERROR;

@@ -27,6 +27,7 @@ using Elastos::Droid::Net::IUri;
 using Elastos::Droid::Net::CUriHelper;
 using Elastos::Droid::Net::IUriHelper;
 using Elastos::Droid::Os::AsyncResult;
+using Elastos::Droid::Os::IAsyncResult;
 using Elastos::Core::IBoolean;
 using Elastos::Utility::Objects;
 using Elastos::Utility::Logging::Logger;
@@ -61,7 +62,7 @@ ECode TelephonyConnection::MyHandler::HandleMessage(
             Logger::V("TelephonyConnection", "MSG_HANDOVER_STATE_CHANGED");
             AutoPtr<IInterface> obj;
             msg->GetObj((IInterface**)&obj);
-            AutoPtr<AsyncResult> ar = (AsyncResult*)IObject::Probe(obj);
+            AutoPtr<AsyncResult> ar = (AsyncResult*)IAsyncResult::Probe(obj);
             AutoPtr<Elastos::Droid::Internal::Telephony::IConnection> connection =
                 Elastos::Droid::Internal::Telephony::IConnection::Probe(ar->mResult);
             mHost->SetOriginalConnection(connection);
@@ -82,7 +83,7 @@ ECode TelephonyConnection::MyHandler::HandleMessage(
             }
             AutoPtr<IInterface> obj;
             msg->GetObj((IInterface**)&obj);
-            AutoPtr<AsyncResult> ar = (AsyncResult*)IObject::Probe(obj);
+            AutoPtr<AsyncResult> ar = (AsyncResult*)IAsyncResult::Probe(obj);
             AutoPtr<IBoolean> valueObj = IBoolean::Probe(ar->mResult);
             Boolean value;
             valueObj->GetValue(&value);

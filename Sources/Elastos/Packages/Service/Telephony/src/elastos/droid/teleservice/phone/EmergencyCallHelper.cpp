@@ -22,6 +22,7 @@ using Elastos::Droid::Telephony::CDisconnectCause;
 using Elastos::Droid::Telephony::IDisconnectCause;
 using Elastos::Droid::Telephony::IServiceState;
 using Elastos::Droid::Os::AsyncResult;
+using Elastos::Droid::Os::IAsyncResult;
 using Elastos::Droid::Os::IPowerManager;
 using Elastos::Droid::Os::IUserHandleHelper;
 using Elastos::Droid::Os::CUserHandleHelper;
@@ -176,7 +177,7 @@ void EmergencyCallHelper::OnServiceStateChanged(
 {
     AutoPtr<IInterface> obj;
     msg->GetObj((IInterface**)&obj);
-    AutoPtr<AsyncResult> aResult = (AsyncResult*)IObject::Probe(obj);
+    AutoPtr<AsyncResult> aResult = (AsyncResult*)IAsyncResult::Probe(obj);
     AutoPtr<IServiceState> state = IServiceState::Probe(aResult->mResult);
     if (DBG) {
         StringBuilder sb;
@@ -227,7 +228,7 @@ void EmergencyCallHelper::OnDisconnect(
 {
     AutoPtr<IInterface> obj;
     msg->GetObj((IInterface**)&obj);
-    AutoPtr<AsyncResult> aResult = (AsyncResult*)IObject::Probe(obj);
+    AutoPtr<AsyncResult> aResult = (AsyncResult*)IAsyncResult::Probe(obj);
     AutoPtr<Elastos::Droid::Internal::Telephony::IConnection> conn =
             Elastos::Droid::Internal::Telephony::IConnection::Probe(aResult->mResult);
     Int32 cause;

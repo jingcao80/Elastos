@@ -23,6 +23,8 @@ CSubInfoRecord::CSubInfoRecord()
     , mDataRoaming(0)
     , mMcc(0)
     , mMnc(0)
+    , mStatus(ISubscriptionManager::ACTIVE)
+    , mNwMode(ISubscriptionManager::DEFAULT_NW_MODE)
 {
     mSimIconRes = ArrayOf<Int32>::Alloc(2);
 }
@@ -48,7 +50,9 @@ ECode CSubInfoRecord::constructor(
     /* [in] */ Int32 roaming,
     /* [in] */ ArrayOf<Int32>* iconRes,
     /* [in] */ Int32 mcc,
-    /* [in] */ Int32 mnc)
+    /* [in] */ Int32 mnc,
+    /* [in] */ Int32 status,
+    /* [in] */ Int32 nwMode)
 {
     mSubId = subId;
     mIccId = iccId;
@@ -62,6 +66,8 @@ ECode CSubInfoRecord::constructor(
     mSimIconRes = iconRes;
     mMcc = mcc;
     mMnc = mnc;
+    mStatus = status;
+    mNwMode = nwMode;
     return NOERROR;
 }
 

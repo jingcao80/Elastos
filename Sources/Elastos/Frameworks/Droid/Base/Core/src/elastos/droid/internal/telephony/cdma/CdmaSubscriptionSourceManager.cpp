@@ -217,8 +217,15 @@ void CdmaSubscriptionSourceManager::HandleGetCdmaSubscriptionSource(
         // because modem created GSM Phone. If modem created
         // GSMPhone, then PhoneProxy will trigger a change in
         // Phone objects and this object will be destroyed.
-        Logw(String("Unable to get CDMA Subscription Source, Exception: ") + TO_CSTR(ar->mException)
-                + ", result: " + TO_CSTR(ar->mResult));
+        String e;
+        if (ar->mException != NULL) {
+            e = TO_CSTR(ar->mException);
+        }
+        String r;
+        if (ar->mResult != NULL) {
+            r = TO_CSTR(ar->mResult);
+        }
+        Logw(String("Unable to get CDMA Subscription Source, Exception: ") + e + ", result: " + r);
     }
 }
 

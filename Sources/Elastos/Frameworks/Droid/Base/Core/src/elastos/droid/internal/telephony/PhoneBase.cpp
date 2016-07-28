@@ -38,6 +38,7 @@ using Elastos::Droid::Content::ISharedPreferences;
 using Elastos::Droid::Net::ILinkProperties;
 using Elastos::Droid::Net::INetworkCapabilities;
 using Elastos::Droid::Os::Build;
+using Elastos::Droid::Os::IAsyncResult;
 using Elastos::Droid::Os::Looper;
 using Elastos::Droid::Os::Registrant;
 using Elastos::Droid::Os::SystemProperties;
@@ -518,7 +519,7 @@ ECode PhoneBase::HandleMessage(
             Logger::D(TAG, "Event EVENT_CALL_RING Received state=%d", cs);
             AutoPtr<IInterface> obj;
             msg->GetObj((IInterface**)&obj);
-            ar = (AsyncResult*)IObject::Probe(obj);
+            ar = (AsyncResult*)IAsyncResult::Probe(obj);
             if (ar->mException == NULL) {
                 PhoneConstantsState state;
                 GetState(&state);
@@ -557,7 +558,7 @@ ECode PhoneBase::HandleMessage(
         case EVENT_SET_NETWORK_AUTOMATIC_COMPLETE: {
             AutoPtr<IInterface> obj;
             msg->GetObj((IInterface**)&obj);
-            HandleSetSelectNetwork((AsyncResult*) IObject::Probe(obj));
+            HandleSetSelectNetwork((AsyncResult*) IAsyncResult::Probe(obj));
             break;
         }
 
@@ -565,7 +566,7 @@ ECode PhoneBase::HandleMessage(
             Logger::D(TAG, "Event EVENT_INITIATE_SILENT_REDIAL Received");
             AutoPtr<IInterface> obj;
             msg->GetObj((IInterface**)&obj);
-            ar = (AsyncResult*) IObject::Probe(obj);
+            ar = (AsyncResult*) IAsyncResult::Probe(obj);
             if ((ar->mException == NULL) && (ar->mResult != NULL)) {
                 String dialString;
                 ICharSequence::Probe(ar->mResult)->ToString(&dialString);
@@ -581,7 +582,7 @@ ECode PhoneBase::HandleMessage(
         case EVENT_SRVCC_STATE_CHANGED: {
             AutoPtr<IInterface> obj;
             msg->GetObj((IInterface**)&obj);
-            ar = (AsyncResult*)IObject::Probe(obj);
+            ar = (AsyncResult*)IAsyncResult::Probe(obj);
             if (ar->mException == NULL) {
                 assert(0 && "TODO");
                 // HandleSrvccStateChanged((Int32[]) ar.result);
@@ -595,7 +596,7 @@ ECode PhoneBase::HandleMessage(
         case EVENT_UNSOL_OEM_HOOK_RAW: {
             AutoPtr<IInterface> obj;
             msg->GetObj((IInterface**)&obj);
-            ar = (AsyncResult*)IObject::Probe(obj);
+            ar = (AsyncResult*)IAsyncResult::Probe(obj);
             if (ar->mException == NULL) {
                 AutoPtr<IArrayOf> byteArray = IArrayOf::Probe(ar->mResult);
                 Int32 size;

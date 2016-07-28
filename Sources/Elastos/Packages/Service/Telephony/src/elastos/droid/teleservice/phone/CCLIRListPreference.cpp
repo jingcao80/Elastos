@@ -1,6 +1,8 @@
 
 #include "elastos/droid/teleservice/phone/CCLIRListPreference.h"
 
+using Elastos::Droid::Os::IAsyncResult;
+
 namespace Elastos {
 namespace Droid {
 namespace TeleService {
@@ -38,7 +40,7 @@ void CCLIRListPreference::MyHandler::HandleGetCLIRResponse(
 {
     AutoPtr<IInterface> obj;
     msg->GetObj((IInterface**)&obj);
-    AutoPtr<AsyncResult> ar = (AsyncResult*)IObject::Probe(obj);
+    AutoPtr<AsyncResult> ar = (AsyncResult*)IAsyncResult::Probe(obj);
 
     Int32 arg2;
     msg->GetArg2(&arg2);
@@ -56,7 +58,7 @@ void CCLIRListPreference::MyHandler::HandleGetCLIRResponse(
             sb += TO_CSTR(ar->mException);
             Logger::D(TAG, sb.ToString());
         }
-        mTcpListener->OnException(mHost, ICommandException::Probe(ar->mException)));
+        mTcpListener->OnException(mHost, ICommandException::Probe(ar->mException));
     }
     else if (IThrowable::Probe(ar->mUserObj) != NULL) {
         mTcpListener->OnError(mHost, RESPONSE_ERROR);
@@ -96,7 +98,7 @@ void CCLIRListPreference::MyHandler::HandleSetCLIRResponse(
 {
     AutoPtr<IInterface> obj;
     msg->GetObj((IInterface**)&obj);
-    AutoPtr<AsyncResult> ar = (AsyncResult*)IObject::Probe(obj);
+    AutoPtr<AsyncResult> ar = (AsyncResult*)IAsyncResult::Probe(obj);
 
     if (ar->mException != NULL) {
         if (DBG) {

@@ -35,6 +35,7 @@ using Elastos::Droid::Internal::Telephony::ICommandsInterface;
 using Elastos::Droid::Internal::Telephony::IPhoneConstants;
 using Elastos::Droid::Os::CMessageHelper;
 using Elastos::Droid::Os::CUserHandleHelper;
+using Elastos::Droid::Os::IAsyncResult;
 using Elastos::Droid::Os::IMessageHelper;
 using Elastos::Droid::Os::IUserHandle;
 using Elastos::Droid::Os::IUserHandleHelper;
@@ -220,7 +221,7 @@ ECode CCallFeaturesSetting::MyHandler2::HandleMessage(
 {
     AutoPtr<IInterface> obj;
     msg->GetObj((IInterface**)&obj);
-    AsyncResult* result = (AsyncResult*)IObject::Probe(obj);
+    AsyncResult* result = (AsyncResult*)IAsyncResult::Probe(obj);
 
     Int32 what;
     msg->GetWhat(&what);
@@ -247,7 +248,7 @@ ECode CCallFeaturesSetting::MyHandler3::HandleMessage(
 {
     AutoPtr<IInterface> obj;
     msg->GetObj((IInterface**)&obj);
-    AsyncResult* result = (AsyncResult*)IObject::Probe(obj);
+    AsyncResult* result = (AsyncResult*)IAsyncResult::Probe(obj);
     Boolean done = FALSE;
 
     Int32 what;
@@ -326,7 +327,7 @@ ECode CCallFeaturesSetting::MyHandler4::HandleMessage(
 {
     AutoPtr<IInterface> obj;
     msg->GetObj((IInterface**)&obj);
-    AsyncResult* result = (AsyncResult*)IObject::Probe(obj);
+    AsyncResult* result = (AsyncResult*)IAsyncResult::Probe(obj);
 
     Int32 what;
     msg->GetWhat(&what);

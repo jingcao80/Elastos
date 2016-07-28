@@ -12,6 +12,7 @@ using Elastos::Droid::Os::CUserHandleHelper;
 using Elastos::Droid::Os::IUserHandleHelper;
 using Elastos::Droid::Os::IUserHandle;
 using Elastos::Droid::Os::AsyncResult;
+using Elastos::Droid::Os::IAsyncResult;
 using Elastos::Droid::Internal::Os::ISomeArgs;
 using Elastos::Droid::Internal::Os::CSomeArgsHelper;
 using Elastos::Droid::Internal::Os::ISomeArgsHelper;
@@ -63,7 +64,7 @@ ECode EmergencyCallHelper::MyHandler::HandleMessage(
         {
             AutoPtr<IInterface> obj;
             msg->GetObj((IInterface**)&obj);
-            AutoPtr<AsyncResult> args = (AsyncResult*)IObject::Probe(obj);
+            AutoPtr<AsyncResult> args = (AsyncResult*)IAsyncResult::Probe(obj);
 
             mHost->OnServiceStateChanged(IServiceState::Probe(args->mResult));
             break;

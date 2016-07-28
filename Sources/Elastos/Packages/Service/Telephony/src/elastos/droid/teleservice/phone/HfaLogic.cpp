@@ -14,6 +14,7 @@ using Elastos::Droid::Internal::Utility::IPreconditions;
 using Elastos::Droid::Internal::Utility::CPreconditions;
 using Elastos::Droid::Internal::Telephony::IPhone;
 using Elastos::Droid::Os::AsyncResult;
+using Elastos::Droid::Os::IAsyncResult;
 using Elastos::Core::StringBuilder;
 using Elastos::Utility::Logging::Logger;
 
@@ -39,7 +40,7 @@ ECode HfaLogic::MyHandler::HandleMessage(
         {
             AutoPtr<IInterface> obj;
             msg->GetObj((IInterface**)&obj);
-            AutoPtr<AsyncResult> result = (AsyncResult*)IObject::Probe(obj);
+            AutoPtr<AsyncResult> result = (AsyncResult*)IAsyncResult::Probe(obj);
             AutoPtr<IServiceState> state = IServiceState::Probe(result->mResult);
             mHost->OnServiceStateChange(state);
             break;

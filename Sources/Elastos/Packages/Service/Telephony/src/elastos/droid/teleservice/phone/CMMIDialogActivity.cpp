@@ -11,6 +11,7 @@
 
 using Elastos::Droid::Content::IDialogInterface;
 using Elastos::Droid::Os::AsyncResult;
+using Elastos::Droid::Os::IAsyncResult;
 using Elastos::Droid::Os::IMessageHelper;
 using Elastos::Droid::Os::CMessageHelper;
 using Elastos::Droid::Internal::Telephony::IPhoneConstants;
@@ -45,7 +46,7 @@ ECode CMMIDialogActivity::MyHandler::HandleMessage(
         {
             AutoPtr<IInterface> obj;
             msg->GetObj((IInterface**)&obj);
-            AutoPtr<AsyncResult> result = (AsyncResult*)IObject::Probe(obj);
+            AutoPtr<AsyncResult> result = (AsyncResult*)IAsyncResult::Probe(obj);
             AutoPtr<IMmiCode> code = IMmiCode::Probe(result->mResult);
             mHost->OnMMIComplete(code);
             break;

@@ -11,6 +11,7 @@ using Elastos::Droid::Content::Res::IResources;
 using Elastos::Droid::Internal::Telephony::IIccCard;
 using Elastos::Droid::Internal::Telephony::ICommandException;
 using Elastos::Droid::Os::CMessageHelper;
+using Elastos::Droid::Os::IAsyncResult;
 using Elastos::Droid::Os::IMessageHelper;
 using Elastos::Droid::Text::TextUtils;
 using Elastos::Droid::Text::Method::IKeyListener;
@@ -41,7 +42,7 @@ ECode CEnableFdnScreen::MyHandler::HandleMessage(
         case ENABLE_FDN_COMPLETE:
             AutoPtr<IInterface> obj;
             msg->GetObj((IInterface**)&obj);
-            AutoPtr<AsyncResult> ar = (AsyncResult*)IObject::Probe(obj);
+            AutoPtr<AsyncResult> ar = (AsyncResult*)IAsyncResult::Probe(obj);
             mHost->HandleResult(ar);
             break;
     }

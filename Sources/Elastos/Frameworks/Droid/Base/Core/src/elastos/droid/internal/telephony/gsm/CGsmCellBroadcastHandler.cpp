@@ -8,6 +8,7 @@
 #include <elastos/core/StringUtils.h>
 
 using Elastos::Droid::Internal::Telephony::PhoneBase;
+using Elastos::Droid::Os::IAsyncResult;
 using Elastos::Droid::Os::SystemProperties;
 using Elastos::Droid::Telephony::CSmsCbLocation;
 using Elastos::Droid::Telephony::ICellLocation;
@@ -133,7 +134,7 @@ Boolean CGsmCellBroadcastHandler::HandleSmsMessage(
     AutoPtr<IInterface> obj;
     message->GetObj((IInterface**)&obj);
     // if (obj instanceof AsyncResult) {
-    if (((AsyncResult*)IObject::Probe(obj)) != NULL) {
+    if (IAsyncResult::Probe(obj) != NULL) {
         AutoPtr<ISmsCbMessage> cbMessage = HandleGsmBroadcastSms((AsyncResult*)(IObject*)obj.Get());
         if (cbMessage != NULL) {
             HandleBroadcastSms(cbMessage);

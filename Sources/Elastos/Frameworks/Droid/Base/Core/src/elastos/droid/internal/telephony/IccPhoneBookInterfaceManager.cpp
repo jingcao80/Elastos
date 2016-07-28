@@ -17,6 +17,7 @@ using Elastos::Droid::Internal::Telephony::Uicc::APPTYPE_USIM;
 using Elastos::Droid::Internal::Telephony::Uicc::IAdnRecord;
 using Elastos::Droid::Internal::Telephony::Uicc::IIccConstants;
 using Elastos::Droid::Internal::Telephony::Uicc::IIccRecords;
+using Elastos::Droid::Os::IAsyncResult;
 using Elastos::Droid::Os::Looper;
 using Elastos::Droid::Text::TextUtils;
 using Elastos::Core::AutoLock;
@@ -52,7 +53,7 @@ ECode IccPhoneBookInterfaceManager::BaseHandler::HandleMessage(
     msg->GetObj((IInterface**)&obj);
     switch (what) {
         case EVENT_GET_SIZE_DONE: {
-            ar = (AsyncResult*) IObject::Probe(obj);
+            ar = (AsyncResult*) IAsyncResult::Probe(obj);
             {
                 AutoLock lock(mHost->mLock);
                 if (ar->mException == NULL) {
@@ -72,7 +73,7 @@ ECode IccPhoneBookInterfaceManager::BaseHandler::HandleMessage(
             break;
         }
         case EVENT_UPDATE_DONE: {
-            ar = (AsyncResult*) IObject::Probe(obj);
+            ar = (AsyncResult*) IAsyncResult::Probe(obj);
             {
                 AutoLock lock(mHost->mLock);
                 mHost->mSuccess = (ar->mException == NULL);
@@ -81,7 +82,7 @@ ECode IccPhoneBookInterfaceManager::BaseHandler::HandleMessage(
             break;
         }
         case EVENT_LOAD_DONE: {
-            ar = (AsyncResult*)IObject::Probe(obj);
+            ar = (AsyncResult*)IAsyncResult::Probe(obj);
             {
                 AutoLock lock(mHost->mLock);
                 if (ar->mException == NULL) {

@@ -4,6 +4,8 @@
 #include "elastos/droid/internal/telephony/dataconnection/DcSwitchState.h"
 #include "elastos/droid/internal/telephony/dataconnection/DctController.h"
 #include "elastos/droid/internal/telephony/dataconnection/DdsScheduler.h"
+#include "elastos/droid/internal/telephony/ModemStackController.h"
+#include "elastos/droid/internal/telephony/SubscriptionController.h"
 #include "elastos/droid/internal/utility/StateMachine.h"
 #include "elastos/droid/os/AsyncResult.h"
 #include "elastos/droid/os/SystemProperties.h"
@@ -13,8 +15,11 @@
 #include <elastos/core/AutoLock.h>
 #include <elastos/utility/logging/Logger.h>
 
+using Elastos::Droid::Internal::Telephony::IISub;
 using Elastos::Droid::Internal::Telephony::IModemStackController;
 using Elastos::Droid::Internal::Telephony::ISubscriptionController;
+using Elastos::Droid::Internal::Telephony::ModemStackController;
+using Elastos::Droid::Internal::Telephony::SubscriptionController;
 using Elastos::Droid::Os::AsyncResult;
 using Elastos::Droid::Os::IAsyncResult;
 using Elastos::Droid::Os::IHandler;
@@ -803,10 +808,10 @@ ECode DdsScheduler::NotifyRequestAccepted(
     if (!isAlreadyAccepted) {
         MarkAccepted(nr);
         Logger::D(TAG, "Accepted req = %s", TO_CSTR(nr));
-        assert(0 && "TODO: SubscriptionController");
-        // AutoPtr<ISubscriptionController> subController = SubscriptionController::GetInstance();
-        // subController->NotifyOnDemandDataSubIdChanged(nr);
-    } else {
+        AutoPtr<ISubscriptionController> subController = SubscriptionController::GetInstance();
+        subController->NotifyOnDemandDataSubIdChanged(nr);
+    }
+    else {
         Logger::D(TAG, "Already accepted/notified req = %s", TO_CSTR(nr));
     }
     return NOERROR;
@@ -839,11 +844,10 @@ ECode DdsScheduler::GetCurrentDds(
 {
     VALIDATE_NOT_NULL(result)
 
-    assert(0 && "TODO: SubscriptionController");
-    // AutoPtr<ISubscriptionController> subController = SubscriptionController::GetInstance();
-    // if (mCurrentDds == ISubscriptionManager::INVALID_SUB_ID) {
-    //     subController->GetDefaultDataSubId(&mCurrentDds);
-    // }
+    AutoPtr<ISubscriptionController> subController = SubscriptionController::GetInstance();
+    if (mCurrentDds == ISubscriptionManager::INVALID_SUB_ID) {
+        IISub::Probe(subController)->GetDefaultDataSubId(&mCurrentDds);
+    }
     Logger::D(TAG, "mCurrentDds = %ld", mCurrentDds);
     *result = mCurrentDds;
     return NOERROR;
@@ -863,10 +867,8 @@ ECode DdsScheduler::GetSubIdFromNetworkRequest(
 {
     VALIDATE_NOT_NULL(result)
 
-    assert(0 && "TODO: SubscriptionController");
-    // AutoPtr<ISubscriptionController> subController = SubscriptionController::GetInstance();
-    // return subController->GetSubIdFromNetworkRequest(n);
-    return NOERROR;
+    AutoPtr<ISubscriptionController> subController = SubscriptionController::GetInstance();
+    return subController->GetSubIdFromNetworkRequest(n, result);
 }
 
 ECode DdsScheduler::RequestDdsSwitch(
@@ -874,7 +876,8 @@ ECode DdsScheduler::RequestDdsSwitch(
 {
     if (n != NULL) {
         mDctController->SetOnDemandDataSubId(n);
-    } else {
+    }
+    else {
         // set DDS to user configured defaultDds SUB.
         // requestPsAttach would make sure that OemHook api to set DDS
         // is called as well as PS ATTACH is requested.
@@ -899,19 +902,18 @@ ECode DdsScheduler::GetMaxDataAllowed(
 {
     VALIDATE_NOT_NULL(result)
 
-    assert(0 && "TODO: ModemStackController");
-    // AutoPtr<IModemStackController> modemStackController = ModemStackController::GetInstance();
-    // Logger::D(TAG, "ModemStackController = %s", TO_CSTR(modemStackController));
-    // Int32 maxData;
-    // modemStackController->GetMaxDataAllowed(&maxData);
-    // Logger::D(TAG, "modem value of max_data = %d", maxData);
-    // Int32 override = SystemProperties::GetInt32(OVERRIDE_MODEM_DUAL_DATA_CAP_PROP,
-    //         MODEM_DATA_CAPABILITY_UNKNOWN);
-    // if (override != MODEM_DATA_CAPABILITY_UNKNOWN) {
-    //     Logger::D(TAG, "Overriding modem max_data_value with %d", override);
-    //     maxData = override;
-    // }
-    // *result = maxData;
+    AutoPtr<ModemStackController> modemStackController = ModemStackController::GetInstance();
+    Logger::D(TAG, "ModemStackController = %s", TO_CSTR(modemStackController));
+    Int32 maxData = modemStackController->GetMaxDataAllowed();
+    Logger::D(TAG, "modem value of max_data = %d", maxData);
+    Int32 override = 0;
+    SystemProperties::GetInt32(OVERRIDE_MODEM_DUAL_DATA_CAP_PROP,
+            MODEM_DATA_CAPABILITY_UNKNOWN, &override);
+    if (override != MODEM_DATA_CAPABILITY_UNKNOWN) {
+        Logger::D(TAG, "Overriding modem max_data_value with %d", override);
+        maxData = override;
+    }
+    *result = maxData;
     return NOERROR;
 }
 

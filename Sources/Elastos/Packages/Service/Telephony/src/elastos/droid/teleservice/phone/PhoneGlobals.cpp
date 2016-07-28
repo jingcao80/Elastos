@@ -33,6 +33,7 @@ using Elastos::Droid::Os::SystemClock;
 using Elastos::Droid::Os::IUpdateLock;
 using Elastos::Droid::Os::CUpdateLock;
 using Elastos::Droid::Os::AsyncResult;
+using Elastos::Droid::Os::IAsyncResult;
 using Elastos::Droid::Os::ServiceManager;
 using Elastos::Droid::Os::ISystemProperties;
 using Elastos::Droid::Os::CSystemProperties;
@@ -274,7 +275,7 @@ ECode PhoneGlobals::MyHandler::HandleMessage(
         {
             AutoPtr<IInterface> obj;
             msg->GetObj((IInterface**)&obj);
-            AutoPtr<AsyncResult> result = (AsyncResult*)IObject::Probe(obj);
+            AutoPtr<AsyncResult> result = (AsyncResult*)IAsyncResult::Probe(obj);
             mHost->OnMMIComplete(result);
             break;
         }
@@ -695,7 +696,7 @@ ECode PhoneGlobals::HandleOtaspEvent(
 
     AutoPtr<IInterface> obj;
     msg->GetObj((IInterface**)&obj);
-    return mOtaUtils->OnOtaProvisionStatusChanged((AsyncResult*)IObject::Probe(obj));
+    return mOtaUtils->OnOtaProvisionStatusChanged((AsyncResult*)IAsyncResult::Probe(obj));
 }
 
 ECode PhoneGlobals::HandleOtaspDisconnect()

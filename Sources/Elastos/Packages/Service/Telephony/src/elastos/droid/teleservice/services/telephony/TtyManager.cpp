@@ -8,6 +8,7 @@
 using Elastos::Droid::Content::CIntentFilter;
 using Elastos::Droid::Content::IIntentFilter;
 using Elastos::Droid::Os::AsyncResult;
+using Elastos::Droid::Os::IAsyncResult;
 using Elastos::Droid::Telecom::ITelecomManager;
 using Elastos::Droid::Telecom::CTelecomManagerHelper;
 using Elastos::Droid::Telecom::ITelecomManagerHelper;
@@ -63,7 +64,7 @@ ECode TtyManager::MyHandler::HandleMessage(
 
             AutoPtr<IInterface> obj;
             msg->GetObj((IInterface**)&obj);
-            AutoPtr<AsyncResult> ar = (AsyncResult*)IObject::Probe(obj);
+            AutoPtr<AsyncResult> ar = (AsyncResult*)IAsyncResult::Probe(obj);
             if (ar->mException != NULL) {
                 Logger::D("TtyManager", "setTTYMode exception: %s", TO_CSTR(ar->mException));
             }
@@ -78,7 +79,7 @@ ECode TtyManager::MyHandler::HandleMessage(
 
             AutoPtr<IInterface> obj;
             msg->GetObj((IInterface**)&obj);
-            AutoPtr<AsyncResult> ar = (AsyncResult*)IObject::Probe(obj);
+            AutoPtr<AsyncResult> ar = (AsyncResult*)IAsyncResult::Probe(obj);
             if (ar->mException != NULL) {
                 Logger::D("TtyManager", "queryTTYMode exception: %s", TO_CSTR(ar->mException));
             }

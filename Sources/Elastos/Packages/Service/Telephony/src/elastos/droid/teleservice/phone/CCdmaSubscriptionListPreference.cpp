@@ -12,6 +12,7 @@ using Elastos::Droid::Content::IContentResolver;
 using Elastos::Droid::Internal::Telephony::IPhoneFactory;
 using Elastos::Droid::Internal::Telephony::CPhoneFactory;
 using Elastos::Droid::Os::AsyncResult;
+using Elastos::Droid::Os::IAsyncResult;
 using Elastos::Droid::Provider::CSettingsGlobal;
 using Elastos::Droid::Provider::ISettingsGlobal;
 using Elastos::Droid::Provider::Settings;
@@ -55,7 +56,7 @@ void CCdmaSubscriptionListPreference::CdmaSubscriptionButtonHandler::HandleSetCd
 
     AutoPtr<IInterface> obj;
     msg->GetObj((IInterface**)&obj);
-    AsyncResult* ar = (AsyncResult*) IObject::Probe(obj);
+    AsyncResult* ar = (AsyncResult*) IAsyncResult::Probe(obj);
 
     if (ar->mException == NULL) {
         // Get the original string entered by the user

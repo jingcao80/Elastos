@@ -12,6 +12,7 @@
 using Elastos::Droid::Content::IContentResolver;
 using Elastos::Droid::Internal::Telephony::ITelephonyProperties;
 using Elastos::Droid::Os::AsyncResult;
+using Elastos::Droid::Os::IAsyncResult;
 using Elastos::Droid::Os::CSystemProperties;
 using Elastos::Droid::Os::ISystemProperties;
 using Elastos::Droid::Provider::CSettingsGlobal;
@@ -58,7 +59,7 @@ void CCdmaSystemSelectListPreference::MyHandler::HandleQueryCdmaRoamingPreferenc
 {
     AutoPtr<IInterface> obj;
     msg->GetObj((IInterface**)&obj);
-    AsyncResult* ar = (AsyncResult*) IObject::Probe(obj);
+    AsyncResult* ar = (AsyncResult*) IAsyncResult::Probe(obj);
 
     if (ar->mException == NULL) {
         Int32 statusCdmaRoamingMode = 0;
@@ -104,7 +105,7 @@ void CCdmaSystemSelectListPreference::MyHandler::HandleSetCdmaRoamingPreference(
 {
     AutoPtr<IInterface> obj;
     msg->GetObj((IInterface**)&obj);
-    AsyncResult* ar = (AsyncResult*) IObject::Probe(obj);
+    AsyncResult* ar = (AsyncResult*) IAsyncResult::Probe(obj);
 
     String value;
     mHost->GetValue(&value);

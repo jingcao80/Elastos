@@ -29,6 +29,7 @@ using Elastos::Droid::Net::IUri;
 using Elastos::Droid::Net::CUriHelper;
 using Elastos::Droid::Net::IUriHelper;
 using Elastos::Droid::Os::AsyncResult;
+using Elastos::Droid::Os::IAsyncResult;
 using Elastos::Droid::Os::ISystemProperties;
 using Elastos::Droid::Os::CSystemProperties;
 using Elastos::Droid::Os::IUserHandleHelper;
@@ -84,7 +85,7 @@ void CMobileNetworkSettings::MyHandler::HandleGetPreferredNetworkTypeResponse(
 {
     AutoPtr<IInterface> obj;
     msg->GetObj((IInterface**)&obj);
-    AutoPtr<AsyncResult> ar = (AsyncResult*)IObject::Probe(obj);
+    AutoPtr<AsyncResult> ar = (AsyncResult*)IAsyncResult::Probe(obj);
 
     if (ar->mException == NULL) {
         AutoPtr<IArrayOf> array = IArrayOf::Probe(ar->mResult);
@@ -169,7 +170,7 @@ void CMobileNetworkSettings::MyHandler::HandleSetPreferredNetworkTypeResponse(
 {
     AutoPtr<IInterface> obj;
     msg->GetObj((IInterface**)&obj);
-    AutoPtr<AsyncResult> ar = (AsyncResult*)IObject::Probe(obj);
+    AutoPtr<AsyncResult> ar = (AsyncResult*)IAsyncResult::Probe(obj);
 
     if (ar->mException == NULL) {
         String value;

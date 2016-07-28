@@ -50,6 +50,7 @@ using Elastos::Droid::Net::Uri;
 using Elastos::Droid::Os::Binder;
 using Elastos::Droid::Os::Build;
 using Elastos::Droid::Os::CUserHandle;
+using Elastos::Droid::Os::IAsyncResult;
 using Elastos::Droid::Os::IPowerManager;
 using Elastos::Droid::Os::SystemProperties;
 using Elastos::Droid::Os::UserHandle;
@@ -313,14 +314,14 @@ ECode InboundSmsHandler::DeliveringState::ProcessMessage(
     switch (what) {
         case EVENT_NEW_SMS:
             // handle new SMS from RIL
-            mHost->HandleNewSms((AsyncResult*)IObject::Probe(obj));
+            mHost->HandleNewSms((AsyncResult*)IAsyncResult::Probe(obj));
             mHost->SendMessage(EVENT_RETURN_TO_IDLE);
             *result = IState::HANDLED;
             return NOERROR;
 
         case EVENT_INJECT_SMS:
             // handle new injected SMS
-            mHost->HandleInjectSms((AsyncResult*)IObject::Probe(obj));
+            mHost->HandleInjectSms((AsyncResult*)IAsyncResult::Probe(obj));
             mHost->SendMessage(EVENT_RETURN_TO_IDLE);
             *result = IState::HANDLED;
             return NOERROR;

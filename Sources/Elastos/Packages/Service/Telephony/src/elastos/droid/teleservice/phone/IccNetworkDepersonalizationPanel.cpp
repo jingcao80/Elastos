@@ -11,6 +11,7 @@
 using Elastos::Droid::Content::Res::IResources;
 using Elastos::Droid::Internal::Telephony::IIccCard;
 using Elastos::Droid::Os::AsyncResult;
+using Elastos::Droid::Os::IAsyncResult;
 using Elastos::Droid::Os::IMessageHelper;
 using Elastos::Droid::Os::CMessageHelper;
 using Elastos::Droid::Text::TextUtils;
@@ -79,7 +80,7 @@ ECode IccNetworkDepersonalizationPanel::MyHandler::HandleMessage(
     if (what == EVENT_ICC_NTWRK_DEPERSONALIZATION_RESULT) {
         AutoPtr<IInterface> obj;
         msg->GetObj((IInterface**)&obj);
-        AutoPtr<AsyncResult> res = (AsyncResult*)IObject::Probe(obj);
+        AutoPtr<AsyncResult> res = (AsyncResult*)IAsyncResult::Probe(obj);
         if (res->mException != NULL) {
             if (DBG) mHost->Log(String("network depersonalization request failure."));
             mHost->IndicateError();

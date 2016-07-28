@@ -20,6 +20,7 @@ using Elastos::Droid::Content::CIntent;
 using Elastos::Droid::Content::IIntentFilter;
 using Elastos::Droid::Content::CIntentFilter;
 using Elastos::Droid::Content::Res::IResources;
+using Elastos::Droid::Os::IAsyncResult;
 using Elastos::Droid::Os::ISystemProperties;
 using Elastos::Droid::Os::CSystemProperties;
 using Elastos::Droid::Internal::Telephony::ITelephonyProperties;
@@ -98,7 +99,7 @@ ECode CEmergencyCallbackModeService::MyHandler::HandleMessage(
         case ECM_TIMER_RESET:
             AutoPtr<IInterface> obj;
             msg->GetObj((IInterface**)&obj);
-            AutoPtr<AsyncResult> result = (AsyncResult*)IObject::Probe(obj);
+            AutoPtr<AsyncResult> result = (AsyncResult*)IAsyncResult::Probe(obj);
             mHost->ResetEcmTimer(result);
             break;
     }
