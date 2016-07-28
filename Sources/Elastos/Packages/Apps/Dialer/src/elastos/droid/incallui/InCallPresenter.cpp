@@ -4,6 +4,7 @@
 #include "Elastos.Droid.View.h"
 #include "Elastos.CoreLibrary.Utility.h"
 #include "Elastos.CoreLibrary.Utility.Concurrent.h"
+#include "elastos/droid/incallui/CInCallActivity.h"
 #include "elastos/droid/incallui/InCallPresenter.h"
 #include "elastos/droid/incallui/TelecomAdapter.h"
 #include "elastos/droid/incalluibind/ObjectFactory.h"
@@ -1052,8 +1053,7 @@ AutoPtr<InCallCameraManager> InCallPresenter::GetInCallCameraManager()
     {
         AutoLock lock(this);
         if (mInCallCameraManager == NULL) {
-            mInCallCameraManager = new InCallCameraManager();
-            mInCallCameraManager->constructor(mContext);
+            mInCallCameraManager = new InCallCameraManager(mContext);
         }
 
         return mInCallCameraManager;

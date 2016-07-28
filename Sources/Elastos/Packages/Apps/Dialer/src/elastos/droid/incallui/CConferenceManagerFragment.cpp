@@ -1,8 +1,20 @@
 
+#include "Elastos.Droid.App.h"
+#include "Elastos.Droid.Widget.h"
 #include "elastos/droid/incallui/CConferenceManagerFragment.h"
 #include "elastos/droid/incallui/ConferenceManagerPresenter.h"
+#include "R.h"
+#include <elastos/droid/text/TextUtils.h>
+#include <elastos/core/CoreUtils.h>
 
+using Elastos::Droid::App::IActivity;
+using Elastos::Droid::App::IActionBar;
+using Elastos::Droid::Text::TextUtils;
 using Elastos::Droid::View::EIID_IViewOnClickListener;
+using Elastos::Droid::Widget::IImageView;
+using Elastos::Droid::Widget::ITextView;
+using Elastos::Droid::Dialer::R;
+using Elastos::Core::CoreUtils;
 
 namespace Elastos {
 namespace Droid {
@@ -17,7 +29,7 @@ ECode CConferenceManagerFragment::EndButtonClickListener::OnClick(
     /* [in] */ IView* v)
 {
     ConferenceManagerPresenter* presenter = (ConferenceManagerPresenter*)mHost->GetPresenter().Get();
-    presenter->EndConferenceConnection(rowId);
+    presenter->EndConferenceConnection(mRowId);
     return NOERROR;
 }
 
@@ -31,7 +43,7 @@ ECode CConferenceManagerFragment::SeparateButtonClickListener::OnClick(
     /* [in] */ IView* v)
 {
     ConferenceManagerPresenter* presenter = (ConferenceManagerPresenter*)mHost->GetPresenter().Get();
-    presenter->SeparateConferenceConnection(rowId);
+    presenter->SeparateConferenceConnection(mRowId);
     return NOERROR;
 }
 
@@ -133,7 +145,7 @@ ECode CConferenceManagerFragment::SetVisible(
 
         AutoPtr<CallList> calls = CallList::GetInstance();
         ConferenceManagerPresenter* presenter = (ConferenceManagerPresenter*)GetPresenter().Get();
-        presenter->Init(activity, calls);
+        presenter->Init(IContext::Probe(activity), calls);
         AutoPtr<IView> v;
         GetView((IView**)&v);
         v->SetVisibility(IView::VISIBLE);
@@ -179,36 +191,77 @@ ECode CConferenceManagerFragment::DisplayCallerInfoForConferenceRow(
     /* [in] */ const String& lookupKey,
     /* [in] */ IUri* photoUri)
 {
+    AutoPtr<IView> conferenceView = IView::Probe((*mConferenceCallList)[rowId]);
     AutoPtr<IView> v;
-    IView::Probe((*mConferenceCallList)[rowId])->FindViewById(R::id::callerPhoto, (IView**)&v);
+    conferenceView->FindViewById(R::id::callerPhoto, (IView**)&v);
     AutoPtr<IImageView> photoView = IImageView::Probe(v);
+    v = NULL;
+    conferenceView->FindViewById(R::id::conferenceCallerName, (IView**)&v);
+    AutoPtr<ITextView> nameTextView = ITextView::Probe(v);
+    v = NULL;
+    conferenceView->FindViewById(R::id::conferenceCallerNumber, (IView**)&v);
+    AutoPtr<ITextView> numberTextView = ITextView::Probe(v);
+    v = NULL;
+    conferenceView->FindViewById(R::id::conferenceCallerNumberType, (IView**)&v);
+    AutoPtr<ITextView> numberTypeTextView = ITextView::Probe(v);
 
-    final ImageView photoView = (ImageView) mConferenceCallList[rowId].findViewById(
-            R.id.callerPhoto);
-    final TextView nameTextView = (TextView) mConferenceCallList[rowId].findViewById(
-            R.id.conferenceCallerName);
-    final TextView numberTextView = (TextView) mConferenceCallList[rowId].findViewById(
-            R.id.conferenceCallerNumber);
-    final TextView numberTypeTextView = (TextView) mConferenceCallList[rowId].findViewById(
-            R.id.conferenceCallerNumberType);
-
-    DefaultImageRequest imageRequest = (photoUri != null) ? null :
-            new DefaultImageRequest(callerName, lookupKey, true /* isCircularPhoto */);
-    mContactPhotoManager.loadDirectoryPhoto(photoView, photoUri, false, true, imageRequest);
+    assert(0 && "TODO");
+    // DefaultImageRequest imageRequest = (photoUri != null) ? null :
+    //         new DefaultImageRequest(callerName, lookupKey, true /* isCircularPhoto */);
+    // mContactPhotoManager.loadDirectoryPhoto(photoView, photoUri, false, true, imageRequest);
 
     // set the caller name
-    nameTextView.setText(callerName);
+    nameTextView->SetText(CoreUtils::Convert(callerName));
 
     // set the caller number in subscript, or make the field disappear.
-    if (TextUtils.isEmpty(callerNumber)) {
-        numberTextView.setVisibility(View.GONE);
-        numberTypeTextView.setVisibility(View.GONE);
-    } else {
-        numberTextView.setVisibility(View.VISIBLE);
-        numberTextView.setText(callerNumber);
-        numberTypeTextView.setVisibility(View.VISIBLE);
-        numberTypeTextView.setText(callerNumberType);
+    if (TextUtils::IsEmpty(callerNumber)) {
+        IView::Probe(numberTextView)->SetVisibility(IView::GONE);
+        IView::Probe(numberTypeTextView)->SetVisibility(IView::GONE);
     }
+    else {
+        IView::Probe(numberTextView)->SetVisibility(IView::VISIBLE);
+        numberTextView->SetText(CoreUtils::Convert(callerNumber));
+        IView::Probe(numberTypeTextView)->SetVisibility(IView::VISIBLE);
+        numberTypeTextView->SetText(CoreUtils::Convert(callerNumberType));
+    }
+    return NOERROR;
+}
+
+ECode CConferenceManagerFragment::SetupEndButtonForRow(
+    /* [in] */ Int32 rowId,
+    /* [in] */ Boolean canDisconnect)
+{
+    AutoPtr<IView> endButton;
+    IView::Probe((*mConferenceCallList)[rowId])->FindViewById(
+            R::id::conferenceCallerDisconnect, (IView**)&endButton);
+
+    // Comment
+    if (canDisconnect) {
+        endButton->SetOnClickListener(new EndButtonClickListener(rowId, this));
+        endButton->SetVisibility(IView::VISIBLE);
+    }
+    else {
+        endButton->SetVisibility(IView::INVISIBLE);
+    }
+    return NOERROR;
+}
+
+ECode CConferenceManagerFragment::SetupSeparateButtonForRow(
+    /* [in] */ Int32 rowId,
+    /* [in] */ Boolean canSeparate)
+{
+    AutoPtr<IView> separateButton;
+    IView::Probe((*mConferenceCallList)[rowId])->FindViewById(
+            R::id::conferenceCallerSeparate, (IView**)&separateButton);
+
+    if (canSeparate) {
+        separateButton->SetOnClickListener(new SeparateButtonClickListener(rowId, this));
+        separateButton->SetVisibility(IView::VISIBLE);
+    }
+    else {
+        separateButton->SetVisibility(IView::INVISIBLE);
+    }
+    return NOERROR;
 }
 
 } // namespace InCallUI

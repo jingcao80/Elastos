@@ -3,6 +3,9 @@
 #define __ELASTOS_DROID_INCALLUI_CONFERENCEMANAGERPRESENTER_H__
 
 #include "_Elastos.Droid.Dialer.h"
+#include "elastos/droid/incallui/CallList.h"
+#include "elastos/droid/incallui/ContactInfoCache.h"
+#include "elastos/droid/incallui/Presenter.h"
 
 using Elastos::Droid::Content::IContext;
 

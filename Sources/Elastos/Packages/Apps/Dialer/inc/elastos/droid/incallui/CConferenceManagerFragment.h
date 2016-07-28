@@ -118,14 +118,14 @@ public:
         /* [in] */ IUri* photoUri);
 
     // @Override
-    CARAPI SetupSeparateButtonForRow(
-        /* [in] */ Int32 rowId,
-        /* [in] */ Boolean canSeparate);
-
-    // @Override
     CARAPI SetupEndButtonForRow(
         /* [in] */ Int32 rowId,
         /* [in] */ Boolean canDisconnect);
+
+    // @Override
+    CARAPI SetupSeparateButtonForRow(
+        /* [in] */ Int32 rowId,
+        /* [in] */ Boolean canSeparate);
 
 private:
     AutoPtr< ArrayOf<IViewGroup*> > mConferenceCallList;
