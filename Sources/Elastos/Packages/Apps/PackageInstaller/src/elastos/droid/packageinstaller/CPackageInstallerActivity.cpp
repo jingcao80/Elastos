@@ -47,6 +47,7 @@ using Elastos::Droid::View::EIID_IViewOnClickListener;
 using Elastos::Droid::View::ILayoutInflater;
 using Elastos::Droid::View::IViewGroup;
 using Elastos::Droid::Widget::EIID_ITabHostOnTabChangeListener;
+using Elastos::Droid::Widget::CAppSecurityPermissions;
 using Elastos::Droid::Widget::IAppSecurityPermissions;
 using Elastos::Droid::Widget::IButton;
 using Elastos::Droid::Widget::ITabHost;
@@ -728,12 +729,11 @@ void CPackageInstallerActivity::StartInstallConfirm()
     Int32 msg = 0;
     if (mPkgInfo != NULL) {
         AutoPtr<IAppSecurityPermissions> perms;
-        Logger::E(TAG, "TODO need CAppSecurityPermissions!");
-        // CAppSecurityPermissions::New(this, mPkgInfo, (IAppSecurityPermissions**)&perms);
+        CAppSecurityPermissions::New(this, mPkgInfo, (IAppSecurityPermissions**)&perms);
         Int32 NP = 0;
-        //perms->GetPermissionCount(IAppSecurityPermissions::WHICH_PERSONAL, &NP);
+        perms->GetPermissionCount(IAppSecurityPermissions::WHICH_PERSONAL, &NP);
         Int32 ND = 0;
-        //perms->GetPermissionCount(IAppSecurityPermissions::WHICH_DEVICE, &ND);
+        perms->GetPermissionCount(IAppSecurityPermissions::WHICH_DEVICE, &ND);
         if (mAppInfo != NULL) {
             Int32 flags = 0;
             mAppInfo->GetFlags(&flags);

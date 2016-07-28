@@ -10,6 +10,7 @@
 #include "Elastos.Droid.Os.h"
 #include "Elastos.Droid.Widget.h"
 
+using Elastos::Droid::Animation::ITimeInterpolator;
 using Elastos::Droid::Database::DataSetObserver;
 using Elastos::Droid::Graphics::IRect;
 using Elastos::Droid::Graphics::Drawable::IDrawable;
@@ -275,6 +276,7 @@ private:
     class MyInterpolator
         : public Object
         , public IInterpolator
+        , public ITimeInterpolator
     {
     public:
         CAR_INTERFACE_DECL()
@@ -283,6 +285,9 @@ private:
         CARAPI GetInterpolation(
             /* [in] */ Float input,
             /* [out] */ Float* interpolation);
+
+        CARAPI HasNativeInterpolator(
+            /* [out] */ Boolean* res);
     };
 
     class EndScrollRunnable : public Runnable

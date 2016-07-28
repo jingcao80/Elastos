@@ -116,7 +116,7 @@ private:
 
     private:
         AutoPtr<IContext> mContext;
-        CSmsApplication* mHost;
+        AutoPtr<CSmsApplication> mHost;
     };
 
 public:

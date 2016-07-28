@@ -59,7 +59,7 @@ installation screens
         android:layout_below="@id/app_name">
         <ProgressBar
             android:id="@+id/progress_bar"
-            style="@android:style/Widget.Holo.ProgressBar.Horizontal"
+            style="?android:attr/progressBarStyleHorizontal"
             android:layout_width="match_parent"
             android:layout_height="wrap_content" />
     </FrameLayout>

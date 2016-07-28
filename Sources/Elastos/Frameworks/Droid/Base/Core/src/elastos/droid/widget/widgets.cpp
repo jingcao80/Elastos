@@ -14,6 +14,7 @@
 #include "elastos/droid/widget/CAdapterViewFlipper.h"
 #include "elastos/droid/widget/CAlphabetIndexer.h"
 #include "elastos/droid/widget/CAnalogClock.h"
+#include "elastos/droid/widget/CAppSecurityPermissionsPermissionItemView.h"
 #include "elastos/droid/widget/CArrayAdapter.h"
 #include "elastos/droid/widget/CAutoCompleteTextView.h"
 #include "elastos/droid/widget/CBlinkLayout.h"
@@ -157,6 +158,7 @@ CAR_OBJECT_IMPL(CAdapterViewAnimatorSavedState)
 CAR_OBJECT_IMPL(CAdapterViewFlipper)
 CAR_OBJECT_IMPL(CAlphabetIndexer)
 CAR_OBJECT_IMPL(CAnalogClock)
+CAR_OBJECT_IMPL(CAppSecurityPermissionsPermissionItemView)
 CAR_OBJECT_IMPL(CArrayAdapter)
 CAR_OBJECT_IMPL(CAutoCompleteTextView)
 CAR_OBJECT_IMPL(CBlinkLayout)

@@ -9,6 +9,7 @@
 #include <elastos/core/StringBuilder.h>
 #include <elastos/utility/logging/Slogger.h>
 
+using Elastos::Droid::Animation::EIID_ITimeInterpolator;
 using Elastos::Droid::Content::Res::IResources;
 using Elastos::Droid::Content::Res::ITypedArray;
 using Elastos::Droid::Database::IDataSetObserver;
@@ -82,7 +83,7 @@ ECode ViewPager::ItemInfoComparator::Compare(
 // ViewPager::MyInterpolator
 //=================================================================
 
-CAR_INTERFACE_IMPL(ViewPager::MyInterpolator, Object, IInterpolator)
+CAR_INTERFACE_IMPL_2(ViewPager::MyInterpolator, Object, IInterpolator, ITimeInterpolator)
 
 ECode ViewPager::MyInterpolator::GetInterpolation(
     /* [in] */ Float t,
@@ -94,6 +95,13 @@ ECode ViewPager::MyInterpolator::GetInterpolation(
     return NOERROR;
 }
 
+ECode ViewPager::MyInterpolator::HasNativeInterpolator(
+    /* [out] */ Boolean* res)
+{
+    VALIDATE_NOT_NULL(res)
+    *res = FALSE;
+    return NOERROR;
+}
 
 //=================================================================
 // ViewPager::EndScrollRunnable
@@ -664,7 +672,7 @@ void ViewPager::SetCurrentItemInternal(
     if (item < 0) {
         item = 0;
     }
-    else if (mAdapter->GetCount(&count), item <= count) {
+    else if (mAdapter->GetCount(&count), item >= count) {
         item = count - 1;
     }
     Int32 pageLimit = mOffscreenPageLimit;

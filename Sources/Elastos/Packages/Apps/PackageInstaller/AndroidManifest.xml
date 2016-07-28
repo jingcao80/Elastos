@@ -1,6 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
-<manifest xmlns:android="http://schemas.android.com/apk/res/android" package="Elastos.Droid.PackageInstaller">
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+          package="Elastos.Droid.PackageInstaller">
+
     <original-package android:name="Elastos.Droid.PackageInstaller" />
+
     <uses-permission android:name="android.permission.INSTALL_PACKAGES" />
     <uses-permission android:name="android.permission.DELETE_PACKAGES" />
     <uses-permission android:name="android.permission.CLEAR_APP_CACHE" />
@@ -16,6 +19,7 @@
             android:allowBackup="false"
             android:theme="@style/Theme.DialogWhenLarge"
             android:supportsRtl="true">
+
         <activity android:name="Elastos.Droid.PackageInstaller.CPackageInstallerActivity"
                 android:configChanges="orientation|keyboardHidden|screenSize"
                 android:excludeFromRecents="true">
@@ -38,6 +42,26 @@
             </intent-filter>
         </activity>
 
+        <activity android:name="Elastos.Droid.PackageInstaller.CInstallAppProgress"
+                android:configChanges="orientation|keyboardHidden|screenSize"
+                android:exported="false" />
+
+        <activity android:name="Elastos.Droid.PackageInstaller.CUninstallerActivity"
+                android:configChanges="orientation|keyboardHidden|screenSize"
+                android:excludeFromRecents="true"
+                android:theme="@style/Theme.AlertDialogActivity">
+            <intent-filter>
+                <action android:name="android.intent.action.DELETE" />
+                <action android:name="android.intent.action.UNINSTALL_PACKAGE" />
+                <category android:name="android.intent.category.DEFAULT" />
+                <data android:scheme="package" />
+            </intent-filter>
+        </activity>
+
+        <activity android:name="Elastos.Droid.PackageInstaller.CUninstallAppProgress"
+                android:configChanges="orientation|keyboardHidden|screenSize"
+                android:exported="false" />
+
         <activity android:name="Elastos.Droid.PackageInstaller.CGrantActivity"
                 android:configChanges="orientation|keyboardHidden|screenSize"
                 android:excludeFromRecents="true"
@@ -45,25 +69,6 @@
             <intent-filter>
                 <action android:name="android.content.pm.action.REQUEST_PERMISSION" />
                 <category android:name="android.intent.category.DEFAULT" />
-            </intent-filter>
-        </activity>
-
-        <activity android:name="Elastos.Droid.PackageInstaller.CInstallAppProgress"
-                android:configChanges="orientation|keyboardHidden|screenSize"
-                android:exported="false" />
-
-        <activity android:name="Elastos.Droid.PackageInstaller.CUninstallAppProgress"
-                android:configChanges="orientation|keyboardHidden|screenSize"
-                android:exported="false" />
-
-        <activity android:name="Elastos.Droid.PackageInstaller.CUninstallerActivity"
-                android:configChanges="orientation|keyboardHidden|screenSize"
-                android:excludeFromRecents="true">
-            <intent-filter>
-                <action android:name="android.intent.action.DELETE" />
-                <action android:name="android.intent.action.UNINSTALL_PACKAGE" />
-                <category android:name="android.intent.category.DEFAULT" />
-                <data android:scheme="package" />
             </intent-filter>
         </activity>
 

@@ -50,10 +50,10 @@ module
     [local]
     class CCaffeinatedScrollView {
         constructor(
-            [in] IContext* context);
+            [in] IContext* ctx);
 
         constructor(
-            [in] IContext* context,
+            [in] IContext* ctx,
             [in] IAttributeSet* attrs);
 
         interface ICaffeinatedScrollView;

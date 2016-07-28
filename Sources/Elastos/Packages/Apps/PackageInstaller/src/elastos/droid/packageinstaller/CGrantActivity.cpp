@@ -11,7 +11,7 @@ using Elastos::Droid::Content::Pm::IPermissionInfo;
 using Elastos::Droid::View::EIID_IViewOnClickListener;
 using Elastos::Droid::View::ILayoutInflater;
 using Elastos::Droid::View::IViewGroup;
-//using Elastos::Droid::Widget::CAppSecurityPermissions;
+using Elastos::Droid::Widget::CAppSecurityPermissions;
 using Elastos::Droid::Widget::ITabHost;
 using Elastos::Droid::Widget::ITabSpec;
 using Elastos::Droid::Widget::ITextView;
@@ -56,10 +56,9 @@ ECode CGrantActivity::OnCreate(
 
     AutoPtr<IPackageInfo> pkgInfo = GetUpdatedPackageInfo();
     AutoPtr<IAppSecurityPermissions> perms;
-    Logger::D("CGrantActivity", "TODO: need CAppSecurityPermissions!");
-    // CAppSecurityPermissions::New(this, pkgInfo);
+    CAppSecurityPermissions::New(this, pkgInfo, (IAppSecurityPermissions**)&perms);
     Int32 count = 0;
-    // perms->GetPermissionCount(AppSecurityPermissions::WHICH_NEW, &count);
+    perms->GetPermissionCount(IAppSecurityPermissions::WHICH_NEW, &count);
     if (count == 0) {
         // The updated permissions dialog said there are no new permissions.
         // This should never occur if mRequested_permissions.length > 0,

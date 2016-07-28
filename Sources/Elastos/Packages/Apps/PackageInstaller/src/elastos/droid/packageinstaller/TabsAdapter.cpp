@@ -2,6 +2,7 @@
 #include "elastos/droid/packageinstaller/CCaffeinatedScrollView.h"
 #include "elastos/droid/packageinstaller/TabsAdapter.h"
 
+using Elastos::Droid::Graphics::CRect;
 using Elastos::Droid::View::CView;
 using Elastos::Droid::Widget::EIID_ITabHostOnTabChangeListener;
 using Elastos::Droid::Widget::EIID_ITabHostTabContentFactory;
@@ -73,6 +74,7 @@ TabsAdapter::TabsAdapter(
     mTabHost->SetOnTabChangedListener(this);
     mViewPager->SetAdapter(this);
     mViewPager->SetOnPageChangeListener(this);
+    CRect::New((IRect**)&mTempRect);
 }
 
 ECode TabsAdapter::AddTab(

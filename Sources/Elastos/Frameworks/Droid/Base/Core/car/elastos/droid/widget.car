@@ -145,6 +145,7 @@ module
     interface Elastos.Droid.Content.IIntent;
     interface Elastos.Droid.Content.IDialogInterfaceOnClickListener;
     interface Elastos.Droid.Content.Pm.IApplicationInfo;
+    interface Elastos.Droid.Content.Pm.IPackageInfo;
     interface Elastos.Droid.Database.ICursor;
     interface Elastos.Droid.Database.IDataSetObserver;
     interface Elastos.Droid.Database.IContentObserver;
@@ -3277,6 +3278,40 @@ module
         interface ITextView;
         interface IView;
         interface IOnPreDrawListener;
+        interface IDrawableCallback;
+        interface IKeyEventCallback;
+        interface IAccessibilityEventSource;
+    }
+
+    [local]
+    class CAppSecurityPermissions {
+        constructor(
+            [in] IContext* context,
+            [in] String packageName);
+
+        constructor(
+            [in] IContext* context,
+            [in] IPackageInfo* info);
+
+        interface IAppSecurityPermissions;
+    }
+
+    singleton class CAppSecurityPermissionsHelper {
+        interface IAppSecurityPermissionsHelper;
+    }
+
+    [local]
+    class CAppSecurityPermissionsPermissionItemView {
+        constructor(
+            [in] IContext* ctx,
+            [in] IAttributeSet* attrs);
+
+        interface IPermissionItemView;
+        interface ILinearLayout;
+        interface IViewGroup;
+        interface IView;
+        interface IViewParent;
+        interface IViewManager;
         interface IDrawableCallback;
         interface IKeyEventCallback;
         interface IAccessibilityEventSource;
