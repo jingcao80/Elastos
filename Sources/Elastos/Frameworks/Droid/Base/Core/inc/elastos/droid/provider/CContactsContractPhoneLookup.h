@@ -32,6 +32,9 @@ public:
      */
     CARAPI GetCONTENT_FILTER_URI(
         /* [out] */ IUri** uri);
+
+    CARAPI GetENTERPRISE_CONTENT_FILTER_URI(
+        /* [out] */ IUri** uri);
 };
 
 } //Provider

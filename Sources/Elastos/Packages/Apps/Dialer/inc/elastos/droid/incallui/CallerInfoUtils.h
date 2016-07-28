@@ -14,6 +14,15 @@ namespace InCallUI {
  */
 class CallerInfoUtils
 {
+private:
+    // class MyOnLoadCompleteListener
+    //     : public Object
+    //     , public IOnLoadCompleteListener
+    // {
+    // public:
+    //     CAR_INTERFACE_DECL()
+    // };
+
 public:
     /**
      * This is called to get caller info for a call. This will return a CallerInfo
@@ -26,7 +35,7 @@ public:
         /* [in] */ Call* call,
         /* [in] */ IOnQueryCompleteListener* listener);
 
-    static CARAPI_(AutoPtr<CallerInfo>) buildCallerInfo(
+    static CARAPI_(AutoPtr<CallerInfo>) BuildCallerInfo(
         /* [in] */ IContext* context,
         /* [in] */ Call* call);
 

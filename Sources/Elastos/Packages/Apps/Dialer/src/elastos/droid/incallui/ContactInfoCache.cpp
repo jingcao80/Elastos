@@ -11,6 +11,7 @@
 #include <elastos/utility/logging/Logger.h>
 #include "R.h"
 #include "Elastos.Droid.Internal.h"
+#include "Elastos.Droid.Provider.h"
 
 using Elastos::Droid::Content::Res::IResources;
 using Elastos::Droid::Contacts::Common::Util::PhoneNumberHelper;
@@ -39,15 +40,15 @@ namespace Elastos {
 namespace Droid {
 namespace InCallUI {
 
-//================================================================
+// ================================================================
 // ContactInfoCache::FindInfoCallback
-//================================================================
-CAR_INTERFACE_DECL(ContactInfoCache::FindInfoCallback, Object, IOnQueryCompleteListener)
+// ================================================================
+CAR_INTERFACE_IMPL(ContactInfoCache::FindInfoCallback, Object, IOnQueryCompleteListener)
 
 ECode ContactInfoCache::FindInfoCallback::OnQueryComplete(
     /* [in] */ Int32 token,
     /* [in] */ IInterface* cookie,
-    /* [in] */ ICallerInfo* ci)
+    /* [in] */ ICallerInfo* callerInfo)
 {
     mHost->FindInfoQueryComplete((Call*)ICall::Probe(cookie), (CallerInfo*)callerInfo, mIsIncoming, TRUE);
     return NOERROR;
@@ -91,7 +92,7 @@ ECode ContactInfoCache::PhoneNumberServiceListener::OnPhoneNumberInfoComplete(
         AutoPtr<IContactsContractCommonDataKindsPhone> phone;
         CContactsContractCommonDataKindsPhone::AcquireSingleton((IContactsContractCommonDataKindsPhone**)&phone);
         AutoPtr<IResources> res;
-        mContext->GetResources((IResources**)&res);
+        mHost->mContext->GetResources((IResources**)&res);
         AutoPtr<ICharSequence> typeStr;
         AutoPtr<ICharSequence> cs;
         CString::New(label, (ICharSequence**)&cs);
@@ -120,9 +121,9 @@ ECode ContactInfoCache::PhoneNumberServiceListener::OnPhoneNumberInfoComplete(
     if ((info->GetImageUrl(&url), url.IsNull()) && (info->IsBusiness(&isBusiness), isBusiness)) {
         Logger::D(TAG, "Business has no image. Using default.");
         AutoPtr<IResources> res;
-        mContext->GetResources((IResources**)&res);
+        mHost->mContext->GetResources((IResources**)&res);
         AutoPtr<IDrawable> temp;
-        res->GetDrawable(R::drawable::img_business, (IDrawable**)&temp)
+        res->GetDrawable(Elastos::Droid::Dialer::R::drawable::img_business, (IDrawable**)&temp);
         entry->mPhoto = temp;
     }
 
@@ -170,7 +171,7 @@ const String ContactInfoCache::TAG("ContactInfoCache");
 const Int32 ContactInfoCache::TOKEN_UPDATE_PHOTO_FOR_CALL_STATE;
 AutoPtr<ContactInfoCache> ContactInfoCache::sCache;
 
-AutoPtr<ContactCacheEntry> ContactInfoCache::GetInstance(
+AutoPtr<ContactInfoCache> ContactInfoCache::GetInstance(
     /* [in] */ IContext* context)
 {
     if (sCache == NULL) {
@@ -189,15 +190,15 @@ ContactInfoCache::ContactInfoCache(
     // mPhoneNumberService = ServiceFactory.newPhoneNumberService(context);
 }
 
-AutoPtr<ContactCacheEntry> ContactInfoCache::GetInfo(
+AutoPtr<ContactInfoCache::ContactCacheEntry> ContactInfoCache::GetInfo(
     /* [in] */ const String& callId)
 {
     HashMap<String, AutoPtr<ContactCacheEntry> >::Iterator it = mInfoMap.Find(callId);
-    if (it != mInfoMap.End) return it->mSecond;
+    if (it != mInfoMap.End()) return it->mSecond;
     return NULL;
 }
 
-AutoPtr<ContactCacheEntry> ContactInfoCache::BuildCacheEntryFromCall(
+AutoPtr<ContactInfoCache::ContactCacheEntry> ContactInfoCache::BuildCacheEntryFromCall(
     /* [in] */ IContext* context,
     /* [in] */ Call* call,
     /* [in] */ Boolean isIncoming)
@@ -221,7 +222,7 @@ void ContactInfoCache::FindInfo(
     Looper::GetMainLooper()->GetThread((IThread**)&thread);
     if (FAILED(preconditions->CheckState(thread == Thread::GetCurrentThread())))
         return;
-    if (FAILED(preconditions->CheckNotNull(callBacks)))
+    if (FAILED(preconditions->CheckNotNull(callback)))
         return;
 
     String callId = call->GetId();
@@ -315,8 +316,11 @@ void ContactInfoCache::FindInfoQueryComplete(
             Logger::D(TAG, "Contact lookup. Local contact found, starting image load");
             // Load the image with a callback to update the image state.
             // When the load is finished, onImageLoadComplete() will be called.
-            ContactsAsyncHelper::StartObtainPhotoAsync(TOKEN_UPDATE_PHOTO_FOR_CALL_STATE,
-                    mContext, cacheEntry->mDisplayPhotoUri, this, callId);
+            AutoPtr<ICharSequence> cs;
+            CString::New(callId, (ICharSequence**)&cs);
+            ContactsAsyncHelper::StartObtainPhotoAsync(
+                    TOKEN_UPDATE_PHOTO_FOR_CALL_STATE, mContext, cacheEntry->mDisplayPhotoUri,
+                    IOnImageLoadCompleteListener::Probe(this), cs);
         }
         else {
             if (callerInfo->mContactExists) {
@@ -353,7 +357,7 @@ ECode ContactInfoCache::OnImageLoadComplete(
         ClearCallbacks(callId);
         return NOERROR;
     }
-    Logger::D(TAG, "setting photo for entry: ", entry);
+    Logger::D(TAG, "setting photo for entry: %s", TO_CSTR(entry));
 
     // Conference call icons are being handled in CallCardPresenter.
     if (photo != NULL) {
@@ -384,7 +388,7 @@ void ContactInfoCache::ClearCache()
     mCallBacks.Clear();
 }
 
-AutoPtr<ContactCacheEntry> ContactInfoCache::BuildEntry(
+AutoPtr<ContactInfoCache::ContactCacheEntry> ContactInfoCache::BuildEntry(
     /* [in] */ IContext* context,
     /* [in] */ const String& callId,
     /* [in] */ CallerInfo* info,
@@ -410,14 +414,14 @@ AutoPtr<ContactCacheEntry> ContactInfoCache::BuildEntry(
         else {
             AutoPtr<IResources> res;
             context->GetResources((IResources**)&res);
-            res->GetDrawable(R::drawable::img_no_image, (IDrawable**)&photo);
+            res->GetDrawable(Elastos::Droid::Dialer::R::drawable::img_no_image, (IDrawable**)&photo);
             photo->SetAutoMirrored(TRUE);
         }
     }
     else if (info->mContactDisplayPhotoUri == NULL) {
         AutoPtr<IResources> res;
         context->GetResources((IResources**)&res);
-        res->GetDrawable(R::drawable::img_no_image, (IDrawable**)&photo);
+        res->GetDrawable(Elastos::Droid::Dialer::R::drawable::img_no_image, (IDrawable**)&photo);
         photo->SetAutoMirrored(TRUE);
     }
     else {
@@ -449,8 +453,8 @@ void ContactInfoCache::PopulateCacheEntry(
     /* [in] */ Int32 presentation,
     /* [in] */ Boolean isIncoming)
 {
-    AutoPtr<IPreconditions> presentations;
-    CPreconditions::AcquireSingleton((IPreconditions**)&presentations);
+    AutoPtr<IPreconditions> preconditions;
+    CPreconditions::AcquireSingleton((IPreconditions**)&preconditions);
     if (FAILED(preconditions->CheckNotNull((ICallerInfo*)info)))
         return;
     String displayName;
@@ -609,12 +613,12 @@ String ContactInfoCache::GetPresentationString(
     /* [in] */ Int32 presentation)
 {
     String name;
-    context->GetString(R::string::unknown, &name);
+    context->GetString(Elastos::Droid::Dialer::R::string::unknown, &name);
     if (presentation == ITelecomManager::PRESENTATION_RESTRICTED) {
-        context->GetString(R::string::private_num, &name);
+        context->GetString(Elastos::Droid::Dialer::R::string::private_num, &name);
     }
     else if (presentation == ITelecomManager::PRESENTATION_PAYPHONE) {
-        context->GetString(R::string::payphone, &name);
+        context->GetString(Elastos::Droid::Dialer::R::string::payphone, &name);
     }
     return name;
 }

@@ -22,8 +22,8 @@ namespace InCallUI {
  * Proxy class for getting and setting the audio mode.
  */
 class CallerInfo
-    : Object
-    , ICallerInfo
+    : public Object
+    , public ICallerInfo
 {
 public:
     CallerInfo();

@@ -23,7 +23,15 @@ ECode CContactsContractPhoneLookup::GetCONTENT_FILTER_URI(
 {
     VALIDATE_NOT_NULL(uri);
 
-    return Uri::WithAppendedPath(ContactsContract::AUTHORITY_URI.Get(), String("phone_lookup"), uri);
+    return Uri::WithAppendedPath(ContactsContract::AUTHORITY_URI, String("phone_lookup"), uri);
+}
+
+ECode CContactsContractPhoneLookup::GetENTERPRISE_CONTENT_FILTER_URI(
+    /* [out] */ IUri** uri)
+{
+    VALIDATE_NOT_NULL(uri);
+
+    return Uri::WithAppendedPath(ContactsContract::AUTHORITY_URI, String("phone_lookup_enterprise"), uri);
 }
 
 } //Provider

@@ -10,3 +10,4 @@ SOURCES += PhoneNumberHelper.cpp
 SOURCES += ViewUtil.cpp
 SOURCES += ContactListViewUtils.cpp
 SOURCES += SchedulingUtils.cpp
+SOURCES += TelephonyManagerUtils.cpp

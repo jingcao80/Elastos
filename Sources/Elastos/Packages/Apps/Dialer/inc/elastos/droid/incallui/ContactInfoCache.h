@@ -4,12 +4,14 @@
 
 #include "elastos/droid/incallui/CallerInfo.h"
 #include <elastos/utility/etl/HashMap.h>
+#include <elastos/utility/etl/Set.h>
 
 using Elastos::Droid::InCallUI::Service::IPhoneNumberInfo;
 using Elastos::Droid::InCallUI::Service::IImageLookupListener;
 using Elastos::Droid::InCallUI::Service::INumberLookupListener;
 using Elastos::Droid::InCallUI::Service::IPhoneNumberService;
 using Elastos::Utility::Etl::HashMap;
+using Elastos::Utility::Etl::Set;
 
 namespace Elastos {
 namespace Droid {
@@ -108,7 +110,7 @@ private:
     };
 
 public:
-    static CARAPI_(AutoPtr<ContactCacheEntry>) GetInstance(
+    static CARAPI_(AutoPtr<ContactInfoCache>) GetInstance(
         /* [in] */ IContext* mContext);
 
     CARAPI_(AutoPtr<ContactCacheEntry>) GetInfo(
