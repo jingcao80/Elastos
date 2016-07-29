@@ -92,7 +92,7 @@ SOURCES += CUpdateLockService.cpp
 SOURCES += CVibratorService.cpp
 SOURCES += DockObserver.cpp
 SOURCES += Watchdog.cpp
-#SOURCES += WiredAccessoryManager.cpp  //needs CInputManagerService
+SOURCES += WiredAccessoryManager.cpp
 
 #=========================================
 # TODO

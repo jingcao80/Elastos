@@ -103,6 +103,16 @@ ECode AudioState::ToString(
 ECode AudioState::ReadFromParcel(
     /* [in] */ IParcel* source)
 {
+    Byte mute;
+    source->ReadByte(&mute);
+    if (mute != 0) {
+        mIsMuted = TRUE;
+    }
+    else {
+        mIsMuted = FALSE;
+    }
+    source->ReadInt32(&mRoute);
+    source->ReadInt32(&mSupportedRouteMask);
     return NOERROR;
 }
 

@@ -877,7 +877,7 @@ void ConnectionService::OnAudioStateChanged(
     /* [in] */ const String& callId,
     /* [in] */ IAudioState* audioState)
 {
-    Logger::D("ConnectionService", "onAudioStateChanged %s %p", (const char*)callId, audioState);
+    Logger::D("ConnectionService", "onAudioStateChanged %s %s", (const char*)callId, TO_CSTR(audioState));
     AutoPtr<ICharSequence> pId;
     CString::New(callId, (ICharSequence**)&pId);
     Boolean bCK = FALSE;

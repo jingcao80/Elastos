@@ -1,5 +1,6 @@
 
 #include "elastos/droid/server/WiredAccessoryManager.h"
+#include "elastos/droid/server/input/CInputManagerService.h"
 #include "elastos/droid/R.h"
 #include "elastos/droid/os/Looper.h"
 #include "elastos/droid/os/Handler.h"
@@ -24,6 +25,7 @@ using Elastos::Droid::Os::Looper;
 using Elastos::Droid::Os::IPowerManager;
 using Elastos::Droid::Os::IPowerManagerWakeLock;
 using Elastos::Droid::R;
+using Elastos::Droid::Server::Input::EIID_IWiredAccessoryCallbacks;
 using Elastos::Droid::View::IInputDevice;
 using Elastos::Utility::Logging::Logger;
 using Elastos::Utility::Logging::Slogger;
@@ -145,7 +147,7 @@ Int32 WiredAccessoryManager::WiredAccessoryObserver::UEventInfo::ComputeNewHeads
     /* [in] */ Int32 headsetState,
     /* [in] */ Int32 switchState)
 {
-    Int32 preserveMask = ~(mState1Bits | mState2Bits| mStateNBits);
+    Int32 preserveMask = ~(mState1Bits | mState2Bits| mStateNbits);
     Int32 setBits = ((switchState == 1) ? mState1Bits :
                   ((switchState == 2) ? mState2Bits :
                     ((switchState == mStateNbits) ? mStateNbits : 0)));
@@ -226,7 +228,7 @@ WiredAccessoryManager::WiredAccessoryObserver::MakeObservedUEventList()
     if (!mUseDevInputEventForAudioJack) {
         uei = new UEventInfo(NAME_H2W, BIT_HEADSET, BIT_HEADSET_NO_MIC, BIT_LINEOUT);
         if (uei->CheckSwitchExists()) {
-            retVal->PuashBack(uei);
+            retVal->PushBack(uei);
         }
         else {
             Slogger::W(mHost->TAG, "This kernel does not have wired headset support");
@@ -359,8 +361,9 @@ ECode WiredAccessoryManager::NotifyWiredAccessoryChanged(
     /* [in] */ Int32 switchValues,
     /* [in] */ Int32 switchMask)
 {
-    if (LOG) Slogger::V(TAG, "notifyWiredAccessoryChanged: when=%d bits=%s mask=0x%x", whenNanos
+    if (LOG) Slogger::V(TAG, "notifyWiredAccessoryChanged: when=%lld bits=%s values=0x%x, mask=0x%x", whenNanos
             , SwitchCodeToString(switchValues, switchMask).string()
+            , switchValues
             , switchMask);
 
     {

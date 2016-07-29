@@ -6777,9 +6777,11 @@ Boolean CAudioService::HandleDeviceConnection(
         Boolean b;
         mConnectedDevices->ContainsKey(i32, &b);
         AutoPtr<IInterface> obj;
-        mConnectedDevices->Get(i32, (IInterface**)&obj);
+        if (b)
+            mConnectedDevices->Get(i32, (IInterface**)&obj);
         String str;
-        ICharSequence::Probe(obj)->ToString(&str);
+        if (obj != NULL)
+            ICharSequence::Probe(obj)->ToString(&str);
         Boolean isConnected = (b &&
                 (params.IsEmpty() || str.Equals(params)));
 

@@ -92,6 +92,9 @@ public:
         CARAPI OnUEvent(
             /* [in] */ IUEvent* event);
 
+        CARAPI_(Int32) ValidateSwitchState(
+            /* [in] */ Int32 state);
+
     private:
         CARAPI_(AutoPtr< List<AutoPtr<UEventInfo> > >) MakeObservedUEventList();
 

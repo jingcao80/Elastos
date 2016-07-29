@@ -31,6 +31,7 @@
 #include "elastos/droid/server/power/ShutdownThread.h"
 #include "elastos/droid/server/twilight/CTwilightService.h"
 //#include "elastos/droid/server/search/CSearchManagerService.h"
+#include "elastos/droid/server/WiredAccessoryManager.h"
 #include "elastos/droid/server/webkit/WebViewUpdateService.h"
 #include "elastos/droid/server/wm/InputMonitor.h"
 #include "elastos/droid/server/wm/CWindowManagerService.h"
@@ -941,16 +942,17 @@ ECode SystemServer::StartOtherServices()
             // mSystemServiceManager->StartService(systemService.Get());
         }
 
-        // if (!disableMedia) {
-        //     try {
-        //         Slogger::I(TAG, "Wired Accessory Manager");
-        //         // Listen for wired headset changes
-        //         inputManager.setWiredAccessoryCallbacks(
-        //                 new WiredAccessoryManager(context, inputManager));
-        //     } catch (Throwable e) {
-        //         ReportWtf("starting WiredAccessoryManager", ec);
-        //     }
-        // }
+        if (!disableMedia) {
+            //try {
+                Slogger::I(TAG, "Wired Accessory Manager");
+                // Listen for wired headset changes
+                inputManager->SetWiredAccessoryCallbacks(
+                        new WiredAccessoryManager(context, inputManager));
+
+            //} catch (Throwable e) {
+            //if (FAILED(ec)) ReportWtf("starting WiredAccessoryManager", ec);
+            //}
+        }
 
         // if (!disableNonCoreServices) {
         //     if (mPackageManager.hasSystemFeature(PackageManager.FEATURE_USB_HOST)

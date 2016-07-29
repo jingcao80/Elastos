@@ -1162,7 +1162,7 @@ ECode ConnectionServiceWrapper::OnAudioStateChanged(
     IsServiceValid(String("onAudioStateChanged"), &isServiceValid);
     if (callId != NULL && isServiceValid) {
         // try {
-        LogOutgoing("onAudioStateChanged %s %s", callId.string(), audioState);
+        LogOutgoing("onAudioStateChanged %s %s", callId.string(), TO_CSTR(audioState));
         ECode ec = mServiceInterface->OnAudioStateChanged(callId, audioState);
         // } catch (RemoteException e) {
         if (FAILED(ec)) {
