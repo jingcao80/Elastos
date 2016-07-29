@@ -110,7 +110,7 @@ ECode PathKeyframes::FloatKeyframesBase1::GetFloatValue(
 {
     VALIDATE_NOT_NULL(value);
     AutoPtr<IInterface> pointF;
-    GetValue(fraction, (IInterface**)&pointF);
+    mHost->GetValue(fraction, (IInterface**)&pointF);
     return IPointF::Probe(pointF)->GetX(value);
 }
 
@@ -120,7 +120,7 @@ ECode PathKeyframes::FloatKeyframesBase2::GetFloatValue(
 {
     VALIDATE_NOT_NULL(value);
     AutoPtr<IInterface> pointF;
-    GetValue(fraction, (IInterface**)&pointF);
+    mHost->GetValue(fraction, (IInterface**)&pointF);
     return IPointF::Probe(pointF)->GetY(value);
 }
 
@@ -130,7 +130,7 @@ ECode PathKeyframes::Int32KeyframesBase1::GetInt32Value(
 {
     VALIDATE_NOT_NULL(value);
     AutoPtr<IInterface> pointF;
-    GetValue(fraction, (IInterface**)&pointF);
+    mHost->GetValue(fraction, (IInterface**)&pointF);
     Float v = 0.f;
     IPointF::Probe(pointF)->GetX(&v);
     *value = Elastos::Core::Math::Round(v);
@@ -143,7 +143,7 @@ ECode PathKeyframes::Int32KeyframesBase2::GetInt32Value(
 {
     VALIDATE_NOT_NULL(value);
     AutoPtr<IInterface> pointF;
-    GetValue(fraction, (IInterface**)&pointF);
+    mHost->GetValue(fraction, (IInterface**)&pointF);
     Float v = 0.f;
     IPointF::Probe(pointF)->GetY(&v);
     *value = Elastos::Core::Math::Round(v);
@@ -336,22 +336,22 @@ Float PathKeyframes::Interpolate(
 
 AutoPtr<IFloatKeyframes> PathKeyframes::CreateXFloatKeyframes()
 {
-    return new FloatKeyframesBase1();
+    return new FloatKeyframesBase1(this);
 }
 
 AutoPtr<IFloatKeyframes> PathKeyframes::CreateYFloatKeyframes()
 {
-    return new FloatKeyframesBase2();
+    return new FloatKeyframesBase2(this);
 }
 
 AutoPtr<IInt32Keyframes> PathKeyframes::CreateXInt32Keyframes()
 {
-    return new Int32KeyframesBase1();
+    return new Int32KeyframesBase1(this);
 }
 
 AutoPtr<IInt32Keyframes> PathKeyframes::CreateYInt32Keyframes()
 {
-    return new Int32KeyframesBase2();
+    return new Int32KeyframesBase2(this);
 }
 
 }   //namespace Animation

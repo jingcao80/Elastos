@@ -104,36 +104,68 @@ private:
         : public FloatKeyframesBase
     {
     public:
+        FloatKeyframesBase1(
+            /* [in] */ PathKeyframes* host)
+            : mHost(host)
+        {}
+
         CARAPI GetFloatValue(
             /* [in] */ Float fraction,
             /* [out] */ Float* value);
+
+    private:
+        AutoPtr<PathKeyframes> mHost; // should hold mHost
     };
 
     class FloatKeyframesBase2
         : public FloatKeyframesBase
     {
     public:
+        FloatKeyframesBase2(
+            /* [in] */ PathKeyframes* host)
+            : mHost(host)
+        {}
+
         CARAPI GetFloatValue(
             /* [in] */ Float fraction,
             /* [out] */ Float* value);
+
+    private:
+        AutoPtr<PathKeyframes> mHost; // should hold mHost
     };
 
     class Int32KeyframesBase1
         : public Int32KeyframesBase
     {
     public:
+        Int32KeyframesBase1(
+            /* [in] */ PathKeyframes* host)
+            : mHost(host)
+        {}
+
         CARAPI GetInt32Value(
             /* [in] */ Float fraction,
             /* [out] */ Int32* value);
+
+    private:
+        AutoPtr<PathKeyframes> mHost; // should hold mHost
     };
 
     class Int32KeyframesBase2
         : public Int32KeyframesBase
     {
     public:
+        Int32KeyframesBase2(
+            /* [in] */ PathKeyframes* host)
+            : mHost(host)
+        {}
+
         CARAPI GetInt32Value(
             /* [in] */ Float fraction,
             /* [out] */ Int32* value);
+
+    private:
+        AutoPtr<PathKeyframes> mHost; // should hold mHost
     };
 
 public:

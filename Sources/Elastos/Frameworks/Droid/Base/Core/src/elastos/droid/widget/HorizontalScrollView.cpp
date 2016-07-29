@@ -1839,7 +1839,7 @@ ECode HorizontalScrollView::Draw(
             canvas->RestoreToCount(restoreCount);
         }
         Boolean isFinished = FALSE;
-        mEdgeGlowLeft->IsFinished(&isFinished);
+        mEdgeGlowRight->IsFinished(&isFinished);
         if (!isFinished) {
             Int32 restoreCount = 0;
             canvas->Save(&restoreCount);
@@ -1851,7 +1851,7 @@ ECode HorizontalScrollView::Draw(
             canvas->Translate(-mPaddingTop, Elastos::Core::Math::Max(GetScrollRange(), scrollX) + width);
             mEdgeGlowRight->SetSize(height, width);
             Boolean isDraw = FALSE;
-            mEdgeGlowLeft->Draw(canvas, &isDraw);
+            mEdgeGlowRight->Draw(canvas, &isDraw);
             if (isDraw) {
                 PostInvalidateOnAnimation();
             }
