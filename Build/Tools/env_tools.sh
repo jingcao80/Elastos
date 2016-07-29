@@ -367,6 +367,7 @@ function pd ()
             echo "       pd @       (PUSHD to target directory)"
             echo "       pd inc     (PUSHD to compiled INC directory)"
             echo "       pd lib     (PUSHD to compiled LIB directory)"
+            echo "       pd p       (PUSHD to compiled EPK directory)"
 #            echo "       pd cls     (PUSHD to compiled CLS directory)"
         ;;
         "")
@@ -377,6 +378,9 @@ function pd ()
         ;;
         "inc" | "cls" | "lib")
             pushd $XDK_USER_OBJ/$XDK_BUILD_KIND/$1 1>/dev/null
+        ;;
+        "p")
+            pushd $XDK_USER_OBJ/$XDK_BUILD_KIND/package 1>/dev/null
         ;;
         "m")
             local PROJECT_DIR=$PWD
