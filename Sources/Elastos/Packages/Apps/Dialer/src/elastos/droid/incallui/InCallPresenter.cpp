@@ -9,6 +9,7 @@
 #include "elastos/droid/incallui/TelecomAdapter.h"
 #include "elastos/droid/incalluibind/ObjectFactory.h"
 #include <elastos/droid/text/TextUtils.h>
+#include <elastos/core/AutoLock.h>
 #include <elastos/core/CoreUtils.h>
 #include <elastos/utility/logging/Logger.h>
 
@@ -20,7 +21,9 @@ using Elastos::Droid::Telecom::CVideoProfile;
 using Elastos::Droid::Telecom::IVideoProfileVideoState;
 using Elastos::Droid::Text::TextUtils;
 using Elastos::Droid::View::ISurface;
+using Elastos::Core::AutoLock;
 using Elastos::Core::CoreUtils;
+using Elastos::Utility::IArrayList;
 using Elastos::Utility::IIterator;
 using Elastos::Utility::ICollections;
 using Elastos::Utility::CCollections;

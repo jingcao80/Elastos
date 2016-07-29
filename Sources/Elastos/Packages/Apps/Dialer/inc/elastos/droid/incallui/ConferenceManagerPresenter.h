@@ -35,7 +35,7 @@ public:
 
     CARAPI_(void) Init(
         /* [in] */ IContext* context,
-        /* [in] */ CallList* callList);
+        /* [in] */ ICallList* callList);
 
     /**
       * Updates a single row of the "Manage conference" UI.  (One row in this
@@ -65,7 +65,7 @@ public:
 
 private:
     CARAPI_(void) Update(
-        /* [in] */ CallList* callList);
+        /* [in] */ ICallList* callList);
 
 private:
     static const Int32 MAX_CALLERS_IN_CONFERENCE;
