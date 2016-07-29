@@ -1,6 +1,7 @@
 
 #include "Elastos.Droid.Telephony.h"
 #include "elastos/droid/internal/telephony/CRestrictedState.h"
+#include "elastos/droid/internal/telephony/MccTable.h"
 #include "elastos/droid/internal/telephony/ServiceStateTracker.h"
 #include "elastos/droid/internal/telephony/uicc/CUiccControllerHelper.h"
 #include "elastos/droid/os/SystemClock.h"
@@ -160,6 +161,9 @@ ServiceStateTracker::ServiceStateTracker()
     CRestrictedState::New((IRestrictedState**)&mRestrictedState);
 
     AutoPtr<IRegistrantList> list;
+    CRegistrantList::New((IRegistrantList**)&list);
+    mRoamingOnRegistrants = (RegistrantList*)(list.Get());
+    list = NULL;
     CRegistrantList::New((IRegistrantList**)&list);
     mRoamingOffRegistrants = (RegistrantList*)(list.Get());
     list = NULL;
@@ -790,7 +794,6 @@ Boolean ServiceStateTracker::ShouldFixTimeZoneNow(
     /* [in] */ const String& prevOperatorNumeric,
     /* [in] */ Boolean needToFixTimeZone)
 {
-    assert(0);
     // Return FALSE if the mcc isn't valid as we don't know where we are.
     // Return TRUE if we have an IccCard and the mcc changed or we
     // need to fix it because when the NITZ time came in we didn't
@@ -972,11 +975,7 @@ void ServiceStateTracker::UpdateCarrierMccMncConfiguration(
     if (((newOp.IsNull()) && (TextUtils::IsEmpty(oldOp) == FALSE)) ||
             ((!newOp.IsNull()) && (newOp.Equals(oldOp) == FALSE))) {
         Log(String("update mccmnc=") + newOp + String(" fromServiceState=TRUE"));
-        Logger::E("ServiceStateTracker", "TODO UpdateCarrierMccMncConfiguration is not ready!");
-        // assert(0 && "TODO");
-        // AutoPtr<IMccTableHelper> mccTableHelper;
-        // CMccTableHelper::AcquireSingleton((IMccTableHelper**)&mccTableHelper);
-        // mccTableHelper->UpdateMccMncConfiguration(context, newOp, TRUE);
+        MccTable::UpdateMccMncConfiguration(context, newOp, TRUE);
     }
 }
 

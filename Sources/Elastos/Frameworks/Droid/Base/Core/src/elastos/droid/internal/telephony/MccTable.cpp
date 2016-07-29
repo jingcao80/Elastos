@@ -1,6 +1,6 @@
 
 #include "elastos/droid/internal/telephony/MccTable.h"
-// #include "elastos/droid/internal/telephony/ServiceStateTracker.h"
+#include "elastos/droid/internal/telephony/ServiceStateTracker.h"
 #include "elastos/droid/telephony/CTelephonyManager.h"
 #include "elastos/droid/app/ActivityManagerNative.h"
 #include "elastos/droid/content/res/CConfiguration.h"
@@ -446,8 +446,7 @@ void MccTable::SetTimezoneFromMccIfNeeded(
     /* [in] */ Int32 mcc)
 {
     String timezone;
-    assert(0 && "TODO");
-    // SystemProperties::Get(ServiceStateTracker::TIMEZONE_PROPERTY, &timezone);
+    SystemProperties::Get(ServiceStateTracker::TIMEZONE_PROPERTY, &timezone);
     if (timezone == NULL || timezone.GetLength() == 0) {
         String zoneId = DefaultTimeZoneForMcc(mcc);
         if (zoneId != NULL && zoneId.GetLength() > 0) {

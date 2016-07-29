@@ -29,7 +29,7 @@ ECode CatLog::D(
     //TODO String className; // = caller.getClass().getName();
     //TODO Logger::D("CAT", className.Substring(className.LastIndexOf('.') + 1) + ": "
     //        + msg);
-    Logger::D("CAT", "TODO %s", msg.string());
+    Logger::D(TO_CSTR(caller), "msg: %s", msg.string());
     return NOERROR;
 }
 
@@ -52,7 +52,7 @@ ECode CatLog::E(
     //String className;// = caller.getClass().getName();
     //Logger::E("CAT", className.Substring(className.LastIndexOf('.') + 1) + ": "
     //        + msg);
-    Logger::E("CAT", "TODO %s", msg.string());
+    Logger::E(TO_CSTR(caller), "msg: %s", msg.string());
     return NOERROR;
 }
 

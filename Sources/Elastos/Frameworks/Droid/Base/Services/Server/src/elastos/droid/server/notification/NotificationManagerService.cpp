@@ -4969,8 +4969,7 @@ void NotificationManagerService::ListenForCallState()
     CTelephonyManagerHelper::AcquireSingleton((ITelephonyManagerHelper**)&helper);
     AutoPtr<ITelephonyManager> manager;
     helper->From(context, (ITelephonyManager**)&manager);
-    Slogger::I(TAG, "TODO: ITelephonyManager");
-    // manager->Listen(new InnerSub_PhoneStateListener(this), IPhoneStateListener::LISTEN_CALL_STATE);
+    manager->Listen(new InnerSub_PhoneStateListener(this), IPhoneStateListener::LISTEN_CALL_STATE);
 }
 
 AutoPtr<INotificationRankingUpdate> NotificationManagerService::MakeRankingUpdateLocked(

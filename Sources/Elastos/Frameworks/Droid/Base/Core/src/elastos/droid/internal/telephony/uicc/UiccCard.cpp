@@ -870,8 +870,7 @@ ECode UiccCard::Finalize()
 void UiccCard::Log(
     /* [in] */ const String& msg)
 {
-    // Rlog.d(LOGTAG, msg);
-    Logger::E("leliang", "TODO msg:%s, line:%d, func:%s\n", msg.string(), __LINE__, __func__);
+    Logger::D(LOGTAG, msg);
 }
 
 AutoPtr<ArrayOf<IUiccCardApplication*> > UiccCard::MiddleInitMuiccapplications()
@@ -996,8 +995,7 @@ void UiccCard::OnCarrierPriviligesLoadedMessage()
 void UiccCard::Loge(
     /* [in] */ const String& msg)
 {
-    // Rlog.e(LOGTAG, msg);
-    Logger::E("leliang", "TODO msg:%s, line:%d, func:%s\n", msg.string(), __LINE__, __func__);
+    Logger::E(LOGTAG, msg);
 }
 
 } // namespace Uicc

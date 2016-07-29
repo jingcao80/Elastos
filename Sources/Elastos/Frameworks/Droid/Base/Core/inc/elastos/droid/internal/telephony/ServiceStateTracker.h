@@ -284,6 +284,8 @@ public:
     // TODO - this should not be public, right now used externally GsmConnetion.
     AutoPtr<IRestrictedState> mRestrictedState;
 
+    static const String TIMEZONE_PROPERTY;
+
 protected:
     static const Boolean DBG;
     static const Boolean VDBG;
@@ -346,7 +348,6 @@ protected:
     */
     static const AutoPtr<ArrayOf<String> > GMT_COUNTRY_CODES;
 
-    static const String TIMEZONE_PROPERTY;
     /** Reason for registration denial. */
     static const String REGISTRATION_DENIED_GEN;
     static const String REGISTRATION_DENIED_AUTH;

@@ -392,7 +392,6 @@ ECode IccRecords::GetVoiceMailNumber(
 ECode IccRecords::GetServiceProviderName(
     /* [out] */ String* result)
 {
-    Logger::E("IccRecords", "TODO GetServiceProviderName ");
     VALIDATE_NOT_NULL(result);
     String providerName = mSpn;
 

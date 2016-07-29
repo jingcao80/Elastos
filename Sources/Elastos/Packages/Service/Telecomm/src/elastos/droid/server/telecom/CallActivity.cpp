@@ -7,6 +7,7 @@
 #include <Elastos.Droid.Provider.h>
 #include <Elastos.Droid.Telecom.h>
 #include <Elastos.Droid.Telephony.h>
+#include <Elastos.Droid.Widget.h>
 #include <elastos/droid/R.h>
 #include <elastos/droid/app/ActivityManagerNative.h>
 #include <elastos/droid/net/Uri.h>
@@ -31,12 +32,19 @@ using Elastos::Droid::Os::IUserHandle;
 using Elastos::Droid::Os::IUserManager;
 using Elastos::Droid::Os::UserHandle;
 using Elastos::Droid::Provider::ISettingsSecure;
+using Elastos::Droid::Telecom::CVideoProfileVideoStateHelper;
 using Elastos::Droid::Telecom::IPhoneAccount;
 using Elastos::Droid::Telecom::ITelecomManager;
 using Elastos::Droid::Telecom::IVideoProfileVideoState;
+using Elastos::Droid::Telecom::IVideoProfileVideoStateHelper;
 using Elastos::Droid::Telephony::CPhoneNumberUtils;
 using Elastos::Droid::Telephony::IPhoneNumberUtils;
 using Elastos::Droid::Text::TextUtils;
+using Elastos::Droid::Widget::CToastHelper;
+using Elastos::Droid::Widget::IToast;
+using Elastos::Droid::Widget::IToastHelper;
+using Elastos::Core::CString;
+using Elastos::Core::ICharSequence;
 
 namespace Elastos {
 namespace Droid {
@@ -134,9 +142,14 @@ ECode CallActivity::ProcessOutgoingCallIntent(
         GetResources((IResources**)&res);
         String str;
         res->GetString(R::string::outgoing_call_not_allowed, &str);
-        assert(0 && "TODO: CToastHelper");
-        // Toast::MakeText(this, str,
-        //         IToast::LENGTH_SHORT)->Show();
+
+        AutoPtr<IToastHelper> tHelper;
+        CToastHelper::AcquireSingleton((IToastHelper**)&tHelper);
+        AutoPtr<IToast> toast;
+        AutoPtr<ICharSequence> cs;
+        CString::New(str, (ICharSequence**)&cs);
+        tHelper->MakeText(this, cs, IToast::LENGTH_SHORT, (IToast**)&toast);
+        toast->Show();
         Log::D("CallActivity", "Rejecting non-emergency phone call due to DISALLOW_OUTGOING_CALLS "
                 "restriction");
         return NOERROR;
@@ -148,18 +161,26 @@ ECode CallActivity::ProcessOutgoingCallIntent(
     Log::D("CallActivity", "processOutgoingCallIntent videoState = %d", videoState);
     Boolean isTtyModeEnabled;
     IsTtyModeEnabled(&isTtyModeEnabled);
-    Logger::W("CallActivity", "TODO CallActivity::ProcessOutgoingCallIntent IVideoProfileHelper is not ready!!");
-    //TODO leliang
-    //assert(0 && "TODO: IVideoProfileHelper");
-    // if (VideoProfile::VideoState::IsVideo(videoState) && isTtyModeEnabled) {
-    //     AutoPtr<IResources> res;
-    //     GetResources((IResources**)&res);
-    //     assert(0 && "TODO: CToastHelper");
-    //     // Toast::MakeText(this, res->GetString(R::string::
-    //     //         video_call_not_allowed_if_tty_enabled), IToast::LENGTH_SHORT)->Show();
-    //     Log::D("CallActivity", "Rejecting video calls as tty is enabled");
-    //     return NOERROR;
-    // }
+
+    AutoPtr<IVideoProfileVideoStateHelper> vsHelper;
+    CVideoProfileVideoStateHelper::AcquireSingleton((IVideoProfileVideoStateHelper**)&vsHelper);
+    Boolean vFlag = FALSE;
+    vsHelper->IsVideo(videoState, &vFlag);
+    if (vFlag && isTtyModeEnabled) {
+        AutoPtr<IResources> res;
+        GetResources((IResources**)&res);
+        AutoPtr<IToastHelper> tHelper;
+        CToastHelper::AcquireSingleton((IToastHelper**)&tHelper);
+        String v;
+        res->GetString(R::string::video_call_not_allowed_if_tty_enabled, &v);
+        AutoPtr<ICharSequence> cs;
+        CString::New(v, (ICharSequence**)&cs);
+        AutoPtr<IToast> toast;
+        tHelper->MakeText(this, cs, IToast::LENGTH_SHORT, (IToast**)&toast);
+        toast->Show();
+        Log::D("CallActivity", "Rejecting video calls as tty is enabled");
+        return NOERROR;
+    }
     obj = NULL;
     GetSystemService(IContext::APP_OPS_SERVICE, (IInterface**)&obj);
     AutoPtr<IAppOpsManager> appOps = IAppOpsManager::Probe(obj);
@@ -188,11 +209,10 @@ ECode CallActivity::ProcessOutgoingCallIntent(
         }
     }
     // }
-    Int32 noteOpNoThrow;
+    Int32 noteOpNoThrow = 0;
     appOps->NoteOpNoThrow(IAppOpsManager::OP_CALL_PHONE, launchedFromUid,
             launchedFromPackage, &noteOpNoThrow);
-    Logger::W("CallActivity", "TODO CallActivity::ProcessOutgoingCallIntent permission not given!!");
-    if (FALSE/*TODO leliang noteOpNoThrow != IAppOpsManager::MODE_ALLOWED*/) {
+    if (noteOpNoThrow != IAppOpsManager::MODE_ALLOWED) {
         Log::W("CallActivity", "Rejecting call from uid %d package %s", launchedFromUid,
                 launchedFromPackage.string());
         return NOERROR;

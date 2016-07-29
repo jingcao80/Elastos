@@ -447,7 +447,6 @@ ECode MediaFocusControl::constructor(
     mContext->GetSystemService(IContext::TELEPHONY_SERVICE, ((IInterface**)&service));
     AutoPtr<ITelephonyManager> tmgr = ITelephonyManager::Probe(service);
     if (tmgr != NULL) {
-        Logger::E(TAG, "TODO, tmgr is not NULL, tmgr must be implemented");
         tmgr->Listen(mPhoneStateListener, IPhoneStateListener::LISTEN_CALL_STATE);
     }
 

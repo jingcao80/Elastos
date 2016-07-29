@@ -219,6 +219,23 @@ private:
         DcTracker* mHost;
     };
 
+    class OnDemandDdsLockNotifier
+        : public Object
+        , public ISubscriptionControllerOnDemandDdsLockNotifier
+    {
+    public:
+        CAR_INTERFACE_DECL()
+
+        OnDemandDdsLockNotifier(
+            /* [in] */ DcTracker* host);
+
+        CARAPI NotifyOnDemandDdsLockGranted(
+            /* [in] */ INetworkRequest* n);
+
+    private:
+        DcTracker* mHost;
+    };
+
 public:
     TO_STRING_IMPL("DcTracker")
 

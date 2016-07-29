@@ -558,8 +558,7 @@ ECode Call::SetHandle(
         mHandle->GetSchemeSpecificPart(&schemeSpecificPart);
         phoneNumberUtilsHelper->IsLocalEmergencyNumber(mContext, schemeSpecificPart, &isLocalEmergencyNumber);
         mIsEmergencyCall = mHandle != NULL && isLocalEmergencyNumber;
-        Logger::W("Call", "TODO Call::SetHandle ignore the function StartCallerInfoLookup!!");
-        //TODO leliang StartCallerInfoLookup();
+        StartCallerInfoLookup();
         AutoPtr<IIterator> it;
         mListeners->GetIterator((IIterator**)&it);
         Boolean hasNext;

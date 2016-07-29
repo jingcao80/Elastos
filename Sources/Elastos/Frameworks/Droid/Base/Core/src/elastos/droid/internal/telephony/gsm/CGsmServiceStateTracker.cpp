@@ -1643,10 +1643,9 @@ void CGsmServiceStateTracker::PollStateDone()
                 Boolean testOneUniqueOffsetPath = b &&
                         ((SystemClock::GetUptimeMillis() & 1) == 0);
 
-                Logger::E("CGsmServiceStateTracker", "TODO GetTimeZonesWithUniqueOffsets is not ready!");
-                AutoPtr<ArrayOf<ITimeZone *> > uniqueZones;//TODO  = TimeUtils::GetTimeZonesWithUniqueOffsets(iso);
+                AutoPtr<ArrayOf<ITimeZone *> > uniqueZones = TimeUtils::GetTimeZonesWithUniqueOffsets(iso);
                 Int32 size = 0;
-                //TODO size = uniqueZones->GetLength();
+                size = uniqueZones->GetLength();
                 if ((size == 1) || testOneUniqueOffsetPath) {
                     zone = (*uniqueZones)[0];
                     if (DBG) {
@@ -1668,9 +1667,8 @@ void CGsmServiceStateTracker::PollStateDone()
                 }
             }
 
-            Logger::E("CGsmServiceStateTracker", "TODO ShouldFixTimeZoneNow is not ready!");
-            if (FALSE/*ShouldFixTimeZoneNow(IPhoneBase::Probe(mPhone), operatorNumeric, prevOperatorNumeric,
-                    mNeedFixZoneAfterNitz)*/) {
+            if (ShouldFixTimeZoneNow(IPhoneBase::Probe(mPhone), operatorNumeric, prevOperatorNumeric,
+                    mNeedFixZoneAfterNitz)) {
                 // If the offset is (0, FALSE) and the timezone property
                 // is set, use the timezone property rather than
                 // GMT.

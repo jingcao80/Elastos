@@ -77,13 +77,7 @@ public:
     CARAPI GetLegacyType(
         /* [out] */ Int32* result);
 
-private:
-    /**
-     * The {@link NetworkCapabilities} that define this request.
-     * @hide
-     */
-    AutoPtr<INetworkCapabilities> mNetworkCapabilities;
-
+public:
     /**
      * Identifies the request.  NetworkRequests should only be constructed by
      * the Framework and given out to applications as tokens to be used to identify
@@ -91,6 +85,13 @@ private:
      * @hide
      */
     Int32 mRequestId;
+
+private:
+    /**
+     * The {@link NetworkCapabilities} that define this request.
+     * @hide
+     */
+    AutoPtr<INetworkCapabilities> mNetworkCapabilities;
 
     /**
      * Set for legacy requests and the default.  Set to TYPE_NONE for none.

@@ -354,7 +354,6 @@ CARAPI SubInfoRecordUpdater::HandleMessage(
         }
     }
     slotId--;
-    Logger::D(LOGTAG, "[TODO]  ======SubInfoRecordUpdater::HandleMessage=what:%d, slotId:%d====", msgNum, slotId);
     Int32 event = msgNum >> (slotId * EVENT_OFFSET);
     switch (event) {
         case EVENT_QUERY_ICCID_DONE:
@@ -393,7 +392,6 @@ CARAPI SubInfoRecordUpdater::HandleMessage(
             if (ar != NULL && ar->mResult != NULL) {
                 cardIndex = IInteger32::Probe(ar->mResult);
             } else {
-                //TODO Rlog->E(LOGTAG, "Error: Invalid card index EVENT_ICC_CHANGED ");
                 Logger::E(LOGTAG, "Error: Invalid card index EVENT_ICC_CHANGED ");
                 return NOERROR;
             }
@@ -443,7 +441,6 @@ void SubInfoRecordUpdater::UpdateIccAvailability(
         newCard->GetCardState(&newState);
     }
     CardState oldState = (*sCardState)[slotId];
-    Logger::E("SubInfoRecordUpdater", "TODO UpdateIccAvailability does the oldState is right???");
     (*sCardState)[slotId] = newState;
     Logd(String("Slot[") + IntegralToString::ToString(slotId) + String("]: New Card State = ")
             + IntegralToString::ToString(newState) + String(" ") + String("Old Card State = ") + IntegralToString::ToString(oldState));
@@ -814,9 +811,7 @@ CARAPI SubInfoRecordUpdater::Dispose()
 void SubInfoRecordUpdater::Logd(
     /* [in] */ const String& message)
 {
-//TODO
-//    Rlog->D(LOGTAG, "[SubInfoRecordUpdater]" + message);
-    Logger::E("SubInfoRecordUpdater", "TODO SubInfoRecordUpdater, Logd:%s\n", message.string());
+    Logger::E("SubInfoRecordUpdater", "[SubInfoRecordUpdater]:%s\n", message.string());
 }
 
 } // namespace Telephony

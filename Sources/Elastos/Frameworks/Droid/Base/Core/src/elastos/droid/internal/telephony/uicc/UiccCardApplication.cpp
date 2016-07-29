@@ -261,7 +261,6 @@ ECode UiccCardApplication::Dispose()
 
 ECode UiccCardApplication::QueryFdn()
 {
-    Logger::E("UiccCardApplication", "TODO QueryFdn is not implemented");
     //This shouldn't change run-time. So needs to be called only once.
     Int32 serviceClassX = 0;
 
@@ -1064,14 +1063,14 @@ void UiccCardApplication::Log(
     /* [in] */ const String& msg)
 {
     // Rlog.d(LOGTAG, msg);
-    Logger::E("UiccCardApplication", "TODO Log, msg:%s", msg.string());
+    Logger::E("UiccCardApplication", "[Log] msg:%s", msg.string());
 }
 
 void UiccCardApplication::Loge(
     /* [in] */ const String& msg)
 {
     // Rlog.e(LOGTAG, msg);
-    Logger::E("UiccCardApplication", "TODO Loge, msg:%s", msg.string());
+    Logger::E("UiccCardApplication", "[Loge] msg:%s", msg.string());
 }
 
 } // namespace Uicc

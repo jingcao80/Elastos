@@ -7,12 +7,13 @@
 #include "elastos/droid/os/Handler.h"
 #include "elastos/droid/content/BroadcastReceiver.h"
 
-using Elastos::Core::Object;
-
+using Elastos::Droid::Content::BroadcastReceiver;
 using Elastos::Droid::Content::IBroadcastReceiver;
 using Elastos::Droid::Content::IContext;
 using Elastos::Droid::Content::IIntent;
 using Elastos::Droid::Os::Handler;
+using Elastos::Droid::Os::IPowerManagerWakeLock;
+using Elastos::Core::Object;
 
 namespace Elastos {
 namespace Droid {
@@ -24,13 +25,19 @@ class SmsStorageMonitor
     , public ISmsStorageMonitor
 {
 private:
-    class ECO_LOCAL BroadcastReceiver
-        : public Object
+    class SmsBroadcastReceiver
+        : public BroadcastReceiver
     {
     public:
+        SmsBroadcastReceiver(
+            /* [in] */ SmsStorageMonitor* host);
+
         CARAPI OnReceive(
             /* [in] */ IContext* context,
             /* [in] */ IIntent* intent);
+
+    private:
+        SmsStorageMonitor* mHost;
     };
 
 public:
@@ -53,7 +60,6 @@ public:
     CARAPI HandleMessage(IMessage* msg);
 
 private:
-
     void CreateWakelock();
 
     /**
@@ -88,10 +94,10 @@ private:
 
     AutoPtr<ICommandsInterface> mCi;                // accessed from inner class
 
-    AutoPtr<BroadcastReceiver> mResultReceiver;
+    AutoPtr<IBroadcastReceiver> mResultReceiver;
 
     /** Wake lock to ensure device stays awake while dispatching the SMS intent. */
-//    PowerManager.WakeLock mWakeLock;
+    AutoPtr<IPowerManagerWakeLock> mWakeLock;
 
     Boolean mReportMemoryStatusPending;
     Boolean mStorageAvailable;                      // accessed from inner class

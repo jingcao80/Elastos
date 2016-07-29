@@ -12,6 +12,7 @@
 #include "elastos/droid/database/ContentObserver.h"
 #include "elastos/droid/internal/telephony/PhoneBase.h"
 #include "elastos/droid/internal/telephony/IccUtils.h"
+#include "elastos/droid/internal/telephony/SubscriptionController.h"
 #include "elastos/droid/internal/telephony/cdma/CdmaSubscriptionSourceManager.h"
 #include "elastos/droid/internal/telephony/dataconnection/ApnContext.h"
 #include "elastos/droid/internal/telephony/dataconnection/ApnSetting.h"
@@ -91,6 +92,7 @@ using Elastos::Droid::Internal::Telephony::IServiceStateTracker;
 using Elastos::Droid::Internal::Telephony::ISubscriptionController;
 using Elastos::Droid::Internal::Telephony::ITelephonyIntents;
 using Elastos::Droid::Internal::Telephony::PhoneConstantsDataState_DISCONNECTED;
+using Elastos::Droid::Internal::Telephony::SubscriptionController;
 using Elastos::Droid::Internal::Telephony::Cdma::CdmaSubscriptionSourceManager;
 using Elastos::Droid::Internal::Telephony::Cdma::ICDMALTEPhone;
 using Elastos::Droid::Internal::Telephony::Cdma::ICDMAPhone;
@@ -109,6 +111,7 @@ using Elastos::Droid::Net::CNetworkConfig;
 using Elastos::Droid::Net::CProxyInfo;
 using Elastos::Droid::Net::IConnectivityManager;
 using Elastos::Droid::Net::IProxyInfo;
+using Elastos::Droid::Net::NetworkRequest;
 using Elastos::Droid::Net::NetworkUtils;
 using Elastos::Droid::Net::Uri;
 using Elastos::Droid::Os::CBundle;
@@ -185,9 +188,8 @@ ECode DcTracker::SubBroadcastReceiverDefaultDds::OnReceive(
             ISubscriptionManager::INVALID_SUB_ID, &i64);
     mHost->Log("got ACTION_DEFAULT_DATA_SUBSCRIPTION_CHANGED, new DDS = %ld", i64);
     mHost->UpdateSubIdAndCapability();
-    Int64 defaultDataSubId;
-    assert(0 && "TODO: SubscriptionController");
-    // SubscriptionController::GetInstance()->GetDefaultDataSubId(&defaultDataSubId);
+    Int64 defaultDataSubId = 0;
+    IISub::Probe(SubscriptionController::GetInstance())->GetDefaultDataSubId(&defaultDataSubId);
     if (mHost->mSubId == defaultDataSubId) {
         mHost->Log("Dct is default-DDS now, process any pending MMS requests");
     }
@@ -284,17 +286,11 @@ ECode DcTracker::TelephonyNetworkFactory::ProcessPendingNetworkRequests(
 
 ECode DcTracker::TelephonyNetworkFactory::RegisterOnDemandDdsCallback()
 {
-    assert(0 && "TODO: SubscriptionController");
-    // AutoPtr<ISubscriptionController> subController = SubscriptionController::GetInstance();
-    // Int64 subId;
-    // mPhone->GetSubId(&subId);
-    // subController->RegisterForOnDemandDdsLockNotification(subId,
-    //         new SubscriptionController::OnDemandDdsLockNotifier() {
-    //             public void notifyOnDemandDdsLockGranted(NetworkRequest n) {
-    //                 Log("Got the tempDds lock for the request = %s", TO_CSTR(n));
-    //                 ProcessPendingNetworkRequests(n);
-    //             }
-    //         });
+    AutoPtr<ISubscriptionController> subController = SubscriptionController::GetInstance();
+    Int64 subId = 0;
+    mPhone->GetSubId(&subId);
+    AutoPtr<OnDemandDdsLockNotifier> ln = new OnDemandDdsLockNotifier(mHost);
+    subController->RegisterForOnDemandDdsLockNotification(subId, ln);
     return NOERROR;
 }
 
@@ -303,19 +299,20 @@ ECode DcTracker::TelephonyNetworkFactory::UpdateNetworkCapability(
 {
     Log("update networkCapabilites for subId = %ld", subId);
     mNetworkCapabilities->SetNetworkSpecifier(String("") + StringUtils::ToString(subId));
-    assert(0 && "TODO: SubscriptionController");
-    // Int64 defaultDataSubId;
-    // SubscriptionController::GetInstance()->GetDefaultDataSubId(&defaultDataSubId);
-    // if ((subId > 0 && SubscriptionController::GetInstance().
-    //         GetSubState(subId) == ISubscriptionManager::ACTIVE) &&
-    //         (subId == defaultDataSubId)) {
-    //     Log("INTERNET capability is with subId = %ld", subId);
-    //     //Only defaultDataSub provides INTERNET.
-    //     mNetworkCapabilities->AddCapability(INetworkCapabilities::NET_CAPABILITY_INTERNET);
-    // } else {
-    //     Log("INTERNET capability is removed from subId = %ld", subId);
-    //     mNetworkCapabilities->RemoveCapability(INetworkCapabilities::NET_CAPABILITY_INTERNET);
-    // }
+    Int64 defaultDataSubId = 0;
+    AutoPtr<ISubscriptionController> sc = SubscriptionController::GetInstance();
+    IISub::Probe(sc)->GetDefaultDataSubId(&defaultDataSubId);
+    Int32 ss = 0;
+    if ((subId > 0 && (IISub::Probe(sc)->GetSubState(subId, &ss), ss) == ISubscriptionManager::ACTIVE) &&
+            (subId == defaultDataSubId)) {
+        Log("INTERNET capability is with subId = %ld", subId);
+        //Only defaultDataSub provides INTERNET.
+        mNetworkCapabilities->AddCapability(INetworkCapabilities::NET_CAPABILITY_INTERNET);
+    }
+    else {
+        Log("INTERNET capability is removed from subId = %ld", subId);
+        mNetworkCapabilities->RemoveCapability(INetworkCapabilities::NET_CAPABILITY_INTERNET);
+    }
     SetScoreFilter(50);
     RegisterOnDemandDdsCallback();
     Log("Ready to handle network requests");
@@ -328,63 +325,65 @@ ECode DcTracker::TelephonyNetworkFactory::NeedNetworkFor(
 {
     // figure out the apn type and enable it
     if (mHost->DBG) Log("Cellular needs Network for %s", TO_CSTR(networkRequest));
-    assert(0 && "TODO: SubscriptionController");
-    // AutoPtr<ISubscriptionController> subController = SubscriptionController::GetInstance();
-    // Log("subController = %s", TO_CSTR(subController));
-    // Int64 currentDds;
-    // subController->GetDefaultDataSubId(&currentDds);
-    // Int64 subId;
-    // mPhone->GetSubId(&subId);
-    // Int64 requestedSpecifier;
-    // subController->GetSubIdFromNetworkRequest(networkRequest, &requestedSpecifier);
-    // Log("CurrentDds = %ld", currentDds);
-    // Log("mySubId = %ld", subId);
-    // Log("Requested networkSpecifier = %ld", requestedSpecifier);
-    // String networkSpecifier;
-    // mNetworkCapabilities->GetNetworkSpecifier(&networkSpecifier);
-    // Log("my networkSpecifier = %s", networkSpecifier.string());
-    // if (subId < 0) {
-    //     Log("Can't handle any network request now, subId not ready.");
-    //     return NOERROR;
-    // }
-    // // For clients that do not send subId in NetworkCapabilities,
-    // // Connectivity will send to all network factories. Accept only
-    // // when requestedSpecifier is same as current factory's subId
-    // if (requestedSpecifier != subId) {
-    //     Log("requestedSpecifier is not same as mysubId. Bail out.");
-    //     return NOERROR;
-    // }
-    // if (currentDds != requestedSpecifier) {
-    //     Log("This request would result in DDS switch");
-    //     Log("Requested DDS switch to subId = %ld", requestedSpecifier);
-    //     //Queue this request and initiate temp DDS switch.
-    //     //Once the DDS switch is done we will revist the pending requests.
-    //     mDdsRequests->Put(networkRequest->mRequestId, networkRequest);
-    //     RequestOnDemandDataSubscriptionLock(networkRequest);
-    //     return NOERROR;
-    // } else {
-    //     Boolean isNetworkRequestForInternet;
-    //     IsNetworkRequestForInternet(networkRequest, &isNetworkRequestForInternet);
-    //     if (isNetworkRequestForInternet) {
-    //         Log("Activating internet request on subId = %ld", subId);
-    //         AutoPtr<IApnContext> apnContext;
-    //         mHost->ApnContextForNetworkRequest(networkRequest, (IApnContext**)&apnContext);
-    //         if (apnContext != NULL) {
-    //             mHost->Log("Activating APN=%s", TO_CSTR(apnContext));
-    //             apnContext->IncRefCount();
-    //         }
-    //     } else {
-    //         Boolean isValidRequest;
-    //         IsValidRequest(networkRequest, &isValidRequest);
-    //         if (isValidRequest) {
-    //             //non-default APN requests for this subscription.
-    //             mDdsRequests->Put(networkRequest->mRequestId, networkRequest);
-    //             RequestOnDemandDataSubscriptionLock(networkRequest);
-    //         } else {
-    //             Log("Bogus request req = %s", TO_CSTR(networkRequest));
-    //         }
-    //     }
-    // }
+    AutoPtr<ISubscriptionController> subController = SubscriptionController::GetInstance();
+    Log("subController = %s", TO_CSTR(subController));
+    Int64 currentDds;
+    IISub::Probe(subController)->GetDefaultDataSubId(&currentDds);
+    Int64 subId;
+    mPhone->GetSubId(&subId);
+    Int64 requestedSpecifier;
+    subController->GetSubIdFromNetworkRequest(networkRequest, &requestedSpecifier);
+    Log("CurrentDds = %ld", currentDds);
+    Log("mySubId = %ld", subId);
+    Log("Requested networkSpecifier = %ld", requestedSpecifier);
+    String networkSpecifier;
+    mNetworkCapabilities->GetNetworkSpecifier(&networkSpecifier);
+    Log("my networkSpecifier = %s", networkSpecifier.string());
+    if (subId < 0) {
+        Log("Can't handle any network request now, subId not ready.");
+        return NOERROR;
+    }
+    // For clients that do not send subId in NetworkCapabilities,
+    // Connectivity will send to all network factories. Accept only
+    // when requestedSpecifier is same as current factory's subId
+    if (requestedSpecifier != subId) {
+        Log("requestedSpecifier is not same as mysubId. Bail out.");
+        return NOERROR;
+    }
+    if (currentDds != requestedSpecifier) {
+        Log("This request would result in DDS switch");
+        Log("Requested DDS switch to subId = %ld", requestedSpecifier);
+        //Queue this request and initiate temp DDS switch.
+        //Once the DDS switch is done we will revist the pending requests.
+        mDdsRequests->Put(((NetworkRequest*)networkRequest)->mRequestId, networkRequest);
+        RequestOnDemandDataSubscriptionLock(networkRequest);
+        return NOERROR;
+    }
+    else {
+        Boolean isNetworkRequestForInternet;
+        IsNetworkRequestForInternet(networkRequest, &isNetworkRequestForInternet);
+        if (isNetworkRequestForInternet) {
+            Log("Activating internet request on subId = %ld", subId);
+            AutoPtr<IApnContext> apnContext;
+            mHost->ApnContextForNetworkRequest(networkRequest, (IApnContext**)&apnContext);
+            if (apnContext != NULL) {
+                mHost->Log("Activating APN=%s", TO_CSTR(apnContext));
+                apnContext->IncRefCount();
+            }
+        }
+        else {
+            Boolean isValidRequest;
+            IsValidRequest(networkRequest, &isValidRequest);
+            if (isValidRequest) {
+                //non-default APN requests for this subscription.
+                mDdsRequests->Put(((NetworkRequest*)networkRequest)->mRequestId, networkRequest);
+                RequestOnDemandDataSubscriptionLock(networkRequest);
+            }
+            else {
+                Log("Bogus request req = %s", TO_CSTR(networkRequest));
+            }
+        }
+    }
     return NOERROR;
 }
 
@@ -424,10 +423,9 @@ ECode DcTracker::TelephonyNetworkFactory::RequestOnDemandDataSubscriptionLock(
     IsNetworkRequestForInternet(n, &isNetworkRequestForInternet);
     if (!isNetworkRequestForInternet) {
         //Request tempDDS lock only for non-default PDP requests
-        assert(0 && "TODO: SubscriptionController");
-        // AutoPtr<ISubscriptionController> subController = SubscriptionController::GetInstance();
-        // Log("requestOnDemandDataSubscriptionLock for request = %s", TO_CSTR(n));
-        // subController->StartOnDemandDataSubscriptionRequest(n);
+        AutoPtr<ISubscriptionController> subController = SubscriptionController::GetInstance();
+        Log("requestOnDemandDataSubscriptionLock for request = %s", TO_CSTR(n));
+        subController->StartOnDemandDataSubscriptionRequest(n);
     }
     return NOERROR;
 }
@@ -462,10 +460,10 @@ ECode DcTracker::TelephonyNetworkFactory::RemoveRequestIfFound(
     Boolean isNetworkRequestForInternet;
     IsNetworkRequestForInternet(n, &isNetworkRequestForInternet);
     if (!isNetworkRequestForInternet) {
-        assert(0 && "TODO: SubscriptionController");
-        // AutoPtr<ISubscriptionController> subController = SubscriptionController::GetInstance();
-        // subController->StopOnDemandDataSubscriptionRequest(n);
-    } else {
+        AutoPtr<ISubscriptionController> subController = SubscriptionController::GetInstance();
+        subController->StopOnDemandDataSubscriptionRequest(n);
+    }
+    else {
         // Internet requests are not queued in DDS list. So deactivate here explicitly.
         AutoPtr<IApnContext> apnContext;
         mHost->ApnContextForNetworkRequest(n, (IApnContext**)&apnContext);
@@ -488,8 +486,7 @@ ECode DcTracker::TelephonyNetworkFactory::ReleaseNetworkFor(
 ECode DcTracker::TelephonyNetworkFactory::ReleaseAllNetworkRequests()
 {
     Log("releaseAllNetworkRequests");
-    assert(0 && "TODO: SubscriptionController");
-    // AutoPtr<ISubscriptionController> subController = SubscriptionController::GetInstance();
+    AutoPtr<ISubscriptionController> subController = SubscriptionController::GetInstance();
     Int32 size;
     mDdsRequests->GetSize(&size);
     for (Int32 i = 0; i < size; i++) {
@@ -498,8 +495,7 @@ ECode DcTracker::TelephonyNetworkFactory::ReleaseAllNetworkRequests()
         AutoPtr<INetworkRequest> nr = INetworkRequest::Probe(obj);
         if (nr != NULL) {
             Log("Removing request = %s", TO_CSTR(nr));
-            assert(0 && "TODO: SubscriptionController");
-            // subController->StopOnDemandDataSubscriptionRequest(nr);
+            subController->StopOnDemandDataSubscriptionRequest(nr);
             Int32 requestId;
             nr->GetRequestId(&requestId);
             mDdsRequests->Remove(requestId);
@@ -593,6 +589,21 @@ ECode DcTracker::ProvisionNotificationBroadcastReceiver::OnReceive(
     mHost->SetRadio(TRUE);
     SetEnableFailFastMobileData(IDctConstants::ENABLED);
     EnableMobileProvisioning();
+    return NOERROR;
+}
+
+CAR_INTERFACE_IMPL(DcTracker::OnDemandDdsLockNotifier, Object, ISubscriptionControllerOnDemandDdsLockNotifier)
+
+DcTracker::OnDemandDdsLockNotifier::OnDemandDdsLockNotifier(
+    /* [in] */ DcTracker* host)
+    : mHost(host)
+{}
+
+DcTracker::OnDemandDdsLockNotifier::NotifyOnDemandDdsLockGranted(
+    /* [in] */ INetworkRequest* n)
+{
+    mHost->Log("Got the tempDds lock for the request = %s", TO_CSTR(n));
+    mHost->ProcessPendingNetworkRequests(n);
     return NOERROR;
 }
 
@@ -771,24 +782,23 @@ ECode DcTracker::RegisterForAllEvents()
              IDctConstants::EVENT_VOICE_CALL_STARTED, NULL);
     AutoPtr<IServiceStateTracker> serviceStateTracker;
     mPhone->GetServiceStateTracker((IServiceStateTracker**)&serviceStateTracker);
-    Logger::E("DcTracker", "TODO RegisterForAllEvents ServiceStateTracker is NOT ready");
-    //TODO serviceStateTracker->RegisterForDataConnectionAttached(this,
-    //TODO         IDctConstants::EVENT_DATA_CONNECTION_ATTACHED, NULL);
-    //TODO serviceStateTracker->RegisterForDataConnectionDetached(this,
-    //TODO         IDctConstants::EVENT_DATA_CONNECTION_DETACHED, NULL);
-    //TODO serviceStateTracker->RegisterForRoamingOn(this,
-    //TODO         IDctConstants::EVENT_ROAMING_ON, NULL);
-    //TODO serviceStateTracker->RegisterForRoamingOff(this,
-    //TODO         IDctConstants::EVENT_ROAMING_OFF, NULL);
-    //TODO serviceStateTracker->RegisterForPsRestrictedEnabled(this,
-    //TODO         IDctConstants::EVENT_PS_RESTRICT_ENABLED, NULL);
-    //TODO serviceStateTracker->RegisterForPsRestrictedDisabled(this,
-    //TODO         IDctConstants::EVENT_PS_RESTRICT_DISABLED, NULL);
- //   SubscriptionManager.registerForDdsSwitch(this,
- //          DctConstants.EVENT_CLEAN_UP_ALL_CONNECTIONS, null);
-    //TODO serviceStateTracker->RegisterForDataRegStateOrRatChanged(this,
-    //TODO        IDctConstants::EVENT_DATA_RAT_CHANGED, NULL);
-    Int32 phoneType;
+    serviceStateTracker->RegisterForDataConnectionAttached(this,
+             IDctConstants::EVENT_DATA_CONNECTION_ATTACHED, NULL);
+    serviceStateTracker->RegisterForDataConnectionDetached(this,
+             IDctConstants::EVENT_DATA_CONNECTION_DETACHED, NULL);
+    serviceStateTracker->RegisterForRoamingOn(this,
+             IDctConstants::EVENT_ROAMING_ON, NULL);
+    serviceStateTracker->RegisterForRoamingOff(this,
+             IDctConstants::EVENT_ROAMING_OFF, NULL);
+    serviceStateTracker->RegisterForPsRestrictedEnabled(this,
+             IDctConstants::EVENT_PS_RESTRICT_ENABLED, NULL);
+    serviceStateTracker->RegisterForPsRestrictedDisabled(this,
+             IDctConstants::EVENT_PS_RESTRICT_DISABLED, NULL);
+    // SubscriptionManager::RegisterForDdsSwitch(this,
+    //          IDctConstants::EVENT_CLEAN_UP_ALL_CONNECTIONS, NULL);
+    serviceStateTracker->RegisterForDataRegStateOrRatChanged(this,
+             IDctConstants::EVENT_DATA_RAT_CHANGED, NULL);
+    Int32 phoneType = 0;
     IPhone::Probe(mPhone)->GetPhoneType(&phoneType);
     if (phoneType == IPhoneConstants::PHONE_TYPE_CDMA) {
         AutoPtr<IContext> context;
@@ -858,9 +868,8 @@ ECode DcTracker::UnregisterForAllEvents()
     ((PhoneBase*) mPhone.Get())->mCi->UnregisterForDataNetworkStateChanged(this);
     AutoPtr<ICallTracker> ct;
     mPhone->GetCallTracker((ICallTracker**)&ct);
-    assert(0 && "TODO: ICallTracker");
-    // ct->UnregisterForVoiceCallEnded(this);
-    // ct->UnregisterForVoiceCallStarted(this);
+    ct->UnregisterForVoiceCallEnded(this);
+    ct->UnregisterForVoiceCallStarted(this);
     AutoPtr<IServiceStateTracker> serviceStateTracker;
     mPhone->GetServiceStateTracker((IServiceStateTracker**)&serviceStateTracker);
     serviceStateTracker->UnregisterForDataConnectionAttached(this);
@@ -4003,15 +4012,17 @@ ECode DcTracker::IsNvSubscription(
         *result = FALSE;
         return NOERROR;
     }
-    Int32 cdmaSubscriptionSource;
+    Int32 cdmaSubscriptionSource = 0;
     mCdmaSsm->GetCdmaSubscriptionSource(&cdmaSubscriptionSource);
-    assert(0 && "TODO: UiccController");
-    // if (UiccController::GetFamilyFromRadioTechnology(radioTech) == IUiccController::APP_FAM_3GPP2
-    //         && cdmaSubscriptionSource ==
-    //                 ICdmaSubscriptionSourceManager::SUBSCRIPTION_FROM_NV) {
-    //     *result = TRUE;
-    //     return NOERROR;
-    // }
+    AutoPtr<IUiccControllerHelper> ucHelper;
+    CUiccControllerHelper::AcquireSingleton((IUiccControllerHelper**)&ucHelper);
+    Int32 flag = 0;
+    ucHelper->GetFamilyFromRadioTechnology(radioTech, &flag);
+    if (flag == IUiccController::APP_FAM_3GPP2
+            && cdmaSubscriptionSource == ICdmaSubscriptionSourceManager::SUBSCRIPTION_FROM_NV) {
+        *result = TRUE;
+        return NOERROR;
+    }
     *result = FALSE;
     return NOERROR;
 }
@@ -4415,17 +4426,20 @@ ECode DcTracker::IsDummyProfileNeeded(
     IPhone::Probe(mPhone)->GetServiceState((IServiceState**)&serviceState);
     Int32 radioTech;
     serviceState->GetRilDataRadioTechnology(&radioTech);
-    assert(0 && "TODO: UiccController");
-    // Int32 radioTechFam = UiccController::GetFamilyFromRadioTechnology(radioTech);
-    // AutoPtr<IInterface> obj;
-    // mIccRecords->Get((IInterface**)&obj);
-    // AutoPtr<IIccRecords> r = IIccRecords::Probe(obj);
-    // if (DBG) Log("isDummyProfileNeeded: radioTechFam = %d", radioTechFam);
-    // // If uicc app family based on data rat is unknown,
-    // // check if records selected is RuimRecords.
-    // *result = (radioTechFam == IUiccController::APP_FAM_3GPP2 ||
-    //         ((radioTechFam == IUiccController::APP_FAM_UNKNOWN) &&
-    //         (r != NULL) && (IRuimRecords::Probe(r) != NULL)));
+
+    AutoPtr<IUiccControllerHelper> ucHelper;
+    CUiccControllerHelper::AcquireSingleton((IUiccControllerHelper**)&ucHelper);
+    Int32 radioTechFam = 0;
+    ucHelper->GetFamilyFromRadioTechnology(radioTech, &radioTechFam);
+    AutoPtr<IInterface> obj;
+    mIccRecords->Get((IInterface**)&obj);
+    AutoPtr<IIccRecords> r = IIccRecords::Probe(obj);
+    if (DBG) Log(String("isDummyProfileNeeded: radioTechFam = ") + StringUtils::ToString(radioTechFam));
+    // If uicc app family based on data rat is unknown,
+    // check if records selected is RuimRecords.
+    *result = (radioTechFam == IUiccController::APP_FAM_3GPP2 ||
+            ((radioTechFam == IUiccController::APP_FAM_UNKNOWN) &&
+            (r != NULL) && (IRuimRecords::Probe(r) != NULL)));
     return NOERROR;
 }
 
@@ -5056,14 +5070,16 @@ ECode DcTracker::Update()
             ISettingsGlobal::MOBILE_DATA + StringUtils::ToString(phoneId), 1, &i32);
     mUserDataEnabled = i32 == 1;
     if (ICDMALTEPhone::Probe(mPhone) != NULL) {
-        assert(0 && "TODO: ICDMAPhone");
-        // ICDMAPhone::Probe(mPhone)->UpdateCurrentCarrierInProvider();
+        assert(0 && "Need UpdateCurrentCarrierInProvider in ICDMALTEPhone");
+        // ICDMALTEPhone::Probe(mPhone)->UpdateCurrentCarrierInProvider();
         SupplyMessenger();
-    } else if (IGSMPhone::Probe(mPhone) != NULL) {
+    }
+    else if (IGSMPhone::Probe(mPhone) != NULL) {
         Boolean b;
         IGSMPhone::Probe(mPhone)->UpdateCurrentCarrierInProvider(&b);
         SupplyMessenger();
-    } else {
+    }
+    else {
         Log("Phone object is not MultiSim. This should not hit!!!!");
     }
     return NOERROR;

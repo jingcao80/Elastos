@@ -65,8 +65,7 @@ MobileDataController::MobileDataController(
 
     AutoPtr<INetworkPolicyManagerHelper> nHelper;
     CNetworkPolicyManagerHelper::AcquireSingleton((INetworkPolicyManagerHelper**)&nHelper);
-    Logger::D(TAG, "TODO: Need NetworkPolicyManager.");
-    // nHelper->From(mContext, (INetworkPolicyManager**)&mPolicyManager);
+    nHelper->From(mContext, (INetworkPolicyManager**)&mPolicyManager);
 }
 
 Boolean MobileDataController::InitStatic()

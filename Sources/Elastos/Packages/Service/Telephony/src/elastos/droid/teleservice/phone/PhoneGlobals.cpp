@@ -471,7 +471,6 @@ ECode PhoneGlobals::OnCreate()
 
         if (DBG) Logger::D(IPhoneGlobals::TAG, "onCreate: mUpdateLock: %s", TO_CSTR(mUpdateLock));
 
-#if 1
         Logger::D(TAG, "TODO Need CallLogAsync");
         //TODO AutoPtr<ICallLogAsync> callLogAsync;
         //TODO CCallLogAsync::New((ICallLogAsync**)&callLogAsync);
@@ -504,17 +503,15 @@ ECode PhoneGlobals::OnCreate()
         // launching the incoming-call UI when an incoming call comes
         // in.)
         //Logger::D(TAG, "TODO Need callLogger");
-         mNotifier = CallNotifier::Init(this, mPhone, callLogger, mCallStateMonitor,
+        mNotifier = CallNotifier::Init(this, mPhone, callLogger, mCallStateMonitor,
                  mBluetoothManager);
-#endif
 
         // register for ICC status
         AutoPtr<IIccCard> sim;
         mPhone->GetIccCard((IIccCard**)&sim);
         if (sim != NULL) {
             if (VDBG) Logger::V(IPhoneGlobals::TAG, "register for ICC status");
-            Logger::D(TAG, "TODO IccCard is not ready!");
-            //TODO sim->RegisterForPersoLocked(mHandler, EVENT_SIM_NETWORK_LOCKED, NULL);
+            sim->RegisterForPersoLocked(mHandler, EVENT_SIM_NETWORK_LOCKED, NULL);
         }
 
         // register for MMI/USSD
@@ -643,10 +640,17 @@ ECode PhoneGlobals::GetCallManager(
 AutoPtr<IPendingIntent> PhoneGlobals::CreateHangUpOngoingCallPendingIntent(
     /* [in] */ IContext* context)
 {
+    AutoPtr<IClassLoader> cl;
+    context->GetClassLoader((IClassLoader**)&cl);
+
+    AutoPtr<IClassInfo> clsInfo;
+    cl->LoadClass(String("Elastos.Droid.TeleService.Phone.CPhoneGlobalsNotificationBroadcastReceiver")
+            , (IClassInfo**)&clsInfo);
+    assert(clsInfo != NULL);
+
     AutoPtr<IIntent> intent;
-    assert(0);
-    // CIntent::New(IPhoneGlobals::ACTION_HANG_UP_ONGOING_CALL, NULL,
-    //         context, ECLSID_CPhoneGlobalsNotificationBroadcastReceiver, (IIntent**)&intent);
+    CIntent::New(IPhoneGlobals::ACTION_HANG_UP_ONGOING_CALL, NULL,
+            context, clsInfo, (IIntent**)&intent);
 
     AutoPtr<IPendingIntentHelper> helper;
     CPendingIntentHelper::AcquireSingleton((IPendingIntentHelper**)&helper);
@@ -947,10 +951,7 @@ void PhoneGlobals::InitForNewRadioTechnology()
     mPhone->GetIccCard((IIccCard**)&sim);
     if (sim != NULL) {
         if (DBG) Logger::D(IPhoneGlobals::TAG, "Update registration for ICC status...");
-
-        assert(0);
         //Register all events new to the new active phone
-        //sim->RegisterForNetworkLocked(mHandler, EVENT_SIM_NETWORK_LOCKED, NULL);
     }
 }
 

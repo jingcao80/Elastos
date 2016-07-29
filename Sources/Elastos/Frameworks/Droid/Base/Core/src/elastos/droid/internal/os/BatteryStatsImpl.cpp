@@ -2996,6 +2996,7 @@ void BatteryStatsImpl::Uid::MakeProcessState(
         AutoPtr<StopwatchTimer> timer = new StopwatchTimer();
         timer->constructor(this, PROCESS_STATE, NULL,
                 mHost->mOnBatteryTimeBase, in);
+        mProcessStateTimer->Set(i, timer);
     }
 }
 

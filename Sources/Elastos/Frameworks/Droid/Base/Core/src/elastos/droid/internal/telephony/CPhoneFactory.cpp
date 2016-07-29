@@ -7,14 +7,17 @@
 #include "elastos/droid/internal/telephony/CPhoneProxy.h"
 #include "elastos/droid/internal/telephony/CSmsApplication.h"
 #include "elastos/droid/internal/telephony/CSubInfoRecordUpdater.h"
+#include "elastos/droid/internal/telephony/CSubscriptionControllerHelper.h"
 #include "elastos/droid/internal/telephony/CTelephonyDevControllerHelper.h"
 #include "elastos/droid/internal/telephony/MccTable.h"
 #include "elastos/droid/internal/telephony/ModemBindingPolicyHandler.h"
 #include "elastos/droid/internal/telephony/ProxyController.h"
 #include "elastos/droid/internal/telephony/SubscriptionController.h"
 #include "elastos/droid/internal/telephony/TelephonyDevController.h"
+#include "elastos/droid/internal/telephony/cdma/CCDMAPhone.h"
 #include "elastos/droid/internal/telephony/cdma/CCDMALTEPhone.h"
 #include "elastos/droid/internal/telephony/cdma/CdmaSubscriptionSourceManager.h"
+#include "elastos/droid/internal/telephony/imsphone/ImsPhoneFactory.h"
 #include "elastos/droid/internal/telephony/sip/SipPhoneFactory.h"
 #include "elastos/droid/internal/telephony/uicc/UiccController.h"
 #include "elastos/droid/content/CIntent.h"
@@ -59,9 +62,11 @@ using Elastos::Droid::Internal::Telephony::ProxyController;
 using Elastos::Droid::Internal::Telephony::TelephonyDevController;
 using Elastos::Droid::Internal::Telephony::Gsm::CGSMPhone;
 using Elastos::Droid::Internal::Telephony::ITelephonyProperties;
+using Elastos::Droid::Internal::Telephony::Cdma::CCDMAPhone;
 using Elastos::Droid::Internal::Telephony::Cdma::CCDMALTEPhone;
 using Elastos::Droid::Internal::Telephony::Cdma::CdmaSubscriptionSourceManager;
 using Elastos::Droid::Internal::Telephony::Cdma::ICdmaSubscriptionSourceManager;
+using Elastos::Droid::Internal::Telephony::ImsPhone::ImsPhoneFactory;
 using Elastos::Droid::Internal::Telephony::Sip::SipPhoneFactory;
 using Elastos::Droid::Internal::Telephony::Uicc::UiccController;
 using Elastos::Droid::Internal::Telephony::Uicc::IUiccControllerHelper;
@@ -189,7 +194,6 @@ ECode CPhoneFactory::MakeDefaultPhone(
             sRILClassname.Trim();
             Logger::I(LOGTAG, "RILClassname is %s", sRILClassname.string());
 
-            Logger::D(LOGTAG, "[TODO] ====================================0==1=numPhones=[%d]",numPhones);
             for (Int32 i = 0; i < numPhones; i++) {
                 //reads the system properties and makes commandsinterface
                 // try {
@@ -320,9 +324,8 @@ ECode CPhoneFactory::GetCdmaPhone(
     AutoPtr<IPhone> phone;
     {
         AutoLock syncLock(PhoneProxy::lockForRadioTechnologyChange);
-        assert(0 && "TODO");
-        // phone = new CDMALTEPhone(sContext, (*sCommandsInterfaces)[phoneId],
-        //         sPhoneNotifier, phoneId);
+        CCDMALTEPhone::New(sContext, (*sCommandsInterfaces)[phoneId],
+                sPhoneNotifier, phoneId, (IPhone**)&phone);
     }
     *result = phone;
     REFCOUNT_ADD(*result)
@@ -476,15 +479,13 @@ ECode CPhoneFactory::GetCdmaPhone(
         hlp->GetLteOnCdmaModeStatic(&cdmamodestatic);
         switch (cdmamodestatic) {
             case IPhoneConstants::LTE_ON_CDMA_TRUE: {
-                assert(0 && "TODO");
-                // phone = new CDMALTEPhone(sContext, sCommandsInterface, sPhoneNotifier);
+                CCDMALTEPhone::New(sContext, sCommandsInterface, sPhoneNotifier, (IPhone**)&phone);
                 break;
             }
             case IPhoneConstants::LTE_ON_CDMA_FALSE:
             case IPhoneConstants::LTE_ON_CDMA_UNKNOWN:
             default: {
-                assert(0 && "TODO");
-                // phone = new CDMAPhone(sContext, sCommandsInterface, sPhoneNotifier);
+                CCDMAPhone::New(sContext, sCommandsInterface, sPhoneNotifier, (IPhone**)&phone);
                 break;
             }
         }
@@ -622,8 +623,7 @@ ECode CPhoneFactory::GetDefaultSubscription(
 {
     VALIDATE_NOT_NULL(result)
     AutoPtr<ISubscriptionControllerHelper> hlpSC;
-    assert(0 && "TODO");
-    // CSubscriptionControllerHelper::AcquireSingleton((ISubscriptionControllerHelper**)&hlpSC);
+    CSubscriptionControllerHelper::AcquireSingleton((ISubscriptionControllerHelper**)&hlpSC);
     AutoPtr<ISubscriptionController> sc;
     hlpSC->GetInstance((ISubscriptionController**)&sc);
     Int64 subId = 0;
@@ -773,8 +773,7 @@ ECode CPhoneFactory::GetDataSubscription(
     // }
 
     AutoPtr<ISubscriptionControllerHelper> hlpSC;
-    assert(0 && "TODO");
-    // CSubscriptionControllerHelper::AcquireSingleton((ISubscriptionControllerHelper**)&hlpSC);
+    CSubscriptionControllerHelper::AcquireSingleton((ISubscriptionControllerHelper**)&hlpSC);
     AutoPtr<ISubscriptionController> sc;
     hlpSC->GetInstance((ISubscriptionController**)&sc);
     Int32 phoneId = 0;
@@ -812,8 +811,7 @@ ECode CPhoneFactory::GetSMSSubscription(
     // }
 
     AutoPtr<ISubscriptionControllerHelper> hlpSC;
-    assert(0 && "TODO");
-    // CSubscriptionControllerHelper::AcquireSingleton((ISubscriptionControllerHelper**)&hlpSC);
+    CSubscriptionControllerHelper::AcquireSingleton((ISubscriptionControllerHelper**)&hlpSC);
     AutoPtr<ISubscriptionController> sc;
     hlpSC->GetInstance((ISubscriptionController**)&sc);
     Int32 phoneId = 0;
@@ -918,9 +916,8 @@ ECode CPhoneFactory::MakeImsPhone(
     /* [out] */ IImsPhone** result)
 {
     VALIDATE_NOT_NULL(result)
-    assert(0 && "TODO");
-    // return ImsPhoneFactory::MakePhone(sContext, phoneNotifier, defaultPhone);
-    *result = NULL;
+    AutoPtr<IImsPhone> ip = ImsPhoneFactory::MakePhone(sContext, phoneNotifier, defaultPhone);
+    *result = ip;
     return NOERROR;
 }
 
@@ -939,13 +936,11 @@ Boolean CPhoneFactory::IsValidphoneId(
 Int32 CPhoneFactory::GetDefaultPhoneId()
 {
     AutoPtr<ISubscriptionControllerHelper> hlpSC;
-    assert(0 && "TODO");
-    // CSubscriptionControllerHelper::AcquireSingleton((ISubscriptionControllerHelper**)&hlpSC);
+    CSubscriptionControllerHelper::AcquireSingleton((ISubscriptionControllerHelper**)&hlpSC);
     AutoPtr<ISubscriptionController> sc;
     hlpSC->GetInstance((ISubscriptionController**)&sc);
     Int64 subscription = 0;
-    assert(0 && "TODO");
-    // GetDefaultSubscription(&subscription);
+    GetDefaultSubscription(&subscription);
     Int32 phoneId = 0;
     IISub::Probe(sc)->GetPhoneId(subscription, &phoneId);
     if (!IsValidphoneId(phoneId)) {

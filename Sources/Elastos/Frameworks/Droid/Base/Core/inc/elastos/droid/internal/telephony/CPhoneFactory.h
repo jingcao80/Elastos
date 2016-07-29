@@ -153,7 +153,7 @@ public:
         /* [out] */ ISubInfoRecordUpdater** result);
 
 private:
-    static CARAPI InstantiateCustomRIL(
+    CARAPI InstantiateCustomRIL(
         /* [in] */ String sRILClassname,
         /* [in] */ IContext* context,
         /* [in] */ Int32 networkMode,
@@ -161,10 +161,10 @@ private:
         /* [in] */ IInteger32* instanceId,
         /* [out] */ IInterface** result);
 
-    static CARAPI_(Boolean) IsValidphoneId(
+    CARAPI_(Boolean) IsValidphoneId(
         /* [in] */ Int32 phoneId);
 
-    static CARAPI_(Int32) GetDefaultPhoneId();
+    CARAPI_(Int32) GetDefaultPhoneId();
 
 public:
     static const String LOGTAG;

@@ -1,5 +1,6 @@
 
 #include "elastos/droid/internal/telephony/PhoneBase.h"
+#include "elastos/droid/internal/telephony/PhoneProxy.h"
 #include "elastos/droid/internal/telephony/CallManager.h"
 #include "elastos/droid/internal/telephony/CallTracker.h"
 #include "elastos/droid/internal/telephony/IccUtils.h"
@@ -418,12 +419,12 @@ ECode PhoneBase::constructor(
 
     SetPropertiesByCarrier();
 
-    Logger::E(TAG, "TODO SmsStorageMonitor & SmsUsageMonitor is not ready");
     // Initialize device storage and outgoing SMS usage monitors for SMSDispatchers.
-    //TODO mSmsStorageMonitor = new SmsStorageMonitor();
-    //TODO mSmsStorageMonitor->constructor(this);
-    //TODO mSmsUsageMonitor = new SmsUsageMonitor();
-    //TODO mSmsUsageMonitor->constructor(context);
+    mSmsStorageMonitor = new SmsStorageMonitor();
+    mSmsStorageMonitor->constructor(this);
+    Logger::D(TAG, "[TODO] Need implement SmsUsageMonitor.");
+    // mSmsUsageMonitor = new SmsUsageMonitor();
+    // mSmsUsageMonitor->constructor(context);
 
     mUiccController = UiccController::GetInstance();
     mUiccController->RegisterForIccChanged(this, EVENT_ICC_CHANGED, NULL);
@@ -445,8 +446,7 @@ ECode PhoneBase::constructor(
 // @Override
 ECode PhoneBase::Dispose()
 {
-    assert(0 && "TODO");
-    // AutoLock lock(PhoneProxy::sLockForRadioTechnologyChange);
+    AutoLock lock(PhoneProxy::lockForRadioTechnologyChange);
     mContext->UnregisterReceiver(mImsIntentReceiver);
     mCi->UnSetOnCallRing(this);
     // Must cleanup all connectionS and needs to use sendMessage!

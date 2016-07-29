@@ -10,8 +10,7 @@
 #include "elastos/droid/internal/telephony/CPhoneSubInfo.h"
 #include "elastos/droid/internal/telephony/PhoneProxy.h"
 #include "elastos/droid/internal/telephony/Subscription.h"
-// TODO: Need SubscriptionController
-// #include "elastos/droid/internal/telephony/SubscriptionController.h"
+#include "elastos/droid/internal/telephony/SubscriptionController.h"
 #include "elastos/droid/net/Uri.h"
 #include "elastos/droid/os/SystemProperties.h"
 #include "elastos/droid/preference/PreferenceManager.h"
@@ -23,6 +22,7 @@
 #include "elastos/droid/telephony/CSubscriptionManager.h"
 #include "elastos/droid/telephony/CTelephonyManager.h"
 #include "elastos/droid/telephony/PhoneNumberUtils.h"
+#include "elastos/droid/text/TextUtils.h"
 #include <elastos/core/AutoLock.h>
 #include <elastos/core/CoreUtils.h>
 #include <elastos/core/StringUtils.h>
@@ -41,8 +41,7 @@ using Elastos::Droid::Internal::Telephony::IPhoneFactory;
 using Elastos::Droid::Internal::Telephony::ISubscriptionController;
 using Elastos::Droid::Internal::Telephony::PhoneProxy;
 using Elastos::Droid::Internal::Telephony::Subscription;
-// TODO: Need SubscriptionController
-// using Elastos::Droid::Internal::Telephony::SubscriptionController;
+using Elastos::Droid::Internal::Telephony::SubscriptionController;
 // TODO:
 // using Elastos::Droid::Internal::Telephony::Test::ISimulatedRadioControl;
 using Elastos::Droid::Internal::Telephony::Uicc::IIccVmNotSupportedException;
@@ -60,6 +59,7 @@ using Elastos::Droid::Telephony::CTelephonyManager;
 using Elastos::Droid::Telephony::CSubscriptionManager;
 using Elastos::Droid::Telephony::ISubscriptionManager;
 using Elastos::Droid::Telephony::PhoneNumberUtils;
+using Elastos::Droid::Text::TextUtils;
 using Elastos::Core::AutoLock;
 using Elastos::Core::CoreUtils;
 using Elastos::Core::IArrayOf;
@@ -713,7 +713,7 @@ ECode CGSMPhone::HandleInCallMmiCommands(
         return NOERROR;
     }
 
-    if (dialString.IsEmpty()) {
+    if (TextUtils::IsEmpty(dialString)) {
         *result = FALSE;
         return NOERROR;
     }
@@ -992,7 +992,7 @@ ECode CGSMPhone::GetVoiceMailNumber(
     else {
         number = String("");
     }
-    if (number.IsEmpty()) {
+    if (TextUtils::IsEmpty(number)) {
         AutoPtr<IContext> ctx;
         GetContext((IContext**)&ctx);
         AutoPtr<ISharedPreferences> sp;
@@ -1003,7 +1003,7 @@ ECode CGSMPhone::GetVoiceMailNumber(
         sp->GetString(sb.ToString(), String(NULL), &number);
     }
 
-    if (number.IsEmpty()) {
+    if (TextUtils::IsEmpty(number)) {
         AutoPtr<IContext> ctx;
         GetContext((IContext**)&ctx);
         AutoPtr<IResources> res;
@@ -1013,7 +1013,7 @@ ECode CGSMPhone::GetVoiceMailNumber(
 
         if (listArray != NULL && listArray->GetLength() > 0) {
             for (Int32 i=0; i < listArray->GetLength(); i++) {
-                if (!(*listArray)[i].IsEmpty()) {
+                if (!TextUtils::IsEmpty((*listArray)[i])) {
                     AutoPtr<ArrayOf<String> > defaultVMNumberArray;
                     StringUtils::Split((*listArray)[i], String(";"), (ArrayOf<String>**)&defaultVMNumberArray);
                     if (defaultVMNumberArray != NULL && defaultVMNumberArray->GetLength() > 0) {
@@ -1022,7 +1022,7 @@ ECode CGSMPhone::GetVoiceMailNumber(
                             number = (*defaultVMNumberArray)[0];
                         }
                         else if (defaultVMNumberArray->GetLength() == 2 &&
-                                !(*defaultVMNumberArray)[1].IsEmpty() &&
+                                !TextUtils::IsEmpty((*defaultVMNumberArray)[1]) &&
                                 (*defaultVMNumberArray)[1].EqualsIgnoreCase((GetGroupIdLevel1(&str), str))) {
                             number = (*defaultVMNumberArray)[0];
                             break;
@@ -1592,9 +1592,7 @@ ECode CGSMPhone::HandleMessage(
                 StoreVoiceMailNumber(String(NULL));
                 SetCallForwardingPreference(FALSE);
                 SetSimImsi(String(NULL));
-                AutoPtr<ISubscriptionController> controller;
-// TODO: Need SubscriptionController
-                // SubscriptionController::GetInstance((ISubscriptionController**)&controller);
+                AutoPtr<ISubscriptionController> controller = SubscriptionController::GetInstance();
                 controller->RemoveStaleSubPreferences(VM_NUMBER);
                 controller->RemoveStaleSubPreferences(SIM_IMSI);
                 controller->RemoveStaleSubPreferences(CF_ENABLED);

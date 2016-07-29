@@ -30,7 +30,10 @@ using Elastos::Droid::Internal::Telephony::PhoneConstantsState_OFFHOOK;
 using Elastos::Droid::Internal::Telephony::PhoneConstantsState_IDLE;
 using Elastos::Droid::Internal::Telephony::ITelephonyCapabilities;
 using Elastos::Droid::Internal::Telephony::CTelephonyCapabilities;
+using Elastos::Droid::Internal::Telephony::Cdma::CSignalToneUtilHelper;
+using Elastos::Droid::Internal::Telephony::Cdma::ISignalToneUtilHelper;
 using Elastos::Droid::Internal::Telephony::Cdma::ICdmaInformationRecordsCdmaDisplayInfoRec;
+using Elastos::Droid::Internal::Telephony::Cdma::ICdmaInformationRecordsCdmaSignalInfoRec;
 using Elastos::Droid::Media::CAudioAttributesBuilder;
 using Elastos::Droid::Media::CToneGenerator;
 using Elastos::Droid::Media::IAudioAttributesBuilder;
@@ -516,8 +519,7 @@ CallNotifier::CallNotifier(
     AutoPtr<IInterface> obj2;
     IContext::Probe(app)->GetSystemService(IContext::TELEPHONY_SERVICE, (IInterface**)&obj2);
     AutoPtr<ITelephonyManager> telephonyManager = ITelephonyManager::Probe(obj2);
-    Logger::E("CallNotifier", " TODO: Service %s is not ready!", IContext::TELEPHONY_SERVICE.string());
-    //TODO telephonyManager->Listen(mPhoneStateListener, IPhoneStateListener::LISTEN_MESSAGE_WAITING_INDICATOR | IPhoneStateListener::LISTEN_CALL_FORWARDING_INDICATOR);
+    telephonyManager->Listen(mPhoneStateListener, IPhoneStateListener::LISTEN_MESSAGE_WAITING_INDICATOR | IPhoneStateListener::LISTEN_CALL_FORWARDING_INDICATOR);
 }
 
 void CallNotifier::CreateSignalInfoToneGenerator()
@@ -1122,44 +1124,52 @@ void CallNotifier::OnSignalInfo(
     mCM->GetFirstActiveRingingCall((ICall**)&call);
     Int32 state;
     call->GetState(&state);
-    assert(0 && "TODO : need PhoneUtils");
-    // if (PhoneUtils::IsRealIncomingCall(state)) {
-    //     // Do not start any new SignalInfo tone when Call state is INCOMING
-    //     // and stop any previous SignalInfo tone which is being played
-    //     StopSignalInfoTone();
-    // }
-    // else {
-    //     // Extract the SignalInfo String from the message
-    //     CdmaSignalInfoRec signalInfoRec = (CdmaSignalInfoRec)(r.result);
-    //     // Only proceed if a Signal info is present.
-    //     if (signalInfoRec != NULL) {
-    //         Boolean isPresent = signalInfoRec.isPresent;
-    //         if (DBG) Log(String("onSignalInfo: isPresent=") + StringUtils::ToString(isPresent));
-    //         if (isPresent) {// if tone is valid
-    //             Int32 uSignalType = signalInfoRec.signalType;
-    //             Int32 uAlertPitch = signalInfoRec.alertPitch;
-    //             Int32 uSignal = signalInfoRec.signal;
+    if (PhoneUtils::IsRealIncomingCall(state)) {
+        // Do not start any new SignalInfo tone when Call state is INCOMING
+        // and stop any previous SignalInfo tone which is being played
+        StopSignalInfoTone();
+    }
+    else {
+        // Extract the SignalInfo String from the message
+        AutoPtr<ICdmaInformationRecordsCdmaSignalInfoRec> signalInfoRec
+            = ICdmaInformationRecordsCdmaSignalInfoRec::Probe(((AsyncResult*)r)->mResult);
+        // Only proceed if a Signal info is present.
+        if (signalInfoRec != NULL) {
+            Boolean isPresent = FALSE;
+            assert(0 && "Need CdmaSignalInfoRec");
+            // isPresent = signalInfoRec.isPresent;
+            if (DBG) Log(String("onSignalInfo: isPresent=") + StringUtils::ToString(isPresent));
+            if (isPresent) {// if tone is valid
+                assert(0 && "Need CdmaSignalInfoRec");
+                Int32 uSignalType = 0;
+                Int32 uAlertPitch = 0;
+                Int32 uSignal = 0;
+                // uSignalType = signalInfoRec.signalType;
+                // uAlertPitch = signalInfoRec.alertPitch;
+                // uSignal = signalInfoRec.signal;
 
-    //             if (DBG) {
-    //                 StringBuilder sb;
-    //                 sb += "onSignalInfo: uSignalType=";
-    //                 sb += uSignalType;
-    //                 sb += ", uAlertPitch=";
-    //                 sb += uAlertPitch;
-    //                 sb += ", uSignal=";
-    //                 sb += uSignal;
-    //                 Log(sb.ToString());
-    //             }
-    //             //Map the Signal to a ToneGenerator ToneID only if Signal info is present
-    //             Int32 toneID;
-    //             SignalToneUtil::GetAudioToneFromSignalInfo(uSignalType, uAlertPitch, uSignal, &toneID);
+                if (DBG) {
+                    StringBuilder sb;
+                    sb += "onSignalInfo: uSignalType=";
+                    sb += uSignalType;
+                    sb += ", uAlertPitch=";
+                    sb += uAlertPitch;
+                    sb += ", uSignal=";
+                    sb += uSignal;
+                    Log(sb.ToString());
+                }
+                //Map the Signal to a ToneGenerator ToneID only if Signal info is present
+                Int32 toneID = 0;
+                AutoPtr<ISignalToneUtilHelper> helper;
+                CSignalToneUtilHelper::AcquireSingleton((ISignalToneUtilHelper**)&helper);
+                helper->GetAudioToneFromSignalInfo(uSignalType, uAlertPitch, uSignal, &toneID);
 
-    //             //Create the SignalInfo tone player and pass the ToneID
-    //             AutoPtr<ISignalInfoTonePlayer> player = new SignalInfoTonePlayer(toneID);
-    //             player->Start();
-    //         }
-    //     }
-    // }
+                //Create the SignalInfo tone player and pass the ToneID
+                AutoPtr<SignalInfoTonePlayer> player = new SignalInfoTonePlayer(this, toneID);
+                player->Start();
+            }
+        }
+    }
 }
 
 ECode CallNotifier::StopSignalInfoTone()
