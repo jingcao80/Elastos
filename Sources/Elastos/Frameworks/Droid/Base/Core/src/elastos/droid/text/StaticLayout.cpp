@@ -1153,7 +1153,8 @@ public:
         , mChars(inputText)
     {
         UErrorCode status = U_ZERO_ERROR;
-        mUText = utext_openUChars(NULL, (const UChar*)mChars->GetPayload(), length, &status);
+        AutoPtr<ArrayOf<Char16> > char16s = String(*inputText).GetChar16s();
+        mUText = utext_openUChars(NULL, (const UChar*)char16s->GetPayload(), length, &status);
         if (mUText == NULL) {
             return;
         }
