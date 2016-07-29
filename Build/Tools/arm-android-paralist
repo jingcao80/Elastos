@@ -406,6 +406,10 @@
   Elastos/Packages/Providers/MediaProvider Elastos.Droid.Providers.Media.car
 > Elastos/Packages/Providers/MediaProvider
 
+# ==== build Provider.Telephony ====
+  Elastos/Packages/Providers/TelephonyProvider Elastos.Droid.Providers.Telephony.car
+> Elastos/Packages/Providers/TelephonyProvider
+
 # ==== build DefContainer ====
   Elastos/Frameworks/Droid/Base/Packages/DefaultContainerService/ Elastos.Droid.DefContainer.car
 > Elastos/Frameworks/Droid/Base/Packages/DefaultContainerService/
