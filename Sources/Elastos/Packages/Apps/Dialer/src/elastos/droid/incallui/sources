@@ -14,6 +14,7 @@ SOURCES += CallList.cpp
 SOURCES += CCallButtonFragment.cpp
 SOURCES += CCallCardFragment.cpp
 SOURCES += CConferenceManagerFragment.cpp
+SOURCES += ConferenceManagerPresenter.cpp
 #SOURCES += CInCallActivity.cpp
 SOURCES += CInCallServiceImpl.cpp
 SOURCES += InCallPresenter.cpp

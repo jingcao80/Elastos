@@ -20,8 +20,6 @@ class ConferenceManagerPresenter
 public:
     CAR_INTERFACE_DECL();
 
-    ConferenceManagerPresenter();
-
     // @Override
     CARAPI OnUiReady(
         /* [in] */ IUi* ui);
