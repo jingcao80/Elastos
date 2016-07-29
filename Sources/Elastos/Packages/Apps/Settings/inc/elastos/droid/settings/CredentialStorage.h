@@ -345,7 +345,7 @@ public class CredentialStorage extends Activity {
             if (mConfigureConfirmed) {
                 mConfigureConfirmed = FALSE;
                 Intent intent = new Intent(DevicePolicyManager.ACTION_SET_NEW_PASSWORD);
-                intent->PutExtra(ChooseLockGeneric.ChooseLockGenericFragment.MINIMUM_QUALITY_KEY,
+                intent->PutExtra(CChooseLockGenericFragment::MINIMUM_QUALITY_KEY,
                                 MIN_PASSWORD_QUALITY);
                 StartActivity(intent);
                 return;

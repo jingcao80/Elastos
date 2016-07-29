@@ -111,6 +111,14 @@ ECode UserHandle::ReadFromParcel(
     return CUserHandle::New(handle, h);
 }
 
+ECode UserHandle::IsOwner(
+    /* [out] */ Boolean* res)
+{
+    VALIDATE_NOT_NULL(res)
+
+    return this->Equals(OWNER, res);
+}
+
 ECode UserHandle::GetIdentifier(
     /* [out] */ Int32* id)
 {

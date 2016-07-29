@@ -3,6 +3,7 @@ module
     importlib("Elastos.Droid.Core.eco");
 
     merge("car/elastos/droid/ButtonBarHandler.car");
+    merge("car/elastos/droid/ChooseLockGeneric.car");
     merge("car/elastos/droid/DialogCreatable.car");
     merge("car/elastos/droid/SettingsActivity.car");
     merge("car/elastos/droid/SettingsPreferenceFragment.car");
@@ -638,6 +639,115 @@ module
 
         interface ILocaleSelectionListener;
         interface IDialogCreatable;
+    }
+
+    class CChooseLockGeneric {
+        constructor();
+
+        interface ISettingsActivity;
+
+        interface IActivity;
+        interface IContext;
+        interface IContextThemeWrapper;
+        interface ILayoutInflaterFactory;
+        interface ILayoutInflaterFactory2;
+        interface IWindowCallback;
+        interface IKeyEventCallback;
+        interface IViewOnCreateContextMenuListener;
+        interface IComponentCallbacks;
+        interface IComponentCallbacks2;
+        interface IOnWindowDismissedCallback;
+
+        interface IPreferenceManagerOnPreferenceTreeClickListener;
+        interface IPreferenceFragmentOnPreferenceStartFragmentCallback;
+        interface IButtonBarHandler;
+        interface IFragmentManagerOnBackStackChangedListener;
+        interface ISearchViewOnQueryTextListener;
+        interface ISearchViewOnCloseListener;
+        interface IOnActionExpandListener;
+    }
+
+    class CChooseLockGenericInternalActivity {
+        constructor();
+
+        interface IChooseLockGenericInternalActivity;
+
+        interface ISettingsActivity;
+
+        interface IActivity;
+        interface IContext;
+        interface IContextThemeWrapper;
+        interface ILayoutInflaterFactory;
+        interface ILayoutInflaterFactory2;
+        interface IWindowCallback;
+        interface IKeyEventCallback;
+        interface IViewOnCreateContextMenuListener;
+        interface IComponentCallbacks;
+        interface IComponentCallbacks2;
+        interface IOnWindowDismissedCallback;
+
+        interface IPreferenceManagerOnPreferenceTreeClickListener;
+        interface IPreferenceFragmentOnPreferenceStartFragmentCallback;
+        interface IButtonBarHandler;
+        interface IFragmentManagerOnBackStackChangedListener;
+        interface ISearchViewOnQueryTextListener;
+        interface ISearchViewOnCloseListener;
+        interface IOnActionExpandListener;
+    }
+
+    class CChooseLockGenericFragment {
+        constructor();
+
+        interface ISettingsPreferenceFragment;
+        interface IPreferenceFragment;
+        interface IFragment;
+        interface IPreferenceManagerOnPreferenceTreeClickListener;
+        interface IComponentCallbacks;
+        interface IComponentCallbacks2;
+        interface IViewOnCreateContextMenuListener;
+        interface IDialogCreatable;
+    }
+
+    class CEncryptionInterstitial {
+        constructor();
+
+        interface ISettingsActivity;
+
+        interface IActivity;
+        interface IContext;
+        interface IContextThemeWrapper;
+        interface ILayoutInflaterFactory;
+        interface ILayoutInflaterFactory2;
+        interface IWindowCallback;
+        interface IKeyEventCallback;
+        interface IViewOnCreateContextMenuListener;
+        interface IComponentCallbacks;
+        interface IComponentCallbacks2;
+        interface IOnWindowDismissedCallback;
+
+        interface IPreferenceManagerOnPreferenceTreeClickListener;
+        interface IPreferenceFragmentOnPreferenceStartFragmentCallback;
+        interface IButtonBarHandler;
+        interface IFragmentManagerOnBackStackChangedListener;
+        interface ISearchViewOnQueryTextListener;
+        interface ISearchViewOnCloseListener;
+        interface IOnActionExpandListener;
+    }
+
+    class CEncryptionInterstitialFragment {
+        constructor();
+
+        interface ISettingsPreferenceFragment;
+        interface IPreferenceFragment;
+        interface IFragment;
+        interface IPreferenceManagerOnPreferenceTreeClickListener;
+        interface IComponentCallbacks;
+        interface IComponentCallbacks2;
+        interface IViewOnCreateContextMenuListener;
+        interface IDialogCreatable;
+
+        interface IViewOnClickListener;
+        interface IDialogInterfaceOnClickListener;
     }
 
     class CSettings {

@@ -40,6 +40,15 @@ module
          */
         const Boolean MU_ENABLED = TRUE;
 
+        /**
+         * Returns true if this UserHandle refers to the owner user; false otherwise.
+         * @return true if this UserHandle refers to the owner user; false otherwise.
+         * @hide
+         */
+        //@SystemApi
+        IsOwner(
+            [out] Boolean* res);
+
         GetIdentifier(
             [out] Int32* id);
 

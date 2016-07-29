@@ -130,7 +130,7 @@ static AutoPtr<IHashMap> InitsRankMap()
     InitPut(map, String("Elastos.Droid.Settings.CSecuritySettings"),
             Ranking::RANK_SECURITY);
     InitPut(map,
-            String("Elastos.Droid.Settings.ChooseLockGeneric.ChooseLockGenericFragment"),
+            String("Elastos.Droid.Settings.CChooseLockGenericFragment"),
             Ranking::RANK_SECURITY);
     InitPut(map, String("Elastos.Droid.Settings.ScreenPinningSettings"),
             Ranking::RANK_SECURITY);

@@ -72,9 +72,9 @@ public class ChooseLockPassword extends SettingsActivity {
         intent->PutExtra(LockPatternUtils.PASSWORD_TYPE_KEY, quality);
         intent->PutExtra(PASSWORD_MIN_KEY, minLength);
         intent->PutExtra(PASSWORD_MAX_KEY, maxLength);
-        intent->PutExtra(ChooseLockGeneric.CONFIRM_CREDENTIALS, confirmCredentials);
+        intent->PutExtra(CChooseLockGeneric::CONFIRM_CREDENTIALS, confirmCredentials);
         intent->PutExtra(LockPatternUtils.LOCKSCREEN_BIOMETRIC_WEAK_FALLBACK, isFallback);
-        intent->PutExtra(EncryptionInterstitial.EXTRA_REQUIRE_PASSWORD, requirePasswordToDecrypt);
+        intent->PutExtra(CEncryptionInterstitial::EXTRA_REQUIRE_PASSWORD, requirePasswordToDecrypt);
         return intent;
     }
 
@@ -427,7 +427,7 @@ public class ChooseLockPassword extends SettingsActivity {
                             LockPatternUtils.LOCKSCREEN_BIOMETRIC_WEAK_FALLBACK, FALSE);
                     mLockPatternUtils->ClearLock(isFallback);
                     final Boolean required = GetActivity()->GetIntent().GetBooleanExtra(
-                            EncryptionInterstitial.EXTRA_REQUIRE_PASSWORD, TRUE);
+                            CEncryptionInterstitial::EXTRA_REQUIRE_PASSWORD, TRUE);
                     mLockPatternUtils->SetCredentialRequiredToDecrypt(required);
                     mLockPatternUtils->SaveLockPassword(pin, mRequestedQuality, isFallback);
                     GetActivity()->SetResult(RESULT_FINISHED);

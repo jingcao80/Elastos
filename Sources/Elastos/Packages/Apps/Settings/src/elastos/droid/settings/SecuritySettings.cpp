@@ -1005,9 +1005,8 @@ ECode SecuritySettings::OnPreferenceTreeClick(
     String key;
     preference->GetKey(&key);
     if (KEY_UNLOCK_SET_OR_CHANGE.Equals(key)) {
-        assert(0 && "TODO");
-        // StartFragment(this, String("com.android.settings.ChooseLockGeneric$ChooseLockGenericFragment"),
-                // R::string::lock_settings_picker_title, SET_OR_CHANGE_LOCK_METHOD_REQUEST, NULL);
+        StartFragment(this, String("Elastos.Droid.Settings.CChooseLockGenericFragment"),
+                R::string::lock_settings_picker_title, SET_OR_CHANGE_LOCK_METHOD_REQUEST, NULL);
     }
     else if (KEY_BIOMETRIC_WEAK_IMPROVE_MATCHING.Equals(key)) {
         AutoPtr<IActivity> activity;

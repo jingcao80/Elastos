@@ -1143,7 +1143,7 @@
             android:exported="false"
             android:windowSoftInputMode="stateVisible|adjustResize"/>
 
-        <activity android:name="ChooseLockGeneric"
+        <activity android:name="CChooseLockGeneric"
             android:label="@string/lockpassword_choose_lock_generic_header"
             android:excludeFromRecents="true" >
             <intent-filter>
@@ -1154,7 +1154,7 @@
                 android:value="true" />
         </activity>
 
-        <activity android:name="ChooseLockGeneric$InternalActivity" android:exported="false"
+        <activity android:name="CChooseLockGenericInternalActivity" android:exported="false"
             android:label="@string/lockpassword_choose_lock_generic_header"
             android:excludeFromRecents="true"
         />
@@ -1164,7 +1164,7 @@
         <activity android:name="ChooseLockPassword" android:exported="false"
             android:windowSoftInputMode="stateVisible|adjustResize"/>
 
-        <activity android:name=".EncryptionInterstitial"/>
+        <activity android:name=".CEncryptionInterstitial"/>
 
         <!-- Runs in the phone process since it needs access to the Phone object -->
         <activity android:name=".Deviceinfo.Status"

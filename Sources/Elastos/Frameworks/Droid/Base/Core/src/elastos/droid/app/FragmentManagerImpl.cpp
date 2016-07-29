@@ -1358,7 +1358,7 @@ ECode FragmentManagerImpl::FindFragmentByTag(
     /* [out] */ IFragment** fragment)
 {
     VALIDATE_NOT_NULL(fragment);
-    if (mAdded != NULL && tag != NULL) {
+    if (mAdded != NULL && !tag.IsNull()) {
         // First look through added fragments.
         Int32 N;
         mAdded->GetSize(&N);
@@ -1903,7 +1903,7 @@ ECode FragmentManagerImpl::SaveAllState(
 
             AutoPtr<CFragmentState> fs;
             CFragmentState::NewByFriend(f, (CFragmentState**)&fs);
-            active->Set(i, fs);
+            active->Set(i, (IFragmentState*)fs.Get());
 
             Int32 fstate;
             f->GetState(&fstate);
@@ -2153,7 +2153,8 @@ ECode FragmentManagerImpl::RestoreAllState(
                 SetBackStackIndex(((BackStackRecord*)bse.Get())->mIndex, bse);
             }
         }
-    } else {
+    }
+    else {
         mBackStack = NULL;
     }
 

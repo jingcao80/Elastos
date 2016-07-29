@@ -443,7 +443,7 @@ public:
 
     static const String EXTRA_SHOW_FRAGMENT_AS_SUBSETTING;
 
-private:
+protected:
     // extras that allow any preference activity to be launched as part of a wizard
 
     // show Back and Next buttons? takes Boolean parameter

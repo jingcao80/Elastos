@@ -768,9 +768,6 @@ ECode InputMethodAndLanguageSettings::OnResume()
         AutoPtr<IPreference> pref;
         FindPreference(CoreUtils::Convert(KEY_USER_DICTIONARY_SETTINGS),
                 (IPreference**)&pref);
-if (pref == NULL) {
-    Slogger::D("InputMethodAndLanguageSettings", "=================== pref == NULL ===================");
-}
         UpdateUserDictionaryPreference(pref);
         if (SHOW_INPUT_METHOD_SWITCHER_SETTINGS) {
             IPreference::Probe(mShowInputMethodSelectorPref)->SetOnPreferenceChangeListener(this);

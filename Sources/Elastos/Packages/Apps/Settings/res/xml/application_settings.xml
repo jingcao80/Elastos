@@ -27,20 +27,20 @@
         android:key="applications_settings">
 
     <Elastos.Droid.Preference.CPreferenceScreen
-            android:fragment="Elastos.Droid.Settings.applications.ManageApplications"
+            android:fragment="Elastos.Droid.Settings.Applications.ManageApplications"
             android:title="@string/manageapplications_settings_title"
             android:summary="@string/manageapplications_settings_summary">
     </Elastos.Droid.Preference.CPreferenceScreen>
 
     <Elastos.Droid.Preference.CPreferenceScreen
-            android:fragment="Elastos.Droid.Settings.applications.ManageApplications"
+            android:fragment="Elastos.Droid.Settings.Applications.ManageApplications"
             android:title="@string/runningservices_settings_title"
             android:summary="@string/runningservices_settings_summary">
         <extra android:name="classname" android:value="Elastos.Droid.Settings.Settings$RunningServicesActivity" />
     </Elastos.Droid.Preference.CPreferenceScreen>
 
     <Elastos.Droid.Preference.CPreferenceScreen
-            android:fragment="Elastos.Droid.Settings.applications.ManageApplications"
+            android:fragment="Elastos.Droid.Settings.Applications.ManageApplications"
             android:title="@string/storageuse_settings_title"
             android:summary="@string/storageuse_settings_summary">
         <extra android:name="classname"

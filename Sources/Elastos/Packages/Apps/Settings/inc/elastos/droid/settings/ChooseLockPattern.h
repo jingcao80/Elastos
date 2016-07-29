@@ -73,9 +73,9 @@ public class ChooseLockPattern extends SettingsActivity {
             Boolean requirePassword, Boolean confirmCredentials) {
         Intent intent = new Intent(context, ChooseLockPattern.class);
         intent->PutExtra("key_lock_method", "pattern");
-        intent->PutExtra(ChooseLockGeneric.CONFIRM_CREDENTIALS, confirmCredentials);
+        intent->PutExtra(CChooseLockGeneric::CONFIRM_CREDENTIALS, confirmCredentials);
         intent->PutExtra(LockPatternUtils.LOCKSCREEN_BIOMETRIC_WEAK_FALLBACK, isFallback);
-        intent->PutExtra(EncryptionInterstitial.EXTRA_REQUIRE_PASSWORD, requirePassword);
+        intent->PutExtra(CEncryptionInterstitial::EXTRA_REQUIRE_PASSWORD, requirePassword);
         return intent;
     }
 
@@ -541,7 +541,7 @@ public class ChooseLockPattern extends SettingsActivity {
                 .GetBooleanExtra(LockPatternUtils.LOCKSCREEN_BIOMETRIC_WEAK_FALLBACK, FALSE);
 
             final Boolean required = GetActivity()->GetIntent().GetBooleanExtra(
-                    EncryptionInterstitial.EXTRA_REQUIRE_PASSWORD, TRUE);
+                    CEncryptionInterstitial::EXTRA_REQUIRE_PASSWORD, TRUE);
             utils->SetCredentialRequiredToDecrypt(required);
             utils->SaveLockPattern(mChosenPattern, isFallback);
             utils->SetLockPatternEnabled(TRUE);

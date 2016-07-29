@@ -38,6 +38,15 @@ public:
     CARAPI WriteToParcel(
         /* [in] */ IParcel* dest);
 
+    /**
+     * Returns true if this UserHandle refers to the owner user; false otherwise.
+     * @return true if this UserHandle refers to the owner user; false otherwise.
+     * @hide
+     */
+    //@SystemApi
+    CARAPI IsOwner(
+        /* [out] */ Boolean* res);
+
     CARAPI GetIdentifier(
         /* [out] */ Int32* id);
 
