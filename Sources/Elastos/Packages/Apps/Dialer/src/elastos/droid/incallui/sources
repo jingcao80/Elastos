@@ -28,3 +28,6 @@ SOURCES += CallerInfo.cpp
 SOURCES += CallerInfoUtils.cpp
 SOURCES += ContactsAsyncHelper.cpp
 SOURCES += CallerInfoAsyncQuery.cpp
+SOURCES += InCallApp.cpp
+SOURCES += StatusBarNotifier.cpp
+#SOURCES += CNotificationBroadcastReceiver.cpp
