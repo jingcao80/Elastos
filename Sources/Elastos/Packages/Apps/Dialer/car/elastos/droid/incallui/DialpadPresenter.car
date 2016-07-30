@@ -1,0 +1,27 @@
+
+module
+{
+    interface Elastos.Droid.InCallUI.IUi;
+
+    namespace Elastos {
+    namespace Droid {
+    namespace InCallUI {
+
+    /**
+    * @Involve
+    * interface IUi
+    */
+    interface IDialpadUi {
+
+        SetVisible(
+            [in] Boolean on);
+
+        AppendDigitsToField(
+            [in] Char32 digit);
+
+    }
+
+    } // namespace InCallUI
+    } // namespace Droid
+    } // namespace Elastos
+}

@@ -113,6 +113,8 @@ module
     merge("car/elastos/droid/incallui/CallerInfoAsyncQuery.car");
     merge("car/elastos/droid/incallui/ContactsAsyncHelper.car");
     merge("car/elastos/droid/incallui/CallerInfo.car");
+    merge("car/elastos/droid/incallui/AccelerometerListener.car");
+    merge("car/elastos/droid/incallui/DialpadPresenter.car");
     merge("car/elastos/droid/incallui/service/PhoneNumberService.car");
     merge("car/elastos/droid/phone/common/animation/AnimUtils.car");
     merge("car/elastos/droid/phone/common/dialpad/DialpadKeyButton.car");
@@ -134,6 +136,7 @@ module
 //    using interface Elastos.Droid.Content.IAsyncTaskLoader;
     using interface Elastos.Droid.Content.IContextWrapper;
     using interface Elastos.Droid.Content.IContext;
+    using interface Elastos.Droid.Content.IBroadcastReceiver;
 //    using interface Elastos.Droid.Content.IContentProvider;
 //    using interface Elastos.Droid.Content.IContentResolver;
     using interface Elastos.Droid.Content.IComponentCallbacks;
@@ -1349,93 +1352,93 @@ module
 //    } //namespace Droid
 //    } //namespace Elastos
 
-//    namespace Elastos {
-//    namespace Droid {
-//    namespace InCallUI {
-//
-//    class CAnswerFragment {
-//        constructor();
-//
-//        interface IAnswerFragment;
-//        interface IFragment;
-//        interface IComponentCallbacks;
-//        interface IComponentCallbacks2;
-//        interface IViewOnCreateContextMenuListener;
-//        interface IAnswerListener;
-//        interface IAnswerUi;
-//        interface IUi;
-//    }
-//
-//    class CCallButtonFragment {
-//        constructor();
-//
-//        interface ICallButtonFragment;
-//        interface IFragment;
-//        interface IComponentCallbacks;
-//        interface IComponentCallbacks2;
-//        interface IViewOnCreateContextMenuListener;
-//        interface ICallButtonUi;
-//        interface IUi;
-//        interface IPopupMenuOnMenuItemClickListener;
-//        interface IPopupMenuOnDismissListener;
-//        interface IViewOnClickListener;
-//        interface ICompoundButtonOnCheckedChangeListener;
-//    }
-//
-//    class CCallCardFragment {
-//        constructor();
-//
-//        interface ICallCardFragment;
-//        interface IFragment;
-//        interface IComponentCallbacks;
-//        interface IComponentCallbacks2;
-//        interface IViewOnCreateContextMenuListener;
-//        interface ICallCardUi;
-//        interface IUi;
-//    }
-//
-//    class CConferenceManagerFragment {
-//        constructor();
-//
-//        interface IConferenceManagerFragment;
-//        interface IFragment;
-//        interface IComponentCallbacks;
-//        interface IComponentCallbacks2;
-//        interface IViewOnCreateContextMenuListener;
-//        interface IConferenceManagerUi;
-//        interface IUi;
-//    }
-//
-//    class CInCallActivity {
-//        constructor();
-//
-//        interface IInCallActivity;
-//        interface IActivity;
-//        interface IContext;
-//        interface IContextThemeWrapper;
-//        interface ILayoutInflaterFactory;
-//        interface ILayoutInflaterFactory2;
-//        interface IWindowCallback;
-//        interface IKeyEventCallback;
-//        interface IViewOnCreateContextMenuListener;
-//        interface IComponentCallbacks;
-//        interface IComponentCallbacks2;
-//        interface IOnWindowDismissedCallback;
-//    }
-//
-//    class CInCallServiceImpl {
-//        constructor();
-//
-//        interface IInCallService;
-//    }
+    namespace Elastos {
+    namespace Droid {
+    namespace InCallUI {
 
-//    class CNotificationBroadcastReceiver {
-//        interface IBroadcastReceiver;
-//    }
-//
-//    } //namespace InCallUI
-//    } //namespace Droid
-//    } //namespace Elastos
+    class CAnswerFragment {
+        constructor();
+
+        interface IAnswerFragment;
+        interface IFragment;
+        interface IComponentCallbacks;
+        interface IComponentCallbacks2;
+        interface IViewOnCreateContextMenuListener;
+        interface IAnswerListener;
+        interface IAnswerUi;
+        interface IUi;
+    }
+
+    class CCallButtonFragment {
+        constructor();
+
+        interface ICallButtonFragment;
+        interface IFragment;
+        interface IComponentCallbacks;
+        interface IComponentCallbacks2;
+        interface IViewOnCreateContextMenuListener;
+        interface ICallButtonUi;
+        interface IUi;
+        interface IPopupMenuOnMenuItemClickListener;
+        interface IPopupMenuOnDismissListener;
+        interface IViewOnClickListener;
+        interface ICompoundButtonOnCheckedChangeListener;
+    }
+
+    class CCallCardFragment {
+        constructor();
+
+        interface ICallCardFragment;
+        interface IFragment;
+        interface IComponentCallbacks;
+        interface IComponentCallbacks2;
+        interface IViewOnCreateContextMenuListener;
+        interface ICallCardUi;
+        interface IUi;
+    }
+
+    class CConferenceManagerFragment {
+        constructor();
+
+        interface IConferenceManagerFragment;
+        interface IFragment;
+        interface IComponentCallbacks;
+        interface IComponentCallbacks2;
+        interface IViewOnCreateContextMenuListener;
+        interface IConferenceManagerUi;
+        interface IUi;
+    }
+
+    class CInCallActivity {
+        constructor();
+
+        interface IInCallActivity;
+        interface IActivity;
+        interface IContext;
+        interface IContextThemeWrapper;
+        interface ILayoutInflaterFactory;
+        interface ILayoutInflaterFactory2;
+        interface IWindowCallback;
+        interface IKeyEventCallback;
+        interface IViewOnCreateContextMenuListener;
+        interface IComponentCallbacks;
+        interface IComponentCallbacks2;
+        interface IOnWindowDismissedCallback;
+    }
+
+    class CInCallServiceImpl {
+        constructor();
+
+        interface IInCallService;
+    }
+
+    class CNotificationBroadcastReceiver {
+        interface IBroadcastReceiver;
+    }
+
+    } //namespace InCallUI
+    } //namespace Droid
+    } //namespace Elastos
 
     namespace Elastos {
     namespace Droid {
