@@ -31,7 +31,7 @@ esac
 
 export TOOLCHAIN=$PWD/android-toolchain
 mkdir -p $TOOLCHAIN
-if [ -z "$1" ]; then
+if [ -n "$1" ]; then
 $1/build/tools/make-standalone-toolchain.sh \
     --toolchain=$TOOLCHAIN_NAME-$CC_VER \
     --arch=$ARCH \
