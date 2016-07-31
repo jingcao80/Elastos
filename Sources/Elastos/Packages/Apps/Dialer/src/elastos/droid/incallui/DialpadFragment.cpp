@@ -162,6 +162,12 @@ CAR_INTERFACE_IMPL_6(DialpadFragment, BaseFragment
         , IViewOnHoverListener
         , IViewOnClickListener)
 
+String DialpadFragment::GetDtmfText()
+{
+    assert(0 && "TODO");
+    return String(NULL);
+}
+
 } // namespace InCallUI
 } // namespace Droid
 } // namespace Elastos

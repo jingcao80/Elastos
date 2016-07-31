@@ -34,3 +34,5 @@ SOURCES += CNotificationBroadcastReceiver.cpp
 SOURCES += AccelerometerListener.cpp
 SOURCES += ProximitySensor.cpp
 SOURCES += DialpadFragment.cpp
+SOURCES += InCallAnimationUtils.cpp
+SOURCES += InCallCameraManager.cpp

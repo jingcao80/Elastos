@@ -2,7 +2,12 @@
 #ifndef __ELASTOS_DROID_INCALLUI_INCALLANIMATIONUTILS_H__
 #define __ELASTOS_DROID_INCALLUI_INCALLANIMATIONUTILS_H__
 
+#include "Elastos.Droid.Graphics.h"
+#include "Elastos.Droid.Widget.h"
 #include "_Elastos.Droid.Dialer.h"
+
+using Elastos::Droid::Graphics::Drawable::IDrawable;
+using Elastos::Droid::Widget::IImageView;
 
 namespace Elastos {
 namespace Droid {

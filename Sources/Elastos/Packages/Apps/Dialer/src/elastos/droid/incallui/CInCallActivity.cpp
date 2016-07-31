@@ -2,6 +2,7 @@
 #include "Elastos.Droid.App.h"
 #include "Elastos.CoreLibrary.Utility.h"
 #include "elastos/droid/incallui/CInCallActivity.h"
+#include "elastos/droid/incallui/InCallPresenter.h"
 #include "elastos/droid/phone/common/animation/AnimUtils.h"
 #include <elastos/droid/text/TextUtils.h>
 #include <elastos/droid/view/animation/AnimationUtils.h>
@@ -146,11 +147,222 @@ ECode CInCallActivity::OnSaveInstanceState(
     Boolean isVisible;
     mCallButtonFragment->IsDialpadVisible(&isVisible);
     out->PutBoolean(SHOW_DIALPAD_EXTRA, isVisible);
-    assert(0 && "TODO");
-    // if (mDialpadFragment != NULL) {
-    //     out->PutString(DIALPAD_TEXT_EXTRA, mDialpadFragment->GetDtmfText());
-    // }
+    if (mDialpadFragment != NULL) {
+        out->PutString(DIALPAD_TEXT_EXTRA, mDialpadFragment->GetDtmfText());
+    }
     return NOERROR;
+}
+
+ECode CInCallActivity::OnStart()
+{
+    Logger::D("CInCallActivity", "onStart()...");
+    FAIL_RETURN(Activity::OnStart());
+
+    // setting activity should be last thing in setup process
+    InCallPresenter::GetInstance()->SetActivity(this);
+    return NOERROR;
+}
+
+ECode CInCallActivity::OnResume()
+{
+    assert(0 && "TODO");
+    return NOERROR;
+}
+
+ECode CInCallActivity::OnPause()
+{
+    assert(0 && "TODO");
+    return NOERROR;
+}
+
+ECode CInCallActivity::OnStop()
+{
+    assert(0 && "TODO");
+    return NOERROR;
+}
+
+ECode CInCallActivity::OnDestroy()
+{
+    assert(0 && "TODO");
+    return NOERROR;
+}
+
+Boolean CInCallActivity::IsForegroundActivity()
+{
+    return mIsForegroundActivity;
+}
+
+Boolean CInCallActivity::HasPendingErrorDialog()
+{
+    return mDialog != NULL;
+}
+
+ECode CInCallActivity::Finish()
+{
+    assert(0 && "TODO");
+    return NOERROR;
+}
+
+ECode CInCallActivity::OnNewIntent(
+    /* [in] */ IIntent* intent)
+{
+    assert(0 && "TODO");
+    return NOERROR;
+}
+
+ECode CInCallActivity::OnBackPressed()
+{
+    assert(0 && "TODO");
+    return NOERROR;
+}
+
+ECode CInCallActivity::OnOptionsItemSelected(
+    /* [in] */ IMenuItem* item,
+    /* [out] */ Boolean* result)
+{
+    assert(0 && "TODO");
+    return NOERROR;
+}
+
+ECode CInCallActivity::OnKeyUp(
+    /* [in] */ Int32 keyCode,
+    /* [in] */ IKeyEvent* event,
+    /* [out] */ Boolean* result)
+{
+    assert(0 && "TODO");
+    return NOERROR;
+}
+
+ECode CInCallActivity::OnKeyDown(
+    /* [in] */ Int32 keyCode,
+    /* [in] */ IKeyEvent* event,
+    /* [out] */ Boolean* result)
+{
+    assert(0 && "TODO");
+    return NOERROR;
+}
+
+Boolean CInCallActivity::HandleDialerKeyDown(
+    /* [in] */ Int32 keyCode,
+    /* [in] */ IKeyEvent* event)
+{
+    assert(0 && "TODO");
+    return FALSE;
+}
+
+ECode CInCallActivity::OnConfigurationChanged(
+    /* [in] */ IConfiguration* config)
+{
+    assert(0 && "TODO");
+    return NOERROR;
+}
+
+AutoPtr<CCallButtonFragment> CInCallActivity::GetCallButtonFragment()
+{
+    assert(0 && "TODO");
+    return NULL;
+}
+
+AutoPtr<CCallCardFragment> CInCallActivity::GetCallCardFragment()
+{
+    assert(0 && "TODO");
+    return NULL;
+}
+
+void CInCallActivity::InternalResolveIntent(
+    /* [in] */ IIntent* intent)
+{
+    assert(0 && "TODO");
+}
+
+Boolean CInCallActivity::IsEmergencyCall(
+    /* [in] */ Call* call)
+{
+    assert(0 && "TODO");
+    return FALSE;
+}
+
+void CInCallActivity::RelaunchedFromDialer(
+    /* [in] */ Boolean showDialpad)
+{
+    assert(0 && "TODO");
+}
+
+void CInCallActivity::InitializeInCall()
+{
+    assert(0 && "TODO");
+}
+
+void CInCallActivity::HideDialpadForDisconnect()
+{
+    assert(0 && "TODO");
+}
+
+void CInCallActivity::DismissKeyguard(
+    /* [in] */ Boolean dismiss)
+{
+    assert(0 && "TODO");
+}
+
+void CInCallActivity::ShowDialpad(
+    /* [in] */ Boolean showDialpad)
+{
+    assert(0 && "TODO");
+}
+
+void CInCallActivity::DisplayDialpad(
+    /* [in] */ Boolean showDialpad,
+    /* [in] */ Boolean animate)
+{
+    assert(0 && "TODO");
+}
+
+Boolean CInCallActivity::IsDialpadVisible()
+{
+    assert(0 && "TODO");
+    return FALSE;
+}
+
+void CInCallActivity::ShowConferenceCallManager()
+{
+    assert(0 && "TODO");
+}
+
+void CInCallActivity::ShowPostCharWaitDialog(
+    /* [in] */ const String& callId,
+    /* [in] */ const String& chars)
+{
+    assert(0 && "TODO");
+}
+
+ECode CInCallActivity::DispatchPopulateAccessibilityEvent(
+    /* [in] */ IAccessibilityEvent* event,
+    /* [out] */ Boolean* isConsumed)
+{
+    assert(0 && "TODO");
+    return NOERROR;
+}
+
+void CInCallActivity::MaybeShowErrorDialogOnDisconnect(
+    /* [in] */ IDisconnectCause* disconnectCause)
+{
+    assert(0 && "TODO");
+}
+
+void CInCallActivity::DismissPendingDialogs()
+{
+    assert(0 && "TODO");
+}
+
+void CInCallActivity::ShowErrorDialog(
+    /* [in] */ ICharSequence* msg)
+{
+    assert(0 && "TODO");
+}
+
+void CInCallActivity::OnDialogDismissed()
+{
+    assert(0 && "TODO");
 }
 
 } // namespace InCallUI

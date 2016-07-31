@@ -10,6 +10,7 @@
 #include "elastos/droid/incallui/CCallButtonFragment.h"
 #include "elastos/droid/incallui/CCallCardFragment.h"
 #include "elastos/droid/incallui/CConferenceManagerFragment.h"
+#include "elastos/droid/incallui/DialpadFragment.h"
 #include "elastos/droid/phone/common/animation/AnimationListenerAdapter.h"
 #include "R.h"
 #include <elastos/droid/app/Activity.h>
@@ -205,7 +206,7 @@ private:
     AutoPtr<CCallButtonFragment> mCallButtonFragment;
     AutoPtr<CCallCardFragment> mCallCardFragment;
     AutoPtr<CAnswerFragment> mAnswerFragment;
-    // AutoPtr<CDialpadFragment> mDialpadFragment;
+    AutoPtr<DialpadFragment> mDialpadFragment;
     AutoPtr<CConferenceManagerFragment> mConferenceManagerFragment;
     AutoPtr<IFragmentManager> mChildFragmentManager;
 
