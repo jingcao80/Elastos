@@ -518,6 +518,7 @@
 < Elastos/Packages/Apps/Dialer/src/elastos/droid/dialer
   Elastos/Packages/Apps/Dialer/src/elastos/droid/dialerbind/analytics
 < Elastos/Packages/Apps/Dialer/src/elastos/droid/dialerbind
+  Elastos/Packages/Apps/Dialer/src/elastos/droid/incallui
   Elastos/Packages/Apps/Dialer/src/elastos/droid/phone/common/animation
   Elastos/Packages/Apps/Dialer/src/elastos/droid/phone/common/dialpad
   Elastos/Packages/Apps/Dialer/src/elastos/droid/phone/common/util
