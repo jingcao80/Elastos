@@ -95,7 +95,7 @@ reset_env ()
    export XDK_USER_INC=$XDK_USER_OBJ/$XDK_BUILD_KIND/inc
    export XDK_USER_LIB=$XDK_USER_OBJ/$XDK_BUILD_KIND/lib
    export XDK_TARGETS=$XDK_TARGETS_PATH/$XDK_BUILD_ENV/$XDK_BUILD_KIND/bin
-   export TARGET_PACK_PATH=$XDK_USER_OBJ/$XDK_BUILD_KIND/package
+   export TARGET_PACK_PATH=$XDK_TARGETS/package
 
    export PATH=$PATH:$XDK_TARGETS:
 
@@ -380,7 +380,7 @@ function pd ()
             pushd $XDK_USER_OBJ/$XDK_BUILD_KIND/$1 1>/dev/null
         ;;
         "p")
-            pushd $XDK_USER_OBJ/$XDK_BUILD_KIND/package 1>/dev/null
+            pushd $TARGET_PACK_PATH 1>/dev/null
         ;;
         "m")
             local PROJECT_DIR=$PWD

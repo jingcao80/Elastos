@@ -86,7 +86,7 @@ else
             export XDK_USER_INC=$XDK_USER_OBJ/$XDK_BUILD_KIND/inc
             export XDK_USER_LIB=$XDK_USER_OBJ/$XDK_BUILD_KIND/lib
             export XDK_TARGETS=$XDK_TARGETS_PATH/$XDK_BUILD_ENV/$XDK_BUILD_KIND/bin
-            export TARGET_PACK_PATH=$XDK_USER_OBJ/$XDK_BUILD_KIND/package
+            export TARGET_PACK_PATH=$XDK_TARGETS/package
 
             if [ "$XDK_BUILD_ENV" == "sdk" ]; then
                 export XDK_INC_PATH=$XDK_BUILD_PATH/Prebuilt/RDK/$XDK_BUILD_KIND/inc
