@@ -180,6 +180,7 @@ module
     using interface Elastos.Droid.View.IViewOnLongClickListener;
     using interface Elastos.Droid.View.IViewOnClickListener;
     using interface Elastos.Droid.View.IContextThemeWrapper;
+    using interface Elastos.Droid.View.IViewOnHoverListener;
 //    using interface Elastos.Droid.View.ILayoutInflater;
     using interface Elastos.Droid.View.ILayoutInflaterFactory;
     using interface Elastos.Droid.View.ILayoutInflaterFactory2;
@@ -189,7 +190,7 @@ module
     using interface Elastos.Droid.View.Accessibility.IAccessibilityEventSource;
 //    using interface Elastos.Droid.View.IViewGroupOnHierarchyChangeListener;
 //    using interface Elastos.Droid.View.IViewOnFocusChangeListener;
-//    using interface Elastos.Droid.View.IViewOnTouchListener;
+    using interface Elastos.Droid.View.IViewOnTouchListener;
 //    using interface Elastos.Droid.View.IOnGlobalLayoutListener;
 //    using interface Elastos.Droid.View.IOnTouchModeChangeListener;
     using interface Elastos.Droid.Widget.ICompoundButtonOnCheckedChangeListener;
@@ -1434,6 +1435,61 @@ module
 
     class CNotificationBroadcastReceiver {
         interface IBroadcastReceiver;
+    }
+
+    [local]
+    class CDialpadSlidingLinearLayout {
+        constructor(
+            [in] IContext* context);
+
+        constructor(
+            [in] IContext* context,
+            [in] IAttributeSet* attrs);
+
+        constructor(
+            [in] IContext* context,
+            [in] IAttributeSet* attrs,
+            [in] Int32 defStyle);
+
+        interface IView;
+        interface IViewGroup;
+        interface IViewParent;
+        interface IViewManager;
+        interface ILinearLayout;
+    }
+
+    [local]
+    class CHoverIgnoringLinearLayout {
+        constructor(
+            [in] IContext* context);
+
+        constructor(
+            [in] IContext* context,
+            [in] IAttributeSet* attrs);
+
+        constructor(
+            [in] IContext* context,
+            [in] IAttributeSet* attrs,
+            [in] Int32 defStyle);
+
+        interface IView;
+        interface IViewGroup;
+        interface IViewParent;
+        interface IViewManager;
+        interface ILinearLayout;
+    }
+
+    class CDialpadFragment {
+        interface IFragment;
+        interface IComponentCallbacks;
+        interface IComponentCallbacks2;
+        interface IViewOnCreateContextMenuListener;
+        interface IUi;
+        interface IDialpadUi;
+        interface IViewOnTouchListener;
+        interface IViewOnKeyListener;
+        interface IViewOnHoverListener;
+        interface IViewOnClickListener;
     }
 
     } //namespace InCallUI

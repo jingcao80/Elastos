@@ -5,10 +5,13 @@
 #include "Elastos.Droid.View.h"
 #include "Elastos.Droid.Widget.h"
 #include "elastos/droid/incallui/BaseFragment.h"
+#include "elastos/droid/incallui/DialpadPresenter.h"
+#include "elastos/droid/os/Runnable.h"
 #include "elastos/droid/text/method/DialerKeyListener.h"
 #include <elastos/utility/etl/HashMap.h>
 
 using Elastos::Droid::Os::IHandler;
+using Elastos::Droid::Os::Runnable;
 using Elastos::Droid::Phone::Common::Dialpad::IDialpadView;
 using Elastos::Droid::Text::Method::DialerKeyListener;
 using Elastos::Droid::View::IView;
@@ -139,6 +142,21 @@ private:
 
     private:
         DialpadFragment* mHost;
+        friend class DialpadFragment;
+    };
+
+    class StopDtmfRunnable : public Runnable
+    {
+    public:
+        StopDtmfRunnable(
+            /* [in] */ DialpadPresenter* presenter)
+            : mPresenter(presenter)
+        {}
+
+        CARAPI Run();
+
+    private:
+        AutoPtr<DialpadPresenter> mPresenter;
     };
 
     class StaticInitializer
@@ -148,8 +166,6 @@ private:
     };
 
 public:
-    DialpadFragment();
-
     CAR_INTERFACE_DECL()
 
     // @Override
@@ -184,6 +200,13 @@ public:
     // @Override
     CARAPI OnCreate(
         /* [in] */ IBundle* savedInstanceState);
+
+    // @Override
+    CARAPI OnCreateView(
+        /* [in] */ ILayoutInflater* inflater,
+        /* [in] */ IViewGroup* container,
+        /* [in] */ IBundle* savedInstanceState,
+        /* [out] */ IView** view);
 
     // @Override
     CARAPI OnDestroyView();
