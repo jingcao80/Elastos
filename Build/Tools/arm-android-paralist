@@ -408,6 +408,7 @@
 
 # ==== build Provider.Telephony ====
   Elastos/Packages/Providers/TelephonyProvider Elastos.Droid.Providers.Telephony.car
+  Elastos/Packages/Providers/TelephonyProvider R.cpp
 > Elastos/Packages/Providers/TelephonyProvider
 
 # ==== build DefContainer ====
