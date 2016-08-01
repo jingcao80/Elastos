@@ -40,3 +40,4 @@ SOURCES += CDialpadSlidingLinearLayout.cpp
 SOURCES += CHoverIgnoringLinearLayout.cpp
 SOURCES += CDialpadFragment.cpp
 SOURCES += DialpadPresenter.cpp
+SOURCES += PostCharDialogFragment.cpp

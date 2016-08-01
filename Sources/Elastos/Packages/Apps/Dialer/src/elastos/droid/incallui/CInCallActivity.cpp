@@ -3,11 +3,21 @@
 #include "Elastos.CoreLibrary.Utility.h"
 #include "elastos/droid/incallui/CInCallActivity.h"
 #include "elastos/droid/incallui/InCallPresenter.h"
+#include "elastos/droid/incallui/PostCharDialogFragment.h"
 #include "elastos/droid/phone/common/animation/AnimUtils.h"
 #include <elastos/droid/text/TextUtils.h>
 #include <elastos/droid/view/animation/AnimationUtils.h>
 #include <elastos/utility/logging/Logger.h>
+#include "R.h"
 
+using Elastos::Droid::App::IAlertDialog;
+using Elastos::Droid::App::IAlertDialogBuilder;
+using Elastos::Droid::App::CAlertDialogBuilder;
+using Elastos::Droid::App::IFragmentTransaction;
+using Elastos::Droid::App::IDialog;
+using Elastos::Droid::App::IFragment;
+using Elastos::Droid::Content::EIID_IDialogInterfaceOnClickListener;
+using Elastos::Droid::Content::EIID_IDialogInterfaceOnCancelListener;
 using Elastos::Droid::Phone::Common::Animation::AnimUtils;
 using Elastos::Droid::App::IActionBar;
 using Elastos::Droid::Text::TextUtils;
@@ -28,6 +38,33 @@ ECode CInCallActivity::MyAnimationListenerAdapter::OnAnimationEnd(
     /* [in] */ IAnimation* animation)
 {
     mHost->ShowDialpad(FALSE);
+    return NOERROR;
+}
+
+
+//=============================================================
+// CInCallActivity::MyDialogOnClickListener
+//=============================================================
+CAR_INTERFACE_IMPL(CInCallActivity::MyDialogOnClickListener, Object, IDialogInterfaceOnClickListener)
+
+ECode CInCallActivity::MyDialogOnClickListener::OnClick(
+    /* [in] */ IDialogInterface* dialog,
+    /* [in] */ Int32 which)
+{
+    mHost->OnDialogDismissed();
+    return NOERROR;
+}
+
+
+//=============================================================
+// CInCallActivity::MyDialogOnCancelListener
+//=============================================================
+CAR_INTERFACE_IMPL(CInCallActivity::MyDialogOnCancelListener, Object, IDialogInterfaceOnCancelListener)
+
+ECode CInCallActivity::MyDialogOnCancelListener::OnCancel(
+    /* [in] */ IDialogInterface* dialog)
+{
+    mHost->OnDialogDismissed();
     return NOERROR;
 }
 
@@ -295,74 +332,179 @@ void CInCallActivity::InitializeInCall()
 
 void CInCallActivity::HideDialpadForDisconnect()
 {
-    assert(0 && "TODO");
+    mCallButtonFragment->DisplayDialpad(FALSE /* show */, TRUE /* animate */);
 }
 
 void CInCallActivity::DismissKeyguard(
     /* [in] */ Boolean dismiss)
 {
-    assert(0 && "TODO");
+    AutoPtr<IWindow> win;
+    GetWindow((IWindow**)&win);
+    if (dismiss) {
+        win->AddFlags(IWindowManagerLayoutParams::FLAG_DISMISS_KEYGUARD);
+    }
+    else {
+        win->ClearFlags(IWindowManagerLayoutParams::FLAG_DISMISS_KEYGUARD);
+    }
 }
 
 void CInCallActivity::ShowDialpad(
     /* [in] */ Boolean showDialpad)
 {
-    assert(0 && "TODO");
+    // If the dialpad is being shown and it has not already been loaded, replace the dialpad
+    // placeholder with the actual fragment before continuing.
+    if (mDialpadFragment == NULL && showDialpad) {
+        AutoPtr<IFragmentTransaction> loadTransaction;
+        mChildFragmentManager->BeginTransaction((IFragmentTransaction**)&loadTransaction);
+        AutoPtr<IView> fragmentContainer = FindViewById(Elastos::Droid::Dialer::R::id::dialpadFragmentContainer);
+        AutoPtr<CDialpadFragment> temp;
+        CDialpadFragment::NewByFriend((CDialpadFragment**)&temp);
+        mDialpadFragment = temp;
+        Int32 id;
+        fragmentContainer->GetId(&id);
+        EGuid clsId;
+        mDialpadFragment->GetClassID(&clsId);
+        loadTransaction->Replace(id, IFragment::Probe(mDialpadFragment), String(clsId.mUunm));
+        Int32 value;
+        loadTransaction->CommitAllowingStateLoss(&value);
+        Boolean result;
+        mChildFragmentManager->ExecutePendingTransactions(&result);
+    }
+
+    AutoPtr<IFragmentTransaction> ft;
+    mChildFragmentManager->BeginTransaction((IFragmentTransaction**)&ft);
+    if (showDialpad) {
+        ft->Show(mDialpadFragment);
+    } else {
+        ft->Hide(mDialpadFragment);
+    }
+    Int32 value;
+    ft->CommitAllowingStateLoss(&value);
 }
 
 void CInCallActivity::DisplayDialpad(
     /* [in] */ Boolean showDialpad,
     /* [in] */ Boolean animate)
 {
-    assert(0 && "TODO");
+    // If the dialpad is already visible, don't animate in. If it's gone, don't animate out.
+    if ((showDialpad && IsDialpadVisible()) || (!showDialpad && !IsDialpadVisible())) {
+        return;
+    }
+    // We don't do a FragmentTransaction on the hide case because it will be dealt with when
+    // the listener is fired after an animation finishes.
+    if (!animate) {
+        ShowDialpad(showDialpad);
+    }
+    else {
+        if (showDialpad) {
+            ShowDialpad(TRUE);
+            mDialpadFragment->AnimateShowDialpad();
+        }
+        mCallCardFragment->OnDialpadVisiblityChange(showDialpad);
+        AutoPtr<IView> v;
+        mDialpadFragment->GetView((IView**)&v);
+        v->StartAnimation(showDialpad ? mSlideIn : mSlideOut);
+    }
+
+    InCallPresenter::GetInstance()->GetProximitySensor()->OnDialpadVisible(showDialpad);
 }
 
 Boolean CInCallActivity::IsDialpadVisible()
 {
-    assert(0 && "TODO");
-    return FALSE;
+    Boolean isVisible;
+    return mDialpadFragment != NULL && (mDialpadFragment->IsVisible(&isVisible), isVisible);
 }
 
 void CInCallActivity::ShowConferenceCallManager()
 {
-    assert(0 && "TODO");
+    mConferenceManagerFragment->SetVisible(TRUE);
 }
 
 void CInCallActivity::ShowPostCharWaitDialog(
     /* [in] */ const String& callId,
     /* [in] */ const String& chars)
 {
-    assert(0 && "TODO");
+    if (IsForegroundActivity()) {
+        AutoPtr<PostCharDialogFragment> fragment = new PostCharDialogFragment(callId,  chars);
+        AutoPtr<IFragmentManager> fragmentManager;
+        GetFragmentManager((IFragmentManager**)&fragmentManager);
+        fragment->Show(fragmentManager, String("postCharWait"));
+
+        mShowPostCharWaitDialogOnResume = FALSE;
+        mShowPostCharWaitDialogCallId = String(NULL);
+        mShowPostCharWaitDialogChars = String(NULL);
+    }
+    else {
+        mShowPostCharWaitDialogOnResume = TRUE;
+        mShowPostCharWaitDialogCallId = callId;
+        mShowPostCharWaitDialogChars = chars;
+    }
 }
 
 ECode CInCallActivity::DispatchPopulateAccessibilityEvent(
     /* [in] */ IAccessibilityEvent* event,
     /* [out] */ Boolean* isConsumed)
 {
-    assert(0 && "TODO");
-    return NOERROR;
+    if (mCallCardFragment != NULL) {
+        mCallCardFragment->DispatchPopulateAccessibilityEvent(event);
+    }
+    return Activity::DispatchPopulateAccessibilityEvent(event, isConsumed);
 }
 
 void CInCallActivity::MaybeShowErrorDialogOnDisconnect(
     /* [in] */ IDisconnectCause* disconnectCause)
 {
-    assert(0 && "TODO");
+    Logger::D("CInCallActivity", "maybeShowErrorDialogOnDisconnect");
+
+    Boolean isFinishing;
+    AutoPtr<ICharSequence> desc;
+    Int32 code;
+    if ((IsFinishing(&isFinishing), !isFinishing) &&
+            (disconnectCause->GetDescription((ICharSequence**)&desc), !TextUtils::IsEmpty(desc))
+            && ((disconnectCause->GetCode(&code), code == IDisconnectCause::ERROR) ||
+                    (disconnectCause->GetCode(&code), code == IDisconnectCause::RESTRICTED))) {
+        ShowErrorDialog(desc);
+    }
 }
 
 void CInCallActivity::DismissPendingDialogs()
 {
-    assert(0 && "TODO");
+    if (mDialog != NULL) {
+        IDialogInterface::Probe(mDialog)->Dismiss();
+        mDialog = NULL;
+    }
+    mAnswerFragment->DismissPendingDialogues();
 }
 
 void CInCallActivity::ShowErrorDialog(
     /* [in] */ ICharSequence* msg)
 {
-    assert(0 && "TODO");
+    Logger::I("CInCallActivity", "Show Dialog: %s", TO_CSTR(msg));
+
+    DismissPendingDialogs();
+
+    AutoPtr<IAlertDialogBuilder> builder;
+    CAlertDialogBuilder::New(IContext::Probe(this), (IAlertDialogBuilder**)&builder);
+    builder->SetMessage(msg);
+    AutoPtr<IDialogInterfaceOnClickListener> listener = (IDialogInterfaceOnClickListener*)new MyDialogOnClickListener(this);
+    builder->SetPositiveButton(Elastos::Droid::Dialer::R::string::ok, listener);
+    AutoPtr<IDialogInterfaceOnCancelListener> cancelListener  = new MyDialogOnCancelListener(this);
+    builder->SetOnCancelListener(cancelListener);
+    AutoPtr<IAlertDialog> temp;
+    builder->Create((IAlertDialog**)&temp);
+    mDialog = temp;
+
+    AutoPtr<IDialog> d = IDialog::Probe(mDialog);
+    AutoPtr<IWindow> win;
+    d->GetWindow((IWindow**)&win);
+    win->AddFlags(IWindowManagerLayoutParams::FLAG_DIM_BEHIND);
+    d->Show();
 }
 
 void CInCallActivity::OnDialogDismissed()
 {
-    assert(0 && "TODO");
+    mDialog = NULL;
+    InCallPresenter::GetInstance()->OnDismissDialog();
 }
 
 } // namespace InCallUI

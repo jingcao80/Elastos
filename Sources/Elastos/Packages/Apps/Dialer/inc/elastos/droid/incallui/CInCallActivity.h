@@ -10,13 +10,16 @@
 #include "elastos/droid/incallui/CCallButtonFragment.h"
 #include "elastos/droid/incallui/CCallCardFragment.h"
 #include "elastos/droid/incallui/CConferenceManagerFragment.h"
-#include "elastos/droid/incallui/DialpadFragment.h"
+#include "elastos/droid/incallui/CDialpadFragment.h"
 #include "elastos/droid/phone/common/animation/AnimationListenerAdapter.h"
 #include "R.h"
 #include <elastos/droid/app/Activity.h>
 
 using Elastos::Droid::App::Activity;
 using Elastos::Droid::App::IFragmentManager;
+using Elastos::Droid::Content::IDialogInterfaceOnClickListener;
+using Elastos::Droid::Content::IDialogInterfaceOnCancelListener;
+using Elastos::Droid::Content::IDialogInterface;
 using Elastos::Droid::Os::CBundle;
 using Elastos::Droid::Telecom::CDisconnectCause;
 using Elastos::Droid::Telecom::IPhoneAccount;
@@ -44,6 +47,45 @@ private:
         // @Override
         CARAPI OnAnimationEnd(
             /* [in] */ IAnimation* animation);
+
+    private:
+        CInCallActivity* mHost;
+    };
+
+    class MyDialogOnClickListener
+        : public Object
+        , public IDialogInterfaceOnClickListener
+    {
+    public:
+        MyDialogOnClickListener(
+            /* [in] */ CInCallActivity* host)
+            : mHost(host)
+        {}
+
+        CAR_INTERFACE_DECL()
+
+        CARAPI OnClick(
+            /* [in] */ IDialogInterface* dialog,
+            /* [in] */ Int32 which);
+
+    private:
+        CInCallActivity* mHost;
+    };
+
+    class MyDialogOnCancelListener
+        : public Object
+        , public IDialogInterfaceOnCancelListener
+    {
+    public:
+        MyDialogOnCancelListener(
+            /* [in] */ CInCallActivity* host)
+            : mHost(host)
+        {}
+
+        CAR_INTERFACE_DECL()
+
+        CARAPI OnCancel(
+            /* [in] */ IDialogInterface* dialog);
 
     private:
         CInCallActivity* mHost;
@@ -206,7 +248,7 @@ private:
     AutoPtr<CCallButtonFragment> mCallButtonFragment;
     AutoPtr<CCallCardFragment> mCallCardFragment;
     AutoPtr<CAnswerFragment> mAnswerFragment;
-    AutoPtr<DialpadFragment> mDialpadFragment;
+    AutoPtr<CDialpadFragment> mDialpadFragment;
     AutoPtr<CConferenceManagerFragment> mConferenceManagerFragment;
     AutoPtr<IFragmentManager> mChildFragmentManager;
 
@@ -237,6 +279,8 @@ private:
      * has occurred.
      */
     Int32 mCurrentOrientation;
+
+    friend class MyDialogOnClickListener;
 };
 
 } // namespace InCallUI
