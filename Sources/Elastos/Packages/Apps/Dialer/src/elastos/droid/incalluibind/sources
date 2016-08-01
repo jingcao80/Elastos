@@ -1,0 +1,10 @@
+
+TARGET_NAME= incalluibind
+TARGET_TYPE= lib
+
+INCLUDES += $(MAKEDIR)/../../../../inc
+INCLUDES += $(MAKEDIR)/../../../../
+INCLUDES += ../../../../
+
+SOURCES += ObjectFactory.cpp
+

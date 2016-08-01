@@ -381,6 +381,17 @@ void CAnswerFragment::DismissCustomMessagePopup()
     }
 }
 
+void CAnswerFragment::DismissPendingDialogues()
+{
+    if (IsCannedResponsePopupShowing()) {
+        DismissCannedResponsePopup();
+    }
+
+    if (IsCustomMessagePopupShowing()) {
+        DismissCustomMessagePopup();
+    }
+}
+
 Boolean CAnswerFragment::HasPendingDialogs()
 {
     return !(mCannedResponsePopup == NULL && mCustomMessagePopup == NULL);

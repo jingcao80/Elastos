@@ -1,15 +1,23 @@
 
 #include "Elastos.Droid.App.h"
+#include "Elastos.Droid.Graphics.h"
+#include "Elastos.Droid.Telephony.h"
+#include "Elastos.Droid.Text.h"
+#include "Elastos.Droid.View.h"
 #include "Elastos.CoreLibrary.Utility.h"
 #include "elastos/droid/incallui/CInCallActivity.h"
 #include "elastos/droid/incallui/InCallPresenter.h"
 #include "elastos/droid/incallui/PostCharDialogFragment.h"
+#include "elastos/droid/incallui/TelecomAdapter.h"
 #include "elastos/droid/phone/common/animation/AnimUtils.h"
+#include "R.h"
 #include <elastos/droid/text/TextUtils.h>
 #include <elastos/droid/view/animation/AnimationUtils.h>
+#include <elastos/droid/R.h>
 #include <elastos/utility/logging/Logger.h>
 #include "R.h"
 
+using Elastos::Droid::App::IActionBar;
 using Elastos::Droid::App::IAlertDialog;
 using Elastos::Droid::App::IAlertDialogBuilder;
 using Elastos::Droid::App::CAlertDialogBuilder;
@@ -18,10 +26,13 @@ using Elastos::Droid::App::IDialog;
 using Elastos::Droid::App::IFragment;
 using Elastos::Droid::Content::EIID_IDialogInterfaceOnClickListener;
 using Elastos::Droid::Content::EIID_IDialogInterfaceOnCancelListener;
-using Elastos::Droid::Phone::Common::Animation::AnimUtils;
-using Elastos::Droid::App::IActionBar;
+using Elastos::Droid::Graphics::IPoint;
+using Elastos::Droid::Telephony::IPhoneNumberUtils;
+using Elastos::Droid::Telephony::CPhoneNumberUtils;
 using Elastos::Droid::Text::TextUtils;
 using Elastos::Droid::View::Animation::AnimationUtils;
+using Elastos::Droid::Phone::Common::Animation::AnimUtils;
+using Elastos::Utility::CArrayList;
 using Elastos::Utility::ILocale;
 using Elastos::Utility::ILocaleHelper;
 using Elastos::Utility::CLocaleHelper;
@@ -123,7 +134,7 @@ ECode CInCallActivity::OnCreate(
     // lp.inputFeatures |= WindowManager.LayoutParams.INPUT_FEATURE_DISABLE_USER_ACTIVITY;
 
     // Inflate everything in incall_screen.xml and add it to the screen.
-    SetContentView(R::layout::incall_screen);
+    SetContentView(Elastos::Droid::Dialer::R::layout::incall_screen);
 
     InitializeInCall();
 
@@ -147,16 +158,20 @@ ECode CInCallActivity::OnCreate(
 
     if (mIsLandscape) {
         AnimationUtils::LoadAnimation(this,
-                isRtl ? R::anim::dialpad_slide_in_left : R::anim::dialpad_slide_in_right,
+                isRtl ? Elastos::Droid::Dialer::R::anim::dialpad_slide_in_left :
+                        Elastos::Droid::Dialer::R::anim::dialpad_slide_in_right,
                 (IAnimation**)&mSlideIn);
         AnimationUtils::LoadAnimation(this,
-                isRtl ? R::anim::dialpad_slide_out_left : R::anim::dialpad_slide_out_right,
+                isRtl ? Elastos::Droid::Dialer::R::anim::dialpad_slide_out_left :
+                        Elastos::Droid::Dialer::R::anim::dialpad_slide_out_right,
                 (IAnimation**)&mSlideOut);
     }
     else {
-        AnimationUtils::LoadAnimation(this, R::anim::dialpad_slide_in_bottom,
+        AnimationUtils::LoadAnimation(this,
+                Elastos::Droid::Dialer::R::anim::dialpad_slide_in_bottom,
                 (IAnimation**)&mSlideIn);
-        AnimationUtils::LoadAnimation(this, R::anim::dialpad_slide_out_bottom,
+        AnimationUtils::LoadAnimation(this,
+                Elastos::Droid::Dialer::R::anim::dialpad_slide_out_bottom,
                 (IAnimation**)&mSlideOut);
     }
 
@@ -202,26 +217,58 @@ ECode CInCallActivity::OnStart()
 
 ECode CInCallActivity::OnResume()
 {
-    assert(0 && "TODO");
+    Logger::I("CInCallActivity", "onResume()...");
+    FAIL_RETURN(Activity::OnResume());
+
+    mIsForegroundActivity = TRUE;
+    InCallPresenter::GetInstance()->OnUiShowing(TRUE);
+
+    if (mShowDialpadRequested) {
+        mCallButtonFragment->DisplayDialpad(TRUE /* show */,
+                mAnimateDialpadOnShow /* animate */);
+        mShowDialpadRequested = FALSE;
+        mAnimateDialpadOnShow = FALSE;
+
+        if (mDialpadFragment != NULL) {
+            mDialpadFragment->SetDtmfText(mDtmfText);
+            mDtmfText = NULL;
+        }
+    }
+
+    if (mShowPostCharWaitDialogOnResume) {
+        ShowPostCharWaitDialog(mShowPostCharWaitDialogCallId, mShowPostCharWaitDialogChars);
+    }
     return NOERROR;
 }
 
 ECode CInCallActivity::OnPause()
 {
-    assert(0 && "TODO");
+    Logger::D("CInCallActivity", "onPause()...");
+    FAIL_RETURN(Activity::OnPause());
+
+    mIsForegroundActivity = FALSE;
+
+    if (mDialpadFragment != NULL) {
+        mDialpadFragment->OnDialerKeyUp(NULL);
+    }
+
+    InCallPresenter::GetInstance()->OnUiShowing(FALSE);
     return NOERROR;
 }
 
 ECode CInCallActivity::OnStop()
 {
-    assert(0 && "TODO");
-    return NOERROR;
+    Logger::D("CInCallActivity", "onStop()...");
+    return CInCallActivity::OnStop();
 }
 
 ECode CInCallActivity::OnDestroy()
 {
-    assert(0 && "TODO");
-    return NOERROR;
+    Logger::D("CInCallActivity", "onDestroy()...  this = %s", TO_CSTR(this));
+
+    InCallPresenter::GetInstance()->SetActivity(NULL);
+
+    return CInCallActivity::OnDestroy();
 }
 
 Boolean CInCallActivity::IsForegroundActivity()
@@ -236,29 +283,83 @@ Boolean CInCallActivity::HasPendingErrorDialog()
 
 ECode CInCallActivity::Finish()
 {
-    assert(0 && "TODO");
+    Logger::I("CInCallActivity", "finish().  Dialog showing: %d", (mDialog != NULL));
+
+    // skip finish if we are still showing a dialog.
+    if (!HasPendingErrorDialog() && !mAnswerFragment->HasPendingDialogs()) {
+        return CInCallActivity::Finish();
+    }
     return NOERROR;
 }
 
 ECode CInCallActivity::OnNewIntent(
     /* [in] */ IIntent* intent)
 {
-    assert(0 && "TODO");
+    Logger::D("CInCallActivity", "onNewIntent: intent = %s", TO_CSTR(intent));
+
+    // We're being re-launched with a new Intent.  Since it's possible for a
+    // single InCallActivity instance to persist indefinitely (even if we
+    // finish() ourselves), this sequence can potentially happen any time
+    // the InCallActivity needs to be displayed.
+
+    // Stash away the new intent so that we can get it in the future
+    // by calling getIntent().  (Otherwise getIntent() will return the
+    // original Intent from when we first got created!)
+    SetIntent(intent);
+
+    // Activities are always paused before receiving a new intent, so
+    // we can count on our onResume() method being called next.
+
+    // Just like in onCreate(), handle the intent.
+    InternalResolveIntent(intent);
     return NOERROR;
 }
 
 ECode CInCallActivity::OnBackPressed()
 {
-    assert(0 && "TODO");
-    return NOERROR;
+    Logger::D("CInCallActivity", "onBackPressed()...");
+
+    // BACK is also used to exit out of any "special modes" of the
+    // in-call UI:
+
+    Boolean isVisible;
+    if (mCallCardFragment->IsVisible(&isVisible), !isVisible) {
+        return NOERROR;
+    }
+
+    if (mDialpadFragment != NULL && (mDialpadFragment->IsVisible(&isVisible), isVisible)) {
+        mCallButtonFragment->DisplayDialpad(FALSE /* show */, TRUE /* animate */);
+        return NOERROR;
+    }
+    else if (mConferenceManagerFragment->IsVisible(&isVisible), isVisible) {
+        mConferenceManagerFragment->SetVisible(false);
+        return NOERROR;
+    }
+
+    // Always disable the Back key while an incoming call is ringing
+    AutoPtr<Call> call = CallList::GetInstance()->GetIncomingCall();
+    if (call != NULL) {
+        Logger::D("CInCallActivity", "Consume Back press for an incoming call");
+        return NOERROR;
+    }
+
+    // Nothing special to do.  Fall back to the default behavior.
+    return Activity::OnBackPressed();
 }
 
 ECode CInCallActivity::OnOptionsItemSelected(
     /* [in] */ IMenuItem* item,
     /* [out] */ Boolean* result)
 {
-    assert(0 && "TODO");
-    return NOERROR;
+    VALIDATE_NOT_NULL(result);
+    Int32 itemId;
+    item->GetItemId(&itemId);
+    if (itemId == Elastos::Droid::R::id::home) {
+        OnBackPressed();
+        *result = TRUE;
+        return NOERROR;
+    }
+    return Activity::OnOptionsItemSelected(item, result);
 }
 
 ECode CInCallActivity::OnKeyUp(
@@ -266,8 +367,19 @@ ECode CInCallActivity::OnKeyUp(
     /* [in] */ IKeyEvent* event,
     /* [out] */ Boolean* result)
 {
-    assert(0 && "TODO");
-    return NOERROR;
+    VALIDATE_NOT_NULL(result);
+    // push input to the dialer.
+    if (mDialpadFragment != NULL && (mDialpadFragment->IsVisible(result), *result) &&
+            (mDialpadFragment->OnDialerKeyUp(event))) {
+        *result = TRUE;
+        return NOERROR;
+    }
+    else if (keyCode == IKeyEvent::KEYCODE_CALL) {
+        // Always consume CALL to be sure the PhoneWindow won't do anything with it
+        *result = TRUE;
+        return NOERROR;
+    }
+    return Activity::OnKeyUp(keyCode, event, result);
 }
 
 ECode CInCallActivity::OnKeyDown(
@@ -275,59 +387,305 @@ ECode CInCallActivity::OnKeyDown(
     /* [in] */ IKeyEvent* event,
     /* [out] */ Boolean* result)
 {
-    assert(0 && "TODO");
-    return NOERROR;
+    VALIDATE_NOT_NULL(result);
+    switch (keyCode) {
+        case IKeyEvent::KEYCODE_CALL: {
+            Boolean handled = InCallPresenter::GetInstance()->HandleCallKey();
+            if (!handled) {
+                Logger::W("CInCallActivity", "InCallActivity should always handle KEYCODE_CALL in onKeyDown");
+            }
+            // Always consume CALL to be sure the PhoneWindow won't do anything with it
+            *result = TRUE;
+            return NOERROR;
+        }
+
+        // Note there's no KeyEvent.KEYCODE_ENDCALL case here.
+        // The standard system-wide handling of the ENDCALL key
+        // (see PhoneWindowManager's handling of KEYCODE_ENDCALL)
+        // already implements exactly what the UI spec wants,
+        // namely (1) "hang up" if there's a current active call,
+        // or (2) "don't answer" if there's a current ringing call.
+
+        case IKeyEvent::KEYCODE_CAMERA:
+            // Disable the CAMERA button while in-call since it's too
+            // easy to press accidentally.
+            *result = TRUE;
+            return NOERROR;
+
+        case IKeyEvent::KEYCODE_VOLUME_UP:
+        case IKeyEvent::KEYCODE_VOLUME_DOWN:
+        case IKeyEvent::KEYCODE_VOLUME_MUTE:
+            // Ringer silencing handled by PhoneWindowManager.
+            break;
+
+        case IKeyEvent::KEYCODE_MUTE:
+            // toggle mute
+            TelecomAdapter::GetInstance()->Mute(!AudioModeProvider::GetInstance()->GetMute());
+            *result = TRUE;
+            return NOERROR;
+
+        // Various testing/debugging features, enabled ONLY when VERBOSE == true.
+        case IKeyEvent::KEYCODE_SLASH:
+            if (Logger::VERBOSE) {
+                Logger::V("CInCallActivity", "----------- InCallActivity View dump --------------");
+                // Dump starting from the top-level view of the entire activity:
+                AutoPtr<IWindow> w;
+                GetWindow((IWindow**)&w);
+                AutoPtr<IView> decorView;
+                w->GetDecorView((IView**)&decorView);
+                Logger::D("CInCallActivity", "View dump:%s", TO_CSTR(decorView));
+                *result = TRUE;
+                return NOERROR;
+            }
+            break;
+        case IKeyEvent::KEYCODE_EQUALS:
+            // TODO: Dump phone state?
+            break;
+    }
+
+    Int32 count;
+    if ((event->GetRepeatCount(&count), count == 0) && HandleDialerKeyDown(keyCode, event)) {
+        *result = TRUE;
+        return NOERROR;
+    }
+
+    return Activity::OnKeyDown(keyCode, event, result);
 }
 
 Boolean CInCallActivity::HandleDialerKeyDown(
     /* [in] */ Int32 keyCode,
     /* [in] */ IKeyEvent* event)
 {
-    assert(0 && "TODO");
+    Logger::V("CInCallActivity", "handleDialerKeyDown: keyCode %d, event %s ...", keyCode, TO_CSTR(event));
+
+    // As soon as the user starts typing valid dialable keys on the
+    // keyboard (presumably to type DTMF tones) we start passing the
+    // key events to the DTMFDialer's onDialerKeyDown.
+    Boolean isVisible;
+    if (mDialpadFragment != NULL && (mDialpadFragment->IsVisible(&isVisible), isVisible)) {
+        return mDialpadFragment->OnDialerKeyDown(event);
+
+        // TODO: If the dialpad isn't currently visible, maybe
+        // consider automatically bringing it up right now?
+        // (Just to make sure the user sees the digits widget...)
+        // But this probably isn't too critical since it's awkward to
+        // use the hard keyboard while in-call in the first place,
+        // especially now that the in-call UI is portrait-only...
+    }
+
     return FALSE;
 }
 
 ECode CInCallActivity::OnConfigurationChanged(
     /* [in] */ IConfiguration* config)
 {
-    assert(0 && "TODO");
-    return NOERROR;
+    InCallPresenter::GetInstance()->GetProximitySensor()->OnConfigurationChanged(config);
+    Int32 orientation;
+    config->GetOrientation(&orientation);
+    Logger::D("CInCallActivity", "onConfigurationChanged %d", orientation);
+
+    // Check to see if the orientation changed to prevent triggering orientation change events
+    // for other configuration changes.
+    if (orientation != mCurrentOrientation) {
+        mCurrentOrientation = orientation;
+        AutoPtr<IWindowManager> wm;
+        GetWindowManager((IWindowManager**)&wm);
+        AutoPtr<IDisplay> display;
+        wm->GetDefaultDisplay((IDisplay**)&display);
+        Int32 rotation;
+        display->GetRotation(&rotation);
+        InCallPresenter::GetInstance()->OnDeviceRotationChange(rotation);
+        InCallPresenter::GetInstance()->OnDeviceOrientationChange(mCurrentOrientation);
+    }
+    return Activity::OnConfigurationChanged(config);
 }
 
 AutoPtr<CCallButtonFragment> CInCallActivity::GetCallButtonFragment()
 {
-    assert(0 && "TODO");
-    return NULL;
+    return mCallButtonFragment;
 }
 
 AutoPtr<CCallCardFragment> CInCallActivity::GetCallCardFragment()
 {
-    assert(0 && "TODO");
-    return NULL;
+    return mCallCardFragment;
 }
 
 void CInCallActivity::InternalResolveIntent(
     /* [in] */ IIntent* intent)
 {
-    assert(0 && "TODO");
+    String action;
+    intent->GetAction(&action);
+
+    if (action.Equals(IIntent::ACTION_MAIN)) {
+        // This action is the normal way to bring up the in-call UI.
+        //
+        // But we do check here for one extra that can come along with the
+        // ACTION_MAIN intent:
+        Boolean result;
+        if (intent->HasExtra(SHOW_DIALPAD_EXTRA, &result), result) {
+            // SHOW_DIALPAD_EXTRA can be used here to specify whether the DTMF
+            // dialpad should be initially visible.  If the extra isn't
+            // present at all, we just leave the dialpad in its previous state.
+
+            Boolean showDialpad;
+            intent->GetBooleanExtra(SHOW_DIALPAD_EXTRA, FALSE, &showDialpad);
+            Logger::D("CInCallActivity", "- internalResolveIntent: SHOW_DIALPAD_EXTRA: %d", showDialpad);
+
+            RelaunchedFromDialer(showDialpad);
+        }
+
+        Boolean newOutgoingCall;
+        if (intent->GetBooleanExtra(NEW_OUTGOING_CALL, FALSE, &newOutgoingCall), newOutgoingCall) {
+            intent->RemoveExtra(NEW_OUTGOING_CALL);
+            AutoPtr<Call> call = CallList::GetInstance()->GetOutgoingCall();
+            if (call == NULL) {
+                call = CallList::GetInstance()->GetPendingOutgoingCall();
+            }
+
+            AutoPtr<IBundle> extras;
+            if (call != NULL) {
+                AutoPtr<ICallDetails> details;
+                call->GetTelecommCall()->GetDetails((ICallDetails**)&details);
+                details->GetExtras((IBundle**)&extras);
+            }
+            if (extras == NULL) {
+                // Initialize the extras bundle to avoid NPE
+                CBundle::New((IBundle**)&extras);
+            }
+
+            AutoPtr<IPoint> touchPoint;
+            assert(0 && "TODO");
+            // if (TouchPointManager.getInstance().hasValidPoint()) {
+            //     // Use the most immediate touch point in the InCallUi if available
+            //     touchPoint = TouchPointManager.getInstance().getPoint();
+            // }
+            // else {
+            //     // Otherwise retrieve the touch point from the call intent
+            //     if (call != null) {
+            //         touchPoint = (Point) extras.getParcelable(TouchPointManager.TOUCH_POINT);
+            //     }
+            // }
+            mCallCardFragment->AnimateForNewOutgoingCall(touchPoint);
+
+            /*
+             * If both a phone account handle and a list of phone accounts to choose from are
+             * missing, then disconnect the call because there is no way to place an outgoing
+             * call.
+             * The exception is emergency calls, which may be waiting for the ConnectionService
+             * to set the PhoneAccount during the PENDING_OUTGOING state.
+             */
+            if (call != NULL && !IsEmergencyCall(call)) {
+                AutoPtr<IArrayList> phoneAccountHandles;
+                extras->GetParcelableArrayList(Elastos::Droid::Telecom::ICall::AVAILABLE_PHONE_ACCOUNTS,
+                        (IArrayList**)&phoneAccountHandles);
+                Boolean isEmpty;
+                if (call->GetAccountHandle() == NULL &&
+                        (phoneAccountHandles == NULL || (phoneAccountHandles->IsEmpty(&isEmpty), isEmpty))) {
+                    TelecomAdapter::GetInstance()->DisconnectCall(call->GetId());
+                }
+            }
+        }
+
+        AutoPtr<Call> pendingAccountSelectionCall = CallList::GetInstance()->GetWaitingForAccountCall();
+        if (pendingAccountSelectionCall != NULL) {
+            mCallCardFragment->SetVisible(FALSE);
+            AutoPtr<ICallDetails> details;
+            pendingAccountSelectionCall->GetTelecommCall()->GetDetails((ICallDetails**)&details);
+            AutoPtr<IBundle> extras;
+            details->GetExtras((IBundle**)&extras);
+
+            AutoPtr<IArrayList> phoneAccountHandles;
+            if (extras != NULL) {
+                extras->GetParcelableArrayList(
+                        Elastos::Droid::Telecom::ICall::AVAILABLE_PHONE_ACCOUNTS, (IArrayList**)&phoneAccountHandles);
+            }
+            else {
+                CArrayList::New((IArrayList**)&phoneAccountHandles);
+            }
+
+            AutoPtr<IFragmentManager> fm;
+            GetFragmentManager((IFragmentManager**)&fm);
+            assert(0 && "TODO");
+            // SelectPhoneAccountDialogFragment::ShowAccountDialog(fm, phoneAccountHandles);
+        }
+        else {
+            mCallCardFragment->SetVisible(TRUE);
+        }
+
+        return;
+    }
 }
 
 Boolean CInCallActivity::IsEmergencyCall(
     /* [in] */ Call* call)
 {
-    assert(0 && "TODO");
-    return FALSE;
+    AutoPtr<IUri> handle = call->GetHandle();
+    if (handle == NULL) {
+        return FALSE;
+    }
+    String number;
+    handle->GetSchemeSpecificPart(&number);
+    AutoPtr<IPhoneNumberUtils> utils;
+    CPhoneNumberUtils::AcquireSingleton((IPhoneNumberUtils**)&utils);
+    Boolean result;
+    utils->IsEmergencyNumber(number, &result);
+    return result;
 }
 
 void CInCallActivity::RelaunchedFromDialer(
     /* [in] */ Boolean showDialpad)
 {
-    assert(0 && "TODO");
+    mShowDialpadRequested = showDialpad;
+    mAnimateDialpadOnShow = TRUE;
+
+    if (mShowDialpadRequested) {
+        // If there's only one line in use, AND it's on hold, then we're sure the user
+        // wants to use the dialpad toward the exact line, so un-hold the holding line.
+        AutoPtr<Call> call = CallList::GetInstance()->GetActiveOrBackgroundCall();
+        if (call != NULL && call->GetState() == Call::State::ONHOLD) {
+            TelecomAdapter::GetInstance()->UnholdCall(call->GetId());
+        }
+    }
 }
 
 void CInCallActivity::InitializeInCall()
 {
-    assert(0 && "TODO");
+    if (mCallCardFragment == NULL) {
+        AutoPtr<IFragmentManager> fm;
+        GetFragmentManager((IFragmentManager**)&fm);
+        AutoPtr<IFragment> fg;
+        fm->FindFragmentById(Elastos::Droid::Dialer::R::id::callCardFragment, (IFragment**)&fg);
+        mCallCardFragment = (CCallCardFragment*)ICallCardFragment::Probe(fg);
+    }
+
+    mChildFragmentManager = NULL;
+    mCallCardFragment->GetChildFragmentManager((IFragmentManager**)&mChildFragmentManager);
+
+    if (mCallButtonFragment == NULL) {
+        AutoPtr<IFragment> fg;
+        mChildFragmentManager->FindFragmentById(Elastos::Droid::Dialer::R::id::callButtonFragment, (IFragment**)&fg);
+        mCallButtonFragment = (CCallButtonFragment*)ICallButtonFragment::Probe(fg);
+        AutoPtr<IView> v;
+        mCallButtonFragment->GetView((IView**)&v);
+        v->SetVisibility(IView::INVISIBLE);
+    }
+
+    if (mAnswerFragment == NULL) {
+        AutoPtr<IFragment> fg;
+        mChildFragmentManager->FindFragmentById(Elastos::Droid::Dialer::R::id::answerFragment, (IFragment**)&fg);
+        mAnswerFragment = (CAnswerFragment*)IAnswerFragment::Probe(fg);
+    }
+
+    if (mConferenceManagerFragment == NULL) {
+        AutoPtr<IFragmentManager> fm;
+        GetFragmentManager((IFragmentManager**)&fm);
+        AutoPtr<IFragment> fg;
+        fm->FindFragmentById(Elastos::Droid::Dialer::R::id::conferenceManagerFragment, (IFragment**)&fg);
+        mConferenceManagerFragment = (CConferenceManagerFragment*)IConferenceManagerFragment::Probe(fg);
+        AutoPtr<IView> v;
+        mConferenceManagerFragment->GetView((IView**)&v);
+        v->SetVisibility(IView::INVISIBLE);
+    }
 }
 
 void CInCallActivity::HideDialpadForDisconnect()

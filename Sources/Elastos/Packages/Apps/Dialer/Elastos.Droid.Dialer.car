@@ -1427,11 +1427,11 @@ module
         interface IOnWindowDismissedCallback;
     }
 
-    class CInCallServiceImpl {
-        constructor();
-
-        interface IInCallService;
-    }
+//    class CInCallServiceImpl {
+//        constructor();
+//
+//        interface IInCallService;
+//    }
 
     class CNotificationBroadcastReceiver {
         interface IBroadcastReceiver;

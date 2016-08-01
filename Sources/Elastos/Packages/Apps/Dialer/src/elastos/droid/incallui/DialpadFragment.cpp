@@ -60,7 +60,7 @@ AutoPtr<ArrayOf<Char32> > DialpadFragment::DTMFKeyListener::GetAcceptedChars()
     return DTMF_CHARACTERS;
 }
 
-ECode DialpadFragment::DTMFKeyListener:: Backspace(
+ECode DialpadFragment::DTMFKeyListener::Backspace(
     /* [in] */ IView* view,
     /* [in] */ IEditable* content,
     /* [in] */ Int32 keyCode,
@@ -86,7 +86,7 @@ Boolean DialpadFragment::DTMFKeyListener::IsAcceptableModifierKey(
     }
 }
 
-ECode DialpadFragment::DTMFKeyListener:: OnKeyDown(
+ECode DialpadFragment::DTMFKeyListener::OnKeyDown(
     /* [in] */ IView* view,
     /* [in] */ IEditable* content,
     /* [in] */ Int32 keyCode,
@@ -120,6 +120,39 @@ ECode DialpadFragment::DTMFKeyListener:: OnKeyDown(
     }
     return FALSE;
 }
+
+ECode DialpadFragment::DTMFKeyListener::OnKeyUp(
+    /* [in] */ IView* view,
+    /* [in] */ IEditable* content,
+    /* [in] */ Int32 keyCode,
+    /* [in] */ IKeyEvent* event,
+    /* [out] */ Boolean* ret)
+{
+    assert(0 && "TODO");
+    return NOERROR;
+}
+
+Boolean DialpadFragment::DTMFKeyListener::OnKeyDown(
+    /* [in] */ IKeyEvent* event)
+{
+    assert(0 && "TODO");
+    return FALSE;
+}
+
+Boolean DialpadFragment::DTMFKeyListener::OnKeyUp(
+    /* [in] */ IKeyEvent* event)
+{
+    assert(0 && "TODO");
+    return FALSE;
+}
+
+Boolean DialpadFragment::DTMFKeyListener::IsKeyEventAcceptable (
+    /* [in] */ IKeyEvent* event)
+{
+    assert(0 && "TODO");
+    return FALSE;
+}
+
 
 // ECode DialpadFragment::DTMFKeyLis;
 
