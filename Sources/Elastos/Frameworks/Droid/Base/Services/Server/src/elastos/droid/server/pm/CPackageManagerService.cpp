@@ -5995,7 +5995,7 @@ AutoPtr< HashMap<String, AutoPtr<IFeatureInfo> > > CPackageManagerService::GetFe
     AutoPtr<ISystemProperties> prop;
     CSystemProperties::AcquireSingleton((ISystemProperties**)&prop);
     Int32 hasExtra;
-    prop->GetInt32(String("persist.sys.extra_features"), 1, &hasExtra);
+    prop->GetInt32(String("persist.sys.extra_features"), 0, &hasExtra);
     return (hasExtra > 0) ? mExtraFeatures : mAvailableFeatures;
 }
 

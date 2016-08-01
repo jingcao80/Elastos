@@ -1056,7 +1056,7 @@ AutoPtr<IPackageInfo> PackageParser::GeneratePackageInfo(
                 List< AutoPtr<Activity> >::Iterator it;
                 for (it = p->mActivities.Begin(); it != p->mActivities.End(); ++it) {
                     Boolean enabled;
-                    IApplicationInfo::Probe((*it)->mInfo)->GetEnabled(&enabled);
+                    IComponentInfo::Probe((*it)->mInfo)->GetEnabled(&enabled);
                     if (enabled) num++;
                 }
                 infos = ArrayOf<IActivityInfo*>::Alloc(num);
@@ -1065,7 +1065,7 @@ AutoPtr<IPackageInfo> PackageParser::GeneratePackageInfo(
             for (it = p->mActivities.Begin(), j = 0; it != p->mActivities.End(); ++it) {
                 AutoPtr<Activity> activity = *it;
                 Boolean enabled;
-                IApplicationInfo::Probe(activity->mInfo)->GetEnabled(&enabled);
+                IComponentInfo::Probe(activity->mInfo)->GetEnabled(&enabled);
                 if (enabled || (flags & IPackageManager::GET_DISABLED_COMPONENTS) != 0) {
                     infos->Set(j++, GenerateActivityInfo(activity, flags, state, userId));
                 }
@@ -1085,7 +1085,7 @@ AutoPtr<IPackageInfo> PackageParser::GeneratePackageInfo(
                 List< AutoPtr<Activity> >::Iterator it;
                 for (it = p->mReceivers.Begin(); it != p->mReceivers.End(); ++it) {
                     Boolean enabled;
-                    IApplicationInfo::Probe((*it)->mInfo)->GetEnabled(&enabled);
+                    IComponentInfo::Probe((*it)->mInfo)->GetEnabled(&enabled);
                     if (enabled) num++;
                 }
                 infos = ArrayOf<IActivityInfo*>::Alloc(num);
@@ -1094,7 +1094,7 @@ AutoPtr<IPackageInfo> PackageParser::GeneratePackageInfo(
             for (it = p->mReceivers.Begin(), j = 0; it != p->mReceivers.End(); ++it) {
                 AutoPtr<Activity> activity = *it;
                 Boolean enabled;
-                IApplicationInfo::Probe(activity->mInfo)->GetEnabled(&enabled);
+                IComponentInfo::Probe(activity->mInfo)->GetEnabled(&enabled);
                 if (enabled || (flags & IPackageManager::GET_DISABLED_COMPONENTS) != 0) {
                     infos->Set(j++, GenerateActivityInfo(activity, flags, state, userId));
                 }
@@ -1114,7 +1114,7 @@ AutoPtr<IPackageInfo> PackageParser::GeneratePackageInfo(
                 List< AutoPtr<Service> >::Iterator it;
                 for (it = p->mServices.Begin(); it != p->mServices.End(); ++it) {
                     Boolean enabled;
-                    IApplicationInfo::Probe((*it)->mInfo)->GetEnabled(&enabled);
+                    IComponentInfo::Probe((*it)->mInfo)->GetEnabled(&enabled);
                     if (enabled) num++;
                 }
                 infos = ArrayOf<IServiceInfo*>::Alloc(num);
@@ -1123,7 +1123,7 @@ AutoPtr<IPackageInfo> PackageParser::GeneratePackageInfo(
             for (it = p->mServices.Begin(), j = 0; it != p->mServices.End(); ++it) {
                 AutoPtr<Service> service = *it;
                 Boolean enabled;
-                IApplicationInfo::Probe(service->mInfo)->GetEnabled(&enabled);
+                IComponentInfo::Probe(service->mInfo)->GetEnabled(&enabled);
                 if (enabled || (flags & IPackageManager::GET_DISABLED_COMPONENTS) != 0) {
                     infos->Set(j++, GenerateServiceInfo(service, flags, state, userId));
                 }
@@ -1143,7 +1143,7 @@ AutoPtr<IPackageInfo> PackageParser::GeneratePackageInfo(
                 List< AutoPtr<Provider> >::Iterator it;
                 for (it = p->mProviders.Begin(); it != p->mProviders.End(); ++it) {
                     Boolean enabled;
-                    IApplicationInfo::Probe((*it)->mInfo)->GetEnabled(&enabled);
+                    IComponentInfo::Probe((*it)->mInfo)->GetEnabled(&enabled);
                     if (enabled) num++;
                 }
                 infos = ArrayOf<IProviderInfo*>::Alloc(num);
@@ -1152,7 +1152,7 @@ AutoPtr<IPackageInfo> PackageParser::GeneratePackageInfo(
             for (it = p->mProviders.Begin(), j = 0; it != p->mProviders.End(); ++it) {
                 AutoPtr<Provider> provider = *it;
                 Boolean enabled;
-                IApplicationInfo::Probe(provider->mInfo)->GetEnabled(&enabled);
+                IComponentInfo::Probe(provider->mInfo)->GetEnabled(&enabled);
                 if (enabled || (flags & IPackageManager::GET_DISABLED_COMPONENTS) != 0) {
                     infos->Set(j++, GenerateProviderInfo(provider, flags, state, userId));
                 }

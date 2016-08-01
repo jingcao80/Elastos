@@ -1,9 +1,10 @@
 #include "elastos/droid/media/CAudioAttributes.h"
+#include <elastos/core/CoreUtils.h>
 #include <elastos/core/StringBuilder.h>
 #include <elastos/core/StringUtils.h>
 #include <elastos/utility/logging/Logger.h>
 
-using Elastos::Core::CString;
+using Elastos::Core::CoreUtils;
 using Elastos::Core::ICharSequence;
 using Elastos::Core::StringBuilder;
 using Elastos::Core::StringUtils;
@@ -50,9 +51,13 @@ ECode CAudioAttributes::ReadFromParcel(
     source->ReadInt32(&mSource);
     source->ReadInt32(&mFlags);
     source->ReadString(&mFormattedTags);
-    AutoPtr<IInterface> obj;
-    source->ReadInterfacePtr((Handle32*)&obj);
-    mTags = IHashSet::Probe(obj);
+    AutoPtr<ArrayOf<String> > tagsArray;
+    source->ReadArrayOfString((ArrayOf<String>**)&tagsArray);
+    mTags = NULL;
+    CHashSet::New((IHashSet**)&mTags);
+    for (Int32 i = 0; i < tagsArray->GetLength(); i++) {
+        mTags->Add(CoreUtils::Convert((*tagsArray)[i]));
+    }
     return NOERROR;
 }
 
@@ -64,7 +69,13 @@ ECode CAudioAttributes::WriteToParcel(
     dest->WriteInt32(mSource);
     dest->WriteInt32(mFlags);
     dest->WriteString(mFormattedTags);
-    dest->WriteInterfacePtr(mTags);
+    AutoPtr<ArrayOf<IInterface*> > array;
+    mTags->ToArray((ArrayOf<IInterface*>**)&array);
+    Int32 size = array->GetLength();
+    AutoPtr<ArrayOf<String> > tagsArray = ArrayOf<String>::Alloc(size);
+    for (Int32 i = 0; i < size; i++)
+        tagsArray->Set(i, TO_STR((*array)[i]));
+    dest->WriteArrayOfString(tagsArray);
     return NOERROR;
 }
 

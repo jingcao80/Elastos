@@ -92,10 +92,10 @@ ECode CServiceNative::GetRemoteInstance(
     jclass binderClass = env->FindClass("android/os/Binder");
     Util::CheckErrorAndLog(env, TAG, "Error while findClass Binder, line: %d", __LINE__);
 
-    jmethodID m = env->GetStaticMethodID(binderClass, "javaObjectForIBinder", "(I)Landroid/os/IBinder;");
+    jmethodID m = env->GetStaticMethodID(binderClass, "javaObjectForIBinder", "(J)Landroid/os/IBinder;");
     Util::CheckErrorAndLog(env, TAG, "GetMethodID: Binder::javaObjectForIBinder line: %d", __LINE__);
 
-    jobject jbinder = env->CallStaticObjectMethod(binderClass, m, (int)mibinder.get());
+    jobject jbinder = env->CallStaticObjectMethod(binderClass, m, (jlong)mibinder.get());
     Util::CheckErrorAndLog(env, TAG, "call Binder::ibinderForJavaObject : %d!\n", __LINE__);
     env->DeleteLocalRef(binderClass);
     *obj = (Handle64)jbinder;
@@ -125,10 +125,10 @@ ECode CServiceNative::WriteToParcel(
         jclass binderClass = env->FindClass("android/os/Binder");
         Util::CheckErrorAndLog(env, TAG, "Error while findClass Binder, line: %d", __LINE__);
 
-        jmethodID m = env->GetStaticMethodID(binderClass, "writeJavaBinder", "(ILandroid/os/IBinder;)V");
+        jmethodID m = env->GetStaticMethodID(binderClass, "writeJavaBinder", "(JLandroid/os/IBinder;)V");
         Util::CheckErrorAndLog(env, TAG, "GetMethodID: Binder::ibinderForJavaObject line: %d", __LINE__);
 
-        env->CallStaticVoidMethod(binderClass, m, (jint)parcel, mJInstance);
+        env->CallStaticVoidMethod(binderClass, m, (jlong)parcel, mJInstance);
         Util::CheckErrorAndLog(env, TAG, "call Binder::ibinderForJavaObject : %d!\n", __LINE__);
         env->DeleteLocalRef(binderClass);
     }

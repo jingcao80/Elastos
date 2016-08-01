@@ -40,6 +40,7 @@ private:
     class SimpleKeyframes
         : public Object
         , public IKeyframes
+        , public ICloneable
     {
     public:
         CAR_INTERFACE_DECL()
