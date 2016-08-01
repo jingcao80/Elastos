@@ -39,3 +39,4 @@ SOURCES += InCallCameraManager.cpp
 SOURCES += CDialpadSlidingLinearLayout.cpp
 SOURCES += CHoverIgnoringLinearLayout.cpp
 SOURCES += CDialpadFragment.cpp
+SOURCES += DialpadPresenter.cpp
