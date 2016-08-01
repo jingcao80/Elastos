@@ -17,6 +17,8 @@ class EriInfo
 public:
     CAR_INTERFACE_DECL();
 
+    EriInfo();
+
     CARAPI constructor(
         /* [in] */ Int32 roamingIndicator,
         /* [in] */ Int32 iconIndex,

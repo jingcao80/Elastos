@@ -1,6 +1,9 @@
 #include "Elastos.Droid.Internal.h"
 
 #include "elastos/droid/internal/telephony/cdma/CdmaInformationRecords.h"
+#include <elastos/core/StringUtils.h>
+
+using Elastos::Core::StringUtils;
 
 namespace Elastos {
 namespace Droid {
@@ -12,6 +15,10 @@ namespace Cdma {
 //              CdmaInformationRecords::CdmaSignalInfoRec
 //=====================================================================
 CdmaInformationRecords::CdmaSignalInfoRec::CdmaSignalInfoRec()
+    : isPresent(FALSE)
+    , signalType(0)
+    , alertPitch(0)
+    , signal(0)
 {
 }
 
@@ -21,26 +28,22 @@ CdmaInformationRecords::CdmaSignalInfoRec::CdmaSignalInfoRec(
     /* [in] */ Int32 alertPitch,
     /* [in] */ Int32 signal)
 {
-    // ==================before translated======================
-    // this.isPresent = isPresent != 0;
-    // this.signalType = signalType;
-    // this.alertPitch = alertPitch;
-    // this.signal = signal;
+    this->isPresent = isPresent != 0;
+    this->signalType = signalType;
+    this->alertPitch = alertPitch;
+    this->signal = signal;
 }
 
 ECode CdmaInformationRecords::CdmaSignalInfoRec::ToString(
     /* [out] */ String* result)
 {
     VALIDATE_NOT_NULL(result);
-    *result = NULL;
-    // ==================before translated======================
-    // return "CdmaSignalInfo: {" +
-    //         " isPresent: " + isPresent +
-    //         ", signalType: " + signalType +
-    //         ", alertPitch: " + alertPitch +
-    //         ", signal: " + signal +
-    //         " }";
-    assert(0);
+    *result = String("CdmaSignalInfo: {") +
+            " isPresent: " + StringUtils::BooleanToString(isPresent) +
+            ", signalType: " + StringUtils::ToString(signalType) +
+            ", alertPitch: " + StringUtils::ToString(alertPitch) +
+            ", signal: " + StringUtils::ToString(signal) +
+            " }";
     return NOERROR;
 }
 
@@ -51,22 +54,18 @@ CdmaInformationRecords::CdmaDisplayInfoRec::CdmaDisplayInfoRec(
     /* [in] */ Int32 id,
     /* [in] */ const String& alpha)
 {
-    // ==================before translated======================
-    // this.id = id;
-    // this.alpha = alpha;
+    this->id = id;
+    this->alpha = alpha;
 }
 
 ECode CdmaInformationRecords::CdmaDisplayInfoRec::ToString(
     /* [out] */ String* result)
 {
     VALIDATE_NOT_NULL(result);
-    *result = NULL;
-    // ==================before translated======================
-    // return "CdmaDisplayInfoRec: {" +
-    //         " id: " + CdmaInformationRecords.idToString(id) +
-    //         ", alpha: " + alpha +
-    //         " }";
-    assert(0);
+    *result = String("CdmaDisplayInfoRec: {") +
+            " id: " + CdmaInformationRecords::IdToString(id) +
+            ", alpha: " + alpha +
+            " }";
     return NOERROR;
 }
 
@@ -81,29 +80,25 @@ CdmaInformationRecords::CdmaNumberInfoRec::CdmaNumberInfoRec(
     /* [in] */ Int32 pi,
     /* [in] */ Int32 si)
 {
-    // ==================before translated======================
-    // this.number = number;
-    // this.numberType = (byte)numberType;
-    // this.numberPlan = (byte)numberPlan;
-    // this.pi = (byte)pi;
-    // this.si = (byte)si;
+    this->number = number;
+    this->numberType = (Byte)numberType;
+    this->numberPlan = (Byte)numberPlan;
+    this->pi = (Byte)pi;
+    this->si = (Byte)si;
 }
 
 ECode CdmaInformationRecords::CdmaNumberInfoRec::ToString(
     /* [out] */ String* result)
 {
     VALIDATE_NOT_NULL(result);
-    *result = NULL;
-    // ==================before translated======================
-    // return "CdmaNumberInfoRec: {" +
-    //         " id: " + CdmaInformationRecords.idToString(id) +
-    //         ", number: " + number +
-    //         ", numberType: " + numberType +
-    //         ", numberPlan: " + numberPlan +
-    //         ", pi: " + pi +
-    //         ", si: " + si +
-    //         " }";
-    assert(0);
+    *result = String("CdmaNumberInfoRec: {") +
+            " id: " + CdmaInformationRecords::IdToString(id) +
+            ", number: " + number +
+            ", numberType: " + StringUtils::ToString(numberType) +
+            ", numberPlan: " + StringUtils::ToString(numberPlan) +
+            ", pi: " + StringUtils::ToString(pi) +
+            ", si: " + StringUtils::ToString(si) +
+            " }";
     return NOERROR;
 }
 
@@ -124,24 +119,22 @@ CdmaInformationRecords::CdmaRedirectingNumberInfoRec::CdmaRedirectingNumberInfoR
     /* [in] */ Int32 pi,
     /* [in] */ Int32 si,
     /* [in] */ Int32 reason)
+    : redirectingReason(reason)
 {
-    // ==================before translated======================
-    // numberInfoRec = new CdmaNumberInfoRec(RIL_CDMA_REDIRECTING_NUMBER_INFO_REC,
-    //                                       number, numberType, numberPlan, pi, si);
-    // redirectingReason = reason;
+    numberInfoRec = new CdmaNumberInfoRec(RIL_CDMA_REDIRECTING_NUMBER_INFO_REC,
+                                          number, numberType, numberPlan, pi, si);
 }
 
 ECode CdmaInformationRecords::CdmaRedirectingNumberInfoRec::ToString(
     /* [out] */ String* result)
 {
     VALIDATE_NOT_NULL(result);
-    *result = NULL;
-    // ==================before translated======================
-    // return "CdmaNumberInfoRec: {" +
-    //         " numberInfoRec: " + numberInfoRec +
-    //         ", redirectingReason: " + redirectingReason +
-    //         " }";
-    assert(0);
+    String str;
+    numberInfoRec->ToString(&str);
+    *result = String("CdmaNumberInfoRec: {") +
+            " numberInfoRec: " + str +
+            ", redirectingReason: " + StringUtils::ToString(redirectingReason) +
+            " }";
     return NOERROR;
 }
 
@@ -154,26 +147,22 @@ CdmaInformationRecords::CdmaLineControlInfoRec::CdmaLineControlInfoRec(
     /* [in] */ Int32 lineCtrlReverse,
     /* [in] */ Int32 lineCtrlPowerDenial)
 {
-    // ==================before translated======================
-    // this.lineCtrlPolarityIncluded = (byte)lineCtrlPolarityIncluded;
-    // this.lineCtrlToggle = (byte)lineCtrlToggle;
-    // this.lineCtrlReverse = (byte)lineCtrlReverse;
-    // this.lineCtrlPowerDenial = (byte)lineCtrlPowerDenial;
+    this->lineCtrlPolarityIncluded = (Byte)lineCtrlPolarityIncluded;
+    this->lineCtrlToggle = (Byte)lineCtrlToggle;
+    this->lineCtrlReverse = (Byte)lineCtrlReverse;
+    this->lineCtrlPowerDenial = (Byte)lineCtrlPowerDenial;
 }
 
 ECode CdmaInformationRecords::CdmaLineControlInfoRec::ToString(
     /* [out] */ String* result)
 {
     VALIDATE_NOT_NULL(result);
-    *result = NULL;
-    // ==================before translated======================
-    // return "CdmaLineControlInfoRec: {" +
-    //         " lineCtrlPolarityIncluded: " + lineCtrlPolarityIncluded +
-    //         " lineCtrlToggle: " + lineCtrlToggle +
-    //         " lineCtrlReverse: " + lineCtrlReverse +
-    //         " lineCtrlPowerDenial: " + lineCtrlPowerDenial +
-    //         " }";
-    assert(0);
+    *result = String("CdmaLineControlInfoRec: {") +
+            " lineCtrlPolarityIncluded: " + StringUtils::ToString(lineCtrlPolarityIncluded) +
+            " lineCtrlToggle: " + StringUtils::ToString(lineCtrlToggle) +
+            " lineCtrlReverse: " + StringUtils::ToString(lineCtrlReverse) +
+            " lineCtrlPowerDenial: " + StringUtils::ToString(lineCtrlPowerDenial) +
+            " }";
     return NOERROR;
 }
 
@@ -183,20 +172,16 @@ ECode CdmaInformationRecords::CdmaLineControlInfoRec::ToString(
 CdmaInformationRecords::CdmaT53ClirInfoRec::CdmaT53ClirInfoRec(
     /* [in] */ Int32 cause)
 {
-    // ==================before translated======================
-    // this.cause = (byte)cause;
+    this->cause = (Byte)cause;
 }
 
 ECode CdmaInformationRecords::CdmaT53ClirInfoRec::ToString(
     /* [out] */ String* result)
 {
     VALIDATE_NOT_NULL(result);
-    *result = NULL;
-    // ==================before translated======================
-    // return "CdmaT53ClirInfoRec: {" +
-    //         " cause: " + cause +
-    //         " }";
-    assert(0);
+    *result = String("CdmaT53ClirInfoRec: {") +
+            " cause: " + StringUtils::ToString(cause) +
+            " }";
     return NOERROR;
 }
 
@@ -207,22 +192,18 @@ CdmaInformationRecords::CdmaT53AudioControlInfoRec::CdmaT53AudioControlInfoRec(
     /* [in] */ Int32 uplink,
     /* [in] */ Int32 downlink)
 {
-    // ==================before translated======================
-    // this.uplink = (byte) uplink;
-    // this.downlink = (byte) downlink;
+    this->uplink = (Byte) uplink;
+    this->downlink = (Byte) downlink;
 }
 
 ECode CdmaInformationRecords::CdmaT53AudioControlInfoRec::ToString(
     /* [out] */ String* result)
 {
     VALIDATE_NOT_NULL(result);
-    *result = NULL;
-    // ==================before translated======================
-    // return "CdmaT53AudioControlInfoRec: {" +
-    //         " uplink: " + uplink +
-    //         " downlink: " + downlink +
-    //         " }";
-    assert(0);
+    *result = String("CdmaT53AudioControlInfoRec: {") +
+            " uplink: " + StringUtils::ToString(uplink) +
+            " downlink: " + StringUtils::ToString(downlink) +
+            " }";
     return NOERROR;
 }
 
@@ -238,72 +219,99 @@ CdmaInformationRecords::CdmaInformationRecords()
 ECode CdmaInformationRecords::constructor(
     /* [in] */ IParcel* p)
 {
-    // ==================before translated======================
-    // int id = p.readInt();
-    // switch (id) {
-    //     case RIL_CDMA_DISPLAY_INFO_REC:
-    //     case RIL_CDMA_EXTENDED_DISPLAY_INFO_REC:
-    //         record  = new CdmaDisplayInfoRec(id, p.readString());
-    //         break;
-    //
-    //     case RIL_CDMA_CALLED_PARTY_NUMBER_INFO_REC:
-    //     case RIL_CDMA_CALLING_PARTY_NUMBER_INFO_REC:
-    //     case RIL_CDMA_CONNECTED_NUMBER_INFO_REC:
-    //         record = new CdmaNumberInfoRec(id, p.readString(), p.readInt(), p.readInt(),
-    //                 p.readInt(), p.readInt());
-    //         break;
-    //
-    //     case RIL_CDMA_SIGNAL_INFO_REC:
-    //         record = new CdmaSignalInfoRec(p.readInt(), p.readInt(), p.readInt(), p.readInt());
-    //         break;
-    //
-    //     case RIL_CDMA_REDIRECTING_NUMBER_INFO_REC:
-    //         record = new CdmaRedirectingNumberInfoRec(p.readString(), p.readInt(), p.readInt(),
-    //                 p.readInt(), p.readInt(), p.readInt());
-    //         break;
-    //
-    //     case RIL_CDMA_LINE_CONTROL_INFO_REC:
-    //         record = new CdmaLineControlInfoRec(p.readInt(), p.readInt(), p.readInt(),
-    //                 p.readInt());
-    //         break;
-    //
-    //     case RIL_CDMA_T53_CLIR_INFO_REC:
-    //         record = new CdmaT53ClirInfoRec(p.readInt());
-    //         break;
-    //
-    //     case RIL_CDMA_T53_AUDIO_CONTROL_INFO_REC:
-    //         record = new CdmaT53AudioControlInfoRec(p.readInt(), p.readInt());
-    //         break;
-    //
-    //     case RIL_CDMA_T53_RELEASE_INFO_REC:
-    //         // TODO: WHAT to do, for now fall through and throw exception
-    //     default:
-    //         throw new RuntimeException("RIL_UNSOL_CDMA_INFO_REC: unsupported record. Got "
-    //                                     + CdmaInformationRecords.idToString(id) + " ");
-    //
-    // }
+    Int32 id;
+    p->ReadInt32(&id);
+    switch (id) {
+        case RIL_CDMA_DISPLAY_INFO_REC:
+        case RIL_CDMA_EXTENDED_DISPLAY_INFO_REC: {
+            String str;
+            p->ReadString(&str);
+            record  = new CdmaDisplayInfoRec(id, str);
+            break;
+        }
+        case RIL_CDMA_CALLED_PARTY_NUMBER_INFO_REC:
+        case RIL_CDMA_CALLING_PARTY_NUMBER_INFO_REC:
+        case RIL_CDMA_CONNECTED_NUMBER_INFO_REC: {
+            String str;
+            p->ReadString(&str);
+            Int32 val1, val2, val3, val4;
+            p->ReadInt32(&val1);
+            p->ReadInt32(&val2);
+            p->ReadInt32(&val3);
+            p->ReadInt32(&val4);
+            record = new CdmaNumberInfoRec(id, str, val1, val2, val3, val4);
+            break;
+        }
+        case RIL_CDMA_SIGNAL_INFO_REC: {
+            Int32 val1, val2, val3, val4;
+            p->ReadInt32(&val1);
+            p->ReadInt32(&val2);
+            p->ReadInt32(&val3);
+            p->ReadInt32(&val4);
+            record = new CdmaSignalInfoRec(val1, val2, val3, val4);
+            break;
+        }
+        case RIL_CDMA_REDIRECTING_NUMBER_INFO_REC: {
+            String str;
+            p->ReadString(&str);
+            Int32 val1, val2, val3, val4 ,val5;
+            p->ReadInt32(&val1);
+            p->ReadInt32(&val2);
+            p->ReadInt32(&val3);
+            p->ReadInt32(&val4);
+            p->ReadInt32(&val5);
+            record = new CdmaRedirectingNumberInfoRec(str, val1, val2, val3, val4, val5);
+            break;
+        }
+        case RIL_CDMA_LINE_CONTROL_INFO_REC: {
+            Int32 val1, val2, val3, val4;
+            p->ReadInt32(&val1);
+            p->ReadInt32(&val2);
+            p->ReadInt32(&val3);
+            p->ReadInt32(&val4);
+            record = new CdmaLineControlInfoRec(val1, val2, val3, val4);
+            break;
+        }
+        case RIL_CDMA_T53_CLIR_INFO_REC: {
+            Int32 val1;
+            p->ReadInt32(&val1);
+            record = new CdmaT53ClirInfoRec(val1);
+            break;
+        }
+        case RIL_CDMA_T53_AUDIO_CONTROL_INFO_REC: {
+            Int32 val1, val2;
+            p->ReadInt32(&val1);
+            p->ReadInt32(&val2);
+            record = new CdmaT53AudioControlInfoRec(val1, val2);
+            break;
+        }
+        case RIL_CDMA_T53_RELEASE_INFO_REC:
+            // TODO: WHAT to do, for now fall through and throw exception
+        default:
+            // throw new RuntimeException("RIL_UNSOL_CDMA_INFO_REC: unsupported record. Got "
+            //                             + CdmaInformationRecords.idToString(id) + " ");
+            return E_RUNTIME_EXCEPTION;
+    }
     return NOERROR;
 }
 
 String CdmaInformationRecords::IdToString(
     /* [in] */ Int32 id)
 {
-    // ==================before translated======================
-    // switch(id) {
-    // case RIL_CDMA_DISPLAY_INFO_REC: return "RIL_CDMA_DISPLAY_INFO_REC";
-    // case RIL_CDMA_CALLED_PARTY_NUMBER_INFO_REC: return "RIL_CDMA_CALLED_PARTY_NUMBER_INFO_REC";
-    // case RIL_CDMA_CALLING_PARTY_NUMBER_INFO_REC: return "RIL_CDMA_CALLING_PARTY_NUMBER_INFO_REC";
-    // case RIL_CDMA_CONNECTED_NUMBER_INFO_REC: return "RIL_CDMA_CONNECTED_NUMBER_INFO_REC";
-    // case RIL_CDMA_SIGNAL_INFO_REC: return "RIL_CDMA_SIGNAL_INFO_REC";
-    // case RIL_CDMA_REDIRECTING_NUMBER_INFO_REC: return "RIL_CDMA_REDIRECTING_NUMBER_INFO_REC";
-    // case RIL_CDMA_LINE_CONTROL_INFO_REC: return "RIL_CDMA_LINE_CONTROL_INFO_REC";
-    // case RIL_CDMA_EXTENDED_DISPLAY_INFO_REC: return "RIL_CDMA_EXTENDED_DISPLAY_INFO_REC";
-    // case RIL_CDMA_T53_CLIR_INFO_REC: return "RIL_CDMA_T53_CLIR_INFO_REC";
-    // case RIL_CDMA_T53_RELEASE_INFO_REC: return "RIL_CDMA_T53_RELEASE_INFO_REC";
-    // case RIL_CDMA_T53_AUDIO_CONTROL_INFO_REC: return "RIL_CDMA_T53_AUDIO_CONTROL_INFO_REC";
-    // default: return "<unknown record>";
-    // }
-    assert(0);
+    switch(id) {
+    case RIL_CDMA_DISPLAY_INFO_REC: return String("RIL_CDMA_DISPLAY_INFO_REC");
+    case RIL_CDMA_CALLED_PARTY_NUMBER_INFO_REC: return String("RIL_CDMA_CALLED_PARTY_NUMBER_INFO_REC");
+    case RIL_CDMA_CALLING_PARTY_NUMBER_INFO_REC: return String("RIL_CDMA_CALLING_PARTY_NUMBER_INFO_REC");
+    case RIL_CDMA_CONNECTED_NUMBER_INFO_REC: return String("RIL_CDMA_CONNECTED_NUMBER_INFO_REC");
+    case RIL_CDMA_SIGNAL_INFO_REC: return String("RIL_CDMA_SIGNAL_INFO_REC");
+    case RIL_CDMA_REDIRECTING_NUMBER_INFO_REC: return String("RIL_CDMA_REDIRECTING_NUMBER_INFO_REC");
+    case RIL_CDMA_LINE_CONTROL_INFO_REC: return String("RIL_CDMA_LINE_CONTROL_INFO_REC");
+    case RIL_CDMA_EXTENDED_DISPLAY_INFO_REC: return String("RIL_CDMA_EXTENDED_DISPLAY_INFO_REC");
+    case RIL_CDMA_T53_CLIR_INFO_REC: return String("RIL_CDMA_T53_CLIR_INFO_REC");
+    case RIL_CDMA_T53_RELEASE_INFO_REC: return String("RIL_CDMA_T53_RELEASE_INFO_REC");
+    case RIL_CDMA_T53_AUDIO_CONTROL_INFO_REC: return String("RIL_CDMA_T53_AUDIO_CONTROL_INFO_REC");
+    default: return String("<unknown record>");
+    }
     return String("");
 }
 

@@ -49,12 +49,18 @@ public:
         : public Handler
     {
     public:
+        TO_STRING_IMPL("CdmaConnection::MyHandler")
+
         MyHandler(
-            /* [in] */ ILooper* l);
+            /* [in] */ ILooper* l,
+            /* [in] */ CdmaConnection* host);
 
         // @Override
         CARAPI HandleMessage(
             /* [in] */ IMessage* msg);
+
+    private:
+        CdmaConnection* mHost;
     };
 
 public:
@@ -263,8 +269,9 @@ private:
       */
     CARAPI_(Boolean) IsConnectingInOrOut();
 
-    CARAPI_(AutoPtr<ICdmaCall>) ParentFromDCState(
-        /* [in] */ IDriverCallState state);
+    CARAPI ParentFromDCState(
+        /* [in] */ IDriverCallState state,
+        /* [out] */ ICdmaCall** result);
 
     /**
       * Set post dial state and acquire wake lock while switching to "started" or "wait"

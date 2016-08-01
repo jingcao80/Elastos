@@ -624,14 +624,17 @@ ECode CGsmServiceStateTracker::PollState()
             mCi->GetOperator(msg);
 
             iArray->Set(0, CoreUtils::Convert(++(*mPollingContext)[0]));        // (*mPollingContext)[0]++;
+            msg = NULL;
             ObtainMessage(EVENT_POLL_STATE_GPRS, iArray, (IMessage**)&msg);
             mCi->GetDataRegistrationState(msg);
 
             iArray->Set(0, CoreUtils::Convert(++(*mPollingContext)[0]));        // (*mPollingContext)[0]++;
+            msg = NULL;
             ObtainMessage(EVENT_POLL_STATE_REGISTRATION, iArray, (IMessage**)&msg);
             mCi->GetVoiceRegistrationState(msg);
 
             iArray->Set(0, CoreUtils::Convert(++(*mPollingContext)[0]));        // (*mPollingContext)[0]++;
+            msg = NULL;
             ObtainMessage(EVENT_POLL_STATE_NETWORK_SELECTION_MODE, iArray, (IMessage**)&msg);
             mCi->GetNetworkSelectionMode(msg);
         break;

@@ -120,6 +120,8 @@ public:
 
     CDMAPhone();
 
+    virtual ~CDMAPhone();
+
     // Constructors
     CARAPI constructor();
 

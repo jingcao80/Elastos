@@ -70,6 +70,9 @@ class SmsMessage
     : public SmsMessageBase
     , public ISmsMessage
 {
+  friend class CdmaSMSDispatcher;
+  friend class CdmaInboundSmsHandler;
+
 public:
     class SubmitPdu
         : public Object //TOOD SmsMessageBase::SubmitPduBase
@@ -81,6 +84,8 @@ public:
 
 public:
     CAR_INTERFACE_DECL();
+
+    SmsMessage();
 
     /**
       * Create an SmsMessage from a raw PDU.
@@ -398,7 +403,7 @@ protected:
     /**
       * Parses a SMS message from its BearerData stream. (mobile-terminated only)
       */
-    virtual CARAPI_(void) ParseSms();
+    virtual CARAPI ParseSms();
 
     /**
      * CT WDP header contains WDP Msg Identifier and WDP Userdata
@@ -413,7 +418,7 @@ private:
       * of the SMS Java-object.
       * @see #createPdu()
       */
-    CARAPI_(void) ParsePdu(
+    CARAPI ParsePdu(
         /* [in] */ ArrayOf<Byte>* pdu);
 
     /**

@@ -70,6 +70,7 @@ using Elastos::Droid::Os::IMessage;
 using Elastos::Droid::Internal::Telephony::IPhoneConstants;
 //using Elastos::Droid::Internal::Telephony::Uicc::IsimRecords;
 using Elastos::Droid::Os::IHandler;
+using Elastos::Core::IThrowable;
 using Elastos::IO::IFileDescriptor;
 using Elastos::IO::IPrintWriter;
 
@@ -243,9 +244,9 @@ protected:
     virtual CARAPI_(void) Loge(
         /* [in] */ const String& s);
 
-    //virtual CARAPI_(void) Loge(
-    //    /* [in] */ const String& s,
-    //    /* [in] */ Throwable* e);
+    virtual CARAPI_(void) Loge(
+       /* [in] */ const String& s,
+       /* [in] */ IThrowable* e);
 
 private:
     CARAPI_(void) OnSubscriptionActivated();

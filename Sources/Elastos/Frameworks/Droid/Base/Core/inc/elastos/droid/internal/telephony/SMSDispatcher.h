@@ -65,12 +65,12 @@ protected:
 
         CARAPI UpdateSentMessageStatus(IContext* context, Int32 status);
 
+        CARAPI OnFailed(IContext* context, Int32 error, Int32 errorCode);
+
     private:
         CARAPI_(void) UpdateMessageErrorCode(IContext* context, Int32 errorCode);
 
         CARAPI_(void) SetMessageFinalState(IContext* context, Int32 messageType);
-
-        CARAPI OnFailed(IContext* context, Int32 error, Int32 errorCode);
 
         CARAPI OnSent(IContext* context);
 
@@ -217,7 +217,7 @@ public:
 protected:
     static Int32 GetNextConcatenatedRef();
 
-    SMSDispatcher(
+    constructor(
         /* [in] */ IPhoneBase* phone,
         /* [in] */ ISmsUsageMonitor* usageMonitor,
         /* [in] */ IImsSMSDispatcher* imsSMSDispatcher);
@@ -485,8 +485,7 @@ protected:
     AutoPtr<ICommandsInterface> mCi;
     AutoPtr<ITelephonyManager> mTelephonyManager;
 
-    //TODO
-//    IImsSMSDispatcher mImsSMSDispatcher;
+    AutoPtr<IImsSMSDispatcher> mImsSMSDispatcher;
 
     /* Flags indicating whether the current device allows sms service */
     Boolean mSmsCapable;

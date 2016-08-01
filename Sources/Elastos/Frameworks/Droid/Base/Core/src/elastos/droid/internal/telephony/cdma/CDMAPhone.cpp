@@ -1,10 +1,79 @@
 #include "Elastos.Droid.Internal.h"
 #include "Elastos.Droid.Os.h"
-
+#include "elastos/droid/app/ActivityManagerNative.h"
+#include "elastos/droid/content/CContentValues.h"
+#include "elastos/droid/content/CIntent.h"
+#include "elastos/droid/internal/telephony/cdma/CCdmaServiceStateTracker.h"
+#include "elastos/droid/internal/telephony/cdma/CCdmaCallTracker.h"
+#include "elastos/droid/internal/telephony/cdma/CdmaCallTracker.h"
+#include "elastos/droid/internal/telephony/cdma/CdmaMmiCode.h"
 #include "elastos/droid/internal/telephony/cdma/CDMAPhone.h"
+#include "elastos/droid/internal/telephony/cdma/CdmaSubscriptionSourceManager.h"
+#include "elastos/droid/internal/telephony/cdma/CEriManager.h"
+#include "elastos/droid/internal/telephony/cdma/CRuimPhoneBookInterfaceManager.h"
+#include "elastos/droid/internal/telephony/dataconnection/CDcTracker.h"
+#include "elastos/droid/internal/telephony/CPhoneFactory.h"
+#include "elastos/droid/internal/telephony/CPhoneSubInfo.h"
+#include "elastos/droid/internal/telephony/MccTable.h"
+#include "elastos/droid/internal/telephony/PhoneProxy.h"
+#include "elastos/droid/internal/telephony/SubscriptionController.h"
+#include "elastos/droid/net/Uri.h"
+#include "elastos/droid/os/CRegistrant.h"
+#include "elastos/droid/os/SystemProperties.h"
+#include "elastos/droid/preference/PreferenceManager.h"
+#include "elastos/droid/provider/CTelephonyCarriers.h"
+#include "elastos/droid/provider/Settings.h"
+#include "elastos/droid/R.h"
+#include "elastos/droid/telephony/cdma/CCdmaCellLocation.h"
+#include "elastos/droid/telephony/CServiceState.h"
+#include "elastos/droid/telephony/PhoneNumberUtils.h"
+#include "elastos/droid/telephony/SubscriptionManager.h"
+#include "elastos/droid/text/TextUtils.h"
+#include <elastos/core/AutoLock.h>
+#include <elastos/core/CoreUtils.h>
+#include <elastos/core/StringUtils.h>
+#include <elastos/utility/logging/Logger.h>
 
-using Elastos::Utility::Regex::IPatternHelper;
+using Elastos::Droid::App::ActivityManagerNative;
+using Elastos::Droid::Content::CContentValues;
+using Elastos::Droid::Content::CIntent;
+using Elastos::Droid::Content::IContentValues;
+using Elastos::Droid::Content::ISharedPreferences;
+using Elastos::Droid::Internal::Telephony::Cdma::CdmaSubscriptionSourceManager;
+using Elastos::Droid::Internal::Telephony::CPhoneFactory;
+using Elastos::Droid::Internal::Telephony::CPhoneSubInfo;
+using Elastos::Droid::Internal::Telephony::DataConnection::CDcTracker;
+using Elastos::Droid::Internal::Telephony::DataConnection::IDcTracker;
+using Elastos::Droid::Internal::Telephony::IPhoneFactory;
+using Elastos::Droid::Internal::Telephony::MccTable;
+using Elastos::Droid::Internal::Telephony::PhoneProxy;
+using Elastos::Droid::Internal::Telephony::SubscriptionController;
+using Elastos::Droid::Internal::Telephony::Uicc::IIccException;
+using Elastos::Droid::Net::Uri;
+using Elastos::Droid::Os::CRegistrant;
+using Elastos::Droid::Os::IPowerManager;
+using Elastos::Droid::Os::IRegistrant;
+using Elastos::Droid::Os::SystemProperties;
+using Elastos::Droid::Preference::PreferenceManager;
+using Elastos::Droid::Provider::CTelephonyCarriers;
+using Elastos::Droid::Provider::ISettingsSecure;
+using Elastos::Droid::Provider::ITelephonyCarriers;
+using Elastos::Droid::Provider::Settings;
+using Elastos::Droid::R;
+using Elastos::Droid::Telephony::Cdma::CCdmaCellLocation;
+using Elastos::Droid::Telephony::Cdma::ICdmaCellLocation;
+using Elastos::Droid::Telephony::CServiceState;
+using Elastos::Droid::Telephony::PhoneNumberUtils;
+using Elastos::Droid::Telephony::SubscriptionManager;
+using Elastos::Droid::Text::TextUtils;
+using Elastos::Core::CoreUtils;
+using Elastos::Core::IArrayOf;
+using Elastos::Core::StringUtils;
+using Elastos::Utility::CArrayList;
+using Elastos::Utility::Logging::Logger;
 using Elastos::Utility::Regex::CPatternHelper;
+using Elastos::Utility::Regex::IMatcher;
+using Elastos::Utility::Regex::IPatternHelper;
 
 namespace Elastos {
 namespace Droid {
@@ -19,16 +88,11 @@ CDMAPhone::InnerRunnable::InnerRunnable(
     /* [in] */ CDMAPhone* owner)
     : mOwner(owner)
 {
-    // ==================before translated======================
-    // mOwner = owner;
 }
 
 ECode CDMAPhone::InnerRunnable::Run()
 {
-    // ==================before translated======================
-    // exitEmergencyCallbackMode();
-    assert(0);
-    return NOERROR;
+    return mOwner->ExitEmergencyCallbackMode();
 }
 
 //=====================================================================
@@ -39,8 +103,8 @@ CAR_INTERFACE_IMPL(CDMAPhone, PhoneBase, ICDMAPhone);
 const String CDMAPhone::LOGTAG("CDMAPhone");
 const Int32 CDMAPhone::RESTART_ECM_TIMER;
 const Int32 CDMAPhone::CANCEL_ECM_TIMER;
-const Boolean CDMAPhone::DBG = true;
-const Boolean CDMAPhone::VDBG = false;
+const Boolean CDMAPhone::DBG = TRUE;
+const Boolean CDMAPhone::VDBG = FALSE;
 const Int32 CDMAPhone::DEFAULT_ECM_EXIT_TIMER_VALUE;
 const String CDMAPhone::VM_NUMBER_CDMA("vm_number_key_cdma");
 const String CDMAPhone::IS683A_FEATURE_CODE("*228");
@@ -70,7 +134,25 @@ static AutoPtr<IPattern> InitPattern(
 AutoPtr<IPattern> CDMAPhone::pOtaSpNumSchema = InitPattern(String("[,\\s]+"));
 
 CDMAPhone::CDMAPhone()
+    : mCdmaSubscriptionSource(ICdmaSubscriptionSourceManager::SUBSCRIPTION_SOURCE_UNKNOWN)
+    , mIsPhoneInEcmState(FALSE)
 {
+    CArrayList::New((IArrayList**)&mPendingMmis);
+
+    mEriFileLoadedRegistrants = new RegistrantList();
+    mEcmTimerResetRegistrants = new RegistrantList();
+
+    mExitEcmRunnable = new InnerRunnable(this);
+}
+
+CDMAPhone::~CDMAPhone()
+{
+    if(DBG) Logger::D(LOGTAG, "CDMAPhone finalized");
+    Boolean b;
+    if (mWakeLock->IsHeld(&b), b) {
+        Logger::E(LOGTAG, "UNEXPECTED; mWakeLock is held when finalizing.");
+        mWakeLock->ReleaseLock();
+    }
 }
 
 ECode CDMAPhone::constructor()
@@ -83,10 +165,9 @@ ECode CDMAPhone::constructor(
     /* [in] */ ICommandsInterface* ci,
     /* [in] */ IPhoneNotifier* notifier)
 {
-    // ==================before translated======================
-    // super("CDMA", notifier, context, ci, false);
-    // initSstIcc();
-    // init(context, notifier);
+    PhoneBase::constructor(String("CDMA"), notifier, context, ci, FALSE);
+    InitSstIcc();
+    Init(context, notifier);
     return NOERROR;
 }
 
@@ -96,10 +177,9 @@ ECode CDMAPhone::constructor(
     /* [in] */ IPhoneNotifier* notifier,
     /* [in] */ Int32 phoneId)
 {
-    // ==================before translated======================
-    // super("CDMA", notifier, context, ci, false, phoneId);
-    // initSstIcc();
-    // init(context, notifier);
+    PhoneBase::constructor(String("CDMA"), notifier, context, ci, FALSE, phoneId);
+    InitSstIcc();
+    Init(context, notifier);
     return NOERROR;
 }
 
@@ -109,58 +189,53 @@ ECode CDMAPhone::constructor(
     /* [in] */ IPhoneNotifier* notifier,
     /* [in] */ Boolean unitTestMode)
 {
-    // ==================before translated======================
-    // super("CDMA", notifier, context, ci, unitTestMode);
-    // initSstIcc();
-    // init(context, notifier);
+    PhoneBase::constructor(String("CDMA"), notifier, context, ci, unitTestMode);
+    InitSstIcc();
+    Init(context, notifier);
     return NOERROR;
 }
 
 ECode CDMAPhone::Dispose()
 {
-    // ==================before translated======================
-    // synchronized(PhoneProxy.lockForRadioTechnologyChange) {
-    //     super.dispose();
-    //     log("dispose");
-    //
-    //     //Unregister from all former registered events
-    //     unregisterForRuimRecordEvents();
-    //     mCi.unregisterForAvailable(this); //EVENT_RADIO_AVAILABLE
-    //     mCi.unregisterForOffOrNotAvailable(this); //EVENT_RADIO_OFF_OR_NOT_AVAILABLE
-    //     mCi.unregisterForOn(this); //EVENT_RADIO_ON
-    //     mSST.unregisterForNetworkAttached(this); //EVENT_REGISTERED_TO_NETWORK
-    //     mCi.unSetOnSuppServiceNotification(this);
-    //     mCi.unregisterForExitEmergencyCallbackMode(this);
-    //     removeCallbacks(mExitEcmRunnable);
-    //
-    //     mPendingMmis.clear();
-    //
-    //     //Force all referenced classes to unregister their former registered events
-    //     mCT.dispose();
-    //     mDcTracker.dispose();
-    //     mSST.dispose();
-    //     mCdmaSSM.dispose(this);
-    //     mRuimPhoneBookInterfaceManager.dispose();
-    //     mSubInfo.dispose();
-    //     mEriManager.dispose();
-    // }
-    assert(0);
+    AutoLock lock(PhoneProxy::lockForRadioTechnologyChange);
+    PhoneBase::Dispose();
+    Log(String("dispose"));
+
+    //Unregister from all former registered events
+    UnregisterForRuimRecordEvents();
+    mCi->UnregisterForAvailable(this); //EVENT_RADIO_AVAILABLE
+    mCi->UnregisterForOffOrNotAvailable(this); //EVENT_RADIO_OFF_OR_NOT_AVAILABLE
+    mCi->UnregisterForOn(this); //EVENT_RADIO_ON
+    IServiceStateTracker::Probe(mSST)->UnregisterForNetworkAttached(this); //EVENT_REGISTERED_TO_NETWORK
+    mCi->UnSetOnSuppServiceNotification(this);
+    mCi->UnregisterForExitEmergencyCallbackMode(this);
+    RemoveCallbacks(mExitEcmRunnable);
+
+    mPendingMmis->Clear();
+
+    //Force all referenced classes to unregister their former registered events
+    mCT->Dispose();
+    mDcTracker->Dispose();
+    IServiceStateTracker::Probe(mSST)->Dispose();
+    mCdmaSSM->Dispose(this);
+    IIccPhoneBookInterfaceManager::Probe(mRuimPhoneBookInterfaceManager)->Dispose();
+    mSubInfo->Dispose();
+    mEriManager->Dispose();
+
     return NOERROR;
 }
 
 ECode CDMAPhone::RemoveReferences()
 {
-    // ==================before translated======================
-    // log("removeReferences");
-    // mRuimPhoneBookInterfaceManager = null;
-    // mSubInfo = null;
-    // mCT = null;
-    // mSST = null;
-    // mEriManager = null;
-    // mExitEcmRunnable = null;
-    //
-    // super.removeReferences();
-    assert(0);
+    Log(String("removeReferences"));
+    mRuimPhoneBookInterfaceManager = NULL;
+    mSubInfo = NULL;
+    mCT = NULL;
+    mSST = NULL;
+    mEriManager = NULL;
+    mExitEcmRunnable = NULL;
+
+    PhoneBase::RemoveReferences();
     return NOERROR;
 }
 
@@ -168,22 +243,29 @@ ECode CDMAPhone::GetServiceState(
     /* [out] */ IServiceState** result)
 {
     VALIDATE_NOT_NULL(result);
-    *result = NULL;
-    // ==================before translated======================
-    // if (mSST == null || mSST.mSS.getState() != ServiceState.STATE_IN_SERVICE) {
-    //     if (mImsPhone != null &&
-    //             mImsPhone.getServiceState().getState() == ServiceState.STATE_IN_SERVICE) {
-    //         return mImsPhone.getServiceState();
-    //     }
-    // }
-    //
-    // if (mSST != null) {
-    //     return mSST.mSS;
-    // } else {
-    //     // avoid potential NPE in EmergencyCallHelper during Phone switch
-    //     return new ServiceState();
-    // }
-    assert(0);
+
+    Int32 state;
+    ((CdmaServiceStateTracker*)mSST.Get())->mSS->GetState(&state);
+    if ((mSST == NULL) || state != IServiceState::STATE_IN_SERVICE) {
+        if (mImsPhone != NULL) {
+            AutoPtr<IServiceState> ss;
+            IPhone::Probe(mImsPhone)->GetServiceState((IServiceState**)&ss);
+            ss->GetState(&state);
+            if (state == IServiceState::STATE_IN_SERVICE) {
+                return IPhone::Probe(mImsPhone)->GetServiceState(result);
+            }
+        }
+    }
+
+    if (mSST != NULL) {
+        *result = ((CdmaServiceStateTracker*)mSST.Get())->mSS;
+        REFCOUNT_ADD(*result)
+        return NOERROR;
+    }
+    else {
+        // avoid potential NPE in EmergencyCallHelper during Phone switch
+        return CServiceState::New(result);
+    }
     return NOERROR;
 }
 
@@ -191,10 +273,8 @@ ECode CDMAPhone::GetCallTracker(
     /* [out] */ ICallTracker** result)
 {
     VALIDATE_NOT_NULL(result);
-    *result = NULL;
-    // ==================before translated======================
-    // return mCT;
-    assert(0);
+    *result = ICallTracker::Probe(mCT);
+    REFCOUNT_ADD(*result)
     return NOERROR;
 }
 
@@ -202,9 +282,7 @@ ECode CDMAPhone::GetState(
     /* [out] */ PhoneConstantsState* result)
 {
     VALIDATE_NOT_NULL(result);
-    // ==================before translated======================
-    // return mCT.mState;
-    assert(0);
+    *result = ((CdmaCallTracker*)mCT.Get())->mState;
     return NOERROR;
 }
 
@@ -212,10 +290,8 @@ ECode CDMAPhone::GetServiceStateTracker(
     /* [out] */ IServiceStateTracker** result)
 {
     VALIDATE_NOT_NULL(result);
-    *result = NULL;
-    // ==================before translated======================
-    // return mSST;
-    assert(0);
+    *result = IServiceStateTracker::Probe(mSST);
+    REFCOUNT_ADD(*result)
     return NOERROR;
 }
 
@@ -223,9 +299,7 @@ ECode CDMAPhone::GetPhoneType(
     /* [out] */ Int32* result)
 {
     VALIDATE_NOT_NULL(result);
-    // ==================before translated======================
-    // return PhoneConstants.PHONE_TYPE_CDMA;
-    assert(0);
+    *result = IPhoneConstants::PHONE_TYPE_CDMA;
     return NOERROR;
 }
 
@@ -233,11 +307,8 @@ ECode CDMAPhone::CanTransfer(
     /* [out] */ Boolean* result)
 {
     VALIDATE_NOT_NULL(result);
+    Logger::E(LOGTAG, "canTransfer: not possible in CDMA");
     *result = FALSE;
-    // ==================before translated======================
-    // Rlog.e(LOGTAG, "canTransfer: not possible in CDMA");
-    // return false;
-    assert(0);
     return NOERROR;
 }
 
@@ -245,16 +316,19 @@ ECode CDMAPhone::GetRingingCall(
     /* [out] */ ICall** result)
 {
     VALIDATE_NOT_NULL(result);
-    *result = NULL;
-    // ==================before translated======================
-    // ImsPhone imPhone = mImsPhone;
-    // if ( mCT.mRingingCall != null && mCT.mRingingCall.isRinging() ) {
-    //     return mCT.mRingingCall;
-    // } else if ( imPhone != null ) {
-    //     return imPhone.getRingingCall();
-    // }
-    // return mCT.mRingingCall;
-    assert(0);
+    AutoPtr<IImsPhone> imPhone = mImsPhone;
+    Boolean b;
+    if ( ((CdmaCallTracker*)mCT.Get())->mRingingCall != NULL
+        && (ICall::Probe(((CdmaCallTracker*)mCT.Get())->mRingingCall)->IsRinging(&b), b) ) {
+        *result = ICall::Probe(((CdmaCallTracker*)mCT.Get())->mRingingCall);
+        REFCOUNT_ADD(*result)
+        return NOERROR;
+    }
+    else if ( imPhone != NULL ) {
+        return IPhone::Probe(imPhone)->GetRingingCall(result);
+    }
+    *result = ICall::Probe(((CdmaCallTracker*)mCT.Get())->mRingingCall);
+    REFCOUNT_ADD(*result)
     return NOERROR;
 }
 
@@ -263,45 +337,34 @@ ECode CDMAPhone::SetUiTTYMode(
     /* [in] */ IMessage* onComplete)
 {
     VALIDATE_NOT_NULL(onComplete);
-    // ==================before translated======================
-    // if (mImsPhone != null) {
-    //     mImsPhone.setUiTTYMode(uiTtyMode, onComplete);
-    // }
-    assert(0);
+    if (mImsPhone != NULL) {
+        IPhone::Probe(mImsPhone)->SetUiTTYMode(uiTtyMode, onComplete);
+    }
     return NOERROR;
 }
 
 ECode CDMAPhone::SetMute(
     /* [in] */ Boolean muted)
 {
-    // ==================before translated======================
-    // mCT.setMute(muted);
-    assert(0);
-    return NOERROR;
+    return ((CdmaCallTracker*)mCT.Get())->SetMute(muted);
 }
 
 ECode CDMAPhone::GetMute(
     /* [out] */ Boolean* result)
 {
     VALIDATE_NOT_NULL(result);
-    *result = FALSE;
-    // ==================before translated======================
-    // return mCT.getMute();
-    assert(0);
-    return NOERROR;
+    return ((CdmaCallTracker*)mCT.Get())->GetMute(result);
 }
 
 ECode CDMAPhone::Conference()
 {
-    // ==================before translated======================
-    // if (mImsPhone != null && mImsPhone.canConference()) {
-    //     log("conference() - delegated to IMS phone");
-    //     mImsPhone.conference();
-    //     return;
-    // }
-    // // three way calls in CDMA will be handled by feature codes
-    // Rlog.e(LOGTAG, "conference: not possible in CDMA");
-    assert(0);
+    Boolean b;
+    if (mImsPhone != NULL && (IPhone::Probe(mImsPhone)->CanConference(&b), b)) {
+        Log(String("conference() - delegated to IMS phone"));
+        return IPhone::Probe(mImsPhone)->Conference();
+    }
+    // three way calls in CDMA will be handled by feature codes
+    Logger::E(LOGTAG, "conference: not possible in CDMA");
     return NOERROR;
 }
 
@@ -310,63 +373,56 @@ ECode CDMAPhone::EnableEnhancedVoicePrivacy(
     /* [in] */ IMessage* onComplete)
 {
     VALIDATE_NOT_NULL(onComplete);
-    // ==================before translated======================
-    // mCi.setPreferredVoicePrivacy(enable, onComplete);
-    assert(0);
-    return NOERROR;
+    return mCi->SetPreferredVoicePrivacy(enable, onComplete);
 }
 
 ECode CDMAPhone::GetEnhancedVoicePrivacy(
     /* [in] */ IMessage* onComplete)
 {
     VALIDATE_NOT_NULL(onComplete);
-    // ==================before translated======================
-    // mCi.getPreferredVoicePrivacy(onComplete);
-    assert(0);
-    return NOERROR;
+    return mCi->GetPreferredVoicePrivacy(onComplete);
 }
 
 ECode CDMAPhone::ClearDisconnected()
 {
-    // ==================before translated======================
-    // mCT.clearDisconnected();
-    assert(0);
-    return NOERROR;
+    return ((CdmaCallTracker*)mCT.Get())->ClearDisconnected();
 }
 
 ECode CDMAPhone::GetDataActivityState(
     /* [out] */ IPhoneDataActivityState* result)
 {
     VALIDATE_NOT_NULL(result);
-    // ==================before translated======================
-    // DataActivityState ret = DataActivityState.NONE;
-    //
-    // if (mSST.getCurrentDataConnectionState() == ServiceState.STATE_IN_SERVICE) {
-    //
-    //     switch (mDcTracker.getActivity()) {
-    //         case DATAIN:
-    //             ret = DataActivityState.DATAIN;
-    //         break;
-    //
-    //         case DATAOUT:
-    //             ret = DataActivityState.DATAOUT;
-    //         break;
-    //
-    //         case DATAINANDOUT:
-    //             ret = DataActivityState.DATAINANDOUT;
-    //         break;
-    //
-    //         case DORMANT:
-    //             ret = DataActivityState.DORMANT;
-    //         break;
-    //
-    //         default:
-    //             ret = DataActivityState.NONE;
-    //         break;
-    //     }
-    // }
-    // return ret;
-    assert(0);
+    IPhoneDataActivityState ret = IPhoneDataActivityState_NONE;
+
+    Int32 state;
+    IServiceStateTracker::Probe(mSST)->GetCurrentDataConnectionState(&state);
+    if (state == IServiceState::STATE_IN_SERVICE) {
+
+        DctConstantsActivity val;
+        mDcTracker->GetActivity(&val);
+        switch (val) {
+            case DctConstantsActivity_DATAIN:
+                ret = IPhoneDataActivityState_DATAIN;
+            break;
+
+            case DctConstantsActivity_DATAOUT:
+                ret = IPhoneDataActivityState_DATAOUT;
+            break;
+
+            case DctConstantsActivity_DATAINANDOUT:
+                ret = IPhoneDataActivityState_DATAINANDOUT;
+            break;
+
+            case DctConstantsActivity_DORMANT:
+                ret = IPhoneDataActivityState_DORMANT;
+            break;
+
+            default:
+                ret = IPhoneDataActivityState_NONE;
+            break;
+        }
+    }
+    *result = ret;
     return NOERROR;
 }
 
@@ -376,11 +432,7 @@ ECode CDMAPhone::Dial(
     /* [out] */ IConnection** result)
 {
     VALIDATE_NOT_NULL(result);
-    *result = NULL;
-    // ==================before translated======================
-    // return (dial(dialString, videoState, null));
-    assert(0);
-    return NOERROR;
+    return Dial(dialString, videoState, NULL, result);
 }
 
 ECode CDMAPhone::Dial(
@@ -391,38 +443,47 @@ ECode CDMAPhone::Dial(
 {
     VALIDATE_NOT_NULL(result);
     *result = NULL;
-    // ==================before translated======================
-    // ImsPhone imsPhone = mImsPhone;
-    //
-    // boolean imsUseEnabled =
+
+    AutoPtr<IImsPhone> imsPhone = mImsPhone;
+
+    Boolean imsUseEnabled;
+// TODO: Need ImsManager
+    // imsUseEnabled =
     //         ImsManager.isEnhanced4gLteModeSettingEnabledByPlatform(mContext) &&
     //         ImsManager.isEnhanced4gLteModeSettingEnabledByUser(mContext);
-    // if (!imsUseEnabled) {
-    //     Rlog.w(LOGTAG, "IMS is disabled: forced to CS");
-    // }
-    //
-    // if (imsUseEnabled && imsPhone != null
-    //         && ((imsPhone.getServiceState().getState() == ServiceState.STATE_IN_SERVICE
-    //         && !PhoneNumberUtils.isEmergencyNumber(dialString))
-    //         || (PhoneNumberUtils.isEmergencyNumber(dialString)
-    //         && mContext.getResources().getBoolean(
-    //                 com.android.internal.R.bool.useImsAlwaysForEmergencyCall))) ) {
-    //     try {
-    //         if (DBG) Rlog.d(LOGTAG, "Trying IMS PS call");
-    //         return imsPhone.dial(dialString, videoState, extras);
-    //     } catch (CallStateException e) {
-    //         if (DBG) Rlog.d(LOGTAG, "IMS PS call exception " + e);
-    //         if (!ImsPhone.CS_FALLBACK.equals(e.getMessage())) {
-    //             CallStateException ce = new CallStateException(e.getMessage());
-    //             ce.setStackTrace(e.getStackTrace());
-    //             throw ce;
-    //         }
-    //     }
-    // }
-    //
-    // if (DBG) Rlog.d(LOGTAG, "Trying (non-IMS) CS call");
-    // return dialInternal(dialString, null, videoState);
-    assert(0);
+    if (!imsUseEnabled) {
+        Logger::W(LOGTAG, "IMS is disabled: forced to CS");
+    }
+
+    AutoPtr<IResources> res;
+    mContext->GetResources((IResources**)&res);
+    if (imsUseEnabled && imsPhone != NULL) {
+        AutoPtr<IServiceState> ss;
+        IPhone::Probe(imsPhone)->GetServiceState((IServiceState**)&ss);
+        Int32 state;
+        ss->GetState(&state);
+        Boolean b1, b2, b3;
+        if ((state == IServiceState::STATE_IN_SERVICE
+            && (PhoneNumberUtils::IsEmergencyNumber(dialString, &b1), !b1))
+            || ((PhoneNumberUtils::IsEmergencyNumber(dialString, &b2), b2)
+            && (res->GetBoolean(R::bool_::useImsAlwaysForEmergencyCall, &b3), b3))) {
+            // try {
+            if (DBG) Logger::D(LOGTAG, "Trying IMS PS call");
+            return IPhone::Probe(imsPhone)->Dial(dialString, videoState, extras, result);
+            // } catch (CallStateException e) {
+            //     if (DBG) Logger::D(LOGTAG, "IMS PS call exception " + e);
+            //     if (!ImsPhone.CS_FALLBACK.equals(e->GetMessage())) {
+            //         CallStateException ce = new CallStateException(e->GetMessage());
+            //         ce.setStackTrace(e->GetStackTrace());
+            //         throw ce;
+            //     }
+            // }
+        }
+    }
+
+    if (DBG) Logger::D(LOGTAG, "Trying (non-IMS) CS call");
+    *result = DialInternal(dialString, NULL, videoState);
+    REFCOUNT_ADD(*result)
     return NOERROR;
 }
 
@@ -436,10 +497,7 @@ ECode CDMAPhone::Dial(
     VALIDATE_NOT_NULL(uusInfo);
     VALIDATE_NOT_NULL(extras);
     VALIDATE_NOT_NULL(result);
-    // ==================before translated======================
-    // return dial(dialString, uusInfo, videoState, null);
-    assert(0);
-    return NOERROR;
+    return Dial(dialString, uusInfo, videoState, NULL, result);
 }
 
 ECode CDMAPhone::Dial(
@@ -450,20 +508,16 @@ ECode CDMAPhone::Dial(
 {
     VALIDATE_NOT_NULL(result);
     *result = NULL;
-    // ==================before translated======================
     // throw new CallStateException("Sending UUS information NOT supported in CDMA!");
-    assert(0);
-    return NOERROR;
+    return E_CALL_STATE_EXCEPTION;
 }
 
 ECode CDMAPhone::GetPendingMmiCodes(
     /* [out] */ IList** result)
 {
     VALIDATE_NOT_NULL(result);
-    *result = NULL;
-    // ==================before translated======================
-    // return mPendingMmis;
-    assert(0);
+    *result = IList::Probe(mPendingMmis);
+    REFCOUNT_ADD(*result)
     return NOERROR;
 }
 
@@ -474,9 +528,7 @@ ECode CDMAPhone::RegisterForSuppServiceNotification(
 {
     VALIDATE_NOT_NULL(h);
     VALIDATE_NOT_NULL(obj);
-    // ==================before translated======================
-    // Rlog.e(LOGTAG, "method registerForSuppServiceNotification is NOT supported in CDMA!");
-    assert(0);
+    Logger::E(LOGTAG, "method registerForSuppServiceNotification is NOT supported in CDMA!");
     return NOERROR;
 }
 
@@ -484,10 +536,8 @@ ECode CDMAPhone::GetBackgroundCall(
     /* [out] */ ICall** result)
 {
     VALIDATE_NOT_NULL(result);
-    *result = NULL;
-    // ==================before translated======================
-    // return mCT.mBackgroundCall;
-    assert(0);
+    *result = ICall::Probe(((CdmaCallTracker*)mCT.Get())->mBackgroundCall);
+    REFCOUNT_ADD(*result)
     return NOERROR;
 }
 
@@ -496,11 +546,8 @@ ECode CDMAPhone::HandleInCallMmiCommands(
     /* [out] */ Boolean* result)
 {
     VALIDATE_NOT_NULL(result);
+    Logger::E(LOGTAG, "method handleInCallMmiCommands is NOT supported in CDMA!");
     *result = FALSE;
-    // ==================before translated======================
-    // Rlog.e(LOGTAG, "method handleInCallMmiCommands is NOT supported in CDMA!");
-    // return false;
-    assert(0);
     return NOERROR;
 }
 
@@ -508,14 +555,26 @@ ECode CDMAPhone::IsInCall(
     /* [out] */ Boolean* result)
 {
     VALIDATE_NOT_NULL(result);
-    // ==================before translated======================
-    // CdmaCall.State foregroundCallState = getForegroundCall().getState();
-    // CdmaCall.State backgroundCallState = getBackgroundCall().getState();
-    // CdmaCall.State ringingCallState = getRingingCall().getState();
-    //
-    // return (foregroundCallState.isAlive() || backgroundCallState.isAlive() || ringingCallState
-    //         .isAlive());
-    assert(0);
+
+    AutoPtr<ICall> fgc;
+    GetForegroundCall((ICall**)&fgc);
+    ICallState foregroundCallState;
+    fgc->GetState(&foregroundCallState);
+
+    AutoPtr<ICall> bgc;
+    GetBackgroundCall((ICall**)&bgc);
+    ICallState backgroundCallState;
+    bgc->GetState(&backgroundCallState);
+
+    AutoPtr<ICall> call;
+    GetRingingCall((ICall**)&call);
+    ICallState ringingCallState;
+    call->GetState(&ringingCallState);
+
+// TODO: Need ICallState::isAlive
+    // *result = (foregroundCallState->IsAlive()
+    //         || backgroundCallState->IsAlive()
+    //         || ringingCallState->IsAlive());
     return NOERROR;
 }
 
@@ -523,17 +582,16 @@ ECode CDMAPhone::SetNetworkSelectionModeAutomatic(
     /* [in] */ IMessage* response)
 {
     VALIDATE_NOT_NULL(response);
-    // ==================before translated======================
-    // Rlog.e(LOGTAG, "method setNetworkSelectionModeAutomatic is NOT supported in CDMA!");
-    // if (response != null) {
-    //     Rlog.e(LOGTAG,
-    //             "setNetworkSelectionModeAutomatic: not possible in CDMA- Posting exception");
-    //     CommandException ce = new CommandException(
-    //             CommandException.Error.REQUEST_NOT_SUPPORTED);
-    //     AsyncResult.forMessage(response).exception = ce;
-    //     response.sendToTarget();
-    // }
-    assert(0);
+    Logger::E(LOGTAG, "method setNetworkSelectionModeAutomatic is NOT supported in CDMA!");
+    if (response != NULL) {
+        Logger::E(LOGTAG,
+                "setNetworkSelectionModeAutomatic: not possible in CDMA- Posting exception");
+// TODO: Need CommandException
+        // CommandException ce = new CommandException(
+        //         CommandException.Error.REQUEST_NOT_SUPPORTED);
+        // AsyncResult::ForMessage(response)->mException = ce;
+        response->SendToTarget();
+    }
     return NOERROR;
 }
 
@@ -541,69 +599,67 @@ ECode CDMAPhone::UnregisterForSuppServiceNotification(
     /* [in] */ IHandler* h)
 {
     VALIDATE_NOT_NULL(h);
-    // ==================before translated======================
-    // Rlog.e(LOGTAG, "method unregisterForSuppServiceNotification is NOT supported in CDMA!");
-    assert(0);
+    Logger::E(LOGTAG, "method unregisterForSuppServiceNotification is NOT supported in CDMA!");
     return NOERROR;
 }
 
 ECode CDMAPhone::AcceptCall(
     /* [in] */ Int32 videoState)
 {
-    // ==================before translated======================
-    // ImsPhone imsPhone = mImsPhone;
-    // if ( imsPhone != null && imsPhone.getRingingCall().isRinging() ) {
-    //     imsPhone.acceptCall(videoState);
-    // } else {
-    //     mCT.acceptCall();
-    // }
-    assert(0);
+    AutoPtr<IImsPhone> imsPhone = mImsPhone;
+    AutoPtr<ICall> call;
+    IPhone::Probe(imsPhone)->GetRingingCall((ICall**)&call);
+    Boolean b;
+    if ( imsPhone != NULL && (call->IsRinging(&b), b) ) {
+        IPhone::Probe(imsPhone)->AcceptCall(videoState);
+    }
+    else {
+        ((CdmaCallTracker*)mCT.Get())->AcceptCall();
+    }
     return NOERROR;
 }
 
 ECode CDMAPhone::DeflectCall(
     /* [in] */ const String& number)
 {
-    // ==================before translated======================
-    // ImsPhone imsPhone = mImsPhone;
-    // if ( imsPhone != null && imsPhone.getRingingCall().isRinging() ) {
-    //     imsPhone.deflectCall(number);
-    // } else {
-    //     throw new CallStateException("Deflect call NOT supported in CDMA!");
-    // }
-    assert(0);
+    AutoPtr<IImsPhone> imsPhone = mImsPhone;
+    AutoPtr<ICall> call;
+    IPhone::Probe(imsPhone)->GetRingingCall((ICall**)&call);
+    Boolean b;
+    if ( imsPhone != NULL && (call->IsRinging(&b), b) ) {
+        IPhone::Probe(imsPhone)->DeflectCall(number);
+    }
+    else {
+        // throw new CallStateException("Deflect call NOT supported in CDMA!");
+        return E_CALL_STATE_EXCEPTION;
+    }
     return NOERROR;
 }
 
 ECode CDMAPhone::RejectCall()
 {
-    // ==================before translated======================
-    // mCT.rejectCall();
-    assert(0);
-    return NOERROR;
+    return ((CdmaCallTracker*)mCT.Get())->RejectCall();
 }
 
 ECode CDMAPhone::SwitchHoldingAndActive()
 {
-    // ==================before translated======================
-    // mCT.switchWaitingOrHoldingAndActive();
-    assert(0);
-    return NOERROR;
+    return ((CdmaCallTracker*)mCT.Get())->SwitchWaitingOrHoldingAndActive();
 }
 
 ECode CDMAPhone::GetIccSerialNumber(
     /* [out] */ String* result)
 {
     VALIDATE_NOT_NULL(result);
-    *result = NULL;
-    // ==================before translated======================
-    // IccRecords r = mIccRecords.get();
-    // if (r == null) {
-    //     // to get ICCID form SIMRecords because it is on MF.
-    //     r = mUiccController.getIccRecords(mPhoneId, UiccController.APP_FAM_3GPP);
-    // }
-    // return (r != null) ? r.getIccId() : null;
-    assert(0);
+    AutoPtr<IInterface> obj;
+    mIccRecords->Get((IInterface**)&obj);
+    AutoPtr<IIccRecords> r = IIccRecords::Probe(obj);
+    if (r == NULL) {
+        // to get ICCID form SIMRecords because it is on MF.
+        mUiccController->GetIccRecords(mPhoneId, IUiccController::APP_FAM_3GPP, (IIccRecords**)&r);
+    }
+
+    String str;
+    *result = (r != NULL) ? (r->GetIccId(&str), str) : String(NULL);
     return NOERROR;
 }
 
@@ -611,73 +667,48 @@ ECode CDMAPhone::GetLine1Number(
     /* [out] */ String* result)
 {
     VALIDATE_NOT_NULL(result);
-    *result = NULL;
-    // ==================before translated======================
-    // return mSST.getMdnNumber();
-    assert(0);
-    return NOERROR;
+    return mSST->GetMdnNumber(result);
 }
 
 ECode CDMAPhone::GetCdmaPrlVersion(
     /* [out] */ String* result)
 {
     VALIDATE_NOT_NULL(result);
-    *result = NULL;
-    // ==================before translated======================
-    // return mSST.getPrlVersion();
-    assert(0);
-    return NOERROR;
+    return mSST->GetPrlVersion(result);
 }
 
 ECode CDMAPhone::GetCdmaMin(
     /* [out] */ String* result)
 {
     VALIDATE_NOT_NULL(result);
-    *result = NULL;
-    // ==================before translated======================
-    // return mSST.getCdmaMin();
-    assert(0);
-    return NOERROR;
+    return mSST->GetCdmaMin(result);
 }
 
 ECode CDMAPhone::IsMinInfoReady(
     /* [out] */ Boolean* result)
 {
     VALIDATE_NOT_NULL(result);
-    *result = FALSE;
-    // ==================before translated======================
-    // return mSST.isMinInfoReady();
-    assert(0);
-    return NOERROR;
+    return mSST->IsMinInfoReady(result);
 }
 
 ECode CDMAPhone::GetCallWaiting(
     /* [in] */ IMessage* onComplete)
 {
     VALIDATE_NOT_NULL(onComplete);
-    // ==================before translated======================
-    // mCi.queryCallWaiting(CommandsInterface.SERVICE_CLASS_VOICE, onComplete);
-    assert(0);
-    return NOERROR;
+    return mCi->QueryCallWaiting(ICommandsInterface::SERVICE_CLASS_VOICE, onComplete);
 }
 
 ECode CDMAPhone::SetRadioPower(
     /* [in] */ Boolean power)
 {
-    // ==================before translated======================
-    // mSST.setRadioPower(power);
-    assert(0);
-    return NOERROR;
+    return IServiceStateTracker::Probe(mSST)->SetRadioPower(power);
 }
 
 ECode CDMAPhone::GetEsn(
     /* [out] */ String* result)
 {
     VALIDATE_NOT_NULL(result);
-    *result = NULL;
-    // ==================before translated======================
-    // return mEsn;
-    assert(0);
+    *result = mEsn;
     return NOERROR;
 }
 
@@ -685,10 +716,7 @@ ECode CDMAPhone::GetMeid(
     /* [out] */ String* result)
 {
     VALIDATE_NOT_NULL(result);
-    *result = NULL;
-    // ==================before translated======================
-    // return mMeid;
-    assert(0);
+    *result = mMeid;
     return NOERROR;
 }
 
@@ -696,15 +724,14 @@ ECode CDMAPhone::GetDeviceId(
     /* [out] */ String* result)
 {
     VALIDATE_NOT_NULL(result);
-    *result = NULL;
-    // ==================before translated======================
-    // String id = getMeid();
-    // if ((id == null) || id.matches("^0*$")) {
-    //     Rlog.d(LOGTAG, "getDeviceId(): MEID is not initialized use ESN");
-    //     id = getEsn();
-    // }
-    // return id;
-    assert(0);
+    String id;
+    GetMeid(&id);
+    Boolean b;
+    if ((id.IsNull()) || (StringUtils::Matches(id, String("^0*$"), &b), b)) {
+        Logger::D(LOGTAG, "getDeviceId(): MEID is not initialized use ESN");
+        GetEsn(&id);
+    }
+    *result = id;
     return NOERROR;
 }
 
@@ -712,11 +739,8 @@ ECode CDMAPhone::GetDeviceSvn(
     /* [out] */ String* result)
 {
     VALIDATE_NOT_NULL(result);
-    *result = NULL;
-    // ==================before translated======================
-    // Rlog.d(LOGTAG, "getDeviceSvn(): return 0");
-    // return "0";
-    assert(0);
+    Logger::D(LOGTAG, "getDeviceSvn(): return 0");
+    *result = String("0");
     return NOERROR;
 }
 
@@ -724,22 +748,15 @@ ECode CDMAPhone::GetSubscriberId(
     /* [out] */ String* result)
 {
     VALIDATE_NOT_NULL(result);
-    *result = NULL;
-    // ==================before translated======================
-    // return mSST.getImsi();
-    assert(0);
-    return NOERROR;
+    return ((CdmaServiceStateTracker*)mSST.Get())->GetImsi(result);
 }
 
 ECode CDMAPhone::GetGroupIdLevel1(
     /* [out] */ String* result)
 {
     VALIDATE_NOT_NULL(result);
-    *result = NULL;
-    // ==================before translated======================
-    // Rlog.e(LOGTAG, "GID1 is not available in CDMA");
-    // return null;
-    assert(0);
+    Logger::E(LOGTAG, "GID1 is not available in CDMA");
+    *result = String(NULL);
     return NOERROR;
 }
 
@@ -747,11 +764,8 @@ ECode CDMAPhone::GetImei(
     /* [out] */ String* result)
 {
     VALIDATE_NOT_NULL(result);
-    *result = NULL;
-    // ==================before translated======================
-    // Rlog.e(LOGTAG, "getImei() called for CDMAPhone");
-    // return mImei;
-    assert(0);
+    Logger::E(LOGTAG, "getImei() called for CDMAPhone");
+    *result = mImei;
     return NOERROR;
 }
 
@@ -759,14 +773,13 @@ ECode CDMAPhone::CanConference(
     /* [out] */ Boolean* result)
 {
     VALIDATE_NOT_NULL(result);
+    Boolean b;
+    if (mImsPhone != NULL && (IPhone::Probe(mImsPhone)->CanConference(&b), b)) {
+        *result = TRUE;
+        return NOERROR;
+    }
+    Logger::E(LOGTAG, "canConference: not possible in CDMA");
     *result = FALSE;
-    // ==================before translated======================
-    // if (mImsPhone != null && mImsPhone.canConference()) {
-    //     return true;
-    // }
-    // Rlog.e(LOGTAG, "canConference: not possible in CDMA");
-    // return false;
-    assert(0);
     return NOERROR;
 }
 
@@ -774,23 +787,32 @@ ECode CDMAPhone::GetCellLocation(
     /* [out] */ ICellLocation** result)
 {
     VALIDATE_NOT_NULL(result);
-    *result = NULL;
-    // ==================before translated======================
-    // CdmaCellLocation loc = mSST.mCellLoc;
-    //
-    // int mode = Settings.Secure.getInt(getContext().getContentResolver(),
-    //         Settings.Secure.LOCATION_MODE, Settings.Secure.LOCATION_MODE_OFF);
-    // if (mode == Settings.Secure.LOCATION_MODE_OFF) {
-    //     // clear lat/long values for location privacy
-    //     CdmaCellLocation privateLoc = new CdmaCellLocation();
-    //     privateLoc.setCellLocationData(loc.getBaseStationId(),
-    //             CdmaCellLocation.INVALID_LAT_LONG,
-    //             CdmaCellLocation.INVALID_LAT_LONG,
-    //             loc.getSystemId(), loc.getNetworkId());
-    //     loc = privateLoc;
-    // }
-    // return loc;
-    assert(0);
+    AutoPtr<ICdmaCellLocation> loc = ((CdmaServiceStateTracker*)mSST.Get())->mCellLoc;
+
+    AutoPtr<IContext> ctx;
+    GetContext((IContext**)&ctx);
+    AutoPtr<IContentResolver> cr;
+    ctx->GetContentResolver((IContentResolver**)&cr);
+    Int32 mode = Settings::Secure::GetInt32(cr,
+            ISettingsSecure::LOCATION_MODE, ISettingsSecure::LOCATION_MODE_OFF);
+    if (mode == ISettingsSecure::LOCATION_MODE_OFF) {
+        // clear lat/long values for location privacy
+        AutoPtr<ICdmaCellLocation> privateLoc;
+        CCdmaCellLocation::New((ICdmaCellLocation**)&privateLoc);
+        Int32 stationId;
+        loc->GetBaseStationId(&stationId);
+        Int32 systemId;
+        loc->GetSystemId(&systemId);
+        Int32 networkId;
+        loc->GetNetworkId(&networkId);
+        privateLoc->SetCellLocationData(stationId,
+                ICdmaCellLocation::INVALID_LAT_LONG,
+                ICdmaCellLocation::INVALID_LAT_LONG,
+                systemId, networkId);
+        loc = privateLoc;
+    }
+    *result = ICellLocation::Probe(loc);
+    REFCOUNT_ADD(*result)
     return NOERROR;
 }
 
@@ -798,10 +820,8 @@ ECode CDMAPhone::GetForegroundCall(
     /* [out] */ ICall** result)
 {
     VALIDATE_NOT_NULL(result);
-    *result = NULL;
-    // ==================before translated======================
-    // return mCT.mForegroundCall;
-    assert(0);
+    *result = ICall::Probe(((CdmaCallTracker*)mCT.Get())->mForegroundCall);
+    REFCOUNT_ADD(*result)
     return NOERROR;
 }
 
@@ -809,15 +829,14 @@ ECode CDMAPhone::SelectNetworkManually(
     /* [in] */ IOperatorInfo* network,
     /* [in] */ IMessage* response)
 {
-    // ==================before translated======================
-    // Rlog.e(LOGTAG, "selectNetworkManually: not possible in CDMA");
-    // if (response != null) {
-    //     CommandException ce = new CommandException(
-    //             CommandException.Error.REQUEST_NOT_SUPPORTED);
-    //     AsyncResult.forMessage(response).exception = ce;
-    //     response.sendToTarget();
-    // }
-    assert(0);
+    Logger::E(LOGTAG, "selectNetworkManually: not possible in CDMA");
+    if (response != NULL) {
+// TODO: Need CommandException
+        // CommandException ce = new CommandException(
+        //         CommandException.Error.REQUEST_NOT_SUPPORTED);
+        // AsyncResult::ForMessage(response)->mException = ce;
+        response->SendToTarget();
+    }
     return NOERROR;
 }
 
@@ -826,10 +845,7 @@ ECode CDMAPhone::SetOnPostDialCharacter(
     /* [in] */ Int32 what,
     /* [in] */ IInterface* obj)
 {
-    // ==================before translated======================
-    // mPostDialHandler = new Registrant(h, what, obj);
-    assert(0);
-    return NOERROR;
+    return CRegistrant::New(h, what, obj, (IRegistrant**)&mPostDialHandler);
 }
 
 ECode CDMAPhone::HandlePinMmi(
@@ -837,37 +853,44 @@ ECode CDMAPhone::HandlePinMmi(
     /* [out] */ Boolean* result)
 {
     VALIDATE_NOT_NULL(result);
+    AutoPtr<IInterface> obj;
+    mUiccApplication->Get((IInterface**)&obj);
+
+    AutoPtr<ICdmaMmiCode> mmi = CdmaMmiCode::NewFromDialString(
+            dialString, this, IUiccCardApplication::Probe(obj));
+
+    Boolean b;
+    if (mmi == NULL) {
+        Logger::E(LOGTAG, "Mmi is NULL!");
+        *result = FALSE;
+        return NOERROR;
+    }
+    else if (((CdmaMmiCode*)mmi.Get())->IsPinPukCommand(&b), b) {
+        mPendingMmis->Add(mmi);
+        AutoPtr<AsyncResult> ar = new AsyncResult(NULL, mmi, NULL);
+        mMmiRegistrants->NotifyRegistrants(ar);
+        ((CdmaMmiCode*)mmi.Get())->ProcessCode();
+        *result = TRUE;
+        return NOERROR;
+    }
+    Logger::E(LOGTAG, "Unrecognized mmi!");
     *result = FALSE;
-    // ==================before translated======================
-    // CdmaMmiCode mmi = CdmaMmiCode.newFromDialString(dialString, this, mUiccApplication.get());
-    //
-    // if (mmi == null) {
-    //     Rlog.e(LOGTAG, "Mmi is NULL!");
-    //     return false;
-    // } else if (mmi.isPinPukCommand()) {
-    //     mPendingMmis.add(mmi);
-    //     mMmiRegistrants.notifyRegistrants(new AsyncResult(null, mmi, null));
-    //     mmi.processCode();
-    //     return true;
-    // }
-    // Rlog.e(LOGTAG, "Unrecognized mmi!");
-    // return false;
-    assert(0);
     return NOERROR;
 }
 
 ECode CDMAPhone::OnMMIDone(
     /* [in] */ ICdmaMmiCode* mmi)
 {
-    // ==================before translated======================
-    // /*
-    //  * Only notify complete if it's on the pending list. Otherwise, it's
-    //  * already been handled (eg, previously canceled).
-    //  */
-    // if (mPendingMmis.remove(mmi)) {
-    //     mMmiCompleteRegistrants.notifyRegistrants(new AsyncResult(null, mmi, null));
-    // }
-    assert(0);
+    /*
+     * Only notify complete if it's on the pending list. Otherwise, it's
+     * already been handled (eg, previously canceled).
+     */
+    Boolean b;
+    mPendingMmis->Remove(mmi, &b);
+    if (b) {
+        AutoPtr<AsyncResult> ar = new AsyncResult(NULL, mmi, NULL);
+        mMmiCompleteRegistrants->NotifyRegistrants(ar);
+    }
     return NOERROR;
 }
 
@@ -876,9 +899,7 @@ ECode CDMAPhone::SetLine1Number(
     /* [in] */ const String& number,
     /* [in] */ IMessage* onComplete)
 {
-    // ==================before translated======================
-    // Rlog.e(LOGTAG, "setLine1Number: not possible in CDMA");
-    assert(0);
+    Logger::E(LOGTAG, "setLine1Number: not possible in CDMA");
     return NOERROR;
 }
 
@@ -886,27 +907,19 @@ ECode CDMAPhone::SetCallWaiting(
     /* [in] */ Boolean enable,
     /* [in] */ IMessage* onComplete)
 {
-    // ==================before translated======================
-    // Rlog.e(LOGTAG, "method setCallWaiting is NOT supported in CDMA!");
-    assert(0);
+    Logger::E(LOGTAG, "method setCallWaiting is NOT supported in CDMA!");
     return NOERROR;
 }
 
 ECode CDMAPhone::UpdateServiceLocation()
 {
-    // ==================before translated======================
-    // mSST.enableSingleLocationUpdate();
-    assert(0);
-    return NOERROR;
+    return IServiceStateTracker::Probe(mSST)->EnableSingleLocationUpdate();
 }
 
 ECode CDMAPhone::SetDataRoamingEnabled(
     /* [in] */ Boolean enable)
 {
-    // ==================before translated======================
-    // mDcTracker.setDataOnRoamingEnabled(enable);
-    assert(0);
-    return NOERROR;
+    return mDcTracker->SetDataOnRoamingEnabled(enable);
 }
 
 ECode CDMAPhone::RegisterForCdmaOtaStatusChange(
@@ -914,19 +927,13 @@ ECode CDMAPhone::RegisterForCdmaOtaStatusChange(
     /* [in] */ Int32 what,
     /* [in] */ IInterface* obj)
 {
-    // ==================before translated======================
-    // mCi.registerForCdmaOtaProvision(h, what, obj);
-    assert(0);
-    return NOERROR;
+    return mCi->RegisterForCdmaOtaProvision(h, what, obj);
 }
 
 ECode CDMAPhone::UnregisterForCdmaOtaStatusChange(
     /* [in] */ IHandler* h)
 {
-    // ==================before translated======================
-    // mCi.unregisterForCdmaOtaProvision(h);
-    assert(0);
-    return NOERROR;
+    return mCi->UnregisterForCdmaOtaProvision(h);
 }
 
 ECode CDMAPhone::RegisterForSubscriptionInfoReady(
@@ -934,19 +941,13 @@ ECode CDMAPhone::RegisterForSubscriptionInfoReady(
     /* [in] */ Int32 what,
     /* [in] */ IInterface* obj)
 {
-    // ==================before translated======================
-    // mSST.registerForSubscriptionInfoReady(h, what, obj);
-    assert(0);
-    return NOERROR;
+    return mSST->RegisterForSubscriptionInfoReady(h, what, obj);
 }
 
 ECode CDMAPhone::UnregisterForSubscriptionInfoReady(
     /* [in] */ IHandler* h)
 {
-    // ==================before translated======================
-    // mSST.unregisterForSubscriptionInfoReady(h);
-    assert(0);
-    return NOERROR;
+    return mSST->UnregisterForSubscriptionInfoReady(h);
 }
 
 ECode CDMAPhone::SetOnEcbModeExitResponse(
@@ -954,19 +955,13 @@ ECode CDMAPhone::SetOnEcbModeExitResponse(
     /* [in] */ Int32 what,
     /* [in] */ IInterface* obj)
 {
-    // ==================before translated======================
-    // mEcmExitRespRegistrant = new Registrant (h, what, obj);
-    assert(0);
-    return NOERROR;
+    return CRegistrant::New(h, what, obj, (IRegistrant**)&mEcmExitRespRegistrant);
 }
 
 ECode CDMAPhone::UnsetOnEcbModeExitResponse(
     /* [in] */ IHandler* h)
 {
-    // ==================before translated======================
-    // mEcmExitRespRegistrant.clear();
-    assert(0);
-    return NOERROR;
+    return mEcmExitRespRegistrant->Clear();
 }
 
 ECode CDMAPhone::RegisterForCallWaiting(
@@ -974,40 +969,33 @@ ECode CDMAPhone::RegisterForCallWaiting(
     /* [in] */ Int32 what,
     /* [in] */ IInterface* obj)
 {
-    // ==================before translated======================
-    // mCT.registerForCallWaiting(h, what, obj);
-    assert(0);
-    return NOERROR;
+    return mCT->RegisterForCallWaiting(h, what, obj);
 }
 
 ECode CDMAPhone::UnregisterForCallWaiting(
     /* [in] */ IHandler* h)
 {
-    // ==================before translated======================
-    // mCT.unregisterForCallWaiting(h);
-    assert(0);
-    return NOERROR;
+    return mCT->UnregisterForCallWaiting(h);
 }
 
 ECode CDMAPhone::GetNeighboringCids(
     /* [in] */ IMessage* response)
 {
-    // ==================before translated======================
-    // /*
-    //  * This is currently not implemented.  At least as of June
-    //  * 2009, there is no neighbor cell information available for
-    //  * CDMA because some party is resisting making this
-    //  * information readily available.  Consequently, calling this
-    //  * function can have no useful effect.  This situation may
-    //  * (and hopefully will) change in the future.
-    //  */
-    // if (response != null) {
-    //     CommandException ce = new CommandException(
-    //             CommandException.Error.REQUEST_NOT_SUPPORTED);
-    //     AsyncResult.forMessage(response).exception = ce;
-    //     response.sendToTarget();
-    // }
-    assert(0);
+    /*
+     * This is currently not implemented.  At least as of June
+     * 2009, there is no neighbor cell information available for
+     * CDMA because some party is resisting making this
+     * information readily available.  Consequently, calling this
+     * function can have no useful effect.  This situation may
+     * (and hopefully will) change in the future.
+     */
+    if (response != NULL) {
+// TODO: Need CommandException
+        // CommandException ce = new CommandException(
+        //         CommandException.Error.REQUEST_NOT_SUPPORTED);
+        // AsyncResult::ForMessage(response)->mException = ce;
+        response->SendToTarget();
+    }
     return NOERROR;
 }
 
@@ -1016,99 +1004,101 @@ ECode CDMAPhone::GetDataConnectionState(
     /* [out] */ PhoneConstantsState* result)
 {
     VALIDATE_NOT_NULL(result);
-    // ==================before translated======================
-    // PhoneConstants.DataState ret = PhoneConstants.DataState.DISCONNECTED;
-    //
-    // if (mSST == null) {
-    //      // Radio Technology Change is ongoning, dispose() and removeReferences() have
-    //      // already been called
-    //
-    //      ret = PhoneConstants.DataState.DISCONNECTED;
-    // } else if (mSST.getCurrentDataConnectionState() != ServiceState.STATE_IN_SERVICE
-    //         && mOosIsDisconnect) {
-    //     // If we're out of service, open TCP sockets may still work
-    //     // but no data will flow
-    //     ret = PhoneConstants.DataState.DISCONNECTED;
-    //     log("getDataConnectionState: Data is Out of Service. ret = " + ret);
-    // } else if (mDcTracker.isApnTypeEnabled(apnType) == false ||
-    //         mDcTracker.isApnTypeActive(apnType) == false) {
-    //     ret = PhoneConstants.DataState.DISCONNECTED;
-    // } else {
-    //     switch (mDcTracker.getState(apnType)) {
-    //         case RETRYING:
-    //         case FAILED:
-    //         case IDLE:
-    //             ret = PhoneConstants.DataState.DISCONNECTED;
-    //         break;
-    //
-    //         case CONNECTED:
-    //         case DISCONNECTING:
-    //             if ( mCT.mState != PhoneConstants.State.IDLE
-    //                     && !mSST.isConcurrentVoiceAndDataAllowed()) {
-    //                 ret = PhoneConstants.DataState.SUSPENDED;
-    //             } else {
-    //                 ret = PhoneConstants.DataState.CONNECTED;
-    //             }
-    //         break;
-    //
-    //         case CONNECTING:
-    //         case SCANNING:
-    //             ret = PhoneConstants.DataState.CONNECTING;
-    //         break;
-    //     }
-    // }
-    //
-    // log("getDataConnectionState apnType=" + apnType + " ret=" + ret);
-    // return ret;
-    assert(0);
+    PhoneConstantsDataState ret = PhoneConstantsDataState_DISCONNECTED;
+
+    Int32 s;
+    Boolean b1, b2;
+    if (mSST == NULL) {
+         // Radio Technology Change is ongoning, dispose() and removeReferences() have
+         // already been called
+
+         ret = PhoneConstantsDataState_DISCONNECTED;
+    }
+    else if ((IServiceStateTracker::Probe(mSST)->GetCurrentDataConnectionState(&s), s)
+            != IServiceState::STATE_IN_SERVICE && mOosIsDisconnect) {
+        // If we're out of service, open TCP sockets may still work
+        // but no data will flow
+        ret = PhoneConstantsDataState_DISCONNECTED;
+        Log(String("getDataConnectionState: Data is Out of Service. ret = ")
+                + StringUtils::ToString(ret));
+    }
+    else if ((mDcTracker->IsApnTypeEnabled(apnType, &b1), b1) == FALSE ||
+            (mDcTracker->IsApnTypeActive(apnType, &b2), b2) == FALSE) {
+        ret = PhoneConstantsDataState_DISCONNECTED;
+    }
+    else {
+        DctConstantsState state;
+        mDcTracker->GetState(apnType, &state);
+        switch (state) {
+            case DctConstantsState_RETRYING:
+            case DctConstantsState_FAILED:
+            case DctConstantsState_IDLE:
+                ret = PhoneConstantsDataState_DISCONNECTED;
+            break;
+
+            case DctConstantsState_CONNECTED:
+            case DctConstantsState_DISCONNECTING:
+                if ( ((CdmaCallTracker*)mCT.Get())->mState != PhoneConstantsState_IDLE
+                        && (IServiceStateTracker::Probe(mSST)->IsConcurrentVoiceAndDataAllowed(&b1), b1)) {
+                    ret = PhoneConstantsDataState_SUSPENDED;
+                }
+                else {
+                    ret = PhoneConstantsDataState_CONNECTED;
+                }
+            break;
+
+            case DctConstantsState_CONNECTING:
+            case DctConstantsState_SCANNING:
+                ret = PhoneConstantsDataState_CONNECTING;
+            break;
+        }
+    }
+
+    Log(String("getDataConnectionState apnType=") + apnType + " ret=" + StringUtils::ToString(ret));
+    *result = ret;
     return NOERROR;
 }
 
 ECode CDMAPhone::SendUssdResponse(
     /* [in] */ const String& ussdMessge)
 {
-    // ==================before translated======================
-    // Rlog.e(LOGTAG, "sendUssdResponse: not possible in CDMA");
-    assert(0);
+    Logger::E(LOGTAG, "sendUssdResponse: not possible in CDMA");
     return NOERROR;
 }
 
 ECode CDMAPhone::SendDtmf(
     /* [in] */ Char32 c)
 {
-    // ==================before translated======================
-    // if (!PhoneNumberUtils.is12Key(c)) {
-    //     Rlog.e(LOGTAG,
-    //             "sendDtmf called with invalid character '" + c + "'");
-    // } else {
-    //     if (mCT.mState ==  PhoneConstants.State.OFFHOOK) {
-    //         mCi.sendDtmf(c, null);
-    //     }
-    // }
-    assert(0);
+    Boolean b;
+    if (PhoneNumberUtils::Is12Key(c, &b), !b) {
+        Logger::E(LOGTAG,
+                "sendDtmf called with invalid character '%d'", c);
+    }
+    else {
+        if (((CdmaCallTracker*)mCT.Get())->mState ==  PhoneConstantsState_OFFHOOK) {
+            mCi->SendDtmf(c, NULL);
+        }
+    }
     return NOERROR;
 }
 
 ECode CDMAPhone::StartDtmf(
     /* [in] */ Char32 c)
 {
-    // ==================before translated======================
-    // if (!PhoneNumberUtils.is12Key(c)) {
-    //     Rlog.e(LOGTAG,
-    //             "startDtmf called with invalid character '" + c + "'");
-    // } else {
-    //     mCi.startDtmf(c, null);
-    // }
-    assert(0);
+    Boolean b;
+    if (PhoneNumberUtils::Is12Key(c, &b), !b) {
+        Logger::E(LOGTAG,
+                "startDtmf called with invalid character '%d'", c);
+    }
+    else {
+        mCi->StartDtmf(c, NULL);
+    }
     return NOERROR;
 }
 
 ECode CDMAPhone::StopDtmf()
 {
-    // ==================before translated======================
-    // mCi.stopDtmf(null);
-    assert(0);
-    return NOERROR;
+    return mCi->StopDtmf(NULL);
 }
 
 ECode CDMAPhone::SendBurstDtmf(
@@ -1117,35 +1107,33 @@ ECode CDMAPhone::SendBurstDtmf(
     /* [in] */ Int32 off,
     /* [in] */ IMessage* onComplete)
 {
-    // ==================before translated======================
-    // boolean check = true;
-    // for (int itr = 0;itr < dtmfString.length(); itr++) {
-    //     if (!PhoneNumberUtils.is12Key(dtmfString.charAt(itr))) {
-    //         Rlog.e(LOGTAG,
-    //                 "sendDtmf called with invalid character '" + dtmfString.charAt(itr)+ "'");
-    //         check = false;
-    //         break;
-    //     }
-    // }
-    // if ((mCT.mState ==  PhoneConstants.State.OFFHOOK)&&(check)) {
-    //     mCi.sendBurstDtmf(dtmfString, on, off, onComplete);
-    // }
-    assert(0);
+    Boolean check = TRUE;
+    for (Int32 itr = 0; itr < dtmfString.GetLength(); itr++) {
+        Boolean b;
+        if (PhoneNumberUtils::Is12Key(dtmfString.GetChar(itr), &b), !b) {
+            Logger::E(LOGTAG,
+                    "sendDtmf called with invalid character '%d'", dtmfString.GetChar(itr));
+            check = FALSE;
+            break;
+        }
+    }
+    if ((((CdmaCallTracker*)mCT.Get())->mState ==  PhoneConstantsState_OFFHOOK)&&(check)) {
+        mCi->SendBurstDtmf(dtmfString, on, off, onComplete);
+    }
     return NOERROR;
 }
 
 ECode CDMAPhone::GetAvailableNetworks(
     /* [in] */ IMessage* response)
 {
-    // ==================before translated======================
-    // Rlog.e(LOGTAG, "getAvailableNetworks: not possible in CDMA");
-    // if (response != null) {
-    //     CommandException ce = new CommandException(
-    //             CommandException.Error.REQUEST_NOT_SUPPORTED);
-    //     AsyncResult.forMessage(response).exception = ce;
-    //     response.sendToTarget();
-    // }
-    assert(0);
+    Logger::E(LOGTAG, "getAvailableNetworks: not possible in CDMA");
+    if (response != NULL) {
+// TODO: Need CommandException
+        // CommandException ce = new CommandException(
+        //         CommandException.Error.REQUEST_NOT_SUPPORTED);
+        // AsyncResult::ForMessage(response)->mException = ce;
+        response->SendToTarget();
+    }
     return NOERROR;
 }
 
@@ -1153,67 +1141,45 @@ ECode CDMAPhone::SetOutgoingCallerIdDisplay(
     /* [in] */ Int32 commandInterfaceCLIRMode,
     /* [in] */ IMessage* onComplete)
 {
-    // ==================before translated======================
-    // Rlog.e(LOGTAG, "setOutgoingCallerIdDisplay: not possible in CDMA");
-    assert(0);
+    Logger::E(LOGTAG, "setOutgoingCallerIdDisplay: not possible in CDMA");
     return NOERROR;
 }
 
 ECode CDMAPhone::EnableLocationUpdates()
 {
-    // ==================before translated======================
-    // mSST.enableLocationUpdates();
-    assert(0);
-    return NOERROR;
+    return IServiceStateTracker::Probe(mSST)->EnableLocationUpdates();
 }
 
 ECode CDMAPhone::DisableLocationUpdates()
 {
-    // ==================before translated======================
-    // mSST.disableLocationUpdates();
-    assert(0);
-    return NOERROR;
+    return IServiceStateTracker::Probe(mSST)->DisableLocationUpdates();
 }
 
 ECode CDMAPhone::GetDataCallList(
     /* [in] */ IMessage* response)
 {
     VALIDATE_NOT_NULL(response);
-    // ==================before translated======================
-    // mCi.getDataCallList(response);
-    assert(0);
-    return NOERROR;
+    return mCi->GetDataCallList(response);
 }
 
 ECode CDMAPhone::GetDataRoamingEnabled(
     /* [out] */ Boolean* result)
 {
     VALIDATE_NOT_NULL(result);
-    *result = FALSE;
-    // ==================before translated======================
-    // return mDcTracker.getDataOnRoamingEnabled();
-    assert(0);
-    return NOERROR;
+    return mDcTracker->GetDataOnRoamingEnabled(result);
 }
 
 ECode CDMAPhone::SetDataEnabled(
     /* [in] */ Boolean enable)
 {
-    // ==================before translated======================
-    // mDcTracker.setDataEnabled(enable);
-    assert(0);
-    return NOERROR;
+    return mDcTracker->SetDataEnabled(enable);
 }
 
 ECode CDMAPhone::GetDataEnabled(
     /* [out] */ Boolean* result)
 {
     VALIDATE_NOT_NULL(result);
-    *result = FALSE;
-    // ==================before translated======================
-    // return mDcTracker.getDataEnabled();
-    assert(0);
-    return NOERROR;
+    return mDcTracker->GetDataEnabled(result);
 }
 
 ECode CDMAPhone::SetVoiceMailNumber(
@@ -1221,15 +1187,15 @@ ECode CDMAPhone::SetVoiceMailNumber(
     /* [in] */ const String& voiceMailNumber,
     /* [in] */ IMessage* onComplete)
 {
-    // ==================before translated======================
-    // Message resp;
-    // mVmNumber = voiceMailNumber;
-    // resp = obtainMessage(EVENT_SET_VM_NUMBER_DONE, 0, 0, onComplete);
-    // IccRecords r = mIccRecords.get();
-    // if (r != null) {
-    //     r.setVoiceMailNumber(alphaTag, mVmNumber, resp);
-    // }
-    assert(0);
+    AutoPtr<IMessage> resp;
+    mVmNumber = voiceMailNumber;
+    ObtainMessage(EVENT_SET_VM_NUMBER_DONE, 0, 0, onComplete, (IMessage**)&resp);
+    AutoPtr<IInterface> obj;
+    mIccRecords->Get((IInterface**)&obj);
+    AutoPtr<IIccRecords> r = IIccRecords::Probe(obj);
+    if (r != NULL) {
+        r->SetVoiceMailNumber(alphaTag, mVmNumber, resp);
+    }
     return NOERROR;
 }
 
@@ -1237,43 +1203,52 @@ ECode CDMAPhone::GetVoiceMailNumber(
     /* [out] */ String* result)
 {
     VALIDATE_NOT_NULL(result);
-    *result = NULL;
-    // ==================before translated======================
-    // String number = null;
-    // SharedPreferences sp = PreferenceManager.getDefaultSharedPreferences(getContext());
-    // number = sp.getString(VM_NUMBER_CDMA + getSubId(), null);
-    // if (TextUtils.isEmpty(number)) {
-    //     String[] listArray = getContext().getResources()
-    //         .getStringArray(com.android.internal.R.array.config_default_vm_number);
-    //     if (listArray != null && listArray.length > 0) {
-    //         for (int i=0; i<listArray.length; i++) {
-    //             if (!TextUtils.isEmpty(listArray[i])) {
-    //                 String[] defaultVMNumberArray = listArray[i].split(";");
-    //                 if (defaultVMNumberArray != null && defaultVMNumberArray.length > 0) {
-    //                     if (defaultVMNumberArray.length == 1) {
-    //                         number = defaultVMNumberArray[0];
-    //                     } else if (defaultVMNumberArray.length == 2 &&
-    //                             !TextUtils.isEmpty(defaultVMNumberArray[1]) &&
-    //                             defaultVMNumberArray[1].equalsIgnoreCase(getGroupIdLevel1())) {
-    //                         number = defaultVMNumberArray[0];
-    //                         break;
-    //                     }
-    //                 }
-    //             }
-    //         }
-    //     }
-    // }
-    // if (TextUtils.isEmpty(number)) {
-    //     // Read platform settings for dynamic voicemail number
-    //     if (getContext().getResources().getBoolean(com.android.internal
-    //             .R.bool.config_telephony_use_own_number_for_voicemail)) {
-    //         number = getLine1Number();
-    //     } else {
-    //         number = "*86";
-    //     }
-    // }
-    // return number;
-    assert(0);
+    String number;
+    AutoPtr<IContext> ctx;
+    GetContext((IContext**)&ctx);
+    AutoPtr<ISharedPreferences> sp;
+    PreferenceManager::GetDefaultSharedPreferences(ctx, (ISharedPreferences**)&sp);
+    Int64 sid;
+    GetSubId(&sid);
+    sp->GetString(VM_NUMBER_CDMA + StringUtils::ToString(sid), String(NULL), &number);
+    AutoPtr<IResources> res;
+    ctx->GetResources((IResources**)&res);
+    if (TextUtils::IsEmpty(number)) {
+        AutoPtr<ArrayOf<String> > listArray;
+        res->GetStringArray(R::array::config_default_vm_number, (ArrayOf<String>**)&listArray);
+        if (listArray != NULL && listArray->GetLength() > 0) {
+            for (Int32 i=0; i<listArray->GetLength(); i++) {
+                if (!TextUtils::IsEmpty((*listArray)[i])) {
+                    AutoPtr<ArrayOf<String> > defaultVMNumberArray;
+                    StringUtils::Split((*listArray)[i], ";",
+                            (ArrayOf<String>**)&defaultVMNumberArray);
+                    if (defaultVMNumberArray != NULL && defaultVMNumberArray->GetLength() > 0) {
+                        String str;
+                        if (defaultVMNumberArray->GetLength() == 1) {
+                            number = (*defaultVMNumberArray)[0];
+                        }
+                        else if (defaultVMNumberArray->GetLength() == 2 &&
+                                !TextUtils::IsEmpty((*defaultVMNumberArray)[1]) &&
+                                (*defaultVMNumberArray)[1].EqualsIgnoreCase((GetGroupIdLevel1(&str), str))) {
+                            number = (*defaultVMNumberArray)[0];
+                            break;
+                        }
+                    }
+                }
+            }
+        }
+    }
+    if (TextUtils::IsEmpty(number)) {
+        // Read platform settings for dynamic voicemail number
+        Boolean b;
+        if (res->GetBoolean(R::bool_::config_telephony_use_own_number_for_voicemail, &b), b) {
+            GetLine1Number(&number);
+        }
+        else {
+            number = String("*86");
+        }
+    }
+    *result = number;
     return NOERROR;
 }
 
@@ -1282,19 +1257,19 @@ ECode CDMAPhone::GetVoiceMailAlphaTag(
 {
     VALIDATE_NOT_NULL(result);
     *result = NULL;
-    // ==================before translated======================
-    // // TODO: Where can we get this value has to be clarified with QC.
-    // String ret = "";//TODO: Remove = "", if we know where to get this value.
-    //
-    // //ret = mSIMRecords.getVoiceMailAlphaTag();
-    //
-    // if (ret == null || ret.length() == 0) {
-    //     return mContext.getText(
-    //         com.android.internal.R.string.defaultVoiceMailAlphaTag).toString();
-    // }
-    //
-    // return ret;
-    assert(0);
+    // TODO: Where can we get this value has to be clarified with QC.
+    String ret = String("");//TODO: Remove = "", if we know where to get this value.
+
+    //ret = mSIMRecords->GetVoiceMailAlphaTag();
+
+    if (ret == NULL || ret.GetLength() == 0) {
+        AutoPtr<ICharSequence> cs;
+        mContext->GetText(
+            R::string::defaultVoiceMailAlphaTag, (ICharSequence**)&cs);
+        cs->ToString(&ret);
+    }
+
+    *result = ret;
     return NOERROR;
 }
 
@@ -1302,9 +1277,7 @@ ECode CDMAPhone::GetCallForwardingOption(
     /* [in] */ Int32 commandInterfaceCFReason,
     /* [in] */ IMessage* onComplete)
 {
-    // ==================before translated======================
-    // Rlog.e(LOGTAG, "getCallForwardingOption: not possible in CDMA");
-    assert(0);
+    Logger::E(LOGTAG, "getCallForwardingOption: not possible in CDMA");
     return NOERROR;
 }
 
@@ -1315,9 +1288,7 @@ ECode CDMAPhone::SetCallForwardingOption(
     /* [in] */ Int32 timerSeconds,
     /* [in] */ IMessage* onComplete)
 {
-    // ==================before translated======================
-    // Rlog.e(LOGTAG, "setCallForwardingOption: not possible in CDMA");
-    assert(0);
+    Logger::E(LOGTAG, "setCallForwardingOption: not possible in CDMA");
     return NOERROR;
 }
 
@@ -1325,18 +1296,18 @@ ECode CDMAPhone::GetCallForwardingUncondTimerOption(
     /* [in] */ Int32 commandInterfaceCFReason,
     /* [in] */ IMessage* onComplete)
 {
-    // ==================before translated======================
-    // ImsPhone imsPhone = mImsPhone;
-    // if (imsPhone != null) {
-    //     imsPhone.getCallForwardingOption(commandInterfaceCFReason, onComplete);
-    // } else {
-    //     if (onComplete != null) {
-    //         AsyncResult.forMessage(onComplete, null,
-    //                 new CommandException(CommandException.Error.GENERIC_FAILURE));
-    //         onComplete.sendToTarget();
-    //     }
-    // }
-    assert(0);
+    AutoPtr<IImsPhone> imsPhone = mImsPhone;
+    if (imsPhone != NULL) {
+        IPhone::Probe(imsPhone)->GetCallForwardingOption(commandInterfaceCFReason, onComplete);
+    }
+    else {
+        if (onComplete != NULL) {
+// TODO: Need CommandException
+            // AsyncResult::ForMessage(onComplete, NULL,
+            //         new CommandException(CommandException.Error.GENERIC_FAILURE));
+            onComplete->SendToTarget();
+        }
+    }
     return NOERROR;
 }
 
@@ -1350,29 +1321,27 @@ ECode CDMAPhone::SetCallForwardingUncondTimerOption(
     /* [in] */ const String& dialingNumber,
     /* [in] */ IMessage* onComplete)
 {
-    // ==================before translated======================
-    // ImsPhone imsPhone = mImsPhone;
-    // if (imsPhone != null) {
-    //     imsPhone.setCallForwardingUncondTimerOption(startHour, startMinute, endHour,
-    //             endMinute, commandInterfaceCFAction, commandInterfaceCFReason,
-    //             dialingNumber, onComplete);
-    // } else {
-    //     if (onComplete != null) {
-    //         AsyncResult.forMessage(onComplete, null,
-    //                 new CommandException(CommandException.Error.GENERIC_FAILURE));
-    //         onComplete.sendToTarget();
-    //    }
-    // }
-    assert(0);
+    AutoPtr<IImsPhone> imsPhone = mImsPhone;
+    if (imsPhone != NULL) {
+        IPhone::Probe(imsPhone)->SetCallForwardingUncondTimerOption(startHour, startMinute, endHour,
+                endMinute, commandInterfaceCFAction, commandInterfaceCFReason,
+                dialingNumber, onComplete);
+    }
+    else {
+        if (onComplete != NULL) {
+// TODO: Need CommandException
+            // AsyncResult::ForMessage(onComplete, NULL,
+            //         new CommandException(CommandException.Error.GENERIC_FAILURE));
+            onComplete->SendToTarget();
+       }
+    }
     return NOERROR;
 }
 
 ECode CDMAPhone::GetOutgoingCallerIdDisplay(
     /* [in] */ IMessage* onComplete)
 {
-    // ==================before translated======================
-    // Rlog.e(LOGTAG, "getOutgoingCallerIdDisplay: not possible in CDMA");
-    assert(0);
+    Logger::E(LOGTAG, "getOutgoingCallerIdDisplay: not possible in CDMA");
     return NOERROR;
 }
 
@@ -1380,19 +1349,14 @@ ECode CDMAPhone::GetCallForwardingIndicator(
     /* [out] */ Boolean* result)
 {
     VALIDATE_NOT_NULL(result);
+    Logger::E(LOGTAG, "getCallForwardingIndicator: not possible in CDMA");
     *result = FALSE;
-    // ==================before translated======================
-    // Rlog.e(LOGTAG, "getCallForwardingIndicator: not possible in CDMA");
-    // return false;
-    assert(0);
     return NOERROR;
 }
 
 ECode CDMAPhone::ExplicitCallTransfer()
 {
-    // ==================before translated======================
-    // Rlog.e(LOGTAG, "explicitCallTransfer: not possible in CDMA");
-    assert(0);
+    Logger::E(LOGTAG, "explicitCallTransfer: not possible in CDMA");
     return NOERROR;
 }
 
@@ -1400,28 +1364,20 @@ ECode CDMAPhone::GetLine1AlphaTag(
     /* [out] */ String* result)
 {
     VALIDATE_NOT_NULL(result);
+    Logger::E(LOGTAG, "getLine1AlphaTag: not possible in CDMA");
     *result = NULL;
-    // ==================before translated======================
-    // Rlog.e(LOGTAG, "getLine1AlphaTag: not possible in CDMA");
-    // return null;
-    assert(0);
     return NOERROR;
 }
 
 ECode CDMAPhone::NotifyPhoneStateChanged()
 {
-    // ==================before translated======================
-    // mNotifier.notifyPhoneState(this);
-    assert(0);
-    return NOERROR;
+    return mNotifier->NotifyPhoneState(this);
 }
 
 ECode CDMAPhone::NotifyPreciseCallStateChanged()
 {
-    // ==================before translated======================
-    // /* we'd love it if this was package-scoped*/
-    // super.notifyPreciseCallStateChangedP();
-    assert(0);
+    /* we'd love it if this was package-scoped*/
+    PhoneBase::NotifyPreciseCallStateChangedP();
     return NOERROR;
 }
 
@@ -1429,39 +1385,32 @@ ECode CDMAPhone::NotifyServiceStateChanged(
     /* [in] */ IServiceState* ss)
 {
     VALIDATE_NOT_NULL(ss);
-    // ==================before translated======================
-    // super.notifyServiceStateChangedP(ss);
-    assert(0);
+    PhoneBase::NotifyServiceStateChangedP(ss);
     return NOERROR;
 }
 
 ECode CDMAPhone::NotifyLocationChanged()
 {
-    // ==================before translated======================
-    // mNotifier.notifyCellLocation(this);
-    assert(0);
-    return NOERROR;
+    return mNotifier->NotifyCellLocation(this);
 }
 
 ECode CDMAPhone::NotifyNewRingingConnection(
     /* [in] */ IConnection* c)
 {
     VALIDATE_NOT_NULL(c);
-    // ==================before translated======================
-    // super.notifyNewRingingConnectionP(c);
-    assert(0);
-    return NOERROR;
+    return PhoneBase::NotifyNewRingingConnectionP(c);
 }
 
 ECode CDMAPhone::NotifyDisconnect(
     /* [in] */ IConnection* cn)
 {
     VALIDATE_NOT_NULL(cn);
-    // ==================before translated======================
-    // mDisconnectRegistrants.notifyResult(cn);
-    //
-    // mNotifier.notifyDisconnectCause(cn.getDisconnectCause(), cn.getPreciseDisconnectCause());
-    assert(0);
+    mDisconnectRegistrants->NotifyResult(cn);
+
+    Int32 val1, val2;
+    cn->GetDisconnectCause(&val1);
+    cn->GetPreciseDisconnectCause(&val2);
+    mNotifier->NotifyDisconnectCause(val1, val2);
     return NOERROR;
 }
 
@@ -1469,9 +1418,7 @@ ECode CDMAPhone::NotifyUnknownConnection(
     /* [in] */ IConnection* connection)
 {
     VALIDATE_NOT_NULL(connection);
-    // ==================before translated======================
-    // mUnknownConnectionRegistrants.notifyResult(connection);
-    assert(0);
+    mUnknownConnectionRegistrants->NotifyResult(connection);
     return NOERROR;
 }
 
@@ -1479,77 +1426,71 @@ ECode CDMAPhone::IsInEmergencyCall(
     /* [out] */ Boolean* result)
 {
     VALIDATE_NOT_NULL(result);
-    *result = FALSE;
-    // ==================before translated======================
-    // return mCT.isInEmergencyCall();
-    assert(0);
-    return NOERROR;
+    return ((CdmaCallTracker*)mCT.Get())->IsInEmergencyCall(result);
 }
 
 ECode CDMAPhone::IsInEcm(
     /* [out] */ Boolean* result)
 {
     VALIDATE_NOT_NULL(result);
-    *result = FALSE;
-    // ==================before translated======================
-    // return mIsPhoneInEcmState;
-    assert(0);
+    *result = mIsPhoneInEcmState;
     return NOERROR;
 }
 
 ECode CDMAPhone::SendEmergencyCallbackModeChange()
 {
-    // ==================before translated======================
-    // //Send an Intent
-    // Intent intent = new Intent(TelephonyIntents.ACTION_EMERGENCY_CALLBACK_MODE_CHANGED);
-    // intent.putExtra(PhoneConstants.PHONE_IN_ECM_STATE, mIsPhoneInEcmState);
-    // SubscriptionManager.putPhoneIdAndSubIdExtra(intent, getPhoneId());
-    // ActivityManagerNative.broadcastStickyIntent(intent,null,UserHandle.USER_ALL);
-    // if (DBG) Rlog.d(LOGTAG, "sendEmergencyCallbackModeChange");
-    assert(0);
+    //Send an Intent
+    AutoPtr<IIntent> intent;
+    CIntent::New(ITelephonyIntents::ACTION_EMERGENCY_CALLBACK_MODE_CHANGED, (IIntent**)&intent);
+    intent->PutExtra(IPhoneConstants::PHONE_IN_ECM_STATE, mIsPhoneInEcmState);
+    Int32 pid;
+    GetPhoneId(&pid);
+    SubscriptionManager::PutPhoneIdAndSubIdExtra(intent, pid);
+    ActivityManagerNative::BroadcastStickyIntent(intent, String(NULL), IUserHandle::USER_ALL);
+    if (DBG) Logger::D(LOGTAG, "SendEmergencyCallbackModeChange");
     return NOERROR;
 }
 
 ECode CDMAPhone::ExitEmergencyCallbackMode()
 {
-    // ==================before translated======================
-    // if (mWakeLock.isHeld()) {
-    //     mWakeLock.release();
-    // }
-    // // Send a message which will invoke handleExitEmergencyCallbackMode
-    // mCi.exitEmergencyCallbackMode(obtainMessage(EVENT_EXIT_EMERGENCY_CALLBACK_RESPONSE));
-    assert(0);
+    Boolean b;
+    if (mWakeLock->IsHeld(&b), b) {
+        mWakeLock->ReleaseLock();
+    }
+    // Send a message which will invoke handleExitEmergencyCallbackMode
+    AutoPtr<IMessage> msg;
+    ObtainMessage(EVENT_EXIT_EMERGENCY_CALLBACK_RESPONSE, (IMessage**)&msg);
+    mCi->ExitEmergencyCallbackMode(msg);
     return NOERROR;
 }
 
 ECode CDMAPhone::HandleTimerInEmergencyCallbackMode(
     /* [in] */ Int32 action)
 {
-    // ==================before translated======================
-    // switch(action) {
-    // case CANCEL_ECM_TIMER:
-    //     removeCallbacks(mExitEcmRunnable);
-    //     mEcmTimerResetRegistrants.notifyResult(Boolean.TRUE);
-    //     break;
-    // case RESTART_ECM_TIMER:
-    //     long delayInMillis = SystemProperties.getLong(
-    //             TelephonyProperties.PROPERTY_ECM_EXIT_TIMER, DEFAULT_ECM_EXIT_TIMER_VALUE);
-    //     postDelayed(mExitEcmRunnable, delayInMillis);
-    //     mEcmTimerResetRegistrants.notifyResult(Boolean.FALSE);
-    //     break;
-    // default:
-    //     Rlog.e(LOGTAG, "handleTimerInEmergencyCallbackMode, unsupported action " + action);
-    // }
-    assert(0);
+    switch(action) {
+    case CANCEL_ECM_TIMER:
+        RemoveCallbacks(mExitEcmRunnable);
+        mEcmTimerResetRegistrants->NotifyResult(CoreUtils::Convert(TRUE));
+        break;
+    case RESTART_ECM_TIMER:
+        Int64 delayInMillis;
+        SystemProperties::GetInt64(
+                ITelephonyProperties::PROPERTY_ECM_EXIT_TIMER,
+                DEFAULT_ECM_EXIT_TIMER_VALUE, &delayInMillis);
+        Boolean b;
+        PostDelayed(mExitEcmRunnable, delayInMillis, &b);
+        mEcmTimerResetRegistrants->NotifyResult(CoreUtils::Convert(FALSE));
+        break;
+    default:
+        Logger::E(LOGTAG, "handleTimerInEmergencyCallbackMode, unsupported action %d", action);
+    }
     return NOERROR;
 }
 
 ECode CDMAPhone::NotifyEcbmTimerReset(
     /* [in] */ Boolean flag)
 {
-    // ==================before translated======================
-    // mEcmTimerResetRegistrants.notifyResult(flag);
-    assert(0);
+    mEcmTimerResetRegistrants->NotifyResult(CoreUtils::Convert(flag));
     return NOERROR;
 }
 
@@ -1558,150 +1499,175 @@ ECode CDMAPhone::RegisterForEcmTimerReset(
     /* [in] */ Int32 what,
     /* [in] */ IInterface* obj)
 {
-    // ==================before translated======================
-    // mEcmTimerResetRegistrants.addUnique(h, what, obj);
-    assert(0);
+    mEcmTimerResetRegistrants->AddUnique(h, what, obj);
     return NOERROR;
 }
 
 ECode CDMAPhone::UnregisterForEcmTimerReset(
     /* [in] */ IHandler* h)
 {
-    // ==================before translated======================
-    // mEcmTimerResetRegistrants.remove(h);
-    assert(0);
+    mEcmTimerResetRegistrants->Remove(h);
     return NOERROR;
 }
 
 ECode CDMAPhone::HandleMessage(
     /* [in] */ IMessage* msg)
 {
-    // ==================before translated======================
-    // AsyncResult ar;
-    // Message     onComplete;
-    //
-    // if (!mIsTheCurrentActivePhone) {
-    //     Rlog.e(LOGTAG, "Received message " + msg +
-    //             "[" + msg.what + "] while being destroyed. Ignoring.");
-    //     return;
-    // }
-    // switch(msg.what) {
-    //     case EVENT_RADIO_AVAILABLE: {
-    //         mCi.getBasebandVersion(obtainMessage(EVENT_GET_BASEBAND_VERSION_DONE));
-    //
-    //         mCi.getDeviceIdentity(obtainMessage(EVENT_GET_DEVICE_IDENTITY_DONE));
-    //     }
-    //     break;
-    //
-    //     case EVENT_GET_BASEBAND_VERSION_DONE:{
-    //         ar = (AsyncResult)msg.obj;
-    //
-    //         if (ar.exception != null) {
-    //             break;
-    //         }
-    //
-    //         if (DBG) Rlog.d(LOGTAG, "Baseband version: " + ar.result);
-    //         if (!"".equals((String)ar.result)) {
-    //             setSystemProperty(TelephonyProperties.PROPERTY_BASEBAND_VERSION,
-    //                               (String)ar.result);
-    //         }
-    //     }
-    //     break;
-    //
-    //     case EVENT_GET_DEVICE_IDENTITY_DONE:{
-    //         ar = (AsyncResult)msg.obj;
-    //
-    //         if (ar.exception != null) {
-    //             break;
-    //         }
-    //         String[] respId = (String[])ar.result;
-    //         mImei = respId[0];
-    //         mImeiSv = respId[1];
-    //         mEsn  =  respId[2];
-    //         mMeid =  respId[3];
-    //     }
-    //     break;
-    //
-    //     case EVENT_EMERGENCY_CALLBACK_MODE_ENTER:{
-    //         handleEnterEmergencyCallbackMode(msg);
-    //     }
-    //     break;
-    //
-    //     case  EVENT_EXIT_EMERGENCY_CALLBACK_RESPONSE:{
-    //         handleExitEmergencyCallbackMode(msg);
-    //     }
-    //     break;
-    //
-    //     case EVENT_RUIM_RECORDS_LOADED:{
-    //         Rlog.d(LOGTAG, "Event EVENT_RUIM_RECORDS_LOADED Received");
-    //         updateCurrentCarrierInProvider();
-    //         // Notify voicemails.
-    //         log("notifyMessageWaitingChanged");
-    //         mNotifier.notifyMessageWaitingChanged(this);
-    //         updateVoiceMail();
-    //     }
-    //     break;
-    //
-    //     case EVENT_RADIO_OFF_OR_NOT_AVAILABLE:{
-    //         Rlog.d(LOGTAG, "Event EVENT_RADIO_OFF_OR_NOT_AVAILABLE Received");
-    //     }
-    //     break;
-    //
-    //     case EVENT_RADIO_ON:{
-    //         Rlog.d(LOGTAG, "Event EVENT_RADIO_ON Received");
-    //         handleCdmaSubscriptionSource(mCdmaSSM.getCdmaSubscriptionSource());
-    //     }
-    //     break;
-    //
-    //     case EVENT_CDMA_SUBSCRIPTION_SOURCE_CHANGED:{
-    //         Rlog.d(LOGTAG, "EVENT_CDMA_SUBSCRIPTION_SOURCE_CHANGED");
-    //         handleCdmaSubscriptionSource(mCdmaSSM.getCdmaSubscriptionSource());
-    //     }
-    //     break;
-    //
-    //     case EVENT_SSN:{
-    //         Rlog.d(LOGTAG, "Event EVENT_SSN Received");
-    //     }
-    //     break;
-    //
-    //     case EVENT_REGISTERED_TO_NETWORK:{
-    //         Rlog.d(LOGTAG, "Event EVENT_REGISTERED_TO_NETWORK Received");
-    //     }
-    //     break;
-    //
-    //     case EVENT_NV_READY:{
-    //         Rlog.d(LOGTAG, "Event EVENT_NV_READY Received");
-    //         prepareEri();
-    //         // Notify voicemails.
-    //         log("notifyMessageWaitingChanged");
-    //         mNotifier.notifyMessageWaitingChanged(this);
-    //         updateVoiceMail();
-    //         SubInfoRecordUpdater subInfoRecordUpdater = PhoneFactory.getSubInfoRecordUpdater();
-    //         if (subInfoRecordUpdater != null) {
-    //             subInfoRecordUpdater.updateSubIdForNV (mPhoneId);
-    //         }
-    //     }
-    //     break;
-    //
-    //     case EVENT_SET_VM_NUMBER_DONE:{
-    //         ar = (AsyncResult)msg.obj;
-    //         if (IccException.class.isInstance(ar.exception)) {
-    //             storeVoiceMailNumber(mVmNumber);
-    //             ar.exception = null;
-    //         }
-    //         onComplete = (Message) ar.userObj;
-    //         if (onComplete != null) {
-    //             AsyncResult.forMessage(onComplete, ar.result, ar.exception);
-    //             onComplete.sendToTarget();
-    //         }
-    //     }
-    //     break;
-    //
-    //     default:{
-    //         super.handleMessage(msg);
-    //     }
-    // }
-    assert(0);
+    AutoPtr<AsyncResult> ar;
+    AutoPtr<IMessage> onComplete;
+
+    if (!mIsTheCurrentActivePhone) {
+        // Logger::E(LOGTAG, "Received message " + msg +
+        //         "[" + msg.what + "] while being destroyed. Ignoring.");
+        return NOERROR;
+    }
+
+    Int32 what;
+    msg->GetWhat(&what);
+    switch(what) {
+        case EVENT_RADIO_AVAILABLE: {
+            AutoPtr<IMessage> msg;
+            ObtainMessage(EVENT_GET_BASEBAND_VERSION_DONE, (IMessage**)&msg);
+            mCi->GetBasebandVersion(msg);
+
+            msg = NULL;
+            ObtainMessage(EVENT_GET_DEVICE_IDENTITY_DONE, (IMessage**)&msg);
+            mCi->GetDeviceIdentity(msg);
+        }
+        break;
+
+        case EVENT_GET_BASEBAND_VERSION_DONE:{
+            AutoPtr<IInterface> obj;
+            msg->GetObj((IInterface**)&obj);
+            ar = (AsyncResult*)(IObject*)obj.Get();
+
+            if (ar->mException != NULL) {
+                break;
+            }
+
+            // if (DBG) Logger::D(LOGTAG, "Baseband version: " + ar->mResult);
+            String str;
+            ICharSequence::Probe(ar->mResult)->ToString(&str);
+            if (!str.Equals("")) {
+                SetSystemProperty(ITelephonyProperties::PROPERTY_BASEBAND_VERSION, str);
+            }
+        }
+        break;
+
+        case EVENT_GET_DEVICE_IDENTITY_DONE:{
+            AutoPtr<IInterface> obj;
+            msg->GetObj((IInterface**)&obj);
+            ar = (AsyncResult*)(IObject*)obj.Get();
+
+            if (ar->mException != NULL) {
+                break;
+            }
+
+            AutoPtr<IArrayOf> iArray = IArrayOf::Probe(ar->mResult);
+            obj = NULL;
+            iArray->Get(0, (IInterface**)&obj);
+            ICharSequence::Probe(obj)->ToString(&mImei);
+            obj = NULL;
+            iArray->Get(1, (IInterface**)&obj);
+            ICharSequence::Probe(obj)->ToString(&mImeiSv);
+            obj = NULL;
+            iArray->Get(2, (IInterface**)&obj);
+            ICharSequence::Probe(obj)->ToString(&mEsn);
+            obj = NULL;
+            iArray->Get(3, (IInterface**)&obj);
+            ICharSequence::Probe(obj)->ToString(&mMeid);
+        }
+        break;
+
+        case EVENT_EMERGENCY_CALLBACK_MODE_ENTER:{
+            HandleEnterEmergencyCallbackMode(msg);
+        }
+        break;
+
+        case  EVENT_EXIT_EMERGENCY_CALLBACK_RESPONSE:{
+            HandleExitEmergencyCallbackMode(msg);
+        }
+        break;
+
+        case EVENT_RUIM_RECORDS_LOADED:{
+            Logger::D(LOGTAG, "Event EVENT_RUIM_RECORDS_LOADED Received");
+            Boolean b;
+            UpdateCurrentCarrierInProvider(&b);
+            // Notify voicemails.
+            Log(String("notifyMessageWaitingChanged"));
+            mNotifier->NotifyMessageWaitingChanged(this);
+            UpdateVoiceMail();
+        }
+        break;
+
+        case EVENT_RADIO_OFF_OR_NOT_AVAILABLE:{
+            Logger::D(LOGTAG, "Event EVENT_RADIO_OFF_OR_NOT_AVAILABLE Received");
+        }
+        break;
+
+        case EVENT_RADIO_ON:{
+            Logger::D(LOGTAG, "Event EVENT_RADIO_ON Received");
+            Int32 val;
+            mCdmaSSM->GetCdmaSubscriptionSource(&val);
+            HandleCdmaSubscriptionSource(val);
+        }
+        break;
+
+        case EVENT_CDMA_SUBSCRIPTION_SOURCE_CHANGED:{
+            Logger::D(LOGTAG, "EVENT_CDMA_SUBSCRIPTION_SOURCE_CHANGED");
+            Int32 val;
+            mCdmaSSM->GetCdmaSubscriptionSource(&val);
+            HandleCdmaSubscriptionSource(val);
+        }
+        break;
+
+        case EVENT_SSN:{
+            Logger::D(LOGTAG, "Event EVENT_SSN Received");
+        }
+        break;
+
+        case EVENT_REGISTERED_TO_NETWORK:{
+            Logger::D(LOGTAG, "Event EVENT_REGISTERED_TO_NETWORK Received");
+        }
+        break;
+
+        case EVENT_NV_READY:{
+            Logger::D(LOGTAG, "Event EVENT_NV_READY Received");
+            PrepareEri();
+            // Notify voicemails.
+            Log(String("notifyMessageWaitingChanged"));
+            mNotifier->NotifyMessageWaitingChanged(this);
+            UpdateVoiceMail();
+            AutoPtr<ISubInfoRecordUpdater> subInfoRecordUpdater;
+            AutoPtr<IPhoneFactory> pf;
+            CPhoneFactory::AcquireSingleton((IPhoneFactory**)&pf);
+            pf->GetSubInfoRecordUpdater((ISubInfoRecordUpdater**)&subInfoRecordUpdater);
+            if (subInfoRecordUpdater != NULL) {
+                subInfoRecordUpdater->UpdateSubIdForNV (mPhoneId);
+            }
+        }
+        break;
+
+        case EVENT_SET_VM_NUMBER_DONE:{
+            AutoPtr<IInterface> obj;
+            msg->GetObj((IInterface**)&obj);
+            ar = (AsyncResult*)(IObject*)obj.Get();
+            if (IIccException::Probe(ar->mException) != NULL) {
+                StoreVoiceMailNumber(mVmNumber);
+                ar->mException = NULL;
+            }
+            onComplete = IMessage::Probe(ar->mUserObj);
+            if (onComplete != NULL) {
+                AsyncResult::ForMessage(onComplete, ar->mResult, ar->mException);
+                onComplete->SendToTarget();
+            }
+        }
+        break;
+
+        default:{
+            PhoneBase::HandleMessage(msg);
+        }
+    }
     return NOERROR;
 }
 
@@ -1709,10 +1675,8 @@ ECode CDMAPhone::GetPhoneSubInfo(
     /* [out] */ IPhoneSubInfo** result)
 {
     VALIDATE_NOT_NULL(result);
-    *result = NULL;
-    // ==================before translated======================
-    // return mSubInfo;
-    assert(0);
+    *result = mSubInfo;
+    REFCOUNT_ADD(*result)
     return NOERROR;
 }
 
@@ -1720,10 +1684,8 @@ ECode CDMAPhone::GetIccPhoneBookInterfaceManager(
     /* [out] */ IIccPhoneBookInterfaceManager** result)
 {
     VALIDATE_NOT_NULL(result);
-    *result = NULL;
-    // ==================before translated======================
-    // return mRuimPhoneBookInterfaceManager;
-    assert(0);
+    *result = IIccPhoneBookInterfaceManager::Probe(mRuimPhoneBookInterfaceManager);
+    REFCOUNT_ADD(*result)
     return NOERROR;
 }
 
@@ -1732,19 +1694,16 @@ ECode CDMAPhone::RegisterForEriFileLoaded(
     /* [in] */ Int32 what,
     /* [in] */ IInterface* obj)
 {
-    // ==================before translated======================
-    // Registrant r = new Registrant (h, what, obj);
-    // mEriFileLoadedRegistrants.add(r);
-    assert(0);
+    AutoPtr<IRegistrant> r;
+    CRegistrant::New(h, what, obj, (IRegistrant**)&r);
+    mEriFileLoadedRegistrants->Add(r);
     return NOERROR;
 }
 
 ECode CDMAPhone::UnregisterForEriFileLoaded(
     /* [in] */ IHandler* h)
 {
-    // ==================before translated======================
-    // mEriFileLoadedRegistrants.remove(h);
-    assert(0);
+    mEriFileLoadedRegistrants->Remove(h);
     return NOERROR;
 }
 
@@ -1752,10 +1711,7 @@ ECode CDMAPhone::SetSystemProperty(
     /* [in] */ const String& property,
     /* [in] */ const String& value)
 {
-    // ==================before translated======================
-    // super.setSystemProperty(property, value);
-    assert(0);
-    return NOERROR;
+    return PhoneBase::SetSystemProperty(property, value);
 }
 
 ECode CDMAPhone::GetSystemProperty(
@@ -1764,53 +1720,39 @@ ECode CDMAPhone::GetSystemProperty(
     /* [out] */ String* result)
 {
     VALIDATE_NOT_NULL(result);
-    *result = NULL;
-    // ==================before translated======================
-    // return super.getSystemProperty(property, defValue);
-    assert(0);
-    return NOERROR;
+    return PhoneBase::GetSystemProperty(property, defValue, result);
 }
 
 ECode CDMAPhone::ActivateCellBroadcastSms(
     /* [in] */ Int32 activate,
     /* [in] */ IMessage* response)
 {
-    // ==================before translated======================
-    // Rlog.e(LOGTAG, "[CDMAPhone] activateCellBroadcastSms() is obsolete; use SmsManager");
-    // response.sendToTarget();
-    assert(0);
-    return NOERROR;
+    Logger::E(LOGTAG, "[CDMAPhone] activateCellBroadcastSms() is obsolete; use SmsManager");
+    return response->SendToTarget();
 }
 
 ECode CDMAPhone::GetCellBroadcastSmsConfig(
     /* [in] */ IMessage* response)
 {
-    // ==================before translated======================
-    // Rlog.e(LOGTAG, "[CDMAPhone] getCellBroadcastSmsConfig() is obsolete; use SmsManager");
-    // response.sendToTarget();
-    assert(0);
-    return NOERROR;
+    Logger::E(LOGTAG, "[CDMAPhone] getCellBroadcastSmsConfig() is obsolete; use SmsManager");
+    return response->SendToTarget();
 }
 
 ECode CDMAPhone::SetCellBroadcastSmsConfig(
     /* [in] */ ArrayOf<Int32>* configValuesArray,
     /* [in] */ IMessage* response)
 {
-    // ==================before translated======================
-    // Rlog.e(LOGTAG, "[CDMAPhone] setCellBroadcastSmsConfig() is obsolete; use SmsManager");
-    // response.sendToTarget();
-    assert(0);
-    return NOERROR;
+    Logger::E(LOGTAG, "[CDMAPhone] setCellBroadcastSmsConfig() is obsolete; use SmsManager");
+    return response->SendToTarget();
 }
 
 ECode CDMAPhone::NeedsOtaServiceProvisioning(
     /* [out] */ Boolean* result)
 {
     VALIDATE_NOT_NULL(result);
-    *result = FALSE;
-    // ==================before translated======================
-    // return mSST.getOtasp() != ServiceStateTracker.OTASP_NOT_NEEDED;
-    assert(0);
+    Int32 val;
+    ((CdmaServiceStateTracker*)mSST.Get())->GetOtasp(&val);
+    *result = val != IServiceStateTracker::OTASP_NOT_NEEDED;
     return NOERROR;
 }
 
@@ -1819,19 +1761,17 @@ ECode CDMAPhone::IsOtaSpNumber(
     /* [out] */ Boolean* result)
 {
     VALIDATE_NOT_NULL(result);
-    *result = FALSE;
-    // ==================before translated======================
-    // boolean isOtaSpNum = false;
-    // String dialableStr = PhoneNumberUtils.extractNetworkPortionAlt(dialStr);
-    // if (dialableStr != null) {
-    //     isOtaSpNum = isIs683OtaSpDialStr(dialableStr);
-    //     if (isOtaSpNum == false) {
-    //         isOtaSpNum = isCarrierOtaSpNum(dialableStr);
-    //     }
-    // }
-    // if (DBG) Rlog.d(LOGTAG, "isOtaSpNumber " + isOtaSpNum);
-    // return isOtaSpNum;
-    assert(0);
+    Boolean isOtaSpNum = FALSE;
+    String dialableStr;
+    PhoneNumberUtils::ExtractNetworkPortionAlt(dialStr, &dialableStr);
+    if (dialableStr != NULL) {
+        isOtaSpNum = IsIs683OtaSpDialStr(dialableStr);
+        if (isOtaSpNum == FALSE) {
+            isOtaSpNum = IsCarrierOtaSpNum(dialableStr);
+        }
+    }
+    if (DBG) Logger::D(LOGTAG, "isOtaSpNumber %d", isOtaSpNum);
+    *result = isOtaSpNum;
     return NOERROR;
 }
 
@@ -1839,20 +1779,18 @@ ECode CDMAPhone::GetCdmaEriIconIndex(
     /* [out] */ Int32* result)
 {
     VALIDATE_NOT_NULL(result);
-    // ==================before translated======================
-    // return getServiceState().getCdmaEriIconIndex();
-    assert(0);
-    return NOERROR;
+    AutoPtr<IServiceState> ss;
+    GetServiceState((IServiceState**)&ss);
+    return ss->GetCdmaEriIconIndex(result);
 }
 
 ECode CDMAPhone::GetCdmaEriIconMode(
     /* [out] */ Int32* result)
 {
     VALIDATE_NOT_NULL(result);
-    // ==================before translated======================
-    // return getServiceState().getCdmaEriIconMode();
-    assert(0);
-    return NOERROR;
+    AutoPtr<IServiceState> ss;
+    GetServiceState((IServiceState**)&ss);
+    return ss->GetCdmaEriIconMode(result);
 }
 
 ECode CDMAPhone::GetCdmaEriText(
@@ -1860,12 +1798,13 @@ ECode CDMAPhone::GetCdmaEriText(
 {
     VALIDATE_NOT_NULL(result);
     *result = NULL;
-    // ==================before translated======================
-    // int roamInd = getServiceState().getCdmaRoamingIndicator();
-    // int defRoamInd = getServiceState().getCdmaDefaultRoamingIndicator();
-    // return mEriManager.getCdmaEriText(roamInd, defRoamInd);
-    assert(0);
-    return NOERROR;
+    AutoPtr<IServiceState> ss;
+    GetServiceState((IServiceState**)&ss);
+    Int32 roamInd;
+    ss->GetCdmaRoamingIndicator(&roamInd);
+    Int32 defRoamInd;
+    ss->GetCdmaDefaultRoamingIndicator(&defRoamInd);
+    return mEriManager->GetCdmaEriText(roamInd, defRoamInd, result);
 }
 
 ECode CDMAPhone::UpdateCurrentCarrierInProvider(
@@ -1873,27 +1812,37 @@ ECode CDMAPhone::UpdateCurrentCarrierInProvider(
     /* [out] */ Boolean* result)
 {
     VALIDATE_NOT_NULL(result);
-    // ==================before translated======================
-    // log("CDMAPhone: updateCurrentCarrierInProvider called");
-    // if (!TextUtils.isEmpty(operatorNumeric)) {
-    //     try {
-    //         Uri uri = Uri.withAppendedPath(Telephony.Carriers.CONTENT_URI, "current");
-    //         ContentValues map = new ContentValues();
-    //         map.put(Telephony.Carriers.NUMERIC, operatorNumeric);
-    //         log("updateCurrentCarrierInProvider from system: numeric=" + operatorNumeric);
-    //         getContext().getContentResolver().insert(uri, map);
-    //
-    //         // Updates MCC MNC device configuration information
-    //         log("update mccmnc=" + operatorNumeric);
-    //         MccTable.updateMccMncConfiguration(mContext, operatorNumeric, false);
-    //
-    //         return true;
-    //     } catch (SQLException e) {
-    //         Rlog.e(LOGTAG, "Can't store current operator", e);
-    //     }
-    // }
-    // return false;
-    assert(0);
+    Log(String("CDMAPhone: UpdateCurrentCarrierInProvider called"));
+    if (!TextUtils::IsEmpty(operatorNumeric)) {
+        // try {
+            AutoPtr<ITelephonyCarriers> tc;
+            CTelephonyCarriers::AcquireSingleton((ITelephonyCarriers**)&tc);
+            AutoPtr<IUri> contentUri;
+            tc->GetCONTENT_URI((IUri**)&contentUri);
+            AutoPtr<IUri> uri;
+            Uri::WithAppendedPath(contentUri, String("current"), (IUri**)&uri);
+            AutoPtr<IContentValues> map;
+            CContentValues::New((IContentValues**)&map);
+            map->Put(ITelephonyCarriers::NUMERIC, operatorNumeric);
+            Log(String("UpdateCurrentCarrierInProvider from system: numeric=") + operatorNumeric);
+            AutoPtr<IContext> ctx;
+            GetContext((IContext**)&ctx);
+            AutoPtr<IContentResolver> cr;
+            ctx->GetContentResolver((IContentResolver**)&cr);
+            AutoPtr<IUri> tmpUri;
+            cr->Insert(uri, map, (IUri**)&tmpUri);
+
+            // Updates MCC MNC device configuration information
+            Log(String("update mccmnc=") + operatorNumeric);
+            MccTable::UpdateMccMncConfiguration(mContext, operatorNumeric, FALSE);
+
+            *result = TRUE;
+            return NOERROR;
+        // } catch (SQLException e) {
+        //     Logger::E(LOGTAG, "Can't store current operator", e);
+        // }
+    }
+    *result = FALSE;
     return NOERROR;
 }
 
@@ -1901,26 +1850,23 @@ ECode CDMAPhone::UpdateCurrentCarrierInProvider(
     /* [out] */ Boolean* result)
 {
     VALIDATE_NOT_NULL(result);
-    // ==================before translated======================
-    // return true;
-    assert(0);
+    *result = TRUE;
     return NOERROR;
 }
 
 ECode CDMAPhone::PrepareEri()
 {
-    // ==================before translated======================
-    // if (mEriManager == null) {
-    //     Rlog.e(LOGTAG, "PrepareEri: Trying to access stale objects");
-    //     return;
-    // }
-    // mEriManager.loadEriFile();
-    // if(mEriManager.isEriFileLoaded()) {
-    //     // when the ERI file is loaded
-    //     log("ERI read, notify registrants");
-    //     mEriFileLoadedRegistrants.notifyRegistrants();
-    // }
-    assert(0);
+    if (mEriManager == NULL) {
+        Logger::E(LOGTAG, "PrepareEri: Trying to access stale objects");
+        return NOERROR;
+    }
+    mEriManager->LoadEriFile();
+    Boolean b;
+    if(mEriManager->IsEriFileLoaded(&b), b) {
+        // when the ERI file is loaded
+        Log(String("ERI read, notify registrants"));
+        mEriFileLoadedRegistrants->NotifyRegistrants();
+    }
     return NOERROR;
 }
 
@@ -1928,20 +1874,14 @@ ECode CDMAPhone::IsEriFileLoaded(
     /* [out] */ Boolean* result)
 {
     VALIDATE_NOT_NULL(result);
-    // ==================before translated======================
-    // return mEriManager.isEriFileLoaded();
-    assert(0);
-    return NOERROR;
+    return mEriManager->IsEriFileLoaded(result);
 }
 
 ECode CDMAPhone::SetVoiceMessageWaiting(
     /* [in] */ Int32 line,
     /* [in] */ Int32 countWaiting)
 {
-    // ==================before translated======================
-    // setVoiceMessageCount(countWaiting);
-    assert(0);
-    return NOERROR;
+    return SetVoiceMessageCount(countWaiting);
 }
 
 ECode CDMAPhone::Dump(
@@ -1949,31 +1889,29 @@ ECode CDMAPhone::Dump(
     /* [in] */ IPrintWriter* pw,
     /* [in] */ ArrayOf<String>* args)
 {
-    // ==================before translated======================
-    // pw.println("CDMAPhone extends:");
-    // super.dump(fd, pw, args);
-    // pw.println(" mVmNumber=" + mVmNumber);
-    // pw.println(" mCT=" + mCT);
-    // pw.println(" mSST=" + mSST);
-    // pw.println(" mCdmaSSM=" + mCdmaSSM);
-    // pw.println(" mPendingMmis=" + mPendingMmis);
-    // pw.println(" mRuimPhoneBookInterfaceManager=" + mRuimPhoneBookInterfaceManager);
-    // pw.println(" mCdmaSubscriptionSource=" + mCdmaSubscriptionSource);
-    // pw.println(" mSubInfo=" + mSubInfo);
-    // pw.println(" mEriManager=" + mEriManager);
-    // pw.println(" mWakeLock=" + mWakeLock);
-    // pw.println(" mIsPhoneInEcmState=" + mIsPhoneInEcmState);
-    // if (VDBG) pw.println(" mImei=" + mImei);
-    // if (VDBG) pw.println(" mImeiSv=" + mImeiSv);
-    // if (VDBG) pw.println(" mEsn=" + mEsn);
-    // if (VDBG) pw.println(" mMeid=" + mMeid);
-    // pw.println(" mCarrierOtaSpNumSchema=" + mCarrierOtaSpNumSchema);
-    // pw.println(" getCdmaEriIconIndex()=" + getCdmaEriIconIndex());
-    // pw.println(" getCdmaEriIconMode()=" + getCdmaEriIconMode());
-    // pw.println(" getCdmaEriText()=" + getCdmaEriText());
-    // pw.println(" isMinInfoReady()=" + isMinInfoReady());
-    // pw.println(" isCspPlmnEnabled()=" + isCspPlmnEnabled());
-    assert(0);
+    pw->Println(String("CDMAPhone extends:"));
+    PhoneBase::Dump(fd, pw, args);
+    // pw->Println(String(" mVmNumber=") + mVmNumber);
+    // pw->Println(String(" mCT=") + mCT);
+    // pw->Println(String(" mSST=") + mSST);
+    // pw->Println(String(" mCdmaSSM=") + mCdmaSSM);
+    // pw->Println(String(" mPendingMmis=") + mPendingMmis);
+    // pw->Println(String(" mRuimPhoneBookInterfaceManager=") + mRuimPhoneBookInterfaceManager);
+    // pw->Println(String(" mCdmaSubscriptionSource=") + mCdmaSubscriptionSource);
+    // pw->Println(String(" mSubInfo=") + mSubInfo);
+    // pw->Println(String(" mEriManager=") + mEriManager);
+    // pw->Println(String(" mWakeLock=") + mWakeLock);
+    // pw->Println(String(" mIsPhoneInEcmState=") + mIsPhoneInEcmState);
+    // if (VDBG) pw->Println(String(" mImei=") + mImei);
+    // if (VDBG) pw->Println(String(" mImeiSv=") + mImeiSv);
+    // if (VDBG) pw->Println(String(" mEsn=") + mEsn);
+    // if (VDBG) pw->Println(String(" mMeid=") + mMeid);
+    // pw->Println(String(" mCarrierOtaSpNumSchema=") + mCarrierOtaSpNumSchema);
+    // pw->Println(String(" getCdmaEriIconIndex()=") + getCdmaEriIconIndex());
+    // pw->Println(String(" getCdmaEriIconMode()=") + getCdmaEriIconMode());
+    // pw->Println(String(" getCdmaEriText()=") + getCdmaEriText());
+    // pw->Println(String(" isMinInfoReady()=") + isMinInfoReady());
+    // pw->Println(String(" isCspPlmnEnabled()=") + isCspPlmnEnabled());
     return NOERROR;
 }
 
@@ -1982,120 +1920,123 @@ ECode CDMAPhone::SetOperatorBrandOverride(
     /* [out] */ Boolean* result)
 {
     VALIDATE_NOT_NULL(result);
-    *result = FALSE;
-    // ==================before translated======================
-    // if (mUiccController == null) {
-    //     return false;
-    // }
-    //
-    // UiccCard card = mUiccController.getUiccCard();
-    // if (card == null) {
-    //     return false;
-    // }
-    //
-    // boolean status = card.setOperatorBrandOverride(brand);
-    //
-    // // Refresh.
-    // if (status) {
-    //     IccRecords iccRecords = mIccRecords.get();
-    //     if (iccRecords != null) {
-    //         SystemProperties.set(TelephonyProperties.PROPERTY_ICC_OPERATOR_ALPHA,
-    //                 iccRecords.getServiceProviderName());
-    //     }
-    //     if (mSST != null) {
-    //         mSST.pollState();
-    //     }
-    // }
-    // return status;
-    assert(0);
+    if (mUiccController == NULL) {
+        *result = FALSE;
+        return NOERROR;
+    }
+
+    AutoPtr<IUiccCard> card;
+    mUiccController->GetUiccCard((IUiccCard**)&card);
+    if (card == NULL) {
+        *result = FALSE;
+        return NOERROR;
+    }
+
+    Boolean status;
+    card->SetOperatorBrandOverride(brand, &status);
+
+    // Refresh.
+    if (status) {
+        AutoPtr<IInterface> obj;
+        mIccRecords->Get((IInterface**)&obj);
+        AutoPtr<IIccRecords> iccRecords = IIccRecords::Probe(obj);
+        if (iccRecords != NULL) {
+            String str;
+            iccRecords->GetServiceProviderName(&str);
+            SystemProperties::Set(ITelephonyProperties::PROPERTY_ICC_OPERATOR_ALPHA, str);
+        }
+        if (mSST != NULL) {
+            IServiceStateTracker::Probe(mSST)->PollState();
+        }
+    }
+    *result = status;
     return NOERROR;
 }
 
 void CDMAPhone::InitSstIcc()
 {
-    // ==================before translated======================
-    // mSST = new CdmaServiceStateTracker(this);
-    assert(0);
+    CCdmaServiceStateTracker::New(this, (ICdmaServiceStateTracker**)&mSST);
 }
 
 void CDMAPhone::Init(
     /* [in] */ IContext* context,
     /* [in] */ IPhoneNotifier* notifier)
 {
-    // ==================before translated======================
-    // mCi.setPhoneType(PhoneConstants.PHONE_TYPE_CDMA);
-    // mCT = new CdmaCallTracker(this);
-    // mCdmaSSM = CdmaSubscriptionSourceManager.getInstance(context, mCi, this,
-    //         EVENT_CDMA_SUBSCRIPTION_SOURCE_CHANGED, null);
-    // mDcTracker = new DcTracker(this);
-    // mRuimPhoneBookInterfaceManager = new RuimPhoneBookInterfaceManager(this);
-    // mSubInfo = new PhoneSubInfo(this);
-    // mEriManager = new EriManager(this, context, EriManager.ERI_FROM_XML);
-    //
-    // mCi.registerForAvailable(this, EVENT_RADIO_AVAILABLE, null);
-    // mCi.registerForOffOrNotAvailable(this, EVENT_RADIO_OFF_OR_NOT_AVAILABLE, null);
-    // mCi.registerForOn(this, EVENT_RADIO_ON, null);
-    // mCi.setOnSuppServiceNotification(this, EVENT_SSN, null);
-    // mSST.registerForNetworkAttached(this, EVENT_REGISTERED_TO_NETWORK, null);
-    // mCi.setEmergencyCallbackMode(this, EVENT_EMERGENCY_CALLBACK_MODE_ENTER, null);
-    // mCi.registerForExitEmergencyCallbackMode(this, EVENT_EXIT_EMERGENCY_CALLBACK_RESPONSE,
-    //         null);
-    //
-    // PowerManager pm
-    //     = (PowerManager) context.getSystemService(Context.POWER_SERVICE);
-    // mWakeLock = pm.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK,LOGTAG);
-    //
-    // //Change the system setting
-    // SystemProperties.set(TelephonyProperties.CURRENT_ACTIVE_PHONE,
-    //         Integer.toString(PhoneConstants.PHONE_TYPE_CDMA));
-    //
-    // // This is needed to handle phone process crashes
-    // String inEcm=SystemProperties.get(TelephonyProperties.PROPERTY_INECM_MODE, "false");
-    // mIsPhoneInEcmState = inEcm.equals("true");
-    // if (mIsPhoneInEcmState) {
-    //     // Send a message which will invoke handleExitEmergencyCallbackMode
-    //     mCi.exitEmergencyCallbackMode(obtainMessage(EVENT_EXIT_EMERGENCY_CALLBACK_RESPONSE));
-    // }
-    //
-    // // get the string that specifies the carrier OTA Sp number
-    // mCarrierOtaSpNumSchema = SystemProperties.get(
-    //         TelephonyProperties.PROPERTY_OTASP_NUM_SCHEMA,"");
-    //
-    // // Sets operator properties by retrieving from build-time system property
-    // String operatorAlpha = SystemProperties.get("ro.cdma.home.operator.alpha");
-    // String operatorNumeric = SystemProperties.get(PROPERTY_CDMA_HOME_OPERATOR_NUMERIC);
-    // log("init: operatorAlpha='" + operatorAlpha
-    //         + "' operatorNumeric='" + operatorNumeric + "'");
-    // if (mUiccController.getUiccCardApplication(mPhoneId, UiccController.APP_FAM_3GPP) == null) {
-    //     log("init: APP_FAM_3GPP == NULL");
-    //     if (!TextUtils.isEmpty(operatorAlpha)) {
-    //         log("init: set 'gsm.sim.operator.alpha' to operator='" + operatorAlpha + "'");
-    //         setSystemProperty(PROPERTY_ICC_OPERATOR_ALPHA, operatorAlpha);
-    //     }
-    //     if (!TextUtils.isEmpty(operatorNumeric)) {
-    //         log("init: set 'gsm.sim.operator.numeric' to operator='" + operatorNumeric + "'");
-    //         log("update icc_operator_numeric=" + operatorNumeric);
-    //         setSystemProperty(PROPERTY_ICC_OPERATOR_NUMERIC, operatorNumeric);
-    //
-    //         SubscriptionController.getInstance().setMccMnc(operatorNumeric, getSubId());
-    //     }
-    //     setIsoCountryProperty(operatorNumeric);
-    // }
-    //
-    // // Sets current entry in the telephony carrier table
-    // updateCurrentCarrierInProvider(operatorNumeric);
-    assert(0);
-}
+    mCi->SetPhoneType(IPhoneConstants::PHONE_TYPE_CDMA);
+    CCdmaCallTracker::New(this, (ICdmaCallTracker**)&mCT);
+    mCdmaSSM = CdmaSubscriptionSourceManager::GetInstance(context, mCi, this,
+            EVENT_CDMA_SUBSCRIPTION_SOURCE_CHANGED, NULL);
+    CDcTracker::New(this, (IDcTracker**)&mDcTracker);
+    CRuimPhoneBookInterfaceManager::New(this, (IRuimPhoneBookInterfaceManager**)&mRuimPhoneBookInterfaceManager);
+    CPhoneSubInfo::New(this, (IPhoneSubInfo**)&mSubInfo);
+    CEriManager::New(this, context, CEriManager::ERI_FROM_XML, (IEriManager**)&mEriManager);
 
-void CDMAPhone::Finalize()
-{
-    // ==================before translated======================
-    // if(DBG) Rlog.d(LOGTAG, "CDMAPhone finalized");
-    // if (mWakeLock.isHeld()) {
-    //     Rlog.e(LOGTAG, "UNEXPECTED; mWakeLock is held when finalizing.");
-    //     mWakeLock.release();
-    // }
-    assert(0);
+    mCi->RegisterForAvailable(this, EVENT_RADIO_AVAILABLE, NULL);
+    mCi->RegisterForOffOrNotAvailable(this, EVENT_RADIO_OFF_OR_NOT_AVAILABLE, NULL);
+    mCi->RegisterForOn(this, EVENT_RADIO_ON, NULL);
+    mCi->SetOnSuppServiceNotification(this, EVENT_SSN, NULL);
+    IServiceStateTracker::Probe(mSST)->RegisterForNetworkAttached(this, EVENT_REGISTERED_TO_NETWORK, NULL);
+    mCi->SetEmergencyCallbackMode(this, EVENT_EMERGENCY_CALLBACK_MODE_ENTER, NULL);
+    mCi->RegisterForExitEmergencyCallbackMode(this, EVENT_EXIT_EMERGENCY_CALLBACK_RESPONSE,
+            NULL);
+
+    AutoPtr<IInterface> obj;
+    context->GetSystemService(IContext::POWER_SERVICE, (IInterface**)&obj);
+    AutoPtr<IPowerManager> pm = IPowerManager::Probe(obj);
+    pm->NewWakeLock(IPowerManager::PARTIAL_WAKE_LOCK,LOGTAG,
+            (IPowerManagerWakeLock**)&mWakeLock);
+
+    //Change the system setting
+    SystemProperties::Set(ITelephonyProperties::CURRENT_ACTIVE_PHONE,
+            StringUtils::ToString(IPhoneConstants::PHONE_TYPE_CDMA));
+
+    // This is needed to handle phone process crashes
+    String inEcm;
+    SystemProperties::Get(ITelephonyProperties::PROPERTY_INECM_MODE, String("FALSE"), &inEcm);
+    mIsPhoneInEcmState = inEcm.Equals("TRUE");
+    if (mIsPhoneInEcmState) {
+        // Send a message which will invoke handleExitEmergencyCallbackMode
+        AutoPtr<IMessage> msg;
+        ObtainMessage(EVENT_EXIT_EMERGENCY_CALLBACK_RESPONSE, (IMessage**)&msg);
+        mCi->ExitEmergencyCallbackMode(msg);
+    }
+
+    // get the string that specifies the carrier OTA Sp number
+    SystemProperties::Get(
+            ITelephonyProperties::PROPERTY_OTASP_NUM_SCHEMA, String(""), &mCarrierOtaSpNumSchema);
+
+    // Sets operator properties by retrieving from build-time system property
+    String operatorAlpha;
+    SystemProperties::Get(String("ro.cdma.home.operator.alpha"), &operatorAlpha);
+    String operatorNumeric;
+    SystemProperties::Get(PROPERTY_CDMA_HOME_OPERATOR_NUMERIC, &operatorNumeric);
+    Log(String("init: operatorAlpha='") + operatorAlpha
+            + "' operatorNumeric='" + operatorNumeric + "'");
+    AutoPtr<IUiccCardApplication> app;
+    mUiccController->GetUiccCardApplication(mPhoneId, IUiccController::APP_FAM_3GPP,
+        (IUiccCardApplication**)&app);
+    if (app == NULL) {
+        Log(String("init: APP_FAM_3GPP == NULL"));
+        if (!TextUtils::IsEmpty(operatorAlpha)) {
+            Log(String("init: set 'gsm.sim.operator.alpha' to operator='") + operatorAlpha + "'");
+            SetSystemProperty(ITelephonyProperties::PROPERTY_ICC_OPERATOR_ALPHA, operatorAlpha);
+        }
+        if (!TextUtils::IsEmpty(operatorNumeric)) {
+            Log(String("init: set 'gsm.sim.operator.numeric' to operator='") + operatorNumeric + "'");
+            Log(String("update icc_operator_numeric=") + operatorNumeric);
+            SetSystemProperty(ITelephonyProperties::PROPERTY_ICC_OPERATOR_NUMERIC, operatorNumeric);
+
+            Int64 sid;
+            GetSubId(&sid);
+            Int32 val;
+            SubscriptionController::GetInstance()->SetMccMnc(operatorNumeric, sid, &val);
+        }
+        SetIsoCountryProperty(operatorNumeric);
+    }
+
+    // Sets current entry in the telephony carrier table
+    Boolean b;
+    UpdateCurrentCarrierInProvider(operatorNumeric, &b);
 }
 
 AutoPtr<IConnection> CDMAPhone::DialInternal(
@@ -2103,377 +2044,381 @@ AutoPtr<IConnection> CDMAPhone::DialInternal(
     /* [in] */ IUUSInfo* uusInfo,
     /* [in] */ Int32 videoState)
 {
-    // ==================before translated======================
-    // // Need to make sure dialString gets parsed properly
-    // String newDialString = PhoneNumberUtils.stripSeparators(dialString);
-    // return mCT.dial(newDialString);
-    assert(0);
-    AutoPtr<IConnection> empty;
-    return empty;
+    // Need to make sure dialString gets parsed properly
+    String newDialString;
+    PhoneNumberUtils::StripSeparators(dialString, &newDialString);
+    AutoPtr<IConnection> conn;
+    ((CdmaCallTracker*)mCT.Get())->Dial(newDialString, (IConnection**)&conn);
+    return conn;
 }
 
 AutoPtr<IUiccCardApplication> CDMAPhone::GetUiccCardApplication()
 {
-    // ==================before translated======================
-    // return  mUiccController.getUiccCardApplication(mPhoneId, UiccController.APP_FAM_3GPP2);
-    assert(0);
-    AutoPtr<IUiccCardApplication> empty;
-    return empty;
+    AutoPtr<IUiccCardApplication> app;
+    mUiccController->GetUiccCardApplication(mPhoneId, IUiccController::APP_FAM_3GPP2,
+            (IUiccCardApplication**)&app);
+    return app;
 }
 
 void CDMAPhone::SetCardInPhoneBook()
 {
-    // ==================before translated======================
-    // if (mUiccController == null ) {
-    //     return;
-    // }
-    //
-    // mRuimPhoneBookInterfaceManager.setIccCard(mUiccController.getUiccCard(mPhoneId));
-    assert(0);
+    if (mUiccController == NULL ) {
+        return;
+    }
+
+    AutoPtr<IUiccCard> card;
+    mUiccController->GetUiccCard(mPhoneId, (IUiccCard**)&card);
+    IIccPhoneBookInterfaceManager::Probe(mRuimPhoneBookInterfaceManager)->SetIccCard(card);
 }
 
 ECode CDMAPhone::OnUpdateIccAvailability()
 {
-    // ==================before translated======================
-    // if (mUiccController == null ) {
-    //     return;
-    // }
-    //
-    // // Get the latest info on the card and
-    // // send this to Phone Book
-    // setCardInPhoneBook();
-    //
-    // UiccCardApplication newUiccApplication = getUiccCardApplication();
-    //
-    // if (newUiccApplication == null) {
-    //     log("can't find 3GPP2 application; trying APP_FAM_3GPP");
-    //     newUiccApplication =
-    //             mUiccController.getUiccCardApplication(mPhoneId, UiccController.APP_FAM_3GPP);
-    // }
-    //
-    // UiccCardApplication app = mUiccApplication.get();
-    // if (app != newUiccApplication) {
-    //     if (app != null) {
-    //         log("Removing stale icc objects.");
-    //         if (mIccRecords.get() != null) {
-    //             unregisterForRuimRecordEvents();
-    //         }
-    //         mIccRecords.set(null);
-    //         mUiccApplication.set(null);
-    //     }
-    //     if (newUiccApplication != null) {
-    //         log("New Uicc application found");
-    //         mUiccApplication.set(newUiccApplication);
-    //         mIccRecords.set(newUiccApplication.getIccRecords());
-    //         registerForRuimRecordEvents();
-    //     }
-    // }
-    assert(0);
+    if (mUiccController == NULL ) {
+        return NOERROR;
+    }
+
+    // Get the latest info on the card and
+    // send this to Phone Book
+    SetCardInPhoneBook();
+
+    AutoPtr<IUiccCardApplication> newUiccApplication = GetUiccCardApplication();
+
+    if (newUiccApplication == NULL) {
+        Log(String("can't find 3GPP2 application; trying APP_FAM_3GPP"));
+
+        mUiccController->GetUiccCardApplication(mPhoneId, IUiccController::APP_FAM_3GPP,
+                (IUiccCardApplication**)&newUiccApplication);
+    }
+
+    AutoPtr<IInterface> obj;
+    mUiccApplication->Get((IInterface**)&obj);
+    AutoPtr<IUiccCardApplication> app = IUiccCardApplication::Probe(obj);
+    if (app != newUiccApplication) {
+        if (app != NULL) {
+            Log(String("Removing stale icc objects."));
+            obj = NULL;
+            mIccRecords->Get((IInterface**)&obj);
+            if (obj != NULL) {
+                UnregisterForRuimRecordEvents();
+            }
+            mIccRecords->Set(NULL);
+            mUiccApplication->Set(NULL);
+        }
+        if (newUiccApplication != NULL) {
+            Log(String("New Uicc application found"));
+            mUiccApplication->Set(newUiccApplication);
+            AutoPtr<IIccRecords> card;
+            newUiccApplication->GetIccRecords((IIccRecords**)&card);
+            mIccRecords->Set(card);
+            RegisterForRuimRecordEvents();
+        }
+    }
     return NOERROR;
 }
 
 void CDMAPhone::SetIsoCountryProperty(
     /* [in] */ const String& operatorNumeric)
 {
-    // ==================before translated======================
-    // if (TextUtils.isEmpty(operatorNumeric)) {
-    //     log("setIsoCountryProperty: clear 'gsm.sim.operator.iso-country'");
-    //     setSystemProperty(PROPERTY_ICC_OPERATOR_ISO_COUNTRY, "");
-    // } else {
-    //     String iso = "";
-    //     try {
-    //         iso = MccTable.countryCodeForMcc(Integer.parseInt(
-    //                 operatorNumeric.substring(0,3)));
-    //     } catch (NumberFormatException ex) {
-    //         loge("setIsoCountryProperty: countryCodeForMcc error", ex);
-    //     } catch (StringIndexOutOfBoundsException ex) {
-    //         loge("setIsoCountryProperty: countryCodeForMcc error", ex);
-    //     }
-    //
-    //     log("setIsoCountryProperty: set 'gsm.sim.operator.iso-country' to iso=" + iso);
-    //     setSystemProperty(PROPERTY_ICC_OPERATOR_ISO_COUNTRY, iso);
-    // }
-    assert(0);
+    if (TextUtils::IsEmpty(operatorNumeric)) {
+        Log(String("setIsoCountryProperty: clear 'gsm.sim.operator.iso-country'"));
+        SetSystemProperty(ITelephonyProperties::PROPERTY_ICC_OPERATOR_ISO_COUNTRY, String(""));
+    }
+    else {
+        String iso = String("");
+        // try {
+            iso = MccTable::CountryCodeForMcc(StringUtils::ParseInt32(
+                    operatorNumeric.Substring(0,3)));
+        // } catch (NumberFormatException ex) {
+        //     loge("setIsoCountryProperty: countryCodeForMcc error", ex);
+        // } catch (StringIndexOutOfBoundsException ex) {
+        //     loge("setIsoCountryProperty: countryCodeForMcc error", ex);
+        // }
+
+        Log(String("setIsoCountryProperty: set 'gsm.sim.operator.iso-country' to iso=") + iso);
+        SetSystemProperty(ITelephonyProperties::PROPERTY_ICC_OPERATOR_ISO_COUNTRY, iso);
+    }
 }
 
 void CDMAPhone::RegisterForRuimRecordEvents()
 {
-    // ==================before translated======================
-    // IccRecords r = mIccRecords.get();
-    // if (r == null) {
-    //     return;
-    // }
-    // r.registerForRecordsLoaded(this, EVENT_RUIM_RECORDS_LOADED, null);
-    assert(0);
+    AutoPtr<IInterface> obj;
+    mIccRecords->Get((IInterface**)&obj);
+    AutoPtr<IIccRecords> r = IIccRecords::Probe(obj);
+    if (r == NULL) {
+        return;
+    }
+    r->RegisterForRecordsLoaded(this, EVENT_RUIM_RECORDS_LOADED, NULL);
 }
 
 void CDMAPhone::UnregisterForRuimRecordEvents()
 {
-    // ==================before translated======================
-    // IccRecords r = mIccRecords.get();
-    // if (r == null) {
-    //     return;
-    // }
-    // r.unregisterForRecordsLoaded(this);
-    assert(0);
+    AutoPtr<IInterface> obj;
+    mIccRecords->Get((IInterface**)&obj);
+    AutoPtr<IIccRecords> r = IIccRecords::Probe(obj);
+    if (r == NULL) {
+        return;
+    }
+    r->UnregisterForRecordsLoaded(this);
 }
 
 void CDMAPhone::Log(
     /* [in] */ const String& s)
 {
-    // ==================before translated======================
-    // if (DBG)
-    //     Rlog.d(LOGTAG, s);
-    assert(0);
+    if (DBG)
+        Logger::D(LOGTAG, s);
 }
 
 //void CDMAPhone::Loge(
 //    /* [in] */ const String& s,
 //    /* [in] */ Exception* e)
 //{
-//    // ==================before translated======================
-//    // if (DBG)
-//    //     Rlog.e(LOGTAG, s, e);
-//    assert(0);
-//}
+////    // if (DBG)
+//    //     Logger::E(LOGTAG, s, e);
+////}
 
 void CDMAPhone::UpdateVoiceMail()
 {
-    // ==================before translated======================
-    // setVoiceMessageCount(getStoredVoiceMessageCount());
-    assert(0);
+    SetVoiceMessageCount(GetStoredVoiceMessageCount());
 }
 
 Int32 CDMAPhone::GetStoredVoiceMessageCount()
 {
-    // ==================before translated======================
-    // SharedPreferences sp = PreferenceManager.getDefaultSharedPreferences(mContext);
-    // return (sp.getInt(VM_COUNT + getSubId(), 0));
-    assert(0);
-    return 0;
+    AutoPtr<ISharedPreferences> sp;
+    PreferenceManager::GetDefaultSharedPreferences(mContext, (ISharedPreferences**)&sp);
+    Int64 sid;
+    GetSubId(&sid);
+    Int32 val;
+    sp->GetInt32(VM_COUNT + StringUtils::ToString(sid), 0, &val);
+    return val;
 }
 
 void CDMAPhone::HandleEnterEmergencyCallbackMode(
     /* [in] */ IMessage* msg)
 {
-    // ==================before translated======================
-    // if (DBG) {
-    //     Rlog.d(LOGTAG, "handleEnterEmergencyCallbackMode,mIsPhoneInEcmState= "
-    //             + mIsPhoneInEcmState);
-    // }
-    // // if phone is not in Ecm mode, and it's changed to Ecm mode
-    // if (mIsPhoneInEcmState == false) {
-    //     mIsPhoneInEcmState = true;
-    //     // notify change
-    //     sendEmergencyCallbackModeChange();
-    //     super.setSystemProperty(TelephonyProperties.PROPERTY_INECM_MODE, "true");
-    //
-    //     // Post this runnable so we will automatically exit
-    //     // if no one invokes exitEmergencyCallbackMode() directly.
-    //     long delayInMillis = SystemProperties.getLong(
-    //             TelephonyProperties.PROPERTY_ECM_EXIT_TIMER, DEFAULT_ECM_EXIT_TIMER_VALUE);
-    //     postDelayed(mExitEcmRunnable, delayInMillis);
-    //     // We don't want to go to sleep while in Ecm
-    //     mWakeLock.acquire();
-    // }
-    assert(0);
+    if (DBG) {
+        Logger::D(LOGTAG, "handleEnterEmergencyCallbackMode,mIsPhoneInEcmState= %d"
+                , mIsPhoneInEcmState);
+    }
+    // if phone is not in Ecm mode, and it's changed to Ecm mode
+    if (mIsPhoneInEcmState == FALSE) {
+        mIsPhoneInEcmState = TRUE;
+        // notify change
+        SendEmergencyCallbackModeChange();
+        PhoneBase::SetSystemProperty(ITelephonyProperties::PROPERTY_INECM_MODE, String("TRUE"));
+
+        // Post this runnable so we will automatically exit
+        // if no one invokes exitEmergencyCallbackMode() directly.
+        Int64 delayInMillis;
+        SystemProperties::GetInt64(
+                ITelephonyProperties::PROPERTY_ECM_EXIT_TIMER, DEFAULT_ECM_EXIT_TIMER_VALUE,
+                &delayInMillis);
+        Boolean b;
+        PostDelayed(mExitEcmRunnable, delayInMillis, &b);
+        // We don't want to go to sleep while in Ecm
+        mWakeLock->AcquireLock();
+    }
 }
 
 void CDMAPhone::HandleExitEmergencyCallbackMode(
     /* [in] */ IMessage* msg)
 {
-    // ==================before translated======================
-    // AsyncResult ar = (AsyncResult)msg.obj;
-    // if (DBG) {
-    //     Rlog.d(LOGTAG, "handleExitEmergencyCallbackMode,ar.exception , mIsPhoneInEcmState "
-    //             + ar.exception + mIsPhoneInEcmState);
-    // }
-    // // Remove pending exit Ecm runnable, if any
-    // removeCallbacks(mExitEcmRunnable);
-    //
-    // if (mEcmExitRespRegistrant != null) {
-    //     mEcmExitRespRegistrant.notifyRegistrant(ar);
-    // }
-    // // if exiting ecm success
-    // if (ar.exception == null) {
-    //     if (mIsPhoneInEcmState) {
-    //         mIsPhoneInEcmState = false;
-    //         super.setSystemProperty(TelephonyProperties.PROPERTY_INECM_MODE, "false");
-    //     }
-    //     // send an Intent
-    //     sendEmergencyCallbackModeChange();
-    //     // Re-initiate data connection
-    //     mDcTracker.setInternalDataEnabled(true);
-    // }
-    assert(0);
+    AutoPtr<IInterface> obj;
+    msg->GetObj((IInterface**)&obj);
+    AutoPtr<AsyncResult> ar = (AsyncResult*)(IObject*)obj.Get();
+    if (DBG) {
+        // Logger::D(LOGTAG, "handleExitEmergencyCallbackMode,ar->mException , mIsPhoneInEcmState "
+        //         + ar->mException + mIsPhoneInEcmState);
+    }
+    // Remove pending exit Ecm runnable, if any
+    RemoveCallbacks(mExitEcmRunnable);
+
+    if (mEcmExitRespRegistrant != NULL) {
+        mEcmExitRespRegistrant->NotifyRegistrant(ar);
+    }
+    // if exiting ecm success
+    if (ar->mException == NULL) {
+        if (mIsPhoneInEcmState) {
+            mIsPhoneInEcmState = FALSE;
+            PhoneBase::SetSystemProperty(ITelephonyProperties::PROPERTY_INECM_MODE, String("FALSE"));
+        }
+        // send an Intent
+        SendEmergencyCallbackModeChange();
+        // Re-initiate data connection
+        Boolean b;
+        mDcTracker->SetInternalDataEnabled(TRUE, &b);
+    }
 }
 
 void CDMAPhone::HandleCdmaSubscriptionSource(
     /* [in] */ Int32 newSubscriptionSource)
 {
-    // ==================before translated======================
-    // if (newSubscriptionSource != mCdmaSubscriptionSource) {
-    //      mCdmaSubscriptionSource = newSubscriptionSource;
-    //      if (newSubscriptionSource == CDMA_SUBSCRIPTION_NV) {
-    //          // NV is ready when subscription source is NV
-    //          sendMessage(obtainMessage(EVENT_NV_READY));
-    //      }
-    // }
-    assert(0);
+    if (newSubscriptionSource != mCdmaSubscriptionSource) {
+         mCdmaSubscriptionSource = newSubscriptionSource;
+         if (newSubscriptionSource == CDMA_SUBSCRIPTION_NV) {
+             // NV is ready when subscription source is NV
+            AutoPtr<IMessage> msg;
+            ObtainMessage(EVENT_NV_READY, (IMessage**)&msg);
+            Boolean b;
+            SendMessage(msg, &b);
+         }
+    }
 }
 
 Boolean CDMAPhone::IsIs683OtaSpDialStr(
     /* [in] */ const String& dialStr)
 {
-    // ==================before translated======================
-    // int sysSelCodeInt;
-    // boolean isOtaspDialString = false;
-    // int dialStrLen = dialStr.length();
-    //
-    // if (dialStrLen == IS683A_FEATURE_CODE_NUM_DIGITS) {
-    //     if (dialStr.equals(IS683A_FEATURE_CODE)) {
-    //         isOtaspDialString = true;
-    //     }
-    // } else {
-    //     sysSelCodeInt = extractSelCodeFromOtaSpNum(dialStr);
-    //     switch (sysSelCodeInt) {
-    //         case IS683_CONST_800MHZ_A_BAND:
-    //         case IS683_CONST_800MHZ_B_BAND:
-    //         case IS683_CONST_1900MHZ_A_BLOCK:
-    //         case IS683_CONST_1900MHZ_B_BLOCK:
-    //         case IS683_CONST_1900MHZ_C_BLOCK:
-    //         case IS683_CONST_1900MHZ_D_BLOCK:
-    //         case IS683_CONST_1900MHZ_E_BLOCK:
-    //         case IS683_CONST_1900MHZ_F_BLOCK:
-    //             isOtaspDialString = true;
-    //             break;
-    //         default:
-    //             break;
-    //     }
-    // }
-    // return isOtaspDialString;
-    assert(0);
-    return FALSE;
+    Int32 sysSelCodeInt;
+    Boolean isOtaspDialString = FALSE;
+    Int32 dialStrLen = dialStr.GetLength();
+
+    if (dialStrLen == IS683A_FEATURE_CODE_NUM_DIGITS) {
+        if (dialStr.Equals(IS683A_FEATURE_CODE)) {
+            isOtaspDialString = TRUE;
+        }
+    }
+    else {
+        sysSelCodeInt = ExtractSelCodeFromOtaSpNum(dialStr);
+        switch (sysSelCodeInt) {
+            case IS683_CONST_800MHZ_A_BAND:
+            case IS683_CONST_800MHZ_B_BAND:
+            case IS683_CONST_1900MHZ_A_BLOCK:
+            case IS683_CONST_1900MHZ_B_BLOCK:
+            case IS683_CONST_1900MHZ_C_BLOCK:
+            case IS683_CONST_1900MHZ_D_BLOCK:
+            case IS683_CONST_1900MHZ_E_BLOCK:
+            case IS683_CONST_1900MHZ_F_BLOCK:
+                isOtaspDialString = TRUE;
+                break;
+            default:
+                break;
+        }
+    }
+    return isOtaspDialString;
 }
 
 Int32 CDMAPhone::ExtractSelCodeFromOtaSpNum(
     /* [in] */ const String& dialStr)
 {
-    // ==================before translated======================
-    // int dialStrLen = dialStr.length();
-    // int sysSelCodeInt = INVALID_SYSTEM_SELECTION_CODE;
-    //
-    // if ((dialStr.regionMatches(0, IS683A_FEATURE_CODE,
-    //                            0, IS683A_FEATURE_CODE_NUM_DIGITS)) &&
-    //     (dialStrLen >= (IS683A_FEATURE_CODE_NUM_DIGITS +
-    //                     IS683A_SYS_SEL_CODE_NUM_DIGITS))) {
-    //         // Since we checked the condition above, the system selection code
-    //         // extracted from dialStr will not cause any exception
-    //         sysSelCodeInt = Integer.parseInt (
-    //                         dialStr.substring (IS683A_FEATURE_CODE_NUM_DIGITS,
-    //                         IS683A_FEATURE_CODE_NUM_DIGITS + IS683A_SYS_SEL_CODE_NUM_DIGITS));
-    // }
-    // if (DBG) Rlog.d(LOGTAG, "extractSelCodeFromOtaSpNum " + sysSelCodeInt);
-    // return sysSelCodeInt;
-    assert(0);
-    return 0;
+    Int32 dialStrLen = dialStr.GetLength();
+    Int32 sysSelCodeInt = INVALID_SYSTEM_SELECTION_CODE;
+
+    if ((dialStr.RegionMatches(0, IS683A_FEATURE_CODE,
+                               0, IS683A_FEATURE_CODE_NUM_DIGITS)) &&
+        (dialStrLen >= (IS683A_FEATURE_CODE_NUM_DIGITS +
+                        IS683A_SYS_SEL_CODE_NUM_DIGITS))) {
+            // Since we checked the condition above, the system selection code
+            // extracted from dialStr will not cause any exception
+            sysSelCodeInt = StringUtils::ParseInt32 (
+                            dialStr.Substring (IS683A_FEATURE_CODE_NUM_DIGITS,
+                            IS683A_FEATURE_CODE_NUM_DIGITS + IS683A_SYS_SEL_CODE_NUM_DIGITS));
+    }
+    if (DBG) Logger::D(LOGTAG, "extractSelCodeFromOtaSpNum %d", sysSelCodeInt);
+    return sysSelCodeInt;
 }
 
 Boolean CDMAPhone::CheckOtaSpNumBasedOnSysSelCode(
     /* [in] */ Int32 sysSelCodeInt,
     /* [in] */ ArrayOf<String>* sch)
 {
-    // ==================before translated======================
-    // boolean isOtaSpNum = false;
+    Boolean isOtaSpNum = FALSE;
     // try {
-    //     // Get how many number of system selection code ranges
-    //     int selRc = Integer.parseInt(sch[1]);
-    //     for (int i = 0; i < selRc; i++) {
-    //         if (!TextUtils.isEmpty(sch[i+2]) && !TextUtils.isEmpty(sch[i+3])) {
-    //             int selMin = Integer.parseInt(sch[i+2]);
-    //             int selMax = Integer.parseInt(sch[i+3]);
-    //             // Check if the selection code extracted from the dial string falls
-    //             // within any of the range pairs specified in the schema.
-    //             if ((sysSelCodeInt >= selMin) && (sysSelCodeInt <= selMax)) {
-    //                 isOtaSpNum = true;
-    //                 break;
-    //             }
-    //         }
-    //     }
+    // Get how many number of system selection code ranges
+    Int32 selRc = StringUtils::ParseInt32((*sch)[1]);
+    for (Int32 i = 0; i < selRc; i++) {
+        if (!TextUtils::IsEmpty((*sch)[i+2]) && !TextUtils::IsEmpty((*sch)[i+3])) {
+            Int32 selMin = StringUtils::ParseInt32((*sch)[i+2]);
+            Int32 selMax = StringUtils::ParseInt32((*sch)[i+3]);
+            // Check if the selection code extracted from the dial string falls
+            // within any of the range pairs specified in the schema.
+            if ((sysSelCodeInt >= selMin) && (sysSelCodeInt <= selMax)) {
+                isOtaSpNum = TRUE;
+                break;
+            }
+        }
+    }
     // } catch (NumberFormatException ex) {
     //     // If the carrier ota sp number schema is not correct, we still allow dial
     //     // and only log the error:
-    //     Rlog.e(LOGTAG, "checkOtaSpNumBasedOnSysSelCode, error", ex);
+    //     Logger::E(LOGTAG, "checkOtaSpNumBasedOnSysSelCode, error", ex);
     // }
-    // return isOtaSpNum;
-    assert(0);
-    return FALSE;
+    return isOtaSpNum;
 }
 
 Boolean CDMAPhone::IsCarrierOtaSpNum(
     /* [in] */ const String& dialStr)
 {
-    // ==================before translated======================
-    // boolean isOtaSpNum = false;
-    // int sysSelCodeInt = extractSelCodeFromOtaSpNum(dialStr);
-    // if (sysSelCodeInt == INVALID_SYSTEM_SELECTION_CODE) {
-    //     return isOtaSpNum;
-    // }
-    // // mCarrierOtaSpNumSchema is retrieved from PROPERTY_OTASP_NUM_SCHEMA:
-    // if (!TextUtils.isEmpty(mCarrierOtaSpNumSchema)) {
-    //     Matcher m = pOtaSpNumSchema.matcher(mCarrierOtaSpNumSchema);
-    //     if (DBG) {
-    //         Rlog.d(LOGTAG, "isCarrierOtaSpNum,schema" + mCarrierOtaSpNumSchema);
-    //     }
-    //
-    //     if (m.find()) {
-    //         String sch[] = pOtaSpNumSchema.split(mCarrierOtaSpNumSchema);
-    //         // If carrier uses system selection code mechanism
-    //         if (!TextUtils.isEmpty(sch[0]) && sch[0].equals("SELC")) {
-    //             if (sysSelCodeInt!=INVALID_SYSTEM_SELECTION_CODE) {
-    //                 isOtaSpNum=checkOtaSpNumBasedOnSysSelCode(sysSelCodeInt,sch);
-    //             } else {
-    //                 if (DBG) {
-    //                     Rlog.d(LOGTAG, "isCarrierOtaSpNum,sysSelCodeInt is invalid");
-    //                 }
-    //             }
-    //         } else if (!TextUtils.isEmpty(sch[0]) && sch[0].equals("FC")) {
-    //             int fcLen =  Integer.parseInt(sch[1]);
-    //             String fc = sch[2];
-    //             if (dialStr.regionMatches(0,fc,0,fcLen)) {
-    //                 isOtaSpNum = true;
-    //             } else {
-    //                 if (DBG) Rlog.d(LOGTAG, "isCarrierOtaSpNum,not otasp number");
-    //             }
-    //         } else {
-    //             if (DBG) {
-    //                 Rlog.d(LOGTAG, "isCarrierOtaSpNum,ota schema not supported" + sch[0]);
-    //             }
-    //         }
-    //     } else {
-    //         if (DBG) {
-    //             Rlog.d(LOGTAG, "isCarrierOtaSpNum,ota schema pattern not right" +
-    //                   mCarrierOtaSpNumSchema);
-    //         }
-    //     }
-    // } else {
-    //     if (DBG) Rlog.d(LOGTAG, "isCarrierOtaSpNum,ota schema pattern empty");
-    // }
-    // return isOtaSpNum;
-    assert(0);
-    return FALSE;
+    Boolean isOtaSpNum = FALSE;
+    Int32 sysSelCodeInt = ExtractSelCodeFromOtaSpNum(dialStr);
+    if (sysSelCodeInt == INVALID_SYSTEM_SELECTION_CODE) {
+        return isOtaSpNum;
+    }
+    // mCarrierOtaSpNumSchema is retrieved from PROPERTY_OTASP_NUM_SCHEMA:
+    if (!TextUtils::IsEmpty(mCarrierOtaSpNumSchema)) {
+        AutoPtr<IMatcher> m;
+        pOtaSpNumSchema->Matcher(mCarrierOtaSpNumSchema, (IMatcher**)&m);
+        if (DBG) {
+            Logger::D(LOGTAG, "isCarrierOtaSpNum,schema %s", mCarrierOtaSpNumSchema.string());
+        }
+
+        Boolean b;
+        if (m->Find(&b), b) {
+            AutoPtr<ArrayOf<String> > sch;
+            pOtaSpNumSchema->Split(mCarrierOtaSpNumSchema, (ArrayOf<String>**)&sch);
+            // If carrier uses system selection code mechanism
+            if (!TextUtils::IsEmpty((*sch)[0]) && (*sch)[0].Equals("SELC")) {
+                if (sysSelCodeInt != INVALID_SYSTEM_SELECTION_CODE) {
+                    isOtaSpNum = CheckOtaSpNumBasedOnSysSelCode(sysSelCodeInt, sch);
+                }
+                else {
+                    if (DBG) {
+                        Logger::D(LOGTAG, "isCarrierOtaSpNum,sysSelCodeInt is invalid");
+                    }
+                }
+            }
+            else if (!TextUtils::IsEmpty((*sch)[0]) && (*sch)[0].Equals("FC")) {
+                Int32 fcLen =  StringUtils::ParseInt32((*sch)[1]);
+                String fc = (*sch)[2];
+                if (dialStr.RegionMatches(0,fc,0,fcLen)) {
+                    isOtaSpNum = TRUE;
+                }
+                else {
+                    if (DBG) Logger::D(LOGTAG, "isCarrierOtaSpNum,not otasp number");
+                }
+            }
+            else {
+                if (DBG) {
+                    Logger::D(LOGTAG, "isCarrierOtaSpNum,ota schema not supported %s"
+                        , (*sch)[0].string());
+                }
+            }
+        }
+        else {
+            if (DBG) {
+                Logger::D(LOGTAG, "isCarrierOtaSpNum,ota schema pattern not right %s",
+                      mCarrierOtaSpNumSchema.string());
+            }
+        }
+    }
+    else {
+        if (DBG) Logger::D(LOGTAG, "isCarrierOtaSpNum,ota schema pattern empty");
+    }
+    return isOtaSpNum;
 }
 
 void CDMAPhone::StoreVoiceMailNumber(
     /* [in] */ const String& number)
 {
-    // ==================before translated======================
-    // // Update the preference value of voicemail number
-    // SharedPreferences sp = PreferenceManager.getDefaultSharedPreferences(getContext());
-    // SharedPreferences.Editor editor = sp.edit();
-    // editor.putString(VM_NUMBER_CDMA + getSubId(), number);
-    // editor.apply();
-    assert(0);
+    // Update the preference value of voicemail number
+    AutoPtr<IContext> ctx;
+    GetContext((IContext**)&ctx);
+    AutoPtr<ISharedPreferences> sp;
+    PreferenceManager::GetDefaultSharedPreferences(ctx, (ISharedPreferences**)&sp);
+    AutoPtr<ISharedPreferencesEditor> editor;
+    sp->Edit((ISharedPreferencesEditor**)&editor);
+    Int64 sid;
+    GetSubId(&sid);
+    editor->PutString(VM_NUMBER_CDMA + StringUtils::ToString(sid), number);
+    editor->Apply();
 }
 
 } // namespace Cdma

@@ -13,6 +13,15 @@ namespace Cdma {
 //=====================================================================
 CAR_INTERFACE_IMPL(EriInfo, Object, IEriInfo);
 
+EriInfo::EriInfo()
+    : roamingIndicator(0)
+    , iconIndex(0)
+    , iconMode(0)
+    , callPromptId(0)
+    , alertId(0)
+{
+}
+
 ECode EriInfo::constructor(
     /* [in] */ Int32 roamingIndicator,
     /* [in] */ Int32 iconIndex,
@@ -21,14 +30,13 @@ ECode EriInfo::constructor(
     /* [in] */ Int32 callPromptId,
     /* [in] */ Int32 alertId)
 {
-    // ==================before translated======================
-    //
-    // this.roamingIndicator = roamingIndicator;
-    // this.iconIndex = iconIndex;
-    // this.iconMode = iconMode;
-    // this.eriText = eriText;
-    // this.callPromptId = callPromptId;
-    // this.alertId = alertId;
+
+    this->roamingIndicator = roamingIndicator;
+    this->iconIndex = iconIndex;
+    this->iconMode = iconMode;
+    this->eriText = eriText;
+    this->callPromptId = callPromptId;
+    this->alertId = alertId;
     return NOERROR;
 }
 
