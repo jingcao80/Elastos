@@ -98,7 +98,7 @@ ECode InCallService::MyHandler::HandleMessage(
 //===============================================================
 // InCallService::
 //===============================================================
-CAR_INTERFACE_IMPL(InCallService, Object, IInCallService)
+CAR_INTERFACE_IMPL(InCallService, Service, IInCallService)
 
 InCallService::InCallService()
 {
