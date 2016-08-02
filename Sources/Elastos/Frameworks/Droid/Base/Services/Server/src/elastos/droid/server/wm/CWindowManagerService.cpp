@@ -922,6 +922,8 @@ void CWindowManagerService::InitPolicy()
     UiThread::GetHandler()->RunWithScissors(runnable, 0, &result);
 }
 
+static Int64 sConstructorTime = 0;
+
 ECode CWindowManagerService::constructor(
     /* [in] */ IContext* context,
     /* [in] */ IIInputManager* inputManager,
@@ -929,6 +931,7 @@ ECode CWindowManagerService::constructor(
     /* [in] */ Boolean showBootMsgs,
     /* [in] */ Boolean onlyCore)
 {
+    sConstructorTime = SystemClock::GetUptimeMillis();
     mCurrentProfileIds = ArrayOf<Int32>::Alloc(1);
     (*mCurrentProfileIds)[0] = IUserHandle::USER_OWNER;
 
@@ -7213,7 +7216,7 @@ void CWindowManagerService::PerformEnableScreen()
 
         mDisplayEnabled = TRUE;
         if (DEBUG_SCREEN_ON || DEBUG_BOOT) Slogger::I(TAG, "******************** ENABLING SCREEN!");
-
+        Slogger::I(TAG, "From constructor to ENABLING SCREEN use time = %lldms", SystemClock::GetUptimeMillis() - sConstructorTime);
         // Enable input dispatch.
         mInputMonitor->SetEventDispatchingLw(mEventDispatchingEnabled);
     }

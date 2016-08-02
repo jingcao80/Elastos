@@ -1,4 +1,4 @@
 
 DIRS = SystemUI
-#DIRS += DefaultContainerService
+DIRS += DefaultContainerService
 DIRS += SettingsProvider

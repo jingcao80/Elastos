@@ -8,7 +8,7 @@ Elastos.Runtime.eco
 Elastos.CoreLibrary.eco
 Elastos.Droid.Core.eco
 Elastos.Droid.Server.eco
-;Elastos.Droid.JavaProxy.eco
+Elastos.Droid.JavaProxy.eco
 elservicemanager
 ElApp_process
 pm

@@ -87,17 +87,18 @@ ECode WebViewUpdateService::BinderService::WaitForRelroCreationCompleted(
     Int64 NS_PER_MS = 1000000;
     Int64 timeoutTimeMs = nt / NS_PER_MS + WAIT_TIMEOUT_MS;
     Boolean relroReady = (is64Bit ? mHost->mRelroReady64Bit : mHost->mRelroReady32Bit);
-    {    AutoLock syncLock(this);
-        while (!relroReady) {
-            system->GetNanoTime(&nt);
-            Int64 timeNowMs = nt / NS_PER_MS;
-            if (timeNowMs >= timeoutTimeMs) break;
-            // try {
-            obj->Wait(timeoutTimeMs - timeNowMs);
-            // } catch (InterruptedException e) {}
-            relroReady = (is64Bit ? mHost->mRelroReady64Bit : mHost->mRelroReady32Bit);
-        }
-    }
+    Slogger::E(TAG, "TODO:  WebViewFactory::PrepareWebViewInSystemServer is not implemented!");
+    // {    AutoLock syncLock(this);
+    //     while (!relroReady) {
+    //         system->GetNanoTime(&nt);
+    //         Int64 timeNowMs = nt / NS_PER_MS;
+    //         if (timeNowMs >= timeoutTimeMs) break;
+    //         // try {
+    //         obj->Wait(timeoutTimeMs - timeNowMs);
+    //         // } catch (InterruptedException e) {}
+    //         relroReady = (is64Bit ? mHost->mRelroReady64Bit : mHost->mRelroReady32Bit);
+    //     }
+    // }
     if (!relroReady) Slogger::W(TAG, "creating relro file timed out");
     return NOERROR;
 }
