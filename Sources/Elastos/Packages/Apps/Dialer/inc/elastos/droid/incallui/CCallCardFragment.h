@@ -40,6 +40,7 @@ namespace InCallUI {
 
 CarClass(CCallCardFragment)
     , public BaseFragment
+    , public ICallCardFragment
     , public ICallCardUi
     , public IUi
 {

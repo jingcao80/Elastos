@@ -1427,11 +1427,11 @@ module
         interface IOnWindowDismissedCallback;
     }
 
-//    class CInCallServiceImpl {
-//        constructor();
-//
-//        interface IInCallService;
-//    }
+    class CInCallServiceImpl {
+        constructor();
+
+        interface IInCallService;
+    }
 
     class CNotificationBroadcastReceiver {
         interface IBroadcastReceiver;
@@ -1579,6 +1579,25 @@ module
     }
 
     } // namespace Dialpad
+
+    namespace Widget {
+
+    [local]
+    class CResizingTextTextView {
+        constructor(
+            [in] IContext* ctx,
+            [in] IAttributeSet* attrs);
+
+        interface ITextView;
+        interface IView;
+        interface IOnPreDrawListener;
+        interface IDrawableCallback;
+        interface IKeyEventCallback;
+        interface IAccessibilityEventSource;
+    }
+
+    } // namespace Widget
+
     } // namespace Common
     } // namespace Phone
     } // namespace Droid

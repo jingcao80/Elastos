@@ -17,6 +17,7 @@ namespace InCallUI {
 
 CarClass(CConferenceManagerFragment)
     , public BaseFragment
+    , public IConferenceManagerFragment
     , public IConferenceManagerUi
     , public IUi
 {

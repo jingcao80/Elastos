@@ -16,7 +16,7 @@
   -->
 
 <!-- TODO(klp): move out to separate file -->
-<com.android.incallui.GlowPadWrapper
+<Elastos.Droid.InCallUI.CGlowPadWrapper
         xmlns:android="http://schemas.android.com/apk/res/android"
         xmlns:dc="http://schemas.android.com/apk/res-auto"
         android:id="@+id/glow_pad_view"

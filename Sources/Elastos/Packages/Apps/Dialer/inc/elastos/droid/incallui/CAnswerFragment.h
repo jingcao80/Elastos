@@ -33,6 +33,7 @@ namespace InCallUI {
 
 CarClass(CAnswerFragment)
     , public BaseFragment
+    , public IAnswerFragment
     , public IAnswerListener
     , public IAnswerUi
     , public IUi

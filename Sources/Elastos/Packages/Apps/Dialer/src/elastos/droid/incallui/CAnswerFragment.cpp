@@ -170,7 +170,7 @@ const Int32 CAnswerFragment::TARGET_SET_FOR_VIDEO_WITHOUT_SMS;
 const Int32 CAnswerFragment::TARGET_SET_FOR_VIDEO_WITH_SMS;
 const Int32 CAnswerFragment::TARGET_SET_FOR_VIDEO_UPGRADE_REQUEST;
 
-CAR_INTERFACE_IMPL_3(CAnswerFragment, BaseFragment, IAnswerListener, IAnswerUi, IUi);
+CAR_INTERFACE_IMPL_4(CAnswerFragment, BaseFragment, IAnswerFragment, IAnswerListener, IAnswerUi, IUi);
 
 CAR_OBJECT_IMPL(CAnswerFragment);
 
@@ -181,7 +181,7 @@ CAnswerFragment::CAnswerFragment()
 
 ECode CAnswerFragment::constructor()
 {
-    return NOERROR;
+    return BaseFragment::constructor();
 }
 
 AutoPtr<IPresenter> CAnswerFragment::CreatePresenter()
@@ -202,7 +202,8 @@ ECode CAnswerFragment::OnCreateView(
     /* [out] */ IView** view)
 {
     VALIDATE_NOT_NULL(view);
-    assert(0 && "TODO");
+    // TODO:
+    // assert(0 && "TODO");
     // mGlowpad = (GlowPadWrapper) inflater.inflate(R.layout.answer_fragment,
     //         container, false);
 
@@ -213,6 +214,7 @@ ECode CAnswerFragment::OnCreateView(
     // mGlowpad.setAnswerListener(this);
 
     // *view = mGlowpad;
+    *view = NULL;
     REFCOUNT_ADD(*view);
     return NOERROR;
 }

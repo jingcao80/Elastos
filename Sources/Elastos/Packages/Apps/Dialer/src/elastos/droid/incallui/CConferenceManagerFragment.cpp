@@ -51,7 +51,7 @@ ECode CConferenceManagerFragment::SeparateButtonClickListener::OnClick(
 //================================================================
 // CConferenceManagerFragment
 //================================================================
-CAR_INTERFACE_IMPL_2(CConferenceManagerFragment, BaseFragment, IConferenceManagerUi, IUi);
+CAR_INTERFACE_IMPL_3(CConferenceManagerFragment, BaseFragment, IConferenceManagerFragment, IConferenceManagerUi, IUi);
 
 CAR_OBJECT_IMPL(CConferenceManagerFragment);
 
@@ -61,7 +61,7 @@ CConferenceManagerFragment::CConferenceManagerFragment()
 
 ECode CConferenceManagerFragment::constructor()
 {
-    return NOERROR;
+    return BaseFragment::constructor();
 }
 
 AutoPtr<IPresenter> CConferenceManagerFragment::CreatePresenter()

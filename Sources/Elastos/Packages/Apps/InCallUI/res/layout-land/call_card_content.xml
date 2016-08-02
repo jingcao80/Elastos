@@ -35,7 +35,7 @@
 
         <include layout="@layout/primary_call_info" />
 
-        <fragment android:name="com.android.incallui.CallButtonFragment"
+        <fragment android:name="Elastos.Droid.InCallUI.CCallButtonFragment"
             android:id="@+id/callButtonFragment"
             android:layout_width="match_parent"
             android:layout_height="wrap_content" />
@@ -71,12 +71,14 @@
         android:layout_height="wrap_content"
         android:layout_alignTop="@id/photo" />
 
-    <fragment android:name="com.android.incallui.VideoCallFragment"
+    <!--
+    <fragment android:name="Elastos.Droid.InCallUI.CVideoCallFragment"
         android:layout_alignParentStart="true"
         android:layout_gravity="start|center_vertical"
         android:id="@+id/videoCallFragment"
         android:layout_width="match_parent"
         android:layout_height="match_parent" />
+    -->
 
     <!-- Progress spinner, useful for indicating pending operations such as upgrade to video. -->
     <FrameLayout
@@ -107,7 +109,7 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent" />
 
-    <fragment android:name="com.android.incallui.AnswerFragment"
+    <fragment android:name="Elastos.Droid.InCallUI.CAnswerFragment"
         android:id="@+id/answerFragment"
         android:layout_toEndOf="@id/primary_call_info_container"
         android:layout_width="match_parent"

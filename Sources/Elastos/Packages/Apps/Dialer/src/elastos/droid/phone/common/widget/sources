@@ -7,3 +7,4 @@ INCLUDES += $(MAKEDIR)/../../../../../../
 INCLUDES += ../../../../../../
 
 SOURCES = ResizingTextEditText.cpp
+SOURCES += CResizingTextTextView.cpp

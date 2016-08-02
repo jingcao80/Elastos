@@ -833,6 +833,10 @@ ECode Fragment::Instantiate(
         AutoPtr<IClassLoader> classLoader;
         context->GetClassLoader((IClassLoader**)&classLoader);
         classLoader->LoadClass(fname, (IClassInfo**)&clazz);
+        if (clazz == NULL) {
+            Slogger::E(TAG, "Trying to instantiate a class %s failed", fname.string());
+            return E_INSTANTIATION_EXCEPTION;
+        }
         // if (!Fragment.class.isAssignableFrom(clazz)) {
         //     throw new InstantiationException("Trying to instantiate a class " + fname
         //             + " that is not a Fragment", new ClassCastException());

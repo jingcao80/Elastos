@@ -368,8 +368,7 @@ ECode CCallCardFragment::AnimatorListener3::OnAnimationStart(
 //==========================================================================
 // CCallCardFragment
 //==========================================================================
-//CAR_INTERFACE_IMPL_2(CCallCardFragment, BaseFragment, ICallCardUi, IUi);
-CAR_INTERFACE_IMPL_2(CCallCardFragment, Fragment, ICallCardUi, IUi);
+CAR_INTERFACE_IMPL_3(CCallCardFragment, BaseFragment, ICallCardFragment, ICallCardUi, IUi);
 
 CAR_OBJECT_IMPL(CCallCardFragment);
 
