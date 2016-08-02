@@ -119,7 +119,7 @@ private:
 
     static NAN_METHOD(NewInRegimeConstructor);
 
-    static NAN_METHOD(CARObject::InRegime);
+    static NAN_METHOD(InRegime);
 
     static ::v8::Local<::v8::FunctionTemplate> NewClassTemplate(IClassInfo const *classInfo,
             _ELASTOS ArrayOf<IConstructorInfo const *> const &constructorInfos,
@@ -139,7 +139,7 @@ private:
     static NAN_METHOD(WrapConstructor);
 
     CARObject(IClassInfo const *classInfo, _ELASTOS ArrayOf<IConstructorInfo const *> const &constructorInfos,
-            IInterface *regime,
+            IRegime *regime,
             size_t argc, ::v8::Local<::v8::Value> argv[]);
 
     CARObject(IClassInfo const *classInfo, _ELASTOS ArrayOf<IConstructorInfo const *> const &constructorInfos,

@@ -37,12 +37,16 @@ public:
         _ETL Vector<Element, Alloc>(first, last)
     {}
 
+    using _ETL Vector<Element, Alloc>::GetSize;
+
     SizeType Size() const noexcept
     {
         return GetSize();
     }
 
     using typename _ETL Vector<Element, Alloc>::Pointer;
+
+    using _ETL Vector<Element, Alloc>::GetFront;
 
     Pointer Data() noexcept
     {

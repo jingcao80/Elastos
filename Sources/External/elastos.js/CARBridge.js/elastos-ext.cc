@@ -307,7 +307,7 @@ ECode HasImportedModule(IModuleInfo const *moduleInfo, String const &path, Boole
 {
     ECode ec;
 
-    IModuleInfo *_;
+    IModuleInfo const *_;
 
     if (moduleInfo == 0)
         return E_INVALID_ARGUMENT;

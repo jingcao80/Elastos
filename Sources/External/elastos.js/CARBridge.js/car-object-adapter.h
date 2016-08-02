@@ -78,7 +78,7 @@ private:
         void *_vtptr; // It must be the first non-static data member.
 
         _ELASTOS AutoPtr<IInterfaceInfo const> _interfaceInfo;
-        _ELASTOS AutoPtr<_ELASTOS ArrayOf<IFunctionInfo const *> const> _methodInfos;
+        _ELASTOS AutoPtr<_ELASTOS ArrayOf<IMethodInfo const *> const> _methodInfos;
 
         _ELASTOS AutoPtr<CARObjectAdapter> _owner;
 

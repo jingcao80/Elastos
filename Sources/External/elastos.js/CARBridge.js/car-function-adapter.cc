@@ -35,7 +35,7 @@ _ELASTOS_NAMESPACE_USING
 CAR_BRIDGE_NAMESPACE_BEGIN
 
 template<class T>
-inline T &&_To(va_list ap) noexcept
+inline T _To(va_list ap) noexcept
 {
     return va_arg(ap, T);
 }

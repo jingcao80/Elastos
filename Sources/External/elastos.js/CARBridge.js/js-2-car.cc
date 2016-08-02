@@ -1626,7 +1626,7 @@ Local<Value> ToValue(ICarArrayInfo const *carArrayInfo, CarQuintet const *carQui
     AutoPtr<ICarArrayGetter const> carArrayGetter;
     ICarArrayGetter *_carArrayGetter;
 
-    ec = carArrayInfo->CreateVariableBox(carQuintet, &_variableOfCARArray);
+    ec = carArrayInfo->CreateVariableBox(const_cast<CarQuintet *>(carQuintet), &_variableOfCARArray);
     if (FAILED(ec))
         throw Error(Error::TYPE_ELASTOS, ec, "");
 
@@ -2947,8 +2947,6 @@ bool CanBeUsedAs(IDataTypeInfo const *dataTypeInfo, Local<Value> value, int *pri
 
 bool IsCARObject(Local<Value> value)
 {
-    CARObject *carObject;
-
     if (!value->IsObject())
         return false;
 
